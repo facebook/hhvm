@@ -203,6 +203,7 @@ let rec expr (acc : acc) (_, e) : acc =
     let acc = exprs acc es2 in
     let acc = Option.value_map es3 ~default:acc ~f:(expr acc) in
     acc
+  | Aast.FunctionPointer (e, _) -> expr acc e
   | Aast.New _ ->
     failwith "Unexpected Expr: Typing_get_locals expected CIexpr in New"
   | Aast.Record (_, _, exprexprs) ->

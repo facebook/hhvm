@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<cfff63cb3c61e9a488bf95c95d87ab4f>>
+// @generated SignedSource<<3118291b23171fd8b847838b74755c9b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -190,6 +190,7 @@ pub enum Expr_<Ex, Fb, En, Hi> {
             Option<Expr<Ex, Fb, En, Hi>>,
         )>,
     ),
+    FunctionPointer(Box<(Expr<Ex, Fb, En, Hi>, Vec<Targ<Hi>>)>),
     Int(String),
     Float(String),
     String(String),

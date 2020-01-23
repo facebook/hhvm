@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8eb2e2aa95dc904726702ce3fe909a3a>>
+// @generated SignedSource<<9c6b9f7a10d00c44d22b39eb40b0e543>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -960,6 +960,9 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     ) -> Self {
         Expr_::Call(Box::new((p0, p1, p2, p3, p4)))
     }
+    pub fn mk_function_pointer(p0: Expr<Ex, Fb, En, Hi>, p1: Vec<Targ<Hi>>) -> Self {
+        Expr_::FunctionPointer(Box::new((p0, p1)))
+    }
     pub fn mk_int(p0: String) -> Self {
         Expr_::Int(p0)
     }
@@ -1219,6 +1222,12 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn is_call(&self) -> bool {
         match self {
             Expr_::Call(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_function_pointer(&self) -> bool {
+        match self {
+            Expr_::FunctionPointer(..) => true,
             _ => false,
         }
     }
@@ -1574,6 +1583,12 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     )> {
         match self {
             Expr_::Call(p0) => Some((&p0.0, &p0.1, &p0.2, &p0.3, &p0.4)),
+            _ => None,
+        }
+    }
+    pub fn as_function_pointer(&self) -> Option<(&Expr<Ex, Fb, En, Hi>, &Vec<Targ<Hi>>)> {
+        match self {
+            Expr_::FunctionPointer(p0) => Some((&p0.0, &p0.1)),
             _ => None,
         }
     }
@@ -1971,6 +1986,14 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
+    pub fn as_function_pointer_mut(
+        &mut self,
+    ) -> Option<(&mut Expr<Ex, Fb, En, Hi>, &mut Vec<Targ<Hi>>)> {
+        match self {
+            Expr_::FunctionPointer(p0) => Some((&mut p0.0, &mut p0.1)),
+            _ => None,
+        }
+    }
     pub fn as_int_mut(&mut self) -> Option<&mut String> {
         match self {
             Expr_::Int(p0) => Some(p0),
@@ -2361,6 +2384,12 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     )> {
         match self {
             Expr_::Call(p0) => Some(((*p0).0, (*p0).1, (*p0).2, (*p0).3, (*p0).4)),
+            _ => None,
+        }
+    }
+    pub fn as_function_pointer_into(self) -> Option<(Expr<Ex, Fb, En, Hi>, Vec<Targ<Hi>>)> {
+        match self {
+            Expr_::FunctionPointer(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,
         }
     }

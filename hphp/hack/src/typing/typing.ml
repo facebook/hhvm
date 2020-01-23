@@ -2553,6 +2553,11 @@ and expr_
         ~in_suspend:false
     in
     (env, te, ty)
+  | FunctionPointer (_e, _targs) ->
+    Errors.experimental_feature
+      p
+      "We don't expect this since it should be a parse error";
+    expr_error env Reason.Rnone outer
   | Binop (Ast_defs.QuestionQuestion, e1, e2) ->
     let (env, te1, ty1) = raw_expr ~lhs_of_null_coalesce:true env e1 in
     let (env, te2, ty2) = expr ?expected env e2 in

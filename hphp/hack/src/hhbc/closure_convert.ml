@@ -912,6 +912,10 @@ let rec convert_expr env st ((p, expr_) as expr) =
       let (st, el2) = convert_exprs env st el2 in
       let (st, e3) = convert_opt_expr env st e3 in
       (st, (p, Call (ct, e, targs, el2, e3)))
+    | FunctionPointer (e, targs) ->
+      let (st, e) = convert_expr env st e in
+      let (st, targs) = convert_tyargs env st targs in
+      (st, (p, FunctionPointer (e, targs)))
     | String2 el ->
       let (st, el) = convert_exprs env st el in
       (st, (p, String2 el))

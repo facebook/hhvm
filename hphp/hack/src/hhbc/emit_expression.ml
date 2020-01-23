@@ -1651,6 +1651,7 @@ and emit_expr (env : Emit_env.t) (expr : Tast.expr) =
     fst (emit_obj_get env pos QueryOp.CGet expr prop nullflavor)
   | A.Call (_, e, targs, args, uarg) ->
     emit_call_expr env pos e targs args uarg None
+  | A.FunctionPointer (_e, _targs) -> failwith "TODO"
   | A.New (cid, targs, args, uarg, _constructor_annot) ->
     emit_new env pos cid targs args uarg
   | A.Record (cid, is_array, es) ->
@@ -4083,6 +4084,7 @@ and can_use_as_rhs_in_list_assignment (expr : Tast.expr_) =
     | Class_get _
     | PU_atom _
     | Call _
+    | FunctionPointer _
     | New _
     | Record _
     | Expr_list _

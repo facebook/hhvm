@@ -479,6 +479,8 @@ module Visitor_DEPRECATED = struct
 
       method on_call : 'a -> call_type -> expr -> expr list -> expr option -> 'a
 
+      method on_function_pointer : 'a -> expr -> targ list -> 'a
+
       method on_true : 'a -> 'a
 
       method on_false : 'a -> 'a
@@ -792,6 +794,7 @@ module Visitor_DEPRECATED = struct
         | Class_const (cid, id) -> this#on_class_const acc cid id
         | Call (ct, e, _, el, unpacked_element) ->
           this#on_call acc ct e el unpacked_element
+        | FunctionPointer (e, targs) -> this#on_function_pointer acc e targs
         | String2 el -> this#on_string2 acc el
         | PrefixedString (_, e) -> this#on_expr acc e
         | Pair (e1, e2) -> this#on_pair acc e1 e2
@@ -929,6 +932,11 @@ module Visitor_DEPRECATED = struct
         let acc =
           Option.value_map unpacked_element ~f:(this#on_expr acc) ~default:acc
         in
+        acc
+
+      method on_function_pointer acc e targs =
+        let acc = this#on_expr acc e in
+        let acc = List.fold_left targs ~f:this#on_targ ~init:acc in
         acc
 
       method on_true acc = acc

@@ -157,6 +157,7 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
       * ('ex, 'fb, 'en, 'hi) expr list
       (* positional args *)
       * ('ex, 'fb, 'en, 'hi) expr option (* unpacked arg *)
+  | FunctionPointer of ('ex, 'fb, 'en, 'hi) expr * 'hi targ list
   | Int of string
   | Float of string
   | String of string

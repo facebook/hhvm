@@ -440,6 +440,7 @@ and expr_ env acc p e =
     let acc = List.fold_left ~f:expr ~init:acc el in
     let acc = Option.value_map ~f:(expr acc) ~default:acc unpacked_element in
     expr acc e
+  | FunctionPointer (e, _targs) -> expr acc e
   | True
   | False
   | Int _

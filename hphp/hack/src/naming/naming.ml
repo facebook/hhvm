@@ -2468,6 +2468,11 @@ module Make (GetLocals : GetLocals) = struct
           targl env p tal,
           exprl env el,
           oexpr env unpacked_element )
+    | Aast.FunctionPointer ((p, Aast.Id fid), targs) ->
+      let e = N.Id (Env.fun_id env fid) in
+      N.FunctionPointer ((p, e), targl env p targs)
+    | Aast.FunctionPointer (e, targs) ->
+      N.FunctionPointer (expr env e, targl env p targs)
     | Aast.Yield_break -> N.Yield_break
     | Aast.Yield e -> N.Yield (afield env e)
     | Aast.Await e -> N.Await (expr env e)

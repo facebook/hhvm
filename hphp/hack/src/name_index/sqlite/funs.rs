@@ -4,15 +4,10 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::datatypes::*;
+use crate::Names;
 
 use oxidized::relative_path::RelativePath;
 use rusqlite::{params, Connection, OptionalExtension};
-use std::sync::{Arc, Mutex};
-
-#[derive(Clone, Debug)]
-pub(crate) struct FunsTable {
-    connection: Arc<Mutex<Connection>>,
-}
 
 #[derive(Clone, Debug)]
 pub(crate) struct FunItem {
@@ -22,28 +17,18 @@ pub(crate) struct FunItem {
 
 // TODO: some functions is only used in unit tests for now
 #[allow(dead_code)]
-impl FunsTable {
-    pub fn new(connection: Arc<Mutex<Connection>>) -> Self {
-        FunsTable {
-            connection: connection.clone(),
-        }
-    }
-
-    pub fn create(&self) {
+impl Names {
+    pub(crate) fn create_funs_table(connection: &Connection) {
         let statement = "
             CREATE TABLE IF NOT EXISTS NAMING_FUNS (
                 HASH INTEGER PRIMARY KEY NOT NULL,
                 FILE_INFO_ID INTEGER NOT NULL
             );";
 
-        self.connection
-            .lock()
-            .unwrap()
-            .execute(&statement, params![])
-            .unwrap();
+        connection.execute(&statement, params![]).unwrap();
     }
 
-    pub fn insert(&self, items: &[FunItem]) {
+    fn insert_funs(&self, items: &[FunItem]) {
         let insert_statement = "
             INSERT INTO NAMING_FUNS (
                 HASH,
@@ -52,7 +37,7 @@ impl FunsTable {
                 ?, ?
             );";
 
-        let connection = self.connection.lock().unwrap();
+        let connection = &self.connection;
         let mut insert_statement = connection.prepare(&insert_statement).unwrap();
 
         for item in items {
@@ -67,7 +52,7 @@ impl FunsTable {
         }
     }
 
-    pub fn map_names_to_paths(&self, names: &[&str]) -> Vec<Option<RelativePath>> {
+    pub fn paths_of_funs(&self, names: &[&str]) -> Vec<Option<RelativePath>> {
         let select_statement = "
             SELECT
                 NAMING_FILE_INFO.PATH_PREFIX_TYPE,
@@ -82,7 +67,7 @@ impl FunsTable {
                 NAMING_FUNS.HASH = ?
             ";
 
-        let connection = self.connection.lock().unwrap();
+        let connection = &self.connection;
         let mut select_statement = connection.prepare(&select_statement).unwrap();
         names
             .into_iter()
@@ -109,14 +94,11 @@ mod tests {
 
     #[test]
     fn test_add_fun() {
-        let fun_table = FunsTable::new(Arc::new(Mutex::new(Connection::open_in_memory().unwrap())));
-        fun_table.create();
+        let names = Names::new("");
         let funs = [FunItem {
             name: "Foo".to_string(),
             file_info_id: 123,
         }];
-        fun_table.insert(&funs);
-
-        assert!(true)
+        names.insert_funs(&funs);
     }
 }

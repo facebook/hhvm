@@ -3,59 +3,42 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::consts::*;
-use crate::file_infos::*;
-use crate::funs::*;
-
-use oxidized::relative_path::RelativePath;
 use rusqlite::{Connection, OpenFlags};
 use std::path::{Path, PathBuf};
-use std::sync::{Arc, Mutex};
 
-// TODO: file_infos is not used yet
-#[allow(dead_code)]
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct Names {
-    funs: FunsTable,
-    consts: ConstsTable,
-    file_infos: FileInfoTable,
+    pub(crate) connection: Connection,
     path: PathBuf,
 }
 
 impl Names {
-    pub fn new(path: &Path) -> Self {
+    pub fn new(path: impl AsRef<Path>) -> Self {
+        let path = path.as_ref();
         let connection = if path.exists() {
             eprintln!("Loading name index from '{:#?}' in read-only mode", path);
-            Arc::new(Mutex::new(
-                Connection::open_with_flags(path, OpenFlags::SQLITE_OPEN_READ_ONLY).unwrap(),
-            ))
+            Connection::open_with_flags(path, OpenFlags::SQLITE_OPEN_READ_ONLY).unwrap()
         } else {
-            println!(
-                "Path '{:#?}' does not point to a file on disk - creating an in-memory read-write database",
+            eprintln!(
+                "Path '{:#?}' does not point to a file on disk - \
+                 creating an in-memory read-write database",
                 path,
             );
-            let connection = Arc::new(Mutex::new(Connection::open_in_memory().unwrap()));
-            FileInfoTable::new(connection.clone()).create();
-            FunsTable::new(connection.clone()).create();
-            ConstsTable::new(connection.clone()).create();
-
+            let connection = Connection::open_in_memory().unwrap();
+            Self::create_tables(&connection);
             connection
         };
 
         Names {
-            funs: FunsTable::new(connection.clone()),
-            consts: ConstsTable::new(connection.clone()),
-            file_infos: FileInfoTable::new(connection.clone()),
+            connection,
             path: path.to_path_buf(),
         }
     }
 
-    pub fn paths_of_funs(&self, names: &[&str]) -> Vec<Option<RelativePath>> {
-        self.funs.map_names_to_paths(names)
-    }
-
-    pub fn paths_of_consts(&self, names: &[&str]) -> Vec<Option<RelativePath>> {
-        self.consts.map_names_to_paths(names)
+    fn create_tables(connection: &Connection) {
+        Self::create_file_info_table(connection);
+        Self::create_funs_table(connection);
+        Self::create_consts_table(connection);
     }
 }
 
@@ -65,7 +48,7 @@ mod tests {
 
     #[test]
     fn test_get_non_existent_const() {
-        let names = Names::new(Path::new(""));
+        let names = Names::new("");
 
         let result = names.paths_of_consts(&["\\Foo"]);
 

@@ -4,17 +4,12 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::datatypes::*;
+use crate::Names;
 
 use ocamlrep::rc::RcOc;
 use oxidized::file_info::FileInfo;
 use oxidized::relative_path::RelativePath;
 use rusqlite::{params, Connection};
-use std::sync::{Arc, Mutex};
-
-#[derive(Clone, Debug)]
-pub(crate) struct FileInfoTable {
-    connection: Arc<Mutex<Connection>>,
-}
 
 #[derive(Debug)]
 pub(crate) struct FileInfoItem {
@@ -24,14 +19,8 @@ pub(crate) struct FileInfoItem {
 
 // TODO: some functions is only used in unit tests for now
 #[allow(dead_code)]
-impl FileInfoTable {
-    pub fn new(connection: Arc<Mutex<Connection>>) -> Self {
-        FileInfoTable {
-            connection: connection.clone(),
-        }
-    }
-
-    pub fn create(&self) {
+impl Names {
+    pub(crate) fn create_file_info_table(connection: &Connection) {
         let statement = "
             CREATE TABLE IF NOT EXISTS NAMING_FILE_INFO (
                 FILE_INFO_ID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -46,14 +35,10 @@ impl FileInfoTable {
                 TYPEDEFS TEXT
             );";
 
-        self.connection
-            .lock()
-            .unwrap()
-            .execute(&statement, params![])
-            .unwrap();
+        connection.execute(&statement, params![]).unwrap();
     }
 
-    pub fn insert(self, items: &[FileInfoItem]) {
+    fn insert_file_infos(&self, items: &[FileInfoItem]) {
         let insert_statement = "
             INSERT INTO NAMING_FILE_INFO (
                 PATH_PREFIX_TYPE,
@@ -68,7 +53,7 @@ impl FileInfoTable {
             ) VALUES (
                 ?, ?, ?, ?, ?, ?, ?, ?, ?
             );";
-        let connection = self.connection.lock().unwrap();
+        let connection = &self.connection;
         let mut insert_statement = connection.prepare(&insert_statement).unwrap();
 
         for item in items {
@@ -112,12 +97,10 @@ mod tests {
 
     #[test]
     fn test_add_file_info() {
-        let file_info_table =
-            FileInfoTable::new(Arc::new(Mutex::new(Connection::open_in_memory().unwrap())));
-        file_info_table.create();
+        let names = Names::new("");
         let path = RcOc::new(RelativePath::make(Prefix::Root, PathBuf::from("foo.php")));
         let file_infos = [FileInfoItem {
-            path: path.clone(),
+            path: RcOc::clone(&path),
             file_info: FileInfo {
                 hash: None,
                 file_mode: Some(Mode::Mstrict),
@@ -129,8 +112,6 @@ mod tests {
                 comments: None,
             },
         }];
-        file_info_table.insert(&file_infos);
-
-        assert!(true)
+        names.insert_file_infos(&file_infos);
     }
 }

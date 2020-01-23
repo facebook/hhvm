@@ -175,3 +175,5 @@ let no_attributes_on_variadic_parameter =
 
 let invalid_typehint_alias alias hint =
   "Invalid type hint '" ^ alias ^ "'. Use '" ^ hint ^ "' instead"
+
+let function_pointer_bad_recv = "Function pointers must be explicitly specified"

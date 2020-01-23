@@ -123,3 +123,5 @@ val no_attributes_on_variadic_parameter : string
 val statement_without_await_in_concurrent_block : string
 
 val invalid_typehint_alias : string -> string -> string
+
+val function_pointer_bad_recv : string

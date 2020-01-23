@@ -917,3 +917,5 @@ pub fn invalid_typehint_alias(alias: &str, hint: &str) -> Error {
 }
 pub const halt_compiler_is_disabled: Error =
     Cow::Borrowed("__halt_compiler() is not supported in Hack");
+pub const function_pointer_bad_recv: Error =
+    Cow::Borrowed("Function pointers must be explicitly specified");

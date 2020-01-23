@@ -1011,6 +1011,7 @@ struct RuntimeOption {
   F(bool, JitAlignUniqueStubs,         true)                            \
   F(uint32_t, SerDesSampleRate,            0)                           \
   F(bool, JitSerdesModeForceOff,       false)                           \
+  F(bool, JitDesUnitPreload,           false)                           \
   F(std::set<std::string>, JitSerdesDebugFunctions, {})                 \
   F(uint32_t, JitSerializeOptProfSeconds,  0)                           \
   F(uint32_t, JitSerializeOptProfRequests, 0)                           \

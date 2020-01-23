@@ -163,6 +163,8 @@ T read_raw(ProfDataDeserializer& ser) {
   return reinterpret_cast<T&>(t);
 }
 
+void write_raw_string(ProfDataSerializer& ser, const StringData* str);
+StringData* read_raw_string(ProfDataDeserializer& ser, bool skip = false);
 void write_string(ProfDataSerializer& ser, const StringData* str);
 StringData* read_string(ProfDataDeserializer& ser);
 void write_array(ProfDataSerializer& ser, const ArrayData* arr);

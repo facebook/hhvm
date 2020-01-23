@@ -6,6 +6,7 @@
 mod consts;
 mod datatypes;
 mod file_infos;
+mod funs;
 
 pub mod names;
 

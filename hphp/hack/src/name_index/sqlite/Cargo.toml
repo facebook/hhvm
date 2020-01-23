@@ -1,11 +1,11 @@
 # @generated
 # @autocargo from //hphp/hack/src/name_index/sqlite:names
-# Signature<<d7fe7acc7c3d71506d59d78da7853a4438d35fc0>>
+# Signature<<5207577d5abfd3c644c6996c8a783795ee83aa0c>>
 [package]
 name = "names"
 edition = "2018"
 version = "0.0.0"
-include = ["consts.rs", "datatypes.rs", "file_infos.rs", "lib.rs", "names.rs"]
+include = ["consts.rs", "datatypes.rs", "file_infos.rs", "funs.rs", "lib.rs", "names.rs"]
 
 [lib]
 path = "lib.rs"
@@ -15,4 +15,4 @@ ocamlrep = { path = "../../ocamlrep" }
 oxidized = { path = "../../oxidized" }
 rusqlite = "0.21"
 rust-crypto = "0.2"
-# @end of Signature<<d7fe7acc7c3d71506d59d78da7853a4438d35fc0>>
+# @end of Signature<<5207577d5abfd3c644c6996c8a783795ee83aa0c>>

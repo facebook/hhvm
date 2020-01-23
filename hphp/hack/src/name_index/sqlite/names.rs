@@ -5,6 +5,7 @@
 
 use crate::consts::*;
 use crate::file_infos::*;
+use crate::funs::*;
 
 use oxidized::relative_path::RelativePath;
 use rusqlite::{Connection, OpenFlags};
@@ -15,6 +16,7 @@ use std::sync::{Arc, Mutex};
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
 pub struct Names {
+    funs: FunsTable,
     consts: ConstsTable,
     file_infos: FileInfoTable,
     path: PathBuf,
@@ -34,16 +36,22 @@ impl Names {
             );
             let connection = Arc::new(Mutex::new(Connection::open_in_memory().unwrap()));
             FileInfoTable::new(connection.clone()).create();
+            FunsTable::new(connection.clone()).create();
             ConstsTable::new(connection.clone()).create();
 
             connection
         };
 
         Names {
+            funs: FunsTable::new(connection.clone()),
             consts: ConstsTable::new(connection.clone()),
             file_infos: FileInfoTable::new(connection.clone()),
             path: path.to_path_buf(),
         }
+    }
+
+    pub fn paths_of_funs(&self, names: &[&str]) -> Vec<Option<RelativePath>> {
+        self.funs.map_names_to_paths(names)
     }
 
     pub fn paths_of_consts(&self, names: &[&str]) -> Vec<Option<RelativePath>> {

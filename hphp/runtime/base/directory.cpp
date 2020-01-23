@@ -79,6 +79,8 @@ void PlainDirectory::close() {
 }
 
 Variant PlainDirectory::read() {
+  if (!m_dir) return false;
+
   struct dirent entry;
   struct dirent *result;
   int ret = readdir_r(m_dir, &entry, &result);
@@ -89,6 +91,8 @@ Variant PlainDirectory::read() {
 }
 
 void PlainDirectory::rewind() {
+  if (!m_dir) return;
+
   ::rewinddir(m_dir);
 }
 

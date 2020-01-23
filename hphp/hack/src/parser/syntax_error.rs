@@ -695,7 +695,7 @@ pub const global_in_const_decl: Error =
 pub const parent_static_const_decl: Error =
     Cow::Borrowed("Cannot use static or parent::class in constant declaration");
 pub const no_async_before_lambda_body: Error =
-    Cow::Borrowed("Unexpected use of async {...} as lambda expression");
+    Cow::Borrowed("Don't use () ==> async { ... }. Instead, use: async () ==> { ... }");
 pub const halt_compiler_top_level_only: Error =
     Cow::Borrowed("__halt_compiler function should appear only at the top level");
 pub fn invalid_number_of_args(name: &str, n: usize) -> Error {

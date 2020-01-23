@@ -366,10 +366,6 @@ and internal_type =
   | LoclType of locl_ty
   | ConstraintType of constraint_type
 
-and internal_type_ =
-  | LoclType_ of locl_ty_
-  | ConstraintType_ of constraint_type_
-
 and array_kind =
   (* An array declared as a varray. *)
   | AKvarray of locl_ty
@@ -492,8 +488,3 @@ let get_pos t = Reason.to_pos (get_reason t)
 let mk_constraint_type p = p
 
 let deref_constraint_type p = p
-
-let deref_internal t =
-  match t with
-  | ConstraintType (r, t_) -> (r, ConstraintType_ t_)
-  | LoclType (r, t_) -> (r, LoclType_ t_)

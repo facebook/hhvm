@@ -140,7 +140,7 @@ type 'ty tparam = {
 type 'ty where_constraint = 'ty * Ast_defs.constraint_kind * 'ty [@@deriving eq]
 
 (* = Reason.t * 'phase ty_ *)
-type 'phase ty = Reason.t * 'phase ty_
+type 'phase ty
 
 and decl_ty = decl_phase ty
 
@@ -363,15 +363,11 @@ and destructure = {
 }
 
 (* = Reason.t * constraint_type_ *)
-and constraint_type = Reason.t * constraint_type_
+and constraint_type
 
 and internal_type =
   | LoclType of locl_ty
   | ConstraintType of constraint_type
-
-and internal_type_ =
-  | LoclType_ of locl_ty_
-  | ConstraintType_ of constraint_type_
 
 and array_kind =
   (* An array declared as a varray. *)
@@ -483,8 +479,6 @@ and locl_fun_params = locl_ty fun_params
 val mk : Reason.t * 'phase ty_ -> 'phase ty
 
 val deref : 'phase ty -> Reason.t * 'phase ty_
-
-val deref_internal : internal_type -> Reason.t * internal_type_
 
 val get_reason : 'phase ty -> Reason.t
 

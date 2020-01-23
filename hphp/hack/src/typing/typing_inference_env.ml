@@ -782,7 +782,7 @@ module Size = struct
     ty_size_visitor#on_type 0 ty
 
   let rec constraint_type_size env ty =
-    match ty with
+    match deref_constraint_type ty with
     | (_, Tdestructure d) ->
       let { d_required; d_optional; d_variadic; _ } = d in
       1

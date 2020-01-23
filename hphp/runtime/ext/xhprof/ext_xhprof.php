@@ -9,7 +9,7 @@
  */
 <<__HipHopSpecific, __Native>>
 function xhprof_enable(int $flags = 0,
-                       array $args = []): void;
+                       varray $args = varray[]): void;
 
 /** Ends and reports xhprof profiling result. For details on how to use this
  * function, please refer to

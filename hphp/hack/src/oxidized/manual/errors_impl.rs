@@ -60,6 +60,25 @@ impl<P: Ord> PartialEq for Error_<P> {
 
 impl<P: Ord + Eq> Eq for Error_<P> {}
 
+impl Error_<Pos> {
+    /// Return a struct with a `std::fmt::Display` implementation that displays
+    /// the position, error code, and first error message only (omitting the
+    /// subsequent messages further explaining the error).
+    pub fn display_first_message(&self) -> DisplayFirstErrorMessage<'_> {
+        DisplayFirstErrorMessage(self)
+    }
+}
+
+pub struct DisplayFirstErrorMessage<'a>(&'a Error_<Pos>);
+
+impl<'a> std::fmt::Display for DisplayFirstErrorMessage<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let Error_(code, messages) = self.0;
+        let (pos, msg) = messages.first().unwrap();
+        write!(f, "{} - [{}] - {}", pos, code, msg)
+    }
+}
+
 impl Errors {
     pub fn empty() -> Self {
         Errors(FilesT::new(), FilesT::new())

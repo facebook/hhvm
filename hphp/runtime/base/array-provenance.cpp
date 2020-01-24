@@ -47,8 +47,7 @@ std::string Tag::toString() const {
 
 namespace {
 
-RDS_LOCAL(c_WaitableWaitHandle*, rl_wh_override);
-
+RDS_LOCAL_NO_CHECK(Tag, rl_tag_override);
 RDS_LOCAL(ArrayProvenanceTable, rl_array_provenance);
 folly::F14FastMap<const void*, Tag> s_static_array_provenance;
 std::mutex s_static_provenance_lock;
@@ -74,6 +73,9 @@ namespace {
  * True for refcounted request arrays, else false.
  */
 bool wants_local_prov(const ArrayData* ad) { return ad->isRefCounted(); }
+constexpr bool wants_local_prov(const AsioExternalThreadEvent* ev) {
+  return true;
+}
 constexpr bool wants_local_prov(const APCArray* a) { return false; }
 
 }
@@ -90,6 +92,10 @@ bool arrayWantsTag(const APCArray* a) {
     (RO::EvalArrProvHackArrays && (a->isVec() || a->isDict())) ||
     (RO::EvalArrProvDVArrays && (a->isVArray() || a->isDArray()))
   );
+}
+
+bool arrayWantsTag(const AsioExternalThreadEvent* ev) {
+  return true;
 }
 
 namespace {
@@ -185,6 +191,9 @@ folly::Optional<Tag> getTag(const ArrayData* ad) {
 folly::Optional<Tag> getTag(const APCArray* a) {
   return getTagImpl(a);
 }
+folly::Optional<Tag> getTag(const AsioExternalThreadEvent* ev) {
+  return getTagImpl(ev);
+}
 
 template<Mode mode>
 void setTag(ArrayData* ad, Tag tag) {
@@ -197,10 +206,17 @@ void setTag(const APCArray* a, Tag tag) {
   setTagImpl<mode>(a, tag);
 }
 
+template <Mode mode>
+void setTag(AsioExternalThreadEvent* ev, Tag tag) {
+  setTagImpl<mode>(ev, tag);
+}
+
 template void setTag<Mode::Insert>(ArrayData*, Tag);
 template void setTag<Mode::Emplace>(ArrayData*, Tag);
 template void setTag<Mode::Insert>(const APCArray*, Tag);
 template void setTag<Mode::Emplace>(const APCArray*, Tag);
+template void setTag<Mode::Insert>(AsioExternalThreadEvent*, Tag);
+template void setTag<Mode::Emplace>(AsioExternalThreadEvent*, Tag);
 
 void clearTag(ArrayData* ad) {
   ad->setHasProvenanceData(false);
@@ -208,6 +224,9 @@ void clearTag(ArrayData* ad) {
 }
 void clearTag(const APCArray* a) {
   clearTagImpl(a);
+}
+void clearTag(AsioExternalThreadEvent* ev) {
+  clearTagImpl(ev);
 }
 
 void reassignTag(ArrayData* ad) {
@@ -278,21 +297,27 @@ ArrayData* tagStaticArr(ArrayData* ad, folly::Optional<Tag> tag) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TagOverride::TagOverride(c_WaitableWaitHandle* wh)
-  : m_saved_wh{*rl_wh_override}
+TagOverride::TagOverride(Tag tag)
+  : m_saved_tag(rl_tag_override.getInited()
+                ? folly::make_optional<Tag>(*rl_tag_override)
+                : folly::none)
 {
-  assertx(rl_wh_override);
-  assertx(wh != nullptr);
-
-  *rl_wh_override = wh;
+  rl_tag_override.emplace(tag);
 }
 
 TagOverride::~TagOverride() {
-  *rl_wh_override = m_saved_wh;
+  if (m_saved_tag) {
+    *rl_tag_override = *m_saved_tag;
+  } else {
+    rl_tag_override.nullOut();
+  }
 }
 
 folly::Optional<Tag> tagFromPC() {
+  if (rl_tag_override.getInited()) return *rl_tag_override;
+
   VMRegAnchor _(VMRegAnchor::Soft);
+
   if (tl_regState != VMRegState::CLEAN ||
       rds::header() == nullptr ||
       vmfp() == nullptr) {
@@ -317,9 +342,7 @@ folly::Optional<Tag> tagFromPC() {
            !fp->func()->isCPPBuiltin();
   };
 
-  auto const tag = rl_wh_override && *rl_wh_override
-    ? fromLeafWH(*rl_wh_override, make_tag, skip_frame)
-    : fromLeaf(make_tag, skip_frame);
+  auto const tag = fromLeaf(make_tag, skip_frame);
   assertx(!tag || tag->filename() != nullptr);
   return tag;
 }

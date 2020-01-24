@@ -4,4 +4,4 @@ dict(2) {
   ["baz"]=>
   string(4) "quux"
 }
-string(%d) "%s/etewh-unserialize.php:11"
+string(%d) "%s/etewh-unserialize.php:10"

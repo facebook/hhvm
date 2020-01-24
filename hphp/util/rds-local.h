@@ -302,13 +302,16 @@ struct RDSLocal : private detail::RDSLocalBase<T> {
     return m_offset;
   }
 
+  template <typename... Args>
+  void emplace(Args&& ...args);
+
 protected:
   template<typename T1 = T>
   std::enable_if_t<!std::is_copy_constructible<T1>::value> defaultInit() {}
   template<typename T1 = T>
   std::enable_if_t<std::is_copy_constructible<T1>::value> defaultInit() {
     if (auto const& defaultValue = this->getDefault()) {
-      node().emplace(*defaultValue);
+      emplace(*defaultValue);
     }
   }
 
@@ -451,6 +454,13 @@ T* RDSLocal<T, Init>::get() const {
   }
   return getCheck();
 }
+
+template<typename T, Initialize Init>
+template<typename... Args>
+void RDSLocal<T, Init>::emplace(Args&&... args) {
+  node().emplace(std::forward<Args>(args) ... );
+}
+
 
 // This aliased rds local type is the same as an rds local, except it also
 // stores a pointer to the rds storage in the hot rds locals struct.  This

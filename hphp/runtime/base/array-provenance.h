@@ -33,6 +33,7 @@ struct APCArray;
 struct ArrayData;
 struct StringData;
 struct c_WaitableWaitHandle;
+struct AsioExternalThreadEvent;
 
 namespace arrprov {
 
@@ -95,14 +96,21 @@ folly::Optional<Tag> tagFromPC();
 /*
  * RAII struct for modifying the behavior of tagFromPC().
  *
- * When this is in effect, we backtrace from `wh` instead of vmfp().
+ * When this is in effect we use the tag provided instead of computing a
+ * backtrace
  */
 struct TagOverride {
-  explicit TagOverride(c_WaitableWaitHandle* wh);
+  explicit TagOverride(Tag tag);
   ~TagOverride();
 
+  TagOverride(TagOverride&&) = delete;
+  TagOverride(const TagOverride&) = delete;
+
+  TagOverride& operator=(const TagOverride&) = delete;
+  TagOverride& operator=(TagOverride&&) = delete;
+
 private:
-  c_WaitableWaitHandle* m_saved_wh;
+  folly::Optional<Tag> m_saved_tag;
 };
 
 /*
@@ -112,12 +120,14 @@ private:
  */
 bool arrayWantsTag(const ArrayData* a);
 bool arrayWantsTag(const APCArray* a);
+bool arrayWantsTag(const AsioExternalThreadEvent* a);
 
 /*
  * Get the provenance tag for `a`.
  */
 folly::Optional<Tag> getTag(const ArrayData* a);
 folly::Optional<Tag> getTag(const APCArray* a);
+folly::Optional<Tag> getTag(const AsioExternalThreadEvent* ev);
 
 /*
  * Set mode: insert or emplace.
@@ -132,6 +142,7 @@ enum class Mode { Insert, Emplace };
  */
 template<Mode mode = Mode::Insert> void setTag(ArrayData* a, Tag tag);
 template<Mode mode = Mode::Insert> void setTag(const APCArray* a, Tag tag);
+template<Mode mode = Mode::Insert> void setTag(AsioExternalThreadEvent* ev, Tag tag);
 
 /*
  * Clear a tag for a released array---only call this if the array is henceforth
@@ -139,6 +150,7 @@ template<Mode mode = Mode::Insert> void setTag(const APCArray* a, Tag tag);
  */
 void clearTag(ArrayData* ad);
 void clearTag(const APCArray* a);
+void clearTag(AsioExternalThreadEvent* ev);
 
 /*
  * Invalidates the old tag on the provided array and reassigns one from the

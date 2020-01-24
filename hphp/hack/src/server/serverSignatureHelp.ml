@@ -128,7 +128,7 @@ let get_occurrence_info
       in
       (ft, full_occurrence)
   in
-  let def_opt = ServerSymbolDefinition.go (Some nast) full_occurrence in
+  let def_opt = ServerSymbolDefinition.go ctx (Some nast) full_occurrence in
   match ft_opt with
   | None -> None
   | Some ft -> Some (occurrence, ft, def_opt)

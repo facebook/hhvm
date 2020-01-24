@@ -170,9 +170,12 @@ let handlers =
     S.map_result =
       begin
         fun ast refs ->
+        let ctx =
+          Provider_context.get_global_context_or_empty_FOR_MIGRATION ()
+        in
         let ast = Some ast in
         Results.elements refs
-        |> List.map ~f:(ServerSymbolDefinition.go ast)
+        |> List.map ~f:(ServerSymbolDefinition.go ctx ast)
         |> List.sort ~compare
         |> remove_duplicates_except_none
       end;

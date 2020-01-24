@@ -8,6 +8,7 @@
  *)
 
 val go :
+  Provider_context.t ->
   Nast.program option ->
   Relative_path.t SymbolOccurrence.t ->
   Relative_path.t SymbolDefinition.t option

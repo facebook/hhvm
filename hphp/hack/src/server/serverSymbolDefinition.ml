@@ -16,6 +16,7 @@ module Syntax = Full_fidelity_positioned_syntax
 module SyntaxKind = Full_fidelity_syntax_kind
 module SyntaxTree =
   Full_fidelity_syntax_tree.WithSyntax (Full_fidelity_positioned_syntax)
+module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 open Aast
 
@@ -103,14 +104,14 @@ let summarize_class_typedef x =
     Ast_provider.find_record_def_in_file fn x >>= fun rd ->
     Some (FileOutline.summarize_record_decl rd)
 
-let go ast result =
+let go ctx ast result =
   match result.SymbolOccurrence.type_ with
   | SymbolOccurrence.Attribute
       (Some { SymbolOccurrence.class_name; method_name; is_static }) ->
-    Decl_provider.get_class class_name >>= fun cls ->
+    Decl_provider.get_class ctx class_name >>= fun cls ->
     let matching_method =
       Cls.all_ancestor_names cls
-      |> Sequence.filter_map ~f:Decl_provider.get_class
+      |> Sequence.filter_map ~f:(Decl_provider.get_class ctx)
       (* Find all inherited methods with the same name. *)
       |> Sequence.filter_map ~f:(fun cls ->
              ( if is_static then
@@ -130,7 +131,7 @@ let go ast result =
     (* Classes on typing heap have all the methods from inheritance hierarchy
      * folded together, so we will correctly identify them even if method_name
      * is not defined directly in class c_name *)
-    Decl_provider.get_class c_name >>= fun class_ ->
+    Decl_provider.get_class ctx c_name >>= fun class_ ->
     if method_name = Naming_special_names.Members.__construct then
       match fst (Cls.construct class_) with
       | Some m -> get_member_def (Constructor, m.ce_origin, method_name)
@@ -145,7 +146,7 @@ let go ast result =
         get_member_def (Static_method, m.ce_origin, method_name)
     )
   | SymbolOccurrence.Property (c_name, property_name) ->
-    Decl_provider.get_class c_name >>= fun class_ ->
+    Decl_provider.get_class ctx c_name >>= fun class_ ->
     let property_name = clean_member_name property_name in
     begin
       match Cls.get_prop class_ property_name with
@@ -155,7 +156,7 @@ let go ast result =
         get_member_def (Static_property, m.ce_origin, property_name)
     end
   | SymbolOccurrence.ClassConst (c_name, const_name) ->
-    Decl_provider.get_class c_name >>= fun class_ ->
+    Decl_provider.get_class ctx c_name >>= fun class_ ->
     Cls.get_const class_ const_name >>= fun m ->
     get_member_def (Class_const, m.cc_origin, const_name)
   | SymbolOccurrence.Function ->
@@ -169,7 +170,7 @@ let go ast result =
   | SymbolOccurrence.Record ->
     summarize_class_typedef result.SymbolOccurrence.name
   | SymbolOccurrence.Typeconst (c_name, typeconst_name) ->
-    Decl_provider.get_class c_name >>= fun class_ ->
+    Decl_provider.get_class ctx c_name >>= fun class_ ->
     Cls.get_typeconst class_ typeconst_name >>= fun m ->
     get_member_def (Typeconst, m.ttc_origin, typeconst_name)
   | SymbolOccurrence.LocalVar ->

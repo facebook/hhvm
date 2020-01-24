@@ -154,14 +154,14 @@ let json_of_class_from_symbol _ class_name mods progress =
   let is_final = List.mem mods SymbolDefinition.Final ~equal:phys_equal in
   json_of_class class_name is_abstract is_final progress
 
-let json_of_decl tcopt decl_type json_fun id elem progress =
-  let (_, fact_id, progress) = json_fun tcopt id elem progress in
+let json_of_decl ctx decl_type json_fun id elem progress =
+  let (_, fact_id, progress) = json_fun ctx id elem progress in
   let json = JSON_Object [(decl_type, JSON_Number (string_of_int fact_id))] in
   (json, fact_id, progress)
 
-let json_of_decl_loc tcopt decl_type pos json_fun id elem progress =
+let json_of_decl_loc ctx decl_type pos json_fun id elem progress =
   let (decl_json, _, progress) =
-    json_of_decl tcopt decl_type json_fun id elem progress
+    json_of_decl ctx decl_type json_fun id elem progress
   in
   let filepath = Relative_path.S.to_string (Pos.filename pos) in
   let json_fact =
@@ -203,21 +203,14 @@ let json_of_file_xrefs filepath xref_map progress =
   in
   glean_json FileXRefs json_fact progress
 
-let build_json tcopt symbols =
+let build_json ctx symbols =
   let progress =
     List.fold symbols.decls ~init:init_progress ~f:(fun acc symbol ->
         match symbol with
         | Class cd ->
           let (pos, id) = cd.c_name in
           let (_, _, res) =
-            json_of_decl_loc
-              tcopt
-              "class_"
-              pos
-              json_of_class_from_node
-              id
-              cd
-              acc
+            json_of_decl_loc ctx "class_" pos json_of_class_from_node id cd acc
           in
           res
         | _ -> acc)
@@ -231,7 +224,7 @@ let build_json tcopt symbols =
         if occ.is_declaration then
           (prog, xrefs)
         else
-          let symbol_def_res = ServerSymbolDefinition.go None occ in
+          let symbol_def_res = ServerSymbolDefinition.go ctx None occ in
           let filepath = Relative_path.S.to_string (Pos.filename occ.pos) in
           match symbol_def_res with
           | None -> (prog, xrefs)
@@ -240,7 +233,7 @@ let build_json tcopt symbols =
             | Class ->
               let (decl_json, target_id, prog) =
                 json_of_decl
-                  tcopt
+                  ctx
                   "class_"
                   json_of_class_from_symbol
                   symbol_def.name

@@ -50,7 +50,7 @@ let go_quarantined
   (* TODO(ljw): shouldn't the following be quarantined also? *)
   List.map symbols ~f:(fun symbol ->
       let symbol_definition =
-        ServerSymbolDefinition.go (Some entry.Provider_context.ast) symbol
+        ServerSymbolDefinition.go ctx (Some entry.Provider_context.ast) symbol
       in
       (symbol, symbol_definition))
 

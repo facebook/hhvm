@@ -215,10 +215,13 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     let ctx = Provider_context.empty ~tcopt:env.tcopt in
     (env, ServerMethodJumpsBatch.go ctx genv.workers classes filter)
   | FIND_REFS find_refs_action ->
-    Done_or_retry.(
-      let include_defs = false in
-      ServerFindRefs.(
-        go find_refs_action include_defs genv env |> map_env ~f:to_absolute))
+    let ctx = Provider_context.empty ~tcopt:env.tcopt in
+    Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+        let open Done_or_retry in
+        let include_defs = false in
+        ServerFindRefs.(
+          go ctx find_refs_action include_defs genv env
+          |> map_env ~f:to_absolute))
   | GO_TO_IMPL go_to_impl_action ->
     Done_or_retry.(
       ServerGoToImpl.go go_to_impl_action genv env
@@ -234,12 +237,13 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
           ~path
           ~file_input
       in
-      (match ServerFindRefs.go_from_file_ctx ~ctx ~entry ~line ~column with
-      | None -> (env, Done None)
-      | Some (name, action) ->
-        map_env
-          ~f:(ServerFindRefs.to_ide name)
-          (ServerFindRefs.go action include_defs genv env)))
+      Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+          match ServerFindRefs.go_from_file_ctx ~ctx ~entry ~line ~column with
+          | None -> (env, Done None)
+          | Some (name, action) ->
+            map_env
+              ~f:(ServerFindRefs.to_ide name)
+              (ServerFindRefs.go ctx action include_defs genv env)))
   | IDE_GO_TO_IMPL (labelled_file, line, column) ->
     Done_or_retry.(
       let (path, file_input) =
@@ -269,17 +273,20 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
           (env, ServerHighlightRefs.go_quarantined ~ctx ~entry ~line ~column))
     in
     r
-  | REFACTOR refactor_action -> ServerRefactor.go refactor_action genv env
+  | REFACTOR refactor_action ->
+    let ctx = Provider_context.empty ~tcopt:env.tcopt in
+    Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+        ServerRefactor.go ctx refactor_action genv env)
   | IDE_REFACTOR
       { ServerCommandTypes.Ide_refactor_type.filename; line; char; new_name } ->
-    Done_or_retry.(
-      begin
+    let ctx = Provider_context.empty ~tcopt:env.tcopt in
+    Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+        let open Done_or_retry in
         match
-          ServerRefactor.go_ide (filename, line, char) new_name genv env
+          ServerRefactor.go_ide ctx (filename, line, char) new_name genv env
         with
         | Error e -> (env, Done (Error e))
-        | Ok r -> map_env r ~f:(fun x -> Ok x)
-      end)
+        | Ok r -> map_env r ~f:(fun x -> Ok x))
   | REMOVE_DEAD_FIXMES codes ->
     if genv.ServerEnv.options |> ServerArgs.no_load then (
       HackEventLogger.check_response (Errors.get_error_list env.errorl);

@@ -22,6 +22,7 @@ val handle_prechecked_files :
   ServerEnv.env * 'a ServerCommandTypes.Done_or_retry.t
 
 val go :
+  Provider_context.t ->
   action ->
   bool ->
   ServerEnv.genv ->

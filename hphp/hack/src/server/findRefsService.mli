@@ -38,10 +38,14 @@ val find_references :
   (string * Pos.t) list
 
 val find_child_classes :
-  string -> Naming_table.t -> Relative_path.Set.t -> SSet.t
+  Provider_context.t ->
+  string ->
+  Naming_table.t ->
+  Relative_path.Set.t ->
+  SSet.t
 
 val get_origin_class_name :
-  string -> ServerCommandTypes.Find_refs.member -> string
+  Provider_context.t -> string -> ServerCommandTypes.Find_refs.member -> string
 
 val get_child_classes_files : string -> Relative_path.Set.t
 

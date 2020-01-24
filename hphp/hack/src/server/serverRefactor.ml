@@ -397,7 +397,7 @@ let get_deprecated_wrapper_patch ~filename ~definition ~tcopt new_name =
         in
         Insert patch)))
 
-let go action genv env =
+let go ctx action genv env =
   let module Types = ServerCommandTypes.Find_refs in
   let (find_refs_action, new_name) =
     match action with
@@ -412,7 +412,7 @@ let go action genv env =
       (Types.LocalVar { filename; file_content; line; char }, new_name)
   in
   let include_defs = true in
-  ServerFindRefs.go find_refs_action include_defs genv env
+  ServerFindRefs.go ctx find_refs_action include_defs genv env
   |> ServerCommandTypes.Done_or_retry.map_env ~f:(fun refs ->
          let changes =
            List.fold_left
@@ -447,11 +447,11 @@ let go action genv env =
            ~default:changes
            ~f:(fun patch -> patch :: changes))
 
-let go_ide (filename, line, column) new_name genv env =
+let go_ide ctx (filename, line, column) new_name genv env =
   SymbolDefinition.(
     let (ctx, entry) =
       Provider_utils.update_context
-        ~ctx:(Provider_context.empty ~tcopt:env.ServerEnv.tcopt)
+        ~ctx
         ~path:(Relative_path.create_detect_prefix filename)
         ~file_input:(ServerCommandTypes.FileName filename)
     in
@@ -476,18 +476,18 @@ let go_ide (filename, line, column) new_name genv env =
               new_name;
             }
         in
-        Ok (go command genv env)
+        Ok (go ctx command genv env)
       | (Enum, [enum_name]) ->
         let command = ServerRefactorTypes.ClassRename (enum_name, new_name) in
-        Ok (go command genv env)
+        Ok (go ctx command genv env)
       | (Class, [class_name]) ->
         let command = ServerRefactorTypes.ClassRename (class_name, new_name) in
-        Ok (go command genv env)
+        Ok (go ctx command genv env)
       | (Const, [class_name; const_name]) ->
         let command =
           ServerRefactorTypes.ClassConstRename (class_name, const_name, new_name)
         in
-        Ok (go command genv env)
+        Ok (go ctx command genv env)
       | (Method, [class_name; method_name]) ->
         let command =
           ServerRefactorTypes.MethodRename
@@ -499,7 +499,7 @@ let go_ide (filename, line, column) new_name genv env =
               new_name;
             }
         in
-        Ok (go command genv env)
+        Ok (go ctx command genv env)
       | (LocalVar, _) ->
         let command =
           ServerRefactorTypes.LocalVarRename
@@ -511,7 +511,7 @@ let go_ide (filename, line, column) new_name genv env =
               new_name = maybe_add_dollar new_name;
             }
         in
-        Ok (go command genv env)
+        Ok (go ctx command genv env)
       | (_, _) -> Error "Tried to rename a non-renameable symbol")
     (* We have 0 or >1 definitions so correct behavior is unknown *)
     | _ -> Error "Tried to rename a non-renameable symbol")

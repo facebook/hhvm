@@ -12,6 +12,7 @@ open Option.Monad_infix
 open Reordered_argument_collections
 open ServerCommandTypes.Find_refs
 open Typing_defs
+module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 
 type member_class =
@@ -48,8 +49,8 @@ let process_fun_id target_fun id =
   else
     Pos.Map.empty
 
-let check_if_extends_class target_class_name class_name =
-  let class_ = Decl_provider.get_class class_name in
+let check_if_extends_class ctx target_class_name class_name =
+  let class_ = Decl_provider.get_class ctx class_name in
   match class_ with
   | Some cls
     when Cls.has_ancestor cls target_class_name
@@ -57,13 +58,13 @@ let check_if_extends_class target_class_name class_name =
     true
   | _ -> false
 
-let is_target_class target_classes class_name =
+let is_target_class ctx target_classes class_name =
   match target_classes with
   | Class_set s -> SSet.mem s class_name
-  | Subclasses_of s -> s = class_name || check_if_extends_class s class_name
+  | Subclasses_of s -> s = class_name || check_if_extends_class ctx s class_name
 
 let process_member_id
-    target_classes target_member class_name mid ~is_method ~is_const =
+    ctx target_classes target_member class_name mid ~is_method ~is_const =
   let member_name = snd mid in
   let is_target =
     match target_member with
@@ -75,7 +76,7 @@ let process_member_id
     | Class_const target_name -> is_const && member_name = target_name
     | Typeconst _ -> false
   in
-  if is_target && is_target_class target_classes class_name then
+  if is_target && is_target_class ctx target_classes class_name then
     Pos.Map.singleton (fst mid) (class_name ^ "::" ^ snd mid)
   else
     Pos.Map.empty
@@ -91,9 +92,11 @@ let process_class_id target_class cid mid_option =
   else
     Pos.Map.empty
 
-let process_taccess target_classes target_typeconst (class_name, tconst_name, p)
-    =
-  if is_target_class target_classes class_name && target_typeconst = tconst_name
+let process_taccess
+    ctx target_classes target_typeconst (class_name, tconst_name, p) =
+  if
+    is_target_class ctx target_classes class_name
+    && target_typeconst = tconst_name
   then
     Pos.Map.singleton p (class_name ^ "::" ^ tconst_name)
   else
@@ -105,13 +108,13 @@ let process_gconst_id target_gconst id =
   else
     Pos.Map.empty
 
-let add_if_extends_class target_class_name class_name acc =
-  if check_if_extends_class target_class_name class_name then
+let add_if_extends_class ctx target_class_name class_name acc =
+  if check_if_extends_class ctx target_class_name class_name then
     SSet.add acc class_name
   else
     acc
 
-let find_child_classes target_class_name naming_table files =
+let find_child_classes ctx target_class_name naming_table files =
   SharedMem.invalidate_caches ();
   Relative_path.Set.fold files ~init:SSet.empty ~f:(fun fn acc ->
       try
@@ -119,15 +122,15 @@ let find_child_classes target_class_name naming_table files =
           Naming_table.get_file_info_unsafe naming_table fn
         in
         List.fold_left classes ~init:acc ~f:(fun acc cid ->
-            add_if_extends_class target_class_name (snd cid) acc)
+            add_if_extends_class ctx target_class_name (snd cid) acc)
       with Caml.Not_found -> acc)
 
-let get_origin_class_name class_name member =
+let get_origin_class_name ctx class_name member =
   let origin =
     match member with
     | Method method_name ->
       begin
-        match Decl_provider.get_class class_name with
+        match Decl_provider.get_class ctx class_name with
         | Some class_ ->
           let get_origin_class meth =
             match meth with
@@ -196,14 +199,14 @@ let get_deps_set_gconst cst_name =
     Relative_path.Set.add files fn
   | None -> Relative_path.Set.empty
 
-let fold_one_tast target acc symbol =
+let fold_one_tast ctx target acc symbol =
   let module SO = SymbolOccurrence in
   let SO.{ type_; pos; name; _ } = symbol in
   Pos.Map.union acc
   @@
   match (target, type_) with
   | (IMember (classes, Typeconst tc), SO.Typeconst (c_name, tc_name)) ->
-    process_taccess classes tc (c_name, tc_name, pos)
+    process_taccess ctx classes tc (c_name, tc_name, pos)
   | (IMember (classes, member), SO.Method (c_name, m_name))
   | (IMember (classes, member), SO.ClassConst (c_name, m_name))
   | (IMember (classes, member), SO.Property (c_name, m_name)) ->
@@ -218,7 +221,7 @@ let fold_one_tast target acc symbol =
       | SO.ClassConst _ -> true
       | _ -> false
     in
-    process_member_id classes member c_name mid ~is_method ~is_const
+    process_member_id ctx classes member c_name mid ~is_method ~is_const
   | (IFunction fun_name, SO.Function) -> process_fun_id fun_name (pos, name)
   | (IClass c, SO.Class) -> process_class_id c (pos, name) None
   | (IGConst cst_name, SO.GConst) -> process_gconst_id cst_name (pos, name)
@@ -235,7 +238,7 @@ let find_refs
   let results_from_tast (_file, tast) : string Pos.Map.t =
     IdentifySymbolService.all_symbols tast
     |> List.filter ~f:(fun symbol -> not symbol.SymbolOccurrence.is_declaration)
-    |> List.fold ~init:Pos.Map.empty ~f:(fold_one_tast target)
+    |> List.fold ~init:Pos.Map.empty ~f:(fold_one_tast ctx target)
   in
   (* These are the tasts for all the 'fileinfo_l' passed in *)
   let tasts_of_files : (Relative_path.t * Tast.program) list =
@@ -283,7 +286,7 @@ let find_refs_ctx
   let results =
     symbols
     |> List.filter ~f:(fun symbol -> not symbol.SymbolOccurrence.is_declaration)
-    |> List.fold ~init:Pos.Map.empty ~f:(fold_one_tast target)
+    |> List.fold ~init:Pos.Map.empty ~f:(fold_one_tast ctx target)
   in
   Pos.Map.fold (fun p str acc -> (str, p) :: acc) results []
 
@@ -295,10 +298,10 @@ let parallel_find_refs workers files target ctx =
     ~merge:List.rev_append
     ~next:(MultiWorker.next workers files)
 
-let get_definitions = function
+let get_definitions ctx = function
   | IMember (Class_set classes, Method method_name) ->
     SSet.fold classes ~init:[] ~f:(fun class_name acc ->
-        match Decl_provider.get_class class_name with
+        match Decl_provider.get_class ctx class_name with
         | Some class_ ->
           let add_meth get acc =
             match get method_name with
@@ -313,7 +316,7 @@ let get_definitions = function
         | None -> acc)
   | IMember (Class_set classes, Class_const class_const_name) ->
     SSet.fold classes ~init:[] ~f:(fun class_name acc ->
-        match Decl_provider.get_class class_name with
+        match Decl_provider.get_class ctx class_name with
         | Some class_ ->
           let add_class_const get acc =
             match get class_const_name with
@@ -330,23 +333,23 @@ let get_definitions = function
       ~default:[]
       (Naming_table.Types.get_kind class_name >>= function
        | Naming_table.TClass ->
-         Decl_provider.get_class class_name >>= fun class_ ->
+         Decl_provider.get_class ctx class_name >>= fun class_ ->
          Some [(class_name, Cls.pos class_)]
        | Naming_table.TTypedef ->
-         Decl_provider.get_typedef class_name >>= fun type_ ->
+         Decl_provider.get_typedef ctx class_name >>= fun type_ ->
          Some [(class_name, type_.td_pos)]
        | Naming_table.TRecordDef ->
-         Decl_provider.get_record_def class_name >>= fun rd ->
+         Decl_provider.get_record_def ctx class_name >>= fun rd ->
          Some [(class_name, rd.rdt_pos)])
   | IRecord record_name ->
     begin
-      match Decl_provider.get_record_def record_name with
+      match Decl_provider.get_record_def ctx record_name with
       | Some rd -> [(record_name, rd.rdt_pos)]
       | None -> []
     end
   | IFunction fun_name ->
     begin
-      match Decl_provider.get_fun fun_name with
+      match Decl_provider.get_fun ctx fun_name with
       | Some { fe_pos; _ } -> [(fun_name, fe_pos)]
       | _ -> []
     end
@@ -370,7 +373,7 @@ let find_references ctx workers target include_defs files =
     Hh_logger.debug "find_references: %d results" (List.length results)
   in
   if include_defs then
-    let defs = get_definitions target in
+    let defs = get_definitions ctx target in
     let () = Hh_logger.debug "find_references: +%d defs" (List.length defs) in
     List.rev_append defs results
   else

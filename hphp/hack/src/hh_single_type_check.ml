@@ -1504,20 +1504,23 @@ let handle_mode
         ~path:(Relative_path.create_detect_prefix filename)
         ~file_input:(ServerCommandTypes.FileContent content)
     in
-    Option.Monad_infix.(
-      ServerCommandTypes.Done_or_retry.(
-        let results =
+    let open Option.Monad_infix in
+    let open ServerCommandTypes.Done_or_retry in
+    let results =
+      Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerFindRefs.(
             go_from_file_ctx ~ctx ~entry ~line ~column >>= fun (name, action) ->
-            go action include_defs genv env |> map_env ~f:(to_ide name) |> snd
+            go ctx action include_defs genv env
+            |> map_env ~f:(to_ide name)
+            |> snd
             |> function
             | Done r -> r
             | Retry ->
               failwith
               @@ "should only happen with prechecked files "
-              ^ "which are not a thing in hh_single_type_check")
-        in
-        ClientFindRefs.print_ide_readable results))
+              ^ "which are not a thing in hh_single_type_check"))
+    in
+    ClientFindRefs.print_ide_readable results
   | Go_to_impl (line, column) ->
     let filename = expect_single_file () in
     let naming_table = Naming_table.create files_info in

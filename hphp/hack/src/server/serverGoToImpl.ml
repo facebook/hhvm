@@ -111,7 +111,8 @@ let find_child_classes
       genv.ServerEnv.workers
       (SSet.singleton class_name)
   in
-  FindRefsService.find_child_classes class_name env.naming_table files
+  let ctx = Provider_context.get_global_context_or_empty_FOR_MIGRATION () in
+  FindRefsService.find_child_classes ctx class_name env.naming_table files
   |> SSet.elements
 
 let search_class
@@ -138,7 +139,9 @@ let search_member
   match member with
   | Method method_name ->
     let class_name = ServerFindRefs.add_ns class_name in
-    let class_name = FindRefsService.get_origin_class_name class_name member in
+    let class_name =
+      FindRefsService.get_origin_class_name ctx class_name member
+    in
     ServerFindRefs.handle_prechecked_files
       genv
       env

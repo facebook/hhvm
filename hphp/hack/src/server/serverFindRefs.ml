@@ -81,15 +81,17 @@ let search_function function_name include_defs genv env =
   in
   search (FindRefsService.IFunction function_name) include_defs files genv env
 
-let search_member class_name member include_defs genv env =
+let search_member ctx class_name member include_defs genv env =
   let class_name = add_ns class_name in
-  let class_name = FindRefsService.get_origin_class_name class_name member in
+  let class_name =
+    FindRefsService.get_origin_class_name ctx class_name member
+  in
   handle_prechecked_files genv env Typing_deps.Dep.(make (Class class_name))
   @@ fun () ->
   (* Find all the classes that extend this one *)
   let files = FindRefsService.get_child_classes_files class_name in
   let all_classes =
-    FindRefsService.find_child_classes class_name env.naming_table files
+    FindRefsService.find_child_classes ctx class_name env.naming_table files
   in
   let all_classes = SSet.add all_classes class_name in
   (* Get all the files that reference those classes *)
@@ -147,10 +149,10 @@ let search_localvar path content line char env =
     List.map results (fun x -> (var_text, x))
   | [] -> []
 
-let go action include_defs genv env =
+let go ctx action include_defs genv env =
   match action with
   | Member (class_name, member) ->
-    search_member class_name member include_defs genv env
+    search_member ctx class_name member include_defs genv env
   | Function function_name ->
     search_function function_name include_defs genv env
   | Class class_name -> search_class class_name include_defs genv env

@@ -215,6 +215,17 @@ where
         self.text = text
     }
 
+    pub fn drop_state(self) -> SyntaxTree<'a, Syntax, ()> {
+        SyntaxTree {
+            text: self.text,
+            root: self.root,
+            errors: self.errors,
+            mode: self.mode,
+            state: (),
+            required_stack_size: self.required_stack_size,
+        }
+    }
+
     //TODO: to_json require some unimplemented methods in syntax.rs, particularly
     // Hh_json.to_json
 }

@@ -13,6 +13,7 @@ use oxidized::parser_options::ParserOptions;
 use parser_core_types::{
     indexed_source_text::IndexedSourceText,
     lexable_token::LexableToken,
+    positioned_syntax::PositionedSyntax,
     syntax::{ListItemChildren, Syntax, SyntaxValueType, SyntaxVariant, SyntaxVariant::*},
     syntax_error::{self as errors, Error, ErrorType, SyntaxError},
     syntax_trait::SyntaxTrait,
@@ -220,7 +221,7 @@ fn make_first_use_or_def(
 
     res
 }
-pub struct ParserErrors<'a, Token, Value, State> {
+struct ParserErrors<'a, Token, Value, State> {
     phantom: std::marker::PhantomData<(*const Token, *const Value, *const State)>,
 
     env: Env<'a, Syntax<Token, Value>, SyntaxTree<'a, Syntax<Token, Value>, State>>,
@@ -5469,4 +5470,14 @@ where
             }
         }
     }
+}
+
+pub fn parse_errors<'a>(
+    tree: &'a SyntaxTree<'a, PositionedSyntax, ()>,
+    parser_options: ParserOptions,
+    hhvm_compat_mode: bool,
+    hhi_mode: bool,
+    codegen: bool,
+) -> Vec<SyntaxError> {
+    ParserErrors::parse_errors(tree, parser_options, hhvm_compat_mode, hhi_mode, codegen)
 }

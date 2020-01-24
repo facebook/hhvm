@@ -91,7 +91,7 @@ ocaml_ffi! {
             <SyntaxTree<PositionedSyntax, ()>>::ffi_pointer_into_boxed(ocaml_tree, &source_text)
         };
 
-        let errors = rust_parser_errors::ParserErrors::parse_errors(
+        let errors = rust_parser_errors::parse_errors(
             &tree,
             parser_options,
             hhvm_compat_mode,

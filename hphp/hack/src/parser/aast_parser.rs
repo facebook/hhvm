@@ -25,12 +25,13 @@ use parser_core_types::{
     syntax_tree::SyntaxTree,
 };
 use regex::bytes::Regex;
-use rust_parser_errors::ParserErrors;
+use rust_parser_errors::parse_errors;
 use stack_limit::StackLimit;
 use std::borrow::Borrow;
 
 type State<'a> = CoroutineState<'a, PositionedSyntax>;
-type PositionedSyntaxTree<'a> = SyntaxTree<'a, PositionedSyntax, State<'a>>;
+type PositionedSyntaxTreeWithCoroutineState<'a> = SyntaxTree<'a, PositionedSyntax, State<'a>>;
+type PositionedSyntaxTree<'a> = SyntaxTree<'a, PositionedSyntax, ()>;
 
 struct PositionedSyntaxLowerer;
 impl<'a> lowerer::Lowerer<'a, PositionedToken, PositionedValue> for PositionedSyntaxLowerer {}
@@ -77,6 +78,7 @@ impl<'a> AastParser {
         let scoured_comments =
             Self::scour_comments_and_add_fixmes(env, indexed_source_text, &tree.root())?;
         let lower_coroutines = env.lower_coroutines && env.codegen && tree.sc_state().seen_ppl();
+        let tree = tree.drop_state();
         if lower_coroutines && rewritten_source.is_none() {
             let (source, rewritten_source) = coroutine_lowerer::rewrite_coroutines(
                 indexed_source_text.source_text(),
@@ -93,7 +95,7 @@ impl<'a> AastParser {
             let original_tree = &tree;
             let tree = if let Some(rewritten_source) = rewritten_source {
                 let (_, rewritten_tree) = Self::parse_text(env, rewritten_source, stack_limit)?;
-                Left(rewritten_tree)
+                Left(rewritten_tree.drop_state())
             } else {
                 Right(&tree)
             };
@@ -143,7 +145,7 @@ impl<'a> AastParser {
     ) -> Vec<SyntaxError> {
         let find_errors = |hhi_mode: bool| -> Vec<SyntaxError> {
             let mut errors = tree.errors().into_iter().cloned().collect::<Vec<_>>();
-            errors.extend(ParserErrors::parse_errors(
+            errors.extend(parse_errors(
                 &tree,
                 // TODO(hrust) change to parser_otions to ref in ParserErrors
                 env.parser_options.clone(),
@@ -179,7 +181,7 @@ impl<'a> AastParser {
         env: &Env,
         indexed_source_text: &'a IndexedSourceText<'a>,
         stack_limit: Option<&'a StackLimit>,
-    ) -> Result<(Option<Mode>, PositionedSyntaxTree<'a>)> {
+    ) -> Result<(Option<Mode>, PositionedSyntaxTreeWithCoroutineState<'a>)> {
         let source_text = indexed_source_text.source_text();
         let mode = parse_mode(indexed_source_text.source_text());
         if mode == Some(Mode::Mexperimental) && env.codegen && !env.hacksperimental {
@@ -207,7 +209,7 @@ impl<'a> AastParser {
         let tree = if quick_mode {
             let (tree, errors, _state) =
                 decl_mode_parser::parse_script(source_text, parser_env, stack_limit);
-            PositionedSyntaxTree::create(
+            PositionedSyntaxTreeWithCoroutineState::create(
                 source_text,
                 tree,
                 errors,
@@ -218,7 +220,14 @@ impl<'a> AastParser {
         } else {
             let (tree, errors, state) =
                 coroutine_parser_leak_tree::parse_script(source_text, parser_env, stack_limit);
-            PositionedSyntaxTree::create(source_text, tree, errors, mode, state, None)
+            PositionedSyntaxTreeWithCoroutineState::create(
+                source_text,
+                tree,
+                errors,
+                mode,
+                state,
+                None,
+            )
         };
         Ok((mode, tree))
     }

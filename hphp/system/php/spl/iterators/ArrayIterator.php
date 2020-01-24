@@ -8,9 +8,7 @@
  * iterating over Arrays and Objects.
  *
  * When you want to iterate over the same array multiple times you need to
- * instantiate ArrayObject and let it create ArrayIterator instances that
- * refer to it either by using foreach or by calling its getIterator()
- * method manually.
+ * create multiple ArrayIterator instances.
  *
  */
 class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
@@ -32,7 +30,7 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
    * @return     mixed   An ArrayIterator object.
    */
   public function __construct($array = darray[], $flags = null) {
-    if (($array is ArrayObject) || ($array is ArrayIterator)) {
+    if ($array is ArrayIterator) {
       $this->storage = $array->getArrayCopy();
       $flags = ($flags === null) ? $array->getFlags() : $flags;
     } else if (gettype($array) === 'object') {

@@ -53,7 +53,6 @@ namespace HPHP { namespace SystemLib {
   x(SoapFault)                                  \
   x(Serializable)                               \
   x(ArrayAccess)                                \
-  x(ArrayObject)                                \
   x(ArrayIterator)                              \
   x(IteratorAggregate)                          \
   x(Countable)                                  \

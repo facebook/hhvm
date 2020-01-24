@@ -532,11 +532,12 @@ void ObjectData::o_getArray(Array& props,
   );
 }
 
-// a constant for ArrayObjects AND ArrayIterators that changes the way the
+// a constant for ArrayIterators that changes the way the
 // object is converted to an array
 const int64_t ARRAY_OBJ_ITERATOR_STD_PROP_LIST = 1;
 
-const StaticString s_flags("flags");
+const StaticString s_flags("flags"),
+                   s_storage("storage");
 
 template <IntishCast IC /* = IntishCast::None */>
 Array ObjectData::toArray(bool pubOnly /* = false */,
@@ -555,17 +556,8 @@ Array ObjectData::toArray(bool pubOnly /* = false */,
       raise_notice("SimpleXMLElement to array cast");
     }
     return SimpleXMLElement_objectCast(this, KindOfArray).toArray();
-  } else if (UNLIKELY(instanceof(SystemLib::s_ArrayObjectClass)) ||
-             UNLIKELY(instanceof(SystemLib::s_ArrayIteratorClass))) {
-    auto const cls = [&]() {
-      if (instanceof(SystemLib::s_ArrayObjectClass)) {
-        return SystemLib::s_ArrayObjectClass;
-      }
-      assertx(instanceof(SystemLib::s_ArrayIteratorClass));
-      return SystemLib::s_ArrayIteratorClass;
-    }();
-
-    auto const flags = getProp(cls, s_flags.get());
+  } else if (UNLIKELY(instanceof(SystemLib::s_ArrayIteratorClass))) {
+    auto const flags = getProp(SystemLib::s_ArrayIteratorClass, s_flags.get());
     assertx(flags.is_set());
     if (UNLIKELY(flags.type() == KindOfInt64 &&
                  flags.val().num == ARRAY_OBJ_ITERATOR_STD_PROP_LIST)) {
@@ -576,7 +568,7 @@ Array ObjectData::toArray(bool pubOnly /* = false */,
 
     check_recursion_throw();
 
-    auto const storage = getProp(cls, s_storage.get());
+    auto const storage = getProp(SystemLib::s_ArrayIteratorClass, s_storage.get());
     assertx(storage.is_set());
     return tvCastToArrayLike(storage.tv());
   } else if (UNLIKELY(instanceof(c_Closure::classof()))) {

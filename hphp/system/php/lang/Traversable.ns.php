@@ -3,7 +3,6 @@
 namespace HH {
 
 <<__Sealed(
-  \ArrayObject::class,
   \DOMNodeList::class,
   \Imagick::class,
   \HH\Iterable::class,

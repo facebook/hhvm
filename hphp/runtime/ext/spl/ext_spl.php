@@ -9,7 +9,6 @@ function spl_classes(): array {
   return array (
     AppendIterator::class => AppendIterator::class,
     ArrayIterator::class => ArrayIterator::class,
-    ArrayObject::class => ArrayObject::class,
     BadFunctionCallException::class => BadFunctionCallException::class,
     BadMethodCallException::class => BadMethodCallException::class,
     CachingIterator::class => CachingIterator::class,

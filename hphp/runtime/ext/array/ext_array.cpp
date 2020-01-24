@@ -1373,19 +1373,13 @@ namespace {
 
 enum class NoCow {};
 template<class DoCow = void, class NonArrayRet, class OpPtr>
-static Variant iter_op_impl(Variant& refParam, OpPtr op, const String& objOp,
+static Variant iter_op_impl(Variant& refParam, OpPtr op,
                             NonArrayRet nonArray,
                             const std::string& fnName,
                             bool(ArrayData::*pred)() const =
                               &ArrayData::isInvalid) {
   auto& cell = *refParam.asTypedValue();
   if (!isArrayLikeType(cell.m_type)) {
-    if (cell.m_type == KindOfObject) {
-      auto obj = cell.m_data.pobj;
-      if (obj->instanceof(SystemLib::s_ArrayObjectClass)) {
-        return obj->o_invoke_few_args(objOp, 0);
-      }
-    }
     raise_bad_type_warning("%s() expects array, was %s",
                              fnName.c_str(),
                              getDataTypeString(refParam.getType()).c_str());
@@ -1404,22 +1398,11 @@ static Variant iter_op_impl(Variant& refParam, OpPtr op, const String& objOp,
 
 }
 
-const StaticString
-  s___each("__each"),
-  s___current("__current"),
-  s___key("__key"),
-  s___next("__next"),
-  s___prev("__prev"),
-  s___reset("__reset"),
-  s___end("__end");
-
-
 Variant HHVM_FUNCTION(each,
                       Variant& refParam) {
   return iter_op_impl(
     refParam,
     &ArrayData::each,
-    s___each,
     Variant::NullInit(),
     "each"
   );
@@ -1432,7 +1415,6 @@ Variant HHVM_FUNCTION(current,
     // yet still requires non-const reference
     const_cast<Variant&>(refParam),
     &ArrayData::current,
-    s___current,
     false,
     "current"
   );
@@ -1445,7 +1427,6 @@ Variant HHVM_FUNCTION(key,
     // yet still requires non-const reference
     const_cast<Variant&>(refParam),
     &ArrayData::key,
-    s___key,
     false,
     "key"
   );
@@ -1456,7 +1437,6 @@ Variant HHVM_FUNCTION(next,
   return iter_op_impl(
     refParam,
     &ArrayData::next,
-    s___next,
     false,
     "next"
   );
@@ -1467,7 +1447,6 @@ Variant HHVM_FUNCTION(prev,
   return iter_op_impl(
     refParam,
     &ArrayData::prev,
-    s___prev,
     false,
     "prev"
   );
@@ -1478,7 +1457,6 @@ Variant HHVM_FUNCTION(reset,
   return iter_op_impl(
     refParam,
     &ArrayData::reset,
-    s___reset,
     false,
     "reset",
     &ArrayData::isHead
@@ -1490,7 +1468,6 @@ Variant HHVM_FUNCTION(end,
   return iter_op_impl(
     refParam,
     &ArrayData::end,
-    s___end,
     false,
     "end",
     &ArrayData::isTail

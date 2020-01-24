@@ -77,13 +77,7 @@ TypedValue objOffsetGet(
   return g_context->invokeMethod(base, method, InvokeArgs(&offset, 1));
 }
 
-enum class OffsetExistsResult {
-  DoesNotExist = 0,
-  DefinitelyExists = 1,
-  IssetIfNonNull = 2
-};
-
-static OffsetExistsResult objOffsetExists(ObjectData* base, TypedValue offset) {
+bool objOffsetIsset(ObjectData* base, TypedValue offset) {
   objArrayAccess(base);
 
   assertx(!base->isCollection());
@@ -95,37 +89,11 @@ static OffsetExistsResult objOffsetExists(ObjectData* base, TypedValue offset) {
   // In-place cast decrefs the function call result.
   tvCastToBooleanInPlace(&result);
 
-  if (!result.m_data.num) {
-    return OffsetExistsResult::DoesNotExist;
-  }
-
-  return method->cls() == SystemLib::s_ArrayObjectClass
-    ? OffsetExistsResult::IssetIfNonNull
-    : OffsetExistsResult::DefinitelyExists;
-}
-
-bool objOffsetIsset(ObjectData* base, TypedValue offset) {
-  auto exists = objOffsetExists(base, offset);
-
-  // Unless we called ArrayObject::offsetExists, there's nothing more to do.
-  if (exists != OffsetExistsResult::IssetIfNonNull) {
-    return (int)exists;
-  }
-
-  // For ArrayObject::offsetExists, we need to check the value at `offset`.  If
-  // it's null, then we return false.  We can't call the offsetGet method on
-  // `base` because users aren't expecting offsetGet to be called for
-  // `isset(...)` expressions, so call the method on the base ArrayObject class.
-  auto const cls = SystemLib::s_ArrayObjectClass;
-  auto const method = cls->lookupMethod(s_offsetGet.get());
-  assertx(method != nullptr);
-
-  auto result = g_context->invokeMethodV(base, method, InvokeArgs(&offset, 1));
-  return !result.isNull();
+  return result.m_data.num;
 }
 
 bool objOffsetEmpty(ObjectData* base, TypedValue offset) {
-  if (objOffsetExists(base, offset) == OffsetExistsResult::DoesNotExist) {
+  if (!objOffsetIsset(base, offset)) {
     return true;
   }
 

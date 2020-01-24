@@ -40,8 +40,6 @@
 
 namespace HPHP {
 
-const StaticString s_storage("storage");
-
 struct InvalidSetMException : std::runtime_error {
   InvalidSetMException()
     : std::runtime_error("Empty InvalidSetMException")
@@ -918,22 +916,6 @@ inline tv_lval ElemDObject(TypedValue& tvRef, tv_lval base,
 
   if (LIKELY(obj->isCollection())) {
     return collections::atLval(obj, &scratchKey);
-  } else if (obj->getVMClass()->classof(SystemLib::s_ArrayObjectClass)) {
-    auto storage = obj->getPropLval(SystemLib::s_ArrayObjectClass,
-                                    s_storage.get());
-    if (debug) {
-      // ArrayObject should always have the 'storage' property, it shouldn't
-      // have a type-hint on it, nor should it be LateInit.
-      always_assert(storage);
-      auto const slot = obj->getVMClass()->getDeclPropSlot(
-        SystemLib::s_ArrayObjectClass,
-        s_storage.get()
-      ).slot;
-      auto const& prop = obj->getVMClass()->declProperties()[slot];
-      always_assert(!prop.typeConstraint.isCheckable());
-      always_assert(!(prop.attrs & AttrLateInit));
-    }
-    return ElemDArray<mode, keyType>(storage, key);
   }
 
   tvRef = objOffsetGet(instanceFromTv(base), scratchKey);

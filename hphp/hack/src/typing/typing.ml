@@ -1607,7 +1607,10 @@ and expr
       (Printf.sprintf
          "Exception while typechecking expression at position %s"
          pos);
-    Caml.Printexc.raise_with_backtrace e stack
+    prerr_endline (Caml.Printexc.to_string e);
+    Caml.Printexc.print_raw_backtrace stderr stack;
+    Errors.exception_occurred p;
+    make_result env p Aast.Any @@ err_witness env p
 
 and raw_expr
     ?(accept_using_var = false)

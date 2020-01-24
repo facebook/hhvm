@@ -9,6 +9,7 @@
 
 open Core_kernel
 open HoverService
+module Decl_provider = Decl_provider_ctx
 
 (** When we get a Class occurrence and a Method occurrence, that means that the
 user is hovering over an invocation of the constructor, and would therefore only
@@ -348,7 +349,7 @@ let make_hover_info ctx env_and_ty entry occurrence def_opt =
           when name = Naming_special_names.Members.__construct ->
           let snippet_opt =
             Option.Monad_infix.(
-              Decl_provider.get_class classname >>= fun c ->
+              Decl_provider.get_class ctx classname >>= fun c ->
               fst (Decl_provider.Class.construct c) >>| fun elt ->
               let ty = Lazy.force_val elt.ce_type in
               Tast_env.print_ty_with_identity env (DeclTy ty) occurrence def_opt)

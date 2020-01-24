@@ -3717,7 +3717,7 @@ and anon_bind_param params (env, t_params) ty : env * Tast.fun_param list =
         { (Phase.env_with_self env) with from_class = Some CIstatic }
       in
       let (env, h) = Phase.localize ~ety_env env h in
-      let pos = get_pos ty in
+      let pos = get_pos h in
       let env =
         Typing_coercion.coerce_type
           pos
@@ -3758,7 +3758,7 @@ and anon_bind_variadic env vparam variadic_ty =
         { (Phase.env_with_self env) with from_class = Some CIstatic }
       in
       let (env, h) = Phase.localize ~ety_env env h in
-      let pos = get_pos variadic_ty in
+      let pos = get_pos h in
       let env =
         Typing_coercion.coerce_type
           pos
@@ -3845,23 +3845,23 @@ and stash_conts_for_anon env p is_anon captured f =
   (env, tfun, result)
 
 (* Make a type-checking function for an anonymous function. *)
-and anon_make tenv p f ft idl is_anon outer =
+and anon_make tenv lambda_pos f ft idl is_anon outer =
   let anon_lenv = tenv.lenv in
   let is_typing_self = ref false in
   let nb = Nast.assert_named_body f.f_body in
   let is_coroutine = Ast_defs.(equal_fun_kind f.f_fun_kind FCoroutine) in
   ( is_coroutine,
     ref ([], []),
-    p,
+    lambda_pos,
     (* Here ret_ty should include Awaitable wrapper *)
     fun ?el ?ret_ty env supplied_params supplied_arity ->
       if !is_typing_self then (
-        Errors.anonymous_recursive p;
-        expr_error env (Reason.Rwitness p) outer
+        Errors.anonymous_recursive lambda_pos;
+        expr_error env (Reason.Rwitness lambda_pos) outer
       ) else (
         is_typing_self := true;
         Env.anon anon_lenv env (fun env ->
-            stash_conts_for_anon env p is_anon idl (fun env ->
+            stash_conts_for_anon env lambda_pos is_anon idl (fun env ->
                 let env = Env.clear_params env in
                 let make_variadic_arg env varg tyl =
                   let remaining_types =
@@ -3964,11 +3964,11 @@ and anon_make tenv p f ft idl is_anon outer =
                     begin
                       match ret_ty with
                       | None ->
-                        let (env, ret_ty) = Env.fresh_type env p in
-                        (env, Typing_return.wrap_awaitable env p ret_ty)
+                        let (env, ret_ty) = Env.fresh_type env lambda_pos in
+                        (env, Typing_return.wrap_awaitable env lambda_pos ret_ty)
                       | Some ret_ty ->
                         (* We might need to force it to be Awaitable if it is a type variable *)
-                        Typing_return.force_awaitable env p ret_ty
+                        Typing_return.force_awaitable env lambda_pos ret_ty
                     end
                   | Some ret ->
                     (* If a 'this' type appears it needs to be compatible with the
@@ -4011,7 +4011,7 @@ and anon_make tenv p f ft idl is_anon outer =
                   if (not implicit_return) || Nast.named_body_is_unsafe nb then
                     env
                   else
-                    fun_implicit_return env p hret f.f_fun_kind
+                    fun_implicit_return env lambda_pos hret f.f_fun_kind
                 in
                 is_typing_self := false;
                 let annotation =
@@ -4047,12 +4047,15 @@ and anon_make tenv p f ft idl is_anon outer =
                     Aast.f_static = f.f_static;
                   }
                 in
-                let ty = mk (Reason.Rwitness p, Tfun ft) in
+                let ty = mk (Reason.Rwitness lambda_pos, Tfun ft) in
                 let te =
-                  if is_anon then
-                    Tast.make_typed_expr p ty (Aast.Efun (tfun_, idl))
-                  else
-                    Tast.make_typed_expr p ty (Aast.Lfun (tfun_, idl))
+                  Tast.make_typed_expr
+                    lambda_pos
+                    ty
+                    ( if is_anon then
+                      Aast.Efun (tfun_, idl)
+                    else
+                      Aast.Lfun (tfun_, idl) )
                 in
                 let env = Env.set_tyvar_variance env ty in
                 (env, te, hret)))

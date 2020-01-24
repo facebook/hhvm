@@ -1,0 +1,10 @@
+File "bad_pos_bug.php--file1.php", line 9, characters 22-22:
+Invalid argument (Typing[4323])
+File "bad_pos_bug.php--file2.php", line 3, characters 18-18:
+Some type constraint(s) are violated here
+File "bad_pos_bug.php--file2.php", line 3, characters 13-13:
+T is a constrained type parameter
+File "bad_pos_bug.php--file1.php", line 9, characters 22-22:
+Expected C
+File "bad_pos_bug.php--file2.php", line 3, characters 18-18:
+But got J

@@ -1,2 +1,3 @@
 --disallow-invalid-arraykey
 --hh-log-level prop 1
+--new-inference-lambda

@@ -297,11 +297,6 @@ public:
   Vinstr def_inst;
 };
 
-/*
- * Bitset of Vreg numbers.
- */
-using LiveSet = boost::dynamic_bitset<>;
-
 template<class Fn> void forEach(const LiveSet& bits, Fn fn) {
   for (auto i = bits.find_first(); i != bits.npos; i = bits.find_next(i)) {
     fn(Vreg(i));
@@ -703,84 +698,6 @@ jit::vector<int> analyzeSP(const Vunit& unit,
     }
   }
   return spill_offsets;
-}
-
-/*
- * Compute livein set for each block.
- *
- * An iterative data-flow analysis to compute the livein sets for each block is
- * necessary for two reasons:
- *
- * 1. buildIntervals() uses the sets in a single backwards pass to build
- *    precise Intervals with live range holes, and
- *
- * 2. resolveEdges() uses the sets to discover which intervals require copies
- *    on control flow edges due to having been split.
- */
-jit::vector<LiveSet> computeLiveness(const Vunit& unit,
-                                     const Abi& abi,
-                                     const jit::vector<Vlabel>& blocks) {
-  auto livein = jit::vector<LiveSet>{unit.blocks.size()};
-  auto const preds = computePreds(unit);
-
-  auto blockPO = jit::vector<uint32_t>(unit.blocks.size());
-  auto revBlocks = blocks;
-  std::reverse(begin(revBlocks), end(revBlocks));
-
-  FTRACE(6, "computeLiveness: starting with {} blocks (unit blocks: {})\n",
-         revBlocks.size(), unit.blocks.size());
-
-  auto wl = dataflow_worklist<uint32_t>(revBlocks.size());
-
-  for (unsigned po = 0; po < revBlocks.size(); po++) {
-    wl.push(po);
-    blockPO[revBlocks[po]] = po;
-    FTRACE(6, "  - inserting block {} (po = {})\n", revBlocks[po], po);
-  }
-
-  while (!wl.empty()) {
-    auto b = revBlocks[wl.pop()];
-    auto& block = unit.blocks[b];
-
-    FTRACE(6, "  - popped block {} (po = {})\n", b, blockPO[b]);
-
-    // start with the union of the successor blocks
-    LiveSet live(unit.next_vr);
-    for (auto s : succs(block)) {
-      if (!livein[s].empty()) live |= livein[s];
-    }
-
-    // and now go through the instructions in the block in reverse order
-    for (auto const& inst : boost::adaptors::reverse(block.code)) {
-      RegSet implicit_uses, implicit_across, implicit_defs;
-      getEffects(abi, inst, implicit_uses, implicit_across, implicit_defs);
-
-      auto const vsf = Vreg{RegSF{0}};
-
-      auto const dvisit = [&] (Vreg r, Width w) {
-        live.reset(w == Width::Flags ? vsf : r);
-      };
-      auto const uvisit = [&] (Vreg r, Width w) {
-        live.set(w == Width::Flags ? vsf : r);
-      };
-
-      visitDefs(unit, inst, dvisit);
-      visit(unit, implicit_defs, dvisit);
-
-      visitUses(unit, inst, uvisit);
-      visit(unit, implicit_uses, uvisit);
-    }
-
-    if (live != livein[b]) {
-      livein[b] = live;
-      for (auto p : preds[b]) {
-        wl.push(blockPO[p]);
-        FTRACE(6, "  - reinserting block {} (po = {})\n", p, blockPO[p]);
-      }
-    }
-  }
-
-  return livein;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

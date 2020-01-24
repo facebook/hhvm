@@ -16,7 +16,7 @@ class Two extends One {
   }
 }
 
-function throwException() : <<__Soft>> nothing {
+function throwException() {
   throw new \Exception("");
 }
 

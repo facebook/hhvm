@@ -37,12 +37,8 @@ let is_not_acceptable ~is_return ty =
 
       method! on_tnonnull _ _ = true
 
-      (* nothing is acceptable only if is_return is true *)
-      method! on_tunion _ _ l =
-        if is_return then
-          l <> []
-        else
-          true
+      (* nothing is never acceptable, for now *)
+      method! on_tunion _ _ _ = true
 
       (* mixed, even though we could infer it and add it, might lead to further
       problems and doesn't gives us a lot of information. More conceptually

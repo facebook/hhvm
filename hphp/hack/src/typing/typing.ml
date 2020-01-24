@@ -8151,7 +8151,7 @@ and pu_enum_def
           in
           (env, ty, Some (ExpectedTy.make (fst sid) Reason.URhint ty))
         in
-        let (_env, expr, ty') = expr ?expected env map_expr in
+        let (env, expr, ty') = expr ?expected env map_expr in
         ignore
           (Typing_ops.sub_type
              (fst sid)

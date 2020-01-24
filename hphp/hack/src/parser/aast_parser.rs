@@ -5,7 +5,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::aast_check;
-use crate::rust_aast_parser_types::{Env, Result as ParserResult};
 use coroutine_smart_constructors::State as CoroutineState;
 use itertools::{
     Either,
@@ -25,6 +24,7 @@ use parser_core_types::{
     syntax_tree::SyntaxTree,
 };
 use regex::bytes::Regex;
+use rust_aast_parser_types::{Env, Result as ParserResult};
 use rust_parser_errors::parse_errors;
 use stack_limit::StackLimit;
 use std::borrow::Borrow;

@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/test/rust:facts_parse_rust
-# Signature<<871fe624c3c9c04acc8dec8043b3c1f982c6ce94>>
+# Signature
 [package]
 name = "facts_parse_rust"
 edition = "2018"
@@ -16,4 +16,4 @@ facts_rust = { path = "../../../../src/facts/cargo/facts_rust" }
 oxidized = { path = "../../../../src/oxidized" }
 clap = "2.33"
 ocaml = "0.8"
-# @end of Signature<<871fe624c3c9c04acc8dec8043b3c1f982c6ce94>>
+# @end of Signature

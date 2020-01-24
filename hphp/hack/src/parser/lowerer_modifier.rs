@@ -67,13 +67,6 @@ impl KindSet {
         KindSet(0)
     }
 
-    pub fn from_kinds(kinds: &[Kind]) -> Self {
-        kinds.iter().fold(KindSet(0), |mut acc, x| {
-            acc.add(*x);
-            acc
-        })
-    }
-
     pub fn add(&mut self, kind: Kind) {
         self.0 = self.0 | kind.0
     }

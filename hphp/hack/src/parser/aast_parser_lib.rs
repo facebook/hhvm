@@ -6,6 +6,5 @@
 
 mod aast_check;
 mod aast_parser;
-pub mod rust_aast_parser_types;
-
 pub use aast_parser::{AastParser, Error};
+pub use rust_aast_parser_types;

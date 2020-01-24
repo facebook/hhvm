@@ -5,7 +5,7 @@
 name = "aast_parser"
 edition = "2018"
 version = "0.0.0"
-include = ["../../aast_check.rs", "../../aast_parser.rs", "../../aast_parser_lib.rs", "../../rust_aast_parser_types.rs"]
+include = ["../../aast_check.rs", "../../aast_parser.rs", "../../aast_parser_lib.rs"]
 
 [lib]
 path = "../../aast_parser_lib.rs"
@@ -23,6 +23,7 @@ ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_derive = { path = "../../../ocamlrep_derive" }
 oxidized = { path = "../../../oxidized" }
 parser_core_types = { path = "../core_types" }
+rust_aast_parser_types = { path = "../rust_aast_parser_types" }
 rust_parser_errors = { path = "../errors" }
 smart_constructors = { path = "../smart_constructors" }
 stack_limit = { path = "../../../utils/stack_limit" }

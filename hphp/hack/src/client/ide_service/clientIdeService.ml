@@ -15,7 +15,7 @@ module Status = struct
     | Initializing
     | Processing_files of ClientIdeMessage.Processing_files.t
     | Ready
-    | Stopped of Marshal_tools.remote_exception_data
+    | Stopped of ClientIdeMessage.error_data
 
   let to_string (t : t) : string =
     match t with
@@ -26,8 +26,8 @@ module Status = struct
         "Processing_files(%s)"
         (ClientIdeMessage.Processing_files.to_string p)
     | Ready -> "Ready"
-    | Stopped { Marshal_tools.message; _ } ->
-      Printf.sprintf "Stopped(%s)" message
+    | Stopped { ClientIdeMessage.user_message; _ } ->
+      Printf.sprintf "Stopped(%s)" user_message
 end
 
 module Stop_reason = struct
@@ -47,17 +47,17 @@ end
 
 type state =
   | Uninitialized of { wait_for_initialization: bool }
-  | Failed_to_initialize of Marshal_tools.remote_exception_data
+  | Failed_to_initialize of ClientIdeMessage.error_data
   | Initialized of { status: Status.t }
-  | Stopped of Stop_reason.t * Marshal_tools.remote_exception_data
+  | Stopped of Stop_reason.t * ClientIdeMessage.error_data
 
 let state_to_string (state : state) : string =
   match state with
   | Uninitialized { wait_for_initialization = true } ->
     "Uninitialized(will_wait_for_init)"
   | Uninitialized _ -> "Uninitialized"
-  | Failed_to_initialize { Marshal_tools.message; _ } ->
-    Printf.sprintf "Failed_to_initialize(%s)" message
+  | Failed_to_initialize { ClientIdeMessage.user_message; _ } ->
+    Printf.sprintf "Failed_to_initialize(%s)" user_message
   | Initialized env ->
     Printf.sprintf "Initialized(%s)" (Status.to_string env.status)
   | Stopped (reason, _) ->
@@ -144,17 +144,24 @@ let do_rpc
       than coercing its type immediately. *)
       ref_unblocked_time := unblocked_time;
       let response = Result.map ~f:Obj.magic response in
+      let response =
+        match response with
+        | Ok r -> Ok r
+        | Error { ClientIdeMessage.user_message; log_string } ->
+          Error { Marshal_tools.message = user_message; stack = log_string }
+      in
       Lwt.return response
   with e ->
-    let stack = Printexc.get_backtrace () in
-    let exn_message = Exn.to_string e in
-    let message =
-      Printf.sprintf
-        "Exception occurred while handling RPC call: %s\nStack: %s"
-        exn_message
-        stack
+    let e = Exception.wrap e in
+    let error_data =
+      {
+        Marshal_tools.message =
+          "Internal error during RPC call to IDE services: "
+          ^ Exception.get_ctor_string e;
+        stack = Exception.to_string e;
+      }
     in
-    Lwt.return_error { Marshal_tools.message; stack }
+    Lwt.return_error error_data
 
 let make (args : ClientIdeMessage.daemon_args) : t =
   let daemon_handle =
@@ -196,7 +203,7 @@ let initialize_from_saved_state
     ~(naming_table_saved_state_path : Path.t option)
     ~(wait_for_initialization : bool)
     ~(use_ranked_autocomplete : bool) :
-    (unit, Marshal_tools.remote_exception_data) Lwt_result.t =
+    (unit, ClientIdeMessage.error_data) Lwt_result.t =
   set_state t (Uninitialized { wait_for_initialization });
 
   let param =
@@ -232,27 +239,20 @@ let initialize_from_saved_state
     set_state t (Initialized { status = Status.Ready });
     Lwt.return_ok ()
   | ClientIdeMessage.Notification _ ->
-    let message =
+    let user_message =
       "Failed to initialize IDE service process "
       ^ "because we received a notification before the initialization response"
     in
-    log "%s" message;
-    let stack = Exception.get_current_callstack_string 100 in
-    let edata = { Marshal_tools.message; stack } in
-    set_state t (Failed_to_initialize edata);
-    Lwt.return_error edata
+    let log_string = Exception.get_current_callstack_string 100 in
+    log "%s" user_message;
+    let error_data = { ClientIdeMessage.user_message; log_string } in
+    set_state t (Failed_to_initialize error_data);
+    Lwt.return_error error_data
   | ClientIdeMessage.Response
-      { ClientIdeMessage.response = Error { Marshal_tools.message; stack }; _ }
-    ->
-    log "Failed to initialize IDE service process: %s" message;
-    let edata =
-      {
-        Marshal_tools.message = "could not load saved-state";
-        stack = message ^ "\n" ^ stack;
-      }
-    in
-    set_state t (Failed_to_initialize edata);
-    Lwt.return_error edata
+      { ClientIdeMessage.response = Error error_data; _ } ->
+    log "Failed to initialize IDE service process";
+    set_state t (Failed_to_initialize error_data);
+    Lwt.return_error error_data
 
 let process_status_notification
     (t : t) (notification : ClientIdeMessage.notification) : unit =
@@ -333,10 +333,10 @@ let destroy (t : t) ~(tracking_id : string) : unit Lwt.t =
 
 let stop (t : t) ~(tracking_id : string) ~(reason : Stop_reason.t) : unit Lwt.t
     =
-  let edata =
+  let error_data =
     {
-      Marshal_tools.message = "Stopped";
-      stack = Exception.get_current_callstack_string 100;
+      ClientIdeMessage.user_message = "Stopped";
+      log_string = Exception.get_current_callstack_string 100;
     }
   in
   let%lwt () = destroy t ~tracking_id in
@@ -357,7 +357,7 @@ let stop (t : t) ~(tracking_id : string) ~(reason : Stop_reason.t) : unit Lwt.t
   weirdly because of the lack of hhi.
   Luckily we're saved from that because clientLsp never makes rpc requests
   to us after it has called 'stop'. *)
-  set_state t (Stopped (reason, edata));
+  set_state t (Stopped (reason, error_data));
   Lwt.return_unit
 
 let cleanup_upon_shutdown_or_exn (t : t) ~(e : Exception.t option) : unit Lwt.t
@@ -469,22 +469,27 @@ let rpc
         Marshal_tools.message = "IDE service has not yet been initialized";
         stack;
       }
-  | Failed_to_initialize { Marshal_tools.message; stack } ->
-    Lwt.return_error
+  | Failed_to_initialize { ClientIdeMessage.user_message; log_string } ->
+    let error_data =
       {
         Marshal_tools.message =
-          Printf.sprintf "IDE service failed to initialize: %s" message;
-        stack;
+          "IDE service failed to initialize: " ^ user_message;
+        stack = log_string;
       }
-  | Stopped (reason, { Marshal_tools.message; stack }) ->
-    Lwt.return_error
+    in
+    Lwt.return_error error_data
+  | Stopped (reason, { ClientIdeMessage.user_message; log_string }) ->
+    let error_data =
       {
         Marshal_tools.message =
           Printf.sprintf
-            "IDE service is stopped: %s"
-            (Stop_reason.to_string reason);
-        stack = message ^ "\n" ^ stack;
+            "IDE service is stopped: %s. %s"
+            (Stop_reason.to_string reason)
+            user_message;
+        stack = log_string;
       }
+    in
+    Lwt.return_error error_data
   | Uninitialized { wait_for_initialization = true } ->
     let%lwt () = wait_for_initialization t in
     let%lwt result =
@@ -510,11 +515,13 @@ let get_notifications (t : t) : notification_emitter = t.notification_emitter
 let get_status (t : t) : Status.t =
   match t.state with
   | Uninitialized _ -> Status.Initializing
-  | Failed_to_initialize edata -> Status.Stopped edata
-  | Stopped (reason, { Marshal_tools.message; stack }) ->
-    Status.Stopped
-      {
-        Marshal_tools.message = Stop_reason.to_string reason;
-        stack = message ^ "\n" ^ stack;
-      }
+  | Failed_to_initialize error_data -> Status.Stopped error_data
+  | Stopped (reason, error_data) ->
+    let user_message =
+      Stop_reason.to_string reason
+      ^ ". "
+      ^ error_data.ClientIdeMessage.user_message
+    in
+    let error_data = { error_data with ClientIdeMessage.user_message } in
+    Status.Stopped error_data
   | Initialized { status } -> status

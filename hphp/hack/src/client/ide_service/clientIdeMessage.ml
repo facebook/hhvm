@@ -194,9 +194,14 @@ let notification_to_string (n : notification) : string =
     Printf.sprintf "Processing_file(%s)" (Processing_files.to_string p)
   | Done_processing -> "Done_processing"
 
+type error_data = {
+  user_message: string;
+  log_string: string;
+}
+
 type 'a timed_response = {
   unblocked_time: float;
-  response: ('a, Marshal_tools.remote_exception_data) result;
+  response: ('a, error_data) result;
 }
 
 type message_from_daemon =
@@ -206,8 +211,8 @@ type message_from_daemon =
 let message_from_daemon_to_string (m : message_from_daemon) : string =
   match m with
   | Notification n -> notification_to_string n
-  | Response { response = Error { Marshal_tools.message; _ }; _ } ->
-    Printf.sprintf "Response_error(%s)" message
+  | Response { response = Error { user_message; _ }; _ } ->
+    Printf.sprintf "Response_error(%s)" user_message
   | Response { response = Ok _; _ } -> Printf.sprintf "Response_ok"
 
 type daemon_args = {

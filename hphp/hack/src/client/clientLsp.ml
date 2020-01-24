@@ -2438,13 +2438,13 @@ let get_client_ide_status (ide_service : ClientIdeService.t) :
       total = None;
       shortMessage = None;
     }
-  | ClientIdeService.Status.Stopped { Marshal_tools.message; _ } ->
+  | ClientIdeService.Status.Stopped { ClientIdeMessage.user_message; _ } ->
     {
       ShowStatusFB.request =
         ShowMessageRequest.
           {
             type_ = MessageType.ErrorMessage;
-            message = "IDE services stopped: " ^ message ^ ".";
+            message = "IDE services stopped: " ^ user_message ^ ".";
             actions = [{ title = client_ide_restart_button_text }];
           };
       progress = None;
@@ -3256,8 +3256,8 @@ let run_ide_service (env : env) (ide_service : ClientIdeService.t) : unit Lwt.t
     | Ok () ->
       let%lwt () = ClientIdeService.serve ide_service in
       Lwt.return_unit
-    | Error { Marshal_tools.message; _ } ->
-      log "IDE services could not be initialized: %s" message;
+    | Error { ClientIdeMessage.user_message; _ } ->
+      log "IDE services could not be initialized: %s" user_message;
       Lwt.return_unit
   ) else
     Lwt.return_unit

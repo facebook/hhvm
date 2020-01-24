@@ -28,7 +28,7 @@ module Status : sig
         (** The IDE services are available, but are also in the middle of
         processing files. *)
     | Ready  (** The IDE services are available. *)
-    | Stopped of Marshal_tools.remote_exception_data
+    | Stopped of ClientIdeMessage.error_data
         (** The IDE services are not available. *)
 
   val to_string : t -> string
@@ -58,7 +58,7 @@ val initialize_from_saved_state :
   naming_table_saved_state_path:Path.t option ->
   wait_for_initialization:bool ->
   use_ranked_autocomplete:bool ->
-  (unit, Marshal_tools.remote_exception_data) Lwt_result.t
+  (unit, ClientIdeMessage.error_data) Lwt_result.t
 
 (** Pump the message loop for the IDE service. Exits once the IDE service has
 been [destroy]ed. *)

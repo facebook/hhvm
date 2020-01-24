@@ -46,11 +46,12 @@ max_workers = 2
 
         # hardcoded map of valid keys
         cls.valid_keys = {
-            "hack.ClassDeclaration.1": ["name", "is_abstract", "is_final"],
+            "hack.ClassDeclaration.1": ["name"],
             "hack.DeclarationLocation.1": ["declaration", "file", "span"],
             "hack.FileXRefs.1": ["file", "xrefs"],
             "name": ["key"],
-            "declaration": ["class_"],
+            "declaration": ["container"],
+            "container": ["class_"],
             "id": [int],
             "key": [str],
         }

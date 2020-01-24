@@ -7,7 +7,6 @@
  *)
 
 open Aast
-open Ast_defs
 open Decl_env
 open Hh_json
 open Hh_prelude
@@ -130,33 +129,22 @@ let json_of_rel_bytespan offset len =
 
 let json_of_file filepath = JSON_Object [("key", JSON_String filepath)]
 
-let json_of_class class_name is_abstract is_final progress =
+let json_of_class_decl name progress =
   let json_fact =
-    JSON_Object
-      [
-        ("name", JSON_Object [("key", JSON_String class_name)]);
-        ("is_abstract", JSON_Bool is_abstract);
-        ("is_final", JSON_Bool is_final);
-      ]
+    JSON_Object [("name", JSON_Object [("key", JSON_String name)])]
   in
   glean_json ClassDeclaration json_fact progress
 
-let json_of_class_from_node _ class_name clss progress =
-  let is_abstract =
-    match clss.c_kind with
-    | Cabstract -> true
-    | _ -> false
+let json_of_container_decl container_type decl_fun _ name _elem progress =
+  let (_, fact_id, progress) = decl_fun name progress in
+  let container_decl =
+    JSON_Object [(container_type, JSON_Number (string_of_int fact_id))]
   in
-  json_of_class class_name is_abstract clss.c_final progress
-
-let json_of_class_from_symbol _ class_name mods progress =
-  let is_abstract = List.mem mods SymbolDefinition.Abstract ~equal:phys_equal in
-  let is_final = List.mem mods SymbolDefinition.Final ~equal:phys_equal in
-  json_of_class class_name is_abstract is_final progress
+  (container_decl, fact_id, progress)
 
 let json_of_decl ctx decl_type json_fun id elem progress =
-  let (_, fact_id, progress) = json_fun ctx id elem progress in
-  let json = JSON_Object [(decl_type, JSON_Number (string_of_int fact_id))] in
+  let (decl_json, fact_id, progress) = json_fun ctx id elem progress in
+  let json = JSON_Object [(decl_type, decl_json)] in
   (json, fact_id, progress)
 
 let json_of_decl_loc ctx decl_type pos json_fun id elem progress =
@@ -210,7 +198,14 @@ let build_json ctx symbols =
         | Class cd ->
           let (pos, id) = cd.c_name in
           let (_, _, res) =
-            json_of_decl_loc ctx "class_" pos json_of_class_from_node id cd acc
+            json_of_decl_loc
+              ctx
+              "container"
+              pos
+              (json_of_container_decl "class_" json_of_class_decl)
+              id
+              cd
+              acc
           in
           res
         | _ -> acc)
@@ -234,10 +229,10 @@ let build_json ctx symbols =
               let (decl_json, target_id, prog) =
                 json_of_decl
                   ctx
-                  "class_"
-                  json_of_class_from_symbol
+                  "container"
+                  (json_of_container_decl "class_" json_of_class_decl)
                   symbol_def.name
-                  symbol_def.modifiers
+                  symbol_def
                   prog
               in
               let xrefs =

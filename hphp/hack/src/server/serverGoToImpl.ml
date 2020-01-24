@@ -12,6 +12,7 @@ open Reordered_argument_collections
 open ServerCommandTypes.Find_refs
 open ServerCommandTypes.Done_or_retry
 open Typing_defs
+module Decl_provider = Decl_provider_ctx
 
 let parallel_limit = 10
 
@@ -51,11 +52,11 @@ let parallel_find_positions_of_classes
     ~merge:List.append
     ~next:(MultiWorker.next workers child_classes)
 
-let add_if_valid_origin class_elt child_class method_name result =
+let add_if_valid_origin ctx class_elt child_class method_name result =
   if class_elt.ce_origin = child_class then
     (method_name, Lazy.force class_elt.ce_pos) :: result
   else
-    let origin_decl = Decl_provider.get_class class_elt.ce_origin in
+    let origin_decl = Decl_provider.get_class ctx class_elt.ce_origin in
     match origin_decl with
     | Some origin_decl ->
       let origin_kind = Decl_provider.Class.kind origin_decl in
@@ -69,33 +70,35 @@ let add_if_valid_origin class_elt child_class method_name result =
     | None -> failwith "TODO"
 
 let find_positions_of_methods
+    (ctx : Provider_context.t)
     (method_name : string)
     (acc : (string * Pos.t) list)
     (child_classes : string list) : (string * Pos.t) list =
   List.fold child_classes ~init:acc ~f:(fun result child_class ->
-      let class_decl = Decl_provider.get_class child_class in
+      let class_decl = Decl_provider.get_class ctx child_class in
       match class_decl with
       | Some decl ->
         let method_info = Decl_provider.Class.get_method decl method_name in
         (match method_info with
         | Some class_elt ->
-          add_if_valid_origin class_elt child_class method_name result
+          add_if_valid_origin ctx class_elt child_class method_name result
         | None ->
           let smethod_info = Decl_provider.Class.get_smethod decl method_name in
           (match smethod_info with
           | Some class_elt ->
-            add_if_valid_origin class_elt child_class method_name result
+            add_if_valid_origin ctx class_elt child_class method_name result
           | None -> result))
       | None ->
         failwith ("Could not find definition of child class: " ^ child_class))
 
 let parallel_find_positions_of_methods
+    (ctx : Provider_context.t)
     (child_classes : string list)
     (method_name : string)
     (workers : MultiWorker.worker list option) : (string * Pos.t) list =
   MultiWorker.call
     workers
-    ~job:(find_positions_of_methods method_name)
+    ~job:(find_positions_of_methods ctx method_name)
     ~neutral:[]
     ~merge:List.append
     ~next:(MultiWorker.next workers child_classes)
@@ -127,6 +130,7 @@ let search_class
     parallel_find_positions_of_classes child_classes genv.workers
 
 let search_member
+    (ctx : Provider_context.t)
     (class_name : string)
     (member : member)
     (genv : ServerEnv.genv)
@@ -144,9 +148,10 @@ let search_member
     let child_classes = find_child_classes class_name genv env in
     let results =
       if List.length child_classes < parallel_limit then
-        find_positions_of_methods method_name [] child_classes
+        find_positions_of_methods ctx method_name [] child_classes
       else
         parallel_find_positions_of_methods
+          ctx
           child_classes
           method_name
           genv.workers
@@ -160,9 +165,10 @@ let search_member
 
 let go ~(action : action) ~(genv : ServerEnv.genv) ~(env : ServerEnv.env) :
     ServerEnv.env * server_result_or_retry =
+  let ctx = Provider_context.get_global_context_or_empty_FOR_MIGRATION () in
   match action with
   | Class class_name -> search_class class_name genv env
-  | Member (class_name, member) -> search_member class_name member genv env
+  | Member (class_name, member) -> search_member ctx class_name member genv env
   | Function _
   | Record _
   | GConst _

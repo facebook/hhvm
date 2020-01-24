@@ -23,12 +23,19 @@ class rii extends RecursiveIteratorIterator
   }
 }
 
+class MyAggregate implements IteratorAggregate {
+  public function __construct(public $a) {}
+
+  public function getIterator() {
+    return new RecursiveArrayIterator($this->a);
+  }
+}
 
 <<__EntryPoint>>
 function main_recursive_iterator_iterator_begin_end_iteration() {
 $ar = array(1, 2, array(31));
 
-$it = new rii(new ArrayObject($ar, 0, "RecursiveArrayIterator"));
+$it = new rii(new MyAggregate($ar));
 
 $it->rewind();
 $it->rewind();

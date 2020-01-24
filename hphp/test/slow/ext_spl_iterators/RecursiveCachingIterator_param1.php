@@ -9,5 +9,5 @@ try {
   echo $e->getMessage() . "\n";
 }
 
-new RecursiveCachingIterator(new ArrayObject([]));
+new RecursiveCachingIterator(Vector{});
 }

@@ -10,7 +10,7 @@ class foo {
 }
 
 namespace foo;
-use \ArrayObject;
+use \ArrayIterator;
 
 const C = "foo\\C\n";
 const I = 11;
@@ -23,7 +23,7 @@ class foo {
     const C3 = foo\foo::C;
     const C4 = \foo\C;
     const C5 = \foo\foo::C;
-    const C6 = ArrayObject::STD_PROP_LIST;
+    const C6 = ArrayIterator::STD_PROP_LIST;
     const C7 = \E_ERROR;
 }
 
@@ -33,7 +33,7 @@ class bar1 {
     static $a3 = array(foo\foo::I => 0);
     static $a4 = array(\foo\I => 0);
     static $a5 = array(\foo\foo::I => 0);
-    static $a6 = array(ArrayObject::STD_PROP_LIST => 0);
+    static $a6 = array(ArrayIterator::STD_PROP_LIST => 0);
     static $a7 = array(\E_ERROR => 0);
 }
 
@@ -43,7 +43,7 @@ class bar2 {
     static $a3 = array(foo\foo::I => I);
     static $a4 = array(\foo\I => I);
     static $a5 = array(\foo\foo::I => I);
-    static $a6 = array(ArrayObject::STD_PROP_LIST => I);
+    static $a6 = array(ArrayIterator::STD_PROP_LIST => I);
     static $a7 = array(\E_ERROR => I);
 }
 
@@ -53,18 +53,18 @@ class bar3 {
     static $a3 = array(foo\foo::I => foo\I);
     static $a4 = array(\foo\I => foo\I);
     static $a5 = array(\foo\foo::I => foo\I);
-    static $a6 = array(ArrayObject::STD_PROP_LIST => foo\I);
+    static $a6 = array(ArrayIterator::STD_PROP_LIST => foo\I);
     static $a7 = array(\E_ERROR => foo\I);
 }
 
 class bar4 {
-    static $a1 = array(I => ArrayObject::STD_PROP_LIST);
-    static $a2 = array(foo\I => ArrayObject::STD_PROP_LIST);
-    static $a3 = array(foo\foo::I => ArrayObject::STD_PROP_LIST);
-    static $a4 = array(\foo\I => ArrayObject::STD_PROP_LIST);
-    static $a5 = array(\foo\foo::I => ArrayObject::STD_PROP_LIST);
-    static $a6 = array(ArrayObject::STD_PROP_LIST => ArrayObject::STD_PROP_LIST);
-    static $a7 = array(\E_ERROR => ArrayObject::STD_PROP_LIST);
+    static $a1 = array(I => ArrayIterator::STD_PROP_LIST);
+    static $a2 = array(foo\I => ArrayIterator::STD_PROP_LIST);
+    static $a3 = array(foo\foo::I => ArrayIterator::STD_PROP_LIST);
+    static $a4 = array(\foo\I => ArrayIterator::STD_PROP_LIST);
+    static $a5 = array(\foo\foo::I => ArrayIterator::STD_PROP_LIST);
+    static $a6 = array(ArrayIterator::STD_PROP_LIST => ArrayIterator::STD_PROP_LIST);
+    static $a7 = array(\E_ERROR => ArrayIterator::STD_PROP_LIST);
 }
 
 class bar5 {
@@ -73,7 +73,7 @@ class bar5 {
     static $a3 = array(foo\foo::I => \E_ERROR);
     static $a4 = array(\foo\I => \E_ERROR);
     static $a5 = array(\foo\foo::I => \E_ERROR);
-    static $a6 = array(ArrayObject::STD_PROP_LIST => \E_ERROR);
+    static $a6 = array(ArrayIterator::STD_PROP_LIST => \E_ERROR);
     static $a7 = array(\E_ERROR => \E_ERROR);
 }
 
@@ -86,7 +86,7 @@ echo foo\C;
 echo foo\foo::C;
 echo foo::C;
 echo \foo\foo::C;
-echo ArrayObject::STD_PROP_LIST . "\n";
+echo ArrayIterator::STD_PROP_LIST . "\n";
 echo \E_ERROR . "\n";
 echo "second\n";
 echo \foo\foo::C1;

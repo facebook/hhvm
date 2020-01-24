@@ -17,7 +17,7 @@ class C implements IteratorAggregate {
 }
 class D implements IteratorAggregate {
   function getIterator() {
-    return new ArrayObject(array(1,2,3));
+    return new ArrayIterator(array(1,2,3));
   }
 }
 

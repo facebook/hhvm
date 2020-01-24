@@ -10,5 +10,5 @@ function main_incomplete_class() {
   $o->attach($incomplete);
   var_dump($o->count());
 
-  $arr = new ArrayObject($incomplete); // No Exception
+  $arr = new ArrayIterator($incomplete); // No Exception
 }

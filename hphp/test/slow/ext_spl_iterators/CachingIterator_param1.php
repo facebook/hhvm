@@ -2,5 +2,5 @@
 
 <<__EntryPoint>>
 function main_caching_iterator_param1() {
-new CachingIterator(new ArrayObject([]));
+  new CachingIterator(Vector{});
 }

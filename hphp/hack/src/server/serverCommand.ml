@@ -10,6 +10,7 @@
 open Core_kernel
 open Utils
 open ServerCommandTypes
+module Decl_provider = Decl_provider_ctx
 
 exception Nonfatal_rpc_exception of exn * string * ServerEnv.env
 
@@ -191,7 +192,7 @@ let with_dependency_table_reads full_recheck_needed f =
  * declarations computed while handling IDE commands will likely be useful for subsequent IDE
  * commands too, but are not persisted outside of make_then_revert_local_changes closure. *)
 let predeclare_ide_deps
-    genv { FileInfo.n_funs; n_classes; n_record_defs; n_types; n_consts } =
+    genv ctx { FileInfo.n_funs; n_classes; n_record_defs; n_types; n_consts } =
   if genv.ServerEnv.local_config.ServerLocalConfig.predeclare_ide_deps then
     Utils.try_finally
       ~f:
@@ -201,19 +202,23 @@ let predeclare_ide_deps
            * heaps (similar to what Typing_check_service.check_files does) *)
           File_provider.local_changes_push_stack ();
           Ast_provider.local_changes_push_stack ();
-          let iter : type a. (string -> bool) -> (string -> a) -> SSet.t -> unit
-              =
+          let iter :
+              type a.
+              (string -> bool) ->
+              (Provider_context.t -> string -> a) ->
+              SSet.t ->
+              unit =
            fun mem declare s ->
             SSet.iter
               begin
                 fun x ->
                 (* Depending on Decl_provider putting the thing we ask for in shared memory *)
-                if not @@ mem x then ignore @@ (declare x : a)
+                if not @@ mem x then ignore @@ (declare ctx x : a)
               end
               s
           in
-          let declare_class x =
-            let cls = Decl_provider.get_class x in
+          let declare_class ctx x =
+            let cls = Decl_provider.get_class ctx x in
             (* For now, is_disposable forces the eager computation of all ancestor
            declarations. In the future, we will want to explicitly declare all
            ancestors when shallow decl is enabled instead. *)
@@ -282,7 +287,8 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
                (e, Caml.Printexc.raw_backtrace_to_string stack, env))
     in
     let parsed_files = Full_fidelity_parser_profiling.stop_profiling () in
-    predeclare_ide_deps genv declared_names;
+    let ctx = Provider_context.empty ~tcopt:env.ServerEnv.tcopt in
+    predeclare_ide_deps genv ctx declared_names;
     let (major_gc_time, minor_gc_time) = Sys_utils.get_gc_time () in
     let lvl =
       if ClientProvider.is_persistent client then

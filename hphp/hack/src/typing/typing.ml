@@ -7837,6 +7837,13 @@ and class_def_ env c tc =
     && Cls.members_fully_known tc
   then (
     check_extend_abstract_meth ~is_final pc (Cls.methods tc);
+    (match fst (Cls.construct tc) with
+    | Some constr ->
+      check_extend_abstract_meth
+        ~is_final
+        pc
+        (Sequence.singleton (SN.Members.__construct, constr))
+    | None -> ());
     check_extend_abstract_meth ~is_final pc (Cls.smethods tc);
     check_extend_abstract_prop ~is_final pc (Cls.sprops tc);
     check_extend_abstract_const ~is_final pc (Cls.consts tc);

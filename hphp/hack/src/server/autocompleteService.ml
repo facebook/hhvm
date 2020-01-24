@@ -18,6 +18,7 @@ module Nast = Aast
 module Tast = Aast
 module Phase = Typing_phase
 module TUtils = Typing_utils
+module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 
 let ac_env = ref None
@@ -352,7 +353,7 @@ let resolve_ty
 let autocomplete_typed_member ~is_static env class_ty cid mid =
   Tast_env.get_class_ids env class_ty
   |> List.iter ~f:(fun cname ->
-         Decl_provider.get_class cname
+         Decl_provider.get_class (Tast_env.get_ctx env) cname
          |> Option.iter ~f:(fun class_ ->
                 let cid = Option.map cid to_nast_class_id_ in
                 autocomplete_member ~is_static env class_ cid mid))
@@ -462,7 +463,7 @@ let visitor =
       let trimmed_sid = (fst sid, snd sid |> Utils.strip_both_ns) in
       autocomplete_id trimmed_sid env;
       let cid = Nast.CI sid in
-      Decl_provider.get_class (snd sid)
+      Decl_provider.get_class (Tast_env.get_ctx env) (snd sid)
       |> Option.iter ~f:(fun c ->
              List.iter attrs ~f:(function
                  | Tast.Xhp_simple (id, _) ->

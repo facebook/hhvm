@@ -1210,6 +1210,7 @@ let result_name_to_string (result : lsp_result) : string =
   | HackTestStartServerResultFB -> "$test/startHhServer"
   | HackTestStopServerResultFB -> "$test/stopHhServer"
   | HackTestShutdownServerlessResultFB -> "$test/shutdownServerlessIde"
+  | RegisterCapabilityRequestResult -> "client/registerCapability"
   | ErrorResult (e, _stack) -> "ERROR/" ^ e.Error.message
 
 let notification_name_to_string (notification : lsp_notification) : string =
@@ -1327,9 +1328,9 @@ let parse_lsp_result (request : lsp_request) (result : json) : lsp_result =
     ShowMessageRequestResult (parse_result_showMessageRequest (Some result))
   | ShowStatusRequestFB _ ->
     ShowStatusResultFB (parse_result_showMessageRequest (Some result))
+  | RegisterCapabilityRequest _ -> RegisterCapabilityRequestResult
   (* shares result type *)
   | InitializeRequest _
-  | RegisterCapabilityRequest _
   | ShutdownRequest
   | CodeLensResolveRequest _
   | HoverRequest _
@@ -1456,7 +1457,8 @@ let print_lsp_response
     | HackTestStopServerResultFB -> JSON_Null
     | HackTestShutdownServerlessResultFB -> JSON_Null
     | ShowMessageRequestResult _
-    | ShowStatusResultFB _ ->
+    | ShowStatusResultFB _
+    | RegisterCapabilityRequestResult ->
       failwith ("Don't know how to print result " ^ method_)
     | ErrorResult (e, stack) -> print_error ?include_error_stack_trace e stack
   in

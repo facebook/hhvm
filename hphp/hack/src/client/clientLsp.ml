@@ -3423,6 +3423,7 @@ let handle_client_message
         let id = NumberId (Jsonrpc.get_next_request_id ()) in
         let request = do_didChangeWatchedFiles_registerCapability () in
         to_stdout (print_lsp_request id request);
+        (* TODO: our handler should really handle an error response properly *)
         let handler _response state = Lwt.return state in
         requests_outstanding :=
           IdMap.add id (request, handler) !requests_outstanding

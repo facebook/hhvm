@@ -1230,6 +1230,7 @@ type lsp_result =
   | HackTestStartServerResultFB
   | HackTestStopServerResultFB
   | HackTestShutdownServerlessResultFB
+  | RegisterCapabilityRequestResult
   (* the string is a stacktrace *)
   | ErrorResult of Error.t * string
 

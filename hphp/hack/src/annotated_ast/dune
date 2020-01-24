@@ -8,7 +8,7 @@
   (libraries
     ast
     namespace_env)
-  (preprocess (pps ppx_deriving.std visitors.ppx)))
+  (preprocess (pps visitors.ppx ppx_deriving.std)))
 
 (library
   (name namespace_env)

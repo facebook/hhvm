@@ -638,7 +638,8 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
     match t with
     | {
      message_queue;
-     state = Initialized ({ server_env; changed_files_to_process; _ } as state);
+     state =
+       Initialized ({ server_env; changed_files_to_process; ctx; _ } as state);
     }
       when Lwt_message_queue.is_empty message_queue
            && (not (Lwt_unix.readable in_fd))
@@ -656,7 +657,7 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
       let%lwt server_env =
         try%lwt
           let%lwt server_env =
-            ClientIdeIncremental.process_changed_file server_env next_file
+            ClientIdeIncremental.process_changed_file server_env ctx next_file
           in
           Lwt.return server_env
         with exn ->

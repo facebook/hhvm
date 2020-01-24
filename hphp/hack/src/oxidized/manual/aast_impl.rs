@@ -82,6 +82,12 @@ impl<Ex, Fb, En, Hi> ClassId<Ex, Fb, En, Hi> {
     }
 }
 
+impl<Hi> TypeHint<Hi> {
+    pub fn get_hint(&self) -> &TypeHint_ {
+        &self.1
+    }
+}
+
 // This wrapper constructor can avoid other crates (HackNative, etc)
 // depends on ocamlrep.
 pub fn new_nsenv(env: crate::namespace_env::Env) -> Nsenv {

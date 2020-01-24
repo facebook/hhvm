@@ -71,7 +71,7 @@ impl ClassExpr {
         None
     }
 
-    fn expr_to_class_expr(
+    pub fn expr_to_class_expr(
         emitter: &Emitter,
         check_traits: bool,
         resolve_self: bool,

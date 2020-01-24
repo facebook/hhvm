@@ -474,7 +474,7 @@ translate(TransArgs args, FPInvOffset spOff,
       "region_size", folly::to<std::string>(args.region->instrSize()));
     auto const transContext =
       TransContext{env.transID, args.kind, args.flags, args.sk,
-                   env.initSpOffset, args.optIndex};
+                   env.initSpOffset, args.optIndex, args.region.get()};
 
     env.unit = irGenRegion(*args.region, transContext, env.pconds);
     auto const unitAnnotations = env.unit->annotationData->getAllAnnotations();

@@ -62,7 +62,8 @@ TransContext prologue_context(TransID transID,
     TransFlags{},
     SrcKey{func, entry, SrcKey::PrologueTag{}},
     FPInvOffset{func->numSlotsInFrame()},
-    0
+    0,
+    nullptr
   );
 }
 

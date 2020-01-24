@@ -25,13 +25,14 @@ namespace HPHP { namespace jit {
 
 inline TransContext::TransContext(
   TransID id, TransKind kind, TransFlags flags,
-  SrcKey sk, FPInvOffset spOff, int optIndex)
+  SrcKey sk, FPInvOffset spOff, int optIndex, const RegionDesc* region)
   : transID(id)
   , optIndex(optIndex)
   , kind(kind)
   , flags(flags)
   , initSpOffset(spOff)
   , initSrcKey(sk)
+  , region(region)
 {}
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -52,4 +52,8 @@ type changed_files = Path.t list
 type load_error
 
 (* Please do not throw an exception here; it breaks hack for open source users *)
-let load_error_to_string _ = "Saved states are not supported in this build."
+let user_message_of_error _ = "Saved states are not supported in this build."
+
+let log_string_of_error _ = ""
+
+let is_error_actionable _ = false

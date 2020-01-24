@@ -119,8 +119,8 @@ let load_saved_state
         let stack =
           Utils.Callstack (Exception.get_current_callstack_string 100)
         in
-        let message = Saved_state_loader.load_error_to_string load_error in
-        log "[saved-state] %s" message;
+        (* TODO(ljw): report+log more carefully *)
+        let message = Saved_state_loader.user_message_of_error load_error in
         Lwt.return_error (message, stack)
     with e ->
       let stack = Printexc.get_backtrace () in

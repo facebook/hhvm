@@ -487,7 +487,6 @@ function get_options($argv) {
     '*hhserver-binary-path:' => '',
     'record-failures:' => '',
     '*hackc' => '',
-    '*srcloc' => '',
     '*hack-only' => '',
     '*ignore-oids' => '',
     'jitsample:' => '',
@@ -2921,47 +2920,6 @@ SHIP
   }
 }
 
-function aggregate_srcloc_info($tests) {
-  $all_missing_on_lhs = varray[];
-  $all_missing_on_rhs = varray[];
-  $all_mismatched_srcloc = varray[];
-
-  foreach ($tests as $test) {
-    $file = "$test.diff";
-    $json_content = file_get_contents($file);
-    $srcloc_info = json_decode($json_content, true);
-
-    $mismatched_srcloc = $srcloc_info['mismatched_srcloc'];
-    foreach ($mismatched_srcloc as $instr) {
-      $all_mismatched_srcloc[] = $instr;
-    }
-    $all_mismatched_srcloc = array_unique($all_mismatched_srcloc);
-    sort(inout $all_mismatched_srcloc);
-
-    $missing_on_lhs_srcloc = $srcloc_info['missing_on_lhs_srcloc'];
-    foreach ($missing_on_lhs_srcloc as $instr) {
-      $all_missing_on_lhs[] = $instr;
-    }
-    $all_missing_on_lhs = array_unique($all_missing_on_lhs);
-    sort(inout $all_missing_on_lhs);
-
-    $missing_on_rhs_srcloc = $srcloc_info['missing_on_rhs_srcloc'];
-    foreach ($missing_on_rhs_srcloc as $instr) {
-      $all_missing_on_rhs[] = $instr;
-    }
-    $all_missing_on_rhs = array_unique($all_missing_on_rhs);
-    sort(inout $all_missing_on_rhs);
-  }
-
-  print "\nInstructions with mismatched srcloc:\n";
-  print "  - " . implode(",\n  - ", $all_mismatched_srcloc) . "\n\n";
-  print "Instructions with missing srcloc in HackC:\n";
-  print "  - " . implode(",\n  - ", $all_missing_on_lhs) . "\n\n";
-  print "Instructions with missing srcloc in HHVM:\n";
-  print "  - " . implode(",\n  - ", $all_missing_on_rhs) . "\n\n";
-  print "\n";
-}
-
 function print_failure($argv, $results, $options) {
   $failed = array();
   $passed = array();
@@ -2985,38 +2943,34 @@ function print_failure($argv, $results, $options) {
     // https://knowyourmeme.com/memes/flipping-tables
   }
 
-  if (isset($options['srcloc'])) {
-    aggregate_srcloc_info ($failed);
-  } else {
-    print make_header("See the diffs:").
-      implode("\n", array_map(
-        function($test) { return 'cat '.$test.'.diff'; },
-      $failed))."\n";
+  print make_header("See the diffs:").
+    implode("\n", array_map(
+      function($test) { return 'cat '.$test.'.diff'; },
+    $failed))."\n";
 
-    $failing_tests_file = ($options['failure-file'] ?? false)
-      ? $options['failure-file']
-      : tempnam('/tmp', 'test-failures');
-    file_put_contents($failing_tests_file, implode("\n", $failed)."\n");
-    print make_header('For xargs, list of failures is available using:').
-      'cat '.$failing_tests_file."\n";
+  $failing_tests_file = ($options['failure-file'] ?? false)
+    ? $options['failure-file']
+    : tempnam('/tmp', 'test-failures');
+  file_put_contents($failing_tests_file, implode("\n", $failed)."\n");
+  print make_header('For xargs, list of failures is available using:').
+    'cat '.$failing_tests_file."\n";
 
-    if ($passed ?? false) {
-      $passing_tests_file = ($options['success-file'] ?? false)
-        ? $options['success-file']
-        : tempnam('/tmp', 'tests-passed');
-      file_put_contents($passing_tests_file, implode("\n", $passed)."\n");
-      print make_header('For xargs, list of passed tests is available using:').
-        'cat '.$passing_tests_file."\n";
-    }
-
-    print_commands($failed, $options);
-
-    print
-      make_header("Re-run just the failing tests:") .
-      str_replace("run.php", "run", $argv[0]) . ' ' .
-      implode(' ', $GLOBALS['recorded_options']) .
-      sprintf(' $(cat %s)%s', $failing_tests_file, "\n");
+  if ($passed ?? false) {
+    $passing_tests_file = ($options['success-file'] ?? false)
+      ? $options['success-file']
+      : tempnam('/tmp', 'tests-passed');
+    file_put_contents($passing_tests_file, implode("\n", $passed)."\n");
+    print make_header('For xargs, list of passed tests is available using:').
+      'cat '.$passing_tests_file."\n";
   }
+
+  print_commands($failed, $options);
+
+  print
+    make_header("Re-run just the failing tests:") .
+    str_replace("run.php", "run", $argv[0]) . ' ' .
+    implode(' ', $GLOBALS['recorded_options']) .
+    sprintf(' $(cat %s)%s', $failing_tests_file, "\n");
 }
 
 function port_is_listening($port) {

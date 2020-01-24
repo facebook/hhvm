@@ -8,9 +8,10 @@
  *)
 
 open Core_kernel
+module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 
-let get_all_ancestors class_name =
+let get_all_ancestors ctx class_name =
   let rec helper classes_to_check cinfos seen_classes =
     match classes_to_check with
     | [] -> cinfos
@@ -18,7 +19,7 @@ let get_all_ancestors class_name =
       helper classes cinfos seen_classes
     | class_name :: classes ->
       begin
-        match Decl_provider.get_class class_name with
+        match Decl_provider.get_class ctx class_name with
         | None -> helper classes cinfos seen_classes
         | Some class_info ->
           let ancestors =
@@ -93,7 +94,7 @@ let fallback ctx class_name member_name =
               ancestors)
       end
   in
-  get_all_ancestors class_name
+  get_all_ancestors ctx class_name
   |> all_interfaces_or_first_class_docblock []
   |> render_ancestor_docblocks
 

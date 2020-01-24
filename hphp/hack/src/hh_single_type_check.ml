@@ -681,9 +681,7 @@ let print_global_inference_envs tcopt ~verbosity gienvs =
 let merge_global_inference_envs_opt tcopt gienvs =
   if TypecheckerOptions.global_inference tcopt then
     let open Typing_global_inference in
-    let env =
-      Typing_env.empty GlobalOptions.default Relative_path.default None
-    in
+    let env = Typing_env.empty tcopt Relative_path.default None in
     let state_errors = StateErrors.mk_empty () in
     let (env, state_errors) =
       StateConstraintGraph.merge_subgraphs (env, state_errors) gienvs

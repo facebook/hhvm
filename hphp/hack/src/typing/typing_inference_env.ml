@@ -407,7 +407,17 @@ let fresh_type ?variance env p =
 
 let fresh_invariant_type_var = fresh_type ~variance:Ast_defs.Invariant
 
-let new_global_tyvar = fresh_unsolved_tyvar ~is_global:true
+let new_global_tyvar env v r =
+  let env =
+    let p = Reason.to_pos r in
+    match get_tyvar_info_opt env v with
+    | Some tvinfo ->
+      assert tvinfo.is_global;
+      assert (Pos.equal tvinfo.tyvar_pos p);
+      env
+    | None -> fresh_unsolved_tyvar env v ~is_global:true p
+  in
+  (env, mk (r, Tvar v))
 
 let wrap_ty_in_var env r ty =
   let v = Ident.tmp () in

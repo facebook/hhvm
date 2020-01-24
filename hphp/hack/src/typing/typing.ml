@@ -8486,6 +8486,7 @@ and merge_decl_header_with_hints ~params ~ret ~variadic decl_header env =
 
 and method_def env cls m =
   with_timeout env m.m_name ~do_:(fun env ->
+      let initial_env = env in
       (* reset the expression dependent display ids for each method body *)
       Reason.expr_display_id_map := IMap.empty;
       let decl_header =
@@ -8667,6 +8668,7 @@ and method_def env cls m =
         }
       in
       let (env, global_inference_env) = Env.extract_global_inference_env env in
+      let env = Env.log_env_change "method_def" initial_env env in
       ( Typing_lambda_ambiguous.suggest_method_def env method_def,
         (pos, global_inference_env) ))
 

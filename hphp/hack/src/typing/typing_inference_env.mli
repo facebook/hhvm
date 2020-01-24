@@ -121,7 +121,7 @@ val get_tyvar_appears_invariantly : t -> Ident.t -> bool
 
 val is_global_tyvar : t -> Ident.t -> bool
 
-val new_global_tyvar : t -> Ident.t -> ?variance:Ast_defs.variance -> Pos.t -> t
+val new_global_tyvar : t -> Ident.t -> Typing_reason.t -> t * locl_ty
 
 val wrap_ty_in_var : t -> Typing_reason.t -> locl_ty -> t * locl_ty
 

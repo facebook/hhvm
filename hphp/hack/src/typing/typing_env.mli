@@ -315,8 +315,7 @@ val get_tyvar_appears_invariantly : env -> Ident.t -> bool
 
 val is_global_tyvar : env -> Ident.t -> bool
 
-val new_global_tyvar :
-  ?variance:Ast_defs.variance -> env -> Ident.t -> Pos.t -> env
+val new_global_tyvar : env -> Ident.t -> Typing_reason.t -> env * locl_ty
 
 (** At the end of typechecking a function body, extract the remaining
 inference env, which should only contain global type variables. *)

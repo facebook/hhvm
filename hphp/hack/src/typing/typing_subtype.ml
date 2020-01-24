@@ -273,9 +273,9 @@ let is_final_and_not_contravariant env id =
   | None -> false
 
 (** Make all types appearing in the given type a Tany, e.g.
-- for A<B> return A<_>
-- for function(A): B return function (_): _
-*)
+    - for A<B> return A<_>
+    - for function(A): B return function (_): _
+    *)
 let anyfy env r ty =
   let anyfyer =
     object
@@ -381,8 +381,8 @@ let rec describe_ty_super env ?(short = false) ty =
         (describe_ty_super env (LoclType lty))
         (describe_ty_super env (ConstraintType cty)))
 
-(* Process the constraint proposition. There should only be errors left now,
-i.e. empty disjunction with error functions we call here. *)
+(** Process the constraint proposition. There should only be errors left now,
+    i.e. empty disjunction with error functions we call here. *)
 let rec process_simplify_subtype_result prop =
   match prop with
   | TL.IsSubtype (_ty1, _ty2) ->
@@ -3505,6 +3505,8 @@ let subtype_method
     (r_super : Reason.t)
     (ft_super : locl_fun_type)
     (on_error : Errors.typing_error_callback) : env =
+  Env.log_env_change "subtype_method" env
+  @@
   let old_tpenv = Env.get_tpenv env in
   (* We check constraint entailment and contravariant parameter/covariant result
    * subtyping in the context of the ft_super constraints. But we'd better
@@ -3524,7 +3526,7 @@ let subtype_method
   in
   let env = add_tparams_constraints env (fst ft_super.ft_tparams) in
   let env = add_where_constraints env ft_super.ft_where_constraints in
-  let (env, res) =
+  let (env, prop) =
     simplify_subtype_funs
       ~subtype_env:(make_subtype_env on_error)
       ~check_return
@@ -3535,9 +3537,9 @@ let subtype_method
       ft_super
       env
   in
-  let (env, res) = prop_to_env env res on_error in
-  let env = Env.add_subtype_prop env res in
-  ignore (process_simplify_subtype_result res);
+  let (env, prop) = prop_to_env env prop on_error in
+  let env = Env.add_subtype_prop env prop in
+  ignore (process_simplify_subtype_result prop);
 
   (* This is (3) above *)
   let check_tparams_constraints env tparams =

@@ -889,6 +889,8 @@ let check_class_implements
 (*****************************************************************************)
 
 let check_implements env removals parent_type type_to_be_checked =
+  Env.log_env_change "check_implements" env
+  @@
   let (parent_r, parent_name, parent_tparaml) =
     TUtils.unwrap_class_type parent_type
   in

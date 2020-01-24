@@ -11,6 +11,7 @@ open Core_kernel
 open Option.Monad_infix
 module SourceText = Full_fidelity_source_text
 module Syntax = Full_fidelity_positioned_syntax
+module Decl_provider = Decl_provider_ctx
 
 (** Returns ((symbol_line, symbol_char), argument_idx) where:
     - symbol_line: the line number of the function symbol
@@ -97,6 +98,7 @@ let get_positional_info (cst : Syntax.t) (file_offset : int) :
 
 let get_occurrence_info
     (env : ServerEnv.env)
+    (ctx : Provider_context.t)
     (nast : Nast.program)
     (occurrence : Relative_path.t SymbolOccurrence.t) =
   let (ft_opt, full_occurrence) =
@@ -106,18 +108,18 @@ let get_occurrence_info
       let classname = Utils.add_ns classname in
       let ft =
         if methodname = "__construct" then
-          Decl_provider.get_class_constructor classname
+          Decl_provider.get_class_constructor ctx classname
         else
           Option.first_some
-            (Decl_provider.get_class_method classname methodname)
-            (Decl_provider.get_static_method classname methodname)
+            (Decl_provider.get_class_method ctx classname methodname)
+            (Decl_provider.get_static_method ctx classname methodname)
       in
       (ft, occurrence)
     | _ ->
       let fun_name =
         ServerEnv.expand_namespace env occurrence.SymbolOccurrence.name
       in
-      let ft = Decl_provider.get_fun fun_name in
+      let ft = Decl_provider.get_fun ctx fun_name in
       let full_occurrence =
         match occurrence.SymbolOccurrence.type_ with
         | SymbolOccurrence.Function ->
@@ -167,7 +169,7 @@ let go_quarantined
     (match List.hd results with
     | None -> None
     | Some head_result ->
-      (match get_occurrence_info env nast head_result with
+      (match get_occurrence_info env ctx nast head_result with
       | None -> None
       | Some (occurrence, fe, def_opt) ->
         Typing_defs.(

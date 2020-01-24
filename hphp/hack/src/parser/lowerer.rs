@@ -28,7 +28,8 @@ use oxidized::{
 };
 use parser_core_types::{
     indexed_source_text::IndexedSourceText, lexable_token::LexablePositionedToken,
-    positioned_syntax::PositionedSyntaxTrait, source_text::SourceText, syntax::*, syntax_error,
+    positioned_syntax::PositionedSyntaxTrait, positioned_syntax::PositionedValue,
+    positioned_token::PositionedToken, source_text::SourceText, syntax::*, syntax_error,
     syntax_kind, syntax_trait::SyntaxTrait, token_kind::TokenKind as TK,
 };
 use regex::bytes::Regex;
@@ -344,7 +345,7 @@ type Result<T> = std::result::Result<T, Error>;
 
 use parser_core_types::syntax::SyntaxVariant::*;
 
-pub trait Lowerer<'a, T, V>
+trait Lowerer<'a, T, V>
 where
     T: LexablePositionedToken<'a>,
     Syntax<T, V>: PositionedSyntaxTrait,
@@ -5064,4 +5065,14 @@ where
             Error::Failwith(msg) => msg,
         })
     }
+}
+
+struct PositionedSyntaxLowerer;
+impl<'a> Lowerer<'a, PositionedToken, PositionedValue> for PositionedSyntaxLowerer {}
+
+pub fn lower<'a>(
+    env: &mut Env<'a>,
+    script: &Syntax<PositionedToken, PositionedValue>,
+) -> std::result::Result<ast::Program, String> {
+    PositionedSyntaxLowerer::lower(env, script)
 }

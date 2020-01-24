@@ -11,7 +11,7 @@ use itertools::{
     Either,
     Either::{Left, Right},
 };
-use lowerer::{Lowerer, ScourComment};
+use lowerer::{lower, ScourComment};
 use mode_parser::parse_mode;
 use ocamlrep_derive::OcamlRep;
 use oxidized::{aast::Program, file_info::Mode, pos::Pos, scoured_comments::ScouredComments};
@@ -32,9 +32,6 @@ use std::borrow::Borrow;
 type State<'a> = CoroutineState<'a, PositionedSyntax>;
 type PositionedSyntaxTreeWithCoroutineState<'a> = SyntaxTree<'a, PositionedSyntax, State<'a>>;
 type PositionedSyntaxTree<'a> = SyntaxTree<'a, PositionedSyntax, ()>;
-
-struct PositionedSyntaxLowerer;
-impl<'a> lowerer::Lowerer<'a, PositionedToken, PositionedValue> for PositionedSyntaxLowerer {}
 
 #[derive(Debug, OcamlRep)]
 pub enum Error {
@@ -111,10 +108,7 @@ impl<'a> AastParser {
                 &env.parser_options,
                 stack_limit,
             );
-            let ret = PositionedSyntaxLowerer::lower(
-                &mut lowerer_env,
-                Self::to_as_ref(tree).as_ref().root(),
-            );
+            let ret = lower(&mut lowerer_env, Self::to_as_ref(tree).as_ref().root());
             let syntax_errors = match &ret {
                 Ok(aast) => {
                     Self::check_syntax_error(&env, indexed_source_text, original_tree, Some(aast))

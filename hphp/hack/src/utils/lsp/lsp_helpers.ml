@@ -389,6 +389,16 @@ let log_warning (writer : Jsonrpc.writer) =
 
 let log_info (writer : Jsonrpc.writer) = log writer MessageType.InfoMessage
 
+let showMessage
+    (writer : Jsonrpc.writer) (type_ : MessageType.t) (message : string) : unit
+    =
+  let params = { ShowMessage.type_; message } in
+  let notification = ShowMessageNotification params in
+  notification |> print_lsp_notification |> writer
+
+let showMessage_error (writer : Jsonrpc.writer) =
+  showMessage writer MessageType.ErrorMessage
+
 let dismiss_diagnostics (writer : Jsonrpc.writer) (diagnostic_uris : UriSet.t) :
     UriSet.t =
   let dismiss_one (uri : documentUri) : unit =

@@ -120,12 +120,22 @@ let load_saved_state
           Saved_state_loader.user_message_of_error load_error
         in
         let log_string = Saved_state_loader.log_string_of_error load_error in
-        Lwt.return_error { ClientIdeMessage.user_message; log_string }
+        let is_actionable = Saved_state_loader.is_error_actionable load_error in
+        Lwt.return_error
+          { ClientIdeMessage.user_message; log_string; is_actionable }
     with e ->
-      let stack = Printexc.get_backtrace () in
-      Hh_logger.exc e ~prefix:"Uncaught exception in client IDE services" ~stack;
+      let e = Exception.wrap e in
+      Hh_logger.exc
+        (Exception.to_exn e)
+        ~prefix:"Uncaught exception in client IDE services"
+        ~stack:(Exception.get_backtrace_string e);
       let user_message = "Uncaught exception in client IDE services" in
-      Lwt.return_error { ClientIdeMessage.user_message; log_string = stack }
+      Lwt.return_error
+        {
+          ClientIdeMessage.user_message;
+          log_string = Exception.to_string e;
+          is_actionable = false;
+        }
   in
   Lwt.return result
 
@@ -339,6 +349,7 @@ let handle_message :
           ^ "should have waited for the IDE services to become ready before "
           ^ "sending file-change notifications.";
         log_string = Exception.get_current_callstack_string 99;
+        is_actionable = false;
       }
     in
     Lwt.return (state, Handle_message_result.Error error_data)
@@ -383,6 +394,7 @@ let handle_message :
         ClientIdeMessage.user_message =
           "Tried to initialize when already initialized";
         log_string = Exception.get_current_callstack_string 100;
+        is_actionable = false;
       }
     in
     Lwt.return (state, Handle_message_result.Error error_data)
@@ -392,6 +404,7 @@ let handle_message :
         ClientIdeMessage.user_message =
           "IDE services have not yet been initialized";
         log_string = Exception.get_current_callstack_string 100;
+        is_actionable = false;
       }
     in
     Lwt.return (state, Handle_message_result.Error error_data)
@@ -713,6 +726,7 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
               {
                 ClientIdeMessage.user_message;
                 log_string = Exception.get_backtrace_string e;
+                is_actionable = false;
               }
             in
 

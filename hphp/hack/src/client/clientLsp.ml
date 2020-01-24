@@ -3256,8 +3256,11 @@ let run_ide_service (env : env) (ide_service : ClientIdeService.t) : unit Lwt.t
     | Ok () ->
       let%lwt () = ClientIdeService.serve ide_service in
       Lwt.return_unit
-    | Error { ClientIdeMessage.user_message; _ } ->
-      log "IDE services could not be initialized: %s" user_message;
+    | Error { ClientIdeMessage.user_message; log_string; is_actionable; _ } ->
+      log "IDE services could not be initialized: %s" log_string;
+      Lsp_helpers.log_error to_stdout user_message;
+      if is_actionable then
+        Lsp_helpers.showMessage_error to_stdout ("Hack failure: " ^ user_message);
       Lwt.return_unit
   ) else
     Lwt.return_unit

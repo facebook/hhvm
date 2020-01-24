@@ -93,4 +93,8 @@ val log_warning : Jsonrpc.writer -> string -> unit
 
 val log_info : Jsonrpc.writer -> string -> unit
 
+val showMessage : Jsonrpc.writer -> Lsp.MessageType.t -> string -> unit
+
+val showMessage_error : Jsonrpc.writer -> string -> unit
+
 val dismiss_diagnostics : Jsonrpc.writer -> Lsp.UriSet.t -> Lsp.UriSet.t

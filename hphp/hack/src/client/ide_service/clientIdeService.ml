@@ -147,7 +147,7 @@ let do_rpc
       let response =
         match response with
         | Ok r -> Ok r
-        | Error { ClientIdeMessage.user_message; log_string } ->
+        | Error { ClientIdeMessage.user_message; log_string; _ } ->
           Error { Marshal_tools.message = user_message; stack = log_string }
       in
       Lwt.return response
@@ -245,7 +245,9 @@ let initialize_from_saved_state
     in
     let log_string = Exception.get_current_callstack_string 100 in
     log "%s" user_message;
-    let error_data = { ClientIdeMessage.user_message; log_string } in
+    let error_data =
+      { ClientIdeMessage.user_message; log_string; is_actionable = false }
+    in
     set_state t (Failed_to_initialize error_data);
     Lwt.return_error error_data
   | ClientIdeMessage.Response
@@ -337,6 +339,7 @@ let stop (t : t) ~(tracking_id : string) ~(reason : Stop_reason.t) : unit Lwt.t
     {
       ClientIdeMessage.user_message = "Stopped";
       log_string = Exception.get_current_callstack_string 100;
+      is_actionable = false;
     }
   in
   let%lwt () = destroy t ~tracking_id in
@@ -469,7 +472,7 @@ let rpc
         Marshal_tools.message = "IDE service has not yet been initialized";
         stack;
       }
-  | Failed_to_initialize { ClientIdeMessage.user_message; log_string } ->
+  | Failed_to_initialize { ClientIdeMessage.user_message; log_string; _ } ->
     let error_data =
       {
         Marshal_tools.message =
@@ -478,7 +481,7 @@ let rpc
       }
     in
     Lwt.return_error error_data
-  | Stopped (reason, { ClientIdeMessage.user_message; log_string }) ->
+  | Stopped (reason, { ClientIdeMessage.user_message; log_string; _ }) ->
     let error_data =
       {
         Marshal_tools.message =

@@ -197,6 +197,7 @@ let notification_to_string (n : notification) : string =
 type error_data = {
   user_message: string;
   log_string: string;
+  is_actionable: bool;
 }
 
 type 'a timed_response = {

@@ -5212,6 +5212,13 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                     "shortMessage": "Hack IDE: initializing",
                 },
             )
+            .wait_for_notification(
+                method="window/logMessage",
+                params={
+                    "type": 1,
+                    "message": "Uncaught exception in client IDE services",
+                },
+            )
             .wait_for_server_request(
                 method="window/showStatus",
                 params={

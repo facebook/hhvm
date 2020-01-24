@@ -1,0 +1,6 @@
+File "obj_get_dollar_dollar_bad.php", line 8, characters 8-14:
+Invalid argument (Typing[4110])
+File "obj_get_dollar_dollar_bad.php", line 4, characters 23-25:
+Expected int
+File "obj_get_dollar_dollar_bad.php", line 8, characters 8-14:
+But got string

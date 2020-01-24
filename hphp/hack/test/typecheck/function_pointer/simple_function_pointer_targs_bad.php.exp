@@ -1,0 +1,8 @@
+File "simple_function_pointer_targs_bad.php", line 8, characters 6-19:
+Invalid argument (Typing[4110])
+File "simple_function_pointer_targs_bad.php", line 7, characters 12-14:
+Expected int
+File "simple_function_pointer_targs_bad.php", line 3, characters 17-17:
+  via this generic T
+File "simple_function_pointer_targs_bad.php", line 8, characters 6-19:
+But got string

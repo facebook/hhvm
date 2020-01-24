@@ -1,0 +1,4 @@
+File "bad_syntax2.php", line 10, characters 8-13:
+Function pointers must be explicitly specified (Parsing[1002])
+File "bad_syntax2.php", line 10, characters 8-15:
+Function pointers must be explicitly named (Typing[4363])

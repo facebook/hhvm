@@ -1,0 +1,6 @@
+File "class_const_parent_bad.php", line 9, characters 8-14:
+Invalid argument (Typing[4110])
+File "class_const_parent_bad.php", line 4, characters 30-32:
+Expected int
+File "class_const_parent_bad.php", line 9, characters 8-14:
+But got string

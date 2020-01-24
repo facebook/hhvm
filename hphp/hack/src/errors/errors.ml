@@ -3543,6 +3543,18 @@ let consistent_construct_reified pos =
     pos
     "This class or one of its ancestors is annotated with <<__ConsistentConstruct>>. It cannot have reified generics."
 
+let bad_function_pointer_construction pos =
+  add
+    (Typing.err_code Typing.BadFunctionPointerConstruction)
+    pos
+    "Function pointers must be explicitly named"
+
+let reified_generics_not_allowed pos =
+  add
+    (Typing.err_code Typing.InvalidReifiedFunctionPointer)
+    pos
+    "Creating function pointers with reified generics is not currently allowed"
+
 let new_without_newable pos name =
   add
     (Typing.err_code Typing.NewWithoutNewable)

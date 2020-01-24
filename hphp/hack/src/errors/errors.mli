@@ -1239,6 +1239,10 @@ val class_get_reified : Pos.t -> unit
 
 val consistent_construct_reified : Pos.t -> unit
 
+val reified_generics_not_allowed : Pos.t -> unit
+
+val bad_function_pointer_construction : Pos.t -> unit
+
 val new_without_newable : Pos.t -> string -> unit
 
 val mutably_owned_argument_mismatch :

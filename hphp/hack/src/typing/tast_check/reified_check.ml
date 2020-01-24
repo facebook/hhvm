@@ -243,6 +243,16 @@ let handler =
             verify_call_targs env call_pos (get_pos fun_ty) tparams targs
           | _ -> ()
         end
+      | ((pos, fun_ty), FunctionPointer (_, _targs)) ->
+        begin
+          match get_node fun_ty with
+          | Tfun { ft_tparams; _ } ->
+            (* Once we support reified generics in function pointers,
+             * we can let this case fall through to the next *)
+            if tparams_has_reified (fst ft_tparams) then
+              Errors.reified_generics_not_allowed pos
+          | _ -> ()
+        end
       | ((pos, _), Call (_, ((_, fun_ty), _), targs, _, _)) ->
         begin
           match get_node fun_ty with

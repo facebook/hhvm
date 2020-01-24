@@ -1,0 +1,6 @@
+File "class_const_dollar_dollar_bad2.php", line 11, characters 22-28:
+Function pointers must be explicitly specified (Parsing[1002])
+File "class_const_dollar_dollar_bad2.php", line 11, characters 26-28:
+No static method 'bar' in Qux (Typing[4090])
+File "class_const_dollar_dollar_bad2.php", line 7, characters 13-15:
+Declaration of Qux is here

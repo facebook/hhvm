@@ -1,0 +1,12 @@
+File "inst_meth_mixed.php", line 5, characters 3-13:
+  err
+File "inst_meth_mixed.php", line 10, characters 3-13:
+  err
+File "inst_meth_mixed.php", line 4, characters 12-14:
+You are trying to access the method 'foo' but this is a mixed value. Use a specific class or interface name. (Typing[4064])
+File "inst_meth_mixed.php", line 3, characters 15-19:
+Definition is here
+File "inst_meth_mixed.php", line 9, characters 22-26:
+You are trying to access the method 'foo' but this is a mixed value. Use a specific class or interface name. (Typing[4064])
+File "inst_meth_mixed.php", line 8, characters 31-35:
+Definition is here

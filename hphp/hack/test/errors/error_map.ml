@@ -612,4 +612,6 @@ StaticCallWithClassLevelReifiedGeneric = 4358
 SplatArrayRequired = 4359
 SplatArrayVariadic = 4360
 ExceptionOccurred = 4361
+InvalidReifiedFunctionPointer = 4362
+BadFunctionPointerConstruction = 4363
   |}]

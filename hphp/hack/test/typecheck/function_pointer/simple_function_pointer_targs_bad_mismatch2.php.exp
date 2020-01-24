@@ -1,0 +1,4 @@
+File "simple_function_pointer_targs_bad_mismatch2.php", line 7, characters 8-10:
+Expected 2 type parameters (Typing[4029])
+File "simple_function_pointer_targs_bad_mismatch2.php", line 3, characters 10-12:
+Definition is here

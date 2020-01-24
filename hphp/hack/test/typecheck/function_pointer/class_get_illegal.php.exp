@@ -1,0 +1,6 @@
+File "class_get_illegal.php", line 8, characters 8-24:
+Function pointers must be explicitly specified (Parsing[1002])
+File "class_get_illegal.php", line 8, characters 14-23:
+Cannot use dynamic class name in strict mode (Naming[2078])
+File "class_get_illegal.php", line 8, characters 8-26:
+Function pointers must be explicitly named (Typing[4363])

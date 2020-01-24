@@ -1,0 +1,6 @@
+File "obj_get_chained_bad.php", line 14, characters 6-12:
+Invalid argument (Typing[4110])
+File "obj_get_chained_bad.php", line 8, characters 23-25:
+Expected int
+File "obj_get_chained_bad.php", line 14, characters 6-12:
+But got string

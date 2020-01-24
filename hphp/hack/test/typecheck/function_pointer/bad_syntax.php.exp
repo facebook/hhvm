@@ -2,7 +2,5 @@ File "bad_syntax.php", line 9, characters 8-18:
 Function pointers must be explicitly specified (Parsing[1002])
 File "bad_syntax.php", line 16, characters 8-13:
 Function pointers must be explicitly specified (Parsing[1002])
-File "bad_syntax.php", line 9, characters 8-20:
-Cannot use experimental feature: We don't expect this since it should be a parse error (Other[0000])
 File "bad_syntax.php", line 16, characters 8-15:
-Cannot use experimental feature: We don't expect this since it should be a parse error (Other[0000])
+Function pointers must be explicitly named (Typing[4363])

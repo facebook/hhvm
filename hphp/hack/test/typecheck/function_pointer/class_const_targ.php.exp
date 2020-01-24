@@ -1,0 +1,4 @@
+File "class_const_targ.php", line 8, characters 11-13:
+Cannot call Foo::bar(); it is abstract (Typing[4073])
+File "class_const_targ.php", line 4, characters 26-28:
+Declaration is here

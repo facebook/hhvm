@@ -1,0 +1,20 @@
+# @generated
+# @autocargo from //hphp/hack/src/hhbc:emit_file_attributes_rust
+# Signature<<23e772270aabd9a8db5e6ddf9a391c8db025538e>>
+[package]
+name = "emit_file_attributes_rust"
+edition = "2018"
+version = "0.0.0"
+include = ["../../emit_file_attributes.rs"]
+
+[lib]
+path = "../../emit_file_attributes.rs"
+
+[dependencies]
+emit_attribute_rust = { path = "../emit_attribute" }
+emit_fatal_rust = { path = "../emit_fatal" }
+env = { path = "../env" }
+hhas_attribute_rust = { path = "../hhas_attribute" }
+oxidized = { path = "../../../oxidized" }
+itertools = "0.8"
+# @end of Signature<<23e772270aabd9a8db5e6ddf9a391c8db025538e>>

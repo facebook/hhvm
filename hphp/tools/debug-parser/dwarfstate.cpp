@@ -27,46 +27,6 @@ namespace debug_parser {
 namespace {
 ////////////////////////////////////////////////////////////////////////////////
 
-//  Hack for this file to work with old & new interfaces of ElfFile
-struct ElfFileOpenResult {
-  int code{};
-  char const* msg{};
-};
-template <typename EF>
-ElfFileOpenResult doElfFileOpenNoThrow(
-    std::false_type,
-    EF& ef,
-    char const* name,
-    bool readonly) {
-  auto res = ef.openNoThrow(name, typename EF::Options().writable(!readonly));
-  return {res.code, res.msg};
-}
-template <typename EF>
-ElfFileOpenResult doElfFileOpenNoThrow(
-    std::true_type,
-    EF& ef,
-    char const* name,
-    bool readonly) {
-  char const* msg{};
-  auto code = ef.openNoThrow(name, readonly, &msg);
-  return {code, msg};
-}
-template <typename, typename>
-struct ElfFileOpenNoThrowMsgInvocable : std::false_type {};
-template <typename EF>
-struct ElfFileOpenNoThrowMsgInvocable<
-    folly::void_t<decltype(
-        std::declval<EF&>().openNoThrow(nullptr, false, nullptr))>,
-    EF> : std::true_type {};
-template <typename EF>
-ElfFileOpenResult doElfFileOpenNoThrow(
-    EF& ef,
-    char const* name,
-    bool readonly) {
-  using tag = ElfFileOpenNoThrowMsgInvocable<void, EF>;
-  return doElfFileOpenNoThrow(tag{}, ef, name, readonly);
-}
-
 // All following read* functions read from a StringPiece, advancing the
 // StringPiece, and aborting if there's not enough room.
 
@@ -195,7 +155,7 @@ void AbbrevMap::build(folly::StringPiece debug_abbrev) {
 }
 
 DwarfState::DwarfState(std::string filename) {
-  auto res = doElfFileOpenNoThrow(elf, filename.c_str(), true);
+  auto res = elf.openNoThrow(filename.c_str());
   if (res.code != folly::symbolizer::ElfFile::kSuccess) {
     throw DwarfStateException{
       folly::sformat(

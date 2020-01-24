@@ -1,13 +1,5 @@
 <?hh
 
-/*
-   We dont' have ArrayObject so use something from http://php.net/manual/en/class.arrayaccess.php
-class foo extends ArrayObject {
-    public function __construct($arr) {
-        parent::__construct($arr);
-    }
-}
-*/
 class foo implements arrayaccess {
     private $container = array();
     public function __construct($container) {

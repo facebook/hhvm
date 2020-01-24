@@ -224,12 +224,6 @@ null cmp object t4:
 F       T       T       T       F       T       F       F       -1
 null cmp object t5:
 F       T       T       T       F       T       F       F       -1
-null cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-null cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-null cmp object ao3:
-F       T       T       T       F       T       F       F       -1
 null cmp object xml:
 F       T       T       T       F       T       F       F       -1
 null cmp vector v1:
@@ -477,12 +471,6 @@ F       T       T       T       F       T       F       F       -1
 false cmp object t4:
 F       T       T       T       F       T       F       F       -1
 false cmp object t5:
-F       T       T       T       F       T       F       F       -1
-false cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-false cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-false cmp object ao3:
 F       T       T       T       F       T       F       F       -1
 false cmp object xml:
 F       T       F       T       T       F       T       F       0
@@ -732,12 +720,6 @@ true cmp object t4:
 F       T       F       T       T       F       T       F       0
 true cmp object t5:
 F       T       F       T       T       F       T       F       0
-true cmp object ao1:
-F       T       F       T       T       F       T       F       0
-true cmp object ao2:
-F       T       F       T       T       F       T       F       0
-true cmp object ao3:
-F       T       F       T       T       F       T       F       0
 true cmp object xml:
 F       T       F       F       F       T       T       T       1
 true cmp vector v1:
@@ -985,12 +967,6 @@ F       T       T       T       F       T       F       F       -1
 int 0 cmp object t4:
 F       T       T       T       F       T       F       F       -1
 int 0 cmp object t5:
-F       T       T       T       F       T       F       F       -1
-int 0 cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-int 0 cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-int 0 cmp object ao3:
 F       T       T       T       F       T       F       F       -1
 int 0 cmp object xml:
 F       T       F       T       T       F       T       F       0
@@ -1240,12 +1216,6 @@ int 99 cmp object t4:
 F       T       F       F       F       T       T       T       1
 int 99 cmp object t5:
 F       T       F       F       F       T       T       T       1
-int 99 cmp object ao1:
-F       T       F       F       F       T       T       T       1
-int 99 cmp object ao2:
-F       T       F       F       F       T       T       T       1
-int 99 cmp object ao3:
-F       T       F       F       F       T       T       T       1
 int 99 cmp object xml:
 F       T       F       F       F       T       T       T       1
 int 99 cmp vector v1:
@@ -1493,12 +1463,6 @@ F       T       T       T       F       T       F       F       -1
 int -1 cmp object t4:
 F       T       T       T       F       T       F       F       -1
 int -1 cmp object t5:
-F       T       T       T       F       T       F       F       -1
-int -1 cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-int -1 cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-int -1 cmp object ao3:
 F       T       T       T       F       T       F       F       -1
 int -1 cmp object xml:
 F       T       T       T       F       T       F       F       -1
@@ -1748,12 +1712,6 @@ float 0 cmp object t4:
 F       T       T       T       F       T       F       F       -1
 float 0 cmp object t5:
 F       T       T       T       F       T       F       F       -1
-float 0 cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-float 0 cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-float 0 cmp object ao3:
-F       T       T       T       F       T       F       F       -1
 float 0 cmp object xml:
 F       T       F       T       T       F       T       F       0
 float 0 cmp vector v1:
@@ -2001,12 +1959,6 @@ F       T       F       F       F       T       T       T       1
 double 99 cmp object t4:
 F       T       F       F       F       T       T       T       1
 double 99 cmp object t5:
-F       T       F       F       F       T       T       T       1
-double 99 cmp object ao1:
-F       T       F       F       F       T       T       T       1
-double 99 cmp object ao2:
-F       T       F       F       F       T       T       T       1
-double 99 cmp object ao3:
 F       T       F       F       F       T       T       T       1
 double 99 cmp object xml:
 F       T       F       F       F       T       T       T       1
@@ -2256,12 +2208,6 @@ float 99 cmp object t4:
 F       T       F       F       F       T       T       T       1
 float 99 cmp object t5:
 F       T       F       F       F       T       T       T       1
-float 99 cmp object ao1:
-F       T       F       F       F       T       T       T       1
-float 99 cmp object ao2:
-F       T       F       F       F       T       T       T       1
-float 99 cmp object ao3:
-F       T       F       F       F       T       T       T       1
 float 99 cmp object xml:
 F       T       F       F       F       T       T       T       1
 float 99 cmp vector v1:
@@ -2509,12 +2455,6 @@ F       T       T       T       F       T       F       F       -1
 float -1 cmp object t4:
 F       T       T       T       F       T       F       F       -1
 float -1 cmp object t5:
-F       T       T       T       F       T       F       F       -1
-float -1 cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-float -1 cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-float -1 cmp object ao3:
 F       T       T       T       F       T       F       F       -1
 float -1 cmp object xml:
 F       T       T       T       F       T       F       F       -1
@@ -2764,12 +2704,6 @@ INF cmp object t4:
 F       T       F       F       F       T       T       T       1
 INF cmp object t5:
 F       T       F       F       F       T       T       T       1
-INF cmp object ao1:
-F       T       F       F       F       T       T       T       1
-INF cmp object ao2:
-F       T       F       F       F       T       T       T       1
-INF cmp object ao3:
-F       T       F       F       F       T       T       T       1
 INF cmp object xml:
 F       T       F       F       F       T       T       T       1
 INF cmp vector v1:
@@ -3017,12 +2951,6 @@ F       T       T       T       F       T       F       F       -1
 -INF cmp object t4:
 F       T       T       T       F       T       F       F       -1
 -INF cmp object t5:
-F       T       T       T       F       T       F       F       -1
--INF cmp object ao1:
-F       T       T       T       F       T       F       F       -1
--INF cmp object ao2:
-F       T       T       T       F       T       F       F       -1
--INF cmp object ao3:
 F       T       T       T       F       T       F       F       -1
 -INF cmp object xml:
 F       T       T       T       F       T       F       F       -1
@@ -3272,12 +3200,6 @@ NAN cmp object t4:
 F       T       F       F       F       T       F       F       -1
 NAN cmp object t5:
 F       T       F       F       F       T       F       F       -1
-NAN cmp object ao1:
-F       T       F       F       F       T       F       F       -1
-NAN cmp object ao2:
-F       T       F       F       F       T       F       F       -1
-NAN cmp object ao3:
-F       T       F       F       F       T       F       F       -1
 NAN cmp object xml:
 F       T       F       F       F       T       F       F       -1
 NAN cmp vector v1:
@@ -3525,12 +3447,6 @@ F       T       T       T       F       T       F       F       -1
 "" cmp object t4:
 F       T       T       T       F       T       F       F       -1
 "" cmp object t5:
-F       T       T       T       F       T       F       F       -1
-"" cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-"" cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-"" cmp object ao3:
 F       T       T       T       F       T       F       F       -1
 "" cmp object xml:
 F       T       F       T       T       F       T       F       0
@@ -3780,12 +3696,6 @@ F       T       T       T       F       T       F       F       -1
 F       T       T       T       F       T       F       F       -1
 "0" cmp object t5:
 F       T       T       T       F       T       F       F       -1
-"0" cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-"0" cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-"0" cmp object ao3:
-F       T       T       T       F       T       F       F       -1
 "0" cmp object xml:
 F       T       F       F       F       T       T       T       1
 "0" cmp vector v1:
@@ -4033,12 +3943,6 @@ F       T       T       T       F       T       F       F       -1
 "99" cmp object t4:
 F       T       T       T       F       T       F       F       -1
 "99" cmp object t5:
-F       T       T       T       F       T       F       F       -1
-"99" cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-"99" cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-"99" cmp object ao3:
 F       T       T       T       F       T       F       F       -1
 "99" cmp object xml:
 F       T       F       F       F       T       T       T       1
@@ -4288,12 +4192,6 @@ F       T       T       T       F       T       F       F       -1
 F       T       T       T       F       T       F       F       -1
 "-1" cmp object t5:
 F       T       T       T       F       T       F       F       -1
-"-1" cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-"-1" cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-"-1" cmp object ao3:
-F       T       T       T       F       T       F       F       -1
 "-1" cmp object xml:
 F       T       F       F       F       T       T       T       1
 "-1" cmp vector v1:
@@ -4541,12 +4439,6 @@ F       T       T       T       F       T       F       F       -1
 "0.0" cmp object t4:
 F       T       T       T       F       T       F       F       -1
 "0.0" cmp object t5:
-F       T       T       T       F       T       F       F       -1
-"0.0" cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-"0.0" cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-"0.0" cmp object ao3:
 F       T       T       T       F       T       F       F       -1
 "0.0" cmp object xml:
 F       T       F       F       F       T       T       T       1
@@ -4796,12 +4688,6 @@ F       T       T       T       F       T       F       F       -1
 F       T       T       T       F       T       F       F       -1
 "99.0" cmp object t5:
 F       T       T       T       F       T       F       F       -1
-"99.0" cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-"99.0" cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-"99.0" cmp object ao3:
-F       T       T       T       F       T       F       F       -1
 "99.0" cmp object xml:
 F       T       F       F       F       T       T       T       1
 "99.0" cmp vector v1:
@@ -5049,12 +4935,6 @@ F       T       T       T       F       T       F       F       -1
 "-1.0" cmp object t4:
 F       T       T       T       F       T       F       F       -1
 "-1.0" cmp object t5:
-F       T       T       T       F       T       F       F       -1
-"-1.0" cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-"-1.0" cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-"-1.0" cmp object ao3:
 F       T       T       T       F       T       F       F       -1
 "-1.0" cmp object xml:
 F       T       F       F       F       T       T       T       1
@@ -5304,12 +5184,6 @@ F       T       T       T       F       T       F       F       -1
 F       T       T       T       F       T       F       F       -1
 "foo" cmp object t5:
 F       T       T       T       F       T       F       F       -1
-"foo" cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-"foo" cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-"foo" cmp object ao3:
-F       T       T       T       F       T       F       F       -1
 "foo" cmp object xml:
 F       T       F       F       F       T       T       T       1
 "foo" cmp vector v1:
@@ -5557,12 +5431,6 @@ F       T       T       T       F       T       F       F       -1
 "BAZ" cmp object t4:
 F       T       T       T       F       T       F       F       -1
 "BAZ" cmp object t5:
-F       T       T       T       F       T       F       F       -1
-"BAZ" cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-"BAZ" cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-"BAZ" cmp object ao3:
 F       T       T       T       F       T       F       F       -1
 "BAZ" cmp object xml:
 F       T       F       F       F       T       T       T       1
@@ -5812,12 +5680,6 @@ array arr1 cmp object t4:
 F       T       T       T       F       T       F       F       -1
 array arr1 cmp object t5:
 F       T       T       T       F       T       F       F       -1
-array arr1 cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-array arr1 cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-array arr1 cmp object ao3:
-F       T       T       T       F       T       F       F       -1
 array arr1 cmp object xml:
 F       T       T       T       F       T       F       F       -1
 array arr1 cmp vector v1:
@@ -6065,12 +5927,6 @@ F       T       T       T       F       T       F       F       -1
 array arr2 cmp object t4:
 F       T       T       T       F       T       F       F       -1
 array arr2 cmp object t5:
-F       T       T       T       F       T       F       F       -1
-array arr2 cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-array arr2 cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-array arr2 cmp object ao3:
 F       T       T       T       F       T       F       F       -1
 array arr2 cmp object xml:
 F       T       T       T       F       T       F       F       -1
@@ -6320,12 +6176,6 @@ array arr3 cmp object t4:
 F       T       T       T       F       T       F       F       -1
 array arr3 cmp object t5:
 F       T       T       T       F       T       F       F       -1
-array arr3 cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-array arr3 cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-array arr3 cmp object ao3:
-F       T       T       T       F       T       F       F       -1
 array arr3 cmp object xml:
 F       T       T       T       F       T       F       F       -1
 array arr3 cmp vector v1:
@@ -6573,12 +6423,6 @@ F       T       T       T       F       T       F       F       -1
 array arr4 cmp object t4:
 F       T       T       T       F       T       F       F       -1
 array arr4 cmp object t5:
-F       T       T       T       F       T       F       F       -1
-array arr4 cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-array arr4 cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-array arr4 cmp object ao3:
 F       T       T       T       F       T       F       F       -1
 array arr4 cmp object xml:
 F       T       T       T       F       T       F       F       -1
@@ -6828,12 +6672,6 @@ array arr5 cmp object t4:
 F       T       T       T       F       T       F       F       -1
 array arr5 cmp object t5:
 F       T       T       T       F       T       F       F       -1
-array arr5 cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-array arr5 cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-array arr5 cmp object ao3:
-F       T       T       T       F       T       F       F       -1
 array arr5 cmp object xml:
 F       T       T       T       F       T       F       F       -1
 array arr5 cmp vector v1:
@@ -7081,12 +6919,6 @@ F       T       T       T       F       T       F       F       -1
 array arr6 cmp object t4:
 F       T       T       T       F       T       F       F       -1
 array arr6 cmp object t5:
-F       T       T       T       F       T       F       F       -1
-array arr6 cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-array arr6 cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-array arr6 cmp object ao3:
 F       T       T       T       F       T       F       F       -1
 array arr6 cmp object xml:
 F       T       T       T       F       T       F       F       -1
@@ -7336,12 +7168,6 @@ array arr7 cmp object t4:
 F       T       T       T       F       T       F       F       -1
 array arr7 cmp object t5:
 F       T       T       T       F       T       F       F       -1
-array arr7 cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-array arr7 cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-array arr7 cmp object ao3:
-F       T       T       T       F       T       F       F       -1
 array arr7 cmp object xml:
 F       T       T       T       F       T       F       F       -1
 array arr7 cmp vector v1:
@@ -7589,12 +7415,6 @@ F       T       T       T       F       T       F       F       -1
 array arr8 cmp object t4:
 F       T       T       T       F       T       F       F       -1
 array arr8 cmp object t5:
-F       T       T       T       F       T       F       F       -1
-array arr8 cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-array arr8 cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-array arr8 cmp object ao3:
 F       T       T       T       F       T       F       F       -1
 array arr8 cmp object xml:
 F       T       T       T       F       T       F       F       -1
@@ -7844,12 +7664,6 @@ array arr9 cmp object t4:
 F       T       T       T       F       T       F       F       -1
 array arr9 cmp object t5:
 F       T       T       T       F       T       F       F       -1
-array arr9 cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-array arr9 cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-array arr9 cmp object ao3:
-F       T       T       T       F       T       F       F       -1
 array arr9 cmp object xml:
 F       T       T       T       F       T       F       F       -1
 array arr9 cmp vector v1:
@@ -8097,12 +7911,6 @@ F       T       T       T       F       T       F       F       -1
 array arr10 cmp object t4:
 F       T       T       T       F       T       F       F       -1
 array arr10 cmp object t5:
-F       T       T       T       F       T       F       F       -1
-array arr10 cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-array arr10 cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-array arr10 cmp object ao3:
 F       T       T       T       F       T       F       F       -1
 array arr10 cmp object xml:
 F       T       T       T       F       T       F       F       -1
@@ -8352,12 +8160,6 @@ array arr11 cmp object t4:
 F       T       T       T       F       T       F       F       -1
 array arr11 cmp object t5:
 F       T       T       T       F       T       F       F       -1
-array arr11 cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-array arr11 cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-array arr11 cmp object ao3:
-F       T       T       T       F       T       F       F       -1
 array arr11 cmp object xml:
 F       T       T       T       F       T       F       F       -1
 array arr11 cmp vector v1:
@@ -8605,12 +8407,6 @@ F       T       T       T       F       T       F       F       -1
 array arr12 cmp object t4:
 F       T       T       T       F       T       F       F       -1
 array arr12 cmp object t5:
-F       T       T       T       F       T       F       F       -1
-array arr12 cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-array arr12 cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-array arr12 cmp object ao3:
 F       T       T       T       F       T       F       F       -1
 array arr12 cmp object xml:
 F       T       T       T       F       T       F       F       -1
@@ -8860,12 +8656,6 @@ array arr13 cmp object t4:
 F       T       T       T       F       T       F       F       -1
 array arr13 cmp object t5:
 F       T       T       T       F       T       F       F       -1
-array arr13 cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-array arr13 cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-array arr13 cmp object ao3:
-F       T       T       T       F       T       F       F       -1
 array arr13 cmp object xml:
 F       T       T       T       F       T       F       F       -1
 array arr13 cmp vector v1:
@@ -9113,12 +8903,6 @@ F       T       T       T       F       T       F       F       -1
 array arr14 cmp object t4:
 F       T       T       T       F       T       F       F       -1
 array arr14 cmp object t5:
-F       T       T       T       F       T       F       F       -1
-array arr14 cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-array arr14 cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-array arr14 cmp object ao3:
 F       T       T       T       F       T       F       F       -1
 array arr14 cmp object xml:
 F       T       T       T       F       T       F       F       -1
@@ -9368,12 +9152,6 @@ array arr15 cmp object t4:
 F       T       T       T       F       T       F       F       -1
 array arr15 cmp object t5:
 F       T       T       T       F       T       F       F       -1
-array arr15 cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-array arr15 cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-array arr15 cmp object ao3:
-F       T       T       T       F       T       F       F       -1
 array arr15 cmp object xml:
 F       T       T       T       F       T       F       F       -1
 array arr15 cmp vector v1:
@@ -9621,12 +9399,6 @@ F       T       T       T       F       T       F       F       -1
 array arr16 cmp object t4:
 F       T       T       T       F       T       F       F       -1
 array arr16 cmp object t5:
-F       T       T       T       F       T       F       F       -1
-array arr16 cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-array arr16 cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-array arr16 cmp object ao3:
 F       T       T       T       F       T       F       F       -1
 array arr16 cmp object xml:
 F       T       T       T       F       T       F       F       -1
@@ -9876,12 +9648,6 @@ array arr17 cmp object t4:
 F       T       T       T       F       T       F       F       -1
 array arr17 cmp object t5:
 F       T       T       T       F       T       F       F       -1
-array arr17 cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-array arr17 cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-array arr17 cmp object ao3:
-F       T       T       T       F       T       F       F       -1
 array arr17 cmp object xml:
 F       T       T       T       F       T       F       F       -1
 array arr17 cmp vector v1:
@@ -10129,12 +9895,6 @@ F       T       T       T       F       T       F       F       -1
 array arr18 cmp object t4:
 F       T       T       T       F       T       F       F       -1
 array arr18 cmp object t5:
-F       T       T       T       F       T       F       F       -1
-array arr18 cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-array arr18 cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-array arr18 cmp object ao3:
 F       T       T       T       F       T       F       F       -1
 array arr18 cmp object xml:
 F       T       T       T       F       T       F       F       -1
@@ -10384,12 +10144,6 @@ array arr19 cmp object t4:
 F       T       T       T       F       T       F       F       -1
 array arr19 cmp object t5:
 F       T       T       T       F       T       F       F       -1
-array arr19 cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-array arr19 cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-array arr19 cmp object ao3:
-F       T       T       T       F       T       F       F       -1
 array arr19 cmp object xml:
 F       T       T       T       F       T       F       F       -1
 array arr19 cmp vector v1:
@@ -10637,12 +10391,6 @@ F       T       T       T       F       T       F       F       -1
 array arr20 cmp object t4:
 F       T       T       T       F       T       F       F       -1
 array arr20 cmp object t5:
-F       T       T       T       F       T       F       F       -1
-array arr20 cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-array arr20 cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-array arr20 cmp object ao3:
 F       T       T       T       F       T       F       F       -1
 array arr20 cmp object xml:
 F       T       T       T       F       T       F       F       -1
@@ -10892,12 +10640,6 @@ array arr21 cmp object t4:
 F       T       T       T       F       T       F       F       -1
 array arr21 cmp object t5:
 F       T       T       T       F       T       F       F       -1
-array arr21 cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-array arr21 cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-array arr21 cmp object ao3:
-F       T       T       T       F       T       F       F       -1
 array arr21 cmp object xml:
 F       T       T       T       F       T       F       F       -1
 array arr21 cmp vector v1:
@@ -11145,12 +10887,6 @@ F       T       T       T       F       T       F       F       -1
 array arr22 cmp object t4:
 F       T       T       T       F       T       F       F       -1
 array arr22 cmp object t5:
-F       T       T       T       F       T       F       F       -1
-array arr22 cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-array arr22 cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-array arr22 cmp object ao3:
 F       T       T       T       F       T       F       F       -1
 array arr22 cmp object xml:
 F       T       T       T       F       T       F       F       -1
@@ -11400,12 +11136,6 @@ array arr23 cmp object t4:
 F       T       T       T       F       T       F       F       -1
 array arr23 cmp object t5:
 F       T       T       T       F       T       F       F       -1
-array arr23 cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-array arr23 cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-array arr23 cmp object ao3:
-F       T       T       T       F       T       F       F       -1
 array arr23 cmp object xml:
 F       T       T       T       F       T       F       F       -1
 array arr23 cmp vector v1:
@@ -11653,12 +11383,6 @@ F       T       T       T       F       T       F       F       -1
 array arr24 cmp object t4:
 F       T       T       T       F       T       F       F       -1
 array arr24 cmp object t5:
-F       T       T       T       F       T       F       F       -1
-array arr24 cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-array arr24 cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-array arr24 cmp object ao3:
 F       T       T       T       F       T       F       F       -1
 array arr24 cmp object xml:
 F       T       T       T       F       T       F       F       -1
@@ -11908,12 +11632,6 @@ array arr25 cmp object t4:
 F       T       T       T       F       T       F       F       -1
 array arr25 cmp object t5:
 F       T       T       T       F       T       F       F       -1
-array arr25 cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-array arr25 cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-array arr25 cmp object ao3:
-F       T       T       T       F       T       F       F       -1
 array arr25 cmp object xml:
 F       T       T       T       F       T       F       F       -1
 array arr25 cmp vector v1:
@@ -12161,12 +11879,6 @@ F       T       T       T       F       T       F       F       -1
 array arr26 cmp object t4:
 F       T       T       T       F       T       F       F       -1
 array arr26 cmp object t5:
-F       T       T       T       F       T       F       F       -1
-array arr26 cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-array arr26 cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-array arr26 cmp object ao3:
 F       T       T       T       F       T       F       F       -1
 array arr26 cmp object xml:
 F       T       T       T       F       T       F       F       -1
@@ -12416,12 +12128,6 @@ vec vec1 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec1 cmp object t5:
 F       T       Err     Err     F       T       Err     Err     Err
-vec vec1 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-vec vec1 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-vec vec1 cmp object ao3:
-F       T       Err     Err     F       T       Err     Err     Err
 vec vec1 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec1 cmp vector v1:
@@ -12669,12 +12375,6 @@ F       T       Err     Err     F       T       Err     Err     Err
 vec vec2 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec2 cmp object t5:
-F       T       Err     Err     F       T       Err     Err     Err
-vec vec2 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-vec vec2 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-vec vec2 cmp object ao3:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec2 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -12924,12 +12624,6 @@ vec vec3 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec3 cmp object t5:
 F       T       Err     Err     F       T       Err     Err     Err
-vec vec3 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-vec vec3 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-vec vec3 cmp object ao3:
-F       T       Err     Err     F       T       Err     Err     Err
 vec vec3 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec3 cmp vector v1:
@@ -13177,12 +12871,6 @@ F       T       Err     Err     F       T       Err     Err     Err
 vec vec4 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec4 cmp object t5:
-F       T       Err     Err     F       T       Err     Err     Err
-vec vec4 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-vec vec4 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-vec vec4 cmp object ao3:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec4 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -13432,12 +13120,6 @@ vec vec5 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec5 cmp object t5:
 F       T       Err     Err     F       T       Err     Err     Err
-vec vec5 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-vec vec5 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-vec vec5 cmp object ao3:
-F       T       Err     Err     F       T       Err     Err     Err
 vec vec5 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec5 cmp vector v1:
@@ -13685,12 +13367,6 @@ F       T       Err     Err     F       T       Err     Err     Err
 vec vec6 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec6 cmp object t5:
-F       T       Err     Err     F       T       Err     Err     Err
-vec vec6 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-vec vec6 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-vec vec6 cmp object ao3:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec6 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -13940,12 +13616,6 @@ vec vec7 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec7 cmp object t5:
 F       T       Err     Err     F       T       Err     Err     Err
-vec vec7 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-vec vec7 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-vec vec7 cmp object ao3:
-F       T       Err     Err     F       T       Err     Err     Err
 vec vec7 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec7 cmp vector v1:
@@ -14193,12 +13863,6 @@ F       T       Err     Err     F       T       Err     Err     Err
 vec vec8 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec8 cmp object t5:
-F       T       Err     Err     F       T       Err     Err     Err
-vec vec8 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-vec vec8 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-vec vec8 cmp object ao3:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec8 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -14448,12 +14112,6 @@ vec vec9 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec9 cmp object t5:
 F       T       Err     Err     F       T       Err     Err     Err
-vec vec9 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-vec vec9 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-vec vec9 cmp object ao3:
-F       T       Err     Err     F       T       Err     Err     Err
 vec vec9 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec9 cmp vector v1:
@@ -14701,12 +14359,6 @@ F       T       Err     Err     F       T       Err     Err     Err
 vec vec10 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec10 cmp object t5:
-F       T       Err     Err     F       T       Err     Err     Err
-vec vec10 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-vec vec10 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-vec vec10 cmp object ao3:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec10 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -14956,12 +14608,6 @@ vec vec11 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec11 cmp object t5:
 F       T       Err     Err     F       T       Err     Err     Err
-vec vec11 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-vec vec11 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-vec vec11 cmp object ao3:
-F       T       Err     Err     F       T       Err     Err     Err
 vec vec11 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec11 cmp vector v1:
@@ -15209,12 +14855,6 @@ F       T       Err     Err     F       T       Err     Err     Err
 dict dict1 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict1 cmp object t5:
-F       T       Err     Err     F       T       Err     Err     Err
-dict dict1 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-dict dict1 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-dict dict1 cmp object ao3:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict1 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -15464,12 +15104,6 @@ dict dict2 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict2 cmp object t5:
 F       T       Err     Err     F       T       Err     Err     Err
-dict dict2 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-dict dict2 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-dict dict2 cmp object ao3:
-F       T       Err     Err     F       T       Err     Err     Err
 dict dict2 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict2 cmp vector v1:
@@ -15717,12 +15351,6 @@ F       T       Err     Err     F       T       Err     Err     Err
 dict dict3 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict3 cmp object t5:
-F       T       Err     Err     F       T       Err     Err     Err
-dict dict3 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-dict dict3 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-dict dict3 cmp object ao3:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict3 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -15972,12 +15600,6 @@ dict dict4 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict4 cmp object t5:
 F       T       Err     Err     F       T       Err     Err     Err
-dict dict4 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-dict dict4 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-dict dict4 cmp object ao3:
-F       T       Err     Err     F       T       Err     Err     Err
 dict dict4 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict4 cmp vector v1:
@@ -16225,12 +15847,6 @@ F       T       Err     Err     F       T       Err     Err     Err
 dict dict5 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict5 cmp object t5:
-F       T       Err     Err     F       T       Err     Err     Err
-dict dict5 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-dict dict5 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-dict dict5 cmp object ao3:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict5 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -16480,12 +16096,6 @@ dict dict6 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict6 cmp object t5:
 F       T       Err     Err     F       T       Err     Err     Err
-dict dict6 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-dict dict6 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-dict dict6 cmp object ao3:
-F       T       Err     Err     F       T       Err     Err     Err
 dict dict6 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict6 cmp vector v1:
@@ -16733,12 +16343,6 @@ F       T       Err     Err     F       T       Err     Err     Err
 dict dict7 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict7 cmp object t5:
-F       T       Err     Err     F       T       Err     Err     Err
-dict dict7 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-dict dict7 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-dict dict7 cmp object ao3:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict7 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -16988,12 +16592,6 @@ dict dict8 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict8 cmp object t5:
 F       T       Err     Err     F       T       Err     Err     Err
-dict dict8 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-dict dict8 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-dict dict8 cmp object ao3:
-F       T       Err     Err     F       T       Err     Err     Err
 dict dict8 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict8 cmp vector v1:
@@ -17241,12 +16839,6 @@ F       T       Err     Err     F       T       Err     Err     Err
 dict dict9 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict9 cmp object t5:
-F       T       Err     Err     F       T       Err     Err     Err
-dict dict9 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-dict dict9 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-dict dict9 cmp object ao3:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict9 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -17496,12 +17088,6 @@ dict dict10 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict10 cmp object t5:
 F       T       Err     Err     F       T       Err     Err     Err
-dict dict10 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-dict dict10 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-dict dict10 cmp object ao3:
-F       T       Err     Err     F       T       Err     Err     Err
 dict dict10 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict10 cmp vector v1:
@@ -17749,12 +17335,6 @@ F       T       Err     Err     F       T       Err     Err     Err
 dict dict11 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict11 cmp object t5:
-F       T       Err     Err     F       T       Err     Err     Err
-dict dict11 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-dict dict11 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-dict dict11 cmp object ao3:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict11 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -18004,12 +17584,6 @@ keyset ks1 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks1 cmp object t5:
 F       T       Err     Err     F       T       Err     Err     Err
-keyset ks1 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-keyset ks1 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-keyset ks1 cmp object ao3:
-F       T       Err     Err     F       T       Err     Err     Err
 keyset ks1 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks1 cmp vector v1:
@@ -18257,12 +17831,6 @@ F       T       Err     Err     F       T       Err     Err     Err
 keyset ks2 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks2 cmp object t5:
-F       T       Err     Err     F       T       Err     Err     Err
-keyset ks2 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-keyset ks2 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-keyset ks2 cmp object ao3:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks2 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -18512,12 +18080,6 @@ keyset ks3 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks3 cmp object t5:
 F       T       Err     Err     F       T       Err     Err     Err
-keyset ks3 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-keyset ks3 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-keyset ks3 cmp object ao3:
-F       T       Err     Err     F       T       Err     Err     Err
 keyset ks3 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks3 cmp vector v1:
@@ -18765,12 +18327,6 @@ F       T       Err     Err     F       T       Err     Err     Err
 keyset ks4 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks4 cmp object t5:
-F       T       Err     Err     F       T       Err     Err     Err
-keyset ks4 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-keyset ks4 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-keyset ks4 cmp object ao3:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks4 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -19020,12 +18576,6 @@ keyset ks5 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks5 cmp object t5:
 F       T       Err     Err     F       T       Err     Err     Err
-keyset ks5 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-keyset ks5 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-keyset ks5 cmp object ao3:
-F       T       Err     Err     F       T       Err     Err     Err
 keyset ks5 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks5 cmp vector v1:
@@ -19273,12 +18823,6 @@ F       T       Err     Err     F       T       Err     Err     Err
 keyset ks6 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks6 cmp object t5:
-F       T       Err     Err     F       T       Err     Err     Err
-keyset ks6 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-keyset ks6 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-keyset ks6 cmp object ao3:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks6 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -19528,12 +19072,6 @@ keyset ks7 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks7 cmp object t5:
 F       T       Err     Err     F       T       Err     Err     Err
-keyset ks7 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-keyset ks7 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-keyset ks7 cmp object ao3:
-F       T       Err     Err     F       T       Err     Err     Err
 keyset ks7 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks7 cmp vector v1:
@@ -19781,12 +19319,6 @@ F       T       Err     Err     F       T       Err     Err     Err
 keyset ks8 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks8 cmp object t5:
-F       T       Err     Err     F       T       Err     Err     Err
-keyset ks8 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-keyset ks8 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-keyset ks8 cmp object ao3:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks8 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -20036,12 +19568,6 @@ keyset ks9 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks9 cmp object t5:
 F       T       Err     Err     F       T       Err     Err     Err
-keyset ks9 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-keyset ks9 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-keyset ks9 cmp object ao3:
-F       T       Err     Err     F       T       Err     Err     Err
 keyset ks9 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks9 cmp vector v1:
@@ -20289,12 +19815,6 @@ F       T       Err     Err     F       T       Err     Err     Err
 keyset ks10 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks10 cmp object t5:
-F       T       Err     Err     F       T       Err     Err     Err
-keyset ks10 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-keyset ks10 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-keyset ks10 cmp object ao3:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks10 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -20544,12 +20064,6 @@ keyset ks11 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks11 cmp object t5:
 F       T       Err     Err     F       T       Err     Err     Err
-keyset ks11 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-keyset ks11 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-keyset ks11 cmp object ao3:
-F       T       Err     Err     F       T       Err     Err     Err
 keyset ks11 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks11 cmp vector v1:
@@ -20797,12 +20311,6 @@ F       T       Err     Err     F       T       Err     Err     Err
 keyset ks12 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks12 cmp object t5:
-F       T       Err     Err     F       T       Err     Err     Err
-keyset ks12 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-keyset ks12 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-keyset ks12 cmp object ao3:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks12 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -21052,12 +20560,6 @@ keyset ks13 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks13 cmp object t5:
 F       T       Err     Err     F       T       Err     Err     Err
-keyset ks13 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-keyset ks13 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-keyset ks13 cmp object ao3:
-F       T       Err     Err     F       T       Err     Err     Err
 keyset ks13 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks13 cmp vector v1:
@@ -21305,12 +20807,6 @@ F       T       F       F       F       T       F       F       1
 object a1 cmp object t4:
 F       T       F       F       F       T       F       F       1
 object a1 cmp object t5:
-F       T       F       F       F       T       F       F       1
-object a1 cmp object ao1:
-F       T       F       F       F       T       F       F       1
-object a1 cmp object ao2:
-F       T       F       F       F       T       F       F       1
-object a1 cmp object ao3:
 F       T       F       F       F       T       F       F       1
 object a1 cmp object xml:
 F       T       F       F       F       T       F       F       1
@@ -21560,12 +21056,6 @@ object a2 cmp object t4:
 F       T       F       F       F       T       F       F       1
 object a2 cmp object t5:
 F       T       F       F       F       T       F       F       1
-object a2 cmp object ao1:
-F       T       F       F       F       T       F       F       1
-object a2 cmp object ao2:
-F       T       F       F       F       T       F       F       1
-object a2 cmp object ao3:
-F       T       F       F       F       T       F       F       1
 object a2 cmp object xml:
 F       T       F       F       F       T       F       F       1
 object a2 cmp vector v1:
@@ -21813,12 +21303,6 @@ F       T       F       F       F       T       F       F       1
 object a3 cmp object t4:
 F       T       F       F       F       T       F       F       1
 object a3 cmp object t5:
-F       T       F       F       F       T       F       F       1
-object a3 cmp object ao1:
-F       T       F       F       F       T       F       F       1
-object a3 cmp object ao2:
-F       T       F       F       F       T       F       F       1
-object a3 cmp object ao3:
 F       T       F       F       F       T       F       F       1
 object a3 cmp object xml:
 F       T       F       F       F       T       F       F       1
@@ -22068,12 +21552,6 @@ object a4 cmp object t4:
 F       T       F       F       F       T       F       F       1
 object a4 cmp object t5:
 F       T       F       F       F       T       F       F       1
-object a4 cmp object ao1:
-F       T       F       F       F       T       F       F       1
-object a4 cmp object ao2:
-F       T       F       F       F       T       F       F       1
-object a4 cmp object ao3:
-F       T       F       F       F       T       F       F       1
 object a4 cmp object xml:
 F       T       F       F       F       T       F       F       1
 object a4 cmp vector v1:
@@ -22321,12 +21799,6 @@ F       T       F       F       F       T       F       F       1
 object a5 cmp object t4:
 F       T       F       F       F       T       F       F       1
 object a5 cmp object t5:
-F       T       F       F       F       T       F       F       1
-object a5 cmp object ao1:
-F       T       F       F       F       T       F       F       1
-object a5 cmp object ao2:
-F       T       F       F       F       T       F       F       1
-object a5 cmp object ao3:
 F       T       F       F       F       T       F       F       1
 object a5 cmp object xml:
 F       T       F       F       F       T       F       F       1
@@ -22576,12 +22048,6 @@ object a6 cmp object t4:
 F       T       F       F       F       T       F       F       1
 object a6 cmp object t5:
 F       T       F       F       F       T       F       F       1
-object a6 cmp object ao1:
-F       T       F       F       F       T       F       F       1
-object a6 cmp object ao2:
-F       T       F       F       F       T       F       F       1
-object a6 cmp object ao3:
-F       T       F       F       F       T       F       F       1
 object a6 cmp object xml:
 F       T       F       F       F       T       F       F       1
 object a6 cmp vector v1:
@@ -22829,12 +22295,6 @@ F       T       F       F       F       T       F       F       1
 object a7 cmp object t4:
 F       T       F       F       F       T       F       F       1
 object a7 cmp object t5:
-F       T       F       F       F       T       F       F       1
-object a7 cmp object ao1:
-F       T       F       F       F       T       F       F       1
-object a7 cmp object ao2:
-F       T       F       F       F       T       F       F       1
-object a7 cmp object ao3:
 F       T       F       F       F       T       F       F       1
 object a7 cmp object xml:
 F       T       F       F       F       T       F       F       1
@@ -23084,12 +22544,6 @@ object a8 cmp object t4:
 F       T       F       F       F       T       F       F       1
 object a8 cmp object t5:
 F       T       F       F       F       T       F       F       1
-object a8 cmp object ao1:
-F       T       F       F       F       T       F       F       1
-object a8 cmp object ao2:
-F       T       F       F       F       T       F       F       1
-object a8 cmp object ao3:
-F       T       F       F       F       T       F       F       1
 object a8 cmp object xml:
 F       T       F       F       F       T       F       F       1
 object a8 cmp vector v1:
@@ -23337,12 +22791,6 @@ F       T       F       F       F       T       F       F       1
 object a9 cmp object t4:
 F       T       F       F       F       T       F       F       1
 object a9 cmp object t5:
-F       T       F       F       F       T       F       F       1
-object a9 cmp object ao1:
-F       T       F       F       F       T       F       F       1
-object a9 cmp object ao2:
-F       T       F       F       F       T       F       F       1
-object a9 cmp object ao3:
 F       T       F       F       F       T       F       F       1
 object a9 cmp object xml:
 F       T       F       F       F       T       F       F       1
@@ -23592,12 +23040,6 @@ object a10 cmp object t4:
 F       T       F       F       F       T       F       F       1
 object a10 cmp object t5:
 F       T       F       F       F       T       F       F       1
-object a10 cmp object ao1:
-F       T       F       F       F       T       F       F       1
-object a10 cmp object ao2:
-F       T       F       F       F       T       F       F       1
-object a10 cmp object ao3:
-F       T       F       F       F       T       F       F       1
 object a10 cmp object xml:
 F       T       F       F       F       T       F       F       1
 object a10 cmp vector v1:
@@ -23845,12 +23287,6 @@ F       T       F       F       F       T       F       F       1
 object a11 cmp object t4:
 F       T       F       F       F       T       F       F       1
 object a11 cmp object t5:
-F       T       F       F       F       T       F       F       1
-object a11 cmp object ao1:
-F       T       F       F       F       T       F       F       1
-object a11 cmp object ao2:
-F       T       F       F       F       T       F       F       1
-object a11 cmp object ao3:
 F       T       F       F       F       T       F       F       1
 object a11 cmp object xml:
 F       T       F       F       F       T       F       F       1
@@ -24100,12 +23536,6 @@ object a12 cmp object t4:
 F       T       F       F       F       T       F       F       1
 object a12 cmp object t5:
 F       T       F       F       F       T       F       F       1
-object a12 cmp object ao1:
-F       T       F       F       F       T       F       F       1
-object a12 cmp object ao2:
-F       T       F       F       F       T       F       F       1
-object a12 cmp object ao3:
-F       T       F       F       F       T       F       F       1
 object a12 cmp object xml:
 F       T       F       F       F       T       F       F       1
 object a12 cmp vector v1:
@@ -24353,12 +23783,6 @@ F       T       F       F       F       T       F       F       1
 object a13 cmp object t4:
 F       T       F       F       F       T       F       F       1
 object a13 cmp object t5:
-F       T       F       F       F       T       F       F       1
-object a13 cmp object ao1:
-F       T       F       F       F       T       F       F       1
-object a13 cmp object ao2:
-F       T       F       F       F       T       F       F       1
-object a13 cmp object ao3:
 F       T       F       F       F       T       F       F       1
 object a13 cmp object xml:
 F       T       F       F       F       T       F       F       1
@@ -24608,12 +24032,6 @@ object a14 cmp object t4:
 F       T       F       F       F       T       F       F       1
 object a14 cmp object t5:
 F       T       F       F       F       T       F       F       1
-object a14 cmp object ao1:
-F       T       F       F       F       T       F       F       1
-object a14 cmp object ao2:
-F       T       F       F       F       T       F       F       1
-object a14 cmp object ao3:
-F       T       F       F       F       T       F       F       1
 object a14 cmp object xml:
 F       T       F       F       F       T       F       F       1
 object a14 cmp vector v1:
@@ -24861,12 +24279,6 @@ F       T       F       F       F       T       F       F       1
 object a15 cmp object t4:
 F       T       F       F       F       T       F       F       1
 object a15 cmp object t5:
-F       T       F       F       F       T       F       F       1
-object a15 cmp object ao1:
-F       T       F       F       F       T       F       F       1
-object a15 cmp object ao2:
-F       T       F       F       F       T       F       F       1
-object a15 cmp object ao3:
 F       T       F       F       F       T       F       F       1
 object a15 cmp object xml:
 F       T       F       F       F       T       F       F       1
@@ -25116,12 +24528,6 @@ object a16 cmp object t4:
 F       T       F       F       F       T       F       F       1
 object a16 cmp object t5:
 F       T       F       F       F       T       F       F       1
-object a16 cmp object ao1:
-F       T       F       F       F       T       F       F       1
-object a16 cmp object ao2:
-F       T       F       F       F       T       F       F       1
-object a16 cmp object ao3:
-F       T       F       F       F       T       F       F       1
 object a16 cmp object xml:
 F       T       F       F       F       T       F       F       1
 object a16 cmp vector v1:
@@ -25369,12 +24775,6 @@ F       T       F       F       F       T       F       F       1
 object a17 cmp object t4:
 F       T       F       F       F       T       F       F       1
 object a17 cmp object t5:
-F       T       F       F       F       T       F       F       1
-object a17 cmp object ao1:
-F       T       F       F       F       T       F       F       1
-object a17 cmp object ao2:
-F       T       F       F       F       T       F       F       1
-object a17 cmp object ao3:
 F       T       F       F       F       T       F       F       1
 object a17 cmp object xml:
 F       T       F       F       F       T       F       F       1
@@ -25624,12 +25024,6 @@ object a18 cmp object t4:
 F       T       F       F       F       T       F       F       1
 object a18 cmp object t5:
 F       T       F       F       F       T       F       F       1
-object a18 cmp object ao1:
-F       T       F       F       F       T       F       F       1
-object a18 cmp object ao2:
-F       T       F       F       F       T       F       F       1
-object a18 cmp object ao3:
-F       T       F       F       F       T       F       F       1
 object a18 cmp object xml:
 F       T       F       F       F       T       F       F       1
 object a18 cmp vector v1:
@@ -25877,12 +25271,6 @@ F       T       F       F       F       T       F       F       1
 object b1 cmp object t4:
 F       T       F       F       F       T       F       F       1
 object b1 cmp object t5:
-F       T       F       F       F       T       F       F       1
-object b1 cmp object ao1:
-F       T       F       F       F       T       F       F       1
-object b1 cmp object ao2:
-F       T       F       F       F       T       F       F       1
-object b1 cmp object ao3:
 F       T       F       F       F       T       F       F       1
 object b1 cmp object xml:
 F       T       F       F       F       T       F       F       1
@@ -26132,12 +25520,6 @@ object c1 cmp object t4:
 F       T       F       F       F       T       F       F       1
 object c1 cmp object t5:
 F       T       F       F       F       T       F       F       1
-object c1 cmp object ao1:
-F       T       F       F       F       T       F       F       1
-object c1 cmp object ao2:
-F       T       F       F       F       T       F       F       1
-object c1 cmp object ao3:
-F       T       F       F       F       T       F       F       1
 object c1 cmp object xml:
 F       T       F       F       F       T       F       F       1
 object c1 cmp vector v1:
@@ -26385,12 +25767,6 @@ F       T       F       F       F       T       F       F       1
 object s1 cmp object t4:
 F       T       F       F       F       T       F       F       1
 object s1 cmp object t5:
-F       T       F       F       F       T       F       F       1
-object s1 cmp object ao1:
-F       T       F       F       F       T       F       F       1
-object s1 cmp object ao2:
-F       T       F       F       F       T       F       F       1
-object s1 cmp object ao3:
 F       T       F       F       F       T       F       F       1
 object s1 cmp object xml:
 F       T       F       F       F       T       F       F       1
@@ -26640,12 +26016,6 @@ object s2 cmp object t4:
 F       T       F       F       F       T       F       F       1
 object s2 cmp object t5:
 F       T       F       F       F       T       F       F       1
-object s2 cmp object ao1:
-F       T       F       F       F       T       F       F       1
-object s2 cmp object ao2:
-F       T       F       F       F       T       F       F       1
-object s2 cmp object ao3:
-F       T       F       F       F       T       F       F       1
 object s2 cmp object xml:
 F       T       F       F       F       T       F       F       1
 object s2 cmp vector v1:
@@ -26893,12 +26263,6 @@ F       T       F       F       F       T       F       F       1
 object s3 cmp object t4:
 F       T       F       F       F       T       F       F       1
 object s3 cmp object t5:
-F       T       F       F       F       T       F       F       1
-object s3 cmp object ao1:
-F       T       F       F       F       T       F       F       1
-object s3 cmp object ao2:
-F       T       F       F       F       T       F       F       1
-object s3 cmp object ao3:
 F       T       F       F       F       T       F       F       1
 object s3 cmp object xml:
 F       T       F       F       F       T       F       F       1
@@ -27148,12 +26512,6 @@ object s4 cmp object t4:
 F       T       F       F       F       T       F       F       1
 object s4 cmp object t5:
 F       T       F       F       F       T       F       F       1
-object s4 cmp object ao1:
-F       T       F       F       F       T       F       F       1
-object s4 cmp object ao2:
-F       T       F       F       F       T       F       F       1
-object s4 cmp object ao3:
-F       T       F       F       F       T       F       F       1
 object s4 cmp object xml:
 F       T       F       F       F       T       F       F       1
 object s4 cmp vector v1:
@@ -27402,12 +26760,6 @@ object t1 cmp object t4:
 F       T       Err     Err     Err     Err     Err     Err     Err
 object t1 cmp object t5:
 F       T       F       F       F       T       T       T       1
-object t1 cmp object ao1:
-F       T       F       F       F       T       F       F       1
-object t1 cmp object ao2:
-F       T       F       F       F       T       F       F       1
-object t1 cmp object ao3:
-F       T       F       F       F       T       F       F       1
 object t1 cmp object xml:
 F       T       F       F       F       T       F       F       1
 object t1 cmp vector v1:
@@ -27656,12 +27008,6 @@ object t2 cmp object t4:
 F       T       Err     Err     Err     Err     Err     Err     Err
 object t2 cmp object t5:
 F       T       F       F       F       T       T       T       1
-object t2 cmp object ao1:
-F       T       F       F       F       T       F       F       1
-object t2 cmp object ao2:
-F       T       F       F       F       T       F       F       1
-object t2 cmp object ao3:
-F       T       F       F       F       T       F       F       1
 object t2 cmp object xml:
 F       T       F       F       F       T       F       F       1
 object t2 cmp vector v1:
@@ -27910,12 +27256,6 @@ object t3 cmp object t4:
 F       T       Err     Err     Err     Err     Err     Err     Err
 object t3 cmp object t5:
 F       T       F       T       T       F       T       F       0
-object t3 cmp object ao1:
-F       T       F       F       F       T       F       F       1
-object t3 cmp object ao2:
-F       T       F       F       F       T       F       F       1
-object t3 cmp object ao3:
-F       T       F       F       F       T       F       F       1
 object t3 cmp object xml:
 F       T       F       F       F       T       F       F       1
 object t3 cmp vector v1:
@@ -28164,12 +27504,6 @@ object t4 cmp object t4:
 T       F       F       T       T       F       T       F       0
 object t4 cmp object t5:
 F       T       Err     Err     Err     Err     Err     Err     Err
-object t4 cmp object ao1:
-F       T       F       F       F       T       F       F       1
-object t4 cmp object ao2:
-F       T       F       F       F       T       F       F       1
-object t4 cmp object ao3:
-F       T       F       F       F       T       F       F       1
 object t4 cmp object xml:
 F       T       F       F       F       T       F       F       1
 object t4 cmp vector v1:
@@ -28418,12 +27752,6 @@ object t5 cmp object t4:
 F       T       Err     Err     Err     Err     Err     Err     Err
 object t5 cmp object t5:
 T       F       F       T       T       F       T       F       0
-object t5 cmp object ao1:
-F       T       F       F       F       T       F       F       1
-object t5 cmp object ao2:
-F       T       F       F       F       T       F       F       1
-object t5 cmp object ao3:
-F       T       F       F       F       T       F       F       1
 object t5 cmp object xml:
 F       T       F       F       F       T       F       F       1
 object t5 cmp vector v1:
@@ -28447,768 +27775,6 @@ F       T       F       F       F       T       T       T       1
 object t5 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 object t5 cmp resource f3:
-F       T       F       F       F       T       T       T       1
-object ao1 cmp null:
-F       T       F       F       F       T       T       T       1
-object ao1 cmp false:
-F       T       F       F       F       T       T       T       1
-object ao1 cmp true:
-F       T       F       T       T       F       T       F       0
-object ao1 cmp int 0:
-F       T       F       F       F       T       T       T       1
-object ao1 cmp int 99:
-F       T       T       T       F       T       F       F       -1
-object ao1 cmp int -1:
-F       T       F       F       F       T       T       T       1
-object ao1 cmp float 0:
-F       T       F       F       F       T       T       T       1
-object ao1 cmp double 99:
-F       T       T       T       F       T       F       F       -1
-object ao1 cmp float 99:
-F       T       T       T       F       T       F       F       -1
-object ao1 cmp float -1:
-F       T       F       F       F       T       T       T       1
-object ao1 cmp INF:
-F       T       T       T       F       T       F       F       -1
-object ao1 cmp -INF:
-F       T       F       F       F       T       T       T       1
-object ao1 cmp NAN:
-F       T       F       F       F       T       F       F       -1
-object ao1 cmp "":
-F       T       F       F       F       T       T       T       1
-object ao1 cmp "0":
-F       T       F       F       F       T       T       T       1
-object ao1 cmp "99":
-F       T       F       F       F       T       T       T       1
-object ao1 cmp "-1":
-F       T       F       F       F       T       T       T       1
-object ao1 cmp "0.0":
-F       T       F       F       F       T       T       T       1
-object ao1 cmp "99.0":
-F       T       F       F       F       T       T       T       1
-object ao1 cmp "-1.0":
-F       T       F       F       F       T       T       T       1
-object ao1 cmp "foo":
-F       T       F       F       F       T       T       T       1
-object ao1 cmp "BAZ":
-F       T       F       F       F       T       T       T       1
-object ao1 cmp array arr1:
-F       T       F       F       F       T       T       T       1
-object ao1 cmp array arr2:
-F       T       F       F       F       T       T       T       1
-object ao1 cmp array arr3:
-F       T       F       F       F       T       T       T       1
-object ao1 cmp array arr4:
-F       T       F       F       F       T       T       T       1
-object ao1 cmp array arr5:
-F       T       F       F       F       T       T       T       1
-object ao1 cmp array arr6:
-F       T       F       F       F       T       T       T       1
-object ao1 cmp array arr7:
-F       T       F       F       F       T       T       T       1
-object ao1 cmp array arr8:
-F       T       F       F       F       T       T       T       1
-object ao1 cmp array arr9:
-F       T       F       F       F       T       T       T       1
-object ao1 cmp array arr10:
-F       T       F       F       F       T       T       T       1
-object ao1 cmp array arr11:
-F       T       F       F       F       T       T       T       1
-object ao1 cmp array arr12:
-F       T       F       F       F       T       T       T       1
-object ao1 cmp array arr13:
-F       T       F       F       F       T       T       T       1
-object ao1 cmp array arr14:
-F       T       F       F       F       T       T       T       1
-object ao1 cmp array arr15:
-F       T       F       F       F       T       T       T       1
-object ao1 cmp array arr16:
-F       T       F       F       F       T       T       T       1
-object ao1 cmp array arr17:
-F       T       F       F       F       T       T       T       1
-object ao1 cmp array arr18:
-F       T       F       F       F       T       T       T       1
-object ao1 cmp array arr19:
-F       T       F       F       F       T       T       T       1
-object ao1 cmp array arr20:
-F       T       F       F       F       T       T       T       1
-object ao1 cmp array arr21:
-F       T       F       F       F       T       T       T       1
-object ao1 cmp array arr22:
-F       T       F       F       F       T       T       T       1
-object ao1 cmp array arr23:
-F       T       F       F       F       T       T       T       1
-object ao1 cmp array arr24:
-F       T       F       F       F       T       T       T       1
-object ao1 cmp array arr25:
-F       T       F       F       F       T       T       T       1
-object ao1 cmp array arr26:
-F       T       F       F       F       T       T       T       1
-object ao1 cmp vec vec1:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp vec vec2:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp vec vec3:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp vec vec4:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp vec vec5:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp vec vec6:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp vec vec7:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp vec vec8:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp vec vec9:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp vec vec10:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp vec vec11:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp dict dict1:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp dict dict2:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp dict dict3:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp dict dict4:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp dict dict5:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp dict dict6:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp dict dict7:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp dict dict8:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp dict dict9:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp dict dict10:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp dict dict11:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp keyset ks1:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp keyset ks2:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp keyset ks3:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp keyset ks4:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp keyset ks5:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp keyset ks6:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp keyset ks7:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp keyset ks8:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp keyset ks9:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp keyset ks10:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp keyset ks11:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp keyset ks12:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp keyset ks13:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp object a1:
-F       T       F       F       F       T       F       F       1
-object ao1 cmp object a2:
-F       T       F       F       F       T       F       F       1
-object ao1 cmp object a3:
-F       T       F       F       F       T       F       F       1
-object ao1 cmp object a4:
-F       T       F       F       F       T       F       F       1
-object ao1 cmp object a5:
-F       T       F       F       F       T       F       F       1
-object ao1 cmp object a6:
-F       T       F       F       F       T       F       F       1
-object ao1 cmp object a7:
-F       T       F       F       F       T       F       F       1
-object ao1 cmp object a8:
-F       T       F       F       F       T       F       F       1
-object ao1 cmp object a9:
-F       T       F       F       F       T       F       F       1
-object ao1 cmp object a10:
-F       T       F       F       F       T       F       F       1
-object ao1 cmp object a11:
-F       T       F       F       F       T       F       F       1
-object ao1 cmp object a12:
-F       T       F       F       F       T       F       F       1
-object ao1 cmp object a13:
-F       T       F       F       F       T       F       F       1
-object ao1 cmp object a14:
-F       T       F       F       F       T       F       F       1
-object ao1 cmp object a15:
-F       T       F       F       F       T       F       F       1
-object ao1 cmp object a16:
-F       T       F       F       F       T       F       F       1
-object ao1 cmp object a17:
-F       T       F       F       F       T       F       F       1
-object ao1 cmp object a18:
-F       T       F       F       F       T       F       F       1
-object ao1 cmp object b1:
-F       T       F       F       F       T       F       F       1
-object ao1 cmp object c1:
-F       T       F       F       F       T       F       F       1
-object ao1 cmp object s1:
-F       T       F       F       F       T       F       F       1
-object ao1 cmp object s2:
-F       T       F       F       F       T       F       F       1
-object ao1 cmp object s3:
-F       T       F       F       F       T       F       F       1
-object ao1 cmp object s4:
-F       T       F       F       F       T       F       F       1
-object ao1 cmp object t1:
-F       T       F       F       F       T       F       F       1
-object ao1 cmp object t2:
-F       T       F       F       F       T       F       F       1
-object ao1 cmp object t3:
-F       T       F       F       F       T       F       F       1
-object ao1 cmp object t4:
-F       T       F       F       F       T       F       F       1
-object ao1 cmp object t5:
-F       T       F       F       F       T       F       F       1
-object ao1 cmp object ao1:
-T       F       F       T       T       F       T       F       0
-object ao1 cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-object ao1 cmp object ao3:
-F       T       T       T       F       T       F       F       -1
-object ao1 cmp object xml:
-F       T       F       F       F       T       F       F       1
-object ao1 cmp vector v1:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp vector v2:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp vector v3:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp pair p1:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp pair p2:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp pair p3:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao1 cmp closure clo1:
-F       T       F       F       F       T       F       F       1
-object ao1 cmp closure clo2:
-F       T       F       F       F       T       F       F       1
-object ao1 cmp resource f1:
-F       T       F       F       F       T       T       T       1
-object ao1 cmp resource f2:
-F       T       F       F       F       T       T       T       1
-object ao1 cmp resource f3:
-F       T       F       F       F       T       T       T       1
-object ao2 cmp null:
-F       T       F       F       F       T       T       T       1
-object ao2 cmp false:
-F       T       F       F       F       T       T       T       1
-object ao2 cmp true:
-F       T       F       T       T       F       T       F       0
-object ao2 cmp int 0:
-F       T       F       F       F       T       T       T       1
-object ao2 cmp int 99:
-F       T       T       T       F       T       F       F       -1
-object ao2 cmp int -1:
-F       T       F       F       F       T       T       T       1
-object ao2 cmp float 0:
-F       T       F       F       F       T       T       T       1
-object ao2 cmp double 99:
-F       T       T       T       F       T       F       F       -1
-object ao2 cmp float 99:
-F       T       T       T       F       T       F       F       -1
-object ao2 cmp float -1:
-F       T       F       F       F       T       T       T       1
-object ao2 cmp INF:
-F       T       T       T       F       T       F       F       -1
-object ao2 cmp -INF:
-F       T       F       F       F       T       T       T       1
-object ao2 cmp NAN:
-F       T       F       F       F       T       F       F       -1
-object ao2 cmp "":
-F       T       F       F       F       T       T       T       1
-object ao2 cmp "0":
-F       T       F       F       F       T       T       T       1
-object ao2 cmp "99":
-F       T       F       F       F       T       T       T       1
-object ao2 cmp "-1":
-F       T       F       F       F       T       T       T       1
-object ao2 cmp "0.0":
-F       T       F       F       F       T       T       T       1
-object ao2 cmp "99.0":
-F       T       F       F       F       T       T       T       1
-object ao2 cmp "-1.0":
-F       T       F       F       F       T       T       T       1
-object ao2 cmp "foo":
-F       T       F       F       F       T       T       T       1
-object ao2 cmp "BAZ":
-F       T       F       F       F       T       T       T       1
-object ao2 cmp array arr1:
-F       T       F       F       F       T       T       T       1
-object ao2 cmp array arr2:
-F       T       F       F       F       T       T       T       1
-object ao2 cmp array arr3:
-F       T       F       F       F       T       T       T       1
-object ao2 cmp array arr4:
-F       T       F       F       F       T       T       T       1
-object ao2 cmp array arr5:
-F       T       F       F       F       T       T       T       1
-object ao2 cmp array arr6:
-F       T       F       F       F       T       T       T       1
-object ao2 cmp array arr7:
-F       T       F       F       F       T       T       T       1
-object ao2 cmp array arr8:
-F       T       F       F       F       T       T       T       1
-object ao2 cmp array arr9:
-F       T       F       F       F       T       T       T       1
-object ao2 cmp array arr10:
-F       T       F       F       F       T       T       T       1
-object ao2 cmp array arr11:
-F       T       F       F       F       T       T       T       1
-object ao2 cmp array arr12:
-F       T       F       F       F       T       T       T       1
-object ao2 cmp array arr13:
-F       T       F       F       F       T       T       T       1
-object ao2 cmp array arr14:
-F       T       F       F       F       T       T       T       1
-object ao2 cmp array arr15:
-F       T       F       F       F       T       T       T       1
-object ao2 cmp array arr16:
-F       T       F       F       F       T       T       T       1
-object ao2 cmp array arr17:
-F       T       F       F       F       T       T       T       1
-object ao2 cmp array arr18:
-F       T       F       F       F       T       T       T       1
-object ao2 cmp array arr19:
-F       T       F       F       F       T       T       T       1
-object ao2 cmp array arr20:
-F       T       F       F       F       T       T       T       1
-object ao2 cmp array arr21:
-F       T       F       F       F       T       T       T       1
-object ao2 cmp array arr22:
-F       T       F       F       F       T       T       T       1
-object ao2 cmp array arr23:
-F       T       F       F       F       T       T       T       1
-object ao2 cmp array arr24:
-F       T       F       F       F       T       T       T       1
-object ao2 cmp array arr25:
-F       T       F       F       F       T       T       T       1
-object ao2 cmp array arr26:
-F       T       F       F       F       T       T       T       1
-object ao2 cmp vec vec1:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp vec vec2:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp vec vec3:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp vec vec4:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp vec vec5:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp vec vec6:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp vec vec7:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp vec vec8:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp vec vec9:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp vec vec10:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp vec vec11:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp dict dict1:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp dict dict2:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp dict dict3:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp dict dict4:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp dict dict5:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp dict dict6:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp dict dict7:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp dict dict8:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp dict dict9:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp dict dict10:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp dict dict11:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp keyset ks1:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp keyset ks2:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp keyset ks3:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp keyset ks4:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp keyset ks5:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp keyset ks6:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp keyset ks7:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp keyset ks8:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp keyset ks9:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp keyset ks10:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp keyset ks11:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp keyset ks12:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp keyset ks13:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp object a1:
-F       T       F       F       F       T       F       F       1
-object ao2 cmp object a2:
-F       T       F       F       F       T       F       F       1
-object ao2 cmp object a3:
-F       T       F       F       F       T       F       F       1
-object ao2 cmp object a4:
-F       T       F       F       F       T       F       F       1
-object ao2 cmp object a5:
-F       T       F       F       F       T       F       F       1
-object ao2 cmp object a6:
-F       T       F       F       F       T       F       F       1
-object ao2 cmp object a7:
-F       T       F       F       F       T       F       F       1
-object ao2 cmp object a8:
-F       T       F       F       F       T       F       F       1
-object ao2 cmp object a9:
-F       T       F       F       F       T       F       F       1
-object ao2 cmp object a10:
-F       T       F       F       F       T       F       F       1
-object ao2 cmp object a11:
-F       T       F       F       F       T       F       F       1
-object ao2 cmp object a12:
-F       T       F       F       F       T       F       F       1
-object ao2 cmp object a13:
-F       T       F       F       F       T       F       F       1
-object ao2 cmp object a14:
-F       T       F       F       F       T       F       F       1
-object ao2 cmp object a15:
-F       T       F       F       F       T       F       F       1
-object ao2 cmp object a16:
-F       T       F       F       F       T       F       F       1
-object ao2 cmp object a17:
-F       T       F       F       F       T       F       F       1
-object ao2 cmp object a18:
-F       T       F       F       F       T       F       F       1
-object ao2 cmp object b1:
-F       T       F       F       F       T       F       F       1
-object ao2 cmp object c1:
-F       T       F       F       F       T       F       F       1
-object ao2 cmp object s1:
-F       T       F       F       F       T       F       F       1
-object ao2 cmp object s2:
-F       T       F       F       F       T       F       F       1
-object ao2 cmp object s3:
-F       T       F       F       F       T       F       F       1
-object ao2 cmp object s4:
-F       T       F       F       F       T       F       F       1
-object ao2 cmp object t1:
-F       T       F       F       F       T       F       F       1
-object ao2 cmp object t2:
-F       T       F       F       F       T       F       F       1
-object ao2 cmp object t3:
-F       T       F       F       F       T       F       F       1
-object ao2 cmp object t4:
-F       T       F       F       F       T       F       F       1
-object ao2 cmp object t5:
-F       T       F       F       F       T       F       F       1
-object ao2 cmp object ao1:
-F       T       F       F       F       T       T       T       1
-object ao2 cmp object ao2:
-T       F       F       T       T       F       T       F       0
-object ao2 cmp object ao3:
-F       T       F       T       T       F       T       F       0
-object ao2 cmp object xml:
-F       T       F       F       F       T       F       F       1
-object ao2 cmp vector v1:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp vector v2:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp vector v3:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp pair p1:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp pair p2:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp pair p3:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao2 cmp closure clo1:
-F       T       F       F       F       T       F       F       1
-object ao2 cmp closure clo2:
-F       T       F       F       F       T       F       F       1
-object ao2 cmp resource f1:
-F       T       F       F       F       T       T       T       1
-object ao2 cmp resource f2:
-F       T       F       F       F       T       T       T       1
-object ao2 cmp resource f3:
-F       T       F       F       F       T       T       T       1
-object ao3 cmp null:
-F       T       F       F       F       T       T       T       1
-object ao3 cmp false:
-F       T       F       F       F       T       T       T       1
-object ao3 cmp true:
-F       T       F       T       T       F       T       F       0
-object ao3 cmp int 0:
-F       T       F       F       F       T       T       T       1
-object ao3 cmp int 99:
-F       T       T       T       F       T       F       F       -1
-object ao3 cmp int -1:
-F       T       F       F       F       T       T       T       1
-object ao3 cmp float 0:
-F       T       F       F       F       T       T       T       1
-object ao3 cmp double 99:
-F       T       T       T       F       T       F       F       -1
-object ao3 cmp float 99:
-F       T       T       T       F       T       F       F       -1
-object ao3 cmp float -1:
-F       T       F       F       F       T       T       T       1
-object ao3 cmp INF:
-F       T       T       T       F       T       F       F       -1
-object ao3 cmp -INF:
-F       T       F       F       F       T       T       T       1
-object ao3 cmp NAN:
-F       T       F       F       F       T       F       F       -1
-object ao3 cmp "":
-F       T       F       F       F       T       T       T       1
-object ao3 cmp "0":
-F       T       F       F       F       T       T       T       1
-object ao3 cmp "99":
-F       T       F       F       F       T       T       T       1
-object ao3 cmp "-1":
-F       T       F       F       F       T       T       T       1
-object ao3 cmp "0.0":
-F       T       F       F       F       T       T       T       1
-object ao3 cmp "99.0":
-F       T       F       F       F       T       T       T       1
-object ao3 cmp "-1.0":
-F       T       F       F       F       T       T       T       1
-object ao3 cmp "foo":
-F       T       F       F       F       T       T       T       1
-object ao3 cmp "BAZ":
-F       T       F       F       F       T       T       T       1
-object ao3 cmp array arr1:
-F       T       F       F       F       T       T       T       1
-object ao3 cmp array arr2:
-F       T       F       F       F       T       T       T       1
-object ao3 cmp array arr3:
-F       T       F       F       F       T       T       T       1
-object ao3 cmp array arr4:
-F       T       F       F       F       T       T       T       1
-object ao3 cmp array arr5:
-F       T       F       F       F       T       T       T       1
-object ao3 cmp array arr6:
-F       T       F       F       F       T       T       T       1
-object ao3 cmp array arr7:
-F       T       F       F       F       T       T       T       1
-object ao3 cmp array arr8:
-F       T       F       F       F       T       T       T       1
-object ao3 cmp array arr9:
-F       T       F       F       F       T       T       T       1
-object ao3 cmp array arr10:
-F       T       F       F       F       T       T       T       1
-object ao3 cmp array arr11:
-F       T       F       F       F       T       T       T       1
-object ao3 cmp array arr12:
-F       T       F       F       F       T       T       T       1
-object ao3 cmp array arr13:
-F       T       F       F       F       T       T       T       1
-object ao3 cmp array arr14:
-F       T       F       F       F       T       T       T       1
-object ao3 cmp array arr15:
-F       T       F       F       F       T       T       T       1
-object ao3 cmp array arr16:
-F       T       F       F       F       T       T       T       1
-object ao3 cmp array arr17:
-F       T       F       F       F       T       T       T       1
-object ao3 cmp array arr18:
-F       T       F       F       F       T       T       T       1
-object ao3 cmp array arr19:
-F       T       F       F       F       T       T       T       1
-object ao3 cmp array arr20:
-F       T       F       F       F       T       T       T       1
-object ao3 cmp array arr21:
-F       T       F       F       F       T       T       T       1
-object ao3 cmp array arr22:
-F       T       F       F       F       T       T       T       1
-object ao3 cmp array arr23:
-F       T       F       F       F       T       T       T       1
-object ao3 cmp array arr24:
-F       T       F       F       F       T       T       T       1
-object ao3 cmp array arr25:
-F       T       F       F       F       T       T       T       1
-object ao3 cmp array arr26:
-F       T       F       F       F       T       T       T       1
-object ao3 cmp vec vec1:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp vec vec2:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp vec vec3:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp vec vec4:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp vec vec5:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp vec vec6:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp vec vec7:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp vec vec8:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp vec vec9:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp vec vec10:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp vec vec11:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp dict dict1:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp dict dict2:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp dict dict3:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp dict dict4:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp dict dict5:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp dict dict6:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp dict dict7:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp dict dict8:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp dict dict9:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp dict dict10:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp dict dict11:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp keyset ks1:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp keyset ks2:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp keyset ks3:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp keyset ks4:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp keyset ks5:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp keyset ks6:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp keyset ks7:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp keyset ks8:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp keyset ks9:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp keyset ks10:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp keyset ks11:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp keyset ks12:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp keyset ks13:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp object a1:
-F       T       F       F       F       T       F       F       1
-object ao3 cmp object a2:
-F       T       F       F       F       T       F       F       1
-object ao3 cmp object a3:
-F       T       F       F       F       T       F       F       1
-object ao3 cmp object a4:
-F       T       F       F       F       T       F       F       1
-object ao3 cmp object a5:
-F       T       F       F       F       T       F       F       1
-object ao3 cmp object a6:
-F       T       F       F       F       T       F       F       1
-object ao3 cmp object a7:
-F       T       F       F       F       T       F       F       1
-object ao3 cmp object a8:
-F       T       F       F       F       T       F       F       1
-object ao3 cmp object a9:
-F       T       F       F       F       T       F       F       1
-object ao3 cmp object a10:
-F       T       F       F       F       T       F       F       1
-object ao3 cmp object a11:
-F       T       F       F       F       T       F       F       1
-object ao3 cmp object a12:
-F       T       F       F       F       T       F       F       1
-object ao3 cmp object a13:
-F       T       F       F       F       T       F       F       1
-object ao3 cmp object a14:
-F       T       F       F       F       T       F       F       1
-object ao3 cmp object a15:
-F       T       F       F       F       T       F       F       1
-object ao3 cmp object a16:
-F       T       F       F       F       T       F       F       1
-object ao3 cmp object a17:
-F       T       F       F       F       T       F       F       1
-object ao3 cmp object a18:
-F       T       F       F       F       T       F       F       1
-object ao3 cmp object b1:
-F       T       F       F       F       T       F       F       1
-object ao3 cmp object c1:
-F       T       F       F       F       T       F       F       1
-object ao3 cmp object s1:
-F       T       F       F       F       T       F       F       1
-object ao3 cmp object s2:
-F       T       F       F       F       T       F       F       1
-object ao3 cmp object s3:
-F       T       F       F       F       T       F       F       1
-object ao3 cmp object s4:
-F       T       F       F       F       T       F       F       1
-object ao3 cmp object t1:
-F       T       F       F       F       T       F       F       1
-object ao3 cmp object t2:
-F       T       F       F       F       T       F       F       1
-object ao3 cmp object t3:
-F       T       F       F       F       T       F       F       1
-object ao3 cmp object t4:
-F       T       F       F       F       T       F       F       1
-object ao3 cmp object t5:
-F       T       F       F       F       T       F       F       1
-object ao3 cmp object ao1:
-F       T       F       F       F       T       T       T       1
-object ao3 cmp object ao2:
-F       T       F       T       T       F       T       F       0
-object ao3 cmp object ao3:
-T       F       F       T       T       F       T       F       0
-object ao3 cmp object xml:
-F       T       F       F       F       T       F       F       1
-object ao3 cmp vector v1:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp vector v2:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp vector v3:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp pair p1:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp pair p2:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp pair p3:
-F       T       Err     Err     F       T       Err     Err     Err
-object ao3 cmp closure clo1:
-F       T       F       F       F       T       F       F       1
-object ao3 cmp closure clo2:
-F       T       F       F       F       T       F       F       1
-object ao3 cmp resource f1:
-F       T       F       F       F       T       T       T       1
-object ao3 cmp resource f2:
-F       T       F       F       F       T       T       T       1
-object ao3 cmp resource f3:
 F       T       F       F       F       T       T       T       1
 object xml cmp null:
 F       T       F       F       F       T       T       T       1
@@ -29433,12 +27999,6 @@ F       T       F       F       F       T       F       F       1
 object xml cmp object t4:
 F       T       F       F       F       T       F       F       1
 object xml cmp object t5:
-F       T       F       F       F       T       F       F       1
-object xml cmp object ao1:
-F       T       F       F       F       T       F       F       1
-object xml cmp object ao2:
-F       T       F       F       F       T       F       F       1
-object xml cmp object ao3:
 F       T       F       F       F       T       F       F       1
 object xml cmp object xml:
 T       F       F       T       T       F       T       F       0
@@ -29688,12 +28248,6 @@ vector v1 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 vector v1 cmp object t5:
 F       T       Err     Err     F       T       Err     Err     Err
-vector v1 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-vector v1 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-vector v1 cmp object ao3:
-F       T       Err     Err     F       T       Err     Err     Err
 vector v1 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
 vector v1 cmp vector v1:
@@ -29941,12 +28495,6 @@ F       T       Err     Err     F       T       Err     Err     Err
 vector v2 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 vector v2 cmp object t5:
-F       T       Err     Err     F       T       Err     Err     Err
-vector v2 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-vector v2 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-vector v2 cmp object ao3:
 F       T       Err     Err     F       T       Err     Err     Err
 vector v2 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -30196,12 +28744,6 @@ vector v3 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 vector v3 cmp object t5:
 F       T       Err     Err     F       T       Err     Err     Err
-vector v3 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-vector v3 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-vector v3 cmp object ao3:
-F       T       Err     Err     F       T       Err     Err     Err
 vector v3 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
 vector v3 cmp vector v1:
@@ -30449,12 +28991,6 @@ F       T       Err     Err     F       T       Err     Err     Err
 pair p1 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 pair p1 cmp object t5:
-F       T       Err     Err     F       T       Err     Err     Err
-pair p1 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-pair p1 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-pair p1 cmp object ao3:
 F       T       Err     Err     F       T       Err     Err     Err
 pair p1 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -30704,12 +29240,6 @@ pair p2 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 pair p2 cmp object t5:
 F       T       Err     Err     F       T       Err     Err     Err
-pair p2 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-pair p2 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-pair p2 cmp object ao3:
-F       T       Err     Err     F       T       Err     Err     Err
 pair p2 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
 pair p2 cmp vector v1:
@@ -30957,12 +29487,6 @@ F       T       Err     Err     F       T       Err     Err     Err
 pair p3 cmp object t4:
 F       T       Err     Err     F       T       Err     Err     Err
 pair p3 cmp object t5:
-F       T       Err     Err     F       T       Err     Err     Err
-pair p3 cmp object ao1:
-F       T       Err     Err     F       T       Err     Err     Err
-pair p3 cmp object ao2:
-F       T       Err     Err     F       T       Err     Err     Err
-pair p3 cmp object ao3:
 F       T       Err     Err     F       T       Err     Err     Err
 pair p3 cmp object xml:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -31212,12 +29736,6 @@ closure clo1 cmp object t4:
 F       T       F       F       F       T       F       F       1
 closure clo1 cmp object t5:
 F       T       F       F       F       T       F       F       1
-closure clo1 cmp object ao1:
-F       T       F       F       F       T       F       F       1
-closure clo1 cmp object ao2:
-F       T       F       F       F       T       F       F       1
-closure clo1 cmp object ao3:
-F       T       F       F       F       T       F       F       1
 closure clo1 cmp object xml:
 F       T       F       F       F       T       F       F       1
 closure clo1 cmp vector v1:
@@ -31465,12 +29983,6 @@ F       T       F       F       F       T       F       F       1
 closure clo2 cmp object t4:
 F       T       F       F       F       T       F       F       1
 closure clo2 cmp object t5:
-F       T       F       F       F       T       F       F       1
-closure clo2 cmp object ao1:
-F       T       F       F       F       T       F       F       1
-closure clo2 cmp object ao2:
-F       T       F       F       F       T       F       F       1
-closure clo2 cmp object ao3:
 F       T       F       F       F       T       F       F       1
 closure clo2 cmp object xml:
 F       T       F       F       F       T       F       F       1
@@ -31720,12 +30232,6 @@ resource f1 cmp object t4:
 F       T       T       T       F       T       F       F       -1
 resource f1 cmp object t5:
 F       T       T       T       F       T       F       F       -1
-resource f1 cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-resource f1 cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-resource f1 cmp object ao3:
-F       T       T       T       F       T       F       F       -1
 resource f1 cmp object xml:
 F       T       T       T       F       T       F       F       -1
 resource f1 cmp vector v1:
@@ -31973,12 +30479,6 @@ F       T       T       T       F       T       F       F       -1
 resource f2 cmp object t4:
 F       T       T       T       F       T       F       F       -1
 resource f2 cmp object t5:
-F       T       T       T       F       T       F       F       -1
-resource f2 cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-resource f2 cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-resource f2 cmp object ao3:
 F       T       T       T       F       T       F       F       -1
 resource f2 cmp object xml:
 F       T       T       T       F       T       F       F       -1
@@ -32228,12 +30728,6 @@ resource f3 cmp object t4:
 F       T       T       T       F       T       F       F       -1
 resource f3 cmp object t5:
 F       T       T       T       F       T       F       F       -1
-resource f3 cmp object ao1:
-F       T       T       T       F       T       F       F       -1
-resource f3 cmp object ao2:
-F       T       T       T       F       T       F       F       -1
-resource f3 cmp object ao3:
-F       T       T       T       F       T       F       F       -1
 resource f3 cmp object xml:
 F       T       T       T       F       T       F       F       -1
 resource f3 cmp vector v1:
@@ -32261,10 +30755,6 @@ T       F       F       T       T       F       T       F       0
 
 same    nsame   lt      lte     eq      neq     gte     gt      cmp
 
-ArrayObject 1 cmp ArrayObject 2:
-F       T       T       T       F       T       F       F       -1
-ArrayObject 2 cmp ArrayObject 1:
-F       T       F       F       F       T       T       T       1
 ArrayIterator 1 cmp ArrayIterator 2:
 F       T       T       T       F       T       F       F       -1
 ArrayIterator 2 cmp ArrayIterator 1:

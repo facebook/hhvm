@@ -138,10 +138,6 @@ function main(): void {
   $t4 = new DateTime1(-1);
   $t5 = new DateTime2;
 
-  $ao1 = new ArrayObject(array());
-  $ao2 = new ArrayObject(array(99));
-  $ao3 = new ArrayObject(array(99));
-
   $xml = simplexml_load_string("<root />")->unknown;
 
   $v1 = Vector{0, 1, 2, 3, 4};
@@ -278,8 +274,7 @@ function main(): void {
                'object b1' => $b1, 'object c1' => $c1, 'object s1' => $s1,
                'object s2' => $s2, 'object s3' => $s3, 'object s4' => $s4,
                'object t1' => $t1, 'object t2' => $t2, 'object t3' => $t3,
-               'object t4' => $t4, 'object t5' => $t5, 'object ao1' => $ao1,
-               'object ao2' => $ao2, 'object ao3' => $ao3, 'object xml' => $xml,
+               'object t4' => $t4, 'object t5' => $t5, 'object xml' => $xml,
 
                'vector v1' => $v1, 'vector v2' => $v2, 'vector v3' => $v3,
                'pair p1' => $p1, 'pair p2' => $p2, 'pair p3' => $p3,
@@ -302,8 +297,6 @@ function main(): void {
 
   // also test some pairs that are not interesting to compare in an O(n^2) way
   // to everything above, but we want to see how they compare to each other
-  $aobj1 = new ArrayObject(array('a' => 'b'));
-  $aobj2 = new ArrayObject(array('a' => 'b')); $aobj2->c = 'd';
   $aiter1 = new ArrayIterator(array('a' => 'b'));
   $aiter2 = new ArrayIterator(array('a' => 'b')); $aiter2->c = 'd';
   $xml1 = simplexml_load_string("<apple />");
@@ -319,10 +312,6 @@ function main(): void {
   $dynamicBCThrows->c = 'c';
 
   $pairs = array(
-    array(
-      array('k' => 'ArrayObject 1', 'v' => $aobj1),
-      array('k' => 'ArrayObject 2', 'v' => $aobj2),
-    ),
     array(
       array('k' => 'ArrayIterator 1', 'v' => $aiter1),
       array('k' => 'ArrayIterator 2', 'v' => $aiter2),

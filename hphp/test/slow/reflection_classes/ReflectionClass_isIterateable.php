@@ -19,7 +19,7 @@ function dump_iterateable($class) {
 
 <<__EntryPoint>>
 function main_reflection_class_is_iterateable() {
-$classes = array("ArrayObject", "IteratorClass", "DerivedClass", "NonIterator");
+$classes = array("IteratorClass", "DerivedClass", "NonIterator");
 
 foreach ($classes as $class) {
   echo "Is $class iterateable? ";

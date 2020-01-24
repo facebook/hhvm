@@ -746,6 +746,8 @@ let daemon_main
       (Random_id.short_string ())
   in
   HackEventLogger.serverless_ide_init ~init_id:daemon_init_id;
+  Hh_logger.Level.set_min_level_file Hh_logger.Level.Info;
+  Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Error;
   if args.ClientIdeMessage.verbose then
     Hh_logger.Level.set_min_level Hh_logger.Level.Debug;
   Lwt_main.run (serve ~in_fd ~out_fd)

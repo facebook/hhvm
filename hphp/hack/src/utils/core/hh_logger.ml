@@ -38,7 +38,12 @@ let id_string () =
   | None -> ""
   | Some id -> Printf.sprintf "[%s] " id
 
-let print_with_newline ?exn fmt =
+type passes = {
+  passes_file: bool;
+  passes_stderr: bool;
+}
+
+let print_with_newline_internal ~passes ?exn fmt =
   let print_raw ?exn s =
     let exn_str =
       Option.value_map exn ~default:"" ~f:(fun exn ->
@@ -61,14 +66,21 @@ let print_with_newline ?exn fmt =
     let time = timestamp_string () in
     let id_str = id_string () in
     begin
-      match !dupe_log with
-      | None -> ()
-      | Some dupe_log_oc ->
+      match (!dupe_log, passes.passes_file) with
+      | (Some dupe_log_oc, true) ->
         Printf.fprintf dupe_log_oc "%s %s%s%s\n%!" time id_str s exn_str
+      | (_, _) -> ()
     end;
-    Printf.eprintf "%s %s%s%s\n%!" time id_str s exn_str
+    if passes.passes_stderr then
+      Printf.eprintf "%s %s%s%s\n%!" time id_str s exn_str
   in
   Printf.ksprintf (print_raw ?exn) fmt
+
+let print_with_newline ?exn fmt =
+  print_with_newline_internal
+    ~passes:{ passes_file = true; passes_stderr = true }
+    ?exn
+    fmt
 
 let print_duration name t =
   let t2 = Unix.gettimeofday () in
@@ -91,6 +103,10 @@ module Level : sig
     | Debug
 
   val set_min_level : t -> unit
+
+  val set_min_level_file : t -> unit
+
+  val set_min_level_stderr : t -> unit
 
   val passes_min_level : t -> bool
 
@@ -118,23 +134,44 @@ end = struct
     | Info -> 2
     | Debug -> 1
 
-  let min_level_ref = ref Info
+  let min_level_file_ref = ref Info
 
-  let set_min_level level = min_level_ref := level
+  let min_level_stderr_ref = ref Info
 
-  let passes_min_level level = int_of_level level >= int_of_level !min_level_ref
+  let set_min_level_file level = min_level_file_ref := level
+
+  let set_min_level_stderr level = min_level_stderr_ref := level
+
+  let set_min_level level =
+    set_min_level_file level;
+    set_min_level_stderr level;
+    ()
+
+  let passes level =
+    let ilevel = int_of_level level in
+    let passes_file = ilevel >= int_of_level !min_level_file_ref in
+    let passes_stderr = ilevel >= int_of_level !min_level_stderr_ref in
+    if passes_file || passes_stderr then
+      Some { passes_file; passes_stderr }
+    else
+      None
+
+  let passes_min_level level = passes level |> Option.is_some
 
   let log level ?exn fmt =
-    if passes_min_level level then
-      print_with_newline ?exn fmt
-    else
-      Printf.ifprintf () fmt
+    match passes level with
+    | Some passes -> print_with_newline_internal ~passes ?exn fmt
+    | None -> Printf.ifprintf () fmt
 
-  let log_duration level fmt t =
-    if passes_min_level level then
-      print_duration fmt t
-    else
-      t
+  let log_duration level name t =
+    let t2 = Unix.gettimeofday () in
+    begin
+      match passes level with
+      | Some passes ->
+        print_with_newline_internal ~passes "%s: %f" name (t2 -. t)
+      | None -> ()
+    end;
+    t2
 end
 
 (* Default log instructions to INFO level *)

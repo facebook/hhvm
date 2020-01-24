@@ -3934,6 +3934,8 @@ let handle_tick
 
 let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
   Printexc.record_backtrace true;
+  Hh_logger.Level.set_min_level_file Hh_logger.Level.Info;
+  Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Error;
   if env.verbose then Hh_logger.Level.set_min_level Hh_logger.Level.Debug;
   ref_from := env.from;
   HackEventLogger.set_from env.from;

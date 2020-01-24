@@ -8,27 +8,32 @@
 
 open Core_kernel
 open Direct_decl_parser
+module Decl_provider = Decl_provider_ctx
 
 type verbosity =
   | Standard
   | Verbose
   | Silent
 
-let init root =
+let init root : Provider_context.t =
   Relative_path.(set_path_prefix Root root);
   let (_handle : SharedMem.handle) =
     SharedMem.init ~num_workers:0 GlobalConfig.default_sharedmem_config
   in
   Parser_options_provider.set ParserOptions.default;
-  Global_naming_options.set
+  let tcopt =
     {
       TypecheckerOptions.default with
       GlobalOptions.tco_shallow_class_decl = true;
-    };
+    }
+  in
+  Global_naming_options.set tcopt;
+  let ctx = Provider_context.empty ~tcopt in
 
   (* Push local stacks here so we don't include shared memory in our timing. *)
   File_provider.local_changes_push_stack ();
-  Decl_provider.local_changes_push_stack ()
+  Decl_provider.local_changes_push_stack ctx;
+  ctx
 
 let time verbosity msg f =
   let before = Unix.gettimeofday () in
@@ -236,6 +241,7 @@ let () =
       | None -> usage_and_exit ()
       | Some file ->
         let file = Path.make file in
-        init (Path.dirname file);
-        if not @@ compare_decl !verbosity file then exit 1
+        let ctx = init (Path.dirname file) in
+        Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+            if not @@ compare_decl !verbosity file then exit 1)
     end

@@ -25,11 +25,9 @@ let timestamp_string () =
 (* We might want to log to both stderr and a file. Shelling out to tee isn't cross-platform.
  * We could dup2 stderr to a pipe and have a child process write to both original stderr and the
  * file, but that's kind of overkill. This is good enough *)
-let dupe_log : (string * out_channel) option ref = ref None
+let dupe_log : out_channel option ref = ref None
 
-let set_log filename fd = dupe_log := Some (filename, fd)
-
-let get_log_name () = Option.map !dupe_log ~f:fst
+let set_log _filename fd = dupe_log := Some fd
 
 let id : string option ref = ref None
 
@@ -65,7 +63,7 @@ let print_with_newline ?exn fmt =
     begin
       match !dupe_log with
       | None -> ()
-      | Some (_, dupe_log_oc) ->
+      | Some dupe_log_oc ->
         Printf.fprintf dupe_log_oc "%s %s%s%s\n%!" time id_str s exn_str
     end;
     Printf.eprintf "%s %s%s%s\n%!" time id_str s exn_str
@@ -91,8 +89,6 @@ module Level : sig
     | Warn
     | Info
     | Debug
-
-  val min_level : unit -> t
 
   val set_min_level : t -> unit
 
@@ -123,8 +119,6 @@ end = struct
     | Debug -> 1
 
   let min_level_ref = ref Info
-
-  let min_level () = !min_level_ref
 
   let set_min_level level = min_level_ref := level
 

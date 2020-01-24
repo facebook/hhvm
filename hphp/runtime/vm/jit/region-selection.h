@@ -411,6 +411,57 @@ void RegionDesc::forEachArc(Work w) const {
 
 //////////////////////////////////////////////////////////////////////
 
+/**
+ * A key struct that uniquely identifies a single translation that can be
+ * published at any point in time.  This includes both the SrcKey for the start
+ * of the translation and the list of its entry guards.
+ */
+struct RegionEntryKey {
+
+  RegionEntryKey(SrcKey srcKey, const GuardedLocations& guards)
+    : m_srcKey(srcKey)
+    , m_guards(guards)
+  { }
+
+  explicit RegionEntryKey(const RegionDesc& region)
+    : m_srcKey(region.entry()->start())
+    , m_guards(region.entry()->typePreConditions())
+  { }
+
+  SrcKey                  srcKey() const { return m_srcKey; }
+  const GuardedLocations& guards() const { return m_guards; }
+
+  struct Eq {
+    bool operator()(const RegionEntryKey& key1,
+                    const RegionEntryKey& key2) const {
+      return key1.m_srcKey == key2.m_srcKey &&
+             key1.m_guards == key2.m_guards;
+    }
+  };
+
+  struct Hash {
+    size_t operator()(const RegionEntryKey& key) const {
+      size_t h = key.m_srcKey.toAtomicInt();
+      Location::Hash lochash;
+      using data_category_t = std::underlying_type<DataTypeCategory>::type;
+      for (auto& guard : key.m_guards) {
+        h = folly::hash::hash_combine(
+          h, lochash(guard.location),
+          guard.type.hash(),
+          static_cast<data_category_t>(guard.category)
+        );
+      }
+      return h;
+    }
+  };
+
+ private:
+  SrcKey           m_srcKey;
+  GuardedLocations m_guards;
+};
+
+//////////////////////////////////////////////////////////////////////
+
 /*
  * Select a compilation region corresponding to the given context.
  * The shape of the region selected is controlled by

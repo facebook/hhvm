@@ -70,6 +70,13 @@ struct ProfCounters {
     }
   }
 
+  void clear() {
+    for (auto& chunk : m_chunks) {
+      chunk.reset();
+    }
+    m_chunks.clear();
+  }
+
 private:
   static const uint32_t kCountersPerChunk = 2 * 1024 * 1024 / sizeof(T);
 

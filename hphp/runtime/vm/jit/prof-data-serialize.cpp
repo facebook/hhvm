@@ -41,10 +41,12 @@
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/jit/meth-profile.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
+#include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/release-vv-profile.h"
 #include "hphp/runtime/vm/jit/switch-profile.h"
 #include "hphp/runtime/vm/jit/trans-cfg.h"
 #include "hphp/runtime/vm/jit/type-profile.h"
+#include "hphp/runtime/vm/jit/vasm-block-counters.h"
 #include "hphp/runtime/vm/named-entity-defs.h"
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/property-profile.h"
@@ -1391,6 +1393,21 @@ ClsMethDataRef read_clsmeth(ProfDataDeserializer& ser) {
   return ClsMethDataRef::create(cls, func);
 }
 
+void write_regionkey(ProfDataSerializer& ser, const RegionEntryKey& regionkey) {
+  write_srckey(ser, regionkey.srcKey());
+  write_container(ser, regionkey.guards(), write_guarded_location);
+}
+
+RegionEntryKey read_regionkey(ProfDataDeserializer& des) {
+  auto srcKey = read_srckey(des);
+  GuardedLocations guards;
+  read_container(des,
+                 [&] {
+                   guards.push_back(read_guarded_location(des));
+                 });
+  return RegionEntryKey(srcKey, guards);
+}
+
 std::string serializeProfData(const std::string& filename) {
   try {
     ProfDataSerializer ser{filename, ProfDataSerializer::FileMode::Create};
@@ -1449,8 +1466,7 @@ std::string serializeOptProfData(const std::string& filename) {
   try {
     ProfDataSerializer ser(filename, ProfDataSerializer::FileMode::Append);
 
-    // The profile data collected for the optimized code should be serialized
-    // here.
+    VasmBlockCounters::serialize(ser);
 
     ser.finalize();
 
@@ -1519,6 +1535,7 @@ std::string deserializeProfData(const std::string& filename, int numWorkers) {
 
     if (!ser.done()) {
       // We have profile data for the optimized code, so deserialize it too.
+      VasmBlockCounters::deserialize(ser);
     }
 
     if (s_preload_dispatcher) {

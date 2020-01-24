@@ -188,6 +188,7 @@ namespace Trace {
       TM(unwind)        \
       TM(ustubs)        \
       TM(vasm)          \
+      TM(vasm_block_count) \
       TM(vasm_copy)     \
       TM(vasm_graph_color) \
       TM(vasm_phi)      \

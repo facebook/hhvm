@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/vasm.h"
+#include "hphp/runtime/vm/jit/vasm-block-counters.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-internal.h"
 #include "hphp/runtime/vm/jit/vasm-lower.h"
@@ -1204,6 +1205,10 @@ void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
       doPass("VOPT_SF_PEEPHOLES", [&] (Vunit& u) { sfPeepholes(u, abi); });
       doPass("VOPT_POST_RA_SIMPLIFY", postRASimplify);
     }
+  }
+  if (unit.needsRegAlloc() && regalloc) {
+    doPass("VOPT_BLOCK_WEIGHTS",
+           [] (Vunit& u) { VasmBlockCounters::profileGuidedUpdate(u); });
   }
   if (unit.blocks.size() > 1) {
     doPass("VOPT_JMP", [] (Vunit& u) { optimizeJmps(u); });

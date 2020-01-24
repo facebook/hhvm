@@ -40,88 +40,8 @@ val start_offset : t -> int
 
 val end_offset : t -> int
 
-val error1001 : string
-
-val error1060 : string
-
-val shape_field_int_like_string : string
-
-val shape_type_ellipsis_without_trailing_comma : string
+val experimental_in_codegen_without_hacksperimental : string
 
 val this_in_static : string
 
-val autoload_takes_one_argument : string
-
-val constants_as_attribute_arguments : string
-
 val toplevel_await_use : string
-
-val invalid_constructor_method_call : string
-
-val invalid_variable_name : string
-
-val invalid_variable_variable : string
-
-val invalid_yield : string
-
-val invalid_yield_from : string
-
-val goto : string
-
-val goto_label : string
-
-val invalid_octal_integer : string
-
-val non_re_prefix : string
-
-val collection_intrinsic_many_typeargs : string
-
-val invalid_shape_field_name : string
-
-val empty_method_name : string
-
-val toplevel_statements : string
-
-val invalid_reified : string
-
-val cls_reified_generic_in_static_method : string
-
-val static_method_reified_obj_creation : string
-
-val non_invariant_reified_generic : string
-
-val no_generics_on_constructors : string
-
-val experimental_in_codegen_without_hacksperimental : string
-
-val xhp_class_attribute_type_constant : string
-
-val lowering_parsing_error : string -> string -> string
-
-val static_closures_are_disabled : string
-
-val halt_compiler_is_disabled : string
-
-val tparams_in_tconst : string
-
-val targs_not_allowed : string
-
-val reified_attribute : string
-
-val only_soft_allowed : string
-
-val soft_no_arguments : string
-
-val outside_dollar_str_interp : string
-
-val no_silence : string
-
-val const_mutation : string
-
-val no_attributes_on_variadic_parameter : string
-
-val statement_without_await_in_concurrent_block : string
-
-val invalid_typehint_alias : string -> string -> string
-
-val function_pointer_bad_recv : string

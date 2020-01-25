@@ -57,15 +57,15 @@ impl Names {
         let mut insert_statement = connection.prepare(&insert_statement).unwrap();
 
         for item in items {
-            let path_prefix_type = Convert::prefix_to_i64(item.path.prefix());
+            let path_prefix_type = convert::prefix_to_i64(item.path.prefix());
             let path_suffix = item.path.path_str();
-            let type_checker_mode = Convert::mode_to_i64(item.file_info.file_mode);
+            let type_checker_mode = convert::mode_to_i64(item.file_info.file_mode);
             let decl_hash = "TODO: OpaqueDigest is just a stub currently";
-            let classes = Convert::ids_to_string(&item.file_info.classes);
-            let consts = Convert::ids_to_string(&item.file_info.consts);
-            let funs = Convert::ids_to_string(&item.file_info.funs);
-            let recs = Convert::ids_to_string(&item.file_info.record_defs);
-            let typedefs = Convert::ids_to_string(&item.file_info.typedefs);
+            let classes = convert::ids_to_string(&item.file_info.classes);
+            let consts = convert::ids_to_string(&item.file_info.consts);
+            let funs = convert::ids_to_string(&item.file_info.funs);
+            let recs = convert::ids_to_string(&item.file_info.record_defs);
+            let typedefs = convert::ids_to_string(&item.file_info.typedefs);
 
             let result = insert_statement.execute(params![
                 path_prefix_type,

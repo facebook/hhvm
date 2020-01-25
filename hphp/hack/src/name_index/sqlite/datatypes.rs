@@ -44,9 +44,9 @@ impl FromSql for SqlitePathBuf {
     }
 }
 
-pub(crate) struct Convert;
+pub(crate) mod convert {
+    use super::*;
 
-impl Convert {
     pub fn ids_to_string(ids: &[Id]) -> String {
         let ids = ids
             .into_iter()

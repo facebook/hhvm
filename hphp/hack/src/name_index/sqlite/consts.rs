@@ -41,7 +41,7 @@ impl Names {
         let mut insert_statement = connection.prepare(&insert_statement).unwrap();
 
         for item in items {
-            let hash = Convert::name_to_hash(&item.name);
+            let hash = convert::name_to_hash(&item.name);
 
             let result = insert_statement.execute(params![hash, item.file_info_id]);
 
@@ -72,7 +72,7 @@ impl Names {
         names
             .into_iter()
             .map(|name| {
-                let hash = Convert::name_to_hash(&name);
+                let hash = convert::name_to_hash(&name);
                 let path = &select_statement
                     .query_row::<RelativePath, _, _>(params![hash], |row| {
                         let prefix: SqlitePrefix = row.get(0).unwrap();

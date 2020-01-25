@@ -58,17 +58,6 @@ struct Extension;
  *
  ****************************************************************************
  *
- * For functions with variadic args or other "special" handling,
- * declare the prototype as a BuiltinFuncPtr:
- *   TypedValue* HHVM_FN(sum)(ActRec* ar) { ... }
- * And declare it in Systemlib with the "ActRec" subattribute
- *   <?php
- *   <<__Native("ActRec")>>
- *   function sum(int $a, int $b): int;
- * Registering the function in moduleLoad() remains the same.
- *
- ****************************************************************************
- *
  * If, for whatever reason, the standard declaration doesn't work,
  * you may declare the function directly as:
  *   ReturnType localSymbolName(parameterList...)

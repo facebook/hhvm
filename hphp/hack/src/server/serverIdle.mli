@@ -8,11 +8,11 @@
  *)
 
 (* Called whenever the server is idle *)
-val go : unit -> unit
+val go : ServerEnv.env -> ServerEnv.env
 
-val async : (unit -> unit) -> unit
+val async : (env:ServerEnv.env -> ServerEnv.env) -> unit
 
 (* Called every time a client connects *)
 val stamp_connection : unit -> unit
 
-val init : ServerEnv.genv -> SearchUtils.si_env ref -> Path.t -> unit
+val init : ServerEnv.genv -> Path.t -> unit

@@ -45,7 +45,7 @@ module SearchServiceRunner = struct
   let run_completely (sienv : SearchUtils.si_env ref) =
     update_search (Queue.length queue) sienv
 
-  let run genv (sienv : SearchUtils.si_env ref) () =
+  let run genv (sienv : SearchUtils.si_env ref) =
     if ServerArgs.ai_mode genv.options = None then
       let size =
         if chunk_size genv = 0 then

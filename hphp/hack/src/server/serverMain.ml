@@ -41,7 +41,7 @@ end = struct
     (* note: we only run periodical tasks on the root, not extras *)
     let env = init_fun () in
     Hh_logger.log "Server is partially ready";
-    ServerIdle.init genv env.local_symbol_table root;
+    ServerIdle.init genv root;
     let t' = Unix.gettimeofday () in
     Hh_logger.log "Took %f seconds." (t' -. t);
     HackEventLogger.server_is_partially_ready ();
@@ -630,10 +630,10 @@ let serve_one_iteration genv env client_provider =
         last_stats.total_rechecked_count
         (fun () -> SharedMem.collect `aggressive);
       let t = Unix.gettimeofday () in
-      if t -. env.last_idle_job_time > 0.5 then (
-        ServerIdle.go ();
+      if t -. env.last_idle_job_time > 0.5 then
+        let env = ServerIdle.go env in
         { env with last_idle_job_time = t }
-      ) else
+      else
         env
     ) else
       env

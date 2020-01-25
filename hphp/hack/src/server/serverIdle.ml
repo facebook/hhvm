@@ -16,8 +16,8 @@ open SearchServiceRunner
 (*****************************************************************************)
 
 type callback =
-  | Periodic of (float ref * float * (unit -> unit))
-  | Once of (float ref * (unit -> unit))
+  | Periodic of (float ref * float * (env:ServerEnv.env -> ServerEnv.env))
+  | Once of (float ref * (env:ServerEnv.env -> ServerEnv.env))
 
 module Periodical : sig
   val always : float
@@ -28,7 +28,7 @@ module Periodical : sig
 
   val one_week : float
 
-  val check : unit -> unit
+  val check : ServerEnv.env -> ServerEnv.env
 
   (* register_callback X Y
    * Registers a new callback Y called every X seconds.
@@ -50,9 +50,10 @@ end = struct
 
   let last_call = ref (Unix.time ())
 
-  let check () =
+  let check (env : ServerEnv.env) : ServerEnv.env =
     let current = Unix.time () in
     let delta = current -. !last_call in
+    let env = ref env in
     last_call := current;
     callback_list :=
       List.filter !callback_list (fun callback ->
@@ -60,12 +61,13 @@ end = struct
           | Periodic (seconds_left, _, job)
           | Once (seconds_left, job) ->
             seconds_left := !seconds_left -. delta;
-            if !seconds_left < 0.0 then job ());
+            if !seconds_left < 0.0 then env := job !env);
           match callback with
           | Periodic (seconds_left, period, _) ->
             if !seconds_left < 0.0 then seconds_left := period;
             true
-          | Once _ -> false)
+          | Once _ -> false);
+    !env
 
   let register_callback cb = callback_list := cb :: !callback_list
 end
@@ -103,26 +105,45 @@ let exit_if_unused () =
 (*****************************************************************************)
 (* The registered jobs *)
 (*****************************************************************************)
-let init
-    (genv : ServerEnv.genv) (sienv : SearchUtils.si_env ref) (root : Path.t) :
-    unit =
+let init (genv : ServerEnv.genv) (root : Path.t) : unit =
   let jobs =
     [
       (* I'm not sure explicitly invoking the Gc here is necessary, but
        * major_slice takes something like ~0.0001s to run, so why not *)
-      (Periodical.always, (fun () -> ignore @@ Gc.major_slice 0));
-      (Periodical.one_hour *. 3., EventLogger.log_gc_stats);
-      (Periodical.always, (fun () -> SharedMem.collect `aggressive));
-      (Periodical.always, EventLogger.flush);
-      (Periodical.always, SearchServiceRunner.run genv sienv);
-      (Periodical.one_day, exit_if_unused);
-      (Periodical.one_day, Hhi.touch);
+      ( Periodical.always,
+        fun ~env ->
+          let _result : int = Gc.major_slice 0 in
+          env );
+      ( Periodical.one_hour *. 3.,
+        fun ~env ->
+          EventLogger.log_gc_stats ();
+          env );
+      ( Periodical.always,
+        fun ~env ->
+          SharedMem.collect `aggressive;
+          env );
+      ( Periodical.always,
+        fun ~env ->
+          EventLogger.flush ();
+          env );
+      ( Periodical.always,
+        fun ~env ->
+          SearchServiceRunner.run genv env.ServerEnv.local_symbol_table;
+          env );
+      ( Periodical.one_day,
+        fun ~env ->
+          exit_if_unused ();
+          env );
+      ( Periodical.one_day,
+        fun ~env ->
+          Hhi.touch ();
+          env );
       (* try_touch wraps Unix.lutimes, which doesn't open/close any fds, so we
        * won't lose our lock by doing this. We are only touching the top level
        * of files, however -- we don't want to do it recursively so that old
        * files under e.g. /tmp/hh_server/logs still get cleaned up. *)
       ( Periodical.one_day,
-        fun () ->
+        fun ~env ->
           Array.iter
             begin
               fun fn ->
@@ -137,7 +158,8 @@ let init
               else
                 Sys_utils.try_touch ~follow_symlinks:false fn
             end
-            (Sys.readdir GlobalConfig.tmp_dir) );
+            (Sys.readdir GlobalConfig.tmp_dir);
+          env );
     ]
   in
   List.iter jobs (fun (period, cb) ->

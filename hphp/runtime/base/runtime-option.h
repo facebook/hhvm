@@ -1015,7 +1015,7 @@ struct RuntimeOption {
   F(bool, JitSerdesModeForceOff,       false)                           \
   F(bool, JitDesUnitPreload,           false)                           \
   F(std::set<std::string>, JitSerdesDebugFunctions, {})                 \
-  F(uint32_t, JitSerializeOptProfSeconds, ServerExecutionMode() ? 360 : 0)\
+  F(uint32_t, JitSerializeOptProfSeconds, ServerExecutionMode() ? 300 : 0)\
   F(uint32_t, JitSerializeOptProfRequests, 0)                           \
   F(int, SimpleJsonMaxLength,        2 << 20)                           \
   F(uint32_t, JitSampleRate,               0)                           \

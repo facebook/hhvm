@@ -36,7 +36,7 @@ fn main() {
 
     let naming_table_path = args.naming_table.as_path();
 
-    let names = Names::new(naming_table_path);
+    let names = Names::readonly_from_file(naming_table_path);
 
     let paths = names.paths_of_consts(&[&args.gconst]);
 

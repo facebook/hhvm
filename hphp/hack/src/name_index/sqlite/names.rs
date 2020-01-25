@@ -4,35 +4,26 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use rusqlite::{Connection, OpenFlags};
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 #[derive(Debug)]
 pub struct Names {
     pub(crate) connection: Connection,
-    path: PathBuf,
 }
 
 impl Names {
-    pub fn new(path: impl AsRef<Path>) -> Self {
+    pub fn readonly_from_file(path: impl AsRef<Path>) -> Self {
         let path = path.as_ref();
-        let connection = if path.exists() {
-            eprintln!("Loading name index from '{:#?}' in read-only mode", path);
-            Connection::open_with_flags(path, OpenFlags::SQLITE_OPEN_READ_ONLY).unwrap()
-        } else {
-            eprintln!(
-                "Path '{:#?}' does not point to a file on disk - \
-                 creating an in-memory read-write database",
-                path,
-            );
-            let connection = Connection::open_in_memory().unwrap();
-            Self::create_tables(&connection);
-            connection
-        };
+        assert!(path.exists());
+        let connection =
+            Connection::open_with_flags(path, OpenFlags::SQLITE_OPEN_READ_ONLY).unwrap();
+        Names { connection }
+    }
 
-        Names {
-            connection,
-            path: path.to_path_buf(),
-        }
+    pub fn new_in_memory() -> Self {
+        let connection = Connection::open_in_memory().unwrap();
+        Self::create_tables(&connection);
+        Names { connection }
     }
 
     fn create_tables(connection: &Connection) {
@@ -48,7 +39,7 @@ mod tests {
 
     #[test]
     fn test_get_non_existent_const() {
-        let names = Names::new("");
+        let names = Names::new_in_memory();
 
         let result = names.paths_of_consts(&["\\Foo"]);
 

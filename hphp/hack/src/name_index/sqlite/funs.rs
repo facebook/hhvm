@@ -94,7 +94,7 @@ mod tests {
 
     #[test]
     fn test_add_fun() {
-        let names = Names::new("");
+        let names = Names::new_in_memory();
         let funs = [FunItem {
             name: "Foo".to_string(),
             file_info_id: 123,

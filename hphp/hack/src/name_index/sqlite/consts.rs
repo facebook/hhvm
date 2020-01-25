@@ -94,7 +94,7 @@ mod tests {
 
     #[test]
     fn test_add_const() {
-        let names = Names::new("");
+        let names = Names::new_in_memory();
         let consts = [ConstItem {
             name: "Foo".to_string(),
             file_info_id: 123,

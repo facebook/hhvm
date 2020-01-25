@@ -97,7 +97,7 @@ mod tests {
 
     #[test]
     fn test_add_file_info() {
-        let names = Names::new("");
+        let names = Names::new_in_memory();
         let path = RcOc::new(RelativePath::make(Prefix::Root, PathBuf::from("foo.php")));
         let file_infos = [FileInfoItem {
             path: RcOc::clone(&path),

@@ -1403,7 +1403,7 @@ folly::Optional<IsTypeOp> type_to_istypeop(const Type& t);
  * no matching Type is found.
  *
  */
-folly::Optional<Type> type_of_type_structure(SArray ts);
+folly::Optional<Type> type_of_type_structure(const Index&, Context, SArray ts);
 
 /*
  * Return the DObj structure for a strict subtype of TObj or TOptObj.

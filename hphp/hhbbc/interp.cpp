@@ -3202,7 +3202,7 @@ void isAsTypeStructImpl(ISS& env, SArray inputTS) {
 
   if (is_nullable_ts && is_definitely_null) return result(TTrue);
 
-  auto const ts_type = type_of_type_structure(ts);
+  auto const ts_type = type_of_type_structure(env.index, env.ctx, ts);
 
   if (is_nullable_ts && !is_definitely_not_null && ts_type == folly::none) {
     // Ts is nullable and we know that t could be null but we dont know for sure

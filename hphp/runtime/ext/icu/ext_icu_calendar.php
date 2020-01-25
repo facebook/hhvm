@@ -447,21 +447,13 @@ class IntlCalendar {
    *
    * @return bool - Returns TRUE on success and FALSE on failure.
    */
+  <<__Native>>
   public function set(int $yearOrField,
                       int $monthOrValue,
                       ?int $dayOfMonth = NULL,
                       ?int $hour = NULL,
                       ?int $minute = NULL,
-                      ?int $second = NULL): bool {
-    return $this->__set_array(varray[$yearOrField,$monthOrValue,
-                       $dayOfMonth,$hour,$minute,$second]);
-  }
-
-  /**
-   * Workaround for >5 arguments till the ActRec API is live
-   */
-  <<__Native>>
-  private function __set_array(array $args): bool;
+                      ?int $second = NULL): bool;
 
   /**
    * Set the day on which the week is deemed to start
@@ -1194,22 +1186,13 @@ class IntlGregorianCalendar extends IntlCalendar {
    * @param int $minute
    * @param int $second
    */
+  <<__Native>>
   public function __construct(mixed $yearOrTz = NULL,
                               mixed $monthOrLocale = NULL,
                               ?int $day = NULL,
                               ?int $hour = NULL,
                               ?int $minute = NULL,
-                              ?int $second = NULL): void {
-    $this->__ctor_array(varray[$yearOrTz, $monthOrLocale, $day,
-                         $hour, $minute, $second]);
-  }
-
-  /**
-   * TODO: Workaround for large parameter list
-   * pending ActRec aPI
-   */
-  <<__Native>>
-  private function __ctor_array(array $args): void;
+                              ?int $second = NULL): void;
 
   /**
    * Is the identified year a leap year?

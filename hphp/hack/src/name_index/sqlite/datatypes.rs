@@ -25,9 +25,10 @@ pub(crate) struct SqlitePathBuf {
 impl FromSql for SqlitePrefix {
     fn column_result(value: ValueRef) -> FromSqlResult<Self> {
         match value {
-            ValueRef::Integer(i) => Ok(SqlitePrefix {
-                value: Prefix::try_from(i as usize).unwrap(),
-            }),
+            ValueRef::Integer(i) => match Prefix::try_from(i as usize) {
+                Ok(value) => Ok(SqlitePrefix { value }),
+                Err(_) => Err(FromSqlError::OutOfRange(i)),
+            },
             _ => Err(FromSqlError::InvalidType),
         }
     }

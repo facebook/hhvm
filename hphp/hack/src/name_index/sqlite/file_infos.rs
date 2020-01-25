@@ -5,6 +5,7 @@
 
 use crate::datatypes::*;
 use crate::Names;
+use crate::Result;
 
 use ocamlrep::rc::RcOc;
 use oxidized::file_info::FileInfo;
@@ -20,7 +21,7 @@ pub(crate) struct FileInfoItem {
 // TODO: some functions is only used in unit tests for now
 #[allow(dead_code)]
 impl Names {
-    pub(crate) fn create_file_info_table(connection: &Connection) {
+    pub(crate) fn create_file_info_table(connection: &Connection) -> Result<()> {
         let statement = "
             CREATE TABLE IF NOT EXISTS NAMING_FILE_INFO (
                 FILE_INFO_ID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -35,10 +36,11 @@ impl Names {
                 TYPEDEFS TEXT
             );";
 
-        connection.execute(&statement, params![]).unwrap();
+        connection.execute(&statement, params![])?;
+        Ok(())
     }
 
-    fn insert_file_infos(&self, items: &[FileInfoItem]) {
+    fn insert_file_infos(&self, items: &[FileInfoItem]) -> Result<()> {
         let insert_statement = "
             INSERT INTO NAMING_FILE_INFO (
                 PATH_PREFIX_TYPE,
@@ -54,7 +56,7 @@ impl Names {
                 ?, ?, ?, ?, ?, ?, ?, ?, ?
             );";
         let connection = &self.connection;
-        let mut insert_statement = connection.prepare(&insert_statement).unwrap();
+        let mut insert_statement = connection.prepare(&insert_statement)?;
 
         for item in items {
             let path_prefix_type = convert::prefix_to_i64(item.path.prefix());
@@ -67,7 +69,7 @@ impl Names {
             let recs = convert::ids_to_string(&item.file_info.record_defs);
             let typedefs = convert::ids_to_string(&item.file_info.typedefs);
 
-            let result = insert_statement.execute(params![
+            insert_statement.execute(params![
                 path_prefix_type,
                 path_suffix,
                 type_checker_mode,
@@ -77,13 +79,9 @@ impl Names {
                 funs,
                 recs,
                 typedefs
-            ]);
-
-            match result {
-                Ok(_v) => println!("Inserted row OK"),
-                Err(e) => println!("Error: {:?}", e),
-            }
+            ])?;
         }
+        Ok(())
     }
 }
 
@@ -97,7 +95,7 @@ mod tests {
 
     #[test]
     fn test_add_file_info() {
-        let names = Names::new_in_memory();
+        let names = Names::new_in_memory().unwrap();
         let path = RcOc::new(RelativePath::make(Prefix::Root, PathBuf::from("foo.php")));
         let file_infos = [FileInfoItem {
             path: RcOc::clone(&path),
@@ -112,6 +110,6 @@ mod tests {
                 comments: None,
             },
         }];
-        names.insert_file_infos(&file_infos);
+        names.insert_file_infos(&file_infos).unwrap();
     }
 }

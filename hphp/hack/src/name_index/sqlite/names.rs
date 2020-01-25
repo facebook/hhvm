@@ -6,30 +6,31 @@
 use rusqlite::{Connection, OpenFlags};
 use std::path::Path;
 
+use crate::Result;
+
 #[derive(Debug)]
 pub struct Names {
     pub(crate) connection: Connection,
 }
 
 impl Names {
-    pub fn readonly_from_file(path: impl AsRef<Path>) -> Self {
+    pub fn readonly_from_file(path: impl AsRef<Path>) -> Result<Self> {
         let path = path.as_ref();
-        assert!(path.exists());
-        let connection =
-            Connection::open_with_flags(path, OpenFlags::SQLITE_OPEN_READ_ONLY).unwrap();
-        Names { connection }
+        let connection = Connection::open_with_flags(path, OpenFlags::SQLITE_OPEN_READ_ONLY)?;
+        Ok(Self { connection })
     }
 
-    pub fn new_in_memory() -> Self {
-        let connection = Connection::open_in_memory().unwrap();
-        Self::create_tables(&connection);
-        Names { connection }
+    pub fn new_in_memory() -> Result<Self> {
+        let connection = Connection::open_in_memory()?;
+        Self::create_tables(&connection)?;
+        Ok(Self { connection })
     }
 
-    fn create_tables(connection: &Connection) {
-        Self::create_file_info_table(connection);
-        Self::create_funs_table(connection);
-        Self::create_consts_table(connection);
+    fn create_tables(connection: &Connection) -> Result<()> {
+        Self::create_file_info_table(connection)?;
+        Self::create_funs_table(connection)?;
+        Self::create_consts_table(connection)?;
+        Ok(())
     }
 }
 
@@ -39,9 +40,9 @@ mod tests {
 
     #[test]
     fn test_get_non_existent_const() {
-        let names = Names::new_in_memory();
+        let names = Names::new_in_memory().unwrap();
 
-        let result = names.paths_of_consts(&["\\Foo"]);
+        let result = names.paths_of_consts(&["\\Foo"]).unwrap();
 
         assert_eq!(
             1,

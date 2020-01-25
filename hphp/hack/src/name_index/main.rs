@@ -36,9 +36,9 @@ fn main() {
 
     let naming_table_path = args.naming_table.as_path();
 
-    let names = Names::readonly_from_file(naming_table_path);
+    let names = Names::readonly_from_file(naming_table_path).unwrap();
 
-    let paths = names.paths_of_consts(&[&args.gconst]);
+    let paths = names.paths_of_consts(&[&args.gconst]).unwrap();
 
     println!("{:?}", paths);
 }

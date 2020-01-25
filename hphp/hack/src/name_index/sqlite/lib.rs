@@ -11,3 +11,5 @@ mod funs;
 pub mod names;
 
 pub use names::Names;
+
+pub use rusqlite::Result;

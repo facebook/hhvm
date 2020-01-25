@@ -285,7 +285,6 @@ bool refinable_load_eligible(const IRInstruction& inst) {
   switch (inst.op()) {
     case LdLoc:
     case LdStk:
-    case LdMBase:
     case LdMem:
     case LdIterPos:
     case LdIterEnd:

@@ -13,7 +13,7 @@ use emit_pos_rust::emit_pos_then;
 use env::{emitter::Emitter, Env};
 use hhbc_ast_rust::*;
 use hhbc_id_rust::{self as hhbc_id, Id};
-use instruction_sequence_rust::InstrSeq;
+use instruction_sequence_rust::{InstrSeq, Result};
 use oxidized::{aast as a, ast as tast, ast_defs, pos::Pos};
 
 use lazy_static::lazy_static;
@@ -55,7 +55,7 @@ fn get_level<Ex, Fb, En, Hi>(
     pos: Pos,
     op: &str,
     ex: a::Expr_<Ex, Fb, En, Hi>,
-) -> Result<a::BreakContinueLevel, emit_fatal::Error> {
+) -> Result<a::BreakContinueLevel> {
     if let a::Expr_::Int(ref s) = ex {
         match s.parse::<isize>() {
             Ok(level) if level > 0 => return Ok(a::BreakContinueLevel::LevelOk(Some(level))),
@@ -139,11 +139,7 @@ fn set_bytes_kind(name: &str) -> Option<Setrange> {
     })
 }
 
-fn emit_stmt(
-    e: &mut Emitter,
-    env: &mut Env,
-    stmt: &tast::Stmt,
-) -> Result<InstrSeq, emit_fatal::Error> {
+fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
     use ast_defs::Id;
     let pos = &stmt.0;
     match &stmt.1 {

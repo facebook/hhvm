@@ -6,6 +6,7 @@ use emit_fatal_rust as emit_fatal;
 use hhas_type::{constraint, Info};
 use hhbc_id_rust::{class, Id as ClassId};
 use hhbc_string_utils_rust as string_utils;
+use instruction_sequence_rust::Result;
 use naming_special_names_rust::{classes, typehints};
 use oxidized::{
     aast_defs::{Hint, Hint_, Hint_::*, NastShapeInfo, ShapeFieldInfo, Tprim},
@@ -300,7 +301,7 @@ fn happly_helper(
     kind: &Kind,
     pos: &Pos,
     name: String,
-) -> Result<constraint::Type, emit_fatal::Error> {
+) -> Result<constraint::Type> {
     use constraint::{Flags, Type};
     if tparams.contains(&name.as_str()) {
         Ok(Type::make_with_raw_str(

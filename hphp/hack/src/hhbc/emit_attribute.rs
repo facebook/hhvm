@@ -8,6 +8,7 @@ use emit_fatal_rust as emit_fatal;
 use env::emitter::Emitter;
 use hhas_attribute_rust::HhasAttribute;
 use hhbc_id_rust::{self as hhbc_id, Id};
+use instruction_sequence_rust::Result;
 use naming_special_names::user_attributes as ua;
 use naming_special_names_rust as naming_special_names;
 use oxidized::{ast as a, namespace_env::Env as Namespace};
@@ -21,7 +22,7 @@ pub fn from_asts(
     e: &mut Emitter,
     namespace: &Namespace,
     attrs: &[a::UserAttribute],
-) -> Result<Vec<HhasAttribute>, emit_fatal::Error> {
+) -> Result<Vec<HhasAttribute>> {
     attrs
         .iter()
         .map(|attr| from_ast(e, namespace, attr))
@@ -35,7 +36,7 @@ pub fn from_ast(
     e: &mut Emitter,
     namespace: &Namespace,
     attr: &a::UserAttribute, /*<Ex, Fb, En, Hi>*/
-) -> Result<HhasAttribute, emit_fatal::Error> {
+) -> Result<HhasAttribute> {
     let arguments =
         ast_constant_folder::literals_from_exprs(namespace, &mut attr.params.clone(), e).map_err(
             |err| {

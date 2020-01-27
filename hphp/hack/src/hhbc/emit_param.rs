@@ -2,7 +2,6 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use ast_class_expr_rust::ClassExpr;
 use ast_scope_rust::Scope;
 use emit_attribute_rust as emit_attribute;
 use emit_expression_rust as emit_expression;
@@ -13,7 +12,7 @@ use env::{emitter::Emitter, Env};
 use hhas_param_rust::HhasParam;
 use hhas_type::Info;
 use hhbc_string_utils_rust::locals::strip_dollar;
-use instruction_sequence_rust::InstrSeq;
+use instruction_sequence_rust::{InstrSeq, Result};
 use local_rust as local;
 use oxidized::{
     aast_defs::{Hint, Hint_},
@@ -35,11 +34,11 @@ pub fn from_asts(
     generate_defaults: bool,
     scope: &Scope,
     ast_params: &[a::FunParam],
-) -> Result<Vec<HhasParam>, emit_fatal::Error> {
+) -> Result<Vec<HhasParam>> {
     ast_params
         .iter()
         .map(|param| from_ast(emitter, tparams, namespace, generate_defaults, scope, param))
-        .collect::<Result<Vec<_>, _>>()
+        .collect::<Result<Vec<_>>>()
         .map(|params| {
             params
                 .iter()
@@ -89,7 +88,7 @@ fn from_ast(
     generate_defaults: bool,
     scope: &Scope,
     param: &a::FunParam,
-) -> Result<Option<HhasParam>, emit_fatal::Error> {
+) -> Result<Option<HhasParam>> {
     if param.is_variadic && param.name == "..." {
         return Ok(None);
     };
@@ -156,7 +155,7 @@ pub fn emit_param_default_value_setter(
     is_native: bool,
     pos: &Pos,
     params: &Vec<HhasParam>,
-) -> Result<(InstrSeq, InstrSeq), emit_fatal::Error> {
+) -> Result<(InstrSeq, InstrSeq)> {
     let param_to_setter = |param: &HhasParam| {
         let (is_optional, is_mixed, is_callable) = match &param.type_info {
             Some(Info {

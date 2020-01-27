@@ -6,13 +6,8 @@
 use emit_pos_rust::emit_pos;
 use env::emitter::Emitter;
 use hhbc_ast_rust::FatalOp;
-use instruction_sequence_rust::InstrSeq;
+use instruction_sequence_rust::{Error, InstrSeq};
 use oxidized::pos::Pos;
-
-#[derive(Debug)]
-pub enum Error {
-    IncludeTimeFatalException(FatalOp, String),
-}
 
 pub fn raise_fatal_runtime(pos: &Pos, msg: String) -> Error {
     Error::IncludeTimeFatalException(FatalOp::Runtime, format!("{:?}: {}", pos, msg))

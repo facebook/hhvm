@@ -16,7 +16,7 @@ use hhas_attribute_rust::{self as hhas_attribute, HhasAttribute};
 use hhas_body_rust::HhasBody;
 use hhas_function_rust::{self as hhas_function, HhasFunction};
 use hhbc_id_rust::{self as hhbc_id, Id};
-use instruction_sequence_rust::InstrSeq;
+use instruction_sequence_rust::{InstrSeq, Result};
 use naming_special_names_rust::user_attributes as ua;
 use options::HhvmFlags;
 use oxidized::{aast as a, ast as tast, ast_defs, pos::Pos};
@@ -28,7 +28,7 @@ pub fn emit_function(
     e: &mut Emitter,
     f: tast::Fun_,
     hoisted: HoistKind,
-) -> Result<Vec<HhasFunction>, emit_fatal::Error> {
+) -> Result<Vec<HhasFunction>> {
     use ast_defs::FunKind;
     use hhas_function::Flags;
     // TODO(hrust) ideally, we should be able to break f into parts and avoid cloning

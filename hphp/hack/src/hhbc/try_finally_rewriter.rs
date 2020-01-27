@@ -14,7 +14,7 @@ use emit_fatal_rust as emit_fatal;
 use emit_pos_rust::emit_pos;
 use env::{emitter::Emitter, iterator::Iter, jump_targets as jt, Env};
 use hhbc_ast_rust::{self as hhbc_ast, Instruct};
-use instruction_sequence_rust::InstrSeq;
+use instruction_sequence_rust::{InstrSeq, Result};
 use label::Label;
 use label_rust as label;
 use local_rust as local;
@@ -118,7 +118,7 @@ fn emit_goto(
     label: String,
     env: &mut Env,
     local_gen: &mut local::Gen,
-) -> Result<InstrSeq, emit_fatal::Error> {
+) -> Result {
     let in_using_opt = env
         .jump_targets_gen
         .get_labels_in_function()
@@ -346,13 +346,8 @@ fn emit_finally_epilogue(
     pos: &Pos,
     jump_instrs: JumpInstructions,
     finally_end: Label,
-) -> Result<InstrSeq, emit_fatal::Error> {
-    fn emit_instr(
-        e: &mut Emitter,
-        env: &mut Env,
-        pos: &Pos,
-        i: &Instruct,
-    ) -> Result<InstrSeq, emit_fatal::Error> {
+) -> Result {
+    fn emit_instr(e: &mut Emitter, env: &mut Env, pos: &Pos, i: &Instruct) -> Result {
         use hhbc_ast::Instruct::*;
         use hhbc_ast::InstructControlFlow::{RetC, RetCSuspended, RetM};
         use hhbc_ast::InstructSpecialFlow::{Break, Continue, Goto};

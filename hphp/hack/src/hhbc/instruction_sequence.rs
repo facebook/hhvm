@@ -14,6 +14,14 @@ use runtime::TypedValue;
 use std::collections::HashMap;
 use std::convert::TryInto;
 
+pub type Result<T = InstrSeq> = std::result::Result<T, Error>;
+
+#[derive(Debug)]
+pub enum Error {
+    IncludeTimeFatalException(FatalOp, String),
+    Unrecoverable(String),
+}
+
 /// The various from_X functions below take some kind of AST (expression,
 /// statement, etc.) and produce what is logically a sequence of instructions.
 /// This could simply be represented by a list, but then we would need to

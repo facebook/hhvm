@@ -5,7 +5,7 @@
 
 use emit_fatal_rust as emit_fatal;
 use hhas_param_rust::HhasParam;
-use instruction_sequence_rust::InstrSeq;
+use instruction_sequence_rust::{InstrSeq, Result};
 use local_rust as local;
 use oxidized::{aast::FunParam, pos::Pos};
 
@@ -43,7 +43,7 @@ pub fn check_memoize_possible<Ex, Fb, En, Hi>(
     pos: &Pos,
     params: &[&FunParam<Ex, Fb, En, Hi>],
     is_method: bool,
-) -> Result<(), emit_fatal::Error> {
+) -> Result<()> {
     if !is_method && params.iter().any(|param| param.is_variadic) {
         return Err(emit_fatal::raise_fatal_runtime(
             pos,

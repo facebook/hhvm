@@ -474,6 +474,7 @@ dependencies = [
 name = "hhas_attribute_rust"
 version = "0.0.0"
 dependencies = [
+ "instruction_sequence_rust 0.0.0",
  "naming_special_names_rust 0.0.0",
  "runtime 0.0.0",
 ]

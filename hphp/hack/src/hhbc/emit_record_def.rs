@@ -8,6 +8,7 @@ use emit_type_hint_rust as emit_type_hint;
 use env::emitter::Emitter;
 use hhas_record_def_rust::{Field as RecordField, HhasRecord};
 use hhas_type::constraint;
+use instruction_sequence_rust::Result;
 
 use hhbc_string_utils_rust as string_utils;
 use oxidized::ast::*;
@@ -26,10 +27,7 @@ fn valid_tc_for_record_field(tc: &constraint::Type) -> bool {
     }
 }
 
-fn emit_field(
-    emitter: &Emitter,
-    field: (Sid, Hint, Option<Expr>),
-) -> Result<RecordField, emit_fatal::Error> {
+fn emit_field(emitter: &Emitter, field: (Sid, Hint, Option<Expr>)) -> Result<RecordField> {
     let (Id(pos, mut name), hint, expr_opt) = field;
     let otv = expr_opt.map_or(None, |e| {
         constant_folder::expr_to_opt_typed_value(emitter, &e)

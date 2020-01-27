@@ -20,5 +20,7 @@ _obuild/
 hhi/**/INDEX
 facebook/opam
 facebook/opam2-mini-repository
+facebook/opam2-mini-repository-*
+facebook/opam2-mini-repository-*.tar.gz
 target/
 dev_env.sh

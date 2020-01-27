@@ -25,6 +25,8 @@ export OPAMYES="1"
 
 # shellcheck disable=SC1090
 source "$SOURCE_ROOT/opam_helpers.sh"
+# shellcheck disable=SC1090
+source "$SOURCE_ROOT/ocaml_deps_data.sh"
 
 # Shamelessly copied from
 # https://github.com/facebook/infer/blob/master/scripts/opam_utils.sh
@@ -51,19 +53,21 @@ opam_require_version_2
 
 # End of shame
 
-HACK_OPAM_SWITCH="ocaml-base-compiler.4.07.1"
+
+HACK_OPAM_SWITCH="ocaml-base-compiler.${HACK_OCAML_VERSION}"
 HACK_OPAM_DEFAULT_NAME="hack-switch"
 HACK_OPAM_NAME=${HACK_OPAM_NAME:-$HACK_OPAM_DEFAULT_NAME}
 
-MINI_TARBALL="$SOURCE_ROOT/facebook/opam2-mini-repository.tar.gz"
-MINI_REPO="$SOURCE_ROOT/facebook/opam2-mini-repository"
+MINI_REPO_FETCH_SCRIPT="${SOURCE_ROOT}/facebook/fetch_opam2_repo_hack.sh"
 
 # OSS does not provide bubblewrap yet so we disable it
-if [ -f "$MINI_TARBALL" ]
+if [ -e "$MINI_REPO_FETCH_SCRIPT" ]
 then
-  rm -rf "$MINI_REPO" ||:
-  tar xzf "$MINI_TARBALL" -C "$SOURCE_ROOT/facebook"
-  opam init --disable-sandboxing --reinit offline_clone "$MINI_REPO" --no-setup --bare
+  MINI_REPO_DIR="$("${MINI_REPO_FETCH_SCRIPT}")"
+  MINI_REPO_TARBALL="${MINI_REPO_DIR}.tar.gz"
+  rm -rf "$MINI_REPO_DIR" ||:
+  tar xzf "$MINI_REPO_TARBALL" -C "$SOURCE_ROOT/facebook"
+  opam init --disable-sandboxing --reinit offline_clone "$MINI_REPO_DIR" --no-setup --bare
 else
   opam init --disable-sandboxing --reinit --no-setup --bare
 fi
@@ -72,26 +76,7 @@ opam_switch_create_if_needed "$HACK_OPAM_NAME" "$HACK_OPAM_SWITCH"
 opam switch set "$HACK_OPAM_NAME"
 eval "$(opam env)"
 
-opam install \
-  core_kernel.v0.11.1 \
-  dtoa.0.3.1 \
-  dune.1.11.0 \
-  fileutils.0.5.3 \
-  lwt.4.2.1 \
-  lwt_log.1.1.0 \
-  lwt_ppx.1.2.2 \
-  merlin.3.3.2 \
-  ocp-indent.1.7.0 \
-  ounit.2.2.1 \
-  pcre.7.3.5 \
-  ppx_deriving.4.2.1 \
-  ppx_gen_rec.1.1.0 \
-  sedlex.1.99.4 \
-  sexplib.v0.11.0 \
-  sqlite3.4.4.1 \
-  uchar.0.0.2 \
-  visitors.20180513 \
-  wtf8.1.0.1
+opam install "${HACK_OPAM_DEPS[@]}"
 
 dune_version=$(dune --version)
 echo ""

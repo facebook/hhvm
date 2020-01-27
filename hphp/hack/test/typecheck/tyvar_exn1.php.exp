@@ -1,0 +1,4 @@
+File "tyvar_exn1.php", line 5, characters 10-11:
+A function that receives an unpacked array as an argument must have a variadic parameter to accept the elements of the array (Typing[4359])
+File "tyvar_exn1.php", line 2, characters 10-12:
+Definition is here

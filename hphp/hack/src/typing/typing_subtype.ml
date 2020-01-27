@@ -722,12 +722,14 @@ and simplify_subtype_i
           in
           match (d_kind, d_required, d_variadic) with
           | (SplatUnpack, _ :: _, _) ->
-            invalid_with (fun () ->
+            (* return the env so as not to discard the type variable that might
+            have been created for the Traversable type created below. *)
+            invalid_env_with env (fun () ->
                 Errors.unpack_array_required_argument
                   (Reason.to_pos r_super)
                   fpos)
           | (SplatUnpack, [], None) ->
-            invalid_with (fun () ->
+            invalid_env_with env (fun () ->
                 Errors.unpack_array_variadic_argument
                   (Reason.to_pos r_super)
                   fpos)
@@ -762,7 +764,7 @@ and simplify_subtype_i
               | Reason.Runpack_param (epos, fpos, c) -> (epos, fpos, c)
               | _ -> (Reason.to_pos r_super, Reason.to_pos r, 0)
             in
-            invalid_with (fun () ->
+            invalid_env_with env (fun () ->
                 f (prefix + len_required) (prefix + len_ts) epos fpos)
           in
           if len_ts < len_required then

@@ -570,6 +570,12 @@ let hh_show_env p env =
   lastenv := env;
   log_env_diff p old_env env
 
+let hh_show_full_env p env =
+  let empty_env =
+    { env with inference_env = Typing_inference_env.empty_inference_env }
+  in
+  log_env_diff p empty_env env
+
 let _ =
   Env.set_env_log_function (fun pos name old_env env ->
       log_env_diff pos ~function_name:name old_env env)
@@ -593,7 +599,7 @@ type log_structure =
   | Log_type of string * Typing_defs.locl_ty
   | Log_type_i of string * Typing_defs.internal_type
 
-let log_with_level env key level log_f =
+let log_with_level env key ~level log_f =
   if Env.get_log_level env key >= level then
     log_f ()
   else
@@ -679,3 +685,19 @@ let log_intersection ~level env r ty1 ty2 ~inter_ty =
 let increment_feature_count env s =
   if GlobalOptions.tco_language_feature_logging (Env.get_tcopt env) then
     Measure.sample s 1.0
+
+module GlobalInference = struct
+  let log_cat = "gi"
+
+  let log_merging_subgraph env pos =
+    log_with_level env log_cat ~level:1 (fun () ->
+        log_position pos (fun () ->
+            log_key "merging subgraph for function at this position"))
+
+  let log_merging_var env pos var =
+    log_with_level env log_cat ~level:1 (fun () ->
+        log_position pos (fun () ->
+            log_key (Printf.sprintf "merging type variable %d" var)))
+end
+
+module GI = GlobalInference

@@ -701,7 +701,7 @@ let print_global_inference_env
     print_endline (String.map s (const '='))
   in
   print_header (Printf.sprintf "%sd environment" step_name);
-  Typing_log.hh_show_env Pos.none env;
+  Typing_log.hh_show_full_env Pos.none env;
 
   print_header (Printf.sprintf "%s errors" step_name);
   List.iter

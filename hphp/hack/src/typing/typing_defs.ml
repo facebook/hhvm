@@ -214,9 +214,16 @@ type expand_env = {
   T54121530 aims at offering a better mechanism. *)
 }
 
-let is_tyvar t =
+let get_var t =
   match get_node t with
-  | Tvar _ -> true
+  | Tvar v -> Some v
+  | _ -> None
+
+let is_tyvar t = Option.is_some (get_var t)
+
+let is_var_v t v =
+  match get_node t with
+  | Tvar v' when Ident.equal v v' -> true
   | _ -> false
 
 let is_dynamic t =
@@ -306,6 +313,20 @@ let is_union_or_inter_type (ty : locl_ty) =
   | Tclass _
   | Tarraykind _ ->
     false
+
+module InternalType = struct
+  let get_var t =
+    match t with
+    | LoclType t -> get_var t
+    | ConstraintType _ -> None
+
+  let is_var_v t ~v =
+    match t with
+    | LoclType t -> is_var_v t v
+    | ConstraintType _ -> false
+
+  let is_not_var_v t ~v = not @@ is_var_v t ~v
+end
 
 (* The identifier for this *)
 let this = Local_id.make_scoped "$this"

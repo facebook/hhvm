@@ -78,6 +78,9 @@ module StateConstraintGraph = struct
   end)
 
   let merge_var (env, errors) (pos, subgraph) var =
+    Typing_log.GI.log_merging_var env pos var;
+    Env.log_env_change_ "merge_var" env
+    @@
     let catch_exc = catch_exc pos in
     let (env, var') =
       Env.copy_tyvar_from_genv_to_env var ~from:subgraph ~to_:env
@@ -87,6 +90,29 @@ module StateConstraintGraph = struct
     let on_err = make_error_callback errors var in
     let env = catch_exc on_err env (Sub.sub_type env ty ty') in
     let env = catch_exc on_err env (Sub.sub_type env ty' ty) in
+    let (env, vars_in_lower_bounds, vars_in_upper_bounds) =
+      let get_unsolved_tyvars tyset =
+        ITySet.fold
+          (fun ty (env, vars_acc) ->
+            let (env, ty) = Env.expand_internal_type env ty in
+            let vars_acc =
+              Option.fold
+                (InternalType.get_var ty)
+                ~init:vars_acc
+                ~f:(fun vars_acc v -> ISet.add v vars_acc)
+            in
+            (env, vars_acc))
+          tyset
+          (env, ISet.empty)
+      in
+      let (env, vars_in_lower_bounds) =
+        get_unsolved_tyvars (Env.get_tyvar_lower_bounds env var')
+      in
+      let (env, vars_in_upper_bounds) =
+        get_unsolved_tyvars (Env.get_tyvar_upper_bounds env var')
+      in
+      (env, vars_in_lower_bounds, vars_in_upper_bounds)
+    in
     let env =
       catch_exc on_err env (fun _ ->
           Typing_solver.try_bind_to_equal_bound env var')
@@ -95,12 +121,23 @@ module StateConstraintGraph = struct
       catch_exc on_err env (fun _ ->
           Typing_solver.try_bind_to_equal_bound env var)
     in
+    let env =
+      Env.remove_var
+        env
+        var'
+        ~search_in_lower_bounds_of:vars_in_upper_bounds
+        ~search_in_upper_bounds_of:vars_in_lower_bounds
+    in
     (env, errors)
 
   let merge_subgraph (env, errors) ((pos, subgraph) : Inf.t_global_with_pos) =
+    Typing_log.GI.log_merging_subgraph env pos;
     let vars = Inf.get_vars_g subgraph in
-    List.fold vars ~init:(env, errors) ~f:(fun (env, errors) var ->
-        merge_var (env, errors) (pos, subgraph) var)
+    let env =
+      List.fold vars ~init:env ~f:(Env.initialize_tyvar_as_in ~as_in:subgraph)
+    in
+    List.fold vars ~init:(env, errors) ~f:(fun (env, errors) v ->
+        merge_var (env, errors) (pos, subgraph) v)
 
   let merge_subgraphs (env, errors) subgraphs =
     List.fold ~f:merge_subgraph ~init:(env, errors) subgraphs

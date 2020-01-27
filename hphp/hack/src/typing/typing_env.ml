@@ -1599,9 +1599,24 @@ let add_tyvar_lower_bound ?union env var ty =
   else
     env
 
+let initialize_tyvar_as_in ~as_in:genv env v =
+  log_env_change "initialize_tyvar_as_in" env
+  @@ wrap_inference_env_call_env env (fun env ->
+         Inf.initialize_tyvar_as_in ~as_in:genv env v)
+
 let copy_tyvar_from_genv_to_env var ~to_:env ~from:genv =
-  wrap_inference_env_call env (fun env ->
-      Inf.copy_tyvar_from_genv_to_env var ~to_:env ~from:genv)
+  log_env_change_ "copy_tyvar_from_genv_to_env" env
+  @@ wrap_inference_env_call env (fun env ->
+         Inf.copy_tyvar_from_genv_to_env var ~to_:env ~from:genv)
 
 let get_all_tyvars env =
   wrap_inference_env_call_res env (fun env -> Inf.get_vars env)
+
+let remove_var env var ~search_in_upper_bounds_of ~search_in_lower_bounds_of =
+  log_env_change "remove_var" env
+  @@ wrap_inference_env_call_env env (fun env ->
+         Inf.remove_var
+           env
+           var
+           ~search_in_upper_bounds_of
+           ~search_in_lower_bounds_of)

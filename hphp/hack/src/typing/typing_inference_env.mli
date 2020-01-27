@@ -152,6 +152,8 @@ val get_vars : t -> Ident.t list
 
 val get_vars_g : t_global -> Ident.t list
 
+val initialize_tyvar_as_in : as_in:t_global -> t -> int -> t
+
 val copy_tyvar_from_genv_to_env :
   Ident.t -> to_:t -> from:t_global -> t * Ident.t
 
@@ -179,3 +181,11 @@ val compress_g : t_global -> t_global
 (** Split multiple global environments into (weakly) connected components. *)
 val connected_components_g :
   t_global_with_pos list -> t_global_with_pos list list
+
+(** Remove solved variable from environment by replacing it by its binding. *)
+val remove_var :
+  t ->
+  Ident.t ->
+  search_in_upper_bounds_of:ISet.t ->
+  search_in_lower_bounds_of:ISet.t ->
+  t

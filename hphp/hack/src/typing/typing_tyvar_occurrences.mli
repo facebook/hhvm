@@ -28,3 +28,8 @@ val make_tyvar_no_more_occur_in_tyvar : t -> Ident.t -> no_more_in:int -> t
 val unbind_tyvar : t -> Ident.t -> t
 
 val occurs_in : t -> Ident.t -> in_:Ident.t -> bool
+
+(** remove variable from the occurrence structure.
+    Does not try and be clever, especially does not perform any
+    type simplification. *)
+val remove_var : t -> Ident.t -> t

@@ -7,6 +7,8 @@
  *
  *)
 
+open Hh_prelude
+
 external hh_counter_next : unit -> int = "hh_counter_next"
 
 type t = int [@@deriving eq]
@@ -23,6 +25,8 @@ let tmp () =
     trace := IMap.add res ("__tmp" ^ string_of_int res) !trace;
   res
 
+[@@@warning "-3"]
+
 let to_string x =
   (try IMap.find x !trace with Not_found -> "v" ^ string_of_int x)
 
@@ -30,6 +34,8 @@ let debug ?normalize:(f = (fun x -> x)) x =
   let normalized_x = string_of_int (f x) in
   try IMap.find x !trace ^ "[" ^ normalized_x ^ "]"
   with Not_found -> "tvar_" ^ normalized_x
+
+[@@@warning "+3"]
 
 let get_name x =
   assert !track_names;
@@ -43,3 +49,5 @@ let make x =
   res
 
 let pp = Format.pp_print_int
+
+let not_equal x y = not @@ equal x y

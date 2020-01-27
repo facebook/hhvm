@@ -13,6 +13,8 @@ val log_key : string -> unit
 
 val hh_show_env : Pos.t -> Typing_env_types.env -> unit
 
+val hh_show_full_env : Pos.t -> Typing_env_types.env -> unit
+
 val hh_show : Pos.t -> Typing_env_types.env -> Typing_defs.locl_ty -> unit
 
 (** Simple type of possible log data *)
@@ -22,7 +24,7 @@ type log_structure =
   | Log_type_i of string * Typing_defs.internal_type
 
 val log_with_level :
-  Typing_env_types.env -> string -> int -> (unit -> unit) -> unit
+  Typing_env_types.env -> string -> level:int -> (unit -> unit) -> unit
 
 val log_types : Pos.t -> Typing_env_types.env -> log_structure list -> unit
 
@@ -73,3 +75,11 @@ val log_intersection :
   unit
 
 val increment_feature_count : Typing_env_types.env -> string -> unit
+
+module GlobalInference : sig
+  val log_merging_subgraph : Typing_env_types.env -> Pos.t -> unit
+
+  val log_merging_var : Typing_env_types.env -> Pos.t -> Ident.t -> unit
+end
+
+module GI = GlobalInference

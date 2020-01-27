@@ -125,3 +125,23 @@ let occurs_in x occuring_tv ~in_:containing_tv =
   let contains = ISet.mem occuring_tv (get_tyvars_in_tyvar x containing_tv) in
   assert (occurs = contains);
   occurs
+
+let remove_var x v =
+  let occurrences = get_tyvar_occurrences x v in
+  let x =
+    ISet.fold
+      (fun occ x -> make_tyvar_no_more_occur_in_tyvar x v ~no_more_in:occ)
+      occurrences
+      x
+  in
+  let x = { x with tyvar_occurrences = IMap.remove v x.tyvar_occurrences } in
+  let vars_in_v = get_tyvars_in_tyvar x v in
+  let x =
+    ISet.fold
+      (fun var_in_v x ->
+        make_tyvar_no_more_occur_in_tyvar x var_in_v ~no_more_in:v)
+      vars_in_v
+      x
+  in
+  let x = { x with tyvars_in_tyvar = IMap.remove v x.tyvars_in_tyvar } in
+  x

@@ -26,3 +26,5 @@ val set_name : t -> string -> unit
 val make : string -> t
 
 val pp : Format.formatter -> t -> unit
+
+val not_equal : t -> t -> bool

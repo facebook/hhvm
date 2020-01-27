@@ -97,9 +97,16 @@ HPHP::jit::irgen::IRBuilder::optimizeInst(HPHP::jit::IRInstruction*, HPHP::jit::
 HPHP::Trace::dumpEntry(HPHP::Trace::RingBufferEntry const*)::indentDepth
 HPHP::high_arena_tcache # Only needed in lowptr builds.
 HPHP::(anonymous namespace)::s_localCounters
+HPHP::arrprov::(anonymous namespace)::tl_tag_override
+
+# The native autoloader is not request-scoped.
 HPHP::WatchmanAutoload::t_adb
 HPHP::WatchmanAutoload::(anonymous namespace)::t_savedStates
-HPHP::arrprov::(anonymous namespace)::tl_tag_override
+
+# Thread locals to allow the native autoloader to use memcache.
+# "guard variable for" is a clang-ism, leaving it out is a GCC-ism
+facebook::datatype::MemcacheFetcher<HPHP::WatchmanAutoload::(anonymous namespace)::FactsMemcacheDataType, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >::timeToLive() const::gen
+guard variable for facebook::datatype::MemcacheFetcher<HPHP::WatchmanAutoload::(anonymous namespace)::FactsMemcacheDataType, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >::timeToLive() const::gen
 
 # TODO: (T9683397) Un-whitelist these Call Threaded Interpreter TLS vars.
 HPHP::(anonymous namespace)::cc_lookups

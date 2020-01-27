@@ -592,7 +592,9 @@ and get_local env (pos, (str : string)) : Hhbc_ast.local_id =
 and emit_local ~notice env (lid : Aast.lid) =
   let (pos, id) = lid in
   let str = Local_id.get_name id in
-  if SN.Superglobals.globals = str || SN.Superglobals.is_superglobal str then
+  if SN.Superglobals.globals = str then
+    Emit_fatal.raise_fatal_parse pos "Access $GLOBALS via wrappers"
+  else if SN.Superglobals.is_superglobal str then
     gather
       [
         instr_string (SU.Locals.strip_dollar str);
@@ -2943,9 +2945,10 @@ and emit_base_worker
         }
   in
   match expr_ with
+  | A.Lvar (_, x) when Local_id.get_name x = SN.Superglobals.globals ->
+    Emit_fatal.raise_fatal_runtime pos "Cannot use [] with $GLOBALS"
   | A.Lvar (name_pos, x)
-    when SN.Superglobals.is_superglobal (Local_id.get_name x)
-         || Local_id.get_name x = SN.Superglobals.globals ->
+    when SN.Superglobals.is_superglobal (Local_id.get_name x) ->
     emit_default
       ( emit_pos_then name_pos
       @@ instr_string (SU.Locals.strip_dollar (Local_id.get_name x)) )

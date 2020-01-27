@@ -1,2 +1,2 @@
 
-Fatal error: append on $GLOBALS is not implemented yet. in %s on line 6
+Fatal error: Cannot use [] with $GLOBALS in %s/global_addelem.php on line 6

@@ -10,7 +10,7 @@ use aast_parser::{
     AastParser, Error as AastError,
 };
 use hhas_program_rust::HhasProgram;
-use hhbc_hhas_rust::to_segments;
+use hhbc_hhas_rust::print_program;
 use itertools::{Either, Either::*};
 use ocamlrep::rc::RcOc;
 use options::{HhvmFlags, LangFlags, Options, PhpismFlags};
@@ -85,15 +85,18 @@ pub fn from_text(text: &[u8], env: Env) -> Output {
         Either::Left((pos, msg, is_runtime_error)) => emit_fatal(&env, is_runtime_error, pos, msg),
     };
 
-    let bytecode = profile(&opts, &mut ret.printing_t, || {
-        to_segments(
+    let mut bytecode = String::new();
+    profile(&opts, &mut ret.printing_t, || {
+        print_program(
             Some(&env.filepath),
             env.flags.contains(EnvFlags::DUMP_SYMBOL_REFS),
-            program,
+            &mut bytecode,
+            &program,
         )
-    });
+    })
+    .unwrap();
 
-    ret.bytecode_segments = bytecode;
+    ret.bytecode_segments = vec![bytecode];
     ret.codegen_t = codegen_t;
     ret
 }

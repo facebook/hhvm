@@ -537,6 +537,8 @@ name = "hhbc_hhas_rust"
 version = "0.0.0"
 dependencies = [
  "hhas_program_rust 0.0.0",
+ "hhas_record_def_rust 0.0.0",
+ "hhbc_id_rust 0.0.0",
  "oxidized 0.0.0",
 ]
 

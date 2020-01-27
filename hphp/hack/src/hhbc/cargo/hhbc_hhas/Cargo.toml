@@ -5,12 +5,14 @@
 name = "hhbc_hhas_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["../../hhbc_hhas.rs"]
+include = ["../../hhbc_hhas.rs", "../../hhbc_hhas_env.rs", "../../hhbc_hhas_write.rs"]
 
 [lib]
 path = "../../hhbc_hhas.rs"
 
 [dependencies]
 hhas_program_rust = { path = "../hhas_program" }
+hhas_record_def_rust = { path = "../hhas_record_def" }
+hhbc_id_rust = { path = "../hhbc_id" }
 oxidized = { path = "../../../oxidized" }
 # @end of Signature

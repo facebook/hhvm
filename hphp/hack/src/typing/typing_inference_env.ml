@@ -542,13 +542,13 @@ let get_tyvar_upper_bounds env var : ITySet.t =
     | TVIConstraints cstr -> cstr.upper_bounds)
 
 let set_tyvar_lower_bounds env var lower_bounds =
-  let tyvar_constraints = get_tyvar_constraints_or_empty env var in
+  let tyvar_constraints = get_tyvar_constraints_exn env var in
   let tyvar_constraints = { tyvar_constraints with lower_bounds } in
   let env = set_tyvar_constraints env var tyvar_constraints in
   env
 
 let set_tyvar_upper_bounds env var upper_bounds =
-  let tyvar_constraints = get_tyvar_constraints_or_empty env var in
+  let tyvar_constraints = get_tyvar_constraints_exn env var in
   let tyvar_constraints = { tyvar_constraints with upper_bounds } in
   let env = set_tyvar_constraints env var tyvar_constraints in
   env

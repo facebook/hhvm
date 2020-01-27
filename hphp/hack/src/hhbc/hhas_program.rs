@@ -8,6 +8,7 @@ use hhas_record_def_rust::HhasRecord;
 use hhas_symbol_refs_rust::HhasSymbolRefs;
 use hhas_typedef_rust::Typedef;
 
+#[derive(Default)]
 pub struct HhasProgram<'a> {
     pub is_hh: bool,
     /* TODO(hrust): add `pub adata: Hhas_adata.t list` */

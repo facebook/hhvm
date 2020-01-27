@@ -180,7 +180,7 @@ let emit ~env ~is_hh_file ~empty_namespace ~hhbc_options tast =
         else
           tast
       in
-      Emit_program.from_ast
+      Emit_program.emit_program
         ~is_evaled:env.is_evaled
         ~for_debugger_eval:env.for_debugger_eval
         ~empty_namespace

@@ -7,6 +7,8 @@
 mod print_env;
 mod write;
 
+pub use write::{Error, IoWrite, Result, Write};
+
 use hhas_program_rust::HhasProgram;
 use hhas_record_def_rust::{Field, HhasRecord};
 use hhbc_id_rust::Id;

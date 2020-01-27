@@ -117,7 +117,7 @@ macro_rules! prefixed_flags {
 }
 
 /// An option of non-boolean type T (i.e., not a flag)
-#[derive(Serialize, Deserialize, Debug, Default, PartialEq)]
+#[derive(Clone, Serialize, Deserialize, Debug, Default, PartialEq)]
 pub struct Arg<T> {
     global_value: T,
 }
@@ -185,7 +185,7 @@ impl Default for HhvmFlags {
 }
 
 #[prefix_all("hhvm.")]
-#[derive(Serialize, Deserialize, Debug, Default, PartialEq)]
+#[derive(Clone, Serialize, Deserialize, Debug, Default, PartialEq)]
 pub struct Hhvm {
     #[serde(default)]
     pub aliased_namespaces: Arg<BTreeMap<String, String>>,
@@ -274,13 +274,13 @@ impl Default for RepoFlags {
 }
 
 #[prefix_all("hhvm.server.")]
-#[derive(Serialize, Deserialize, Default, PartialEq, Debug)]
+#[derive(Clone, Serialize, Deserialize, Default, PartialEq, Debug)]
 pub struct Server {
     #[serde(default)]
     pub include_search_paths: Arg<Vec<String>>,
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Debug)]
+#[derive(Clone, Serialize, Deserialize, PartialEq, Debug)]
 pub struct Options {
     #[serde(default)]
     pub doc_root: Arg<String>,
@@ -329,6 +329,15 @@ pub struct Options {
     #[serde(flatten, default)]
     pub server: Server,
 }
+
+impl Options {
+    pub fn log_extern_compiler_perf(&self) -> bool {
+        self.hhvm
+            .flags
+            .contains(HhvmFlags::LOG_EXTERN_COMPILER_PERF)
+    }
+}
+
 impl Default for Options {
     fn default() -> Options {
         Options {

@@ -5,17 +5,22 @@
 #![allow(unused_variables)]
 #![allow(dead_code)]
 
-use std::fmt;
+use std::{
+    fmt::{self, Debug},
+    io,
+};
+use thiserror::Error;
 
 pub type Result<T, WE> = std::result::Result<T, Error<WE>>;
 
-#[derive(Debug)]
-pub enum Error<WE> {
+#[derive(Error, Debug)]
+pub enum Error<WE: Debug> {
+    #[error("write error: {0:?}")]
     WriteError(WE),
 }
 
 pub trait Write {
-    type Error;
+    type Error: Debug;
     fn write(&mut self, s: &str) -> Result<(), Self::Error>;
 }
 
@@ -23,6 +28,25 @@ impl<W: fmt::Write> Write for W {
     type Error = fmt::Error;
     fn write(&mut self, s: &str) -> Result<(), Self::Error> {
         self.write_str(s).map_err(Error::WriteError)
+    }
+}
+
+pub struct IoWrite(Box<dyn io::Write>);
+
+impl IoWrite {
+    pub fn new(w: impl io::Write + 'static) -> Self {
+        Self(Box::new(w))
+    }
+
+    pub fn flush(&mut self) -> std::result::Result<(), io::Error> {
+        self.0.flush()
+    }
+}
+
+impl Write for IoWrite {
+    type Error = std::io::Error;
+    fn write(&mut self, s: &str) -> Result<(), Self::Error> {
+        self.0.write_all(s.as_bytes()).map_err(Error::WriteError)
     }
 }
 

@@ -13,7 +13,7 @@ use walkdir::WalkDir;
 
 use compile_rust as compile;
 
-use compile::{Env, EnvFlags, Output};
+use compile::{Env, EnvFlags};
 use options::Options;
 use oxidized::{
     namespace_env::Env as NamespaceEnv,
@@ -72,7 +72,7 @@ struct Opts {
 
 const NEED_FILENAME: &'static str = "Missing FILENAME";
 
-type OutputHandler = dyn Fn(&Path, Output);
+type OutputHandler = dyn Fn(&Path, String);
 
 fn process_single_file(opts: &Opts, filepath: &Path, handle_output: &OutputHandler) {
     if opts.verbosity > 1 {
@@ -103,11 +103,12 @@ fn process_single_file(opts: &Opts, filepath: &Path, handle_output: &OutputHandl
         .read_to_end(&mut text)
         .expect("TODO(hrust) error handling");
 
-    let output = compile::from_text(&text, env);
-    handle_output(filepath, output);
+    let mut s = String::new();
+    let _output = compile::from_text(&text, env, &mut s);
+    handle_output(filepath, s);
 }
 
-fn write_bytecode(path: &Option<impl AsRef<Path>>, segments: Vec<String>) {
+fn write_bytecode(path: &Option<impl AsRef<Path>>, output: String) {
     let mut out = path.as_ref().map_or_else(
         || Left(io::stdout()),
         |path| {
@@ -127,9 +128,7 @@ fn write_bytecode(path: &Option<impl AsRef<Path>>, segments: Vec<String>) {
             format!("failed to write to file: {}", p.as_ref().display())
         });
 
-    for s in segments {
-        out.write_all(s.as_bytes()).expect(&failed_write_msg);
-    }
+    out.write_all(output.as_bytes()).expect(&failed_write_msg);
 }
 
 fn expand_files(file_or_dir: &Path) -> impl Iterator<Item = PathBuf> {
@@ -234,7 +233,7 @@ fn main() {
         let config = Rc::clone(&config);
         let opts = Rc::clone(&opts);
         if opts.filename.as_ref().map_or(false, |p| p.is_dir()) {
-            Box::new(move |input_path: &Path, output: Output| {
+            Box::new(move |input_path: &Path, output: String| {
                 if let Ok(mut filepath_buf) = input_path.canonicalize() {
                     let extension = filepath_buf.extension().and_then(|os| os.to_str());
                     if let Some("php") = extension {
@@ -248,7 +247,7 @@ fn main() {
                             eprintln!("Output file {} already exists", output_path.display());
                         }
                     } else {
-                        write_bytecode(&Some(output_path), output.bytecode_segments);
+                        write_bytecode(&Some(output_path), output);
                     }
                 } else if opts.verbosity > 0 {
                     // Rust-only (guard via the new --verbose flag)
@@ -257,14 +256,14 @@ fn main() {
             })
         } else {
             // single file mode (FILENAME) or --input-file-list
-            Box::new(move |_: &Path, output: Output| {
+            Box::new(move |_: &Path, output| {
                 if let None = opts.output_file {
                     config.dump_if_needed(&opts);
                     if opts.quiet_mode {
                         return;
                     }
                 };
-                write_bytecode(&opts.output_file, output.bytecode_segments);
+                write_bytecode(&opts.output_file, output);
             })
         }
     };

@@ -3,17 +3,20 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 #![allow(unused_variables)]
-extern crate bitflags;
+/* extern crate bitflags; */
 
 use aast_parser::{
     rust_aast_parser_types::{Env as AastEnv, Result as AastResult},
     AastParser, Error as AastError,
 };
+use anyhow;
+use emit_program_rust::{emit_program, FromAstFlags};
 use hhas_program_rust::HhasProgram;
-use hhbc_hhas_rust::print_program;
+use hhbc_hhas_rust::{print_program, Write};
+use instruction_sequence_rust::Error;
 use itertools::{Either, Either::*};
 use ocamlrep::rc::RcOc;
-use options::{HhvmFlags, LangFlags, Options, PhpismFlags};
+use options::{LangFlags, Options, PhpismFlags};
 use oxidized::{
     ast as Tast, namespace_env::Env as NamespaceEnv, parser_options::ParserOptions, pos::Pos,
     relative_path::RelativePath,
@@ -35,6 +38,7 @@ pub struct Env {
 
 bitflags! {
     // Note: these flags are intentionally packed into bits to overcome
+
     // the limitation of to-OCaml FFI functions having at most 5 parameters
     pub struct EnvFlags: u8 {
         const IS_SYSTEMLIB = 1 << 0;
@@ -44,15 +48,14 @@ bitflags! {
     }
 }
 
-/// Compilation output. All times are in seconds,
+/// Compilation profile. All times are in seconds,
 /// except when they are ignored and should not be reported,
 /// such as in the case hhvm.log_extern_compiler_perf is false
 /// (this avoids the need to read Options from OCaml, as
 /// they can be simply returned as NaNs to signal that
 /// they should _not_ be passed back as JSON to HHVM process)
 #[derive(Debug)]
-pub struct Output {
-    pub bytecode_segments: Vec<String>,
+pub struct Profile {
     pub parsing_t: f64,
     pub codegen_t: f64,
     pub printing_t: f64,
@@ -66,47 +69,75 @@ pub fn is_ignored_duration(dt: &f64) -> bool {
     dt.is_nan()
 }
 
-pub fn from_text(text: &[u8], env: Env) -> Output {
-    let opts = Options::from_configs(&env.config_jsons, &env.config_list).unwrap();
+pub fn from_text<W>(text: &[u8], env: Env, writer: &mut W) -> anyhow::Result<Profile>
+where
+    W: Write,
+    W::Error: Send + Sync + 'static, // required by anyhow::Error
+{
+    let opts =
+        Options::from_configs(&env.config_jsons, &env.config_list).map_err(anyhow::Error::msg)?;
+    let log_extern_compiler_perf = opts.log_extern_compiler_perf();
 
-    let mut ret = Output {
-        bytecode_segments: vec![],
+    let mut ret = Profile {
         parsing_t: IGNORED_DURATION,
         codegen_t: IGNORED_DURATION,
         printing_t: IGNORED_DURATION,
     };
 
-    let ast = profile(&opts, &mut ret.parsing_t, || {
+    let ast = profile(log_extern_compiler_perf, &mut ret.parsing_t, || {
         parse_file(&opts, &env.filepath, text)
     });
 
     let (program, codegen_t) = match ast {
-        Either::Right((ast, is_hh_file)) => emit(&env, ast),
+        Either::Right((ast, is_hh_file)) => emit(&env, opts, is_hh_file, ast),
         Either::Left((pos, msg, is_runtime_error)) => emit_fatal(&env, is_runtime_error, pos, msg),
     };
+    let program = program?;
+    ret.codegen_t = codegen_t;
 
-    let mut bytecode = String::new();
-    profile(&opts, &mut ret.printing_t, || {
+    profile(log_extern_compiler_perf, &mut ret.printing_t, || {
         print_program(
             Some(&env.filepath),
             env.flags.contains(EnvFlags::DUMP_SYMBOL_REFS),
-            &mut bytecode,
+            writer,
             &program,
         )
-    })
-    .unwrap();
-
-    ret.bytecode_segments = vec![bytecode];
-    ret.codegen_t = codegen_t;
-    ret
+    })?;
+    Ok(ret)
 }
 
-fn emit(env: &Env, ast: Tast::Program) -> (HhasProgram, f64) {
-    //TODO(hrust): enable emit_programm::from_ast
-    unimplemented!()
+fn emit<'p>(
+    env: &Env,
+    opts: Options,
+    is_hh: bool,
+    ast: Tast::Program,
+) -> (Result<HhasProgram<'p>, Error>, f64) {
+    let mut flags = FromAstFlags::empty();
+    if is_hh {
+        flags |= FromAstFlags::IS_HH_FILE;
+    }
+    if env.flags.contains(EnvFlags::IS_EVALED) {
+        flags |= FromAstFlags::IS_EVALED;
+    }
+    if env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL) {
+        flags |= FromAstFlags::FOR_DEBUGGER_EVAL;
+    }
+    if env.flags.contains(EnvFlags::IS_SYSTEMLIB) {
+        flags |= FromAstFlags::IS_SYSTEMLIB;
+    }
+    let mut t = 0f64;
+    let r = profile(opts.log_extern_compiler_perf(), &mut t, || {
+        emit_program(opts, flags, ast)
+    });
+    (r, t)
 }
 
-fn emit_fatal(env: &Env, is_runtime_error: bool, pos: Pos, msg: String) -> (HhasProgram, f64) {
+fn emit_fatal(
+    env: &Env,
+    is_runtime_error: bool,
+    pos: Pos,
+    msg: String,
+) -> (Result<HhasProgram, Error>, f64) {
     //TODO(hrust): enable emit_program::emit_fatal_program
     unimplemented!()
 }
@@ -197,17 +228,13 @@ fn parse_file(
     }
 }
 
-fn profile<T, F>(opts: &Options, dt: &mut f64, f: F) -> T
+fn profile<T, F>(log_extern_compiler_perf: bool, dt: &mut f64, f: F) -> T
 where
     F: FnOnce() -> T,
 {
     let t0 = std::time::Instant::now();
     let ret = f();
-    *dt = if opts
-        .hhvm
-        .flags
-        .contains(HhvmFlags::LOG_EXTERN_COMPILER_PERF)
-    {
+    *dt = if log_extern_compiler_perf {
         t0.elapsed().as_secs_f64()
     } else {
         IGNORED_DURATION

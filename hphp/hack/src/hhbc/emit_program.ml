@@ -92,7 +92,8 @@ let debugger_eval_should_modify ast =
     | Aast.Stmt (_, Aast.Expr _) -> true
     | _ -> false
 
-let from_ast ~is_hh_file ~is_evaled ~for_debugger_eval ~empty_namespace tast =
+let emit_program ~is_hh_file ~is_evaled ~for_debugger_eval ~empty_namespace tast
+    =
   Utils.try_finally
     ~f:
       begin

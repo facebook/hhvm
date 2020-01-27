@@ -10,15 +10,18 @@ use label_rust as label;
 use label_rust::Label;
 use local_rust as local;
 use runtime::TypedValue;
+use thiserror::Error;
 
-use std::collections::HashMap;
-use std::convert::TryInto;
+use std::{collections::HashMap, convert::TryInto};
 
 pub type Result<T = InstrSeq> = std::result::Result<T, Error>;
 
-#[derive(Debug)]
+#[derive(Error, Debug)]
 pub enum Error {
+    #[error("IncludeTimeFatalException: FatalOp={0:?}, {1}")]
     IncludeTimeFatalException(FatalOp, String),
+
+    #[error("Unrecoverable: {0}")]
     Unrecoverable(String),
 }
 

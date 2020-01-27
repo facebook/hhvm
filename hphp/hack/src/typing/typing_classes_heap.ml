@@ -416,6 +416,12 @@ module Api = struct
     | Lazy lc -> LSTable.get lc.ih.smethods id
     | Eager c -> SMap.find_opt id c.tc_smethods
 
+  let get_any_method ~is_static =
+    if is_static then
+      get_smethod
+    else
+      get_method
+
   let has_const t id =
     match t with
     | Lazy lc -> LSTable.mem lc.ih.consts id

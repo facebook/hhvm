@@ -7692,10 +7692,10 @@ and class_def tcopt c =
 (* The two following functions enable us to retrieve the function (or class)
   header from the shared mem. Note that they only return a non None value if
   global inference is on *)
-and get_decl_method_header tcopt cls method_id =
+and get_decl_method_header tcopt cls method_id ~is_static =
   let is_global_inference_on = TCO.global_inference tcopt in
   if is_global_inference_on then
-    match Cls.get_method cls method_id with
+    match Cls.get_any_method ~is_static cls method_id with
     | Some { ce_type = (lazy ty); _ } ->
       begin
         match get_node ty with
@@ -8499,7 +8499,11 @@ and method_def env cls m =
       (* reset the expression dependent display ids for each method body *)
       Reason.expr_display_id_map := IMap.empty;
       let decl_header =
-        get_decl_method_header (Env.get_tcopt env) cls (snd m.m_name)
+        get_decl_method_header
+          (Env.get_tcopt env)
+          cls
+          (snd m.m_name)
+          ~is_static:m.m_static
       in
       let pos = fst m.m_name in
       let env = Env.open_tyvars env (fst m.m_name) in
@@ -8559,7 +8563,7 @@ and method_def env cls m =
             env
       in
       let env = Env.clear_params env in
-      let (decl_ty, params_decl_ty, variadicity_decl_ty) =
+      let (ret_decl_ty, params_decl_ty, variadicity_decl_ty) =
         merge_decl_header_with_hints
           ~params:m.m_params
           ~ret:m.m_ret
@@ -8569,7 +8573,7 @@ and method_def env cls m =
       in
       let env = Env.set_fn_kind env m.m_fun_kind in
       let (env, locl_ty) =
-        match decl_ty with
+        match ret_decl_ty with
         | None ->
           Typing_return.make_default_return
             ~is_method:true
@@ -8592,7 +8596,7 @@ and method_def env cls m =
           env
           ~is_explicit:(Option.is_some (hint_of_type_hint m.m_ret))
           locl_ty
-          decl_ty
+          ret_decl_ty
       in
       let (env, param_tys) =
         List.zip_exn m.m_params params_decl_ty

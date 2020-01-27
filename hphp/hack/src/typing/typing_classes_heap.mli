@@ -109,6 +109,8 @@ module Api : sig
 
   val get_smethod : t -> string -> class_elt option
 
+  val get_any_method : is_static:bool -> t -> string -> class_elt option
+
   val has_const : t -> string -> bool
 
   val has_typeconst : t -> string -> bool

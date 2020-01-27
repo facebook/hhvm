@@ -8431,6 +8431,7 @@ and class_type_param env ct =
   The same goes for parameter types, but this time we force them to be contravariant
 *)
 and set_tyvars_variance_in_callable env return_ty param_tys =
+  let (env, return_ty) = Env.expand_type env return_ty in
   let env =
     match get_node return_ty with
     | Tvar v -> Env.set_tyvar_appears_covariantly env v
@@ -8439,6 +8440,7 @@ and set_tyvars_variance_in_callable env return_ty param_tys =
   List.fold
     ~init:env
     ~f:(fun env ty ->
+      let (env, ty) = Env.expand_type env ty in
       match get_node ty with
       | Tvar v -> Env.set_tyvar_appears_contravariantly env v
       | _ -> env)

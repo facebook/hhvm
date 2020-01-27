@@ -13,6 +13,8 @@ module ITySet = Internal_type_set
 module Occ = Typing_tyvar_occurrences
 module TL = Typing_logic
 
+exception InconsistentTypeVarState of string
+
 [@@@warning "-32"]
 
 let pp _ _ = Printf.printf "%s\n" "<inference_env>"
@@ -353,7 +355,9 @@ let get_type env r v =
         match get_node ty with
         | Tvar v' ->
           if ISet.mem v aliases then
-            failwith "Two type variables are aliasing each other!";
+            raise
+            @@ InconsistentTypeVarState
+                 "Two type variables are aliasing each other!";
           get v' (ISet.add v aliases)
         | _ ->
           let env = shorten_paths () in
@@ -442,7 +446,7 @@ let open_tyvars env p = { env with tyvars_stack = (p, []) :: env.tyvars_stack }
 
 let close_tyvars env =
   match env.tyvars_stack with
-  | [] -> failwith "close_tyvars: empty stack"
+  | [] -> raise @@ InconsistentTypeVarState "close_tyvars: empty stack"
   | _ :: rest -> { env with tyvars_stack = rest }
 
 let get_current_tyvars env =
@@ -457,10 +461,22 @@ let get_tyvar_constraints_opt env var =
   | Some (TVIType _) ->
     None
 
+let get_tyvar_constraints_exn env var =
+  match get_solving_info_opt env var with
+  | None ->
+    raise
+    @@ InconsistentTypeVarState
+         "Attempting to get constraints for non-existing type variable."
+  | Some (TVIType _) ->
+    raise
+    @@ InconsistentTypeVarState
+         "Attempting to get constraints for already solved type variable"
+  | Some (TVIConstraints constraints) -> constraints
+
 let get_tyvar_constraints_or_empty env var =
-  match get_tyvar_constraints_opt env var with
-  | Some constraints -> constraints
-  | None -> empty_tyvar_constraints
+  Option.value
+    (get_tyvar_constraints_opt env var)
+    ~default:empty_tyvar_constraints
 
 let set_tyvar_constraints env v tyvar_constraints =
   set_solving_info env v (TVIConstraints tyvar_constraints)
@@ -559,7 +575,7 @@ let get_tyvar_appears_invariantly env var =
   && get_tyvar_appears_contravariantly env var
 
 let set_tyvar_appears_covariantly env v =
-  let tyvar_constraints = get_tyvar_constraints_or_empty env v in
+  let tyvar_constraints = get_tyvar_constraints_exn env v in
   let tyvar_constraints =
     { tyvar_constraints with appears_covariantly = true }
   in
@@ -567,7 +583,7 @@ let set_tyvar_appears_covariantly env v =
   env
 
 let set_tyvar_appears_contravariantly env v =
-  let tyvar_constraints = get_tyvar_constraints_or_empty env v in
+  let tyvar_constraints = get_tyvar_constraints_exn env v in
   let tyvar_constraints =
     { tyvar_constraints with appears_contravariantly = true }
   in

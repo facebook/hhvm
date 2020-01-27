@@ -1,0 +1,8 @@
+File "allowed_func_ptr_builtins2.php", line 11, characters 14-17:
+Invalid expression in constant initializer (Parsing[1002])
+File "allowed_func_ptr_builtins2.php", line 12, characters 15-24:
+Invalid expression in constant initializer (Parsing[1002])
+File "allowed_func_ptr_builtins2.php", line 18, characters 14-17:
+Invalid expression in constant initializer (Parsing[1002])
+File "allowed_func_ptr_builtins2.php", line 19, characters 15-24:
+Invalid expression in constant initializer (Parsing[1002])

@@ -4536,7 +4536,12 @@ where
                     _ => default(self),
                 }
             }
-
+            FunctionPointerExpression(_) => {
+                // Bans the equivalent of inst_meth as well as class_meth and fun
+                if self.env.parser_options.po_disallow_func_ptrs_in_constants {
+                    default(self)
+                }
+            }
             _ => default(self),
         }
     }

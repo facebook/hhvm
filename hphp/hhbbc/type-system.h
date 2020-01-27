@@ -780,6 +780,7 @@ private:
   friend Type loosen_provenance(Type);
   friend Type loosen_values(Type);
   friend Type loosen_emptiness(Type);
+  friend Type loosen_string_like(Type);
   friend Type add_nonemptiness(Type);
   friend Type assert_emptiness(Type);
   friend Type assert_nonemptiness(Type);
@@ -1565,6 +1566,11 @@ Type loosen_values(Type t);
  * type otherwise.
  */
 Type loosen_emptiness(Type t);
+
+/*
+ * Force all TFunc and TCls types to TUncStrLike.
+ */
+Type loosen_string_like(Type t);
 
 /*
  * Loosens staticness, emptiness, and values from the type. This forces a type

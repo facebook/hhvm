@@ -4758,11 +4758,69 @@ Type loosen_emptiness(Type t) {
   return project_data(t, t.m_bits);
 }
 
+Type loosen_string_like(Type t) {
+  if (t.couldBe(BFunc | BCls)) t = union_of(std::move(t), TUncStrLike);
+
+  switch (t.m_dataTag) {
+  case DataTag::None:
+  case DataTag::Str:
+  case DataTag::Int:
+  case DataTag::Dbl:
+  case DataTag::Cls:
+    break;
+
+  case DataTag::ArrLikeVal:
+    // Static arrays cannot currently contain function or class pointers.
+    break;
+
+  case DataTag::Obj:
+    if (t.m_data.dobj.whType) {
+      auto whType = t.m_data.dobj.whType.mutate();
+      *whType = loosen_string_like(std::move(*whType));
+    }
+    break;
+
+  case DataTag::ArrLikePacked: {
+    auto& packed = *t.m_data.packed.mutate();
+    for (auto& e : packed.elems) {
+      e = loosen_string_like(std::move(e));
+    }
+    break;
+  }
+
+  case DataTag::ArrLikePackedN: {
+    auto& packed = *t.m_data.packedn.mutate();
+    packed.type = loosen_string_like(std::move(packed.type));
+    break;
+  }
+
+  case DataTag::ArrLikeMap: {
+    auto& map = *t.m_data.map.mutate();
+    for (auto it = map.map.begin(); it != map.map.end(); it++) {
+      map.map.update(it, loosen_string_like(it->second));
+    }
+    map.optKey = loosen_string_like(std::move(map.optKey));
+    map.optVal = loosen_string_like(std::move(map.optVal));
+    break;
+  }
+
+  case DataTag::ArrLikeMapN: {
+    auto& map = *t.m_data.mapn.mutate();
+    map.key = loosen_string_like(std::move(map.key));
+    map.val = loosen_string_like(std::move(map.val));
+    break;
+  }
+  }
+  return t;
+}
+
 Type loosen_all(Type t) {
   return loosen_dvarrayness(
     loosen_staticness(
       loosen_emptiness(
-        loosen_values(std::move(t))
+        loosen_values(
+          loosen_string_like(std::move(t))
+        )
       )
     )
   );

@@ -1311,12 +1311,22 @@ bool tvSame(TypedValue c1, TypedValue c2) {
       if (isStringType(c2.m_type)) {
         return funcToStringHelper(c1.m_data.pfunc)->same(c2.m_data.pstr);
       }
+      if (isClassType(c2.m_type)) {
+        return
+          funcToStringHelper(c1.m_data.pfunc)
+            ->same(classToStringHelper(c2.m_data.pclass));
+      }
       if (c2.m_type != KindOfFunc) return false;
       return c1.m_data.pfunc == c2.m_data.pfunc;
 
     case KindOfClass:
       if (isStringType(c2.m_type)) {
         return classToStringHelper(c1.m_data.pclass)->same(c2.m_data.pstr);
+      }
+      if (isFuncType(c2.m_type)) {
+        return
+          classToStringHelper(c1.m_data.pclass)
+            ->same(funcToStringHelper(c2.m_data.pfunc));
       }
       if (c2.m_type != KindOfClass) return false;
       return c1.m_data.pclass == c2.m_data.pclass;

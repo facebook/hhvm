@@ -1028,6 +1028,32 @@ void implObjCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
         [&]{ return emitObjStrCmp(env, op, left, right); }
       )
     );
+  } else if (rightTy <= TFunc) {
+    if (RuntimeOption::EvalRaiseFuncConversionWarning) {
+      gen(env, RaiseWarning, cns(env, s_funcToStringWarning.get()));
+    }
+    push(
+      env,
+      emitCollectionCheck(
+        env,
+        op,
+        left,
+        [&]{ return emitObjStrCmp(env, op, left, gen(env, LdFuncName, right)); }
+      )
+    );
+  } else if (rightTy <= TCls) {
+    if (RuntimeOption::EvalRaiseClassConversionWarning) {
+      gen(env, RaiseWarning, cns(env, s_clsToStringWarning.get()));
+    }
+    push(
+      env,
+      emitCollectionCheck(
+        env,
+        op,
+        left,
+        [&]{ return emitObjStrCmp(env, op, left, gen(env, LdClsName, right)); }
+      )
+    );
   } else if (rightTy <= TArr) {
     // Object is always greater than array, but we need a collection check
     // first.
@@ -1324,6 +1350,8 @@ void implCmp(IRGS& env, Op op) {
   auto equiv = [&] {
     return
       equivDataTypes(leftTy.toDataType(), rightTy.toDataType()) ||
+      (isFuncType(leftTy.toDataType()) && isClassType(rightTy.toDataType())) ||
+      (isClassType(leftTy.toDataType()) && isFuncType(rightTy.toDataType())) ||
       (isFuncType(leftTy.toDataType()) && isStringType(rightTy.toDataType())) ||
       (isStringType(leftTy.toDataType()) && isFuncType(rightTy.toDataType())) ||
       (isClassType(leftTy.toDataType()) && isStringType(rightTy.toDataType()))||

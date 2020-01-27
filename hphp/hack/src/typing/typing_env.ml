@@ -90,15 +90,17 @@ let expand_var env r v =
   wrap_inference_env_call env (fun env -> Inf.expand_var env r v)
 
 let fresh_type_reason ?variance env r =
-  log_env_change_ "fresh_type" env
+  log_env_change_ "fresh_type_reason" env
   @@ wrap_inference_env_call env (fun env ->
          Inf.fresh_type_reason ?variance env r)
 
 let fresh_type env p =
-  wrap_inference_env_call env (fun env -> Inf.fresh_type env p)
+  log_env_change_ "fresh_type" env
+  @@ wrap_inference_env_call env (fun env -> Inf.fresh_type env p)
 
 let fresh_invariant_type_var env p =
-  wrap_inference_env_call env (fun env -> Inf.fresh_invariant_type_var env p)
+  log_env_change_ "fresh_invariant_type_var" env
+  @@ wrap_inference_env_call env (fun env -> Inf.fresh_invariant_type_var env p)
 
 let new_global_tyvar env v r =
   wrap_inference_env_call env (fun env -> Inf.new_global_tyvar env v r)

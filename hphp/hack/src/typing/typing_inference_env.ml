@@ -466,17 +466,16 @@ let get_tyvar_constraints_exn env var =
   | None ->
     raise
     @@ InconsistentTypeVarState
-         "Attempting to get constraints for non-existing type variable."
+         (Printf.sprintf
+            "Attempting to get constraints for non-existing type variable #%d."
+            var)
   | Some (TVIType _) ->
     raise
     @@ InconsistentTypeVarState
-         "Attempting to get constraints for already solved type variable"
+         (Printf.sprintf
+            "Attempting to get constraints for already solved type variable #%d."
+            var)
   | Some (TVIConstraints constraints) -> constraints
-
-let get_tyvar_constraints_or_empty env var =
-  Option.value
-    (get_tyvar_constraints_opt env var)
-    ~default:empty_tyvar_constraints
 
 let set_tyvar_constraints env v tyvar_constraints =
   set_solving_info env v (TVIConstraints tyvar_constraints)
@@ -644,7 +643,7 @@ let get_current_pos_from_tyvar_stack env =
  *   v <: (t1 & ... & tn)
  *)
 let add_tyvar_upper_bound ?intersect env var (ty : internal_type) =
-  let tvconstraints = get_tyvar_constraints_or_empty env var in
+  let tvconstraints = get_tyvar_constraints_exn env var in
   let upper_bounds =
     match intersect with
     | None -> ITySet.add ty tvconstraints.upper_bounds
@@ -663,7 +662,7 @@ let add_tyvar_upper_bound ?intersect env var (ty : internal_type) =
  *   (t1 | ... | tn) <: v
  *)
 let add_tyvar_lower_bound ?union env var ty =
-  let tvconstraints = get_tyvar_constraints_or_empty env var in
+  let tvconstraints = get_tyvar_constraints_exn env var in
   let lower_bounds =
     match union with
     | None -> ITySet.add ty tvconstraints.lower_bounds

@@ -5,15 +5,15 @@ require_once(__DIR__ . '/test_base.inc');
 $requests = array(
   array(
     '-dalways_populate_raw_post_data=1',
-    ['CONTENT_TYPE' => 'multipart/form-data; boundary=dumy']),
-  array('-dalways_populate_raw_post_data=1', []),
-  array('', []),
-  array('-dvariables_order=NONE -drequest_order=', []),
-  array('-dvariables_order=E -drequest_order=GPC', []),
-  array('-dvariables_order=CGP -drequest_order=GP', []),
-  array('-dvariables_order=GC -drequest_order=CG', []),
-  array('-dvariables_order=GC -drequest_order=GC', []),
-  array('-dvariables_order=GC -drequest_order=P', []),
+    darray['CONTENT_TYPE' => 'multipart/form-data; boundary=dumy']),
+  array('-dalways_populate_raw_post_data=1', darray[]),
+  array('', darray[]),
+  array('-dvariables_order=NONE -drequest_order=', darray[]),
+  array('-dvariables_order=E -drequest_order=GPC', darray[]),
+  array('-dvariables_order=CGP -drequest_order=GP', darray[]),
+  array('-dvariables_order=GC -drequest_order=CG', darray[]),
+  array('-dvariables_order=GC -drequest_order=GC', darray[]),
+  array('-dvariables_order=GC -drequest_order=P', darray[]),
 );
 
 foreach($requests as $request) {

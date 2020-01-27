@@ -9,7 +9,7 @@ function BadAuthDigestTestController($serverPort) {
     'qop="auth", response="6dfbea52fbf13016476c1879e6436004", ' .
     'opaque="cdce8a5c95a1427d74df7acbf41c9ce0"');
   var_dump(request('localhost', $serverPort, "test_auth_digest.php",
-                  [], [], $args));
+                  darray[], darray[], $args));
 }
 
 function GoodAuthDigestTestController($serverPort) {
@@ -19,7 +19,7 @@ function GoodAuthDigestTestController($serverPort) {
     'qop="auth", response="e544aaed06917adea3e5c74dd49f0e32", ' .
     'opaque="cdce8a5c95a1427d74df7acbf41c9ce0"');
   var_dump(request('localhost', $serverPort, "test_auth_digest.php",
-                  [], [], $args));
+                  darray[], darray[], $args));
 }
 <<__EntryPoint>> function main(): void {
 runTest("BadAuthDigestTestController");

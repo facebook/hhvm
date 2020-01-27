@@ -24,7 +24,7 @@ function runTest($testController, $customArgs = '') {
   }
 }
 
-function request($host, $port, $path, $post = [], $headers = [], $extra_args = []) {
+function request($host, $port, $path, $post = darray[], $headers = darray[], $extra_args = darray[]) {
 
 
   try {

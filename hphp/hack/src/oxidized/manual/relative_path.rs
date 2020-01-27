@@ -55,17 +55,7 @@ impl Display for Prefix {
     }
 }
 
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    OcamlRep,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize
-)]
+#[derive(Clone, Debug, Eq, OcamlRep, Ord, PartialEq, PartialOrd)]
 pub struct RelativePath {
     prefix: Prefix,
     path: PathBuf,
@@ -100,6 +90,79 @@ impl RelativePath {
 impl Display for RelativePath {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} {}", self.prefix, self.path.display())
+    }
+}
+
+// This custom implementation of Serialize/Deserialize encodes the RelativePath
+// as a string. This allows using it as a map key in serde_json.
+impl Serialize for RelativePath {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        let path_str = self.path.to_str().ok_or(serde::ser::Error::custom(
+            "path contains invalid UTF-8 characters",
+        ))?;
+        if self.prefix() == Prefix::Dummy {
+            serializer.serialize_str(&format!("|{}", path_str))
+        } else {
+            serializer.serialize_str(&format!("{}|{}", self.prefix(), path_str))
+        }
+    }
+}
+
+// See comment on impl of Serialize above.
+impl<'de> Deserialize<'de> for RelativePath {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        struct Visitor;
+
+        impl<'de> serde::de::Visitor<'de> for Visitor {
+            type Value = RelativePath;
+
+            fn expecting(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+                write!(formatter, "a string for RelativePath")
+            }
+
+            fn visit_str<E>(self, value: &str) -> Result<RelativePath, E>
+            where
+                E: serde::de::Error,
+            {
+                let mut split = value.splitn(2, '|');
+                let prefix_str = split.next();
+                let path_str = split.next();
+                assert!(split.next() == None, "splitn(2) should yield <=2 results");
+                let prefix = match prefix_str {
+                    Some("root") => Prefix::Root,
+                    Some("hhi") => Prefix::Hhi,
+                    Some("tmp") => Prefix::Tmp,
+                    Some("") => Prefix::Dummy,
+                    _ => {
+                        return Err(E::invalid_value(
+                            serde::de::Unexpected::Other(&format!(
+                                "unknown relative_path::Prefix: {:?}",
+                                value
+                            )),
+                            &self,
+                        ))
+                    }
+                };
+                let path = match path_str {
+                    Some(path_str) => PathBuf::from(path_str),
+                    None => {
+                        return Err(E::invalid_value(
+                            serde::de::Unexpected::Other(
+                                "missing pipe or got empty string \
+                                 when deserializing RelativePath",
+                            ),
+                            &self,
+                        ))
+                    }
+                };
+                Ok(RelativePath { prefix, path })
+            }
+        }
+
+        deserializer.deserialize_str(Visitor)
     }
 }
 

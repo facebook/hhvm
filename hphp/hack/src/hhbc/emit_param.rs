@@ -100,9 +100,8 @@ fn from_ast(
         .as_ref()
         .map_or(false, |a::Expr(_, e)| e.is_null());
     let type_info = {
-        let mut param_type_hint = param.type_hint.get_hint().clone();
-        if param.is_variadic {
-            param_type_hint = Some(Hint(
+        let param_type_hint = if param.is_variadic {
+            Some(Hint(
                 Pos::make_none(),
                 Box::new(Hint_::mk_happly(
                     Id(Pos::make_none(), "array".to_string()),
@@ -113,8 +112,20 @@ fn from_ast(
                         .map_or(vec![], |h| vec![h.clone()]),
                 )),
             ))
+        } else {
+            param.type_hint.get_hint().clone()
         };
-        param_type_hint.map(|h| hint_to_type_info(&Kind::Param, false, nullable, &tparams[..], &h))
+        if let Some(h) = param_type_hint {
+            Some(hint_to_type_info(
+                &Kind::Param,
+                false,
+                nullable,
+                &tparams[..],
+                &h,
+            )?)
+        } else {
+            None
+        }
     };
     // Do the type check for default value type and hint type
     if !nullable {

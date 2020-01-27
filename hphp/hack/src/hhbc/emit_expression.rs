@@ -11,7 +11,7 @@ use emit_fatal_rust as emit_fatal;
 use emit_type_constant_rust as emit_type_constant;
 use env::{emitter::Emitter, Env};
 use hhbc_ast_rust::*;
-use instruction_sequence_rust::{InstrSeq, Result};
+use instruction_sequence_rust::{Error::Unrecoverable, InstrSeq, Result};
 use label_rust::Label;
 use local_rust as local;
 use naming_special_names_rust::{special_idents, superglobals};
@@ -435,11 +435,13 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
         Expr_::Callconv(e) => emit_callconv(env, &**e),
         Expr_::Import(e) => emit_import(env, pos, &**e),
         Expr_::Omitted => Ok(InstrSeq::Empty),
-        Expr_::YieldBreak => panic!("yield break should be in statement position"),
-        Expr_::YieldFrom(_) => panic!("complex yield_from expression"),
-        Expr_::Lfun(_) => {
-            panic!("expected Lfun to be converted to Efun during closure conversion emit_expr")
-        }
+        Expr_::YieldBreak => Err(Unrecoverable(
+            "yield break should be in statement position".into(),
+        )),
+        Expr_::YieldFrom(_) => Err(Unrecoverable("complex yield_from expression".into())),
+        Expr_::Lfun(_) => Err(Unrecoverable(
+            "expected Lfun to be converted to Efun during closure conversion emit_expr".into(),
+        )),
         _ => unimplemented!("TODO(hrust)"),
     }
 }

@@ -13,7 +13,7 @@ use emit_pos_rust::emit_pos_then;
 use env::{emitter::Emitter, Env};
 use hhbc_ast_rust::*;
 use hhbc_id_rust::{self as hhbc_id, Id};
-use instruction_sequence_rust::{InstrSeq, Result};
+use instruction_sequence_rust::{Error::Unrecoverable, InstrSeq, Result};
 use oxidized::{aast as a, ast as tast, ast_defs, pos::Pos};
 
 use lazy_static::lazy_static;
@@ -78,9 +78,9 @@ fn emit_return(e: &mut Emitter, env: &mut Env) -> InstrSeq {
     tfr::emit_return(e, false, env)
 }
 
-fn emit_def_inline<Ex, Fb, En, Hi>(e: &mut Emitter, def: a::Def<Ex, Fb, En, Hi>) -> InstrSeq {
+fn emit_def_inline<Ex, Fb, En, Hi>(e: &mut Emitter, def: a::Def<Ex, Fb, En, Hi>) -> Result {
     use ast_defs::Id;
-    match def {
+    Ok(match def {
         a::Def::Class(cd) => {
             let make_def_instr = |num| {
                 if e.context().systemlib() {
@@ -103,8 +103,12 @@ fn emit_def_inline<Ex, Fb, En, Hi>(e: &mut Emitter, def: a::Def<Ex, Fb, En, Hi>)
             let num = name.parse::<ClassNum>().unwrap();
             emit_pos_then(e, &pos, InstrSeq::make_defrecord(num))
         }
-        _ => panic!("Define inline: Invalid inline definition"),
-    }
+        _ => {
+            return Err(Unrecoverable(
+                "Define inline: Invalid inline definition".into(),
+            ))
+        }
+    })
 }
 
 fn set_bytes_kind(name: &str) -> Option<Setrange> {

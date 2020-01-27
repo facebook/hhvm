@@ -9,7 +9,6 @@ use ast_scope_rust::{Scope, ScopeItem};
 use closure_convert_rust::HoistKind;
 use emit_attribute_rust as emit_attribute;
 use emit_body_rust::{self as emit_body};
-use emit_fatal_rust as emit_fatal;
 use emit_memoize_helpers_rust as emit_memoize_helpers;
 use env::emitter::Emitter;
 use hhas_attribute_rust::{self as hhas_attribute, HhasAttribute};

@@ -38,7 +38,7 @@ fn emit_field(emitter: &Emitter, field: (Sid, Hint, Option<Expr>)) -> Result<Rec
         false,
         &[],
         &hint,
-    );
+    )?;
     if valid_tc_for_record_field(&ti.type_constraint) {
         Ok(RecordField(name, ti, otv))
     } else {

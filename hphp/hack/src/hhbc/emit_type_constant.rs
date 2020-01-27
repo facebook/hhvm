@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 use hhbc_id_rust::{class, Id};
 use hhbc_string_utils_rust as string_utils;
+use instruction_sequence_rust::{Error::Unrecoverable, Result};
 use naming_special_names_rust::classes;
 use options::{HhvmFlags, Options};
 use oxidized::{
@@ -124,11 +125,11 @@ fn shape_field_to_pair(
     tparams: &[&str],
     targ_map: &BTreeMap<&str, i64>,
     sfi: ShapeFieldInfo,
-) -> (TypedValue, TypedValue) {
+) -> Result<(TypedValue, TypedValue)> {
     let (name, is_class_const) = shape_field_name(sfi.name);
     let mut inner_value = vec![(
         TypedValue::String("value".into()),
-        hint_to_type_constant(opts, tparams, targ_map, sfi.hint),
+        hint_to_type_constant(opts, tparams, targ_map, sfi.hint)?,
     )];
     if is_class_const {
         inner_value.extend_from_slice(&[(
@@ -142,7 +143,7 @@ fn shape_field_to_pair(
             TypedValue::Bool(true),
         )]);
     };
-    (TypedValue::String(name), dict_or_darray(opts, inner_value))
+    Ok((TypedValue::String(name), dict_or_darray(opts, inner_value)))
 }
 
 fn shape_info_to_typed_value(
@@ -150,13 +151,13 @@ fn shape_info_to_typed_value(
     tparams: &[&str],
     targ_map: &BTreeMap<&str, i64>,
     si: NastShapeInfo,
-) -> TypedValue {
+) -> Result<TypedValue> {
     let info = si
         .field_map
         .into_iter()
         .map(|sfi| shape_field_to_pair(opts, tparams, targ_map, sfi))
-        .collect();
-    dict_or_darray(opts, info)
+        .collect::<Result<_>>()?;
+    Ok(dict_or_darray(opts, info))
 }
 
 fn type_constant_access_list(opts: &Options, sl: Vec<aast::Sid>) -> TypedValue {
@@ -190,15 +191,15 @@ fn get_generic_types(
     tparams: &[&str],
     targ_map: &BTreeMap<&str, i64>,
     hints: Vec<Hint>,
-) -> Vec<(TypedValue, TypedValue)> {
-    if hints.is_empty() {
+) -> Result<Vec<(TypedValue, TypedValue)>> {
+    Ok(if hints.is_empty() {
         vec![]
     } else {
         vec![(
             TypedValue::String("generic_types".into()),
-            hints_to_type_constant(opts, tparams, targ_map, hints),
+            hints_to_type_constant(opts, tparams, targ_map, hints)?,
         )]
-    }
+    })
 }
 
 fn get_kind(tparams: &[&str], s: &str) -> Vec<(TypedValue, TypedValue)> {
@@ -232,10 +233,10 @@ fn hint_to_type_constant_list(
     tparams: &[&str],
     targ_map: &BTreeMap<&str, i64>,
     hint: Hint,
-) -> Vec<(TypedValue, TypedValue)> {
+) -> Result<Vec<(TypedValue, TypedValue)>> {
     use aast_defs::Hint_::*;
     let Hint(_, h) = hint;
-    match *h {
+    Ok(match *h {
         Happly(s, hints) => {
             let ast_defs::Id(_, name) = s;
             if hints.is_empty() {
@@ -253,7 +254,7 @@ fn hint_to_type_constant_list(
                 {
                     vec![]
                 } else {
-                    get_generic_types(opts, tparams, targ_map, hints)
+                    get_generic_types(opts, tparams, targ_map, hints)?
                 };
                 let (classname, kind) = resolve_classname(tparams, name);
                 [generic_types, classname, kind].concat()
@@ -262,7 +263,7 @@ fn hint_to_type_constant_list(
         Hshape(si) => [
             vec![(
                 TypedValue::String("fields".into()),
-                shape_info_to_typed_value(opts, tparams, targ_map, si),
+                shape_info_to_typed_value(opts, tparams, targ_map, si)?,
             )],
             get_kind(tparams, "shape"),
             vec![(
@@ -271,25 +272,31 @@ fn hint_to_type_constant_list(
             )],
         ]
         .concat(),
-        Haccess(_, _) => panic!("Structure not translated according to ast_to_nast"),
+        Haccess(_, _) => {
+            return Err(Unrecoverable(
+                "Structure not translated according to ast_to_nast".into(),
+            ))
+        }
         Hfun(hf) => {
             if hf.is_coroutine {
-                panic!("Codegen for coroutine functions is not supported")
+                return Err(Unrecoverable(
+                    "Codegen for coroutine functions is not supported".into(),
+                ));
             } else {
                 let kind = get_kind(tparams, "$$internal$$fun");
                 let single_hint = |name: &str, h| {
-                    vec![(
+                    Ok(vec![(
                         TypedValue::String(name.into()),
-                        hint_to_type_constant(opts, tparams, targ_map, h),
-                    )]
+                        hint_to_type_constant(opts, tparams, targ_map, h)?,
+                    )])
                 };
-                let return_type = single_hint("return_type", hf.return_ty);
+                let return_type = single_hint("return_type", hf.return_ty)?;
                 let variadic_type = hf
                     .variadic_ty
-                    .map_or_else(|| vec![], |h| single_hint("variadic_type", h));
+                    .map_or_else(|| Ok(vec![]), |h| single_hint("variadic_type", h))?;
                 let param_types = vec![(
                     TypedValue::String("param_types".into()),
-                    hints_to_type_constant(opts, tparams, targ_map, hf.param_tys),
+                    hints_to_type_constant(opts, tparams, targ_map, hf.param_tys)?,
                 )];
                 [variadic_type, param_types, return_type, kind].concat()
             }
@@ -298,12 +305,12 @@ fn hint_to_type_constant_list(
             let kind = get_kind(tparams, "tuple");
             let elem_types = vec![(
                 TypedValue::String("elem_types".into()),
-                hints_to_type_constant(opts, tparams, targ_map, hints),
+                hints_to_type_constant(opts, tparams, targ_map, hints)?,
             )];
             [elem_types, kind].concat()
         }
         Hoption(h) => [
-            hint_to_type_constant_list(opts, tparams, targ_map, h),
+            hint_to_type_constant_list(opts, tparams, targ_map, h)?,
             vec![(
                 TypedValue::String("nullable".into()),
                 TypedValue::Bool(true),
@@ -311,18 +318,26 @@ fn hint_to_type_constant_list(
         ]
         .concat(),
         Hsoft(h) => [
-            hint_to_type_constant_list(opts, tparams, targ_map, h),
+            hint_to_type_constant_list(opts, tparams, targ_map, h)?,
             vec![(TypedValue::String("soft".into()), TypedValue::Bool(true))],
         ]
         .concat(),
         Hlike(h) => [
-            hint_to_type_constant_list(opts, tparams, targ_map, h),
+            hint_to_type_constant_list(opts, tparams, targ_map, h)?,
             vec![(TypedValue::String("like".into()), TypedValue::Bool(true))],
         ]
         .concat(),
-        HpuAccess(_, _) => panic!("TODO(T36532263) hint_to_type_constant_list"),
-        _ => panic!("Hints not available on the original AST"),
-    }
+        HpuAccess(_, _) => {
+            return Err(Unrecoverable(
+                "TODO(T36532263) hint_to_type_constant_list".into(),
+            ))
+        }
+        _ => {
+            return Err(Unrecoverable(
+                "Hints not available on the original AST".into(),
+            ))
+        }
+    })
 }
 
 pub fn hint_to_type_constant(
@@ -330,11 +345,11 @@ pub fn hint_to_type_constant(
     tparams: &[&str],
     targ_map: &BTreeMap<&str, i64>,
     hint: Hint,
-) -> TypedValue {
-    dict_or_darray(
+) -> Result<TypedValue> {
+    Ok(dict_or_darray(
         opts,
-        hint_to_type_constant_list(opts, tparams, targ_map, hint),
-    )
+        hint_to_type_constant_list(opts, tparams, targ_map, hint)?,
+    ))
 }
 
 fn hints_to_type_constant(
@@ -342,12 +357,12 @@ fn hints_to_type_constant(
     tparams: &[&str],
     targ_map: &BTreeMap<&str, i64>,
     hints: Vec<Hint>,
-) -> TypedValue {
-    vec_or_varray(
+) -> Result<TypedValue> {
+    Ok(vec_or_varray(
         opts,
         hints
             .into_iter()
             .map(|h| hint_to_type_constant(opts, tparams, targ_map, h))
-            .collect(),
-    )
+            .collect::<Result<_>>()?,
+    ))
 }

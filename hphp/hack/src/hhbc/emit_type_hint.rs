@@ -6,7 +6,7 @@ use emit_fatal_rust as emit_fatal;
 use hhas_type::{constraint, Info};
 use hhbc_id_rust::{class, Id as ClassId};
 use hhbc_string_utils_rust as string_utils;
-use instruction_sequence_rust::Result;
+use instruction_sequence_rust::{Error::Unrecoverable, Result};
 use naming_special_names_rust::{classes, typehints};
 use oxidized::{
     aast_defs::{Hint, Hint_, Hint_::*, NastShapeInfo, ShapeFieldInfo, Tprim},
@@ -56,26 +56,28 @@ pub fn prim_to_string(prim: &Tprim) -> String {
     String::from(res)
 }
 
-pub fn fmt_hint(tparams: &[&str], strip_tparams: bool, hint: Hint) -> String {
+pub fn fmt_hint(tparams: &[&str], strip_tparams: bool, hint: Hint) -> Result<String> {
     let Hint(_, h) = hint;
-    match *h {
+    Ok(match *h {
         Happly(Id(_, id), args) => {
             let name = fmt_name_or_prim(tparams, id);
             if args.is_empty() || strip_tparams {
                 name
             } else {
-                format!("{}<{}>", name, fmt_hints(tparams, args))
+                format!("{}<{}>", name, fmt_hints(tparams, args)?)
             }
         }
         Hfun(hf) => {
             // TODO(mqian): Implement for inout parameters
             if hf.is_coroutine {
-                panic!("Codegen for coroutine functions is not supported")
+                return Err(Unrecoverable(
+                    "Codegen for coroutine functions is not supported".into(),
+                ));
             } else {
                 format!(
                     "(function ({}): {})",
-                    fmt_hints(tparams, hf.param_tys),
-                    fmt_hint(tparams, false, hf.return_ty)
+                    fmt_hints(tparams, hf.param_tys)?,
+                    fmt_hint(tparams, false, hf.return_ty)?
                 )
             }
         }
@@ -91,7 +93,9 @@ pub fn fmt_hint(tparams: &[&str], strip_tparams: bool, hint: Hint) -> String {
                         .join("::")
                 )
             } else {
-                panic!("ast_to_nast error. Should be Haccess(Happly())")
+                return Err(Unrecoverable(
+                    "ast_to_nast error. Should be Haccess(Happly())".into(),
+                ));
             }
         }
         Hoption(hint) => {
@@ -99,9 +103,9 @@ pub fn fmt_hint(tparams: &[&str], strip_tparams: bool, hint: Hint) -> String {
             if let Hsoft(t) = *h {
                 // Follow HHVM order: soft -> option
                 // Can we fix this eventually?
-                format!("@?{}", fmt_hint(tparams, false, t))
+                format!("@?{}", fmt_hint(tparams, false, t)?)
             } else {
-                format!("?{}", fmt_hint(tparams, false, Hint(p, h)))
+                format!("?{}", fmt_hint(tparams, false, Hint(p, h))?)
             }
         }
         // No guarantee that this is in the correct order when using map instead of list
@@ -116,27 +120,31 @@ pub fn fmt_hint(tparams: &[&str], strip_tparams: bool, hint: Hint) -> String {
             };
             let fmt_field = |field: ShapeFieldInfo| {
                 let prefix = if field.optional { "?" } else { "" };
-                format!(
+                Ok(format!(
                     "{}{}=>{}",
                     prefix,
                     fmt_field_name(field.name),
-                    fmt_hint(tparams, false, field.hint)
-                )
+                    fmt_hint(tparams, false, field.hint)?
+                ))
             };
             let shape_fields = field_map
                 .into_iter()
                 .map(fmt_field)
-                .collect::<Vec<_>>()
-                .join(", ");
+                .collect::<Result<Vec<_>>>()
+                .map(|v| v.join(", "))?;
             string_utils::prefix_namespace("HH", &format!("shape({})", shape_fields).as_str())
         }
-        Htuple(hints) => format!("({})", fmt_hints(tparams, hints.to_owned())),
-        Hlike(t) => format!("~{}", fmt_hint(tparams, false, t.to_owned())),
-        Hsoft(t) => format!("@{}", fmt_hint(tparams, false, t.to_owned())),
-        HpuAccess(h, Id(_, id)) => format!("({}:@{})", fmt_hint(tparams, false, h.to_owned()), id),
-        Herr | Hany => panic!("This should be an error caught in naming"),
+        Htuple(hints) => format!("({})", fmt_hints(tparams, hints.to_owned())?),
+        Hlike(t) => format!("~{}", fmt_hint(tparams, false, t.to_owned())?),
+        Hsoft(t) => format!("@{}", fmt_hint(tparams, false, t.to_owned())?),
+        HpuAccess(h, Id(_, id)) => format!("({}:@{})", fmt_hint(tparams, false, h.to_owned())?, id),
+        Herr | Hany => {
+            return Err(Unrecoverable(
+                "This should be an error caught in naming".into(),
+            ))
+        }
         h => fmt_name_or_prim(tparams, hint_to_string(&h)),
-    }
+    })
 }
 
 fn hint_to_string(h: &Hint_) -> String {
@@ -157,12 +165,12 @@ fn hint_to_string(h: &Hint_) -> String {
     String::from(res)
 }
 
-fn fmt_hints(tparams: &[&str], hints: Vec<Hint>) -> String {
+fn fmt_hints(tparams: &[&str], hints: Vec<Hint>) -> Result<String> {
     hints
         .into_iter()
         .map(|h| fmt_hint(tparams, false, h))
-        .collect::<Vec<_>>()
-        .join(", ")
+        .collect::<Result<Vec<_>>>()
+        .map(|v| v.join(", "))
 }
 
 fn can_be_nullable(hint: &Hint_) -> bool {
@@ -188,10 +196,10 @@ fn hint_to_type_constraint(
     tparams: &[&str],
     skipawaitable: bool,
     h: &Hint,
-) -> constraint::Type {
+) -> Result<constraint::Type> {
     use constraint::{Flags, Type};
     let Hint(pos, hint) = h;
-    match &**hint {
+    Ok(match &**hint {
         Hdynamic | Hlike(_) | Hfun(_) | Hunion(_) | Hintersection(_) | Hmixed | HpuAccess(_, _) => {
             Type::default()
         }
@@ -204,13 +212,17 @@ fn hint_to_type_constraint(
             skipawaitable,
             t,
             Flags::SOFT | Flags::EXTENDED_HINT,
-        ),
-        Herr | Hany => panic!("This should be an error caught in naming"),
+        )?,
+        Herr | Hany => {
+            return Err(Unrecoverable(
+                "This should be an error caught in naming".into(),
+            ))
+        }
         Hoption(t) => {
             if let Happly(Id(_, s), hs) = &**hint {
                 if skipawaitable && is_awaitable(&s) {
                     match &hs[..] {
-                        [] => return Type::default(),
+                        [] => return Ok(Type::default()),
                         [h] => return hint_to_type_constraint(kind, tparams, false, h),
                         _ => (),
                     }
@@ -236,7 +248,7 @@ fn hint_to_type_constraint(
                 skipawaitable,
                 t,
                 Flags::NULLABLE | Flags::DISPLAY_NULLABLE | Flags::EXTENDED_HINT,
-            )
+            )?
         }
         Happly(Id(_, s), hs) => {
             match &hs[..] {
@@ -246,16 +258,16 @@ fn hint_to_type_constraint(
                         || (skipawaitable && is_awaitable(s))
                         || (s.eq_ignore_ascii_case("\\hh\\void") && !is_typedef(&kind))
                     {
-                        return Type::default();
+                        return Ok(Type::default());
                     }
                 }
                 [Hint(_, h)] => {
                     if skipawaitable && is_awaitable(s) {
                         match &**h {
-                            Hprim(Tprim::Tvoid) => return Type::default(),
+                            Hprim(Tprim::Tvoid) => return Ok(Type::default()),
                             Happly(Id(_, s), hs) => {
                                 if s == "\\HH\\void" && hs.is_empty() {
-                                    return Type::default();
+                                    return Ok(Type::default());
                                 }
                             }
                             _ => (),
@@ -267,7 +279,7 @@ fn hint_to_type_constraint(
             happly_helper(tparams, kind, pos, s.to_string()).unwrap()
         }
         h => happly_helper(tparams, kind, pos, hint_to_string(h)).unwrap(),
-    }
+    })
 }
 
 fn is_awaitable(s: &str) -> bool {
@@ -288,12 +300,12 @@ fn make_tc_with_flags_if_non_empty_flags(
     skipawaitable: bool,
     hint: &Hint,
     flags: constraint::Flags,
-) -> constraint::Type {
-    let tc = hint_to_type_constraint(kind, tparams, skipawaitable, hint);
-    match (&tc.name, &tc.flags.bits()) {
+) -> Result<constraint::Type> {
+    let tc = hint_to_type_constraint(kind, tparams, skipawaitable, hint)?;
+    Ok(match (&tc.name, &tc.flags.bits()) {
         (None, 0) => tc,
         _ => constraint::Type::make(tc.name, flags | tc.flags),
-    }
+    })
 }
 
 fn happly_helper(
@@ -341,10 +353,10 @@ fn make_type_info(
     h: &Hint,
     tc_name: Option<String>,
     tc_flags: constraint::Flags,
-) -> Info {
-    let type_info_user_type = Some(fmt_hint(tparams, false, h.to_owned()));
+) -> Result<Info> {
+    let type_info_user_type = Some(fmt_hint(tparams, false, h.to_owned())?);
     let type_info_type_constraint = constraint::Type::make(tc_name, tc_flags);
-    Info::make(type_info_user_type, type_info_type_constraint)
+    Ok(Info::make(type_info_user_type, type_info_type_constraint))
 }
 
 pub fn hint_to_type_info(
@@ -353,8 +365,8 @@ pub fn hint_to_type_info(
     nullable: bool,
     tparams: &[&str],
     hint: &Hint,
-) -> Info {
-    let tc = hint_to_type_constraint(kind, tparams, skipawaitable, hint);
+) -> Result<Info> {
+    let tc = hint_to_type_constraint(kind, tparams, skipawaitable, hint)?;
     if let Kind::Param = kind {
         return make_type_info(
             tparams,

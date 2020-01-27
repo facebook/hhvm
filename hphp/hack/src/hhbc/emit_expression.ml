@@ -1651,7 +1651,7 @@ and emit_expr (env : Emit_env.t) (expr : Tast.expr) =
     fst (emit_obj_get env pos QueryOp.CGet expr prop nullflavor)
   | A.Call (_, e, targs, args, uarg) ->
     emit_call_expr env pos e targs args uarg None
-  | A.FunctionPointer (_e, _targs) -> failwith "TODO"
+  | A.FunctionPointer (e, targs) -> emit_function_pointer env e targs
   | A.New (cid, targs, args, uarg, _constructor_annot) ->
     emit_new env pos cid targs args uarg
   | A.Record (cid, is_array, es) ->
@@ -3766,12 +3766,7 @@ and emit_special_function
         ("fun() expects exactly 1 parameter, " ^ string_of_int nargs ^ " given")
     else (
       match args with
-      | [(_, A.String func_name)] ->
-        let func_name = SU.strip_global_ns func_name in
-        if Hhbc_options.emit_func_pointers !Hhbc_options.compiler_options then
-          Some (instr_resolve_func @@ Hhbc_id.Function.from_raw_string func_name)
-        else
-          Some (instr_string func_name)
+      | [(_, A.String func_name)] -> Some (emit_hh_fun func_name)
       | _ ->
         Emit_fatal.raise_fatal_runtime pos "Constant string expected in fun()"
     )
@@ -3793,24 +3788,7 @@ and emit_special_function
     begin
       match args with
       | [obj_expr; method_name] ->
-        Some
-          (gather
-             [
-               emit_expr env obj_expr;
-               emit_expr env method_name;
-               ( if
-                 Hhbc_options.emit_inst_meth_pointers
-                   !Hhbc_options.compiler_options
-               then
-                 instr_resolve_obj_method
-               else
-                 instr
-                   (ILitConst
-                      ( if hack_arr_dv_arrs () then
-                        NewVecArray 2
-                      else
-                        NewVArray 2 )) );
-             ])
+        Some (emit_inst_meth env obj_expr method_name)
       | _ ->
         Emit_fatal.raise_fatal_runtime
           pos
@@ -3821,45 +3799,12 @@ and emit_special_function
   | ("HH\\class_meth", _) ->
     begin
       match args with
+      (* Hunch: This is wrong - Should instead be only Class_const::class *)
       | [((_, A.Class_const _) as class_name); ((_, A.String _) as method_name)]
       | [((_, A.String _) as class_name); ((_, A.String _) as method_name)] ->
-        Some
-          (gather
-             [
-               emit_expr env class_name;
-               emit_expr env method_name;
-               ( if
-                 Hhbc_options.emit_cls_meth_pointers
-                   !Hhbc_options.compiler_options
-               then
-                 instr_resolve_cls_method NoWarn
-               else
-                 instr
-                   (ILitConst
-                      ( if hack_arr_dv_arrs () then
-                        NewVecArray 2
-                      else
-                        NewVArray 2 )) );
-             ])
+        Some (emit_class_meth env class_name method_name NoWarn)
       | [class_name; method_name] ->
-        Some
-          (gather
-             [
-               emit_expr env class_name;
-               emit_expr env method_name;
-               ( if
-                 Hhbc_options.emit_cls_meth_pointers
-                   !Hhbc_options.compiler_options
-               then
-                 instr_resolve_cls_method Warn
-               else
-                 instr
-                   (ILitConst
-                      ( if hack_arr_dv_arrs () then
-                        NewVecArray 2
-                      else
-                        NewVArray 2 )) );
-             ])
+        Some (emit_class_meth env class_name method_name Warn)
       | _ ->
         Emit_fatal.raise_fatal_runtime
           pos
@@ -3953,6 +3898,47 @@ and emit_special_function
         end
     end
 
+and emit_hh_fun func_name =
+  let func_name = SU.strip_global_ns func_name in
+  if Hhbc_options.emit_func_pointers !Hhbc_options.compiler_options then
+    instr_resolve_func @@ Hhbc_id.Function.from_raw_string func_name
+  else
+    instr_string func_name
+
+and emit_class_meth env class_name method_name warn_type =
+  gather
+    [
+      emit_expr env class_name;
+      emit_expr env method_name;
+      ( if Hhbc_options.emit_cls_meth_pointers !Hhbc_options.compiler_options
+      then
+        instr_resolve_cls_method warn_type
+      else
+        instr
+          (ILitConst
+             ( if hack_arr_dv_arrs () then
+               NewVecArray 2
+             else
+               NewVArray 2 )) );
+    ]
+
+and emit_inst_meth env obj_expr method_name =
+  gather
+    [
+      emit_expr env obj_expr;
+      emit_expr env method_name;
+      ( if Hhbc_options.emit_inst_meth_pointers !Hhbc_options.compiler_options
+      then
+        instr_resolve_obj_method
+      else
+        instr
+          (ILitConst
+             ( if hack_arr_dv_arrs () then
+               NewVecArray 2
+             else
+               NewVArray 2 )) );
+    ]
+
 and emit_call
     env
     pos
@@ -4007,6 +3993,25 @@ and emit_call
       | None -> default ()
     end
   | _ -> default ()
+
+(* How do we make these work with reified generics? *)
+and emit_function_pointer env (annot, e) _targs =
+  match e with
+  (* This is a function name. Equivalent to HH\fun('str') *)
+  | A.Id (_, str) -> emit_hh_fun str
+  (* class_meth *)
+  | A.Class_const (cid, method_name) ->
+    let substitute_class_const =
+      (annot, A.Class_const (cid, (Pos.none, SN.Members.mClass)))
+    in
+    let substitute_method_name = (annot, A.String (snd method_name)) in
+    emit_class_meth env substitute_class_const substitute_method_name NoWarn
+  (* inst_meth *)
+  (* TODO: account for nullable ness of this *)
+  | A.Obj_get (obj_expr, (annot, A.Id (_, method_name)), _null_flavor) ->
+    let substitute_method_name = (annot, A.String method_name) in
+    emit_inst_meth env obj_expr substitute_method_name
+  | _ -> failwith "What else could go here?"
 
 and emit_final_member_op stack_index op mk =
   match op with

@@ -607,14 +607,14 @@ let get_tyvar_pu_access env var (_, typ_name) =
   SMap.find_opt typ_name (get_tyvar_pu_accesses env var)
 
 let set_tyvar_type_const env var ((_, tyconstid_) as tyconstid) ty =
-  let tvinfo = get_tyvar_constraints_or_empty env var in
+  let tvinfo = get_tyvar_constraints_exn env var in
   let type_constants =
     SMap.add tyconstid_ (tyconstid, ty) tvinfo.type_constants
   in
   set_tyvar_constraints env var { tvinfo with type_constants }
 
 let set_tyvar_pu_access env var base enum new_var name =
-  let tvinfo = get_tyvar_constraints_or_empty env var in
+  let tvinfo = get_tyvar_constraints_exn env var in
   let pu_accesses =
     SMap.add (snd name) (base, enum, new_var, name) tvinfo.pu_accesses
   in

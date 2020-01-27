@@ -390,11 +390,7 @@ let make_param_local_ty env decl_hint param =
   let r = Reason.Rwitness param.param_pos in
   let (env, ty) =
     match decl_hint with
-    | None ->
-      if TCO.global_inference (Env.get_tcopt env) then
-        Env.fresh_type_reason ~variance:Ast_defs.Contravariant env r
-      else
-        (env, mk (r, TUtils.tany env))
+    | None -> (env, mk (r, TUtils.tany env))
     | Some ty ->
       let { et_type = ty; _ } =
         Typing_enforceability.compute_enforced_and_pessimize_ty
@@ -696,11 +692,7 @@ and fun_def tcopt f :
       let (env, locl_ty) =
         match decl_ty with
         | None ->
-          Typing_return.make_default_return
-            ~is_method:false
-            ~is_global_inference_on:(TCO.global_inference (Env.get_tcopt env))
-            env
-            f.f_name
+          (env, Typing_return.make_default_return ~is_method:false env f.f_name)
         | Some ty ->
           let localize env ty = Phase.localize_with_self env ty in
           Typing_return.make_return_type localize env ty
@@ -8575,11 +8567,7 @@ and method_def env cls m =
       let (env, locl_ty) =
         match ret_decl_ty with
         | None ->
-          Typing_return.make_default_return
-            ~is_method:true
-            ~is_global_inference_on:(TCO.global_inference (Env.get_tcopt env))
-            env
-            m.m_name
+          (env, Typing_return.make_default_return ~is_method:true env m.m_name)
         | Some ret ->
           (* If a 'this' type appears it needs to be compatible with the
            * late static type

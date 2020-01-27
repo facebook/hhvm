@@ -133,22 +133,13 @@ let force_awaitable env p ty =
     (env, wrapped_ty)
   | _ -> (env, ty)
 
-let make_default_return ~is_method ~is_global_inference_on env name =
+let make_default_return ~is_method env name =
   let pos = fst name in
-  let reason = Reason.Rwitness pos in
-  let default = mk (reason, Typing_utils.tany env) in
+  let r = Reason.Rwitness pos in
   if is_method && String.equal (snd name) SN.Members.__construct then
-    (env, MakeType.void (Reason.Rwitness pos))
-  else if is_global_inference_on then
-    (* When infer missing is turned on we create a fresh variable for the
-        returned type. Later on it will be reused to get back the inferred type
-        of the function. *)
-    let (env, ty) =
-      Env.fresh_type_reason ~variance:Ast_defs.Covariant env reason
-    in
-    (env, wrap_awaitable env pos ty)
+    MakeType.void r
   else
-    (env, default)
+    mk (r, Typing_utils.tany env)
 
 let async_suggest_return fkind hint pos =
   let is_async = Ast_defs.(equal_fun_kind FAsync fkind) in

@@ -8,7 +8,6 @@
  *)
 
 open Hh_prelude
-open Typing_heap
 
 let check_cache_consistency x expected_kind expected_result =
   if
@@ -37,7 +36,7 @@ let get_type_id_filename x expected_kind =
 let get_class = Typing_classes_heap.Classes.get
 
 let get_fun x =
-  match Funs.get x with
+  match Typing_heap.Funs.get x with
   | Some c -> Some c
   | None ->
     (match Naming_table.Funs.get_filename x with
@@ -50,7 +49,7 @@ let get_fun x =
     | None -> None)
 
 let get_gconst cst_name =
-  match GConsts.get cst_name with
+  match Typing_heap.GConsts.get cst_name with
   | Some c -> Some c
   | None ->
     (match Naming_table.Consts.get_filename cst_name with
@@ -63,7 +62,7 @@ let get_gconst cst_name =
     | None -> None)
 
 let get_record_def x =
-  match RecordDefs.get x with
+  match Typing_heap.RecordDefs.get x with
   | Some c -> Some c
   | None ->
     (match get_type_id_filename x Naming_table.TRecordDef with
@@ -76,7 +75,7 @@ let get_record_def x =
     | None -> None)
 
 let get_typedef x =
-  match Typedefs.get x with
+  match Typing_heap.Typedefs.get x with
   | Some c -> Some c
   | None ->
     (match get_type_id_filename x Naming_table.TTypedef with

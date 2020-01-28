@@ -2,84 +2,86 @@ from __future__ import absolute_import, unicode_literals
 
 import os
 from sys import stderr
+from typing import List
 
 import hh_paths
 from common_tests import CommonTestDriver
 from test_case import TestCase
 
 
-auto_namespace_map = '{"PHP": "HH\\\\Lib\\\\PHP"}'
-
-
 class ExtractStandaloneDriver(CommonTestDriver):
+
+    error_file_ext = ".err"
+    auto_namespace_map = '{"PHP": "HH\\\\Lib\\\\PHP"}'
+
     def write_load_config(self, use_saved_state: bool = False) -> None:
         with open(os.path.join(self.repo_dir, ".hhconfig"), "w") as f:
             f.write(
                 """
 auto_namespace_map = {}
 """.format(
-                    auto_namespace_map
+                    self.auto_namespace_map
                 )
             )
 
-    def run_single_typecheck(self, filename: str) -> int:
-        _, _, retcode = self.proc_call(
+    def expected_file_name(self, function_name: str) -> str:
+        return os.path.join(
+            self.repo_dir,
+            "expected/{}.php.exp".format(
+                function_name.replace("::", "++").replace("\\", "__")
+            ),
+        )
+
+    def expected_code(self, function_name: str) -> str:
+        with open(self.expected_file_name(function_name)) as expected_file:
+            return expected_file.read().strip()
+
+    def expected_code_type_errors(self, function_name: str) -> str:
+        with open(
+            self.expected_file_name(function_name) + self.error_file_ext
+        ) as error_file:
+            return error_file.read().strip()
+
+    def extract_code(self, function_name: str) -> str:
+        extracted_code, _, retcode = self.run_check(
+            options=["--extract-standalone", function_name]
+        )
+        self.assertEqual(
+            0,
+            retcode,
+            "hh --extract-standalone {} returned non-zero code".format(function_name),
+        )
+        return extracted_code.strip()
+
+    def assert_expected_code_matches_extracted_code(self, function_name: str) -> None:
+        self.assertMultiLineEqual(
+            self.expected_code(function_name),
+            self.extract_code(function_name),
+            f"The expected result of extracting {function_name} doesn't match the extracted code",
+        )
+
+    def type_check_expected_files(self, function_names: List[str]) -> None:
+        files = [
+            self.expected_file_name(function_name) for function_name in function_names
+        ]
+        self.proc_call(
             [
                 hh_paths.hh_single_type_check,
                 "--auto-namespace-map",
-                auto_namespace_map,
-                filename,
+                self.auto_namespace_map,
+                "--batch-files",
+                "--out-extension",
+                self.error_file_ext,
             ]
+            + files
         )
-        if retcode != 0:
-            print(
-                "hh_single_type_check returned non-zero code: {}".format(retcode),
-                file=stderr,
-            )
-        return retcode
 
-    @staticmethod
-    def function_to_filename(func) -> str:
-        func = func.replace("::", "++")
-        return func.replace("\\", "__")
-
-    def assert_output_matches(self, output: str, fname_expected: str) -> None:
-        expected_file = "expected/{}.php.exp".format(fname_expected)
-        expected_file_absolute = os.path.join(self.repo_dir, expected_file)
-        with open(expected_file_absolute) as expected:
-            expected = expected.read().strip()
-            output = output.strip()
-            self.assertMultiLineEqual(
-                output, expected, f"Mismatch in file {expected_file}"
-            )
-
-    def check_extract_standalone(
-        self, function_to_extract: str, typecheck=True
-    ) -> None:
-        generated_code, _, retcode = self.run_check(
-            options=["--extract-standalone", function_to_extract]
+    def assert_expected_code_is_well_typed(self, function_name: str) -> None:
+        self.assertMultiLineEqual(
+            "No errors",
+            self.expected_code_type_errors(function_name),
+            f"The expected result of extracting {function_name} has type errors",
         )
-        if retcode != 0:
-            print(
-                "hh --extract-standalone {} returned non-zero code: {}".format(
-                    function_to_extract, retcode
-                ),
-                file=stderr,
-            )
-            raise AssertionError()
-
-        extracted_file = os.path.join(self.repo_dir, "extracted.php.out")
-        # Check if the generated code is the same as expected
-        expected_fname = self.function_to_filename(function_to_extract)
-        self.assert_output_matches(generated_code, expected_fname)
-        # Check if the generated code typechecks
-        if typecheck:
-            with open(extracted_file, "w") as f:
-                print(generated_code, file=f, flush=True)
-            assert self.run_single_typecheck(extracted_file) == 0
-
-    def check_failing(self, function_to_extract: str) -> None:
-        self.check_extract_standalone(function_to_extract, typecheck=False)
 
 
 class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
@@ -98,7 +100,7 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
     def test_extract(self) -> None:
         self.test_driver.write_load_config()
 
-        paths = [
+        function_names = [
             "\\shallow_toplevel",
             "\\with_typedefs",
             "\\with_generics",
@@ -171,11 +173,24 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
             "\\with_IEWGPCOUP",
         ]
 
-        for path in paths:
-            with self.subTest(path=path):
-                self.test_driver.check_extract_standalone(path)
+        for function_name in function_names:
+            with self.subTest(msg=function_name):
+                self.test_driver.assert_expected_code_matches_extracted_code(
+                    function_name
+                )
+
+        self.test_driver.type_check_expected_files(function_names)
+
+        for function_name in function_names:
+            with self.subTest(msg=function_name):
+                self.test_driver.assert_expected_code_is_well_typed(function_name)
 
     def test_failing(self) -> None:
         self.test_driver.write_load_config()
-        self.test_driver.check_failing("\\nonexistent_function")
-        self.test_driver.check_failing("\\nonexistent_dependency")
+
+        self.test_driver.assert_expected_code_matches_extracted_code(
+            "\\nonexistent_function"
+        )
+        self.test_driver.assert_expected_code_matches_extracted_code(
+            "\\nonexistent_dependency"
+        )

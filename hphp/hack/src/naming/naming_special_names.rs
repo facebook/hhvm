@@ -334,6 +334,10 @@ pub mod user_attributes {
     pub fn is_meth_caller(name: &str) -> bool {
         name == "__MethCaller"
     }
+
+    pub fn is_reserved(name: &str) -> bool {
+        name.starts_with("__")
+    }
 }
 
 pub mod attribute_kinds {
@@ -384,6 +388,8 @@ pub mod attribute_kinds {
 
 /* Tested before \\-prepending name-canonicalization */
 pub mod special_functions {
+    use lazy_static::lazy_static;
+
     pub const TUPLE: &str = "tuple"; /* pseudo-function */
 
     pub const ECHO: &str = "echo"; /* pseudo-function */
@@ -391,6 +397,18 @@ pub mod special_functions {
     pub const ASSERT_: &str = "assert";
 
     pub const AUTOLOAD: &str = "__autoload";
+
+    pub const HHAS_ADATA: &str = "__hhas_adata";
+
+    pub fn is_special_function(x: &str) -> bool {
+        lazy_static! {
+            static ref ALL_SPECIAL_FUNCTIONS: Vec<&'static str> =
+                vec![TUPLE, ECHO, ASSERT_, AUTOLOAD, HHAS_ADATA,]
+                    .into_iter()
+                    .collect();
+        }
+        ALL_SPECIAL_FUNCTIONS.contains(&x)
+    }
 }
 
 pub mod autoimported_functions {
@@ -824,6 +842,18 @@ pub mod ppl_functions {
     }
     pub fn is_reserved(x: &str) -> bool {
         ALL_RESERVED_SET.contains(x)
+    }
+}
+
+pub mod xhp {
+    pub const PCDATA: &str = "pcdata";
+    pub const ANY: &str = "any";
+    pub const EMPTY: &str = "empty";
+    pub fn is_reserved(x: &str) -> bool {
+        x == PCDATA || x == ANY || x == EMPTY
+    }
+    pub fn is_xhp_category(x: &str) -> bool {
+        x.starts_with('%')
     }
 }
 

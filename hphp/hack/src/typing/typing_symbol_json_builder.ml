@@ -7,6 +7,7 @@
  *)
 
 open Aast
+open Ast_defs
 open Decl_env
 open Hh_json
 open Hh_prelude
@@ -27,11 +28,13 @@ type symbol_occurrences = {
 
 type predicate =
   | ClassDeclaration
+  | ClassDefinition
   | DeclarationLocation
   | FileXRefs
 
 type glean_json = {
   classDeclaration: json list;
+  classDefinition: json list;
   declarationLocation: json list;
   fileXRefs: json list;
 }
@@ -44,7 +47,12 @@ type result_progress = {
 
 let init_progress =
   let default_json =
-    { classDeclaration = []; declarationLocation = []; fileXRefs = [] }
+    {
+      classDeclaration = [];
+      classDefinition = [];
+      declarationLocation = [];
+      fileXRefs = [];
+    }
   in
   { resultJson = default_json; factIds = JMap.empty }
 
@@ -72,6 +80,11 @@ let update_json_data predicate json progress =
       {
         progress.resultJson with
         classDeclaration = json :: progress.resultJson.classDeclaration;
+      }
+    | ClassDefinition ->
+      {
+        progress.resultJson with
+        classDefinition = json :: progress.resultJson.classDefinition;
       }
     | DeclarationLocation ->
       {
@@ -129,6 +142,22 @@ let json_of_rel_bytespan offset len =
 
 let json_of_file filepath = JSON_Object [("key", JSON_String filepath)]
 
+let json_of_class_defn clss decl_id progress =
+  let is_abstract =
+    match clss.c_kind with
+    | Cabstract -> true
+    | _ -> false
+  in
+  let json_fact =
+    JSON_Object
+      [
+        ("declaration", JSON_Number (string_of_int decl_id));
+        ("is_abstract", JSON_Bool is_abstract);
+        ("is_final", JSON_Bool clss.c_final);
+      ]
+  in
+  glean_json ClassDefinition json_fact progress
+
 let json_of_class_decl name progress =
   let json_fact =
     JSON_Object [("name", JSON_Object [("key", JSON_String name)])]
@@ -147,10 +176,11 @@ let json_of_decl ctx decl_type json_fun id elem progress =
   let json = JSON_Object [(decl_type, decl_json)] in
   (json, fact_id, progress)
 
-let json_of_decl_loc ctx decl_type pos json_fun id elem progress =
-  let (decl_json, _, progress) =
-    json_of_decl ctx decl_type json_fun id elem progress
+let json_of_decl_loc ctx decl_type pos decl_fun defn_fun id elem progress =
+  let (decl_json, decl_id, progress) =
+    json_of_decl ctx decl_type decl_fun id elem progress
   in
+  let (_, _, progress) = defn_fun elem decl_id progress in
   let filepath = Relative_path.S.to_string (Pos.filename pos) in
   let json_fact =
     JSON_Object
@@ -203,6 +233,7 @@ let build_json ctx symbols =
               "container"
               pos
               (json_of_container_decl "class_" json_of_class_decl)
+              json_of_class_defn
               id
               cd
               acc
@@ -275,6 +306,7 @@ let build_json ctx symbols =
     by id only *)
     [
       ("hack.FileXRefs.1", progress.resultJson.fileXRefs);
+      ("hack.ClassDefinition.1", progress.resultJson.classDefinition);
       ("hack.DeclarationLocation.1", progress.resultJson.declarationLocation);
       ("hack.ClassDeclaration.1", progress.resultJson.classDeclaration);
     ]

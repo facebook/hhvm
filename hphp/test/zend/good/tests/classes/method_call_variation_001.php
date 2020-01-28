@@ -15,13 +15,13 @@ function foo($a, $b)
 <<__EntryPoint>> function main(): void {
 $c = new C;
 
-$functions = ['foo', [2 => [3 => array()]]];
+$functions = varray['foo', darray[2 => darray[3 => array()]]];
 $functions[1][2][3][4] = 'foo';
 
 $c->$functions[0](1, 2);
 $c->$functions[1][2][3][4](3, 4);
 
-$c->functions = ['foo', [2 => [3 => array()]]];
+$c->functions = varray['foo', darray[2 => darray[3 => array()]]];
 $c->functions[1][2][3][4] = 'foo';
 
 $c->functions[0](5, 6);

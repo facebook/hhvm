@@ -8,7 +8,7 @@ function reverse(array $array) {
     }
 }
 <<__EntryPoint>> function main(): void {
-$array = [
+$array = darray[
     'foo' => 'bar',
     'bar' => 'foo',
 ];

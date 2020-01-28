@@ -91,7 +91,7 @@ function teardown_relative_path() {
 }
 
 abstract final class ZendGoodExtStandardTestsFileFopenIncludePathInc {
-  public static $reldirs = ["dir1", "dir2", "dir3"];
+  public static $reldirs = varray["dir1", "dir2", "dir3"];
   public static $newdirs;
   public static $dir1;
   public static $dir2;

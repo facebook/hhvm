@@ -1,7 +1,7 @@
 <?hh
 
 function gen() {
-    yield [] => 1;
+    yield varray[] => 1;
 }
 <<__EntryPoint>> function main(): void {
 $gen = gen();

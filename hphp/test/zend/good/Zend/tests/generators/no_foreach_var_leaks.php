@@ -6,7 +6,7 @@ function gen(array $array) {
     }
 }
 <<__EntryPoint>> function main(): void {
-$gen = gen(['Foo', 'Bar']);
+$gen = gen(varray['Foo', 'Bar']);
 $gen->next();
 var_dump($gen->current());
 

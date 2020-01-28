@@ -8,7 +8,7 @@ class A {
 
 <<__EntryPoint>> function main(): void {
   error_reporting(E_ALL & ~E_STRICT);
-  $y = ['hello'];
+  $y = varray['hello'];
   A::$y[0]();
   echo "===DONE===\n";
 }

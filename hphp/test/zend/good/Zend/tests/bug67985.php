@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$a = ['zero', 'one', 'two'];
+$a = varray['zero', 'one', 'two'];
 unset($a[2]);
 $b = $a;
 $a[] = 'three';

@@ -6,7 +6,7 @@ class Foo {
   private $f = 6;
 
   public function __debugInfo() {
-    return ['a'=>1, "\0*\0b"=>2, "\0Foo\0c"=>3];
+    return darray['a'=>1, "\0*\0b"=>2, "\0Foo\0c"=>3];
   }
 }
 

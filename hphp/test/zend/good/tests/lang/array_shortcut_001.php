@@ -1,3 +1,3 @@
 <?hh <<__EntryPoint>> function main(): void {
-print_r([1, 2, 3]);
+print_r(varray[1, 2, 3]);
 }

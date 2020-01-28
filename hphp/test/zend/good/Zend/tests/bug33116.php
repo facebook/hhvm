@@ -1,7 +1,7 @@
 <?hh
 function __autoload($class)
 {
-  $GLOBALS['include'] ??= [];
+  $GLOBALS['include'] ??= varray[];
   $GLOBALS['include'][] = $class;
   eval("class DefClass{}");
 }

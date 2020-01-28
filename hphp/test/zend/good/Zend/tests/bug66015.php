@@ -5,10 +5,10 @@ class Test
    const SECOND = 2;
    const THIRD = 3;
 
-   protected static $array = [
+   protected static $array = darray[
        self::FIRST => 'first',
-       'second',
-       'third'
+       self::SECOND => 'second',
+       self::THIRD => 'third'
    ];
 
    public function __construct()

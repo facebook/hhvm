@@ -40,7 +40,7 @@ var_dump($foo->a3);
 $foo->f5()->a = 1;
 var_dump($foo->o2);
 
-$foo->a1 = [2];
+$foo->a1 = varray[2];
 
 var_dump($foo->a1[0]);
 $foo->f1()[0]++;

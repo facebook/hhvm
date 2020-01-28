@@ -21,7 +21,7 @@ function main_entry(): void {
   $iterator = new RecursiveDirectoryIterator(__DIR__ . DIRECTORY_SEPARATOR . $depth0);
   $it = new RecursiveIteratorIterator($iterator);
 
-  $list = [];
+  $list = varray[];
   while($it->valid()) {
     $list[] = $it->getSubPath();
     $it->next();

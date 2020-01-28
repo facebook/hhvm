@@ -7,7 +7,7 @@ class foo {
 	}
 
 	function echoName() {
-    $GLOBALS['names'] ??= [];
+    $GLOBALS['names'] ??= varray[];
     $GLOBALS['names'][] = $this->Name;
 	}
 }

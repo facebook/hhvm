@@ -31,14 +31,18 @@ type predicate =
   | ClassDefinition
   | DeclarationLocation
   | FileXRefs
+  | InterfaceDeclaration
 
-type container_type = ClassContainer
+type container_type =
+  | ClassContainer
+  | InterfaceContainer
 
 type glean_json = {
   classDeclaration: json list;
   classDefinition: json list;
   declarationLocation: json list;
   fileXRefs: json list;
+  interfaceDeclaration: json list;
 }
 
 type result_progress = {
@@ -54,6 +58,7 @@ let init_progress =
       classDefinition = [];
       declarationLocation = [];
       fileXRefs = [];
+      interfaceDeclaration = [];
     }
   in
   { resultJson = default_json; factIds = JMap.empty }
@@ -98,6 +103,11 @@ let update_json_data predicate json progress =
         progress.resultJson with
         fileXRefs = json :: progress.resultJson.fileXRefs;
       }
+    | InterfaceDeclaration ->
+      {
+        progress.resultJson with
+        interfaceDeclaration = json :: progress.resultJson.interfaceDeclaration;
+      }
   in
   { resultJson = json; factIds = progress.factIds }
 
@@ -129,9 +139,11 @@ let glean_json predicate json progress =
 let container_decl_predicate container_type =
   match container_type with
   | ClassContainer -> ("class_", ClassDeclaration)
+  | InterfaceContainer -> ("interface_", InterfaceDeclaration)
 
 let get_container_kind clss =
   match clss.c_kind with
+  | Cinterface -> InterfaceContainer
   (* TODO: process enum kind here *)
   | _ -> ClassContainer
 
@@ -170,6 +182,9 @@ let json_of_container_defn clss decl_id progress =
         ]
     in
     let (_, _, progress) = glean_json ClassDefinition json_fact progress in
+    progress
+  | _ ->
+    (* TODO: implement other container definitions *)
     progress
 
 let json_of_container_decl (container_type, decl_pred) _ctx name _elem progress
@@ -313,6 +328,9 @@ let build_json ctx symbols =
             | Class ->
               let decl_pred = container_decl_predicate ClassContainer in
               add_container_xref ctx symbol_def occ.pos decl_pred (xrefs, prog)
+            | Interface ->
+              let decl_pred = container_decl_predicate InterfaceContainer in
+              add_container_xref ctx symbol_def occ.pos decl_pred (xrefs, prog)
             | _ -> (xrefs, prog)))
   in
   let progress =
@@ -332,6 +350,7 @@ let build_json ctx symbols =
       ("hack.ClassDefinition.1", progress.resultJson.classDefinition);
       ("hack.DeclarationLocation.1", progress.resultJson.declarationLocation);
       ("hack.ClassDeclaration.1", progress.resultJson.classDeclaration);
+      ("hack.InterfaceDeclaration.1", progress.resultJson.interfaceDeclaration);
     ]
   in
   let json_array =

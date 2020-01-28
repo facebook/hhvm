@@ -491,7 +491,7 @@ mod tests {
         );
 
         assert_eq!(
-            Err("Position in separate files dummy a and dummy b".to_string()),
+            Err("Position in separate files |a and |b".to_string()),
             Pos::merge(
                 &make_pos("a", (0, 0, 0), (0, 0, 0)),
                 &make_pos("b", (0, 0, 0), (0, 0, 0))

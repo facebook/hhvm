@@ -46,11 +46,13 @@ impl TryFrom<usize> for Prefix {
 impl Display for Prefix {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use Prefix::*;
+        // NB: This encoding is used in the impl of Serialize and Deserialize
+        // for RelativePath below.
         match self {
             Root => write!(f, "root"),
             Hhi => write!(f, "hhi"),
             Tmp => write!(f, "tmp"),
-            Dummy => write!(f, "dummy"),
+            Dummy => write!(f, ""),
         }
     }
 }
@@ -89,7 +91,7 @@ impl RelativePath {
 
 impl Display for RelativePath {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}", self.prefix, self.path.display())
+        write!(f, "{}|{}", self.prefix, self.path.display())
     }
 }
 
@@ -100,11 +102,7 @@ impl Serialize for RelativePath {
         let path_str = self.path.to_str().ok_or(serde::ser::Error::custom(
             "path contains invalid UTF-8 characters",
         ))?;
-        if self.prefix() == Prefix::Dummy {
-            serializer.serialize_str(&format!("|{}", path_str))
-        } else {
-            serializer.serialize_str(&format!("{}|{}", self.prefix(), path_str))
-        }
+        serializer.serialize_str(&format!("{}|{}", self.prefix, path_str))
     }
 }
 

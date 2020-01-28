@@ -8,7 +8,6 @@
 
 open Core_kernel
 open Direct_decl_parser
-module Decl_provider = Decl_provider_ctx
 
 type verbosity =
   | Standard

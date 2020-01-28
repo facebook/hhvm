@@ -12,6 +12,7 @@ val count_local_fileinfos : sienv:SearchUtils.si_env -> int
 
 (* SLOWER: FileInfo.t objects don't include all the data we need, so this function has to re-parse the file. Use [update_file_facts] when possible. *)
 val update_file :
+  ctx:Provider_context.t ->
   sienv:SearchUtils.si_env ->
   path:Relative_path.t ->
   info:SearchUtils.info ->

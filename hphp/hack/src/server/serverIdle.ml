@@ -128,8 +128,9 @@ let init (genv : ServerEnv.genv) (root : Path.t) : unit =
           env );
       ( Periodical.always,
         fun ~env ->
+          let ctx = Provider_context.empty ~tcopt:env.ServerEnv.tcopt in
           let local_symbol_table =
-            SearchServiceRunner.run genv env.ServerEnv.local_symbol_table
+            SearchServiceRunner.run genv ctx env.ServerEnv.local_symbol_table
           in
           { env with ServerEnv.local_symbol_table } );
       ( Periodical.one_day,

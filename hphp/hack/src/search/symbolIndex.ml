@@ -218,8 +218,9 @@ let find_matching_symbols
  * this information should capture it here.
  *)
 let update_files
-    ~(sienv : si_env) ~(paths : (Relative_path.t * info * file_source) list) :
-    si_env =
+    ~(ctx : Provider_context.t)
+    ~(sienv : si_env)
+    ~(paths : (Relative_path.t * info * file_source) list) : si_env =
   match sienv.sie_provider with
   | NoIndex -> sienv
   | CustomIndex
@@ -227,7 +228,7 @@ let update_files
   | SqliteIndex ->
     List.fold paths ~init:sienv ~f:(fun sienv (path, info, detector) ->
         if detector = SearchUtils.TypeChecker then
-          LocalSearchService.update_file ~sienv ~path ~info
+          LocalSearchService.update_file ~ctx ~sienv ~path ~info
         else
           sienv)
 

@@ -1133,7 +1133,8 @@ let dump_debug_glean_deps
 let scan_files_for_symbol_index
     (filename : Relative_path.t)
     (popt : ParserOptions.t)
-    (sienv : SearchUtils.si_env) : SearchUtils.si_env =
+    (sienv : SearchUtils.si_env)
+    (ctx : Provider_context.t) : SearchUtils.si_env =
   let files_contents = Multifile.file_to_files filename in
   let (_, individual_file_info) = parse_name_and_decl popt files_contents in
   let fileinfo_list = Relative_path.Map.values individual_file_info in
@@ -1141,7 +1142,7 @@ let scan_files_for_symbol_index
     List.map fileinfo_list ~f:(fun fileinfo ->
         (filename, SearchUtils.Full fileinfo, SearchUtils.TypeChecker))
   in
-  SymbolIndex.update_files ~sienv ~paths:transformed_list
+  SymbolIndex.update_files ~ctx ~sienv ~paths:transformed_list
 
 let handle_mode
     mode
@@ -1190,7 +1191,6 @@ let handle_mode
   | Autocomplete
   | Autocomplete_manually_invoked ->
     let path = expect_single_file () in
-    let sienv = scan_files_for_symbol_index path popt sienv in
     let content = cat (Relative_path.to_absolute path) in
     (* Search backwards: there should only be one /real/ case. If there's multiple, *)
     (* guess that the others are preceding explanation comments *)
@@ -1214,6 +1214,7 @@ let handle_mode
         ~pos
         ~is_manually_invoked
     in
+    let sienv = scan_files_for_symbol_index path popt sienv ctx in
     let result =
       ServerAutoComplete.go_at_auto332_ctx
         ~ctx
@@ -1231,7 +1232,8 @@ let handle_mode
   | Ffp_autocomplete ->
     iter_over_files (fun filename ->
         try
-          let sienv = scan_files_for_symbol_index filename popt sienv in
+          let ctx = Provider_context.empty ~tcopt in
+          let sienv = scan_files_for_symbol_index filename popt sienv ctx in
           let file_text = cat (Relative_path.to_absolute filename) in
           (* TODO: Use a magic word/symbol to identify autocomplete location instead *)
           let args_regex = Str.regexp "AUTOCOMPLETE [1-9][0-9]* [1-9][0-9]*" in

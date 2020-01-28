@@ -43,6 +43,7 @@ val find_matching_symbols :
 (* SLOWER: Update from a FileInfo.t object.  May need to do extra work to parse
  * into a usable format. *)
 val update_files :
+  ctx:Provider_context.t ->
   sienv:SearchUtils.si_env ->
   paths:(Relative_path.t * SearchUtils.info * SearchUtils.file_source) list ->
   SearchUtils.si_env

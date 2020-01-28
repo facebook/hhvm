@@ -14,15 +14,17 @@ open ServerEnv
 module SLC = ServerLocalConfig
 include ServerInitTypes
 
-let run_search (genv : ServerEnv.genv) (t : float) (sienv : SearchUtils.si_env)
-    : SearchUtils.si_env =
+let run_search (genv : ServerEnv.genv) (env : ServerEnv.env) (t : float) :
+    SearchUtils.si_env =
+  let ctx = Provider_context.empty ~tcopt:env.tcopt in
+  let sienv = env.local_symbol_table in
   if
     SearchServiceRunner.should_run_completely
       genv
       sienv.SearchUtils.sie_provider
   then (
     (* The duration is already logged by SearchServiceRunner *)
-    let sienv = SearchServiceRunner.run_completely sienv in
+    let sienv = SearchServiceRunner.run_completely ctx sienv in
     HackEventLogger.update_search_end t;
     sienv
   ) else
@@ -219,12 +221,7 @@ let init
             ~workers:genv.workers;
       }
     in
-    let env =
-      {
-        env with
-        local_symbol_table = run_search genv t env.ServerEnv.local_symbol_table;
-      }
-    in
+    let env = { env with local_symbol_table = run_search genv env t } in
     SharedMem.init_done ();
     ServerUtils.print_hash_stats ();
     (env, init_result)

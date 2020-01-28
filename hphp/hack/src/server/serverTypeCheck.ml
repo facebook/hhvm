@@ -320,6 +320,7 @@ let parsing genv env to_check ~stop_at_errors =
 
   (* During integration tests, we want to pretend that search is run
     synchronously *)
+  let ctx = Provider_context.empty ~tcopt:env.tcopt in
   let env =
     {
       env with
@@ -330,7 +331,7 @@ let parsing genv env to_check ~stop_at_errors =
              genv
              sie.SearchUtils.sie_provider
          then
-           SearchServiceRunner.run_completely sie
+           SearchServiceRunner.run_completely ctx sie
          else
            sie);
     }

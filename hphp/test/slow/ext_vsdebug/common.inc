@@ -188,11 +188,11 @@ function setBreakpoints($breakpoints, $verify = true) {
             "path" => $bpsForFile{'path'},
             "name" => "test"
           ),
-        "breakpoints" => []
+        "breakpoints" => varray[]
       ));
 
-    $responseBps = [];
-    $responseLines = [];
+    $responseBps = varray[];
+    $responseLines = varray[];
     foreach ($bpsForFile{'breakpoints'} as $bp) {
       $setBreakpointsCommand['arguments']['breakpoints'][] = array("line" => $bp{'line'}, "condition" => $bp{'condition'});
       $responseBps[] = array("id" => ++ExtVsdebugCommonInc::$bpId, "verified" => false);
@@ -239,7 +239,7 @@ function setBreakpoints($breakpoints, $verify = true) {
   }
 }
 
-function vsDebugLaunch($scriptPath, $sendDefaultInit = true, $breakpoints = []) {
+function vsDebugLaunch($scriptPath, $sendDefaultInit = true, $breakpoints = varray[]) {
   $descriptorspec = array(
      0 => array("pipe", "r"), // stdin
      1 => array("pipe", "w"), // stdout
@@ -419,7 +419,7 @@ function vsDebugLaunch($scriptPath, $sendDefaultInit = true, $breakpoints = []) 
     checkObjEqualRecursively($msg{'body'}, array("allThreadsContinued" => false));
   }
 
-  return [$process, $pipes, $client];
+  return varray[$process, $pipes, $client];
 }
 
 // Polls up to 10 seconds waiting for the specified process to exit.

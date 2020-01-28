@@ -271,22 +271,22 @@ TypedValue HHVM_FUNCTION(array_fill,
     raise_invalid_argument_warning("Number of elements can't be negative");
     return make_tv<KindOfBoolean>(false);
   } else if (num == 0) {
-    return tvReturn(empty_array());
+    return tvReturn(start_index == 0 ? empty_varray() : empty_darray());
   }
 
   if (start_index == 0) {
-    PackedArrayInit pai(num, CheckAllocation{});
+    VArrayInit vai(num);
     for (size_t k = 0; k < num; k++) {
-      pai.append(value);
+      vai.append(value);
     }
-    return tvReturn(pai.toVariant());
+    return make_array_like_tv(vai.create());
   } else {
-    ArrayInit ret(num, ArrayInit::Mixed{}, CheckAllocation{});
+    DArrayInit ret(num, CheckAllocation{});
     ret.set(start_index, value);
     for (int i = num - 1; i > 0; i--) {
       ret.append(value);
     }
-    return tvReturn(ret.toVariant());
+    return make_array_like_tv(ret.create());
   }
 }
 

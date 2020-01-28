@@ -1141,9 +1141,7 @@ let scan_files_for_symbol_index
     List.map fileinfo_list ~f:(fun fileinfo ->
         (filename, SearchUtils.Full fileinfo, SearchUtils.TypeChecker))
   in
-  let sienv_ref = ref sienv in
-  SymbolIndex.update_files ~sienv:sienv_ref ~paths:transformed_list;
-  !sienv_ref
+  SymbolIndex.update_files ~sienv ~paths:transformed_list
 
 let handle_mode
     mode

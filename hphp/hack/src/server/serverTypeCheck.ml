@@ -300,12 +300,18 @@ let parsing genv env to_check ~stop_at_errors =
   Ast_provider.remove_batch ide_files;
   Fixme_provider.remove_batch ide_files;
 
-  SymbolIndex.remove_files ~sienv:env.local_symbol_table ~paths:to_check;
+  let env =
+    {
+      env with
+      local_symbol_table =
+        SymbolIndex.remove_files ~sienv:env.local_symbol_table ~paths:to_check;
+    }
+  in
   SharedMem.collect `gentle;
   let get_next =
     MultiWorker.next genv.workers (Relative_path.Set.elements disk_files)
   in
-  let ((fast, errors, failed_parsing) as res) =
+  let (fast, errors, failed_parsing) =
     Parsing_service.go genv.workers ide_files ~get_next env.popt ~trace:true
   in
   SearchServiceRunner.update_fileinfo_map
@@ -314,11 +320,21 @@ let parsing genv env to_check ~stop_at_errors =
 
   (* During integration tests, we want to pretend that search is run
     synchronously *)
-  let sie = env.local_symbol_table in
-  if
-    SearchServiceRunner.should_run_completely genv !sie.SearchUtils.sie_provider
-  then
-    SearchServiceRunner.run_completely env.local_symbol_table;
+  let env =
+    {
+      env with
+      local_symbol_table =
+        (let sie = env.local_symbol_table in
+         if
+           SearchServiceRunner.should_run_completely
+             genv
+             sie.SearchUtils.sie_provider
+         then
+           SearchServiceRunner.run_completely sie
+         else
+           sie);
+    }
+  in
 
   if stop_at_errors then (
     (* Revert changes and ignore results for IDE files that failed parsing *)
@@ -343,9 +359,9 @@ let parsing genv env to_check ~stop_at_errors =
     Ast_provider.local_changes_pop_stack ();
     Fixme_provider.local_changes_pop_stack ();
 
-    (fast, errors, failed_parsing)
+    (env, fast, errors, failed_parsing)
   ) else
-    res
+    (env, fast, errors, failed_parsing)
 
 (*****************************************************************************)
 (* At any given point in time, we want to know what each file defines.
@@ -734,8 +750,8 @@ functor
         (genv : genv)
         (env : env)
         ~(files_to_parse : Relative_path.Set.t)
-        ~(stop_at_errors : bool) : parsing_result =
-      let (fast_parsed, errorl, failed_parsing) =
+        ~(stop_at_errors : bool) : ServerEnv.env * parsing_result =
+      let (env, fast_parsed, errorl, failed_parsing) =
         parsing genv env files_to_parse ~stop_at_errors
       in
       let errors = env.errorl in
@@ -743,7 +759,7 @@ functor
         Errors.(incremental_update_set errors errorl files_to_parse Parsing)
       in
       let errors = clear_failed_parsing errors failed_parsing in
-      { parse_errors = errors; failed_parsing; fast_parsed }
+      (env, { parse_errors = errors; failed_parsing; fast_parsed })
 
     type naming_result = {
       errors_after_naming: Errors.t;
@@ -1086,7 +1102,7 @@ functor
       Hh_logger.log "Begin %s" logstring;
 
       (* Parse all changed files. *)
-      let { parse_errors = errors; failed_parsing; fast_parsed } =
+      let (env, { parse_errors = errors; failed_parsing; fast_parsed }) =
         do_parsing genv env ~files_to_parse ~stop_at_errors
       in
       let hs = SharedMem.heap_size () in

@@ -14,19 +14,19 @@ open ServerEnv
 module SLC = ServerLocalConfig
 include ServerInitTypes
 
-let run_search
-    (genv : ServerEnv.genv) (t : float) (sienv : SearchUtils.si_env ref) : unit
-    =
+let run_search (genv : ServerEnv.genv) (t : float) (sienv : SearchUtils.si_env)
+    : SearchUtils.si_env =
   if
     SearchServiceRunner.should_run_completely
       genv
-      !sienv.SearchUtils.sie_provider
+      sienv.SearchUtils.sie_provider
   then (
     (* The duration is already logged by SearchServiceRunner *)
-    SearchServiceRunner.run_completely sienv;
-    HackEventLogger.update_search_end t
+    let sienv = SearchServiceRunner.run_completely sienv in
+    HackEventLogger.update_search_end t;
+    sienv
   ) else
-    ()
+    sienv
 
 let save_state
     (genv : ServerEnv.genv) (env : ServerEnv.env) (output_filename : string) :
@@ -202,19 +202,29 @@ let init
     let (env, t) = ServerAiInit.ai_check genv env.naming_table env t in
     (* Configure symbol index settings *)
     let namespace_map = GlobalOptions.po_auto_namespace_map env.tcopt in
-    env.local_symbol_table :=
-      SymbolIndex.initialize
-        ~globalrev:None
-        ~gleanopt:env.gleanopt
-        ~namespace_map
-        ~provider_name:
-          genv.local_config.ServerLocalConfig.symbolindex_search_provider
-        ~quiet:genv.local_config.ServerLocalConfig.symbolindex_quiet
-        ~ignore_hh_version:(ServerArgs.ignore_hh_version genv.options)
-        ~savedstate_file_opt:
-          genv.local_config.ServerLocalConfig.symbolindex_file
-        ~workers:genv.workers;
-    run_search genv t env.ServerEnv.local_symbol_table;
+    let env =
+      {
+        env with
+        local_symbol_table =
+          SymbolIndex.initialize
+            ~globalrev:None
+            ~gleanopt:env.gleanopt
+            ~namespace_map
+            ~provider_name:
+              genv.local_config.ServerLocalConfig.symbolindex_search_provider
+            ~quiet:genv.local_config.ServerLocalConfig.symbolindex_quiet
+            ~ignore_hh_version:(ServerArgs.ignore_hh_version genv.options)
+            ~savedstate_file_opt:
+              genv.local_config.ServerLocalConfig.symbolindex_file
+            ~workers:genv.workers;
+      }
+    in
+    let env =
+      {
+        env with
+        local_symbol_table = run_search genv t env.ServerEnv.local_symbol_table;
+      }
+    in
     SharedMem.init_done ();
     ServerUtils.print_hash_stats ();
     (env, init_result)

@@ -43,20 +43,20 @@ val find_matching_symbols :
 (* SLOWER: Update from a FileInfo.t object.  May need to do extra work to parse
  * into a usable format. *)
 val update_files :
-  sienv:SearchUtils.si_env ref ->
+  sienv:SearchUtils.si_env ->
   paths:(Relative_path.t * SearchUtils.info * SearchUtils.file_source) list ->
-  unit
+  SearchUtils.si_env
 
 (* FASTER: Update from facts directly *)
 val update_from_facts :
-  sienv:SearchUtils.si_env ref ->
+  sienv:SearchUtils.si_env ->
   path:Relative_path.t ->
   facts:Facts.facts ->
-  unit
+  SearchUtils.si_env
 
 (* Notify the search service that certain files have been removed locally *)
 val remove_files :
-  sienv:SearchUtils.si_env ref -> paths:Relative_path.Set.t -> unit
+  sienv:SearchUtils.si_env -> paths:Relative_path.Set.t -> SearchUtils.si_env
 
 (* Identify the position of an item *)
 val get_position_for_symbol :

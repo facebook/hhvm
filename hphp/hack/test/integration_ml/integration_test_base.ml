@@ -111,7 +111,7 @@ let setup_server ?custom_config ?(hhi_files = []) () =
   {
     result with
     ServerEnv.disk_needs_parsing = hhi_set;
-    ServerEnv.local_symbol_table = ref sienv;
+    ServerEnv.local_symbol_table = sienv;
   }
 
 let default_loop_input =
@@ -160,7 +160,13 @@ let run_loop_once :
   (* Always pick up disk changes in tests immediately *)
   let env = ServerEnv.{ env with last_notifier_check_time = 0.0 } in
   let env = ServerMain.serve_one_iteration genv env client_provider in
-  SearchServiceRunner.run_completely env.ServerEnv.local_symbol_table;
+  let env =
+    {
+      env with
+      ServerEnv.local_symbol_table =
+        SearchServiceRunner.run_completely env.ServerEnv.local_symbol_table;
+    }
+  in
   ( env,
     {
       did_read_disk_changes = !did_read_disk_changes_ref;

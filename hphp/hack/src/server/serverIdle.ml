@@ -128,8 +128,10 @@ let init (genv : ServerEnv.genv) (root : Path.t) : unit =
           env );
       ( Periodical.always,
         fun ~env ->
-          SearchServiceRunner.run genv env.ServerEnv.local_symbol_table;
-          env );
+          let local_symbol_table =
+            SearchServiceRunner.run genv env.ServerEnv.local_symbol_table
+          in
+          { env with ServerEnv.local_symbol_table } );
       ( Periodical.one_day,
         fun ~env ->
           exit_if_unused ();

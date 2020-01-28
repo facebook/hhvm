@@ -143,15 +143,13 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     in
     (* Since this is being executed from the command line,
      * let's turn on the flags that increase accuracy but slow it down *)
-    let old_sienv = env.ServerEnv.local_symbol_table in
     let sienv =
-      ref
-        {
-          !old_sienv with
-          SearchUtils.sie_resolve_signatures = true;
-          SearchUtils.sie_resolve_positions = true;
-          SearchUtils.sie_resolve_local_decl = true;
-        }
+      {
+        env.ServerEnv.local_symbol_table with
+        SearchUtils.sie_resolve_signatures = true;
+        SearchUtils.sie_resolve_positions = true;
+        SearchUtils.sie_resolve_local_decl = true;
+      }
     in
     (* feature not implemented here; it only works for LSP *)
     let (ctx, entry) =
@@ -173,15 +171,17 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         ~filename:Relative_path.default
         ~text:content
     in
-    (match facts_opt with
-    | None -> ()
-    | Some facts ->
-      SymbolIndex.update_from_facts ~sienv ~path:Relative_path.default ~facts);
+    let sienv =
+      match facts_opt with
+      | None -> sienv
+      | Some facts ->
+        SymbolIndex.update_from_facts ~sienv ~path:Relative_path.default ~facts
+    in
     let result =
       ServerAutoComplete.go_at_auto332_ctx
         ~ctx
         ~entry
-        ~sienv:!sienv
+        ~sienv
         ~autocomplete_context
     in
     (env, result.With_complete_flag.value)
@@ -316,7 +316,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       (env, Error "There are typecheck errors; cannot generate saved state.")
   | SEARCH (query, type_) ->
     let lst = env.ServerEnv.local_symbol_table in
-    (env, ServerSearch.go query type_ !lst)
+    (env, ServerSearch.go query type_ lst)
   | COVERAGE_COUNTS path -> (env, ServerCoverageMetric.go path genv env)
   | LINT fnl ->
     let ctx = Provider_context.empty ~tcopt:env.tcopt in
@@ -363,7 +363,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
           ServerAutoComplete.go_ctx
             ~ctx
             ~entry
-            ~sienv:!(env.ServerEnv.local_symbol_table)
+            ~sienv:env.ServerEnv.local_symbol_table
             ~is_manually_invoked
             ~line:pos.File_content.line
             ~column:pos.File_content.column)
@@ -383,7 +383,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         content
         pos
         ~filter_by_token:false
-        ~sienv:!(env.ServerEnv.local_symbol_table)
+        ~sienv:env.ServerEnv.local_symbol_table
     in
     ( env,
       {

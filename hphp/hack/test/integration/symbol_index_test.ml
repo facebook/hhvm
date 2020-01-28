@@ -44,14 +44,12 @@ let assert_ns_matches (expected_ns : string) (actual : SearchUtils.si_results) :
   ()
 
 let assert_autocomplete
-    ~(query_text : string)
-    ~(kind : si_kind)
-    ~(expected : int)
-    ~(sienv : si_env ref) : unit =
+    ~(query_text : string) ~(kind : si_kind) ~(expected : int) ~(sienv : si_env)
+    : unit =
   (* Search for the symbol *)
   let results =
     SymbolIndex.find_matching_symbols
-      ~sienv:!sienv
+      ~sienv
       ~query_text
       ~max_results:100
       ~kind_filter:(Some kind)
@@ -118,8 +116,7 @@ let run_index_builder (harness : Test_harness.t) : si_env =
   sienv
 
 let test_sqlite_plus_local (harness : Test_harness.t) : bool =
-  let sienv = ref SearchUtils.quiet_si_env in
-  sienv := run_index_builder harness;
+  let sienv = run_index_builder harness in
 
   (* Find one of each major type *)
   assert_autocomplete ~query_text:"UsesA" ~kind:SI_Class ~expected:1 ~sienv;
@@ -142,7 +139,7 @@ let test_sqlite_plus_local (harness : Test_harness.t) : bool =
   let s = Relative_path.Set.empty in
   let s = Relative_path.Set.add s bar1path in
   let s = Relative_path.Set.add s foo3path in
-  SymbolIndex.remove_files ~sienv ~paths:s;
+  let sienv = SymbolIndex.remove_files ~sienv ~paths:s in
   Hh_logger.log "Removed files";
 
   (* Two of these have been removed! *)
@@ -197,8 +194,8 @@ let test_sqlite_plus_local (harness : Test_harness.t) : bool =
       (foo3path, Full foo3fileinfo, TypeChecker);
     ]
   in
-  SymbolIndex.update_files ~sienv ~paths:changelist;
-  let n = LocalSearchService.count_local_fileinfos !sienv in
+  let sienv = SymbolIndex.update_files ~sienv ~paths:changelist in
+  let n = LocalSearchService.count_local_fileinfos sienv in
   Hh_logger.log "Added back; local search service now contains %d files" n;
 
   (* Find one of each major type *)
@@ -222,8 +219,7 @@ let test_sqlite_plus_local (harness : Test_harness.t) : bool =
 (* Test the ability of the index builder to capture a variety of
  * names and kinds correctly *)
 let test_builder_names (harness : Test_harness.t) : bool =
-  let sienv = ref SearchUtils.quiet_si_env in
-  sienv := run_index_builder harness;
+  let sienv = run_index_builder harness in
 
   (* Assert that we can capture all kinds of symbols *)
   assert_autocomplete ~query_text:"UsesA" ~kind:SI_Class ~expected:1 ~sienv;

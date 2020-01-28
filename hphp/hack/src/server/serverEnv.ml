@@ -183,7 +183,7 @@ type env = {
   recent_recheck_loop_stats: recheck_loop_stats;
   last_recheck_info: recheck_info option;
   (* Symbols for locally changed files *)
-  local_symbol_table: SearchUtils.si_env ref; [@opaque]
+  local_symbol_table: SearchUtils.si_env; [@opaque]
 }
 [@@deriving show]
 

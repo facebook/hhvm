@@ -229,9 +229,7 @@ let initialize
       SearchUtils.use_ranked_autocomplete;
     }
   in
-  let server_env =
-    { server_env with ServerEnv.local_symbol_table = ref sienv }
-  in
+  let server_env = { server_env with ServerEnv.local_symbol_table = sienv } in
   let start_time = log_startup_time "symbol_index" start_time in
   if use_ranked_autocomplete then AutocompleteRankService.initialize ();
   let%lwt load_state_result =
@@ -450,7 +448,7 @@ let handle_message :
     let (state, ctx, entry) =
       make_context_from_document_location initialized_state document_location
     in
-    let sienv = !(initialized_state.server_env.ServerEnv.local_symbol_table) in
+    let sienv = initialized_state.server_env.ServerEnv.local_symbol_table in
     let result =
       ServerAutoComplete.go_ctx
         ~ctx

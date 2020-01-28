@@ -218,36 +218,38 @@ let find_matching_symbols
  * this information should capture it here.
  *)
 let update_files
-    ~(sienv : si_env ref) ~(paths : (Relative_path.t * info * file_source) list)
-    : unit =
-  match !sienv.sie_provider with
-  | NoIndex -> ()
+    ~(sienv : si_env) ~(paths : (Relative_path.t * info * file_source) list) :
+    si_env =
+  match sienv.sie_provider with
+  | NoIndex -> sienv
   | CustomIndex
   | LocalIndex
   | SqliteIndex ->
-    List.iter paths ~f:(fun (path, info, detector) ->
+    List.fold paths ~init:sienv ~f:(fun sienv (path, info, detector) ->
         if detector = SearchUtils.TypeChecker then
-          sienv := LocalSearchService.update_file ~sienv:!sienv ~path ~info)
+          LocalSearchService.update_file ~sienv ~path ~info
+        else
+          sienv)
 
 (* Update from fast facts parser directly *)
 let update_from_facts
-    ~(sienv : si_env ref) ~(path : Relative_path.t) ~(facts : Facts.facts) :
-    unit =
-  sienv := LocalSearchService.update_file_facts ~sienv:!sienv ~path ~facts
+    ~(sienv : si_env) ~(path : Relative_path.t) ~(facts : Facts.facts) : si_env
+    =
+  LocalSearchService.update_file_facts ~sienv ~path ~facts
 
 (*
  * This method is called when the typechecker is about to re-check a file.
  * Any local caches should be cleared of values for this file.
  *)
-let remove_files
-    ~(sienv : SearchUtils.si_env ref) ~(paths : Relative_path.Set.t) : unit =
-  match !sienv.sie_provider with
-  | NoIndex -> ()
+let remove_files ~(sienv : SearchUtils.si_env) ~(paths : Relative_path.Set.t) :
+    si_env =
+  match sienv.sie_provider with
+  | NoIndex -> sienv
   | CustomIndex
   | LocalIndex
   | SqliteIndex ->
-    Relative_path.Set.iter paths ~f:(fun path ->
-        sienv := LocalSearchService.remove_file ~sienv:!sienv ~path)
+    Relative_path.Set.fold paths ~init:sienv ~f:(fun path sienv ->
+        LocalSearchService.remove_file ~sienv ~path)
 
 (* Fetch best available position information for a symbol *)
 let get_position_for_symbol (symbol : string) (kind : si_kind) :

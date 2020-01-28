@@ -340,5 +340,5 @@ let make_env ?init_id config =
     diag_subscribe = None;
     recent_recheck_loop_stats = empty_recheck_loop_stats;
     last_recheck_info = None;
-    local_symbol_table = ref SearchUtils.default_si_env;
+    local_symbol_table = SearchUtils.default_si_env;
   }

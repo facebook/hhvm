@@ -55,14 +55,13 @@ using DecodedHandlerPtr = req::unique_ptr<AutoloadHandler::DecodedHandler>;
 
 //////////////////////////////////////////////////////////////////////
 
-Variant invoke_for_autoload(const String& function, const Variant& params) {
-  Func* func = Unit::loadFunc(function.get());
-  if (func && (isContainer(params) || params.isNull())) {
-    return Variant::attach(g_context->invokeFunc(func, params));
+void invoke_for_autoload(const String& function, const Array& params) {
+  if (auto* func = Unit::loadFunc(function.get())) {
+    g_context->invokeFunc(func, params);
+    return;
   }
   raise_warning("call_user_func to non-existent function %s",
     function.c_str());
-  return Variant(false);
 }
 
 /*
@@ -463,7 +462,7 @@ bool AutoloadHandler::autoloadClassPHP5Impl(const String& className,
     assertx(l_className == className);
   };
 
-  Array params = PackedArrayInit(1).append(className).toArray();
+  auto params = make_varray(className);
   if (!m_spl_stack_inited && !forceSplStack) {
     if (function_exists(s_autoload)) {
       invoke_for_autoload(s_autoload, params);

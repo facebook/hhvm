@@ -185,16 +185,13 @@ let parse_options () =
   let disallow_ambiguous_lambda = ref None in
   let disallow_array_typehint = ref None in
   let disallow_array_literal = ref None in
-  let no_fallback_in_namespaces = ref None in
   let dynamic_view = ref None in
-  let allow_user_attributes = ref None in
   let auto_namespace_map = ref None in
   let unsafe_rx = ref (Some false) in
   let log_inference_constraints = ref None in
   let new_inference_lambda = ref (Some false) in
   let timeout = ref None in
   let disallow_invalid_arraykey = ref None in
-  let allow_ref_param_on_constructor = ref (Some false) in
   let disallow_byref_dynamic_calls = ref (Some false) in
   let disallow_byref_calls = ref (Some false) in
   let set_bool x () = x := Some true in
@@ -239,9 +236,6 @@ let parse_options () =
   let options =
     [
       ("--ai", Arg.String set_ai, " Run the abstract interpreter (Zoncolan)");
-      ( "--allow-user-attributes",
-        Arg.Unit (set_bool allow_user_attributes),
-        " Allow all user attributes" );
       ( "--deregister-attributes",
         Arg.Unit (set_bool deregister_attributes),
         " Ignore all functions with attribute '__PHPStdLib'" );
@@ -365,10 +359,6 @@ let parse_options () =
       ( "--disallow-array-literal",
         Arg.Unit (set_bool disallow_array_literal),
         " Disallow usage of array literals." );
-      ( "--no-fallback-in-namespaces",
-        Arg.Unit (set_bool no_fallback_in_namespaces),
-        " Treat foo() as namespace\\foo() and MY_CONST as namespace\\MY_CONST."
-      );
       ( "--dynamic-view",
         Arg.Unit (set_bool dynamic_view),
         " Turns on dynamic view, replacing Tany with dynamic" );
@@ -408,9 +398,6 @@ let parse_options () =
       ( "--check-xhp-attribute",
         Arg.Set check_xhp_attribute,
         " Typechecks xhp required attributes" );
-      ( "--allow-ref-param-on-constructor",
-        Arg.Unit (set_bool allow_ref_param_on_constructor),
-        "Allow class constructors to take reference parameters" );
       ( "--disallow-byref-dynamic-calls",
         Arg.Unit (set_bool disallow_byref_dynamic_calls),
         " Disallow passing arguments by reference to dynamically called functions [e.g. $foo(&$bar)]"

@@ -13,7 +13,7 @@ const CONDCONST2 = 'zyzzy';
 const CONDCONST3 = vec[1, 2, 3];
 const CONDCONST4 = varray[1, 2, 3];
 const CONDCONST5 = darray['a' => 100, 'b' => 200];
-const CONDCONST6 = [1, 2, 3];
+const CONDCONST6 = varray[1, 2, 3];
 
 type VAlias = varray;
 type DAlias = darray;

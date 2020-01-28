@@ -763,6 +763,12 @@ let get_method_declaration method_ ~from_interface =
     else
       ""
   in
+  let final =
+    if method_.m_final then
+      "final"
+    else
+      ""
+  in
   let visibility = string_of_visibility method_.m_visibility in
   let static =
     if method_.m_static then
@@ -796,9 +802,10 @@ let get_method_declaration method_ ~from_interface =
       "{throw new \\Exception();}"
   in
   Printf.sprintf
-    "%s %s %s %s function %s%s(%s)%s%s"
+    "%s %s %s %s %s function %s%s(%s)%s%s"
     user_attributes
     abstract
+    final
     visibility
     static
     name

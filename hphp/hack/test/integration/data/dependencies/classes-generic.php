@@ -94,3 +94,17 @@ class Kwery<TValue, TResult as Result<TValue>> implements IKwery<TResult> {}
 function kwery(): Kwery<int, Result<int>> {
   return new Kwery();
 }
+
+<<__ConsistentConstruct>>
+abstract class Box<+T> {
+  private function __construct(private T $value) {}
+  final public static function make(T $value): this {
+    return new static($value);
+  }
+}
+
+class IntBox extends Box<int> {}
+
+function with_contra_tparam(): Box<int> {
+  return IntBox::make(42);
+}

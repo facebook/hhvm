@@ -171,6 +171,7 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
             "\\WithOptionalConstructorArguments::get",
             "\\TExtendsWithConsistentConstruct::get",
             "\\with_IEWGPCOUP",
+            "\\with_contra_tparam",
         ]
 
         for function_name in function_names:

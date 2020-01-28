@@ -816,6 +816,7 @@ let get_method_declaration method_ ~from_interface =
 
 let get_prop_declaration ctx prop =
   let name = snd prop.cv_id in
+  let user_attributes = string_of_user_attributes prop.cv_user_attributes in
   let visibility = string_of_visibility prop.cv_visibility in
   let static =
     if prop.cv_is_static then
@@ -832,7 +833,14 @@ let get_prop_declaration ctx prop =
     (* Untyped prop, not supported for now *)
     | (None, Some _) -> raise Unsupported
   in
-  Printf.sprintf "%s %s %s $%s%s;" visibility static type_ name init
+  Printf.sprintf
+    "%s %s %s %s $%s%s;"
+    user_attributes
+    visibility
+    static
+    type_
+    name
+    init
 
 let get_typeconst_declaration typeconst =
   let abstract =

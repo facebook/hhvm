@@ -132,3 +132,16 @@ class WithReactiveMethods {
     $this->shallow_reactive();
   }
 }
+
+class WithLateInit {
+  <<__LateInit>>
+  private int $count;
+
+  public function getCount(): int {
+    return $this->count;
+  }
+
+  public function setCount(int $count): void {
+    $this->count = $count;
+  }
+}

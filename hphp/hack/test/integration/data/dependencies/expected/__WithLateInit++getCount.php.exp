@@ -1,0 +1,11 @@
+<?hh
+class WithLateInit {
+  <<__LateInit>> private int $count;
+  public function getCount(): int {
+    return $this->count;
+  }
+}
+<<__Rx>>
+function extract_standalone_make_default(): nothing {
+  throw new \Exception();
+}

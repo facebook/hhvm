@@ -172,6 +172,7 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
             "\\TExtendsWithConsistentConstruct::get",
             "\\with_IEWGPCOUP",
             "\\with_contra_tparam",
+            "\\WithLateInit::getCount",
         ]
 
         for function_name in function_names:

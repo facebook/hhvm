@@ -87,6 +87,7 @@ type t = {
   tco_error_php_lambdas: bool;
   tco_disallow_discarded_nullable_awaitables: bool;
   po_enable_xhp_class_modifier: bool;
+  po_enable_first_class_function_pointers: bool;
 }
 [@@deriving show]
 
@@ -244,6 +245,7 @@ let default =
     tco_error_php_lambdas = false;
     tco_disallow_discarded_nullable_awaitables = false;
     po_enable_xhp_class_modifier = false;
+    po_enable_first_class_function_pointers = false;
   }
 
 let make
@@ -340,6 +342,8 @@ let make
     ?(tco_disallow_discarded_nullable_awaitables =
       default.tco_disallow_discarded_nullable_awaitables)
     ?(po_enable_xhp_class_modifier = default.po_enable_xhp_class_modifier)
+    ?(po_enable_first_class_function_pointers =
+      default.po_enable_first_class_function_pointers)
     () =
   {
     tco_experimental_features;
@@ -421,6 +425,7 @@ let make
     tco_error_php_lambdas;
     tco_disallow_discarded_nullable_awaitables;
     po_enable_xhp_class_modifier;
+    po_enable_first_class_function_pointers;
   }
 
 let tco_experimental_feature_enabled t s =
@@ -594,3 +599,5 @@ let tco_disallow_discarded_nullable_awaitables t =
   t.tco_disallow_discarded_nullable_awaitables
 
 let po_enable_xhp_class_modifier t = t.po_enable_xhp_class_modifier
+let po_enable_first_class_function_pointers t =
+  t.po_enable_first_class_function_pointers

@@ -859,6 +859,7 @@ std::string mangleUnitSha1(const std::string& fileSha1,
     + (RuntimeOption::EvalHackRecords ? '1' : '0')
     + (RuntimeOption::EvalHackRecordArrays ? '1' : '0')
     + (RuntimeOption::EvalArrayProvenance ? '1' : '0')
+    + (RuntimeOption::EnableFirstClassFunctionPointers ? '1' : '0')
     + std::to_string(RuntimeOption::EvalEnforceGenericsUB)
     + std::to_string(RuntimeOption::EvalAssemblerMaxScalarSize)
     + opts.cacheKeyRaw()

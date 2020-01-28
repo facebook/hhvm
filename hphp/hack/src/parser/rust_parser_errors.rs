@@ -5132,6 +5132,21 @@ where
         }
     }
 
+    fn disabled_function_pointer_expression_error(&mut self, node: &'a Syntax<Token, Value>) {
+        if let FunctionPointerExpression(_) = &node.syntax {
+            if !self
+                .env
+                .parser_options
+                .po_enable_first_class_function_pointers
+            {
+                self.errors.push(Self::make_error_from_node(
+                    node,
+                    errors::function_pointers_disabled,
+                ))
+            }
+        }
+    }
+
     fn strip_ns(name: &str) -> &str {
         match name.chars().next() {
             Some('\\') => &name[1..],
@@ -5312,6 +5327,7 @@ where
             }
             OldAttributeSpecification(_) => self.disabled_legacy_attribute_syntax_errors(node),
             SoftTypeSpecifier(_) => self.disabled_legacy_soft_typehint_errors(node),
+            FunctionPointerExpression(_) => self.disabled_function_pointer_expression_error(node),
             _ => {}
         }
         self.lval_errors(node);

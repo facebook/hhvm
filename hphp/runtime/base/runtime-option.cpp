@@ -822,6 +822,7 @@ bool RuntimeOption::DisableNontoplevelDeclarations = false;
 bool RuntimeOption::DisableStaticClosures = false;
 bool RuntimeOption::DisableHaltCompiler = false;
 bool RuntimeOption::EnableClassLevelWhereClauses = false;
+bool RuntimeOption::EnableFirstClassFunctionPointers = false;
 
 #ifdef HHVM_DYNAMIC_EXTENSION_DIR
 std::string RuntimeOption::ExtensionDir = HHVM_DYNAMIC_EXTENSION_DIR;
@@ -1985,6 +1986,8 @@ void RuntimeOption::Load(
                  "Hack.Lang.CheckIntOverflow", 0);
     Config::Bind(StrictArrayFillKeys, ini, config,
                  "Hack.Lang.StrictArrayFillKeys", HackStrictOption::ON);
+    Config::Bind(EnableFirstClassFunctionPointers, ini, config,
+                 "Hack.Lang.EnableFirstClassFunctionPointers", 0);
 
     Config::Bind(LookForTypechecker, ini, config,
                  "Hack.Lang.LookForTypechecker", false);

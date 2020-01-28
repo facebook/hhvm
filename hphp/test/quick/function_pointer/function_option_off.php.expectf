@@ -1,0 +1,1 @@
+Fatal error: Function pointers are not enabled. Use the hhvm.hack.lang.enable_first_class_function_pointers parser flag in %s/test/quick/function_pointer/function_option_off.php on line 5

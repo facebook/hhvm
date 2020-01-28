@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5af7bf9f2dd4d88844eea9e16739f44f>>
+// @generated SignedSource<<5a1fb15dfba7b33bd51c2256e6694be9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -588,6 +588,8 @@ pub enum Typing {
     SplatArrayRequired,
     SplatArrayVariadic,
     ExceptionOccurred,
+    InvalidReifiedFunctionPointer,
+    BadFunctionPointerConstruction,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]

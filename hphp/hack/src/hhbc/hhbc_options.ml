@@ -57,6 +57,7 @@ type t = {
   option_check_int_overflow: bool;
   option_enable_xhp_class_modifier: bool;
   option_rust_lowerer: bool;
+  option_enable_first_class_function_pointers: bool;
 }
 
 let default =
@@ -109,6 +110,7 @@ let default =
     option_check_int_overflow = false;
     option_enable_xhp_class_modifier = false;
     option_rust_lowerer = true;
+    option_enable_first_class_function_pointers = false;
   }
 
 let constant_folding o = o.option_constant_folding
@@ -204,6 +206,9 @@ let enforce_generics_ub o = o.option_enforce_generics_ub
 let check_int_overflow o = o.option_check_int_overflow
 
 let rust_lowerer o = o.option_rust_lowerer
+
+let enable_first_class_function_pointers o =
+  o.option_enable_first_class_function_pointers
 
 let to_string o =
   let aliased_namespaces_str =
@@ -387,6 +392,11 @@ let set_option options name value =
     { options with option_check_int_overflow = int_of_string value > 0 }
   | "hhvm.hack.lang.rust_lowerer" ->
     { options with option_rust_lowerer = as_bool value }
+  | "hhvm.hack.lang.enable_first_class_function_pointers" ->
+    {
+      options with
+      option_enable_first_class_function_pointers = int_of_string value > 0;
+    }
   | _ -> options
 
 let get_value_from_config_ config key =
@@ -592,6 +602,11 @@ let value_setters =
     @@ fun opts v -> { opts with option_check_int_overflow = v > 0 } );
     ( set_value "hhvm.hack.lang.rust_lowerer" get_value_from_config_int
     @@ fun opts v -> { opts with option_rust_lowerer = v = 1 } );
+    ( set_value
+        "hhvm.hack.lang.enable_first_class_function_pointers"
+        get_value_from_config_int
+    @@ fun opts v ->
+      { opts with option_enable_first_class_function_pointers = v = 1 } );
   ]
 
 let extract_config_options_from_json ~init config_json =

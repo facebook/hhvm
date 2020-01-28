@@ -575,6 +575,7 @@ struct RuntimeOption {
   static std::string ProfDataTag;
   static bool DumpPreciseProfData;
   static bool EnablePocketUniverses;
+  static bool EnableFirstClassFunctionPointers;
 
   // ENABLED (1) selects PHP7 behavior.
   static bool PHP7_IntSemantics;

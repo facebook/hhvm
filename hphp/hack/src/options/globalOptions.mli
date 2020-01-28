@@ -224,6 +224,8 @@ type t = {
    * New style: xhp class name {}
    *)
   po_enable_xhp_class_modifier: bool;
+  (* Enables the special first class function pointer syntax foo<> *)
+  po_enable_first_class_function_pointers: bool;
 }
 [@@deriving show]
 
@@ -306,6 +308,7 @@ val make :
   ?tco_error_php_lambdas:bool ->
   ?tco_disallow_discarded_nullable_awaitables:bool ->
   ?po_enable_xhp_class_modifier:bool ->
+  ?po_enable_first_class_function_pointers:bool ->
   unit ->
   t
 
@@ -494,3 +497,4 @@ val tco_error_php_lambdas : t -> bool
 val tco_disallow_discarded_nullable_awaitables : t -> bool
 
 val po_enable_xhp_class_modifier : t -> bool
+val po_enable_first_class_function_pointers : t -> bool

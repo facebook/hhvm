@@ -110,7 +110,9 @@ let parse_file ~hhbc_options filename text :
         ~disable_unset_class_const:(disable_unset_class_const co)
         ~disallow_func_ptrs_in_constants:(disallow_func_ptrs_in_constants co)
         ~enable_xhp_class_modifier:(enable_xhp_class_modifier co)
-        ~rust_lowerer:(rust_lowerer co))
+        ~rust_lowerer:(rust_lowerer co)
+        ~enable_first_class_function_pointers:
+          (enable_first_class_function_pointers co))
   in
   let env =
     Full_fidelity_ast.make_env

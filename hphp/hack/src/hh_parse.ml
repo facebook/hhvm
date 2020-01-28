@@ -71,6 +71,7 @@ module FullFidelityParseArgs = struct
     disallow_func_ptrs_in_constants: bool;
     error_php_lambdas: bool;
     disallow_discarded_nullable_awaitables: bool;
+    enable_first_class_function_pointers: bool;
   }
 
   let make
@@ -106,7 +107,8 @@ module FullFidelityParseArgs = struct
       disable_halt_compiler
       disallow_func_ptrs_in_constants
       error_php_lambdas
-      disallow_discarded_nullable_awaitables =
+      disallow_discarded_nullable_awaitables
+      enable_first_class_function_pointers =
     {
       full_fidelity_json;
       full_fidelity_dot;
@@ -141,6 +143,7 @@ module FullFidelityParseArgs = struct
       disallow_func_ptrs_in_constants;
       error_php_lambdas;
       disallow_discarded_nullable_awaitables;
+      enable_first_class_function_pointers;
     }
 
   let parse_args () =
@@ -192,6 +195,7 @@ module FullFidelityParseArgs = struct
     let disallow_func_ptrs_in_constants = ref false in
     let error_php_lambdas = ref false in
     let disallow_discarded_nullable_awaitables = ref false in
+    let enable_first_class_function_pointers = ref false in
     let options =
       [
         (* modes *)
@@ -323,6 +327,9 @@ No errors are filtered out."
         ( "--disallow-discarded-nullable-awaitables",
           Arg.Set disallow_discarded_nullable_awaitables,
           "Error on using discarded nullable awaitables" );
+        ( "--enable-first-class-function-pointers",
+          Arg.Set enable_first_class_function_pointers,
+          "Enables parsing of first class function pointers" );
       ]
     in
     Arg.parse options push_file usage;
@@ -377,6 +384,7 @@ No errors are filtered out."
       !disallow_func_ptrs_in_constants
       !error_php_lambdas
       !disallow_discarded_nullable_awaitables
+      !enable_first_class_function_pointers
 end
 
 open FullFidelityParseArgs
@@ -445,6 +453,11 @@ let handle_existing_file args filename =
     ParserOptions.with_disallow_func_ptrs_in_constants
       popt
       args.disallow_func_ptrs_in_constants
+  in
+  let popt =
+    ParserOptions.with_enable_first_class_function_pointers
+      popt
+      args.enable_first_class_function_pointers
   in
   (* Parse with the full fidelity parser *)
   let file = Relative_path.create Relative_path.Dummy filename in

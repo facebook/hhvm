@@ -233,6 +233,7 @@ let parse_options () =
   let disallow_discarded_nullable_awaitables = ref false in
   let enable_xhp_class_modifier = ref false in
   let verbosity = ref 0 in
+  let enable_first_class_function_pointers = ref false in
   let options =
     [
       ("--ai", Arg.String set_ai, " Run the abstract interpreter (Zoncolan)");
@@ -512,6 +513,9 @@ let parse_options () =
       ( "--verbose",
         Arg.Int (fun v -> verbosity := v),
         "Verbosity as an integer." );
+      ( "--enable-first-class-function-pointers",
+        Arg.Set enable_first_class_function_pointers,
+        "Enable first class funciton pointers using <> syntax" );
     ]
   in
   let options = Arg.align ~limit:25 options in
@@ -573,6 +577,8 @@ let parse_options () =
       ~glean_port:!glean_port
       ~glean_reponame:!glean_reponame
       ~po_enable_xhp_class_modifier:!enable_xhp_class_modifier
+      ~po_enable_first_class_function_pointers:
+        !enable_first_class_function_pointers
       ()
   in
   let tcopt =

@@ -95,6 +95,12 @@ let enable_xhp_class_modifier = GlobalOptions.po_enable_xhp_class_modifier
 let with_enable_xhp_class_modifier po b =
   { po with GlobalOptions.po_enable_xhp_class_modifier = b }
 
+let enable_first_class_function_pointers =
+  GlobalOptions.po_enable_first_class_function_pointers
+
+let with_enable_first_class_function_pointers po b =
+  { po with GlobalOptions.po_enable_first_class_function_pointers = b }
+
 let make
     ~auto_namespace_map
     ~codegen
@@ -113,7 +119,8 @@ let make
     ~disable_unset_class_const
     ~disallow_func_ptrs_in_constants
     ~enable_xhp_class_modifier
-    ~rust_lowerer =
+    ~rust_lowerer
+    ~enable_first_class_function_pointers =
   GlobalOptions.
     {
       default with
@@ -135,11 +142,24 @@ let make
       po_disallow_func_ptrs_in_constants = disallow_func_ptrs_in_constants;
       po_enable_xhp_class_modifier = enable_xhp_class_modifier;
       po_rust_lowerer = rust_lowerer;
+      po_enable_first_class_function_pointers =
+        enable_first_class_function_pointers;
     }
 
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)
 type ffi_t =
-  bool * bool * bool * bool * bool * bool * bool * bool * bool * bool * bool
+  bool
+  * bool
+  * bool
+  * bool
+  * bool
+  * bool
+  * bool
+  * bool
+  * bool
+  * bool
+  * bool
+  * bool
 
 let to_rust_ffi_t po ~hhvm_compat_mode ~hhi_mode ~codegen =
   ( hhvm_compat_mode,
@@ -152,4 +172,5 @@ let to_rust_ffi_t po ~hhvm_compat_mode ~hhi_mode ~codegen =
     const_default_func_args po,
     abstract_static_props po,
     disallow_func_ptrs_in_constants po,
-    enable_xhp_class_modifier po )
+    enable_xhp_class_modifier po,
+    enable_first_class_function_pointers po )

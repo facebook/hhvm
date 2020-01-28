@@ -1008,6 +1008,11 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
   // is explicitly flushed (e.g., due to being idle).
   json->initSb(length);
 
+  if (depth <= 0) {
+    json->error_code = json_error_codes::JSON_ERROR_DEPTH;
+    return false;
+  }
+
   // SimpleParser only handles the most common set of options. Also, only use it
   // if its array nesting depth check is *more* restrictive than what the user
   // asks for, to ensure that the precise semantics of the general case is

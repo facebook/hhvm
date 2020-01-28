@@ -4,7 +4,7 @@ class A {
 }
 
 $obj = new A;
-$obj->arr = ['test'];
+$obj->arr = varray['test'];
 var_dump($obj->arr);
 unset($obj->arr);
 var_dump($obj->arr);

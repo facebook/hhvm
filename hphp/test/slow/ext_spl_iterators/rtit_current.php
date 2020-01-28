@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_rtit_current() {
-$rait = new RecursiveArrayIterator([0,1,[2,3,[4,5],6,7],8,9,[0,1]]);
+$rait = new RecursiveArrayIterator(varray[0,1,varray[2,3,varray[4,5],6,7],8,9,varray[0,1]]);
 
 $rtit = new RecursiveTreeIterator($rait);
 $rtit_curr = new RecursiveTreeIterator($rait, RecursiveTreeIterator::BYPASS_CURRENT);

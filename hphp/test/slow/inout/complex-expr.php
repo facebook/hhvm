@@ -3,20 +3,20 @@
 function fuzz(inout $a) {
   $orig_a = $a;
   $a = 'fuzzed';
-  return array(
+  return varray[
     $orig_a,
     $a,
-    array(
+    varray[
       debug_backtrace()[0]['function'],
       debug_backtrace()[1]['function'],
-    ),
-  );
+    ],
+  ];
 }
 
 <<__EntryPoint>>
 function main() {
-  $arr = [0 => [12 => array(['bar' => array()])],
-          18 => array(['hello' => array()])];
+  $arr = darray[0 => darray[12 => varray[darray['bar' => array()]]],
+          18 => varray[darray['hello' => array()]]];
   $arr[0][12][0]['bar']['x'] = 'value1';
   $arr[18][0]['hello']['y'] = 'value2';
 
@@ -44,7 +44,7 @@ function main() {
   $arr[0][12][0]['bar']['x'] = 'value1';
   $arr[18][0]['hello']['y'] = 'value2';
 
-  $a = array(Vector{1, 2});
+  $a = varray[Vector{1, 2}];
   list(
     $original,
     $new,
@@ -55,7 +55,7 @@ function main() {
   ) = fuzz(inout $a[0]);
   var_dump($original, $new, $callee, $caller, $a);
 
-  $a = array(Vector{1, 2});
+  $a = varray[Vector{1, 2}];
   list(
     $original,
     $new,
@@ -66,7 +66,7 @@ function main() {
   ) = fuzz(inout $a);
   var_dump($original, $new, $callee, $caller, $a);
 
-  $a = array(vec[Vector{1, 2}]);
+  $a = varray[vec[Vector{1, 2}]];
   list(
     $original,
     $new,

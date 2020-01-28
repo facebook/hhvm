@@ -19,22 +19,22 @@ function test_warning($c, $f, $cmp) {
   $x = HH\class_meth($c, $f); var_dump(prev(inout $x));
   $x = HH\class_meth($c, $f); var_dump(end(inout $x));
 
-  var_dump(array_diff(HH\class_meth($c, $f), [$f]));
-  var_dump(array_udiff(HH\class_meth($c, $f), [$f], $cmp));
-  var_dump(array_diff_assoc(HH\class_meth($c, $f), [$f]));
-  var_dump(array_udiff_assoc(HH\class_meth($c, $f), [$f], $cmp));
-  var_dump(array_udiff_uassoc(HH\class_meth($c, $f), [$f], $cmp, $cmp));
-  var_dump(array_diff_key(HH\class_meth($c, $f), [0]));
-  var_dump(array_diff_ukey(HH\class_meth($c, $f), [0], $cmp));
+  var_dump(array_diff(HH\class_meth($c, $f), varray[$f]));
+  var_dump(array_udiff(HH\class_meth($c, $f), varray[$f], $cmp));
+  var_dump(array_diff_assoc(HH\class_meth($c, $f), varray[$f]));
+  var_dump(array_udiff_assoc(HH\class_meth($c, $f), varray[$f], $cmp));
+  var_dump(array_udiff_uassoc(HH\class_meth($c, $f), varray[$f], $cmp, $cmp));
+  var_dump(array_diff_key(HH\class_meth($c, $f), varray[0]));
+  var_dump(array_diff_ukey(HH\class_meth($c, $f), varray[0], $cmp));
 
-  var_dump(array_intersect(HH\class_meth($c, $f), [$f]));
-  var_dump(array_uintersect(HH\class_meth($c, $f), [$f], $cmp));
-  var_dump(array_intersect_assoc(HH\class_meth($c, $f), [$c]));
-  var_dump(array_intersect_uassoc(HH\class_meth($c, $f), [$c], $cmp));
-  var_dump(array_uintersect_assoc(HH\class_meth($c, $f), [$c], $cmp));
-  var_dump(array_uintersect_uassoc(HH\class_meth($c, $f), [$c], $cmp, $cmp));
-  var_dump(array_intersect_key(HH\class_meth($c, $f), [0]));
-  var_dump(array_intersect_ukey(HH\class_meth($c, $f), [0], $cmp));
+  var_dump(array_intersect(HH\class_meth($c, $f), varray[$f]));
+  var_dump(array_uintersect(HH\class_meth($c, $f), varray[$f], $cmp));
+  var_dump(array_intersect_assoc(HH\class_meth($c, $f), varray[$c]));
+  var_dump(array_intersect_uassoc(HH\class_meth($c, $f), varray[$c], $cmp));
+  var_dump(array_uintersect_assoc(HH\class_meth($c, $f), varray[$c], $cmp));
+  var_dump(array_uintersect_uassoc(HH\class_meth($c, $f), varray[$c], $cmp, $cmp));
+  var_dump(array_intersect_key(HH\class_meth($c, $f), varray[0]));
+  var_dump(array_intersect_ukey(HH\class_meth($c, $f), varray[0], $cmp));
 
   $x = HH\class_meth($c, $f); var_dump(sort(inout $x));
   $x = HH\class_meth($c, $f); var_dump(rsort(inout $x));

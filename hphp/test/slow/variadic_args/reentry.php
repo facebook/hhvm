@@ -7,7 +7,7 @@ function f_variadic(...$args) {
 }
 
 function g1($a1, $a2=null) {
-  $args = isset($a2) ? [$a1, $a2] : [$a1];
+  $args = isset($a2) ? varray[$a1, $a2] : varray[$a1];
   return $args;
 }
 
@@ -19,12 +19,12 @@ function main() {
   echo '= Single-arg array_map =', "\n";
   $v = Vector {1, 2, 3, 4};
   $a = $v->toArray();
-  $expected = array(
-    array(1),
-    array(2),
-    array(3),
-    array(4),
-  );
+  $expected = varray[
+    varray[1],
+    varray[2],
+    varray[3],
+    varray[4],
+  ];
 
   // this should end up using the hack implementation
   $ret = array_map(fun('f_variadic'), $a);
@@ -37,9 +37,9 @@ function main() {
   var_dump($ret === array_map(fun('g2'), $a));
 
   echo "\n\n = Multi-arg ArrayMap =\n";
-  $ret = array_map(fun('f_variadic'), $a, array('a', 'b', 'c', 'd'));
-  var_dump($ret === array_map(fun('g1'), $a, array('a', 'b', 'c', 'd')));
-  var_dump($ret === array_map(fun('g2'), $a, array('a', 'b', 'c', 'd')));
+  $ret = array_map(fun('f_variadic'), $a, varray['a', 'b', 'c', 'd']);
+  var_dump($ret === array_map(fun('g1'), $a, varray['a', 'b', 'c', 'd']));
+  var_dump($ret === array_map(fun('g2'), $a, varray['a', 'b', 'c', 'd']));
 }
 
 

@@ -43,7 +43,7 @@ function buz() {
 
 function io(inout string $a, inout $b): string {
   var_dump($a, $b);
-  list($a, $b) = [$b, $a];
+  list($a, $b) = varray[$b, $a];
   return $a;
 }
 

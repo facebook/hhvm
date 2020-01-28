@@ -16,7 +16,7 @@ function meep(inout $f, $g, inout $r) {
 
 function io_intercept($name, $obj_or_cls, inout $args, $ctx, inout $done) {
   var_dump($args, $done);
-  $args = ['red', 'green', 'blue'];
+  $args = varray['red', 'green', 'blue'];
   $done = $ctx;
 }
 

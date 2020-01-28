@@ -20,21 +20,21 @@ end;
 
 $count = -1;
 $ret = preg_replace_callback_array(
-  [
+  darray[
     '~\$[a-z_][a-z\d_]*~i' => function ($match) use ($tokenStream) {
-      $tokenStream->stream[] = ['T_VARIABLE', $match[0]];
+      $tokenStream->stream[] = varray['T_VARIABLE', $match[0]];
     },
     '~=~' => function ($match) use ($tokenStream) {
-      $tokenStream->stream[] = ['T_ASSIGN', $match[0]];
+      $tokenStream->stream[] = varray['T_ASSIGN', $match[0]];
     },
     '~[\d]+~' => function ($match) use ($tokenStream) {
-      $tokenStream->stream[] = ['T_NUM', $match[0]];
+      $tokenStream->stream[] = varray['T_NUM', $match[0]];
     },
     '~;~' => function ($match) use ($tokenStream) {
-      $tokenStream->stream[] = ['T_TERMINATE_STMT', $match[0]];
+      $tokenStream->stream[] = varray['T_TERMINATE_STMT', $match[0]];
     },
     '~//.*~' => function ($match) use ($tokenStream) {
-      $tokenStream->stream[] = ['T_COMMENT', $match[0]];
+      $tokenStream->stream[] = varray['T_COMMENT', $match[0]];
     }
   ],
   $input,

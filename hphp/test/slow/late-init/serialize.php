@@ -12,7 +12,7 @@ class B {
   <<__LateInit>> public $y;
   public $z = 'abc';
   public function __sleep() {
-    return ['x', 'y'];
+    return varray['x', 'y'];
   }
 }
 
@@ -21,7 +21,7 @@ class C {
   <<__LateInit>> public $y;
   public $z = 'abc';
   public function __sleep() {
-    return ['x', 'z'];
+    return varray['x', 'z'];
   }
 }
 

@@ -42,12 +42,12 @@ function test_casting($a) {
 
 function run_tests() {
   test([], '10');
-  test([1, 2, 3, 4], '2');
-  test([10 => 'abc'], '10');
+  test(varray[1, 2, 3, 4], '2');
+  test(darray[10 => 'abc'], '10');
 
   test_const_key([]);
-  test_const_key([1, 2, 3, 4]);
-  test_const_key([2 => 'abc']);
+  test_const_key(varray[1, 2, 3, 4]);
+  test_const_key(darray[2 => 'abc']);
 
   test_casting(dict['1' => true, '2' => false]);
   test_casting(keyset['1', '2', '3']);

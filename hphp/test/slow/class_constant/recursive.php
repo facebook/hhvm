@@ -76,8 +76,8 @@ class J2 {
 }
 
 class K {
-  const FOO = [self::BAR];
-  const BAR = [self::FOO];
+  const FOO = varray[self::BAR];
+  const BAR = varray[self::FOO];
 }
 
 function test1() { var_dump(A::FOO); }

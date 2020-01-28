@@ -50,5 +50,5 @@ function junk2() {
 
 <<__ALWAYS_INLINE>>
 function junk3() {
-  hphp_array_idx([0], '0', 0);
+  hphp_array_idx(varray[0], '0', 0);
 }

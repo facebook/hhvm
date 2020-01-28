@@ -1,15 +1,15 @@
 <?hh
 require(__DIR__ . '/common.inc');
 <<__EntryPoint>> function main(): void {
-$breakpoints = [
-   array(
+$breakpoints = varray[
+   darray[
      "path" => __FILE__ . ".test",
-     "breakpoints" => [
-       array("line" => 9, "calibratedLine" => 9, "condition" => ""),
-       array("line" => 10, "calibratedLine" => 10, "condition" => ""),
-       array("line" => 12, "calibratedLine" => 16, "condition" => "",
-        "multiLine" => true),
-     ])
+     "breakpoints" => varray[
+       darray["line" => 9, "calibratedLine" => 9, "condition" => ""],
+       darray["line" => 10, "calibratedLine" => 10, "condition" => ""],
+       darray["line" => 12, "calibratedLine" => 16, "condition" => "",
+        "multiLine" => true],
+     ]]
    ];
 
 $testProcess = vsDebugLaunch(__FILE__ . ".test", true, $breakpoints);
@@ -28,81 +28,81 @@ resumeTarget();
 verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[2]);
 
 // Set a breakpoint past the end of the file. This breakpoint will never verify.
-$breakpoints = [
-  array(
+$breakpoints = varray[
+  darray[
     "path" => __FILE__ . ".test",
-    "breakpoints" => [
-      array("line" => 200, "calibratedLine" => 200, "condition" => ""),
-    ])
+    "breakpoints" => varray[
+      darray["line" => 200, "calibratedLine" => 200, "condition" => ""],
+    ]]
   ];
 setBreakpoints($breakpoints, false);
 
 // Test breakpoint calibration
-$breakpoints = [
-  array(
+$breakpoints = varray[
+  darray[
     "path" => __FILE__ . ".test",
-    "breakpoints" => [
-      array("line" => 19, "calibratedLine" => 20, "condition" => ""),
-      array("line" => 22, "calibratedLine" => 26, "condition" => ""),
-    ])
+    "breakpoints" => varray[
+      darray["line" => 19, "calibratedLine" => 20, "condition" => ""],
+      darray["line" => 22, "calibratedLine" => 26, "condition" => ""],
+    ]]
   ];
 setBreakpoints($breakpoints, true);
 
 // Setting a breakpoint with an invalid line number should fail.
-$setBreakpointsCommand = array(
+$setBreakpointsCommand = darray[
   "command" => "setBreakpoints",
   "type" => "request",
-  "arguments" => array(
+  "arguments" => darray[
     "source" =>
-      array(
+      darray[
         "path" => __FILE__ . ".test",
         "name" => "test"
-      ),
-    "breakpoints" => [
-        array("line" => -1, "condition" => "")
+      ],
+    "breakpoints" => varray[
+        darray["line" => -1, "condition" => ""]
     ]
-  ));
+  ]];
 $seq = sendVsCommand($setBreakpointsCommand);
 
 $msg = json_decode(getNextVsDebugMessage(), true);
 checkObjEqualRecursively($msg,
-  array(
+  darray[
     "type" => "response",
     "command" => "setBreakpoints",
     "success" => false,
     "message" => "Breakpoint has invalid line number.",
-    "request_seq" => $seq));
+    "request_seq" => $seq]);
 
 // Remove all breakpoints.
-$seq = sendVsCommand(array(
+$seq = sendVsCommand(darray[
   "command" => "setBreakpoints",
   "type" => "request",
-  "arguments" => array(
+  "arguments" => darray[
     "source" =>
-      array(
+      darray[
         "path" => __FILE__ . ".test",
         "name" => "test"
-      ),
+      ],
     "lines" => [],
-    "breakpoints" => [])));
+    "breakpoints" => []]]);
 
 // Response should indicate no breakpoints remaining.
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, array(
+checkObjEqualRecursively($msg, darray[
   "type" => "response",
   "command" => "setBreakpoints",
   "request_seq" => $seq,
   "success" => true,
-  "body" => array(
+  "body" => darray[
       "breakpoints" => []
-  )));
+  ]]);
 
-$breakpoints = [
-  array(
+$breakpoints = varray[
+  darray[
     "path" => __FILE__ . ".test",
-    "breakpoints" => [
-      array("line" => 29, "calibratedLine" => 29, "condition" => ""),
-    ])
+    "breakpoints" => varray[
+      darray["line" => 29, "calibratedLine" => 29, "condition" => ""],
+    ]]
   ];
 setBreakpoints($breakpoints, true);
 resumeTarget();
@@ -122,62 +122,62 @@ verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[0], 2);
 
 // Remove the breakpoint and resume, it should not hit again now even
 // though the loop has 8 more iterations.
-$seq = sendVsCommand(array(
+$seq = sendVsCommand(darray[
   "command" => "setBreakpoints",
   "type" => "request",
-  "arguments" => array(
+  "arguments" => darray[
     "source" =>
-      array(
+      darray[
         "path" => __FILE__ . ".test",
         "name" => "test"
-      ),
+      ],
     "lines" => [],
-    "breakpoints" => [])));
+    "breakpoints" => []]]);
 
 // Response should indicate no breakpoints remaining.
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, array(
+checkObjEqualRecursively($msg, darray[
   "type" => "response",
   "command" => "setBreakpoints",
   "request_seq" => $seq,
   "success" => true,
-  "body" => array(
+  "body" => darray[
       "breakpoints" => []
-  )));
+  ]]);
 resumeTarget();
 
 // Verify hard break was hit.
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, array(
+checkObjEqualRecursively($msg, darray[
   "type" => "event",
   "event" => "stopped",
-  "body" => array(
+  "body" => darray[
       "threadId" => 1,
       "reason" => "breakpoint",
       "description" => "hphp_debug_break()",
-  )));
+  ]]);
 
 // Verify relative breakpoints work. Two different files named "test.php"
 // will be required by the test script, the breakpoint should hit on
 // both of them.
-$breakpoints = [
-  array(
+$breakpoints = varray[
+  darray[
     "path" => "test.php.test",
-    "breakpoints" => [
-      array("line" => 4, "calibratedLine" => 4, "condition" => ""),
-    ])
+    "breakpoints" => varray[
+      darray["line" => 4, "calibratedLine" => 4, "condition" => ""],
+    ]]
   ];
 setBreakpoints($breakpoints, false);
 resumeTarget();
 
 // Breakpoint verifies when the require call executes in the target.
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, array(
+checkObjEqualRecursively($msg, darray[
   "type" => "event",
   "event" => "breakpoint",
-  "body" => array(
+  "body" => darray[
       "reason" => "changed",
-  )));
+  ]]);
 
 checkForOutput($testProcess, "hello\n", "stdout");
 verifyBpHit("test.php", $breakpoints[0]{'breakpoints'}[0], 1, true);
@@ -188,28 +188,28 @@ checkForOutput($testProcess, "hello\n", "stdout");
 verifyBpHit("test.php", $breakpoints[0]{'breakpoints'}[0], 2, true);
 
 //Verify removing relative breakpoints works
-$seq = sendVsCommand(array(
+$seq = sendVsCommand(darray[
   "command" => "setBreakpoints",
   "type" => "request",
-  "arguments" => array(
+  "arguments" => darray[
     "source" =>
-      array(
+      darray[
         "path" => "test.php.test",
         "name" => "test"
-      ),
+      ],
     "lines" => [],
-    "breakpoints" => [])));
+    "breakpoints" => []]]);
 
 // Response should indicate no breakpoints remaining.
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, array(
+checkObjEqualRecursively($msg, darray[
   "type" => "response",
   "command" => "setBreakpoints",
   "request_seq" => $seq,
   "success" => true,
-  "body" => array(
+  "body" => darray[
       "breakpoints" => []
-  )));
+  ]]);
 
 resumeTarget();
 checkForOutput($testProcess, "world\n", "stdout");

@@ -7,5 +7,5 @@ class Foo {
 
 <<__EntryPoint>>
 function main_bug_3289_reflectionparameter_getclass_callable() {
-var_dump((new ReflectionParameter(['Foo', 'bar'], 'baz'))->getClass());
+var_dump((new ReflectionParameter(varray['Foo', 'bar'], 'baz'))->getClass());
 }

@@ -11,7 +11,7 @@ function main() {
   $args = new stdClass();
   f('a', 'b', ...$args);
   // FIXME(t4599379): This is a Traversable
-  $args = new ArrayIterator(['c', 'd', 'e']);
+  $args = new ArrayIterator(varray['c', 'd', 'e']);
   f('a', 'b', ...$args);
 }
 

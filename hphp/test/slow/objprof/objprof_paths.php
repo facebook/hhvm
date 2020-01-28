@@ -36,7 +36,7 @@ function getStr(int $len): string {
 // TEST: tracking works when enabled and not when disabled
 class StaticClass {
   public static ?mixed $myStaticRef;
-  public static array<mixed> $myStaticArr = array();
+  public static varray<mixed> $myStaticArr = varray[];
 }
 
 class RootClass {
@@ -69,9 +69,9 @@ function main_objprof_paths() {
 $childClass = new ChildClass();
 $childClass->parentNested = new NestedClass();
 $childClass->childNested = new NestedClass();
-$childClass->mixed = ["MyStringKey" => $childClass->parentNested];
+$childClass->mixed = darray["MyStringKey" => $childClass->parentNested];
 $childClass->mixed[123] = $childClass->parentNested;
-$childClass->packed = [$childClass->parentNested];
+$childClass->packed = varray[$childClass->parentNested];
 
 $childClass2 = new ChildClass();
 $childClass2->parentNested = new NestedClass();
@@ -82,12 +82,12 @@ $rootObject->someObject = $childClass;
 StaticClass::$myStaticRef = new ClassReachableByStaticOnly();
 StaticClass::$myStaticArr[] = StaticClass::$myStaticRef;
 $allobjs = objprof_get_paths();
-$objs = array();
+$objs = darray[];
 $objs['RootClass'] = $allobjs['RootClass'];
 $objs['NestedClass'] = $allobjs['NestedClass'];
 $objs['ClassReachableByStaticOnly'] = $allobjs['ClassReachableByStaticOnly'];
 $objs['ChildClass'] = $allobjs['ChildClass'];
-$pathstrs = array();
+$pathstrs = varray[];
 foreach ($objs as $name => $metrics) {
   foreach ($metrics['paths'] as $path => $path_metrics) {
     $pathstrs[] = $path.' '.idx($path_metrics,'refs',-1);

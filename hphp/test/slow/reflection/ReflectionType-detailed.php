@@ -15,7 +15,7 @@ class c extends b {
 function main_reflection_type_detailed() {
 $closure = function (Test $a): Test { return $a; };
 echo "*** functions\n";
-foreach ([
+foreach (varray[
   new ReflectionFunction('foo'),
   new ReflectionFunction($closure),
 ] as $idx => $rf) {
@@ -31,7 +31,7 @@ foreach ([
   }
 }
 echo "\n*** methods\n";
-foreach ([
+foreach (varray[
   new ReflectionMethod('SplObserver', 'update'),
   new ReflectionMethod('c', 'bar'),
   new ReflectionMethod('c', 'pbar'),
@@ -49,7 +49,7 @@ foreach ([
   }
 }
 echo "\n*** return types\n";
-foreach ([
+foreach (varray[
   new ReflectionMethod('SplObserver', 'update'),
   new ReflectionFunction('bar'),
   new ReflectionMethod('c', 'bar'),

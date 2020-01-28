@@ -3,7 +3,7 @@
 
 class B {
   const BAR1 = STDIN;
-  const BAR2 = [STDIN, STDIN];
+  const BAR2 = varray[STDIN, STDIN];
   const BAR3 = vec[STDIN, STDIN];
   const BAR4 = dict[1 => STDIN, 'abc' => STDIN];
 }

@@ -10,15 +10,15 @@ function io(inout $x, $y) {
 }
 
 function main() {
-  $f = [1, 'world', 3];
+  $f = varray[1, 'world', 3];
   $ret = io(inout $f, wrap($f[1]));
   echo $f.$ret."\n";
 
-  $f = [null, 'x', [1, 'world', 3]];
+  $f = varray[null, 'x', varray[1, 'world', 3]];
   $ret = io(inout $f, wrap($f[2][1]));
   echo $f.$ret."\n";
 
-  $f = [null, 'x', [1, 'orl', 3]];
+  $f = varray[null, 'x', varray[1, 'orl', 3]];
   $ret = io(inout $f, wrap('w'.$f[2][1].'d'));
   echo $f.$ret."\n";
 

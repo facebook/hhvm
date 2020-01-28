@@ -28,14 +28,14 @@ function comp($x, $y) {
 }
 
 function getTestcase(int $num) {
-  $test_cases = [
+  $test_cases = varray[
     null,
     false, true,
     0, 1,
     0.0, 1.0,
     "Array",
     HH\fun("wrap"),
-    array('A', 'func1'),
+    varray['A', 'func1'],
     HH\Vector{'A', 'foo'},
     varray['A', 'func1'],
     vec['A', 'func1'],

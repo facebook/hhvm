@@ -6,7 +6,7 @@ class Test
 {
     public function foo()
     {
-        $x = ['foo', 'bar'];
+        $x = varray['foo', 'bar'];
         // The actual operation isn't important, just need to do something to turn the literal
         // strings into refcounted strings
         $y = array_map(function($it) { return $it.$it; }, $x);

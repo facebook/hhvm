@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_dst_change() {
-$datetimes = [
+$datetimes = varray[
     '2014-10-05T01:59:59',
     '2014-10-05T02:00:00',
     '2014-10-05T02:59:59',

@@ -88,25 +88,25 @@ function member_ops($arr, $keys) {
 
 <<__EntryPoint>>
 function main_implicit_key() {
-$sub = [0 => 100, 1 => 100, "" => 100];
-$arr = [
-  0 => [
+$sub = darray[0 => 100, 1 => 100, "" => 100];
+$arr = darray[
+  0 => darray[
     0 => $sub,
     1 => $sub,
     "" => $sub
   ],
-  1 => [
+  1 => darray[
     0 => $sub,
     1 => $sub,
     "" => $sub
   ],
-  "" => [
+  "" => darray[
     0 => $sub,
     1 => $sub,
     "" => $sub
   ]
 ];
-$keys = [null, true, false, 1.5];
+$keys = varray[null, true, false, 1.5];
 basic_getters($arr, $keys);
 basic_setters($arr, $keys);
 member_ops($arr, $keys);

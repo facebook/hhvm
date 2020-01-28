@@ -5,7 +5,7 @@ class Foo { static function bar() {} }
 <<__EntryPoint>>
 function main() {
   $cma = class_meth(Foo::class, 'bar');
-  $arra = ['a' => dict['r' => class_meth(Foo::class, 'bar')], 'b' => 123];
+  $arra = darray['a' => dict['r' => class_meth(Foo::class, 'bar')], 'b' => 123];
   var_dump(serialize($cma));
   var_dump(serialize($arra));
   var_dump(json_encode($cma));

@@ -24,10 +24,10 @@ function vector_from_keys($containers) {
 }
 
 function main() {
-  $containers = array(
+  $containers = darray[
     'empty array'  => [],
-    'packed array' => ['a', 'b', 'c'],
-    'mixed array'  => ['a' => 1, 'b' => 2],
+    'packed array' => varray['a', 'b', 'c'],
+    'mixed array'  => darray['a' => 1, 'b' => 2],
 
     'empty Vector'    => Vector {},
     'empty ImmVector' => ImmVector {},
@@ -42,7 +42,7 @@ function main() {
     'ImmMap'    => ImmMap {'a' => 1, 'b' => 2},
     'Set'       => Set {4, 5, 6},
     'ImmSet'    => ImmSet {4, 5, 6},
-  );
+  ];
   set_from_keys($containers);
   vector_from_keys($containers);
 }

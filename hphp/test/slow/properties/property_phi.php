@@ -19,7 +19,7 @@ class thinger {
   private function process($history, inout $updated) {
     $updated = rand(0, 1) == 2;
     $fn = $this->fn;
-    return $fn([$history]);
+    return $fn(varray[$history]);
   }
 
   public function done($init) {

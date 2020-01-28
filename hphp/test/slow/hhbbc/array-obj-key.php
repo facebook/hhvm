@@ -4,7 +4,7 @@
 class A {
   public static $foo;
   public static function set($x) { self::$foo = $x; }
-  public static function get() { return [self::$foo => 'abc']; }
+  public static function get() { return darray[self::$foo => 'abc']; }
 }
 
 function test() {

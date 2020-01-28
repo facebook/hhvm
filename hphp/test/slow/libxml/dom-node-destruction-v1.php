@@ -27,7 +27,7 @@ function foo() {
   $dom->appendChild($dom->createElement('bar')->init());
 
   echo "Leave foo()\n";
-  return [$dom, $child];
+  return varray[$dom, $child];
 }
 
 function bar() {

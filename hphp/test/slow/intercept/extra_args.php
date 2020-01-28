@@ -7,7 +7,7 @@ function foo(...$args) {
 
 class lol {}
 function bar($_1, $_2, inout $_3, $_4, inout $_5) {
-  var_dump([$_1, $_2, $_3, $_4, $_5]);
+  var_dump(varray[$_1, $_2, $_3, $_4, $_5]);
   $x = new lol();
   return $x;
 }

@@ -8,7 +8,7 @@ function addAndDump($addMe) {
 }
 
 function main() {
-  addAndDump([1, 2]);
+  addAndDump(varray[1, 2]);
   addAndDump(vec[1, 2]);
   addAndDump(Vector {1, 2});
 }

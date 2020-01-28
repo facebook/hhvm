@@ -5,7 +5,7 @@ class Foo {
   public $bling;
 }
 <<__EntryPoint>> function main(): void {
-$data = [
+$data = varray[
   's:5:"Hello"',
   's:5:"Hello";',
   's:5:"Hello"Z',

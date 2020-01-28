@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_rtit_prefixpart_outofrange() {
-$rait = new RecursiveArrayIterator([0,1,[2,3]]);
+$rait = new RecursiveArrayIterator(varray[0,1,varray[2,3]]);
 $rtit = new RecursiveTreeIterator($rait);
 
 try {

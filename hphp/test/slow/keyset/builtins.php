@@ -73,7 +73,7 @@ function with_keyset($k1) {
   // like if an array were passed.
   //
   echo "array_key_exists: ";
-  var_dump([array_key_exists('x', $k1), array_key_exists('q', $k1)]);
+  var_dump(varray[array_key_exists('x', $k1), array_key_exists('q', $k1)]);
   echo "array_keys: ";
   var_dump(array_keys($k1));
   $k = $k1;
@@ -105,7 +105,7 @@ function with_keyset($k1) {
   echo "end: ";
   var_dump(end(inout $k));
   echo "in_array: ";
-  var_dump([in_array('x', $k1), in_array('q', $k1)]);
+  var_dump(varray[in_array('x', $k1), in_array('q', $k1)]);
   echo "key: ";
   var_dump(key($k));
   // list() could be tested here, but it's just weird with keysets
@@ -125,7 +125,7 @@ function with_keyset($k1) {
   echo "array_pad 2: ";
   var_dump(array_pad($k1, 2, 'x'));
   echo "array_replace: ";
-  var_dump(array_replace($k1, ['q' => 'r']));
+  var_dump(array_replace($k1, darray['q' => 'r']));
   echo "array_unique 1: ";
   var_dump(array_unique($k1));
   echo "array_unique 2: ";
@@ -161,18 +161,18 @@ echo "array_chunk 2: ";
 var_dump(array_chunk(keyset[1, 2, 3], 2, true /* preserve keys */));
 echo "array_column 1: ";
 var_dump(array_column(
-  array(
-    'a' => array('foo' => 'bar1', 'baz' => 'qux1'),
+  darray[
+    'a' => darray['foo' => 'bar1', 'baz' => 'qux1'],
     'b' => keyset['foo', 'baz'],
-  ),
+  ],
   'foo',
 ));
 echo "array_column 2: ";
 var_dump(array_column(
-  array(
-    'a' => array('foo' => 'bar1', 'baz' => 'qux1'),
+  darray[
+    'a' => darray['foo' => 'bar1', 'baz' => 'qux1'],
     'b' => keyset['foo', 'baz'],
-  ),
+  ],
   'foo',
   'baz',
 ));
@@ -190,9 +190,9 @@ $ar2 = array(10, "colors" => keyset["green", "blue"]);
 echo "array_merge_recursive: ";
 var_dump(array_merge_recursive($ar1, $ar2));
 echo "array_replace_recursive 1: "; // The keyset remains in the return value
-var_dump(array_replace_recursive($ar1, ["green" => "blue"]));
+var_dump(array_replace_recursive($ar1, darray["green" => "blue"]));
 echo "array_replace_recursive 2: ";
-var_dump(array_replace_recursive($ar1, ["colors" => ["green" => "blue"]]));
+var_dump(array_replace_recursive($ar1, darray["colors" => darray["green" => "blue"]]));
 
 // These functions should return false or null and emit a warning when passed a
 // hack array.

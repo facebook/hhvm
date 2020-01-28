@@ -16,27 +16,27 @@ try {
 
 // Bad param name.
 try {
-  new ReflectionParameter(['A', 'bar'], 'not-baz');
+  new ReflectionParameter(varray['A', 'bar'], 'not-baz');
 } catch (ReflectionException $e) {
   echo $e->getMessage() . "\n";
 }
 
 // Out of bound param.
-new ReflectionParameter(['A', 'bar'], 0);
+new ReflectionParameter(varray['A', 'bar'], 0);
 try {
-  new ReflectionParameter(['A', 'bar'], 1);
+  new ReflectionParameter(varray['A', 'bar'], 1);
 } catch (ReflectionException $e) {
   echo $e->getMessage() . "\n";
 }
 try {
-  new ReflectionParameter(['A', 'bar'], -1);
+  new ReflectionParameter(varray['A', 'bar'], -1);
 } catch (ReflectionException $e) {
   echo $e->getMessage() . "\n";
 }
 
 // Bad param type.
 try {
-  new ReflectionParameter(['A', 'bar'], []);
+  new ReflectionParameter(varray['A', 'bar'], []);
 } catch (ReflectionException $e) {
   echo $e->getMessage() . "\n";
 }

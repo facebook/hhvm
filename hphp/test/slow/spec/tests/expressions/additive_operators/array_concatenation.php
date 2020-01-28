@@ -9,7 +9,7 @@
 error_reporting(-1);
 
 ///*
-$oper = array([1, 5 => FALSE, "red"], [NULL], [4 => -5, 1.23]);
+$oper = varray[[1, 5 => FALSE, "red"], varray[NULL], [4 => -5, 1.23]];
 
 foreach ($oper as $e1)
 {

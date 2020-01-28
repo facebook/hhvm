@@ -5,7 +5,7 @@
 function main_scalar_none() {
 require 'fix_exceptions.inc';
 
-$functions = [
+$functions = darray[
     'int' => function (int $i) { return $i; },
     'float' => function (float $f) { return $f; },
     'string' => function (string $s) { return $s; },

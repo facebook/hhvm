@@ -2,15 +2,15 @@
 require(__DIR__ . '/common.inc');
 
 $path = __FILE__ . ".test";
-$breakpoints = [
-   array(
+$breakpoints = varray[
+   darray[
      "path" => $path,
-     "breakpoints" => [
-       array("line" => 20, "calibratedLine" => 20, "condition" => ""),
-       array("line" => 21, "calibratedLine" => 21, "condition" => ""),
-       array("line" => 23, "calibratedLine" => 24, "condition" => ""),
-       array("line" => 28, "calibratedLine" => 28, "condition" => ""),
-     ])
+     "breakpoints" => varray[
+       darray["line" => 20, "calibratedLine" => 20, "condition" => ""],
+       darray["line" => 21, "calibratedLine" => 21, "condition" => ""],
+       darray["line" => 23, "calibratedLine" => 24, "condition" => ""],
+       darray["line" => 28, "calibratedLine" => 28, "condition" => ""],
+     ]]
    ];
 
 $testProcess = vsDebugLaunch(__FILE__ . ".test", true, $breakpoints);
@@ -19,102 +19,102 @@ $testProcess = vsDebugLaunch(__FILE__ . ".test", true, $breakpoints);
 verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[0]);
 
 // Check thread stacks.
-$seq = sendVsCommand(array(
+$seq = sendVsCommand(darray[
   "command" => "stackTrace",
   "type" => "request",
-  "arguments" => array(
+  "arguments" => darray[
     "threadId" => 1
-  )));
+  ]]);
 
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, array(
+checkObjEqualRecursively($msg, darray[
   "type" => "response",
   "command" => "stackTrace",
   "request_seq" => $seq,
   "success" => true,
-  "body" => array(
+  "body" => darray[
       "totalFrames" => 2,
-      "stackFrames" => [
-        array(
-          "source" => array("path" => $path, "name" => str_replace(".test", "", basename($path))),
+      "stackFrames" => varray[
+        darray[
+          "source" => darray["path" => $path, "name" => str_replace(".test", "", basename($path))],
           "id" => 1,
           "line" => 20,
           "name" => "innerFunc"
-        ),
-        array(
-          "source" => array("path" => $path, "name" => str_replace(".test", "", basename($path))),
+        ],
+        darray[
+          "source" => darray["path" => $path, "name" => str_replace(".test", "", basename($path))],
           "id" => 2,
           "line" => 31,
           "name" => "{main}"
-        )
+        ]
       ]
-    )
-  ));
+    ]
+  ]);
 
 // Check threads.
-$seq = sendVsCommand(array(
+$seq = sendVsCommand(darray[
   "command" => "threads",
-  "type" => "request"));
+  "type" => "request"]);
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, array(
+checkObjEqualRecursively($msg, darray[
   "type" => "response",
   "command" => "threads",
   "request_seq" => $seq,
   "success" => true,
-  "body" => [
-    "threads" => [array("name" => "Request 1", "id" => 1)]
+  "body" => darray[
+    "threads" => varray[darray["name" => "Request 1", "id" => 1]]
   ]
-  ));
+  ]);
 
 
 // Get scopes.
-$seq = sendVsCommand(array(
+$seq = sendVsCommand(darray[
   "command" => "scopes",
   "type" => "request",
-  "arguments" => array("frameId" => 1)));
+  "arguments" => darray["frameId" => 1]]);
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, array(
+checkObjEqualRecursively($msg, darray[
   "type" => "response",
   "command" => "scopes",
   "request_seq" => $seq,
   "success" => true,
-  "body" => [
-    "scopes" => [
-      array(
+  "body" => darray[
+    "scopes" => varray[
+      darray[
         "namedVariables" => 1,
         "name" => "Locals",
-      ),
-      array(
+      ],
+      darray[
         "namedVariables" => 8,
         "name" => "Superglobals",
-      ),
-      array(
+      ],
+      darray[
         "namedVariables" => 2,
         "name" => "Constants",
-      )
+      ]
   ]]
-  ));
+  ]);
 
 // Get locals, only $a should be visible right here.
-$seq = sendVsCommand(array(
+$seq = sendVsCommand(darray[
   "command" => "variables",
   "type" => "request",
-  "arguments" => array("variablesReference" => 3)));
+  "arguments" => darray["variablesReference" => 3]]);
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, array(
+checkObjEqualRecursively($msg, darray[
   "type" => "response",
   "command" => "variables",
   "request_seq" => $seq,
   "success" => true,
-  "body" => [
-    "variables" => [
-      array(
+  "body" => darray[
+    "variables" => varray[
+      darray[
         "type" => "int",
         "name" => "\$a",
         "value" => "1",
-      ),
+      ],
   ]]
-  ));
+  ]);
 
 if (count($msg{"body"}{"variables"}) != 1) {
   throw new UnexpectedValueException("Unexpected variable count");
@@ -133,672 +133,672 @@ resumeTarget();
 // Verify we hit breakpoint 4.
 verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[3]);
 
-$seq = sendVsCommand(array(
+$seq = sendVsCommand(darray[
   "command" => "stackTrace",
   "type" => "request",
-  "arguments" => array(
+  "arguments" => darray[
     "threadId" => 1
-  )));
+  ]]);
 $msg = json_decode(getNextVsDebugMessage(), true);
 
-$seq = sendVsCommand(array(
+$seq = sendVsCommand(darray[
   "command" => "scopes",
   "type" => "request",
-  "arguments" => array("frameId" => 8)));
+  "arguments" => darray["frameId" => 8]]);
 $msg = json_decode(getNextVsDebugMessage(), true);
 
-$seq = sendVsCommand(array(
+$seq = sendVsCommand(darray[
   "command" => "variables",
   "type" => "request",
-  "arguments" => array("variablesReference" => 3)));
+  "arguments" => darray["variablesReference" => 3]]);
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, array(
+checkObjEqualRecursively($msg, darray[
     "type" => "response",
     "command" => "variables",
     "request_seq" => $seq,
     "success" => true,
-    "body" => [
-      "variables" => [
-        array(
+    "body" => darray[
+      "variables" => varray[
+        darray[
           "type" => "int",
           "name" => "\$a",
           "value" => "1",
-        ),
-        array(
+        ],
+        darray[
           "type" => "string",
           "name" => "\$b",
           "value" => "Hello world",
-        ),
-        array(
+        ],
+        darray[
           "type" => "B",
           "name" => "\$bObj",
           "value" => "B",
-        ),
-        array(
+        ],
+        darray[
           "type" => "array",
           "name" => "\$c",
           "value" => "array[3]",
           "indexedVariables" => 3,
-        ),
-        array(
+        ],
+        darray[
           "type" => "array",
           "name" => "\$d",
           "value" => "array[2]",
           "indexedVariables" => 2,
-        ),
-        array(
+        ],
+        darray[
           "type" => "array",
           "name" => "\$e",
           "value" => "array[2]",
           "indexedVariables" => 2,
-        ),
+        ],
     ]]
-    ));
+    ]);
 
 if (count($msg{"body"}{"variables"}) != 6) {
   throw new UnexpectedValueException("Unexpected variable count");
 }
 
-$seq = sendVsCommand(array(
+$seq = sendVsCommand(darray[
   "command" => "variables",
   "type" => "request",
-  "arguments" => array("variablesReference" => 14)));
+  "arguments" => darray["variablesReference" => 14]]);
 
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, array(
+checkObjEqualRecursively($msg, darray[
     "type" => "response",
     "command" => "variables",
     "request_seq" => $seq,
     "success" => true,
-    "body" => [
-      "variables" => [
-        array(
+    "body" => darray[
+      "variables" => varray[
+        darray[
           "type" => "A",
           "name" => "aObj",
           "value" => "A",
           "namedVariables" => 2,
           "variablesReference" => 16,
-          "presentationHint" => array(
+          "presentationHint" => darray[
             "visibility" => "public"
-          )
-        ),
-        array(
+          ]
+        ],
+        darray[
           "type" => "int",
           "name" => "b",
           "value" => "2",
-          "presentationHint" => array(
+          "presentationHint" => darray[
             "visibility" => "protected"
-          )
-        ),
-        array(
+          ]
+        ],
+        darray[
           "type" => "int",
           "name" => "c",
           "value" => "3",
-          "presentationHint" => array(
+          "presentationHint" => darray[
             "visibility" => "public"
-          )
-        ),
+          ]
+        ],
 
         // The private props should contain the base class's copy of $a, only.
-        array(
+        darray[
           "variablesReference" => 17,
           "name" => "Private props",
           "value" => "class A",
           "namedVariables" => 1,
-          "presentationHint" => array(
-            "attributes" => ["constant", "readOnly"]
-          )
-        ),
+          "presentationHint" => darray[
+            "attributes" => varray["constant", "readOnly"]
+          ]
+        ],
 
         // Two constants should be visible on A, HELLOA and HELLOB, and one
         // on class B.
-        array(
+        darray[
           "variablesReference" => 18,
           "name" => "Class Constants",
           "value" => "class B",
           "namedVariables" => 3,
-          "presentationHint" => array(
-            "attributes" => ["constant", "readOnly"]
-          )
-        ),
+          "presentationHint" => darray[
+            "attributes" => varray["constant", "readOnly"]
+          ]
+        ],
 
-        array(
+        darray[
           "variablesReference" => 19,
           "name" => "Static Props",
           "value" => "class B",
           "namedVariables" => 1,
-          "presentationHint" => array(
-            "attributes" => ["constant", "readOnly"]
-          )
-        ),
+          "presentationHint" => darray[
+            "attributes" => varray["constant", "readOnly"]
+          ]
+        ],
     ]]
-    ));
+    ]);
 
 // Check that we can see the correct properties of $aObj
-$seq = sendVsCommand(array(
+$seq = sendVsCommand(darray[
   "command" => "variables",
   "type" => "request",
-  "arguments" => array("variablesReference" => 16)));
+  "arguments" => darray["variablesReference" => 16]]);
 
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, array(
+checkObjEqualRecursively($msg, darray[
     "type" => "response",
     "command" => "variables",
     "request_seq" => $seq,
     "success" => true,
-    "body" => [
-      "variables" => [
-        array(
+    "body" => darray[
+      "variables" => varray[
+        darray[
           "type" => "int",
           "name" => "a",
           "value" => "0",
-          "presentationHint" => array(
+          "presentationHint" => darray[
             "visibility" => "private"
-          )
-        ),
-        array(
+          ]
+        ],
+        darray[
           "type" => "int",
           "name" => "b",
           "value" => "1",
-          "presentationHint" => array(
+          "presentationHint" => darray[
             "visibility" => "protected"
-          )
-        ),
-        array(
+          ]
+        ],
+        darray[
           "name" => "Class Constants",
           "value" => "class A",
           "namedVariables" => 2,
-          "presentationHint" => array(
-            "attributes" => ["constant", "readOnly"]
-          )
-        ),
+          "presentationHint" => darray[
+            "attributes" => varray["constant", "readOnly"]
+          ]
+        ],
 
-        array(
+        darray[
           "name" => "Static Props",
           "value" => "class A",
           "namedVariables" => 1,
-          "presentationHint" => array(
-            "attributes" => ["constant", "readOnly"]
-          )
-        ),
+          "presentationHint" => darray[
+            "attributes" => varray["constant", "readOnly"]
+          ]
+        ],
       ]
-    ]));
+    ]]);
 
 if (count($msg{"body"}{"variables"}) != 4) {
   throw new UnexpectedValueException("Unexpected variable count");
 }
 
 // Correct private props of $bObj from base class A
-$seq = sendVsCommand(array(
+$seq = sendVsCommand(darray[
   "command" => "variables",
   "type" => "request",
-  "arguments" => array("variablesReference" => 17)));
+  "arguments" => darray["variablesReference" => 17]]);
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, array(
+checkObjEqualRecursively($msg, darray[
     "type" => "response",
     "command" => "variables",
     "request_seq" => $seq,
     "success" => true,
-    "body" => [
-      "variables" => [
-        array(
+    "body" => darray[
+      "variables" => varray[
+        darray[
           "type" => "int",
           "name" => "a",
           "value" => "0",
-          "presentationHint" => array(
+          "presentationHint" => darray[
             "visibility" => "private"
-          )
-        )
+          ]
+        ]
       ]
-    ]));
+    ]]);
 
 if (count($msg{"body"}{"variables"}) != 1) {
   throw new UnexpectedValueException("Unexpected variable count");
 }
 
 // Correct statics, $bObj should see statics inherited from class A
-$seq = sendVsCommand(array(
+$seq = sendVsCommand(darray[
   "command" => "variables",
   "type" => "request",
-  "arguments" => array("variablesReference" => 19)));
+  "arguments" => darray["variablesReference" => 19]]);
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, array(
+checkObjEqualRecursively($msg, darray[
     "type" => "response",
     "command" => "variables",
     "request_seq" => $seq,
     "success" => true,
-    "body" => [
-      "variables" => [
-        array(
+    "body" => darray[
+      "variables" => varray[
+        darray[
           "type" => "int",
           "name" => "B::\$S",
           "value" => "100",
-          "presentationHint" => array(
+          "presentationHint" => darray[
             "visibility" => "public"
-          )
-        )
+          ]
+        ]
       ]
-    ]));
+    ]]);
 
 if (count($msg{"body"}{"variables"}) != 1) {
   throw new UnexpectedValueException("Unexpected variable count");
 }
 
 // Correct class constants. Should inclide consts from A and B, sorted by name.
-$seq = sendVsCommand(array(
+$seq = sendVsCommand(darray[
   "command" => "variables",
   "type" => "request",
-  "arguments" => array("variablesReference" => 18)));
+  "arguments" => darray["variablesReference" => 18]]);
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, array(
+checkObjEqualRecursively($msg, darray[
     "type" => "response",
     "command" => "variables",
     "request_seq" => $seq,
     "success" => true,
-    "body" => [
-      "variables" => [
-        array(
+    "body" => darray[
+      "variables" => varray[
+        darray[
           "type" => "string",
           "name" => "A::HELLOA",
           "value" => "hello0",
-          "presentationHint" => array(
-            "attributes" => ["constant", "readOnly"]
-          )
-        ),
-        array(
+          "presentationHint" => darray[
+            "attributes" => varray["constant", "readOnly"]
+          ]
+        ],
+        darray[
           "type" => "string",
           "name" => "A::HELLOB",
           "value" => "hello0",
-          "presentationHint" => array(
-            "attributes" => ["constant", "readOnly"]
-          )
-        ),
-        array(
+          "presentationHint" => darray[
+            "attributes" => varray["constant", "readOnly"]
+          ]
+        ],
+        darray[
           "type" => "string",
           "name" => "B::HELLOB",
           "value" => "hello1",
-          "presentationHint" => array(
-            "attributes" => ["constant", "readOnly"]
-          )
-        )
+          "presentationHint" => darray[
+            "attributes" => varray["constant", "readOnly"]
+          ]
+        ]
       ]
-    ]));
+    ]]);
 
 if (count($msg{"body"}{"variables"}) != 3) {
   throw new UnexpectedValueException("Unexpected variable count");
 }
 
 // Check $c, a regular array of ints.
-$seq = sendVsCommand(array(
+$seq = sendVsCommand(darray[
   "command" => "variables",
   "type" => "request",
-  "arguments" => array("variablesReference" => 12)));
+  "arguments" => darray["variablesReference" => 12]]);
   $msg = json_decode(getNextVsDebugMessage(), true);
-  checkObjEqualRecursively($msg, array(
+  checkObjEqualRecursively($msg, darray[
       "type" => "response",
       "command" => "variables",
       "request_seq" => $seq,
       "success" => true,
-      "body" => [
-        "variables" => [
-          array(
+      "body" => darray[
+        "variables" => varray[
+          darray[
             "type" => "int",
             "name" => "0",
             "value" => "1"
-          ),
-          array(
+          ],
+          darray[
             "type" => "int",
             "name" => "1",
             "value" => "2"
-          ),
-          array(
+          ],
+          darray[
             "type" => "int",
             "name" => "2",
             "value" => "3"
-          )
+          ]
         ]
-      ]));
+      ]]);
 
 if (count($msg{"body"}{"variables"}) != 3) {
   throw new UnexpectedValueException("Unexpected variable count");
 }
 
 // Ask for a subset of the array.
-$seq = sendVsCommand(array(
+$seq = sendVsCommand(darray[
   "command" => "variables",
   "type" => "request",
-  "arguments" =>array("variablesReference" => 12, "count" => 2)));
+  "arguments" =>darray["variablesReference" => 12, "count" => 2]]);
   $msg = json_decode(getNextVsDebugMessage(), true);
-  checkObjEqualRecursively($msg, array(
+  checkObjEqualRecursively($msg, darray[
       "type" => "response",
       "command" => "variables",
       "request_seq" => $seq,
       "success" => true,
-      "body" => [
-        "variables" => [
-          array(
+      "body" => darray[
+        "variables" => varray[
+          darray[
             "type" => "int",
             "name" => "0",
             "value" => "1"
-          ),
-          array(
+          ],
+          darray[
             "type" => "int",
             "name" => "1",
             "value" => "2"
-          )
+          ]
         ]
-      ]));
+      ]]);
 
 if (count($msg{"body"}{"variables"}) != 2) {
   throw new UnexpectedValueException("Unexpected variable count");
 }
 
 // Check $d, a array of arrays.
-$seq = sendVsCommand(array(
+$seq = sendVsCommand(darray[
   "command" => "variables",
   "type" => "request",
-  "arguments" => array("variablesReference" => 13)));
+  "arguments" => darray["variablesReference" => 13]]);
   $msg = json_decode(getNextVsDebugMessage(), true);
-  checkObjEqualRecursively($msg, array(
+  checkObjEqualRecursively($msg, darray[
       "type" => "response",
       "command" => "variables",
       "request_seq" => $seq,
       "success" => true,
-      "body" => [
-        "variables" => [
-          array(
+      "body" => darray[
+        "variables" => varray[
+          darray[
             "type" => "int",
             "name" => "0",
             "value" => "1"
-          ),
-          array(
+          ],
+          darray[
             "type" => "array",
             "name" => "1",
             "value" => "array[2]",
             "variablesReference" => 22
-          )
+          ]
         ]
-      ]));
+      ]]);
 
 if (count($msg{"body"}{"variables"}) != 2) {
   throw new UnexpectedValueException("Unexpected variable count");
 }
 
 // check $d[1], sub array of ints.
-$seq = sendVsCommand(array(
+$seq = sendVsCommand(darray[
   "command" => "variables",
   "type" => "request",
-  "arguments" => array("variablesReference" => 22)));
+  "arguments" => darray["variablesReference" => 22]]);
   $msg = json_decode(getNextVsDebugMessage(), true);
-  checkObjEqualRecursively($msg, array(
+  checkObjEqualRecursively($msg, darray[
       "type" => "response",
       "command" => "variables",
       "request_seq" => $seq,
       "success" => true,
-      "body" => [
-        "variables" => [
-          array(
+      "body" => darray[
+        "variables" => varray[
+          darray[
             "type" => "int",
             "name" => "0",
             "value" => "2"
-          ),
-          array(
+          ],
+          darray[
             "type" => "int",
             "name" => "1",
             "value" => "3"
-          )
+          ]
         ]
-      ]));
+      ]]);
 
 if (count($msg{"body"}{"variables"}) != 2) {
   throw new UnexpectedValueException("Unexpected variable count");
 }
 
 // Check $e, array of objects
-$seq = sendVsCommand(array(
+$seq = sendVsCommand(darray[
   "command" => "variables",
   "type" => "request",
-  "arguments" => array("variablesReference" => 15)));
+  "arguments" => darray["variablesReference" => 15]]);
   $msg = json_decode(getNextVsDebugMessage(), true);
-  checkObjEqualRecursively($msg, array(
+  checkObjEqualRecursively($msg, darray[
       "type" => "response",
       "command" => "variables",
       "request_seq" => $seq,
       "success" => true,
-      "body" => [
-        "variables" => [
-          array(
+      "body" => darray[
+        "variables" => varray[
+          darray[
             "type" => "B",
             "name" => "0",
             "value" => "B",
             "variablesReference" => 14
-          ),
-          array(
+          ],
+          darray[
             "type" => "B",
             "name" => "1",
             "value" => "B",
             "variablesReference" => 14
-          )
+          ]
         ]
-      ]));
+      ]]);
 
 if (count($msg{"body"}{"variables"}) != 2) {
   throw new UnexpectedValueException("Unexpected variable count");
 }
 
-$seq = sendVsCommand(array(
+$seq = sendVsCommand(darray[
   "command" => "variables",
   "type" => "request",
-  "arguments" => array("variablesReference" => 14)));
+  "arguments" => darray["variablesReference" => 14]]);
 
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, array(
+checkObjEqualRecursively($msg, darray[
   "type" => "response",
   "command" => "variables",
   "request_seq" => $seq,
   "success" => true,
-  "body" => [
-    "variables" => [
-      array(
+  "body" => darray[
+    "variables" => varray[
+      darray[
         "type" => "A",
         "name" => "aObj",
         "value" => "A",
         "namedVariables" => 2,
         "variablesReference" => 16,
-        "presentationHint" => array(
+        "presentationHint" => darray[
           "visibility" => "public"
-        )
-      ),
-      array(
+        ]
+      ],
+      darray[
         "type" => "int",
         "name" => "b",
         "value" => "2",
-        "presentationHint" => array(
+        "presentationHint" => darray[
           "visibility" => "protected"
-        )
-      ),
-      array(
+        ]
+      ],
+      darray[
         "type" => "int",
         "name" => "c",
         "value" => "3",
-        "presentationHint" => array(
+        "presentationHint" => darray[
           "visibility" => "public"
-        )
-      ),
+        ]
+      ],
 
       // The private props should contain the base class's copy of $a, only.
-      array(
+      darray[
         "variablesReference" => 23,
         "name" => "Private props",
         "value" => "class A",
         "namedVariables" => 1,
-        "presentationHint" => array(
-          "attributes" => ["constant", "readOnly"]
-        )
-      ),
+        "presentationHint" => darray[
+          "attributes" => varray["constant", "readOnly"]
+        ]
+      ],
 
       // Two constants should be visible on A, HELLOA and HELLOB, and one
       // on class B.
-      array(
+      darray[
         "variablesReference" => 24,
         "name" => "Class Constants",
         "value" => "class B",
         "namedVariables" => 3,
-        "presentationHint" => array(
-          "attributes" => ["constant", "readOnly"]
-        )
-      ),
+        "presentationHint" => darray[
+          "attributes" => varray["constant", "readOnly"]
+        ]
+      ],
 
-      array(
+      darray[
         "variablesReference" => 25,
         "name" => "Static Props",
         "value" => "class B",
         "namedVariables" => 1,
-        "presentationHint" => array(
-          "attributes" => ["constant", "readOnly"]
-        )
-      ),
+        "presentationHint" => darray[
+          "attributes" => varray["constant", "readOnly"]
+        ]
+      ],
   ]]
-  ));
+  ]);
 
   // Ask for a subset of the array. Give me index 1 only.
-$seq = sendVsCommand(array(
+$seq = sendVsCommand(darray[
   "command" => "variables",
   "type" => "request",
   "seq" => 27,
-  "arguments" => array(
+  "arguments" => darray[
     "variablesReference" => 12,
     "start" => 1,
     "count" => 1
-  )));
+  ]]);
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, array(
+checkObjEqualRecursively($msg, darray[
     "type" => "response",
     "command" => "variables",
     "request_seq" => $seq,
     "success" => true,
-    "body" => [
-      "variables" => [
-          array(
+    "body" => darray[
+      "variables" => varray[
+          darray[
           "type" => "int",
           "name" => "1",
           "value" => "2"
-        )
+        ]
       ]
-    ]));
+    ]]);
 
 if (count($msg{"body"}{"variables"}) != 1) {
   throw new UnexpectedValueException("Unexpected variable count");
 }
 
 // Subset of class constants.
-$seq = sendVsCommand(array(
+$seq = sendVsCommand(darray[
   "command" => "variables",
   "type" => "request",
   "arguments" =>
-  array(
+  darray[
     "variablesReference" => 24,
     "start" => 1,
     "count" => 2
-  )));
+  ]]);
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, array(
+checkObjEqualRecursively($msg, darray[
     "type" => "response",
     "command" => "variables",
     "request_seq" => $seq,
     "success" => true,
-    "body" => [
-      "variables" => [
-        array(
+    "body" => darray[
+      "variables" => varray[
+        darray[
           "type" => "string",
           "name" => "A::HELLOB",
           "value" => "hello0",
-          "presentationHint" => array(
-            "attributes" => ["constant", "readOnly"]
-          )
-        ),
-        array(
+          "presentationHint" => darray[
+            "attributes" => varray["constant", "readOnly"]
+          ]
+        ],
+        darray[
           "type" => "string",
           "name" => "B::HELLOB",
           "value" => "hello1",
-          "presentationHint" => array(
-            "attributes" => ["constant", "readOnly"]
-          )
-        )
+          "presentationHint" => darray[
+            "attributes" => varray["constant", "readOnly"]
+          ]
+        ]
       ]
-    ]));
+    ]]);
 
 if (count($msg{"body"}{"variables"}) != 2) {
   throw new UnexpectedValueException("Unexpected variable count");
 }
 
 // Invalid subsets.
-$seq = sendVsCommand(array(
+$seq = sendVsCommand(darray[
   "command" => "variables",
   "type" => "request",
   "arguments" =>
-  array(
+  darray[
     "variablesReference" => 24,
     "start" => 100,
     "count" => 1
-  )));
+  ]]);
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, array(
+checkObjEqualRecursively($msg, darray[
     "type" => "response",
     "command" => "variables",
     "request_seq" => $seq,
     "success" => true,
-    "body" => [
-      "variables" => [
-        array(
+    "body" => darray[
+      "variables" => varray[
+        darray[
           "type" => "string",
           "name" => "A::HELLOA",
           "value" => "hello0",
-          "presentationHint" => array(
-            "attributes" => ["constant", "readOnly"]
-          )
-        ),
+          "presentationHint" => darray[
+            "attributes" => varray["constant", "readOnly"]
+          ]
+        ],
       ]
-    ]));
+    ]]);
 if (count($msg{"body"}{"variables"}) != 1) {
   throw new UnexpectedValueException("Unexpected variable count");
 }
 
-$seq = sendVsCommand(array(
+$seq = sendVsCommand(darray[
   "command" => "variables",
   "type" => "request",
   "arguments" =>
-  array(
+  darray[
     "variablesReference" => 24,
     "start" => 1,
     "count" => 100
-  )));
+  ]]);
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, array(
+checkObjEqualRecursively($msg, darray[
     "type" => "response",
     "command" => "variables",
     "request_seq" => $seq,
     "success" => true,
-    "body" => [
-      "variables" => [
-        array(
+    "body" => darray[
+      "variables" => varray[
+        darray[
           "type" => "string",
           "name" => "A::HELLOB",
           "value" => "hello0",
-          "presentationHint" => array(
-            "attributes" => ["constant", "readOnly"]
-          )
-        ),
-        array(
+          "presentationHint" => darray[
+            "attributes" => varray["constant", "readOnly"]
+          ]
+        ],
+        darray[
           "type" => "string",
           "name" => "B::HELLOB",
           "value" => "hello1",
-          "presentationHint" => array(
-            "attributes" => ["constant", "readOnly"]
-          )
-        )
+          "presentationHint" => darray[
+            "attributes" => varray["constant", "readOnly"]
+          ]
+        ]
       ]
-    ]));
+    ]]);
 if (count($msg{"body"}{"variables"}) != 2) {
   throw new UnexpectedValueException("Unexpected variable count");
 }

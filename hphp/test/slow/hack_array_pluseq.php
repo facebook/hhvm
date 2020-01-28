@@ -18,8 +18,8 @@ function main($a, $a2, $a3) {
 
 <<__EntryPoint>>
 function main_hack_array_pluseq() {
-$a1 = array(1, 2, 3);
-$a2 = array("1", "b", "c");
+$a1 = varray[1, 2, 3];
+$a2 = varray["1", "b", "c"];
 
 $v1 = vec[1, 2, 3];
 $d1 = dict['a' => 1, 'b' => 2, 'c' => 3];

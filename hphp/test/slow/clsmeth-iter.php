@@ -23,7 +23,7 @@ function iter_arg($arg) {
 
 function iter_dynamic() {
   iter_arg(get_meth());
-  iter_arg([Foo::class, 'bar']);
+  iter_arg(varray[Foo::class, 'bar']);
   iter_arg(vec[Foo::class, 'bar']);
   iter_arg(dict[0 => Foo::class, 1 => 'bar']);
 }
@@ -39,10 +39,10 @@ function iter_recursive($v) {
 
 function iter_recursive_init() {
   iter_recursive([]);
-  iter_recursive(['a' => ['b' => 'xyz']]);
-  iter_recursive(['a' => ['b' => 'xyz'], 'f' => get_meth()]);
-  iter_recursive(['a' => ['b' => get_meth()]]);
-  iter_recursive(['a' => ['b' => class_meth(Foo::class, 'bar')]]);
+  iter_recursive(darray['a' => darray['b' => 'xyz']]);
+  iter_recursive(darray['a' => darray['b' => 'xyz'], 'f' => get_meth()]);
+  iter_recursive(darray['a' => darray['b' => get_meth()]]);
+  iter_recursive(darray['a' => darray['b' => class_meth(Foo::class, 'bar')]]);
   iter_recursive(class_meth(Foo::class, 'bar'));
 }
 

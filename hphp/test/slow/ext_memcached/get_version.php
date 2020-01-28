@@ -2,10 +2,10 @@
 <<__EntryPoint>> function main(): void {
 $memc = new Memcached();
 
-$servers = [
+$servers = varray[
   // Test both servers formats
-  ['host' => 'localhost', 'port' => 11211, 'weight' => 50],
-  ['localhost', 22222, 50] // Dummy port to check failure
+  darray['host' => 'localhost', 'port' => 11211, 'weight' => 50],
+  varray['localhost', 22222, 50] // Dummy port to check failure
 ];
 
 $memc->addServers($servers);

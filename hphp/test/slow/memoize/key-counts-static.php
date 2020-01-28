@@ -12,62 +12,62 @@ class A {
   <<__Memoize>> public static function func1($p1) {
 
     if (MemoizeKeyCountsStaticPhp::$do_echo) echo "A::func1($p1)\n";
-    return json_encode([$p1]);
+    return json_encode(varray[$p1]);
   }
   <<__Memoize>> public static function func2($p1, $p2) {
 
     if (MemoizeKeyCountsStaticPhp::$do_echo) echo "A::func2($p1, $p2)\n";
-    return json_encode([$p1, $p2]);
+    return json_encode(varray[$p1, $p2]);
   }
   <<__Memoize>> public static function func3($p1, $p2, $p3) {
 
     if (MemoizeKeyCountsStaticPhp::$do_echo) echo "A::func3($p1, $p2, $p3)\n";
-    return json_encode([$p1, $p2, $p3]);
+    return json_encode(varray[$p1, $p2, $p3]);
   }
   <<__Memoize>> public static function func4($p1, $p2, $p3, $p4) {
 
     if (MemoizeKeyCountsStaticPhp::$do_echo) echo "A::func4($p1, $p2, $p3, $p4)\n";
-    return json_encode([$p1, $p2, $p3, $p4]);
+    return json_encode(varray[$p1, $p2, $p3, $p4]);
   }
   <<__Memoize>> public static function func5($p1, $p2, $p3, $p4, $p5) {
 
     if (MemoizeKeyCountsStaticPhp::$do_echo) echo "A::func5($p1, $p2, $p3, $p4, $p5)\n";
-    return json_encode([$p1, $p2, $p3, $p4, $p5]);
+    return json_encode(varray[$p1, $p2, $p3, $p4, $p5]);
   }
   <<__Memoize>> public static function func6($p1, $p2, $p3, $p4, $p5, $p6) {
 
     if (MemoizeKeyCountsStaticPhp::$do_echo) echo "A::func6($p1, $p2, $p3, $p4, $p5, $p6)\n";
-    return json_encode([$p1, $p2, $p3, $p4, $p5, $p6]);
+    return json_encode(varray[$p1, $p2, $p3, $p4, $p5, $p6]);
   }
   <<__Memoize>> public static function func7($p1, $p2, $p3, $p4, $p5, $p6, $p7) {
 
     if (MemoizeKeyCountsStaticPhp::$do_echo) echo "A::func7($p1, $p2, $p3, $p4, $p5, $p6, $p7)\n";
-    return json_encode([$p1, $p2, $p3, $p4, $p5, $p6, $p7]);
+    return json_encode(varray[$p1, $p2, $p3, $p4, $p5, $p6, $p7]);
   }
   <<__Memoize>> public static function func8($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8) {
 
     if (MemoizeKeyCountsStaticPhp::$do_echo) echo "A::func8($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8)\n";
-    return json_encode([$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8]);
+    return json_encode(varray[$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8]);
   }
   <<__Memoize>> public static function func9($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9) {
 
     if (MemoizeKeyCountsStaticPhp::$do_echo) echo "A::func9($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9)\n";
-    return json_encode([$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9]);
+    return json_encode(varray[$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9]);
   }
   <<__Memoize>> public static function func10($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10) {
 
     if (MemoizeKeyCountsStaticPhp::$do_echo) echo "A::func10($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10)\n";
-    return json_encode([$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10]);
+    return json_encode(varray[$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10]);
   }
   <<__Memoize>> public static function func11($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10, $p11) {
 
     if (MemoizeKeyCountsStaticPhp::$do_echo) echo "A::func11($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10, $p11)\n";
-    return json_encode([$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10, $p11]);
+    return json_encode(varray[$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10, $p11]);
   }
   <<__Memoize>> public static function func12($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10, $p11, $p12) {
 
     if (MemoizeKeyCountsStaticPhp::$do_echo) echo "A::func12($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10, $p11, $p12)\n";
-    return json_encode([$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10, $p11, $p12]);
+    return json_encode(varray[$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10, $p11, $p12]);
   }
 }
 

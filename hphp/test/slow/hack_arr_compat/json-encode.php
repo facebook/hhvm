@@ -8,7 +8,7 @@ function literals() {
     JSON_FB_WARN_DICTS | JSON_FB_WARN_KEYSETS | JSON_FB_WARN_PHP_ARRAYS
   );
   json_encode(
-    [1, 2, 3, 4],
+    varray[1, 2, 3, 4],
     JSON_FB_WARN_DICTS | JSON_FB_WARN_KEYSETS | JSON_FB_WARN_PHP_ARRAYS
   );
   json_encode(
@@ -37,7 +37,7 @@ function literals() {
   );
 
   json_encode(
-    [[1, 2], [3, 4]],
+    varray[varray[1, 2], varray[3, 4]],
     JSON_FB_WARN_DICTS | JSON_FB_WARN_KEYSETS | JSON_FB_WARN_PHP_ARRAYS
   );
   json_encode(
@@ -50,7 +50,7 @@ function literals() {
   );
 
   json_encode(
-    [1, vec[2, 3, 4], [5, 6, 7], keyset[8, 9, 10], dict['a' => 11, 'b' => 12]],
+    varray[1, vec[2, 3, 4], varray[5, 6, 7], keyset[8, 9, 10], dict['a' => 11, 'b' => 12]],
     JSON_FB_WARN_DICTS | JSON_FB_WARN_KEYSETS | JSON_FB_WARN_PHP_ARRAYS
   );
 }
@@ -58,7 +58,7 @@ function literals() {
 function test($name, $options) {
   echo "==================== $name =========================\n";
   var_dump(json_encode([], $options));
-  var_dump(json_encode([1, 2, 3, 4], $options));
+  var_dump(json_encode(varray[1, 2, 3, 4], $options));
   var_dump(json_encode(vec[], $options));
   var_dump(json_encode(vec[1, 2, 3, 4], $options));
   var_dump(json_encode(dict[], $options));
@@ -70,7 +70,7 @@ function test($name, $options) {
   var_dump(json_encode(keyset[], $options));
   var_dump(json_encode(keyset['a', 'b', 'c'], $options));
 
-  var_dump(json_encode([[1, 2], [3, 4]], $options));
+  var_dump(json_encode(varray[varray[1, 2], varray[3, 4]], $options));
   var_dump(json_encode(vec[vec[1, 2], vec[3, 4]], $options));
   var_dump(json_encode(
     dict['a' => dict['c' => 1, 'd' => 2], 'b' => dict['e' => 3, 'f' => 4]],
@@ -78,12 +78,12 @@ function test($name, $options) {
   ));
 
   var_dump(json_encode(
-    [1, vec[2, 3, 4], [5, 6, 7], keyset[8, 9, 10], dict['a' => 11, 'b' => 12]],
+    varray[1, vec[2, 3, 4], varray[5, 6, 7], keyset[8, 9, 10], dict['a' => 11, 'b' => 12]],
     $options
   ));
 
   $obj = new stdclass();
-  $obj->a = [1, 2, 3];
+  $obj->a = varray[1, 2, 3];
   $obj->b = vec[1, 2, 3];
   $obj->c = dict['a' => 1, 'b' => 2];
   $obj->d = keyset['a', 'b', 'c'];

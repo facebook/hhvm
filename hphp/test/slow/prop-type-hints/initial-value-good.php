@@ -46,7 +46,7 @@ class A {
   public string $p2 = 'abc';
   public bool $p3 = false;
   public float $p4 = 3.14;
-  public array $p5a = [1, 2, 3];
+  public array $p5a = varray[1, 2, 3];
   public array $p5b = varray[1, 2, 3];
   public array $p5c = darray[1 => 'a', 2 => 'b', 3 => 'c'];
   public resource $p6 = STDIN;
@@ -59,7 +59,7 @@ class A {
   public keyset $p13 = keyset['a', 'b', 'c'];
   public vec_or_dict $p14 = vec['a', 'b',' c'];
   public vec_or_dict $p15 = dict['a' => 100, 'b' => 200];
-  public arraylike $p16 = [100, 200];
+  public arraylike $p16 = varray[100, 200];
   public arraylike $p17 = vec[100, 200];
   public arraylike $p18 = dict[1 => 100, 2 => 200];
   public arraylike $p19 = keyset[100, 200];
@@ -69,7 +69,7 @@ class A {
   public darray $p23 = varray['val1', 'val2'];
   public varray_or_darray $p24 = varray[9, 8, 7];
   public varray_or_darray $p25 = darray['a' => 100, 'b' => 200];
-  public varray_or_darray $p26 = ['a' => 100, 'b' => 200];
+  public varray_or_darray $p26 = darray['a' => 100, 'b' => 200];
   public Vector $p27 = Vector{};
   public Map $p28 = Map{};
   public Enum1 $p29 = 'abc';
@@ -109,7 +109,7 @@ class A {
   public arraykey $p62 = STRCONST;
   public vec $p63 = vec[INTCONST, STRCONST, INTCONST];
   public dict $p64 = dict[STRCONST => INTCONST, INTCONST => STRCONST];
-  public array $p65 = [INTCONST, STRCONST, INTCONST];
+  public array $p65 = varray[INTCONST, STRCONST, INTCONST];
   public Enum1 $p66 = STRCONST;
   public Enum2 $p67 = INTCONST;
   public Enum3 $p68 = INTCONST;
@@ -136,7 +136,7 @@ class A {
   public arraykey $p88 = CONDCONST2;
   public vec $p89 = vec[CONDCONST1, CONDCONST2, CONDCONST1];
   public dict $p90 = dict[CONDCONST2 => CONDCONST1, CONDCONST1 => CONDCONST2];
-  public array $p91 = [CONDCONST1, CONDCONST2, CONDCONST1];
+  public array $p91 = varray[CONDCONST1, CONDCONST2, CONDCONST1];
   public Enum1 $p92 = CONDCONST2;
   public Enum2 $p93 = CONDCONST1;
   public Enum3 $p94 = CONDCONST1;
@@ -198,7 +198,7 @@ class A {
   public static string $s2 = 'abc';
   public static bool $s3 = false;
   public static float $s4 = 3.14;
-  public static array $s5a = [1, 2, 3];
+  public static array $s5a = varray[1, 2, 3];
   public static array $s5b = varray[1, 2, 3];
   public static array $s5c = darray[1 => 'a', 2 => 'b', 3 => 'c'];
   public static resource $s6 = STDIN;
@@ -211,7 +211,7 @@ class A {
   public static keyset $s13 = keyset['a', 'b', 'c'];
   public static vec_or_dict $s14 = vec['a', 'b',' c'];
   public static vec_or_dict $s15 = dict['a' => 100, 'b' => 200];
-  public static arraylike $s16 = [100, 200];
+  public static arraylike $s16 = varray[100, 200];
   public static arraylike $s17 = vec[100, 200];
   public static arraylike $s18 = dict[1 => 100, 2 => 200];
   public static arraylike $s19 = keyset[100, 200];
@@ -221,7 +221,7 @@ class A {
   public static darray $s23 = varray['val1', 'val2'];
   public static varray_or_darray $s24 = varray[9, 8, 7];
   public static varray_or_darray $s25 = darray['a' => 100, 'b' => 200];
-  public static varray_or_darray $s26 = ['a' => 100, 'b' => 200];
+  public static varray_or_darray $s26 = darray['a' => 100, 'b' => 200];
   public static Vector $s27 = Vector{};
   public static Map $s28 = Map{};
   public static Enum1 $s29 = 'abc';
@@ -261,7 +261,7 @@ class A {
   public static arraykey $s62 = STRCONST;
   public static vec $s63 = vec[INTCONST, STRCONST, INTCONST];
   public static dict $s64 = dict[STRCONST => INTCONST, INTCONST => STRCONST];
-  public static array $s65 = [INTCONST, STRCONST, INTCONST];
+  public static array $s65 = varray[INTCONST, STRCONST, INTCONST];
   public static Enum1 $s66 = STRCONST;
   public static Enum2 $s67 = INTCONST;
   public static Enum3 $s68 = INTCONST;
@@ -288,7 +288,7 @@ class A {
   public static arraykey $s88 = CONDCONST2;
   public static vec $s89 = vec[CONDCONST1, CONDCONST2, CONDCONST1];
   public static dict $s90 = dict[CONDCONST2 => CONDCONST1, CONDCONST1 => CONDCONST2];
-  public static array $s91 = [CONDCONST1, CONDCONST2, CONDCONST1];
+  public static array $s91 = varray[CONDCONST1, CONDCONST2, CONDCONST1];
   public static Enum1 $s92 = CONDCONST2;
   public static Enum2 $s93 = CONDCONST1;
   public static Enum3 $s94 = CONDCONST1;

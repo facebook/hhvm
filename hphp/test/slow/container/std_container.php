@@ -2,11 +2,11 @@
 
 class TestingIterator implements HH\Iterator {
     private $position = 0;
-    private $array = array(
+    private $array = varray[
         "second",
         "third",
         "forth"
-    );
+    ];
 
     public function __construct() {
         $this->position = 0;
@@ -119,10 +119,10 @@ function main() {
   print "==========\n";
   print "array\n";
   print "==========\n";
-  test([7, 8, 9]);
-  test([7]);
+  test(varray[7, 8, 9]);
+  test(varray[7]);
   test([]);
-  $a = [];
+  $a = darray[];
   $a[100] = "321";
   $a["0"] = 2;
   $a[-1] = "10";

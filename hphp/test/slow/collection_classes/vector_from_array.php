@@ -7,8 +7,8 @@ function test($name, $a) {
 
 function main() {
   test('empty', []);
-  test('packed', [1, 2, 3]);
-  test('mixed', ['a' => 'b', 'c' => 'd']);
+  test('packed', varray[1, 2, 3]);
+  test('mixed', darray['a' => 'b', 'c' => 'd']);
 }
 
 

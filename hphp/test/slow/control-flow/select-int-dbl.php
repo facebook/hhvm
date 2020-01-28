@@ -10,8 +10,8 @@ function main(bool $b1, bool $b2) {
 
 <<__EntryPoint>>
 function main_select_int_dbl() {
-foreach ([false, true, false, true] as $b1) {
-  foreach ([false, true, false, true] as $b2) {
+foreach (varray[false, true, false, true] as $b1) {
+  foreach (varray[false, true, false, true] as $b2) {
     var_dump(main($b1, $b2));
   }
 }

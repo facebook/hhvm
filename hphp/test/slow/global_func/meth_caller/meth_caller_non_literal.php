@@ -14,7 +14,7 @@ function test_builtins($m) {
 <<__EntryPoint>>
 function main() {
   test_builtins(HH\meth_caller(A::class, "afunc"));
-  $carr = [A::class];
+  $carr = varray[A::class];
   $func_n = "afunc";
   foreach ($carr as $c) {
     $m = HH\meth_caller($c, $func_n);

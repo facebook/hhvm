@@ -47,7 +47,7 @@ function main() {
   };
   fb_intercept('foo', 'handler1');
   fb_intercept('bar', 'W::handler2');
-  fb_intercept('fiz', [new W, 'handler3']);
+  fb_intercept('fiz', varray[new W, 'handler3']);
   fb_intercept('buz', (new W)->make_closure());
   fb_intercept('biz', W::make_static_closure());
   fb_intercept('far', $handler6);

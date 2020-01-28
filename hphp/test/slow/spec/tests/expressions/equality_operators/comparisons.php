@@ -26,8 +26,8 @@ echo "\n";
 ///*
 // NULL operand with all kinds of operands
 
-$oper1 = array(NULL);
-$oper2 = array(0, 100, -3.4, TRUE, FALSE, NULL, "", "123", "abc", [], [10,2.3]);
+$oper1 = varray[NULL];
+$oper2 = varray[0, 100, -3.4, TRUE, FALSE, NULL, "", "123", "abc", [], varray[10,2.3]];
 
 foreach ($oper1 as $e1)
 {
@@ -47,8 +47,8 @@ echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n";
 ///*
 // Two non-numeric strings
 
-$oper1 = array("", "a", "aa");
-$oper2 = array("", "aa", "A", "AB");
+$oper1 = varray["", "a", "aa"];
+$oper2 = varray["", "aa", "A", "AB"];
 
 foreach ($oper1 as $e1)
 {
@@ -68,8 +68,8 @@ echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n";
 ///*
 // Boolean operand with all kinds of operands
 
-$oper1 = array(TRUE, FALSE);
-$oper2 = array(0, 100, -3.4, TRUE, FALSE, NULL, "", "123", "abc", [], [10,2.3]);
+$oper1 = varray[TRUE, FALSE];
+$oper2 = varray[0, 100, -3.4, TRUE, FALSE, NULL, "", "123", "abc", [], varray[10,2.3]];
 
 foreach ($oper1 as $e1)
 {
@@ -89,8 +89,8 @@ echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n";
 ///*
 // Numeric strings with all kinds of operands
 
-$oper1 = array("10", "-5.1");
-$oper2 = array(0, 10, -3.4, TRUE, FALSE, NULL, "", "123", "abc", [], [10,2.3]);
+$oper1 = varray["10", "-5.1"];
+$oper2 = varray[0, 10, -3.4, TRUE, FALSE, NULL, "", "123", "abc", [], varray[10,2.3]];
 
 foreach ($oper1 as $e1)
 {
@@ -110,8 +110,8 @@ echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n";
 ///*
 // Two array types
 
-$oper1 = array([10,20], ["red"=>0,"green"=>0]);
-$oper2 = array([10,20.0], [10,20,30], ["red"=>0,"green"=>0], ["green"=>0,"red"=>0]);
+$oper1 = varray[varray[10,20], darray["red"=>0,"green"=>0]];
+$oper2 = varray[varray[10,20.0], varray[10,20,30], darray["red"=>0,"green"=>0], darray["green"=>0,"red"=>0]];
 
 foreach ($oper1 as $e1)
 {

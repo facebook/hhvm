@@ -14,6 +14,6 @@ if (__hhvm_intrinsics\launder_value(false)) {
   include 'unknown-reffiness-array-param2.inc';
 }
 
-$a = [100 => [200 => 'abc']];
+$a = darray[100 => darray[200 => 'abc']];
 var_dump(main(__hhvm_intrinsics\launder_value($a)));
 }

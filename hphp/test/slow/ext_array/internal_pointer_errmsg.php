@@ -12,7 +12,7 @@ function run($input) {
 
 <<__EntryPoint>>
 function main() {
-  run([1, 2, 3, 4, 5]);
+  run(varray[1, 2, 3, 4, 5]);
   run(vec[1, 2, 3, 4]);
   run(dict['foo' => 'bar', 'baz' => 'qux', 'zar' => 'doz']);
   run(0);

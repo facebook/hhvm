@@ -275,18 +275,18 @@ function runMethods() {
   echo "==========================================\n";
   echo "Testing methods....\n\n";
   $a = new Cls1();
-  runFuncs([$a, 'func1'],
-           [$a, 'func2'],
-           [$a, 'func3'],
-           [$a, 'func4'],
-           [$a, 'func5']);
+  runFuncs(varray[$a, 'func1'],
+           varray[$a, 'func2'],
+           varray[$a, 'func3'],
+           varray[$a, 'func4'],
+           varray[$a, 'func5']);
 
   $b = new Cls1();
-  runFuncs([$b, 'func1'],
-           [$b, 'func2'],
-           [$b, 'func3'],
-           [$b, 'func4'],
-           [$b, 'func5']);
+  runFuncs(varray[$b, 'func1'],
+           varray[$b, 'func2'],
+           varray[$b, 'func3'],
+           varray[$b, 'func4'],
+           varray[$b, 'func5']);
 }
 
 function runSingleMethods() {
@@ -297,11 +297,11 @@ function runSingleMethods() {
   $c = new Cls4();
   $d = new Cls5();
   $e = new Cls6();
-  runFuncs([$a, 'func'],
-           [$b, 'func'],
-           [$c, 'func'],
-           [$d, 'func'],
-           [$e, 'func']);
+  runFuncs(varray[$a, 'func'],
+           varray[$b, 'func'],
+           varray[$c, 'func'],
+           varray[$d, 'func'],
+           varray[$e, 'func']);
 }
 
 function runTraitStatics() {
@@ -323,17 +323,17 @@ function runTraitMethods() {
   echo "==========================================\n";
   echo "Testing trait methods....\n\n";
   $a = new Cls7();
-  runFuncs([$a, 'func1'],
-           [$a, 'func2'],
-           [$a, 'func3'],
-           [$a, 'func4'],
-           [$a, 'func5']);
+  runFuncs(varray[$a, 'func1'],
+           varray[$a, 'func2'],
+           varray[$a, 'func3'],
+           varray[$a, 'func4'],
+           varray[$a, 'func5']);
   $b = new Cls8();
-  runFuncs([$b, 'func1'],
-           [$b, 'func2'],
-           [$b, 'func3'],
-           [$b, 'func4'],
-           [$b, 'func5']);
+  runFuncs(varray[$b, 'func1'],
+           varray[$b, 'func2'],
+           varray[$b, 'func3'],
+           varray[$b, 'func4'],
+           varray[$b, 'func5']);
 }
 
 

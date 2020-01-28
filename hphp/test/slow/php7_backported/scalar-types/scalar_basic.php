@@ -8,19 +8,19 @@ class Stringable {
     }
 }
 <<__EntryPoint>> function main(): void {
-$errnames = [
+$errnames = darray[
     E_NOTICE => 'E_NOTICE',
     E_WARNING => 'E_WARNING',
 ];
 
-$functions = [
+$functions = darray[
     'int' => function (int $i) { return $i; },
     'float' => function (float $f) { return $f; },
     'string' => function (string $s) { return $s; },
     'bool' => function (bool $b) { return $b; }
 ];
 
-$values = [
+$values = varray[
     1,
     "1",
     1.0,

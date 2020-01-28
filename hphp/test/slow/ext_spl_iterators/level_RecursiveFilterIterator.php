@@ -22,14 +22,14 @@ class TestingFilterIterator extends RecursiveFilterIterator {
 
 <<__EntryPoint>>
 function main_level_recursive_filter_iterator() {
-$arrayForTest = [
-    'a1' => [
+$arrayForTest = darray[
+    'a1' => darray[
         'b1' => new StdClass(),
         'b2' => new StdClass(),
         'b3' => [],
     ],
-    'a2' => [
-        'b4' => [
+    'a2' => darray[
+        'b4' => darray[
             'c1' => new StdClass(),
         ]
     ]
@@ -41,7 +41,7 @@ $filter   = new TestingFilterIterator($iterator);
 $final    = new RecursiveIteratorIterator($filter,
                                          RecursiveIteratorIterator::SELF_FIRST);
 
-$keys = [];
+$keys = varray[];
 foreach($final as $key => $value)
 {
     $keys[] = $key;

@@ -12,7 +12,7 @@ class Foo {
 
 function test_invoke($ref, $instance) {
   try {
-    $ref->invokeArgs($instance, ["SUCCESS"]);
+    $ref->invokeArgs($instance, varray["SUCCESS"]);
   } catch (Exception $e) {
     echo get_class($e) . ': ' . $e->getMessage() . "\n";
   }

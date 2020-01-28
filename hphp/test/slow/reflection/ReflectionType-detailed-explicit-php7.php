@@ -21,7 +21,7 @@ function main_reflection_type_detailed_explicit_php7() {
 $closure = function (Test $a): Test { return $a; };
 $nclosure = function (?Test $a): ?Test { return $a; };
 echo "*** functions\n";
-foreach ([
+foreach (varray[
   new ReflectionFunction('foo'),
   new ReflectionFunction('nfoo'),
   new ReflectionFunction($closure),
@@ -39,7 +39,7 @@ foreach ([
   }
 }
 echo "\n*** methods\n";
-foreach ([
+foreach (varray[
   new ReflectionMethod('SplObserver', 'update'),
   new ReflectionMethod('c', 'bar'),
   new ReflectionMethod('c', 'nbar'),
@@ -59,7 +59,7 @@ foreach ([
   }
 }
 echo "\n*** return types\n";
-foreach ([
+foreach (varray[
   new ReflectionMethod('SplObserver', 'update'),
   new ReflectionFunction('bar'),
   new ReflectionMethod('c', 'bar'),

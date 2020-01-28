@@ -17,7 +17,7 @@ class D {
 
 function main() {
   $c = new C();
-  $c->foo = [42];
+  $c->foo = varray[42];
   $c->bar += 42;
   $c->baz++;
   var_dump($c);

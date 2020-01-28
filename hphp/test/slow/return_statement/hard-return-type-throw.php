@@ -8,7 +8,7 @@ set_error_handler(fun('error_handler'));
 class Media {}
 
 function crash(): string {
-  $medias = [new Media];
+  $medias = varray[new Media];
   foreach ($medias as $media) {
     echo "about to return\n";
     return $media;

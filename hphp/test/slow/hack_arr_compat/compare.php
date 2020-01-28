@@ -45,12 +45,12 @@ function do_compares($a, $b, $cmp) {
 function main() {
   set_error_handler(fun('handler'));
 
-  $x1 = [
+  $x1 = varray[
     [],
-    [1, 2, [3, 4]],
-    ['a' => 'b', 'c' => 'd']
+    varray[1, 2, varray[3, 4]],
+    darray['a' => 'b', 'c' => 'd']
   ];
-  $x2_non_hack_arrays = [
+  $x2_non_hack_arrays = varray[
     true,
     false,
     null,
@@ -59,17 +59,17 @@ function main() {
     'abc',
     new stdclass,
     imagecreate(1, 1),
-    [1, [2, 5], [3, 4]],
-    ['a' => [], 'c' => [1, 2]],
+    varray[1, varray[2, 5], varray[3, 4]],
+    darray['a' => [], 'c' => varray[1, 2]],
   ];
-  $x2_hack_arrays = [
+  $x2_hack_arrays = varray[
     vec[],
     vec[1, 2, 3],
     dict[],
     dict['a' => 'b', 'c' => 'd'],
     keyset[],
     keyset['a', 'b', 'c'],
-    [1, 2, vec[3, 4]],
+    varray[1, 2, vec[3, 4]],
   ];
 
   $do_compare_hack_array_listener

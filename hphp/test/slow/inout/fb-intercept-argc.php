@@ -16,13 +16,13 @@ function meep(inout $f, $g, inout $r) {
 
 function too_many($name, $obj_or_cls, inout $args, $ctx, inout $done) {
   var_dump($args, $done);
-  $args = ['red', 'green', 'blue', 'apple', 'bannana', 'pear'];
+  $args = varray['red', 'green', 'blue', 'apple', 'bannana', 'pear'];
   $done = $ctx;
 }
 
 function too_few($name, $obj_or_cls, inout $args, $ctx, inout $done) {
   var_dump($args, $done);
-  $args = ['foo'];
+  $args = varray['foo'];
   $done = $ctx;
 }
 

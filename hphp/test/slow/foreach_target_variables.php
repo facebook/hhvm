@@ -12,7 +12,7 @@ class Test2 {
 // Target: Integer array keys
 <<__EntryPoint>>
 function main_foreach_target_variables() {
-$array = [1, 2, 3];
+$array = varray[1, 2, 3];
 
 $a = [];
 foreach ($array as $a[0] => $a[1]) {
@@ -21,10 +21,10 @@ foreach ($array as $a[0] => $a[1]) {
 echo "\n";
 
 // Target: Append to array
-$array = [1, 2, 3];
+$array = varray[1, 2, 3];
 
 $i = 0;
-$a = [];
+$a = varray[];
 foreach ($array as $a[] => $a[]) {
     echo $a[$i+1], " => ", $a[$i], ",";
     $i += 2;
@@ -32,7 +32,7 @@ foreach ($array as $a[] => $a[]) {
 echo "\n";
 
 // Target: Non-static properties
-$array = [1, 2, 3];
+$array = varray[1, 2, 3];
 
 $obj = new Test;
 foreach ($array as $obj->keyProp => $obj->valProp) {
@@ -41,7 +41,7 @@ foreach ($array as $obj->keyProp => $obj->valProp) {
 echo "\n";
 
 // Target: Static properties
-$array = [1, 2, 3];
+$array = varray[1, 2, 3];
 
 foreach ($array as Test2::$staticKeyProp => Test::$staticValProp) {
     echo Test2::$staticKeyProp, " => ", Test::$staticValProp, ",";

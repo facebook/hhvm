@@ -30,7 +30,7 @@ function run(?string $cls, ?string $func = null) {
     $ok = "-";
   }
   A::$sideEffects = vec[];
-  $values = [
+  $values = varray[
     A::foo1(),
     B::foo1(),
     C::foo1(),

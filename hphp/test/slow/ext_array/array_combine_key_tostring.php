@@ -4,10 +4,10 @@ class Foo { function __toString() { return 'Hello'; } }
 
 <<__EntryPoint>>
 function main_array_combine_key_tostring() {
-$foos = [new Foo];
+$foos = varray[new Foo];
 $bar = array_combine($foos, $foos);
 
-$arrays = [array(1), 2];
+$arrays = varray[varray[1], 2];
 $bar2 = array_combine($arrays, $arrays);
 
 var_dump($bar);

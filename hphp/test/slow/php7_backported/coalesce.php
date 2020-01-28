@@ -2,7 +2,7 @@
 
 function foobar() {
   echo "called\n";
-  return ['a'];
+  return varray['a'];
 }
 function f($x)
 {
@@ -18,12 +18,12 @@ function main_entry(): void {
   $obj = new StdClass;
   $obj->boo = 7;
 
-  $arr = [
+  $arr = darray[
     2 => 7,
     "foo" => "bar",
     "foobar" => NULL,
     "qux" => $obj,
-    "bing" => [
+    "bing" => varray[
       "bang"
       ]
   ];

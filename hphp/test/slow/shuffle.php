@@ -12,8 +12,8 @@ function main_shuffle() {
 srand(1234);
 
 test([]);
-test([1, 2, 3, 4, 5]);
-test([1 => 'a', 2 => 'b', 3 => 'c']);
+test(varray[1, 2, 3, 4, 5]);
+test(darray[1 => 'a', 2 => 'b', 3 => 'c']);
 
 test(vec[]);
 test(vec[1, 2, 3, 4, 5]);

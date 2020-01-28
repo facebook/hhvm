@@ -3,9 +3,9 @@
 
 <<__EntryPoint>>
 function main_number_format_multibyte() {
-$separators = [
-  'multichar' => ['herp', 'derp'],
-  'multibyte' => ['¡', '×']
+$separators = darray[
+  'multichar' => varray['herp', 'derp'],
+  'multibyte' => varray['¡', '×']
 ];
 
 var_dump(

@@ -1,7 +1,7 @@
 <?hh
 // Same as map_unser.php, but with -vServer.UnserializationBigMapThreshold=1
 
-$data = [
+$data = varray[
   'K:6:"HH\\Map":0:{}',
   'K:6:"HH\\Map":1:{s:3:"bar";i:7;}',
   'K:6:"HH\\Map":1:{s:3:"bar";i:;}',
@@ -31,7 +31,7 @@ function makeBig($n) {
   return $m;
 }
 
-$sizes = [ 0, 1, 100, 1000];
+$sizes = varray[ 0, 1, 100, 1000];
 
 foreach ($sizes as $n) {
   var_dump(unserialize(serialize(makeBig($n))));

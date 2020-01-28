@@ -8,7 +8,7 @@ class Foo
 
 <<__EntryPoint>>
 function main_self_reflection_getclass() {
-$rc = (new ReflectionParameter(['Foo', 'compare'], 'otherFoo'))->getClass();
+$rc = (new ReflectionParameter(varray['Foo', 'compare'], 'otherFoo'))->getClass();
 var_dump(get_class($rc));
 var_dump($rc->getName());
 }

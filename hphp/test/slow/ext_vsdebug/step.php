@@ -7,67 +7,67 @@ function verifyStopLine($frames, $line) {
 
 
   $msg = json_decode(getNextVsDebugMessage(), true);
-  checkObjEqualRecursively($msg, array(
+  checkObjEqualRecursively($msg, darray[
     "type" => "event",
     "event" => "stopped",
-    "body" => array(
+    "body" => darray[
         "threadId" => 1
-    )));
+    ]]);
 
-  $seq = sendVsCommand(array(
+  $seq = sendVsCommand(darray[
     "command" => "stackTrace",
     "type" => "request",
-    "arguments" => array(
+    "arguments" => darray[
       "threadId" => 1
-    )));
+    ]]);
 
   $msg = json_decode(getNextVsDebugMessage(), true);
-  checkObjEqualRecursively($msg, array(
+  checkObjEqualRecursively($msg, darray[
     "type" => "response",
     "command" => "stackTrace",
     "request_seq" => $seq,
     "success" => true,
-    "body" => array(
+    "body" => darray[
         "totalFrames" => $frames,
-        "stackFrames" => [
-          array(
-            "source" => array("path" => ExtVsdebugStep::$path, "name" => str_replace(".test", "", basename(ExtVsdebugStep::$path))),
+        "stackFrames" => varray[
+          darray[
+            "source" => darray["path" => ExtVsdebugStep::$path, "name" => str_replace(".test", "", basename(ExtVsdebugStep::$path))],
             "line" => $line,
-          )
+          ]
         ]
-      )
-    ));
+      ]
+    ]);
 }
 
 function stepCommand($cmd) {
-  $seq = sendVsCommand(array(
+  $seq = sendVsCommand(darray[
     "command" => $cmd,
     "type" => "request",
-    "arguments" => array("threadId" => 1)));
+    "arguments" => darray["threadId" => 1]]);
   $msg = json_decode(getNextVsDebugMessage(), true);
-  checkObjEqualRecursively($msg, array(
+  checkObjEqualRecursively($msg, darray[
     "type" => "response",
     "command" => $cmd,
     "request_seq" => $seq,
-    "success" => true));
+    "success" => true]);
 
   $msg = json_decode(getNextVsDebugMessage(), true);
-  checkObjEqualRecursively($msg, array(
+  checkObjEqualRecursively($msg, darray[
     "type" => "event",
     "event" => "continued",
-    "body" => array(
+    "body" => darray[
         "threadId" => 1
-    )));
+    ]]);
 }
 
 
-$breakpoints = [
-   array(
+$breakpoints = varray[
+   darray[
      "path" => __FILE__ . ".test",
-     "breakpoints" => [
-       array("line" => 9, "calibratedLine" => 9, "condition" => ""),
-       array("line" => 13, "calibratedLine" => 13, "condition" => ""),
-     ])
+     "breakpoints" => varray[
+       darray["line" => 9, "calibratedLine" => 9, "condition" => ""],
+       darray["line" => 13, "calibratedLine" => 13, "condition" => ""],
+     ]]
    ];
 
 $testProcess = vsDebugLaunch(ExtVsdebugStep::$path, true, $breakpoints);
@@ -97,34 +97,34 @@ stepCommand("next");
 verifyStopLine(1, 12);
 
 // Continue to location hits bp on the way to the target line.
-$seq = sendVsCommand(array(
+$seq = sendVsCommand(darray[
   "command" => "fb_continueToLocation",
   "type" => "request",
   "seq" => 5,
   "arguments" =>
-    array(
+    darray[
       "threadId" => 1,
-      "source" => array("path" => ExtVsdebugStep::$path),
+      "source" => darray["path" => ExtVsdebugStep::$path],
       "line" => 15
-    )));
+    ]]);
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, array(
+checkObjEqualRecursively($msg, darray[
   "type" => "event",
   "event" => "output",
-  "body" => array(
+  "body" => darray[
       "category" => "info",
-  )));
+  ]]);
 
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, array(
+checkObjEqualRecursively($msg, darray[
   "type" => "response",
   "command" => "fb_continueToLocation",
-  "request_seq" => $seq));
+  "request_seq" => $seq]);
 
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, array(
+checkObjEqualRecursively($msg, darray[
   "type" => "event",
-  "event" => "continued"));
+  "event" => "continued"]);
 
 checkForOutput($testProcess, "hello world 2\n", "stdout");
 verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[1]);

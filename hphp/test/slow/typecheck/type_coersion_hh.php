@@ -8,7 +8,7 @@ function errHandler($errno, $errmsg, $file, $line) {
 
 function check($kind, $builtin_fn) {
   echo "\n$kind\n";
-  foreach ([True, 1, 3.14, "abc", [1, 2, 3], null] as $k => $v) {
+  foreach (varray[True, 1, 3.14, "abc", varray[1, 2, 3], null] as $k => $v) {
     try { $builtin_fn($v); } catch (Exception $e) { echo 'WARNING: '.$e->getMessage()."\n"; }
   }
 }

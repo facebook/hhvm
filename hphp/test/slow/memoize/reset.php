@@ -137,10 +137,10 @@ function testMethods() {
   echo "================================\n";
   echo "Testing methods....\n\n";
   $a = new Cls2();
-  runFuncs([$a, 'func1'], [$a, 'func2']);
-  runFuncs([$a, 'func1'], [$a, 'func2']);
+  runFuncs(varray[$a, 'func1'], varray[$a, 'func2']);
+  runFuncs(varray[$a, 'func1'], varray[$a, 'func2']);
   HH\clear_instance_memoization($a);
-  runFuncs([$a, 'func1'], [$a, 'func2']);
+  runFuncs(varray[$a, 'func1'], varray[$a, 'func2']);
 }
 
 function testSingleMethods() {
@@ -148,22 +148,22 @@ function testSingleMethods() {
   echo "Testing single methods....\n\n";
   $a = new Cls3();
   $b = new Cls4();
-  runFuncs([$a, 'func'], [$b, 'func']);
-  runFuncs([$a, 'func'], [$b, 'func']);
+  runFuncs(varray[$a, 'func'], varray[$b, 'func']);
+  runFuncs(varray[$a, 'func'], varray[$b, 'func']);
   HH\clear_instance_memoization($a);
-  runFuncs([$a, 'func'], [$b, 'func']);
+  runFuncs(varray[$a, 'func'], varray[$b, 'func']);
   HH\clear_instance_memoization($b);
-  runFuncs([$a, 'func'], [$b, 'func']);
+  runFuncs(varray[$a, 'func'], varray[$b, 'func']);
 }
 
 function testTraits() {
   echo "================================\n";
   echo "Testing traits....\n\n";
   $a = new Cls5();
-  runFuncs([$a, 'func1'], [$a, 'func2']);
-  runFuncs([$a, 'func1'], [$a, 'func2']);
+  runFuncs(varray[$a, 'func1'], varray[$a, 'func2']);
+  runFuncs(varray[$a, 'func1'], varray[$a, 'func2']);
   HH\clear_instance_memoization($a);
-  runFuncs([$a, 'func1'], [$a, 'func2']);
+  runFuncs(varray[$a, 'func1'], varray[$a, 'func2']);
 }
 
 function testTraitStatics() {
@@ -184,12 +184,12 @@ function testTraitSingleMethods() {
   echo "Testing trait single methods....\n\n";
   $a = new Cls7();
   $b = new Cls8();
-  runFuncs([$a, 'func'], [$b, 'func']);
-  runFuncs([$a, 'func'], [$b, 'func']);
+  runFuncs(varray[$a, 'func'], varray[$b, 'func']);
+  runFuncs(varray[$a, 'func'], varray[$b, 'func']);
   HH\clear_instance_memoization($a);
-  runFuncs([$a, 'func'], [$b, 'func']);
+  runFuncs(varray[$a, 'func'], varray[$b, 'func']);
   HH\clear_instance_memoization($b);
-  runFuncs([$a, 'func'], [$b, 'func']);
+  runFuncs(varray[$a, 'func'], varray[$b, 'func']);
 }
 
 function testFreeFuncs() {

@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_keygen() {
-$algos = [
+$algos = varray[
   'aead_chacha20poly1305',
   'aead_chacha20poly1305_ietf',
   'aead_xchacha20poly1305_ietf',

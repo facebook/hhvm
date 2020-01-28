@@ -1,7 +1,7 @@
 <?hh
 
 function gen1() {
-    return [4, 5, 6];
+    return varray[4, 5, 6];
 }
 
 function gen2() {

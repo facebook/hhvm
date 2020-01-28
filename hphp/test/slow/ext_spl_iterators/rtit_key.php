@@ -18,10 +18,10 @@ $rait = new RecursiveArrayIterator([
   ),
   8,
   9,
-  array(
+  varray[
     0,
     1
-  )
+  ]
 ]
 );
 

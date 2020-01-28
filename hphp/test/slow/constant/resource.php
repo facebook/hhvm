@@ -7,7 +7,7 @@
 // const BAR4 = dict[1 => FOO1, 'abc' => FOO1];
 
 const BAR5 = STDIN;
-const BAR6 = [STDIN, STDIN];
+const BAR6 = varray[STDIN, STDIN];
 const BAR7 = vec[STDIN, STDIN];
 const BAR8 = dict[1 => STDIN, 'abc' => STDIN];
 

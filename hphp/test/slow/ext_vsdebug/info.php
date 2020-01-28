@@ -2,21 +2,21 @@
 require(__DIR__ . '/common.inc');
 
 function getInfo($sym) {
-  $command = array(
+  $command = darray[
     "command" => "info",
     "type" => "request",
-    "arguments" => array(
+    "arguments" => darray[
       "object" => $sym,
       "threadId" => 1,
-    ));
+    ]];
 
   $seq = sendVsCommand($command);
-  $response = array(
+  $response = darray[
     "type" => "response",
     "command" => "info",
     "success" => true,
     "request_seq" => $seq,
-  );
+  ];
 
   $str = getNextVsDebugMessage();
   $msg = json_decode($str, true);
@@ -26,13 +26,13 @@ function getInfo($sym) {
 <<__EntryPoint>> function main(): void {
 $path = __FILE__ . ".test";
 
-$breakpoints = [
-   array(
+$breakpoints = varray[
+   darray[
      "path" => __FILE__ . ".test",
-     "breakpoints" => [
-       array("line" => 7, "calibratedLine" => 7, "condition" => ""),
-       array("line" => 12, "calibratedLine" => 12, "condition" => ""),
-     ])
+     "breakpoints" => varray[
+       darray["line" => 7, "calibratedLine" => 7, "condition" => ""],
+       darray["line" => 12, "calibratedLine" => 12, "condition" => ""],
+     ]]
    ];
 
 $testProcess = vsDebugLaunch($path, true, $breakpoints);

@@ -37,7 +37,7 @@ function main() {
   $r = 5;
   $s = 6;
 
-  list($a, $b, $c) = [2.0, 3, "5"];
+  list($a, $b, $c) = varray[2.0, 3, "5"];
   var_dump(
     "one",
     var_dump(1),

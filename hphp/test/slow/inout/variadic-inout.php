@@ -13,7 +13,7 @@ function bar(inout $x, ...$z) {
 }
 
 function main() {
-  $x = [1, 2, 3];
+  $x = varray[1, 2, 3];
   foo(inout $x, 24);
   foo(inout $x, 42, 'apple', 200);
   foo(inout $x, 8, 99, 'green');

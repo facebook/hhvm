@@ -11,6 +11,6 @@ $actual = ini_get('hhvm.server.source_root');
 var_dump(
   ($actual === $expected)
   ? "matches"
-  : [$expected, $actual]
+  : varray[$expected, $actual]
 );
 }

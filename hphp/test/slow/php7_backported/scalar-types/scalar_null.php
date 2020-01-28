@@ -2,7 +2,7 @@
 
 require 'fix_exceptions.inc';
 <<__EntryPoint>> function main(): void {
-$functions = [
+$functions = darray[
     'int' => function (int $i) { return $i; },
     'float' => function (float $f) { return $f; },
     'string' => function (string $s) { return $s; },

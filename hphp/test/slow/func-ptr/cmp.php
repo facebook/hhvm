@@ -31,9 +31,9 @@ function comp($x, $y) {
 }
 
 function getTestcase(int $num) {
-  $test_cases = [
+  $test_cases = varray[
     true, false, 0, 1, 0.0, 1.0, "foo",
-    array('foo'),
+    varray['foo'],
     varray['foo'],
     vec['foo'],
     darray[0 => 'foo'],

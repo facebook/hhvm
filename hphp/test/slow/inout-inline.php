@@ -11,7 +11,7 @@ function foo(inout float $a, inout int $b, inout string $c) {
 
 <<__EntryPoint>>
 function main() {
-  list($a, $b, $c) = [2.0, 3, "5"];
+  list($a, $b, $c) = varray[2.0, 3, "5"];
   var_dump(
     "one",
     var_dump(1),

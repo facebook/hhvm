@@ -15,7 +15,7 @@ async function gena<Tk as arraykey, Tv>(
 async function f() { return 1; }
 
 async function test() {
-  $x = [f(), f(), f()];
+  $x = varray[f(), f(), f()];
   await gena($x);
 }
 

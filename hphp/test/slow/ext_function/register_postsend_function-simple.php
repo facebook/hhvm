@@ -19,8 +19,8 @@ class Test {
 <<__EntryPoint>>
 function main_register_postsend_function_simple() {
   \register_postsend_function(__NAMESPACE__ . '\test');
-  \register_postsend_function([new Test, 'handleInstance']);
-  \register_postsend_function([__NAMESPACE__ . '\Test', 'handleStatic']);
+  \register_postsend_function(varray[new Test, 'handleInstance']);
+  \register_postsend_function(varray[__NAMESPACE__ . '\Test', 'handleStatic']);
   \register_postsend_function(function () {
     \var_dump('Lambda');
   });

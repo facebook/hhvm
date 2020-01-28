@@ -17,6 +17,6 @@ EOF
 $node->addChild('test', 'best');
 $nodes = (array)$node;
 var_dump($nodes);
-$arr = [$nodes['hello'] => 1];
+$arr = darray[$nodes['hello'] => 1];
 var_dump($arr);
 }

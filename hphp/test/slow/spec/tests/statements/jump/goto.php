@@ -36,11 +36,11 @@ label1:
 function main_entry(): void {
   error_reporting(-1);
 
-  $table = array();
-  $table[0] = [34];
+  $table = darray[];
+  $table[0] = varray[34];
   $table[0][1] = -3;
   $table[0][2] = 345;
-  $table[1] = [123];
+  $table[1] = varray[123];
   $table[1][1] = 9854;
   $table[1][2] = -765;
 

@@ -2,7 +2,7 @@
 
 <<__EntryPoint>>
 function main_subclass() {
-$exec_class = ['Exception', 'RuntimeException', 'InvalidArgumentException',
+$exec_class = varray['Exception', 'RuntimeException', 'InvalidArgumentException',
                'BadMethodCallException', 'OutOfBoundsException',
                'DOMException', 'PDOException'];
 

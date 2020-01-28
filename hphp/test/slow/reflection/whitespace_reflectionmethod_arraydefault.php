@@ -1,7 +1,7 @@
 <?hh
 
 class Herp {
-  function derp($derp = [1,2,3]) {}
+  function derp($derp = varray[1,2,3]) {}
 }
 
 

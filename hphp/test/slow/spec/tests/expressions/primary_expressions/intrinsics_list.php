@@ -10,38 +10,38 @@ error_reporting(-1);
 
 echo "--------- test with full and omitted LHS vars -------------\n";
 
-$v = list($min, $max, $avg) = array(0, 100, 67);
+$v = list($min, $max, $avg) = varray[0, 100, 67];
 echo "\$min: $min, \$max: $max, \$avg: $avg\n";
 print_r($v);
 
-$v = list($min, $max, $avg) = array(2 => 67, 1 => 100, 0 => 0);
+$v = list($min, $max, $avg) = darray[2 => 67, 1 => 100, 0 => 0];
 echo "\$min: $min, \$max: $max, \$avg: $avg\n";
 print_r($v);
 
-list($min, , $avg) = array(0, 100, 67);
+list($min, , $avg) = varray[0, 100, 67];
 echo "\$min: $min, , \$avg: $avg\n";
 
-list(, $max, $avg) = array(0, 100, 67);
+list(, $max, $avg) = varray[0, 100, 67];
 echo ", \$max: $max, \$avg: $avg\n";
 
-list(, , $avg) = array(0, 100, 67);
+list(, , $avg) = varray[0, 100, 67];
 echo ", , \$avg: $avg\n";
 
-list($min, $max, ) = array(0, 100, 67);
+list($min, $max, ) = varray[0, 100, 67];
 echo "\$min: $min, \$max: $max,\n";
 
-list($min, $max) = array(0, 100, 67);
+list($min, $max) = varray[0, 100, 67];
 echo "\$min: $min, \$max: $max\n";
 
-list($min, , ) = array(0, 100, 67);
+list($min, , ) = varray[0, 100, 67];
 echo "\$min: $min, ,\n";
 
-list($min) = array(0, 100, 67);
+list($min) = varray[0, 100, 67];
 echo "\$min: $min\n";
 
 echo "--------- test with more array elements than variables -------------\n";
 
-$v = list($min, $max, $avg) = array(0, 100, 67, 22, 33);
+$v = list($min, $max, $avg) = varray[0, 100, 67, 22, 33];
 echo "\$min: $min, \$max: $max, \$avg: $avg\n";
 print_r($v);
 
@@ -54,7 +54,7 @@ var_dump($max);
 var_dump(isset($avg));
 var_dump($avg);
 
-try { list($min, $max, $avg) = $v = array(100, 500);  // Undefined offset: 2
+try { list($min, $max, $avg) = $v = varray[100, 500];  // Undefined offset: 2
 } catch (Exception $e) { echo $e->getMessage()."\n"; }
 echo "\$min: $min, \$max: $max, \$avg: $avg\n";
 print_r($v);
@@ -96,7 +96,7 @@ print_r($v);
 echo "--------- test with non-numeric array -------------\n";
 
 try {
-list($min, $max, $avg) = $v = ["x" => 10, "a" => 20, "y" => 30];
+list($min, $max, $avg) = $v = darray["x" => 10, "a" => 20, "y" => 30];
 } catch (Exception $e) { echo $e->getMessage()."\n"; }
     // Undefined offset: 2, 1, 0
 echo "\$min: $min, \$max: $max, \$avg: $avg\n";
@@ -108,7 +108,7 @@ var_dump(isset($avg));  // FALSE
 
 echo "--------- test with array element being an array -------------\n";
 
-try { list($min, $max, $avg) = $v = array(0, array(100, 67)); // Undefined offset: 2
+try { list($min, $max, $avg) = $v = varray[0, varray[100, 67]]; // Undefined offset: 2
 } catch (Exception $e) { echo $e->getMessage()."\n"; }
 print_r($v);
 
@@ -121,24 +121,24 @@ var_dump($avg);
 
 echo "--------- test with nested lists -------------\n";
 
-$v = list($min, list($max, $avg)) = [0, [1 => 67, 99, 0 => 100], 33];
+$v = list($min, list($max, $avg)) = varray[0, [1 => 67, 99, 0 => 100], 33];
 echo "\$min: $min, \$max: $max, \$avg: $avg\n";
 print_r($v);
 
 echo "--------- test with target vars being array elements -------------\n";
-$a = array();
-$v = list($a[0], $a[2], $a[4]) = array(0, 100, 67);
+$a = darray[];
+$v = list($a[0], $a[2], $a[4]) = varray[0, 100, 67];
 print_r($a);
 print_r($v);
 
 echo "--------- test with no variables -------------\n";
 
-$v = list() = array(0, 100, 67);
+$v = list() = varray[0, 100, 67];
 print_r($v);
 
-$v = list(,) = array(0, 100, 67);
+$v = list(,) = varray[0, 100, 67];
 print_r($v);
 
-$v = list(,,) = array(0, 100, 67);
+$v = list(,,) = varray[0, 100, 67];
 print_r($v);
 }

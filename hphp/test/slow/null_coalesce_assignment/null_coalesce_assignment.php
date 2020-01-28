@@ -147,7 +147,7 @@ function test_falsey(): void {
 function test_array_get(): void {
   echo("test_array_get()\n");
 
-  $arr = [];
+  $arr = darray[];
   $i = -1;
   VS($arr[++$i] ??= 42, 42); // Evaluates $i once
   VS($i, 0);
@@ -282,7 +282,7 @@ function test_multi_dim_basic(): void {
 
 function test_null_base(): void {
   echo("test_null_base()\n");
-  $arr = array(); $arreq = array();
+  $arr = darray[]; $arreq = darray[];
   VS($arr[1] ??= 'hello', 'hello');
   VS($arreq[1] = 'hello', 'hello'); // Consistent with plain ol' equals
   VS($arr, $arreq); // $arr and $arreq get set consistently by `??=` and `=`

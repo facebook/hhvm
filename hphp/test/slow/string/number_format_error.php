@@ -8,7 +8,7 @@ $iptc_hdr =
   "\x00" .     // padding
   pack("N", $READ_LENGTH);
 // spray a bit so it's near the broken string
-$holder = [];
+$holder = varray[];
 for($i = 0; $i < 100; $i++)
   $holder[] = str_pad($iptc_hdr, 96);
 // trigger bug to create string with len=-1

@@ -33,7 +33,7 @@ function main_entry(): void {
 
   $v = $obj->iMethod(10, TRUE, "abc");
   var_dump($v);
-  $obj->__call('iMethod', array(10, TRUE, "abc"));
+  $obj->__call('iMethod', varray[10, TRUE, "abc"]);
   $obj->__call('123#$%', []);
 
   $v = Widget::sDoit();

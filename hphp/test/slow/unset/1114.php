@@ -5,7 +5,7 @@ function foo() {
   $GLOBALS['foo'] = 1;
   unset($GLOBALS['foo']);
   var_dump(array_key_exists('foo', $GLOBALS['GLOBALS']));
-  $g = ['foo' => 1];
+  $g = darray['foo' => 1];
   unset($g['foo']);
   var_dump(array_key_exists('foo', $g));
   var_dump(array_key_exists('a', $GLOBALS['GLOBALS']));

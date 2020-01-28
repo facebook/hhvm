@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_rtit_get_entry() {
-$rait = new RecursiveArrayIterator([0,1,[2,3,[4,5]]]);
+$rait = new RecursiveArrayIterator(varray[0,1,varray[2,3,varray[4,5]]]);
 
 $rtit = new RecursiveTreeIterator($rait);
 

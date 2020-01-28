@@ -28,12 +28,12 @@ function go(bool $ret) {
   $m1 = "mixed";
   $m2 = 42;
   $out1 = new stdclass;
-  $out2 = [1, 2, new stdclass];
+  $out2 = varray[1, 2, new stdclass];
   $out3 = "beepboop";
   var_dump(
     "one",
     "two",
-    [1,2,3],
+    varray[1,2,3],
     $s1,
     $s2,
     $i1,
@@ -100,12 +100,12 @@ function go2(bool $ret) {
   $m1 = "mixed";
   $m2 = 42;
   $out1 = new stdclass;
-  $out2 = [1, 2, new stdclass];
+  $out2 = varray[1, 2, new stdclass];
   $out3 = "beepboop";
   var_dump(
     "one",
     "two",
-    [1,2,3],
+    varray[1,2,3],
     $s1,
     $s2,
     $i1,

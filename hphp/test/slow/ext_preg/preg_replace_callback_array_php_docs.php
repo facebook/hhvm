@@ -7,7 +7,7 @@ function main_preg_replace_callback_array_php_docs() {
 $subject = 'Aaafaaba BbaCZbx';
 $count = 0;
 $ret = preg_replace_callback_array(
-    [
+    darray[
         '~[a]+~i' => function ($match) {},
         '~[b]+~i' => function ($match) {}
     ],

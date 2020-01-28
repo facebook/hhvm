@@ -3,7 +3,7 @@
 function foo(inout $x) { var_dump($x); $x = 12; }
 
 function checkStatic() {
-  $a = ['apple' => ['orange' => 5]];
+  $a = darray['apple' => darray['orange' => 5]];
   try { foo(inout $a[10]); } catch (Exception $e) { echo $e->getMessage()."\n"; }
   try { foo(inout $a['apple']['banana']); } catch (Exception $e) { echo $e->getMessage()."\n"; }
   try { foo(inout $a['apple']['orange']); } catch (Exception $e) { echo $e->getMessage()."\n"; }
@@ -50,8 +50,8 @@ function checkNums($a) {
 <<__EntryPoint>>
 function main() {
   checkStatic();
-  $a = ['apple' => ['orange' => 5]];
-  $b = dict['apple' => ['orange' => 5]];
+  $a = darray['apple' => darray['orange' => 5]];
+  $b = dict['apple' => darray['orange' => 5]];
   $c = keyset[0, 1, 2];
   $d = vec[vec[0, 1, 2], 3, 4];
   checkNonStatic($a);

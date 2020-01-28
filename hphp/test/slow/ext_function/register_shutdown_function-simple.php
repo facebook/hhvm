@@ -19,8 +19,8 @@ class Test {
 <<__EntryPoint>>
 function main_register_shutdown_function_simple() {
   \register_shutdown_function(__NAMESPACE__ . '\test');
-  \register_shutdown_function([new Test, 'handleInstance']);
-  \register_shutdown_function([__NAMESPACE__ . '\Test', 'handleStatic']);
+  \register_shutdown_function(varray[new Test, 'handleInstance']);
+  \register_shutdown_function(varray[__NAMESPACE__ . '\Test', 'handleStatic']);
   \register_shutdown_function(function () {
     \var_dump('Lambda');
   });

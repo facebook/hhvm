@@ -23,14 +23,14 @@ class D extends C {
 
   protected function direct() {
     echo "\ndirect:\n\n";
-    array_map($x ==> parent::bar(), [1]); // capture $this
+    array_map($x ==> parent::bar(), varray[1]); // capture $this
   }
 
   protected function nestedCapture() {
     echo "\nnestedCapture:\n\n";
     array_map($x ==> { // capture, because of inner capture
       (() ==> parent::bar())(); // capture
-    }, [1]);
+    }, varray[1]);
   }
 
   protected function reflectionInfo() {

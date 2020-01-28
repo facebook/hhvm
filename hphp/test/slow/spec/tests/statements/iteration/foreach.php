@@ -14,7 +14,7 @@ foreach ($array as $a)
     echo $a."\n";
 }
 
-$colors = array("red", "white", "blue");
+$colors = varray["red", "white", "blue"];
 
 // access each element's value
 
@@ -44,10 +44,10 @@ foreach ($colors as $color)
 }
 var_dump($colors);
 
-$ary = array();
-$ary[0] = ["abc"];
+$ary = darray[];
+$ary[0] = varray["abc"];
 $ary[0][1] = "ij";
-$ary[1] = ["mnop"];
+$ary[1] = varray["mnop"];
 $ary[1][1] = "xyz";
 
 foreach ($ary as $e1)
@@ -61,7 +61,7 @@ foreach ($ary as $e1)
 
 // test use of list
 
-$a = array(array(10,20), array(1.2, 4.5), array(TRUE, "abc"));
+$a = varray[varray[10,20], varray[1.2, 4.5], varray[TRUE, "abc"]];
 foreach ($a as $key => $value)
 {
     echo "------\n";

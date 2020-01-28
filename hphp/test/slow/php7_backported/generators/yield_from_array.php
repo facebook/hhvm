@@ -2,7 +2,7 @@
 function from() {
   yield 0;
   yield from []; // must not yield anything
-  yield from [1,2];
+  yield from varray[1,2];
 }
 function gen() {
   yield from from();

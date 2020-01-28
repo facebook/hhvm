@@ -6,7 +6,7 @@ function main_imageaffine() {
 $base_img = tempnam('/tmp', 'test-imageaffine');
 $tgt_img = tempnam('/tmp', 'test-imageaffine');
 
-$toDelete = [$base_img, $tgt_img];
+$toDelete = varray[$base_img, $tgt_img];
 
 $arrAffine = varray[
     varray[ 1, 0, 0, 1, 0, 0 ],

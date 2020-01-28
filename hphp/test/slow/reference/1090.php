@@ -16,7 +16,7 @@ function f() {
 }
 function test() {
   $v = 100;
-  $arr = ['hello' => $v];
+  $arr = darray['hello' => $v];
   $a = new B();
   $a->t($arr['hello'], $arr);
 }

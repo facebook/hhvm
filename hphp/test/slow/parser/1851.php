@@ -19,7 +19,7 @@ Foo::$b = function ($x) {
  }
 ;
 (Foo::$b)("bar\n");
-Foo::$c = [function ($x) {
+Foo::$c = varray[function ($x) {
  echo '.' . $x;
 }]
 ;

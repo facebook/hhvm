@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_array_iterator_seek_bounds() {
-$array = [1];
+$array = varray[1];
 $i = new ArrayIterator($array);
 
 try {

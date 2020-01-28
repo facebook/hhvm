@@ -9,7 +9,6 @@
 
 open Core_kernel
 open Reordered_argument_collections
-module Decl_provider = Decl_provider_ctx
 
 let log s = Hh_logger.log ("[ide-incremental] " ^^ s)
 

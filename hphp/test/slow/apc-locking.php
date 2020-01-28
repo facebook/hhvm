@@ -11,11 +11,11 @@ function thread_main() {
   echo "In thread_main\n";
 
   HH\autoload_set_paths(
-    [
-      'class' => [],
-      'constant' => [],
-      'function' => [],
-      'type' => [],
+    darray[
+      'class' => darray[],
+      'constant' => darray[],
+      'function' => darray[],
+      'type' => darray[],
       'failure' => 'autoloader'
     ],
     ''

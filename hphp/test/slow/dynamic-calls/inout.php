@@ -23,10 +23,10 @@ function positive_tests() {
   try { $x = 'func1'; $x(inout $v); } catch (Exception $e) { wrap($e); }
   try { $x = 'A::func3'; $x(inout $v); } catch (Exception $e) { wrap($e); }
 
-  try { $x = ['A', 'func3']; $x(inout $v); } catch (Exception $e) { wrap($e); }
+  try { $x = varray['A', 'func3']; $x(inout $v); } catch (Exception $e) { wrap($e); }
 
-  try { $x = [new A, 'func2']; $x(inout $v); } catch (Exception $e) { wrap($e); }
-  try { $x = [new A, 'func3']; $x(inout $v); } catch (Exception $e) { wrap($e); }
+  try { $x = varray[new A, 'func2']; $x(inout $v); } catch (Exception $e) { wrap($e); }
+  try { $x = varray[new A, 'func3']; $x(inout $v); } catch (Exception $e) { wrap($e); }
 
 
 
@@ -48,10 +48,10 @@ function negative_tests() {
   $x = 'func4'; $x(inout $v);
   $x = 'B::func6'; $x(inout $v);
 
-  $x = ['B', 'func6']; $x(inout $v);
+  $x = varray['B', 'func6']; $x(inout $v);
 
-  $x = [new B, 'func5']; $x(inout $v);
-  $x = [new B, 'func6']; $x(inout $v);
+  $x = varray[new B, 'func5']; $x(inout $v);
+  $x = varray[new B, 'func6']; $x(inout $v);
 
   $x = 'B'; $x::func6(inout $v);
 

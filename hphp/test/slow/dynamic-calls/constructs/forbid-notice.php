@@ -175,16 +175,16 @@ async function positive_tests() {
   //try { $x = 'A::async_func'; await $x(); } catch (Exception $e) { wrap($e); } // fatal
   try { $x = 'A::static_async_func'; await $x(); } catch (Exception $e) { wrap($e); }
 
-  //try { $x = ['A', 'func']; $x(); } catch (Exception $e) { wrap($e); } // fatal
-  try { $x = ['A', 'static_func']; $x(); } catch (Exception $e) { wrap($e); }
-  //try { $x = ['A', 'async_func']; await $x(); } catch (Exception $e) { wrap($e); } // fatal
-  try { $x = ['A', 'static_async_func']; await $x(); } catch (Exception $e) { wrap($e); }
+  //try { $x = varray['A', 'func']; $x(); } catch (Exception $e) { wrap($e); } // fatal
+  try { $x = varray['A', 'static_func']; $x(); } catch (Exception $e) { wrap($e); }
+  //try { $x = varray['A', 'async_func']; await $x(); } catch (Exception $e) { wrap($e); } // fatal
+  try { $x = varray['A', 'static_async_func']; await $x(); } catch (Exception $e) { wrap($e); }
 
-  try { $x = [new A, 'func']; $x(); } catch (Exception $e) { wrap($e); }
-  try { $x = [new A, 'static_func']; $x(); } catch (Exception $e) { wrap($e); }
-  try { $x = [new A, 'async_func']; await $x(); } catch (Exception $e) { wrap($e); }
-  try { $x = [new A, 'static_async_func']; await $x(); } catch (Exception $e) { wrap($e); }
-  try { $x = [new C, 'foobar']; $x(); } catch (Exception $e) { wrap($e); }
+  try { $x = varray[new A, 'func']; $x(); } catch (Exception $e) { wrap($e); }
+  try { $x = varray[new A, 'static_func']; $x(); } catch (Exception $e) { wrap($e); }
+  try { $x = varray[new A, 'async_func']; await $x(); } catch (Exception $e) { wrap($e); }
+  try { $x = varray[new A, 'static_async_func']; await $x(); } catch (Exception $e) { wrap($e); }
+  try { $x = varray[new C, 'foobar']; $x(); } catch (Exception $e) { wrap($e); }
 
   try { $x = 'A'; $x::static_func(); } catch (Exception $e) { wrap($e); }
 
@@ -206,70 +206,70 @@ async function positive_tests() {
 
   try { $obj = new C; $x = 'foobar'; $obj->$x(); } catch (Exception $e) { wrap($e); }
 
-  try { array_map('func', [true]); } catch (Exception $e) { wrap($e); }
-  //try { array_map('A::func', [true]); } catch (Exception $e) { wrap($e); } // fatal
-  try { array_map('A::static_func', [true]); } catch (Exception $e) { wrap($e); }
+  try { array_map('func', varray[true]); } catch (Exception $e) { wrap($e); }
+  //try { array_map('A::func', varray[true]); } catch (Exception $e) { wrap($e); } // fatal
+  try { array_map('A::static_func', varray[true]); } catch (Exception $e) { wrap($e); }
 
-  //try { array_map(['A', 'func'], [true]); } catch (Exception $e) { wrap($e); } // fatal
-  try { array_map(['A', 'static_func'], [true]); } catch (Exception $e) { wrap($e); }
+  //try { array_map(varray['A', 'func'], varray[true]); } catch (Exception $e) { wrap($e); } // fatal
+  try { array_map(varray['A', 'static_func'], varray[true]); } catch (Exception $e) { wrap($e); }
 
-  try { array_map([new A, 'func'], [true]); } catch (Exception $e) { wrap($e); }
-  try { array_map([new A, 'static_func'], [true]); } catch (Exception $e) { wrap($e); }
-  try { array_map([new C, 'foobar'], [true]); } catch (Exception $e) { wrap($e); }
+  try { array_map(varray[new A, 'func'], varray[true]); } catch (Exception $e) { wrap($e); }
+  try { array_map(varray[new A, 'static_func'], varray[true]); } catch (Exception $e) { wrap($e); }
+  try { array_map(varray[new C, 'foobar'], varray[true]); } catch (Exception $e) { wrap($e); }
 
-  $x = Vector::fromItems([[]]);
+  $x = Vector::fromItems(varray[varray[]]);
   try { $x->map('func'); } catch (Exception $e) { wrap($e); }
 
   try { $x->map('A::static_func'); } catch (Exception $e) { wrap($e); }
 
 
-  try { $x->map(['A', 'static_func']); } catch (Exception $e) { wrap($e); }
+  try { $x->map(varray['A', 'static_func']); } catch (Exception $e) { wrap($e); }
 
-  try { $x->map([new A, 'func']); } catch (Exception $e) { wrap($e); }
-  try { $x->map([new A, 'static_func']); } catch (Exception $e) { wrap($e); }
-  try { $x->map([new C, 'foobar']); } catch (Exception $e) { wrap($e); }
+  try { $x->map(varray[new A, 'func']); } catch (Exception $e) { wrap($e); }
+  try { $x->map(varray[new A, 'static_func']); } catch (Exception $e) { wrap($e); }
+  try { $x->map(varray[new C, 'foobar']); } catch (Exception $e) { wrap($e); }
 
   try { call_user_func('func'); } catch (Exception $e) { wrap($e); }
 
   try { call_user_func('A::static_func'); } catch (Exception $e) { wrap($e); }
 
 
-  try { call_user_func(['A', 'static_func']); } catch (Exception $e) { wrap($e); }
+  try { call_user_func(varray['A', 'static_func']); } catch (Exception $e) { wrap($e); }
 
-  try { call_user_func([new A, 'func']); } catch (Exception $e) { wrap($e); }
-  try { call_user_func([new A, 'static_func']); } catch (Exception $e) { wrap($e); }
-  try { call_user_func([new C, 'foobar']); } catch (Exception $e) { wrap($e); }
+  try { call_user_func(varray[new A, 'func']); } catch (Exception $e) { wrap($e); }
+  try { call_user_func(varray[new A, 'static_func']); } catch (Exception $e) { wrap($e); }
+  try { call_user_func(varray[new C, 'foobar']); } catch (Exception $e) { wrap($e); }
 
-  try { call_user_func_array('func', []); } catch (Exception $e) { wrap($e); }
+  try { call_user_func_array('func', varray[]); } catch (Exception $e) { wrap($e); }
 
-  try { call_user_func_array('A::static_func', []); } catch (Exception $e) { wrap($e); }
+  try { call_user_func_array('A::static_func', varray[]); } catch (Exception $e) { wrap($e); }
 
-  try { call_user_func_array(['A', 'static_func'], []); } catch (Exception $e) { wrap($e); }
-  try { call_user_func_array([new A, 'func'], []); } catch (Exception $e) { wrap($e); }
-  try { call_user_func_array([new A, 'static_func'], []); } catch (Exception $e) { wrap($e); }
+  try { call_user_func_array(varray['A', 'static_func'], varray[]); } catch (Exception $e) { wrap($e); }
+  try { call_user_func_array(varray[new A, 'func'], varray[]); } catch (Exception $e) { wrap($e); }
+  try { call_user_func_array(varray[new A, 'static_func'], varray[]); } catch (Exception $e) { wrap($e); }
 
-  try { $x = 'cmp'; $y = [2, 1]; usort(inout $y, $x); } catch (Exception $e) { wrap($e); }
+  try { $x = 'cmp'; $y = varray[2, 1]; usort(inout $y, $x); } catch (Exception $e) { wrap($e); }
 
-  try { $x = 'A::static_cmp'; $y = [2, 1]; usort(inout $y, $x); } catch (Exception $e) { wrap($e); }
+  try { $x = 'A::static_cmp'; $y = varray[2, 1]; usort(inout $y, $x); } catch (Exception $e) { wrap($e); }
 
 
-  try { $x = ['A', 'static_cmp']; $y = [2, 1]; usort(inout $y, $x); } catch (Exception $e) { wrap($e); }
+  try { $x = varray['A', 'static_cmp']; $y = varray[2, 1]; usort(inout $y, $x); } catch (Exception $e) { wrap($e); }
 
-  try { $x = [new A, 'cmp']; $y = [2, 1]; usort(inout $y, $x); } catch (Exception $e) { wrap($e); }
-  try { $x = [new A, 'static_cmp']; $y = [2, 1]; usort(inout $y, $x); } catch (Exception $e) { wrap($e); }
-  try { $x = [new CCmp, 'foobar']; $y = [2, 1]; usort(inout $y, $x); } catch (Exception $e) { wrap($e); }
+  try { $x = varray[new A, 'cmp']; $y = varray[2, 1]; usort(inout $y, $x); } catch (Exception $e) { wrap($e); }
+  try { $x = varray[new A, 'static_cmp']; $y = varray[2, 1]; usort(inout $y, $x); } catch (Exception $e) { wrap($e); }
+  try { $x = varray[new CCmp, 'foobar']; $y = varray[2, 1]; usort(inout $y, $x); } catch (Exception $e) { wrap($e); }
 }
 
 async function negative_tests() {
   func();
-  count([]);
+  count(varray[]);
   await async_func();
 
   A::static_func();
 
   await A::static_async_func();
 
-  Vector::fromItems([]);
+  Vector::fromItems(varray[]);
 
   $x = ($k ==> {});
   $x(1);
@@ -294,51 +294,51 @@ async function negative_tests() {
   $obj->firstValue();
 
 
-  array_map($k ==> {}, [true]);
-  array_map(new Invokable, [true]);
+  array_map($k ==> {}, varray[true]);
+  array_map(new Invokable, varray[true]);
 
-  $x = Vector::fromItems([true]);
+  $x = Vector::fromItems(varray[true]);
   $x->map($k ==> {});
   $x->map(new Invokable);
 
-  $x = [2, 1];
+  $x = varray[2, 1];
   usort(inout $x, ($k1, $k2) ==> { return $k1 <=> $k2; });
 
-  $x = [2, 1];
+  $x = varray[2, 1];
   usort(inout $x, new InvokableCmp);
 
-  $x = 'count'; $x([]);
-  array_map('count', [[]]);
-  $x = Vector::fromItems([true]); $x->map('count');
-  call_user_func('count', []);
-  call_user_func_array('count', [[]]);
+  $x = 'count'; $x(varray[]);
+  array_map('count', varray[varray[]]);
+  $x = Vector::fromItems(varray[true]); $x->map('count');
+  call_user_func('count', varray[]);
+  call_user_func_array('count', varray[varray[]]);
 
-  $x = 'HH\Vector::fromItems'; $x([]);
-  $x = ['HH\Vector', 'fromItems']; $x([]);
-  $x = [new Vector, 'fromItems']; $x([]);
-  $x = 'fromItems'; Vector::$x([]);
-  $x = [new Vector, 'firstValue']; $x();
-  $x = 'HH\Vector'; $x::fromItems([]);
+  $x = 'HH\Vector::fromItems'; $x(varray[]);
+  $x = varray['HH\Vector', 'fromItems']; $x(varray[]);
+  $x = varray[new Vector, 'fromItems']; $x(varray[]);
+  $x = 'fromItems'; Vector::$x(varray[]);
+  $x = varray[new Vector, 'firstValue']; $x();
+  $x = 'HH\Vector'; $x::fromItems(varray[]);
   $obj = new Vector; $x = 'firstValue'; $obj->$x();
 
-  array_map('HH\Vector::fromItems', [[]]);
-  array_map(['HH\Vector', 'fromItems'], [[]]);
-  array_map([new Vector, 'fromItems'], [[]]);
-  $x = Vector::fromItems([[]]);
+  array_map('HH\Vector::fromItems', varray[varray[]]);
+  array_map(varray['HH\Vector', 'fromItems'], varray[varray[]]);
+  array_map(varray[new Vector, 'fromItems'], varray[varray[]]);
+  $x = Vector::fromItems(varray[varray[]]);
   $x->map('HH\Vector::fromItems');
-  $x->map(['HH\Vector', 'fromItems']);
-  $x->map([new Vector, 'fromItems']);
-  call_user_func('HH\Vector::fromItems', []);
-  call_user_func(['HH\Vector', 'fromItems'], []);
-  call_user_func([new Vector, 'firstValue']);
-  call_user_func([new Vector, 'fromItems'], []);
-  call_user_func_array('HH\Vector::fromItems', [[]]);
-  call_user_func_array(['HH\Vector', 'fromItems'], [[]]);
-  call_user_func_array([new Vector, 'firstValue'], []);
-  call_user_func_array([new Vector, 'fromItems'], [[]]);
+  $x->map(varray['HH\Vector', 'fromItems']);
+  $x->map(varray[new Vector, 'fromItems']);
+  call_user_func('HH\Vector::fromItems', varray[]);
+  call_user_func(varray['HH\Vector', 'fromItems'], varray[]);
+  call_user_func(varray[new Vector, 'firstValue']);
+  call_user_func(varray[new Vector, 'fromItems'], varray[]);
+  call_user_func_array('HH\Vector::fromItems', varray[varray[]]);
+  call_user_func_array(varray['HH\Vector', 'fromItems'], varray[varray[]]);
+  call_user_func_array(varray[new Vector, 'firstValue'], varray[]);
+  call_user_func_array(varray[new Vector, 'fromItems'], varray[varray[]]);
 
   $x = 'array_map';
-  $x('count', []);
+  $x('count', varray[]);
 
   $obj = null; $obj?->foobar();
 
@@ -351,16 +351,16 @@ async function negative_tests() {
   //$x = 'A::async_func2'; await $x(); // fatal
   $x = 'A::static_async_func2'; await $x();
 
-  //$x = ['A', 'func2']; $x(); // fatal
-  $x = ['A', 'static_func2']; $x();
-  //$x = ['A', 'async_func2']; await $x(); // fatal
-  $x = ['A', 'static_async_func2']; await $x();
+  //$x = varray['A', 'func2']; $x(); // fatal
+  $x = varray['A', 'static_func2']; $x();
+  //$x = varray['A', 'async_func2']; await $x(); // fatal
+  $x = varray['A', 'static_async_func2']; await $x();
 
-  $x = [new A, 'func2']; $x();
-  $x = [new A, 'static_func2']; $x();
-  $x = [new A, 'async_func2']; await $x();
-  $x = [new A, 'static_async_func2']; await $x();
-  $x = [new E, 'foobar']; $x();
+  $x = varray[new A, 'func2']; $x();
+  $x = varray[new A, 'static_func2']; $x();
+  $x = varray[new A, 'async_func2']; await $x();
+  $x = varray[new A, 'static_async_func2']; await $x();
+  $x = varray[new E, 'foobar']; $x();
 
   $x = 'A'; $x::static_func2();
 
@@ -379,58 +379,58 @@ async function negative_tests() {
 
   $obj = new E; $x = 'foobar'; $obj->$x();
 
-  array_map('func2', [true]);
-  //array_map('A::func2', [true]); // fatal
-  array_map('A::static_func2', [true]);
+  array_map('func2', varray[true]);
+  //array_map('A::func2', varray[true]); // fatal
+  array_map('A::static_func2', varray[true]);
 
-  //array_map(['A', 'func2'], [true]); // fatal
-  array_map(['A', 'static_func2'], [true]);
+  //array_map(varray['A', 'func2'], varray[true]); // fatal
+  array_map(varray['A', 'static_func2'], varray[true]);
 
-  array_map([new A, 'func2'], [true]);
-  array_map([new A, 'static_func2'], [true]);
-  array_map([new E, 'foobar'], [true]);
+  array_map(varray[new A, 'func2'], varray[true]);
+  array_map(varray[new A, 'static_func2'], varray[true]);
+  array_map(varray[new E, 'foobar'], varray[true]);
 
-  $x = Vector::fromItems([[]]);
+  $x = Vector::fromItems(varray[varray[]]);
   $x->map('func2');
 
   $x->map('A::static_func2');
 
 
-  $x->map(['A', 'static_func2']);
+  $x->map(varray['A', 'static_func2']);
 
-  $x->map([new A, 'func2']);
-  $x->map([new A, 'static_func2']);
-  $x->map([new E, 'foobar']);
+  $x->map(varray[new A, 'func2']);
+  $x->map(varray[new A, 'static_func2']);
+  $x->map(varray[new E, 'foobar']);
 
   call_user_func('func2');
 
   call_user_func('A::static_func2');
 
 
-  call_user_func(['A', 'static_func2']);
+  call_user_func(varray['A', 'static_func2']);
 
-  call_user_func([new A, 'func2']);
-  call_user_func([new A, 'static_func2']);
-  call_user_func([new E, 'foobar']);
+  call_user_func(varray[new A, 'func2']);
+  call_user_func(varray[new A, 'static_func2']);
+  call_user_func(varray[new E, 'foobar']);
 
-  call_user_func_array('func2', []);
+  call_user_func_array('func2', varray[]);
 
-  call_user_func_array('A::static_func2', []);
+  call_user_func_array('A::static_func2', varray[]);
 
-  call_user_func_array(['A', 'static_func2'], []);
-  call_user_func_array([new A, 'func2'], []);
-  call_user_func_array([new A, 'static_func2'], []);
+  call_user_func_array(varray['A', 'static_func2'], varray[]);
+  call_user_func_array(varray[new A, 'func2'], varray[]);
+  call_user_func_array(varray[new A, 'static_func2'], varray[]);
 
-  $x = 'cmp2'; $y = [2, 1]; usort(inout $y, $x);
+  $x = 'cmp2'; $y = varray[2, 1]; usort(inout $y, $x);
 
-  $x = 'A::static_cmp2'; $y = [2, 1]; usort(inout $y, $x);
+  $x = 'A::static_cmp2'; $y = varray[2, 1]; usort(inout $y, $x);
 
 
-  $x = ['A', 'static_cmp2']; $y = [2, 1]; usort(inout $y, $x);
+  $x = varray['A', 'static_cmp2']; $y = varray[2, 1]; usort(inout $y, $x);
 
-  $x = [new A, 'cmp2']; $y = [2, 1]; usort(inout $y, $x);
-  $x = [new A, 'static_cmp2']; $y = [2, 1]; usort(inout $y, $x);
-  $x = [new CCmp2, 'foobar']; $y = [2, 1]; usort(inout $y, $x);
+  $x = varray[new A, 'cmp2']; $y = varray[2, 1]; usort(inout $y, $x);
+  $x = varray[new A, 'static_cmp2']; $y = varray[2, 1]; usort(inout $y, $x);
+  $x = varray[new CCmp2, 'foobar']; $y = varray[2, 1]; usort(inout $y, $x);
 }
 <<__EntryPoint>>
 function main_entry(): void {

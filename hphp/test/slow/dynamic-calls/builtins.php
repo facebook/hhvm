@@ -11,31 +11,31 @@ class A extends DateTime {
 }
 
 function test() {
-  $x = 'count'; $x([]);
+  $x = 'count'; $x(varray[]);
 
-  $x = 'HH\Vector::fromItems'; $x([]);
-  $x = ['HH\Vector', 'fromItems']; $x([]);
-  $x = [new Vector, 'fromItems']; $x([]);
-  $x = [new Vector, 'toArray']; $x();
-  $x = 'HH\Vector'; $x::fromItems([]);
-  $x = 'fromItems'; Vector::$x([]);
+  $x = 'HH\Vector::fromItems'; $x(varray[]);
+  $x = varray['HH\Vector', 'fromItems']; $x(varray[]);
+  $x = varray[new Vector, 'fromItems']; $x(varray[]);
+  $x = varray[new Vector, 'toArray']; $x();
+  $x = 'HH\Vector'; $x::fromItems(varray[]);
+  $x = 'fromItems'; Vector::$x(varray[]);
 
   $x = 'toArray'; $obj = new Vector; $obj->$x();
   $x = 'HH\Vector'; new $x();
 
   $obj = new A; $obj->test();
 
-  $x = 'SplFixedArray::fromArray'; $x([1, 2, 3]);
-  $x = ['SplFixedArray', 'fromArray']; $x([1, 2, 3]);
-  $x = [new SplFixedArray, 'fromArray']; $x([1, 2, 3]);
-  $x = [new SplFixedArray, 'toArray']; $x();
-  $x = 'SplFixedArray'; $x::fromArray([1, 2, 3]);
-  $x = 'fromArray'; SplFixedArray::$x([1, 2, 3]);
+  $x = 'SplFixedArray::fromArray'; $x(varray[1, 2, 3]);
+  $x = varray['SplFixedArray', 'fromArray']; $x(varray[1, 2, 3]);
+  $x = varray[new SplFixedArray, 'fromArray']; $x(varray[1, 2, 3]);
+  $x = varray[new SplFixedArray, 'toArray']; $x();
+  $x = 'SplFixedArray'; $x::fromArray(varray[1, 2, 3]);
+  $x = 'fromArray'; SplFixedArray::$x(varray[1, 2, 3]);
 
   $x = 'toArray'; $obj = new SplFixedArray; $obj->$x();
   $x = 'SplFixedArray'; new $x();
 
-  $x = 'array_map'; $x($a ==> $a, []);
+  $x = 'array_map'; $x($a ==> $a, varray[]);
 
   $x = null; $x?->foo();
 }

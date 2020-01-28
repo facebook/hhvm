@@ -11,7 +11,7 @@ class A {
   public function __isset($a) { echo "A::__isset\n"; return false; }
   public function __unset($a) { echo "A::__unset\n"; }
 
-  public function __sleep() { echo "A::__sleep\n"; return []; }
+  public function __sleep() { echo "A::__sleep\n"; return varray[]; }
   public function __wakeup() { echo "A::__wakeup\n"; }
 
   public function __toString() { echo "A::__toString\n"; return ""; }
@@ -19,7 +19,7 @@ class A {
   public function __invoke() { echo "A::__invoke\n"; }
 
   public static function __set_state($a) { echo "A::__set_state\n"; return new stdclass; }
-  public function __debugInfo() { echo "A::__debugInfo\n"; return []; }
+  public function __debugInfo() { echo "A::__debugInfo\n"; return varray[]; }
 
   public function __clone() { echo "A::__clone\n"; }
 }
@@ -71,10 +71,10 @@ function test_invoke() {
 
   $x->__invoke();
 
-  array_map($x, [1]);
-  Vector::fromItems([true])->map($x);
-  call_user_func($x, []);
-  call_user_func_array($x, [[]]);
+  array_map($x, varray[1]);
+  Vector::fromItems(varray[true])->map($x);
+  call_user_func($x, varray[]);
+  call_user_func_array($x, varray[varray[]]);
 }
 
 function test_debug() {

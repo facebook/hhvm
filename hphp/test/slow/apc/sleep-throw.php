@@ -23,6 +23,6 @@ function store($k, $a) {
 
 <<__EntryPoint>>
 function main_sleep_throw() {
-store("a1", [new SleepThrow("Sleep throw 1")]);
-store("a2", ["key" => new SleepThrow("Sleep throw 2")]);
+store("a1", varray[new SleepThrow("Sleep throw 1")]);
+store("a2", darray["key" => new SleepThrow("Sleep throw 2")]);
 }

@@ -18,7 +18,7 @@ trait T {
   function go() {
     parent::go();
     echo "In ".self::class."\n";
-    foreach (['f', 'g', 'h', 'i'] as $f) self::point($f);
+    foreach (varray['f', 'g', 'h', 'i'] as $f) self::point($f);
   }
 }
 
@@ -43,7 +43,7 @@ function main() {
   (new W)->go();
 
   echo "In main\n";
-  foreach (['f', 'g', 'h', 'i'] as $f) {
+  foreach (varray['f', 'g', 'h', 'i'] as $f) {
     wrap(() ==>
       hh\dynamic_class_meth(C::class, __hhvm_intrinsics\launder_value($f))
     );

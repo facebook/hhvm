@@ -366,7 +366,7 @@ pub mod attribute_kinds {
 
     pub const TYPE_CONST: &str = "\\HH\\TypeConstantAttribute";
 
-    pub static PLAIN_ENGLISH: &'static [(&'static str, &'static str)] = &[
+    pub static PLAIN_ENGLISH: &[(&str, &str)] = &[
         (CLS, "a class"),
         (ENUM, "an enum"),
         (TYPE_ALIAS, "a typealias"),
@@ -588,7 +588,7 @@ pub mod typehints {
             .collect();
         }
 
-        return RESERVED_TYPEHINTS.contains(x);
+        RESERVED_TYPEHINTS.contains(x)
     }
 
     lazy_static! {
@@ -623,7 +623,7 @@ pub mod typehints {
     pub fn is_namespace_with_reserved_hh_name(x: &str) -> bool {
         // This splits the string into its namespaces
         fn unqualify(x: &str) -> (Vec<&str>, &str) {
-            let mut as_list = x.split("\\").collect::<Vec<&str>>();
+            let mut as_list = x.split('\\').collect::<Vec<&str>>();
             // Retain if not empty
             as_list.retain(|&split| match split {
                 "" => false,
@@ -638,7 +638,7 @@ pub mod typehints {
         }
 
         // This returns a bool whether or not the list is just the string "HH"
-        fn is_hh(qualifier: &Vec<&str>) -> bool {
+        fn is_hh(qualifier: &[&str]) -> bool {
             match qualifier.len() {
                 1 => qualifier[0] == "HH",
                 _ => false,
@@ -777,7 +777,7 @@ pub mod rx {
             .collect();
         }
 
-        return REACTIVE_TYPEHINTS.contains(x);
+        REACTIVE_TYPEHINTS.contains(x)
     }
 }
 

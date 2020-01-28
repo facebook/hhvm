@@ -454,12 +454,13 @@ struct SimpleParser {
       case 'u': {
         if (UNLIKELY(is_tsimplejson)) {
           auto const ch1 = *p++;
+          if (UNLIKELY(ch1 != '0')) return false;
           auto const ch2 = *p++;
+          if (UNLIKELY(ch2 != '0')) return false;
           auto const dch3 = dehexchar(*p++);
+          if (UNLIKELY(dch3 < 0)) return false;
           auto const dch4 = dehexchar(*p++);
-          if (UNLIKELY(ch1 != '0' || ch2 != '0' || dch3 < 0 || dch4 < 0)) {
-            return false;
-          }
+          if (UNLIKELY(dch4 < 0)) return false;
           out = (dch3 << 4) | dch4;
           return true;
         } else {

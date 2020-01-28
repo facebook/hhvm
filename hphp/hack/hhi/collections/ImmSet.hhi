@@ -78,7 +78,7 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    *           `false` otherwise.
    */
   <<__Rx, __MaybeMutable>>
-  public function contains(mixed $k): bool;
+  public function contains(arraykey $k): bool;
 
   /**
    * Returns an `array` containing the values from the current `ImmSet`.

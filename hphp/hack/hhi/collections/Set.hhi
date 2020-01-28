@@ -519,7 +519,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    *           `false` otherwise.
    */
   <<__Rx, __MaybeMutable>>
-  public function contains(mixed $v): bool;
+  public function contains(arraykey $v): bool;
 
   /**
    * Add the value to the current `Set`.

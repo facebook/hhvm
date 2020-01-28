@@ -124,7 +124,7 @@ interface ConstSetAccess<+Tm as arraykey> {
    * @return - `true` if the value is in the current `Set`; `false` otherwise.
    */
   <<__Rx, __MaybeMutable>>
-  public function contains(mixed $m): bool;
+  public function contains(arraykey $m): bool;
 }
 
 /**

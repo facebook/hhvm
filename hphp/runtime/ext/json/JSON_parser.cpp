@@ -1180,6 +1180,10 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
   // is explicitly flushed (e.g., due to being idle).
   json->initSb(length);
   json->prov_tag = arrprov::tagFromPC();
+  if (depth <= 0) {
+    json->error_code = json_error_codes::JSON_ERROR_DEPTH;
+    return false;
+  }
   SCOPE_EXIT {
     constexpr int kMaxPersistentStringBufferCapacity = 256 * 1024;
     if (json->sb_cap > kMaxPersistentStringBufferCapacity) json->flushSb();

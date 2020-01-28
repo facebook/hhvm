@@ -60,22 +60,22 @@ function test_casting($a) {
 
 function run_tests() {
   echo "\n******* ad-hoc tests ********************************\n";
-  test([], '10');
-  test([], 10);
-  test([1, 2, 3, 4], '2');
-  test([1, 2, 3, 4], 2);
-  test([10 => 'abc'], '10');
-  test([10 => 'abc'], 10);
+  test(varray[], '10');
+  test(varray[], 10);
+  test(varray[1, 2, 3, 4], '2');
+  test(varray[1, 2, 3, 4], 2);
+  test(darray[10 => 'abc'], '10');
+  test(darray[10 => 'abc'], 10);
 
   echo "\n******* constant string tests ***********************\n";
-  test_const_key([]);
-  test_const_key([1, 2, 3, 4]);
-  test_const_key([2 => 'abc']);
+  test_const_key(varray[]);
+  test_const_key(varray[1, 2, 3, 4]);
+  test_const_key(darray[2 => 'abc']);
 
   echo "\n******* constant int tests **************************\n";
-  test_const_key_int([]);
-  test_const_key_int([1, 2, 3, 4]);
-  test_const_key_int([2 => 'abc']);
+  test_const_key_int(varray[]);
+  test_const_key_int(varray[1, 2, 3, 4]);
+  test_const_key_int(darray[2 => 'abc']);
 
   echo "\n******* casting tests *******************************\n";
   test_casting(dict['1' => true, '2' => false]);

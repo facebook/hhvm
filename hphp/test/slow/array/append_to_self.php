@@ -1,7 +1,7 @@
 <?hh
 
 function append_to_self(): array {
-  $a = [];
+  $a = varray[];
   $a[] = $a;
   $a[] = $a;
   $a[] = $a;

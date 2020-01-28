@@ -11,7 +11,7 @@ function main() {
   try { var_dump($a[42]); } catch (Exception $e) { echo $e->getMessage()."\n"; }
   var_dump($a["42"]);
 
-  $b = darray(["42" => "string", 42 => "int"]);
+  $b = darray(darray["42" => "string", 42 => "int"]);
   var_dump($b);
   var_dump($b["42"]);
   var_dump($b[42]);

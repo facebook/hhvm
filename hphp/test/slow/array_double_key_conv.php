@@ -29,8 +29,8 @@ function main($a, $k) {
 
 <<__EntryPoint>>
 function main_array_double_key_conv() {
-main([], 1.0E+100);
-main([], -1.0E+100);
-main([], INF);
-main([], -INF);
+main(darray[], 1.0E+100);
+main(darray[], -1.0E+100);
+main(darray[], INF);
+main(darray[], -INF);
 }

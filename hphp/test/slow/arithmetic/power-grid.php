@@ -12,7 +12,7 @@ function inline_dump($val) {
 function main_power_grid() {
 error_reporting(E_ALL | E_NOTICE | E_STRICT);
 
-$args = [
+$args = varray[
   null,
   true,
   false,
@@ -20,8 +20,8 @@ $args = [
   3.0,
   '',
   '4',
-  [],
-  [5],
+  varray[],
+  varray[5],
   fopen('php://memory', 'w+'),
   $closeme = fopen('php://memory', 'w+'),
 ];

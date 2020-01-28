@@ -4,7 +4,7 @@ function foo($x) {
  var_dump($x);
  }
 function test() {
-  $data = ['bar' => array()];
+  $data = darray['bar' => array()];
   $data['bar']['baz'] = 1;
   foo($data);
 }

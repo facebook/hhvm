@@ -1,7 +1,7 @@
 <?hh
 
 function f(array $a, $e) {
-  $a[$e] = [$e => 30];
+  $a[$e] = darray[$e => 30];
   $x = new stdClass();
   $x = $a[$e];
   var_dump($a, $x);

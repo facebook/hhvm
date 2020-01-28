@@ -5659,14 +5659,11 @@ and dispatch_call
                 match SMap.find_opt case et.tpu_case_values with
                 | Some (_, case) -> case
                 | None ->
-                  failwithf
-                    "TODO(T36532263): PU_identifier: %s has no case value %s"
-                    enum
-                    case
-                    ()
+                  Errors.pu_typing cpos "identifier" case;
+                  mk (Reason.Rwitness cpos, Terr)
               in
               (* Type variable to type the parameter of the Pu expression call.
-                 We use a variable in case there is some dependency *)
+                     We use a variable in case there is some dependency *)
               (* let (env, fresh_ty) = Env.fresh_invariant_type_var env cpos in *)
               let (env, fresh_ty) = Env.fresh_type env cpos in
               (* It's original upper bound is the PU enum itself *)

@@ -1462,10 +1462,12 @@ where
         self.require_token(TokenKind::RightParen, Errors::error1011)
     }
 
-    fn require_semicolon_token(&mut self) -> Option<S::Token> {
+    fn require_semicolon_token(&mut self, saw_type_name: bool) -> Option<S::Token> {
         match self.peek_token_kind() {
             // TODO: Kill PHPism; no semicolon required right before ?>
             TokenKind::QuestionGreaterThan => None,
+            TokenKind::Variable if saw_type_name => self
+                .require_and_return_token(TokenKind::Semicolon, Errors::local_variable_with_type),
             _ => self.require_and_return_token(TokenKind::Semicolon, Errors::error1010),
         }
     }

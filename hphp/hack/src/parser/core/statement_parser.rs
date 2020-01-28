@@ -1071,8 +1071,27 @@ where
             }
             _ => {
                 self.expect_in_new_scope(ExpectedTokens::Semicolon);
+
+                // Detect common patterns of users trying to put type
+                // annotations on local variables.
+                let saw_type_name = match self.peek_token_kind() {
+                    // User-defined types.
+                    TokenKind::Name => true,
+                    // Common reserved names that are types.
+                    TokenKind::Darray => true,
+                    TokenKind::Dict => true,
+                    TokenKind::Int => true,
+                    TokenKind::Keyset => true,
+                    TokenKind::Shape => true,
+                    TokenKind::String => true,
+                    TokenKind::Varray => true,
+                    TokenKind::Vec => true,
+                    _ => false,
+                };
+
                 let expression = self.parse_expression();
-                let token = match self.require_semicolon_token() {
+
+                let token = match self.require_semicolon_token(saw_type_name) {
                     Some(t) => {
                         if expression.is_halt_compiler_expression() {
                             let token = self.rescan_halt_compiler(t);

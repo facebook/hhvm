@@ -428,6 +428,7 @@ pub mod special_idents {
 
 pub mod pseudo_functions {
     use lazy_static::lazy_static;
+    use std::collections::HashSet;
 
     pub const ISSET: &str = "\\isset";
 
@@ -465,6 +466,12 @@ pub mod pseudo_functions {
             EXIT,
             DIE,
         ];
+        static ref PSEUDO_SET: HashSet<&'static str> =
+            ALL_PSEUDO_FUNCTIONS.iter().cloned().collect();
+    }
+
+    pub fn is_pseudo_function(x: &str) -> bool {
+        PSEUDO_SET.contains(x)
     }
 }
 
@@ -533,6 +540,38 @@ pub mod typehints {
     pub const OBJECT_CAST: &str = "object";
 
     pub const WILDCARD: &str = "_";
+
+    pub fn is_reserved_type_hint(x: &str) -> bool {
+        lazy_static! {
+            static ref RESERVED_TYPEHINTS: HashSet<&'static str> = vec![
+                NULL,
+                VOID,
+                RESOURCE,
+                NUM,
+                ARRAYKEY,
+                NORETURN,
+                MIXED,
+                NONNULL,
+                THIS,
+                DYNAMIC,
+                NOTHING,
+                INT,
+                BOOL,
+                FLOAT,
+                STRING,
+                ARRAY,
+                DARRAY,
+                VARRAY,
+                VARRAY_OR_DARRAY,
+                CALLABLE,
+                WILDCARD,
+            ]
+            .into_iter()
+            .collect();
+        }
+
+        return RESERVED_TYPEHINTS.contains(x);
+    }
 
     lazy_static! {
         static ref RESERVED_GLOBAL_NAMES: HashSet<&'static str> = vec![
@@ -702,6 +741,26 @@ pub mod rx {
     pub const MAYBE_MUTABLE: &str = "MaybeMutable";
 
     pub const OWNED_MUTABLE: &str = "OwnedMutable";
+
+    pub fn is_reactive_typehint(x: &str) -> bool {
+        use lazy_static::lazy_static;
+        use std::collections::HashSet;
+
+        lazy_static! {
+            static ref REACTIVE_TYPEHINTS: HashSet<&'static str> = vec![
+                RX,
+                RX_LOCAL,
+                RX_SHALLOW,
+                MUTABLE,
+                MAYBE_MUTABLE,
+                OWNED_MUTABLE,
+            ]
+            .into_iter()
+            .collect();
+        }
+
+        return REACTIVE_TYPEHINTS.contains(x);
+    }
 }
 
 pub mod shapes {

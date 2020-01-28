@@ -27,7 +27,7 @@ pub enum Region {
     Using(Label, LabelSet),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct JumpTargets(Vec<Region>);
 impl JumpTargets {
     pub fn as_slice(&self) -> &[Region] {
@@ -189,7 +189,7 @@ pub enum IdKey {
     IdLabel(Label),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Gen {
     label_id_map: HashMap<IdKey, Id>,
     labels_in_function: HashMap<String, bool>,

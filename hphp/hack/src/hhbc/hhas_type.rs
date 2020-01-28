@@ -73,6 +73,14 @@ impl Info {
             type_constraint,
         }
     }
+
+    pub fn make_empty() -> Info {
+        Info::make(Some(String::from("")), constraint::Type::default())
+    }
+
+    pub fn has_type_constraint(&self) -> bool {
+        !self.type_constraint.flags.is_empty()
+    }
 }
 
 impl Constant {

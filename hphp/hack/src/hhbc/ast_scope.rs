@@ -37,9 +37,9 @@ impl ScopeItem<'_> {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct Scope<'a> {
-    items: Vec<ScopeItem<'a>>,
+    pub items: Vec<ScopeItem<'a>>,
 }
 
 impl<'a> Scope<'a> {

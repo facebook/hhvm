@@ -31,8 +31,8 @@ pub struct HhasProperty<'id> {
     pub flags: HhasPropertyFlags,
     pub attributes: Vec<HhasAttribute>,
     pub visibility: Visibility,
-    pub initial_value: runtime::TypedValue,
-    pub initializer_instrs: InstrSeq,
+    pub initial_value: Option<runtime::TypedValue>,
+    pub initializer_instrs: Option<InstrSeq>,
     pub type_info: hhas_type::Info,
     pub doc_comment: Option<DocComment>,
 }

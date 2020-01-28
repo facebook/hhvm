@@ -390,6 +390,14 @@ impl InstrSeq {
         Self::make_instr(Instruct::IMutator(InstructMutator::PopL(l)))
     }
 
+    pub fn make_initprop(pid: PropId, op: InitpropOp) -> Self {
+        Self::make_instr(Instruct::IMutator(InstructMutator::InitProp(pid, op)))
+    }
+
+    pub fn make_checkprop(pid: PropId) -> Self {
+        Self::make_instr(Instruct::IMutator(InstructMutator::CheckProp(pid)))
+    }
+
     pub fn make_pushl(local: local::Type) -> Self {
         Self::make_instr(Instruct::IGet(InstructGet::PushL(local)))
     }

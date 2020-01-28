@@ -33,3 +33,12 @@ impl Id {
         &self.1
     }
 }
+
+impl ClassKind {
+    pub fn is_cabstract(&self) -> bool {
+        match self {
+            ClassKind::Cabstract => true,
+            _ => false,
+        }
+    }
+}

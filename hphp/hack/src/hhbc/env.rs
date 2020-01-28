@@ -7,16 +7,21 @@ pub mod emitter; // emitter is public API for mutating state
 pub mod iterator;
 pub mod jump_targets;
 
-use ast_scope_rust::Scope;
+use ast_scope_rust::{Scope, ScopeItem};
 use iterator::Iter;
 use label_rust::Label;
-use oxidized::ast as tast;
+use oxidized::{ast as tast, ast_defs::Id};
 use rx_rust as rx;
 
 extern crate bitflags;
 use bitflags::bitflags;
 
+use std::borrow::Cow;
+
+static SEP: &'static str = "|";
+
 bitflags! {
+    #[derive(Default)]
     pub struct Flags: u8 {
         const NEEDS_LOCAL_THIS =    0b0000_0001;
         const IN_TRY =              0b0000_0010;
@@ -25,6 +30,7 @@ bitflags! {
     }
 }
 
+#[derive(Default)]
 pub struct Env {
     pub flags: Flags,
     pub jump_targets_gen: jump_targets::Gen,
@@ -36,6 +42,30 @@ pub struct Env {
 }
 
 impl Env {
+    pub fn with_need_local_this(&mut self, need_local_this: bool) {
+        if need_local_this {
+            self.flags = self.flags | Flags::NEEDS_LOCAL_THIS;
+        }
+    }
+
+    pub fn with_rx_body(&mut self, in_rx_body: bool) {
+        if in_rx_body {
+            self.flags = self.flags | Flags::IN_RX_BODY;
+        }
+    }
+
+    fn with_scope(mut self, scope: Scope<'static>) -> Env {
+        self.scope = scope;
+        self
+    }
+
+    pub fn make_class_env(class: &'static tast::Class_) -> Env {
+        Env::default().with_scope(Scope {
+            items: vec![ScopeItem::Class(Cow::Borrowed(class))],
+        })
+        //TODO(hrust): set namespace
+    }
+
     pub fn do_in_loop_body<R, F>(
         &mut self,
         label_break: Label,
@@ -141,6 +171,7 @@ pub struct GlobalState {
     pub closure_enclosing_classes: SMap<tast::Class_>, // TODO(hrust) need Tast
     pub function_to_labels_map: SMap<SMap<bool>>,
     pub lambda_rx_of_scope: SMap<rx::Level>,
+    pub functions_with_finally: SSet,
 }
 
 impl GlobalState {
@@ -155,4 +186,19 @@ impl GlobalState {
     pub fn get_closure_enclosing_class(&self, class_name: &str) -> Option<&tast::Class_> {
         self.closure_enclosing_classes.get(class_name)
     }
+}
+
+pub fn get_unique_id_for_main() -> String {
+    String::from("|")
+}
+
+pub fn get_unique_id_for_method(cls: &tast::Class_, md: &tast::Method_) -> String {
+    let Id(_, cls_name) = &cls.name;
+    let Id(_, md_name) = &md.name;
+    format!("{}|{}", cls_name, md_name)
+}
+
+pub fn get_unique_id_for_function(fun: &tast::Fun_) -> String {
+    let Id(_, fn_name) = &fun.name;
+    format!("|{}", fn_name)
 }

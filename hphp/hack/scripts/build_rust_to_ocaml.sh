@@ -35,10 +35,10 @@ fi
   cp ./.cargo/Cargo.toml.ocaml_build ./Cargo.toml && \
   cargo build \
     $LOCK_FLAG \
+    --quiet \
     --target-dir "${TARGET_DIR}" \
     --package "$pkg" \
     $profile_flags \
     "$@";
   [ -e ./Cargo.toml ] && rm ./Cargo.toml;
 ) && cp "${TARGET_DIR}/$profile/lib$lib.a" "lib${lib}_stubs.a"
-

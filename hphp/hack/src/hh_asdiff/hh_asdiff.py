@@ -65,11 +65,13 @@ Examples:
         action="store_true",
         help="report when two HHASes are identical",
     )
-    ap.add_argument("expected_file", type=argparse.FileType("r"), help="Expected HHAS")
+    ap.add_argument(
+        "expected_file", type=argparse.FileType("r+b"), help="Expected HHAS"
+    )
     ap.add_argument(
         "actual_file",
         nargs="?",
-        type=argparse.FileType("r"),
+        type=argparse.FileType("r+b"),
         default=sys.stdin,
         help="Actual HHAS; a .hhas file or stdin (piped from hh_single_compile)",
     )

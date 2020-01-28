@@ -8,10 +8,10 @@
 import difflib
 from heapq import heappush, heappushpop
 from itertools import zip_longest
-from typing import Iterator, List, Sequence, Tuple
+from typing import AnyStr, Iterator, List, Sequence, Tuple
 
 
-def equal_lines(expected: Iterator[str], actual: Iterator[str]) -> bool:
+def equal_lines(expected: Iterator[AnyStr], actual: Iterator[AnyStr]) -> bool:
     """Compares each line of expected input against the actual input,
     where the inputs may differ in their type (i.e., opposite);
     returns true if and only if the sequences have the same number of elements

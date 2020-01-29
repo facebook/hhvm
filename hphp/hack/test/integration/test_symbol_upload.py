@@ -58,6 +58,7 @@ max_workers = 2
             "hack.InterfaceDeclaration.1": ["name"],
             "hack.InterfaceDefinition.1": ["declaration"],
             "hack.TraitDeclaration.1": ["name"],
+            "hack.TraitDefinition.1": ["declaration"],
             "name": ["key"],
             "declaration": ["container", int],
             "container": ["class_", "interface_", "trait_"],
@@ -84,6 +85,7 @@ max_workers = 2
             "hack.InterfaceDeclaration.1",
             "hack.InterfaceDefinition.1",
             "hack.TraitDeclaration.1",
+            "hack.TraitDefinition.1",
         ]
 
         for json_obj in json_array:

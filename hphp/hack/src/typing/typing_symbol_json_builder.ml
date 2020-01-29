@@ -34,6 +34,7 @@ type predicate =
   | InterfaceDeclaration
   | InterfaceDefinition
   | TraitDeclaration
+  | TraitDefinition
 
 type container_type =
   | ClassContainer
@@ -48,6 +49,7 @@ type glean_json = {
   interfaceDeclaration: json list;
   interfaceDefinition: json list;
   traitDeclaration: json list;
+  traitDefinition: json list;
 }
 
 type result_progress = {
@@ -66,6 +68,7 @@ let init_progress =
       interfaceDeclaration = [];
       interfaceDefinition = [];
       traitDeclaration = [];
+      traitDefinition = [];
     }
   in
   { resultJson = default_json; factIds = JMap.empty }
@@ -124,6 +127,11 @@ let update_json_data predicate json progress =
       {
         progress.resultJson with
         traitDeclaration = json :: progress.resultJson.traitDeclaration;
+      }
+    | TraitDefinition ->
+      {
+        progress.resultJson with
+        traitDefinition = json :: progress.resultJson.traitDefinition;
       }
   in
   { resultJson = json; factIds = progress.factIds }
@@ -185,7 +193,16 @@ let json_of_rel_bytespan offset len =
 let json_of_file filepath = JSON_Object [("key", JSON_String filepath)]
 
 let json_of_container_defn clss decl_id progress =
+  let base_defn defn_pred =
+    let json_fact =
+      JSON_Object [("declaration", JSON_Number (string_of_int decl_id))]
+    in
+    let (_, _, prog) = glean_json defn_pred json_fact progress in
+    prog
+  in
   match get_container_kind clss with
+  | InterfaceContainer -> base_defn InterfaceDefinition
+  | TraitContainer -> base_defn TraitDefinition
   | ClassContainer ->
     let is_abstract =
       match clss.c_kind with
@@ -202,13 +219,6 @@ let json_of_container_defn clss decl_id progress =
     in
     let (_, _, progress) = glean_json ClassDefinition json_fact progress in
     progress
-  | InterfaceContainer ->
-    let json_fact =
-      JSON_Object [("declaration", JSON_Number (string_of_int decl_id))]
-    in
-    let (_, _, progress) = glean_json InterfaceDefinition json_fact progress in
-    progress
-  | _ -> progress
 
 let json_of_container_decl (container_type, decl_pred) _ctx name _elem progress
     =
@@ -374,6 +384,7 @@ let build_json ctx symbols =
     [
       ("hack.FileXRefs.1", progress.resultJson.fileXRefs);
       ("hack.ClassDefinition.1", progress.resultJson.classDefinition);
+      ("hack.TraitDefinition.1", progress.resultJson.traitDefinition);
       ("hack.InterfaceDefinition.1", progress.resultJson.interfaceDefinition);
       ("hack.DeclarationLocation.1", progress.resultJson.declarationLocation);
       ("hack.ClassDeclaration.1", progress.resultJson.classDeclaration);

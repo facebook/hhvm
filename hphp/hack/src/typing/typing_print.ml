@@ -342,7 +342,7 @@ module Full = struct
     | Toption x -> Concat [text "?"; k x]
     | Tlike x -> Concat [text "~"; k x]
     | Tprim x -> tprim x
-    | Tvar _ -> text "_"
+    | Tvar x -> text (Printf.sprintf "#%d" x)
     | Tfun ft -> tfun ~ty to_doc st env ft
     (* Don't strip_ns here! We want the FULL type, including the initial slash.
       *)

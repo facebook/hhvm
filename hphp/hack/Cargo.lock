@@ -54,6 +54,38 @@ dependencies = [
 ]
 
 [[package]]
+name = "anyhow"
+version = "1.0.26"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "ast_class_expr_rust"
+version = "0.0.0"
+dependencies = [
+ "ast_scope_rust 0.0.0",
+ "env 0.0.0",
+ "hhbc_ast_rust 0.0.0",
+ "hhbc_string_utils_rust 0.0.0",
+ "instruction_sequence_rust 0.0.0",
+ "naming_special_names_rust 0.0.0",
+ "oxidized 0.0.0",
+]
+
+[[package]]
+name = "ast_constant_folder_rust"
+version = "0.0.0"
+dependencies = [
+ "ast_class_expr_rust 0.0.0",
+ "ast_scope_rust 0.0.0",
+ "env 0.0.0",
+ "hhbc_id_rust 0.0.0",
+ "hhbc_string_utils_rust 0.0.0",
+ "naming_special_names_rust 0.0.0",
+ "oxidized 0.0.0",
+ "runtime 0.0.0",
+]
+
+[[package]]
 name = "ast_scope_rust"
 version = "0.0.0"
 dependencies = [
@@ -111,10 +143,13 @@ name = "compile_rust"
 version = "0.0.0"
 dependencies = [
  "aast_parser 0.0.0",
+ "anyhow 1.0.26 (registry+https://github.com/rust-lang/crates.io-index)",
  "bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "emit_program_rust 0.0.0",
  "env 0.0.0",
  "hhas_program_rust 0.0.0",
  "hhbc_hhas_rust 0.0.0",
+ "instruction_sequence_rust 0.0.0",
  "itertools 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "ocamlrep 0.0.0",
  "options 0.0.0",
@@ -245,6 +280,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "decl_vars_rust"
+version = "0.0.0"
+dependencies = [
+ "env 0.0.0",
+ "hhas_param_rust 0.0.0",
+ "naming_special_names_rust 0.0.0",
+ "oxidized 0.0.0",
+]
+
+[[package]]
 name = "difference"
 version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -281,6 +326,95 @@ version = "1.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
+name = "emit_adata_rust"
+version = "0.0.0"
+dependencies = [
+ "bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "env 0.0.0",
+ "instruction_sequence_rust 0.0.0",
+ "options 0.0.0",
+]
+
+[[package]]
+name = "emit_attribute_rust"
+version = "0.0.0"
+dependencies = [
+ "ast_constant_folder_rust 0.0.0",
+ "emit_expression_rust 0.0.0",
+ "emit_fatal_rust 0.0.0",
+ "env 0.0.0",
+ "escaper 0.0.0",
+ "hhas_attribute_rust 0.0.0",
+ "hhbc_id_rust 0.0.0",
+ "instruction_sequence_rust 0.0.0",
+ "itertools 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "naming_special_names_rust 0.0.0",
+ "oxidized 0.0.0",
+ "runtime 0.0.0",
+]
+
+[[package]]
+name = "emit_body_rust"
+version = "0.0.0"
+dependencies = [
+ "ast_scope_rust 0.0.0",
+ "bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "decl_vars_rust 0.0.0",
+ "emit_adata_rust 0.0.0",
+ "emit_expression_rust 0.0.0",
+ "emit_fatal_rust 0.0.0",
+ "emit_param_rust 0.0.0",
+ "emit_pos_rust 0.0.0",
+ "emit_type_hint_rust 0.0.0",
+ "env 0.0.0",
+ "generator_rust 0.0.0",
+ "hhas_body_rust 0.0.0",
+ "hhas_param_rust 0.0.0",
+ "hhas_type 0.0.0",
+ "hhbc_ast_rust 0.0.0",
+ "hhbc_id_rust 0.0.0",
+ "hhbc_string_utils_rust 0.0.0",
+ "instruction_sequence_rust 0.0.0",
+ "label_rewriter_rust 0.0.0",
+ "label_rust 0.0.0",
+ "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "local_rust 0.0.0",
+ "naming_special_names_rust 0.0.0",
+ "options 0.0.0",
+ "oxidized 0.0.0",
+ "regex 1.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "runtime 0.0.0",
+]
+
+[[package]]
+name = "emit_expression_rust"
+version = "0.0.0"
+dependencies = [
+ "ast_class_expr_rust 0.0.0",
+ "ast_constant_folder_rust 0.0.0",
+ "ast_scope_rust 0.0.0",
+ "emit_adata_rust 0.0.0",
+ "emit_fatal_rust 0.0.0",
+ "emit_pos_rust 0.0.0",
+ "emit_symbol_refs_rust 0.0.0",
+ "emit_type_constant_rust 0.0.0",
+ "env 0.0.0",
+ "hhas_symbol_refs_rust 0.0.0",
+ "hhas_type 0.0.0",
+ "hhbc_ast_rust 0.0.0",
+ "hhbc_id_rust 0.0.0",
+ "hhbc_string_utils_rust 0.0.0",
+ "instruction_sequence_rust 0.0.0",
+ "label_rust 0.0.0",
+ "local_rust 0.0.0",
+ "naming_special_names_rust 0.0.0",
+ "options 0.0.0",
+ "oxidized 0.0.0",
+ "runtime 0.0.0",
+ "scope_rust 0.0.0",
+]
+
+[[package]]
 name = "emit_fatal_rust"
 version = "0.0.0"
 dependencies = [
@@ -292,6 +426,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "emit_param_rust"
+version = "0.0.0"
+dependencies = [
+ "ast_class_expr_rust 0.0.0",
+ "ast_constant_folder_rust 0.0.0",
+ "ast_scope_rust 0.0.0",
+ "emit_attribute_rust 0.0.0",
+ "emit_expression_rust 0.0.0",
+ "emit_fatal_rust 0.0.0",
+ "emit_pos_rust 0.0.0",
+ "emit_type_hint_rust 0.0.0",
+ "env 0.0.0",
+ "hhas_param_rust 0.0.0",
+ "hhas_type 0.0.0",
+ "hhbc_ast_rust 0.0.0",
+ "hhbc_string_utils_rust 0.0.0",
+ "instruction_sequence_rust 0.0.0",
+ "label_rust 0.0.0",
+ "local_rust 0.0.0",
+ "options 0.0.0",
+ "oxidized 0.0.0",
+]
+
+[[package]]
 name = "emit_pos_rust"
 version = "0.0.0"
 dependencies = [
@@ -299,6 +457,54 @@ dependencies = [
  "hhbc_ast_rust 0.0.0",
  "instruction_sequence_rust 0.0.0",
  "options 0.0.0",
+ "oxidized 0.0.0",
+]
+
+[[package]]
+name = "emit_program_rust"
+version = "0.0.0"
+dependencies = [
+ "bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "emit_body_rust 0.0.0",
+ "env 0.0.0",
+ "hhas_body_rust 0.0.0",
+ "instruction_sequence_rust 0.0.0",
+ "options 0.0.0",
+ "oxidized 0.0.0",
+]
+
+[[package]]
+name = "emit_symbol_refs_rust"
+version = "0.0.0"
+dependencies = [
+ "env 0.0.0",
+ "hhas_symbol_refs_rust 0.0.0",
+ "hhbc_id_rust 0.0.0",
+]
+
+[[package]]
+name = "emit_type_constant_rust"
+version = "0.0.0"
+dependencies = [
+ "hhbc_id_rust 0.0.0",
+ "hhbc_string_utils_rust 0.0.0",
+ "instruction_sequence_rust 0.0.0",
+ "naming_special_names_rust 0.0.0",
+ "options 0.0.0",
+ "oxidized 0.0.0",
+ "runtime 0.0.0",
+]
+
+[[package]]
+name = "emit_type_hint_rust"
+version = "0.0.0"
+dependencies = [
+ "emit_fatal_rust 0.0.0",
+ "hhas_type 0.0.0",
+ "hhbc_id_rust 0.0.0",
+ "hhbc_string_utils_rust 0.0.0",
+ "instruction_sequence_rust 0.0.0",
+ "naming_special_names_rust 0.0.0",
  "oxidized 0.0.0",
 ]
 
@@ -399,6 +605,13 @@ version = "0.3.55"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
+name = "generator_rust"
+version = "0.0.0"
+dependencies = [
+ "oxidized 0.0.0",
+]
+
+[[package]]
 name = "hack_integration_tests"
 version = "3.49.0"
 dependencies = [
@@ -480,6 +693,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "hhas_body_rust"
+version = "0.0.0"
+dependencies = [
+ "env 0.0.0",
+ "hhas_param_rust 0.0.0",
+ "hhas_type 0.0.0",
+ "instruction_sequence_rust 0.0.0",
+]
+
+[[package]]
+name = "hhas_param_rust"
+version = "0.0.0"
+dependencies = [
+ "hhas_attribute_rust 0.0.0",
+ "hhas_type 0.0.0",
+ "label_rust 0.0.0",
+ "oxidized 0.0.0",
+]
+
+[[package]]
 name = "hhas_program_rust"
 version = "0.0.0"
 dependencies = [
@@ -540,6 +773,7 @@ dependencies = [
  "hhas_record_def_rust 0.0.0",
  "hhbc_id_rust 0.0.0",
  "oxidized 0.0.0",
+ "thiserror 1.0.10 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -582,6 +816,7 @@ dependencies = [
  "local_rust 0.0.0",
  "pretty_assertions 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "runtime 0.0.0",
+ "thiserror 1.0.10 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -596,6 +831,17 @@ dependencies = [
 name = "itoa"
 version = "0.4.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "label_rewriter_rust"
+version = "0.0.0"
+dependencies = [
+ "env 0.0.0",
+ "hhas_param_rust 0.0.0",
+ "hhbc_ast_rust 0.0.0",
+ "instruction_sequence_rust 0.0.0",
+ "label_rust 0.0.0",
+]
 
 [[package]]
 name = "label_rust"
@@ -1195,6 +1441,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "scope_rust"
+version = "0.0.0"
+dependencies = [
+ "env 0.0.0",
+ "instruction_sequence_rust 0.0.0",
+ "label_rust 0.0.0",
+ "local_rust 0.0.0",
+]
+
+[[package]]
 name = "serde"
 version = "1.0.103"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1296,6 +1552,24 @@ version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "unicode-width 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "thiserror"
+version = "1.0.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "thiserror-impl 1.0.10 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "thiserror-impl"
+version = "1.0.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "proc-macro2 1.0.6 (registry+https://github.com/rust-lang/crates.io-index)",
+ "quote 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "syn 1.0.11 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -1419,6 +1693,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 [metadata]
 "checksum aho-corasick 0.7.6 (registry+https://github.com/rust-lang/crates.io-index)" = "58fb5e95d83b38284460a5fda7d6470aa0b8844d283a0b614b8535e880800d2d"
 "checksum ansi_term 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)" = "ee49baf6cb617b853aa8d93bf420db2383fab46d314482ca2803b40d5fde979b"
+"checksum anyhow 1.0.26 (registry+https://github.com/rust-lang/crates.io-index)" = "7825f6833612eb2414095684fcf6c635becf3ce97fe48cf6421321e93bfbd53c"
 "checksum atty 0.2.13 (registry+https://github.com/rust-lang/crates.io-index)" = "1803c647a3ec87095e7ae7acfca019e98de5ec9a7d01343f611cf3152ed71a90"
 "checksum bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "cf1de2fe8c75bc145a2f577add951f8134889b4795d47466a54a5c846d691693"
 "checksum clap 2.33.0 (registry+https://github.com/rust-lang/crates.io-index)" = "5067f5bb2d80ef5d68b4c87db81601f0b75bca627bc2ef76b141d7b846a3c6d9"
@@ -1467,6 +1742,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum syn 1.0.11 (registry+https://github.com/rust-lang/crates.io-index)" = "dff0acdb207ae2fe6d5976617f887eb1e35a2ba52c13c7234c790960cdad9238"
 "checksum synstructure 0.12.3 (registry+https://github.com/rust-lang/crates.io-index)" = "67656ea1dc1b41b1451851562ea232ec2e5a80242139f7e679ceccfb5d61f545"
 "checksum textwrap 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)" = "d326610f408c7a4eb6f51c37c330e496b08506c9457c9d34287ecc38809fb060"
+"checksum thiserror 1.0.10 (registry+https://github.com/rust-lang/crates.io-index)" = "205684fd018ca14432b12cce6ea3d46763311a571c3d294e71ba3f01adcf1aad"
+"checksum thiserror-impl 1.0.10 (registry+https://github.com/rust-lang/crates.io-index)" = "57e4d2e50ca050ed44fb58309bdce3efa79948f84f9993ad1978de5eebdce5a7"
 "checksum thread_local 0.3.6 (registry+https://github.com/rust-lang/crates.io-index)" = "c6b53e329000edc2b34dbe8545fd20e55a333362d0a321909685a19bd28c3f1b"
 "checksum time 0.1.42 (registry+https://github.com/rust-lang/crates.io-index)" = "db8dcfca086c1143c9270ac42a2bbd8a7ee477b78ac8e45b19abfb0cbede4b6f"
 "checksum unicode-segmentation 1.6.0 (registry+https://github.com/rust-lang/crates.io-index)" = "e83e153d1053cbb5a118eeff7fd5be06ed99153f00dbcd8ae310c5fb2b22edc0"

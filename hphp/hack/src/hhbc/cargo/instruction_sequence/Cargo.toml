@@ -17,6 +17,7 @@ hhbc_id_rust = { path = "../hhbc_id" }
 label_rust = { path = "../label" }
 local_rust = { path = "../local" }
 runtime = { path = "../runtime" }
+thiserror = "1.0"
 
 [dev-dependencies]
 pretty_assertions = "0.6"

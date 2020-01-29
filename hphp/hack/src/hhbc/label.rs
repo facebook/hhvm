@@ -7,7 +7,7 @@ use std::fmt;
 
 pub type Id = usize;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, std::cmp::Ord, std::cmp::PartialOrd)]
 pub enum Label {
     Regular(Id),
     DefaultArg(Id),
@@ -95,5 +95,9 @@ impl Gen {
         let curr_id = self.next_id;
         self.next_id = curr_id + 1;
         curr_id
+    }
+
+    pub fn reset(&mut self) {
+        self.next_id = 0;
     }
 }

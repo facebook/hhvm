@@ -2,7 +2,12 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use oxidized::{ast, ast_defs::FunKind, pos::Pos, s_map};
+use oxidized::{
+    ast,
+    ast_defs::{FunKind, Id},
+    pos::Pos,
+    s_map,
+};
 use rx_rust as rx;
 use std::borrow::Cow;
 
@@ -279,5 +284,22 @@ impl<'a> Scope<'a> {
             }
         }
         true
+    }
+
+    // get captured variables when in closure scope
+    pub fn get_captured_vars(&self) -> Vec<String> {
+        // closure scope: lambda -> method -> class
+        if let ScopeItem::Class(ast_cls) = &self.items[2] {
+            ast_cls
+                .vars
+                .iter()
+                .map(|var| {
+                    let Id(_, id) = &var.id;
+                    format!("${}", id)
+                })
+                .collect::<Vec<_>>()
+        } else {
+            panic!("closure scope should be lambda -> method -> class")
+        }
     }
 }

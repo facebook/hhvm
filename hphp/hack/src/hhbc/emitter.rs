@@ -68,6 +68,10 @@ impl Emitter {
         self
     }
 
+    pub fn iterator(&self) -> &Iter {
+        &self.iterator
+    }
+
     pub fn iterator_mut(&mut self) -> &mut Iter {
         &mut self.iterator
     }

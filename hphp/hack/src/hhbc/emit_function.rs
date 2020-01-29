@@ -84,7 +84,7 @@ pub fn emit_function(
     };
 
     let deprecation_info = hhas_attribute::deprecation_info(attrs.iter());
-    let (body, is_gen, is_pair_gen): (HhasBody, bool, bool) = {
+    let (body, is_gen, is_pair_gen): (Result<HhasBody>, bool, bool) = {
         let deprecation_info = if memoized { None } else { deprecation_info };
         let native = attrs.iter().any(|a| ua::is_native(&a.name));
         use emit_body::{Args as EmitBodyArgs, Flags as EmitBodyFlags};
@@ -99,12 +99,12 @@ pub fn emit_function(
         emit_body::emit_body(
             e,
             &f.namespace,
-            InstrSeq::make_null(),
             &vec![a::Def::mk_stmt(a::Stmt(
                 Pos::make_none(),
                 a::Stmt_::Block(ast_body.clone()),
             ))],
-            EmitBodyArgs {
+            InstrSeq::make_null(),
+            &mut EmitBodyArgs {
                 flags,
                 deprecation_info: &deprecation_info,
                 default_dropthrough: None,
@@ -130,6 +130,7 @@ pub fn emit_function(
         None
     };
     let name: String = renamed_id.into();
+    let body = body?;
     let normal_function = HhasFunction {
         attributes: attrs,
         name: name.into(),

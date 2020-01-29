@@ -12,13 +12,16 @@ path = "../../compile.rs"
 
 [dependencies]
 aast_parser = { path = "../../../parser/cargo/aast_parser" }
+emit_program_rust = { path = "../emit_program" }
 env = { path = "../env" }
 hhas_program_rust = { path = "../hhas_program" }
 hhbc_hhas_rust = { path = "../hhbc_hhas" }
+instruction_sequence_rust = { path = "../instruction_sequence" }
 ocamlrep = { path = "../../../ocamlrep" }
 options = { path = "../options" }
 oxidized = { path = "../../../oxidized" }
 parser_core_types = { path = "../../../parser/cargo/core_types" }
+anyhow = "1.0"
 bitflags = "1.2"
 itertools = "0.8"
 # @end of Signature

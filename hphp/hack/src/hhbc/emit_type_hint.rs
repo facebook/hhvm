@@ -405,7 +405,7 @@ pub fn hint_to_class<'a>(hint: &'a Hint) -> class::Type<'a> {
 
 pub fn emit_type_constraint_for_native_function(
     tparams: &[&str],
-    ret_opt: &Option<(Pos, Hint_)>,
+    ret_opt: &Option<Hint>,
     ti: Info,
 ) -> Info {
     use constraint::Flags;
@@ -415,7 +415,7 @@ pub fn emit_type_constraint_for_native_function(
             if t == "HH\\mixed" || t == "callable" {
                 (None, Flags::default())
             } else {
-                let (_, h) = ret_opt.as_ref().unwrap();
+                let Hint(_, h) = ret_opt.as_ref().unwrap();
                 let name = Some(
                     string_utils::strip_type_list(
                         t.trim_start_matches("?")

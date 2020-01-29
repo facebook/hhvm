@@ -150,6 +150,7 @@ prefixed_flags!(
     CompilerFlags,
     "hack.compiler.",
     CONSTANT_FOLDING,
+    ENFORCE_GENERICS_UB,
     OPTIMIZE_NULL_CHECKS,
     RELABEL,
 );

@@ -12,13 +12,18 @@ path = "../../emit_body.rs"
 
 [dependencies]
 ast_scope_rust = { path = "../ast_scope" }
+decl_vars_rust = { path = "../decl_vars" }
 emit_adata_rust = { path = "../emit_adata" }
 emit_expression_rust = { path = "../.." }
 emit_fatal_rust = { path = "../emit_fatal" }
+emit_param_rust = { path = "../emit_param" }
 emit_pos_rust = { path = "../emit_pos" }
 emit_type_hint_rust = { path = "../emit_type_hint" }
 env = { path = "../env" }
+generator_rust = { path = "../generator" }
 hhas_body_rust = { path = "../hhas_body" }
+hhas_param_rust = { path = "../hhas_param" }
+hhas_type = { path = "../hhas_type" }
 hhbc_ast_rust = { path = "../hhbc_ast" }
 hhbc_id_rust = { path = "../hhbc_id" }
 hhbc_string_utils_rust = { path = "../string_utils" }

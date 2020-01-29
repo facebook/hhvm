@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use env::emitter::Emitter;
+use instruction_sequence_rust::InstrSeq;
 
 struct State {
     // TODO(hrust)
@@ -15,6 +16,10 @@ impl State {
     }
 }
 env::lazy_emit_state!(adata_state, State, State::init);
+
+pub fn rewrite_typed_value(_instrseq: &mut InstrSeq) {
+    //TODO(hrust) implement
+}
 
 #[cfg(test)]
 mod tests {

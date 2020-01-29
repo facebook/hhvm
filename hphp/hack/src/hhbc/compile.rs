@@ -89,7 +89,7 @@ where
     });
 
     let (program, codegen_t) = match ast {
-        Either::Right((ast, is_hh_file)) => emit(&env, opts, is_hh_file, ast),
+        Either::Right((ast, is_hh_file)) => emit(&env, opts, is_hh_file, &ast),
         Either::Left((pos, msg, is_runtime_error)) => emit_fatal(&env, is_runtime_error, pos, msg),
     };
     let program = program?;
@@ -110,7 +110,7 @@ fn emit<'p>(
     env: &Env,
     opts: Options,
     is_hh: bool,
-    ast: Tast::Program,
+    ast: &Tast::Program,
 ) -> (Result<HhasProgram<'p>, Error>, f64) {
     let mut flags = FromAstFlags::empty();
     if is_hh {
@@ -127,7 +127,7 @@ fn emit<'p>(
     }
     let mut t = 0f64;
     let r = profile(opts.log_extern_compiler_perf(), &mut t, || {
-        emit_program(opts, flags, ast)
+        emit_program(opts, flags, &env.empty_namespace, ast)
     });
     (r, t)
 }

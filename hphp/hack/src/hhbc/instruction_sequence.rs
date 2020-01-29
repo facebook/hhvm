@@ -973,6 +973,10 @@ impl InstrSeq {
         }
     }
 
+    pub fn rewrite_user_labels(&mut self, label_gen: &mut label::Gen) {
+        *self = Self::rewrite_user_labels_aux(label_gen, self, &HashMap::new()).0
+    }
+
     fn rewrite_user_labels_aux<'a>(
         label_gen: &mut label::Gen,
         instrseq: &Self,
@@ -1016,7 +1020,7 @@ impl InstrSeq {
         }
     }
 
-    fn first(&self) -> Option<&Instruct> {
+    pub fn first(&self) -> Option<&Instruct> {
         match self {
             Self::Empty => None,
             Self::One(i) => {
@@ -1034,7 +1038,7 @@ impl InstrSeq {
         }
     }
 
-    fn is_empty(&self) -> bool {
+    pub fn is_empty(&self) -> bool {
         match self {
             Self::Empty => true,
             Self::One(i) => Self::is_srcloc(i),

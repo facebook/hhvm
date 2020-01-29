@@ -165,7 +165,7 @@ pub fn emit_param_default_value_setter(
     env: &Env,
     is_native: bool,
     pos: &Pos,
-    params: &Vec<HhasParam>,
+    params: &[HhasParam],
 ) -> Result<(InstrSeq, InstrSeq)> {
     let param_to_setter = |param: &HhasParam| {
         let (is_optional, is_mixed, is_callable) = match &param.type_info {

@@ -11,7 +11,11 @@ include = ["../../emit_program.rs"]
 path = "../../emit_program.rs"
 
 [dependencies]
+emit_body_rust = { path = "../emit_body" }
 env = { path = "../env" }
+hhas_body_rust = { path = "../hhas_body" }
+instruction_sequence_rust = { path = "../instruction_sequence" }
 options = { path = "../options" }
+oxidized = { path = "../../../oxidized" }
 bitflags = "1.2"
 # @end of Signature

@@ -163,7 +163,7 @@ struct VariantControllerImpl {
           : empty_darray();
     }
   }
-  static MapType createMap(ArrayInit&& map) {
+  static MapType createMap(DArrayInit&& map) {
     auto arrayData = map.toArray().detach();
     switch (HackArraysMode) {
       case VariantControllerHackArraysMode::ON:
@@ -175,8 +175,8 @@ struct VariantControllerImpl {
     }
     not_reached(); // not sure why I need this here and not in createMap()
   }
-  static ArrayInit reserveMap(size_t n) {
-    ArrayInit res(n, ArrayInit::Map{}, CheckAllocation{});
+  static DArrayInit reserveMap(size_t n) {
+    DArrayInit res(n, CheckAllocation{});
     return res;
   }
   static MapType getStaticEmptyMap() {
@@ -213,7 +213,7 @@ struct VariantControllerImpl {
   }
 
   template <typename Key>
-  static void mapSet(ArrayInit& map, Key&& k, VariantType&& v) {
+  static void mapSet(DArrayInit& map, Key&& k, VariantType&& v) {
     map.setUnknownKey<IntishCast::Cast>(std::move(k), std::move(v));
   }
   static int64_t mapSize(const MapType& map) { return map.size(); }

@@ -5,6 +5,13 @@ HHVM_DEFINE_EXTENSION("hsl_io"
     ext_hsl_io.php
 )
 
+HHVM_DEFINE_EXTENSION("hsl_os"
+  SOURCES
+    ext_hsl_os.cpp
+  SYSTEMLIB
+    ext_hsl_os.php
+)
+
 HHVM_DEFINE_EXTENSION("hsl_random"
   SOURCES
     ext_hsl_random.cpp

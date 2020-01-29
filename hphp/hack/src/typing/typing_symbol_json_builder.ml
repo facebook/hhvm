@@ -32,10 +32,12 @@ type predicate =
   | DeclarationLocation
   | FileXRefs
   | InterfaceDeclaration
+  | TraitDeclaration
 
 type container_type =
   | ClassContainer
   | InterfaceContainer
+  | TraitContainer
 
 type glean_json = {
   classDeclaration: json list;
@@ -43,6 +45,7 @@ type glean_json = {
   declarationLocation: json list;
   fileXRefs: json list;
   interfaceDeclaration: json list;
+  traitDeclaration: json list;
 }
 
 type result_progress = {
@@ -59,6 +62,7 @@ let init_progress =
       declarationLocation = [];
       fileXRefs = [];
       interfaceDeclaration = [];
+      traitDeclaration = [];
     }
   in
   { resultJson = default_json; factIds = JMap.empty }
@@ -108,6 +112,11 @@ let update_json_data predicate json progress =
         progress.resultJson with
         interfaceDeclaration = json :: progress.resultJson.interfaceDeclaration;
       }
+    | TraitDeclaration ->
+      {
+        progress.resultJson with
+        traitDeclaration = json :: progress.resultJson.traitDeclaration;
+      }
   in
   { resultJson = json; factIds = progress.factIds }
 
@@ -140,10 +149,12 @@ let container_decl_predicate container_type =
   match container_type with
   | ClassContainer -> ("class_", ClassDeclaration)
   | InterfaceContainer -> ("interface_", InterfaceDeclaration)
+  | TraitContainer -> ("trait_", TraitDeclaration)
 
 let get_container_kind clss =
   match clss.c_kind with
   | Cinterface -> InterfaceContainer
+  | Ctrait -> TraitContainer
   (* TODO: process enum kind here *)
   | _ -> ClassContainer
 
@@ -331,6 +342,9 @@ let build_json ctx symbols =
             | Interface ->
               let decl_pred = container_decl_predicate InterfaceContainer in
               add_container_xref ctx symbol_def occ.pos decl_pred (xrefs, prog)
+            | Trait ->
+              let decl_pred = container_decl_predicate TraitContainer in
+              add_container_xref ctx symbol_def occ.pos decl_pred (xrefs, prog)
             | _ -> (xrefs, prog)))
   in
   let progress =
@@ -350,6 +364,7 @@ let build_json ctx symbols =
       ("hack.ClassDefinition.1", progress.resultJson.classDefinition);
       ("hack.DeclarationLocation.1", progress.resultJson.declarationLocation);
       ("hack.ClassDeclaration.1", progress.resultJson.classDeclaration);
+      ("hack.TraitDeclaration.1", progress.resultJson.traitDeclaration);
       ("hack.InterfaceDeclaration.1", progress.resultJson.interfaceDeclaration);
     ]
   in

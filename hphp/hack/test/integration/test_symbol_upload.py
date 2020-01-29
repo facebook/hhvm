@@ -56,9 +56,10 @@ max_workers = 2
             "hack.DeclarationLocation.1": ["declaration", "file", "span"],
             "hack.FileXRefs.1": ["file", "xrefs"],
             "hack.InterfaceDeclaration.1": ["name"],
+            "hack.TraitDeclaration.1": ["name"],
             "name": ["key"],
             "declaration": ["container", int],
-            "container": ["class_", "interface_"],
+            "container": ["class_", "interface_", "trait_"],
             "id": [int],
             "key": [str],
         }
@@ -80,6 +81,7 @@ max_workers = 2
             "hack.DeclarationLocation.1",
             "hack.FileXRefs.1",
             "hack.InterfaceDeclaration.1",
+            "hack.TraitDeclaration.1",
         ]
 
         for json_obj in json_array:

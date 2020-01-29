@@ -954,6 +954,7 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
     case T::Dict:           return X(TDict, Dict, CountedDict);
     case T::SKeyset:        return X(TStaticKeyset, StaticKeyset, StaticKeyset);
     case T::Keyset:         return X(TKeyset, Keyset, Keyset);
+    case T::VecLike:        return X(TVec, Vec, CountedVec) | TClsMeth;
 
     case T::OptSArr:        return X(TStaticArr, StaticArray, StaticArray)
                                    | TInitNull;
@@ -971,6 +972,11 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
                                    | TInitNull;
     case T::OptKeyset:      return X(TKeyset, Keyset, Keyset)
                                    | TInitNull;
+    case T::OptVecLike:  return X(TVec, Vec, CountedVec)
+                                | TClsMeth | TInitNull;
+    case T::PArrLike:    return X(TArr, Array, CountedArray) | TClsMeth;
+    case T::OptPArrLike: return X(TArr, Array, CountedArray)
+                                   | TInitNull | TClsMeth;
 #undef X
 
 #define X(A, B, C)                                                      \
@@ -1001,6 +1007,10 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
                             | TInitNull;
     case T::OptDArr: return X(ArrayData::kMixedKind, Array, CountedArray)
                             | TInitNull;
+    case T::VArrLike:return X(ArrayData::kPackedKind, Array, CountedArray)
+                            | TClsMeth;
+    case T::OptVArrLike: return X(ArrayData::kPackedKind, Array, CountedArray)
+                                | TClsMeth | TInitNull;
 #undef X
 
     case T::SubObj:

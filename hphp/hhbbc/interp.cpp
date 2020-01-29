@@ -1946,20 +1946,6 @@ bool isTypeHelper(ISS& env,
   // If the type could be ClsMeth and Arr/Vec, skip location refining.
   // Otherwise, refine location based on the testType.
   auto testTy = type_of_istype(typeOp);
-  if (RuntimeOption::EvalIsCompatibleClsMethType && val.couldBe(BClsMeth)) {
-    assertx(RuntimeOption::EvalEmitClsMethPointers);
-    if (RuntimeOption::EvalHackArrDVArrs) {
-      if ((typeOp == IsTypeOp::Vec) || (typeOp == IsTypeOp::VArray)) {
-        if (val.couldBe(BVec | BVArr)) return false;
-        testTy = TClsMeth;
-      }
-    } else {
-      if ((typeOp == IsTypeOp::Arr) || (typeOp == IsTypeOp::VArray)) {
-        if (val.couldBe(BArr | BVArr)) return false;
-        testTy = TClsMeth;
-      }
-    }
-  }
 
   assertx(val.couldBe(testTy) &&
           (!val.subtypeOf(testTy) || val.subtypeOf(BObj)));
@@ -2998,11 +2984,6 @@ void isTypeLImpl(ISS& env, const Op& op) {
     nothrow(env);
   }
 
-  if (RuntimeOption::EvalIsCompatibleClsMethType &&
-      isCompactTypeClsMeth(env, op.subop2, loc)) {
-    return;
-  }
-
   switch (op.subop2) {
   case IsTypeOp::Scalar: return push(env, TBool);
   case IsTypeOp::Obj: return isTypeObj(env, loc);
@@ -3017,11 +2998,6 @@ void isTypeCImpl(ISS& env, const Op& op) {
   if (!is_type_might_raise(op.subop1, t1)) {
     constprop(env);
     nothrow(env);
-  }
-
-  if (RuntimeOption::EvalIsCompatibleClsMethType &&
-      isCompactTypeClsMeth(env, op.subop1, t1)) {
-    return;
   }
 
   switch (op.subop1) {
@@ -3162,29 +3138,6 @@ void isAsTypeStructImpl(ISS& env, SArray inputTS) {
   ) {
     if (!type || is_type_might_raise(*type, t)) return result(TBool);
     auto test = type.value();
-    if (t.couldBe(BClsMeth)) {
-      if (RuntimeOption::EvalHackArrDVArrs) {
-        if (test == TVec) {
-          if (t.subtypeOf(BClsMeth | BVec)) return result(TTrue);
-          else if (t.couldBe(BVec)) return result(TBool);
-          else test = TClsMeth;
-        } else if (test == TVArr) {
-          if (t.subtypeOf(BClsMeth | BVArr)) return result(TTrue);
-          else if (t.couldBe(BVArr)) return result(TBool);
-          else test = TClsMeth;
-        }
-      } else {
-        if (test == TVArr) {
-          if (t.subtypeOf(BClsMeth | BVArr)) return result(TTrue);
-          else if (t.couldBe(BVArr)) return result(TBool);
-          else test = TClsMeth;
-        } else if (test == TArr) {
-          if (t.subtypeOf(BClsMeth | BArr)) return result(TTrue);
-          else if (t.couldBe(BArr)) return result(TBool);
-          else test = TClsMeth;
-        }
-      }
-    }
     if (t.subtypeOf(test)) return result(TTrue);
     if (!t.couldBe(test) && (!deopt || !t.couldBe(deopt.value()))) {
       return result(TFalse);

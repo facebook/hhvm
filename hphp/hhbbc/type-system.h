@@ -384,6 +384,15 @@ enum trep : uint64_t {
   BOptStrLike    = BInitNull | BStrLike,
   BOptUncStrLike = BInitNull | BUncStrLike,
 
+  BVArrLike = BClsMeth | BVArr,
+  BVecLike  = BClsMeth | BVec,
+
+  BOptVArrLike = BInitNull | BVArrLike,
+  BOptVecLike  = BInitNull | BVecLike,
+
+  BPArrLike    = BClsMeth | BArr,
+  BOptPArrLike = BInitNull | BPArrLike,
+
   BInitPrim = BInitNull | BBool | BNum | BFunc | BCls |
               (use_lowptr ? BClsMeth : 0),
 
@@ -780,7 +789,7 @@ private:
   friend Type loosen_provenance(Type);
   friend Type loosen_values(Type);
   friend Type loosen_emptiness(Type);
-  friend Type loosen_string_like(Type);
+  friend Type loosen_likeness(Type);
   friend Type add_nonemptiness(Type);
   friend Type assert_emptiness(Type);
   friend Type assert_nonemptiness(Type);
@@ -952,8 +961,11 @@ X(DArrN)                                        \
 X(DArr)                                         \
 X(UncArrKey)                                    \
 X(ArrKey)                                       \
-X(UncStrLike)                                 \
-X(StrLike)                                    \
+X(UncStrLike)                                   \
+X(StrLike)                                      \
+X(PArrLike)                                  \
+X(VArrLike)                                     \
+X(VecLike)                                      \
 X(InitPrim)                                     \
 X(Prim)                                         \
 X(InitUnc)                                      \
@@ -1016,8 +1028,11 @@ X(OptDArrN)                                     \
 X(OptDArr)                                      \
 X(OptUncArrKey)                                 \
 X(OptArrKey)                                    \
-X(OptUncStrLike)                              \
-X(OptStrLike)                                 \
+X(OptUncStrLike)                                \
+X(OptStrLike)                                   \
+X(OptPArrLike)                               \
+X(OptVArrLike)                                  \
+X(OptVecLike)                                   \
 X(InitCell)                                     \
 X(Cell)                                         \
 X(Top)
@@ -1568,9 +1583,10 @@ Type loosen_values(Type t);
 Type loosen_emptiness(Type t);
 
 /*
- * Force all TFunc and TCls types to TUncStrLike.
+ * Force all TFunc and TCls types to TUncStrLike, and all TClsMeth to either
+ * TVArrLike or TVecLike.
  */
-Type loosen_string_like(Type t);
+Type loosen_likeness(Type t);
 
 /*
  * Loosens staticness, emptiness, and values from the type. This forces a type

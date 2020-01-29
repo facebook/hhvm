@@ -166,6 +166,12 @@ bool RepoAuthType::operator==(RepoAuthType o) const {
   case T::VArr:
   case T::SDArr:
   case T::DArr:
+  case T::VArrLike:
+  case T::VecLike:
+  case T::OptVArrLike:
+  case T::OptVecLike:
+  case T::PArrLike:
+  case T::OptPArrLike:
     // array id equals to either kInvalidArrayId for null array info, or a
     // regular id. in each case, we just need to compare their id.
     return arrayId() == o.arrayId();
@@ -258,6 +264,17 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
     }
     return true;
 
+  case T::OptPArrLike:
+    if (initNull) return true;
+    // fallthrough
+  case T::PArrLike:
+    if (isClsMethType(tv.m_type)) return true;
+    if (!isArrayType(tv.m_type)) return false;
+    if (auto const arr = ty.array()) {
+      if (!tvMatchesArrayType(tv, arr)) return false;
+    }
+    return true;
+
   case T::OptArr:
     if (initNull) return true;
     // fallthrough
@@ -283,8 +300,16 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
     }
     return true;
 
-  case T::OptVArr:
+  case T::OptVArrLike:
     if (initNull) return true;
+    // fallthrough
+  case T::VArrLike:
+    if (isClsMethType(tv.m_type)) return true;
+
+    if (false) {
+      case T::OptVArr:
+        if (initNull) return true;
+    }
     // fallthrough
   case T::VArr:
     assertx(!RuntimeOption::EvalHackArrDVArrs);
@@ -330,8 +355,16 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
     }
     return true;
 
-  case T::OptVec:
+  case T::OptVecLike:
     if (initNull) return true;
+    // fallthrough
+  case T::VecLike:
+    if (isClsMethType(tv.m_type)) return true;
+
+    if (false) {
+      case T::OptVec:
+        if (initNull) return true;
+    }
     // fallthrough
   case T::Vec:
     if (!isVecType(tv.m_type)) return false;
@@ -535,6 +568,12 @@ std::string show(RepoAuthType rat) {
   case T::Keyset:
   case T::OptSKeyset:
   case T::OptKeyset:
+  case T::VArrLike:
+  case T::VecLike:
+  case T::OptVArrLike:
+  case T::OptVecLike:
+  case T::PArrLike:
+  case T::OptPArrLike:
     {
       auto ret = std::string{};
       if (tag == T::OptArr    || tag == T::OptSArr ||
@@ -542,8 +581,19 @@ std::string show(RepoAuthType rat) {
           tag == T::OptDArr   || tag == T::OptSDArr ||
           tag == T::OptVec    || tag == T::OptSVec ||
           tag == T::OptDict   || tag == T::OptSDict ||
-          tag == T::OptKeyset || tag == T::OptSKeyset) {
+          tag == T::OptKeyset || tag == T::OptSKeyset ||
+          tag == T::OptVArrLike || tag == T::OptVecLike ||
+          tag == T::OptPArrLike) {
         ret += '?';
+      }
+      if (tag == T::PArrLike || tag == T::OptPArrLike) {
+        ret += "PArrLike";
+      }
+      if (tag == T::VArrLike || tag == T::OptVArrLike) {
+        ret += "VArrLike";
+      }
+      if (tag == T::VecLike || tag == T::OptVecLike) {
+        ret += "VecLike";
       }
       if (tag == T::SArr    || tag == T::OptSArr ||
           tag == T::SVArr   || tag == T::OptSVArr ||

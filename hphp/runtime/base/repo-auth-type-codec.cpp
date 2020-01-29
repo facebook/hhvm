@@ -105,6 +105,12 @@ RepoAuthType decodeRATImpl(const unsigned char*& pc, LookupStr lookupStr,
   case T::OptSKeyset:
   case T::Keyset:
   case T::OptKeyset:
+  case T::VArrLike:
+  case T::VecLike:
+  case T::OptVArrLike:
+  case T::OptVecLike:
+  case T::PArrLike:
+  case T::OptPArrLike:
     if (highBitSet) {
       uint32_t id = decode_iva(pc);
       auto const arr = lookupArrayType(id);
@@ -227,6 +233,12 @@ void encodeRAT(UnitEmitter& ue, RepoAuthType rat) {
   case T::OptSKeyset:
   case T::Keyset:
   case T::OptKeyset:
+  case T::VArrLike:
+  case T::VecLike:
+  case T::OptVArrLike:
+  case T::OptVecLike:
+  case T::PArrLike:
+  case T::OptPArrLike:
     if (rat.hasArrData()) {
       ue.emitIVA(rat.arrayId());
     }

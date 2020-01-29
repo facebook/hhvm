@@ -109,6 +109,12 @@ size_t encodedRATSize(const unsigned char* pc) {
   case T::OptSKeyset:
   case T::Keyset:
   case T::OptKeyset:
+  case T::VArrLike:
+  case T::VecLike:
+  case T::OptVArrLike:
+  case T::OptVecLike:
+  case T::PArrLike:
+  case T::OptPArrLike:
     if (highBitSet) {
       return ((int8_t(nextPcVal) < 0) ? 4 : 1) + tagSize;
     }

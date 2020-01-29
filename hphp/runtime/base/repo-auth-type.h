@@ -95,6 +95,12 @@ struct RepoAuthType {
     TAG(InitCell)                                 \
     TAG(Cell)                                     \
     /* Types where array() may be non-null. */    \
+    TAG(PArrLike)                              \
+    TAG(OptPArrLike)                           \
+    TAG(VArrLike)                                 \
+    TAG(VecLike)                                  \
+    TAG(OptVArrLike)                              \
+    TAG(OptVecLike)                               \
     TAG(SArr)                                     \
     TAG(OptSArr)                                  \
     TAG(Arr)                                      \

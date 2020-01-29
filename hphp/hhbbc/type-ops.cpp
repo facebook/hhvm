@@ -231,16 +231,8 @@ Type typeSetOp(SetOpOp op, Type lhs, Type rhs) {
 //////////////////////////////////////////////////////////////////////
 
 Type typeSame(const Type& a, const Type& b) {
-  auto const nsa = loosen_string_like(loosen_provenance(loosen_dvarrayness(a)));
-  auto const nsb = loosen_string_like(loosen_provenance(loosen_dvarrayness(b)));
-  if (nsa.couldBe(BClsMeth) &&
-      nsb.couldBe(RuntimeOption::EvalHackArrDVArrs ? BVec : BVArr)) {
-    return TBool;
-  }
-  if (nsb.couldBe(BClsMeth) &&
-      nsa.couldBe(RuntimeOption::EvalHackArrDVArrs ? BVec : BVArr)) {
-    return TBool;
-  }
+  auto const nsa = loosen_likeness(loosen_provenance(loosen_dvarrayness(a)));
+  auto const nsb = loosen_likeness(loosen_provenance(loosen_dvarrayness(b)));
   if (!nsa.couldBe(nsb)) return TFalse;
   return TBool;
 }

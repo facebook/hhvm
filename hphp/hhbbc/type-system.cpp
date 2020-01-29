@@ -119,6 +119,10 @@ bool mayHaveData(trep bits) {
   case BOptCDictE: case BOptSDictE: case BOptDictE:
     return true;
 
+  case BVArrLike: case BVecLike: case BOptVArrLike: case BOptVecLike:
+  case BPArrLike: case BOptPArrLike:
+    return true;
+
   case BBottom:
   case BUninit:
   case BInitNull:
@@ -235,6 +239,9 @@ bool canBeOptional(trep bits) {
   case BArrKey:
   case BUncStrLike:
   case BStrLike:
+  case BPArrLike:
+  case BVArrLike:
+  case BVecLike:
   case BSArr:
   case BArrE:
   case BArrN:
@@ -309,6 +316,9 @@ bool canBeOptional(trep bits) {
   case BOptArrKey:
   case BOptUncStrLike:
   case BOptStrLike:
+  case BOptPArrLike:
+  case BOptVArrLike:
+  case BOptVecLike:
   case BOptFunc:
   case BOptCls:
   case BOptClsMeth:
@@ -3717,6 +3727,7 @@ folly::Optional<size_t> array_size(const Type& t) {
 }
 
 Type type_of_istype(IsTypeOp op) {
+  using RO = RuntimeOption;
   switch (op) {
   case IsTypeOp::Null:   return TNull;
   case IsTypeOp::Bool:   return TBool;
@@ -3724,16 +3735,20 @@ Type type_of_istype(IsTypeOp op) {
   case IsTypeOp::Dbl:    return TDbl;
   case IsTypeOp::Str:    return TStrLike;
   case IsTypeOp::Res:    return TRes;
-  case IsTypeOp::Arr:    return TArr;
-  case IsTypeOp::Vec:    return TVec;
+  case IsTypeOp::Arr:
+    return !RO::EvalHackArrDVArrs && RO::EvalIsCompatibleClsMethType
+      ? TPArrLike : TArr;
+  case IsTypeOp::Vec:
+    return RO::EvalHackArrDVArrs && RO::EvalIsCompatibleClsMethType
+      ? TVecLike : TVec;
   case IsTypeOp::Dict:   return TDict;
   case IsTypeOp::Keyset: return TKeyset;
   case IsTypeOp::Obj:    return TObj;
   case IsTypeOp::VArray:
-    assertx(!RuntimeOption::EvalHackArrDVArrs);
-    return TVArr;
+    assertx(!RO::EvalHackArrDVArrs);
+    return RO::EvalIsCompatibleClsMethType ? TVArrLike : TVArr;
   case IsTypeOp::DArray:
-    assertx(!RuntimeOption::EvalHackArrDVArrs);
+    assertx(!RO::EvalHackArrDVArrs);
     return TDArr;
   case IsTypeOp::ClsMeth: return TClsMeth;
   case IsTypeOp::Func: return TFunc;
@@ -3790,6 +3805,9 @@ folly::Optional<Type> type_of_type_structure(const Index& index,
     case TypeStructure::Kind::T_dict:
       return is_nullable ? TOptDict : TDict;
     case TypeStructure::Kind::T_vec:
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        return is_nullable ? TOptVecLike : TVecLike;
+      }
       return is_nullable ? TOptVec : TVec;
     case TypeStructure::Kind::T_keyset:
       return is_nullable ? TOptKeyset : TKeyset;
@@ -4381,11 +4399,16 @@ Type union_of(Type a, Type b) {
   Y(UncArrKey)
   Y(ArrKey)
 
+  Y(ClsMeth)
+  Y(Func)
+
   Y(UncStrLike)
   Y(StrLike)
 
-  Y(ClsMeth)
-  Y(Func)
+  Y(VecLike)
+  Y(VArrLike)
+
+  Y(PArrLike)
 
   // non-optional types that contain other types above (and hence
   // must come after them).
@@ -4758,7 +4781,15 @@ Type loosen_emptiness(Type t) {
   return project_data(t, t.m_bits);
 }
 
-Type loosen_string_like(Type t) {
+Type loosen_likeness(Type t) {
+  if (RuntimeOption::EvalIsCompatibleClsMethType && t.couldBe(BClsMeth)) {
+    if (!RuntimeOption::EvalHackArrDVArrs) {
+      t = union_of(std::move(t), TVArrLike);
+    } else {
+      t = union_of(std::move(t), TVecLike);
+    }
+  }
+
   if (t.couldBe(BFunc | BCls)) t = union_of(std::move(t), TUncStrLike);
 
   switch (t.m_dataTag) {
@@ -4776,38 +4807,38 @@ Type loosen_string_like(Type t) {
   case DataTag::Obj:
     if (t.m_data.dobj.whType) {
       auto whType = t.m_data.dobj.whType.mutate();
-      *whType = loosen_string_like(std::move(*whType));
+      *whType = loosen_likeness(std::move(*whType));
     }
     break;
 
   case DataTag::ArrLikePacked: {
     auto& packed = *t.m_data.packed.mutate();
     for (auto& e : packed.elems) {
-      e = loosen_string_like(std::move(e));
+      e = loosen_likeness(std::move(e));
     }
     break;
   }
 
   case DataTag::ArrLikePackedN: {
     auto& packed = *t.m_data.packedn.mutate();
-    packed.type = loosen_string_like(std::move(packed.type));
+    packed.type = loosen_likeness(std::move(packed.type));
     break;
   }
 
   case DataTag::ArrLikeMap: {
     auto& map = *t.m_data.map.mutate();
     for (auto it = map.map.begin(); it != map.map.end(); it++) {
-      map.map.update(it, loosen_string_like(it->second));
+      map.map.update(it, loosen_likeness(it->second));
     }
-    map.optKey = loosen_string_like(std::move(map.optKey));
-    map.optVal = loosen_string_like(std::move(map.optVal));
+    map.optKey = loosen_likeness(std::move(map.optKey));
+    map.optVal = loosen_likeness(std::move(map.optVal));
     break;
   }
 
   case DataTag::ArrLikeMapN: {
     auto& map = *t.m_data.mapn.mutate();
-    map.key = loosen_string_like(std::move(map.key));
-    map.val = loosen_string_like(std::move(map.val));
+    map.key = loosen_likeness(std::move(map.key));
+    map.val = loosen_likeness(std::move(map.val));
     break;
   }
   }
@@ -4819,7 +4850,7 @@ Type loosen_all(Type t) {
     loosen_staticness(
       loosen_emptiness(
         loosen_values(
-          loosen_string_like(std::move(t))
+          loosen_likeness(std::move(t))
         )
       )
     )
@@ -6025,18 +6056,18 @@ bool is_type_might_raise(const Type& testTy, const Type& valTy) {
   if (is_opt(testTy)) return is_type_might_raise(unopt(testTy), valTy);
   if (testTy == TStrLike) {
     return valTy.couldBe(BFunc | BCls);
-  } else if (testTy == TArr) {
+  } else if (testTy == TArr || testTy == TPArrLike) {
     return mayLogProv ||
            (RO::EvalIsVecNotices && !hackarr && valTy.couldBe(BClsMeth)) ||
            (RO::EvalHackArrCompatIsArrayNotices && valTy.couldBe(BHackArr));
-  } else if (testTy == TVArr) {
+  } else if (testTy == TVArr || testTy == TVArrLike) {
     return mayLogProv ||
            (RO::EvalIsVecNotices && valTy.couldBe(BClsMeth)) ||
            (RO::EvalHackArrCompatIsVecDictNotices && valTy.couldBe(BVec));
   } else if (testTy == TDArr) {
     return mayLogProv ||
            (RO::EvalHackArrCompatIsVecDictNotices && valTy.couldBe(BDict));
-  } else if (testTy == TVec) {
+  } else if (testTy == TVec || testTy == TVecLike) {
     return mayLogProv ||
            (RO::EvalIsVecNotices && hackarr && valTy.couldBe(BClsMeth)) ||
            (RO::EvalHackArrCompatIsVecDictNotices && valTy.couldBe(BVec));
@@ -6485,6 +6516,12 @@ RepoAuthType make_repo_type(ArrayTypeTable::Builder& arrTable, const Type& t) {
   X(StrLike)
   X(OptUncStrLike)
   X(OptStrLike)
+  X(VArrLike)
+  X(VecLike)
+  X(OptVArrLike)
+  X(OptVecLike)
+  X(PArrLike)
+  X(OptPArrLike)
   X(InitUnc)
   X(Unc)
   X(InitCell)

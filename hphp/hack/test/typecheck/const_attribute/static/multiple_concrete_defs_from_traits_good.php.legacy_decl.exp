@@ -1,0 +1,30 @@
+File "multiple_concrete_defs_from_traits_good.php", line 16, characters 7-7:
+Class C does not correctly implement all required members  (Typing[4340])
+File "multiple_concrete_defs_from_traits_good.php", line 17, characters 7-8:
+Some members are incompatible with those declared in type T1
+Read the following to see why:
+File "multiple_concrete_defs_from_traits_good.php", line 13, characters 29-31:
+Member $p has the wrong type
+File "multiple_concrete_defs_from_traits_good.php", line 13, characters 29-31:
+T3 and T1 both declare ambiguous implementations of $p.
+File "multiple_concrete_defs_from_traits_good.php", line 13, characters 29-31:
+T3's definition is here.
+File "multiple_concrete_defs_from_traits_good.php", line 5, characters 29-31:
+T1's definition is here.
+File "multiple_concrete_defs_from_traits_good.php", line 13, characters 29-31:
+Redeclare $p in C with a compatible signature.
+File "multiple_concrete_defs_from_traits_good.php", line 16, characters 7-7:
+Class C does not correctly implement all required members  (Typing[4340])
+File "multiple_concrete_defs_from_traits_good.php", line 17, characters 11-12:
+Some members are incompatible with those declared in type T2
+Read the following to see why:
+File "multiple_concrete_defs_from_traits_good.php", line 13, characters 29-31:
+Member $p has the wrong type
+File "multiple_concrete_defs_from_traits_good.php", line 13, characters 29-31:
+T3 and T2 both declare ambiguous implementations of $p.
+File "multiple_concrete_defs_from_traits_good.php", line 13, characters 29-31:
+T3's definition is here.
+File "multiple_concrete_defs_from_traits_good.php", line 9, characters 29-31:
+T2's definition is here.
+File "multiple_concrete_defs_from_traits_good.php", line 13, characters 29-31:
+Redeclare $p in C with a compatible signature.

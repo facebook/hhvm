@@ -3,9 +3,9 @@ Class C does not correctly implement all required members  (Typing[4340])
 File "abstract_inherits_from_traits.php", line 13, characters 7-7:
 Some members are incompatible with those declared in type A
 Read the following to see why:
-File "abstract_inherits_from_traits.php", line 9, characters 38-40:
+File "abstract_inherits_from_traits.php", line 9, characters 42-43:
 Member $p has the wrong type
-File "abstract_inherits_from_traits.php", line 9, characters 38-40:
+File "abstract_inherits_from_traits.php", line 9, characters 42-43:
 Typing error
 File "abstract_inherits_from_traits.php", line 5, characters 38-40:
 Expected int

@@ -1,4 +1,4 @@
-File "redeclare_to_const_in_trait.php", line 4, characters 21-23:
+File "redeclare_to_const_in_trait.php", line 4, characters 25-26:
 This property is not __Const (Typing[4204])
-File "redeclare_to_const_in_trait.php", line 5, characters 30-32:
+File "redeclare_to_const_in_trait.php", line 5, characters 34-35:
 This property is __Const

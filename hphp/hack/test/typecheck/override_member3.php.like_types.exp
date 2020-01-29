@@ -1,0 +1,4 @@
+File "override_member3.php", line 17, characters 10-13:
+Member x has the wrong type (Typing[4341])
+File "override_member3.php", line 13, characters 10-11:
+When redeclaring class members, both declarations must have a typehint

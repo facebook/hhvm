@@ -65,10 +65,8 @@ let check_visibility parent_vis c_vis parent_pos pos on_error =
 let check_class_elt_visibility parent_class_elt class_elt on_error =
   let parent_vis = parent_class_elt.ce_visibility in
   let c_vis = class_elt.ce_visibility in
-  let (lazy parent_ty) = parent_class_elt.ce_type in
-  let (lazy elt_ty) = class_elt.ce_type in
-  let parent_pos = get_pos parent_ty in
-  let pos = get_pos elt_ty in
+  let (lazy parent_pos) = parent_class_elt.ce_pos in
+  let (lazy pos) = class_elt.ce_pos in
   check_visibility parent_vis c_vis parent_pos pos on_error
 
 (* Check that all the required members are implemented *)
@@ -86,8 +84,7 @@ let check_members_implemented
          * trait *)
         ()
       | _ when Option.is_none (get_member member_name) ->
-        let (lazy ty) = class_elt.ce_type in
-        let defn_pos = get_pos ty in
+        let (lazy defn_pos) = class_elt.ce_pos in
         Errors.member_not_implemented member_name parent_reason reason defn_pos
       | _ -> ())
 
@@ -143,10 +140,8 @@ let check_final_method member_source parent_class_elt class_elt =
   in
   if is_method && is_override && not class_elt.ce_synthesized then
     (* we have a final method being overridden by a user-declared method *)
-    let (lazy parent_ty) = parent_class_elt.ce_type in
-    let (lazy elt_ty) = class_elt.ce_type in
-    let parent_pos = get_pos parent_ty in
-    let pos = get_pos elt_ty in
+    let (lazy parent_pos) = parent_class_elt.ce_pos in
+    let (lazy pos) = class_elt.ce_pos in
     Errors.override_final parent_pos pos
 
 let check_memoizelsb_method member_source parent_class_elt class_elt =
@@ -163,10 +158,8 @@ let check_memoizelsb_method member_source parent_class_elt class_elt =
   in
   if is_method && is_memoizelsb && is_override then
     (* we have a __MemoizeLSB method which is overriding something else *)
-    let (lazy parent_ty) = parent_class_elt.ce_type in
-    let (lazy elt_ty) = class_elt.ce_type in
-    let parent_pos = get_pos parent_ty in
-    let pos = get_pos elt_ty in
+    let (lazy parent_pos) = parent_class_elt.ce_pos in
+    let (lazy pos) = class_elt.ce_pos in
     Errors.override_memoizelsb parent_pos pos
 
 let check_lsb_overrides member_source member_name parent_class_elt class_elt =
@@ -181,10 +174,8 @@ let check_lsb_overrides member_source member_name parent_class_elt class_elt =
   in
   if is_sprop && parent_is_lsb && is_override then
     (* __LSB attribute is being overridden *)
-    let (lazy parent_ty) = parent_class_elt.ce_type in
-    let (lazy elt_ty) = class_elt.ce_type in
-    let parent_pos = get_pos parent_ty in
-    let pos = get_pos elt_ty in
+    let (lazy parent_pos) = parent_class_elt.ce_pos in
+    let (lazy pos) = class_elt.ce_pos in
     Errors.override_lsb member_name parent_pos pos
 
 let check_lateinit parent_class_elt class_elt =
@@ -195,10 +186,8 @@ let check_lateinit parent_class_elt class_elt =
     Bool.( <> ) parent_class_elt.ce_lateinit class_elt.ce_lateinit
   in
   if is_override && lateinit_diff then
-    let (lazy parent_ty) = parent_class_elt.ce_type in
-    let (lazy child_ty) = class_elt.ce_type in
-    let parent_pos = get_pos parent_ty in
-    let child_pos = get_pos child_ty in
+    let (lazy parent_pos) = parent_class_elt.ce_pos in
+    let (lazy child_pos) = class_elt.ce_pos in
     Errors.bad_lateinit_override
       parent_class_elt.ce_lateinit
       parent_pos
@@ -221,10 +210,8 @@ let check_xhp_attr_required env parent_class_elt class_elt on_error =
     match (parent_attr, attr) with
     | (Some { xa_tag = parent_tag; _ }, Some { xa_tag = tag; _ })
       when is_less_strict (tag, parent_tag) ->
-      let (lazy parent_ty) = parent_class_elt.ce_type in
-      let (lazy child_ty) = class_elt.ce_type in
-      let parent_pos = get_pos parent_ty in
-      let child_pos = get_pos child_ty in
+      let (lazy parent_pos) = parent_class_elt.ce_pos in
+      let (lazy child_pos) = class_elt.ce_pos in
       let show = function
         | None -> "not required or lateinit"
         | Some Required -> "required"
@@ -269,10 +256,8 @@ let check_override
   check_xhp_attr_required env parent_class_elt class_elt on_error;
   let check_params = should_check_params parent_class class_ in
   check_class_elt_visibility parent_class_elt class_elt on_error;
-  let (lazy fty_child) = class_elt.ce_type in
-  let (lazy fty_parent) = parent_class_elt.ce_type in
-  let pos = get_pos fty_child in
-  let parent_pos = get_pos fty_parent in
+  let (lazy pos) = class_elt.ce_pos in
+  let (lazy parent_pos) = parent_class_elt.ce_pos in
   if Bool.( <> ) class_elt.ce_const parent_class_elt.ce_const then
     Errors.overriding_prop_const_mismatch
       parent_pos
@@ -296,6 +281,8 @@ let check_override
     let on_error ?code:_ errorl =
       Errors.bad_method_override pos member_name errorl on_error
     in
+    let (lazy fty_child) = class_elt.ce_type in
+    let (lazy fty_parent) = parent_class_elt.ce_type in
     match (deref fty_parent, deref fty_child) with
     | ((r_parent, Tfun ft_parent), (r_child, Tfun ft_child)) ->
       let is_static = Cls.has_smethod parent_class member_name in
@@ -419,7 +406,7 @@ let check_const_override
       && not parent_class_const.cc_abstract
     | _ -> false
   in
-  ( if check_params then
+  if check_params then
     if member_not_unique then
       Errors.multiple_concrete_defs
         class_const.cc_pos
@@ -430,9 +417,10 @@ let check_const_override
         (Cls.name class_)
         on_error
     else if (not parent_class_const.cc_abstract) && class_const.cc_abstract then
-      let pos = get_pos class_const.cc_type in
-      let parent_pos = get_pos parent_class_const.cc_type in
-      Errors.abstract_concrete_override pos parent_pos `constant );
+      Errors.abstract_concrete_override
+        class_const.cc_pos
+        parent_class_const.cc_pos
+        `constant;
   Phase.sub_type_decl
     env
     class_const.cc_type
@@ -608,8 +596,8 @@ let check_constructors
     match (fst (Cls.construct parent_class), fst (Cls.construct class_)) with
     | (Some parent_cstr, _) when parent_cstr.ce_synthesized -> env
     | (Some parent_cstr, None) ->
-      let (lazy ty) = parent_cstr.ce_type in
-      Errors.missing_constructor (get_pos ty) on_error;
+      let (lazy pos) = parent_cstr.ce_pos in
+      Errors.missing_constructor pos on_error;
       env
     | (_, Some cstr) when cstr.ce_override ->
       (* <<__UNSAFE_Construct>> *)
@@ -839,10 +827,9 @@ let check_consts env parent_class class_ psubst subst on_error =
               on_error
           | Some _ -> ())
         | None ->
-          let parent_pos = get_pos parent_const.cc_type in
           Errors.member_not_implemented
             const_name
-            parent_pos
+            parent_const.cc_pos
             (Cls.pos class_)
             (Cls.pos parent_class));
   ()
@@ -889,12 +876,10 @@ let check_class_implements
 (*****************************************************************************)
 
 let check_implements env removals parent_type type_to_be_checked =
-  Env.log_env_change "check_implements" env
-  @@
-  let (parent_r, parent_name, parent_tparaml) =
-    TUtils.unwrap_class_type parent_type
-  in
-  let (r, name, tparaml) = TUtils.unwrap_class_type type_to_be_checked in
+  let (_, parent_name, parent_tparaml) = TUtils.unwrap_class_type parent_type in
+  let (_, name, tparaml) = TUtils.unwrap_class_type type_to_be_checked in
+  let (name_pos, name_str) = name in
+  let (parent_name_pos, parent_name_str) = parent_name in
   let parent_class = Env.get_class env (snd parent_name) in
   let class_ = Env.get_class env (snd name) in
   match (parent_class, class_) with
@@ -902,24 +887,22 @@ let check_implements env removals parent_type type_to_be_checked =
   | (_, None) ->
     env
   | (Some parent_class, Some class_) ->
-    let parent_class = (Reason.to_pos parent_r, parent_class, parent_tparaml) in
-    let class_ = (Reason.to_pos r, class_, tparaml) in
+    let parent_class = (parent_name_pos, parent_class, parent_tparaml) in
+    let class_ = (name_pos, class_, tparaml) in
     check_class_implements
       env
       removals
       (parent_class, parent_type)
       (class_, type_to_be_checked)
       (fun ?code:_ errorl ->
-        let (name_pos, name_str) = name in
-        let (p_name_pos, p_name_str) = parent_name in
         (* sadly, enum error reporting requires this to keep the error in the file
            with the enum *)
-        if String.equal (snd parent_name) SN.Classes.cHH_BuiltinEnum then
+        if String.equal parent_name_str SN.Classes.cHH_BuiltinEnum then
           Errors.bad_enum_decl name_pos errorl
         else
           Errors.bad_decl_override
-            p_name_pos
-            p_name_str
+            parent_name_pos
+            parent_name_str
             name_pos
             name_str
             errorl)

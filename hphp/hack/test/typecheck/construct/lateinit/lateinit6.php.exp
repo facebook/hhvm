@@ -3,7 +3,7 @@ Class D does not initialize all of its members; foo is not always initialized.
 Make sure you systematically set $this->foo when the method __construct is called.
 Alternatively, you can define the member as optional (?...)
  (NastCheck[3015])
-File "lateinit6.php", line 9, characters 10-12:
+File "lateinit6.php", line 9, characters 14-17:
 Redeclared properties must be consistently declared __LateInit (Typing[4282])
-File "lateinit6.php", line 4, characters 10-12:
+File "lateinit6.php", line 4, characters 14-17:
 The property is not declared __LateInit here

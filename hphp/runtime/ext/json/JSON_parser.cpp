@@ -342,7 +342,7 @@ struct SimpleParser {
                        JSONContainerType container_type, bool is_tsimplejson) {
     SimpleParser parser(inp, length, buf, container_type, is_tsimplejson);
     bool ok = parser.parseValue();
-    parser.skipSpace();
+    if (ok) parser.skipSpace();
     if (!ok || parser.p != inp + length) {
       // Unsupported, malformed, or trailing garbage. Release entire stack.
       tvDecRefRange(buf, parser.top);

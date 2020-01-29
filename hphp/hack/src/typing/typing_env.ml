@@ -114,7 +114,8 @@ let is_global_tyvar env var =
 
 let empty_bounds = TySet.empty
 
-let tyvar_is_solved env var = Inf.tyvar_is_solved env.inference_env var
+let tyvar_is_solved_or_skip_global env var =
+  Inf.tyvar_is_solved_or_skip_global env.inference_env var
 
 let make_tyvar_no_more_occur_in_tyvar env v ~no_more_in:v' =
   wrap_inference_env_call_env env (fun env ->
@@ -897,6 +898,13 @@ let get_mode env = env.decl_env.mode
 let is_strict env = FileInfo.is_strict (get_mode env)
 
 let is_decl env = FileInfo.(equal_mode (get_mode env) Mdecl)
+
+let get_allow_solve_globals env =
+  wrap_inference_env_call_res env Inf.get_allow_solve_globals
+
+let set_allow_solve_globals env flag =
+  wrap_inference_env_call_env env (fun env ->
+      Inf.set_allow_solve_globals env flag)
 
 let iter_anonymous env f =
   IMap.iter

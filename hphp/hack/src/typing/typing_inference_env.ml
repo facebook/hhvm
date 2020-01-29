@@ -69,6 +69,7 @@ type t = {
   tyvars_stack: (Pos.t * Ident.t list) list;
   subtype_prop: Typing_logic.subtype_prop;
   tyvar_occurrences: Typing_tyvar_occurrences.t;
+  allow_solve_globals: bool;
 }
 
 type global_tyvar_info = {
@@ -139,13 +140,22 @@ module Log = struct
            List (List.map l (fun i -> Atom (var_as_string i)))))
 
   let inference_env_as_value env =
-    let { tvenv; tyvars_stack; subtype_prop; tyvar_occurrences } = env in
+    let {
+      tvenv;
+      tyvars_stack;
+      subtype_prop;
+      tyvar_occurrences;
+      allow_solve_globals;
+    } =
+      env
+    in
     make_map
       [
         ("tvenv", tvenv_as_value tvenv);
         ("tyvars_stack", tyvars_stack_as_value tyvars_stack);
         ("subtype_prop", subtype_prop_as_value subtype_prop);
         ("tyvar_occurrences", Occ.Log.as_value tyvar_occurrences);
+        ("allow_solve_globals", bool_as_value allow_solve_globals);
       ]
 
   let global_tyvar_info_as_value tvinfo =
@@ -228,6 +238,7 @@ let empty_inference_env =
     tyvars_stack = [];
     subtype_prop = TL.valid;
     tyvar_occurrences = Occ.init;
+    allow_solve_globals = false;
   }
 
 let empty_tyvar_constraints =
@@ -247,6 +258,10 @@ let empty_tyvar_info pos =
     eager_solve_failed = false;
     solving_info = TVIConstraints empty_tyvar_constraints;
   }
+
+let get_allow_solve_globals env = env.allow_solve_globals
+
+let set_allow_solve_globals env flag = { env with allow_solve_globals = flag }
 
 let get_tyvar_info_opt env v = IMap.find_opt v env.tvenv
 
@@ -276,6 +291,11 @@ let get_tyvars_in_tyvar env = Occ.get_tyvars_in_tyvar env.tyvar_occurrences
 let contains_unsolved_tyvars env =
   Occ.contains_unsolved_tyvars env.tyvar_occurrences
 
+let is_global_tyvar env v =
+  match get_tyvar_info_opt env v with
+  | None -> false
+  | Some tvinfo -> tvinfo.is_global
+
 let tyvar_is_solved env var =
   match get_solving_info_opt env var with
   | None -> false
@@ -283,6 +303,10 @@ let tyvar_is_solved env var =
     (match sinfo with
     | TVIConstraints _ -> false
     | TVIType _ -> true)
+
+let tyvar_is_solved_or_skip_global env var =
+  tyvar_is_solved env var
+  || ((not (get_allow_solve_globals env)) && is_global_tyvar env var)
 
 (** Get type variables in a type that are either unsolved or
 solved to a type that itself contains unsolved type variables. *)
@@ -436,11 +460,6 @@ let wrap_ty_in_var env r ty =
   let env = set_tyvar_info env v tvinfo in
   let env = update_tyvar_occurrences env v ty in
   (env, mk (r, Tvar v))
-
-let is_global_tyvar env v =
-  match get_tyvar_info_opt env v with
-  | None -> false
-  | Some tvinfo -> tvinfo.is_global
 
 let open_tyvars env p = { env with tyvars_stack = (p, []) :: env.tyvars_stack }
 
@@ -853,7 +872,13 @@ module Size = struct
       ubound_size + lbound_size + tconst_size + pu_accesses_size
 
   let inference_env_size env =
-    let { tvenv; subtype_prop = _; tyvars_stack = _; tyvar_occurrences = _ } =
+    let {
+      tvenv;
+      subtype_prop = _;
+      tyvars_stack = _;
+      tyvar_occurrences = _;
+      allow_solve_globals = _;
+    } =
       env
     in
     IMap.map (tyvar_info_size env) tvenv |> fun m ->
@@ -866,6 +891,7 @@ let simple_merge env1 env2 =
     subtype_prop = subtype_prop1;
     tyvars_stack = tyvars_stack1;
     tyvar_occurrences = tyvar_occurrences1;
+    allow_solve_globals = allow_solve_globals1;
   } =
     env1
   in
@@ -874,6 +900,7 @@ let simple_merge env1 env2 =
     subtype_prop = _;
     tyvars_stack = _;
     tyvar_occurrences = _;
+    allow_solve_globals = _;
   } =
     env2
   in
@@ -930,6 +957,7 @@ let simple_merge env1 env2 =
     subtype_prop = subtype_prop1;
     tyvars_stack = tyvars_stack1;
     tyvar_occurrences = tyvar_occurrences1;
+    allow_solve_globals = allow_solve_globals1;
   }
 
 let get_nongraph_subtype_prop env = env.subtype_prop
@@ -981,9 +1009,17 @@ let global_tyvar_info_carries_information tvinfo =
   solving_info_carries_information solving_info
 
 let compress env =
-  let { tvenv; subtype_prop; tyvars_stack; tyvar_occurrences } = env in
+  let {
+    tvenv;
+    subtype_prop;
+    tyvars_stack;
+    tyvar_occurrences;
+    allow_solve_globals;
+  } =
+    env
+  in
   let tvenv = IMap.filter (fun _k -> tyvar_info_carries_information) tvenv in
-  { tvenv; subtype_prop; tyvars_stack; tyvar_occurrences }
+  { tvenv; subtype_prop; tyvars_stack; tyvar_occurrences; allow_solve_globals }
 
 let compress_g genv =
   IMap.filter (fun _ -> global_tyvar_info_carries_information) genv
@@ -1209,9 +1245,17 @@ let remove_var env var ~search_in_upper_bounds_of ~search_in_lower_bounds_of =
       ~search_in_lower_bounds_of
   in
   let (env, ty) = expand_var env Reason.none var in
-  let { tvenv; tyvars_stack; tyvar_occurrences; subtype_prop } = env in
+  let {
+    tvenv;
+    tyvars_stack;
+    tyvar_occurrences;
+    subtype_prop;
+    allow_solve_globals;
+  } =
+    env
+  in
   let tyvar_occurrences = Occ.remove_var tyvar_occurrences var in
   let tvenv = IMap.remove var tvenv in
   let tyvars_stack = remove_var_from_tyvars_stack tyvars_stack var in
   let subtype_prop = replace_var_by_ty_in_prop subtype_prop var ty in
-  { tvenv; tyvars_stack; tyvar_occurrences; subtype_prop }
+  { tvenv; tyvars_stack; tyvar_occurrences; subtype_prop; allow_solve_globals }

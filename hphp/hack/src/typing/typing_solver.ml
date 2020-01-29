@@ -511,7 +511,7 @@ let union_any_if_any_in_lower_bounds env ty lower_bounds =
   (env, ty)
 
 let try_bind_to_equal_bound ~freshen env r var on_error =
-  if Env.tyvar_is_solved env var then
+  if Env.tyvar_is_solved_or_skip_global env var then
     env
   else
     Env.log_env_change "bind_to_equal_bound" env
@@ -543,7 +543,7 @@ let try_bind_to_equal_bound ~freshen env r var on_error =
           (fun upper_bound env ->
             ITySet.fold
               (fun lower_bound env ->
-                if Env.tyvar_is_solved env var then
+                if Env.tyvar_is_solved_or_skip_global env var then
                   let (env, ty) = Env.expand_var env r var in
                   let ty = LoclType ty in
                   let env =
@@ -584,7 +584,7 @@ the operation which we eagerly solved for in the first place.
 let rec always_solve_tyvar_down ~freshen env r var on_error =
   (* If there is a type that is both a lower and upper bound, force to that type *)
   let env = try_bind_to_equal_bound ~freshen env r var on_error in
-  if Env.tyvar_is_solved env var then
+  if Env.tyvar_is_solved_or_skip_global env var then
     env
   else
     let r =
@@ -618,7 +618,7 @@ let rec always_solve_tyvar_down ~freshen env r var on_error =
  *   us to set v := ti.
  *)
 let solve_tyvar_wrt_variance env r var on_error =
-  if Env.tyvar_is_solved env var then
+  if Env.tyvar_is_solved_or_skip_global env var then
     env
   else
     let r =
@@ -701,12 +701,18 @@ let solve_all_unsolved_tyvars env on_error =
   env
 
 let solve_all_unsolved_tyvars_gi env make_on_error =
-  List.fold (Env.get_all_tyvars env) ~init:env ~f:(fun env tyvar ->
-      always_solve_tyvar_wrt_variance_or_down
-        env
-        Reason.Rnone
-        tyvar
-        ~on_error:(make_on_error tyvar))
+  let old_allow_solve_globals = Env.get_allow_solve_globals env in
+  let env = Env.set_allow_solve_globals env true in
+  let env =
+    List.fold (Env.get_all_tyvars env) ~init:env ~f:(fun env tyvar ->
+        always_solve_tyvar_wrt_variance_or_down
+          env
+          Reason.Rnone
+          tyvar
+          ~on_error:(make_on_error tyvar))
+  in
+  let env = Env.set_allow_solve_globals env old_allow_solve_globals in
+  env
 
 let unsolved_invariant_tyvars_under_union_and_intersection env ty =
   let rec find_tyvars (env, tyvars) ty =

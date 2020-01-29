@@ -39,6 +39,10 @@ val pp : Format.formatter -> t -> unit
 
 val empty_inference_env : t
 
+val get_allow_solve_globals : t -> bool
+
+val set_allow_solve_globals : t -> bool -> t
+
 val fresh_type : ?variance:Ast_defs.variance -> t -> Pos.t -> t * locl_ty
 
 (** Same as fresh_type but takes a specific reason as parameter. *)
@@ -53,7 +57,7 @@ val get_current_tyvars : t -> Ident.t list
 
 val close_tyvars : t -> t
 
-val tyvar_is_solved : t -> Ident.t -> bool
+val tyvar_is_solved_or_skip_global : t -> Ident.t -> bool
 
 val tyvar_occurs_in_tyvar : t -> Ident.t -> in_:Ident.t -> bool
 

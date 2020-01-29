@@ -32,6 +32,7 @@ type predicate =
   | DeclarationLocation
   | FileXRefs
   | InterfaceDeclaration
+  | InterfaceDefinition
   | TraitDeclaration
 
 type container_type =
@@ -45,6 +46,7 @@ type glean_json = {
   declarationLocation: json list;
   fileXRefs: json list;
   interfaceDeclaration: json list;
+  interfaceDefinition: json list;
   traitDeclaration: json list;
 }
 
@@ -62,6 +64,7 @@ let init_progress =
       declarationLocation = [];
       fileXRefs = [];
       interfaceDeclaration = [];
+      interfaceDefinition = [];
       traitDeclaration = [];
     }
   in
@@ -111,6 +114,11 @@ let update_json_data predicate json progress =
       {
         progress.resultJson with
         interfaceDeclaration = json :: progress.resultJson.interfaceDeclaration;
+      }
+    | InterfaceDefinition ->
+      {
+        progress.resultJson with
+        interfaceDefinition = json :: progress.resultJson.interfaceDefinition;
       }
     | TraitDeclaration ->
       {
@@ -194,9 +202,13 @@ let json_of_container_defn clss decl_id progress =
     in
     let (_, _, progress) = glean_json ClassDefinition json_fact progress in
     progress
-  | _ ->
-    (* TODO: implement other container definitions *)
+  | InterfaceContainer ->
+    let json_fact =
+      JSON_Object [("declaration", JSON_Number (string_of_int decl_id))]
+    in
+    let (_, _, progress) = glean_json InterfaceDefinition json_fact progress in
     progress
+  | _ -> progress
 
 let json_of_container_decl (container_type, decl_pred) _ctx name _elem progress
     =
@@ -362,6 +374,7 @@ let build_json ctx symbols =
     [
       ("hack.FileXRefs.1", progress.resultJson.fileXRefs);
       ("hack.ClassDefinition.1", progress.resultJson.classDefinition);
+      ("hack.InterfaceDefinition.1", progress.resultJson.interfaceDefinition);
       ("hack.DeclarationLocation.1", progress.resultJson.declarationLocation);
       ("hack.ClassDeclaration.1", progress.resultJson.classDeclaration);
       ("hack.TraitDeclaration.1", progress.resultJson.traitDeclaration);

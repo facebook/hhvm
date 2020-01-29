@@ -56,6 +56,7 @@ max_workers = 2
             "hack.DeclarationLocation.1": ["declaration", "file", "span"],
             "hack.FileXRefs.1": ["file", "xrefs"],
             "hack.InterfaceDeclaration.1": ["name"],
+            "hack.InterfaceDefinition.1": ["declaration"],
             "hack.TraitDeclaration.1": ["name"],
             "name": ["key"],
             "declaration": ["container", int],
@@ -81,6 +82,7 @@ max_workers = 2
             "hack.DeclarationLocation.1",
             "hack.FileXRefs.1",
             "hack.InterfaceDeclaration.1",
+            "hack.InterfaceDefinition.1",
             "hack.TraitDeclaration.1",
         ]
 

@@ -1764,8 +1764,8 @@ and expr_
    * Given a list of types, computes their supertype. If any of the types are
    * unknown (e.g., comes from PHP), the supertype will be Typing_utils.tany env.
    *)
-  let compute_supertype ~(expected : ExpectedTy.t option) ~reason r env tys =
-    let p = Reason.to_pos r in
+  let compute_supertype
+      ~(expected : ExpectedTy.t option) ~reason ~use_pos r env tys =
     let (env, supertype) =
       match expected with
       | None -> Env.fresh_type_reason env r
@@ -1776,7 +1776,7 @@ and expr_
     | Tany _ -> (env, supertype)
     | _ ->
       let subtype_value env ty =
-        Type.sub_type p reason env ty supertype Errors.unify_error
+        Type.sub_type use_pos reason env ty supertype Errors.unify_error
       in
       let env = List.fold_left tys ~init:env ~f:subtype_value in
       if
@@ -1785,7 +1785,7 @@ and expr_
       then
         (* If one of the values comes from PHP land, we have to be conservative
          * and consider that we don't know what the type of the values are. *)
-        (env, mk (Reason.Rwitness p, Typing_utils.tany env))
+        (env, mk (Reason.Rwitness use_pos, Typing_utils.tany env))
       else
         (env, supertype)
   in
@@ -1797,6 +1797,7 @@ and expr_
   let compute_exprs_and_supertype
       ~(expected : ExpectedTy.t option)
       ?(reason = Reason.URarray_value)
+      ~use_pos
       r
       env
       l
@@ -1805,7 +1806,9 @@ and expr_
       List.map_env env l (extract_expr_and_ty ~expected)
     in
     let (exprs, tys) = List.unzip exprs_and_tys in
-    let (env, supertype) = compute_supertype ~expected ~reason r env tys in
+    let (env, supertype) =
+      compute_supertype ~expected ~reason ~use_pos r env tys
+    in
     (env, exprs, supertype)
   in
   let forget_fake_members env p callexpr =
@@ -1894,6 +1897,7 @@ and expr_
         let (env, tel, value_ty) =
           compute_exprs_and_supertype
             ~expected:elem_expected
+            ~use_pos:p
             (Reason.Rtype_variable_generics (p, "T", "array"))
             env
             l
@@ -1922,6 +1926,7 @@ and expr_
       let (env, _value_exprs, value_ty) =
         compute_exprs_and_supertype
           ~expected:vexpected
+          ~use_pos:p
           (Reason.Rtype_variable_generics (p, "T", "array"))
           env
           l
@@ -1950,6 +1955,7 @@ and expr_
       let (env, key_exprs, key_ty) =
         compute_exprs_and_supertype
           ~expected:kexpected
+          ~use_pos:p
           (Reason.Rtype_variable_generics (p, "Tk", "array"))
           env
           l
@@ -1957,6 +1963,7 @@ and expr_
       in
       let (env, value_exprs, value_ty) =
         compute_exprs_and_supertype
+          ~use_pos:p
           ~expected:vexpected
           (Reason.Rtype_variable_generics (p, "Tv", "array"))
           env
@@ -2026,6 +2033,7 @@ and expr_
     let (env, tel, elem_ty) =
       compute_exprs_and_supertype
         ~expected:elem_expected
+        ~use_pos:p
         ~reason:Reason.URvector
         (Reason.Rtype_variable_generics (p, "T", strip_ns name))
         env
@@ -2080,6 +2088,7 @@ and expr_
     let (env, tkl, k) =
       compute_exprs_and_supertype
         ~expected:kexpected
+        ~use_pos:p
         ~reason:Reason.URkey
         (Reason.Rtype_variable_generics (p, "Tk", strip_ns name))
         env
@@ -2089,6 +2098,7 @@ and expr_
     let (env, tvl, v) =
       compute_exprs_and_supertype
         ~expected:vexpected
+        ~use_pos:p
         ~reason:Reason.URvalue
         (Reason.Rtype_variable_generics (p, "Tv", strip_ns name))
         env
@@ -5740,8 +5750,8 @@ and fun_type_of_id env x tal el =
     let (env, _, ty) = unbound_name env x (Pos.none, Aast.Null) in
     (env, ty, [])
   | Some { fe_type; fe_pos; fe_deprecated; _ } ->
-    (match deref fe_type with
-    | (r, Tfun ft) ->
+    (match get_node fe_type with
+    | Tfun ft ->
       let ft =
         Typing_special_fun.transform_special_fun_ty ft x (List.length el)
       in
@@ -5760,18 +5770,18 @@ and fun_type_of_id env x tal el =
         Typing_enforceability.compute_enforced_and_pessimize_fun_type env ft
       in
       let use_pos = fst x in
+      let def_pos = fe_pos in
       let (env, ft) =
         Phase.(
           localize_ft
             ~instantiation:
               { use_name = strip_ns (snd x); use_pos; explicit_targs = tal }
-            ~def_pos:fe_pos
+            ~def_pos
             ~ety_env
             env
             ft)
       in
       let fty = mk (get_reason fe_type, Tfun ft) in
-      let def_pos = Reason.to_pos r in
       TVis.check_deprecated ~use_pos ~def_pos fe_deprecated;
       (env, fty, tal)
     | _ -> failwith "Expected function type")

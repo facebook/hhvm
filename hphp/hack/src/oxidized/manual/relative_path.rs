@@ -57,6 +57,35 @@ impl Display for Prefix {
     }
 }
 
+struct PrefixPathMap {
+    root: PathBuf,
+    hhi: PathBuf,
+    tmp: PathBuf,
+    dummy: PathBuf,
+}
+
+impl Default for PrefixPathMap {
+    fn default() -> Self {
+        Self {
+            root: PathBuf::new(),
+            hhi: PathBuf::new(),
+            tmp: PathBuf::new(),
+            dummy: PathBuf::new(),
+        }
+    }
+}
+
+impl Prefix {
+    fn to_path(self, map: &PrefixPathMap) -> &Path {
+        match self {
+            Self::Root => &map.root,
+            Self::Hhi => &map.hhi,
+            Self::Tmp => &map.tmp,
+            Self::Dummy => &map.dummy,
+        }
+    }
+}
+
 #[derive(Clone, Debug, Eq, OcamlRep, Ord, PartialEq, PartialOrd)]
 pub struct RelativePath {
     prefix: Prefix,
@@ -86,6 +115,14 @@ impl RelativePath {
 
     pub fn prefix(&self) -> Prefix {
         self.prefix
+    }
+
+    pub fn to_absoute(&self) -> PathBuf {
+        let prefix_map = PrefixPathMap::default();
+        let prefix = self.prefix.to_path(&prefix_map);
+        let mut r = PathBuf::from(prefix);
+        r.push(self.path.as_path());
+        r
     }
 }
 

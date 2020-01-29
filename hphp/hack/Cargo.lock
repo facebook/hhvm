@@ -468,6 +468,7 @@ dependencies = [
  "emit_body_rust 0.0.0",
  "env 0.0.0",
  "hhas_body_rust 0.0.0",
+ "hhas_program_rust 0.0.0",
  "instruction_sequence_rust 0.0.0",
  "options 0.0.0",
  "oxidized 0.0.0",
@@ -665,7 +666,9 @@ dependencies = [
 name = "hh_compile"
 version = "0.0.0"
 dependencies = [
+ "anyhow 1.0.26 (registry+https://github.com/rust-lang/crates.io-index)",
  "compile_rust 0.0.0",
+ "hhbc_hhas_rust 0.0.0",
  "itertools 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "options 0.0.0",
  "oxidized 0.0.0",
@@ -769,6 +772,7 @@ dependencies = [
 name = "hhbc_hhas_rust"
 version = "0.0.0"
 dependencies = [
+ "escaper 0.0.0",
  "hhas_program_rust 0.0.0",
  "hhas_record_def_rust 0.0.0",
  "hhbc_id_rust 0.0.0",

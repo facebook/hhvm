@@ -11,6 +11,7 @@ include = ["../../print.rs", "../../print_env.rs", "../../write.rs"]
 path = "../../print.rs"
 
 [dependencies]
+escaper = { path = "../../../utils/escaper" }
 hhas_program_rust = { path = "../hhas_program" }
 hhas_record_def_rust = { path = "../hhas_record_def" }
 hhbc_id_rust = { path = "../hhbc_id" }

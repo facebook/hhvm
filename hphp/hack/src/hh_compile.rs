@@ -3,17 +3,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-extern crate itertools;
-extern crate structopt;
-extern crate walkdir;
+use ::anyhow::{self, anyhow, Context};
 
-use itertools::Either::{Left, Right};
 use structopt::StructOpt;
-use walkdir::WalkDir;
 
 use compile_rust as compile;
 
-use compile::{Env, EnvFlags};
+use compile::{Env, EnvFlags, Profile};
+use hhbc_hhas_rust::{IoWrite, Write as HhWrite};
+use itertools::Either::*;
 use options::Options;
 use oxidized::{
     namespace_env::Env as NamespaceEnv,
@@ -23,9 +21,10 @@ use oxidized::{
 
 use std::{
     fs::File,
-    io::{self, Read, Write},
-    iter::Iterator,
+    io::{self, BufRead, Read, Write},
+    iter::{once, Iterator, Map},
     path::{Path, PathBuf},
+    vec::IntoIter,
 };
 
 #[derive(StructOpt, Clone, Debug)]
@@ -41,25 +40,20 @@ struct Opts {
     config_file: Option<PathBuf>,
 
     /// Output file. Creates it if necessary
-    #[structopt(short = "o")]
+    #[structopt(short = "o", conflicts_with("input_file_list"))]
     output_file: Option<PathBuf>,
 
     /// Run a daemon which processes Hack source from standard input
     #[structopt(long)]
     daemon: bool,
 
-    /// read a list of files (one per line) from the file `input-file-list'"
+    /// read a list of files or stdin (one per line) from the file `input-file-list'"
     #[structopt(long)]
-    input_file_list: Option<PathBuf>,
+    input_file_list: Option<Option<PathBuf>>,
 
     /// Dump configuration settings
     #[structopt(long)]
     dump_config: bool,
-
-    /// Runs very quietly, and ignore any result if invoked without -o
-    /// (lower priority than the debug-time option)
-    #[structopt(long)]
-    quiet_mode: bool,
 
     /// The level of verbosity (can be set multiple times)
     #[structopt(long = "verbose", parse(from_occurrences))]
@@ -70,11 +64,11 @@ struct Opts {
     filename: Option<PathBuf>,
 }
 
-const NEED_FILENAME: &'static str = "Missing FILENAME";
-
-type OutputHandler = dyn Fn(&Path, String);
-
-fn process_single_file(opts: &Opts, filepath: &Path, handle_output: &OutputHandler) {
+fn process_single_file<W>(opts: &Opts, filepath: &Path, writer: &mut W) -> anyhow::Result<Profile>
+where
+    W: HhWrite,
+    W::Error: Send + Sync + 'static,
+{
     if opts.verbosity > 1 {
         eprintln!("processing file: {}", filepath.display());
     }
@@ -99,66 +93,26 @@ fn process_single_file(opts: &Opts, filepath: &Path, handle_output: &OutputHandl
     };
     let mut text: Vec<u8> = Vec::new();
     File::open(filepath)
-        .expect(&format!("cannot open input file: {}", filepath.display()))
-        .read_to_end(&mut text)
-        .expect("TODO(hrust) error handling");
-
-    let mut s = String::new();
-    let _output = compile::from_text(&text, env, &mut s);
-    handle_output(filepath, s);
+        .with_context(|| format!("cannot open input file: {}", filepath.display()))?
+        .read_to_end(&mut text)?;
+    compile::from_text(&text, env, writer)
 }
 
-fn write_bytecode(path: &Option<impl AsRef<Path>>, output: String) {
-    let mut out = path.as_ref().map_or_else(
-        || Left(io::stdout()),
-        |path| {
-            Right(
-                std::fs::OpenOptions::new()
-        .write(true)
-        .create(true)
-        .truncate(false) // see sys_utils.write_strings_to_file in OCaml
-        .open(path)
-        .expect(&format!("cannot open file for writing: {}", path.as_ref().display())),
-            )
-        },
-    );
-    let failed_write_msg = path
-        .as_ref()
-        .map_or(String::from("failed to write to (stdout)"), |p| {
-            format!("failed to write to file: {}", p.as_ref().display())
-        });
-
-    out.write_all(output.as_bytes()).expect(&failed_write_msg);
-}
-
-fn expand_files(file_or_dir: &Path) -> impl Iterator<Item = PathBuf> {
-    if !file_or_dir.is_dir() {
-        return Left(std::iter::once(file_or_dir.to_owned()));
-    }
-
-    // Recursively expand the directory
-    Right(
-        WalkDir::new(file_or_dir)
+fn read_file_list(input_path: &Option<PathBuf>) -> anyhow::Result<impl Iterator<Item = PathBuf>> {
+    fn read_lines(r: impl Read) -> anyhow::Result<Map<IntoIter<String>, fn(String) -> PathBuf>> {
+        Ok(io::BufReader::new(r)
+            .lines()
+            .collect::<std::io::Result<Vec<_>>>()
+            .context("could not read line from input file list")?
             .into_iter()
-            .filter_map(|e| e.ok().map(|e| e.into_path()))
-            .filter(|e| !e.is_dir()),
-    )
-}
-
-fn read_file_list(input_path: &Path) -> impl Iterator<Item = PathBuf> {
-    use io::BufRead;
-    if let Ok(input_file) = File::open(input_path) {
-        io::BufReader::new(input_file).lines().map(|line| {
-            PathBuf::from(
-                line.expect("could not read line from input file list")
-                    .trim(),
-            )
-        })
-    } else {
-        panic!(format!(
-            "Could not open input file: {}",
-            input_path.display()
-        ));
+            .map(|l| PathBuf::from(l.trim())))
+    }
+    match input_path.as_ref() {
+        None => read_lines(io::stdin()),
+        Some(path) => read_lines(
+            File::open(path)
+                .with_context(|| format!("Could not open input file: {}", path.display()))?,
+        ),
     }
 }
 
@@ -217,65 +171,43 @@ impl Config {
     }
 }
 
-fn main() {
-    // use Rc to avoid needing to clone in clone+move in handle_output
-    use std::rc::Rc;
-    let opts = Rc::new(Opts::from_args());
+fn main() -> anyhow::Result<()> {
+    let opts = Opts::from_args();
     if opts.verbosity > 1 {
         eprintln!("hh_compile options/flags: {:#?}", opts);
     }
-    let config = Rc::new(Config::new(&opts));
+    let config = Config::new(&opts);
 
     if opts.daemon {
         unimplemented!("TODO(hrust) handlers for daemon (HHVM) mode");
-    }
-    let handle_output: Box<OutputHandler> = {
-        let config = Rc::clone(&config);
-        let opts = Rc::clone(&opts);
-        if opts.filename.as_ref().map_or(false, |p| p.is_dir()) {
-            Box::new(move |input_path: &Path, output: String| {
-                if let Ok(mut filepath_buf) = input_path.canonicalize() {
-                    let extension = filepath_buf.extension().and_then(|os| os.to_str());
-                    if let Some("php") = extension {
-                    } else {
-                        return;
-                    }
-                    filepath_buf.set_extension("hhas");
-                    let output_path = &filepath_buf;
-                    if output_path.exists() {
-                        if !opts.quiet_mode {
-                            eprintln!("Output file {} already exists", output_path.display());
-                        }
-                    } else {
-                        write_bytecode(&Some(output_path), output);
-                    }
-                } else if opts.verbosity > 0 {
-                    // Rust-only (guard via the new --verbose flag)
-                    eprintln!("Failed to canonicalize path: {}", input_path.display());
-                }
-            })
-        } else {
-            // single file mode (FILENAME) or --input-file-list
-            Box::new(move |_: &Path, output| {
-                if let None = opts.output_file {
-                    config.dump_if_needed(&opts);
-                    if opts.quiet_mode {
-                        return;
-                    }
+    } else {
+        config.dump_if_needed(&opts);
+        let (files, mut writer) = match &opts.input_file_list {
+            Some(filename) => {
+                let files = read_file_list(&filename)?;
+                let writer = IoWrite::new(std::io::stdout());
+                (Left(files), writer)
+            }
+            None => {
+                let writer = match &opts.output_file {
+                    None => IoWrite::new(std::io::stdout()),
+                    Some(output_file) => IoWrite::new(File::create(output_file)?),
                 };
-                write_bytecode(&opts.output_file, output);
-            })
+                let filename = opts
+                    .filename
+                    .as_ref()
+                    .cloned()
+                    .ok_or_else(|| anyhow! {"TODO(hrust) support stdin"})?;
+                (Right(once(filename)), writer)
+            }
+        };
+        for f in files {
+            let r = process_single_file(&opts, &f, &mut writer);
+            match r {
+                Err(e) => eprintln!("Error in file {}: {}", f.display(), e),
+                Ok(_) => writer.flush()?,
+            }
         }
-    };
-
-    // Generate the appropriate filepath iterator
-    let filepaths = opts.input_file_list.as_ref().map_or_else(
-        || Left(expand_files(opts.filename.as_ref().expect(NEED_FILENAME))),
-        |filename_list_file| Right(read_file_list(filename_list_file)),
-    );
-
-    // Actually execute the compilation(s)
-    for filepath in filepaths {
-        process_single_file(&opts, &filepath, &*handle_output);
+        Ok(())
     }
 }

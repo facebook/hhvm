@@ -17,6 +17,8 @@ pub type Result<T, WE> = std::result::Result<T, Error<WE>>;
 pub enum Error<WE: Debug> {
     #[error("write error: {0:?}")]
     WriteError(WE),
+    #[error("a string may contain invalid utf-8")]
+    InvalidUTF8,
 }
 
 pub trait Write {

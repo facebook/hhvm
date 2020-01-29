@@ -57,7 +57,7 @@ fn emit_program_<'p>(
         .context_mut()
         .set_systemlib(flags.contains(FromAstFlags::IS_SYSTEMLIB));
 
-    emit_main(&mut emitter, flags, namespace, prog);
+    emit_main(&mut emitter, flags, namespace, prog)?;
 
     Ok(HhasProgram::default())
 }

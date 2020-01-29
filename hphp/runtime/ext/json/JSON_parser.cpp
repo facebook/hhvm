@@ -514,6 +514,7 @@ struct SimpleParser {
     auto const slice = folly::StringPiece(start, len);
     start[len] = '\0';
     if (container_type != JSONContainerType::HACK_ARRAYS &&
+        container_type != JSONContainerType::LEGACY_HACK_ARRAYS &&
         is_strictly_integer(start, len, num)) {
       pushInt64(num);
     } else if (auto const str = lookupStaticString(slice)) {
@@ -1047,7 +1048,8 @@ static void object_set(const json_parser* json,
     if (container_type == JSONContainerType::COLLECTIONS) {
       auto keyTV = make_tv<KindOfString>(key.get());
       collections::set(var.getObjectData(), &keyTV, value.asTypedValue());
-    } else if (container_type == JSONContainerType::HACK_ARRAYS) {
+    } else if (container_type == JSONContainerType::HACK_ARRAYS ||
+               container_type == JSONContainerType::LEGACY_HACK_ARRAYS) {
       forceToDict(var).set(key, value);
       if (RO::EvalArrayProvenance && json->prov_tag) {
         auto const tv = var.asTypedValue();

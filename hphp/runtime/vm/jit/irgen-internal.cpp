@@ -33,8 +33,8 @@ SSATmp* checkAndLoadThis(IRGS& env) {
 
 SSATmp* convertClsMethToVec(IRGS& env, SSATmp* clsMeth) {
   assertx(clsMeth->isA(TClsMeth));
-  auto const cls = gen(env, LdClsFromClsMeth, clsMeth);
-  auto const func = gen(env, LdFuncFromClsMeth, clsMeth);
+  auto const cls = gen(env, LdClsName, gen(env, LdClsFromClsMeth, clsMeth));
+  auto const func = gen(env, LdFuncName, gen(env, LdFuncFromClsMeth, clsMeth));
   auto vec = gen(env,
     RuntimeOption::EvalHackArrDVArrs ? AllocVecArray : AllocVArray,
     PackedArrayData { 2 });

@@ -2,7 +2,7 @@ string(1) "t"
 class(X)
 array(2) {
   [0]=>
-  class(X)
+  string(1) "X"
   [1]=>
-  function(X::y)
+  string(1) "y"
 }

@@ -13,8 +13,8 @@ bool(false)
 Notice: Implicit clsmeth to varray conversion in %s/mutate.php on line 13
 
 Notice: Implicit clsmeth to varray conversion in %s/mutate.php on line 13
-class(C)
-function(C::func1)
+string(1) "C"
+string(5) "func1"
 bool(true)
 int(1)
 Cannot use [] with clsmeth for writing

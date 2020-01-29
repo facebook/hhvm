@@ -145,7 +145,16 @@ bool HHVM_FUNCTION(HH_is_darray, const Variant& val) {
 }
 
 bool HHVM_FUNCTION(HH_is_any_array, const Variant& val) {
-  // TODO(T60686780): Check EvalIsCompatibleClsMethType here, and maybe log.
+  if (tvIsClsMeth(val.asTypedValue())) {
+    if (RuntimeOption::EvalIsCompatibleClsMethType) {
+      if (RuntimeOption::EvalIsVecNotices) {
+        raise_notice(Strings::CLSMETH_COMPAT_IS_ANY_ARR);
+      }
+      return true;
+    }
+    return false;
+  }
+
   return tvIsArrayLike(val.asTypedValue()) || tvIsClsMeth(val.asTypedValue());
 }
 

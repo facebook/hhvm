@@ -3,13 +3,13 @@ Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_
 int(0)
 
 Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_warn.php on line 14
-class(A)
+string(1) "A"
 
 Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_warn.php on line 15
 int(1)
 
 Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_warn.php on line 16
-function(A::func1)
+string(5) "func1"
 
 Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_warn.php on line 18
 vec(2) {
@@ -19,8 +19,8 @@ vec(2) {
 
 Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_warn.php on line 19
 vec(2) {
-  class(A)
-  function(A::func1)
+  string(1) "A"
+  string(5) "func1"
 }
 int(2)
 int(2)
@@ -43,22 +43,22 @@ Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_
 int(1)
 
 Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_warn.php on line 28
-class(A)
+string(1) "A"
 
 Notice: Implicit clsmeth to array conversion in %s/container_builtins_convert_and_warn.php on line 30
 array(2) {
   [0]=>
-  class(A)
+  string(1) "A"
   [1]=>
-  function(A::func1)
+  string(5) "func1"
 }
 
 Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_warn.php on line 32
 array(2) {
   [0]=>
-  class(A)
+  string(1) "A"
   [1]=>
-  function(A::func1)
+  string(5) "func1"
 }
 
 Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_warn.php on line 34
@@ -74,12 +74,12 @@ array(2) {
   [0]=>
   array(1) {
     [0]=>
-    class(A)
+    string(1) "A"
   }
   [1]=>
   array(1) {
     [0]=>
-    function(A::func1)
+    string(5) "func1"
   }
 }
 
@@ -90,7 +90,7 @@ array(0) {
 Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_warn.php on line 40
 array(1) {
   [0]=>
-  function(A::func1)
+  string(5) "func1"
 }
 
 Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_warn.php on line 41
@@ -103,8 +103,8 @@ array(2) {
 
 Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_warn.php on line 42
 vec(3) {
-  class(A)
-  function(A::func1)
+  string(1) "A"
+  string(5) "func1"
   int(255)
 }
 
@@ -119,17 +119,17 @@ array(2) {
 Notice: Implicit clsmeth to array conversion in %s/container_builtins_convert_and_warn.php on line 45
 array(2) {
   [0]=>
-  function(A::func1)
+  string(5) "func1"
   [1]=>
-  class(A)
+  string(1) "A"
 }
 
 Notice: Implicit clsmeth to array conversion in %s/container_builtins_convert_and_warn.php on line 48
 array(4) {
   [0]=>
-  class(A)
+  string(1) "A"
   [1]=>
-  function(A::func1)
+  string(5) "func1"
   [2]=>
   int(3)
   [3]=>
@@ -139,9 +139,9 @@ array(4) {
 Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_warn.php on line 49
 array(4) {
   [0]=>
-  class(A)
+  string(1) "A"
   [1]=>
-  function(A::func1)
+  string(5) "func1"
   [2]=>
   int(3)
   [3]=>
@@ -165,41 +165,41 @@ array(2) {
 }
 
 Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_warn.php on line 53
-function(A::func1)
+string(5) "func1"
 vec(1) {
-  class(A)
+  string(1) "A"
 }
 
 Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_warn.php on line 54
 int(3)
 vec(3) {
-  class(A)
-  function(A::func1)
+  string(1) "A"
+  string(5) "func1"
   string(2) "t1"
 }
 
 Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_warn.php on line 55
-class(A)
+string(1) "A"
 vec(1) {
-  function(A::func1)
+  string(5) "func1"
 }
 
 Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_warn.php on line 56
 array(1) {
   [0]=>
-  function(A::func1)
+  string(5) "func1"
 }
 array(1) {
   [0]=>
-  class(A)
+  string(1) "A"
 }
 
 Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_warn.php on line 57
 int(3)
 vec(3) {
   string(3) "foo"
-  class(A)
-  function(A::func1)
+  string(1) "A"
+  string(5) "func1"
 }
 
 Notice: Implicit clsmeth to vec conversion for implode() in %s/container_builtins_convert_and_warn.php on line 61

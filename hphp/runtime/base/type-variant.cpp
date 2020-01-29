@@ -534,7 +534,7 @@ Array Variant::toPHPArrayHelper() const {
     case KindOfClsMeth:
       raiseClsMethToVecWarningHelper();
       return make_packed_array(
-        m_data.pclsmeth->getCls(), m_data.pclsmeth->getFunc());
+        m_data.pclsmeth->getClsStr(), m_data.pclsmeth->getFuncStr());
     case KindOfRecord:
       raise_convert_record_to_type("array");
       return empty_array();

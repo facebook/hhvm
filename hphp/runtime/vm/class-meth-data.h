@@ -24,6 +24,7 @@ namespace HPHP {
 
 struct Class;
 struct Func;
+struct String;
 
 struct ClsMethData
 #ifndef USE_LOWPTR
@@ -52,6 +53,10 @@ struct ClsMethData
   Func* getFunc() const {
     return reinterpret_cast<Func*>(m_func);
   }
+
+  String getClsStr() const;
+
+  String getFuncStr() const;
 
   static constexpr ptrdiff_t clsOffset() {
     return offsetof(ClsMethData, m_cls);

@@ -1,0 +1,45 @@
+is_array($m): (error: is_array() called on clsmeth) True
+hh\is_any_array($m): (error: is_any_array() called on clsmeth) True
+is_varray($m): (error: is_varray() called on clsmeth) True
+is_varray($m): (error: is_varray() called on clsmeth) True
+$m is arraylike: (error: is_any_array() called on clsmeth) True
+$m is shape(...): (error: is_shape() called on clsmeth) True
+$m is shape(str,str): (error: is_shape() called on clsmeth) True
+$m is HH\Traversable: True
+$m is Traversable: True
+$m is KeyedTraversable: True
+$m is HH\Rx\Traversable: True
+$m is HH\Rx\KeyedTraversable: True
+$m is Container: True
+$m is KeyedContainer: True
+is_a($m, HH\Traversable): False
+is_a($m, Traversable): False
+is_a($m, KeyedTraversable): False
+is_a($m, HH\Rx\Traversable): False
+is_a($m, HH\Rx\KeyedTraversable): False
+is_a($m, Container): False
+is_a($m, KeyedContainer): False
+is_array($m): (error: is_array() called on clsmeth) True
+hh\is_any_array($m): (error: is_any_array() called on clsmeth) True
+is_varray($m): (error: is_varray() called on clsmeth) True
+is_varray($m): (error: is_varray() called on clsmeth) True
+$m is arraylike: (error: is_any_array() called on clsmeth) True
+$m is shape(...): (error: is_shape() called on clsmeth) True
+$m is shape(str,str): (error: is_shape() called on clsmeth) True
+$m is HH\Traversable: True
+$m is Traversable: True
+$m is KeyedTraversable: True
+$m is HH\Rx\Traversable: True
+$m is HH\Rx\KeyedTraversable: True
+$m is Container: True
+$m is KeyedContainer: True
+is_a($m, HH\Traversable): False
+is_a($m, Traversable): False
+is_a($m, KeyedTraversable): False
+is_a($m, HH\Rx\Traversable): False
+is_a($m, HH\Rx\KeyedTraversable): False
+is_a($m, Container): False
+is_a($m, KeyedContainer): False
+is_array($m): (error: is_array() called on clsmeth) True
+hh\is_any_array($m): (error: is_any_array() called on clsmeth) True
+hh\is_varray($m): (error: is_varray() called on clsmeth) True

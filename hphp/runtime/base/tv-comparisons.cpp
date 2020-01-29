@@ -1124,14 +1124,14 @@ struct CompareBase {
   }
 
   RetType operator()(ClsMethDataRef c1, ClsMethDataRef c2) const {
-    auto const cls1 = classToStringHelper(c1->getCls());
-    auto const cls2 = classToStringHelper(c2->getCls());
+    auto const cls1 = c1->getClsStr().get();
+    auto const cls2 = c2->getClsStr().get();
     auto const cmp = cls1->compare(cls2);
     if (cmp != 0) {
       return operator()(cmp, 0);
     }
-    auto const func1 = funcToStringHelper(c1->getFunc());
-    auto const func2 = funcToStringHelper(c2->getFunc());
+    auto const func1 = c1->getFuncStr().get();
+    auto const func2 = c2->getFuncStr().get();
     return operator()(func1, func2);
   }
 

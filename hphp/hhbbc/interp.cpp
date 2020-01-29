@@ -3094,7 +3094,7 @@ template<bool asExpression>
 void isAsTypeStructImpl(ISS& env, SArray inputTS) {
   auto const resolvedTS = resolveTSStatically(env, inputTS, env.ctx.cls);
   auto const ts = resolvedTS ? resolvedTS : inputTS;
-  auto const t = topC(env, 1); // operand to is/as
+  auto const t = loosen_likeness(topC(env, 1)); // operand to is/as
 
   bool may_raise = true;
   auto result = [&] (

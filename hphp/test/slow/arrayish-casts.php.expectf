@@ -9,31 +9,31 @@ Exception: Func to vec conversion
 Exception: Func to keyset conversion
 array(2) {
   [0]=>
-  class(A)
+  string(1) "A"
   [1]=>
-  function(A::meth)
+  string(4) "meth"
 }
 array(2) {
   [0]=>
-  class(A)
+  string(1) "A"
   [1]=>
-  function(A::meth)
+  string(4) "meth"
 }
 array(2) {
   [0]=>
-  class(A)
+  string(1) "A"
   [1]=>
-  function(A::meth)
+  string(4) "meth"
 }
 dict(2) {
   [0]=>
-  class(A)
+  string(1) "A"
   [1]=>
-  function(A::meth)
+  string(4) "meth"
 }
 vec(2) {
-  class(A)
-  function(A::meth)
+  string(1) "A"
+  string(4) "meth"
 }
 keyset(2) {
   string(1) "A"

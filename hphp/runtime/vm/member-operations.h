@@ -391,8 +391,13 @@ inline tv_rval ElemKeyset(ArrayData* base, key_type<keyType> key) {
  */
 template<MOpMode mode>
 inline TypedValue ElemClsMethPre(ClsMethDataRef base, int64_t key) {
-  if (key == 0) return make_tv<KindOfClass>(base->getCls());
-  else if (key == 1) return make_tv<KindOfFunc>(base->getFunc());
+  if (key == 0) {
+    return make_tv<KindOfString>(
+      const_cast<StringData*>(base->getCls()->name()));
+  } else if (key == 1) {
+    return make_tv<KindOfString>(
+      const_cast<StringData*>(base->getFunc()->name()));
+  }
   if (mode == MOpMode::Warn || mode == MOpMode::InOut) {
     SystemLib::throwOutOfBoundsExceptionObject(
       folly::sformat("Out of bounds clsmeth access: invalid index {}", key));

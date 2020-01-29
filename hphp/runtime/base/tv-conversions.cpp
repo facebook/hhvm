@@ -807,7 +807,8 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
       case KindOfClsMeth: {
         raiseClsMethConvertWarningHelper("array");
         a = make_packed_array(
-          val(tv).pclsmeth->getCls(), val(tv).pclsmeth->getFunc()).detach();
+          val(tv).pclsmeth->getClsStr(), val(tv).pclsmeth->getFuncStr()
+        ).detach();
         tvDecRefClsMeth(tv);
         continue;
       }
@@ -925,7 +926,8 @@ enable_if_lval_t<T, void> tvCastToVecInPlace(T tv) {
       case KindOfClsMeth: {
         raiseClsMethConvertWarningHelper("vec");
         a = make_vec_array(
-          val(tv).pclsmeth->getCls(), val(tv).pclsmeth->getFunc()).detach();
+          val(tv).pclsmeth->getClsStr(), val(tv).pclsmeth->getFuncStr()
+        ).detach();
         tvDecRefClsMeth(tv);
         continue;
       }
@@ -1039,8 +1041,8 @@ enable_if_lval_t<T, void> tvCastToDictInPlace(T tv) {
       case KindOfClsMeth: {
         raiseClsMethConvertWarningHelper("dict");
         a = make_dict_array(
-          0, val(tv).pclsmeth->getCls(),
-          1, val(tv).pclsmeth->getFunc()).detach();
+          0, val(tv).pclsmeth->getClsStr(),
+          1, val(tv).pclsmeth->getFuncStr()).detach();
         tvDecRefClsMeth(tv);
         continue;
       }
@@ -1154,10 +1156,9 @@ enable_if_lval_t<T, void> tvCastToKeysetInPlace(T tv) {
       case KindOfClsMeth: {
         raiseClsMethConvertWarningHelper("keyset");
         a = make_keyset_array(
-          const_cast<StringData*>(
-            classToStringHelper(val(tv).pclsmeth->getCls())),
-          const_cast<StringData*>(
-            funcToStringHelper(val(tv).pclsmeth->getFunc()))).detach();
+          const_cast<StringData*>(val(tv).pclsmeth->getCls()->name()),
+          const_cast<StringData*>(val(tv).pclsmeth->getFunc()->name())
+        ).detach();
         tvDecRefClsMeth(tv);
         continue;
       }
@@ -1281,7 +1282,8 @@ enable_if_lval_t<T, void> tvCastToVArrayInPlace(T tv) {
       case KindOfClsMeth: {
         raiseClsMethConvertWarningHelper("varray");
         a = make_varray(
-          val(tv).pclsmeth->getCls(), val(tv).pclsmeth->getFunc()).detach();
+          val(tv).pclsmeth->getClsStr(), val(tv).pclsmeth->getFuncStr()
+        ).detach();
         tvDecRefClsMeth(tv);
         continue;
       }
@@ -1408,8 +1410,9 @@ enable_if_lval_t<T, void> tvCastToDArrayInPlace(T tv) {
       case KindOfClsMeth: {
         raiseClsMethConvertWarningHelper("darray");
         a = make_darray(
-          0, val(tv).pclsmeth->getCls(),
-          1, val(tv).pclsmeth->getFunc()).detach();
+          0, val(tv).pclsmeth->getClsStr(),
+          1, val(tv).pclsmeth->getFuncStr()
+        ).detach();
         tvDecRefClsMeth(tv);
         continue;
       }
@@ -1476,7 +1479,7 @@ ObjectData* tvCastToObjectData(TypedValue tv) {
     case KindOfClsMeth: {
       raiseClsMethConvertWarningHelper("array");
       auto arr = make_packed_array(
-        val(tv).pclsmeth->getCls(), val(tv).pclsmeth->getFunc());
+        val(tv).pclsmeth->getClsStr(), val(tv).pclsmeth->getFuncStr());
       return ObjectData::FromArray(arr.get()).detach();
     }
 

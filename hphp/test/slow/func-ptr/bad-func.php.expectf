@@ -5,4 +5,4 @@ classMeth{
 }
 int(3)
 
-Fatal error: calling an ill-formed function pointer without resolved class/object pointer in %s/test/slow/func-ptr/bad-func.php on line 15
+Fatal error: Call to undefined function f1() in %s/test/slow/func-ptr/bad-func.php on line 15

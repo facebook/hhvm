@@ -1050,6 +1050,17 @@ void TypeConstraint::verifyParamFail(const Func* func, TypedValue* tv,
   );
 }
 
+namespace {
+template<class F>
+void castClsMeth(TypedValue* c, F make) {
+  auto const a =
+    make(val(c).pclsmeth->getClsStr(), val(c).pclsmeth->getFuncStr()).detach();
+  tvDecRefClsMeth(c);
+  val(c).parr = a;
+  type(c) = a->toDataType();
+}
+}
+
 void TypeConstraint::verifyOutParamFail(const Func* func,
                                         TypedValue* c,
                                         int paramNum) const {
@@ -1084,7 +1095,7 @@ void TypeConstraint::verifyOutParamFail(const Func* func,
           raise_clsmeth_compat_type_hint_outparam_notice(
             func, displayName(func->cls()), paramNum);
         }
-        tvCastToVecInPlace(c);
+        castClsMeth(c, make_vec_array<String,String>);
         return;
       }
     } else {
@@ -1093,7 +1104,7 @@ void TypeConstraint::verifyOutParamFail(const Func* func,
           raise_clsmeth_compat_type_hint_outparam_notice(
             func, displayName(func->cls()), paramNum);
         }
-        tvCastToVArrayInPlace(c);
+        castClsMeth(c, make_varray<String,String>);
         return;
       }
     }
@@ -1256,7 +1267,7 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* c,
             func, name,
             id != ReturnId ? folly::make_optional(id) : folly::none);
         }
-        tvCastToVecInPlace(c);
+        castClsMeth(c, make_vec_array<String,String>);
         return;
       }
     } else {
@@ -1266,7 +1277,7 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* c,
             func, name,
             id != ReturnId ? folly::make_optional(id) : folly::none);
         }
-        tvCastToVArrayInPlace(c);
+        castClsMeth(c, make_varray<String,String>);
         return;
       }
     }

@@ -670,6 +670,24 @@ bool checkTypeStructureMatchesTVImpl(
     }
 
     case TypeStructure::Kind::T_tuple: {
+      if (RO::EvalIsCompatibleClsMethType) {
+        if (isClsMethType(type)) {
+          if (RO::EvalIsVecNotices) {
+            raise_notice(Strings::CLSMETH_COMPAT_IS_TUPLE);
+          }
+          auto const arr = clsMethToVecHelper(data.pclsmeth);
+          return checkTypeStructureMatchesTVImpl<gen_error>(
+            ts,
+            make_array_like_tv(arr.get()),
+            givenType,
+            expectedType,
+            errorKey,
+            warn,
+            isOrAsOp
+          );
+        }
+      }
+
       if (!isArrayLikeType(type)) return false;
       auto const ad = data.parr;
 
@@ -772,6 +790,24 @@ bool checkTypeStructureMatchesTVImpl(
     }
 
     case TypeStructure::Kind::T_shape: {
+      if (!RO::EvalHackArrDVArrs && RO::EvalIsCompatibleClsMethType) {
+        if (isClsMethType(type)) {
+          if (RO::EvalIsVecNotices) {
+            raise_notice(Strings::CLSMETH_COMPAT_IS_SHAPE);
+          }
+          auto const arr = clsMethToVecHelper(data.pclsmeth);
+          return checkTypeStructureMatchesTVImpl<gen_error>(
+            ts,
+            make_array_like_tv(arr.get()),
+            givenType,
+            expectedType,
+            errorKey,
+            warn,
+            isOrAsOp
+          );
+        }
+      }
+
       if (!isArrayLikeType(type)) return false;
       auto const ad = data.parr;
 

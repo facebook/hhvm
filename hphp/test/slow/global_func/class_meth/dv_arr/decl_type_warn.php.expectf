@@ -6,41 +6,41 @@ classMeth{
 Notice: class_meth Compat: Argument 1 passed to test_array_as_param() must be of type array, clsmeth given in %s/decl_type_warn.php on line 16
 array(2) {
   [0]=>
-  class(A)
+  string(1) "A"
   [1]=>
-  function(A::func1)
+  string(5) "func1"
 }
 
 Notice: class_meth Compat: Argument 1 passed to test_varray_as_param() must be of type HH\varray, clsmeth given in %s/decl_type_warn.php on line 17
 array(2) {
   [0]=>
-  class(A)
+  string(1) "A"
   [1]=>
-  function(A::func1)
+  string(5) "func1"
 }
 
 Notice: class_meth Compat: Argument 1 passed to test_vdarray_as_param() must be of type HH\varray_or_darray, clsmeth given in %s/decl_type_warn.php on line 18
 array(2) {
   [0]=>
-  class(A)
+  string(1) "A"
   [1]=>
-  function(A::func1)
+  string(5) "func1"
 }
 
 Notice: class_meth Compat: Argument 1 passed to test_container_as_param() must be of type HH\Container, clsmeth given in %s/decl_type_warn.php on line 19
 array(2) {
   [0]=>
-  class(A)
+  string(1) "A"
   [1]=>
-  function(A::func1)
+  string(5) "func1"
 }
 
 Notice: class_meth Compat: Argument 1 passed to test_soft_type_array_as_param() must be of type @array, clsmeth given in %s/decl_type_warn.php on line 21
 array(2) {
   [0]=>
-  class(A)
+  string(1) "A"
   [1]=>
-  function(A::func1)
+  string(5) "func1"
 }
 
 Warning: Argument 1 to test_soft_type_vec_as_param() must be of type @HH\vec, clsmeth given in %s/decl_type_warn.php on line 22
@@ -62,41 +62,41 @@ classMeth{
 Notice: class_meth Compat: Argument 1 passed to test_array_as_io_param() must be of type array, clsmeth given in %s/decl_type_warn.php on line 37
 array(2) {
   [0]=>
-  class(A)
+  string(1) "A"
   [1]=>
-  function(A::func1)
+  string(5) "func1"
 }
 
 Notice: class_meth Compat: Argument 1 passed to test_varry_as_io_param() must be of type HH\varray, clsmeth given in %s/decl_type_warn.php on line 38
 array(2) {
   [0]=>
-  class(A)
+  string(1) "A"
   [1]=>
-  function(A::func1)
+  string(5) "func1"
 }
 
 Notice: class_meth Compat: Argument 1 passed to test_vdarray_as_io_param() must be of type HH\varray_or_darray, clsmeth given in %s/decl_type_warn.php on line 39
 array(2) {
   [0]=>
-  class(A)
+  string(1) "A"
   [1]=>
-  function(A::func1)
+  string(5) "func1"
 }
 
 Notice: class_meth Compat: Argument 1 passed to test_container_as_io_param() must be of type HH\Container, clsmeth given in %s/decl_type_warn.php on line 40
 array(2) {
   [0]=>
-  class(A)
+  string(1) "A"
   [1]=>
-  function(A::func1)
+  string(5) "func1"
 }
 
 Notice: class_meth Compat: Argument 1 passed to test_soft_type_array_as_io_param() must be of type @array, clsmeth given in %s/decl_type_warn.php on line 42
 array(2) {
   [0]=>
-  class(A)
+  string(1) "A"
   [1]=>
-  function(A::func1)
+  string(5) "func1"
 }
 
 Warning: Argument 1 to test_soft_type_vec_as_io_param() must be of type @HH\vec, clsmeth given in %s/decl_type_warn.php on line 43
@@ -122,25 +122,25 @@ classMeth{
 Notice: class_meth Compat: Value returned from function test_return_as_array() must be of type array, clsmeth given in %s/decl_type_warn.php on line 61
 array(2) {
   [0]=>
-  class(A)
+  string(1) "A"
   [1]=>
-  function(A::func1)
+  string(5) "func1"
 }
 
 Notice: class_meth Compat: Value returned from function test_return_as_varray() must be of type HH\varray, clsmeth given in %s/decl_type_warn.php on line 64
 array(2) {
   [0]=>
-  class(A)
+  string(1) "A"
   [1]=>
-  function(A::func1)
+  string(5) "func1"
 }
 
 Notice: class_meth Compat: Value returned from function test_return_as_vdarray() must be of type HH\varray_or_darray, clsmeth given in %s/decl_type_warn.php on line 67
 array(2) {
   [0]=>
-  class(A)
+  string(1) "A"
   [1]=>
-  function(A::func1)
+  string(5) "func1"
 }
 Caught: Value returned from function test_return_as_vec() must be of type HH\vec, clsmeth given
 classMeth{
@@ -156,9 +156,9 @@ classMeth{
 Notice: class_meth Compat: Value returned from function test_return_as_container() must be of type HH\Container, clsmeth given in %s/decl_type_warn.php on line 76
 array(2) {
   [0]=>
-  class(A)
+  string(1) "A"
   [1]=>
-  function(A::func1)
+  string(5) "func1"
 }
 
 Notice: class_meth Compat: Static property 'B::s_a' declared as type array, clsmeth assigned in %s/decl_type_warn.php on line 106

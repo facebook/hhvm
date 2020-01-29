@@ -2,8 +2,8 @@ test on varray:
 string(1) "A"
 string(5) "func1"
 test on clsmeth:
-class(A)
-function(A::func1)
+string(1) "A"
+string(5) "func1"
 string(1) "A"
 string(5) "func1"
 

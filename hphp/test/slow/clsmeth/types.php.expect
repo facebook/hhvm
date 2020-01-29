@@ -1,0 +1,96 @@
+$m is arraylike: True
+$m is shape(str,str): True
+$m is shape(...): True
+$m is Traversable: True
+$m is Container: True
+$m is (string,string): True
+$m[0] is string: True
+$m[1] is string: True
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+$m is arraylike: True
+$m is shape(str,str): True
+$m is shape(...): True
+$m is Traversable: True
+$m is Container: True
+$m is (string,string): True
+$m[0] is string: True
+$m[1] is string: True
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+$m is arraylike: True
+$m is shape(str,str): True
+$m is shape(...): True
+$m is Traversable: True
+$m is Container: True
+$m is (string,string): True
+$m[0] is string: True
+$m[1] is string: True
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+$m is arraylike: True
+$m is shape(str,str): True
+$m is shape(...): True
+$m is Traversable: True
+$m is Container: True
+$m is (string,string): True
+$m[0] is string: True
+$m[1] is string: True
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+$m is arraylike: True
+$m is shape(str,str): True
+$m is shape(...): True
+$m is Traversable: True
+$m is Container: True
+$m is (string,string): True
+$m[0] is string: True
+$m[1] is string: True
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+$m is arraylike: True
+$m is shape(str,str): True
+$m is shape(...): True
+$m is Traversable: True
+$m is Container: True
+$m is (string,string): True
+$m[0] is string: True
+$m[1] is string: True
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+$m === ($m as shape(...)): True
+$m === ($m as Traversable): True
+$m === ($m as shape(...)): True
+$m === ($m as Traversable): True
+$m === ($m as shape(...)): True
+$m === ($m as Traversable): True
+$m === ($m as shape(...)): True
+$m === ($m as arraylike): True
+$m === ($m as shape(...)): True
+$m === ($m as arraylike): True
+$m === ($m as shape(...)): True
+$m === ($m as arraylike): True

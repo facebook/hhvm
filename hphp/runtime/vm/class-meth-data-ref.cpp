@@ -65,7 +65,7 @@ void raiseClsMethConvertWarningHelper(const char* toType) {
 }
 
 Array clsMethToVecHelper(ClsMethDataRef clsMeth) {
-  return make_varray(clsMeth->getCls(), clsMeth->getFunc());
+  return make_varray(clsMeth->getClsStr(), clsMeth->getFuncStr());
 }
 
 } // namespace HPHP

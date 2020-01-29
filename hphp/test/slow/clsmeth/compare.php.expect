@@ -1,0 +1,104 @@
+[static] $cm ? VAR
++------------+------+------+------+------+------+------+------+
+| VAR        | <    | <=   | >    | >=   | ==   | ===  | <=>  |
++============+======+======+======+======+======+======+======+
+| $va        | F    | T    | F    | T    | T    | T    | 0    |
+| $oa        | F    | T    | F    | T    | T    | F    | 0    |
+| $fa        | F    | T    | F    | T    | T    | T    | 0    |
+| $ca        | F    | T    | F    | T    | T    | T    | 0    |
+| $pa        | F    | T    | F    | T    | T    | T    | 0    |
+| WRAPA($va) | F    | T    | F    | T    | T    | T    | 0    |
+| WRAPA($oa) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPA($fa) | F    | T    | F    | T    | T    | T    | 0    |
+| WRAPA($ca) | F    | T    | F    | T    | T    | T    | 0    |
+| WRAPA($pa) | F    | T    | F    | T    | T    | T    | 0    |
+| WRAPO($va) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPO($oa) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPO($fa) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPO($ca) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPO($pa) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPD($va) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPD($oa) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPD($fa) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPD($ca) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPD($pa) | F    | T    | F    | T    | T    | F    | 0    |
++------------+------+------+------+------+------+------+------+
+
+[static] VAR ? $cm
++------------+------+------+------+------+------+------+------+
+| VAR        | <    | <=   | >    | >=   | ==   | ===  | <=>  |
++============+======+======+======+======+======+======+======+
+| $va        | F    | T    | F    | T    | T    | T    | 0    |
+| $oa        | F    | T    | F    | T    | T    | F    | 0    |
+| $fa        | F    | T    | F    | T    | T    | T    | 0    |
+| $ca        | F    | T    | F    | T    | T    | T    | 0    |
+| $pa        | F    | T    | F    | T    | T    | T    | 0    |
+| WRAPA($va) | F    | T    | F    | T    | T    | T    | 0    |
+| WRAPA($oa) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPA($fa) | F    | T    | F    | T    | T    | T    | 0    |
+| WRAPA($ca) | F    | T    | F    | T    | T    | T    | 0    |
+| WRAPA($pa) | F    | T    | F    | T    | T    | T    | 0    |
+| WRAPO($va) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPO($oa) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPO($fa) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPO($ca) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPO($pa) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPD($va) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPD($oa) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPD($fa) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPD($ca) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPD($pa) | F    | T    | F    | T    | T    | F    | 0    |
++------------+------+------+------+------+------+------+------+
+
+[dynamic] $cm ? VAR
++------------+------+------+------+------+------+------+------+
+| VAR        | <    | <=   | >    | >=   | ==   | ===  | <=>  |
++============+======+======+======+======+======+======+======+
+| $va        | F    | T    | F    | T    | T    | T    | 0    |
+| $oa        | F    | T    | F    | T    | T    | F    | 0    |
+| $fa        | F    | T    | F    | T    | T    | T    | 0    |
+| $ca        | F    | T    | F    | T    | T    | T    | 0    |
+| $pa        | F    | T    | F    | T    | T    | T    | 0    |
+| WRAPA($va) | F    | T    | F    | T    | T    | T    | 0    |
+| WRAPA($oa) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPA($fa) | F    | T    | F    | T    | T    | T    | 0    |
+| WRAPA($ca) | F    | T    | F    | T    | T    | T    | 0    |
+| WRAPA($pa) | F    | T    | F    | T    | T    | T    | 0    |
+| WRAPO($va) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPO($oa) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPO($fa) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPO($ca) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPO($pa) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPD($va) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPD($oa) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPD($fa) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPD($ca) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPD($pa) | F    | T    | F    | T    | T    | F    | 0    |
++------------+------+------+------+------+------+------+------+
+
+[dynamic] VAR ? $cm
++------------+------+------+------+------+------+------+------+
+| VAR        | <    | <=   | >    | >=   | ==   | ===  | <=>  |
++============+======+======+======+======+======+======+======+
+| $va        | F    | T    | F    | T    | T    | T    | 0    |
+| $oa        | F    | T    | F    | T    | T    | F    | 0    |
+| $fa        | F    | T    | F    | T    | T    | T    | 0    |
+| $ca        | F    | T    | F    | T    | T    | T    | 0    |
+| $pa        | F    | T    | F    | T    | T    | T    | 0    |
+| WRAPA($va) | F    | T    | F    | T    | T    | T    | 0    |
+| WRAPA($oa) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPA($fa) | F    | T    | F    | T    | T    | T    | 0    |
+| WRAPA($ca) | F    | T    | F    | T    | T    | T    | 0    |
+| WRAPA($pa) | F    | T    | F    | T    | T    | T    | 0    |
+| WRAPO($va) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPO($oa) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPO($fa) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPO($ca) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPO($pa) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPD($va) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPD($oa) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPD($fa) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPD($ca) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPD($pa) | F    | T    | F    | T    | T    | F    | 0    |
++------------+------+------+------+------+------+------+------+
+

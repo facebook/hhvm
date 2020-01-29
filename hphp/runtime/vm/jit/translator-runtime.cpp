@@ -253,28 +253,29 @@ ArrayData* convObjToKeysetHelper(ObjectData* obj) {
 
 ArrayData* convClsMethToArrHealper(ClsMethDataRef clsmeth) {
   raiseClsMethConvertWarningHelper("array");
-  auto a = make_varray(clsmeth->getCls(), clsmeth->getFunc()).detach();
+  auto a = make_varray(clsmeth->getClsStr(), clsmeth->getFuncStr()).detach();
   decRefClsMeth(clsmeth);
   return a;
 }
 
 ArrayData* convClsMethToVArrHealper(ClsMethDataRef clsmeth) {
   raiseClsMethConvertWarningHelper("varray");
-  auto a = make_varray(clsmeth->getCls(), clsmeth->getFunc()).detach();
+  auto a = make_varray(clsmeth->getClsStr(), clsmeth->getFuncStr()).detach();
   decRefClsMeth(clsmeth);
   return a;
 }
 
 ArrayData* convClsMethToVecHealper(ClsMethDataRef clsmeth) {
   raiseClsMethConvertWarningHelper("vec");
-  auto a = make_vec_array(clsmeth->getCls(), clsmeth->getFunc()).detach();
+  auto a = make_vec_array(clsmeth->getClsStr(), clsmeth->getFuncStr()).detach();
   decRefClsMeth(clsmeth);
   return a;
 }
 
 ArrayData* convClsMethToDArrHealper(ClsMethDataRef clsmeth) {
   raiseClsMethConvertWarningHelper("darray");
-  auto a = make_darray(0, clsmeth->getCls(), 1, clsmeth->getFunc()).detach();
+  auto a = make_darray(
+    0, clsmeth->getClsStr(), 1, clsmeth->getFuncStr()).detach();
   decRefClsMeth(clsmeth);
   return a;
 }
@@ -282,7 +283,7 @@ ArrayData* convClsMethToDArrHealper(ClsMethDataRef clsmeth) {
 ArrayData* convClsMethToDictHealper(ClsMethDataRef clsmeth) {
   raiseClsMethConvertWarningHelper("dict");
   auto a = make_dict_array(
-    0, clsmeth->getCls(), 1, clsmeth->getFunc()).detach();
+    0, clsmeth->getClsStr(), 1, clsmeth->getFuncStr()).detach();
   decRefClsMeth(clsmeth);
   return a;
 }
@@ -290,8 +291,7 @@ ArrayData* convClsMethToDictHealper(ClsMethDataRef clsmeth) {
 ArrayData* convClsMethToKeysetHealper(ClsMethDataRef clsmeth) {
   raiseClsMethConvertWarningHelper("keyset");
   auto a = make_keyset_array(
-    const_cast<StringData*>(classToStringHelper(clsmeth->getCls())),
-    const_cast<StringData*>(funcToStringHelper(clsmeth->getFunc()))).detach();
+    clsmeth->getClsStr(), clsmeth->getFuncStr()).detach();
   decRefClsMeth(clsmeth);
   return a;
 }

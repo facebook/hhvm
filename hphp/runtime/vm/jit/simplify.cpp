@@ -2094,7 +2094,7 @@ SSATmp* simplifyConvClsMethToArr(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   if (src->hasConstVal()) {
     auto const clsmeth = src->clsmethVal();
-    auto arr = make_packed_array(clsmeth->getCls(), clsmeth->getFunc());
+    auto arr = make_packed_array(clsmeth->getClsStr(), clsmeth->getFuncStr());
     return cns(env, ArrayData::GetScalarArray(std::move(arr)));
   }
   return nullptr;
@@ -2104,7 +2104,7 @@ SSATmp* simplifyConvClsMethToVArr(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   if (src->hasConstVal()) {
     auto const clsmeth = src->clsmethVal();
-    auto arr = make_varray(clsmeth->getCls(), clsmeth->getFunc());
+    auto arr = make_varray(clsmeth->getClsStr(), clsmeth->getFuncStr());
     return cns(env, ArrayData::GetScalarArray(std::move(arr)));
   }
   return nullptr;
@@ -2114,7 +2114,7 @@ SSATmp* simplifyConvClsMethToVec(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   if (src->hasConstVal()) {
     auto const clsmeth = src->clsmethVal();
-    auto arr = make_vec_array(clsmeth->getCls(), clsmeth->getFunc());
+    auto arr = make_vec_array(clsmeth->getClsStr(), clsmeth->getFuncStr());
     return cns(env, ArrayData::GetScalarArray(std::move(arr)));
   }
   return nullptr;
@@ -2124,7 +2124,7 @@ SSATmp* simplifyConvClsMethToDArr(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   if (src->hasConstVal()) {
     auto const clsmeth = src->clsmethVal();
-    auto arr = make_darray(0, clsmeth->getCls(), 1, clsmeth->getFunc());
+    auto arr = make_darray(0, clsmeth->getClsStr(), 1, clsmeth->getFuncStr());
     return cns(env, ArrayData::GetScalarArray(std::move(arr)));
   }
   return nullptr;
@@ -2135,7 +2135,7 @@ SSATmp* simplifyConvClsMethToDict(State& env, const IRInstruction* inst) {
   if (src->hasConstVal()) {
     auto const clsmeth = src->clsmethVal();
     auto arr = make_dict_array(
-      0, clsmeth->getCls(), 1, clsmeth->getFunc());
+      0, clsmeth->getClsStr(), 1, clsmeth->getFuncStr());
     return cns(env, ArrayData::GetScalarArray(std::move(arr)));
   }
   return nullptr;

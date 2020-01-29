@@ -129,6 +129,8 @@ constexpr char CLSMETH_COMPAT_IS_ARR[] = "is_array() called on clsmeth";
 constexpr char CLSMETH_COMPAT_IS_VEC[] = "is_vec() called on clsmeth";
 constexpr char CLSMETH_COMPAT_IS_VARR[] = "is_varray() called on clsmeth";
 constexpr char CLSMETH_COMPAT_IS_ANY_ARR[] = "is_any_array() called on clsmeth";
+constexpr char CLSMETH_COMPAT_IS_SHAPE[] = "is_shape() called on clsmeth";
+constexpr char CLSMETH_COMPAT_IS_TUPLE[] = "is_tuple() called on clsmeth";
 
 constexpr char FUNC_TO_STRING_IMPLICIT[] =
   "Implicit Func to string conversion for type-hint";

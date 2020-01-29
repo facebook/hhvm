@@ -1,0 +1,228 @@
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+string(3) "Foo"
+string(3) "bar"
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+string(3) "Foo"
+string(3) "bar"
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+string(1) "o"
+string(1) "r"
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+string(1) "o"
+string(1) "r"
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+int(3)
+int(3)
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+int(3)
+int(3)
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+int(70)
+int(97)
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+int(70)
+int(97)
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+string(3) "$"
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+string(3) "$"
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+string(3) "Foo"
+string(3) "bar"
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+string(3) "Foo"
+string(3) "bar"
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+string(1) "o"
+string(1) "r"
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+string(1) "o"
+string(1) "r"
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+int(3)
+int(3)
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+int(3)
+int(3)
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+int(70)
+int(97)
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+int(70)
+int(97)
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+string(3) "$"
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+string(3) "$"
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+string(3) "Foo"
+string(3) "bar"
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+string(3) "Foo"
+string(3) "bar"
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+string(1) "o"
+string(1) "r"
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+string(1) "o"
+string(1) "r"
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+int(3)
+int(3)
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+int(3)
+int(3)
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+int(70)
+int(97)
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+int(70)
+int(97)
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+string(3) "$"
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+string(3) "$"
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+string(3) "Foo"
+string(3) "bar"
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+string(3) "Foo"
+string(3) "bar"
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+string(1) "o"
+string(1) "r"
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+string(1) "o"
+string(1) "r"
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+int(3)
+int(3)
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+int(3)
+int(3)
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+int(70)
+int(97)
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+int(70)
+int(97)
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+string(3) "$"
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+string(3) "$"
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+string(3) "Foo"
+string(3) "bar"
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+string(3) "Foo"
+string(3) "bar"
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+string(1) "o"
+string(1) "r"
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+string(1) "o"
+string(1) "r"
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+int(3)
+int(3)
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+int(3)
+int(3)
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+int(70)
+int(97)
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+int(70)
+int(97)
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+string(3) "$"
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+string(3) "$"
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+string(3) "Foo"
+string(3) "bar"
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+string(3) "Foo"
+string(3) "bar"
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+string(1) "o"
+string(1) "r"
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+string(1) "o"
+string(1) "r"
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+int(3)
+int(3)
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+int(3)
+int(3)
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+int(70)
+int(97)
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+int(70)
+int(97)
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+string(3) "$"
+** CAST: clsmeth -> varray
+** CAST: clsmeth -> varray
+string(3) "$"

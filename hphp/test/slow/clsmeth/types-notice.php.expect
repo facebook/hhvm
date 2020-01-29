@@ -1,0 +1,189 @@
+handle_error(): [8]: is_any_array() called on clsmeth
+$m is arraylike: True
+handle_error(): [8]: is_shape() called on clsmeth
+$m is shape(str,str): True
+handle_error(): [8]: is_shape() called on clsmeth
+$m is shape(...): True
+$m is Traversable: True
+$m is Container: True
+handle_error(): [8]: is_tuple() called on clsmeth
+$m is (string,string): True
+handle_error(): [8]: Implicit clsmeth to varray conversion
+$m[0] is string: True
+handle_error(): [8]: Implicit clsmeth to varray conversion
+$m[1] is string: True
+handle_error(): [8]: is_any_array() called on clsmeth
+handle_error(): [8]: is_shape() called on clsmeth
+handle_error(): [8]: is_shape() called on clsmeth
+handle_error(): [8]: is_tuple() called on clsmeth
+handle_error(): [8]: Implicit clsmeth to varray conversion
+handle_error(): [8]: Implicit clsmeth to varray conversion
+handle_error(): [8]: Implicit clsmeth to varray conversion
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+handle_error(): [8]: is_any_array() called on clsmeth
+$m is arraylike: True
+handle_error(): [8]: is_shape() called on clsmeth
+$m is shape(str,str): True
+handle_error(): [8]: is_shape() called on clsmeth
+$m is shape(...): True
+$m is Traversable: True
+$m is Container: True
+handle_error(): [8]: is_tuple() called on clsmeth
+$m is (string,string): True
+handle_error(): [8]: Implicit clsmeth to varray conversion
+$m[0] is string: True
+handle_error(): [8]: Implicit clsmeth to varray conversion
+$m[1] is string: True
+handle_error(): [8]: is_any_array() called on clsmeth
+handle_error(): [8]: is_shape() called on clsmeth
+handle_error(): [8]: is_shape() called on clsmeth
+handle_error(): [8]: is_tuple() called on clsmeth
+handle_error(): [8]: Implicit clsmeth to varray conversion
+handle_error(): [8]: Implicit clsmeth to varray conversion
+handle_error(): [8]: Implicit clsmeth to varray conversion
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+handle_error(): [8]: is_any_array() called on clsmeth
+$m is arraylike: True
+handle_error(): [8]: is_shape() called on clsmeth
+$m is shape(str,str): True
+handle_error(): [8]: is_shape() called on clsmeth
+$m is shape(...): True
+$m is Traversable: True
+$m is Container: True
+handle_error(): [8]: is_tuple() called on clsmeth
+$m is (string,string): True
+handle_error(): [8]: Implicit clsmeth to varray conversion
+$m[0] is string: True
+handle_error(): [8]: Implicit clsmeth to varray conversion
+$m[1] is string: True
+handle_error(): [8]: is_any_array() called on clsmeth
+handle_error(): [8]: is_shape() called on clsmeth
+handle_error(): [8]: is_shape() called on clsmeth
+handle_error(): [8]: is_tuple() called on clsmeth
+handle_error(): [8]: Implicit clsmeth to varray conversion
+handle_error(): [8]: Implicit clsmeth to varray conversion
+handle_error(): [8]: Implicit clsmeth to varray conversion
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+handle_error(): [8]: is_any_array() called on clsmeth
+$m is arraylike: True
+handle_error(): [8]: is_shape() called on clsmeth
+$m is shape(str,str): True
+handle_error(): [8]: is_shape() called on clsmeth
+$m is shape(...): True
+$m is Traversable: True
+$m is Container: True
+handle_error(): [8]: is_tuple() called on clsmeth
+$m is (string,string): True
+handle_error(): [8]: Implicit clsmeth to varray conversion
+$m[0] is string: True
+handle_error(): [8]: Implicit clsmeth to varray conversion
+$m[1] is string: True
+handle_error(): [8]: is_any_array() called on clsmeth
+handle_error(): [8]: is_shape() called on clsmeth
+handle_error(): [8]: is_shape() called on clsmeth
+handle_error(): [8]: is_tuple() called on clsmeth
+handle_error(): [8]: Implicit clsmeth to varray conversion
+handle_error(): [8]: Implicit clsmeth to varray conversion
+handle_error(): [8]: Implicit clsmeth to varray conversion
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+handle_error(): [8]: is_any_array() called on clsmeth
+$m is arraylike: True
+handle_error(): [8]: is_shape() called on clsmeth
+$m is shape(str,str): True
+handle_error(): [8]: is_shape() called on clsmeth
+$m is shape(...): True
+$m is Traversable: True
+$m is Container: True
+handle_error(): [8]: is_tuple() called on clsmeth
+$m is (string,string): True
+handle_error(): [8]: Implicit clsmeth to varray conversion
+$m[0] is string: True
+handle_error(): [8]: Implicit clsmeth to varray conversion
+$m[1] is string: True
+handle_error(): [8]: is_any_array() called on clsmeth
+handle_error(): [8]: is_shape() called on clsmeth
+handle_error(): [8]: is_shape() called on clsmeth
+handle_error(): [8]: is_tuple() called on clsmeth
+handle_error(): [8]: Implicit clsmeth to varray conversion
+handle_error(): [8]: Implicit clsmeth to varray conversion
+handle_error(): [8]: Implicit clsmeth to varray conversion
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+handle_error(): [8]: is_any_array() called on clsmeth
+$m is arraylike: True
+handle_error(): [8]: is_shape() called on clsmeth
+$m is shape(str,str): True
+handle_error(): [8]: is_shape() called on clsmeth
+$m is shape(...): True
+$m is Traversable: True
+$m is Container: True
+handle_error(): [8]: is_tuple() called on clsmeth
+$m is (string,string): True
+handle_error(): [8]: Implicit clsmeth to varray conversion
+$m[0] is string: True
+handle_error(): [8]: Implicit clsmeth to varray conversion
+$m[1] is string: True
+handle_error(): [8]: is_any_array() called on clsmeth
+handle_error(): [8]: is_shape() called on clsmeth
+handle_error(): [8]: is_shape() called on clsmeth
+handle_error(): [8]: is_tuple() called on clsmeth
+handle_error(): [8]: Implicit clsmeth to varray conversion
+handle_error(): [8]: Implicit clsmeth to varray conversion
+handle_error(): [8]: Implicit clsmeth to varray conversion
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+handle_error(): [8]: is_array() called on clsmeth
+handle_error(): [8]: is_shape() called on clsmeth
+$m === ($m as shape(...)): True
+$m === ($m as Traversable): True
+handle_error(): [8]: is_array() called on clsmeth
+handle_error(): [8]: is_shape() called on clsmeth
+$m === ($m as shape(...)): True
+$m === ($m as Traversable): True
+handle_error(): [8]: is_array() called on clsmeth
+handle_error(): [8]: is_shape() called on clsmeth
+$m === ($m as shape(...)): True
+$m === ($m as Traversable): True
+handle_error(): [8]: is_array() called on clsmeth
+handle_error(): [8]: is_shape() called on clsmeth
+$m === ($m as shape(...)): True
+handle_error(): [8]: is_any_array() called on clsmeth
+$m === ($m as arraylike): True
+handle_error(): [8]: is_array() called on clsmeth
+handle_error(): [8]: is_shape() called on clsmeth
+$m === ($m as shape(...)): True
+handle_error(): [8]: is_any_array() called on clsmeth
+$m === ($m as arraylike): True
+handle_error(): [8]: is_array() called on clsmeth
+handle_error(): [8]: is_shape() called on clsmeth
+$m === ($m as shape(...)): True
+handle_error(): [8]: is_any_array() called on clsmeth
+$m === ($m as arraylike): True

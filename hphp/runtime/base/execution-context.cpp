@@ -1796,14 +1796,23 @@ TypedValue ExecutionContext::invokeFuncFew(
                         numArgs, doEnterVM);
 }
 
-static void prepareAsyncFuncEntry(ActRec* enterFnAr, Resumable* resumable) {
+static void prepareAsyncFuncEntry(ActRec* enterFnAr,
+                                  Resumable* resumable,
+                                  bool willUnwind) {
   assertx(enterFnAr);
   assertx(enterFnAr->func()->isAsync());
   assertx(isResumed(enterFnAr));
   assertx(resumable);
 
   vmfp() = enterFnAr;
-  vmpc() = enterFnAr->func()->unit()->at(resumable->resumeFromAwaitOffset());
+  // If we're going to unwind, we need to resume at the offset we
+  // suspended at, so we look up the correct catch trace (not the one
+  // for the next op).
+  vmpc() = enterFnAr->func()->unit()->at(
+    willUnwind
+      ? resumable->suspendOffset()
+      : resumable->resumeFromAwaitOffset()
+  );
   EventHook::FunctionResumeAwait(enterFnAr);
 }
 
@@ -1828,7 +1837,7 @@ void ExecutionContext::resumeAsyncFunc(Resumable* resumable,
   SCOPE_EXIT { popVMState(); };
 
   enterVM(fp, [&] {
-    prepareAsyncFuncEntry(fp, resumable);
+    prepareAsyncFuncEntry(fp, resumable, false);
 
     const bool useJit = RID().getJit();
     if (LIKELY(useJit && resumable->resumeAddr())) {
@@ -1859,7 +1868,7 @@ void ExecutionContext::resumeAsyncFuncThrow(Resumable* resumable,
   SCOPE_EXIT { popVMState(); };
 
   enterVMCustomHandler(fp, [&] {
-    prepareAsyncFuncEntry(fp, resumable);
+    prepareAsyncFuncEntry(fp, resumable, true);
     unwindVM(exception);
   });
 }

@@ -231,3 +231,18 @@ trait TFlob {
     $_ = static::f2();
   }
 }
+
+final class Flobby extends FlobBase {
+  use TFlobby;
+}
+
+trait TFlobby {
+  final public function g(): void {
+    $flobby = $this->asFlobby();
+    $flobby->f1();
+  }
+
+  private function asFlobby(): Flobby {
+    return $this as Flobby;
+  }
+}

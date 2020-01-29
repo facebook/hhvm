@@ -761,8 +761,6 @@ let get_member is_method env class_ mid =
     in
     Option.iter env.decl_env.droot (fun root -> Typing_deps.add_idep root dep)
   in
-  add_dep (Cls.name class_);
-
   (* The type of a member is stored separately in the heap. This means that
    * any user of the member also has a dependency on the class where the member
    * originated.
@@ -773,7 +771,9 @@ let get_member is_method env class_ mid =
     else
       Cls.get_prop class_ mid
   in
-  Option.iter ce_opt (fun ce -> add_dep ce.ce_origin);
+  Option.iter ce_opt (fun ce ->
+      add_dep (Cls.name class_);
+      add_dep ce.ce_origin);
   ce_opt
 
 let suggest_member is_method class_ mid =

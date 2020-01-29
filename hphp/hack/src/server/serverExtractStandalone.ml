@@ -1311,6 +1311,7 @@ let get_dependency_origin ctx cls (dep : 'a Typing_deps.Dep.variant) =
       | _ -> raise UnexpectedDependency))
 
 let get_dependencies ctx target =
+  let filename = get_filename ctx target in
   let dependencies = HashSet.create 0 in
   let add_dependency
       (root : Typing_deps.Dep.dependent Typing_deps.Dep.variant)
@@ -1318,7 +1319,6 @@ let get_dependencies ctx target =
     if is_relevant_dependency target root then do_add_dep ctx dependencies obj
   in
   Typing_deps.add_dependency_callback "add_dependency" add_dependency;
-  let filename = get_filename ctx target in
   (* Collect dependencies through side effects of typechecking and remove
    * the target function/method from the set of dependencies to avoid
    * declaring it twice.

@@ -173,6 +173,7 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
             "\\with_IEWGPCOUP",
             "\\with_contra_tparam",
             "\\WithLateInit::getCount",
+            "\\TFlobby::g",
         ]
 
         for function_name in function_names:

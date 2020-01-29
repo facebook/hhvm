@@ -39,9 +39,11 @@ void MemoryManager::checkSampling(size_t bytes) {
   if (allocated < m_nextSample) return;
   auto const usage = m_stats.mmUsage();
   s_samples->addAllocSample(usage, bytes);
-  // Get native stacktrace here.
-  StackTrace st(StackTrace::Force{});
-  s_samples->back().nativeStack = st;
+  if (RuntimeOption::EvalHeapAllocSampleNativeStack) {
+    // Get native stacktrace here.
+    StackTrace st(StackTrace::Force{});
+    s_samples->back().nativeStack = st;
+  }
   assertx(RuntimeOption::EvalHeapAllocSampleBytes > 0);
   do {
     m_nextSample += RuntimeOption::EvalHeapAllocSampleBytes;

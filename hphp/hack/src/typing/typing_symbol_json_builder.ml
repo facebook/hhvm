@@ -165,7 +165,7 @@ let container_decl_predicate container_type =
   match container_type with
   | ClassContainer -> ("class_", ClassDeclaration)
   | InterfaceContainer -> ("interface_", InterfaceDeclaration)
-  | TraitContainer -> ("trait_", TraitDeclaration)
+  | TraitContainer -> ("trait", TraitDeclaration)
 
 let get_container_kind clss =
   match clss.c_kind with

@@ -61,7 +61,7 @@ max_workers = 2
             "hack.TraitDefinition.1": ["declaration"],
             "name": ["key"],
             "declaration": ["container", int],
-            "container": ["class_", "interface_", "trait_"],
+            "container": ["class_", "interface_", "trait"],
             "id": [int],
             "key": [str],
         }

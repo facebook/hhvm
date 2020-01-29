@@ -554,15 +554,10 @@ struct SimpleParser {
           ? ArrayData::CreateVArray()
           : PackedArray::MakeVArrayNatural(top - fp, fp);
       }
-      if (container_type == JSONContainerType::DARRAYS) {
-        return top == fp
-          ? ArrayData::CreateDArray()
-          : MixedArray::MakeDArrayNatural(top - fp, fp);
-      }
-      assertx(container_type == JSONContainerType::PHP_ARRAYS);
+      assertx(container_type == JSONContainerType::DARRAYS);
       return top == fp
-        ? ArrayData::Create()
-        : PackedArray::MakePackedNatural(top - fp, fp);
+        ? ArrayData::CreateDArray()
+        : MixedArray::MakeDArrayNatural(top - fp, fp);
     }();
     top = fp;
     pushArrayData(arr);
@@ -597,16 +592,11 @@ struct SimpleParser {
         ret->setLegacyArray(true);
         return ret;
       }
-      if (container_type == JSONContainerType::DARRAYS ||
-          container_type == JSONContainerType::DARRAYS_AND_VARRAYS) {
-        return top == fp
-          ? ArrayData::CreateDArray()
-          : MixedArray::MakeDArray((top - fp) >> 1, fp)->asArrayData();
-      }
-      assertx(container_type == JSONContainerType::PHP_ARRAYS);
+      assertx(container_type == JSONContainerType::DARRAYS ||
+              container_type == JSONContainerType::DARRAYS_AND_VARRAYS);
       return top == fp
-        ? ArrayData::Create()
-        : MixedArray::MakeMixed((top - fp) >> 1, fp)->asArrayData();
+        ? ArrayData::CreateDArray()
+        : MixedArray::MakeDArray((top - fp) >> 1, fp)->asArrayData();
     }();
     // MixedArray::MakeMixed can return nullptr if there are duplicate keys
     if (!arr) return false;
@@ -1063,8 +1053,7 @@ static void object_set(const json_parser* json,
         auto const tv = var.asTypedValue();
         *tv = arrprov::tagTVKnown(*tv, *json->prov_tag);
       }
-    } else if (container_type == JSONContainerType::DARRAYS ||
-               container_type == JSONContainerType::DARRAYS_AND_VARRAYS) {
+    } else {
       int64_t i;
       if (key.get()->isStrictlyInteger(i)) {
         forceToDArray(var).set(i, value);
@@ -1074,13 +1063,6 @@ static void object_set(const json_parser* json,
       if (RO::EvalArrayProvenance && json->prov_tag) {
         auto const tv = var.asTypedValue();
         *tv = arrprov::tagTVKnown(*tv, *json->prov_tag);
-      }
-    } else {
-      int64_t i;
-      if (key.get()->isStrictlyInteger(i)) {
-        forceToArray(var).set(i, value);
-      } else {
-        forceToArray(var).set(key, value);
       }
     }
   }
@@ -1131,7 +1113,7 @@ JSONContainerType get_container_type_from_options(int64_t options) {
     return JSONContainerType::LEGACY_HACK_ARRAYS;
   }
 
-  return JSONContainerType::PHP_ARRAYS;
+  return JSONContainerType::DARRAYS;
 }
 
 /**
@@ -1158,11 +1140,6 @@ JSONContainerType get_container_type_from_options(int64_t options) {
  * DARRAYS              | false    | "{}"       => stdClass
  * DARRAYS              | true     | "[]"       => darray
  * DARRAYS              | false    | "[]"       => stdClass
- *
- * PHP_ARRAYS           | true     | "{}"       => array
- * PHP_ARRAYS           | false    | "{}"       => stdClass
- * PHP_ARRAYS           | true     | "[]"       => array
- * PHP_ARRAYS           | false    | "[]"       => stdClass
  *
  * DARRAYS_AND_VARRAYS  | true     | "{}"       => darray
  * DARRAYS_AND_VARRAYS  | false    | "{}"       => stdClass
@@ -1351,7 +1328,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
               arr->setLegacyArray(true);
               top = arr;
             } else {
-              top = Array::Create();
+              top = Array::CreateDArray();
             }
           /*<fb>*/
           }
@@ -1430,7 +1407,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
             arr->setLegacyArray(true);
             top = arr;
           } else {
-            top = Array::Create();
+            top = Array::CreateDArray();
           }
           /*</fb>*/
           json->stack[json->top].key = copy_and_clear(*key);

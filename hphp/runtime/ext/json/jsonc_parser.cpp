@@ -108,8 +108,8 @@ Variant json_type_array_to_variant(json_object *new_obj, const bool assoc,
     case JSONContainerType::HACK_ARRAYS:
       var = Array::CreateVec();
       break;
-    case JSONContainerType::PHP_ARRAYS:
-      var = Array::Create();
+    case JSONContainerType::DARRAYS:
+      var = Array::CreateDArray();
       break;
   }
 
@@ -141,8 +141,8 @@ Variant json_type_object_to_variant(json_object *new_obj, const bool assoc,
       case JSONContainerType::HACK_ARRAYS:
         var = Array::CreateDict();
         break;
-      case JSONContainerType::PHP_ARRAYS:
-        var = Array::Create();
+      case JSONContainerType::DARRAYS:
+        var = Array::CreateDArray();
         break;
     }
   }
@@ -171,8 +171,8 @@ Variant json_type_object_to_variant(json_object *new_obj, const bool assoc,
         case JSONContainerType::HACK_ARRAYS:
           forceToDict(var).set(key, tmpvar);
           break;
-        case JSONContainerType::PHP_ARRAYS:
-          forceToArray(var).set(key, tmpvar);
+        case JSONContainerType::DARRAYS:
+          forceToDArray(var).set(key, tmpvar);
           break;
       }
     }
@@ -247,7 +247,7 @@ bool JSON_parser(Variant &return_value, const char *data, int data_len,
     //if (!(options & k_JSON_FB_LOOSE)) {
     //    json_tokener_set_flags(tok, JSON_TOKENER_STRICT);
     //}
-    JSONContainerType container_type = JSONContainerType::PHP_ARRAYS;
+    JSONContainerType container_type = JSONContainerType::DARRAYS;
     if (options & (k_JSON_FB_STABLE_MAPS | k_JSON_FB_COLLECTIONS)) {
       assoc = true;
       container_type = JSONContainerType::COLLECTIONS;

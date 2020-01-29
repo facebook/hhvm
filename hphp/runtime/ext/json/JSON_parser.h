@@ -29,7 +29,6 @@ namespace HPHP {
  * Objects are not included here.
  */
 enum class JSONContainerType {
-  PHP_ARRAYS = 1,
   COLLECTIONS = 2,
   HACK_ARRAYS = 3,
   DARRAYS = 4,

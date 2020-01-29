@@ -1704,9 +1704,15 @@ void minstr_touch(Env& env, int32_t depth) {
   while (depth--) {
     auto& ui = env.dceState.stack[env.dceState.stack.size() - 1 - depth];
     if (ui.usage != Use::Used) {
-      DEBUG_ONLY auto inserted = ui.actions.emplace(
-        env.id, DceAction { DceAction::MinstrStackFixup, 1u << depth }).second;
-      assertx(inserted);
+      auto const result = ui.actions.emplace(
+        env.id, DceAction { DceAction::MinstrStackFixup, 1u << depth }
+      );
+      if (!result.second) {
+        always_assert(
+          result.first->second.action == DceAction::MinstrStackFixup
+        );
+        result.first->second.maskOrCount |= (1u << depth);
+      }
     }
   }
 }

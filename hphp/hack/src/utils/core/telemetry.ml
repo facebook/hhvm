@@ -6,6 +6,8 @@
  *
  *)
 
+open Core_kernel
+
 type t = key_value_pair list
 
 and key_value_pair = string * Hh_json.json
@@ -27,6 +29,26 @@ let string_
     | Some truncate -> String_utils.truncate truncate value
   in
   string_ key value :: telemetry
+
+let array_
+    ?(truncate_elems : int option)
+    ?(truncate_len : int option)
+    (telemetry : t)
+    ~(key : string)
+    ~(value : string list) : t =
+  let value =
+    match truncate_elems with
+    | None -> value
+    | Some truncate_elems -> List.take value truncate_elems
+  in
+  let value =
+    match truncate_len with
+    | None -> value
+    | Some truncate_len ->
+      List.map ~f:(fun s -> String_utils.truncate truncate_len s) value
+  in
+  let value = List.map ~f:(fun s -> Hh_json.JSON_String s) value in
+  (key, Hh_json.JSON_Array value) :: telemetry
 
 let bool_ (key : string) (value : bool) : key_value_pair =
   (key, Hh_json.JSON_Bool value)

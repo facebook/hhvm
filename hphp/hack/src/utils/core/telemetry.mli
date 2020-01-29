@@ -14,6 +14,14 @@ val to_string : t -> string
 
 val string_ : ?truncate:int -> t -> key:string -> value:string -> t
 
+val array_ :
+  ?truncate_elems:int ->
+  ?truncate_len:int ->
+  t ->
+  key:string ->
+  value:string list ->
+  t
+
 val bool_ : t -> key:string -> value:bool -> t
 
 val int_opt : t -> key:string -> value:int option -> t

@@ -5,9 +5,40 @@
 
 const TIMEOUT_SECONDS = 300;
 
+// NOTE: The "HPHP_HOME" environment variable can be set (to ".../fbcode"), to
+// define "hphp_home()" and (indirectly) "test_dir()".  Otherwise, we will use
+// "__DIR__" as "test_dir()", and its grandparent directory for "hphp_home()"
+// (unless we are testing a dso extensions).
+
+<<__Memoize>>
 function is_testing_dso_extension() {
+  $home = getenv("HPHP_HOME");
+  if ($home is string) {
+    return false;
+  }
   // detecting if we're running outside of the hhvm codebase.
-  return !is_file(__DIR__ . "/../../hphp/test/run");
+  return !is_file(__DIR__."/../../hphp/test/run");
+}
+
+<<__Memoize>>
+function hphp_home() {
+  $home = getenv("HPHP_HOME");
+  if ($home is string) {
+    return realpath($home);
+  }
+  if (is_testing_dso_extension()) {
+    return realpath(__DIR__);
+  }
+  return realpath(__DIR__."/../..");
+}
+
+<<__Memoize>>
+function test_dir(): string {
+  $home = getenv("HPHP_HOME");
+  if ($home is string) {
+    return realpath($home)."/hphp/test";
+  }
+  return __DIR__;
 }
 
 function get_expect_file_and_type($test, $options) {
@@ -69,12 +100,12 @@ function jit_serialize_option($cmd, $test, $options, $serialize) {
 }
 
 function usage() {
-  $argv = $GLOBALS['argv'];
+  $argv = \HH\global_get('argv');
   return "usage: {$argv[0]} [-m jit|interp] [-r] <test/directories>";
 }
 
 function help() {
-  $argv = $GLOBALS['argv'];
+  $argv = \HH\global_get('argv');
   $ztestexample = 'test/zend/good/*/*z*.php'; // sep. for syntax highlighting.
   $help = <<<EOT
 
@@ -250,13 +281,6 @@ function check_for_multiple_default_binaries($typechecker) {
   }
   $msg .= " " . $path_option . " /path/to/binary slow\n";
   error($msg);
-}
-
-function hphp_home() {
-  if (is_testing_dso_extension()) {
-    return realpath(__DIR__);
-  }
-  return realpath(__DIR__.'/../..');
 }
 
 function hhvm_path() {
@@ -540,7 +564,7 @@ function get_options($argv) {
     }
   }
 
-  $GLOBALS['recorded_options'] = $recorded;
+  \HH\global_set('recorded_options', $recorded);
 
   if (isset($options['hhbbc2'])) {
     $options['repo-separate'] = true;
@@ -587,7 +611,7 @@ function get_options($argv) {
 }
 
 /*
- * Return the path to $test relative to __DIR__, or false if __DIR__ does not
+ * Return the path to $test relative to $base, or false if $base does not
  * contain test.
  */
 function canonical_path_from_base($test, $base) {
@@ -608,7 +632,7 @@ function canonical_path_from_base($test, $base) {
 }
 
 function canonical_path($test) {
-  $attempt = canonical_path_from_base($test,__DIR__);
+  $attempt = canonical_path_from_base($test, test_dir());
   if ($attempt === false) {
    return canonical_path_from_base($test, hphp_home());
   } else {
@@ -638,18 +662,20 @@ function find_test_files($file) {
     'zend_tests'  => 'hphp/test/zend/good/tests',
   );
 
-  if (isset($mappage[$file])) {
-    $matches = glob(hphp_home().'/'.$mappage[$file]);
-    if (count($matches) == 0) {
-      error(sprintf(
-        "Convenience test name '%s' is recognized but does not match any test ".
-        "files (pattern = '%s', hphp_home = '%s')",
-        $file, $mappage[$file], hphp_home()));
+  $pattern = $mappage[$file] ?? null;
+  if ($pattern is nonnull) {
+    $pattern = hphp_home().'/'.$pattern;
+    $matches = glob($pattern);
+    if (count($matches) === 0) {
+      error(
+        "Convenience test name '$file' is recognized but does not match ".
+        "any test files (pattern = '$pattern')",
+      );
     }
     return $matches;
-  } else {
-    return array($file, );
   }
+
+  return array($file);
 }
 
 // Some tests have to be run together in the same test bucket, serially, one
@@ -783,7 +809,7 @@ function find_tests($files, array $options = null) {
 }
 
 function list_tests($files, $options) {
-  $args = implode(' ', $GLOBALS['recorded_options']);
+  $args = implode(' ', \HH\global_get('recorded_options'));
 
   foreach (find_tests($files, $options) as $test) {
     print str_replace('\\', '\\\\',
@@ -815,7 +841,7 @@ function find_file_for_dir($dir, $name) {
     }
     $dir = dirname($dir);
   }
-  $file = __DIR__.'/'.$name;
+  $file = test_dir().'/'.$name;
   if (file_exists($file)) {
     return $file;
   }
@@ -1318,9 +1344,9 @@ class Queue {
 
   // If a message "body" is larger than CHUNK bytes, then writers must break
   // it into chunks, and send all but the last chunk with type 0.  The reader
-  // collects those chunks in this dict (indexed by pid), until the final chunk
+  // collects those chunks in this Map (indexed by pid), until the final chunk
   // is received, and the chunks can be reassembled.
-  private dict $partials = dict[];
+  private Map<int, Vector<string>> $partials = Map {};
 
 
   // NOTE: Only certain directories support "posix_mkfifo()".
@@ -1398,15 +1424,13 @@ class Queue {
       $this->validate($pid, $type, $blen);
       $body = $this->read($blen);
       if ($type === 0) {
-        if (isset($this->partials[$pid])) {
-          $this->partials[$pid][] = $body;
-        } else {
-          $this->partials[$pid] = vec[$body];
-        }
+        $this->partials[$pid] ??= Vector {};
+        $this->partials[$pid][] = $body;
       } else {
-        if (isset($this->partials[$pid])) {
-          $this->partials[$pid][] = $body;
-          $body = \join("", $this->partials[$pid]);
+        $chunks = $this->partials[$pid] ?? null;
+        if ($chunks is nonnull) {
+          $chunks[] = $body;
+          $body = \join("", $chunks);
           unset($this->partials[$pid]);
         }
         return tuple($pid, $type, $body);
@@ -1859,6 +1883,7 @@ class Status {
     return strpos($stty, 'erase = <undef>') === false;
   }
 
+  <<__Memoize>>
   public static function getSTTY() {
     $descriptorspec = array(1 => array("pipe", "w"), 2 => array("pipe", "w"));
     $pipes = null;
@@ -2477,7 +2502,7 @@ function timeout_prefix() {
   if (is_executable('/usr/bin/timeout')) {
     return '/usr/bin/timeout ' . TIMEOUT_SECONDS . ' ';
   } else {
-    return __DIR__.'/../tools/timeout.sh -t ' . TIMEOUT_SECONDS . ' ';
+    return hphp_home() . '/hphp/tools/timeout.sh -t ' . TIMEOUT_SECONDS . ' ';
   }
 }
 
@@ -2969,7 +2994,7 @@ function print_failure($argv, $results, $options) {
   print
     make_header("Re-run just the failing tests:") .
     str_replace("run.php", "run", $argv[0]) . ' ' .
-    implode(' ', $GLOBALS['recorded_options']) .
+    implode(' ', \HH\global_get('recorded_options')) .
     sprintf(' $(cat %s)%s', $failing_tests_file, "\n");
 }
 
@@ -3497,5 +3522,5 @@ function main($argv) {
 
 <<__EntryPoint>>
 function run_main(): void {
-  exit(main($GLOBALS['argv']));
+  exit(main(\HH\global_get('argv')));
 }

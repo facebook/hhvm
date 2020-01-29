@@ -2389,7 +2389,7 @@ let format_string pos snippet s class_pos fname class_suggest =
   add_list
     (Typing.err_code Typing.FormatString)
     [
-      (pos, "I don't understand the format string " ^ snippet ^ " in " ^ s);
+      (pos, "Invalid format string " ^ snippet ^ " in " ^ s);
       ( class_pos,
         "You can add a new format specifier by adding "
         ^ fname

@@ -25,6 +25,7 @@ module Reason = Typing_reason
 module Inst = Decl_instantiate
 module Type = Typing_ops
 module Env = Typing_env
+module Inf = Typing_inference_env
 module LEnv = Typing_lenv
 module Async = Typing_async
 module SubType = Typing_subtype
@@ -1592,7 +1593,8 @@ and expr
       ?expected
       env
       e
-  with e ->
+  with Inf.InconsistentTypeVarState _ as e ->
+    (* we don't want to catch unwanted exceptions here, eg Timeouts *)
     let stack = Caml.Printexc.get_raw_backtrace () in
     let pos = Pos.string (Pos.to_absolute p) in
     prerr_endline

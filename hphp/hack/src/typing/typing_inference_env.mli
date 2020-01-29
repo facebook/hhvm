@@ -8,6 +8,8 @@
 
 open Typing_defs
 
+exception InconsistentTypeVarState of string
+
 (** contains the inference env, containing all the information necessary to
 perform type inference, including global type variables. *)
 type t

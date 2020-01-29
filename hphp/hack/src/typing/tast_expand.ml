@@ -10,6 +10,7 @@
 open Hh_prelude
 open Typing_defs
 module T = Aast
+module MakeType = Typing_make_type
 
 (* Eliminate residue of type inference:
  *   1. Tvars are replaced (deep) by the expanded type
@@ -55,7 +56,7 @@ let expand_ty ?var_hook ?pos env ty =
           mk (p, Tvar v))
       (* TODO TAST: replace with Tfun type *)
       | (p, Tanon (x, y)) -> mk (p, Tanon (x, y))
-      | (p, Terr) -> mk (p, Terr)
+      | (p, Terr) -> MakeType.err p
       (* TODO(T36532263) see if that needs updating *)
       | (p, Tpu (base, enum)) -> mk (p, Tpu (exp_ty base, enum))
       | (p, Tpu_type_access (base, enum, member, tyname)) ->

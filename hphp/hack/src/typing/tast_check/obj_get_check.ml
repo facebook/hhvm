@@ -26,7 +26,7 @@ let handler =
                   env
                   ty
                   (mk (Reason.none, Typing_defs.make_tany ()))
-             || Tast_env.is_sub_type_for_union env ty (mk (Reason.none, Terr))
+             || Tast_env.is_sub_type_for_union env ty (MakeType.err Reason.none)
         ->
         ()
       | (_, Obj_get (_, ((p, _), Lvar _), _)) -> Errors.lvar_in_obj_get p

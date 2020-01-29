@@ -69,7 +69,7 @@ let overload_extract_from_awaitable env ~p opt_ty_maybe =
       let return_type =
         match get_node e_opt_ty with
         | Tany _ -> mk (r, Typing_defs.make_tany ())
-        | Terr -> mk (r, Terr)
+        | Terr -> MakeType.err r
         | Tdynamic -> MakeType.dynamic r
         | Tnonnull
         | Tarraykind _

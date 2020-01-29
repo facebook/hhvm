@@ -92,7 +92,7 @@ let wrap_awaitable env p rty =
   | Ast_defs.FGenerator
   (* Is an error, but caught in NastCheck. *)
   | Ast_defs.FAsyncGenerator ->
-    mk (Reason.Rnone, TUtils.terr env)
+    TUtils.terr env Reason.Rnone
   | Ast_defs.FAsync ->
     MakeType.awaitable (Reason.Rret_fun_kind (p, Ast_defs.FAsync)) rty
 

@@ -96,6 +96,8 @@ let tyvar r v = mk (r, Tvar v)
 
 let generic r n = mk (r, Tgeneric n)
 
+let err r = mk (r, Terr)
+
 let nullable_decl r ty =
   (* Cheap avoidance of double nullable *)
   match deref ty with

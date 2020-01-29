@@ -113,7 +113,7 @@ let env_with_self ?pos ?(quiet = false) env =
 
 let rec localize ~ety_env env (dty : decl_ty) =
   match deref dty with
-  | (r, Terr) -> (env, mk (r, TUtils.terr env))
+  | (r, Terr) -> (env, TUtils.terr env r)
   | (r, Tany _) -> (env, mk (r, TUtils.tany env))
   | (r, Tvar var) -> Env.new_global_tyvar env var r
   | (r, ((Tnonnull | Tprim _ | Tdynamic) as x)) -> (env, mk (r, x))
@@ -325,7 +325,7 @@ let rec localize ~ety_env env (dty : decl_ty) =
       Errors.pu_localize
         (Reason.to_pos r)
         (Typing_print.full_decl (Typing_env.get_ctx env) dty);
-      (env, mk (r, Typing_utils.terr env)))
+      (env, TUtils.terr env r))
 
 and localize_tparams ~ety_env env pos tyl tparams =
   let length = min (List.length tyl) (List.length tparams) in

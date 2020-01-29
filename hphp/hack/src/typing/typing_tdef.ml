@@ -25,7 +25,7 @@ let expand_typedef_ ?(force_expand = false) ety_env env r x argl =
   let pos = Reason.to_pos r in
   if Typing_defs.has_expanded ety_env x then (
     Errors.cyclic_typedef pos;
-    (env, (ety_env, mk (r, Terr)))
+    (env, (ety_env, MakeType.err r))
   ) else
     let {
       td_pos;

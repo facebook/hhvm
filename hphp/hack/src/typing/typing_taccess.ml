@@ -356,7 +356,7 @@ let expand_with_env
     with NoTypeConst error ->
       if not ignore_errors then error ();
       let reason = make_reason env Reason.Rnone id root in
-      (env, mk (reason, Typing_utils.terr env))
+      (env, Typing_utils.terr env reason)
   in
   (* If type constant has type this::ID and method has associated condition
      type ROOTCOND_TY for the receiver - check if condition type has type

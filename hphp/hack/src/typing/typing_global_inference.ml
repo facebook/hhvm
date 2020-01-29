@@ -186,10 +186,7 @@ module StateSolvedGraph = struct
     let env =
       List.fold vars ~init:env ~f:(fun env var ->
           if StateErrors.has_error errors var then
-            Typing_solver.bind
-              env
-              var
-              (Typing_defs.mk (Typing_reason.Rnone, Typing_defs.Terr))
+            Typing_solver.bind env var (MakeType.err Typing_reason.Rnone)
           else
             env)
     in

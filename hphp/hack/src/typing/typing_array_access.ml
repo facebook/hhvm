@@ -22,7 +22,7 @@ module Partial = Partial_provider
 module GenericRules = Typing_generic_rules
 open String.Replace_polymorphic_compare
 
-let err_witness env p = mk (Reason.Rwitness p, TUtils.terr env)
+let err_witness env p = TUtils.terr env (Reason.Rwitness p)
 
 let error_array env p ty =
   Errors.array_access p (get_pos ty) (Typing_print.error env ty);

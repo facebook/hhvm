@@ -27,7 +27,7 @@ module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 module Partial = Partial_provider
 
-let err_witness env p = mk (Reason.Rwitness p, Typing_utils.terr env)
+let err_witness env p = TUtils.terr env (Reason.Rwitness p)
 
 let smember_not_found pos ~is_const ~is_method class_ member_name on_error =
   let kind =
@@ -648,7 +648,7 @@ and obj_get_
           id_str
           id_pos
           (Reason.to_string "This can be null" r));
-      (env, (mk (get_reason ety1, Typing_utils.terr env), []))
+      (env, (TUtils.terr env (get_reason ety1), []))
   in
   match deref ety1 with
   | (r, Tunion tyl) ->
@@ -812,7 +812,7 @@ and obj_get_
       id_str
       id_pos
       (Reason.to_string "It is unknown" r);
-    (env, (mk (r, Typing_utils.terr env), []))
+    (env, (TUtils.terr env r, []))
   | (_, _) ->
     obj_get_concrete_ty
       ~inst_meth

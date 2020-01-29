@@ -212,7 +212,7 @@ let bind env var (ty : locl_ty) =
       Errors.unification_cycle
         (get_pos ty)
         Typing_print.(with_blank_tyvars (fun () -> full_rec env var ty));
-      Env.add env var (mk (r, Terr))
+      Env.add env var (MakeType.err r)
     end else
       Env.add env var ty
   in
@@ -497,7 +497,7 @@ let ty_equal_shallow env ty1 ty2 =
 let union_any_if_any_in_lower_bounds env ty lower_bounds =
   let r = Reason.none in
   let any = LoclType (mk (r, Typing_defs.make_tany ()))
-  and err = LoclType (mk (r, Terr)) in
+  and err = LoclType (MakeType.err r) in
   let (env, ty) =
     match ITySet.find_opt any lower_bounds with
     | Some (LoclType any) -> Union.union env ty any
@@ -528,7 +528,7 @@ let try_bind_to_equal_bound ~freshen env r var on_error =
     let upper_bounds = expand_all (Env.get_tyvar_upper_bounds env var) in
     let equal_bounds = ITySet.inter lower_bounds upper_bounds in
     let any = LoclType (mk (Reason.none, Typing_defs.make_tany ()))
-    and err = LoclType (mk (Reason.none, Terr)) in
+    and err = LoclType (MakeType.err Reason.none) in
     let equal_bounds = equal_bounds |> ITySet.remove any |> ITySet.remove err in
     match ITySet.choose_opt equal_bounds with
     | Some (LoclType ty) ->
@@ -762,7 +762,7 @@ let expand_type_and_solve env ~description_of_expected p ty on_error =
             (Reason.to_string "It is unknown" r);
           Env.set_tyvar_eager_solve_fail env v)
     in
-    (env, mk (Reason.Rsolve_fail p, TUtils.terr env))
+    (env, TUtils.terr env (Reason.Rsolve_fail p))
   | _ -> (env', ety)
 
 let expand_type_and_solve_eq env ty on_error =

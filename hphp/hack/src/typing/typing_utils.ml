@@ -606,14 +606,14 @@ let tany = Env.tany
 
 let decl_tany = Env.decl_tany
 
-let terr env =
+let terr env r =
   let dynamic_view_enabled =
     TypecheckerOptions.dynamic_view (Typing_env.get_tcopt env)
   in
   if dynamic_view_enabled then
-    Tdynamic
+    MakeType.dynamic r
   else
-    Terr
+    MakeType.err r
 
 (* Hacked version of Typing_subtype.try_intersect for collecting function types *)
 let add_function_type env fty logged =

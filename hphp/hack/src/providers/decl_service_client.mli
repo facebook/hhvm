@@ -6,6 +6,8 @@
  *
  *)
 
+open Core_kernel
+
 (* `t` represents a decl service, i.e. something where you can make requests
 for decls and get back answers. Often these requests will block upon IO. *)
 type t = {
@@ -19,7 +21,7 @@ decl service which is listening on unix domain socket `socket`. It trusts
 that the decl service knows to use `addr` as its base addrss. *)
 val init :
   decl_sock:Path.t ->
-  base_addr:Decl_ipc_ffi_externs.sharedmem_base_address ->
+  cache_view:Decl_ipc_ffi_externs.readonly_cache_view ->
   hhi_root:Path.t ->
   (t, Marshal_tools.error) result
 

@@ -298,11 +298,11 @@ fn debug_slab(name: &'static str, slab: &Slab<'_>, f: &mut fmt::Formatter) -> fm
             blocks.push(DebugBlock(&slab[i..(i + size)], offset_or_address));
             i += size;
         }
-        let root_value = slab.base() + slab.root_value_offset() * WORD_SIZE;
+        let root_value = slab.root_value_offset() * WORD_SIZE;
         f.debug_struct(name)
             .field("base", &DebugPtr(slab.base()))
             .field("current_address", &DebugPtr(slab.current_address()))
-            .field("root_value", &DebugPtr(root_value))
+            .field("root_value_offset", &DebugPtr(root_value))
             .field("blocks", &blocks)
             .finish()
     }

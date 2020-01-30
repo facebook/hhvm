@@ -6,9 +6,13 @@
  *
  *)
 
-type sharedmem_base_address
+type readonly_cache_view
 
 let get_gconst_ffi _ _ _ = failwith "decl_ipc not implemented"
+
+let map_shared_memory_ffi _ = failwith "decl_ipc not implemented"
+
+let shared_memory_address _ = failwith "decl_ipc not implemented"
 
 type inproc_state
 

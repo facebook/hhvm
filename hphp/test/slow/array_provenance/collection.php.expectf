@@ -1,0 +1,16 @@
+dict(2) {
+  ["outer"]=>
+  string(0) ""
+  ["inner"]=>
+  string(%d) "%s/hphp/test/slow/array_provenance/collection.php:26"
+}
+dict(2) {
+  ["outer"]=>
+  string(0) ""
+  ["inner"]=>
+  string(%d) "%s/hphp/test/slow/array_provenance/collection.php:27"
+}
+
+Fatal error: Uncaught Error: done in %s/hphp/test/slow/array_provenance/collection.php:28
+Stack trace:
+%A

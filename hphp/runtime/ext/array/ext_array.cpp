@@ -3393,14 +3393,14 @@ TypedValue HHVM_FUNCTION(HH_tag_provenance_here, TypedValue in) {
   if (!RuntimeOption::EvalArrayProvenance ||
       !isArrayLikeType(type(in)) ||
       !arrprov::arrayWantsTag(val(in).parr)) {
-    return in;
+    return tvReturn(tvAsCVarRef(&in));
   }
 
   auto const ad = in.m_data.parr->copy();
-
   if (auto const tag = arrprov::tagFromPC()) {
     arrprov::setTag<arrprov::Mode::Emplace>(ad, *tag);
   }
+  assertx(ad->hasExactlyOneRef());
   return make_array_like_tv(ad);
 }
 

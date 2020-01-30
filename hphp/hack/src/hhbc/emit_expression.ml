@@ -1741,9 +1741,6 @@ and emit_static_collection env ~transform_to_collection pos tv =
     | Some collection_type -> instr_colfromarray collection_type
     | _ -> empty
   in
-  let col =
-    gather [emit_pos pos; instr (ILitConst (TypedValue tv)); transform_instr]
-  in
   (* This is a nasty hack to make sure that static arrays in a PSF function are tagged
    * using dynamic provenance information *)
   if
@@ -1754,16 +1751,18 @@ and emit_static_collection env ~transform_to_collection pos tv =
   then
     gather
       [
+        emit_pos pos;
         instr_nulluninit;
         instr_nulluninit;
         instr_nulluninit;
-        col;
+        instr (ILitConst (TypedValue tv));
         instr_fcallfuncd
           (make_fcall_args 1)
           (Hhbc_id.Function.from_raw_string "HH\\tag_provenance_here");
+        transform_instr;
       ]
   else
-    col
+    gather [emit_pos pos; instr (ILitConst (TypedValue tv)); transform_instr]
 
 and emit_value_only_collection env pos es constructor =
   let limit = max_array_elem_on_stack () in

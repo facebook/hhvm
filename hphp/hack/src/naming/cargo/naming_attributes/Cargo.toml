@@ -1,0 +1,15 @@
+# @generated
+# @autocargo from //hphp/hack/src/naming:naming_attributes_rust
+# Signature
+[package]
+name = "naming_attributes_rust"
+edition = "2018"
+version = "0.0.0"
+include = ["../../naming_attributes.rs"]
+
+[lib]
+path = "../../naming_attributes.rs"
+
+[dependencies]
+oxidized = { path = "../../../oxidized" }
+# @end of Signature

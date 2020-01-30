@@ -174,6 +174,12 @@ let get_container_kind clss =
   (* TODO: process enum kind here *)
   | _ -> ClassContainer
 
+let json_of_name name =
+  (* Remove leading slash, if present, so names such as
+  Exception and \Exception are captured by the same fact *)
+  let basename = String_utils.lstrip name "\\" in
+  JSON_Object [("name", JSON_Object [("key", JSON_String basename)])]
+
 let json_of_bytespan pos =
   let start = fst (Pos.info_raw pos) in
   let length = Pos.length pos in
@@ -222,9 +228,7 @@ let json_of_container_defn clss decl_id progress =
 
 let json_of_container_decl (container_type, decl_pred) _ctx name _elem progress
     =
-  let json_fact =
-    JSON_Object [("name", JSON_Object [("key", JSON_String name)])]
-  in
+  let json_fact = json_of_name name in
   let (_, fact_id, progress) = glean_json decl_pred json_fact progress in
   let container_decl =
     JSON_Object [(container_type, JSON_Number (string_of_int fact_id))]

@@ -436,7 +436,7 @@ pub mod special_idents {
     pub const TMP_VAR_PREFIX: &str = "__tmp$";
 
     pub fn is_tmp_var(name: &str) -> bool {
-        name.len() > 6 && &name[..6] == TMP_VAR_PREFIX
+        name.len() > 6 && &name.as_bytes()[..6] == TMP_VAR_PREFIX.as_bytes()
     }
 
     pub fn assert_tmp_var(name: &str) {
@@ -881,6 +881,7 @@ mod test {
     fn test_special_idents_is_tmp_var() {
         assert!(!is_tmp_var("_tmp$Blah"));
         assert!(!is_tmp_var("__tmp$"));
+        assert!(!is_tmp_var("О БОЖЕ"));
 
         assert!(is_tmp_var("__tmp$Blah"));
     }

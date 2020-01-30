@@ -1116,6 +1116,9 @@ and convert_hint env st ((p, h) as hint) =
   | Haccess _
   | Hfun _ ->
     (st, hint)
+  | Hpu_access (hint, name) ->
+    let (st, hint) = convert_hint env st hint in
+    (st, (p, Hpu_access (hint, name)))
   | _ ->
     failwith "TODO Unimplemented convert_hints hints not present in legacy AST"
 

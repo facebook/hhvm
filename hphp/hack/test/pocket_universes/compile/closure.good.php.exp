@@ -1,0 +1,46 @@
+# closure.good.php starts here
+
+.filepath "closure.good.php";
+
+.hh_file 1;
+.adata A_0 = """Y:1:{s:8:\"nullable\";b:1;}""";
+.adata A_1 = """v:0:{}""";
+
+.main {
+  DefCls 0
+  Int 1
+  RetC
+}
+
+.class C {
+  .method [public static] <"HH\\void" N  > derive(<"TE" "" extended_hint type_var > $field, <"HH\\mixed" N  > $data) {
+    .declvars $_;
+    VerifyParamType $field
+    CGetL $data
+    SetL _3
+    Array @A_0
+    SetL _4
+    IsTypeStructC Resolve
+    JmpNZ L0
+    PushL _3
+    PushL _4
+    ThrowAsTypeStructException
+  L0:
+    PushL _3
+    UnsetL _4
+    SetL $_
+    PopC
+    Null
+    RetC
+  }
+  .method [public static] <"HH\\mixed" N  > E##Members() {
+    .declvars $mems;
+    Vec @A_1
+    SetL $mems
+    PopC
+    CGetL $mems
+    RetC
+  }
+}
+
+# closure.good.php ends here

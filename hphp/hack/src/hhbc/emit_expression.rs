@@ -254,7 +254,8 @@ pub fn get_type_structure_for_hint(
     targ_map: &BTreeMap<&str, i64>,
     hint: aast::Hint,
 ) -> InstrSeq {
-    let _tv = emit_type_constant::hint_to_type_constant(opts, tparams, targ_map, hint);
+    let _tv =
+        emit_type_constant::hint_to_type_constant(opts, tparams, targ_map, hint, false, false);
     unimplemented!("TODO(hrust) after porting most of emit_adata")
 }
 

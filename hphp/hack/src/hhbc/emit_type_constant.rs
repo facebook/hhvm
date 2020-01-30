@@ -129,7 +129,7 @@ fn shape_field_to_pair(
     let (name, is_class_const) = shape_field_name(sfi.name);
     let mut inner_value = vec![(
         TypedValue::String("value".into()),
-        hint_to_type_constant(opts, tparams, targ_map, sfi.hint)?,
+        hint_to_type_constant(opts, tparams, targ_map, sfi.hint, false, false)?,
     )];
     if is_class_const {
         inner_value.extend_from_slice(&[(
@@ -285,10 +285,8 @@ fn hint_to_type_constant_list(
             } else {
                 let kind = get_kind(tparams, "$$internal$$fun");
                 let single_hint = |name: &str, h| {
-                    Ok(vec![(
-                        TypedValue::String(name.into()),
-                        hint_to_type_constant(opts, tparams, targ_map, h)?,
-                    )])
+                    hint_to_type_constant(opts, tparams, targ_map, h, false, false)
+                        .map(|tc| (vec![(TypedValue::String(name.into()), tc)]))
                 };
                 let return_type = single_hint("return_type", hf.return_ty)?;
                 let variadic_type = hf
@@ -345,11 +343,17 @@ pub fn hint_to_type_constant(
     tparams: &[&str],
     targ_map: &BTreeMap<&str, i64>,
     hint: Hint,
+    is_typedef: bool,
+    is_opaque: bool,
 ) -> Result<TypedValue> {
-    Ok(dict_or_darray(
-        opts,
-        hint_to_type_constant_list(opts, tparams, targ_map, hint)?,
-    ))
+    let mut tconsts = hint_to_type_constant_list(opts, tparams, targ_map, hint)?;
+    if is_typedef {
+        tconsts.extend_from_slice(get_typevars(tparams).as_slice());
+    };
+    if is_opaque {
+        tconsts.extend_from_slice(&[(TypedValue::String("opaque".into()), TypedValue::Bool(true))])
+    };
+    Ok(dict_or_darray(opts, tconsts))
 }
 
 fn hints_to_type_constant(
@@ -358,11 +362,9 @@ fn hints_to_type_constant(
     targ_map: &BTreeMap<&str, i64>,
     hints: Vec<Hint>,
 ) -> Result<TypedValue> {
-    Ok(vec_or_varray(
-        opts,
-        hints
-            .into_iter()
-            .map(|h| hint_to_type_constant(opts, tparams, targ_map, h))
-            .collect::<Result<_>>()?,
-    ))
+    let hints = hints
+        .into_iter()
+        .map(|h| hint_to_type_constant(opts, tparams, targ_map, h, false, false))
+        .collect::<Result<Vec<_>>>();
+    hints.map(|hs| vec_or_varray(opts, hs))
 }

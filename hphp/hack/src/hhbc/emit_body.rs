@@ -565,7 +565,7 @@ fn get_tp_name(tparam: &tast::Tparam) -> &str {
     name
 }
 
-fn get_tp_names(tparams: &[tast::Tparam]) -> Vec<&str> {
+pub fn get_tp_names(tparams: &[tast::Tparam]) -> Vec<&str> {
     tparams.iter().map(get_tp_name).collect()
 }
 

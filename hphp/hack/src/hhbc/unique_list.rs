@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 extern crate indexmap;
-use indexmap::IndexSet;
+use indexmap::{Equivalent, IndexSet};
 use std::hash::Hash;
 
 #[derive(Clone)]
@@ -42,7 +42,10 @@ where
         &self.set
     }
 
-    pub fn remove(&mut self, item: &T) {
+    pub fn remove<Q: ?Sized>(&mut self, item: &Q)
+    where
+        Q: Hash + Equivalent<T>,
+    {
         self.set.shift_remove(item);
     }
 

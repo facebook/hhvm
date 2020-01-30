@@ -77,7 +77,7 @@ mod tests {
     #[bench]
     fn bench_remove_string(b: &mut Bencher) {
         let mut ul = make_sample_unique_list();
-        b.iter(|| ul.remove(&&"abcde".to_string()));
+        b.iter(|| ul.remove("abcde"));
     }
 
     #[bench]
@@ -118,7 +118,7 @@ mod tests {
     #[bench]
     fn bench_remove_from_big_ul(b: &mut Bencher) {
         let mut ul = make_big_usize_list();
-        b.iter(|| ul.remove(&&228491));
+        b.iter(|| ul.remove(&228491));
     }
 
     #[bench]

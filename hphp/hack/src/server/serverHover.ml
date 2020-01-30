@@ -9,7 +9,6 @@
 
 open Core_kernel
 open HoverService
-module Decl_provider = Decl_provider_ctx
 
 (** When we get a Class occurrence and a Method occurrence, that means that the
 user is hovering over an invocation of the constructor, and would therefore only

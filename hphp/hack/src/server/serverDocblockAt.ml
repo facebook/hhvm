@@ -8,7 +8,6 @@
  *)
 
 open Core_kernel
-module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 
 let get_all_ancestors ctx class_name =

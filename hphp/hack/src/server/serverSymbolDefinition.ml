@@ -16,7 +16,6 @@ module Syntax = Full_fidelity_positioned_syntax
 module SyntaxKind = Full_fidelity_syntax_kind
 module SyntaxTree =
   Full_fidelity_syntax_tree.WithSyntax (Full_fidelity_positioned_syntax)
-module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 open Aast
 

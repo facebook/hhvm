@@ -10,7 +10,6 @@
 open Core_kernel
 open Utils
 open ServerCommandTypes
-module Decl_provider = Decl_provider_ctx
 
 exception Nonfatal_rpc_exception of exn * string * ServerEnv.env
 

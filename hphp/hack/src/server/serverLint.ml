@@ -12,7 +12,6 @@ open Utils
 module Hack_bucket = Bucket
 open Core_kernel
 module RP = Relative_path
-module Decl_provider = Decl_provider_ctx
 
 let output_json oc el =
   let errors_json = List.map el Lint.to_json in

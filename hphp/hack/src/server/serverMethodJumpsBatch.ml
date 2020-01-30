@@ -8,7 +8,6 @@
  *)
 
 open Core_kernel
-module Decl_provider = Decl_provider_ctx
 
 let get_ancestors_single ctx class_ ~filter =
   let class_ = MethodJumps.add_ns class_ in

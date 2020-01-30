@@ -12,7 +12,6 @@ open Reordered_argument_collections
 open ServerCommandTypes.Find_refs
 open ServerCommandTypes.Done_or_retry
 open Typing_defs
-module Decl_provider = Decl_provider_ctx
 
 let parallel_limit = 10
 

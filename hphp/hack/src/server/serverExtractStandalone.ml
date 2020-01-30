@@ -15,7 +15,6 @@ module Syntax = Full_fidelity_positioned_syntax
 module SyntaxTree = Full_fidelity_syntax_tree.WithSyntax (Syntax)
 module SyntaxError = Full_fidelity_syntax_error
 module SN = Naming_special_names
-module Decl_provider = Decl_provider_ctx
 module Class = Decl_provider.Class
 
 (* Internal error: for example, we are generating code for a dependency on an enum,

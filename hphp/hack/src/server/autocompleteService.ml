@@ -18,7 +18,6 @@ module Nast = Aast
 module Tast = Aast
 module Phase = Typing_phase
 module TUtils = Typing_utils
-module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 
 let ac_env = ref None

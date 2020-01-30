@@ -11,7 +11,6 @@ open Core_kernel
 open Option.Monad_infix
 module SourceText = Full_fidelity_source_text
 module Syntax = Full_fidelity_positioned_syntax
-module Decl_provider = Decl_provider_ctx
 
 (** Returns ((symbol_line, symbol_char), argument_idx) where:
     - symbol_line: the line number of the function symbol

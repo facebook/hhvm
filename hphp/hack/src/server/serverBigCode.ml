@@ -14,7 +14,6 @@ open Typing_defs
 module Nast = Aast
 module Tast = Aast
 module Phase = Typing_phase
-module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 
 type autocomplete_data_entry = {

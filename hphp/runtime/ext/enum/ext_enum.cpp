@@ -93,6 +93,7 @@ struct enumExtension final : Extension {
     HHVM_STATIC_MALIAS(HH\\BuiltinEnum, getNames, BuiltinEnum, getNames);
     HHVM_STATIC_MALIAS(HH\\BuiltinEnum, isValid, BuiltinEnum, isValid);
     HHVM_STATIC_MALIAS(HH\\BuiltinEnum, coerce, BuiltinEnum, coerce);
+    HHVM_RC_STR(HH\\BUILTIN_ENUM, "HH\\BuiltinEnum");
     loadSystemlib();
   }
 } s_enum_extension;

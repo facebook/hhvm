@@ -6,6 +6,7 @@ use env::Env;
 use hhas_param_rust::HhasParam;
 use instruction_sequence_rust::InstrSeq;
 
+#[derive(Default)]
 pub struct HhasBody {
     pub body_instrs: InstrSeq,
     pub decl_vars: Vec<String>,
@@ -17,4 +18,21 @@ pub struct HhasBody {
     pub return_type_info: Option<hhas_type::Info>,
     pub doc_comment: Option<String>,
     pub env: Option<Env>,
+}
+
+impl HhasBody {
+    pub fn with_body_instrs(mut self, body_instrs: InstrSeq) -> Self {
+        self.body_instrs = body_instrs;
+        self
+    }
+
+    pub fn with_return_type_info(mut self, return_type_info: hhas_type::Info) -> Self {
+        self.return_type_info = Some(return_type_info);
+        self
+    }
+
+    pub fn with_params(mut self, params: Vec<HhasParam>) -> Self {
+        self.params = params;
+        self
+    }
 }

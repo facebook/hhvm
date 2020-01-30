@@ -333,13 +333,12 @@ fn make_decl_vars(
     (need_local_this, decl_vars)
 }
 
-fn make_return_type_info(
-    skip_awaitable: bool,
-    is_native: bool,
-    ret: &Option<aast::Hint>,
+pub fn emit_return_type_info(
     tp_names: &[&str],
+    skip_awaitable: bool,
+    ret: &Option<aast::Hint>,
 ) -> Result<HhasTypeInfo> {
-    let return_type_info = match ret {
+    match ret {
         None => Ok(HhasTypeInfo::make(
             Some("".to_string()),
             hhas_type::constraint::Type::default(),
@@ -351,7 +350,16 @@ fn make_return_type_info(
             tp_names,
             &hint,
         ),
-    };
+    }
+}
+
+fn make_return_type_info(
+    skip_awaitable: bool,
+    is_native: bool,
+    ret: &Option<aast::Hint>,
+    tp_names: &[&str],
+) -> Result<HhasTypeInfo> {
+    let return_type_info = emit_return_type_info(tp_names, skip_awaitable, ret);
     if is_native {
         return return_type_info.map(|rti| {
             emit_type_hint::emit_type_constraint_for_native_function(tp_names, ret, rti)

@@ -335,6 +335,8 @@ let function_make_default = "extract_standalone_make_default"
 
 let call_make_default = Printf.sprintf "\\%s()" function_make_default
 
+let extract_standalone_any = "EXTRACT_STANDALONE_ANY"
+
 let string_of_tprim = function
   | Tbool -> "bool"
   | Tint -> "int"
@@ -459,8 +461,8 @@ let rec string_of_hint hint =
     Printf.sprintf "(%s)" (concat_map ~sep:" | " ~f:string_of_hint hints)
   | Hintersection hints ->
     Printf.sprintf "(%s)" (concat_map ~sep:" & " ~f:string_of_hint hints)
-  | Hany -> failwith "unprintable type hint: Hany"
-  | Herr -> failwith "unprintable type hint: Herr"
+  | Hany -> extract_standalone_any
+  | Herr -> extract_standalone_any
 
 let maybe_string_of_user_attribute { ua_name; ua_params } =
   let name = snd ua_name in
@@ -1455,17 +1457,24 @@ let get_code strict_declarations partial_declarations =
   in
   let (strict_toplevel, strict_namespaces) = get_code strict_declarations in
   let (partial_toplevel, partial_namespaces) = get_code partial_declarations in
-  let helper =
-    Printf.sprintf
-      "<<__Rx>> function %s(): nothing {throw new \\Exception();}"
-      function_make_default
+  let helpers =
+    [
+      Printf.sprintf
+        "<<__Rx>> function %s(): nothing {throw new \\Exception();}"
+        function_make_default;
+      "/* HH_FIXME[4101] */";
+      Printf.sprintf
+        "type %s = \\%s_;"
+        extract_standalone_any
+        extract_standalone_any;
+      Printf.sprintf "type %s_<T> = T;" extract_standalone_any;
+    ]
   in
   let strict_hh_prefix = "<?hh" in
   let partial_hh_prefix = "<?hh // partial" in
   let sections =
     [
-      ( "//// strict_toplevel.php",
-        (strict_hh_prefix, strict_toplevel @ [helper]) );
+      ("//// strict_toplevel.php", (strict_hh_prefix, strict_toplevel @ helpers));
       ("//// partial_toplevel.php", (partial_hh_prefix, partial_toplevel));
       ("//// strict_namespaces.php", (strict_hh_prefix, strict_namespaces));
       ("//// partial_namespaces.php", (partial_hh_prefix, partial_namespaces));

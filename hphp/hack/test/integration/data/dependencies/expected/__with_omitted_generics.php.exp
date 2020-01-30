@@ -1,7 +1,5 @@
 //// strict_toplevel.php
 <?hh
-function with_newtype_with_newtype_bound(M $_): void {}
-newtype M as \N = nothing;
 <<__Rx>>
 function extract_standalone_make_default(): nothing {
   throw new \Exception();
@@ -12,4 +10,11 @@ type EXTRACT_STANDALONE_ANY_<T> = T;
 
 //// partial_toplevel.php
 <?hh // partial
-newtype N as arraykey = int;
+function expect_darray(
+  darray<EXTRACT_STANDALONE_ANY, EXTRACT_STANDALONE_ANY> $_,
+): void {
+  throw new \Exception();
+}
+function with_omitted_generics(): void {
+  expect_darray(darray['a' => 1, 'b' => 2]);
+}

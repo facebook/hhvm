@@ -5,6 +5,9 @@ function with_newtype_with_bound(dict<N, mixed> $_): void {}
 function extract_standalone_make_default(): nothing {
   throw new \Exception();
 }
+/* HH_FIXME[4101] */
+type EXTRACT_STANDALONE_ANY = \EXTRACT_STANDALONE_ANY_;
+type EXTRACT_STANDALONE_ANY_<T> = T;
 
 //// partial_toplevel.php
 <?hh // partial

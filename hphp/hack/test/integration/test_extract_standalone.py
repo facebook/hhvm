@@ -174,6 +174,7 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
             "\\with_contra_tparam",
             "\\WithLateInit::getCount",
             "\\TFlobby::g",
+            "\\with_omitted_generics",
         ]
 
         for function_name in function_names:

@@ -130,13 +130,6 @@ and uop =
         ancestors = ["map_defs_base"];
       }]
 
-(* This type is not used in the AST so no visitor is generated for it *)
-type fun_decl_kind =
-  | FDeclAsync
-  | FDeclSync
-  | FDeclCoroutine
-[@@deriving show { with_path = false }]
-
 (*****************************************************************************)
 (* Helpers *)
 (*****************************************************************************)

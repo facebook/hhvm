@@ -34,5 +34,5 @@ function baz($a, $b, $c, $d, $e, $f) {
 
 <<__EntryPoint>>
 function main() {
-  baz(fun('foo'), fun('foo'), fun('bar'), 'foo', 'bar', []);
+  baz(fun('foo'), fun('foo'), fun('bar'), 'foo', 'bar', varray[]);
 }

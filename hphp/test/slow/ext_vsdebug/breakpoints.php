@@ -83,8 +83,8 @@ $seq = sendVsCommand(darray[
         "path" => __FILE__ . ".test",
         "name" => "test"
       ],
-    "lines" => [],
-    "breakpoints" => []]]);
+    "lines" => varray[],
+    "breakpoints" => varray[]]]);
 
 // Response should indicate no breakpoints remaining.
 $msg = json_decode(getNextVsDebugMessage(), true);
@@ -94,7 +94,7 @@ checkObjEqualRecursively($msg, darray[
   "request_seq" => $seq,
   "success" => true,
   "body" => darray[
-      "breakpoints" => []
+      "breakpoints" => varray[]
   ]]);
 
 $breakpoints = varray[
@@ -131,8 +131,8 @@ $seq = sendVsCommand(darray[
         "path" => __FILE__ . ".test",
         "name" => "test"
       ],
-    "lines" => [],
-    "breakpoints" => []]]);
+    "lines" => varray[],
+    "breakpoints" => varray[]]]);
 
 // Response should indicate no breakpoints remaining.
 $msg = json_decode(getNextVsDebugMessage(), true);
@@ -142,7 +142,7 @@ checkObjEqualRecursively($msg, darray[
   "request_seq" => $seq,
   "success" => true,
   "body" => darray[
-      "breakpoints" => []
+      "breakpoints" => varray[]
   ]]);
 resumeTarget();
 
@@ -197,8 +197,8 @@ $seq = sendVsCommand(darray[
         "path" => "test.php.test",
         "name" => "test"
       ],
-    "lines" => [],
-    "breakpoints" => []]]);
+    "lines" => varray[],
+    "breakpoints" => varray[]]]);
 
 // Response should indicate no breakpoints remaining.
 $msg = json_decode(getNextVsDebugMessage(), true);
@@ -208,7 +208,7 @@ checkObjEqualRecursively($msg, darray[
   "request_seq" => $seq,
   "success" => true,
   "body" => darray[
-      "breakpoints" => []
+      "breakpoints" => varray[]
   ]]);
 
 resumeTarget();

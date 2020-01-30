@@ -6,7 +6,7 @@ function test($name, $a) {
 }
 
 function main() {
-  test('empty', []);
+  test('empty', varray[]);
   test('packed', varray[1, 2, 3]);
   test('mixed', darray['a' => 'b', 'c' => 'd']);
 }

@@ -14,7 +14,7 @@ class Test2 {
 function main_foreach_target_variables() {
 $array = varray[1, 2, 3];
 
-$a = [];
+$a = varray[];
 foreach ($array as $a[0] => $a[1]) {
   echo $a[0], " => ", $a[1], ",";
 }

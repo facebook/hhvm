@@ -10,7 +10,7 @@ var_dump(HH\autoload_set_paths(new A(), ''));
 var_dump(HH\autoload_set_paths(STDOUT, ''));
 
 $map = Map {
-  'function' => [],
+  'function' => darray[],
   'failure' => function ($kind, $name) {
     echo "Autoload $kind $name\n";
 }};

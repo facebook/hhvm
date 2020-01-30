@@ -3,9 +3,9 @@
 
 <<__EntryPoint>>
 function main_rtit_key() {
-$rait = new RecursiveArrayIterator([
+$rait = new RecursiveArrayIterator(darray[
   'a' => 0,
-  1,
+  0 => 1,
   'b' => array(
     2,
     3,
@@ -16,9 +16,9 @@ $rait = new RecursiveArrayIterator([
     6,
     7
   ),
-  8,
-  9,
-  varray[
+  1 => 8,
+  2 => 9,
+  3 => varray[
     0,
     1
   ]

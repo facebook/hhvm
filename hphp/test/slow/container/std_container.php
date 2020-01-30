@@ -121,7 +121,7 @@ function main() {
   print "==========\n";
   test(varray[7, 8, 9]);
   test(varray[7]);
-  test([]);
+  test(varray[]);
   $a = darray[];
   $a[100] = "321";
   $a["0"] = 2;

@@ -6,7 +6,7 @@ function main_splfixedarray_set_size_errors() {
 $fixedarr = new SplFixedArray();
 
 echo "Errors:", PHP_EOL;
-$fixedarr->setSize([]);
+$fixedarr->setSize(varray[]);
 $fixedarr->setSize("notanint");
 
 echo "No Error:", PHP_EOL;

@@ -38,7 +38,7 @@ function iter_recursive($v) {
 }
 
 function iter_recursive_init() {
-  iter_recursive([]);
+  iter_recursive(darray[]);
   iter_recursive(darray['a' => darray['b' => 'xyz']]);
   iter_recursive(darray['a' => darray['b' => 'xyz'], 'f' => get_meth()]);
   iter_recursive(darray['a' => darray['b' => get_meth()]]);

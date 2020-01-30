@@ -10,7 +10,7 @@ print("Correct usage, two args\n");
 var_dump(pcntl_sigprocmask(SIG_BLOCK, varray[SIGHUP], inout $oldset));
 
 print("Invalid \$how\n");
-var_dump(pcntl_sigprocmask(PHP_INT_MAX, [], inout $oldset));
+var_dump(pcntl_sigprocmask(PHP_INT_MAX, varray[], inout $oldset));
 
 print("Invalid signal\n");
 var_dump(pcntl_sigprocmask(SIG_SETMASK, varray[1337], inout $oldset));

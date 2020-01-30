@@ -26,7 +26,7 @@ $arrayForTest = darray[
     'a1' => darray[
         'b1' => new StdClass(),
         'b2' => new StdClass(),
-        'b3' => [],
+        'b3' => varray[],
     ],
     'a2' => darray[
         'b4' => darray[

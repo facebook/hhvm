@@ -34,5 +34,5 @@ function baz($a, $b, $c, $d, $e, $f) {
 
 <<__EntryPoint>>
 function main() {
-  baz(__hhvm_intrinsics\create_class_pointer('foo'), __hhvm_intrinsics\create_class_pointer('foo'), __hhvm_intrinsics\create_class_pointer('bar'), 'foo', 'bar', []);
+  baz(__hhvm_intrinsics\create_class_pointer('foo'), __hhvm_intrinsics\create_class_pointer('foo'), __hhvm_intrinsics\create_class_pointer('bar'), 'foo', 'bar', varray[]);
 }

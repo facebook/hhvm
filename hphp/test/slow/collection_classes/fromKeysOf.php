@@ -25,7 +25,7 @@ function vector_from_keys($containers) {
 
 function main() {
   $containers = darray[
-    'empty array'  => [],
+    'empty array'  => varray[],
     'packed array' => varray['a', 'b', 'c'],
     'mixed array'  => darray['a' => 1, 'b' => 2],
 

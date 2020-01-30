@@ -88,7 +88,7 @@ function get_name(string $name, string $n): string {
 }
 
 class A {
-  private $map = [];
+  private $map = darray[];
   function set($k, $v) {
     $this->map[$k] = $v;
   }

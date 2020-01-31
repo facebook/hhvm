@@ -14,7 +14,6 @@ path = "../../emit_typedef.rs"
 ast_constant_folder_rust = { path = "../ast_constant_folder" }
 emit_attribute_rust = { path = "../emit_attribute" }
 emit_body_rust = { path = "../emit_body" }
-emit_fatal_rust = { path = "../emit_fatal" }
 emit_type_constant_rust = { path = "../emit_type_constant" }
 emit_type_hint_rust = { path = "../emit_type_hint" }
 env = { path = "../env" }

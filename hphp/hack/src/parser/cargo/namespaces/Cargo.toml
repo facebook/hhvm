@@ -1,0 +1,18 @@
+# @generated
+# @autocargo from //hphp/hack/src/parser:namespaces_rust
+# Signature
+[package]
+name = "namespaces_rust"
+edition = "2018"
+version = "0.0.0"
+include = ["../../namespaces.rs"]
+
+[lib]
+path = "../../namespaces.rs"
+
+[dependencies]
+core_utils_rust = { path = "../../../utils/core" }
+naming_special_names_rust = { path = "../../../naming" }
+oxidized = { path = "../../../oxidized" }
+lazy_static = "1.4"
+# @end of Signature

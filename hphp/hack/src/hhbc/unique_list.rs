@@ -38,6 +38,10 @@ where
         self.set.iter()
     }
 
+    pub fn into_iter(self) -> impl Iterator<Item = T> {
+        self.set.into_iter()
+    }
+
     pub fn items_set(&self) -> &IndexSet<T> {
         &self.set
     }

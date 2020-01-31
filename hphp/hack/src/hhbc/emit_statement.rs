@@ -144,7 +144,6 @@ fn set_bytes_kind(name: &str) -> Option<Setrange> {
 }
 
 fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
-    use ast_defs::Id;
     let pos = &stmt.0;
     match &stmt.1 {
         a::Stmt_::Expr(e_) => match &(*e_).1 {

@@ -13,6 +13,7 @@ path = "../../closure_convert.rs"
 [dependencies]
 ast_constant_folder_rust = { path = "../ast_constant_folder" }
 ast_scope_rust = { path = "../ast_scope" }
+decl_vars_rust = { path = "../decl_vars" }
 env = { path = "../env" }
 hhbc_string_utils_rust = { path = "../string_utils" }
 naming_special_names_rust = { path = "../../../naming" }
@@ -21,5 +22,6 @@ options = { path = "../options" }
 oxidized = { path = "../../../oxidized" }
 rx_rust = { path = "../rx" }
 unique_list_rust = { path = "../unique_list" }
+bitflags = "1.2"
 itertools = "0.8"
 # @end of Signature

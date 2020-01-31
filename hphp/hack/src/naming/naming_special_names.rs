@@ -466,6 +466,10 @@ pub mod pseudo_functions {
 
     pub const ECHO: &str = "\\echo";
 
+    pub const ECHO_NO_NS: &str = "echo";
+
+    pub const EMPTY: &str = "\\empty";
+
     pub const EXIT: &str = "\\exit";
 
     pub const DIE: &str = "\\die";
@@ -481,6 +485,7 @@ pub mod pseudo_functions {
             HH_LOOP_FOREVER,
             ASSERT,
             ECHO,
+            EMPTY,
             EXIT,
             DIE,
         ];
@@ -859,6 +864,11 @@ pub mod xhp {
 
 pub mod regex {
     pub const T_PATTERN: &str = "\\HH\\Lib\\Regex\\Pattern";
+}
+
+pub mod emitter_special_functions {
+    pub const EVAL: &str = "\\eval";
+    pub const SET_FRAME_METADATA: &str = "\\HH\\set_frame_metadata";
 }
 
 pub mod math {

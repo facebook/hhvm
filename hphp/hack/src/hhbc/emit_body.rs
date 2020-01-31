@@ -305,21 +305,17 @@ fn make_decl_vars(
     body: &tast::Program,
     is_closure_body: bool,
 ) -> (bool, Vec<String>) {
-    let has_this = scope.has_this();
-    let is_toplevel = scope.is_toplevel();
-    let is_in_static_method = scope.is_in_static_method();
+    use decl_vars::Flags;
+    let mut flags = Flags::empty();
+    flags.set(Flags::HAS_THIS, scope.has_this());
+    flags.set(Flags::IS_TOPLEVEL, scope.is_toplevel());
+    flags.set(Flags::IS_IN_STATIC_METHOD, scope.is_in_static_method());
+    flags.set(Flags::IS_CLOSURE_BODY, is_closure_body);
 
     let explicit_use_set = &emitter.state().explicit_use_set;
 
-    let (need_local_this, mut decl_vars) = decl_vars::from_ast(
-        is_closure_body,
-        has_this,
-        is_toplevel,
-        is_in_static_method,
-        explicit_use_set,
-        params,
-        body,
-    );
+    let (need_local_this, mut decl_vars) =
+        decl_vars::from_ast(params, body, flags, explicit_use_set);
 
     if is_closure_body {
         let captured_vars = scope.get_captured_vars();

@@ -1,0 +1,12 @@
+# @generated
+# @autocargo from //hphp/hack/src/utils/core:core_utils_rust
+# Signature
+[package]
+name = "core_utils_rust"
+edition = "2018"
+version = "0.0.0"
+include = ["utils.rs"]
+
+[lib]
+path = "utils.rs"
+# @end of Signature

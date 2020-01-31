@@ -3,11 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use itertools::{EitherOrBoth::*, Itertools};
+use itertools::{Either, EitherOrBoth::*, Itertools};
 use std::{borrow::Cow, collections::HashSet, mem};
 
 use ast_constant_folder_rust as ast_constant_folder;
 use ast_scope_rust as ast_scope;
+use decl_vars_rust as decl_vars;
 use env::emitter::Emitter;
 use hhbc_string_utils_rust as string_utils;
 use naming_special_names_rust::{fb, special_idents, superglobals};
@@ -61,7 +62,7 @@ impl<'a> Env<'a> {
         defs: &Program,
     ) -> Self {
         let scope = ast_scope::Scope::toplevel();
-        let all_vars = get_vars(&scope, false, &vec![], &defs);
+        let all_vars = get_vars(&scope, false, &vec![], Either::Left(&defs));
 
         Self {
             scope,
@@ -78,14 +79,15 @@ impl<'a> Env<'a> {
     fn with_function_like_(
         &mut self,
         e: ast_scope::ScopeItem<'a>,
-        _is_closure_body: bool,
+        is_closure_body: bool,
         params: &[FunParam],
-        _body: &Block,
+        body: &Block,
     ) {
         self.scope.push_item(e);
+        let all_vars = get_vars(&self.scope, is_closure_body, params, Either::Right(body));
         self.variable_scopes.push(Variables {
             parameter_names: get_parameter_names(params),
-            all_vars: HashSet::new(),
+            all_vars,
         })
     }
 
@@ -265,13 +267,18 @@ fn add_generic(env: &mut Env, st: &mut State, var: &str) {
 }
 
 fn get_vars(
-    _scope: &ast_scope::Scope,
-    _is_closure_body: bool,
-    _params: &[FunParam],
-    _body: &Program,
+    scope: &ast_scope::Scope,
+    is_closure_body: bool,
+    params: &[FunParam],
+    body: decl_vars::ProgramOrStmt,
 ) -> HashSet<String> {
-    // TODO(hrust)
-    HashSet::new()
+    use decl_vars::{vars_from_ast, Flags};
+    let mut flags = Flags::empty();
+    flags.set(Flags::HAS_THIS, scope.has_this());
+    flags.set(Flags::IS_TOPLEVEL, scope.is_toplevel());
+    flags.set(Flags::IS_IN_STATIC_METHOD, scope.is_in_static_method());
+    flags.set(Flags::IS_CLOSURE_BODY, is_closure_body);
+    vars_from_ast(params, body, flags)
 }
 
 fn get_parameter_names(params: &[FunParam]) -> HashSet<String> {
@@ -688,9 +695,6 @@ impl<'a> VisitorMut for ClosureConvertVisitor<'a> {
 
     fn visit_hint_(&mut self, env: &mut Env<'a>, hint: &mut Hint_) {
         if let Hint_::Happly(id, _) = hint {
-            // T43412864 claims that this does not need to be added into the closure and can be removed
-            // There are no relevant HHVM tests checking for it, but there are flib test failures when you try
-            // to remove it.
             add_generic(env, &mut self.state, id.name())
         };
         hint.recurse(env, self.object());
@@ -775,6 +779,16 @@ impl<'a> VisitorMut for ClosureConvertVisitor<'a> {
                 res.recurse(env, self.object());
                 *pos = res.0;
                 res.1
+            }
+            Expr_::ClassGet(mut x) => {
+                if let ClassGetExpr::CGstring(id) = &x.1 {
+                    // T43412864 claims that this does not need to be added into the closure and can be removed
+                    // There are no relevant HHVM tests checking for it, but there are flib test failures when you try
+                    // to remove it.
+                    add_var(env, &mut self.state, &id.1);
+                };
+                x.recurse(env, self.object());
+                Expr_::ClassGet(x)
             }
             mut x => {
                 x.recurse(env, self.object());

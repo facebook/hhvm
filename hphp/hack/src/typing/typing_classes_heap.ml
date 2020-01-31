@@ -250,7 +250,6 @@ module Api = struct
     seq
     |> Sequence.to_list_rev
     |> List.sort ~compare:(fun (a, _) (b, _) -> String.compare a b)
-    |> Sequence.of_list
 
   let get_ancestor t ancestor =
     match t with
@@ -293,7 +292,7 @@ module Api = struct
 
   let all_ancestors t =
     match t with
-    | Lazy lc -> LSTable.to_seq lc.ancestors |> sort_by_key
+    | Lazy lc -> LSTable.to_seq lc.ancestors |> sort_by_key |> Sequence.of_list
     | Eager c -> SMap.bindings c.tc_ancestors |> Sequence.of_list
 
   let all_ancestor_names t =
@@ -456,37 +455,40 @@ module Api = struct
 
   let consts t =
     match t with
-    | Lazy lc -> LSTable.to_seq lc.ih.consts |> sort_by_key
+    | Lazy lc -> LSTable.to_seq lc.ih.consts |> sort_by_key |> Sequence.of_list
     | Eager c -> Sequence.of_list (SMap.bindings c.tc_consts)
 
   let typeconsts t =
     match t with
-    | Lazy lc -> LSTable.to_seq lc.ih.typeconsts |> sort_by_key
+    | Lazy lc ->
+      LSTable.to_seq lc.ih.typeconsts |> sort_by_key |> Sequence.of_list
     | Eager c -> Sequence.of_list (SMap.bindings c.tc_typeconsts)
 
   let pu_enums t =
     match t with
-    | Lazy lc -> LSTable.to_seq lc.ih.pu_enums |> sort_by_key
+    | Lazy lc ->
+      LSTable.to_seq lc.ih.pu_enums |> sort_by_key |> Sequence.of_list
     | Eager c -> Sequence.of_list (SMap.bindings c.tc_pu_enums)
 
   let props t =
     match t with
-    | Lazy lc -> LSTable.to_seq lc.ih.props |> sort_by_key
+    | Lazy lc -> LSTable.to_seq lc.ih.props |> sort_by_key |> Sequence.of_list
     | Eager c -> Sequence.of_list (SMap.bindings c.tc_props)
 
   let sprops t =
     match t with
-    | Lazy lc -> LSTable.to_seq lc.ih.sprops |> sort_by_key
+    | Lazy lc -> LSTable.to_seq lc.ih.sprops |> sort_by_key |> Sequence.of_list
     | Eager c -> Sequence.of_list (SMap.bindings c.tc_sprops)
 
   let methods t =
     match t with
-    | Lazy lc -> LSTable.to_seq lc.ih.methods |> sort_by_key
+    | Lazy lc -> LSTable.to_seq lc.ih.methods |> sort_by_key |> Sequence.of_list
     | Eager c -> Sequence.of_list (SMap.bindings c.tc_methods)
 
   let smethods t =
     match t with
-    | Lazy lc -> LSTable.to_seq lc.ih.smethods |> sort_by_key
+    | Lazy lc ->
+      LSTable.to_seq lc.ih.smethods |> sort_by_key |> Sequence.of_list
     | Eager c -> Sequence.of_list (SMap.bindings c.tc_smethods)
 
   let get_all cache id = LSTable.get cache id |> Option.value ~default:[]

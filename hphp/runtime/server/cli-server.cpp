@@ -99,7 +99,7 @@ This special Stream::Wrapper implements all file:// IO for requests handled by
 CLIServer. It proxies all syscalls to the client process over the unix socket
 connection. The client responds with the results of these calls, and in the
 case of open() and opendir(), with the actual file-descriptors it opened (via
-SCM_RIGHTS).
+SCM_RIGHTS)
 
 ================================ [ The Client ] ================================
 
@@ -127,6 +127,7 @@ way to determine how much progress the server made.
 */
 
 #include "hphp/runtime/server/cli-server.h"
+#include "hphp/runtime/server/cli-server-ext.h"
 
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/execution-context.h"
@@ -159,7 +160,6 @@ way to determine how much progress the server made.
 #include <folly/io/async/EventBaseManager.h>
 #include <folly/portability/Sockets.h>
 
-#include <afdt.h>
 #include <errno.h>
 #include <grp.h>
 #include <pwd.h>
@@ -246,29 +246,6 @@ struct CLIClientGuardedFile : PlainFile {
 static_assert(sizeof(CLIClientGuardedFile) == sizeof(PlainFile),
               "CLIClientGuardedFile inherits PlainFile::heapSize()");
 
-namespace {
-
-template<class... Args>
-void cli_write(int afdt_fd, Args&&... args) {
-  FTRACE(4, "cli_write({}, nargs={})\n", afdt_fd, sizeof...(args) + 1);
-  try {
-    afdt::sendx(afdt_fd, std::forward<Args>(args)...);
-  } catch (const std::runtime_error& ex) {
-    throw Exception("Failed in afdt::sendRaw: %s [%s]",
-                    ex.what(), folly::errnoStr(errno).c_str());
-  }
-}
-
-template<class... Args>
-void cli_read(int afdt_fd, Args&&... args) {
-  FTRACE(4, "cli_read({}, nargs={})\n", afdt_fd, sizeof...(args) + 1);
-  try {
-    afdt::recvx(afdt_fd, std::forward<Args>(args)...);
-  } catch (const std::runtime_error& ex) {
-    throw Exception("Failed in afdt::recvRaw: %s [%s]",
-                    ex.what(), folly::errnoStr(errno).c_str());
-  }
-}
 
 int cli_read_fd(int afdt_fd) {
   int fd = afdt::recv_fd(afdt_fd);
@@ -287,6 +264,8 @@ void cli_write_fd(int afdt_fd, int fd) {
                     folly::errnoStr(errno).c_str());
   }
 }
+
+namespace {
 
 #ifdef SCM_CREDENTIALS
 
@@ -511,6 +490,7 @@ private:
 };
 
 CLIServer* s_cliServer{nullptr};
+std::map<std::string, std::function<void(int)>> s_extensionHandlers;
 __thread ucred* tl_ucred{nullptr};
 __thread int tl_cliSock{-1};
 __thread Array* tl_env;
@@ -1562,6 +1542,20 @@ folly::Optional<int> cli_process_command_loop(int fd) {
       cli_write(fd, true, out);
       continue;
     }
+
+    if (cmd == "ext") {
+      std::string name;
+      cli_read(fd, name);
+      FTRACE(2, "cli_process_command_loop({}): {}\n", fd, name);
+      auto handler = s_extensionHandlers.find(name);
+      if (handler == s_extensionHandlers.end()) {
+        cli_write(fd, /* handler_recognized = */ false);
+        continue;
+      }
+      cli_write(fd, /* handler recognized = */ true);
+      handler->second(fd);
+      continue;
+    }
   }
 }
 
@@ -1632,6 +1626,15 @@ folly::Optional<int> run_client(const char* sock_path,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+}
+
+
+int cli_get_cli_sock() {
+  return tl_cliSock;
+}
+
+void cli_register_handler(const char* name, std::function<void(int)> impl) {
+  s_extensionHandlers.emplace(std::string(name), impl);
 }
 
 void init_cli_server(const char* socket_path) {

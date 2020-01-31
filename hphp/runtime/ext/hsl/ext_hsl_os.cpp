@@ -19,6 +19,7 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/native-data.h"
+#include "hphp/runtime/server/cli-server-ext.h"
 #include "hphp/system/systemlib.h"
 
 #include <fcntl.h>
@@ -104,15 +105,38 @@ Array HHVM_METHOD(HSLFileDescriptor, __debugInfo) {
   return Native::data<HSLFileDescriptor>(this_)->__debugInfo();
 }
 
-Object HHVM_FUNCTION(HSL_os_open, const String& path, int64_t flags, const Variant& mode) {
-int fd;
-  if (flags & O_CREAT) {
-    // TODO: throw ??? if mode is not an int
-    fd = ::open(path.c_str(), flags, mode.asInt64Val());
-  } else {
-    fd = ::open(path.c_str(), flags);
+void CLI_CLIENT_HANDLER(HSL_os_open, int afdt_fd) {
+  std::string path;
+  int64_t flags;
+  int64_t mode;
+  cli_read(afdt_fd, path, flags, mode);
+  auto fd = ::open(path.c_str(), flags, mode);
+  if (fd == -1) {
+    cli_write(afdt_fd, false, errno);
+    return;
   }
-  THROW_ERRNO_IF_MINUS_ONE(fd);
+  cli_write(afdt_fd, true);
+  cli_write_fd(afdt_fd, fd);
+}
+
+Object HHVM_FUNCTION(HSL_os_open, const String& path, int64_t flags, const Variant& mode) {
+  int fd;
+  int cli_fd = cli_get_cli_sock();
+  if (cli_get_cli_sock() >= 0) {
+    CLI_INVOKE_HANDLER(HSL_os_open, path.c_str(), flags, mode.asInt64Val());
+    bool success;
+    cli_read(cli_fd, success);
+    if (!success) {
+      int error;
+      cli_read(cli_fd, error);
+      THROW_AS_ERRNO(error);
+    }
+    fd = cli_read_fd(cli_fd);
+    assertx(fd >= 0);
+  } else {
+    fd = ::open(path.c_str(), flags, mode.asInt64Val());
+    THROW_ERRNO_IF_MINUS_ONE(fd);
+  }
   return HSLFileDescriptor::newInstance(fd, folly::sformat("open('{}', {})", path.c_str(), flags));
 }
 
@@ -160,6 +184,8 @@ struct OSExtension final : Extension {
     HHVM_FALIAS(HH\\Lib\\_Private\\OS\\close, HSL_os_close);
 
     HHVM_NAMED_ME(HH\\Lib\\OS\\FileDescriptor, __debugInfo, HHVM_MN(HSLFileDescriptor, __debugInfo));
+
+    CLI_REGISTER_HANDLER(HSL_os_open);
 
     loadSystemlib();
   }

@@ -1,1 +1,1 @@
---enable-xhp-class-modifier
+--disable-xhp-element-mangling --enable-xhp-class-modifier

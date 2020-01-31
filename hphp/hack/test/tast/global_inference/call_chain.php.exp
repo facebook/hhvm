@@ -24,7 +24,7 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
         ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
-        ns_is_codegen = false };
+        ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       f_doc_comment = None; f_static = false })
   ]
 [(Fun
@@ -56,7 +56,7 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
         ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
-        ns_is_codegen = false };
+        ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       f_doc_comment = None; f_static = false })
   ]
 [(Fun
@@ -88,6 +88,6 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
         ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
-        ns_is_codegen = false };
+        ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       f_doc_comment = None; f_static = false })
   ]

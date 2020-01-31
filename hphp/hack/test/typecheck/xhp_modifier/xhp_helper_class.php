@@ -4,5 +4,5 @@
 class xhp {}
 
 function param_and_return(xhp $x): xhp {
-  return $x;
+	return $x;
 }

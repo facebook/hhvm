@@ -15,7 +15,7 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
         ns_const_uses = <opaque>; ns_name = (Some "A"); ns_auto_ns_map = [];
-        ns_is_codegen = false };
+        ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       c_user_attributes = [];
       c_file_attributes =
       [{ fa_user_attributes =
@@ -24,7 +24,8 @@
          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
            ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
            ns_const_uses = <opaque>; ns_name = (Some "A");
-           ns_auto_ns_map = []; ns_is_codegen = false }
+           ns_auto_ns_map = []; ns_is_codegen = false;
+           ns_disable_xhp_element_mangling = false }
          };
         { fa_user_attributes =
           [{ ua_name = ([11:9-14], "\\B\\AttrB"); ua_params = [] }];
@@ -32,7 +33,8 @@
           { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
             ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
             ns_const_uses = <opaque>; ns_name = (Some "B");
-            ns_auto_ns_map = []; ns_is_codegen = false }
+            ns_auto_ns_map = []; ns_is_codegen = false;
+            ns_disable_xhp_element_mangling = false }
           }
         ];
       c_enum = None; c_pu_enums = []; c_doc_comment = None });
@@ -53,7 +55,7 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
          ns_const_uses = <opaque>; ns_name = (Some "B"); ns_auto_ns_map = [];
-         ns_is_codegen = false };
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        c_user_attributes = [];
        c_file_attributes =
        [{ fa_user_attributes =
@@ -62,7 +64,8 @@
           { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
             ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
             ns_const_uses = <opaque>; ns_name = (Some "A");
-            ns_auto_ns_map = []; ns_is_codegen = false }
+            ns_auto_ns_map = []; ns_is_codegen = false;
+            ns_disable_xhp_element_mangling = false }
           };
          { fa_user_attributes =
            [{ ua_name = ([11:9-14], "\\B\\AttrB"); ua_params = [] }];
@@ -70,7 +73,8 @@
            { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
              ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
              ns_const_uses = <opaque>; ns_name = (Some "B");
-             ns_auto_ns_map = []; ns_is_codegen = false }
+             ns_auto_ns_map = []; ns_is_codegen = false;
+             ns_disable_xhp_element_mangling = false }
            }
          ];
        c_enum = None; c_pu_enums = []; c_doc_comment = None })

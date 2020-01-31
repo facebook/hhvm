@@ -24,10 +24,32 @@ let elaborate_into_ns ns_name id =
 
 let elaborate_into_current_ns nsenv id = elaborate_into_ns nsenv.ns_name id
 
+(* If the given id is an xhp id, for example :foo:bar
+ * we will pull it apart into foo and bar, then reassemble
+ * into \foo\bar. This gives us the fully qualified name
+ * in a way that the rest of elaborate_id_impl expects.
+ *)
+let elaborate_xhp_namespace id =
+  let is_xhp s = s <> "" && String.contains s ':' in
+
+  if is_xhp id then
+    Str.global_replace (Str.regexp ":") "\\\\" id
+  else
+    id
+
 (* Elaborate a defined identifier in a given namespace environment. For example,
  * a class might be defined inside a namespace.
  *)
-let elaborate_defined_id nsenv (p, id) = (p, elaborate_into_current_ns nsenv id)
+let elaborate_defined_id nsenv (p, id) =
+  let xhp_id = elaborate_xhp_namespace id in
+  if nsenv.ns_disable_xhp_element_mangling && xhp_id <> id then
+    begin if xhp_id.[0] = '\\'
+    then (p, xhp_id)
+    else (p, elaborate_into_current_ns nsenv xhp_id)
+    end
+  else
+    (p, elaborate_into_current_ns nsenv id)
+
 
 (* Resolves an identifier in a given namespace environment. For example, if we
  * are in the namespace "N\O", the identifier "P\Q" is resolved to "\N\O\P\Q".
@@ -46,6 +68,14 @@ let elaborate_defined_id nsenv (p, id) = (p, elaborate_into_current_ns nsenv id)
  * used to be other schemes here.)
  *)
 let elaborate_raw_id nsenv kind id =
+  (* in case we've found an xhp id let's do some preparation to get it into the \namespace\xhp format *)
+  let id =
+    if kind = ElaborateClass && nsenv.ns_disable_xhp_element_mangling then
+      elaborate_xhp_namespace id
+    else
+      id
+  in
+
   if id <> "" && id.[0] = '\\' then
     id
   else

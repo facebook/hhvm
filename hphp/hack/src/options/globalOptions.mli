@@ -224,6 +224,12 @@ type t = {
    * New style: xhp class name {}
    *)
   po_enable_xhp_class_modifier: bool;
+  (*
+   * Flag to disable the old stype xhp element mangling. `<something/>` would otherwise be resolved as `xhp_something`
+   * The new style `xhp class something {}` does not do this style of mangling, thus we need a way to disable it on the
+   * 'lookup side'.
+   *)
+  po_disable_xhp_element_mangling: bool;
   (* Enables the special first class function pointer syntax foo<> *)
   po_enable_first_class_function_pointers: bool;
 }
@@ -308,6 +314,7 @@ val make :
   ?tco_error_php_lambdas:bool ->
   ?tco_disallow_discarded_nullable_awaitables:bool ->
   ?po_enable_xhp_class_modifier:bool ->
+  ?po_disable_xhp_element_mangling:bool ->
   ?po_enable_first_class_function_pointers:bool ->
   unit ->
   t
@@ -497,4 +504,7 @@ val tco_error_php_lambdas : t -> bool
 val tco_disallow_discarded_nullable_awaitables : t -> bool
 
 val po_enable_xhp_class_modifier : t -> bool
+
+val po_disable_xhp_element_mangling : t -> bool
+
 val po_enable_first_class_function_pointers : t -> bool

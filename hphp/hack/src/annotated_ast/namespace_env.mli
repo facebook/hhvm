@@ -15,6 +15,7 @@ type env = {
   ns_name: string option;
   ns_auto_ns_map: (string * string) list;
   ns_is_codegen: bool;
+  ns_disable_xhp_element_mangling: bool;
 }
 [@@deriving eq, show]
 

@@ -388,6 +388,8 @@ let load config_filename options =
       ?tco_disallow_discarded_nullable_awaitables:
         (bool_opt "disallow_discarded_nullable_awaitables" config)
       ?po_rust_lowerer:(bool_opt "rust_lowerer" config)
+      ?po_disable_xhp_element_mangling:
+        (bool_opt "disable_xhp_element_mangling" config)
       ?po_enable_xhp_class_modifier:
         (bool_opt "enable_xhp_class_modifier" config)
       ()

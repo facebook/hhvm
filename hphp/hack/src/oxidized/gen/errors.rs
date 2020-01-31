@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d6b3b0048c39369cf3cefdd433e382aa>>
+// @generated SignedSource<<9b8807c9ac76c4aee44e0e3f77c175dc>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -26,18 +26,7 @@ pub type ErrorCode = isize;
 
 pub type Message<A> = (A, String);
 
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    OcamlRep,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize
-)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, Ord, PartialEq, PartialOrd, Serialize)]
 pub enum Phase {
     Init,
     Parsing,

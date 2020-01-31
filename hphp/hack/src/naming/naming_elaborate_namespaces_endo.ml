@@ -296,10 +296,12 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
         Class_get ((p1, CIexpr (p2, Id x1)), self#on_class_get_expr env cge)
       | Xml (id, al, el) ->
         let id =
-          if in_codegen env then
-            id
-          else
-            elaborate_type_name env id
+          (* if XHP element mangling is disabled, namespaces are supported *)
+          if
+            in_codegen env &&
+            (not env.namespace.Namespace_env.ns_disable_xhp_element_mangling)
+          then id
+          else elaborate_type_name env id
         in
         Xml
           ( id,

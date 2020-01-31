@@ -7,7 +7,11 @@ use crate::gen::namespace_env::Env;
 use crate::s_map::SMap;
 
 impl Env {
-    pub fn empty(auto_ns_map: Vec<(String, String)>, is_codegen: bool) -> Self {
+    pub fn empty(
+        auto_ns_map: Vec<(String, String)>,
+        is_codegen: bool,
+        disable_xhp_element_mangling: bool,
+    ) -> Self {
         Env {
             ns_uses: SMap::new(),
             class_uses: SMap::new(),
@@ -17,6 +21,7 @@ impl Env {
             name: None,
             auto_ns_map,
             is_codegen,
+            disable_xhp_element_mangling,
         }
     }
 }

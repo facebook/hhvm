@@ -8,7 +8,6 @@
  *)
 open Core_kernel
 open SearchUtils
-module Decl_provider = Decl_provider_ctx
 
 (* How many locally changed files are in this env? *)
 let count_local_fileinfos ~(sienv : si_env) : int =

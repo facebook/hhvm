@@ -70,22 +70,14 @@
   (preprocess (pps ppx_deriving.std)))
 
 (library
-  (name decl_provider_ctx)
+  (name decl_provider)
   (modules
-    decl_provider_ctx)
+    decl_provider)
   (libraries
     decl_service_client
     global_naming_options
     provider_backend
     typing_heap)
-  (preprocess (pps ppx_deriving.std)))
-
-(library
-  (name decl_provider)
-  (modules
-    decl_provider)
-  (libraries
-    decl_provider_ctx)
   (preprocess (pps ppx_deriving.std)))
 
 (library

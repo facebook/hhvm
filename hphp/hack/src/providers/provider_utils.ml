@@ -6,7 +6,6 @@
  *
  *)
 open Core_kernel
-module Decl_provider = Decl_provider_ctx
 
 module Compute_tast = struct
   type t = {

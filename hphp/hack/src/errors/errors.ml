@@ -2421,15 +2421,6 @@ let generic_array_strict p =
     p
     "You cannot have an array without generics in strict mode"
 
-let strict_members_not_known p name =
-  let name = strip_ns name in
-  add
-    (Typing.err_code Typing.StrictMembersNotKnown)
-    p
-    ( name
-    ^ " has a non-<?hh grandparent; this is not allowed in strict mode"
-    ^ " because that parent may define methods of unknowable name and type" )
-
 let option_return_only_typehint p kind =
   let (typehint, reason) =
     match kind with

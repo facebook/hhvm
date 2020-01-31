@@ -35,10 +35,6 @@ class Foo extends FooParent {
 let foo_parent_missing_diagnostics =
   "
 /foo.php:
-File \"/foo.php\", line 3, characters 7-9:
-Foo has a non-<?hh grandparent; this is not allowed in strict mode because "
-  ^ "that parent may define methods of unknowable name and type (Typing[4123])
-
 File \"/foo.php\", line 3, characters 19-27:
 Unbound name: FooParent (an object type) (Naming[2049])
 

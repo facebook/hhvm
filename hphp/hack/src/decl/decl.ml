@@ -603,11 +603,6 @@ and class_decl c =
   let ext_strict =
     List.fold_left c.sc_uses ~f:(trait_exists env) ~init:ext_strict
   in
-  if (not ext_strict) && Partial.should_check_error env.Decl_env.mode 4117 then
-    let (p, name) = c.sc_name in
-    Errors.strict_members_not_known p name
-  else
-    ();
   let enum = c.sc_enum_type in
   let consts =
     Decl_enum.rewrite_class

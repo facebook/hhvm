@@ -291,8 +291,6 @@ val bad_regex_pattern : Pos.t -> string -> unit
 
 val generic_array_strict : Pos.t -> unit
 
-val strict_members_not_known : Pos.t -> string -> unit
-
 val option_return_only_typehint : Pos.t -> [< `void | `noreturn ] -> unit
 
 val tuple_syntax : Pos.t -> unit

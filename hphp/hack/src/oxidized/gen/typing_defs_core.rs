@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c0ab5494d686169abd032291f4418a84>>
+// @generated SignedSource<<45037bfe169659208cc756f6ed7f9dcb>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -50,7 +50,15 @@ pub enum ParamMutability {
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]
 pub enum FunTparamsKind {
+    /// If ft_tparams is empty, the containing fun_type is a concrete function type.
+    /// Otherwise, it is a generic function and ft_tparams specifies its type parameters.
     FTKtparams,
+    /// The containing fun_type is a concrete function type which is an
+    /// instantiation of a generic function with at least one reified type
+    /// parameter. This means that the function requires explicit type arguments
+    /// at every invocation, and ft_tparams specifies the type arguments with
+    /// which the generic function was instantiated, as well as whether each
+    /// explicit type argument must be reified.
     FTKinstantiatedTargs,
 }
 

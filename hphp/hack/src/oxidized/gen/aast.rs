@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5a52d74c0217168190a5df345b5c5cfe>>
+// @generated SignedSource<<a62421a3c2eb750c9ad0c8d5bd070621>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -205,6 +205,7 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     ExprList(Vec<Expr<Ex, Fb, En, Hi>>),
     Cast(Box<(Hint, Expr<Ex, Fb, En, Hi>)>),
     Unop(Box<(ast_defs::Uop, Expr<Ex, Fb, En, Hi>)>),
+    /// The ID of the $$ that is implicitly declared by this pipe.
     Binop(Box<(ast_defs::Bop, Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>)>),
     Pipe(Box<(Lid, Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>)>),
     Eif(
@@ -331,6 +332,12 @@ pub struct Fun_<Ex, Fb, En, Hi> {
     pub static_: bool,
 }
 
+/// Naming has two phases and the annotation helps to indicate the phase.
+/// In the first pass, it will perform naming on everything except for function
+/// and method bodies and collect information needed. Then, another round of
+/// naming is performed where function bodies are named. Thus, naming will
+/// have named and unnamed variants of the annotation.
+/// See BodyNamingAnnotation in nast.ml and the comment in naming.ml
 #[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
 pub struct FuncBody<Ex, Fb, En, Hi> {
     pub ast: Block<Ex, Fb, En, Hi>,

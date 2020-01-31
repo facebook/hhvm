@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<64768dadb453839670f5950cef4e1bae>>
+// @generated SignedSource<<b2ba8876ded22512c6427949c6310ee4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -116,11 +116,4 @@ pub enum Uop {
     Upincr,
     Updecr,
     Usilence,
-}
-
-#[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]
-pub enum FunDeclKind {
-    FDeclAsync,
-    FDeclSync,
-    FDeclCoroutine,
 }

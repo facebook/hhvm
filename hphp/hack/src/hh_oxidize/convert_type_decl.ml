@@ -108,6 +108,62 @@ let rename ty_name =
 let should_use_alias_instead_of_tuple_struct ty_name =
   List.mem tuple_aliases (curr_module_name (), ty_name) ~equal:( = )
 
+let doc_comment_of_attribute attr =
+  match attr with
+  | ({ txt = "ocaml.doc"; _ }, PStr structure_items) ->
+    List.find_map structure_items (fun structure_item ->
+        match structure_item.pstr_desc with
+        | Pstr_eval
+            ({ pexp_desc = Pexp_constant (Pconst_string (doc, _)); _ }, _) ->
+          Some doc
+        | _ -> None)
+  | _ -> None
+
+let convert_doc_comment doc =
+  doc
+  |> String.strip ~drop:(function
+         | '*'
+         | ' '
+         | '\n'
+         | '\t' ->
+           true
+         | _ -> false)
+  |> String.split ~on:'\n'
+  |> List.fold
+       ~init:(false, [])
+       ~f:(fun (was_in_code_block, lines) original_line ->
+         (* Remove leading whitespace *)
+         let lstripped = String.lstrip original_line in
+         let maybe_chop_prefix prefix s =
+           String.chop_prefix s ~prefix |> Option.value ~default:s
+         in
+         (* Remove leading asterisk and one space after, if present *)
+         let no_asterisk =
+           lstripped |> maybe_chop_prefix "*" |> maybe_chop_prefix " "
+         in
+         let now_in_code_block =
+           if String.is_prefix ~prefix:"```" (String.lstrip no_asterisk) then
+             not was_in_code_block
+           else
+             was_in_code_block
+         in
+         let line =
+           if now_in_code_block && was_in_code_block && lstripped = no_asterisk
+           then
+             sprintf "///%s\n" original_line
+           else
+             sprintf "/// %s\n" no_asterisk
+         in
+         (now_in_code_block, line :: lines))
+  |> (fun (_, l) -> List.rev l)
+  |> String.concat
+
+let doc_comment_of_attribute_list attrs =
+  attrs
+  |> List.find_map ~f:doc_comment_of_attribute
+  |> Option.map ~f:convert_doc_comment
+  |> Option.value ~default:""
+
 let type_param (ct, _) = core_type ct
 
 let type_params params =
@@ -117,6 +173,7 @@ let type_params params =
     params |> map_and_concat ~f:type_param ~sep:", " |> sprintf "<%s>"
 
 let record_label_declaration ?(pub = false) ?(prefix = "") overrides ld =
+  let doc = doc_comment_of_attribute_list ld.pld_attributes in
   let pub =
     if pub then
       "pub "
@@ -131,7 +188,7 @@ let record_label_declaration ?(pub = false) ?(prefix = "") overrides ld =
     | None -> core_type ld.pld_type
     | Some x -> x
   in
-  sprintf "%s%s: %s,\n" pub name ty
+  sprintf "%s%s%s: %s,\n" doc pub name ty
 
 let record_declaration ?(pub = false) overrides labels =
   let prefix =
@@ -172,6 +229,7 @@ let constructor_arguments ?(box_fields = false) = function
   | Pcstr_record labels -> record_declaration SMap.empty labels
 
 let variant_constructor_declaration ?(box_fields = false) cd =
+  let doc = doc_comment_of_attribute_list cd.pcd_attributes in
   let name = convert_type_name cd.pcd_name.txt in
   let args = constructor_arguments ~box_fields cd.pcd_args in
   let discriminant =
@@ -199,7 +257,7 @@ let variant_constructor_declaration ?(box_fields = false) cd =
         | _ -> None)
     |> Option.value ~default:""
   in
-  sprintf "%s%s%s,\n" name args discriminant
+  sprintf "%s%s%s%s,\n" doc name args discriminant
 
 let ctor_arg_len (ctor_args : constructor_arguments) : int =
   match ctor_args with
@@ -207,6 +265,7 @@ let ctor_arg_len (ctor_args : constructor_arguments) : int =
   | Pcstr_record x -> List.length x
 
 let type_declaration name td =
+  let doc = doc_comment_of_attribute_list td.ptype_attributes in
   let attrs_and_vis init_derives =
     let derive_attr =
       derived_traits @ init_derives @ additional_derived_traits name
@@ -217,7 +276,7 @@ let type_declaration name td =
       |> String.concat ~sep:", "
       |> sprintf "#[derive(%s)]"
     in
-    derive_attr ^ "\npub"
+    doc ^ derive_attr ^ "\npub"
   in
   let tparams =
     match (td.ptype_params, td.ptype_name.txt) with
@@ -271,12 +330,17 @@ let type_declaration name td =
       ) else
         let ty = core_type ty in
         if should_add_rcoc name then
-          sprintf "pub type %s%s = ocamlrep::rc::RcOc<%s>;" name tparams ty
+          sprintf
+            "%spub type %s%s = ocamlrep::rc::RcOc<%s>;"
+            doc
+            name
+            tparams
+            ty
         else
-          sprintf "pub type %s%s = %s;" name tparams ty
+          sprintf "%spub type %s%s = %s;" doc name tparams ty
     | _ ->
       if should_use_alias_instead_of_tuple_struct name then
-        sprintf "pub type %s%s = %s;" name tparams (core_type ty)
+        sprintf "%spub type %s%s = %s;" doc name tparams (core_type ty)
       else
         let ty =
           match ty.ptyp_desc with

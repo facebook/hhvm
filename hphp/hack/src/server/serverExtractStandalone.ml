@@ -355,6 +355,12 @@ let string_of_shape_field_name = function
   | Ast_defs.SFlit_str (_, s) -> Printf.sprintf "'%s'" s
   | Ast_defs.SFclass_const ((_, c), (_, s)) -> Printf.sprintf "%s::%s" c s
 
+let string_of_xhp_attr_info xhp_attr_info =
+  match xhp_attr_info.xai_tag with
+  | Some Required -> "@required"
+  | Some LateInit -> "@lateinit"
+  | None -> ""
+
 let rec string_of_hint hint =
   match snd hint with
   | Hoption hint -> "?" ^ string_of_hint hint
@@ -818,13 +824,6 @@ let get_method_declaration method_ ~from_interface =
 let get_prop_declaration ctx prop =
   let name = snd prop.cv_id in
   let user_attributes = string_of_user_attributes prop.cv_user_attributes in
-  let visibility = string_of_visibility prop.cv_visibility in
-  let static =
-    if prop.cv_is_static then
-      "static"
-    else
-      ""
-  in
   let (type_, init) =
     match (prop.cv_type, prop.cv_expr) with
     | (Some hint, Some _) ->
@@ -834,14 +833,33 @@ let get_prop_declaration ctx prop =
     (* Untyped prop, not supported for now *)
     | (None, Some _) -> raise Unsupported
   in
-  Printf.sprintf
-    "%s %s %s %s $%s%s;"
-    user_attributes
-    visibility
-    static
-    type_
-    name
-    init
+  match prop.cv_xhp_attr with
+  | None ->
+    (* Ordinary property *)
+    let visibility = string_of_visibility prop.cv_visibility in
+    let static =
+      if prop.cv_is_static then
+        "static"
+      else
+        ""
+    in
+    Printf.sprintf
+      "%s %s %s %s $%s%s;"
+      user_attributes
+      visibility
+      static
+      type_
+      name
+      init
+  | Some xhp_attr_info ->
+    (* XHP attribute *)
+    Printf.sprintf
+      "%s attribute %s %s %s %s;"
+      user_attributes
+      type_
+      (String.lstrip ~drop:(fun c -> c = ':') name)
+      init
+      (string_of_xhp_attr_info xhp_attr_info)
 
 let get_typeconst_declaration typeconst =
   let abstract =

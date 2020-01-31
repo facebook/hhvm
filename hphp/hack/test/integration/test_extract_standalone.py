@@ -28,7 +28,7 @@ auto_namespace_map = {}
         return os.path.join(
             self.repo_dir,
             "expected/{}.php.exp".format(
-                function_name.replace("::", "++").replace("\\", "__")
+                function_name.replace(":", "+").replace("\\", "__")
             ),
         )
 
@@ -175,6 +175,7 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
             "\\WithLateInit::getCount",
             "\\TFlobby::g",
             "\\with_omitted_generics",
+            "\\:foo::render",
         ]
 
         for function_name in function_names:

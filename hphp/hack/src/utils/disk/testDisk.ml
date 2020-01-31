@@ -118,7 +118,7 @@ let is_directory x =
     | Actual_file_with_contents _ -> false
   with No_such_file_or_directory _ -> false
 
-let cat = get
+let cat x = Counters.count_disk_cat @@ fun () -> get x
 
 let file_exists x =
   try

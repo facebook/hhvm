@@ -10,7 +10,9 @@
 
 let category_decl_accessor = 0
 
-let category_count = 1
+let category_disk_cat = 1
+
+let category_count = 2
 
 type t = {
   count: int;
@@ -60,3 +62,7 @@ let get_counter (category : int) : t = !state.counters.(category)
 let count_decl_accessor (f : unit -> 'a) : 'a = count category_decl_accessor f
 
 let get_decl_accessor_counter () : t = get_counter category_decl_accessor
+
+let count_disk_cat (f : unit -> 'a) : 'a = count category_disk_cat f
+
+let get_disk_cat_counter () : t = get_counter category_disk_cat

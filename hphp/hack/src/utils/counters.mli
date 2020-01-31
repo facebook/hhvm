@@ -30,3 +30,7 @@ val restore_state : state -> unit
 val count_decl_accessor : (unit -> 'a) -> 'a
 
 val get_decl_accessor_counter : unit -> t
+
+val count_disk_cat : (unit -> 'a) -> 'a
+
+val get_disk_cat_counter : unit -> t

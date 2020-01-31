@@ -2636,7 +2636,8 @@ let connect_after_hello (server_conn : server_conn) (state : state) : unit Lwt.t
   in
   Lwt.return_unit
 
-let rec connect_client (root : Path.t) ~(autostart : bool) : server_conn Lwt.t =
+let rec connect_client ~(env : env) (root : Path.t) ~(autostart : bool) :
+    server_conn Lwt.t =
   log "connect_client";
   Exit_status.(
     (* This basically does the same connection attempt as "hh_client check":  *)
@@ -2670,7 +2671,9 @@ let rec connect_client (root : Path.t) ~(autostart : bool) : server_conn Lwt.t =
         do_post_handoff_handshake = false;
         ignore_hh_version = false;
         saved_state_ignore_hhconfig = false;
-        use_priority_pipe = true;
+        (* priority_pipe delivers good experience for hh_server, but has a bug,
+        and doesn't provide benefits in serverless-ide. *)
+        use_priority_pipe = not env.use_serverless_ide;
         prechecked = None;
         config = [];
         allow_non_opt_build = false;
@@ -2687,7 +2690,7 @@ let rec connect_client (root : Path.t) ~(autostart : bool) : server_conn Lwt.t =
       (* Raised when the server was running an old version. We'll retry once.   *)
       log "connect_client: build_id_mismatch";
       can_autostart_after_mismatch := false;
-      connect_client root ~autostart:true)
+      connect_client ~env root ~autostart:true)
 
 let do_initialize (root : Path.t) : Initialize.result =
   let server_args = ServerArgs.default_options ~root:(Path.to_string root) in
@@ -2809,7 +2812,7 @@ let start_server (root : Path.t) : unit =
 (* leaves in a Lost_server state. You might call this from Pre_init or        *)
 (* Lost_server states, obviously. But you can also call it from In_init state *)
 (* if you want to give up on the prior attempt at connection and try again.   *)
-let rec connect (state : state) : state Lwt.t =
+let rec connect ~(env : env) (state : state) : state Lwt.t =
   let root =
     match get_root_opt () with
     | Some root -> root
@@ -2830,7 +2833,7 @@ let rec connect (state : state) : state Lwt.t =
     | _ -> failwith "connect only in Pre_init, In_init or Lost_server state"
   end;
   try%lwt
-    let%lwt conn = connect_client root ~autostart:false in
+    let%lwt conn = connect_client ~env root ~autostart:false in
     set_hh_server_state Hh_server_initializing;
     match state with
     | In_init ienv ->
@@ -2896,6 +2899,7 @@ let rec connect (state : state) : state Lwt.t =
         do_lost_server
           state
           ~allow_immediate_reconnect:false
+          ~env
           {
             Lost_env.explanation;
             new_hh_server_state;
@@ -2907,8 +2911,8 @@ let rec connect (state : state) : state Lwt.t =
       Lwt.return state)
 
 and reconnect_from_lost_if_necessary
-    (state : state) (reason : [> `Event of event | `Force_regain ]) :
-    state Lwt.t =
+    ~(env : env) (state : state) (reason : [> `Event of event | `Force_regain ])
+    : state Lwt.t =
   Lost_env.(
     let should_reconnect =
       match (state, reason) with
@@ -2949,7 +2953,7 @@ and reconnect_from_lost_if_necessary
         Lsp_helpers.telemetry_log to_stdout message;
         exit_fail ()
       ) else
-        let%lwt state = connect state in
+        let%lwt state = connect ~env state in
         Lwt.return state
     else
       Lwt.return state)
@@ -2958,8 +2962,10 @@ and reconnect_from_lost_if_necessary
 (* the LSP server alive, and will (elsewhere) listen for the various triggers *)
 (* of getting the server back.                                                *)
 and do_lost_server
-    (state : state) ?(allow_immediate_reconnect = true) (p : Lost_env.params) :
-    state Lwt.t =
+    (state : state)
+    ~(env : env)
+    ?(allow_immediate_reconnect = true)
+    (p : Lost_env.params) : state Lwt.t =
   Lost_env.(
     set_hh_server_state p.new_hh_server_state;
 
@@ -2992,7 +2998,7 @@ and do_lost_server
         to_stdout
         "Reconnecting immediately to hh_server";
       let%lwt new_state =
-        reconnect_from_lost_if_necessary lost_state `Force_regain
+        reconnect_from_lost_if_necessary ~env lost_state `Force_regain
       in
       Lwt.return new_state
     ) else
@@ -3291,7 +3297,7 @@ let tick_showStatus
           (* After that it's safe to try to reconnect! *)
           start_server root;
           let%lwt state =
-            reconnect_from_lost_if_necessary state `Force_regain
+            reconnect_from_lost_if_necessary ~env state `Force_regain
           in
           Lwt.return state
         | (Some { title }, _) when title = client_ide_restart_button_text ->
@@ -3416,7 +3422,7 @@ let handle_client_message
       hhconfig_version := version;
       HackEventLogger.set_hhconfig_version
         (Some (String_utils.lstrip !hhconfig_version "^"));
-      let%lwt new_state = connect !state in
+      let%lwt new_state = connect ~env !state in
       state := new_state;
       Relative_path.set_path_prefix Relative_path.Root root;
       let result = do_initialize root in
@@ -3788,8 +3794,8 @@ let handle_client_message
   in
   Lwt.return_unit
 
-let handle_server_message ~(message : server_message) ~(state : state ref) :
-    unit Lwt.t =
+let handle_server_message
+    ~(env : env) ~(state : state ref) ~(message : server_message) : unit Lwt.t =
   let open Main_env in
   let%lwt () =
     match (!state, message) with
@@ -3829,6 +3835,7 @@ let handle_server_message ~(message : server_message) ~(state : state ref) :
       ->
       let%lwt new_state =
         do_lost_server
+          ~env
           !state
           {
             Lost_env.explanation = "hh_server is active in another window.";
@@ -3905,7 +3912,7 @@ let handle_tick
           Lwt.return_unit
         ) else
           (* terminate + retry the connection *)
-            let%lwt new_state = connect !state in
+            let%lwt new_state = connect ~env !state in
             state := new_state;
             Lwt.return_unit
       in
@@ -3972,7 +3979,7 @@ let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
 
       (* if we're in a lost-server state, some triggers cause us to reconnect *)
       let%lwt new_state =
-        reconnect_from_lost_if_necessary !state (`Event event)
+        reconnect_from_lost_if_necessary ~env !state (`Event event)
       in
       state := new_state;
 
@@ -4007,7 +4014,7 @@ let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
             ~ref_unblocked_time
         | Client_ide_notification notification ->
           handle_client_ide_notification ~notification
-        | Server_message message -> handle_server_message ~message ~state
+        | Server_message message -> handle_server_message ~env ~state ~message
         | Server_hello -> handle_server_hello ~state
         | Tick ->
           handle_tick ~env ~state ~ide_service:!ide_service ~ref_unblocked_time
@@ -4095,6 +4102,7 @@ let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
             (fun () ->
               let%lwt new_state =
                 do_lost_server
+                  ~env
                   !state
                   {
                     Lost_env.explanation;

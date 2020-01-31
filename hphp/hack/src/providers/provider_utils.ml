@@ -22,6 +22,9 @@ module Compute_tast_and_errors = struct
   }
 end
 
+let ctx_from_server_env (env : ServerEnv.env) : Provider_context.t =
+  Provider_context.empty ~tcopt:env.ServerEnv.tcopt
+
 let respect_but_quarantine_unsaved_changes
     ~(ctx : Provider_context.t) ~(f : unit -> 'a) : 'a =
   let make_then_revert_local_changes f () =

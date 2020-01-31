@@ -121,6 +121,7 @@
     provider_context
     relative_path
     server_command_types
+    server_env
     typechecker_options
     typing)
   (preprocess (pps ppx_deriving.std)))

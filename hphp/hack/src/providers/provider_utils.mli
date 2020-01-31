@@ -21,6 +21,10 @@ module Compute_tast_and_errors : sig
   }
 end
 
+(** Construct a [Provider_context.t] from the configuration information
+contained within a [ServerEnv.env]. *)
+val ctx_from_server_env : ServerEnv.env -> Provider_context.t
+
 (** Compute the given AST for the given path, and return an updated [t]
 containing that entry. *)
 val update_context :

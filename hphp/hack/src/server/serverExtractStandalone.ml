@@ -1014,8 +1014,16 @@ let construct_typedef typedef =
     | Some hint -> " as " ^ string_of_hint hint
     | None -> ""
   in
+  let pos = fst typedef.t_name in
+  let hh_fixmes =
+    String.concat
+      (List.map
+         ~f:(fun code -> Printf.sprintf "/* HH_FIXME[%d] */\n" code)
+         (ISet.elements (Fixme_provider.get_fixme_codes_for_pos pos)))
+  in
   Printf.sprintf
-    "%s %s%s%s = %s;"
+    "%s%s %s%s%s = %s;"
+    hh_fixmes
     keyword
     (strip_ns name)
     tparams

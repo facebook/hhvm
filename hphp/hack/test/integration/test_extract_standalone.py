@@ -176,6 +176,7 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
             "\\TFlobby::g",
             "\\with_omitted_generics",
             "\\:foo::render",
+            "\\with_unsafe_type_hh_fixme",
         ]
 
         for function_name in function_names:

@@ -126,3 +126,12 @@ function with_newtype_with_bound(dict<N, mixed> $_): void {}
 newtype M as N = nothing;
 
 function with_newtype_with_newtype_bound(M $_): void {}
+
+type UNSAFE_TYPE_HH_FIXME_<T> = T;
+
+/* HH_FIXME[4101] */
+type UNSAFE_TYPE_HH_FIXME = UNSAFE_TYPE_HH_FIXME_;
+
+function with_unsafe_type_hh_fixme(UNSAFE_TYPE_HH_FIXME $x): int {
+  return $x;
+}

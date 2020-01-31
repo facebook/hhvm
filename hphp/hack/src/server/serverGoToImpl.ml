@@ -110,7 +110,7 @@ let find_child_classes
       genv.ServerEnv.workers
       (SSet.singleton class_name)
   in
-  let ctx = Provider_context.get_global_context_or_empty_FOR_MIGRATION () in
+  let ctx = Provider_utils.ctx_from_server_env env in
   FindRefsService.find_child_classes ctx class_name env.naming_table files
   |> SSet.elements
 
@@ -167,7 +167,7 @@ let search_member
 
 let go ~(action : action) ~(genv : ServerEnv.genv) ~(env : ServerEnv.env) :
     ServerEnv.env * server_result_or_retry =
-  let ctx = Provider_context.get_global_context_or_empty_FOR_MIGRATION () in
+  let ctx = Provider_utils.ctx_from_server_env env in
   match action with
   | Class class_name -> search_class class_name genv env
   | Member (class_name, member) -> search_member ctx class_name member genv env

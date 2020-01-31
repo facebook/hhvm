@@ -212,11 +212,9 @@ let process_file
     (opts : GlobalOptions.t)
     (errors : Errors.t)
     (file : check_file_computation) : process_file_results =
-  let (_old_state : Deferred_decl.deferred_decl_state) =
-    Deferred_decl.reset
-      ~enable:(should_enable_deferring opts file)
-      ~threshold_opt:(GlobalOptions.tco_defer_class_declaration_threshold opts)
-  in
+  Deferred_decl.reset
+    ~enable:(should_enable_deferring opts file)
+    ~threshold_opt:(GlobalOptions.tco_defer_class_declaration_threshold opts);
   let fn = file.path in
   let ast = Ast_provider.get_ast ~full:true fn in
   let (funs, classes, record_defs, typedefs, gconsts) = Nast.get_defs ast in
@@ -256,8 +254,10 @@ let process_file
     if GlobalOptions.tco_global_inference opts then
       Typing_global_inference.StateSubConstraintGraphs.save global_tvenvs;
     let deferred_files = Deferred_decl.get_deferments ~f:(fun d -> Declare d) in
-    let decl_cache_misses = Deferred_decl.get_decl_cache_misses_counter () in
-    let decl_cache_misses_time = Deferred_decl.get_decl_cache_misses_time () in
+    (* TODO(ljw): *)
+    let decl_cache_misses = 0 in
+    (* TODO(ljw): *)
+    let decl_cache_misses_time = 0. in
     match deferred_files with
     | [] ->
       {

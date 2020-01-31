@@ -85,7 +85,6 @@ module Classes = struct
         match cached with
         | Some dc -> dc
         | None ->
-          let start_time = Unix.gettimeofday () in
           (match Naming_table.Types.get_filename_and_kind class_name with
           | Some (_, Naming_table.TTypedef)
           | Some (_, Naming_table.TRecordDef)
@@ -97,7 +96,7 @@ module Classes = struct
               Errors.run_in_decl_mode file (fun () ->
                   Decl.declare_class_in_file file class_name)
             in
-            Deferred_decl.count_decl_cache_miss class_name ~start_time;
+            Deferred_decl.increment_counter ();
             (match class_type with
             | Some class_type -> class_type
             | None ->

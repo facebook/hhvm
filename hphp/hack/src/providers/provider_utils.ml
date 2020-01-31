@@ -156,9 +156,11 @@ let compute_tast_and_errors_unquarantined_internal
     { Compute_tast_and_errors.tast; errors; decl_cache_misses = 0 }
   | (mode, _, _) ->
     (* prepare logging *)
-    let prev_deferral_state =
-      Deferred_decl.reset ~enable:true ~threshold_opt:None
-    in
+    Deferred_decl.reset ~enable:false ~threshold_opt:None;
+    (* TODO(ljw): reset tally *)
+    (* let prev_decl_tally_state =
+      Decl_tally.reset ~enable:true ~deferment_miss_threshold_opt:None
+    in *)
     begin
       match ctx.Provider_context.backend with
       | Provider_backend.Local_memory { decl_cache; _ } ->
@@ -190,10 +192,13 @@ let compute_tast_and_errors_unquarantined_internal
     let errors = Errors.merge nast_errors tast_errors in
 
     (* Logging... *)
-    let decl_cache_misses = Deferred_decl.get_decl_cache_misses_counter () in
-    let decl_cache_misses_time = Deferred_decl.get_decl_cache_misses_time () in
+    (* TODO(ljw): *)
+    let decl_cache_misses = 0 in
+    (* TODO(ljw): *)
+    let decl_cache_misses_time = 0. in
     let time_decl_and_typecheck = Unix.gettimeofday () -. t in
-    Deferred_decl.restore_state prev_deferral_state;
+    (* TODO(ljw): restore tally state *)
+    (* Decl_tally.restore_state prev_decl_tally_state; *)
     (* Sometimes we're called with a FileName that doesn't exist on disk. *)
     let filesize_opt =
       match entry.Provider_context.file_input with

@@ -8,7 +8,9 @@
 
 (** Categories (internal): we're using ints rather than enums just for convenience. *)
 
-let category_count = 0
+let category_decl_accessor = 0
+
+let category_count = 1
 
 type t = {
   count: int;
@@ -55,6 +57,6 @@ let count (category : int) (f : unit -> 'a) : 'a =
 
 let get_counter (category : int) : t = !state.counters.(category)
 
-let _ = count
+let count_decl_accessor (f : unit -> 'a) : 'a = count category_decl_accessor f
 
-let _ = get_counter
+let get_decl_accessor_counter () : t = get_counter category_decl_accessor

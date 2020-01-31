@@ -26,3 +26,7 @@ val reset : enable:bool -> state
 
 (** restores global mutable state to what it was before you called 'reset' *)
 val restore_state : state -> unit
+
+val count_decl_accessor : (unit -> 'a) -> 'a
+
+val get_decl_accessor_counter : unit -> t

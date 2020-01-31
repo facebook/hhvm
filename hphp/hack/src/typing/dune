@@ -31,6 +31,7 @@
   (libraries
     core_kernel
     decl
+    counters
     typing_defs)
   (preprocess (pps ppx_deriving.std))) ; See T41851208
 

@@ -27,6 +27,7 @@ let check_cache_consistency x expected_kind expected_result =
   )
 
 let get_type_id_filename x expected_kind =
+  Counters.count_decl_accessor @@ fun () ->
   match Naming_table.Types.get_filename_and_kind x with
   | Some (fn, kind) when Naming_table.equal_type_of_type kind expected_kind ->
     check_cache_consistency x expected_kind fn;
@@ -36,6 +37,7 @@ let get_type_id_filename x expected_kind =
 let get_class = Typing_classes_heap.Classes.get
 
 let get_fun x =
+  Counters.count_decl_accessor @@ fun () ->
   match Typing_heap.Funs.get x with
   | Some c -> Some c
   | None ->
@@ -49,6 +51,7 @@ let get_fun x =
     | None -> None)
 
 let get_gconst cst_name =
+  Counters.count_decl_accessor @@ fun () ->
   match Typing_heap.GConsts.get cst_name with
   | Some c -> Some c
   | None ->
@@ -62,6 +65,7 @@ let get_gconst cst_name =
     | None -> None)
 
 let get_record_def x =
+  Counters.count_decl_accessor @@ fun () ->
   match Typing_heap.RecordDefs.get x with
   | Some c -> Some c
   | None ->
@@ -75,6 +79,7 @@ let get_record_def x =
     | None -> None)
 
 let get_typedef x =
+  Counters.count_decl_accessor @@ fun () ->
   match Typing_heap.Typedefs.get x with
   | Some c -> Some c
   | None ->

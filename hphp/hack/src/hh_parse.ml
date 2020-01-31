@@ -343,7 +343,7 @@ No errors are filtered out."
           "Enables the 'xhp class foo' syntax" );
         ( "--disable-xhp-element-mangling",
           Arg.Set disable_xhp_element_mangling,
-          "Disables all XHP mangling; required for --enable-xhp-class-modifier"
+          "Disable mangling of XHP elements :foo. That is, :foo:bar is now \\foo\\bar, not xhp_foo__bar"
         );
       ]
     in

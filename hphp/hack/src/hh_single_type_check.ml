@@ -509,7 +509,7 @@ let parse_options () =
         "Error on using discarded nullable awaitables" );
       ( "--disable-xhp-element-mangling",
         Arg.Set disable_xhp_element_mangling,
-        "Disable mangling of XHP elements :foo. This is necessary for classes using xhp class modifiers."
+        "Disable mangling of XHP elements :foo. That is, :foo:bar is now \\foo\\bar, not xhp_foo__bar"
       );
       ( "--enable-xhp-class-modifier",
         Arg.Set enable_xhp_class_modifier,

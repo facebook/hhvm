@@ -265,7 +265,7 @@ and fun_decl_in_env env ~is_lambda f =
   let params = make_params env ~is_lambda f.f_params in
   let ret_ty =
     match hint_of_type_hint f.f_ret with
-    | None -> ret_from_fun_kind (fst f.f_name) ~is_lambda f.f_fun_kind
+    | None -> ret_from_fun_kind ~is_lambda env (fst f.f_name) f.f_fun_kind
     | Some ty -> Decl_hint.hint env ty
   in
   let arity =

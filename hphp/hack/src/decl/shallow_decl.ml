@@ -142,7 +142,12 @@ let make_xhp_attr cv =
 
 let prop env cv =
   let cv_pos = fst cv.cv_id in
-  let ty = Option.map cv.cv_type ~f:(Decl_hint.hint env) in
+  let ty =
+    global_inference_create_tyvar_from_hint
+      env
+      (Reason.Rwitness cv_pos)
+      (hint_of_type_hint cv.cv_type)
+  in
   let const = Attrs.mem SN.UserAttributes.uaConst cv.cv_user_attributes in
   let lateinit = Attrs.mem SN.UserAttributes.uaLateInit cv.cv_user_attributes in
   if cv.cv_final then Errors.final_property cv_pos;
@@ -163,7 +168,12 @@ let prop env cv =
 
 and static_prop env c cv =
   let (cv_pos, cv_name) = cv.cv_id in
-  let ty = Option.map cv.cv_type ~f:(Decl_hint.hint env) in
+  let ty =
+    global_inference_create_tyvar_from_hint
+      env
+      (Reason.Rwitness cv_pos)
+      (hint_of_type_hint cv.cv_type)
+  in
   let id = "$" ^ cv_name in
   let lateinit = Attrs.mem SN.UserAttributes.uaLateInit cv.cv_user_attributes in
   let abstract = cv.cv_abstract in
@@ -173,7 +183,7 @@ and static_prop env c cv =
     Option.is_none cv.cv_expr
     && FileInfo.(is_strict c.c_mode || equal_mode c.c_mode Mpartial)
   then
-    match cv.cv_type with
+    match hint_of_type_hint cv.cv_type with
     | None
     | Some (_, Hmixed)
     | Some (_, Hoption _) ->
@@ -210,6 +220,7 @@ let method_type env m =
       ret_from_fun_kind
         ~is_lambda:false
         ~is_constructor:(String.equal (snd m.m_name) SN.Members.__construct)
+        env
         (fst m.m_name)
         m.m_fun_kind
     | Some ret -> Decl_hint.hint env ret
@@ -252,6 +263,7 @@ let method_redeclaration_type env m =
       ret_from_fun_kind
         ~is_lambda:false
         ~is_constructor:(String.equal (snd m.mt_name) SN.Members.__construct)
+        env
         (fst m.mt_name)
         m.mt_fun_kind
     | Some ret -> Decl_hint.hint env ret

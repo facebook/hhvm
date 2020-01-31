@@ -244,7 +244,7 @@ and typeconst (env, _) tconst =
   maybe hint env tconst.c_tconst_type;
   maybe hint env tconst.c_tconst_constraint
 
-and class_var env cv = maybe hint env cv.cv_type
+and class_var env cv = maybe hint env (hint_of_type_hint cv.cv_type)
 
 and method_ env m =
   (* Add method type parameters to environment and localize the bounds

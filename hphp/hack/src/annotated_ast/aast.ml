@@ -394,7 +394,7 @@ and xhp_attr_tag =
   | LateInit
 
 and ('ex, 'fb, 'en, 'hi) xhp_attr =
-  hint option
+  'hi type_hint
   * ('ex, 'fb, 'en, 'hi) class_var
   * xhp_attr_tag option
   * (pos * bool * ('ex, 'fb, 'en, 'hi) expr list) option
@@ -450,7 +450,7 @@ and ('ex, 'fb, 'en, 'hi) class_var = {
   cv_xhp_attr: xhp_attr_info option;
   cv_abstract: bool;
   cv_visibility: visibility;
-  cv_type: hint option;
+  cv_type: 'hi type_hint;
   cv_id: sid;
   cv_expr: ('ex, 'fb, 'en, 'hi) expr option;
   cv_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;

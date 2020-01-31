@@ -135,7 +135,7 @@ let from_class_elt_classvars ast_class class_is_const tparams =
       if cv.A.cv_is_promoted_variadic then
         None
       else
-        cv.A.cv_type
+        A.hint_of_type_hint cv.A.cv_type
     in
     Emit_property.from_ast
       ast_class
@@ -427,7 +427,8 @@ let emit_class (ast_class, hoisted) =
   in
   let class_xhp_attributes =
     List.map
-      ~f:(fun (ho, cv, b, eo) -> Hhas_xhp_attribute.make ho cv b eo)
+      ~f:(fun (ho, cv, b, eo) ->
+        Hhas_xhp_attribute.make (A.hint_of_type_hint ho) cv b eo)
       ast_class.A.c_xhp_attrs
   in
   let class_xhp_children =

@@ -141,7 +141,9 @@ let handler =
       Option.iter t.t_constraint (check_hint env)
 
     method! at_class_ env c =
-      let check_class_vars cvar = Option.iter cvar.cv_type (check_hint env) in
+      let check_class_vars cvar =
+        Option.iter (hint_of_type_hint cvar.cv_type) (check_hint env)
+      in
       List.iter c.c_vars check_class_vars;
       check_tparams env c.c_tparams.c_tparam_list
 

@@ -1358,7 +1358,7 @@ module Make (GetLocals : GetLocals) = struct
           Some (pos, Aast.Happly ((pos, "string"), []))
         else
           Some (pos, Aast.Happly ((pos, "mixed"), []))
-      | _ -> h
+      | _ -> Aast.hint_of_type_hint h
     in
     let hint_ =
       match hint_ with
@@ -1380,7 +1380,8 @@ module Make (GetLocals : GetLocals) = struct
           Some (p, Aast.Hoption (p, h))
       | None -> None
     in
-    let hint_ = Option.map hint_ (hint env) in
+    let hint_ = ((), hint_) in
+    let hint_ = Aast.type_hint_option_map hint_ ~f:(hint env) in
     let (expr, _) = class_prop_expr_is_xhp env cv in
     let xhp_attr_info = Some { N.xai_tag = tag } in
     {
@@ -1471,7 +1472,9 @@ module Make (GetLocals : GetLocals) = struct
     let attrs = user_attributes env cv.Aast.cv_user_attributes in
     let lsb = Naming_attributes.mem SN.UserAttributes.uaLSB attrs in
     let forbid_this = not lsb in
-    let h = Option.map cv.Aast.cv_type (hint ~forbid_this env) in
+    let h =
+      Aast.type_hint_option_map ~f:(hint ~forbid_this env) cv.Aast.cv_type
+    in
     let (expr, is_xhp) = class_prop_expr_is_xhp env cv in
     {
       N.cv_final = cv.Aast.cv_final;
@@ -1490,7 +1493,7 @@ module Make (GetLocals : GetLocals) = struct
     }
 
   and class_prop_non_static env ?(const = None) cv =
-    let h = Option.map cv.Aast.cv_type (hint env) in
+    let h = Aast.type_hint_option_map ~f:(hint env) cv.Aast.cv_type in
     let attrs = user_attributes env cv.Aast.cv_user_attributes in
     (* if class is __Const, make all member fields __Const *)
     let attrs =

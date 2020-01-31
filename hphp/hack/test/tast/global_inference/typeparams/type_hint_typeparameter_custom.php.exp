@@ -19,7 +19,8 @@ Errors:
       c_typeconsts = [];
       c_vars =
       [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false;
-         cv_visibility = Public; cv_type = (Some ([4:10-11], (Habstr "T")));
+         cv_visibility = Public;
+         cv_type = ((T), (Some ([4:10-11], (Habstr "T"))));
          cv_id = ([4:12-14], "y"); cv_expr = None; cv_user_attributes = [];
          cv_doc_comment = None; cv_is_promoted_variadic = false;
          cv_is_static = false; cv_span = [4:12-14] }

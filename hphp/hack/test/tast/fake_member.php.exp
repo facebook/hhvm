@@ -11,7 +11,8 @@
       c_vars =
       [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false;
          cv_visibility = Private;
-         cv_type = (Some ([4:11-15], (Hoption ([4:12-15], (Hprim Tint)))));
+         cv_type =
+         ((?int), (Some ([4:11-15], (Hoption ([4:12-15], (Hprim Tint))))));
          cv_id = ([4:16-20], "foo");
          cv_expr = (Some (([4:23-27], null), Null)); cv_user_attributes = [];
          cv_doc_comment = None; cv_is_promoted_variadic = false;

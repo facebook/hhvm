@@ -45,7 +45,7 @@ let xhp_attribute_declaration_method
       m_body;
       m_fun_kind = A.FSync;
       m_user_attributes = [];
-      m_ret = Tast.dummy_type_hint;
+      m_ret = Tast.dummy_type_hint None;
       m_external = false;
       m_doc_comment = None;
     }

@@ -46,7 +46,8 @@
        c_typeconsts = [];
        c_vars =
        [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false;
-          cv_visibility = Private; cv_type = None; cv_id = ([8:18-20], "d");
+          cv_visibility = Private; cv_type = ((dynamic), None);
+          cv_id = ([8:18-20], "d");
           cv_expr =
           (Some (([8:23-11:4], darray<string, classname<(A | B)>>),
                  (Darray (None,
@@ -66,7 +67,7 @@
           cv_is_promoted_variadic = false; cv_is_static = true;
           cv_span = [8:18-11:4] };
          { cv_final = false; cv_xhp_attr = None; cv_abstract = false;
-           cv_visibility = Private; cv_type = None;
+           cv_visibility = Private; cv_type = ((dynamic), None);
            cv_id = ([12:18-20], "s");
            cv_expr =
            (Some (([12:23-34], Set<string>),

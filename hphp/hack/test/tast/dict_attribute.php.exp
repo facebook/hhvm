@@ -516,7 +516,7 @@
        c_vars =
        [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false;
           cv_visibility = Private;
-          cv_type = (Some ([27:18-21], (Hprim Tint)));
+          cv_type = ((int), (Some ([27:18-21], (Hprim Tint))));
           cv_id = ([27:22-27], "smem");
           cv_expr = (Some (([27:30-32], int), (Int "42")));
           cv_user_attributes =
@@ -537,7 +537,7 @@
           cv_is_static = true; cv_span = [27:22-32] };
          { cv_final = false; cv_xhp_attr = None; cv_abstract = false;
            cv_visibility = Private;
-           cv_type = (Some ([25:11-14], (Hprim Tint)));
+           cv_type = ((int), (Some ([25:11-14], (Hprim Tint))));
            cv_id = ([25:15-19], "mem");
            cv_expr = (Some (([25:22-23], int), (Int "4")));
            cv_user_attributes =

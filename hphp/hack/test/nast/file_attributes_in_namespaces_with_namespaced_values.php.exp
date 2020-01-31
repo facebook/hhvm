@@ -12,7 +12,7 @@
       c_vars =
       [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false;
          cv_visibility = Public;
-         cv_type = (Some ([5:40-46], (Hprim Tstring)));
+         cv_type = ((), (Some ([5:40-46], (Hprim Tstring))));
          cv_id = ([5:47-58], "attr_value"); cv_expr = None;
          cv_user_attributes = []; cv_doc_comment = None;
          cv_is_promoted_variadic = false; cv_is_static = false;

@@ -7715,6 +7715,22 @@ and get_decl_function_header env function_id =
   else
     None
 
+and get_decl_prop_ty env cls ~is_static prop_id =
+  let is_global_inference_on = TCO.global_inference (Env.get_tcopt env) in
+  if is_global_inference_on then
+    let prop_opt =
+      if is_static then
+        (* this is very ad-hoc, but this is how we do it in the decl-heap *)
+        Cls.get_sprop cls ("$" ^ prop_id)
+      else
+        Cls.get_prop cls prop_id
+    in
+    match prop_opt with
+    | None -> failwith "error: could not find property in decl heap"
+    | Some { ce_type; _ } -> Some (Lazy.force ce_type)
+  else
+    None
+
 and class_def_ env c tc =
   let env =
     let kind =
@@ -7877,8 +7893,11 @@ and class_def_ env c tc =
     List.iter
       (c.c_extends @ c.c_uses)
       (Typing_disposable.enforce_is_disposable env);
-  let (env, typed_vars) =
-    List.map_env env vars (class_var_def ~is_static:false)
+  let (env, typed_vars_and_global_inference_envs) =
+    List.map_env env vars (class_var_def ~is_static:false tc)
+  in
+  let (typed_vars, vars_global_inference_envs) =
+    List.unzip typed_vars_and_global_inference_envs
   in
   let typed_method_redeclarations = [] in
   let (typed_methods, methods_global_inference_envs) =
@@ -7890,8 +7909,11 @@ and class_def_ env c tc =
   let env = Typing_enum.enum_class_check env tc c.c_consts const_types in
   let typed_constructor = class_constr_def env tc constructor in
   let env = Env.set_static env in
-  let (env, typed_static_vars) =
-    List.map_env env static_vars (class_var_def ~is_static:true)
+  let (env, typed_static_vars_and_global_inference_envs) =
+    List.map_env env static_vars (class_var_def ~is_static:true tc)
+  in
+  let (typed_static_vars, static_vars_global_inference_envs) =
+    List.unzip typed_static_vars_and_global_inference_envs
   in
   let (typed_static_methods, static_methods_global_inference_envs) =
     List.filter_map static_methods (method_def env tc) |> List.unzip
@@ -7953,7 +7975,9 @@ and class_def_ env c tc =
     },
     methods_global_inference_envs
     @ static_methods_global_inference_envs
-    @ constr_global_inference_env )
+    @ constr_global_inference_env
+    @ static_vars_global_inference_envs
+    @ vars_global_inference_envs )
 
 and check_dynamic_class_element get_static_elt element_name dyn_pos ~elt_type =
   (* The non-static properties that we get passed do not start with '$', but the
@@ -8233,18 +8257,26 @@ and class_implements_type env c1 removals ctype2 =
   Typing_extends.check_implements env removals ctype2 ctype1
 
 (* Type-check a property declaration, with optional initializer *)
-and class_var_def ~is_static env cv =
+and class_var_def ~is_static cls env cv =
   (* First pick up and localize the hint if it exists *)
+  let decl_cty =
+    merge_hint_with_decl_hint
+      env
+      (hint_of_type_hint cv.cv_type)
+      (get_decl_prop_ty env cls ~is_static (snd cv.cv_id))
+  in
   let (env, expected) =
-    match cv.cv_type with
+    match decl_cty with
     | None -> (env, None)
-    | Some ((p, _) as cty) ->
-      let decl_cty = Decl_hint.hint env.decl_env cty in
+    | Some decl_cty ->
       let decl_cty = Typing_enforceability.compute_enforced_ty env decl_cty in
       let (env, cty) =
         Phase.localize_possibly_enforced_with_self env decl_cty
       in
-      (env, Some (ExpectedTy.make_and_allow_coercion p Reason.URhint cty))
+      let expected =
+        Some (ExpectedTy.make_and_allow_coercion cv.cv_span Reason.URhint cty)
+      in
+      (env, expected)
   in
   (* Next check the expression, passing in expected type if present *)
   let (env, typed_cv_expr) =
@@ -8287,28 +8319,36 @@ and class_var_def ~is_static env cv =
     List.map_env env cv.cv_user_attributes user_attribute
   in
   if
-    Option.is_none cv.cv_type
+    Option.is_none (hint_of_type_hint cv.cv_type)
     && Partial.should_check_error (Env.get_mode env) 2001
   then
     Errors.prop_without_typehint
       (string_of_visibility cv.cv_visibility)
       cv.cv_id;
+  let (env, global_inference_env) = Env.extract_global_inference_env env in
+  let cv_type =
+    match expected with
+    | Some expected ->
+      (expected.ExpectedTy.ty.et_type, hint_of_type_hint cv.cv_type)
+    | None -> dummy_type_hint (hint_of_type_hint cv.cv_type)
+  in
   ( env,
-    {
-      Aast.cv_final = cv.cv_final;
-      Aast.cv_xhp_attr = cv.cv_xhp_attr;
-      Aast.cv_abstract = cv.cv_abstract;
-      Aast.cv_visibility = cv.cv_visibility;
-      Aast.cv_type = cv.cv_type;
-      Aast.cv_id = cv.cv_id;
-      Aast.cv_expr = typed_cv_expr;
-      Aast.cv_user_attributes = user_attributes;
-      Aast.cv_is_promoted_variadic = cv.cv_is_promoted_variadic;
-      Aast.cv_doc_comment = cv.cv_doc_comment;
-      (* Can make None to save space *)
-      Aast.cv_is_static = is_static;
-      Aast.cv_span = cv.cv_span;
-    } )
+    ( {
+        Aast.cv_final = cv.cv_final;
+        Aast.cv_xhp_attr = cv.cv_xhp_attr;
+        Aast.cv_abstract = cv.cv_abstract;
+        Aast.cv_visibility = cv.cv_visibility;
+        Aast.cv_type;
+        Aast.cv_id = cv.cv_id;
+        Aast.cv_expr = typed_cv_expr;
+        Aast.cv_user_attributes = user_attributes;
+        Aast.cv_is_promoted_variadic = cv.cv_is_promoted_variadic;
+        Aast.cv_doc_comment = cv.cv_doc_comment;
+        (* Can make None to save space *)
+        Aast.cv_is_static = is_static;
+        Aast.cv_span = cv.cv_span;
+      },
+      (cv.cv_span, global_inference_env) ) )
 
 and supertype_redeclared_method tc env m =
   let (pos, name) = m.mt_name in

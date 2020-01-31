@@ -4050,7 +4050,7 @@ where
                         xhp_attr: None,
                         abstract_: kinds.has(modifier::ABSTRACT),
                         visibility: vis,
-                        type_: type_.clone(),
+                        type_: ast::TypeHint((), type_.clone()),
                         id: name_expr.1,
                         expr: name_expr.2,
                         user_attributes: user_attributes.clone(),
@@ -4093,7 +4093,7 @@ where
                             xhp_attr: None,
                             abstract_: false,
                             visibility: param.visibility.unwrap(),
-                            type_: param.type_hint.1.clone(),
+                            type_: param.type_hint.clone(),
                             id: ast::Id(p.clone(), cvname.to_string()),
                             expr: None,
                             user_attributes: param.user_attributes.clone(),
@@ -4340,13 +4340,13 @@ where
                             let init_expr =
                                 Self::mp_optional(Self::p_simple_initializer, init, env)?;
                             let xhp_attr = ast::XhpAttr(
-                                hint.clone(),
+                                ast::TypeHint((), hint.clone()),
                                 ast::ClassVar {
                                     final_: false,
                                     xhp_attr: Some(ast::XhpAttrInfo { xai_tag: req }),
                                     abstract_: false,
                                     visibility: ast::Visibility::Public,
-                                    type_: hint,
+                                    type_: ast::TypeHint((), hint),
                                     id: ast::Id(p, String::from(":") + &name),
                                     expr: init_expr,
                                     user_attributes: vec![],

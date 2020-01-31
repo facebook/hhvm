@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3118291b23171fd8b847838b74755c9b>>
+// @generated SignedSource<<5a52d74c0217168190a5df345b5c5cfe>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -429,7 +429,7 @@ pub enum XhpAttrTag {
 
 #[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
 pub struct XhpAttr<Ex, Fb, En, Hi>(
-    pub Option<Hint>,
+    pub TypeHint<Hi>,
     pub ClassVar<Ex, Fb, En, Hi>,
     pub Option<XhpAttrTag>,
     pub Option<(Pos, bool, Vec<Expr<Ex, Fb, En, Hi>>)>,
@@ -492,7 +492,7 @@ pub struct ClassVar<Ex, Fb, En, Hi> {
     pub xhp_attr: Option<XhpAttrInfo>,
     pub abstract_: bool,
     pub visibility: Visibility,
-    pub type_: Option<Hint>,
+    pub type_: TypeHint<Hi>,
     pub id: Sid,
     pub expr: Option<Expr<Ex, Fb, En, Hi>>,
     pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,

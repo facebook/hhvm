@@ -1152,7 +1152,7 @@ module Visitor_DEPRECATED = struct
       method on_class_var acc c_var =
         let acc = this#on_id acc c_var.cv_id in
         let acc =
-          match c_var.cv_type with
+          match hint_of_type_hint c_var.cv_type with
           | Some h -> this#on_hint acc h
           | None -> acc
         in

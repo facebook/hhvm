@@ -825,7 +825,7 @@ let get_prop_declaration ctx prop =
   let name = snd prop.cv_id in
   let user_attributes = string_of_user_attributes prop.cv_user_attributes in
   let (type_, init) =
-    match (prop.cv_type, prop.cv_expr) with
+    match (hint_of_type_hint prop.cv_type, prop.cv_expr) with
     | (Some hint, Some _) ->
       (string_of_hint hint, Printf.sprintf " = %s" (get_init_from_hint ctx hint))
     | (Some hint, None) -> (string_of_hint hint, "")

@@ -72,24 +72,31 @@ let get_param_mutability user_attributes =
 
 (* If global inference is on this will create a new type variable and store it in
   the global tvenv. Otherwise we return the default type given as parameter *)
-let global_inference_create_tyvar ~is_lambda ~default =
-  let (reason, default_ty_) = deref default in
-  let tco = Global_naming_options.get () in
-  if GlobalOptions.tco_global_inference tco && not is_lambda then
-    mk (reason, Tvar (Ident.tmp ()))
+let global_inference_create_tyvar_from_hint env reason hint =
+  match hint with
+  | None ->
+    let tco = Global_naming_options.get () in
+    if GlobalOptions.tco_global_inference tco then
+      Some (mk (reason, Tvar (Ident.tmp ())))
+    else
+      None
+  | Some hint -> Some (Decl_hint.hint env hint)
+
+let global_inference_create_tyvar ~is_lambda ~default env hint =
+  if is_lambda then
+    Option.map hint ~f:(Decl_hint.hint env) |> Option.value ~default
   else
-    mk (reason, default_ty_)
+    global_inference_create_tyvar_from_hint env (get_reason default) hint
+    |> Option.value ~default
 
 let make_param_ty env ~is_lambda param =
   let ty =
-    match hint_of_type_hint param.param_type_hint with
-    | None ->
-      let r = Reason.Rwitness param.param_pos in
-      global_inference_create_tyvar
-        ~is_lambda
-        ~default:(mk (r, Typing_defs.make_tany ()))
-    (* if the code is strict, use the type-hint *)
-    | Some x -> Decl_hint.hint env x
+    let r = Reason.Rwitness param.param_pos in
+    global_inference_create_tyvar
+      ~is_lambda
+      ~default:(mk (r, Typing_defs.make_tany ()))
+      env
+      (hint_of_type_hint param.param_type_hint)
   in
   let ty =
     match get_node ty with
@@ -129,13 +136,13 @@ let make_param_ty env ~is_lambda param =
     fp_rx_annotation = rx_annotation;
   }
 
-let ret_from_fun_kind ?(is_constructor = false) ~is_lambda pos kind =
+let ret_from_fun_kind ?(is_constructor = false) ~is_lambda env pos kind =
   let default = mk (Reason.Rwitness pos, Typing_defs.make_tany ()) in
   let ret_ty () =
     if is_constructor then
       mk (Reason.Rwitness pos, Tprim Tvoid)
     else
-      global_inference_create_tyvar ~is_lambda ~default
+      global_inference_create_tyvar ~is_lambda ~default env None
   in
   match kind with
   | Ast_defs.FGenerator ->

@@ -124,7 +124,8 @@ let handler =
       List.iter c.c_typeconsts (fun t ->
           Option.iter t.c_tconst_type (check_hint env);
           Option.iter t.c_tconst_constraint (check_hint env));
-      List.iter c.c_vars (fun v -> Option.iter v.cv_type (check_hint env));
+      List.iter c.c_vars (fun v ->
+          Option.iter (hint_of_type_hint v.cv_type) (check_hint env));
       Option.iter c.c_enum (fun e ->
           check_hint env e.e_base;
           Option.iter e.e_constraint (check_hint env));

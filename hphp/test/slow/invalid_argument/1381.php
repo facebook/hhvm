@@ -75,8 +75,16 @@ var_dump(base_convert('05678', 8, 37));
 var_dump(convert_cyr_string('abc', 'y', 'z'));
 var_dump(money_format('%abc', 1.33));
 var_dump(money_format('%i%i', 1.33));
-var_dump(str_pad('abc', 10, '', 100));
-var_dump(str_pad('abc', 10, ' ', 100));
+try {
+  var_dump(str_pad('abc', 10, '', 100));
+} catch (Exception $e) {
+  var_dump($e->getMessage());
+}
+try {
+  var_dump(str_pad('abc', 10, ' ', 100));
+} catch (Exception $e) {
+  var_dump($e->getMessage());
+}
 var_dump(wordwrap('', 75, '', true));
 var_dump(wordwrap('', 75, '', true));
 var_dump(wordwrap('abc', 75, '', true));

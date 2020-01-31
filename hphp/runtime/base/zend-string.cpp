@@ -118,8 +118,8 @@ String string_pad(const char *input, int len, int pad_length,
 
   /* Setup the padding string values if specified. */
   if (pad_str_len == 0) {
-    raise_invalid_argument_warning("pad_string: (empty)");
-    return String();
+    SystemLib::throwRuntimeExceptionObject(
+      "Invalid argument: pad_string: (empty)");
   }
 
   String ret(pad_length, ReserveString);
@@ -141,8 +141,8 @@ String string_pad(const char *input, int len, int pad_length,
     right_pad = num_pad_chars - left_pad;
     break;
   default:
-    raise_invalid_argument_warning("pad_type: %d", pad_type);
-    return String();
+    SystemLib::throwRuntimeExceptionObject(
+      folly::sformat("Invalid argument: pad_type: {}", pad_type));
   }
 
   /* First we pad on the left. */

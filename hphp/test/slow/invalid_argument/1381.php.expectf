@@ -151,12 +151,8 @@ bool(false)
 
 Warning: Invalid argument: format: Only a single %ci or %cn token can be used in %s/test/slow/invalid_argument/1381.php on line %d
 bool(false)
-
-Warning: Invalid argument: pad_string: (empty) in %s/test/slow/invalid_argument/1381.php on line %d
-NULL
-
-Warning: Invalid argument: pad_type: 100 in %s/test/slow/invalid_argument/1381.php on line %d
-NULL
+string(37) "Invalid argument: pad_string: (empty)"
+string(31) "Invalid argument: pad_type: 100"
 string(0) ""
 string(0) ""
 

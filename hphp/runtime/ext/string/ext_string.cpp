@@ -943,8 +943,8 @@ String HHVM_FUNCTION(str_repeat,
   }
 
   if (multiplier < 0) {
-    raise_warning("Second argument has to be greater than or equal to 0");
-    return String();
+    SystemLib::throwRuntimeExceptionObject(
+      "Second argument has to be greater than or equal to 0");
   }
 
   if (multiplier == 0) {

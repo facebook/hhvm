@@ -51,7 +51,7 @@ echo "\n\n*** Testing error conditions ***";
 try { var_dump( str_repeat() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // Zero args
 try { var_dump( str_repeat($input[0]) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // args < expected
 try { var_dump( str_repeat($input[0], 3, 4) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // args > expected
-var_dump( str_repeat($input[0], -1) );
+try { var_dump( str_repeat($input[0], -1) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // $repeat_count < 0
 
 echo "Done\n";
 }

@@ -38,7 +38,7 @@ let check_parent
     seen_types
     seen_values
     c_extends =
-  Sequence.iter
+  List.iter
     ~f:(fun parent ->
       match Decl_provider.get_class ctx parent with
       | None -> ()

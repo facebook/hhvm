@@ -1219,9 +1219,9 @@ and simplify_subtype_i
               in
               let lower_bounds_super = Cls.lower_bounds_on_this class_ty in
               let rec try_constraints lower_bounds_super env =
-                match Sequence.next lower_bounds_super with
-                | None -> invalid_with fail
-                | Some (ty_super, lower_bounds_super) ->
+                match lower_bounds_super with
+                | [] -> invalid_with fail
+                | ty_super :: lower_bounds_super ->
                   let (env, ty_super) = Phase.localize ~ety_env env ty_super in
                   env
                   |> simplify_subtype ~subtype_env ~this_ty ty_sub ty_super
@@ -1842,12 +1842,12 @@ and simplify_subtype_i
                          equal_class_kind (Cls.kind class_sub) Cinterface)
                   then
                     let rec try_upper_bounds_on_this up_objs env =
-                      match Sequence.next up_objs with
-                      | None ->
+                      match up_objs with
+                      | [] ->
                         (* It's crucial that we don't lose updates to global_tpenv in env that were
                          * introduced by PHase.localize. TODO: avoid this requirement *)
                         invalid_env env
-                      | Some (ub_obj_typ, up_objs) ->
+                      | ub_obj_typ :: up_objs ->
                         (* a trait is never the runtime type, but it can be used
                          * as a constraint if it has requirements or where constraints
                          * for its using classes *)

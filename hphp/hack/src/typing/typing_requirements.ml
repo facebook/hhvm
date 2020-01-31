@@ -31,7 +31,7 @@ let check_class env tc =
   match Cls.kind tc with
   | Ast_defs.Cnormal
   | Ast_defs.Cabstract ->
-    Sequence.iter
+    List.iter
       (Cls.all_ancestor_reqs tc)
       (check_fulfillment env (Cls.get_ancestor tc))
   | Ast_defs.Ctrait

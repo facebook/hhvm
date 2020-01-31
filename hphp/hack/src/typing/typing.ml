@@ -5952,8 +5952,7 @@ and class_get_
       in
       let get_smember_from_constraints env class_info =
         let upper_bounds =
-          Sequence.to_list
-            (Cls.upper_bounds_on_this_from_constraints class_info)
+          Cls.upper_bounds_on_this_from_constraints class_info
         in
         let (env, upper_bounds) =
           List.map_env env upper_bounds ~f:(fun env up ->
@@ -6192,7 +6191,7 @@ and class_id_for_new ~exact p env cid explicit_targs =
  * the 'require extends' must belong to the same inheritance hierarchy
  * and one of them should be the child of all the others *)
 and trait_most_concrete_req_class trait env =
-  Sequence.fold
+  List.fold
     (Cls.all_ancestor_reqs trait)
     ~f:
       begin

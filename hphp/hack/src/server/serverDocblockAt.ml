@@ -23,7 +23,7 @@ let get_all_ancestors ctx class_name =
         | Some class_info ->
           let ancestors =
             Cls.all_ancestor_names class_info
-            |> Sequence.fold ~init:classes ~f:(fun acc cid -> cid :: acc)
+            |> List.fold ~init:classes ~f:(fun acc cid -> cid :: acc)
           in
           helper
             ancestors

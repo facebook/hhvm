@@ -1610,7 +1610,7 @@ module PrintClass = struct
      *
      * ParentPartiallyKnown must inherit one of the ! Unknown parents, so that
      * sigil could be omitted *)
-    Sequence.fold m ~init:"" ~f:(fun acc (field, v) ->
+    List.fold m ~init:"" ~f:(fun acc (field, v) ->
         let (sigil, kind) =
           match Decl_provider.get_class ctx field with
           | None -> ("!", "")
@@ -1636,7 +1636,7 @@ module PrintClass = struct
     ce_str ^ consist_str
 
   let req_ancestors tcopt xs =
-    Sequence.fold xs ~init:"" ~f:(fun acc (_p, x) ->
+    List.fold xs ~init:"" ~f:(fun acc (_p, x) ->
         acc ^ Full.to_string_decl tcopt x ^ ", ")
 
   let class_type ctx c =

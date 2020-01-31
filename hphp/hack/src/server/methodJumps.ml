@@ -161,7 +161,7 @@ let get_ancestor_classes_and_methods ctx cls ~filter acc =
   match class_ with
   | None -> []
   | Some cls ->
-    Sequence.fold (Cls.all_ancestor_names cls) ~init:acc ~f:(fun acc k ->
+    List.fold (Cls.all_ancestor_names cls) ~init:acc ~f:(fun acc k ->
         let class_ = Decl_provider.get_class ctx k in
         match class_ with
         | Some c when class_passes_filter ~filter c ->

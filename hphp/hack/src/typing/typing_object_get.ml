@@ -176,9 +176,7 @@ and obj_get_concrete_ty
   | (r, Tclass (x, exact, paraml)) ->
     let get_member_from_constraints env class_info =
       let ety_env = mk_ety_env r class_info x exact paraml in
-      let upper_bounds =
-        Sequence.to_list (Cls.upper_bounds_on_this class_info)
-      in
+      let upper_bounds = Cls.upper_bounds_on_this class_info in
       let (env, upper_bounds) =
         List.map_env env upper_bounds ~f:(fun env up ->
             Phase.localize ~ety_env env up)

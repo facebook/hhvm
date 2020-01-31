@@ -110,9 +110,9 @@ let go ctx ast result =
     Decl_provider.get_class ctx class_name >>= fun cls ->
     let matching_method =
       Cls.all_ancestor_names cls
-      |> Sequence.filter_map ~f:(Decl_provider.get_class ctx)
+      |> List.filter_map ~f:(Decl_provider.get_class ctx)
       (* Find all inherited methods with the same name. *)
-      |> Sequence.filter_map ~f:(fun cls ->
+      |> List.filter_map ~f:(fun cls ->
              ( if is_static then
                Cls.get_smethod
              else
@@ -120,7 +120,7 @@ let go ctx ast result =
                cls
                method_name)
       (* Take the earliest method in the linearization, if any. *)
-      |> Sequence.to_list_rev
+      |> List.rev
       |> List.hd
     in
     (match matching_method with

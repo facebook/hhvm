@@ -292,18 +292,18 @@ module Api = struct
 
   let all_ancestors t =
     match t with
-    | Lazy lc -> LSTable.to_seq lc.ancestors |> sort_by_key |> Sequence.of_list
-    | Eager c -> SMap.bindings c.tc_ancestors |> Sequence.of_list
+    | Lazy lc -> LSTable.to_seq lc.ancestors |> sort_by_key
+    | Eager c -> SMap.bindings c.tc_ancestors
 
   let all_ancestor_names t =
     match t with
-    | Lazy _ -> Sequence.map (all_ancestors t) fst
-    | Eager c -> SMap.ordered_keys c.tc_ancestors |> Sequence.of_list
+    | Lazy _ -> List.map (all_ancestors t) fst
+    | Eager c -> SMap.ordered_keys c.tc_ancestors
 
   let all_ancestor_reqs t =
     match t with
-    | Lazy lc -> Sequence.of_list (Lazy.force lc.all_requirements)
-    | Eager c -> Sequence.of_list c.tc_req_ancestors
+    | Lazy lc -> Lazy.force lc.all_requirements
+    | Eager c -> c.tc_req_ancestors
 
   let all_ancestor_req_names t =
     match t with
@@ -337,16 +337,15 @@ module Api = struct
           Some l
         | _ -> None)
       (where_constraints t)
-    |> Sequence.of_list
 
   (* get upper bounds on `this` from the where constraints as well as
    * requirements *)
   let upper_bounds_on_this t =
-    Sequence.map ~f:(fun req -> snd req) (all_ancestor_reqs t)
-    |> Sequence.append (upper_bounds_on_this_from_constraints t)
+    List.map ~f:(fun req -> snd req) (all_ancestor_reqs t)
+    |> List.append (upper_bounds_on_this_from_constraints t)
 
   let has_upper_bounds_on_this_from_constraints t =
-    not (Sequence.is_empty (upper_bounds_on_this_from_constraints t))
+    not (List.is_empty (upper_bounds_on_this_from_constraints t))
 
   (* get lower bounds on `this` from the where constraints *)
   let lower_bounds_on_this_from_constraints t =
@@ -361,12 +360,11 @@ module Api = struct
           Some l
         | _ -> None)
       (where_constraints t)
-    |> Sequence.of_list
 
   let lower_bounds_on_this = lower_bounds_on_this_from_constraints
 
   let has_lower_bounds_on_this_from_constraints t =
-    not (Sequence.is_empty (lower_bounds_on_this_from_constraints t))
+    not (List.is_empty (lower_bounds_on_this_from_constraints t))
 
   let is_disposable_class_name class_name =
     String.equal class_name SN.Classes.cIDisposable
@@ -376,7 +374,7 @@ module Api = struct
     match t with
     | Lazy _ ->
       is_disposable_class_name (name t)
-      || Sequence.exists (all_ancestor_names t) is_disposable_class_name
+      || List.exists (all_ancestor_names t) is_disposable_class_name
       || Sequence.exists (all_ancestor_req_names t) is_disposable_class_name
     | Eager c -> c.tc_is_disposable
 

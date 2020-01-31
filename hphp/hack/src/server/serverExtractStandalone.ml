@@ -1126,7 +1126,7 @@ and add_signature_dependencies ctx deps obj =
         let m = value_or_not_found description @@ Class.get_method cls name in
         add_dep @@ Lazy.force m.ce_type;
         Class.all_ancestor_names cls
-        |> Sequence.iter ~f:(fun ancestor_name ->
+        |> List.iter ~f:(fun ancestor_name ->
                match Decl_provider.get_class ctx ancestor_name with
                | Some ancestor when Class.has_method ancestor name ->
                  do_add_dep ctx deps (Method (ancestor_name, name))
@@ -1136,7 +1136,7 @@ and add_signature_dependencies ctx deps obj =
         | Some sm ->
           add_dep @@ Lazy.force sm.ce_type;
           Class.all_ancestor_names cls
-          |> Sequence.iter ~f:(fun ancestor_name ->
+          |> List.iter ~f:(fun ancestor_name ->
                  match Decl_provider.get_class ctx ancestor_name with
                  | Some ancestor when Class.has_smethod ancestor name ->
                    do_add_dep ctx deps (SMethod (ancestor_name, name))
@@ -1162,8 +1162,8 @@ and add_signature_dependencies ctx deps obj =
         | (Some constr, _) -> add_dep @@ Lazy.force constr.ce_type
         | _ -> ())
       | Class _ ->
-        Sequence.iter (Class.all_ancestors cls) (fun (_, ty) -> add_dep ty);
-        Sequence.iter (Class.all_ancestor_reqs cls) (fun (_, ty) -> add_dep ty);
+        List.iter (Class.all_ancestors cls) (fun (_, ty) -> add_dep ty);
+        List.iter (Class.all_ancestor_reqs cls) (fun (_, ty) -> add_dep ty);
         Option.iter (Class.enum_type cls) ~f:(fun { te_base; te_constraint } ->
             add_dep te_base;
             Option.iter te_constraint ~f:add_dep)
@@ -1266,12 +1266,13 @@ let get_implementation_dependencies ctx deps cls_name =
           deps
           acc
     in
-    Sequence.fold
-      (Sequence.append
-         (Class.all_ancestor_names cls)
-         (Class.all_ancestor_req_names cls))
-      ~init:[]
-      ~f:add_impls
+    let result =
+      List.fold ~init:[] ~f:add_impls (Class.all_ancestor_names cls)
+    in
+    let result =
+      Sequence.fold ~init:result ~f:add_impls (Class.all_ancestor_req_names cls)
+    in
+    result
 
 let rec add_implementation_dependencies ctx deps =
   let open Typing_deps.Dep in

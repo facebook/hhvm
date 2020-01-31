@@ -24,4 +24,5 @@ function i(): void {
   if ($h === null) {
   }
   $x = $h ?? $f;
+  if ($x) {}
 }

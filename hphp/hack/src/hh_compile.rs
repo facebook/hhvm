@@ -12,6 +12,7 @@ use compile_rust as compile;
 use compile::{Env, EnvFlags, Profile};
 use hhbc_hhas_rust::{IoWrite, Write as HhWrite};
 use itertools::Either::*;
+use multifile_rust as multifile;
 use options::Options;
 use oxidized::{
     namespace_env::Env as NamespaceEnv,
@@ -64,7 +65,20 @@ struct Opts {
     filename: Option<PathBuf>,
 }
 
-fn process_single_file<W>(opts: &Opts, filepath: &Path, writer: &mut W) -> anyhow::Result<Profile>
+fn read_file(filepath: &Path) -> anyhow::Result<Vec<u8>> {
+    let mut text: Vec<u8> = Vec::new();
+    File::open(filepath)
+        .with_context(|| format!("cannot open input file: {}", filepath.display()))?
+        .read_to_end(&mut text)?;
+    Ok(text)
+}
+
+fn process_single_file<W>(
+    opts: &Opts,
+    filepath: &Path,
+    content: &[u8],
+    writer: &mut W,
+) -> anyhow::Result<Profile>
 where
     W: HhWrite,
     W::Error: Send + Sync + 'static,
@@ -91,11 +105,7 @@ where
         config_list: vec![],
         flags: EnvFlags::empty(),
     };
-    let mut text: Vec<u8> = Vec::new();
-    File::open(filepath)
-        .with_context(|| format!("cannot open input file: {}", filepath.display()))?
-        .read_to_end(&mut text)?;
-    compile::from_text(&text, env, writer)
+    compile::from_text(content, env, writer)
 }
 
 fn read_file_list(input_path: &Option<PathBuf>) -> anyhow::Result<impl Iterator<Item = PathBuf>> {
@@ -201,11 +211,16 @@ fn main() -> anyhow::Result<()> {
                 (Right(once(filename)), writer)
             }
         };
-        for f in files {
-            let r = process_single_file(&opts, &f, &mut writer);
-            match r {
-                Err(e) => eprintln!("Error in file {}: {}", f.display(), e),
-                Ok(_) => writer.flush()?,
+        for ref f in files {
+            let content = read_file(f)?;
+            let files = multifile::to_files(f, content.as_slice())?;
+            for (f, content) in files {
+                let f = f.as_ref();
+                let r = process_single_file(&opts, f, content.as_ref(), &mut writer);
+                match r {
+                    Err(e) => eprintln!("Error in file {}: {}", f.display(), e),
+                    Ok(_) => writer.flush()?,
+                }
             }
         }
         Ok(())

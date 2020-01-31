@@ -1,4 +1,4 @@
-//// def.php
+//// def.hack
 
 newtype FormatString<T> = string;
 

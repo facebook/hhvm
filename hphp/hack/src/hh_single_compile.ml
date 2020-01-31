@@ -8,7 +8,6 @@
  *)
 
 open Core_kernel
-open Sys_utils
 module P = Printf
 module SyntaxError = Full_fidelity_syntax_error
 module SourceText = Full_fidelity_source_text
@@ -635,15 +634,17 @@ let decl_and_run_mode compiler_options =
         in
         let process_single_file handle_output filename =
           let filename = Relative_path.create Relative_path.Dummy filename in
-          let abs_path = Relative_path.to_absolute filename in
-          process_single_source_unit
-            ~is_systemlib:false
-            ~config_jsons:!config_jsons
-            compiler_options
-            handle_output
-            handle_exception
-            filename
-            (cat abs_path)
+          (* let abs_path = Relative_path.to_absolute filename in *)
+          let files = Multifile.file_to_file_list filename in
+          List.iter files ~f:(fun (filename, content) ->
+              process_single_source_unit
+                ~is_systemlib:false
+                ~config_jsons:!config_jsons
+                compiler_options
+                handle_output
+                handle_exception
+                filename
+                content)
         in
         let (filenames, handle_output) =
           match compiler_options.input_file_list with

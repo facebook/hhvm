@@ -6,7 +6,7 @@ class A {
   const int P = 9;
 }
 
-////file2.php
+////file2.hack
 class B extends A {
   const arraykey P = 5;
 }

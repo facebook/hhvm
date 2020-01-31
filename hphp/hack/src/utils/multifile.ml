@@ -19,7 +19,7 @@ let rec make_files = function
   | Str.Delim header :: Str.Text content :: rl ->
     let pattern = Str.regexp "////" in
     let header = Str.global_replace pattern "" header in
-    let pattern = Str.regexp "[ ]*" in
+    let pattern = Str.regexp "[ |\n]*" in
     let filename = Str.global_replace pattern "" header in
     (filename, content) :: make_files rl
   | _ -> assert false
@@ -31,24 +31,15 @@ let rec make_files = function
  * file boundary.
  * Takes the path to a single file, returns a map of filenames to file contents.
  *)
-let file_to_files file =
+let file_to_file_list file =
   let abs_fn = Relative_path.to_absolute file in
   let content = Sys_utils.cat abs_fn in
   let delim = Str.regexp "////.*\n" in
   if Str.string_match delim content 0 then
     let contentl = Str.full_split delim content in
     let files = make_files contentl in
-    List.fold_left
-      ~f:
-        begin
-          fun acc (sub_fn, content) ->
-          let file =
-            Relative_path.create Relative_path.Dummy (abs_fn ^ "--" ^ sub_fn)
-          in
-          Relative_path.Map.add acc ~key:file ~data:content
-        end
-      ~init:Relative_path.Map.empty
-      files
+    List.map files ~f:(fun (sub_fn, c) ->
+        (Relative_path.create Relative_path.Dummy (abs_fn ^ "--" ^ sub_fn), c))
   else if String.is_prefix content ~prefix:"// @directory " then (
     let contentl = Str.split (Str.regexp "\n") content in
     let first_line = List.hd_exn contentl in
@@ -63,6 +54,8 @@ let file_to_files file =
     in
     let file = Relative_path.create Relative_path.Dummy (dir ^ file_name) in
     let content = String.concat ~sep:"\n" (List.tl_exn contentl) in
-    Relative_path.Map.singleton file content
+    [(file, content)]
   ) else
-    Relative_path.Map.singleton file content
+    [(file, content)]
+
+let file_to_files file = file_to_file_list file |> Relative_path.Map.of_list

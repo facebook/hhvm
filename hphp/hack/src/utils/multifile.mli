@@ -6,5 +6,6 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+val file_to_file_list : Relative_path.t -> (Relative_path.t * string) list
 
 val file_to_files : Relative_path.t -> string Relative_path.Map.t

@@ -1,0 +1,24 @@
+# @generated
+# @autocargo from //hphp/hack/src:hh_compile
+# Signature
+[package]
+name = "hh_compile"
+edition = "2018"
+version = "0.0.0"
+include = ["../../hh_compile.rs"]
+
+[[bin]]
+name = "hh_compile"
+path = "../../hh_compile.rs"
+
+[dependencies]
+compile_rust = { path = "../../hhbc/cargo/compile" }
+hhbc_hhas_rust = { path = "../../hhbc/cargo/hhbc_hhas" }
+multifile_rust = { path = "../../utils/multifile" }
+options = { path = "../../hhbc/cargo/options" }
+oxidized = { path = "../../oxidized" }
+anyhow = "1.0"
+itertools = "0.8"
+structopt = "0.3"
+walkdir = "2.2"
+# @end of Signature

@@ -133,7 +133,7 @@ let ret_from_fun_kind ?(is_constructor = false) ~is_lambda pos kind =
   let default = mk (Reason.Rwitness pos, Typing_defs.make_tany ()) in
   let ret_ty () =
     if is_constructor then
-      default
+      mk (Reason.Rwitness pos, Tprim Tvoid)
     else
       global_inference_create_tyvar ~is_lambda ~default
   in

@@ -47,7 +47,7 @@ Errors:
                        (([10:15-24], Exception),
                         (CI ([10:15-24], "\\Exception"))),
                        [], [], None,
-                       ([10:15-24], (function(string $message, int $code, ?Exception $previous): _))
+                       ([10:15-24], (function(string $message, int $code, ?Exception $previous): void))
                        )))))
                 ],
               [(([11:12-21], "\\Exception"), ([11:22-24], $_), [])],

@@ -1,14 +1,3 @@
-//// strict_toplevel.php
-<?hh
-<<__Rx>>
-function extract_standalone_make_default(): nothing {
-  throw new \Exception();
-}
-/* HH_FIXME[4101] */
-type EXTRACT_STANDALONE_ANY = \EXTRACT_STANDALONE_ANY_;
-type EXTRACT_STANDALONE_ANY_<T> = T;
-
-//// strict_namespaces.php
 <?hh
 namespace Test1 {
   function f(int $x): \Test1\A {

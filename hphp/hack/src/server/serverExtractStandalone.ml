@@ -1011,29 +1011,42 @@ let construct_type_declaration ctx t target fields =
     let typedef = get_typedef_nast_exn ctx t in
     construct_typedef typedef
 
-let rec do_add_dep ctx deps dep =
+type extraction_env = {
+  dependencies: Typing_deps.Dep.dependency Typing_deps.Dep.variant HashSet.t;
+  depends_on_make_default: bool ref;
+  depends_on_any: bool ref;
+}
+
+let rec do_add_dep ctx env dep =
   if
     dep <> Typing_deps.Dep.Class SN.Typehints.wildcard
-    && (not (HashSet.mem deps dep))
+    && (not (HashSet.mem env.dependencies dep))
     && not (is_builtin_dep ctx dep)
   then (
-    HashSet.add deps dep;
-    add_signature_dependencies ctx deps dep
+    HashSet.add env.dependencies dep;
+    add_signature_dependencies ctx env dep
   )
 
-and add_dep ctx deps ~this ty : unit =
+and add_dep ctx env ~this ty : unit =
   let visitor =
     object
-      inherit [unit] Type_visitor.decl_type_visitor
+      inherit [unit] Type_visitor.decl_type_visitor as super
+
+      method! on_tany _ _ = env.depends_on_any := true
+
+      method! on_tfun () r ft =
+        if List.length ft.ft_params > arity_min ft.ft_arity then
+          env.depends_on_make_default := true;
+        super#on_tfun () r ft
 
       method! on_tapply _ _ (_, name) tyl =
         let dep = Typing_deps.Dep.Class name in
-        do_add_dep ctx deps dep;
+        do_add_dep ctx env dep;
 
         (* If we have a constant of a generic type, it can only be an
            array type, e.g., vec<A>, for which don't need values of A
            to generate an initializer. *)
-        List.iter tyl ~f:(add_dep ctx deps ~this)
+        List.iter tyl ~f:(add_dep ctx env ~this)
 
       method! on_tshape _ _ _ fdm =
         Nast.ShapeMap.iter
@@ -1043,9 +1056,9 @@ and add_dep ctx deps ~this ty : unit =
             | Ast_defs.SFlit_str _ ->
               ()
             | Ast_defs.SFclass_const ((_, c), (_, s)) ->
-              do_add_dep ctx deps (Typing_deps.Dep.Class c);
-              do_add_dep ctx deps (Typing_deps.Dep.Const (c, s)));
-            add_dep ctx deps ~this sft_ty)
+              do_add_dep ctx env (Typing_deps.Dep.Class c);
+              do_add_dep ctx env (Typing_deps.Dep.Const (c, s)));
+            add_dep ctx env ~this sft_ty)
           fdm
 
       method! on_taccess () r (root, tconsts) =
@@ -1056,13 +1069,13 @@ and add_dep ctx deps ~this ty : unit =
              Class, get its type or upper bound T, continue adding
              dependencies of T::TConst2[::...] *)
           | (_, tconst) :: tconsts ->
-            do_add_dep ctx deps (Typing_deps.Dep.Const (class_name, tconst));
+            do_add_dep ctx env (Typing_deps.Dep.Const (class_name, tconst));
             let cls = get_class_exn ctx class_name in
             (match Decl_provider.Class.get_typeconst cls tconst with
             | Some typeconst ->
               Option.iter
                 typeconst.ttc_type
-                ~f:(add_dep ctx ~this:(Some class_name) deps);
+                ~f:(add_dep ctx ~this:(Some class_name) env);
               if not (List.is_empty tconsts) then (
                 match (typeconst.ttc_type, typeconst.ttc_constraint) with
                 | (Some tc_type, _)
@@ -1077,7 +1090,7 @@ and add_dep ctx deps ~this ty : unit =
                   add_dep
                     ctx
                     ~this
-                    deps
+                    env
                     (Typing_defs.mk (Typing_reason.Rnone, taccess))
                 | (None, None) -> ()
               )
@@ -1088,7 +1101,7 @@ and add_dep ctx deps ~this ty : unit =
           add_dep
             ctx
             ~this
-            deps
+            env
             (Typing_defs.mk (r, Taccess (root', tconsts' @ tconsts)))
         | Tapply ((_, name), _) -> expand_type_access name tconsts
         | Tthis -> expand_type_access (Option.value_exn this) tconsts
@@ -1097,28 +1110,28 @@ and add_dep ctx deps ~this ty : unit =
   in
   visitor#on_type () ty
 
-and add_signature_dependencies ctx deps obj =
+and add_signature_dependencies ctx env obj =
   let open Typing_deps.Dep in
   let description = to_string obj in
   match get_class_name obj with
   | Some cls_name ->
-    do_add_dep ctx deps (Typing_deps.Dep.Class cls_name);
+    do_add_dep ctx env (Typing_deps.Dep.Class cls_name);
     (match Decl_provider.get_class ctx cls_name with
     | None ->
       let td =
         value_or_not_found description @@ Decl_provider.get_typedef ctx cls_name
       in
-      add_dep ctx ~this:None deps td.td_type;
-      Option.iter td.td_constraint ~f:(add_dep ctx ~this:None deps)
+      add_dep ctx ~this:None env td.td_type;
+      Option.iter td.td_constraint ~f:(add_dep ctx ~this:None env)
     | Some cls ->
-      let add_dep = add_dep ctx deps ~this:(Some cls_name) in
+      let add_dep = add_dep ctx env ~this:(Some cls_name) in
       (match obj with
       | Prop (_, name) ->
         let p = value_or_not_found description @@ Class.get_prop cls name in
         add_dep @@ Lazy.force p.ce_type;
 
         (* We need to initialize properties in the constructor, add a dependency on it *)
-        do_add_dep ctx deps (Cstr cls_name)
+        do_add_dep ctx env (Cstr cls_name)
       | SProp (_, name) ->
         let sp = value_or_not_found description @@ Class.get_sprop cls name in
         add_dep @@ Lazy.force sp.ce_type
@@ -1129,7 +1142,7 @@ and add_signature_dependencies ctx deps obj =
         |> List.iter ~f:(fun ancestor_name ->
                match Decl_provider.get_class ctx ancestor_name with
                | Some ancestor when Class.has_method ancestor name ->
-                 do_add_dep ctx deps (Method (ancestor_name, name))
+                 do_add_dep ctx env (Method (ancestor_name, name))
                | _ -> ())
       | SMethod (_, name) ->
         (match Class.get_smethod cls name with
@@ -1139,19 +1152,19 @@ and add_signature_dependencies ctx deps obj =
           |> List.iter ~f:(fun ancestor_name ->
                  match Decl_provider.get_class ctx ancestor_name with
                  | Some ancestor when Class.has_smethod ancestor name ->
-                   do_add_dep ctx deps (SMethod (ancestor_name, name))
+                   do_add_dep ctx env (SMethod (ancestor_name, name))
                  | _ -> ())
         | None ->
           (match Class.get_method cls name with
           | Some _ ->
-            HashSet.remove deps obj;
-            do_add_dep ctx deps (Method (cls_name, name))
+            HashSet.remove env.dependencies obj;
+            do_add_dep ctx env (Method (cls_name, name))
           | None -> raise (DependencyNotFound description)))
       | Const (_, name) ->
         (match Class.get_typeconst cls name with
         | Some tc ->
           if cls_name <> tc.ttc_origin then
-            do_add_dep ctx deps (Const (tc.ttc_origin, name));
+            do_add_dep ctx env (Const (tc.ttc_origin, name));
           Option.iter tc.ttc_type ~f:add_dep;
           Option.iter tc.ttc_constraint ~f:add_dep
         | None ->
@@ -1181,16 +1194,16 @@ and add_signature_dependencies ctx deps obj =
       let func =
         value_or_not_found description @@ Decl_provider.get_fun ctx f
       in
-      add_dep ctx ~this:None deps @@ func.fe_type
+      add_dep ctx ~this:None env @@ func.fe_type
     | GConst c
     | GConstName c ->
       let (ty, _) =
         value_or_not_found description @@ Decl_provider.get_gconst ctx c
       in
-      add_dep ctx ~this:None deps ty
+      add_dep ctx ~this:None env ty
     | _ -> raise UnexpectedDependency)
 
-let get_implementation_dependencies ctx deps cls_name =
+let get_implementation_dependencies ctx env cls_name =
   let open Decl_provider in
   match get_class ctx cls_name with
   | None -> []
@@ -1263,7 +1276,7 @@ let get_implementation_dependencies ctx deps cls_name =
               else
                 acc
             | _ -> acc)
-          deps
+          env.dependencies
           acc
     in
     let result =
@@ -1274,19 +1287,20 @@ let get_implementation_dependencies ctx deps cls_name =
     in
     result
 
-let rec add_implementation_dependencies ctx deps =
+let rec add_implementation_dependencies ctx env =
   let open Typing_deps.Dep in
-  let size = HashSet.length deps in
+  let size = HashSet.length env.dependencies in
   HashSet.fold
     (fun dep acc ->
       match dep with
       | Class cls_name -> cls_name :: acc
       | _ -> acc)
-    deps
+    env.dependencies
     []
-  |> List.concat_map ~f:(get_implementation_dependencies ctx deps)
-  |> List.iter ~f:(do_add_dep ctx deps);
-  if HashSet.length deps <> size then add_implementation_dependencies ctx deps
+  |> List.concat_map ~f:(get_implementation_dependencies ctx env)
+  |> List.iter ~f:(do_add_dep ctx env);
+  if HashSet.length env.dependencies <> size then
+    add_implementation_dependencies ctx env
 
 let get_dependency_origin ctx cls (dep : 'a Typing_deps.Dep.variant) =
   Decl_provider.(
@@ -1312,13 +1326,19 @@ let get_dependency_origin ctx cls (dep : 'a Typing_deps.Dep.variant) =
       | Cstr cls -> cls
       | _ -> raise UnexpectedDependency))
 
-let get_dependencies ctx target =
+let collect_dependencies ctx target =
   let filename = get_filename ctx target in
-  let dependencies = HashSet.create 0 in
+  let env =
+    {
+      dependencies = HashSet.create 0;
+      depends_on_make_default = ref false;
+      depends_on_any = ref false;
+    }
+  in
   let add_dependency
       (root : Typing_deps.Dep.dependent Typing_deps.Dep.variant)
       (obj : Typing_deps.Dep.dependency Typing_deps.Dep.variant) : unit =
-    if is_relevant_dependency target root then do_add_dep ctx dependencies obj
+    if is_relevant_dependency target root then do_add_dep ctx env obj
   in
   Typing_deps.add_dependency_callback "add_dependency" add_dependency;
   (* Collect dependencies through side effects of typechecking and remove
@@ -1332,8 +1352,8 @@ let get_dependencies ctx target =
         let (_ : (Tast.def * Typing_inference_env.t_global_with_pos) option) =
           Typing_check_service.type_fun ctx.Provider_context.tcopt filename func
         in
-        HashSet.remove dependencies (Fun func);
-        HashSet.remove dependencies (FunName func)
+        HashSet.remove env.dependencies (Fun func);
+        HashSet.remove env.dependencies (FunName func)
       | Method (cls, m) ->
         let (_
               : (Tast.def * Typing_inference_env.t_global_with_pos list) option)
@@ -1343,11 +1363,11 @@ let get_dependencies ctx target =
             filename
             cls
         in
-        HashSet.remove dependencies (Method (cls, m));
-        HashSet.remove dependencies (SMethod (cls, m)))
+        HashSet.remove env.dependencies (Method (cls, m));
+        HashSet.remove env.dependencies (SMethod (cls, m)))
   in
-  add_implementation_dependencies ctx dependencies;
-  HashSet.fold List.cons dependencies []
+  add_implementation_dependencies ctx env;
+  env
 
 let group_class_dependencies_by_class ctx dependencies =
   List.fold_left
@@ -1431,7 +1451,11 @@ let sort_by_namespace declarations =
    declarations, we "generate" a separate file for toplevel declarations, using
    hh_single_type_check multifile syntax.
 *)
-let get_code strict_declarations partial_declarations =
+let get_code
+    ~depends_on_make_default
+    ~depends_on_any
+    strict_declarations
+    partial_declarations =
   let get_code declarations =
     let decl_names = SMap.keys declarations in
     let global_namespace = sort_by_namespace decl_names in
@@ -1459,17 +1483,26 @@ let get_code strict_declarations partial_declarations =
   let (strict_toplevel, strict_namespaces) = get_code strict_declarations in
   let (partial_toplevel, partial_namespaces) = get_code partial_declarations in
   let helpers =
-    [
-      Printf.sprintf
-        "<<__Rx>> function %s(): nothing {throw new \\Exception();}"
-        function_make_default;
-      "/* HH_FIXME[4101] */";
-      Printf.sprintf
-        "type %s = \\%s_;"
-        extract_standalone_any
-        extract_standalone_any;
-      Printf.sprintf "type %s_<T> = T;" extract_standalone_any;
-    ]
+    ( if depends_on_make_default then
+      [
+        Printf.sprintf
+          "<<__Rx>> function %s(): nothing {throw new \\Exception();}"
+          function_make_default;
+      ]
+    else
+      [] )
+    @
+    if depends_on_any then
+      [
+        "/* HH_FIXME[4101] */";
+        Printf.sprintf
+          "type %s = \\%s_;"
+          extract_standalone_any
+          extract_standalone_any;
+        Printf.sprintf "type %s_<T> = T;" extract_standalone_any;
+      ]
+    else
+      []
   in
   let strict_hh_prefix = "<?hh" in
   let partial_hh_prefix = "<?hh // partial" in
@@ -1542,7 +1575,8 @@ let get_declarations ctx target class_dependencies global_dependencies =
 
 let go ctx target =
   try
-    let dependencies = get_dependencies ctx target in
+    let env = collect_dependencies ctx target in
+    let dependencies = HashSet.fold List.cons env.dependencies [] in
     let (class_dependencies, global_dependencies) =
       List.partition_tf dependencies ~f:(fun dep ->
           Option.is_some (get_class_name dep))
@@ -1554,7 +1588,11 @@ let go ctx target =
         (group_class_dependencies_by_class ctx class_dependencies)
         global_dependencies
     in
-    get_code strict_declarations partial_declarations
+    get_code
+      ~depends_on_make_default:!(env.depends_on_make_default)
+      ~depends_on_any:!(env.depends_on_any)
+      strict_declarations
+      partial_declarations
   with
   | DependencyNotFound d -> Printf.sprintf "Dependency not found: %s" d
   | Unsupported

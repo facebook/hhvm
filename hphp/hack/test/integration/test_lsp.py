@@ -4106,7 +4106,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 result={
                     "signatures": [
                         {
-                            "label": "public function __construct(): _",
+                            "label": "public function __construct(): void",
                             "documentation": "Constructor with doc block",
                             "parameters": [],
                         }

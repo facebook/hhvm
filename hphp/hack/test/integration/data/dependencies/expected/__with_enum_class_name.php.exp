@@ -6,10 +6,3 @@ enum SomeEnum: int {
   FIRST = 0;
   SECOND = 0;
 }
-<<__Rx>>
-function extract_standalone_make_default(): nothing {
-  throw new \Exception();
-}
-/* HH_FIXME[4101] */
-type EXTRACT_STANDALONE_ANY = \EXTRACT_STANDALONE_ANY_;
-type EXTRACT_STANDALONE_ANY_<T> = T;

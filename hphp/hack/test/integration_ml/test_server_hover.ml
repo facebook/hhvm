@@ -507,7 +507,7 @@ the other stars.";
     ( ("docblock.php", 17, 12),
       [
         {
-          snippet = "public function __construct(): _";
+          snippet = "public function __construct(): void";
           addendum =
             ["Full name: `DocBlockOnClassButNotConstructor::__construct`"];
           pos = pos_at (17, 12) (17, 43);
@@ -524,7 +524,7 @@ the other stars.";
     ( ("docblock.php", 23, 12),
       [
         {
-          snippet = "public function __construct(): _";
+          snippet = "public function __construct(): void";
           addendum =
             [
               "DocBlockBase: constructor doc block.";
@@ -536,7 +536,7 @@ the other stars.";
     ( ("docblock.php", 25, 14),
       [
         {
-          snippet = "public function __construct(): _";
+          snippet = "public function __construct(): void";
           addendum =
             [
               "DocBlockBase: constructor doc block.";

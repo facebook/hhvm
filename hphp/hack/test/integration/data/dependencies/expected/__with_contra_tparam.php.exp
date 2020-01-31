@@ -9,10 +9,3 @@ function with_contra_tparam(): Box<int> {
   return IntBox::make(42);
 }
 class IntBox extends \Box<int> {}
-<<__Rx>>
-function extract_standalone_make_default(): nothing {
-  throw new \Exception();
-}
-/* HH_FIXME[4101] */
-type EXTRACT_STANDALONE_ANY = \EXTRACT_STANDALONE_ANY_;
-type EXTRACT_STANDALONE_ANY_<T> = T;

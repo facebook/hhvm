@@ -202,7 +202,7 @@
                       (([33:12-25], MyPhonyVector<X>),
                        (CI ([33:12-25], "\\MyPhonyVector"))),
                       [((X), ([33:12-25], (Happly (([Pos.none], "_"), []))))],
-                      [], None, ([33:12-25], (function(): _)))))
+                      [], None, ([33:12-25], (function(): void)))))
                   )))));
            ([34:3-20],
             (Expr

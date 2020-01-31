@@ -3,10 +3,3 @@ class SimpleClass {}
 function with_classname(): string {
   return SimpleClass::class;
 }
-<<__Rx>>
-function extract_standalone_make_default(): nothing {
-  throw new \Exception();
-}
-/* HH_FIXME[4101] */
-type EXTRACT_STANDALONE_ANY = \EXTRACT_STANDALONE_ANY_;
-type EXTRACT_STANDALONE_ANY_<T> = T;

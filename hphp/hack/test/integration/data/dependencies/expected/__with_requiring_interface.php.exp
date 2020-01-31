@@ -6,10 +6,3 @@ interface IWithRequirement {
 class A extends \A0 implements \I1 {}
 function with_requiring_interface(IWithRequirement $arg): void {}
 interface I1 {}
-<<__Rx>>
-function extract_standalone_make_default(): nothing {
-  throw new \Exception();
-}
-/* HH_FIXME[4101] */
-type EXTRACT_STANDALONE_ANY = \EXTRACT_STANDALONE_ANY_;
-type EXTRACT_STANDALONE_ANY_<T> = T;

@@ -362,16 +362,20 @@ module ProfileTypeCheck = struct
       ~time_typecheck_opt:_
       ~times_checked:_
       ~files_to_declare:_
-      ~decl_cache_misses:_
-      ~decl_cache_misses_time:_
+      ~decl_accessor_count:_
+      ~decl_accessor_time:_
+      ~disk_cat_count:_
+      ~disk_cat_time:_
       ~path:_ =
     ()
 
   let compute_tast
       ~provider_backend:_
       ~time_decl_and_typecheck:_
-      ~decl_cache_misses:_
-      ~decl_cache_misses_time:_
+      ~decl_accessor_count:_
+      ~decl_accessor_time:_
+      ~disk_cat_count:_
+      ~disk_cat_time:_
       ~cache_overhead_time_opt:_
       ~cache_peak_bytes_opt:_
       ~filesize_opt:_

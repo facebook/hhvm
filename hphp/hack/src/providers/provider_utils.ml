@@ -10,7 +10,8 @@ open Core_kernel
 module Compute_tast = struct
   type t = {
     tast: Tast.program;
-    decl_cache_misses: int;
+    decl_accessor_count: int;
+    disk_cat_count: int;
   }
 end
 
@@ -18,7 +19,8 @@ module Compute_tast_and_errors = struct
   type t = {
     tast: Tast.program;
     errors: Errors.t;
-    decl_cache_misses: int;
+    decl_accessor_count: int;
+    disk_cat_count: int;
   }
 end
 
@@ -151,9 +153,14 @@ let compute_tast_and_errors_unquarantined_internal
     ~(mode : a compute_tast_mode) : a =
   match (mode, entry.Provider_context.tast, entry.Provider_context.errors) with
   | (Compute_tast_only, Some tast, _) ->
-    { Compute_tast.tast; decl_cache_misses = 0 }
+    { Compute_tast.tast; decl_accessor_count = 0; disk_cat_count = 0 }
   | (Compute_tast_and_errors, Some tast, Some errors) ->
-    { Compute_tast_and_errors.tast; errors; decl_cache_misses = 0 }
+    {
+      Compute_tast_and_errors.tast;
+      errors;
+      decl_accessor_count = 0;
+      disk_cat_count = 0;
+    }
   | (mode, _, _) ->
     (* prepare logging *)
     Deferred_decl.reset ~enable:false ~threshold_opt:None;
@@ -189,10 +196,8 @@ let compute_tast_and_errors_unquarantined_internal
     let errors = Errors.merge nast_errors tast_errors in
 
     (* Logging... *)
-    (* TODO(ljw): *)
-    let decl_cache_misses = 0 in
-    (* TODO(ljw): *)
-    let decl_cache_misses_time = 0. in
+    let decl_accessor_counter = Counters.get_decl_accessor_counter () in
+    let disk_cat_counter = Counters.get_disk_cat_counter () in
     let time_decl_and_typecheck = Unix.gettimeofday () -. t in
     Counters.restore_state prev_tally_state;
     (* Sometimes we're called with a FileName that doesn't exist on disk. *)
@@ -222,12 +227,14 @@ let compute_tast_and_errors_unquarantined_internal
     let seconds_to_ms s = 1000. *. s |> int_of_float |> string_of_int in
     let bytes_to_k b = b / 1024 |> string_of_int in
     Hh_logger.debug
-      "compute_tast: %s (%s ms / %s k), decl-fetch (%d / %s ms), cache (%s ms, %s k, %s entries, %s evictions)"
+      "compute_tast: %s (%s ms / %s k), decl-accessors (%d / %s ms), disk-cat (%d / %s ms), cache (%s ms, %s k, %s entries, %s evictions)"
       (Relative_path.suffix entry.Provider_context.path)
       (time_decl_and_typecheck |> seconds_to_ms)
       (Option.value_map filesize_opt ~default:"?" ~f:bytes_to_k)
-      decl_cache_misses
-      (decl_cache_misses_time |> seconds_to_ms)
+      decl_accessor_counter.Counters.count
+      (decl_accessor_counter.Counters.time |> seconds_to_ms)
+      disk_cat_counter.Counters.count
+      (disk_cat_counter.Counters.time |> seconds_to_ms)
       (Option.value_map cache_overhead_time_opt ~default:"?" ~f:seconds_to_ms)
       (Option.value_map cache_peak_bytes_opt ~default:"?" ~f:bytes_to_k)
       (Option.value_map cache_num_entries_opt ~default:"?" ~f:string_of_int)
@@ -236,21 +243,30 @@ let compute_tast_and_errors_unquarantined_internal
       ~provider_backend:
         (ctx.Provider_context.backend |> Provider_backend.t_to_string)
       ~time_decl_and_typecheck
-      ~decl_cache_misses
-      ~decl_cache_misses_time
+      ~decl_accessor_count:decl_accessor_counter.Counters.count
+      ~decl_accessor_time:decl_accessor_counter.Counters.time
+      ~disk_cat_count:disk_cat_counter.Counters.count
+      ~disk_cat_time:disk_cat_counter.Counters.time
       ~cache_overhead_time_opt
       ~cache_peak_bytes_opt
       ~filesize_opt
       ~path:entry.Provider_context.path;
 
+    let decl_accessor_count = decl_accessor_counter.Counters.count in
+    let disk_cat_count = disk_cat_counter.Counters.count in
     (match mode with
     | Compute_tast_and_errors ->
       entry.Provider_context.tast <- Some tast;
       entry.Provider_context.errors <- Some errors;
-      { Compute_tast_and_errors.tast; errors; decl_cache_misses }
+      {
+        Compute_tast_and_errors.tast;
+        errors;
+        decl_accessor_count;
+        disk_cat_count;
+      }
     | Compute_tast_only ->
       entry.Provider_context.tast <- Some tast;
-      { Compute_tast.tast; decl_cache_misses })
+      { Compute_tast.tast; decl_accessor_count; disk_cat_count })
 
 let compute_tast_and_errors_unquarantined
     ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
@@ -274,7 +290,12 @@ let compute_tast_and_errors_quarantined
   (* If results have already been memoized, don't bother quarantining anything *)
   match (entry.Provider_context.tast, entry.Provider_context.errors) with
   | (Some tast, Some errors) ->
-    { Compute_tast_and_errors.tast; errors; decl_cache_misses = 0 }
+    {
+      Compute_tast_and_errors.tast;
+      errors;
+      decl_accessor_count = 0;
+      disk_cat_count = 0;
+    }
   (* Okay, we don't have memoized results, let's ensure we are quarantined before computing *)
   | _ ->
     let f () = compute_tast_and_errors_unquarantined ~ctx ~entry in
@@ -288,7 +309,8 @@ let compute_tast_quarantined
     Compute_tast.t =
   (* If results have already been memoized, don't bother quarantining anything *)
   match entry.Provider_context.tast with
-  | Some tast -> { Compute_tast.tast; decl_cache_misses = 0 }
+  | Some tast ->
+    { Compute_tast.tast; decl_accessor_count = 0; disk_cat_count = 0 }
   (* Okay, we don't have memoized results, let's ensure we are quarantined before computing *)
   | None ->
     let f () =

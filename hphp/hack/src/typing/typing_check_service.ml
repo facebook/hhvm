@@ -203,8 +203,8 @@ let should_enable_deferring
 type process_file_results = {
   errors: Errors.t;
   computation: file_computation list;
-  decl_cache_misses: int;
-  decl_cache_misses_time: float;
+  decl_accessor_counter: Counters.t;
+  disk_cat_counter: Counters.t;
 }
 
 let process_file
@@ -217,7 +217,7 @@ let process_file
   Deferred_decl.reset
     ~enable:(should_enable_deferring opts file)
     ~threshold_opt:(GlobalOptions.tco_defer_class_declaration_threshold opts);
-  let prev_tally_state = Counters.reset ~enable:true in
+  let prev_counters_state = Counters.reset ~enable:true in
   let (funs, classes, record_defs, typedefs, gconsts) = Nast.get_defs ast in
   let opts =
     {
@@ -255,18 +255,16 @@ let process_file
     if GlobalOptions.tco_global_inference opts then
       Typing_global_inference.StateSubConstraintGraphs.save global_tvenvs;
     let deferred_files = Deferred_decl.get_deferments ~f:(fun d -> Declare d) in
-    (* TODO(ljw): *)
-    let decl_cache_misses = 0 in
-    (* TODO(ljw): *)
-    let decl_cache_misses_time = 0. in
-    Counters.restore_state prev_tally_state;
+    let decl_accessor_counter = Counters.get_decl_accessor_counter () in
+    let disk_cat_counter = Counters.get_disk_cat_counter () in
+    Counters.restore_state prev_counters_state;
     match deferred_files with
     | [] ->
       {
         errors = Errors.merge errors' errors;
         computation = [];
-        decl_cache_misses;
-        decl_cache_misses_time;
+        decl_accessor_counter;
+        disk_cat_counter;
       }
     | _ ->
       let computation =
@@ -276,7 +274,7 @@ let process_file
             [Check { file with deferred_count = file.deferred_count + 1 }];
           ]
       in
-      { errors; computation; decl_cache_misses; decl_cache_misses_time }
+      { errors; computation; decl_accessor_counter; disk_cat_counter }
   with e ->
     let stack = Caml.Printexc.get_raw_backtrace () in
     let () =
@@ -344,8 +342,10 @@ let process_files
         ~time_typecheck_opt
         ~times_checked
         ~files_to_declare
-        ~decl_cache_misses:result.decl_cache_misses
-        ~decl_cache_misses_time:result.decl_cache_misses_time
+        ~decl_accessor_count:result.decl_accessor_counter.Counters.count
+        ~decl_accessor_time:result.decl_accessor_counter.Counters.time
+        ~disk_cat_count:result.disk_cat_counter.Counters.count
+        ~disk_cat_time:result.disk_cat_counter.Counters.time
         ~path:file.path;
     let _t : float =
       Hh_logger.log_duration

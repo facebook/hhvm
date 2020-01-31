@@ -298,10 +298,12 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
         let id =
           (* if XHP element mangling is disabled, namespaces are supported *)
           if
-            in_codegen env &&
-            (not env.namespace.Namespace_env.ns_disable_xhp_element_mangling)
-          then id
-          else elaborate_type_name env id
+            in_codegen env
+            && not env.namespace.Namespace_env.ns_disable_xhp_element_mangling
+          then
+            id
+          else
+            elaborate_type_name env id
         in
         Xml
           ( id,

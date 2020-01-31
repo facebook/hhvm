@@ -43,13 +43,12 @@ let elaborate_xhp_namespace id =
 let elaborate_defined_id nsenv (p, id) =
   let xhp_id = elaborate_xhp_namespace id in
   if nsenv.ns_disable_xhp_element_mangling && xhp_id <> id then
-    begin if xhp_id.[0] = '\\'
-    then (p, xhp_id)
-    else (p, elaborate_into_current_ns nsenv xhp_id)
-    end
+    if xhp_id.[0] = '\\' then
+      (p, xhp_id)
+    else
+      (p, elaborate_into_current_ns nsenv xhp_id)
   else
     (p, elaborate_into_current_ns nsenv id)
-
 
 (* Resolves an identifier in a given namespace environment. For example, if we
  * are in the namespace "N\O", the identifier "P\Q" is resolved to "\N\O\P\Q".

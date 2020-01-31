@@ -31,6 +31,17 @@ module Level : sig
     | Warn
     | Info
     | Debug
+  [@@deriving enum]
+
+  val of_enum_string : string -> t option
+
+  val to_enum_string : t -> string
+
+  (** returns the min file log level *)
+  val min_level_file : unit -> t
+
+  (** returns the min stderr log level *)
+  val min_level_stderr : unit -> t
 
   (** overwrites min level for both stderr and file (if enabled) *)
   val set_min_level : t -> unit

@@ -101,6 +101,15 @@ module Level : sig
     | Warn
     | Info
     | Debug
+  [@@deriving enum]
+
+  val of_enum_string : string -> t option
+
+  val to_enum_string : t -> string
+
+  val min_level_file : unit -> t
+
+  val min_level_stderr : unit -> t
 
   val set_min_level : t -> unit
 
@@ -119,20 +128,30 @@ module Level : sig
   val log_duration : t -> string -> float -> float
 end = struct
   type t =
-    | Off
-    | Fatal
-    | Error
-    | Warn
-    | Info
-    | Debug
+    | Off [@value 6]
+    | Fatal [@value 5]
+    | Error [@value 4]
+    | Warn [@value 3]
+    | Info [@value 2]
+    | Debug [@value 1]
+  [@@deriving enum]
 
-  let int_of_level = function
-    | Off -> 6
-    | Fatal -> 5
-    | Error -> 4
-    | Warn -> 3
-    | Info -> 2
-    | Debug -> 1
+  let to_enum_string = function
+    | Off -> "off"
+    | Fatal -> "fatal"
+    | Error -> "error"
+    | Warn -> "warn"
+    | Info -> "info"
+    | Debug -> "debug"
+
+  let of_enum_string = function
+    | "off" -> Some Off
+    | "fatal" -> Some Fatal
+    | "error" -> Some Error
+    | "warn" -> Some Warn
+    | "info" -> Some Info
+    | "debug" -> Some Debug
+    | _ -> None
 
   let min_level_file_ref = ref Info
 
@@ -147,10 +166,14 @@ end = struct
     set_min_level_stderr level;
     ()
 
+  let min_level_file () = !min_level_file_ref
+
+  let min_level_stderr () = !min_level_stderr_ref
+
   let passes level =
-    let ilevel = int_of_level level in
-    let passes_file = ilevel >= int_of_level !min_level_file_ref in
-    let passes_stderr = ilevel >= int_of_level !min_level_stderr_ref in
+    let ilevel = to_enum level in
+    let passes_file = ilevel >= to_enum !min_level_file_ref in
+    let passes_stderr = ilevel >= to_enum !min_level_stderr_ref in
     if passes_file || passes_stderr then
       Some { passes_file; passes_stderr }
     else

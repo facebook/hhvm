@@ -97,7 +97,6 @@
     common
     decl
     decl_provider
-    decl_provider_ctx
     hackfmt_doc
     hackfmt_env
     hackfmt

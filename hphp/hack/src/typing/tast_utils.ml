@@ -13,7 +13,6 @@ open Aast_defs
 open Typing_defs
 module Env = Tast_env
 module MakeType = Typing_make_type
-module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 
 (** Return true if ty definitely does not contain null.  I.e., the

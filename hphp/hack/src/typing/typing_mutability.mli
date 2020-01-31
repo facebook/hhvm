@@ -7,8 +7,6 @@
  *
  *)
 
-module Decl_provider = Decl_provider_ctx
-
 module type Env_S = sig
   type env
 

@@ -12,7 +12,6 @@ open Aast
 open Typing_defs
 open Utils
 module Env = Tast_env
-module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 module MakeType = Typing_make_type
 

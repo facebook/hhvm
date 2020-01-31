@@ -17,7 +17,6 @@ open Hh_prelude
 open Aast
 open Typing_defs
 module Phase = Typing_phase
-module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 module MakeType = Typing_make_type
 

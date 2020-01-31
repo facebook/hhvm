@@ -18,7 +18,6 @@ module Phase = Typing_phase
 module TySet = Typing_set
 module TR = Typing_reactivity
 module CT = Typing_subtype.ConditionTypes
-module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 module MakeType = Typing_make_type
 

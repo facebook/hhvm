@@ -7,7 +7,6 @@
  *
  *)
 open Typing_env_types
-module Decl_provider = Decl_provider_ctx
 open Decl_provider
 open Typing_defs
 module TPEnv = Type_parameter_env

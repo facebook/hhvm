@@ -7,6 +7,4 @@
  *
  *)
 
-module Decl_provider = Decl_provider_ctx
-
 val check_class : Typing_env_types.env -> Decl_provider.class_decl -> unit

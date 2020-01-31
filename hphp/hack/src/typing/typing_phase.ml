@@ -17,7 +17,6 @@ module TUtils = Typing_utils
 module TGenConstraint = Typing_generic_constraint
 module Subst = Decl_subst
 module MakeType = Typing_make_type
-module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 
 (* Here is the general problem the delayed application of the phase solves.

@@ -1,5 +1,4 @@
 module Env = Typing_env
-module Decl_provider = Decl_provider_ctx
 open Typing_defs
 open Typing_env_types
 

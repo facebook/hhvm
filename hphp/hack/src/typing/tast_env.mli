@@ -7,8 +7,6 @@
  *
  *)
 
-module Decl_provider = Decl_provider_ctx
-
 type env [@@deriving show]
 
 type t = env [@@deriving show]

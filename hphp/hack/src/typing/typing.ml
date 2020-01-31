@@ -46,7 +46,6 @@ module Try = Typing_try
 module TR = Typing_reactivity
 module FL = FeatureLogging
 module MakeType = Typing_make_type
-module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 module Partial = Partial_provider
 module Fake = Typing_fake_members

@@ -10,7 +10,6 @@
 open Hh_prelude
 open Aast
 open Typing_defs
-module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 module Env = Tast_env
 

@@ -12,7 +12,6 @@ open Typing_defs
 open Utils
 module Env = Typing_env
 module TUtils = Typing_utils
-module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 
 let is_private_visible env x self_id =

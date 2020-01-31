@@ -12,7 +12,6 @@ open Aast
 open Shallow_decl_defs
 open Typing_defs
 module Attrs = Naming_attributes
-module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 module Env = Typing_env
 module SN = Naming_special_names

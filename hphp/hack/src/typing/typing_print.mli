@@ -8,7 +8,6 @@
  *)
 
 open Typing_env_types
-module Decl_provider = Decl_provider_ctx
 
 (*****************************************************************************)
 (* Pretty printing of types *)

@@ -23,7 +23,6 @@ module TVis = Typing_visibility
 module Phase = Typing_phase
 module Subst = Decl_subst
 module MakeType = Typing_make_type
-module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 module Partial = Partial_provider
 

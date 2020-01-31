@@ -16,7 +16,6 @@ module TySet = Typing_set
 module Utils = Typing_utils
 module MakeType = Typing_make_type
 module Nast = Aast
-module Decl_provider = Decl_provider_ctx
 
 exception Dont_simplify
 

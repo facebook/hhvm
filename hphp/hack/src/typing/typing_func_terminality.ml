@@ -11,7 +11,6 @@ open Hh_prelude
 open Aast
 open Typing_defs
 module Env = Typing_env
-module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 
 (* Not adding a Typing_dep here because it will be added when the

@@ -31,7 +31,6 @@ module SN = Naming_special_names
 module TGenConstraint = Typing_generic_constraint
 module Subst = Decl_subst
 module TUtils = Typing_utils
-module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 
 type env = {

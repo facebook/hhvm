@@ -11,7 +11,6 @@ open Hh_prelude
 open Typing_reason
 module SN = Naming_special_names
 module MakeType = Typing_make_type
-module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 
 let check_implements

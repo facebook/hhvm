@@ -7,8 +7,6 @@
  *
  *)
 
-module Decl_provider = Decl_provider_ctx
-
 val obj_get :
   obj_pos:Ast_defs.pos ->
   is_method:bool ->

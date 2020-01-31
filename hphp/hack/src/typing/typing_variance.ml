@@ -13,7 +13,6 @@ open Utils
 module Env = Typing_env
 module SN = Naming_special_names
 module TGen = Typing_generic
-module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 
 (*****************************************************************************)

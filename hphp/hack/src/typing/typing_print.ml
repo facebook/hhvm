@@ -18,7 +18,6 @@ open Typing_logic
 module SN = Naming_special_names
 module Reason = Typing_reason
 module TySet = Typing_set
-module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 module Nast = Aast
 

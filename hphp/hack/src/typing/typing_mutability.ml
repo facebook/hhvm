@@ -13,7 +13,6 @@ open Typing_defs
 module Env = Typing_env
 module T = Aast
 module LMap = Local_id.Map
-module Decl_provider = Decl_provider_ctx
 
 module type Env_S = sig
   type env

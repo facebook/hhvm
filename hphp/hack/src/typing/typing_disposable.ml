@@ -13,7 +13,6 @@ open Hh_prelude
 open Typing_defs
 module Env = Typing_env
 module MakeType = Typing_make_type
-module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 
 let is_disposable_visitor env =

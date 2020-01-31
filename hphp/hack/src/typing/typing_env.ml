@@ -20,7 +20,6 @@ module LID = Local_id
 module SG = SN.Superglobals
 module LEnvC = Typing_per_cont_env
 module C = Typing_continuations
-module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 module Fake = Typing_fake_members
 module ITySet = Internal_type_set

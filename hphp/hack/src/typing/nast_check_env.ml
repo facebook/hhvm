@@ -69,9 +69,9 @@ let class_env env c =
 
 let typedef_env env t = { env with file_mode = t.t_mode }
 
-let get_empty_env () =
+let get_empty_env ctx =
   {
-    ctx = Provider_context.get_global_context_or_empty_FOR_MIGRATION ();
+    ctx;
     is_reactive = false;
     class_kind = None;
     class_name = None;
@@ -85,8 +85,8 @@ let get_empty_env () =
     rx_move_allowed = false;
   }
 
-let def_env x =
-  let empty_env = get_empty_env () in
+let def_env ctx x =
+  let empty_env = get_empty_env ctx in
   match x with
   | Fun f -> fun_env empty_env f
   | Class c -> class_env empty_env c

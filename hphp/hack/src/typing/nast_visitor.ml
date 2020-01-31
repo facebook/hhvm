@@ -17,10 +17,10 @@ class virtual iter =
     inherit [_] Aast.iter as super
 
     (* Entry point *)
-    method go (program : Nast.program) =
-      self#on_list (fun () -> self#go_def) () program
+    method go (ctx : Provider_context.t) (program : Nast.program) =
+      self#on_list (fun () -> self#go_def ctx) () program
 
-    method go_def x = self#on_def (def_env x) x
+    method go_def ctx x = self#on_def (def_env ctx x) x
 
     method! on_fun_ env x = super#on_fun_ (fun_env env x) x
 
@@ -105,10 +105,11 @@ class virtual ['state] iter_with_state =
     inherit [_] Aast.iter as super
 
     (* Entry point *)
-    method go (state : 'state) (program : Nast.program) =
-      self#on_list (fun () -> self#go_def state) () program
+    method go
+        (state : 'state) (ctx : Provider_context.t) (program : Nast.program) =
+      self#on_list (fun () -> self#go_def state ctx) () program
 
-    method go_def state x = self#on_def (def_env x, state) x
+    method go_def state ctx x = self#on_def (def_env ctx x, state) x
 
     method! on_fun_ (env, state) x = super#on_fun_ (fun_env env x, state) x
   end

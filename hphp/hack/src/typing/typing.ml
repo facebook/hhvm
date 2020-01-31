@@ -9033,10 +9033,11 @@ let nast_to_tast_gienv ~(do_tast_checks : bool) opts nast :
       failwith
         "Invalid nodes in NAST. These nodes should be removed during naming."
   in
-  Nast_check.program nast;
+  let ctx = Provider_context.get_global_context_or_empty_FOR_MIGRATION () in
+  Nast_check.program ctx nast;
   let (tast, envs) = List.unzip @@ List.map nast convert_def in
   let envs = List.concat envs in
-  if do_tast_checks then Tast_check.program opts tast;
+  if do_tast_checks then Tast_check.program ctx.Provider_context.tcopt tast;
   (tast, envs)
 
 let nast_to_tast ~do_tast_checks opts nast =

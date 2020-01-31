@@ -112,7 +112,10 @@ let type_fun (opts : TypecheckerOptions.t) (fn : Relative_path.t) (x : string) :
   | Some f ->
     handle_exn_as_error f.Aast.f_span (fun () ->
         let fun_ = Naming.fun_ f in
-        Nast_check.def (Aast.Fun fun_);
+        let ctx =
+          Provider_context.get_global_context_or_empty_FOR_MIGRATION ()
+        in
+        Nast_check.def ctx (Aast.Fun fun_);
         let def_opt =
           Typing.fun_def opts fun_
           |> Option.map ~f:(fun (f, global_tvenv) -> (Aast.Fun f, global_tvenv))
@@ -127,7 +130,10 @@ let type_class (opts : TypecheckerOptions.t) (fn : Relative_path.t) (x : string)
   | Some cls ->
     handle_exn_as_error cls.Aast.c_span (fun () ->
         let class_ = Naming.class_ cls in
-        Nast_check.def (Aast.Class class_);
+        let ctx =
+          Provider_context.get_global_context_or_empty_FOR_MIGRATION ()
+        in
+        Nast_check.def ctx (Aast.Class class_);
         let def_opt =
           Typing.class_def opts class_
           |> Option.map ~f:(fun (c, global_tvenv) ->
@@ -144,7 +150,10 @@ let type_record_def
   | Some rd ->
     handle_exn_as_error rd.Aast.rd_span (fun () ->
         let rd = Naming.record_def rd in
-        Nast_check.def (Aast.RecordDef rd);
+        let ctx =
+          Provider_context.get_global_context_or_empty_FOR_MIGRATION ()
+        in
+        Nast_check.def ctx (Aast.RecordDef rd);
 
         let def = Aast.RecordDef (Typing.record_def_def opts rd) in
         Tast_check.def opts def;
@@ -158,9 +167,12 @@ let check_typedef
   | Some t ->
     handle_exn_as_error Pos.none (fun () ->
         let typedef = Naming.typedef t in
-        Nast_check.def (Aast.Typedef typedef);
+        let ctx =
+          Provider_context.get_global_context_or_empty_FOR_MIGRATION ()
+        in
+        Nast_check.def ctx (Aast.Typedef typedef);
         let ret = Typing.typedef_def opts typedef in
-        Typing_variance.typedef (Provider_context.empty ~tcopt:opts) x;
+        Typing_variance.typedef ctx x;
         let def = Aast.Typedef ret in
         Tast_check.def opts def;
         Some def)
@@ -174,7 +186,10 @@ let check_const
   | Some cst ->
     handle_exn_as_error cst.Aast.cst_span (fun () ->
         let cst = Naming.global_const cst in
-        Nast_check.def (Aast.Constant cst);
+        let ctx =
+          Provider_context.get_global_context_or_empty_FOR_MIGRATION ()
+        in
+        Nast_check.def ctx (Aast.Constant cst);
         let def = Aast.Constant (Typing.gconst_def opts cst) in
         Tast_check.def opts def;
         Some def)

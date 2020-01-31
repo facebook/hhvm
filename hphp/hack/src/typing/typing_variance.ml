@@ -291,17 +291,16 @@ let rec class_ tcopt class_name class_type impl =
   in
   List.iter impl ~f:(type_ tcopt root Vboth env);
   Cls.props class_type
-  |> Sequence.iter ~f:(class_member class_type tcopt root `Instance env);
+  |> List.iter ~f:(class_member class_type tcopt root `Instance env);
   Cls.sprops class_type
-  |> Sequence.iter ~f:(class_member class_type tcopt root `Static env);
-  Cls.methods class_type
-  |> Sequence.iter ~f:(class_method tcopt root `Instance env);
+  |> List.iter ~f:(class_member class_type tcopt root `Static env);
+  Cls.methods class_type |> List.iter ~f:(class_method tcopt root `Instance env);
 
   (* We need to apply the same restrictions to non-final static members because
      they can be invoked through classname instances *)
   if not (Cls.final class_type) then
     Cls.smethods class_type
-    |> Sequence.iter ~f:(class_method tcopt root `Static env)
+    |> List.iter ~f:(class_method tcopt root `Static env)
 
 (*****************************************************************************)
 (* The entry point (for typedefs). *)

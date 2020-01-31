@@ -7660,7 +7660,7 @@ and check_const_trait_members pos env use_list =
   let (_, trait, _) = Decl_utils.unwrap_class_hint use_list in
   match Env.get_class env trait with
   | Some c when Ast_defs.(equal_class_kind (Cls.kind c) Ctrait) ->
-    Sequence.iter (Cls.props c) (fun (x, ce) ->
+    List.iter (Cls.props c) (fun (x, ce) ->
         if not ce.ce_const then Errors.trait_prop_const_class pos x)
   | _ -> ()
 
@@ -7751,8 +7751,8 @@ and class_def_ env c tc =
         let pos = method_pos ~is_static ce.ce_origin id in
         Errors.override_per_trait c.c_name id pos
     in
-    Sequence.iter (Cls.methods tc) (check_override ~is_static:false);
-    Sequence.iter (Cls.smethods tc) (check_override ~is_static:true)
+    List.iter (Cls.methods tc) (check_override ~is_static:false);
+    List.iter (Cls.smethods tc) (check_override ~is_static:true)
   );
   let env =
     {
@@ -7835,10 +7835,7 @@ and class_def_ env c tc =
     check_extend_abstract_meth ~is_final pc (Cls.methods tc);
     (match fst (Cls.construct tc) with
     | Some constr ->
-      check_extend_abstract_meth
-        ~is_final
-        pc
-        (Sequence.singleton (SN.Members.__construct, constr))
+      check_extend_abstract_meth ~is_final pc [(SN.Members.__construct, constr)]
     | None -> ());
     check_extend_abstract_meth ~is_final pc (Cls.smethods tc);
     check_extend_abstract_prop ~is_final pc (Cls.sprops tc);
@@ -7993,14 +7990,14 @@ and check_static_class_element get_dyn_elt element_name static_pos ~elt_type =
       ~elt_type
 
 and check_extend_abstract_meth ~is_final p seq =
-  Sequence.iter seq (fun (x, ce) ->
+  List.iter seq (fun (x, ce) ->
       match ce.ce_type with
       | (lazy ty) when ce.ce_abstract && is_fun ty ->
         Errors.implement_abstract ~is_final p (get_pos ty) "method" x
       | _ -> ())
 
 and check_extend_abstract_prop ~is_final p seq =
-  Sequence.iter seq (fun (x, ce) ->
+  List.iter seq (fun (x, ce) ->
       if ce.ce_abstract then
         let ce_pos = Lazy.force ce.ce_type |> get_pos in
         Errors.implement_abstract ~is_final p ce_pos "property" x)
@@ -8008,7 +8005,7 @@ and check_extend_abstract_prop ~is_final p seq =
 (* Type constants must be bound to a concrete type for non-abstract classes.
  *)
 and check_extend_abstract_typeconst ~is_final p seq =
-  Sequence.iter seq (fun (x, tc) ->
+  List.iter seq (fun (x, tc) ->
       if Option.is_none tc.ttc_type then
         Errors.implement_abstract
           ~is_final
@@ -8018,7 +8015,7 @@ and check_extend_abstract_typeconst ~is_final p seq =
           x)
 
 and check_extend_abstract_const ~is_final p seq =
-  Sequence.iter seq (fun (x, cc) ->
+  List.iter seq (fun (x, cc) ->
       if cc.cc_abstract && not cc.cc_synthesized then
         let cc_pos = get_pos cc.cc_type in
         Errors.implement_abstract ~is_final p cc_pos "constant" x)

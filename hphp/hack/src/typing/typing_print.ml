@@ -1536,15 +1536,15 @@ module PrintClass = struct
     synth ^ vis ^ " " ^ type_
 
   let class_elts tcopt m =
-    Sequence.fold m ~init:"" ~f:(fun acc (field, v) ->
+    List.fold m ~init:"" ~f:(fun acc (field, v) ->
         "(" ^ field ^ ": " ^ class_elt tcopt v ^ ") " ^ acc)
 
   let class_elts_with_breaks tcopt m =
-    Sequence.fold m ~init:"" ~f:(fun acc (field, v) ->
+    List.fold m ~init:"" ~f:(fun acc (field, v) ->
         "\n" ^ indent ^ field ^ ": " ^ class_elt tcopt v ^ acc)
 
   let class_consts tcopt m =
-    Sequence.fold m ~init:"" ~f:(fun acc (field, cc) ->
+    List.fold m ~init:"" ~f:(fun acc (field, cc) ->
         let synth =
           if cc.cc_synthesized then
             "synthetic "
@@ -1599,7 +1599,7 @@ module PrintClass = struct
       ""
 
   let typeconsts tcopt m =
-    Sequence.fold m ~init:"" ~f:(fun acc (_, v) ->
+    List.fold m ~init:"" ~f:(fun acc (_, v) ->
         "\n(" ^ typeconst tcopt v ^ ")" ^ acc)
 
   let ancestors ctx m =

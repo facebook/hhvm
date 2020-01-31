@@ -719,8 +719,7 @@ let get_static_member is_method env class_ mid =
 
 (* Given a list of things whose name we can extract with `f`, return
    the item whose name is closest to `name`. *)
-let most_similar
-    (name : string) (possibilities : 'a Sequence.t) (f : 'a -> string) :
+let most_similar (name : string) (possibilities : 'a list) (f : 'a -> string) :
     'a option =
   let distance = String_utils.levenshtein_distance in
   let choose_closest x y =
@@ -729,15 +728,14 @@ let most_similar
     else
       y
   in
-  Sequence.fold possibilities ~init:None ~f:(fun acc possibility ->
+  List.fold possibilities ~init:None ~f:(fun acc possibility ->
       match acc with
       | None -> Some possibility
       | Some current_best -> Some (choose_closest current_best possibility))
 
 let suggest_member members mid =
   let pairs =
-    Sequence.map members ~f:(fun (x, { ce_type = (lazy ty); _ }) ->
-        (get_pos ty, x))
+    List.map members ~f:(fun (x, { ce_type = (lazy ty); _ }) -> (get_pos ty, x))
   in
   most_similar mid pairs snd
 
@@ -1006,9 +1004,7 @@ let get_local_in_ctx env ?error_if_undef_at_pos:p x ctx_opt =
       let in_rx_scope = env_local_reactive env in
       let lid = LID.to_string x in
       let suggest_most_similar lid =
-        let all_locals =
-          Sequence.of_list (LID.Map.elements ctx.LEnvC.local_types)
-        in
+        let all_locals = LID.Map.elements ctx.LEnvC.local_types in
         let var_name (k, _) = LID.to_string k in
         match most_similar lid all_locals var_name with
         | Some (k, _) -> Some (LID.to_string k)

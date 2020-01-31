@@ -123,19 +123,19 @@ module Api : sig
 
   val has_smethod : t -> string -> bool
 
-  val consts : t -> (string * class_const) Sequence.t
+  val consts : t -> (string * class_const) list
 
-  val typeconsts : t -> (string * typeconst_type) Sequence.t
+  val typeconsts : t -> (string * typeconst_type) list
 
-  val pu_enums : t -> (string * pu_enum_type) Sequence.t
+  val pu_enums : t -> (string * pu_enum_type) list
 
-  val props : t -> (string * class_elt) Sequence.t
+  val props : t -> (string * class_elt) list
 
-  val sprops : t -> (string * class_elt) Sequence.t
+  val sprops : t -> (string * class_elt) list
 
-  val methods : t -> (string * class_elt) Sequence.t
+  val methods : t -> (string * class_elt) list
 
-  val smethods : t -> (string * class_elt) Sequence.t
+  val smethods : t -> (string * class_elt) list
 
   (** The following functions return _all_ class member declarations defined in or
       inherited by this class with the given member name, including ones which

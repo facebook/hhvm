@@ -27,9 +27,9 @@ let raise_xhp_required env pos ureason ty =
 (**
  * Given class info, produces the subset of props that are XHP attributes
  *)
-let xhp_attributes_for_class info : (string * class_elt) Sequence.t =
+let xhp_attributes_for_class info : (string * class_elt) list =
   Cls.props info
-  |> Sequence.filter ~f:(fun (_, elt_) -> Option.is_some elt_.ce_xhp_attr)
+  |> List.filter ~f:(fun (_, elt_) -> Option.is_some elt_.ce_xhp_attr)
 
 (**
  * Walks a type and gathers all the XHP, adding an error when we encounter a
@@ -107,14 +107,14 @@ and walk_list_and_gather_xhp env pos tyl =
 and get_spread_attributes env pos onto_xhp cty =
   let onto_attrs =
     xhp_attributes_for_class onto_xhp
-    |> Sequence.fold ~init:SSet.empty ~f:(fun acc (k, _) -> SSet.add k acc)
+    |> List.fold ~init:SSet.empty ~f:(fun acc (k, _) -> SSet.add k acc)
   in
   let (env, possible_xhp, non_xhp) = walk_and_gather_xhp_ ~env ~pos cty in
   List.iter non_xhp ~f:(raise_xhp_required env pos Reason.URxhp_spread);
   let xhp_to_attrs env (xhp_ty, tparams, xhp_info) =
     let attrs = xhp_attributes_for_class xhp_info in
     (* Compute the intersection and then localize the types *)
-    let attrs = Sequence.filter attrs (fun (k, _) -> SSet.mem k onto_attrs) in
+    let attrs = List.filter attrs (fun (k, _) -> SSet.mem k onto_attrs) in
     (* XHP does not allow generics in the class declaration, so
      * we don't need to perform any substitutions *)
     let ety_env =
@@ -136,7 +136,7 @@ and get_spread_attributes env pos onto_xhp cty =
           (env, ((pos, k), (pos, ty)))
         end
       env
-      (Sequence.to_list attrs)
+      attrs
   in
   let (env, attrs) = List.map_env ~f:xhp_to_attrs env possible_xhp in
   (env, List.concat attrs)

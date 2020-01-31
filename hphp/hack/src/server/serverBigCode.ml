@@ -50,8 +50,8 @@ class visitor =
         Tast_env.is_visible env (elt.ce_visibility, elt.ce_lsb) cid class_
       in
       elts
-      |> Sequence.filter ~f:is_visible
-      |> Sequence.map ~f:(fun (id, { ce_type = (lazy ty); _ }) -> (id, ty))
+      |> List.filter ~f:is_visible
+      |> List.map ~f:(fun (id, { ce_type = (lazy ty); _ }) -> (id, ty))
 
     method autocomplete_member ~is_static env class_ cid =
       let match_both_static_and_instance =
@@ -61,20 +61,20 @@ class visitor =
       in
       let add _ (name, _) = candidates := name :: !candidates in
       if is_static || match_both_static_and_instance then (
-        Sequence.iter
+        List.iter
           (self#get_class_elt_types env class_ cid (Cls.smethods class_))
           ~f:(add SearchUtils.SI_ClassMethod);
-        Sequence.iter
+        List.iter
           (self#get_class_elt_types env class_ cid (Cls.sprops class_))
           ~f:(add SearchUtils.SI_Property);
-        Sequence.iter (Cls.consts class_) ~f:(fun (name, cc) ->
+        List.iter (Cls.consts class_) ~f:(fun (name, cc) ->
             add SearchUtils.SI_ClassConstant (name, cc.cc_type))
       );
       if (not is_static) || match_both_static_and_instance then (
-        Sequence.iter
+        List.iter
           (self#get_class_elt_types env class_ cid (Cls.methods class_))
           ~f:(add SearchUtils.SI_ClassMethod);
-        Sequence.iter
+        List.iter
           (self#get_class_elt_types env class_ cid (Cls.props class_))
           ~f:(add SearchUtils.SI_Property)
       )

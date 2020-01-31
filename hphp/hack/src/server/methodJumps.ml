@@ -32,7 +32,7 @@ let get_overridden_methods ctx origin_class get_or_method dest_class acc =
   | None -> acc
   | Some dest_class ->
     (* Check if each destination method exists in the origin *)
-    Sequence.fold
+    List.fold
       (Cls.methods dest_class)
       ~init:acc
       ~f:(fun acc (m_name, de_mthd) ->

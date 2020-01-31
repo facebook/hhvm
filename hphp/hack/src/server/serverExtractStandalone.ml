@@ -1169,7 +1169,7 @@ and add_signature_dependencies ctx deps obj =
             Option.iter te_constraint ~f:add_dep)
       | AllMembers _ ->
         (* AllMembers is used for dependencies on enums, so we should depend on all constants *)
-        Sequence.iter (Class.consts cls) (fun (name, c) ->
+        List.iter (Class.consts cls) (fun (name, c) ->
             if name <> "class" then add_dep c.cc_type)
       (* Ignore, we fetch class hierarchy when we call add_signature_dependencies on a class dep *)
       | Extends _ -> ()
@@ -1220,26 +1220,26 @@ let get_implementation_dependencies ctx deps cls_name =
       let ancestor = get_class_exn ctx ancestor_name in
       if is_builtin_dep ctx (Class ancestor_name) then
         let acc =
-          Sequence.fold
+          List.fold
             (Class.smethods ancestor)
             ~init:acc
             ~f:(fun acc (smethod_name, _) -> add_smethod_impl acc smethod_name)
         in
         let acc =
-          Sequence.fold
+          List.fold
             (Class.methods ancestor)
             ~init:acc
             ~f:(fun acc (method_name, _) -> add_method_impl acc method_name)
         in
         let acc =
-          Sequence.fold
+          List.fold
             (Class.typeconsts ancestor)
             ~init:acc
             ~f:(fun acc (typeconst_name, _) ->
               add_typeconst_impl acc typeconst_name)
         in
         let acc =
-          Sequence.fold
+          List.fold
             (Class.consts ancestor)
             ~init:acc
             ~f:(fun acc (const_name, _) -> add_const_impl acc const_name)

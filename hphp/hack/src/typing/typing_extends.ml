@@ -72,7 +72,7 @@ let check_class_elt_visibility parent_class_elt class_elt on_error =
 (* Check that all the required members are implemented *)
 let check_members_implemented
     check_private parent_reason reason (_, parent_members, get_member) =
-  Sequence.iter parent_members (fun (member_name, class_elt) ->
+  List.iter parent_members (fun (member_name, class_elt) ->
       match class_elt.ce_visibility with
       | Vprivate _ when not check_private -> ()
       | Vprivate _ ->
@@ -429,7 +429,7 @@ let check_const_override
 
 (* Privates are only visible in the parent, we don't need to check them *)
 let filter_privates members =
-  Sequence.filter members (fun (_name, class_elt) ->
+  List.filter members (fun (_name, class_elt) ->
       (not (is_private class_elt)) || is_lsb class_elt)
 
 let check_members
@@ -470,7 +470,7 @@ let check_members
       && String.( <> ) class_elt.ce_origin parent_class_elt.ce_origin
     | _ -> false
   in
-  Sequence.fold
+  List.fold
     ~init:env
     parent_members
     ~f:(fun env (member_name, parent_class_elt) ->
@@ -525,12 +525,12 @@ let check_members
 
 (* Instantiation basically applies the substitution *)
 let instantiate_consts subst consts =
-  Sequence.map consts (fun (id, cc) -> (id, Inst.instantiate_cc subst cc))
+  List.map consts (fun (id, cc) -> (id, Inst.instantiate_cc subst cc))
 
 let make_all_members ~child_class ~parent_class =
   let wrap_constructor = function
-    | None -> Sequence.empty
-    | Some x -> Sequence.singleton (Naming_special_names.Members.__construct, x)
+    | None -> []
+    | Some x -> [(Naming_special_names.Members.__construct, x)]
   in
   [
     (`FromProp, Cls.props parent_class, Cls.get_prop child_class);
@@ -785,7 +785,7 @@ let check_typeconsts env parent_class class_ on_error =
   let tconst_check parent_tconst tconst () =
     tconst_subsumption env (Cls.name class_) parent_tconst tconst on_error
   in
-  Sequence.iter ptypeconsts (fun (tconst_name, parent_tconst) ->
+  List.iter ptypeconsts (fun (tconst_name, parent_tconst) ->
       match Cls.get_typeconst class_ tconst_name with
       | Some tconst ->
         check_ambiguous_inheritance
@@ -808,9 +808,9 @@ let check_consts env parent_class class_ psubst subst on_error =
   let pconsts = instantiate_consts psubst pconsts in
   let consts = instantiate_consts subst consts in
   let consts =
-    Sequence.fold consts ~init:SMap.empty ~f:(fun m (k, v) -> SMap.add k v m)
+    List.fold consts ~init:SMap.empty ~f:(fun m (k, v) -> SMap.add k v m)
   in
-  Sequence.iter pconsts (fun (const_name, parent_const) ->
+  List.iter pconsts (fun (const_name, parent_const) ->
       if String.( <> ) const_name SN.Members.mClass then
         match SMap.find_opt const_name consts with
         | Some const ->

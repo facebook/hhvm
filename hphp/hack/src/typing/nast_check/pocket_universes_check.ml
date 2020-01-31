@@ -45,7 +45,7 @@ let check_parent
       | Some cls ->
         let c_name = Cls.name cls in
         let c_pu_enums = Cls.pu_enums cls in
-        Sequence.iter
+        List.iter
           ~f:(fun (enum_name, pu_enum) ->
             begin
               match SMap.find_opt enum_name seen_types with
@@ -175,7 +175,7 @@ let handler =
 
         (* Gather information about atoms definitions and instances to check
          * if they are correct *)
-        Sequence.iter
+        List.iter
           ~f:
             (fun (enum_name, { tpu_case_types; tpu_case_values; tpu_members; _ })
                  ->

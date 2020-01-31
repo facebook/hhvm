@@ -26,8 +26,10 @@ let collect_attrs_from_ty_sid ?(include_optional = false) env add bag sid =
       | Some { xa_tag = Some Required; _ } -> true
       | _ -> false
     in
-    let required_attrs = S.filter (Cls.props c) (compose should_collect snd) in
-    S.fold required_attrs ~init:bag ~f:(fun s (n, elt) ->
+    let required_attrs =
+      List.filter (Cls.props c) (compose should_collect snd)
+    in
+    List.fold required_attrs ~init:bag ~f:(fun s (n, elt) ->
         add (n, elt.ce_origin) s)
 
 let rec collect_attrs_from_ty env set ty =

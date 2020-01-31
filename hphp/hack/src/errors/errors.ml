@@ -13,7 +13,7 @@ open String_utils
 
 type error_code = int [@@deriving eq]
 
-(* We use `Pos.t message` on the server and convert to `Pos.absolute message`
+(** We use `Pos.t message` on the server and convert to `Pos.absolute message`
  * before sending it to the client *)
 type 'a message = 'a * string [@@deriving eq]
 
@@ -37,8 +37,7 @@ type typing_error_callback = ?code:int -> (Pos.t * string) list -> unit
 type name_context =
   | FunctionNamespace
   | ConstantNamespace
-  (* Classes, interfaces, traits, records and type aliases.*)
-  | TypeNamespace
+  | TypeNamespace  (** Classes, interfaces, traits, records and type aliases.*)
   (* The following are all subsets of TypeNamespace, used when we can
      give a more specific naming error. E.g. `use Foo;` only allows
      traits. *)
@@ -65,10 +64,10 @@ module PhaseMap = Reordered_argument_map (WrappedMap.Make (struct
   let compare x y = rank x - rank y
 end))
 
-(* Results of single file analysis. *)
+(** Results of single file analysis. *)
 type 'a file_t = 'a list PhaseMap.t [@@deriving eq]
 
-(* Results of multi-file analysis. *)
+(** Results of multi-file analysis. *)
 type 'a files_t = 'a file_t Relative_path.Map.t [@@deriving eq]
 
 let files_t_fold v ~f ~init =

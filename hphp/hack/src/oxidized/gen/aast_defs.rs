@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<38dab47bd52e39ab6cee175ce5be9b83>>
+// @generated SignedSource<<fc8532b6cd0d9356cd83e2f267bd428a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -32,7 +32,9 @@ pub type IsReified = bool;
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]
 pub enum CallType {
+    /// when the call looks like f()
     Cnormal,
+    /// when the call looks like call_user_func(...)
     CuserFunc,
 }
 
@@ -103,6 +105,24 @@ pub enum Hint_ {
     Htuple(Vec<Hint>),
     Happly(Sid, Vec<Hint>),
     Hshape(NastShapeInfo),
+    /// This represents the use of a type const. Type consts are accessed like
+    /// regular consts in Hack, i.e.
+    ///
+    /// [self | static | Class]::TypeConst
+    ///
+    /// Class  => Happly "Class"
+    /// self   => Happly of the class of definition
+    /// static => Habstr ("static",
+    ///           Habstr ("this", (Constraint_as, Happly of class of definition)))
+    /// Type const access can be chained such as
+    ///
+    /// Class::TC1::TC2::TC3
+    ///
+    /// We resolve the root of the type access chain as a type as follows.
+    ///
+    /// This will result in the following representation
+    ///
+    /// Haccess (Happly "Class", ["TC1", "TC2", "TC3"])
     Haccess(Hint, Vec<Sid>),
     Hsoft(Hint),
     Hany,
@@ -123,6 +143,7 @@ pub enum Hint_ {
     Hintersection(Vec<Hint>),
 }
 
+/// AST types such as Happly("int", []) are resolved to Hprim values
 #[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
 pub enum Tprim {
     Tnull,
@@ -135,6 +156,8 @@ pub enum Tprim {
     Tnum,
     Tarraykey,
     Tnoreturn,
+    /// plain Pocket Universe atom when we don't know which enum it is in.
+    /// E.g. `:@MyAtom`
     Tatom(String),
 }
 

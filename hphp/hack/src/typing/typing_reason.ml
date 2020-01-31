@@ -11,24 +11,27 @@ open Hh_prelude
 
 let strip_ns id = id |> Utils.strip_ns |> Hh_autoimport.reverse_type
 
-(* The reason why something is expected to have a certain type *)
+(** The reason why something is expected to have a certain type *)
 type t =
   | Rnone
   | Rwitness of Pos.t
-  | Ridx of Pos.t * t (* Used as an index into a vector-like
-                                     array or string. Position of indexing,
-                                     reason for the indexed type *)
-  | Ridx_vector of Pos.t (* Used as an index, in the Vector case *)
-  | Rappend of Pos.t (* Used to append element to an array *)
-  | Rfield of Pos.t (* Array accessed with a static string index *)
-  | Rforeach of Pos.t (* Because it is iterated in a foreach loop *)
-  | Rasyncforeach of Pos.t (* Because it is iterated "await as" in foreach *)
+  | Ridx of Pos.t * t
+      (** Used as an index into a vector-like
+          array or string. Position of indexing,
+          reason for the indexed type *)
+  | Ridx_vector of Pos.t  (** Used as an index, in the Vector case *)
+  | Rappend of Pos.t  (** Used to append element to an array *)
+  | Rfield of Pos.t  (** Array accessed with a static string index *)
+  | Rforeach of Pos.t  (** Because it is iterated in a foreach loop *)
+  | Rasyncforeach of Pos.t  (** Because it is iterated "await as" in foreach *)
   | Raccess of Pos.t
   | Rarith of Pos.t
   | Rarith_int of Pos.t
   | Rarith_ret of Pos.t
-  | Rarith_ret_float of Pos.t * t * arg_position (* pos, arg float typing reason, arg position *)
-  | Rarith_ret_num of Pos.t * t * arg_position (* pos, arg num typing reason, arg position *)
+  | Rarith_ret_float of Pos.t * t * arg_position
+      (** pos, arg float typing reason, arg position *)
+  | Rarith_ret_num of Pos.t * t * arg_position
+      (** pos, arg num typing reason, arg position *)
   | Rarith_ret_int of Pos.t
   | Rarith_dynamic of Pos.t
   | Rbitwise_dynamic of Pos.t
@@ -57,7 +60,7 @@ type t =
   | Ryield_asyncgen of Pos.t
   | Ryield_asyncnull of Pos.t
   | Ryield_send of Pos.t
-  | Rlost_info of string * t * Pos.t * bool (* true if due to lambda *)
+  | Rlost_info of string * t * Pos.t * bool  (** true if due to lambda *)
   | Rcoerced of t * Pos.t * string
   | Rformat of Pos.t * string * t
   | Rclass_class of Pos.t * string
@@ -65,14 +68,15 @@ type t =
   | Rdynamic_yield of Pos.t * Pos.t * string * string
   | Rmap_append of Pos.t
   | Rvar_param of Pos.t
-  | Runpack_param of Pos.t * Pos.t * int (* splat pos, fun def pos, number of args before splat *)
+  | Runpack_param of Pos.t * Pos.t * int
+      (** splat pos, fun def pos, number of args before splat *)
   | Rinout_param of Pos.t
   | Rinstantiate of t * string * t
   | Rarray_filter of Pos.t * t
   | Rtypeconst of t * (Pos.t * string) * string * t
   | Rtype_access of t * (t * string) list
   | Rexpr_dep_type of t * Pos.t * expr_dep_type_reason
-  | Rnullsafe_op of Pos.t (* ?-> operator is used *)
+  | Rnullsafe_op of Pos.t  (** ?-> operator is used *)
   | Rtconst_no_cstr of Aast.sid
   | Rused_as_map of Pos.t
   | Rused_as_shape of Pos.t
@@ -726,8 +730,7 @@ type ureason =
   | URawait
   | URyield
   | URyield_from
-  (* Name of XHP class, Name of XHP attribute *)
-  | URxhp of string * string
+  | URxhp of string * string  (** Name of XHP class, Name of XHP attribute *)
   | URxhp_spread
   | URindex of string
   | URparam

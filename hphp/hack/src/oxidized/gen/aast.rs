@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a62421a3c2eb750c9ad0c8d5bd070621>>
+// @generated SignedSource<<a74111ac94c8e8ed9ddbc92b4c7316b3>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -50,6 +50,12 @@ pub use aast_defs::WhereConstraint;
 pub use aast_defs::XhpChild;
 pub use aast_defs::XhpChildOp;
 
+/// Aast.program represents the top-level definitions in a Hack program.
+/// ex: Expression annotation type (when typechecking, the inferred dtype)
+/// fb: Function body tag (e.g. has naming occurred)
+/// en: Environment (tracking state inside functions and classes)
+/// hi: Hint annotation (when typechecking it will be the localized type hint or the
+/// inferred missing type if the hint is missing)
 pub type Program<Ex, Fb, En, Hi> = Vec<Def<Ex, Fb, En, Hi>>;
 
 #[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
@@ -160,7 +166,9 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     ),
     Varray(Box<(Option<Targ<Hi>>, Vec<Expr<Ex, Fb, En, Hi>>)>),
     Shape(Vec<(ast_defs::ShapeFieldName, Expr<Ex, Fb, En, Hi>)>),
+    /// TODO: T38184446 Consolidate collections in AAST
     ValCollection(Box<(VcKind, Option<Targ<Hi>>, Vec<Expr<Ex, Fb, En, Hi>>)>),
+    /// TODO: T38184446 Consolidate collections in AAST
     KeyValCollection(
         Box<(
             KvcKind,
@@ -205,8 +213,8 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     ExprList(Vec<Expr<Ex, Fb, En, Hi>>),
     Cast(Box<(Hint, Expr<Ex, Fb, En, Hi>)>),
     Unop(Box<(ast_defs::Uop, Expr<Ex, Fb, En, Hi>)>),
-    /// The ID of the $$ that is implicitly declared by this pipe.
     Binop(Box<(ast_defs::Bop, Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>)>),
+    /// The lid is the ID of the $$ that is implicitly declared by this pipe.
     Pipe(Box<(Lid, Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>)>),
     Eif(
         Box<(
@@ -238,12 +246,14 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     ),
     Callconv(Box<(ast_defs::ParamKind, Expr<Ex, Fb, En, Hi>)>),
     Import(Box<(ImportFlavor, Expr<Ex, Fb, En, Hi>)>),
+    /// TODO: T38184446 Consolidate collections in AAST
     Collection(Box<(Sid, Option<CollectionTarg<Hi>>, Vec<Afield<Ex, Fb, En, Hi>>)>),
     BracedExpr(Box<Expr<Ex, Fb, En, Hi>>),
     ParenthesizedExpr(Box<Expr<Ex, Fb, En, Hi>>),
     Lplaceholder(Box<Pos>),
     FunId(Box<Sid>),
     MethodId(Box<(Expr<Ex, Fb, En, Hi>, Pstring)>),
+    /// meth_caller('Class name', 'method name')
     MethodCaller(Box<(Sid, Pstring)>),
     SmethodId(Box<(Sid, Pstring)>),
     Pair(Box<(Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>)>),
@@ -304,10 +314,14 @@ pub struct FunParam<Ex, Fb, En, Hi> {
     pub visibility: Option<Visibility>,
 }
 
+/// does function take varying number of args?
 #[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
 pub enum FunVariadicity<Ex, Fb, En, Hi> {
+    /// PHP5.6 ...$args finishes the func declaration
     FVvariadicArg(FunParam<Ex, Fb, En, Hi>),
+    /// HH ... finishes the declaration; deprecate for ...$args?
     FVellipsis(Pos),
+    /// standard non variadic function
     FVnonVariadic,
 }
 
@@ -326,6 +340,8 @@ pub struct Fun_<Ex, Fb, En, Hi> {
     pub fun_kind: ast_defs::FunKind,
     pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
     pub file_attributes: Vec<FileAttribute<Ex, Fb, En, Hi>>,
+    /// true if this declaration has no body because it is an
+    /// external function declaration (e.g. from an HHI file)
     pub external: bool,
     pub namespace: Nsenv,
     pub doc_comment: Option<DocComment>,
@@ -344,9 +360,16 @@ pub struct FuncBody<Ex, Fb, En, Hi> {
     pub annotation: Fb,
 }
 
+/// A type annotation is two things:
+/// - the localized hint, or if the hint is missing, the inferred type
+/// - The typehint associated to this expression if it exists
 #[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
 pub struct TypeHint<Hi>(pub Hi, pub TypeHint_);
 
+/// Explicit type argument to function, constructor, or collection literal.
+/// 'hi = unit in NAST
+/// 'hi = Typing_defs.(locl ty) in TAST,
+/// and is used to record inferred type arguments, with wildcard hint.
 #[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
 pub struct Targ<Hi>(pub Hi, pub Hint);
 
@@ -355,6 +378,7 @@ pub type TypeHint_ = Option<Hint>;
 #[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
 pub struct UserAttribute<Ex, Fb, En, Hi> {
     pub name: Sid,
+    /// user attributes are restricted to scalar values
     pub params: Vec<Expr<Ex, Fb, En, Hi>>,
 }
 
@@ -376,6 +400,9 @@ pub struct Tparam<Ex, Fb, En, Hi> {
 #[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
 pub struct ClassTparams<Ex, Fb, En, Hi> {
     pub list: Vec<Tparam<Ex, Fb, En, Hi>>,
+    /// keeping around the ast version of the constraint only
+    /// for the purposes of Naming.class_meth_bodies
+    /// TODO: remove this and use tp_constraints
     pub constraints: s_map::SMap<(ReifyKind, Vec<(ast_defs::ConstraintKind, Hint)>)>,
 }
 
@@ -402,6 +429,7 @@ pub struct Class_<Ex, Fb, En, Hi> {
     pub has_xhp_keyword: bool,
     pub kind: ast_defs::ClassKind,
     pub name: Sid,
+    /// The type parameters of a class A<T> (T is the parameter)
     pub tparams: ClassTparams<Ex, Fb, En, Hi>,
     pub extends: Vec<Hint>,
     pub uses: Vec<Hint>,
@@ -466,6 +494,7 @@ pub enum CaType {
 pub struct ClassConst<Ex, Fb, En, Hi> {
     pub type_: Option<Hint>,
     pub id: Sid,
+    /// expr = None indicates an abstract const
     pub expr: Option<Expr<Ex, Fb, En, Hi>>,
     pub doc_comment: Option<DocComment>,
 }
@@ -477,6 +506,11 @@ pub enum TypeconstAbstractKind {
     TCConcrete,
 }
 
+/// This represents a type const definition. If a type const is abstract then
+/// then the type hint acts as a constraint. Any concrete definition of the
+/// type const must satisfy the constraint.
+///
+/// If the type const is not abstract then a type must be specified.
 #[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
 pub struct ClassTypeconst<Ex, Fb, En, Hi> {
     pub abstract_: TypeconstAbstractKind,
@@ -526,6 +560,8 @@ pub struct Method_<Ex, Fb, En, Hi> {
     pub fun_kind: ast_defs::FunKind,
     pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
     pub ret: TypeHint<Hi>,
+    /// true if this declaration has no body because it is an external method
+    /// declaration (e.g. from an HHI file)
     pub external: bool,
     pub doc_comment: Option<DocComment>,
 }
@@ -587,6 +623,32 @@ pub struct RecordDef<Ex, Fb, En, Hi> {
     pub doc_comment: Option<DocComment>,
 }
 
+/// Pocket Universe Enumeration, e.g.
+///
+/// ```
+///   enum Foo { // pu_name
+///     // pu_case_types
+///     case type T0;
+///     case type T1;
+///
+///     // pu_case_values
+///     case ?T0 default_value;
+///     case T1 foo;
+///
+///     // pu_members
+///     :@A( // pum_atom
+///       // pum_types
+///       type T0 = string,
+///       type T1 = int,
+///
+///       // pum_exprs
+///       default_value = null,
+///       foo = 42,
+///     );
+///     :@B( ... )
+///     ...
+///   }
+/// ```
 #[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
 pub struct PuEnum<Ex, Fb, En, Hi> {
     pub annotation: En,

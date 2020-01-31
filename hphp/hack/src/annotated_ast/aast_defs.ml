@@ -23,10 +23,10 @@ and sid = Ast_defs.id
 and is_reified = bool
 
 and call_type =
-  (* when the call looks like f() *)
   | Cnormal [@visitors.name "call_type_Cnormal"]
-  (* when the call looks like call_user_func(...) *)
+      (** when the call looks like f() *)
   | Cuser_func [@visitors.name "call_type_Cuser_func"]
+      (** when the call looks like call_user_func(...) *)
 
 and is_coroutine = bool
 
@@ -82,26 +82,26 @@ and hint_ =
   | Htuple of hint list
   | Happly of sid * hint list
   | Hshape of nast_shape_info
-  (* This represents the use of a type const. Type consts are accessed like
-   * regular consts in Hack, i.e.
-   *
-   * [self | static | Class]::TypeConst
-   *
-   * Class  => Happly "Class"
-   * self   => Happly of the class of definition
-   * static => Habstr ("static",
-   *           Habstr ("this", (Constraint_as, Happly of class of definition)))
-   * Type const access can be chained such as
-   *
-   * Class::TC1::TC2::TC3
-   *
-   * We resolve the root of the type access chain as a type as follows.
-   *
-   * This will result in the following representation
-   *
-   * Haccess (Happly "Class", ["TC1", "TC2", "TC3"])
-   *)
   | Haccess of hint * sid list
+      (** This represents the use of a type const. Type consts are accessed like
+       * regular consts in Hack, i.e.
+       *
+       * [self | static | Class]::TypeConst
+       *
+       * Class  => Happly "Class"
+       * self   => Happly of the class of definition
+       * static => Habstr ("static",
+       *           Habstr ("this", (Constraint_as, Happly of class of definition)))
+       * Type const access can be chained such as
+       *
+       * Class::TC1::TC2::TC3
+       *
+       * We resolve the root of the type access chain as a type as follows.
+       *
+       * This will result in the following representation
+       *
+       * Haccess (Happly "Class", ["TC1", "TC2", "TC3"])
+       *)
   | Hsoft of hint
   (* The following constructors don't exist in the AST hint type *)
   | Hany
@@ -121,7 +121,7 @@ and hint_ =
   | Hunion of hint list
   | Hintersection of hint list
 
-(* AST types such as Happly("int", []) are resolved to Hprim values *)
+(** AST types such as Happly("int", []) are resolved to Hprim values *)
 and tprim =
   | Tnull
   | Tvoid
@@ -133,9 +133,9 @@ and tprim =
   | Tnum
   | Tarraykey
   | Tnoreturn
-  (* plain Pocket Universe atom when we don't know which enum it is in.
-   * E.g. `:@MyAtom` *)
   | Tatom of string
+      (** plain Pocket Universe atom when we don't know which enum it is in.
+       * E.g. `:@MyAtom` *)
 
 and shape_field_info = {
   sfi_optional: bool;

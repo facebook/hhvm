@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<79cc968d6fca9e5e638dfe7ef5250c2d>>
+// @generated SignedSource<<683b38e409958f970711c0b52aac6024>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -16,21 +16,32 @@ use crate::aast;
 use crate::ast_defs;
 use crate::pos;
 
+/// The reason why something is expected to have a certain type
 #[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
 pub enum Reason {
     Rnone,
     Rwitness(pos::Pos),
+    /// Used as an index into a vector-like
+    /// array or string. Position of indexing,
+    /// reason for the indexed type
     Ridx(pos::Pos, Box<Reason>),
+    /// Used as an index, in the Vector case
     RidxVector(pos::Pos),
+    /// Used to append element to an array
     Rappend(pos::Pos),
+    /// Array accessed with a static string index
     Rfield(pos::Pos),
+    /// Because it is iterated in a foreach loop
     Rforeach(pos::Pos),
+    /// Because it is iterated "await as" in foreach
     Rasyncforeach(pos::Pos),
     Raccess(pos::Pos),
     Rarith(pos::Pos),
     RarithInt(pos::Pos),
     RarithRet(pos::Pos),
+    /// pos, arg float typing reason, arg position
     RarithRetFloat(pos::Pos, Box<Reason>, ArgPosition),
+    /// pos, arg num typing reason, arg position
     RarithRetNum(pos::Pos, Box<Reason>, ArgPosition),
     RarithRetInt(pos::Pos),
     RarithDynamic(pos::Pos),
@@ -60,6 +71,7 @@ pub enum Reason {
     RyieldAsyncgen(pos::Pos),
     RyieldAsyncnull(pos::Pos),
     RyieldSend(pos::Pos),
+    /// true if due to lambda
     RlostInfo(String, Box<Reason>, pos::Pos, bool),
     Rcoerced(Box<Reason>, pos::Pos, String),
     Rformat(pos::Pos, String, Box<Reason>),
@@ -68,6 +80,7 @@ pub enum Reason {
     RdynamicYield(pos::Pos, pos::Pos, String, String),
     RmapAppend(pos::Pos),
     RvarParam(pos::Pos),
+    /// splat pos, fun def pos, number of args before splat
     RunpackParam(pos::Pos, pos::Pos, isize),
     RinoutParam(pos::Pos),
     Rinstantiate(Box<Reason>, String, Box<Reason>),
@@ -75,6 +88,7 @@ pub enum Reason {
     Rtypeconst(Box<Reason>, (pos::Pos, String), String, Box<Reason>),
     RtypeAccess(Box<Reason>, Vec<(Box<Reason>, String)>),
     RexprDepType(Box<Reason>, pos::Pos, ExprDepTypeReason),
+    /// ?-> operator is used
     RnullsafeOp(pos::Pos),
     RtconstNoCstr(aast::Sid),
     RusedAsMap(pos::Pos),
@@ -140,6 +154,7 @@ pub enum Ureason {
     URawait,
     URyield,
     URyieldFrom,
+    /// Name of XHP class, Name of XHP attribute
     URxhp(String, String),
     URxhpSpread,
     URindex(String),

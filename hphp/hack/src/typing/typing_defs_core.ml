@@ -79,7 +79,7 @@ type xhp_attr = {
 }
 [@@deriving eq]
 
-(* Denotes the categories of requirements we apply to constructor overrides.
+(** Denotes the categories of requirements we apply to constructor overrides.
  *
  * In the default case, we use Inconsistent. If a class has <<__ConsistentConstruct>>,
  * or if it inherits a class that has <<__ConsistentConstruct>>, we use inherited.
@@ -147,14 +147,16 @@ and locl_ty = locl_phase ty
 
 and locl_ty_ = locl_phase ty_
 
-(* A shape may specify whether or not fields are required. For example, consider
-   this typedef:
-
-     type ShapeWithOptionalField = shape(?'a' => ?int);
-
-   With this definition, the field 'a' may be unprovided in a shape. In this
-   case, the field 'a' would have sf_optional set to true.
-   *)
+(** A shape may specify whether or not fields are required. For example, consider
+ * this typedef:
+ *
+ * ```
+ * type ShapeWithOptionalField = shape(?'a' => ?int);
+ * ```
+ *
+ * With this definition, the field 'a' may be unprovided in a shape. In this
+ * case, the field 'a' would have sf_optional set to true.
+ *)
 and 'phase shape_field_type = {
   sft_optional: bool;
   sft_ty: 'phase ty;
@@ -162,169 +164,166 @@ and 'phase shape_field_type = {
 
 and _ ty_ =
   (*========== Following Types Exist Only in the Declared Phase ==========*)
-  (* The late static bound type of a class *)
-  | Tthis : decl_phase ty_
-  (* Either an object type or a type alias, ty list are the arguments *)
+  | Tthis : decl_phase ty_  (** The late static bound type of a class *)
   | Tapply : Nast.sid * decl_ty list -> decl_phase ty_
-  (* Name of class, name of type const, remaining names of type consts *)
+      (** Either an object type or a type alias, ty list are the arguments *)
   | Taccess : taccess_type -> decl_phase ty_
-  (* The type of the various forms of "array":
-   * Tarray (None, None)         => "array"
-   * Tarray (Some ty, None)      => "array<ty>"
-   * Tarray (Some ty1, Some ty2) => "array<ty1, ty2>"
-   * Tarray (None, Some ty)      => [invalid]
-   *)
+      (** Name of class, name of type const, remaining names of type consts *)
   | Tarray : decl_ty option * decl_ty option -> decl_phase ty_
-  (* Tdarray (ty1, ty2) => "darray<ty1, ty2>" *)
+      (** The type of the various forms of "array":
+       *
+       * ```
+       * Tarray (None, None)         => "array"
+       * Tarray (Some ty, None)      => "array<ty>"
+       * Tarray (Some ty1, Some ty2) => "array<ty1, ty2>"
+       * Tarray (None, Some ty)      => [invalid]
+       * ```
+       *)
   | Tdarray : decl_ty * decl_ty -> decl_phase ty_
-  (* Tvarray (ty) => "varray<ty>" *)
-  | Tvarray : decl_ty -> decl_phase ty_
-  (* Tvarray_or_darray (ty1, ty2) => "varray_or_darray<ty1, ty2>" *)
+      (** Tdarray (ty1, ty2) => "darray<ty1, ty2>" *)
+  | Tvarray : decl_ty -> decl_phase ty_  (** Tvarray (ty) => "varray<ty>" *)
   | Tvarray_or_darray : decl_ty option * decl_ty -> decl_phase ty_
-  (* "Any" is the type of a variable with a missing annotation, and "mixed" is
-   * the type of a variable annotated as "mixed". THESE TWO ARE VERY DIFFERENT!
-   * Any unifies with anything, i.e., it is both a supertype and subtype of any
-   * other type. You can do literally anything to it; it's the "trust me" type.
-   * Mixed, on the other hand, is only a supertype of everything. You need to do
-   * a case analysis to figure out what it is (i.e., its elimination form).
-   *
-   * Here's an example to demonstrate:
-   *
-   * function f($x): int {
-   *   return $x + 1;
-   * }
-   *
-   * In that example, $x has type Tany. This unifies with anything, so adding
-   * one to it is allowed, and returning that as int is allowed.
-   *
-   * In contrast, if $x were annotated as mixed, adding one to that would be
-   * a type error -- mixed is not a subtype of int, and you must be a subtype
-   * of int to take part in addition. (The converse is true though -- int is a
-   * subtype of mixed.) A case analysis would need to be done on $x, via
-   * is_int or similar.
-   *
-   * mixed exists only in the decl_phase phase because it is desugared into ?nonnull
-   * during the localization phase.
-   *)
+      (** Tvarray_or_darray (ty1, ty2) => "varray_or_darray<ty1, ty2>" *)
   | Tmixed : decl_phase ty_
+      (** "Any" is the type of a variable with a missing annotation, and "mixed" is
+       * the type of a variable annotated as "mixed". THESE TWO ARE VERY DIFFERENT!
+       * Any unifies with anything, i.e., it is both a supertype and subtype of any
+       * other type. You can do literally anything to it; it's the "trust me" type.
+       * Mixed, on the other hand, is only a supertype of everything. You need to do
+       * a case analysis to figure out what it is (i.e., its elimination form).
+       *
+       * Here's an example to demonstrate:
+       *
+       * ```
+       * function f($x): int {
+       *   return $x + 1;
+       * }
+       * ```
+       *
+       * In that example, $x has type Tany. This unifies with anything, so adding
+       * one to it is allowed, and returning that as int is allowed.
+       *
+       * In contrast, if $x were annotated as mixed, adding one to that would be
+       * a type error -- mixed is not a subtype of int, and you must be a subtype
+       * of int to take part in addition. (The converse is true though -- int is a
+       * subtype of mixed.) A case analysis would need to be done on $x, via
+       * is_int or similar.
+       *
+       * mixed exists only in the decl_phase phase because it is desugared into ?nonnull
+       * during the localization phase.
+       *)
   | Tnothing : decl_phase ty_
   | Tlike : decl_ty -> decl_phase ty_
-  (* Access to a Pocket Universe Expression or Atom, denoted by
-   * Foo:@Bar or Foo:@Bar:@X.
-   * It might be unresolved at first (e.g. if Foo is a generic variable).
-   * Will be refined to Tpu once typechecking is successful
-   *)
   | Tpu_access : decl_ty * Nast.sid -> decl_phase ty_
+      (** Access to a Pocket Universe Expression or Atom, denoted by
+       * Foo:@Bar or Foo:@Bar:@X.
+       * It might be unresolved at first (e.g. if Foo is a generic variable).
+       * Will be refined to Tpu once typechecking is successful
+       *)
   (*========== Following Types Exist in Both Phases ==========*)
   | Tany : TanySentinel.t -> 'phase ty_
   | Terr
   | Tnonnull
-  (* A dynamic type is a special type which sometimes behaves as if it were a
-   * top type; roughly speaking, where a specific value of a particular type is
-   * expected and that type is dynamic, anything can be given. We call this
-   * behaviour "coercion", in that the types "coerce" to dynamic. In other ways it
-   * behaves like a bottom type; it can be used in any sort of binary expression
-   * or even have object methods called from it. However, it is in fact neither.
-   *
-   * it captures dynamicism within function scope.
-   * See tests in typecheck/dynamic/ for more examples.
-   *)
   | Tdynamic
-  (* Nullable, called "option" in the ML parlance. *)
+      (** A dynamic type is a special type which sometimes behaves as if it were a
+       * top type; roughly speaking, where a specific value of a particular type is
+       * expected and that type is dynamic, anything can be given. We call this
+       * behaviour "coercion", in that the types "coerce" to dynamic. In other ways it
+       * behaves like a bottom type; it can be used in any sort of binary expression
+       * or even have object methods called from it. However, it is in fact neither.
+       *
+       * it captures dynamicism within function scope.
+       * See tests in typecheck/dynamic/ for more examples.
+       *)
   | Toption : 'phase ty -> 'phase ty_
-  (* All the primitive types: int, string, void, etc. *)
+      (** Nullable, called "option" in the ML parlance. *)
   | Tprim : Aast.tprim -> 'phase ty_
-  (* A wrapper around fun_type, which contains the full type information for a
-   * function, method, lambda, etc. Note that lambdas have an additional layer
-   * of indirection before you get to Tfun -- see Tanon below. *)
+      (** All the primitive types: int, string, void, etc. *)
   | Tfun : 'phase ty fun_type -> 'phase ty_
-  (* Tuple, with ordered list of the types of the elements of the tuple. *)
+      (** A wrapper around fun_type, which contains the full type information for a
+       * function, method, lambda, etc. Note that lambdas have an additional layer
+       * of indirection before you get to Tfun -- see Tanon below. *)
   | Ttuple : 'phase ty list -> 'phase ty_
-  (* Whether all fields of this shape are known, types of each of the
-   * known arms.
-   *)
+      (** Tuple, with ordered list of the types of the elements of the tuple. *)
   | Tshape : shape_kind * 'phase shape_field_type Nast.ShapeMap.t -> 'phase ty_
-  (* Access to a Pocket Universe Expression or Atom, denoted by
-   * Foo:@Bar or Foo:@Bar:@X.
-   * It might be unresolved at first (e.g. if Foo is a generic variable).
-   * Will be refined to Tpu once typechecking is successful
-   *)
+      (** Whether all fields of this shape are known, types of each of the
+       * known arms.
+       *)
   | Tvar : Ident.t -> 'phase ty_
-  (* The type of a generic parameter. The constraints on a generic parameter
-   * are accessed through the lenv.tpenv component of the environment, which
-   * is set up when checking the body of a function or method. See uses of
-   * Typing_phase.localize_generic_parameters_with_bounds.
-   *)
   | Tgeneric : string -> 'phase ty_
+      (** The type of a generic parameter. The constraints on a generic parameter
+       * are accessed through the lenv.tpenv component of the environment, which
+       * is set up when checking the body of a function or method. See uses of
+       * Typing_phase.localize_generic_parameters_with_bounds.
+       *)
   (*========== Below Are Types That Cannot Be Declared In User Code ==========*)
-
-  (* The type of an opaque type (e.g. a "newtype" outside of the file where it
-   * was defined) or enum. They are "opaque", which means that they only unify with
-   * themselves. However, it is possible to have a constraint that allows us to
-   * relax this. For example:
-   *
-   *   newtype my_type as int = ...
-   *
-   * Outside of the file where the type was defined, this translates to:
-   *
-   *   Tnewtype ((pos, "my_type"), [], Tprim Tint)
-   *
-   * Which means that my_type is abstract, but is subtype of int as well.
-   *)
   | Tnewtype : string * locl_ty list * locl_ty -> locl_phase ty_
-  (* see dependent_type *)
+      (** The type of an opaque type (e.g. a "newtype" outside of the file where it
+       * was defined) or enum. They are "opaque", which means that they only unify with
+       * themselves. However, it is possible to have a constraint that allows us to
+       * relax this. For example:
+       *
+       *   newtype my_type as int = ...
+       *
+       * Outside of the file where the type was defined, this translates to:
+       *
+       *   Tnewtype ((pos, "my_type"), [], Tprim Tint)
+       *
+       * Which means that my_type is abstract, but is subtype of int as well.
+       *)
   | Tdependent : dependent_type * locl_ty -> locl_phase ty_
-  (* An anonymous function, including the fun arity, and the identifier to
-   * type the body of the function. (The actual closure is stored in
-   * Typing_env.env.genv.anons) *)
+      (** see dependent_type *)
   | Tanon : locl_fun_arity * Ident.t -> locl_phase ty_
-  (* Union type.
-   * The values that are members of this type are the union of the values
-   * that are members of the components of the union.
-   * Some examples (writing | for binary union)
-   *   Tunion []  is the "nothing" type, with no values
-   *   Tunion [int;float] is the same as num
-   *   Tunion [null;t] is the same as Toption t
-   *)
+      (** An anonymous function, including the fun arity, and the identifier to
+       * type the body of the function. (The actual closure is stored in
+       * Typing_env.env.genv.anons) *)
   | Tunion : 'phase ty list -> 'phase ty_
+      (** Union type.
+       * The values that are members of this type are the union of the values
+       * that are members of the components of the union.
+       * Some examples (writing | for binary union)
+       *   Tunion []  is the "nothing" type, with no values
+       *   Tunion [int;float] is the same as num
+       *   Tunion [null;t] is the same as Toption t
+       *)
   | Tintersection : 'phase ty list -> 'phase ty_
-  (* Tobject is an object type compatible with all objects. This type is also
-   * compatible with some string operations (since a class might implement
-   * __toString), but not with string type hints. In a similar way, Tobject
-   * is compatible with some array operations (since a class might implement
-   * ArrayAccess), but not with array type hints.
-   *
-   * Tobject is currently used to type code like:
-   *   ../test/typecheck/return_unknown_class.php
-   *)
   | Tobject : locl_phase ty_
-  (* An instance of a class or interface, ty list are the arguments
-   * If exact=Exact, then this represents instances of *exactly* this class
-   * If exact=Nonexact, this also includes subclasses
-   *)
+      (** Tobject is an object type compatible with all objects. This type is also
+       * compatible with some string operations (since a class might implement
+       * __toString), but not with string type hints. In a similar way, Tobject
+       * is compatible with some array operations (since a class might implement
+       * ArrayAccess), but not with array type hints.
+       *
+       * Tobject is currently used to type code like:
+       *   ../test/typecheck/return_unknown_class.php
+       *)
   | Tclass : Nast.sid * exact * locl_ty list -> locl_phase ty_
-  (* Localized version of Tarray *)
+      (** An instance of a class or interface, ty list are the arguments
+       * If exact=Exact, then this represents instances of *exactly* this class
+       * If exact=Nonexact, this also includes subclasses
+       *)
   | Tarraykind : array_kind -> locl_phase ty_
-  (* Typing of Pocket Universe Expressions
-   * - first parameter is the enclosing class
-   * - second parameter is the name of the Pocket Universe Enumeration
-   * - third parameter is  either Pu_plain (the enumeration as the set of
-   *   all its atoms) or Pu_atom (a specific atom in the enumeration)
-   *)
+      (** Localized version of Tarray *)
   | Tpu : locl_ty * Nast.sid -> locl_phase ty_
-  (* Typing of Pocket Universes type projections
-   * - first parameter is the enclosing class
-   * - second parameter is the name of the Pocket Universe Enumeration
-   * - third parameter is the generic (tvar/tabstract) in place of the
-   *   member name
-   * - the fourth parameter is the name of the type to project
-   *)
+      (** Typing of Pocket Universe Expressions
+       * - first parameter is the enclosing class
+       * - second parameter is the name of the Pocket Universe Enumeration
+       * - third parameter is  either Pu_plain (the enumeration as the set of
+       *   all its atoms) or Pu_atom (a specific atom in the enumeration)
+       *)
   | Tpu_type_access : locl_ty * Nast.sid * locl_ty * Nast.sid -> locl_phase ty_
+      (** Typing of Pocket Universes type projections
+       * - first parameter is the enclosing class
+       * - second parameter is the name of the Pocket Universe Enumeration
+       * - third parameter is the generic (tvar/tabstract) in place of the
+       *   member name
+       * - the fourth parameter is the name of the type to project
+       *)
 
 and constraint_type_ =
   | Thas_member of has_member
-  (* The type of container destructuring via list() or splat `...` *)
   | Tdestructure of destructure
+      (** The type of container destructuring via list() or splat `...` *)
   | TCunion of locl_ty * constraint_type
   | TCintersection of locl_ty * constraint_type
 
@@ -338,26 +337,26 @@ and has_member = {
 }
 
 and destructure = {
-  (* This represents the standard parameters of a function or the fields in a list
-   * destructuring assignment. Example:
-   *
-   * function take(bool $b, float $f = 3.14, arraykey ...$aks): void {}
-   * function f((bool, float, int, string) $tup): void {
-   *   take(...$tup);
-   * }
-   *
-   * corresponds to the subtyping assertion
-   *
-   * (bool, float, int, string) <: splat([#1], [opt#2], ...#3)
-   *)
   d_required: locl_ty list;
-  (* Represents the optional parameters in a function, only used for splats *)
+      (** This represents the standard parameters of a function or the fields in a list
+       * destructuring assignment. Example:
+       *
+       * function take(bool $b, float $f = 3.14, arraykey ...$aks): void {}
+       * function f((bool, float, int, string) $tup): void {
+       *   take(...$tup);
+       * }
+       *
+       * corresponds to the subtyping assertion
+       *
+       * (bool, float, int, string) <: splat([#1], [opt#2], ...#3)
+       *)
   d_optional: locl_ty list;
-  (* Represents a function's variadic parameter, also only used for splats *)
+      (** Represents the optional parameters in a function, only used for splats *)
   d_variadic: locl_ty option;
-  (* list() destructuring allows for partial matches on lists, even when the operation
-   * might throw i.e. list($a) = vec[]; *)
+      (** Represents a function's variadic parameter, also only used for splats *)
   d_kind: destructure_kind;
+      (** list() destructuring allows for partial matches on lists, even when the operation
+       * might throw i.e. list($a) = vec[]; *)
 }
 
 and constraint_type = Reason.t * constraint_type_
@@ -367,18 +366,15 @@ and internal_type =
   | ConstraintType of constraint_type
 
 and array_kind =
-  (* An array declared as a varray. *)
-  | AKvarray of locl_ty
-  (* An array declared as a darray. *)
-  | AKdarray of locl_ty * locl_ty
-  (* An array annotated as a varray_or_darray. *)
+  | AKvarray of locl_ty  (** An array declared as a varray. *)
+  | AKdarray of locl_ty * locl_ty  (** An array declared as a darray. *)
   | AKvarray_or_darray of locl_ty * locl_ty
-  (* This is a type created when we see array() literal *)
-  | AKempty
+      (** An array annotated as a varray_or_darray. *)
+  | AKempty  (** This is a type created when we see array() literal *)
 
 and taccess_type = decl_ty * Nast.sid list
 
-(* represents reactivity of function
+(** represents reactivity of function
    - None corresponds to non-reactive function
    - Some reactivity - to reactive function with specified reactivity flavor
 
@@ -386,8 +382,12 @@ and taccess_type = decl_ty * Nast.sid list
 
  MaybeReactive represents conditional reactivity of function that depends on
    reactivity of function arguments
+
+```
    <<__Rx>>
    function f(<<__MaybeRx>> $g) { ... }
+```
+
    call to function f will be treated as reactive only if $g is reactive
   *)
 and reactivity =
@@ -398,7 +398,7 @@ and reactivity =
   | MaybeReactive of reactivity
   | RxVar of reactivity option
 
-(* The type of a function AND a method.
+(** The type of a function AND a method.
  * A function has a min and max arity because of optional arguments *)
 and 'ty fun_type = {
   ft_is_coroutine: bool;
@@ -407,12 +407,11 @@ and 'ty fun_type = {
   ft_where_constraints: 'ty where_constraint list;
   ft_params: 'ty fun_params;
   ft_ret: 'ty possibly_enforced_ty;
-  (* Carries through the sync/async information from the aast *)
   ft_fun_kind: Ast_defs.fun_kind;
+      (** Carries through the sync/async information from the aast *)
   ft_reactive: reactivity;
   ft_return_disposable: bool;
-  (* mutability of the receiver *)
-  ft_mutability: param_mutability option;
+  ft_mutability: param_mutability option;  (** mutability of the receiver *)
   ft_returns_mutable: bool;
   ft_returns_void_to_rx: bool;
 }
@@ -421,18 +420,17 @@ and decl_fun_type = decl_ty fun_type
 
 and locl_fun_type = locl_ty fun_type
 
-(* Arity information for a fun_type; indicating the minimum number of
+(** Arity information for a fun_type; indicating the minimum number of
  * args expected by the function and the maximum number of args for
  * standard, non-variadic functions or the type of variadic argument taken *)
 and 'ty fun_arity =
-  (* min ; max *)
-  | Fstandard of int * int
-  (* PHP5.6-style ...$args finishes the func declaration.
-     min ; variadic param type *)
+  | Fstandard of int * int  (** min ; max *)
   | Fvariadic of int * 'ty fun_param
-  (* HH-style ... anonymous variadic arg; body presumably uses func_get_args.
-     min ; position of ... *)
+      (** PHP5.6-style ...$args finishes the func declaration.
+          min ; variadic param type *)
   | Fellipsis of int * Pos.t
+      (** HH-style ... anonymous variadic arg; body presumably uses func_get_args.
+          min ; position of ... *)
 
 and decl_fun_arity = decl_ty fun_arity
 
@@ -443,8 +441,8 @@ and param_rx_annotation =
   | Param_rx_if_impl of decl_ty
 
 and 'ty possibly_enforced_ty = {
-  (* True if consumer of this type enforces it at runtime *)
   et_enforced: bool;
+      (** True if consumer of this type enforces it at runtime *)
   et_type: 'ty;
 }
 

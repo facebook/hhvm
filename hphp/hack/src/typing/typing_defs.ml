@@ -14,28 +14,25 @@ type class_elt = {
   ce_abstract: bool;
   ce_final: bool;
   ce_xhp_attr: xhp_attr option;
-  (* This field has different meanings in shallow mode and eager mode:
-   * In shallow mode, true if this method has attribute __Override.
-   * In eager mode, true if this method is originally defined in a trait,
-   * AND has the override attribute, AND the trait does not inherit any
-   * other method of that name. *)
   ce_override: bool;
-  (* true if this static property has attribute __LSB *)
-  ce_lsb: bool;
-  (* true if this method has attribute __MemoizeLSB *)
-  ce_memoizelsb: bool;
-  (* true if this elt arose from require-extends or other mechanisms
-     of hack "synthesizing" methods that were not written by the
-     programmer. The eventual purpose of this is to make sure that
-     elts that *are* written by the programmer take precedence over
-     synthesized elts. *)
+      (** This field has different meanings in shallow mode and eager mode:
+       * In shallow mode, true if this method has attribute __Override.
+       * In eager mode, true if this method is originally defined in a trait,
+       * AND has the override attribute, AND the trait does not inherit any
+       * other method of that name. *)
+  ce_lsb: bool;  (** true if this static property has attribute __LSB *)
+  ce_memoizelsb: bool;  (** true if this method has attribute __MemoizeLSB *)
   ce_synthesized: bool;
+      (** true if this elt arose from require-extends or other mechanisms
+          of hack "synthesizing" methods that were not written by the
+          programmer. The eventual purpose of this is to make sure that
+          elts that *are* written by the programmer take precedence over
+          synthesized elts. *)
   ce_visibility: visibility;
   ce_const: bool;
   ce_lateinit: bool;
   ce_type: decl_ty Lazy.t;
-  (* identifies the class from which this elt originates *)
-  ce_origin: string;
+  ce_origin: string;  (** identifies the class from which this elt originates *)
   ce_deprecated: string option;
   ce_pos: Pos.t Lazy.t;
 }
@@ -53,13 +50,14 @@ and class_const = {
   cc_pos: Pos.t;
   cc_type: decl_ty;
   cc_expr: Nast.expr option;
-  (* identifies the class from which this const originates *)
   cc_origin: string;
+      (** identifies the class from which this const originates *)
 }
 
-(* The position is that of the hint in the `use` / `implements` AST node
+(** The position is that of the hint in the `use` / `implements` AST node
  * that causes a class to have this requirement applied to it. E.g.
  *
+ * ```
  * class Foo {}
  *
  * interface Bar {
@@ -68,22 +66,23 @@ and class_const = {
  *
  * class Baz extends Foo implements Bar { <- position of the `implements`
  * }
+ * ```
  *)
 and requirement = Pos.t * decl_ty
 
 and class_type = {
   tc_need_init: bool;
-  (* Whether the typechecker knows of all (non-interface) ancestors
-   * and thus known all accessible members of this class *)
   tc_members_fully_known: bool;
+      (** Whether the typechecker knows of all (non-interface) ancestors
+       * and thus known all accessible members of this class *)
   tc_abstract: bool;
   tc_final: bool;
   tc_const: bool;
-  (* True when the class is annotated with the __PPL attribute. *)
   tc_ppl: bool;
-  (* When a class is abstract (or in a trait) the initialization of
-   * a protected member can be delayed *)
+      (** True when the class is annotated with the __PPL attribute. *)
   tc_deferred_init_members: SSet.t;
+      (** When a class is abstract (or in a trait) the initialization of
+       * a protected member can be delayed *)
   tc_kind: Ast_defs.class_kind;
   tc_is_xhp: bool;
   tc_has_xhp_keyword: bool;
@@ -99,14 +98,13 @@ and class_type = {
   tc_sprops: class_elt SMap.t;
   tc_methods: class_elt SMap.t;
   tc_smethods: class_elt SMap.t;
-  (* the bool represents final constructor or __ConsistentConstruct *)
   tc_construct: class_elt option * consistent_kind;
-  (* This includes all the classes, interfaces and traits this class is
-   * using. *)
+      (** the consistent_kind represents final constructor or __ConsistentConstruct *)
   tc_ancestors: decl_ty SMap.t;
+      (** This includes all the classes, interfaces and traits this class is
+       * using. *)
   tc_req_ancestors: requirement list;
-  tc_req_ancestors_extends: SSet.t;
-  (* the extends of req_ancestors *)
+  tc_req_ancestors_extends: SSet.t;  (** the extends of req_ancestors *)
   tc_extends: SSet.t;
   tc_enum_type: enum_type option;
   tc_sealed_whitelist: SSet.t option;
@@ -182,36 +180,36 @@ type phase_ty =
   | LoclTy of locl_ty
 
 type deserialization_error =
-  (* The type was valid, but some component thereof was a decl_ty when we
-  expected a locl_phase ty, or vice versa. *)
   | Wrong_phase of string
-  (* The specific type or some component thereof is not one that we support
-  deserializing, usually because not enough information was serialized to be
-  able to deserialize it again. For example, lambda types (`Tanon`) contain a
-  reference to an identifier (`Ident.t`), which is not serialized. *)
+      (** The type was valid, but some component thereof was a decl_ty when we
+          expected a locl_phase ty, or vice versa. *)
   | Not_supported of string
-  (* The input JSON was invalid for some reason. *)
+      (** The specific type or some component thereof is not one that we support
+          deserializing, usually because not enough information was serialized to be
+          able to deserialize it again. For example, lambda types (`Tanon`) contain a
+          reference to an identifier (`Ident.t`), which is not serialized. *)
   | Deserialization_error of string
+      (** The input JSON was invalid for some reason. *)
 
-(* Tracks information about how a type was expanded *)
+(** Tracks information about how a type was expanded *)
 type expand_env = {
-  (* A list of the type defs and type access we have expanded thus far. Used
-   * to prevent entering into a cycle when expanding these types
-   *)
   type_expansions: (Pos.t * string) list;
+      (** A list of the type defs and type access we have expanded thus far. Used
+       * to prevent entering into a cycle when expanding these types
+       *)
   substs: locl_ty SMap.t;
   this_ty: locl_ty;
-  (* The class that the type is extracted from. Used for creating expression
-   * dependent types for type constants.
-   *)
   from_class: Nast.class_id_ option;
+      (** The class that the type is extracted from. Used for creating expression
+       * dependent types for type constants.
+       *)
   quiet: bool;
   on_error: Errors.typing_error_callback;
       (** If what we are localizing or expanding comes from the decl heap for
-  example, then some errors must be silenced since they must have already been
-  raised when first typechecking whatever we have fetched from the heap.
-  Setting {!quiet} to true will silence those errors.
-  T54121530 aims at offering a better mechanism. *)
+          example, then some errors must be silenced since they must have already been
+          raised when first typechecking whatever we have fetched from the heap.
+          Setting {!quiet} to true will silence those errors.
+          T54121530 aims at offering a better mechanism. *)
 }
 
 let get_var t =

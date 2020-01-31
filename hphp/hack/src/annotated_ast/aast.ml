@@ -9,7 +9,7 @@
 
 include Aast_defs
 
-(* Aast.program represents the top-level definitions in a Hack program.
+(** Aast.program represents the top-level definitions in a Hack program.
  ex: Expression annotation type (when typechecking, the inferred dtype)
  fb: Function body tag (e.g. has naming occurred)
  en: Environment (tracking state inside functions and classes)
@@ -128,11 +128,11 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
       * (('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr) list
   | Varray of 'hi targ option * ('ex, 'fb, 'en, 'hi) expr list
   | Shape of (Ast_defs.shape_field_name * ('ex, 'fb, 'en, 'hi) expr) list
-  (* TODO: T38184446 Consolidate collections in AAST *)
   | ValCollection of vc_kind * 'hi targ option * ('ex, 'fb, 'en, 'hi) expr list
-  (* TODO: T38184446 Consolidate collections in AAST *)
+      (** TODO: T38184446 Consolidate collections in AAST *)
   | KeyValCollection of
       kvc_kind * ('hi targ * 'hi targ) option * ('ex, 'fb, 'en, 'hi) field list
+      (** TODO: T38184446 Consolidate collections in AAST *)
   | Null
   | This
   | True
@@ -174,8 +174,8 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
   | Unop of Ast_defs.uop * ('ex, 'fb, 'en, 'hi) expr
   | Binop of
       Ast_defs.bop * ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr
-      (** The ID of the $$ that is implicitly declared by this pipe. *)
   | Pipe of lid * ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr
+      (** The lid is the ID of the $$ that is implicitly declared by this pipe. *)
   | Eif of
       ('ex, 'fb, 'en, 'hi) expr
       * ('ex, 'fb, 'en, 'hi) expr option
@@ -200,17 +200,17 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
       * ('ex, 'fb, 'en, 'hi) expr list
   | Callconv of Ast_defs.param_kind * ('ex, 'fb, 'en, 'hi) expr
   | Import of import_flavor * ('ex, 'fb, 'en, 'hi) expr
-  (* TODO: T38184446 Consolidate collections in AAST *)
   | Collection of
       sid * 'hi collection_targ option * ('ex, 'fb, 'en, 'hi) afield list
+      (** TODO: T38184446 Consolidate collections in AAST *)
   | BracedExpr of ('ex, 'fb, 'en, 'hi) expr
   | ParenthesizedExpr of ('ex, 'fb, 'en, 'hi) expr
   (* None of these constructors exist in the AST *)
   | Lplaceholder of pos
   | Fun_id of sid
   | Method_id of ('ex, 'fb, 'en, 'hi) expr * pstring
-  (* meth_caller('Class name', 'method name') *)
   | Method_caller of sid * pstring
+      (** meth_caller('Class name', 'method name') *)
   | Smethod_id of sid * pstring
   | Pair of ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr
   | Assert of ('ex, 'fb, 'en, 'hi) assert_expr
@@ -262,13 +262,14 @@ and ('ex, 'fb, 'en, 'hi) fun_param = {
   param_visibility: visibility option;
 }
 
+(** does function take varying number of args? *)
 and ('ex, 'fb, 'en, 'hi) fun_variadicity =
-  (* does function take varying number of args? *)
-  | FVvariadicArg of ('ex, 'fb, 'en, 'hi) fun_param (* PHP5.6 ...$args finishes the func declaration *)
-  | FVellipsis of pos (* HH ... finishes the declaration; deprecate for ...$args? *)
-  | FVnonVariadic
+  | FVvariadicArg of ('ex, 'fb, 'en, 'hi) fun_param
+      (** PHP5.6 ...$args finishes the func declaration *)
+  | FVellipsis of pos
+      (** HH ... finishes the declaration; deprecate for ...$args? *)
+  | FVnonVariadic  (** standard non variadic function *)
 
-(* standard non variadic function *)
 and ('ex, 'fb, 'en, 'hi) fun_ = {
   f_span: pos;
   f_annotation: 'en;
@@ -284,7 +285,7 @@ and ('ex, 'fb, 'en, 'hi) fun_ = {
   f_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
   f_file_attributes: ('ex, 'fb, 'en, 'hi) file_attribute list;
   f_external: bool;
-  (* true if this declaration has no body because it is an
+      (** true if this declaration has no body because it is an
                          external function declaration (e.g. from an HHI file)*)
   f_namespace: nsenv;
   f_doc_comment: string option;
@@ -304,12 +305,12 @@ and ('ex, 'fb, 'en, 'hi) func_body = {
   fb_annotation: 'fb;
 }
 
-(* A type annotation is two things:
+(** A type annotation is two things:
   - the localized hint, or if the hint is missing, the inferred type
   - The typehint associated to this expression if it exists *)
 and 'hi type_hint = 'hi * type_hint_
 
-(* Explicit type argument to function, constructor, or collection literal.
+(** Explicit type argument to function, constructor, or collection literal.
  * 'hi = unit in NAST
  * 'hi = Typing_defs.(locl ty) in TAST,
  * and is used to record inferred type arguments, with wildcard hint.
@@ -321,7 +322,7 @@ and type_hint_ = hint option
 and ('ex, 'fb, 'en, 'hi) user_attribute = {
   ua_name: sid;
   ua_params: ('ex, 'fb, 'en, 'hi) expr list;
-      (* user attributes are restricted to scalar values *)
+      (** user attributes are restricted to scalar values *)
 }
 
 and ('ex, 'fb, 'en, 'hi) file_attribute = {
@@ -339,12 +340,12 @@ and ('ex, 'fb, 'en, 'hi) tparam = {
 
 and ('ex, 'fb, 'en, 'hi) class_tparams = {
   c_tparam_list: ('ex, 'fb, 'en, 'hi) tparam list;
-  (* TODO: remove this and use tp_constraints *)
-  (* keeping around the ast version of the constraint only
-   * for the purposes of Naming.class_meth_bodies *)
   c_tparam_constraints:
     (reify_kind * (Ast_defs.constraint_kind * hint) list) SMap.t;
       [@visitors.opaque]
+      (** keeping around the ast version of the constraint only
+       * for the purposes of Naming.class_meth_bodies
+       * TODO: remove this and use tp_constraints *)
 }
 
 and use_as_alias = sid option * pstring * sid option * use_as_visibility list
@@ -362,8 +363,8 @@ and ('ex, 'fb, 'en, 'hi) class_ = {
   c_has_xhp_keyword: bool;
   c_kind: Ast_defs.class_kind;
   c_name: sid;
-  (* The type parameters of a class A<T> (T is the parameter) *)
   c_tparams: ('ex, 'fb, 'en, 'hi) class_tparams;
+      (** The type parameters of a class A<T> (T is the parameter) *)
   c_extends: hint list;
   c_uses: hint list;
   c_use_as_alias: use_as_alias list;
@@ -414,11 +415,11 @@ and ca_type =
   | CA_hint of hint
   | CA_enum of string list
 
-(* expr = None indicates an abstract const *)
 and ('ex, 'fb, 'en, 'hi) class_const = {
   cc_type: hint option;
   cc_id: sid;
   cc_expr: ('ex, 'fb, 'en, 'hi) expr option;
+      (** expr = None indicates an abstract const *)
   cc_doc_comment: string option;
 }
 
@@ -427,7 +428,7 @@ and typeconst_abstract_kind =
   | TCPartiallyAbstract
   | TCConcrete
 
-(* This represents a type const definition. If a type const is abstract then
+(** This represents a type const definition. If a type const is abstract then
  * then the type hint acts as a constraint. Any concrete definition of the
  * type const must satisfy the constraint.
  *
@@ -477,7 +478,8 @@ and ('ex, 'fb, 'en, 'hi) method_ = {
   m_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
   m_ret: 'hi type_hint;
   m_external: bool;
-  (* see f_external above for context *)
+      (** true if this declaration has no body because it is an external method
+          declaration (e.g. from an HHI file) *)
   m_doc_comment: string option;
 }
 
@@ -534,7 +536,9 @@ and ('ex, 'fb, 'en, 'hi) record_def = {
   rd_doc_comment: string option;
 }
 
-(* Pocket Universe Enumeration, e.g.
+(** Pocket Universe Enumeration, e.g.
+
+```
    enum Foo { // pu_name
      // pu_case_types
      case type T0;
@@ -557,6 +561,7 @@ and ('ex, 'fb, 'en, 'hi) record_def = {
      :@B( ... )
      ...
    }
+```
 *)
 and ('ex, 'fb, 'en, 'hi) pu_enum = {
   pu_annotation: 'en;

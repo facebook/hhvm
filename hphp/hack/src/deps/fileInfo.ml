@@ -25,11 +25,11 @@ open Prim_defs
 (*****************************************************************************)
 
 type mode =
-  | Mphp (* Do the best you can to support legacy PHP *)
-  | Mdecl (* just declare signatures, don't check anything *)
-  | Mstrict (* check everything! *)
-  | Mpartial (* Don't fail if you see a function/class you don't know *)
-  | Mexperimental (* Strict mode + experimental features *)
+  | Mphp  (** Do the best you can to support legacy PHP *)
+  | Mdecl  (** just declare signatures, don't check anything *)
+  | Mstrict  (** check everything! *)
+  | Mpartial  (** Don't fail if you see a function/class you don't know *)
+  | Mexperimental  (** Strict mode + experimental features *)
 [@@deriving eq, show, enum]
 
 let parse_mode = function
@@ -69,12 +69,9 @@ let pp_mode fmt mode =
   | Mexperimental -> "Mexperimental"
 
 (*****************************************************************************)
-(* We define two types of positions establishing the location of a given name:
- * a Full position contains the exact position of a name in a file, and a
- * File position contains just the file and the type of toplevel entity,
- * allowing us to lazily retrieve the name's exact location if necessary.
- *)
+(* Positions of names in a file *)
 (*****************************************************************************)
+
 type name_type =
   | Fun
   | Class
@@ -83,6 +80,11 @@ type name_type =
   | Const
 [@@deriving eq, show]
 
+(** We define two types of positions establishing the location of a given name:
+ * a Full position contains the exact position of a name in a file, and a
+ * File position contains just the file and the type of toplevel entity,
+ * allowing us to lazily retrieve the name's exact location if necessary.
+ *)
 type pos =
   | Full of Pos.t
   | File of name_type * Relative_path.t
@@ -90,14 +92,13 @@ type pos =
 
 type id = pos * string [@@deriving eq, show]
 
-(* The hash value of a decl AST.
-  We use this to see if two versions of a file are "similar", i.e. their
-  declarations only differ by position information.  *)
-
 (*****************************************************************************)
 (* The record produced by the parsing phase. *)
 (*****************************************************************************)
 
+(** The hash value of a decl AST.
+  We use this to see if two versions of a file are "similar", i.e. their
+  declarations only differ by position information.  *)
 type hash_type = OpaqueDigest.t option [@@deriving eq]
 
 let pp_hash_type fmt hash =
@@ -105,6 +106,7 @@ let pp_hash_type fmt hash =
   | None -> Format.fprintf fmt "None"
   | Some hash -> Format.fprintf fmt "Some (%s)" (OpaqueDigest.to_hex hash)
 
+(** The record produced by the parsing phase. *)
 type t = {
   hash: hash_type;
   file_mode: mode option;
@@ -113,7 +115,8 @@ type t = {
   record_defs: id list;
   typedefs: id list;
   consts: id list;
-  comments: (Pos.t * comment) list option; (* None if loaded from saved state *)
+  comments: (Pos.t * comment) list option;
+      (** None if loaded from saved state *)
 }
 [@@deriving eq, show]
 
@@ -139,6 +142,7 @@ let get_pos_filename = function
 (* The simplified record used after parsing. *)
 (*****************************************************************************)
 
+(** The simplified record used after parsing. *)
 type names = {
   n_funs: SSet.t;
   n_classes: SSet.t;
@@ -147,7 +151,7 @@ type names = {
   n_consts: SSet.t;
 }
 
-(* Data structure stored in the saved state *)
+(** Data structure stored in the saved state *)
 type saved = {
   s_names: names;
   s_hash: OpaqueDigest.t option;

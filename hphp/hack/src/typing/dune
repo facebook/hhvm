@@ -228,6 +228,7 @@
     heap_global_storage
     procs_bucket
     server_monitor
+    counters
     typing
     typing_defs
     typing_service_api

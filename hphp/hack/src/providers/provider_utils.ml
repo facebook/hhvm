@@ -157,10 +157,7 @@ let compute_tast_and_errors_unquarantined_internal
   | (mode, _, _) ->
     (* prepare logging *)
     Deferred_decl.reset ~enable:false ~threshold_opt:None;
-    (* TODO(ljw): reset tally *)
-    (* let prev_decl_tally_state =
-      Decl_tally.reset ~enable:true ~deferment_miss_threshold_opt:None
-    in *)
+    let prev_tally_state = Counters.reset ~enable:true in
     begin
       match ctx.Provider_context.backend with
       | Provider_backend.Local_memory { decl_cache; _ } ->
@@ -197,8 +194,7 @@ let compute_tast_and_errors_unquarantined_internal
     (* TODO(ljw): *)
     let decl_cache_misses_time = 0. in
     let time_decl_and_typecheck = Unix.gettimeofday () -. t in
-    (* TODO(ljw): restore tally state *)
-    (* Decl_tally.restore_state prev_decl_tally_state; *)
+    Counters.restore_state prev_tally_state;
     (* Sometimes we're called with a FileName that doesn't exist on disk. *)
     let filesize_opt =
       match entry.Provider_context.file_input with

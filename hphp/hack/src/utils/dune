@@ -84,6 +84,15 @@
     mutable_accumulator))
 
 (library
+  (name counters)
+  (wrapped false)
+  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)) ; See T41851208
+  (modules
+    counters)
+  (libraries
+    utils_core))
+
+(library
   (name relative_path)
   (wrapped false)
   (modules

@@ -212,11 +212,12 @@ let process_file
     (opts : GlobalOptions.t)
     (errors : Errors.t)
     (file : check_file_computation) : process_file_results =
+  let fn = file.path in
+  let ast = Ast_provider.get_ast ~full:true fn in
   Deferred_decl.reset
     ~enable:(should_enable_deferring opts file)
     ~threshold_opt:(GlobalOptions.tco_defer_class_declaration_threshold opts);
-  let fn = file.path in
-  let ast = Ast_provider.get_ast ~full:true fn in
+  let prev_tally_state = Counters.reset ~enable:true in
   let (funs, classes, record_defs, typedefs, gconsts) = Nast.get_defs ast in
   let opts =
     {
@@ -258,6 +259,7 @@ let process_file
     let decl_cache_misses = 0 in
     (* TODO(ljw): *)
     let decl_cache_misses_time = 0. in
+    Counters.restore_state prev_tally_state;
     match deferred_files with
     | [] ->
       {

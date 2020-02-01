@@ -9,4 +9,7 @@ include = ["lib.rs", "retry.rs"]
 
 [lib]
 path = "lib.rs"
+
+[dependencies]
+thiserror = "1.0"
 # @end of Signature

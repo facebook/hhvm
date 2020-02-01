@@ -33,10 +33,10 @@ impl<W: fmt::Write> Write for W {
     }
 }
 
-pub struct IoWrite(Box<dyn io::Write>);
+pub struct IoWrite(Box<dyn io::Write + Send>);
 
 impl IoWrite {
-    pub fn new(w: impl io::Write + 'static) -> Self {
+    pub fn new(w: impl io::Write + 'static + Send) -> Self {
         Self(Box::new(w))
     }
 

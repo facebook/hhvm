@@ -21,6 +21,7 @@ ocamlrep = { path = "../../../ocamlrep" }
 options = { path = "../options" }
 oxidized = { path = "../../../oxidized" }
 parser_core_types = { path = "../../../parser/cargo/core_types" }
+stack_limit = { path = "../../../utils/stack_limit" }
 anyhow = "1.0"
 bitflags = "1.2"
 itertools = "0.8"

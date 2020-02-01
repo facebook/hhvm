@@ -17,8 +17,9 @@ hhbc_hhas_rust = { path = "../../hhbc/cargo/hhbc_hhas" }
 multifile_rust = { path = "../../utils/multifile" }
 options = { path = "../../hhbc/cargo/options" }
 oxidized = { path = "../../oxidized" }
+stack_limit = { path = "../../utils/stack_limit" }
 anyhow = "1.0"
+atty = "0.2"
 itertools = "0.8"
 structopt = "0.3"
-walkdir = "2.2"
 # @end of Signature

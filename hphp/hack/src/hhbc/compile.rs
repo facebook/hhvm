@@ -3,13 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 #![allow(unused_variables)]
-/* extern crate bitflags; */
 
 use aast_parser::{
     rust_aast_parser_types::{Env as AastEnv, Result as AastResult},
     AastParser, Error as AastError,
 };
 use anyhow;
+use bitflags::bitflags;
 use emit_program_rust::{emit_program, FromAstFlags};
 use hhas_program_rust::HhasProgram;
 use hhbc_hhas_rust::{print_program, Write};
@@ -22,8 +22,7 @@ use oxidized::{
     relative_path::RelativePath,
 };
 use parser_core_types::{indexed_source_text::IndexedSourceText, source_text::SourceText};
-
-use bitflags::bitflags;
+use stack_limit::StackLimit;
 
 /// Common input needed for compilation.  Extra care is taken
 /// so that everything is easily serializable at the FFI boundary
@@ -69,7 +68,12 @@ pub fn is_ignored_duration(dt: &f64) -> bool {
     dt.is_nan()
 }
 
-pub fn from_text<W>(text: &[u8], env: Env, writer: &mut W) -> anyhow::Result<Profile>
+pub fn from_text<W>(
+    env: Env,
+    stack_limit: &StackLimit,
+    writer: &mut W,
+    text: &[u8],
+) -> anyhow::Result<Profile>
 where
     W: Write,
     W::Error: Send + Sync + 'static, // required by anyhow::Error
@@ -85,7 +89,7 @@ where
     };
 
     let ast = profile(log_extern_compiler_perf, &mut ret.parsing_t, || {
-        parse_file(&opts, &env.filepath, text)
+        parse_file(&opts, stack_limit, &env.filepath, text)
     });
 
     let (program, codegen_t) = match ast {
@@ -183,6 +187,7 @@ fn create_parser_options(opts: &Options) -> ParserOptions {
 /// - Right((ast, is_hh_file))
 fn parse_file(
     opts: &Options,
+    stack_limit: &StackLimit,
     filepath: &RelativePath,
     text: &[u8],
 ) -> Either<(Pos, String, bool), (Tast::Program, bool)> {
@@ -194,7 +199,7 @@ fn parse_file(
     aast_env.parser_options = create_parser_options(opts);
     let source_text = SourceText::make(RcOc::new(filepath.clone()), text);
     let indexed_source_text = IndexedSourceText::new(source_text);
-    let ast_result = AastParser::from_text(&aast_env, &indexed_source_text, None);
+    let ast_result = AastParser::from_text(&aast_env, &indexed_source_text, Some(stack_limit));
     match ast_result {
         Err(AastError::Other(msg)) => Left((Pos::make_none(), msg, false)),
         Err(AastError::ParserFatal(syntax_error, pos)) => {

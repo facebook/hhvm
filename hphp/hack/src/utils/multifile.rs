@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use anyhow::{anyhow, Result};
-use itertools::Either::{self, *};
+use itertools::Either::*;
 use lazy_static::lazy_static;
 use regex::bytes::Regex;
 use std::{
@@ -14,23 +14,31 @@ use std::{
     str,
 };
 
+// Content type in return type can be improved to
+//     impl AsRef<[u8]> + Into<Vec<u8>> + 't
+// instead of Vec<u8>. After Either implements,
+//     impl<L: Into<T>, R: Into<T>> Into<T> for Either<L, R> { .. }
 pub fn to_files<'p, 't>(
     path: &'p Path,
-    content: &'t [u8],
-) -> Result<Vec<(impl AsRef<Path> + 'p, impl AsRef<[u8]> + 't)>> {
+    content: impl AsRef<[u8]> + Into<Vec<u8>> + 't,
+) -> Result<Vec<(impl AsRef<Path> + 'p, Vec<u8>)>> {
     lazy_static! {
         static ref DELIM: Regex = Regex::new(r#"(?m)^////\s*(.*)\n"#).unwrap();
         static ref DIRECTORY: Regex =
             Regex::new(r#"^// @directory \s*(\S+)\s*(?:@file\s*(\S+))?\n"#).unwrap();
     }
     let delims: Vec<&[u8]> = DELIM
-        .captures_iter(content)
+        .captures_iter(content.as_ref())
         .map(|c| c.get(1).unwrap().as_bytes())
         .collect();
     if delims.len() > 0 {
-        let mut contents: Vec<Either<&[u8], _>> = DELIM.split(content).skip(1).map(Left).collect();
+        let mut contents: Vec<Vec<u8>> = DELIM
+            .split(content.as_ref())
+            .skip(1)
+            .map(|c| c.into())
+            .collect();
         if contents.len() + 1 == delims.len() {
-            contents.push(Left(b""));
+            contents.push(vec![]);
         } else if contents.len() != delims.len() {
             return Err(
                 anyhow! {"delims len {} and content len {} mismatch.", delims.len(), contents.len()},
@@ -44,7 +52,7 @@ pub fn to_files<'p, 't>(
             .map(|f| Right(PathBuf::from(format!("{}--{}", path.display(), f))))
             .zip(contents.into_iter())
             .collect())
-    } else if let Some(captures) = DIRECTORY.captures(content) {
+    } else if let Some(captures) = DIRECTORY.captures(content.as_ref()) {
         let dir = str::from_utf8(&captures[1])?;
         let file = captures.get(2).map_or_else(
             || path.file_name().unwrap_or(OsStr::new("")),
@@ -52,10 +60,10 @@ pub fn to_files<'p, 't>(
         );
         let mut newpath = PathBuf::from(dir);
         newpath.push(file);
-        let content = Right(DIRECTORY.replace(content, &b""[..]));
-        Ok(vec![(Right(newpath), content)])
+        let content = DIRECTORY.replace(content.as_ref(), &b""[..]);
+        Ok(vec![(Right(newpath), content.into())])
     } else {
-        Ok(vec![(Left(path), Left(content))])
+        Ok(vec![(Left(path), content.into())])
     }
 }
 
@@ -73,13 +81,13 @@ mod tests {
 a
 ////  file2.php
 b";
-        let r = to_files(&p, c).unwrap();
+        let r = to_files(&p, &c[..]).unwrap();
         assert_eq!(r.len(), 2);
         assert_eq!(r[0].0.as_ref(), &PathBuf::from("test.php--file1.php"));
         assert_eq!(r[1].0.as_ref(), &PathBuf::from("test.php--file2.php"));
 
-        assert_eq!(r[0].1.as_ref(), b"a\n");
-        assert_eq!(r[1].1.as_ref(), b"b");
+        assert_eq!(&r[0].1, b"a\n");
+        assert_eq!(&r[1].1, b"b");
     }
 
     #[test]
@@ -90,13 +98,13 @@ b";
 a
 ////file2.php
 ";
-        let r = to_files(&p, c).unwrap();
+        let r = to_files(&p, &c[..]).unwrap();
         assert_eq!(r.len(), 2);
         assert_eq!(r[0].0.as_ref(), &PathBuf::from("test.php--file1.php"));
         assert_eq!(r[1].0.as_ref(), &PathBuf::from("test.php--file2.php"));
 
-        assert_eq!(r[0].1.as_ref(), b"a\n");
-        assert_eq!(r[1].1.as_ref(), b"");
+        assert_eq!(&r[0].1, b"a\n");
+        assert_eq!(&r[1].1, b"");
     }
 
     #[test]
@@ -107,13 +115,13 @@ a
 ////  file2.php
 a
 ";
-        let r = to_files(&p, c).unwrap();
+        let r = to_files(&p, &c[..]).unwrap();
         assert_eq!(r.len(), 2);
         assert_eq!(r[0].0.as_ref(), &PathBuf::from("test.php--file1.php"));
         assert_eq!(r[1].0.as_ref(), &PathBuf::from("test.php--file2.php"));
 
-        assert_eq!(r[0].1.as_ref(), b"");
-        assert_eq!(r[1].1.as_ref(), b"a\n");
+        assert_eq!(&r[0].1, b"");
+        assert_eq!(&r[1].1, b"a\n");
     }
 
     #[test]
@@ -121,11 +129,11 @@ a
         let p = PathBuf::from("test.php");
         let c = b"// @directory a/b/c
 ";
-        let r = to_files(&p, c).unwrap();
+        let r = to_files(&p, &c[..]).unwrap();
         assert_eq!(r.len(), 1);
         assert_eq!(r[0].0.as_ref(), &PathBuf::from("a/b/c/test.php"));
 
-        assert_eq!(r[0].1.as_ref(), b"");
+        assert_eq!(&r[0].1, b"");
     }
 
     #[test]
@@ -134,11 +142,11 @@ a
         let c = b"// @directory a/b/c
 a
 ";
-        let r = to_files(&p, c).unwrap();
+        let r = to_files(&p, &c[..]).unwrap();
         assert_eq!(r.len(), 1);
         assert_eq!(r[0].0.as_ref(), &PathBuf::from("a/b/c/test.php"));
 
-        assert_eq!(r[0].1.as_ref(), b"a\n");
+        assert_eq!(&r[0].1, b"a\n");
     }
 
     #[test]
@@ -147,20 +155,20 @@ a
         let c = b"// @directory a/b/c @file f.php
 a
 ";
-        let r = to_files(&p, c).unwrap();
+        let r = to_files(&p, &c[..]).unwrap();
         assert_eq!(r.len(), 1);
         assert_eq!(r[0].0.as_ref(), &PathBuf::from("a/b/c/f.php"));
 
-        assert_eq!(r[0].1.as_ref(), b"a\n");
+        assert_eq!(&r[0].1, b"a\n");
     }
 
     #[test]
     fn normal_file() {
         let p = PathBuf::from("test.php");
         let c = b"a";
-        let r = to_files(&p, c).unwrap();
+        let r = to_files(&p, &c[..]).unwrap();
         assert_eq!(r.len(), 1);
         assert_eq!(r[0].0.as_ref(), &PathBuf::from("test.php"));
-        assert_eq!(r[0].1.as_ref(), b"a");
+        assert_eq!(&r[0].1, b"a");
     }
 }

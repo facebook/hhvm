@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use super::{StackLimit, GI, KI, MI};
+use thiserror::Error;
 
 use std::fmt;
 
@@ -139,7 +140,7 @@ pub fn hhvm_stack_slack(_stack_size: usize) -> usize {
     MI
 }
 
-#[derive(Debug)]
+#[derive(Error, Debug)]
 pub struct JobFailed {
     pub max_stack_size_tried: usize,
 }

@@ -193,7 +193,12 @@ let type_check
     in
     let hs = SharedMem.heap_size () in
     Hh_logger.log "Heap size: %d" hs;
-    HackEventLogger.type_check_end telemetry count count t;
+    HackEventLogger.type_check_end
+      telemetry
+      ~started_count:count
+      ~count
+      ~experiments:genv.local_config.ServerLocalConfig.experiments
+      ~start_t:t;
     let env =
       {
         env with

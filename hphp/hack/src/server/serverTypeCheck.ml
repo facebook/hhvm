@@ -1379,9 +1379,10 @@ functor
 
       HackEventLogger.type_check_end
         telemetry
-        to_recheck_count
-        total_rechecked_count
-        t;
+        ~started_count:to_recheck_count
+        ~count:total_rechecked_count
+        ~experiments:genv.local_config.ServerLocalConfig.experiments
+        ~start_t:t;
       let logstring =
         Printf.sprintf "Typechecked %d files" total_rechecked_count
       in

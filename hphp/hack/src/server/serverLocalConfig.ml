@@ -12,6 +12,9 @@ open Hh_core
 
 type t = {
   min_log_level: Hh_logger.Level.t;
+  (* the list of experiments from the experiments config *)
+  experiments: string list;
+  (* a free-form diagnostic string *)
   experiments_config_meta: string;
   use_watchman: bool;
   watchman_init_timeout: int;
@@ -147,6 +150,7 @@ and remote_type_check = {
 let default =
   {
     min_log_level = Hh_logger.Level.Info;
+    experiments = [];
     experiments_config_meta = "";
     use_watchman = false;
     (* Buck and hgwatchman use a 10 second timeout too *)
@@ -377,6 +381,13 @@ let load_ fn ~silent ~current_version overrides =
   let config = Config_file.parse_local_config ~silent fn in
   let (experiments_config_meta, config) =
     apply_overrides ~silent ~current_version ~config ~overrides
+  in
+  let experiments =
+    string_list
+      "experiments"
+      ~delim:(Str.regexp ",")
+      ~default:default.experiments
+      config
   in
   let min_log_level =
     match
@@ -680,6 +691,7 @@ let load_ fn ~silent ~current_version overrides =
   in
   {
     min_log_level;
+    experiments;
     experiments_config_meta;
     use_watchman;
     watchman_init_timeout;

@@ -248,10 +248,10 @@ class A {
   public static CondEnum1 $s50 = 181;
   public static Traversable $s51 = vec[];
   public static Traversable $s52 = dict[];
-  public static Traversable $s53 = [];
+  public static Traversable $s53 = varray[];
   public static Alias12 $s54 = vec[];
   public static Alias12 $s55 = dict[];
-  public static Alias12 $s56 = [];
+  public static Alias12 $s56 = varray[];
   public static Alias12 $s57 = null;
 
   public static int $s58 = INTCONST;

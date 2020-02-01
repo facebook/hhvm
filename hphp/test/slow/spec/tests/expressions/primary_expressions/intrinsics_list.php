@@ -89,7 +89,7 @@ var_dump(isset($v));    // FALSE
 
 echo "--------- test with mixed array -------------\n";
 
-$v = list($min, $max, $avg) = [10, "a" => 20, 30, "b" => 40, 50];
+$v = list($min, $max, $avg) = darray[0 => 10, "a" => 20, 1 => 30, "b" => 40, 2 => 50];
 echo "\$min: $min, \$max: $max, \$avg: $avg\n";
 print_r($v);
 

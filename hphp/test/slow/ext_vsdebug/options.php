@@ -11,7 +11,7 @@ function skipEvents() {
 }
 <<__EntryPoint>> function main(): void {
 $path = __FILE__ . ".test";
-$testProcess = vsDebugLaunch($path, true, []);
+$testProcess = vsDebugLaunch($path, true, varray[]);
 
 $msg = json_decode(getNextVsDebugMessage(), true);
 checkObjEqualRecursively($msg, darray[

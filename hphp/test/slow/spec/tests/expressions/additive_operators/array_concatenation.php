@@ -48,8 +48,8 @@ NULL   + [1, 5 => FALSE, "red"];
 ///*
 // show that a new array is created and that the operand-arrays are unchanged
 
-$a1 = [1, 5 => FALSE, "red"];   // [0], [5], [6]
-$a2 = [4 => -5, 1.23];          // [4], [5]
+$a1 = darray[0 => 1, 5 => FALSE, 6 => "red"];   // [0], [5], [6]
+$a2 = darray[4 => -5, 5 => 1.23];               // [4], [5]
 
 $a3 = $a1 + $a2;    // [0], [5], [6], [4]
 var_dump($a3);

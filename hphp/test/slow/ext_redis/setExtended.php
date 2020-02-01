@@ -20,13 +20,13 @@ var_dump($r->set('test3', '5', varray['xx'])); // true
 var_dump($r->set('test4', '6', varray['xx'])); // false
 
 // true if not exist with expiration
-var_dump($r->set('test4', '7', ['nx', 'ex' => 5])); // true
+var_dump($r->set('test4', '7', darray[0 => 'nx', 'ex' => 5])); // true
 sleep(6);
 var_dump($r->get('test4')); // null
 
 // true if not exist with expiration
 var_dump($r->set('test5', '8')); // true
-var_dump($r->set('test5', '9', ['xx', 'ex' => 5])); // true
+var_dump($r->set('test5', '9', darray[0 => 'xx', 'ex' => 5])); // true
 sleep(6);
 var_dump($r->get('test5')); // null
 

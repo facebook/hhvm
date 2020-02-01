@@ -156,7 +156,7 @@ function test() {
     varray[
       // the serializations for these 2 differ by the position of 1 STOP byte
       varray[darray[1 => 1]],
-      varray[[], 1],
+      varray[darray[], 1],
     ]
   );
 

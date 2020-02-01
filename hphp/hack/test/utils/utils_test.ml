@@ -96,6 +96,85 @@ let test_strip_namespace () =
     "Strip xhp should leave unchanged normal strings";
   true
 
+let test_telemetry_test () =
+  let sub_telemetry =
+    Telemetry.create ()
+    |> Telemetry.int_ ~key:"a" ~value:15
+    |> Telemetry.int_opt ~key:"b" ~value:None
+    |> Telemetry.string_ ~key:"c" ~value:"oops"
+  in
+  let telemetry =
+    Telemetry.create ()
+    |> Telemetry.int_ ~key:"d" ~value:12
+    |> Telemetry.object_ ~key:"e" ~value:sub_telemetry
+  in
+
+  let assert_throws : 'a 'b. ('b -> 'a) -> 'b -> string -> string -> unit =
+   fun f arg exp message ->
+    let e =
+      try
+        let _ = f arg in
+        "[no exception]"
+      with e -> Printexc.to_string e
+    in
+    if not (String_utils.is_substring exp e) then begin
+      Printf.eprintf
+        "%s.\nExpected it to throw '%s' but got '%s'\n"
+        message
+        exp
+        e;
+      assert false
+    end;
+    ()
+  in
+
+  Int_asserter.assert_option_equals
+    (Telemetry_test_utils.int_opt telemetry "e.a")
+    (Some 15)
+    "int_opt e.a should be 15";
+  Int_asserter.assert_option_equals
+    (Telemetry_test_utils.int_opt telemetry "e.b")
+    None
+    "int_opt e.b should be None";
+  assert_throws
+    (Telemetry_test_utils.int_opt telemetry)
+    "e.c"
+    "c not correct"
+    "int_opt e.c should throw";
+  Int_asserter.assert_option_equals
+    (Telemetry_test_utils.int_opt telemetry "e.d")
+    None
+    "int_opt e.d should be None";
+  Int_asserter.assert_option_equals
+    (Telemetry_test_utils.int_opt telemetry "d")
+    (Some 12)
+    "int_opt d should be 12";
+  assert_throws
+    (Telemetry_test_utils.int_opt telemetry)
+    "e"
+    "not correct"
+    "int_opt e should throw";
+  assert_throws
+    (Telemetry_test_utils.int_opt telemetry)
+    ""
+    "empty path"
+    "int_opt '' should throw";
+  Int_asserter.assert_equals
+    (Telemetry_test_utils.int_exn telemetry "e.a")
+    15
+    "int_exn e.a should be 15";
+  assert_throws
+    (Telemetry_test_utils.int_exn telemetry)
+    "e.b"
+    "not found"
+    "int_exn e.b should throw";
+  assert_throws
+    (Telemetry_test_utils.int_exn telemetry)
+    "e.d"
+    "not found"
+    "int_exn e.d should throw";
+  true
+
 let () =
   Unit_test.run_all
     [
@@ -103,4 +182,5 @@ let () =
       ("test ability to split class::meth", test_class_meth_splitter);
       ("test ability to expand namespaces", test_expand_namespace);
       ("test strip namespace functions", test_strip_namespace);
+      ("test telemetry_test functions", test_telemetry_test);
     ]

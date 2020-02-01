@@ -56,19 +56,13 @@ let bool_ (key : string) (value : bool) : key_value_pair =
 let bool_ (telemetry : t) ~(key : string) ~(value : bool) : t =
   bool_ key value :: telemetry
 
-let int_opt (key : string) (value : int option) : key_value_pair =
-  match value with
-  | None -> (key, Hh_json.JSON_Null)
-  | Some value -> (key, Hh_json.int_ value)
-
 let int_opt (telemetry : t) ~(key : string) ~(value : int option) : t =
-  int_opt key value :: telemetry
-
-let int_ (key : string) (value : int) : key_value_pair =
-  (key, Hh_json.int_ value)
+  match value with
+  | None -> (key, Hh_json.JSON_Null) :: telemetry
+  | Some value -> (key, Hh_json.int_ value) :: telemetry
 
 let int_ (telemetry : t) ~(key : string) ~(value : int) : t =
-  int_ key value :: telemetry
+  (key, Hh_json.int_ value) :: telemetry
 
 let object_ (telemetry : t) ~(key : string) ~(value : t) : t =
   (key, Hh_json.JSON_Object value) :: telemetry
@@ -84,11 +78,13 @@ let duration ~(start_time : float) : key_value_pair =
 let duration (telemetry : t) ~(start_time : float) : t =
   duration start_time :: telemetry
 
-let float_ (key : string) (value : float) : key_value_pair =
-  (key, Hh_json.float_ value)
-
 let float_ (telemetry : t) ~(key : string) ~(value : float) : t =
-  float_ key value :: telemetry
+  (key, Hh_json.float_ value) :: telemetry
+
+let float_opt (telemetry : t) ~(key : string) ~(value : float option) : t =
+  match value with
+  | None -> (key, Hh_json.JSON_Null) :: telemetry
+  | Some value -> (key, Hh_json.float_ value) :: telemetry
 
 let error ~(stack : string option) (e : string) : key_value_pair =
   let vals = [("message", Hh_json.JSON_String e)] in

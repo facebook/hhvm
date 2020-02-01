@@ -9,8 +9,7 @@
 module Compute_tast : sig
   type t = {
     tast: Tast.program;
-    decl_accessor_count: int;
-    disk_cat_count: int;
+    telemetry: Telemetry.t;
   }
 end
 
@@ -18,8 +17,7 @@ module Compute_tast_and_errors : sig
   type t = {
     tast: Tast.program;
     errors: Errors.t;
-    decl_accessor_count: int;
-    disk_cat_count: int;
+    telemetry: Telemetry.t;
   }
 end
 

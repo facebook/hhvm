@@ -34,6 +34,8 @@ val duration : t -> start_time:float -> t
 
 val float_ : t -> key:string -> value:float -> t
 
+val float_opt : t -> key:string -> value:float option -> t
+
 val error : t -> e:string -> t
 
 val error_with_stack : t -> stack:string -> e:string -> t

@@ -356,31 +356,9 @@ let search_symbol_index
   ()
 
 module ProfileTypeCheck = struct
-  let process_file
-      ~recheck_id:_
-      ~time_decl_and_typecheck:_
-      ~time_typecheck_opt:_
-      ~times_checked:_
-      ~files_to_declare:_
-      ~decl_accessor_count:_
-      ~decl_accessor_time:_
-      ~disk_cat_count:_
-      ~disk_cat_time:_
-      ~path:_ =
-    ()
+  let process_file ~recheck_id:_ ~path:_ ~telemetry:_ = ()
 
-  let compute_tast
-      ~provider_backend:_
-      ~time_decl_and_typecheck:_
-      ~decl_accessor_count:_
-      ~decl_accessor_time:_
-      ~disk_cat_count:_
-      ~disk_cat_time:_
-      ~cache_overhead_time_opt:_
-      ~cache_peak_bytes_opt:_
-      ~filesize_opt:_
-      ~path:_ =
-    ()
+  let compute_tast ~path:_ ~telemetry:_ = ()
 
   let get_telemetry_url_opt ~profile_log:_ ~init_id:_ ~recheck_id:_ = None
 end

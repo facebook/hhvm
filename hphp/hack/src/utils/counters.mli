@@ -6,15 +6,6 @@
  *
  *)
 
-type t = {
-  (* how many times did 'count' get called? *)
-  count: int;
-  (* cumulative duration of all calls to 'count' *)
-  time: float;
-  (* an internal field to avoid double-counting when a method calls 'count' and so does a nested one *)
-  is_counting: bool;
-}
-
 (** state is a global mutable variable, accumulating all counts *)
 type state
 
@@ -29,8 +20,6 @@ val restore_state : state -> unit
 
 val count_decl_accessor : (unit -> 'a) -> 'a
 
-val get_decl_accessor_counter : unit -> t
-
 val count_disk_cat : (unit -> 'a) -> 'a
 
-val get_disk_cat_counter : unit -> t
+val get_counters : unit -> Telemetry.t

@@ -203,8 +203,7 @@ let should_enable_deferring
 type process_file_results = {
   errors: Errors.t;
   computation: file_computation list;
-  decl_accessor_counter: Counters.t;
-  disk_cat_counter: Counters.t;
+  counters: Telemetry.t;
 }
 
 let process_file
@@ -255,17 +254,10 @@ let process_file
     if GlobalOptions.tco_global_inference opts then
       Typing_global_inference.StateSubConstraintGraphs.save global_tvenvs;
     let deferred_files = Deferred_decl.get_deferments ~f:(fun d -> Declare d) in
-    let decl_accessor_counter = Counters.get_decl_accessor_counter () in
-    let disk_cat_counter = Counters.get_disk_cat_counter () in
+    let counters = Counters.get_counters () in
     Counters.restore_state prev_counters_state;
     match deferred_files with
-    | [] ->
-      {
-        errors = Errors.merge errors' errors;
-        computation = [];
-        decl_accessor_counter;
-        disk_cat_counter;
-      }
+    | [] -> { errors = Errors.merge errors' errors; computation = []; counters }
     | _ ->
       let computation =
         List.concat
@@ -274,7 +266,7 @@ let process_file
             [Check { file with deferred_count = file.deferred_count + 1 }];
           ]
       in
-      { errors; computation; decl_accessor_counter; disk_cat_counter }
+      { errors; computation; counters }
   with e ->
     let stack = Caml.Printexc.get_raw_backtrace () in
     let () =
@@ -310,7 +302,7 @@ let process_files
   Ast_provider.local_changes_push_stack ();
 
   let profile_log start_time second_start_time_opt file result =
-    let { computation; _ } = result in
+    let { computation; counters; _ } = result in
     let end_time = Unix.gettimeofday () in
     let times_checked = file.deferred_count + 1 in
     let files_to_declare =
@@ -335,24 +327,36 @@ let process_files
       || times_checked > 1
       || files_to_declare > 0
     in
-    if should_log then
+    if should_log then (
+      let filesize_opt =
+        try Some (Relative_path.to_absolute file.path |> Unix.stat).Unix.st_size
+        with _ -> None
+      in
+      let deferment_telemetry =
+        Telemetry.create ()
+        |> Telemetry.int_ ~key:"times_checked" ~value:times_checked
+        |> Telemetry.int_ ~key:"files_to_declare" ~value:files_to_declare
+      in
+      let telemetry =
+        counters
+        |> Telemetry.float_
+             ~key:"time_decl_and_typecheck"
+             ~value:time_decl_and_typecheck
+        |> Telemetry.float_opt ~key:"time_typecheck" ~value:time_typecheck_opt
+        |> Telemetry.int_opt ~key:"filesize" ~value:filesize_opt
+        |> Telemetry.object_ ~key:"deferment" ~value:deferment_telemetry
+      in
       HackEventLogger.ProfileTypeCheck.process_file
         ~recheck_id:check_info.recheck_id
-        ~time_decl_and_typecheck
-        ~time_typecheck_opt
-        ~times_checked
-        ~files_to_declare
-        ~decl_accessor_count:result.decl_accessor_counter.Counters.count
-        ~decl_accessor_time:result.decl_accessor_counter.Counters.time
-        ~disk_cat_count:result.disk_cat_counter.Counters.count
-        ~disk_cat_time:result.disk_cat_counter.Counters.time
-        ~path:file.path;
-    let _t : float =
-      Hh_logger.log_duration
-        (Printf.sprintf "%s [type-check]" (Relative_path.suffix file.path))
-        start_time
-    in
-    ()
+        ~path:file.path
+        ~telemetry;
+      let _t : float =
+        Hh_logger.log_duration
+          (Printf.sprintf "%s [type-check]" (Relative_path.suffix file.path))
+          start_time
+      in
+      ()
+    )
   in
   let rec process_or_exit errors progress =
     match progress.remaining with

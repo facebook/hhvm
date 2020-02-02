@@ -92,6 +92,11 @@ void HostHealthMonitor::waitForEnd() {
 
 void HostHealthMonitor::monitor() {
   Logger::Info("Host health monitor starts working.");
+  m_healthLevelCounter =
+    ServiceData::createTimeSeries("health.level",
+                                  {ServiceData::StatsType::AVG},
+                                  {std::chrono::seconds(5),
+                                   std::chrono::seconds(60)});
   std::unique_lock<std::mutex> guard(m_stopped_lock);
   m_stopped = false;
 
@@ -99,6 +104,7 @@ void HostHealthMonitor::monitor() {
   while (!m_stopped) {
     HealthLevel newStatus = evaluate();
     notifyObservers(newStatus);
+    m_healthLevelCounter->addValue(healthLeveltToInt(newStatus));
     m_condition.wait_for(guard, dura, [this] { return m_stopped; });
   }
   Logger::Info("Host health monitor exits.");

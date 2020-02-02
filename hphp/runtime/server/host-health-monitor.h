@@ -26,6 +26,7 @@
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/health-monitor-types.h"
+#include "hphp/util/service-data.h"
 
 namespace HPHP {
 
@@ -55,6 +56,7 @@ struct HostHealthMonitor {
   boost::container::flat_set<IHostHealthObserver*> m_observers;
   std::mutex m_lock;                    // protects metrics/observers
   HealthLevel m_status{HealthLevel::Bold};
+  ServiceData::ExportedTimeSeries* m_healthLevelCounter{nullptr};
   std::mutex m_stopped_lock;
   std::condition_variable m_condition;
   bool m_stopped{true};

@@ -833,6 +833,8 @@ struct RuntimeOption {
   F(uint32_t, JitRetranslateAllSeconds, retranslateAllSecondsDefault()) \
   F(bool,     JitPGOLayoutSplitHotCold, pgoLayoutSplitHotColdDefault()) \
   F(bool,     JitPGOVasmBlockCounters, true)                            \
+  F(bool,     JitPGOVasmBlockCountersForceSaveSF, true)                 \
+  F(bool,     JitPGOVasmBlockCountersForceSaveGP, true)                 \
   F(bool, JitLayoutPrologueSplitHotCold, layoutPrologueSplitHotColdDefault()) \
   F(bool, JitLayoutProfileSplitHotCold, true)                           \
   F(double,   JitLayoutHotThreshold,   0.05)                            \
@@ -1017,7 +1019,7 @@ struct RuntimeOption {
   F(bool, JitSerdesModeForceOff,       false)                           \
   F(bool, JitDesUnitPreload,           false)                           \
   F(std::set<std::string>, JitSerdesDebugFunctions, {})                 \
-  F(uint32_t, JitSerializeOptProfSeconds,  0)                           \
+  F(uint32_t, JitSerializeOptProfSeconds, ServerExecutionMode() ? 300 : 0)\
   F(uint32_t, JitSerializeOptProfRequests, 0)                           \
   F(int, SimpleJsonMaxLength,        2 << 20)                           \
   F(uint32_t, JitSampleRate,               0)                           \

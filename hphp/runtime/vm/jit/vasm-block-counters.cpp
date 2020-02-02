@@ -74,7 +74,8 @@ void insert(Vunit& unit) {
     auto const counterAddr = s_blockCounters.addCounter(regionKey,
                                                         block.code.front().op);
     auto const& live_set = livein[b];
-    auto const save_sf = live_set[Vreg(rsf)];
+    auto const save_sf = live_set[Vreg(rsf)] ||
+                         RuntimeOption::EvalJitPGOVasmBlockCountersForceSaveSF;
 
     // search for an available gp register to load the counter's address into it
     auto save_gp = true;
@@ -85,6 +86,7 @@ void insert(Vunit& unit) {
                         rgp = r;
                       }
                     });
+    if (RuntimeOption::EvalJitPGOVasmBlockCountersForceSaveGP) save_gp = true;
 
     // emit the increment of the counter, saving/restoring the used registers on
     // the native stack before/after if needed.

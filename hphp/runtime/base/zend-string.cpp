@@ -1628,7 +1628,7 @@ String string_number_format(double d, int dec,
   // The number of characters that would have been written if n had been
   // sufficiently large, not counting the terminating null character.
   if (tmplen < 0) return empty_string();
-  if (tmplen < 64 && (tmpbuf == nullptr || !isdigit((int)tmpbuf[0]))) {
+  if (tmplen < 64 && (tmpbuf != nullptr && !isdigit((int)tmpbuf[0]))) {
     tmpstr.setSize(tmplen);
     return tmpstr;
   }

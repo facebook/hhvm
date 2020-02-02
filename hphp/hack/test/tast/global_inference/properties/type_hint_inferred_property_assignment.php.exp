@@ -46,7 +46,7 @@
              ];
            fb_annotation = No unsafe blocks };
          m_fun_kind = FSync; m_user_attributes = [];
-         m_ret = ((_), (Some ([7:19-30], (Hprim Tvoid))));
+         m_ret = ((void), (Some ([7:19-30], (Hprim Tvoid))));
          m_external = false; m_doc_comment = None };
         { m_span = [11:3-13:4]; m_annotation = (); m_final = false;
           m_abstract = false; m_static = true; m_visibility = Public;

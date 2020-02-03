@@ -46,10 +46,12 @@ let get_first_suggested_type_as_string file type_map node =
         match phase_ty with
         | Typing_defs.LoclTy ty ->
           let (env, ty) = Tast_env.simplify_unions env ty in
+          let (env, ty) = Tast_env.expand_type env ty in
           begin
             match Typing_defs.deref ty with
             | (_, Typing_defs.Tnewtype ("HackSuggest", [ty], _)) ->
               let (env, ty) = Tast_env.simplify_unions env ty in
+              let ty = Tast_env.fully_expand env ty in
               begin
                 match print_ty ty with
                 | Some type_str -> Some type_str

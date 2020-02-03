@@ -88,6 +88,7 @@ const StaticString
   s_class_meth_get_method("HH\\class_meth_get_method"),
   s_shapes_idx("HH\\Shapes::idx"),
   s_is_meth_caller("HH\\is_meth_caller"),
+  s_tag_provenance_here("HH\\tag_provenance_here"),
   s_mark_legacy_hack_array("HH\\mark_legacy_hack_array"),
   s_meth_caller_get_class("HH\\meth_caller_get_class"),
   s_meth_caller_get_method("HH\\meth_caller_get_method");
@@ -1043,6 +1044,12 @@ SSATmp* opt_shapes_idx(IRGS& env, const ParamPrep& params) {
   }));
 }
 
+SSATmp* opt_tag_provenance_here(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
+  if (RO::EvalLogArrayProvenance) return nullptr;
+  return params[0].value;
+}
+
 SSATmp* opt_mark_legacy_hack_array(IRGS& env, const ParamPrep& params) {
   if (params.size() != 1) return nullptr;
   auto const value = params[0].value;
@@ -1163,6 +1170,7 @@ SSATmp* optimizedFCallBuiltin(IRGS& env,
     X(class_meth_get_method)
     X(shapes_idx)
     X(is_meth_caller)
+    X(tag_provenance_here)
     X(mark_legacy_hack_array)
     X(meth_caller_get_class)
     X(meth_caller_get_method)

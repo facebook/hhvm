@@ -48,7 +48,8 @@ let get_first_suggested_type_as_string file type_map node =
           let (env, ty) = Tast_env.simplify_unions env ty in
           begin
             match Typing_defs.deref ty with
-            | (Typing_reason.Rsolve_fail _, ty_) ->
+            | (_, Typing_defs.Tnewtype ("HackSuggest", [ty], _)) ->
+              let (env, ty) = Tast_env.simplify_unions env ty in
               begin
                 match print_ty ty with
                 | Some type_str -> Some type_str
@@ -59,7 +60,8 @@ let get_first_suggested_type_as_string file type_map node =
                     (text node)
                     (Tast_env.print_ty
                        env
-                       (Typing_defs.mk (Typing_reason.Rnone, ty_)));
+                       (Typing_defs.mk
+                          (Typing_reason.Rnone, Typing_defs.get_node ty)));
                   None
               end
             | _ -> None

@@ -30,7 +30,7 @@ module Decl_cache_entry = struct
 
   type 'a value = 'a
 
-  let get_size _value = 1
+  let get_size ~key:_ ~value:_ = 1
 end
 
 module Decl_cache = Lru_cache.Cache (Decl_cache_entry)

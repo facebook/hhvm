@@ -50,12 +50,10 @@ module type Entry = sig
   the entry key-value pair". *)
   type 'a value = 'a
 
-  (** Get the size associated with a value. For example, you can measure its
-  size in bytes. If the size is always [1], this causes the cache to act as a
-  regular LRU cache.
-
-  The key is currently not considered as part of the size. *)
-  val get_size : 'a value -> size
+  (** Get the size associated with a key-value pair. For example, you can
+  measure its size in bytes. If the size is always [1], this causes the cache to
+  act as a regular LRU cache. *)
+  val get_size : key:'a key -> value:'a value -> size
 end
 
 module Cache (Entry : Entry) : sig

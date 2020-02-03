@@ -19,7 +19,7 @@ module Decl_cache_entry : sig
 
   type 'a value = 'a
 
-  val get_size : 'a value -> int
+  val get_size : key:'a key -> value:'a value -> int
 end
 
 (** Maps decl names to types. *)

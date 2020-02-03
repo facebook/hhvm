@@ -17,7 +17,7 @@ module type Entry = sig
 
   type 'a value = 'a
 
-  val get_size : 'a value -> size
+  val get_size : key:'a key -> value:'a value -> size
 end
 
 module Cache (Entry : Entry) = struct
@@ -115,7 +115,7 @@ module Cache (Entry : Entry) = struct
     incr_timestamp t;
     let entry =
       {
-        size = Entry.get_size value;
+        size = Entry.get_size ~key ~value;
         last_used_timestamp = t.timestamp;
         value = Value_wrapper value;
       }

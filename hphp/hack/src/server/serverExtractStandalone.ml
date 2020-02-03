@@ -510,7 +510,7 @@ let string_of_tparam
     | Erased -> ""
     | SoftReified
     | Reified ->
-      "refied"
+      "reify"
   in
   String.concat
     ~sep:" "

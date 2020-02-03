@@ -108,3 +108,9 @@ class IntBox extends Box<int> {}
 function with_contra_tparam(): Box<int> {
   return IntBox::make(42);
 }
+
+class WithReifiedGenerics<reify T as arraykey> {}
+
+function with_reified_generics(): WithReifiedGenerics<int> {
+  return new WithReifiedGenerics<int>();
+}

@@ -1,0 +1,5 @@
+<?hh
+function with_reified_generics(): WithReifiedGenerics<int> {
+  return new WithReifiedGenerics<int>();
+}
+class WithReifiedGenerics<reify T as arraykey> {}

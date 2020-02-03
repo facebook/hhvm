@@ -1257,19 +1257,11 @@ let this_no_argument pos =
     pos
     "\"this\" expects no arguments"
 
-let object_cast pos cls_opt =
-  let msg1 = "Object casts are unsupported." in
-  let msg2 =
-    match cls_opt with
-    | Some c ->
-      " Try 'if ($var instanceof "
-      ^ c
-      ^ ")' or 'invariant($var instanceof "
-      ^ c
-      ^ ", ...)'."
-    | None -> ""
-  in
-  add (Naming.err_code Naming.ObjectCast) pos (msg1 ^ msg2)
+let object_cast pos =
+  add
+    (Naming.err_code Naming.ObjectCast)
+    pos
+    "Casts are only supported for bool, int, float and string."
 
 let this_hint_outside_class pos =
   add

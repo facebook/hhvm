@@ -1,0 +1,4 @@
+File "object_cast.php", line 4, characters 9-14:
+Unbound name: object (Naming[2049])
+File "object_cast.php", line 4, characters 9-14:
+Casts are only supported for bool, int, float and string. (Naming[2055])

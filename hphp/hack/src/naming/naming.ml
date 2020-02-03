@@ -2494,10 +2494,8 @@ module Make (GetLocals : GetLocals) = struct
         match try_castable_hint ~tp_depth:1 env p x hl with
         | Some ty -> (p, ty)
         | None ->
-          (* Let's just assume that any other invalid cases are attempts to
-          * cast to specific objects *)
           let h = hint ~allow_typedef:false env ty in
-          Errors.object_cast p (Some x);
+          Errors.object_cast p;
           h
       in
       N.Cast (ty, expr env e2)

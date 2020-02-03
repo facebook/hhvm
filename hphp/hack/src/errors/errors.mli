@@ -210,7 +210,7 @@ val array_literals_disallowed : Pos.t -> unit
 
 val wildcard_disallowed : Pos.t -> unit
 
-val object_cast : Pos.t -> string option -> unit
+val object_cast : Pos.t -> unit
 
 val this_no_argument : Pos.t -> unit
 

@@ -10,13 +10,13 @@
  */
 
 function f(): array {
-  return [1];
+  return varray[1];
 }
 
 function g(): array<int> {
-  return [1];
+  return varray[1];
 }
 
 function h(): array<string, int> {
-  return ["one" => 1];
+  return darray["one" => 1];
 }

@@ -1,18 +1,18 @@
-((script 116
-  ((list 116
+((script 79
+  ((list 79
     ((markup_section 4
       ((missing 0 ()) (() markup 0 ())
        (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))
        (missing 0 ())))
-     (function_declaration 111
+     (function_declaration 74
       ((missing 0 ())
        (function_declaration_header 12
         ((missing 0 ()) (() function 8 ((whitespace 1))) (() name 1 ())
          (missing 0 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())
          (missing 0 ()) (missing 0 ()) (missing 0 ())))
-       (compound_statement 99
+       (compound_statement 62
         ((() { 1 ((end_of_line 1)))
-         (list 93
+         (list 56
           ((expression_statement 8
             ((array_intrinsic_expression 7
               ((((whitespace 2)) array 5 ()) (() "(" 1 ()) (missing 0 ())
@@ -47,38 +47,6 @@
                  (list_item 2
                   ((variable 2 ((() variable 2 ()))) (missing 0 ())))))
                (() ")" 1 ())))
-             (() ";" 1 ((end_of_line 1)))))
-           (expression_statement 3
-            ((array_creation_expression 2
-              ((((whitespace 2)) [ 1 ()) (missing 0 ()) (() ] 1 ())))
-             (() ";" 1 ((end_of_line 1)))))
-           (expression_statement 5
-            ((array_creation_expression 4
-              ((((whitespace 2)) [ 1 ())
-               (list 2
-                ((list_item 2
-                  ((variable 2 ((() variable 2 ()))) (missing 0 ())))))
-               (() ] 1 ())))
-             (() ";" 1 ((end_of_line 1)))))
-           (expression_statement 6
-            ((array_creation_expression 5
-              ((((whitespace 2)) [ 1 ())
-               (list 3
-                ((list_item 3
-                  ((variable 2 ((() variable 2 ()))) (() , 1 ())))))
-               (() ] 1 ())))
-             (() ";" 1 ((end_of_line 1)))))
-           (expression_statement 11
-            ((array_creation_expression 10
-              ((((whitespace 2)) [ 1 ())
-               (list 8
-                ((list_item 3
-                  ((variable 2 ((() variable 2 ()))) (() , 1 ())))
-                 (list_item 3
-                  ((variable 2 ((() variable 2 ()))) (() , 1 ())))
-                 (list_item 2
-                  ((variable 2 ((() variable 2 ()))) (missing 0 ())))))
-               (() ] 1 ())))
              (() ";" 1 ((end_of_line 1)))))))
          (() } 1 ((end_of_line 1)))))))
      (end_of_file 0 ((() end_of_file 0 ()))))))))

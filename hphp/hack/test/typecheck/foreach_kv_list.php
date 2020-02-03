@@ -14,7 +14,7 @@ function takes_int(int $a): void {}
 function takes_string(string $a): void {}
 
 function foo(): array<(int, string)> {
-  return [];
+  return varray[];
 }
 
 function f(): void {

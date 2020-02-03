@@ -26,18 +26,18 @@ function test1(
   darray<int, string> $darray3,
 ): void {
   if ($b) {
-    $x = []; // AKempty
+    $x = array(); // AKempty
   } else {
-    $x = []; // AKempty
+    $x = array(); // AKempty
   }
   hh_show($x);
   hh_show($x[0]);
   expect_array($x);
 
   if ($b) {
-    $x = []; // AKempty
+    $x = array(); // AKempty
   } else {
-    $x = [1]; // AKvarray
+    $x = varray[1]; // AKvarray
   }
   hh_show($x);
   hh_show($x[0]);
@@ -53,7 +53,7 @@ function test1(
   expect_array($x);
 
   if ($b) {
-    $x = [1]; // AKvarray
+    $x = varray[1]; // AKvarray
   } else {
     $x = $array; // AKany
   }
@@ -95,14 +95,14 @@ function test1(
   expect_int_array($x); // error
   expect_string_array($x); // error
 
-  $x = ($b ? varray[0] : [2, 4]);
+  $x = ($b ? varray[0] : varray[2, 4]);
   hh_show($x);
   hh_show($x[0]);
 
   if ($b) {
     $x = $arrayint; // AKvarray
   } else {
-    $x = [1]; // AKvarray
+    $x = varray[1]; // AKvarray
   }
   hh_show($x);
   hh_show($x[0]);
@@ -111,7 +111,7 @@ function test1(
   if ($b) {
     $x = varray[0]; // AKvarray
   } else {
-    $x = [""]; // AKvarray
+    $x = varray[""]; // AKvarray
   }
   hh_show($x);
   hh_show($x[0]);
@@ -160,15 +160,15 @@ function test1(
   hh_show($x);
   hh_show($x[0]);
 
-  $x = ($b ? [1 => true, 2 => ""] : [1 => true, 2 => ""]); // AKdarray \/ AKdarray
+  $x = ($b ? darray[1 => true, 2 => ""] : darray[1 => true, 2 => ""]); // AKdarray \/ AKdarray
   hh_show($x);
   hh_show($x[0]);
 
-  $x = ($b ? [1 => true, 2 => false] : $arrayIntBool); // AKdarray \/ AKdarray
+  $x = ($b ? darray[1 => true, 2 => false] : $arrayIntBool); // AKdarray \/ AKdarray
   hh_show($x);
   hh_show($x[0]);
 
-  $x = ($b ? [1 => true, 2 => false] : darray[0 => true]); // AKdarray \/ AKdarray
+  $x = ($b ? darray[1 => true, 2 => false] : darray[0 => true]); // AKdarray \/ AKdarray
   hh_show($x);
   hh_show($x[0]);
 

@@ -19,7 +19,6 @@ async function foo(): Awaitable<void> {
   $x = shape('key' => (await genx()));
   $x = tuple((await genx()), (await geny()));
   $x = array((await genx()), (await geny()) => (await genz()));
-  $x = [(await genx()), (await geny()) => (await genz())];
   $x = darray[(await genx()) => (await geny())];
   $x = varray[(await genx()), (await geny())];
   $x = dict[(await genx()) => (await geny())];

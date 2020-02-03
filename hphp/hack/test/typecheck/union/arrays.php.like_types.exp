@@ -128,7 +128,7 @@ File "arrays.php", line 120, characters 20-21:
 Invalid argument (Typing[4110])
 File "arrays.php", line 185, characters 33-35:
 Expected int
-File "arrays.php", line 114, characters 11-12:
+File "arrays.php", line 114, characters 17-18:
 But got string
 File "arrays.php", line 121, characters 23-24:
 Invalid argument (Typing[4110])

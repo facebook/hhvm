@@ -4,7 +4,7 @@
 function count_to_ten(): Generator<int, int, void> {
   yield 1;
   yield 2;
-  yield from [3, 4];
+  yield from varray[3, 4];
   yield from seven_eight();
   yield 9;
   yield 10;

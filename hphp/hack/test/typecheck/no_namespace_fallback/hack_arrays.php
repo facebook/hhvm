@@ -12,13 +12,13 @@
 namespace NS;
 
 function returns_dict(): dict<string, int> {
-  return dict(['a' => 123, 'b' => 456, 'c' => 789]);
+  return dict(darray['a' => 123, 'b' => 456, 'c' => 789]);
 }
 
 function returns_keyset(): keyset<string> {
-  return keyset(['a', 'b', 'c']);
+  return keyset(varray['a', 'b', 'c']);
 }
 
 function returns_vec(): vec<string> {
-  return vec(['a', 'b', 'c']);
+  return vec(varray['a', 'b', 'c']);
 }

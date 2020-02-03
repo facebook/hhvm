@@ -6,10 +6,10 @@ function add_word_helper<T>((function(): T) $callback): T {
   return $callback();
 }
 
-function add_word(array<string> $words): array<string> {
+function add_word(varray<string> $words): varray<string> {
   return add_word_helper(() ==> {
     if (count($words) == 0){
-      $words = ['current'];
+      $words = varray['current'];
     }
 
     $words[] = 'events';
@@ -18,4 +18,4 @@ function add_word(array<string> $words): array<string> {
   });
 }
 
-var_dump(add_word(['when', 'in', 'the', 'course', 'of', 'human']));
+var_dump(add_word(varray['when', 'in', 'the', 'course', 'of', 'human']));

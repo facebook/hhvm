@@ -27,7 +27,7 @@ echo "\n";
 // LHS/RHS order is irrelevent.
 
 $oper1 = varray[NULL];
-$oper2 = varray[0, 100, -3.4, TRUE, FALSE, NULL, "", "123", "abc", [], varray[10,2.3]];
+$oper2 = varray[0, 100, -3.4, TRUE, FALSE, NULL, "", "123", "abc", varray[], varray[10,2.3]];
 
 foreach ($oper1 as $e1)
 {

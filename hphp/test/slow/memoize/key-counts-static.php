@@ -7,7 +7,7 @@ class A {
   <<__Memoize>> public static function func0() {
 
     if (MemoizeKeyCountsStaticPhp::$do_echo) echo "A::func0()\n";
-    return json_encode([]);
+    return json_encode(varray[]);
   }
   <<__Memoize>> public static function func1($p1) {
 

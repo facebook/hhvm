@@ -30,12 +30,12 @@ function main_entry(): void {
 
   $obj = new Widget;
   $v = $obj->iDoit();
-  $obj->__call('iDoit', []);
+  $obj->__call('iDoit', varray[]);
 
   $v = $obj->iMethod(10, TRUE, "abc");
   var_dump($v);
   $obj->__call('iMethod', varray[10, TRUE, "abc"]);
-  $obj->__call('123#$%', []);
+  $obj->__call('123#$%', varray[]);
 
   $v = Widget::sDoit();
 }

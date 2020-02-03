@@ -7,7 +7,7 @@ function foo($x) {
 
 <<__EntryPoint>>
 function main_empty_infinite_loop() {
-foo(__hhvm_intrinsics\launder_value([]));
+foo(__hhvm_intrinsics\launder_value(varray[]));
 
 echo "DONE\n";
 }

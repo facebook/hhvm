@@ -112,7 +112,7 @@ function test() {
   test_group(
     "empty containers",
     varray[
-      [],
+      varray[],
       $emptyFormerPackedArray,
       $emptyFormerMixedArray,
       Vector {},

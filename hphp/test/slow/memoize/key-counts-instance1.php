@@ -7,12 +7,12 @@ class A {
   <<__Memoize>> public function func0A() {
 
     if (MemoizeKeyCountsInstance1Php::$do_echo) echo "A::func0A()\n";
-    return json_encode([]);
+    return json_encode(varray[]);
   }
   <<__Memoize>> public function func0B() {
 
     if (MemoizeKeyCountsInstance1Php::$do_echo) echo "A::func0B()\n";
-    return json_encode([]);
+    return json_encode(varray[]);
   }
   <<__Memoize>> public function func1A($p1) {
 

@@ -27,7 +27,7 @@ echo "\n";
 // NULL operand with all kinds of operands
 
 $oper1 = varray[NULL];
-$oper2 = varray[0, 100, -3.4, TRUE, FALSE, NULL, "", "123", "abc", [], varray[10,2.3]];
+$oper2 = varray[0, 100, -3.4, TRUE, FALSE, NULL, "", "123", "abc", varray[], varray[10,2.3]];
 
 foreach ($oper1 as $e1)
 {
@@ -69,7 +69,7 @@ echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n";
 // Boolean operand with all kinds of operands
 
 $oper1 = varray[TRUE, FALSE];
-$oper2 = varray[0, 100, -3.4, TRUE, FALSE, NULL, "", "123", "abc", [], varray[10,2.3]];
+$oper2 = varray[0, 100, -3.4, TRUE, FALSE, NULL, "", "123", "abc", varray[], varray[10,2.3]];
 
 foreach ($oper1 as $e1)
 {
@@ -90,7 +90,7 @@ echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n";
 // Numeric strings with all kinds of operands
 
 $oper1 = varray["10", "-5.1"];
-$oper2 = varray[0, 10, -3.4, TRUE, FALSE, NULL, "", "123", "abc", [], varray[10,2.3]];
+$oper2 = varray[0, 10, -3.4, TRUE, FALSE, NULL, "", "123", "abc", varray[], varray[10,2.3]];
 
 foreach ($oper1 as $e1)
 {

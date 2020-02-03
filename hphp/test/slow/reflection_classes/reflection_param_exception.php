@@ -36,7 +36,7 @@ try {
 
 // Bad param type.
 try {
-  new ReflectionParameter(varray['A', 'bar'], []);
+  new ReflectionParameter(varray['A', 'bar'], varray[]);
 } catch (ReflectionException $e) {
   echo $e->getMessage() . "\n";
 }

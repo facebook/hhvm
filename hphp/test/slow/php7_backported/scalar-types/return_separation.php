@@ -3,7 +3,7 @@
 function by_ref(inout $ref) {}
 
 function test1() : array {
-  $array = [];
+  $array = varray[];
   by_ref(inout $array);
   return $array;
 }

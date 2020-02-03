@@ -6,7 +6,7 @@ MemoizeKeyCountsFuncPhp::$do_echo = true;
 <<__Memoize>> function func0() {
 
   if (MemoizeKeyCountsFuncPhp::$do_echo) echo "func0()\n";
-  return json_encode([]);
+  return json_encode(varray[]);
 }
 <<__Memoize>> function func1($p1) {
 

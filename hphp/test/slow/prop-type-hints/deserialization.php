@@ -11,7 +11,7 @@ class A {
   public Traversable $p7;
   public varray $p8 = varray[];
   public darray $p9 = darray[];
-  public array $p10 = [];
+  public array $p10 = array();
 }
 
 class B extends A {

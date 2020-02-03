@@ -15,7 +15,7 @@ function test($x) {
   test('abc');
   test(new stdclass);
 
-  test([]);
+  test(varray[]);
   test(varray[]);
   test(darray[]);
   test(vec[]);

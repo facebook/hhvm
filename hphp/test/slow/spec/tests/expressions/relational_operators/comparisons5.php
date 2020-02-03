@@ -11,8 +11,8 @@ error_reporting(0);
 ///*
 // Two array types
 
-$oper1 = varray[[], varray[10,20], darray["red"=>0,"green"=>0]];
-$oper2 = varray[[], varray[10,20], varray[10,20,30], varray[10,30], darray["red"=>0,"green"=>0], darray["green"=>0,"red"=>0]];
+$oper1 = varray[varray[], varray[10,20], darray["red"=>0,"green"=>0]];
+$oper2 = varray[varray[], varray[10,20], varray[10,20,30], varray[10,30], darray["red"=>0,"green"=>0], darray["green"=>0,"red"=>0]];
 
 foreach ($oper1 as $e1)
 {

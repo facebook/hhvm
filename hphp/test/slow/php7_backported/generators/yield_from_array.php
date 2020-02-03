@@ -1,7 +1,7 @@
 <?hh
 function from() {
   yield 0;
-  yield from []; // must not yield anything
+  yield from varray[]; // must not yield anything
   yield from varray[1,2];
 }
 function gen() {

@@ -28,7 +28,7 @@ function main() {
   var_dump(get(vec['value2']));
   var_dump(get(vec['value2']));
 
-  var_dump(get([]));
+  var_dump(get(varray[]));
   var_dump(get(keyset[]));
   var_dump(get(dict[]));
   var_dump(get(Map{}));

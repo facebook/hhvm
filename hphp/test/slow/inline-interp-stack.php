@@ -41,7 +41,7 @@ function main($x, $y) {
   blue($x, $y);
 }
 
-for ($i = 0; $i < 10; $i++) main([], false);
+for ($i = 0; $i < 10; $i++) main(varray[], false);
 
 <<__ALWAYS_INLINE>>
 function junk2() {

@@ -121,7 +121,7 @@ var_dump($avg);
 
 echo "--------- test with nested lists -------------\n";
 
-$v = list($min, list($max, $avg)) = varray[0, [1 => 67, 99, 0 => 100], 33];
+$v = list($min, list($max, $avg)) = varray[0, darray[1 => 67, 2 => 99, 0 => 100], 33];
 echo "\$min: $min, \$max: $max, \$avg: $avg\n";
 print_r($v);
 

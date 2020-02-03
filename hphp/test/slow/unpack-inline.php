@@ -12,7 +12,7 @@ function mix(...$args) {
 
 <<__NEVER_INLINE>>
 function bar() {
-  echo mix('alpha', new stdclass, 'gamma', [])."\n";
+  echo mix('alpha', new stdclass, 'gamma', varray[])."\n";
 }
 
 <<__EntryPoint>>

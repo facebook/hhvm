@@ -7,7 +7,7 @@ function get_int() {
 
 function get_sarr() { return varray[1, 2, 3]; }
 function get_arrn() { return varray[get_int(), get_int(), get_int()]; }
-function get_arre() { return []; }
+function get_arre() { return varray[]; }
 function get_single_arr() { return varray[10]; }
 
 function get_packedn() {

@@ -7,7 +7,7 @@ list($a, $b) = varray[1, 2];
 var_dump($a);
 var_dump($b);
 
-$array = [];
+$array = varray[];
 list($array[], $array[], $array[]) = varray[1, 2, 3];
 var_dump($array);
 

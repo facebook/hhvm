@@ -335,7 +335,7 @@ function speak($s): string {
 }
 
 class Shoo {
-    public $b = [];
+    public $b = darray[];
 }
 
 function test_multi_dim_side_effects(): void {

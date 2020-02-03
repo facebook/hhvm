@@ -96,10 +96,10 @@ class A {
   public CondEnum1 $p50 = 181;
   public Traversable $p51 = vec[];
   public Traversable $p52 = dict[];
-  public Traversable $p53 = [];
+  public Traversable $p53 = varray[];
   public Alias12 $p54 = vec[];
   public Alias12 $p55 = dict[];
-  public Alias12 $p56 = [];
+  public Alias12 $p56 = varray[];
   public Alias12 $p57 = null;
 
   public int $p58 = INTCONST;

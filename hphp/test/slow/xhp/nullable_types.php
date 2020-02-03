@@ -2,7 +2,7 @@
 
 class base {
   protected static function __xhpAttributeDeclaration(): array {
-    return [];
+    return darray[];
   }
 }
 

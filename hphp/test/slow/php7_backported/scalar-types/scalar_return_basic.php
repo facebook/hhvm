@@ -22,7 +22,7 @@ $values = varray[
     TRUE,
     FALSE,
     NULL,
-    [],
+    varray[],
     new StdClass,
     new Stringable,
     fopen("data:text/plain,foobar", "r")

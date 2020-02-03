@@ -65,169 +65,169 @@ function test() {
   fun1(shape('a' => true, 'b' => false));
   fun1(varray[]);
   fun1(darray[]);
-  fun1([]);
+  fun1(array());
 
   fun2(tuple(true, false));
   fun2(shape('a' => true, 'b' => false));
   fun2(varray[]);
   fun2(darray[]);
-  fun2([]);
+  fun2(array());
 
   fun3(tuple(true, false));
   fun3(shape('a' => true, 'b' => false));
   fun3(varray[]);
   fun3(darray[]);
-  fun3([]);
+  fun3(array());
 
   fun4(tuple(true, false));
   fun4(shape('a' => true, 'b' => false));
   fun4(varray[]);
   fun4(darray[]);
-  fun4([]);
+  fun4(array());
 
   opt_fun1(tuple(true, false));
   opt_fun1(shape('a' => true, 'b' => false));
   opt_fun1(varray[]);
   opt_fun1(darray[]);
-  opt_fun1([]);
+  opt_fun1(array());
   opt_fun1(null);
 
   opt_fun2(tuple(true, false));
   opt_fun2(shape('a' => true, 'b' => false));
   opt_fun2(varray[]);
   opt_fun2(darray[]);
-  opt_fun2([]);
+  opt_fun2(array());
   opt_fun2(null);
 
   opt_fun3(tuple(true, false));
   opt_fun3(shape('a' => true, 'b' => false));
   opt_fun3(varray[]);
   opt_fun3(darray[]);
-  opt_fun3([]);
+  opt_fun3(array());
   opt_fun3(null);
 
   opt_fun4(tuple(true, false));
   opt_fun4(shape('a' => true, 'b' => false));
   opt_fun4(varray[]);
   opt_fun4(darray[]);
-  opt_fun4([]);
+  opt_fun4(array());
   opt_fun4(null);
 
   tuple_fun(tuple(true, false));
   tuple_fun(shape('a' => true, 'b' => false));
   tuple_fun(varray[]);
   tuple_fun(darray[]);
-  tuple_fun([]);
+  tuple_fun(array());
 
   shape_fun(shape('a' => true, 'b' => false));
   shape_fun(tuple(true, false));
   shape_fun(varray[]);
   shape_fun(darray[]);
-  shape_fun([]);
+  shape_fun(array());
 
   opt_tuple_fun(tuple(true, false));
   opt_tuple_fun(shape('a' => true, 'b' => false));
   opt_tuple_fun(varray[]);
   opt_tuple_fun(darray[]);
-  opt_tuple_fun([]);
+  opt_tuple_fun(array());
   opt_tuple_fun(null);
 
   opt_shape_fun(shape('a' => true, 'b' => false));
   opt_shape_fun(tuple(true, false));
   opt_shape_fun(varray[]);
   opt_shape_fun(darray[]);
-  opt_shape_fun([]);
+  opt_shape_fun(array());
   opt_shape_fun(null);
 
   alias_fun1(tuple(true, false));
   alias_fun1(shape('a' => true, 'b' => false));
   alias_fun1(varray[]);
   alias_fun1(darray[]);
-  alias_fun1([]);
+  alias_fun1(array());
 
   alias_fun2(tuple(true, false));
   alias_fun2(shape('a' => true, 'b' => false));
   alias_fun2(varray[]);
   alias_fun2(darray[]);
-  alias_fun2([]);
+  alias_fun2(array());
 
   alias_fun3(tuple(true, false));
   alias_fun3(shape('a' => true, 'b' => false));
   alias_fun3(varray[]);
   alias_fun3(darray[]);
-  alias_fun3([]);
+  alias_fun3(array());
 
   alias_fun4(tuple(true, false));
   alias_fun4(shape('a' => true, 'b' => false));
   alias_fun4(varray[]);
   alias_fun4(darray[]);
-  alias_fun4([]);
+  alias_fun4(array());
 
   alias_fun5(tuple(true, false));
   alias_fun5(shape('a' => true, 'b' => false));
   alias_fun5(varray[]);
   alias_fun5(darray[]);
-  alias_fun5([]);
+  alias_fun5(array());
 
   alias_fun6(tuple(true, false));
   alias_fun6(shape('a' => true, 'b' => false));
   alias_fun6(varray[]);
   alias_fun6(darray[]);
-  alias_fun6([]);
+  alias_fun6(array());
 
   alias_fun7(tuple(true, false));
   alias_fun7(shape('a' => true, 'b' => false));
   alias_fun7(varray[]);
   alias_fun7(darray[]);
-  alias_fun7([]);
+  alias_fun7(array());
 
   opt_alias_fun1(tuple(true, false));
   opt_alias_fun1(shape('a' => true, 'b' => false));
   opt_alias_fun1(varray[]);
   opt_alias_fun1(darray[]);
-  opt_alias_fun1([]);
+  opt_alias_fun1(array());
   opt_alias_fun1(null);
 
   opt_alias_fun2(tuple(true, false));
   opt_alias_fun2(shape('a' => true, 'b' => false));
   opt_alias_fun2(varray[]);
   opt_alias_fun2(darray[]);
-  opt_alias_fun2([]);
+  opt_alias_fun2(array());
   opt_alias_fun2(null);
 
   opt_alias_fun3(tuple(true, false));
   opt_alias_fun3(shape('a' => true, 'b' => false));
   opt_alias_fun3(varray[]);
   opt_alias_fun3(darray[]);
-  opt_alias_fun3([]);
+  opt_alias_fun3(array());
   opt_alias_fun3(null);
 
   opt_alias_fun4(tuple(true, false));
   opt_alias_fun4(shape('a' => true, 'b' => false));
   opt_alias_fun4(varray[]);
   opt_alias_fun4(darray[]);
-  opt_alias_fun4([]);
+  opt_alias_fun4(array());
   opt_alias_fun4(null);
 
   opt_alias_fun5(tuple(true, false));
   opt_alias_fun5(shape('a' => true, 'b' => false));
   opt_alias_fun5(varray[]);
   opt_alias_fun5(darray[]);
-  opt_alias_fun5([]);
+  opt_alias_fun5(array());
   opt_alias_fun5(null);
 
   opt_alias_fun6(tuple(true, false));
   opt_alias_fun6(shape('a' => true, 'b' => false));
   opt_alias_fun6(varray[]);
   opt_alias_fun6(darray[]);
-  opt_alias_fun6([]);
+  opt_alias_fun6(array());
   opt_alias_fun6(null);
 
   opt_alias_fun7(tuple(true, false));
   opt_alias_fun7(shape('a' => true, 'b' => false));
   opt_alias_fun7(varray[]);
   opt_alias_fun7(darray[]);
-  opt_alias_fun7([]);
+  opt_alias_fun7(array());
   opt_alias_fun7(null);
 
   $x = varray[];
@@ -239,7 +239,7 @@ function test() {
   $x = varray[];
   inout_fun1(inout $x, darray[]);
   $x = varray[];
-  inout_fun1(inout $x, []);
+  inout_fun1(inout $x, array());
 
   $x = darray[];
   inout_fun2(inout $x, tuple(true, false));
@@ -250,7 +250,7 @@ function test() {
   $x = darray[];
   inout_fun2(inout $x, darray[]);
   $x = darray[];
-  inout_fun2(inout $x, []);
+  inout_fun2(inout $x, array());
 
   $x = darray[];
   inout_fun3(inout $x, tuple(true, false));
@@ -261,18 +261,18 @@ function test() {
   $x = darray[];
   inout_fun3(inout $x, darray[]);
   $x = darray[];
-  inout_fun3(inout $x, []);
+  inout_fun3(inout $x, array());
 
-  $x = [];
+  $x = array();
   inout_fun4(inout $x, tuple(true, false));
-  $x = [];
+  $x = array();
   inout_fun4(inout $x, shape('a' => true, 'b' => false));
-  $x = [];
+  $x = array();
   inout_fun4(inout $x, varray[]);
-  $x = [];
+  $x = array();
   inout_fun4(inout $x, darray[]);
-  $x = [];
-  inout_fun4(inout $x, []);
+  $x = array();
+  inout_fun4(inout $x, array());
 
   $x = varray[];
   opt_inout_fun1(inout $x, tuple(true, false));
@@ -283,7 +283,7 @@ function test() {
   $x = varray[];
   opt_inout_fun1(inout $x, darray[]);
   $x = varray[];
-  opt_inout_fun1(inout $x, []);
+  opt_inout_fun1(inout $x, array());
   $x = varray[];
   opt_inout_fun1(inout $x, null);
 
@@ -296,7 +296,7 @@ function test() {
   $x = darray[];
   opt_inout_fun2(inout $x, darray[]);
   $x = darray[];
-  opt_inout_fun2(inout $x, []);
+  opt_inout_fun2(inout $x, array());
   $x = darray[];
   opt_inout_fun2(inout $x, null);
 
@@ -309,34 +309,34 @@ function test() {
   $x = darray[];
   opt_inout_fun3(inout $x, darray[]);
   $x = darray[];
-  opt_inout_fun3(inout $x, []);
+  opt_inout_fun3(inout $x, array());
   $x = darray[];
   opt_inout_fun3(inout $x, null);
 
-  $x = [];
+  $x = array();
   opt_inout_fun4(inout $x, tuple(true, false));
-  $x = [];
+  $x = array();
   opt_inout_fun4(inout $x, shape('a' => true, 'b' => false));
-  $x = [];
+  $x = array();
   opt_inout_fun4(inout $x, varray[]);
-  $x = [];
+  $x = array();
   opt_inout_fun4(inout $x, darray[]);
-  $x = [];
-  opt_inout_fun4(inout $x, []);
-  $x = [];
+  $x = array();
+  opt_inout_fun4(inout $x, array());
+  $x = array();
   opt_inout_fun4(inout $x, null);
 
   vsoft(tuple(true, false));
   vsoft(shape('a' => true, 'b' => false));
   vsoft(varray[]);
   vsoft(darray[]);
-  vsoft([]);
+  vsoft(array());
 
   dsoft(tuple(true, false));
   dsoft(shape('a' => true, 'b' => false));
   dsoft(varray[]);
   dsoft(darray[]);
-  dsoft([]);
+  dsoft(array());
 
   set_error_handler(fun('handler'));
 

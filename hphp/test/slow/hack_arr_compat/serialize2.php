@@ -4,7 +4,7 @@
 function literals() {
   echo "================== literals ==================\n";
   HH\serialize_with_options(
-    [],
+    array(),
     dict["warnOnHackArrays" => true, "warnOnPHPArrays" => true]
   );
   HH\serialize_with_options(
@@ -57,7 +57,7 @@ function literals() {
 
 function test($name, $options) {
   echo "==================== $name =========================\n";
-  var_dump(HH\serialize_with_options([], $options));
+  var_dump(HH\serialize_with_options(array(), $options));
   var_dump(HH\serialize_with_options(varray[1, 2, 3, 4], $options));
   var_dump(HH\serialize_with_options(vec[], $options));
   var_dump(HH\serialize_with_options(vec[1, 2, 3, 4], $options));

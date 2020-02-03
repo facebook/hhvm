@@ -6,7 +6,7 @@ function test1() {
   __hhvm_intrinsics\dummy_varr_or_darr_builtin(shape('a' => true, 'b' => false));
   __hhvm_intrinsics\dummy_varr_or_darr_builtin(varray[]);
   __hhvm_intrinsics\dummy_varr_or_darr_builtin(darray[]);
-  __hhvm_intrinsics\dummy_varr_or_darr_builtin([]);
+  __hhvm_intrinsics\dummy_varr_or_darr_builtin(array());
 }
 
 function test2($a, $b, $c, $d, $e) {
@@ -28,7 +28,7 @@ function test3() {
   __hhvm_intrinsics\dummy_array_builtin(shape('a' => true, 'b' => false));
   __hhvm_intrinsics\dummy_array_builtin(varray[]);
   __hhvm_intrinsics\dummy_array_builtin(darray[]);
-  __hhvm_intrinsics\dummy_array_builtin([]);
+  __hhvm_intrinsics\dummy_array_builtin(array());
 }
 
 function test4($a, $b, $c, $d, $e) {
@@ -73,7 +73,7 @@ function main_type_hints_builtins() {
     shape('a' => true, 'b' => false),
     varray[],
     darray[],
-    []
+    array()
   );
   process_logs();
 
@@ -83,7 +83,7 @@ function main_type_hints_builtins() {
     shape('a' => true, 'b' => false),
     varray[],
     darray[],
-    []
+    array()
   );
   process_logs(false);
 }

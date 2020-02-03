@@ -46,7 +46,7 @@ function main() {
   set_error_handler(fun('handler'));
 
   $x1 = varray[
-    [],
+    varray[],
     varray[1, 2, varray[3, 4]],
     darray['a' => 'b', 'c' => 'd']
   ];
@@ -60,7 +60,7 @@ function main() {
     new stdclass,
     imagecreate(1, 1),
     varray[1, varray[2, 5], varray[3, 4]],
-    darray['a' => [], 'c' => varray[1, 2]],
+    darray['a' => varray[], 'c' => varray[1, 2]],
   ];
   $x2_hack_arrays = varray[
     vec[],

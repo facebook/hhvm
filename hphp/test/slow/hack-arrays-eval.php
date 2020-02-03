@@ -12,7 +12,7 @@ function test_eval() {
   var_dump($d);
   var_dump($k);
 
-  $a = [100, 200, 300];
+  $a = varray[100, 200, 300];
   eval('$v = vec($a);');
   eval('$d = dict($a);');
   eval('$k = keyset($a);');
@@ -41,8 +41,6 @@ function test_default_value() {
 
 <<__EntryPoint>>
 function main_hack_arrays_eval() {
-$array = [];
-
 test_eval();
 test_default_value();
 }

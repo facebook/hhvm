@@ -41,11 +41,11 @@ function test_casting($a) {
 }
 
 function run_tests() {
-  test([], '10');
+  test(varray[], '10');
   test(varray[1, 2, 3, 4], '2');
   test(darray[10 => 'abc'], '10');
 
-  test_const_key([]);
+  test_const_key(varray[]);
   test_const_key(varray[1, 2, 3, 4]);
   test_const_key(darray[2 => 'abc']);
 

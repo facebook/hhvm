@@ -9,10 +9,10 @@ function test_all() {
   $x = vec[
     varray[],
     darray[],
-    [],
+    array(),
     varray[1, 2, 3],
     darray[0 => 1, 1 => 2, 2 => 3],
-    [1, 2, 3]
+    array(1, 2, 3)
   ];
   $x = __hhvm_intrinsics\launder_value($x);
 
@@ -31,59 +31,59 @@ function test_all() {
 
 function test_literals() {
   try { varray[] == darray[]; } catch (Exception $e) { report($e); }
-  try { varray[] == []; } catch (Exception $e) { report($e); }
+  try { varray[] == array(); } catch (Exception $e) { report($e); }
   try { darray[] == varray[]; } catch (Exception $e) { report($e); }
-  try { darray[] == []; } catch (Exception $e) { report($e); }
-  try { [] == varray[]; } catch (Exception $e) { report($e); }
-  try { [] == darray[]; } catch (Exception $e) { report($e); }
+  try { darray[] == array(); } catch (Exception $e) { report($e); }
+  try { array() == varray[]; } catch (Exception $e) { report($e); }
+  try { array() == darray[]; } catch (Exception $e) { report($e); }
   try { darray[] == darray[]; } catch (Exception $e) { report($e); }
 
   try { varray[] != darray[]; } catch (Exception $e) { report($e); }
-  try { varray[] != []; } catch (Exception $e) { report($e); }
+  try { varray[] != array(); } catch (Exception $e) { report($e); }
   try { darray[] != varray[]; } catch (Exception $e) { report($e); }
-  try { darray[] != []; } catch (Exception $e) { report($e); }
-  try { [] != varray[]; } catch (Exception $e) { report($e); }
-  try { [] != darray[]; } catch (Exception $e) { report($e); }
+  try { darray[] != array(); } catch (Exception $e) { report($e); }
+  try { array() != varray[]; } catch (Exception $e) { report($e); }
+  try { array() != darray[]; } catch (Exception $e) { report($e); }
   try { darray[] != darray[]; } catch (Exception $e) { report($e); }
 
   try { varray[] === darray[]; } catch (Exception $e) { report($e); }
-  try { varray[] === []; } catch (Exception $e) { report($e); }
+  try { varray[] === array(); } catch (Exception $e) { report($e); }
   try { darray[] === varray[]; } catch (Exception $e) { report($e); }
-  try { darray[] === []; } catch (Exception $e) { report($e); }
-  try { [] === varray[]; } catch (Exception $e) { report($e); }
-  try { [] === darray[]; } catch (Exception $e) { report($e); }
+  try { darray[] === array(); } catch (Exception $e) { report($e); }
+  try { array() === varray[]; } catch (Exception $e) { report($e); }
+  try { array() === darray[]; } catch (Exception $e) { report($e); }
   try { darray[] === darray[]; } catch (Exception $e) { report($e); }
 
   try { varray[] !== darray[]; } catch (Exception $e) { report($e); }
-  try { varray[] !== []; } catch (Exception $e) { report($e); }
+  try { varray[] !== array(); } catch (Exception $e) { report($e); }
   try { darray[] !== varray[]; } catch (Exception $e) { report($e); }
-  try { darray[] !== []; } catch (Exception $e) { report($e); }
-  try { [] !== varray[]; } catch (Exception $e) { report($e); }
-  try { [] !== darray[]; } catch (Exception $e) { report($e); }
+  try { darray[] !== array(); } catch (Exception $e) { report($e); }
+  try { array() !== varray[]; } catch (Exception $e) { report($e); }
+  try { array() !== darray[]; } catch (Exception $e) { report($e); }
   try { darray[] !== darray[]; } catch (Exception $e) { report($e); }
 
   try { varray[] < darray[]; } catch (Exception $e) { report($e); }
-  try { varray[] < []; } catch (Exception $e) { report($e); }
+  try { varray[] < array(); } catch (Exception $e) { report($e); }
   try { darray[] < varray[]; } catch (Exception $e) { report($e); }
-  try { darray[] < []; } catch (Exception $e) { report($e); }
-  try { [] < varray[]; } catch (Exception $e) { report($e); }
-  try { [] < darray[]; } catch (Exception $e) { report($e); }
+  try { darray[] < array(); } catch (Exception $e) { report($e); }
+  try { array() < varray[]; } catch (Exception $e) { report($e); }
+  try { array() < darray[]; } catch (Exception $e) { report($e); }
   try { darray[] < darray[]; } catch (Exception $e) { report($e); }
 
   try { varray[] > darray[]; } catch (Exception $e) { report($e); }
-  try { varray[] > []; } catch (Exception $e) { report($e); }
+  try { varray[] > array(); } catch (Exception $e) { report($e); }
   try { darray[] > varray[]; } catch (Exception $e) { report($e); }
-  try { darray[] > []; } catch (Exception $e) { report($e); }
-  try { [] > varray[]; } catch (Exception $e) { report($e); }
-  try { [] > darray[]; } catch (Exception $e) { report($e); }
+  try { darray[] > array(); } catch (Exception $e) { report($e); }
+  try { array() > varray[]; } catch (Exception $e) { report($e); }
+  try { array() > darray[]; } catch (Exception $e) { report($e); }
   try { darray[] > darray[]; } catch (Exception $e) { report($e); }
 
   try { varray[] <=> darray[]; } catch (Exception $e) { report($e); }
-  try { varray[] <=> []; } catch (Exception $e) { report($e); }
+  try { varray[] <=> array(); } catch (Exception $e) { report($e); }
   try { darray[] <=> varray[]; } catch (Exception $e) { report($e); }
-  try { darray[] <=> []; } catch (Exception $e) { report($e); }
-  try { [] <=> varray[]; } catch (Exception $e) { report($e); }
-  try { [] <=> darray[]; } catch (Exception $e) { report($e); }
+  try { darray[] <=> array(); } catch (Exception $e) { report($e); }
+  try { array() <=> varray[]; } catch (Exception $e) { report($e); }
+  try { array() <=> darray[]; } catch (Exception $e) { report($e); }
   try { darray[] <=> darray[]; } catch (Exception $e) { report($e); }
 }
 

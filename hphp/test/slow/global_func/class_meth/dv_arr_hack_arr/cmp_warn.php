@@ -60,11 +60,11 @@ function comp($x, $y) {
 <<__EntryPoint>>
 function main() {
   print "* vec vs array:\n";
-  comp(vec[A::class, 'func1'], [A::class, 'func1']);
-  comp(vec[A::class, 'func1'], [A::class, 'func2']);
+  comp(vec[A::class, 'func1'], array(A::class, 'func1'));
+  comp(vec[A::class, 'func1'], array(A::class, 'func2'));
   print "* clsmeth vs array:\n";
-  comp(HH\class_meth(A::class, 'func1'), [A::class, 'func1']);
-  comp(HH\class_meth(A::class, 'func1'), [A::class, 'func2']);
+  comp(HH\class_meth(A::class, 'func1'), array(A::class, 'func1'));
+  comp(HH\class_meth(A::class, 'func1'), array(A::class, 'func2'));
 
   print "* vec vs vec:\n";
   comp(vec[A::class, 'func1'], vec[A::class, 'func1']);

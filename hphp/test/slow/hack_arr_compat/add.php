@@ -6,9 +6,9 @@ function do_add($a, $b) {
 }
 
 function main() {
-  do_add([], []);
-  do_add(varray[1, 2, 3], []);
-  do_add([], varray[1, 2, 3]);
+  do_add(varray[], varray[]);
+  do_add(varray[1, 2, 3], varray[]);
+  do_add(varray[], varray[1, 2, 3]);
   do_add(varray[1, 2, 3], varray[4, 5, 6]);
 }
 

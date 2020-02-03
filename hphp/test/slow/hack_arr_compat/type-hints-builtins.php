@@ -8,25 +8,25 @@ function test1() {
   __hhvm_intrinsics\dummy_varray_builtin(shape('a' => true, 'b' => false));
   __hhvm_intrinsics\dummy_varray_builtin(varray[]);
   __hhvm_intrinsics\dummy_varray_builtin(darray[]);
-  __hhvm_intrinsics\dummy_varray_builtin([]);
+  __hhvm_intrinsics\dummy_varray_builtin(array());
 
   __hhvm_intrinsics\dummy_darray_builtin(tuple(true, false));
   __hhvm_intrinsics\dummy_darray_builtin(shape('a' => true, 'b' => false));
   __hhvm_intrinsics\dummy_darray_builtin(varray[]);
   __hhvm_intrinsics\dummy_darray_builtin(darray[]);
-  __hhvm_intrinsics\dummy_darray_builtin([]);
+  __hhvm_intrinsics\dummy_darray_builtin(array());
 
   __hhvm_intrinsics\dummy_varr_or_darr_builtin(tuple(true, false));
   __hhvm_intrinsics\dummy_varr_or_darr_builtin(shape('a' => true, 'b' => false));
   __hhvm_intrinsics\dummy_varr_or_darr_builtin(varray[]);
   __hhvm_intrinsics\dummy_varr_or_darr_builtin(darray[]);
-  __hhvm_intrinsics\dummy_varr_or_darr_builtin([]);
+  __hhvm_intrinsics\dummy_varr_or_darr_builtin(array());
 
   __hhvm_intrinsics\dummy_array_builtin(tuple(true, false));
   __hhvm_intrinsics\dummy_array_builtin(shape('a' => true, 'b' => false));
   __hhvm_intrinsics\dummy_array_builtin(varray[]);
   __hhvm_intrinsics\dummy_array_builtin(darray[]);
-  __hhvm_intrinsics\dummy_array_builtin([]);
+  __hhvm_intrinsics\dummy_array_builtin(array());
 }
 
 function test2($a, $b, $c, $d, $e) {
@@ -78,6 +78,6 @@ test2(
   shape('a' => true, 'b' => false),
   varray[],
   darray[],
-  []
+  array()
 );
 }

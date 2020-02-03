@@ -46,11 +46,11 @@ function test_serialization($x) {
 }
 
 function test_misc() {
-  $x = [1, 2, 3, 4];
+  $x = varray[1, 2, 3, 4];
   unset($x[0]);
-  $x = [1, 2, 3, 4];
+  $x = varray[1, 2, 3, 4];
   $x['foo'] = 1;
-  $x = [1, 2, 3, 4];
+  $x = varray[1, 2, 3, 4];
   $x[42] = 1;
 }
 
@@ -58,12 +58,12 @@ function test_misc() {
 function main_varr_to_darr() {
   test(varray[]);
   test(darray[]);
-  test([]);
+  test(__hhvm_intrinsics\dummy_array_builtin(varray[]));
   test(dict[]);
 
   test(varray[1, 2, 3, 4]);
   test(darray['a' => 10, 'b' => 20]);
-  test(['a' => 10, 'b' => 20]);
+  test(array('a' => 10, 'b' => 20));
   test(dict['a' => 10, 'b' => 20]);
 
   test(varray[1, 2, 3, 4, 5, 6, 7, 8]);

@@ -4,7 +4,7 @@
 function literals() {
   echo "================== literals ==================\n";
   json_encode(
-    [],
+    varray[],
     JSON_FB_WARN_DICTS | JSON_FB_WARN_KEYSETS | JSON_FB_WARN_PHP_ARRAYS
   );
   json_encode(
@@ -57,7 +57,7 @@ function literals() {
 
 function test($name, $options) {
   echo "==================== $name =========================\n";
-  var_dump(json_encode([], $options));
+  var_dump(json_encode(varray[], $options));
   var_dump(json_encode(varray[1, 2, 3, 4], $options));
   var_dump(json_encode(vec[], $options));
   var_dump(json_encode(vec[1, 2, 3, 4], $options));

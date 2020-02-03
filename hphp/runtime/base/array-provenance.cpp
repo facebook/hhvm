@@ -240,46 +240,6 @@ void reassignTag(ArrayData* ad) {
   clearTag(ad);
 }
 
-namespace {
-
-void tagTVImpl(TypedValue& tv, folly::Optional<Tag> tag) {
-  assertx(RO::EvalArrayProvenance);
-
-  if (!isArrayType(type(tv))) return;
-
-  auto ad = val(tv).parr;
-  if (!arrayWantsTag(ad) || ad->hasProvenanceData()) return;
-
-  if (!tag) tag = tagFromPC();
-  if (!tag) return;
-
-  if (!ad->hasExactlyOneRef()) {
-    ad = ad->copy();
-
-    TypedValue tmp;
-    type(tmp) = dt_with_rc(type(tv));
-    val(tmp).parr = ad;
-
-    tvMove(tmp, tv);
-  }
-  // the copy() above may have tagged this array with the PC data
-  // so we can't assert that it's not there--this is safe since
-  // we bail out above if the input array was already tagged
-  setTag<Mode::Emplace>(ad, *tag);
-}
-
-}
-
-TypedValue tagTV(TypedValue tv) {
-  tagTVImpl(tv, folly::none);
-  return tv;
-}
-
-TypedValue tagTVKnown(TypedValue tv, Tag tag) {
-  tagTVImpl(tv, tag);
-  return tv;
-}
-
 ArrayData* tagStaticArr(ArrayData* ad, folly::Optional<Tag> tag) {
   assertx(RO::EvalArrayProvenance);
   assertx(ad->isStatic());

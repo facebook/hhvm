@@ -2816,6 +2816,9 @@ void RuntimeOption::Load(
 
   if (RuntimeOption::EvalArrayProvenance) {
     RuntimeOption::EvalJitForceVMRegSync = true;
+  } else {
+    RuntimeOption::EvalArrProvDVArrays = false;
+    RuntimeOption::EvalArrProvHackArrays = false;
   }
 
   // Initialize defaults for repo-specific parser configuration options.

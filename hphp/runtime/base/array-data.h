@@ -843,6 +843,9 @@ extern std::aligned_storage<kEmptySetArraySize, 16>::type s_theEmptySetArray;
  * These are singleton static arrays that can be used whenever an empty array
  * is needed.  staticEmptyArray() has kEmptyKind, and the others have the
  * corresponding Hack array kind.
+ *
+ * Builtins should use ArrayData::CreateDArray and similar methods, which also
+ * tag the resulting array with provenance information.
  */
 ArrayData* staticEmptyArray();
 ArrayData* staticEmptyVArray();

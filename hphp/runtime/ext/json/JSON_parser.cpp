@@ -362,7 +362,6 @@ struct SimpleParser {
     , is_tsimplejson(is_tsimplejson)
   {
     assertx(input[length] == 0);  // Parser relies on sentinel to avoid checks.
-    prov_tag = arrprov::tagFromPC();
   }
 
   /*
@@ -686,10 +685,7 @@ struct SimpleParser {
     auto const tv = top++;
     tv->m_type = data->toDataType();
     tv->m_data.parr = data;
-
-    if (RuntimeOption::EvalArrayProvenance && prov_tag) {
-      *tv = arrprov::tagTVKnown(*tv, *prov_tag);
-    }
+    assertx(IMPLIES(arrprov::arrayWantsTag(data), arrprov::getTag(data)));
   }
 
   const char* p;
@@ -697,7 +693,6 @@ struct SimpleParser {
   int array_depth;
   JSONContainerType container_type;
   bool is_tsimplejson;
-  folly::Optional<arrprov::Tag> prov_tag;
 };
 
 /*
@@ -765,7 +760,6 @@ struct json_parser {
   UncheckedBuffer sb_buf;
   UncheckedBuffer sb_key;
   int sb_cap{0};  // Capacity of each of sb_buf/key.
-  folly::Optional<arrprov::Tag> prov_tag;
 
   void initSb(int length) {
     if (UNLIKELY(length >= sb_cap)) {
@@ -1051,10 +1045,6 @@ static void object_set(const json_parser* json,
     } else if (container_type == JSONContainerType::HACK_ARRAYS ||
                container_type == JSONContainerType::LEGACY_HACK_ARRAYS) {
       forceToDict(var).set(key, value);
-      if (RO::EvalArrayProvenance && json->prov_tag) {
-        auto const tv = var.asTypedValue();
-        *tv = arrprov::tagTVKnown(*tv, *json->prov_tag);
-      }
     } else {
       int64_t i;
       if (key.get()->isStrictlyInteger(i)) {
@@ -1062,10 +1052,10 @@ static void object_set(const json_parser* json,
       } else {
         forceToDArray(var).set(key, value);
       }
-      if (RO::EvalArrayProvenance && json->prov_tag) {
-        auto const tv = var.asTypedValue();
-        *tv = arrprov::tagTVKnown(*tv, *json->prov_tag);
-      }
+    }
+    if (var.isArray()) {
+      DEBUG_ONLY auto const data = var.getArrayData();
+      assertx(IMPLIES(arrprov::arrayWantsTag(data), arrprov::getTag(data)));
     }
   }
 }
@@ -1158,7 +1148,6 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
   // they exceed kMaxPersistentStringBufferCapacity at exit or if the thread
   // is explicitly flushed (e.g., due to being idle).
   json->initSb(length);
-  json->prov_tag = arrprov::tagFromPC();
   SCOPE_EXIT {
     constexpr int kMaxPersistentStringBufferCapacity = 256 * 1024;
     if (json->sb_cap > kMaxPersistentStringBufferCapacity) json->flushSb();
@@ -1326,7 +1315,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
             /* </fb> */
             } else if (
               container_type == JSONContainerType::LEGACY_HACK_ARRAYS) {
-              auto arr = Array::CreateDict().copy();
+              auto arr = staticEmptyDictArray()->copy();
               arr->setLegacyArray(true);
               top = arr;
             } else {
@@ -1405,7 +1394,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
           } else if (container_type == JSONContainerType::DARRAYS) {
             top = Array::CreateDArray();
           } else if (container_type == JSONContainerType::LEGACY_HACK_ARRAYS) {
-            auto arr = Array::CreateVec().copy();
+            auto arr = staticEmptyVecArray()->copy();
             arr->setLegacyArray(true);
             top = arr;
           } else {

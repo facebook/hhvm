@@ -1439,22 +1439,19 @@ Array VariableUnserializer::unserializeVArray() {
   if (size == 0) {
     expectChar('}');
     if (m_type != Type::Serialize) {
-      return Array::attach(
-        provTag
-          ? arrprov::tagStaticArr(staticEmptyVArray(), provTag)
-          : staticEmptyVArray()
+      return Array::attach(provTag
+        ? arrprov::tagStaticArr(staticEmptyVArray(), provTag)
+        : staticEmptyVArray()
       );
     }
     return m_forceDArrays
-      ? Array::attach(
-          provTag
-            ? arrprov::tagStaticArr(staticEmptyDArray(), provTag)
-            : staticEmptyDArray()
+      ? Array::attach(provTag
+          ? arrprov::tagStaticArr(staticEmptyDArray(), provTag)
+          : staticEmptyDArray()
         )
-      : Array::attach(
-          provTag
-            ? arrprov::tagStaticArr(staticEmptyVArray(), provTag)
-            : staticEmptyVArray()
+      : Array::attach(provTag
+          ? arrprov::tagStaticArr(staticEmptyVArray(), provTag)
+          : staticEmptyVArray()
         );
   }
   if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
@@ -1519,10 +1516,9 @@ Array VariableUnserializer::unserializeDArray() {
 
   if (size == 0) {
     expectChar('}');
-    return Array::attach(
-      provTag
-        ? arrprov::tagStaticArr(staticEmptyDArray(), provTag)
-        : staticEmptyDArray()
+    return Array::attach(provTag
+      ? arrprov::tagStaticArr(staticEmptyDArray(), provTag)
+      : staticEmptyDArray()
     );
   }
   if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {

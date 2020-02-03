@@ -4835,11 +4835,6 @@ void iopFCallBuiltin(
 
   frame_free_args(args, numNonDefault);
   vmStack().ndiscard(numArgs);
-
-  if (RuntimeOption::EvalArrayProvenance &&
-      !func->isProvenanceSkipFrame()) {
-    ret = arrprov::tagTV(ret);
-  }
   tvCopy(ret, *vmStack().allocTV());
 }
 
@@ -5265,19 +5260,8 @@ OPTBLD_INLINE TCA iopNativeImpl(PC& pc) {
   vmStack().ndiscard(func->numSlotsInFrame());
   vmStack().ret();
 
-  auto const retval = vmStack().topTV();
-
   // Return control to the caller.
   returnToCaller(pc, sfp, callOff);
-
-  if (RuntimeOption::EvalArrayProvenance &&
-      !func->isProvenanceSkipFrame()) {
-    auto const origPC = vmpc();
-    SCOPE_EXIT { vmpc() = origPC; };
-
-    vmpc() = pc;
-    *retval = arrprov::tagTV(*retval);
-  }
   return jitReturnPost(jitReturn);
 }
 

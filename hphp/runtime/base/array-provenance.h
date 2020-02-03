@@ -161,22 +161,6 @@ void clearTag(AsioExternalThreadEvent* ev);
  */
 void reassignTag(ArrayData* ad);
 
-
-/*
- * Tag `tv` with provenance for the current PC and unit (if it admits a tag and
- * doesn't already have one).
- *
- * tagTV() takes logical ownership of `tv`, and if it makes any modifications,
- * it will incref the new value and decref the old one.  As such, generally the
- * appropriate use of this function is:
- *
- *    tv = tagTV(tv);
- *
- * without touching the usual TV mutation machinery.
- */
-TypedValue tagTV(TypedValue tv);
-TypedValue tagTVKnown(TypedValue tv, Tag tag);
-
 /*
  * Produce a static array with the given provenance tag.
  *

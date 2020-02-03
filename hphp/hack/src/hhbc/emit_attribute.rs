@@ -64,10 +64,7 @@ pub fn from_ast(
 /// parameters. The arguments to __Reified are number of type parameters
 /// followed by the indicies of these reified type parameters and whether they
 /// are soft reified or not
-pub fn add_reified_attribute<Ex, Fb, En, Hi>(
-    attrs: &mut Vec<HhasAttribute>,
-    tparams: &[a::Tparam],
-) {
+pub fn add_reified_attribute(attrs: &mut Vec<HhasAttribute>, tparams: &[a::Tparam]) {
     let reified_data: Vec<(usize, bool, bool)> = tparams
         .iter()
         .enumerate()

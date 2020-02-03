@@ -5,6 +5,7 @@
 use env::Env;
 use hhas_param_rust::HhasParam;
 use instruction_sequence_rust::InstrSeq;
+use oxidized::doc_comment::DocComment;
 
 #[derive(Default)]
 pub struct HhasBody {
@@ -16,7 +17,7 @@ pub struct HhasBody {
     pub upper_bounds: Vec<(String, Vec<hhas_type::Info>)>,
     pub params: Vec<HhasParam>,
     pub return_type_info: Option<hhas_type::Info>,
-    pub doc_comment: Option<String>,
+    pub doc_comment: Option<DocComment>,
     pub env: Option<Env>,
 }
 

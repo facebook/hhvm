@@ -41,4 +41,27 @@ impl ClassKind {
             _ => false,
         }
     }
+
+    pub fn is_cinterface(&self) -> bool {
+        match self {
+            ClassKind::Cinterface => true,
+            _ => false,
+        }
+    }
+}
+
+impl FunKind {
+    pub fn is_fasync(&self) -> bool {
+        match self {
+            FunKind::FAsync => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_fasync_generator(&self) -> bool {
+        match self {
+            FunKind::FAsyncGenerator => true,
+            _ => false,
+        }
+    }
 }

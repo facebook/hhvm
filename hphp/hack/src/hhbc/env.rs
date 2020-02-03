@@ -10,7 +10,7 @@ pub mod jump_targets;
 use ast_scope_rust::{Scope, ScopeItem};
 use iterator::Iter;
 use label_rust::Label;
-use oxidized::{ast as tast, ast_defs::Id};
+use oxidized::{ast as tast, ast_defs::Id, namespace_env::Env as NamespaceEnv};
 use rx_rust as rx;
 
 extern crate bitflags;
@@ -167,7 +167,7 @@ pub type SSet = std::collections::BTreeSet<String>;
 #[derive(Default, Debug)]
 pub struct GlobalState {
     pub explicit_use_set: SSet,
-    // closure_namespaces: SMap<NamespaceEnv>, // TODO(hrust) use oxidized
+    pub closure_namespaces: SMap<NamespaceEnv>,
     pub closure_enclosing_classes: SMap<tast::Class_>, // TODO(hrust) need Tast
     pub function_to_labels_map: SMap<SMap<bool>>,
     pub lambda_rx_of_scope: SMap<rx::Level>,

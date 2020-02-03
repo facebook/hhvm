@@ -15,4 +15,5 @@ env = { path = "../env" }
 hhas_param_rust = { path = "../hhas_param" }
 hhas_type = { path = "../hhas_type" }
 instruction_sequence_rust = { path = "../instruction_sequence" }
+oxidized = { path = "../../../oxidized" }
 # @end of Signature

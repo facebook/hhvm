@@ -24,7 +24,7 @@ use instruction_sequence_rust::{InstrSeq, Result};
 use label_rewriter_rust as label_rewriter;
 use naming_special_names_rust::classes;
 use options::CompilerFlags;
-use oxidized::{aast, ast as tast, ast_defs, namespace_env, pos::Pos};
+use oxidized::{aast, ast as tast, ast_defs, doc_comment::DocComment, namespace_env, pos::Pos};
 use runtime::TypedValue;
 
 static THIS: &'static str = "$this";
@@ -41,7 +41,7 @@ pub struct Args<'a> {
     pub scope: &'a Scope<'a>,
     pub pos: &'a Pos,
     pub deprecation_info: &'a Option<&'a [TypedValue]>,
-    pub doc_comment: Option<&'a str>,
+    pub doc_comment: Option<DocComment>,
     pub default_dropthrough: Option<InstrSeq>,
     pub flags: Flags,
 }
@@ -203,7 +203,7 @@ pub fn emit_body(
             upper_bounds,
             params,
             Some(return_type_info),
-            args.doc_comment.map(|dc| dc.to_string()),
+            args.doc_comment.to_owned(),
             Some(env),
         )),
         is_generator,
@@ -421,7 +421,7 @@ pub fn make_body(
     upper_bounds: Vec<(String, Vec<HhasTypeInfo>)>,
     mut params: Vec<HhasParam>,
     return_type_info: Option<HhasTypeInfo>,
-    doc_comment: Option<String>,
+    doc_comment: Option<DocComment>,
     env: Option<Env>,
 ) -> HhasBody {
     body_instrs.rewrite_user_labels(emitter.label_gen_mut());

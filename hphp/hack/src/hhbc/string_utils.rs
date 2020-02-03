@@ -63,11 +63,11 @@ pub fn is_xhp(name: &str) -> bool {
     name.chars().next().map_or(false, |c| c == ':')
 }
 
-pub fn mangle_xhp_id(mut name: String) -> String {
-    fn ignore_id(name: &str) -> bool {
-        name.starts_with("Closure$")
-    }
+fn ignore_id(name: &str) -> bool {
+    name.starts_with("Closure$")
+}
 
+pub fn mangle_xhp_id(mut name: String) -> String {
     if !ignore_id(&name) && MANGLE_XHP_MODE.with(|x| x.get()) {
         if is_xhp(&name) {
             name.replace_range(..1, "xhp_")
@@ -76,6 +76,10 @@ pub fn mangle_xhp_id(mut name: String) -> String {
     } else {
         name
     }
+}
+
+pub fn mangle(_name: String) -> String {
+    unimplemented!("")
 }
 
 pub fn quote_string(s: &str) -> String {

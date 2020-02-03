@@ -714,6 +714,7 @@ dependencies = [
  "hhas_param_rust 0.0.0",
  "hhas_type 0.0.0",
  "instruction_sequence_rust 0.0.0",
+ "oxidized 0.0.0",
 ]
 
 [[package]]

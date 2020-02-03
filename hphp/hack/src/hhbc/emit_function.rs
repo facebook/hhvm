@@ -43,7 +43,7 @@ pub fn emit_function(
 
     let mut attrs: Vec<HhasAttribute> =
         emit_attribute::from_asts(e, &f.namespace, &f.user_attributes)?;
-    emit_attribute::add_reified_attribute::<Pos, (), (), ()>(&mut attrs, &f.tparams);
+    emit_attribute::add_reified_attribute(&mut attrs, &f.tparams);
     let memoized = attrs.iter().any(|a| ua::is_memoized(&a.name));
     flags.set(Flags::MEMOIZE_IMPL, memoized);
     flags.set(
@@ -108,7 +108,7 @@ pub fn emit_function(
                 flags,
                 deprecation_info: &deprecation_info,
                 default_dropthrough: None,
-                doc_comment: f.doc_comment.as_ref().map(|dc| dc.0.as_str()),
+                doc_comment: f.doc_comment.clone(),
                 pos: &f.span,
                 scope: &scope,
                 ret: f.ret.1.clone(),

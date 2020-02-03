@@ -54,7 +54,7 @@ if ($success) {
 } else {
   $stacks = xenon_get_data();
 }
-$required_functions = array(
+$required_functions = varray[
   'array_map',
   'HH\Asio\join',
   'HH\Asio\result',
@@ -67,14 +67,14 @@ $required_functions = array(
   'genBar',
   'main',
   'apc_fetch',
-);
-$optional_functions = array(
+];
+$optional_functions = varray[
   'include',
   'is_callable',
   AwaitAllWaitHandle::class.'::fromVArray',
   RescheduleWaitHandle::class.'::create',
   Awaitable::class.'::result',
-);
+];
 verifyTestRun($stacks, $required_functions, $optional_functions);
 if ($success) {
   apc_store('request_number', 2);

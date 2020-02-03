@@ -13,19 +13,19 @@
 
 // Both static and dynamic
 
-const ARR1 = [];
+const ARR1 = array();
 const VARR1 = varray[];
 const DARR1 = darray[];
 
-const ARR2 = ['a', 'b', 'c'];
+const ARR2 = array('a', 'b', 'c');
 const VARR2 = varray['a', 'b', 'c'];
 const DARR2 = darray[0 => 'a', 1 => 'b', 2 => 'c'];
 
-const ARR3 = [100 => 200, 200 => 300];
+const ARR3 = array(100 => 200, 200 => 300);
 const DARR3 = darray[100 => 200, 200 => 300];
 
-const ARR4 = ['a' => 'x', 'b' => 'y', 'c' => 'z'];
-const DARR4 = ['a' => 'x', 'b' => 'y', 'c' => 'z'];
+const ARR4 = array('a' => 'x', 'b' => 'y', 'c' => 'z');
+const DARR4 = darray['a' => 'x', 'b' => 'y', 'c' => 'z'];
 
 function test() {
   var_dump(ARR1 == VARR1);

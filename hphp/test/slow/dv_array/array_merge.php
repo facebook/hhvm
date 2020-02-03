@@ -14,10 +14,10 @@ function test($a, $b) {
 
 function test_all() {
   $vals = vec[
-    [],
-    ['a', 'b', 'c'],
-    [10 => 'a', 20 => 'b', 30 => 'c'],
-    ['a' => 123, 'b' => 456, 'c' => 789],
+    __hhvm_intrinsics\dummy_array_builtin(varray[]),
+    varray['a', 'b', 'c'],
+    darray[10 => 'a', 20 => 'b', 30 => 'c'],
+    darray['a' => 123, 'b' => 456, 'c' => 789],
     varray[],
     varray['a', 'b', 'c'],
     darray[],

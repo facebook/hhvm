@@ -3,7 +3,7 @@
 function array_count_values_test_cases(
 ): vec<mixed> {
   return vec[
-    tuple(varray[], []),
+    tuple(varray[], array()),
     tuple(
       varray[
         'foo',
@@ -13,12 +13,12 @@ function array_count_values_test_cases(
         'baz',
         'zar',
       ],
-      [
+      array(
         'foo' => 2,
         'bar' => 1,
         'baz' => 2,
         'zar' => 1,
-      ],
+      ),
     ),
     tuple(
       darray[
@@ -29,10 +29,10 @@ function array_count_values_test_cases(
         'cro' => 1,
         'sby' => 1,
       ],
-      [
+      array(
         1 => 4,
         42 => 2,
-      ],
+      ),
     ),
     tuple(
       Vector {
@@ -42,14 +42,14 @@ function array_count_values_test_cases(
         0,
         1,
       },
-      [
+      array(
         0 => 3,
         1 => 2,
-      ],
+      ),
     ),
     tuple(
-      [null, 0, false, 0.2],
-      [0 => 1],
+      array(null, 0, false, 0.2),
+      array(0 => 1),
     )
   ];
 }

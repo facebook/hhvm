@@ -14,10 +14,10 @@ function test($a, $b) {
 
 function test_all() {
   $vals = vec[
-    [],
-    ['a', 'b', 'c'],
-    [10 => 'a', 20 => 'b', 30 => 'c'],
-    ['a' => 123, 'b' => 456, 'c' => 789],
+    array(),
+    array('a', 'b', 'c'),
+    array(10 => 'a', 20 => 'b', 30 => 'c'),
+    array('a' => 123, 'b' => 456, 'c' => 789),
     varray[],
     varray['a', 'b', 'c'],
     darray[],

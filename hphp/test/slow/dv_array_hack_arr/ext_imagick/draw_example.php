@@ -1,10 +1,10 @@
 <?hh
 
 function get_coord($ox, $oy, $rx, $ry, $arg) {
-  return array(
+  return darray[
     'x' => $ox + $rx * cos(deg2rad($arg)),
     'y' => $oy + $ry * sin(deg2rad($arg))
-  );
+  ];
 }
 
 function draw_pie($canvas, $ox, $oy, $r, $sd, $ed, $color) {
@@ -15,11 +15,11 @@ function draw_pie($canvas, $ox, $oy, $r, $sd, $ed, $color) {
   $draw->setStrokeWidth(1);
 
   $draw->arc($ox - $r, $oy - $r, $ox + $r, $oy + $r, $sd, $ed);
-  $draw->polygon(array(
-    array('x' => $ox, 'y' => $oy),
+  $draw->polygon(varray[
+    darray['x' => $ox, 'y' => $oy],
     get_coord($ox, $oy, $r, $r, $sd),
     get_coord($ox, $oy, $r, $r, $ed)
-  ));
+  ]);
 
   $canvas->drawImage($draw);
 }
@@ -113,16 +113,16 @@ $bg = new ImagickPixel('white');
 $actual_iterator = new ImagickPixelIterator($canvas);
 $expected_iterator =  new ImagickPixelIterator(new Imagick($expected_file));
 
-list($total, $same, $similar, $diff) = array(0, 0, 0, 0);
+list($total, $same, $similar, $diff) = varray[0, 0, 0, 0];
 
 $actual_iterator->rewind();
 $expected_iterator->rewind();
 while ($actual_iterator->valid() && $expected_iterator->valid()) {
   if ($expected_iterator->key() !== $expected_iterator->key()) {
-    var_dump(array(
+    var_dump(darray[
       'actual' => $expected_iterator->key(),
       'expected' => $expected_iterator->key()
-    ));
+    ]);
   }
   $actual_pixels = $actual_iterator->current();
   $expected_pixels = $expected_iterator->current();
@@ -145,12 +145,12 @@ while ($actual_iterator->valid() && $expected_iterator->valid()) {
   $expected_iterator->next();
 }
 
-var_dump(array(
+var_dump(darray[
   'total'   => $total,
   'same'    => $same,
   'similar' => $similar,
   'diff'    => $diff
-));
+]);
 var_dump($total > 55000 && $total < 65000);
 var_dump($same > $total * 0.92);
 var_dump($diff < $total * 0.04);

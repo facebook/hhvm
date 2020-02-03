@@ -20,9 +20,9 @@ async function fa2($a) {
 }
 
 async function fa1($a) {
-  $values = await \HH\Asio\v(array(
+  $values = await \HH\Asio\v(varray[
     fa2($a),
-  ));
+  ]);
   return 3 * $values[0];
 }
 
@@ -44,7 +44,7 @@ echo main(42) . "\n";
 // get the Xenon data then verify that there are no unknown functions
 // and that all of the functions in this file are in the stack
 $stacks = xenon_get_data();
-$required_functions = array(
+$required_functions = varray[
   'HH\Asio\join',
   'HH\Asio\v',
   'HH\Asio\result',
@@ -56,13 +56,13 @@ $required_functions = array(
   'fn0',
   'fn1',
   'main',
-);
-$optional_functions = array(
+];
+$optional_functions = varray[
   'include',
   'count',
   Vector::class.'::__construct',
   AwaitAllWaitHandle::class.'::fromVector',
   RescheduleWaitHandle::class.'::create',
-);
+];
 
 verifyTestRun($stacks, $required_functions, $optional_functions);

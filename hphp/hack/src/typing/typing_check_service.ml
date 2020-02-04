@@ -208,23 +208,23 @@ type process_file_results = {
 
 let process_file
     (dynamic_view_files : Relative_path.Set.t)
-    (opts : GlobalOptions.t)
+    (ctx : Provider_context.t)
     (errors : Errors.t)
     (file : check_file_computation) : process_file_results =
   let fn = file.path in
   let ast = Ast_provider.get_ast ~full:true fn in
+  let opts =
+    {
+      ctx.Provider_context.tcopt with
+      GlobalOptions.tco_dynamic_view =
+        Relative_path.Set.mem dynamic_view_files fn;
+    }
+  in
   Deferred_decl.reset
     ~enable:(should_enable_deferring opts file)
     ~threshold_opt:(GlobalOptions.tco_defer_class_declaration_threshold opts);
   let prev_counters_state = Counters.reset ~enable:true in
   let (funs, classes, record_defs, typedefs, gconsts) = Nast.get_defs ast in
-  let opts =
-    {
-      opts with
-      GlobalOptions.tco_dynamic_view =
-        Relative_path.Set.mem dynamic_view_files fn;
-    }
-  in
   let ignore_type_record_def opts fn name =
     ignore (type_record_def opts fn name)
   in
@@ -292,7 +292,7 @@ let should_exit ~(memory_cap : int option) =
 
 let process_files
     (dynamic_view_files : Relative_path.Set.t)
-    (opts : GlobalOptions.t)
+    (ctx : Provider_context.t)
     (errors : Errors.t)
     (progress : computation_progress)
     ~(memory_cap : int option)
@@ -365,13 +365,13 @@ let process_files
         match fn with
         | Check file ->
           let start_time = Unix.gettimeofday () in
-          let result = process_file dynamic_view_files opts errors file in
+          let result = process_file dynamic_view_files ctx errors file in
           let second_start_time =
             if check_info.profile_type_check_twice then
               let t = Unix.gettimeofday () in
               (* we're running this routine solely for the side effect *)
               (* of seeing how long it takes to run. *)
-              let _ignored = process_file dynamic_view_files opts errors file in
+              let _ignored = process_file dynamic_view_files ctx errors file in
               Some t
             else
               None
@@ -420,7 +420,8 @@ let load_and_process_files
   Sys_utils.set_signal
     Sys.sigusr1
     (Sys.Signal_handle Typing.debug_print_last_pos);
-  process_files dynamic_view_files opts errors progress ~memory_cap ~check_info
+  let ctx = Provider_context.empty ~tcopt:opts in
+  process_files dynamic_view_files ctx errors progress ~memory_cap ~check_info
 
 (*****************************************************************************)
 (* Let's go! That's where the action is *)
@@ -733,6 +734,7 @@ let go_with_interrupt
     (Errors.t, Delegate.state, Telemetry.t, 'a) job_result =
   let fnl = List.map fnl ~f:(fun path -> Check { path; deferred_count = 0 }) in
   Mocking.with_test_mocking fnl @@ fun fnl ->
+  let ctx = Provider_context.empty ~tcopt:opts in
   let result =
     if should_process_sequentially opts fnl then (
       Hh_logger.log "Type checking service will process files sequentially";
@@ -740,7 +742,7 @@ let go_with_interrupt
       let (errors, _) =
         process_files
           dynamic_view_files
-          opts
+          ctx
           neutral
           progress
           ~memory_cap:None
@@ -754,7 +756,7 @@ let go_with_interrupt
         workers
         delegate_state
         telemetry
-        opts
+        ctx.Provider_context.tcopt
         fnl
         ~interrupt
         ~memory_cap

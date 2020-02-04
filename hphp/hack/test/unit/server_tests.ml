@@ -166,21 +166,21 @@ let server_setup_for_deferral_tests () =
     two computations:
       - a declaration of \Bar
       - a (deferred) type check of \Foo *)
-  let opts = Global_naming_options.get () in
-  (opts, foo_path, foo_contents)
+  let ctx = Provider_context.empty ~tcopt:(Global_naming_options.get ()) in
+  (ctx, foo_path, foo_contents)
 
 (* In this test, we wish to establish that we enable deferring type checking
   for files that have undeclared dependencies, UNLESS we've already deferred
   those files a certain number of times. *)
 let test_process_file_deferring () =
-  let (opts, path, _contents) = server_setup_for_deferral_tests () in
+  let (ctx, path, _contents) = server_setup_for_deferral_tests () in
   let file = Typing_check_service.{ path; deferred_count = 0 } in
   let dynamic_view_files = Relative_path.Set.empty in
   let errors = Errors.empty in
 
   (* Finally, this is what all the setup was for: process this file *)
   let { Typing_check_service.computation; counters; _ } =
-    Typing_check_service.process_file dynamic_view_files opts errors file
+    Typing_check_service.process_file dynamic_view_files ctx errors file
   in
   Asserter.Int_asserter.assert_equals
     2
@@ -236,11 +236,10 @@ let test_process_file_deferring () =
 (* This test verifies that the deferral/counting machinery works for
    ProviderUtils.compute_tast_and_errors_unquarantined. *)
 let test_compute_tast_counting () =
-  let (tcopt, path, content) = server_setup_for_deferral_tests () in
+  let (ctx, path, content) = server_setup_for_deferral_tests () in
   Parser_options_provider.set ParserOptions.default;
   EventLogger.init_fake ();
 
-  let ctx = Provider_context.empty ~tcopt in
   let file_input = ServerCommandTypes.FileContent content in
   let (ctx, entry) = Provider_utils.update_context ctx path file_input in
   let { Provider_utils.Compute_tast_and_errors.telemetry; _ } =

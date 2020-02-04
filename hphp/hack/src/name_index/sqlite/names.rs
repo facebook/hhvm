@@ -36,16 +36,16 @@ impl Names {
         Ok(())
     }
 
-    pub fn paths_of_funs(&self, names: &[&str]) -> Result<Vec<Option<RelativePath>>> {
-        funs::paths_of_funs(&self.connection, names)
+    pub fn get_fun_path(&self, name: &str) -> Result<Option<RelativePath>> {
+        funs::get_path(&self.connection, name)
     }
 
-    pub fn paths_of_types(&self, names: &[&str]) -> Result<Vec<Option<RelativePath>>> {
-        types::paths_of_types(&self.connection, names)
+    pub fn get_type_path(&self, name: &str) -> Result<Option<RelativePath>> {
+        types::get_path(&self.connection, name)
     }
 
-    pub fn paths_of_consts(&self, names: &[&str]) -> Result<Vec<Option<RelativePath>>> {
-        consts::paths_of_consts(&self.connection, names)
+    pub fn get_const_path(&self, name: &str) -> Result<Option<RelativePath>> {
+        consts::get_path(&self.connection, name)
     }
 }
 
@@ -57,18 +57,11 @@ mod tests {
     fn test_get_non_existent_const() {
         let names = Names::new_in_memory().unwrap();
 
-        let result = names.paths_of_consts(&["\\Foo"]).unwrap();
+        let result = names.get_const_path("\\Foo").unwrap();
 
-        assert_eq!(
-            1,
-            result.len(),
-            "The result vec must have exactly 1 element"
-        );
-
-        match result.first() {
-            Some(Some(path)) => assert!(false, format!("Unexpected path: {:?}", path)),
-            Some(None) => assert!(true),
-            None => assert!(false, "Expected an element but got none"),
+        match result {
+            Some(path) => assert!(false, format!("Unexpected path: {:?}", path)),
+            None => assert!(true),
         }
     }
 }

@@ -51,10 +51,7 @@ fn insert(connection: &Connection, items: &[TypeItem]) -> Result<()> {
     Ok(())
 }
 
-pub fn paths_of_types(
-    connection: &Connection,
-    names: &[&str],
-) -> Result<Vec<Option<RelativePath>>> {
+pub fn get_path(connection: &Connection, name: &str) -> Result<Option<RelativePath>> {
     let select_statement = "
         SELECT
             NAMING_FILE_INFO.PATH_PREFIX_TYPE,
@@ -69,20 +66,15 @@ pub fn paths_of_types(
             NAMING_TYPES.HASH = ?
         ";
 
-    let mut select_statement = connection.prepare(&select_statement)?;
-    names
-        .into_iter()
-        .map(|name| {
-            let hash = convert::name_to_hash(&name);
-            select_statement
-                .query_row::<RelativePath, _, _>(params![hash], |row| {
-                    let prefix: SqlitePrefix = row.get(0)?;
-                    let suffix: SqlitePathBuf = row.get(1)?;
-                    Ok(RelativePath::make(prefix.value, suffix.value))
-                })
-                .optional()
+    let mut select_statement = connection.prepare_cached(&select_statement)?;
+    let hash = convert::name_to_hash(&name);
+    select_statement
+        .query_row::<RelativePath, _, _>(params![hash], |row| {
+            let prefix: SqlitePrefix = row.get(0)?;
+            let suffix: SqlitePathBuf = row.get(1)?;
+            Ok(RelativePath::make(prefix.value, suffix.value))
         })
-        .collect()
+        .optional()
 }
 
 #[cfg(test)]

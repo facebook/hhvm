@@ -33,7 +33,8 @@ let emit_main is_evaled debugger_modify_program namespace (defs : Tast.program)
           instr_int 1 )
       ~default_dropthrough:None
       ~doc_comment:None
-      []
+      ~immediate_tparams:[]
+      ~class_tparam_names:[]
       []
       None
       defs

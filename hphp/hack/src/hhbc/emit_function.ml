@@ -77,7 +77,8 @@ let emit_function (ast_fun, hoisted) : Hhas_function.t list =
       ~return_value:instr_null
       ~namespace
       ~doc_comment:ast_fun.T.f_doc_comment
-      ast_fun.T.f_tparams
+      ~immediate_tparams:ast_fun.T.f_tparams
+      ~class_tparam_names:[]
       ast_fun.T.f_params
       (T.hint_of_type_hint ast_fun.T.f_ret)
       [T.Stmt (Pos.none, T.Block ast_body)]

@@ -37,7 +37,8 @@ val emit_body :
   return_value:Instruction_sequence.t ->
   namespace:Namespace_env.env ->
   doc_comment:string option ->
-  Tast.tparam list ->
+  immediate_tparams:Tast.tparam list ->
+  class_tparam_names:string list ->
   Tast.fun_param list ->
   Aast.hint option ->
   Tast.program ->
@@ -70,5 +71,6 @@ val emit_deprecation_warning :
 
 val emit_generics_upper_bounds :
   Tast.tparam list ->
+  string list ->
   skipawaitable:bool ->
   (string * Hhas_type_info.t list) list

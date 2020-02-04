@@ -147,6 +147,9 @@ let from_ast_wrapper privatize make_name ast_class ast_method =
     else
       (ast_method.T.m_body.T.fb_ast, false, false)
   in
+  let class_tparam_names =
+    List.map ast_class.T.c_tparams.T.c_tparam_list (fun t -> snd t.T.tp_name)
+  in
   let (method_body, method_is_generator, method_is_pair_generator) =
     if is_native_opcode_impl then
       ( Emit_native_opcode.emit_body
@@ -174,7 +177,8 @@ let from_ast_wrapper privatize make_name ast_class ast_method =
         ~return_value:instr_null
         ~namespace
         ~doc_comment:ast_method.T.m_doc_comment
-        ast_method.T.m_tparams
+        ~immediate_tparams:ast_method.T.m_tparams
+        ~class_tparam_names
         ast_method.T.m_params
         ret
         [T.Stmt (Pos.none, T.Block ast_body_block)]

@@ -5145,7 +5145,7 @@ OPTBLD_INLINE void iopVerifyParamType(local_var param) {
     auto it = ubs.find(param.index);
     if (it != ubs.end()) {
       for (auto const& ub : it->second) {
-        ub.verifyParam(param.ptr, func, param.index);
+        if (ub.isCheckable()) ub.verifyParam(param.ptr, func, param.index);
       }
     }
   }
@@ -5184,7 +5184,9 @@ OPTBLD_INLINE void iopVerifyOutType(uint32_t paramId) {
     auto it = ubs.find(paramId);
     if (it != ubs.end()) {
       for (auto const& ub : it->second) {
-        ub.verifyOutParam(vmStack().topTV(), func, paramId);
+        if (ub.isCheckable()) {
+          ub.verifyOutParam(vmStack().topTV(), func, paramId);
+        }
       }
     }
   }
@@ -5198,7 +5200,7 @@ OPTBLD_INLINE void verifyRetTypeImpl(size_t ind) {
   if (tc.isCheckable()) tc.verifyReturn(vmStack().indC(ind), func);
   if (func->hasReturnWithMultiUBs()) {
     for (auto const& ub : func->returnUBs()) {
-      ub.verifyReturn(vmStack().indC(ind), func);
+      if (ub.isCheckable()) ub.verifyReturn(vmStack().indC(ind), func);
     }
   }
 }

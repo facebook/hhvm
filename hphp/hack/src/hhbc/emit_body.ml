@@ -20,13 +20,14 @@ let has_type_constraint env ti ast_param =
     (RGH.has_reified_type_constraint env h, Some h)
   | _ -> (RGH.NoConstraint, None)
 
-let emit_generics_upper_bounds tparams ~skipawaitable =
+let emit_generics_upper_bounds tparams class_tparam_names ~skipawaitable =
   List.filter_map tparams ~f:(fun t ->
       let ubs =
         List.filter_map t.A.tp_constraints ~f:(fun c ->
             match c with
             | (Ast_defs.Constraint_as, h) ->
               let tparams = List.map tparams (fun t -> snd t.A.tp_name) in
+              let tparams = tparams @ class_tparam_names in
               Some
                 (Emit_type_hint.hint_to_type_info
                    ~kind:Emit_type_hint.UpperBound
@@ -328,7 +329,8 @@ let emit_body
     ~return_value
     ~namespace
     ~doc_comment
-    immediate_tparams
+    ~immediate_tparams
+    ~class_tparam_names
     ast_params
     ret
     (body : Tast.program) =
@@ -575,7 +577,10 @@ let emit_body
   in
   let upper_bounds =
     if Hhbc_options.enforce_generics_ub !Hhbc_options.compiler_options then
-      emit_generics_upper_bounds immediate_tparams ~skipawaitable
+      emit_generics_upper_bounds
+        immediate_tparams
+        class_tparam_names
+        ~skipawaitable
     else
       []
   in

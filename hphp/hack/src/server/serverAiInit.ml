@@ -39,8 +39,8 @@ let ai_check
       let check_mode = ServerArgs.check_mode genv.options in
       let errorl =
         Ai.go
-          (fun tcopt path file_info ->
-            let ctx = Provider_context.empty ~tcopt in
+          (fun _tcopt path file_info ->
+            let ctx = Provider_utils.ctx_from_server_env env in
             Typing_check_utils.type_file ctx path file_info)
           genv.workers
           files_info

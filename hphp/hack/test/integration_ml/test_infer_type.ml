@@ -370,9 +370,11 @@ let test () =
       Test.assertEqual (fmt expected) (fmt ty_str)
     in
     let fn = ServerCommandTypes.FileName ("/" ^ file) in
-    let ServerEnv.{ tcopt; _ } = env in
-    let tcopt = { tcopt with GlobalOptions.tco_dynamic_view = dynamic } in
-    let ctx = Provider_context.empty ~tcopt in
+    let ctx =
+      Provider_utils.ctx_from_server_env env
+      |> Provider_context.map_tcopt ~f:(fun tcopt ->
+             { tcopt with GlobalOptions.tco_dynamic_view = dynamic })
+    in
     let (ctx, entry) =
       Provider_utils.update_context
         ~ctx

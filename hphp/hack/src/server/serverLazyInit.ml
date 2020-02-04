@@ -633,7 +633,7 @@ let write_symbol_info_init (genv : ServerEnv.genv) (env : ServerEnv.env) :
   else
     Sys_utils.mkdir_p out_dir;
 
-  let ctx = Provider_context.empty ~tcopt:env.tcopt in
+  let ctx = Provider_utils.ctx_from_server_env env in
   Typing_symbol_info_writer.go genv.workers ctx out_dir files;
 
   (env, t)

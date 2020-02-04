@@ -286,7 +286,7 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
                (e, Caml.Printexc.raw_backtrace_to_string stack, env))
     in
     let parsed_files = Full_fidelity_parser_profiling.stop_profiling () in
-    let ctx = Provider_context.empty ~tcopt:env.ServerEnv.tcopt in
+    let ctx = Provider_utils.ctx_from_server_env env in
     predeclare_ide_deps genv ctx declared_names;
     let (major_gc_time, minor_gc_time) = Sys_utils.get_gc_time () in
     let lvl =

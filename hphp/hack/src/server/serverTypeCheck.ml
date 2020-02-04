@@ -320,7 +320,7 @@ let parsing genv env to_check ~stop_at_errors =
 
   (* During integration tests, we want to pretend that search is run
     synchronously *)
-  let ctx = Provider_context.empty ~tcopt:env.tcopt in
+  let ctx = Provider_utils.ctx_from_server_env env in
   let env =
     {
       env with

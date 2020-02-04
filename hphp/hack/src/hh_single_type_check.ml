@@ -1494,7 +1494,7 @@ let handle_mode
     let include_defs = true in
     let (ctx, entry) =
       Provider_utils.update_context
-        ~ctx:(Provider_context.empty ~tcopt:env.ServerEnv.tcopt)
+        ~ctx:(Provider_utils.ctx_from_server_env env)
         ~path:(Relative_path.create_detect_prefix filename)
         ~file_input:(ServerCommandTypes.FileContent content)
     in
@@ -1531,7 +1531,7 @@ let handle_mode
     let content = cat filename in
     let (ctx, entry) =
       Provider_utils.update_context
-        ~ctx:(Provider_context.empty ~tcopt:env.ServerEnv.tcopt)
+        ~ctx:(Provider_utils.ctx_from_server_env env)
         ~path:(Relative_path.create_detect_prefix filename)
         ~file_input:(ServerCommandTypes.FileContent content)
     in

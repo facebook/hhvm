@@ -112,7 +112,7 @@ let load_saved_state
                hhi_root;
                server_env;
                changed_files_to_process = Path.Set.of_list changed_files;
-               ctx = Provider_context.empty server_env.ServerEnv.tcopt;
+               ctx = Provider_utils.ctx_from_server_env server_env;
                peak_changed_files_queue_size = List.length changed_files;
              })
       | Error load_error ->

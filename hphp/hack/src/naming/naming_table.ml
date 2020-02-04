@@ -188,9 +188,9 @@ let to_canon_name_key = String.lowercase_ascii
 let canonize_set = SSet.map to_canon_name_key
 
 type type_of_type =
-  | TClass
-  | TTypedef
-  | TRecordDef
+  | TClass [@value 0]
+  | TTypedef [@value 1]
+  | TRecordDef [@value 2]
 [@@deriving eq, enum]
 
 module Sqlite : sig

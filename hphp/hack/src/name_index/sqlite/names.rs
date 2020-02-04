@@ -8,7 +8,7 @@ use std::path::Path;
 
 use oxidized::relative_path::RelativePath;
 
-use crate::{consts, file_infos, funs, Result};
+use crate::{consts, file_infos, funs, types, Result};
 
 #[derive(Debug)]
 pub struct Names {
@@ -31,12 +31,17 @@ impl Names {
     fn create_tables(connection: &Connection) -> Result<()> {
         file_infos::create_table(connection)?;
         funs::create_table(connection)?;
+        types::create_table(connection)?;
         consts::create_table(connection)?;
         Ok(())
     }
 
     pub fn paths_of_funs(&self, names: &[&str]) -> Result<Vec<Option<RelativePath>>> {
         funs::paths_of_funs(&self.connection, names)
+    }
+
+    pub fn paths_of_types(&self, names: &[&str]) -> Result<Vec<Option<RelativePath>>> {
+        types::paths_of_types(&self.connection, names)
     }
 
     pub fn paths_of_consts(&self, names: &[&str]) -> Result<Vec<Option<RelativePath>>> {

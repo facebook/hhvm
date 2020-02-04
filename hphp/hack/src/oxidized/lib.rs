@@ -52,6 +52,7 @@ pub use gen::full_fidelity_parser_env;
 pub use gen::global_options;
 pub use gen::ident;
 pub use gen::namespace_env;
+pub use gen::naming_table;
 pub use gen::nast;
 pub use gen::parser_options;
 pub use gen::prim_defs;

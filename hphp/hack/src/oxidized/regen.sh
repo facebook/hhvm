@@ -30,6 +30,7 @@ BUILD_AND_RUN="hphp/hack/scripts/build_and_run.sh"
   hphp/hack/src/errors/errors.ml                                              \
   hphp/hack/src/errors/error_codes.ml                                         \
   hphp/hack/src/heap/ident.ml                                                 \
+  hphp/hack/src/naming/naming_table.ml                                        \
   hphp/hack/src/naming/nast.ml                                                \
   hphp/hack/src/options/globalOptions.ml                                      \
   hphp/hack/src/options/parserOptions.ml                                      \

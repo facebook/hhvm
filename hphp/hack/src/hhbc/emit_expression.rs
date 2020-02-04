@@ -11,13 +11,15 @@ use emit_fatal_rust as emit_fatal;
 use emit_type_constant_rust as emit_type_constant;
 use env::{emitter::Emitter, Env};
 use hhbc_ast_rust::*;
-use hhbc_id_rust::{r#const, Id};
+use hhbc_id_rust::{class, method, r#const, Id};
+use hhbc_string_utils_rust as string_utils;
 use instruction_sequence_rust::{Error::Unrecoverable, InstrSeq, Result};
 use label_rust::Label;
 use local_rust as local;
 use naming_special_names_rust::{pseudo_consts, special_idents, superglobals};
-use options::Options;
+use options::{HhvmFlags, Options};
 use oxidized::{aast, aast_defs, ast as tast, ast_defs, local_id, pos::Pos};
+use scope_rust::scope;
 
 use std::{collections::BTreeMap, convert::TryInto};
 
@@ -378,7 +380,7 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
             }
         }
         Expr_::ObjGet(e) => emit_obj_get(env, pos, QueryOp::CGet, &**e),
-        Expr_::Call(e) => emit_call_expr(env, pos, None, &**e),
+        Expr_::Call(_) => emit_call_expr(env, pos, None, expr.as_call().unwrap()),
         Expr_::New(e) => emit_new(env, pos, &**e),
         Expr_::Record(e) => emit_record(env, pos, &**e),
         Expr_::Array(es) => emit_pos_then(emitter, pos, emit_collection(env, expression, es)?),
@@ -426,7 +428,7 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
         }
         Expr_::Clone(e) => emit_pos_then(emitter, pos, emit_clone(env, &**e)?),
         Expr_::Shape(e) => emit_pos_then(emitter, pos, emit_shape(env, expression, e)?),
-        Expr_::Await(e) => emit_await(env, pos, &**e),
+        Expr_::Await(e) => emit_await(emitter, env, pos, &**e),
         Expr_::Yield(e) => emit_yield(env, pos, &**e),
         Expr_::Efun(e) => emit_pos_then(emitter, pos, emit_lambda(env, &**e)?),
         Expr_::ClassGet(e) => emit_class_get(env, QueryOp::CGet, &**e),
@@ -437,7 +439,7 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
             emit_pos_then(emitter, pos, instrs)
         }
         Expr_::Xml(e) => emit_xhp(env, pos, &**e),
-        Expr_::Callconv(e) => emit_callconv(env, &**e),
+        Expr_::Callconv(e) => emit_callconv(&**e),
         Expr_::Import(e) => emit_import(env, pos, &**e),
         Expr_::Omitted => Ok(InstrSeq::Empty),
         Expr_::YieldBreak => Err(Unrecoverable(
@@ -489,7 +491,7 @@ fn emit_id(emitter: &mut Emitter, env: &Env, id: &tast::Sid) -> Result {
     Ok(res)
 }
 
-fn emit_exit<'a>(emitter: &mut Emitter, env: &Env, expr_opt: Option<&'a tast::Expr>) -> Result {
+fn emit_exit(emitter: &mut Emitter, env: &Env, expr_opt: Option<&tast::Expr>) -> Result {
     Ok(InstrSeq::gather(vec![
         expr_opt.map_or_else(
             || InstrSeq::make_int(0),
@@ -499,7 +501,10 @@ fn emit_exit<'a>(emitter: &mut Emitter, env: &Env, expr_opt: Option<&'a tast::Ex
     ]))
 }
 
-fn emit_callconv(env: &Env, (kind, expr): &(ast_defs::ParamKind, tast::Expr)) -> Result {
+fn emit_callconv((kind, _): &(ast_defs::ParamKind, tast::Expr)) -> Result {
+    if let ast_defs::ParamKind::Pinout = kind {
+        panic!("emit_callconv: This should have been caught at emit_arg")
+    };
     unimplemented!("TODO(hrust)")
 }
 
@@ -531,8 +536,104 @@ fn emit_lambda(env: &Env, (fndef, ids): &(tast::Fun_, Vec<aast_defs::Lid>)) -> R
     unimplemented!("TODO(hrust)")
 }
 
-fn emit_await(env: &Env, pos: &Pos, expr: &tast::Expr) -> Result {
-    unimplemented!("TODO(hrust)")
+fn emit_await(emitter: &mut Emitter, env: &Env, pos: &Pos, expr: &tast::Expr) -> Result {
+    let tast::Expr(_, e) = expr;
+    let cant_inline_gen_functions = emitter
+        .options()
+        .hhvm
+        .flags
+        .contains(HhvmFlags::JIT_ENABLE_RENAME_FUNCTION);
+    match e.as_call() {
+        Some((_, tast::Expr(_, tast::Expr_::Id(id)), _, args, None))
+            if (cant_inline_gen_functions
+                && args.len() == 1
+                && string_utils::strip_global_ns(&(*id.1)) == "gena") =>
+        {
+            return inline_gena_call(emitter, env, &args[0])
+        }
+        _ => {
+            let after_await = emitter.label_gen_mut().next_regular();
+            let instrs = match e.as_call() {
+                Some(call_expr) => emit_call_expr(env, pos, Some(after_await.clone()), call_expr)?,
+                None => emit_expr(emitter, env, expr)?,
+            };
+            Ok(InstrSeq::gather(vec![
+                instrs,
+                emit_pos(emitter, pos)?,
+                InstrSeq::make_dup(),
+                InstrSeq::make_istypec(IstypeOp::OpNull),
+                InstrSeq::make_jmpnz(after_await.clone()),
+                InstrSeq::make_await(),
+                InstrSeq::make_label(after_await),
+            ]))
+        }
+    }
+}
+
+fn hack_arr_dv_arrs(opts: &Options) -> bool {
+    opts.hhvm.flags.contains(HhvmFlags::HACK_ARR_DV_ARRS)
+}
+
+fn inline_gena_call(emitter: &mut Emitter, env: &Env, arg: &tast::Expr) -> Result {
+    let load_arr = emit_expr(emitter, env, arg)?;
+    let async_eager_label = emitter.label_gen_mut().next_regular();
+    let hack_arr_dv_arrs = hack_arr_dv_arrs(emitter.options());
+
+    Ok(scope::with_unnamed_local(emitter, |arr_local| {
+        let before = InstrSeq::gather(vec![
+            load_arr,
+            if hack_arr_dv_arrs {
+                InstrSeq::make_cast_dict()
+            } else {
+                InstrSeq::make_cast_darray()
+            },
+            InstrSeq::make_popl(arr_local.clone()),
+        ]);
+
+        let inner = InstrSeq::gather(vec![
+            InstrSeq::make_nulluninit(),
+            InstrSeq::make_nulluninit(),
+            InstrSeq::make_nulluninit(),
+            InstrSeq::make_cgetl(arr_local.clone()),
+            InstrSeq::make_fcallclsmethodd(
+                FcallArgs::new(None, None, None, Some(async_eager_label.clone()), 1),
+                method::from_raw_string(if hack_arr_dv_arrs {
+                    "fromDict"
+                } else {
+                    "fromArray"
+                }),
+                class::from_raw_string("HH\\AwaitAllWaitHandle"),
+            ),
+            InstrSeq::make_await(),
+            InstrSeq::make_label(async_eager_label.clone()),
+            InstrSeq::make_popc(),
+            emit_iter(
+                //TODO(milliechen) this needs to take in &mut Emitter
+                // which isn't allowed while emitter's already being mutably borrowed
+                InstrSeq::make_cgetl(arr_local.clone()),
+                |key_local, val_local| {
+                    InstrSeq::gather(vec![
+                        InstrSeq::make_cgetl(val_local),
+                        InstrSeq::make_whresult(),
+                        InstrSeq::make_basel(arr_local.clone(), MemberOpMode::Define),
+                        InstrSeq::make_setm(0, MemberKey::EL(key_local)),
+                        InstrSeq::make_popc(),
+                    ])
+                },
+            ),
+        ]);
+
+        let after = InstrSeq::make_pushl(arr_local);
+
+        (before, inner, after)
+    }))
+}
+
+fn emit_iter<F: FnOnce(local::Type, local::Type) -> InstrSeq>(
+    collection: InstrSeq,
+    f: F,
+) -> InstrSeq {
+    unimplemented!("")
 }
 
 fn emit_shape(
@@ -596,12 +697,12 @@ fn emit_call_expr(
     env: &Env,
     pos: &Pos,
     async_eager_label: Option<Label>,
-    (_, e, targs, args, uarg): &(
-        tast::CallType,
-        tast::Expr,
-        Vec<tast::Targ>,
-        Vec<tast::Expr>,
-        Option<tast::Expr>,
+    (_, e, targs, args, uarg): (
+        &tast::CallType,
+        &tast::Expr,
+        &Vec<tast::Targ>,
+        &Vec<tast::Expr>,
+        &Option<tast::Expr>,
     ),
 ) -> Result {
     unimplemented!("TODO(hrust)")

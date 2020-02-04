@@ -58,6 +58,7 @@
   (modules ast_provider)
   (libraries
     ast
+    counters
     file_provider
     heap_shared_mem
     nast

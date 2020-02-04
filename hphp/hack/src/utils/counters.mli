@@ -22,4 +22,6 @@ val count_decl_accessor : (unit -> 'a) -> 'a
 
 val count_disk_cat : (unit -> 'a) -> 'a
 
+val count_get_ast : (unit -> 'a) -> 'a
+
 val get_counters : unit -> Telemetry.t

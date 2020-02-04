@@ -12,7 +12,9 @@ let category_decl_accessor = 0
 
 let category_disk_cat = 1
 
-let category_count = 2
+let category_get_ast = 2
+
+let category_count = 3
 
 type t = {
   (* how many times did 'count' get called? *)
@@ -64,6 +66,8 @@ let count_decl_accessor (f : unit -> 'a) : 'a = count category_decl_accessor f
 
 let count_disk_cat (f : unit -> 'a) : 'a = count category_disk_cat f
 
+let count_get_ast (f : unit -> 'a) : 'a = count category_get_ast f
+
 let get_counters () : Telemetry.t =
   let telemetry_of_counter counter =
     Telemetry.create ()
@@ -77,3 +81,6 @@ let get_counters () : Telemetry.t =
   |> Telemetry.object_
        ~key:"disk_cat"
        ~value:(telemetry_of_counter !state.counters.(category_disk_cat))
+  |> Telemetry.object_
+       ~key:"get_ast"
+       ~value:(telemetry_of_counter !state.counters.(category_get_ast))

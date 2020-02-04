@@ -42,6 +42,7 @@ val get_ast : ?full:bool -> Relative_path.t -> Nast.program
 
 val parse_file_input :
   ?full:bool ->
+  ?keep_errors:bool ->
   Relative_path.t ->
   ServerCommandTypes.file_input ->
   Full_fidelity_source_text.t * Nast.program * Parser_return.comments

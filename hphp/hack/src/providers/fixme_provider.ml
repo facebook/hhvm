@@ -56,18 +56,53 @@ let get_fixmes filename =
   | None -> DECL_HH_FIXMES.get filename
   | Some x -> Some x
 
-let get_hh_fixmes filename = HH_FIXMES.get filename
+let get_hh_fixmes filename =
+  match Provider_backend.get () with
+  | Provider_backend.Shared_memory -> HH_FIXMES.get filename
+  | backend ->
+    failwith
+      (Printf.sprintf
+         "get_hh_fixmes not implemented for backend %s"
+         (Provider_backend.t_to_string backend))
 
-let get_decl_hh_fixmes filename = DECL_HH_FIXMES.get filename
+let get_decl_hh_fixmes filename =
+  match Provider_backend.get () with
+  | Provider_backend.Shared_memory -> DECL_HH_FIXMES.get filename
+  | backend ->
+    failwith
+      (Printf.sprintf
+         "get_hh_fixmes not implemented for backend %s"
+         (Provider_backend.t_to_string backend))
 
-let get_disallowed_fixmes filename = DISALLOWED_FIXMES.get filename
+let get_disallowed_fixmes filename =
+  match Provider_backend.get () with
+  | Provider_backend.Shared_memory -> DISALLOWED_FIXMES.get filename
+  | backend ->
+    failwith
+      (Printf.sprintf
+         "get_hh_fixmes not implemented for backend %s"
+         (Provider_backend.t_to_string backend))
 
-let provide_hh_fixmes filename fixmes = HH_FIXMES.add filename fixmes
+let provide_hh_fixmes filename fixmes =
+  match Provider_backend.get () with
+  | Provider_backend.Shared_memory -> HH_FIXMES.add filename fixmes
+  | Provider_backend.Local_memory _
+  | Provider_backend.Decl_service _ ->
+    ()
 
-let provide_decl_hh_fixmes filename fixmes = DECL_HH_FIXMES.add filename fixmes
+let provide_decl_hh_fixmes filename fixmes =
+  match Provider_backend.get () with
+  | Provider_backend.Shared_memory -> DECL_HH_FIXMES.add filename fixmes
+  | Provider_backend.Local_memory _
+  | Provider_backend.Decl_service _ ->
+    ()
 
 let provide_disallowed_fixmes filename fixmes =
-  DISALLOWED_FIXMES.add filename fixmes
+  match Provider_backend.get () with
+  | Provider_backend.Shared_memory -> DISALLOWED_FIXMES.add filename fixmes
+  | Provider_backend.Local_memory _
+  | Provider_backend.Decl_service _ ->
+    ()
 
 let remove_batch paths =
   HH_FIXMES.remove_batch paths;

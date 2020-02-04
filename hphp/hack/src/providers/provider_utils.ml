@@ -95,19 +95,24 @@ let respect_but_quarantine_unsaved_changes
 let internal_load_entry
     ~(path : Relative_path.t) ~(file_input : ServerCommandTypes.file_input) :
     Provider_context.entry =
-  let (source_text, ast, comments) =
-    Errors.ignore_ (fun () ->
-        Ast_provider.parse_file_input ~full:true path file_input)
+  let (ast_errors, (source_text, ast, comments)) =
+    Errors.do_with_context path Errors.Parsing (fun () ->
+        Ast_provider.parse_file_input
+          ~full:true
+          ~keep_errors:true
+          path
+          file_input)
   in
   {
     Provider_context.path;
     file_input;
     source_text;
     ast;
+    ast_errors;
     comments;
     cst = None;
     tast = None;
-    errors = None;
+    tast_errors = None;
     symbols = None;
   }
 
@@ -149,10 +154,13 @@ let compute_tast_and_errors_unquarantined_internal
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
     ~(mode : a compute_tast_mode) : a =
-  match (mode, entry.Provider_context.tast, entry.Provider_context.errors) with
+  match
+    (mode, entry.Provider_context.tast, entry.Provider_context.tast_errors)
+  with
   | (Compute_tast_only, Some tast, _) ->
     { Compute_tast.tast; telemetry = Telemetry.create () }
-  | (Compute_tast_and_errors, Some tast, Some errors) ->
+  | (Compute_tast_and_errors, Some tast, Some tast_errors) ->
+    let errors = Errors.merge entry.Provider_context.ast_errors tast_errors in
     { Compute_tast_and_errors.tast; errors; telemetry = Telemetry.create () }
   | (mode, _, _) ->
     (* prepare logging *)
@@ -185,8 +193,7 @@ let compute_tast_and_errors_unquarantined_internal
         (fun () ->
           Typing.nast_to_tast ~do_tast_checks ctx.Provider_context.tcopt nast)
     in
-
-    let errors = Errors.merge nast_errors tast_errors in
+    let tast_errors = Errors.merge nast_errors tast_errors in
 
     (* Logging... *)
     let telemetry = Counters.get_counters () in
@@ -243,7 +250,8 @@ let compute_tast_and_errors_unquarantined_internal
     (match mode with
     | Compute_tast_and_errors ->
       entry.Provider_context.tast <- Some tast;
-      entry.Provider_context.errors <- Some errors;
+      entry.Provider_context.tast_errors <- Some tast_errors;
+      let errors = Errors.merge entry.Provider_context.ast_errors tast_errors in
       { Compute_tast_and_errors.tast; errors; telemetry }
     | Compute_tast_only ->
       entry.Provider_context.tast <- Some tast;
@@ -269,8 +277,9 @@ let compute_tast_and_errors_quarantined
     ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
     Compute_tast_and_errors.t =
   (* If results have already been memoized, don't bother quarantining anything *)
-  match (entry.Provider_context.tast, entry.Provider_context.errors) with
-  | (Some tast, Some errors) ->
+  match (entry.Provider_context.tast, entry.Provider_context.tast_errors) with
+  | (Some tast, Some tast_errors) ->
+    let errors = Errors.merge entry.Provider_context.ast_errors tast_errors in
     { Compute_tast_and_errors.tast; errors; telemetry = Telemetry.create () }
   (* Okay, we don't have memoized results, let's ensure we are quarantined before computing *)
   | _ ->

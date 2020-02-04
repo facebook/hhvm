@@ -43,6 +43,7 @@ module LocalParserCache =
 
 let parse_file_input
     ?(full = false)
+    ?(keep_errors = false)
     (file_name : Relative_path.t)
     (file_input : ServerCommandTypes.file_input) :
     Full_fidelity_source_text.t * Nast.program * Parser_return.comments =
@@ -50,7 +51,7 @@ let parse_file_input
   let parser_env =
     Full_fidelity_ast.make_env
       ~quick_mode:(not full)
-      ~keep_errors:false
+      ~keep_errors
       ~parser_options:popt
       file_name
   in

@@ -37,8 +37,8 @@ let get_original_class_name ~resolve_self ~check_traits scope =
           match
             SMap.find_opt class_name (Emit_env.get_closure_enclosing_classes ())
           with
-          | Some cd when cd.A.c_kind <> Ast_defs.Ctrait ->
-            Some (snd cd.A.c_name)
+          | Some cd when cd.Emit_env.kind <> Ast_defs.Ctrait ->
+            Some cd.Emit_env.name
           | _ -> None
         end
       | _ -> None)
@@ -67,7 +67,7 @@ let get_original_parent_class_name ~check_traits ~resolve_self scope =
         let cd_opt =
           SMap.find_opt class_name (Emit_env.get_closure_enclosing_classes ())
         in
-        Option.bind cd_opt get_parent_class_name
+        Option.bind cd_opt (fun x -> x.Emit_env.parent_class_name)
       | None -> get_parent_class_name cd)
 
 let expr_to_class_expr

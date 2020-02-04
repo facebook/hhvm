@@ -21,10 +21,16 @@ type t = {
   env_in_rx_body: bool;
 }
 
+type closure_enclosing_class_info = {
+  kind: Ast_defs.class_kind;
+  name: string;
+  parent_class_name: string option;
+}
+
 type global_state = {
   global_explicit_use_set: SSet.t;
   global_closure_namespaces: Namespace_env.env SMap.t;
-  global_closure_enclosing_classes: Tast.class_ SMap.t;
+  global_closure_enclosing_classes: closure_enclosing_class_info SMap.t;
   global_functions_with_finally: SSet.t;
   global_function_to_labels_map: bool SMap.t SMap.t;
   global_lambda_rx_of_scope: Rx.t SMap.t;

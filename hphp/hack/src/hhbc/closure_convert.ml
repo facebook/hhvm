@@ -91,7 +91,7 @@ type state = {
      properly qualify things when that method's body is emitted. *)
   closure_namespaces: Namespace_env.env SMap.t;
   (* original enclosing class for closure *)
-  closure_enclosing_classes: class_ SMap.t;
+  closure_enclosing_classes: Emit_env.closure_enclosing_class_info SMap.t;
   (* information about current function *)
   current_function_state: per_function_state;
   (*** accumulated information about program ***)
@@ -1122,6 +1122,17 @@ and convert_hint env st ((p, h) as hint) =
   | _ ->
     failwith "TODO Unimplemented convert_hints hints not present in legacy AST"
 
+and make_info (c : Tast.class_) : Emit_env.closure_enclosing_class_info =
+  Emit_env.
+    {
+      kind = c.c_kind;
+      name = snd c.c_name;
+      parent_class_name =
+        (match c.c_extends with
+        | [(_, Happly ((_, parent_cid), _))] -> Some parent_cid
+        | _ -> None);
+    }
+
 (* Closure-convert a lambda expression, with use_vars_opt = Some vars
  * if there is an explicit `use` clause.
  *)
@@ -1247,7 +1258,8 @@ and convert_lambda env st p fd use_vars_opt =
   let closure_class_name = snd cd.c_name in
   let closure_enclosing_classes =
     match Scope.get_class env.scope with
-    | Some cd -> SMap.add closure_class_name cd st.closure_enclosing_classes
+    | Some cd ->
+      SMap.add closure_class_name (make_info cd) st.closure_enclosing_classes
     | None -> st.closure_enclosing_classes
   in
   (* adjust captured $this information *)

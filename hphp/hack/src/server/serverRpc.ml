@@ -294,9 +294,11 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     ) else
       (env, `Error remove_dead_fixme_warning)
   | REWRITE_LAMBDA_PARAMETERS files ->
-    (env, ServerRefactor.get_lambda_parameter_rewrite_patches env files)
+    let ctx = Provider_utils.ctx_from_server_env env in
+    (env, ServerRefactor.get_lambda_parameter_rewrite_patches ctx files)
   | REWRITE_TYPE_PARAMS_TYPE files ->
-    (env, ServerRefactor.get_type_params_type_rewrite_patches env files)
+    let ctx = Provider_utils.ctx_from_server_env env in
+    (env, ServerRefactor.get_type_params_type_rewrite_patches ctx files)
   | DUMP_SYMBOL_INFO file_list ->
     (env, SymbolInfoService.go genv.workers file_list env)
   | IN_MEMORY_DEP_TABLE_SIZE ->

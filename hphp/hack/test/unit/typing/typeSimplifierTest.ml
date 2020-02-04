@@ -37,9 +37,8 @@ end = struct
   let () = Typing_subtype.set_fun_refs ()
 
   let dummy_env =
-    let env =
-      Env.empty TypecheckerOptions.default Relative_path.default ~droot:None
-    in
+    let ctx = Provider_context.empty ~tcopt:TypecheckerOptions.default in
+    let env = Env.empty ctx Relative_path.default ~droot:None in
     let env = Env.set_log_level env "show" 2 in
     env
 

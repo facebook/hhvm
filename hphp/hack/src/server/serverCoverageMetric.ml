@@ -60,7 +60,7 @@ class count_getter fixme_map =
 (* This should likely take in tasts made with type checker options that were
  * made permissive using TypecheckerOptions.make_permissive
  *)
-let accumulate_types tast check =
+let accumulate_types ctx tast check =
   let fixmes =
     match Fixme_provider.get_hh_fixmes check with
     | Some fixmes -> fixmes
@@ -69,7 +69,7 @@ let accumulate_types tast check =
         ("HH_FIXMEs not found for path " ^ Relative_path.to_absolute check)
   in
   let cg = new count_getter fixmes in
-  cg#go tast
+  cg#go ctx tast
 
 (* Create a trie for a single key. More complicated tries can then be built from
  * path tries using merge_trie* functions *)
@@ -120,15 +120,15 @@ let relativize root path =
       None
 
 (* Returns a list of (file_name, assoc list of counts) *)
-let get_coverage root tcopt neutral fnl =
+let get_coverage root ctx neutral fnl =
   SharedMem.invalidate_caches ();
   let naming_table = NamingTableStore.load () in
   let file_counts =
     List.rev_filter_map fnl (fun fn ->
         relativize root (Relative_path.to_absolute fn) >>= fun relativized_fn ->
         Naming_table.get_file_info naming_table fn >>= fun defs ->
-        let (tast, _) = Typing_check_utils.type_file tcopt fn defs in
-        let type_acc = accumulate_types tast fn in
+        let (tast, _) = Typing_check_utils.type_file ctx fn defs in
+        let type_acc = accumulate_types ctx tast fn in
         Some (relativized_fn, type_acc))
   in
   mk_trie neutral file_counts

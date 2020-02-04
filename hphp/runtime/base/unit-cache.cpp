@@ -794,8 +794,7 @@ CachedUnit checkoutFile(
 const std::string mangleUnitPHP7Options() {
   // As the list of options increases, we may want to do something smarter here?
   std::string s;
-  s += (RuntimeOption::PHP7_IntSemantics ? '1' : '0') +
-      (RuntimeOption::PHP7_NoHexNumerics ? '1' : '0') +
+  s += (RuntimeOption::PHP7_NoHexNumerics ? '1' : '0') +
       (RuntimeOption::PHP7_Builtins ? '1' : '0') +
       (RuntimeOption::PHP7_Substr ? '1' : '0');
   return s;

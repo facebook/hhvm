@@ -71,15 +71,6 @@ struct Repo::GlobalData {
   bool HardPrivatePropInference = false;
 
   /*
-   * Indicates whether the repo was compiled with PHP7 integer semantics. This
-   * slightly changes the way certain arithmetic operations are evaluated, in
-   * small enough ways that don't warrant new bytecodes, but in ways that do
-   * affect everything from hphpc's constant folding up through the JIT, and
-   * so need to be kept consistent.
-   */
-  bool PHP7_IntSemantics = false;
-
-  /*
    * Indicates whether hex strings (e.g. "0x20") can be used for numeric
    * operations, e.g. ("0x20" + 1)
    */
@@ -200,7 +191,6 @@ struct Repo::GlobalData {
       (HardReturnTypeHints)
       (CheckPropTypeHints)
       (HardPrivatePropInference)
-      (PHP7_IntSemantics)
       (PHP7_NoHexNumerics)
       (PHP7_Substr)
       (PHP7_Builtins)

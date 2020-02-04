@@ -26,10 +26,8 @@ constexpr char FUNCTION_ALREADY_DEFINED[] = "Function already defined: %s";
 constexpr char CONSTANT_ALREADY_DEFINED[] = "Constant %s already defined";
 constexpr char CONSTANTS_MUST_BE_SCALAR[] =
   "Constants may only evaluate to scalar values or arrays";
-constexpr char MODULO_BY_ZERO[] = "Modulo by zero";
 constexpr char DIVISION_BY_ZERO[] =
   "Division by zero";
-constexpr char NEGATIVE_SHIFT[] = "Bit shift by negative number";
 constexpr char INTEGER_OVERFLOW[] = "Integer overflow";
 constexpr char UNDEFINED_VARIABLE[] = "Undefined variable: %s";
 constexpr char UNKNOWN_CLASS[] = "Class undefined: %s";

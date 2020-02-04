@@ -229,7 +229,6 @@ void Repo::loadGlobalData(bool readArrayTable /* = true */) {
     RuntimeOption::EnableIntrinsicsExtension =
       s_globalData.EnableIntrinsicsExtension;
     RuntimeOption::PHP7_Builtins            = s_globalData.PHP7_Builtins;
-    RuntimeOption::PHP7_IntSemantics        = s_globalData.PHP7_IntSemantics;
     RuntimeOption::PHP7_NoHexNumerics       = s_globalData.PHP7_NoHexNumerics;
     RuntimeOption::PHP7_Substr              = s_globalData.PHP7_Substr;
     RuntimeOption::EvalCheckPropTypeHints   = s_globalData.CheckPropTypeHints;

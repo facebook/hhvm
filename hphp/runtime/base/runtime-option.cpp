@@ -843,7 +843,6 @@ bool RuntimeOption::LookForTypechecker = false;
 bool RuntimeOption::AutoTypecheck = false;
 
 bool RuntimeOption::PHP7_EngineExceptions = false;
-bool RuntimeOption::PHP7_IntSemantics = false;
 bool RuntimeOption::PHP7_NoHexNumerics = false;
 bool RuntimeOption::PHP7_Builtins = false;
 bool RuntimeOption::PHP7_Substr = false;
@@ -2021,8 +2020,6 @@ void RuntimeOption::Load(
     // of questionable value, so just doing this for now.
     Config::Bind(s_PHP7_master, ini, config, "PHP7.all", s_PHP7_default);
     Config::Bind(PHP7_EngineExceptions, ini, config, "PHP7.EngineExceptions",
-                 s_PHP7_master);
-    Config::Bind(PHP7_IntSemantics, ini, config, "PHP7.IntSemantics",
                  s_PHP7_master);
     Config::Bind(PHP7_NoHexNumerics, ini, config, "PHP7.NoHexNumerics",
                  s_PHP7_master);

@@ -216,9 +216,8 @@ void cgConvDblToInt(IRLS& env, const IRInstruction* inst) {
             [&] (Vout& v) {
               // PF = 1 -> unordered, i.e., we are doing an int cast of NaN.
               // PHP5 didn't formally define this, but observationally returns
-              // the truncated value (i.e., what d currently holds).  PHP7
-              // formally defines this case to return 0.
-              return RuntimeOption::PHP7_IntSemantics ? v.cns(0) : d;
+              // the truncated value (i.e., what d currently holds).
+              return d;
             },
             [&] (Vout& v) {
               constexpr uint64_t ulong_max =

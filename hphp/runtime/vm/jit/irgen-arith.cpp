@@ -1606,8 +1606,6 @@ void emitXor(IRGS& env) {
   decRef(env, btr);
 }
 
-const StaticString s_NEGATIVE_SHIFT(Strings::NEGATIVE_SHIFT);
-
 void implShift(IRGS& env, Opcode op) {
   auto const shiftAmount    = popC(env);
   auto const lhs            = popC(env);
@@ -1620,62 +1618,7 @@ void implShift(IRGS& env, Opcode op) {
   //   to do some comparison logic here.
   // - PHP7 defines negative shifts to throw an ArithmeticError.
   // - PHP5 semantics for such operations are machine-dependent.
-  if (RuntimeOption::PHP7_IntSemantics &&
-      !(shiftAmountInt->hasConstVal() &&
-        shiftAmountInt->intVal() < 64 && shiftAmountInt->intVal() >= 0)) {
-    push(env, cond(
-      env,
-      [&] (Block* taken) {
-        auto const checkShift = gen(env, GteInt, shiftAmountInt, cns(env, 64));
-        gen(env, JmpNZero, taken, checkShift);
-      },
-      [&] {
-        return cond(
-          env,
-          [&] (Block* taken) {
-            auto const checkShift =
-              gen(env, LtInt, shiftAmountInt, cns(env, 0));
-            gen(env, JmpNZero, taken, checkShift);
-          },
-          [&] {
-            return gen(env, op, lhsInt, shiftAmountInt);
-          },
-          [&] {
-            // Unlikely: shifting by a negative amount.
-            hint(env, Block::Hint::Unlikely);
-
-            gen(env, ThrowArithmeticError,
-                cns(env, s_NEGATIVE_SHIFT.get()));
-
-            // Dead-code, but needed to satisfy cond().
-            return cns(env, false);
-          }
-        );
-      },
-      [&] {
-        // Unlikely: shifting by >= 64.
-        hint(env, Block::Hint::Unlikely);
-
-        if (op != Shr) {
-          return cns(env, 0);
-        }
-
-        if (lhsInt->hasConstVal()) {
-          int64_t lhsConst = lhsInt->intVal();
-          if (lhsConst >= 0) {
-            return cns(env, 0);
-          } else {
-            return cns(env, -1);
-          }
-        }
-
-        return gen(env, op, lhsInt, cns(env, 63));
-      }
-    ));
-  } else {
-    push(env, gen(env, op, lhsInt, shiftAmountInt));
-  }
-
+  push(env, gen(env, op, lhsInt, shiftAmountInt));
   decRef(env, lhs);
   decRef(env, shiftAmount);
 }
@@ -1789,25 +1732,16 @@ void emitDiv(IRGS& env) {
       hint(env, Block::Hint::Unlikely);
 
       // PHP5 results in false; we side exit since the type of the result
-      // has now dramatically changed. PHP7 falls through to the IEEE
-      // division semantics below (and doesn't side exit since the type is
-      // still a double).
+      // has now dramatically changed.
       if (RuntimeOption::EvalForbidDivisionByZero) {
         gen(env, ThrowDivisionByZeroException);
       } else {
         auto const msg = cns(env, s_DIVISION_BY_ZERO.get());
         gen(env, RaiseWarning, msg);
-        if (!RuntimeOption::PHP7_IntSemantics) {
-          push(env, cns(env, false));
-          gen(env, Jmp, makeExit(env, nextBcOff(env)));
-        } else if (!divisor->isA(TDbl) && !dividend->isA(TDbl)) {
-          // We don't need to side exit here, but it's cleaner, and we assume
-          // that division by zero is unikely
-          push(env, gen(env, DivDbl, toDbl(dividend), toDbl(divisor)));
-          gen(env, Jmp, makeExit(env, nextBcOff(env)));
+        push(env, cns(env, false));
+        gen(env, Jmp, makeExit(env, nextBcOff(env)));
         }
       }
-    }
   );
 
   if (divisor->isA(TDbl) || dividend->isA(TDbl)) {
@@ -1855,7 +1789,6 @@ void emitDiv(IRGS& env) {
   push(env, result);
 }
 
-const StaticString s_MODULO_BY_ZERO(Strings::MODULO_BY_ZERO);
 void emitMod(IRGS& env) {
   auto const btr = popC(env);
   auto const btl = popC(env);
@@ -1871,10 +1804,7 @@ void emitMod(IRGS& env) {
     [&] {
       hint(env, Block::Hint::Unlikely);
 
-      if (RuntimeOption::PHP7_IntSemantics) {
-        auto const msg = cns(env, s_MODULO_BY_ZERO.get());
-        gen(env, ThrowDivisionByZeroError, msg);
-      } else if (RuntimeOption::EvalForbidDivisionByZero) {
+      if (RuntimeOption::EvalForbidDivisionByZero) {
         gen(env, ThrowDivisionByZeroException);
       } else {
         // Make progress before side-exiting to the next instruction: raise a

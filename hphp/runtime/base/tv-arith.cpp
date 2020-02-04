@@ -253,29 +253,7 @@ struct Div {
         SystemLib::throwDivisionByZeroExceptionObject();
       }
       raise_warning(Strings::DIVISION_BY_ZERO);
-      if (RuntimeOption::PHP7_IntSemantics) {
-        // PHP 7 requires IEEE compliance (+/- INF and NAN) with the result
-        // of dividing a value by zero. MSVC warns about the direct division
-        // by zero, and the literal division may not be portable to all
-        // platforms, so abstract the division out so that we can both keep
-        // MSVC quiet, and also handle platforms that don't have the same
-        // semantics as x86_64.
-        //
-        // This has to be factored out like this in order for MSVC to actually
-        // disable the warning, as MSVC only allows this warning to be disabled
-        // at function boundaries. Disabling it for a single line in a function
-        // is impossible; it must be disabled for the entire function.
-        FOLLY_PUSH_WARNING
-        FOLLY_MSVC_DISABLE_WARNING(4723)
-        return make_dbl([](int64_t tVal) {
-          auto v = tVal / 0.0;
-          assertx(std::isnan(v) || std::isinf(v));
-          return v;
-        }(t));
-        FOLLY_POP_WARNING
-      } else {
-        return make_tv<KindOfBoolean>(false);
-      }
+      return make_tv<KindOfBoolean>(false);
     }
 
     // Avoid SIGFPE when dividing the miniumum respresentable integer
@@ -298,12 +276,7 @@ struct Div {
         SystemLib::throwDivisionByZeroExceptionObject();
       }
       raise_warning(Strings::DIVISION_BY_ZERO);
-      if (RuntimeOption::PHP7_IntSemantics) {
-        // PHP7 uses the IEEE definition (+/- INF and NAN).
-        return make_dbl(t / u);
-      } else {
-        return make_tv<KindOfBoolean>(false);
-      }
+      return make_tv<KindOfBoolean>(false);
     }
     return make_dbl(t / u);
   }
@@ -709,9 +682,7 @@ TypedValue tvMod(TypedValue c1, TypedValue c2) {
   auto const i1 = tvToInt(c1);
   auto const i2 = tvToInt(c2);
   if (UNLIKELY(i2 == 0)) {
-    if (RuntimeOption::PHP7_IntSemantics) {
-      SystemLib::throwDivisionByZeroErrorObject(Strings::MODULO_BY_ZERO);
-    } else if (RuntimeOption::EvalForbidDivisionByZero) {
+    if (RuntimeOption::EvalForbidDivisionByZero) {
       SystemLib::throwDivisionByZeroExceptionObject();
     } else {
       raise_warning(Strings::DIVISION_BY_ZERO);
@@ -748,32 +719,12 @@ TypedValue tvShl(TypedValue c1, TypedValue c2) {
   int64_t lhs = tvToInt(c1);
   int64_t shift = tvToInt(c2);
 
-  if (RuntimeOption::PHP7_IntSemantics) {
-    if (UNLIKELY(shift >= 64)) {
-      return make_int(0);
-    }
-
-    if (UNLIKELY(shift < 0)) {
-      SystemLib::throwArithmeticErrorObject(Strings::NEGATIVE_SHIFT);
-    }
-  }
-
   return make_int(shl_ignore_overflow(lhs, shift));
 }
 
 TypedValue tvShr(TypedValue c1, TypedValue c2) {
   int64_t lhs = tvToInt(c1);
   int64_t shift = tvToInt(c2);
-
-  if (RuntimeOption::PHP7_IntSemantics) {
-    if (UNLIKELY(shift >= 64)) {
-      return make_int(lhs >= 0 ? 0 : -1);
-    }
-
-    if (UNLIKELY(shift < 0)) {
-      SystemLib::throwArithmeticErrorObject(Strings::NEGATIVE_SHIFT);
-    }
-  }
 
   return make_int(lhs >> (shift & 63));
 }

@@ -578,7 +578,6 @@ struct RuntimeOption {
   static bool EnableFirstClassFunctionPointers;
 
   // ENABLED (1) selects PHP7 behavior.
-  static bool PHP7_IntSemantics;
   static bool PHP7_NoHexNumerics;
   static bool PHP7_Builtins;
   static bool PHP7_EngineExceptions;

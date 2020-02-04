@@ -130,4 +130,6 @@ type delegate_env = {
     is only useful in development and should not be set in the normal course
     of business during type checking user's code. *)
   version_specifier: string option;
+  (* The minimum log level workers should be logging at *)
+  worker_min_log_level: Hh_logger.Level.t;
 }

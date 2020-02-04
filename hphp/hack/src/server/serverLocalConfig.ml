@@ -142,6 +142,7 @@ and remote_type_check = {
   (* If set, distributes type checking to remote workers if the number of files to
     type check exceeds the threshold. If not set, then always checks everything locally. *)
   recheck_threshold: int option;
+  worker_min_log_level: Hh_logger.Level.t;
   (* Indicates the size of the job below which a virtual file system should
     be used by the remote worker *)
   worker_vfs_checkout_threshold: int;
@@ -210,6 +211,7 @@ let default =
         min_batch_size = 5_000;
         num_workers = 4;
         recheck_threshold = None;
+        worker_min_log_level = Hh_logger.Level.Info;
         worker_vfs_checkout_threshold = 10_000;
       };
     remote_worker_key = None;
@@ -302,7 +304,27 @@ let load_remote_type_check ~current_version config =
   in
   let recheck_threshold = int_opt "recheck_threshold" ~prefix config in
   let enabled =
-    bool_if_min_version "enabled" ~prefix ~default:true ~current_version config
+    bool_if_min_version
+      "enabled"
+      ~prefix
+      ~default:default.remote_type_check.enabled
+      ~current_version
+      config
+  in
+  let worker_min_log_level =
+    match
+      Hh_logger.Level.of_enum_string
+        (String.lowercase_ascii
+           (string_
+              ~prefix
+              "worker_min_log_level"
+              ~default:
+                (Hh_logger.Level.to_enum_string
+                   default.remote_type_check.worker_min_log_level)
+              config))
+    with
+    | Some level -> level
+    | None -> Hh_logger.Level.Debug
   in
   let worker_vfs_checkout_threshold =
     int_
@@ -317,6 +339,7 @@ let load_remote_type_check ~current_version config =
     min_batch_size;
     num_workers;
     recheck_threshold;
+    worker_min_log_level;
     worker_vfs_checkout_threshold;
   }
 
@@ -391,16 +414,15 @@ let load_ fn ~silent ~current_version overrides =
   in
   let min_log_level =
     match
-      String.lowercase_ascii (string_ "min_log_level" ~default:"info" config)
+      Hh_logger.Level.of_enum_string
+        (String.lowercase_ascii
+           (string_
+              "min_log_level"
+              ~default:(Hh_logger.Level.to_enum_string default.min_log_level)
+              config))
     with
-    | "off" -> Hh_logger.Level.Off
-    | "fatal" -> Hh_logger.Level.Fatal
-    | "error" -> Hh_logger.Level.Error
-    | "warn" -> Hh_logger.Level.Warn
-    | "info" -> Hh_logger.Level.Info
-    | "debug"
-    | _ ->
-      Hh_logger.Level.Debug
+    | Some level -> level
+    | None -> Hh_logger.Level.Debug
   in
   let use_watchman =
     bool_if_version "use_watchman" ~default:default.use_watchman config

@@ -1021,6 +1021,10 @@ functor
       let min_batch_size =
         ServerLocalConfig.(genv.local_config.remote_type_check.min_batch_size)
       in
+      let worker_min_log_level =
+        ServerLocalConfig.(
+          genv.local_config.remote_type_check.worker_min_log_level)
+      in
       let root = Relative_path.path_of_prefix Relative_path.Root in
       {
         env with
@@ -1042,6 +1046,7 @@ functor
                         ~ignore_hh_version:
                           (ServerArgs.ignore_hh_version genv.options);
                     version_specifier;
+                    worker_min_log_level;
                   }
                 (* TODO: use env.typing_service.delegate_state when cancellation
                   implementation is finished *)

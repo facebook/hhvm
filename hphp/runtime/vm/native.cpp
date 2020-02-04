@@ -248,6 +248,10 @@ void callFunc(const Func* const func, const void* const ctx,
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfClsMeth:
@@ -269,13 +273,6 @@ void callFunc(const Func* const func, const void* const ctx,
       }
       return;
     }
-
-    case KindOfPersistentDArray:
-    case KindOfDArray:
-    case KindOfPersistentVArray:
-    case KindOfVArray:
-      // TODO(T58820726)
-      break;
 
     case KindOfUninit:
       break;
@@ -316,18 +313,21 @@ void coerceFCallArgs(TypedValue* args,
 
       if (LIKELY(!RuntimeOption::EvalHackArrCompatTypeHintNotices) ||
           !tc.isArray() ||
-          !isArrayType(c->m_type)) continue;
+          !isArrayType(c->m_type)) {
+        continue;
+      }
 
       auto const raise = [&] {
+        auto const ad = val(c).parr;
         if (tc.isVArray()) {
-          return !c->m_data.parr->isVArray();
+          return !ad->isVArray();
         } else if (tc.isDArray()) {
-          return !c->m_data.parr->isDArray();
+          return !ad->isDArray();
         } else if (tc.isVArrayOrDArray()) {
-          return c->m_data.parr->isNotDVArray() ||
+          return ad->isNotDVArray() ||
                  RuntimeOption::EvalHackArrCompatTypeHintPolymorphism;
         } else {
-          return !c->m_data.parr->isNotDVArray();
+          return !ad->isNotDVArray();
         }
       }();
       if (raise) {
@@ -546,11 +546,9 @@ static folly::Optional<TypedValue> builtinInValue(
   case KindOfPersistentKeyset:
   case KindOfKeyset:  return make_tv<KindOfNull>();
   case KindOfPersistentDArray:
-  case KindOfDArray:
+  case KindOfDArray:  return make_array_like_tv(ArrayData::CreateDArray());
   case KindOfPersistentVArray:
-  case KindOfVArray:
-    // TODO(T58820726)
-    raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
+  case KindOfVArray:  return make_array_like_tv(ArrayData::CreateVArray());
   case KindOfPersistentArray:
   case KindOfArray:   return make_array_like_tv(ArrayData::Create());
   case KindOfUninit:
@@ -596,15 +594,15 @@ static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
     case KindOfPersistentString:
     case KindOfString:       return ty == T::String   || ty == T::StringArg;
     case KindOfPersistentVec:
-    case KindOfVec:          return ty == T::Array    || ty == T::ArrayArg;
+    case KindOfVec:
     case KindOfPersistentDict:
-    case KindOfDict:         return ty == T::Array    || ty == T::ArrayArg;
+    case KindOfDict:
     case KindOfPersistentKeyset:
-    case KindOfKeyset:       return ty == T::Array    || ty == T::ArrayArg;
+    case KindOfKeyset:
     case KindOfPersistentDArray:
     case KindOfDArray:
     case KindOfPersistentVArray:
-    case KindOfVArray:       return false; // TODO(T58820726)
+    case KindOfVArray:
     case KindOfPersistentArray:
     case KindOfArray:        return ty == T::Array    || ty == T::ArrayArg;
     case KindOfResource:     return ty == T::Resource || ty == T::ResourceArg;
@@ -640,7 +638,7 @@ static bool tcCheckNativeIO(
       case KindOfPersistentDArray:
       case KindOfDArray:
       case KindOfPersistentVArray:
-      case KindOfVArray:       return false; // TODO(T58820726)
+      case KindOfVArray:
       case KindOfPersistentArray:
       case KindOfArray:        return ty == T::ArrayIO;
       case KindOfResource:     return ty == T::ResourceIO;

@@ -671,9 +671,6 @@ Variant HHVM_FUNCTION(file_put_contents,
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-      // TODO(T58820726)
-      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
-
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentDict:

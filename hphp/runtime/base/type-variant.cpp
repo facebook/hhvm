@@ -255,6 +255,10 @@ DataType Variant::toNumeric(int64_t &ival, double &dval,
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
@@ -276,11 +280,6 @@ DataType Variant::toNumeric(int64_t &ival, double &dval,
     case KindOfPersistentString:
     case KindOfString:
       return checkString ? m_data.pstr->toNumeric(ival, dval) : m_type;
-    case KindOfPersistentDArray:
-    case KindOfDArray:
-    case KindOfPersistentVArray:
-    case KindOfVArray:
-      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
   }
   not_reached();
 }
@@ -331,19 +330,16 @@ static bool isAllowedAsConstantValueImpl(TypedValue tv) {
     case KindOfPersistentDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+    case KindOfPersistentDArray:
+    case KindOfPersistentVArray:
     case KindOfPersistentArray:
     case KindOfResource:
     case KindOfFunc:
     case KindOfClsMeth:
       return true;
 
-    case KindOfPersistentDArray:
     case KindOfDArray:
-    case KindOfPersistentVArray:
     case KindOfVArray:
-      // TODO(T58820726)
-      return false;
-
     case KindOfVec:
     case KindOfDict:
     case KindOfArray: {
@@ -397,8 +393,6 @@ bool Variant::toBooleanHelper() const {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
-      return false;
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentDict:
@@ -434,8 +428,6 @@ int64_t Variant::toInt64Helper(int base /* = 10 */) const {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
-      return 0;
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentDict:
@@ -473,8 +465,6 @@ double Variant::toDoubleHelper() const {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
-      return 0.0;
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentDict:
@@ -520,7 +510,6 @@ Array Variant::toPHPArrayHelper() const {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
     case KindOfPersistentArray:
     case KindOfArray:         return Array(m_data.parr);
     case KindOfObject:        return m_data.pobj->toArray();
@@ -645,11 +634,17 @@ void Variant::setEvalScalar() {
       do_array();
       return;
 
-    case KindOfPersistentDArray:
     case KindOfDArray:
-    case KindOfPersistentVArray:
+      m_type = KindOfPersistentDArray;
+    case KindOfPersistentDArray:
+      do_array();
+      return;
+
     case KindOfVArray:
-      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
+      m_type = KindOfPersistentVArray;
+    case KindOfPersistentVArray:
+      do_array();
+      return;
 
     case KindOfArray:
       m_type = KindOfPersistentArray;

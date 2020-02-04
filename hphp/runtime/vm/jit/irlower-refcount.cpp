@@ -267,8 +267,6 @@ CallSpec getDtorCallSpec(Vout& v, Vreg obj, DataType type, ArgGroup& args) {
       return CallSpec::method(&StringData::release);
     case KindOfDArray:
     case KindOfVArray:
-      // TODO(T58820726)
-      // fallthrough
     case KindOfArray:
       return CallSpec::method(&ArrayData::release);
     case KindOfVec:

@@ -655,6 +655,10 @@ const char* VariablesCommand::getTypeName(const Variant& variable) {
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
     case KindOfPersistentArray:
     case KindOfArray: {
       if (variable.isVecArray()) {
@@ -740,6 +744,10 @@ const VariablesCommand::VariableValue VariablesCommand::getVariableValue(
     case KindOfPersistentVec:
     case KindOfVec:
       return VariableValue{format("vec[{}]", variable.toArray().size()).str()};
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
     case KindOfPersistentArray:
     case KindOfArray: {
       return VariableValue{format("array[{}]", variable.toArray().size()).str()};

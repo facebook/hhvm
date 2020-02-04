@@ -237,22 +237,29 @@ static_assert(!equivDataTypes(KindOfObject, KindOfPersistentKeyset),"");
 static_assert(!equivDataTypes(KindOfArray, KindOfString),           "");
 static_assert(!equivDataTypes(KindOfArray, KindOfPersistentString), "");
 static_assert(!equivDataTypes(KindOfArray, KindOfObject),           "");
-static_assert(!equivDataTypes(KindOfArray, KindOfVArray),           "");
-static_assert(!equivDataTypes(KindOfArray, KindOfDArray),           "");
 static_assert(!equivDataTypes(KindOfArray, KindOfVec),              "");
 static_assert(!equivDataTypes(KindOfArray, KindOfDict),             "");
 static_assert(!equivDataTypes(KindOfArray, KindOfKeyset),           "");
 static_assert(!equivDataTypes(KindOfArray, KindOfPersistentVec),    "");
 static_assert(!equivDataTypes(KindOfArray, KindOfPersistentDict),   "");
 static_assert(!equivDataTypes(KindOfArray, KindOfPersistentKeyset), "");
-static_assert(!equivDataTypes(KindOfArray, KindOfPersistentVArray), "");
-static_assert(!equivDataTypes(KindOfArray, KindOfPersistentDArray), "");
 static_assert(!equivDataTypes(KindOfString, KindOfVec),             "");
 static_assert(!equivDataTypes(KindOfString, KindOfDict),            "");
 static_assert(!equivDataTypes(KindOfString, KindOfKeyset),          "");
 static_assert(!equivDataTypes(KindOfString, KindOfPersistentVec),   "");
 static_assert(!equivDataTypes(KindOfString, KindOfPersistentDict),  "");
 static_assert(!equivDataTypes(KindOfString, KindOfPersistentKeyset),"");
+// aggressive equivalence of php arraytypes, for now.
+static_assert(equivDataTypes(KindOfArray, KindOfVArray),            "");
+static_assert(equivDataTypes(KindOfArray, KindOfPersistentVArray),  "");
+static_assert(equivDataTypes(KindOfArray, KindOfDArray),            "");
+static_assert(equivDataTypes(KindOfArray, KindOfPersistentDArray),  "");
+static_assert(equivDataTypes(KindOfVArray, KindOfPersistentArray),  "");
+static_assert(equivDataTypes(KindOfVArray, KindOfPersistentDArray), "");
+static_assert(equivDataTypes(KindOfDArray, KindOfPersistentArray),  "");
+static_assert(equivDataTypes(KindOfDArray, KindOfPersistentVArray), "");
+static_assert(equivDataTypes(KindOfPersistentVArray, KindOfArray),  "");
+static_assert(equivDataTypes(KindOfPersistentDArray, KindOfArray),  "");
 
 static_assert(KindOfUninit == static_cast<DataType>(0),
               "Several things assume this tag is 0, especially RDS");

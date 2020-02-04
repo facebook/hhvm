@@ -97,8 +97,6 @@ Variant SSATmp::variantVal() const {
       return Variant{strVal(), Variant::PersistentStrInit{}};
     case KindOfPersistentDArray:
     case KindOfPersistentVArray:
-      // TODO(T58820726)
-      break;
     case KindOfPersistentVec:
     case KindOfPersistentDict:
     case KindOfPersistentKeyset:

@@ -48,6 +48,20 @@ Array HHVM_FUNCTION(dummy_darray_builtin, const Array& arr) {
   return Array::CreateDArray();
 }
 
+TypedValue HHVM_FUNCTION(dummy_kindofdarray_builtin) {
+  TypedValue tv;
+  type(tv) = KindOfDArray;
+  val(tv).parr = ArrayData::CreateDArray();
+  return tv;
+}
+
+TypedValue HHVM_FUNCTION(dummy_kindofvarray_builtin) {
+  TypedValue tv;
+  type(tv) = KindOfVArray;
+  val(tv).parr = ArrayData::CreateVArray();
+  return tv;
+}
+
 TypedValue HHVM_FUNCTION(dummy_varr_or_darr_builtin, const Variant& var) {
   if (var.isArray()) {
     auto const& arr = var.asCArrRef();
@@ -289,6 +303,8 @@ void StandardExtension::initIntrinsics() {
 
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_varray_builtin, dummy_varray_builtin);
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_darray_builtin, dummy_darray_builtin);
+  HHVM_FALIAS(__hhvm_intrinsics\\dummy_kindofdarray_builtin, dummy_kindofdarray_builtin);
+  HHVM_FALIAS(__hhvm_intrinsics\\dummy_kindofvarray_builtin, dummy_kindofvarray_builtin);
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_varr_or_darr_builtin,
               dummy_varr_or_darr_builtin);
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_arraylike_builtin,

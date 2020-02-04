@@ -4912,11 +4912,9 @@ Index::ConstraintResolution Index::get_type_for_annotated_type(
       case KindOfPersistentKeyset:
       case KindOfKeyset:       return TKeyset;
       case KindOfPersistentDArray:
-      case KindOfDArray:
+      case KindOfDArray:       return TDArr;
       case KindOfPersistentVArray:
-      case KindOfVArray:
-        always_assert_flog(false, "Unexpected DataType T58820726");
-        break;
+      case KindOfVArray:       return TVArr;
       case KindOfPersistentArray:
       case KindOfArray:        return TPArr;
       case KindOfResource:     return TRes;

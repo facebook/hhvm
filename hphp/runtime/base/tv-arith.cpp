@@ -119,8 +119,6 @@ TypedNum numericConvHelper(TypedValue cell) {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
-
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentDict:

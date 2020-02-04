@@ -1107,10 +1107,9 @@ std::string describeKeyType(const TypedValue* tv) {
   case KindOfPersistentKeyset:
   case KindOfKeyset:           return "keyset";
   case KindOfPersistentDArray:
-  case KindOfDArray:
+  case KindOfDArray:           return "darray";
   case KindOfPersistentVArray:
-  case KindOfVArray:
-    // TODO(T58820726)
+  case KindOfVArray:           return "varray";
   case KindOfPersistentArray:
   case KindOfArray:            return "array";
   case KindOfResource:

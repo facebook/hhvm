@@ -351,13 +351,6 @@ bool HHVM_FUNCTION(array_key_exists,
       }
       return ad->useWeakKeys() && ad->exists(staticEmptyString());
 
-    case KindOfPersistentDArray:
-    case KindOfDArray:
-    case KindOfPersistentVArray:
-    case KindOfVArray:
-      // TODO(T58820726)
-      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
-
     case KindOfClsMeth:
       raiseClsMethToVecWarningHelper(__FUNCTION__+2);
       // fallthrough
@@ -369,6 +362,10 @@ bool HHVM_FUNCTION(array_key_exists,
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
@@ -1326,9 +1323,6 @@ int64_t HHVM_FUNCTION(count,
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-      // TODO(T58820726)
-      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
-
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentDict:

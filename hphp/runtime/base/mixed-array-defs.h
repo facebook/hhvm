@@ -259,16 +259,13 @@ void ConvertTvToUncounted(
       break;
     }
 
-    case KindOfPersistentDArray:
     case KindOfDArray:
-    case KindOfPersistentVArray:
     case KindOfVArray:
-      // TODO(T58820726)
-      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
-
     case KindOfArray:
       type = KindOfPersistentArray;
       // Fall-through.
+    case KindOfPersistentDArray:
+    case KindOfPersistentVArray:
     case KindOfPersistentArray: {
       auto& ad = data.parr;
       assertx(ad->isPHPArray());

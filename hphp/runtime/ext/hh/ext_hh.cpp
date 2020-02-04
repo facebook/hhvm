@@ -317,9 +317,6 @@ void serialize_memoize_tv(StringBuffer& sb, int depth, TypedValue tv) {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-      // TODO(T58820726)
-      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
-
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentDict:

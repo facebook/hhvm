@@ -377,6 +377,8 @@ const StaticString
   s_integer("integer"),
   s_double("double"),
   s_string("string"),
+  s_varray("varray"),
+  s_darray("darray"),
   s_array("array"),
   s_vec("vec"),
   s_dict("dict"),
@@ -404,10 +406,9 @@ StaticString getDataTypeString(DataType t) {
     case KindOfPersistentKeyset:
     case KindOfKeyset:     return s_keyset;
     case KindOfPersistentDArray:
-    case KindOfDArray:
+    case KindOfDArray:     return s_darray;
     case KindOfPersistentVArray:
-    case KindOfVArray:
-      // TODO(T58820726)
+    case KindOfVArray:     return s_varray;
     case KindOfPersistentArray:
     case KindOfArray:      return s_array;
     case KindOfObject:     return s_object;

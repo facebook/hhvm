@@ -232,8 +232,6 @@ void deepCopy(tv_lval lval) {
 
     case KindOfDArray:
     case KindOfVArray:
-      // TODO(T58820726)
-      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
     case KindOfArray: {
       auto& original = val(lval).parr;
       auto arr = deepCopyArray(original);

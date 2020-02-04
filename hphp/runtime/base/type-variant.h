@@ -722,6 +722,14 @@ struct Variant : private TypedValue {
   bool isPHPArray() const {
     return isArrayType(getType());
   }
+  bool isDArray() const {
+    return (isArrayType(getType()) && m_data.parr->isDArray()) ||
+      isDArrayType(getType());
+  }
+  bool isVArray() const {
+    return (isArrayType(getType()) && m_data.parr->isVArray()) ||
+      isVArrayType(getType());
+  }
   bool isVecArray() const {
     return isVecType(getType());
   }

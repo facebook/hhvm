@@ -206,7 +206,7 @@ inline bool is_varray(const TypedValue* c) {
   // only dynamic calls to is_varray will remain at that point.
   if (RuntimeOption::EvalHackArrDVArrs) return is_vec(c);
 
-  if (tvIsArray(c) && c->m_data.parr->isVArray()) {
+  if (tvIsVArray(c) || (tvIsArray(c) && c->m_data.parr->isVArray())) {
     maybe_raise_array_serialization_notice(SerializationSite::IsVArray, c);
     return true;
   }
@@ -234,7 +234,7 @@ inline bool is_darray(const TypedValue* c) {
   // only dynamic calls to is_darray will remain at that point.
   if (RuntimeOption::EvalHackArrDVArrs) return is_dict(c);
 
-  if (tvIsArray(c) && c->m_data.parr->isDArray()) {
+  if (tvIsDArray(c) || (tvIsArray(c) && c->m_data.parr->isDArray())) {
     maybe_raise_array_serialization_notice(SerializationSite::IsDArray, c);
     return true;
   }

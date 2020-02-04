@@ -648,8 +648,6 @@ void staticStreamer(const TypedValue* tv, std::string& out) {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-      // TODO(T58820726)
-      break;
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentDict:

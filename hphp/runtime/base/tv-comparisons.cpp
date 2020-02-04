@@ -120,9 +120,6 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, int64_t val) {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-      // TODO(T58820726)
-      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
-
     case KindOfPersistentArray:
     case KindOfArray:
       if (UNLIKELY(op.noticeOnArrNonArr())) {
@@ -198,9 +195,6 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, double val) {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-      // TODO(T58820726)
-      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
-
     case KindOfPersistentArray:
     case KindOfArray:
       if (UNLIKELY(op.noticeOnArrNonArr())) {
@@ -284,9 +278,6 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const StringData* val) {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-      // TODO(T58820726)
-      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
-
     case KindOfPersistentArray:
     case KindOfArray:
       if (UNLIKELY(op.noticeOnArrNonArr())) {
@@ -391,9 +382,6 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const ArrayData* ad) {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-      // TODO(T58820726)
-      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
-
     case KindOfPersistentArray:
     case KindOfArray:
       return op(cell.m_data.parr, ad);
@@ -474,9 +462,6 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const ObjectData* od) {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-      // TODO(T58820726)
-      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
-
     case KindOfPersistentArray:
     case KindOfArray:
       if (UNLIKELY(op.noticeOnArrNonArr())) {
@@ -560,9 +545,6 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const ResourceData* rd) {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-      // TODO(T58820726)
-      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
-
     case KindOfPersistentArray:
     case KindOfArray:
       if (UNLIKELY(op.noticeOnArrNonArr())) {
@@ -695,9 +677,6 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, ClsMethDataRef clsMeth) {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-      // TODO(T58820726)
-      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
-
     case KindOfPersistentArray:
     case KindOfArray: {
       if (RuntimeOption::EvalHackArrDVArrs) {
@@ -777,9 +756,6 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const Func* val) {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-      // TODO(T58820726)
-      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
-
     case KindOfPersistentArray:
     case KindOfArray:
       if (UNLIKELY(op.noticeOnArrNonArr())) {
@@ -874,9 +850,6 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const Class* val) {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-      // TODO(T58820726)
-      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
-
     case KindOfPersistentArray:
     case KindOfArray:
       if (UNLIKELY(op.noticeOnArrNonArr())) {
@@ -948,13 +921,10 @@ typename Op::RetType tvRelOp(Op op, TypedValue c1, TypedValue c2) {
   case KindOfDict:         return tvRelOpDict(op, c1, c2.m_data.parr);
   case KindOfPersistentKeyset:
   case KindOfKeyset:       return tvRelOpKeyset(op, c1, c2.m_data.parr);
-
-  // TODO(T58820726)
   case KindOfPersistentDArray:
   case KindOfDArray:
   case KindOfPersistentVArray:
-  case KindOfVArray:       raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
-
+  case KindOfVArray:
   case KindOfPersistentArray:
   case KindOfArray:        return tvRelOp(op, c1, c2.m_data.parr);
   case KindOfObject:       return tvRelOp(op, c1, c2.m_data.pobj);
@@ -1365,9 +1335,6 @@ bool tvSame(TypedValue c1, TypedValue c2) {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-      // TODO(T58820726)
-      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
-
     case KindOfPersistentArray:
     case KindOfArray:
       if (isClsMethType(c2.m_type)) {

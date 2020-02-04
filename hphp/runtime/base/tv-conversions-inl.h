@@ -52,7 +52,6 @@ inline bool tvToBool(TypedValue cell) {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR); break;
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentDict:
@@ -91,7 +90,6 @@ inline int64_t tvToInt(TypedValue cell) {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR); break;
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentDict:
@@ -177,8 +175,6 @@ inline TypedValue tvToKey(TypedValue cell, const ArrayData* ad) {
     case KindOfPersistentDArray:
     case KindOfVArray:
     case KindOfPersistentVArray:
-      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
-
     case KindOfClsMeth:
     case KindOfPersistentArray:
     case KindOfArray:

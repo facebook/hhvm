@@ -78,6 +78,10 @@ struct VariantControllerImpl {
       case KindOfPersistentString:
       case KindOfString:     return HPHP::serialize::Type::STRING;
       case KindOfObject:     return HPHP::serialize::Type::OBJECT;
+      case KindOfPersistentDArray:
+      case KindOfDArray:
+      case KindOfPersistentVArray:
+      case KindOfVArray:
       case KindOfPersistentArray:
       case KindOfArray:
         if (HackArraysMode == VariantControllerHackArraysMode::MIGRATORY) {
@@ -120,12 +124,6 @@ struct VariantControllerImpl {
         } else {
           return HPHP::serialize::Type::MAP;
         }
-
-      case KindOfPersistentDArray:
-      case KindOfDArray:
-      case KindOfPersistentVArray:
-      case KindOfVArray:
-        // TODO(T58820726)
 
       case KindOfResource:
       case KindOfRecord: // TODO(T41025646): implement serialization for records

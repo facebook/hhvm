@@ -160,7 +160,9 @@ bool HHVM_FUNCTION(HH_is_any_array, const Variant& val) {
 
 bool HHVM_FUNCTION(HH_is_list_like, const Variant& val) {
   if (val.isClsMeth()) return true;
-  if (!val.isArray()) return false;
+  auto const& ty = val.getType();
+  if (!isArrayLikeType(ty)) return false;
+  if (isVecType(ty) || isVArrayType(ty)) return true;
   auto const& arr = val.asCArrRef();
   return arr->isVectorData();
 }
@@ -489,6 +491,10 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
       break;
     }
 
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
     case KindOfPersistentArray:
     case KindOfArray: {
       ArrayData *arr = value.getArrayData();
@@ -507,12 +513,6 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
       }
       break;
     }
-    case KindOfPersistentDArray:
-    case KindOfDArray:
-    case KindOfPersistentVArray:
-    case KindOfVArray:
-      // TODO(T58820726)
-      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
     case KindOfDouble:
     case KindOfObject:
     case KindOfClsMeth:

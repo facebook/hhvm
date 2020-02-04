@@ -520,9 +520,6 @@ std::pair<int, double> tvGetSize(
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-      // TODO(T58820726)
-      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
-
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentDict:
@@ -662,12 +659,10 @@ void tvGetStrings(
       // This is a shallow size function, not a recursive one
       break;
     }
-    case KindOfPersistentDArray:
-    case KindOfDArray:
-    case KindOfPersistentVArray:
-    case KindOfVArray:
-      // TODO(T58820726)
-      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
+    case HPHP::KindOfPersistentDArray:
+    case HPHP::KindOfDArray:
+    case HPHP::KindOfPersistentVArray:
+    case HPHP::KindOfVArray:
     case HPHP::KindOfPersistentVec:
     case HPHP::KindOfVec:
     case HPHP::KindOfPersistentDict:

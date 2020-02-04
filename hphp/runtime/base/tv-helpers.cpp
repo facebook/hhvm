@@ -91,6 +91,10 @@ bool tvIsPlausible(const TypedValue cell) {
         assertx(cell.m_data.parr->isKeyset());
         assertx(cell.m_data.parr->isNotDVArray());
         return;
+      case KindOfPersistentDArray:
+      case KindOfPersistentVArray:
+        assertx(cell.m_data.parr->dvArray());
+        /* FALLTHROUGH */
       case KindOfPersistentArray:
         assertPtr(cell.m_data.parr);
         assertx(cell.m_data.parr->kindIsValid());
@@ -98,6 +102,10 @@ bool tvIsPlausible(const TypedValue cell) {
         assertx(cell.m_data.parr->isPHPArray());
         assertx(cell.m_data.parr->dvArraySanityCheck());
         return;
+      case KindOfDArray:
+      case KindOfVArray:
+        assertx(cell.m_data.parr->dvArray());
+        /* FALLTHROUGH */
       case KindOfArray:
         assertPtr(cell.m_data.parr);
         assertx(cell.m_data.parr->kindIsValid());
@@ -130,12 +138,6 @@ bool tvIsPlausible(const TypedValue cell) {
         return;
       case KindOfClsMeth:
         assertx(cell.m_data.pclsmeth->validate());
-        return;
-      case KindOfPersistentDArray:
-      case KindOfDArray:
-      case KindOfPersistentVArray:
-      case KindOfVArray:
-        assert_flog(false, "premature use of datatype-specialized php arrays");
         return;
     }
     not_reached();

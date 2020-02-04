@@ -690,6 +690,10 @@ static std::string toStringElm(const TypedValue* tv) {
       print_count();
       os << ":Keyset";
       continue;
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
     case KindOfPersistentArray:
     case KindOfArray:
       assertx(tv->m_data.parr->isPHPArray());
@@ -739,11 +743,6 @@ static std::string toStringElm(const TypedValue* tv) {
        << tv->m_data.pclsmeth->getFunc()->fullName()->data()
        << ")";
        continue;
-    case KindOfPersistentDArray:
-    case KindOfDArray:
-    case KindOfPersistentVArray:
-    case KindOfVArray:
-      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
     }
     not_reached();
   } while (0);
@@ -2491,8 +2490,12 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
           match = SwitchMatch::DEFAULT;
           return;
 
+        case KindOfDArray:
+        case KindOfVArray:
         case KindOfArray:
           tvDecRefArr(val);
+        case KindOfPersistentDArray:
+        case KindOfPersistentVArray:
         case KindOfPersistentArray:
           match = SwitchMatch::DEFAULT;
           return;
@@ -2511,13 +2514,6 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
           intval = val->m_data.pres->data()->o_toInt64();
           tvDecRefRes(val);
           return;
-
-        case KindOfPersistentDArray:
-        case KindOfDArray:
-        case KindOfPersistentVArray:
-        case KindOfVArray:
-          // TODO(T58820726)
-          raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
 
         case KindOfRecord: // TODO (T41029094)
           raise_error(Strings::RECORD_NOT_SUPPORTED);
@@ -5460,6 +5456,10 @@ OPTBLD_INLINE TCA iopYieldK(PC origpc, PC& pc) {
 OPTBLD_INLINE bool typeIsValidGeneratorDelegate(DataType type) {
   return type == KindOfArray           ||
          type == KindOfPersistentArray ||
+         type == KindOfDArray           ||
+         type == KindOfPersistentDArray ||
+         type == KindOfVArray           ||
+         type == KindOfPersistentVArray ||
          type == KindOfObject;
 }
 

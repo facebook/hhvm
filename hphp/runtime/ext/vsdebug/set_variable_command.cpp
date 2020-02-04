@@ -384,6 +384,10 @@ void SetVariableCommand::setVariableValue(
     case KindOfResource:
     case KindOfPersistentVec:
     case KindOfVec:
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfPersistentDict:

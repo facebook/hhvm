@@ -1594,8 +1594,6 @@ void VariableSerializer::serializeVariant(tv_rval tv,
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-      always_assert(0 && "premature use of datatype-specialized php arrays");
-
     case KindOfPersistentArray:
     case KindOfArray:
       assertx(!isArrayKey);

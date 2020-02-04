@@ -976,6 +976,10 @@ std::string describe_actual_type(tv_rval val) {
     case KindOfDict:          return "HH\\dict";
     case KindOfPersistentKeyset:
     case KindOfKeyset:        return "HH\\keyset";
+    case KindOfPersistentDArray:
+    case KindOfDArray:        return "darray";
+    case KindOfPersistentVArray:
+    case KindOfVArray:        return "varray";
     case KindOfPersistentArray:
     case KindOfArray:         return "array";
     case KindOfResource:
@@ -993,11 +997,6 @@ std::string describe_actual_type(tv_rval val) {
       auto const generics = getClsReifiedGenericsProp(cls, obj);
       return folly::sformat("{}{}", name, mangleReifiedGenericsName(generics));
     }
-    case KindOfPersistentDArray:
-    case KindOfDArray:
-    case KindOfPersistentVArray:
-    case KindOfVArray:
-      return "premature use of datatype-specialized php arrays";
   }
   not_reached();
 }
@@ -1399,16 +1398,16 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
         case KindOfDict:
         case KindOfPersistentKeyset:
         case KindOfKeyset:
+        case KindOfPersistentDArray:
+        case KindOfDArray:
+        case KindOfPersistentVArray:
+        case KindOfVArray:
         case KindOfPersistentArray:
         case KindOfArray:
         case KindOfClsMeth:
         case KindOfResource:
         case KindOfRecord:
         case KindOfNull:         return MK::None;
-        case KindOfPersistentDArray:
-        case KindOfDArray:
-        case KindOfPersistentVArray:
-        case KindOfVArray:
         case KindOfUninit:
         case KindOfFunc:
         case KindOfClass:

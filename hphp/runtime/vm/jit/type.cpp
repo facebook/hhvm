@@ -501,23 +501,25 @@ Type::bits_t Type::bitsFromDataType(DataType outer) {
     case KindOfPersistentVec    : return kPersistentVec;
     case KindOfPersistentDict   : return kPersistentDict;
     case KindOfPersistentKeyset : return kPersistentKeyset;
+
+    case KindOfPersistentDArray :
+    case KindOfPersistentVArray :
     case KindOfPersistentArray  : return kPersistentArr;
+
     case KindOfVec              : return kVec;
     case KindOfDict             : return kDict;
     case KindOfKeyset           : return kKeyset;
+
+    case KindOfDArray           :
+    case KindOfVArray           :
     case KindOfArray            : return kArr;
+
     case KindOfResource         : return kRes;
     case KindOfObject           : return kObj;
     case KindOfFunc             : return kFunc;
     case KindOfClass            : return kCls;
     case KindOfClsMeth          : return kClsMeth;
     case KindOfRecord           : return kRecord;
-    case KindOfPersistentDArray:
-    case KindOfDArray:
-    case KindOfPersistentVArray:
-    case KindOfVArray:
-      // TODO(T58820726)
-      not_reached();
   }
   not_reached();
 }

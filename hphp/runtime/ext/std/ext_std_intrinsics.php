@@ -27,6 +27,12 @@ function dummy_varray_builtin(varray $x): varray;
 function dummy_darray_builtin(darray $x): darray;
 
 <<__Native, __HipHopSpecific>>
+function dummy_kindofdarray_builtin(): mixed;
+
+<<__Native, __HipHopSpecific>>
+function dummy_kindofvarray_builtin(): mixed;
+
+<<__Native, __HipHopSpecific>>
 function dummy_varr_or_darr_builtin(varray_or_darray $x): varray_or_darray;
 
 <<__Native, __HipHopSpecific>>

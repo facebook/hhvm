@@ -45,14 +45,13 @@ SSATmp* staticTVCns(IRGS& env, const TypedValue* tv) {
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-    case KindOfPersistentArray:
-    case KindOfArray:         return cns(env, tv->m_data.parr);
-
     case KindOfPersistentDArray:
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-      // TODO(T58820726)
+    case KindOfPersistentArray:
+    case KindOfArray:         return cns(env, tv->m_data.parr);
+
     case KindOfUninit:
     case KindOfObject:
     case KindOfResource:

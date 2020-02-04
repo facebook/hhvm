@@ -53,7 +53,7 @@ union Value {
   int64_t       num;    // KindOfInt64, KindOfBool (must be zero-extended)
   double        dbl;    // KindOfDouble
   StringData*   pstr;   // KindOfString, KindOfPersistentString
-  ArrayData*    parr;   // KindOfArray, KindOfVec, KindOfDict, KindOfKeyset
+  ArrayData*    parr;   // KindOf{Persistent,}{Vec,Dict,Keyset,{,D,V}Array}
   ObjectData*   pobj;   // KindOfObject
   ResourceHdr*  pres;   // KindOfResource
   MaybeCountable* pcnt; // for alias-safe generic refcounting operations
@@ -270,6 +270,10 @@ X(KindOfNull,         void);
 X(KindOfBoolean,      bool);
 X(KindOfInt64,        int64_t);
 X(KindOfDouble,       double);
+X(KindOfDArray,       ArrayData*);
+X(KindOfPersistentDArray,  const ArrayData*);
+X(KindOfVArray,       ArrayData*);
+X(KindOfPersistentVArray,  const ArrayData*);
 X(KindOfArray,        ArrayData*);
 X(KindOfPersistentArray,  const ArrayData*);
 X(KindOfVec,          ArrayData*);

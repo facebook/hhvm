@@ -715,14 +715,10 @@ SSATmp* opt_foldable(IRGS& env,
           env,
           make_tv<KindOfPersistentKeyset>(scalar_array())
         );
-
       case KindOfPersistentDArray:
       case KindOfDArray:
       case KindOfPersistentVArray:
       case KindOfVArray:
-        // TODO(T58820726)
-        return nullptr;
-
       case KindOfPersistentArray:
       case KindOfArray:
         return cns(

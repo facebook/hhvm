@@ -34,6 +34,9 @@ let empty ~tcopt =
   let backend = Provider_backend.get () in
   { tcopt; backend; entries = Relative_path.Map.empty }
 
+let map_tcopt (t : t) ~(f : TypecheckerOptions.t -> TypecheckerOptions.t) : t =
+  { t with tcopt = f t.tcopt }
+
 let global_context : t option ref = ref None
 
 let get_file_input ~(ctx : t) ~(path : Relative_path.t) :

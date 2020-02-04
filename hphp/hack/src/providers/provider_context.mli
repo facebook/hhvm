@@ -40,6 +40,9 @@ type t = {
 (** The empty context, denoting no delta from the current state of the world. *)
 val empty : tcopt:TypecheckerOptions.t -> t
 
+(** Update the [TypecheckerOptions.t] contained within the [t]. *)
+val map_tcopt : t -> f:(TypecheckerOptions.t -> TypecheckerOptions.t) -> t
+
 (** Returns a [ServerCommandTypes.file_input] corresponding to the given [path].
 
 If the [path] is in the context, returns its associated

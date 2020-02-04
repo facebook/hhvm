@@ -214,7 +214,7 @@ let process_file
     ~threshold_opt:(GlobalOptions.tco_defer_class_declaration_threshold opts);
   let prev_counters_state = Counters.reset ~enable:true in
   let (funs, classes, record_defs, typedefs, gconsts) = Nast.get_defs ast in
-  let ctx = { ctx with Provider_context.tcopt = opts } in
+  let ctx = Provider_context.map_tcopt ctx ~f:(fun _tcopt -> opts) in
   let ignore_type_record_def opts fn name =
     ignore (type_record_def opts fn name)
   in

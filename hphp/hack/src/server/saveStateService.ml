@@ -123,7 +123,7 @@ let get_hot_classes (filename : string) : SSet.t =
     |> List.map ~f:Hh_json.get_string_exn
     |> SSet.of_list
 
-let dump_class_decls filename =
+let dump_class_decls ctx filename =
   let start_t = Unix.gettimeofday () in
   Hh_logger.log "Begin saving class declarations";
   try
@@ -131,7 +131,7 @@ let dump_class_decls filename =
     Hh_logger.log "Reading hot class names from %s" hot_classes_filename;
     let classes = get_hot_classes hot_classes_filename in
     Hh_logger.log "Exporting %d class declarations..." @@ SSet.cardinal classes;
-    let decls = Decl_export.export_class_decls classes in
+    let decls = Decl_export.export_class_decls ctx classes in
     Hh_logger.log "Marshalling class declarations...";
     dump_contents filename decls;
     ignore @@ Hh_logger.log_duration "Saved class declarations" start_t
@@ -143,6 +143,7 @@ let dump_class_decls filename =
 (* Dumps the file info and the errors, if any. *)
 let dump_saved_state
     ~(save_decls : bool)
+    (ctx : Provider_context.t)
     (output_filename : string)
     (naming_table : Naming_table.t)
     (errors : Errors.t) : unit =
@@ -169,7 +170,7 @@ let dump_saved_state
     in
     dump_contents (get_errors_filename output_filename) errors_in_phases );
 
-  if save_decls then dump_class_decls (get_decls_filename output_filename)
+  if save_decls then dump_class_decls ctx (get_decls_filename output_filename)
 
 let update_save_state
     ~(save_decls : bool)
@@ -182,7 +183,8 @@ let update_save_state
     failwith "Given existing save state SQL file missing";
   let naming_table = env.ServerEnv.naming_table in
   let errors = env.ServerEnv.errorl in
-  dump_saved_state ~save_decls output_filename naming_table errors;
+  let ctx = Provider_utils.ctx_from_server_env env in
+  dump_saved_state ~save_decls ctx output_filename naming_table errors;
   let dep_table_edges_added =
     SharedMem.update_dep_table_sqlite
       db_name
@@ -220,7 +222,8 @@ let save_state
     let naming_table = env.ServerEnv.naming_table in
     let errors = env.ServerEnv.errorl in
     let t = Unix.gettimeofday () in
-    dump_saved_state ~save_decls output_filename naming_table errors;
+    let ctx = Provider_utils.ctx_from_server_env env in
+    dump_saved_state ~save_decls ctx output_filename naming_table errors;
 
     let dep_table_edges_added =
       SharedMem.save_dep_table_sqlite

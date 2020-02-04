@@ -740,7 +740,11 @@ let tconst_subsumption env class_name parent_typeconst child_typeconst on_error
         let emit_error =
           Errors.invalid_enforceable_type "constant" (pos, name)
         in
-        Enforceable_hint_check.validator#validate_type tast_env ty emit_error
+        Enforceable_hint_check.validator#validate_type
+          tast_env
+          (fst child_typeconst.ttc_name)
+          ty
+          emit_error
       | _ -> ()
     end;
 

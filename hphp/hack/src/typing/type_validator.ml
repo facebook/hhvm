@@ -131,7 +131,8 @@ class virtual type_validator =
               this#on_newtype acc r (pos, name) tyl td_constraint td_type
             | _ -> this#on_alias acc r (pos, name) tyl td_type)
 
-    method validate_type env root_ty emit_error =
+    (* Use_pos is the primary error position *)
+    method validate_type env use_pos root_ty emit_error =
       let state =
         this#on_type
           {
@@ -146,7 +147,7 @@ class virtual type_validator =
                     ~default:(MakeType.nothing Reason.none);
                 from_class = Some Aast.CIstatic;
                 quiet = true;
-                on_error = Errors.unify_error_at (get_pos root_ty);
+                on_error = Errors.unify_error_at use_pos;
               };
             expanded_typedefs = SSet.empty;
             validity = Valid;
@@ -155,12 +156,12 @@ class virtual type_validator =
           root_ty
       in
       match state.validity with
-      | Invalid (r, msg) -> emit_error (get_pos root_ty) (Reason.to_pos r) msg
+      | Invalid (r, msg) -> emit_error use_pos (Reason.to_pos r) msg
       | Valid -> ()
 
     method validate_hint env hint emit_error =
       let hint_ty = Env.hint_to_ty env hint in
-      this#validate_type env hint_ty emit_error
+      this#validate_type env (fst hint) hint_ty emit_error
 
     method invalid state r msg =
       match state.validity with

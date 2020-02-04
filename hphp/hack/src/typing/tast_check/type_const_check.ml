@@ -18,7 +18,7 @@ let check_reifiable env tc attr_pos =
     match ty_opt with
     | Some ty ->
       let emit_err = Errors.reifiable_attr attr_pos kind in
-      Reified_check.validator#validate_type env ty emit_err
+      Reified_check.validator#validate_type env (fst tc.ttc_name) ty emit_err
     | None -> ()
   in
   check_impl "type" tc.ttc_type;
@@ -61,6 +61,7 @@ let handler =
                     let pos = fst tc.ttc_enforceable in
                     Enforceable_hint_check.validator#validate_type
                       env
+                      (fst tc.ttc_name)
                       ty
                       (Errors.invalid_enforceable_type "constant" (pos, name))
                 | _ -> ()

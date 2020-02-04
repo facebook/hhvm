@@ -11,6 +11,7 @@ open Reordered_argument_collections
 open Typing_deps
 
 val redo_type_decl :
+  Provider_context.t ->
   MultiWorker.worker list option ->
   bucket_size:int ->
   conservative_redecl:bool ->

@@ -399,8 +399,13 @@ let get_elems workers ~bucket_size ~old defs =
 (*****************************************************************************)
 
 let redo_type_decl
-    workers ~bucket_size ~conservative_redecl get_classes all_oldified_defs fast
-    =
+    ctx
+    workers
+    ~bucket_size
+    ~conservative_redecl
+    get_classes
+    all_oldified_defs
+    fast =
   let defs =
     Relative_path.Map.fold fast ~init:FileInfo.empty_names ~f:(fun _ ->
         FileInfo.merge_names)
@@ -419,7 +424,6 @@ let redo_type_decl
   let oldified_elems = get_elems oldified_defs ~old:true in
   let all_elems = SMap.union current_elems oldified_elems in
   let fnl = Relative_path.Map.keys fast in
-  let ctx = Provider_context.get_global_context_or_empty_FOR_MIGRATION () in
   (* If there aren't enough files, let's do this ourselves ... it's faster! *)
   let (errors, changed, to_redecl, to_recheck) =
     if List.length fnl < 10 then

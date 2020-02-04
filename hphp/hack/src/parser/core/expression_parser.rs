@@ -1737,8 +1737,7 @@ where
         // cast-expression:
         //   (  cast-type  ) unary-expression
         // cast-type:
-        //   array, bool, double, float, real, int, integer, object, string, binary,
-        //   unset
+        //   array, bool, double, float, real, int, integer, object, string, binary
         //
         // TODO: This implies that a cast "(name)" can only be a simple name, but
         // I would expect that (\Foo\Bar), (:foo), (array<int>), and the like
@@ -1751,13 +1750,6 @@ where
         // ambiguity as follows:
         //
         // * If the thing in parens is one of the keywords mentioned above, then
-        //   it's a cast.
-        // * If the token which follows (x) is "is" or "as" then
-        //   it's a parenthesized expression.
-        // * PHP-ism extension: if the token is "and", "or" or "xor", then it's a
-        //   parenthesized expression.
-        // * Otherwise, if the token which follows (x) is $$, @, ~, !, (, +, -,
-        //   any name, qualified name, variable name, literal, or keyword then
         //   it's a cast.
         // * Otherwise, it's a parenthesized expression.
         let left_paren = self.assert_token(TokenKind::LeftParen);

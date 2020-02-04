@@ -6,11 +6,13 @@
 use rusqlite::{Connection, OpenFlags};
 use std::path::Path;
 
-use crate::Result;
+use oxidized::relative_path::RelativePath;
+
+use crate::{consts, file_infos, funs, Result};
 
 #[derive(Debug)]
 pub struct Names {
-    pub(crate) connection: Connection,
+    connection: Connection,
 }
 
 impl Names {
@@ -27,10 +29,18 @@ impl Names {
     }
 
     fn create_tables(connection: &Connection) -> Result<()> {
-        Self::create_file_info_table(connection)?;
-        Self::create_funs_table(connection)?;
-        Self::create_consts_table(connection)?;
+        file_infos::create_table(connection)?;
+        funs::create_table(connection)?;
+        consts::create_table(connection)?;
         Ok(())
+    }
+
+    pub fn paths_of_funs(&self, names: &[&str]) -> Result<Vec<Option<RelativePath>>> {
+        funs::paths_of_funs(&self.connection, names)
+    }
+
+    pub fn paths_of_consts(&self, names: &[&str]) -> Result<Vec<Option<RelativePath>>> {
+        consts::paths_of_consts(&self.connection, names)
     }
 }
 

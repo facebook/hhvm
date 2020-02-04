@@ -15,11 +15,11 @@ module Classes : sig
 
   type t
 
-  val get : key -> t option
+  val get : Provider_context.t -> key -> t option
 
-  val mem : key -> bool
+  val mem : Provider_context.t -> key -> bool
 
-  val find_unsafe : key -> t
+  val find_unsafe : Provider_context.t -> key -> t
 end
 
 module Api : sig
@@ -157,4 +157,5 @@ module Api : sig
 end
 
 (** Implementation detail, do not use. For use in [Decl_provider] only. *)
-val compute_class_decl_no_cache : string -> Classes.t option
+val compute_class_decl_no_cache :
+  Provider_context.t -> string -> Classes.t option

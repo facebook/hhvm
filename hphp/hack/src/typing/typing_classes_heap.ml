@@ -71,7 +71,9 @@ module Classes = struct
 
   type t = class_type_variant
 
-  let compute_class_decl ~(use_cache : bool) (class_name : string) : t option =
+  let compute_class_decl
+      ~(use_cache : bool) (ctx : Provider_context.t) (class_name : string) :
+      t option =
     try
       let get_eager_class_type class_name =
         Decl_class.to_class_type
@@ -94,10 +96,6 @@ module Classes = struct
             Deferred_decl.raise_if_should_defer ~d:file;
             let class_type =
               Errors.run_in_decl_mode file (fun () ->
-                  let ctx =
-                    Provider_context.get_global_context_or_empty_FOR_MIGRATION
-                      ()
-                  in
                   Decl.declare_class_in_file ctx file class_name)
             in
             Deferred_decl.increment_counter ();
@@ -131,19 +129,19 @@ module Classes = struct
       None
     | Exit -> None
 
-  let get class_name =
+  let get ctx class_name =
     Counters.count_decl_accessor @@ fun () ->
     match Cache.get class_name with
     | Some t -> Some t
-    | None -> compute_class_decl ~use_cache:true class_name
+    | None -> compute_class_decl ~use_cache:true ctx class_name
 
-  let find_unsafe key =
-    match get key with
+  let find_unsafe ctx key =
+    match get ctx key with
     | None -> raise Caml.Not_found
     | Some x -> x
 
-  let mem key =
-    match get key with
+  let mem ctx key =
+    match get ctx key with
     | None -> false
     | Some _ -> true
 end

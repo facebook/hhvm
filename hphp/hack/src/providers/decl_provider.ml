@@ -51,7 +51,7 @@ let get_fun (ctx : Provider_context.t) (fun_name : fun_key) : fun_decl option =
 let get_class (ctx : Provider_context.t) (class_name : class_key) :
     class_decl option =
   match ctx.Provider_context.backend with
-  | Provider_backend.Shared_memory -> Typing_lazy_heap.get_class class_name
+  | Provider_backend.Shared_memory -> Typing_lazy_heap.get_class ctx class_name
   | Provider_backend.Local_memory { decl_cache } ->
     let result : Obj.t option =
       Provider_backend.Decl_cache.find_or_add
@@ -59,7 +59,7 @@ let get_class (ctx : Provider_context.t) (class_name : class_key) :
         ~key:(Provider_backend.Decl_cache_entry.Class_decl class_name)
         ~default:(fun () ->
           let result : class_decl option =
-            Typing_classes_heap.compute_class_decl_no_cache class_name
+            Typing_classes_heap.compute_class_decl_no_cache ctx class_name
           in
           Option.map result ~f:Obj.repr)
     in

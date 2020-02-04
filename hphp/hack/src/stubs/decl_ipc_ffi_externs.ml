@@ -6,16 +6,6 @@
  *
  *)
 
-type readonly_cache_view
+type decl_client
 
-let get_gconst_ffi _ _ _ = failwith "decl_ipc not implemented"
-
-let map_shared_memory_ffi _ = failwith "decl_ipc not implemented"
-
-let shared_memory_address _ = failwith "decl_ipc not implemented"
-
-type inproc_state
-
-let inproc_init_ffi _ _ _ = failwith "inproc_init not implemented"
-
-let inproc_request_ffi _ _ _ = failwith "inproc_request not implemented"
+let get_gconst_ffi _ _ = failwith "decl_ipc not implemented"

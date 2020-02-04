@@ -174,7 +174,7 @@ let get_gconst (ctx : Provider_context.t) (gconst_name : string) :
           Some gconst
         | None -> None)
   | Provider_backend.Decl_service decl ->
-    decl.Decl_service_client.rpc_get_gconst gconst_name
+    Decl_service_client.rpc_get_gconst decl gconst_name
     |> Option.map ~f:(fun decl -> (decl, Errors.empty))
 
 let invalidate_fun (ctx : Provider_context.t) (fun_name : fun_key) : unit =

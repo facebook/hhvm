@@ -82,6 +82,13 @@ impl<'a> Value<'a> {
         Value(value as usize, PhantomData)
     }
 
+    /// # Safety
+    ///
+    /// The lifetime 'a returned is arbitrarily chosen, and does not necessarily
+    /// reflect the actual lifetime of the data. If the given value is a
+    /// pointer, it is up to the caller to ensure that for the duration of this
+    /// lifetime, the block this pointer points to, and every value reachable
+    /// from it, does not get written to.
     #[inline(always)]
     pub unsafe fn from_bits(value: usize) -> Value<'a> {
         Value(value, PhantomData)

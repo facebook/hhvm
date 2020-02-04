@@ -88,14 +88,6 @@ Array& Array::operator=(Variant&& v) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Array Array::values() const {
-  PackedArrayInit ai(size());
-  for (ArrayIter iter(*this); iter; ++iter) {
-    ai.append(iter.secondVal());
-  }
-  return ai.toArray();
-}
-
 ArrayIter Array::begin(const String& /*context*/ /* = null_string */) const {
   return ArrayIter(*this);
 }

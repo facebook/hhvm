@@ -216,7 +216,7 @@ Variant HHVM_FUNCTION(spl_autoload_functions) {
   if (handlers.isNull()) {
     return false;
   } else {
-    return handlers.values();
+    return handlers;
   }
 }
 

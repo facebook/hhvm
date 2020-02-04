@@ -268,11 +268,6 @@ public:
   // PHP operations.
 
   /*
-   * Get a packed array of this Array's values.
-   */
-  Array values() const;
-
-  /*
    * PHP array union operator.
    */
   Array  operator+(ArrayData* data) const;

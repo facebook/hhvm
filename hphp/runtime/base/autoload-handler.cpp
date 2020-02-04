@@ -609,10 +609,10 @@ bool AutoloadHandler::autoloadNamedType(const String& clsName) {
 
 Array AutoloadHandler::getHandlers() {
   if (!m_spl_stack_inited) {
-    return Array();
+    return null_array;
   }
 
-  PackedArrayInit handlers(m_handlers.size());
+  VArrayInit handlers(m_handlers.size());
 
   for (const HandlerBundle& hb : m_handlers) {
     DecodedHandler* decodedHandler = hb.m_decodedHandler.get();
@@ -621,15 +621,15 @@ Array AutoloadHandler::getHandlers() {
     if (hb.m_handler.isObject()) {
       handlers.append(hb.m_handler);
     } else if (decodedHandler->m_cls) {
-      PackedArrayInit callable(2);
-      callable.append(String(decodedHandler->m_cls->nameStr()));
-      callable.append(String(f->nameStr()));
-      handlers.append(callable.toArray());
+      handlers.append(make_varray(
+        String(decodedHandler->m_cls->nameStr()),
+        String(f->nameStr())
+      ));
     } else if (decodedHandler->m_obj) {
-      PackedArrayInit callable(2);
-      callable.append(decodedHandler->m_obj);
-      callable.append(String(f->nameStr()));
-      handlers.append(callable.toArray());
+      handlers.append(make_varray(
+        decodedHandler->m_obj,
+        String(f->nameStr())
+      ));
     } else {
       handlers.append(String(f->nameStr()));
     }

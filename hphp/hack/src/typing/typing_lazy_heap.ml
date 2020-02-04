@@ -36,7 +36,7 @@ let get_type_id_filename x expected_kind =
 
 let get_class = Typing_classes_heap.Classes.get
 
-let get_fun x =
+let get_fun ctx x =
   Counters.count_decl_accessor @@ fun () ->
   match Typing_heap.Funs.get x with
   | Some c -> Some c
@@ -45,15 +45,12 @@ let get_fun x =
     | Some filename ->
       let ft =
         Errors.run_in_decl_mode filename (fun () ->
-            let ctx =
-              Provider_context.get_global_context_or_empty_FOR_MIGRATION ()
-            in
             Decl.declare_fun_in_file ctx filename x)
       in
       Some ft
     | None -> None)
 
-let get_gconst cst_name =
+let get_gconst ctx cst_name =
   Counters.count_decl_accessor @@ fun () ->
   match Typing_heap.GConsts.get cst_name with
   | Some c -> Some c
@@ -62,15 +59,12 @@ let get_gconst cst_name =
     | Some filename ->
       let gconst =
         Errors.run_in_decl_mode filename (fun () ->
-            let ctx =
-              Provider_context.get_global_context_or_empty_FOR_MIGRATION ()
-            in
             Decl.declare_const_in_file ctx filename cst_name)
       in
       Some gconst
     | None -> None)
 
-let get_record_def x =
+let get_record_def ctx x =
   Counters.count_decl_accessor @@ fun () ->
   match Typing_heap.RecordDefs.get x with
   | Some c -> Some c
@@ -79,15 +73,12 @@ let get_record_def x =
     | Some filename ->
       let tdecl =
         Errors.run_in_decl_mode filename (fun () ->
-            let ctx =
-              Provider_context.get_global_context_or_empty_FOR_MIGRATION ()
-            in
             Decl.declare_record_def_in_file ctx filename x)
       in
       Some tdecl
     | None -> None)
 
-let get_typedef x =
+let get_typedef ctx x =
   Counters.count_decl_accessor @@ fun () ->
   match Typing_heap.Typedefs.get x with
   | Some c -> Some c
@@ -96,9 +87,6 @@ let get_typedef x =
     | Some filename ->
       let tdecl =
         Errors.run_in_decl_mode filename (fun () ->
-            let ctx =
-              Provider_context.get_global_context_or_empty_FOR_MIGRATION ()
-            in
             Decl.declare_typedef_in_file ctx filename x)
       in
       Some tdecl

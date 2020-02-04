@@ -33,11 +33,14 @@ let decl_files ctx errors fnl =
 (* Let's go! That's where the action is *)
 (*****************************************************************************)
 
-let go (workers : MultiWorker.worker list option) ~bucket_size fast =
+let go
+    (ctx : Provider_context.t)
+    (workers : MultiWorker.worker list option)
+    ~bucket_size
+    fast =
   let fast_l = Relative_path.Map.fold fast ~init:[] ~f:(fun x _ y -> x :: y) in
   let neutral = Errors.empty in
   Hh_logger.debug "Declaring the types";
-  let ctx = Provider_context.get_global_context_or_empty_FOR_MIGRATION () in
   let result =
     MultiWorker.call
       workers

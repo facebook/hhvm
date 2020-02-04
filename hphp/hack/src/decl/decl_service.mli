@@ -11,6 +11,7 @@
 (* Starts the process *)
 (*****************************************************************************)
 val go :
+  Provider_context.t ->
   MultiWorker.worker list option ->
   bucket_size:int ->
   Naming_table.fast ->

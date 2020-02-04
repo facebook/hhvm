@@ -33,10 +33,11 @@ type inherited_members = {
     type parameter substitutions. Drop MRO elements for which we cannot find a
     shallow class (this should only happen in partial-mode files when the
     assume_php setting is enabled). *)
-let get_shallow_classes_and_substs (lin : linearization) :
+let get_shallow_classes_and_substs
+    (ctx : Provider_context.t) (lin : linearization) :
     (mro_element * shallow_class * decl_subst) Sequence.t =
   Sequence.filter_map lin (fun mro ->
-      match Shallow_classes_heap.get mro.mro_name with
+      match Shallow_classes_heap.get ctx mro.mro_name with
       | None -> None
       | Some cls ->
         let subst = Decl_subst.make_decl cls.sc_tparams mro.mro_type_args in
@@ -217,7 +218,7 @@ let make_elt_cache class_name seq =
 
 (** Given a linearization filtered for const lookup, return a [Sequence.t]
     emitting each constant in linearization order. *)
-let consts child_class_name get_ancestor lin =
+let consts ctx child_class_name get_ancestor lin =
   (* If a class extends the legacy [Enum] class, we give all of the constants
      in the class the type of the Enum, as a convenience. Modern Hack enums
      should replace the legacy Enum class, but perhaps they cannot do so
@@ -230,7 +231,7 @@ let consts child_class_name get_ancestor lin =
      The [classname_const] here is the implicit constant [C::class], which has
      type [classname<C>]. *)
   let (classname_const, enum_kind) =
-    match Shallow_classes_heap.get child_class_name with
+    match Shallow_classes_heap.get ctx child_class_name with
     | None -> (Sequence.empty, lazy None)
     | Some cls ->
       ( Sequence.singleton (DTT.classname_const cls.sc_name),
@@ -427,10 +428,10 @@ let props_cache ~static class_name lin =
   |> filter_or_chown_privates class_name
   |> make_elt_cache class_name
 
-let consts_cache class_name get_ancestor lin =
+let consts_cache ctx class_name get_ancestor lin =
   lin
   |> filter_for_const_lookup
-  |> consts class_name get_ancestor
+  |> consts ctx class_name get_ancestor
   |> make_consts_cache class_name
 
 let typeconsts_cache class_name lin =
@@ -458,7 +459,7 @@ let construct class_name lin =
 let make ctx class_name get_ancestor =
   let lin =
     Decl_linearize.get_linearization ctx class_name
-    |> get_shallow_classes_and_substs
+    |> get_shallow_classes_and_substs ctx
     |> Sequence.memoize
   in
   let all_methods = get_all_methods class_name lin ~static:false in
@@ -475,7 +476,7 @@ let make ctx class_name get_ancestor =
   let all_inherited_methods = make_inheritance_cache all_methods in
   let all_inherited_smethods = make_inheritance_cache all_smethods in
   {
-    consts = consts_cache class_name get_ancestor lin;
+    consts = consts_cache ctx class_name get_ancestor lin;
     typeconsts = typeconsts_cache class_name lin;
     pu_enums = pu_enums_cache lin;
     props = props_cache class_name lin ~static:false;

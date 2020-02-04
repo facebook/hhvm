@@ -24,9 +24,9 @@ let push_local_changes = Classes.LocalChanges.push_stack
 
 let pop_local_changes = Classes.LocalChanges.pop_stack
 
-let class_naming_and_decl c =
+let class_naming_and_decl ctx c =
   let c = Errors.ignore_ (fun () -> Naming.class_ c) in
-  Shallow_decl.class_ c
+  Shallow_decl.class_ ctx c
 
 let shallow_decl_enabled () =
   TypecheckerOptions.shallow_class_decl (Global_naming_options.get ())
@@ -43,12 +43,12 @@ let add_to_store cid c =
   else
     failwith "shallow_class_decl not enabled"
 
-let class_decl_if_missing (c : Nast.class_) =
+let class_decl_if_missing (ctx : Provider_context.t) (c : Nast.class_) =
   let (_, cid) = c.Aast.c_name in
   match get_from_store cid with
   | Some c -> c
   | None ->
-    let c = class_naming_and_decl c in
+    let c = class_naming_and_decl ctx c in
     add_to_store cid c;
     c
 
@@ -58,9 +58,9 @@ let err_not_found file name =
   in
   raise (Decl_defs.Decl_not_found err_str)
 
-let declare_class_in_file file name =
+let declare_class_in_file ctx file name =
   match Ast_provider.find_class_in_file file name with
-  | Some cls -> class_decl_if_missing cls
+  | Some cls -> class_decl_if_missing ctx cls
   | None -> err_not_found file name
 
 let get_class_filename x =
@@ -68,13 +68,13 @@ let get_class_filename x =
   | Some (fn, Naming_table.TClass) -> Some fn
   | _ -> None
 
-let get cid =
+let get ctx cid =
   match get_from_store cid with
   | Some _ as c -> c
   | None ->
     (match get_class_filename cid with
     | None -> None
-    | Some filename -> Some (declare_class_in_file filename cid))
+    | Some filename -> Some (declare_class_in_file ctx filename cid))
 
 let get_batch = Classes.get_batch
 

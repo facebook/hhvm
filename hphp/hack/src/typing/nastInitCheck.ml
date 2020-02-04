@@ -104,7 +104,7 @@ module Env = struct
   let rec make tenv c =
     let (_, _, methods) = split_methods c in
     let methods = List.fold_left ~f:method_ ~init:SMap.empty methods in
-    let sc = Shallow_decl.class_ c in
+    let sc = Shallow_decl.class_ (Typing_env.get_ctx tenv) c in
     ( if shallow_decl_enabled () then
       (* Run DeferredMembers.class_ for its error-emitting side effects.
          When shallow_class_decl is disabled, these are emitted by Decl. *)

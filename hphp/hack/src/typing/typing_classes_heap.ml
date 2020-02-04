@@ -114,7 +114,7 @@ module Classes = struct
          shallow_class_decl is enabled. *)
       let class_type_variant =
         if shallow_decl_enabled () then
-          match Shallow_classes_heap.get class_name with
+          match Shallow_classes_heap.get ctx class_name with
           | None -> raise Exit
           | Some sc -> Lazy (make_lazy_class_type ctx class_name sc)
         else

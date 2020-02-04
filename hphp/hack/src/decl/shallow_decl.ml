@@ -426,16 +426,10 @@ let class_ env c =
     sc_decl_errors = Errors.empty;
   }
 
-let class_ c =
+let class_ ctx c =
   let (cls_pos, cls_name) = c.c_name in
   let class_dep = Dep.Class cls_name in
-  let env =
-    {
-      Decl_env.mode = c.c_mode;
-      droot = Some class_dep;
-      ctx = Provider_context.get_global_context_or_empty_FOR_MIGRATION ();
-    }
-  in
+  let env = { Decl_env.mode = c.c_mode; droot = Some class_dep; ctx } in
   let (errors, sc) =
     Errors.run_in_context (Pos.filename cls_pos) Errors.Decl (fun () ->
         Errors.do_ (fun () -> class_ env c))

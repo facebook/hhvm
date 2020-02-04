@@ -98,7 +98,7 @@ let rec parent_props env c props =
         match get_node parent with
         | Tapply ((_, parent), _) ->
           begin
-            match Shallow_classes_heap.get parent with
+            match Shallow_classes_heap.get (Env.get_ctx env) parent with
             | None -> acc
             | Some sc ->
               let members = class_ env sc in
@@ -117,7 +117,9 @@ and trait_props env c props =
         match get_node ty with
         | Tapply ((_, trait), _) ->
           let cls = Env.get_class_dep env trait in
-          let shallow_class = Shallow_classes_heap.get trait in
+          let shallow_class =
+            Shallow_classes_heap.get (Env.get_ctx env) trait
+          in
           (match (cls, shallow_class) with
           | (Some cls, Some sc) ->
             let cstr = Cls.construct cls in

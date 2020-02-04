@@ -29,6 +29,8 @@ type env = {
   linearization_kind: linearization_kind;
 }
 
+let get_ctx env = env.decl_env.Decl_env.ctx
+
 (** These state variants drive the Sequence generating the linearization. *)
 type state =
   | Child of mro_element
@@ -245,7 +247,7 @@ let rec ancestor_linearization
       }
     in
     let tparams =
-      Shallow_classes_heap.get class_name
+      Shallow_classes_heap.get (get_ctx env) class_name
       |> Option.value_map ~default:[] ~f:(fun c -> c.sc_tparams)
     in
     let subst = Decl_subst.make_decl tparams type_args in
@@ -267,7 +269,7 @@ let rec ancestor_linearization
          verified that the ancestor extends and implements the required classes
          and interfaces, so there is no need to do so for the child. *)
       let ancestor_checks_requirements =
-        Shallow_classes_heap.get class_name
+        Shallow_classes_heap.get (get_ctx env) class_name
         |> Option.value_map ~default:false ~f:(fun c ->
                match c.sc_kind with
                | Ast_defs.(Cnormal | Cabstract) -> true
@@ -394,7 +396,7 @@ and next_state
           let names_equal a b = String.equal a.mro_name b.mro_name in
           let skip_or_mark_trait_reuse equals_next =
             let is_trait class_name =
-              match Shallow_classes_heap.get class_name with
+              match Shallow_classes_heap.get (get_ctx env) class_name with
               | Some { sc_kind = Ast_defs.Ctrait; _ } -> true
               | _ -> false
             in
@@ -490,7 +492,7 @@ and get_linearization (env : env) (class_name : string) : linearization =
       (match LocalCache.get key with
       | Some lin -> lin
       | None ->
-        (match Shallow_classes_heap.get class_name with
+        (match Shallow_classes_heap.get (get_ctx env) class_name with
         | Some c ->
           let lin = linearize env c in
           LocalCache.add key lin;

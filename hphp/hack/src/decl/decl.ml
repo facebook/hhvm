@@ -380,7 +380,9 @@ let rec class_decl_if_missing class_env (c : Nast.class_) =
          producing a folded class declaration, there is nothing we can return.
          This is a code smell--we should use a function with a different
          signature when we only want this side effect. *)
-    let (_ : shallow_class) = Shallow_classes_heap.class_decl_if_missing c in
+    let (_ : shallow_class) =
+      Shallow_classes_heap.class_decl_if_missing class_env.ctx c
+    in
     None
   else
     match Decl_heap.Classes.get cid with
@@ -394,7 +396,9 @@ let rec class_decl_if_missing class_env (c : Nast.class_) =
 
 and class_naming_and_decl (class_env : class_env) cid c =
   let class_env = { class_env with stack = SSet.add cid class_env.stack } in
-  let shallow_class = Shallow_classes_heap.class_naming_and_decl c in
+  let shallow_class =
+    Shallow_classes_heap.class_naming_and_decl class_env.ctx c
+  in
   let (errors, tc) =
     Errors.do_ (fun () ->
         class_parents_decl class_env shallow_class;

@@ -109,12 +109,12 @@ let check_extend_kind parent_pos parent_kind child_pos child_kind =
       let child = Ast_defs.string_of_class_kind child_kind in
       Errors.wrong_extend_kind child_pos child parent_pos parent)
 
-let check_extend_kinds shallow_class =
+let check_extend_kinds ctx shallow_class =
   let class_pos = fst shallow_class.sc_name in
   let class_kind = shallow_class.sc_kind in
   List.iter shallow_class.sc_extends ~f:(fun ty ->
       let (_, (parent_pos, parent_name), _) = Decl_utils.unwrap_class_type ty in
-      match Shallow_classes_heap.get parent_name with
+      match Shallow_classes_heap.get ctx parent_name with
       | None -> ()
       | Some parent ->
         check_extend_kind parent_pos parent.sc_kind class_pos class_kind)
@@ -132,7 +132,7 @@ let check_trait_reuse ctx shallow_class =
          | None -> ()
          | Some parent_name ->
            let parent_pos =
-             Shallow_classes_heap.get parent_name
+             Shallow_classes_heap.get ctx parent_name
              |> Option.value_map ~default:Pos.none ~f:(fun p -> fst p.sc_name)
            in
            Errors.trait_reuse
@@ -144,7 +144,7 @@ let check_trait_reuse ctx shallow_class =
 let check_class env cls =
   check_if_cyclic (Env.get_ctx env) cls;
   let shallow_class = Cls.shallow_decl cls in
-  check_extend_kinds shallow_class;
+  check_extend_kinds (Env.get_ctx env) shallow_class;
   if no_trait_reuse_enabled env then
     check_trait_reuse (Env.get_ctx env) shallow_class;
   if not Ast_defs.(equal_class_kind (Cls.kind cls) Ctrait) then (

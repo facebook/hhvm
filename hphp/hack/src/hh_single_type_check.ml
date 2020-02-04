@@ -833,15 +833,17 @@ let parse_name_and_decl popt files_contents =
 
       files_info)
 
-let parse_name_and_shallow_decl popt filename file_contents :
+let parse_name_and_shallow_decl ctx filename file_contents :
     Shallow_decl_defs.shallow_class SMap.t =
   Errors.ignore_ (fun () ->
       let files_contents = Relative_path.Map.singleton filename file_contents in
-      let (parsed_files, _) = parse_and_name popt files_contents in
+      let (parsed_files, _) =
+        parse_and_name ctx.Provider_context.tcopt files_contents
+      in
       let parsed_file = Relative_path.Map.values parsed_files |> List.hd_exn in
       parsed_file.Parser_return.ast
       |> List.filter_map ~f:(function
-             | Aast.Class c -> Some (Shallow_decl.class_ c)
+             | Aast.Class c -> Some (Shallow_decl.class_ ctx c)
              | _ -> None)
       |> List.fold ~init:SMap.empty ~f:(fun acc c ->
              SMap.add (snd c.Shallow_decl_defs.sc_name) c acc))
@@ -1645,7 +1647,8 @@ let handle_mode
   | Shallow_class_diff ->
     print_errors_if_present parse_errors;
     let filename = expect_single_file () in
-    test_shallow_class_diff popt filename
+    let ctx = Provider_context.empty ~tcopt in
+    test_shallow_class_diff ctx filename
   | Linearization ->
     if parse_errors <> [] then (
       print_error error_format (List.hd_exn parse_errors);

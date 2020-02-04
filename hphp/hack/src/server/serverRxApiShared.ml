@@ -75,7 +75,7 @@ type ('a, 'r, 's) handlers = {
     ('r option, string) result -> Relative_path.t * int * int -> string;
   walker: 'a walker;
   get_state: Relative_path.t -> 's;
-  map_result: 's -> 'a -> 'r;
+  map_result: Provider_context.t -> 's -> 'a -> 'r;
 }
 
 let prepare_pos_infos pos_list =
@@ -103,7 +103,7 @@ let helper h ctx acc pos_list =
         |> Result.of_option ~error:"No such file or directory"
         |> Result.map ~f:(fun tast ->
                (find_in_tree h.walker line char)#go tast
-               |> Option.map ~f:(h.map_result s))
+               |> Option.map ~f:(h.map_result ctx s))
       in
       h.result_to_string result pos :: acc)
 

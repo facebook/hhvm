@@ -169,10 +169,7 @@ let handlers =
       end;
     S.map_result =
       begin
-        fun ast refs ->
-        let ctx =
-          Provider_context.get_global_context_or_empty_FOR_MIGRATION ()
-        in
+        fun ctx ast refs ->
         let ast = Some ast in
         Results.elements refs
         |> List.map ~f:(ServerSymbolDefinition.go ctx ast)

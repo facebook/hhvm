@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/jit/types.h"
 
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/either.h"
 
 #include <cstddef>
 
@@ -47,8 +48,8 @@ namespace jit {
  * Used to pass values between unwinder code and catch traces.
  */
 struct UnwindRDS {
-  /* PHP exception or nullptr if C++/SetM exception */
-  ObjectData* exn;
+  /* PHP or C++ exception, nullptr if SetM exception */
+  Either<ObjectData*, Exception*> exn;
 
   /* Some helpers need to signal an error along with a TypedValue to be pushed
    * on the eval stack. When present, that value lives here. */

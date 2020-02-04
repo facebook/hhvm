@@ -62,7 +62,7 @@ struct VMState {
   MInstrState mInstrState;
   ActRec* jitCalledFrame;
   jit::TCA jitReturnAddr;
-  ObjectData* exn;
+  Either<ObjectData*, Exception*> exn;
   bool unwinderSideEnter;
 };
 

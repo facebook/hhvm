@@ -1100,8 +1100,8 @@ namespace {
 
 [[noreturn]] static void throw_exception_while_unwinding() {
   assert_native_stack_aligned();
-  assertx(g_unwind_rds->exn != nullptr);
-  throw req::root<Object>(Object::attach(g_unwind_rds->exn));
+  assertx(g_unwind_rds->exn.left());
+  throw req::root<Object>(Object::attach(g_unwind_rds->exn.left()));
 }
 
 } // namespace

@@ -222,14 +222,18 @@ tc_unwind_personality(int version,
     static_cast<InvalidSetMException*>(exn);
   __cxxabiv1::__cxa_begin_catch(ue);
   if (tl_regState == VMRegState::DIRTY) sync_regstate(ip, context);
-  g_unwind_rds->exn = [&] () -> ObjectData* {
+  g_unwind_rds->exn = [&]() -> Either<ObjectData*, Exception*> {
     if (ti == typeid(Object)) return static_cast<Object*>(exn)->get();
     if (ti == typeid(req::root<Object>)) {
       return static_cast<req::root<Object>*>(exn)->get();
     }
+    if (!ism) return static_cast<Exception*>(exn);
     return nullptr;
   }();
-  assertx(!g_unwind_rds->exn || g_unwind_rds->exn->kindIsValid());
+  assertx((g_unwind_rds->exn.left() &&
+           g_unwind_rds->exn.left()->kindIsValid()) ||
+          g_unwind_rds->exn.right() ||
+          (g_unwind_rds->exn.isNull() && ism));
 
   auto const tv = ism ? ism->tv() : TypedValue{};
 
@@ -272,7 +276,7 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp) {
     auto savedRip = reinterpret_cast<TCA>(fp->m_savedRip);
 
     tl_regState = VMRegState::CLEAN;
-    if (g_unwind_rds->exn) lockObjectWhileUnwinding(vmpc(), vmStack());
+    if (g_unwind_rds->exn.left()) lockObjectWhileUnwinding(vmpc(), vmStack());
 
     if (savedRip == tc::ustubs().callToExit) {
       // If we're the top VM frame, there's nothing we need to do; we can just
@@ -282,7 +286,8 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp) {
                   "by throwing\n");
         // Looks like we got here having skipped itanium unwinder, lets enter
         g_unwind_rds->sideEnter = false;
-        assertx(g_unwind_rds->exn);
+        // We can only side enter with a PHP exception
+        assertx(g_unwind_rds->exn.left());
         return {tc::ustubs().throwExceptionWhileUnwinding, sfp};
       }
       ITRACE(1, "top VM frame, passing back to _Unwind_Resume\n");
@@ -304,7 +309,7 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp) {
         fp, fp->func()->fullName(), sfp, sfp->func()->fullName());
 
       // Unwind vm stack to sfp
-      if (g_unwind_rds->exn) {
+      if (g_unwind_rds->exn.left()) {
         auto const result = unwindVM(g_unwind_rds->exn, sfp);
         if (!(result & UnwindReachedGoal)) {
           if (!g_unwind_rds->sideEnter) __cxxabiv1::__cxa_end_catch();

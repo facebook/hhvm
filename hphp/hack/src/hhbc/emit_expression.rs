@@ -11,10 +11,11 @@ use emit_fatal_rust as emit_fatal;
 use emit_type_constant_rust as emit_type_constant;
 use env::{emitter::Emitter, Env};
 use hhbc_ast_rust::*;
+use hhbc_id_rust::{r#const, Id};
 use instruction_sequence_rust::{Error::Unrecoverable, InstrSeq, Result};
 use label_rust::Label;
 use local_rust as local;
-use naming_special_names_rust::{special_idents, superglobals};
+use naming_special_names_rust::{pseudo_consts, special_idents, superglobals};
 use options::Options;
 use oxidized::{aast, aast_defs, ast as tast, ast_defs, local_id, pos::Pos};
 
@@ -431,7 +432,10 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
         Expr_::ClassGet(e) => emit_class_get(env, QueryOp::CGet, &**e),
         Expr_::String2(es) => emit_string2(env, pos, es),
         Expr_::BracedExpr(e) => emit_expr(emitter, env, &**e),
-        Expr_::Id(id) => emit_pos_then(emitter, pos, emit_id(env, &**id)?),
+        Expr_::Id(e) => {
+            let instrs = emit_id(emitter, env, &**e)?;
+            emit_pos_then(emitter, pos, instrs)
+        }
         Expr_::Xml(e) => emit_xhp(env, pos, &**e),
         Expr_::Callconv(e) => emit_callconv(env, &**e),
         Expr_::Import(e) => emit_import(env, pos, &**e),
@@ -455,8 +459,44 @@ fn emit_pos(emitter: &Emitter, pos: &Pos) -> Result {
     Ok(emit_pos_rust::emit_pos(emitter, pos))
 }
 
-fn emit_id(env: &Env, id: &tast::Sid) -> Result {
-    unimplemented!("TODO(hrust)")
+fn emit_id(emitter: &mut Emitter, env: &Env, id: &tast::Sid) -> Result {
+    use pseudo_consts::*;
+    use InstructLitConst::*;
+
+    let ast_defs::Id(p, s) = id;
+    let res = match s.as_str() {
+        G__FILE__ => InstrSeq::make_lit_const(File),
+        G__DIR__ => InstrSeq::make_lit_const(Dir),
+        G__METHOD__ => InstrSeq::make_lit_const(Method),
+        G__FUNCTION_CREDENTIAL__ => InstrSeq::make_lit_const(FuncCred),
+        G__CLASS__ => InstrSeq::gather(vec![InstrSeq::make_self(), InstrSeq::make_classname()]),
+        G__COMPILER_FRONTEND__ => InstrSeq::make_string("hackc"),
+        G__LINE__ => InstrSeq::make_int(p.info_pos_extended().1.try_into().map_err(|_| {
+            emit_fatal::raise_fatal_parse(
+                p,
+                "error converting end of line from usize to isize".to_string(),
+            )
+        })?),
+        G__NAMESPACE__ => InstrSeq::make_string(env.namespace.name.as_ref().map_or("", |s| &s[..])),
+        EXIT | DIE => return emit_exit(emitter, env, None),
+        _ => {
+            panic!("TODO: uncomment after D19350786 lands")
+            // let cid: ConstId = r#const::Type::from_ast_name(&s);
+            // emit_symbol_refs::State::add_constant(emitter, cid.clone());
+            // return emit_pos_then(emitter, p, InstrSeq::make_lit_const(CnsE(cid)));
+        }
+    };
+    Ok(res)
+}
+
+fn emit_exit<'a>(emitter: &mut Emitter, env: &Env, expr_opt: Option<&'a tast::Expr>) -> Result {
+    Ok(InstrSeq::gather(vec![
+        expr_opt.map_or_else(
+            || InstrSeq::make_int(0),
+            |e| emit_expr(emitter, env, e).unwrap_or_default(),
+        ),
+        InstrSeq::make_exit(),
+    ]))
 }
 
 fn emit_callconv(env: &Env, (kind, expr): &(ast_defs::ParamKind, tast::Expr)) -> Result {

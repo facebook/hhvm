@@ -36,6 +36,7 @@ pub struct Env {
     pub jump_targets_gen: jump_targets::Gen,
     // Scope is owned (not borrowed) here
     pub scope: Scope<'static>,
+    pub namespace: NamespaceEnv,
     // TODO(hrust)
     // - pipe_var after porting Local
     // - namespace after porting Namespace_env

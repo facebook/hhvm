@@ -10,7 +10,7 @@ use hhas_symbol_refs_rust::*;
 use hhbc_id_rust::{class, function, r#const, Id};
 use std::collections::BTreeSet;
 
-struct State {
+pub struct State {
     symbol_refs: HhasSymbolRefs,
 }
 

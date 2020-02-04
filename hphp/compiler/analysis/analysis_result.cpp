@@ -31,7 +31,6 @@
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/package.h"
 #include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/util/hash.h"

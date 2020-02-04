@@ -14,7 +14,8 @@ type linearization_kind =
   | Ancestor_types
 [@@deriving show]
 
-val get_linearization : ?kind:linearization_kind -> string -> linearization
+val get_linearization :
+  ?kind:linearization_kind -> Provider_context.t -> string -> linearization
 
 val push_local_changes : unit -> unit
 

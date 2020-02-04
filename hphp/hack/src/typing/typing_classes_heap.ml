@@ -29,7 +29,7 @@ type class_type_variant =
   | Lazy of lazy_class_type
   | Eager of class_type
 
-let make_lazy_class_type class_name sc =
+let make_lazy_class_type ctx class_name sc =
   let Decl_ancestors.
         {
           ancestors;
@@ -38,10 +38,10 @@ let make_lazy_class_type class_name sc =
           req_ancestor_names;
           all_requirements;
         } =
-    Decl_ancestors.make class_name
+    Decl_ancestors.make ctx class_name
   in
   let get_ancestor = LSTable.get ancestors in
-  let inherited_members = Decl_inheritance.make class_name get_ancestor in
+  let inherited_members = Decl_inheritance.make ctx class_name get_ancestor in
   {
     sc;
     ih = inherited_members;
@@ -116,7 +116,7 @@ module Classes = struct
         if shallow_decl_enabled () then
           match Shallow_classes_heap.get class_name with
           | None -> raise Exit
-          | Some sc -> Lazy (make_lazy_class_type class_name sc)
+          | Some sc -> Lazy (make_lazy_class_type ctx class_name sc)
         else
           Eager (get_eager_class_type class_name)
       in

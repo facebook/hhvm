@@ -37,15 +37,15 @@ let parents_and_traits lin =
 let members_fully_known lin =
   lazy (Sequence.for_all lin ~f:(fun mro -> not mro.mro_class_not_found))
 
-let req_ancestor_names class_name =
-  Decl_linearize.get_linearization class_name
+let req_ancestor_names ctx class_name =
+  Decl_linearize.get_linearization ctx class_name
   |> Sequence.filter ~f:(fun mro ->
          mro.mro_via_req_extends || mro.mro_via_req_impl)
   |> Sequence.map ~f:(fun mro -> (mro.mro_name, ()))
 
-let all_requirements class_name =
+let all_requirements ctx class_name =
   lazy
-    ( Decl_linearize.get_linearization class_name
+    ( Decl_linearize.get_linearization ctx class_name
     |> Sequence.filter ~f:(fun mro -> not mro.mro_xhp_attrs_only)
     |> Sequence.filter_map ~f:(fun mro ->
            Option.map mro.mro_required_at (fun pos ->
@@ -57,9 +57,9 @@ let is_canonical _ = true
 
 let merge ~earlier ~later:_ = earlier
 
-let make class_name =
+let make ctx class_name =
   let lin =
-    Decl_linearize.(get_linearization ~kind:Ancestor_types) class_name
+    Decl_linearize.(get_linearization ctx ~kind:Ancestor_types) class_name
     (* Drop the requested class; we only want its ancestors. *)
     |> fun lin -> Sequence.drop_eagerly lin 1
   in
@@ -69,6 +69,6 @@ let make class_name =
       LSTable.make (parents_and_traits lin) ~is_canonical ~merge;
     members_fully_known = members_fully_known lin;
     req_ancestor_names =
-      LSTable.make (req_ancestor_names class_name) ~is_canonical ~merge;
-    all_requirements = all_requirements class_name;
+      LSTable.make (req_ancestor_names ctx class_name) ~is_canonical ~merge;
+    all_requirements = all_requirements ctx class_name;
   }

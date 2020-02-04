@@ -513,12 +513,12 @@ and get_linearization (env : env) (class_name : string) : linearization =
               mro_class_not_found = true (* This class is not known to exist! *);
             }))
 
-let get_linearization ?(kind = Member_resolution) class_name =
+let get_linearization ?(kind = Member_resolution) ctx class_name =
   let decl_env =
     {
       Decl_env.mode = FileInfo.Mstrict;
       droot = Some (Typing_deps.Dep.Class class_name);
-      ctx = Provider_context.get_global_context_or_empty_FOR_MIGRATION ();
+      ctx;
     }
   in
   let env = { class_stack = SSet.empty; decl_env; linearization_kind = kind } in

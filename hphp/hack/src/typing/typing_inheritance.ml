@@ -85,9 +85,9 @@ let check_trait_override_annotations env cls ~static =
                   (get_pos ty)
           ))
 
-let check_if_cyclic cls =
+let check_if_cyclic ctx cls =
   let cyclic_classes =
-    Decl_linearize.get_linearization (Cls.name cls)
+    Decl_linearize.get_linearization ctx (Cls.name cls)
     |> Sequence.find_map ~f:(fun mro -> mro.mro_cyclic)
   in
   match cyclic_classes with
@@ -124,9 +124,9 @@ let no_trait_reuse_enabled env =
     (Env.get_tcopt env)
     TypecheckerOptions.experimental_no_trait_reuse
 
-let check_trait_reuse shallow_class =
+let check_trait_reuse ctx shallow_class =
   let class_name = snd shallow_class.sc_name in
-  Decl_linearize.(get_linearization ~kind:Ancestor_types) class_name
+  Decl_linearize.(get_linearization ctx ~kind:Ancestor_types) class_name
   |> Sequence.iter ~f:(fun mro ->
          match mro.mro_trait_reuse with
          | None -> ()
@@ -142,10 +142,11 @@ let check_trait_reuse shallow_class =
              mro.mro_name)
 
 let check_class env cls =
-  check_if_cyclic cls;
+  check_if_cyclic (Env.get_ctx env) cls;
   let shallow_class = Cls.shallow_decl cls in
   check_extend_kinds shallow_class;
-  if no_trait_reuse_enabled env then check_trait_reuse shallow_class;
+  if no_trait_reuse_enabled env then
+    check_trait_reuse (Env.get_ctx env) shallow_class;
   if not Ast_defs.(equal_class_kind (Cls.kind cls) Ctrait) then (
     check_override_annotations cls ~static:false;
     check_override_annotations cls ~static:true

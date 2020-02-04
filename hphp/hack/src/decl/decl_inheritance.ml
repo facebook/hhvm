@@ -455,9 +455,9 @@ let construct class_name lin =
          ~init:(None, Inconsistent)
          ~f:(fold_constructors class_name) )
 
-let make class_name get_ancestor =
+let make ctx class_name get_ancestor =
   let lin =
-    Decl_linearize.get_linearization class_name
+    Decl_linearize.get_linearization ctx class_name
     |> get_shallow_classes_and_substs
     |> Sequence.memoize
   in

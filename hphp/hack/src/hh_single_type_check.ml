@@ -1666,7 +1666,9 @@ let handle_mode
         let { FileInfo.classes; _ } = info in
         List.iter classes ~f:(fun (_, classname) ->
             Printf.printf "Linearization for class %s:\n" classname;
-            let linearization = Decl_linearize.get_linearization classname in
+            let linearization =
+              Decl_linearize.get_linearization ctx classname
+            in
             let linearization =
               Sequence.map linearization (fun mro ->
                   let name = mro.Decl_defs.mro_name in

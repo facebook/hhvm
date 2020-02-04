@@ -23,4 +23,8 @@ type inherited_members = {
   construct: (class_elt option * consistent_kind) Lazy.t;
 }
 
-val make : string -> (string -> decl_ty option) -> inherited_members
+val make :
+  Provider_context.t ->
+  string ->
+  (string -> decl_ty option) ->
+  inherited_members

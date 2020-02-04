@@ -643,8 +643,9 @@ let full_init (genv : ServerEnv.genv) (env : ServerEnv.env) :
     ServerEnv.env * float =
   let (env, t) =
     if
-      genv.ServerEnv.local_config.SLC.remote_type_check.SLC.recheck_threshold
-      = None
+      genv.ServerEnv.local_config.SLC.remote_type_check
+        .SLC.load_naming_table_on_full_init
+      = false
     then
       initialize_naming_table ~do_naming:true "full initialization" genv env
     else

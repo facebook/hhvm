@@ -135,6 +135,7 @@ type t = {
 and remote_type_check = {
   (* Enables remote type check *)
   enabled: bool;
+  load_naming_table_on_full_init: bool;
   max_batch_size: int;
   min_batch_size: int;
   (* Dictates the number of remote type checking workers *)
@@ -207,6 +208,7 @@ let default =
     remote_type_check =
       {
         enabled = true;
+        load_naming_table_on_full_init = false;
         max_batch_size = 8_000;
         min_batch_size = 5_000;
         num_workers = 4;
@@ -303,6 +305,14 @@ let load_remote_type_check ~current_version config =
       config
   in
   let recheck_threshold = int_opt "recheck_threshold" ~prefix config in
+  let load_naming_table_on_full_init =
+    bool_if_min_version
+      "load_naming_table_on_full_init"
+      ~prefix
+      ~default:default.remote_type_check.load_naming_table_on_full_init
+      ~current_version
+      config
+  in
   let enabled =
     bool_if_min_version
       "enabled"
@@ -335,6 +345,7 @@ let load_remote_type_check ~current_version config =
   in
   {
     enabled;
+    load_naming_table_on_full_init;
     max_batch_size;
     min_batch_size;
     num_workers;

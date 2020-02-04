@@ -58,6 +58,7 @@ type t = {
   option_enable_xhp_class_modifier: bool;
   option_rust_lowerer: bool;
   option_enable_first_class_function_pointers: bool;
+  option_widen_is_array: bool;
 }
 
 let default =
@@ -111,6 +112,7 @@ let default =
     option_enable_xhp_class_modifier = false;
     option_rust_lowerer = true;
     option_enable_first_class_function_pointers = false;
+    option_widen_is_array = false;
   }
 
 let constant_folding o = o.option_constant_folding
@@ -207,8 +209,15 @@ let check_int_overflow o = o.option_check_int_overflow
 
 let rust_lowerer o = o.option_rust_lowerer
 
+
 let enable_first_class_function_pointers o =
   o.option_enable_first_class_function_pointers
+
+(**
+ * Widen the default behavior of `is_array` from "is exactly a PHP array to"
+ * "is any kind of CoW container" (i.e. `HH\is_any_array`)
+ *)
+let widen_is_array o = o.option_widen_is_array
 
 let to_string o =
   let aliased_namespaces_str =
@@ -397,6 +406,8 @@ let set_option options name value =
       options with
       option_enable_first_class_function_pointers = int_of_string value > 0;
     }
+  | "hhvm.widen_is_array" ->
+    { options with option_widen_is_array = as_bool value }
   | _ -> options
 
 let get_value_from_config_ config key =
@@ -607,6 +618,8 @@ let value_setters =
         get_value_from_config_int
     @@ fun opts v ->
       { opts with option_enable_first_class_function_pointers = v = 1 } );
+    ( set_value "hhvm.widen_is_array" get_value_from_config_int @@ fun opts v ->
+      { opts with option_widen_is_array = v = 1 } );
   ]
 
 let extract_config_options_from_json ~init config_json =

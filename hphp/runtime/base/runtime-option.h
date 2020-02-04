@@ -1274,6 +1274,10 @@ struct RuntimeOption {
      2 - throw */                                                       \
   F(uint64_t, DynamicClsMethLevel, 1)                                   \
   F(bool, APCSerializeFuncs, true)                                      \
+  /* When set, `is_array` becomes equivalent to `is_any_array` or
+   * `isTvArrayLike` instead of being a strict KindOfArray check.
+   */                                                                   \
+  F(bool, WidenIsArray, false)                                          \
   /* */
 
 private:

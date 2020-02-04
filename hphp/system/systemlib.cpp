@@ -59,7 +59,7 @@ DEBUG_ONLY bool throwable_has_expected_props() {
 }
 
 ALWAYS_INLINE
-Object createAndConstruct(Class* cls, const Variant& args) {
+Object createAndConstruct(Class* cls, const Array& args) {
   Object inst{cls};
   tvDecRefGen(g_context->invokeFunc(cls->getCtor(), args, inst.get()));
   return inst;
@@ -198,29 +198,23 @@ Object AllocSoapFaultObject(const Variant& code,
                                  const Variant& header /* = uninit_variant */) {
   return createAndConstruct(
     s_SoapFaultClass,
-    make_packed_array(code,
-                      message,
-                      actor,
-                      detail,
-                      name,
-                      header
-                     )
+    make_varray(code, message, actor, detail, name, header)
   );
 }
 
 Object AllocLazyKVZipIterableObject(const Variant& mp) {
   return createAndConstruct(s_LazyKVZipIterableClass,
-                            make_packed_array(mp));
+                            make_varray(mp));
 }
 
 Object AllocLazyIterableViewObject(const Variant& iterable) {
   return createAndConstruct(s_LazyIterableViewClass,
-                            make_packed_array(iterable));
+                            make_varray(iterable));
 }
 
 Object AllocLazyKeyedIterableViewObject(const Variant& iterable) {
   return createAndConstruct(s_LazyKeyedIterableViewClass,
-                            make_packed_array(iterable));
+                            make_varray(iterable));
 }
 
 void throwExceptionObject(const Variant& message) {

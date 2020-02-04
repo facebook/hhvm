@@ -561,7 +561,7 @@ Array ObjectData::toArray(bool pubOnly /* = false */,
     assertx(flags.is_set());
     if (UNLIKELY(flags.type() == KindOfInt64 &&
                  flags.val().num == ARRAY_OBJ_ITERATOR_STD_PROP_LIST)) {
-      auto ret = Array::Create();
+      auto ret = Array::CreateDArray();
       o_getArray(ret, true, ignoreLateInit);
       return ret;
     }
@@ -572,11 +572,11 @@ Array ObjectData::toArray(bool pubOnly /* = false */,
     assertx(storage.is_set());
     return tvCastToArrayLike(storage.tv());
   } else if (UNLIKELY(instanceof(c_Closure::classof()))) {
-    return make_packed_array(Object(const_cast<ObjectData*>(this)));
+    return make_varray(Object(const_cast<ObjectData*>(this)));
   } else if (UNLIKELY(instanceof(DateTimeData::getClass()))) {
     return Native::data<DateTimeData>(this)->getDebugInfo();
   } else {
-    auto ret = Array::Create();
+    auto ret = Array::CreateDArray();
     o_getArray(ret, pubOnly, ignoreLateInit);
     return ret;
   }

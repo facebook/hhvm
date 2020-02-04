@@ -1463,8 +1463,8 @@ void AsyncMysqlConnectAndMultiQueryEvent::unserialize(TypedValue& result) {
   auto queryResults = transformQueryResults(m_multi_query_op, m_clientStats);
   auto connResult = AsyncMysqlConnectResult::newInstance(
       m_connect_op, m_clientStats);
-  auto resTuple = make_packed_array(connResult, queryResults);
   if (m_multi_query_op->ok()) {
+    auto resTuple = make_varray(connResult, queryResults);
     tvCopy(make_array_like_tv(resTuple.detach()), result);
   } else {
     throwAsyncMysqlQueryException("AsyncMysqlQueryException", m_multi_query_op,

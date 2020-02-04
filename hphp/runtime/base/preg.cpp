@@ -920,7 +920,7 @@ static inline void add_offset_pair_split(Array& result,
                                          bool hackArrOutput) {
   auto match_pair = hackArrOutput
     ? make_vec_array(str, offset)
-    : make_packed_array(str, offset);
+    : make_varray(str, offset);
   if (name) result.set(String(name), match_pair);
   result.append(match_pair);
 }

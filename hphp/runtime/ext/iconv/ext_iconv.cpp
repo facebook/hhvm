@@ -1786,7 +1786,7 @@ static Variant HHVM_FUNCTION(iconv_mime_decode_headers,
       if (ret.exists(header)) {
         Variant elem = ret[header];
         if (!elem.isArray()) {
-          ret.set(header, make_packed_array(elem, value));
+          ret.set(header, make_varray(elem, value));
         } else {
           elem.asArrRef().append(value);
           ret.set(header, elem);

@@ -400,7 +400,7 @@ bool HHVM_FUNCTION(pcntl_signal_dispatch) {
       // We generally catch any exception a handler might throw, except
       // ExitException and ResourceExceededException.
       try {
-        vm_call_user_func(handler, make_packed_array(signum));
+        vm_call_user_func(handler, make_varray(signum));
       } catch (const ExitException& e) {
         throw;
       } catch (const ResourceExceededException& e) {

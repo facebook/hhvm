@@ -1438,7 +1438,7 @@ ObjectData* tvCastToObjectData(TypedValue tv) {
 
     case KindOfClsMeth: {
       raiseClsMethConvertWarningHelper("array");
-      auto arr = make_packed_array(
+      auto arr = make_varray(
         val(tv).pclsmeth->getClsStr(), val(tv).pclsmeth->getFuncStr());
       return ObjectData::FromArray(arr.get()).detach();
     }

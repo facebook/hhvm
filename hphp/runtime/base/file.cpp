@@ -753,7 +753,7 @@ Array File::readCSV(int64_t length /* = 0 */,
                     const String* input /* = nullptr */) {
   const String& line = (input != nullptr) ? *input : readLine(length);
   if (line.empty()) {
-    return Array();
+    return null_array;
   }
 
   String new_line;
@@ -781,7 +781,7 @@ Array File::readCSV(int64_t length /* = 0 */,
   temp = (char *)malloc(temp_len + line_end_len + 1);
 
   /* Initialize return array */
-  Array ret;
+  auto ret = Array::CreateVArray();
 
   /* Main loop to read CSV fields */
   /* NB this routine will return a single null entry for a blank line */

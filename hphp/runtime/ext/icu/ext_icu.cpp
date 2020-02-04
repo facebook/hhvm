@@ -47,7 +47,7 @@ static Variant icu_match_impl(const String& pattern,
                               int64_t flags) {
   UErrorCode status = U_ZERO_ERROR;
 
-  Array matchesArr = Array::Create();
+  Array matchesArr = Array::CreateVArray();
   SCOPE_EXIT {
     if (matches) {
       *matches = matchesArr;
@@ -120,7 +120,7 @@ static Variant icu_match_impl(const String& pattern,
           }
 
           start = usubject.countChar32(0, start);
-          matchesArr.append(make_packed_array(match, start));
+          matchesArr.append(make_varray(match, start));
         } else {
           matchesArr.append(match);
         }

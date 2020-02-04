@@ -3812,12 +3812,12 @@ static Variant _php_mb_regex_ereg_search_exec(const String& pattern,
       {
         beg = MBSTRG(search_regs)->beg[0];
         end = MBSTRG(search_regs)->end[0];
-        ret = make_packed_array(beg, end - beg);
+        ret = make_varray(beg, end - beg);
       }
       break;
     case 2:
       n = MBSTRG(search_regs)->num_regs;
-      ret = Variant(Array::Create());
+      ret = Variant(Array::CreateVArray());
       for (i = 0; i < n; i++) {
         beg = MBSTRG(search_regs)->beg[i];
         end = MBSTRG(search_regs)->end[i];

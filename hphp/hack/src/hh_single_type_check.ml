@@ -740,7 +740,7 @@ let global_inference_merge_and_solve
   print_solved_global_inference_env ~verbosity gienv error_format max_errors;
   gienv
 
-let check_file opts ~verbosity errors files_info error_format max_errors =
+let check_file ctx ~verbosity errors files_info error_format max_errors =
   let (errors, gienvs) =
     Relative_path.Map.fold
       files_info
@@ -748,7 +748,7 @@ let check_file opts ~verbosity errors files_info error_format max_errors =
         begin
           fun fn fileinfo (errors, global_tvenvs) ->
           let (_, lazy_global_tvenvs, new_errors) =
-            Typing_check_utils.type_file_with_global_tvenvs opts fn fileinfo
+            Typing_check_utils.type_file_with_global_tvenvs ctx fn fileinfo
           in
           ( errors @ Errors.get_error_list new_errors,
             global_tvenvs @ Lazy.force lazy_global_tvenvs )
@@ -757,7 +757,7 @@ let check_file opts ~verbosity errors files_info error_format max_errors =
   in
   let _gienv =
     global_inference_merge_and_solve
-      opts
+      ctx.Provider_context.tcopt
       ~verbosity:(verbosity + 1)
       gienvs
       ~error_format
@@ -1158,7 +1158,7 @@ let scan_files_for_symbol_index
 let handle_mode
     mode
     filenames
-    tcopt
+    ctx
     popt
     builtins
     files_contents
@@ -1193,12 +1193,17 @@ let handle_mode
             | _ -> false)
       in
       let errors =
-        check_file ~verbosity tcopt [] to_check error_format max_errors
+        check_file ~verbosity ctx [] to_check error_format max_errors
       in
       if errors <> [] then
         List.iter ~f:(print_error error_format) errors
       else
-        Ai.do_ Typing_check_utils.type_file files_info ai_options tcopt
+        Ai.do_
+          (fun _tcopt path file_info ->
+            Typing_check_utils.type_file ctx path file_info)
+          files_info
+          ai_options
+          ctx.Provider_context.tcopt
   | Autocomplete
   | Autocomplete_manually_invoked ->
     let path = expect_single_file () in
@@ -1215,7 +1220,7 @@ let handle_mode
     let is_manually_invoked = mode = Autocomplete_manually_invoked in
     let (ctx, entry) =
       Provider_utils.update_context
-        ~ctx:(Provider_context.empty tcopt)
+        ~ctx
         ~path
         ~file_input:(ServerCommandTypes.FileContent content)
     in
@@ -1243,7 +1248,6 @@ let handle_mode
   | Ffp_autocomplete ->
     iter_over_files (fun filename ->
         try
-          let ctx = Provider_context.empty ~tcopt in
           let sienv = scan_files_for_symbol_index filename popt sienv ctx in
           let file_text = cat (Relative_path.to_absolute filename) in
           (* TODO: Use a magic word/symbol to identify autocomplete location instead *)
@@ -1261,7 +1265,7 @@ let handle_mode
           in
           let result =
             FfpAutocompleteService.auto_complete
-              tcopt
+              ctx.Provider_context.tcopt
               file_text
               position
               ~filter_by_token:true
@@ -1282,7 +1286,7 @@ let handle_mode
         if Relative_path.Map.mem builtins fn then
           ()
         else
-          let (tast, _) = Typing_check_utils.type_file tcopt fn fileinfo in
+          let (tast, _) = Typing_check_utils.type_file ctx fn fileinfo in
           let result = Coverage_level.get_levels tast fn in
           print_colored fn result)
   | Coverage ->
@@ -1290,12 +1294,11 @@ let handle_mode
         if Relative_path.Map.mem builtins fn then
           ()
         else
-          let (tast, _) = Typing_check_utils.type_file tcopt fn fileinfo in
+          let (tast, _) = Typing_check_utils.type_file ctx fn fileinfo in
           let type_acc = ServerCoverageMetric.accumulate_types tast fn in
           print_coverage type_acc)
   | Cst_search ->
     let path = expect_single_file () in
-    let ctx = Provider_context.empty ~tcopt in
     let (ctx, entry) =
       Provider_utils.update_context
         ~ctx
@@ -1324,14 +1327,16 @@ let handle_mode
         match Relative_path.Map.find_opt files_info filename with
         | Some fileinfo ->
           let raw_result =
-            SymbolInfoService.helper tcopt [] [(filename, fileinfo)]
+            SymbolInfoService.helper
+              ctx.Provider_context.tcopt
+              []
+              [(filename, fileinfo)]
           in
           let result = SymbolInfoService.format_result raw_result in
           let result_json = ClientSymbolInfo.to_json result in
           print_endline (Hh_json.json_to_multiline result_json)
         | None -> ())
   | Lint ->
-    let ctx = Provider_context.empty ~tcopt in
     let lint_errors =
       Relative_path.Map.fold
         files_contents
@@ -1357,15 +1362,14 @@ let handle_mode
       Printf.printf "No lint errors\n"
   | Dump_deps ->
     Relative_path.Map.iter files_info (fun fn fileinfo ->
-        ignore @@ Typing_check_utils.check_defs tcopt fn fileinfo);
+        ignore @@ Typing_check_utils.check_defs ctx fn fileinfo);
     if Caml.Hashtbl.length dbg_deps > 0 then dump_debug_deps dbg_deps
   | Dump_glean_deps ->
     Relative_path.Map.iter files_info (fun fn fileinfo ->
-        ignore @@ Typing_check_utils.check_defs tcopt fn fileinfo);
+        ignore @@ Typing_check_utils.check_defs ctx fn fileinfo);
     dump_debug_glean_deps dbg_glean_deps
   | Dump_inheritance ->
     let open ServerCommandTypes.Method_jumps in
-    let ctx = Provider_context.empty ~tcopt in
     let naming_table = Naming_table.create files_info in
     Naming_table.iter naming_table Typing_deps.update_file;
     Naming_table.iter naming_table (fun fn fileinfo ->
@@ -1409,12 +1413,7 @@ let handle_mode
     let file_input =
       ServerCommandTypes.FileName (Relative_path.to_absolute path)
     in
-    let (ctx, entry) =
-      Provider_utils.update_context
-        ~ctx:(Provider_context.empty ~tcopt)
-        ~path
-        ~file_input
-    in
+    let (ctx, entry) = Provider_utils.update_context ~ctx ~path ~file_input in
     (* TODO(ljw): surely this doesn't need quarantine? *)
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
@@ -1447,25 +1446,35 @@ let handle_mode
         Printf.printf "%s\n" (Nast.show_program nast))
   | Dump_tast ->
     let (errors, tasts) =
-      compute_tasts_expand_types tcopt ~verbosity files_info files_contents
+      compute_tasts_expand_types
+        ctx.Provider_context.tcopt
+        ~verbosity
+        files_info
+        files_contents
     in
     print_errors_if_present (parse_errors @ Errors.get_error_list errors);
-    print_tasts tasts tcopt
+    print_tasts tasts ctx.Provider_context.tcopt
   | Check_tast ->
     iter_over_files (fun filename ->
         let files_contents =
           Relative_path.Map.filter files_contents ~f:(fun k _v -> k = filename)
         in
         let (errors, tasts) =
-          compute_tasts_expand_types tcopt ~verbosity files_info files_contents
+          compute_tasts_expand_types
+            ctx.Provider_context.tcopt
+            ~verbosity
+            files_info
+            files_contents
         in
-        print_tasts tasts tcopt;
+        print_tasts tasts ctx.Provider_context.tcopt;
         if not @@ Errors.is_empty errors then (
           print_errors error_format errors max_errors;
           Printf.printf "Did not typecheck the TAST as there are typing errors.";
           exit 2
         ) else
-          let tast_check_errors = typecheck_tasts tasts tcopt filename in
+          let tast_check_errors =
+            typecheck_tasts tasts ctx.Provider_context.tcopt filename
+          in
           print_error_list error_format tast_check_errors max_errors;
           if tast_check_errors <> [] then exit 2)
   | Dump_stripped_tast ->
@@ -1474,7 +1483,7 @@ let handle_mode
           Relative_path.Map.filter files_contents ~f:(fun k _v -> k = filename)
         in
         let (_, (tasts, _gienvs)) =
-          compute_tasts tcopt files_info files_contents
+          compute_tasts ctx.Provider_context.tcopt files_info files_contents
         in
         let tast = Relative_path.Map.find tasts filename in
         let nast = Tast.to_nast tast in
@@ -1488,7 +1497,7 @@ let handle_mode
       {
         (ServerEnvBuild.make_env genv.ServerEnv.config) with
         ServerEnv.naming_table;
-        ServerEnv.tcopt;
+        ServerEnv.tcopt = ctx.Provider_context.tcopt;
       }
     in
     let filename = Relative_path.to_absolute filename in
@@ -1526,7 +1535,7 @@ let handle_mode
       {
         (ServerEnvBuild.make_env genv.ServerEnv.config) with
         ServerEnv.naming_table;
-        ServerEnv.tcopt;
+        ServerEnv.tcopt = ctx.Provider_context.tcopt;
       }
     in
     let filename = Relative_path.to_absolute filename in
@@ -1558,12 +1567,7 @@ let handle_mode
     let file_input =
       ServerCommandTypes.FileName (Relative_path.to_absolute path)
     in
-    let (ctx, entry) =
-      Provider_utils.update_context
-        ~ctx:(Provider_context.empty ~tcopt)
-        ~path
-        ~file_input
-    in
+    let (ctx, entry) = Provider_utils.update_context ~ctx ~path ~file_input in
     let results =
       ServerHighlightRefs.go_quarantined ~ctx ~entry ~line ~column
     in
@@ -1582,7 +1586,7 @@ let handle_mode
         else (
           Typing_log.out_channel := oc;
           Provider_utils.respect_but_quarantine_unsaved_changes
-            ~ctx:(Provider_context.empty ~tcopt)
+            ~ctx
             ~f:(fun () ->
               let files_contents = Multifile.file_to_files filename in
               let (parse_errors, individual_file_info) =
@@ -1590,7 +1594,7 @@ let handle_mode
               in
               let errors =
                 check_file
-                  tcopt
+                  ctx
                   ~verbosity
                   (Errors.get_error_list parse_errors)
                   individual_file_info
@@ -1606,9 +1610,7 @@ let handle_mode
         let oc =
           Out_channel.create (Relative_path.to_absolute filename ^ ".decl_out")
         in
-        Provider_utils.respect_but_quarantine_unsaved_changes
-          ~ctx:(Provider_context.empty ~tcopt)
-          ~f:(fun () ->
+        Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
             let files_contents =
               Relative_path.Map.filter files_contents ~f:(fun k _v ->
                   k = filename)
@@ -1631,13 +1633,7 @@ let handle_mode
   | Errors ->
     (* Don't typecheck builtins *)
     let errors =
-      check_file
-        tcopt
-        ~verbosity
-        parse_errors
-        files_info
-        error_format
-        max_errors
+      check_file ctx ~verbosity parse_errors files_info error_format max_errors
     in
     print_error_list error_format errors max_errors;
     if errors <> [] then exit 2
@@ -1647,7 +1643,6 @@ let handle_mode
   | Shallow_class_diff ->
     print_errors_if_present parse_errors;
     let filename = expect_single_file () in
-    let ctx = Provider_context.empty ~tcopt in
     test_shallow_class_diff ctx filename
   | Linearization ->
     if parse_errors <> [] then (
@@ -1664,7 +1659,6 @@ let handle_mode
           end
         ~init:files_info
     in
-    let ctx = Provider_context.empty ~tcopt in
     Relative_path.Map.iter files_info ~f:(fun _file info ->
         let { FileInfo.classes; _ } = info in
         List.iter classes ~f:(fun (_, classname) ->
@@ -1833,10 +1827,11 @@ let decl_and_run_mode
     in
     Typing_deps.add_dependency_callback "get_debug_trace" get_debug_trace );
   let (errors, files_info) = parse_name_and_decl popt to_decl in
+  let ctx = Provider_context.empty ~tcopt in
   handle_mode
     mode
     files
-    tcopt
+    ctx
     popt
     builtins
     files_contents

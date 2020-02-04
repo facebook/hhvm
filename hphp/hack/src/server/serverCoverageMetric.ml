@@ -142,11 +142,11 @@ let go_ fn genv env =
       (Naming_table.get_files env.ServerEnv.naming_table)
   in
   NamingTableStore.store env.ServerEnv.naming_table;
-  let tcopt = env.ServerEnv.tcopt in
+  let ctx = Provider_utils.ctx_from_server_env env in
   let result =
     MultiWorker.call
       genv.ServerEnv.workers
-      ~job:(get_coverage root tcopt)
+      ~job:(get_coverage root ctx)
       ~neutral:None
       ~merge:merge_trie_opt
       ~next:next_files

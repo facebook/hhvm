@@ -106,92 +106,81 @@ let handle_exn_as_error : type res. Pos.t -> (unit -> res option) -> res option
     Errors.exception_occurred pos;
     None
 
-let type_fun (opts : TypecheckerOptions.t) (fn : Relative_path.t) (x : string) :
+let type_fun (ctx : Provider_context.t) (fn : Relative_path.t) (x : string) :
     (Tast.def * Typing_inference_env.t_global_with_pos) option =
   match Ast_provider.find_fun_in_file ~full:true fn x with
   | Some f ->
     handle_exn_as_error f.Aast.f_span (fun () ->
         let fun_ = Naming.fun_ f in
-        let ctx =
-          Provider_context.get_global_context_or_empty_FOR_MIGRATION ()
-        in
         Nast_check.def ctx (Aast.Fun fun_);
         let def_opt =
-          Typing.fun_def opts fun_
+          Typing.fun_def ctx.Provider_context.tcopt fun_
           |> Option.map ~f:(fun (f, global_tvenv) -> (Aast.Fun f, global_tvenv))
         in
-        Option.iter def_opt (fun (f, _) -> Tast_check.def opts f);
+        Option.iter def_opt (fun (f, _) ->
+            Tast_check.def ctx.Provider_context.tcopt f);
         def_opt)
   | None -> None
 
-let type_class (opts : TypecheckerOptions.t) (fn : Relative_path.t) (x : string)
-    : (Tast.def * Typing_inference_env.t_global_with_pos list) option =
+let type_class (ctx : Provider_context.t) (fn : Relative_path.t) (x : string) :
+    (Tast.def * Typing_inference_env.t_global_with_pos list) option =
   match Ast_provider.find_class_in_file ~full:true fn x with
   | Some cls ->
     handle_exn_as_error cls.Aast.c_span (fun () ->
         let class_ = Naming.class_ cls in
-        let ctx =
-          Provider_context.get_global_context_or_empty_FOR_MIGRATION ()
-        in
         Nast_check.def ctx (Aast.Class class_);
         let def_opt =
-          Typing.class_def opts class_
+          Typing.class_def ctx.Provider_context.tcopt class_
           |> Option.map ~f:(fun (c, global_tvenv) ->
                  (Aast.Class c, global_tvenv))
         in
-        Option.iter def_opt (fun (f, _) -> Tast_check.def opts f);
+        Option.iter def_opt (fun (f, _) ->
+            Tast_check.def ctx.Provider_context.tcopt f);
         def_opt)
   | None -> None
 
 let type_record_def
-    (opts : TypecheckerOptions.t) (fn : Relative_path.t) (x : string) :
+    (ctx : Provider_context.t) (fn : Relative_path.t) (x : string) :
     Tast.def option =
   match Ast_provider.find_record_def_in_file ~full:true fn x with
   | Some rd ->
     handle_exn_as_error rd.Aast.rd_span (fun () ->
         let rd = Naming.record_def rd in
-        let ctx =
-          Provider_context.get_global_context_or_empty_FOR_MIGRATION ()
-        in
         Nast_check.def ctx (Aast.RecordDef rd);
 
-        let def = Aast.RecordDef (Typing.record_def_def opts rd) in
-        Tast_check.def opts def;
+        let def =
+          Aast.RecordDef (Typing.record_def_def ctx.Provider_context.tcopt rd)
+        in
+        Tast_check.def ctx.Provider_context.tcopt def;
         Some def)
   | None -> None
 
-let check_typedef
-    (opts : TypecheckerOptions.t) (fn : Relative_path.t) (x : string) :
-    Tast.def option =
+let check_typedef (ctx : Provider_context.t) (fn : Relative_path.t) (x : string)
+    : Tast.def option =
   match Ast_provider.find_typedef_in_file ~full:true fn x with
   | Some t ->
     handle_exn_as_error Pos.none (fun () ->
         let typedef = Naming.typedef t in
-        let ctx =
-          Provider_context.get_global_context_or_empty_FOR_MIGRATION ()
-        in
         Nast_check.def ctx (Aast.Typedef typedef);
-        let ret = Typing.typedef_def opts typedef in
+        let ret = Typing.typedef_def ctx.Provider_context.tcopt typedef in
         Typing_variance.typedef ctx x;
         let def = Aast.Typedef ret in
-        Tast_check.def opts def;
+        Tast_check.def ctx.Provider_context.tcopt def;
         Some def)
   | None -> None
 
-let check_const
-    (opts : TypecheckerOptions.t) (fn : Relative_path.t) (x : string) :
+let check_const (ctx : Provider_context.t) (fn : Relative_path.t) (x : string) :
     Tast.def option =
   match Ast_provider.find_gconst_in_file ~full:true fn x with
   | None -> None
   | Some cst ->
     handle_exn_as_error cst.Aast.cst_span (fun () ->
         let cst = Naming.global_const cst in
-        let ctx =
-          Provider_context.get_global_context_or_empty_FOR_MIGRATION ()
-        in
         Nast_check.def ctx (Aast.Constant cst);
-        let def = Aast.Constant (Typing.gconst_def opts cst) in
-        Tast_check.def opts def;
+        let def =
+          Aast.Constant (Typing.gconst_def ctx.Provider_context.tcopt cst)
+        in
+        Tast_check.def ctx.Provider_context.tcopt def;
         Some def)
 
 let should_enable_deferring
@@ -225,6 +214,7 @@ let process_file
     ~threshold_opt:(GlobalOptions.tco_defer_class_declaration_threshold opts);
   let prev_counters_state = Counters.reset ~enable:true in
   let (funs, classes, record_defs, typedefs, gconsts) = Nast.get_defs ast in
+  let ctx = { ctx with Provider_context.tcopt = opts } in
   let ignore_type_record_def opts fn name =
     ignore (type_record_def opts fn name)
   in
@@ -235,20 +225,19 @@ let process_file
       Errors.do_with_context fn Errors.Typing (fun () ->
           let fun_global_tvenvs =
             List.map funs ~f:snd
-            |> List.filter_map ~f:(type_fun opts fn)
+            |> List.filter_map ~f:(type_fun ctx fn)
             |> List.map ~f:snd
           in
           let class_global_tvenvs =
             List.map classes ~f:snd
-            |> List.filter_map ~f:(type_class opts fn)
+            |> List.filter_map ~f:(type_class ctx fn)
             |> List.map ~f:snd
             |> List.concat
           in
           List.map record_defs ~f:snd
-          |> List.iter ~f:(ignore_type_record_def opts fn);
-          List.map typedefs ~f:snd
-          |> List.iter ~f:(ignore_check_typedef opts fn);
-          List.map gconsts ~f:snd |> List.iter ~f:(ignore_check_const opts fn);
+          |> List.iter ~f:(ignore_type_record_def ctx fn);
+          List.map typedefs ~f:snd |> List.iter ~f:(ignore_check_typedef ctx fn);
+          List.map gconsts ~f:snd |> List.iter ~f:(ignore_check_const ctx fn);
           fun_global_tvenvs @ class_global_tvenvs)
     in
     if GlobalOptions.tco_global_inference opts then
@@ -380,9 +369,6 @@ let process_files
             profile_log start_time second_start_time file result;
           (result.errors, result.computation)
         | Declare path ->
-          let ctx =
-            Provider_context.get_global_context_or_empty_FOR_MIGRATION ()
-          in
           let errors = Decl_service.decl_file ctx errors path in
           (errors, [])
         | Prefetch paths ->

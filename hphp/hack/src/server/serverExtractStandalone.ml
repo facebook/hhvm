@@ -1376,7 +1376,7 @@ let collect_dependencies ctx target =
       match target with
       | Function func ->
         let (_ : (Tast.def * Typing_inference_env.t_global_with_pos) option) =
-          Typing_check_service.type_fun ctx.Provider_context.tcopt filename func
+          Typing_check_service.type_fun ctx filename func
         in
         HashSet.remove env.dependencies (Fun func);
         HashSet.remove env.dependencies (FunName func)
@@ -1384,10 +1384,7 @@ let collect_dependencies ctx target =
         let (_
               : (Tast.def * Typing_inference_env.t_global_with_pos list) option)
             =
-          Typing_check_service.type_class
-            ctx.Provider_context.tcopt
-            filename
-            cls
+          Typing_check_service.type_class ctx filename cls
         in
         HashSet.remove env.dependencies (Method (cls, m));
         HashSet.remove env.dependencies (SMethod (cls, m)))

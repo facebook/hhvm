@@ -491,15 +491,12 @@ private:
  *
  * During iteration, if objFn or arrFn returns true, iteration stops.
  *
- * There are also two supported shortcuts:
+ * There is also a supported shortcut:
  * If ObjFn is a bool, and 'it' is not an array, and not a collection,
  * IterateV will do nothing, and return the value of objFn.
  *
- * If PreCollFn is a bool, and 'it' is not an array, IterateV will do nothing,
- * and return the value of preCollFn.
- *
- * There are overloads that take 4 and 3 arguments respectively, that pass
- * false for the trailing arguments as a convenience.
+ * There is an overload that takes 4 arguments and passes false for ObjFn
+ * as a convenient way to access this shortcut.
  */
 
 // Overload for the case where we already know we have an array
@@ -543,9 +540,6 @@ bool IterateV(const TypedValue& it,
     if (ArrayData::call_helper(preArrFn, adata)) return true;
     return IterateV<ArrFn, false>(adata, arrFn);
   }
-  if (std::is_same<PreCollFn, bool>::value) {
-    return ArrayData::call_helper(preCollFn, nullptr);
-  }
   if (isClsMethType(it.m_type)) {
     raiseClsMethToVecWarningHelper();
     adata = clsMethToVecHelper(it.m_data.pclsmeth).detach();
@@ -584,13 +578,6 @@ bool IterateV(const TypedValue& it,
               ArrFn arrFn,
               PreCollFn preCollFn) {
   return IterateV(it, preArrFn, arrFn, preCollFn, false);
-}
-
-template <typename PreArrFn, typename ArrFn>
-bool IterateV(const TypedValue& it,
-              PreArrFn preArrFn,
-              ArrFn arrFn) {
-  return IterateV(it, preArrFn, arrFn, false);
 }
 
 /*
@@ -642,9 +629,6 @@ bool IterateKV(const TypedValue& it,
     if (preArrFn(adata)) return true;
     return IterateKV<ArrFn, false>(adata, arrFn);
   }
-  if (std::is_same<PreCollFn, bool>::value) {
-    return ArrayData::call_helper(preCollFn, nullptr);
-  }
   if (isClsMethType(it.m_type)) {
     raiseClsMethToVecWarningHelper();
     adata = clsMethToVecHelper(it.m_data.pclsmeth).detach();
@@ -687,13 +671,6 @@ bool IterateKV(const TypedValue& it,
                ArrFn arrFn,
                PreCollFn preCollFn) {
   return IterateKV(it, preArrFn, arrFn, preCollFn, false);
-}
-
-template <typename PreArrFn, typename ArrFn>
-bool IterateKV(const TypedValue& it,
-               PreArrFn preArrFn,
-               ArrFn arrFn) {
-  return IterateKV(it, preArrFn, arrFn, false);
 }
 
 //////////////////////////////////////////////////////////////////////

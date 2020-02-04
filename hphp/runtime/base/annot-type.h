@@ -237,6 +237,10 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
         ? AnnotAction::VArrayCheck
         : AnnotAction::Pass;
     case AnnotMetaType::DArray:
+      if (isClsMethType(dt)) {
+        return RuntimeOption::EvalHackArrDVArrs ?
+          AnnotAction::Fail : AnnotAction::ClsMethCheck;
+      }
       if (!isArrayType(dt)) return AnnotAction::Fail;
       return UNLIKELY(RuntimeOption::EvalHackArrCompatTypeHintNotices)
         ? AnnotAction::DArrayCheck

@@ -557,20 +557,27 @@ SSATmp* isVecImpl(IRGS& env, SSATmp* src) {
     return cns(env, true);
   });
 
-  if (RO::EvalHackArrDVArrs && RO::EvalIsCompatibleClsMethType) {
-    mc.ifTypeThen(src, TClsMeth, [&](SSATmp* src) {
-      if (RO::EvalIsVecNotices) {
-        gen(env, RaiseNotice,
-            cns(env, makeStaticString(Strings::CLSMETH_COMPAT_IS_VEC)));
-      }
-      return cns(env, true);
-    });
-  }
-
   auto const hacLogging = [&](const char* msg) {
     if (!RO::EvalHackArrCompatIsVecDictNotices) return;
     gen(env, RaiseHackArrCompatNotice, cns(env, makeStaticString(msg)));
   };
+
+  if (RO::EvalIsCompatibleClsMethType) {
+    if (RO::EvalHackArrDVArrs) {
+      mc.ifTypeThen(src, TClsMeth, [&](SSATmp* src) {
+        if (RO::EvalIsVecNotices) {
+          gen(env, RaiseNotice,
+              cns(env, makeStaticString(Strings::CLSMETH_COMPAT_IS_VEC)));
+        }
+        return cns(env, true);
+      });
+    } else {
+      mc.ifTypeThen(src, TClsMeth, [&](SSATmp* src) {
+        hacLogging(Strings::HACKARR_COMPAT_VARR_IS_VEC);
+        return cns(env, false);
+      });
+    }
+  }
 
   if (RO::EvalHackArrCompatIsVecDictNotices ||
       (RO::EvalLogArrayProvenance && RO::EvalArrProvDVArrays)) {
@@ -1259,6 +1266,17 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
         if (RuntimeOption::EvalVecHintNotices) {
           raiseClsmethCompatTypeHint(env, id, func, tc);
         }
+        if (RuntimeOption::EvalHackArrCompatTypeHintNotices) {
+          if (getAnnotMetaType(tc.type()) == AnnotMetaType::DArray) {
+            gen(
+              env,
+              RaiseHackArrParamNotice,
+              RaiseHackArrParamNoticeData { tc, id, true },
+              cns(env, empty_varray().get()),
+              cns(env, func)
+            );
+          }
+        }
         auto clsMethArr = convertClsMethToVec(env, val);
         discard(env, 1);
         push(env, clsMethArr);
@@ -1364,6 +1382,17 @@ void verifyParamTypeImpl(IRGS& env, int32_t id) {
       [&] (SSATmp* val) { // clsmeth to varray/vec conversions
         if (RuntimeOption::EvalVecHintNotices) {
           raiseClsmethCompatTypeHint(env, id, func, tc);
+        }
+        if (RuntimeOption::EvalHackArrCompatTypeHintNotices) {
+          if (getAnnotMetaType(tc.type()) == AnnotMetaType::DArray) {
+            gen(
+              env,
+              RaiseHackArrParamNotice,
+              RaiseHackArrParamNoticeData { tc, id, false },
+              cns(env, empty_varray().get()),
+              cns(env, func)
+            );
+          }
         }
         auto clsMethArr = convertClsMethToVec(env, val);
         stLocRaw(env, id, fp(env), clsMethArr);
@@ -1627,12 +1656,14 @@ SSATmp* isTypeHelper(IRGS& env, IsTypeOp subop, SSATmp* val) {
   }
 
   // We eventually want ClsMeth to be its own DataType, so we must log.
-  if (subop == IsTypeOp::ArrLike && val->isA(TClsMeth)) {
-    if (RuntimeOption::EvalIsVecNotices) {
-      auto const msg = makeStaticString(Strings::CLSMETH_COMPAT_IS_ANY_ARR);
-      gen(env, RaiseNotice, cns(env, msg));
+  if (RO::EvalIsCompatibleClsMethType && subop == IsTypeOp::ArrLike) {
+    if (val->isA(TClsMeth)) {
+      if (RuntimeOption::EvalIsVecNotices) {
+        auto const msg = makeStaticString(Strings::CLSMETH_COMPAT_IS_ANY_ARR);
+        gen(env, RaiseNotice, cns(env, msg));
+      }
+      return cns(env, true);
     }
-    return cns(env, true);
   }
 
   auto const t = typeOpToType(subop);

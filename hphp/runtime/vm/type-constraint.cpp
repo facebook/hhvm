@@ -1104,6 +1104,11 @@ void TypeConstraint::verifyOutParamFail(const Func* func,
             func, displayName(func->cls()), paramNum);
         }
         castClsMeth(c, make_varray<String,String>);
+        if (RuntimeOption::EvalHackArrCompatTypeHintNotices && isDArray()) {
+          raise_hackarr_compat_type_hint_outparam_notice(
+            func, c->m_data.parr, displayName(func->cls()).c_str(), paramNum
+          );
+        }
         return;
       }
     }
@@ -1277,6 +1282,22 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* c,
             id != ReturnId ? folly::make_optional(id) : folly::none);
         }
         castClsMeth(c, make_varray<String,String>);
+        if (RuntimeOption::EvalHackArrCompatTypeHintNotices && isDArray()) {
+          if (id == ReturnId) {
+            raise_hackarr_compat_type_hint_ret_notice(
+              func,
+              c->m_data.parr,
+              name.c_str()
+            );
+          } else {
+            raise_hackarr_compat_type_hint_param_notice(
+              func,
+              c->m_data.parr,
+              name.c_str(),
+              id
+            );
+          }
+        }
         return;
       }
     }

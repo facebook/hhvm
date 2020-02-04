@@ -3645,7 +3645,8 @@ OPTBLD_INLINE static bool isTypeHelper(TypedValue* val, IsTypeOp op) {
   case IsTypeOp::Res:    return val->m_type == KindOfResource;
   case IsTypeOp::Scalar: return HHVM_FN(is_scalar)(tvAsCVarRef(val));
   case IsTypeOp::ArrLike:
-    if (isClsMethType(val->m_type)) {
+    if (RuntimeOption::EvalIsCompatibleClsMethType &&
+        isClsMethType(val->m_type)) {
       if (RO::EvalIsVecNotices) {
         raise_notice(Strings::CLSMETH_COMPAT_IS_ANY_ARR);
       }

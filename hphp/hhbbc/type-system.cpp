@@ -4782,7 +4782,9 @@ Type loosen_emptiness(Type t) {
 Type loosen_likeness(Type t) {
   if (RuntimeOption::EvalIsCompatibleClsMethType && t.couldBe(BClsMeth)) {
     if (!RuntimeOption::EvalHackArrDVArrs) {
-      t = union_of(std::move(t), TVArrLike);
+      // Ideally we would loosen to TVArrLike, however, varray and darray need
+      // to behave the same in most instances.
+      t = union_of(std::move(t), TPArrLike);
     } else {
       t = union_of(std::move(t), TVecLike);
     }
@@ -6113,12 +6115,12 @@ bool inner_types_might_raise(const Type& t1, const Type& t2) {
         sz = t.m_data.packed->elems.size();
         return true;
       case DataTag::ArrLikePackedN:
-        return t.m_data.packedn->type.couldBe(BArrLike | BObj);
+        return t.m_data.packedn->type.couldBe(BArrLike | BObj | BClsMeth);
       case DataTag::ArrLikeMap:
         if (!t.m_data.map->hasOptElements()) sz = t.m_data.map->map.size();
         return true;
       case DataTag::ArrLikeMapN:
-        return t.m_data.mapn->val.couldBe(BArrLike | BObj);
+        return t.m_data.mapn->val.couldBe(BArrLike | BObj | BClsMeth);
     }
     not_reached();
   };
@@ -6218,6 +6220,17 @@ bool compare_might_raise(const Type& t1, const Type& t2) {
   if (auto const f = checkOne(BDict)) return *f;
   if (auto const f = checkOne(BVec)) return *f;
   if (auto const f = checkOne(BKeyset)) return *f;
+
+  if (RuntimeOption::EvalHackArrCompatDVCmpNotices ||
+      RuntimeOption::EvalEmitClsMethPointers) {
+    if (!RuntimeOption::EvalHackArrDVArrs) {
+      if (t1.couldBe(TClsMeth) && t2.couldBe(TArr))     return true;
+      if (t1.couldBe(TArr)     && t2.couldBe(TClsMeth)) return true;
+    } else if (RuntimeOption::EvalEmitClsMethPointers) {
+      if (t1.couldBe(TClsMeth) && t2.couldBe(TVec))     return true;
+      if (t1.couldBe(TVec)     && t2.couldBe(TClsMeth)) return true;
+    }
+  }
 
   return t1.couldBe(BObj) && t2.couldBe(BObj);
 }

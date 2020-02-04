@@ -157,17 +157,21 @@ inline bool is_vec(const TypedValue* c) {
     return true;
   }
 
+  auto const hacLogging = [&](const char* msg) {
+    if (RO::EvalHackArrCompatIsVecDictNotices) raise_hackarr_compat_notice(msg);
+  };
   if (tvIsClsMeth(c)) {
     if (RO::EvalHackArrDVArrs && RO::EvalIsCompatibleClsMethType) {
       if (RO::EvalIsVecNotices) raise_notice(Strings::CLSMETH_COMPAT_IS_VEC);
       return true;
     }
+
+    if (!RO::EvalHackArrDVArrs) {
+      hacLogging(Strings::HACKARR_COMPAT_VARR_IS_VEC);
+    }
     return false;
   }
 
-  auto const hacLogging = [&](const char* msg) {
-    if (RO::EvalHackArrCompatIsVecDictNotices) raise_hackarr_compat_notice(msg);
-  };
   if (tvIsArray(c) && c->m_data.parr->isVArray()) {
     hacLogging(Strings::HACKARR_COMPAT_VARR_IS_VEC);
     maybe_raise_array_serialization_notice(SerializationSite::IsVec, c);

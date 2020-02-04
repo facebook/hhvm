@@ -1498,7 +1498,8 @@ std::pair<Type,bool> resolveSame(ISS& env) {
   // arrays inside these arrays.
   auto warningsEnabled =
     (RuntimeOption::EvalHackArrCompatNotices ||
-     RuntimeOption::EvalHackArrCompatDVCmpNotices);
+     RuntimeOption::EvalHackArrCompatDVCmpNotices ||
+     RuntimeOption::EvalEmitClsMethPointers);
 
   auto const result = [&] {
     auto const v1 = tv(t1);

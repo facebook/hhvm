@@ -233,21 +233,15 @@ let get_class_parents_and_traits env shallow_class =
 (* Section declaring the type of a function *)
 (*****************************************************************************)
 
-let rec ifun_decl (f : Nast.fun_) =
+let rec ifun_decl (ctx : Provider_context.t) (f : Nast.fun_) =
   let f = Errors.ignore_ (fun () -> Naming.fun_ f) in
-  fun_decl f
+  fun_decl ctx f
 
-and fun_decl f =
+and fun_decl ctx f =
   let (errors, fe) =
     Errors.do_ (fun () ->
         let dep = Dep.Fun (snd f.f_name) in
-        let env =
-          {
-            Decl_env.mode = f.f_mode;
-            droot = Some dep;
-            ctx = Provider_context.get_global_context_or_empty_FOR_MIGRATION ();
-          }
-        in
+        let env = { Decl_env.mode = f.f_mode; droot = Some dep; ctx } in
         fun_decl_in_env env ~is_lambda:false f)
   in
   let fe = { fe with fe_decl_errors = Some errors } in
@@ -312,7 +306,10 @@ and fun_decl_in_env env ~is_lambda f =
 (* Section declaring the type of a class *)
 (*****************************************************************************)
 
-type class_env = { stack: SSet.t }
+type class_env = {
+  ctx: Provider_context.t;
+  stack: SSet.t;
+}
 
 let check_if_cyclic class_env (pos, cid) =
   let stack = class_env.stack in
@@ -396,12 +393,12 @@ let rec class_decl_if_missing class_env (c : Nast.class_) =
       Some class_
 
 and class_naming_and_decl (class_env : class_env) cid c =
-  let class_env = { stack = SSet.add cid class_env.stack } in
+  let class_env = { class_env with stack = SSet.add cid class_env.stack } in
   let shallow_class = Shallow_classes_heap.class_naming_and_decl c in
   let (errors, tc) =
     Errors.do_ (fun () ->
         class_parents_decl class_env shallow_class;
-        class_decl shallow_class)
+        class_decl class_env.ctx shallow_class)
   in
   let errors = Errors.merge shallow_class.sc_decl_errors errors in
   let name = snd shallow_class.sc_name in
@@ -484,7 +481,7 @@ and synthesize_defaults k tc (typeconsts, consts) =
     (typeconsts, consts)
   | _ -> (typeconsts, consts)
 
-and class_decl c =
+and class_decl ctx c =
   let is_abstract = class_is_abstract c in
   let const = Attrs.mem SN.UserAttributes.uaConst c.sc_user_attributes in
   let is_ppl =
@@ -492,13 +489,7 @@ and class_decl c =
   in
   let (_p, cls_name) = c.sc_name in
   let class_dep = Dep.Class cls_name in
-  let env =
-    {
-      Decl_env.mode = c.sc_mode;
-      droot = Some class_dep;
-      ctx = Provider_context.get_global_context_or_empty_FOR_MIGRATION ();
-    }
-  in
+  let env = { Decl_env.mode = c.sc_mode; droot = Some class_dep; ctx } in
   let inherited = Decl_inherit.make env c in
   let props = inherited.Decl_inherit.ih_props in
   let props = List.fold_left ~f:(prop_decl c) ~init:props c.sc_props in
@@ -564,7 +555,7 @@ and class_decl c =
       (* HHVM implicitly adds Stringish interface for every class/iface/trait
        * with a __toString method; "string" also implements this interface *)
       (* Declare Stringish and parents if not already declared *)
-      let class_env = { stack = SSet.empty } in
+      let class_env = { ctx; stack = SSet.empty } in
       let ty =
         mk (Reason.Rhint pos, Tapply ((pos, SN.Classes.cStringish), []))
       in
@@ -1082,7 +1073,7 @@ let record_def_decl rd : Typing_defs.record_def_type =
     rdt_errors = None;
   }
 
-let type_record_def_naming_and_decl rd =
+let type_record_def_naming_and_decl (_ctx : Provider_context.t) rd =
   let rd = Errors.ignore_ (fun () -> Naming.record_def rd) in
   let (errors, tdecl) = Errors.do_ (fun () -> record_def_decl rd) in
   record_record_def (snd rd.rd_name);
@@ -1090,11 +1081,11 @@ let type_record_def_naming_and_decl rd =
   Decl_heap.RecordDefs.add (snd rd.rd_name) tdecl;
   tdecl
 
-let record_def_decl_if_missing rd =
+let record_def_decl_if_missing ctx rd =
   let (_, rdid) = rd.rd_name in
   if not (Decl_heap.RecordDefs.mem rdid) then
     let (_ : Typing_defs.record_def_type) =
-      type_record_def_naming_and_decl rd
+      type_record_def_naming_and_decl ctx rd
     in
     ()
 
@@ -1102,13 +1093,13 @@ let record_def_decl_if_missing rd =
 (* Dealing with typedefs *)
 (*****************************************************************************)
 
-let rec type_typedef_decl_if_missing typedef =
+let rec type_typedef_decl_if_missing ctx typedef =
   let (_, name) = typedef.t_name in
   if not (Decl_heap.Typedefs.mem name) then
-    let (_ : typedef_type) = type_typedef_naming_and_decl typedef in
+    let (_ : typedef_type) = type_typedef_naming_and_decl ctx typedef in
     ()
 
-and typedef_decl tdef =
+and typedef_decl ctx tdef =
   let {
     t_annotation = ();
     t_name = (td_pos, tid);
@@ -1123,22 +1114,16 @@ and typedef_decl tdef =
     tdef
   in
   let dep = Typing_deps.Dep.Class tid in
-  let env =
-    {
-      Decl_env.mode;
-      droot = Some dep;
-      ctx = Provider_context.get_global_context_or_empty_FOR_MIGRATION ();
-    }
-  in
+  let env = { Decl_env.mode; droot = Some dep; ctx } in
   let td_tparams = List.map params (type_param env) in
   let td_type = Decl_hint.hint env concrete_type in
   let td_constraint = Option.map tcstr (Decl_hint.hint env) in
   let td_decl_errors = None in
   { td_vis; td_tparams; td_constraint; td_type; td_pos; td_decl_errors }
 
-and type_typedef_naming_and_decl tdef =
+and type_typedef_naming_and_decl ctx tdef =
   let tdef = Errors.ignore_ (fun () -> Naming.typedef tdef) in
-  let (errors, tdecl) = Errors.do_ (fun () -> typedef_decl tdef) in
+  let (errors, tdecl) = Errors.do_ (fun () -> typedef_decl ctx tdef) in
   record_typedef (snd tdef.t_name);
   let tdecl = { tdecl with td_decl_errors = Some errors } in
   Decl_heap.Typedefs.add (snd tdef.t_name) tdecl;
@@ -1148,16 +1133,10 @@ and type_typedef_naming_and_decl tdef =
 (* Global constants *)
 (*****************************************************************************)
 
-let const_decl cst =
+let const_decl ctx cst =
   let (cst_pos, _cst_name) = cst.cst_name in
   let dep = Dep.GConst (snd cst.cst_name) in
-  let env =
-    {
-      Decl_env.mode = cst.cst_mode;
-      droot = Some dep;
-      ctx = Provider_context.get_global_context_or_empty_FOR_MIGRATION ();
-    }
-  in
+  let env = { Decl_env.mode = cst.cst_mode; droot = Some dep; ctx } in
   match cst.cst_type with
   | Some h -> Decl_hint.hint env h
   | None ->
@@ -1168,38 +1147,38 @@ let const_decl cst =
       mk (Reason.Rwitness cst_pos, Terr)
     | None -> mk (Reason.Rwitness cst_pos, Typing_defs.make_tany ()))
 
-let iconst_decl cst =
+let iconst_decl ctx cst =
   let cst = Errors.ignore_ (fun () -> Naming.global_const cst) in
-  let (errors, hint_ty) = Errors.do_ (fun () -> const_decl cst) in
+  let (errors, hint_ty) = Errors.do_ (fun () -> const_decl ctx cst) in
   record_const (snd cst.cst_name);
   Decl_heap.GConsts.add (snd cst.cst_name) (hint_ty, errors);
   (hint_ty, errors)
 
 (*****************************************************************************)
-let rec name_and_declare_types_program prog =
+let rec name_and_declare_types_program ctx prog =
   List.iter prog (fun def ->
       match def with
-      | Namespace (_, prog) -> name_and_declare_types_program prog
+      | Namespace (_, prog) -> name_and_declare_types_program ctx prog
       | NamespaceUse _ -> ()
       | SetNamespaceEnv _ -> ()
       | FileAttributes _ -> ()
       | Fun f ->
-        let (_ : fun_elt) = ifun_decl f in
+        let (_ : fun_elt) = ifun_decl ctx f in
         ()
       | Class c ->
-        let class_env = { stack = SSet.empty } in
+        let class_env = { ctx; stack = SSet.empty } in
         let (_ : decl_class_type option) = class_decl_if_missing class_env c in
         ()
-      | RecordDef rd -> record_def_decl_if_missing rd
-      | Typedef typedef -> type_typedef_decl_if_missing typedef
+      | RecordDef rd -> record_def_decl_if_missing ctx rd
+      | Typedef typedef -> type_typedef_decl_if_missing ctx typedef
       | Stmt _ -> ()
       | Constant cst ->
-        let (_ : decl_ty * Errors.t) = iconst_decl cst in
+        let (_ : decl_ty * Errors.t) = iconst_decl ctx cst in
         ())
 
-let make_env fn =
+let make_env ctx fn =
   let ast = Ast_provider.get_ast fn in
-  name_and_declare_types_program ast
+  name_and_declare_types_program ctx ast
 
 let err_not_found file name =
   let err_str =
@@ -1207,29 +1186,29 @@ let err_not_found file name =
   in
   raise (Decl_not_found err_str)
 
-let declare_class_in_file file name =
+let declare_class_in_file ctx file name =
   match Ast_provider.find_class_in_file file name with
   | Some cls ->
-    let class_env = { stack = SSet.empty } in
+    let class_env = { ctx; stack = SSet.empty } in
     class_decl_if_missing class_env cls
   | None -> err_not_found file name
 
-let declare_fun_in_file file name =
+let declare_fun_in_file ctx file name =
   match Ast_provider.find_fun_in_file file name with
-  | Some f -> ifun_decl f
+  | Some f -> ifun_decl ctx f
   | None -> err_not_found file name
 
-let declare_record_def_in_file file name =
+let declare_record_def_in_file ctx file name =
   match Ast_provider.find_record_def_in_file file name with
-  | Some rd -> type_record_def_naming_and_decl rd
+  | Some rd -> type_record_def_naming_and_decl ctx rd
   | None -> err_not_found file name
 
-let declare_typedef_in_file file name =
+let declare_typedef_in_file ctx file name =
   match Ast_provider.find_typedef_in_file file name with
-  | Some t -> type_typedef_naming_and_decl t
+  | Some t -> type_typedef_naming_and_decl ctx t
   | None -> err_not_found file name
 
-let declare_const_in_file file name =
+let declare_const_in_file ctx file name =
   match Ast_provider.find_gconst_in_file file name with
-  | Some cst -> iconst_decl cst
+  | Some cst -> iconst_decl ctx cst
   | None -> err_not_found file name

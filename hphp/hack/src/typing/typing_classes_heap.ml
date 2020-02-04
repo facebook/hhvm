@@ -94,7 +94,11 @@ module Classes = struct
             Deferred_decl.raise_if_should_defer ~d:file;
             let class_type =
               Errors.run_in_decl_mode file (fun () ->
-                  Decl.declare_class_in_file file class_name)
+                  let ctx =
+                    Provider_context.get_global_context_or_empty_FOR_MIGRATION
+                      ()
+                  in
+                  Decl.declare_class_in_file ctx file class_name)
             in
             Deferred_decl.increment_counter ();
             (match class_type with

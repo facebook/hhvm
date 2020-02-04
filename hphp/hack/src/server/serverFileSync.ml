@@ -55,8 +55,10 @@ let open_file ~predeclare env path content =
     (* Before making any changes, pre-load (into Decl_heap) currently existing
      * declarations so there is always a previous version to compare against,
      * which makes incremental mode perform better. *)
-    if predeclare && not (Relative_path.Set.mem env.editor_open_files path) then
-      Decl.make_env path;
+    ( if predeclare && not (Relative_path.Set.mem env.editor_open_files path)
+    then
+      let ctx = Provider_utils.ctx_from_server_env env in
+      Decl.make_env ctx path );
     let editor_open_files = Relative_path.Set.add env.editor_open_files path in
     File_provider.remove_batch (Relative_path.Set.singleton path);
     File_provider.provide_file path (File_provider.Ide content);
@@ -136,8 +138,10 @@ let edit_file ~predeclare env path (edits : File_content.text_edit list) =
   let new_env =
     try_relativize_path path >>= fun path ->
     (* See similar predeclare in open_file function *)
-    if predeclare && not (Relative_path.Set.mem env.editor_open_files path) then
-      Decl.make_env path;
+    ( if predeclare && not (Relative_path.Set.mem env.editor_open_files path)
+    then
+      let ctx = Provider_utils.ctx_from_server_env env in
+      Decl.make_env ctx path );
     ServerBusyStatus.send env ServerCommandTypes.Needs_local_typecheck;
     let fc =
       match File_provider.get path with

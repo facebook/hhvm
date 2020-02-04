@@ -380,7 +380,10 @@ let process_files
             profile_log start_time second_start_time file result;
           (result.errors, result.computation)
         | Declare path ->
-          let errors = Decl_service.decl_file errors path in
+          let ctx =
+            Provider_context.get_global_context_or_empty_FOR_MIGRATION ()
+          in
+          let errors = Decl_service.decl_file ctx errors path in
           (errors, [])
         | Prefetch paths ->
           Vfs.prefetch paths;

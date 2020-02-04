@@ -83,8 +83,11 @@ let rec collect_class
             (* NOTE: the following relies on the fact that declaring a class puts
           the inheritance hierarchy into the shared memory heaps. When that
           invariant no longer holds, the following will no longer work. *)
+            let ctx =
+              Provider_context.get_global_context_or_empty_FOR_MIGRATION ()
+            in
             let (_ : Decl_defs.decl_class_type option) =
-              Decl.declare_class_in_file filename cid
+              Decl.declare_class_in_file ctx filename cid
             in
             collect_class requested_classes cid decls ~fail_if_missing:true
         with

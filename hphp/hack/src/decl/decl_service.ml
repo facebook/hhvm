@@ -17,16 +17,17 @@ open Hh_prelude
 (* The job that will be run on the workers *)
 (*****************************************************************************)
 
-let decl_file errorl fn =
+let decl_file ctx errorl fn =
   let (errorl', ()) =
     Errors.do_with_context fn Errors.Decl (fun () ->
         Hh_logger.debug "Typing decl: %s" (Relative_path.to_absolute fn);
-        Decl.make_env fn;
+        Decl.make_env ctx fn;
         Hh_logger.debug "Typing dec OK")
   in
   Errors.merge errorl' errorl
 
-let decl_files errors fnl = List.fold_left fnl ~f:decl_file ~init:errors
+let decl_files ctx errors fnl =
+  List.fold_left fnl ~f:(decl_file ctx) ~init:errors
 
 (*****************************************************************************)
 (* Let's go! That's where the action is *)
@@ -36,10 +37,11 @@ let go (workers : MultiWorker.worker list option) ~bucket_size fast =
   let fast_l = Relative_path.Map.fold fast ~init:[] ~f:(fun x _ y -> x :: y) in
   let neutral = Errors.empty in
   Hh_logger.debug "Declaring the types";
+  let ctx = Provider_context.get_global_context_or_empty_FOR_MIGRATION () in
   let result =
     MultiWorker.call
       workers
-      ~job:decl_files
+      ~job:(decl_files ctx)
       ~neutral
       ~merge:Errors.merge
       ~next:(MultiWorker.next ~max_size:bucket_size workers fast_l)

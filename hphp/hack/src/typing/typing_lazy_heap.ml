@@ -45,7 +45,10 @@ let get_fun x =
     | Some filename ->
       let ft =
         Errors.run_in_decl_mode filename (fun () ->
-            Decl.declare_fun_in_file filename x)
+            let ctx =
+              Provider_context.get_global_context_or_empty_FOR_MIGRATION ()
+            in
+            Decl.declare_fun_in_file ctx filename x)
       in
       Some ft
     | None -> None)
@@ -59,7 +62,10 @@ let get_gconst cst_name =
     | Some filename ->
       let gconst =
         Errors.run_in_decl_mode filename (fun () ->
-            Decl.declare_const_in_file filename cst_name)
+            let ctx =
+              Provider_context.get_global_context_or_empty_FOR_MIGRATION ()
+            in
+            Decl.declare_const_in_file ctx filename cst_name)
       in
       Some gconst
     | None -> None)
@@ -73,7 +79,10 @@ let get_record_def x =
     | Some filename ->
       let tdecl =
         Errors.run_in_decl_mode filename (fun () ->
-            Decl.declare_record_def_in_file filename x)
+            let ctx =
+              Provider_context.get_global_context_or_empty_FOR_MIGRATION ()
+            in
+            Decl.declare_record_def_in_file ctx filename x)
       in
       Some tdecl
     | None -> None)
@@ -87,7 +96,10 @@ let get_typedef x =
     | Some filename ->
       let tdecl =
         Errors.run_in_decl_mode filename (fun () ->
-            Decl.declare_typedef_in_file filename x)
+            let ctx =
+              Provider_context.get_global_context_or_empty_FOR_MIGRATION ()
+            in
+            Decl.declare_typedef_in_file ctx filename x)
       in
       Some tdecl
     | None -> None)

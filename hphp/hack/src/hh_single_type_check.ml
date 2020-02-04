@@ -826,7 +826,10 @@ let parse_name_and_decl popt files_contents =
       let (parsed_files, files_info) = parse_and_name popt files_contents in
       Relative_path.Map.iter parsed_files (fun fn parsed_file ->
           Errors.run_in_context fn Errors.Decl (fun () ->
-              Decl.name_and_declare_types_program parsed_file.Parser_return.ast));
+              let ctx = Provider_context.empty ~tcopt:popt in
+              Decl.name_and_declare_types_program
+                ctx
+                parsed_file.Parser_return.ast));
 
       files_info)
 

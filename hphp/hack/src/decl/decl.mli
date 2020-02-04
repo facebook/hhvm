@@ -17,26 +17,33 @@
  * about classes, functions, typedefs, respectively in the globals
  * in Typing_env.Class, Typing_env.Fun, and Typing_env.Typedef.
  *)
-val name_and_declare_types_program : Nast.program -> unit
+val name_and_declare_types_program : Provider_context.t -> Nast.program -> unit
 
-val make_env : Relative_path.t -> unit
+val make_env : Provider_context.t -> Relative_path.t -> unit
 
 val fun_decl_in_env :
   Decl_env.env -> is_lambda:bool -> Nast.fun_ -> Typing_defs.fun_elt
 
 val declare_const_in_file :
-  Relative_path.t -> string -> Typing_defs.decl_ty * Errors.t
+  Provider_context.t ->
+  Relative_path.t ->
+  string ->
+  Typing_defs.decl_ty * Errors.t
 
 val declare_record_def_in_file :
-  Relative_path.t -> string -> Typing_defs.record_def_type
+  Provider_context.t -> Relative_path.t -> string -> Typing_defs.record_def_type
 
 val declare_typedef_in_file :
-  Relative_path.t -> string -> Typing_defs.typedef_type
+  Provider_context.t -> Relative_path.t -> string -> Typing_defs.typedef_type
 
 val declare_class_in_file :
-  Relative_path.t -> string -> Decl_defs.decl_class_type option
+  Provider_context.t ->
+  Relative_path.t ->
+  string ->
+  Decl_defs.decl_class_type option
 
-val declare_fun_in_file : Relative_path.t -> string -> Typing_defs.fun_elt
+val declare_fun_in_file :
+  Provider_context.t -> Relative_path.t -> string -> Typing_defs.fun_elt
 
 val start_tracking : unit -> unit
 

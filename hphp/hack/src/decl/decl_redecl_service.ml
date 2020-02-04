@@ -45,9 +45,9 @@ end)
 (* Re-declaring the types in a file *)
 (*****************************************************************************)
 
-let on_the_fly_decl_file errors fn =
+let on_the_fly_decl_file ctx errors fn =
   let (decl_errors, ()) =
-    Errors.do_with_context fn Errors.Decl (fun () -> Decl.make_env fn)
+    Errors.do_with_context fn Errors.Decl (fun () -> Decl.make_env ctx fn)
   in
   Errors.merge decl_errors errors
 
@@ -144,8 +144,8 @@ let compute_gconsts_deps
  *)
 (*****************************************************************************)
 
-let redeclare_files filel =
-  List.fold_left filel ~f:on_the_fly_decl_file ~init:Errors.empty
+let redeclare_files ctx filel =
+  List.fold_left filel ~f:(on_the_fly_decl_file ctx) ~init:Errors.empty
 
 let otf_decl_files filel =
   SharedMem.invalidate_caches ();
@@ -197,8 +197,8 @@ let compute_deps ~conservative_redecl fast filel =
 (* Load the environment and then redeclare *)
 (*****************************************************************************)
 
-let load_and_otf_decl_files _ filel =
-  try otf_decl_files filel
+let load_and_otf_decl_files ctx _ filel =
+  try otf_decl_files ctx filel
   with e ->
     Printf.printf "Error: %s\n" (Exn.to_string e);
     Out_channel.flush stdout;
@@ -228,13 +228,13 @@ let merge_compute_deps
 (*****************************************************************************)
 (* The parallel worker *)
 (*****************************************************************************)
-let parallel_otf_decl ~conservative_redecl workers bucket_size fast fnl =
+let parallel_otf_decl ~conservative_redecl ctx workers bucket_size fast fnl =
   try
     OnTheFlyStore.store fast;
     let errors =
       MultiWorker.call
         workers
-        ~job:load_and_otf_decl_files
+        ~job:(load_and_otf_decl_files ctx)
         ~neutral:otf_neutral
         ~merge:merge_on_the_fly
         ~next:(MultiWorker.next ~max_size:bucket_size workers fnl)
@@ -419,16 +419,17 @@ let redo_type_decl
   let oldified_elems = get_elems oldified_defs ~old:true in
   let all_elems = SMap.union current_elems oldified_elems in
   let fnl = Relative_path.Map.keys fast in
+  let ctx = Provider_context.get_global_context_or_empty_FOR_MIGRATION () in
   (* If there aren't enough files, let's do this ourselves ... it's faster! *)
   let (errors, changed, to_redecl, to_recheck) =
     if List.length fnl < 10 then
-      let errors = otf_decl_files fnl in
+      let errors = otf_decl_files ctx fnl in
       let (changed, to_redecl, to_recheck) =
         compute_deps ~conservative_redecl fast fnl
       in
       (errors, changed, to_redecl, to_recheck)
     else
-      parallel_otf_decl ~conservative_redecl workers bucket_size fast fnl
+      parallel_otf_decl ~conservative_redecl ctx workers bucket_size fast fnl
   in
   let (changed, to_recheck) =
     if shallow_decl_enabled () then (

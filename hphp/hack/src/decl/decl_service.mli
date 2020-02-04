@@ -16,4 +16,4 @@ val go :
   Naming_table.fast ->
   Errors.t
 
-val decl_file : Errors.t -> Relative_path.t -> Errors.t
+val decl_file : Provider_context.t -> Errors.t -> Relative_path.t -> Errors.t

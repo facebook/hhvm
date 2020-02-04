@@ -41,7 +41,7 @@ let get_fun (ctx : Provider_context.t) (fun_name : fun_key) : fun_decl option =
         | Some filename ->
           let ft =
             Errors.run_in_decl_mode filename (fun () ->
-                Decl.declare_fun_in_file filename fun_name)
+                Decl.declare_fun_in_file ctx filename fun_name)
           in
           Some ft
         | None -> None)
@@ -125,7 +125,7 @@ let get_typedef (ctx : Provider_context.t) (typedef_name : string) :
         | Some filename ->
           let tdecl =
             Errors.run_in_decl_mode filename (fun () ->
-                Decl.declare_typedef_in_file filename typedef_name)
+                Decl.declare_typedef_in_file ctx filename typedef_name)
           in
           Some tdecl
         | None -> None)
@@ -146,7 +146,7 @@ let get_record_def (ctx : Provider_context.t) (record_name : string) :
         | Some filename ->
           let rdecl =
             Errors.run_in_decl_mode filename (fun () ->
-                Decl.declare_record_def_in_file filename record_name)
+                Decl.declare_record_def_in_file ctx filename record_name)
           in
           Some rdecl
         | None -> None)
@@ -167,7 +167,7 @@ let get_gconst (ctx : Provider_context.t) (gconst_name : string) :
         | Some filename ->
           let gconst =
             Errors.run_in_decl_mode filename (fun () ->
-                Decl.declare_const_in_file filename gconst_name)
+                Decl.declare_const_in_file ctx filename gconst_name)
           in
           Some gconst
         | None -> None)

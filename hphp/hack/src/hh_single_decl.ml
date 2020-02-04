@@ -42,7 +42,7 @@ let time verbosity msg f =
     Printf.printf "%s: %f ms\n" msg ((after -. before) *. 1000.);
   ret
 
-let compare_decl verbosity fn =
+let compare_decl ctx verbosity fn =
   let fn = Path.to_string fn in
   let text = RealDisk.cat fn in
   let fn = Relative_path.(create Root fn) in
@@ -103,13 +103,13 @@ let compare_decl verbosity fn =
           (* Put the file contents in the disk heap so both the decl parsing and
            * legacy decl branches can avoid having to wait for file I/O. *)
           File_provider.provide_file fn (File_provider.Disk text);
-          Decl.make_env fn)
+          Decl.make_env ctx fn)
     in
     let compare name get_decl eq_decl show_decl parsed_decls =
       let different_decls =
         SMap.fold
           (fun key parsed_decl acc ->
-            let legacy_decl = get_decl fn ("\\" ^ key) in
+            let legacy_decl = get_decl ctx fn ("\\" ^ key) in
             let legacy_decl_str = show_decl legacy_decl in
             let parsed_decl_str = show_decl parsed_decl in
             if not @@ eq_decl legacy_decl parsed_decl then
@@ -156,7 +156,7 @@ let compare_decl verbosity fn =
         decls.typedefs;
       compare
         "constant(s)"
-        (fun a b -> Decl.declare_const_in_file a b |> fst)
+        (fun ctx a b -> Decl.declare_const_in_file ctx a b |> fst)
         Typing_defs.equal_decl_ty
         Pp_type.show_decl_ty
         decls.consts;
@@ -169,7 +169,7 @@ let compare_decl verbosity fn =
       compare
         "class(es)"
         Shallow_decl_defs.(
-          fun fn name ->
+          fun _ctx fn name ->
             let class_ = Shallow_classes_heap.declare_class_in_file fn name in
             { class_ with sc_decl_errors = Errors.empty })
         Shallow_decl_defs.equal_shallow_class
@@ -242,5 +242,5 @@ let () =
         let file = Path.make file in
         let ctx = init (Path.dirname file) in
         Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-            if not @@ compare_decl !verbosity file then exit 1)
+            if not @@ compare_decl ctx !verbosity file then exit 1)
     end

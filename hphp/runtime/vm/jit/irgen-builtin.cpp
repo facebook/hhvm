@@ -1047,7 +1047,12 @@ SSATmp* opt_shapes_idx(IRGS& env, const ParamPrep& params) {
 SSATmp* opt_tag_provenance_here(IRGS& env, const ParamPrep& params) {
   if (params.size() != 1) return nullptr;
   if (RO::EvalLogArrayProvenance) return nullptr;
-  return params[0].value;
+  auto const result = params[0].value;
+  // FCallBuiltin uses a pass-by-value ABI (params <= TCell) while NativeImpl
+  // uses pass-by-stack (params <= TPtrToStkCell). Only optimize the former.
+  if (!result->isA(TCell)) return nullptr;
+  gen(env, IncRef, result);
+  return result;
 }
 
 SSATmp* opt_mark_legacy_hack_array(IRGS& env, const ParamPrep& params) {

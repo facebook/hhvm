@@ -234,6 +234,7 @@ tc_unwind_personality(int version,
            g_unwind_rds->exn.left()->kindIsValid()) ||
           g_unwind_rds->exn.right() ||
           (g_unwind_rds->exn.isNull() && ism));
+  g_unwind_rds->isFirstFrame = true;
 
   auto const tv = ism ? ism->tv() : TypedValue{};
 
@@ -276,7 +277,10 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp) {
     auto savedRip = reinterpret_cast<TCA>(fp->m_savedRip);
 
     tl_regState = VMRegState::CLEAN;
-    if (g_unwind_rds->exn.left()) lockObjectWhileUnwinding(vmpc(), vmStack());
+    if (!g_unwind_rds->exn.isNull() && !g_unwind_rds->isFirstFrame) {
+      lockObjectWhileUnwinding(vmpc(), vmStack());
+    }
+    g_unwind_rds->isFirstFrame = false;
 
     if (savedRip == tc::ustubs().callToExit) {
       // If we're the top VM frame, there's nothing we need to do; we can just
@@ -309,7 +313,7 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp) {
         fp, fp->func()->fullName(), sfp, sfp->func()->fullName());
 
       // Unwind vm stack to sfp
-      if (g_unwind_rds->exn.left()) {
+      if (!g_unwind_rds->exn.isNull()) {
         auto const result = unwindVM(g_unwind_rds->exn, sfp);
         if (!(result & UnwindReachedGoal)) {
           if (!g_unwind_rds->sideEnter) __cxxabiv1::__cxa_end_catch();

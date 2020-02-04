@@ -71,6 +71,10 @@ struct UnwindRDS {
    * itanium ABI
    */
   bool sideEnter;
+
+  /* Indicates whether this is the first frame the unwinder will unwind
+   */
+  bool isFirstFrame;
 };
 extern rds::Link<UnwindRDS, rds::Mode::Normal> g_unwind_rds;
 

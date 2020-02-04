@@ -426,15 +426,16 @@ UnwinderResult unwindVM(Either<ObjectData*, Exception*> exception,
   }
 
   if (fp) {
-    assertx(fpToUnwind && phpException);
+    assertx(fpToUnwind && (phpException || exception.right()));
     ITRACE(1, "Reached {}\n", fpToUnwind);
-    phpException->decRefCount();
+    if (phpException) phpException->decRefCount();
     return UnwindReachedGoal;
   }
 
   ITRACE(1, "unwind: reached the end of this nesting's ActRec chain\n");
   if (exception.right()) {
     exception.right()->throwException();
+    not_reached();
   }
   assertx(phpException);
   throw_object(Object::attach(phpException));

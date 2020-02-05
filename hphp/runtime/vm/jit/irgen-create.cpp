@@ -213,6 +213,7 @@ void checkPropInitialValues(IRGS& env, const Class* cls) {
         auto index = cls->propSlotToIndex(slot);
         auto const tv = cls->declPropInit()[index].val.tv();
         if (tv.m_type == KindOfUninit) continue;
+        assertx(!isClsMethType(tv.m_type));
         verifyPropType(
           env,
           cns(env, cls),

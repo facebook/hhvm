@@ -178,7 +178,7 @@ ALWAYS_INLINE void checkPromotion(tv_rval base, const MInstrPropState* pState) {
     auto const cls = pState->getClass();
     if (UNLIKELY(cls != nullptr)) {
       auto const slot = pState->getSlot();
-      auto const tv = make_array_like_tv(staticEmptyArray());
+      auto tv = make_array_like_tv(staticEmptyArray());
       if (pState->isStatic()) {
         assertx(slot < cls->numStaticProperties());
         auto const& sprop = cls->staticProperties()[slot];
@@ -192,6 +192,9 @@ ALWAYS_INLINE void checkPromotion(tv_rval base, const MInstrPropState* pState) {
         auto const& tc = prop.typeConstraint;
         if (tc.isCheckable()) tc.verifyProperty(&tv, cls, prop.cls, prop.name);
       }
+      // No coercion for array types.
+      assertx(isArrayLikeType(tv.m_type) &&
+              tv.m_data.parr == staticEmptyArray());
     }
   }
 
@@ -2964,7 +2967,7 @@ inline void promoteToStdClass(tv_lval base,
     auto const cls = pState->getClass();
     if (UNLIKELY(cls != nullptr)) {
       auto const slot = pState->getSlot();
-      auto const tv = make_tv<KindOfObject>(obj.get());
+      auto tv = make_tv<KindOfObject>(obj.get());
       if (pState->isStatic()) {
         assertx(slot < cls->numStaticProperties());
         auto const& sprop = cls->staticProperties()[slot];
@@ -2978,6 +2981,9 @@ inline void promoteToStdClass(tv_lval base,
         auto const& tc = prop.typeConstraint;
         if (tc.isCheckable()) tc.verifyProperty(&tv, cls, prop.cls, prop.name);
       }
+
+      // No coercion for should occur for object types.
+      assertx(isObjectType(tv.m_type) && tv.m_data.pobj == obj.get());
     }
   }
 

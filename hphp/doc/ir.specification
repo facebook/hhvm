@@ -2125,6 +2125,13 @@ To string conversions:
   Verify that S2 is compatible with the type hint for the property at slot S1
   on S0. S3 is true if this is a static property, false otherwise.
 
+| VerifyPropCoerce, D(InitCell), S(Cls) S(Int) S(Cell) C(Bool), PRc|CRc
+
+  Verify that S2 is compatible with the type hint for the property at slot S1
+  on S0. S3 is true if this is a static property, false otherwise. Once support
+  for coercing class_meth types is removed this ir instruction can also be
+  removed (T61738946).
+
 | VerifyReifiedLocalType<id>, ND, SDArr, NF
 
   Raises a catchable type hint error if the reified generics of function
@@ -2154,6 +2161,13 @@ To string conversions:
 
   Raise a serialization notice with provenance information from the given vec or
   dict, using S0 as the sink kind as defined in the SerializationSite enum
+
+| RaiseClsMethPropConvertNotice<tc,isSProp>, ND, S(Cls) S(Str), NF
+
+  Raise a notice that a class_meth was implicitly converted after being stored
+  into a property with name S1 expecting type tc on class S0. Once support for
+  coercing class_meth types is removed this ir instruction can also be removed
+  (T61738946).
 
 | RaiseUninitLoc<localId>, ND, S(Str), NF
 

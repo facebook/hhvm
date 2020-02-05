@@ -44,7 +44,8 @@ void verifyPropType(IRGS& env,
                     Slot slot,
                     SSATmp* val,
                     SSATmp* name,
-                    bool isSProp);
+                    bool isSProp,
+                    SSATmp** coerce = nullptr);
 
 void raiseClsmethCompatTypeHint(
   IRGS& env, int32_t id, const Func* func, const TypeConstraint& tc);

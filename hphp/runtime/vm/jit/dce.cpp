@@ -548,11 +548,13 @@ bool canDCE(IRInstruction* inst) {
   case VerifyRetFailHard:
   case VerifyProp:
   case VerifyPropCls:
+  case VerifyPropCoerce:
   case VerifyPropFail:
   case VerifyPropFailHard:
   case VerifyParamRecDesc:
   case VerifyRetRecDesc:
   case VerifyPropRecDesc:
+  case RaiseClsMethPropConvertNotice:
   case RaiseHackArrParamNotice:
   case RaiseHackArrPropNotice:
   case RaiseUninitLoc:

@@ -913,7 +913,7 @@ void TypeConstraint::verifyOutParam(TypedValue* tv,
   }
 }
 
-void TypeConstraint::verifyProperty(tv_rval val,
+void TypeConstraint::verifyProperty(tv_lval val,
                                     const Class* thisCls,
                                     const Class* declCls,
                                     const StringData* propName) const {
@@ -924,7 +924,7 @@ void TypeConstraint::verifyProperty(tv_rval val,
   }
 }
 
-void TypeConstraint::verifyStaticProperty(tv_rval val,
+void TypeConstraint::verifyStaticProperty(tv_lval val,
                                           const Class* thisCls,
                                           const Class* declCls,
                                           const StringData* propName) const {
@@ -1050,8 +1050,8 @@ void TypeConstraint::verifyParamFail(const Func* func, TypedValue* tv,
 }
 
 namespace {
-template<class F>
-void castClsMeth(TypedValue* c, F make) {
+template<class T, class F>
+void castClsMeth(T c, F make) {
   auto const a =
     make(val(c).pclsmeth->getClsStr(), val(c).pclsmeth->getFuncStr()).detach();
   tvDecRefClsMeth(c);
@@ -1157,7 +1157,7 @@ void TypeConstraint::verifyRecFieldFail(tv_rval val,
 }
 void TypeConstraint::verifyPropFail(const Class* thisCls,
                                     const Class* declCls,
-                                    tv_rval val,
+                                    tv_lval val,
                                     const StringData* propName,
                                     bool isStatic) const {
   assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
@@ -1185,7 +1185,10 @@ void TypeConstraint::verifyPropFail(const Class* thisCls,
           raise_clsmeth_compat_type_hint_property_notice(
             declCls, propName, displayName(nullptr), isStatic);
         }
-        // No clsmeth to vec/varr converison for prop type
+        // Only trigger coercion logic if property type hints are soft
+        if (RO::EvalCheckPropTypeHints == 3) {
+          castClsMeth(val, make_vec_array<String,String>);
+        }
         return;
       }
     } else {
@@ -1194,7 +1197,15 @@ void TypeConstraint::verifyPropFail(const Class* thisCls,
           raise_clsmeth_compat_type_hint_property_notice(
             declCls, propName, displayName(nullptr), isStatic);
         }
-        // No clsmeth to vec/varr converison for prop type
+        // Only trigger coercion logic if property type hints are soft
+        if (RO::EvalCheckPropTypeHints == 3) {
+          castClsMeth(val, make_varray<String,String>);
+        }
+        if (RuntimeOption::EvalHackArrCompatTypeHintNotices && isDArray()) {
+          raise_hackarr_compat_type_hint_property_notice(
+            declCls, val.val().parr, displayName().c_str(), propName, isStatic
+          );
+        }
         return;
       }
     }

@@ -236,7 +236,7 @@ inline void ObjectData::instanceInit(Class* cls) {
   }
 }
 
-inline void ObjectData::verifyPropTypeHintImpl(tv_rval val,
+inline void ObjectData::verifyPropTypeHintImpl(tv_lval val,
                                                const Class::Prop& prop) const {
   assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
   assertx(tvIsPlausible(val.tv()));
@@ -265,7 +265,7 @@ inline void ObjectData::verifyPropTypeHintImpl(tv_rval val,
   }
 }
 
-inline void ObjectData::verifyPropTypeHints(size_t end) const {
+inline void ObjectData::verifyPropTypeHints(size_t end) {
   assertx(end <= m_cls->declProperties().size());
 
   if (RuntimeOption::EvalCheckPropTypeHints <= 0) return;
@@ -277,11 +277,11 @@ inline void ObjectData::verifyPropTypeHints(size_t end) const {
   }
 }
 
-inline void ObjectData::verifyPropTypeHints() const {
+inline void ObjectData::verifyPropTypeHints() {
   verifyPropTypeHints(m_cls->declProperties().size());
 }
 
-inline void ObjectData::verifyPropTypeHint(Slot slot) const {
+inline void ObjectData::verifyPropTypeHint(Slot slot) {
   assertx(slot < m_cls->declProperties().size());
   if (RuntimeOption::EvalCheckPropTypeHints <= 0) return;
   auto index = m_cls->propSlotToIndex(slot);

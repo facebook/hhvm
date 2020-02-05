@@ -454,6 +454,7 @@ bool opcodeMayRaise(Opcode opc) {
   case PropTypeRedefineCheck:
   case PropX:
   case RaiseArraySerializeNotice:
+  case RaiseClsMethPropConvertNotice:
   case RaiseError:
   case RaiseErrorOnInvalidIsAsExpressionType:
   case RaiseForbiddenDynCall:
@@ -516,6 +517,7 @@ bool opcodeMayRaise(Opcode opc) {
   case VerifyParamFailHard:
   case VerifyProp:
   case VerifyPropCls:
+  case VerifyPropCoerce:
   case VerifyPropFail:
   case VerifyPropFailHard:
   case VerifyReifiedLocalType:

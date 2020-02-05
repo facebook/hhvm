@@ -839,6 +839,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case VerifyPropFail:
   case VerifyPropFailHard:
   case VerifyProp:
+  case VerifyPropCoerce:
   case VerifyPropRecDesc:
     return may_load_store(AHeapAny, AHeapAny);
 
@@ -1993,6 +1994,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case Clone:
   case ThrowArrayIndexException:
   case ThrowArrayKeyException:
+  case RaiseClsMethPropConvertNotice:
   case RaiseArraySerializeNotice:
   case RaiseUninitLoc:
   case RaiseUndefProp:

@@ -122,6 +122,9 @@ void VerifyRetRecDescImpl(int32_t id,
 
 void raise_error_sd(const StringData* sd);
 
+void raiseClsMethPropConvertNotice(
+  const TypeConstraint*, bool, const Class*, const StringData*);
+
 TypedValue arrayIdxI(ArrayData*, int64_t, TypedValue);
 TypedValue arrayIdxS(ArrayData*, StringData*, TypedValue);
 TypedValue arrayIdxScan(ArrayData*, StringData*, TypedValue);

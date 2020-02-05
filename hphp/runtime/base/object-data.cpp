@@ -70,7 +70,7 @@ const StaticString
 ALWAYS_INLINE
 void verifyTypeHint(const Class* thisCls,
                     const Class::Prop* prop,
-                    tv_rval val) {
+                    tv_lval val) {
   assertx(tvIsPlausible(*val));
   assertx(type(val) != KindOfUninit);
   if (RuntimeOption::EvalCheckPropTypeHints <= 0) return;
@@ -439,7 +439,7 @@ void ObjectData::o_set(const String& propName, const Variant& v,
       if (UNLIKELY(lookup.isConst) && !isBeingConstructed()) {
         throwMutateConstProp(lookup.slot);
       }
-      auto const val = tvToInit(*v.asTypedValue());
+      auto val = tvToInit(*v.asTypedValue());
       verifyTypeHint(m_cls, lookup.prop, &val);
       tvSet(val, prop);
       return;
@@ -1614,8 +1614,11 @@ void ObjectData::setProp(Class* ctx, const StringData* key, TypedValue val) {
       if (UNLIKELY(lookup.isConst) && !isBeingConstructed()) {
         throwMutateConstProp(lookup.slot);
       }
-      verifyTypeHint(m_cls, lookup.prop, &val);
-      tvSet(val, prop);
+      // TODO(T61738946): We can remove the temporary here once we no longer
+      // coerce class_meth types.
+      Variant tmp = tvAsVariant(&val);
+      verifyTypeHint(m_cls, lookup.prop, tmp.asTypedValue());
+      tvMove(tmp.detach(), prop);
     }
     return;
   }

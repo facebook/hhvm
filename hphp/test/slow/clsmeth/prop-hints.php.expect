@@ -1,0 +1,640 @@
+[TYPE VIOLATION] Props::priv_sprop_foo_static (wanted: Foo, got: clsmeth)
+array
+array
+array
+array
+[TYPE VIOLATION] Props::priv_sprop_opt_foo_static (wanted: ?Foo, got: clsmeth)
+array
+array
+array
+array
+[TYPE VIOLATION] Props::priv_sprop_foo_static (wanted: Foo, got: clsmeth)
+array
+array
+array
+array
+[TYPE VIOLATION] Props::priv_sprop_opt_foo_static (wanted: ?Foo, got: clsmeth)
+array
+array
+array
+array
+[TYPE VIOLATION] Props::priv_sprop_foo_dynamic (wanted: Foo, got: clsmeth)
+array
+array
+array
+array
+[TYPE VIOLATION] Props::priv_sprop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
+array
+array
+array
+array
+[TYPE VIOLATION] Props::priv_sprop_foo_dynamic (wanted: Foo, got: clsmeth)
+array
+array
+array
+array
+[TYPE VIOLATION] Props::priv_sprop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
+array
+array
+array
+array
+[TYPE VIOLATION] Props::priv_sprop_foo_dynamic (wanted: Foo, got: clsmeth)
+array
+array
+array
+array
+[TYPE VIOLATION] Props::priv_sprop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
+array
+array
+array
+array
+[TYPE VIOLATION] Props::priv_sprop_foo_dynamic (wanted: Foo, got: clsmeth)
+array
+array
+array
+array
+[TYPE VIOLATION] Props::priv_sprop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
+array
+array
+array
+array
+[TYPE VIOLATION] Props::pub_sprop_foo_static (wanted: Foo, got: clsmeth)
+array
+array
+array
+array
+[TYPE VIOLATION] Props::pub_sprop_opt_foo_static (wanted: ?Foo, got: clsmeth)
+array
+array
+array
+array
+[TYPE VIOLATION] Props::pub_sprop_foo_static (wanted: Foo, got: clsmeth)
+array
+array
+array
+array
+[TYPE VIOLATION] Props::pub_sprop_opt_foo_static (wanted: ?Foo, got: clsmeth)
+array
+array
+array
+array
+[TYPE VIOLATION] Props::pub_sprop_foo_dynamic (wanted: Foo, got: clsmeth)
+array
+array
+array
+array
+[TYPE VIOLATION] Props::pub_sprop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
+array
+array
+array
+array
+[TYPE VIOLATION] Props::pub_sprop_foo_dynamic (wanted: Foo, got: clsmeth)
+array
+array
+array
+array
+[TYPE VIOLATION] Props::pub_sprop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
+array
+array
+array
+array
+[TYPE VIOLATION] Props::pub_sprop_foo_dynamic (wanted: Foo, got: clsmeth)
+array
+array
+array
+array
+[TYPE VIOLATION] Props::pub_sprop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
+array
+array
+array
+array
+[TYPE VIOLATION] Props::pub_sprop_foo_dynamic (wanted: Foo, got: clsmeth)
+array
+array
+array
+array
+[TYPE VIOLATION] Props::pub_sprop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
+array
+array
+array
+array
+[TYPE VIOLATION] Props::priv_prop_foo_static (wanted: Foo, got: clsmeth)
+clsmeth
+clsmeth
+clsmeth
+clsmeth
+[TYPE VIOLATION] Props::priv_prop_opt_foo_static (wanted: ?Foo, got: clsmeth)
+clsmeth
+clsmeth
+clsmeth
+clsmeth
+[TYPE VIOLATION] Props::priv_prop_foo_static (wanted: Foo, got: clsmeth)
+clsmeth
+clsmeth
+clsmeth
+clsmeth
+[TYPE VIOLATION] Props::priv_prop_opt_foo_static (wanted: ?Foo, got: clsmeth)
+clsmeth
+clsmeth
+clsmeth
+clsmeth
+[TYPE VIOLATION] Props::priv_prop_foo_dynamic (wanted: Foo, got: clsmeth)
+clsmeth
+clsmeth
+clsmeth
+clsmeth
+[TYPE VIOLATION] Props::priv_prop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
+clsmeth
+clsmeth
+clsmeth
+clsmeth
+[TYPE VIOLATION] Props::priv_prop_foo_dynamic (wanted: Foo, got: clsmeth)
+clsmeth
+clsmeth
+clsmeth
+clsmeth
+[TYPE VIOLATION] Props::priv_prop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
+clsmeth
+clsmeth
+clsmeth
+clsmeth
+[TYPE VIOLATION] Props::priv_prop_foo_dynamic (wanted: Foo, got: clsmeth)
+clsmeth
+clsmeth
+clsmeth
+clsmeth
+[TYPE VIOLATION] Props::priv_prop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
+clsmeth
+clsmeth
+clsmeth
+clsmeth
+[TYPE VIOLATION] Props::priv_prop_foo_dynamic (wanted: Foo, got: clsmeth)
+clsmeth
+clsmeth
+clsmeth
+clsmeth
+[TYPE VIOLATION] Props::priv_prop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
+clsmeth
+clsmeth
+clsmeth
+clsmeth
+[TYPE VIOLATION] Props::pub_prop_foo_static (wanted: Foo, got: clsmeth)
+clsmeth
+clsmeth
+clsmeth
+clsmeth
+[TYPE VIOLATION] Props::pub_prop_opt_foo_static (wanted: ?Foo, got: clsmeth)
+clsmeth
+clsmeth
+clsmeth
+clsmeth
+[TYPE VIOLATION] Props::pub_prop_foo_static (wanted: Foo, got: clsmeth)
+clsmeth
+clsmeth
+clsmeth
+clsmeth
+[TYPE VIOLATION] Props::pub_prop_opt_foo_static (wanted: ?Foo, got: clsmeth)
+clsmeth
+clsmeth
+clsmeth
+clsmeth
+[TYPE VIOLATION] Props::pub_prop_foo_dynamic (wanted: Foo, got: clsmeth)
+clsmeth
+clsmeth
+clsmeth
+clsmeth
+[TYPE VIOLATION] Props::pub_prop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
+clsmeth
+clsmeth
+clsmeth
+clsmeth
+[TYPE VIOLATION] Props::pub_prop_foo_dynamic (wanted: Foo, got: clsmeth)
+clsmeth
+clsmeth
+clsmeth
+clsmeth
+[TYPE VIOLATION] Props::pub_prop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
+clsmeth
+clsmeth
+clsmeth
+clsmeth
+[TYPE VIOLATION] Props::pub_prop_foo_dynamic (wanted: Foo, got: clsmeth)
+clsmeth
+clsmeth
+clsmeth
+clsmeth
+[TYPE VIOLATION] Props::pub_prop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
+clsmeth
+clsmeth
+clsmeth
+clsmeth
+[TYPE VIOLATION] Props::pub_prop_foo_dynamic (wanted: Foo, got: clsmeth)
+clsmeth
+clsmeth
+clsmeth
+clsmeth
+[TYPE VIOLATION] Props::pub_prop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
+clsmeth
+clsmeth
+clsmeth
+clsmeth
+NULL
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+NULL
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+NULL
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+NULL
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+NULL
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+NULL
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+NULL
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+NULL
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+NULL
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+NULL
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+NULL
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+NULL
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+NULL
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+NULL
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+NULL
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+NULL
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}

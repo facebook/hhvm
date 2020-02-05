@@ -203,26 +203,28 @@ static void verifyStaticPropClsImpl(const Class* objCls,
   }
 }
 
-static void verifyPropImpl(const Class* cls,
-                            Slot slot,
-                            TypedValue val) {
+static TypedValue verifyPropImpl(const Class* cls,
+                                 Slot slot,
+                                 TypedValue val) {
   assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
   assertx(slot < cls->numDeclProperties());
   assertx(tvIsPlausible(val));
   auto const& prop = cls->declProperties()[slot];
   auto const& tc = prop.typeConstraint;
   if (tc.isCheckable()) tc.verifyProperty(&val, cls, prop.cls, prop.name);
+  return val;
 }
 
-static void verifySPropImpl(const Class* cls,
-                            Slot slot,
-                            TypedValue val) {
+static TypedValue verifySPropImpl(const Class* cls,
+                                  Slot slot,
+                                  TypedValue val) {
   assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
   assertx(slot < cls->numStaticProperties());
   assertx(tvIsPlausible(val));
   auto const& prop = cls->staticProperties()[slot];
   auto const& tc = prop.typeConstraint;
   if (tc.isCheckable()) tc.verifyStaticProperty(&val, cls, prop.cls, prop.name);
+  return val;
 }
 
 void cgVerifyPropFail(IRLS& env, const IRInstruction* inst) {
@@ -286,6 +288,22 @@ void cgVerifyProp(IRLS& env, const IRInstruction* inst) {
       ? CallSpec::direct(verifySPropImpl)
       : CallSpec::direct(verifyPropImpl),
     kVoidDest,
+    SyncOptions::Sync,
+    argGroup(env, inst)
+      .ssa(0)
+      .ssa(1)
+      .typedValue(2)
+  );
+}
+
+void cgVerifyPropCoerce(IRLS& env, const IRInstruction* inst) {
+  cgCallHelper(
+    vmain(env),
+    env,
+    inst->src(3)->boolVal()
+      ? CallSpec::direct(verifySPropImpl)
+      : CallSpec::direct(verifyPropImpl),
+    callDestTV(env, inst),
     SyncOptions::Sync,
     argGroup(env, inst)
       .ssa(0)

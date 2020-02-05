@@ -1,0 +1,1 @@
+-vCheckPropTypeHints=3 -vRuntime.Eval.EmitClsMethPointers=1 -vRuntime.Eval.IsCompatibleClsMethType=1 -vRuntime.Eval.HackArrCompatTypeHintNotices=1

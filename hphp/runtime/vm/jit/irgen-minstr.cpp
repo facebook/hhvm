@@ -1676,6 +1676,7 @@ SSATmp* setPropImpl(IRGS& env, uint32_t nDiscard, SSATmp* key) {
       *propInfo
     );
 
+    SSATmp* newVal = nullptr;
     assertx(obj != nullptr);
     verifyPropType(
       env,
@@ -1684,15 +1685,16 @@ SSATmp* setPropImpl(IRGS& env, uint32_t nDiscard, SSATmp* key) {
       propInfo->slot,
       value,
       key,
-      false
+      false,
+      &newVal
     );
 
     auto propTy = propPtr->type().deref();
 
     env.irb->constrainValue(value, DataTypeCountness);
     auto const oldVal = gen(env, LdMem, propTy, propPtr);
-    gen(env, IncRef, value);
-    gen(env, StMem, propPtr, value);
+    gen(env, IncRef, newVal);
+    gen(env, StMem, propPtr, newVal);
     decRef(env, oldVal);
   } else {
     gen(
@@ -2267,6 +2269,7 @@ SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
 
     auto const lhs = gen(env, LdMem, propPtr->type().deref(), propPtr);
     if (auto const result = inlineSetOp(env, op, lhs, rhs)) {
+      assertx(!result->type().maybe(TClsMeth));
       verifyPropType(
         env,
         gen(env, LdObjClass, obj),

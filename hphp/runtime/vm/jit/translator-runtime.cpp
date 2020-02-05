@@ -340,6 +340,20 @@ void raiseUndefProp(ObjectData* base, const StringData* name) {
   base->raiseUndefProp(name);
 }
 
+void raiseClsMethPropConvertNotice(const TypeConstraint* tc,
+                                   bool isSProp,
+                                   const Class* cls,
+                                   const StringData* name) {
+  raise_notice(
+    "class_meth Compat: %s '%s::%s' declared as type %s, clsmeth "
+    "assigned",
+    isSProp ? "Static property" : "Property",
+    cls->name()->data(),
+    name->data(),
+    tc->displayName().c_str()
+  );
+}
+
 void raiseUndefVariable(StringData* nm) {
   raise_notice(Strings::UNDEFINED_VARIABLE, nm->data());
   decRefStr(nm);

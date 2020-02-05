@@ -415,11 +415,13 @@ struct TypeConstraint {
   void verifyReturnNonNull(TypedValue* tv, const Func* func) const;
   void verifyOutParam(TypedValue* tv, const Func* func,
                       int paramNum) const;
-  void verifyProperty(tv_rval val,
+  // TODO(T61738946): We can take a tv_rval here once we remove support for
+  // coercing class_meth types.
+  void verifyProperty(tv_lval val,
                       const Class* thisCls,
                       const Class* declCls,
                       const StringData* propName) const;
-  void verifyStaticProperty(tv_rval val,
+  void verifyStaticProperty(tv_lval val,
                             const Class* thisCls,
                             const Class* declCls,
                             const StringData* propName) const;
@@ -434,8 +436,10 @@ struct TypeConstraint {
   void verifyReturnFail(const Func* func, TypedValue* tv) const {
     verifyFail(func, tv, ReturnId);
   }
+  // TODO(T61738946): We can take a tv_rval here once we remove support for
+  // coercing class_meth types.
   void verifyPropFail(const Class* thisCls, const Class* declCls,
-                      tv_rval val, const StringData* propName,
+                      tv_lval val, const StringData* propName,
                       bool isStatic) const;
   void verifyRecFieldFail(tv_rval val,
                        const StringData* recordName,

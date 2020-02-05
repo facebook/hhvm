@@ -188,7 +188,7 @@ void emitSetS(IRGS& env) {
   if (!ssaPropName->isA(TStr)) PUNT(SetS-PropNameNotString);
   if (!ssaCls->isA(TCls))      PUNT(SetS-NotClass);
 
-  auto const value  = popC(env, DataTypeCountness);
+  auto value  = popC(env, DataTypeCountness);
   auto const lookup = ldClsPropAddr(env, ssaCls, ssaPropName, true, true, true);
 
   if (lookup.tc) {
@@ -199,11 +199,12 @@ void emitSetS(IRGS& env) {
       lookup.slot,
       value,
       ssaPropName,
-      true
+      true,
+      &value
     );
   } else if (RuntimeOption::EvalCheckPropTypeHints > 0) {
     auto const slot = gen(env, LookupSPropSlot, ssaCls, ssaPropName);
-    gen(env, VerifyProp, ssaCls, slot, value, cns(env, true));
+    value = gen(env, VerifyPropCoerce, ssaCls, slot, value, cns(env, true));
   }
 
   discard(env);
@@ -280,6 +281,7 @@ void emitIncDecS(IRGS& env, IncDecOp subop) {
   auto const result = incDec(env, subop, oldVal);
   if (!result) PUNT(IncDecS);
   assertx(result->isA(TUncounted));
+  assertx(!result->type().maybe(TClsMeth));
 
   if (lookup.tc) {
     verifyPropType(
@@ -395,7 +397,7 @@ void emitCheckProp(IRGS& env, const StringData* propName) {
 }
 
 void emitInitProp(IRGS& env, const StringData* propName, InitPropOp op) {
-  auto const val = popC(env);
+  auto val = popC(env);
   auto const ctx = curClass(env);
 
   SSATmp* base;
@@ -420,7 +422,8 @@ void emitInitProp(IRGS& env, const StringData* propName, InitPropOp op) {
           slot,
           val,
           cns(env, propName),
-          true
+          true,
+          &val
         );
       }
 
@@ -453,7 +456,8 @@ void emitInitProp(IRGS& env, const StringData* propName, InitPropOp op) {
           slot,
           val,
           cns(env, propName),
-          false
+          false,
+          &val
         );
       }
 

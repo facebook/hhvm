@@ -6548,12 +6548,13 @@ Type adjust_type_for_prop(const Index& index,
                           const php::Class& propCls,
                           const TypeConstraint* tc,
                           const Type& ty) {
+  auto ret = loosen_likeness(ty);
   // If the type-hint might not be enforced, we must be conservative.
-  if (!tc || index.prop_tc_maybe_unenforced(propCls, *tc)) return ty;
+  if (!tc || index.prop_tc_maybe_unenforced(propCls, *tc)) return ret;
   auto const ctx = Context { nullptr, nullptr, &propCls };
   // Otherwise lookup what we know about the constraint.
   auto tcType = unctx(
-    loosen_dvarrayness(remove_uninit(index.lookup_constraint(ctx, *tc, ty)))
+    loosen_dvarrayness(remove_uninit(index.lookup_constraint(ctx, *tc, ret)))
   );
   // For the same reason as property/return type enforcement, we have to be
   // pessimistic with interfaces to ensure that types in the index always
@@ -6564,7 +6565,7 @@ Type adjust_type_for_prop(const Index& index,
   }
   // The adjusted type is the intersection of the constraint and the type (which
   // might not exist).
-  return intersection_of(tcType, ty);
+  return intersection_of(tcType, std::move(ret));
 }
 
 //////////////////////////////////////////////////////////////////////

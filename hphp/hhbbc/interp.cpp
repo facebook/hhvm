@@ -3535,7 +3535,7 @@ void in(ISS& env, const bc::SetG&) {
 }
 
 void in(ISS& env, const bc::SetS& op) {
-  auto const t1    = popC(env);
+  auto const t1    = loosen_likeness(popC(env));
   auto const tcls  = popC(env);
   auto const tname = popC(env);
   auto const vname = tv(tname);

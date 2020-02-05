@@ -864,6 +864,9 @@ void Class::initSProps() const {
   // Perform scalar inits.
   for (Slot slot = 0, n = m_staticProperties.size(); slot < n; ++slot) {
     auto const& sProp = m_staticProperties[slot];
+    // TODO(T61738946): We can remove the temporary here once we no longer
+    // coerce class_meth types.
+    auto val = sProp.val;
 
     if ((sProp.cls == this && !m_sPropCache[slot].isPersistent()) ||
         sProp.attrs & AttrLSB) {
@@ -872,13 +875,13 @@ void Class::initSProps() const {
           sProp.val.m_type != KindOfUninit &&
           sProp.typeConstraint.isCheckable()) {
         sProp.typeConstraint.verifyStaticProperty(
-          &sProp.val,
+          &val,
           this,
           sProp.cls,
           sProp.name
         );
       }
-      m_sPropCache[slot]->val = sProp.val;
+      m_sPropCache[slot]->val = val;
     }
   }
 
@@ -935,7 +938,11 @@ void Class::checkPropInitialValues() const {
     auto index = propSlotToIndex(slot);
     auto rval = m_declPropInit[index].val;
     if (type(rval) == KindOfUninit) continue;
-    tc.verifyProperty(rval, this, prop.cls, prop.name);
+    auto lval = rval.as_lval();
+    tc.verifyProperty(lval, this, prop.cls, prop.name);
+
+    // No coercion for statically initialized properties.
+    assertx(type(lval) == type(rval));
   }
 
   extra->m_checkedPropInitialValues.initWith(true);

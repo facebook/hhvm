@@ -1471,10 +1471,12 @@ void verifyPropType(IRGS& env,
                     Slot slot,
                     SSATmp* val,
                     SSATmp* name,
-                    bool isSProp) {
+                    bool isSProp,
+                    SSATmp** coerce /* = nullptr */) {
   assertx(cls->isA(TCls));
   assertx(val->isA(TCell));
 
+  if (coerce) *coerce = val;
   if (RuntimeOption::EvalCheckPropTypeHints <= 0) return;
   if (!tc || !tc->isCheckable()) return;
   assertx(tc->validForProp());
@@ -1490,7 +1492,47 @@ void verifyPropType(IRGS& env,
     },
     [&] (SSATmp*) { return false; }, // No func to string automatic conversions
     [&] (SSATmp*) { return false; }, // No class to string automatic conversions
-    [&] (SSATmp*) { return false; }, // No clsmeth to vec automatic conversions
+    [&] (SSATmp* val) {
+      if (!coerce) return false;
+      // If we're not hard enforcing property type mismatches don't coerce
+      if (RO::EvalCheckPropTypeHints < 3) return false;
+      if (RuntimeOption::EvalVecHintNotices) {
+        if (cls->hasConstVal(TCls) && name->hasConstVal(TStr)) {
+          auto const msg = makeStaticString(folly::sformat(
+            "class_meth Compat: {} '{}::{}' declared as type {}, clsmeth "
+            "assigned",
+            isSProp ? "Static property" : "Property",
+            cls->clsVal()->name()->data(),
+            name->strVal()->data(),
+            tc->displayName().c_str()
+          ));
+          gen(env, RaiseNotice, cns(env, msg));
+        } else {
+          gen(
+            env,
+            RaiseClsMethPropConvertNotice,
+            RaiseClsMethPropConvertNoticeData{tc, isSProp},
+            cls,
+            name
+          );
+        }
+      }
+      if (RuntimeOption::EvalHackArrCompatTypeHintNotices) {
+        if (getAnnotMetaType(tc->type()) == AnnotMetaType::DArray) {
+          gen(
+            env,
+            RaiseHackArrPropNotice,
+            RaiseHackArrTypehintNoticeData { *tc },
+            cls,
+            cns(env, empty_varray().get()),
+            cns(env, slot),
+            cns(env, isSProp)
+          );
+        }
+      }
+      *coerce = convertClsMethToVec(env, val);
+      return true;
+    },
     [&] (Type, bool hard) { // Check failure
       auto const failHard =
         hard && RuntimeOption::EvalCheckPropTypeHints >= 3;
@@ -1544,7 +1586,18 @@ void verifyPropType(IRGS& env,
       // the check using a runtime helper. This gives us the freedom to call
       // verifyPropType without us worrying about it punting the entire
       // operation.
-      gen(env, VerifyProp, cls, cns(env, slot), val, cns(env, isSProp));
+      if (coerce && (tc->isArray() || (tc->isObject() && !tc->isResolved()))) {
+        *coerce = gen(
+          env,
+          VerifyPropCoerce,
+          cls,
+          cns(env, slot),
+          val,
+          cns(env, isSProp)
+        );
+      } else {
+        gen(env, VerifyProp, cls, cns(env, slot), val, cns(env, isSProp));
+      }
     }
   );
 }

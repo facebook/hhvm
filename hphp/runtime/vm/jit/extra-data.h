@@ -1535,6 +1535,20 @@ struct RaiseHackArrParamNoticeData : RaiseHackArrTypehintNoticeData {
   bool isReturn;
 };
 
+struct RaiseClsMethPropConvertNoticeData : IRExtraData {
+  RaiseClsMethPropConvertNoticeData(const TypeConstraint* tc, bool isSProp)
+    : tc(tc)
+    , isSProp(isSProp)
+  {}
+
+  std::string show() const {
+    return folly::to<std::string>(tc->displayName(), ",", isSProp);
+  }
+
+  union { const TypeConstraint* tc; int64_t tcIntVal; };
+  bool isSProp;
+};
+
 struct ThrowArrayIndexExceptionData : IRExtraData {
   explicit ThrowArrayIndexExceptionData(bool isInOut) : isInOut(isInOut) {}
 
@@ -1718,6 +1732,7 @@ X(LdFuncCached,                 FuncNameData);
 X(LookupFuncCached,             FuncNameData);
 X(LdObjMethodS,                 FuncNameData);
 X(ThrowMissingArg,              FuncArgData);
+X(RaiseClsMethPropConvertNotice,RaiseClsMethPropConvertNoticeData);
 X(RaiseTooManyArg,              FuncData);
 X(ThrowParamInOutMismatch,      ParamData);
 X(ThrowParamInOutMismatchRange, CheckInOutsData);

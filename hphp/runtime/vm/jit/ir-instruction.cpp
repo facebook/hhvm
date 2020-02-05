@@ -212,6 +212,9 @@ bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
     case NewColFromArray:
       return true;
 
+    case VerifyPropCoerce:
+      return move != MustMove && srcNo == 2;
+
     default:
       return move != MustMove;
   }

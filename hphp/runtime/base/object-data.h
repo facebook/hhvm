@@ -442,9 +442,11 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   ObjectProps* props();
   const ObjectProps* props() const;
 
-  void verifyPropTypeHints() const;
-  void verifyPropTypeHints(size_t end) const;
-  void verifyPropTypeHint(Slot slot) const;
+  // TODO(T61738946): These can be const once we remove support for coercing
+  // class_meth types.
+  void verifyPropTypeHints();
+  void verifyPropTypeHints(size_t end);
+  void verifyPropTypeHint(Slot slot);
 
   bool assertPropTypeHints() const;
 
@@ -586,7 +588,9 @@ private:
 
   bool assertTypeHint(tv_rval, Slot) const;
 
-  void verifyPropTypeHintImpl(tv_rval, const Class::Prop&) const;
+  // TODO(T61738946): We can take a tv_rval here once we remove support for
+  // coercing class_meth types.
+  void verifyPropTypeHintImpl(tv_lval, const Class::Prop&) const;
 
 // offset:  0       8       12      16
 // 64bit:   header  cls             [subclass][props...]

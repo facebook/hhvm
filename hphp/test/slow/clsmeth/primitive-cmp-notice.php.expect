@@ -1,0 +1,251 @@
+[static] $cm ? VAR
++------------+------+------+------+------+------+------+------+
+| VAR        | <    | <=   | >    | >=   | ==   | ===  | <=>  |
++============+======+======+======+======+======+======+======+
+| $cm        | F    | T    | F    | T    | T    | T    | 0    |
+| $nv        | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| $tv        | F*   | T*   | F*   | T*   | T    | F    | 0 *  |
+| $bv        | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| $iv        | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| $fv        | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| $sv        | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| $rv        | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| $ov        | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| $va        | F*   | T*   | F*   | T*   | T*   | T*   | 0 *  |
+| $da        | F*   | T*   | F*   | T*   | T*   | T*   | 0 *  |
+| $cp        | F    | T    | F    | T    | T    | T    | 0    |
+| $ep        | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| $lp        | T    | T    | F    | F    | F    | F    | -1   |
+| $qp        | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPA($nv) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPA($tv) | F*   | T*   | F*   | T*   | T    | F    | 0 *  |
+| WRAPA($bv) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPA($iv) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPA($fv) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPA($sv) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPA($rv) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPA($ov) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPA($va) | F*   | T*   | F*   | T*   | T*   | T*   | 0 *  |
+| WRAPA($da) | F*   | T*   | F*   | T*   | T*   | T*   | 0 *  |
+| WRAPA($cp) | F    | T    | F    | T    | T    | T    | 0    |
+| WRAPA($ep) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPA($lp) | T    | T    | F    | F    | F    | F    | -1   |
+| WRAPA($qp) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPO($nv) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPO($tv) | F*   | T*   | F*   | T*   | T    | F    | 0 *  |
+| WRAPO($bv) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPO($iv) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPO($fv) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPO($sv) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPO($rv) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPO($ov) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPO($va) | F*   | T*   | F*   | T*   | T*   | F    | 0 *  |
+| WRAPO($da) | F*   | T*   | F*   | T*   | T*   | F    | 0 *  |
+| WRAPO($cp) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPO($ep) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPO($lp) | T    | T    | F    | F    | F    | F    | -1   |
+| WRAPO($qp) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPD($nv) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPD($tv) | F*   | T*   | F*   | T*   | T    | F    | 0 *  |
+| WRAPD($bv) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPD($iv) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPD($fv) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPD($sv) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPD($rv) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPD($ov) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPD($va) | F*   | T*   | F*   | T*   | T*   | F    | 0 *  |
+| WRAPD($da) | F*   | T*   | F*   | T*   | T*   | F    | 0 *  |
+| WRAPD($cp) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPD($ep) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPD($lp) | T    | T    | F    | F    | F    | F    | -1   |
+| WRAPD($qp) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
++------------+------+------+------+------+------+------+------+
+
+[static] VAR ? $cm
++------------+------+------+------+------+------+------+------+
+| VAR        | <    | <=   | >    | >=   | ==   | ===  | <=>  |
++============+======+======+======+======+======+======+======+
+| $cm        | F    | T    | F    | T    | T    | T    | 0    |
+| $nv        | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| $tv        | F*   | T*   | F*   | T*   | T    | F    | 0 *  |
+| $bv        | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| $iv        | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| $fv        | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| $sv        | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| $rv        | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| $ov        | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| $va        | F*   | T*   | F*   | T*   | T*   | T*   | 0 *  |
+| $da        | F*   | T*   | F*   | T*   | T*   | T*   | 0 *  |
+| $cp        | F    | T    | F    | T    | T    | T    | 0    |
+| $ep        | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| $lp        | F    | F    | T    | T    | F    | F    | 1    |
+| $qp        | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPA($nv) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPA($tv) | F*   | T*   | F*   | T*   | T    | F    | 0 *  |
+| WRAPA($bv) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPA($iv) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPA($fv) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPA($sv) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPA($rv) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPA($ov) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPA($va) | F*   | T*   | F*   | T*   | T*   | T*   | 0 *  |
+| WRAPA($da) | F*   | T*   | F*   | T*   | T*   | T*   | 0 *  |
+| WRAPA($cp) | F    | T    | F    | T    | T    | T    | 0    |
+| WRAPA($ep) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPA($lp) | F    | F    | T    | T    | F    | F    | 1    |
+| WRAPA($qp) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPO($nv) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPO($tv) | F*   | T*   | F*   | T*   | T    | F    | 0 *  |
+| WRAPO($bv) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPO($iv) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPO($fv) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPO($sv) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPO($rv) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPO($ov) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPO($va) | F*   | T*   | F*   | T*   | T*   | F    | 0 *  |
+| WRAPO($da) | F*   | T*   | F*   | T*   | T*   | F    | 0 *  |
+| WRAPO($cp) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPO($ep) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPO($lp) | F    | F    | T    | T    | F    | F    | 1    |
+| WRAPO($qp) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPD($nv) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPD($tv) | F*   | T*   | F*   | T*   | T    | F    | 0 *  |
+| WRAPD($bv) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPD($iv) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPD($fv) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPD($sv) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPD($rv) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPD($ov) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPD($va) | F*   | T*   | F*   | T*   | T*   | F    | 0 *  |
+| WRAPD($da) | F*   | T*   | F*   | T*   | T*   | F    | 0 *  |
+| WRAPD($cp) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPD($ep) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPD($lp) | F    | F    | T    | T    | F    | F    | 1    |
+| WRAPD($qp) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
++------------+------+------+------+------+------+------+------+
+
+[dynamic] $cm ? VAR
++------------+------+------+------+------+------+------+------+
+| VAR        | <    | <=   | >    | >=   | ==   | ===  | <=>  |
++============+======+======+======+======+======+======+======+
+| $cm        | F    | T    | F    | T    | T    | T    | 0    |
+| $nv        | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| $tv        | F*   | T*   | F*   | T*   | T    | F    | 0 *  |
+| $bv        | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| $iv        | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| $fv        | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| $sv        | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| $rv        | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| $ov        | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| $va        | F*   | T*   | F*   | T*   | T*   | T*   | 0 *  |
+| $da        | F*   | T*   | F*   | T*   | T*   | T*   | 0 *  |
+| $cp        | F    | T    | F    | T    | T    | T    | 0    |
+| $ep        | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| $lp        | T    | T    | F    | F    | F    | F    | -1   |
+| $qp        | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPA($nv) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPA($tv) | F*   | T*   | F*   | T*   | T    | F    | 0 *  |
+| WRAPA($bv) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPA($iv) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPA($fv) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPA($sv) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPA($rv) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPA($ov) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPA($va) | F*   | T*   | F*   | T*   | T*   | T*   | 0 *  |
+| WRAPA($da) | F*   | T*   | F*   | T*   | T*   | T*   | 0 *  |
+| WRAPA($cp) | F    | T    | F    | T    | T    | T    | 0    |
+| WRAPA($ep) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPA($lp) | T    | T    | F    | F    | F    | F    | -1   |
+| WRAPA($qp) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPO($nv) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPO($tv) | F*   | T*   | F*   | T*   | T    | F    | 0 *  |
+| WRAPO($bv) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPO($iv) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPO($fv) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPO($sv) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPO($rv) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPO($ov) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPO($va) | F*   | T*   | F*   | T*   | T*   | F    | 0 *  |
+| WRAPO($da) | F*   | T*   | F*   | T*   | T*   | F    | 0 *  |
+| WRAPO($cp) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPO($ep) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPO($lp) | T    | T    | F    | F    | F    | F    | -1   |
+| WRAPO($qp) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPD($nv) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPD($tv) | F*   | T*   | F*   | T*   | T    | F    | 0 *  |
+| WRAPD($bv) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPD($iv) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPD($fv) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPD($sv) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPD($rv) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPD($ov) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPD($va) | F*   | T*   | F*   | T*   | T*   | F    | 0 *  |
+| WRAPD($da) | F*   | T*   | F*   | T*   | T*   | F    | 0 *  |
+| WRAPD($cp) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPD($ep) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPD($lp) | T    | T    | F    | F    | F    | F    | -1   |
+| WRAPD($qp) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
++------------+------+------+------+------+------+------+------+
+
+[dynamic] VAR ? $cm
++------------+------+------+------+------+------+------+------+
+| VAR        | <    | <=   | >    | >=   | ==   | ===  | <=>  |
++============+======+======+======+======+======+======+======+
+| $cm        | F    | T    | F    | T    | T    | T    | 0    |
+| $nv        | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| $tv        | F*   | T*   | F*   | T*   | T    | F    | 0 *  |
+| $bv        | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| $iv        | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| $fv        | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| $sv        | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| $rv        | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| $ov        | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| $va        | F*   | T*   | F*   | T*   | T*   | T*   | 0 *  |
+| $da        | F*   | T*   | F*   | T*   | T*   | T*   | 0 *  |
+| $cp        | F    | T    | F    | T    | T    | T    | 0    |
+| $ep        | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| $lp        | F    | F    | T    | T    | F    | F    | 1    |
+| $qp        | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPA($nv) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPA($tv) | F*   | T*   | F*   | T*   | T    | F    | 0 *  |
+| WRAPA($bv) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPA($iv) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPA($fv) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPA($sv) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPA($rv) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPA($ov) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPA($va) | F*   | T*   | F*   | T*   | T*   | T*   | 0 *  |
+| WRAPA($da) | F*   | T*   | F*   | T*   | T*   | T*   | 0 *  |
+| WRAPA($cp) | F    | T    | F    | T    | T    | T    | 0    |
+| WRAPA($ep) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPA($lp) | F    | F    | T    | T    | F    | F    | 1    |
+| WRAPA($qp) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPO($nv) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPO($tv) | F*   | T*   | F*   | T*   | T    | F    | 0 *  |
+| WRAPO($bv) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPO($iv) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPO($fv) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPO($sv) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPO($rv) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPO($ov) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPO($va) | F*   | T*   | F*   | T*   | T*   | F    | 0 *  |
+| WRAPO($da) | F*   | T*   | F*   | T*   | T*   | F    | 0 *  |
+| WRAPO($cp) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPO($ep) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPO($lp) | F    | F    | T    | T    | F    | F    | 1    |
+| WRAPO($qp) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPD($nv) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPD($tv) | F*   | T*   | F*   | T*   | T    | F    | 0 *  |
+| WRAPD($bv) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPD($iv) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPD($fv) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPD($sv) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPD($rv) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPD($ov) | F*   | F*   | T*   | T*   | F    | F    | 1 *  |
+| WRAPD($va) | F*   | T*   | F*   | T*   | T*   | F    | 0 *  |
+| WRAPD($da) | F*   | T*   | F*   | T*   | T*   | F    | 0 *  |
+| WRAPD($cp) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPD($ep) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
+| WRAPD($lp) | F    | F    | T    | T    | F    | F    | 1    |
+| WRAPD($qp) | T*   | T*   | F*   | F*   | F    | F    | -1*  |
++------------+------+------+------+------+------+------+------+

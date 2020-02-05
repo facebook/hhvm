@@ -52,6 +52,15 @@ ClsMethDataRef ClsMethDataRef::create(Class* cls, Func* func) {
   return ClsMethDataRef(cls, func);
 }
 
+void raiseClsMethVecCompareWarningHelper() {
+  if (!RuntimeOption::EvalRaiseClsMethComparisonWarning) return;
+  raise_notice("Comparing clsmeth with vec");
+}
+
+void raiseClsMethNonClsMethRelCompareWarning() {
+  raise_notice("Comparing clsmeth with non-clsmeth relationally");
+}
+
 void raiseClsMethToVecWarningHelper(const char* fn /* =nullptr */) {
   if (!RuntimeOption::EvalRaiseClsMethConversionWarning) return;
   const char* t = RuntimeOption::EvalHackArrDVArrs ? "vec" : "varray";

@@ -261,8 +261,10 @@ bool builtin_is_list_like(ISS& env, const bc::FCallBuiltin& op) {
   if (op.arg1 != 1) return false;
   auto const ty = topC(env);
 
-  constprop(env);
-  nothrow(env);
+  if (!ty.couldBe(TClsMeth)) {
+    constprop(env);
+    nothrow(env);
+  }
 
   if (!ty.couldBeAny(TArr, TVec, TDict, TKeyset, TClsMeth)) {
     popC(env);

@@ -1,7 +1,5 @@
 -vRuntime.Eval.EmitFuncPointers=1
 -vRuntime.Eval.EmitClsMethPointers=1
 -vRuntime.Eval.IsCompatibleClsMethType=1
--vRuntime.Eval.RaiseFuncConversionWarning=1
--vRuntime.Eval.RaiseClassConversionWarning=1
 
 -vHackArrDVArrs=1

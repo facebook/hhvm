@@ -225,13 +225,31 @@ SSATmp* opt_method_exists(IRGS& env, const ParamPrep& params) {
   return gen(env, MethodExists, cls, meth);
 }
 
+const StaticString
+  s_conv_clsmeth_to_varray("Implicit clsmeth to varray conversion"),
+  s_conv_clsmeth_to_vec("Implicit clsmeth to vec conversion");
+
+void raiseClsMethToVecWarningHelper(IRGS& env) {
+  if (RuntimeOption::EvalRaiseClsMethConversionWarning) {
+    gen(
+      env,
+      RaiseNotice,
+      cns(env, RuntimeOption::EvalHackArrDVArrs ?
+        s_conv_clsmeth_to_vec.get() : s_conv_clsmeth_to_varray.get())
+    );
+  }
+}
+
 SSATmp* opt_count(IRGS& env, const ParamPrep& params) {
   if (params.size() != 2) return nullptr;
 
   auto const mode = params[1].value;
   auto const val = params[0].value;
 
-  if (val->isA(TClsMeth)) return cns(env, 2);
+  if (val->isA(TClsMeth)) {
+    raiseClsMethToVecWarningHelper(env);
+    return cns(env, 2);
+  }
 
   // Bail if we're trying to do a recursive count()
   if (!mode->hasConstVal(0)) return nullptr;
@@ -601,7 +619,10 @@ SSATmp* opt_is_list_like(IRGS& env, const ParamPrep& params) {
   // Type might be a Ptr here, so the maybe() below will go wrong if we don't
   // bail out here.
   if (!(type <= TInitCell)) return nullptr;
-  if (type <= TClsMeth) return cns(env, true);
+  if (type <= TClsMeth) {
+    raiseClsMethToVecWarningHelper(env);
+    return cns(env, true);
+  }
   if (!type.maybe(TArrLike)) return cns(env, false);
   if (type <= TVec || type <= Type::Array(ArrayData::kPackedKind)) {
     return cns(env, true);

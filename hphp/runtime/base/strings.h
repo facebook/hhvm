@@ -54,6 +54,8 @@ constexpr char FUNCTION_NAME_MUST_BE_STRING[] =
   "Function name must be a string";
 constexpr char METHOD_NAME_MUST_BE_STRING[] =
   "Method name must be a string";
+constexpr char CLASS_NAME_MUST_BE_STRING[] =
+  "Class name must be a string";
 constexpr char CANT_UNSET_STRING[] =
   "Cannot unset string offsets";
 constexpr char OP_NOT_SUPPORTED_STRING[] =
@@ -129,6 +131,9 @@ constexpr char CLSMETH_COMPAT_IS_VARR[] = "is_varray() called on clsmeth";
 constexpr char CLSMETH_COMPAT_IS_ANY_ARR[] = "is_any_array() called on clsmeth";
 constexpr char CLSMETH_COMPAT_IS_SHAPE[] = "is_shape() called on clsmeth";
 constexpr char CLSMETH_COMPAT_IS_TUPLE[] = "is_tuple() called on clsmeth";
+constexpr char CLSMETH_COMPAT_VEC_CMP[] = "Comparing clsmeth with vec";
+constexpr char CLSMETH_COMPAT_NON_CLSMETH_REL_CMP[] =
+  "Comparing clsmeth with non-clsmeth relationally";
 
 constexpr char FUNC_TO_STRING_IMPLICIT[] =
   "Implicit Func to string conversion for type-hint";

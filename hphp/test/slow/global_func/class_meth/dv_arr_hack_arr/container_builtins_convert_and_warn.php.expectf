@@ -22,7 +22,11 @@ vec(2) {
   string(1) "A"
   string(5) "func1"
 }
+
+Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_warn.php on line 21
 int(2)
+
+Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_warn.php on line 22
 int(2)
 
 Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_warn.php on line 23

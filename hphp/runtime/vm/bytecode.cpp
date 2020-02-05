@@ -4490,7 +4490,7 @@ OPTBLD_INLINE void iopResolveClsMethod(ClsMethResolveOp op) {
 
   if (!isStringType(func->m_type) || !isStringType(cls->m_type)) {
     raise_error(!isStringType(func->m_type) ?
-      Strings::METHOD_NAME_MUST_BE_STRING : "class name must be a string.");
+      Strings::METHOD_NAME_MUST_BE_STRING : Strings::CLASS_NAME_MUST_BE_STRING);
   }
 
   StringData* invName = nullptr;

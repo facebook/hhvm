@@ -521,7 +521,7 @@ Array Variant::toPHPArrayHelper() const {
       return make_packed_array(Variant{classToStringHelper(m_data.pclass),
                                        PersistentStrInit{}});
     case KindOfClsMeth:
-      raiseClsMethToVecWarningHelper();
+      raiseClsMethConvertWarningHelper("array");
       return make_packed_array(
         m_data.pclsmeth->getClsStr(), m_data.pclsmeth->getFuncStr());
     case KindOfRecord:

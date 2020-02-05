@@ -72,8 +72,9 @@ ALWAYS_INLINE bool isRefCountedClsMeth(ClsMethDataRef clsMeth) {
   return clsMeth->isRefCountedType();
 }
 
+void raiseClsMethVecCompareWarningHelper();
+void raiseClsMethNonClsMethRelCompareWarning();
 void raiseClsMethToVecWarningHelper(const char* fn = nullptr);
-
 void raiseClsMethConvertWarningHelper(const char* toType);
 
 Array clsMethToVecHelper(ClsMethDataRef clsMeth);

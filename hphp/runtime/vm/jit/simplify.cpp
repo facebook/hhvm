@@ -2274,7 +2274,7 @@ const StaticString
     s_msgFuncToBool("Func to bool conversion"),
     s_msgFuncToInt("Func to int conversion"),
     s_msgFuncToDbl("Func to double conversion"),
-    s_msgClsMethToStr("ClsMeth to string conversion"),
+    s_msgClsMethToStr("Implicit clsmeth to string conversion"),
     s_msgClsMethToInt("Implicit clsmeth to int conversion"),
     s_msgClsMethToDbl("Implicit clsmeth to double conversion");
 }

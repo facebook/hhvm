@@ -507,6 +507,32 @@ SSATmp* emitMixedClsMethCmp(IRGS& env, Op op) {
   }
 }
 
+namespace {
+
+void raiseClsMethCompareWarningHelper(IRGS& env, Op op) {
+  if (!RuntimeOption::EvalRaiseClsMethComparisonWarning) return;
+  switch (op) {
+    case Op::Gt:
+    case Op::Gte:
+    case Op::Lt:
+    case Op::Lte:
+    case Op::Cmp:
+      gen(
+        env,
+        RaiseNotice,
+        cns(env, makeStaticString(Strings::CLSMETH_COMPAT_NON_CLSMETH_REL_CMP))
+      );
+      return;
+    case Op::Same:
+    case Op::Eq:
+    case Op::NSame:
+    case Op::Neq: return;
+    default: always_assert(false);
+  }
+}
+
+}
+
 void implNullCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   assertx(left->type() <= TNull);
   auto const rightTy = right->type();
@@ -536,6 +562,7 @@ void implNullCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     if (RuntimeOption::EvalHackArrDVArrs) {
       push(env, emitMixedClsMethCmp(env, op));
     } else {
+      raiseClsMethCompareWarningHelper(env, op);
       push(env, emitConstCmp(env, op, false, true));
     }
   } else {
@@ -562,6 +589,7 @@ void implBoolCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     if (RuntimeOption::EvalHackArrDVArrs) {
       push(env, emitMixedClsMethCmp(env, op));
     } else {
+      raiseClsMethCompareWarningHelper(env, op);
       push(env, gen(env, toBoolCmpOpcode(op), left, cns(env, true)));
     }
   } else {
@@ -638,6 +666,7 @@ void implIntCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     if (RuntimeOption::EvalHackArrDVArrs) {
       push(env, emitMixedClsMethCmp(env, op));
     } else {
+      raiseClsMethCompareWarningHelper(env, op);
       push(env, emitConstCmp(env, op, false, true));
     }
   } else {
@@ -696,6 +725,7 @@ void implDblCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     if (RuntimeOption::EvalHackArrDVArrs) {
       push(env, emitMixedClsMethCmp(env, op));
     } else {
+      raiseClsMethCompareWarningHelper(env, op);
       push(env, emitConstCmp(env, op, false, true));
     }
   } else {
@@ -745,6 +775,16 @@ void raiseClsMethToVecWarningHelper(IRGS& env) {
     gen(env, RaiseNotice, cns(env, makeStaticString(
       folly::sformat("Implicit clsmeth to {} conversion",
         RuntimeOption::EvalHackArrDVArrs ? "vec" : "varray"))));
+  }
+}
+
+void raiseHACCompareWarningHelper(IRGS& env) {
+  if (checkHACCompare()) {
+    gen(
+      env,
+      RaiseHackArrCompatNotice,
+      cns(env, makeStaticString(Strings::HACKARR_COMPAT_ARR_HACK_ARR_CMP))
+    );
   }
 }
 
@@ -812,6 +852,14 @@ void implVecCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
       push(env, gen(env, toVecCmpOpcode(op), left, arr));
       decRef(env, arr);
     } else {
+      raiseHACCompareWarningHelper(env);
+      if (RuntimeOption::EvalRaiseClsMethComparisonWarning) {
+        gen(
+          env,
+          RaiseNotice,
+          cns(env, makeStaticString(Strings::CLSMETH_COMPAT_VEC_CMP))
+        );
+      }
       push(env, emitMixedVecCmp(env, op));
     }
   } else {
@@ -954,6 +1002,7 @@ void implStrCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     if (RuntimeOption::EvalHackArrDVArrs) {
       push(env, emitMixedClsMethCmp(env, op));
     } else {
+      raiseClsMethCompareWarningHelper(env, op);
       push(env, emitConstCmp(env, op, false, true));
     }
   } else {
@@ -1076,6 +1125,7 @@ void implObjCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     if (RuntimeOption::EvalHackArrDVArrs) {
       push(env, emitMixedClsMethCmp(env, op));
     } else {
+      raiseClsMethCompareWarningHelper(env, op);
       push(
         env,
         emitCollectionCheck(
@@ -1141,9 +1191,10 @@ void implResCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     push(env, emitMixedKeysetCmp(env, op));
   } else if (rightTy <= TClsMeth) {
     if (RuntimeOption::EvalHackArrDVArrs) {
-      push(env, emitMixedVecCmp(env, op));
+      push(env, emitMixedClsMethCmp(env, op));
     } else {
-      push(env, emitConstCmp(env, op, true, false));
+      raiseClsMethCompareWarningHelper(env, op);
+      push(env, emitConstCmp(env, op, false, true));
     }
   } else {
     // Resources are always less than anything else.
@@ -1218,12 +1269,6 @@ void implClsMethCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
       return;
     }
     PUNT(ClsMeth-ClsMeth-cmp);
-  } else if (rightTy <= TDict) {
-    push(env, emitMixedDictCmp(env, op));
-    return;
-  } else if (rightTy <= TKeyset) {
-    push(env, emitMixedKeysetCmp(env, op));
-    return;
   }
 
   if (RuntimeOption::EvalHackArrDVArrs) {
@@ -1241,10 +1286,13 @@ void implClsMethCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     if (rightTy.subtypeOfAny(TNull, TInt, TDbl, TStr)) {
       // Null is always less than TClsMeth
       // ints,dbls,strs are implicitly less than TClsMeth
+      raiseClsMethCompareWarningHelper(env, op);
       push(env, emitConstCmp(env, op, true, false));
     } else if (rightTy <= TBool) {
+      raiseClsMethCompareWarningHelper(env, op);
       push(env, gen(env, toBoolCmpOpcode(op), cns(env, true), right));
     } else if (rightTy <= TObj) {
+      raiseClsMethCompareWarningHelper(env, op);
       // collections are greater than TClsMeth
       push(
         env,
@@ -1261,10 +1309,20 @@ void implClsMethCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
       implArrCmp(env, op, arr, right);
       decRef(env, arr);
     } else if (rightTy <= TVec) {
+      raiseHACCompareWarningHelper(env);
+      if (RuntimeOption::EvalRaiseClsMethComparisonWarning) {
+        gen(
+          env,
+          RaiseNotice,
+          cns(env, makeStaticString(Strings::CLSMETH_COMPAT_VEC_CMP))
+        );
+      }
       push(env, emitMixedVecCmp(env, op));
     } else if (rightTy <= TDict) {
+      raiseClsMethCompareWarningHelper(env, op);
       push(env, emitMixedDictCmp(env, op));
     } else if (rightTy <= TKeyset) {
+      raiseClsMethCompareWarningHelper(env, op);
       push(env, emitMixedKeysetCmp(env, op));
     } else {
       PUNT(ClsMeth-cmp);
@@ -1306,13 +1364,7 @@ void implCmp(IRGS& env, Op op) {
       case Op::NSame:
       case Op::Eq:
       case Op::Neq:
-        if (checkHACCompare() && is_php_arr_hack_arr_cmp) {
-          gen(
-            env,
-            RaiseHackArrCompatNotice,
-            cns(env, makeStaticString(Strings::HACKARR_COMPAT_ARR_HACK_ARR_CMP))
-          );
-        }
+        if (is_php_arr_hack_arr_cmp) raiseHACCompareWarningHelper(env);
         break;
       case Op::Lt:
       case Op::Lte:
@@ -1320,25 +1372,19 @@ void implCmp(IRGS& env, Op op) {
       case Op::Gte:
       case Op::Cmp:
         if ((leftTy <= TArr) != (rightTy <= TArr)) {
-          if (checkHACCompare() && is_php_arr_hack_arr_cmp) {
-            gen(
-              env,
-              RaiseHackArrCompatNotice,
-              cns(
+          if (is_php_arr_hack_arr_cmp) {
+            raiseHACCompareWarningHelper(env);
+          } else {
+            if (checkHACCompareNonAnyArray()) {
+              gen(
                 env,
-                makeStaticString(Strings::HACKARR_COMPAT_ARR_HACK_ARR_CMP)
-              )
-            );
-          }
-          if (checkHACCompareNonAnyArray() && !is_php_arr_hack_arr_cmp) {
-            gen(
-              env,
-              RaiseHackArrCompatNotice,
-              cns(
-                env,
-                makeStaticString(Strings::HACKARR_COMPAT_ARR_NON_ARR_CMP)
-              )
-            );
+                RaiseHackArrCompatNotice,
+                cns(
+                  env,
+                  makeStaticString(Strings::HACKARR_COMPAT_ARR_NON_ARR_CMP)
+                )
+              );
+            }
           }
         }
         break;

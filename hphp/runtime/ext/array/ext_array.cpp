@@ -1338,6 +1338,7 @@ int64_t HHVM_FUNCTION(count,
       return var.getArrayData()->size();
 
     case KindOfClsMeth:
+      raiseClsMethToVecWarningHelper();
       return 2;
 
     case KindOfObject:
@@ -2086,6 +2087,9 @@ TypedValue HHVM_FUNCTION(array_diff_uassoc,
                          const Variant& array2,
                          const Variant& key_compare_func,
                          const Array& args /* = null array */) {
+  if (checkIsClsMethAndRaise( __FUNCTION__+2, array1, array2)) {
+    return make_tv<KindOfNull>();
+  }
   Variant func = key_compare_func;
   Array extra = args;
   if (!extra.empty()) {

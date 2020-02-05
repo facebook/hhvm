@@ -251,28 +251,28 @@ ArrayData* convObjToKeysetHelper(ObjectData* obj) {
   return a;
 }
 
-ArrayData* convClsMethToArrHealper(ClsMethDataRef clsmeth) {
+ArrayData* convClsMethToArrHelper(ClsMethDataRef clsmeth) {
   raiseClsMethConvertWarningHelper("array");
   auto a = make_varray(clsmeth->getClsStr(), clsmeth->getFuncStr()).detach();
   decRefClsMeth(clsmeth);
   return a;
 }
 
-ArrayData* convClsMethToVArrHealper(ClsMethDataRef clsmeth) {
+ArrayData* convClsMethToVArrHelper(ClsMethDataRef clsmeth) {
   raiseClsMethConvertWarningHelper("varray");
   auto a = make_varray(clsmeth->getClsStr(), clsmeth->getFuncStr()).detach();
   decRefClsMeth(clsmeth);
   return a;
 }
 
-ArrayData* convClsMethToVecHealper(ClsMethDataRef clsmeth) {
+ArrayData* convClsMethToVecHelper(ClsMethDataRef clsmeth) {
   raiseClsMethConvertWarningHelper("vec");
   auto a = make_vec_array(clsmeth->getClsStr(), clsmeth->getFuncStr()).detach();
   decRefClsMeth(clsmeth);
   return a;
 }
 
-ArrayData* convClsMethToDArrHealper(ClsMethDataRef clsmeth) {
+ArrayData* convClsMethToDArrHelper(ClsMethDataRef clsmeth) {
   raiseClsMethConvertWarningHelper("darray");
   auto a = make_darray(
     0, clsmeth->getClsStr(), 1, clsmeth->getFuncStr()).detach();
@@ -280,7 +280,7 @@ ArrayData* convClsMethToDArrHealper(ClsMethDataRef clsmeth) {
   return a;
 }
 
-ArrayData* convClsMethToDictHealper(ClsMethDataRef clsmeth) {
+ArrayData* convClsMethToDictHelper(ClsMethDataRef clsmeth) {
   raiseClsMethConvertWarningHelper("dict");
   auto a = make_dict_array(
     0, clsmeth->getClsStr(), 1, clsmeth->getFuncStr()).detach();
@@ -288,7 +288,7 @@ ArrayData* convClsMethToDictHealper(ClsMethDataRef clsmeth) {
   return a;
 }
 
-ArrayData* convClsMethToKeysetHealper(ClsMethDataRef clsmeth) {
+ArrayData* convClsMethToKeysetHelper(ClsMethDataRef clsmeth) {
   raiseClsMethConvertWarningHelper("keyset");
   auto a = make_keyset_array(
     clsmeth->getClsStr(), clsmeth->getFuncStr()).detach();

@@ -6197,7 +6197,8 @@ bool inner_types_might_raise(const Type& t1, const Type& t2) {
 
 bool compare_might_raise(const Type& t1, const Type& t2) {
   if (!RuntimeOption::EvalHackArrCompatNotices &&
-      !RuntimeOption::EvalHackArrCompatDVCmpNotices) {
+      !RuntimeOption::EvalHackArrCompatDVCmpNotices &&
+      !RuntimeOption::EvalEmitClsMethPointers) {
     return false;
   }
 

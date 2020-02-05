@@ -22,6 +22,7 @@ function test_warning($c, $f, $cmp) {
   var_dump(array_diff(HH\class_meth($c, $f), varray[$f]));
   var_dump(array_udiff(HH\class_meth($c, $f), varray[$f], $cmp));
   var_dump(array_diff_assoc(HH\class_meth($c, $f), varray[$f]));
+  var_dump(array_diff_uassoc(HH\class_meth($c, $f), varray[$f], $cmp));
   var_dump(array_udiff_assoc(HH\class_meth($c, $f), varray[$f], $cmp));
   var_dump(array_udiff_uassoc(HH\class_meth($c, $f), varray[$f], $cmp, $cmp));
   var_dump(array_diff_key(HH\class_meth($c, $f), varray[0]));
@@ -50,10 +51,9 @@ function test_warning($c, $f, $cmp) {
   $x = HH\class_meth($c, $f); var_dump(uasort(inout $x, $cmp));
   $x = HH\class_meth($c, $f); var_dump(uksort(inout $x, $cmp));
   $x = HH\class_meth($c, $f); var_dump(array_multisort1(inout $x));
-}
 
-function test_string_builtins($c, $f) {
-  var_dump(join(HH\class_meth($c, $f), '::'));
+  $x = HH\class_meth($c, $f); var_dump(count($x));
+  $x = HH\class_meth($c, $f); var_dump(HH\is_list_like($x));
 }
 
 <<__EntryPoint>>

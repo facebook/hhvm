@@ -465,7 +465,7 @@ enable_if_lval_t<T, void> tvCastToStringInPlace(T tv) {
 
     case KindOfClsMeth:
       if (RuntimeOption::EvalRaiseClsMethConversionWarning) {
-        raise_notice("ClsMeth to string conversion");
+        raise_notice("Implicit clsmeth to string conversion");
       }
       tvDecRefClsMeth(tv);
       if (RuntimeOption::EvalHackArrDVArrs) {
@@ -548,7 +548,7 @@ StringData* tvCastToStringData(TypedValue tv) {
 
     case KindOfClsMeth:
       if (RuntimeOption::EvalRaiseClsMethConversionWarning) {
-        raise_notice("ClsMeth to string conversion");
+        raise_notice("Implicit clsmeth to string conversion");
       }
       if (RuntimeOption::EvalHackArrDVArrs) {
         return vec_string.get();

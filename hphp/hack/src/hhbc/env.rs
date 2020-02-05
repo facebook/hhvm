@@ -18,8 +18,6 @@ use bitflags::bitflags;
 
 use std::borrow::Cow;
 
-static SEP: &'static str = "|";
-
 bitflags! {
     #[derive(Default)]
     pub struct Flags: u8 {

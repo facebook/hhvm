@@ -673,7 +673,7 @@ fn mk_afkvalues(es: &Vec<(tast::Expr, tast::Expr)>) -> Vec<tast::Afield> {
         .collect()
 }
 
-fn mk_afvalues(es: &Vec<(tast::Expr)>) -> Vec<tast::Afield> {
+fn mk_afvalues(es: &Vec<tast::Expr>) -> Vec<tast::Afield> {
     es.to_owned()
         .into_iter()
         .map(|e| tast::Afield::mk_afvalue(e))

@@ -2,6 +2,9 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+
+#![allow(dead_code)]
+
 use ast_scope_rust::Scope;
 use emit_attribute_rust as emit_attribute;
 use emit_expression_rust as emit_expression;

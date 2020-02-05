@@ -70,14 +70,14 @@ let get_first_suggested_type_as_string file type_map node =
           end
         | Typing_defs.DeclTy _ -> None))
 
-let get_patches ctx file =
+let get_patches tcopt file =
   let nast = Ast_provider.get_ast ~full:true file in
   let tast =
     (* We don't need an accurate list of typing errors, so we can skip TAST
     checks. *)
-    Typing.nast_to_tast ~do_tast_checks:false ctx (Naming.program nast)
+    Typing.nast_to_tast ~do_tast_checks:false tcopt (Naming.program nast)
   in
-  let type_map = Tast_type_collector.collect_types ctx tast in
+  let type_map = Tast_type_collector.collect_types tast in
   let source_text = Full_fidelity_source_text.from_file file in
   let positioned_tree = PositionedTree.make source_text in
   let root =

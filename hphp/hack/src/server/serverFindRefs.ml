@@ -45,7 +45,7 @@ let search target include_defs files genv env =
           "ServerFindRefs.search file %s"
           (Relative_path.to_absolute file));
   (* Get all the references to the provided target in the files *)
-  let ctx = Provider_utils.ctx_from_server_env env in
+  let ctx = Provider_context.empty ~tcopt:env.tcopt in
   let res =
     FindRefsService.find_references ctx genv.workers target include_defs files
   in

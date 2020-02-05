@@ -13,7 +13,7 @@ let go_quarantined ~(ctx : Provider_context.t) ~(entry : Provider_context.entry)
     let { Provider_utils.Compute_tast.tast; _ } =
       Provider_utils.compute_tast_quarantined ~ctx ~entry
     in
-    Coverage_level.get_levels ctx tast entry.Provider_context.path
+    Coverage_level.get_levels tast entry.Provider_context.path
   with _ ->
     (* The "Fixme Provider" will throw an exception if the file cannot be found.
      * Let's convert that exception to a plain result. *)

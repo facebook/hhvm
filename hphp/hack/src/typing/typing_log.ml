@@ -70,11 +70,7 @@ let indentEnv ?(color = Normal Yellow) message f =
 
 (* Most recent environment. We only display diffs *)
 let lastenv =
-  ref
-    (Env.empty
-       (Provider_context.empty ~tcopt:TypecheckerOptions.default)
-       Relative_path.default
-       None)
+  ref (Env.empty TypecheckerOptions.default Relative_path.default None)
 
 let iterations : int Pos.Map.t ref = ref Pos.Map.empty
 

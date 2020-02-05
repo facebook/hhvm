@@ -370,11 +370,9 @@ let test () =
       Test.assertEqual (fmt expected) (fmt ty_str)
     in
     let fn = ServerCommandTypes.FileName ("/" ^ file) in
-    let ctx =
-      Provider_utils.ctx_from_server_env env
-      |> Provider_context.map_tcopt ~f:(fun tcopt ->
-             { tcopt with GlobalOptions.tco_dynamic_view = dynamic })
-    in
+    let ServerEnv.{ tcopt; _ } = env in
+    let tcopt = { tcopt with GlobalOptions.tco_dynamic_view = dynamic } in
+    let ctx = Provider_context.empty ~tcopt in
     let (ctx, entry) =
       Provider_utils.update_context
         ~ctx
@@ -384,7 +382,7 @@ let test () =
     let { Provider_utils.Compute_tast.tast; _ } =
       Provider_utils.compute_tast_unquarantined ~ctx ~entry
     in
-    let ty = ServerInferType.type_at_pos ctx tast line col in
+    let ty = ServerInferType.type_at_pos tast line col in
     compare_type expected_type ty
   in
   List.iter cases ~f:(test_case ~dynamic:false);

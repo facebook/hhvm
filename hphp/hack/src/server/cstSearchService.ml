@@ -181,7 +181,7 @@ let collect_types (env : env) : env * collected_type_map =
     let { Provider_utils.Compute_tast.tast; _ } =
       Provider_utils.compute_tast_unquarantined ~ctx ~entry
     in
-    let collected_types = Tast_type_collector.collect_types env.ctx tast in
+    let collected_types = Tast_type_collector.collect_types tast in
     let env = { env with collected_types = Some collected_types } in
     (env, collected_types)
 
@@ -566,7 +566,7 @@ let go
     ~(files_to_search : string list option)
     (input : Hh_json.json) : (Hh_json.json, string) Result.t =
   let open Result.Monad_infix in
-  let ctx = Provider_utils.ctx_from_server_env env in
+  let ctx = Provider_context.empty ~tcopt:env.ServerEnv.tcopt in
   compile_pattern ctx input >>| fun pattern ->
   let num_files_searched = ref 0 in
   let last_printed_num_files_searched = ref 0 in

@@ -151,7 +151,7 @@ let go_xcontroller genv env (fnl : string list) =
           >>= fun info -> Some (List.map info.FileInfo.classes ~f:snd))
       |> List.concat
     in
-    let ctx = Provider_utils.ctx_from_server_env env in
+    let ctx = Provider_context.empty ~tcopt:env.tcopt in
     MultiWorker.call
       genv.workers
       ~job:(lint_xcontroller ctx)

@@ -637,9 +637,9 @@ and get_callable_variadicity
 (*****************************************************************************)
 (* Now we are actually checking stuff! *)
 (*****************************************************************************)
-and fun_def ctx f :
+and fun_def tcopt f :
     (Tast.fun_def * Typing_inference_env.t_global_with_pos) option =
-  let env = EnvFromDef.fun_env ctx f in
+  let env = EnvFromDef.fun_env tcopt f in
   with_timeout env f.f_name ~do_:(fun env ->
       (* reset the expression dependent display ids for each function body *)
       Reason.expr_display_id_map := IMap.empty;
@@ -7666,8 +7666,8 @@ and check_const_trait_members pos env use_list =
 and shallow_decl_enabled () =
   TCO.shallow_class_decl (Global_naming_options.get ())
 
-and class_def ctx c =
-  let env = EnvFromDef.class_env ctx c in
+and class_def tcopt c =
+  let env = EnvFromDef.class_env tcopt c in
   let tc = Env.get_class env (snd c.c_name) in
   let env = Env.set_env_pessimize env in
   add_decl_errors Option.(map tc (fun tc -> value_exn (Cls.decl_errors tc)));
@@ -8713,8 +8713,8 @@ and method_def env cls m =
       ( Typing_lambda_ambiguous.suggest_method_def env method_def,
         (pos, global_inference_env) ))
 
-and typedef_def ctx typedef =
-  let env = EnvFromDef.typedef_env ctx typedef in
+and typedef_def tcopt typedef =
+  let env = EnvFromDef.typedef_env tcopt typedef in
   let tdecl = Env.get_typedef env (snd typedef.t_name) in
   add_decl_errors
     Option.(map tdecl (fun tdecl -> value_exn tdecl.td_decl_errors));
@@ -8790,8 +8790,8 @@ and typedef_def ctx typedef =
     Aast.t_namespace = typedef.t_namespace;
   }
 
-and gconst_def ctx cst =
-  let env = EnvFromDef.gconst_env ctx cst in
+and gconst_def tcopt cst =
+  let env = EnvFromDef.gconst_env tcopt cst in
   let env = Env.set_env_pessimize env in
   add_decl_errors (Option.map (Env.get_gconst env (snd cst.cst_name)) ~f:snd);
 
@@ -9011,8 +9011,8 @@ let check_record_inheritance_cycle env ((rd_pos, rd_name) : Aast.sid) : unit =
   in
   worker rd_name [rd_name] (SSet.singleton rd_name)
 
-let record_def_def ctx rd =
-  let env = EnvFromDef.record_def_env ctx rd in
+let record_def_def tcopt rd =
+  let env = EnvFromDef.record_def_env tcopt rd in
   (match rd.rd_extends with
   | Some parent -> record_def_parent env rd parent
   | None -> ());
@@ -9035,12 +9035,12 @@ let record_def_def ctx rd =
     Aast.rd_doc_comment = rd.rd_doc_comment;
   }
 
-let nast_to_tast_gienv ~(do_tast_checks : bool) ctx nast :
+let nast_to_tast_gienv ~(do_tast_checks : bool) opts nast :
     _ * Typing_inference_env.t_global_with_pos list =
   let convert_def = function
     | Fun f ->
       begin
-        match fun_def ctx f with
+        match fun_def opts f with
         | Some (f, env) -> (Aast.Fun f, [env])
         | None ->
           failwith
@@ -9048,23 +9048,23 @@ let nast_to_tast_gienv ~(do_tast_checks : bool) ctx nast :
                "Error when typechecking function: %s"
                (snd f.f_name)
       end
-    | Constant gc -> (Aast.Constant (gconst_def ctx gc), [])
-    | Typedef td -> (Aast.Typedef (typedef_def ctx td), [])
+    | Constant gc -> (Aast.Constant (gconst_def opts gc), [])
+    | Typedef td -> (Aast.Typedef (typedef_def opts td), [])
     | Class c ->
       begin
-        match class_def ctx c with
+        match class_def opts c with
         | Some (c, envs) -> (Aast.Class c, envs)
         | None ->
           failwith
           @@ Printf.sprintf "Error in declaration of class: %s" (snd c.c_name)
       end
-    | RecordDef rd -> (Aast.RecordDef (record_def_def ctx rd), [])
+    | RecordDef rd -> (Aast.RecordDef (record_def_def opts rd), [])
     (* We don't typecheck top level statements:
      * https://docs.hhvm.com/hack/unsupported/top-level
      * so just create the minimal env for us to construct a Stmt.
      *)
     | Stmt s ->
-      let env = Env.empty ctx Relative_path.default None in
+      let env = Env.empty opts Relative_path.default None in
       (Aast.Stmt (snd (stmt env s)), [])
     | Namespace _
     | NamespaceUse _
@@ -9073,12 +9073,13 @@ let nast_to_tast_gienv ~(do_tast_checks : bool) ctx nast :
       failwith
         "Invalid nodes in NAST. These nodes should be removed during naming."
   in
+  let ctx = Provider_context.get_global_context_or_empty_FOR_MIGRATION () in
   Nast_check.program ctx nast;
   let (tast, envs) = List.unzip @@ List.map nast convert_def in
   let envs = List.concat envs in
-  if do_tast_checks then Tast_check.program ctx tast;
+  if do_tast_checks then Tast_check.program ctx.Provider_context.tcopt tast;
   (tast, envs)
 
-let nast_to_tast ~do_tast_checks ctx nast =
-  let (tast, _gienvs) = nast_to_tast_gienv ~do_tast_checks ctx nast in
+let nast_to_tast ~do_tast_checks opts nast =
+  let (tast, _gienvs) = nast_to_tast_gienv ~do_tast_checks opts nast in
   tast

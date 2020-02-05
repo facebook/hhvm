@@ -28,15 +28,17 @@ let get_fixme_patches codes (env : env) =
   in
   List.map ~f:(fun pos -> Remove (Pos.to_absolute pos)) poslist
 
-let get_lambda_parameter_rewrite_patches ctx files =
+let get_lambda_parameter_rewrite_patches env files =
   List.concat_map files (fun file ->
       ServerRewriteLambdaParameters.get_patches
-        ctx
+        env.tcopt
         (Relative_path.from_root file))
 
-let get_type_params_type_rewrite_patches ctx files =
+let get_type_params_type_rewrite_patches env files =
   List.concat_map files (fun file ->
-      ServerRewriteTypeParamsType.get_patches ctx (Relative_path.from_root file))
+      ServerRewriteTypeParamsType.get_patches
+        env.tcopt
+        (Relative_path.from_root file))
 
 let find_def_filename current_filename definition =
   SymbolDefinition.(

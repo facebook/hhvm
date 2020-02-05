@@ -10,12 +10,9 @@
 open Core_kernel
 open Typing_defs
 
-let go_common
-    (ctx : Provider_context.t)
-    (tast : Tast.program)
-    ~(line : int)
-    ~(column : int) : ServerCommandTypes.Go_to_type_definition.result =
-  let env_and_ty = ServerInferType.type_at_pos ctx tast line column in
+let go_common (tast : Tast.program) ~(line : int) ~(column : int) :
+    ServerCommandTypes.Go_to_type_definition.result =
+  let env_and_ty = ServerInferType.type_at_pos tast line column in
   match env_and_ty with
   | None -> []
   | Some (env, ty) ->
@@ -52,4 +49,4 @@ let go_quarantined
   let { Provider_utils.Compute_tast.tast; _ } =
     Provider_utils.compute_tast_quarantined ~ctx ~entry
   in
-  go_common ctx tast ~line ~column
+  go_common tast ~line ~column

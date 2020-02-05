@@ -36,11 +36,8 @@ let run (name, f) =
   let result =
     try f ()
     with e ->
-      let e = Exception.wrap e in
-      let () = Printf.printf "Exception %s\n" (Exception.to_string e) in
-      let () =
-        Printf.printf "Backtrace %s\n" (Exception.get_backtrace_string e)
-      in
+      let () = Printf.printf "Exception %s\n" (Exn.to_string e) in
+      let () = Printf.printf "Backtrace %s\n" (Printexc.get_backtrace ()) in
       false
   in
   if result then

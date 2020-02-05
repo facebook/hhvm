@@ -13,9 +13,9 @@ open Hh_prelude
 
 [@@@warning "+33"]
 
-let visitor ctx =
+let visitor opts =
   let makers = [Xhp_required_check.make_handler] in
-  let handlers = List.map makers (( |> ) ctx) |> List.filter_opt in
+  let handlers = List.map makers (( |> ) opts) |> List.filter_opt in
   Tast_visitor.iter_with
     ( handlers
     @ [
@@ -57,6 +57,6 @@ let visitor ctx =
         Type_const_check.handler;
       ] )
 
-let program ctx = (visitor ctx)#go ctx
+let program opts = (visitor opts)#go
 
-let def ctx = (visitor ctx)#go_def ctx
+let def opts = (visitor opts)#go_def

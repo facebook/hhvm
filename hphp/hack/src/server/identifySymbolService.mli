@@ -11,7 +11,7 @@ module Result_set : Set.S with type elt = Relative_path.t SymbolOccurrence.t
 
 val clean_member_name : string -> string
 
-val all_symbols : Provider_context.t -> Tast.program -> Result_set.elt list
+val all_symbols : Tast.program -> Result_set.elt list
 
 val all_symbols_ctx :
   ctx:Provider_context.t -> entry:Provider_context.entry -> Result_set.elt list

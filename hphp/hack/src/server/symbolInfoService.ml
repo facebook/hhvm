@@ -25,9 +25,10 @@ let recheck_naming filename_l =
                 ()
               | _ -> ())))
 
-let helper ctx acc filetuple_l =
+let helper tcopt acc filetuple_l =
   let filename_l = List.rev_map filetuple_l fst in
   recheck_naming filename_l;
+  let ctx = Provider_context.empty ~tcopt in
   let tasts =
     List.map filename_l ~f:(fun path ->
         let (ctx, entry) =
@@ -42,8 +43,8 @@ let helper ctx acc filetuple_l =
         in
         tast)
   in
-  let fun_calls = SymbolFunCallService.find_fun_calls ctx tasts in
-  let symbol_types = SymbolTypeService.generate_types ctx tasts in
+  let fun_calls = SymbolFunCallService.find_fun_calls tasts in
+  let symbol_types = SymbolTypeService.generate_types tasts in
   (fun_calls, symbol_types) :: acc
 
 let parallel_helper workers filetuple_l tcopt =
@@ -87,11 +88,11 @@ let go workers file_list env =
         end
       ~init:[]
   in
-  let ctx = Provider_utils.ctx_from_server_env env in
+  let tcopt = env.ServerEnv.tcopt in
   let raw_result =
     if List.length file_list < 10 then
-      helper ctx [] filetuple_l
+      helper tcopt [] filetuple_l
     else
-      parallel_helper workers filetuple_l ctx
+      parallel_helper workers filetuple_l tcopt
   in
   format_result raw_result

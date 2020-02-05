@@ -58,7 +58,7 @@ val get_shape_field_name_pos : Ast_defs.shape_field_name -> Pos.t
 
 val empty :
   ?mode:FileInfo.mode ->
-  Provider_context.t ->
+  TypecheckerOptions.t ->
   Relative_path.t ->
   droot:Typing_deps.Dep.dependent Typing_deps.Dep.variant option ->
   env

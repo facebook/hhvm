@@ -38,8 +38,8 @@ class visitor =
     (* Candidate list for each Acclass_get autocompletion *)
     val candidates : string list ref = ref []
 
-    method get_entries ctx tast =
-      self#go ctx tast;
+    method get_entries tast =
+      self#go tast;
       entries
 
     (* Helper functions to extract candidate list
@@ -183,9 +183,9 @@ let go_ctx ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
   let { Provider_utils.Compute_tast.tast; _ } =
     Provider_utils.compute_tast_quarantined ~ctx ~entry
   in
-  let serialized_tast = serialize_tast tast ctx in
+  let serialized_tast = serialize_tast tast ctx.Provider_context.tcopt in
   (* Visit the TAST and extract autocompleteion items for Acclass_get *)
-  let data = (new visitor)#get_entries ctx tast in
+  let data = (new visitor)#get_entries tast in
   let completions =
     List.map data ~f:(fun entry ->
         JSON_Object

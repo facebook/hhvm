@@ -149,20 +149,12 @@ let referenced_typeconsts env root ids =
     (root, ids)
     ~on_error:Errors.unify_error
 
-let empty ctx = Typing_env.empty ctx Relative_path.default ~droot:None
+let empty tcopt = Typing_env.empty tcopt Relative_path.default ~droot:None
 
 let restore_saved_env env saved_env =
   let module Env = Typing_env_types in
-  let ctx =
-    {
-      env.Env.decl_env.Decl_env.ctx with
-      Provider_context.tcopt = saved_env.Tast.tcopt;
-    }
-  in
-  let decl_env = { env.Env.decl_env with Decl_env.ctx } in
   {
     env with
-    Env.decl_env;
     Env.genv =
       {
         env.Env.genv with
@@ -192,34 +184,29 @@ let restore_fun_env env f = restore_saved_env env f.f_annotation
 
 let restore_pu_enum_env env pu = restore_saved_env env pu.pu_annotation
 
-let fun_env ctx f =
-  let ctx = { ctx with Provider_context.tcopt = f.f_annotation.tcopt } in
-  let env = EnvFromDef.fun_env ctx f in
+let fun_env f =
+  let env = EnvFromDef.fun_env f.f_annotation.tcopt f in
   restore_fun_env env f
 
-let class_env ctx c =
-  let ctx = { ctx with Provider_context.tcopt = c.c_annotation.tcopt } in
-  let env = EnvFromDef.class_env ctx c in
+let class_env c =
+  let env = EnvFromDef.class_env c.c_annotation.tcopt c in
   restore_saved_env env c.c_annotation
 
-let typedef_env ctx t =
-  let ctx = { ctx with Provider_context.tcopt = t.t_annotation.tcopt } in
-  let env = EnvFromDef.typedef_env ctx t in
+let typedef_env t =
+  let env = EnvFromDef.typedef_env t.t_annotation.tcopt t in
   restore_saved_env env t.t_annotation
 
-let gconst_env ctx cst =
-  let ctx = { ctx with Provider_context.tcopt = cst.cst_annotation.tcopt } in
-  let env = EnvFromDef.gconst_env ctx cst in
+let gconst_env cst =
+  let env = EnvFromDef.gconst_env cst.cst_annotation.tcopt cst in
   restore_saved_env env cst.cst_annotation
 
-let def_env ctx d =
+let def_env d =
   match d with
-  | Fun x -> fun_env ctx x
-  | Class x -> class_env ctx x
-  | Typedef x -> typedef_env ctx x
-  | Constant x -> gconst_env ctx x
-  | RecordDef _ -> empty (Provider_context.empty ~tcopt:GlobalOptions.default)
-  (* TODO T44306013 *)
+  | Fun x -> fun_env x
+  | Class x -> class_env x
+  | Typedef x -> typedef_env x
+  | Constant x -> gconst_env x
+  | RecordDef _ -> empty GlobalOptions.default (* TODO T44306013 *)
   (* The following nodes are included in the TAST, but are not typechecked.
    * However, we need to return an env here so for now create an empty env using
    * the default typechecker options.
@@ -229,7 +216,7 @@ let def_env ctx d =
   | NamespaceUse _
   | SetNamespaceEnv _
   | FileAttributes _ ->
-    empty (Provider_context.empty ~tcopt:GlobalOptions.default)
+    empty GlobalOptions.default
 
 let set_ppl_lambda env = { env with Typing_env_types.inside_ppl_class = false }
 

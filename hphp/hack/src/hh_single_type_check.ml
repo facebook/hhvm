@@ -650,10 +650,8 @@ let print_colored fn type_acc =
 let print_coverage type_acc =
   ClientCoverageMetric.go ~json:false (Some (Coverage_level_defs.Leaf type_acc))
 
-let print_global_inference_envs ctx ~verbosity gienvs =
-  let tco_global_inference =
-    TypecheckerOptions.global_inference ctx.Provider_context.tcopt
-  in
+let print_global_inference_envs tcopt ~verbosity gienvs =
+  let tco_global_inference = TypecheckerOptions.global_inference tcopt in
   if verbosity >= 2 && tco_global_inference then
     let should_log (pos, gienv) =
       let file_relevant =
@@ -667,16 +665,16 @@ let print_global_inference_envs ctx ~verbosity gienvs =
       in
       file_relevant && (not @@ List.is_empty @@ Inf.get_vars_g gienv)
     in
-    let env = Typing_env.empty ctx Relative_path.default ~droot:None in
+    let env = Typing_env.empty tcopt Relative_path.default ~droot:None in
 
     List.filter gienvs ~f:should_log
     |> List.iter ~f:(fun (pos, gienv) ->
            Typing_log.log_global_inference_env pos env gienv)
 
-let merge_global_inference_envs_opt ctx gienvs =
-  if TypecheckerOptions.global_inference ctx.Provider_context.tcopt then
+let merge_global_inference_envs_opt tcopt gienvs =
+  if TypecheckerOptions.global_inference tcopt then
     let open Typing_global_inference in
-    let env = Typing_env.empty ctx Relative_path.default None in
+    let env = Typing_env.empty tcopt Relative_path.default None in
     let state_errors = StateErrors.mk_empty () in
     let (env, state_errors) =
       StateConstraintGraph.merge_subgraphs (env, state_errors) gienvs
@@ -734,9 +732,9 @@ let solve_global_inference_env gienv =
   Typing_global_inference.StateSolvedGraph.from_constraint_graph gienv
 
 let global_inference_merge_and_solve
-    ctx ~verbosity ?(error_format = Errors.Raw) ?max_errors gienvs =
-  print_global_inference_envs ctx ~verbosity gienvs;
-  let gienv = merge_global_inference_envs_opt ctx gienvs in
+    opts ~verbosity ?(error_format = Errors.Raw) ?max_errors gienvs =
+  print_global_inference_envs opts ~verbosity gienvs;
+  let gienv = merge_global_inference_envs_opt opts gienvs in
   print_merged_global_inference_env ~verbosity gienv error_format max_errors;
   let gienv = Option.map gienv solve_global_inference_env in
   print_solved_global_inference_env ~verbosity gienv error_format max_errors;
@@ -759,7 +757,7 @@ let check_file ctx ~verbosity errors files_info error_format max_errors =
   in
   let _gienv =
     global_inference_merge_and_solve
-      ctx
+      ctx.Provider_context.tcopt
       ~verbosity:(verbosity + 1)
       gienvs
       ~error_format
@@ -1054,17 +1052,17 @@ let merge_global_inference_env_in_tast gienv tast =
 (**
  * Compute TASTs for some files, then expand all type variables.
  *)
-let compute_tasts_expand_types ctx ~verbosity files_info interesting_files =
+let compute_tasts_expand_types opts ~verbosity files_info interesting_files =
   let (errors, (tasts, gienvs)) =
-    compute_tasts ctx files_info interesting_files
+    compute_tasts opts files_info interesting_files
   in
   let tasts =
-    match global_inference_merge_and_solve ctx ~verbosity gienvs with
+    match global_inference_merge_and_solve opts ~verbosity gienvs with
     | None -> tasts
     | Some (gienv, _, _) ->
-      Relative_path.Map.map tasts (merge_global_inference_env_in_tast gienv ctx)
+      Relative_path.Map.map tasts (merge_global_inference_env_in_tast gienv)
   in
-  let tasts = Relative_path.Map.map tasts (Tast_expand.expand_program ctx) in
+  let tasts = Relative_path.Map.map tasts Tast_expand.expand_program in
   (errors, tasts)
 
 let print_tasts tasts tcopt =
@@ -1289,7 +1287,7 @@ let handle_mode
           ()
         else
           let (tast, _) = Typing_check_utils.type_file ctx fn fileinfo in
-          let result = Coverage_level.get_levels ctx tast fn in
+          let result = Coverage_level.get_levels tast fn in
           print_colored fn result)
   | Coverage ->
     Relative_path.Map.iter files_info (fun fn fileinfo ->
@@ -1297,7 +1295,7 @@ let handle_mode
           ()
         else
           let (tast, _) = Typing_check_utils.type_file ctx fn fileinfo in
-          let type_acc = ServerCoverageMetric.accumulate_types ctx tast fn in
+          let type_acc = ServerCoverageMetric.accumulate_types tast fn in
           print_coverage type_acc)
   | Cst_search ->
     let path = expect_single_file () in
@@ -1329,7 +1327,10 @@ let handle_mode
         match Relative_path.Map.find_opt files_info filename with
         | Some fileinfo ->
           let raw_result =
-            SymbolInfoService.helper ctx [] [(filename, fileinfo)]
+            SymbolInfoService.helper
+              ctx.Provider_context.tcopt
+              []
+              [(filename, fileinfo)]
           in
           let result = SymbolInfoService.format_result raw_result in
           let result_json = ClientSymbolInfo.to_json result in
@@ -1445,25 +1446,35 @@ let handle_mode
         Printf.printf "%s\n" (Nast.show_program nast))
   | Dump_tast ->
     let (errors, tasts) =
-      compute_tasts_expand_types ctx ~verbosity files_info files_contents
+      compute_tasts_expand_types
+        ctx.Provider_context.tcopt
+        ~verbosity
+        files_info
+        files_contents
     in
     print_errors_if_present (parse_errors @ Errors.get_error_list errors);
-    print_tasts tasts ctx
+    print_tasts tasts ctx.Provider_context.tcopt
   | Check_tast ->
     iter_over_files (fun filename ->
         let files_contents =
           Relative_path.Map.filter files_contents ~f:(fun k _v -> k = filename)
         in
         let (errors, tasts) =
-          compute_tasts_expand_types ctx ~verbosity files_info files_contents
+          compute_tasts_expand_types
+            ctx.Provider_context.tcopt
+            ~verbosity
+            files_info
+            files_contents
         in
-        print_tasts tasts ctx;
+        print_tasts tasts ctx.Provider_context.tcopt;
         if not @@ Errors.is_empty errors then (
           print_errors error_format errors max_errors;
           Printf.printf "Did not typecheck the TAST as there are typing errors.";
           exit 2
         ) else
-          let tast_check_errors = typecheck_tasts tasts ctx filename in
+          let tast_check_errors =
+            typecheck_tasts tasts ctx.Provider_context.tcopt filename
+          in
           print_error_list error_format tast_check_errors max_errors;
           if tast_check_errors <> [] then exit 2)
   | Dump_stripped_tast ->
@@ -1472,7 +1483,7 @@ let handle_mode
           Relative_path.Map.filter files_contents ~f:(fun k _v -> k = filename)
         in
         let (_, (tasts, _gienvs)) =
-          compute_tasts ctx files_info files_contents
+          compute_tasts ctx.Provider_context.tcopt files_info files_contents
         in
         let tast = Relative_path.Map.find tasts filename in
         let nast = Tast.to_nast tast in
@@ -1494,7 +1505,7 @@ let handle_mode
     let include_defs = true in
     let (ctx, entry) =
       Provider_utils.update_context
-        ~ctx:(Provider_utils.ctx_from_server_env env)
+        ~ctx:(Provider_context.empty ~tcopt:env.ServerEnv.tcopt)
         ~path:(Relative_path.create_detect_prefix filename)
         ~file_input:(ServerCommandTypes.FileContent content)
     in
@@ -1531,7 +1542,7 @@ let handle_mode
     let content = cat filename in
     let (ctx, entry) =
       Provider_utils.update_context
-        ~ctx:(Provider_utils.ctx_from_server_env env)
+        ~ctx:(Provider_context.empty ~tcopt:env.ServerEnv.tcopt)
         ~path:(Relative_path.create_detect_prefix filename)
         ~file_input:(ServerCommandTypes.FileContent content)
     in

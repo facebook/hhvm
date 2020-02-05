@@ -69,10 +69,9 @@ let helper ctx acc pos_list =
         |> Result.map ~f:(fun tast ->
                let env_and_ty =
                  match range_end with
-                 | None -> ServerInferType.type_at_pos ctx tast line char
+                 | None -> ServerInferType.type_at_pos tast line char
                  | Some (end_line, end_char) ->
                    ServerInferType.type_at_range
-                     ctx
                      tast
                      line
                      char
@@ -99,6 +98,7 @@ let go :
     ServerEnv.env ->
     string list =
  fun workers pos_list env ->
+  let { ServerEnv.tcopt; _ } = env in
   let pos_list =
     pos_list
     (* Sort, so that many queries on the same file will (generally) be
@@ -110,7 +110,7 @@ let go :
            let fn = Relative_path.create_detect_prefix fn in
            (fn, line, char, range_end))
   in
-  let ctx = Provider_utils.ctx_from_server_env env in
+  let ctx = Provider_context.empty ~tcopt in
   let results =
     if List.length pos_list < 10 then
       helper ctx [] pos_list

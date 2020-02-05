@@ -63,23 +63,26 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     let path = Relative_path.create_detect_prefix path in
     let (ctx, entry) =
       Provider_utils.update_context
-        ~ctx:(Provider_utils.ctx_from_server_env env)
+        ~ctx:(Provider_context.empty ~tcopt:env.ServerEnv.tcopt)
         ~path
         ~file_input
     in
     (env, ServerColorFile.go_quarantined ~ctx ~entry)
   | INFER_TYPE (file_input, line, column, dynamic_view) ->
-    let ctx =
-      Provider_utils.ctx_from_server_env env
-      |> Provider_context.map_tcopt ~f:(fun tcopt ->
-             { tcopt with GlobalOptions.tco_dynamic_view = dynamic_view })
+    let tcopt =
+      { env.ServerEnv.tcopt with GlobalOptions.tco_dynamic_view = dynamic_view }
     in
     let path =
       match file_input with
       | FileName fn -> Relative_path.create_detect_prefix fn
       | FileContent _ -> Relative_path.create_detect_prefix ""
     in
-    let (ctx, entry) = Provider_utils.update_context ~ctx ~path ~file_input in
+    let (ctx, entry) =
+      Provider_utils.update_context
+        ~ctx:(Provider_context.empty ~tcopt)
+        ~path
+        ~file_input
+    in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerInferType.go_ctx ~ctx ~entry ~line ~column)
@@ -94,14 +97,14 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     let relative_path = Relative_path.create_detect_prefix path in
     let (ctx, entry) =
       Provider_utils.update_context
-        ~ctx:(Provider_utils.ctx_from_server_env env)
+        ~ctx:(Provider_context.empty ~tcopt:env.ServerEnv.tcopt)
         ~path:relative_path
         ~file_input:(ServerCommandTypes.FileName path)
     in
     let result = ServerHover.go_quarantined ~ctx ~entry ~line ~column in
     (env, result)
   | DOCBLOCK_AT (filename, line, column, _, kind) ->
-    let ctx = Provider_utils.ctx_from_server_env env in
+    let ctx = Provider_context.empty ~tcopt:env.ServerEnv.tcopt in
     let entry =
       Provider_utils.get_entry_VOLATILE
         ~ctx
@@ -110,14 +113,14 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     let r = ServerDocblockAt.go_docblock_ctx ~ctx ~entry ~line ~column ~kind in
     (env, r)
   | DOCBLOCK_FOR_SYMBOL (symbol, kind) ->
-    let ctx = Provider_utils.ctx_from_server_env env in
+    let ctx = Provider_context.empty ~tcopt:env.ServerEnv.tcopt in
     let r = ServerDocblockAt.go_docblock_for_symbol ~env ~ctx ~symbol ~kind in
     (env, r)
   | IDE_SIGNATURE_HELP (path, line, column) ->
     let file_input = ServerCommandTypes.FileName path in
     let (ctx, entry) =
       Provider_utils.update_context
-        ~ctx:(Provider_utils.ctx_from_server_env env)
+        ~ctx:(Provider_context.empty ~tcopt:env.ServerEnv.tcopt)
         ~path:(Relative_path.create_detect_prefix path)
         ~file_input
     in
@@ -151,7 +154,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     (* feature not implemented here; it only works for LSP *)
     let (ctx, entry) =
       Provider_utils.update_context
-        ~ctx:(Provider_utils.ctx_from_server_env env)
+        ~ctx:(Provider_context.empty ~tcopt:env.ServerEnv.tcopt)
         ~path:(Relative_path.create_detect_prefix "")
         ~file_input:(ServerCommandTypes.FileContent content)
     in
@@ -185,7 +188,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
   | IDENTIFY_FUNCTION (filename, file_input, line, column) ->
     let (ctx, entry) =
       Provider_utils.update_context
-        ~ctx:(Provider_utils.ctx_from_server_env env)
+        ~ctx:(Provider_context.empty ~tcopt:env.ServerEnv.tcopt)
         ~path:(Relative_path.create_detect_prefix filename)
         ~file_input
     in
@@ -199,7 +202,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     in
     (env, result)
   | METHOD_JUMP (class_, filter, find_children) ->
-    let ctx = Provider_utils.ctx_from_server_env env in
+    let ctx = Provider_context.empty ~tcopt:env.tcopt in
     ( env,
       MethodJumps.get_inheritance
         ctx
@@ -209,10 +212,10 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         env.naming_table
         genv.workers )
   | METHOD_JUMP_BATCH (classes, filter) ->
-    let ctx = Provider_utils.ctx_from_server_env env in
+    let ctx = Provider_context.empty ~tcopt:env.tcopt in
     (env, ServerMethodJumpsBatch.go ctx genv.workers classes filter)
   | FIND_REFS find_refs_action ->
-    let ctx = Provider_utils.ctx_from_server_env env in
+    let ctx = Provider_context.empty ~tcopt:env.tcopt in
     Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
         let open Done_or_retry in
         let include_defs = false in
@@ -230,7 +233,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       in
       let (ctx, entry) =
         Provider_utils.update_context
-          ~ctx:(Provider_utils.ctx_from_server_env env)
+          ~ctx:(Provider_context.empty ~tcopt:env.ServerEnv.tcopt)
           ~path
           ~file_input
       in
@@ -248,7 +251,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       in
       let (ctx, entry) =
         Provider_utils.update_context
-          ~ctx:(Provider_utils.ctx_from_server_env env)
+          ~ctx:(Provider_context.empty ~tcopt:env.ServerEnv.tcopt)
           ~path
           ~file_input
       in
@@ -261,7 +264,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
   | IDE_HIGHLIGHT_REFS (path, file_input, line, column) ->
     let (ctx, entry) =
       Provider_utils.update_context
-        ~ctx:(Provider_utils.ctx_from_server_env env)
+        ~ctx:(Provider_context.empty ~tcopt:env.ServerEnv.tcopt)
         ~path:(Relative_path.create_detect_prefix path)
         ~file_input
     in
@@ -271,12 +274,12 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     in
     r
   | REFACTOR refactor_action ->
-    let ctx = Provider_utils.ctx_from_server_env env in
+    let ctx = Provider_context.empty ~tcopt:env.tcopt in
     Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
         ServerRefactor.go ctx refactor_action genv env)
   | IDE_REFACTOR
       { ServerCommandTypes.Ide_refactor_type.filename; line; char; new_name } ->
-    let ctx = Provider_utils.ctx_from_server_env env in
+    let ctx = Provider_context.empty ~tcopt:env.tcopt in
     Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
         let open Done_or_retry in
         match
@@ -291,11 +294,9 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     ) else
       (env, `Error remove_dead_fixme_warning)
   | REWRITE_LAMBDA_PARAMETERS files ->
-    let ctx = Provider_utils.ctx_from_server_env env in
-    (env, ServerRefactor.get_lambda_parameter_rewrite_patches ctx files)
+    (env, ServerRefactor.get_lambda_parameter_rewrite_patches env files)
   | REWRITE_TYPE_PARAMS_TYPE files ->
-    let ctx = Provider_utils.ctx_from_server_env env in
-    (env, ServerRefactor.get_type_params_type_rewrite_patches ctx files)
+    (env, ServerRefactor.get_type_params_type_rewrite_patches env files)
   | DUMP_SYMBOL_INFO file_list ->
     (env, SymbolInfoService.go genv.workers file_list env)
   | IN_MEMORY_DEP_TABLE_SIZE ->
@@ -318,13 +319,13 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     (env, ServerSearch.go query type_ lst)
   | COVERAGE_COUNTS path -> (env, ServerCoverageMetric.go path genv env)
   | LINT fnl ->
-    let ctx = Provider_utils.ctx_from_server_env env in
+    let ctx = Provider_context.empty ~tcopt:env.tcopt in
     (env, ServerLint.go genv ctx fnl)
   | LINT_STDIN { filename; contents } ->
-    let ctx = Provider_utils.ctx_from_server_env env in
+    let ctx = Provider_context.empty ~tcopt:env.tcopt in
     (env, ServerLint.go_stdin ctx ~filename ~contents)
   | LINT_ALL code ->
-    let ctx = Provider_utils.ctx_from_server_env env in
+    let ctx = Provider_context.empty ~tcopt:env.tcopt in
     (env, ServerLint.lint_all genv ctx code)
   | LINT_XCONTROLLER fnl -> (env, ServerLint.go_xcontroller genv env fnl)
   | CREATE_CHECKPOINT x -> (env, ServerCheckpoint.create_checkpoint x)
@@ -353,7 +354,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     in
     let (ctx, entry) =
       Provider_utils.update_context
-        ~ctx:(Provider_utils.ctx_from_server_env env)
+        ~ctx:(Provider_context.empty ~tcopt:env.ServerEnv.tcopt)
         ~path:(Relative_path.create_detect_prefix filename)
         ~file_input:(ServerCommandTypes.FileContent content)
     in
@@ -465,7 +466,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     in
     let (ctx, entry) =
       Provider_utils.update_context
-        ~ctx:(Provider_utils.ctx_from_server_env env)
+        ~ctx:(Provider_context.empty ~tcopt:env.ServerEnv.tcopt)
         ~path
         ~file_input
     in
@@ -474,7 +475,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     in
     (env, result)
   | EXTRACT_STANDALONE target ->
-    let ctx = Provider_utils.ctx_from_server_env env in
+    let ctx = Provider_context.empty ~tcopt:env.tcopt in
     (env, ServerExtractStandalone.go ctx target)
   | CONCATENATE_ALL paths -> (env, ServerConcatenateAll.go genv env paths)
   | GO_TO_DEFINITION (labelled_file, line, column) ->
@@ -483,7 +484,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     in
     let (ctx, entry) =
       Provider_utils.update_context
-        ~ctx:(Provider_utils.ctx_from_server_env env)
+        ~ctx:(Provider_context.empty ~tcopt:env.ServerEnv.tcopt)
         ~path
         ~file_input
     in
@@ -492,7 +493,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
   | BIGCODE filename ->
     let (ctx, entry) =
       Provider_utils.update_context
-        ~ctx:(Provider_utils.ctx_from_server_env env)
+        ~ctx:(Provider_context.empty ~tcopt:env.ServerEnv.tcopt)
         ~path:(Relative_path.create_detect_prefix filename)
         ~file_input:(ServerCommandTypes.FileName filename)
     in

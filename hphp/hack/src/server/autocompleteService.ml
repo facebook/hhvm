@@ -507,8 +507,8 @@ class local_types =
 
     val mutable after_cursor = false
 
-    method get_types ctx tast =
-      self#go ctx tast;
+    method get_types tast =
+      self#go tast;
       results
 
     method add id ty =
@@ -547,8 +547,8 @@ class local_types =
       self#add id ty
   end
 
-let compute_complete_local ctx tast =
-  (new local_types)#get_types ctx tast
+let compute_complete_local tast =
+  (new local_types)#get_types tast
   |> Local_id.Map.iter (fun x ty ->
          add_partial_result
            (Local_id.get_name x)
@@ -697,7 +697,7 @@ let go_ctx
     Provider_utils.compute_tast_quarantined ~ctx ~entry
   in
   reset ();
-  visitor#go ctx tast;
+  visitor#go tast;
   Errors.ignore_ (fun () ->
       let start_time = Unix.gettimeofday () in
       let max_results = 100 in
@@ -705,7 +705,7 @@ let go_ctx
       let tast_env =
         match !ac_env with
         | Some e -> e
-        | None -> Tast_env.empty ctx
+        | None -> Tast_env.empty ctx.Provider_context.tcopt
       in
       let completion_type = !argument_global_type in
       let ( = ) = Option.equal equal_autocomplete_type in
@@ -723,7 +723,7 @@ let go_ctx
           ~sienv
           ~tast_env;
 
-      if completion_type = Some Acprop then compute_complete_local ctx tast;
+      if completion_type = Some Acprop then compute_complete_local tast;
       let replace_pos =
         try get_replace_pos_exn ()
         with _ -> Pos.none |> Pos.to_absolute |> Ide_api_types.pos_to_range

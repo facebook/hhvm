@@ -104,19 +104,17 @@ let range_visitor startl startc endl endc =
         None
   end
 
-let type_at_pos
-    (ctx : Provider_context.t) (tast : Tast.program) (line : int) (char : int) :
+let type_at_pos (tast : Tast.program) (line : int) (char : int) :
     (Tast_env.env * Tast.ty) option =
-  (base_visitor line char)#go ctx tast >>| fun (_, env, ty) -> (env, ty)
+  (base_visitor line char)#go tast >>| fun (_, env, ty) -> (env, ty)
 
 let type_at_range
-    (ctx : Provider_context.t)
     (tast : Tast.program)
     (start_line : int)
     (start_char : int)
     (end_line : int)
     (end_char : int) : (Tast_env.env * Tast.ty) option =
-  (range_visitor start_line start_char end_line end_char)#go ctx tast
+  (range_visitor start_line start_char end_line end_char)#go tast
 
 let go_ctx
     ~(ctx : Provider_context.t)
@@ -126,6 +124,6 @@ let go_ctx
   let { Provider_utils.Compute_tast.tast; _ } =
     Provider_utils.compute_tast_quarantined ~ctx ~entry
   in
-  type_at_pos ctx tast line column >>| fun (env, ty) ->
+  type_at_pos tast line column >>| fun (env, ty) ->
   ( Tast_env.print_ty env ty,
     Tast_env.ty_to_json env ty |> Hh_json.json_to_string )

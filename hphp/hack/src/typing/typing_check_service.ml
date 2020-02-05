@@ -114,10 +114,11 @@ let type_fun (ctx : Provider_context.t) (fn : Relative_path.t) (x : string) :
         let fun_ = Naming.fun_ f in
         Nast_check.def ctx (Aast.Fun fun_);
         let def_opt =
-          Typing.fun_def ctx fun_
+          Typing.fun_def ctx.Provider_context.tcopt fun_
           |> Option.map ~f:(fun (f, global_tvenv) -> (Aast.Fun f, global_tvenv))
         in
-        Option.iter def_opt (fun (f, _) -> Tast_check.def ctx f);
+        Option.iter def_opt (fun (f, _) ->
+            Tast_check.def ctx.Provider_context.tcopt f);
         def_opt)
   | None -> None
 
@@ -129,11 +130,12 @@ let type_class (ctx : Provider_context.t) (fn : Relative_path.t) (x : string) :
         let class_ = Naming.class_ cls in
         Nast_check.def ctx (Aast.Class class_);
         let def_opt =
-          Typing.class_def ctx class_
+          Typing.class_def ctx.Provider_context.tcopt class_
           |> Option.map ~f:(fun (c, global_tvenv) ->
                  (Aast.Class c, global_tvenv))
         in
-        Option.iter def_opt (fun (f, _) -> Tast_check.def ctx f);
+        Option.iter def_opt (fun (f, _) ->
+            Tast_check.def ctx.Provider_context.tcopt f);
         def_opt)
   | None -> None
 
@@ -146,8 +148,10 @@ let type_record_def
         let rd = Naming.record_def rd in
         Nast_check.def ctx (Aast.RecordDef rd);
 
-        let def = Aast.RecordDef (Typing.record_def_def ctx rd) in
-        Tast_check.def ctx def;
+        let def =
+          Aast.RecordDef (Typing.record_def_def ctx.Provider_context.tcopt rd)
+        in
+        Tast_check.def ctx.Provider_context.tcopt def;
         Some def)
   | None -> None
 
@@ -158,10 +162,10 @@ let check_typedef (ctx : Provider_context.t) (fn : Relative_path.t) (x : string)
     handle_exn_as_error Pos.none (fun () ->
         let typedef = Naming.typedef t in
         Nast_check.def ctx (Aast.Typedef typedef);
-        let ret = Typing.typedef_def ctx typedef in
+        let ret = Typing.typedef_def ctx.Provider_context.tcopt typedef in
         Typing_variance.typedef ctx x;
         let def = Aast.Typedef ret in
-        Tast_check.def ctx def;
+        Tast_check.def ctx.Provider_context.tcopt def;
         Some def)
   | None -> None
 
@@ -173,8 +177,10 @@ let check_const (ctx : Provider_context.t) (fn : Relative_path.t) (x : string) :
     handle_exn_as_error cst.Aast.cst_span (fun () ->
         let cst = Naming.global_const cst in
         Nast_check.def ctx (Aast.Constant cst);
-        let def = Aast.Constant (Typing.gconst_def ctx cst) in
-        Tast_check.def ctx def;
+        let def =
+          Aast.Constant (Typing.gconst_def ctx.Provider_context.tcopt cst)
+        in
+        Tast_check.def ctx.Provider_context.tcopt def;
         Some def)
 
 let should_enable_deferring

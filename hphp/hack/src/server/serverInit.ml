@@ -16,7 +16,7 @@ include ServerInitTypes
 
 let run_search (genv : ServerEnv.genv) (env : ServerEnv.env) (t : float) :
     SearchUtils.si_env =
-  let ctx = Provider_utils.ctx_from_server_env env in
+  let ctx = Provider_context.empty ~tcopt:env.tcopt in
   let sienv = env.local_symbol_table in
   if
     SearchServiceRunner.should_run_completely

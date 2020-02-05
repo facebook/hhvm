@@ -122,6 +122,8 @@ let client_lsp_method_handled
     ~method_:_
     ~kind:_
     ~path_opt:_
+    ~result_count:_
+    ~result_extra_telemetry:_
     ~tracking_id:_
     ~start_queue_time:_
     ~start_hh_server_state:_

@@ -152,6 +152,13 @@ type state =
 
 type result_handler = lsp_result -> state -> state Lwt.t
 
+type result_telemetry = {
+  (* how many results did we send back to the user? *)
+  result_count: int;
+  (* other message-specific data *)
+  result_extra_telemetry: Telemetry.t option;
+}
+
 (* Note: we assume that we won't ever initialize more than once, since this
 promise can only be resolved once. *)
 let ( (initialize_params_promise : Lsp.Initialize.params Lwt.t),
@@ -3135,7 +3142,10 @@ let get_message_kind_and_method_for_logging (message : lsp_message) :
     ("Notification", Lsp_fmt.notification_name_to_string n)
 
 let log_response_if_necessary
-    (event : event) (unblocked_time : float) (env : env) : unit =
+    (env : env)
+    (event : event)
+    (result_telemetry_opt : result_telemetry option)
+    (unblocked_time : float) : unit =
   match event with
   | Client_message (metadata, message) ->
     let (kind, method_) = get_message_kind_and_method_for_logging message in
@@ -3145,11 +3155,19 @@ let log_response_if_necessary
       method_
       (unblocked_time -. metadata.timestamp)
       (t -. unblocked_time);
+    let (result_count, result_extra_telemetry) =
+      match result_telemetry_opt with
+      | None -> (None, None)
+      | Some { result_count; result_extra_telemetry } ->
+        (Some result_count, result_extra_telemetry)
+    in
     HackEventLogger.client_lsp_method_handled
       ~root:(get_root_opt ())
       ~method_
       ~kind
       ~path_opt:(get_filename_in_message_for_logging message)
+      ~result_count
+      ~result_extra_telemetry
       ~tracking_id:metadata.tracking_id
       ~start_queue_time:metadata.timestamp
       ~start_hh_server_state:
@@ -3376,9 +3394,9 @@ let handle_client_message
     ~(ide_service : ClientIdeService.t)
     ~(metadata : incoming_metadata)
     ~(message : lsp_message)
-    ~(ref_unblocked_time : float ref) : unit Lwt.t =
+    ~(ref_unblocked_time : float ref) : result_telemetry option Lwt.t =
   let open Main_env in
-  let%lwt () =
+  let%lwt result_telemetry_opt =
     (* make sure to wrap any exceptions below in the promise *)
     let tracking_id = metadata.tracking_id in
     let timestamp = metadata.timestamp in
@@ -3393,7 +3411,7 @@ let handle_client_message
       let (_, handler) = IdMap.find id !requests_outstanding in
       let%lwt new_state = handler response !state in
       state := new_state;
-      Lwt.return_unit
+      Lwt.return_none
     (* shutdown request *)
     | (_, RequestMessage (id, ShutdownRequest)) ->
       let%lwt new_state =
@@ -3401,11 +3419,11 @@ let handle_client_message
       in
       state := new_state;
       respond_jsonrpc ~powered_by:Language_server id ShutdownResult;
-      Lwt.return_unit
+      Lwt.return_none
     (* cancel notification *)
     | (_, NotificationMessage (CancelRequestNotification _)) ->
       (* For now, we'll ignore it. *)
-      Lwt.return_unit
+      Lwt.return_none
     (* exit notification *)
     | (_, NotificationMessage ExitNotification) ->
       if !state = Post_shutdown then
@@ -3442,7 +3460,7 @@ let handle_client_message
         Lsp_helpers.telemetry_log
           to_stdout
           ("Version in hhconfig=" ^ !hhconfig_version);
-      Lwt.return_unit
+      Lwt.return_some { result_count = 0; result_extra_telemetry = None }
     (* any request/notification if we haven't yet initialized *)
     | (Pre_init, _) ->
       raise (Error.ServerNotInitialized "Server not yet initialized")
@@ -3452,7 +3470,8 @@ let handle_client_message
     | (_, RequestMessage (id, RageRequestFB)) ->
       let%lwt result = do_rageFB !state ref_unblocked_time in
       respond_jsonrpc ~powered_by:Language_server id (RageResultFB result);
-      Lwt.return_unit
+      Lwt.return_some
+        { result_count = List.length result; result_extra_telemetry = None }
     | (_, NotificationMessage (DidChangeWatchedFilesNotification notification))
       when env.use_serverless_ide ->
       let open DidChangeWatchedFiles in
@@ -3460,7 +3479,7 @@ let handle_client_message
           let path = lsp_uri_to_path change.uri in
           let path = Path.make path in
           ClientIdeService.notify_file_changed ide_service ~tracking_id path);
-      Lwt.return_unit
+      Lwt.return_none
     (* Text document completion: "AutoComplete!" *)
     | (_, RequestMessage (id, CompletionRequest params))
       when env.use_serverless_ide ->
@@ -3474,7 +3493,11 @@ let handle_client_message
           params
       in
       respond_jsonrpc ~powered_by:Serverless_ide id (CompletionResult result);
-      Lwt.return_unit
+      Lwt.return_some
+        {
+          result_count = List.length result.Completion.items;
+          result_extra_telemetry = None;
+        }
     (* Resolve documentation for a symbol: "Autocomplete Docblock!" *)
     | (_, RequestMessage (id, CompletionItemResolveRequest params))
       when env.use_serverless_ide ->
@@ -3491,7 +3514,7 @@ let handle_client_message
         ~powered_by:Serverless_ide
         id
         (CompletionItemResolveResult result);
-      Lwt.return_unit
+      Lwt.return_some { result_count = 1; result_extra_telemetry = None }
     (* Document highlighting in serverless IDE *)
     | (_, RequestMessage (id, DocumentHighlightRequest params))
       when env.use_serverless_ide ->
@@ -3508,7 +3531,8 @@ let handle_client_message
         ~powered_by:Serverless_ide
         id
         (DocumentHighlightResult result);
-      Lwt.return_unit
+      Lwt.return_some
+        { result_count = List.length result; result_extra_telemetry = None }
     (* Type coverage in serverless IDE *)
     | (_, RequestMessage (id, TypeCoverageRequestFB params))
       when env.use_serverless_ide ->
@@ -3525,7 +3549,11 @@ let handle_client_message
         ~powered_by:Serverless_ide
         id
         (TypeCoverageResultFB result);
-      Lwt.return_unit
+      Lwt.return_some
+        {
+          result_count = List.length result.TypeCoverageFB.uncoveredRanges;
+          result_extra_telemetry = None;
+        }
     (* Hover docblocks in serverless IDE *)
     | (_, RequestMessage (id, HoverRequest params)) when env.use_serverless_ide
       ->
@@ -3539,7 +3567,12 @@ let handle_client_message
           params
       in
       respond_jsonrpc ~powered_by:Serverless_ide id (HoverResult result);
-      Lwt.return_unit
+      let result_count =
+        match result with
+        | None -> 0
+        | Some { Hover.contents; _ } -> List.length contents
+      in
+      Lwt.return_some { result_count; result_extra_telemetry = None }
     | (_, RequestMessage (id, DocumentSymbolRequest params))
       when env.use_serverless_ide ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
@@ -3555,7 +3588,8 @@ let handle_client_message
         ~powered_by:Serverless_ide
         id
         (DocumentSymbolResult result);
-      Lwt.return_unit
+      Lwt.return_some
+        { result_count = List.length result; result_extra_telemetry = None }
     | (_, RequestMessage (id, DefinitionRequest params))
       when env.use_serverless_ide ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
@@ -3568,7 +3602,8 @@ let handle_client_message
           params
       in
       respond_jsonrpc ~powered_by:Serverless_ide id (DefinitionResult result);
-      Lwt.return_unit
+      Lwt.return_some
+        { result_count = List.length result; result_extra_telemetry = None }
     | (_, RequestMessage (id, TypeDefinitionRequest params))
       when env.use_serverless_ide ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
@@ -3584,7 +3619,8 @@ let handle_client_message
         ~powered_by:Serverless_ide
         id
         (TypeDefinitionResult result);
-      Lwt.return_unit
+      Lwt.return_some
+        { result_count = List.length result; result_extra_telemetry = None }
     (* Resolve documentation for a symbol: "Autocomplete Docblock!" *)
     | (_, RequestMessage (id, SignatureHelpRequest params))
       when env.use_serverless_ide ->
@@ -3598,7 +3634,12 @@ let handle_client_message
           params
       in
       respond_jsonrpc ~powered_by:Serverless_ide id (SignatureHelpResult result);
-      Lwt.return_unit
+      let result_count =
+        match result with
+        | None -> 0
+        | Some { SignatureHelp.signatures; _ } -> List.length signatures
+      in
+      Lwt.return_some { result_count; result_extra_telemetry = None }
     (* textDocument/formatting *)
     | (_, RequestMessage (id, DocumentFormattingRequest params)) ->
       let result = do_documentFormatting editor_open_files params in
@@ -3606,7 +3647,8 @@ let handle_client_message
         ~powered_by:Language_server
         id
         (DocumentFormattingResult result);
-      Lwt.return_unit
+      Lwt.return_some
+        { result_count = List.length result; result_extra_telemetry = None }
     (* textDocument/rangeFormatting *)
     | (_, RequestMessage (id, DocumentRangeFormattingRequest params)) ->
       let result = do_documentRangeFormatting editor_open_files params in
@@ -3614,7 +3656,8 @@ let handle_client_message
         ~powered_by:Language_server
         id
         (DocumentRangeFormattingResult result);
-      Lwt.return_unit
+      Lwt.return_some
+        { result_count = List.length result; result_extra_telemetry = None }
     (* textDocument/onTypeFormatting *)
     | (_, RequestMessage (id, DocumentOnTypeFormattingRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
@@ -3623,13 +3666,14 @@ let handle_client_message
         ~powered_by:Language_server
         id
         (DocumentOnTypeFormattingResult result);
-      Lwt.return_unit
+      Lwt.return_some
+        { result_count = List.length result; result_extra_telemetry = None }
     (* any request/notification that we already handled in [track_open_files] *)
     | (In_init _, NotificationMessage (DidOpenNotification _))
     | (In_init _, NotificationMessage (DidChangeNotification _))
     | (In_init _, NotificationMessage (DidCloseNotification _))
     | (In_init _, NotificationMessage (DidSaveNotification _)) ->
-      Lwt.return_unit
+      Lwt.return_none
     (* any request/notification that we can't handle yet *)
     | (In_init _, _) ->
       (* we respond with Operation_cancelled so that clients don't produce *)
@@ -3638,19 +3682,25 @@ let handle_client_message
         (Error.RequestCancelled
            (Hh_server_initializing |> hh_server_state_to_string))
     | (Main_loop _menv, NotificationMessage InitializedNotification) ->
-      Lwt.return_unit
+      Lwt.return_none
     (* textDocument/hover request *)
     | (Main_loop menv, RequestMessage (id, HoverRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
       let%lwt result = do_hover menv.conn ref_unblocked_time params in
       respond_jsonrpc ~powered_by:Hh_server id (HoverResult result);
-      Lwt.return_unit
+      let result_count =
+        match result with
+        | None -> 0
+        | Some { Hover.contents; _ } -> List.length contents
+      in
+      Lwt.return_some { result_count; result_extra_telemetry = None }
     (* textDocument/typeDefinition request *)
     | (Main_loop menv, RequestMessage (id, TypeDefinitionRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
       let%lwt result = do_typeDefinition menv.conn ref_unblocked_time params in
       respond_jsonrpc ~powered_by:Hh_server id (TypeDefinitionResult result);
-      Lwt.return_unit
+      Lwt.return_some
+        { result_count = List.length result; result_extra_telemetry = None }
     (* textDocument/definition request *)
     | (Main_loop menv, RequestMessage (id, DefinitionRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
@@ -3658,7 +3708,8 @@ let handle_client_message
         do_definition menv.conn ref_unblocked_time editor_open_files params
       in
       respond_jsonrpc ~powered_by:Hh_server id (DefinitionResult result);
-      Lwt.return_unit
+      Lwt.return_some
+        { result_count = List.length result; result_extra_telemetry = None }
     (* textDocument/completion request *)
     | (Main_loop menv, RequestMessage (id, CompletionRequest params)) ->
       let do_completion =
@@ -3670,7 +3721,11 @@ let handle_client_message
       let%lwt () = cancel_if_stale client timestamp short_timeout in
       let%lwt result = do_completion menv.conn ref_unblocked_time params in
       respond_jsonrpc ~powered_by:Hh_server id (CompletionResult result);
-      Lwt.return_unit
+      Lwt.return_some
+        {
+          result_count = List.length result.Completion.items;
+          result_extra_telemetry = None;
+        }
     (* completionItem/resolve request *)
     | (Main_loop menv, RequestMessage (id, CompletionItemResolveRequest params))
       ->
@@ -3682,23 +3737,26 @@ let handle_client_message
         ~powered_by:Hh_server
         id
         (CompletionItemResolveResult result);
-      Lwt.return_unit
+      Lwt.return_some { result_count = 1; result_extra_telemetry = None }
     (* workspace/symbol request *)
     | (Main_loop menv, RequestMessage (id, WorkspaceSymbolRequest params)) ->
       let%lwt result = do_workspaceSymbol menv.conn ref_unblocked_time params in
       respond_jsonrpc ~powered_by:Hh_server id (WorkspaceSymbolResult result);
-      Lwt.return_unit
+      Lwt.return_some
+        { result_count = List.length result; result_extra_telemetry = None }
     (* textDocument/documentSymbol request *)
     | (Main_loop menv, RequestMessage (id, DocumentSymbolRequest params)) ->
       let%lwt result = do_documentSymbol menv.conn ref_unblocked_time params in
       respond_jsonrpc ~powered_by:Hh_server id (DocumentSymbolResult result);
-      Lwt.return_unit
+      Lwt.return_some
+        { result_count = List.length result; result_extra_telemetry = None }
     (* textDocument/references request *)
     | (Main_loop menv, RequestMessage (id, FindReferencesRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp long_timeout in
       let%lwt result = do_findReferences menv.conn ref_unblocked_time params in
       respond_jsonrpc ~powered_by:Hh_server id (FindReferencesResult result);
-      Lwt.return_unit
+      Lwt.return_some
+        { result_count = List.length result; result_extra_telemetry = None }
     (* textDocument/implementation request *)
     | (Main_loop menv, RequestMessage (id, ImplementationRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp long_timeout in
@@ -3706,12 +3764,26 @@ let handle_client_message
         do_goToImplementation menv.conn ref_unblocked_time params
       in
       respond_jsonrpc ~powered_by:Hh_server id (ImplementationResult result);
-      Lwt.return_unit
+      Lwt.return_some
+        { result_count = List.length result; result_extra_telemetry = None }
     (* textDocument/rename *)
     | (Main_loop menv, RequestMessage (id, RenameRequest params)) ->
       let%lwt result = do_documentRename menv.conn ref_unblocked_time params in
       respond_jsonrpc ~powered_by:Hh_server id (RenameResult result);
-      Lwt.return_unit
+      let result_count =
+        SMap.fold
+          (fun _file changes tot -> tot + List.length changes)
+          result.WorkspaceEdit.changes
+          0
+      in
+      let result_extra_telemetry =
+        Telemetry.create ()
+        |> Telemetry.int_
+             ~key:"files"
+             ~value:(SMap.cardinal result.WorkspaceEdit.changes)
+      in
+      Lwt.return_some
+        { result_count; result_extra_telemetry = Some result_extra_telemetry }
     (* textDocument/documentHighlight *)
     | (Main_loop menv, RequestMessage (id, DocumentHighlightRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
@@ -3719,33 +3791,49 @@ let handle_client_message
         do_documentHighlight menv.conn ref_unblocked_time params
       in
       respond_jsonrpc ~powered_by:Hh_server id (DocumentHighlightResult result);
-      Lwt.return_unit
+      Lwt.return_some
+        { result_count = List.length result; result_extra_telemetry = None }
     (* textDocument/typeCoverage *)
     | (Main_loop menv, RequestMessage (id, TypeCoverageRequestFB params)) ->
       let%lwt result = do_typeCoverageFB menv.conn ref_unblocked_time params in
       respond_jsonrpc ~powered_by:Hh_server id (TypeCoverageResultFB result);
-      Lwt.return_unit
+      Lwt.return_some
+        {
+          result_count = List.length result.TypeCoverageFB.uncoveredRanges;
+          result_extra_telemetry = None;
+        }
     (* textDocument/toggleTypeCoverage *)
     | ( Main_loop menv,
         NotificationMessage (ToggleTypeCoverageNotificationFB params) ) ->
-      do_toggleTypeCoverageFB menv.conn ref_unblocked_time params
+      let%lwt () =
+        do_toggleTypeCoverageFB menv.conn ref_unblocked_time params
+      in
+      Lwt.return_none
     (* textDocument/didOpen notification *)
     | (Main_loop menv, NotificationMessage (DidOpenNotification params)) ->
-      do_didOpen menv.conn ref_unblocked_time params
+      let%lwt () = do_didOpen menv.conn ref_unblocked_time params in
+      Lwt.return_none
     (* textDocument/didClose notification *)
     | (Main_loop menv, NotificationMessage (DidCloseNotification params)) ->
-      do_didClose menv.conn ref_unblocked_time params
+      let%lwt () = do_didClose menv.conn ref_unblocked_time params in
+      Lwt.return_none
     (* textDocument/didChange notification *)
     | (Main_loop menv, NotificationMessage (DidChangeNotification params)) ->
-      do_didChange menv.conn ref_unblocked_time params
+      let%lwt () = do_didChange menv.conn ref_unblocked_time params in
+      Lwt.return_none
     (* textDocument/didSave notification *)
     | (Main_loop _menv, NotificationMessage (DidSaveNotification _params)) ->
-      Lwt.return_unit
+      Lwt.return_none
     (* textDocument/signatureHelp notification *)
     | (Main_loop menv, RequestMessage (id, SignatureHelpRequest params)) ->
       let%lwt result = do_signatureHelp menv.conn ref_unblocked_time params in
       respond_jsonrpc ~powered_by:Hh_server id (SignatureHelpResult result);
-      Lwt.return_unit
+      let result_count =
+        match result with
+        | None -> 0
+        | Some result -> List.length result.SignatureHelp.signatures
+      in
+      Lwt.return_some { result_count; result_extra_telemetry = None }
     | (_, RequestMessage (id, HackTestShutdownServerlessRequestFB))
       when env.use_serverless_ide ->
       let%lwt () =
@@ -3758,21 +3846,21 @@ let handle_client_message
         ~powered_by:Serverless_ide
         id
         HackTestShutdownServerlessResultFB;
-      Lwt.return_unit
+      Lwt.return_none
     | (_, RequestMessage (id, HackTestStopServerRequestFB)) ->
       let root_folder =
         Path.make (Relative_path.path_of_prefix Relative_path.Root)
       in
       ClientStop.kill_server root_folder env.from;
       respond_jsonrpc ~powered_by:Serverless_ide id HackTestStopServerResultFB;
-      Lwt.return_unit
+      Lwt.return_none
     | (_, RequestMessage (id, HackTestStartServerRequestFB)) ->
       let root_folder =
         Path.make (Relative_path.path_of_prefix Relative_path.Root)
       in
       start_server root_folder;
       respond_jsonrpc ~powered_by:Serverless_ide id HackTestStartServerResultFB;
-      Lwt.return_unit
+      Lwt.return_none
     (* catch-all for client reqs/notifications we haven't yet implemented *)
     | (Main_loop _menv, message) ->
       let method_ = Lsp_fmt.message_name_to_string message in
@@ -3792,10 +3880,11 @@ let handle_client_message
           (Error.RequestCancelled
              (lenv.p.new_hh_server_state |> hh_server_state_to_string)))
   in
-  Lwt.return_unit
+  Lwt.return result_telemetry_opt
 
 let handle_server_message
-    ~(env : env) ~(state : state ref) ~(message : server_message) : unit Lwt.t =
+    ~(env : env) ~(state : state ref) ~(message : server_message) :
+    result_telemetry option Lwt.t =
   let open Main_env in
   let%lwt () =
     match (!state, message) with
@@ -3859,9 +3948,9 @@ let handle_server_message
     | (_, { push = ServerCommandTypes.NONFATAL_EXCEPTION e; _ }) ->
       raise (Server_nonfatal_exception e)
   in
-  Lwt.return_unit
+  Lwt.return_none
 
-let handle_server_hello ~(state : state ref) : unit Lwt.t =
+let handle_server_hello ~(state : state ref) : result_telemetry option Lwt.t =
   let%lwt () =
     match !state with
     (* server completes initialization *)
@@ -3876,10 +3965,11 @@ let handle_server_hello ~(state : state ref) : unit Lwt.t =
       let stack = "" in
       raise (Server_fatal_connection_exception { Marshal_tools.message; stack })
   in
-  Lwt.return_unit
+  Lwt.return_none
 
 let handle_client_ide_notification
-    ~(notification : ClientIdeMessage.notification) : unit Lwt.t =
+    ~(notification : ClientIdeMessage.notification) :
+    result_telemetry option Lwt.t =
   let%lwt () =
     match notification with
     | ClientIdeMessage.Initializing
@@ -3892,13 +3982,13 @@ let handle_client_ide_notification
         "[client-ide] Done processing file changes";
       Lwt.return_unit
   in
-  Lwt.return_unit
+  Lwt.return_none
 
 let handle_tick
     ~(env : env)
     ~(state : state ref)
     ~(ide_service : ClientIdeService.t)
-    ~(ref_unblocked_time : float ref) : unit Lwt.t =
+    ~(ref_unblocked_time : float ref) : result_telemetry option Lwt.t =
   let%lwt () =
     match !state with
     (* idle tick while waiting for server to complete initialization *)
@@ -3940,7 +4030,7 @@ let handle_tick
       Lwt.async EventLoggerLwt.flush;
       Lwt.return_unit
   in
-  Lwt.return_unit
+  Lwt.return_none
 
 let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
   Printexc.record_backtrace true;
@@ -4001,7 +4091,7 @@ let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
           Lwt.return_unit
       in
       (* this is the main handler for each message*)
-      let%lwt () =
+      let%lwt result_telemetry_opt =
         match event with
         | Client_message (metadata, message) ->
           handle_client_message
@@ -4022,7 +4112,11 @@ let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
       (* for LSP requests and notifications, we keep a log of what+when we responded.
       INVARIANT: every LSP request gets either a response logged here,
       or an error logged by one of the handlers below. *)
-      log_response_if_necessary event !ref_unblocked_time env;
+      log_response_if_necessary
+        env
+        event
+        result_telemetry_opt
+        !ref_unblocked_time;
       Lwt.return_unit
     with
     | Server_fatal_connection_exception { Marshal_tools.stack; message } ->

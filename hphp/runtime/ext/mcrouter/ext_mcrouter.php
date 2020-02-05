@@ -59,16 +59,16 @@ class MCRouter {
    * @return - Instance of MCRouter
    */
   public static function createSimple(ConstVector<string> $servers): MCRouter {
-    $options = array(
-      'config_str' => json_encode(array(
-        'pools' => array(
-          'P' => array(
+    $options = darray[
+      'config_str' => json_encode(darray[
+        'pools' => darray[
+          'P' => darray[
             'servers' => $servers,
-          ),
-        ),
+          ],
+        ],
         'route' => 'PoolRoute|P',
-      )),
-    );
+      ]),
+    ];
 
     return new MCRouter($options, implode(',', $servers));
   }

@@ -6,7 +6,7 @@
  * classes.
  */
 function spl_classes(): array {
-  return array (
+  return darray[
     AppendIterator::class => AppendIterator::class,
     ArrayIterator::class => ArrayIterator::class,
     BadFunctionCallException::class => BadFunctionCallException::class,
@@ -62,7 +62,7 @@ function spl_classes(): array {
     SplTempFileObject::class => SplTempFileObject::class,
     UnderflowException::class => UnderflowException::class,
     UnexpectedValueException::class => UnexpectedValueException::class,
-  );
+  ];
 }
 
 /** This function returns a unique identifier for the object. This id can be
@@ -169,7 +169,7 @@ function iterator_to_array(mixed $obj, bool $use_keys = true): array {
     trigger_error("Argument must implement interface Traversable", E_RECOVERABLE_ERROR);
     return 0;
   }
-  $ret = array();
+  $ret = darray[];
   if ($use_keys) {
     foreach ($obj as $k => $v) {
       $ret[$k] = $v;

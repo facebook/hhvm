@@ -337,7 +337,7 @@ class ReflectionParameter implements Reflector {
       return null;
     }
     $ltype = strtolower($this->info['type']);
-    $nonClassTypehints = array(
+    $nonClassTypehints = darray[
       'hh\\bool' => 1,
       'hh\\int' => 1,
       'hh\\float' => 1,
@@ -357,7 +357,7 @@ class ReflectionParameter implements Reflector {
       'hh\\keyset' => 1,
       'array' => 1,
       'callable' => 1,
-    );
+    ];
     if (isset($nonClassTypehints[$ltype])) {
       return null;
     }
@@ -1174,7 +1174,7 @@ class ReflectionExtension implements Reflector {
    */
   <<__Rx, __MaybeMutable>>
   public function getClassNames() {
-    $ret = array();
+    $ret = varray[];
     foreach ($this->info['classes'] as $cls) {
       $ret[] = $cls->getName();
     }

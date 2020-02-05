@@ -26,7 +26,7 @@ class finfo {
   }
 
   public function __sleep() {
-    return array('options', 'magic_file');
+    return varray['options', 'magic_file'];
   }
 
   public function __wakeup() {

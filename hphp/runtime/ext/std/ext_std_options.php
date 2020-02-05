@@ -460,14 +460,14 @@ namespace __SystemLib {
         $this->body->appendChild($this->element('h2', darray[], 'Version'));
       }
 
-      $data = array(
+      $data = darray[
         'Version' => \HHVM_VERSION,
         'Version ID' => \HHVM_VERSION_ID,
         'Debug' => \HHVM_DEBUG,
         'Compiler ID' => \HHVM_COMPILER_ID,
         'Repo Schema' => \HHVM_REPO_SCHEMA,
         'PHP Version' => \phpversion(),
-        'uname' => \php_uname());
+        'uname' => \php_uname()];
 
       $this->appendChildren($this->body, $this->table('Version', $data));
     }

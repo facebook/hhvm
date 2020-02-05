@@ -46,18 +46,18 @@ class Reflection {
    */
   <<__Rx>>
   public static function getModifierNames($modifiers) {
-    $ret = array();
+    $ret = varray[];
 
     $abstract = ReflectionMethod::IS_ABSTRACT |
                 ReflectionClass::IS_EXPLICIT_ABSTRACT;
     $final = ReflectionMethod::IS_FINAL | ReflectionClass::IS_FINAL;
     $implicit_public = 4096;
 
-    $map = array(
+    $map = darray[
       $abstract => 'abstract',
       $final => 'final',
       $implicit_public => 'public'
-    );
+    ];
 
     $ppp_mask = ReflectionMethod::IS_PUBLIC |
                 ReflectionMethod::IS_PRIVATE |

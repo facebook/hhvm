@@ -62,6 +62,40 @@ function autoload_is_native(): bool;
 function autoload_set_paths(mixed $map, string $root): bool;
 
 /**
+ * Get the path which uniquely defines the given symbol.
+ *
+ * Returns an absolute canonical path with all symlinks dereferenced.
+ *
+ * Throws InvalidOperationException if native autoloading is disabled.
+ */
+<<__Native>>
+function autoload_type_to_path(string $type): ?string;
+<<__Native>>
+function autoload_function_to_path(string $function): ?string;
+<<__Native>>
+function autoload_constant_to_path(string $constant): ?string;
+<<__Native>>
+function autoload_type_alias_to_path(string $type_alias): ?string;
+
+/**
+ * Get the types defined in the given path.
+ *
+ * The path may be relative to the repo root or absolute. But this function
+ * will not dereference symlinks for you, so providing a path with symlinks
+ * may cause this function to return an empty vec when you expected results.
+ *
+ * Throws InvalidOperationException if native autoloading is disabled.
+ */
+<<__Native>>
+function autoload_path_to_types(string $path): vec<classname<mixed>>;
+<<__Native>>
+function autoload_path_to_functions(string $path): vec<string>;
+<<__Native>>
+function autoload_path_to_constants(string $path): vec<string>;
+<<__Native>>
+function autoload_path_to_type_aliases(string $path): vec<string>;
+
+/**
   * Returns whether the (php) file could be included (eg if its been compiled
   * into the binary). This is useful when you don't have a filesystem
   * (RepoAuthoritative mode) but still want to know if including a file will

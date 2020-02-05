@@ -1,0 +1,5 @@
+Fatal error: Uncaught exception 'InvalidOperationException' with message 'Only available if using native autoloader' in %s/hphp/test/slow/autoload/autoload_path_to_symbols.php:13
+Stack trace:
+#0 %s/hphp/test/slow/autoload/autoload_path_to_symbols.php(13): HH\autoload_path_to_types()
+#1 (): main()
+#2 {main}

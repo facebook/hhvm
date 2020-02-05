@@ -91,6 +91,30 @@ folly::Optional<String> UserAutoloadMap::getTypeAliasFile(
   return getFileFromMap(m_typeAliasFile, typeAliasName);
 }
 
+Array UserAutoloadMap::getFileTypes(const String& path) {
+  SystemLib::throwInvalidOperationExceptionObject(
+    "User Autoload Map does not support getFileTypes"
+  );
+}
+
+Array UserAutoloadMap::getFileFunctions(const String& path) {
+  SystemLib::throwInvalidOperationExceptionObject(
+    "User Autoload Map does not support getFileFunctions"
+  );
+}
+
+Array UserAutoloadMap::getFileConstants(const String& path) {
+  SystemLib::throwInvalidOperationExceptionObject(
+    "User Autoload Map does not support getFileConstants"
+  );
+}
+
+Array UserAutoloadMap::getFileTypeAliases(const String& path) {
+  SystemLib::throwInvalidOperationExceptionObject(
+    "User Autoload Map does not support getFileTypeAliases"
+  );
+}
+
 AutoloadMap::Result UserAutoloadMap::handleFailure(
   KindOf kind, const String& className, const Variant& err) const {
   if (m_failFunc.isNull()) {

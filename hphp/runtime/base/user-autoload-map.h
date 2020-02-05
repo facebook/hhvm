@@ -83,6 +83,11 @@ struct UserAutoloadMap : AutoloadMap {
   virtual folly::Optional<String> getTypeAliasFile(
       const String& typeAliasName) override;
 
+  virtual Array getFileTypes(const String& path) override;
+  virtual Array getFileFunctions(const String& path) override;
+  virtual Array getFileConstants(const String& path) override;
+  virtual Array getFileTypeAliases(const String& path) override;
+
   virtual bool canHandleFailure() const override {
     return !m_failFunc.isNull();
   }

@@ -88,6 +88,21 @@ struct AutoloadMap {
     not_reached();
   }
 
+  Array getSymbols(KindOf kind,
+                   const String& path) {
+    switch (kind) {
+      case AutoloadMap::KindOf::Type:
+        return getFileTypes(path);
+      case AutoloadMap::KindOf::Function:
+        return getFileFunctions(path);
+      case AutoloadMap::KindOf::Constant:
+        return getFileConstants(path);
+      case AutoloadMap::KindOf::TypeAlias:
+        return getFileTypeAliases(path);
+    }
+    not_reached();
+  }
+
   /**
    * Map symbols to files
    */
@@ -99,6 +114,14 @@ struct AutoloadMap {
       const String& constantName) = 0;
   virtual folly::Optional<String> getTypeAliasFile(
       const String& typeAliasName) = 0;
+
+  /**
+   * Map path to symbols
+   */
+  virtual Array getFileTypes(const String& path) = 0;
+  virtual Array getFileFunctions(const String& path) = 0;
+  virtual Array getFileConstants(const String& path) = 0;
+  virtual Array getFileTypeAliases(const String& path) = 0;
 
   virtual bool canHandleFailure() const = 0;
   virtual Result handleFailure(KindOf kind, const String& className,

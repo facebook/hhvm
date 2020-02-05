@@ -143,6 +143,12 @@ public:
     return m_map;
   }
 
+  folly::Optional<String> getFile(const String& name,
+                                  AutoloadMap::KindOf kind,
+                                  bool toLower);
+
+  Array getSymbols(const String& path, AutoloadMap::KindOf kind);
+
 private:
   /**
    * This method may return Success or Failure.

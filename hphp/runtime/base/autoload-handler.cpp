@@ -245,6 +245,22 @@ const StaticString
   s_file("file"),
   s_line("line");
 
+folly::Optional<String> AutoloadHandler::getFile(const String& clsName,
+                                                 AutoloadMap::KindOf kind,
+                                                 bool toLower) {
+  assertx(m_map);
+  // Always normalize name before autoloading
+  const String& name = normalizeNS(clsName);
+  String canonicalName = toLower ? HHVM_FN(strtolower)(name) : name;
+  return m_map->getFile(kind, canonicalName);
+}
+
+Array AutoloadHandler::getSymbols(const String& path,
+                                  AutoloadMap::KindOf kind) {
+  assertx(m_map);
+  return m_map->getSymbols(kind, path);
+}
+
 template <class T>
 AutoloadMap::Result
 AutoloadHandler::loadFromMapImpl(const String& clsName,
@@ -252,11 +268,7 @@ AutoloadHandler::loadFromMapImpl(const String& clsName,
                                  bool toLower,
                                  const T &checkExists,
                                  Variant& err) {
-  assertx(m_map);
-  // Always normalize name before autoloading
-  const String& name = normalizeNS(clsName);
-  String canonicalName = toLower ? HHVM_FN(strtolower)(name) : name;
-  auto file = m_map->getFile(kind, canonicalName);
+  auto file = getFile(clsName, kind, toLower);
   if (!file) {
     return AutoloadMap::Result::Failure;
   }

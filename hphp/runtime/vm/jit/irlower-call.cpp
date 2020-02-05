@@ -390,13 +390,6 @@ void cgNativeImpl(IRLS& env, const IRInstruction* inst) {
 
   auto const func = inst->marker().func();
 
-  auto const arr_prov = RuntimeOption::EvalArrayProvenance &&
-                        !func->isProvenanceSkipFrame();
-
-  auto const next = arr_prov
-    ? Vlabel(v.makeBlock())
-    : label(env, inst->next());
-
   if (FixupMap::eagerRecord(func)) {
     emitEagerSyncPoint(v, func->getEntry(), rvmtl(), fp, sp);
   }
@@ -404,26 +397,10 @@ void cgNativeImpl(IRLS& env, const IRInstruction* inst) {
     CallSpec::direct(func->arFuncPtr(), nullptr),
     v.makeVcallArgs({{fp}}),
     v.makeTuple({}),
-    {next, label(env, inst->taken())},
+    {label(env, inst->next()),
+     label(env, inst->taken())},
     makeFixup(inst->marker(), SyncOptions::Sync)
   };
-  if (arr_prov) {
-    v = next;
-    auto const data_loc = fp[kArRetOff] + TVOFF(m_data);
-    auto const type_loc = fp[kArRetOff] + TVOFF(m_type);
-
-    auto const in_data = v.makeReg();
-    auto const in_type = v.makeReg();
-    v << load{data_loc, in_data};
-    v << load{type_loc, in_type};
-
-    auto const out_data = v.makeReg();
-    auto const out_type = v.makeReg();
-
-    v << store{out_data, data_loc};
-    v << store{out_type, type_loc};
-    v << jmp{label(env, inst->next())};
-  }
 }
 
 static void traceCallback(ActRec* fp, TypedValue* sp, Offset bcOff) {

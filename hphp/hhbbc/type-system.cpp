@@ -4730,10 +4730,11 @@ Type loosen_provenance(Type t) {
 }
 
 Type loosen_arrays(Type a) {
-  if (a.couldBe(BArr))    a |= TArr;
-  if (a.couldBe(BVec))    a |= TVec;
-  if (a.couldBe(BDict))   a |= TDict;
-  if (a.couldBe(BKeyset)) a |= TKeyset;
+  if (a.couldBe(BArr))     a |= TArr;
+  if (a.couldBe(BVec))     a |= TVec;
+  if (a.couldBe(BDict))    a |= TDict;
+  if (a.couldBe(BKeyset))  a |= TKeyset;
+  if (a.couldBe(BClsMeth)) a |= RO::EvalHackArrDVArrs ? TVecLike : TPArrLike;
   return a;
 }
 

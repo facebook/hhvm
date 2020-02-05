@@ -17,4 +17,5 @@ string(1) "C"
 string(5) "func1"
 bool(true)
 int(1)
-Cannot use [] with clsmeth for writing
+
+Notice: Implicit clsmeth to varray conversion in %s/global_func/class_meth/dv_arr/mutate.php on line 18

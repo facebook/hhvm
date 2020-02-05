@@ -161,7 +161,6 @@ inline ObjectData* instanceFromTv(tv_rval tv) {
 [[noreturn]] void throw_cannot_use_newelem_for_lval_read_keyset();
 [[noreturn]] void throw_cannot_use_newelem_for_lval_read_clsmeth();
 [[noreturn]] void throw_cannot_use_newelem_for_lval_read_record();
-[[noreturn]] void throw_cannot_write_for_clsmeth();
 [[noreturn]] void throw_cannot_unset_for_clsmeth();
 
 [[noreturn]] void unknownBaseType(DataType);
@@ -207,6 +206,12 @@ ALWAYS_INLINE void checkPromotion(tv_rval base, const MInstrPropState* pState) {
   } else if (UNLIKELY(stringPromote) && tvIsString(base)) {
     raise_hac_empty_string_promote_notice("Promoting empty string to array");
   }
+}
+
+ALWAYS_INLINE void promoteClsMeth(tv_lval base) {
+  raiseClsMethToVecWarningHelper();
+  val(base).parr = clsMethToVecHelper(val(base).pclsmeth).detach();
+  type(base) = val(base).parr->toDataType();
 }
 
 }
@@ -973,7 +978,12 @@ tv_lval ElemD(TypedValue& tvRef, tv_lval base,
     case KindOfObject:
       return ElemDObject<mode, keyType>(tvRef, base, key);
     case KindOfClsMeth:
-      throw_cannot_write_for_clsmeth();
+      detail::promoteClsMeth(base);
+      if (RO::EvalHackArrDVArrs) {
+        return ElemDVec<keyType, copyProv>(base, key);
+      } else {
+        return ElemDArray<mode, keyType>(base, key);
+      }
     case KindOfRecord:
       return ElemDRecord<keyType>(base, key);
   }
@@ -1776,7 +1786,13 @@ StringData* SetElemSlow(tv_lval base,
       SetElemObject<keyType>(base, key, value);
       return nullptr;
     case KindOfClsMeth:
-      throw_cannot_write_for_clsmeth();
+      detail::promoteClsMeth(base);
+      if (RO::EvalHackArrDVArrs) {
+        SetElemVec<setResult, keyType, copyProv>(base, key, value);
+      } else {
+        SetElemArray<setResult, keyType>(base, key, value);
+      }
+      return nullptr;
     case KindOfRecord:
       SetElemRecord<keyType>(base, key, value);
       return nullptr;
@@ -1985,7 +2001,12 @@ inline void SetNewElem(tv_lval base,
     case KindOfObject:
       return SetNewElemObject(base, value);
     case KindOfClsMeth:
-      throw_cannot_write_for_clsmeth();
+      detail::promoteClsMeth(base);
+      if (RO::EvalHackArrDVArrs) {
+        return SetNewElemVec<copyProv>(base, value);
+      } else {
+        return SetNewElemArray(base, value);
+      }
     case KindOfRecord:
       raise_error(Strings::OP_NOT_SUPPORTED_RECORD);
   }
@@ -2026,6 +2047,29 @@ inline tv_lval SetOpElem(TypedValue& tvRef,
                          const MInstrPropState* pState) {
   assertx(tvIsPlausible(*base));
 
+  auto const handleArray = [&] {
+    if (UNLIKELY(!asCArrRef(base).exists(tvAsCVarRef(&key)))) {
+      throwMissingElementException("Set-op");
+    }
+    auto result =
+      ElemDArray<MOpMode::None, KeyType::Any>(base, key);
+    setopBody(result, op, rhs);
+    return result;
+  };
+
+  auto const handleVec = [&] {
+    auto result = [&]{
+      if (RuntimeOption::EvalArrayProvenance) {
+        return ElemDVec<KeyType::Any, true>(base, key);
+      } else {
+        return ElemDVec<KeyType::Any, false>(base, key);
+      }
+    }();
+    result = tvAssertPlausible(result);
+    setopBody(result, op, rhs);
+    return result;
+  };
+
   switch (type(base)) {
     case KindOfUninit:
     case KindOfNull:
@@ -2053,18 +2097,8 @@ inline tv_lval SetOpElem(TypedValue& tvRef,
       return SetOpElemEmptyish(op, base, key, rhs, pState);
 
     case KindOfPersistentVec:
-    case KindOfVec: {
-      auto result = [&]{
-        if (RuntimeOption::EvalArrayProvenance) {
-          return ElemDVec<KeyType::Any, true>(base, key);
-        } else {
-          return ElemDVec<KeyType::Any, false>(base, key);
-        }
-      }();
-      result = tvAssertPlausible(result);
-      setopBody(result, op, rhs);
-      return result;
-    }
+    case KindOfVec:
+      return handleVec();
 
     case KindOfPersistentDict:
     case KindOfDict: {
@@ -2089,15 +2123,8 @@ inline tv_lval SetOpElem(TypedValue& tvRef,
     case KindOfPersistentVArray:
     case KindOfVArray:
     case KindOfPersistentArray:
-    case KindOfArray: {
-      if (UNLIKELY(!asCArrRef(base).exists(tvAsCVarRef(&key)))) {
-        throwMissingElementException("Set-op");
-      }
-      auto result =
-        ElemDArray<MOpMode::None, KeyType::Any>(base, key);
-      setopBody(result, op, rhs);
-      return result;
-    }
+    case KindOfArray:
+      return handleArray();
 
     case KindOfObject: {
       if (LIKELY(val(base).pobj->isCollection())) {
@@ -2114,7 +2141,12 @@ inline tv_lval SetOpElem(TypedValue& tvRef,
     }
 
     case KindOfClsMeth:
-      throw_cannot_write_for_clsmeth();
+      detail::promoteClsMeth(base);
+      if (RO::EvalHackArrDVArrs) {
+        return handleVec();
+      } else {
+        return handleArray();
+      }
 
     case KindOfRecord: {
       auto result = ElemDRecord<KeyType::Any>(base, key);
@@ -2269,6 +2301,26 @@ inline TypedValue IncDecElem(
 ) {
   assertx(tvIsPlausible(*base));
 
+  auto const handleArray = [&] {
+    if (UNLIKELY(!asCArrRef(base).exists(tvAsCVarRef(&key)))) {
+      throwMissingElementException("Inc/dec");
+    }
+    auto result =
+      ElemDArray<MOpMode::None, KeyType::Any>(base, key);
+    return IncDecBody(op, result);
+  };
+
+  auto const handleVec = [&] {
+    auto result = [&]{
+      if (RuntimeOption::EvalArrayProvenance) {
+        return ElemDVec<KeyType::Any, true>(base, key);
+      } else {
+        return ElemDVec<KeyType::Any, false>(base, key);
+      }
+    }();
+    return IncDecBody(op, tvAssertPlausible(result));
+  };
+
   switch (type(base)) {
     case KindOfUninit:
     case KindOfNull:
@@ -2296,16 +2348,8 @@ inline TypedValue IncDecElem(
       return IncDecElemEmptyish(op, base, key, pState);
 
     case KindOfPersistentVec:
-    case KindOfVec: {
-      auto result = [&]{
-        if (RuntimeOption::EvalArrayProvenance) {
-          return ElemDVec<KeyType::Any, true>(base, key);
-        } else {
-          return ElemDVec<KeyType::Any, false>(base, key);
-        }
-      }();
-      return IncDecBody(op, tvAssertPlausible(result));
-    }
+    case KindOfVec:
+      return handleVec();
 
     case KindOfPersistentDict:
     case KindOfDict: {
@@ -2328,14 +2372,8 @@ inline TypedValue IncDecElem(
     case KindOfPersistentVArray:
     case KindOfVArray:
     case KindOfPersistentArray:
-    case KindOfArray: {
-      if (UNLIKELY(!asCArrRef(base).exists(tvAsCVarRef(&key)))) {
-        throwMissingElementException("Inc/dec");
-      }
-      auto result =
-        ElemDArray<MOpMode::None, KeyType::Any>(base, key);
-      return IncDecBody(op, result);
-    }
+    case KindOfArray:
+      return handleArray();
 
     case KindOfObject: {
       tv_lval result;
@@ -2355,7 +2393,12 @@ inline TypedValue IncDecElem(
     }
 
     case KindOfClsMeth:
-      throw_cannot_write_for_clsmeth();
+      detail::promoteClsMeth(base);
+      if (RO::EvalHackArrDVArrs) {
+        return handleVec();
+      } else {
+        return handleArray();
+      }
 
     case KindOfRecord: {
       auto result = ElemDRecord<KeyType::Any>(base, key);

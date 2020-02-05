@@ -41,7 +41,7 @@ void getBaseType(Opcode rawOp, bool predict,
 
   // Deal with possible promotion to stdClass or array
   if ((op == SetElem || op == SetProp) &&
-      baseType.maybe(TNull | TBool | TStr)) {
+      baseType.maybe(TNull | TBool | TStr | TClsMeth)) {
     auto newBase = op == SetProp ? TObj : TArr;
 
     if (predict) {

@@ -1,0 +1,692 @@
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+array(2) {
+  [0]=>
+  string(5) "Apple"
+  [1]=>
+  string(4) "list"
+}
+array(1) {
+  [0]=>
+  array(2) {
+    [0]=>
+    NULL
+    [1]=>
+    array(3) {
+      [0]=>
+      int(1)
+      [1]=>
+      int(2)
+      [2]=>
+      int(3)
+    }
+  }
+}
+array(1) {
+  [0]=>
+  array(2) {
+    [0]=>
+    int(12)
+    [1]=>
+    float(1.2)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  array(2) {
+    [0]=>
+    object(stdClass) (0) {
+    }
+    [1]=>
+    bool(false)
+  }
+}
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+array(2) {
+  [0]=>
+  string(5) "Apple"
+  [1]=>
+  string(4) "list"
+}
+array(1) {
+  [0]=>
+  array(2) {
+    [0]=>
+    NULL
+    [1]=>
+    array(3) {
+      [0]=>
+      int(1)
+      [1]=>
+      int(2)
+      [2]=>
+      int(3)
+    }
+  }
+}
+array(1) {
+  [0]=>
+  array(2) {
+    [0]=>
+    int(12)
+    [1]=>
+    float(1.2)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  array(2) {
+    [0]=>
+    object(stdClass) (0) {
+    }
+    [1]=>
+    bool(false)
+  }
+}
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+array(2) {
+  [0]=>
+  string(5) "Apple"
+  [1]=>
+  string(4) "list"
+}
+array(1) {
+  [0]=>
+  array(2) {
+    [0]=>
+    NULL
+    [1]=>
+    array(3) {
+      [0]=>
+      int(1)
+      [1]=>
+      int(2)
+      [2]=>
+      int(3)
+    }
+  }
+}
+array(1) {
+  [0]=>
+  array(2) {
+    [0]=>
+    int(12)
+    [1]=>
+    float(1.2)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  array(2) {
+    [0]=>
+    object(stdClass) (0) {
+    }
+    [1]=>
+    bool(false)
+  }
+}
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+array(2) {
+  [0]=>
+  string(5) "Apple"
+  [1]=>
+  string(4) "list"
+}
+array(1) {
+  [0]=>
+  array(2) {
+    [0]=>
+    NULL
+    [1]=>
+    array(3) {
+      [0]=>
+      int(1)
+      [1]=>
+      int(2)
+      [2]=>
+      int(3)
+    }
+  }
+}
+array(1) {
+  [0]=>
+  array(2) {
+    [0]=>
+    int(12)
+    [1]=>
+    float(1.2)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  array(2) {
+    [0]=>
+    object(stdClass) (0) {
+    }
+    [1]=>
+    bool(false)
+  }
+}
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+array(3) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+  [2]=>
+  string(3) "XYZ"
+}
+array(1) {
+  [0]=>
+  array(3) {
+    [0]=>
+    string(3) "Foo"
+    [1]=>
+    string(3) "bar"
+    [2]=>
+    array(0) {
+    }
+  }
+}
+array(1) {
+  [0]=>
+  array(3) {
+    [0]=>
+    string(3) "Foo"
+    [1]=>
+    string(3) "bar"
+    [2]=>
+    int(99)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  array(3) {
+    [0]=>
+    string(3) "Foo"
+    [1]=>
+    string(3) "bar"
+    [2]=>
+    bool(false)
+  }
+}
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+array(3) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+  [2]=>
+  string(3) "XYZ"
+}
+array(1) {
+  [0]=>
+  array(3) {
+    [0]=>
+    string(3) "Foo"
+    [1]=>
+    string(3) "bar"
+    [2]=>
+    array(0) {
+    }
+  }
+}
+array(1) {
+  [0]=>
+  array(3) {
+    [0]=>
+    string(3) "Foo"
+    [1]=>
+    string(3) "bar"
+    [2]=>
+    int(99)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  array(3) {
+    [0]=>
+    string(3) "Foo"
+    [1]=>
+    string(3) "bar"
+    [2]=>
+    bool(false)
+  }
+}
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+array(3) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+  [2]=>
+  string(3) "XYZ"
+}
+array(1) {
+  [0]=>
+  array(3) {
+    [0]=>
+    string(3) "Foo"
+    [1]=>
+    string(3) "bar"
+    [2]=>
+    array(0) {
+    }
+  }
+}
+array(1) {
+  [0]=>
+  array(3) {
+    [0]=>
+    string(3) "Foo"
+    [1]=>
+    string(3) "bar"
+    [2]=>
+    int(99)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  array(3) {
+    [0]=>
+    string(3) "Foo"
+    [1]=>
+    string(3) "bar"
+    [2]=>
+    bool(false)
+  }
+}
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+array(3) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+  [2]=>
+  string(3) "XYZ"
+}
+array(1) {
+  [0]=>
+  array(3) {
+    [0]=>
+    string(3) "Foo"
+    [1]=>
+    string(3) "bar"
+    [2]=>
+    array(0) {
+    }
+  }
+}
+array(1) {
+  [0]=>
+  array(3) {
+    [0]=>
+    string(3) "Foo"
+    [1]=>
+    string(3) "bar"
+    [2]=>
+    int(99)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  array(3) {
+    [0]=>
+    string(3) "Foo"
+    [1]=>
+    string(3) "bar"
+    [2]=>
+    bool(false)
+  }
+}
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+array(2) {
+  [0]=>
+  string(8) "Foo-ext1"
+  [1]=>
+  string(7) "bar-xyz"
+}
+array(1) {
+  [0]=>
+  array(2) {
+    [0]=>
+    NULL
+    [1]=>
+    string(3) "=>-"
+  }
+}
+array(1) {
+  [0]=>
+  array(2) {
+    [0]=>
+    int(12)
+    [1]=>
+    float(1.2)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  array(2) {
+    [0]=>
+    int(0)
+    [1]=>
+    int(0)
+  }
+}
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+array(2) {
+  [0]=>
+  string(8) "Foo-ext1"
+  [1]=>
+  string(7) "bar-xyz"
+}
+array(1) {
+  [0]=>
+  array(2) {
+    [0]=>
+    NULL
+    [1]=>
+    string(3) "=>-"
+  }
+}
+array(1) {
+  [0]=>
+  array(2) {
+    [0]=>
+    int(12)
+    [1]=>
+    float(1.2)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  array(2) {
+    [0]=>
+    int(0)
+    [1]=>
+    int(0)
+  }
+}
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+array(2) {
+  [0]=>
+  string(8) "Foo-ext1"
+  [1]=>
+  string(7) "bar-xyz"
+}
+array(1) {
+  [0]=>
+  array(2) {
+    [0]=>
+    NULL
+    [1]=>
+    string(3) "=>-"
+  }
+}
+array(1) {
+  [0]=>
+  array(2) {
+    [0]=>
+    int(12)
+    [1]=>
+    float(1.2)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  array(2) {
+    [0]=>
+    int(0)
+    [1]=>
+    int(0)
+  }
+}
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+array(2) {
+  [0]=>
+  string(8) "Foo-ext1"
+  [1]=>
+  string(7) "bar-xyz"
+}
+array(1) {
+  [0]=>
+  array(2) {
+    [0]=>
+    NULL
+    [1]=>
+    string(3) "=>-"
+  }
+}
+array(1) {
+  [0]=>
+  array(2) {
+    [0]=>
+    int(12)
+    [1]=>
+    float(1.2)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  array(2) {
+    [0]=>
+    int(0)
+    [1]=>
+    int(0)
+  }
+}
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Increment on string 'Foo'
+[NOTICE] Increment on string 'bar'
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Decrement on string 'bar'
+[NOTICE] Increment on string 'Foo'
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Decrement on string 'Foo'
+[NOTICE] Decrement on string 'bar'
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Increment on string 'bar'
+[NOTICE] Decrement on string 'Foo'
+array(2) {
+  [0]=>
+  string(3) "Fop"
+  [1]=>
+  string(3) "bas"
+}
+array(1) {
+  [0]=>
+  array(2) {
+    [0]=>
+    string(3) "Fop"
+    [1]=>
+    string(3) "bar"
+  }
+}
+array(1) {
+  [0]=>
+  array(2) {
+    [0]=>
+    string(3) "Foo"
+    [1]=>
+    string(3) "bar"
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  array(2) {
+    [0]=>
+    string(3) "Foo"
+    [1]=>
+    string(3) "bas"
+  }
+}
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Increment on string 'Foo'
+[NOTICE] Increment on string 'bar'
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Decrement on string 'bar'
+[NOTICE] Increment on string 'Foo'
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Decrement on string 'Foo'
+[NOTICE] Decrement on string 'bar'
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Increment on string 'bar'
+[NOTICE] Decrement on string 'Foo'
+array(2) {
+  [0]=>
+  string(3) "Fop"
+  [1]=>
+  string(3) "bas"
+}
+array(1) {
+  [0]=>
+  array(2) {
+    [0]=>
+    string(3) "Fop"
+    [1]=>
+    string(3) "bar"
+  }
+}
+array(1) {
+  [0]=>
+  array(2) {
+    [0]=>
+    string(3) "Foo"
+    [1]=>
+    string(3) "bar"
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  array(2) {
+    [0]=>
+    string(3) "Foo"
+    [1]=>
+    string(3) "bas"
+  }
+}
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Increment on string 'Foo'
+[NOTICE] Increment on string 'bar'
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Decrement on string 'bar'
+[NOTICE] Increment on string 'Foo'
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Decrement on string 'Foo'
+[NOTICE] Decrement on string 'bar'
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Increment on string 'bar'
+[NOTICE] Decrement on string 'Foo'
+array(2) {
+  [0]=>
+  string(3) "Fop"
+  [1]=>
+  string(3) "bas"
+}
+array(1) {
+  [0]=>
+  array(2) {
+    [0]=>
+    string(3) "Fop"
+    [1]=>
+    string(3) "bar"
+  }
+}
+array(1) {
+  [0]=>
+  array(2) {
+    [0]=>
+    string(3) "Foo"
+    [1]=>
+    string(3) "bar"
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  array(2) {
+    [0]=>
+    string(3) "Foo"
+    [1]=>
+    string(3) "bas"
+  }
+}
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Increment on string 'Foo'
+[NOTICE] Increment on string 'bar'
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Decrement on string 'bar'
+[NOTICE] Increment on string 'Foo'
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Decrement on string 'Foo'
+[NOTICE] Decrement on string 'bar'
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Increment on string 'bar'
+[NOTICE] Decrement on string 'Foo'
+array(2) {
+  [0]=>
+  string(3) "Fop"
+  [1]=>
+  string(3) "bas"
+}
+array(1) {
+  [0]=>
+  array(2) {
+    [0]=>
+    string(3) "Fop"
+    [1]=>
+    string(3) "bar"
+  }
+}
+array(1) {
+  [0]=>
+  array(2) {
+    [0]=>
+    string(3) "Foo"
+    [1]=>
+    string(3) "bar"
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  array(2) {
+    [0]=>
+    string(3) "Foo"
+    [1]=>
+    string(3) "bas"
+  }
+}

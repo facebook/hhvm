@@ -45,6 +45,60 @@ impl Default for InstrSeq {
     }
 }
 
+#[derive(Debug)]
+pub struct InstrIter<'i> {
+    instr_seq: &'i InstrSeq,
+    index: usize,
+    concat_cur: Option<Box<InstrIter<'i>>>,
+}
+
+impl<'i> InstrIter<'i> {
+    pub fn new(instr_seq: &'i InstrSeq) -> Self {
+        Self {
+            instr_seq,
+            index: 0,
+            concat_cur: None,
+        }
+    }
+}
+
+impl<'i> Iterator for InstrIter<'i> {
+    type Item = &'i Instruct;
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.instr_seq {
+            InstrSeq::Empty => None,
+            InstrSeq::One(_) if self.index > 0 => None,
+            InstrSeq::One(i) => {
+                self.index += 1;
+                Some(i)
+            }
+            InstrSeq::List(ii) if self.index >= ii.len() => None,
+            InstrSeq::List(ii) => {
+                let r = ii.get(self.index);
+                self.index += 1;
+                r
+            }
+            InstrSeq::Concat(ii) if self.index >= ii.len() => None,
+            InstrSeq::Concat(ii) => match &mut self.concat_cur {
+                Some(cur) => {
+                    let r = cur.as_mut().next();
+                    if r.is_some() {
+                        r
+                    } else {
+                        self.index += 1;
+                        std::mem::replace(&mut self.concat_cur, None);
+                        self.next()
+                    }
+                }
+                None => {
+                    std::mem::replace(&mut self.concat_cur, Some(Box::new(ii[self.index].iter())));
+                    self.next()
+                }
+            },
+        }
+    }
+}
+
 impl InstrSeq {
     pub fn gather(instrs: Vec<Self>) -> Self {
         let nonempty_instrs = instrs
@@ -59,6 +113,10 @@ impl InstrSeq {
             [x] => x.clone(),
             xs => Self::Concat(xs.to_vec()),
         }
+    }
+
+    pub fn iter(&self) -> InstrIter {
+        InstrIter::new(self)
     }
 
     pub fn make_empty() -> Self {
@@ -1142,5 +1200,47 @@ impl InstrSeq {
         F: FnMut(Instruct) -> Instruct,
     {
         self.filter_map(&mut |x| Some(f(x.clone())))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use pretty_assertions::assert_eq;
+
+    #[test]
+    fn iter() {
+        let mk_i = || Instruct::IComment("".into());
+        let empty = || InstrSeq::Empty;
+        let one = || InstrSeq::make_instr(mk_i());
+        let list0 = || InstrSeq::make_instrs(vec![]);
+        let list1 = || InstrSeq::make_instrs(vec![mk_i()]);
+        let list2 = || InstrSeq::make_instrs(vec![mk_i(), mk_i()]);
+        let concat0 = || InstrSeq::Concat(vec![]);
+
+        assert_eq!(empty().iter().count(), 0);
+        assert_eq!(one().iter().count(), 1);
+        assert_eq!(list0().iter().count(), 0);
+        assert_eq!(list1().iter().count(), 1);
+        assert_eq!(list2().iter().count(), 2);
+        assert_eq!(concat0().iter().count(), 0);
+
+        let concat = InstrSeq::Concat(vec![empty()]);
+        assert_eq!(concat.iter().count(), 0);
+
+        let concat = InstrSeq::Concat(vec![empty(), one()]);
+        assert_eq!(concat.iter().count(), 1);
+
+        let concat = InstrSeq::Concat(vec![one(), empty()]);
+        assert_eq!(concat.iter().count(), 1);
+
+        let concat = InstrSeq::Concat(vec![one(), list1()]);
+        assert_eq!(concat.iter().count(), 2);
+
+        let concat = InstrSeq::Concat(vec![list2(), list1()]);
+        assert_eq!(concat.iter().count(), 3);
+
+        let concat = InstrSeq::Concat(vec![concat0(), list2(), list1()]);
+        assert_eq!(concat.iter().count(), 3);
     }
 }

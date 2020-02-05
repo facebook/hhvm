@@ -12,5 +12,5 @@ path = "../../local.rs"
 
 [dependencies]
 naming_special_names_rust = { path = "../../../naming" }
-lazy_static = "1.4"
+lazy_static = "1.0"
 # @end of Signature

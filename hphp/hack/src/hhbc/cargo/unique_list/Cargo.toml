@@ -11,5 +11,5 @@ include = ["../../unique_list.rs"]
 path = "../../unique_list.rs"
 
 [dependencies]
-indexmap = "1.3"
+indexmap = { version = "1.3", features = ["serde-1", "rayon"] }
 # @end of Signature

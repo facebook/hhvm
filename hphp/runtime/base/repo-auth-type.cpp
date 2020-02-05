@@ -301,15 +301,11 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
     return true;
 
   case T::OptVArrLike:
+  case T::OptVArr:
     if (initNull) return true;
     // fallthrough
   case T::VArrLike:
-    if (isClsMethType(tv.m_type)) return true;
-
-    if (false) {
-      case T::OptVArr:
-        if (initNull) return true;
-    }
+    if (ty.tag() != T::OptVArr && isClsMethType(tv.m_type)) return true;
     // fallthrough
   case T::VArr:
     assertx(!RuntimeOption::EvalHackArrDVArrs);
@@ -356,15 +352,11 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
     return true;
 
   case T::OptVecLike:
+  case T::OptVec:
     if (initNull) return true;
     // fallthrough
   case T::VecLike:
-    if (isClsMethType(tv.m_type)) return true;
-
-    if (false) {
-      case T::OptVec:
-        if (initNull) return true;
-    }
+    if (ty.tag() != T::OptVec && isClsMethType(tv.m_type)) return true;
     // fallthrough
   case T::Vec:
     if (!isVecType(tv.m_type)) return false;

@@ -43,7 +43,7 @@ function f(
   $x = ($cond ? $nullableInt : $nonnull);
   hh_show($x);
 
-  $x = ($cond ? [] : $nonnull);
+  $x = ($cond ? array() : $nonnull);
   hh_show($x);
 
   $x = ($cond ? tuple(1, 2) : $nonnull);

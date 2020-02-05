@@ -94,17 +94,13 @@ let handle_special_calls env call =
       ( ct,
         ((_, Id (_, cn)) as id),
         targs,
-        [(p1, String cl); (p2, String meth)],
+        [(p1, String cl); meth],
         unpacked_element )
-    when cn = SN.AutoimportedFunctions.meth_caller
-         || cn = SN.AutoimportedFunctions.class_meth ->
-    let cl =
-      if not @@ in_codegen env then
-        Utils.add_ns cl
-      else
-        cl
-    in
-    Call (ct, id, targs, [(p1, String cl); (p2, String meth)], unpacked_element)
+    when ( cn = SN.AutoimportedFunctions.meth_caller
+         || cn = SN.AutoimportedFunctions.class_meth )
+         && (not @@ in_codegen env) ->
+    let cl = Utils.add_ns cl in
+    Call (ct, id, targs, [(p1, String cl); meth], unpacked_element)
   | _ -> call
 
 class ['a, 'b, 'c, 'd] generic_elaborator =
@@ -213,6 +209,7 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       match stmt with
       | Foreach (e, ae, b) ->
         let e = self#on_expr env e in
+        let ae = self#on_as_expr env ae in
         let b = self#on_block env b in
         Foreach (e, ae, b)
       | For (e1, e2, e3, b) ->

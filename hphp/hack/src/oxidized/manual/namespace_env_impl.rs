@@ -6,13 +6,15 @@
 use crate::gen::namespace_env::Env;
 use crate::s_map::SMap;
 
+use hh_autoimport_rust as hh_autoimport;
+
 impl Env {
     pub fn empty(auto_ns_map: Vec<(String, String)>, is_codegen: bool) -> Self {
         Env {
-            ns_uses: SMap::new(),
-            class_uses: SMap::new(),
-            fun_uses: SMap::new(),
-            const_uses: SMap::new(),
+            ns_uses: hh_autoimport::NAMESPACES_MAP.clone(),
+            class_uses: hh_autoimport::TYPES_MAP.clone(),
+            fun_uses: hh_autoimport::FUNCS_MAP.clone(),
+            const_uses: hh_autoimport::CONSTS_MAP.clone(),
             record_def_uses: SMap::new(),
             name: None,
             auto_ns_map,

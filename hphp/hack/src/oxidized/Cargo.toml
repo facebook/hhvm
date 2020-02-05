@@ -11,6 +11,7 @@ include = ["**/*.rs"]
 path = "lib.rs"
 
 [dependencies]
+hh_autoimport_rust = { path = "../parser/cargo/hh_autoimport" }
 ocamlrep = { path = "../ocamlrep" }
 ocamlrep_derive = { path = "../ocamlrep_derive" }
 ocaml = "0.8"

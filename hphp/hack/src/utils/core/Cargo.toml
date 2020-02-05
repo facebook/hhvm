@@ -9,4 +9,7 @@ include = ["utils.rs"]
 
 [lib]
 path = "utils.rs"
+
+[dev-dependencies]
+pretty_assertions = "0.6"
 # @end of Signature

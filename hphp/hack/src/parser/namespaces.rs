@@ -17,13 +17,13 @@ pub enum ElaborateKind {
 fn elaborate_into_ns(ns_name: &Option<&str>, id: &str) -> String {
     match ns_name {
         None => {
-            let mut s = String::with_capacity(2 + id.len());
+            let mut s = String::with_capacity(1 + id.len());
             s.push_str("\\");
             s.push_str(id);
             s
         }
         Some(ns) => {
-            let mut s = String::with_capacity(4 + ns.len() + id.len());
+            let mut s = String::with_capacity(2 + ns.len() + id.len());
             s.push_str("\\");
             s.push_str(ns);
             s.push_str("\\");

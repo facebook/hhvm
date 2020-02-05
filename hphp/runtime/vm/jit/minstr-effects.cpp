@@ -41,7 +41,7 @@ void getBaseType(Opcode rawOp, bool predict,
 
   // Deal with possible promotion to stdClass or array
   if ((op == SetElem || op == SetProp) &&
-      baseType.maybe(TNull | TBool | TStr | TClsMeth)) {
+      baseType.maybe(TNull | TBool | TStr)) {
     auto newBase = op == SetProp ? TObj : TArr;
 
     if (predict) {
@@ -70,7 +70,7 @@ void getBaseType(Opcode rawOp, bool predict,
   }
 
   if ((op == SetElem || op == SetRange || op == UnsetElem) &&
-      baseType.maybe(TArrLike | TStr | TRecord)) {
+      baseType.maybe(TArrLike | TStr | TRecord | TClsMeth)) {
     /* Modifying an array or string element, even when COW doesn't kick in,
      * produces a new SSATmp for the base. StaticArr/StaticStr may be promoted
      * to CountedArr/CountedStr. */
@@ -89,6 +89,9 @@ void getBaseType(Opcode rawOp, bool predict,
     if (baseType.maybe(TDict)) baseType |= TCountedDict;
     if (baseType.maybe(TKeyset)) baseType |= TCountedKeyset;
     if (baseType.maybe(TStr)) baseType |= TCountedStr;
+    if (baseType.maybe(TClsMeth)) {
+      baseType |= RO::EvalHackArrDVArrs ? TCountedVec : TCountedArr;
+    }
   }
 }
 

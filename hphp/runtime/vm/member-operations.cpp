@@ -184,11 +184,6 @@ void throw_cannot_use_newelem_for_lval_read_record() {
   );
 }
 
-void throw_cannot_unset_for_clsmeth() {
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Cannot use unset with clsmeth");
-}
-
 void throw_inout_undefined_index(TypedValue tv) {
   if (tv.m_type == KindOfInt64) {
     throwArrayIndexException(tv.m_data.num, true);

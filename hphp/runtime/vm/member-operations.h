@@ -1223,7 +1223,12 @@ tv_lval ElemU(TypedValue& tvRef, tv_lval base, key_type<keyType> key) {
       raise_error(Strings::OP_NOT_SUPPORTED_STRING);
       return nullptr;
     case KindOfClsMeth:
-      throw_cannot_unset_for_clsmeth();
+      detail::promoteClsMeth(base);
+      if (RO::EvalHackArrDVArrs) {
+        return ElemUVec<keyType>(base, key);
+      } else {
+        return ElemUArray<keyType>(base, key);
+      }
     case KindOfPersistentVec:
     case KindOfVec:
       return ElemUVec<keyType>(base, key);
@@ -2717,7 +2722,13 @@ void UnsetElemSlow(tv_lval base, key_type<keyType> key) {
     }
 
     case KindOfClsMeth:
-      throw_cannot_unset_for_clsmeth();
+      detail::promoteClsMeth(base);
+      if (RO::EvalHackArrDVArrs) {
+        UnsetElemVec<keyType>(base, key);
+      } else {
+        UnsetElemArray<keyType>(base, key);
+      }
+      return;
 
     case KindOfRecord:
       raise_error("Cannot unset a record field");

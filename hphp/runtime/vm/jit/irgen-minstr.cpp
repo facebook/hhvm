@@ -1546,7 +1546,7 @@ SSATmp* elemImpl(IRGS& env, MOpMode mode, SSATmp* key) {
       return ptrToUninit(env);
     }
 
-    if (!baseType.maybe(TArrLike | TObj)) {
+    if (!baseType.maybe(TClsMeth | TArrLike | TObj)) {
       return ptrToUninit(env);
     }
   }

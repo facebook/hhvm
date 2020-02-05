@@ -1,0 +1,93 @@
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+array(0) {
+}
+array(1) {
+  [0]=>
+  array(0) {
+  }
+}
+array(1) {
+  [0]=>
+  array(0) {
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  array(0) {
+  }
+}
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+array(0) {
+}
+array(1) {
+  [0]=>
+  array(0) {
+  }
+}
+array(1) {
+  [0]=>
+  array(0) {
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  array(0) {
+  }
+}
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+array(0) {
+}
+array(1) {
+  [0]=>
+  array(0) {
+  }
+}
+array(1) {
+  [0]=>
+  array(0) {
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  array(0) {
+  }
+}
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+[NOTICE] Implicit clsmeth to varray conversion
+array(0) {
+}
+array(1) {
+  [0]=>
+  array(0) {
+  }
+}
+array(1) {
+  [0]=>
+  array(0) {
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  array(0) {
+  }
+}
+[NOTICE] Implicit clsmeth to varray conversion
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+
+Fatal error: Cannot unset string offsets in %s/elem-unset-notice.php on line 53

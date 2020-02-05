@@ -1,0 +1,13 @@
+bool(true)
+bool(true)
+
+Warning: array_mark_legacy() called on vec in %s/pre-migration.php on line %d
+vec(0) {
+}
+
+Warning: array_mark_legacy() called on dict in %s/pre-migration.php on line %d
+dict(0) {
+}
+
+Warning: is_array_marked_legacy expects a dict, vec, darray, or varray in %s/pre-migration.php on line %d
+bool(false)

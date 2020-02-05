@@ -193,6 +193,7 @@ inline void ArrayData::setDVArray(DVArray d) {
 inline bool ArrayData::isVArray() const { return dvArray() & kVArray; }
 inline bool ArrayData::isDArray() const { return dvArray() & kDArray; }
 
+inline bool ArrayData::isDVArray() const { return dvArray(); }
 inline bool ArrayData::isNotDVArray() const { return dvArray() == kNotDVArray; }
 inline bool ArrayData::isVecOrVArray() const {
   return RuntimeOption::EvalHackArrDVArrs ? isVecArray() : isVArray();
@@ -221,10 +222,13 @@ inline bool ArrayData::isLegacyArray() const { return m_aux16 & kLegacyArray; }
 
 inline void ArrayData::setLegacyArray(bool legacy) {
   assertx(hasExactlyOneRef());
-  assertx(!legacy || kind() == kDictKind || kind() == kVecKind);
-  assertx(!legacy ||
-          !RuntimeOption::EvalArrayProvenance ||
-          hasProvenanceData());
+  assertx(!legacy
+          || kind() == kDictKind
+          || kind() == kVecKind
+          || (!RO::EvalHackArrDVArrs && isDVArray()));
+  /* TODO(jgriego) we should be asserting that the
+   * mark-ee should have provenance here but it's not
+   * safe and sane yet */
   if (legacy && !isLegacyArray() && hasProvenanceData()) {
     arrprov::clearTag(this);
     setHasProvenanceData(false);

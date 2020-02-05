@@ -41,16 +41,27 @@ function server_warmup_status_monotonic(): string;
 function execution_context(): string;
 
 <<__Rx, __Native, __IsFoldable>>
-function mark_legacy_hack_array(vec_or_dict $v): vec_or_dict;
+function mark_legacy_hack_array(mixed $v): mixed;
 
 <<__Rx, __Native, __IsFoldable>>
-function is_marked_legacy_hack_array(vec_or_dict $v): bool;
+function is_marked_legacy_hack_array(mixed $v): bool;
 
 <<__Rx, __Native, __IsFoldable>>
-function enable_legacy_behavior(vec_or_dict $v): vec_or_dict;
+function enable_legacy_behavior(mixed $v): mixed;
 
 <<__Rx, __Native, __IsFoldable>>
-function is_legacy_behavior_enabled(vec_or_dict $v): bool;
+function is_legacy_behavior_enabled(mixed $v): bool;
+
+/*
+ * TODO(jgriego) delete the above aliases, these are the preferred names
+*/
+<<__Rx, __Native, __IsFoldable>>
+function array_mark_legacy(mixed $v): mixed;
+
+<<__Rx, __Native, __IsFoldable>>
+function is_array_marked_legacy(mixed $v): bool;
+
+
 
 /**
  * This function is a kludge that returns the last argument it receives

@@ -2,11 +2,19 @@
 
 function good_cases(): vec<Container<mixed>> {
   $init = vec[
-    vec[],
-    dict[],
+    varray[],
+    darray[],
     vec[1, 2, 3],
     dict['foo' =>  null, 'bar' => null],
   ];
+
+  // we also want some non-static arrays:
+  foreach ($init as $e) {
+    $f = $e;
+    $f[] = 42;
+    $init[] = $f;
+  }
+  // now mark them
   foreach ($init as $e) {
     $init[] = HH\mark_legacy_hack_array($e);
   }
@@ -14,7 +22,7 @@ function good_cases(): vec<Container<mixed>> {
 }
 
 function bad_cases(): vec<mixed> {
-  return vec[
+  return varray[
     keyset[],
     42,
     null,

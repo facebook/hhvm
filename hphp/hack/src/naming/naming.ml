@@ -1566,6 +1566,7 @@ module Make (GetLocals : GetLocals) = struct
       when cn = SN.AutoimportedFunctions.fun_
            || cn = SN.AutoimportedFunctions.class_meth
            || cn = SN.StdlibFunctions.mark_legacy_hack_array
+           || cn = SN.StdlibFunctions.array_mark_legacy
            (* Tuples are not really function calls, they are just parsed that way*)
            || cn = SN.SpecialFunctions.tuple ->
       arg_unpack_unexpected unpacked_element;

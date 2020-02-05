@@ -141,6 +141,8 @@ constexpr char FUNC_TO_STRING[] = "Func to string conversion";
 constexpr char CLASS_TO_STRING_IMPLICIT[] =
   "Implicit Class to string conversion for type-hint";
 constexpr char CLASS_TO_STRING[] = "Class to string conversion";
+constexpr char ARRAY_MARK_LEGACY_VEC[] = "array_mark_legacy() called on vec";
+constexpr char ARRAY_MARK_LEGACY_DICT[] = "array_mark_legacy() called on dict";
 
 } // namespace Strings
 } // namespace HPHP

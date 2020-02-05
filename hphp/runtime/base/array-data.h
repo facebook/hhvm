@@ -296,10 +296,11 @@ public:
   uint8_t auxBits() const;
 
   /*
-   * Is the array a varray, darray, or neither?
+   * Is the array a varray, darray, either, or neither?
    */
   bool isVArray() const;
   bool isDArray() const;
+  bool isDVArray() const;
   bool isNotDVArray() const;
   bool isVecOrVArray() const;
   bool isDictOrDArray() const;

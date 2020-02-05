@@ -89,7 +89,7 @@ const StaticString
   s_shapes_idx("HH\\Shapes::idx"),
   s_is_meth_caller("HH\\is_meth_caller"),
   s_tag_provenance_here("HH\\tag_provenance_here"),
-  s_mark_legacy_hack_array("HH\\mark_legacy_hack_array"),
+  s_array_mark_legacy("HH\\array_mark_legacy"),
   s_meth_caller_get_class("HH\\meth_caller_get_class"),
   s_meth_caller_get_method("HH\\meth_caller_get_method");
 
@@ -1072,9 +1072,24 @@ SSATmp* opt_tag_provenance_here(IRGS& env, const ParamPrep& params) {
   return result;
 }
 
-SSATmp* opt_mark_legacy_hack_array(IRGS& env, const ParamPrep& params) {
+StaticString s_ARRAY_MARK_LEGACY_VEC(Strings::ARRAY_MARK_LEGACY_VEC);
+StaticString s_ARRAY_MARK_LEGACY_DICT(Strings::ARRAY_MARK_LEGACY_DICT);
+
+SSATmp* opt_array_mark_legacy(IRGS& env, const ParamPrep& params) {
   if (params.size() != 1) return nullptr;
   auto const value = params[0].value;
+  if (!RO::EvalHackArrDVArrs) {
+    // if we're using NativeImpl, we receive the value as a stack pointer and we
+    // shouldn't bother with any optimizations here
+    if (!value->isA(TCell)) return nullptr;
+    // the machinery below constrains the parameters to DataTypeSpecific so
+    // these checks should be sufficient to correctly implement the logging
+    if (value->isA(TVec)) {
+      gen(env, RaiseWarning, cns(env, s_ARRAY_MARK_LEGACY_VEC.get()));
+    } else if (value->isA(TDict)) {
+      gen(env, RaiseWarning, cns(env, s_ARRAY_MARK_LEGACY_DICT.get()));
+    }
+  }
   if (value->isA(TVec)) {
     return gen(env, SetLegacyVec, value);
   } else if (value->isA(TDict)) {
@@ -1193,7 +1208,7 @@ SSATmp* optimizedFCallBuiltin(IRGS& env,
     X(shapes_idx)
     X(is_meth_caller)
     X(tag_provenance_here)
-    X(mark_legacy_hack_array)
+    X(array_mark_legacy)
     X(meth_caller_get_class)
     X(meth_caller_get_method)
 

@@ -148,5 +148,4 @@ mod tests {
     fn bench_is_closure_name(b: &mut Bencher) {
         b.iter(|| string_utils::closures::is_closure_name("Closure$foo"));
     }
-
 }

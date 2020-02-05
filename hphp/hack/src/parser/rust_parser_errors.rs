@@ -2911,7 +2911,9 @@ where
                 IfStatement(x) if node as *const _ == &x.if_condition as *const _ => break,
                 ForStatement(x) if node as *const _ == &x.for_initializer as *const _ => break,
                 SwitchStatement(x) if node as *const _ == &x.switch_expression as *const _ => break,
-                ForeachStatement(x) if node as *const _ == &x.foreach_collection as *const _ => break,
+                ForeachStatement(x) if node as *const _ == &x.foreach_collection as *const _ => {
+                    break
+                }
                 UsingStatementBlockScoped(x)
                     if node as *const _ == &x.using_block_expressions as *const _ =>
                 {
@@ -2934,7 +2936,9 @@ where
                     break;
                 }
                 // Unary based expressions have their own custom fanout
-                PrefixUnaryExpression(x) if Self::unop_allows_await(&x.prefix_unary_operator) => continue,
+                PrefixUnaryExpression(x) if Self::unop_allows_await(&x.prefix_unary_operator) => {
+                    continue
+                }
                 PostfixUnaryExpression(x) if Self::unop_allows_await(&x.postfix_unary_operator) => {
                     continue
                 }
@@ -3551,7 +3555,6 @@ where
             // If the name is empty, then there was an earlier
             // parsing error that should supercede this one.
             if name == "" {
-
             } else if names.contains(name) {
                 self.errors.push(Self::make_error_from_node(
                     prop,

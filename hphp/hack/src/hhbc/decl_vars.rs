@@ -163,7 +163,6 @@ impl<'a> Visitor for DeclvarVisitor<'a> {
                 match &receiver_e.1 {
                     Lvar(id) if id.name() == "$this" => {
                         if self.context.is_in_static_method && !self.context.is_closure_body {
-
                         } else {
                             self.locals.add(id.name().into())
                         }

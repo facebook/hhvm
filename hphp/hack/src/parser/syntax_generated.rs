@@ -1222,16 +1222,6 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_array_creation_expression(_: &C, array_creation_left_bracket: Self, array_creation_members: Self, array_creation_right_bracket: Self) -> Self {
-        let syntax = SyntaxVariant::ArrayCreationExpression(Box::new(ArrayCreationExpressionChildren {
-            array_creation_left_bracket,
-            array_creation_members,
-            array_creation_right_bracket,
-        }));
-        let value = V::from_syntax(&syntax);
-        Self::make(syntax, value)
-    }
-
     fn make_array_intrinsic_expression(_: &C, array_intrinsic_keyword: Self, array_intrinsic_left_paren: Self, array_intrinsic_members: Self, array_intrinsic_right_paren: Self) -> Self {
         let syntax = SyntaxVariant::ArrayIntrinsicExpression(Box::new(ArrayIntrinsicExpressionChildren {
             array_intrinsic_keyword,
@@ -2815,13 +2805,6 @@ where
                 let acc = f(record_creation_right_bracket, acc);
                 acc
             },
-            SyntaxVariant::ArrayCreationExpression(x) => {
-                let ArrayCreationExpressionChildren { array_creation_left_bracket, array_creation_members, array_creation_right_bracket } = *x;
-                let acc = f(array_creation_left_bracket, acc);
-                let acc = f(array_creation_members, acc);
-                let acc = f(array_creation_right_bracket, acc);
-                acc
-            },
             SyntaxVariant::ArrayIntrinsicExpression(x) => {
                 let ArrayIntrinsicExpressionChildren { array_intrinsic_keyword, array_intrinsic_left_paren, array_intrinsic_members, array_intrinsic_right_paren } = *x;
                 let acc = f(array_intrinsic_keyword, acc);
@@ -3441,7 +3424,6 @@ where
             SyntaxVariant::ObjectCreationExpression {..} => SyntaxKind::ObjectCreationExpression,
             SyntaxVariant::ConstructorCall {..} => SyntaxKind::ConstructorCall,
             SyntaxVariant::RecordCreationExpression {..} => SyntaxKind::RecordCreationExpression,
-            SyntaxVariant::ArrayCreationExpression {..} => SyntaxKind::ArrayCreationExpression,
             SyntaxVariant::ArrayIntrinsicExpression {..} => SyntaxKind::ArrayIntrinsicExpression,
             SyntaxVariant::DarrayIntrinsicExpression {..} => SyntaxKind::DarrayIntrinsicExpression,
             SyntaxVariant::DictionaryIntrinsicExpression {..} => SyntaxKind::DictionaryIntrinsicExpression,
@@ -4269,12 +4251,6 @@ where
                  record_creation_left_bracket: ts.pop().unwrap(),
                  record_creation_array_token: ts.pop().unwrap(),
                  record_creation_type: ts.pop().unwrap(),
-                 
-             })),
-             (SyntaxKind::ArrayCreationExpression, 3) => SyntaxVariant::ArrayCreationExpression(Box::new(ArrayCreationExpressionChildren {
-                 array_creation_right_bracket: ts.pop().unwrap(),
-                 array_creation_members: ts.pop().unwrap(),
-                 array_creation_left_bracket: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::ArrayIntrinsicExpression, 4) => SyntaxVariant::ArrayIntrinsicExpression(Box::new(ArrayIntrinsicExpressionChildren {
@@ -5585,13 +5561,6 @@ pub struct RecordCreationExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
-pub struct ArrayCreationExpressionChildren<T, V> {
-    pub array_creation_left_bracket: Syntax<T, V>,
-    pub array_creation_members: Syntax<T, V>,
-    pub array_creation_right_bracket: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
 pub struct ArrayIntrinsicExpressionChildren<T, V> {
     pub array_intrinsic_keyword: Syntax<T, V>,
     pub array_intrinsic_left_paren: Syntax<T, V>,
@@ -6207,7 +6176,6 @@ pub enum SyntaxVariant<T, V> {
     ObjectCreationExpression(Box<ObjectCreationExpressionChildren<T, V>>),
     ConstructorCall(Box<ConstructorCallChildren<T, V>>),
     RecordCreationExpression(Box<RecordCreationExpressionChildren<T, V>>),
-    ArrayCreationExpression(Box<ArrayCreationExpressionChildren<T, V>>),
     ArrayIntrinsicExpression(Box<ArrayIntrinsicExpressionChildren<T, V>>),
     DarrayIntrinsicExpression(Box<DarrayIntrinsicExpressionChildren<T, V>>),
     DictionaryIntrinsicExpression(Box<DictionaryIntrinsicExpressionChildren<T, V>>),
@@ -7378,15 +7346,6 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     2 => Some(&x.record_creation_left_bracket),
                     3 => Some(&x.record_creation_members),
                     4 => Some(&x.record_creation_right_bracket),
-                        _ => None,
-                    }
-                })
-            },
-            ArrayCreationExpression(x) => {
-                get_index(3).and_then(|index| { match index {
-                        0 => Some(&x.array_creation_left_bracket),
-                    1 => Some(&x.array_creation_members),
-                    2 => Some(&x.array_creation_right_bracket),
                         _ => None,
                     }
                 })

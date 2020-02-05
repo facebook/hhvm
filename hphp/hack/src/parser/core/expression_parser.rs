@@ -444,7 +444,6 @@ where
             | TokenKind::Darray => self.parse_darray_intrinsic_expression(),
             | TokenKind::Dict => self.parse_dictionary_intrinsic_expression(),
             | TokenKind::Keyset => self.parse_keyset_intrinsic_expression(),
-            | TokenKind::LeftBracket => self.parse_array_creation_expression(),
             | TokenKind::Tuple => self.parse_tuple_expression(),
             | TokenKind::Shape => self.parse_shape_expression(),
             | TokenKind::Function => {
@@ -2439,25 +2438,6 @@ where
             TokenKind::Vec,
             |p| p.parse_expression_with_reset_precedence(),
             |p, a, b, c, d, e| S!(make_vector_intrinsic_expression, p, a, b, c, d, e),
-        )
-    }
-
-    // array_creation_expression :=
-    //   [ array-initializer-opt ]
-    // array-initializer :=
-    //   array-initializer-list ,-opt
-    // array-initializer-list :=
-    //   array-element-initializer
-    //   array-element-initializer , array-initializer-list
-    fn parse_array_creation_expression(&mut self) -> S::R {
-        let (left_bracket, members, right_bracket) =
-            self.parse_bracketted_comma_list_opt_allow_trailing(|p| p.parse_array_element_init());
-        S!(
-            make_array_creation_expression,
-            self,
-            left_bracket,
-            members,
-            right_bracket
         )
     }
 

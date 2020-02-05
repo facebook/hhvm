@@ -678,11 +678,6 @@ module type Syntax_S = sig
     ; record_creation_members                            : t
     ; record_creation_right_bracket                      : t
     }
-  | ArrayCreationExpression           of
-    { array_creation_left_bracket                        : t
-    ; array_creation_members                             : t
-    ; array_creation_right_bracket                       : t
-    }
   | ArrayIntrinsicExpression          of
     { array_intrinsic_keyword                            : t
     ; array_intrinsic_left_paren                         : t
@@ -1207,7 +1202,6 @@ module type Syntax_S = sig
   val make_object_creation_expression : t -> t -> t
   val make_constructor_call : t -> t -> t -> t -> t
   val make_record_creation_expression : t -> t -> t -> t -> t -> t
-  val make_array_creation_expression : t -> t -> t -> t
   val make_array_intrinsic_expression : t -> t -> t -> t -> t
   val make_darray_intrinsic_expression : t -> t -> t -> t -> t -> t
   val make_dictionary_intrinsic_expression : t -> t -> t -> t -> t -> t
@@ -1389,7 +1383,6 @@ module type Syntax_S = sig
   val is_object_creation_expression : t -> bool
   val is_constructor_call : t -> bool
   val is_record_creation_expression : t -> bool
-  val is_array_creation_expression : t -> bool
   val is_array_intrinsic_expression : t -> bool
   val is_darray_intrinsic_expression : t -> bool
   val is_dictionary_intrinsic_expression : t -> bool

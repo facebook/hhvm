@@ -1692,13 +1692,6 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
                 ]);
           t env body;
         ]
-    | Syntax.ArrayCreationExpression
-        {
-          array_creation_left_bracket = left_b;
-          array_creation_members = members;
-          array_creation_right_bracket = right_b;
-        } ->
-      transform_argish env left_b members right_b
     | Syntax.ArrayIntrinsicExpression
         {
           array_intrinsic_keyword = kw;

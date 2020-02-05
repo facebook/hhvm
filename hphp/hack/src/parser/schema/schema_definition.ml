@@ -1561,20 +1561,6 @@ let schema : schema_node list =
         ];
     };
     {
-      kind_name = "ArrayCreationExpression";
-      type_name = "array_creation_expression";
-      func_name = "array_creation_expression";
-      description = "array_creation_expression";
-      prefix = "array_creation";
-      aggregates = [Expression; ConstructorExpression; LambdaBody];
-      fields =
-        [
-          ("left_bracket", Token);
-          ("members", ZeroOrMore (Aggregate ConstructorExpression));
-          ("right_bracket", Token);
-        ];
-    };
-    {
       kind_name = "ArrayIntrinsicExpression";
       type_name = "array_intrinsic_expression";
       func_name = "array_intrinsic_expression";

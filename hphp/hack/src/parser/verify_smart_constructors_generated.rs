@@ -954,14 +954,6 @@ impl<'src> SmartConstructors<'src, State> for VerifySmartConstructors
         r
     }
 
-    fn make_array_creation_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
-        let args = arg_kinds!(arg0, arg1, arg2);
-        let r = <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_array_creation_expression(self, arg0, arg1, arg2);
-        self.state_mut().verify(&args);
-        self.state_mut().push(r.kind());
-        r
-    }
-
     fn make_array_intrinsic_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> Self::R {
         let args = arg_kinds!(arg0, arg1, arg2, arg3);
         let r = <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_array_intrinsic_expression(self, arg0, arg1, arg2, arg3);

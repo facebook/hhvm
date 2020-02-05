@@ -507,10 +507,6 @@ impl<'src, State: StateType<'src, PositionedSyntax>> SmartConstructors<'src, Sta
         <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_record_creation_expression(self, arg0, arg1, arg2, arg3, arg4)
     }
 
-    fn make_array_creation_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
-        <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_array_creation_expression(self, arg0, arg1, arg2)
-    }
-
     fn make_array_intrinsic_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> Self::R {
         <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_array_intrinsic_expression(self, arg0, arg1, arg2, arg3)
     }

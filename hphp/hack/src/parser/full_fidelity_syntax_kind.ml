@@ -131,7 +131,6 @@ type t =
   | ObjectCreationExpression
   | ConstructorCall
   | RecordCreationExpression
-  | ArrayCreationExpression
   | ArrayIntrinsicExpression
   | DarrayIntrinsicExpression
   | DictionaryIntrinsicExpression
@@ -315,7 +314,6 @@ let to_string kind =
   | ObjectCreationExpression          -> "object_creation_expression"
   | ConstructorCall                   -> "constructor_call"
   | RecordCreationExpression          -> "record_creation_expression"
-  | ArrayCreationExpression           -> "array_creation_expression"
   | ArrayIntrinsicExpression          -> "array_intrinsic_expression"
   | DarrayIntrinsicExpression         -> "darray_intrinsic_expression"
   | DictionaryIntrinsicExpression     -> "dictionary_intrinsic_expression"

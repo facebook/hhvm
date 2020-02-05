@@ -170,7 +170,6 @@ module WithToken(Token: TokenType) = struct
       | ObjectCreationExpression          _ -> SyntaxKind.ObjectCreationExpression
       | ConstructorCall                   _ -> SyntaxKind.ConstructorCall
       | RecordCreationExpression          _ -> SyntaxKind.RecordCreationExpression
-      | ArrayCreationExpression           _ -> SyntaxKind.ArrayCreationExpression
       | ArrayIntrinsicExpression          _ -> SyntaxKind.ArrayIntrinsicExpression
       | DarrayIntrinsicExpression         _ -> SyntaxKind.DarrayIntrinsicExpression
       | DictionaryIntrinsicExpression     _ -> SyntaxKind.DictionaryIntrinsicExpression
@@ -360,7 +359,6 @@ module WithToken(Token: TokenType) = struct
     let is_object_creation_expression           = has_kind SyntaxKind.ObjectCreationExpression
     let is_constructor_call                     = has_kind SyntaxKind.ConstructorCall
     let is_record_creation_expression           = has_kind SyntaxKind.RecordCreationExpression
-    let is_array_creation_expression            = has_kind SyntaxKind.ArrayCreationExpression
     let is_array_intrinsic_expression           = has_kind SyntaxKind.ArrayIntrinsicExpression
     let is_darray_intrinsic_expression          = has_kind SyntaxKind.DarrayIntrinsicExpression
     let is_dictionary_intrinsic_expression      = has_kind SyntaxKind.DictionaryIntrinsicExpression
@@ -1687,15 +1685,6 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc record_creation_left_bracket in
          let acc = f acc record_creation_members in
          let acc = f acc record_creation_right_bracket in
-         acc
-      | ArrayCreationExpression {
-        array_creation_left_bracket;
-        array_creation_members;
-        array_creation_right_bracket;
-      } ->
-         let acc = f acc array_creation_left_bracket in
-         let acc = f acc array_creation_members in
-         let acc = f acc array_creation_right_bracket in
          acc
       | ArrayIntrinsicExpression {
         array_intrinsic_keyword;
@@ -3565,15 +3554,6 @@ module WithToken(Token: TokenType) = struct
         record_creation_members;
         record_creation_right_bracket;
       ]
-      | ArrayCreationExpression {
-        array_creation_left_bracket;
-        array_creation_members;
-        array_creation_right_bracket;
-      } -> [
-        array_creation_left_bracket;
-        array_creation_members;
-        array_creation_right_bracket;
-      ]
       | ArrayIntrinsicExpression {
         array_intrinsic_keyword;
         array_intrinsic_left_paren;
@@ -5442,15 +5422,6 @@ module WithToken(Token: TokenType) = struct
         "record_creation_left_bracket";
         "record_creation_members";
         "record_creation_right_bracket";
-      ]
-      | ArrayCreationExpression {
-        array_creation_left_bracket;
-        array_creation_members;
-        array_creation_right_bracket;
-      } -> [
-        "array_creation_left_bracket";
-        "array_creation_members";
-        "array_creation_right_bracket";
       ]
       | ArrayIntrinsicExpression {
         array_intrinsic_keyword;
@@ -7485,16 +7456,6 @@ module WithToken(Token: TokenType) = struct
           record_creation_left_bracket;
           record_creation_members;
           record_creation_right_bracket;
-        }
-      | (SyntaxKind.ArrayCreationExpression, [
-          array_creation_left_bracket;
-          array_creation_members;
-          array_creation_right_bracket;
-        ]) ->
-        ArrayCreationExpression {
-          array_creation_left_bracket;
-          array_creation_members;
-          array_creation_right_bracket;
         }
       | (SyntaxKind.ArrayIntrinsicExpression, [
           array_intrinsic_keyword;
@@ -9905,19 +9866,6 @@ module WithToken(Token: TokenType) = struct
           record_creation_left_bracket;
           record_creation_members;
           record_creation_right_bracket;
-        } in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_array_creation_expression
-        array_creation_left_bracket
-        array_creation_members
-        array_creation_right_bracket
-      =
-        let syntax = ArrayCreationExpression {
-          array_creation_left_bracket;
-          array_creation_members;
-          array_creation_right_bracket;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

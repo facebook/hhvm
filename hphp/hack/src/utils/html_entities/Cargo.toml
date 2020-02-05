@@ -12,8 +12,8 @@ path = "html_entities.rs"
 
 [dependencies]
 ocaml_helper = { path = "../ocaml_helper" }
-lazy_static = "1.4"
-regex = "1.3"
+lazy_static = "1.0"
+regex = "1.0"
 
 [dev-dependencies]
 pretty_assertions = "0.6"

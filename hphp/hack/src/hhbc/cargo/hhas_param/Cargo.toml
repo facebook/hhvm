@@ -15,4 +15,5 @@ hhas_attribute_rust = { path = "../hhas_attribute" }
 hhas_type = { path = "../hhas_type" }
 label_rust = { path = "../label" }
 oxidized = { path = "../../../oxidized" }
+bitflags = "1.2"
 # @end of Signature

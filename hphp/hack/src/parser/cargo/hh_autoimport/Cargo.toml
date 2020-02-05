@@ -11,5 +11,5 @@ include = ["../../hh_autoimport.rs"]
 path = "../../hh_autoimport.rs"
 
 [dependencies]
-lazy_static = "1.4"
+lazy_static = "1.0"
 # @end of Signature

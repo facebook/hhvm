@@ -15,5 +15,5 @@ path = "main.rs"
 names = { path = "sqlite" }
 oxidized = { path = "../oxidized" }
 rusqlite = "0.21"
-structopt = "0.3"
+structopt = "0.3.7"
 # @end of Signature

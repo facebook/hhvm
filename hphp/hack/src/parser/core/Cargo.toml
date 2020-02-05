@@ -19,6 +19,6 @@ oxidized = { path = "../../oxidized" }
 parser_core_types = { path = "../cargo/core_types" }
 smart_constructors = { path = "../cargo/smart_constructors" }
 stack_limit = { path = "../../utils/stack_limit" }
-lazy_static = "1.4"
+lazy_static = "1.0"
 ocaml = "0.8"
 # @end of Signature

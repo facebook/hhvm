@@ -11,5 +11,5 @@ include = ["naming_special_names.rs"]
 path = "naming_special_names.rs"
 
 [dependencies]
-lazy_static = "1.4"
+lazy_static = "1.0"
 # @end of Signature

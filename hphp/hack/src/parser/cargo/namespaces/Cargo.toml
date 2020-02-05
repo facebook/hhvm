@@ -14,5 +14,5 @@ path = "../../namespaces.rs"
 core_utils_rust = { path = "../../../utils/core" }
 naming_special_names_rust = { path = "../../../naming" }
 oxidized = { path = "../../../oxidized" }
-lazy_static = "1.4"
+lazy_static = "1.0"
 # @end of Signature

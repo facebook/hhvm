@@ -229,11 +229,12 @@ const StaticString
   s_conv_clsmeth_to_varray("Implicit clsmeth to varray conversion"),
   s_conv_clsmeth_to_vec("Implicit clsmeth to vec conversion");
 
-void raiseClsMethToVecWarningHelper(IRGS& env) {
+void raiseClsMethToVecWarningHelper(IRGS& env, const ParamPrep& params) {
   if (RuntimeOption::EvalRaiseClsMethConversionWarning) {
     gen(
       env,
       RaiseNotice,
+      make_opt_catch(env, params),
       cns(env, RuntimeOption::EvalHackArrDVArrs ?
         s_conv_clsmeth_to_vec.get() : s_conv_clsmeth_to_varray.get())
     );
@@ -247,7 +248,7 @@ SSATmp* opt_count(IRGS& env, const ParamPrep& params) {
   auto const val = params[0].value;
 
   if (val->isA(TClsMeth)) {
-    raiseClsMethToVecWarningHelper(env);
+    raiseClsMethToVecWarningHelper(env, params);
     return cns(env, 2);
   }
 
@@ -620,7 +621,7 @@ SSATmp* opt_is_list_like(IRGS& env, const ParamPrep& params) {
   // bail out here.
   if (!(type <= TInitCell)) return nullptr;
   if (type <= TClsMeth) {
-    raiseClsMethToVecWarningHelper(env);
+    raiseClsMethToVecWarningHelper(env, params);
     return cns(env, true);
   }
   if (!type.maybe(TArrLike)) return cns(env, false);

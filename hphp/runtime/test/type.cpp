@@ -413,6 +413,33 @@ TEST(Type, Specialized) {
   EXPECT_EQ(TCls, TCls - subCls);
 }
 
+TEST(Type, SpecializedArrays) {
+  EXPECT_FALSE(TArr.isSpecialized());
+  EXPECT_FALSE(TArr.arrSpec());
+  EXPECT_FALSE(TArr.arrSpec().kind());
+
+  auto const packed_array = Type::Array(ArrayData::kPackedKind);
+  EXPECT_TRUE(packed_array.isSpecialized());
+  EXPECT_TRUE(packed_array.arrSpec());
+  EXPECT_TRUE(packed_array.arrSpec().kind());
+  EXPECT_EQ(packed_array.arrSpec().kind(), ArrayData::kPackedKind);
+
+  auto const const_array = Type::cns(staticEmptyVArray());
+  EXPECT_TRUE(const_array.isSpecialized());
+  EXPECT_TRUE(const_array.arrSpec());
+  EXPECT_TRUE(const_array.arrSpec().kind());
+  EXPECT_EQ(*const_array.arrSpec().kind(), ArrayData::kPackedKind);
+
+  EXPECT_FALSE(TDict.isSpecialized());
+  EXPECT_FALSE(TDict.arrSpec());
+  EXPECT_FALSE(TDict.arrSpec().kind());
+
+  auto const const_dict = Type::cns(staticEmptyDictArray());
+  EXPECT_FALSE(const_dict.isSpecialized());
+  EXPECT_FALSE(const_dict.arrSpec());
+  EXPECT_FALSE(const_dict.arrSpec().kind());
+}
+
 TEST(Type, SpecializedObjects) {
   auto const A = SystemLib::s_HH_IteratorClass;
   auto const B = SystemLib::s_HH_TraversableClass;

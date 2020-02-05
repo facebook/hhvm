@@ -42,8 +42,8 @@ inline TypeSpec::TypeSpec(ArraySpec arrSpec, ClassSpec clsSpec)
   , m_arrSpec(arrSpec)
   , m_clsSpec(clsSpec)
 {
-  if (arrSpec != ArraySpec::Bottom) m_kind |= SpecKind::Array;
-  if (clsSpec != ClassSpec::Bottom) m_kind |= SpecKind::Class;
+  if (arrSpec != ArraySpec::Bottom()) m_kind |= SpecKind::Array;
+  if (clsSpec != ClassSpec::Bottom()) m_kind |= SpecKind::Class;
 }
 
 inline SpecKind TypeSpec::kind() const {
@@ -102,8 +102,14 @@ inline TypeSpec TypeSpec::operator-(const TypeSpec& rhs) const {
   inline uintptr_t Spec::bits() const {                   \
     return m_bits;                                        \
   }                                                       \
+  constexpr Spec Spec::Top() {                            \
+    return Spec{};                                        \
+  }                                                       \
+  constexpr Spec Spec::Bottom() {                         \
+    return Spec{BottomTag{}};                             \
+  }                                                       \
   inline Spec::operator bool() const {                    \
-    return *this != Top && *this != Spec::Bottom;         \
+    return *this != Top() && *this != Bottom();           \
   }                                                       \
   inline bool Spec::operator==(const Spec& rhs) const {   \
     return m_bits == rhs.m_bits;                          \
@@ -121,7 +127,7 @@ inline TypeSpec TypeSpec::operator-(const TypeSpec& rhs) const {
     return *this >= rhs && *this != rhs;                  \
   }                                                       \
   inline Spec Spec::operator-(const Spec& rhs) const {    \
-    return *this <= rhs ? Bottom : *this;                 \
+    return *this <= rhs ? Bottom() : *this;               \
   }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -133,7 +139,7 @@ constexpr inline ArraySpec::ArraySpec()
   , m_ptr(0)
 {}
 
-inline ArraySpec::ArraySpec(ArraySpec::BottomTag)
+constexpr inline ArraySpec::ArraySpec(ArraySpec::BottomTag)
   : m_sort(IsBottom)
   , m_kind(ArrayData::ArrayKind{})
   , m_ptr(0)
@@ -143,20 +149,26 @@ inline ArraySpec::ArraySpec(ArrayData::ArrayKind kind)
   : m_sort(HasKind)
   , m_kind(kind)
   , m_ptr(0)
-{}
+{
+  assertx(checkInvariants());
+}
 
 inline ArraySpec::ArraySpec(const RepoAuthType::Array* arrTy)
   : m_sort(HasType)
   , m_kind(ArrayData::ArrayKind{})
   , m_ptr(reinterpret_cast<uintptr_t>(arrTy))
-{}
+{
+  assertx(checkInvariants());
+}
 
 inline ArraySpec::ArraySpec(ArrayData::ArrayKind kind,
                             const RepoAuthType::Array* arrTy)
   : m_sort(HasKind | HasType)
   , m_kind(kind)
   , m_ptr(reinterpret_cast<uintptr_t>(arrTy))
-{}
+{
+  assertx(checkInvariants());
+}
 
 inline void ArraySpec::adjust(const RepoAuthType::Array* adjusted) {
   assertx(type() && adjusted);
@@ -196,7 +208,7 @@ constexpr inline ClassSpec::ClassSpec()
   , m_ptr(0)
 {}
 
-inline ClassSpec::ClassSpec(ClassSpec::BottomTag)
+constexpr inline ClassSpec::ClassSpec(ClassSpec::BottomTag)
   : m_sort(IsBottom)
   , m_ptr(0)
 {}

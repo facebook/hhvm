@@ -41,7 +41,7 @@ struct ArraySpec {
   /*
    * Constructors.
    */
-  constexpr ArraySpec();
+  explicit constexpr ArraySpec();
   explicit ArraySpec(ArrayData::ArrayKind kind);
   explicit ArraySpec(const RepoAuthType::Array* arrTy);
   ArraySpec(ArrayData::ArrayKind kind, const RepoAuthType::Array* arrTy);
@@ -50,6 +50,11 @@ struct ArraySpec {
    * Post-deserialization fixup.
    */
   void adjust(const RepoAuthType::Array* adjusted);
+
+  /*
+   * Human-readable debug string.
+   */
+  std::string toString() const;
 
   /*
    * Accessors.
@@ -90,15 +95,21 @@ struct ArraySpec {
   /*
    * Top and bottom types.
    */
-  static const ArraySpec Top;
-  static const ArraySpec Bottom;
+  static constexpr ArraySpec Top();
+  static constexpr ArraySpec Bottom();
 
 private:
   /*
    * Bottom constructor.
    */
   enum class BottomTag {};
-  explicit ArraySpec(BottomTag);
+  explicit constexpr ArraySpec(BottomTag);
+
+  /*
+   * Checked by the ArraySpec constructors, to ensure that we don't create
+   * invalid array specializations like "Dict=DictKind".
+   */
+  bool checkInvariants() const;
 
   /*
    * Mask of specializations that a given ArraySpec represents.
@@ -148,6 +159,11 @@ struct ClassSpec {
   ClassSpec(const Class* cls, ExactTag);
 
   /*
+   * Human-readable debug string.
+   */
+  std::string toString() const;
+
+  /*
    * Accessors.
    */
   uintptr_t bits() const;
@@ -182,15 +198,15 @@ struct ClassSpec {
   /*
    * Top and bottom types.
    */
-  static const ClassSpec Top;
-  static const ClassSpec Bottom;
+  static constexpr ClassSpec Top();
+  static constexpr ClassSpec Bottom();
 
 private:
   /*
    * Bottom constructor.
    */
   enum class BottomTag {};
-  explicit ClassSpec(BottomTag);
+  explicit constexpr ClassSpec(BottomTag);
 
   /*
    * Sort tag.

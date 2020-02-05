@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/type-specialization.h"
 
+#include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/vm/class.h"
 
@@ -23,14 +24,13 @@ namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 // ArraySpec.
 
-const ArraySpec ArraySpec::Top;
-const ArraySpec ArraySpec::Bottom(ArraySpec::BottomTag{});
-
 bool ArraySpec::operator<=(const ArraySpec& rhs) const {
+  assertx(checkInvariants());
+  assertx(rhs.checkInvariants());
   auto const& lhs = *this;
 
-  if (lhs == Bottom || rhs == Top) return true;
-  if (lhs == Top || rhs == Bottom) return false;
+  if (lhs == Bottom() || rhs == Top()) return true;
+  if (lhs == Top() || rhs == Bottom()) return false;
 
   // It's possible to subtype RAT::Array types, but it's potentially O(n), so
   // we just don't do it.
@@ -39,6 +39,8 @@ bool ArraySpec::operator<=(const ArraySpec& rhs) const {
 }
 
 ArraySpec ArraySpec::operator|(const ArraySpec& rhs) const {
+  assertx(checkInvariants());
+  assertx(rhs.checkInvariants());
   auto const& lhs = *this;
 
   if (lhs <= rhs) return rhs;
@@ -54,10 +56,12 @@ ArraySpec ArraySpec::operator|(const ArraySpec& rhs) const {
 
   if (new_kind) return ArraySpec(*new_kind);
   if (new_type) return ArraySpec(new_type);
-  return Top;
+  return Top();
 }
 
 ArraySpec ArraySpec::operator&(const ArraySpec& rhs) const {
+  assertx(checkInvariants());
+  assertx(rhs.checkInvariants());
   auto const& lhs = *this;
 
   if (lhs <= rhs) return lhs;
@@ -85,7 +89,7 @@ ArraySpec ArraySpec::operator&(const ArraySpec& rhs) const {
     //
     // Note that we ignore this check for type(), because we don't subtype RAT
     // types precisely.
-    return Bottom;
+    return Bottom();
   }
 
   if (new_kind && new_type) {
@@ -96,21 +100,51 @@ ArraySpec ArraySpec::operator&(const ArraySpec& rhs) const {
     return ArraySpec(new_type);
   }
 
-  return Top;
+  return Top();
+}
+
+std::string ArraySpec::toString() const {
+  std::string result;
+  if (m_sort & HasKind) {
+    auto const kind = ArrayData::ArrayKind(m_kind);
+    result += folly::to<std::string>('=', ArrayData::kindToString(kind));
+  }
+  if (m_sort & HasType) {
+    auto const type = reinterpret_cast<const RepoAuthType::Array*>(m_ptr);
+    result += folly::to<std::string>(':', show(*type));
+  }
+  return result;
+}
+
+bool ArraySpec::checkInvariants() const {
+  if ((*this == Top()) || (*this == Bottom())) return true;
+  assertx(m_sort != IsTop);
+  assertx(!(m_sort & IsBottom));
+  if (m_sort & HasKind) {
+    assertx(isArrayKind(HeaderKind(m_kind)));
+    assertx(m_kind != ArrayData::kVecKind &&
+            m_kind != ArrayData::kDictKind &&
+            m_kind != ArrayData::kKeysetKind);
+  } else {
+    assertx(m_kind == ArrayData::ArrayKind{});
+  }
+  if (m_sort & HasType) {
+    assertx(m_ptr != 0);
+  } else {
+    assertx(m_ptr == 0);
+  }
+  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // ClassSpec.
 
-const ClassSpec ClassSpec::Top;
-const ClassSpec ClassSpec::Bottom(ClassSpec::BottomTag{});
-
 bool ClassSpec::operator<=(const ClassSpec& rhs) const {
   auto const& lhs = *this;
 
   if (lhs == rhs) return true;
-  if (lhs == Bottom || rhs == Top) return true;
-  if (lhs == Top || rhs == Bottom) return false;
+  if (lhs == Bottom() || rhs == Top()) return true;
+  if (lhs == Top() || rhs == Bottom()) return false;
 
   return !rhs.exact() && lhs.cls()->classof(rhs.cls());
 }
@@ -125,7 +159,7 @@ ClassSpec ClassSpec::operator|(const ClassSpec& rhs) const {
 
   // We're unwilling to unify with interfaces, so just return Top.
   if (!isNormalClass(lhs.cls()) || !isNormalClass(rhs.cls())) {
-    return Top;
+    return Top();
   }
 
   // Unify to a common ancestor if possible.
@@ -133,7 +167,7 @@ ClassSpec ClassSpec::operator|(const ClassSpec& rhs) const {
     return ClassSpec(cls, ClassSpec::SubTag{});
   }
 
-  return Top;
+  return Top();
 }
 
 ClassSpec ClassSpec::operator&(const ClassSpec& rhs) const {
@@ -146,7 +180,7 @@ ClassSpec ClassSpec::operator&(const ClassSpec& rhs) const {
 
   // If neither class is an interface, their intersection is trivial.
   if (isNormalClass(lhs.cls()) && isNormalClass(rhs.cls())) {
-    return Bottom;
+    return Bottom();
   }
 
   // If either is an interface, we'd need to explore all implementing classes
@@ -164,6 +198,12 @@ ClassSpec ClassSpec::operator&(const ClassSpec& rhs) const {
   // in this case to ensure that the ordering is dependent only on the source
   // program (Class* or something like that seems less desirable).
   return lhs.cls()->name()->compare(rhs.cls()->name()) < 0 ? lhs : rhs;
+}
+
+std::string ClassSpec::toString() const {
+  auto const type = exact() ? "=" : "<=";
+  auto const name = cls()->name()->data();
+  return folly::to<std::string>(type, name);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

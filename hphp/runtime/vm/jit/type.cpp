@@ -267,32 +267,16 @@ std::string Type::toString() const {
 
   std::vector<std::string> parts;
   if (isSpecialized()) {
-    if (auto clsSpec = t.clsSpec()) {
+    if (auto const cls = t.clsSpec()) {
       auto const base = Type{m_bits & kClsSpecBits, t.ptrKind(), t.memKind()};
-      auto const exact = clsSpec.exact() ? "=" : "<=";
-      auto const name = clsSpec.cls()->name()->data();
-      auto const partStr = folly::to<std::string>(base.toString(), exact, name);
-
-      parts.push_back(partStr);
-      t -= TObj;
-    } else if (auto arrSpec = t.arrSpec()) {
-      auto str = Type{
-        m_bits & kArrSpecBits,
-        t.ptrKind(),
-        t.memKind()
-      }.toString();
-
-      if (auto const kind = arrSpec.kind()) {
-        str += "=";
-        str += ArrayData::kindToString(*kind);
-      }
-      if (auto const ty = arrSpec.type()) {
-        str += folly::to<std::string>(':', show(*ty));
-      }
-      parts.push_back(str);
-      t -= TArr;
+      parts.push_back(folly::to<std::string>(base.toString(), cls.toString()));
+      t -= base;
+    } else if (auto const arr = t.arrSpec()) {
+      auto const base = Type{m_bits & kArrSpecBits, t.ptrKind(), t.memKind()};
+      parts.push_back(folly::to<std::string>(base.toString(), arr.toString()));
+      t -= base;
     } else {
-      not_reached();
+      always_assert(false);
     }
   }
 
@@ -551,8 +535,7 @@ DataType Type::toDataType() const {
   if (*this <= TCls)         return KindOfClass;
   if (*this <= TClsMeth)     return KindOfClsMeth;
   if (*this <= TRecord)      return KindOfRecord;
-  always_assert_flog(false,
-                     "Bad Type {} in Type::toDataType()", *this);
+  always_assert_flog(false, "Bad Type {} in Type::toDataType()", *this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -569,11 +552,11 @@ Type Type::specialize(TypeSpec spec) const {
     return *this;
   }
 
-  if (spec.arrSpec() != ArraySpec::Bottom) {
+  if (spec.arrSpec() != ArraySpec::Bottom()) {
     return Type{*this, spec.arrSpec()};
   }
 
-  assertx(spec.clsSpec() != ClassSpec::Bottom);
+  assertx(spec.clsSpec() != ClassSpec::Bottom());
   return Type{*this, spec.clsSpec()};
 }
 
@@ -591,7 +574,7 @@ Type Type::modified() const {
  * Return true if the array satisfies requirement on the ArraySpec.
  */
 static bool arrayFitsSpec(const ArrayData* arr, const ArraySpec spec) {
-  if (spec == ArraySpec::Top) return true;
+  if (spec == ArraySpec::Top()) return true;
 
   if (auto const spec_kind = spec.kind()) {
     if (arr->kind() == spec_kind) return true;
@@ -717,10 +700,10 @@ Type Type::operator&(Type rhs) const {
   if (ptr == Ptr::Bottom || mem == Mem::Bottom) bits &= ~kCell;
 
   // Arr/Cls bits and specs.
-  if (arrSpec == ArraySpec::Bottom) bits &= ~kArrSpecBits;
-  if (clsSpec == ClassSpec::Bottom) bits &= ~kClsSpecBits;
-  if (!supports(bits, SpecKind::Array)) arrSpec = ArraySpec::Bottom;
-  if (!supports(bits, SpecKind::Class)) clsSpec = ClassSpec::Bottom;
+  if (arrSpec == ArraySpec::Bottom()) bits &= ~kArrSpecBits;
+  if (clsSpec == ClassSpec::Bottom()) bits &= ~kClsSpecBits;
+  if (!supports(bits, SpecKind::Array)) arrSpec = ArraySpec::Bottom();
+  if (!supports(bits, SpecKind::Class)) clsSpec = ClassSpec::Bottom();
 
   // Ptr and Mem also depend on Cell bits. This must come after all possible
   // fixups of bits.
@@ -793,8 +776,8 @@ Type Type::operator-(Type rhs) const {
 
   auto const have_arr_bits = supports(bits, SpecKind::Array);
   auto const have_cls_bits = supports(bits, SpecKind::Class);
-  auto const have_arr_spec = arrSpec != ArraySpec::Bottom;
-  auto const have_cls_spec = clsSpec != ClassSpec::Bottom;
+  auto const have_arr_spec = arrSpec != ArraySpec::Bottom();
+  auto const have_cls_spec = clsSpec != ClassSpec::Bottom();
 
   // ptr and mem can only interact with clsSpec if lhs.m_bits has at least one
   // kCell member of kClsSpecBits.

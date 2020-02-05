@@ -409,9 +409,6 @@ IMPLEMENT_CNS_VAL(TMemToCell,  ptr, const TypedValue*)
 // Specialized type creation.
 
 inline Type Type::Array(ArrayData::ArrayKind kind) {
-  assertx(kind != ArrayData::kVecKind &&
-          kind != ArrayData::kDictKind &&
-          kind != ArrayData::kKeysetKind);
   return Type(TArr, ArraySpec(kind));
 }
 
@@ -421,9 +418,6 @@ inline Type Type::Array(const RepoAuthType::Array* rat) {
 
 inline Type Type::Array(ArrayData::ArrayKind kind,
                         const RepoAuthType::Array* rat) {
-  assertx(kind != ArrayData::kVecKind &&
-          kind != ArrayData::kDictKind &&
-          kind != ArrayData::kKeysetKind);
   return Type(TArr, ArraySpec(kind, rat));
 }
 
@@ -440,9 +434,6 @@ inline Type Type::Keyset(const RepoAuthType::Array* rat) {
 }
 
 inline Type Type::StaticArray(ArrayData::ArrayKind kind) {
-  assertx(kind != ArrayData::kVecKind &&
-          kind != ArrayData::kDictKind &&
-          kind != ArrayData::kKeysetKind);
   return Type(TStaticArr, ArraySpec(kind));
 }
 
@@ -452,9 +443,6 @@ inline Type Type::StaticArray(const RepoAuthType::Array* rat) {
 
 inline Type Type::StaticArray(ArrayData::ArrayKind kind,
                               const RepoAuthType::Array* rat) {
-  assertx(kind != ArrayData::kVecKind &&
-          kind != ArrayData::kDictKind &&
-          kind != ArrayData::kKeysetKind);
   return Type(TStaticArr, ArraySpec(kind, rat));
 }
 
@@ -476,9 +464,6 @@ inline Type Type::CountedArray(const RepoAuthType::Array* rat) {
 
 inline Type Type::CountedArray(ArrayData::ArrayKind kind,
                               const RepoAuthType::Array* rat) {
-  assertx(kind != ArrayData::kVecKind &&
-          kind != ArrayData::kDictKind &&
-          kind != ArrayData::kKeysetKind);
   return Type(TCountedArr, ArraySpec(kind, rat));
 }
 
@@ -536,34 +521,35 @@ inline bool Type::supports(SpecKind kind) const {
 }
 
 inline ArraySpec Type::arrSpec() const {
-  if (!supports(SpecKind::Array)) return ArraySpec::Bottom;
+  if (!supports(SpecKind::Array)) return ArraySpec::Bottom();
 
   // Currently, a Type which supports multiple specializations is trivial
   // along all of them.
-  if (supports(SpecKind::Class)) return ArraySpec::Top;
+  if (supports(SpecKind::Class)) return ArraySpec::Top();
 
   if (m_hasConstVal) {
-    if (m_ptr != Ptr::NotPtr) return ArraySpec::Top;
+    if (m_ptr != Ptr::NotPtr) return ArraySpec::Top();
+    if ((m_bits & kArr) == kBottom) return ArraySpec::Top();
     return ArraySpec(m_arrVal->kind());
   }
 
-  assertx(m_arrSpec != ArraySpec::Bottom);
+  assertx(m_arrSpec != ArraySpec::Bottom());
   return m_arrSpec;
 }
 
 inline ClassSpec Type::clsSpec() const {
-  if (!supports(SpecKind::Class)) return ClassSpec::Bottom;
+  if (!supports(SpecKind::Class)) return ClassSpec::Bottom();
 
   // Currently, a Type which supports multiple specializations is trivial
   // along all of them.
-  if (supports(SpecKind::Array)) return ClassSpec::Top;
+  if (supports(SpecKind::Array)) return ClassSpec::Top();
 
   if (m_hasConstVal) {
-    if (m_ptr != Ptr::NotPtr) return ClassSpec::Top;
+    if (m_ptr != Ptr::NotPtr) return ClassSpec::Top();
     return ClassSpec(clsVal(), ClassSpec::ExactTag{});
   }
 
-  assertx(m_clsSpec != ClassSpec::Bottom);
+  assertx(m_clsSpec != ClassSpec::Bottom());
   return m_clsSpec;
 }
 
@@ -633,7 +619,7 @@ inline Type::Type(Type t, ArraySpec arraySpec)
   , m_arrSpec(arraySpec)
 {
   assertx(checkValid());
-  assertx(m_arrSpec != ArraySpec::Bottom);
+  assertx(m_arrSpec != ArraySpec::Bottom());
 }
 
 inline Type::Type(Type t, ClassSpec classSpec)
@@ -644,7 +630,7 @@ inline Type::Type(Type t, ClassSpec classSpec)
   , m_clsSpec(classSpec)
 {
   assertx(checkValid());
-  assertx(m_clsSpec != ClassSpec::Bottom);
+  assertx(m_clsSpec != ClassSpec::Bottom());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

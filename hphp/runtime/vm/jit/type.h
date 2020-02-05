@@ -702,8 +702,7 @@ public:
   static Type Keyset(const RepoAuthType::Array*);
 
   /*
-   * Return a specialized TStaticArr/TStaticVec/
-   * TStaticDict/TStaticKeyset.
+   * Return a specialized TStaticArr/TStaticVec/TStaticDict/TStaticKeyset.
    */
   static Type StaticArray(ArrayData::ArrayKind kind);
   static Type StaticArray(const RepoAuthType::Array* rat);

@@ -1699,6 +1699,11 @@ where
                 )?))
             }
             ArrayCreationExpression(c) => {
+                Self::raise_parsing_error_pos(
+                    &pos,
+                    env,
+                    "Array literals are no longer legal; use varray or darray instead",
+                );
                 /* TODO: Or tie in with other intrinsics and post-process to Array */
                 Ok(E_::Array(Self::could_map(
                     Self::p_afield,

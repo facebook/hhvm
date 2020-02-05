@@ -25,7 +25,7 @@ const \TypedefForString TYPEDEF = "";
 const shape('a' => int, 'b' => string, ...) SHAPE3 = shape('a' => 0, 'b' => "");
 const shape(\WithConst::CSTRING => int) SHAPE2 =
   shape(\WithConst::CSTRING => 0);
-const array<string, int> ARR = [];
+const array<string, int> ARR = array();
 type TypedefForString = string;
 const varray<string> MAP_INDEX = varray[];
 const shape('x' => int, 'y' => \SecondEnum) SHAPE1 =

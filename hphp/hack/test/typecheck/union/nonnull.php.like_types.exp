@@ -26,6 +26,8 @@ File "nonnull.php--file2.php", line 54, characters 3-13:
   mixed
 File "nonnull.php--file2.php", line 57, characters 3-13:
   ~nonnull
+File "nonnull.php--file2.php", line 36, characters 17-18:
+Array literals are no longer legal; use varray or darray instead (Parsing[1002])
 File "nonnull.php--file2.php", line 51, characters 18-19:
 Invalid argument (Typing[4110])
 File "nonnull.php--file2.php", line 60, characters 25-31:

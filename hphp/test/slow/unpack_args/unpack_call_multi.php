@@ -6,7 +6,7 @@ function f($a, $b, $c) {
 }
 
 function main() {
-  $args = ['a', 'b', 'c'];
+  $args = varray['a', 'b', 'c'];
   f(...$args, ...$args);
 }
 

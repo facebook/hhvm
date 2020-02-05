@@ -612,7 +612,7 @@ let rec get_init_from_hint ctx hint =
   | Hprim prim -> get_init_for_prim prim
   | Hoption _ -> "null"
   | Hlike hint -> get_init_from_hint ctx hint
-  | Harray _ -> "[]"
+  | Harray _ -> "array()"
   | Hdarray _ -> "darray[]"
   | Hvarray_or_darray _
   | Hvarray _ ->

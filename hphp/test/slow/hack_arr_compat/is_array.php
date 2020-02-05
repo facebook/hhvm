@@ -93,7 +93,7 @@ function literals() {
   echo "---------------------- is_php_array ----------------\n";
 
   var_dump(HH\is_php_array(false));
-  var_dump(HH\is_php_array([]));
+  var_dump(HH\is_php_array(array()));
   var_dump(HH\is_php_array(vec[]));
   var_dump(HH\is_php_array(dict[]));
   var_dump(HH\is_php_array(keyset[]));
@@ -162,7 +162,7 @@ normal_dict(darray[]);
 echo "---------------------- is_php_array ------------------\n";
 
 normal_php_array(false);
-normal_php_array([]);
+normal_php_array(array());
 normal_php_array(vec[]);
 normal_php_array(dict[]);
 normal_php_array(keyset[]);
@@ -223,7 +223,7 @@ dynamic_dict(darray[]);
 echo "---------------------- is_php_array ------------------\n";
 
 dynamic_php_array(false);
-dynamic_php_array([]);
+dynamic_php_array(array());
 dynamic_php_array(vec[]);
 dynamic_php_array(dict[]);
 dynamic_php_array(keyset[]);

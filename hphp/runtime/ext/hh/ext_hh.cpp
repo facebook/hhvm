@@ -740,7 +740,7 @@ TypedValue dynamicClassMeth(const StringData* cls, const StringData* meth,
                      cls->data(), meth->data())
     );
   }
-  if (!func->isStatic()) {
+  if (!func->isStaticInPrologue()) {
     SystemLib::throwInvalidArgumentExceptionObject(
       folly::sformat("Method {}::{} is not static",
                      cls->data(), meth->data())

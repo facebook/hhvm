@@ -608,37 +608,37 @@ bool can_emit_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
   auto const concrete_params = func->params.size() - (variadic ? 1 : 0);
 
   // Only allowed to overrun the signature if we have somewhere to put it
-  if (!variadic && (fca.hasUnpack() || fca.numArgs > concrete_params)) {
+  if (!variadic && (fca.hasUnpack() || fca.numArgs() > concrete_params)) {
     return false;
   }
 
   // Don't convert an FCall* with unpack unless we're calling a variadic
   // function with the unpack in the right place to pass it directly.
-  if (variadic && fca.hasUnpack() && fca.numArgs != concrete_params) {
+  if (variadic && fca.hasUnpack() && fca.numArgs() != concrete_params) {
     return false;
   }
 
   // Don't convert to FCallBuiltin if there are too many variadic args.
   if (variadic && !fca.hasUnpack() &&
-      fca.numArgs - concrete_params > ArrayData::MaxElemsOnStack) {
+      fca.numArgs() - concrete_params > ArrayData::MaxElemsOnStack) {
     return false;
   }
 
   if (fca.enforceInOut()) {
     // Don't convert functions with mis-annotated inout arguments
     for (int i = 0; i < func->params.size(); ++i) {
-      auto const isInOut = i < fca.numArgs && fca.isInOut(i);
+      auto const isInOut = i < fca.numArgs() && fca.isInOut(i);
       if (func->params[i].inout != isInOut) return false;
     }
 
     // Don't convert functions with extra inout arguments
-    for (int i = func->params.size(); i < fca.numArgs; ++i) {
+    for (int i = func->params.size(); i < fca.numArgs(); ++i) {
       if (fca.isInOut(i)) return false;
     }
   }
 
   // Check for missing non-optional arguments.
-  for (int i = fca.numArgs; i < concrete_params; i++) {
+  for (int i = fca.numArgs(); i < concrete_params; i++) {
     auto const& pi = func->params[i];
     if (pi.defaultValue.m_type == KindOfUninit) {
       return false;
@@ -652,7 +652,7 @@ void finish_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
   BytecodeVec repl;
   assertx(!fca.hasGenerics());
   assertx(!fca.hasUnpack() ||
-          (fca.numArgs + 1 == func->params.size() &&
+          (fca.numArgs() + 1 == func->params.size() &&
            func->params.back().isVariadic));
 
   auto numArgs = fca.numInputs();
@@ -691,16 +691,16 @@ void finish_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
   auto const numParams = static_cast<uint32_t>(func->params.size());
   if (func->cls == nullptr) {
     repl.emplace_back(
-      bc::FCallBuiltin { numParams, numArgs, fca.numRets - 1, func->name });
+      bc::FCallBuiltin { numParams, numArgs, fca.numRets() - 1, func->name });
   } else {
     assertx(func->attrs & AttrStatic);
     auto const fullname =
       makeStaticString(folly::sformat("{}::{}", func->cls->name, func->name));
     repl.emplace_back(
-      bc::FCallBuiltin { numParams, numArgs, fca.numRets - 1, fullname });
+      bc::FCallBuiltin { numParams, numArgs, fca.numRets() - 1, fullname });
   }
-  if (fca.numRets != 1) {
-    repl.emplace_back(bc::PopFrame { fca.numRets });
+  if (fca.numRets() != 1) {
+    repl.emplace_back(bc::PopFrame { fca.numRets() });
   } else {
     repl.emplace_back(bc::PopU2 {});
     repl.emplace_back(bc::PopU2 {});

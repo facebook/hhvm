@@ -413,7 +413,7 @@ bool canFold(ISS& env, const php::Func* func, const FCallArgs& fca,
   if (!func ||
       fca.hasUnpack() ||
       fca.hasGenerics() ||
-      fca.numRets != 1 ||
+      fca.numRets() != 1 ||
       !options.ConstantFoldBuiltins ||
       !will_reduce(env) ||
       any(env.collect.opts & CollectionOpts::Speculating) ||
@@ -461,7 +461,7 @@ bool canFold(ISS& env, const php::Func* func, const FCallArgs& fca,
 
   if (func->params.size()) {
     // Not worth trying if we're going to warn due to missing args
-    return check_nargs_in_range(func, fca.numArgs);
+    return check_nargs_in_range(func, fca.numArgs());
   }
 
   // The function has no args. Check if it's effect free and returns

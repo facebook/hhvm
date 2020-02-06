@@ -524,14 +524,22 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define IMM_KA(n)      encode_member_key(make_member_key(data.mkey), ue);
 #define IMM_LAR(n)     emit_lar(data.locrange);
 #define IMM_ITA(n)     emit_ita(data.ita);
-#define IMM_FCA(n)     encodeFCallArgs(                                    \
-                         ue, data.fca, data.fca.inoutArgs.get(),              \
-                         data.fca.asyncEagerTarget != NoBlockId,           \
-                         [&] {                                             \
-                           set_expected_depth(data.fca.asyncEagerTarget);  \
-                           emit_branch(data.fca.asyncEagerTarget);         \
-                         });                                               \
-                       if (!data.fca.hasUnpack()) ret.containsCalls = true;\
+#define IMM_FCA(n)     encodeFCallArgs(                                 \
+                         ue, data.fca.base(),                           \
+                         data.fca.enforceInOut(),                       \
+                         [&] {                                          \
+                           data.fca.applyIO(                            \
+                             [&] (int numBytes, const uint8_t* inOut) { \
+                               encodeFCallArgsIO(ue, numBytes, inOut);  \
+                             }                                          \
+                           );                                           \
+                         },                                             \
+                         data.fca.asyncEagerTarget() != NoBlockId,      \
+                         [&] {                                          \
+                           set_expected_depth(data.fca.asyncEagerTarget()); \
+                           emit_branch(data.fca.asyncEagerTarget());    \
+                         });                                            \
+                       if (!data.fca.hasUnpack()) ret.containsCalls = true;
 
 #define IMM_NA
 #define IMM_ONE(x)                IMM_##x(1)
@@ -554,14 +562,14 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define POP_CMANY_U3   pop(data.arg1 + 3);
 #define POP_CALLNATIVE pop(data.arg1 + data.arg3);
 #define POP_FCALL(nin, nobj) \
-                       pop(nin + data.fca.numInputs() + 2 + data.fca.numRets);
+                       pop(nin + data.fca.numInputs() + 2 + data.fca.numRets());
 
 #define PUSH_NOV
 #define PUSH_ONE(x)            push(1);
 #define PUSH_TWO(x, y)         push(2);
 #define PUSH_THREE(x, y, z)    push(3);
 #define PUSH_CMANY             push(data.arg1);
-#define PUSH_FCALL             push(data.fca.numRets);
+#define PUSH_FCALL             push(data.fca.numRets());
 #define PUSH_CALLNATIVE        push(data.arg3 + 1);
 
 #define O(opcode, imms, inputs, outputs, flags)                 \

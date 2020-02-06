@@ -187,12 +187,12 @@ std::string show(const Func& func, const Bytecode& bc) {
 #define IMM_KA(n)      ret += " "; append_mkey(data.mkey);
 #define IMM_LAR(n)     ret += " "; append_lar(data.locrange);
 #define IMM_ITA(n)     ret += " "; append_ita(data.ita);
-#define IMM_FCA(n)     do {                                       \
-  auto const aeTarget = data.fca.asyncEagerTarget != NoBlockId    \
-    ? folly::sformat("<aeblk:{}>", data.fca.asyncEagerTarget)     \
-    : "-";                                                        \
-  folly::toAppend(                                                \
-    " ", show(data.fca, data.fca.inoutArgs.get(), aeTarget), &ret);  \
+#define IMM_FCA(n)     do {                                        \
+  auto const aeTarget = data.fca.asyncEagerTarget() != NoBlockId   \
+    ? folly::sformat("<aeblk:{}>", data.fca.asyncEagerTarget())    \
+    : "-";                                                         \
+  folly::toAppend(                                                 \
+    " ", show(data.fca.base(), data.fca.inoutArgs(), aeTarget), &ret);  \
 } while (false);
 
 #define IMM_NA

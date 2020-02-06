@@ -3688,9 +3688,9 @@ bool fcallOptimizeChecks(
   FCallWithFCA fcallWithFCA
 ) {
   auto const numOut = env.index.lookup_num_inout_params(env.ctx, func);
-  if (fca.enforceInOut() && numOut == fca.numRets - 1) {
+  if (fca.enforceInOut() && numOut == fca.numRets() - 1) {
     bool match = true;
-    for (auto i = 0; i < fca.numArgs; ++i) {
+    for (auto i = 0; i < fca.numArgs(); ++i) {
       auto const kind = env.index.lookup_param_prep(env.ctx, func, i);
       if (kind == PrepKind::Unknown) {
         match = false;
@@ -3725,36 +3725,23 @@ bool fcallOptimizeChecks(
 
     if (match) {
       // Optimize away the runtime inout-ness check.
-      reduce(env, fcallWithFCA(FCallArgs(
-        fca.flags, fca.numArgs, fca.numRets, nullptr, fca.asyncEagerTarget,
-        fca.lockWhileUnwinding, fca.skipNumArgsCheck)));
+      reduce(env, fcallWithFCA(fca.withoutInOut()));
       return true;
     }
   }
 
   // Infer whether the callee supports async eager return.
-  if (fca.asyncEagerTarget != NoBlockId &&
+  if (fca.asyncEagerTarget() != NoBlockId &&
       !fca.supportsAsyncEagerReturn()) {
     auto const status = env.index.supports_async_eager_return(func);
     if (status) {
-      auto newFCA = fca;
-      if (*status) {
-        // Callee supports async eager return.
-        newFCA.flags = static_cast<FCallArgs::Flags>(
-          newFCA.flags | FCallArgs::SupportsAsyncEagerReturn);
-      } else {
-        // Callee doesn't support async eager return.
-        newFCA.asyncEagerTarget = NoBlockId;
-      }
-      reduce(env, fcallWithFCA(std::move(newFCA)));
+      reduce(env, fcallWithFCA(fca.fixEager(*status)));
       return true;
     }
   }
 
-  if (!fca.skipNumArgsCheck && fca.numArgs <= func.minNonVariadicParams()) {
-    auto newFCA = fca;
-    newFCA.skipNumArgsCheck = true;
-    reduce(env, fcallWithFCA(std::move(newFCA)));
+  if (!fca.skipNumArgsCheck() && fca.numArgs() <= func.minNonVariadicParams()) {
+    reduce(env, fcallWithFCA(fca.withoutNumArgsCheck()));
     return true;
   }
 
@@ -3775,20 +3762,20 @@ bool fcallTryFold(
     return false;
   }
 
-  assertx(!fca.hasUnpack() && !fca.hasGenerics() && fca.numRets == 1);
+  assertx(!fca.hasUnpack() && !fca.hasGenerics() && fca.numRets() == 1);
   assertx(options.ConstantFoldBuiltins);
 
   auto tried_lookup = false;
   auto ty = [&] () {
     if (foldableFunc->attrs & AttrBuiltin &&
         foldableFunc->attrs & AttrIsFoldable) {
-      auto ret = const_fold(env, fca.numArgs, numExtraInputs, *foldableFunc,
+      auto ret = const_fold(env, fca.numArgs(), numExtraInputs, *foldableFunc,
                             false);
       return ret ? *ret : TBottom;
     }
-    CompactVector<Type> args(fca.numArgs);
+    CompactVector<Type> args(fca.numArgs());
     auto const firstArgPos = numExtraInputs + fca.numInputs() - 1;
-    for (auto i = uint32_t{0}; i < fca.numArgs; ++i) {
+    for (auto i = uint32_t{0}; i < fca.numArgs(); ++i) {
       auto const& arg = topT(env, firstArgPos - i);
       auto const isScalar = is_scalar(arg);
       if (!isScalar &&
@@ -3807,13 +3794,13 @@ bool fcallTryFold(
   if (auto v = tv(ty)) {
     BytecodeVec repl;
     for (uint32_t i = 0; i < numExtraInputs; ++i) repl.push_back(bc::PopC {});
-    for (uint32_t i = 0; i < fca.numArgs; ++i) repl.push_back(bc::PopC {});
+    for (uint32_t i = 0; i < fca.numArgs(); ++i) repl.push_back(bc::PopC {});
     repl.push_back(bc::PopU {});
     repl.push_back(bc::PopU {});
-    if (topT(env, fca.numArgs + 2 + numExtraInputs).subtypeOf(TInitCell)) {
+    if (topT(env, fca.numArgs() + 2 + numExtraInputs).subtypeOf(TInitCell)) {
       repl.push_back(bc::PopC {});
     } else {
-      assertx(topT(env, fca.numArgs + 2 + numExtraInputs).subtypeOf(TUninit));
+      assertx(topT(env, fca.numArgs() + 2 + numExtraInputs).subtypeOf(TUninit));
       repl.push_back(bc::PopU {});
     }
     repl.push_back(gen_constant(*v));
@@ -3850,23 +3837,24 @@ void pushCallReturnType(ISS& env, Type&& ty, const FCallArgs& fca) {
     // The callee function never returns.  It might throw, or loop forever.
     unreachable(env);
   }
-  if (fca.numRets != 1) {
-    assertx(fca.asyncEagerTarget == NoBlockId);
-    for (auto i = uint32_t{0}; i < fca.numRets - 1; ++i) popU(env);
+  auto const numRets = fca.numRets();
+  if (numRets != 1) {
+    assertx(fca.asyncEagerTarget() == NoBlockId);
+    for (auto i = uint32_t{0}; i < numRets - 1; ++i) popU(env);
     if (is_specialized_vec(ty)) {
-      for (int32_t i = 1; i < fca.numRets; i++) {
+      for (int32_t i = 1; i < numRets; i++) {
         push(env, vec_elem(ty, ival(i)).first);
       }
       push(env, vec_elem(ty, ival(0)).first);
     } else {
-      for (int32_t i = 0; i < fca.numRets; i++) push(env, TInitCell);
+      for (int32_t i = 0; i < numRets; i++) push(env, TInitCell);
     }
     return;
   }
-  if (fca.asyncEagerTarget != NoBlockId) {
+  if (fca.asyncEagerTarget() != NoBlockId) {
     push(env, typeFromWH(ty));
     assertx(topC(env) != TBottom);
-    env.propagate(fca.asyncEagerTarget, &env.state);
+    env.propagate(fca.asyncEagerTarget(), &env.state);
     popC(env);
   }
   return push(env, std::move(ty));
@@ -3885,10 +3873,11 @@ void fcallKnownImpl(
   uint32_t numExtraInputs,
   FCallWithFCA fcallWithFCA
 ) {
+  auto const numArgs = fca.numArgs();
   auto returnType = [&] {
-    CompactVector<Type> args(fca.numArgs);
+    CompactVector<Type> args(numArgs);
     auto const firstArgPos = numExtraInputs + fca.numInputs() - 1;
-    for (auto i = uint32_t{0}; i < fca.numArgs; ++i) {
+    for (auto i = uint32_t{0}; i < numArgs; ++i) {
       args[i] = topCV(env, firstArgPos - i);
     }
 
@@ -3901,24 +3890,20 @@ void fcallKnownImpl(
     return ty;
   }();
 
-  if (fca.asyncEagerTarget != NoBlockId && typeFromWH(returnType) == TBottom) {
+  if (fca.asyncEagerTarget() != NoBlockId && typeFromWH(returnType) == TBottom) {
     // Kill the async eager target if the function never returns.
-    auto newFCA = fca;
-    newFCA.asyncEagerTarget = NoBlockId;
-    newFCA.flags = static_cast<FCallArgs::Flags>(
-      newFCA.flags & ~FCallArgs::SupportsAsyncEagerReturn);
-    reduce(env, fcallWithFCA(std::move(newFCA)));
+    reduce(env, fcallWithFCA(std::move(fca.fixEager(false))));
     return;
   }
 
   if (func.name()->isame(s_function_exists.get()) &&
-      (fca.numArgs == 1 || fca.numArgs == 2) &&
+      (numArgs == 1 || numArgs == 2) &&
       !fca.hasUnpack() && !fca.hasGenerics()) {
-    handle_function_exists(env, topT(env, numExtraInputs + fca.numArgs - 1));
+    handle_function_exists(env, topT(env, numExtraInputs + numArgs - 1));
   }
 
   if (func.name()->isame(s_defined.get()) &&
-      fca.numArgs == 1 && !fca.hasUnpack() && !fca.hasGenerics()) {
+      numArgs == 1 && !fca.hasUnpack() && !fca.hasGenerics()) {
     // If someone calls defined('foo') they probably want foo to be
     // defined normally; ie not a persistent constant.
     if (auto const v = tv(topCV(env, numExtraInputs))) {
@@ -3932,7 +3917,7 @@ void fcallKnownImpl(
   for (auto i = uint32_t{0}; i < numExtraInputs; ++i) popC(env);
   if (fca.hasGenerics()) popC(env);
   if (fca.hasUnpack()) popC(env);
-  for (auto i = uint32_t{0}; i < fca.numArgs; ++i) popCV(env);
+  for (auto i = uint32_t{0}; i < numArgs; ++i) popCV(env);
   popU(env);
   popU(env);
   popCU(env);
@@ -3942,18 +3927,20 @@ void fcallKnownImpl(
 void fcallUnknownImpl(ISS& env, const FCallArgs& fca) {
   if (fca.hasGenerics()) popC(env);
   if (fca.hasUnpack()) popC(env);
-  for (auto i = uint32_t{0}; i < fca.numArgs; ++i) popCV(env);
+  auto const numArgs = fca.numArgs();
+  auto const numRets = fca.numRets();
+  for (auto i = uint32_t{0}; i < numArgs; ++i) popCV(env);
   popU(env);
   popU(env);
   popCU(env);
-  if (fca.asyncEagerTarget != NoBlockId) {
-    assertx(fca.numRets == 1);
+  if (fca.asyncEagerTarget() != NoBlockId) {
+    assertx(numRets == 1);
     push(env, TInitCell);
-    env.propagate(fca.asyncEagerTarget, &env.state);
+    env.propagate(fca.asyncEagerTarget(), &env.state);
     popC(env);
   }
-  for (auto i = uint32_t{0}; i < fca.numRets - 1; ++i) popU(env);
-  for (auto i = uint32_t{0}; i < fca.numRets; ++i) push(env, TInitCell);
+  for (auto i = uint32_t{0}; i < numRets - 1; ++i) popU(env);
+  for (auto i = uint32_t{0}; i < numRets; ++i) push(env, TInitCell);
 }
 
 void in(ISS& env, const bc::FCallFuncD& op) {
@@ -4083,14 +4070,16 @@ void fcallObjMethodNullsafe(ISS& env, const FCallArgs& fca, bool extraInput) {
   if (extraInput) repl.push_back(bc::PopC {});
   if (fca.hasGenerics()) repl.push_back(bc::PopC {});
   if (fca.hasUnpack()) repl.push_back(bc::PopC {});
-  for (uint32_t i = 0; i < fca.numArgs; ++i) {
+  auto const numArgs = fca.numArgs();
+  for (uint32_t i = 0; i < numArgs; ++i) {
     assertx(topC(env, repl.size()).subtypeOf(BInitCell));
     repl.push_back(bc::PopC {});
   }
   repl.push_back(bc::PopU {});
   repl.push_back(bc::PopU {});
   repl.push_back(bc::PopC {});
-  for (uint32_t i = 0; i < fca.numRets - 1; ++i) {
+  auto const numRets = fca.numRets();
+  for (uint32_t i = 0; i < numRets - 1; ++i) {
     repl.push_back(bc::PopU {});
   }
   repl.push_back(bc::Null {});
@@ -4518,16 +4507,16 @@ bool objMightHaveConstProps(const Type& t) {
 
 void in(ISS& env, const bc::FCallCtor& op) {
   auto const obj = topC(env, op.fca.numInputs() + 2);
-  assertx(op.fca.numRets == 1);
+  assertx(op.fca.numRets() == 1);
 
   if (!is_specialized_obj(obj)) {
     return fcallUnknownImpl(env, op.fca);
   }
 
-  if (op.fca.lockWhileUnwinding && !objMightHaveConstProps(obj)) {
-    auto newFca = folly::copy(op.fca);
-    newFca.lockWhileUnwinding = false;
-    return reduce(env, bc::FCallCtor { std::move(newFca), op.str2 });
+  if (op.fca.lockWhileUnwinding() && !objMightHaveConstProps(obj)) {
+    return reduce(
+      env, bc::FCallCtor { op.fca.withoutLockWhileUnwinding(), op.str2 }
+    );
   }
 
   auto const dobj = dobj_of(obj);

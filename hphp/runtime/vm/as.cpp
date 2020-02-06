@@ -1427,17 +1427,23 @@ std::map<std::string,ParserFunc> opcode_parsers;
 #define IMM_OA(ty) as.ue->emitByte(read_subop<ty>(as));
 #define IMM_LAR    encodeLocalRange(*as.ue, read_local_range(as))
 #define IMM_ITA    encodeIterArgs(*as.ue, read_iter_args(as))
-#define IMM_FCA do {                                                \
-    auto const fca = read_fcall_args(as, thisOpcode);               \
-    encodeFCallArgs(                                                \
-      *as.ue, std::get<0>(fca), std::get<1>(fca).get(),             \
-      std::get<2>(fca) != "-",                                      \
-      [&] {                                                         \
-        labelJumps.emplace_back(std::get<2>(fca), as.ue->bcPos());  \
-        as.ue->emitInt32(0);                                        \
-      }                                                             \
-    );                                                              \
-    immFCA = std::get<0>(fca);                                      \
+#define IMM_FCA do {                                                    \
+    auto const fca = read_fcall_args(as, thisOpcode);                   \
+    auto const& fcab = std::get<0>(fca);                                \
+    auto const io = std::get<1>(fca).get();                             \
+    encodeFCallArgs(                                                    \
+      *as.ue, fcab,                                                     \
+      io != nullptr,                                                    \
+      [&] {                                                             \
+        encodeFCallArgsIO(*as.ue, (fcab.numArgs+7)/8, io);              \
+      },                                                                \
+      std::get<2>(fca) != "-",                                          \
+      [&] {                                                             \
+        labelJumps.emplace_back(std::get<2>(fca), as.ue->bcPos());      \
+        as.ue->emitInt32(0);                                            \
+      }                                                                 \
+    );                                                                  \
+    immFCA = fcab;                                                      \
   } while (0)
 
 // Record the offset of the immediate so that we can correlate it with its

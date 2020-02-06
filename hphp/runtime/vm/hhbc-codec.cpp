@@ -100,7 +100,7 @@ IterArgs decodeIterArgs(PC& pc) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void encodeFCallArgsBase(UnitEmitter& ue, const FCallArgsBase& fca,
-                         const uint8_t* inoutArgs, bool hasAsyncEagerOffset) {
+                         bool hasInoutArgs, bool hasAsyncEagerOffset) {
   auto constexpr kFirstNumArgsBit = FCallArgsBase::kFirstNumArgsBit;
   bool smallNumArgs =
     fca.skipNumArgsCheck && (((fca.numArgs + 1) << kFirstNumArgsBit) <= 0xff);
@@ -108,7 +108,7 @@ void encodeFCallArgsBase(UnitEmitter& ue, const FCallArgsBase& fca,
   assertx(!(flags & ~FCallArgsBase::kInternalFlags));
   if (smallNumArgs) flags |= (fca.numArgs + 1) << kFirstNumArgsBit;
   if (fca.numRets != 1) flags |= FCallArgsBase::HasInOut;
-  if (inoutArgs != nullptr) flags |= FCallArgsBase::EnforceInOut;
+  if (hasInoutArgs) flags |= FCallArgsBase::EnforceInOut;
   if (hasAsyncEagerOffset) flags |= FCallArgsBase::HasAsyncEagerOffset;
   if (fca.lockWhileUnwinding) {
     // intentionally re-using the SupportsAsyncEagerReturn bit
@@ -121,11 +121,11 @@ void encodeFCallArgsBase(UnitEmitter& ue, const FCallArgsBase& fca,
     ue.emitIVA((uint64_t)fca.numArgs * 2 + fca.skipNumArgsCheck);
   }
   if (fca.numRets != 1) ue.emitIVA(fca.numRets);
+}
 
-  if (inoutArgs != nullptr) {
-    auto const numBytes = (fca.numArgs + 7) / 8;
-    for (auto i = 0; i < numBytes; ++i) ue.emitByte(inoutArgs[i]);
-  }
+void encodeFCallArgsIO(UnitEmitter& ue, int numBytes,
+                       const uint8_t* inoutArgs) {
+  for (auto i = 0; i < numBytes; ++i) ue.emitByte(inoutArgs[i]);
 }
 
 FCallArgs decodeFCallArgs(Op thisOpcode, PC& pc) {

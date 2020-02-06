@@ -133,7 +133,13 @@ pub struct State {
     pub doc_comments: Vec<Option<DocComment>>,
 
     pub local_id_counter: isize,
+
+    // TODO(hrust): this check is to avoid crash in Ocaml.
+    // Remove it after all Ocaml callers are eliminated.
+    pub exp_recursion_depth: usize,
 }
+
+const EXP_RECUSION_LIMIT: usize = 30_000;
 
 #[derive(Debug, Clone)]
 pub struct Env<'a> {
@@ -223,6 +229,7 @@ impl<'a> Env<'a> {
                 local_id_counter: 1,
                 hh_errors: vec![],
                 lint_errors: vec![],
+                exp_recursion_depth: 0,
             })),
         }
     }
@@ -279,6 +286,10 @@ impl<'a> Env<'a> {
         Ref::map(self.state.borrow(), |s| {
             s.doc_comments.last().unwrap_or(&None)
         })
+    }
+
+    fn exp_recursion_depth(&self) -> RefMut<usize> {
+        RefMut::map(self.state.borrow_mut(), |s| &mut s.exp_recursion_depth)
     }
 
     fn next_local_id(&self) -> isize {
@@ -1475,6 +1486,22 @@ where
     }
 
     fn p_expr_impl_(
+        location: ExprLocation,
+        node: &Syntax<T, V>,
+        env: &mut Env,
+        parent_pos: Option<Pos>,
+    ) -> Result<ast::Expr_> {
+        if *env.exp_recursion_depth() >= EXP_RECUSION_LIMIT {
+            Err(Error::Failwith("Expression recursion limit reached".into()))
+        } else {
+            *env.exp_recursion_depth() += 1;
+            let r = Self::p_expr_impl__(location, node, env, parent_pos);
+            *env.exp_recursion_depth() -= 1;
+            r
+        }
+    }
+
+    fn p_expr_impl__(
         location: ExprLocation,
         node: &Syntax<T, V>,
         env: &mut Env,

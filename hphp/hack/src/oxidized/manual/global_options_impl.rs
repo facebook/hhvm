@@ -87,6 +87,8 @@ impl Default for GlobalOptions {
             glean_hostname: String::new(),
             glean_port: 0,
             glean_reponame: String::new(),
+            symbol_write_root_path: String::new(),
+            symbol_write_hhi_path: String::new(),
             po_enable_first_class_function_pointers: false,
         }
     }

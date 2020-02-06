@@ -17,6 +17,8 @@ val set_tc_options : t -> TypecheckerOptions.t -> t
 
 val set_glean_options : t -> GleanOptions.t -> t
 
+val set_symbol_write_options : t -> SymbolWriteOptions.t -> t
+
 val filename : Relative_path.t
 
 val load : Relative_path.t -> ServerArgs.options -> t * ServerLocalConfig.t
@@ -40,6 +42,8 @@ val typechecker_options : t -> TypecheckerOptions.t
 val parser_options : t -> ParserOptions.t
 
 val glean_options : t -> GleanOptions.t
+
+val symbol_write_options : t -> SymbolWriteOptions.t
 
 val formatter_override : t -> Path.t option
 

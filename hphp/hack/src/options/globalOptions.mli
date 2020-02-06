@@ -213,6 +213,10 @@ type t = {
   glean_port: int;
   (* Reponame used for glean connection, default to "www.autocomplete" *)
   glean_reponame: string;
+  (* Path prefix to use for files relative to the repository root when writing symbol info to JSON *)
+  symbol_write_root_path: string;
+  (* Path prefix to use for hhi files when writing symbol info to JSON *)
+  symbol_write_hhi_path: string;
   (* Flag to disallow HH\fun and HH\class_meth in constants and constant initializers *)
   po_disallow_func_ptrs_in_constants: bool;
   (* Flag to report an error on php style anonymous functions *)
@@ -304,6 +308,8 @@ val make :
   ?glean_hostname:string ->
   ?glean_port:int ->
   ?glean_reponame:string ->
+  ?symbol_write_root_path:string ->
+  ?symbol_write_hhi_path:string ->
   ?po_disallow_func_ptrs_in_constants:bool ->
   ?tco_error_php_lambdas:bool ->
   ?tco_disallow_discarded_nullable_awaitables:bool ->
@@ -490,6 +496,10 @@ val glean_port : t -> int
 
 val glean_reponame : t -> string
 
+val symbol_write_root_path : t -> string
+
+val symbol_write_hhi_path : t -> string
+
 val po_disallow_func_ptrs_in_constants : t -> bool
 
 val tco_error_php_lambdas : t -> bool
@@ -497,4 +507,5 @@ val tco_error_php_lambdas : t -> bool
 val tco_disallow_discarded_nullable_awaitables : t -> bool
 
 val po_enable_xhp_class_modifier : t -> bool
+
 val po_enable_first_class_function_pointers : t -> bool

@@ -28,6 +28,7 @@ type t = {
   tc_options: TypecheckerOptions.t;
   parser_options: ParserOptions.t;
   glean_options: GleanOptions.t;
+  symbol_write_options: SymbolWriteOptions.t;
   formatter_override: Path.t option;
   config_hash: string option;
   (* A list of regexps for paths to ignore *)
@@ -382,6 +383,8 @@ let load config_filename options =
       ?glean_hostname:(string_opt "glean_hostname" config)
       ?glean_port:(int_opt "glean_port" config)
       ?glean_reponame:(string_opt "glean_reponame" config)
+      ?symbol_write_root_path:(string_opt "symbol_write_root_path" config)
+      ?symbol_write_hhi_path:(string_opt "symbol_write_hhi_path" config)
       ?po_disallow_func_ptrs_in_constants:
         (bool_opt "disallow_func_ptrs_in_constants" config)
       ?tco_error_php_lambdas:(bool_opt "error_php_lambdas" config)
@@ -403,6 +406,7 @@ let load config_filename options =
       tc_options = global_opts;
       parser_options = global_opts;
       glean_options = global_opts;
+      symbol_write_options = global_opts;
       formatter_override;
       config_hash = Some config_hash;
       ignored_paths;
@@ -421,6 +425,7 @@ let default_config =
     sharedmem_config = GlobalConfig.default_sharedmem_config;
     tc_options = TypecheckerOptions.default;
     glean_options = GleanOptions.default;
+    symbol_write_options = SymbolWriteOptions.default;
     parser_options = ParserOptions.default;
     formatter_override = None;
     config_hash = None;
@@ -436,6 +441,9 @@ let set_tc_options config tcopt = { config with tc_options = tcopt }
 
 let set_glean_options config gleanopt = { config with glean_options = gleanopt }
 
+let set_symbol_write_options config swriteopt =
+  { config with symbol_write_options = swriteopt }
+
 let gc_control config = config.gc_control
 
 let sharedmem_config config = config.sharedmem_config
@@ -445,6 +453,8 @@ let typechecker_options config = config.tc_options
 let parser_options config = config.parser_options
 
 let glean_options config = config.glean_options
+
+let symbol_write_options config = config.symbol_write_options
 
 let formatter_override config = config.formatter_override
 

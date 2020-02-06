@@ -83,6 +83,8 @@ type t = {
   glean_hostname: string;
   glean_port: int;
   glean_reponame: string;
+  symbol_write_root_path: string;
+  symbol_write_hhi_path: string;
   po_disallow_func_ptrs_in_constants: bool;
   tco_error_php_lambdas: bool;
   tco_disallow_discarded_nullable_awaitables: bool;
@@ -241,6 +243,8 @@ let default =
     glean_hostname = "";
     glean_port = 0;
     glean_reponame = "www.autocomplete";
+    symbol_write_root_path = "www";
+    symbol_write_hhi_path = "hhi";
     po_disallow_func_ptrs_in_constants = false;
     tco_error_php_lambdas = false;
     tco_disallow_discarded_nullable_awaitables = false;
@@ -336,6 +340,8 @@ let make
     ?(glean_hostname = default.glean_hostname)
     ?(glean_port = default.glean_port)
     ?(glean_reponame = default.glean_reponame)
+    ?(symbol_write_root_path = default.symbol_write_root_path)
+    ?(symbol_write_hhi_path = default.symbol_write_hhi_path)
     ?(po_disallow_func_ptrs_in_constants =
       default.po_disallow_func_ptrs_in_constants)
     ?(tco_error_php_lambdas = default.tco_error_php_lambdas)
@@ -421,6 +427,8 @@ let make
     glean_hostname;
     glean_port;
     glean_reponame;
+    symbol_write_root_path;
+    symbol_write_hhi_path;
     po_disallow_func_ptrs_in_constants;
     tco_error_php_lambdas;
     tco_disallow_discarded_nullable_awaitables;
@@ -587,6 +595,10 @@ let glean_port t = t.glean_port
 
 let glean_reponame t = t.glean_reponame
 
+let symbol_write_root_path t = t.symbol_write_root_path
+
+let symbol_write_hhi_path t = t.symbol_write_hhi_path
+
 let set_global_inference t = { t with tco_global_inference = true }
 
 let po_parser_errors_only t = t.po_parser_errors_only
@@ -599,5 +611,6 @@ let tco_disallow_discarded_nullable_awaitables t =
   t.tco_disallow_discarded_nullable_awaitables
 
 let po_enable_xhp_class_modifier t = t.po_enable_xhp_class_modifier
+
 let po_enable_first_class_function_pointers t =
   t.po_enable_first_class_function_pointers

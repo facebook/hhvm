@@ -18,6 +18,7 @@
     experiments_config_file_stubs
     file_info
     glean_options
+    symbol_write_options
     parser_options
     procs_bucket
     pos

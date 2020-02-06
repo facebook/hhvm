@@ -98,6 +98,7 @@ type env = {
   tcopt: TypecheckerOptions.t;
   popt: ParserOptions.t;
   gleanopt: GleanOptions.t;
+  swriteopt: SymbolWriteOptions.t;
   (* Errors are indexed by files that were known to GENERATE errors in
    * corresponding phases. Note that this is different from HAVING errors -
    * it's possible for checking of A to generate error in B - in this case

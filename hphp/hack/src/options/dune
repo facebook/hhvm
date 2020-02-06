@@ -46,6 +46,15 @@
   (preprocess (pps ppx_deriving.std)))
 
 (library
+  (name symbol_write_options)
+  (wrapped false)
+  (modules
+    symbolWriteOptions)
+  (libraries
+    global_options)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
   (name typechecker_options)
   (wrapped false)
   (modules

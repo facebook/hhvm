@@ -294,6 +294,7 @@ let make_env ?init_id config =
     tcopt;
     popt = ServerConfig.parser_options config;
     gleanopt = ServerConfig.glean_options config;
+    swriteopt = ServerConfig.symbol_write_options config;
     naming_table = Naming_table.empty;
     typing_service =
       {

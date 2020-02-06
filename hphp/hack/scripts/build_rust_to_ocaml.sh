@@ -30,6 +30,7 @@ if [ -z ${HACKDEBUG+1} ]; then
 fi
 ( # add CARGO_BIN to PATH so that rustc and other tools can be invoked
   [[ -n "$CARGO_BIN" ]] && PATH="$CARGO_BIN:$PATH";
+  trap "[ -e ./Cargo.toml ] && rm ./Cargo.toml" EXIT
   # note: --manifest-path doesn't work with custom toolchain, so do cd
   cd "$HACK_SOURCE_ROOT" && \
   cp ./.cargo/Cargo.toml.ocaml_build ./Cargo.toml && \
@@ -40,5 +41,4 @@ fi
     --package "$pkg" \
     $profile_flags \
     "$@";
-  [ -e ./Cargo.toml ] && rm ./Cargo.toml;
 ) && cp "${TARGET_DIR}/$profile/lib$lib.a" "lib${lib}_stubs.a"

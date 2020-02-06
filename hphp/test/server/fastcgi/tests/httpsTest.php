@@ -3,7 +3,7 @@
 require_once('test_base.inc');
 
 function httpsTestController($serverPort) {
-  $args = array('HTTPS' => '');
+  $args = darray['HTTPS' => ''];
   var_dump(request('localhost', $serverPort, "test_https.php",
                   darray[], darray[], $args));
 }

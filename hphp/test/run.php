@@ -45,37 +45,37 @@ function get_expect_file_and_type($test, $options) {
   // .typechecker files are for typechecker (hh_server --check) test runs.
   $types = null;
   if (isset($options['typechecker'])) {
-    $types = array('typechecker.expect', 'typechecker.expectf');
+    $types = varray['typechecker.expect', 'typechecker.expectf'];
   } else {
-    $types = array('expect', 'hhvm.expect', 'expectf', 'hhvm.expectf',
-                   'expectregex');
+    $types = varray['expect', 'hhvm.expect', 'expectf', 'hhvm.expectf',
+                   'expectregex'];
   }
   if (isset($options['repo'])) {
     if (file_exists($test . '.hhbbc_assert')) {
-      return array($test . '.hhbbc_assert', 'expectf');
+      return varray[$test . '.hhbbc_assert', 'expectf'];
     }
     foreach ($types as $type) {
       $fname = "$test.$type-repo";
       if (file_exists($fname)) {
-        return array($fname, $type);
+        return varray[$fname, $type];
       }
     }
   }
   foreach ($types as $type) {
     $fname = "$test.$type";
     if (file_exists($fname)) {
-      return array($fname, $type);
+      return varray[$fname, $type];
     }
   }
-  return array(null, null);
+  return varray[null, null];
 }
 
 function multi_request_modes() {
-  return array('relocate',
+  return varray['relocate',
                'retranslate-all',
                'recycle-tc',
                'jit-serialize',
-               'cli-server');
+               'cli-server'];
 }
 
 function has_multi_request_mode($options) {
@@ -209,7 +209,7 @@ function check_executable($path, $typechecker) {
   if (!is_file($rpath)) {
     error($msg);
   }
-  $output = array();
+  $output = varray[];
   $return_var = -1;
   exec($rpath . " --help 2> /dev/null", inout $output, inout $return_var);
   $str = implode($output);
@@ -221,24 +221,24 @@ function check_executable($path, $typechecker) {
 }
 
 function hhvm_binary_routes() {
-  return array(
+  return darray[
     "buck"    => "/buck-out/gen/hphp/hhvm/hhvm",
     "cmake"   => "/hphp/hhvm"
-  );
+  ];
 }
 
 function hh_server_binary_routes() {
-  return array(
+  return darray[
     "buck"    => "/buck-out/gen/hphp/hack/src/hh_server",
     "cmake"   => "/hphp/hack/bin"
-  );
+  ];
 }
 
 function hh_codegen_binary_routes() {
-  return array(
+  return darray[
     "buck"    => "/buck-out/bin/hphp/hack/src/hh_single_compile",
     "cmake"   => "/hphp/hack/bin"
-  );
+  ];
 }
 
 // For Facebook: We have several build systems, and we can use any of them in
@@ -255,7 +255,7 @@ function check_for_multiple_default_binaries($typechecker) {
   $routes = $typechecker ? hh_server_binary_routes() : hhvm_binary_routes();
   $binary = $typechecker ? "hh_server" : "hhvm";
 
-  $found = array();
+  $found = varray[];
   foreach ($routes as $_ => $path) {
     $abs_path = $home . $path . "/" . $binary;
     if (file_exists($abs_path)) {
@@ -470,7 +470,7 @@ function rel_path($to) {
 
 function get_options($argv) {
   # Options marked * affect test behavior, and need to be reported by list_tests
-  $parameters = array(
+  $parameters = darray[
     '*env:' => '',
     'exclude:' => 'e:',
     'exclude-pattern:' => 'E:',
@@ -515,10 +515,10 @@ function get_options($argv) {
     '*ignore-oids' => '',
     'jitsample:' => '',
     '*hh_single_type_check:' => '',
-  );
-  $options = array();
-  $files = array();
-  $recorded = array();
+  ];
+  $options = darray[];
+  $files = varray[];
+  $recorded = varray[];
 
   /*
    * '-' argument causes all future arguments to be treated as filenames, even
@@ -541,7 +541,7 @@ function get_options($argv) {
 
       foreach ($parameters as $long => $short) {
         if ($arg == '-'.str_replace(':', '', $short) ||
-            $arg == '--'.str_replace(array(':', '*'), array('', ''), $long)) {
+            $arg == '--'.str_replace(varray[':', '*'], varray['', ''], $long)) {
           $record = substr($long, 0, 1) === '*';
           if ($record) $recorded[] = $arg;
           if (substr($long, -1, 1) == ':') {
@@ -550,7 +550,7 @@ function get_options($argv) {
           } else {
             $value = true;
           }
-          $options[str_replace(array(':', '*'), array('', ''), $long)] = $value;
+          $options[str_replace(varray[':', '*'], varray['', ''], $long)] = $value;
           $found = true;
           break;
         }
@@ -607,7 +607,7 @@ function get_options($argv) {
     exit(1);
   }
 
-  return array($options, $files);
+  return varray[$options, $files];
 }
 
 /*
@@ -645,7 +645,7 @@ function canonical_path($test) {
  * suites are, to avoid typing 'hphp/test/foo'.
  */
 function find_test_files($file) {
-  $mappage = array(
+  $mappage = darray[
     'quick'      => 'hphp/test/quick',
     'slow'       => 'hphp/test/slow',
     'debugger'   => 'hphp/test/server/debugger/tests',
@@ -660,7 +660,7 @@ function find_test_files($file) {
     'zend_ext_nz' => 'hphp/test/zend/good/ext/[n-z]*',
     'zend_Zend'   => 'hphp/test/zend/good/Zend',
     'zend_tests'  => 'hphp/test/zend/good/tests',
-  );
+  ];
 
   $pattern = $mappage[$file] ?? null;
   if ($pattern is nonnull) {
@@ -675,14 +675,14 @@ function find_test_files($file) {
     return $matches;
   }
 
-  return array($file);
+  return varray[$file];
 }
 
 // Some tests have to be run together in the same test bucket, serially, one
 // after other in order to avoid races and other collisions.
 function serial_only_tests($tests) {
   if (is_testing_dso_extension()) {
-    return array();
+    return varray[];
   }
   // Add a <testname>.php.serial file to make your test run in the serial
   // bucket.
@@ -699,7 +699,7 @@ function serial_only_tests($tests) {
 // "find" command (especially because "escapeshellarg()" adds two single
 // quote characters to each file), so we split "files" into chunks below.
 function exec_find(mixed $files, string $extra): mixed {
-  $results = array();
+  $results = varray[];
   foreach (array_chunk($files, 500) as $chunk) {
     $efa = implode(' ', array_map(fun('escapeshellarg'), $chunk));
     $output = shell_exec("find $efa $extra");
@@ -713,15 +713,15 @@ function exec_find(mixed $files, string $extra): mixed {
 
 function find_tests($files, array $options = null) {
   if (!$files) {
-    $files = array('quick');
+    $files = varray['quick'];
   }
-  if ($files == array('all')) {
-    $files = array('quick', 'slow', 'zend', 'fastcgi');
+  if ($files == varray['all']) {
+    $files = varray['quick', 'slow', 'zend', 'fastcgi'];
     if (is_dir(hphp_home() . '/hphp/facebook/test')) {
       $files[] = 'facebook';
     }
   }
-  $ft = array();
+  $ft = varray[];
   foreach ($files as $file) {
     $ft = array_merge($ft, find_test_files($file));
   }
@@ -814,7 +814,7 @@ function list_tests($files, $options) {
   foreach (find_tests($files, $options) as $test) {
     print str_replace('\\', '\\\\',
                       Status::jsonEncode(
-                        array('args' => $args, 'name' => $test)
+                        darray['args' => $args, 'name' => $test]
                       )
                      )."\n";
   }
@@ -876,7 +876,7 @@ function mode_cmd($options) {
     case 'interp':
       return "$repo_args -vEval.Jit=0";
     case 'interp,jit':
-      return array("$repo_args -vEval.Jit=0", $jit_args);
+      return varray["$repo_args -vEval.Jit=0", $jit_args];
     default:
       error("-m must be one of jit | pgo | interp | interp,jit. Got: '$mode'");
   }
@@ -896,9 +896,9 @@ function extra_args($options): string {
 function hhvm_cmd_impl($options, $config, $test, ...$extra_args) {
   $modes = (array)mode_cmd($options);
 
-  $cmds = array();
+  $cmds = varray[];
   foreach ($modes as $mode_num => $mode) {
-    $args = array(
+    $args = varray[
       hhvm_path(),
       '-c',
       $config,
@@ -921,7 +921,7 @@ function hhvm_cmd_impl($options, $config, $test, ...$extra_args) {
       '-vEval.EmbeddedDataExtractPath='
         .escapeshellarg(bin_root().'/hhvm_%{type}_%{buildid}'),
       extra_args($options),
-    );
+    ];
 
     if (isset($options['hackc'])) {
       $args[] = '-vEval.HackCompilerCommand="'.hh_codegen_cmd($options).'"';
@@ -1067,7 +1067,7 @@ function hhvm_cmd($options, $test, $test_run = null, $is_temp_file = false) {
   }
 
   $env = $_ENV;
-  $extra_env = array();
+  $extra_env = varray[];
 
   // Apply the --env option
   if (isset($options['env'])) {
@@ -1115,7 +1115,7 @@ function hhvm_cmd($options, $test, $test_run = null, $is_temp_file = false) {
     $cmd = $cmds . $cmd;
   }
 
-  return array($cmd, $env);
+  return varray[$cmd, $env];
 }
 
 function hphp_cmd($options, $test, $program) {
@@ -1124,11 +1124,11 @@ function hphp_cmd($options, $test, $program) {
   $compiler_args = "";
   if (isset($options['hackc'])) {
     $hh_single_compile = hh_codegen_path();
-    $compiler_args = implode(" ", array(
+    $compiler_args = implode(" ", varray[
       '-vRuntime.Eval.HackCompilerUseEmbedded=false',
       "-vRuntime.Eval.HackCompilerInheritConfig=true",
       "-vRuntime.Eval.HackCompilerCommand=\"{$hh_single_compile} -v Hack.Compiler.SourceMapping=1 --daemon --dump-symbol-refs\""
-    ));
+    ]);
   }
 
   $hdf_suffix = ".use.for.ini.migration.testing.only.hdf";
@@ -1146,7 +1146,7 @@ function hphp_cmd($options, $test, $program) {
     }
   }
 
-  return implode(" ", array(
+  return implode(" ", varray[
     hhvm_path(),
     '--hphp',
     '-vUseHHBBC='. (repo_separate($options, $test) ? 'false' : 'true'),
@@ -1165,11 +1165,11 @@ function hphp_cmd($options, $test, $program) {
     $extra_args,
     $compiler_args,
     read_opts_file("$test.hphp_opts"),
-  ));
+  ]);
 }
 
 function hhbbc_cmd($options, $test, $program) {
-  return implode(" ", array(
+  return implode(" ", varray[
     hhvm_path(),
     '--hhbbc',
     '--no-logging',
@@ -1179,7 +1179,7 @@ function hhbbc_cmd($options, $test, $program) {
       .escapeshellarg(bin_root().'/hackc_%{schema}'),
     read_opts_file("$test.hhbbc_opts"),
     "-o \"$test.repo/$program.hhbbc\" \"$test.repo/$program.hhbc\"",
-  ));
+  ]);
 }
 
 // Execute $cmd and return its output, including any stacktrace.log
@@ -1187,9 +1187,9 @@ function hhbbc_cmd($options, $test, $program) {
 function exec_with_stack($cmd) {
   $pipes = null;
   $proc = proc_open($cmd,
-                    array(0 => array('pipe', 'r'),
-                          1 => array('pipe', 'w'),
-                          2 => array('pipe', 'w')), inout $pipes);
+                    darray[0 => varray['pipe', 'r'],
+                          1 => varray['pipe', 'w'],
+                          2 => varray['pipe', 'w']], inout $pipes);
   fclose($pipes[0]);
   $s = '';
   $all_selects_failed=true;
@@ -1198,7 +1198,7 @@ function exec_with_stack($cmd) {
   while (true) {
     $now = microtime(true);
     if ($now >= $end) break;
-    $read = array($pipes[1], $pipes[2]);
+    $read = varray[$pipes[1], $pipes[2]];
     $write = null;
     $except = null;
     $available = @stream_select(
@@ -1312,7 +1312,7 @@ function hh_server_cmd($options, $test) {
     );
     fclose($f);
   }
-  return array($cmd, ' ', $temp_dir);
+  return varray[$cmd, ' ', $temp_dir];
 }
 
 
@@ -1508,7 +1508,7 @@ class Queue {
 
 
 class Status {
-  private static $results = array();
+  private static $results = varray[];
   private static $mode = 0;
 
   private static $use_color = false;
@@ -1524,7 +1524,7 @@ class Status {
 
   public static $passed = 0;
   public static $skipped = 0;
-  public static $skip_reasons = array();
+  public static $skip_reasons = darray[];
   public static $failed = 0;
 
   const MODE_NORMAL = 0;
@@ -1648,18 +1648,18 @@ class Status {
   }
 
   public static function pass($test, $detail, $time, $stime, $etime) {
-    self::$results[] = array('name' => $test,
+    self::$results[] = darray['name' => $test,
                              'status' => 'passed',
                              'start_time' => $stime,
                              'end_time' => $etime,
-                             'time' => $time);
+                             'time' => $time];
     $how = $detail === 'pass-server' ? self::PASS_SERVER :
       ($detail === 'skip-server' ? self::SKIP_SERVER : self::PASS_CLI);
-    self::send(self::MSG_TEST_PASS, array($test, $how, $time, $stime, $etime));
+    self::send(self::MSG_TEST_PASS, varray[$test, $how, $time, $stime, $etime]);
   }
 
   public static function skip($test, $reason, $time, $stime, $etime) {
-    self::$results[] = array(
+    self::$results[] = darray[
       'name' => $test,
       /* testpilot needs a positive response for every test run, report
        * that this test isn't relevant so it can silently drop. */
@@ -1669,21 +1669,21 @@ class Status {
       'start_time' => $stime,
       'end_time' => $etime,
       'time' => $time,
-    );
+    ];
     self::send(self::MSG_TEST_SKIP,
-               array($test, $reason, $time, $stime, $etime));
+               varray[$test, $reason, $time, $stime, $etime]);
   }
 
   public static function fail($test, $time, $stime, $etime, $diff) {
-    self::$results[] = array(
+    self::$results[] = darray[
       'name' => $test,
       'status' => 'failed',
       'details' => self::utf8Sanitize($diff),
       'start_time' => $stime,
       'end_time' => $etime,
       'time' => $time
-    );
-    self::send(self::MSG_TEST_FAIL, array($test, $time, $stime, $etime));
+    ];
+    self::send(self::MSG_TEST_FAIL, varray[$test, $time, $stime, $etime]);
   }
 
   public static function handle_message($type, $message) {
@@ -1845,9 +1845,9 @@ class Status {
   }
 
   public static function sayTestpilot($test, $status, $stime, $etime) {
-    $start = array('op' => 'start', 'test' => $test);
-    $end = array('op' => 'test_done', 'test' => $test, 'status' => $status,
-                 'start_time' => $stime, 'end_time' => $etime);
+    $start = darray['op' => 'start', 'test' => $test];
+    $end = darray['op' => 'test_done', 'test' => $test, 'status' => $status,
+                 'start_time' => $stime, 'end_time' => $etime];
     if ($status == 'failed') {
       $end['details'] = self::utf8Sanitize(@file_get_contents("$test.diff"));
     }
@@ -1885,11 +1885,11 @@ class Status {
 
   <<__Memoize>>
   public static function getSTTY() {
-    $descriptorspec = array(1 => array("pipe", "w"), 2 => array("pipe", "w"));
+    $descriptorspec = darray[1 => varray["pipe", "w"], 2 => varray["pipe", "w"]];
     $pipes = null;
     $process = proc_open(
       'stty -a', $descriptorspec, inout $pipes, null, null,
-      array('suppress_errors' => true)
+      darray['suppress_errors' => true]
     );
     $stty = stream_get_contents($pipes[1]);
     proc_close($process);
@@ -1930,7 +1930,7 @@ function clean_intermediate_files($test, $options) {
   if (isset($options['no-clean'])) {
     return;
   }
-  $exts = array(
+  $exts = varray[
     // normal test output
     'out',
     'diff',
@@ -1949,7 +1949,7 @@ function clean_intermediate_files($test, $options) {
     '1.autoloadDB',
     '1.autoloadDB-shm',
     '1.autoloadDB-wal',
-  );
+  ];
   foreach ($exts as $ext) {
     $file = "$test.$ext";
     if (file_exists($file)) {
@@ -2024,11 +2024,11 @@ function skip_test($options, $test) {
   list($hhvm, $_) = hhvm_cmd($options_without_repo, $test, $skipif_test);
   if (is_array($hhvm)) $hhvm=$hhvm[0];
 
-  $descriptorspec = array(
-    0 => array("pipe", "r"),
-    1 => array("pipe", "w"),
-    2 => array("pipe", "w"),
-  );
+  $descriptorspec = darray[
+    0 => varray["pipe", "r"],
+    1 => varray["pipe", "w"],
+    2 => varray["pipe", "w"],
+  ];
   $pipes = null;
   $process = proc_open("$hhvm $test 2>&1", $descriptorspec, inout $pipes);
   if (!is_resource($process)) {
@@ -2109,8 +2109,8 @@ function count_array_diff($ar1, $ar2, $is_reg, $idx1, $idx2, $cnt1, $cnt2,
 function generate_array_diff($ar1, $ar2, $is_reg, $w) {
   $idx1 = 0; $cnt1 = @count($ar1);
   $idx2 = 0; $cnt2 = @count($ar2);
-  $old1 = array();
-  $old2 = array();
+  $old1 = darray[];
+  $old2 = darray[];
 
   while ($idx1 < $cnt1 && $idx2 < $cnt2) {
     if (comp_line($ar1[$idx1], $ar2[$idx2], $is_reg)) {
@@ -2134,7 +2134,7 @@ function generate_array_diff($ar1, $ar2, $is_reg, $w) {
     }
   }
 
-  $diff = array();
+  $diff = varray[];
   $old1_keys = array_keys($old1);
   $old2_keys = array_keys($old2);
   $old1_values = array_values($old1);
@@ -2184,8 +2184,8 @@ function generate_diff($wanted, $wanted_re, $output)
   } else {
     if (preg_match_with_matches('/^\((.*)\)\{(\d+)\}$/s', $wanted_re, inout $m)) {
       $t = explode("\n", $m[1]);
-      $r = array();
-      $w2 = array();
+      $r = varray[];
+      $w2 = varray[];
       for ($i = 0; $i < $m[2]; $i++) {
         foreach ($t as $v) {
           $r[] = $v;
@@ -2205,12 +2205,12 @@ function generate_diff($wanted, $wanted_re, $output)
 }
 
 function dump_hhas_cmd($hhvm_cmd, $test, $hhas_file) {
-  $dump_flags = implode(' ', array(
+  $dump_flags = implode(' ', varray[
     '-vEval.AllowHhas=true',
     '-vEval.DumpHhas=1',
     '-vEval.DumpHhasToFile='.escapeshellarg($hhas_file),
     '-vEval.LoadFilepathFromUnitCache=0',
-  ));
+  ]);
   $cmd = str_replace(' -- ', " $dump_flags -- ", $hhvm_cmd);
   if ($cmd == $hhvm_cmd) $cmd .= " $dump_flags";
   return $cmd;
@@ -2274,7 +2274,7 @@ function run_config_server($options, $test) {
   curl_close($ch);
   $output = trim($output);
 
-  return array($output, '');
+  return varray[$output, ''];
 }
 
 function run_config_cli($options, $test, $cmd, $cmd_env) {
@@ -2283,11 +2283,11 @@ function run_config_cli($options, $test, $cmd, $cmd_env) {
     $cmd_env['HPHP_TRACE_FILE'] = $test . '.log';
   }
 
-  $descriptorspec = array(
-    0 => array("pipe", "r"),
-    1 => array("pipe", "w"),
-    2 => array("pipe", "w"),
-  );
+  $descriptorspec = darray[
+    0 => varray["pipe", "r"],
+    1 => varray["pipe", "w"],
+    2 => varray["pipe", "w"],
+  ];
   $pipes = null;
   if (isset($options['typechecker'])) {
     $process = proc_open(
@@ -2311,7 +2311,7 @@ function run_config_cli($options, $test, $cmd, $cmd_env) {
   fclose($pipes[2]);
   proc_close($process);
 
-  return array($output, $stderr);
+  return varray[$output, $stderr];
 }
 
 function replace_object_resource_ids($str, $replacement) {
@@ -2430,22 +2430,22 @@ function run_config_post($outputs, $test, $options) {
     $wanted_re = $temp;
 
     $wanted_re = str_replace(
-      array('%binary_string_optional%'),
+      varray['%binary_string_optional%'],
       'string',
       $wanted_re
     );
     $wanted_re = str_replace(
-      array('%unicode_string_optional%'),
+      varray['%unicode_string_optional%'],
       'string',
       $wanted_re
     );
     $wanted_re = str_replace(
-      array('%unicode\|string%', '%string\|unicode%'),
+      varray['%unicode\|string%', '%string\|unicode%'],
       'string',
       $wanted_re
     );
     $wanted_re = str_replace(
-      array('%u\|b%', '%b\|u%'),
+      varray['%u\|b%', '%b\|u%'],
       '',
       $wanted_re
     );
@@ -2946,8 +2946,8 @@ SHIP
 }
 
 function print_failure($argv, $results, $options) {
-  $failed = array();
-  $passed = array();
+  $failed = varray[];
+  $passed = varray[];
   foreach ($results as $result) {
     if ($result['status'] === 'failed') {
       $failed[] = $result['name'];
@@ -3061,11 +3061,11 @@ function start_server_proc($options, $config, $port) {
     echo "Starting server '$command'\n";
   }
 
-  $descriptors = array(
-    0 => array('file', '/dev/null', 'r'),
-    1 => array('file', '/dev/null', 'w'),
-    2 => array('file', '/dev/null', 'w'),
-  );
+  $descriptors = darray[
+    0 => varray['file', '/dev/null', 'r'],
+    1 => varray['file', '/dev/null', 'w'],
+    2 => varray['file', '/dev/null', 'w'],
+  ];
 
   $dummy = null;
   $proc = proc_open($command, $descriptors, inout $dummy);
@@ -3091,17 +3091,17 @@ final class ServerRef {
  * information about the server.
  */
 function start_servers($options, $configs) {
-  $starting = array();
+  $starting = varray[];
   foreach ($configs as $config) {
     $starting[] = start_server_proc($options, $config, find_open_port());
   }
 
   $start_time = microtime(true);
-  $servers = array('pids' => array(), 'configs' => array());
+  $servers = darray['pids' => darray[], 'configs' => darray[]];
 
   // Wait for all servers to come up.
   while (count($starting) > 0) {
-    $still_starting = array();
+    $still_starting = varray[];
 
     foreach ($starting as $server) {
       $new_status = proc_get_status($server['proc']);
@@ -3250,7 +3250,7 @@ function main($argv) {
     if (isset($options['repo']) || isset($options['typechecker'])) {
       error("Server mode repo tests are not supported");
     }
-    $configs = array();
+    $configs = darray[];
 
     /* We need to start up a separate server process for each config file
      * found. */
@@ -3275,7 +3275,7 @@ function main($argv) {
 
   // Try to construct the buckets so the test results are ready in
   // approximately alphabetical order.
-  $test_buckets = array();
+  $test_buckets = varray[];
   $i = 0;
 
   // Get the serial tests to be in their own bucket later.
@@ -3291,7 +3291,7 @@ function main($argv) {
   foreach ($tests as $test) {
     if (!in_array($test, $serial_tests)) {
       if (!array_key_exists($i, $test_buckets)) {
-       $test_buckets[$i] = array();
+       $test_buckets[$i] = varray[];
       }
       $test_buckets[$i][] = $test;
       $i = ($i + 1) % $parallel_threads;
@@ -3317,7 +3317,7 @@ function main($argv) {
        : $options['threads'] - 1; // all parallel filled; last thread; 0 indexed
     foreach ($serial_tests as $test) {
       if (!array_key_exists($i, $test_buckets)) {
-        $test_buckets[$i] = array();
+        $test_buckets[$i] = varray[];
       }
       $test_buckets[$i][] = $test;
     }
@@ -3375,9 +3375,9 @@ function main($argv) {
   Status::started();
 
   // Fork "worker" children (if needed).
-  $children = array();
+  $children = darray[];
   // A poor man's shared memory.
-  $bad_test_files = array();
+  $bad_test_files = varray[];
   if (Status::$nofork) {
     $bad_test_file = tempnam('/tmp', 'test-run-');
     $bad_test_files[] = $bad_test_file;
@@ -3455,7 +3455,7 @@ function main($argv) {
   }
 
   // aggregate results
-  $results = array();
+  $results = darray[];
   foreach ($bad_test_files as $bad_test_file) {
     $json = json_decode(file_get_contents($bad_test_file), true);
     if (!is_array($json)) {
@@ -3471,8 +3471,8 @@ function main($argv) {
   // print results
   if (isset($options['record-failures'])) {
     $fail_file = $options['record-failures'];
-    $failed_tests = array();
-    $prev_failing = array();
+    $failed_tests = varray[];
+    $prev_failing = varray[];
     if (file_exists($fail_file)) {
       $prev_failing = explode("\n", file_get_contents($fail_file));
     }
@@ -3499,7 +3499,7 @@ function main($argv) {
     sort(inout $failed_tests);
     file_put_contents($fail_file, implode("\n", $failed_tests));
   } else if (isset($options['testpilot'])) {
-    Status::say(array('op' => 'all_done', 'results' => $results));
+    Status::say(darray['op' => 'all_done', 'results' => $results]);
     return $return_value;
   } else if (!$return_value) {
     print_success($tests, $results, $options);

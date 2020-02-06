@@ -51,7 +51,7 @@ class TimeHHOperations {
     echo "\n{$opname} result = {$result}";
 
     // Record time
-    $time = array();
+    $time = darray[];
     for ($iter = 0; $iter < $run_count; $iter++) {
       $start_time = microtime(true);
       $result = $time_function(10000);
@@ -90,9 +90,9 @@ class TimeHHOperations {
     echo "\n{$opname} time measurement complete. Run count = {$run_count}.";
     echo "\n";
     // Write stats to csv file
-    fputcsv(TimeHhOperations::$file, array($opname,
+    fputcsv(TimeHhOperations::$file, varray[$opname,
     $max / TimeHHOperations::$nmedian, $min / TimeHHOperations::$nmedian,
-    $mean / TimeHHOperations::$nmedian, $median / TimeHHOperations::$nmedian));
+    $mean / TimeHHOperations::$nmedian, $median / TimeHHOperations::$nmedian]);
   }
 }
 
@@ -1040,7 +1040,7 @@ class Runner {
     }
 
     // Cache info
-    $cachefiles = array();
+    $cachefiles = darray[];
     $dirpath = '/sys/devices/system/cpu/cpu0/cache/';
     $dirhandle = opendir($dirpath);
     $count = 0;
@@ -1052,8 +1052,8 @@ class Runner {
     }
     closedir($dirhandle);
     $num_caches = $count;
-    $cachesizes = array();
-    $cachetypes = array();
+    $cachesizes = darray[];
+    $cachetypes = darray[];
     for ($count = 0 ; $count < $num_caches; $count++) {
       $fh_size = fopen($dirpath . $cachefiles[$count] . "/size", "r");
       $fh_type = fopen($dirpath . $cachefiles[$count] . "/type", "r");

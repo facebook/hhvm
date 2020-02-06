@@ -9,19 +9,19 @@ $customArgs = "-d hhvm.server.thread_count=1";
 
 // Test static content request before the creation of any HPHP sessions
 requestAll(
-  array(
+  varray[
     "static_content.txt",
     "test_get.php?name=Foo",
-  ),
+  ],
   $customArgs
 );
 
 // Test static content request after a HPHP session has terminated
 requestAll(
-  array(
+  varray[
     "test_get.php?name=Foo",
     "static_content.txt",
-  ),
+  ],
   $customArgs
 );
 }

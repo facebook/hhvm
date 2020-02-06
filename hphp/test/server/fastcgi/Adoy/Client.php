@@ -91,7 +91,7 @@ class Client
      *
      * @var array
      */
-    private $_requests = array();
+    private $_requests = darray[];
 
     /**
      * Use persistent sockets to connect to backend
@@ -308,7 +308,7 @@ class Client
      */
     private function readNvpair($data, $length = null)
     {
-        $array = array();
+        $array = darray[];
 
         if ($length === null) {
             $length = \strlen($data);
@@ -347,7 +347,7 @@ class Client
      */
     private function decodePacketHeader($data)
     {
-        $ret = array();
+        $ret = darray[];
         $ret['version']       = \ord($data{0});
         $ret['type']          = \ord($data{1});
         $ret['requestId']     = (\ord($data{2}) << 8) + \ord($data{3});
@@ -477,10 +477,10 @@ class Client
             throw new \Exception('Failed to write request to socket');
         }
 
-        $this->_requests[$id] = array(
+        $this->_requests[$id] = darray[
             'state' => self::REQ_STATE_WRITTEN,
             'response' => null
-        );
+        ];
 
         return $id;
     }

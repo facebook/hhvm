@@ -2,7 +2,7 @@
 $realm = 'Restricted area';
 
 //user => password
-$users = array('admin' => 'mypass');
+$users = darray['admin' => 'mypass'];
 
 if (!($_SERVER['PHP_AUTH_DIGEST'] ?? false)) {
     header('HTTP/1 . 1 401 Unauthorized');
@@ -37,9 +37,9 @@ echo 'You are logged in as: ' . $data['username'];
 function http_digest_parse($txt)
 {
     // protect against missing data
-    $needed_parts = array('nonce'=>1, 'nc'=>1, 'cnonce'=>1, 'qop'=>1,
-                          'username'=>1, 'uri'=>1, 'response'=>1);
-    $data = array();
+    $needed_parts = darray['nonce'=>1, 'nc'=>1, 'cnonce'=>1, 'qop'=>1,
+                          'username'=>1, 'uri'=>1, 'response'=>1];
+    $data = darray[];
     $keys = implode('|', array_keys($needed_parts));
 
     $matches = null;

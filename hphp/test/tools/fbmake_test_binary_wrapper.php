@@ -15,14 +15,14 @@ function finish($status) {
 
 
 
-  say(array('op' => 'test_done',
+  say(darray['op' => 'test_done',
             'test' => ToolsFbmakeTestBinaryWrapperPhp::$current,
             'details' => '',
-            'status' => $status));
-  ToolsFbmakeTestBinaryWrapperPhp::$results[] = array(
+            'status' => $status]);
+  ToolsFbmakeTestBinaryWrapperPhp::$results[] = darray[
     'name'   => ToolsFbmakeTestBinaryWrapperPhp::$current,
     'status' => $status,
-  );
+  ];
   ToolsFbmakeTestBinaryWrapperPhp::$current = '';
 }
 
@@ -30,8 +30,8 @@ function start($test) {
 
 
   ToolsFbmakeTestBinaryWrapperPhp::$current = $test;
-  say(array('op'    => 'start',
-            'test'  => ToolsFbmakeTestBinaryWrapperPhp::$current));
+  say(darray['op'    => 'start',
+            'test'  => ToolsFbmakeTestBinaryWrapperPhp::$current]);
 }
 
 function test_is_running() {
@@ -62,8 +62,8 @@ function loop_tests($cmd, $line_func) {
     return;
   }
 
-  say(array('op'      => 'all_done',
-            'results' => ToolsFbmakeTestBinaryWrapperPhp::$results));
+  say(darray['op'      => 'all_done',
+            'results' => ToolsFbmakeTestBinaryWrapperPhp::$results]);
 }
 
 
@@ -87,7 +87,7 @@ async function main(): Awaitable<void> {
   );
 
   // Currently running test, and the results of each test.
-  ToolsFbmakeTestBinaryWrapperPhp::$results = array();
+  ToolsFbmakeTestBinaryWrapperPhp::$results = varray[];
   ToolsFbmakeTestBinaryWrapperPhp::$current = '';
 
   loop_tests($cmd, function ($line) {

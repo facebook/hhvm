@@ -3,9 +3,9 @@
 require_once('test_base.inc');
 
 function opts(bool $hack_arr = false): string {
-  $args = array(
+  $args = varray[
     '-vEval.HackArrCompatTypeHintNotices=1',
-  );
+  ];
   if ($hack_arr) {
     $args[] = '-vEval.HackArrDVArrs=true';
   }
@@ -13,9 +13,9 @@ function opts(bool $hack_arr = false): string {
 }
 
 function hphp_opts(bool $hack_arr = false): string {
-  $args = array(
+  $args = varray[
     '-vRuntime.Eval.HackArrCompatTypeHintNotices=1',
-  );
+  ];
   if ($hack_arr) {
     $args[] = '-vHackArrDVArrs=1';
   }
@@ -24,34 +24,34 @@ function hphp_opts(bool $hack_arr = false): string {
 
 <<__EntryPoint>> function main(): void {
   requestAll(
-    array(
-      array(
+    varray[
+      varray[
         'test_get_headers_secure.php',
         null,
-        array(
+        darray[
           'xyzzy' => 42,
           'XyZZy' => 43,
           'XYZZY' => 44,
           'xxxxx' => 45,
-        )
-      )
-    ),
+        ]
+      ]
+    ],
     opts(),
     hphp_opts(),
   );
   requestAll(
-    array(
-      array(
+    varray[
+      varray[
         'test_get_headers_secure.php',
         null,
-        array(
+        darray[
           'xyzzy' => 42,
           'XyZZy' => 43,
           'XYZZY' => 44,
           'xxxxx' => 45,
-        )
-      )
-    ),
+        ]
+      ]
+    ],
     opts(true),
     hphp_opts(true),
   );

@@ -1222,26 +1222,14 @@ TypedValue HHVM_FUNCTION(array_unshift,
   return make_tv<KindOfNull>();
 }
 
-Variant array_values(const Variant& input) {
-  auto const cell = *input.asTypedValue();
-  if (isArrayType(cell.m_type)) {
-    if (cell.m_data.parr->isPacked()) {
-      return input;
-    }
-    if (cell.m_data.parr->isMixed()) {
-      if (MixedArray::IsStrictVector(cell.m_data.parr)) {
-        return input;
-      }
-    } else if (cell.m_data.parr->isApcArray() &&
-               APCLocalArray::IsVectorData(cell.m_data.parr)) {
-      return input;
-    }
-  } else if (input.isClsMeth()) {
-    return input.toArray();
+TypedValue HHVM_FUNCTION(array_values,
+                         const Variant& input) {
+  if (input.isArray() || input.isClsMeth()) {
+    return tvReturn(input.toVArray());
   }
 
-  folly::Optional<PackedArrayInit> ai;
-  auto ok = IterateV(cell,
+  folly::Optional<VArrayInit> ai;
+  auto ok = IterateV(*input.asTypedValue(),
                      [&](ArrayData* adata) {
                        ai.emplace(adata->size());
                      },
@@ -1257,16 +1245,11 @@ Variant array_values(const Variant& input) {
   if (!ok) {
     raise_warning("array_values() expects parameter 1 to be an array "
                   "or collection");
-    return init_null();
+    return make_tv<KindOfNull>();
   }
 
   assertx(ai.hasValue());
-  return ai->toVariant();
-}
-
-TypedValue HHVM_FUNCTION(array_values,
-                         const Variant& input) {
-  return tvReturn(array_values(input));
+  return tvReturn(ai->toArray());
 }
 
 static int php_count_recursive(const Array& array) {

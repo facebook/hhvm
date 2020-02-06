@@ -32,6 +32,12 @@ let rec make_files = function
  * Takes the path to a single file, returns a map of filenames to file contents.
  *)
 let file_to_file_list file =
+  let strip_root p =
+    if p.[0] = '/' then
+      Str.string_after p 1
+    else
+      p
+  in
   let abs_fn = Relative_path.to_absolute file in
   let content = Sys_utils.cat abs_fn in
   let delim = Str.regexp "////.*\n" in
@@ -52,7 +58,9 @@ let file_to_file_list file =
     let file_name =
       (try Str.matched_group 3 first_line with Caml.Not_found -> abs_fn)
     in
-    let file = Relative_path.create Relative_path.Dummy (dir ^ file_name) in
+    let file =
+      Relative_path.create Relative_path.Dummy (dir ^ strip_root file_name)
+    in
     let content = String.concat ~sep:"\n" (List.tl_exn contentl) in
     [(file, content)]
   ) else

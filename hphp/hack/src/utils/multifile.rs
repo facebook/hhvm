@@ -27,16 +27,13 @@ pub fn to_files<'p, 't>(
         static ref DIRECTORY: Regex =
             Regex::new(r#"^// @directory \s*(\S+)\s*(?:@file\s*(\S+))?\n"#).unwrap();
     }
+    let content = content.as_ref();
     let delims: Vec<&[u8]> = DELIM
-        .captures_iter(content.as_ref())
+        .captures_iter(content)
         .map(|c| c.get(1).unwrap().as_bytes())
         .collect();
-    if delims.len() > 0 {
-        let mut contents: Vec<Vec<u8>> = DELIM
-            .split(content.as_ref())
-            .skip(1)
-            .map(|c| c.into())
-            .collect();
+    if content.starts_with(b"////") && delims.len() > 0 {
+        let mut contents: Vec<Vec<u8>> = DELIM.split(content).skip(1).map(|c| c.into()).collect();
         if contents.len() + 1 == delims.len() {
             contents.push(vec![]);
         } else if contents.len() != delims.len() {
@@ -52,18 +49,26 @@ pub fn to_files<'p, 't>(
             .map(|f| Right(PathBuf::from(format!("{}--{}", path.display(), f))))
             .zip(contents.into_iter())
             .collect())
-    } else if let Some(captures) = DIRECTORY.captures(content.as_ref()) {
+    } else if let Some(captures) = DIRECTORY.captures(content) {
         let dir = str::from_utf8(&captures[1])?;
         let file = captures.get(2).map_or_else(
-            || path.file_name().unwrap_or(OsStr::new("")),
+            || strip_root(path).as_os_str(),
             |m| OsStr::new(str::from_utf8(m.as_bytes()).unwrap()),
         );
         let mut newpath = PathBuf::from(dir);
         newpath.push(file);
-        let content = DIRECTORY.replace(content.as_ref(), &b""[..]);
+        let content = DIRECTORY.replace(content, &b""[..]);
         Ok(vec![(Right(newpath), content.into())])
     } else {
         Ok(vec![(Left(path), content.into())])
+    }
+}
+
+fn strip_root(p: &Path) -> &Path {
+    if p.starts_with("/") {
+        p.strip_prefix("/").unwrap()
+    } else {
+        p
     }
 }
 
@@ -76,8 +81,7 @@ mod tests {
     #[test]
     fn two_files() {
         let p = PathBuf::from("test.php");
-        let c = b"
-//// file1.php
+        let c = b"//// file1.php
 a
 ////  file2.php
 b";
@@ -93,8 +97,7 @@ b";
     #[test]
     fn last_empty() {
         let p = PathBuf::from("test.php");
-        let c = b"
-//// file1.php
+        let c = b"//// file1.php
 a
 ////file2.php
 ";
@@ -110,8 +113,7 @@ a
     #[test]
     fn mid_empty() {
         let p = PathBuf::from("test.php");
-        let c = b"
-//// file1.php
+        let c = b"//// file1.php
 ////  file2.php
 a
 ";

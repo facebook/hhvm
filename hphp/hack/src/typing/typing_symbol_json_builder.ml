@@ -245,7 +245,7 @@ let json_of_decl_loc ctx decl_type pos decl_fun defn_fun id elem progress =
     json_of_decl ctx decl_type decl_fun id elem progress
   in
   let progress = defn_fun elem decl_id progress in
-  let filepath = Relative_path.S.to_string (Pos.filename pos) in
+  let filepath = Relative_path.to_absolute (Pos.filename pos) in
   let json_fact =
     JSON_Object
       [
@@ -288,7 +288,7 @@ let json_of_file_xrefs filepath xref_map progress =
   glean_json FileXRefs json_fact progress
 
 let add_xref target_json target_id ref_pos xrefs =
-  let filepath = Relative_path.S.to_string (Pos.filename ref_pos) in
+  let filepath = Relative_path.to_absolute (Pos.filename ref_pos) in
   SMap.update
     filepath
     (fun file_map ->

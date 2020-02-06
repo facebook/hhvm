@@ -83,6 +83,8 @@ let write_json
 let recheck_job
     (ctx : Provider_context.t)
     (out_dir : string)
+    (root_path : string)
+    (hhi_path : string)
     ()
     (progress : Relative_path.t list) : unit =
   let tasts =
@@ -99,12 +101,16 @@ let recheck_job
         in
         tast)
   in
+  Relative_path.set_path_prefix Relative_path.Root (Path.make root_path);
+  Relative_path.set_path_prefix Relative_path.Hhi (Path.make hhi_path);
   write_json ctx out_dir tasts
 
 let go
     (workers : MultiWorker.worker list option)
     (ctx : Provider_context.t)
     (out_dir : string)
+    (root_path : string)
+    (hhi_path : string)
     (file_tuples : Relative_path.t list) : unit =
   let num_workers =
     match workers with
@@ -113,7 +119,7 @@ let go
   in
   MultiWorker.call
     workers
-    ~job:(recheck_job ctx out_dir)
+    ~job:(recheck_job ctx out_dir root_path hhi_path)
     ~merge:(fun () () -> ())
     ~next:(Bucket.make ~num_workers ~max_size:150 file_tuples)
     ~neutral:()

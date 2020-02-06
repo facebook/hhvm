@@ -186,12 +186,6 @@ let instr_issetg = instr (IIsset IssetG)
 
 let instr_issets = instr (IIsset IssetS)
 
-let instr_emptys = instr (IIsset EmptyS)
-
-let instr_emptyg = instr (IIsset EmptyG)
-
-let instr_emptyl local = instr (IIsset (EmptyL local))
-
 let instr_cgets = instr (IGet CGetS)
 
 let instr_cgetg = instr (IGet CGetG)

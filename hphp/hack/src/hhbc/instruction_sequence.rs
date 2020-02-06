@@ -372,18 +372,6 @@ impl InstrSeq {
         Self::make_instr(Instruct::IIsset(InstructIsset::IssetS))
     }
 
-    pub fn make_emptys() -> Self {
-        Self::make_instr(Instruct::IIsset(InstructIsset::EmptyS))
-    }
-
-    pub fn make_emptyg() -> Self {
-        Self::make_instr(Instruct::IIsset(InstructIsset::EmptyG))
-    }
-
-    pub fn make_emptyl(local: local::Type) -> Self {
-        Self::make_instr(Instruct::IIsset(InstructIsset::EmptyL(local)))
-    }
-
     pub fn make_cgets() -> Self {
         Self::make_instr(Instruct::IGet(InstructGet::CGetS))
     }

@@ -107,7 +107,6 @@ let stk_data : instruct -> stack_sig = function
   | IGet PushL _
   | IGet CUGetL _
   | IIsset IssetL _
-  | IIsset EmptyL _
   | IIsset IsTypeL _
   | IMutator IncDecL _
   | IMutator CheckProp _

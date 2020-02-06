@@ -138,7 +138,6 @@ pub enum QueryOp {
     CGet,
     CGetQuiet,
     Isset,
-    Empty,
     InOut,
 }
 
@@ -387,9 +386,6 @@ pub enum InstructIsset {
     IssetL(local::Type),
     IssetG,
     IssetS,
-    EmptyL(local::Type),
-    EmptyG,
-    EmptyS,
     IsTypeC(IstypeOp),
     IsTypeL(local::Type, IstypeOp),
 }

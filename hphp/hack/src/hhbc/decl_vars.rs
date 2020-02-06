@@ -233,7 +233,6 @@ impl<'a> Visitor for DeclvarVisitor<'a> {
                 let barethis = match &func_e.1 {
                     Id(name)
                         if &name.1 == pseudo_functions::ISSET
-                            || &name.1 == pseudo_functions::EMPTY
                             || &name.1 == pseudo_functions::ECHO_NO_NS =>
                     {
                         BareThis

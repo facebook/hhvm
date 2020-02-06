@@ -172,7 +172,6 @@ let declvar_visitor explicit_use_set_opt is_in_static_method is_closure_body =
           match func_e with
           | (_, Aast.Id (_, name))
             when name = SN.PseudoFunctions.isset
-                 || name = SN.PseudoFunctions.empty
                  || "\\" ^ name = SN.PseudoFunctions.echo ->
             Bare_this
           | _ -> Bare_this_as_ref

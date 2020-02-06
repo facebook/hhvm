@@ -64,7 +64,7 @@ let random_collection_type () : CollectionType.t =
 let random_p_op () : initprop_op = [Static; NonStatic] |> rand_elt
 
 let random_query_op () : QueryOp.t =
-  [QueryOp.CGet; QueryOp.CGetQuiet; QueryOp.Isset; QueryOp.Empty] |> rand_elt
+  [QueryOp.CGet; QueryOp.CGetQuiet; QueryOp.Isset] |> rand_elt
 
 let random_bare_op () : bare_this_op = [Notice; NoNotice] |> rand_elt
 
@@ -136,7 +136,6 @@ let all_instrs (_ : IS.t) : lazy_instruct list =
     (fun () -> IGet (CUGetL (random_local ())));
     (fun () -> IGet (PushL (random_local ())));
     (fun () -> IIsset (IssetL (random_local ())));
-    (fun () -> IIsset (EmptyL (random_local ())));
     (fun () -> IIsset (IsTypeL (random_local (),random_op_type ())));
     (fun () -> ILitConst NullUninit);
     (fun () -> IBasic PopC);
@@ -163,7 +162,6 @@ let all_instrs (_ : IS.t) : lazy_instruct list =
     (fun () -> IGet CGetG);
     (*(fun () -> IIsset IssetC);*)
     (fun () -> IIsset IssetG);
-    (fun () -> IIsset EmptyG);
     (fun () -> IIsset (IsTypeC (random_op_type ())));
     (fun () -> IMutator (SetL (random_local ())));
     (fun () -> IMutator (SetOpL (random_local (), random_eq_op ())));

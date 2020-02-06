@@ -107,7 +107,6 @@ module QueryOp = struct
     | CGet
     | CGetQuiet
     | Isset
-    | Empty
     | InOut
 
   let to_string op =
@@ -115,7 +114,6 @@ module QueryOp = struct
     | CGet -> "CGet"
     | CGetQuiet -> "CGetQuiet"
     | Isset -> "Isset"
-    | Empty -> "Empty"
     | InOut -> "InOut"
 end
 
@@ -362,9 +360,6 @@ type instruct_isset =
   | IssetL of local_id
   | IssetG
   | IssetS
-  | EmptyL of local_id
-  | EmptyG
-  | EmptyS
   | IsTypeC of istype_op
   | IsTypeL of local_id * istype_op
 

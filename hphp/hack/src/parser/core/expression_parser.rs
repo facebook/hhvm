@@ -470,6 +470,11 @@ where
             | TokenKind::HaltCompiler => self.parse_halt_compiler_expression(),
             | TokenKind::Eval => self.parse_eval_expression(),
             | TokenKind::ColonAt => self.parse_pocket_atom(),
+            | TokenKind::Empty => {
+                self.with_error(Errors::empty_expression_illegal);
+                let token = self.next_token_non_reserved_as_name();
+                S!(make_token, self, token)
+            }
             | kind if self.expects(kind) => {
                 // ERROR RECOVERY: if we've prematurely found a token we're expecting
                 // later, mark the expression missing, throw an error, and do not advance

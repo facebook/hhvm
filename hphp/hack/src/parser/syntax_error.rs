@@ -927,3 +927,6 @@ pub const local_variable_with_type: Error =
 pub const function_pointers_disabled: Error = Cow::Borrowed(
     "Function pointers are not enabled. Use the hhvm.hack.lang.enable_first_class_function_pointers parser flag",
 );
+
+pub const empty_expression_illegal: Error =
+    Cow::Borrowed("The empty() expression has been removed from Hack.");

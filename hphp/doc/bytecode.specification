@@ -1541,7 +1541,9 @@ IsTypeC  <op>                     [C]  ->  [C:Bool]
       ArrLike  | Arr or Vec or Dict or Keyset
       Scalar   | Int or Dbl or Str or Bool
       Res      | Res
+      PHPArr   | Arr
 
+  If operand is Arr we'll emit a notice if C is Vec, Dict, or Keyset.
   If t is Obj, this instruction checks if the operand in an object.
     Instances of a special class __PHP_Incomplete_Class are not considered
     objects.
@@ -1568,6 +1570,7 @@ IsTypeL  <local variable id> <op>     []  ->  [C:Bool]
       ArrLike  | Arr or Vec or Dict or Keyset
       Scalar   | Int or Dbl or Str or Bool
       Res      | Res
+      PHPArr   | Arr
 
   If the local variable given by %1 is defined, the logic is the same as for
     IsTypeC (see above).
@@ -1576,6 +1579,8 @@ IsTypeL  <local variable id> <op>     []  ->  [C:Bool]
   If the local variable given by %1 is not defined, this instruction raises a
   warning and pushes false onto the stack, unless if the operand is Null, in
   which case it pushes true.
+  If operand is Arr this instruction emits a notice if %1 is Vec, Dict, or
+  Keyset. PHPArr is the same as Arr except that it doesn't emit notices.
 
 
 7. Mutator instructions

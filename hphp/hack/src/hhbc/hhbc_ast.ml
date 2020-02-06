@@ -354,6 +354,7 @@ type istype_op =
   | OpDArray
   | OpClsMeth
   | OpFunc
+  | OpPHPArr (* Arr *)
 
 type instruct_isset =
   | IssetC

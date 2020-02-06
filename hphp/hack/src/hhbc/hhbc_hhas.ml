@@ -285,6 +285,7 @@ let string_of_istype_op op =
   | OpDArray -> "DArray"
   | OpClsMeth -> "ClsMeth"
   | OpFunc -> "Func"
+  | OpPHPArr -> "PHPArr"
 
 let string_of_initprop_op op =
   match op with

@@ -449,6 +449,7 @@ let istype_op id =
   | "HH\\is_any_array" -> Some OpArrLike
   | "HH\\is_class_meth" -> Some OpClsMeth
   | "HH\\is_fun" -> Some OpFunc
+  | "HH\\is_php_array" -> Some OpPHPArr
   | _ -> None
 
 let is_isexp_op lower_fq_id : Aast.hint option =

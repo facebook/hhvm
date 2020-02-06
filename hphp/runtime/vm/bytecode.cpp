@@ -3629,6 +3629,7 @@ OPTBLD_INLINE static bool isTypeHelper(TypedValue* val, IsTypeOp op) {
   case IsTypeOp::Int:    return is_int(val);
   case IsTypeOp::Dbl:    return is_double(val);
   case IsTypeOp::Arr:    return is_array(val, !vmfp()->m_func->isBuiltin());
+  case IsTypeOp::PHPArr: return is_array(val, /* logOnHackArrays = */ false);
   case IsTypeOp::Vec:    return is_vec(val);
   case IsTypeOp::Dict:   return is_dict(val);
   case IsTypeOp::Keyset: return is_keyset(val);

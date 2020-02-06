@@ -3735,6 +3735,7 @@ Type type_of_istype(IsTypeOp op) {
   case IsTypeOp::Dbl:    return TDbl;
   case IsTypeOp::Str:    return TStrLike;
   case IsTypeOp::Res:    return TRes;
+  case IsTypeOp::PHPArr:
   case IsTypeOp::Arr:
     return !RO::EvalHackArrDVArrs && RO::EvalIsCompatibleClsMethType
       ? TPArrLike : TArr;

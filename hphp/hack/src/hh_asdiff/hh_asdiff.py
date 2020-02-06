@@ -10,7 +10,7 @@ import itertools
 import logging
 import os
 import sys
-from typing import List, Sequence, Tuple
+from typing import AnyStr, Dict, Iterator, List, Sequence, Optional, Tuple
 
 from hphp.hack.src.hh_asdiff import diff, parsing
 
@@ -65,6 +65,7 @@ Examples:
         action="store_true",
         help="report when two HHASes are identical",
     )
+    ap.add_argument("--report-summary", action="store_true", help="report")
     ap.add_argument(
         "expected_file", type=argparse.FileType("r+b"), help="Expected HHAS"
     )
@@ -115,11 +116,43 @@ class DiffHandler:
         return ret
 
 
+def report_summary(exp_file: Iterator[AnyStr], act_file: Iterator[AnyStr]):
+    act: Dict[Optional[str], Sequence[str]] = {}
+    exp: Dict[Optional[str], Sequence[str]] = {}
+    for fn, content in parsing.split_lines(exp_file):
+        if fn is None:
+            log.error("Found file without name")
+        exp[fn] = content
+    act = {}
+    for fn, content in parsing.split_lines(act_file):
+        if fn is None:
+            log.error("Found file without name")
+        act[fn] = content
+    exp_keys = set(exp.keys())
+    act_keys = set(act.keys())
+    all_keys = sorted(exp_keys.union(act_keys))
+
+    for k in all_keys:
+        from_exp = exp.get(k)
+        from_act = act.get(k)
+        if from_exp is None:
+            print("|NotInExp|", k)
+        elif from_act is None:
+            print("|NotInAct|", k)
+        elif diff.equal_lines(iter(from_exp), iter(from_act)):
+            print("|Identical|", k)
+        else:
+            print("|Mismatch|", k)
+
+
 def main(args: List[str]) -> int:
     exit_code = 0
     opts = parse_args(sys.argv)
     compare_all = opts.all or opts.diff_smallest
     try:
+        if opts.report_summary:
+            report_summary(opts.expected_file, opts.actual_file)
+            return exit_code
         compare_count = 0
         diff_handler = DiffHandler(opts)
         for exp, act in itertools.zip_longest(

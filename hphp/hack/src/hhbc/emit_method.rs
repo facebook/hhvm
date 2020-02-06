@@ -176,7 +176,7 @@ pub fn from_ast<'a>(
                 &class.user_attributes,
                 &method.name,
                 &method.params,
-                &method.ret.1,
+                method.ret.1.as_ref(),
             ),
             false,
             false,
@@ -203,7 +203,7 @@ pub fn from_ast<'a>(
             &mut emit_body::Args {
                 immediate_tparams: &method.tparams,
                 ast_params: &method.params,
-                ret: method.ret.1.clone(),
+                ret: method.ret.1.as_ref(),
                 scope: &scope,
                 pos: &method.span,
                 deprecation_info: &deprecation_info,

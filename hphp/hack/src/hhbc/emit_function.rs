@@ -111,7 +111,7 @@ pub fn emit_function(
                 doc_comment: f.doc_comment.clone(),
                 pos: &f.span,
                 scope: &scope,
-                ret: f.ret.1.clone(),
+                ret: f.ret.1.as_ref(),
                 ast_params: &f.params,
                 immediate_tparams: &f.tparams,
             },

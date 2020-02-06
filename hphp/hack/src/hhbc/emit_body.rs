@@ -37,7 +37,7 @@ use bitflags::bitflags;
 pub struct Args<'a> {
     pub immediate_tparams: &'a Vec<tast::Tparam>,
     pub ast_params: &'a Vec<tast::FunParam>,
-    pub ret: Option<aast::Hint>,
+    pub ret: Option<&'a tast::Hint>,
     pub scope: &'a Scope<'a>,
     pub pos: &'a Pos,
     pub deprecation_info: &'a Option<&'a [TypedValue]>,
@@ -116,7 +116,7 @@ pub fn emit_body(
 ) -> (Result<HhasBody>, bool, bool) {
     if args.flags.contains(Flags::ASYNC)
         && args.flags.contains(Flags::SKIP_AWAITABLE)
-        && args.ret.as_ref().map_or(false, |hint| !is_awaitable(&hint))
+        && args.ret.map_or(false, |hint| !is_awaitable(&hint))
     {
         report_error(
             args.flags.contains(Flags::CLOSURE_BODY),
@@ -140,7 +140,7 @@ pub fn emit_body(
     let return_type_info = match make_return_type_info(
         args.flags.contains(Flags::SKIP_AWAITABLE),
         args.flags.contains(Flags::NATIVE),
-        &args.ret,
+        args.ret,
         &tp_names,
     ) {
         Err(x) => return (Err(x), is_generator, is_pair_generator),
@@ -178,7 +178,7 @@ pub fn emit_body(
 
     emit_statements(
         &mut env,
-        args.ret.as_ref(),
+        args.ret,
         return_value,
         &params,
         &mut args.default_dropthrough,
@@ -351,7 +351,7 @@ fn make_decl_vars(
 pub fn emit_return_type_info(
     tp_names: &[&str],
     skip_awaitable: bool,
-    ret: &Option<aast::Hint>,
+    ret: Option<&aast::Hint>,
 ) -> Result<HhasTypeInfo> {
     match ret {
         None => Ok(HhasTypeInfo::make(
@@ -371,7 +371,7 @@ pub fn emit_return_type_info(
 fn make_return_type_info(
     skip_awaitable: bool,
     is_native: bool,
-    ret: &Option<aast::Hint>,
+    ret: Option<&aast::Hint>,
     tp_names: &[&str],
 ) -> Result<HhasTypeInfo> {
     let return_type_info = emit_return_type_info(tp_names, skip_awaitable, ret);
@@ -384,7 +384,7 @@ fn make_return_type_info(
 }
 
 #[allow(unused_variables)]
-fn make_env(
+pub fn make_env(
     _namespace: &namespace_env::Env,
     need_local_this: bool,
     _scope: &Scope,
@@ -476,7 +476,7 @@ fn emit_defs(_env: &mut Env, _defs: &tast::Program) -> InstrSeq {
     InstrSeq::Empty
 }
 
-fn emit_method_prolog(
+pub fn emit_method_prolog(
     _env: &mut Env,
     _pos: &Pos,
     _params: &[HhasParam],
@@ -488,7 +488,10 @@ fn emit_method_prolog(
     InstrSeq::Empty
 }
 
-fn emit_deprecation_info(_scope: &Scope, _deprecation_info: &Option<&[TypedValue]>) -> InstrSeq {
+pub fn emit_deprecation_info(
+    _scope: &Scope,
+    _deprecation_info: &Option<&[TypedValue]>,
+) -> InstrSeq {
     //TODO(hrust) implement
     InstrSeq::Empty
 }

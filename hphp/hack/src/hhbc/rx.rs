@@ -85,6 +85,13 @@ impl Level {
             _ => panic!("invalid combination of Rx attributes escaped the parser"),
         }
     }
+
+    pub fn is_non_rx(&self) -> bool {
+        if let Self::NonRx = self {
+            return true;
+        }
+        false
+    }
 }
 
 pub fn halves_of_is_enabled_body<Ex, Fb, En, Hi>(

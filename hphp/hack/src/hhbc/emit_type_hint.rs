@@ -405,7 +405,7 @@ pub fn hint_to_class<'a>(hint: &'a Hint) -> class::Type<'a> {
 
 pub fn emit_type_constraint_for_native_function(
     tparams: &[&str],
-    ret_opt: &Option<Hint>,
+    ret_opt: Option<&Hint>,
     ti: Info,
 ) -> Info {
     use constraint::Flags;

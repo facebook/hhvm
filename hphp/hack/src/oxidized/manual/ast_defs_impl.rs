@@ -48,6 +48,13 @@ impl ClassKind {
             _ => false,
         }
     }
+
+    pub fn is_ctrait(&self) -> bool {
+        match self {
+            ClassKind::Ctrait => true,
+            _ => false,
+        }
+    }
 }
 
 impl FunKind {

@@ -21,7 +21,7 @@ pub fn emit_body(
     class_attrs: &[tast::UserAttribute],
     name: &tast::Sid,
     params: &[tast::FunParam],
-    ret: &Option<aast::Hint>,
+    ret: Option<&aast::Hint>,
 ) -> Result<HhasBody> {
     let body_instrs = emit_native_opcode_impl(&name.1, params, class_attrs);
     let mut tparams = scope

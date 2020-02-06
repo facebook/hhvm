@@ -106,7 +106,7 @@ class RegexIterator extends FilterIterator
     $this->key     = parent::key();
     $this->current = parent::current();
 
-    $matches = array();
+    $matches = darray[];
     $useKey  = ($this->flags & self::USE_KEY);
     $subject = $useKey
       ? (string) $this->key
@@ -118,13 +118,13 @@ class RegexIterator extends FilterIterator
                                         $this->pregFlags) > 0);
         break;
       case self::GET_MATCH:
-        $__current = array();
+        $__current = darray[];
         $ret = (preg_match_with_matches($this->regex, $subject, inout $__current,
                            $this->pregFlags) > 0);
         $this->current = $__current;
         break;
       case self::ALL_MATCHES:
-        $__current = array();
+        $__current = darray[];
         $count = preg_match_all_with_matches($this->regex, $subject,
                                              inout $__current,
                                              $this->pregFlags);

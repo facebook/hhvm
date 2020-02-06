@@ -575,7 +575,7 @@ class Redis {
      */
     if ($flat === false) return $flat;
     assert(count($flat) % 2 == 0);
-    $ret = array();
+    $ret = darray[];
     for ($i = 0; $i < count($flat); $i += 2) $ret[$flat[$i]] = $flat[$i + 1];
     return $ret;
   }
@@ -590,7 +590,7 @@ class Redis {
      * keys to values.
      */
     assert(count($flat) % 2 == 0);
-    $ret = array();
+    $ret = darray[];
     for ($i = 0; $i < count($flat); $i += 2) $ret[$flat[$i]] = $flat[$i + 1];
     return $ret;
   }
@@ -1715,7 +1715,7 @@ class Redis {
     $errstr = null;
     if ($persistent) {
       if ($persistent_id ?? false) {
-        $pid     = array('id' => array('persistent_id' => $persistent_id));
+        $pid     = darray['id' => darray['persistent_id' => $persistent_id]];
         $context = stream_context_create($pid);
         $sok     = $host;
         if ($port > 0) $sok .= ':' . $port;

@@ -56,7 +56,7 @@ trait BaseException {
 
   final public function setPreviousChain(\Throwable $previous) {
     $cur = $this;
-    $cycle = array();
+    $cycle = darray[];
     $cycle[\spl_object_hash($cur)] = true;
     $next = $cur->getPrevious();
     while ($next is \Throwable &&
@@ -196,7 +196,7 @@ trait BaseException {
    */
   public function toString() {
     $res = "";
-    $lst = array();
+    $lst = darray[];
     $ex = $this;
     while ($ex != null && !\array_key_exists(\spl_object_hash($ex), $lst)) {
       $lst[\spl_object_hash($ex)] = $ex;

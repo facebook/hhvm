@@ -23,14 +23,14 @@ class RecursiveTreeIterator extends RecursiveIteratorIterator
 
   private $flags;
 
-  private $prefix = array(
+  private $prefix = varray[
     "",    // PREFIX_LEFT
     "| ",  // PREFIX_MID_HAS_NEXT
     "  ",  // PREFIX_MID_LAST
     "|-",  // PREFIX_END_HAS_NEXT
     "\\-", // PREFIX_END_LAST
     "",    // PREFIX_RIGHT
-  );
+  ];
 
   private $postfix = "";
 

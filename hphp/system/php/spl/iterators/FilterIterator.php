@@ -124,7 +124,7 @@ abstract class FilterIterator extends IteratorIterator {
   }
 
   public function __call($func, $params) {
-    return call_user_func_array(array($this->it, $func), $params);
+    return call_user_func_array(varray[$this->it, $func], $params);
   }
 }
 

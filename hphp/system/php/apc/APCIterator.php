@@ -115,7 +115,7 @@ class APCIterator implements Iterator{
   public function current() {
     if (!$this->valid()) return false;
     $info = $this->getInfo()[$this->index];
-    $ret = array();
+    $ret = darray[];
     if ($this->format & APC_ITER_TYPE) {
       $ret['type'] = ($info['type'] == 0) ? 'user' : 'file';
     }

@@ -11,7 +11,7 @@ from common_tests import CommonTestDriver
 from hh_paths import hh_server
 
 
-class SymbolUploadTests(test_case.TestCase[CommonTestDriver]):
+class WriteSymbolInfoTests(test_case.TestCase[CommonTestDriver]):
     write_repo: ClassVar[str] = "default_symbol_info_test_dir"
     valid_keys: ClassVar[Dict[str, List[object]]] = {}
 

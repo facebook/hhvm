@@ -915,47 +915,6 @@ SSATmp* emitKeysetIsset(IRGS& env, SSATmp* base, SSATmp* key) {
   return gen(env, KeysetIsset, base, key);
 }
 
-SSATmp* emitVecArrayEmptyElem(IRGS& env, SSATmp* base, SSATmp* key) {
-  assertx(base->isA(TVec));
-
-  if (key->isA(TStr)) return cns(env, true);
-  if (!key->isA(TInt)) {
-    gen(env, ThrowInvalidArrayKey, base, key);
-    return cns(env, TBottom);
-  }
-
-  return cond(
-    env,
-    [&] (Block* taken) {
-      gen(env, CheckPackedArrayDataBounds, taken, base, key);
-    },
-    [&] {
-      auto const elem = gen(env, LdVecElem, base, key);
-      auto const b = gen(env, ConvTVToBool, elem);
-      return gen(env, XorBool, b, cns(env, true));
-    },
-    [&] { return cns(env, true); }
-  );
-}
-
-SSATmp* emitDictEmptyElem(IRGS& env, SSATmp* base, SSATmp* key) {
-  assertx(base->isA(TDict));
-  if (!key->isA(TInt | TStr)) {
-    gen(env, ThrowInvalidArrayKey, base, key);
-    return cns(env, TBottom);
-  }
-  return gen(env, DictEmptyElem, base, key);
-}
-
-SSATmp* emitKeysetEmptyElem(IRGS& env, SSATmp* base, SSATmp* key) {
-  assertx(base->isA(TKeyset));
-  if (!key->isA(TInt | TStr)) {
-    gen(env, ThrowInvalidArrayKey, base, key);
-    return cns(env, TBottom);
-  }
-  return gen(env, KeysetEmptyElem, base, key);
-}
-
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* emitIncDecProp(IRGS& env, IncDecOp op, SSATmp* base, SSATmp* key) {
@@ -1079,29 +1038,6 @@ SSATmp* emitIssetElem(IRGS& env, SSATmp* base, SSATmp* key, SimpleOp simpleOp) {
     return gen(env, MapIsset, base, key);
   case SimpleOp::None:
     return gen(env, IssetElem, base, key);
-  }
-
-  always_assert(false);
-}
-
-SSATmp* emitEmptyElem(IRGS& env, SSATmp* base,
-                      SSATmp* key, SimpleOp simpleOp) {
-  switch (simpleOp) {
-    case SimpleOp::VecArray:
-      return emitVecArrayEmptyElem(env, base, key);
-    case SimpleOp::Dict:
-      return emitDictEmptyElem(env, base, key);
-    case SimpleOp::Keyset:
-      return emitKeysetEmptyElem(env, base, key);
-    case SimpleOp::Array:
-    case SimpleOp::PackedArray:
-    case SimpleOp::ProfiledPackedArray:
-    case SimpleOp::String:
-    case SimpleOp::Vector:
-    case SimpleOp::Pair:
-    case SimpleOp::Map:
-    case SimpleOp::None:
-      return gen(env, EmptyElem, ldMBase(env), key);
   }
 
   always_assert(false);
@@ -2136,11 +2072,6 @@ void emitQueryM(IRGS& env, uint32_t nDiscard, QueryMOp query, MemberKey mk) {
         return mcodeIsProp(mk.mcode)
           ? gen(env, IssetProp, extractBaseIfObj(env), key)
           : emitIssetElem(env, maybeExtractBase(env), key, simpleOp);
-
-      case QueryMOp::Empty:
-        return mcodeIsProp(mk.mcode)
-          ? gen(env, EmptyProp, extractBaseIfObj(env), key)
-          : emitEmptyElem(env, maybeExtractBase(env), key, simpleOp);
     }
     not_reached();
   }();

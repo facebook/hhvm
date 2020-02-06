@@ -170,7 +170,7 @@ void emitCGetS(IRGS& env) {
   auto const ssaPropName = topC(env, BCSPRelOffset{1});
 
   if (!ssaPropName->isA(TStr)) PUNT(CGetS-PropNameNotString);
-  if (!ssaCls->isA(TCls))      PUNT(EmptyS-NotClass);
+  if (!ssaCls->isA(TCls))      PUNT(CGetS-NotClass);
 
   auto const propAddr  =
     ldClsPropAddr(env, ssaCls, ssaPropName, true, false, false).propPtr;
@@ -233,33 +233,6 @@ void emitIssetS(IRGS& env) {
       return cns(env, false);
     }
   );
-
-  discard(env);
-  destroyName(env, ssaPropName);
-  push(env, ret);
-}
-
-void emitEmptyS(IRGS& env) {
-  auto const ssaCls      = topC(env);
-  auto const ssaPropName = topC(env, BCSPRelOffset{1});
-
-  if (!ssaPropName->isA(TStr)) PUNT(EmptyS-PropNameNotString);
-  if (!ssaCls->isA(TCls))      PUNT(EmptyS-NotClass);
-
-  auto const ret = cond(
-    env,
-    [&] (Block* taken) {
-      auto const propAddr =
-        ldClsPropAddr(env, ssaCls, ssaPropName, false, true, false).propPtr;
-      return gen(env, CheckNonNull, taken, propAddr);
-    },
-    [&] (SSATmp* ptr) {
-      auto const val = gen(env, LdMem, ptr->type().deref(), ptr);
-      return gen(env, XorBool, gen(env, ConvTVToBool, val), cns(env, true));
-    },
-    [&] { // Taken: LdClsPropAddr* returned Nullptr because it isn't defined
-      return cns(env, true);
-    });
 
   discard(env);
   destroyName(env, ssaPropName);
@@ -358,26 +331,6 @@ void emitIssetG(IRGS& env) {
       return cns(env, false);
     }
   );
-  destroyName(env, name);
-  push(env, ret);
-}
-
-void emitEmptyG(IRGS& env) {
-  auto const name = topC(env);
-  if (!name->isA(TStr)) PUNT(EmptyG-NameNotStr);
-
-  auto const ret = cond(
-    env,
-    [&] (Block* taken) {
-      return gen(env, LdGblAddr, taken, name);
-    },
-    [&] (SSATmp* ptr) { // Next: global exists
-      auto const val = gen(env, LdMem, TCell, ptr);
-      return gen(env, XorBool, gen(env, ConvTVToBool, val), cns(env, true));
-    },
-    [&] { // Taken: global doesn't exist
-      return cns(env, true);
-    });
   destroyName(env, name);
   push(env, ret);
 }

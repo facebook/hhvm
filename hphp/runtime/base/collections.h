@@ -137,11 +137,9 @@ tv_lval atRw(ObjectData* obj, const TypedValue* key);
 /* Check for {key} within {obj} Collection
  * `contains` merely need to exist
  * `isset` needs to exist and not be null
- * `empty` needs to exist and not be falsy
  */
 bool contains(ObjectData* obj, const Variant& offset);
 bool (isset)(ObjectData* obj, const TypedValue* key);
-bool empty(ObjectData* obj, const TypedValue* key);
 
 /* Remove element {key} from Collection {obj} */
 void unset(ObjectData* obj, const TypedValue* key);

@@ -2892,10 +2892,6 @@ fields of that struct for holding intermediate values.
 
   Increment/decrement property with key S1 in base S0.
 
-| EmptyProp, D(Bool), S(Obj,LvalToCell) S(Cell), NF
-
-  Returns true iff the property with key S1 in base S0 is empty.
-
 | IssetProp, D(Bool), S(Obj,LvalToCell) S(Cell), NF
 
   Returns true iff the property with key S1 in base S0 is set.
@@ -3236,19 +3232,6 @@ fields of that struct for holding intermediate values.
 | IssetElem, D(Bool), S(LvalToCell) S(Cell), NF
 
   Returns true iff the element at key S1 in S0 is set.
-
-| EmptyElem, D(Bool), S(LvalToCell) S(Cell), NF
-
-  Returns true iff the element at key S1 in S0 is set and not equal (as defined
-  by the hhbc Eq instruction) to false.
-
-| DictEmptyElem, D(Bool), S(Dict) S(Int,Str), NF
-
-  Like EmptyElem, but specialized for dicts.
-
-| KeysetEmptyElem, D(Bool), S(Keyset) S(Int,Str), NF
-
-  Like EmptyElem, but specialized for dicts.
 
 | CheckRange, D(Bool), S(Int) S(Int), NF
 

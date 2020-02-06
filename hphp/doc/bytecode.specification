@@ -749,7 +749,7 @@ The instruction set is organized into the following sections:
    3. Operator instructions
    4. Control flow instructions
    5. Get instructions
-   6. Isset, Empty and type querying instructions
+   6. Isset and type querying instructions
    7. Mutator instructions
    8. Call instructions
    9. Member operations
@@ -1491,7 +1491,7 @@ ClassGetTS                         [C:DArr]  ->  [C:Class, C:StaticVArr|Null]
   in RecordReifiedGeneric and pushed. If not present, null is pushed.
 
 
-6. Isset, Empty, and type querying instructions
+6. Isset and type querying instructions
 -----------------------------------------------
 
 IssetC    [C]  ->  [C:Bool]
@@ -1520,25 +1520,6 @@ IssetS    [C C:Class]  ->  [C:Bool]
   If class $1 does have an accessible property named x, this instruction reads
   the static property named x. If the static property is null, this instruction
   pushes false onto the stack, otherwise it pushes true.
-
-EmptyL <local variable id>     []  ->  [C:Bool]
-
-  Empty local. This instruction reads the local variable named %1 into x. If
-  the local variable is defined this instruction pushes !(x) onto the stack,
-  otherwise it pushes true.
-
-EmptyG    [C]  ->  [C:Bool]
-
-  Empty global. This instruction reads the global variable named (string)$1
-  into x. If the global variable is defined this instruction pushes !(x) onto
-  the stack, otherwise it pushes true.
-
-EmptyS    [C C:Class]  ->  [C:Bool]
-
-  Empty static property. This instruction first checks if $1 has an
-  accessible static property named (string)$2. If it doesn't, this instruction
-  pushes true, otherwise this instruction reads the static property into x and
-  pushes !(x) onto the stack.
 
 IsTypeC  <op>                     [C]  ->  [C:Bool]
 
@@ -2371,34 +2352,6 @@ IssetElemL <local variable id>    [B]  ->  [C:Bool]
   If y is a not a string, array, or object, this operation pushes false onto
   the stack.
 
-EmptyElemC                        [C B]  ->  [C]
-EmptyElemL <local variable id>    [B]  ->  [C]
-
-  Empty element.
-
-  These instructions first load a value into x and a base into y, as given by
-  the following table:
-
-         operation    x    y
-       ------------+----+-----
-        EmptyElemC | $2 | $1
-        EmptyElemL | %1 | $1
-
-  If y is an array, this operation pushes !(y[x]) onto the stack.
-
-  If y is an object that implements the ArrayAccess interface, this operation
-  first calls y->offsetExists(x); if that returns false this operation pushes
-  true onto the stack, otherwise it pushes !(y->offsetGet(x)) onto the stack.
-
-  If y is an object that does not implement the ArrayAccess interface, this
-  operation throws a fatal error.
-
-  If y is a string, this operation computes z = (int)x, then pushes true if (z
-  < 0 || z >= strlen(y)), !(y[z]) otherwise.
-
-  If y is, not an array, object, or string, this operation pushes true onto the
-  stack.
-
 SetElemC    [C C B]  ->  [C]
 
   Set element. If $1 is an array, this operation executes $1[$3] = $2 and then
@@ -2679,40 +2632,6 @@ IssetPropL <local variable id>    [B]  ->  [C:Bool]
 
   If y is not an object or array, this operation pushes false.
 
-EmptyPropC                        [C B]  ->  [C:Bool]
-EmptyPropL <local variable id>    [B]  ->  [C:Bool]
-
-  Empty property.
-
-  These instructions first load a value into x and a base into y, as given by
-  the following table:
-
-         operation     x    y
-       -------------+----+-----
-        EmptyPropC  | $2 | $1
-        EmptyPropL  | %1 | $1
-
-  If y is an object that does not have an eligible __isset method, this
-  operation first checks if y has a visible and accessible property named x.
-  If it does, this operation pushes !(y->x) onto the stack. Otherwise this
-  operation pushes true onto the stack.
-
-  If y is an object that has an eligible __isset method but it does not have an
-  eligible __get method, this operation checks if y has a visible and
-  accessible property named x. If it does, this operation pushes !(y->x) onto
-  the stack. Otherwise this operation pushes !(y->__isset(x)) onto the stack.
-
-  If y is an object that has an eligible __isset method and an eligible __get
-  method, this operation checks if y has a visible and accessible property
-  named x. If it does, this operation pushes !(y->x) onto the stack. Otherwise
-  this operation continues to execute x = y->__isset(x). If x is false this
-  operation pushes true onto the stack, otherwise this operation pushes
-  !(y->__get(x)) onto the stack.
-
-  If y is an array, this operation pushes !(y[x]) onto the stack.
-
-  If y is not an object or array, this operation pushes true.
-
 SetPropC                        [C C B]  ->  [C]
 SetPropL <local variable id>    [C B]  ->  [C]
 
@@ -2916,7 +2835,7 @@ result. These are elements read by Base*C instructions, and member keys.
 
 QueryM <stack count> <query op> <member key>    [...]  ->  [C]
 
-  {CGet,Isset,Empty}{Prop,Elem} member operation.
+  {CGet,Isset}{Prop,Elem} member operation.
 
 SetM <stack count> <member key>    [... C]  ->  [C]
 

@@ -243,9 +243,6 @@ static const struct {
   { OpIssetL,      {Local,            Stack1,       OutBoolean      }},
   { OpIssetG,      {Stack1,           Stack1,       OutBoolean      }},
   { OpIssetS,      {StackTop2,        Stack1,       OutBoolean      }},
-  { OpEmptyL,      {Local,            Stack1,       OutBoolean      }},
-  { OpEmptyG,      {Stack1,           Stack1,       OutBoolean      }},
-  { OpEmptyS,      {StackTop2,        Stack1,       OutBoolean      }},
   { OpIsTypeC,     {Stack1|
                     DontGuardStack1,  Stack1,       OutBoolean      }},
   { OpIsTypeL,     {Local,            Stack1,       OutIsTypeL      }},
@@ -842,7 +839,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::AssertRATL:
   case Op::AssertRATStk:
   case Op::SetL:
-  case Op::EmptyL:
   case Op::CastBool:
   case Op::Same:
   case Op::NSame:
@@ -911,8 +907,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::Div:
   case Op::Double:
   case Op::Dup:
-  case Op::EmptyG:
-  case Op::EmptyS:
   case Op::FCallClsMethod:
   case Op::FCallClsMethodD:
   case Op::FCallClsMethodS:

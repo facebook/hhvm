@@ -251,16 +251,6 @@ bool BaseVector::OffsetIsset(ObjectData* obj, const TypedValue* key) {
   return result ? !tvIsNull(*result) : false;
 }
 
-bool BaseVector::OffsetEmpty(ObjectData* obj, const TypedValue* key) {
-  if (UNLIKELY(key->m_type != KindOfInt64)) {
-    throwBadKeyType();
-    return false;
-  }
-  const auto vec = static_cast<BaseVector*>(obj);
-  const auto result = vec->get(key->m_data.num);
-  return result ? !tvToBool(*result) : true;
-}
-
 bool BaseVector::OffsetContains(ObjectData* obj, const TypedValue* key) {
   auto vec = static_cast<BaseVector*>(obj);
   if (key->m_type == KindOfInt64) {

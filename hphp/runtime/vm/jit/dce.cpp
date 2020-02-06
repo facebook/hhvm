@@ -260,12 +260,10 @@ bool canDCE(IRInstruction* inst) {
   case DictGetQuiet:
   case DictGetK:
   case DictIsset:
-  case DictEmptyElem:
   case DictIdx:
   case KeysetGetQuiet:
   case KeysetGetK:
   case KeysetIsset:
-  case KeysetEmptyElem:
   case KeysetIdx:
   case VecFirst:
   case VecLast:
@@ -635,7 +633,6 @@ bool canDCE(IRInstruction* inst) {
   case UnsetProp:
   case SetOpProp:
   case IncDecProp:
-  case EmptyProp:
   case IssetProp:
   case ElemX:
   case ProfileMixedArrayAccess:
@@ -688,7 +685,6 @@ bool canDCE(IRInstruction* inst) {
   case PairIsset:
   case MapIsset:
   case IssetElem:
-  case EmptyElem:
   case ProfileArrayKind:
   case ProfileType:
   case ProfileCall:

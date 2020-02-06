@@ -127,7 +127,6 @@ public:
     }
   }
   static bool OffsetIsset(ObjectData* obj, const TypedValue* key);
-  static bool OffsetEmpty(ObjectData* obj, const TypedValue* key);
   static bool OffsetContains(ObjectData* obj, const TypedValue* key);
   static void OffsetUnset(ObjectData* obj, const TypedValue* key);
 

@@ -1683,13 +1683,6 @@ static Variant HHVM_METHOD(SimpleXMLElement, __set,
   return sxe_prop_dim_write(data, name, value, true, false, nullptr);
 }
 
-bool SimpleXMLElement_propEmpty(const ObjectData* this_,
-                                const StringData* key) {
-  auto data = Native::data<SimpleXMLElement>(const_cast<ObjectData*>(this_));
-  return !sxe_prop_dim_exists(data, Variant(key->toCppString()),
-                              true, true, false);
-}
-
 static int64_t HHVM_METHOD(SimpleXMLElement, count) {
   auto data = Native::data<SimpleXMLElement>(this_);
   return php_sxe_count_elements_helper(data);

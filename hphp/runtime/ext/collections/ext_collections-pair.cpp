@@ -101,18 +101,6 @@ bool c_Pair::OffsetIsset(ObjectData* obj, const TypedValue* key) {
   return result ? !tvIsNull(result) : false;
 }
 
-bool c_Pair::OffsetEmpty(ObjectData* obj, const TypedValue* key) {
-  auto pair = static_cast<c_Pair*>(obj);
-  TypedValue* result;
-  if (key->m_type == KindOfInt64) {
-    result = pair->get(key->m_data.num);
-  } else {
-    throwBadKeyType();
-    result = nullptr;
-  }
-  return result ? !tvToBool(*result) : true;
-}
-
 bool c_Pair::OffsetContains(ObjectData* obj, const TypedValue* key) {
   auto pair = static_cast<c_Pair*>(obj);
   if (key->m_type == KindOfInt64) {

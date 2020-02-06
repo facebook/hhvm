@@ -1432,11 +1432,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case DictGetQuiet:
   case DictIsset:
-  case DictEmptyElem:
   case DictIdx:
   case KeysetGetQuiet:
   case KeysetIsset:
-  case KeysetEmptyElem:
   case KeysetIdx:
   case AKExistsDict:
   case AKExistsKeyset:
@@ -1468,11 +1466,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
    * arbitrary heap locations.
    */
   case CGetElem:
-  case EmptyElem:
   case IssetElem:
   case CGetProp:
   case CGetPropQ:
-  case EmptyProp:
   case IssetProp:
     return may_load_store_kill(
       AHeapAny | all_pointees(inst),

@@ -3211,19 +3211,13 @@ void queryMImpl(MemberKey mk, int32_t nDiscard, QueryMOp op) {
       break;
 
     case QueryMOp::Isset:
-    case QueryMOp::Empty:
       result.m_type = KindOfBoolean;
       if (mcodeIsProp(mk.mcode)) {
         auto const ctx = arGetContextClass(vmfp());
-        result.m_data.num = op == QueryMOp::Empty
-          ? IssetEmptyProp<true>(ctx, mstate.base, key)
-          : IssetEmptyProp<false>(ctx, mstate.base, key);
+        result.m_data.num = IssetProp(ctx, mstate.base, key);
       } else {
         assertx(mcodeIsElem(mk.mcode));
-
-        result.m_data.num = op == QueryMOp::Empty
-          ? IssetEmptyElem<true>(mstate.base, key)
-          : IssetEmptyElem<false>(mstate.base, key);
+        result.m_data.num = IssetElem(mstate.base, key);
       }
       break;
   }
@@ -3709,38 +3703,6 @@ OPTBLD_INLINE void iopAssertRATStk(uint32_t stkSlot, RepoAuthType rat) {
 OPTBLD_INLINE void iopBreakTraceHint() {
 }
 
-OPTBLD_INLINE void iopEmptyL(local_var loc) {
-  bool e = !tvToBool(*loc.ptr);
-  vmStack().pushBool(e);
-}
-
-OPTBLD_INLINE void iopEmptyG() {
-  StringData* name;
-  TypedValue* tv1 = vmStack().topTV();
-  TypedValue* tv = nullptr;
-  bool e;
-  lookup_gbl(vmfp(), name, tv1, tv);
-  SCOPE_EXIT { decRefStr(name); };
-  if (tv == nullptr) {
-    e = true;
-  } else {
-    e = !tvToBool(*tv);
-  }
-  vmStack().replaceC<KindOfBoolean>(e);
-}
-
-OPTBLD_INLINE void iopEmptyS() {
-  SpropState ss(vmStack(), true);
-  bool e;
-  if (!(ss.visible && ss.accessible)) {
-    e = true;
-  } else {
-    e = !tvToBool(*ss.val);
-  }
-  ss.output->m_data.num = e;
-  ss.output->m_type = KindOfBoolean;
-}
-
 OPTBLD_INLINE void iopAKExists() {
   TypedValue* arr = vmStack().topTV();
   TypedValue* key = arr + 1;
@@ -3799,7 +3761,7 @@ OPTBLD_INLINE void iopIdx() {
     // This replicates the behavior of the hack implementation of idx, which
     // first checks isset($arr[$idx]), then returns $arr[(int)$idx]
     auto str = arr->m_data.pstr;
-    if (IssetEmptyElemString<false, KeyType::Any>(str, *key)) {
+    if (IssetElemString<KeyType::Any>(str, *key)) {
       auto idx = tvCastToInt64(*key);
       assertx(idx >= 0 && idx < str->size());
       result = make_tv<KindOfPersistentString>(str->getChar(idx));

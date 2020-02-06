@@ -138,7 +138,6 @@ TypedValue objOffsetGet(
 );
 
 bool objOffsetIsset(ObjectData* base, TypedValue offset);
-bool objOffsetEmpty(ObjectData* base, TypedValue offset);
 
 void objOffsetSet(
   ObjectData* base,
@@ -2759,29 +2758,23 @@ inline void UnsetElem(tv_lval base, key_type<keyType> key) {
 }
 
 /**
- * IssetEmptyElem when base is an Object
+ * IssetElem when base is an Object
  */
-template<bool useEmpty, KeyType keyType>
-bool IssetEmptyElemObj(ObjectData* instance, key_type<keyType> key) {
+template<KeyType keyType>
+bool IssetElemObj(ObjectData* instance, key_type<keyType> key) {
   auto scratchKey = initScratchKey(key);
   if (LIKELY(instance->isCollection())) {
-    return useEmpty
-      ? collections::empty(instance, &scratchKey)
-      : collections::isset(instance, &scratchKey);
+    return collections::isset(instance, &scratchKey);
   }
 
-  return useEmpty
-    ? objOffsetEmpty(instance, scratchKey)
-    : objOffsetIsset(instance, scratchKey);
+  return objOffsetIsset(instance, scratchKey);
 }
 
 /**
- * IssetEmptyElem when base is a String
+ * IssetElem when base is a String
  */
-template <bool useEmpty, KeyType keyType>
-bool IssetEmptyElemString(const StringData* sd, key_type<keyType> key) {
-  // TODO Task #2716479: Fix this so that the warnings raised match
-  // PHP5.
+template<KeyType keyType>
+bool IssetElemString(const StringData* sd, key_type<keyType> key) {
   auto scratchKey = initScratchKey(key);
   int64_t x;
   if (LIKELY(scratchKey.m_type == KindOfInt64)) {
@@ -2808,103 +2801,76 @@ bool IssetEmptyElemString(const StringData* sd, key_type<keyType> key) {
     // raise the appropriate warnings.
     tvCastToInt64InPlace(&tv);
     if (badKey) {
-      return useEmpty;
+      return false;
     }
     x = tv.m_data.num;
   }
-  if (x < 0 || x >= sd->size()) {
-    return useEmpty;
-  }
-  if (!useEmpty) {
-    return true;
-  }
-
-  auto str = sd->getChar(x);
-  assertx(str->isStatic());
-  return !str->toBoolean();
+  return x >= 0 && x < sd->size();
 }
 
 /**
- * IssetEmptyElem when base is an Array
+ * IssetElem when base is an Array
  */
-template <bool useEmpty, KeyType keyType>
-bool IssetEmptyElemArray(ArrayData* a, key_type<keyType> key) {
+template<KeyType keyType>
+bool IssetElemArray(ArrayData* a, key_type<keyType> key) {
   assertx(a->isPHPArray());
   auto const result = ElemArray<MOpMode::None, keyType>(a, key);
-  if (useEmpty) {
-    return !tvToBool(result.tv());
-  }
   return !tvIsNull(result.tv());
 }
 
 /**
- * IssetEmptyElem when base is a Vec
+ * IssetElem when base is a Vec
  */
-template <bool useEmpty, KeyType keyType>
-bool IssetEmptyElemVec(ArrayData* a, key_type<keyType> key) {
+template<KeyType keyType>
+bool IssetElemVec(ArrayData* a, key_type<keyType> key) {
   assertx(a->isVecArray());
   auto const result = ElemVec<MOpMode::None, keyType>(a, key);
-  if (useEmpty) {
-    return !tvToBool(tvAssertPlausible(result.tv()));
-  }
   return !tvIsNull(tvAssertPlausible(result.tv()));
 }
 
 /**
- * IssetEmptyElem when base is a Dict
+ * IssetElem when base is a Dict
  */
-template <bool useEmpty, KeyType keyType>
-bool IssetEmptyElemDict(ArrayData* a, key_type<keyType> key) {
+template<KeyType keyType>
+bool IssetElemDict(ArrayData* a, key_type<keyType> key) {
   assertx(a->isDict());
   auto const result = ElemDict<MOpMode::None, keyType>(a, key);
-  if (useEmpty) {
-    return !tvToBool(tvAssertPlausible(result.tv()));
-  }
   return !tvIsNull(tvAssertPlausible(result.tv()));
 }
 
 /**
- * IssetEmptyElem when base is a Keyset
+ * IssetElem when base is a Keyset
  */
-template <bool useEmpty, KeyType keyType>
-bool IssetEmptyElemKeyset(ArrayData* a, key_type<keyType> key) {
+template<KeyType keyType>
+bool IssetElemKeyset(ArrayData* a, key_type<keyType> key) {
   assertx(a->isKeyset());
   auto const result = ElemKeyset<MOpMode::None, keyType>(a, key);
-  if (useEmpty) {
-    return !tvToBool(tvAssertPlausible(result.tv()));
-  }
   return !tvIsNull(tvAssertPlausible(result.tv()));
 }
 
 /**
- * IssetEmptyElem when base is a ClsMeth
+ * IssetElem when base is a ClsMeth
  */
-template <bool useEmpty, KeyType keyType>
-bool IssetEmptyElemClsMeth(ClsMethDataRef base, key_type<keyType> key) {
+template<KeyType keyType>
+bool IssetElemClsMeth(ClsMethDataRef base, key_type<keyType> key) {
   const TypedValue result = ElemClsMethPre<MOpMode::None>(base, key);
-  if (useEmpty) {
-    return !tvToBool(tvAssertPlausible(result));
-  }
   return !tvIsNull(tvAssertPlausible(result));
 }
 
 /**
- * IssetEmptyElem when base is a Record
+ * IssetElem when base is a Record
  */
-template <bool useEmpty, KeyType keyType>
-bool IssetEmptyElemRecord(RecordData* base, key_type<keyType> key) {
+template<KeyType keyType>
+bool IssetElemRecord(RecordData* base, key_type<keyType> key) {
   auto const  result = ElemRecord<keyType>(base, key);
-  if (useEmpty) {
-    return !tvToBool(tvAssertPlausible(result.tv()));
-  }
   return !tvIsNull(tvAssertPlausible(result.tv()));
 }
 
 /**
- * isset/empty($base[$key])
+ * isset($base[$key])
  */
-template <bool useEmpty, KeyType keyType>
-NEVER_INLINE bool IssetEmptyElemSlow(tv_rval base, key_type<keyType> key) {
+template <KeyType keyType>
+NEVER_INLINE bool IssetElemSlow(tv_rval base, key_type<keyType> key) {
   assertx(tvIsPlausible(*base));
 
   switch (type(base)) {
@@ -2914,33 +2880,33 @@ NEVER_INLINE bool IssetEmptyElemSlow(tv_rval base, key_type<keyType> key) {
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
-      return useEmpty;
+      return false;
 
     case KindOfFunc:
-      return IssetEmptyElemString<useEmpty, keyType>(
+      return IssetElemString<keyType>(
         funcToStringHelper(val(base).pfunc), key
       );
 
     case KindOfClass:
-      return IssetEmptyElemString<useEmpty, keyType>(
+      return IssetElemString<keyType>(
         classToStringHelper(val(base).pclass), key
       );
 
     case KindOfPersistentString:
     case KindOfString:
-      return IssetEmptyElemString<useEmpty, keyType>(val(base).pstr, key);
+      return IssetElemString<keyType>(val(base).pstr, key);
 
     case KindOfPersistentVec:
     case KindOfVec:
-      return IssetEmptyElemVec<useEmpty, keyType>(val(base).parr, key);
+      return IssetElemVec<keyType>(val(base).parr, key);
 
     case KindOfPersistentDict:
     case KindOfDict:
-      return IssetEmptyElemDict<useEmpty, keyType>(val(base).parr, key);
+      return IssetElemDict<keyType>(val(base).parr, key);
 
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-      return IssetEmptyElemKeyset<useEmpty, keyType>(val(base).parr, key);
+      return IssetElemKeyset<keyType>(val(base).parr, key);
 
     case KindOfPersistentDArray:
     case KindOfDArray:
@@ -2948,43 +2914,39 @@ NEVER_INLINE bool IssetEmptyElemSlow(tv_rval base, key_type<keyType> key) {
     case KindOfVArray:
     case KindOfPersistentArray:
     case KindOfArray:
-      return IssetEmptyElemArray<useEmpty, keyType>(
-        val(base).parr, key
-      );
+      return IssetElemArray<keyType>(val(base).parr, key);
 
     case KindOfObject:
-      return IssetEmptyElemObj<useEmpty, keyType>(val(base).pobj, key);
+      return IssetElemObj<keyType>(val(base).pobj, key);
 
     case KindOfClsMeth: {
       raiseClsMethToVecWarningHelper();
-      return IssetEmptyElemClsMeth<useEmpty, keyType>(val(base).pclsmeth, key);
+      return IssetElemClsMeth<keyType>(val(base).pclsmeth, key);
     }
 
     case KindOfRecord:
-      return IssetEmptyElemRecord<useEmpty, keyType>(val(base).prec, key);
+      return IssetElemRecord<keyType>(val(base).prec, key);
   }
   unknownBaseType(type(base));
 }
 
-template <bool useEmpty, KeyType keyType = KeyType::Any>
-bool IssetEmptyElem(tv_rval base, key_type<keyType> key) {
+template <KeyType keyType = KeyType::Any>
+bool IssetElem(tv_rval base, key_type<keyType> key) {
   assertx(tvIsPlausible(*base));
 
   if (LIKELY(tvIsArray(base))) {
-    return IssetEmptyElemArray<useEmpty, keyType>(
-      val(base).parr, key
-    );
+    return IssetElemArray<keyType>(val(base).parr, key);
   }
   if (LIKELY(tvIsVec(base))) {
-    return IssetEmptyElemVec<useEmpty, keyType>(val(base).parr, key);
+    return IssetElemVec<keyType>(val(base).parr, key);
   }
   if (LIKELY(tvIsDict(base))) {
-    return IssetEmptyElemDict<useEmpty, keyType>(val(base).parr, key);
+    return IssetElemDict<keyType>(val(base).parr, key);
   }
   if (LIKELY(tvIsKeyset(base))) {
-    return IssetEmptyElemKeyset<useEmpty, keyType>(val(base).parr, key);
+    return IssetElemKeyset<keyType>(val(base).parr, key);
   }
-  return IssetEmptyElemSlow<useEmpty, keyType>(base, key);
+  return IssetElemSlow<keyType>(base, key);
 }
 
 template<MOpMode mode>
@@ -3224,23 +3186,20 @@ inline tv_lval Prop(TypedValue& tvRef,
   );
 }
 
-template <bool useEmpty, KeyType kt>
-inline bool IssetEmptyPropObj(Class* ctx, ObjectData* instance,
-                              key_type<kt> key) {
+template <KeyType kt>
+inline bool IssetPropObj(Class* ctx, ObjectData* instance, key_type<kt> key) {
   auto keySD = prepareKey(key);
   SCOPE_EXIT { releaseKey<kt>(keySD); };
 
-  return useEmpty ?
-    instance->propEmpty(ctx, keySD) :
-    instance->propIsset(ctx, keySD);
+  return instance->propIsset(ctx, keySD);
 }
 
-template <bool useEmpty, KeyType kt = KeyType::Any>
-bool IssetEmptyProp(Class* ctx, tv_lval base, key_type<kt> key) {
+template <KeyType kt = KeyType::Any>
+bool IssetProp(Class* ctx, tv_lval base, key_type<kt> key) {
   if (LIKELY(type(base) == KindOfObject)) {
-    return IssetEmptyPropObj<useEmpty, kt>(ctx, instanceFromTv(base), key);
+    return IssetPropObj<kt>(ctx, instanceFromTv(base), key);
   }
-  return useEmpty;
+  return false;
 }
 
 template <bool setResult>

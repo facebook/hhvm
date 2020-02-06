@@ -1506,10 +1506,6 @@ void in(ISS& env, const bc::QueryM& op) {
       case QueryMOp::Isset:
         miFinalIssetProp(env, nDiscard, *key);
         break;
-      case QueryMOp::Empty:
-        discard(env, nDiscard);
-        push(env, TBool);
-        break;
       case QueryMOp::InOut:
         always_assert(false);
     }
@@ -1529,15 +1525,6 @@ void in(ISS& env, const bc::QueryM& op) {
                         [](Type t) {
                           return t.subtypeOf(BInitNull) ? TFalse :
                             !t.couldBe(BInitNull) ? TTrue : TBool;
-                        });
-        break;
-      case QueryMOp::Empty:
-        miFinalCGetElem(env, nDiscard, *key, true,
-                        [](Type t) {
-                          auto const e = emptiness(t);
-                          return
-                            e == Emptiness::Empty ? TTrue :
-                            e == Emptiness::NonEmpty ? TFalse : TBool;
                         });
         break;
     }

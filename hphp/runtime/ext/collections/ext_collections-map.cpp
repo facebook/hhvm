@@ -329,20 +329,6 @@ bool BaseMap::OffsetIsset(ObjectData* obj, const TypedValue* key) {
   return result ? !tvIsNull(result) : false;
 }
 
-bool BaseMap::OffsetEmpty(ObjectData* obj, const TypedValue* key) {
-  auto map = static_cast<BaseMap*>(obj);
-  TypedValue* result;
-  if (key->m_type == KindOfInt64) {
-    result = map->get(key->m_data.num);
-  } else if (isStringType(key->m_type)) {
-    result = map->get(key->m_data.pstr);
-  } else {
-    throwBadKeyType();
-    result = nullptr;
-  }
-  return result ? !tvToBool(*result) : true;
-}
-
 bool BaseMap::OffsetContains(ObjectData* obj, const TypedValue* key) {
   auto map = static_cast<BaseMap*>(obj);
   if (key->m_type == KindOfInt64) {

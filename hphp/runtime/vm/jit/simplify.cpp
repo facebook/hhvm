@@ -3152,16 +3152,6 @@ SSATmp* hackArrIssetImpl(State& env, const IRInstruction* inst,
 }
 
 template <typename I, typename S>
-SSATmp* hackArrEmptyElemImpl(State& env, const IRInstruction* inst,
-                             I getInt, S getStr) {
-  return hackArrQueryImpl(
-    env, inst,
-    getInt, getStr,
-    [&] (tv_rval rval) { return cns(env, !rval || !tvToBool(rval.tv())); }
-  );
-}
-
-template <typename I, typename S>
 SSATmp* hackArrIdxImpl(State& env, const IRInstruction* inst,
                        I getInt, S getStr) {
   return hackArrQueryImpl(
@@ -3199,7 +3189,6 @@ SSATmp* simplify##Name(State& env, const IRInstruction* inst) {       \
 X(DictGet, Get, dictVal)
 X(DictGetQuiet, GetQuiet, dictVal)
 X(DictIsset, Isset, dictVal)
-X(DictEmptyElem, EmptyElem, dictVal)
 X(DictIdx, Idx, dictVal)
 X(AKExistsDict, AKExists, dictVal)
 
@@ -3221,7 +3210,6 @@ SSATmp* simplify##Name(State& env, const IRInstruction* inst) {       \
 X(KeysetGet, Get, keysetVal)
 X(KeysetGetQuiet, GetQuiet, keysetVal)
 X(KeysetIsset, Isset, keysetVal)
-X(KeysetEmptyElem, EmptyElem, keysetVal)
 X(KeysetIdx, Idx, keysetVal)
 X(AKExistsKeyset, AKExists, keysetVal)
 
@@ -3955,8 +3943,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(ArrayIsset)
   X(DictIsset)
   X(KeysetIsset)
-  X(DictEmptyElem)
-  X(KeysetEmptyElem)
   X(ArrayIdx)
   X(AKExistsArr)
   X(DictIdx)

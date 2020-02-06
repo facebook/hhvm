@@ -382,8 +382,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ElemVecD:
   case ElemVecU:
   case ElemX:
-  case EmptyElem:
-  case EmptyProp:
   case EqArr:
   case EqDict:
   case EqObj:
@@ -676,7 +674,6 @@ bool opcodeMayRaise(Opcode opc) {
   case DefLabel:
   case DefFrameRelSP:
   case DefRegSP:
-  case DictEmptyElem:
   case DictFirst:
   case DictFirstKey:
   case DictGetK:
@@ -773,7 +770,6 @@ bool opcodeMayRaise(Opcode opc) {
   case JmpSwitchDest:
   case JmpZero:
   case JmpPlaceholder:
-  case KeysetEmptyElem:
   case KeysetFirst:
   case KeysetGetK:
   case KeysetGetQuiet:

@@ -1684,18 +1684,6 @@ void emitIssetL(IRGS& env, int32_t id) {
   push(env, gen(env, IsNType, TNull, ld));
 }
 
-void emitEmptyL(IRGS& env, int32_t id) {
-  auto const ldPMExit = makePseudoMainExit(env);
-  auto const ld = ldLoc(env, id, ldPMExit, DataTypeSpecific);
-  if (ld->isA(TClsMeth)) {
-    PUNT(EmptyL_is_ClsMeth);
-  }
-  push(
-    env,
-    gen(env, XorBool, gen(env, ConvTVToBool, ld), cns(env, true))
-  );
-}
-
 SSATmp* isTypeHelper(IRGS& env, IsTypeOp subop, SSATmp* val) {
   switch (subop) {
     case IsTypeOp::VArray: /* intentional fallthrough */

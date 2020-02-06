@@ -1544,61 +1544,6 @@ bool ObjectData::propIsset(const Class* ctx, const StringData* key) {
   return r.val.m_data.num;
 }
 
-bool ObjectData::propEmptyImpl(const Class* ctx, const StringData* key) {
-  auto const lookup = getPropImpl<false, true, true>(ctx, key);
-  if (lookup.val && lookup.accessible) {
-    if (lookup.val.type() != KindOfUninit) {
-      return !tvToBool(lookup.val.tv());
-    }
-    if (lookup.prop && (lookup.prop->attrs & AttrLateInit)) {
-      return true;
-    }
-  }
-
-  if (m_cls->rtAttribute(Class::HasNativePropHandler)) {
-    if (auto r = invokeNativeIssetProp(key)) {
-      tvCastToBooleanInPlace(&r.val);
-      if (!r.val.m_data.num) return true;
-      if (auto r2 = invokeNativeGetProp(key)) {
-        auto const emptyResult = !tvToBool(r2.val);
-        tvDecRefGen(&r2.val);
-        return emptyResult;
-      }
-      return false;
-    }
-  }
-
-  if (!m_cls->rtAttribute(Class::UseIsset)) return true;
-  auto r = invokeIsset(key);
-  if (!r) return true;
-
-  tvCastToBooleanInPlace(&r.val);
-  if (!r.val.m_data.num) return true;
-
-  if (m_cls->rtAttribute(Class::UseGet)) {
-    if (auto r = invokeGet(key)) {
-      auto const emptyResult = !tvToBool(r.val);
-      tvDecRefGen(&r.val);
-      return emptyResult;
-    }
-  }
-  return false;
-}
-
-bool ObjectData::propEmpty(const Class* ctx, const StringData* key) {
-  if (UNLIKELY(m_cls->rtAttribute(Class::CallToImpl))) {
-    // We only get here for SimpleXMLElement or collections
-    if (LIKELY(!isCollection())) {
-      assertx(instanceof(SimpleXMLElement_classof()));
-      if (RuntimeOption::EvalNoticeOnSimpleXMLBehavior) {
-        raise_notice("SimpleXMLElement empty() property check");
-      }
-      return SimpleXMLElement_propEmpty(this, key);
-    }
-  }
-  return propEmptyImpl(ctx, key);
-}
-
 void ObjectData::setProp(Class* ctx, const StringData* key, TypedValue val) {
   assertx(tvIsPlausible(val));
   assertx(val.m_type != KindOfUninit);

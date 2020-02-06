@@ -92,17 +92,6 @@ bool objOffsetIsset(ObjectData* base, TypedValue offset) {
   return result.m_data.num;
 }
 
-bool objOffsetEmpty(ObjectData* base, TypedValue offset) {
-  if (!objOffsetIsset(base, offset)) {
-    return true;
-  }
-
-  auto value = objOffsetGet(base, offset, false);
-  auto result = !tvToBool(value);
-  tvDecRefGen(value);
-  return result;
-}
-
 void objOffsetAppend(
   ObjectData* base,
   TypedValue* val,

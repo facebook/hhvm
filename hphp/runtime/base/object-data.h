@@ -528,8 +528,6 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   tv_lval propImpl(TypedValue* tvRef, const Class* ctx,
                    const StringData* key, MInstrPropState* pState);
 
-  bool propEmptyImpl(const Class* ctx, const StringData* key);
-
   void setDynProp(const StringData* key, TypedValue val);
 
   bool invokeSet(const StringData* key, TypedValue val);
@@ -549,7 +547,6 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
                 const StringData* key, MInstrPropState* pState);
 
   bool propIsset(const Class* ctx, const StringData* key);
-  bool propEmpty(const Class* ctx, const StringData* key);
 
   void setProp(Class* ctx, const StringData* key, TypedValue val);
   tv_lval setOpProp(TypedValue& tvRef, Class* ctx, SetOpOp op,

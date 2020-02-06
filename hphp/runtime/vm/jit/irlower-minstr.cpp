@@ -108,23 +108,6 @@ void implProp(IRLS& env, const IRInstruction* inst) {
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
 }
 
-void implIssetEmptyProp(IRLS& env, const IRInstruction* inst) {
-  auto const isEmpty = inst->op() == EmptyProp;
-  auto const base = inst->src(0);
-  auto const key = inst->src(1);
-  auto const keyType = getKeyTypeNoInt(key);
-
-  BUILD_OPTAB2(base->isA(TObj),
-               ISSET_EMPTY_OBJ_PROP_HELPER_TABLE,
-               ISSET_EMPTY_PROP_HELPER_TABLE,
-               keyType, isEmpty);
-
-  auto const args = propArgs(env, inst).memberKeyS(1);
-
-  auto& v = vmain(env);
-  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
-}
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -250,11 +233,20 @@ void cgIncDecProp(IRLS& env, const IRInstruction* inst) {
                SyncOptions::Sync, args);
 }
 
-void cgIssetProp(IRLS& env, const IRInstruction* i) {
-  implIssetEmptyProp(env, i);
-}
-void cgEmptyProp(IRLS& env, const IRInstruction* i) {
-  implIssetEmptyProp(env, i);
+void cgIssetProp(IRLS& env, const IRInstruction* inst) {
+  auto const base = inst->src(0);
+  auto const key = inst->src(1);
+  auto const keyType = getKeyTypeNoInt(key);
+
+  BUILD_OPTAB2(base->isA(TObj),
+               ISSET_OBJ_PROP_HELPER_TABLE,
+               ISSET_PROP_HELPER_TABLE,
+               keyType);
+
+  auto const args = propArgs(env, inst).memberKeyS(1);
+
+  auto& v = vmain(env);
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
 }
 
 IMPL_OPCODE_CALL(ProfileProp);
@@ -297,16 +289,6 @@ void implElem(IRLS& env, const IRInstruction* inst) {
 
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
-}
-
-void implIssetEmptyElem(IRLS& env, const IRInstruction* inst) {
-  auto const isEmpty = inst->op() == EmptyElem;
-  auto const key     = inst->src(1);
-  BUILD_OPTAB(ISSET_EMPTY_ELEM_HELPER_TABLE, getKeyType(key), isEmpty);
-
-  auto& v = vmain(env);
-  cgCallHelper(v, env, target, callDest(env, inst),
-               SyncOptions::Sync, elemArgs(env, inst));
 }
 
 }
@@ -407,11 +389,13 @@ void cgUnsetElem(IRLS& env, const IRInstruction* inst) {
                SyncOptions::Sync, elemArgs(env, inst));
 }
 
-void cgIssetElem(IRLS& env, const IRInstruction* i) {
-  implIssetEmptyElem(env, i);
-}
-void cgEmptyElem(IRLS& env, const IRInstruction* i) {
-  implIssetEmptyElem(env, i);
+void cgIssetElem(IRLS& env, const IRInstruction* inst) {
+  auto const key     = inst->src(1);
+  BUILD_OPTAB(ISSET_ELEM_HELPER_TABLE, getKeyType(key));
+
+  auto& v = vmain(env);
+  cgCallHelper(v, env, target, callDest(env, inst),
+               SyncOptions::Sync, elemArgs(env, inst));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1085,17 +1069,6 @@ void implDictSet(IRLS& env, const IRInstruction* inst) {
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
 }
 
-void implDictIsset(IRLS& env, const IRInstruction* inst) {
-  auto const key     = inst->src(1);
-  auto const empty   = inst->op() == DictEmptyElem;
-  BUILD_OPTAB(DICT_ISSET_EMPTY_ELEM_HELPER_TABLE, getKeyType(key), empty);
-
-  auto args = argGroup(env, inst).ssa(0).ssa(1);
-
-  auto& v = vmain(env);
-  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
-}
-
 }
 
 void cgElemDictX(IRLS& env, const IRInstruction* inst) {
@@ -1165,10 +1138,13 @@ void cgDictGetK(IRLS& env, const IRInstruction* inst) {
 void cgDictSet(IRLS& env, const IRInstruction* i)    { implDictSet(env, i); }
 
 void cgDictIsset(IRLS& env, const IRInstruction* inst) {
-  implDictIsset(env, inst);
-}
-void cgDictEmptyElem(IRLS& env, const IRInstruction* inst) {
-  implDictIsset(env, inst);
+  auto const key     = inst->src(1);
+  BUILD_OPTAB(DICT_ISSET_ELEM_HELPER_TABLE, getKeyType(key));
+
+  auto args = argGroup(env, inst).ssa(0).ssa(1);
+
+  auto& v = vmain(env);
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
 }
 
 void cgDictIdx(IRLS& env, const IRInstruction* inst) {
@@ -1205,17 +1181,6 @@ void implKeysetGet(IRLS& env, const IRInstruction* inst) {
 
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDestTV(env, inst), SyncOptions::Sync, args);
-}
-
-void implKeysetIsset(IRLS& env, const IRInstruction* inst) {
-  auto const key = inst->src(1);
-  auto const empty = inst->op() == KeysetEmptyElem;
-  BUILD_OPTAB(KEYSET_ISSET_EMPTY_ELEM_HELPER_TABLE, getKeyType(key), empty);
-
-  auto args = argGroup(env, inst).ssa(0).ssa(1);
-
-  auto& v = vmain(env);
-  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
 }
 
 }
@@ -1282,10 +1247,13 @@ void cgSetNewElemKeyset(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgKeysetIsset(IRLS& env, const IRInstruction* inst) {
-  implKeysetIsset(env, inst);
-}
-void cgKeysetEmptyElem(IRLS& env, const IRInstruction* inst) {
-  implKeysetIsset(env, inst);
+  auto const key = inst->src(1);
+  BUILD_OPTAB(KEYSET_ISSET_ELEM_HELPER_TABLE, getKeyType(key));
+
+  auto args = argGroup(env, inst).ssa(0).ssa(1);
+
+  auto& v = vmain(env);
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
 }
 
 void cgKeysetIdx(IRLS& env, const IRInstruction* inst) {

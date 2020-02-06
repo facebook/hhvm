@@ -1568,7 +1568,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::CGetL2:
     case Op::PushL:
     case Op::IssetL:
-    case Op::EmptyL:
     case Op::SetL:
     case Op::SetOpL:
     case Op::IncDecL:
@@ -1776,7 +1775,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
       // fallthrough
     case Op::CGetG:
     case Op::IssetG:
-    case Op::EmptyG:
     case Op::SetG:
     case Op::SetOpG:
     case Op::IncDecG:
@@ -1791,7 +1789,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
       // fallthrough
     case Op::CGetS:
     case Op::IssetS:
-    case Op::EmptyS:
     case Op::SetS:
     case Op::SetOpS:
     case Op::IncDecS:

@@ -438,7 +438,6 @@ enum class MOpMode : uint8_t {
   OP(CGet)                                        \
   OP(CGetQuiet)                                   \
   OP(Isset)                                       \
-  OP(Empty)                                       \
   OP(InOut)
 
 enum class QueryMOp : uint8_t {
@@ -651,9 +650,6 @@ constexpr uint32_t kMaxConcatN = 4;
   O(IssetL,          ONE(LA),          NOV,             ONE(CV),    NF) \
   O(IssetG,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(IssetS,          NA,               TWO(CV,CV),      ONE(CV),    NF) \
-  O(EmptyL,          ONE(LA),          NOV,             ONE(CV),    NF) \
-  O(EmptyG,          NA,               ONE(CV),         ONE(CV),    NF) \
-  O(EmptyS,          NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(IsTypeC,         ONE(OA(IsTypeOp)),ONE(CV),         ONE(CV),    NF) \
   O(IsTypeL,         TWO(LA,                                            \
                        OA(IsTypeOp)),  NOV,             ONE(CV),    NF) \
@@ -832,8 +828,7 @@ inline MOpMode getQueryMOpMode(QueryMOp op) {
   switch (op) {
     case QueryMOp::CGet:  return MOpMode::Warn;
     case QueryMOp::CGetQuiet:
-    case QueryMOp::Isset:
-    case QueryMOp::Empty: return MOpMode::None;
+    case QueryMOp::Isset: return MOpMode::None;
     case QueryMOp::InOut: return MOpMode::InOut;
   }
   always_assert(false);

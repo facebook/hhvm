@@ -452,23 +452,6 @@ bool isset(ObjectData* obj, const TypedValue* key) {
   not_reached();
 }
 
-bool empty(ObjectData* obj, const TypedValue* key) {
-  switch (obj->collectionType()) {
-    case CollectionType::Vector:
-    case CollectionType::ImmVector:
-      return BaseVector::OffsetEmpty(obj, key);
-    case CollectionType::Map:
-    case CollectionType::ImmMap:
-      return BaseMap::OffsetEmpty(obj, key);
-    case CollectionType::Set:
-    case CollectionType::ImmSet:
-      return BaseSet::OffsetEmpty(obj, key);
-    case CollectionType::Pair:
-      return c_Pair::OffsetEmpty(obj, key);
-  }
-  not_reached();
-}
-
 void unset(ObjectData* obj, const TypedValue* key) {
   switch (obj->collectionType()) {
     case CollectionType::Vector:

@@ -2861,18 +2861,6 @@ void in(ISS& env, const bc::IssetL& op) {
   push(env, TBool);
 }
 
-void in(ISS& env, const bc::EmptyL& op) {
-  nothrow(env);
-  constprop(env);
-  castBoolImpl(env, locAsCell(env, op.loc1), true);
-}
-
-void in(ISS& env, const bc::EmptyS& op) {
-  popC(env);
-  popC(env);
-  push(env, TBool);
-}
-
 void in(ISS& env, const bc::IssetS& op) {
   auto const tcls  = popC(env);
   auto const tname = popC(env);
@@ -2913,7 +2901,6 @@ void in(ISS& env, const bc::IssetS& op) {
   push(env, TBool);
 }
 
-void in(ISS& env, const bc::EmptyG&) { popC(env); push(env, TBool); }
 void in(ISS& env, const bc::IssetG&) { popC(env); push(env, TBool); }
 
 void isTypeImpl(ISS& env, const Type& locOrCell, const Type& test) {

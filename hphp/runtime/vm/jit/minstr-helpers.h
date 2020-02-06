@@ -267,34 +267,30 @@ inline TypedValue incDecPropCO(Class* ctx, ObjectData* base, TypedValue key,
 
 //////////////////////////////////////////////////////////////////////
 
-#define ISSET_EMPTY_PROP_HELPER_TABLE(m)                \
-  /* name          keyType       useEmpty */            \
-  m(issetPropC,    KeyType::Any, false)                 \
-  m(issetPropCS,   KeyType::Str, false)                 \
-  m(issetPropCE,   KeyType::Any, true)                  \
-  m(issetPropCES,  KeyType::Str, true)                  \
+#define ISSET_PROP_HELPER_TABLE(m) \
+  /* name        keyType */        \
+  m(issetPropC,  KeyType::Any)     \
+  m(issetPropCS, KeyType::Str)     \
 
-#define X(nm, kt, useEmpty)                                             \
-/* This returns uint64_t to ensure all 64 bits of rax are valid. */     \
+#define X(nm, kt)                                                   \
+/* This returns uint64_t to ensure all 64 bits of rax are valid. */ \
 inline uint64_t nm(Class* ctx, tv_lval base, key_type<kt> key) {    \
-  return HPHP::IssetEmptyProp<useEmpty, kt>(ctx, base, key);            \
+  return HPHP::IssetProp<kt>(ctx, base, key);                       \
 }
-ISSET_EMPTY_PROP_HELPER_TABLE(X)
+ISSET_PROP_HELPER_TABLE(X)
 #undef X
 
-#define ISSET_EMPTY_OBJ_PROP_HELPER_TABLE(m)       \
-  /* name          keyType       useEmpty */       \
-  m(issetPropCEO,  KeyType::Any, true)             \
-  m(issetPropCEOS, KeyType::Str, true)             \
-  m(issetPropCO,   KeyType::Any, false)            \
-  m(issetPropCOS,  KeyType::Str, false)            \
+#define ISSET_OBJ_PROP_HELPER_TABLE(m) \
+  /* name         keyType */           \
+  m(issetPropCO,  KeyType::Any)        \
+  m(issetPropCOS, KeyType::Str)        \
 
-#define X(nm, kt, useEmpty)                                             \
-/* This returns uint64_t to ensure all 64 bits of rax are valid. */     \
-inline uint64_t nm(Class* ctx, ObjectData* base, key_type<kt> key) {    \
-  return IssetEmptyPropObj<useEmpty, kt>(ctx, base, key);               \
+#define X(nm, kt)                                                    \
+/* This returns uint64_t to ensure all 64 bits of rax are valid. */  \
+inline uint64_t nm(Class* ctx, ObjectData* base, key_type<kt> key) { \
+  return IssetPropObj<kt>(ctx, base, key);                           \
 }
-ISSET_EMPTY_OBJ_PROP_HELPER_TABLE(X)
+ISSET_OBJ_PROP_HELPER_TABLE(X)
 #undef X
 
 //////////////////////////////////////////////////////////////////////
@@ -819,44 +815,30 @@ ARRAY_ISSET_HELPER_TABLE(X)
 
 //////////////////////////////////////////////////////////////////////
 
-template<KeyType keyType, bool isEmpty>
-uint64_t dictIssetImpl(ArrayData* a, key_type<keyType> key) {
-  return IssetEmptyElemDict<isEmpty, keyType>(a, key);
-}
+#define DICT_ISSET_ELEM_HELPER_TABLE(m) \
+  /* name           keyType */          \
+  m(dictIssetElemS, KeyType::Str)       \
+  m(dictIssetElemI, KeyType::Int)       \
 
-#define DICT_ISSET_EMPTY_ELEM_HELPER_TABLE(m)         \
-  /* name              keyType      isEmpty */        \
-  m(dictIssetElemS,    KeyType::Str,  false)          \
-  m(dictIssetElemSE,   KeyType::Str,  true)           \
-  m(dictIssetElemI,    KeyType::Int,  false)          \
-  m(dictIssetElemIE,   KeyType::Int,  true)           \
-
-#define X(nm, keyType, isEmpty)                               \
-inline uint64_t nm(ArrayData* a, key_type<keyType> key) {     \
-  return dictIssetImpl<keyType, isEmpty>(a, key);             \
+#define X(nm, keyType)                                    \
+inline uint64_t nm(ArrayData* a, key_type<keyType> key) { \
+  return IssetElemDict<keyType>(a, key);                  \
 }
-DICT_ISSET_EMPTY_ELEM_HELPER_TABLE(X)
+DICT_ISSET_ELEM_HELPER_TABLE(X)
 #undef X
 
 //////////////////////////////////////////////////////////////////////
 
-template<KeyType keyType, bool isEmpty>
-uint64_t keysetIssetImpl(ArrayData* a, key_type<keyType> key) {
-  return IssetEmptyElemKeyset<isEmpty, keyType>(a, key);
-}
+#define KEYSET_ISSET_ELEM_HELPER_TABLE(m) \
+  /* name             keyType */          \
+  m(keysetIssetElemS, KeyType::Str)       \
+  m(keysetIssetElemI, KeyType::Int)       \
 
-#define KEYSET_ISSET_EMPTY_ELEM_HELPER_TABLE(m)         \
-  /* name                keyType      isEmpty */        \
-  m(keysetIssetElemS,    KeyType::Str,  false)          \
-  m(keysetIssetElemSE,   KeyType::Str,  true)           \
-  m(keysetIssetElemI,    KeyType::Int,  false)          \
-  m(keysetIssetElemIE,   KeyType::Int,  true)           \
-
-#define X(nm, keyType, isEmpty)                               \
-inline uint64_t nm(ArrayData* a, key_type<keyType> key) {     \
-  return keysetIssetImpl<keyType, isEmpty>(a, key);           \
+#define X(nm, keyType)                                    \
+inline uint64_t nm(ArrayData* a, key_type<keyType> key) { \
+  return IssetElemKeyset<keyType>(a, key);                \
 }
-KEYSET_ISSET_EMPTY_ELEM_HELPER_TABLE(X)
+KEYSET_ISSET_ELEM_HELPER_TABLE(X)
 #undef X
 
 //////////////////////////////////////////////////////////////////////
@@ -881,25 +863,17 @@ UNSET_ELEM_HELPER_TABLE(X)
 
 //////////////////////////////////////////////////////////////////////
 
-template <KeyType keyType, bool isEmpty>
-bool issetEmptyElemImpl(tv_lval base, key_type<keyType> key) {
-  return HPHP::IssetEmptyElem<isEmpty, keyType>(base, key);
-}
+#define ISSET_ELEM_HELPER_TABLE(m) \
+  /* name       keyType */         \
+  m(issetElemC, KeyType::Any)      \
+  m(issetElemI, KeyType::Int)      \
+  m(issetElemS, KeyType::Str)      \
 
-#define ISSET_EMPTY_ELEM_HELPER_TABLE(m)    \
-  /* name         keyType       isEmpty */  \
-  m(issetElemC,   KeyType::Any, false)      \
-  m(issetElemCE,  KeyType::Any,  true)      \
-  m(issetElemI,   KeyType::Int, false)      \
-  m(issetElemIE,  KeyType::Int,  true)      \
-  m(issetElemS,   KeyType::Str, false)      \
-  m(issetElemSE,  KeyType::Str,  true)      \
-
-#define X(nm, kt, isEmpty)                            \
-inline uint64_t nm(tv_lval base, key_type<kt> key) {  \
-  return issetEmptyElemImpl<kt, isEmpty>(base, key);  \
+#define X(nm, kt)                                    \
+inline uint64_t nm(tv_lval base, key_type<kt> key) { \
+  return HPHP::IssetElem<kt>(base, key);             \
 }
-ISSET_EMPTY_ELEM_HELPER_TABLE(X)
+ISSET_ELEM_HELPER_TABLE(X)
 #undef X
 
 //////////////////////////////////////////////////////////////////////

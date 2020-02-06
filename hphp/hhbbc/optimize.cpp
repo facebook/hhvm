@@ -244,9 +244,6 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
   case Op::IssetL:
   case Op::IssetG:
   case Op::IssetS:
-  case Op::EmptyL:
-  case Op::EmptyG:
-  case Op::EmptyS:
   case Op::IsTypeC:
   case Op::IsTypeL:
   case Op::OODeclExists:

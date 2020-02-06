@@ -1562,9 +1562,6 @@ void dce(Env& env, const bc::DefClsNop& op) { no_dce(env, op); }
 void dce(Env& env, const bc::DefCns& op) { no_dce(env, op); }
 void dce(Env& env, const bc::DefRecord& op) { no_dce(env, op); }
 void dce(Env& env, const bc::DefTypeAlias& op) { no_dce(env, op); }
-void dce(Env& env, const bc::EmptyG& op) { no_dce(env, op); }
-void dce(Env& env, const bc::EmptyL& op) { no_dce(env, op); }
-void dce(Env& env, const bc::EmptyS& op) { no_dce(env, op); }
 void dce(Env& env, const bc::EntryNop& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Eval& op) { no_dce(env, op); }
 void dce(Env& env, const bc::FCallBuiltin& op) { no_dce(env, op); }

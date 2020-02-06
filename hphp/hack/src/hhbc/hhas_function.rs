@@ -7,6 +7,7 @@ use closure_convert_rust::HoistKind;
 use hhas_attribute_rust::HhasAttribute;
 use hhas_body_rust::HhasBody;
 use hhas_param_rust::HhasParam;
+
 use hhas_pos_rust as hhas_pos;
 use hhbc_id_rust as hhbc_id;
 use rx_rust as rx;
@@ -14,6 +15,7 @@ use rx_rust as rx;
 extern crate bitflags;
 use bitflags::bitflags;
 
+#[derive(Debug)]
 pub struct HhasFunction<'a> {
     pub attributes: Vec<HhasAttribute>,
     pub name: hhbc_id::function::Type<'a>,
@@ -42,6 +44,22 @@ impl HhasFunction<'_> {
             HoistKind::TopLevel => true,
             HoistKind::Hoisted => false,
         }
+    }
+
+    pub fn is_async(&self) -> bool {
+        self.flags.contains(Flags::ASYNC)
+    }
+
+    pub fn is_generator(&self) -> bool {
+        self.flags.contains(Flags::GENERATOR)
+    }
+
+    pub fn is_pair_generator(&self) -> bool {
+        self.flags.contains(Flags::PAIR_GENERATOR)
+    }
+
+    pub fn rx_disabled(&self) -> bool {
+        self.flags.contains(Flags::RX_DISABLED)
     }
 
     pub fn with_body<F, T>(&mut self, body: HhasBody, f: F) -> T

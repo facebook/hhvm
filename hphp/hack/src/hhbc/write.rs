@@ -13,23 +13,38 @@ use thiserror::Error;
 
 pub type Result<T, WE> = std::result::Result<T, Error<WE>>;
 
+#[macro_export]
+macro_rules! not_impl {
+    () => {
+        Err(Error::NotImpl(format!("{}:{}", file!(), line!())))
+    };
+}
+
 #[derive(Error, Debug)]
 pub enum Error<WE: Debug> {
     #[error("write error: {0:?}")]
     WriteError(WE),
+
     #[error("a string may contain invalid utf-8")]
     InvalidUTF8,
+
+    //TODO(hrust): This is a temp error during porting
+    #[error("NOT_IMPL: {0}")]
+    NotImpl(String),
+
+    #[error("Failed: {0}")]
+    Fail(String),
 }
 
 pub trait Write {
     type Error: Debug;
-    fn write(&mut self, s: &str) -> Result<(), Self::Error>;
+    fn write(&mut self, s: impl AsRef<str>) -> Result<(), Self::Error>;
 }
 
 impl<W: fmt::Write> Write for W {
     type Error = fmt::Error;
-    fn write(&mut self, s: &str) -> Result<(), Self::Error> {
-        self.write_str(s).map_err(Error::WriteError)
+    fn write(&mut self, s: impl AsRef<str>) -> Result<(), Self::Error> {
+        self.write_str(s.as_ref()).map_err(Error::WriteError)
     }
 }
 
@@ -47,8 +62,10 @@ impl IoWrite {
 
 impl Write for IoWrite {
     type Error = std::io::Error;
-    fn write(&mut self, s: &str) -> Result<(), Self::Error> {
-        self.0.write_all(s.as_bytes()).map_err(Error::WriteError)
+    fn write(&mut self, s: impl AsRef<str>) -> Result<(), Self::Error> {
+        self.0
+            .write_all(s.as_ref().as_bytes())
+            .map_err(Error::WriteError)
     }
 }
 
@@ -56,8 +73,9 @@ pub fn newline<W: Write>(w: &mut W) -> Result<(), W::Error> {
     w.write("\n")
 }
 
-pub fn wrap_by_<W: Write, F>(w: &mut W, s: &str, e: &str, f: F) -> Result<(), W::Error>
+pub fn wrap_by_<W, F>(w: &mut W, s: &str, e: &str, f: F) -> Result<(), W::Error>
 where
+    W: Write,
     F: FnOnce(&mut W) -> Result<(), W::Error>,
 {
     w.write(s)?;
@@ -79,38 +97,67 @@ where
     wrap_by_(w, "{", "}", f)
 }
 
+pub fn wrap_by_paren<W: Write, F>(w: &mut W, f: F) -> Result<(), W::Error>
+where
+    F: FnOnce(&mut W) -> Result<(), W::Error>,
+{
+    wrap_by_(w, "(", ")", f)
+}
+
 pub fn write_list<W: Write>(w: &mut W, items: &[impl AsRef<str>]) -> Result<(), W::Error> {
     Ok(for i in items {
         w.write(i.as_ref())?;
     })
 }
 
-pub fn write_list_by<W: Write>(
+pub fn concat_str<W: Write, I: AsRef<str>>(w: &mut W, ss: impl AsRef<[I]>) -> Result<(), W::Error> {
+    concat(w, ss, |w, s| w.write(s))
+}
+
+pub fn concat_str_by<W: Write, I: AsRef<str>>(
     w: &mut W,
     sep: impl AsRef<str>,
-    items: &[impl AsRef<str>],
+    ss: impl AsRef<[I]>,
 ) -> Result<(), W::Error> {
+    concat_by(w, sep, ss, |w, s| w.write(s))
+}
+
+pub fn concat<W, T, F>(w: &mut W, items: impl AsRef<[T]>, f: F) -> Result<(), W::Error>
+where
+    W: Write,
+    F: FnMut(&mut W, &T) -> Result<(), W::Error>,
+{
+    concat_by(w, "", items, f)
+}
+
+pub fn concat_by<W, T, F>(
+    w: &mut W,
+    sep: impl AsRef<str>,
+    items: impl AsRef<[T]>,
+    mut f: F,
+) -> Result<(), W::Error>
+where
+    W: Write,
+    F: FnMut(&mut W, &T) -> Result<(), W::Error>,
+{
     let mut first = true;
     let sep = sep.as_ref();
-    Ok(for i in items {
+    Ok(for i in items.as_ref() {
         if first {
             first = false;
         } else {
             w.write(sep)?;
         }
-        w.write(i.as_ref())?;
+        f(w, i)?;
     })
 }
 
-pub fn write_map<'i, W: Write, Item: 'i, F>(
-    w: &mut W,
-    f: F,
-    items: impl Iterator<Item = &'i Item>,
-) -> Result<(), W::Error>
+pub fn option<W: Write, T, F>(w: &mut W, i: Option<T>, f: F) -> Result<(), W::Error>
 where
-    F: Fn(&mut W, &Item) -> Result<(), W::Error>,
+    F: Fn(&mut W, T) -> Result<(), W::Error>,
 {
-    Ok(for i in items {
-        f(w, i)?
-    })
+    match i {
+        None => Ok(()),
+        Some(i) => f(w, i),
+    }
 }

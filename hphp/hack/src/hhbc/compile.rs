@@ -12,7 +12,7 @@ use anyhow;
 use bitflags::bitflags;
 use emit_program_rust::{emit_program, FromAstFlags};
 use hhas_program_rust::HhasProgram;
-use hhbc_hhas_rust::{print_program, Write};
+use hhbc_hhas_rust::{print_program, Context, Write};
 use instruction_sequence_rust::Error;
 use itertools::{Either, Either::*};
 use ocamlrep::rc::RcOc;
@@ -93,7 +93,8 @@ where
     });
 
     let (program, codegen_t) = match ast {
-        Either::Right((ast, is_hh_file)) => emit(&env, opts, is_hh_file, &ast),
+        // TODO(shiqicao): change opts to Rc<Option> to avoid cloning
+        Either::Right((ast, is_hh_file)) => emit(&env, opts.clone(), is_hh_file, &ast),
         Either::Left((pos, msg, is_runtime_error)) => emit_fatal(&env, is_runtime_error, pos, msg),
     };
     let program = program?;
@@ -101,8 +102,11 @@ where
 
     profile(log_extern_compiler_perf, &mut ret.printing_t, || {
         print_program(
-            Some(&env.filepath),
-            env.flags.contains(EnvFlags::DUMP_SYMBOL_REFS),
+            &mut Context::new(
+                &opts,
+                Some(&env.filepath),
+                env.flags.contains(EnvFlags::DUMP_SYMBOL_REFS),
+            ),
             writer,
             &program,
         )

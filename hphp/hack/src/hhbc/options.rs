@@ -437,6 +437,16 @@ impl Options {
         let opts: serde_json::Result<Self> = serde_json::value::from_value(merged);
         opts.map_err(|e| e.to_string())
     }
+
+    pub fn source_map(&self) -> bool {
+        self.eval_flags
+            .contains(EvalFlags::DISASSEMBLER_SOURCE_MAPPING)
+    }
+
+    pub fn enforce_generic_ub(&self) -> bool {
+        self.hack_compiler_flags
+            .contains(CompilerFlags::ENFORCE_GENERICS_UB)
+    }
 }
 
 use serde::de::{self, Deserializer, MapAccess, Visitor};

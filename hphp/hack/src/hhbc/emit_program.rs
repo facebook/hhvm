@@ -24,7 +24,6 @@ pub fn emit_fatal_program<'p>(options: Options, is_systemlib: bool) -> Result<Hh
 }
 
 /// This is the entry point from hh_single_compile & coroutine
-#[allow(unused_variables)]
 pub fn emit_program<'p>(
     options: Options,
     flags: FromAstFlags,
@@ -33,7 +32,7 @@ pub fn emit_program<'p>(
 ) -> Result<HhasProgram<'p>> {
     let result = emit_program_(options.clone(), flags, namespace, tast);
     match result {
-        Err(Error::IncludeTimeFatalException(op, msg)) => {
+        Err(Error::IncludeTimeFatalException(_op, _msg)) => {
             emit_fatal_program(options, flags.contains(FromAstFlags::IS_SYSTEMLIB))
         }
         _ => result,
@@ -57,9 +56,13 @@ fn emit_program_<'p>(
         .context_mut()
         .set_systemlib(flags.contains(FromAstFlags::IS_SYSTEMLIB));
 
-    emit_main(&mut emitter, flags, namespace, prog)?;
+    let main = emit_main(&mut emitter, flags, namespace, prog)?;
 
-    Ok(HhasProgram::default())
+    Ok(HhasProgram {
+        main,
+        is_hh: flags.contains(FromAstFlags::IS_HH_FILE),
+        ..HhasProgram::default()
+    })
 }
 
 bitflags! {
@@ -72,8 +75,6 @@ bitflags! {
 }
 
 // IMPLEMENTATION DETAILS
-
-#[allow(unused_variables)]
 fn emit_main(
     emitter: &mut Emitter,
     flags: FromAstFlags,

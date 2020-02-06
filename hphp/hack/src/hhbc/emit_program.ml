@@ -110,7 +110,7 @@ let emit_program ~is_hh_file ~is_evaled ~for_debugger_eval ~empty_namespace tast
           let debugger_modify_program =
             for_debugger_eval && debugger_eval_should_modify tast
           in
-          let compiled_defs =
+          let compiled_main =
             emit_main
               is_evaled
               debugger_modify_program
@@ -144,7 +144,7 @@ let emit_program ~is_hh_file ~is_evaled ~for_debugger_eval ~empty_namespace tast
               compiled_records
               compiled_typedefs
               compiled_file_attributes
-              compiled_defs
+              compiled_main
               symbol_refs
           in
           hhas

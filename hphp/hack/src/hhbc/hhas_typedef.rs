@@ -11,6 +11,7 @@ use runtime;
 use hhas_attribute::HhasAttribute;
 use runtime::TypedValue;
 
+#[derive(Debug)]
 pub struct Typedef<'a> {
     pub name: hhas_id::class::Type<'a>,
     pub attributes: Vec<HhasAttribute>,

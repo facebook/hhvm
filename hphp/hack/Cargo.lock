@@ -154,6 +154,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "closure_convert_rust"
+version = "0.0.0"
+dependencies = [
+ "ast_constant_folder_rust 0.0.0",
+ "ast_scope_rust 0.0.0",
+ "bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "decl_vars_rust 0.0.0",
+ "env 0.0.0",
+ "hhbc_string_utils_rust 0.0.0",
+ "itertools 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "naming_special_names_rust 0.0.0",
+ "ocamlrep 0.0.0",
+ "options 0.0.0",
+ "oxidized 0.0.0",
+ "rx_rust 0.0.0",
+ "unique_list_rust 0.0.0",
+]
+
+[[package]]
 name = "compile_rust"
 version = "0.0.0"
 dependencies = [
@@ -775,6 +794,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "hhas_function_rust"
+version = "0.0.0"
+dependencies = [
+ "bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "closure_convert_rust 0.0.0",
+ "hhas_attribute_rust 0.0.0",
+ "hhas_body_rust 0.0.0",
+ "hhas_param_rust 0.0.0",
+ "hhas_pos_rust 0.0.0",
+ "hhbc_id_rust 0.0.0",
+ "rx_rust 0.0.0",
+]
+
+[[package]]
 name = "hhas_param_rust"
 version = "0.0.0"
 dependencies = [
@@ -786,10 +819,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "hhas_pos_rust"
+version = "0.0.0"
+dependencies = [
+ "oxidized 0.0.0",
+]
+
+[[package]]
 name = "hhas_program_rust"
 version = "0.0.0"
 dependencies = [
  "hhas_attribute_rust 0.0.0",
+ "hhas_body_rust 0.0.0",
+ "hhas_function_rust 0.0.0",
  "hhas_record_def_rust 0.0.0",
  "hhas_symbol_refs_rust 0.0.0",
  "hhas_typedef_rust 0.0.0",
@@ -843,9 +885,17 @@ name = "hhbc_hhas_rust"
 version = "0.0.0"
 dependencies = [
  "escaper 0.0.0",
+ "hhas_body_rust 0.0.0",
+ "hhas_function_rust 0.0.0",
+ "hhas_param_rust 0.0.0",
+ "hhas_pos_rust 0.0.0",
  "hhas_program_rust 0.0.0",
  "hhas_record_def_rust 0.0.0",
+ "hhas_type 0.0.0",
+ "hhbc_ast_rust 0.0.0",
  "hhbc_id_rust 0.0.0",
+ "instruction_sequence_rust 0.0.0",
+ "options 0.0.0",
  "oxidized 0.0.0",
  "thiserror 1.0.10 (registry+https://github.com/rust-lang/crates.io-index)",
 ]

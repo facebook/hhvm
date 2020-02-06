@@ -18,7 +18,7 @@ use generator_rust as generator;
 use hhas_body_rust::HhasBody;
 use hhas_param_rust::HhasParam;
 use hhas_type::Info as HhasTypeInfo;
-use hhbc_ast_rust::Instruct;
+use hhbc_ast_rust::{Instruct, InstructControlFlow, InstructLitConst};
 use hhbc_string_utils_rust as string_utils;
 use instruction_sequence_rust::{InstrSeq, Result};
 use label_rewriter_rust as label_rewriter;
@@ -78,14 +78,33 @@ bitflags! {
 }
 
 pub fn emit_body_with_default_args(
-    emitter: &mut Emitter,
-    namespace: &namespace_env::Env,
-    body: &tast::Program,
-    return_value: InstrSeq,
+    _emitter: &mut Emitter,
+    _namespace: &namespace_env::Env,
+    _body: &tast::Program,
+    _return_value: InstrSeq,
 ) -> Result<HhasBody> {
-    let (res, _, _) =
+    // TODO(hrust): temporary replace the following code by a dummy Hhasbody
+    // in order to unblock end to end testing.
+    /*
+     let (res, _, _) =
         Args::with_default(|mut args| emit_body(emitter, namespace, body, return_value, &mut args));
     res
+    */
+    Ok(HhasBody {
+        body_instrs: InstrSeq::make_instrs(vec![
+            Instruct::ILitConst(InstructLitConst::Int(1)),
+            Instruct::IContFlow(InstructControlFlow::RetC),
+        ]),
+        decl_vars: vec![],
+        num_iters: 0,
+        is_memoize_wrapper: false,
+        is_memoize_wrapper_lsb: false,
+        upper_bounds: vec![],
+        params: vec![],
+        return_type_info: None,
+        doc_comment: None,
+        env: None,
+    })
 }
 
 pub fn emit_body(

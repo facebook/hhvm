@@ -734,22 +734,22 @@ let string_of_instruction instruction =
   in
   s ^ "\n"
 
-let adjusted_indent instruction indent =
-  match instruction with
-  | IComment _ -> 0
-  | ILabel _
-  | ITry TryCatchMiddle
-  | ITry TryCatchEnd ->
-    indent - 2
-  | _ -> indent
-
-let new_indent instruction indent =
-  match instruction with
-  | ITry TryCatchBegin -> indent + 2
-  | ITry TryCatchEnd -> indent - 2
-  | _ -> indent
-
 let add_instruction_list buffer indent instructions =
+  let adjusted_indent instruction indent =
+    match instruction with
+    | IComment _ -> 0
+    | ILabel _
+    | ITry TryCatchMiddle
+    | ITry TryCatchEnd ->
+      indent - 2
+    | _ -> indent
+  in
+  let new_indent instruction indent =
+    match instruction with
+    | ITry TryCatchBegin -> indent + 2
+    | ITry TryCatchEnd -> indent - 2
+    | _ -> indent
+  in
   let rec aux instructions indent =
     match instructions with
     | [] -> ()
@@ -2163,7 +2163,7 @@ let add_data_region buf adata =
   List.iter ~f:(add_data_region_element buf) adata;
   Acc.add buf "\n"
 
-let add_top_level buf body =
+let add_main buf body =
   Acc.add buf ".main ";
   if Hhbc_options.source_mapping !Hhbc_options.compiler_options then
     Acc.add buf "(1,1) ";
@@ -2272,13 +2272,13 @@ let add_program_content ?path dump_symbol_refs buf hhas_prog =
   in
   Acc.add buf @@ "\n.hh_file " ^ is_hh ^ ";\n";
   let functions = Hhas_program.functions hhas_prog in
-  let top_level_body = Hhas_program.main hhas_prog in
+  let main = Hhas_program.main hhas_prog in
   let classes = Hhas_program.classes hhas_prog in
   let records = Hhas_program.record_defs hhas_prog in
   let adata = Hhas_program.adata hhas_prog in
   let symbol_refs = Hhas_program.symbol_refs hhas_prog in
   add_data_region buf adata;
-  add_top_level buf top_level_body;
+  add_main buf main;
   List.iter ~f:(add_fun_def buf) functions;
   List.iter ~f:(add_class_def buf) classes;
   List.iter ~f:(add_record_def buf) records;

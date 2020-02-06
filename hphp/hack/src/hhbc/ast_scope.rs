@@ -11,20 +11,20 @@ use oxidized::{
 use rx_rust as rx;
 use std::borrow::Cow;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct LongLambda {
     pub is_static: bool,
     pub is_async: bool,
     pub rx_level: Option<rx::Level>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Lambda {
     pub is_async: bool,
     pub rx_level: Option<rx::Level>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum ScopeItem<'a> {
     Class(Cow<'a, ast::Class_>),
     Function(Cow<'a, ast::Fun_>),
@@ -42,7 +42,7 @@ impl ScopeItem<'_> {
     }
 }
 
-#[derive(Clone, Default)]
+#[derive(Clone, Default, Debug)]
 pub struct Scope<'a> {
     pub items: Vec<ScopeItem<'a>>,
 }

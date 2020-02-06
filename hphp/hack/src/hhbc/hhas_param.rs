@@ -9,7 +9,7 @@ use label_rust::Label;
 use oxidized::ast as tast;
 extern crate bitflags;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct HhasParam {
     pub name: String,
     pub is_variadic: bool,

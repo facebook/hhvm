@@ -7,7 +7,7 @@ use hhas_param_rust::HhasParam;
 use instruction_sequence_rust::InstrSeq;
 use oxidized::doc_comment::DocComment;
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct HhasBody {
     pub body_instrs: InstrSeq,
     pub decl_vars: Vec<String>,

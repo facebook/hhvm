@@ -20,7 +20,7 @@ use naming_special_names::user_attributes as ua;
 ///   }
 /// ```
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct HhasAttribute {
     pub name: String,
     pub arguments: Vec<TypedValue>,

@@ -28,7 +28,7 @@ bitflags! {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct Env {
     pub flags: Flags,
     pub jump_targets_gen: jump_targets::Gen,

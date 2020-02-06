@@ -7,12 +7,13 @@ extern crate bitflags;
 
 /// Type info has additional optional user type *)
 #[allow(dead_code)]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Info {
     pub user_type: Option<String>,
     pub type_constraint: constraint::Type,
 }
 
+#[derive(Debug)]
 pub struct Constant {
     pub name: String,
     pub initializer: constraint::Type,
@@ -23,7 +24,7 @@ pub mod constraint {
 
     use bitflags::bitflags;
 
-    #[derive(Clone, Default)]
+    #[derive(Clone, Default, Debug)]
     pub struct Type {
         pub name: Option<String>,
         pub flags: Flags,

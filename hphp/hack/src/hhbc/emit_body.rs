@@ -18,10 +18,11 @@ use generator_rust as generator;
 use hhas_body_rust::HhasBody;
 use hhas_param_rust::HhasParam;
 use hhas_type::Info as HhasTypeInfo;
-use hhbc_ast_rust::{Instruct, InstructControlFlow, InstructLitConst};
+use hhbc_ast_rust::{Instruct, InstructControlFlow, InstructLitConst, ParamId};
 use hhbc_string_utils_rust as string_utils;
 use instruction_sequence_rust::{InstrSeq, Result};
 use label_rewriter_rust as label_rewriter;
+use local_rust as local;
 use naming_special_names_rust::classes;
 use options::CompilerFlags;
 use oxidized::{aast, ast as tast, ast_defs, doc_comment::DocComment, namespace_env, pos::Pos};
@@ -112,7 +113,7 @@ pub fn emit_body(
     namespace: &namespace_env::Env,
     body: &tast::Program,
     return_value: InstrSeq,
-    args: &mut Args,
+    args: &Args,
 ) -> (Result<HhasBody>, bool, bool) {
     if args.flags.contains(Flags::ASYNC)
         && args.flags.contains(Flags::SKIP_AWAITABLE)
@@ -176,14 +177,12 @@ pub fn emit_body(
         args.flags.contains(Flags::RX_BODY),
     );
 
-    emit_statements(
-        &mut env,
-        args.ret,
+    set_emit_statement_state(
+        emitter,
         return_value,
         &params,
-        &mut args.default_dropthrough,
         &return_type_info,
-        args.flags.contains(Flags::ASYNC),
+        args,
         is_generator,
     );
     env.jump_targets_gen.reset();
@@ -267,12 +266,12 @@ fn make_body_instrs(
         _ => false,
     };
     let header = if first_instr_is_label && InstrSeq::is_empty(&header_content) {
-        InstrSeq::gather(vec![InstrSeq::make_entrynop(), begin_label])
+        InstrSeq::gather(vec![begin_label, InstrSeq::make_entrynop()])
     } else {
-        InstrSeq::gather(vec![header_content, begin_label])
+        InstrSeq::gather(vec![begin_label, header_content])
     };
 
-    let mut body_instrs = InstrSeq::gather(vec![default_value_setters, stmt_instrs, header]);
+    let mut body_instrs = InstrSeq::gather(vec![header, stmt_instrs, default_value_setters]);
     if debugger_modify_program {
         modify_prog_for_debugger_eval(&mut body_instrs);
     };
@@ -496,43 +495,73 @@ pub fn emit_deprecation_info(
     InstrSeq::Empty
 }
 
-#[allow(unused_variables)]
-fn emit_statements(
-    env: &mut Env,
-    ret: Option<&aast::Hint>,
-    return_value: InstrSeq,
+fn set_emit_statement_state(
+    emitter: &mut Emitter,
+    default_return_value: InstrSeq,
     params: &[HhasParam],
-    default_dropthrough: &mut Option<InstrSeq>,
     return_type_info: &HhasTypeInfo,
-    is_async: bool,
+    args: &Args,
     is_generator: bool,
 ) {
     let verify_return = match &return_type_info.user_type {
         Some(s) if s == "" => None,
-        _ if return_type_info.has_type_constraint() && !is_generator => ret,
+        _ if return_type_info.has_type_constraint() && !is_generator => args.ret.map(|h| h.clone()),
         _ => None,
     };
-    if default_dropthrough.is_none() && is_async && verify_return.is_some() {
-        *default_dropthrough = Some(InstrSeq::gather(vec![
+    let default_dropthrough = if args.default_dropthrough.is_none()
+        && args.flags.contains(Flags::ASYNC)
+        && verify_return.is_some()
+    {
+        Some(InstrSeq::gather(vec![
             InstrSeq::make_null(),
             InstrSeq::make_verify_ret_type_c(),
             InstrSeq::make_retc(),
-        ]));
+        ]))
+    } else {
+        args.default_dropthrough.clone()
     };
     let (num_out, verify_out) = emit_verify_out(params);
 
-    //TODO(hrust) uncomment after porting emit_statement
-    // emit_statement::set_verify_return(verify_return);
-    // emit_statement::set_verify_out(verify_out);
-    // emit_statement::set_num_out(num_out);
-    // emit_statement::set_default_dropthrough(default_dropthrough);
-    // emit_statement::set_default_return_value(return_value);
-    // emit_statement::set_function_pos(pos);
+    emit_statement::set_state(
+        emitter,
+        emit_statement::State {
+            verify_return,
+            default_return_value,
+            default_dropthrough,
+            verify_out,
+            function_pos: args.pos.clone(),
+            num_out,
+        },
+    )
 }
 
-fn emit_verify_out(_params: &[HhasParam]) -> (usize, InstrSeq) {
-    //TODO(hrust) implement
-    (0, InstrSeq::Empty)
+fn emit_verify_out(params: &[HhasParam]) -> (usize, InstrSeq) {
+    use std::convert::TryInto;
+    let param_instrs: Vec<InstrSeq> = params
+        .iter()
+        .rev()
+        .enumerate()
+        .filter_map(|(i, p)| {
+            (Some(InstrSeq::gather(vec![
+                InstrSeq::make_cgetl(local::Type::Named(p.name.clone())),
+                match p.type_info.as_ref() {
+                    Some(HhasTypeInfo { user_type, .. }) if !is_mixed_or_dynamic(user_type) => {
+                        InstrSeq::make_verify_out_type(ParamId::ParamUnnamed(i.try_into().unwrap()))
+                    }
+                    _ => InstrSeq::Empty,
+                },
+            ])))
+            .filter(|_| p.is_inout)
+        })
+        .collect();
+    (param_instrs.len(), InstrSeq::gather(param_instrs))
+}
+
+fn is_mixed_or_dynamic(typ_opt: &Option<String>) -> bool {
+    match typ_opt {
+        Some(t) if t.ends_with("HH\\mixed") || t.ends_with("HH\\dynamic") => true,
+        _ => false,
+    }
 }
 
 pub fn emit_generics_upper_bounds(

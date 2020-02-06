@@ -78,7 +78,7 @@ fn emit_return(e: &mut Emitter, env: &mut Env) -> InstrSeq {
     tfr::emit_return(e, false, env)
 }
 
-fn emit_def_inline<Ex, Fb, En, Hi>(e: &mut Emitter, def: a::Def<Ex, Fb, En, Hi>) -> Result {
+fn emit_def_inline<Ex, Fb, En, Hi>(e: &mut Emitter, def: &a::Def<Ex, Fb, En, Hi>) -> Result {
     use ast_defs::Id;
     Ok(match def {
         a::Def::Class(cd) => {
@@ -89,17 +89,17 @@ fn emit_def_inline<Ex, Fb, En, Hi>(e: &mut Emitter, def: a::Def<Ex, Fb, En, Hi>)
                     InstrSeq::make_defcls(num)
                 }
             };
-            let Id(pos, name) = (*cd).name;
+            let Id(pos, name) = &(*cd).name;
             let num = name.parse::<ClassNum>().unwrap();
             emit_pos_then(e, &pos, make_def_instr(num))
         }
         a::Def::Typedef(td) => {
-            let Id(pos, name) = (*td).name;
+            let Id(pos, name) = &(*td).name;
             let num = name.parse::<TypedefNum>().unwrap();
             emit_pos_then(e, &pos, InstrSeq::make_deftypealias(num))
         }
         a::Def::RecordDef(rd) => {
-            let Id(pos, name) = (*rd).name;
+            let Id(pos, name) = &(*rd).name;
             let num = name.parse::<ClassNum>().unwrap();
             emit_pos_then(e, &pos, InstrSeq::make_defrecord(num))
         }
@@ -183,6 +183,7 @@ fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
             }
             _ => (),
         },
+        a::Stmt_::DefInline(def) => return emit_def_inline(e, &**def),
         _ => (),
     }
     unimplemented!("TODO(hrust)")

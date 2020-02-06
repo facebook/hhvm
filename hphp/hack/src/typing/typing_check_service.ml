@@ -198,6 +198,7 @@ type process_file_results = {
 let process_file
     (dynamic_view_files : Relative_path.Set.t)
     (ctx : Provider_context.t)
+    ~(profile_log : bool)
     (errors : Errors.t)
     (file : check_file_computation) : process_file_results =
   let fn = file.path in
@@ -212,7 +213,7 @@ let process_file
   Deferred_decl.reset
     ~enable:(should_enable_deferring opts file)
     ~threshold_opt:(GlobalOptions.tco_defer_class_declaration_threshold opts);
-  let prev_counters_state = Counters.reset ~enable:true in
+  let prev_counters_state = Counters.reset ~enable:profile_log in
   let (funs, classes, record_defs, typedefs, gconsts) = Nast.get_defs ast in
   let ctx = Provider_context.map_tcopt ctx ~f:(fun _tcopt -> opts) in
   let ignore_type_record_def opts fn name =
@@ -354,13 +355,27 @@ let process_files
         match fn with
         | Check file ->
           let start_time = Unix.gettimeofday () in
-          let result = process_file dynamic_view_files ctx errors file in
+          let result =
+            process_file
+              dynamic_view_files
+              ctx
+              check_info.profile_log
+              errors
+              file
+          in
           let second_start_time =
             if check_info.profile_type_check_twice then
               let t = Unix.gettimeofday () in
               (* we're running this routine solely for the side effect *)
               (* of seeing how long it takes to run. *)
-              let _ignored = process_file dynamic_view_files ctx errors file in
+              let (_ignored : process_file_results) =
+                process_file
+                  dynamic_view_files
+                  ctx
+                  ~profile_log:false
+                  errors
+                  file
+              in
               Some t
             else
               None

@@ -180,7 +180,12 @@ let test_process_file_deferring () =
 
   (* Finally, this is what all the setup was for: process this file *)
   let { Typing_check_service.computation; counters; _ } =
-    Typing_check_service.process_file dynamic_view_files ctx errors file
+    Typing_check_service.process_file
+      dynamic_view_files
+      ctx
+      ~profile_log:true
+      errors
+      file
   in
   Asserter.Int_asserter.assert_equals
     2

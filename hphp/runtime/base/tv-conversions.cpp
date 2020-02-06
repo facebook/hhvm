@@ -1449,10 +1449,6 @@ ObjectData* tvCastToObjectData(TypedValue tv) {
   not_reached();
 }
 
-Object tvCastToObject(TypedValue tv) {
-  return Object::attach(tvCastToObjectData(tv));
-}
-
 template<typename T>
 enable_if_lval_t<T, void> tvCastToResourceInPlace(T tv) {
   assertx(tvIsPlausible(*tv));

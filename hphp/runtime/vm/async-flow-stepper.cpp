@@ -27,9 +27,11 @@ namespace HPHP {
 
 TRACE_SET_MOD(debuggerflow);
 
+namespace {
 c_WaitableWaitHandle *objToWaitableWaitHandle(const Object& o) {
   assertx(o->instanceof(c_WaitableWaitHandle::classof()));
   return static_cast<c_WaitableWaitHandle*>(o.get());
+}
 }
 
 bool AsyncFlowStepper::isActRecOnAsyncStack(const ActRec* target) {
@@ -49,7 +51,7 @@ bool AsyncFlowStepper::isActRecOnAsyncStack(const ActRec* target) {
     if (isNullType(rval.type())) {
       return false;
     }
-    auto wh = objToWaitableWaitHandle(tvCastToObject(rval.tv()));
+    auto const wh = objToWaitableWaitHandle(asCObjRef(rval));
     if (wh->getKind() == c_Awaitable::Kind::AsyncFunction &&
       target == wh->asAsyncFunction()->actRec()) {
       return true;

@@ -94,7 +94,6 @@ double tvCastToDouble(TypedValue tv);
 String tvCastToString(TypedValue tv);
 template <IntishCast IC = IntishCast::None>
 Array tvCastToArrayLike(TypedValue tv);
-Object tvCastToObject(TypedValue tv);
 
 StringData* tvCastToStringData(TypedValue tv);
 StringData* tvCastToStringData(TypedValue c);

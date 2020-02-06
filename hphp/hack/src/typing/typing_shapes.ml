@@ -295,7 +295,7 @@ let to_collection env shape_ty res return_type =
 
       inherit! Type_mapper.tvar_expanding_type_mapper
 
-      method! on_tshape env _r shape_kind fdm =
+      method! on_tshape env r shape_kind fdm =
         match shape_kind with
         | Closed_shape ->
           let keys = ShapeMap.keys fdm in
@@ -319,10 +319,10 @@ let to_collection env shape_ty res return_type =
                     | None -> (env, mk (Reason.Rwitness p, TUtils.tany env))
                   end)
           in
-          let (env, key) = Typing_arrays.union_keys env keys in
+          let (env, key) = Typing_union.union_list env r keys in
           let values = ShapeMap.values fdm in
           let values = List.map ~f:(fun { sft_ty; _ } -> sft_ty) values in
-          let (env, value) = Typing_arrays.union_values env values in
+          let (env, value) = Typing_union.union_list env r values in
           return_type env (get_reason res) key value
         | Open_shape -> (env, res)
 

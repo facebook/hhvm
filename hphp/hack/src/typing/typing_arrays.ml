@@ -65,22 +65,6 @@ class virtual downcast_tabstract_to_array_type_mapper =
     method virtual on_type : env -> locl_ty -> result
   end
 
-let union env tyl =
-  match tyl with
-  | [] -> Env.fresh_type env Pos.none (* TODO: position *)
-  | ty :: tyl' -> List.fold_left_env env tyl' ~init:ty ~f:TUtils.union
-
-let union_keys = union
-
-let union_values env values =
-  let unknown =
-    List.find values (fun ty ->
-        TUtils.is_sub_type_for_union env (mk (Reason.none, make_tany ())) ty)
-  in
-  match unknown with
-  | Some ty -> (env, mk (get_reason ty, TUtils.tany env))
-  | None -> union env values
-
 (* Apply this function to a type after lvalue array access that should update
  * array type (e.g from AKempty to AKdarray after using it as a dict). *)
 let update_array_type p ~is_map env ty =

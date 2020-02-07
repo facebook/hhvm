@@ -217,7 +217,11 @@ void FastCGISession::closeWhenIdle() {
   m_keepConn = false; // will shutdown when request completes
 }
 
+#ifdef FACEBOOK
+void FastCGISession::dropConnection(const std::string& /* errorMsg */) {
+#else
 void FastCGISession::dropConnection() {
+#endif
   // Nothing else needs to be placed here. Calling closeWithReset() will cause
   // readEOF to be called immediately which will call shutdown().
   //

@@ -200,7 +200,11 @@ struct FastCGISession
   bool isBusy() const override;
   void notifyPendingShutdown() override;
   void closeWhenIdle() override;
+#ifdef FACEBOOK
+  void dropConnection(const std::string& errorMsg = "") override;
+#else
   void dropConnection() override;
+#endif
   void dumpConnectionState(uint8_t loglevel) override;
 
 private:

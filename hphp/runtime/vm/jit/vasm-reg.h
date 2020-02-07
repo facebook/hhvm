@@ -632,18 +632,19 @@ private:
   // represent an actual Vreg. We could use bitvec_test and others for
   // this, but this generates better code.
   bool isExtended() const {
-    return extended.bit & (1ULL << (kExtendedBit % 64));
+    return extendedByte() & (1U << (kExtendedBit % 8));
   }
   void setExtendedBit() {
-    extended.bit |= (1ULL << (kExtendedBit % 64));
+    extendedByte() |= (1U << (kExtendedBit % 8));
   }
   void clearExtendedBit() {
-    extended.bit &= ~(1ULL << (kExtendedBit % 64));
+    extendedByte() &= ~(1U << (kExtendedBit % 8));
   }
 
   // The extended bit is chosen to be an invalid physical register (so
   // should never legitimately appear as a Vreg in the set).
   static constexpr size_t kExtendedBit = PhysReg::kMaxRegs - 1;
+  static constexpr size_t kExtendedIndex = kExtendedBit / 8 - sizeof(size_t);
   static_assert(kExtendedBit < PhysReg::kMaxRegs, "");
   static_assert(kExtendedBit >= PhysReg::kSFOffset + PhysReg::kNumSF, "");
   static_assert((kExtendedBit / 64) == 1, "");
@@ -785,17 +786,25 @@ private:
   // Metadata when in extended mode
   struct Extended {
     size_t size;
-    uint64_t bit; // This has to overlap with the second word of Block
+    // This has to overlap with the second word of Block
+    uint8_t bits[sizeof(uint64_t)];
     Block* blocks;
   };
 
+  const uint8_t& extendedByte() const {
+    return *(reinterpret_cast<const uint8_t*>(&extended) + (kExtendedBit / 8));
+  }
+  uint8_t& extendedByte() {
+    return *(reinterpret_cast<uint8_t*>(&extended) + (kExtendedBit / 8));
+  }
+
   // Make sure that Block and Extended alias in precisely the way we expect
   static_assert(offsetof(Block, data[0]) == offsetof(Extended, size), "");
-  static_assert(offsetof(Block, data[1]) == offsetof(Extended, bit), "");
+  static_assert(offsetof(Block, data[1]) == offsetof(Extended, bits), "");
   static_assert(offsetof(Block, data[2]) == offsetof(Extended, blocks), "");
 
   static_assert(sizeof(Block::data[0]) == sizeof(Extended::size), "");
-  static_assert(sizeof(Block::data[1]) == sizeof(Extended::bit), "");
+  static_assert(sizeof(Block::data[1]) == sizeof(Extended::bits), "");
   static_assert(sizeof(Block::data[2]) == sizeof(Extended::blocks), "");
 
   union {

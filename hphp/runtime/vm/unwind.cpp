@@ -425,7 +425,7 @@ UnwinderResult unwindVM(Either<ObjectData*, Exception*> exception,
     lockObjectWhileUnwinding(pc, stack);
   }
 
-  if (fp) {
+  if (fp || fpToUnwind) {
     assertx(fpToUnwind && (phpException || exception.right()));
     ITRACE(1, "Reached {}\n", fpToUnwind);
     if (phpException) phpException->decRefCount();

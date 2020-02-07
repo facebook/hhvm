@@ -35,6 +35,7 @@ inline void exception_handler(Action action) {
     ITRACE_MOD(Trace::unwind, 1, "unwind: Object of class {}\n",
                o->getVMClass()->name()->data());
     assertx(o.get());
+    if (vmfp() == nullptr) throw;
     unwindVM(o.get());
     if (LIKELY(o.get()->hasMultipleRefs()) ||
         vmfp() != nullptr ||
@@ -64,19 +65,25 @@ inline void exception_handler(Action action) {
   catch (Exception& e) {
     checkVMRegState();
     ITRACE_MOD(Trace::unwind, 1, "unwind: Exception: {}\n", e.what());
+    if (vmfp() == nullptr) throw;
     unwindVM(e.clone());
   }
 
   catch (std::exception& e) {
     checkVMRegState();
     ITRACE_MOD(Trace::unwind, 1, "unwind: std::exception: {}\n", e.what());
-    unwindVM(new Exception("unexpected %s: %s", typeid(e).name(), e.what()));
+    auto const exn =
+      new Exception("unexpected %s: %s", typeid(e).name(), e.what());
+    if (vmfp() == nullptr) exn->throwException();
+    unwindVM(exn);
   }
 
   catch (...) {
     checkVMRegState();
     ITRACE_MOD(Trace::unwind, 1, "unwind: unknown\n");
-    unwindVM(new Exception("unknown exception"));
+    auto const exn = new Exception("unknown exception");
+    if (vmfp() == nullptr) exn->throwException();
+    unwindVM(exn);
   }
 
   not_reached();

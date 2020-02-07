@@ -282,35 +282,10 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp) {
     }
     g_unwind_rds->isFirstFrame = false;
 
-    if (savedRip == tc::ustubs().callToExit) {
-      // If we're the top VM frame, there's nothing we need to do; we can just
-      // let the native C++ unwinder take over.
-      if (g_unwind_rds->sideEnter) {
-        ITRACE(1, "top VM frame, sideEnter is set, enter itanium unwinder "
-                  "by throwing\n");
-        // Looks like we got here having skipped itanium unwinder, lets enter
-        g_unwind_rds->sideEnter = false;
-        // We can only side enter with a PHP exception
-        assertx(g_unwind_rds->exn.left());
-        return {tc::ustubs().throwExceptionWhileUnwinding, sfp};
-      }
-      ITRACE(1, "top VM frame, passing back to _Unwind_Resume\n");
-
-      switch (arch()) {
-        case Arch::ARM:
-        case Arch::X64:
-          return {nullptr, sfp};
-        case Arch::PPC64:
-          // On PPC64 the fp->m_savedRip is not the return address of the
-          // context of fp, but from the next frame. So if the callToExit is
-          // found in fp->m_savedRip, the correct frame to be returned is fp.
-          return {nullptr, fp};
-      }
-    }
-
     if (isVMFrame(fp)) {
       ITRACE(2, "fp {} {}, sfp {} {}\n",
-        fp, fp->func()->fullName(), sfp, sfp->func()->fullName());
+        fp, fp->func()->fullName(), sfp,
+        isVMFrame(sfp, true) ? sfp->func()->fullName()->data() : "[non-vm]");
 
       // Unwind vm stack to sfp
       if (!g_unwind_rds->exn.isNull()) {
@@ -344,6 +319,32 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp) {
           FTRACE(1, "Resuming from resumeHelper with fp {}\n", fp);
           return {tc::ustubs().resumeHelper, fp};
         }
+      }
+    }
+
+    if (savedRip == tc::ustubs().callToExit) {
+      // If we're the top VM frame, there's nothing we need to do; we can just
+      // let the native C++ unwinder take over.
+      if (g_unwind_rds->sideEnter) {
+        ITRACE(1, "top VM frame, sideEnter is set, enter itanium unwinder "
+                  "by throwing\n");
+        // Looks like we got here having skipped itanium unwinder, lets enter
+        g_unwind_rds->sideEnter = false;
+        // We can only side enter with a PHP exception
+        assertx(g_unwind_rds->exn.left());
+        return {tc::ustubs().throwExceptionWhileUnwinding, sfp};
+      }
+      ITRACE(1, "top VM frame, passing back to _Unwind_Resume\n");
+
+      switch (arch()) {
+        case Arch::ARM:
+        case Arch::X64:
+          return {nullptr, sfp};
+        case Arch::PPC64:
+          // On PPC64 the fp->m_savedRip is not the return address of the
+          // context of fp, but from the next frame. So if the callToExit is
+          // found in fp->m_savedRip, the correct frame to be returned is fp.
+          return {nullptr, fp};
       }
     }
 

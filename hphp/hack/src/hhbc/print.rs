@@ -390,7 +390,7 @@ fn print_instr<W: Write>(w: &mut W, instr: &Instruct) -> Result<(), W::Error> {
         IIterator(_) => not_impl!(),
         IBasic(_) => not_impl!(),
         ILitConst(lit) => print_lit_const(w, lit),
-        IOp(_) => not_impl!(),
+        IOp(op) => print_op(w, op),
         IContFlow(cf) => print_control_flow(w, cf),
         ICall(_) => not_impl!(),
         IMisc(_) => not_impl!(),
@@ -432,7 +432,28 @@ fn print_lit_const<W: Write>(w: &mut W, lit: &InstructLitConst) -> Result<(), W:
     match lit {
         Null => w.write("Null"),
         Int(i) => concat_str_by(w, " ", ["Int", i.to_string().as_str()]),
+        String(s) => {
+            w.write("String ");
+            wrap_by_quotes(w, |w| w.write(s))
+        }
         _ => not_impl!(),
+    }
+}
+
+fn print_op<W: Write>(w: &mut W, op: &InstructOperator) -> Result<(), W::Error> {
+    use InstructOperator::*;
+    match op {
+        Fatal(fatal_op) => print_fatal_op(w, fatal_op),
+        _ => not_impl!(),
+    }
+}
+
+fn print_fatal_op<W: Write>(w: &mut W, f: &FatalOp) -> Result<(), W::Error> {
+    use FatalOp::*;
+    match f {
+        Parse => w.write("Fatal Parse"),
+        Runtime => w.write("Fatal Runtime"),
+        RuntimeOmitFrame => w.write("Fatal RuntimeOmitFrame"),
     }
 }
 

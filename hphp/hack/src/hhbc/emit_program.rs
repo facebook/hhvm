@@ -2,14 +2,16 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use emit_body_rust::emit_body_with_default_args;
+use emit_body_rust::{emit_body_with_default_args, make_body};
+use emit_fatal_rust::emit_fatal;
 use emit_file_attributes_rust::emit_file_attributes_from_program;
 use env::{self, emitter::Emitter};
 use hhas_body_rust::HhasBody;
 use hhas_program_rust::HhasProgram;
+use hhbc_ast_rust::FatalOp;
 use instruction_sequence_rust::{Error, InstrSeq, Result};
 use options::Options;
-use oxidized::{ast as Tast, namespace_env}; // use std::result::Result;
+use oxidized::{ast as Tast, namespace_env, pos::Pos}; // use std::result::Result;
 
 extern crate bitflags;
 use bitflags::bitflags;
@@ -17,11 +19,32 @@ use bitflags::bitflags;
 // PUBLIC INTERFACE (ENTRY POINTS)
 
 /// This is the entry point from hh_single_compile & fuzzer
-pub fn emit_fatal_program<'p>(options: Options, is_systemlib: bool) -> Result<HhasProgram<'p>> {
-    // TODO(hrust) implement the rest
+pub fn emit_fatal_program<'p>(
+    options: Options,
+    is_systemlib: bool,
+    op: FatalOp,
+    msg: String,
+) -> Result<HhasProgram<'p>> {
     let mut emitter = Emitter::new(options);
     emitter.context_mut().set_systemlib(is_systemlib);
-    Ok(HhasProgram::default())
+    let body_instrs = emit_fatal(&emitter, op, &Pos::make_none(), msg);
+    let main = make_body(
+        &mut emitter,
+        body_instrs,
+        vec![],
+        false,
+        false,
+        vec![],
+        vec![],
+        None,
+        None,
+        None,
+    );
+    Ok(HhasProgram {
+        is_hh: true,
+        main,
+        ..HhasProgram::default()
+    })
 }
 
 /// This is the entry point from hh_single_compile & coroutine
@@ -33,8 +56,8 @@ pub fn emit_program<'p>(
 ) -> Result<HhasProgram<'p>> {
     let result = emit_program_(options.clone(), flags, namespace, tast);
     match result {
-        Err(Error::IncludeTimeFatalException(_op, _msg)) => {
-            emit_fatal_program(options, flags.contains(FromAstFlags::IS_SYSTEMLIB))
+        Err(Error::IncludeTimeFatalException(op, msg)) => {
+            emit_fatal_program(options, flags.contains(FromAstFlags::IS_SYSTEMLIB), op, msg)
         }
         _ => result,
     }

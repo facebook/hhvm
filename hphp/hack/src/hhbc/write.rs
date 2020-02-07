@@ -104,6 +104,13 @@ where
     wrap_by_(w, "(", ")", f)
 }
 
+pub fn wrap_by_quotes<W: Write, F>(w: &mut W, f: F) -> Result<(), W::Error>
+where
+    F: FnOnce(&mut W) -> Result<(), W::Error>,
+{
+    wrap_by_(w, "\"", "\"", f)
+}
+
 pub fn write_list<W: Write>(w: &mut W, items: &[impl AsRef<str>]) -> Result<(), W::Error> {
     Ok(for i in items {
         w.write(i.as_ref())?;

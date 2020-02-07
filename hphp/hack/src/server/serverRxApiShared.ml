@@ -123,8 +123,7 @@ let go :
     _ handlers ->
     _ =
  fun workers pos_list env h ->
-  let { ServerEnv.tcopt; _ } = env in
-  let ctx = Provider_context.empty ~tcopt in
+  let ctx = Provider_utils.ctx_from_server_env env in
   let pos_list = prepare_pos_infos pos_list in
   let results =
     if List.length pos_list < 10 then

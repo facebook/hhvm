@@ -566,7 +566,7 @@ let go
     ~(files_to_search : string list option)
     (input : Hh_json.json) : (Hh_json.json, string) Result.t =
   let open Result.Monad_infix in
-  let ctx = Provider_context.empty ~tcopt:env.ServerEnv.tcopt in
+  let ctx = Provider_utils.ctx_from_server_env env in
   compile_pattern ctx input >>| fun pattern ->
   let num_files_searched = ref 0 in
   let last_printed_num_files_searched = ref 0 in

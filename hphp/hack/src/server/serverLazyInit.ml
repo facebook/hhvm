@@ -634,7 +634,7 @@ let write_symbol_info_init (genv : ServerEnv.genv) (env : ServerEnv.env) :
   else
     Sys_utils.mkdir_p out_dir;
 
-  let ctx = Provider_context.empty ~tcopt:env.tcopt in
+  let ctx = Provider_utils.ctx_from_server_env env in
   let root_path = env.swriteopt.symbol_write_root_path in
   let hhi_path = env.swriteopt.symbol_write_hhi_path in
   Typing_symbol_info_writer.go genv.workers ctx out_dir root_path hhi_path files;

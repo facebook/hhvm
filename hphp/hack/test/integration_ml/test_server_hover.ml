@@ -1040,7 +1040,7 @@ let test () =
         let file_input = ServerCommandTypes.FileName ("/" ^ file) in
         let (ctx, entry) =
           Provider_utils.update_context
-            ~ctx:(Provider_context.empty ~tcopt:env.ServerEnv.tcopt)
+            ~ctx:(Provider_utils.ctx_from_server_env env)
             ~path
             ~file_input
         in

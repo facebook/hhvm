@@ -281,8 +281,7 @@ let test () =
   let env = Test.setup_disk env files in
   let h = ServerFunIsLocallableBatch.handlers in
   let do_test ((file, line, col), expected) =
-    let ServerEnv.{ tcopt; _ } = env in
-    let ctx = Provider_context.empty ~tcopt in
+    let ctx = Provider_utils.ctx_from_server_env env in
     let pos_list = [(Relative_path.from_root file, line, col)] in
     let result = ServerRxApiShared.helper h ctx [] pos_list in
     if result <> [expected] then

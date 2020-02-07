@@ -128,7 +128,7 @@ let init (genv : ServerEnv.genv) (root : Path.t) : unit =
           env );
       ( Periodical.always,
         fun ~env ->
-          let ctx = Provider_context.empty ~tcopt:env.ServerEnv.tcopt in
+          let ctx = Provider_utils.ctx_from_server_env env in
           let local_symbol_table =
             SearchServiceRunner.run genv ctx env.ServerEnv.local_symbol_table
           in

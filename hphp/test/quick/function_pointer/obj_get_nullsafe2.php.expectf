@@ -1,0 +1,1 @@
+Catchable fatal error: Argument 1 passed to MyClass::foo() must be an instance of int, string given in %s/function_pointer/obj_get_nullsafe2.php on line %d

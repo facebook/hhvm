@@ -1,0 +1,4 @@
+File "obj_get_null_flavor4.php", line 10, characters 8-15:
+You are using the ?-> operator but this object cannot be null.  (Typing[4117])
+File "obj_get_null_flavor4.php", line 9, characters 14-16:
+This is what makes me believe it cannot be null

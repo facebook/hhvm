@@ -2208,28 +2208,43 @@ and expr_
   | FunctionPointer
       ((pos_obj, Obj_get (e1, (pos_id, Id sid), null_flavor)), targs) ->
     let (env, te, ty1) = expr env e1 in
-    let nullsafe =
+    let ty_to_pass_to_obj_get =
       match null_flavor with
-      | OG_nullsafe -> Some pos_obj (* What is the correct position to give? *)
-      | OG_nullthrows -> None
+      | OG_nullthrows -> ty1
+      | OG_nullsafe ->
+        let (_, fake_non_null_ty) = Typing_solver.non_null env pos_obj ty1 in
+        fake_non_null_ty
     in
     let (env, (result, tal)) =
       TOG.obj_get_
         ~inst_meth:false (* Allow private and public I guess *)
         ~obj_pos:p
         ~is_method:true
-        ~nullsafe (* Why is this is a pos option? *)
+        ~nullsafe:
+          None
+          (* This is not a nullsafe method call, just nullsafe method access *)
         ~coerce_from_ty:None (* What's coerce_from_ty actually mean? *)
         ~pos_params:None (* No idea what this means either *)
         ~explicit_targs:targs
         ~is_nonnull:false (* Hmmm: No idea here. Does this depend on nullsafe *)
         env
-        ty1
+        ty_to_pass_to_obj_get
         (CIexpr e1)
         sid
         (fun x -> x) (* Not sure what this is either *)
         (* Sure why not? *)
         Errors.unify_error
+    in
+    let (env, result) =
+      match null_flavor with
+      | OG_nullthrows -> (env, result)
+      | OG_nullsafe ->
+        let r = Reason.Rnullsafe_op pos_obj in
+        let null_ty = MakeType.null r in
+        (* Intersect ty1 with null to make sure obj is nullable *)
+        let (env, null_or_nothing_ty) = Inter.intersect env ~r null_ty ty1 in
+        let (env, result) = Union.union env null_or_nothing_ty result in
+        (env, result)
     in
     let (env, result) =
       Env.FakeMembers.check_instance_invalid env e1 (snd sid) result

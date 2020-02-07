@@ -1,0 +1,8 @@
+File "obj_get_null_flavor_targ.php", line 14, characters 8-8:
+Invalid argument (Typing[4110])
+File "obj_get_null_flavor_targ.php", line 12, characters 23-28:
+Expected string
+File "obj_get_null_flavor_targ.php", line 6, characters 26-26:
+  via this generic T
+File "obj_get_null_flavor_targ.php", line 14, characters 8-8:
+But got int

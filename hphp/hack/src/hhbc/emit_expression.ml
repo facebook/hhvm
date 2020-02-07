@@ -3986,10 +3986,33 @@ and emit_function_pointer env (annot, e) _targs =
     let substitute_method_name = (annot, A.String (snd method_name)) in
     emit_class_meth env substitute_class_const substitute_method_name NoWarn
   (* inst_meth *)
-  (* TODO: account for nullable ness of this *)
-  | A.Obj_get (obj_expr, (annot, A.Id (_, method_name)), _null_flavor) ->
-    let substitute_method_name = (annot, A.String method_name) in
-    emit_inst_meth env obj_expr substitute_method_name
+  | A.Obj_get
+      (obj_expr, (((pos, _) as annot), A.Id (_, method_name)), null_flavor) ->
+    if null_flavor = A.OG_nullsafe then
+      let end_label = Label.next_regular () in
+      gather
+        [
+          fst (emit_quiet_expr env pos obj_expr);
+          instr_dup;
+          instr_istypec OpNull;
+          instr_jmpnz end_label;
+          emit_expr env (annot, A.String method_name);
+          ( if
+            Hhbc_options.emit_inst_meth_pointers !Hhbc_options.compiler_options
+          then
+            instr_resolve_obj_method
+          else
+            instr
+              (ILitConst
+                 ( if hack_arr_dv_arrs () then
+                   NewVecArray 2
+                 else
+                   NewVArray 2 )) );
+          instr_label end_label;
+        ]
+    else
+      let substitute_method_name = (annot, A.String method_name) in
+      emit_inst_meth env obj_expr substitute_method_name
   | _ -> failwith "What else could go here?"
 
 and emit_final_member_op stack_index op mk =

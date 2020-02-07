@@ -38,8 +38,6 @@ const StaticString& getStringRepr(AutoloadMap::KindOf kind) {
       return s_function;
     case AutoloadMap::KindOf::Constant:
       return s_constant;
-    case AutoloadMap::KindOf::TypeAlias:
-      return s_type;
   }
   not_reached();
 }
@@ -63,11 +61,22 @@ UserAutoloadMap UserAutoloadMap::fromFullMap(const Array& fullMap,
   auto typeAliasFile = getSubMapFromMap(fullMap, s_type);
   auto failFunc = fullMap[s_failure];
 
+  // Merge types and type aliases into the same table.
+  // Note that one, both, or neither array may actually exist here.
+  typeFile = [&] {
+    if (typeAliasFile.get() == nullptr) {
+      return std::move(typeFile);
+    }
+    if (typeFile.get() == nullptr) {
+      return std::move(typeAliasFile);
+    }
+    return typeFile.merge(typeAliasFile);
+  }();
+
   return {std::move(root),
       std::move(typeFile),
       std::move(functionFile),
       std::move(constantFile),
-      std::move(typeAliasFile),
       std::move(failFunc)};
 }
 
@@ -86,11 +95,6 @@ folly::Optional<String> UserAutoloadMap::getConstantFile(
   return getFileFromMap(m_constantFile, constName);
 }
 
-folly::Optional<String> UserAutoloadMap::getTypeAliasFile(
-  const String& typeAliasName) {
-  return getFileFromMap(m_typeAliasFile, typeAliasName);
-}
-
 Array UserAutoloadMap::getFileTypes(const String& path) {
   SystemLib::throwInvalidOperationExceptionObject(
     "User Autoload Map does not support getFileTypes"
@@ -106,12 +110,6 @@ Array UserAutoloadMap::getFileFunctions(const String& path) {
 Array UserAutoloadMap::getFileConstants(const String& path) {
   SystemLib::throwInvalidOperationExceptionObject(
     "User Autoload Map does not support getFileConstants"
-  );
-}
-
-Array UserAutoloadMap::getFileTypeAliases(const String& path) {
-  SystemLib::throwInvalidOperationExceptionObject(
-    "User Autoload Map does not support getFileTypeAliases"
   );
 }
 

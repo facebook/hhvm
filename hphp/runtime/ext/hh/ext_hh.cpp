@@ -118,10 +118,6 @@ Variant HHVM_FUNCTION(autoload_constant_to_path, const String& constant) {
   return autoload_symbol_to_path(constant, AutoloadMap::KindOf::Constant);
 }
 
-Variant HHVM_FUNCTION(autoload_type_alias_to_path, const String& typeAlias) {
-  return autoload_symbol_to_path(typeAlias, AutoloadMap::KindOf::TypeAlias);
-}
-
 namespace {
 
 Array autoload_path_to_symbols(const String& path, AutoloadMap::KindOf kind) {
@@ -143,10 +139,6 @@ Array HHVM_FUNCTION(autoload_path_to_functions, const String& path) {
 
 Array HHVM_FUNCTION(autoload_path_to_constants, const String& path) {
   return autoload_path_to_symbols(path, AutoloadMap::KindOf::Constant);
-}
-
-Array HHVM_FUNCTION(autoload_path_to_type_aliases, const String& path) {
-  return autoload_path_to_symbols(path, AutoloadMap::KindOf::TypeAlias);
 }
 
 bool HHVM_FUNCTION(could_include, const String& file) {
@@ -824,16 +816,12 @@ static struct HHExtension final : Extension {
                   HHVM_FN(autoload_function_to_path));
     HHVM_NAMED_FE(HH\\autoload_constant_to_path,
                   HHVM_FN(autoload_constant_to_path));
-    HHVM_NAMED_FE(HH\\autoload_type_alias_to_path,
-                  HHVM_FN(autoload_type_alias_to_path));
     HHVM_NAMED_FE(HH\\autoload_path_to_types,
                   HHVM_FN(autoload_path_to_types));
     HHVM_NAMED_FE(HH\\autoload_path_to_functions,
                   HHVM_FN(autoload_path_to_functions));
     HHVM_NAMED_FE(HH\\autoload_path_to_constants,
                   HHVM_FN(autoload_path_to_constants));
-    HHVM_NAMED_FE(HH\\autoload_path_to_type_aliases,
-                  HHVM_FN(autoload_path_to_type_aliases));
     HHVM_NAMED_FE(HH\\could_include, HHVM_FN(could_include));
     HHVM_NAMED_FE(HH\\serialize_memoize_param,
                   HHVM_FN(serialize_memoize_param));
@@ -870,8 +858,6 @@ static struct HHExtension final : Extension {
                 static_cast<int64_t>(AutoloadMap::KindOf::Function));
     HHVM_RC_INT(HH\\AUTOLOAD_MAP_KIND_OF_CONSTANT,
                 static_cast<int64_t>(AutoloadMap::KindOf::Constant));
-    HHVM_RC_INT(HH\\AUTOLOAD_MAP_KIND_OF_TYPE_ALIAS,
-                static_cast<int64_t>(AutoloadMap::KindOf::TypeAlias));
 
     loadSystemlib();
   }

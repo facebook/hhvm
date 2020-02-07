@@ -216,4 +216,5 @@ function fb_cs_entrypoint(): void {
   $ret = null;
   var_dump(fb_compact_unserialize($s, inout $ret, inout $err));
   var_dump($ret);
+  var_dump($err);
 }

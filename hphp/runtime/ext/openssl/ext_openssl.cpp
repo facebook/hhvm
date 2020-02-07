@@ -1908,12 +1908,13 @@ Array HHVM_FUNCTION(openssl_pkey_get_details, const Resource& key) {
   char *pbio;
   unsigned int pbio_len = BIO_get_mem_data(out, &pbio);
 
-  Array ret;
-  ret.set(s_bits, EVP_PKEY_bits(pkey));
-  ret.set(s_key, String(pbio, pbio_len, CopyString));
+  auto ret = make_darray(
+    s_bits, EVP_PKEY_bits(pkey),
+    s_key, String(pbio, pbio_len, CopyString)
+  );
   long ktype = -1;
 
-  Array details;
+  auto details = Array::CreateDArray();
   switch (EVP_PKEY_id(pkey)) {
   case EVP_PKEY_RSA:
   case EVP_PKEY_RSA2:
@@ -2295,7 +2296,7 @@ Variant HHVM_FUNCTION(openssl_seal, const String& data, Variant& sealed_data,
   if (len1 + len2 > 0) {
     sealed_data = s.setSize(len1 + len2);
 
-    Array ekeys;
+    auto ekeys = Array::CreateVArray();
     for (i = 0; i < nkeys; i++) {
       eks[i][eksl[i]] = '\0';
       ekeys.append(String((char*)eks[i], eksl[i], AttachString));
@@ -2701,7 +2702,7 @@ Variant HHVM_FUNCTION(openssl_x509_parse, const Variant& x509cert,
   X509 *cert = ocert->m_cert;
   assertx(cert);
 
-  Array ret;
+  auto ret = Array::CreateDArray();
   const auto sn = X509_get_subject_name(cert);
   if (sn) {
     ret.set(s_name, String(X509_NAME_oneline(sn, nullptr, 0), CopyString));
@@ -2748,21 +2749,19 @@ Variant HHVM_FUNCTION(openssl_x509_parse, const Variant& x509cert,
     for (int i = 0; i < X509_PURPOSE_get_count(); i++) {
       X509_PURPOSE *purp = X509_PURPOSE_get0(i);
       int id = X509_PURPOSE_get_id(purp);
-
-      Array subsub;
-      subsub.append((bool)X509_check_purpose(cert, id, 0));
-      subsub.append((bool)X509_check_purpose(cert, id, 1));
-
       char * pname = shortnames ? X509_PURPOSE_get0_sname(purp) :
         X509_PURPOSE_get0_name(purp);
-      subsub.append(String(pname, CopyString));
-
-      subitem.set(id, subsub);
+      auto subsub = make_varray(
+        (bool)X509_check_purpose(cert, id, 0),
+        (bool)X509_check_purpose(cert, id, 1),
+        String(pname, CopyString)
+      );
+      subitem.set(id, std::move(subsub));
     }
     ret.set(s_purposes, subitem);
   }
   {
-    Array subitem;
+    auto subitem = Array::CreateDArray();
     for (int i = 0; i < X509_get_ext_count(cert); i++) {
       int nid;
       X509_EXTENSION *extension = X509_get_ext(cert, i);
@@ -3331,7 +3330,7 @@ static void openssl_add_method(const OBJ_NAME *name, void *arg)
 }
 
 Array HHVM_FUNCTION(openssl_get_cipher_methods, bool aliases /* = false */) {
-  Array ret = Array::Create();
+  Array ret = Array::CreateVArray();
   OBJ_NAME_do_all_sorted(OBJ_NAME_TYPE_CIPHER_METH,
     aliases ? openssl_add_method_or_alias: openssl_add_method,
     &ret);
@@ -3346,7 +3345,7 @@ Variant HHVM_FUNCTION(openssl_get_curve_names) {
     return false;
   }
 
-  PackedArrayInit ret(len);
+  VArrayInit ret(len);
   for (size_t i = 0; i < len; ++i) {
     auto const sname = OBJ_nid2sn(curves[i].nid);
     if (sname != nullptr) {
@@ -3361,7 +3360,7 @@ Variant HHVM_FUNCTION(openssl_get_curve_names) {
 }
 
 Array HHVM_FUNCTION(openssl_get_md_methods, bool aliases /* = false */) {
-  Array ret = Array::Create();
+  Array ret = Array::CreateVArray();
   OBJ_NAME_do_all_sorted(OBJ_NAME_TYPE_MD_METH,
     aliases ? openssl_add_method_or_alias: openssl_add_method,
     &ret);

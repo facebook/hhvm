@@ -81,7 +81,7 @@ function openssl_csr_get_subject(mixed $csr,
  * @return mixed - Returns the CSR.
  */
 <<__Native>>
-function openssl_csr_new(?array $dn,
+function openssl_csr_new(?darray $dn,
                          inout mixed $privkey,
                          mixed $configargs = null,
                          mixed $extraattribs = null): mixed;
@@ -233,7 +233,7 @@ function openssl_pkcs7_decrypt(string $infilename,
 function openssl_pkcs7_encrypt(string $infilename,
                                string $outfilename,
                                mixed $recipcerts,
-                               array $headers,
+                               darray $headers,
                                int $flags = 0,
                                int $cipherid = OPENSSL_CIPHER_RC2_40): bool;
 
@@ -358,7 +358,7 @@ function openssl_free_key(resource $key): void {
  * OPENSSL_KEYTYPE_EC or -1 meaning unknown).
  */
 <<__Native>>
-function openssl_pkey_get_details(resource $key): array<string, mixed>;
+function openssl_pkey_get_details(resource $key): darray<string, mixed>;
 
 /* openssl_get_privatekey() parses key and prepares it for use by other
  * functions.
@@ -514,7 +514,7 @@ function openssl_seal(string $data,
                       inout mixed $sealed_data,
                       <<__OutOnly>>
                       inout mixed $env_keys,
-                      array $pub_key_ids,
+                      varray $pub_key_ids,
                       string $method,
                       <<__OutOnly>>
                       inout mixed $iv): mixed;
@@ -769,7 +769,7 @@ function openssl_digest(string $data,
  * @return array - An array of available cipher methods.
  */
 <<__Native>>
-function openssl_get_cipher_methods(bool $aliases = false): array<string>;
+function openssl_get_cipher_methods(bool $aliases = false): varray<string>;
 
 /**
  * Return array of available elliptic curves or FALSE on failure.
@@ -783,4 +783,4 @@ function openssl_get_curve_names(): mixed;
  * @return array - An array of available digest methods.
  */
 <<__Native>>
-function openssl_get_md_methods(bool $aliases = false): array<string>;
+function openssl_get_md_methods(bool $aliases = false): varray<string>;

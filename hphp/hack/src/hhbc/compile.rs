@@ -29,7 +29,7 @@ use stack_limit::StackLimit;
 /// until the migration from OCaml is fully complete
 pub struct Env {
     pub filepath: RelativePath,
-    pub empty_namespace: NamespaceEnv,
+    pub empty_namespace: ocamlrep::rc::RcOc<NamespaceEnv>,
     pub config_jsons: Vec<String>,
     pub config_list: Vec<String>,
     pub flags: EnvFlags,
@@ -94,7 +94,10 @@ where
 
     let (program, codegen_t) = match ast {
         // TODO(shiqicao): change opts to Rc<Option> to avoid cloning
-        Either::Right((ast, is_hh_file)) => emit(&env, opts.clone(), is_hh_file, &ast),
+        Either::Right((mut ast, is_hh_file)) => {
+            elaborate_namespaces_visitor::elaborate_program(env.empty_namespace.clone(), &mut ast);
+            emit(&env, opts.clone(), is_hh_file, &ast)
+        }
         Either::Left((pos, msg, is_runtime_error)) => emit_fatal(&env, is_runtime_error, pos, msg),
     };
     let program = program?;

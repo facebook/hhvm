@@ -90,7 +90,7 @@ fn process_single_file_impl(
     let env = Env {
         filepath: rel_path,
         // TODO(hrust) port empty_from_popt
-        empty_namespace: NamespaceEnv {
+        empty_namespace: ocamlrep::rc::RcOc::new(NamespaceEnv {
             is_codegen: true,
             ns_uses: SMap::new(),
             class_uses: SMap::new(),
@@ -99,7 +99,7 @@ fn process_single_file_impl(
             const_uses: SMap::new(),
             name: None,
             auto_ns_map: vec![],
-        },
+        }),
         config_jsons: vec![],
         config_list: vec![],
         flags: EnvFlags::empty(),

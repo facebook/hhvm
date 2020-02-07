@@ -179,6 +179,7 @@ dependencies = [
  "aast_parser 0.0.0",
  "anyhow 1.0.26 (registry+https://github.com/rust-lang/crates.io-index)",
  "bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "elaborate_namespaces_visitor 0.0.0",
  "emit_program_rust 0.0.0",
  "env 0.0.0",
  "hhas_program_rust 0.0.0",
@@ -190,6 +191,13 @@ dependencies = [
  "oxidized 0.0.0",
  "parser_core_types 0.0.0",
  "stack_limit 0.0.0",
+]
+
+[[package]]
+name = "core_utils_rust"
+version = "0.0.0"
+dependencies = [
+ "pretty_assertions 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -403,6 +411,19 @@ version = "1.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
+name = "elaborate_namespaces_visitor"
+version = "0.0.0"
+dependencies = [
+ "core_utils_rust 0.0.0",
+ "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "namespaces_rust 0.0.0",
+ "naming_attributes_rust 0.0.0",
+ "naming_special_names_rust 0.0.0",
+ "ocamlrep 0.0.0",
+ "oxidized 0.0.0",
+]
+
+[[package]]
 name = "emit_adata_rust"
 version = "0.0.0"
 dependencies = [
@@ -503,6 +524,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "emit_file_attributes_rust"
+version = "0.0.0"
+dependencies = [
+ "emit_attribute_rust 0.0.0",
+ "emit_fatal_rust 0.0.0",
+ "env 0.0.0",
+ "hhas_attribute_rust 0.0.0",
+ "instruction_sequence_rust 0.0.0",
+ "itertools 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "oxidized 0.0.0",
+]
+
+[[package]]
 name = "emit_param_rust"
 version = "0.0.0"
 dependencies = [
@@ -543,6 +577,7 @@ version = "0.0.0"
 dependencies = [
  "bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "emit_body_rust 0.0.0",
+ "emit_file_attributes_rust 0.0.0",
  "env 0.0.0",
  "hhas_body_rust 0.0.0",
  "hhas_program_rust 0.0.0",
@@ -757,6 +792,7 @@ dependencies = [
  "hhbc_hhas_rust 0.0.0",
  "itertools 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "multifile_rust 0.0.0",
+ "ocamlrep 0.0.0",
  "options 0.0.0",
  "oxidized 0.0.0",
  "stack_limit 0.0.0",
@@ -885,6 +921,7 @@ name = "hhbc_hhas_rust"
 version = "0.0.0"
 dependencies = [
  "escaper 0.0.0",
+ "hhas_attribute_rust 0.0.0",
  "hhas_body_rust 0.0.0",
  "hhas_function_rust 0.0.0",
  "hhas_param_rust 0.0.0",
@@ -894,9 +931,12 @@ dependencies = [
  "hhas_type 0.0.0",
  "hhbc_ast_rust 0.0.0",
  "hhbc_id_rust 0.0.0",
+ "hhbc_string_utils_rust 0.0.0",
  "instruction_sequence_rust 0.0.0",
+ "itertools 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "options 0.0.0",
  "oxidized 0.0.0",
+ "runtime 0.0.0",
  "thiserror 1.0.10 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -1135,6 +1175,23 @@ dependencies = [
  "oxidized 0.0.0",
  "rusqlite 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rust-crypto 0.2.36 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "namespaces_rust"
+version = "0.0.0"
+dependencies = [
+ "core_utils_rust 0.0.0",
+ "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "naming_special_names_rust 0.0.0",
+ "oxidized 0.0.0",
+]
+
+[[package]]
+name = "naming_attributes_rust"
+version = "0.0.0"
+dependencies = [
+ "oxidized 0.0.0",
 ]
 
 [[package]]

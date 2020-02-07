@@ -12,6 +12,7 @@ path = "../../compile.rs"
 
 [dependencies]
 aast_parser = { path = "../../../parser/cargo/aast_parser" }
+elaborate_namespaces_visitor = { path = "../../../naming/cargo/elaborate_namespaces" }
 emit_program_rust = { path = "../emit_program" }
 env = { path = "../env" }
 hhas_program_rust = { path = "../hhas_program" }

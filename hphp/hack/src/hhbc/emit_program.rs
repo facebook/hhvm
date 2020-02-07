@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use emit_body_rust::emit_body_with_default_args;
+use emit_file_attributes_rust::emit_file_attributes_from_program;
 use env::{self, emitter::Emitter};
 use hhas_body_rust::HhasBody;
 use hhas_program_rust::HhasProgram;
@@ -57,10 +58,12 @@ fn emit_program_<'p>(
         .set_systemlib(flags.contains(FromAstFlags::IS_SYSTEMLIB));
 
     let main = emit_main(&mut emitter, flags, namespace, prog)?;
+    let file_attributes = emit_file_attributes_from_program(&mut emitter, prog)?;
 
     Ok(HhasProgram {
         main,
         is_hh: flags.contains(FromAstFlags::IS_HH_FILE),
+        file_attributes,
         ..HhasProgram::default()
     })
 }

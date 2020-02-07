@@ -7,9 +7,11 @@
 mod print_env;
 mod write;
 
+use itertools::Itertools;
 pub use write::{Error, IoWrite, Result, Write};
 
 use escaper::escape;
+use hhas_attribute_rust::HhasAttribute;
 use hhas_body_rust::HhasBody;
 use hhas_function_rust::HhasFunction;
 use hhas_param_rust::HhasParam;
@@ -19,10 +21,14 @@ use hhas_record_def_rust::{Field, HhasRecord};
 use hhas_type::Info as HhasTypeInfo;
 use hhbc_ast_rust::*;
 use hhbc_id_rust::Id;
+use hhbc_string_utils_rust::quote_string_with_escape;
 use instruction_sequence_rust::InstrSeq;
 use options::Options;
 use oxidized::relative_path::RelativePath;
+use runtime::TypedValue;
 use write::*;
+
+const ADATA_VARRAY_PREFIX: &str = "y";
 
 /// Indent is an abstraction of indentation. Configurable indentation
 /// and perf tweaking will be easier.
@@ -154,6 +160,7 @@ fn print_program_<W: Write>(
     print_main(ctx, w, &prog.main)?;
     concat(w, &prog.record_defs, print_record_def)?;
     concat(w, &prog.functions, |w, f| print_fun_def(ctx, w, f))?;
+    print_file_attributes(ctx, w, &prog.file_attributes)?;
 
     if ctx.dump_symbol_refs() {
         return not_impl!();
@@ -207,8 +214,57 @@ fn print_fun_def<W: Write>(
     wrap_by_braces(w, |w| print_body(ctx, w, body))
 }
 
+fn print_adata<W: Write>(ctx: &mut Context, w: &mut W, tv: &TypedValue) -> Result<(), W::Error> {
+    match tv {
+        TypedValue::String(s) => w.write(format!("s:{}:{};", s.len(), quote_string_with_escape(s))),
+        TypedValue::Int(i) => w.write(format!("i:{};", i)),
+        _ => unimplemented!("{:?}", tv),
+    }
+}
+
+fn print_file_attribute<W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    a: &HhasAttribute,
+) -> Result<(), W::Error> {
+    w.write(format!(
+        "\"{}\"(\"\"\"{}:{}:{{",
+        a.name,
+        ADATA_VARRAY_PREFIX,
+        a.arguments.len()
+    ))?;
+    concat(w, &a.arguments, |w, arg| print_adata(ctx, w, arg))?;
+    w.write("}\"\"\")")?;
+
+    Ok(())
+}
+
+fn print_file_attributes<W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    al: &Vec<HhasAttribute>,
+) -> Result<(), W::Error> {
+    if al.is_empty() {
+        return Ok(());
+    }
+    newline(w)?;
+    newline(w)?;
+    w.write(".file_attributes [")?;
+
+    // Adjust for underscore coming before alphabet
+    let al: Vec<&HhasAttribute> = al
+        .iter()
+        .sorted_by_key(|a| (!a.name.starts_with("__"), &a.name))
+        .collect();
+
+    concat_by(w, " ", &al, |w, a| print_file_attribute(ctx, w, a))?;
+    w.write("] ;")?;
+
+    Ok(())
+}
+
 fn print_main<W: Write>(ctx: &mut Context, w: &mut W, body: &HhasBody) -> Result<(), W::Error> {
-    ctx.newline(w)?;
+    newline(w)?;
     w.write(".main ")?;
     if ctx.opts.source_map() {
         w.write("(1,1) ")?;

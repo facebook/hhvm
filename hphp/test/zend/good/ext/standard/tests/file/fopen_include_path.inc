@@ -6,11 +6,11 @@ ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir2 = $pwd."/".$f.".dir2";
 ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir3 = $pwd."/".$f.".dir3";
 //invalid directory
 ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir4 = $pwd."/".$f.".dir4";
-ZendGoodExtStandardTestsFileFopenIncludePathInc::$newdirs = array(
+ZendGoodExtStandardTestsFileFopenIncludePathInc::$newdirs = varray[
   ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir1,
   ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir2,
   ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir3,
-);
+];
 
 
 

@@ -30,7 +30,7 @@ foreach ($tests as $n=>$test)
 	}
 
 	// try for operators
-	$operators = array('===', '~==');
+	$operators = varray['===', '~=='];
 	$operator = NULL;
 	foreach ($operators as $a_operator) {
 		if (strpos($test, $a_operator)!== FALSE) {

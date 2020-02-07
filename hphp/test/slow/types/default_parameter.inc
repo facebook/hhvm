@@ -26,7 +26,7 @@ class Foo {
 
 
 function test($prefix) {
-  $hints = array(
+  $hints = varray[
     // Primitives without HH namespace
     "bool",
     "int",
@@ -54,9 +54,9 @@ function test($prefix) {
     "HH\\KeyedContainer",
     "XHPChild",
     "Stringish"
-  );
+  ];
 
-  $default_values = array(
+  $default_values = darray[
     "b" => "false",
     "i" => "1337",
     "f" => "3.1415926",
@@ -64,7 +64,7 @@ function test($prefix) {
     "a" => "array()",
     "n" => "null",
     "r" => "STDIN"
-  );
+  ];
 
   set_error_handler(
     function(
@@ -78,9 +78,9 @@ function test($prefix) {
   );
 
   $i = 0;
-  $tldr_table = array();
+  $tldr_table = darray[];
   foreach ($hints as $h) {
-    $tldr_row = array();
+    $tldr_row = varray[];
     echo "##### Parameter type: $h #####\n";
     foreach ($default_values as $dv) {
       echo "== Default value: $dv ==\n";

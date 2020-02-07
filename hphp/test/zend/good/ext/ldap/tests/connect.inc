@@ -23,46 +23,46 @@ function ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version) 
 
 function insert_dummy_data($link, $base) {
 	// Create root if not there
-	$testBase = ldap_read($link, $base, '(objectClass=*)', array('objectClass'));
+	$testBase = ldap_read($link, $base, '(objectClass=*)', varray['objectClass']);
 	if (ldap_count_entries($link, $testBase) < 1) {
 		ldap_add(
-			$link, "$base", array(
-				"objectClass"   => array(
+			$link, "$base", darray[
+				"objectClass"   => varray[
 					"top",
 					"organization",
 					"dcObject"
-				),
+				],
 				"o" => "php ldap tests"
-			)
+			]
 		);
 	}
-	ldap_add($link, "o=test,$base", array(
-	        "objectClass"   => array(
+	ldap_add($link, "o=test,$base", darray[
+	        "objectClass"   => varray[
             "top",
-            "organization"),
+            "organization"],
 	        "o"             => "test",
-	));
-	ldap_add($link, "cn=userA,$base", array(
+	]);
+	ldap_add($link, "cn=userA,$base", darray[
 	        "objectclass" => "person",
 	        "cn" => "userA",
 	        "sn" => "testSN1",
 	        "userPassword" => "oops",
 	        "telephoneNumber" => "xx-xx-xx-xx-xx",
 	        "description" => "user A",
-	));
-	ldap_add($link, "cn=userB,$base", array(
+	]);
+	ldap_add($link, "cn=userB,$base", darray[
 	        "objectclass" => "person",
 	        "cn" => "userB",
 	        "sn" => "testSN2",
 	        "userPassword" => "oopsIDitItAgain",
 	        "description" => "user B",
-	));
-	ldap_add($link, "cn=userC,cn=userB,$base", array(
+	]);
+	ldap_add($link, "cn=userC,cn=userB,$base", darray[
 	        "objectclass" => "person",
 	        "cn" => "userC",
 	        "sn" => "testSN3",
 	        "userPassword" => "0r1g1na1 passw0rd",
-	));
+	]);
 }
 
 function remove_dummy_data($link, $base) {

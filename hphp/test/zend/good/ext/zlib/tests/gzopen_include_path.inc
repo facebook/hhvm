@@ -6,9 +6,9 @@ $dir2 = $pwd."/".$f.".dir2";
 $dir3 = $pwd."/".$f.".dir3";
 //invalid directory
 ZendGoodExtZlibTestsGzopenIncludePathInc::$dir4 = $pwd."/".$f.".dir4";
-ZendGoodExtZlibTestsGzopenIncludePathInc::$newdirs = array($dir1, $dir2, $dir3);
+ZendGoodExtZlibTestsGzopenIncludePathInc::$newdirs = varray[$dir1, $dir2, $dir3];
 
-ZendGoodExtZlibTestsGzopenIncludePathInc::$reldirs = array("dir1", "dir2", "dir3");
+ZendGoodExtZlibTestsGzopenIncludePathInc::$reldirs = varray["dir1", "dir2", "dir3"];
 
 function generate_next_rel_path() {
 

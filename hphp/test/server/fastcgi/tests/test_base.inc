@@ -31,13 +31,13 @@ function request($host, $port, $path, $post = darray[], $headers = darray[], $ex
     $client = new \Adoy\FastCGI\Client($host, $port);
     $content = http_build_query($post);
 
-    $args = array_merge(array(
+    $args = array_merge(darray[
       'GATEWAY_INTERFACE' => 'FastCGI/1.0',
       'REQUEST_METHOD' => (!($post ?? false)) ? 'GET' : 'POST',
       'SERVER_SOFTWARE' => 'php/fcgiclient',
       'SERVER_PROTOCOL' => 'HTTP/1.1',
       'CONTENT_LENGTH' => strlen($content)
-    ), $extra_args);
+    ], $extra_args);
     foreach($headers as $k => $v) {
       $args["HTTP_" . strtoupper($k)] = $v;
     }

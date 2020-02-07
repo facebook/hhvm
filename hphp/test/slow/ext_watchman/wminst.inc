@@ -40,13 +40,13 @@ class WatchmanInstance {
       $this->logfile,
       $this->tempfile(),
     );
-    $pipes = array();
+    $pipes = darray[];
     $this->run_details = "Ran command: $cmd, in ".$this->repo_root;
-    $this->proc = proc_open($cmd, array(
-      0 => array('file', '/dev/null', 'r'),
-      1 => array('file', $this->logfile, 'a'),
-      2 => array('file', $this->logfile, 'a'),
-    ), inout $pipes, $this->repo_root);
+    $this->proc = proc_open($cmd, darray[
+      0 => varray['file', '/dev/null', 'r'],
+      1 => varray['file', $this->logfile, 'a'],
+      2 => varray['file', $this->logfile, 'a'],
+    ], inout $pipes, $this->repo_root);
     if (!$this->proc) {
       throw new Exception("Failed to spawn $cmd");
     }

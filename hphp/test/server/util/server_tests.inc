@@ -169,8 +169,8 @@ function startServer(inout $serverPort, inout $adminPort, inout $debugPort, $hom
     $cmd = getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
                         $customArgs, $serverId, $repoArgs);
     tlog('Starting server with command: '.$cmd);
-    $pipes = array();
-    $serverProc = proc_open($cmd, array(), inout $pipes);
+    $pipes = darray[];
+    $serverProc = proc_open($cmd, darray[], inout $pipes);
     if (!is_resource($serverProc)) {
       tlog('Failed to start a shell process for the server');
     } else if (waitForServerToGetGoing($serverPort, $serverProc, $serverId, $expect404)) {
@@ -268,8 +268,8 @@ function takeoverOldServer($serverPort, $adminPort, $home, $root,
   $customArgs .= " -vServer.TakeoverFilename={$socketFile}";
   $cmd = getServerCmd($serverPort, $adminPort, false, $home, $root,
                       $customArgs, $serverId);
-  $pipes = array();
-  $serverProc = proc_open($cmd, array(), inout $pipes);
+  $pipes = darray[];
+  $serverProc = proc_open($cmd, darray[], inout $pipes);
   if (!is_resource($serverProc)) {
     tlog('Failed to start a shell process for the server');
     return;
@@ -292,7 +292,7 @@ function http_request($host, $port, $path, $timeout = 1200, $curl_opts = '') {
     $post = '--data-urlencode='.urlencode($post);;
   }
   if ($headers) {
-    $s = array();
+    $s = varray[];
     foreach ($headers as $h => $v) {
       $s[] = "-H '$h: $v'";
     }
@@ -331,7 +331,7 @@ if (!function_exists("request")) {
   include 'server_tests1.inc';
 }
 
-function killChildren($pid, $safe_children = array()) {
+function killChildren($pid, $safe_children = darray[]) {
   $output = null;
   $return_var = -1;
   $childIds = exec("pgrep -f -d , -P $pid", inout $output, inout $return_var);

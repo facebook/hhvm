@@ -23,11 +23,11 @@ function startDebuggerClient($debugPort, $input_path, inout $pipes) {
     $config . $logFileConfig . $repoConfig . $debugConfig .
     ' <'.$home.$input_path;
 
-  $descriptorspec = array(
-     0 => array("pipe", "r"),
-     1 => array("pipe", "w"),
-     2 => array("pipe", "w"),
-  );
+  $descriptorspec = darray[
+     0 => varray["pipe", "r"],
+     1 => varray["pipe", "w"],
+     2 => varray["pipe", "w"],
+  ];
 
   $env = $_ENV;
   $env["TERM"] = "dumb";

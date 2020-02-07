@@ -91,69 +91,69 @@ function sendVsCommand($commandMsg) {
 
 function resumeTarget() {
   // Resume.
-  $contCommand = array(
+  $contCommand = darray[
     "command" => "continue",
     "type" => "request",
     "threadId" => 1
-  );
+  ];
   sendVsCommand($contCommand);
 
   // Target resume event (not thread specific)
   $msg = json_decode(getNextVsDebugMessage(), true);
-  checkObjEqualRecursively($msg, array(
+  checkObjEqualRecursively($msg, darray[
     "type" => "event",
     "event" => "continued",
-  ));
+  ]);
 
   // Request resumed event.
   $msg = json_decode(getNextVsDebugMessage(), true);
-  checkObjEqualRecursively($msg, array(
+  checkObjEqualRecursively($msg, darray[
     "type" => "event",
     "event" => "continued",
-    "body" => array(
+    "body" => darray[
         "threadId" => 1
-    )));
+    ]]);
 }
 
 function verifyBpHit($path, $breakpoint, $hitCount = 1, $relative = false) {
   // Verify breakpoint hit count updated.
   $msg = json_decode(getNextVsDebugMessage(), true);
   if (!$relative) {
-    checkObjEqualRecursively($msg, array(
+    checkObjEqualRecursively($msg, darray[
       "type" => "event",
       "event" => "breakpoint",
-      "body" => array(
+      "body" => darray[
           "reason" => "changed",
-          "breakpoint" => array(
-            "source" => array("path" => $path),
+          "breakpoint" => darray[
+            "source" => darray["path" => $path],
             "originalLine" => $breakpoint{'line'},
             "nuclide_hitCount" => $hitCount,
             "verified" => true,
             "endLine" => $breakpoint{'calibratedLine'}
-      ))));
+      ]]]);
   } else {
-    checkObjEqualRecursively($msg, array(
+    checkObjEqualRecursively($msg, darray[
       "type" => "event",
       "event" => "breakpoint",
-      "body" => array(
+      "body" => darray[
           "reason" => "changed",
-          "breakpoint" => array(
+          "breakpoint" => darray[
             "originalLine" => $breakpoint{'line'},
             "nuclide_hitCount" => $hitCount,
             "verified" => true,
             "endLine" => $breakpoint{'calibratedLine'}
-      ))));
+      ]]]);
   }
 
   // Verify request stopped.
   $msg = json_decode(getNextVsDebugMessage(), true);
-  checkObjEqualRecursively($msg, array(
+  checkObjEqualRecursively($msg, darray[
     "type" => "event",
     "event" => "stopped",
-    "body" => array(
+    "body" => darray[
         "threadId" => 1,
         "allThreadsStopped" => true
-    )));
+    ]]);
 }
 
 function getHhvmPath() {
@@ -163,8 +163,8 @@ function getHhvmPath() {
 function checkForOutput($testProcess, $expectedOutput, $expectedCategory, $error = false) {
   $pipes = $testProcess[1];
   $msg = json_decode(getNextVsDebugMessage(), true);
-  checkObjEqualRecursively($msg, array("type" => "event", "event" => "output"));
-  checkObjEqualRecursively($msg{'body'}, array("output" => $expectedOutput, "category" => $expectedCategory));
+  checkObjEqualRecursively($msg, darray["type" => "event", "event" => "output"]);
+  checkObjEqualRecursively($msg{'body'}, darray["output" => $expectedOutput, "category" => $expectedCategory]);
 
   // Verify the message was actually written to the output stream.
   if (!$error) {
@@ -179,23 +179,23 @@ ExtVsdebugCommonInc::$bpId = 0;
 function setBreakpoints($breakpoints, $verify = true) {
 
   foreach ($breakpoints as $bpsForFile) {
-    $setBreakpointsCommand = array(
+    $setBreakpointsCommand = darray[
       "command" => "setBreakpoints",
       "type" => "request",
-      "arguments" => array(
+      "arguments" => darray[
         "source" =>
-          array(
+          darray[
             "path" => $bpsForFile{'path'},
             "name" => "test"
-          ),
+          ],
         "breakpoints" => varray[]
-      ));
+      ]];
 
     $responseBps = varray[];
     $responseLines = varray[];
     foreach ($bpsForFile{'breakpoints'} as $bp) {
-      $setBreakpointsCommand['arguments']['breakpoints'][] = array("line" => $bp{'line'}, "condition" => $bp{'condition'});
-      $responseBps[] = array("id" => ++ExtVsdebugCommonInc::$bpId, "verified" => false);
+      $setBreakpointsCommand['arguments']['breakpoints'][] = darray["line" => $bp{'line'}, "condition" => $bp{'condition'}];
+      $responseBps[] = darray["id" => ++ExtVsdebugCommonInc::$bpId, "verified" => false];
       $responseLines{ExtVsdebugCommonInc::$bpId} = $bp{'calibratedLine'};
     }
 
@@ -204,21 +204,21 @@ function setBreakpoints($breakpoints, $verify = true) {
     // Expect a setBreakpoints response
     $msg = json_decode(getNextVsDebugMessage(), true);
     checkObjEqualRecursively($msg,
-      array(
+      darray[
         "type" => "response",
         "command" => "setBreakpoints",
         "success" => true,
         "request_seq" => $seq,
-        "body" => array(
-          "breakpoints" => $responseBps)));
+        "body" => darray[
+          "breakpoints" => $responseBps]]);
 
     // Expect a new breakpoint event.
     for ($i = 0; $i < count($responseLines); $i++) {
       $msg = json_decode(getNextVsDebugMessage(), true);
-      checkObjEqualRecursively($msg, array("type" => "event","event" => "breakpoint"));
-      checkObjEqualRecursively($msg{'body'}, array("reason" => "new"));
+      checkObjEqualRecursively($msg, darray["type" => "event","event" => "breakpoint"]);
+      checkObjEqualRecursively($msg{'body'}, darray["reason" => "new"]);
       checkObjEqualRecursively($msg{'body'}{'breakpoint'},
-        array("verified" => false, "line" => $setBreakpointsCommand{'arguments'}{'breakpoints'}[$i]{'line'})
+        darray["verified" => false, "line" => $setBreakpointsCommand{'arguments'}{'breakpoints'}[$i]{'line'}]
       );
     }
 
@@ -226,13 +226,13 @@ function setBreakpoints($breakpoints, $verify = true) {
     if ($verify) {
       for ($i = 0; $i < count($responseLines); $i++) {
         $msg = json_decode(getNextVsDebugMessage(), true);
-        checkObjEqualRecursively($msg, array("type" => "event","event" => "breakpoint"));
-        checkObjEqualRecursively($msg{'body'}, array("reason" => "changed"));
+        checkObjEqualRecursively($msg, darray["type" => "event","event" => "breakpoint"]);
+        checkObjEqualRecursively($msg{'body'}, darray["reason" => "changed"]);
         checkObjEqualRecursively($msg{'body'}{'breakpoint'},
-          array(
+          darray[
             "verified" => true,
             "endLine" => $responseLines[$msg{'body'}{'breakpoint'}{'id'}]
-          )
+          ]
         );
       }
     }
@@ -240,11 +240,11 @@ function setBreakpoints($breakpoints, $verify = true) {
 }
 
 function vsDebugLaunch($scriptPath, $sendDefaultInit = true, $breakpoints = varray[]) {
-  $descriptorspec = array(
-     0 => array("pipe", "r"), // stdin
-     1 => array("pipe", "w"), // stdout
-     2 => array("pipe", "w")  // stderr
-  );
+  $descriptorspec = darray[
+     0 => varray["pipe", "r"], // stdin
+     1 => varray["pipe", "w"], // stdout
+     2 => varray["pipe", "w"]  // stderr
+  ];
 
   if (!$GLOBALS['USE_UNIX_SOCKET']) {
     // Grab an available port.
@@ -308,30 +308,30 @@ function vsDebugLaunch($scriptPath, $sendDefaultInit = true, $breakpoints = varr
   $GLOBALS['client'] = $client;
 
   if ($sendDefaultInit) {
-    $initCommand = array(
+    $initCommand = darray[
       "command" => "initialize",
       "type" => "request",
       "seq" => 1,
-      "arguments" => array(
+      "arguments" => darray[
         "clientID" => "Nuclide",
         "adapterID" => "hhvm",
         "linesStartAt1" => true,
         "columnsStartAt1" => true,
-        "pathFormat" => "path")
-      );
+        "pathFormat" => "path"]
+      ];
 
     $seq = sendVsCommand($initCommand);
 
     // Get an InitializeResponse
     $msg = json_decode(getNextVsDebugMessage(), true);
     checkObjEqualRecursively($msg,
-      array(
+      darray[
         "type" => "response",
         "command" => "initialize",
         "success" => true,
-        "request_seq" => $seq));
+        "request_seq" => $seq]);
     checkObjEqualRecursively($msg{'body'},
-      array(
+      darray[
         "supportsLoadedSourcesRequest" => false,
         "supportTerminateDebuggee" => false,
         "supportsExceptionOptions" => true,
@@ -350,29 +350,29 @@ function vsDebugLaunch($scriptPath, $sendDefaultInit = true, $breakpoints = varr
         "supportsCompletionsRequest" => true,
         "supportsRestartFrame" => false,
         "supportsStepInTargetsRequest" => false
-      ));
+      ]);
 
-    $launchCommand = array(
+    $launchCommand = darray[
       "command" => "launch",
       "type" => "request",
-      "arguments" => array(
-        "startupDocumentPath" => __DIR__ . '/dummy.php.inc')
-      );
+      "arguments" => darray[
+        "startupDocumentPath" => __DIR__ . '/dummy.php.inc']
+      ];
 
     $seq = sendVsCommand($launchCommand);
 
     // Expect a launch response
     $msg = json_decode(getNextVsDebugMessage(), true);
-    checkObjEqualRecursively($msg, array("type" => "response", "command" => "launch", "success" => true, "request_seq" => $seq));
+    checkObjEqualRecursively($msg, darray["type" => "response", "command" => "launch", "success" => true, "request_seq" => $seq]);
 
     // Expect an initialized event
     $msg = json_decode(getNextVsDebugMessage(), true);
-    checkObjEqualRecursively($msg, array("type" => "event", "event" => "initialized"));
+    checkObjEqualRecursively($msg, darray["type" => "event", "event" => "initialized"]);
 
     // Expect an output event about the console being prepared.
     $msg = json_decode(getNextVsDebugMessage(), true);
-    checkObjEqualRecursively($msg, array("type" => "event", "event" => "output"));
-    checkObjEqualRecursively($msg{'body'}, array("category" => "console"));
+    checkObjEqualRecursively($msg, darray["type" => "event", "event" => "output"]);
+    checkObjEqualRecursively($msg{'body'}, darray["category" => "console"]);
     // The exact text of the message is allowed to change, we don't need to enforce that in test code here.
     // But it should not be empty.
     assertIsNotEmpty($msg{'body'}{'output'});
@@ -380,8 +380,8 @@ function vsDebugLaunch($scriptPath, $sendDefaultInit = true, $breakpoints = varr
     // Verify once the dummy is started it prints a hello message, so we know it's running.
     $dummyMsg = "I am the dummy!\n";
     $msg = json_decode(getNextVsDebugMessage(), true);
-    checkObjEqualRecursively($msg, array("type" => "event", "event" => "output"));
-    checkObjEqualRecursively($msg{'body'}, array("output" => $dummyMsg, "category" => "stdout"));
+    checkObjEqualRecursively($msg, darray["type" => "event", "event" => "output"]);
+    checkObjEqualRecursively($msg{'body'}, darray["output" => $dummyMsg, "category" => "stdout"]);
 
     // Verify that the dummy actually printed its message to stdout successfully, in addition
     // to the debugger informing the client of the output.
@@ -393,30 +393,30 @@ function vsDebugLaunch($scriptPath, $sendDefaultInit = true, $breakpoints = varr
     // Now the debugger sends a message telling the user the console is ready,
     // followed by a readyForEvaluations event.
     $msg = json_decode(getNextVsDebugMessage(), true);
-    checkObjEqualRecursively($msg, array("type" => "event", "event" => "output"));
-    checkObjEqualRecursively($msg{'body'}, array("category" => "success"));
+    checkObjEqualRecursively($msg, darray["type" => "event", "event" => "output"]);
+    checkObjEqualRecursively($msg{'body'}, darray["category" => "success"]);
 
     $msg = json_decode(getNextVsDebugMessage(), true);
-    checkObjEqualRecursively($msg, array("type" => "event", "event" => "readyForEvaluations"));
+    checkObjEqualRecursively($msg, darray["type" => "event", "event" => "readyForEvaluations"]);
 
     // Set any initial breakpoints that need to be set before we resume the target.
     setBreakpoints($breakpoints);
 
     // Send configuration done, which resumes the target.
-    $configDoneCommand = array(
+    $configDoneCommand = darray[
       "command" => "configurationDone",
       "type" => "request",
       "seq" => 3,
-    );
+    ];
     $seq = sendVsCommand($configDoneCommand);
 
     $msg = json_decode(getNextVsDebugMessage(), true);
-    checkObjEqualRecursively($msg, array("type" => "response", "command" => "configurationDone", "success" => true, "request_seq" => $seq));
+    checkObjEqualRecursively($msg, darray["type" => "response", "command" => "configurationDone", "success" => true, "request_seq" => $seq]);
 
     // The debugger sends a contiued event indicating the target resumed.
     $msg = json_decode(getNextVsDebugMessage(), true);
-    checkObjEqualRecursively($msg, array("type" => "event", "event" => "continued"));
-    checkObjEqualRecursively($msg{'body'}, array("allThreadsContinued" => false));
+    checkObjEqualRecursively($msg, darray["type" => "event", "event" => "continued"]);
+    checkObjEqualRecursively($msg{'body'}, darray["allThreadsContinued" => false]);
   }
 
   return varray[$process, $pipes, $client];
@@ -449,13 +449,13 @@ function vsDebugCleanup($testProcess, $expectedExitCode = 0) {
 
   // The script should have exited.
   $msg = json_decode(getNextVsDebugMessage(), true);
-  checkObjEqualRecursively($msg, array(
+  checkObjEqualRecursively($msg, darray[
     "type" => "event",
     "event" => "thread",
-    "body" => array(
+    "body" => darray[
       "threadId" => 1,
       "reason" => "exited"
-    )));
+    ]]);
 
   fclose($client);
 

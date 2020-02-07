@@ -7,7 +7,7 @@
 function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
 
 	
-	$err_type = array (
+	$err_type = darray [
 				1	=> "Error",			// E_ERROR
 				2	=> "Warning",			// E_WARINING
 				4	=> "Parsing Error",	// E_PARSE
@@ -21,7 +21,7 @@ function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
 				1024=> "User Notice",		// E_USER_NOTICE
 				2048=> "Strict Notice",      // E_STRICT
 				4096=> "Catchable fatal error",      // E_RECOVERABLE_ERROR
-				);
+				];
 	
 	if (ZendGoodExtMbstringTestsCommonInc::$debug) {
 		printf("%s: %s (%d)\n", $err_type[$err_no], $err_msg, $linenum);
@@ -35,10 +35,10 @@ set_error_handler('test_error_handler');
 
 
 // Var def for testing
-$t_ary = array(
+$t_ary = darray[
 		's1' => '日本語EUC-JPの文字列',
 		's2' => 'English Text'
-		);
+		];
 
 class tc
 {

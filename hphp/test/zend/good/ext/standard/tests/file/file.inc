@@ -242,7 +242,7 @@ function create_files( $file_path,
                        $file_extension = ".tmp"
                      )
 {
-  $return_value = array('created' => 0, 'filled' => 0, 'perms_changed' => 0);
+  $return_value = darray['created' => 0, 'filled' => 0, 'perms_changed' => 0];
 
   //ensure that suffix is a +ve integer
   if ($name_suffix <= 0) {
@@ -359,7 +359,7 @@ function create_links($file_path,
                       $link_file_extension = ".tmp"
                      )
 {
-  $return_value = array('created' => 0, 'filled' => 0, 'perms_changed' => 0);
+  $return_value = darray['created' => 0, 'filled' => 0, 'perms_changed' => 0];
   $tmp_name_suffix = $link_name_suffix;
   $src_filename = $file_path."/".$filename;
   switch( $link_type ) {
@@ -465,7 +465,7 @@ function delete_files($file_path,
                       $name_suffix = 1,
                       $file_extension = ".tmp")
 {
-  $return_value = array ('deleted' => 0, 'notfound' => 0, 'failed' => 0);
+  $return_value = darray ['deleted' => 0, 'notfound' => 0, 'failed' => 0];
 
   if ( $name_suffix < 1 )
     $name_suffix = 1;
@@ -536,9 +536,9 @@ function compare_self_stat( array $stat )
   $return_value = true;
 
   // named keys present in a stat
-  $string_keys = array("dev", "ino", "mode", "nlink", "uid", "gid",
+  $string_keys = varray["dev", "ino", "mode", "nlink", "uid", "gid",
                        "rdev", "size", "atime", "mtime", "ctime",
-                       "blksize", "blocks");
+                       "blksize", "blocks"];
 
   // first numeric key
   $key = 0;
@@ -585,10 +585,10 @@ Description:
   $flag = specify true to dump the stat1 and stat2
 */
 
-$all_stat_keys = array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
+$all_stat_keys = varray[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
                        "dev", "ino", "mode", "nlink", "uid", "gid",
                        "rdev", "size", "atime", "mtime", "ctime",
-                       "blksize", "blocks");
+                       "blksize", "blocks"];
 
 function compare_stats($stat1, $stat2, $fields, $op = "==", $flag = false ) {
   // dump the stat if requested

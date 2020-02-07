@@ -40,11 +40,11 @@ class PDOTest {
 
 		// clean up any crufty test tables we might have left behind
 		// on a previous run
-		$test_tables = array(
+		$test_tables = varray[
 			'test',
 			'test2',
 			'classtypes'
-			);
+			];
 		if ($drop_test_tables) {
 			foreach ($test_tables as $table) {
 				$db->exec("DROP TABLE $table");

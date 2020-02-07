@@ -34,7 +34,7 @@ impl ClassExpr {
                 } else if let Some(c) = emitter.emit_state().get_closure_enclosing_class(class_name)
                 {
                     if c.kind != ast_defs::ClassKind::Ctrait {
-                        return Some(c.name.1.clone());
+                        return Some(c.name.clone());
                     }
                 }
             }
@@ -67,7 +67,7 @@ impl ClassExpr {
                     return Self::get_parent_class_name(cd);
                 } else if let Some(c) = emitter.emit_state().get_closure_enclosing_class(class_name)
                 {
-                    return Self::get_parent_class_name(c);
+                    return c.parent_class_name.clone();
                 }
             }
         }

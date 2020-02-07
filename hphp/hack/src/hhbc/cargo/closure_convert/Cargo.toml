@@ -15,6 +15,7 @@ ast_constant_folder_rust = { path = "../ast_constant_folder" }
 ast_scope_rust = { path = "../ast_scope" }
 decl_vars_rust = { path = "../decl_vars" }
 env = { path = "../env" }
+global_state = { path = "../global_state" }
 hhbc_string_utils_rust = { path = "../string_utils" }
 naming_special_names_rust = { path = "../../../naming" }
 ocamlrep = { path = "../../../ocamlrep" }

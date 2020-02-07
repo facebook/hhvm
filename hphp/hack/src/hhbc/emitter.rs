@@ -127,6 +127,7 @@ macro_rules! lazy_emit_state {
         pub trait LazyState<T> {
             fn emit_state(&self) -> &T;
             fn emit_state_mut(&mut self) -> &mut T;
+            fn into_emit_state(self) -> T;
         }
         impl LazyState<$type> for Emitter {
             fn emit_state(&self) -> &$type {
@@ -143,6 +144,15 @@ macro_rules! lazy_emit_state {
                     .downcast_mut::<$type>()
                     .expect(concat!("expected ", module_path!(), " state"))
             }
+
+            fn into_emit_state(mut self) -> $type {
+                *(self
+                    .$field
+                    .into()
+                    .expect(concat!("uninit'd ", module_path!(), " state")))
+                .downcast::<$type>()
+                .expect(concat!("expected ", module_path!(), " state"))
+            }
         }
     };
 }
@@ -157,5 +167,9 @@ impl DynState {
     }
     pub fn as_ref(&self) -> Option<&Box<dyn Any>> {
         self.0.as_ref()
+    }
+
+    pub fn into(self) -> Option<Box<dyn Any>> {
+        self.0
     }
 }

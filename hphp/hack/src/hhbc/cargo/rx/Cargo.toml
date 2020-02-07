@@ -12,5 +12,7 @@ path = "../../rx.rs"
 
 [dependencies]
 naming_special_names_rust = { path = "../../../naming" }
+ocamlrep = { path = "../../../ocamlrep" }
+ocamlrep_derive = { path = "../../../ocamlrep_derive" }
 oxidized = { path = "../../../oxidized" }
 # @end of Signature

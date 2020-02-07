@@ -36,6 +36,50 @@ type global_state = {
   global_lambda_rx_of_scope: Rx.t SMap.t;
 }
 
+let global_state_to_string
+    ({
+       global_explicit_use_set;
+       global_closure_enclosing_classes;
+       global_closure_namespaces;
+       global_functions_with_finally;
+       global_function_to_labels_map;
+       global_lambda_rx_of_scope;
+     } :
+      global_state) : string =
+  let buf = Buffer.create 1024 in
+  Printf.bprintf buf "global_explicit_use_set\n";
+  SSet.iter (Printf.bprintf buf "%s\n") global_explicit_use_set;
+  Printf.bprintf buf "global_closure_enclosing_classes\n";
+  SMap.iter
+    (fun x _y -> Printf.bprintf buf "%s\n" x)
+    global_closure_enclosing_classes;
+  Printf.bprintf buf "global_closure_namespaces\n";
+  SMap.iter (fun x _y -> Printf.bprintf buf "%s\n" x) global_closure_namespaces;
+  Printf.bprintf buf "global_functions_with_finally\n";
+  SSet.iter (Printf.bprintf buf "%s\n") global_functions_with_finally;
+  Printf.bprintf buf "global_function_to_labels_map\n";
+  SMap.iter
+    begin
+      fun x y ->
+      Printf.bprintf buf "%s:\n" x;
+      SMap.iter
+        begin
+          fun x y ->
+          Printf.bprintf buf "  %s - %b\n" x y
+        end
+        y
+    end
+    global_function_to_labels_map;
+  SMap.iter
+    (fun x y ->
+      Printf.bprintf
+        buf
+        "%s %s\n"
+        x
+        (Option.value (Rx.rx_level_to_attr_string y) ~default:"None"))
+    global_lambda_rx_of_scope;
+  Buffer.contents buf
+
 let empty_global_state =
   {
     global_explicit_use_set = SSet.empty;

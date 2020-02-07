@@ -4,12 +4,17 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use itertools::{Either, EitherOrBoth::*, Itertools};
-use std::{borrow::Cow, collections::HashSet, mem};
+use std::{
+    borrow::Cow,
+    collections::{BTreeMap, HashSet},
+    mem,
+};
 
 use ast_constant_folder_rust as ast_constant_folder;
 use ast_scope_rust as ast_scope;
 use decl_vars_rust as decl_vars;
 use env::emitter::Emitter;
+use global_state::{ClosureEnclosingClassInfo, GlobalState, LazyState};
 use hhbc_string_utils_rust as string_utils;
 use naming_special_names_rust::{fb, pseudo_consts, special_idents, superglobals};
 use options::CompilerFlags;
@@ -53,6 +58,15 @@ struct Env<'a> {
     defined_record_count: usize,
     /// How many existing functions are there?
     defined_function_count: usize,
+    // if we are immediately in using statement
+    in_using: bool,
+}
+
+#[derive(Default, Clone)]
+struct PerFunctionState {
+    pub has_finally: bool,
+    pub has_goto: bool,
+    pub labels: BTreeMap<String, bool>,
 }
 
 impl<'a> Env<'a> {
@@ -74,6 +88,7 @@ impl<'a> Env<'a> {
             defined_class_count: class_count,
             defined_record_count: record_count,
             defined_function_count: function_count,
+            in_using: false,
         }
     }
 
@@ -147,6 +162,16 @@ impl<'a> Env<'a> {
         self.scope
             .push_item(ast_scope::ScopeItem::Class(Cow::Owned(cd.clone())));
     }
+
+    fn with_in_using<F>(&mut self, in_using: bool, mut f: F)
+    where
+        F: FnMut(&mut Self),
+    {
+        let old_in_using = self.in_using;
+        self.in_using = in_using;
+        f(self);
+        self.in_using = old_in_using;
+    }
 }
 
 struct State {
@@ -158,24 +183,56 @@ struct State {
     captured_generics: UniqueList<String>,
     // Closure classes and hoisted inline classes
     hoisted_classes: Vec<Class_>,
+    // The current namespace environment
+    namespace: namespace_env::Env,
     // Empty namespace as constructed by parser
     empty_namespace: namespace_env::Env,
+    // information about current function
+    current_function_state: PerFunctionState,
+    // accumulated information about program
+    global_state: GlobalState,
 }
 
 impl State {
     pub fn initial_state(empty_namespace: namespace_env::Env) -> Self {
         Self {
+            namespace: empty_namespace.clone(),
             empty_namespace, // TODO(hrust) : pass in Rc?
             closure_cnt_per_fun: 0,
             captured_vars: UniqueList::new(),
             captured_this: false,
             captured_generics: UniqueList::new(),
             hoisted_classes: vec![],
+            current_function_state: PerFunctionState::default(),
+            global_state: GlobalState::default(),
         }
     }
 
     pub fn reset_function_counts(&mut self) {
         self.closure_cnt_per_fun = 0;
+    }
+
+    pub fn record_function_state(
+        &mut self,
+        key: String,
+        fun: PerFunctionState,
+        rx_of_scope: rx::Level,
+    ) {
+        if fun.has_finally {
+            self.global_state.functions_with_finally.insert(key.clone());
+        }
+
+        if !fun.labels.is_empty() {
+            self.global_state
+                .function_to_labels_map
+                .insert(key.clone(), fun.labels);
+        }
+
+        if rx_of_scope != rx::Level::NonRx {
+            self.global_state
+                .lambda_rx_of_scope
+                .insert(key, rx_of_scope);
+        }
     }
 
     // Clear the variables, upon entering a lambda
@@ -507,6 +564,16 @@ fn convert_id(env: &Env, Id(p, s): Id) -> Expr_ {
     }
 }
 
+fn make_info(c: &Class_) -> ClosureEnclosingClassInfo {
+    ClosureEnclosingClassInfo {
+        kind: c.kind,
+        name: c.name.1.clone(),
+        parent_class_name: match &c.extends.as_slice() {
+            [x] => x.as_happly().map(|(id, _args)| id.1.clone()),
+            _ => None,
+        },
+    }
+}
 // Closure-convert a lambda expression, with use_vars_opt = Some vars
 // if there is an explicit `use` clause.
 fn convert_lambda<'a>(
@@ -522,6 +589,8 @@ fn convert_lambda<'a>(
     let captured_this = st.captured_this;
     let captured_vars = st.captured_vars.clone();
     let captured_generics = st.captured_generics.clone();
+    let old_function_state = st.current_function_state.clone();
+    let rx_of_scope = env.scope.rx_of_scope();
     st.enter_lambda();
     let lambda_env = &mut env.clone();
 
@@ -530,10 +599,11 @@ fn convert_lambda<'a>(
     } else {
         lambda_env.with_lambda(&fd)
     };
-
-    fd.body.recurse(lambda_env, self_.object());
-    fd.params.recurse(lambda_env, self_.object());
-    fd.ret.recurse(lambda_env, self_.object());
+    let function_state = convert_function_like_body(self_, lambda_env, &mut fd.body);
+    for param in &mut fd.params {
+        self_.visit_fun_param(lambda_env, param)
+    }
+    self_.visit_type_hint(lambda_env, &mut fd.ret);
 
     let st = &mut self_.state;
     st.closure_cnt_per_fun += 1;
@@ -623,6 +693,18 @@ fn convert_lambda<'a>(
         fd,
     );
 
+    if is_long_lambda {
+        st.global_state
+            .explicit_use_set
+            .insert(inline_fundef.name.1.clone());
+    }
+
+    let closure_class_name = &cd.name.1;
+    if let Some(cd) = env.scope.get_class() {
+        st.global_state
+            .closure_enclosing_classes
+            .insert(closure_class_name.clone(), make_info(cd));
+    }
     // adjust captured $this information if lambda that was just processed was converted into
     // non-static one
     let captured_this = captured_this || !is_static;
@@ -631,6 +713,15 @@ fn convert_lambda<'a>(
     st.captured_vars = captured_vars;
     st.captured_this = captured_this;
     st.captured_generics = captured_generics;
+    st.current_function_state = old_function_state;
+    st.global_state
+        .closure_namespaces
+        .insert(closure_class_name.clone(), st.namespace.clone());
+    st.record_function_state(
+        env::get_unique_id_for_method(&cd, &cd.methods.first().unwrap()),
+        function_state,
+        rx_of_scope,
+    );
     // back to using env instead of lambda_env here
 
     // Add lambda captured vars to current captured vars
@@ -643,6 +734,22 @@ fn convert_lambda<'a>(
 
     st.hoisted_classes.push(cd);
     Expr_::mk_efun(inline_fundef, use_vars)
+}
+
+fn convert_function_like_body<'a>(
+    self_: &mut ClosureConvertVisitor<'a>,
+    env: &mut Env<'a>,
+    body: &mut FuncBody,
+) -> PerFunctionState {
+    // reset has_finally/goto_state values on the state
+    let old_state = std::mem::replace(
+        &mut self_.state.current_function_state,
+        PerFunctionState::default(),
+    );
+    body.recurse(env, self_.object());
+    // restore old has_finally/goto_state values
+    let function_state = std::mem::replace(&mut self_.state.current_function_state, old_state);
+    function_state
 }
 
 fn add_reified_property(tparams: &ClassTparams, vars: &mut Vec<ClassVar>) {
@@ -717,11 +824,23 @@ impl<'a> VisitorMut for ClosureConvertVisitor<'a> {
     }
 
     fn visit_method_(&mut self, env: &mut Env<'a>, md: &mut Method_) {
+        let cls = env
+            .scope
+            .get_class()
+            .expect("unexpected scope shape - method is not inside the class");
         // TODO(hrust): not great to have to clone env constantly
         let mut env = env.clone();
         env.with_method(md);
         self.state.reset_function_counts();
-        md.recurse(&mut env, self.object());
+        let function_state = convert_function_like_body(self, &mut env, &mut md.body);
+        self.state.record_function_state(
+            env::get_unique_id_for_method(cls, &md),
+            function_state,
+            rx::Level::NonRx,
+        );
+        for mut param in &mut md.params {
+            self.visit_fun_param(&mut env, &mut param);
+        }
     }
 
     fn visit_class_<'b>(&mut self, env: &mut Env<'a>, cd: &'b mut Class_) {
@@ -733,14 +852,25 @@ impl<'a> VisitorMut for ClosureConvertVisitor<'a> {
     }
 
     fn visit_def(&mut self, env: &mut Env<'a>, def: &mut Def) {
-        match &def {
-            // need to handle it ourselvses, because in visit_fun_ is
+        match def {
+            // need to handle it ourselvses, because visit_fun_ is
             // called both for toplevel functions and lambdas
             Def::Fun(x) => {
                 let mut env = env.clone();
-                env.with_function(x);
+                env.with_function(&x);
                 self.state.reset_function_counts();
-                def.recurse(&mut env, self.object());
+                let function_state = convert_function_like_body(self, &mut env, &mut x.body);
+                self.state.record_function_state(
+                    env::get_unique_id_for_function(&x),
+                    function_state,
+                    rx::Level::NonRx,
+                );
+                for mut param in &mut x.params {
+                    self.visit_fun_param(&mut env, &mut param)
+                }
+                for mut ua in &mut x.user_attributes {
+                    self.visit_user_attribute(&mut env, &mut ua)
+                }
             }
             _ => def.recurse(env, self.object()),
         }
@@ -751,6 +881,82 @@ impl<'a> VisitorMut for ClosureConvertVisitor<'a> {
             add_generic(env, &mut self.state, id.name())
         };
         hint.recurse(env, self.object());
+    }
+
+    fn visit_stmt_(&mut self, env: &mut Env<'a>, stmt: &mut Stmt_) {
+        match stmt {
+            Stmt_::Do(x) => {
+                let (b, e) = (&mut x.0, &mut x.1);
+                env.with_in_using(false, |env| {
+                    for stmt in b.iter_mut() {
+                        self.visit_stmt(env, stmt);
+                    }
+                });
+                self.visit_expr(env, e);
+            }
+            Stmt_::While(x) => {
+                let (e, b) = (&mut x.0, &mut x.1);
+                self.visit_expr(env, e);
+                env.with_in_using(false, |env| {
+                    for stmt in b.iter_mut() {
+                        self.visit_stmt(env, stmt);
+                    }
+                });
+            }
+            Stmt_::For(x) => {
+                let (e1, e2, e3, b) = (&mut x.0, &mut x.1, &mut x.2, &mut x.3);
+                self.visit_expr(env, e1);
+                self.visit_expr(env, e2);
+                env.with_in_using(false, |env| {
+                    for stmt in b.iter_mut() {
+                        self.visit_stmt(env, stmt);
+                    }
+                });
+                self.visit_expr(env, e3);
+            }
+            Stmt_::Switch(x) => {
+                let (e, cl) = (&mut x.0, &mut x.1);
+                self.visit_expr(env, e);
+                env.with_in_using(false, |env| {
+                    for c in cl.iter_mut() {
+                        self.visit_case(env, c);
+                    }
+                })
+            }
+            Stmt_::Try(x) => {
+                let (b1, cl, b2) = (&mut x.0, &mut x.1, &mut x.2);
+                for stmt in b1.iter_mut() {
+                    self.visit_stmt(env, stmt);
+                }
+                for c in cl.iter_mut() {
+                    self.visit_catch(env, c);
+                }
+                env.with_in_using(false, |env| {
+                    for stmt in b2.iter_mut() {
+                        self.visit_stmt(env, stmt);
+                    }
+                });
+                self.state.current_function_state.has_finally |= !x.2.is_empty()
+            }
+            Stmt_::Using(x) => {
+                self.visit_expr(env, &mut x.expr);
+                env.with_in_using(true, |env| {
+                    for stmt in x.block.iter_mut() {
+                        self.visit_stmt(env, stmt);
+                    }
+                });
+                self.state.current_function_state.has_finally = true
+            }
+            Stmt_::GotoLabel(x) => {
+                let label = &x.1;
+                // record known label in function
+                self.state
+                    .current_function_state
+                    .labels
+                    .insert(label.clone(), env.in_using);
+            }
+            _ => stmt.recurse(env, self.object()),
+        }
     }
 
     //TODO(hrust): do we need special handling for Awaitall?
@@ -929,6 +1135,12 @@ pub fn convert_toplevel_prog(e: &mut Emitter, defs: &mut Program) {
         }
     }
 
+    visitor.state.record_function_state(
+        env::get_unique_id_for_main(),
+        visitor.state.current_function_state.clone(),
+        rx::Level::NonRx,
+    );
+
     *defs = new_defs;
     hoist_toplevel_functions(defs);
 
@@ -939,4 +1151,5 @@ pub fn convert_toplevel_prog(e: &mut Emitter, defs: &mut Program) {
             .into_iter()
             .map(|x| Def::mk_class(x)),
     );
+    *e.emit_state_mut() = visitor.state.global_state
 }

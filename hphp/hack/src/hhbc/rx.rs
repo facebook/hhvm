@@ -4,11 +4,12 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use naming_special_names_rust::{self as sn, user_attributes::*};
+use ocamlrep_derive::OcamlRep;
 use oxidized::{aast as a, ast_defs};
 use std::{convert::TryFrom, str::FromStr};
 
 /// The possible Rx levels of a function or method
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, OcamlRep)]
 pub enum Level {
     NonRx, // TODO this is redundant and ambiguously used in OCaml (== None)
     ConditionalRxLocal,

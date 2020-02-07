@@ -6,13 +6,14 @@
 
 use aast_parser::{rust_aast_parser_types::Env, AastParser};
 use env::emitter::Emitter;
+use global_state::{GlobalState, LazyState};
 use ocamlrep_ocamlpool::ocaml_ffi;
 use options::{CompilerFlags, Options};
 use oxidized::namespace_env;
 use parser_core_types::{indexed_source_text::IndexedSourceText, source_text::SourceText};
 
 ocaml_ffi! {
-    fn rust_closure_convert_from_text(source_text: SourceText) -> oxidized::ast::Program {
+    fn rust_closure_convert_from_text(source_text: SourceText) -> (oxidized::ast::Program, GlobalState) {
         let mut env = Env::default();
         env.keep_errors = true;
         env.show_all_errors = true;
@@ -27,6 +28,6 @@ ocaml_ffi! {
         options.hack_compiler_flags.set(CompilerFlags::CONSTANT_FOLDING, true);
         let mut emitter = Emitter::new(options);
         closure_convert_rust::convert_toplevel_prog(&mut emitter, &mut res);
-        res
+        (res, emitter.into_emit_state())
     }
 }

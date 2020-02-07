@@ -4,17 +4,35 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use env::{emitter::Emitter, SMap, SSet, UniqueIdBuilder};
-use oxidized::{ast as tast, namespace_env::Env as NamespaceEnv};
+use ocamlrep_derive::OcamlRep;
+use oxidized::{ast_defs::ClassKind, namespace_env::Env as NamespaceEnv};
 use rx_rust as rx;
 
-#[derive(Default, Debug)]
+#[derive(Debug, OcamlRep, Clone)]
+pub struct ClosureEnclosingClassInfo {
+    pub kind: ClassKind,
+    pub name: String,
+    pub parent_class_name: Option<String>,
+}
+
+impl Default for ClosureEnclosingClassInfo {
+    fn default() -> Self {
+        Self {
+            kind: ClassKind::Cnormal,
+            name: "".to_string(),
+            parent_class_name: None,
+        }
+    }
+}
+
+#[derive(Default, OcamlRep, Debug)]
 pub struct GlobalState {
     pub explicit_use_set: SSet,
     pub closure_namespaces: SMap<NamespaceEnv>,
-    pub closure_enclosing_classes: SMap<tast::Class_>, // TODO(hrust) need Tast
+    pub closure_enclosing_classes: SMap<ClosureEnclosingClassInfo>,
+    pub functions_with_finally: SSet,
     pub function_to_labels_map: SMap<SMap<bool>>,
     pub lambda_rx_of_scope: SMap<rx::Level>,
-    pub functions_with_finally: SSet,
 }
 
 impl GlobalState {
@@ -30,7 +48,10 @@ impl GlobalState {
             .unwrap_or(&rx::Level::NonRx)
     }
 
-    pub fn get_closure_enclosing_class(&self, class_name: &str) -> Option<&tast::Class_> {
+    pub fn get_closure_enclosing_class(
+        &self,
+        class_name: &str,
+    ) -> Option<&ClosureEnclosingClassInfo> {
         self.closure_enclosing_classes.get(class_name)
     }
 }

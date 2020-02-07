@@ -1056,14 +1056,18 @@ let construct_undirected_tyvar_graph genvs :
     | LoclType ty ->
       let walker =
         object
-          inherit [_] Type_visitor.locl_type_visitor
+          inherit [ISet.t IMap.t] Type_mapper_generic.internal_type_mapper
 
-          method! on_tvar graph _ tyvar' =
-            add_edge ~from:tyvar ~to_:tyvar' graph
-            |> add_edge ~from:tyvar' ~to_:tyvar
+          method! on_tvar graph r tyvar' =
+            let graph =
+              graph
+              |> add_edge ~from:tyvar ~to_:tyvar'
+              |> add_edge ~from:tyvar' ~to_:tyvar
+            in
+            (graph, mk (r, Tvar tyvar'))
         end
       in
-      walker#on_type graph ty
+      fst @@ walker#on_type graph ty
   in
   let graph : ISet.t IMap.t =
     IMap.fold

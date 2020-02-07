@@ -123,8 +123,8 @@ let _assert_opts_equal caml rust =
     Hhbc_options.(disallow_func_ptrs_in_constants caml)
     Hhbc_options.(disallow_func_ptrs_in_constants rust);
   assert_equal
-    Hhbc_options.(enforce_generics_ub caml)
-    Hhbc_options.(enforce_generics_ub rust);
+    Hhbc_options.(emit_generics_ub caml)
+    Hhbc_options.(emit_generics_ub rust);
   assert_equal
     Hhbc_options.(check_int_overflow caml)
     Hhbc_options.(check_int_overflow rust);

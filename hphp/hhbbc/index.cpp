@@ -4843,7 +4843,10 @@ template<bool getSuperType>
 Type Index::get_type_for_constraint(Context ctx,
                                     const TypeConstraint& tc,
                                     const Type& candidate) const {
-  assertx(IMPLIES(!tc.isCheckable(), tc.isMixed()));
+  assertx(IMPLIES(!tc.isCheckable(),
+                   tc.isMixed() ||
+                   (tc.isUpperBound() &&
+                    RuntimeOption::EvalEnforceGenericsUB == 0)));
 
   if (getSuperType) {
     /*
@@ -4851,7 +4854,7 @@ Type Index::get_type_for_constraint(Context ctx,
      * Also upper-bound type hints are not checked when they do not error.
      */
     if (tc.isSoft() ||
-        (RuntimeOption::EvalEnforceGenericsUB != 2 && tc.isUpperBound())) {
+        (RuntimeOption::EvalEnforceGenericsUB < 2 && tc.isUpperBound())) {
       return TCell;
     }
   }
@@ -5784,7 +5787,7 @@ void Index::init_return_type(const php::Func* func) {
 
   auto make_type = [&] (const TypeConstraint& tc) {
     if (tc.isSoft() ||
-        (RuntimeOption::EvalEnforceGenericsUB != 2 && tc.isUpperBound())) {
+        (RuntimeOption::EvalEnforceGenericsUB < 2 && tc.isUpperBound())) {
       return TBottom;
     }
     return loosen_dvarrayness(

@@ -1591,7 +1591,7 @@ let add_fun_def buf fun_def =
   let function_is_pair_generator = Hhas_function.is_pair_generator fun_def in
   let function_rx_disabled = Hhas_function.rx_disabled fun_def in
   Acc.add buf "\n.function ";
-  if Hhbc_options.enforce_generics_ub !Hhbc_options.compiler_options then
+  if Hhbc_options.emit_generics_ub !Hhbc_options.compiler_options then
     Acc.add buf (string_of_upper_bounds function_upper_bounds);
   Acc.add buf (function_attributes fun_def);
   if Hhbc_options.source_mapping !Hhbc_options.compiler_options then
@@ -1728,7 +1728,7 @@ let add_method_def buf method_def =
   let method_is_closure_body = Hhas_method.is_closure_body method_def in
   let method_rx_disabled = Hhas_method.rx_disabled method_def in
   Acc.add buf "\n  .method ";
-  if Hhbc_options.enforce_generics_ub !Hhbc_options.compiler_options then
+  if Hhbc_options.emit_generics_ub !Hhbc_options.compiler_options then
     Acc.add buf (string_of_upper_bounds method_upper_bounds);
   Acc.add buf (method_attributes method_def);
   if Hhbc_options.source_mapping !Hhbc_options.compiler_options then
@@ -2093,7 +2093,7 @@ let add_class_def buf class_def =
   let class_name = Hhas_class.name class_def in
   (* TODO: user attributes *)
   Acc.add buf "\n.class ";
-  if Hhbc_options.enforce_generics_ub !Hhbc_options.compiler_options then
+  if Hhbc_options.emit_generics_ub !Hhbc_options.compiler_options then
     Acc.add buf (string_of_upper_bounds (Hhas_class.upper_bounds class_def));
   Acc.add buf (class_special_attributes class_def);
   Acc.add buf (Hhbc_id.Class.to_raw_string class_name);

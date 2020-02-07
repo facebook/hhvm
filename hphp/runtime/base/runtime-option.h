@@ -90,6 +90,7 @@ struct RepoOptions {
   E(bool,           EmitInstMethPointers,           EmitFuncPointers) \
   H(bool,           RustLowerer,                    true)             \
   H(bool,           EnableXHPClassModifier,         false)            \
+  E(bool,           EmitGenericsUB,                 false)            \
   /**/
 
   /**/

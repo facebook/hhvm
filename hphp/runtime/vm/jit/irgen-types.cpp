@@ -231,7 +231,7 @@ void verifyTypeImpl(IRGS& env,
     auto const failHard = RuntimeOption::RepoAuthoritative
       && !tc.isSoft()
       && (!tc.isThis() || thisFailsHard)
-      && (!tc.isUpperBound() || RuntimeOption::EvalEnforceGenericsUB == 2);
+      && (!tc.isUpperBound() || RuntimeOption::EvalEnforceGenericsUB >= 2);
     return fail(valType, failHard);
   };
 

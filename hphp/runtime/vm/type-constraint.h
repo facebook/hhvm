@@ -209,7 +209,11 @@ struct TypeConstraint {
    * type at runtime (because of a type-alias for example).
    */
   bool isCheckable() const {
-    return hasConstraint() && !isMixed() && !isTypeVar() && !isTypeConstant();
+    return hasConstraint()
+        && !isMixed()
+        && !isTypeVar()
+        && !isTypeConstant()
+        && !(isUpperBound() && RuntimeOption::EvalEnforceGenericsUB == 0);
   }
 
   /*

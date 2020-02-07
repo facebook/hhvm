@@ -576,7 +576,7 @@ let emit_body
       body_instrs
   in
   let upper_bounds =
-    if Hhbc_options.enforce_generics_ub !Hhbc_options.compiler_options then
+    if Hhbc_options.emit_generics_ub !Hhbc_options.compiler_options then
       emit_generics_upper_bounds
         immediate_tparams
         class_tparam_names

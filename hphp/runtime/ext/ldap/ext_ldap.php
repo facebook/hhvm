@@ -79,7 +79,7 @@ function ldap_err2str(int $errnum): string;
  *
  */
 <<__Native>>
-function ldap_add(resource $link, string $dn, array $entry): bool;
+function ldap_add(resource $link, string $dn, darray $entry): bool;
 
 /**
  * Adds one or more attributes to the specified dn. It performs the
@@ -95,7 +95,7 @@ function ldap_add(resource $link, string $dn, array $entry): bool;
  *
  */
 <<__Native>>
-function ldap_mod_add(resource $link, string $dn, array $entry): bool;
+function ldap_mod_add(resource $link, string $dn, darray $entry): bool;
 
 /**
  * Removes one or more attributes from the specified dn. It performs the
@@ -156,7 +156,7 @@ function ldap_modify(resource $link, string $dn, darray $entry): bool;
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
 <<__Native>>
-function ldap_modify_batch(resource $link, string $dn, array $modifs): bool;
+function ldap_modify_batch(resource $link, string $dn, varray $modifs): bool;
 
 /**
  * Binds to the LDAP directory with specified RDN and password. If bind_rdn
@@ -330,7 +330,7 @@ function ldap_list(mixed $link,
 function ldap_read(mixed $link,
                    mixed $base_dn,
                    mixed $filter,
-                   ?array $attributes = null,
+                   ?varray $attributes = null,
                    int $attrsonly = 0,
                    int $sizelimit = -1,
                    int $timelimit = -1,
@@ -390,7 +390,7 @@ function ldap_read(mixed $link,
 function ldap_search(mixed $link,
                      mixed $base_dn,
                      mixed $filter,
-                     ?array $attributes = null,
+                     ?varray $attributes = null,
                      int $attrsonly = 0,
                      int $sizelimit = -1,
                      int $timelimit = -1,

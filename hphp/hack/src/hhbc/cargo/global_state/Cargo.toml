@@ -1,0 +1,17 @@
+# @generated
+# @autocargo from //hphp/hack/src/hhbc:global_state
+# Signature
+[package]
+name = "global_state"
+edition = "2018"
+version = "0.0.0"
+include = ["../../global_state.rs"]
+
+[lib]
+path = "../../global_state.rs"
+
+[dependencies]
+env = { path = "../env" }
+oxidized = { path = "../../../oxidized" }
+rx_rust = { path = "../rx" }
+# @end of Signature

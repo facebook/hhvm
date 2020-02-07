@@ -14,6 +14,7 @@ path = "../../emit_program.rs"
 emit_body_rust = { path = "../emit_body" }
 emit_file_attributes_rust = { path = "../emit_file_attributes" }
 env = { path = "../env" }
+global_state = { path = "../global_state" }
 hhas_body_rust = { path = "../hhas_body" }
 hhas_program_rust = { path = "../hhas_program" }
 instruction_sequence_rust = { path = "../instruction_sequence" }

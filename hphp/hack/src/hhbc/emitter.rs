@@ -7,14 +7,12 @@ use label_rust as label;
 use local_rust as local;
 use options::Options;
 
-use super::{iterator::Iter, GlobalState};
+use super::iterator::Iter;
 
 #[derive(Debug, Default)]
 pub struct Emitter {
     /// Options are frozen/const after emitter is constructed
     opts: Options,
-    /// State is also frozen and set after closure conversion
-    state: GlobalState,
     /// systemlib is part of context, changed externally
     systemlib: bool,
     // the rest is being mutated during emittance
@@ -31,6 +29,8 @@ pub struct Emitter {
     pub expression_state: DynState,
     pub statement_state: DynState,
     pub symbol_refs_state: DynState,
+    /// State is also frozen and set after closure conversion
+    pub global_state: DynState,
 }
 
 pub struct StateRef<'a> {
@@ -40,10 +40,9 @@ pub struct StateRef<'a> {
 }
 
 impl Emitter {
-    pub fn new(opts: Options, state: GlobalState) -> Emitter {
+    pub fn new(opts: Options) -> Emitter {
         Emitter {
             opts,
-            state,
             ..Default::default()
         }
     }
@@ -55,10 +54,6 @@ impl Emitter {
     /// Destruct the emitter but salvage its options (for use in emitting fatal program).
     pub fn into_options(self) -> Options {
         self.opts
-    }
-
-    pub fn state(&self) -> &GlobalState {
-        &self.state
     }
 
     pub fn context(&self) -> &dyn Context {
@@ -129,7 +124,7 @@ macro_rules! lazy_emit_state {
         // Note: if multiple decls or name clashes, do one of:
         // - add explicit name(s) as macro parameter(s)
         // - use crate paste/mashup to create unique trait/method names
-        pub(crate) trait LazyState<T> {
+        pub trait LazyState<T> {
             fn emit_state(&self) -> &T;
             fn emit_state_mut(&mut self) -> &mut T;
         }

@@ -9,6 +9,7 @@ use emit_fatal_rust::{emit_fatal_runtimeomitframe, raise_fatal_parse};
 use emit_memoize_helpers_rust as emit_memoize_helpers;
 use emit_native_opcode_rust as emit_native_opcode;
 use env::emitter::Emitter;
+use global_state::LazyState;
 use hhas_attribute_rust as hhas_attribute;
 use hhas_method_rust::{HhasMethod, HhasMethodFlags};
 use hhas_pos_rust::Span;
@@ -134,7 +135,7 @@ pub fn from_ast<'a>(
         })))
     };
     let namespace = emitter
-        .state()
+        .emit_state()
         .closure_namespaces
         .get(&class_name)
         .unwrap_or(&class.namespace)
@@ -142,7 +143,7 @@ pub fn from_ast<'a>(
     let rx_level = rx::Level::from_ast(&method.user_attributes).unwrap_or_else(|| {
         if is_closure_body {
             emitter
-                .state()
+                .emit_state()
                 .get_lambda_rx_of_scope(&class.name.1, &method.name.1)
         } else {
             rx::Level::NonRx

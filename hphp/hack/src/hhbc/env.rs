@@ -11,7 +11,6 @@ use ast_scope_rust::{Scope, ScopeItem};
 use iterator::Iter;
 use label_rust::Label;
 use oxidized::{ast as tast, ast_defs::Id, namespace_env::Env as NamespaceEnv};
-use rx_rust as rx;
 
 extern crate bitflags;
 use bitflags::bitflags;
@@ -162,30 +161,6 @@ impl UniqueIdBuilder {
 
 pub type SMap<T> = std::collections::BTreeMap<String, T>;
 pub type SSet = std::collections::BTreeSet<String>;
-
-#[derive(Default, Debug)]
-pub struct GlobalState {
-    pub explicit_use_set: SSet,
-    pub closure_namespaces: SMap<NamespaceEnv>,
-    pub closure_enclosing_classes: SMap<tast::Class_>, // TODO(hrust) need Tast
-    pub function_to_labels_map: SMap<SMap<bool>>,
-    pub lambda_rx_of_scope: SMap<rx::Level>,
-    pub functions_with_finally: SSet,
-}
-
-impl GlobalState {
-    pub fn get_lambda_rx_of_scope(&self, class_name: &str, meth_name: &str) -> rx::Level {
-        let key = UniqueIdBuilder::new().method(class_name, meth_name);
-        *self
-            .lambda_rx_of_scope
-            .get(&key)
-            .unwrap_or(&rx::Level::NonRx)
-    }
-
-    pub fn get_closure_enclosing_class(&self, class_name: &str) -> Option<&tast::Class_> {
-        self.closure_enclosing_classes.get(class_name)
-    }
-}
 
 pub fn get_unique_id_for_main() -> String {
     String::from("|")

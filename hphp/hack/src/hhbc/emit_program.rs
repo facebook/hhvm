@@ -19,7 +19,7 @@ use bitflags::bitflags;
 /// This is the entry point from hh_single_compile & fuzzer
 pub fn emit_fatal_program<'p>(options: Options, is_systemlib: bool) -> Result<HhasProgram<'p>> {
     // TODO(hrust) implement the rest
-    let mut emitter = Emitter::new(options, env::GlobalState::default());
+    let mut emitter = Emitter::new(options);
     emitter.context_mut().set_systemlib(is_systemlib);
     Ok(HhasProgram::default())
 }
@@ -47,12 +47,12 @@ fn emit_program_<'p>(
     prog: &Tast::Program,
 ) -> Result<HhasProgram<'p>> {
     // TODO(hrust) real code in closure_convert.rs
-    fn closure_convert() -> ((), env::GlobalState) {
-        ((), env::GlobalState::default())
+    fn closure_convert() -> ((), global_state::GlobalState) {
+        ((), global_state::GlobalState::default())
     }
 
-    let (_ast_defs, global_state) = closure_convert();
-    let mut emitter = Emitter::new(options, global_state);
+    let (_ast_defs, _global_state) = closure_convert();
+    let mut emitter = Emitter::new(options);
     emitter
         .context_mut()
         .set_systemlib(flags.contains(FromAstFlags::IS_SYSTEMLIB));

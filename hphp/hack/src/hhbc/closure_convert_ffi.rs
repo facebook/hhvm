@@ -5,7 +5,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use aast_parser::{rust_aast_parser_types::Env, AastParser};
-use env::{emitter::Emitter, GlobalState};
+use env::emitter::Emitter;
 use ocamlrep_ocamlpool::ocaml_ffi;
 use options::{CompilerFlags, Options};
 use oxidized::namespace_env;
@@ -25,8 +25,7 @@ ocaml_ffi! {
 
         let mut options = Options::default();
         options.hack_compiler_flags.set(CompilerFlags::CONSTANT_FOLDING, true);
-        let state = GlobalState::default();
-        let mut emitter = Emitter::new(options, state);
+        let mut emitter = Emitter::new(options);
         closure_convert_rust::convert_toplevel_prog(&mut emitter, &mut res);
         res
     }

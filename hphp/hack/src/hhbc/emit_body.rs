@@ -15,6 +15,7 @@ use emit_param_rust as emit_param;
 use emit_type_hint_rust as emit_type_hint;
 use env::{emitter::Emitter, Env};
 use generator_rust as generator;
+use global_state::LazyState;
 use hhas_body_rust::HhasBody;
 use hhas_param_rust::HhasParam;
 use hhas_type::Info as HhasTypeInfo;
@@ -330,7 +331,7 @@ fn make_decl_vars(
     flags.set(Flags::IS_IN_STATIC_METHOD, scope.is_in_static_method());
     flags.set(Flags::IS_CLOSURE_BODY, is_closure_body);
 
-    let explicit_use_set = &emitter.state().explicit_use_set;
+    let explicit_use_set = &emitter.emit_state().explicit_use_set;
 
     let (need_local_this, mut decl_vars) =
         decl_vars::from_ast(params, body, flags, explicit_use_set);
@@ -638,7 +639,7 @@ fn set_function_jmp_targets(emitter: &mut Emitter, env: &mut Env, scope: &Scope)
         [.., Function(fun)] => env::get_unique_id_for_function(fun),
         _ => panic!("unexpected scope shape"),
     };
-    let global_state = emitter.state();
+    let global_state = emitter.emit_state();
     match global_state.function_to_labels_map.get(&function_state_key) {
         Some(labels) => {
             env.jump_targets_gen.set_function_has_goto(true);

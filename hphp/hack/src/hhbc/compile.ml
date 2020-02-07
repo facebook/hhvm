@@ -30,6 +30,7 @@ type env = {
   dump_symbol_refs: bool;
   config_jsons: Hh_json.json option list;
   config_list: string list;
+  disable_toplevel_elaboration: bool;
 }
 
 let add_to_time t0 =
@@ -86,8 +87,9 @@ let pos_of_error path source_text error =
     (SyntaxError.start_offset error)
     (SyntaxError.end_offset error)
 
-let parse_file ~hhbc_options filename text :
+let parse_file ~hhbc_options env text :
     (Tast.program * bool, Pos.t * string * bool) Either.t * ParserOptions.t =
+  let filename = env.filepath in
   let popt =
     Hhbc_options.(
       let co = hhbc_options in
@@ -124,6 +126,7 @@ let parse_file ~hhbc_options filename text :
       ~hacksperimental:(Hhbc_options.hacksperimental hhbc_options)
       ~keep_errors:false
       ~lower_coroutines:(Hhbc_options.enable_coroutines hhbc_options)
+      ~elaborate_namespaces:(not env.disable_toplevel_elaboration)
       filename
   in
   let source_text = SourceText.make filename text in
@@ -207,9 +210,7 @@ let emit_fatal ~env ~is_runtime_error pos message =
 let from_text (source_text : string) (env : env) : result =
   with_global_state env (fun hhbc_options ->
       let t = Unix.gettimeofday () in
-      let (fail_or_tast, popt) =
-        parse_file env.filepath source_text ~hhbc_options
-      in
+      let (fail_or_tast, popt) = parse_file env source_text ~hhbc_options in
       let (_, parsing_t) = add_to_time t in
       let ret =
         match fail_or_tast with

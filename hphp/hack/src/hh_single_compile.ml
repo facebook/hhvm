@@ -37,6 +37,7 @@ type options = {
   extract_facts: bool;
   log_stats: bool;
   for_debugger_eval: bool;
+  disable_toplevel_elaboration: bool;
 }
 
 type message_handler = Hh_json.json -> string -> unit
@@ -109,6 +110,7 @@ let parse_options () =
   let dump_config = ref false in
   let log_stats = ref false in
   let for_debugger_eval = ref false in
+  let disable_toplevel_elaboration = ref false in
   let usage =
     P.sprintf "Usage: hh_single_compile (%s) filename\n" Sys.argv.(0)
   in
@@ -158,6 +160,9 @@ let parse_options () =
       ( "--for-debugger-eval",
         Arg.Unit (fun () -> for_debugger_eval := true),
         " Mutate the program as if we're in the debugger repl" );
+      ( "--disable-toplevel-elaboration",
+        Arg.Unit (fun () -> disable_toplevel_elaboration := true),
+        "Disable toplevel definition elaboration" );
     ]
   in
   let options = Arg.align ~limit:25 options in
@@ -199,6 +204,7 @@ let parse_options () =
     log_stats = !log_stats;
     extract_facts = !extract_facts;
     for_debugger_eval = !for_debugger_eval;
+    disable_toplevel_elaboration = !disable_toplevel_elaboration;
   }
 
 let fail_daemon file error =
@@ -294,6 +300,8 @@ let do_compile
         dump_symbol_refs = compiler_options.dump_symbol_refs;
         config_list = compiler_options.config_list;
         config_jsons;
+        disable_toplevel_elaboration =
+          compiler_options.disable_toplevel_elaboration;
       }
   in
   let ret = Compile.from_text source_text env in

@@ -21,6 +21,7 @@ type env = {
   dump_symbol_refs: bool;
   config_jsons: Hh_json.json option list;
   config_list: string list;
+  disable_toplevel_elaboration: bool;
 }
 
 val from_text : string -> env -> result

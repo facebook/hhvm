@@ -11,7 +11,7 @@ use ast_scope_rust as ast_scope;
 use decl_vars_rust as decl_vars;
 use env::emitter::Emitter;
 use hhbc_string_utils_rust as string_utils;
-use naming_special_names_rust::{fb, special_idents, superglobals};
+use naming_special_names_rust::{fb, pseudo_consts, special_idents, superglobals};
 use options::CompilerFlags;
 use oxidized::{
     aast_defs,
@@ -448,11 +448,63 @@ fn make_closure(
 
 // Translate special identifiers __CLASS__, __METHOD__ and __FUNCTION__ into
 // literal strings. It's necessary to do this before closure conversion
-// because the enclosing class will be changed. *)
-fn convert_id(_env: &Env, Id(p, s): Id) -> Expr_ {
-    // TODO(hrust): not implemented, because all the branches besides default are for now
-    // unreachable due to some missing id / namespace elaboration in previous steps
-    Expr_::mk_id(Id(p, s))
+// because the enclosing class will be changed.
+fn convert_id(env: &Env, Id(p, s): Id) -> Expr_ {
+    use ast_scope::*;
+    let ret = |newstr| Expr_::mk_string(newstr);
+    let name =
+        |c: &Class_| Expr_::mk_string(string_utils::mangle_xhp_id(strip_id(&c.name).to_string()));
+
+    match s {
+        _ if s.eq_ignore_ascii_case(pseudo_consts::G__TRAIT__) => match env.scope.get_class() {
+            Some(c) if c.kind == ClassKind::Ctrait => name(c),
+            _ => ret("".into()),
+        },
+        _ if s.eq_ignore_ascii_case(pseudo_consts::G__CLASS__) => match env.scope.get_class() {
+            Some(c) if c.kind != ClassKind::Ctrait => name(c),
+            Some(_) => Expr_::mk_id(Id(p, s)),
+            None => ret("".into()),
+        },
+        _ if s.eq_ignore_ascii_case(pseudo_consts::G__METHOD__) => {
+            let (prefix, is_trait) = match env.scope.get_class() {
+                None => ("".into(), false),
+                Some(cd) => (
+                    string_utils::mangle_xhp_id(strip_id(&cd.name).to_string()) + "::",
+                    cd.kind == ClassKind::Ctrait,
+                ),
+            };
+            // for lambdas nested in trait methods HHVM replaces __METHOD__
+            // with enclosing method name - do the same and bubble up from lambdas *
+            let scope = env
+                .scope
+                .iter()
+                .skip_while(|x| is_trait && x.is_in_lambda())
+                .next();
+
+            match scope {
+                Some(ScopeItem::Function(fd)) => ret(prefix + strip_id(&fd.name)),
+                Some(ScopeItem::Method(md)) => ret(prefix + strip_id(&md.name)),
+                Some(ScopeItem::Lambda(_)) | Some(ScopeItem::LongLambda(_)) => {
+                    ret(prefix + "{closure}")
+                }
+                // PHP weirdness: __METHOD__ inside a class outside a method returns class name
+                Some(ScopeItem::Class(cd)) => ret(strip_id(&cd.name).to_string()),
+                _ => ret("".into()),
+            }
+        }
+        _ if s.eq_ignore_ascii_case(pseudo_consts::G__FUNCTION__) => match env.scope.items.last() {
+            Some(ScopeItem::Function(fd)) => ret(strip_id(&fd.name).to_string()),
+            Some(ScopeItem::Method(md)) => ret(strip_id(&md.name).to_string()),
+            Some(ScopeItem::Lambda(_)) | Some(ScopeItem::LongLambda(_)) => ret("{closure}".into()),
+            _ => ret("".into()),
+        },
+        _ if s.eq_ignore_ascii_case(pseudo_consts::G__LINE__) => {
+            // If the expression goes on multi lines, we return the last line
+            let (_, line, _, _) = p.info_pos_extended();
+            Expr_::mk_int(line.to_string())
+        }
+        _ => Expr_::mk_id(Id(p, s)),
+    }
 }
 
 // Closure-convert a lambda expression, with use_vars_opt = Some vars

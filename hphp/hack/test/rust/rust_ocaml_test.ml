@@ -698,12 +698,16 @@ module ClosureConvertTest_ = struct
         ~parser_options
     in
 
+    let elaborator = new Naming_elaborate_namespaces_endo.generic_elaborator in
+
     let ocaml_tast =
       let open Rust_aast_parser_types in
       (match (LowererTest_.lower lower_env source_text).aast with
       | Ok x -> x
       | Error x -> failwith x)
       |> Full_fidelity_ast.aast_to_tast
+      |> elaborator#on_program
+           (Naming_elaborate_namespaces_endo.make_env empty_namespace)
       |> Closure_convert.convert_toplevel_prog ~empty_namespace
       |> fun x ->
       x.Closure_convert.ast_defs

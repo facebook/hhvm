@@ -109,15 +109,9 @@ pub mod class {
 
     impl_id!(Type, mangle = true, {
         fn from_ast_name(s: &'a str) -> Type<'a> {
-            if true
-            /* TODO(hrust) port new Hh_autoimport logic */
-            {
-                s.into()
-            } else {
-                let mut ret = "HH\\".to_owned();
-                ret.push_str(s);
-                ret.into()
-            }
+            strip_global_ns(&mangle_xhp_id(s.to_string()))
+                .to_string()
+                .into()
         }
     });
 }

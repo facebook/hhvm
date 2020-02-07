@@ -526,7 +526,7 @@ let initial_local tpenv local_reactive =
     local_reactive;
   }
 
-let empty ?(mode = FileInfo.Mstrict) tcopt file ~droot =
+let empty ?(mode = FileInfo.Mstrict) ctx file ~droot =
   {
     function_pos = Pos.none;
     fresh_typarams = SSet.empty;
@@ -536,10 +536,10 @@ let empty ?(mode = FileInfo.Mstrict) tcopt file ~droot =
     in_case = false;
     inside_constructor = false;
     inside_ppl_class = false;
-    decl_env = { mode; droot; ctx = Provider_context.empty ~tcopt };
+    decl_env = { mode; droot; ctx };
     genv =
       {
-        tcopt;
+        tcopt = ctx.Provider_context.tcopt;
         return =
           {
             (* Actually should get set straight away anyway *)
@@ -562,7 +562,7 @@ let empty ?(mode = FileInfo.Mstrict) tcopt file ~droot =
         file;
       };
     global_tpenv = TPEnv.empty;
-    log_levels = TypecheckerOptions.log_levels tcopt;
+    log_levels = TypecheckerOptions.log_levels ctx.Provider_context.tcopt;
     inference_env = Inf.empty_inference_env;
     allow_wildcards = false;
     big_envs = ref [];

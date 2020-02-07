@@ -102,7 +102,7 @@ let helper h ctx acc pos_list =
         Relative_path.Map.find_opt tasts fn
         |> Result.of_option ~error:"No such file or directory"
         |> Result.map ~f:(fun tast ->
-               (find_in_tree h.walker line char)#go tast
+               (find_in_tree h.walker line char)#go ctx tast
                |> Option.map ~f:(h.map_result ctx s))
       in
       h.result_to_string result pos :: acc)

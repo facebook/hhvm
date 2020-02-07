@@ -261,23 +261,27 @@ let test_compute_tast_counting () =
     "There should be 0 disk_cat_count for shared_mem provider";
 
   (* Now try the same with local_memory backend *)
-  Provider_backend.set_local_memory_backend ~max_num_decls:1000;
-  Parser_options_provider.set ParserOptions.default;
-  let (ctx, entry) = Provider_utils.update_context ctx path file_input in
-  let { Provider_utils.Compute_tast_and_errors.telemetry; _ } =
-    Provider_utils.compute_tast_and_errors_unquarantined ~ctx ~entry
-  in
-  Asserter.Int_asserter.assert_equals
-    58
-    (Telemetry_test_utils.int_exn telemetry "decl_accessors.count")
-    "There should be 58 decl_accessor_count for local_memory provider";
-  Asserter.Int_asserter.assert_equals
-    2
-    (Telemetry_test_utils.int_exn telemetry "disk_cat.count")
-    "There should be 2 disk_cat_count for local_memory_provider";
-
-  (* restore it back to shared_mem for the rest of the tests *)
-  Provider_backend.set_shared_memory_backend ();
+  Utils.with_context
+    ~enter:(fun () ->
+      Provider_backend.set_local_memory_backend ~max_num_decls:1000)
+    ~exit:(fun () ->
+      (* restore it back to shared_mem for the rest of the tests *)
+      Provider_backend.set_shared_memory_backend ())
+    ~do_:(fun () ->
+      Parser_options_provider.set ParserOptions.default;
+      let ctx = Provider_context.empty ~tcopt:TypecheckerOptions.default in
+      let (ctx, entry) = Provider_utils.update_context ctx path file_input in
+      let { Provider_utils.Compute_tast_and_errors.telemetry; _ } =
+        Provider_utils.compute_tast_and_errors_unquarantined ~ctx ~entry
+      in
+      Asserter.Int_asserter.assert_equals
+        58
+        (Telemetry_test_utils.int_exn telemetry "decl_accessors.count")
+        "There should be 58 decl_accessor_count for local_memory provider";
+      Asserter.Int_asserter.assert_equals
+        2
+        (Telemetry_test_utils.int_exn telemetry "disk_cat.count")
+        "There should be 2 disk_cat_count for local_memory_provider");
 
   true
 

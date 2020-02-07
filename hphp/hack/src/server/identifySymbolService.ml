@@ -349,7 +349,7 @@ let visitor =
       self#plus acc (super#on_user_attribute env ua)
   end
 
-let all_symbols tast = visitor#go tast |> Result_set.elements
+let all_symbols ctx tast = visitor#go ctx tast |> Result_set.elements
 
 let all_symbols_ctx
     ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
@@ -359,7 +359,7 @@ let all_symbols_ctx
     let { Provider_utils.Compute_tast.tast; _ } =
       Provider_utils.compute_tast_quarantined ~ctx ~entry
     in
-    let symbols = all_symbols tast in
+    let symbols = all_symbols ctx tast in
     entry.Provider_context.symbols <- Some symbols;
     symbols
   | Some symbols -> symbols

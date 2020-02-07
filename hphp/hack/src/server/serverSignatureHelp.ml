@@ -173,7 +173,7 @@ let go_quarantined
       | Some (occurrence, fe, def_opt) ->
         Typing_defs.(
           Lsp.SignatureHelp.(
-            let tast_env = Tast_env.empty ctx.Provider_context.tcopt in
+            let tast_env = Tast_env.empty ctx in
             let siginfo_label =
               Tast_env.print_ty_with_identity
                 tast_env

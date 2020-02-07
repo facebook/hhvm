@@ -235,7 +235,7 @@ let find_refs
   (* use-sites in the tast e.g. "foo(1)" is a use-site of symbol foo,   *)
   (* and returns a map from use-site-position to name of the symbol.    *)
   let results_from_tast (_file, tast) : string Pos.Map.t =
-    IdentifySymbolService.all_symbols tast
+    IdentifySymbolService.all_symbols ctx tast
     |> List.filter ~f:(fun symbol -> not symbol.SymbolOccurrence.is_declaration)
     |> List.fold ~init:Pos.Map.empty ~f:(fold_one_tast ctx target)
   in

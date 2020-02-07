@@ -223,10 +223,10 @@ val get_inside_ppl_class : env -> bool
 
 (** Construct an empty {!env}. Unlikely to be the best choice; prefer using
     {!Tast_visitor} or constructing an {!env} from a {!Tast.def}. *)
-val empty : TypecheckerOptions.t -> env
+val empty : Provider_context.t -> env
 
 (** Construct an {!env} from a toplevel definition. *)
-val def_env : Tast.def -> env
+val def_env : Provider_context.t -> Tast.def -> env
 
 (** Construct an {!env} from a method definition and the {!env} of the context
     it appears in. *)

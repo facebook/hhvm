@@ -394,7 +394,7 @@ let go_quarantined
     Provider_utils.compute_tast_quarantined ~ctx ~entry
   in
   let env_and_ty =
-    ServerInferType.type_at_pos tast line column
+    ServerInferType.type_at_pos ctx tast line column
     |> Option.map ~f:(fun (env, ty) -> (env, Tast_expand.expand_ty env ty))
   in
   (* There are legitimate cases where we expect to have no identities returned,

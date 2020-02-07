@@ -660,22 +660,12 @@ module Full = struct
 
   let to_string_decl ctx (x : decl_ty) =
     let ty = decl_ty in
-    let env =
-      Typing_env.empty
-        ctx.Provider_context.tcopt
-        Relative_path.default
-        ~droot:None
-    in
+    let env = Typing_env.empty ctx Relative_path.default ~droot:None in
     to_string ~ty Doc.text env x
 
   let fun_to_string ctx (x : decl_fun_type) =
     let ty = decl_ty in
-    let env =
-      Typing_env.empty
-        ctx.Provider_context.tcopt
-        Relative_path.default
-        ~droot:None
-    in
+    let env = Typing_env.empty ctx Relative_path.default ~droot:None in
     fun_type ~ty Doc.text ISet.empty env x
     |> Libhackfmt.format_doc_unbroken format_env
     |> String.strip
@@ -1639,12 +1629,7 @@ module PrintClass = struct
         acc ^ Full.to_string_decl tcopt x ^ ", ")
 
   let class_type ctx c =
-    let tenv =
-      Typing_env.empty
-        ctx.Provider_context.tcopt
-        (Pos.filename (Cls.pos c))
-        None
-    in
+    let tenv = Typing_env.empty ctx (Pos.filename (Cls.pos c)) None in
     let tc_need_init = bool (Cls.need_init c) in
     let tc_members_fully_known = bool (Cls.members_fully_known c) in
     let tc_abstract = bool (Cls.abstract c) in

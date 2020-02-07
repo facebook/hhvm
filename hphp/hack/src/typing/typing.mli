@@ -13,24 +13,24 @@ val with_expr_hook :
 val debug_print_last_pos : 'a -> unit
 
 val fun_def :
-  TypecheckerOptions.t ->
+  Provider_context.t ->
   Nast.fun_ ->
   (Tast.fun_ * Typing_inference_env.t_global_with_pos) option
 
 val class_def :
-  TypecheckerOptions.t ->
+  Provider_context.t ->
   Nast.class_ ->
   (Tast.class_ * Typing_inference_env.t_global_with_pos list) option
 
-val record_def_def : TypecheckerOptions.t -> Nast.record_def -> Tast.record_def
+val record_def_def : Provider_context.t -> Nast.record_def -> Tast.record_def
 
-val typedef_def : TypecheckerOptions.t -> Nast.typedef -> Tast.typedef
+val typedef_def : Provider_context.t -> Nast.typedef -> Tast.typedef
 
-val gconst_def : TypecheckerOptions.t -> Nast.gconst -> Tast.gconst
+val gconst_def : Provider_context.t -> Nast.gconst -> Tast.gconst
 
 val nast_to_tast_gienv :
   do_tast_checks:bool ->
-  TypecheckerOptions.t ->
+  Provider_context.t ->
   Nast.program ->
   Tast.program * Typing_inference_env.t_global_with_pos list
 
@@ -41,4 +41,4 @@ TAST. This means that the associated list of errors may be incomplete. This is
 useful for performance in cases where we want the TAST, but don't need a correct
 list of errors. *)
 val nast_to_tast :
-  do_tast_checks:bool -> TypecheckerOptions.t -> Nast.program -> Tast.program
+  do_tast_checks:bool -> Provider_context.t -> Nast.program -> Tast.program

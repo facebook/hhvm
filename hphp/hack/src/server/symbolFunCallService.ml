@@ -141,5 +141,6 @@ class visitor =
       self#plus acc (super#on_Call env ct e hl el unpacked_element)
   end
 
-let find_fun_calls tasts =
-  List.concat_map tasts ~f:(fun x -> (new visitor)#go x |> Result_set.elements)
+let find_fun_calls ctx tasts =
+  List.concat_map tasts ~f:(fun x ->
+      (new visitor)#go ctx x |> Result_set.elements)

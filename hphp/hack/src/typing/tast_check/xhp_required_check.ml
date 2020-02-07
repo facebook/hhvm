@@ -77,7 +77,7 @@ let check_attrs pos env sid attrs =
         Errors.missing_xhp_required_attr pos attr msg)
       missing_attrs
 
-let make_handler opts =
+let make_handler ctx =
   let handler =
     object
       inherit Tast_visitor.handler_base
@@ -88,7 +88,7 @@ let make_handler opts =
         | _ -> ()
     end
   in
-  if TypecheckerOptions.check_xhp_attribute opts then
+  if TypecheckerOptions.check_xhp_attribute ctx.Provider_context.tcopt then
     Some handler
   else
     None

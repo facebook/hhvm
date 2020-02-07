@@ -382,7 +382,7 @@ let test () =
     let { Provider_utils.Compute_tast.tast; _ } =
       Provider_utils.compute_tast_unquarantined ~ctx ~entry
     in
-    let ty = ServerInferType.type_at_pos tast line col in
+    let ty = ServerInferType.type_at_pos ctx tast line col in
     compare_type expected_type ty
   in
   List.iter cases ~f:(test_case ~dynamic:false);

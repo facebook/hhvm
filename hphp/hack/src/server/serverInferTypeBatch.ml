@@ -69,9 +69,10 @@ let helper ctx acc pos_list =
         |> Result.map ~f:(fun tast ->
                let env_and_ty =
                  match range_end with
-                 | None -> ServerInferType.type_at_pos tast line char
+                 | None -> ServerInferType.type_at_pos ctx tast line char
                  | Some (end_line, end_char) ->
                    ServerInferType.type_at_range
+                     ctx
                      tast
                      line
                      char

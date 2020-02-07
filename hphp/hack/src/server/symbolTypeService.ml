@@ -53,8 +53,8 @@ let visitor =
       self#plus acc @@ super#on_fun_param env param
   end
 
-let generate_types tasts =
+let generate_types ctx tasts =
   tasts
-  |> List.map ~f:visitor#go
+  |> List.map ~f:(visitor#go ctx)
   |> List.fold ~init:Result_set.empty ~f:Result_set.union
   |> Result_set.elements

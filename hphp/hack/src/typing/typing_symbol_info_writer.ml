@@ -14,11 +14,11 @@ open Typing_symbol_json_builder
 open SymbolOccurrence
 module Bucket = Hack_bucket
 
-let get_localvars fn_def lv_acc =
+let get_localvars ctx fn_def lv_acc =
   let process_lv symbol =
     { lv_name = symbol.name; lv_definition = symbol.pos; lvs = [symbol] }
   in
-  let symbols = IdentifySymbolService.all_symbols [fn_def] in
+  let symbols = IdentifySymbolService.all_symbols ctx [fn_def] in
   let new_lvs =
     List.fold symbols ~init:[] ~f:(fun acc symbol ->
         match symbol.type_ with
@@ -38,7 +38,8 @@ let get_localvars fn_def lv_acc =
   in
   new_lvs @ lv_acc
 
-let get_decls (tast : Tast.program list) : symbol_occurrences =
+let get_decls (ctx : Provider_context.t) (tast : Tast.program list) :
+    symbol_occurrences =
   let (all_decls, all_defs, all_lvs) =
     List.fold
       tast
@@ -53,10 +54,10 @@ let get_decls (tast : Tast.program list) : symbol_occurrences =
             | Typedef _
             | Constant _ ->
               (def :: decls, def :: defs, lvs)
-            | Fun _ -> (def :: decls, def :: defs, get_localvars def lvs)
+            | Fun _ -> (def :: decls, def :: defs, get_localvars ctx def lvs)
             | _ -> (decls, def :: defs, lvs)))
   in
-  let symbols = IdentifySymbolService.all_symbols all_defs in
+  let symbols = IdentifySymbolService.all_symbols ctx all_defs in
   { decls = all_decls; occurrences = symbols; localvars = all_lvs }
 
 let write_json
@@ -64,7 +65,7 @@ let write_json
     (file_dir : string)
     (tast_lst : Tast.program list) : unit =
   try
-    let symbol_occurrences = get_decls tast_lst in
+    let symbol_occurrences = get_decls ctx tast_lst in
     let json_chunks =
       Typing_symbol_json_builder.build_json ctx symbol_occurrences
     in

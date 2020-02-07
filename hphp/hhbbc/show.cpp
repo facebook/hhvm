@@ -137,7 +137,7 @@ std::string show(const Func& func, const Bytecode& bc) {
 
     switch (mkey.mcode) {
       case MEL: case MPL:
-        folly::toAppend(':', local_string(func, mkey.local), &ret);
+        folly::toAppend(':', local_string(func, mkey.local.id), &ret);
         break;
       case MEC: case MPC:
         folly::toAppend(':', mkey.idx, &ret);
@@ -175,6 +175,8 @@ std::string show(const Func& func, const Bytecode& bc) {
 #define IMM_IVA(n)     folly::toAppend(" ", data.arg##n, &ret);
 #define IMM_I64A(n)    folly::toAppend(" ", data.arg##n, &ret);
 #define IMM_LA(n)      ret += " " + local_string(func, data.loc##n);
+#define IMM_NLA(n)     ret += " " + local_string(func, data.nloc##n.id);
+#define IMM_ILA(n)     ret += " " + local_string(func, data.loc##n);
 #define IMM_IA(n)      folly::toAppend(" iter:", data.iter##n, &ret);
 #define IMM_DA(n)      folly::toAppend(" ", data.dbl##n, &ret);
 #define IMM_SA(n)      folly::toAppend(" ", escaped_string(data.str##n), &ret);
@@ -222,6 +224,8 @@ std::string show(const Func& func, const Bytecode& bc) {
 #undef IMM_IVA
 #undef IMM_I64A
 #undef IMM_LA
+#undef IMM_NLA
+#undef IMM_ILA
 #undef IMM_IA
 #undef IMM_DA
 #undef IMM_SA

@@ -65,6 +65,21 @@ using PC = const uint8_t*;
 using Id = int;
 constexpr Id kInvalidId = -1;
 
+
+/*
+ * Id type for local names.  Indexes into the local name table of the func.
+ */
+using LocalName = int;
+constexpr LocalName kInvalidLocalName = -1;
+
+/*
+ * A local index alongside an local name id.
+ */
+struct NamedLocal {
+  LocalName name;
+  int32_t id;
+};
+
 /*
  * Translation IDs.
  *

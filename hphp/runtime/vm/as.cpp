@@ -1250,7 +1250,8 @@ MemberKey read_member_key(AsmState& as) {
       if (!as.in.readword(name)) {
         as.error("couldn't read name for local variable in member key");
       }
-      return MemberKey{mcode, as.getLocalId(name)};
+      int32_t lid = as.getLocalId(name);
+      return MemberKey{mcode, NamedLocal{lid, lid}};
     }
     case MEC: case MPC:
       return MemberKey{mcode, read_opcode_arg<int32_t>(as)};
@@ -1421,6 +1422,11 @@ std::map<std::string,ParserFunc> opcode_parsers;
 #define IMM_I64A   as.ue->emitInt64(read_opcode_arg<int64_t>(as))
 #define IMM_DA     as.ue->emitDouble(read_opcode_arg<double>(as))
 #define IMM_LA     as.ue->emitIVA(as.getLocalId(  \
+                     read_opcode_arg<std::string>(as)))
+#define IMM_NLA    auto const loc = as.getLocalId(        \
+                     read_opcode_arg<std::string>(as));   \
+                   as.ue->emitNamedLocal(NamedLocal{loc, loc});
+#define IMM_ILA    as.ue->emitIVA(as.getLocalId(  \
                      read_opcode_arg<std::string>(as)))
 #define IMM_IA     as.ue->emitIVA(as.getIterId( \
                      read_opcode_arg<int32_t>(as)))
@@ -1600,6 +1606,8 @@ OPCODES
 #undef IMM_DA
 #undef IMM_IVA
 #undef IMM_LA
+#undef IMM_NLA
+#undef IMM_ILA
 #undef IMM_BA
 #undef IMM_BLA
 #undef IMM_SLA

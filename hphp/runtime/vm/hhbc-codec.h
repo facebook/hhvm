@@ -135,6 +135,11 @@ ALWAYS_INLINE uint32_t decode_iva(PC& pc) {
 }
 
 /*
+ * decode a namedlocal, advancing pc past it.
+ */
+NamedLocal decode_named_local(PC& pc);
+
+/*
  * Decode a MemberKey, advancing pc past it.
  */
 MemberKey decode_member_key(PC& pc, Either<const Unit*, const UnitEmitter*> u);

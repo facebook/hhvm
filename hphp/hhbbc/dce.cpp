@@ -1086,7 +1086,7 @@ void cgetImpl(Env& env, LocalId loc, bool quiet) {
 }
 
 void dce(Env& env, const bc::CGetL& op) {
-  cgetImpl(env, op.loc1, false);
+  cgetImpl(env, op.nloc1.id, false);
 }
 
 void dce(Env& env, const bc::CGetQuietL& op) {
@@ -1113,10 +1113,10 @@ void dce(Env& env, const bc::PushL& op) {
 }
 
 void dce(Env& env, const bc::CGetL2& op) {
-  auto const ty = locRaw(env, op.loc1);
+  auto const ty = locRaw(env, op.nloc1.id);
 
   stack_ops(env, [&] (const UseInfo& u1, const UseInfo& u2) {
-      scheduleGenLoc(env, op.loc1);
+      scheduleGenLoc(env, op.nloc1.id);
       if (readCouldHaveSideEffects(ty) || !allUnused(u1, u2)) {
         return PushFlags::MarkLive;
       }
@@ -1151,9 +1151,9 @@ void dce(Env& env, const bc::IsTypeC& op) {
 }
 
 void dce(Env& env, const bc::IsTypeL& op) {
-  auto const ty = locRaw(env, op.loc1);
+  auto const ty = locRaw(env, op.nloc1.id);
   stack_ops(env, [&] (UseInfo& ui) {
-      scheduleGenLoc(env, op.loc1);
+      scheduleGenLoc(env, op.nloc1.id);
       if (allUnused(ui) &&
           !readCouldHaveSideEffects(ty) &&
           !is_type_might_raise(type_of_istype(op.subop2), ty)) {
@@ -1393,12 +1393,12 @@ void dce(Env& env, const bc::UnsetL& op) {
  * set of upward exposed uses.
  */
 void dce(Env& env, const bc::IncDecL& op) {
-  auto const oldTy   = locRaw(env, op.loc1);
+  auto const oldTy   = locRaw(env, op.nloc1.id);
   auto const effects = readCouldHaveSideEffects(oldTy) ||
-                       isLocVolatile(env, op.loc1);
+                       isLocVolatile(env, op.nloc1.id);
   stack_ops(env, [&] (const UseInfo& ui) {
-      scheduleGenLoc(env, op.loc1);
-      if (!isLocLive(env, op.loc1) && !effects && allUnused(ui)) {
+      scheduleGenLoc(env, op.nloc1.id);
+      if (!isLocLive(env, op.nloc1.id) && !effects && allUnused(ui)) {
         return PushFlags::MarkUnused;
       }
       return PushFlags::MarkLive;
@@ -1734,7 +1734,7 @@ void minstr_final(Env& env, const Op& op, int32_t ndiscard) {
   push_outputs(env, op.numPush());
   auto const numPop = op.numPop();
   auto const stackRead = op.mkey.mcode == MEC || op.mkey.mcode == MPC ?
-    op.mkey.idx : numPop;
+    op.mkey.idx : -1;
 
   for (auto i = numPop; i--; ) {
     if (i == stackRead || i >= DceAction::kMaskSize || i < numPop - ndiscard) {
@@ -1742,6 +1742,12 @@ void minstr_final(Env& env, const Op& op, int32_t ndiscard) {
     } else {
       pop(env, {Use::Not, {{env.id, {DceAction::MinstrStackFinal, 1u << i}}}});
     }
+  }
+
+  if (stackRead >= numPop) {
+    assertx(stackRead < env.dceState.stack.size());
+    use(env.dceState.forcedLiveLocations,
+        env.dceState.stack, env.dceState.stack.size() - 1 - stackRead);
   }
 }
 
@@ -1753,9 +1759,9 @@ void dce(Env& env, const bc::BaseSC& op)      {
 }
 
 void dce(Env& env, const bc::BaseL& op) {
-  if (!isLocLive(env, op.loc1) &&
-      !readCouldHaveSideEffects(locRaw(env, op.loc1)) &&
-      !isLocVolatile(env, op.loc1)) {
+  if (!isLocLive(env, op.nloc1.id) &&
+      !readCouldHaveSideEffects(locRaw(env, op.nloc1.id)) &&
+      !isLocVolatile(env, op.nloc1.id)) {
     env.dceState.actionMap[env.id] = DceAction::MinstrPushBase;
   }
   no_dce(env, op);
@@ -2186,7 +2192,7 @@ void dce_perform(php::Func& func,
         assertx(b->hhbcs[id.idx].op == OpBaseL);
         auto const base = b->hhbcs[id.idx].BaseL;
         auto const srcLoc = b->hhbcs[id.idx].srcLoc;
-        b->hhbcs[id.idx] = bc::PushL {base.loc1};
+        b->hhbcs[id.idx] = bc::PushL {base.nloc1.id};
         b->hhbcs.insert(
           b->hhbcs.begin() + id.idx + 1, bc::BaseC{0, base.subop2});
         setloc(srcLoc, b->hhbcs.begin() + id.idx, 2);

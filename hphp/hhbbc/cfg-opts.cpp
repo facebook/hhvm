@@ -147,7 +147,7 @@ struct SwitchInfo {
   union Case { SString s; int64_t i; };
   std::vector<std::pair<Case,BlockId>> cases;
   BlockId defaultBlock = NoBlockId;
-  LocalId switchLoc    = NoLocalId;
+  NamedLocal switchLoc{};
   DataType kind;
 };
 
@@ -166,11 +166,13 @@ bool analyzeSwitch(const php::Func& func,
       auto const& cmp = jmp[-1];
       if (cmp.op != Op::Eq && cmp.op != Op::Neq) return false;
       auto check = [&] (const Bytecode& arg1, const Bytecode& arg2) -> bool {
-        LocalId loc;
+        NamedLocal loc;
         if (arg2.op == Op::CGetL) {
-          loc = arg2.CGetL.loc1;
+          loc = arg2.CGetL.nloc1;
+        } else if (arg2.op == Op::CGetQuietL) {
+          loc = NamedLocal{kInvalidLocalName, arg2.CGetQuietL.loc1};
         } else if (arg2.op == Op::CGetL2 && &arg2 == &arg1 + 1) {
-          loc = arg2.CGetL2.loc1;
+          loc = arg2.CGetL2.nloc1;
         } else {
           return false;
         }
@@ -217,14 +219,17 @@ bool analyzeSwitch(const php::Func& func,
     case Op::SSwitch: {
       if (blk.hhbcs.size() < 2) return false;
       auto const& cgetl = jmp[-1];
-      if (cgetl.op != Op::CGetL) return false;
+      if (cgetl.op != Op::CGetL && cgetl.op != Op::CGetQuietL) return false;
+      auto const loc = cgetl.op == Op::CGetQuietL
+                       ? NamedLocal{kInvalidLocalName, cgetl.CGetQuietL.loc1}
+                       : cgetl.CGetL.nloc1;
       auto const dt = jmp->op == Op::Switch ? KindOfInt64 : KindOfString;
       if (switchInfo) {
         if (switchInfo->cases.size()) {
-          if (cgetl.CGetL.loc1 != switchInfo->switchLoc) return false;
+          if (loc != switchInfo->switchLoc) return false;
           if (dt != switchInfo->kind) return false;
         } else {
-          switchInfo->switchLoc = cgetl.CGetL.loc1;
+          switchInfo->switchLoc = loc;
           switchInfo->kind = dt;
         }
       }

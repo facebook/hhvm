@@ -57,8 +57,11 @@ std::string show(MemberKey mk) {
   std::string ret = memberCodeString(mk.mcode);
 
   switch (mk.mcode) {
-    case MEL: case MEC: case MPL: case MPC:
+    case MEC: case MPC:
       folly::toAppend(':', mk.iva, &ret);
+      break;
+    case MEL: case MPL:
+      folly::toAppend(':', mk.local.name, ':', mk.local.id, &ret);
       break;
     case MEI:
       folly::toAppend(':', mk.int64, &ret);

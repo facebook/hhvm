@@ -795,7 +795,7 @@ void in(ISS& env, const bc::PopC&) {
       return reduce(env);
     }
     if (last->op == Op::CGetL2) {
-      auto loc = last->CGetL2.loc1;
+      auto loc = last->CGetL2.nloc1;
       rewind(env, 1);
       return reduce(env, bc::PopC {}, bc::CGetL { loc });
     }
@@ -1543,9 +1543,18 @@ void sameImpl(ISS& env) {
     }
     if (auto const prev = last_op(env, 1)) {
       if (prev->op == Op::Null &&
-          (last->op == Op::CGetL || last->op == Op::CGetL2)) {
-        auto const loc = last->op == Op::CGetL ?
-          last->CGetL.loc1 : last->CGetL2.loc1;
+          (last->op == Op::CGetL || last->op == Op::CGetL2 ||
+           last->op == Op::CGetQuietL)) {
+        auto const loc = [&]() {
+          if (last->op == Op::CGetL) {
+            return last->CGetL.nloc1;
+          } else if (last->op == Op::CGetL2) {
+            return last->CGetL2.nloc1;
+          } else if (last->op == Op::CGetQuietL) {
+            return NamedLocal{kInvalidLocalName, last->CGetQuietL.loc1};
+          }
+          always_assert(false);
+        }();
         rewind(env, 2);
         reduce(env, bc::IsTypeL { loc, IsTypeOp::Null });
         if (Negate) reduce(env, bc::Not {});
@@ -2183,7 +2192,7 @@ void jmpImpl(ISS& env, const JmpOp& op) {
     } else if (last->op == Op::IssetL) {
       if (isTypeHelper(env,
                        IsTypeOp::Null,
-                       last->IsTypeL.loc1,
+                       last->IssetL.loc1,
                        last->op,
                        op)) {
         return fix();
@@ -2191,7 +2200,7 @@ void jmpImpl(ISS& env, const JmpOp& op) {
     } else if (last->op == Op::IsTypeL) {
       if (isTypeHelper(env,
                        last->IsTypeL.subop2,
-                       last->IsTypeL.loc1,
+                       last->IsTypeL.nloc1.id,
                        last->op,
                        op)) {
         return fix();
@@ -2338,8 +2347,8 @@ void in(ISS& env, const bc::NativeImpl&) {
 }
 
 void in(ISS& env, const bc::CGetL& op) {
-  if (locIsThis(env, op.loc1)) {
-    auto const& ty = peekLocRaw(env, op.loc1);
+  if (locIsThis(env, op.nloc1.id)) {
+    auto const& ty = peekLocRaw(env, op.nloc1.id);
     if (!ty.subtypeOf(BInitNull)) {
       auto const subop = ty.couldBe(BUninit) ?
         BareThisOp::Notice : ty.couldBe(BNull) ?
@@ -2349,29 +2358,34 @@ void in(ISS& env, const bc::CGetL& op) {
   }
   if (auto const last = last_op(env)) {
     if (!is_pseudomain(env.ctx.func) && last->op == Op::PopL &&
+        op.nloc1.id == last->PopL.loc1) {
+      reprocess(env);
+      rewind(env, 1);
+      setLocRaw(env, op.nloc1.id, TCell);
+      return reduce(env, bc::SetL { op.nloc1.id });
+    }
+  }
+  if (!peekLocCouldBeUninit(env, op.nloc1.id)) {
+    auto const minLocEquiv = findMinLocEquiv(env, op.nloc1.id, false);
+    auto const loc = minLocEquiv != NoLocalId ? minLocEquiv : op.nloc1.id;
+    return reduce(env, bc::CGetQuietL { loc });
+  }
+  mayReadLocal(env, op.nloc1.id);
+  push(env, locAsCell(env, op.nloc1.id), op.nloc1.id);
+}
+
+void in(ISS& env, const bc::CGetQuietL& op) {
+  if (locIsThis(env, op.loc1)) {
+    return reduce(env, bc::BareThis { BareThisOp::NoNotice });
+  }
+  if (auto const last = last_op(env)) {
+    if (!is_pseudomain(env.ctx.func) && last->op == Op::PopL &&
         op.loc1 == last->PopL.loc1) {
       reprocess(env);
       rewind(env, 1);
       setLocRaw(env, op.loc1, TCell);
       return reduce(env, bc::SetL { op.loc1 });
     }
-  }
-  if (!peekLocCouldBeUninit(env, op.loc1)) {
-    auto const minLocEquiv = findMinLocEquiv(env, op.loc1, false);
-    if (minLocEquiv != NoLocalId) {
-      return reduce(env, bc::CGetL { minLocEquiv });
-    }
-
-    nothrow(env);
-    constprop(env);
-  }
-  mayReadLocal(env, op.loc1);
-  push(env, locAsCell(env, op.loc1), op.loc1);
-}
-
-void in(ISS& env, const bc::CGetQuietL& op) {
-  if (locIsThis(env, op.loc1)) {
-    return reduce(env, bc::BareThis { BareThisOp::NoNotice });
   }
   auto const minLocEquiv = findMinLocEquiv(env, op.loc1, true);
   if (minLocEquiv != NoLocalId) {
@@ -2402,7 +2416,7 @@ void in(ISS& env, const bc::PushL& op) {
 
   auto const minLocEquiv = findMinLocEquiv(env, op.loc1, false);
   if (minLocEquiv != NoLocalId) {
-    return reduce(env, bc::CGetL { minLocEquiv }, bc::UnsetL { op.loc1 });
+    return reduce(env, bc::CGetQuietL { minLocEquiv }, bc::UnsetL { op.loc1 });
   }
 
   if (auto const last = last_op(env)) {
@@ -2420,31 +2434,32 @@ void in(ISS& env, const bc::PushL& op) {
     }
   }
 
-  impl(env, bc::CGetL { op.loc1 }, bc::UnsetL { op.loc1 });
+  impl(env, bc::CGetQuietL { op.loc1 }, bc::UnsetL { op.loc1 });
 }
 
 void in(ISS& env, const bc::CGetL2& op) {
   if (auto const last = last_op(env)) {
     if ((poppable(last->op) && !numPop(*last)) ||
-        (last->op == Op::CGetL && !peekLocCouldBeUninit(env, op.loc1))) {
+        ((last->op == Op::CGetL || last->op == Op::CGetQuietL) &&
+         !peekLocCouldBeUninit(env, op.nloc1.id))) {
       auto const other = *last;
       rewind(env, 1);
-      return reduce(env, bc::CGetL { op.loc1 }, other);
+      return reduce(env, bc::CGetL { op.nloc1 }, other);
     }
   }
 
-  if (!peekLocCouldBeUninit(env, op.loc1)) {
-    auto const minLocEquiv = findMinLocEquiv(env, op.loc1, false);
+  if (!peekLocCouldBeUninit(env, op.nloc1.id)) {
+    auto const minLocEquiv = findMinLocEquiv(env, op.nloc1.id, false);
     if (minLocEquiv != NoLocalId) {
-      return reduce(env, bc::CGetL2 { minLocEquiv });
+      return reduce(env, bc::CGetL2 { { kInvalidLocalName, minLocEquiv } });
     }
     effect_free(env);
   }
-  mayReadLocal(env, op.loc1);
-  auto loc = locAsCell(env, op.loc1);
+  mayReadLocal(env, op.nloc1.id);
+  auto loc = locAsCell(env, op.nloc1.id);
   auto topEquiv = topStkLocal(env);
   auto top = popT(env);
-  push(env, std::move(loc), op.loc1);
+  push(env, std::move(loc), op.nloc1.id);
   push(env, std::move(top), topEquiv);
 }
 
@@ -2639,12 +2654,12 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
   auto const rclsIMemoizeParam = env.index.builtin_class(s_IMemoizeParam.get());
   auto const tyIMemoizeParam = subObj(rclsIMemoizeParam);
 
-  auto const inTy = locAsCell(env, op.loc1);
+  auto const inTy = locAsCell(env, op.nloc1.id);
 
   // If the local could be uninit, we might raise a warning (as
   // usual). Converting an object to a memo key might invoke PHP code if it has
   // the IMemoizeParam interface, and if it doesn't, we'll throw.
-  if (!locCouldBeUninit(env, op.loc1) &&
+  if (!locCouldBeUninit(env, op.nloc1.id) &&
       !inTy.couldBeAny(TObj, TArr, TVec, TDict)) {
     nothrow(env); constprop(env);
   }
@@ -2655,8 +2670,8 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
   using MK = MemoKeyConstraint;
   folly::Optional<res::Class> resolvedCls;
   auto const mkc = [&] {
-    if (op.loc1 >= env.ctx.func->params.size()) return MK::None;
-    auto tc = env.ctx.func->params[op.loc1].typeConstraint;
+    if (op.nloc1.id >= env.ctx.func->params.size()) return MK::None;
+    auto tc = env.ctx.func->params[op.nloc1.id].typeConstraint;
     if (tc.type() == AnnotType::Object) {
       auto res = env.index.resolve_type_name(tc.typeName());
       if (res.type != AnnotType::Object) {
@@ -2676,21 +2691,21 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
   switch (mkc) {
     case MK::Int:
       // Always an int, so the key is always an identity mapping
-      if (inTy.subtypeOf(BInt)) return reduce(env, bc::CGetL { op.loc1 });
+      if (inTy.subtypeOf(BInt)) return reduce(env, bc::CGetL { op.nloc1 });
       break;
     case MK::Bool:
       // Always a bool, so the key is the bool cast to an int
       if (inTy.subtypeOf(BBool)) {
-        return reduce(env, bc::CGetL { op.loc1 }, bc::CastInt {});
+        return reduce(env, bc::CGetL { op.nloc1 }, bc::CastInt {});
       }
       break;
     case MK::Str:
       // Always a string, so the key is always an identity mapping
-      if (inTy.subtypeOf(BStr)) return reduce(env, bc::CGetL { op.loc1 });
+      if (inTy.subtypeOf(BStr)) return reduce(env, bc::CGetL { op.nloc1 });
       break;
     case MK::IntOrStr:
       // Either an int or string, so the key can be an identity mapping
-      if (inTy.subtypeOf(BArrKey)) return reduce(env, bc::CGetL { op.loc1 });
+      if (inTy.subtypeOf(BArrKey)) return reduce(env, bc::CGetL { op.nloc1 });
       break;
     case MK::StrOrNull:
       // A nullable string. The key will either be the string or the integer
@@ -2698,9 +2713,9 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
       if (inTy.subtypeOrNull(BStr)) {
         return reduce(
           env,
-          bc::CGetL { op.loc1 },
+          bc::CGetL { op.nloc1 },
           bc::Int { 0 },
-          bc::IsTypeL { op.loc1, IsTypeOp::Null },
+          bc::IsTypeL { op.nloc1, IsTypeOp::Null },
           bc::Select {}
         );
       }
@@ -2711,9 +2726,9 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
       if (inTy.subtypeOrNull(BInt)) {
         return reduce(
           env,
-          bc::CGetL { op.loc1 },
+          bc::CGetL { op.nloc1 },
           bc::String { staticEmptyString() },
-          bc::IsTypeL { op.loc1, IsTypeOp::Null },
+          bc::IsTypeL { op.nloc1, IsTypeOp::Null },
           bc::Select {}
         );
       }
@@ -2723,10 +2738,10 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
       if (inTy.subtypeOrNull(BBool)) {
         return reduce(
           env,
-          bc::CGetL { op.loc1 },
+          bc::CGetL { op.nloc1 },
           bc::CastInt {},
           bc::Int { 2 },
-          bc::IsTypeL { op.loc1, IsTypeOp::Null },
+          bc::IsTypeL { op.nloc1, IsTypeOp::Null },
           bc::Select {}
         );
       }
@@ -2734,7 +2749,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
     case MK::Dbl:
       // The double will be converted (losslessly) to an integer.
       if (inTy.subtypeOf(BDbl)) {
-        return reduce(env, bc::CGetL { op.loc1 }, bc::DblAsBits {});
+        return reduce(env, bc::CGetL { op.nloc1 }, bc::DblAsBits {});
       }
       break;
     case MK::DblOrNull:
@@ -2743,10 +2758,10 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
       if (inTy.subtypeOrNull(BDbl)) {
         return reduce(
           env,
-          bc::CGetL { op.loc1 },
+          bc::CGetL { op.nloc1 },
           bc::DblAsBits {},
           bc::String { staticEmptyString() },
-          bc::IsTypeL { op.loc1, IsTypeOp::Null },
+          bc::IsTypeL { op.nloc1, IsTypeOp::Null },
           bc::Select {}
         );
       }
@@ -2762,7 +2777,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
           inTy.subtypeOf(tyIMemoizeParam)) {
         return reduce(
           env,
-          bc::CGetL { op.loc1 },
+          bc::CGetL { op.nloc1 },
           bc::NullUninit {},
           bc::NullUninit {},
           bc::FCallObjMethodD {
@@ -2785,7 +2800,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
           inTy.subtypeOf(opt(tyIMemoizeParam))) {
         return reduce(
           env,
-          bc::CGetL { op.loc1 },
+          bc::CGetL { op.nloc1 },
           bc::NullUninit {},
           bc::NullUninit {},
           bc::FCallObjMethodD {
@@ -2796,7 +2811,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
           },
           bc::CastString {},
           bc::Int { 0 },
-          bc::IsTypeL { op.loc1, IsTypeOp::Null },
+          bc::IsTypeL { op.nloc1, IsTypeOp::Null },
           bc::Select {}
         );
       }
@@ -2816,13 +2831,13 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
   }
 
   // Integer keys are always mapped to themselves
-  if (inTy.subtypeOf(BInt)) return reduce(env, bc::CGetL { op.loc1 });
+  if (inTy.subtypeOf(BInt)) return reduce(env, bc::CGetL { op.nloc1 });
   if (inTy.subtypeOrNull(BInt)) {
     return reduce(
       env,
-      bc::CGetL { op.loc1 },
+      bc::CGetL { op.nloc1 },
       bc::String { s_nullMemoKey.get() },
-      bc::IsTypeL { op.loc1, IsTypeOp::Null },
+      bc::IsTypeL { op.nloc1, IsTypeOp::Null },
       bc::Select {}
     );
   }
@@ -2831,7 +2846,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
       env,
       bc::String { s_falseMemoKey.get() },
       bc::String { s_trueMemoKey.get() },
-      bc::CGetL { op.loc1 },
+      bc::CGetL { op.nloc1 },
       bc::Select {}
     );
   }
@@ -2966,8 +2981,9 @@ bool isCompactTypeClsMeth(ISS& env, IsTypeOp op, const Type& t) {
 
 template<class Op>
 void isTypeLImpl(ISS& env, const Op& op) {
-  auto const loc = locAsCell(env, op.loc1);
-  if (!locCouldBeUninit(env, op.loc1) && !is_type_might_raise(op.subop2, loc)) {
+  auto const loc = locAsCell(env, op.nloc1.id);
+  if (!locCouldBeUninit(env, op.nloc1.id) &&
+      !is_type_might_raise(op.subop2, loc)) {
     constprop(env);
     nothrow(env);
   }
@@ -3444,7 +3460,7 @@ folly::Optional<std::pair<Type, LocalId>> moveToLocImpl(ISS& env,
                                                         const Set& op) {
   if (auto const prev = last_op(env, 1)) {
     if (prev->op == Op::CGetL2 &&
-        prev->CGetL2.loc1 == op.loc1 &&
+        prev->CGetL2.nloc1.id == op.loc1 &&
         last_op(env)->op == Op::Concat) {
       rewind(env, 2);
       reduce(env, bc::SetOpL { op.loc1, SetOpOp::ConcatEqual });
@@ -3619,18 +3635,18 @@ void in(ISS& env, const bc::SetOpS& op) {
 }
 
 void in(ISS& env, const bc::IncDecL& op) {
-  auto loc = locAsCell(env, op.loc1);
+  auto loc = locAsCell(env, op.nloc1.id);
   auto newT = typeIncDec(op.subop2, loc);
   auto const pre = isPre(op.subop2);
 
   // If it's a non-numeric string, this may cause it to exceed the max length.
-  if (!locCouldBeUninit(env, op.loc1) &&
+  if (!locCouldBeUninit(env, op.nloc1.id) &&
       !loc.couldBe(BStr)) {
     nothrow(env);
   }
 
   if (!pre) push(env, std::move(loc));
-  setLoc(env, op.loc1, newT);
+  setLoc(env, op.nloc1.id, newT);
   if (pre)  push(env, std::move(newT));
 }
 

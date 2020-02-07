@@ -477,6 +477,15 @@ bool FuncChecker::checkImmLA(PC& pc, PC const instr) {
   return ok;
 }
 
+bool FuncChecker::checkImmNLA(PC& pc, PC const instr) {
+  decode_iva(pc);
+  return checkImmLA(pc, instr);
+}
+
+bool FuncChecker::checkImmILA(PC& pc, PC const instr) {
+  return checkImmLA(pc, instr);
+}
+
 bool FuncChecker::checkImmIA(PC& pc, PC const instr) {
   auto const k = decode_iva(pc);
   if (!(0 <= k && k < numIters())) {
@@ -560,6 +569,7 @@ bool FuncChecker::checkImmKA(PC& pc, PC const /*instr*/) {
     case MW:
       break;
     case MEL: case MPL: {
+      decode_iva(pc);
       auto const loc = decode_iva(pc);
       ok &= checkLocal(pc, loc);
       break;
@@ -840,14 +850,15 @@ bool FuncChecker::checkMemberKey(State* cur, PC pc, Op op) {
       break;
     }
 
-    case MEC: case MEL: case MPC: case MPL: iva = decode_iva(pc); break;
+    case MEC: case MPC: iva = decode_iva(pc); break;
+    case MEL: case MPL: decode_iva(pc); decode_iva(pc); break;
     case MEI:                               decode_raw<int64_t>(pc); break;
     case MW:                                break;
   }
 
   if ((mcode == MemberCode::MEC || mcode == MemberCode::MPC) &&
       iva + 1 > cur->stklen) {
-    MemberKey key{mcode, iva};
+    MemberKey key{mcode, static_cast<int32_t>(iva)};
     error("Member Key %s in op %s has stack offset greater than stack"
           " depth %d\n", show(key).c_str(), opcodeToName(op), cur->stklen);
     return false;
@@ -983,6 +994,8 @@ std::set<int> localIds(Op op, PC pc) {
 #define FIVE(a, b, c, d, e) FOUR(a, b, c, d) e(4)
 #define SIX(a, b, c, d, e, f) FIVE(a, b, c, d, f) f(5)
 #define LA(n) result.insert(getImm(pc, n).u_LA);
+#define NLA(n) result.insert(getImm(pc, n).u_NLA.id);
+#define ILA(n) result.insert(getImm(pc, n).u_ILA);
 #define MA(n)
 #define BLA(n)
 #define SLA(n)
@@ -1015,6 +1028,8 @@ std::set<int> localIds(Op op, PC pc) {
 #undef FIVE
 #undef SIX
 #undef LA
+#undef NLA
+#undef ILA
 #undef MA
 #undef BLA
 #undef SLA
@@ -1422,6 +1437,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
     if (op == Op::BaseGC || op == Op::BaseGL || op == Op::BaseL)  {
       auto new_pc = pc;
       decode_op(new_pc);
+      if (op == Op::BaseL) decode_iva(new_pc);
       decode_iva(new_pc);
       cur->mbr_mode = decode_oa<MOpMode>(new_pc);
     }

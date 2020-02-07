@@ -120,15 +120,15 @@ void emitClassGetTS(IRGS& env) {
   push(env, cns(env, TInitNull));
 }
 
-void emitCGetL(IRGS& env, int32_t id) {
+void emitCGetL(IRGS& env, NamedLocal loc) {
   auto const ldPMExit = makePseudoMainExit(env);
-  auto const loc = ldLocWarn(
+  auto const value = ldLocWarn(
     env,
-    id,
+    loc,
     ldPMExit,
     DataTypeCountnessInit
   );
-  pushIncRef(env, loc);
+  pushIncRef(env, value);
 }
 
 void emitCGetQuietL(IRGS& env, int32_t id) {
@@ -154,7 +154,7 @@ void emitCGetQuietL(IRGS& env, int32_t id) {
             gen(env, CheckInit, taken, loc);
           },
           [&] { // Next: local is InitCell.
-            return loc;
+            return gen(env, AssertType, TInitCell, loc);
           },
           [&] { // Taken: local is Uninit
             return cns(env, TInitNull);
@@ -179,12 +179,12 @@ void emitPushL(IRGS& env, int32_t id) {
   stLocRaw(env, id, fp(env), cns(env, TUninit));
 }
 
-void emitCGetL2(IRGS& env, int32_t id) {
+void emitCGetL2(IRGS& env, NamedLocal loc) {
   auto const ldPMExit = makePseudoMainExit(env);
   auto const oldTop = pop(env, DataTypeGeneric);
   auto const val = ldLocWarn(
     env,
-    id,
+    loc,
     ldPMExit,
     DataTypeCountnessInit
   );

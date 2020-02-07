@@ -741,7 +741,7 @@ folly::Optional<Type> key_type_or_fixup(ISS& env, Op op) {
     case MEC: case MPC:
       return fixup(topC(env, op.mkey.idx), op.mkey.mcode == MPC);
     case MEL: case MPL:
-      return fixup(locAsCell(env, op.mkey.local), op.mkey.mcode == MPL);
+      return fixup(locAsCell(env, op.mkey.local.id), op.mkey.mcode == MPL);
     case MW:
       return TBottom;
     case MEI:
@@ -758,7 +758,7 @@ LocalId key_local(ISS& env, Op op) {
     case MEC: case MPC:
       return topStkLocal(env, op.mkey.idx);
     case MEL: case MPL:
-      return op.mkey.local;
+      return op.mkey.local.id;
     case MW:
     case MEI:
     case MET: case MPT: case MQT:
@@ -770,22 +770,23 @@ LocalId key_local(ISS& env, Op op) {
 //////////////////////////////////////////////////////////////////////
 // base ops
 
-Base miBaseLocal(ISS& env, LocalId locBase, MOpMode mode) {
-  auto const locName = env.ctx.func->locals[locBase].name;
+Base miBaseLocal(ISS& env, NamedLocal locBase, MOpMode mode) {
+  auto const locName = env.ctx.func->locals[locBase.name].name;
   auto const isDefine = mode == MOpMode::Define;
   if (mode == MOpMode::None ||
-      (mode == MOpMode::Warn && !locCouldBeUninit(env, locBase))) {
+      (mode == MOpMode::Warn && !locCouldBeUninit(env, locBase.id))) {
     nothrow(env);
   }
   // If we're changing the local to define it, we don't need to do an miThrow
   // yet---the promotions (to array or stdClass) on previously uninitialized
   // locals happen before raising warnings that could throw, so we can wait
   // until the first moveBase.
-  return Base { isDefine ? locAsCell(env, locBase) : derefLoc(env, locBase),
+  return Base { isDefine ? locAsCell(env, locBase.id)
+                         : derefLoc(env, locBase.id),
                 BaseLoc::Local,
                 TBottom,
                 locName,
-                locBase };
+                locBase.id };
 }
 
 Base miBaseSProp(ISS& env, Type cls, const Type& tprop) {
@@ -1406,7 +1407,7 @@ void in(ISS& env, const bc::BaseSC& op) {
 }
 
 void in(ISS& env, const bc::BaseL& op) {
-  auto newBase = miBaseLocal(env, op.loc1, op.subop2);
+  auto newBase = miBaseLocal(env, op.nloc1, op.subop2);
   if (newBase.type.subtypeOf(BBottom)) return unreachable(env);
   startBase(env, std::move(newBase));
 }

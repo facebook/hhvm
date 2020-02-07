@@ -49,13 +49,41 @@ struct Bytecode;
 
 //////////////////////////////////////////////////////////////////////
 
+struct NamedLocal {
+  NamedLocal()
+    : name(kInvalidLocalName)
+    , id(NoLocalId)
+  {}
+  NamedLocal(LocalName name, LocalId id)
+    : name(name)
+    , id(id)
+  {}
+  /* implicit */ NamedLocal(const ::HPHP::NamedLocal& nl)
+    : name(nl.name)
+    , id(nl.id)
+  {}
+  /* implicit */ operator auto(){
+    return ::HPHP::NamedLocal{name, static_cast<int32_t>(id)};
+  }
+  LocalName name;
+  LocalId id;
+};
+
+inline bool operator==(NamedLocal a, NamedLocal b) {
+  return a.name == b.name && a.id == b.id;
+}
+
+inline bool operator!=(NamedLocal a, NamedLocal b) {
+  return !(a == b);
+}
+
 struct MKey {
   MKey()
     : mcode{MW}
     , int64{0}
   {}
 
-  MKey(MemberCode mcode, LocalId local)
+  MKey(MemberCode mcode, NamedLocal local)
     : mcode{mcode}
     , local{local}
   {}
@@ -80,7 +108,7 @@ struct MKey {
     SString litstr;
     int64_t int64;
     int64_t idx;
-    LocalId local;
+    NamedLocal local;
   };
 };
 
@@ -621,6 +649,10 @@ struct hasher_impl {
     return HPHP::hash_int64_pair(kv.first->hash(), kv.second);
   }
 
+  static size_t hash(NamedLocal loc) {
+    return HPHP::hash_int64((((uint64_t)loc.name) << 32) | loc.id);
+  }
+
   static size_t hash(LocalRange range) {
     return HPHP::hash_int64_pair(range.first, range.count);
   }
@@ -763,6 +795,8 @@ namespace imm {
 #define IMM_ID_IVA      IVA
 #define IMM_ID_I64A     I64A
 #define IMM_ID_LA       LA
+#define IMM_ID_NLA      NLA
+#define IMM_ID_ILA      ILA
 #define IMM_ID_IA       IA
 #define IMM_ID_DA       DA
 #define IMM_ID_SA       SA
@@ -781,6 +815,8 @@ namespace imm {
 #define IMM_TY_IVA      uint32_t
 #define IMM_TY_I64A     int64_t
 #define IMM_TY_LA       LocalId
+#define IMM_TY_NLA      NamedLocal
+#define IMM_TY_ILA      LocalId
 #define IMM_TY_IA       IterId
 #define IMM_TY_DA       double
 #define IMM_TY_SA       LSString
@@ -799,6 +835,8 @@ namespace imm {
 #define IMM_NAME_IVA(n)     arg##n
 #define IMM_NAME_I64A(n)    arg##n
 #define IMM_NAME_LA(n)      loc##n
+#define IMM_NAME_NLA(n)     nloc##n
+#define IMM_NAME_ILA(n)     loc##n
 #define IMM_NAME_IA(n)      iter##n
 #define IMM_NAME_DA(n)      dbl##n
 #define IMM_NAME_SA(n)      str##n
@@ -818,6 +856,8 @@ namespace imm {
 #define IMM_TARGETS_IVA(n)
 #define IMM_TARGETS_I64A(n)
 #define IMM_TARGETS_LA(n)
+#define IMM_TARGETS_NLA(n)
+#define IMM_TARGETS_ILA(n)
 #define IMM_TARGETS_IA(n)
 #define IMM_TARGETS_DA(n)
 #define IMM_TARGETS_SA(n)
@@ -839,6 +879,8 @@ namespace imm {
 #define IMM_EXTRA_IVA
 #define IMM_EXTRA_I64A
 #define IMM_EXTRA_LA
+#define IMM_EXTRA_NLA
+#define IMM_EXTRA_ILA
 #define IMM_EXTRA_IA
 #define IMM_EXTRA_DA
 #define IMM_EXTRA_SA
@@ -1146,6 +1188,8 @@ OPCODES
 #undef IMM_TY_IVA
 #undef IMM_TY_I64A
 #undef IMM_TY_LA
+#undef IMM_TY_NLA
+#undef IMM_TY_ILA
 #undef IMM_TY_IA
 #undef IMM_TY_DA
 #undef IMM_TY_SA
@@ -1166,6 +1210,8 @@ OPCODES
 // #undef IMM_NAME_IVA
 // #undef IMM_NAME_I64A
 // #undef IMM_NAME_LA
+// #undef IMM_NAME_NLA
+// #undef IMM_NAME_ILA
 // #undef IMM_NAME_IA
 // #undef IMM_NAME_DA
 // #undef IMM_NAME_SA
@@ -1182,6 +1228,8 @@ OPCODES
 #undef IMM_TARGETS_IVA
 #undef IMM_TARGETS_I64A
 #undef IMM_TARGETS_LA
+#undef IMM_TARGETS_NLA
+#undef IMM_TARGETS_ILA
 #undef IMM_TARGETS_IA
 #undef IMM_TARGETS_DA
 #undef IMM_TARGETS_SA
@@ -1207,6 +1255,8 @@ OPCODES
 #undef IMM_EXTRA_IVA
 #undef IMM_EXTRA_I64A
 #undef IMM_EXTRA_LA
+#undef IMM_EXTRA_NLA
+#undef IMM_EXTRA_ILA
 #undef IMM_EXTRA_IA
 #undef IMM_EXTRA_DA
 #undef IMM_EXTRA_SA

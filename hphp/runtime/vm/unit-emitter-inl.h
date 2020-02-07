@@ -141,6 +141,11 @@ void UnitEmitter::emitIVA(T n) {
   }
 }
 
+inline void UnitEmitter::emitNamedLocal(NamedLocal loc) {
+  emitIVA(loc.name + 1);
+  emitIVA(loc.id);
+}
+
 template<class T>
 void UnitEmitter::emitImpl(T n, int64_t pos) {
   auto c = (unsigned char*)&n;

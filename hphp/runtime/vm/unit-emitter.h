@@ -384,6 +384,8 @@ struct UnitEmitter {
   void emitIVA(bool) = delete;
   template<typename T> void emitIVA(T n);
 
+  void emitNamedLocal(NamedLocal loc);
+
 
   /////////////////////////////////////////////////////////////////////////////
   // Other methods.

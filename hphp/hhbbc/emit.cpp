@@ -389,11 +389,15 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
   auto make_member_key = [&] (MKey mkey) {
     switch (mkey.mcode) {
       case MEC: case MPC:
-        return MemberKey{mkey.mcode, mkey.idx};
-      case MEL: case MPL:
-        return MemberKey{
-          mkey.mcode, static_cast<int32_t>(map_local(mkey.local))
-        };
+        return MemberKey{mkey.mcode, static_cast<int32_t>(mkey.idx)};
+      case MEL: case MPL: {
+        auto loc = mkey.local;
+        if (loc.name != kInvalidLocalName) {
+          loc.name = static_cast<int32_t>(map_local(mkey.local.name));
+        }
+        loc.id = static_cast<int32_t>(map_local(mkey.local.id));
+        return MemberKey{mkey.mcode, loc};
+      }
       case MET: case MPT: case MQT:
         return MemberKey{mkey.mcode, mkey.litstr};
       case MEI:
@@ -494,6 +498,14 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       data.arg1 = euState.typeAliasInfo.size() - 1;
     };
 
+    auto emit_named_local = [&](NamedLocal loc) {
+      if (loc.name != kInvalidLocalName) {
+        loc.name = map_local(loc.name);
+      }
+      loc.id = map_local(loc.id);
+      ue.emitNamedLocal(loc);
+    };
+
     auto emit_lar  = [&](const LocalRange& range) {
       always_assert(range.first + range.count <= func.locals.size());
       auto const first = (range.count > 0) ? map_local(range.first) : 0;
@@ -511,6 +523,8 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define IMM_IVA(n)     ue.emitIVA(data.arg##n);
 #define IMM_I64A(n)    ue.emitInt64(data.arg##n);
 #define IMM_LA(n)      ue.emitIVA(map_local(data.loc##n));
+#define IMM_NLA(n)     emit_named_local(data.nloc##n);
+#define IMM_ILA(n)     ue.emitIVA(map_local(data.loc##n));
 #define IMM_IA(n)      ue.emitIVA(data.iter##n);
 #define IMM_DA(n)      ue.emitDouble(data.dbl##n);
 #define IMM_SA(n)      ue.emitInt32(ue.mergeLitstr(data.str##n));
@@ -629,6 +643,8 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #undef IMM_IVA
 #undef IMM_I64A
 #undef IMM_LA
+#undef IMM_NLA
+#undef IMM_ILA
 #undef IMM_IA
 #undef IMM_DA
 #undef IMM_SA

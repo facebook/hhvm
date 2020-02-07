@@ -1722,9 +1722,9 @@ void emitIsTypeC(IRGS& env, IsTypeOp subop) {
   decRef(env, val);
 }
 
-void emitIsTypeL(IRGS& env, int32_t id, IsTypeOp subop) {
+void emitIsTypeL(IRGS& env, NamedLocal loc, IsTypeOp subop) {
   auto const ldPMExit = makePseudoMainExit(env);
-  auto const val = ldLocWarn(env, id, ldPMExit, DataTypeSpecific);
+  auto const val = ldLocWarn(env, loc, ldPMExit, DataTypeSpecific);
   push(env, isTypeHelper(env, subop, val));
 }
 

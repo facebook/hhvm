@@ -1622,11 +1622,11 @@ void emitSetOpL(IRGS& env, int32_t id, SetOpOp subop) {
   pushStLoc(env, id, ldPMExit, result);
 }
 
-void emitIncDecL(IRGS& env, int32_t id, IncDecOp subop) {
+void emitIncDecL(IRGS& env, NamedLocal loc, IncDecOp subop) {
   auto const ldPMExit = makePseudoMainExit(env);
   auto const src = ldLocWarn(
     env,
-    id,
+    loc,
     ldPMExit,
     DataTypeSpecific
   );
@@ -1635,7 +1635,7 @@ void emitIncDecL(IRGS& env, int32_t id, IncDecOp subop) {
     pushIncRef(env, isPre(subop) ? result : src);
     // Update marker to ensure newly-pushed value isn't clobbered by DecRef.
     updateMarker(env);
-    stLoc(env, id, ldPMExit, result);
+    stLoc(env, loc.id, ldPMExit, result);
     return;
   }
 

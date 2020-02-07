@@ -212,21 +212,24 @@ template<class T> T decode(PC& pc) {
   return v;
 }
 
-inline const StringData* decode_litstr(PC& pc) {
-  auto id = decode<Id>(pc);
-  return liveUnit()->lookupLitstrId(id);
-}
-
 inline const ArrayData* decode_litarr(PC& pc) {
   return liveUnit()->lookupArrayId(decode<Id>(pc));
 }
 
 namespace {
 
-// wrapper for local variable LA operand
+// wrapper for local variable ILA operand
 struct local_var {
   TypedValue* ptr;
   int32_t index;
+  TypedValue* operator->() const { return ptr; }
+  TypedValue& operator*() const { return *ptr; }
+};
+
+// wrapper for named local variable NLA operand
+struct named_local_var {
+  LocalName name;
+  TypedValue* ptr;
   TypedValue* operator->() const { return ptr; }
   TypedValue& operator*() const { return *ptr; }
 };
@@ -250,10 +253,25 @@ template<class T> struct imm_array {
 
 }
 
-ALWAYS_INLINE local_var decode_local(PC& pc) {
+ALWAYS_INLINE TypedValue* decode_local(PC& pc) {
+  auto la = decode_iva(pc);
+  assertx(la < vmfp()->m_func->numLocals());
+  return frame_local(vmfp(), la);
+}
+
+ALWAYS_INLINE local_var decode_indexed_local(PC& pc) {
   auto la = decode_iva(pc);
   assertx(la < vmfp()->m_func->numLocals());
   return local_var{frame_local(vmfp(), la), safe_cast<int32_t>(la)};
+}
+
+ALWAYS_INLINE named_local_var decode_named_local_var(PC& pc) {
+  auto loc = decode_named_local(pc);
+  assertx(0 <= loc.id);
+  assertx(loc.id < vmfp()->m_func->numLocals());
+  assertx(kInvalidLocalName <= loc.name);
+  assertx(loc.name < vmfp()->m_func->numLocals());
+  return named_local_var{loc.name, frame_local(vmfp(), loc.id)};
 }
 
 ALWAYS_INLINE Iter* decode_iter(PC& pc) {
@@ -1475,8 +1493,7 @@ OPTBLD_INLINE void iopPopFrame(uint32_t nout) {
   vmStack().ndiscard(3);
 }
 
-OPTBLD_INLINE void iopPopL(local_var to) {
-  assertx(to.index < vmfp()->m_func->numLocals());
+OPTBLD_INLINE void iopPopL(TypedValue* to) {
   TypedValue* fr = vmStack().topC();
   tvMove(*fr, *to);
   vmStack().discard();
@@ -1595,7 +1612,7 @@ OPTBLD_INLINE void iopNewDictArray(uint32_t capacity) {
 }
 
 OPTBLD_INLINE
-void iopNewLikeArrayL(local_var fr, uint32_t capacity) {
+void iopNewLikeArrayL(TypedValue* fr, uint32_t capacity) {
   ArrayData* arr;
   if (LIKELY(isArrayType(fr->m_type))) {
     arr = MixedArray::MakeReserveLike(fr->m_data.parr, capacity);
@@ -2856,8 +2873,17 @@ OPTBLD_INLINE void iopClassGetTS() {
   }
 }
 
-static void raise_undefined_local(ActRec* fp, Id pind) {
+static void raise_undefined_local(ActRec* fp, LocalName pind) {
   assertx(pind < fp->m_func->numNamedLocals());
+  if (debug) {
+    auto vm = &*g_context;
+    always_assert_flog(
+      pind != kInvalidLocalName,
+      "HHBBC incorrectly removed name info for a local in {}:{}",
+      vm->getContainingFileName()->data(),
+      vm->getLine()
+    );
+  }
   raise_notice(Strings::UNDEFINED_VARIABLE,
                fp->m_func->localVarName(pind)->data());
 }
@@ -2870,42 +2896,42 @@ static inline void cgetl_inner_body(TypedValue* fr, TypedValue* to) {
 OPTBLD_INLINE void cgetl_body(ActRec* fp,
                               TypedValue* fr,
                               TypedValue* to,
-                              Id pind,
+                              LocalName lname,
                               bool warn) {
   if (fr->m_type == KindOfUninit) {
     // `to' is uninitialized here, so we need to tvWriteNull before
     // possibly causing stack unwinding.
     tvWriteNull(*to);
-    if (warn) raise_undefined_local(fp, pind);
+    if (warn) raise_undefined_local(fp, lname);
   } else {
     cgetl_inner_body(fr, to);
   }
 }
 
-OPTBLD_INLINE void iopCGetL(local_var fr) {
+OPTBLD_INLINE void iopCGetL(named_local_var fr) {
   TypedValue* to = vmStack().allocC();
-  cgetl_body(vmfp(), fr.ptr, to, fr.index, true);
+  cgetl_body(vmfp(), fr.ptr, to, fr.name, true);
 }
 
-OPTBLD_INLINE void iopCGetQuietL(local_var fr) {
+OPTBLD_INLINE void iopCGetQuietL(TypedValue* fr) {
   TypedValue* to = vmStack().allocC();
-  cgetl_body(vmfp(), fr.ptr, to, fr.index, false);
+  cgetl_body(vmfp(), fr, to, kInvalidLocalName, false);
 }
 
-OPTBLD_INLINE void iopCUGetL(local_var fr) {
+OPTBLD_INLINE void iopCUGetL(TypedValue* fr) {
   auto to = vmStack().allocTV();
-  tvDup(*fr.ptr, *to);
+  tvDup(*fr, *to);
 }
 
-OPTBLD_INLINE void iopCGetL2(local_var fr) {
+OPTBLD_INLINE void iopCGetL2(named_local_var fr) {
   TypedValue* oldTop = vmStack().topTV();
   TypedValue* newTop = vmStack().allocTV();
   memcpy(newTop, oldTop, sizeof *newTop);
   TypedValue* to = oldTop;
-  cgetl_body(vmfp(), fr.ptr, to, fr.index, true);
+  cgetl_body(vmfp(), fr.ptr, to, fr.name, true);
 }
 
-OPTBLD_INLINE void iopPushL(local_var locVal) {
+OPTBLD_INLINE void iopPushL(TypedValue* locVal) {
   assertx(locVal->m_type != KindOfUninit);
   TypedValue* dest = vmStack().allocTV();
   *dest = *locVal;
@@ -3001,8 +3027,8 @@ OPTBLD_INLINE void iopBaseGC(uint32_t idx, MOpMode mode) {
   baseGImpl(vmStack().indTV(idx), mode);
 }
 
-OPTBLD_INLINE void iopBaseGL(local_var loc, MOpMode mode) {
-  baseGImpl(loc.ptr, mode);
+OPTBLD_INLINE void iopBaseGL(TypedValue* loc, MOpMode mode) {
+  baseGImpl(loc, mode);
 }
 
 OPTBLD_INLINE void iopBaseSC(uint32_t keyIdx, uint32_t clsIdx, MOpMode mode) {
@@ -3038,17 +3064,16 @@ OPTBLD_INLINE void iopBaseSC(uint32_t keyIdx, uint32_t clsIdx, MOpMode mode) {
   mstate.base = tv_lval(lookup.val);
 }
 
-OPTBLD_INLINE void baseLImpl(local_var loc, MOpMode mode) {
+OPTBLD_INLINE void baseLImpl(named_local_var loc, MOpMode mode) {
   auto& mstate = initMState();
   auto local = loc.ptr;
   if (mode == MOpMode::Warn && local->m_type == KindOfUninit) {
-    raise_notice(Strings::UNDEFINED_VARIABLE,
-                 vmfp()->m_func->localVarName(loc.index)->data());
+    raise_undefined_local(vmfp(), loc.name);
   }
   mstate.base = local;
 }
 
-OPTBLD_INLINE void iopBaseL(local_var loc, MOpMode mode) {
+OPTBLD_INLINE void iopBaseL(named_local_var loc, MOpMode mode) {
   baseLImpl(loc, mode);
 }
 
@@ -3140,9 +3165,9 @@ static inline TypedValue key_tv(MemberKey key) {
     case MW:
       return TypedValue{};
     case MEL: case MPL: {
-      auto local = frame_local(vmfp(), key.iva);
+      auto local = frame_local(vmfp(), key.local.id);
       if (local->m_type == KindOfUninit) {
-        raise_undefined_local(vmfp(), key.iva);
+        raise_undefined_local(vmfp(), key.local.name);
         return make_tv<KindOfNull>();
       }
       return *local;
@@ -3613,8 +3638,8 @@ OPTBLD_INLINE void iopIssetS() {
   ss.output->m_type = KindOfBoolean;
 }
 
-OPTBLD_INLINE void iopIssetL(local_var tv) {
-  bool ret = !is_null(tv.ptr);
+OPTBLD_INLINE void iopIssetL(TypedValue* tv) {
+  bool ret = !is_null(tv);
   TypedValue* topTv = vmStack().allocTV();
   topTv->m_data.num = ret;
   topTv->m_type = KindOfBoolean;
@@ -3654,9 +3679,9 @@ OPTBLD_INLINE static bool isTypeHelper(TypedValue* val, IsTypeOp op) {
   not_reached();
 }
 
-OPTBLD_INLINE void iopIsTypeL(local_var loc, IsTypeOp op) {
+OPTBLD_INLINE void iopIsTypeL(named_local_var loc, IsTypeOp op) {
   if (loc.ptr->m_type == KindOfUninit) {
-    raise_undefined_local(vmfp(), loc.index);
+    raise_undefined_local(vmfp(), loc.name);
   }
   vmStack().pushBool(isTypeHelper(loc.ptr, op));
 }
@@ -3673,10 +3698,11 @@ OPTBLD_INLINE void iopAssertRATL(local_var loc, RepoAuthType rat) {
     auto vm = &*g_context;
     always_assert_flog(
       tvMatchesRepoAuthType(tv, rat),
-      "failed assert RATL on local {}: ${} in {}:{}, expected {}, got {}",
+      "failed assert RATL on local slot {}: maybe ${} in {}:{}, expected {},"
+      " got {}",
       loc.index,
       loc.index < func->numNamedLocals() ?
-        func->localNames()[loc.index]->data() : "<unnamed>",
+        func->localNames()[loc.index]->data() : "<unnamed/unknown>",
       vm->getContainingFileName()->data(),
       vm->getLine(),
       show(rat),
@@ -3712,7 +3738,7 @@ OPTBLD_INLINE void iopAKExists() {
   vmStack().replaceTV<KindOfBoolean>(result);
 }
 
-OPTBLD_INLINE void iopGetMemoKeyL(local_var loc) {
+OPTBLD_INLINE void iopGetMemoKeyL(named_local_var loc) {
   DEBUG_ONLY auto const func = vmfp()->m_func;
   assertx(func->isMemoizeWrapper());
 
@@ -3720,7 +3746,7 @@ OPTBLD_INLINE void iopGetMemoKeyL(local_var loc) {
 
   if (UNLIKELY(loc.ptr->m_type == KindOfUninit)) {
     tvWriteNull(*loc.ptr);
-    raise_undefined_local(vmfp(), loc.index);
+    raise_undefined_local(vmfp(), loc.name);
   }
   auto const cell = loc.ptr;
 
@@ -3800,8 +3826,7 @@ OPTBLD_INLINE void iopArrayIdx() {
   *arr = result;
 }
 
-OPTBLD_INLINE void iopSetL(local_var to) {
-  assertx(to.index < vmfp()->m_func->numLocals());
+OPTBLD_INLINE void iopSetL(TypedValue* to) {
   TypedValue* fr = vmStack().topC();
   tvSet(*fr, *to);
 }
@@ -3856,9 +3881,8 @@ OPTBLD_INLINE void iopSetS() {
   vmStack().ndiscard(2);
 }
 
-OPTBLD_INLINE void iopSetOpL(local_var loc, SetOpOp op) {
+OPTBLD_INLINE void iopSetOpL(TypedValue* to, SetOpOp op) {
   TypedValue* fr = vmStack().topC();
-  TypedValue* to = loc.ptr;
   setopBody(to, op, fr);
   tvDecRefGen(fr);
   tvDup(*to, *fr);
@@ -3926,11 +3950,11 @@ OPTBLD_INLINE void iopSetOpS(SetOpOp op) {
   vmStack().ndiscard(2);
 }
 
-OPTBLD_INLINE void iopIncDecL(local_var fr, IncDecOp op) {
+OPTBLD_INLINE void iopIncDecL(named_local_var fr, IncDecOp op) {
   TypedValue* to = vmStack().allocTV();
   tvWriteUninit(*to);
   if (UNLIKELY(fr.ptr->m_type == KindOfUninit)) {
-    raise_undefined_local(vmfp(), fr.index);
+    raise_undefined_local(vmfp(), fr.name);
     tvWriteNull(*fr.ptr);
   }
   tvCopy(IncDecBody(op, fr.ptr), *to);
@@ -3987,8 +4011,8 @@ OPTBLD_INLINE void iopIncDecS(IncDecOp op) {
   }
 }
 
-OPTBLD_INLINE void iopUnsetL(local_var loc) {
-  tvUnset(*loc.ptr);
+OPTBLD_INLINE void iopUnsetL(TypedValue* loc) {
+  tvUnset(*loc);
 }
 
 OPTBLD_INLINE void iopUnsetG() {
@@ -4867,11 +4891,11 @@ OPTBLD_INLINE void iopIterInit(PC& pc, const IterArgs& ita, PC targetpc) {
 }
 
 OPTBLD_INLINE void iopLIterInit(PC& pc, const IterArgs& ita,
-                                local_var base, PC targetpc) {
+                                TypedValue* base, PC targetpc) {
   auto const op = ita.flags & IterArgs::Flags::BaseConst
     ? IterTypeOp::LocalBaseConst
     : IterTypeOp::LocalBaseMutable;
-  implIterInit(pc, ita, base.ptr, targetpc, op);
+  implIterInit(pc, ita, base, targetpc, op);
 }
 
 OPTBLD_INLINE void iopIterNext(PC& pc, const IterArgs& ita, PC targetpc) {
@@ -4879,15 +4903,15 @@ OPTBLD_INLINE void iopIterNext(PC& pc, const IterArgs& ita, PC targetpc) {
 }
 
 OPTBLD_INLINE void iopLIterNext(PC& pc, const IterArgs& ita,
-                                local_var base, PC targetpc) {
-  implIterNext(pc, ita, base.ptr, targetpc);
+                                TypedValue* base, PC targetpc) {
+  implIterNext(pc, ita, base, targetpc);
 }
 
 OPTBLD_INLINE void iopIterFree(Iter* it) {
   it->free();
 }
 
-OPTBLD_INLINE void iopLIterFree(Iter* it, local_var) {
+OPTBLD_INLINE void iopLIterFree(Iter* it, TypedValue*) {
   it->free();
 }
 
@@ -5064,14 +5088,14 @@ OPTBLD_INLINE void iopCheckThis() {
   checkThis(vmfp());
 }
 
-OPTBLD_INLINE void iopInitThisLoc(local_var thisLoc) {
-  tvDecRefGen(thisLoc.ptr);
+OPTBLD_INLINE void iopInitThisLoc(TypedValue* thisLoc) {
+  tvDecRefGen(thisLoc);
   if (vmfp()->func()->cls() && vmfp()->hasThis()) {
     thisLoc->m_data.pobj = vmfp()->getThis();
     thisLoc->m_type = KindOfObject;
-    tvIncRefCountable(*thisLoc.ptr);
+    tvIncRefCountable(*thisLoc);
   } else {
-    tvWriteUninit(*thisLoc.ptr);
+    tvWriteUninit(*thisLoc);
   }
 }
 
@@ -5896,15 +5920,15 @@ OPTBLD_INLINE void iopOODeclExists(OODeclExistsOp subop) {
   tvAsVariant(name) = Unit::classExists(name->m_data.pstr, autoload, kind);
 }
 
-OPTBLD_INLINE void iopSilence(local_var loc, SilenceOp subop) {
+OPTBLD_INLINE void iopSilence(TypedValue* loc, SilenceOp subop) {
   switch (subop) {
     case SilenceOp::Start:
-      loc.ptr->m_type = KindOfInt64;
-      loc.ptr->m_data.num = zero_error_level();
+      loc->m_type = KindOfInt64;
+      loc->m_data.num = zero_error_level();
       break;
     case SilenceOp::End:
-      assertx(loc.ptr->m_type == KindOfInt64);
-      restore_error_level(loc.ptr->m_data.num);
+      assertx(loc->m_type == KindOfInt64);
+      restore_error_level(loc->m_data.num);
       break;
   }
 }
@@ -6068,6 +6092,8 @@ struct litstr_id {
 #define DECODE_IVA decode_iva(pc)
 #define DECODE_I64A decode<int64_t>(pc)
 #define DECODE_LA decode_local(pc)
+#define DECODE_NLA decode_named_local_var(pc)
+#define DECODE_ILA decode_indexed_local(pc)
 #define DECODE_IA decode_iter(pc)
 #define DECODE_DA decode<double>(pc)
 #define DECODE_SA decode<litstr_id>(pc)
@@ -6119,6 +6145,8 @@ OPCODES
 #undef DECODE_IVA
 #undef DECODE_I64A
 #undef DECODE_LA
+#undef DECODE_NLA
+#undef DECODE_ILA
 #undef DECODE_IA
 #undef DECODE_DA
 #undef DECODE_SA

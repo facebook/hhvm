@@ -116,16 +116,31 @@ bool argTypeIsVector(ArgType type) {
 int immSize(Op op, ArgType type, PC immPC) {
   auto pc = immPC;
 
-  if (type == IVA || type == LA || type == IA) {
+  if (type == IVA || type == LA || type == ILA || type == IA) {
     return encoded_iva_size(decode_raw<uint8_t>(pc));
+  }
+
+  if (type == NLA) {
+    auto nextPC = pc;
+    auto const nameSize = encoded_iva_size(decode_raw<uint8_t>(pc));
+    nextPC += nameSize;
+    auto const locSize = encoded_iva_size(decode_raw<uint8_t>(nextPC));
+    return nameSize + locSize;
   }
 
   if (type == KA) {
     switch (decode_raw<MemberCode>(pc)) {
       case MW:
         return 1;
-      case MEL: case MPL: case MEC: case MPC:
+      case MEC: case MPC:
         return 1 + encoded_iva_size(decode_raw<uint8_t>(pc));
+      case MEL: case MPL: {
+        auto nextPC = pc;
+        auto const nameSize = encoded_iva_size(decode_raw<uint8_t>(pc));
+        nextPC += nameSize;
+        auto const locSize = encoded_iva_size(decode_raw<uint8_t>(nextPC));
+        return 1 + nameSize + locSize;
+      }
       case MEI:
         return 1 + sizeof(int64_t);
       case MET: case MPT: case MQT:
@@ -193,8 +208,10 @@ ArgUnion getImm(const PC origPC, int idx, const Unit* unit) {
   }
   always_assert(cursor == idx);
   auto const type = immType(op, idx);
-  if (type == IVA || type == LA || type == IA) {
+  if (type == IVA || type == LA || type == ILA || type == IA) {
     retval.u_IVA = decode_iva(pc);
+  } else if (type == NLA) {
+    retval.u_NLA = decode_named_local(pc);
   } else if (type == KA) {
     assertx(unit != nullptr);
     retval.u_KA = decode_member_key(pc, unit);
@@ -219,6 +236,8 @@ ArgUnion* getImmPtr(const PC origPC, int idx) {
   auto const op = decode_op(pc);
   assertx(immType(op, idx) != IVA);
   assertx(immType(op, idx) != LA);
+  assertx(immType(op, idx) != NLA);
+  assertx(immType(op, idx) != ILA);
   assertx(immType(op, idx) != IA);
   assertx(immType(op, idx) != RATA);
   for (int i = 0; i < idx; i++) {
@@ -257,6 +276,8 @@ OffsetList instrJumpOffsets(const PC origPC) {
 #define IMM_BLA 2
 #define IMM_SLA 3
 #define IMM_LA 0
+#define IMM_NLA 0
+#define IMM_ILA 0
 #define IMM_IA 0
 #define IMM_OA(x) 0
 #define IMM_VSA 0
@@ -282,6 +303,8 @@ OffsetList instrJumpOffsets(const PC origPC) {
 #undef IMM_AA
 #undef IMM_RATA
 #undef IMM_LA
+#undef IMM_NLA
+#undef IMM_ILA
 #undef IMM_IA
 #undef IMM_BA
 #undef IMM_BLA
@@ -780,6 +803,11 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
 #define H_IVA READIVA()
 #define H_I64A READ(int64_t)
 #define H_LA READLA()
+#define H_NLA do {    \
+  auto loc = decode_named_local(it);                 \
+  folly::format(&out, " L:{}:{}", loc.name, loc.id); \
+} while (false)
+#define H_ILA READLA()
 #define H_IA READV()
 #define H_DA READ(double)
 #define H_BA (out += ' ', out += showOffset(decode_ba(it)))
@@ -835,6 +863,8 @@ OPCODES
 #undef H_IVA
 #undef H_I64A
 #undef H_LA
+#undef H_NLA
+#undef H_ILA
 #undef H_IA
 #undef H_DA
 #undef H_BA

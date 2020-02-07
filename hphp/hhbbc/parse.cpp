@@ -256,7 +256,7 @@ template<class T> void decode(PC& pc, T& val) {
 MKey make_mkey(const php::Func& /*func*/, MemberKey mk) {
   switch (mk.mcode) {
     case MEL: case MPL:
-      return MKey{mk.mcode, static_cast<LocalId>(mk.iva)};
+      return MKey{mk.mcode, mk.local};
     case MEC: case MPC:
       return MKey{mk.mcode, mk.iva};
     case MET: case MPT: case MQT:
@@ -336,6 +336,16 @@ void populate_block(ParseUnitState& puState,
 #define IMM_IVA(n)     auto arg##n = decode_iva(pc);
 #define IMM_I64A(n)    auto arg##n = decode<int64_t>(pc);
 #define IMM_LA(n)      auto loc##n = [&] {                       \
+                         LocalId id = decode_iva(pc);            \
+                         always_assert(id < func.locals.size()); \
+                         return id;                              \
+                       }();
+#define IMM_NLA(n)     auto nloc##n = [&] {                         \
+                         NamedLocal loc = decode_named_local(pc);   \
+                         always_assert(loc.id < func.locals.size());\
+                         return loc;                                \
+                       }();
+#define IMM_ILA(n)     auto loc##n = [&] {                       \
                          LocalId id = decode_iva(pc);            \
                          always_assert(id < func.locals.size()); \
                          return id;                              \
@@ -507,6 +517,8 @@ void populate_block(ParseUnitState& puState,
 #undef IMM_IVA
 #undef IMM_I64A
 #undef IMM_LA
+#undef IMM_NLA
+#undef IMM_ILA
 #undef IMM_IA
 #undef IMM_DA
 #undef IMM_SA

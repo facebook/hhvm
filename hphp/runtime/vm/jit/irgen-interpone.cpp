@@ -86,7 +86,18 @@ Type setOpResult(Type locType, Type valType, SetOpOp op) {
 }
 
 uint32_t localInputId(SrcKey sk) {
-  return getImm(sk.pc(), localImmIdx(sk.op())).u_LA;
+  auto const idx = localImmIdx(sk.op());
+  auto const argu = getImm(sk.pc(), idx);
+  switch (immType(sk.op(), idx)) {
+    case ArgType::LA:
+      return argu.u_LA;
+    case ArgType::NLA:
+      return argu.u_NLA.id;
+    case ArgType::ILA:
+      return argu.u_ILA;
+    default:
+      always_assert(false);
+  }
 }
 
 folly::Optional<Type> interpOutputType(IRGS& env,
@@ -195,7 +206,8 @@ interpOutputLocals(IRGS& env,
   };
   auto setImmLocType = [&](uint32_t id, Type t) {
     assertx(id < kMaxHhbcImms);
-    setLocType(getImm(sk.pc(), id).u_LA, t);
+    assertx(id == localImmIdx(sk.op()));
+    setLocType(localInputId(sk), t);
   };
 
   auto const mDefine = static_cast<unsigned char>(MOpMode::Define);

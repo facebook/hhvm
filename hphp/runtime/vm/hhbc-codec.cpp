@@ -20,12 +20,23 @@
 
 namespace HPHP {
 
+NamedLocal decode_named_local(PC& pc) {
+  LocalName lname = decode_iva(pc) - 1;
+  int32_t id = decode_iva(pc);
+  return NamedLocal{lname, id};
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 MemberKey decode_member_key(PC& pc, Either<const Unit*, const UnitEmitter*> u) {
   auto const mcode = static_cast<MemberCode>(decode_byte(pc));
 
   switch (mcode) {
-    case MEC: case MEL: case MPC: case MPL:
-      return MemberKey{mcode, decode_iva(pc)};
+    case MEC: case MPC:
+      return MemberKey{mcode, static_cast<int32_t>(decode_iva(pc))};
+
+    case MEL: case MPL:
+      return MemberKey{mcode, decode_named_local(pc)};
 
     case MEI:
       return MemberKey{mcode, decode_raw<int64_t>(pc)};
@@ -49,8 +60,12 @@ void encode_member_key(MemberKey mk, UnitEmitter& ue) {
   ue.emitByte(mk.mcode);
 
   switch (mk.mcode) {
-    case MEC: case MEL: case MPC: case MPL:
+    case MEC: case MPC:
       ue.emitIVA(mk.iva);
+      break;
+
+    case MEL: case MPL:
+      ue.emitNamedLocal(mk.local);
       break;
 
     case MEI:

@@ -192,6 +192,16 @@ std::string show(const FCallArgsBase&, const uint8_t* inoutArgs,
  * The types in this macro for BLA, SLA, and VSA are meaningless since they
  * are never read out of ArgUnion (they use ImmVector).
  *
+ * There are several different local immediate types:
+ *   - LA immediates are for bytecodes that only require the TypedValue* to
+ *     perform their operation.
+ *   - ILA immediates are used by bytecodes that need both the TypedValue* and
+ *     the slot index to implement their operation.  This could be used by
+ *     opcodes that print an error message including this slot info.
+ *   - NLA immediates are used by bytecodes that need both the TypedValue* and
+ *     the name of the local to be implemented.  This is commonly used for
+ *     ops that raise warnings for undefined local uses.
+ *
  * ArgTypes and their various decoding helpers should be kept in sync with the
  * `hhx' bytecode inspection GDB command.
  */
@@ -201,7 +211,9 @@ std::string show(const FCallArgsBase&, const uint8_t* inoutArgs,
   ARGTYPEVEC(SLA, Id)            /* String id/offset pair vector */            \
   ARGTYPE(IVA,    uint32_t)      /* Variable size: 8 or 32-bit uint */         \
   ARGTYPE(I64A,   int64_t)       /* 64-bit Integer */                          \
-  ARGTYPE(LA,     int32_t)       /* Local variable ID: 8 or 32-bit int */      \
+  ARGTYPE(LA,     int32_t)       /* Local: 8 or 32-bit int */                  \
+  ARGTYPE(NLA,    NamedLocal)    /* Local w/ name: 2x 8 or 32-bit int */       \
+  ARGTYPE(ILA,    int32_t)       /* Local w/ ID: 8 or 32-bit int */            \
   ARGTYPE(IA,     int32_t)       /* Iterator ID: 8 or 32-bit int */            \
   ARGTYPE(DA,     double)        /* Double */                                  \
   ARGTYPE(SA,     Id)            /* Static string ID */                        \
@@ -637,24 +649,24 @@ constexpr uint32_t kMaxConcatN = 4;
   O(RetM,            ONE(IVA),         CMANY,           NOV,        CF_TF) \
   O(RetCSuspended,   NA,               ONE(CV),         NOV,        CF_TF) \
   O(Throw,           NA,               ONE(CV),         NOV,        CF_TF) \
-  O(CGetL,           ONE(LA),          NOV,             ONE(CV),    NF) \
+  O(CGetL,           ONE(NLA),         NOV,             ONE(CV),    NF) \
   O(CGetQuietL,      ONE(LA),          NOV,             ONE(CV),    NF) \
   O(CUGetL,          ONE(LA),          NOV,             ONE(CUV),   NF) \
-  O(CGetL2,          ONE(LA),          ONE(CV),         TWO(CV,CV), NF) \
+  O(CGetL2,          ONE(NLA),         ONE(CV),         TWO(CV,CV), NF) \
   O(PushL,           ONE(LA),          NOV,             ONE(CV),    NF) \
   O(CGetG,           NA,               ONE(CV),         ONE(CV),    NF) \
   O(CGetS,           NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(ClassGetC,       NA,               ONE(CV),         ONE(CV),    NF) \
   O(ClassGetTS,      NA,               ONE(CV),         TWO(CV,CV), NF) \
-  O(GetMemoKeyL,     ONE(LA),          NOV,             ONE(CV),    NF) \
+  O(GetMemoKeyL,     ONE(NLA),         NOV,             ONE(CV),    NF) \
   O(AKExists,        NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(IssetL,          ONE(LA),          NOV,             ONE(CV),    NF) \
   O(IssetG,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(IssetS,          NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(IsTypeC,         ONE(OA(IsTypeOp)),ONE(CV),         ONE(CV),    NF) \
-  O(IsTypeL,         TWO(LA,                                            \
+  O(IsTypeL,         TWO(NLA,                                           \
                        OA(IsTypeOp)),  NOV,             ONE(CV),    NF) \
-  O(AssertRATL,      TWO(LA,RATA),     NOV,             NOV,        NF) \
+  O(AssertRATL,      TWO(ILA,RATA),    NOV,             NOV,        NF) \
   O(AssertRATStk,    TWO(IVA,RATA),    NOV,             NOV,        NF) \
   O(SetL,            ONE(LA),          ONE(CV),         ONE(CV),    NF) \
   O(SetG,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
@@ -663,7 +675,7 @@ constexpr uint32_t kMaxConcatN = 4;
                        OA(SetOpOp)),   ONE(CV),         ONE(CV),    NF) \
   O(SetOpG,          ONE(OA(SetOpOp)), TWO(CV,CV),      ONE(CV),    NF) \
   O(SetOpS,          ONE(OA(SetOpOp)), THREE(CV,CV,CV), ONE(CV),    NF) \
-  O(IncDecL,         TWO(LA,                                            \
+  O(IncDecL,         TWO(NLA,                                           \
                        OA(IncDecOp)),  NOV,             ONE(CV),    NF) \
   O(IncDecG,         ONE(OA(IncDecOp)),ONE(CV),         ONE(CV),    NF) \
   O(IncDecS,         ONE(OA(IncDecOp)),TWO(CV,CV),      ONE(CV),    NF) \
@@ -723,8 +735,8 @@ constexpr uint32_t kMaxConcatN = 4;
   O(OODeclExists,    ONE(OA(OODeclExistsOp)),                           \
                                        TWO(CV,CV),      ONE(CV),    NF) \
   O(VerifyOutType,   ONE(IVA),         ONE(CV),         ONE(CV),    NF) \
-  O(VerifyParamType, ONE(LA),          NOV,             NOV,        NF) \
-  O(VerifyParamTypeTS, ONE(LA),        ONE(CV),         NOV,        NF) \
+  O(VerifyParamType, ONE(ILA),         NOV,             NOV,        NF) \
+  O(VerifyParamTypeTS, ONE(ILA),       ONE(CV),         NOV,        NF) \
   O(VerifyRetTypeC,  NA,               ONE(CV),         ONE(CV),    NF) \
   O(VerifyRetTypeTS, NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(VerifyRetNonNullC, NA,             ONE(CV),         ONE(CV),    NF) \
@@ -768,7 +780,7 @@ constexpr uint32_t kMaxConcatN = 4;
                                        NOV,             NOV,        NF) \
   O(BaseSC,          THREE(IVA, IVA, OA(MOpMode)),                      \
                                        NOV,             NOV,        NF) \
-  O(BaseL,           TWO(LA, OA(MOpMode)),                              \
+  O(BaseL,           TWO(NLA, OA(MOpMode)),                             \
                                        NOV,             NOV,        NF) \
   O(BaseC,           TWO(IVA, OA(MOpMode)),                             \
                                        NOV,             NOV,        NF) \

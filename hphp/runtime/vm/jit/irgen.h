@@ -289,6 +289,8 @@ Type predictedType(const IRGS&, const Location&);
 #define IMM_IVA        uint32_t
 #define IMM_I64A       int64_t
 #define IMM_LA         int32_t
+#define IMM_NLA        NamedLocal
+#define IMM_ILA        int32_t
 #define IMM_IA         int32_t
 #define IMM_DA         double
 #define IMM_SA         const StringData*
@@ -328,6 +330,8 @@ Type predictedType(const IRGS&, const Location&);
 #undef IMM_IVA
 #undef IMM_I64A
 #undef IMM_LA
+#undef IMM_NLA
+#undef IMM_ILA
 #undef IMM_IA
 #undef IMM_DA
 #undef IMM_SA

@@ -693,20 +693,24 @@ inline SSATmp* ldLoc(IRGS& env,
  * it calls this function.
  */
 inline SSATmp* ldLocWarn(IRGS& env,
-                         uint32_t id,
+                         NamedLocal loc,
                          Block* ldPMExit,
                          GuardConstraint gc) {
-  auto const locVal = ldLoc(env, id, ldPMExit, gc);
-  auto const varName = curFunc(env)->localVarName(id);
+  auto const locVal = ldLoc(env, loc.id, ldPMExit, gc);
 
   auto warnUninit = [&] {
+    if (loc.name == kInvalidLocalName) {
+      // HHBBC incorrectly removed local name information for a local.
+      return gen(env, Unreachable, ASSERT_REASON);
+    }
+    auto const varName = curFunc(env)->localVarName(loc.name);
     if (varName != nullptr) {
       gen(env, RaiseUninitLoc, cns(env, varName));
     }
     return cns(env, TInitNull);
   };
 
-  env.irb->constrainLocal(id, DataTypeCountnessInit, "ldLocWarn");
+  env.irb->constrainLocal(loc.id, DataTypeCountnessInit, "ldLocWarn");
 
   if (locVal->type() <= TUninit) return warnUninit();
   if (!locVal->type().maybe(TUninit)) return locVal;

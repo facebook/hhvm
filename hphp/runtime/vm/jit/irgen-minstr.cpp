@@ -1885,7 +1885,8 @@ SSATmp* memberKey(IRGS& env, MemberKey mk) {
     case MW:
       return nullptr;
     case MEL: case MPL:
-      return ldLocWarn(env, mk.iva, makePseudoMainExit(env), DataTypeSpecific);
+      return ldLocWarn(env, mk.local, makePseudoMainExit(env),
+                       DataTypeSpecific);
     case MEC: case MPC:
       return topC(env, BCSPRelOffset{int32_t(mk.iva)});
     case MEI:
@@ -1946,22 +1947,23 @@ void emitBaseSC(IRGS& env, uint32_t propIdx, uint32_t clsIdx, MOpMode mode) {
   setClsMIPropState(env, spropPtr, mode, cls, name);
 }
 
-void emitBaseL(IRGS& env, int32_t locId, MOpMode mode) {
+void emitBaseL(IRGS& env, NamedLocal loc, MOpMode mode) {
   initTvRefs(env);
-  stMBase(env, ldLocAddr(env, locId));
+  stMBase(env, ldLocAddr(env, loc.id));
 
-  auto base = ldLoc(env, locId, makePseudoMainExit(env), DataTypeGeneric);
+  auto base = ldLoc(env, loc.id, makePseudoMainExit(env), DataTypeGeneric);
 
   if (!base->type().isKnownDataType()) PUNT(unknown-BaseL);
 
   if (base->isA(TUninit) && mode == MOpMode::Warn) {
-    env.irb->constrainLocal(locId, DataTypeSpecific,
+    auto const baseName = curFunc(env)->localVarName(loc.name);
+    env.irb->constrainLocal(loc.id, DataTypeSpecific,
                             "emitBaseL: Uninit base local");
-    gen(env, RaiseUninitLoc, cns(env, curFunc(env)->localVarName(locId)));
+    gen(env, RaiseUninitLoc, cns(env, baseName));
   }
 
   simpleBaseImpl(
-    env, base, mode, Location::Local { safe_cast<uint32_t>(locId) }
+    env, base, mode, Location::Local { safe_cast<uint32_t>(loc.id) }
   );
 }
 

@@ -17,44 +17,44 @@
 0xXX+55: AddElemC
 0xXX+56: SetL 0
 0xXX+58: PopC
-0xXX+59: CGetL 0
-0xXX+61: IterInit 0 k:1 v:2 103
-0xXX+70: String
+0xXX+59: CGetL 0 (name: 0)
+0xXX+62: IterInit 0 k:1 v:2 108
+0xXX+71: String 
 
-0xXX+75: CGetL2 2
-0xXX+77: Concat
-0xXX+78: Print
-0xXX+79: PopC
-0xXX+80: String
+0xXX+76: CGetL2 2 (name: 2)
+0xXX+79: Concat
+0xXX+80: Print
+0xXX+81: PopC
+0xXX+82: String 
 
-0xXX+85: CGetL2 1
-0xXX+87: Concat
-0xXX+88: Print
-0xXX+89: PopC
-0xXX+90: CGetL 0
-0xXX+92: IterInit 1 k:3 v:4 55
-0xXX+101: String
+0xXX+87: CGetL2 1 (name: 1)
+0xXX+90: Concat
+0xXX+91: Print
+0xXX+92: PopC
+0xXX+93: CGetL 0 (name: 0)
+0xXX+96: IterInit 1 k:3 v:4 57
+0xXX+105: String 
 
-0xXX+106: CGetL2 4
-0xXX+108: Concat
-0xXX+109: Print
-0xXX+110: PopC
-0xXX+111: String
+0xXX+110: CGetL2 4 (name: 4)
+0xXX+113: Concat
+0xXX+114: Print
+0xXX+115: PopC
+0xXX+116: String 
 
-0xXX+116: CGetL2 3
-0xXX+118: Concat
-0xXX+119: Print
-0xXX+120: PopC
-0xXX+121: IterFree 1
-0xXX+123: IterFree 0
-0xXX+125: Jmp 39
-0xXX+130: IterNext 1 k:3 v:4 -29
-0xXX+139: Jmp 8
-0xXX+144: IterFree 1
-0xXX+146: Throw
-0xXX+147: IterNext 0 k:1 v:2 -77
-0xXX+156: Jmp 8
-0xXX+161: IterFree 0
-0xXX+163: Throw
-0xXX+164: Int 1
-0xXX+173: RetC
+0xXX+121: CGetL2 3 (name: 3)
+0xXX+124: Concat
+0xXX+125: Print
+0xXX+126: PopC
+0xXX+127: IterFree 1
+0xXX+129: IterFree 0
+0xXX+131: Jmp 39
+0xXX+136: IterNext 1 k:3 v:4 -31
+0xXX+145: Jmp 8
+0xXX+150: IterFree 1
+0xXX+152: Throw
+0xXX+153: IterNext 0 k:1 v:2 -82
+0xXX+162: Jmp 8
+0xXX+167: IterFree 0
+0xXX+169: Throw
+0xXX+170: Int 1
+0xXX+179: RetC

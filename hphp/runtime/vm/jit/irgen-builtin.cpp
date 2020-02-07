@@ -2549,13 +2549,13 @@ void emitAKExists(IRGS& env) {
 
 //////////////////////////////////////////////////////////////////////
 
-void emitGetMemoKeyL(IRGS& env, int32_t locId) {
+void emitGetMemoKeyL(IRGS& env, NamedLocal loc) {
   DEBUG_ONLY auto const func = curFunc(env);
   assertx(func->isMemoizeWrapper());
 
   auto const value = ldLocWarn(
     env,
-    locId,
+    loc,
     nullptr,
     DataTypeSpecific
   );

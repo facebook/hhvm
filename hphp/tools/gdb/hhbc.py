@@ -36,7 +36,7 @@ def op_table(name):
 
 @memoized
 def iva_imm_types():
-    return [V('HPHP::' + t) for t in ['IVA', 'LA', 'IA']]
+    return [V('HPHP::' + t) for t in ['IVA', 'LA', 'ILA', 'IA']]
 
 @memoized
 def vec_imm_types():
@@ -52,8 +52,12 @@ def vec_elm_sizes():
     ]]
 
 @memoized
+def tv_iva_mcodes():
+    return [V('HPHP::' + t) for t in ['MEC', 'MPC']]
+
+@memoized
 def tv_loc_mcodes():
-    return [V('HPHP::' + t) for t in ['MEC', 'MPC', 'MEL', 'MPL']]
+    return [V('HPHP::' + t) for t in ['MEL', 'MPL']]
 
 @memoized
 def str_imm_mcodes():
@@ -123,6 +127,23 @@ class HHBC(object):
         return info
 
     @staticmethod
+    def decode_named_local(pc):
+        """Decode the NLA immediate at `pc', returning a dict with 'value' and
+        'size' keys."""
+
+        info = {}
+        name = HHBC.decode_iva(pc)
+        size = name['size']
+        locId = HHBC.decode_iva(pc + size)
+        size += locId['size']
+        info['size'] = size
+        info['value'] = '%s (name: %s)' % (
+            str(locId['value'].cast(T('int32_t'))),
+            str(name['value'].cast(T('int32_t')) - 1)
+        )
+        return info
+
+    @staticmethod
     def decode_ba(pc):
         """Decode the BA immediate at `pc', returning a dict with 'value' and
         'size' keys."""
@@ -189,6 +210,9 @@ class HHBC(object):
         if immtype in iva_imm_types():
             info = HHBC.decode_iva(ptr)
 
+        elif immtype == V('HPHP::NLA'):
+            info = HHBC.decode_named_local(ptr)
+
         elif immtype in vec_imm_types():
             elm_size = vec_elm_sizes()[vec_imm_types().index(immtype)]
             vec_size = HHBC.decode_iva(ptr)
@@ -207,9 +231,13 @@ class HHBC(object):
 
             imm_info = {}
 
-            if mcode in tv_loc_mcodes():
+            if mcode in tv_iva_mcodes():
                 imm_info = HHBC.decode_iva(ptr)
                 imm_info['kind'] = 'iva'
+
+            if mcode in tv_loc_mcodes():
+                imm_info = HHBC.decode_named_local(ptr)
+                imm_info['kind'] = 'local'
 
             elif mcode == V('HPHP::MEI'):
                 t = T('int64_t')

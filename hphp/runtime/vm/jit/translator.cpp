@@ -572,6 +572,8 @@ bool isAlwaysNop(const NormalizedInstruction& ni) {
 #define SIX(a, b, c, d, e, f) a(0) b(1) c(2) d(3) e(4) f(5)
 // Iterator bytecodes are handled specially here
 #define LA(n) assertx(idx == 0xff); idx = n;
+#define NLA(n) assertx(idx == 0xff); idx = n;
+#define ILA(n) assertx(idx == 0xff); idx = n;
 #define MA(n)
 #define BLA(n)
 #define SLA(n)
@@ -613,8 +615,12 @@ size_t memberKeyImmIdx(Op op) {
   size_t idx = 0xff;
   switch (op) {
 #undef LA
+#undef NLA
+#undef ILA
 #undef KA
 #define LA(n)
+#define NLA(n)
+#define ILA(n)
 #define KA(n) assertx(idx == 0xff); idx = n;
     OPCODES
   }
@@ -629,6 +635,8 @@ size_t memberKeyImmIdx(Op op) {
 #undef FIVE
 #undef SIX
 #undef LA
+#undef NLA
+#undef ILA
 #undef MA
 #undef BLA
 #undef SLA
@@ -750,7 +758,20 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, FPInvOffset bcSPOff) {
   }
 
   if (flags & Local) {
-    auto const loc = ni.imm[localImmIdx(ni.op())].u_IVA;
+    auto const loc = [&]() {
+      auto const idx = localImmIdx(ni.op());
+      auto const argu = ni.imm[idx];
+      switch (immType(ni.op(), idx)) {
+        case ArgType::LA:
+          return argu.u_LA;
+        case ArgType::NLA:
+          return argu.u_NLA.id;
+        case ArgType::ILA:
+          return argu.u_ILA;
+        default:
+          always_assert(false);
+      }
+    }();
     SKTRACE(1, sk, "getInputs: local %d\n", loc);
     inputs.emplace_back(Location::Local { uint32_t(loc) });
   }
@@ -1076,6 +1097,8 @@ bool instrBreaksProfileBB(const NormalizedInstruction* inst) {
 #define IMM_IVA(n)     ni.imm[n].u_IVA
 #define IMM_I64A(n)    ni.imm[n].u_I64A
 #define IMM_LA(n)      ni.imm[n].u_LA
+#define IMM_NLA(n)     ni.imm[n].u_NLA
+#define IMM_ILA(n)     ni.imm[n].u_ILA
 #define IMM_IA(n)      ni.imm[n].u_IA
 #define IMM_DA(n)      ni.imm[n].u_DA
 #define IMM_SA(n)      ni.unit()->lookupLitstrId(ni.imm[n].u_SA)
@@ -1117,6 +1140,8 @@ static void translateDispatch(irgen::IRGS& irgs,
 #undef IMM_IVA
 #undef IMM_I64A
 #undef IMM_LA
+#undef IMM_NLA
+#undef IMM_ILA
 #undef IMM_IA
 #undef IMM_DA
 #undef IMM_SA

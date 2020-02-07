@@ -85,7 +85,7 @@ struct Vgen {
   void emit(const copy& i);
   void emit(const copy2& i);
   void emit(const debugtrap& /*i*/) { a.int3(); }
-  void emit(const fallthru& /*i*/) {}
+  void emit(const fallthru&);
   void emit(const ldimmb& i);
   void emit(const ldimml& i);
   void emit(const ldimmq& i);
@@ -754,6 +754,13 @@ void Vgen<X64Asm>::emit(const unwind& i) {
   catches.push_back({a.frontier(), i.targets[1]});
   env.record_inline_stack(a.frontier());
   emit(jmp{i.targets[0]});
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const fallthru&) {
+  a.nop();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

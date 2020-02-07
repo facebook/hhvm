@@ -45,6 +45,7 @@ struct AutoloadMap {
     Type,
     Function,
     Constant,
+    TypeAlias,
   };
 
   virtual ~AutoloadMap() = default;
@@ -81,6 +82,8 @@ struct AutoloadMap {
         return getFunctionFile(typeName);
       case AutoloadMap::KindOf::Constant:
         return getConstantFile(typeName);
+      case AutoloadMap::KindOf::TypeAlias:
+        return getTypeAliasFile(typeName);
     }
     not_reached();
   }
@@ -94,6 +97,8 @@ struct AutoloadMap {
         return getFileFunctions(path);
       case AutoloadMap::KindOf::Constant:
         return getFileConstants(path);
+      case AutoloadMap::KindOf::TypeAlias:
+        return getFileTypeAliases(path);
     }
     not_reached();
   }
@@ -107,6 +112,8 @@ struct AutoloadMap {
       const String& functionName) = 0;
   virtual folly::Optional<String> getConstantFile(
       const String& constantName) = 0;
+  virtual folly::Optional<String> getTypeAliasFile(
+      const String& typeAliasName) = 0;
 
   /**
    * Map path to symbols
@@ -114,6 +121,7 @@ struct AutoloadMap {
   virtual Array getFileTypes(const String& path) = 0;
   virtual Array getFileFunctions(const String& path) = 0;
   virtual Array getFileConstants(const String& path) = 0;
+  virtual Array getFileTypeAliases(const String& path) = 0;
 
   virtual bool canHandleFailure() const = 0;
   virtual Result handleFailure(KindOf kind, const String& className,

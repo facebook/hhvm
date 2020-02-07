@@ -12,7 +12,7 @@
   RetC
 }
 
-.function <"HH\\void" N  > foo(<"HH\\vec<(C:@E)>" "HH\\vec"  > $v) {
+.function <"HH\\void" N > foo(<"HH\\vec<(C:@E)>" "HH\\vec" > $v) {
   .numiters 1;
   .declvars $x;
   Array @A_0
@@ -42,7 +42,7 @@ L0:
   RetC
 }
 
-.function ["__EntryPoint"("""y:0:{}""")] <"HH\\void" N  > main() {
+.function ["__EntryPoint"("""y:0:{}""")] <"HH\\void" N > main() {
   .declvars $v;
   NullUninit
   NullUninit
@@ -61,7 +61,7 @@ L0:
 }
 
 .class C {
-  .method [public static] <"HH\\mixed" N  > E##Members() {
+  .method [public static] <"HH\\mixed" N > E##Members() {
     .declvars $mems;
     Vec @A_1
     SetL $mems
@@ -69,7 +69,7 @@ L0:
     CGetL $mems
     RetC
   }
-  .method [public static] <"HH\\mixed" N  > E##val(<"HH\\string" "HH\\string"  > $atom) {
+  .method [public static] <"HH\\mixed" N > E##val(<"HH\\string" "HH\\string" > $atom) {
     VerifyParamType $atom
     String "A0"
     CGetL2 $atom

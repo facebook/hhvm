@@ -792,7 +792,7 @@ let string_of_type_info ?(is_enum = false) ti =
     else
       "" )
   ^ flags_text
-  ^ " >"
+  ^ ">"
 
 let string_of_typedef_info ti =
   let type_constraint = Hhas_type_info.type_constraint ti in

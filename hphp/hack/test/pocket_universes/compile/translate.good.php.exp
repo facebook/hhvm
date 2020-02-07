@@ -12,9 +12,9 @@
 }
 
 .class C {
-  .property [private sys_initial_val] <"HH\\int" "HH\\int" extended_hint > x =
+  .property [private sys_initial_val] <"HH\\int" "HH\\int" extended_hint> x =
     """N;""";
-  .method [public] <"" N  > __construct(<"HH\\int" "HH\\int"  > $x) {
+  .method [public] <"" N > __construct(<"HH\\int" "HH\\int" > $x) {
     VerifyParamType $x
     CheckThis
     CGetL $x
@@ -24,14 +24,14 @@
     Null
     RetC
   }
-  .method [public] <"HH\\int" "HH\\int" extended_hint > get() {
+  .method [public] <"HH\\int" "HH\\int" extended_hint> get() {
     CheckThis
     BaseH
     QueryM 0 CGet PT:"x"
     VerifyRetTypeC
     RetC
   }
-  .method [public static] <"HH\\mixed" N  > Field##Members() {
+  .method [public static] <"HH\\mixed" N > Field##Members() {
     .declvars $mems;
     Vec @A_0
     SetL $mems
@@ -39,7 +39,7 @@
     CGetL $mems
     RetC
   }
-  .method [public static] <"HH\\mixed" N  > Field##stuff(<"HH\\string" "HH\\string"  > $atom) {
+  .method [public static] <"HH\\mixed" N > Field##stuff(<"HH\\string" "HH\\string" > $atom) {
     VerifyParamType $atom
     String "A"
     CGetL2 $atom
@@ -71,7 +71,7 @@
     Null
     RetC
   }
-  .method [public static] <"HH\\mixed" N  > Field##name(<"HH\\string" "HH\\string"  > $atom) {
+  .method [public static] <"HH\\mixed" N > Field##name(<"HH\\string" "HH\\string" > $atom) {
     VerifyParamType $atom
     String "A"
     CGetL2 $atom
@@ -103,7 +103,7 @@
     Null
     RetC
   }
-  .method [public static] <"HH\\mixed" N  > Field##default_value(<"HH\\string" "HH\\string"  > $atom) {
+  .method [public static] <"HH\\mixed" N > Field##default_value(<"HH\\string" "HH\\string" > $atom) {
     VerifyParamType $atom
     String "A"
     CGetL2 $atom

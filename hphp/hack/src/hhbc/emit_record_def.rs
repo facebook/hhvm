@@ -5,7 +5,7 @@
 use ast_constant_folder_rust as constant_folder;
 use emit_fatal_rust as emit_fatal;
 use emit_type_hint_rust as emit_type_hint;
-use env::emitter::Emitter;
+use env::{emitter::Emitter, Env};
 use hhas_record_def_rust::{Field as RecordField, HhasRecord};
 use hhas_type::constraint;
 use instruction_sequence_rust::Result;
@@ -27,10 +27,14 @@ fn valid_tc_for_record_field(tc: &constraint::Type) -> bool {
     }
 }
 
-fn emit_field(emitter: &Emitter, field: (Sid, Hint, Option<Expr>)) -> Result<RecordField> {
+fn emit_field(
+    emitter: &Emitter,
+    env: &Env,
+    field: (Sid, Hint, Option<Expr>),
+) -> Result<RecordField> {
     let (Id(pos, mut name), hint, expr_opt) = field;
     let otv = expr_opt.map_or(None, |e| {
-        constant_folder::expr_to_opt_typed_value(emitter, &e)
+        constant_folder::expr_to_typed_value(emitter, &env.namespace, &e).ok()
     });
     let ti = emit_type_hint::hint_to_type_info(
         &emit_type_hint::Kind::Property,
@@ -50,7 +54,7 @@ fn emit_field(emitter: &Emitter, field: (Sid, Hint, Option<Expr>)) -> Result<Rec
     }
 }
 
-fn emit_record_def<'a>(emitter: &Emitter, rd: RecordDef) -> HhasRecord<'a> {
+fn emit_record_def<'a>(emitter: &Emitter, env: &Env, rd: RecordDef) -> HhasRecord<'a> {
     let elaborate = |Id(_, name)| name.trim_start_matches("\\").to_string().into();
     let parent_name = match rd.extends {
         Some(Hint(_, h)) => {
@@ -69,15 +73,19 @@ fn emit_record_def<'a>(emitter: &Emitter, rd: RecordDef) -> HhasRecord<'a> {
         fields: rd
             .fields
             .into_iter()
-            .map(|f| emit_field(emitter, f).unwrap())
+            .map(|f| emit_field(emitter, env, f).unwrap())
             .collect(),
     }
 }
 
-pub fn emit_record_defs_from_program<'a>(emitter: &Emitter, p: Program) -> Vec<HhasRecord<'a>> {
+pub fn emit_record_defs_from_program<'a>(
+    emitter: &Emitter,
+    env: &Env,
+    p: Program,
+) -> Vec<HhasRecord<'a>> {
     p.into_iter()
         .filter_map(|def| match def {
-            Def::RecordDef(rd) => Some(emit_record_def(emitter, *rd)),
+            Def::RecordDef(rd) => Some(emit_record_def(emitter, env, *rd)),
             _ => None,
         })
         .collect()

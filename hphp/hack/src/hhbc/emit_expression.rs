@@ -335,7 +335,8 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
         | Expr_::Null
         | Expr_::False
         | Expr_::True => {
-            let v = ast_constant_folder::expr_to_opt_typed_value(emitter, expression).unwrap();
+            let v = ast_constant_folder::expr_to_typed_value(emitter, &env.namespace, expression)
+                .unwrap();
             emit_pos_then(emitter, pos, InstrSeq::make_typedvalue(v))
         }
         Expr_::PrefixedString(e) => emit_expr(emitter, env, &(&**e).1),

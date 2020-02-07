@@ -24,11 +24,12 @@ use hhbc_id_rust::Id;
 use hhbc_string_utils_rust::quote_string_with_escape;
 use instruction_sequence_rust::InstrSeq;
 use options::Options;
-use oxidized::relative_path::RelativePath;
+use oxidized::{ast_defs, relative_path::RelativePath};
 use runtime::TypedValue;
 use write::*;
 
 const ADATA_VARRAY_PREFIX: &str = "y";
+const ADATA_DICT_PREFIX: &str = "D";
 
 /// Indent is an abstraction of indentation. Configurable indentation
 /// and perf tweaking will be easier.
@@ -214,10 +215,56 @@ fn print_fun_def<W: Write>(
     wrap_by_braces(w, |w| print_body(ctx, w, body))
 }
 
+fn pos_to_prov_tag(ctx: &Context, loc: &Option<ast_defs::Pos>) -> String {
+    match loc {
+        Some(_) if ctx.opts.array_provenance() => unimplemented!(),
+        _ => "".into(),
+    }
+}
+
+fn print_adata_mapped_argument<W: Write, F>(
+    ctx: &mut Context,
+    w: &mut W,
+    col_type: &str,
+    loc: &Option<ast_defs::Pos>,
+    pairs: &Vec<(TypedValue, TypedValue)>,
+    f: F,
+) -> Result<(), W::Error>
+where
+    F: Fn(&mut Context, &mut W, &TypedValue, &TypedValue) -> Result<(), W::Error>,
+{
+    w.write(format!(
+        "{}:{}:{{{}",
+        col_type,
+        pairs.len(),
+        pos_to_prov_tag(ctx, loc)
+    ))?;
+    for (v1, v2) in pairs {
+        f(ctx, w, v1, v2)?
+    }
+    w.write(format!("}}"))
+}
+
+fn print_adata_dict_collection_argument<W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    col_type: &str,
+    loc: &Option<ast_defs::Pos>,
+    pairs: &Vec<(TypedValue, TypedValue)>,
+) -> Result<(), W::Error> {
+    print_adata_mapped_argument(ctx, w, col_type, loc, pairs, |ctx, w, v1, v2| {
+        print_adata(ctx, w, v1)?;
+        print_adata(ctx, w, v2)
+    })
+}
+
 fn print_adata<W: Write>(ctx: &mut Context, w: &mut W, tv: &TypedValue) -> Result<(), W::Error> {
     match tv {
         TypedValue::String(s) => w.write(format!("s:{}:{};", s.len(), quote_string_with_escape(s))),
         TypedValue::Int(i) => w.write(format!("i:{};", i)),
+        TypedValue::Dict((pairs, loc)) => {
+            print_adata_dict_collection_argument(ctx, w, ADATA_DICT_PREFIX, loc, pairs)
+        }
         _ => unimplemented!("{:?}", tv),
     }
 }

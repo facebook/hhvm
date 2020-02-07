@@ -8,8 +8,9 @@ use ast_scope_rust as ast_scope;
 use env::emitter::Emitter;
 use hhbc_id_rust::Id;
 use hhbc_string_utils_rust as string_utils;
-use naming_special_names_rust::{math, members, typehints};
+use naming_special_names_rust::{math, members, special_functions, typehints};
 use oxidized::{
+    aast,
     aast_visitor::{visit_mut, NodeMut, VisitorMut},
     ast as tast, ast_defs,
     namespace_env::Env as Namespace,
@@ -55,7 +56,7 @@ fn class_const_to_typed_value(
     emitter: &Emitter,
     cid: &tast::ClassId,
     id: &tast::Pstring,
-) -> Option<TypedValue> {
+) -> Result<TypedValue, Error> {
     if id.1 == members::M_CLASS {
         let cexpr = ast_class_expr::ClassExpr::class_id_to_class_expr(
             emitter,
@@ -66,14 +67,14 @@ fn class_const_to_typed_value(
         );
         if let ast_class_expr::ClassExpr::Id(ast_defs::Id(_, cname)) = cexpr {
             let cname = hhbc_id_rust::class::Type::from_ast_name(&cname).into();
-            return Some(TypedValue::String(cname));
+            return Ok(TypedValue::String(cname));
         }
     }
-    None
+    Err(Error::UserDefinedConstant)
 }
 
-fn array_to_typed_value(fields: &Vec<tast::Afield>) -> Option<TypedValue> {
-    Some(TypedValue::Array(if fields.is_empty() {
+fn array_to_typed_value(fields: &Vec<tast::Afield>) -> Result<TypedValue, Error> {
+    Ok(TypedValue::Array(if fields.is_empty() {
         vec![]
     } else {
         // TODO(hrust): for the purposes of constant folding (fold_program entry point),
@@ -84,33 +85,93 @@ fn array_to_typed_value(fields: &Vec<tast::Afield>) -> Option<TypedValue> {
     }))
 }
 
-fn expr_to_typed_value(
-    e: &Emitter,
-    _ns: &Namespace,
-    expr: &tast::Expr,
-) -> Result<TypedValue, Error> {
-    // TODO(hrust) move logic of expr_to_opt_typed_value here, and make it a wrapper instead
-    expr_to_opt_typed_value(e, expr).map_or(Err(Error::UserDefinedConstant), |o| Ok(o))
-}
-
-pub fn expr_to_opt_typed_value(emitter: &Emitter, expr: &tast::Expr) -> Option<TypedValue> {
-    use TypedValue::*;
-    match &expr.1 {
-        tast::Expr_::Int(s) => Some(Int(try_type_intlike(&s).unwrap_or(std::i64::MAX))),
-        tast::Expr_::True => Some(Bool(true)),
-        tast::Expr_::False => Some(Bool(false)),
-        tast::Expr_::Null => Some(Null),
-        tast::Expr_::String(s) => Some(String(s.to_owned())),
-        tast::Expr_::Float(s) => s.parse().ok().map(|x| Float(x)),
-        tast::Expr_::Id(id) if id.1 == math::NAN => Some(Float(std::f64::NAN)),
-        tast::Expr_::Id(id) if id.1 == math::INF => Some(Float(std::f64::INFINITY)),
-        tast::Expr_::ClassConst(x) => class_const_to_typed_value(emitter, &x.0, &x.1),
-        tast::Expr_::Array(fields) => array_to_typed_value(&fields),
-        _ => None,
+fn afield_to_typed_value_pair(
+    emitter: &Emitter,
+    ns: &Namespace,
+    afield: &tast::Afield,
+) -> Result<(TypedValue, TypedValue), Error> {
+    match afield {
+        tast::Afield::AFvalue(_) => panic!("afield_to_typed_value_pair: unexpected value"),
+        tast::Afield::AFkvalue(key, value) => Ok((
+            key_expr_to_typed_value(emitter, ns, key)?,
+            expr_to_typed_value(emitter, ns, value)?,
+        )),
     }
 }
 
-fn cast_value(hint: &tast::Hint_, v: TypedValue) -> Option<TypedValue> {
+fn key_expr_to_typed_value(
+    emitter: &Emitter,
+    ns: &Namespace,
+    expr: &tast::Expr,
+) -> Result<TypedValue, Error> {
+    let tv = expr_to_typed_value(emitter, ns, expr)?;
+    match tv {
+        TypedValue::Int(_) | TypedValue::String(_) => Ok(tv),
+        _ => Err(Error::NotLiteral),
+    }
+}
+
+pub fn expr_to_typed_value(
+    emitter: &Emitter,
+    ns: &Namespace,
+    expr: &tast::Expr,
+) -> Result<TypedValue, Error> {
+    use aast::Expr_::*;
+    let pos = &expr.0;
+    match &expr.1 {
+        Int(s) => Ok(TypedValue::Int(
+            try_type_intlike(&s).unwrap_or(std::i64::MAX),
+        )),
+        tast::Expr_::True => Ok(TypedValue::Bool(true)),
+        False => Ok(TypedValue::Bool(false)),
+        Null => Ok(TypedValue::Null),
+        String(s) => Ok(TypedValue::String(s.to_owned())),
+        Float(s) => s
+            .parse()
+            .map(|x| TypedValue::Float(x))
+            .map_err(|_| Error::NotLiteral),
+        Id(id) if id.1 == math::NAN => Ok(TypedValue::Float(std::f64::NAN)),
+        Id(id) if id.1 == math::INF => Ok(TypedValue::Float(std::f64::INFINITY)),
+        Call(id)
+            if id
+                .1
+                .as_id()
+                .map(|x| x.1 == special_functions::HHAS_ADATA)
+                .unwrap_or(false) =>
+        {
+            unimplemented!()
+        }
+        Array(fields) => array_to_typed_value(&fields),
+        Varray(_) => unimplemented!(),
+        Darray(_) => unimplemented!(),
+        Collection(x) if x.0.name().eq("vec") => unimplemented!(),
+        ValCollection(x) if x.0 == tast::VcKind::Vec || x.0 == tast::VcKind::Vector => {
+            unimplemented!()
+        }
+        Collection(x) if x.0.name().eq("keyset") => unimplemented!(),
+        ValCollection(x) if x.0 == tast::VcKind::Keyset => unimplemented!(),
+        Collection(x) if x.0.name().eq("dict") => {
+            let values =
+                x.2.iter()
+                    .map(|x| afield_to_typed_value_pair(emitter, ns, x))
+                    .collect::<Result<_, _>>()?;
+            Ok(TypedValue::Dict((values, Some(pos.clone()))))
+        }
+        KeyValCollection(_) => unimplemented!(),
+        Collection(_) => unimplemented!(),
+        ValCollection(x) if x.0 == tast::VcKind::Set || x.0 == tast::VcKind::ImmSet => {
+            unimplemented!()
+        }
+        Shape(_) => unimplemented!(),
+        ClassConst(x) => class_const_to_typed_value(emitter, &x.0, &x.1),
+        BracedExpr(_) => unimplemented!(),
+        Id(_) | ClassGet(_) => unimplemented!(),
+        As(x) if (x.1).1.is_hlike() => unimplemented!(),
+        _ => Err(Error::NotLiteral),
+    }
+}
+
+fn cast_value(hint: &tast::Hint_, v: TypedValue) -> Result<TypedValue, Error> {
     match hint {
         tast::Hint_::Happly(ast_defs::Id(_, id), args) if args.is_empty() => {
             let id = string_utils::strip_hh_ns(id);
@@ -126,9 +187,10 @@ fn cast_value(hint: &tast::Hint_, v: TypedValue) -> Option<TypedValue> {
         }
         _ => None,
     }
+    .ok_or(Error::NotLiteral)
 }
 
-fn unop_on_value(unop: &ast_defs::Uop, v: TypedValue) -> Option<TypedValue> {
+fn unop_on_value(unop: &ast_defs::Uop, v: TypedValue) -> Result<TypedValue, Error> {
     match unop {
         ast_defs::Uop::Unot => v.not(),
         ast_defs::Uop::Uplus => v.add(&TypedValue::Int(0)),
@@ -137,9 +199,14 @@ fn unop_on_value(unop: &ast_defs::Uop, v: TypedValue) -> Option<TypedValue> {
         ast_defs::Uop::Usilence => Some(v.clone()),
         _ => None,
     }
+    .ok_or(Error::NotLiteral)
 }
 
-fn binop_on_values(binop: &ast_defs::Bop, v1: TypedValue, v2: TypedValue) -> Option<TypedValue> {
+fn binop_on_values(
+    binop: &ast_defs::Bop,
+    v1: TypedValue,
+    v2: TypedValue,
+) -> Result<TypedValue, Error> {
     use ast_defs::Bop::*;
     match binop {
         Dot => v1.concat(v2),
@@ -151,6 +218,7 @@ fn binop_on_values(binop: &ast_defs::Bop, v1: TypedValue, v2: TypedValue) -> Opt
         Bar => v1.bitwise_or(&v2),
         _ => None,
     }
+    .ok_or(Error::NotLiteral)
 }
 
 fn value_to_expr(v: TypedValue) -> tast::Expr_ {
@@ -166,10 +234,22 @@ fn value_to_expr(v: TypedValue) -> tast::Expr_ {
     }
 }
 
-struct FolderVisitor {}
+struct FolderVisitor<'a> {
+    emitter: &'a Emitter,
+    empty_namespace: &'a Namespace,
+}
 
-impl VisitorMut for FolderVisitor {
-    type Context = Emitter;
+impl<'a> FolderVisitor<'a> {
+    fn new(emitter: &'a Emitter, empty_namespace: &'a Namespace) -> Self {
+        Self {
+            emitter,
+            empty_namespace,
+        }
+    }
+}
+
+impl VisitorMut for FolderVisitor<'_> {
+    type Context = ();
     type Ex = ast_defs::Pos;
     type Fb = ();
     type En = ();
@@ -190,16 +270,20 @@ impl VisitorMut for FolderVisitor {
     fn visit_expr_(&mut self, c: &mut Self::Context, p: &mut tast::Expr_) {
         p.recurse(c, self.object());
         let new_p = match p {
-            tast::Expr_::Cast(e) => expr_to_opt_typed_value(c, &e.1)
+            tast::Expr_::Cast(e) => expr_to_typed_value(self.emitter, self.empty_namespace, &e.1)
                 .and_then(|v| cast_value(&(e.0).1, v))
-                .map(&value_to_expr),
-            tast::Expr_::Unop(e) => expr_to_opt_typed_value(c, &e.1)
+                .map(&value_to_expr)
+                .ok(),
+            tast::Expr_::Unop(e) => expr_to_typed_value(self.emitter, self.empty_namespace, &e.1)
                 .and_then(|v| unop_on_value(&e.0, v))
-                .map(&value_to_expr),
-            tast::Expr_::Binop(e) => expr_to_opt_typed_value(c, &e.1).and_then(|v1| {
-                expr_to_opt_typed_value(c, &e.2)
-                    .and_then(|v2| binop_on_values(&e.0, v1, v2).map(&value_to_expr))
-            }),
+                .map(&value_to_expr)
+                .ok(),
+            tast::Expr_::Binop(e) => expr_to_typed_value(self.emitter, self.empty_namespace, &e.1)
+                .and_then(|v1| {
+                    expr_to_typed_value(self.emitter, self.empty_namespace, &e.2)
+                        .and_then(|v2| binop_on_values(&e.0, v1, v2).map(&value_to_expr))
+                })
+                .ok(),
             _ => None,
         };
         if let Some(new_p) = new_p {
@@ -208,12 +292,12 @@ impl VisitorMut for FolderVisitor {
     }
 }
 
-pub fn fold_expr(expr: &mut tast::Expr, e: &mut Emitter) {
-    visit_mut(&mut FolderVisitor {}, e, expr);
+pub fn fold_expr(expr: &mut tast::Expr, e: &mut Emitter, empty_namespace: &Namespace) {
+    visit_mut(&mut FolderVisitor::new(e, empty_namespace), &mut (), expr);
 }
 
-pub fn fold_program(p: &mut tast::Program, e: &mut Emitter) {
-    visit_mut(&mut FolderVisitor {}, e, p);
+pub fn fold_program(p: &mut tast::Program, e: &mut Emitter, empty_namespace: &Namespace) {
+    visit_mut(&mut FolderVisitor::new(e, empty_namespace), &mut (), p);
 }
 
 pub fn literals_from_exprs(
@@ -222,7 +306,7 @@ pub fn literals_from_exprs(
     e: &mut Emitter,
 ) -> Result<Vec<TypedValue>, Error> {
     for expr in exprs.iter_mut() {
-        fold_expr(expr, e);
+        fold_expr(expr, e, ns);
     }
     let ret = exprs
         .iter()

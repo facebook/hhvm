@@ -447,6 +447,10 @@ impl Options {
         self.hack_compiler_flags
             .contains(CompilerFlags::ENFORCE_GENERICS_UB)
     }
+
+    pub fn array_provenance(&self) -> bool {
+        self.hhvm.flags.contains(HhvmFlags::ARRAY_PROVENANCE)
+    }
 }
 
 use serde::de::{self, Deserializer, MapAccess, Visitor};

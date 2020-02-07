@@ -101,8 +101,8 @@ pub fn from_ast<'a>(
                 _ => false,
             };
             let deep_init = !args.is_static && expr_requires_deep_init(e);
-            match ast_constant_folder::expr_to_opt_typed_value(emitter, e) {
-                Some(tv) if !(deep_init || is_collection_map) => {
+            match ast_constant_folder::expr_to_typed_value(emitter, &env.namespace, e) {
+                Ok(tv) if !(deep_init || is_collection_map) => {
                     (Some(tv), None, HhasPropertyFlags::empty())
                 }
                 _ => {

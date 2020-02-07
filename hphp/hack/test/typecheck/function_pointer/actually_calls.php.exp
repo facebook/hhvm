@@ -1,0 +1,2 @@
+File "actually_calls.php", line 25, characters 3-23:
+This call is invalid, this is not a function, it is a nullable type (Typing[4009])

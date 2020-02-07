@@ -62,6 +62,20 @@ function return_values(): void {
   $v[] = 0;
   var_dump($d === $v);
   var_dump($d == $v);
+
+  echo "= awaitable ====================================================\n";
+  list($ma, $da, $di) = HH\Asio\join(dummy_await());
+  var_dump(is_array($ma));
+  var_dump(is_darray($da));
+  var_dump(is_dict($di));
+}
+
+async function dummy_await(): Awaitable<(array, darray, dict)> {
+  return tuple(
+    await __hhvm_intrinsics\dummy_array_await(),
+    await __hhvm_intrinsics\dummy_darray_await(),
+    await __hhvm_intrinsics\dummy_dict_await(),
+  );
 }
 
 function parameters(): void {
@@ -93,9 +107,29 @@ function parameters(): void {
 
 }
 
+function cast(): void {
+  echo "= cast ===================================================\n";
+  var_dump(
+    __hhvm_intrinsics\dummy_cast_to_kindofarray(array(1,2,3))
+      |> is_darray($$) || is_varray($$),
+  );
+  $a = __hhvm_intrinsics\dummy_cast_to_kindofarray(varray[1,2,3]);
+  var_dump($a);
+  var_dump(is_darray($a));
+  var_dump(is_varray($a));
+  $d = __hhvm_intrinsics\dummy_cast_to_kindofdarray(varray[1,2,3]);
+  var_dump($d);
+  var_dump(is_darray($d));
+  var_dump(is_varray($d));
+  $v = __hhvm_intrinsics\dummy_cast_to_kindofvarray(darray['a' => 1, 'b' => 2]);
+  var_dump($v);
+  var_dump(is_darray($v));
+  var_dump(is_varray($v));
+}
 
 <<__EntryPoint>>
 function main_builtin_annotations() {
-return_values();
-parameters();
+  return_values();
+  parameters();
+  cast();
 }

@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/request-tracing.h"
 #include "hphp/runtime/base/surprise-flags.h"
+#include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/vm/jit/inlining-decider.h"
@@ -77,6 +78,36 @@ TypedValue HHVM_FUNCTION(dummy_arraylike_builtin, const Variant& var) {
     return tvReturn(arr);
   }
   return tvReturn(ArrayData::CreateKeyset());
+}
+
+TypedValue HHVM_FUNCTION(dummy_cast_to_kindofarray, const Variant& var) {
+  if (!var.isArray()) {
+    SystemLib::throwInvalidOperationExceptionObject("must pass arraylike");
+  }
+  auto const& arr = var.asCArrRef();
+  if (arr->isPHPArray() && arr->isNotDVArray()) {
+    return tvReturn(arr.get());
+  }
+  TypedValue tv;
+  val(tv).parr = arr.toPHPArray().detach();
+  type(tv) = KindOfArray;
+  return tv;
+}
+
+TypedValue HHVM_FUNCTION(dummy_cast_to_kindofdarray, const Array& arr) {
+  if (arr->isDArray()) return tvReturn(arr.get());
+  TypedValue tv;
+  val(tv).parr = arr.toDArray().detach();
+  type(tv) = KindOfDArray;
+  return tv;
+}
+
+TypedValue HHVM_FUNCTION(dummy_cast_to_kindofvarray, const Array& arr) {
+  if (arr->isVArray()) return tvReturn(arr.get());
+  TypedValue tv;
+  val(tv).parr = arr.toVArray().detach();
+  type(tv) = KindOfVArray;
+  return tv;
 }
 
 Array HHVM_FUNCTION(dummy_array_builtin, const Array& arr) {
@@ -257,12 +288,22 @@ int64_t HHVM_FUNCTION(
 
 ///////////////////////////////////////////////////////////////////////////////
 
+struct DummyArrayAwait : AsioExternalThreadEvent {
+  DummyArrayAwait() { markAsFinished(); }
+
+  void unserialize(TypedValue& tv) override {
+    auto arr = make_map_array("foo", "bar", "baz", "quux");
+    type(tv) = KindOfArray;
+    val(tv).parr = arr.detach();
+  }
+};
+
 struct DummyDArrayAwait : AsioExternalThreadEvent {
   DummyDArrayAwait() { markAsFinished(); }
 
   void unserialize(TypedValue& tv) override {
     auto arr = make_darray("foo", "bar", "baz", "quux");
-    type(tv) = KindOfArray;
+    type(tv) = arr->toDataType();
     val(tv).parr = arr.detach();
   }
 };
@@ -276,6 +317,11 @@ struct DummyDictAwait : AsioExternalThreadEvent {
     val(tv).parr = arr.detach();
   }
 };
+
+Object HHVM_FUNCTION(dummy_array_await) {
+  auto ev = new DummyArrayAwait();
+  return Object{ev->getWaitHandle()};
+}
 
 Object HHVM_FUNCTION(dummy_darray_await) {
   auto ev = new DummyDArrayAwait();
@@ -312,6 +358,14 @@ void StandardExtension::initIntrinsics() {
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_array_builtin, dummy_array_builtin);
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_dict_builtin, dummy_dict_builtin);
 
+  HHVM_FALIAS(__hhvm_intrinsics\\dummy_cast_to_kindofarray,
+              dummy_cast_to_kindofarray);
+  HHVM_FALIAS(__hhvm_intrinsics\\dummy_cast_to_kindofdarray,
+              dummy_cast_to_kindofdarray);
+  HHVM_FALIAS(__hhvm_intrinsics\\dummy_cast_to_kindofvarray,
+              dummy_cast_to_kindofvarray);
+
+  HHVM_FALIAS(__hhvm_intrinsics\\dummy_array_await, dummy_array_await);
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_darray_await, dummy_darray_await);
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_dict_await, dummy_dict_await);
 

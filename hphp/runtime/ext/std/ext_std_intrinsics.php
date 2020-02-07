@@ -39,10 +39,22 @@ function dummy_varr_or_darr_builtin(varray_or_darray $x): varray_or_darray;
 function dummy_arraylike_builtin(arraylike $x): arraylike;
 
 <<__Native, __HipHopSpecific>>
+function dummy_cast_to_kindofarray(arraylike $value): mixed;
+
+<<__Native, __HipHopSpecific>>
+function dummy_cast_to_kindofdarray(array $value): mixed;
+
+<<__Native, __HipHopSpecific>>
+function dummy_cast_to_kindofvarray(array $value): mixed;
+
+<<__Native, __HipHopSpecific>>
 function dummy_array_builtin(array $x): array;
 
 <<__Native, __HipHopSpecific>>
 function dummy_dict_builtin(dict $x): dict;
+
+<<__Native, __HipHopSpecific>>
+function dummy_array_await(): Awaitable;
 
 <<__Native, __HipHopSpecific>>
 function dummy_darray_await(): Awaitable;

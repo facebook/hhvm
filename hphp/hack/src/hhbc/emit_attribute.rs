@@ -64,7 +64,7 @@ pub fn from_ast(
 /// parameters. The arguments to __Reified are number of type parameters
 /// followed by the indicies of these reified type parameters and whether they
 /// are soft reified or not
-pub fn add_reified_attribute(attrs: &mut Vec<HhasAttribute>, tparams: &[a::Tparam]) {
+pub fn add_reified_attribute(tparams: &[a::Tparam]) -> Option<HhasAttribute> {
     let reified_data: Vec<(usize, bool, bool)> = tparams
         .iter()
         .enumerate()
@@ -78,19 +78,19 @@ pub fn add_reified_attribute(attrs: &mut Vec<HhasAttribute>, tparams: &[a::Tpara
             }
         })
         .collect();
-    if !reified_data.is_empty() {
-        return;
+    if reified_data.is_empty() {
+        return None;
     }
 
     let name = "__Reified".to_owned();
     let bool2i64 = |b| b as i64;
     // NOTE(hrust) hopefully faster than .into_iter().flat_map(...).collect()
     let mut arguments = Vec::with_capacity(reified_data.len() * 3 + 1);
+    arguments.push(TypedValue::Int(tparams.len() as i64));
     for (i, soft, warn) in reified_data.into_iter() {
         arguments.push(TypedValue::Int(i as i64));
         arguments.push(TypedValue::Int(bool2i64(soft)));
         arguments.push(TypedValue::Int(bool2i64(warn)));
     }
-    arguments.push(TypedValue::Int(tparams.len() as i64));
-    attrs.push(HhasAttribute { name, arguments });
+    Some(HhasAttribute { name, arguments })
 }

@@ -2,6 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use std::cell::Cell;
 
 use ast_class_expr_rust as ast_class_expr;
 use ast_scope_rust as ast_scope;
@@ -73,15 +74,44 @@ fn class_const_to_typed_value(
     Err(Error::UserDefinedConstant)
 }
 
-fn array_to_typed_value(fields: &Vec<tast::Afield>) -> Result<TypedValue, Error> {
+fn array_to_typed_value(
+    emitter: &Emitter,
+    ns: &Namespace,
+    fields: &Vec<tast::Afield>,
+) -> Result<TypedValue, Error> {
     Ok(TypedValue::Array(if fields.is_empty() {
         vec![]
     } else {
-        // TODO(hrust): for the purposes of constant folding (fold_program entry point),
-        // it only matters whether an array is empty or not, so putting a
-        // dummy values here. It will need to be implemented for other callers
-        // of this module (in emit_expression)
-        vec![(TypedValue::Uninit, TypedValue::Uninit)]
+        let mut res = vec![];
+        let maxindex = Cell::new(0);
+
+        let update_max_index = |mut newindex| {
+            if newindex >= maxindex.get() {
+                newindex += 1;
+                maxindex.set(newindex);
+            }
+        };
+        let default = |key, value| {
+            let k_tv = key_expr_to_typed_value(emitter, ns, key)?;
+            if let TypedValue::Int(newindex) = k_tv {
+                update_max_index(newindex)
+            }
+            Ok((k_tv, expr_to_typed_value(emitter, ns, value)?))
+        };
+        for field in fields {
+            res.push(match field {
+                tast::Afield::AFkvalue(key, value) => default(key, value)?,
+                tast::Afield::AFvalue(value) => {
+                    let index = maxindex.get();
+                    maxindex.set(index + 1);
+                    (
+                        TypedValue::Int(index),
+                        expr_to_typed_value(emitter, ns, value)?,
+                    )
+                }
+            })
+        }
+        res
     }))
 }
 
@@ -99,6 +129,19 @@ fn afield_to_typed_value_pair(
     }
 }
 
+fn value_afield_to_typed_value(
+    emitter: &Emitter,
+    ns: &Namespace,
+    afield: &tast::Afield,
+) -> Result<TypedValue, Error> {
+    match afield {
+        tast::Afield::AFvalue(e) => expr_to_typed_value(emitter, ns, e),
+        tast::Afield::AFkvalue(_, _) => {
+            panic!("value_afield_to_typed_value: unexpected key=>value")
+        }
+    }
+}
+
 fn key_expr_to_typed_value(
     emitter: &Emitter,
     ns: &Namespace,
@@ -109,6 +152,38 @@ fn key_expr_to_typed_value(
         TypedValue::Int(_) | TypedValue::String(_) => Ok(tv),
         _ => Err(Error::NotLiteral),
     }
+}
+
+fn keyset_value_afield_to_typed_value(
+    emitter: &Emitter,
+    ns: &Namespace,
+    afield: &tast::Afield,
+) -> Result<TypedValue, Error> {
+    let tv = value_afield_to_typed_value(emitter, ns, afield)?;
+    match tv {
+        TypedValue::Int(_) | TypedValue::String(_) => Ok(tv),
+        _ => Err(Error::NotLiteral),
+    }
+}
+
+fn shape_to_typed_value(
+    emitter: &Emitter,
+    ns: &Namespace,
+    fields: &Vec<(tast::ShapeFieldName, tast::Expr)>,
+    pos: &ast_defs::Pos,
+) -> Result<TypedValue, Error> {
+    let a = fields
+        .iter()
+        .map(|(sf, expr)| {
+            let key = match sf {
+                ast_defs::ShapeFieldName::SFlitInt(_) => unimplemented!(),
+                ast_defs::ShapeFieldName::SFlitStr(id) => TypedValue::String(id.1.clone()),
+                ast_defs::ShapeFieldName::SFclassConst(_, _) => unimplemented!(),
+            };
+            Ok((key, expr_to_typed_value(emitter, ns, expr)?))
+        })
+        .collect::<Result<_, _>>()?;
+    Ok(TypedValue::DArray((a, Some(pos.clone()))))
 }
 
 pub fn expr_to_typed_value(
@@ -141,14 +216,26 @@ pub fn expr_to_typed_value(
         {
             unimplemented!()
         }
-        Array(fields) => array_to_typed_value(&fields),
+        Array(fields) => array_to_typed_value(emitter, ns, &fields),
         Varray(_) => unimplemented!(),
         Darray(_) => unimplemented!(),
-        Collection(x) if x.0.name().eq("vec") => unimplemented!(),
+        Collection(x) if x.0.name().eq("vec") => Ok(TypedValue::Vec((
+            x.2.iter()
+                .map(|x| value_afield_to_typed_value(emitter, ns, x))
+                .collect::<Result<_, _>>()?,
+            Some(pos.clone()),
+        ))),
         ValCollection(x) if x.0 == tast::VcKind::Vec || x.0 == tast::VcKind::Vector => {
             unimplemented!()
         }
-        Collection(x) if x.0.name().eq("keyset") => unimplemented!(),
+        Collection(x) if x.0.name().eq("keyset") => {
+            // TODO(hrust): dedup
+            Ok(TypedValue::Keyset(
+                x.2.iter()
+                    .map(|x| keyset_value_afield_to_typed_value(emitter, ns, x))
+                    .collect::<Result<_, _>>()?,
+            ))
+        }
         ValCollection(x) if x.0 == tast::VcKind::Keyset => unimplemented!(),
         Collection(x) if x.0.name().eq("dict") => {
             let values =
@@ -162,7 +249,7 @@ pub fn expr_to_typed_value(
         ValCollection(x) if x.0 == tast::VcKind::Set || x.0 == tast::VcKind::ImmSet => {
             unimplemented!()
         }
-        Shape(_) => unimplemented!(),
+        Shape(fields) => shape_to_typed_value(emitter, ns, fields, pos),
         ClassConst(x) => class_const_to_typed_value(emitter, &x.0, &x.1),
         BracedExpr(_) => unimplemented!(),
         Id(_) | ClassGet(_) => unimplemented!(),

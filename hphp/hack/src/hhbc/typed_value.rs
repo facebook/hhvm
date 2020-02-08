@@ -31,7 +31,7 @@ pub enum TypedValue {
     HhasAdata(String),
     Array(Vec<(TypedValue, TypedValue)>),
     VArray(Vec<Self>),
-    DArray(Vec<(TypedValue, TypedValue)>),
+    DArray((Vec<(TypedValue, TypedValue)>, ProvTag)),
     // Hack arrays: vectors, keysets, and dictionaries
     Vec((Vec<TypedValue>, ProvTag)),
     Keyset(Vec<TypedValue>),
@@ -67,7 +67,7 @@ impl From<TypedValue> for bool {
             // Empty collections cast to false if empty, otherwise true
             TypedValue::Array(v) => !v.is_empty(),
             TypedValue::VArray(v) => !v.is_empty(),
-            TypedValue::DArray(v) => !v.is_empty(),
+            TypedValue::DArray((v, _)) => !v.is_empty(),
             TypedValue::Vec((v, _)) => !v.is_empty(),
             TypedValue::Keyset(v) => !v.is_empty(),
             TypedValue::Dict((v, _)) => !v.is_empty(),

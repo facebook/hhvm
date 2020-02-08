@@ -42,3 +42,14 @@ impl AsRef<str> for Id {
         &self.1
     }
 }
+
+impl std::fmt::Display for Visibility {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        use Visibility::*;
+        match self {
+            Private => write!(f, "private"),
+            Public => write!(f, "public"),
+            Protected => write!(f, "protected"),
+        }
+    }
+}

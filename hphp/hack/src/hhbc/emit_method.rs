@@ -48,7 +48,7 @@ pub fn from_ast<'a>(
     let mut attributes =
         emit_attribute::from_asts(emitter, &class.namespace, &method.user_attributes)?;
     if is_closure_body {
-        emit_attribute::add_reified_attribute(&mut attributes, &method.tparams[..]);
+        attributes.extend(emit_attribute::add_reified_attribute(&method.tparams[..]));
     };
 
     let is_native = attributes

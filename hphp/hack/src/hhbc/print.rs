@@ -28,8 +28,12 @@ use oxidized::{ast_defs, relative_path::RelativePath};
 use runtime::TypedValue;
 use write::*;
 
+const ADATA_ARRAY_PREFIX: &str = "a";
 const ADATA_VARRAY_PREFIX: &str = "y";
+const ADATA_VEC_PREFIX: &str = "v";
 const ADATA_DICT_PREFIX: &str = "D";
+const ADATA_DARRAY_PREFIX: &str = "Y";
+const ADATA_KEYSET_PREFIX: &str = "k";
 
 /// Indent is an abstraction of indentation. Configurable indentation
 /// and perf tweaking will be easier.
@@ -126,7 +130,6 @@ pub fn print_program<W: Write>(
             handle_not_impl(|| print_program_(ctx, w, prog))?;
 
             newline(w)?;
-            newline(w)?;
             concat_str_by(w, " ", ["#", p, "ends here"])?;
 
             newline(w)
@@ -192,7 +195,7 @@ fn print_fun_def<W: Write>(
     }
     print_fun_attrs(w, fun_def)?;
     if ctx.opts.source_map() {
-        print_span(w, &fun_def.span)?;
+        w.write(string_of_span(&fun_def.span))?;
         w.write(" ")?;
     }
     option(w, body.return_type_info.as_ref(), print_type_info)?;
@@ -222,27 +225,37 @@ fn pos_to_prov_tag(ctx: &Context, loc: &Option<ast_defs::Pos>) -> String {
     }
 }
 
-fn print_adata_mapped_argument<W: Write, F>(
+fn print_adata_mapped_argument<W: Write, F, V>(
     ctx: &mut Context,
     w: &mut W,
     col_type: &str,
     loc: &Option<ast_defs::Pos>,
-    pairs: &Vec<(TypedValue, TypedValue)>,
+    values: &Vec<V>,
     f: F,
 ) -> Result<(), W::Error>
 where
-    F: Fn(&mut Context, &mut W, &TypedValue, &TypedValue) -> Result<(), W::Error>,
+    F: Fn(&mut Context, &mut W, &V) -> Result<(), W::Error>,
 {
     w.write(format!(
         "{}:{}:{{{}",
         col_type,
-        pairs.len(),
+        values.len(),
         pos_to_prov_tag(ctx, loc)
     ))?;
-    for (v1, v2) in pairs {
-        f(ctx, w, v1, v2)?
+    for v in values {
+        f(ctx, w, v)?
     }
     w.write(format!("}}"))
+}
+
+fn print_adata_collection_argument<W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    col_type: &str,
+    loc: &Option<ast_defs::Pos>,
+    values: &Vec<TypedValue>,
+) -> Result<(), W::Error> {
+    print_adata_mapped_argument(ctx, w, col_type, loc, values, &print_adata)
 }
 
 fn print_adata_dict_collection_argument<W: Write>(
@@ -252,7 +265,7 @@ fn print_adata_dict_collection_argument<W: Write>(
     loc: &Option<ast_defs::Pos>,
     pairs: &Vec<(TypedValue, TypedValue)>,
 ) -> Result<(), W::Error> {
-    print_adata_mapped_argument(ctx, w, col_type, loc, pairs, |ctx, w, v1, v2| {
+    print_adata_mapped_argument(ctx, w, col_type, loc, pairs, |ctx, w, (v1, v2)| {
         print_adata(ctx, w, v1)?;
         print_adata(ctx, w, v2)
     })
@@ -265,11 +278,23 @@ fn print_adata<W: Write>(ctx: &mut Context, w: &mut W, tv: &TypedValue) -> Resul
         TypedValue::Dict((pairs, loc)) => {
             print_adata_dict_collection_argument(ctx, w, ADATA_DICT_PREFIX, loc, pairs)
         }
+        TypedValue::Vec((values, loc)) => {
+            print_adata_collection_argument(ctx, w, ADATA_VEC_PREFIX, loc, values)
+        }
+        TypedValue::DArray((pairs, loc)) => {
+            print_adata_dict_collection_argument(ctx, w, ADATA_DARRAY_PREFIX, loc, pairs)
+        }
+        TypedValue::Array(pairs) => {
+            print_adata_dict_collection_argument(ctx, w, ADATA_ARRAY_PREFIX, &None, pairs)
+        }
+        TypedValue::Keyset(values) => {
+            print_adata_collection_argument(ctx, w, ADATA_KEYSET_PREFIX, &None, values)
+        }
         _ => unimplemented!("{:?}", tv),
     }
 }
 
-fn print_file_attribute<W: Write>(
+fn print_attribute<W: Write>(
     ctx: &mut Context,
     w: &mut W,
     a: &HhasAttribute,
@@ -286,6 +311,19 @@ fn print_file_attribute<W: Write>(
     Ok(())
 }
 
+fn print_attributes<W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    al: &Vec<HhasAttribute>,
+) -> Result<(), W::Error> {
+    // Adjust for underscore coming before alphabet
+    let al: Vec<&HhasAttribute> = al
+        .iter()
+        .sorted_by_key(|a| (!a.name.starts_with("__"), &a.name))
+        .collect();
+    concat_by(w, " ", &al, |w, a| print_attribute(ctx, w, a))
+}
+
 fn print_file_attributes<W: Write>(
     ctx: &mut Context,
     w: &mut W,
@@ -295,18 +333,10 @@ fn print_file_attributes<W: Write>(
         return Ok(());
     }
     newline(w)?;
-    newline(w)?;
     w.write(".file_attributes [")?;
-
-    // Adjust for underscore coming before alphabet
-    let al: Vec<&HhasAttribute> = al
-        .iter()
-        .sorted_by_key(|a| (!a.name.starts_with("__"), &a.name))
-        .collect();
-
-    concat_by(w, " ", &al, |w, a| print_file_attribute(ctx, w, a))?;
+    print_attributes(ctx, w, al)?;
     w.write("] ;")?;
-
+    newline(w)?;
     Ok(())
 }
 
@@ -319,7 +349,8 @@ fn print_main<W: Write>(ctx: &mut Context, w: &mut W, body: &HhasBody) -> Result
     wrap_by_braces(w, |w| {
         ctx.block(w, |c, w| print_body(c, w, body))?;
         newline(w)
-    })
+    })?;
+    newline(w)
 }
 
 fn print_body<W: Write>(ctx: &mut Context, w: &mut W, body: &HhasBody) -> Result<(), W::Error> {
@@ -433,7 +464,7 @@ fn print_lit_const<W: Write>(w: &mut W, lit: &InstructLitConst) -> Result<(), W:
         Null => w.write("Null"),
         Int(i) => concat_str_by(w, " ", ["Int", i.to_string().as_str()]),
         String(s) => {
-            w.write("String ");
+            w.write("String ")?;
             wrap_by_quotes(w, |w| w.write(s))
         }
         _ => not_impl!(),
@@ -461,8 +492,8 @@ fn print_params<W: Write>(w: &mut W, params: &[HhasParam]) -> Result<(), W::Erro
     not_impl!()
 }
 
-fn print_span<W: Write>(w: &mut W, span: &Span) -> Result<(), W::Error> {
-    not_impl!()
+fn string_of_span(&Span(line_begin, line_end): &Span) -> String {
+    format!("({},{})", line_begin, line_end)
 }
 
 fn print_fun_attrs<W: Write>(w: &mut W, fun_def: &HhasFunction) -> Result<(), W::Error> {
@@ -493,7 +524,7 @@ fn print_type_info<W: Write>(w: &mut W, ty: &HhasTypeInfo) -> Result<(), W::Erro
 fn print_extends<W: Write>(w: &mut W, base: Option<&str>) -> Result<(), W::Error> {
     match base {
         None => Ok(()),
-        Some(b) => concat_str_by(w, " ", ["extends", b]),
+        Some(b) => concat_str_by(w, " ", [" extends", b]),
     }
 }
 

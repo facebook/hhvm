@@ -79,7 +79,7 @@ let make_86method ~name ~params ~is_static ~visibility ~is_abstract ~span instrs
     (* method_rx_disabled *)
     false
 
-let from_extends ~is_enum _tparams extends =
+let from_extends ~is_enum extends =
   if is_enum then
     Some (Hhbc_id.Class.from_raw_string "HH\\BuiltinEnum")
   else
@@ -455,10 +455,7 @@ let emit_class (ast_class, hoisted) =
       None
     else
       let base =
-        from_extends
-          ~is_enum:(class_enum_type <> None)
-          tparams
-          ast_class.A.c_extends
+        from_extends ~is_enum:(class_enum_type <> None) ast_class.A.c_extends
       in
       match base with
       | Some cls

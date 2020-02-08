@@ -78,8 +78,17 @@ pub fn mangle_xhp_id(mut name: String) -> String {
     }
 }
 
-pub fn mangle(_name: String) -> String {
-    unimplemented!("")
+pub fn mangle(mut name: String) -> String {
+    if !ignore_id(&name) {
+        if let Some(pos) = name.rfind('\\') {
+            if is_xhp(&name[pos + 1..]) {
+                name.replace_range(pos + 1.., &mangle_xhp_id(name[pos + 1..].to_string()))
+            }
+        } else {
+            name = mangle_xhp_id(name);
+        }
+    }
+    name
 }
 
 pub fn quote_string(s: &str) -> String {
@@ -504,6 +513,27 @@ mod string_utils_tests {
         assert_eq!(
             super::mangle_meth_caller(cls, f),
             "\\MethCaller$SomeClass$some_function"
+        );
+    }
+
+    #[test]
+    fn mangle_test_1() {
+        assert_eq!(
+            super::mangle(":foo:bar-and-baz".into()),
+            "xhp_foo__bar_and_baz"
+        );
+    }
+
+    #[test]
+    fn mangle_test_2() {
+        assert_eq!(super::mangle("\\:base".into()), "\\xhp_base");
+    }
+
+    #[test]
+    fn mangle_test_3() {
+        assert_eq!(
+            super::mangle("\\NS1\\NS2\\:base".into()),
+            "\\NS1\\NS2\\xhp_base"
         );
     }
 

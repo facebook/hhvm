@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hhbc_string_utils_rust::{mangle_xhp_id, strip_global_ns};
+use hhbc_string_utils_rust::{mangle, strip_global_ns};
 
 use std::convert::From;
 
@@ -17,19 +17,6 @@ pub trait Id<'a>: Sized {
         Self: From<&'a str>,
     {
         strip_global_ns(s).into()
-    }
-
-    fn strip_gbl_ns(&self) -> Self
-    where
-        Self: From<String>,
-    {
-        use std::borrow::Cow;
-        let mut unstripped = Cow::Borrowed(self.to_raw_string());
-        if Self::MANGLE {
-            // allocate String only if mangling is required
-            unstripped = Cow::Owned(mangle_xhp_id(unstripped.to_owned().to_string()));
-        }
-        strip_global_ns(&unstripped).to_owned().into()
     }
 
     fn to_unmangled_str(&self) -> String {
@@ -50,6 +37,13 @@ macro_rules! impl_id {
 
         #[derive(Clone)]
         pub struct $type<'a>(Cow<'a, str>);
+
+        impl<'a> Default for $type<'a> {
+            fn default() -> Self {
+                Self("".into())
+            }
+        }
+
         impl<'a> crate::Id<'a> for $type<'a> {
             const MANGLE: bool = $mangle;
 
@@ -109,9 +103,7 @@ pub mod class {
 
     impl_id!(Type, mangle = true, {
         fn from_ast_name(s: &'a str) -> Type<'a> {
-            strip_global_ns(&mangle_xhp_id(s.to_string()))
-                .to_string()
-                .into()
+            strip_global_ns(&mangle(s.to_string())).to_string().into()
         }
     });
 }

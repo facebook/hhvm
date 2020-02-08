@@ -95,7 +95,10 @@ where
 
     let (program, codegen_t) = match ast {
         // TODO(shiqicao): change opts to Rc<Option> to avoid cloning
-        Either::Right((ast, is_hh_file)) => emit(&env, opts.clone(), is_hh_file, &ast),
+        Either::Right((mut ast, is_hh_file)) => {
+            elaborate_namespaces_visitor::elaborate_program(env.empty_namespace.clone(), &mut ast);
+            emit(&env, opts.clone(), is_hh_file, &ast)
+        }
         Either::Left((pos, msg, is_runtime_error)) => {
             emit_fatal(&env, is_runtime_error, opts.clone(), pos, msg)
         }

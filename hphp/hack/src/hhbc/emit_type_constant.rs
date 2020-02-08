@@ -35,7 +35,7 @@ fn dict_or_darray(opts: &Options, kv: Vec<(TypedValue, TypedValue)>) -> TypedVal
     if hack_arr_dv_arrs(opts) {
         TypedValue::Dict((kv, None))
     } else {
-        TypedValue::DArray(kv)
+        TypedValue::DArray((kv, None))
     }
 }
 

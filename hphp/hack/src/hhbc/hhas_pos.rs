@@ -6,7 +6,7 @@
 use oxidized::pos::Pos;
 
 /// Span, emitted as prefix to classes and functions
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct Span(pub usize, pub usize);
 
 impl std::convert::From<Pos> for Span {

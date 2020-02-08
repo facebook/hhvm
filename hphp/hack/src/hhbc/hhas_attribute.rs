@@ -32,6 +32,17 @@ impl HhasAttribute {
     }
 }
 
+fn is(s: &str, attr: &HhasAttribute) -> bool {
+    attr.is(|x| x == s)
+}
+
+fn has<F>(attrs: &[HhasAttribute], f: F) -> bool
+where
+    F: Fn(&HhasAttribute) -> bool,
+{
+    attrs.iter().any(f)
+}
+
 pub fn is_no_injection(attrs: &[HhasAttribute]) -> bool {
     is_native_arg(native_arg::NO_INJECTION, attrs)
 }
@@ -48,6 +59,38 @@ fn is_native_arg(s: &str, attrs: &[HhasAttribute]) -> bool {
                 _ => false,
             })
     })
+}
+
+fn is_foldable(attr: &HhasAttribute) -> bool {
+    is("__IsFoldable", attr)
+}
+
+fn is_dynamically_constructible(attr: &HhasAttribute) -> bool {
+    is("__DynamicallyConstructible", attr)
+}
+
+fn is_sealed(attr: &HhasAttribute) -> bool {
+    is("__Sealed", attr)
+}
+
+fn is_const(attr: &HhasAttribute) -> bool {
+    is("__Const", attr)
+}
+
+pub fn has_dynamically_constructible(attrs: &[HhasAttribute]) -> bool {
+    has(attrs, &is_dynamically_constructible)
+}
+
+pub fn has_foldable(attrs: &[HhasAttribute]) -> bool {
+    has(attrs, &is_foldable)
+}
+
+pub fn has_sealed(attrs: &[HhasAttribute]) -> bool {
+    has(attrs, &is_sealed)
+}
+
+pub fn has_const(attrs: &[HhasAttribute]) -> bool {
+    has(attrs, &is_const)
 }
 
 pub fn deprecation_info<'a>(

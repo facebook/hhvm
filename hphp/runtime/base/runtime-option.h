@@ -910,6 +910,7 @@ struct RuntimeOption {
   F(bool, HHIREnableCoalescing,        true)                            \
   F(bool, HHIRAllocSIMDRegs,           true)                            \
   F(bool, HHIRStressSpill,             false)                           \
+  F(bool, JitStressTestLiveness,       false)                           \
   /* Region compiler flags */                                           \
   F(string,   JitRegionSelector,       regionSelectorDefault())         \
   F(bool,     JitPGO,                  pgoDefault())                    \

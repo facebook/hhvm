@@ -23,7 +23,7 @@
     utils_config_file_lwt
     version)
   (preprocess
-    (pps lwt_ppx)))
+    (pps lwt_ppx ppx_deriving.std))) ; See T41851208
 
 (library
   (name client_log_command)
@@ -32,4 +32,4 @@
   (libraries
     sys_utils)
   (preprocess
-    (pps lwt_ppx))) ; See T41851208
+    (pps lwt_ppx ppx_deriving.std))) ; See T41851208

@@ -656,7 +656,7 @@ let respond_to_error (event : event option) (e : exn) (stack : string) : unit =
   | _ ->
     Lsp_helpers.telemetry_error
       to_stdout
-      (Printf.sprintf "%s [%i]\n%s" e.message e.code stack)
+      (Printf.sprintf "%s [%s]\n%s" e.message (Error.show_code e.code) stack)
 
 let status_tick () : string =
   (* OCaml has pretty poor Unicode support.
@@ -696,7 +696,7 @@ let request_showStatusFB
         | _ ->
           let error =
             {
-              Error.code = Error.Code.parseError;
+              Error.code = Error.ParseError;
               message = "expected ShowStatusResult";
               data = None;
             }
@@ -731,7 +731,7 @@ let request_showMessage
     | _ ->
       let error =
         {
-          Error.code = Error.Code.parseError;
+          Error.code = Error.ParseError;
           message = "expected ShowMessageRequestResult";
           data = None;
         }
@@ -2161,7 +2161,10 @@ let do_formatting_common
     (* "hh_client format", and then make it return proper error that we can  *)
     (* pattern-match upon, rather than hard-coding the string...             *)
     []
-  | Error message -> raise (Error.InternalError message)
+  | Error message ->
+    raise
+      (Error.LspException
+         { Error.code = Error.InternalError; message; data = None })
   | Ok r ->
     let range = ide_range_to_lsp r.range in
     let newText = r.new_text in
@@ -2304,7 +2307,10 @@ let do_documentRename
   let patches =
     match patches with
     | Ok patches -> patches
-    | Error message -> raise (Error.InvalidRequest message)
+    | Error message ->
+      raise
+        (Error.LspException
+           { Error.code = Error.InvalidRequest; message; data = None })
   in
   Lwt.return (patches_to_workspace_edit patches)
 
@@ -2878,7 +2884,11 @@ let rec connect ~(env : env) (state : state) : state Lwt.t =
     let stack = Printexc.get_backtrace () in
     let { Lsp.Error.code; message; _ } = Lsp_fmt.error_of_exn e in
     let longMessage =
-      Printf.sprintf "connect failed: %s [%i]\n%s" message code stack
+      Printf.sprintf
+        "connect failed: %s [%s]\n%s"
+        message
+        (Lsp.Error.show_code code)
+        stack
     in
     let () = Lsp_helpers.telemetry_error to_stdout longMessage in
     Exit_status.(
@@ -3239,7 +3249,13 @@ let cancel_if_stale
   let time_elapsed = Unix.gettimeofday () -. timestamp in
   if time_elapsed >= timeout then
     if Jsonrpc.has_message client then
-      raise (Error.RequestCancelled "request timed out")
+      raise
+        (Error.LspException
+           {
+             Error.code = Error.RequestCancelled;
+             message = "request timed out";
+             data = None;
+           })
     else
       Lwt.return_unit
   else
@@ -3463,9 +3479,21 @@ let handle_client_message
       Lwt.return_some { result_count = 0; result_extra_telemetry = None }
     (* any request/notification if we haven't yet initialized *)
     | (Pre_init, _) ->
-      raise (Error.ServerNotInitialized "Server not yet initialized")
+      raise
+        (Error.LspException
+           {
+             Error.code = Error.ServerNotInitialized;
+             message = "Server not yet initialized";
+             data = None;
+           })
     | (Post_shutdown, _c) ->
-      raise (Error.InvalidRequest "already received shutdown request")
+      raise
+        (Error.LspException
+           {
+             Error.code = Error.InvalidRequest;
+             message = "already received shutdown request";
+             data = None;
+           })
     (* rage request *)
     | (_, RequestMessage (id, RageRequestFB)) ->
       let%lwt result = do_rageFB !state ref_unblocked_time in
@@ -3679,8 +3707,12 @@ let handle_client_message
       (* we respond with Operation_cancelled so that clients don't produce *)
       (* user-visible logs/warnings. *)
       raise
-        (Error.RequestCancelled
-           (Hh_server_initializing |> hh_server_state_to_string))
+        (Error.LspException
+           {
+             Error.code = Error.RequestCancelled;
+             message = Hh_server_initializing |> hh_server_state_to_string;
+             data = None;
+           })
     | (Main_loop _menv, NotificationMessage InitializedNotification) ->
       Lwt.return_none
     (* textDocument/hover request *)
@@ -3864,21 +3896,30 @@ let handle_client_message
     (* catch-all for client reqs/notifications we haven't yet implemented *)
     | (Main_loop _menv, message) ->
       let method_ = Lsp_fmt.message_name_to_string message in
-      let message = Printf.sprintf "not implemented: %s" method_ in
-      raise (Error.MethodNotFound message)
+      raise
+        (Error.LspException
+           {
+             Error.code = Error.MethodNotFound;
+             message = Printf.sprintf "not implemented: %s" method_;
+             data = None;
+           })
     (* catch-all for requests/notifications after shutdown request *)
     (* client message when we've lost the server *)
     | (Lost_server lenv, _) ->
-      Lost_env.(
-        (* if trigger_on_lsp_method is set, our caller should already have        *)
-        (* transitioned away from this state.                                     *)
-        assert (not lenv.p.trigger_on_lsp);
+      let open Lost_env in
+      (* if trigger_on_lsp_method is set, our caller should already have        *)
+      (* transitioned away from this state.                                     *)
+      assert (not lenv.p.trigger_on_lsp);
 
-        (* We deny all other requests. This is the only response that won't       *)
-        (* produce logs/warnings on most clients...                               *)
-        raise
-          (Error.RequestCancelled
-             (lenv.p.new_hh_server_state |> hh_server_state_to_string)))
+      (* We deny all other requests. This is the only response that won't       *)
+      (* produce logs/warnings on most clients...                               *)
+      raise
+        (Error.LspException
+           {
+             Error.code = Error.RequestCancelled;
+             message = lenv.p.new_hh_server_state |> hh_server_state_to_string;
+             data = None;
+           })
   in
   Lwt.return result_telemetry_opt
 
@@ -4243,15 +4284,18 @@ let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
         Error_from_server_recoverable
         !ref_unblocked_time
         env;
-      respond_to_error !ref_event (Error.Unknown message) stack;
+      let exn =
+        Error.LspException
+          { Error.code = Error.UnknownErrorCode; message; data = None }
+      in
+      respond_to_error !ref_event exn stack;
       Lwt.return_unit
-    | Error.RequestCancelled _ as e ->
+    | Error.LspException e when e.Error.code = Error.RequestCancelled ->
       let stack = Printexc.get_backtrace () in
-      respond_to_error !ref_event e stack;
-      let message = Exn.to_string e in
+      respond_to_error !ref_event (Error.LspException e) stack;
       hack_log_error
         !ref_event
-        message
+        (Error.show_code e.Error.code ^ " " ^ e.Error.message)
         stack
         Error_from_lsp_cancelled
         !ref_unblocked_time

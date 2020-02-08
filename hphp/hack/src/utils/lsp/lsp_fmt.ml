@@ -21,10 +21,24 @@ let parse_id (json : json) : lsp_id =
   | JSON_Number s ->
     begin
       try NumberId (int_of_string s)
-      with Failure _ -> raise (Error.Parse ("float ids not allowed: " ^ s))
+      with Failure _ ->
+        raise
+          (Error.LspException
+             {
+               Error.code = Error.ParseError;
+               message = "float ids not allowed: " ^ s;
+               data = None;
+             })
     end
   | JSON_String s -> StringId s
-  | _ -> raise (Error.Parse ("not an id: " ^ Hh_json.json_to_string json))
+  | _ ->
+    raise
+      (Error.LspException
+         {
+           Error.code = Error.ParseError;
+           message = "not an id: " ^ Hh_json.json_to_string json;
+           data = None;
+         })
 
 let parse_id_opt (json : json option) : lsp_id option =
   Option.map json ~f:parse_id
@@ -429,11 +443,22 @@ let parse_diagnostic (j : json option) : PublishDiagnostics.diagnostic =
         begin
           try IntCode (int_of_string s)
           with Failure _ ->
-            let msg = "Diagnostic code expected to be an int: " ^ s in
-            raise (Error.Parse msg)
+            raise
+              (Error.LspException
+                 {
+                   Error.code = Error.ParseError;
+                   message = "Diagnostic code expected to be an int: " ^ s;
+                   data = None;
+                 })
         end
       | _ ->
-        raise (Error.Parse "Diagnostic code expected to be an int or string")
+        raise
+          (Error.LspException
+             {
+               Error.code = Error.ParseError;
+               message = "Diagnostic code expected to be an int or string";
+               data = None;
+             })
     in
     let parse_info j =
       {
@@ -1075,43 +1100,17 @@ let parse_didChangeWatchedFiles (json : Hh_json.json option) :
 (************************************************************************)
 
 let error_of_exn (e : exn) : Lsp.Error.t =
-  Lsp.Error.(
-    match e with
-    | Error.Parse message -> { code = Code.parseError; message; data = None }
-    | Error.InvalidRequest message ->
-      { code = Code.invalidRequest; message; data = None }
-    | Error.MethodNotFound message ->
-      { code = Code.methodNotFound; message; data = None }
-    | Error.InvalidParams message ->
-      { code = Code.invalidParams; message; data = None }
-    | Error.InternalError message ->
-      { code = Code.internalError; message; data = None }
-    | Error.ServerErrorStart (message, data) ->
-      {
-        code = Code.serverErrorStart;
-        message;
-        data = Some (print_initializeError data);
-      }
-    | Error.ServerErrorEnd message ->
-      { code = Code.serverErrorEnd; message; data = None }
-    | Error.ServerNotInitialized message ->
-      { code = Code.serverNotInitialized; message; data = None }
-    | Error.Unknown message ->
-      { code = Code.unknownErrorCode; message; data = None }
-    | Error.RequestCancelled message ->
-      { code = Code.requestCancelled; message; data = None }
-    | Exit_status.Exit_with code ->
-      {
-        code = Code.unknownErrorCode;
-        message = Exit_status.to_string code;
-        data = None;
-      }
-    | _ ->
-      {
-        code = Code.unknownErrorCode;
-        message = Printexc.to_string e;
-        data = None;
-      })
+  let open Lsp.Error in
+  match e with
+  | LspException e -> e
+  | Exit_status.Exit_with code ->
+    {
+      code = UnknownErrorCode;
+      message = Exit_status.to_string code;
+      data = None;
+    }
+  | _ ->
+    { code = UnknownErrorCode; message = Printexc.to_string e; data = None }
 
 let print_error
     ?(include_error_stack_trace = true) (e : Error.t) (stack : string) : json =
@@ -1134,13 +1133,19 @@ let print_error
           []
       in
       let entries =
-        ("code", int_ e.code) :: ("message", string_ e.message) :: entries
+        ("code", int_ (Error.code_to_enum e.code))
+        :: ("message", string_ e.message)
+        :: entries
       in
       JSON_Object entries))
 
 let parse_error (error : json) : Error.t =
   let json = Some error in
-  let code = Jget.int_exn json "code" in
+  let code =
+    Jget.int_exn json "code"
+    |> Error.code_of_enum
+    |> Option.value ~default:Error.UnknownErrorCode
+  in
   let message = Jget.string_exn json "message" in
   let data = Jget.val_opt json "data" in
   { Error.code; message; data }
@@ -1356,7 +1361,13 @@ let parse_lsp_result (request : lsp_request) (result : json) : lsp_result =
   | HackTestStopServerRequestFB
   | HackTestShutdownServerlessRequestFB
   | UnknownRequest _ ->
-    raise (Error.Parse ("Don't know how to parse LSP response " ^ method_))
+    raise
+      (Error.LspException
+         {
+           Error.code = Error.ParseError;
+           message = "Don't know how to parse LSP response " ^ method_;
+           data = None;
+         })
 
 (* parse_lsp: non-jsonrpc inputs - will raise an exception                    *)
 (* requests and notifications - will raise an exception if they're malformed, *)
@@ -1381,7 +1392,10 @@ let parse_lsp (json : json) (outstanding : lsp_id -> lsp_request) : lsp_message
     ResponseMessage (id, parse_lsp_result request result)
   | (Some id, _, _, Some error) ->
     ResponseMessage (id, ErrorResult (parse_error error, ""))
-  | (_, _, _, _) -> raise (Error.Parse "Not JsonRPC")
+  | (_, _, _, _) ->
+    raise
+      (Error.LspException
+         { Error.code = Error.ParseError; message = "Not JsonRPC"; data = None })
 
 let print_lsp_request (id : lsp_id) (request : lsp_request) : json =
   let method_ = request_name_to_string request in

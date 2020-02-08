@@ -21,7 +21,12 @@ let lsp_uri_to_path (uri : documentUri) : string =
       File_url.parse uri
     else
       raise
-        (Error.InvalidParams (Printf.sprintf "Not a valid file url '%s'" uri))
+        (Error.LspException
+           {
+             Error.code = Error.InvalidParams;
+             message = Printf.sprintf "Not a valid file url '%s'" uri;
+             data = None;
+           })
   else
     uri
 

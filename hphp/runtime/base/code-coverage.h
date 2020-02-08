@@ -17,8 +17,10 @@
 #ifndef incl_HPHP_EVAL_CODE_COVERAGE_H_
 #define incl_HPHP_EVAL_CODE_COVERAGE_H_
 
-#include "hphp/util/hash-map.h"
+#include "hphp/runtime/base/req-hash-map.h"
+#include "hphp/runtime/base/req-vector.h"
 
+#include <folly/Optional.h>
 #include <string>
 #include <vector>
 
@@ -28,9 +30,9 @@ namespace HPHP {
 struct Array;
 
 struct CodeCoverage {
-  static constexpr int kLineExecuted = 1;
-
   void Record(const char* filename, int line0, int line1);
+  void onSessionInit();
+  void onSessionExit();
 
   /*
    * If report_frequency is passed, returns an array in this format,
@@ -59,9 +61,15 @@ struct CodeCoverage {
    */
   void Reset();
 
+  /*
+   * Causes CodeCoverage to dump any coverage data onSessionExit()
+   */
+  void dumpOnExit() { shouldDump = true; }
+
 private:
-  using CodeCoverageMap = hphp_vector_map<const char*, std::vector<int>>;
-  CodeCoverageMap m_hits;
+  using CodeCoverageMap = req::vector_map<const char*, req::vector<int>>;
+  folly::Optional<CodeCoverageMap> m_hits;
+  bool shouldDump{false};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

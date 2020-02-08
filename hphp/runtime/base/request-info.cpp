@@ -55,13 +55,11 @@ Mutex s_request_info_mutex;
 RDS_LOCAL_NO_CHECK(RequestInfo, RequestInfo::s_requestInfo);
 
 RequestInfo::RequestInfo() {
-  m_coverage = new CodeCoverage();
 }
 
 RequestInfo::~RequestInfo() {
   Lock lock(s_request_info_mutex);
   s_request_infos.erase(this);
-  delete m_coverage;
 }
 
 void RequestInfo::init() {
@@ -125,6 +123,7 @@ void RequestInfo::InvokeOOMKiller() {
 
 void RequestInfo::onSessionInit() {
   m_reqInjectionData.onSessionInit();
+  m_coverage.onSessionInit();
 }
 
 bool RequestInfo::changeGlobalGCStatus(GlobalGCStatus from, GlobalGCStatus to) {
@@ -147,6 +146,7 @@ void RequestInfo::onSessionExit() {
   m_reqInjectionData.setUserTimeout(0);
 
   m_reqInjectionData.reset();
+  m_coverage.onSessionExit();
 
   if (auto tmp = m_pendingException) {
     m_pendingException = nullptr;

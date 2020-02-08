@@ -1112,9 +1112,9 @@ bool HHVM_FUNCTION(fb_rename_function, const String& orig_func_name,
 Variant HHVM_FUNCTION(fb_get_code_coverage, bool flush) {
   RequestInfo *ti = RequestInfo::s_requestInfo.getNoCheck();
   if (ti->m_reqInjectionData.getCoverage()) {
-    Array ret = ti->m_coverage->Report();
+    Array ret = ti->m_coverage.Report();
     if (flush) {
-      ti->m_coverage->Reset();
+      ti->m_coverage.Reset();
     }
     return ret;
   }
@@ -1123,7 +1123,7 @@ Variant HHVM_FUNCTION(fb_get_code_coverage, bool flush) {
 
 void HHVM_FUNCTION(fb_enable_code_coverage) {
   RequestInfo *ti = RequestInfo::s_requestInfo.getNoCheck();
-  ti->m_coverage->Reset();
+  ti->m_coverage.Reset();
   ti->m_reqInjectionData.setCoverage(true);
   if (g_context->isNested()) {
     raise_notice("Calling fb_enable_code_coverage from a nested "
@@ -1148,8 +1148,8 @@ void HHVM_FUNCTION(fb_enable_code_coverage) {
 Array disable_code_coverage_helper(bool report_frequency) {
   RequestInfo *ti = RequestInfo::s_requestInfo.getNoCheck();
   ti->m_reqInjectionData.setCoverage(false);
-  auto ret = ti->m_coverage->Report(report_frequency);
-  ti->m_coverage->Reset();
+  auto ret = ti->m_coverage.Report(report_frequency);
+  ti->m_coverage.Reset();
   return ret;
 }
 

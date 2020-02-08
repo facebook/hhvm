@@ -782,15 +782,15 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program) {
       ));
     }
   }
+  auto& ti = RI();
+  if (coverage && ti.m_reqInjectionData.getCoverage() &&
+      !RuntimeOption::CodeCoverageOutputFile.empty()) {
+    ti.m_coverage.dumpOnExit();
+  }
   g_context->onShutdownPostSend(); // runs more php
   Eval::Debugger::InterruptPSPEnded(program);
   hphp_context_exit();
   hphp_session_exit();
-  auto& ti = RI();
-  if (coverage && ti.m_reqInjectionData.getCoverage() &&
-      !RuntimeOption::CodeCoverageOutputFile.empty()) {
-    ti.m_coverage->Report(RuntimeOption::CodeCoverageOutputFile);
-  }
 }
 
 #if defined(__APPLE__) || defined(_MSC_VER)

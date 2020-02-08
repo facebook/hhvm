@@ -88,14 +88,15 @@ namespace HPHP {
  * So right now it is just simpler to ignore line1.
  */
 void CodeCoverage::Record(const char *filename, int line0, int line1) {
+  assertx(m_hits.hasValue());
   if (!filename || !*filename || line0 <= 0 || line1 <= 0 || line0 > line1) {
     return;
   }
   Logger::Verbose("%s, (%d, %d)\n", filename, line0, line1);
 
-  auto iter = m_hits.find(filename);
-  if (iter == m_hits.end()) {
-    auto& lines = m_hits[filename];
+  auto iter = m_hits->find(filename);
+  if (iter == m_hits->end()) {
+    auto& lines = (*m_hits)[filename];
     lines.resize(line1 + 1);
     for (int i = line0; i <= line0 /* should be line1 one day */; i++) {
       lines[i] = 1;
@@ -113,8 +114,9 @@ void CodeCoverage::Record(const char *filename, int line0, int line1) {
 
 Array CodeCoverage::Report(bool report_frequency /* = false*/,
                            bool sys /* = true */) {
+  assertx(m_hits.hasValue());
   Array ret = Array::CreateDArray();
-  for (const auto& iter : m_hits) {
+  for (const auto& iter : *m_hits) {
     if (!sys && Extension::IsSystemlibPath(iter.first)) {
       continue;
     }
@@ -139,6 +141,7 @@ Array CodeCoverage::Report(bool report_frequency /* = false*/,
 }
 
 void CodeCoverage::Report(const std::string &filename) {
+  assertx(m_hits.hasValue());
   std::ofstream f(filename.c_str());
   if (!f) {
     Logger::Error("unable to open %s", filename.c_str());
@@ -146,12 +149,12 @@ void CodeCoverage::Report(const std::string &filename) {
   }
 
   f << "{\n";
-  for (CodeCoverageMap::const_iterator iter = m_hits.begin();
-       iter != m_hits.end();) {
+  for (CodeCoverageMap::const_iterator iter = m_hits->begin();
+       iter != m_hits->end();) {
     f << "\"" << iter->first << "\": [";
     f << folly::join(",", iter->second);
     f << "]";
-    if (++iter != m_hits.end()) {
+    if (++iter != m_hits->end()) {
       f << ",";
     }
     f << "\n";
@@ -162,8 +165,19 @@ void CodeCoverage::Report(const std::string &filename) {
 }
 
 void CodeCoverage::Reset() {
-  m_hits.clear();
+  assertx(m_hits.hasValue());
+  m_hits->clear();
   resetCoverageCounters();
+}
+
+void CodeCoverage::onSessionInit() {
+  m_hits.emplace();
+}
+
+void CodeCoverage::onSessionExit() {
+  if (shouldDump) Report(RuntimeOption::CodeCoverageOutputFile);
+  shouldDump = false;
+  m_hits.reset();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

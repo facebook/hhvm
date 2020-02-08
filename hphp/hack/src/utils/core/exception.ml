@@ -69,3 +69,30 @@ let get_current_callstack_string n =
   Printexc.get_callstack n |> Printexc.raw_backtrace_to_string
 
 let record_backtrace = Printexc.record_backtrace
+
+let stack_re =
+  Str.regexp
+    {|^\(Called\|Raised\) .* file "\([^"]*\)", line \([0-9]+\), character.*$|}
+
+let filename_re = Str.regexp {|^.*hack/\(.*\)$|}
+
+let clean_stack (stack : string) : string =
+  let format_one_line (s : string) : string =
+    if Str.string_match stack_re s 0 then
+      let filename = Str.matched_group 2 s in
+      let line_number = Str.matched_group 3 s in
+      if Str.string_match filename_re filename 0 then
+        (* keep lines under hack source directory *)
+        let filename = Str.matched_group 1 filename in
+        Printf.sprintf "%s @ %s" filename line_number
+      else
+        (* skip lines not under hack, e.g. those in core libraries *)
+        ""
+    else
+      (* reproduce exactly the non-source lines *)
+      s
+  in
+  String_utils.split_on_newlines stack
+  |> List.map format_one_line
+  |> List.filter (fun s -> String.length s > 0)
+  |> String.concat "\n"

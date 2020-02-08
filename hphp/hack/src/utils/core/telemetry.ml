@@ -101,6 +101,7 @@ let exception_ (e : Exception.t) : key_value_pair =
     (Exception.get_ctor_string e)
 
 let error_with_stack (telemetry : t) ~(stack : string) ~(e : string) : t =
+  let stack = Exception.clean_stack stack in
   error ~stack:(Some stack) e :: telemetry
 
 let error (telemetry : t) ~(e : string) : t = error ~stack:None e :: telemetry

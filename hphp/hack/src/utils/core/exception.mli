@@ -26,3 +26,5 @@ val get_backtrace_string : t -> string
 val get_current_callstack_string : int -> string
 
 val record_backtrace : bool -> unit
+
+val clean_stack : string -> string

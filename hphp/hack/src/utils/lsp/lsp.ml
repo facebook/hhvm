@@ -1198,8 +1198,7 @@ type lsp_result =
   | HackTestStopServerResultFB
   | HackTestShutdownServerlessResultFB
   | RegisterCapabilityRequestResult
-  (* the string is a stacktrace *)
-  | ErrorResult of Error.t * string
+  | ErrorResult of Error.t
 
 type lsp_notification =
   | ExitNotification

@@ -80,7 +80,7 @@ val rpc :
   tracking_id:string ->
   ref_unblocked_time:float ref ->
   'response ClientIdeMessage.t ->
-  ('response, Marshal_tools.remote_exception_data) Lwt_result.t
+  ('response, Lsp.Error.t) Lwt_result.t
 
 (** Get a handle to the stream of notifications sent by the IDE service. These
 notifications may be sent even during RPC requests, and so should be processed

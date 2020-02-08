@@ -168,8 +168,13 @@ val parse_didChangeWatchedFiles :
 
 val error_of_exn : exn -> Lsp.Error.t
 
-val print_error :
-  ?include_error_stack_trace:bool -> Lsp.Error.t -> string -> Hh_json.json
+val error_data_of_stack : string -> Hh_json.json option
+
+val error_data_of_string : key:string -> string -> Hh_json.json option
+
+val print_error : Lsp.Error.t -> Hh_json.json
+
+val error_to_log_string : Lsp.Error.t -> string
 
 val parse_error : Hh_json.json -> Lsp.Error.t
 
@@ -195,13 +200,8 @@ val parse_lsp :
 
 val print_lsp_request : Lsp.lsp_id -> Lsp.lsp_request -> Hh_json.json
 
-val print_lsp_response :
-  ?include_error_stack_trace:bool ->
-  Lsp.lsp_id ->
-  Lsp.lsp_result ->
-  Hh_json.json
+val print_lsp_response : Lsp.lsp_id -> Lsp.lsp_result -> Hh_json.json
 
 val print_lsp_notification : Lsp.lsp_notification -> Hh_json.json
 
-val print_lsp :
-  ?include_error_stack_trace:bool -> Lsp.lsp_message -> Hh_json.json
+val print_lsp : Lsp.lsp_message -> Hh_json.json

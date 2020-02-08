@@ -8,6 +8,7 @@
   (libraries
     client_ide_message
     lwt
+    lsp
     server
     server_env
     state_loader

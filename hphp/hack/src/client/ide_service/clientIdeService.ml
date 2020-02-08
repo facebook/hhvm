@@ -120,8 +120,7 @@ let do_rpc
     ~(tracked_message : 'a ClientIdeMessage.tracked_t)
     ~(ref_unblocked_time : float ref)
     ~(messages_to_send : message_queue)
-    ~(response_emitter : response_emitter) :
-    ('a, Marshal_tools.remote_exception_data) Lwt_result.t =
+    ~(response_emitter : response_emitter) : ('a, Lsp.Error.t) Lwt_result.t =
   try%lwt
     let success =
       Lwt_message_queue.push messages_to_send (Message_wrapper tracked_message)
@@ -144,24 +143,25 @@ let do_rpc
       than coercing its type immediately. *)
       ref_unblocked_time := unblocked_time;
       let response = Result.map ~f:Obj.magic response in
-      let response =
-        match response with
-        | Ok r -> Ok r
-        | Error { ClientIdeMessage.user_message; log_string; _ } ->
-          Error { Marshal_tools.message = user_message; stack = log_string }
-      in
-      Lwt.return response
+      (match response with
+      | Ok r -> Lwt.return_ok r
+      | Error { ClientIdeMessage.user_message; log_string; _ } ->
+        Lwt.return_error
+          {
+            Lsp.Error.code = Lsp.Error.UnknownErrorCode;
+            message = user_message;
+            data = Lsp_fmt.error_data_of_string ~key:"log_string" log_string;
+          })
   with e ->
     let e = Exception.wrap e in
-    let error_data =
+    Lwt.return_error
       {
-        Marshal_tools.message =
+        Lsp.Error.code = Lsp.Error.UnknownErrorCode;
+        message =
           "Internal error during RPC call to IDE services: "
           ^ Exception.get_ctor_string e;
-        stack = Exception.to_string e;
+        data = Lsp_fmt.error_data_of_stack (Exception.to_string e);
       }
-    in
-    Lwt.return_error error_data
 
 let make (args : ClientIdeMessage.daemon_args) : t =
   let daemon_handle =
@@ -299,9 +299,7 @@ let destroy (t : t) ~(tracking_id : string) : unit Lwt.t =
          let%lwt () =
            Lwt.pick
              [
-               (let%lwt (_result
-                          : (unit, Marshal_tools.remote_exception_data) result)
-                    =
+               (let%lwt (_result : (unit, Lsp.Error.t) result) =
                   do_rpc
                     ~tracked_message
                     ~ref_unblocked_time
@@ -460,39 +458,35 @@ let rpc
     (t : t)
     ~(tracking_id : string)
     ~(ref_unblocked_time : float ref)
-    (message : 'a ClientIdeMessage.t) :
-    ('a, Marshal_tools.remote_exception_data) Lwt_result.t =
+    (message : 'a ClientIdeMessage.t) : ('a, Lsp.Error.t) Lwt_result.t =
   let { messages_to_send; response_emitter; _ } = t in
   let tracked_message = { ClientIdeMessage.tracking_id; message } in
   match t.state with
   | Uninitialized { wait_for_initialization = false } ->
-    let stack = Exception.get_current_callstack_string 100 in
     Lwt.return_error
       {
-        Marshal_tools.message = "IDE service has not yet been initialized";
-        stack;
+        Lsp.Error.code = Lsp.Error.RequestCancelled;
+        message = "IDE service has not yet been initialized";
+        data = None;
       }
   | Failed_to_initialize { ClientIdeMessage.user_message; log_string; _ } ->
-    let error_data =
+    Lwt.return_error
       {
-        Marshal_tools.message =
-          "IDE service failed to initialize: " ^ user_message;
-        stack = log_string;
+        Lsp.Error.code = Lsp.Error.RequestCancelled;
+        message = "IDE service failed to initialize: " ^ user_message;
+        data = Lsp_fmt.error_data_of_string ~key:"not_running_reason" log_string;
       }
-    in
-    Lwt.return_error error_data
   | Stopped (reason, { ClientIdeMessage.user_message; log_string; _ }) ->
-    let error_data =
+    Lwt.return_error
       {
-        Marshal_tools.message =
+        Lsp.Error.code = Lsp.Error.RequestCancelled;
+        message =
           Printf.sprintf
             "IDE service is stopped: %s. %s"
             (Stop_reason.to_string reason)
             user_message;
-        stack = log_string;
+        data = Lsp_fmt.error_data_of_string ~key:"not_running_reason" log_string;
       }
-    in
-    Lwt.return_error error_data
   | Uninitialized { wait_for_initialization = true } ->
     let%lwt () = wait_for_initialization t in
     let%lwt result =

@@ -141,14 +141,14 @@ let client_lsp_method_exception
     ~start_hh_server_state:_
     ~start_handle_time:_
     ~serverless_ide_flag:_
-    ~reason:_
-    ~stack:_
+    ~message:_
+    ~data_opt:_
     ~source:_ =
   ()
 
 let serverless_ide_crash ~message:_ ~stack:_ = ()
 
-let client_lsp_exception ~root:_ ~reason:_ ~stack:_ ~source:_ = ()
+let client_lsp_exception ~root:_ ~message:_ ~data_opt:_ ~source:_ = ()
 
 let serverless_ide_startup ~component:_ ~start_time:_ = ()
 

@@ -1021,6 +1021,7 @@ jit::vector<LiveSet> computeLiveness(const Vunit& unit,
 
       visitUses(unit, inst, uvisit);
       visit(unit, implicit_uses, uvisit);
+      visit(unit, implicit_across, uvisit);
     }
 
     if (live != livein[b]) {

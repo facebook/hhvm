@@ -224,6 +224,84 @@ interface TypeParameterAttribute {}
 
 interface TypeConstantAttribute {}
 
+/**
+ * Begin collecting code coverage on all subsequent calls into files in $files
+ * during this request.
+ *
+ * The requst must be executing in non-RepoAuthoritative mode and the server
+ * must be configured with Eval.EnablePerFileCoverage = true.
+ *
+ * @param $files a list of paths to collect coverage from
+ */
+<<__Native>>
+function enable_per_file_coverage(keyset<string> $files): void;
+
+/**
+ * Stop collecting coverage on all subsequent calls into files in $files during
+ * this request.
+ *
+ * @param $files a list of paths to stop collecting coverage from
+ */
+<<__Native>>
+function disable_per_file_coverage(keyset<string> $files): void;
+
+/**
+ * Returns a list of files for which coverage has been enabled in this request.
+ */
+<<__Native>>
+function get_files_with_coverage(): keyset<string>;
+
+/**
+ * Extract coverage data for the file at path $file. The returned vector
+ * contains a list of line numbers that were seen at least once while coverage
+ * was enablgc_enabled for the file.
+ *
+ * @return a list of covered line numbers
+ */
+<<__Native>>
+function get_coverage_for_file(string $file): vec<int>;
+
+/**
+ * Clear all coverage data for the file at path $file. Continue collecting
+ * coverage for that file.
+ *
+ * @param $file the path of the file to clear coverage data for
+ */
+<<__Native>>
+function clear_coverage_for_file(string $file): void;
+
+/**
+ * Disable all coverage. Stops collecting code coverage on any file in the
+ * current request.
+ */
+function disable_all_coverage(): void {
+  disable_per_file_coverage(get_files_with_coverage());
+}
+
+/**
+ * Collect coverage data for all files covered in this request as a map from
+ * filepath to a list of covered lines.
+ *
+ * @return a map of filepath -> line vector
+ */
+function get_all_coverage_data(): dict<string, vec<int>> {
+  $ret = dict[];
+  foreach (get_files_with_coverage() as $file) {
+    $ret[$file] = get_coverage_for_file($file);
+  }
+  return $ret;
+}
+
+/**
+ * Clear all coverage data collected during this requests, continue to collect
+ * new coverage data.
+ */
+function clear_all_coverage_data(): void {
+  foreach (get_files_with_coverage() as $file) {
+    clear_coverage_for_file($file);
+  }
+}
+
 }
 
 

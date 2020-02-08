@@ -811,67 +811,147 @@ TypedValue HHVM_FUNCTION(dynamic_class_meth_force, StringArg cls,
   return dynamicClassMeth(cls.get(), meth.get(), true);
 }
 
+const StaticString
+  s_no_repo_mode("Cannot enable code coverage in Repo.Authoritative mode"),
+  s_no_flag_set("Must set Eval.EnablePerFileCoverage");
+
+void check_coverage_flags() {
+  if (RO::RepoAuthoritative) {
+    throw_invalid_operation_exception(s_no_repo_mode.get());
+  }
+  if (!RO::EvalEnablePerFileCoverage) {
+    throw_invalid_operation_exception(s_no_flag_set.get());
+  }
+}
+
+Unit* loadUnit(StringData* path) {
+  auto const unit = lookupUnit(
+    File::TranslatePath(String{path}).get(),
+    "",
+    nullptr,
+    Native::s_noNativeFuncs,
+    false
+  );
+  if (!unit) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      folly::sformat("Unable to open file: {}", path->data())
+    );
+  }
+  return unit;
+}
+
+std::vector<Unit*> loadUnits(ArrayData* files) {
+  std::vector<Unit*> units;
+  IterateV(
+    files,
+    [&] (TypedValue v) {
+      if (!isStringType(v.m_type)) {
+        assertx(isIntType(v.m_type));
+        SystemLib::throwInvalidArgumentExceptionObject(
+          folly::sformat("Invalid filepath: {}", v.m_data.num)
+        );
+      }
+      units.push_back(loadUnit(v.m_data.pstr));
+    }
+  );
+  return units;
+}
+
+void HHVM_FUNCTION(enable_per_file_coverage, ArrayArg files) {
+  check_coverage_flags();
+  for (auto const u : loadUnits(files.get())) u->enableCoverage();
+}
+
+void HHVM_FUNCTION(disable_per_file_coverage, ArrayArg files) {
+  check_coverage_flags();
+  for (auto const u : loadUnits(files.get())) u->disableCoverage();
+}
+
+Array HHVM_FUNCTION(get_files_with_coverage) {
+  check_coverage_flags();
+  std::vector<const StringData*> units;
+  for (auto const& p : g_context->m_evaledFiles) {
+    if (p.second.unit->isCoverageEnabled()) {
+      units.push_back(p.second.unit->filepath());
+    }
+  }
+  if (units.empty()) return Array::CreateKeyset();
+  KeysetInit k{units.size()};
+  for (auto s : units) k.add(String{const_cast<StringData*>(s)});
+  return k.toArray();
+}
+
+Array HHVM_FUNCTION(get_coverage_for_file, StringArg file) {
+  check_coverage_flags();
+  auto const u = loadUnit(file.get());
+  if (!u->isCoverageEnabled()) {
+    SystemLib::throwInvalidOperationExceptionObject(
+      folly::sformat("Coverage not enabled for file: {}", file->data())
+    );
+  }
+  return u->reportCoverage();
+}
+
+void HHVM_FUNCTION(clear_coverage_for_file, StringArg file) {
+  check_coverage_flags();
+  auto const u = loadUnit(file.get());
+  if (!u->isCoverageEnabled()) {
+    SystemLib::throwInvalidOperationExceptionObject(
+      folly::sformat("Coverage not enabled for file: {}", file->data())
+    );
+  }
+  u->clearCoverage();
+}
+
 }
 
 static struct HHExtension final : Extension {
   HHExtension(): Extension("hh", NO_EXTENSION_VERSION_YET) { }
   void moduleInit() override {
-    HHVM_NAMED_FE(HH\\autoload_is_native, HHVM_FN(autoload_is_native));
-    HHVM_NAMED_FE(HH\\autoload_set_paths, HHVM_FN(autoload_set_paths));
-    HHVM_NAMED_FE(HH\\autoload_type_to_path,
-                  HHVM_FN(autoload_type_to_path));
-    HHVM_NAMED_FE(HH\\autoload_function_to_path,
-                  HHVM_FN(autoload_function_to_path));
-    HHVM_NAMED_FE(HH\\autoload_constant_to_path,
-                  HHVM_FN(autoload_constant_to_path));
-    HHVM_NAMED_FE(HH\\autoload_type_alias_to_path,
-                  HHVM_FN(autoload_type_alias_to_path));
-    HHVM_NAMED_FE(HH\\autoload_path_to_types,
-                  HHVM_FN(autoload_path_to_types));
-    HHVM_NAMED_FE(HH\\autoload_path_to_functions,
-                  HHVM_FN(autoload_path_to_functions));
-    HHVM_NAMED_FE(HH\\autoload_path_to_constants,
-                  HHVM_FN(autoload_path_to_constants));
-    HHVM_NAMED_FE(HH\\autoload_path_to_type_aliases,
-                  HHVM_FN(autoload_path_to_type_aliases));
-    HHVM_NAMED_FE(HH\\could_include, HHVM_FN(could_include));
-    HHVM_NAMED_FE(HH\\serialize_memoize_param,
-                  HHVM_FN(serialize_memoize_param));
-    HHVM_NAMED_FE(HH\\clear_static_memoization,
-                  HHVM_FN(clear_static_memoization));
-    HHVM_NAMED_FE(HH\\ffp_parse_string_native,
-                  HHVM_FN(ffp_parse_string_native));
-    HHVM_NAMED_FE(HH\\clear_lsb_memoization,
-                  HHVM_FN(clear_lsb_memoization));
-    HHVM_NAMED_FE(HH\\clear_instance_memoization,
-                  HHVM_FN(clear_instance_memoization));
-    HHVM_NAMED_FE(HH\\set_frame_metadata, HHVM_FN(set_frame_metadata));
-    HHVM_NAMED_FE(HH\\get_request_count, HHVM_FN(get_request_count));
-    HHVM_NAMED_FE(HH\\get_compiled_units, HHVM_FN(get_compiled_units));
-
-    HHVM_NAMED_FE(HH\\rqtrace\\is_enabled, HHVM_FN(is_enabled));
-    HHVM_NAMED_FE(HH\\rqtrace\\force_enable, HHVM_FN(force_enable));
-    HHVM_NAMED_FE(HH\\rqtrace\\all_request_stats, HHVM_FN(all_request_stats));
-    HHVM_NAMED_FE(HH\\rqtrace\\all_process_stats, HHVM_FN(all_process_stats));
-    HHVM_NAMED_FE(HH\\rqtrace\\request_event_stats,
-                  HHVM_FN(request_event_stats));
-    HHVM_NAMED_FE(HH\\rqtrace\\process_event_stats,
-                  HHVM_FN(process_event_stats));
-    HHVM_NAMED_FE(HH\\dynamic_fun, HHVM_FN(dynamic_fun));
-    HHVM_NAMED_FE(HH\\dynamic_fun_force,
-                  HHVM_FN(dynamic_fun_force));
-    HHVM_NAMED_FE(HH\\dynamic_class_meth, HHVM_FN(dynamic_class_meth));
-    HHVM_NAMED_FE(HH\\dynamic_class_meth_force,
-                  HHVM_FN(dynamic_class_meth_force));
-
-    HHVM_RC_INT(HH\\AUTOLOAD_MAP_KIND_OF_TYPE,
-                static_cast<int64_t>(AutoloadMap::KindOf::Type));
-    HHVM_RC_INT(HH\\AUTOLOAD_MAP_KIND_OF_FUNCTION,
-                static_cast<int64_t>(AutoloadMap::KindOf::Function));
-    HHVM_RC_INT(HH\\AUTOLOAD_MAP_KIND_OF_CONSTANT,
-                static_cast<int64_t>(AutoloadMap::KindOf::Constant));
-    HHVM_RC_INT(HH\\AUTOLOAD_MAP_KIND_OF_TYPE_ALIAS,
-                static_cast<int64_t>(AutoloadMap::KindOf::TypeAlias));
+#define X(nm) HHVM_NAMED_FE(HH\\nm, HHVM_FN(nm))
+    X(autoload_is_native);
+    X(autoload_set_paths);
+    X(autoload_type_to_path);
+    X(autoload_function_to_path);
+    X(autoload_constant_to_path);
+    X(autoload_type_alias_to_path);
+    X(autoload_path_to_types);
+    X(autoload_path_to_functions);
+    X(autoload_path_to_constants);
+    X(autoload_path_to_type_aliases);
+    X(could_include);
+    X(serialize_memoize_param);
+    X(clear_static_memoization);
+    X(ffp_parse_string_native);
+    X(clear_lsb_memoization);
+    X(clear_instance_memoization);
+    X(set_frame_metadata);
+    X(get_request_count);
+    X(get_compiled_units);
+    X(dynamic_fun);
+    X(dynamic_fun_force);
+    X(dynamic_class_meth);
+    X(dynamic_class_meth_force);
+    X(enable_per_file_coverage);
+    X(disable_per_file_coverage);
+    X(get_files_with_coverage);
+    X(get_coverage_for_file);
+    X(clear_coverage_for_file);
+#undef X
+#define X(nm) HHVM_NAMED_FE(HH\\rqtrace\\nm, HHVM_FN(nm))
+    X(is_enabled);
+    X(force_enable);
+    X(all_request_stats);
+    X(all_process_stats);
+    X(request_event_stats);
+    X(process_event_stats);
+#undef X
+#define X(n, t) HHVM_RC_INT(HH\\n, static_cast<int64_t>(AutoloadMap::KindOf::t))
+    X(AUTOLOAD_MAP_KIND_OF_TYPE, Type);
+    X(AUTOLOAD_MAP_KIND_OF_FUNCTION, Function);
+    X(AUTOLOAD_MAP_KIND_OF_CONSTANT, Constant);
+    X(AUTOLOAD_MAP_KIND_OF_TYPE_ALIAS, TypeAlias);
+#undef X
 
     loadSystemlib();
   }

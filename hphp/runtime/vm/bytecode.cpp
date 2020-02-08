@@ -6001,6 +6001,12 @@ void recordCodeCoverage(PC /*pc*/) {
   if (unit == SystemLib::s_hhas_unit) {
     return;
   }
+
+  if (!RO::RepoAuthoritative && RO::EvalEnablePerFileCoverage) {
+    if (unit->isCoverageEnabled()) unit->recordCoverage(pcOff());
+    return;
+  }
+
   int line = unit->getLineNumber(pcOff());
   assertx(line != -1);
 
@@ -6263,7 +6269,12 @@ TCA dispatchThreaded(bool coverage) {
 
 template <bool breakOnCtlFlow>
 TCA dispatchImpl() {
-  bool collectCoverage = RID().getCoverage();
+  auto const checkCoverage = [&] {
+    return !RO::EvalEnablePerFileCoverage
+      ? RID().getCoverage()
+      : vmfp() && vmfp()->unit()->isCoverageEnabled();
+  };
+  bool collectCoverage = checkCoverage();
   if (cti_enabled()) {
     return dispatchThreaded<breakOnCtlFlow>(collectCoverage);
   }
@@ -6342,12 +6353,12 @@ TCA dispatchImpl() {
     }                                                         \
     retAddr = iopWrap##name(pc);                              \
     vmpc() = pc;                                              \
-    if ((isFCallFunc(Op::name) ||                             \
-         Op::name == Op::NativeImpl ||                        \
-         Op::name == Op::FCallBuiltin) &&                     \
-        !collectCoverage && RID().getCoverage()) {            \
-      optab = optabCover;                                     \
-      collectCoverage = true;                                 \
+    if (isFCallFunc(Op::name) ||                              \
+        Op::name == Op::NativeImpl ||                         \
+        Op::name == Op::FCallBuiltin) {                       \
+      collectCoverage = checkCoverage();                      \
+      optab = !collectCoverage ? optabDirect : optabCover;    \
+      DEBUGGER_ATTACHED_ONLY(optab = optabDbg);               \
     }                                                         \
     if (breakOnCtlFlow) {                                     \
       isCtlFlow = instrIsControlFlow(Op::name);               \
@@ -6359,10 +6370,10 @@ TCA dispatchImpl() {
        * been returned by jitReturnPost(), whether or not we were called from
        * the TC. We only actually return callToExit to our caller if that
        * caller is dispatchBB(). */                           \
-      assertx(retAddr == jit::tc::ustubs().callToExit);    \
+      assertx(retAddr == jit::tc::ustubs().callToExit);       \
       return breakOnCtlFlow ? retAddr : nullptr;              \
     }                                                         \
-    assertx(isCtlFlow || !retAddr);                            \
+    assertx(isCtlFlow || !retAddr);                           \
     DISPATCH();                                               \
   }
 

@@ -617,6 +617,54 @@ void stashExtendedLineTable(const Unit* unit, SourceLocTable table) {
   }
 }
 
+bool Unit::isCoverageEnabled() const {
+  return m_coverage.bound() && m_coverage.isInit();
+}
+void Unit::enableCoverage() {
+  if (!m_coverage.bound()) {
+    assertx(!RO::RepoAuthoritative && RO::EvalEnablePerFileCoverage);
+    m_coverage.bind(rds::Mode::Normal);
+  }
+  if (m_coverage.isInit()) return;
+  new (m_coverage.get()) req::dynamic_bitset{};
+  m_coverage.markInit();
+}
+void Unit::disableCoverage() {
+  if (!isCoverageEnabled()) return;
+
+  m_coverage.markUninit();
+  m_coverage->req::dynamic_bitset::~dynamic_bitset();
+}
+void Unit::clearCoverage() {
+  assertx(isCoverageEnabled());
+  m_coverage->reset();
+}
+void Unit::recordCoverage(Offset off) {
+  assertx(isCoverageEnabled());
+
+  auto const line = getLineNumber(off);
+  if (line == -1) return;
+
+  if (m_coverage->size() <= line) m_coverage->resize(line + 1);
+  m_coverage->set(line);
+}
+Array Unit::reportCoverage() const {
+  assertx(isCoverageEnabled());
+
+  auto const& c = *m_coverage;
+  auto const end = req::dynamic_bitset::npos;
+  VecArrayInit init{m_coverage->count()};
+  for (auto i = c.find_first(); i != end; i = c.find_next(i)) {
+    init.append(i);
+  }
+
+  return init.toArray();
+}
+rds::Handle Unit::coverageDataHandle() const {
+  assertx(m_coverage.bound());
+  return m_coverage.handle();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Funcs and PreClasses.
 
@@ -1616,6 +1664,9 @@ void Unit::initialMerge() {
     if (needsCompact) state |= MergeState::NeedsCompact;
   }
 
+  if (!RO::RepoAuthoritative && RO::EvalEnablePerFileCoverage) {
+    m_coverage.bind(rds::Mode::Normal);
+  }
   m_mergeState.store(MergeState::Merged | state, std::memory_order_relaxed);
 }
 

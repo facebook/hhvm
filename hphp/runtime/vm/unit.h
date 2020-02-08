@@ -19,6 +19,8 @@
 
 #include "hphp/parser/location.h"
 
+#include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/req-bitset.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/vm/class.h"
@@ -426,6 +428,45 @@ public:
    * impossible).
    */
   const Func* getFunc(Offset pc) const;
+
+  /*
+   * Check whether the coverage map has been enabled for this unit.
+   */
+  bool isCoverageEnabled() const;
+
+  /*
+   * Enable or disable the coverage map for this unit.
+   *
+   * Pre: !RO::RepoAuthoritative && RO::EvalEnablePerFileCoverage
+   */
+  void enableCoverage();
+  void disableCoverage();
+
+  /*
+   * Reset the coverage map.
+   *
+   * Pre: isCoverageEnabled()
+   */
+  void clearCoverage();
+
+  /*
+   * Record that the bytecode at off was covered.
+   */
+  void recordCoverage(Offset off);
+
+  /*
+   * Generate a vec array where each entry is an integer indicating a covered
+   * line from this file.
+   */
+  Array reportCoverage() const;
+
+  /*
+   * Return an RDS handle that when initialized indicates that coverage is
+   * enabled for this unit.
+   *
+   * Pre: !RO::RepoAuthoritative && RO::EvalEnablePerFileCoverage
+   */
+  rds::Handle coverageDataHandle() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Litstrs and NamedEntitys.                                          [const]
@@ -946,6 +987,8 @@ private:
   mutable LockFreePtrWrapper<VMCompactVector<LineInfo>> m_lineMap;
   UserAttributeMap m_metaData;
   UserAttributeMap m_fileAttributes;
+
+  rds::Link<req::dynamic_bitset, rds::Mode::Normal> m_coverage;
 };
 
 struct UnitExtended : Unit {

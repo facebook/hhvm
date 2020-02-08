@@ -1,0 +1,18 @@
+string(15) "hello, world!~~"
+string(15) "hello, world!~~"
+string(11) "dontcoverme"
+string(8) "coverme!"
+string(11) "dontcoverme"
+string(8) "coverme!"
+string(15) "hello, world!!!"
+string(15) "hello, world!~~"
+string(8) "coverme!"
+string(11) "surprise!!!"
+string(15) "hello, world!!!"
+string(15) "hello, world!??"
+4-7
+10-11
+15-18
+20
+23-26
+29

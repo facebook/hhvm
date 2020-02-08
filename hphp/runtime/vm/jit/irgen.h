@@ -137,6 +137,11 @@ void prepareEntry(IRGS&);
 void incProfCounter(IRGS&, TransID);
 void checkCold(IRGS&, TransID);
 
+/*
+ * Exit if code coverage is enabled for the current function.
+ */
+void checkCoverage(IRGS& env);
+
 uint64_t curProfCount(const IRGS& env);
 uint64_t calleeProfCount(const IRGS& env, const RegionDesc& calleeRegion);
 

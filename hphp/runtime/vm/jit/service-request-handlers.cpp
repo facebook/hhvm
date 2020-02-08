@@ -144,6 +144,12 @@ TCA getTranslation(TransArgs args) {
     return nullptr;
   }
 
+  if (UNLIKELY(!RO::RepoAuthoritative && sk.unit()->isCoverageEnabled())) {
+    assertx(RO::EvalEnablePerFileCoverage);
+    SKTRACE(2, sk, "punting because per file code coverage is enabled");
+    return nullptr;
+  }
+
   args.kind = tc::profileFunc(args.sk.func()) ?
     TransKind::Profile : TransKind::Live;
 

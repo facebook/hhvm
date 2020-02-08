@@ -118,6 +118,18 @@ void checkCold(IRGS& env, TransID transId) {
   gen(env, CheckCold, makeExitOpt(env), TransIDData(transId));
 }
 
+void checkCoverage(IRGS& env) {
+  auto const handle = RDSHandleData { curUnit(env)->coverageDataHandle() };
+  ifElse(
+    env,
+    [&] (Block* next) { gen(env, CheckRDSInitialized, next, handle); },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      gen(env, Jmp, makeExitSlow(env));
+    }
+  );
+}
+
 void ringbufferEntry(IRGS& env, Trace::RingBufferType t, SrcKey sk, int level) {
   if (!Trace::moduleEnabled(Trace::ringbuffer, level)) return;
   gen(env, RBTraceEntry, RBEntryData(t, sk));

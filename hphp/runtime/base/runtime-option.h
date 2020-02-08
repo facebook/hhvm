@@ -1280,6 +1280,7 @@ struct RuntimeOption {
    * `isTvArrayLike` instead of being a strict KindOfArray check.
    */                                                                   \
   F(bool, WidenIsArray, false)                                          \
+  F(bool, EnablePerFileCoverage, false)                                 \
   /* */
 
 private:

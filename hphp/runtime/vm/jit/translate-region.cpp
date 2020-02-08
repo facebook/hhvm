@@ -244,6 +244,10 @@ void emitPredictionsAndPreConditions(irgen::IRGS& irgs,
   if (isEntry) {
     irgen::gen(irgs, EndGuards);
 
+    if (!RO::RepoAuthoritative && RO::EvalEnablePerFileCoverage) {
+      irgen::checkCoverage(irgs);
+    }
+
     if (irgs.context.kind == TransKind::Profile) {
       if (block.func()->isEntry(bcOff) && !mcgen::retranslateAllEnabled()) {
         irgen::checkCold(irgs, irgs.context.transID);

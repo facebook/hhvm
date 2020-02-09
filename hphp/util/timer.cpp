@@ -131,9 +131,8 @@ const char *Timer::getName() const {
   case SystemCPU: return "system cpu";
   case UserCPU:   return "user cpu";
   case TotalCPU:  return "total cpu";
-  default: assert(false);
   }
-  return nullptr;
+  always_assert(false);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

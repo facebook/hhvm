@@ -32,6 +32,9 @@
     core_kernel
     decl
     counters
+    decl_ancestors
+    decl_inheritance
+    shallow_decl_defs
     typing_defs)
   (preprocess (pps ppx_deriving.std))) ; See T41851208
 
@@ -221,7 +224,7 @@
     typing_check_utils)
   (libraries
     core_kernel
-    decl
+    decl_service
     errors
     file_info
     nast

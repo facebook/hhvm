@@ -75,6 +75,7 @@
   (modules
     decl_provider)
   (libraries
+    decl_class
     decl_service_client
     global_naming_options
     provider_backend

@@ -59,6 +59,7 @@
     core_kernel
     find
     decl
+    decl_class
     hhi
     global_config
     procs_bucket
@@ -147,6 +148,8 @@
   (libraries
     ast
     decl
+    decl_compare
+    decl_export
     fileutils
     heap_shared_mem
     parser
@@ -222,6 +225,7 @@
   (libraries
     buffered_line_reader
     coverage_level
+    decl_redecl_service
     dfind
     fileutils
     hg

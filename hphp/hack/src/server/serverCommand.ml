@@ -202,17 +202,13 @@ let predeclare_ide_deps
           File_provider.local_changes_push_stack ();
           Ast_provider.local_changes_push_stack ();
           let iter :
-              type a.
-              (string -> bool) ->
-              (Provider_context.t -> string -> a) ->
-              SSet.t ->
-              unit =
-           fun mem declare s ->
+              type a. (Provider_context.t -> string -> a) -> SSet.t -> unit =
+           fun declare s ->
             SSet.iter
               begin
                 fun x ->
                 (* Depending on Decl_provider putting the thing we ask for in shared memory *)
-                if not @@ mem x then ignore @@ (declare ctx x : a)
+                ignore @@ (declare ctx x : a)
               end
               s
           in
@@ -226,11 +222,11 @@ let predeclare_ide_deps
             in
             ()
           in
-          iter Decl_heap.Funs.mem Decl_provider.get_fun n_funs;
-          iter Decl_heap.Classes.mem declare_class n_classes;
-          iter Decl_heap.RecordDefs.mem declare_class n_record_defs;
-          iter Decl_heap.Typedefs.mem Decl_provider.get_typedef n_types;
-          iter Decl_heap.GConsts.mem Decl_provider.get_gconst n_consts
+          iter Decl_provider.get_fun n_funs;
+          iter declare_class n_classes;
+          iter declare_class n_record_defs;
+          iter Decl_provider.get_typedef n_types;
+          iter Decl_provider.get_gconst n_consts
         end
       ~finally:
         begin

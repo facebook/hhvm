@@ -769,7 +769,7 @@ let string_of_ureason = function
   | URassign_inout -> "Invalid assignment to an inout parameter"
   | URforeach -> "Invalid foreach"
   | URthrow -> "Invalid exception"
-  | URvector -> "Some elements in this Vector are incompatible"
+  | URvector -> "Some elements in this collection are incompatible"
   | URkey -> "The keys of this Map are incompatible"
   | URvalue -> "The values of this Map are incompatible"
   | URif -> "The two branches of ? must have the same type"

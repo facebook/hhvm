@@ -1,5 +1,5 @@
 File "immvector.php", line 39, characters 10-66:
-Some elements in this Vector are incompatible (Typing[4110])
+Some elements in this collection are incompatible (Typing[4110])
 File "immvector.php", line 38, characters 30-46:
 Expected ImmVector<string>
 File "immvector.php", line 16, characters 16-32:

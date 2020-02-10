@@ -2898,7 +2898,7 @@ let member_not_found
   let kind =
     match kind with
     | `method_ -> "method"
-    | `member -> "member"
+    | `property -> "property"
   in
   let msg = Printf.sprintf "No %s '%s' in %s" kind member_name type_name in
   on_error

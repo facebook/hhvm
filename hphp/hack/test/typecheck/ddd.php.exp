@@ -1,5 +1,5 @@
 File "ddd.php", line 14, characters 23-25:
-No member 'WtF' in X (Typing[4053])
+No property 'WtF' in X (Typing[4053])
 File "ddd.php", line 14, characters 16-20:
 This is why I think it is an object of type X
 File "ddd.php", line 12, characters 7-7:

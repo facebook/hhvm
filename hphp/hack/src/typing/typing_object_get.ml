@@ -63,7 +63,7 @@ let member_not_found pos ~is_method class_ member_name r on_error =
     if is_method then
       `method_
     else
-      `member
+      `property
   in
   let cid = (Cls.pos class_, Cls.name class_) in
   let reason =

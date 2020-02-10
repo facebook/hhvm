@@ -399,7 +399,7 @@ val smember_not_found :
   unit
 
 val member_not_found :
-  [< `member | `method_ ] ->
+  [< `property | `method_ ] ->
   Pos.t ->
   Pos.t * string ->
   string ->

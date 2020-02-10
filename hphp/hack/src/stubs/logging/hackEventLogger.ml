@@ -158,7 +158,7 @@ let serverless_ide_destroy_ok _ = ()
 
 let serverless_ide_destroy_error _ _ = ()
 
-let client_bad_exit ~command _ = ()
+let client_bad_exit ~command:_ _ = ()
 
 let glean_globalrev_supplied ~globalrev:_ = ()
 
@@ -204,7 +204,9 @@ let handled_persistent_connection _ = ()
 
 let handle_persistent_connection_exception _ _ = ()
 
-let handled_command _ ~start_t ~major_gc_time ~minor_gc_time ~parsed_files = ()
+let handled_command
+    _ ~start_t:_ ~major_gc_time:_ ~minor_gc_time:_ ~parsed_files:_ =
+  ()
 
 let remote_scheduler_save_naming_end _ = ()
 
@@ -347,14 +349,14 @@ let uncaught_exception _ = ()
 let processed_clients _ = ()
 
 let search_symbol_index
-    ~(query_text : string)
-    ~(max_results : int)
-    ~(results : int)
-    ~(kind_filter : string)
-    ~(duration : float)
-    ~(actype : string)
-    ~(caller : string)
-    ~(search_provider : string) =
+    ~query_text:_
+    ~max_results:_
+    ~results:_
+    ~kind_filter:_
+    ~duration:_
+    ~actype:_
+    ~caller:_
+    ~search_provider:_ =
   ()
 
 module ProfileTypeCheck = struct

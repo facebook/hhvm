@@ -40,7 +40,11 @@ let ai_check
       let errorl =
         Ai.go
           (fun tcopt path file_info ->
-            let ctx = Provider_context.empty ~tcopt in
+            let ctx =
+              Provider_context.empty_for_tool
+                ~tcopt
+                ~backend:Provider_backend.Shared_memory
+            in
             Typing_check_utils.type_file ctx path file_info)
           genv.workers
           files_info

@@ -160,7 +160,7 @@ let run_loop_once :
   (* Always pick up disk changes in tests immediately *)
   let env = ServerEnv.{ env with last_notifier_check_time = 0.0 } in
   let env = ServerMain.serve_one_iteration genv env client_provider in
-  let ctx = Provider_context.empty ~tcopt:env.ServerEnv.tcopt in
+  let ctx = Provider_utils.ctx_from_server_env env in
   let env =
     {
       env with

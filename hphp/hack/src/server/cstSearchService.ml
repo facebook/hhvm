@@ -619,7 +619,7 @@ let go
       (Relative_path.t * result) list =
     List.fold inputs ~init:acc ~f:(fun acc (path, pattern) ->
         try
-          let ctx = Provider_context.empty ~tcopt in
+          let ctx = Provider_context.empty_for_worker ~tcopt in
           let (ctx, entry) =
             Provider_utils.update_context
               ~ctx

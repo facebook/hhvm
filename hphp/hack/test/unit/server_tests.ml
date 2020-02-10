@@ -166,7 +166,9 @@ let server_setup_for_deferral_tests () =
     two computations:
       - a declaration of \Bar
       - a (deferred) type check of \Foo *)
-  let ctx = Provider_context.empty ~tcopt:(Global_naming_options.get ()) in
+  let ctx =
+    Provider_context.empty_for_test ~tcopt:(Global_naming_options.get ())
+  in
   (ctx, foo_path, foo_contents)
 
 (* In this test, we wish to establish that we enable deferring type checking
@@ -269,7 +271,11 @@ let test_compute_tast_counting () =
       Provider_backend.set_shared_memory_backend ())
     ~do_:(fun () ->
       Parser_options_provider.set ParserOptions.default;
-      let ctx = Provider_context.empty ~tcopt:TypecheckerOptions.default in
+      let ctx =
+        Provider_context.empty_for_tool
+          ~tcopt:TypecheckerOptions.default
+          ~backend:(Provider_backend.get ())
+      in
       let (ctx, entry) = Provider_utils.update_context ctx path file_input in
       let { Provider_utils.Compute_tast_and_errors.telemetry; _ } =
         Provider_utils.compute_tast_and_errors_unquarantined ~ctx ~entry

@@ -195,7 +195,7 @@ let test_sqlite_plus_local (harness : Test_harness.t) : bool =
     ]
   in
   let env = ServerEnvBuild.make_env ServerConfig.default_config in
-  let ctx = Provider_context.empty ~tcopt:env.ServerEnv.tcopt in
+  let ctx = Provider_utils.ctx_from_server_env env in
   let sienv = SymbolIndex.update_files ~ctx ~sienv ~paths:changelist in
   let n = LocalSearchService.count_local_fileinfos sienv in
   Hh_logger.log "Added back; local search service now contains %d files" n;

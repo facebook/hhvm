@@ -23,7 +23,12 @@ module Compute_tast_and_errors = struct
 end
 
 let ctx_from_server_env (env : ServerEnv.env) : Provider_context.t =
-  Provider_context.empty ~tcopt:env.ServerEnv.tcopt
+  {
+    Provider_context.tcopt = env.ServerEnv.tcopt;
+    (* TODO: backend should be stored in [env]. *)
+    backend = Provider_backend.get ();
+    entries = Relative_path.Map.empty;
+  }
 
 let respect_but_quarantine_unsaved_changes
     ~(ctx : Provider_context.t) ~(f : unit -> 'a) : 'a =

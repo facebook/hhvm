@@ -828,7 +828,7 @@ let parse_name_and_decl popt files_contents =
       let (parsed_files, files_info) = parse_and_name popt files_contents in
       Relative_path.Map.iter parsed_files (fun fn parsed_file ->
           Errors.run_in_context fn Errors.Decl (fun () ->
-              let ctx = Provider_context.empty ~tcopt:popt in
+              let ctx = Provider_context.empty_for_test ~tcopt:popt in
               Decl.name_and_declare_types_program
                 ctx
                 parsed_file.Parser_return.ast));
@@ -1267,7 +1267,7 @@ let handle_mode
           in
           let result =
             FfpAutocompleteService.auto_complete
-              ctx.Provider_context.tcopt
+              ctx
               file_text
               position
               ~filter_by_token:true
@@ -1816,7 +1816,7 @@ let decl_and_run_mode
     in
     Typing_deps.add_dependency_callback "get_debug_trace" get_debug_trace );
   let (errors, files_info) = parse_name_and_decl popt to_decl in
-  let ctx = Provider_context.empty ~tcopt in
+  let ctx = Provider_context.empty_for_test ~tcopt in
   handle_mode
     mode
     files

@@ -27,7 +27,11 @@ let init root : Provider_context.t =
     }
   in
   Global_naming_options.set tcopt;
-  let ctx = Provider_context.empty ~tcopt in
+  let ctx =
+    Provider_context.empty_for_tool
+      ~tcopt
+      ~backend:Provider_backend.Shared_memory
+  in
 
   (* Push local stacks here so we don't include shared memory in our timing. *)
   File_provider.local_changes_push_stack ();

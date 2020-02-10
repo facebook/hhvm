@@ -9,8 +9,7 @@
 open Hh_core
 open ServerCommandTypes
 
-let go file_input tcopt =
-  let ctx = Provider_context.empty ~tcopt in
+let go file_input ctx =
   let path =
     match file_input with
     | FileName file_name -> Relative_path.create_detect_prefix file_name

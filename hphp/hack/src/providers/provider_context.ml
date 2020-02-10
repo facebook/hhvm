@@ -29,11 +29,29 @@ type t = {
   entries: entry Relative_path.Map.t;
 }
 
-let empty ~tcopt =
-  (* TODO: [backend] should be provided as a parameter. The backend should likely
-  live in the [ServerEnv.env], along with the [tcopt]. *)
-  let backend = Provider_backend.get () in
+let empty_for_tool ~tcopt ~backend =
   { tcopt; backend; entries = Relative_path.Map.empty }
+
+let empty_for_worker ~tcopt =
+  {
+    tcopt;
+    backend = Provider_backend.Shared_memory;
+    entries = Relative_path.Map.empty;
+  }
+
+let empty_for_test ~tcopt =
+  {
+    tcopt;
+    backend = Provider_backend.Shared_memory;
+    entries = Relative_path.Map.empty;
+  }
+
+let empty_for_debugging ~tcopt =
+  {
+    tcopt;
+    backend = Provider_backend.Shared_memory;
+    entries = Relative_path.Map.empty;
+  }
 
 let map_tcopt (t : t) ~(f : TypecheckerOptions.t -> TypecheckerOptions.t) : t =
   { t with tcopt = f t.tcopt }

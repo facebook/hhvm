@@ -27,10 +27,9 @@ module Decl_cache : sig
   include module type of Lru_cache.Cache (Decl_cache_entry)
 end
 
-type t = private
+type t =
   | Shared_memory
   | Local_memory of { decl_cache: Decl_cache.t }
-  (* In Decl_service, 'unit' left for further expansion *)
   | Decl_service of Decl_service_client.t
 
 val t_to_string : t -> string

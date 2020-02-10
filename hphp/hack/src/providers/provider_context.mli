@@ -38,8 +38,24 @@ type t = {
   entries: entry Relative_path.Map.t;
 }
 
-(** The empty context, denoting no delta from the current state of the world. *)
-val empty : tcopt:TypecheckerOptions.t -> t
+(** The empty context, for use at the top-level of stand-alone tools which don't
+have a [ServerEnv.env]. *)
+val empty_for_tool :
+  tcopt:TypecheckerOptions.t -> backend:Provider_backend.t -> t
+
+(** The empty context, for use with Multiworker workers. This assumes that the
+backend is shared memory. We don't want to serialize and send the entire
+[ServerEnv.env] to these workers because a [ServerEnv.env] contains large data
+objects (such as the forward naming table). *)
+val empty_for_worker : tcopt:TypecheckerOptions.t -> t
+
+(** The empty context, for use in tests, where there may not be a
+[ServerEnv.env] available. *)
+val empty_for_test : tcopt:TypecheckerOptions.t -> t
+
+(** The empty context, for use in debugging aides in production code, where
+there may not be a [ServerEnv.env] available. *)
+val empty_for_debugging : tcopt:TypecheckerOptions.t -> t
 
 (** Update the [TypecheckerOptions.t] contained within the [t]. *)
 val map_tcopt : t -> f:(TypecheckerOptions.t -> TypecheckerOptions.t) -> t

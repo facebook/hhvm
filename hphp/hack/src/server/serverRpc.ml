@@ -58,7 +58,8 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         last_recheck_stats;
       } )
   | STATUS_SINGLE (fn, max_errors) ->
-    (env, take_max_errors (ServerStatusSingle.go fn env.tcopt) max_errors)
+    let ctx = Provider_utils.ctx_from_server_env env in
+    (env, take_max_errors (ServerStatusSingle.go fn ctx) max_errors)
   | COVERAGE_LEVELS (path, file_input) ->
     let path = Relative_path.create_detect_prefix path in
     let (ctx, entry) =
@@ -376,9 +377,10 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     let offset = File_content.get_offset content pos in
     (* will raise if out of bounds *)
     let char_at_pos = File_content.get_char content offset in
+    let ctx = Provider_utils.ctx_from_server_env env in
     let result =
       FfpAutocompleteService.auto_complete
-        env.tcopt
+        ctx
         content
         pos
         ~filter_by_token:false

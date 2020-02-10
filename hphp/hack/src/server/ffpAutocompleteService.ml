@@ -58,7 +58,7 @@ let handle_empty_autocomplete (pos : File_content.position) file_content =
       file_content)
 
 let auto_complete
-    (tcopt : TypecheckerOptions.t)
+    (ctx : Provider_context.t)
     (file_content : string)
     (pos : File_content.position)
     ~(filter_by_token : bool)
@@ -118,13 +118,7 @@ let auto_complete
       |> List.map ~f:(make_keyword_completion replace_pos)
     in
     let type_based_completions =
-      FfpAutocompleteTypeCheck.run
-        ~context
-        ~file_content
-        ~stub
-        ~pos
-        ~tcopt
-        ~sienv
+      FfpAutocompleteTypeCheck.run ~context ~file_content ~stub ~pos ~ctx ~sienv
     in
     let global_completions =
       FfpAutocompleteGlobals.get_globals

@@ -30,7 +30,7 @@ let run
     ~(file_content : string)
     ~(stub : string)
     ~(pos : File_content.position)
-    ~(tcopt : TypecheckerOptions.t)
+    ~(ctx : Provider_context.t)
     ~(sienv : SearchUtils.si_env) :
     AutocompleteTypes.complete_autocomplete_result list =
   if
@@ -40,7 +40,7 @@ let run
   then
     let (ctx, entry) =
       Provider_utils.update_context
-        ~ctx:(Provider_context.empty tcopt)
+        ~ctx
         ~path:(Relative_path.create_detect_prefix "")
         ~file_input:(ServerCommandTypes.FileContent file_content)
     in

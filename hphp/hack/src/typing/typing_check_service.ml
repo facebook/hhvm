@@ -415,7 +415,7 @@ let load_and_process_files
   Sys_utils.set_signal
     Sys.sigusr1
     (Sys.Signal_handle Typing.debug_print_last_pos);
-  let ctx = Provider_context.empty ~tcopt:opts in
+  let ctx = Provider_context.empty_for_worker ~tcopt:opts in
   process_files dynamic_view_files ctx errors progress ~memory_cap ~check_info
 
 (*****************************************************************************)
@@ -729,7 +729,7 @@ let go_with_interrupt
     (Errors.t, Delegate.state, Telemetry.t, 'a) job_result =
   let fnl = List.map fnl ~f:(fun path -> Check { path; deferred_count = 0 }) in
   Mocking.with_test_mocking fnl @@ fun fnl ->
-  let ctx = Provider_context.empty ~tcopt:opts in
+  let ctx = Provider_context.empty_for_worker ~tcopt:opts in
   let result =
     if should_process_sequentially opts fnl then (
       Hh_logger.log "Type checking service will process files sequentially";

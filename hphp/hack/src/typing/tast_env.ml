@@ -218,7 +218,7 @@ let def_env ctx d =
   | Class x -> class_env ctx x
   | Typedef x -> typedef_env ctx x
   | Constant x -> gconst_env ctx x
-  | RecordDef _ -> empty (Provider_context.empty ~tcopt:GlobalOptions.default)
+  | RecordDef _ -> empty ctx
   (* TODO T44306013 *)
   (* The following nodes are included in the TAST, but are not typechecked.
    * However, we need to return an env here so for now create an empty env using
@@ -229,7 +229,7 @@ let def_env ctx d =
   | NamespaceUse _
   | SetNamespaceEnv _
   | FileAttributes _ ->
-    empty (Provider_context.empty ~tcopt:GlobalOptions.default)
+    empty ctx
 
 let set_ppl_lambda env = { env with Typing_env_types.inside_ppl_class = false }
 

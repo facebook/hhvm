@@ -124,7 +124,9 @@ module Mode_merge = struct
     Hh_logger.log "GI: Merging %d files" (Array.length subgraphs);
     let env =
       Typing_env.empty
-        (Provider_context.empty ~tcopt:GlobalOptions.default)
+        (Provider_context.empty_for_tool
+           ~tcopt:GlobalOptions.default
+           ~backend:Provider_backend.Shared_memory)
         (Relative_path.from_root "")
         ~droot:None
     in

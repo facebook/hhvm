@@ -421,6 +421,47 @@ SSATmp* emitConstCmp(IRGS& env, Op op, bool left, bool right) {
   return gen(env, toBoolCmpOpcode(op), cns(env, left), cns(env, right));
 }
 
+SSATmp* emitHackArrBoolCmp(IRGS& env, Op op, SSATmp* arr, SSATmp* right) {
+  auto const arrTy = arr->type();
+  assertx(arrTy.subtypeOfAny(TVec, TDict, TKeyset));
+  assertx(right->type() <= TBool);
+
+  switch (op) {
+    case Op::Gt:
+    case Op::Gte:
+    case Op::Lt:
+    case Op::Lte:
+    case Op::Cmp: {
+      auto const m = arrTy <= TVec  ? s_cmpWithVec :
+                     arrTy <= TDict ? s_cmpWithDict :
+                                      s_cmpWithKeyset;
+      gen(env, ThrowInvalidOperation, cns(env, m.get()));
+      return cns(env, op == Op::Cmp ? 0 : false);
+    }
+    case Op::Same:
+    case Op::Eq:
+      if (RuntimeOption::EvalHackArrCompatHackArrCmpNotices) {
+        gen(
+          env,
+          RaiseHackArrCompatNotice,
+          cns(env, makeStaticString(Strings::HACKARR_COMPAT_HACK_ARR_BOOL_CMP))
+        );
+      }
+      return cns(env, false);
+    case Op::NSame:
+    case Op::Neq:
+      if (RuntimeOption::EvalHackArrCompatHackArrCmpNotices) {
+        gen(
+          env,
+          RaiseHackArrCompatNotice,
+          cns(env, makeStaticString(Strings::HACKARR_COMPAT_HACK_ARR_BOOL_CMP))
+        );
+      }
+      return cns(env, true);
+    default: always_assert(false);
+  }
+}
+
 // Relational comparisons of vecs with non-vecs isn't allowed and will always
 // throw. Equality comparisons always act as if they are not equal.
 SSATmp* emitMixedVecCmp(IRGS& env, Op op) {
@@ -552,12 +593,18 @@ void implNullCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     // in certain cases, which we do not want here. Also note that no collection
     // check is done.
     push(env, emitConstCmp(env, op, false, true));
-  } else if (rightTy <= TVec) {
-    push(env, emitMixedVecCmp(env, op));
-  } else if (rightTy <= TDict) {
-    push(env, emitMixedDictCmp(env, op));
-  } else if (rightTy <= TKeyset) {
-    push(env, emitMixedKeysetCmp(env, op));
+  } else if (rightTy.subtypeOfAny(TVec, TDict, TKeyset)) {
+    // Treat null as false when comparing to an array.
+    push(
+      env,
+      emitCommutedOp(
+        env,
+        op,
+        [&](Op op){
+          return emitHackArrBoolCmp(env, op, right, cns(env, false));
+        }
+      )
+    );
   } else if (rightTy <= TClsMeth) {
     if (RuntimeOption::EvalHackArrDVArrs) {
       push(env, emitMixedClsMethCmp(env, op));
@@ -579,12 +626,15 @@ void implBoolCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   assertx(left->type() <= TBool);
   auto const rightTy = right->type();
 
-  if (rightTy <= TVec) {
-    push(env, emitMixedVecCmp(env, op));
-  } else if (rightTy <= TDict) {
-    push(env, emitMixedDictCmp(env, op));
-  } else if (rightTy <= TKeyset) {
-    push(env, emitMixedKeysetCmp(env, op));
+  if (rightTy.subtypeOfAny(TVec, TDict, TKeyset)) {
+    push(
+      env,
+      emitCommutedOp(
+        env,
+        op,
+        [&](Op op){ return emitHackArrBoolCmp(env, op, right, left); }
+      )
+    );
   } else if (rightTy <= TClsMeth) {
     if (RuntimeOption::EvalHackArrDVArrs) {
       push(env, emitMixedClsMethCmp(env, op));
@@ -843,7 +893,9 @@ void implVecCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   auto const rightTy = right->type();
 
   // Left operand is a vec.
-  if (rightTy <= TVec) {
+  if (rightTy.subtypeOfAny(TNull, TBool)) {
+    push(env, emitHackArrBoolCmp(env, op, left, gen(env, ConvTVToBool, right)));
+  } else if (rightTy <= TVec) {
     push(env, gen(env, toVecCmpOpcode(op), left, right));
   } else if (rightTy <= TClsMeth) {
     if (RuntimeOption::EvalHackArrDVArrs) {
@@ -872,7 +924,9 @@ void implDictCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   auto const rightTy = right->type();
 
   // Left operand is a dict.
-  if (rightTy <= TDict) {
+  if (rightTy.subtypeOfAny(TNull, TBool)) {
+    push(env, emitHackArrBoolCmp(env, op, left, gen(env, ConvTVToBool, right)));
+  } else if (rightTy <= TDict) {
     // Dicts can't use relational comparisons.
     if (op == Op::Eq || op == Op::Neq ||
         op == Op::Same || op == Op::NSame) {
@@ -895,7 +949,9 @@ void implKeysetCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   auto const rightTy = right->type();
 
   // Left operand is a keyset.
-  if (rightTy <= TKeyset) {
+  if (rightTy.subtypeOfAny(TNull, TBool)) {
+    push(env, emitHackArrBoolCmp(env, op, left, gen(env, ConvTVToBool, right)));
+  } else if (rightTy <= TKeyset) {
     // Keysets can't use relational comparisons.
     if (op == Op::Eq || op == Op::Neq ||
         op == Op::Same || op == Op::NSame) {

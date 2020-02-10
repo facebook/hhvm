@@ -1,0 +1,12 @@
+-vEval.HackArrCompatNotices=1
+-vEval.HackArrCompatCheckCompare=1
+-vEval.HackArrCompatCheckCompareNonAnyArray=1
+-vEval.HackArrCompatIsArrayNotices=1
+-vEval.HackArrCompatIsVecDictNotices=1
+-vEval.HackArrCompatTypeHintNotices=1
+-vEval.HackArrCompatDVCmpNotices=1
+-vEval.HackArrCompatCheckEmptyStringPromote=1
+-vEval.HackArrCompatCheckVarrayPromote=1
+-vEval.HackArrCompatCheckImplicitVarrayAppend=1
+
+-vEval.HackArrCompatHackArrCmpNotices=1

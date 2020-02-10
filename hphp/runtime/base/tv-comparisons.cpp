@@ -51,12 +51,8 @@ namespace {
 
 template<class Op>
 typename Op::RetType tvRelOp(Op op, TypedValue cell, bool val) {
-  if (UNLIKELY(isVecType(cell.m_type))) {
-    return op.vecVsNonVec();
-  } else if (UNLIKELY(isDictType(cell.m_type))) {
-    return op.dictVsNonDict();
-  } else if (UNLIKELY(isKeysetType(cell.m_type))) {
-    return op.keysetVsNonKeyset();
+  if (UNLIKELY(isHackArrayType(cell.m_type))) {
+    return op(cell.m_data.parr, val);
   } else if (UNLIKELY(isClsMethType(cell.m_type))) {
     if (RuntimeOption::EvalHackArrDVArrs) {
       return op.clsmethVsNonClsMeth();
@@ -607,6 +603,8 @@ typename Op::RetType tvRelOpVec(Op op, TypedValue cell, const ArrayData* a) {
   }
 
   if (UNLIKELY(!isVecType(cell.m_type))) {
+    if (cell.m_type == KindOfBoolean) return op(!!cell.m_data.num, a);
+    if (cell.m_type == KindOfNull) return op(false, a);
     if (isDictType(cell.m_type)) return op.dictVsNonDict();
     if (isKeysetType(cell.m_type)) return op.keysetVsNonKeyset();
     if (UNLIKELY(op.noticeOnArrHackArr() && isArrayType(cell.m_type))) {
@@ -624,6 +622,8 @@ typename Op::RetType tvRelOpDict(Op op, TypedValue cell, const ArrayData* a) {
   assertx(a->isDict());
 
   if (UNLIKELY(!isDictType(cell.m_type))) {
+    if (cell.m_type == KindOfBoolean) return op(!!cell.m_data.num, a);
+    if (cell.m_type == KindOfNull) return op(false, a);
     if (isVecType(cell.m_type)) return op.vecVsNonVec();
     if (isKeysetType(cell.m_type)) return op.keysetVsNonKeyset();
     if (UNLIKELY(op.noticeOnArrHackArr() && isArrayType(cell.m_type))) {
@@ -641,6 +641,8 @@ typename Op::RetType tvRelOpKeyset(Op op, TypedValue cell, const ArrayData* a) {
   assertx(a->isKeyset());
 
   if (UNLIKELY(!isKeysetType(cell.m_type))) {
+    if (cell.m_type == KindOfBoolean) return op(!!cell.m_data.num, a);
+    if (cell.m_type == KindOfNull) return op(false, a);
     if (isVecType(cell.m_type)) return op.vecVsNonVec();
     if (isDictType(cell.m_type)) return op.dictVsNonDict();
     if (UNLIKELY(op.noticeOnArrHackArr() && isArrayType(cell.m_type))) {
@@ -1013,6 +1015,16 @@ struct Eq {
     assertx(ad2->isPHPArray());
     return ArrayData::Equal(ad1, ad2);
   }
+  bool operator()(const ArrayData* ad, bool val) const {
+    assertx(!ad->isPHPArray());
+    raiseHackArrCompatHackArrBoolCmp();
+    return false;
+  }
+  bool operator()(bool val, const ArrayData* ad) const {
+    assertx(!ad->isPHPArray());
+    raiseHackArrCompatHackArrBoolCmp();
+    return false;
+  }
 
   bool operator()(const Func* f1, const Func* f2) const { return f1 == f2; }
   bool operator()(const Class* c1, const Class* c2) const { return c1 == c2; }
@@ -1080,6 +1092,21 @@ struct CompareBase {
   >::type operator()(T t, U u) const {
     auto c = PrimitiveCmpOp();
     return c(t, u);
+  }
+
+  RetType operator()(const ArrayData* ad, bool val) const {
+    assertx(!ad->isPHPArray());
+    if (ad->isVecArray()) throw_vec_compare_exception();
+    if (ad->isDict()) throw_dict_compare_exception();
+    assertx(ad->isKeyset());
+    throw_keyset_compare_exception();
+  }
+  RetType operator()(bool val, const ArrayData* ad) const {
+    assertx(!ad->isPHPArray());
+    if (ad->isVecArray()) throw_vec_compare_exception();
+    if (ad->isDict()) throw_dict_compare_exception();
+    assertx(ad->isKeyset());
+    throw_keyset_compare_exception();
   }
 
   RetType operator()(const StringData* sd1, const StringData* sd2) const {

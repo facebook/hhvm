@@ -1278,6 +1278,11 @@ void raiseHackArrCompatDVArrCmp(const ArrayData* ad1,
   );
 }
 
+void raiseHackArrCompatHackArrBoolCmp() {
+  if (!RuntimeOption::EvalHackArrCompatHackArrCmpNotices) return;
+  raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_HACK_ARR_BOOL_CMP);
+}
+
 std::string makeHackArrCompatImplicitArrayKeyMsg(const TypedValue* key) {
   return folly::sformat(
     "Implicit conversion of {} to array key",

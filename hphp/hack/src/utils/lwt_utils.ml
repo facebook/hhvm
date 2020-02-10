@@ -179,6 +179,13 @@ let try_finally ~(f : unit -> 'a Lwt.t) ~(finally : unit -> unit Lwt.t) :
   let%lwt () = finally () in
   Lwt.return res
 
+let with_context
+    ~(enter : unit -> unit Lwt.t)
+    ~(exit : unit -> unit Lwt.t)
+    ~(do_ : unit -> 'a Lwt.t) : 'a Lwt.t =
+  let%lwt () = enter () in
+  try_finally ~f:do_ ~finally:exit
+
 let read_all (path : string) : (string, string) Lwt_result.t =
   try%lwt
     let%lwt contents =

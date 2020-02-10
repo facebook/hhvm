@@ -55,6 +55,14 @@ raises an exception. *)
 val try_finally :
   f:(unit -> 'a Lwt.t) -> finally:(unit -> unit Lwt.t) -> 'a Lwt.t
 
+(** Asynchronous version of [Utils.with_context]. Call [enter], then run and
+wait for [do_] to complete, and finally call [exit], even if [f] raises an exception. *)
+val with_context :
+  enter:(unit -> unit Lwt.t) ->
+  exit:(unit -> unit Lwt.t) ->
+  do_:(unit -> 'a Lwt.t) ->
+  'a Lwt.t
+
 (** Reads all the contents from the given file on disk, or returns an error
 message if unable to do so. *)
 val read_all : string -> (string, string) Lwt_result.t

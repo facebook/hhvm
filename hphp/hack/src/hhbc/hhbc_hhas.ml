@@ -821,11 +821,9 @@ type default_value_printing_env = {
 
 let rec string_of_afield ~env af =
   match af with
-  | A.AFvalue e -> string_of_param_default_value ~env e
+  | A.AFvalue e -> string_of_expression ~env e
   | A.AFkvalue (k, v) ->
-    string_of_param_default_value ~env k
-    ^ " => "
-    ^ string_of_param_default_value ~env v
+    string_of_expression ~env k ^ " => " ^ string_of_expression ~env v
 
 and string_of_afield_list ~env afl =
   if List.length afl = 0 then
@@ -925,7 +923,7 @@ and string_of_fun ~env f use_list =
       in
       let default_val =
         Option.value_map p.A.param_expr ~default:"" ~f:(fun e ->
-            " = " ^ string_of_param_default_value ~env e)
+            " = " ^ string_of_expression ~env e)
       in
       let param_text =
         inout ^ string_of_is_variadic p.A.param_is_variadic ^ hint
@@ -1042,8 +1040,6 @@ and string_of_statement ~env ~indent (_p, stmt_) =
   in
   text
 
-and string_of_expression ~env e = string_of_param_default_value ~env e
-
 and string_of_xml ~env (_, id) attributes children =
   let env = { env with in_xhp = true } in
   let name = SU.Xhp.mangle id in
@@ -1051,14 +1047,10 @@ and string_of_xml ~env (_, id) attributes children =
     List.fold_right ~f:string_of_xhp_attr attributes ~init:(0, [])
   in
   let attributes =
-    string_of_param_default_value
-      ~env
-      (Tast_annotate.make (A.Darray (None, attributes)))
+    string_of_expression ~env (Tast_annotate.make (A.Darray (None, attributes)))
   in
   let children =
-    string_of_param_default_value
-      ~env
-      (Tast_annotate.make (A.Varray (None, children)))
+    string_of_expression ~env (Tast_annotate.make (A.Varray (None, children)))
   in
   "new " ^ name ^ "(" ^ attributes ^ ", " ^ children ^ ", __FILE__, __LINE__)"
 
@@ -1070,11 +1062,11 @@ and string_of_xhp_attr attr (spread_id, attrs) =
     let s = "...$" ^ string_of_int spread_id in
     (spread_id + 1, (Tast_annotate.make (A.String s), e) :: attrs)
 
-and string_of_param_default_value ~env expr =
+and string_of_expression ~env expr =
   let p = Pos.none in
   let middle_aux e1 s e2 =
-    let e1 = string_of_param_default_value ~env e1 in
-    let e2 = string_of_param_default_value ~env e2 in
+    let e1 = string_of_expression ~env e1 in
+    let e2 = string_of_expression ~env e2 in
     e1 ^ s ^ e2
   in
   (* If we are in the global namespace and the id is a global id, strip \ *)
@@ -1145,7 +1137,7 @@ and string_of_param_default_value ~env expr =
   let string_of_class_get_expr ~env cge =
     match cge with
     | A.CGstring (_, litstr) -> Php_escaping.escape litstr
-    | A.CGexpr e -> string_of_param_default_value ~env e
+    | A.CGexpr e -> string_of_expression ~env e
   in
   let handle_possible_colon_colon_class_expr ~env ~is_array_get e =
     match e with
@@ -1166,7 +1158,7 @@ and string_of_param_default_value ~env expr =
           else
             A.String s1 )
       in
-      Some (string_of_param_default_value ~env e)
+      Some (string_of_expression ~env e)
     | _ -> None
   in
   let escape_char_for_printing chr =
@@ -1224,11 +1216,11 @@ and string_of_param_default_value ~env expr =
     let fl =
       List.map ~f:(fun (f_name, e) -> (shape_field_name_to_expr f_name, e)) fl
     in
-    string_of_param_default_value ~env (fst expr, A.Darray (None, fl))
+    string_of_expression ~env (fst expr, A.Darray (None, fl))
   | A.Binop (bop, e1, e2) ->
     let bop = string_of_bop bop in
-    let e1 = string_of_param_default_value ~env e1 in
-    let e2 = string_of_param_default_value ~env e2 in
+    let e1 = string_of_expression ~env e1 in
+    let e2 = string_of_expression ~env e2 in
     e1 ^ " " ^ bop ^ " " ^ e2
   | A.Call (_, (_, A.Id (_, call_id)), _, es, unpacked_element) ->
     let call_id = adjust_id call_id in
@@ -1238,7 +1230,7 @@ and string_of_param_default_value ~env expr =
       | None -> es
       | Some e -> es @ [e]
     in
-    let es = List.map ~f:(string_of_param_default_value ~env) es in
+    let es = List.map ~f:(string_of_expression ~env) es in
     call_id ^ "(" ^ String.concat ~sep:", " es ^ ")"
   | A.New ((_, A.CIexpr (_, A.Id (_, cname))), _, es, unpacked_element, _) ->
     let class_id =
@@ -1251,17 +1243,17 @@ and string_of_param_default_value ~env expr =
       | None -> es
       | Some e -> es @ [e]
     in
-    let es = List.map ~f:(string_of_param_default_value ~env) es in
+    let es = List.map ~f:(string_of_expression ~env) es in
     "new " ^ class_id ^ "(" ^ String.concat ~sep:", " es ^ ")"
   | A.New ((_, A.CIexpr e), _, es, unpacked_element, _)
   | A.Call (_, e, _, es, unpacked_element) ->
-    let e = String_utils.lstrip (string_of_param_default_value ~env e) "\\\\" in
+    let e = String_utils.lstrip (string_of_expression ~env e) "\\\\" in
     let es =
       match unpacked_element with
       | None -> es
       | Some e -> es @ [e]
     in
-    let es = List.map ~f:(string_of_param_default_value ~env) es in
+    let es = List.map ~f:(string_of_expression ~env) es in
     let prefix =
       match snd expr with
       | A.New (_, _, _, _, _) -> "new "
@@ -1282,7 +1274,7 @@ and string_of_param_default_value ~env expr =
           ~should_format:true
           ~is_class_constant:false
           s1
-      | A.CIexpr e1 -> string_of_param_default_value ~env e1
+      | A.CIexpr e1 -> string_of_expression ~env e1
       | _ -> failwith "TODO Unimplemented unexpected non-CIexpr"
     in
     let s2 = string_of_class_get_expr ~env cge in
@@ -1304,28 +1296,28 @@ and string_of_param_default_value ~env expr =
         in
         s1 ^ "::" ^ s2
       | _ ->
-        let s1 = string_of_param_default_value ~env e1 in
+        let s1 = string_of_expression ~env e1 in
         s1 ^ "::" ^ s2
     end
   | A.Class_const _ -> failwith "TODO: Only expected CIexpr in class_const"
   | A.Unop (uop, e) ->
-    let e = string_of_param_default_value ~env e in
+    let e = string_of_expression ~env e in
     (match uop with
     | Ast_defs.Upincr -> e ^ "++"
     | Ast_defs.Updecr -> e ^ "--"
     | _ -> string_of_uop uop ^ e)
   | A.Obj_get (e1, e2, f) ->
-    let e1 = string_of_param_default_value ~env e1 in
-    let e2 = string_of_param_default_value ~env e2 in
+    let e1 = string_of_expression ~env e1 in
+    let e2 = string_of_expression ~env e2 in
     let f =
       match f with
       | Aast.OG_nullthrows -> "->"
       | Aast.OG_nullsafe -> "\\?->"
     in
     e1 ^ f ^ e2
-  | A.Clone e -> "clone " ^ string_of_param_default_value ~env e
+  | A.Clone e -> "clone " ^ string_of_expression ~env e
   | A.Array_get (e, eo) ->
-    let e = string_of_param_default_value ~env e in
+    let e = string_of_expression ~env e in
     let eo =
       Option.value_map eo ~default:"" ~f:(fun e ->
           let cexpr_o =
@@ -1333,34 +1325,33 @@ and string_of_param_default_value ~env expr =
           in
           match cexpr_o with
           | Some s -> s
-          | None -> string_of_param_default_value ~env e)
+          | None -> string_of_expression ~env e)
     in
     e ^ "[" ^ eo ^ "]"
   | A.String2 es ->
-    String.concat ~sep:" . "
-    @@ List.map ~f:(string_of_param_default_value ~env) es
+    String.concat ~sep:" . " @@ List.map ~f:(string_of_expression ~env) es
   | A.PrefixedString (name, e) ->
-    String.concat ~sep:" . " @@ [name; string_of_param_default_value ~env e]
+    String.concat ~sep:" . " @@ [name; string_of_expression ~env e]
   | A.Eif (cond, etrue, efalse) ->
-    let cond = string_of_param_default_value ~env cond in
+    let cond = string_of_expression ~env cond in
     let etrue =
-      Option.value_map etrue ~default:"" ~f:(string_of_param_default_value ~env)
+      Option.value_map etrue ~default:"" ~f:(string_of_expression ~env)
     in
-    let efalse = string_of_param_default_value ~env efalse in
+    let efalse = string_of_expression ~env efalse in
     cond ^ " \\? " ^ etrue ^ " : " ^ efalse
-  | A.BracedExpr e -> "{" ^ string_of_param_default_value ~env e ^ "}"
-  | A.ParenthesizedExpr e -> "(" ^ string_of_param_default_value ~env e ^ ")"
+  | A.BracedExpr e -> "{" ^ string_of_expression ~env e ^ "}"
+  | A.ParenthesizedExpr e -> "(" ^ string_of_expression ~env e ^ ")"
   | A.Cast (h, e) ->
     let h = string_of_hint ~ns:false h in
-    let e = string_of_param_default_value ~env e in
+    let e = string_of_expression ~env e in
     "(" ^ h ^ ")" ^ e
   | A.Pipe (_, e1, e2) -> middle_aux e1 " |> " e2
   | A.Is (e, h) ->
-    let e = string_of_param_default_value ~env e in
+    let e = string_of_expression ~env e in
     let h = string_of_hint ~ns:true h in
     e ^ " is " ^ h
   | A.As (e, h, b) ->
-    let e = string_of_param_default_value ~env e in
+    let e = string_of_expression ~env e in
     let o =
       if b then
         " ?as "
@@ -1370,21 +1361,21 @@ and string_of_param_default_value ~env expr =
     let h = string_of_hint ~ns:true h in
     e ^ o ^ h
   | A.Varray (_, es) ->
-    let es = List.map ~f:(string_of_param_default_value ~env) es in
+    let es = List.map ~f:(string_of_expression ~env) es in
     "varray[" ^ String.concat ~sep:", " es ^ "]"
   | A.Darray (_, es) ->
     let es = List.map ~f:(fun (e1, e2) -> A.AFkvalue (e1, e2)) es in
     "darray[" ^ string_of_afield_list ~env es ^ "]"
   | A.List l ->
-    let l = List.map ~f:(string_of_param_default_value ~env) l in
+    let l = List.map ~f:(string_of_expression ~env) l in
     "list(" ^ String.concat ~sep:", " l ^ ")"
   | A.Yield y -> "yield " ^ string_of_afield ~env y
-  | A.Await a -> "await " ^ string_of_param_default_value ~env a
+  | A.Await a -> "await " ^ string_of_expression ~env a
   | A.Yield_break -> "return"
-  | A.Yield_from e -> "yield from " ^ string_of_param_default_value ~env e
+  | A.Yield_from e -> "yield from " ^ string_of_expression ~env e
   | A.Import (fl, e) ->
     let fl = string_of_import_flavor fl in
-    let e = string_of_param_default_value ~env e in
+    let e = string_of_expression ~env e in
     fl ^ " " ^ e
   | A.Xml (id, attributes, children) ->
     string_of_xml ~env id attributes children
@@ -1392,7 +1383,7 @@ and string_of_param_default_value ~env expr =
   | A.Omitted -> ""
   | A.Lfun _ ->
     failwith
-      "expected Lfun to be converted to Efun during closure conversion string_of_param_default_value"
+      "expected Lfun to be converted to Efun during closure conversion string_of_expression"
   | A.Suspend _
   | A.Callconv _
   | A.Expr_list _ ->
@@ -1401,7 +1392,7 @@ and string_of_param_default_value ~env expr =
     failwith
       "TODO Unimplemented: We are missing alot of cases in the case match. Delete this catchall"
 
-let string_of_param_default_value_option env default_val =
+let string_of_expression_option env default_val =
   match default_val with
   | None -> ""
   | Some (label, expr) ->
@@ -1409,7 +1400,7 @@ let string_of_param_default_value_option env default_val =
     " = "
     ^ string_of_label label
     ^ "(\"\"\""
-    ^ string_of_param_default_value ~env expr
+    ^ string_of_expression ~env expr
     ^ "\"\"\")"
 
 let string_of_param_user_attributes p =
@@ -1434,7 +1425,7 @@ let string_of_param env p =
   ^ string_of_is_variadic (Hhas_param.is_variadic p)
   ^ string_of_type_info_option param_type_info
   ^ param_name
-  ^ string_of_param_default_value_option env param_default_value
+  ^ string_of_expression_option env param_default_value
 
 let string_of_params env ps =
   "(" ^ String.concat ~sep:", " (List.map ~f:(string_of_param env) ps) ^ ")"

@@ -1066,9 +1066,6 @@ SSATmp* opt_tag_provenance_here(IRGS& env, const ParamPrep& params) {
   if (params.size() != 1) return nullptr;
   if (RO::EvalLogArrayProvenance) return nullptr;
   auto const result = params[0].value;
-  // FCallBuiltin uses a pass-by-value ABI (params <= TCell) while NativeImpl
-  // uses pass-by-stack (params <= TPtrToStkCell). Only optimize the former.
-  if (!result->isA(TCell)) return nullptr;
   gen(env, IncRef, result);
   return result;
 }
@@ -1080,11 +1077,6 @@ SSATmp* opt_array_mark_legacy(IRGS& env, const ParamPrep& params) {
   if (params.size() != 1) return nullptr;
   auto const value = params[0].value;
   if (!RO::EvalHackArrDVArrs) {
-    // if we're using NativeImpl, we receive the value as a stack pointer and we
-    // shouldn't bother with any optimizations here
-    if (!value->isA(TCell)) return nullptr;
-    // the machinery below constrains the parameters to DataTypeSpecific so
-    // these checks should be sufficient to correctly implement the logging
     if (value->isA(TVec)) {
       gen(env, RaiseWarning, cns(env, s_ARRAY_MARK_LEGACY_VEC.get()));
     } else if (value->isA(TDict)) {
@@ -1778,12 +1770,13 @@ SSATmp* builtinCall(IRGS& env,
                     const CatchMaker& catchMaker) {
   assertx(callee->nativeFuncPtr());
 
-  // Try to replace the builtin call with a specialized implementation of the
-  // builtin
-  auto optRet = optimizedFCallBuiltin(env, callee, params, numNonDefault);
-  if (optRet) return optRet;
-
   if (!params.forNativeImpl) {
+    // For FCallBuiltin, params are TypedValues, while for NativeImpl, they're
+    // pointers to these values on the frame. We only optimize native calls
+    // when we have the values.
+    auto const opt = optimizedFCallBuiltin(env, callee, params, numNonDefault);
+    if (opt) return opt;
+
     /*
      * Everything that needs to be on the stack gets spilled now.
      *

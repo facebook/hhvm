@@ -572,40 +572,39 @@ Type Type::modified() const {
 
 /*
  * Return true if the array satisfies requirement on the ArraySpec.
+ * If the kind and RepoAuthType are both set, the array must match both.
  */
 static bool arrayFitsSpec(const ArrayData* arr, const ArraySpec spec) {
   if (spec == ArraySpec::Top()) return true;
 
-  if (auto const spec_kind = spec.kind()) {
-    if (arr->kind() == spec_kind) return true;
-  }
+  if (spec.kind() && arr->kind() != *spec.kind()) return false;
+  if (!spec.type()) return true;
 
-  if (auto const rat_type = spec.type()) {
-    using A = RepoAuthType::Array;
-    if (arr->empty() && rat_type->emptiness() != A::Empty::No) return true;
-    if (arr->isVectorData()) {
-      switch (rat_type->tag()) {
-        case A::Tag::Packed:
-          if (arr->size() != rat_type->size()) break;
-          // fall through
-        case A::Tag::PackedN: {
-          int64_t k = 0;
-          for ( ; k < arr->size(); ++k) {
-            auto const specElemType =
-              rat_type->tag() == A::Tag::Packed ? rat_type->packedElem(k)
-                                                : rat_type->elemType();
-            if (!tvMatchesRepoAuthType(arr->get(k).tv(), specElemType)) {
-              break;
-            }
-          }
-          if (k == arr->size()) return true;
-          break;
+  using A = RepoAuthType::Array;
+  auto const& type = *spec.type();
+  if (arr->empty()) return type.emptiness() != A::Empty::No;
+
+  // Right now, the only non-trivial RepoAuthType::Array we support is for
+  // arrays with "vector" keys (0, 1, ... n - 1). They don't have to be packed.
+  if (!arr->isVectorData()) return false;
+  switch (type.tag()) {
+    case A::Tag::Packed:
+      if (arr->size() != type.size()) break;
+      // fall through
+    case A::Tag::PackedN: {
+      int64_t k = 0;
+      auto const packed = type.tag() == A::Tag::Packed;
+      for ( ; k < arr->size(); ++k) {
+        auto const elemType = packed ? type.packedElem(k) : type.elemType();
+        if (!tvMatchesRepoAuthType(arr->get(k).tv(), elemType)) {
+          return false;
         }
       }
+      return true;
     }
   }
 
-  return false;
+  always_assert(false);
 }
 
 bool Type::operator<=(Type rhs) const {

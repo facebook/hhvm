@@ -111,6 +111,13 @@ where
     wrap_by_(w, "\"", "\"", f)
 }
 
+pub fn wrap_by_angle<W: Write, F>(w: &mut W, f: F) -> Result<(), W::Error>
+where
+    F: FnOnce(&mut W) -> Result<(), W::Error>,
+{
+    wrap_by_(w, "<", ">", f)
+}
+
 pub fn write_list<W: Write>(w: &mut W, items: &[impl AsRef<str>]) -> Result<(), W::Error> {
     Ok(for i in items {
         w.write(i.as_ref())?;
@@ -165,6 +172,21 @@ where
 {
     match i {
         None => Ok(()),
+        Some(i) => f(w, i),
+    }
+}
+
+pub fn option_or<W: Write, T, F>(
+    w: &mut W,
+    i: Option<T>,
+    f: F,
+    default: impl AsRef<str>,
+) -> Result<(), W::Error>
+where
+    F: Fn(&mut W, T) -> Result<(), W::Error>,
+{
+    match i {
+        None => w.write(default),
         Some(i) => f(w, i),
     }
 }

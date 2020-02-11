@@ -63,10 +63,7 @@ pub fn from_ast<'a>(
     if !(method.static_ || is_closure_body) {
         for p in method.params.iter() {
             if p.name == special_idents::THIS {
-                return Err(raise_fatal_parse(
-                    &method.name.0,
-                    "Cannot re-assign $this".into(),
-                ));
+                return Err(raise_fatal_parse(&method.name.0, "Cannot re-assign $this"));
             }
         }
     };

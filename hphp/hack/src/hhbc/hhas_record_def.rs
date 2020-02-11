@@ -7,12 +7,12 @@ use hhbc_id_rust::record;
 use runtime::TypedValue;
 
 #[derive(Debug)]
-pub struct Field(pub String, pub Info, pub Option<TypedValue>);
+pub struct Field<'a>(pub &'a str, pub Info, pub Option<TypedValue>);
 
 #[derive(Debug)]
 pub struct HhasRecord<'a> {
     pub name: record::Type<'a>,
     pub is_abstract: bool,
     pub base: Option<record::Type<'a>>,
-    pub fields: Vec<Field>,
+    pub fields: Vec<Field<'a>>,
 }

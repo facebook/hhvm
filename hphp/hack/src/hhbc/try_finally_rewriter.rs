@@ -166,15 +166,15 @@ fn emit_goto(
                 }
                 jt::ResolvedGotoTarget::GotoFromFinally => Err(emit_fatal::raise_fatal_parse(
                     &get_pos_for_error(env),
-                    "Goto to a label outside a finally block is not supported".into(),
+                    "Goto to a label outside a finally block is not supported",
                 )),
                 jt::ResolvedGotoTarget::GotoInvalidLabel => Err(emit_fatal::raise_fatal_parse(
                     &get_pos_for_error(env),
-                    String::from(if in_using {
+                    if in_using {
                         "'goto' into or across using statement is disallowed"
                     } else {
                         "'goto' into loop or switch statement is disallowed"
-                    }),
+                    },
                 )),
             }
         }

@@ -19,7 +19,6 @@ pub struct HhasProgram<'a> {
     pub record_defs: Vec<HhasRecord<'a>>,
     pub typedefs: Vec<Typedef<'a>>,
     pub file_attributes: Vec<HhasAttribute>,
-    /* TODO(hrust): add `pub main: Hhas_body.t` */
     pub main: HhasBody,
     pub symbol_refs: Vec<HhasSymbolRefs>,
 }

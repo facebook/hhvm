@@ -65,7 +65,7 @@ pub fn make_info<'a>(
             if class.kind.is_cinterface() {
                 return Err(emit_fatal::raise_fatal_parse(
                     pos,
-                    "<<__Memoize>> cannot be used in interfaces".into(),
+                    "<<__Memoize>> cannot be used in interfaces",
                 ));
             } else if m.abstract_ {
                 return Err(emit_fatal::raise_fatal_parse(

@@ -89,18 +89,18 @@ where
         printing_t: IGNORED_DURATION,
     };
 
-    let ast = profile(log_extern_compiler_perf, &mut ret.parsing_t, || {
+    let mut parse_result = profile(log_extern_compiler_perf, &mut ret.parsing_t, || {
         parse_file(&opts, stack_limit, &env.filepath, text)
     });
 
-    let (program, codegen_t) = match ast {
+    let (program, codegen_t) = match &mut parse_result {
         // TODO(shiqicao): change opts to Rc<Option> to avoid cloning
-        Either::Right((mut ast, is_hh_file)) => {
-            elaborate_namespaces_visitor::elaborate_program(env.empty_namespace.clone(), &mut ast);
-            emit(&env, opts.clone(), is_hh_file, &ast)
+        Either::Right((ast, is_hh_file)) => {
+            elaborate_namespaces_visitor::elaborate_program(env.empty_namespace.clone(), ast);
+            emit(&env, opts.clone(), *is_hh_file, ast)
         }
         Either::Left((pos, msg, is_runtime_error)) => {
-            emit_fatal(&env, is_runtime_error, opts.clone(), pos, msg)
+            emit_fatal(&env, *is_runtime_error, opts.clone(), pos, msg)
         }
     };
     let program = program?;
@@ -124,7 +124,7 @@ fn emit<'p>(
     env: &Env,
     opts: Options,
     is_hh: bool,
-    ast: &Tast::Program,
+    ast: &'p Tast::Program,
 ) -> (Result<HhasProgram<'p>, Error>, f64) {
     let mut flags = FromAstFlags::empty();
     if is_hh {
@@ -146,13 +146,13 @@ fn emit<'p>(
     (r, t)
 }
 
-fn emit_fatal(
+fn emit_fatal<'a>(
     env: &Env,
     is_runtime_error: bool,
     opts: Options,
-    pos: Pos,
-    msg: String,
-) -> (Result<HhasProgram, Error>, f64) {
+    pos: &Pos,
+    msg: impl AsRef<str>,
+) -> (Result<HhasProgram<'a>, Error>, f64) {
     let op = if is_runtime_error {
         FatalOp::Runtime
     } else {

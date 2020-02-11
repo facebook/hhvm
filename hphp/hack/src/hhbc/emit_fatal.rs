@@ -9,27 +9,27 @@ use hhbc_ast_rust::FatalOp;
 use instruction_sequence_rust::{Error, InstrSeq};
 use oxidized::pos::Pos;
 
-pub fn raise_fatal_runtime(pos: &Pos, msg: String) -> Error {
-    Error::IncludeTimeFatalException(FatalOp::Runtime, format!("{:?}: {}", pos, msg))
+pub fn raise_fatal_runtime(pos: &Pos, msg: impl AsRef<str>) -> Error {
+    Error::IncludeTimeFatalException(FatalOp::Runtime, format!("{:?}: {}", pos, msg.as_ref()))
 }
 
-pub fn raise_fatal_parse(pos: &Pos, msg: String) -> Error {
-    Error::IncludeTimeFatalException(FatalOp::Parse, format!("{:?}: {}", pos, msg))
+pub fn raise_fatal_parse(pos: &Pos, msg: impl AsRef<str>) -> Error {
+    Error::IncludeTimeFatalException(FatalOp::Parse, format!("{:?}: {}", pos, msg.as_ref()))
 }
 
-pub fn emit_fatal(emitter: &Emitter, op: FatalOp, pos: &Pos, msg: String) -> InstrSeq {
+pub fn emit_fatal(emitter: &Emitter, op: FatalOp, pos: &Pos, msg: impl AsRef<str>) -> InstrSeq {
     InstrSeq::gather(vec![
         emit_pos(emitter, pos),
-        InstrSeq::make_string(&msg),
+        InstrSeq::make_string(msg.as_ref()),
         InstrSeq::make_fatal(op),
     ])
 }
 
-pub fn emit_fatal_runtime(emitter: &Emitter, pos: &Pos, msg: String) -> InstrSeq {
+pub fn emit_fatal_runtime(emitter: &Emitter, pos: &Pos, msg: impl AsRef<str>) -> InstrSeq {
     emit_fatal(emitter, FatalOp::Runtime, pos, msg)
 }
 
-pub fn emit_fatal_runtimeomitframe(emitter: &Emitter, pos: &Pos, msg: String) -> InstrSeq {
+pub fn emit_fatal_runtimeomitframe(emitter: &Emitter, pos: &Pos, msg: impl AsRef<str>) -> InstrSeq {
     emit_fatal(emitter, FatalOp::RuntimeOmitFrame, pos, msg)
 }
 

@@ -18,7 +18,7 @@ use hhas_param_rust::HhasParam;
 use hhas_pos_rust::Span;
 use hhas_program_rust::HhasProgram;
 use hhas_record_def_rust::{Field, HhasRecord};
-use hhas_type::Info as HhasTypeInfo;
+use hhas_type::{constraint, Info as HhasTypeInfo};
 use hhbc_ast_rust::*;
 use hhbc_id_rust::Id;
 use hhbc_string_utils_rust::quote_string_with_escape;
@@ -141,7 +141,6 @@ pub fn print_program<W: Write>(
             handle_not_impl(|| print_program_(ctx, w, prog))?;
 
             newline(w)?;
-            newline(w)?;
             w.write("#ends here")?;
 
             newline(w)
@@ -157,19 +156,27 @@ fn print_program_<W: Write>(
     let is_hh = if prog.is_hh { "1" } else { "0" };
     newline(w)?;
     write_list(w, &[".hh_file ", is_hh, ";"])?;
-
     newline(w)?;
-    // TODO(hrust):
-    // add_data_region buf adata;
+
+    print_data_region(w, vec![])?;
     print_main(ctx, w, &prog.main)?;
-    concat(w, &prog.record_defs, print_record_def)?;
     concat(w, &prog.functions, |w, f| print_fun_def(ctx, w, f))?;
+    concat(w, &prog.record_defs, |w, rd| print_record_def(ctx, w, rd))?;
     print_file_attributes(ctx, w, &prog.file_attributes)?;
 
     if ctx.dump_symbol_refs() {
         return not_impl!();
     }
     Ok(())
+}
+
+fn print_data_region_element<W: Write>(w: &mut W, fake_elem: usize) -> Result<(), W::Error> {
+    not_impl!()
+}
+
+fn print_data_region<W: Write>(w: &mut W, fake_adata: Vec<usize>) -> Result<(), W::Error> {
+    concat(w, fake_adata, |w, i| print_data_region_element(w, *i))?;
+    newline(w)
 }
 
 fn handle_not_impl<E: std::fmt::Debug, F: FnOnce() -> Result<(), E>>(f: F) -> Result<(), E> {
@@ -306,9 +313,7 @@ fn print_attribute<W: Write>(
         a.arguments.len()
     ))?;
     concat(w, &a.arguments, |w, arg| print_adata(ctx, w, arg))?;
-    w.write("}\"\"\")")?;
-
-    Ok(())
+    w.write("}\"\"\")")
 }
 
 fn print_attributes<W: Write>(
@@ -336,12 +341,10 @@ fn print_file_attributes<W: Write>(
     w.write(".file_attributes [")?;
     print_attributes(ctx, w, al)?;
     w.write("] ;")?;
-    newline(w)?;
-    Ok(())
+    newline(w)
 }
 
 fn print_main<W: Write>(ctx: &mut Context, w: &mut W, body: &HhasBody) -> Result<(), W::Error> {
-    newline(w)?;
     w.write(".main ")?;
     if ctx.opts.source_map() {
         w.write("(1,1) ")?;
@@ -517,8 +520,73 @@ fn print_upper_bound<W: Write>(
     })
 }
 
-fn print_type_info<W: Write>(w: &mut W, ty: &HhasTypeInfo) -> Result<(), W::Error> {
-    not_impl!()
+fn print_type_info<W: Write>(w: &mut W, ti: &HhasTypeInfo) -> Result<(), W::Error> {
+    print_type_info_(w, false, ti)
+}
+
+fn print_type_info_<W: Write>(w: &mut W, is_enum: bool, ti: &HhasTypeInfo) -> Result<(), W::Error> {
+    let print_flag = |w: &mut W, flag: constraint::Flags| {
+        let mut first = true;
+        let mut print_space = |w: &mut W| -> Result<(), W::Error> {
+            if !first {
+                w.write(" ")
+            } else {
+                Ok(first = false)
+            }
+        };
+        use constraint::Flags as F;
+        if flag.contains(F::NULLABLE) {
+            print_space(w)?;
+            w.write("nullable")?;
+        }
+        if flag.contains(F::EXTENDED_HINT) {
+            print_space(w)?;
+            w.write("extended_hint")?;
+        }
+        if flag.contains(F::TYPE_VAR) {
+            print_space(w)?;
+            w.write("type_var")?;
+        }
+
+        if flag.contains(F::SOFT) {
+            print_space(w)?;
+            w.write("soft")?;
+        }
+
+        if flag.contains(F::TYPE_CONSTANT) {
+            print_space(w)?;
+            w.write("type_constant")?;
+        }
+
+        if flag.contains(F::DISPLAY_NULLABLE) {
+            print_space(w)?;
+            w.write("display_nullable")?;
+        }
+
+        if flag.contains(F::UPPERBOUND) {
+            print_space(w)?;
+            w.write("upperbound")?;
+        }
+        Ok(())
+    };
+    let print_quote_str = |w: &mut W, opt: &Option<String>| {
+        option_or(
+            w,
+            opt.as_ref(),
+            |w, s| wrap_by_quotes(w, |w| w.write(escape(s.as_ref()))),
+            "N",
+        )
+    };
+
+    wrap_by_angle(w, |w| {
+        print_quote_str(w, &ti.user_type)?;
+        w.write(" ")?;
+        if !is_enum {
+            print_quote_str(w, &ti.type_constraint.name)?;
+            w.write(" ")?;
+        }
+        print_flag(w, ti.type_constraint.flags)
+    })
 }
 
 fn print_extends<W: Write>(w: &mut W, base: Option<&str>) -> Result<(), W::Error> {
@@ -528,24 +596,49 @@ fn print_extends<W: Write>(w: &mut W, base: Option<&str>) -> Result<(), W::Error
     }
 }
 
-fn print_record_field<W: Write>(w: &mut W, field: &Field) -> Result<(), W::Error> {
-    newline(w)
+fn print_record_field<W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    Field(name, type_info, intial_value): &Field,
+) -> Result<(), W::Error> {
+    ctx.newline(w)?;
+    w.write(".property ")?;
+    match intial_value {
+        Some(_) => w.write("[public] ")?,
+        None => w.write("[public sys_initial_val] ")?,
+    }
+    print_type_info(w, type_info)?;
+    concat_str_by(w, " ", ["", name, "="])?;
+
+    ctx.block(w, |c, w| {
+        c.newline(w)?;
+        match intial_value {
+            None => w.write("uninit")?,
+            Some(value) => wrap_by_quotes(w, |w| print_adata(c, w, value))?,
+        }
+        w.write(";")
+    })
 }
 
-fn print_record_def<W: Write>(w: &mut W, record: &HhasRecord) -> Result<(), W::Error> {
+fn print_record_def<W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    record: &HhasRecord,
+) -> Result<(), W::Error> {
     newline(w)?;
     if record.is_abstract {
         concat_str_by(w, " ", [".record", record.name.to_raw_string()])?;
     } else {
         concat_str_by(w, " ", [".record", "[final]", record.name.to_raw_string()])?;
     }
-    w.write(" ")?;
     print_extends(w, record.base.as_ref().map(|b| b.to_raw_string()))?;
     w.write(" ")?;
 
     wrap_by_braces(w, |w| {
-        concat(w, &record.fields, print_record_field)?;
-        newline(w)
+        ctx.block(w, |c, w| {
+            concat(w, &record.fields, |w, rf| print_record_field(c, w, rf))
+        })?;
+        ctx.newline(w)
     })?;
     newline(w)
 }

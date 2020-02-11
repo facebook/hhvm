@@ -5,10 +5,12 @@
 use ast_constant_folder_rust as constant_folder;
 use emit_fatal_rust as emit_fatal;
 use emit_type_hint_rust as emit_type_hint;
-use env::{emitter::Emitter, Env};
+use env::emitter::Emitter;
 use hhas_record_def_rust::{Field as RecordField, HhasRecord};
 use hhas_type::constraint;
+use hhbc_id_rust::record;
 use instruction_sequence_rust::Result;
+use oxidized::namespace_env::Env as Namespace;
 
 use hhbc_string_utils_rust as string_utils;
 use oxidized::ast::*;
@@ -27,14 +29,14 @@ fn valid_tc_for_record_field(tc: &constraint::Type) -> bool {
     }
 }
 
-fn emit_field(
+fn emit_field<'a>(
     emitter: &Emitter,
-    env: &Env,
-    field: (Sid, Hint, Option<Expr>),
-) -> Result<RecordField> {
-    let (Id(pos, mut name), hint, expr_opt) = field;
-    let otv = expr_opt.map_or(None, |e| {
-        constant_folder::expr_to_typed_value(emitter, &env.namespace, &e).ok()
+    namespace: &Namespace,
+    field: &'a (Sid, Hint, Option<Expr>),
+) -> Result<RecordField<'a>> {
+    let (Id(pos, name), hint, expr_opt) = field;
+    let otv = expr_opt.as_ref().map_or(None, |e| {
+        constant_folder::expr_to_typed_value(emitter, namespace, e).ok()
     });
     let ti = emit_type_hint::hint_to_type_info(
         &emit_type_hint::Kind::Property,
@@ -44,9 +46,9 @@ fn emit_field(
         &hint,
     )?;
     if valid_tc_for_record_field(&ti.type_constraint) {
-        Ok(RecordField(name, ti, otv))
+        Ok(RecordField(name.as_str(), ti, otv))
     } else {
-        name = string_utils::strip_ns(&name).to_string();
+        let name = string_utils::strip_ns(name);
         Err(emit_fatal::raise_fatal_parse(
             &pos,
             format!("Invalid record field type hint for '{}'", name),
@@ -54,11 +56,13 @@ fn emit_field(
     }
 }
 
-fn emit_record_def<'a>(emitter: &Emitter, env: &Env, rd: RecordDef) -> HhasRecord<'a> {
-    let elaborate = |Id(_, name)| name.trim_start_matches("\\").to_string().into();
-    let parent_name = match rd.extends {
+fn emit_record_def<'a>(emitter: &Emitter, rd: &'a RecordDef) -> Result<HhasRecord<'a>> {
+    fn elaborate<'b>(Id(_, name): &'b Id) -> record::Type<'b> {
+        name.trim_start_matches("\\").into()
+    }
+    let parent_name = match &rd.extends {
         Some(Hint(_, h)) => {
-            if let Hint_::Happly(id, _) = *h {
+            if let Hint_::Happly(id, _) = h.as_ref() {
                 Some(elaborate(id))
             } else {
                 None
@@ -66,27 +70,23 @@ fn emit_record_def<'a>(emitter: &Emitter, env: &Env, rd: RecordDef) -> HhasRecor
         }
         _ => None,
     };
-    HhasRecord {
-        name: elaborate(rd.name),
+    Ok(HhasRecord {
+        name: elaborate(&rd.name),
         is_abstract: rd.abstract_,
         base: parent_name,
         fields: rd
             .fields
-            .into_iter()
-            .map(|f| emit_field(emitter, env, f).unwrap())
-            .collect(),
-    }
+            .iter()
+            .map(|f| emit_field(emitter, rd.namespace.as_ref(), &f))
+            .collect::<Result<Vec<_>>>()?,
+    })
 }
 
 pub fn emit_record_defs_from_program<'a>(
     emitter: &Emitter,
-    env: &Env,
-    p: Program,
-) -> Vec<HhasRecord<'a>> {
+    p: &'a Program,
+) -> Result<Vec<HhasRecord<'a>>> {
     p.into_iter()
-        .filter_map(|def| match def {
-            Def::RecordDef(rd) => Some(emit_record_def(emitter, env, *rd)),
-            _ => None,
-        })
-        .collect()
+        .filter_map(|d| d.as_record_def().map(|r| emit_record_def(emitter, r)))
+        .collect::<Result<Vec<_>>>()
 }

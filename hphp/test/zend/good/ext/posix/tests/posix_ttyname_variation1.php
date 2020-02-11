@@ -9,7 +9,7 @@ $index_array = varray[1, 2, 3];
 $assoc_array = darray[1 => 'one', 2 => 'two'];
 
 $variation_array = darray[
-  'empty array' => array(),
+  'empty array' => varray[],
   'int indexed array' => $index_array,
   'associative array' => $assoc_array,
   'nested arrays' => varray['foo', $index_array, $assoc_array],

@@ -65,7 +65,7 @@ $inputs = darray[
       'float .5' => .5,
 
       // array data
-      'empty array' => array(),
+      'empty array' => varray[],
       'int indexed array' => $index_array,
       'associative array' => $assoc_array,
       'nested arrays' => varray['foo', $index_array, $assoc_array],

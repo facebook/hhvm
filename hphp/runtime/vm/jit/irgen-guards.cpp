@@ -26,29 +26,56 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-void checkTypeLocal(IRGS& env, uint32_t locId, Type type,
-                    Offset dest, bool outerOnly) {
+template<typename Check, typename Ld>
+void checkTypeImpl(IRGS& env, Type type, Offset dest, Check check, Ld ld) {
   auto exit = env.irb->guardFailBlock();
   if (exit == nullptr) exit = makeExit(env, dest);
 
-  gen(env, CheckLoc, type, LocalId(locId), exit, fp(env));
+  if (env.formingRegion || !type.isSpecialized()) {
+    check(type, exit);
+  } else {
+    auto const test = type.unspecialize();
+    check(test, exit);
+    gen(env, CheckType, type, exit, ld(test));
+  }
 }
 
-void checkTypeStack(IRGS& env, BCSPRelOffset idx, Type type,
-                    Offset dest, bool outerOnly) {
-  auto exit = env.irb->guardFailBlock();
-  if (exit == nullptr) exit = makeExit(env, dest);
+void checkTypeLocal(IRGS& env, uint32_t locId, Type type, Offset dest) {
+  checkTypeImpl(env, type, dest,
+    [&](Type test, Block* exit) {
+      gen(env, CheckLoc, test, LocalId(locId), exit, fp(env));
+    },
+    [&](Type test) {
+      test &= env.irb->fs().local(locId).type;
+      return gen(env, LdLoc, test, LocalId(locId), fp(env));
+    }
+  );
+}
 
+void checkTypeStack(IRGS& env, BCSPRelOffset idx, Type type, Offset dest) {
   auto const soff = IRSPRelOffsetData { offsetFromIRSP(env, idx) };
-  gen(env, CheckStk, type, soff, exit, sp(env));
+  checkTypeImpl(env, type, dest,
+    [&](Type test, Block* exit) {
+      gen(env, CheckStk, test, soff, exit, sp(env));
+    },
+    [&](Type test) {
+      test &= env.irb->fs().stack(soff.offset).type;
+      return gen(env, LdStk, test, soff, sp(env));
+    }
+  );
 }
 
-void checkTypeMBase(IRGS& env, Type type, Offset dest, bool outerOnly) {
-  auto exit = env.irb->guardFailBlock();
-  if (exit == nullptr) exit = makeExit(env, dest);
-
+void checkTypeMBase(IRGS& env, Type type, Offset dest) {
   auto const mbr = gen(env, LdMBase, TLvalToCell);
-  gen(env, CheckMBase, type, exit, mbr);
+  checkTypeImpl(env, type, dest,
+    [&](Type test, Block* exit) {
+      gen(env, CheckMBase, test, exit, mbr);
+    },
+    [&](Type test) {
+      test &= env.irb->fs().mbase().type;
+      return gen(env, LdMem, test, mbr);
+    }
+  );
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -90,14 +117,13 @@ void checkType(IRGS& env, const Location& loc,
 
   switch (loc.tag()) {
     case LTag::Stack:
-      checkTypeStack(env, offsetFromBCSP(env, loc.stackIdx()),
-                     type, dest, outerOnly);
+      checkTypeStack(env, offsetFromBCSP(env, loc.stackIdx()), type, dest);
       break;
     case LTag::Local:
-      checkTypeLocal(env, loc.localId(), type, dest, outerOnly);
+      checkTypeLocal(env, loc.localId(), type, dest);
       break;
     case LTag::MBase:
-      checkTypeMBase(env, type, dest, outerOnly);
+      checkTypeMBase(env, type, dest);
       break;
   }
 }

@@ -112,10 +112,10 @@ fn is_resolved_classname(s: &str) -> bool {
     }
 }
 
-fn shape_field_name(sf: ShapeFieldName) -> (String, bool) {
+fn shape_field_name(sf: &ShapeFieldName) -> (String, bool) {
     use oxidized::ast_defs::{Id, ShapeFieldName::*};
     match sf {
-        SFlitInt((_, s)) | SFlitStr((_, s)) => (s, false),
+        SFlitInt((_, s)) | SFlitStr((_, s)) => (s.to_string(), false),
         SFclassConst(Id(_, cname), (_, s)) => {
             let id = class::Type::from_ast_name(&cname);
             (format!("{}::{}", id.to_raw_string(), s), true)
@@ -127,12 +127,12 @@ fn shape_field_to_pair(
     opts: &Options,
     tparams: &[&str],
     targ_map: &BTreeMap<&str, i64>,
-    sfi: ShapeFieldInfo,
+    sfi: &ShapeFieldInfo,
 ) -> Result<(TypedValue, TypedValue)> {
-    let (name, is_class_const) = shape_field_name(sfi.name);
+    let (name, is_class_const) = shape_field_name(&sfi.name);
     let mut inner_value = vec![(
         TypedValue::String("value".into()),
-        hint_to_type_constant(opts, tparams, targ_map, sfi.hint, false, false)?,
+        hint_to_type_constant(opts, tparams, targ_map, &sfi.hint, false, false)?,
     )];
     if is_class_const {
         inner_value.extend_from_slice(&[(
@@ -153,12 +153,12 @@ fn shape_info_to_typed_value(
     opts: &Options,
     tparams: &[&str],
     targ_map: &BTreeMap<&str, i64>,
-    si: NastShapeInfo,
+    si: &NastShapeInfo,
 ) -> Result<TypedValue> {
     let info = si
         .field_map
-        .into_iter()
-        .map(|sfi| shape_field_to_pair(opts, tparams, targ_map, sfi))
+        .iter()
+        .map(|sfi| shape_field_to_pair(opts, tparams, targ_map, &sfi))
         .collect::<Result<_>>()?;
     Ok(dict_or_darray(opts, info))
 }
@@ -193,7 +193,7 @@ fn get_generic_types(
     opts: &Options,
     tparams: &[&str],
     targ_map: &BTreeMap<&str, i64>,
-    hints: Vec<Hint>,
+    hints: &Vec<Hint>,
 ) -> Result<Vec<(TypedValue, TypedValue)>> {
     Ok(if hints.is_empty() {
         vec![]
@@ -235,11 +235,11 @@ fn hint_to_type_constant_list(
     opts: &Options,
     tparams: &[&str],
     targ_map: &BTreeMap<&str, i64>,
-    hint: Hint,
+    hint: &Hint,
 ) -> Result<Vec<(TypedValue, TypedValue)>> {
     use aast_defs::Hint_::*;
     let Hint(_, h) = hint;
-    Ok(match *h {
+    Ok(match h.as_ref() {
         Happly(s, hints) => {
             let ast_defs::Id(_, name) = s;
             if hints.is_empty() {
@@ -259,7 +259,7 @@ fn hint_to_type_constant_list(
                 } else {
                     get_generic_types(opts, tparams, targ_map, hints)?
                 };
-                let (classname, kind) = resolve_classname(tparams, name);
+                let (classname, kind) = resolve_classname(tparams, name.to_owned());
                 [generic_types, classname, kind].concat()
             }
         }
@@ -291,13 +291,14 @@ fn hint_to_type_constant_list(
                     hint_to_type_constant(opts, tparams, targ_map, h, false, false)
                         .map(|tc| (vec![(TypedValue::String(name.into()), tc)]))
                 };
-                let return_type = single_hint("return_type", hf.return_ty)?;
+                let return_type = single_hint("return_type", &hf.return_ty)?;
                 let variadic_type = hf
                     .variadic_ty
-                    .map_or_else(|| Ok(vec![]), |h| single_hint("variadic_type", h))?;
+                    .as_ref()
+                    .map_or_else(|| Ok(vec![]), |h| single_hint("variadic_type", &h))?;
                 let param_types = vec![(
                     TypedValue::String("param_types".into()),
-                    hints_to_type_constant(opts, tparams, targ_map, hf.param_tys)?,
+                    hints_to_type_constant(opts, tparams, targ_map, &hf.param_tys)?,
                 )];
                 [variadic_type, param_types, return_type, kind].concat()
             }
@@ -345,11 +346,11 @@ pub fn hint_to_type_constant(
     opts: &Options,
     tparams: &[&str],
     targ_map: &BTreeMap<&str, i64>,
-    hint: Hint,
+    hint: &Hint,
     is_typedef: bool,
     is_opaque: bool,
 ) -> Result<TypedValue> {
-    let mut tconsts = hint_to_type_constant_list(opts, tparams, targ_map, hint)?;
+    let mut tconsts = hint_to_type_constant_list(opts, tparams, targ_map, &hint)?;
     if is_typedef {
         tconsts.extend_from_slice(get_typevars(tparams).as_slice());
     };
@@ -363,7 +364,7 @@ fn hints_to_type_constant(
     opts: &Options,
     tparams: &[&str],
     targ_map: &BTreeMap<&str, i64>,
-    hints: Vec<Hint>,
+    hints: &Vec<Hint>,
 ) -> Result<TypedValue> {
     let hints = hints
         .into_iter()

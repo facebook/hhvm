@@ -100,7 +100,7 @@ pub fn make_info<'a>(
 
 pub fn emit_wrapper_methods<'a>(
     emitter: &mut Emitter,
-    env: &mut Env,
+    env: &mut Env<'a>,
     info: &MemoizeInfo,
     class: &T::Class_,
     methods: &'static [T::Method_],
@@ -121,7 +121,7 @@ pub fn emit_wrapper_methods<'a>(
 // This is cut-and-paste from emit_method, with special casing for wrappers
 fn make_memoize_wrapper_method<'a>(
     emitter: &mut Emitter,
-    env: &mut Env,
+    env: &mut Env<'a>,
     info: &MemoizeInfo,
     class: &T::Class_,
     method: &'a T::Method_,
@@ -183,11 +183,11 @@ fn make_memoize_wrapper_method<'a>(
     })
 }
 
-fn emit_memoize_wrapper_body(
+fn emit_memoize_wrapper_body<'a>(
     emitter: &mut Emitter,
-    env: &mut Env,
+    env: &mut Env<'a>,
     args: &mut Args,
-) -> Result<HhasBody> {
+) -> Result<HhasBody<'a>> {
     let mut tparams: Vec<&str> = args
         .scope
         .get_tparams()
@@ -212,13 +212,13 @@ fn emit_memoize_wrapper_body(
     emit(emitter, env, hhas_params, return_type_info, args)
 }
 
-fn emit(
+fn emit<'a>(
     emitter: &mut Emitter,
-    env: &mut Env,
+    env: &mut Env<'a>,
     hhas_params: Vec<HhasParam>,
     return_type_info: HhasTypeInfo,
     args: &Args,
-) -> Result<HhasBody> {
+) -> Result<HhasBody<'a>> {
     let pos = &args.method.span;
     let instrs = make_memoize_method_code(emitter, env, pos, &hhas_params[..], args)?;
     let instrs = emit_pos_then(emitter, pos, instrs);
@@ -421,14 +421,14 @@ fn make_memoize_method_no_params_code(emitter: &mut Emitter, args: &Args) -> Ins
 }
 
 // Construct the wrapper function
-fn make_wrapper(
+fn make_wrapper<'a>(
     emitter: &mut Emitter,
-    env: &Env,
+    env: &Env<'a>,
     instrs: InstrSeq,
     params: Vec<HhasParam>,
     return_type_info: HhasTypeInfo,
     args: &Args,
-) -> HhasBody {
+) -> HhasBody<'a> {
     let decl_vars = if args.flags.contains(Flags::IS_REFIED) {
         vec![reified::GENERICS_LOCAL_NAME.into()]
     } else {

@@ -21,9 +21,9 @@ use runtime::TypedValue;
 
 pub struct FromAstArgs<'a> {
     pub user_attributes: &'a [tast::UserAttribute],
-    pub id: &'static tast::Sid,
+    pub id: &'a tast::Sid,
     pub initial_value: &'a Option<tast::Expr>,
-    pub typehint: &'a Option<aast_defs::Hint>,
+    pub typehint: Option<&'a aast_defs::Hint>,
     pub doc_comment: Option<doc_comment::DocComment>,
     pub visibility: aast_defs::Visibility,
     pub is_static: bool,
@@ -32,14 +32,16 @@ pub struct FromAstArgs<'a> {
 
 pub fn from_ast<'a>(
     emitter: &mut Emitter,
-    class: &'static tast::Class_,
+    class: &'a tast::Class_,
     namespace: &namespace_env::Env,
     tparams: &[&str],
     class_is_const: bool,
     args: FromAstArgs,
 ) -> Result<HhasProperty<'a>> {
     let ast_defs::Id(pos, cv_name) = args.id;
-    let pid = prop::Type::from_ast_name(cv_name);
+    // hhbc_ast.rs definitions require static (owned) strings
+    let pid: String = prop::Type::from_ast_name(cv_name).into();
+    let pid: prop::Type<'static> = pid.into();
     let attributes = emit_attribute::from_asts(emitter, namespace, args.user_attributes)?;
 
     let is_const =

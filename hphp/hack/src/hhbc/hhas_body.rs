@@ -8,7 +8,7 @@ use instruction_sequence_rust::InstrSeq;
 use oxidized::doc_comment::DocComment;
 
 #[derive(Default, Debug)]
-pub struct HhasBody {
+pub struct HhasBody<'a> {
     pub body_instrs: InstrSeq,
     pub decl_vars: Vec<String>,
     pub num_iters: usize,
@@ -18,10 +18,10 @@ pub struct HhasBody {
     pub params: Vec<HhasParam>,
     pub return_type_info: Option<hhas_type::Info>,
     pub doc_comment: Option<DocComment>,
-    pub env: Option<Env>,
+    pub env: Option<Env<'a>>,
 }
 
-impl HhasBody {
+impl HhasBody<'_> {
     pub fn with_body_instrs(mut self, body_instrs: InstrSeq) -> Self {
         self.body_instrs = body_instrs;
         self

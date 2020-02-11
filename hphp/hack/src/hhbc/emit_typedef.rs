@@ -67,7 +67,7 @@ fn kind_to_type_structure(
         emitter.options(),
         tparams,
         &BTreeMap::new(),
-        h,
+        &h,
         true,
         is_opaque,
     )

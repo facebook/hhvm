@@ -25,7 +25,7 @@ use std::borrow::Cow;
 
 pub fn from_asts<'a>(
     emitter: &mut Emitter,
-    class: &T::Class_,
+    class: &'a T::Class_,
     methods: &'a [T::Method_],
 ) -> Result<Vec<HhasMethod<'a>>> {
     methods
@@ -36,7 +36,7 @@ pub fn from_asts<'a>(
 
 pub fn from_ast<'a>(
     emitter: &mut Emitter,
-    class: &T::Class_,
+    class: &'a T::Class_,
     method: &'a T::Method_,
 ) -> Result<HhasMethod<'a>> {
     let is_memoize = method
@@ -198,7 +198,7 @@ pub fn from_ast<'a>(
                 T::Stmt_::mk_block(ast_body_block.to_vec()),
             )))],
             InstrSeq::make_null(),
-            &mut emit_body::Args {
+            &emit_body::Args {
                 immediate_tparams: &method.tparams,
                 ast_params: &method.params,
                 ret: method.ret.1.as_ref(),

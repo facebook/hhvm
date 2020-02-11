@@ -19,7 +19,7 @@ use bitflags::bitflags;
 pub struct HhasFunction<'a> {
     pub attributes: Vec<HhasAttribute>,
     pub name: hhbc_id::function::Type<'a>,
-    pub body: HhasBody,
+    pub body: HhasBody<'a>,
     pub span: hhas_pos::Span,
     pub rx_level: rx::Level,
     pub hoisted: HoistKind,
@@ -38,7 +38,7 @@ bitflags! {
     }
 }
 
-impl HhasFunction<'_> {
+impl<'a> HhasFunction<'a> {
     pub fn is_top(&self) -> bool {
         match self.hoisted {
             HoistKind::TopLevel => true,
@@ -62,7 +62,7 @@ impl HhasFunction<'_> {
         self.flags.contains(Flags::RX_DISABLED)
     }
 
-    pub fn with_body<F, T>(&mut self, body: HhasBody, f: F) -> T
+    pub fn with_body<F, T>(&mut self, body: HhasBody<'a>, f: F) -> T
     where
         F: FnOnce() -> T,
     {

@@ -28,18 +28,17 @@ bitflags! {
 }
 
 #[derive(Default, Debug)]
-pub struct Env {
+pub struct Env<'a> {
     pub flags: Flags,
     pub jump_targets_gen: jump_targets::Gen,
-    // Scope is owned (not borrowed) here
-    pub scope: Scope<'static>,
+    pub scope: Scope<'a>,
     pub namespace: NamespaceEnv,
     // TODO(hrust)
     // - pipe_var after porting Local
     // - namespace after porting Namespace_env
 }
 
-impl Env {
+impl<'a> Env<'a> {
     pub fn with_need_local_this(&mut self, need_local_this: bool) {
         if need_local_this {
             self.flags = self.flags | Flags::NEEDS_LOCAL_THIS;
@@ -52,12 +51,12 @@ impl Env {
         }
     }
 
-    fn with_scope(mut self, scope: Scope<'static>) -> Env {
+    fn with_scope(mut self, scope: Scope<'a>) -> Env {
         self.scope = scope;
         self
     }
 
-    pub fn make_class_env(class: &'static tast::Class_) -> Env {
+    pub fn make_class_env(class: &'a tast::Class_) -> Env {
         Env::default().with_scope(Scope {
             items: vec![ScopeItem::Class(Cow::Borrowed(class))],
         })

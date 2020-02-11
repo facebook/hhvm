@@ -104,12 +104,12 @@ bitflags! {
 }
 
 // IMPLEMENTATION DETAILS
-fn emit_main(
+fn emit_main<'a>(
     emitter: &mut Emitter,
     flags: FromAstFlags,
     namespace: &namespace_env::Env,
-    prog: &Tast::Program,
-) -> Result<HhasBody> {
+    prog: &'a Tast::Program,
+) -> Result<HhasBody<'a>> {
     let return_value = if flags.contains(FromAstFlags::IS_EVALED) {
         InstrSeq::make_null()
     } else {

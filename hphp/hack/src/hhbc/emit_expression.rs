@@ -179,7 +179,7 @@ mod inout_locals {
 
     pub struct Ctx<'a> {
         state: &'a mut AliasInfoMap,
-        env: &'a Env,
+        env: &'a Env<'a>,
         i: usize,
     }
 
@@ -258,7 +258,7 @@ pub fn get_type_structure_for_hint(
     hint: aast::Hint,
 ) -> InstrSeq {
     let _tv =
-        emit_type_constant::hint_to_type_constant(opts, tparams, targ_map, hint, false, false);
+        emit_type_constant::hint_to_type_constant(opts, tparams, targ_map, &hint, false, false);
     unimplemented!("TODO(hrust) after porting most of emit_adata")
 }
 

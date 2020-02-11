@@ -100,7 +100,7 @@ pub(super) fn emit_save_label_id(local_gen: &mut local::Gen, id: usize) -> Instr
     ])
 }
 
-fn get_pos_for_error(env: &Env) -> Cow<Pos> {
+fn get_pos_for_error<'a>(env: &'a Env<'a>) -> Cow<'a, Pos> {
     for item in env.scope.iter() {
         use ast_scope::ScopeItem;
         match item {

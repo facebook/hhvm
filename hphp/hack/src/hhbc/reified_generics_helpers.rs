@@ -32,7 +32,7 @@ impl ReificationLevel {
     }
 }
 
-pub(crate) fn get_erased_tparams(env: &Env) -> impl Iterator<Item = String> + '_ {
+pub(crate) fn get_erased_tparams<'a>(env: &'a Env<'a>) -> impl Iterator<Item = String> + 'a {
     env.scope.get_tparams().into_iter().filter_map(|tp| {
         if tp.reified != aast::ReifyKind::Reified {
             Some(tp.name.1.clone()) // TODO(hrust) figure out how to return &str

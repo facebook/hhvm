@@ -36,18 +36,18 @@ extern crate bitflags;
 use bitflags::bitflags;
 
 /// Optional arguments for emit_body; use Args::default() for defaults
-pub struct Args<'a> {
+pub struct Args<'a, 'b> {
     pub immediate_tparams: &'a Vec<tast::Tparam>,
     pub ast_params: &'a Vec<tast::FunParam>,
     pub ret: Option<&'a tast::Hint>,
-    pub scope: &'a Scope<'a>,
+    pub scope: &'b Scope<'a>,
     pub pos: &'a Pos,
-    pub deprecation_info: &'a Option<&'a [TypedValue]>,
+    pub deprecation_info: &'b Option<&'b [TypedValue]>,
     pub doc_comment: Option<DocComment>,
     pub default_dropthrough: Option<InstrSeq>,
     pub flags: Flags,
 }
-impl Args<'_> {
+impl Args<'_, '_> {
     pub fn with_default<F, T>(f: F) -> T
     where
         F: FnOnce(Args) -> T,
@@ -79,12 +79,12 @@ bitflags! {
     }
 }
 
-pub fn emit_body_with_default_args(
+pub fn emit_body_with_default_args<'a>(
     _emitter: &mut Emitter,
     _namespace: &namespace_env::Env,
-    _body: &tast::Program,
+    body: &'a tast::Program,
     _return_value: InstrSeq,
-) -> Result<HhasBody> {
+) -> Result<HhasBody<'a>> {
     // TODO(hrust): temporary replace the following code by a dummy Hhasbody
     // in order to unblock end to end testing.
     /*
@@ -109,13 +109,13 @@ pub fn emit_body_with_default_args(
     })
 }
 
-pub fn emit_body(
+pub fn emit_body<'a, 'b>(
     emitter: &mut Emitter,
     namespace: &namespace_env::Env,
-    body: &tast::Program,
+    body: &'b tast::Program,
     return_value: InstrSeq,
-    args: &Args,
-) -> (Result<HhasBody>, bool, bool) {
+    args: &Args<'a, 'b>,
+) -> (Result<HhasBody<'a>>, bool, bool) {
     if args.flags.contains(Flags::ASYNC)
         && args.flags.contains(Flags::SKIP_AWAITABLE)
         && args.ret.map_or(false, |hint| !is_awaitable(&hint))
@@ -134,7 +134,7 @@ pub fn emit_body(
         .map(|tp| tp.clone())
         .collect::<Vec<tast::Tparam>>();
     let mut tp_names = get_tp_names(&tparams);
-    let (is_generator, is_pair_generator) = generator::is_function_generator(body);
+    let (is_generator, is_pair_generator) = generator::is_function_generator(&body);
 
     emitter.label_gen_mut().reset();
     emitter.iterator_mut().reset();
@@ -168,7 +168,7 @@ pub fn emit_body(
         args.scope,
         args.immediate_tparams,
         &params,
-        body,
+        &body,
         args.flags.contains(Flags::CLOSURE_BODY),
     );
     let mut env = make_env(
@@ -198,11 +198,11 @@ pub fn emit_body(
     let body_instrs = match make_body_instrs(
         emitter,
         &mut env,
-        args,
+        &args,
         &params,
         &tparams,
         &decl_vars,
-        body,
+        &body,
         need_local_this,
         is_generator,
         args.flags.contains(Flags::NATIVE),
@@ -384,12 +384,12 @@ fn make_return_type_info(
 }
 
 #[allow(unused_variables)]
-pub fn make_env(
+pub fn make_env<'a>(
     _namespace: &namespace_env::Env,
     need_local_this: bool,
-    _scope: &Scope,
+    _scope: &Scope<'a>,
     is_rx_body: bool,
-) -> Env {
+) -> Env<'a> {
     let mut env = Env::default();
     env.with_need_local_this(need_local_this);
     env.with_rx_body(is_rx_body);
@@ -431,7 +431,7 @@ fn make_params(
     )
 }
 
-pub fn make_body(
+pub fn make_body<'a>(
     emitter: &mut Emitter,
     mut body_instrs: InstrSeq,
     decl_vars: Vec<String>,
@@ -441,8 +441,8 @@ pub fn make_body(
     mut params: Vec<HhasParam>,
     return_type_info: Option<HhasTypeInfo>,
     doc_comment: Option<DocComment>,
-    env: Option<Env>,
-) -> HhasBody {
+    env: Option<Env<'a>>,
+) -> HhasBody<'a> {
     body_instrs.rewrite_user_labels(emitter.label_gen_mut());
     emit_adata::rewrite_typed_value(&mut body_instrs);
     if emitter

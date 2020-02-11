@@ -12,7 +12,7 @@ path = "../../emit_attribute.rs"
 
 [dependencies]
 ast_constant_folder_rust = { path = "../ast_constant_folder" }
-emit_expression_rust = { path = "../.." }
+emit_expression_rust = { path = "../emit_expression" }
 emit_fatal_rust = { path = "../emit_fatal" }
 env = { path = "../env" }
 escaper = { path = "../../../utils/escaper" }

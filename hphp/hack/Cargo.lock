@@ -185,6 +185,7 @@ dependencies = [
  "emit_program_rust 0.0.0",
  "env 0.0.0",
  "hhas_program_rust 0.0.0",
+ "hhbc_ast_rust 0.0.0",
  "hhbc_hhas_rust 0.0.0",
  "instruction_sequence_rust 0.0.0",
  "itertools 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -580,14 +581,34 @@ version = "0.0.0"
 dependencies = [
  "bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "emit_body_rust 0.0.0",
+ "emit_fatal_rust 0.0.0",
  "emit_file_attributes_rust 0.0.0",
+ "emit_record_def_rust 0.0.0",
  "env 0.0.0",
  "global_state 0.0.0",
  "hhas_body_rust 0.0.0",
  "hhas_program_rust 0.0.0",
+ "hhbc_ast_rust 0.0.0",
  "instruction_sequence_rust 0.0.0",
  "options 0.0.0",
  "oxidized 0.0.0",
+]
+
+[[package]]
+name = "emit_record_def_rust"
+version = "0.0.0"
+dependencies = [
+ "ast_constant_folder_rust 0.0.0",
+ "emit_fatal_rust 0.0.0",
+ "emit_type_hint_rust 0.0.0",
+ "env 0.0.0",
+ "hhas_record_def_rust 0.0.0",
+ "hhas_type 0.0.0",
+ "hhbc_id_rust 0.0.0",
+ "hhbc_string_utils_rust 0.0.0",
+ "instruction_sequence_rust 0.0.0",
+ "oxidized 0.0.0",
+ "runtime 0.0.0",
 ]
 
 [[package]]

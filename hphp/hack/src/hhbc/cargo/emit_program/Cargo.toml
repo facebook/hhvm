@@ -12,11 +12,14 @@ path = "../../emit_program.rs"
 
 [dependencies]
 emit_body_rust = { path = "../emit_body" }
+emit_fatal_rust = { path = "../emit_fatal" }
 emit_file_attributes_rust = { path = "../emit_file_attributes" }
+emit_record_def_rust = { path = "../emit_record_def" }
 env = { path = "../env" }
 global_state = { path = "../global_state" }
 hhas_body_rust = { path = "../hhas_body" }
 hhas_program_rust = { path = "../hhas_program" }
+hhbc_ast_rust = { path = "../hhbc_ast" }
 instruction_sequence_rust = { path = "../instruction_sequence" }
 options = { path = "../options" }
 oxidized = { path = "../../../oxidized" }

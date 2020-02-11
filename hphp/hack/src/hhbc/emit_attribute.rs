@@ -26,10 +26,7 @@ pub fn from_asts(
     attrs
         .iter()
         .map(|attr| from_ast(e, namespace, attr))
-        .fold_results(vec![], |mut acc, attr| {
-            acc.push(attr);
-            acc
-        })
+        .collect()
 }
 
 pub fn from_ast(

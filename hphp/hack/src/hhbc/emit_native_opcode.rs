@@ -14,15 +14,15 @@ use instruction_sequence_rust::{Error::Unrecoverable, InstrSeq, Result};
 use local_rust as local;
 use oxidized::{aast, ast as tast, namespace_env, pos::Pos};
 
-pub fn emit_body(
+pub fn emit_body<'a>(
     emitter: &mut Emitter,
     scope: &Scope,
     namespace: &namespace_env::Env,
     class_attrs: &[tast::UserAttribute],
     name: &tast::Sid,
-    params: &[tast::FunParam],
+    params: &'a [tast::FunParam],
     ret: Option<&aast::Hint>,
-) -> Result<HhasBody> {
+) -> Result<HhasBody<'a>> {
     let body_instrs = emit_native_opcode_impl(&name.1, params, class_attrs);
     let mut tparams = scope
         .get_tparams()

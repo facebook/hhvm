@@ -23,11 +23,11 @@ use rx_rust as rx;
 
 use std::borrow::Cow;
 
-pub fn emit_function(
+pub fn emit_function<'a>(
     e: &mut Emitter,
-    f: tast::Fun_,
+    f: &'a tast::Fun_,
     hoisted: HoistKind,
-) -> Result<Vec<HhasFunction>> {
+) -> Result<Vec<HhasFunction<'a>>> {
     use ast_defs::FunKind;
     use hhas_function::Flags;
     // TODO(hrust) ideally, we should be able to break f into parts and avoid cloning
@@ -134,7 +134,7 @@ pub fn emit_function(
     let normal_function = HhasFunction {
         attributes: attrs,
         name: name.into(),
-        span: f.span.into(),
+        span: f.span.clone().into(),
         rx_level,
         body,
         hoisted,

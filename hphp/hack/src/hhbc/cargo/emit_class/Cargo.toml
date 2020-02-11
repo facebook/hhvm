@@ -1,0 +1,34 @@
+# @generated
+# @autocargo from //hphp/hack/src/hhbc:emit_class_rust
+# Signature
+[package]
+name = "emit_class_rust"
+edition = "2018"
+version = "0.0.0"
+include = ["../../emit_class.rs"]
+
+[lib]
+path = "../../emit_class.rs"
+
+[dependencies]
+closure_convert_rust = { path = "../closure_convert" }
+emit_attribute_rust = { path = "../emit_attribute" }
+emit_body_rust = { path = "../emit_body" }
+emit_fatal_rust = { path = "../emit_fatal" }
+emit_method_rust = { path = "../emit_method" }
+emit_property_rust = { path = "../emit_property" }
+emit_type_constant_rust = { path = "../emit_type_constant" }
+emit_type_hint_rust = { path = "../emit_type_hint" }
+env = { path = "../env" }
+hhas_attribute_rust = { path = "../hhas_attribute" }
+hhas_class_rust = { path = "../hhas_class" }
+hhas_pos_rust = { path = "../hhas_pos" }
+hhas_property_rust = { path = "../hhas_property" }
+hhas_type = { path = "../hhas_type" }
+hhas_type_const = { path = "../hhas_type_const" }
+hhas_xhp_attribute_rust = { path = "../hhas_xhp_attribute" }
+hhbc_id_rust = { path = "../hhbc_id" }
+instruction_sequence_rust = { path = "../instruction_sequence" }
+naming_special_names_rust = { path = "../../../naming" }
+oxidized = { path = "../../../oxidized" }
+# @end of Signature

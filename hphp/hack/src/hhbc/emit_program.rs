@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use emit_body_rust::{emit_body_with_default_args, make_body};
+use emit_class_rust::emit_classes_from_program;
 use emit_fatal_rust::emit_fatal;
 use emit_file_attributes_rust::emit_file_attributes_from_program;
 use emit_record_def_rust::emit_record_defs_from_program;
@@ -83,11 +84,13 @@ fn emit_program_<'p>(
 
     let main = emit_main(&mut emitter, flags, namespace, prog)?;
     let record_defs = emit_record_defs_from_program(&mut emitter, prog)?;
+    let classes = emit_classes_from_program(&mut emitter, prog)?;
     let file_attributes = emit_file_attributes_from_program(&mut emitter, prog)?;
 
     Ok(HhasProgram {
         main,
         record_defs,
+        classes,
         is_hh: flags.contains(FromAstFlags::IS_HH_FILE),
         file_attributes,
         ..HhasProgram::default()

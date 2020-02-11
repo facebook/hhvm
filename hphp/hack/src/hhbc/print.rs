@@ -7,24 +7,31 @@
 mod print_env;
 mod write;
 
+use indexmap::IndexSet;
 use itertools::Itertools;
 pub use write::{Error, IoWrite, Result, Write};
 
 use escaper::escape;
-use hhas_attribute_rust::HhasAttribute;
+use hhas_attribute_rust::{self as hhas_attribute, HhasAttribute};
 use hhas_body_rust::HhasBody;
+use hhas_class_rust::{self as hhas_class, HhasClass};
 use hhas_function_rust::HhasFunction;
+use hhas_method_rust::HhasMethod;
 use hhas_param_rust::HhasParam;
 use hhas_pos_rust::Span;
 use hhas_program_rust::HhasProgram;
+use hhas_property_rust::HhasProperty;
 use hhas_record_def_rust::{Field, HhasRecord};
 use hhas_type::{constraint, Info as HhasTypeInfo};
+use hhas_type_const::HhasTypeConstant;
 use hhbc_ast_rust::*;
-use hhbc_id_rust::Id;
-use hhbc_string_utils_rust::quote_string_with_escape;
+use hhbc_id_rust::{class, Id};
+use hhbc_string_utils_rust::{
+    float, quote_string_with_escape, strip_global_ns, triple_quote_string,
+};
 use instruction_sequence_rust::InstrSeq;
 use options::Options;
-use oxidized::{ast_defs, relative_path::RelativePath};
+use oxidized::{ast, ast_defs, doc_comment::DocComment, relative_path::RelativePath};
 use runtime::TypedValue;
 use write::*;
 
@@ -162,6 +169,7 @@ fn print_program_<W: Write>(
     print_main(ctx, w, &prog.main)?;
     concat(w, &prog.functions, |w, f| print_fun_def(ctx, w, f))?;
     concat(w, &prog.record_defs, |w, rd| print_record_def(ctx, w, rd))?;
+    concat(w, &prog.classes, |w, cd| print_class_def(ctx, w, cd))?;
     print_file_attributes(ctx, w, &prog.file_attributes)?;
 
     if ctx.dump_symbol_refs() {
@@ -225,6 +233,368 @@ fn print_fun_def<W: Write>(
     wrap_by_braces(w, |w| print_body(ctx, w, body))
 }
 
+fn print_requirement<W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    r: &(class::Type<'_>, hhas_class::TraitReqKind),
+) -> Result<(), W::Error> {
+    w.write("\n  .require ")?;
+    match r {
+        (name, hhas_class::TraitReqKind::MustExtend) => {
+            w.write(format!("extends <{}>;", name.to_raw_string()))
+        }
+        (name, hhas_class::TraitReqKind::MustImplement) => {
+            w.write(format!("implements <{}>;", name.to_raw_string()))
+        }
+    }
+}
+
+fn print_type_constant<W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    c: &HhasTypeConstant,
+) -> Result<(), W::Error> {
+    w.write("\n  .const ")?;
+    w.write(&c.name)?;
+    w.write(" isType")?;
+    match c.initializer.as_ref() {
+        Some(init) => {
+            w.write(" = \"\"\"")?;
+            print_adata(ctx, w, init)?;
+            w.write("\"\"\";")
+        }
+        None => w.write(";"),
+    }
+}
+
+fn print_property_doc_comment<W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    p: &HhasProperty,
+) -> Result<(), W::Error> {
+    if let Some(s) = p.doc_comment.as_ref() {
+        w.write(triple_quote_string(&s.0))?;
+        w.write(" ")?;
+    }
+    Ok(())
+}
+
+fn print_property_attributes<W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    property: &HhasProperty,
+) -> Result<(), W::Error> {
+    let mut special_attributes = vec![];
+    if property.is_late_init() {
+        special_attributes.push("late_init")
+    };
+    if property.is_no_bad_redeclare() {
+        special_attributes.push("no_bad_redeclare")
+    };
+    if property.initial_satisfies_tc() {
+        special_attributes.push("initial_satisfies_tc")
+    }
+    if property.no_implicit_null() {
+        special_attributes.push("no_implicit_null")
+    }
+    if property.has_system_initial() {
+        special_attributes.push("sys_initial_val")
+    }
+    if property.is_const() {
+        special_attributes.push("is_const")
+    }
+    if property.is_deep_init() {
+        special_attributes.push("deep_init")
+    }
+    if property.is_lsb() {
+        special_attributes.push("lsb")
+    }
+    if property.is_static() {
+        special_attributes.push("static")
+    }
+    special_attributes.push(property.visibility.as_ref());
+    special_attributes.reverse();
+
+    w.write("[")?;
+    concat_by(w, " ", &special_attributes, |w, a| w.write(a))?;
+    if !special_attributes.is_empty() && !property.attributes.is_empty() {
+        w.write(" ")?;
+    }
+    print_attributes(ctx, w, &property.attributes)?;
+    w.write("] ")
+}
+
+fn print_property_type_info<W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    p: &HhasProperty,
+) -> Result<(), W::Error> {
+    print_type_info(w, &p.type_info)?;
+    w.write(" ")
+}
+
+fn print_property<W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    class_def: &HhasClass,
+    property: &HhasProperty,
+) -> Result<(), W::Error> {
+    newline(w)?;
+    w.write("  .property ")?;
+    print_property_attributes(ctx, w, property)?;
+    print_property_doc_comment(ctx, w, property)?;
+    print_property_type_info(ctx, w, property)?;
+    w.write(property.name.to_raw_string())?;
+    w.write(" =\n    ")?;
+    let initial_value = property.initial_value.as_ref();
+    if class_def.is_closure() || initial_value == Some(&TypedValue::Uninit) {
+        w.write("uninit;")
+    } else {
+        w.write("\"\"\"")?;
+        match initial_value {
+            None => w.write("N;"),
+            Some(value) => print_adata(ctx, w, &value),
+        }?;
+        w.write("\"\"\";")
+    }
+}
+
+fn print_enum_ty<W: Write>(ctx: &mut Context, w: &mut W, c: &HhasClass) -> Result<(), W::Error> {
+    if let Some(et) = c.enum_type.as_ref() {
+        newline(w)?;
+        w.write("  .enum_ty ")?;
+        print_type_info_(w, true, et)?;
+        w.write(";")?;
+    }
+    Ok(())
+}
+
+fn print_doc_comment<W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    doc_comment: &Option<DocComment>,
+) -> Result<(), W::Error> {
+    if let Some(cmt) = doc_comment {
+        ctx.block(w, |ctx, w| {
+            ctx.newline(w)?;
+            w.write(format!(".doc {};", triple_quote_string(&cmt.0)))
+        })?;
+    }
+    Ok(())
+}
+
+fn print_use_precedence<W: Write, X>(ctx: &mut Context, w: &mut W, _: X) -> Result<(), W::Error> {
+    not_impl!()
+}
+
+fn print_use_alias<W: Write, X>(ctx: &mut Context, w: &mut W, _: X) -> Result<(), W::Error> {
+    not_impl!()
+}
+
+fn print_method_trait_resolutions<W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    (mtr, kind_as_tring): &(&ast::MethodRedeclaration, class::Type),
+) -> Result<(), W::Error> {
+    w.write(format!(
+        "\n    {}::{} as strict ",
+        kind_as_tring.to_raw_string(),
+        mtr.method.1
+    ))?;
+    if mtr.fun_kind.is_async() {
+        w.write("async ")?;
+    }
+    w.write("[")?;
+    if mtr.final_ {
+        w.write("final ")?;
+    }
+    w.write(mtr.visibility.to_string())?;
+    if mtr.abstract_ {
+        w.write(" abstract")?;
+    }
+    if mtr.static_ {
+        w.write(" static")?;
+    }
+    w.write("] ")?;
+    w.write(format!("{};", mtr.name.1))
+}
+
+fn print_uses<W: Write>(ctx: &mut Context, w: &mut W, c: &HhasClass) -> Result<(), W::Error> {
+    if c.uses.is_empty() && c.method_trait_resolutions.is_empty() {
+        Ok(())
+    } else {
+        let unique_ids: IndexSet<&str> = c
+            .uses
+            .iter()
+            .map(|e| strip_global_ns(e.to_raw_string()))
+            .collect();
+        let unique_ids: Vec<_> = unique_ids.into_iter().collect();
+
+        newline(w)?;
+        w.write("  .use ")?;
+        concat_by(w, " ", unique_ids, |w, id| w.write(id))?;
+
+        if c.use_aliases.is_empty()
+            && c.use_precedences.is_empty()
+            && c.method_trait_resolutions.is_empty()
+        {
+            w.write(";")
+        } else {
+            w.write(" {")?;
+            for x in &c.use_precedences {
+                print_use_precedence(ctx, w, x)?;
+            }
+            for x in &c.use_aliases {
+                print_use_alias(ctx, w, x)?;
+            }
+            for x in &c.method_trait_resolutions {
+                print_method_trait_resolutions(ctx, w, x)?;
+            }
+            newline(w)?;
+            w.write("  }")
+        }
+    }
+}
+
+fn print_class_special_attributes<W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    c: &HhasClass,
+) -> Result<(), W::Error> {
+    let user_attrs = &c.attributes;
+    let is_system_lib = false; // TODO(hrust)
+
+    let mut special_attributes: Vec<&str> = vec![];
+    if c.needs_no_reifiedinit() {
+        special_attributes.push("noreifiedinit")
+    }
+    if c.no_dynamic_props() {
+        special_attributes.push("no_dynamic_props")
+    }
+    if c.is_const() {
+        special_attributes.push("is_const")
+    }
+    if hhas_attribute::has_foldable(user_attrs) {
+        special_attributes.push("foldable")
+    }
+    if is_system_lib {
+        special_attributes.extend(&["unique", "builtin", "persistent"])
+    }
+    if hhas_attribute::has_dynamically_constructible(user_attrs) {
+        special_attributes.push("dyn_constructible");
+    }
+    if !c.is_top() {
+        special_attributes.push("nontop");
+    }
+    if c.is_closure() && !is_system_lib {
+        special_attributes.push("unique");
+    }
+    if c.is_closure() {
+        special_attributes.push("no_override");
+    }
+    if c.is_trait() {
+        special_attributes.push("trait");
+    }
+    if c.is_interface() {
+        special_attributes.push("interface");
+    }
+    if c.is_final() {
+        special_attributes.push("final");
+    }
+    if c.is_sealed() {
+        special_attributes.push("sealed");
+    }
+    if c.enum_type.is_some() {
+        special_attributes.push("enum");
+    }
+    if c.is_abstract() {
+        special_attributes.push("abstract");
+    }
+    if special_attributes.is_empty() && user_attrs.is_empty() {
+        return Ok(());
+    }
+
+    w.write("[")?;
+    special_attributes.reverse();
+    concat_by(w, " ", &special_attributes, |w, a| w.write(a))?;
+    if !special_attributes.is_empty() && !user_attrs.is_empty() {
+        w.write(" ")?;
+    }
+    print_attributes(ctx, w, &user_attrs)?;
+    w.write("] ")?;
+    Ok(())
+}
+
+fn print_implements<W: Write>(
+    w: &mut W,
+    implements: &Vec<class::Type<'_>>,
+) -> Result<(), W::Error> {
+    if implements.is_empty() {
+        return Ok(());
+    }
+    w.write(" implements (")?;
+    concat_str_by(
+        w,
+        " ",
+        implements
+            .iter()
+            .map(|x| x.to_raw_string())
+            .collect::<Vec<_>>(),
+    )?;
+    w.write(")")
+}
+
+fn print_method_def<W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    method_def: &HhasMethod,
+) -> Result<(), W::Error> {
+    newline(w)?;
+    w.write("  .method ")?;
+    w.write(method_def.name.to_raw_string())?;
+    w.write(" {")?;
+    w.write("  }")?;
+    not_impl!()
+}
+
+fn print_class_def<W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    class_def: &HhasClass,
+) -> Result<(), W::Error> {
+    newline(w)?;
+    w.write(".class ")?;
+    if ctx.opts.enforce_generic_ub() {
+        print_upper_bounds(w, &class_def.upper_bounds)?;
+    }
+    print_class_special_attributes(ctx, w, class_def)?;
+    w.write(class_def.name.to_raw_string())?;
+    if ctx.opts.source_map() {
+        w.write(format!(" {}", string_of_span(&class_def.span)))?;
+    }
+    print_extends(w, class_def.base.as_ref().map(|x| x.to_raw_string()))?;
+    print_implements(w, &class_def.implements)?;
+    w.write(" {")?;
+    print_doc_comment(ctx, w, &class_def.doc_comment)?;
+    print_uses(ctx, w, class_def)?;
+    print_enum_ty(ctx, w, class_def)?;
+    for x in &class_def.requirements {
+        print_requirement(ctx, w, x)?;
+    }
+    for x in &class_def.type_constants {
+        print_type_constant(ctx, w, x)?;
+    }
+    for x in &class_def.properties {
+        print_property(ctx, w, class_def, x)?;
+    }
+    for m in &class_def.methods {
+        print_method_def(ctx, w, m)?;
+    }
+    newline(w)?;
+    w.write("}")?;
+    newline(w)
+}
+
 fn pos_to_prov_tag(ctx: &Context, loc: &Option<ast_defs::Pos>) -> String {
     match loc {
         Some(_) if ctx.opts.array_provenance() => unimplemented!(),
@@ -280,8 +650,14 @@ fn print_adata_dict_collection_argument<W: Write>(
 
 fn print_adata<W: Write>(ctx: &mut Context, w: &mut W, tv: &TypedValue) -> Result<(), W::Error> {
     match tv {
+        TypedValue::Uninit => w.write("uninit"),
+        TypedValue::Null => w.write("N;"),
         TypedValue::String(s) => w.write(format!("s:{}:{};", s.len(), quote_string_with_escape(s))),
+        TypedValue::Float(f) => w.write(format!("d:{};", float::to_string(*f))),
         TypedValue::Int(i) => w.write(format!("i:{};", i)),
+        // TODO: The False case seems to sometimes be b:0 and sometimes i:0.  Why?
+        TypedValue::Bool(false) => w.write("b:0;"),
+        TypedValue::Bool(true) => w.write("b:1;"),
         TypedValue::Dict((pairs, loc)) => {
             print_adata_dict_collection_argument(ctx, w, ADATA_DICT_PREFIX, loc, pairs)
         }
@@ -297,7 +673,7 @@ fn print_adata<W: Write>(ctx: &mut Context, w: &mut W, tv: &TypedValue) -> Resul
         TypedValue::Keyset(values) => {
             print_adata_collection_argument(ctx, w, ADATA_KEYSET_PREFIX, &None, values)
         }
-        _ => unimplemented!("{:?}", tv),
+        _ => not_impl!(),
     }
 }
 
@@ -535,32 +911,31 @@ fn print_type_info_<W: Write>(w: &mut W, is_enum: bool, ti: &HhasTypeInfo) -> Re
             }
         };
         use constraint::Flags as F;
-        if flag.contains(F::NULLABLE) {
+        if flag.contains(F::DISPLAY_NULLABLE) {
             print_space(w)?;
-            w.write("nullable")?;
+            w.write("display_nullable")?;
         }
         if flag.contains(F::EXTENDED_HINT) {
             print_space(w)?;
             w.write("extended_hint")?;
         }
-        if flag.contains(F::TYPE_VAR) {
+        if flag.contains(F::NULLABLE) {
             print_space(w)?;
-            w.write("type_var")?;
+            w.write("nullable")?;
         }
 
         if flag.contains(F::SOFT) {
             print_space(w)?;
             w.write("soft")?;
         }
-
         if flag.contains(F::TYPE_CONSTANT) {
             print_space(w)?;
             w.write("type_constant")?;
         }
 
-        if flag.contains(F::DISPLAY_NULLABLE) {
+        if flag.contains(F::TYPE_VAR) {
             print_space(w)?;
-            w.write("display_nullable")?;
+            w.write("type_var")?;
         }
 
         if flag.contains(F::UPPERBOUND) {

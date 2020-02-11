@@ -13,6 +13,7 @@ use rx_rust as rx;
 extern crate bitflags;
 use bitflags::bitflags;
 
+#[derive(Debug)]
 pub struct HhasMethod<'id> {
     pub attributes: Vec<HhasAttribute>,
     pub visibility: Visibility,
@@ -36,5 +37,11 @@ bitflags! {
         const IS_MEMOIZE_IMPL = 1 << 9;
         const RX_DISABLED = 1 << 10;
         const NO_INJECTION = 1 << 11;
+    }
+}
+
+impl HhasMethod<'_> {
+    pub fn is_closure_body(&self) -> bool {
+        self.flags.contains(HhasMethodFlags::IS_CLOSURE_BODY)
     }
 }

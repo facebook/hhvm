@@ -26,6 +26,7 @@ bitflags! {
     }
 }
 
+#[derive(Debug)]
 pub struct HhasProperty<'id> {
     pub name: hhbc_id::prop::Type<'id>,
     pub flags: HhasPropertyFlags,
@@ -45,5 +46,32 @@ impl<'a> HhasProperty<'a> {
     }
     pub fn is_public(&self) -> bool {
         self.visibility == Visibility::Public
+    }
+    pub fn is_late_init(&self) -> bool {
+        self.flags.contains(HhasPropertyFlags::IS_LATE_INIT)
+    }
+    pub fn is_no_bad_redeclare(&self) -> bool {
+        self.flags.contains(HhasPropertyFlags::IS_NO_BAD_REDECLARE)
+    }
+    pub fn initial_satisfies_tc(&self) -> bool {
+        self.flags.contains(HhasPropertyFlags::INITIAL_SATISFIES_TC)
+    }
+    pub fn no_implicit_null(&self) -> bool {
+        self.flags.contains(HhasPropertyFlags::NO_IMPLICIT_NULL)
+    }
+    pub fn has_system_initial(&self) -> bool {
+        self.flags.contains(HhasPropertyFlags::HAS_SYSTEM_INITIAL)
+    }
+    pub fn is_const(&self) -> bool {
+        self.flags.contains(HhasPropertyFlags::IS_CONST)
+    }
+    pub fn is_deep_init(&self) -> bool {
+        self.flags.contains(HhasPropertyFlags::IS_DEEP_INIT)
+    }
+    pub fn is_lsb(&self) -> bool {
+        self.flags.contains(HhasPropertyFlags::IS_LSB)
+    }
+    pub fn is_static(&self) -> bool {
+        self.flags.contains(HhasPropertyFlags::IS_STATIC)
     }
 }

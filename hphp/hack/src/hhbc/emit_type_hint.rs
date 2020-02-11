@@ -31,7 +31,7 @@ fn fmt_name_or_prim<'a>(tparams: &[&str], name: &'a str) -> Cow<'a, str> {
         if string_utils::is_xhp(&string_utils::strip_ns(&name)) {
             id.to_unmangled_str().into()
         } else {
-            name.into()
+            id.to_raw_string().to_owned().into()
         }
     }
 }

@@ -12,6 +12,7 @@ path = "../../emit_program.rs"
 
 [dependencies]
 emit_body_rust = { path = "../emit_body" }
+emit_class_rust = { path = "../emit_class" }
 emit_fatal_rust = { path = "../emit_fatal" }
 emit_file_attributes_rust = { path = "../emit_file_attributes" }
 emit_record_def_rust = { path = "../emit_record_def" }

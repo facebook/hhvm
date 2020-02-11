@@ -28,7 +28,7 @@ use oxidized::{
 use rx_rust as rx;
 use unique_list_rust::UniqueList;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum HoistKind {
     /// Def that is already at top-level
     TopLevel,

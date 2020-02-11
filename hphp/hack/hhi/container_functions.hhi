@@ -100,4 +100,8 @@ function darray<Tk as arraykey, Tv>(KeyedTraversable<Tk, Tv> $arr): darray<Tk, T
 <<__Rx>>
 function varray<Tv>(Traversable<Tv> $arr): varray<Tv>;
 
+<<__Rx>>
+function is_php_array(<<__MaybeMutable>> mixed $input): bool;
+
+
 }

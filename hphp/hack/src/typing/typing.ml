@@ -7280,7 +7280,10 @@ and condition
     in
     env
   | Aast.Call (Cnormal, ((p, _), Aast.Id (_, f)), _, [lv], None)
-    when tparamet && String.equal f SN.StdlibFunctions.is_array ->
+    when tparamet && (
+      String.equal f SN.StdlibFunctions.is_array ||
+      String.equal f SN.StdlibFunctions.is_php_array
+    ) ->
     is_array env `PHPArray p f lv
   | Aast.Call
       ( Cnormal,

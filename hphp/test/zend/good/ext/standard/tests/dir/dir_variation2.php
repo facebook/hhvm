@@ -35,7 +35,7 @@ hello world
 EOT;
 
 // unexpected values to be passed to $directory argument
-$unexpected_values = array (
+$unexpected_values = varray [
        // int data
 /*1*/  0,
        1,
@@ -51,10 +51,10 @@ $unexpected_values = array (
 
        // array data
 /*10*/ array(),
-       array(0),
-       array(1),
-       array(1, 2),
-       array('color' => 'red', 'item' => 'pen'),
+       varray[0],
+       varray[1],
+       varray[1, 2],
+       darray['color' => 'red', 'item' => 'pen'],
 
 
        // null data
@@ -84,7 +84,7 @@ $unexpected_values = array (
 
        // unset data
 /*28*/ @$unset_var
-);
+];
 
 // loop through various elements of $unexpected_values to check the behavior of dir()
 $iterator = 1;

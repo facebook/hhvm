@@ -14,21 +14,21 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing arsort() : usage variations ***\n";
 
-$various_arrays = array (
+$various_arrays = varray [
   // group of escape sequences
-  array ("null"=>  null, "NULL" => NULL, "\a" => "\a", "\cx" => "\cx", "\e" => "\e",
+  darray ["null"=>  null, "NULL" => NULL, "\a" => "\a", "\cx" => "\cx", "\e" => "\e",
         "\f" => "\f", "\n" =>"\n", "\r" => "\r", "\t" => "\t", "\xhh" => "\xhh",
         "\ddd" => "\ddd", "\v" => "\v"
-        ),
+        ],
 
   // array contains combination of capital/small letters
-  array ('l' => "lemoN", 'O' => "Orange", 'b' => "banana", 'a' => "apple", 'Te' => "Test",
+  darray ['l' => "lemoN", 'O' => "Orange", 'b' => "banana", 'a' => "apple", 'Te' => "Test",
         'T' => "TTTT", 't' => "ttt", 'w' => "ww", 'x' => "x", 'X' => "X", 'o' => "oraNGe",
         'B' => "BANANA"
-        )
-);
+        ]
+];
 
-$flags = array("SORT_REGULAR" => SORT_REGULAR, "SORT_STRING" => SORT_STRING);
+$flags = darray["SORT_REGULAR" => SORT_REGULAR, "SORT_STRING" => SORT_STRING];
 
 $count = 1;
 echo "\n-- Testing arsort() by supplying various string arrays --\n";

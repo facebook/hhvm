@@ -14,15 +14,15 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing sort() : usage variations ***\n";
 
-$various_arrays = array (
+$various_arrays = varray [
   // group of escape sequences 
-  array(null, NULL, "\a", "\cx", "\e", "\f", "\n", "\r", "\t", "\xhh", "\ddd", "\v"),
+  varray[null, NULL, "\a", "\cx", "\e", "\f", "\n", "\r", "\t", "\xhh", "\ddd", "\v"],
 
   // array contains combination of capital/small letters 
-  array("lemoN", "Orange", "banana", "apple", "Test", "TTTT", "ttt", "ww", "x", "X", "oraNGe", "BANANA")
-);
+  varray["lemoN", "Orange", "banana", "apple", "Test", "TTTT", "ttt", "ww", "x", "X", "oraNGe", "BANANA"]
+];
 
-$flags = array("SORT_REGULAR" => SORT_REGULAR, "SORT_STRING" => SORT_STRING);
+$flags = darray["SORT_REGULAR" => SORT_REGULAR, "SORT_STRING" => SORT_STRING];
 
 $count = 1;
 echo "\n-- Testing sort() by supplying various string arrays --\n";

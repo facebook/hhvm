@@ -1,7 +1,7 @@
 <?hh
 class foo {
     public function __get($member) {
-        $f = array("foo"=>"bar","bar"=>"foo");
+        $f = darray["foo"=>"bar","bar"=>"foo"];
         return $f;
     }
 }

@@ -13,7 +13,7 @@
 echo "*** Testing array_pad() : Passing binary values to \$pad_value argument ***\n";
 
 // initialize the $input and $pad_size argument
-$input = array(1, 2, 3);
+$input = varray[1, 2, 3];
 $pad_size = 6;
 
 // initialize $pad_value with reference variable

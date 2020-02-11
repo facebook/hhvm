@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$foo = array(1,2,3,4);
+$foo = varray[1,2,3,4];
 foreach($foo as $key => $val) {
     if($val == 3) {
         $foo[$key] = 0;

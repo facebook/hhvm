@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$char_variation = array( 'a', "a", 67, -67, 99 );
+$char_variation = varray[ 'a', "a", 67, -67, 99 ];
 
 /* creating dumping file */
 $data_file = dirname(__FILE__) . '/fprintf_variation_004.phpt.txt';

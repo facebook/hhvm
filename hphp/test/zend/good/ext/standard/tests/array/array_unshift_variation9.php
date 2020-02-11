@@ -55,14 +55,14 @@ EOT;
 $array = array('f' => "first", "s" => 'second', 1, 2.222);
 
 // different heredoc strings to be passed to $var argument
-$vars = array(
+$vars = varray[
   $empty_string,
   $blank_line,
   $multiline_string,
   $diff_whitespaces,
   $numeric_string,
   $quote_char_string
-);
+];
 
 // loop through the various elements of $arrays to test array_unshift()
 $iterator = 1;

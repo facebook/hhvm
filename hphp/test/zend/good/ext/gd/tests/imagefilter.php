@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$no_arg_filters = array(
+$no_arg_filters = varray[
     "IMG_FILTER_NEGATE",
     "IMG_FILTER_GRAYSCALE",
     "IMG_FILTER_EDGEDETECT",
@@ -7,7 +7,7 @@ $no_arg_filters = array(
     "IMG_FILTER_SELECTIVE_BLUR",
     "IMG_FILTER_EMBOSS",
     "IMG_FILTER_MEAN_REMOVAL"
-);
+];
 
 $SAVE_DIR = dirname(__FILE__);
 $SOURCE_IMG = $SAVE_DIR . "/test.png";

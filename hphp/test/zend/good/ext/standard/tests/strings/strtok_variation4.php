@@ -11,7 +11,7 @@
 echo "*** Testing strtok() : with embedded nulls in the strings ***\n";
 
 // defining varous strings with embedded nulls
-$strings_with_nulls = array(
+$strings_with_nulls = varray[
                     "\0",
                     '\0',
                            "hello\0world",
@@ -20,7 +20,7 @@ $strings_with_nulls = array(
                            "\0\0hello\tworld\0\0",
                            "\\0he\0llo\\0",
                            'hello\0\0'
-                           );
+                           ];
 
 // loop through each element of the array and check the working of strtok()
 // when supplied with different string values

@@ -5,29 +5,29 @@
 */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_values() on basic array ***\n"; 
-$basic_arr = array( 1, 2, 2.0, "asdasd", array(1,2,3) );
+$basic_arr = varray[ 1, 2, 2.0, "asdasd", varray[1,2,3] ];
 var_dump( array_values($basic_arr) );
 
 echo "\n*** Testing array_values() on various arrays ***";
-$arrays = array (
+$arrays = varray [
   array(), 
-  array(0),
-  array(-1),
-  array( array() ),
-  array("Hello"),
-  array(""),  
-  array("", array()),
-  array(1,2,3), 
-  array(1,2,3, array()),
-  array(1,2,3, array(4,6)),
-  array("a" => 1, "b" => 2, "c" =>3),
-  array(0 => 0, 1 => 1, 2 => 2),  
-  array(TRUE, FALSE, NULL, true, false, null, "TRUE", "FALSE",
-        "NULL", "\x000", "\000"),
-  array("Hi" => 1, "Hello" => 2, "World" => 3),
-  array("a" => "abcd", "a" => "", "ab" => -6, "cd" => -0.5 ),
-  array(0 => array(), 1=> array(0), 2 => array(1), ""=> array(), ""=>"" )
-);
+  varray[0],
+  varray[-1],
+  varray[ array() ],
+  varray["Hello"],
+  varray[""],  
+  varray["", array()],
+  varray[1,2,3], 
+  varray[1,2,3, array()],
+  varray[1,2,3, varray[4,6]],
+  darray["a" => 1, "b" => 2, "c" =>3],
+  darray[0 => 0, 1 => 1, 2 => 2],  
+  varray[TRUE, FALSE, NULL, true, false, null, "TRUE", "FALSE",
+        "NULL", "\x000", "\000"],
+  darray["Hi" => 1, "Hello" => 2, "World" => 3],
+  darray["a" => "abcd", "a" => "", "ab" => -6, "cd" => -0.5 ],
+  darray[0 => array(), 1=> varray[0], 2 => varray[1], ""=> array(), ""=>"" ]
+];
 
 $i = 0;
 /* loop through to test array_values() with different arrays given above */

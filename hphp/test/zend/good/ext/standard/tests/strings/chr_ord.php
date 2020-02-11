@@ -10,7 +10,7 @@ for($i=0; $i<256; $i++) echo !ord(chr($i)) == $i;
 
 /* miscelleous input */
 echo "\n*** Testing chr() usage variations ***\n";
-$arr_test = array(
+$arr_test = varray[
   "true",
   "false",
   true,
@@ -30,7 +30,7 @@ $arr_test = array(
   "aaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbccccccccccccccccccccccccccccccdddddddddddddddddddddddddddddddddddddddddd",
   "abcd\nabcd\tabcd\0abcd\rabcdNULLabcdefgh",
   "abcd\x00abcd\x00abcd\x00abcdefghij",
-);
+];
 $counter=1;
 foreach($arr_test as $var){
   echo "-- Iteration $counter --\n";

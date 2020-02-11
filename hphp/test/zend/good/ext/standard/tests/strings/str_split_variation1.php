@@ -29,7 +29,7 @@ unset ($unset_var);
 $fp = fopen(__FILE__, 'r');
 
 //different values for 'str' argument
-$values = array(
+$values = varray[
 
   // int data
   0,
@@ -46,10 +46,10 @@ $values = array(
 
   // array data
   array(),
-  array(0),
-  array(1),
-  array(1, 2),
-  array('color' => 'red', 'item' => 'pen'),
+  varray[0],
+  varray[1],
+  varray[1, 2],
+  darray['color' => 'red', 'item' => 'pen'],
 
   // null data
   NULL,
@@ -76,7 +76,7 @@ $values = array(
 
   //resource data
   $fp
-);
+];
 
 // loop through each element of $values for 'str' argument
 for($count = 0; $count < count($values); $count++) {

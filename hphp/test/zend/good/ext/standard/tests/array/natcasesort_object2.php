@@ -32,12 +32,12 @@ class for_string_natcasesort
 echo "*** Testing natcasesort() : object functionality ***\n";
 
 // array of string objects
-$unsorted_str_obj = array (
+$unsorted_str_obj = varray [
 new for_string_natcasesort("axx","AXX","ass"),
 new for_string_natcasesort("t","eee","abb"),
 new for_string_natcasesort("w","W", "c"),
 new for_string_natcasesort("py","PY", "pt"),
-);
+];
 
 
 echo "\n-- Testing natcasesort() by supplying object arrays --\n";

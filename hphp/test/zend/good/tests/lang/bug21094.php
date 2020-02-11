@@ -5,7 +5,7 @@ class test {
     }
 }
 <<__EntryPoint>> function main(): void {
-set_error_handler(array(new test(), "hdlr"));
+set_error_handler(varray[new test(), "hdlr"]);
 
 trigger_error("test");
 }

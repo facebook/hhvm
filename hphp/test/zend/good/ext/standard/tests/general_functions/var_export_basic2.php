@@ -8,14 +8,14 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing var_export() with valid boolean values ***\n";
 // different valid  boolean vlaues
-$valid_bool = array(
+$valid_bool = darray[
             "1" => 1,
             "TRUE" => TRUE,
             "true" => true,
             "0" => 0,
             "FALSE" => FALSE,
             "false" => false
-);
+];
 
 /* Loop to check for above boolean values with var_export() */
 echo "\n*** Output for boolean values ***\n";

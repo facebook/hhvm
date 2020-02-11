@@ -23,7 +23,7 @@ $file_handle = fopen(__FILE__, "r");
 
 
 /* array with different values */
-$values =  array (
+$values =  varray [
   /* integer values */
   0,
   1,
@@ -48,10 +48,10 @@ $values =  array (
 
   /* array values */
   array(),
-  array(0),
-  array(1),
-  array(1, 2),
-  array('color' => 'red', 'item' => 'pen'),
+  varray[0],
+  varray[1],
+  varray[1, 2],
+  darray['color' => 'red', 'item' => 'pen'],
 
   /* boolean values */
   true,
@@ -78,7 +78,7 @@ $values =  array (
 
   /* object */
   new sample()
-);
+];
 
 /* loop through each element of the array and check the working of strncmp() */
 $counter = 1;

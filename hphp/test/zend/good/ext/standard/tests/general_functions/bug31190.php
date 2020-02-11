@@ -4,7 +4,7 @@ class test {
      function throwException() { throw new Exception("Hello World!\n");
 } }
 <<__EntryPoint>> function main(): void {
-$array = array(new test(), 'throwException');
+$array = varray[new test(), 'throwException'];
 try {
      call_user_func($array, 1, 2);
 } catch (Exception $e) {
@@ -12,7 +12,7 @@ try {
 }
 
 try {
-     call_user_func_array($array, array(1, 2));
+     call_user_func_array($array, varray[1, 2]);
 } catch (Exception $e) {
      echo $e->getMessage();
 }

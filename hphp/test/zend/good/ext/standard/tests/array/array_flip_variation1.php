@@ -23,7 +23,7 @@ unset ($unset_var);
 $fp = fopen(__FILE__,'r');
 
 //array of values for 'input' argument
-$values = array(
+$values = varray[
           // int data
   /*1*/   0,
           1,
@@ -66,7 +66,7 @@ $values = array(
 
           //resource data
   /*23*/  $fp
-);
+];
 
 // loop through each element of $values for 'input' argument
 for($count = 0; $count < count($values); $count++) {

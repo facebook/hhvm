@@ -29,7 +29,7 @@ var_dump(isset($var));
 var_dump(isset($var[1]));
 var_dump(isset($var, $var[1]));
 echo "..now set\n";
-$var = array();
+$var = darray[];
 $var[1] = 10;
 var_dump(isset($var));
 var_dump(isset($var[1]));

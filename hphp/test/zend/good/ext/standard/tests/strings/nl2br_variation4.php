@@ -12,12 +12,12 @@
 echo "*** Testing nl2br() : usage variations ***\n";
 
 //array of html strings
-$strings = array(
+$strings = varray[
   "<html>Hello<br />world</html>",
   "<html><br /></html>",
   "<html>\nHello\r\nworld\r</html>",
   "<html>\n \r\n \r</html>",
-);
+];
 
 //loop through $strings array to test nl2br() function with each element
 foreach( $strings as $str ){

@@ -35,7 +35,7 @@ $unset_var = 10;
 unset ($unset_var);
 
 // array of unexpected values to be passed to $array argument
-$arrays = array(
+$arrays = varray[
 
        // int data
 /*1*/  0,
@@ -80,7 +80,7 @@ $arrays = array(
 
        // resource variable
 /*24*/ $fp
-);
+];
 
 // loop through each element of $arrays to test the functionality of array_unshift()
 $iterator = 1;

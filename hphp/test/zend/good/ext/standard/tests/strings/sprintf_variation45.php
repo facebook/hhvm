@@ -7,20 +7,20 @@
 echo "*** Testing sprintf() : unsigned formats with boolean values ***\n";
 
 // array of boolean values 
-$boolean_values = array(
+$boolean_values = varray[
   true,
   false,
   TRUE,
   FALSE,
-);
+];
 
 // array of unsigned formats
-$unsigned_formats = array( 
+$unsigned_formats = varray[ 
   "%u", "%hu", "%lu",
   "%Lu", " %u", "%u ",   
   "\t%u", "\n%u", "%4u", 
    "%30u", "%[0-9]", "%*u"
-);
+];
 
 $count = 1;
 foreach($boolean_values as $boolean_value) {

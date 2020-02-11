@@ -21,8 +21,8 @@ include('compare_function.inc');
 echo "*** Testing array_uintersect_assoc() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$arr1 = array(1, 2);
-$arr2 = array(1, 2);
+$arr1 = varray[1, 2];
+$arr2 = varray[1, 2];
 
 $data_compare_function = 'compare_function';
 
@@ -36,11 +36,11 @@ hello world
 EOT;
 
 // add arrays
-$index_array = array (1, 2, 3);
-$assoc_array = array ('one' => 1, 'two' => 2);
+$index_array = varray [1, 2, 3];
+$assoc_array = darray ['one' => 1, 'two' => 2];
 
 //array of values to iterate over
-$inputs = array(
+$inputs = darray[
 
       // int data
       'int 0' => 0,
@@ -84,7 +84,7 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-);
+];
 
 // loop through each element of the array for ...
 

@@ -24,7 +24,7 @@ $unset_var = 10;
 unset ($unset_var);
 
 // different scalar/non scalar values for 'input' argument
-$input_values = array(
+$input_values = varray[
 
          // int data
 /*1*/    0,
@@ -68,7 +68,7 @@ $input_values = array(
 
          // unset data
 /*23*/   @$unset_var,
-);
+];
 
 // loop through each element of the array for input
 for($count = 0; $count < count($input_values); $count++) {

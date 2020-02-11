@@ -19,8 +19,8 @@ class test extends base {
 <<__EntryPoint>> function main(): void {
 echo "Original\n";
 $o1 = new test;
-$o1->a = array(1,2);
-$o1->b = array(3,4);
+$o1->a = varray[1,2];
+$o1->b = varray[3,4];
 $o1->show();
 
 echo "Clone\n";

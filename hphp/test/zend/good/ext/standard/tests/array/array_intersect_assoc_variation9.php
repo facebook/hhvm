@@ -14,21 +14,21 @@
 echo "*** Testing array_intersect_assoc() : passing two dimensional array to both \$arr1 and \$arr2 arguments ***\n";
 
 // two dimensional arrays for $arr1 and $arr2 argument
-$arr1 = array (
+$arr1 = varray [
 
   // arrays with default keys
-  array(1, 2, "hello", 'world'),
-  array(1, 2, 3, 4),
+  varray[1, 2, "hello", 'world'],
+  varray[1, 2, 3, 4],
 
   // arrays with explicit keys
-  array(1 => "one", 2 => "two", 3 => "three"),
-  array("ten" => 10, "twenty" => 20.00, "thirty" => 30)
-);
+  darray[1 => "one", 2 => "two", 3 => "three"],
+  darray["ten" => 10, "twenty" => 20.00, "thirty" => 30]
+];
 
-$arr2 = array (
-  array(1, 2, 3, 4),
-  array(1 => "one", 2 => "two", 3 => "three")
-);
+$arr2 = varray [
+  varray[1, 2, 3, 4],
+  darray[1 => "one", 2 => "two", 3 => "three"]
+];
 
 /* Passing the entire array as argument to $arr1 and $arr2 */
 // Calling array_intersect_assoc() with default arguments

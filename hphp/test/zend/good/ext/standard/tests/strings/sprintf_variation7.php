@@ -7,20 +7,20 @@
 echo "*** Testing sprintf() : integer formats with boolean values ***\n";
 
 // array of boolean type values
-$boolean_values = array (
+$boolean_values = varray [
   true,
   false,
   TRUE,
   FALSE,
-);
+];
 
 // various integer formats
-$int_formats = array(
+$int_formats = varray[
   "%d", "%hd", "%ld",
   "%Ld", " %d", "%d ",
   "\t%d", "\n%d", "%4d", 
   "%30d", "%[0-9]", "%*d"
-);
+];
  
 $count = 1;
 foreach($boolean_values as $boolean_value) {

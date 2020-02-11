@@ -15,18 +15,18 @@ echo "*** Testing array_key_exists() : usage variations ***\n";
 
 $unset = 10;
 unset($unset);
-$array = array ('null' => null,
+$array = darray ['null' => null,
                 'NULL' => NULL,
                 'empty single quoted string' => '',
                 "empty double quoted string" => "",
                 'undefined variable' => @$undefined,
-                'unset variable' => @$unset);
+                'unset variable' => @$unset];
 
 //iterate through original array
 foreach($array as $name => $input) {
     $iterator = 1;
     echo "\n-- Key in \$search array is : $name --\n";
-  $search = array();
+  $search = darray[];
     $search[$input] = 'test';
 
     //iterate through array again to see which values are considered equal

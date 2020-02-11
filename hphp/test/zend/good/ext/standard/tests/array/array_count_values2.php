@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$array1 = array(1,
+$array1 = varray[1,
                 "hello",
                 1,
                 "world",
@@ -11,6 +11,6 @@ $array1 = array(1,
                 TRUE,
                 FALSE,
                 NULL,
-                0);
+                0];
 var_dump(array_count_values($array1));
 }

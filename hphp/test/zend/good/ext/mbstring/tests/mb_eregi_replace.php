@@ -1,6 +1,6 @@
 <?hh
 function do_translit($st) {
-    $replacement = array(
+    $replacement = darray[
         "й"=>"i","ц"=>"c","у"=>"u","к"=>"k","е"=>"e","н"=>"n",
         "г"=>"g","ш"=>"sh","щ"=>"sh","з"=>"z","х"=>"x","ъ"=>"\'",
         "ф"=>"f","ы"=>"i","в"=>"v","а"=>"a","п"=>"p","р"=>"r",
@@ -13,7 +13,7 @@ function do_translit($st) {
         "О"=>"O","Л"=>"L","Д"=>"D","Ж"=>"ZH","Э"=>"IE","Ё"=>"E",
         "Я"=>"YA","Ч"=>"CH","С"=>"C","М"=>"M","И"=>"I","Т"=>"T",
         "Ь"=>"\'","Б"=>"B","Ю"=>"YU",
-    );
+    ];
    
     foreach($replacement as $i=>$u) {
         $st = mb_eregi_replace($i,$u,$st);

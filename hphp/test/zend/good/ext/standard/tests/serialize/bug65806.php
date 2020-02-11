@@ -24,9 +24,9 @@ class myList {
     public function __sleep()
     {
         $this->_serialized = serialize($this->_obj);
-        return array(
+        return varray[
             "\0" . __CLASS__ . "\0_serialized",
-        );
+        ];
     }
     public function __wakeup()
     {

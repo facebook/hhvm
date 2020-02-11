@@ -7,7 +7,7 @@
 echo "*** Testing sprintf() : octal formats with integer values ***\n";
 
 // array of integer values 
-$integer_values = array(
+$integer_values = varray[
   0,
   1,
   -1,
@@ -26,15 +26,15 @@ $integer_values = array(
   01912,       // should be quivalent to octal 1
   -020000000000, // max negative integer as octal
   017777777777  // max positive integer as octal
-);
+];
 
 // array of octal formats
-$octal_formats = array(
+$octal_formats = varray[
   "%o", "%ho", "%lo",
   "%Lo", " %o", "%o ",
   "\t%o", "\n%o", "%4o",
   "%30o", "%[0-7]", "%*o"
-);
+];
 
 $count = 1;
 foreach($integer_values as $integer_value) {

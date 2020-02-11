@@ -12,24 +12,24 @@ class RecursiveArrayIteratorAggregated implements IteratorAggregate {
 <<__EntryPoint>>
 function main_entry(): void {
 
-  $ary = array(
-  	0 => array(
+  $ary = darray[
+  	0 => varray[
   		"a",
   		1,
-  	),
+  	],
   	"a" => array(
   		2,
   		"b",
-  		3 => array(
+  		3 => varray[
   			4,
   			"c",
-  		),
-  		"3" => array(
+  		],
+  		"3" => varray[
   			4,
   			"c",
-  		),
+  		],
   	),
-  );
+  ];
 
   $it = new RecursiveArrayIteratorAggregated($ary);
   echo "-- flags = BYPASS_KEY --\n";

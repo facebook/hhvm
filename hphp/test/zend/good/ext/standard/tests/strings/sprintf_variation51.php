@@ -7,20 +7,20 @@
 echo "*** Testing sprintf() : scientific formats with boolean values ***\n";
 
 // array of boolean values 
-$boolean_values = array(
+$boolean_values = varray[
   true,
   false,
   TRUE,
   FALSE,
-);
+];
 
 // array of scientific formats
-$scientific_formats = array( 
+$scientific_formats = varray[ 
   "%e", "%he", "%le",
   "%Le", " %e", "%e ",
   "\t%e", "\n%e", "%4e", 
   "%30e", "%[0-1]", "%*e"
-);
+];
 
 $count = 1;
 foreach($boolean_values as $boolean_value) {

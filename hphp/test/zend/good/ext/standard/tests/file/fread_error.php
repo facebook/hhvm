@@ -28,14 +28,14 @@ var_dump( fread($file_handle, $len) );
 
 // test invalid arguments : non-resources
 echo "-- Testing fread() with invalid arguments --\n";
-$invalid_args = array (
+$invalid_args = varray [
   "string",
   10,
   10.5,
   true,
-  array(1,2,3),
+  varray[1,2,3],
   new stdclass,
-);
+];
 /* loop to test fread() with different invalid type of args */
 for($loop_counter = 1; $loop_counter <= count($invalid_args); $loop_counter++) {
   echo "-- Iteration $loop_counter --\n";

@@ -14,7 +14,7 @@ echo "*** Testing strspn() : with different start and default len values ***\n";
 
 // initialing required variables
 // defining different strings
-$strings = array(
+$strings = varray[
                    "",
            '',
            "\n",
@@ -32,10 +32,10 @@ $strings = array(
            'hello'.chr(0).'world',
            "hello\0\100\xaaaworld",
            'hello\0\100\xaaaworld'
-                   );
+                   ];
 
 // define the array of mask strings
-$mask_array = array(
+$mask_array = varray[
             "",
             '',
             "f\n\trelshti \l",
@@ -46,10 +46,10 @@ $mask_array = array(
             "felh\t\ ",
             " \t",
                     "fhel\t\i\100\xa"
-                   );
+                   ];
 
 // defining the array for start values
-$start_array = array(
+$start_array = varray[
             0,
             1,
                     2,
@@ -57,7 +57,7 @@ $start_array = array(
             -2,
             2147483647,  // max positive integer
             -2147483648,  // min negative integer
-                   );
+                   ];
 
 
 // loop through each element of the arrays for str, mask and start argument

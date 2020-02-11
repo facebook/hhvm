@@ -5,7 +5,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing floatval() with valid float values ***\n";
 // different valid  float values
-$valid_floats = array(
+$valid_floats = varray[
                 0.0,
                 1.0,
                 -1.0,
@@ -27,7 +27,7 @@ $valid_floats = array(
         -1E+5,
         .5e+7,
         -.5e+7
-);
+];
 
 /* loop to check that floatval() recognizes different
    float values, expected output:float value for valid floating point number */
@@ -55,7 +55,7 @@ $dfp = opendir ( dirname(__FILE__) );
 closedir($dfp);
 
 // other types in an array
-$not_float_types = array (
+$not_float_types = varray [
                    -2147483648, // max negative integer value
                    2147483648,  // max positive integer value
                    $fp,  // resource
@@ -72,7 +72,7 @@ $not_float_types = array (
                    true,
                    NULL,
                    null,
-                 );
+                 ];
 /* loop through the $not_float_types to see working of
    floatval() on non float types, expected output: float value valid floating point numbers */
 foreach ($not_float_types as $type ) {

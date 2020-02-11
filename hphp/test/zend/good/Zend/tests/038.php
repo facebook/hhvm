@@ -1,4 +1,4 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-var_dump(array(function() { } => 1));
+var_dump(darray[function() { } => 1]);
 }

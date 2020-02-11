@@ -31,7 +31,7 @@ $file_handle = fopen(__FILE__, 'r');
 
 
 //array of values to iterate over
-$values = array(
+$values = varray[
 
           // int data
 /*1*/      0,
@@ -75,7 +75,7 @@ $values = array(
 
           // resource data
 /*23*/          $file_handle
-);
+];
 
 // loop through each element of the array for args
 $counter = 1;

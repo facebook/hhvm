@@ -22,7 +22,7 @@ unset($unset_var);
 $file_handle = fopen(__FILE__, "r");
 
 // array with different values for $input
-$inputs =  array (
+$inputs =  varray [
 
 /*1*/      0,
           1,
@@ -38,8 +38,8 @@ $inputs =  array (
 
           // array values
 /*10*/      array(),
-          array(0),
-          array(1, 2),
+          varray[0],
+          varray[1, 2],
 
           // boolean values
 /*13*/      true,
@@ -62,7 +62,7 @@ $inputs =  array (
 
           // unset variable
 /*22*/      @$unset_var
-);
+];
 
 // loop through with each element of the $string array to test ord() function
 $count = 1;

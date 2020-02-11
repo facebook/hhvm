@@ -1,10 +1,10 @@
 <?hh <<__EntryPoint>> function main(): void {
-$test = array(
+$test = darray[
     '1e+308'                    => 1e+308,
     '1e+309'                    => false,
     '1e-323'                    => 1e-323,
     '1e-324'                    => false,
-);
+];
 foreach ($test as $src => $dst) {
     $out = filter_var($src, FILTER_VALIDATE_FLOAT);
     if ($dst !== $out) {

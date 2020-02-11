@@ -7,9 +7,9 @@ class Foo {
     }
 }
 <<__EntryPoint>> function main(): void {
-$it = new ArrayIterator(array(1, 2, 3));
+$it = new ArrayIterator(varray[1, 2, 3]);
 
-iterator_apply($it, array(new Foo, "foobar"));
+iterator_apply($it, varray[new Foo, "foobar"]);
 
 echo "===DONE===\n";
 }

@@ -30,7 +30,7 @@ UTF-8
 EOT;
 
 // unexpected values to be passed to $encoding argument
-$inputs = array(
+$inputs = varray[
 
        // int data
 /*1*/  0,
@@ -73,7 +73,7 @@ $inputs = array(
        // unset data
 /*23*/ @$unset_var,
 
-);
+];
 
 // loop through each element of the array for pattern
 

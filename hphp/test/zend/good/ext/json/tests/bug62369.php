@@ -2,7 +2,7 @@
 <<__EntryPoint>> function main(): void {
 $array = array();
 for ($i=0; $i<550; $i++) {
-    $array = array($array);
+    $array = varray[$array];
 }
 
 json_encode($array, 0, 551);

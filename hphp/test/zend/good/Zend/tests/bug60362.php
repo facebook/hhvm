@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$arr = array('exists' => 'foz');
+$arr = darray['exists' => 'foz'];
 
 if (isset($arr['exists']['non_existent'])) {
     echo "sub-key 'non_existent' is set: ";

@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>>
 function main_entry(): void {
-  $expect = array(
+  $expect = varray[
   	"mimetype",
   	"Configurations2/statusbar/",
   	"Configurations2/accelerator/current.xml",
@@ -17,7 +17,7 @@ function main_entry(): void {
   	"Thumbnails/thumbnail.png",
   	"settings.xml",
   	"META-INF/manifest.xml",
-  );
+  ];
   $dirname = dirname(__FILE__) . '/';
   include $dirname . 'utils.inc';
   $file = $dirname . '__tmp_bug7658.odt';
@@ -33,7 +33,7 @@ function main_entry(): void {
   $zip->close();
   echo "\n";
   $zip->open($file);
-  $found = array();
+  $found = varray[];
   for($i=0; $i < $zip->numFiles; $i++) {
   	$sb = $zip->statIndex($i);
   	$found[] = $sb['name'];

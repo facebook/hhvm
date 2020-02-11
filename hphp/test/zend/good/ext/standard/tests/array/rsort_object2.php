@@ -48,20 +48,20 @@ echo "*** Testing rsort() : object functionality ***\n";
 
 // array of integer objects
 
-$unsorted_int_obj = array(
+$unsorted_int_obj = varray[
   new for_integer_rsort(11,33,30),
   new for_integer_rsort(66,44,4),
   new for_integer_rsort(-88,-5,5),
   new for_integer_rsort(0.001,99.5,0.1)
-);
+];
 
 // array of string objects
-$unsorted_str_obj = array (
+$unsorted_str_obj = varray [
   new for_string_rsort("axx","AXX","ass"),
   new for_string_rsort("t","eee","abb"),
   new for_string_rsort("w","W", "c"),
   new for_string_rsort("py","PY", "pt"),
-);
+];
 
 
 echo "\n-- Sort flag = default --\n";

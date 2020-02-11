@@ -6,12 +6,12 @@ function main_entry(): void {
   var_dump(json_encode(NULL));
   var_dump(json_encode(TRUE));
 
-  var_dump(json_encode(array(""=>"")));
-  var_dump(json_encode(array(array(1))));
+  var_dump(json_encode(darray[""=>""]));
+  var_dump(json_encode(varray[varray[1]]));
   var_dump(json_encode(array()));
 
-  var_dump(json_encode(array(""=>""), JSON_FORCE_OBJECT));
-  var_dump(json_encode(array(array(1)), JSON_FORCE_OBJECT));
+  var_dump(json_encode(darray[""=>""], JSON_FORCE_OBJECT));
+  var_dump(json_encode(varray[varray[1]], JSON_FORCE_OBJECT));
   var_dump(json_encode(array(), JSON_FORCE_OBJECT));
 
   var_dump(json_encode(1));

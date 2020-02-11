@@ -1,6 +1,6 @@
 <?hh 
 <<__EntryPoint>> function main(): void {
-$arr = array(new stdClass, 'stdClass');
+$arr = varray[new stdClass, 'stdClass'];
 
 new $arr[0]();
 new $arr[1]();

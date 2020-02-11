@@ -9,7 +9,7 @@
 */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing nl2br() : usage variations ***\n";
-$strings = array(
+$strings = varray[
   '\n',
   '\r',
   '\r\n',
@@ -29,7 +29,7 @@ $strings = array(
   //inserted new line
   'Hello
 World'
-);
+];
 
 //loop through $strings array to test nl2br() function with each element
 $count = 1;

@@ -63,13 +63,13 @@ echo "*** Testing array_unshift() : Passing object to \$var argument ***\n";
 $array = array('f' => "first", "s" => 'second', 1, 2.222);
 
 // array containing different types of objects as elements
-$vars = array(
+$vars = varray[
   new SimpleClass(),
   new EmptyClass(),
   new ChildClass(),
   new FinalClass(),
   new StaticClass()
-);
+];
 
 // loop through the various elements of $arrays to check the functionality of array_unshift
 $iterator = 1;

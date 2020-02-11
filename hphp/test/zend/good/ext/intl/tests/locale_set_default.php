@@ -9,7 +9,7 @@ function ut_main()
 {
     $res_str = '';
 
-    $locales = array(
+    $locales = varray[
         'uk-ua_CALIFORNIA@currency=;currency=GRN',
         'root',
         'uk@currency=EURO',
@@ -59,7 +59,7 @@ function ut_main()
         'de-419-DE',
         'a-DE',
         'ar-a-aaa-b-bbb-a-ccc'
-    );
+    ];
 
 /*
     $locales = array(

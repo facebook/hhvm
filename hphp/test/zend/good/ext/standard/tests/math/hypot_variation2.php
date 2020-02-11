@@ -25,7 +25,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $arg argument
-$inputs = array(
+$inputs = varray[
        // int data
 /*1*/  0,
        1,
@@ -71,7 +71,7 @@ $inputs = array(
 
        // resource variable
 /*26*/ $fp
-);
+];
 
 // loop through each element of $inputs to check the behaviour of hypot()
 $iterator = 1;

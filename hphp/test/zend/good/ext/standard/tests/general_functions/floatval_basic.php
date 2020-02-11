@@ -5,7 +5,7 @@
 
 // different valid  float values
 <<__EntryPoint>> function main(): void {
-$valid_floats = array(
+$valid_floats = darray[
        "0.0"  => 0.0,
        "1.0"  => 1.0,
        "-1.0" => -1.0,
@@ -27,7 +27,7 @@ $valid_floats = array(
        "-1E5" => -1E+5,
        ".5e+7" => .5e+7,
        "-.5e+7" =>-.5e+7
-);
+];
 
 /* loop to check that floatval() recognizes different
    float values, expected output:float value for valid floating point number */

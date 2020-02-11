@@ -47,14 +47,14 @@ it's bright,but i cann't see it.
 this\line is /with\slashs
 EOT;
 
-$heredoc_strings = array(
+$heredoc_strings = varray[
   $null_string,
   $blank_line,
   $multiline_string,
   $diff_whitespaces,
   $numeric_string,
   $quote_char_string
-);
+];
 
 // loop through $heredoc_strings element and check the working on ucwords()
 $count = 1;

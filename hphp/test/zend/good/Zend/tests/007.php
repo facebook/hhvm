@@ -5,9 +5,9 @@ $var = 1;
 var_dump(each(inout $var));
 $var = "string";
 var_dump(each(inout $var));
-$var = array(1,2,3);
+$var = varray[1,2,3];
 var_dump(each(inout $var));
-$var = array("a"=>1,"b"=>2,"c"=>3);
+$var = darray["a"=>1,"b"=>2,"c"=>3];
 var_dump(each(inout $var));
 
 echo "Done\n";

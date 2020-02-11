@@ -27,8 +27,8 @@ function key_compare_func($key1, $key2)
 echo "*** Testing array_diff_ukey() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$array2 = array('green' => 5, 'blue' => 6, 'yellow' => 7, 'cyan'   => 8);
-$array3 = array('blue'  => 1, 'red'  => 2, 'green'  => 3, 'purple' => 4);
+$array2 = darray['green' => 5, 'blue' => 6, 'yellow' => 7, 'cyan'   => 8];
+$array3 = darray['blue'  => 1, 'red'  => 2, 'green'  => 3, 'purple' => 4];
 
 //get an unset variable
 $unset_var = 10;
@@ -43,7 +43,7 @@ hello world
 EOT;
 
 //array of values to iterate over
-$inputs = array(
+$inputs = darray[
 
       // int data
       'int 0' => 0,
@@ -90,7 +90,7 @@ $inputs = array(
 
       // resource data
       'resource' => $fp,
-);
+];
 
 // loop through each element of the array for arr1
 foreach($inputs as $key =>$value) {

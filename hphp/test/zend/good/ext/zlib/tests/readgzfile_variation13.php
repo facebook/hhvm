@@ -17,10 +17,10 @@ function main_entry(): void {
 
   $filename = $filename = dirname(__FILE__)."/004.txt.gz";
 
-  $variation = array(
+  $variation = darray[
     'instance of classWithToString' => new classWithToString(),
     'instance of classWithoutToString' => new classWithoutToString(),
-    );
+    ];
 
 
   foreach ( $variation as $var ) {

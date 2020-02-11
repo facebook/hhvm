@@ -5,7 +5,7 @@
  * Alias to functions:
  */
 <<__EntryPoint>> function main(): void {
-$ips = array(
+$ips = varray[
     "1.1.011.011",
     "127.0.0.1",
     "1.1.071.071",
@@ -14,7 +14,7 @@ $ips = array(
     "192.168.0.0",
     "256.0.0.1",
     "192.168.0xa.5",
-);
+];
 
 foreach($ips as $ip) {
     var_dump(ip2long($ip));

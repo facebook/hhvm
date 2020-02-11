@@ -41,19 +41,19 @@ class for_string_arsort
 echo "*** Testing arsort() : object functionality ***\n";
 
 // array of integer objects
-$unsorted_int_obj = array (
+$unsorted_int_obj = darray [
   1 => new for_integer_arsort(11), 2 =>  new for_integer_asort(66),
   3 => new for_integer_arsort(23), 4 => new for_integer_asort(-5),
   5 => new for_integer_arsort(0.001), 6 => new for_integer_asort(0)
-);
+];
 
 // array of string objects
-$unsorted_str_obj = array (
+$unsorted_str_obj = darray [
   "a" => new for_string_arsort("axx"), "b" => new for_string_asort("t"),
   "c" => new for_string_arsort("w"), "d" => new for_string_asort("py"),
   "e" => new for_string_arsort("apple"), "f" => new for_string_asort("Orange"),
   "g" => new for_string_arsort("Lemon"), "h" => new for_string_asort("aPPle")
-);
+];
 
 
 echo "\n-- Testing arsort() by supplying various object arrays, 'flag' value is defualt --\n";

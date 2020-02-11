@@ -15,7 +15,7 @@ Hello
 HERE_DOC;
 
 // array of possible valid values for 'val' argument 
-$values = array (
+$values = varray [
 
   /* 1  */  NULL,
             0,
@@ -24,7 +24,7 @@ $values = array (
             'hi',
             "hi",
   /* 7  */  $heredoc 
-);
+];
 
 echo "*** Filling 2 dimensional array with all basic valid values ***\n";
 $counter = 1;

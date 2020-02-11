@@ -13,15 +13,15 @@
 echo "*** Testing array_pad() : Passing 2-d array to \$pad_value argument ***\n";
 
 // initialize the $input and $pad_size argument
-$input = array(1, 2, 3);
+$input = varray[1, 2, 3];
 $pad_size = 5;
 
 // initialize $pad_value
-$pad_value = array (
-  array(1),
-  array("hello", 'world'),
-  array("one" => 1, 'two' => 2)
-);
+$pad_value = varray [
+  varray[1],
+  varray["hello", 'world'],
+  darray["one" => 1, 'two' => 2]
+];
 
 var_dump( array_pad($input, $pad_size, $pad_value) );  // positive 'pad_value'
 var_dump( array_pad($input, -$pad_size, $pad_value) );  // negative 'pad_value'

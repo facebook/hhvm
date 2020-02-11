@@ -23,7 +23,7 @@ multiline heredoc with 123 and
 speci@! ch@r$..checking\nwith\talso
 EOT7;
 
-$input = array(
+$input = darray[
   // numeric values
   'int_value' => 1,
   'negative_value' => -2,
@@ -58,7 +58,7 @@ $input = array(
   'empty_heredoc' => $empty_heredoc,
   'simple_heredoc' => $simple_heredoc,
   'multiline_heredoc' => $multiline_heredoc,
-);
+];
 
 var_dump( array_flip($input) );
 

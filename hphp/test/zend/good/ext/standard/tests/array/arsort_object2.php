@@ -48,16 +48,16 @@ class for_string_arsort
 echo "*** Testing arsort() : object functionality ***\n";
 
 // array of integer objects
-$unsorted_int_obj = array (
+$unsorted_int_obj = darray [
   1 => new for_integer_arsort(11, 33,2), 2 =>  new for_integer_asort(44, 66,3),
   3 => new for_integer_arsort(23, 32,6), 4 => new for_integer_asort(-88, -5,-4),
-);
+];
 
 // array of string objects
-$unsorted_str_obj = array (
+$unsorted_str_obj = darray [
   "a" => new for_string_arsort("axx","AXX","d"), "b" => new for_string_asort("T", "t","q"),
   "c" => new for_string_arsort("w", "W","c"), "d" => new for_string_asort("PY", "py","s"),
-);
+];
 
 
 echo "\n-- Testing arsort() by supplying various object arrays, 'flag' value is default --\n";

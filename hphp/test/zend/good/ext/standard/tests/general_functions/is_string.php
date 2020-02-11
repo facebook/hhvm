@@ -23,7 +23,7 @@ $heredoc_null_string = <<<EOT
 NULL
 EOT;
 
-$strings = array(
+$strings = varray[
   "",
   " ",
   '',
@@ -46,7 +46,7 @@ $strings = array(
   $heredoc_numeric_string,
   $heredoc_empty_string,
   $heredoc_null_string
-);
+];
 /* loop to check that is_string() recognizes different 
    strings, expected output bool(true) */
 $loop_counter = 1;
@@ -71,7 +71,7 @@ EOT;
 unset($unset_string1, $unset_string2, $unset_heredoc);
 
 // other types in a array 
-$not_strings = array (
+$not_strings = varray [
   /* integers */
   0,
   1,
@@ -111,24 +111,24 @@ $not_strings = array (
 
   /* arrays */
   array(),
-  array(0),
-  array(1),
-  array(NULL),
-  array(null),
-  array("string"),
-  array(true),
-  array(TRUE),
-  array(false),
-  array(FALSE),
-  array(1,2,3,4),
-  array(1 => "One", "two" => 2),
+  varray[0],
+  varray[1],
+  varray[NULL],
+  varray[null],
+  varray["string"],
+  varray[true],
+  varray[TRUE],
+  varray[false],
+  varray[FALSE],
+  varray[1,2,3,4],
+  darray[1 => "One", "two" => 2],
 
   /* undefined and unset vars */
   @$unset_string1,
   @$unset_string2,
   @$unset_heredoc,
   @$undefined_var 
-);
+];
 /* loop through the $not_strings to see working of 
    is_string() on non string types, expected output bool(false) */
 $loop_counter = 1;

@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$values = array(
+$values = varray[
 'a@b.c',
 'abuse@example.com',
 'test!.!@#$%^&*@example.com',
@@ -15,7 +15,7 @@ $values = array(
 'foo@-.com',
 'foo@bar.123',
 'foo@bar.-'
-);
+];
 foreach ($values as $value) {
     var_dump(filter_var($value, FILTER_VALIDATE_EMAIL));
 }

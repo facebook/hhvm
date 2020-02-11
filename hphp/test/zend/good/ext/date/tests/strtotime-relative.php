@@ -4,7 +4,7 @@ date_default_timezone_set('UTC');
 
 $base_time = 1204200000; // 28 Feb 2008 12:00:00
 
-$offsets = array(
+$offsets = varray[
 	// offset around a day
 	'80412 seconds',
 	'86399 seconds',
@@ -37,10 +37,10 @@ $offsets = array(
 	'24 years',
 	'25 years',
 	'26 years'
-);
+];
 
 foreach ($offsets as $offset) {
-	foreach (array('+', '-') as $direction) {
+	foreach (varray['+', '-'] as $direction) {
 		echo "$direction$offset: " . date(DATE_ISO8601, strtotime("$direction$offset", $base_time)) . "\n";
 	}
 }

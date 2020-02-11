@@ -57,13 +57,13 @@ function main(): void {
 
   echo "--- Testing sizeof() with objects which doesn't implement Countable interface ---\n";
 
-  $objects = array(
+  $objects = varray[
   /* 1  */  new test(),
             new test1(),
             new test2(),
             new child_test2(),
   /* 5  */  new concrete_class()
-  );
+  ];
 
   $counter = 1;
   for($i = 0; $i < count($objects); $i++) {

@@ -5,7 +5,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing is_numeric() with valid numeric values ***\n";
 // different valid numeric  vlaues
-$numerics = array(
+$numerics = varray[
   0,
   1,
   -1,
@@ -85,7 +85,7 @@ $numerics = array(
   "+0123",
   '-0123',
   '+0123'
-);
+];
 /* loop to check that is_numeric() recognizes different
    numeric values, expected output: bool(true) */
 $loop_counter = 1;
@@ -105,7 +105,7 @@ $unset_var = 10.5;
 unset ($unset_var);
 
 // other types in a array
-$not_numerics = array(
+$not_numerics = varray[
   "-0x80001",
   "+0x80001",
   "-0x80001.5",
@@ -114,7 +114,7 @@ $not_numerics = array(
   $fp,  // resource
   $dfp,
   array(),
-  array("string"),
+  varray["string"],
   "",
   "1 ",
   "- 1",
@@ -134,7 +134,7 @@ $not_numerics = array(
   false,
   @$unset_var, // unset variable
   @$undefined_var
-);
+];
 /* loop through the $not_numerics to see working of
    is_numeric() on non numeric values, expected output: bool(false) */
 $loop_counter = 1;

@@ -25,18 +25,18 @@ function test($value, $key, $inner) {
     return $value === 1 || $value === 4;
 }
 <<__EntryPoint>> function main(): void {
-$tests = array(
-    'instance method'    => function() { return array(new A, 'test'); },
-    'static method'      => function() { return array('B', 'test'); },
+$tests = darray[
+    'instance method'    => function() { return varray[new A, 'test']; },
+    'static method'      => function() { return varray['B', 'test']; },
     'static method (2)'  => function() { return 'B::test'; },
     'function'           => function() { return 'test'; },
     'anonymous function' => function() { return function($value, $key, $inner) { return test($value, $key, $inner); }; },
-);
+];
 
 foreach($tests as $name => $test) {
 
     $callback = $test();
-    $it = new RecursiveArrayIterator(array(1, array(2, 3), array(4, 5)));
+    $it = new RecursiveArrayIterator(varray[1, varray[2, 3], varray[4, 5]]);
     $it = new RecursiveCallbackFilterIterator($it, $callback);
     $it = new RecursiveIteratorIterator($it);
 
@@ -48,7 +48,7 @@ foreach($tests as $name => $test) {
 
     // same test, with no reference to callback
 
-    $it = new RecursiveArrayIterator(array(1, array(2, 3), array(4, 5)));
+    $it = new RecursiveArrayIterator(varray[1, varray[2, 3], varray[4, 5]]);
     $it = new RecursiveCallbackFilterIterator($it, $test());
     $it = new RecursiveIteratorIterator($it);
     unset($callback);

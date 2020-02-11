@@ -1,8 +1,8 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$a = array("foo", "bar", "fubar");
-$b = array("3" => "foo", "4" => "bar", "5" => "fubar");
-$c = array("a" => "foo", "b" => "bar", "c" => "fubar");
+$a = varray["foo", "bar", "fubar"];
+$b = darray["3" => "foo", "4" => "bar", "5" => "fubar"];
+$c = darray["a" => "foo", "b" => "bar", "c" => "fubar"];
 
 /* simple array */
 echo array_pop(inout $a), "\n";

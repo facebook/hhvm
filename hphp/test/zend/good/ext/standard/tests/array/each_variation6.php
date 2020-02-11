@@ -11,7 +11,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing each() : usage variations ***\n";
 
-$arr = array('zero', 'one', 'two', 'abc', 'xyz');
+$arr = varray['zero', 'one', 'two', 'abc', 'xyz'];
 
 echo "\n-- Current position: --\n";
 echo key($arr) . " => " . current($arr) . "\n";

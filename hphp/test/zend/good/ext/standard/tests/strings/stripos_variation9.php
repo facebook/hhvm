@@ -23,7 +23,7 @@ unset($unset_var);
 $file_handle = fopen(__FILE__, "r");
 
 // array with different values
-$haystacks =  array (
+$haystacks =  varray [
 
   // integer values
   0,
@@ -40,10 +40,10 @@ $haystacks =  array (
 
   // array values
   array(),
-  array(0),
-  array(1),
-  array(1, 2),
-  array('color' => 'red', 'item' => 'pen'),
+  varray[0],
+  varray[1],
+  varray[1, 2],
+  darray['color' => 'red', 'item' => 'pen'],
 
   // boolean values
   true,
@@ -70,7 +70,7 @@ $haystacks =  array (
 
   // unset variable
   @$unset_var
-);
+];
 
 $needle = "heredoc 0 1 2 -2 10.5 -10.5 10.5e10 10.6E-10 .5 array true false object \"\" null Resource";
 

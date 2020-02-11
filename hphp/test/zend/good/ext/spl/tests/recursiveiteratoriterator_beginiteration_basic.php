@@ -8,7 +8,7 @@ class SkipsFirstElementRecursiveIteratorIterator extends RecursiveIteratorIterat
 }
 <<__EntryPoint>>
 function main_entry(): void {
-  $sample_array = array(1, 2);
+  $sample_array = varray[1, 2];
   $sub_iterator = new RecursiveArrayIterator($sample_array);
 
   $iterator = new RecursiveIteratorIterator($sub_iterator);

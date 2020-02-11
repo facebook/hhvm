@@ -2,7 +2,7 @@
 <<__EntryPoint>> function main(): void {
 $file = dirname(__FILE__) .'/fgetcsv-test.csv';
 
-$data = array(1, 2, 'foo', 'haha', array(4, 5, 6), 1.3, null);
+$data = varray[1, 2, 'foo', 'haha', varray[4, 5, 6], 1.3, null];
 
 $fp = fopen($file, 'w');
 

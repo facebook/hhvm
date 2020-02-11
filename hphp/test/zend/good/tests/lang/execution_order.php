@@ -119,7 +119,7 @@ echo ($a=$b) + $a;
 echo "\r\n";
 
 
-$a = array(100,200);
+$a = varray[100,200];
 $i = 0;
 
 echo "17)";

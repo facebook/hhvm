@@ -11,13 +11,13 @@
 
 function ut_main()
 {
-    $locales = array(
+    $locales = darray[
         'en_UK' => 'GBP',
         'en_US' => 'USD',
         'ru'    => 'RUR',
         'uk'    => 'UAH',
         'en'    => 'UAH'
-    );
+    ];
 
     $res_str = '';
     $number = 1234567.89;

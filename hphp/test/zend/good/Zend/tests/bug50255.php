@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$arr = array('foo' => 'bar');
+$arr = darray['foo' => 'bar'];
 
 print "isset\n";
 var_dump(isset($arr->foo));

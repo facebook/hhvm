@@ -11,7 +11,7 @@
 echo "*** Testing array_chunk() : usage variations ***\n";
 
 // input array
-$input = array(1, 2);
+$input = varray[1, 2];
 $size = 10;
 
 //get an unset variable
@@ -19,7 +19,7 @@ $unset_var = 10;
 unset ($unset_var);
 
 //array of values to iterate over
-$values = array(
+$values = varray[
 
         // int data
 /*1*/   0,
@@ -49,7 +49,7 @@ $values = array(
         // object data
 /*16*/  new stdclass(),
 
-);
+];
 
 $count = 1;
 

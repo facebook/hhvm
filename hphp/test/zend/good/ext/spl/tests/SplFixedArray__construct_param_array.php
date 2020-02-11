@@ -1,4 +1,4 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$array = new SplFixedArray( array("string", 1) );
+$array = new SplFixedArray( varray["string", 1] );
 }

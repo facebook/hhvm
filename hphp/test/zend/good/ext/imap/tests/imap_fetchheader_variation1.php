@@ -31,14 +31,14 @@ hello world
 EOT;
 
 // get different types of array
-$index_array = array (1, 2, 3);
-$assoc_array = array ('one' => 1, 'two' => 2);
+$index_array = varray [1, 2, 3];
+$assoc_array = darray ['one' => 1, 'two' => 2];
 
 // get a resource variable
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $stream_id argument
-$inputs = array(
+$inputs = varray[
 
        // int data
 /*1*/  0,
@@ -76,7 +76,7 @@ $inputs = array(
 /*21*/ array(),
        $index_array,
        $assoc_array,
-       array('foo', $index_array, $assoc_array),
+       varray['foo', $index_array, $assoc_array],
 
 
        // object data
@@ -87,7 +87,7 @@ $inputs = array(
 
        // unset data
 /*27*/ @$unset_var,
-);
+];
 
 // loop through each element of $inputs to check the behavior of imap_fetchheader()
 $iterator = 1;

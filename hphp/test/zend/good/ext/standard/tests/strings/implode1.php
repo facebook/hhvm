@@ -13,14 +13,14 @@ class foo
 
 <<__EntryPoint>> function main(): void {
 echo "*** Testing implode() for basic opeartions ***\n";
-$arrays = array (
-  array(1,2),
-  array(1.1,2.2),
-  array(array(2),array(1)),
-  array(false,true),
+$arrays = varray [
+  varray[1,2],
+  varray[1.1,2.2],
+  varray[varray[2],varray[1]],
+  varray[false,true],
   array(),
-  array("a","aaaa","b","bbbb","c","ccccccccccccccccccccc")
-);
+  varray["a","aaaa","b","bbbb","c","ccccccccccccccccccccc"]
+];
 /* loop to output string with ', ' as $glue, using implode() */
 foreach ($arrays as $array) {
   var_dump( implode(', ', $array) );
@@ -29,7 +29,7 @@ foreach ($arrays as $array) {
 
 echo "\n*** Testing implode() with variations of glue ***\n";
 /* checking possible variations */
-$pieces = array (
+$pieces = varray [
   2,
   0,
   -639,
@@ -40,19 +40,19 @@ $pieces = array (
   "",
   " ",
   "string\x00with\x00...\0"
-);
-$glues = array (
+];
+$glues = varray [
   "TRUE",
   true,
   false,
-  array("key1", "key2"),
+  varray["key1", "key2"],
   "",
   " ",
   "string\x00between",
   NULL,
   -0,
   '\0'
-);
+];
 /* loop through to display a string containing all the array $pieces in the same order,
    with the $glue string between each element  */
 $counter = 1;
@@ -68,15 +68,15 @@ var_dump( implode("") );
 
 /* checking sub-arrays */
 echo "\n*** Testing implode() on sub-arrays ***\n";
-$sub_array = array(array(1,2,3,4), array(1 => "one", 2 => "two"), "PHP", 50);
+$sub_array = varray[varray[1,2,3,4], darray[1 => "one", 2 => "two"], "PHP", 50];
 var_dump( implode("TEST", $sub_array) );
-var_dump( implode(array(1, 2, 3, 4), $sub_array) );
+var_dump( implode(varray[1, 2, 3, 4], $sub_array) );
 var_dump( implode(2, $sub_array) );
 
 echo "\n*** Testing implode() on objects ***\n";
 /* checking on objects */
 $obj = new foo(); //creating new object
-$arr = array($obj, $obj);
+$arr = varray[$obj, $obj];
 var_dump( implode(",", $arr) );
 var_dump($arr);
 
@@ -89,7 +89,7 @@ $file_handle = fopen(__FILE__, "r");
 $dir_handle = opendir( dirname(__FILE__) );
 
 /* store resources in array for comparison */
-$resources = array($file_handle, $dir_handle);
+$resources = varray[$file_handle, $dir_handle];
 
 var_dump( implode("::", $resources) );
 
@@ -107,7 +107,7 @@ var_dump( implode("glue",1234) );
 var_dump( implode("glue", NULL) );
 
 /* pieces as NULL array */
-var_dump( implode(",", array(NULL)) );
+var_dump( implode(",", varray[NULL]) );
 
 /* integer as glue */
 var_dump( implode(12, "pieces") );

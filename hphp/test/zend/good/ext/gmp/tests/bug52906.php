@@ -1,16 +1,16 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$vals = array(
-	array(7, 3),
-	array(2, 7),
-	array(12, 7),
-	array(-2, 7),
-	array(-12, 7),
-	array(2, -7),
-	array(12, -7),
-	array(-2, -7),
-	array(-12, -7),
-);
+$vals = varray[
+	varray[7, 3],
+	varray[2, 7],
+	varray[12, 7],
+	varray[-2, 7],
+	varray[-12, 7],
+	varray[2, -7],
+	varray[12, -7],
+	varray[-2, -7],
+	varray[-12, -7],
+];
 foreach($vals as $data) {
 	echo "{$data[0]}%{$data[1]}=".gmp_strval(gmp_mod($data[0], $data[1]));
 	echo "\n";

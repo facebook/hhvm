@@ -7,7 +7,7 @@ class test_props {
 }
 
 class test {
-    public $array = array(1,2,3);
+    public $array = varray[1,2,3];
     public $string = "string";
 
     public function __construct() {

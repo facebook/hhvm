@@ -37,11 +37,11 @@ EOF;
 function main_entry(): void {
   for ($i = 0; $i < 10; $i++) {
   	$ws=new TestSoapClient(dirname(__FILE__).'/bug37083.wsdl',
-                     array('encoding'=>'ISO-8859-1',
-                           'cache_wsdl'=>WSDL_CACHE_BOTH));
+                     darray['encoding'=>'ISO-8859-1',
+                           'cache_wsdl'=>WSDL_CACHE_BOTH]);
   	$search=new stdClass();
   	$search->queryString='argo';
-  	$search->ranges = array();
+  	$search->ranges = varray[];
   	$search->ranges[]=$r=new stdClass();
   	$r->field='maxDateTime';
   	$r->min='2003-04-01';

@@ -10,7 +10,7 @@ class something {
   }
 
   public static function do_something() {
-    self::get_object()->vars = array();
+    self::get_object()->vars = varray[];
     self::get_object()->vars[]=1;
     self::get_object()->vars[]=2;
     self::get_object()->vars[]=3;

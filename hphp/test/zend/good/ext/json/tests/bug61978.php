@@ -15,10 +15,10 @@ class JsonTest2 implements JsonSerializable {
         $this->test = '123';
     }
     public function jsonSerialize() {
-        return array(
+        return darray[
             'test' => $this->test,
             'me'   => $this
-        );
+        ];
     }
 }
 

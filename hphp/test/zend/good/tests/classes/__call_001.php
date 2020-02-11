@@ -1,7 +1,7 @@
 <?hh
 
 class Caller {
-    public $x = array(1, 2, 3);
+    public $x = varray[1, 2, 3];
 
     function __call($m, $a) {
         echo "Method $m called:\n";

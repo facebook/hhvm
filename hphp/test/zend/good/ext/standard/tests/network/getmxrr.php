@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$domains = array( 'mx1.tests.php.net', 'mx2.tests.php.net' );
+$domains = varray[ 'mx1.tests.php.net', 'mx2.tests.php.net' ];
 foreach ( $domains as $domain )
 {
     $hosts = null;

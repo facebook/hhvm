@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$valuesy = array(23,
+$valuesy = varray[23,
                 -23,
                 2.345e1,
                 -2.345e1,
@@ -10,9 +10,9 @@ $valuesy = array(23,
                 "2.345e1",
                 null,
                 true,
-                false);
+                false];
 
-$valuesx = array(23,
+$valuesx = varray[23,
                 -23,
                 2.345e1,
                 -2.345e1,
@@ -23,7 +23,7 @@ $valuesx = array(23,
                 "2.345e1",
                 null,
                 true,
-                false);
+                false];
 
 for ($i = 0; $i < count($valuesy); $i++) {
     for ($j = 0; $j < count($valuesx); $j++) {

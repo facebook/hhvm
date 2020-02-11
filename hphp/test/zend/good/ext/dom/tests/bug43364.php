@@ -29,7 +29,7 @@ $doc = new DomDocument();
 $doc->loadXml($xml);
 $doc->xinclude();
 
-$count = loopElements(array($doc->documentElement));
+$count = loopElements(varray[$doc->documentElement]);
 
 var_dump($count);
 }

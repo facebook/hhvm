@@ -35,7 +35,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $key argument
-$inputs = array(
+$inputs = varray[
 
        // int data
 /*1*/  0,
@@ -81,7 +81,7 @@ $inputs = array(
 
        // resource variable
 /*25*/ $fp
-);
+];
 
 // loop through each element of $inputs to check the behavior of array_key_exists()
 $iterator = 1;

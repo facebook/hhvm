@@ -42,7 +42,7 @@ class NumericArrayIterator implements Iterator
     }
 }
 <<__EntryPoint>> function main(): void {
-$it = new LimitIterator(new NumericArrayIterator(array(12, 25, 42, 56)));
+$it = new LimitIterator(new NumericArrayIterator(varray[12, 25, 42, 56]));
 
 foreach($it as $k => $v)
 {

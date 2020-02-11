@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$trans = array("a" => 1,
+$trans = darray["a" => 1,
                "b" => 1,
                "c" => 2,
                "z" => 0,
@@ -8,7 +8,7 @@ $trans = array("a" => 1,
                "F" => NULL,
                0 => "G",
                1 => "h",
-               2 => "i");
+               2 => "i"];
 $trans = array_flip($trans);
 var_dump($trans);
 }

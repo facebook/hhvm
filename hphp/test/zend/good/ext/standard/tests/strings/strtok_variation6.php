@@ -11,19 +11,19 @@
 echo "*** Testing strtok() : with invalid escape sequences in token ***\n";
 
 // defining arrays for input strings and tokens
-$string_array = array(
+$string_array = varray[
                 "khellok worldk",
                 "\khello\k world\k",
                 "/khello\k world/k",
                 "/hellok/ world"
-              );
-$token_array = array(
+              ];
+$token_array = varray[
                "k",
                "/ ",
                "/k",
                "\k",
                "\\\\\\\k\h\\e\l\o\w\r\l\d"
-             );
+             ];
 
 // loop through each element of the array and check the working of strtok()
 // when supplied with different string and token values

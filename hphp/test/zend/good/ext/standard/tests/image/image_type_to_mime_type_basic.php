@@ -8,7 +8,7 @@
 <<__EntryPoint>> function main(): void {
 echo "Starting image_type_to_mime_type() test\n\n";
 
-$image_types = array (
+$image_types = varray [
     IMAGETYPE_GIF,
     IMAGETYPE_JPEG,
     IMAGETYPE_PNG,
@@ -25,7 +25,7 @@ $image_types = array (
     IMAGETYPE_WBMP,
     IMAGETYPE_JPEG2000,
     IMAGETYPE_XBM
-);
+];
 
     foreach($image_types as $image_type) {
         var_dump(image_type_to_mime_type($image_type));

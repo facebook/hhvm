@@ -5,23 +5,23 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing is_array() on different type of arrays ***\n";
 /* different types of arrays */
-$arrays = array(
+$arrays = varray[
   array(),
-  array(NULL),
-  array(null),
-  array(true),
-  array(""),
-  array(''),
-  array(array(), array()),
-  array(array(1, 2), array('a', 'b')),
-  array(1 => 'One'),
-  array("test" => "is_array"),
-  array(0),
-  array(-1),
-  array(10.5, 5.6),
-  array("string", "test"),
-  array('string', 'test')
-);
+  varray[NULL],
+  varray[null],
+  varray[true],
+  varray[""],
+  varray[''],
+  varray[array(), array()],
+  varray[varray[1, 2], varray['a', 'b']],
+  darray[1 => 'One'],
+  darray["test" => "is_array"],
+  varray[0],
+  varray[-1],
+  varray[10.5, 5.6],
+  varray["string", "test"],
+  varray['string', 'test']
+];
 /* loop to check that is_array() recognizes different
    type of arrays, expected output bool(true) */
 $loop_counter = 1;
@@ -37,11 +37,11 @@ $fp = fopen (__FILE__, "r");
 $dfp = opendir ( dirname(__FILE__) );
 
 // unset variables
-$unset_array = array(10);
+$unset_array = varray[10];
 unset($unset_array);
 
 // other types in a array
-$varient_arrays = array (
+$varient_arrays = varray [
   /* integers */
   543915,
   -5322,
@@ -86,7 +86,7 @@ $varient_arrays = array (
   /* unset/undefined arrays  */
   @$unset_array,
   @$undefined_array
-);
+];
 /* loop through the $varient_array to see working of
    is_array() on non array types, expected output bool(false) */
 $loop_counter = 1;

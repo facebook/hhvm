@@ -6,11 +6,11 @@
 
 function ut_main()
 {
-    $locales = array(
+    $locales = varray[
         'en_UK',
         'en_US@California',
         'uk',
-    );
+    ];
 
     $res_str = '';
 

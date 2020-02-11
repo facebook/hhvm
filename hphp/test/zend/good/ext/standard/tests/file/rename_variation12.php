@@ -22,7 +22,7 @@ $toFile = "IwasRenamed.tmp";
 $old_dir_path = getcwd();
 chdir($testDir);
 
-$allDirs = array(
+$allDirs = varray[
   // absolute paths
   "$absSubDir/",
   "$absSubDir/../".$subDir,
@@ -38,7 +38,7 @@ $allDirs = array(
    $mainDir."///".$subDir, 
   "./".$mainDir."/../".$mainDir."/".$subDir,
   "BADDIR",  
-);
+];
 
 for($i = 0; $i<count($allDirs); $i++) {
   $j = $i+1;

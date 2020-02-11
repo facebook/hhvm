@@ -1,7 +1,7 @@
 <?hh
 namespace foo;
 
-function foo($a = array(\unknown => unknown))
+function foo($a = darray[\unknown => unknown])
 {
 }
 <<__EntryPoint>> function main(): void {

@@ -12,7 +12,7 @@ class TestClass
 <<__EntryPoint>> function main(): void {
 $storage = new SplObjectStorage();
 
-foreach(array(1,"2","foo",true) as $value)
+foreach(varray[1,"2","foo",true] as $value)
 {
      $storage->attach(new TestClass($value));
 }

@@ -5,7 +5,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing basic functions of pathinfo() ***\n";
 
-$paths = array (
+$paths = varray [
   '',
   ' ',
   'c:',
@@ -45,7 +45,7 @@ $paths = array (
   '		c:\test\adir\afile.txt',
   '/usr',
   '/usr/'
-);
+];
 
 $counter = 1;
 /* loop through $paths to test each $path in the above array */

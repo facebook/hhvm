@@ -69,7 +69,7 @@ function main(): void {
   $Value_object = new Value();
   $concreteClass_object = new concreteClass();
 
-  $valid_objects = array(
+  $valid_objects = varray[
     new stdclass,
     new foo,
     new concreteClass,
@@ -81,7 +81,7 @@ function main(): void {
     $foo_object,
     $Value_object,
     $concreteClass_object
-  );
+  ];
 
   /* loop to check that is_object() recognizes different
      objects, expected output: bool(true) */
@@ -103,7 +103,7 @@ function main(): void {
   unset($unset_object);
 
   // other types in a array
-  $not_objects = array(
+  $not_objects = varray[
     0,
     -1,
     0.1,
@@ -114,7 +114,7 @@ function main(): void {
     $fp,  // resource
     $dfp,
     array(),
-    array("string"),
+    varray["string"],
     "0",
     "1",
     "",
@@ -123,7 +123,7 @@ function main(): void {
     null,
     @$unset_object, // unset object
     @$undefined_var, // undefined variable
-  );
+  ];
   /* loop through the $not_objects to see working of
      is_object() on non object types, expected output: bool(false) */
   $loop_counter = 1;

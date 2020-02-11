@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$a = array(
-	array(1,2,3),
+$a = varray[
+	varray[1,2,3],
 	"",
 	1,
 	2.5,
@@ -15,7 +15,7 @@ $a = array(
 	array(),
 	-PHP_INT_MAX-1,
 	(string)(-PHP_INT_MAX-1),
-);
+];
 
 foreach ($a as $var) {
 	$var--;

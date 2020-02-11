@@ -7,7 +7,7 @@ class pwa {
     }
 
     function test (){
-        $cont = array();
+        $cont = darray[];
         $cont["mykey"] = "myvalue";
 
         foreach ($cont as $this->var['key'] => $this->var['value'])

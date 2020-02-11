@@ -7,7 +7,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing file_get_contents() : variation ***\n";
 /* An array of filenames */ 
-$names_arr = array(
+$names_arr = varray[
   /* Invalid args */ 
   -1,
   TRUE,
@@ -22,7 +22,7 @@ $names_arr = array(
   "/no/such/file/dir", 
   "php/php"
 
-);
+];
 
 for( $i=0; $i<count($names_arr); $i++ ) {
   echo "-- Iteration $i --\n";

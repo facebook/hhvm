@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$bases = array(23,
+$bases = varray[23,
                 -23,
                 23.1,
                 -23.1,
@@ -11,9 +11,9 @@ $bases = array(23,
                 "23.45",
                 "2.345e1",
                 PHP_INT_MAX,
-                -PHP_INT_MAX - 1);
+                -PHP_INT_MAX - 1];
 
-$exponents = array(0,
+$exponents = varray[0,
                1,
                -1,
                2,
@@ -25,7 +25,7 @@ $exponents = array(0,
                500,
                -500,
                2147483647,
-               -2147483648);
+               -2147483648];
 
 foreach($bases as $base) {
     echo "\n\nBase = $base";

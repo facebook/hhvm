@@ -14,17 +14,17 @@ $fp_copy = $fp;
 $dfp_copy = $dfp;
   
 // array of resource types
-$resource_types = array (
+$resource_types = varray [
   $fp_copy,
   $dfp_copy
-);
+];
 
 // various integer formats
-$int_formats = array(
+$int_formats = varray[
   "%d", "%Ld", " %d",
   "\t%d", "\n%d", "%4d",
   "%[0-9]", "%*d"
-);
+];
  
 $count = 1;
 foreach($resource_types as $res) {

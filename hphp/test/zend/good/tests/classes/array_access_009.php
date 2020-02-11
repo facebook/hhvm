@@ -53,7 +53,7 @@ class Peoples implements ArrayProxyAccess
 
     function __construct()
     {
-        $this->person = array(array('name'=>'Foo'));
+        $this->person = varray[darray['name'=>'Foo']];
     }
 
     function offsetExists($index)

@@ -9,9 +9,9 @@ class ext_heap extends SplMaxHeap {
 }
 <<__EntryPoint>> function main(): void {
 $h = new ext_heap();
-$h->insert(array('foobar'));
-$h->insert(array('foobar1'));
-$h->insert(array('foobar2'));
+$h->insert(varray['foobar']);
+$h->insert(varray['foobar1']);
+$h->insert(varray['foobar2']);
 
 try {
   $h->fail=true;

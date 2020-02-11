@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$sample_array = array(1, 2, array(3, 4));
+$sample_array = varray[1, 2, varray[3, 4]];
 
 $sub_iterator = new RecursiveArrayIterator($sample_array);
 $not_sub_iterator = new RecursiveArrayIterator($sample_array);

@@ -9,28 +9,28 @@ error_reporting(E_ALL & ~E_NOTICE);
 echo "*** Testing sprintf() : string formats with array values ***\n";
 
 // different arrays used to test he function
-$array_values = array(
+$array_values = varray[
   array(),
-  array(0),
-  array(1),
-  array(NULL),
-  array(null),
-  array("string"),
-  array(true),
-  array(TRUE),
-  array(false),
-  array(FALSE),
-  array(1,2,3,4),
-  array(1 => "One", "two" => 2)
-);
+  varray[0],
+  varray[1],
+  varray[NULL],
+  varray[null],
+  varray["string"],
+  varray[true],
+  varray[TRUE],
+  varray[false],
+  varray[FALSE],
+  varray[1,2,3,4],
+  darray[1 => "One", "two" => 2]
+];
 
 // array of string formats
-$string_formats = array( 
+$string_formats = varray[ 
   "%s", "%hs", "%ls", 
   "%Ls"," %s", "%s ", 
   "\t%s", "\n%s", "%4s",
   "%30s", "%[a-zA-Z0-9]", "%*s"
-);
+];
 
 $count = 1;
 foreach($array_values as $array_value) {

@@ -41,42 +41,42 @@ function test_array($array, $which, $flags = 0)
 <<__EntryPoint>>
 function main_entry(): void {
 
-  $array = array(
-    1 => array(
-      1 => array(
+  $array = darray[
+    1 => darray[
+      1 => darray[
         1 => 'apple',
-      ),
-      2 => array(
+      ],
+      2 => darray[
         1 => 'grape',
-      ),
-    ),
-  );
+      ],
+    ],
+  ];
 
   test_array($array, 'Default with array');
 
-  $array = array(
-    1 => array(
-      1 => array(
+  $array = darray[
+    1 => darray[
+      1 => darray[
         1 => new FruitPublic('apple'),
-      ),
-      2 => array(
+      ],
+      2 => darray[
         1 => new FruitPublic('grape'),
-      ),
-    ),
-  );
+      ],
+    ],
+  ];
 
   test_array($array, 'Public Property');
 
-  $array = array(
-    1 => array(
-      1 => array(
+  $array = darray[
+    1 => darray[
+      1 => darray[
         1 => new FruitProtected('apple'),
-      ),
-      2 => array(
+      ],
+      2 => darray[
         1 => new FruitProtected('grape'),
-      ),
-    ),
-  );
+      ],
+    ],
+  ];
 
   test_array($array, 'Protected Property');
 

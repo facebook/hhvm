@@ -22,16 +22,16 @@ function rmul($v, $w)
     return $v;
 }
 <<__EntryPoint>> function main(): void {
-$numbers = array (2,3,5,7);
+$numbers = varray [2,3,5,7];
 $total = array_reduce($numbers, 'add_up');
 print "Total is $total\n";
 
 /* test #2: string data */
-$a = array("a", "b", "c");
+$a = varray["a", "b", "c"];
 var_dump(array_reduce($a, "foo"));
 
 /* test #3: basic test (used to leak memory) */
-$a = array(1, 2, 3, 4, 5);
+$a = varray[1, 2, 3, 4, 5];
 $x = array();
 $b = array_reduce($a, "rsum");
 $c = array_reduce($a, "rmul", 10);

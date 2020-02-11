@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$array = array('a', 'b', 'c');
+$array = varray['a', 'b', 'c'];
 $arrayIterator = new ArrayIterator($array);
 
 try {

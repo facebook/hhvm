@@ -8,7 +8,7 @@
 echo "*** Testing convert_uudecode() : basic functionality ***\n";
 
 // array with different values for $string
-$strings =  array (
+$strings =  varray [
 
   //double quoted strings
   "123",
@@ -24,7 +24,7 @@ $strings =  array (
   '1a2b3c',
   '\t This String contains \t\t some control characters\r\n',
 
-);
+];
 
 // loop through with each element of the $strings array to test convert_uudecode() function
 $count = 1;

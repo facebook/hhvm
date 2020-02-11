@@ -7,7 +7,7 @@
 echo "*** Testing ucwords() : basic functionality ***\n";
 
 // lines with different whitespace charecter
-$str_array = array(
+$str_array = varray[
  "testing ucwords",
  'testing ucwords',
  'testing\tucwords',
@@ -26,7 +26,7 @@ $str_array = array(
  "testing\rucwords",
  'testing\fucwords',
  "testing\fucwords"
-);
+];
 
 // loop through the $strings array to test ucwords on each element 
 $iteration = 1;

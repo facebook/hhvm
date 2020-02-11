@@ -9,36 +9,36 @@ var_dump(filter_var_array(array(), 1000000));
 var_dump(filter_var_array(array(), ""));
 
 echo "-- (2)\n";
-var_dump(filter_var_array(array(""=>""), -1));
-var_dump(filter_var_array(array(""=>""), 1000000));
-var_dump(filter_var_array(array(""=>""), ""));
+var_dump(filter_var_array(darray[""=>""], -1));
+var_dump(filter_var_array(darray[""=>""], 1000000));
+var_dump(filter_var_array(darray[""=>""], ""));
 
 echo "-- (3)\n";
-var_dump(filter_var_array(array("aaa"=>"bbb"), -1));
-var_dump(filter_var_array(array("aaa"=>"bbb"), 1000000));
-var_dump(filter_var_array(array("aaa"=>"bbb"), ""));
+var_dump(filter_var_array(darray["aaa"=>"bbb"], -1));
+var_dump(filter_var_array(darray["aaa"=>"bbb"], 1000000));
+var_dump(filter_var_array(darray["aaa"=>"bbb"], ""));
 
 echo "-- (4)\n";
 var_dump(filter_var_array(array(), new stdclass));
 var_dump(filter_var_array(array(), array()));
-var_dump(filter_var_array(array(), array("var_name"=>1)));
-var_dump(filter_var_array(array(), array("var_name"=>-1)));
-var_dump(filter_var_array(array("var_name"=>""), array("var_name"=>-1)));
+var_dump(filter_var_array(array(), darray["var_name"=>1]));
+var_dump(filter_var_array(array(), darray["var_name"=>-1]));
+var_dump(filter_var_array(darray["var_name"=>""], darray["var_name"=>-1]));
 
 echo "-- (5)\n";
-var_dump(filter_var_array(array("var_name"=>""), array("var_name"=>-1, "asdas"=>"asdasd", "qwe"=>"rty", ""=>"")));
-var_dump(filter_var_array(array("asdas"=>"text"), array("var_name"=>-1, "asdas"=>"asdasd", "qwe"=>"rty", ""=>"")));
+var_dump(filter_var_array(darray["var_name"=>""], darray["var_name"=>-1, "asdas"=>"asdasd", "qwe"=>"rty", ""=>""]));
+var_dump(filter_var_array(darray["asdas"=>"text"], darray["var_name"=>-1, "asdas"=>"asdasd", "qwe"=>"rty", ""=>""]));
 
 
-$a = array(""=>""); $b = -1;
+$a = darray[""=>""]; $b = -1;
 var_dump(filter_var_array($a, $b));
 var_dump($a, $b);
 
-$a = array(""=>""); $b = 100000;
+$a = darray[""=>""]; $b = 100000;
 var_dump(filter_var_array($a, $b));
 var_dump($a, $b);
 
-$a = array(""=>""); $b = "";
+$a = darray[""=>""]; $b = "";
 var_dump(filter_var_array($a, $b));
 var_dump($a, $b);
 

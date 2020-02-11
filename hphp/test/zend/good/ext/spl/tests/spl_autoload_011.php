@@ -9,7 +9,7 @@ class A {
 $a = new A;
 $a->var = 2;
 
-spl_autoload_register(array($a, 'autoload'));
+spl_autoload_register(varray[$a, 'autoload']);
 unset($a);
 
 var_dump(class_exists("C", true));

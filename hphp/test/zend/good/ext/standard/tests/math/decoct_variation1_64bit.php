@@ -24,7 +24,7 @@ EOT;
 // get a resource variable
 $fp = fopen(__FILE__, "r");
 
-$inputs = array(
+$inputs = varray[
        // int data
 /*1*/  0,
        1,
@@ -71,7 +71,7 @@ $inputs = array(
 
        // resource variable
 /*27*/ $fp
-);
+];
 
 // loop through each element of $inputs to check the behaviour of decoct()
 $iterator = 1;

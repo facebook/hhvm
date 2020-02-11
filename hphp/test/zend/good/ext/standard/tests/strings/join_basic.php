@@ -9,23 +9,23 @@ echo "*** Testing join() : basic functionality ***\n";
 
 // Initialize all required variables
 $glue = ',';
-$pieces = array(1, 2, 3, 4);
+$pieces = varray[1, 2, 3, 4];
 
 // pieces as arry with numeric values
 var_dump( join($glue, $pieces) );
 
 // pieces as array with strings values
 $glue = ", "; // multiple car as glue
-$pieces = array("Red", "Green", "Blue", "Black", "White");
+$pieces = varray["Red", "Green", "Blue", "Black", "White"];
 var_dump( join($glue, $pieces) );
 
 // pices as associative array (numeric values)
-$pieces = array("Hour" => 10, "Minute" => 20, "Second" => 40);
+$pieces = darray["Hour" => 10, "Minute" => 20, "Second" => 40];
 $glue = ':';
 var_dump( join($glue, $pieces) );
 
 // pices as associative array (string/numeric values)
-$pieces = array("Day" => 'Friday', "Month" => "September", "Year" => 2007);
+$pieces = darray["Day" => 'Friday', "Month" => "September", "Year" => 2007];
 $glue = '/';
 var_dump( join($glue, $pieces) );
 

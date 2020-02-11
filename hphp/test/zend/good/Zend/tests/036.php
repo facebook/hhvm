@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$test = array();
+$test = darray[];
 $test[function(){}] = 1;
-$a = array();
+$a = darray[];
 $a{function() { }} = 1;
 }

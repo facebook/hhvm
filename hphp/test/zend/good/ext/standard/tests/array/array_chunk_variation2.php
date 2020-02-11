@@ -12,14 +12,14 @@
 echo "*** Testing array_chunk() : usage variations ***\n";
 
 // input array
-$input = array(1, 2);
+$input = varray[1, 2];
 
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
 
 //array of values to iterate over
-$values = array (
+$values = varray [
 
         // float data
 /*1*/   10.5,
@@ -30,10 +30,10 @@ $values = array (
 
         // array data
 /*6*/   array(),
-        array(0),
-        array(1),
-        array(1, 2),
-        array('color' => 'red', 'item' => 'pen'),
+        varray[0],
+        varray[1],
+        varray[1, 2],
+        darray['color' => 'red', 'item' => 'pen'],
 
         // null data
 /*11*/  NULL,
@@ -56,7 +56,7 @@ $values = array (
         // object data
 /*21*/  new stdclass(),
 
-);
+];
 
 // loop through each element of the array for size
 $count = 1;

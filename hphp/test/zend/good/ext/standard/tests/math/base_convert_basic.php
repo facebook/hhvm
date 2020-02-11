@@ -1,8 +1,8 @@
 <?hh <<__EntryPoint>> function main(): void {
-$frombase = array(2,8,10,16,36);
-$tobase = array(2,8,10,16,36);
+$frombase = varray[2,8,10,16,36];
+$tobase = varray[2,8,10,16,36];
 
-$values = array(10,
+$values = varray[10,
                 27,
                 39,
                 039,
@@ -12,7 +12,7 @@ $values = array(10,
                 "39",
                 "5F",
                 "3XYZ"
-                );
+                ];
 
 for ($f= 0; $f < count($frombase); $f++) {
     echo "\n...from base is ", $frombase[$f], "\n";

@@ -22,6 +22,6 @@ $x = new bar;
 
 $x->test();
 
-call_user_func(array('BAR','x'));
+call_user_func(varray['BAR','x']);
 call_user_func('self::y');
 }

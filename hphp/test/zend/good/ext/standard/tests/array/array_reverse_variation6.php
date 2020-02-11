@@ -11,17 +11,17 @@
 echo "*** Testing array_reverse() : usage variations ***\n";
 
 // Initializing the 2-d arrays
-$two_dimensional_array = array(
+$two_dimensional_array = varray[
      
   // associative array
-  array('color' => 'red', 'item' => 'pen', 'place' => 'LA'),
+  darray['color' => 'red', 'item' => 'pen', 'place' => 'LA'],
 
    // numeric array
-   array(1, 2, 3, 4, 5),
+   varray[1, 2, 3, 4, 5],
 
    // combination of numeric and associative arrays
    array('a' => 'green', 'red', 'brown', 33, 88, 'orange', 'item' => 'ball')
-); 
+]; 
 
 // calling array_reverse() with various types of 2-d arrays
 // with default arguments

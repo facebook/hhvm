@@ -9,12 +9,12 @@ function ut_main()
 {
     $res_str = '';
 
-    $locales = array(
+    $locales = varray[
         "de_DE@currency=EUR;collation=PHONEBOOK",
         'uk-ua_CALIFORNIA@currency=GRN'
-    );
+    ];
 
-    $locales = array(
+    $locales = varray[
     'de_DE@currency=EUR;collation=PHONEBOOK',
         'root',
         'uk@currency=EURO',
@@ -64,7 +64,7 @@ function ut_main()
         'de-419-DE',
         'a-DE',
         'ar-a-aaa-b-bbb-a-ccc'
-    );
+    ];
 
     $res_str = '';
 

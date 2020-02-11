@@ -19,7 +19,7 @@ class B extends A {
     public function func($str) {
           self::func2($str);
           self::func3($str);
-          call_user_func_array(array($this, 'self::inexistent'), array($str));
+          call_user_func_array(varray[$this, 'self::inexistent'], varray[$str]);
     }
     private function func2($str) {
         var_dump(__METHOD__ .': '. $str);

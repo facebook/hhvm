@@ -2,8 +2,8 @@
 <<__EntryPoint>> function main(): void {
 // Note: SWC requires zlib
 ($dir = opendir(dirname(__FILE__))) || die('cannot open directory: '.dirname(__FILE__));
-$result = array();
-$files  = array();
+$result = darray[];
+$files  = varray[];
 while (($file = readdir($dir)) !== FALSE) {
     if (preg_match('/^384x385\./',$file)) {
         $files[] = $file;

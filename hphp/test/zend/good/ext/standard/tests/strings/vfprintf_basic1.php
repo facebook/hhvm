@@ -11,9 +11,9 @@ $format = "format";
 $format1 = "%s\n";
 $format2 = "%s %s\n";
 $format3 = "%s %s %s\n";
-$arg1 = array("one");
-$arg2 = array("one","two");
-$arg3 = array("one","two","three");
+$arg1 = varray["one"];
+$arg2 = varray["one","two"];
+$arg3 = varray["one","two","three"];
 
 
 /* creating dumping file */

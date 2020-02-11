@@ -21,7 +21,7 @@ class classA
 echo "*** Testing array_intersect() : Passing non-array values to \$arr2 argument ***\n";
 
 // array to be passsed to $arr1 as default argument
-$arr1 = array(1, 2);
+$arr1 = varray[1, 2];
 
 // arrays to be passed to optional argument
 $arr3 = array(1, 2, "one" => 1, "two" => 2);
@@ -39,7 +39,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $arr2 argument
-$arrays = array(
+$arrays = varray[
 
        // int data
 /*1*/  0,
@@ -84,7 +84,7 @@ $arrays = array(
 
        // resource variable
 /*24*/ $fp
-);
+];
 
 // loop through each sub-array within $arrrays to check the behavior of array_intersect()
 $iterator = 1;

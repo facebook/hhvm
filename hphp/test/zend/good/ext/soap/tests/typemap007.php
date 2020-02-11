@@ -29,14 +29,14 @@ function book_from_xml($xml) {
 <<__EntryPoint>>
 function main_entry(): void {
 
-  $options=array(
+  $options=darray[
           'uri'      => 'http://schemas.nothing.com',
           'location' => 'test://',
   		'actor'    => 'http://schemas.nothing.com',
-  		'typemap'  => array(array("type_ns"   => "http://schemas.nothing.com",
+  		'typemap'  => varray[darray["type_ns"   => "http://schemas.nothing.com",
   		                          "type_name" => "book",
-  		                          "from_xml"  => "book_from_xml"))
-  		);
+  		                          "from_xml"  => "book_from_xml"]]
+  		];
 
   $client = new TestSoapClient(NULL, $options);
   $ret = $client->dotest2("???");

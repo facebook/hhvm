@@ -12,7 +12,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_slice() : usage variations ***\n";
 
-$input = array ('zero', 'one', array('zero', 'un', 'deux'), 9 => 'nine');
+$input = array ('zero', 'one', varray['zero', 'un', 'deux'], 9 => 'nine');
 
 echo "\n-- Slice a two-dimensional array --\n";
 var_dump(array_slice($input, 1, 3));

@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$streams = array(
+$streams = varray[
 	'data:,A%20brief%20note',
 	'data:application/vnd-xxx-query,select_vcount,fcol_from_fieldtable/local',
 	'data:;base64,Zm9vYmFyIGZvb2Jhcg==',
@@ -10,7 +10,7 @@ $streams = array(
 	'data:;charset=UTF-8,Hello',
 	'data:text/plain;charset=UTF-8,Hello',
 	'data:,a,b',
-	);
+	];
 
 foreach($streams as $stream)
 {

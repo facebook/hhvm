@@ -8,5 +8,5 @@ class foo {
 
 <<__EntryPoint>>
 function main() {
-  new foo(array(new stdClass));
+  new foo(varray[new stdClass]);
 }

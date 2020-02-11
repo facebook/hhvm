@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$values = array(111000111,
+$values = varray[111000111,
                 011100000,
                 100002001,
                 '111000111',
@@ -15,7 +15,7 @@ $values = array(111000111,
                 011237,
                 true,
                 false,
-                null);
+                null];
 
 for ($i = 0; $i < count($values); $i++) {
     $res = bindec($values[$i]);

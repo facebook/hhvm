@@ -11,7 +11,7 @@ $file = dirname(__FILE__)."/flock.tmp";
 $fp = fopen($file, "w");
 
 /* array of operatons */
-$operations = array(
+$operations = varray[
   LOCK_SH,
   LOCK_EX,
   LOCK_SH|LOCK_NB,
@@ -22,10 +22,10 @@ $operations = array(
   2,
   2.234,
   TRUE
-);
+];
 
 /* array of wouldblocks */
-$wouldblocks = array(
+$wouldblocks = varray[
   0,
   1,
   2,
@@ -33,7 +33,7 @@ $wouldblocks = array(
   TRUE,
   FALSE,
   NULL,
-  array(1,2,3),
+  varray[1,2,3],
   array(),
   "string",
   "",
@@ -41,7 +41,7 @@ $wouldblocks = array(
   b"string",
   b"",
   "\0"
-);
+];
 
 $i = 0;
 foreach($operations as $operation) {

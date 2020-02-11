@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$ipv6_test = array(
+$ipv6_test = darray[
     "::127.0.0.1"                    => true,
     "FF01::101:127.0.1"             => false,
     "FF01:0:0:0:101:127.0.1.1"        => false,
@@ -43,7 +43,7 @@ $ipv6_test = array(
     '::1.00.3.4'                    => false,
     '0:0:0:255.255.255.255'            => false,
     '0:0:0::255.255.255.255'        => true,
-);
+];
 foreach ($ipv6_test as $ip => $exp) {
     $out = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
     $out = (int) ($out === false ? 0 : 1);

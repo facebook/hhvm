@@ -20,7 +20,7 @@ function check_dirname( $paths ) {
    }
 }
 <<__EntryPoint>> function main(): void {
-$file_path_variations = array (
+$file_path_variations = varray [
   /* home dir shortcut char */
   "~/home/user/bar",
   "~/home/user/bar/",
@@ -56,7 +56,7 @@ $file_path_variations = array (
   '',
   NULL,
   null
-);
+];
 
 echo "*** Testing possible variations in path ***\n";
 check_dirname( $file_path_variations );

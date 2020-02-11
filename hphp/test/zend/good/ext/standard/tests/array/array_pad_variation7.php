@@ -13,11 +13,11 @@
 echo "*** Testing array_pad() : Passing 2-D array to \$input argument ***\n";
 
 // initialize the 2-d array
-$input = array (
-  array(1, 2, 3),
-  array("hello", 'world'),
-  array("one" => 1, "two" => 2)
-);
+$input = varray [
+  varray[1, 2, 3],
+  varray["hello", 'world'],
+  darray["one" => 1, "two" => 2]
+];
 
 // initialize the $pad_size and $pad_value arguments
 $pad_size = 5;

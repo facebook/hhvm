@@ -9,7 +9,7 @@ class BBB
         if ($x == 34) {
             throw new ABCException;
         }
-        return array('foo' => 'xyz');
+        return darray['foo' => 'xyz'];
     }
 }
 
@@ -28,7 +28,7 @@ class AAA
         $b = new BBB;
         $c = new CCC;
         $i = 34;
-        $item = array('foo' => 'bar');
+        $item = darray['foo' => 'bar'];
         try {
             $c->process($b->xyz($item['foo'], $i));
         }

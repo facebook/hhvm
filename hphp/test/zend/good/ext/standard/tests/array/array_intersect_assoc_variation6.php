@@ -23,37 +23,37 @@ Hello world
 EOT;
 
 // different variations of associative arrays to be passed to $arr2 argument
-$arrays = array (
+$arrays = varray [
 
        // empty array
 /*1*/  array(),
 
        // arrays with integer keys
-       array(0 => "0"),
-       array(1 => "1"),
-       array(1 => "1", 2 => "2", 3 => "3", 4 => "4"),
+       darray[0 => "0"],
+       darray[1 => "1"],
+       darray[1 => "1", 2 => "2", 3 => "3", 4 => "4"],
 
        // arrays with float keys
-/*5*/  array(2.3333 => "float"),
-       array(1.2 => "f1", 3.33 => "f2",
+/*5*/  darray[2.3333 => "float"],
+       darray[1.2 => "f1", 3.33 => "f2",
              4.89999922839999 => "f3",
-             33333333.333333 => "f4"),
+             33333333.333333 => "f4"],
 
        // arrays with string keys
-/*7*/  array('\tHello' => 111, 're\td' => "color",
-             '\v\fworld' => 2.2, 'pen\n' => 33),
-       array("\tHello" => 111, "re\td" => "color",
-             "\v\fworld" => 2.2, "pen\n" => 33),
+/*7*/  darray['\tHello' => 111, 're\td' => "color",
+             '\v\fworld' => 2.2, 'pen\n' => 33],
+       darray["\tHello" => 111, "re\td" => "color",
+             "\v\fworld" => 2.2, "pen\n" => 33],
        array("hello", $heredoc => "string"), // heredoc
 
        // array with  unset variable 
-/*10*/ array( @$unset_var => "hello"),
+/*10*/ darray[ @$unset_var => "hello"],
 
        // array with mixed keys
-/*11*/ array('hello' => 1, "fruit" => 2.2,
+/*11*/ darray['hello' => 1, "fruit" => 2.2,
               133 => "int", 444.432 => "float",
-             @$unset_var => "unset", $heredoc => "heredoc")
-);
+             @$unset_var => "unset", $heredoc => "heredoc"]
+];
 
 // array to be passsed to $arr1 argument
 $arr1 = array(0 => 0, 2 => "float", 4 => "f3", 33333333 => "f4",

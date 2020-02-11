@@ -2,7 +2,7 @@
 function foo($a = A) {
     echo "$a\n";
 }
-function bar($a = array(A => B)) {
+function bar($a = darray[A => B]) {
     foreach ($a as $key => $val) {
         echo "$key\n";
         echo "$val\n";

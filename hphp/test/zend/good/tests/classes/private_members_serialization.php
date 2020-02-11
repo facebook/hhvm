@@ -10,7 +10,7 @@ class bar extends foo
 {
     public function __sleep()
     {
-        return array("\0foo\0private", 'protected', 'public');
+        return varray["\0foo\0private", 'protected', 'public'];
     }
 }
 <<__EntryPoint>> function main(): void {

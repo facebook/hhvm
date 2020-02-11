@@ -31,10 +31,10 @@ function main_entry(): void {
    </env:Body>
   <env:Header/>
   </env:Envelope>";
-  $options=array(
+  $options=darray[
   		'actor' =>'http://schema.nothing.com',
-  		'classmap' => array('book'=>'book', 'wsdltype2'=>'classname2')
-  		);
+  		'classmap' => darray['book'=>'book', 'wsdltype2'=>'classname2']
+  		];
 
   $server = new SoapServer(dirname(__FILE__)."/classmap.wsdl",$options);
   $server->setClass("test");

@@ -8,13 +8,13 @@
 echo "*** Testing file() : variation ***\n";
 $testfile = dirname(__FILE__)."/fileVar9.txt";
 
-$contents = array(
+$contents = varray[
    "File ends on a single character\na",
    "File ends on a new line\n",
    "File ends on multiple newlines\n\n\n\n",
    "File has\n\nmultiple lines and newlines\n\n",
    "File has\r\nmultiple crlfs\n\r\n"
-   );
+   ];
 
 @unlink($testfile);
 foreach ($contents as $content) {

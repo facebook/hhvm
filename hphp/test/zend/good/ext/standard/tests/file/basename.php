@@ -19,111 +19,111 @@ function check_basename( $path_arrays ) {
 }
 
 <<__EntryPoint>> function main(): void {
-$file_paths = array (
+$file_paths = varray [
   /* simple paths */
-  array("bar"),
-  array("/foo/bar"),
-  array("foo/bar"),
-  array("/bar"),
+  varray["bar"],
+  varray["/foo/bar"],
+  varray["foo/bar"],
+  varray["/bar"],
   /* simple paths with trailing slashes */
-  array("bar/"),
-  array("/bar/"),
-  array("/foo/bar/"),
-  array("foo/bar/"),
-  array("/bar/"),
+  varray["bar/"],
+  varray["/bar/"],
+  varray["/foo/bar/"],
+  varray["foo/bar/"],
+  varray["/bar/"],
   /* paths with suffix removal */
-  array("bar.gz", ".gz"),
-  array("bar.gz", "bar.gz"),
-  array("/foo/bar.gz", ".gz"),
-  array("foo/bar.gz", ".gz"),
-  array("/bar.gz", ".gz"),
+  varray["bar.gz", ".gz"],
+  varray["bar.gz", "bar.gz"],
+  varray["/foo/bar.gz", ".gz"],
+  varray["foo/bar.gz", ".gz"],
+  varray["/bar.gz", ".gz"],
   /* paths with suffix and trailing slashes with suffix removal*/
-  array("bar.gz/", ".gz"),
-  array("/bar.gz/", ".gz"),
-  array("/foo/bar.gz/", ".gz"),
-  array("foo/bar.gz/", ".gz"),
-  array("/bar.gz/", ".gz"),
+  varray["bar.gz/", ".gz"],
+  varray["/bar.gz/", ".gz"],
+  varray["/foo/bar.gz/", ".gz"],
+  varray["foo/bar.gz/", ".gz"],
+  varray["/bar.gz/", ".gz"],
   /* paths with basename only suffix, with suffix removal*/
-  array("/.gz", ".gz"),
-  array(".gz", ".gz"),
-  array("/foo/.gz", ".gz"),
+  varray["/.gz", ".gz"],
+  varray[".gz", ".gz"],
+  varray["/foo/.gz", ".gz"],
 
   /* paths with basename only suffix & trailing slashes, with suffix removal*/
-  array(".gz/", ".gz"),
-  array("/foo/.gz/", ".gz"),
-  array("foo/.gz/", ".gz"),
+  varray[".gz/", ".gz"],
+  varray["/foo/.gz/", ".gz"],
+  varray["foo/.gz/", ".gz"],
 
   /* paths with binary value to check if the function is binary safe*/
-  array("foo".chr(0)."bar"),
-  array("/foo".chr(0)."bar"),
-  array("/foo".chr(0)."bar/"),
-  array("foo".chr(0)."bar/"),
-  array("foo".chr(0)."bar/test"),
-  array("/foo".chr(0)."bar/bar.gz", ".gz"),
-  array("/foo".chr(0)."bar/bar.gz")
-);
+  varray["foo".chr(0)."bar"],
+  varray["/foo".chr(0)."bar"],
+  varray["/foo".chr(0)."bar/"],
+  varray["foo".chr(0)."bar/"],
+  varray["foo".chr(0)."bar/test"],
+  varray["/foo".chr(0)."bar/bar.gz", ".gz"],
+  varray["/foo".chr(0)."bar/bar.gz"]
+];
 
-$file_path_variations = array (
+$file_path_variations = varray [
   /* paths with shortcut home dir char, with suffix variation */
-  array("~/home/user/bar"),
-  array("~/home/user/bar", ""),
-  array("~/home/user/bar", NULL),
-  array("~/home/user/bar", ' '),
-  array("~/home/user/bar.tar", ".tar"),
-  array("~/home/user/bar.tar", "~"),
-  array("~/home/user/bar.tar/", "~"),
-  array("~/home/user/bar.tar/", ""),
-  array("~/home/user/bar.tar", NULL),
-  array("~/home/user/bar.tar", ''),
-  array("~/home/user/bar.tar", " "),
+  varray["~/home/user/bar"],
+  varray["~/home/user/bar", ""],
+  varray["~/home/user/bar", NULL],
+  varray["~/home/user/bar", ' '],
+  varray["~/home/user/bar.tar", ".tar"],
+  varray["~/home/user/bar.tar", "~"],
+  varray["~/home/user/bar.tar/", "~"],
+  varray["~/home/user/bar.tar/", ""],
+  varray["~/home/user/bar.tar", NULL],
+  varray["~/home/user/bar.tar", ''],
+  varray["~/home/user/bar.tar", " "],
 
   /* paths with hostname:dir notation, with suffix variation */
-  array("hostname:/home/usr/bar.tar"),
-  array("hostname:/home/user/bar.tar", "home"),
-  array("hostname:/home/user/tbar.gz", "bar.gz"),
-  array("hostname:/home/user/tbar.gz", "/bar.gz"),
-  array("hostname:/home/user/tbar.gz", "/bar.gz/"),
-  array("hostname:/home/user/tbar.gz/", "/bar.gz/"),
-  array("hostname:/home/user/tbar.gz/", "/bar.gz/"),
-  array("hostname:/home/user/My Pics.gz/", "/bar.gz/"),
-  array("hostname:/home/user/My Pics.gz/", "Pics.gz/"),
-  array("hostname:/home/user/My Pics.gz/", "Pics.gz"),
-  array("hostname:/home/user/My Pics.gz/", ".gz"),
-  array("hostname:/home/user/My Pics.gz/"),
-  array("hostname:/home/user/My Pics.gz/", NULL),
-  array("hostname:/home/user/My Pics.gz/", ' '),
-  array("hostname:/home/user/My Pics.gz/", ''),
-  array("hostname:/home/user/My Pics.gz/", "My Pics.gz"),
+  varray["hostname:/home/usr/bar.tar"],
+  varray["hostname:/home/user/bar.tar", "home"],
+  varray["hostname:/home/user/tbar.gz", "bar.gz"],
+  varray["hostname:/home/user/tbar.gz", "/bar.gz"],
+  varray["hostname:/home/user/tbar.gz", "/bar.gz/"],
+  varray["hostname:/home/user/tbar.gz/", "/bar.gz/"],
+  varray["hostname:/home/user/tbar.gz/", "/bar.gz/"],
+  varray["hostname:/home/user/My Pics.gz/", "/bar.gz/"],
+  varray["hostname:/home/user/My Pics.gz/", "Pics.gz/"],
+  varray["hostname:/home/user/My Pics.gz/", "Pics.gz"],
+  varray["hostname:/home/user/My Pics.gz/", ".gz"],
+  varray["hostname:/home/user/My Pics.gz/"],
+  varray["hostname:/home/user/My Pics.gz/", NULL],
+  varray["hostname:/home/user/My Pics.gz/", ' '],
+  varray["hostname:/home/user/My Pics.gz/", ''],
+  varray["hostname:/home/user/My Pics.gz/", "My Pics.gz"],
 
   /* paths with numeirc strings */
-  array("10.5"),
-  array("10.5", ".5"),
-  array("10.5", "10.5"),
-  array("10"),
-  array("105", "5"),
-  array("/10.5"),
-  array("10.5/"),
-  array("10/10.gz"),
-  array("0"),
-  array('0'),
+  varray["10.5"],
+  varray["10.5", ".5"],
+  varray["10.5", "10.5"],
+  varray["10"],
+  varray["105", "5"],
+  varray["/10.5"],
+  varray["10.5/"],
+  varray["10/10.gz"],
+  varray["0"],
+  varray['0'],
 
   /* paths and suffix given as same */
-  array("bar.gz", "bar.gz"),
-  array("/bar.gz", "/bar.gz"),
-  array("/bar.gz/", "/bar.gz/"),
-  array(" ", " "),
-  array(' ', ' '),
-  array(NULL, NULL),
+  varray["bar.gz", "bar.gz"],
+  varray["/bar.gz", "/bar.gz"],
+  varray["/bar.gz/", "/bar.gz/"],
+  varray[" ", " "],
+  varray[' ', ' '],
+  varray[NULL, NULL],
 
   /* path with spaces */
-  array(" "),
-  array(' '),
+  varray[" "],
+  varray[' '],
 
   /* empty paths */
-  array(""),
-  array(''),
-  array(NULL)
-);
+  varray[""],
+  varray[''],
+  varray[NULL]
+];
 
 echo "*** Testing basic operations ***\n";
 check_basename( $file_paths );
@@ -140,9 +140,9 @@ try { var_dump( basename("/var/tmp/bar.gz", ".gz", ".gz") ); } catch (Exception 
 
 // passing invalid type arguments
 $object = new stdclass;
-try { var_dump( basename( array("string/bar") ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-try { var_dump( basename( array("string/bar"), "bar" ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-try { var_dump( basename( "bar", array("string/bar") ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( basename( varray["string/bar"] ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( basename( varray["string/bar"], "bar" ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( basename( "bar", varray["string/bar"] ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump( basename( $object, "bar" ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump( basename( $object ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump( basename( $object, $object ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

@@ -26,7 +26,7 @@ unset ($unset_var);
 $file_handle = fopen(__FILE__, "r");
 
 //array of values to iterate over
-$values = array(
+$values = varray[
 
   // int data
   0,
@@ -43,10 +43,10 @@ $values = array(
 
   // array data
   array(),
-  array(0),
-  array(1),
-  array(1, 2),
-  array('color' => 'red', 'item' => 'pen'),
+  varray[0],
+  varray[1],
+  varray[1, 2],
+  darray['color' => 'red', 'item' => 'pen'],
 
   // null data
   NULL,
@@ -69,7 +69,7 @@ $values = array(
 
   // unset data
   @$unset_var,
-);
+];
 
 // loop through $values array to test nl2br() function with each element
 $count = 1;

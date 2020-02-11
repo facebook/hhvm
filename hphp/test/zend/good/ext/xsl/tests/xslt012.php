@@ -24,10 +24,10 @@ if(!$proc) {
 
 $proc->importStylesheet($xsl);
 
-$parameters = array(
+$parameters = darray[
                     'foo' => 'barbar',
                     'foo1' => 'test',
-                    );
+                    ];
 
 $proc->setParameter( "", $parameters);
 

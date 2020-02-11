@@ -11,13 +11,13 @@ echo "*** Testing getdate() : usage variation ***\n";
 date_default_timezone_set("Asia/Calcutta");
 
 //array of values to iterate over
-$inputs = array(
+$inputs = darray[
 
     //octal values
     'octal 05' => 05,
     'octal 010' => 010,
     'octal -010' => -010,
-);
+];
 
 // loop through each element of the array for timestamp
 

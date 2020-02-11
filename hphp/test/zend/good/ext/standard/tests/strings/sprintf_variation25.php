@@ -7,7 +7,7 @@
 echo "*** Testing sprintf() : char formats with string values ***\n";
 
 // array of string values 
-$string_values = array(
+$string_values = varray[
   "",
   '',
   "0",
@@ -26,15 +26,15 @@ $string_values = array(
   'TRUE',
   "NULL",
   'null'
-);
+];
 
 // array of char formats
-$char_formats = array( 
+$char_formats = varray[ 
   "%c", "%hc", "%lc", 
   "%Lc", " %c", "%c ",
   "\t%c", "\n%c", "%4c",
   "%30c", "%[a-bA-B@#$&]", "%*c"
-);
+];
 
 $count = 1;
 foreach($string_values as $string_value) {

@@ -3,7 +3,7 @@ class abc {
     private $arr;
 
     function __set ($key, $value) {
-        if ($this->arr === null) $this->arr = array();
+        if ($this->arr === null) $this->arr = darray[];
         $this->arr[$key] = $value;
     }
 
@@ -13,7 +13,7 @@ class abc {
 }
 <<__EntryPoint>> function main(): void {
 $abc = new abc();
-foreach (array (1,2,3) as $abc->k => $abc->v) {
+foreach (varray [1,2,3] as $abc->k => $abc->v) {
     var_dump($abc->k,$abc->v);
 }
 }

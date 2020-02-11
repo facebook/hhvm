@@ -23,14 +23,14 @@ try { var_dump( fseek($fp, 10, $fp,10) ); } catch (Exception $e) { echo "\n".'Wa
 
 // test invalid arguments : non-resources
 echo "-- Testing fseek() with invalid arguments --\n";
-$invalid_args = array (
+$invalid_args = varray [
   "string",
   10,
   10.5,
   true,
-  array(1,2,3),
+  varray[1,2,3],
   new stdclass
-);
+];
 /* loop to test fseek() with different invalid type of args */
 for($loop_counter = 1; $loop_counter <= count($invalid_args); $loop_counter++) {
   echo "-- Iteration $loop_counter --\n";

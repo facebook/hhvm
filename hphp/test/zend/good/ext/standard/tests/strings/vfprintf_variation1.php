@@ -44,14 +44,14 @@ unset( $funset );
 
 // Test vfprintf()
 writeAndDump( $fp, "format", null );
-writeAndDump( $fp, "Foo is %d and %s", array( 30, 'bar' ) );
+writeAndDump( $fp, "Foo is %d and %s", varray[ 30, 'bar' ] );
 writeAndDump( $fp, "Foobar testing", array() );
-writeAndDump( $fp, "%s %s %s", array( 'bar', 'bar', 'bar' ) );
-writeAndDump( $fp, "%02d", array( 50 ) );
+writeAndDump( $fp, "%s %s %s", varray[ 'bar', 'bar', 'bar' ] );
+writeAndDump( $fp, "%02d", varray[ 50 ] );
 writeAndDump( $fp, "", array() );
-writeAndDump( $fp, "Testing %b %d %f %o %s %x %X", array( 9, 6, 2.5502, 24, "foobar", 15, 65 ) );
-@writeAndDump( $funset, "Foo with %s", array( 'string' ) );
-@writeAndDump( new FooClass(), "Foo with %s", array( 'string' ) );
+writeAndDump( $fp, "Testing %b %d %f %o %s %x %X", varray[ 9, 6, 2.5502, 24, "foobar", 15, 65 ] );
+@writeAndDump( $funset, "Foo with %s", varray[ 'string' ] );
+@writeAndDump( new FooClass(), "Foo with %s", varray[ 'string' ] );
 
 // Close handle
 fclose( $fp );

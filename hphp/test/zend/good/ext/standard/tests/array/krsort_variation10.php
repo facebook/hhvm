@@ -28,11 +28,11 @@ heredoc string\twith!@# and 123
 Test this!!!
 EOT;
 
-$array = array (
+$array = darray [
   $simple_heredoc1 => "Heredoc", 
   $simple_heredoc2 => "HEREDOC",
   $multiline_heredoc => "heredoc string\twith!@# and 123\nTest this!!!"
-);
+];
 
 echo "\n-- Testing krsort() by supplying heredoc string array, 'flag' value is defualt --\n";
 $temp_array = $array;

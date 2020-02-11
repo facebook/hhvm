@@ -22,7 +22,7 @@ unset ($unset_var);
 // resource variable
 $fp = fopen(__FILE__, "r");
 
-$unexpected_values = array (
+$unexpected_values = varray [
 
         // int data
 /*1*/   0,
@@ -60,7 +60,7 @@ $unexpected_values = array (
 
         // resource variable
 /*22*/  $fp
-);
+];
 
 // loop though each element of the array and check the working of krsort()
 // when $array argument is supplied with different values from $unexpected_values

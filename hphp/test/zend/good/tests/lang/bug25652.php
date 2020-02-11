@@ -5,7 +5,7 @@ function testfunc ($var) {
 }
 
 class foo {
-    public $arr = array('testfunc');
+    public $arr = varray['testfunc'];
     function bar () {
         $this->arr[0]('testvalue');
     }

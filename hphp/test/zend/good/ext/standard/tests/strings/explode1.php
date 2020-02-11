@@ -7,7 +7,7 @@
 */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing explode() for basic operations ***\n";
-$delimiters = array (
+$delimiters = varray [
   "",  // len=0
   NULL,
   "abcd",  // string
@@ -19,7 +19,7 @@ $delimiters = array (
   -11.23,  // double
   4,  // positive integer
   "%",
-);
+];
 $string = "1234NULL23abcd00000TRUEFALSE-11.234444true-11.24%PHP%ZEND";
 /* loop prints an array of strings, each of which is a substring of $string
    formed by splitting it on boundaries formed by the string $delimiter.

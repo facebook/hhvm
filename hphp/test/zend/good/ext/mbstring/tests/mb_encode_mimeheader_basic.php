@@ -13,9 +13,9 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing mb_encode_mimeheader() : basic ***\n";
 
-$english = array('English' => 'This is an English string. 0123456789');
-$nonEnglish = array('Japanese' => base64_decode('5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CC'),
-                'Greek' => base64_decode('zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868zrXOvc6/LiAwMTIzNDU2Nzg5Lg=='));
+$english = darray['English' => 'This is an English string. 0123456789'];
+$nonEnglish = darray['Japanese' => base64_decode('5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CC'),
+                'Greek' => base64_decode('zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868zrXOvc6/LiAwMTIzNDU2Nzg5Lg==')];
 
 foreach ($english as $lang => $input) {
     echo "\nLanguage: $lang\n";

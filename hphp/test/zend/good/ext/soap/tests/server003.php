@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$server = new soapserver(null,array('uri'=>"http://testuri.org"));
+$server = new soapserver(null,darray['uri'=>"http://testuri.org"]);
 $server->addfunction(SOAP_FUNCTIONS_ALL);
 
 $HTTP_RAW_POST_DATA = <<<EOF

@@ -13,7 +13,7 @@ function main_entry(): void {
 
   echo "===Array===\n";
 
-  $a = array('zero' => 0, 'one' => 1, 'two' => 2);
+  $a = darray['zero' => 0, 'one' => 1, 'two' => 2];
   $it = new ArrayIterator($a);
 
   var_dump($it->count());

@@ -16,13 +16,13 @@ function callback($a)
 echo "*** Testing array_map() : array having subarrays ***\n";
 
 // different subarrays
-$arr1 = array(
+$arr1 = varray[
   array(),
-  array(1, 2),
-  array('a', 'b'),
-  array(1, 2, 'a', 'b'),
-  array(1 => 'a', 'b' => 2)
-);
+  varray[1, 2],
+  varray['a', 'b'],
+  varray[1, 2, 'a', 'b'],
+  darray[1 => 'a', 'b' => 2]
+];
 
 var_dump( array_map(fun('callback'), $arr1));
 echo "Done";

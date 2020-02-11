@@ -19,7 +19,7 @@ try {
                     isset(AAAA::$a); // ZEND_ISSET_ISEMPTY_VAR
                 } catch (Exception $e) {
                     try  {
-                        $a = array("AAA", "foo");
+                        $a = varray["AAA", "foo"];
                         $a(); //ZEND_INIT_FCALL_BY_NAME
                     } catch (Exception $e) {
                     }

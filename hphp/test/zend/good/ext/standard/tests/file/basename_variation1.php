@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$prefixes = array (
+$prefixes = varray [
 	
     // drive letters
 	"A:/",
@@ -16,9 +16,9 @@ $prefixes = array (
 	// home directory ~
 	"~/",
 	"~\\",
-);
+];
 
-$paths = array (
+$paths = varray [
 
 	"foo",
 	"foo/",
@@ -31,7 +31,7 @@ $paths = array (
     "dir with spaces/foo.bar",
     "dir with spaces\\foo.bar",
 
-);
+];
 
 foreach ($prefixes as $prefix) {
 	foreach ($paths as $path) {

@@ -5,7 +5,7 @@
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 // rename dirs across directories
 echo "\n*** Testing rename() : renaming directory across directories ***\n";
-$src_dirs = array (
+$src_dirs = varray [
   /* Testing simple directory tree */
   "$file_path/rename_variation1/",
 
@@ -14,7 +14,7 @@ $src_dirs = array (
 
   /* Testing dir with double trailing slashes */
   "$file_path//rename_variation1//",
-);
+];
 
 $dest_dir = "$file_path/rename_variation1_dir";
 // create the $dest_dir

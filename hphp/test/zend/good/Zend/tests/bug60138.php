@@ -1,6 +1,6 @@
 <?hh <<__EntryPoint>> function main(): void {
-$category = array("f");
-$tree = array($category);
+$category = varray["f"];
+$tree = varray[$category];
 
 $iterator = new RecursiveIteratorIterator(
     new RecursiveArrayIterator($tree),

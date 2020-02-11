@@ -7,23 +7,23 @@
 echo "*** Testing array_intersect_key() : usage variation ***\n";
 
 /// Initialise function arguments not being substituted (if any)
-$array1 = array(
+$array1 = darray[
 
-      'first' => array('blue'  => 1, 'red'  => 2),
+      'first' => darray['blue'  => 1, 'red'  => 2],
 
-      'second' => array('yellow' => 7),
+      'second' => darray['yellow' => 7],
 
-      'third' => array(0 =>'zero'),
-);
+      'third' => darray[0 =>'zero'],
+];
 
-$array2 = array (
+$array2 = darray [
 
-      'first' => array('blue'  => 1, 'red'  => 2,),
+      'first' => darray['blue'  => 1, 'red'  => 2,],
 
-      'second' => array('cyan'   => 8),
+      'second' => darray['cyan'   => 8],
 
-      'fourth' => array(2 => 'two'),
-);
+      'fourth' => darray[2 => 'two'],
+];
 var_dump( array_intersect_key($array1, $array2) );
 var_dump( array_intersect_key($array2,$array1 ) );
 echo "===DONE===\n";

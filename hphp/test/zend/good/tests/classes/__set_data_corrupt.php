@@ -2,7 +2,7 @@
 
 class foo {
   const foobar=1;
-  public $pp = array('t'=>null);
+  public $pp = darray['t'=>null];
 
   function bar() {
     echo $this->t ='f';

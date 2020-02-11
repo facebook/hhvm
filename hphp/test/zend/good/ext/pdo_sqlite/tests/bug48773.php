@@ -11,7 +11,7 @@ class foo extends PDO {
         $driver_options[PDO::ATTR_ERRMODE] = PDO::ERRMODE_EXCEPTION;
         parent::__construct($dsn, $username, $password, $driver_options);
 
-        $this->setAttribute(PDO::ATTR_STATEMENT_CLASS, array($this->statementClass, array($this)));
+        $this->setAttribute(PDO::ATTR_STATEMENT_CLASS, varray[$this->statementClass, varray[$this]]);
     }
 }
 <<__EntryPoint>> function main(): void {

@@ -14,13 +14,13 @@ $escape_char_str = <<<EOD
 \escape \\seque\nce
 EOD;
 
-$needles = array(
+$needles = varray[
   "\t",
   '\n',
   "\r",
   "\\",
   $escape_char_str //needle as haystack
-);
+];
 
 //loop through to test strrchr() with each needle
 foreach($needles as $needle) {

@@ -17,7 +17,7 @@ $chunklen = 7;
 $ending = "):(";
 
 //different single quoted string for 'str'
-$values = array(
+$values = varray[
   '',  //empty
   ' ',  //space
   'This is simple string',  //regular string
@@ -31,7 +31,7 @@ $values = array(
   '     Testing with    multiple spaces     ',
   'Testing invalid \k and \m escape char',
   'This is to check with \\n and \\t'
-);
+];
 
 
 //Loop through each element of values for 'str'

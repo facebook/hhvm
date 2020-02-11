@@ -19,7 +19,7 @@ class classA
 <<__EntryPoint>> function main(): void {
 echo "\n*** Testing array_diff_assoc() : usage variations ***\n";
 
-$array = array(1, 2, 3);
+$array = varray[1, 2, 3];
 
 //get an unset variable
 $unset_var = 10;
@@ -31,73 +31,73 @@ hello world
 EOT;
 
 //array of different data types to be passed to $arr1 argument
-$inputs = array(
+$inputs = darray[
 
        // int data
 /*1*/
-'int' => array(
+'int' => varray[
        0,
        1,
        12345,
-       -2345),
+       -2345],
 
        // float data
 /*2*/
-'float' => array(
+'float' => varray[
        10.5,
        -10.5,
        12.3456789000e10,
        12.3456789000E-10,
-       .5),
+       .5],
 
        // null data
 /*3*/
-'null' => array(
+'null' => varray[
        NULL,
-       null),
+       null],
 
        // boolean data
 /*4*/
-'bool' => array(
+'bool' => varray[
        true,
        false,
        TRUE,
-       FALSE),
+       FALSE],
 
        // empty data
 /*5*/
-'empty' => array(
+'empty' => varray[
        "",
-       ''),
+       ''],
 
        // string data
 /*6*/
-'string' => array(
+'string' => varray[
        "string",
        'string',
-       $heredoc),
+       $heredoc],
 
        // binary data
 /*7*/
-'binary' => array(
+'binary' => varray[
        b"binary",
-       (string)"binary"),
+       (string)"binary"],
 
        // object data
 /*8*/
-'object' => array(
-      new classA()),
+'object' => varray[
+      new classA()],
 
        // undefined data
 /*9*/
-'undefined' => array(
-       @$undefined_var),
+'undefined' => varray[
+       @$undefined_var],
 
        // unset data
 /*10*/
-'unset' => array(
-      @$unset_var),
-);
+'unset' => varray[
+      @$unset_var],
+];
 
 // loop through each element of $inputs to check the behavior of array_diff_assoc
 $iterator = 1;

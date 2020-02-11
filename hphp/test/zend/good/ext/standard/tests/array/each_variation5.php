@@ -13,9 +13,9 @@
 echo "*** Testing each() : usage variations ***\n";
 
 $arr = array ('zero',
-              array(1, 2, 3),
+              varray[1, 2, 3],
               'one' => 'un',
-              array('a', 'b', 'c')
+              varray['a', 'b', 'c']
               );
 
 echo "\n-- Pass each() a two-dimensional array --\n";

@@ -7,23 +7,23 @@
 echo "*** Testing array_diff_key() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$array1 = array(
+$array1 = darray[
 
-      'first' => array('blue' => 1, 'red' => 2),
+      'first' => darray['blue' => 1, 'red' => 2],
 
-      'second' => array('yellow' => 7),
+      'second' => darray['yellow' => 7],
 
-      'third' => array(0 => 'zero'),
-);
+      'third' => darray[0 => 'zero'],
+];
 
-$array2 = array (
+$array2 = darray [
 
-      'first' => array('blue' => 1, 'red' => 2,),
+      'first' => darray['blue' => 1, 'red' => 2,],
 
-      'second' => array('cyan' => 8),
+      'second' => darray['cyan' => 8],
 
-      'fourth' => array(2 => 'two'),
-);
+      'fourth' => darray[2 => 'two'],
+];
 
 echo "\n-- Testing array_diff_key() function with multi dimensional array --\n";
 var_dump( array_diff_key($array1, $array2) );

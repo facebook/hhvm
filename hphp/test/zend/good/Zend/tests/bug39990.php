@@ -1,7 +1,7 @@
 <?hh
 class Foo {
   public function __get($name) {
-    return array('Hello', 'World');
+    return varray['Hello', 'World'];
   }
 }
 <<__EntryPoint>> function main(): void {

@@ -32,7 +32,7 @@ $empty_heredoc =<<<EOT
 EOT;
 
 // input array with different false elements
-$input = array(
+$input = varray[
   false,
   False,
   '',
@@ -49,7 +49,7 @@ $input = array(
   $empty_heredoc,
   @$unset_var,
   @$undefined_var,
-);
+];
 
 // With default callback function
 var_dump( array_filter($input) );

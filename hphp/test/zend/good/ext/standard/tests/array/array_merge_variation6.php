@@ -12,8 +12,8 @@
 echo "*** Testing array_merge() : usage variations ***\n";
 
 //string keys
-$arr1 = array('zero' => 'zero', 'one' => 'un', 'two' => 'deux');
-$arr2 = array('zero' => 'zero', 'un' => 'eins', 'deux' => 'zwei');
+$arr1 = darray['zero' => 'zero', 'one' => 'un', 'two' => 'deux'];
+$arr2 = darray['zero' => 'zero', 'un' => 'eins', 'deux' => 'zwei'];
 
 var_dump(array_merge($arr1, $arr2));
 var_dump(array_merge($arr2, $arr1));

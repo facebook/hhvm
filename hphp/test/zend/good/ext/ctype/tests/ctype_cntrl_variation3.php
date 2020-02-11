@@ -13,7 +13,7 @@ echo "*** Testing ctype_cntrl() : usage variations ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");
 
-$values = array(
+$values = varray[
 /*1*/  "This string contains just letters and spaces", // Simple string
        "but this one contains some numbers too 123+456 = 678", // Mixed string
        "",
@@ -44,7 +44,7 @@ $values = array(
        "0xA",
        "0xE",
 /*30*/ "\t\r\n",
-);
+];
 
 
 // loop through each element of $values to test behaviour of ctype_cntrl()

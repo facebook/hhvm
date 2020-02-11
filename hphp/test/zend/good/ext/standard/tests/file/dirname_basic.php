@@ -9,7 +9,7 @@ echo "*** Testing dirname() : basic functionality ***\n";
 
 
 // Initialise all required variables
-$paths = array(
+$paths = varray[
   '',
   ' ',
   'c:',
@@ -40,7 +40,7 @@ $paths = array(
   '		c:\test\adir\afile.txt',
   '/usr',
   '/usr/'
-);
+];
 
 foreach ($paths as $path) {
     var_dump( dirname($path) );

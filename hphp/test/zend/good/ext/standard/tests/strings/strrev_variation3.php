@@ -38,14 +38,14 @@ EOD;
 $empty_str = <<<EOD
 EOD;
 
-$strings = array(
+$strings = varray[
   $multi_line_str,
   $special_chars_str,
   $control_chars_str,
   $quote_chars_str,
   $blank_line,
   $empty_str
-);
+];
 
 $count = 1;
 for( $index = 0; $index < count($strings); $index++ ) {

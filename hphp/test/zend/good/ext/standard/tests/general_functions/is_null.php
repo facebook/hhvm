@@ -16,7 +16,7 @@ unset ($unset_array, $unset_int, $unset_float, $unset_bool, $unset_object, $unse
 $null_var1 = NULL;
 $null_var2 = null;
 
-$valid_nulls = array(
+$valid_nulls = varray[
   NULL,
   null,
   @$null_var1,
@@ -28,7 +28,7 @@ $valid_nulls = array(
   @$unset_object,
   @$unset_resource,
   @$undefined_var,
-);
+];
 /* loop to check that is_null() recognizes different 
    null values, expected output: bool(true) */
 $loop_counter = 1;
@@ -44,7 +44,7 @@ $fp = fopen (__FILE__, "r");
 $dfp = opendir ( dirname(__FILE__) );
 
 // other types in a array 
-$not_null_types = array (
+$not_null_types = varray [
 /* integers */
   0,
   1,
@@ -104,18 +104,18 @@ $not_null_types = array (
 
   /* arrays */
   array(),
-  array(0),
-  array(1),
-  array(NULL),
-  array(null),
-  array("string"),
-  array(true),
-  array(TRUE),
-  array(false),
-  array(FALSE),
-  array(1,2,3,4),
-  array(1 => "One", "two" => 2),
-);
+  varray[0],
+  varray[1],
+  varray[NULL],
+  varray[null],
+  varray["string"],
+  varray[true],
+  varray[TRUE],
+  varray[false],
+  varray[FALSE],
+  varray[1,2,3,4],
+  darray[1 => "One", "two" => 2],
+];
 /* loop through the $not_null_types to see working of 
    is_null() on non null types, expected output: bool(false) */
 $loop_counter = 1;

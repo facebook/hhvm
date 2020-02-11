@@ -34,7 +34,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $str argument
-$inputs = array(
+$inputs = darray[
 
        // int data
 /*1*/
@@ -90,7 +90,7 @@ $inputs = array(
        // resource variable
 /*24*/
        'resource' => $fp
-);
+];
 
 // loop through each element of $inputs to check the behavior of iconv_strlen()
 $iterator = 1;

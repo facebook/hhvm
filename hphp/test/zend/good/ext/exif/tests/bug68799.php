@@ -13,7 +13,7 @@ function doStuff ($limit) {
 
   $a = new A;
 
-  $b = array();
+  $b = darray[];
   for ($i = 0; $i < $limit; $i++) {
     $b[$i] = clone $a;
   }

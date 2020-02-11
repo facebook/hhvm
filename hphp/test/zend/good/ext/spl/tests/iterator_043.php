@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$it = new RecursiveCachingIterator(new RecursiveArrayIterator(array(1,2)));
+$it = new RecursiveCachingIterator(new RecursiveArrayIterator(varray[1,2]));
 
 var_dump($it->getChildren());
 $it->rewind();

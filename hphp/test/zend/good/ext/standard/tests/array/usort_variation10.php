@@ -23,9 +23,9 @@ function cmp($value1, $value2)
 echo "*** Testing usort() : usage variation ***\n";
 
 // Array with duplicate string and integer keys and values
-$array_arg = array(0 => 2,     "a" => 8, "d" => 9,
+$array_arg = darray[0 => 2,     "a" => 8, "d" => 9,
                    3 => 3,     5 => 2,   "o" => 6,
-                   "z" => -99, 0 => 1,   "z" => 3);
+                   "z" => -99, 0 => 1,   "z" => 3];
 
 echo "\n-- Array with duplicate keys --\n";
 var_dump( usort(inout $array_arg, fun('cmp')) );

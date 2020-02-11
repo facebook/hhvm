@@ -32,7 +32,7 @@ function main(): void {
   $fp = fopen(__FILE__, "r");
 
   //array of different values for 'input' parameter
-  $values = array(
+  $values = varray[
           // int data
   /*1*/   0,
           1,
@@ -75,7 +75,7 @@ function main(): void {
 
           // unset data
   /*23*/  @$unset_var,
-  );
+  ];
 
   /* loop through each element of the array to test array_rand() function
    * for different values for 'input' argument */

@@ -13,17 +13,17 @@ class Hello {
 echo "*** Testing is_resource() : basic functionality ***\n";
 
 
-$vars = array(
+$vars = varray[
     false,
     true,
     10,
     10.5,
     "Helo World",
-    array(1,2,3,4,5),
+    varray[1,2,3,4,5],
     NULL,
-    new Hello());
+    new Hello()];
 
-$types = array(
+$types = varray[
     "bool=false",
     "bool=true",
     "integer",
@@ -31,7 +31,7 @@ $types = array(
     "string",
     "array",
     "NULL",
-    "object");
+    "object"];
 
 echo "\nNon-resource type cases\n";
 

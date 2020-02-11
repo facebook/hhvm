@@ -8,5 +8,5 @@ class Foo {
 }
 <<__EntryPoint>> function main(): void {
 $a = new Foo;
-call_user_func(array($a, 'aAa'));
+call_user_func(varray[$a, 'aAa']);
 }

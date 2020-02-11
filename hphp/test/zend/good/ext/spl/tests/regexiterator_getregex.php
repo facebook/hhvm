@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$array = array('cat', 'hat', 'sat');
+$array = varray['cat', 'hat', 'sat'];
 $iterator = new ArrayIterator($array);
 
 # Simple regex

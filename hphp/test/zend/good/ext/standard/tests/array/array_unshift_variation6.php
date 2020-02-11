@@ -16,17 +16,17 @@ echo "*** Testing array_unshift() : two dimensional arrays for \$array argument 
 $var = 10;
 
 // two-dimensional array to be passed to $array argument
-$two_dimensional_array = array(
+$two_dimensional_array = varray[
 
    // associative array
-   array('color' => 'red', 'item' => 'pen', 'place' => 'LA'),
+   darray['color' => 'red', 'item' => 'pen', 'place' => 'LA'],
 
    // numeric array
-   array(1, 2, 3, 4, 5),
+   varray[1, 2, 3, 4, 5],
 
    // combination of numeric and associative arrays
    array('a' => 'green', 'red', 'brown', 33, 88, 'orange', 'item' => 'ball')
-);
+];
 
 /* Passing the entire $two_dimensional_array to $array */
 

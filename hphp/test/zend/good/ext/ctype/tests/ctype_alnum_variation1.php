@@ -33,7 +33,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $c argument
-$inputs = array(
+$inputs = varray[
 
        // int data
 /*1*/  0,
@@ -79,7 +79,7 @@ $inputs = array(
 
        // resource variable
 /*25*/ $fp
-);
+];
 
 // loop through each element of $inputs to check the behavior of ctype_alnum()
 $iterator = 1;

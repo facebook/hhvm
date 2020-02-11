@@ -17,9 +17,9 @@ $stringh = <<<END
 utf-8
 END;
 
-$inputs = array('Double Quoted String' => "utf-8",
+$inputs = darray['Double Quoted String' => "utf-8",
                 'Single Quoted String' => 'utf-8',
-                'Heredoc' => $stringh);
+                'Heredoc' => $stringh];
 foreach ($inputs as $type => $input) {
     echo "\n-- $type --\n";
     echo "-- With fourth encoding argument --\n";

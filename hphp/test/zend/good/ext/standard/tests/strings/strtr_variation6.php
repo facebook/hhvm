@@ -29,7 +29,7 @@ $file_handle = fopen(__FILE__, "r");
 $str = "012atm";
 
 // array of values for 'from'
-$from_arr =  array (
+$from_arr =  varray [
 
           // integer values
 /*1*/      0,
@@ -43,8 +43,8 @@ $from_arr =  array (
 
           // array values
 /*7*/      array(),
-          array(0),
-          array(1, 2),
+          varray[0],
+          varray[1, 2],
 
           // boolean values
 /*10*/      true,
@@ -67,7 +67,7 @@ $from_arr =  array (
 
           // unset variable
 /*19*/      @$unset_var
-);
+];
 
 //defining 'to' argument
 $to = "atm012";

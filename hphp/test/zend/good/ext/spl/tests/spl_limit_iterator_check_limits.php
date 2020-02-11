@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>>
 function main_entry(): void {
-    $array = array(array(7,8,9),1,2,3,array(4,5,6));
+    $array = varray[varray[7,8,9],1,2,3,varray[4,5,6]];
   $arrayIterator = new ArrayIterator($array);
 
   try {

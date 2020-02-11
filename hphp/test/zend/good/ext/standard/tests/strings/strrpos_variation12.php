@@ -9,7 +9,7 @@
 */
 <<__EntryPoint>> function main(): void {
 echo "*** Test strrpos() function: binary safe ***\n";
-$haystacks = array(
+$haystacks = varray[
   "Hello".chr(0)."World",
   chr(0)."Hello World",
   "Hello World".chr(0),
@@ -17,7 +17,7 @@ $haystacks = array(
   "Hello\0world",
   "\0Hello",
   "Hello\0"
-);
+];
 
 for($index = 0; $index < count($haystacks); $index++ ) {
   var_dump( strrpos($haystacks[$index], "\0") );

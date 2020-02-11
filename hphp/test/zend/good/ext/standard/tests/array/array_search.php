@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$arr1 = array('a','b','c');
+$arr1 = varray['a','b','c'];
 $arr2 = array();
 $arr3 = array('c','key'=>'d');
 $arr4 = array("a\0b"=>'e','key'=>'d', 'f');

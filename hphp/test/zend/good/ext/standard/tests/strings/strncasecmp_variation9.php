@@ -52,7 +52,7 @@ EOD;
 $empty_string = <<<EOD
 EOD;
 
-$strings = array(
+$strings = varray[
   $multi_line_str,
   $identifier_str1,
   $identifier_str2,
@@ -60,7 +60,7 @@ $strings = array(
   $quote_char_string,
   $blank_line,
   $empty_string
-);
+];
 /* loop through to compare the strings */
 $index2 = count($strings);
 for($index1 = 0; $index1 < count($strings); $index1++) {

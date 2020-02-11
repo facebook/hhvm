@@ -10,7 +10,7 @@ $r = fopen(__FILE__, "r");
 
 $o = new test;
 
-$vars = array(
+$vars = varray[
     "string",
     "8754456",
     "",
@@ -18,13 +18,13 @@ $vars = array(
     9876545,
     0.10,
     array(),
-    array(1,2,3),
+    varray[1,2,3],
     false,
     true,
     NULL,
     $r,
     $o
-);
+];
 
 foreach ($vars as $var) {
     $tmp = (int)$var;

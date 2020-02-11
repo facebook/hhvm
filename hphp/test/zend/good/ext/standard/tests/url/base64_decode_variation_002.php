@@ -23,7 +23,7 @@ $unset_var = 10;
 unset ($unset_var);
 
 //array of values to iterate over
-$values =  array (
+$values =  darray [
        // int data
     "0" =>  0,
     "1" =>  1,
@@ -39,10 +39,10 @@ $values =  array (
 
     // array data
     "array()" =>   array(),
-    "array(0)" =>  array(0),
-    "array(1)" =>  array(1),
-    "array(1, 2)" => array(1, 2),
-    "array('color' => 'red', 'item' => 'pen'" => array('color' => 'red', 'item' => 'pen'),
+    "array(0)" =>  varray[0],
+    "array(1)" =>  varray[1],
+    "array(1, 2)" => varray[1, 2],
+    "array('color' => 'red', 'item' => 'pen'" => darray['color' => 'red', 'item' => 'pen'],
 
     // null data
     "NULL" => NULL,
@@ -69,7 +69,7 @@ $values =  array (
 
     // resource data
     "resource" => $file_handle
-);
+];
 
 // loop through each element of the array for strict argument
 

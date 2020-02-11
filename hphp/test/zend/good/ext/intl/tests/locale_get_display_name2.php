@@ -9,9 +9,9 @@ function ut_main()
 {
     $res_str='';
 
-    $disp_locales=array('en','fr','de');
+    $disp_locales=varray['en','fr','de'];
 
-    $locales = array(
+    $locales = varray[
         'sl_IT_nedis_KIRTI',
         'sl_IT_nedis-a-kirti-x-xyz',
         'sl_IT_rozaj',
@@ -72,7 +72,7 @@ function ut_main()
         'de-419-DE',
         'a-DE',
         'ar-a-aaa-b-bbb-a-ccc'
-    );
+    ];
 
 
     $res_str = '';
@@ -83,7 +83,7 @@ function ut_main()
         foreach( $disp_locales as $disp_locale )
         {
             $scr = ut_loc_get_display_name( $locale ,$disp_locale );
-        $scr = str_replace(array('(', ')'), '#', $scr);
+        $scr = str_replace(varray['(', ')'], '#', $scr);
             $res_str .= "disp_locale=$disp_locale :  display_name=$scr";
             $res_str .= "\n";
         }

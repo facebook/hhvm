@@ -7,30 +7,30 @@
 echo "*** Testing sprintf() : unsigned formats with array values ***\n";
 
 // array of array values 
-$array_values = array(
+$array_values = varray[
   array(),
-  array(0),
-  array(1),
-  array(-12345),
-  array(+12345),
-  array(NULL),
-  array(null),
-  array("string"),
-  array(true),
-  array(TRUE),
-  array(false),
-  array(FALSE),
-  array(1,2,3,4),
-  array(1 => "One", "two" => 2)
-);
+  varray[0],
+  varray[1],
+  varray[-12345],
+  varray[+12345],
+  varray[NULL],
+  varray[null],
+  varray["string"],
+  varray[true],
+  varray[TRUE],
+  varray[false],
+  varray[FALSE],
+  varray[1,2,3,4],
+  darray[1 => "One", "two" => 2]
+];
 
 // array of unsigned formats
-$unsigned_formats = array( 
+$unsigned_formats = varray[ 
   "%u", "%hu", "%lu",
   "%Lu", " %u", "%u ",   
   "\t%u", "\n%u", "%4u", 
    "%30u", "%[0-9]", "%*u"
-);
+];
 
 $count = 1;
 foreach($array_values as $array_value) {

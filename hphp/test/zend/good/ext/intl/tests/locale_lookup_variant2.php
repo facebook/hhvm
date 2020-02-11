@@ -7,15 +7,15 @@
 
 function ut_main()
 {
-    $loc_ranges = array(
+    $loc_ranges = varray[
         'de-de',
         'sl_IT',
         'sl_IT_Nedis',
         'jbo',
         'art-lojban'
-    );
+    ];
 
-    $lang_tags = array(
+    $lang_tags = varray[
         'de-DEVA',
         'de-DE-1996',
         'de-DE',
@@ -33,7 +33,7 @@ function ut_main()
         'jbo',
         'en_sl_IT',
         'zh-Hant-CN-x-prv1-prv2'
-    );
+    ];
 
 
     $res_str = '';

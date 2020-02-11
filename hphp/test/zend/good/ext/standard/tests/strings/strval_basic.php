@@ -14,7 +14,7 @@ EOT;
 
 
 //array of values to iterate over
-$values = array(
+$values = varray[
             // Simple strings
 /*1*/        "Hello World",
             'Hello World',
@@ -33,7 +33,7 @@ $values = array(
 
             //Heredoc String
 /*7*/        $simple_heredoc
-);
+];
 
 // loop through each element of the array for strval
 $iterator = 1;

@@ -2,9 +2,9 @@
 <<__EntryPoint>> function main(): void {
 $var = "1";
 
-$data = array('test1' => 1, 'test2' => $var);
+$data = darray['test1' => 1, 'test2' => $var];
 
-$args = array();
+$args = darray[];
 $args["test1"] = FILTER_VALIDATE_INT;
 $args["test2"] = FILTER_VALIDATE_INT;
 

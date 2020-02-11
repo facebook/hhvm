@@ -21,17 +21,17 @@ var_dump(str_ireplace("tt", "aaa", "ttttTttttttttTT"));
 var_dump(str_ireplace_with_count("tt", "aaa", "ttttTttttttttTT", inout $count));
 var_dump($count);
 
-var_dump(str_ireplace(array("tt", "tt"), "aaa", "ttttTttttttttTT"));
-var_dump(str_ireplace(array("tt", "tt"), array("aaa"), "ttttTttttttttTT"));
-var_dump(str_ireplace(array("tt", "y"), array("aaa", "bbb"), "ttttTttttttttTT"));
+var_dump(str_ireplace(varray["tt", "tt"], "aaa", "ttttTttttttttTT"));
+var_dump(str_ireplace(varray["tt", "tt"], varray["aaa"], "ttttTttttttttTT"));
+var_dump(str_ireplace(varray["tt", "y"], varray["aaa", "bbb"], "ttttTttttttttTT"));
 
-var_dump(str_ireplace(array("tt", "tt"), "aaa", "ttttTttttttttTT"));
-var_dump(str_ireplace(array("tt", "tt"), array("aaa"), "ttttTttttttttTT"));
-var_dump(str_ireplace(array("tt", "y"), array("aaa", "bbb"), "ttttTttttttttTT"));
+var_dump(str_ireplace(varray["tt", "tt"], "aaa", "ttttTttttttttTT"));
+var_dump(str_ireplace(varray["tt", "tt"], varray["aaa"], "ttttTttttttttTT"));
+var_dump(str_ireplace(varray["tt", "y"], varray["aaa", "bbb"], "ttttTttttttttTT"));
 
-var_dump(str_ireplace(array("tt", "y"), array("aaa", "bbb"), array("ttttTttttttttTT", "aayyaayasdayYahsdYYY")));
-var_dump(str_ireplace(array("tt", "y"), array("aaa", "bbb"), array("key"=>"ttttTttttttttTT", "test"=>"aayyaayasdayYahsdYYY")));
-var_dump(str_ireplace(array("t"=>"tt", "y"=>"y"), array("a"=>"aaa", "b"=>"bbb"), array("key"=>"ttttTttttttttTT", "test"=>"aayyaayasdayYahsdYYY")));
+var_dump(str_ireplace(varray["tt", "y"], varray["aaa", "bbb"], varray["ttttTttttttttTT", "aayyaayasdayYahsdYYY"]));
+var_dump(str_ireplace(varray["tt", "y"], varray["aaa", "bbb"], darray["key"=>"ttttTttttttttTT", "test"=>"aayyaayasdayYahsdYYY"]));
+var_dump(str_ireplace(darray["t"=>"tt", "y"=>"y"], darray["a"=>"aaa", "b"=>"bbb"], darray["key"=>"ttttTttttttttTT", "test"=>"aayyaayasdayYahsdYYY"]));
 
 /* separate testcase for str_ireplace() off-by-one */
 

@@ -11,10 +11,10 @@ class B extends A {
     }
 }
 <<__EntryPoint>> function main(): void {
-if (is_callable(array('B', 'foo'))) {
-    call_user_func(array('B', 'foo'));
+if (is_callable(varray['B', 'foo'])) {
+    call_user_func(varray['B', 'foo']);
 }
-if (is_callable(array('A', 'foo'))) {
-    call_user_func(array('A', 'foo'));
+if (is_callable(varray['A', 'foo'])) {
+    call_user_func(varray['A', 'foo']);
 }
 }

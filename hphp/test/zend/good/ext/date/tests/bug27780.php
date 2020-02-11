@@ -1,10 +1,10 @@
 <?hh <<__EntryPoint>> function main(): void {
-$timezones = array (
+$timezones = varray [
     "America/Chicago", "Europe/Amsterdam", "Asia/Jerusalem",
     "Asia/Singapore", "America/Sao_Paulo"
-);
+];
 
-$timestrings = array (
+$timestrings = varray [
     "2004-04-07 00:00:00 -2 months +7 days +23 hours +59 minutes +59 seconds",
     "2004-04-07 00:00:00 -2 months +7 days +23 hours +59 minutes +60 seconds",
     "2004-04-07 00:00:00 -2 months +7 days +23 hours +59 minutes +61 seconds",
@@ -18,7 +18,7 @@ $timestrings = array (
     "2004-04-07 00:00:00 +1 day",
     "2004-04-07 00:00:00 1 day",
     "2004-04-07 00:00:00 +21 days",
-);
+];
 
 foreach ($timezones as $timezone) {
     date_default_timezone_set($timezone);

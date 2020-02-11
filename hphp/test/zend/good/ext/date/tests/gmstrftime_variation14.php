@@ -13,12 +13,12 @@ setlocale(LC_ALL, "en_US");
 date_default_timezone_set("Asia/Calcutta");
 
 //array of values to iterate over
-$inputs = array(
+$inputs = darray[
       'Century number' => "%C",
       'Month Date Year' => "%D",
       'Year with century' => "%G",
       'Year without century' => "%g",
-);
+];
 
 // loop through each element of the array for timestamp
 

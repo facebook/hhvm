@@ -14,22 +14,22 @@ $fp = fopen(__FILE__, "r");
 echo "--- Testing sizeof() with different array values for 'var' argument ---\n";
 
 // array containing different types of array values for 'var' argument 
-$values = array (
+$values = varray [
   /* 1  */  array($fp, "resource" => $fp),
-            array(1, array(3, 4, array(6, array(8)))),
-            array("a" => 1, 'b' => 2, array( "c" =>3, array( "d" => 5))),
+            varray[1, varray[3, 4, varray[6, varray[8]]]],
+            array("a" => 1, 'b' => 2, array( "c" =>3, darray[ "d" => 5])),
             array(),
-  /* 5  */  array(1, 2, 3, 4),
-            array("Saffron", "White", "Green"),
-            array('saffron', 'white', 'green'),
-            array(1 => "Hi", 2 => "Hello" ),
-            array("color" => "red", "item" => "pen"),
-  /* 10 */  array('color' => 'red', 'item' => 'pen'),
-            array(TRUE => "red", FALSE => "pen" ),
-            array(false => 'red', true => 'pen' ),
-            array('color' => "red", "item" => 'pen', 1 => "Hi", "" => "Hello" ),
+  /* 5  */  varray[1, 2, 3, 4],
+            varray["Saffron", "White", "Green"],
+            varray['saffron', 'white', 'green'],
+            darray[1 => "Hi", 2 => "Hello" ],
+            darray["color" => "red", "item" => "pen"],
+  /* 10 */  darray['color' => 'red', 'item' => 'pen'],
+            darray[TRUE => "red", FALSE => "pen" ],
+            darray[false => 'red', true => 'pen' ],
+            darray['color' => "red", "item" => 'pen', 1 => "Hi", "" => "Hello" ],
   /* 14 */  array($fp, "resource1" => $fp, 'resource2' => $fp, array( $fp, 'type' => $fp) )
-);   
+];   
 
 // loop through each element of the values array for 'var' argument 
 // check the working of sizeof()

@@ -23,7 +23,7 @@ unset ($unset_var);
 $fp = fopen(__FILE__, "r");
 
 //array of values with indices to iterate over
-$unexpected_values = array (
+$unexpected_values = darray [
 
   // int data
   0 => 0,
@@ -62,7 +62,7 @@ $unexpected_values = array (
   // resource variable
   20 => $fp
 
-);
+];
 
 // loop though each element of the array and check the working of arsort()
 // when $array argument is supplied with different values from $unexpected_values

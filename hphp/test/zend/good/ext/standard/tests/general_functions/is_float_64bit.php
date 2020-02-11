@@ -3,14 +3,14 @@
  * Description: Finds whether the given variable is a float
  */
 class foo {
-  public $array = array(10.5);
+  public $array = varray[10.5];
 }
 
 <<__EntryPoint>>
 function main(): void {
   echo "*** Testing is_float(), is_double() and is_real() with float values***\n";
   // different valid  float vlaues
-  $floats = array(
+  $floats = varray[
     -2147483649, // float value
     2147483648,  // float value
     -0x80000001, // float value, beyond max negative int
@@ -41,7 +41,7 @@ function main(): void {
     -.05E+44,
     .0034E-30,
     -.0034E-30
-  );
+  ];
   /* loop to check that is_float(), is_double() & is_real() recognizes
      different float values, expected: bool(true)  */
   $loop_counter = 1;
@@ -65,7 +65,7 @@ function main(): void {
   // non_scalar values, objects, arrays, resources and boolean
   $object = new foo();
 
-  $not_floats = array(
+  $not_floats = varray[
     new foo, //object
     $object,
 
@@ -73,10 +73,10 @@ function main(): void {
     $dfp,
 
     array(),  // arrays
-    array(NULL),
-    array(0.5e10),
-    array(1,2,3,4),
-    array("string"),
+    varray[NULL],
+    varray[0.5e10],
+    varray[1,2,3,4],
+    varray["string"],
 
     NULL,  // nulls
     null,
@@ -110,7 +110,7 @@ function main(): void {
 
     @$unset_var,  // unset variable
     @$undefined_var
-  );
+  ];
   /* loop through the $not_floats to see working of
      is_float(), is_double() & is_real() on objects,
       arrays, boolean and others */

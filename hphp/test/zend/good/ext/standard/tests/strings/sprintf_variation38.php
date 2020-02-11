@@ -7,7 +7,7 @@
 echo "*** Testing sprintf() : hexa formats with string values ***\n";
 
 // array of string values 
-$string_values = array(
+$string_values = varray[
   "",
   '',
   "0",
@@ -26,15 +26,15 @@ $string_values = array(
   'TRUE',
   "NULL",
   'null'
-);
+];
 
 // array of hexa formats
-$hexa_formats = array(  
+$hexa_formats = varray[  
   "%x", "%xx", "%lx", 
   "%Lx", " %x", "%x ",
   "\t%x", "\n%x", "%4x",
   "%30x", "%[0-9A-Fa-f]", "%*x"
-);
+];
 
 $count = 1;
 foreach($string_values as $string_value) {

@@ -5,7 +5,7 @@ class foo {
   public $public = 'public';
 
   public function __sleep() {
-    return array('private', 'protected', 'public', 'no_such');
+    return varray['private', 'protected', 'public', 'no_such'];
   }
 }
 

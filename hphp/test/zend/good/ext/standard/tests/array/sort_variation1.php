@@ -23,7 +23,7 @@ unset ($unset_var);
 $fp = fopen(__FILE__, "r");
 
 //array of values to iterate over
-$unexpected_values = array (
+$unexpected_values = varray [
 
        // int data
 /*1*/  0,
@@ -61,7 +61,7 @@ $unexpected_values = array (
 
        // resource variable
 /*23*/ $fp
-);
+];
 
 // loop though each element of the array and check the working of sort()
 // when $array argument is supplied with different values from $unexpected_values

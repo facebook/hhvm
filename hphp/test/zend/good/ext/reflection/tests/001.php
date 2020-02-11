@@ -6,7 +6,7 @@ class ReflectionClassEx extends ReflectionClass
 
     function getMethodNames()
     {
-        $res = array();
+        $res = varray[];
         foreach($this->getMethods() as $m)
         {
             $res[] = $m->class . '::' . $m->name;
@@ -17,7 +17,7 @@ class ReflectionClassEx extends ReflectionClass
 <<__EntryPoint>> function main(): void {
 $r = new ReflectionClassEx('ReflectionClassEx');
 
-$exp = array (
+$exp = varray [
   'UMLClass::__clone',
   'UMLClass::export',
   'UMLClass::__construct',
@@ -51,9 +51,9 @@ $exp = array (
   'UMLClass::isIterateable',
   'UMLClass::implementsInterface',
   'UMLClass::getExtension',
-  'UMLClass::getExtensionName');
+  'UMLClass::getExtensionName'];
 
-$miss = array();
+$miss = varray[];
 
 $res = $r->getMethodNames();
 

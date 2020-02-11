@@ -18,11 +18,11 @@ class Faulty
 }
 <<__EntryPoint>> function main(): void {
 $Faulty = new Faulty();
-$Array = array('Some junk','Some other junk');
+$Array = varray['Some junk','Some other junk'];
 
 // This causes a seg fault.
-$Failure = array_map(array($Faulty,'seg'),$Array);
+$Failure = array_map(varray[$Faulty,'seg'],$Array);
 
 // This does not.
-$Failure = array_map(array($Faulty,'NormalMethod'),$Array);
+$Failure = array_map(varray[$Faulty,'NormalMethod'],$Array);
 }

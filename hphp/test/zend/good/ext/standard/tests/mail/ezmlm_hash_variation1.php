@@ -22,7 +22,7 @@ unset($unset_var);
 $file_handle = fopen(__FILE__, "r");
 
 // array with different values for $delimiter
-$delimiters =  array (
+$delimiters =  varray [
 
   // integer values
   0,
@@ -39,8 +39,8 @@ $delimiters =  array (
 
   // array values
   array(),
-  array(0),
-  array(1, 2),
+  varray[0],
+  varray[1, 2],
 
   // boolean values
   true,
@@ -63,7 +63,7 @@ $delimiters =  array (
 
   // unset variable
   @$unset_var
-);
+];
 
 // loop through with each element of the $delimiters array to test explode() function
 $count = 1;

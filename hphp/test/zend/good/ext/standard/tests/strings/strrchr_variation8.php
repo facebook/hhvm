@@ -12,14 +12,14 @@ echo "*** Testing strrchr() function: with heredoc strings ***\n";
 $empty_str = <<<EOD
 EOD;
 
-$needles = array(
+$needles = varray[
   "",
   '',
   FALSE,
   NULL,
   "\0",
   $empty_str //needle as haystack
-);
+];
 
 //loop through to test strrchr() with each needle
 foreach($needles as $needle) {

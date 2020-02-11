@@ -8,11 +8,11 @@ $increment = 50;
 /* Create some more holes to give the memory allocator something to
  * work with. */
 $num = 5000;
-$a = array();
+$a = darray[];
 for ($i=0; $i<$num; $i++) {
-  $a[$i] = array(1);
+  $a[$i] = varray[1];
 }
-$b = array();
+$b = darray[];
 for ($i=0; $i<$num; $i++) {
   $b[$i] = $a[$i][0];
 }

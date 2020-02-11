@@ -19,8 +19,8 @@ class classWithoutToString
 echo "*** Testing array_diff_key() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$array2 = array('green' => 5, 'blue' => 6, 'yellow' => 7, 'cyan' => 8);
-$array3 = array(1, 2, 3, 4, 5);
+$array2 = darray['green' => 5, 'blue' => 6, 'yellow' => 7, 'cyan' => 8];
+$array3 = varray[1, 2, 3, 4, 5];
 
 //get an unset variable
 $unset_var = 10;
@@ -35,7 +35,7 @@ hello world
 EOT;
 
 //array of values to iterate over
-$inputs = array(
+$inputs = darray[
 
       // int data
       'int 0' => 0,
@@ -82,7 +82,7 @@ $inputs = array(
 
       // resource data
       'resource' => $fp,
-);
+];
 
 // loop through each element of the array for arr1
 foreach($inputs as $key =>$value) {

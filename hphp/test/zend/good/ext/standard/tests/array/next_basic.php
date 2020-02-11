@@ -10,7 +10,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing next() : basic functionality ***\n";
 
-$array = array('zero', 'one', 'two');
+$array = varray['zero', 'one', 'two'];
 echo key($array) . " => " . current($array) . "\n";
 var_dump(next(inout $array));
 

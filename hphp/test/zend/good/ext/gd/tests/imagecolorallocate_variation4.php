@@ -33,11 +33,11 @@ hello world
 EOT;
 
 // add arrays
-$index_array = array (1, 2, 3);
-$assoc_array = array ('one' => 1, 'two' => 2);
+$index_array = varray [1, 2, 3];
+$assoc_array = darray ['one' => 1, 'two' => 2];
 
 //array of values to iterate over
-$values = array(
+$values = darray[
 
       // float data
       'float 10.5' => 10.5,
@@ -50,7 +50,7 @@ $values = array(
       'empty array' => array(),
       'int indexed array' => $index_array,
       'associative array' => $assoc_array,
-	  'nested arrays' => array('foo', $index_array, $assoc_array),
+	  'nested arrays' => varray['foo', $index_array, $assoc_array],
       
       // null data
 	  'uppercase NULL' => NULL,
@@ -84,7 +84,7 @@ $values = array(
       
       //resource 
       "file resource" => $fp
-);
+];
 // loop through each element of the array for red
 foreach($values as $key => $value) {
       echo "\n--$key--\n";

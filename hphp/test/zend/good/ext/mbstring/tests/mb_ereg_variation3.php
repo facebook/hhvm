@@ -36,7 +36,7 @@ function main_entry(): void {
 
   mb_regex_encoding('utf-8'); // have to set otherwise won't match $mb properly
   $mb = base64_decode('5pel5pys6Kqe');
-  $character_classes = array (b'aB1'    => b'[[:alnum:]]+', /*1*/
+  $character_classes = darray [b'aB1'    => b'[[:alnum:]]+', /*1*/
                               b'aBcD'   => b'[[:alpha:]]+',
                               b'ab/='   => b'[[:ascii:]]+',
                               b" \t"    => b'[[:blank:]]+',
@@ -47,7 +47,7 @@ function main_entry(): void {
                               b'.!"*@'  => b'[[:punct:]]+',
                               b"\t"     => b'[[:space:]]+', /*10*/
                               b'IDSJV'  => b'[[:upper:]]+',
-                              b'3b5D'   => b'[[:xdigit:]]+'); /*12*/
+                              b'3b5D'   => b'[[:xdigit:]]+']; /*12*/
 
   $iterator = 1;
   $regs = null;

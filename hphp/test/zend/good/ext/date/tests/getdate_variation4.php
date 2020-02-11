@@ -11,14 +11,14 @@ echo "*** Testing getdate() : usage variation ***\n";
 date_default_timezone_set("Asia/Calcutta");
 
 //array of values to iterate over
-$inputs = array(
+$inputs = darray[
 
     //Year wise time stamps
     '01 Jan 1970' => 0,
     '01 Jan 1971' => 31536000,
     '01 Jan 1972' => 63072000,
     '01 Jan 1973' => 94694400,
-);
+];
 
 // loop through each element of the array for timestamp
 

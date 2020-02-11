@@ -6,7 +6,7 @@ class test {
     }
 }
 <<__EntryPoint>> function main(): void {
-$a = array(1,2,3);
+$a = varray[1,2,3];
 $o = new test;
 $s = "some string";
 $i = 222;

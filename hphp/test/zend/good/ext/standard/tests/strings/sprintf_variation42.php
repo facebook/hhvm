@@ -11,18 +11,18 @@ $fp = fopen (__FILE__, "r");
 $dfp = opendir ( dirname(__FILE__) );
 
 // array of resource types
-$resource_values = array (
+$resource_values = varray [
   $fp,
   $dfp
-);
+];
 
 // array of unsigned formats
-$unsigned_formats = array(
+$unsigned_formats = varray[
   "%u", "%hu", "%lu",
   "%Lu", " %u", "%u ", 
   "\t%u", "\n%u", "%4u",
    "%30u", "%[0-9]", "%*u"
-);
+];
 
 
 $count = 1;

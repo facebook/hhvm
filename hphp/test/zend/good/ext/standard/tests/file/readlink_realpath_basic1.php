@@ -24,7 +24,7 @@ symlink("$file_path/readlink_realpath_basic1/home/readlink_realpath_basic1.tmp",
 
 
 echo "*** Testing readlink() and realpath(): with valid and invalid path ***\n";
-$linknames = array (
+$linknames = varray [
   /* linknames resulting in valid paths */
   "$file_path/readlink_realpath_basic1/home/readlink_realpath_basic1_link.tmp",
   "$file_path/readlink_realpath_basic1/home/test/readlink_realpath_basic1_link.tmp",
@@ -35,7 +35,7 @@ $linknames = array (
   "$file_path/readlink_realpath_basic1/home/../home/../test/../readlink_realpath_basic1_link.tmp",
   "$file_path/readlink_realpath_basic1/..readlink_realpath_basic1_link.tmp",
   "$file_path/readlink_realpath_basic1/home/test/readlink_realpath_basic1_link.tmp/"
-);
+];
 
 $counter = 1;
 /* loop through $files to read the linkpath of

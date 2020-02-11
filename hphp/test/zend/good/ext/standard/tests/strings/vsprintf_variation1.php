@@ -20,7 +20,7 @@ class sample
 echo "*** Testing vsprintf() : with unexpected values for format argument ***\n";
 
 // initialising the required variables
-$args = array(1, 2);
+$args = varray[1, 2];
 
 //get an unset variable
 $unset_var = 10;
@@ -31,7 +31,7 @@ $file_handle = fopen(__FILE__, 'r');
 
 
 //array of values to iterate over
-$values = array(
+$values = varray[
 
   // int data
   0,
@@ -48,10 +48,10 @@ $values = array(
 
   // array data
   array(),
-  array(0),
-  array(1),
-  array(1,2),
-  array('color' => 'red', 'item' => 'pen'),
+  varray[0],
+  varray[1],
+  varray[1,2],
+  darray['color' => 'red', 'item' => 'pen'],
 
   // null data
   NULL,
@@ -78,7 +78,7 @@ $values = array(
 
   // resource data
   $file_handle
-);
+];
 
 // loop through each element of the array for format
 

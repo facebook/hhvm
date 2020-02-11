@@ -13,7 +13,7 @@
 echo "*** Testing krsort() : usage variations ***\n";
 
 // bool value array
-$bool_values = array (true => true, false => false, TRUE => TRUE, FALSE => FALSE);
+$bool_values = darray [true => true, false => false, TRUE => TRUE, FALSE => FALSE];
 
 echo "\n-- Testing krsort() by supplying boolean value array, 'flag' value is defualt --\n";
 $temp_array = $bool_values;

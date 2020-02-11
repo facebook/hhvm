@@ -2,9 +2,9 @@
 class Test {
   function __construct() {
     ob_start(
-      array(
+      varray[
         $this, 'transform'
-      )
+      ]
     );
   }
 

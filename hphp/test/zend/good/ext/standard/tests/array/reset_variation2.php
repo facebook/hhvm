@@ -10,7 +10,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing reset() : usage variations ***\n";
 
-$array = array('a', 'b', 'c');
+$array = varray['a', 'b', 'c'];
 
 echo "\n-- Initial Position: --\n";
 echo current($array) . " => " . key($array) . "\n";

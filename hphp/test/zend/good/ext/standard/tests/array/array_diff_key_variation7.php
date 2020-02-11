@@ -7,17 +7,17 @@
 echo "*** Testing array_diff_key() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$input_array = array(10 => '10', "" => 'empty'); 
+$input_array = darray[10 => '10', "" => 'empty']; 
 
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
 
-$input_arrays = array(
-      'null indexed' => array(NULL => 'null 1', null => 'null 2'),
-      'undefined indexed' => array(@$undefined_var => 'undefined'),
-      'unset  indexed' => array(@$unset_var => 'unset'),
-);
+$input_arrays = darray[
+      'null indexed' => darray[NULL => 'null 1', null => 'null 2'],
+      'undefined indexed' => darray[@$undefined_var => 'undefined'],
+      'unset  indexed' => darray[@$unset_var => 'unset'],
+];
 
 foreach($input_arrays as $key =>$value) {
       echo "\n--$key--\n";

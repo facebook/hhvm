@@ -27,7 +27,7 @@ $hardlink = $file_path."/copy_variation8_hardlink.tmp";
 symlink($file, $symlink);  //creating symlink
 link($file, $hardlink);  //creating hardlink
 
-$dests = array(
+$dests = varray[
   $base_dir."/copy_copy_variation8.tmp",
   $base_dir."/copy_variation8_sub/copy_copy_variation8.tmp",
   "$sub_dir/copy_copy_variation8.tmp",
@@ -36,7 +36,7 @@ $dests = array(
   "$sub_dir/..///../copy_copy_variation8.tmp",
   "$sub_dir/..///../*",
   "$dirname_with_blank/copy_copy_variation8.tmp"
-);
+];
 
 $count = 1;
 foreach($dests as $dest) {

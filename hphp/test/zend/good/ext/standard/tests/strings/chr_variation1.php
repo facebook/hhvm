@@ -22,7 +22,7 @@ unset($unset_var);
 $file_handle = fopen(__FILE__, "r");
 
 // array with different values for $input
-$inputs =  array (
+$inputs =  varray [
 
           // integer values
 /*1*/      0,
@@ -37,8 +37,8 @@ $inputs =  array (
 
           // array values
 /*8*/      array(),
-          array(0),
-          array(1, 2),
+          varray[0],
+          varray[1, 2],
 
           // boolean values
 /*11*/      true,
@@ -61,7 +61,7 @@ $inputs =  array (
 
           // unset variable
 /*20*/      @$unset_var
-);
+];
 
 // loop through with each element of the $inputs array to test chr() function
 $count = 1;

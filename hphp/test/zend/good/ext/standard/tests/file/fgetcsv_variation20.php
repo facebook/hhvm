@@ -14,10 +14,10 @@ echo "*** Testing fgetcsv() : with default enclosure, line without any csv field
 $filename = dirname(__FILE__) . '/fgetcsv_variation20.tmp';
 @unlink($filename);
 
-$file_modes = array ("r","rb", "rt", "r+", "r+b", "r+t",
+$file_modes = varray ["r","rb", "rt", "r+", "r+b", "r+t",
                      "a+", "a+b", "a+t",
                      "w+", "w+b", "w+t",
-                     "x+", "x+b", "x+t");
+                     "x+", "x+b", "x+t"];
 
 $loop_counter = 1;
   for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {

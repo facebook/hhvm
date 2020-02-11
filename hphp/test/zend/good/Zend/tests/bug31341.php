@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$a = array(
+$a = varray[
     "$     \{    ",
     "      \{   $",
     "      \{$   ",
@@ -8,7 +8,7 @@ $a = array(
     "      \{\$  ",
     "\$    \{    ",
     "      \{  \$",
-    "%     \{    ");
+    "%     \{    "];
 
 foreach ($a as $v) {
     echo("'$v'\n");

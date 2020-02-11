@@ -19,7 +19,7 @@ abc
 1a2b3c
 EOD;
 //array of string inputs for $str
-$str_arr = array(
+$str_arr = varray[
   //double quoted strings
   "123",
   "abc",
@@ -32,10 +32,10 @@ $str_arr = array(
 
   //heredoc string
   $heredoc_str
-);
+];
 $from = "123abc";
 $to = "abc123";
-$replace_pairs = array("1" => "a", "a" => 1, "2b3c" => "b2c3", "b2c3" => "3c2b");
+$replace_pairs = darray["1" => "a", "a" => 1, "2b3c" => "b2c3", "b2c3" => "3c2b"];
 
 /* loop through to test strtr() with each element of $str_arr */
 for($index = 0; $index < count($str_arr); $index++) {

@@ -20,8 +20,8 @@ class privf {
 class subprivf extends privf  {
 }
 <<__EntryPoint>> function main(): void {
-$classes = array("pubf", "subpubf", "protf", "subprotf",
-                 "privf", "subprivf");
+$classes = varray["pubf", "subpubf", "protf", "subprotf",
+                 "privf", "subprivf"];
 foreach($classes as $class) {
     echo "Reflecting on class $class: \n";
     $rc = new ReflectionClass($class);

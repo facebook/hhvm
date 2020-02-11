@@ -9,6 +9,6 @@ class foo {
 }
 <<__EntryPoint>> function main(): void {
 $foo = new foo;
-$arr = array($foo, 'abc');
+$arr = varray[$foo, 'abc'];
 $arr();
 }

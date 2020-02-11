@@ -9,7 +9,7 @@ echo "*** Testing strip_tags() : basic functionality ***\n";
 // Calling strip_tags() with all possible arguments
 $string = "<html><p>hello</p><b>world</b><a href=\"#fragment\">Other text</a></html><?hh echo hello ?>";
 
-$allowed_tags_array=array(
+$allowed_tags_array=varray[
   "<html>",
   '<html>',
   "<p>",
@@ -19,7 +19,7 @@ $allowed_tags_array=array(
   "<?hh",
   '<?hh',
   "<html><p><a><?hh"
-);
+];
 
 // loop through the $string with various $allowed_tags_array to test strip_tags
 // on various allowed tags

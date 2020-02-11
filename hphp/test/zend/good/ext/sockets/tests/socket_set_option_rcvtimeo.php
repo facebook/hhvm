@@ -9,7 +9,7 @@ socket_set_block($socket);
 $retval_1 = socket_set_option( $socket, SOL_SOCKET, SO_RCVTIMEO, array());
 
 //set/get comparison
-$options = array("sec" => 1, "usec" => 0);
+$options = darray["sec" => 1, "usec" => 0];
 $retval_2 = socket_set_option( $socket, SOL_SOCKET, SO_RCVTIMEO, $options);
 $retval_3 = socket_get_option( $socket, SOL_SOCKET, SO_RCVTIMEO);
 

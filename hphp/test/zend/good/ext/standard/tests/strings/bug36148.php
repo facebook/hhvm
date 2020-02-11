@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$values = array("a", "aa", "aaa", "aaaa");
+$values = varray["a", "aa", "aaa", "aaaa"];
 foreach ($values as $value) {
     $a = pack("H*", $value);
     $b = unpack("H*", $a);

@@ -60,7 +60,7 @@ class SeekableNumericArrayIterator extends NumericArrayIterator implements Seeka
     }
 }
 <<__EntryPoint>> function main(): void {
-$a = array(1, 2, 3, 4, 5);
+$a = varray[1, 2, 3, 4, 5];
 $it = new LimitIterator(new NumericArrayIterator($a), 1, 3);
 foreach ($it as $v)
 {
@@ -68,7 +68,7 @@ foreach ($it as $v)
 }
 
 echo "===SEEKABLE===\n";
-$a = array(1, 2, 3, 4, 5);
+$a = varray[1, 2, 3, 4, 5];
 $it = new LimitIterator(new SeekableNumericArrayIterator($a), 1, 3);
 foreach($it as $v)
 {
@@ -77,7 +77,7 @@ foreach($it as $v)
 
 echo "===STACKED===\n";
 echo "Shows '2 is greater than 2' because the test is actually done with the current value which is 3.\n";
-$a = array(1, 2, 3, 4, 5);
+$a = varray[1, 2, 3, 4, 5];
 $it = new CachingIterator(new LimitIterator(new SeekableNumericArrayIterator($a), 1, 3));
 foreach($it as $v)
 {

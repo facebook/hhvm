@@ -1,7 +1,7 @@
 <?hh
 class EnglishMealIterator implements Iterator {
     private $pos=0;
-    private $myContent=array("breakfast", "dinner", "tea");
+    private $myContent=varray["breakfast", "dinner", "tea"];
 
     public function valid() {
         echo "--> " . __METHOD__ . " ($this->pos)\n";

@@ -19,7 +19,7 @@ $heredoc_needle = <<<EOD
 ^^&*(
 EOD;
 
-$needles = array(
+$needles = varray[
   "!@@!",
   '_',
   '("_")',
@@ -27,7 +27,7 @@ $needles = array(
   "(special)",
   $heredoc_needle,  //needle as heredoc string
   $special_chars_str  //needle as haystack
-);
+];
 
 //loop through to test strrchr() with each needle
 foreach($needles as $needle) {

@@ -26,14 +26,14 @@ $value2 = "hello";
 $value3 = 0;
 
 // array containing reference variables
-$arr1 = array(
+$arr1 = darray[
   0 => 0,
   1 => $value2,
   2 => $value2,
   3 => "hello",
   4 => $value3,
   $value2 => $value2
-);
+];
 echo "-- with one array --\n";
 var_dump( array_map(fun('callback1'), $arr1) );
 

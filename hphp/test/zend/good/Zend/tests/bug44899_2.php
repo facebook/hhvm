@@ -20,7 +20,7 @@ class myclass
     }
 }
 <<__EntryPoint>> function main(): void {
-$arr = array('foo' => '');
+$arr = darray['foo' => ''];
 
 $myclass = new myclass($arr) ;
 

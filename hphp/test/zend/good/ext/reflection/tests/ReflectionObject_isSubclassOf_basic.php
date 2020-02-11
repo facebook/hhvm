@@ -6,16 +6,16 @@ class C extends B {}
 interface I {}
 class X implements I {}
 <<__EntryPoint>> function main(): void {
-$classNames = array('A', 'B', 'C', 'I', 'X');
+$classNames = varray['A', 'B', 'C', 'I', 'X'];
 
 //Create ReflectionClasses
-$rcs = array();
+$rcs = darray[];
 foreach ($classNames as $className) {
     $rcs[$className] = new ReflectionClass($className);
 }
 
 //Create ReflectionObjects
-$ros = array();
+$ros = darray[];
 foreach ($classNames as $className) {
     if ($rcs[$className]->isInstantiable()) {
         $ros[$className] = new ReflectionObject(new $className);

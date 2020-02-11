@@ -14,7 +14,7 @@ var_dump(min(false, true, false));
 var_dump(min(true, false, true));
 var_dump(min(1, true, false, true));
 var_dump(min(0, true, false, true));
-var_dump(min(0, 1, array(2,3)));
+var_dump(min(0, 1, varray[2,3]));
 
 echo "\nDone\n";
 }

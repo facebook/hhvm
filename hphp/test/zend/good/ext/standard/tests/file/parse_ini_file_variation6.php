@@ -16,7 +16,7 @@ mkdir($absSubDir);
 $old_dir_path = getcwd();
 chdir(dirname(__FILE__));
 
-$allDirs = array(
+$allDirs = varray[
   // absolute paths
   "$absSubDir/",
   "$absSubDir/../".$subDir,
@@ -32,7 +32,7 @@ $allDirs = array(
   "./".$mainDir."/../".$mainDir."/".$subDir,
   "BADDIR",  
   
-);
+];
 
 $filename = 'ParseIniFileVar6.ini';
 $content="a=test";

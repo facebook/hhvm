@@ -6,11 +6,11 @@ class foo {
     const CCC = 'a';
     const DDD = self::AAA;
 
-    private static $foo = array(
+    private static $foo = darray[
         self::BBB    => 'a',
         self::CCC    => 'b',
         self::DDD    =>  self::AAA
-    );
+    ];
 
     public static function test() {
         self::$foo;

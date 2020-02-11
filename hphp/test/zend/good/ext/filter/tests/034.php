@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$booleans = array(
+$booleans = darray[
 '1' => true,
 'On' => true,
 'Off' => true,
@@ -14,7 +14,7 @@ $booleans = array(
 'oFf' => false,
 
 '' => false
-);
+];
 
 foreach($booleans as $val=>$exp) {
     $res =filter_var($val, FILTER_VALIDATE_BOOLEAN);

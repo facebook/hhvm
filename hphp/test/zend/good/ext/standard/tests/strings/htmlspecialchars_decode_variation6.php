@@ -11,12 +11,12 @@
 echo "*** Testing htmlspecialchars_decode() : usage variations ***\n";
 
 //various string inputs
-$strings = array (
+$strings = varray [
   "\tHello \$world ".chr(0)."\&!)The big brown fox jumped over the\t\f lazy dog\v\n",
   "\tHello \"world\"\t\v \0 This is a valid\t string",
   "This converts\t decimal to \$string".decbin(65)."Hello world",
   b"This is a binary\t \v\fstring"
-);
+];
 
 //loop through the strings array to check if htmlspecialchars_decode() is binary safe
 $iterator = 1;

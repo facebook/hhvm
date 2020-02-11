@@ -1,5 +1,5 @@
 <?hh
-function foo($bar = array("a", "b", "c"))
+function foo($bar = varray["a", "b", "c"])
 {
     var_dump(current($bar));
 }

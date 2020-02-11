@@ -32,23 +32,23 @@ Hello world
 EOT;
 
 // associative arrays with different values
-$inputs = array (
+$inputs = varray [
        // arrays with integer values
-/*1*/  array('0' => 0, '1' => 0),
-       array("one" => 1, 'two' => 2, "three" => 1, 4 => 1),
+/*1*/  darray['0' => 0, '1' => 0],
+       darray["one" => 1, 'two' => 2, "three" => 1, 4 => 1],
 
        // arrays with float values
-/*3*/  array("float1" => 2.3333, "float2" => 2.3333),
-       array("f1" => 1.2, 'f2' => 3.33, 3 => 4.89999922839999, 'f4' => 1.2),
+/*3*/  darray["float1" => 2.3333, "float2" => 2.3333],
+       darray["f1" => 1.2, 'f2' => 3.33, 3 => 4.89999922839999, 'f4' => 1.2],
 
        // arrays with string values
-/*5*/  array(111 => "\tHello", "red" => "col\tor", 2 => "\v\fworld", 3.3 =>  "\tHello"),
-       array(111 => '\tHello', "red" => 'col\tor', 2 => '\v\fworld', 3.3 =>  '\tHello'),
+/*5*/  darray[111 => "\tHello", "red" => "col\tor", 2 => "\v\fworld", 3.3 =>  "\tHello"],
+       darray[111 => '\tHello', "red" => 'col\tor', 2 => '\v\fworld', 3.3 =>  '\tHello'],
        array(1 => "hello", "heredoc" => $heredoc, $heredoc),
 
        // array with object, unset variable and resource variable
 /*8*/ array(11 => new classA(), "unset" => @$unset_var, "resource" => $fp, new classA(), $fp),
-);
+];
 
 // loop through each sub-array of $inputs to check the behavior of array_unique()
 $iterator = 1;

@@ -22,7 +22,7 @@ EOT;
 $chunklen = 6E+0;
 
 //different values for 'ending'
-$values = array (
+$values = varray [
   "",  //empty
   " ",  //space
   "a",  //single char
@@ -30,7 +30,7 @@ $values = array (
   "\r\n",  //White space char
   "123",  //Numeric
   ")speci@! ch@r$(",  //String with special chars
-);
+];
 
 //loop through each values for 'ending'
 for($count = 0; $count < count($values); $count++) {

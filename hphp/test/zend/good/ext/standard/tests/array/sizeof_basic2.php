@@ -13,9 +13,9 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing sizeof() : basic functionality ***\n";
 
-$int_array = array(1, 2, 3, 4);
-$string_array = array("Saffron", "White", "Green");
-$indexed_array = array("Aggression" => "Saffron", "Peace" => "White", "Growth" => "Green");
+$int_array = varray[1, 2, 3, 4];
+$string_array = varray["Saffron", "White", "Green"];
+$indexed_array = darray["Aggression" => "Saffron", "Peace" => "White", "Growth" => "Green"];
 $mixed_array = array(1, 2, "Aggression" => "Saffron", 10 => "Ten", "Ten" => 10);
 
 echo "-- Testing sizeof() with integer array --\n";

@@ -16,7 +16,7 @@ function dump_iterateable($class) {
     var_dump($reflection->isIterateable());
 }
 <<__EntryPoint>> function main(): void {
-$classes = array("IteratorClass", "DerivedClass", "NonIterator");
+$classes = varray["IteratorClass", "DerivedClass", "NonIterator"];
 foreach ($classes as $class) {
     echo "Is $class iterateable? ";
     dump_iterateable($class);

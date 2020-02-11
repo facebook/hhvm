@@ -7,7 +7,7 @@ function foo( inout $state ) {
     }
 }
 <<__EntryPoint>> function main(): void {
-$state = array("one" => 1, "two" => 2, "three" => 3);
+$state = darray["one" => 1, "two" => 2, "three" => 3];
 foo(inout $state);
 reset(inout $state);
 var_dump( key($state), current($state) );

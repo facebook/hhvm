@@ -8,7 +8,7 @@ class MyRecursiveFilterIterator extends RecursiveFilterIterator
     }
 }
 <<__EntryPoint>> function main(): void {
-$ar = array(1, array(21, 22), 3);
+$ar = varray[1, varray[21, 22], 3];
 $it = new RecursiveArrayIterator($ar);
 $it = new MyRecursiveFilterIterator($it);
 $it = new RecursiveIteratorIterator($it);

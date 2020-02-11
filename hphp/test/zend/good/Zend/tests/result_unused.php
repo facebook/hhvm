@@ -1,17 +1,17 @@
 <?hh
 
 class Foo {
-	public $prop = array(3);
+	public $prop = varray[3];
 	function __get($name) {
-		return array(4);
+		return varray[4];
 	}
 }
 <<__EntryPoint>>
 function main_entry(): void {
-  $x = array(1);
+  $x = varray[1];
   $a = "x";
 
-  $x = array(array(2));
+  $x = varray[varray[2]];
   $x[0];
 
   $x = "str";

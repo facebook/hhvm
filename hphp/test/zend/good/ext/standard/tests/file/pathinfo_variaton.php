@@ -19,15 +19,15 @@ function main(): void {
 
   $obj = new object_temp();
 
-  $path_arr = array(
+  $path_arr = varray[
     "www.example.com",
     "/testdir/foo//test/",
     "../foo/test.link",
     "./test/work/scratch/mydir/yourdir/ourdir/test1/test2/test3/test4/test5/test6/test.tmp",
     2.345
-  );
+  ];
 
-  $paths = array(
+  $paths = varray[
     /* pathname containing numeric string */
     0,
     1234,
@@ -73,7 +73,7 @@ function main(): void {
     $path_arr[2],
     $path_arr[3],
     $path_arr[4]
-  );
+  ];
 
   $counter = 1;
   /* loop through $paths to test each $path in the above array */

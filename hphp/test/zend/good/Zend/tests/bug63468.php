@@ -3,7 +3,7 @@ class Foo
 {
     public function run()
     {
-        return call_user_func(array('Bar', 'getValue'));
+        return call_user_func(varray['Bar', 'getValue']);
     }
 
     private static function getValue()

@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$array = array(0 => array('world'));
+$array = darray[0 => varray['world']];
 
 $it = new RecursiveIteratorIterator(new RecursiveArrayIterator($array));
 foreach($it as $key => $val) {

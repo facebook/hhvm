@@ -19,7 +19,7 @@ class D extends abstractClass {
     function f2() {}
 }
 <<__EntryPoint>> function main(): void {
-$classes = array("C", "ifaceImpl", "D");
+$classes = varray["C", "ifaceImpl", "D"];
 
 foreach($classes  as $class ) {
     $ro = new ReflectionObject(new $class);

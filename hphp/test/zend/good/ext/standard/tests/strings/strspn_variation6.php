@@ -48,7 +48,7 @@ hello\0\100\xaaworld\0hello
 EOT;
 
 // defining array of different heredoc strings
-$heredoc_strings = array(
+$heredoc_strings = varray[
                    $empty_heredoc,
                    $heredoc_with_newline,
                    $heredoc_with_characters,
@@ -56,10 +56,10 @@ $heredoc_strings = array(
                    $heredoc_with_alphanumerics,
                    $heredoc_with_embedded_nulls,
                    $heredoc_with_hexa_octal
-                   );
+                   ];
 
 // defining array of different mask strings
-$mask_array = array(
+$mask_array = varray[
             "",
             '',
             "fh\ne\trlsti \l",
@@ -70,7 +70,7 @@ $mask_array = array(
             "fl\t\eh ",
             "l \te",
                     "lf\the\i\100\xaa"
-                   );
+                   ];
 
 
 // loop through each element of the array for different heredoc and mask strings

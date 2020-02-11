@@ -1,11 +1,11 @@
 <?hh <<__EntryPoint>> function main(): void {
-$tests = array(
-    array("hello world", "3e4a5a57"),
-    array("", 0),
-    array("", "000000"),
-    array("a", "ca2e9442"),
-    array("aa", "7081738e"),
-);
+$tests = varray[
+    varray["hello world", "3e4a5a57"],
+    varray["", 0],
+    varray["", "000000"],
+    varray["a", "ca2e9442"],
+    varray["aa", "7081738e"],
+];
 
 $i = 0;
 $pass = true;

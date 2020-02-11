@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$foo = array('abc', '0000');
+$foo = varray['abc', '0000'];
 var_dump($foo);
 
 $count = array_count_values( $foo );

@@ -12,9 +12,9 @@
 echo "*** Testing array_intersect() : binary safe checking ***\n";
 
 // array with binary values
-$arr_binary = array(b"hello", b"world");
+$arr_binary = varray[b"hello", b"world"];
 // simple array
-$arr_normal = array("hello", "world");
+$arr_normal = varray["hello", "world"];
 
 // array with binary value for $arr1 argument
 var_dump( array_intersect($arr_binary, $arr_normal) );

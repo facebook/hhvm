@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$array=array('a','b');
+$array=varray['a','b'];
 
 $iterator = new ArrayIterator($array);
 

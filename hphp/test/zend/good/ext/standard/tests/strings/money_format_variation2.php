@@ -29,7 +29,7 @@ unset($unset_var);
 $file_handle = fopen(__FILE__, "r");
 
 // array with different values for $number
-$numbers =  array (
+$numbers =  varray [
 
           // integer values
 /*1*/      0,
@@ -46,8 +46,8 @@ $numbers =  array (
 
           // array values
 /*10*/      array(),
-          array(0),
-          array(1, 2),
+          varray[0],
+          varray[1, 2],
 
           // boolean values
 /*13*/      true,
@@ -77,7 +77,7 @@ $numbers =  array (
 
           // unset variable
 /*27*/      @$unset_var
-);
+];
 
 // loop through with each element of the $numbers array to test money_format() function
 $count = 1;

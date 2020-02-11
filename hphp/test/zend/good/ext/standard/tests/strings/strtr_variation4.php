@@ -19,7 +19,7 @@ $heredoc_str = <<<EOD
 EOD;
 
 //array of string inputs for $str
-$str_arr = array(
+$str_arr = varray[
   "",
   '',
   NULL,
@@ -27,11 +27,11 @@ $str_arr = array(
   FALSE,
   false,
   $heredoc_str
-);
+];
 
 $from = "";
 $to = "TEST";
-$replace_pairs = array("" => "t", '' => "TEST");
+$replace_pairs = darray["" => "t", '' => "TEST"];
 
 
 /* loop through to test strtr() with each element of $str_arr */

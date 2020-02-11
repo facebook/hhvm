@@ -11,7 +11,7 @@
 echo "*** Testing strtok() : with miscellaneous inputs ***\n";
 
 // defining arrays for input strings and tokens
-$string_array = array(
+$string_array = varray[
                   "HELLO WORLD",
                 "hello world",
                   "_HELLO_WORLD_",
@@ -23,8 +23,8 @@ $string_array = array(
                        chr(0).chr(0),
                        chr(0).'hello'.chr(0),
                        'hello'.chr(0).'world'
-              );
-$token_array = array(
+              ];
+$token_array = varray[
               "wr",
               "hello world",
               "__",
@@ -36,7 +36,7 @@ $token_array = array(
               "\0",
               "\0",
               "\0",
-             );
+             ];
 
 // loop through each element of the array and check the working of strtok()
 // when supplied with different string and token values

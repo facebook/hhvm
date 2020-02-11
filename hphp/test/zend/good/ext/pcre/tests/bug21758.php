@@ -6,7 +6,7 @@ class Foo {
     $s = 'preg_replace() is broken';
     var_dump(preg_replace_callback(
                '/broken/',
-               array($this, 'bar'),
+               varray[$this, 'bar'],
                $s,
                -1,
                inout $count

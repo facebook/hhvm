@@ -14,14 +14,14 @@ $quote_char_str = <<<EOD
 'things' 'in' 'single' 'quote'
 EOD;
 
-$needles = array(
+$needles = varray[
   "things",
   "\"things\"",
   "\'things\'",
   "in",
   "quote",
   $quote_char_str //needle as haystack
-);
+];
 
 //loop through to test strrchr() with each needle
 foreach($needles as $needle) {

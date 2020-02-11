@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$it = new ParentIterator(new RecursiveArrayIterator(array(1,array(21,22, array(231)),3)));
+$it = new ParentIterator(new RecursiveArrayIterator(varray[1,varray[21,22, varray[231]],3]));
 
 foreach(new RecursiveIteratorIterator($it) as $k=>$v)
 {

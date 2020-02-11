@@ -1,10 +1,10 @@
 <?hh <<__EntryPoint>> function main(): void {
-$array = array(
+$array = darray[
     'region_id' => 1,
     'discipline' => 23,
     'degrees' => array(),
     'country_id' => 27
-);
+];
 
 $serialized = serialize($array);
 

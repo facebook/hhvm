@@ -11,7 +11,7 @@ echo "*** Testing gmdate() : usage variation ***\n";
 date_default_timezone_set('UTC');
 $timestamp = mktime(8, 8, 8, 8, 8, 2008);
 
-$time_formats = array(
+$time_formats = darray[
 
       'Lowercase Ante meridiem and post meridiem' => 'a',
       'Uppercase Ante meridiem and post meridiem' => 'a',
@@ -23,7 +23,7 @@ $time_formats = array(
       'Minutes with leading zeros' => 'i',
       'Seconds with leading zeros' => 's',
       'Milliseconds' => 'u',
-);
+];
 
 foreach($time_formats as $key =>$value) {
       echo "\n--$key--\n";

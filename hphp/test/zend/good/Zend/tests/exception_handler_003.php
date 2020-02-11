@@ -3,7 +3,7 @@
 class test {
 
     function foo () {
-        set_exception_handler(array($this, "bar"));
+        set_exception_handler(varray[$this, "bar"]);
     }
 
     function bar($e) {

@@ -25,7 +25,7 @@ unset($unset_var);
 $file_handle = fopen(__FILE__, "r");
 
 // array with different values
-$haystacks =  array (
+$haystacks =  varray [
 
   // integer values
   0,
@@ -42,10 +42,10 @@ $haystacks =  array (
 
   // array values
   array(),
-  array(0),
-  array(1),
-  array(1, 2),
-  array('color' => 'red', 'item' => 'pen'),
+  varray[0],
+  varray[1],
+  varray[1, 2],
+  darray['color' => 'red', 'item' => 'pen'],
 
   // boolean values
   true,
@@ -72,9 +72,9 @@ $haystacks =  array (
 
   // unset variable
   @$unset_var
-);
+];
 
-$needles =  array (
+$needles =  varray [
   //integer numeric strings
   "0",
   "1",
@@ -112,7 +112,7 @@ $needles =  array (
   //undefined variable in string form
   @"$undefined_var",
   @"$unset_var"
-);
+];
 
 // loop through each element of the array and check the working of strrchr()
 $count = 1;

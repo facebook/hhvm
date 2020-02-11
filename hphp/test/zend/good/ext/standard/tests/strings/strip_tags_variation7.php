@@ -10,7 +10,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing strip_tags() : usage variations ***\n";
 
-$strings = array (
+$strings = varray [
   "<abc>hello</abc> \t\tworld... <ppp>strip_tags_test</ppp>",
   '<abc>hello</abc> \t\tworld... <ppp>strip_tags_test</ppp>',
   "<%?php hello\t world?%>",
@@ -23,7 +23,7 @@ $strings = array (
   '<nnn>I am not a valid html text</nnn>',
   "<nnn>I am a quoted (\") string with special chars like \$,\!,\@,\%,\&</nnn>",
   '<nnn>I am a quoted (\") string with special chars like \$,\!,\@,\%,\&</nnn>',
-);
+];
 
 $quotes = "<nnn><abc><%?<<html>>";
 

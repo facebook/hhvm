@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$a = array();
+$a = varray[];
 $a[] = $a;
 
 var_dump($a);

@@ -16,7 +16,7 @@ error_reporting(E_ALL & ~E_NOTICE);
 $unset_var = 10;
 unset ($unset_var);
 
-$values = array(
+$values = darray[
 
           // int data
           "0" => 0,
@@ -53,7 +53,7 @@ $values = array(
 
          // unset data
          "unset var" => $unset_var,
-);
+];
 
 // loop through each element of the array for data
 

@@ -18,7 +18,7 @@ echo "*** Testing str_split() : single quoted strings for 'str' ***\n";
 $split_length = 5;
 
 // different values for 'str'
-$values = array(
+$values = varray[
   '',  //empty
   ' ',  //space
   '1234', //with only numbers
@@ -31,7 +31,7 @@ $values = array(
   'with    multiple     space char',
   'Testing invalid \k and \m escape char',
   'to check with \\n and \\t' //ignoring \n and \t results
-);
+];
 
 //loop through each element of $values for 'str' argument
 for($count = 0; $count < count($values); $count++) {

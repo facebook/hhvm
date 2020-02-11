@@ -22,7 +22,7 @@ This is line 2 \tof "heredoc" string
 EOT;
 // initialising the string array
 
-$str_array = array(
+$str_array = varray[
                     // string with newline character
                     "\n",
             "\\n",
@@ -44,7 +44,7 @@ $str_array = array(
                     'Hello \tworld',
                     'Hello \\tworld',
                     $heredoc_string_with_tab
-                  );
+                  ];
 
 $count = 1;
 // looping to test for all strings in $str_array

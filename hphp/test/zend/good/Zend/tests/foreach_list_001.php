@@ -1,23 +1,23 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-foreach(array(array(1,2), array(3,4)) as list($a, $b)) {
+foreach(varray[varray[1,2], varray[3,4]] as list($a, $b)) {
     var_dump($a . $b);
 }
 
-$array = array(
-    array('a', 'b'),
-    array('c', 'd'),
-);
+$array = varray[
+    varray['a', 'b'],
+    varray['c', 'd'],
+];
 
 foreach ($array as list($a, $b)) {
     var_dump($a . $b);
 }
 
 
-$multi = array(
-    array(array(1,2), array(3,4)),
-    array(array(5,6), array(7,8)),
-);
+$multi = varray[
+    varray[varray[1,2], varray[3,4]],
+    varray[varray[5,6], varray[7,8]],
+];
 
 foreach ($multi as list(list($a, $b), list($c, $d))) {
     var_dump($a . $b . $c . $d);

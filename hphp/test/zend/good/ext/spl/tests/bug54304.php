@@ -1,8 +1,8 @@
 <?hh
 class foo extends ArrayIterator {
     public function __construct( ) {
-        parent::__construct(array(
-            'test3'=>'test999'));
+        parent::__construct(darray[
+            'test3'=>'test999']);
     }
 }
 <<__EntryPoint>> function main(): void {

@@ -10,7 +10,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing stripos() function: strings repetitive chars ***\n";
 $haystack = "aBAbaBAbaBabAbAbaBa";
-$needles = array(
+$needles = varray[
   "aba",
   "aBA",
   "ABA",
@@ -19,7 +19,7 @@ $needles = array(
   "bab",
   "bAb",
   "BAB"
-);
+];
 
 /* loop through to consider various offsets in getting the position of the needle in haystack string */
 $count = 1;

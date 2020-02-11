@@ -9,12 +9,12 @@ $heredoc = <<<EOT
 hello world
 EOT;
 
-$variation_array = array(
+$variation_array = darray[
   'string DQ' => "string",
   'string SQ' => 'string',
   'mixed case string' => "sTrInG",
   'heredoc' => $heredoc,
-  );
+  ];
 
 
 foreach ( $variation_array as $var ) {

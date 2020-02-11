@@ -11,18 +11,18 @@ $fp = fopen (__FILE__, "r");
 $dfp = opendir ( dirname(__FILE__) );
 
 // array of resource types
-$resource_values = array (
+$resource_values = varray [
   $fp,
   $dfp
-);
+];
 
 // array of octal formats
-$octal_formats = array( 
+$octal_formats = varray[ 
   "%o", "%ho", "%lo", 
   "%Lo", " %o", "%o ",                        
   "\t%o", "\n%o", "%4o",
   "%30o", "%[0-7]", "%*o"
-);
+];
 
 $count = 1;
 foreach($resource_values as $resource_value) {

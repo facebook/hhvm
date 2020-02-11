@@ -11,7 +11,7 @@ $file_handle = fopen(__FILE__, "r");
 unset($file_handle);
 
 echo "\n*** Testing is_executable() on invalid files ***\n";
-$invalid_files = array(
+$invalid_files = varray[
   0,
   1234,
   -2.34555,
@@ -21,7 +21,7 @@ $invalid_files = array(
   " ",
   @array(),
   @$file_handle
-);
+];
 /* loop through to test each element in the above array 
    is an executable file */
 foreach( $invalid_files as $invalid_file ) {

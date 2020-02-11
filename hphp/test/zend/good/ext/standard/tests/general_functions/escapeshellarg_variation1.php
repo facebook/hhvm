@@ -21,7 +21,7 @@ EOT;
 // get a resource variable
 $fp = fopen(__FILE__, "r");
 
-$inputs = array(
+$inputs = varray[
        // int data
 /*1*/  0,
        1,
@@ -56,7 +56,7 @@ $inputs = array(
        // unset data
 /*20*/ @$unset_var,
 
-);
+];
 
 // loop through each element of $inputs to check the behaviour of escapeshellarg()
 $iterator = 1;

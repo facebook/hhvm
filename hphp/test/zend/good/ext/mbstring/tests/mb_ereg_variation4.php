@@ -39,7 +39,7 @@ function main_entry(): void {
   //contains japanese characters, ASCII digits and different, UTF-8 encoded digits
   $string_mb = base64_decode('5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII=');
 
-  $character_classes = array (b'[[:alnum:]]+', /*1*/
+  $character_classes = varray [b'[[:alnum:]]+', /*1*/
                               b'[[:alpha:]]+',
                               b'[[:ascii:]]+',
                               b'[[:blank:]]+',
@@ -51,7 +51,7 @@ function main_entry(): void {
                               b'[[:punct:]]+', /*10*/
                               b'[[:space:]]+',
                               b'[[:upper:]]+',
-                              b'[[:xdigit:]]+'); /*13*/
+                              b'[[:xdigit:]]+']; /*13*/
 
   $iterator = 1;
   $regs = null;

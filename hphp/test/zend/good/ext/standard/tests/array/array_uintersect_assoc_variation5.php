@@ -5,7 +5,7 @@
  * Alias to functions:
  */
 function incorrect_return_value ($val1, $val2) {
-  return array(1);
+  return varray[1];
 }
 function too_many_parameters ($val1, $val2, $val3) {
   return 1;
@@ -16,8 +16,8 @@ function too_few_parameters ($val1) {
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_uintersect_assoc() : usage variation - differing comparison functions***\n";
 
-$arr1 = array(1);
-$arr2 = array(1,2);
+$arr1 = varray[1];
+$arr2 = varray[1,2];
 
 echo "\n-- comparison function with an incorrect return value --\n";
 var_dump(array_uintersect_assoc($arr1, $arr2, 'incorrect_return_value'));

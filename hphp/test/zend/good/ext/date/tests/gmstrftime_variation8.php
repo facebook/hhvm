@@ -13,9 +13,9 @@ setlocale(LC_ALL, "en_US");
 date_default_timezone_set("Asia/Calcutta");
 
 //array of values to iterate over
-$inputs = array(
+$inputs = darray[
       'A literal % character' => "%%",
-);
+];
 
 // loop through each element of the array for timestamp
 

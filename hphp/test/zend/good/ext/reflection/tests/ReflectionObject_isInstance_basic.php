@@ -3,11 +3,11 @@ class A {}
 class B extends A {}
 class X {}
 <<__EntryPoint>> function main(): void {
-$classes = array("A", "B", "X");
+$classes = varray["A", "B", "X"];
 
-$instances = array(    "myA" => new A,
+$instances = darray[    "myA" => new A,
                     "myB" => new B,
-                    "myX" => new X );
+                    "myX" => new X ];
 
 foreach ($classes as $class) {
     $ro = new ReflectionObject(new $class);

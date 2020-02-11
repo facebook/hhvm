@@ -4,27 +4,27 @@
 */
 <<__EntryPoint>> function main(): void {
 echo "\n*** Testing array_merge() basic functionality ***";
-$begin_array = array(
+$begin_array = varray[
   array(),
-  array( 1 => "string"),
-  array( "" => "string"),
-  array( -2.44444 => 12),
-  array( "a" => 1, "b" => -2.344, "b" => "string", "c" => NULL,    "d" => -2.344),
-  array( 4 => 1, 3 => -2.344, "3" => "string", "2" => NULL,1 => -2.344),
+  darray[ 1 => "string"],
+  darray[ "" => "string"],
+  darray[ -2.44444 => 12],
+  darray[ "a" => 1, "b" => -2.344, "b" => "string", "c" => NULL,    "d" => -2.344],
+  darray[ 4 => 1, 3 => -2.344, "3" => "string", "2" => NULL,1 => -2.344],
   array( NULL, 1.23 => "Hi", "string" => "hello",
-  array("" => "World", "-2.34" => "a", "0" => "b"))
-);
+  darray["" => "World", "-2.34" => "a", "0" => "b"])
+];
 
-$end_array   = array(
+$end_array   = varray[
   array(),
-  array( 1 => "string"),
-  array( "" => "string"),
-  array( -2.44444 => 12),
-  array( "a" => 1, "b" => -2.344, "b" => "string", "c" => NULL, "d" => -2.344),
-  array( 4 => 1, 3 => -2.344, "3" => "string", "2" => NULL, 1=> -2.344),
+  darray[ 1 => "string"],
+  darray[ "" => "string"],
+  darray[ -2.44444 => 12],
+  darray[ "a" => 1, "b" => -2.344, "b" => "string", "c" => NULL, "d" => -2.344],
+  darray[ 4 => 1, 3 => -2.344, "3" => "string", "2" => NULL, 1=> -2.344],
   array( NULL, 1.23 => "Hi", "string" => "hello",
-         array("" => "World", "-2.34" => "a", "0" => "b"))
-);
+         darray["" => "World", "-2.34" => "a", "0" => "b"])
+];
 
 /* loop through to merge two arrays */
 $count_outer = 0;
@@ -51,8 +51,8 @@ var_dump( array_merge( $end_array[0],
 
 var_dump( array_merge( $end_array[0],
                        $end_array[5],
-                       array("array on fly"),
-                       array("nullarray" => array())
+                       varray["array on fly"],
+                       darray["nullarray" => array()]
                      )
         );
 

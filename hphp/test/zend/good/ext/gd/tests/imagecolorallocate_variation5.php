@@ -10,7 +10,7 @@ $red = 10;
 $green = 10;
 $blue = 10;
 
-$values = array(
+$values = darray[
       // octal integer data
       "Octal 000" => 000,
       "Octal 012" => 012,
@@ -22,7 +22,7 @@ $values = array(
       "Hexa-decimal 0xA" => 0xA,
       "Hexa-decimal -0xA" => -0xA,
       "Hexa-decimal 0xFF" => 0xFF,
-);
+];
 
 // loop through each element of the array for blue
 foreach($values as $key => $value) {

@@ -26,7 +26,7 @@ class A {
 
         echo "before call $method\n";
         print_r($this);
-        call_user_func_array(array($drv, $method), $args);
+        call_user_func_array(varray[$drv, $method], $args);
         echo "after call $method\n";
 
         // Uncomment this line to work without crash

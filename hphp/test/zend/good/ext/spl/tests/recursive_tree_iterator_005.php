@@ -1,24 +1,24 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$ary = array(
-	0 => array(
+$ary = darray[
+	0 => varray[
 		(string)"binary",
 		"abc2",
 		1,
-	),
+	],
 	(string)"binary" => array(
 		2,
 		"b",
-		3 => array(
+		3 => varray[
 			4,
 			"c",
-		),
-		"4abc" => array(
+		],
+		"4abc" => varray[
 			4,
 			"c",
-		),
+		],
 	),
-);
+];
 
 $it = new RecursiveTreeIterator(new RecursiveArrayIterator($ary), 0);
 foreach($it as $k => $v) {

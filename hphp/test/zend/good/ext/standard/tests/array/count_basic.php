@@ -12,11 +12,11 @@
 echo "*** Testing count() : basic functionality ***\n";
 
 echo "\n-- One Dimensional Array: --\n";
-$array = array('zero', 'one', 'two');
+$array = varray['zero', 'one', 'two'];
 var_dump(count($array));
 
 echo "\n-- Two Dimensional Array: --\n";
-$array_multi = array('zero', array(1, 2, 3), 'two');
+$array_multi = varray['zero', varray[1, 2, 3], 'two'];
 echo "\$mode = COUNT_NORMAL:    ";
 var_dump(count($array_multi, COUNT_NORMAL));
 echo "\$mode = 0:               ";

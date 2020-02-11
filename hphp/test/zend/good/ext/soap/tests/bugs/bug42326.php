@@ -5,9 +5,9 @@ $request = <<<EOF
 EOF;
 
 
-$soap_admin_classmap = array('productDetailsType' => 'SOAP_productDetailsType',
+$soap_admin_classmap = darray['productDetailsType' => 'SOAP_productDetailsType',
                              'GetProductsRequest' => 'SOAP_GetProductsRequest',
-                             'GetProductsResponse' => 'SOAP_GetProductsResponse');
+                             'GetProductsResponse' => 'SOAP_GetProductsResponse'];
 
 class SOAP_productDetailsType {
     public $id = 0;
@@ -31,7 +31,7 @@ class SOAP_Admin {
     }
 }
 
-$soap = new SoapServer(dirname(__FILE__).'/bug42326.wsdl', array('classmap' => $soap_admin_classmap));
+$soap = new SoapServer(dirname(__FILE__).'/bug42326.wsdl', darray['classmap' => $soap_admin_classmap]);
 $soap->setClass('SOAP_Admin');
 ob_start();
 $soap->handle($request);

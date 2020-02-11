@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$array = array(-1 => 0);
+$array = darray[-1 => 0];
 
 array_pop(inout $array);
 

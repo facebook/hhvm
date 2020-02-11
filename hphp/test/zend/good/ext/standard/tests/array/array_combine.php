@@ -1,9 +1,9 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$array1 = array('green', 'red', 'yellow');
-$array2 = array('1', '2', '3');
-$array3 = array(0, 1, 2);
-$array4 = array(TRUE, FALSE, NULL);
+$array1 = varray['green', 'red', 'yellow'];
+$array2 = varray['1', '2', '3'];
+$array3 = varray[0, 1, 2];
+$array4 = varray[TRUE, FALSE, NULL];
 $a = array_combine($array1, $array1);
 $b = array_combine($array1, $array2);
 $c = array_combine($array1, $array3);

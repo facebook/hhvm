@@ -9,7 +9,7 @@ echo "*** Testing array_multisort() : basic functionality - renumbering of numer
 
 // Initialise all required variables
 $ar1 = array( "strkey" => 2,  1,  9 => 1);
-$ar2 = array( 2, "aa" , "1");
+$ar2 = varray[ 2, "aa" , "1"];
 
 echo "\n-- Testing array_multisort() function with all normal arguments --\n";
 $asc = SORT_ASC;

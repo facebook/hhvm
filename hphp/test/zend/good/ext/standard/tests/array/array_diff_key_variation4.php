@@ -7,13 +7,13 @@
 echo "*** Testing array_diff_key() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$input_array = array(-07 => '-07', 0xA => '0xA'); 
+$input_array = darray[-07 => '-07', 0xA => '0xA']; 
 
-$input_arrays = array(
-      'decimal indexed' => array(10 => '10', '-17' => '-17'),
-      'octal indexed' => array(-011 => '-011', 012 => '012'),
-      'hexa  indexed' => array(0x12 => '0x12', -0x7 => '-0x7', ),
-);
+$input_arrays = darray[
+      'decimal indexed' => darray[10 => '10', '-17' => '-17'],
+      'octal indexed' => darray[-011 => '-011', 012 => '012'],
+      'hexa  indexed' => darray[0x12 => '0x12', -0x7 => '-0x7', ],
+];
 
 // loop through each element of the array for arr1
 foreach($input_arrays as $key =>$value) {

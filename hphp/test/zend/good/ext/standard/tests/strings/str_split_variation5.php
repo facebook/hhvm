@@ -61,7 +61,7 @@ which is single slash
 EOT8;
 
 //different heredoc strings for 'str'
-$heredoc_array = array(
+$heredoc_array = varray[
   $heredoc_null,
   $heredoc_blank,
   $heredoc_char,
@@ -70,7 +70,7 @@ $heredoc_array = array(
   $heredoc_spchar,
   $heredoc_escchar,
   $heredoc_quote_slash
-);
+];
 
 
 // loop through each element of the 'heredoc_array' for 'str'

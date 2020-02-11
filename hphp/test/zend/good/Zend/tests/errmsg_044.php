@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$a = array();
+$a = darray[];
 $a[0] = new stdclass;
 $a[0][0] = new stdclass;
 }

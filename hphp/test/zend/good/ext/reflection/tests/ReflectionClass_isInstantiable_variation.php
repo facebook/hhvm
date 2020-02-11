@@ -17,7 +17,7 @@ class privateCtorNew {
 
 <<__EntryPoint>>
 function main() {
-  $classes = array("noCtor", "publicCtorNew", "protectedCtorNew", "privateCtorNew");
+  $classes = varray["noCtor", "publicCtorNew", "protectedCtorNew", "privateCtorNew"];
 
   foreach($classes  as $class ) {
     $reflectionClass = new ReflectionClass($class);

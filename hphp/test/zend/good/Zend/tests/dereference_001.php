@@ -1,7 +1,7 @@
 <?hh
 
 function a() {
-    return array(1,array(5));
+    return varray[1,varray[5]];
 }
 
 function b() {
@@ -12,12 +12,12 @@ class foo {
     public $y = 1;
 
     public function test() {
-        return array(array(array('foobar')));
+        return varray[varray[varray['foobar']]];
     }
 }
 
 function c() {
-    return array(new foo);
+    return varray[new foo];
 }
 
 function d() {
@@ -27,7 +27,7 @@ function d() {
 
 function e() {
     $y = 'bar';
-    $x = array('a' => 'foo', 'b' => $y);
+    $x = darray['a' => 'foo', 'b' => $y];
     return $x;
 }
 

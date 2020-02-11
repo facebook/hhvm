@@ -12,7 +12,7 @@ $subject = "Hello, world,0120333.3445-1.234567          NULL TRUE FALSE\000
 	    ?Hello, World chr(0).chr(128).chr(234).chr(65).chr(255).chr(256)";
 
 /* needles in an array to be compared in the string $string */
-$search_str = array (
+$search_str = varray [
   "Hello, World",
   'Hello, World',
   '!!Hello, World',
@@ -48,7 +48,7 @@ $search_str = array (
   "\t",
   chr(128).chr(234).chr(65).chr(255).chr(256),
   $subject
-);
+];
 
 /* loop through to get the  $string */
 for( $i = 0; $i < count($search_str); $i++ ) {

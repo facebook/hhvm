@@ -10,14 +10,14 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing strip_tags() : usage variations ***\n";
 
-$double_quote_string = array (
+$double_quote_string = varray [
   "<html> \$ -> This represents the dollar sign</html><?hh echo hello ?>",
   "<html>\t\r\v The quick brown fo\fx jumped over the lazy dog</p>",
   "<a>This is a hyper text tag</a>",
   "<? <html>hello world\\t</html>?>",
   "<p>This is a paragraph</p>",
   "<b>This is \ta text in bold letters\r\s\malong with slashes\n</b>"
-);
+];
 
 $quotes = "<html><a><p><b><?hh";
 

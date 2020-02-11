@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$numbers = array(
+$numbers = varray[
 	"0000000000000000", //0
 	"2d431cebe2362a3f", //.0002
 	"2e431cebe2362a3f", //.0002 + 10^-Accuracy[.0002]*1.01
@@ -14,7 +14,7 @@ $numbers = array(
 	"fefffffffffff000", //2nd maximum subnormal double
 	"0000000000000f7f", //+inf
 	"0000000000000fff", //-inf
-);
+];
 
 foreach ($numbers as $ns) {
 	$num = unpack("d", pack("H*", $ns)); $num = reset(inout $num);

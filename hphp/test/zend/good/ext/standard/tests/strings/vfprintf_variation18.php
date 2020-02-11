@@ -21,37 +21,37 @@ $formats =
 
 // Arrays of non scientific values for the format defined in $format.
 // Each sub array contains non scientific values which correspond to each format in $format
-$args_array = array(
+$args_array = varray[
 
   // array of float values
-  array(2.2, .2, 10.2,
+  varray[2.2, .2, 10.2,
         123456.234, 123456.234, -1234.6789, +1234.6789,
         20.00, +212.2, -411000000000, 2212.000000000001,
         12345.780, 12.000000011111, -12.00000111111, -123456.234,
-        3.33, +4.44, 1.11,-2.22 ),
+        3.33, +4.44, 1.11,-2.22 ],
 
   // array of strings
-  array(" ", ' ', 'hello',
+  varray[" ", ' ', 'hello',
         '123hello', "123hello", '-123hello', '+123hello',
         "\12345678hello", "-\12345678hello", '0123456hello', 'h123456ello',
         "1234hello", "hello\0world", "NULL", "true",
-        "3", "4", '1', '2'),
+        "3", "4", '1', '2'],
 
   // different arrays
-  array( array(0), array(1, 2), array(-1, -1),
-         array("123"), array('123'), array('-123'), array("-123"),
-         array(true), array(false), array(TRUE), array(FALSE),
-         array("123hello"), array("1", "2"), array('123hello'), array(12=>"12twelve"),
-         array("3"), array("4"), array("1"), array("2") ),
+  varray[ varray[0], varray[1, 2], varray[-1, -1],
+         varray["123"], varray['123'], varray['-123'], varray["-123"],
+         varray[true], varray[false], varray[TRUE], varray[FALSE],
+         varray["123hello"], varray["1", "2"], varray['123hello'], darray[12=>"12twelve"],
+         varray["3"], varray["4"], varray["1"], varray["2"] ],
 
   // array of boolean data
-  array( true, TRUE, false,
+  varray[ true, TRUE, false,
          TRUE, 0, FALSE, 1,
          true, false, TRUE, FALSE,
          0, 1, 1, 0,
-         1, TRUE, 0, FALSE),
+         1, TRUE, 0, FALSE],
   
-);
+];
 
 /* creating dumping file */
 $data_file = dirname(__FILE__) . '/vfprintf_variation18.txt';

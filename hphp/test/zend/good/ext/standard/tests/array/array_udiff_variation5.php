@@ -5,7 +5,7 @@
  * Alias to functions:
  */
 function incorrect_return_value ($val1, $val2) {
-  return array(1);
+  return varray[1];
 }
 function too_many_parameters ($val1, $val2, $val3) {
   return 0;
@@ -17,8 +17,8 @@ function too_few_parameters ($val1) {
 echo "*** Testing array_udiff() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$arr1 = array(1);
-$arr2 = array(1);
+$arr1 = varray[1];
+$arr2 = varray[1];
 
 echo "\n-- comparison function with an incorrect return value --\n";
 var_dump(array_udiff($arr1, $arr2, 'incorrect_return_value'));

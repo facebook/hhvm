@@ -7,7 +7,7 @@
 echo "*** Testing sprintf() : with  white spaces in format strings ***\n";
 
 // initializing the format array
-$formats = array(
+$formats = varray[
   "% d", "%  d", "%   d",
   "% f", "%  f", "%   f",
   "% F", "%  F", "%   F",
@@ -19,7 +19,7 @@ $formats = array(
   "% x", "%  x", "%   x",
   "% X", "%  X", "%   X",
   "% E", "%  E", "%   E"
-);
+];
 
 // initializing the args array
 

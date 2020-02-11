@@ -6,7 +6,7 @@ class ÜberKööliäå
 }
 
 <<__EntryPoint>> function main(): void {
-$åäöÅÄÖ = array('åäöÅÄÖ' => 'åäöÅÄÖ');
+$åäöÅÄÖ = darray['åäöÅÄÖ' => 'åäöÅÄÖ'];
 
 $foo = new Überkööliäå();
 

@@ -12,7 +12,7 @@ echo "*** Testing strip_tags() : usage variations ***\n";
 
 $strings = "<html>hello</html> \tworld... <p>strip_tags_test\v\f</p><?hh hello\t wo\rrld?>";
 
-$quotes = array (
+$quotes = varray [
   "<nnn>",
   '<nnn>',
   "<abc>",
@@ -21,7 +21,7 @@ $quotes = array (
   '<%?php',
   "<<html>>",
   '<<html>>'
-);
+];
 
 //loop through the various elements of strings array to test strip_tags() functionality
 $iterator = 1;

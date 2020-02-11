@@ -14,15 +14,15 @@ echo "*** Testing get_resource_type() : variation test ***\n";
 
 $res = fopen(__FILE__, "r");
 
-$vars = array(
+$vars = darray[
     "bool"=>true,
     "int 10"=>10,
     "float 10.5"=>10.5,
     "string"=>"Hello World",
-    "array"=>array(1,2,3,4,5),
+    "array"=>varray[1,2,3,4,5],
     "NULL"=>NULL,
     "Object"=>new Hello()
-);
+];
 
 foreach($vars as $variation =>$object) {
       echo "\n-- $variation --\n";

@@ -12,11 +12,11 @@ $unset_var = array();
 unset ($unset_var); // now a null
 $null_var = NULL;
 
-$valid_nulls = array(
+$valid_nulls = darray[
                 "NULL" =>  NULL,
                 "null" => null,
                 "null_var" => $null_var,
-);
+];
 
 /* Loop to check for above null values with var_export() */
 echo "\n*** Output for null values ***\n";

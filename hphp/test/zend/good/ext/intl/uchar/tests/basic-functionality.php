@@ -1,10 +1,10 @@
 <?hh
 
 function unicode_info($cp) {
-  $proplist = array(
+  $proplist = varray[
     IntlChar::PROPERTY_ALPHABETIC,
-  );
-  $methodList = array(
+  ];
+  $methodList = varray[
     'isUAlphabetic',
     'isUUppercase', 'isupper',
     'isULowercase', 'islower',
@@ -14,7 +14,7 @@ function unicode_info($cp) {
     'isblank', 'isdefined', 'isspace', 'iscntrl',
     'isMirrored', 'isIDStart', 'isIDPart',
     'getBlockCode', 'charName',
-  );
+  ];
 
   $ncp = IntlChar::ord($cp);
   printf("Codepoint U+%04x\n", $ncp);
@@ -34,7 +34,7 @@ function unicode_info($cp) {
 }
 <<__EntryPoint>> function main(): void {
 printf("Codepoint range: %04x-%04x\n", IntlChar::CODEPOINT_MIN, IntlChar::CODEPOINT_MAX);
-$codepoints = array('P', 0xDF, 0x2603);
+$codepoints = varray['P', 0xDF, 0x2603];
 foreach($codepoints as $cp) {
   unicode_info($cp);
 }

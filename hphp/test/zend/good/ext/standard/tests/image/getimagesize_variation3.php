@@ -5,7 +5,7 @@
  */
 
 <<__EntryPoint>> function main(): void {
-$file_types_array = array (
+$file_types_array = darray [
     //File containing text string
     "File with text data" => "test.txt",
 
@@ -17,7 +17,7 @@ $file_types_array = array (
 
     //File having no data
     "Empty File" => "blank_file.bmp"
-);
+];
 
 echo "*** Testing getimagesize() : variation ***\n";
 

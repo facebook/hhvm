@@ -22,7 +22,7 @@ unset($unset_var);
 $file_handle = fopen(__FILE__, "r");
 
 // array with different values for $input
-$inputs =  array (
+$inputs =  varray [
 
       // integer values
 /*1*/ 0,
@@ -36,8 +36,8 @@ $inputs =  array (
 
       // array values
 /*7*/ array(),
-      array(0),
-      array(1, 2),
+      varray[0],
+      varray[1, 2],
 
       // boolean values
 /*10*/true,
@@ -60,7 +60,7 @@ $inputs =  array (
 
       // unset variable
 /*19*/@$unset_var
-);
+];
 
 // loop through with each element of the $inputs array to test bin2hex() function
 $count = 1;

@@ -1,9 +1,9 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$ary = array(
-	"a" => array("b"),
-	"c" => array("d"),
-);
+$ary = darray[
+	"a" => varray["b"],
+	"c" => varray["d"],
+];
 
 $it = new RecursiveArrayIterator($ary);
 $it = new RecursiveTreeIterator($it);

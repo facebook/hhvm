@@ -10,7 +10,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing prev() : basic functionality ***\n";
 
-$array = array('zero', 'one', 'two');
+$array = varray['zero', 'one', 'two'];
 end(inout $array);
 echo key($array) . " => " . current($array) . "\n";
 var_dump(prev(inout $array));

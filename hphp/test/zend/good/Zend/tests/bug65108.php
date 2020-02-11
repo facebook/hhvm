@@ -6,6 +6,6 @@ class E {
 }
 
 <<__EntryPoint>> function main(): void {
-$isCallable = is_callable(array('E', 'f'));
+$isCallable = is_callable(varray['E', 'f']);
 var_dump($isCallable);
 }

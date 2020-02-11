@@ -86,7 +86,7 @@ function main(): void {
   var_dump(is_callable('object_class::foo()')); //expected: false
 
   echo "\n** Testing normal operations of is_callable() on objects **\n";
-  $objects = array(
+  $objects = varray[
     new object_class,
     new no_member_class,
     new contains_object_class,
@@ -95,7 +95,7 @@ function main(): void {
     $obj->no_member_class_object,
     $temp_class_obj,
     @$unset_obj
-  );
+  ];
 
   /* loop to check whether given object/string has valid given method name
    *  expected: true if valid callback
@@ -104,18 +104,18 @@ function main(): void {
   $loop_counter = 1;
   foreach ($objects as $object) {
     echo "--- Outerloop iteration ".$loop_counter." ---\n";
-    $methods = array(
-      array($object, 'foo1'),
-      array($object, 'foo2'),
-      array($object, 'foo3'),
-      array($object, 'x123'),
-      array($object, 'null'),
-      array($object, 'TRUE'),
-      array($object, '123'),
-      array(@$temp_class_obj->value, 100),
-      array($object, 'func'),
-      array('object_class', 'foo1'),
-    );
+    $methods = varray[
+      varray[$object, 'foo1'],
+      varray[$object, 'foo2'],
+      varray[$object, 'foo3'],
+      varray[$object, 'x123'],
+      varray[$object, 'null'],
+      varray[$object, 'TRUE'],
+      varray[$object, '123'],
+      varray[@$temp_class_obj->value, 100],
+      varray[$object, 'func'],
+      varray['object_class', 'foo1'],
+    ];
     /* use check_iscallable_objects() to check whether given object/string
        has valid method name */
     check_iscallable_objects($methods, $loop_counter);

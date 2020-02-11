@@ -20,7 +20,7 @@ class A
 echo "*** Testing array_merge_recursive() : Passing non array values to \$arr2 argument ***\n";
 
 // initialise the first argument
-$arr1 = array(1, array("hello", 'world'));
+$arr1 = varray[1, varray["hello", 'world']];
 
 //get an unset variable
 $unset_var = 10;
@@ -35,7 +35,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $arr2 argument
-$arrays = array (
+$arrays = varray [
 
        // int data
 /*1*/  0,
@@ -80,7 +80,7 @@ $arrays = array (
 
        // object data
 /*24*/ new A()
-);
+];
 
 // loop through each element of $arrays and check the behavior of array_merge_recursive()
 $iterator = 1;

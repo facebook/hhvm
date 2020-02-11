@@ -1,9 +1,9 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 $a = 1;
-$b = array(1);
-$c = array(1);
-$d = array(1);
+$b = varray[1];
+$c = varray[1];
+$d = varray[1];
 $iv = null;
 
 try { var_dump(openssl_seal($a, inout $b, inout $c, $d, '', inout $iv)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

@@ -8,7 +8,7 @@ var_dump(new stdCLass is stdClass);
 $b = () ==> new stdClass;
 var_dump($b() is stdClass);
 
-$c = array(new stdClass);
+$c = varray[new stdClass];
 var_dump($c[0] is stdClass);
 
 var_dump(@$inexistent is stdClass);

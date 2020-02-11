@@ -20,7 +20,7 @@ echo "\n*** Testing with different directory combinations ***";
 $dir = "/disk_free_space";
 mkdir($file_path.$dir);
 
-$dirs_arr = array(
+$dirs_arr = varray[
   ".",
   $file_path.$dir,
   $file_path."/.".$dir,
@@ -39,7 +39,7 @@ $dirs_arr = array(
   $file_path."/.".$dir.chr(0),
   ".".chr(0).$file_path.$dir,
   ".".chr(0).$file_path.$dir.chr(0)
-);
+];
 
 $count = 1;
 /* loop through to test each element the above array */

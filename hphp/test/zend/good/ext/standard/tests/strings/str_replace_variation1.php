@@ -8,8 +8,8 @@
 
 <<__EntryPoint>> function main(): void {
 echo "\n*** Testing str_replace() with various search values ***";
-$search_arr = array( TRUE, FALSE, 1, 0, -1, "1", "0", "-1",  NULL,
-                     array(), "php", "");
+$search_arr = varray[ TRUE, FALSE, 1, 0, -1, "1", "0", "-1",  NULL,
+                     array(), "php", ""];
 
 $i = 0;
 /* loop through to replace the matched elements in the array */

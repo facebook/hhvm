@@ -12,7 +12,7 @@ function run () {
         $x++;
     };
 
-    return array($lambda1, $lambda2);
+    return varray[$lambda1, $lambda2];
 }
 <<__EntryPoint>> function main(): void {
 list ($lambda1, $lambda2) = run();

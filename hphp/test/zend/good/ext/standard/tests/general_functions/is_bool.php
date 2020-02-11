@@ -5,12 +5,12 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing is_bool() with valid boolean values ***\n";
 // different valid  boolean vlaues 
-$valid_bools = array(
+$valid_bools = varray[
   TRUE,
   FALSE,
   true,
   false,
-);
+];
 /* loop to check that is_bool() recognizes different 
    bool values, expected output: bool(true) */
 $loop_counter = 1;
@@ -34,7 +34,7 @@ unset ($unset_bool2);
 unset ($unset_var);
 
 // other types in a array 
-$not_bool_types = array (
+$not_bool_types = varray [
   /* integers */
   0,
   1,
@@ -98,24 +98,24 @@ $not_bool_types = array (
   
   /* arrays */
   array(),
-  array(0),
-  array(1),
-  array(NULL),
-  array(null),
-  array("string"),
-  array(true),
-  array(TRUE),
-  array(false),
-  array(FALSE),
-  array(1,2,3,4),
-  array(1 => "One", "two" => 2),
+  varray[0],
+  varray[1],
+  varray[NULL],
+  varray[null],
+  varray["string"],
+  varray[true],
+  varray[TRUE],
+  varray[false],
+  varray[FALSE],
+  varray[1,2,3,4],
+  darray[1 => "One", "two" => 2],
 
   /* unset bool vars and undefined var */
   @$unset_bool1, 
   @$unset_bool2, 
   @$unset_var, 
   @$undefined_var
-);
+];
 /* loop through the $not_bool_types to see working of 
    is_bool() on non bull types, expected output: bool(false) */
 $loop_counter = 1;

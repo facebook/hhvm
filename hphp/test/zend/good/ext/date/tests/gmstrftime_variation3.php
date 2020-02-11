@@ -11,12 +11,12 @@ echo "*** Testing gmstrftime() : usage variation ***\n";
 $timestamp = gmmktime(8, 8, 8, 8, 8, 2008);
 
 //array of values to iterate over
-$inputs = array(
+$inputs = darray[
       'Abbreviated weekday name' => "%a",
       'Full weekday name' => "%A",
       'Week number of the year' => "%U",
       'Week number of the year in decimal number' => "%W",
-);
+];
 
 // loop through each element of the array for timestamp
 

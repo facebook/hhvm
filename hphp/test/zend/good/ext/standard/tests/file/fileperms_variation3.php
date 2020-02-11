@@ -13,7 +13,7 @@ mkdir($dir_name);
 $file_handle = fopen($dir_name."/fileperms_variation3.tmp", "w");
 fclose($file_handle);
 
-$files_arr = array(
+$files_arr = varray[
   "/fileperms_variation3/fileperms_variation3.tmp",
 
   /* Testing a file trailing slash */
@@ -28,7 +28,7 @@ $files_arr = array(
   /* Testing Binary safe */
   "/fileperms_variation3/fileperms_variation3.tmp".chr(0),
   "/fileperms_variation3/fileperms_variation3.tmp\0"
-);
+];
 
 $count = 1;
 /* loop through to test each element in the above array */

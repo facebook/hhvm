@@ -19,19 +19,19 @@ if ($i != 100) {
 
 echo "\nmt_rand() tests with defined min and max value\n";
 
-$min = array(10,
+$min = varray[10,
              100,
              10.5,
              10.5e3,
              0x10,
-             0400);
+             0400];
 
-$max = array(100,
+$max = varray[100,
              1000,
              19.5,
              10.5e5,
              0x10000,
-             0700);
+             0700];
 
 for ($x = 0; $x < count($min); $x++) {
     for ($i = 0; $i < 100; $i++) {
@@ -49,20 +49,20 @@ for ($x = 0; $x < count($min); $x++) {
 }
 
 echo "\nNon-numeric cases\n";
-$min = array(true,
+$min = varray[true,
              false,
              null,
              "10",
              "0x10",
-             "10.5");
+             "10.5"];
 
 // Eexepcted numerical equivalent of above non-numerics
-$minval = array(1,
+$minval = varray[1,
                 0,
                 0,
                 10,
                 0,
-                10);
+                10];
 for ($x = 0; $x < count($min); $x++) {
     for ($i = 0; $i < 100; $i++) {
         $res = mt_rand((int)$min[$x], 100);

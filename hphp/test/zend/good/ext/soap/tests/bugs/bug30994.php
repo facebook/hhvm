@@ -33,6 +33,6 @@ function bassCall() {
   return "ok";
 }
 
-$x = new SoapServer(NULL, array("uri"=>"http://spock/kunta/kunta"));
+$x = new SoapServer(NULL, darray["uri"=>"http://spock/kunta/kunta"]);
 $x->addFunction("bassCall");
 $x->handle($HTTP_RAW_POST_DATA);

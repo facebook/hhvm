@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-foreach (array(array(1,2), array(3,4)) as list($a, )) {
+foreach (varray[varray[1,2], varray[3,4]] as list($a, )) {
     var_dump($a);
 }
 

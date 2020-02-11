@@ -13,14 +13,14 @@ echo "*** Testing array_merge_recursive() : two dimensional array for \$arr1 arg
 
 // initialize the 2-d array
 $arr1 = array( 
-  array(1, 2, 3, 1),
+  varray[1, 2, 3, 1],
   "array" => array("hello", "world", "str1" => "hello", "str2" => 'world'),
   array(1 => "one", 2 => "two", "one", 'two'),
-  array(1, 2, 3, 1)
+  varray[1, 2, 3, 1]
 );
 
 // initialize the second argument 
-$arr2 = array(1, "hello", "array" => array("hello", 'world'));
+$arr2 = array(1, "hello", "array" => varray["hello", 'world']);
 
 echo "-- Passing the entire 2-d array --\n";
 echo "-- With default argument --\n";

@@ -16,7 +16,7 @@ fwrite( $file_handle, str_repeat(b"Hello2World...\n", 100) );
 fclose($file_handle);
 
 /* array of destination file names */
-$dest_files = array(
+$dest_files = varray[
 
   /* File names containing numerics, strings */
   "copy.tmp",  //regular file name
@@ -28,7 +28,7 @@ $dest_files = array(
   "123copy_variation1.tmp",  //file name containing numeric & string
   "copy_variation.tmp123",  //file name containing string & numeric
   chr(99).chr(111).chr(112).chr(121).chr(49).".tmp"  //file name containing ASCII values
-);
+];
 
 echo "Size of the source file before copy operation => ";
 var_dump( filesize("$src_file_name") );

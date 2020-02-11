@@ -20,53 +20,53 @@ function check_basename( $path_arrays ) {
 }
 
 <<__EntryPoint>> function main(): void {
-$file_paths = array (
+$file_paths = varray [
   /* simple paths */
-  array("bar"),
-  array("/foo/bar"),
-  array("foo/bar"),
-  array("/bar"),
+  varray["bar"],
+  varray["/foo/bar"],
+  varray["foo/bar"],
+  varray["/bar"],
 
   /* simple paths with trailing slashes */
-  array("bar/"),
-  array("/bar/"),
-  array("/foo/bar/"),
-  array("foo/bar/"),
-  array("/bar/"),
+  varray["bar/"],
+  varray["/bar/"],
+  varray["/foo/bar/"],
+  varray["foo/bar/"],
+  varray["/bar/"],
 
   /* paths with suffix removal */
-  array("bar.gz", ".gz"),
-  array("bar.gz", "bar.gz"),
-  array("/foo/bar.gz", ".gz"),
-  array("foo/bar.gz", ".gz"),
-  array("/bar.gz", ".gz"),
+  varray["bar.gz", ".gz"],
+  varray["bar.gz", "bar.gz"],
+  varray["/foo/bar.gz", ".gz"],
+  varray["foo/bar.gz", ".gz"],
+  varray["/bar.gz", ".gz"],
 
   /* paths with suffix and trailing slashes with suffix removal*/
-  array("bar.gz/", ".gz"),
-  array("/bar.gz/", ".gz"),
-  array("/foo/bar.gz/", ".gz"),
-  array("foo/bar.gz/", ".gz"),
-  array("/bar.gz/", ".gz"),
+  varray["bar.gz/", ".gz"],
+  varray["/bar.gz/", ".gz"],
+  varray["/foo/bar.gz/", ".gz"],
+  varray["foo/bar.gz/", ".gz"],
+  varray["/bar.gz/", ".gz"],
 
   /* paths with basename only suffix, with suffix removal*/
-  array("/.gz", ".gz"),
-  array(".gz", ".gz"),
-  array("/foo/.gz", ".gz"),
+  varray["/.gz", ".gz"],
+  varray[".gz", ".gz"],
+  varray["/foo/.gz", ".gz"],
 
   /* paths with basename only suffix & trailing slashes, with suffix removal*/
-  array(".gz/", ".gz"),
-  array("/foo/.gz/", ".gz"),
-  array("foo/.gz/", ".gz"),
+  varray[".gz/", ".gz"],
+  varray["/foo/.gz/", ".gz"],
+  varray["foo/.gz/", ".gz"],
 
   /* paths with binary value to check if the function is binary safe*/
-  array("foo".chr(0)."bar"),
-  array("/foo".chr(0)."bar"),
-  array("/foo".chr(0)."bar/"),
-  array("foo".chr(0)."bar/"),
-  array("foo".chr(0)."bar/test"),
-  array("/foo".chr(0)."bar/bar.gz", ".gz"),
-  array("/foo".chr(0)."bar/bar.gz")
-);
+  varray["foo".chr(0)."bar"],
+  varray["/foo".chr(0)."bar"],
+  varray["/foo".chr(0)."bar/"],
+  varray["foo".chr(0)."bar/"],
+  varray["foo".chr(0)."bar/test"],
+  varray["/foo".chr(0)."bar/bar.gz", ".gz"],
+  varray["/foo".chr(0)."bar/bar.gz"]
+];
 
 echo "*** Testing basic operations ***\n";
 check_basename( $file_paths );

@@ -20,7 +20,7 @@ class MyClass
 }
 
 //array of values to iterate over
-$values = array(
+$values = varray[
 
       // float data
       100.5,
@@ -31,7 +31,7 @@ $values = array(
 
       // array data
       array(),
-      array('color' => 'red', 'item' => 'pen'),
+      darray['color' => 'red', 'item' => 'pen'],
 
       // null data
       NULL,
@@ -59,7 +59,7 @@ $values = array(
 
       // unset data
       @$unset_var,
-);
+];
 
 // loop through each element of the array for imagetype
 $iterator = 1;

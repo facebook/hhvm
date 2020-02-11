@@ -2,7 +2,7 @@
 
 class Test
 {
-    public $a = array('a' => 1);
+    public $a = darray['a' => 1];
 }
 <<__EntryPoint>> function main(): void {
 $ref = new ReflectionClass('Test');

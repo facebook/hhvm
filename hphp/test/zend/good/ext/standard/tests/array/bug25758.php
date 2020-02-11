@@ -1,4 +1,4 @@
 <?hh <<__EntryPoint>> function main(): void {
-$a = array ("quote'" => array("quote'"));
+$a = darray ["quote'" => varray["quote'"]];
 echo var_export($a, true);
 }

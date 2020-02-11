@@ -31,7 +31,7 @@ $file_handle = fopen(__FILE__, 'r');
 
 
 //array of values to iterate over
-$values = array(
+$values = varray[
 
           // int data
 /*1*/      0,
@@ -75,7 +75,7 @@ $values = array(
 
           // resource data
 /*23*/      $file_handle
-);
+];
 
 /* creating dumping file */
 $data_file = dirname(__FILE__) . '/vfprintf_variation21.txt';

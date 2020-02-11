@@ -24,7 +24,7 @@ class Item {
 class handlerClass {
     public function getItems()
     {
-        return new ItemArray(array(
+        return new ItemArray(varray[
                 new Item(0),
                 new Item(1),
                 new Item(2),
@@ -35,7 +35,7 @@ class handlerClass {
                 new Item(7),
                 new Item(8),
                 new Item(9)
-            ));
+            ]);
     }
 }
 <<__EntryPoint>> function main(): void {

@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$values = array(23,
+$values = varray[23,
                 -23,
                 2.345e1,
                 -2.345e1,
@@ -10,7 +10,7 @@ $values = array(23,
                 "2.345e1",
                 null,
                 true,
-                false);
+                false];
 
 echo "\n LOG tests...no base\n";
 for ($i = 0; $i < count($values); $i++) {

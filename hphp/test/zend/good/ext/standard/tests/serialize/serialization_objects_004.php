@@ -11,22 +11,22 @@
  */
 <<__EntryPoint>> function main(): void {
 $x = new stdClass;
-var_dump(serialize(array($x, $x)));
+var_dump(serialize(varray[$x, $x]));
 
 $x = 1;
-var_dump(serialize(array($x, $x)));
+var_dump(serialize(varray[$x, $x]));
 
 $x = "a";
-var_dump(serialize(array($x, $x)));
+var_dump(serialize(varray[$x, $x]));
 
 $x = true;
-var_dump(serialize(array($x, $x)));
+var_dump(serialize(varray[$x, $x]));
 
 $x = null;
-var_dump(serialize(array($x, $x)));
+var_dump(serialize(varray[$x, $x]));
 
 $x = array();
-var_dump(serialize(array($x, $x)));
+var_dump(serialize(varray[$x, $x]));
 
 echo "Done";
 }

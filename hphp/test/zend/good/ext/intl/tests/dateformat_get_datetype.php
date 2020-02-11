@@ -7,13 +7,13 @@
 
 function ut_main()
 {
-    $datetype_arr = array (
+    $datetype_arr = varray [
         IntlDateFormatter::FULL,
         IntlDateFormatter::LONG,
         IntlDateFormatter::MEDIUM,
         IntlDateFormatter::SHORT,
         IntlDateFormatter::NONE
-    );
+    ];
 
     $res_str = '';
 

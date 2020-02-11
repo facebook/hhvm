@@ -18,7 +18,7 @@ unset ($unset_var);
 
 
 // unexpected values to be passed to $stream_id argument
-$inputs = array(
+$inputs = varray[
 
        // int data
 /*1*/  0,
@@ -54,7 +54,7 @@ $inputs = array(
 
        // unset data
 /*21*/ @$unset_var,
-);
+];
 
 // loop through each element of $inputs to check the behavior of getrusage()
 $iterator = 1;

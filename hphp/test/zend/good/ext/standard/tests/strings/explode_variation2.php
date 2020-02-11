@@ -22,7 +22,7 @@ unset($unset_var);
 $file_handle = fopen(__FILE__, "r");
 
 // array with different values for $string
-$strings =  array (
+$strings =  varray [
 
           // integer values
 /*1*/      0,
@@ -39,8 +39,8 @@ $strings =  array (
 
           // array values
 /*10*/      array(),
-          array(0),
-          array(1, 2),
+          varray[0],
+          varray[1, 2],
 
           // boolean values
 /*13*/      true,
@@ -63,7 +63,7 @@ $strings =  array (
 
           // unset variable
 /*22*/      @$unset_var
-);
+];
 
 // loop through with each element of the $strings array to test explode() function
 $count = 1;

@@ -23,15 +23,15 @@ if($file_handle == false)
 fclose($file_handle);
 
 // various formats
-$formats = array( "%d", "%f", "%e", "%u", " %s", "%x", "%o");
+$formats = varray[ "%d", "%f", "%e", "%u", " %s", "%x", "%o"];
 
 $counter = 1;
 
 // various write only modes
-$modes = array("w", "wb", "wt",
+$modes = varray["w", "wb", "wt",
                "a", "ab", "at",
                "x", "xb", "xt"
-         );
+         ];
 
 $counter = 1;
 // reading the values from file using different integer formats

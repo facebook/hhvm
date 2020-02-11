@@ -2,7 +2,7 @@
 class C
 {
     const X = E::A;
-    public static $a = array(K => D::V, E::A => K);
+    public static $a = darray[K => D::V, E::A => K];
 }
 
 eval('class D extends C { const V = \'test\'; }');

@@ -9,7 +9,7 @@ class Callback {
 <<__EntryPoint>> function main(): void {
 $cb = new Callback();
 echo $cb(),"\n";
-$a = array(1, 2);
+$a = varray[1, 2];
 $b = array_map($cb, $a);
 print_r($b);
 }

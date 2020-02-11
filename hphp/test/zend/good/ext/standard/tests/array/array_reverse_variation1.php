@@ -27,7 +27,7 @@ Hello world\t\n
 EOT;
 
 //array of values to iterate over
-$arrays = array (
+$arrays = varray [
 
        // int data
 /*1*/  0,
@@ -73,7 +73,7 @@ $arrays = array (
        // resource variable
 /*24*/ $fp
 
-);
+];
 
 // loop through each element of the array $arrays to check the behavior of array_reverse()
 $iterator = 1;

@@ -7,7 +7,7 @@
 /* Test strrchr() function: with binary values & null terminated strings passed to 'str1' & 'str2' */
 <<__EntryPoint>> function main(): void {
 echo "*** Test strrchr() function: binary safe ***\n";
-$haystacks = array(
+$haystacks = varray[
   "Hello".chr(0)."World",
   chr(0)."Hello World",
   "Hello World".chr(0),
@@ -15,7 +15,7 @@ $haystacks = array(
   "Hello\0world",
   "\0Hello",
   "Hello\0"
-);
+];
 
 for($index = 0; $index < count($haystacks); $index++ ) {
   //needle as null string

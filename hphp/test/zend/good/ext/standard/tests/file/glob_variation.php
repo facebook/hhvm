@@ -17,7 +17,7 @@ fclose($fp);
 $fp = fopen("$file_path/glob_variation/wonder;123456", "w");
 fclose($fp);
 
-$patterns = array (
+$patterns = varray [
   "$file_path/glob_variation/*der*",
   "$file_path/glob_variation/?onder*",
   "$file_path/glob_variation/w*der?*",
@@ -30,7 +30,7 @@ $patterns = array (
   "$file_path/glob_variation/?wonder?",
   "$file_path/glob_variation/wonder?",
   '1'  // boolean true
-);
+];
 $counter = 1;
 /* loop through $patterns to match each $pattern with the files created
    using glob() */

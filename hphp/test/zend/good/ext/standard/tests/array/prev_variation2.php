@@ -13,7 +13,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing prev() : usage variations ***\n";
 
-$subarray = array(9,8,7);
+$subarray = varray[9,8,7];
 end(inout $subarray);
 
 $array_arg = array ($subarray, 'a' => 'z');

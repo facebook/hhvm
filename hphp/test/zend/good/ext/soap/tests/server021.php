@@ -9,7 +9,7 @@ class Foo {
   }
 }
 <<__EntryPoint>> function main(): void {
-$server = new soapserver(null,array('uri'=>"http://testuri.org"));
+$server = new soapserver(null,darray['uri'=>"http://testuri.org"]);
 $server->setclass("Foo");
 
 $HTTP_RAW_POST_DATA = <<<EOF

@@ -21,7 +21,7 @@ class classA
 echo "*** Testing array_pad() : possible values for \$pad_value argument ***\n";
 
 // Initialise $input and $pad_size argument
-$input = array(1, 2);
+$input = varray[1, 2];
 $pad_size = 4;
 
 //get an unset variable
@@ -37,7 +37,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // different values to be passed to $pad_value argument
-$pad_values = array(
+$pad_values = varray[
 
        // int data
 /*1*/  0,
@@ -54,10 +54,10 @@ $pad_values = array(
 
        // array data
 /*10*/ array(),
-       array(0),
-       array(1),
-       array(1, 2),
-       array('color' => 'red', 'item' => 'pen'),
+       varray[0],
+       varray[1],
+       varray[1, 2],
+       darray['color' => 'red', 'item' => 'pen'],
 
        // null data
 /*15*/ NULL,
@@ -93,7 +93,7 @@ $pad_values = array(
 
        // resource variable
 /*31*/ $fp,
-);
+];
 
 // loop through each element of $pad_values to check the behavior of array_pad()
 $iterator = 1;

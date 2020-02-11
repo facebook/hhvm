@@ -11,18 +11,18 @@ $fp = fopen (__FILE__, "r");
 $dfp = opendir ( dirname(__FILE__) );
 
 // array of resource values
-$resource_values = array (
+$resource_values = varray [
   $fp,
   $dfp
-);
+];
 
 // array of string formats
-$string_formats = array( 
+$string_formats = varray[ 
   "%s", "%hs", "%ls", 
   "%Ls"," %s", "%s ", 
   "\t%s", "\n%s", "%4s",
   "%30s", "%[a-zA-Z0-9]", "%*s"
-);
+];
 
 $count = 1;
 foreach($resource_values as $resource_value) {

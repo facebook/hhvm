@@ -7,7 +7,7 @@
 echo "*** Testing json_decode() : basic functionality ***\n";
 
 // array with different values for $string
-$inputs =  array (
+$inputs =  varray [
         '0',
         '123',
         '-123',
@@ -27,7 +27,7 @@ $inputs =  array (
         '{"Jan":31,"Feb":29,"Mar":31,"April":30,"May":31,"June":30}',
         '""',
         '{}'
-);
+];
 
 // loop through with each element of the $inputs array to test json_decode() function
 $count = 1;

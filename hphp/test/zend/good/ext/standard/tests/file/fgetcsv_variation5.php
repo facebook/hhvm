@@ -15,24 +15,24 @@ echo "*** Testing fgetcsv() : with delimiter & enclosure as NULL ***\n";
    1st element is delimiter, 2nd element is enclosure
    and 3rd element is csv fields
 */
-$csv_lists = array (
-  array(',', '"', '"water",fruit'),
-  array(',', '"', '"water","fruit"'),
-  array(' ', '^', '^water^ ^fruit^'),
-  array(':', '&', '&water&:&fruit&'),
-  array('=', '=', '=water===fruit='),
-  array('-', '-', '-water--fruit-air'),
-  array('-', '-', '-water---fruit---air-'),
-  array(':', '&', '&""""&:&"&:,:":&,&:,,,,')
-);
+$csv_lists = varray [
+  varray[',', '"', '"water",fruit'],
+  varray[',', '"', '"water","fruit"'],
+  varray[' ', '^', '^water^ ^fruit^'],
+  varray[':', '&', '&water&:&fruit&'],
+  varray['=', '=', '=water===fruit='],
+  varray['-', '-', '-water--fruit-air'],
+  varray['-', '-', '-water---fruit---air-'],
+  varray[':', '&', '&""""&:&"&:,:":&,&:,,,,']
+];
 
 $filename = dirname(__FILE__) . '/fgetcsv_variation5.tmp';
 @unlink($filename);
 
-$file_modes = array ("r","rb", "rt", "r+", "r+b", "r+t",
+$file_modes = varray ["r","rb", "rt", "r+", "r+b", "r+t",
                      "a+", "a+b", "a+t",
                      "w+", "w+b", "w+t",
-                     "x+", "x+b", "x+t");
+                     "x+", "x+b", "x+t"];
 
 $loop_counter = 1;
 foreach ($csv_lists as $csv_list) {

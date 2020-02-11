@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$ar = array();
+$ar = darray[];
 for ($count = 0; $count < 10; $count++) {
     $ar[$count]        = "$count";
     @$ar[$count]['idx'] = "$count";

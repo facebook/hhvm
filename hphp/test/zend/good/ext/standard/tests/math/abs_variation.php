@@ -31,7 +31,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $number argument
-$inputs = array(
+$inputs = varray[
 
        // null data
 /*10*/ NULL,
@@ -64,7 +64,7 @@ $inputs = array(
 
        // resource variable
 /*25*/ $fp
-);
+];
 
 // loop through each element of $inputs to check the behavior of abs()
 $iterator = 1;

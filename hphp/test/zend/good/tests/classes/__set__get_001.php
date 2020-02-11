@@ -1,7 +1,7 @@
 <?hh
 class setter {
     public $n;
-    public $x = array('a' => 1, 'b' => 2, 'c' => 3);
+    public $x = darray['a' => 1, 'b' => 2, 'c' => 3];
 
     function __get($nm) {
         echo "Getting [$nm]\n";

@@ -1,13 +1,13 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 // test 50 bytes to 50k
-$b = array(
+$b = varray[
     50,
     500,
     5000,
     50000,
 //  1000000, // works, but test would take too long
-);
+];
 
 $s = '';
 $i = 0;

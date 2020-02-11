@@ -21,7 +21,7 @@ EOT;
 
 // initialising the string array
 
-$str_array = array(
+$str_array = varray[
                     // string without any characters that can be backslashed
                     'Hello world',
 
@@ -71,7 +71,7 @@ $str_array = array(
                     // heredoc strings
                     $heredoc_string,
                     $heredoc_null_string
-                  );
+                  ];
 
 $count = 1;
 // looping to test for all strings in $str_array

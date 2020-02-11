@@ -4,11 +4,11 @@
  * Source code: ext/standard/http.c
 */
 <<__EntryPoint>> function main(): void {
-$oDimensional = array(
+$oDimensional = darray[
   "name" => "main page",
   "sort" => "desc,admin",
   "equation" => "10 + 10 - 5"
-);
+];
 
 echo http_build_query($oDimensional, '', ini_get('arg_separator.output'), PHP_QUERY_RFC1738) . PHP_EOL;
 echo http_build_query($oDimensional, '', ini_get('arg_separator.output'), PHP_QUERY_RFC3986);

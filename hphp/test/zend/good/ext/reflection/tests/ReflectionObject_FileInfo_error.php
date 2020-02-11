@@ -2,7 +2,7 @@
 class C { }
 <<__EntryPoint>> function main(): void {
 $rc = new ReflectionObject(new C);
-$methods = array("getFileName", "getStartLine", "getEndLine");
+$methods = varray["getFileName", "getStartLine", "getEndLine"];
 
 foreach ($methods as $method) {
     var_dump($rc->$method());

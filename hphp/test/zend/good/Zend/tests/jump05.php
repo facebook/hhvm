@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$ar = array("1","2","3");
+$ar = varray["1","2","3"];
 foreach ($ar as $val) {
     switch ($val) {
         case "1":

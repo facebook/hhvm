@@ -34,7 +34,7 @@ $unset_var = 10;
 unset ($unset_var);
 
 // different types of values to be passed to $var argument
-$vars = array(
+$vars = varray[
 
        // int data
 /*1*/  0,
@@ -51,10 +51,10 @@ $vars = array(
 
        // array data
 /*10*/ array(),
-       array(0),
-       array(1),
-       array(1, 2),
-       array('color' => 'red', 'item' => 'pen'),
+       varray[0],
+       varray[1],
+       varray[1, 2],
+       darray['color' => 'red', 'item' => 'pen'],
 
        // null data
 /*15*/ NULL,
@@ -86,7 +86,7 @@ $vars = array(
 
        // resource variable
 /*29*/ $fp
-);
+];
 
 // loop through each element of $vars to check the functionality of array_unshift()
 $iterator = 1;

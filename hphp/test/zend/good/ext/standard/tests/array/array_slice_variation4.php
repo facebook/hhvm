@@ -33,7 +33,7 @@ hello world
 EOT;
 
 // unexpected values to be passed to $preserve_keys argument
-$inputs = array(
+$inputs = varray[
 
        // int data
 /*1*/  0,
@@ -76,7 +76,7 @@ $inputs = array(
 
        // unset data
 /*24*/ @$unset_var,
-);
+];
 
 // loop through each element of $inputs to check the behavior of array_slice()
 $iterator = 1;

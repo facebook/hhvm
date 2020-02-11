@@ -3,15 +3,15 @@
 class  foo {
 	public $x = 2;
 	public function a() {
-		$x = array();
+		$x = varray[];
 		$x[] = new foo;
 		return $x;
 	}
 	public function b() {
-		return array(1.2, array(new self));
+		return varray[1.2, varray[new self]];
 	}
 	public function c(inout $a, inout $b) {
-		$a = array();
+		$a = varray[];
 		$a[] = true;
 		return $a;
 	}

@@ -13,7 +13,7 @@ mkdir($dir_name);
 $file_handle = fopen($dir_name."/filegroup_variation3.tmp", "w");
 fclose($file_handle);
 
-$files_arr = array(
+$files_arr = varray[
   "/filegroup_variation3/filegroup_variation3.tmp",
 
   /* Testing a file trailing slash */
@@ -28,7 +28,7 @@ $files_arr = array(
   /* Testing Binary safe */
   "/filegroup_variation3/filegroup_variation3.tmp".chr(0),
   "/filegroup_variation3/filegroup_variation3.tmp\0"
-);
+];
 
 $count = 1;
 /* loop through to test each element in the above array */

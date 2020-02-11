@@ -8,7 +8,7 @@
 echo "*** Testing getdate() : usage variation ***\n";
 
 //Timezones with required data for date_sunrise
-$inputs = array (
+$inputs = varray [
         //GMT-11
         "Pacific/Samoa",
         //GMT-9
@@ -23,7 +23,7 @@ $inputs = array (
         "Australia/Brisbane",
         //GMT+12
         "Pacific/Wallis",
-);
+];
 
 // loop through each element of the array for timestamp
 foreach($inputs as $timezone) {

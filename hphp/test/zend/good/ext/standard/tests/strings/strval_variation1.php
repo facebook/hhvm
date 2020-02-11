@@ -23,7 +23,7 @@ unset ($unset_var);
 $file_handle = fopen(__FILE__, "r");
 
 //array of values to iterate over
-$values = array(
+$values = varray[
           //Decimal values
 /*1*/      0,
           1,
@@ -51,7 +51,7 @@ $values = array(
 
           // array data
 /*18*/    array(),
-          array('color' => 'red', 'item' => 'pen'),
+          darray['color' => 'red', 'item' => 'pen'],
 
           // null data
 /*20*/    NULL,
@@ -78,7 +78,7 @@ $values = array(
 
           // unset data
 /*31*/    @$unset_var,
-);
+];
 
 // loop through each element of the array for strval
 $iterator = 1;

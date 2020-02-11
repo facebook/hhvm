@@ -9,18 +9,18 @@
 /* Test in_array() with different possible needle values */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing in_array() with different needle values ***\n";
-$arrays = array (
-  array(0),
+$arrays = varray [
+  varray[0],
   array("a" => "A", 2 => "B", "C" => 3, 4 => 4, "one" => 1, "" => NULL, "b", "ab", "abcd"),
   array(4, array(1, 2 => 3), "one" => 1, "5" => 5 ),
   array(-1, -2, -3, -4, -2.989888, "-0.005" => "neg0.005", 2.0 => "float2", "-.9" => -.9),
-  array(TRUE, FALSE),
-  array("", array()),
-  array("abcd\x00abcd\x00abcd"),
-  array("abcd\tabcd\nabcd\rabcd\0abcdefghij")
-);
+  varray[TRUE, FALSE],
+  varray["", array()],
+  varray["abcd\x00abcd\x00abcd"],
+  varray["abcd\tabcd\nabcd\rabcd\0abcdefghij"]
+];
 
-$array_compare = array (
+$array_compare = varray [
   4,
   "4",
   4.00,
@@ -39,7 +39,7 @@ $array_compare = array (
   0.0,
   -0,
   "abcd\x00abcd\x00abcd"
-);
+];
 /* loop to check if elements in $array_compare exist in $arrays
    using in_array() */
 $counter = 1;

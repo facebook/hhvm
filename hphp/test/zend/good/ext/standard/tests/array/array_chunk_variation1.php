@@ -19,7 +19,7 @@ $unset_var = 10;
 unset ($unset_var);
 
 //array of values to iterate over
-$values = array(
+$values = varray[
 
         // int data
 /*1*/   0,
@@ -55,7 +55,7 @@ $values = array(
         // object data
 /*20*/  new stdclass(),
 
-);
+];
 
 $count = 1;
 // loop through each element of the array for input

@@ -7,7 +7,7 @@ class ObjectA
 echo "*** test key_exists() by using mixed type of arrays ***\n";
 
 // there is not a index = 0 element
-$a = array(1 => 'bar', 'foo' => 'baz');
+$a = darray[1 => 'bar', 'foo' => 'baz'];
 var_dump(key_exists(0, $a));
 
 echo "integer\n";

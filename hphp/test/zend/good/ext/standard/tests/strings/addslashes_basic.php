@@ -13,11 +13,11 @@
 echo "*** Testing addslashes() : basic functionality ***\n";
 
 // Initialize all required variables
-$str_array = array( "How's everybody",   // string containing single quote
+$str_array = varray[ "How's everybody",   // string containing single quote
                     'Are you "JOHN"?',   // string with double quotes
                     'c:\php\addslashes',   // string with backslashes
                     "hello\0world"   // string with nul character
-                  );
+                  ];
 
 // Calling addslashes() with all arguments
 foreach( $str_array as $str )  {

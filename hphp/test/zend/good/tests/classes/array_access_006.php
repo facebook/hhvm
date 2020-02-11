@@ -4,7 +4,7 @@ class OverloadedArray implements ArrayAccess {
     public $realArray;
 
     function __construct() {
-        $this->realArray = array(1,2,3);
+        $this->realArray = varray[1,2,3];
     }
 
     function offsetExists($index) {

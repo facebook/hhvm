@@ -14,11 +14,11 @@
 echo "*** Testing shuffle() : with associative array ***\n";
 
 // Initialise the associative array
-$array_arg = array(
+$array_arg = darray[
   'one' => 1, 2 => 02, 'three' => 3,
    4 => 4, '#5' => 5, 'SIX' => 6,
   "seven" => 0x7, "#8" => 012, "nine" => 9
-);
+];
 
 // printing the input array before the shuffle operation
 echo "\n-- input array before shuffle() function is applied --\n";

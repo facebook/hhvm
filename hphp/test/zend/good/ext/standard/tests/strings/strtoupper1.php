@@ -22,7 +22,7 @@ var_dump(strtoupper($str));
 
 echo "\n*** Testing strtoupper() with various strings ***";
 /* strings to pass strtoupper() */
-$strings = array (
+$strings = varray [
   "",
   "string",
   "stRINg0234",
@@ -33,7 +33,7 @@ $strings = array (
   TRUE,
   FALSE,
   array()
-);
+];
 
 $count = 0;
 /* loop through to check possible variations */

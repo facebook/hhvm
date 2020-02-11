@@ -16,7 +16,7 @@ function threeArgs($v, $w, $x) {
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_reduce() : variation ***\n";
 
-$array = array(1);
+$array = varray[1];
 
 echo "\n--- Testing with a callback with too few parameters ---\n";
 var_dump(array_reduce($array, "oneArg", 2));

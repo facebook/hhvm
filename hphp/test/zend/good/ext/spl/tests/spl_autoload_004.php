@@ -7,13 +7,13 @@ class MyAutoLoader {
         }
 }
 <<__EntryPoint>> function main(): void {
-spl_autoload_register(array('MyAutoLoader', 'autoLoad'));
+spl_autoload_register(varray['MyAutoLoader', 'autoLoad']);
 
 // and
 
 $myAutoLoader = new MyAutoLoader();
 
-spl_autoload_register(array($myAutoLoader, 'autoLoad'));
+spl_autoload_register(varray[$myAutoLoader, 'autoLoad']);
 
 var_dump(spl_autoload_functions());
 

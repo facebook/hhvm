@@ -23,7 +23,7 @@ $obj = new MyClass();
 // resource data
 $fp = fopen(__FILE__, 'r');
 
-$input = array(
+$input = darray[
   // float values
   'float_value1' => 1.2,
   'float_value2' => 0.5,
@@ -40,14 +40,14 @@ $input = array(
   'null_value1' => null,
 
   // array value
-  'array_value' => array(1),
+  'array_value' => varray[1],
 
   // object value
   'obj_value' => $obj,
 
   // resource value
   'resource_value' => $fp,
-);
+];
 
 var_dump( array_flip($input) );
 

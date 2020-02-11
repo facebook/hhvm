@@ -3,7 +3,7 @@ class mystring { function __toString() { return "hello, world"; } }
 <<__EntryPoint>> function main(): void {
 /* Make a string's first character uppercase */
 echo "#### Basic and Various operations ####\n";
-$str_array = array(
+$str_array = varray[
   "testing ucfirst.",
   "1.testing ucfirst",
   "hELLO wORLD",
@@ -35,7 +35,7 @@ $str_array = array(
   "\t",
   "12",
   "12twelve",     // int + string
-);
+];
 foreach ($str_array as $string) {
   try { var_dump( ucfirst($string) ); } catch (Exception $e) { var_dump($e->getMessage()); }
 }
@@ -45,7 +45,7 @@ foreach ($str_array as $string) {
 echo "\n#### Testing Miscelleneous inputs ####\n";
 
 echo "--- Testing arrays ---";
-$str_arr = array("hello", "?world", "!$%**()%**[][[[&@#~!", array());
+$str_arr = varray["hello", "?world", "!$%**()%**[][[[&@#~!", array()];
 try { var_dump( ucfirst($str_arr) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n--- Testing objects ---\n";

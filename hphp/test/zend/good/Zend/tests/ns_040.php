@@ -18,13 +18,13 @@ function f4($x=\X\A) {
 function f5($x=B) {
     echo $x;
 }
-function f6($x=array(A)) {
+function f6($x=varray[A]) {
     echo $x[0];
 }
-function f7($x=array("aaa"=>A)) {
+function f7($x=darray["aaa"=>A]) {
     echo $x["aaa"];
 }
-function f8($x=array(A=>"aaa\n")) {
+function f8($x=darray[A=>"aaa\n"]) {
     echo $x["ok\n"];
 }
 <<__EntryPoint>> function main(): void {

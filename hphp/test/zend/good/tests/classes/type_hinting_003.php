@@ -20,14 +20,14 @@ class Test
         var_dump($ar);
     }
 
-    static function f4(array $ar = array(25))
+    static function f4(array $ar = varray[25])
     {
         echo __METHOD__ . "()\n";
         var_dump($ar);
     }
 }
 <<__EntryPoint>> function main(): void {
-Test::f1(array(42));
+Test::f1(varray[42]);
 Test::f2(NULL);
 Test::f2();
 Test::f3();

@@ -7,7 +7,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_multisort() : case-sensitive\n";
 
-$a = array(
+$a = varray[
     'Second',
     'First.1',
     'First.2',
@@ -15,9 +15,9 @@ $a = array(
     'Twentieth',
     'Tenth',
     'Third',
-);
+];
 
-$b = array(
+$b = varray[
     '2 a',
     '1 bb 1',
     '1 bB 2',
@@ -25,7 +25,7 @@ $b = array(
     '20 c',
     '10 d',
     '3 e',
-);
+];
 
 $string = SORT_STRING;
 array_multisort3(inout $b, inout $string, inout $a);

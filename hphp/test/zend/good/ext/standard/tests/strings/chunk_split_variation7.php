@@ -17,7 +17,7 @@ $chunklen = 5;
 $ending = "????";
 
 // different values for 'str'
-$values = array(
+$values = varray[
   "",  //empty
   " ",  //space
   "This is simple string",  //regular string
@@ -30,7 +30,7 @@ $values = array(
   "Testing invalid \k and \m escape char",
   "This is to check with \\n and \\t" //to ignore \n and \t results
 
-);
+];
 
 // loop through each element of the array for 'str'
 for($count = 0; $count < count($values); $count++) {

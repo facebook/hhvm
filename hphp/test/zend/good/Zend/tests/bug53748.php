@@ -23,6 +23,6 @@ class MyHelloWorld {
 $o= myHelloWorld::getInstance(1);
 $o= myHelloWorld::getInstance(1);
 $o= myHelloWorld::getInstance(2);
-$o= myHelloWorld::getInstance(array(1=>2));
-$o= myHelloWorld::getInstance(array(1=>2));
+$o= myHelloWorld::getInstance(darray[1=>2]);
+$o= myHelloWorld::getInstance(darray[1=>2]);
 }

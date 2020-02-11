@@ -6,10 +6,10 @@ class Constants {
 }
 
 class ArrayProperty {
-    public static $array = array(
+    public static $array = darray[
         Constants::A => 23,
         Constants::B => 42,
-    );
+    ];
 }
 <<__EntryPoint>> function main(): void {
 var_dump( ArrayProperty::$array );

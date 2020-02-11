@@ -14,7 +14,7 @@ var_dump(max(false, true, false));
 var_dump(max(true, false, true));
 var_dump(max(1, true, false, true));
 var_dump(max(0, true, false, true));
-var_dump(max(0, 1, array(2,3)));
+var_dump(max(0, 1, varray[2,3]));
 
 echo "\nDone\n";
 }

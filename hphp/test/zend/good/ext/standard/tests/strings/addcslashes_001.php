@@ -3,10 +3,10 @@
 echo "*** Testing addcslashes() for basic operations ***\n";
 /* checking normal operation of addcslashes */
 $string = "goodyear12345NULL\0truefalse\a\v\f\b\n\r\t";
-$charlist = array ( 
+$charlist = varray [ 
   NULL,
   2,
-  array(5,6,7),
+  varray[5,6,7],
   "a",
   "\0",
   "\n",
@@ -16,7 +16,7 @@ $charlist = array (
   "\v",
   "\b",
   "\f"
-);
+];
 /* loop prints string with backslashes before characters
    mentioned in $char using addcslashes() */
 $counter = 1;

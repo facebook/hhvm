@@ -10,9 +10,9 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_shift() : usage variations ***\n";
 
-$stack_first = array(array(1, 2, 3), 'one', 'two');
-$last = array (1, 2, 3);
-$stack_last = array ('zero', 'one', $last );
+$stack_first = varray[varray[1, 2, 3], 'one', 'two'];
+$last = varray [1, 2, 3];
+$stack_last = varray ['zero', 'one', $last ];
 echo "\n-- Before shift: --\n";
 echo "---- \$stack_first:\n";
 var_dump($stack_first);

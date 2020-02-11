@@ -7,7 +7,7 @@
 echo "*** Testing sprintf() : unsigned formats with integer values ***\n";
 
 // array of integer values 
-$integer_values = array(
+$integer_values = varray[
   0,
   1,
   -1,
@@ -26,15 +26,15 @@ $integer_values = array(
   01912,       // should be quivalent to octal 1
   -020000000000, // max negative integer as octal 
   017777777777  // max positive integer as octal
-);
+];
 
 // array of unsigned formats
-$unsigned_formats = array(
+$unsigned_formats = varray[
   "%u", "%hu", "%lu",
   "%Lu", " %u", "%u ",
   "\t%u", "\n%u", "%4u",
   "%30u", "%[0-9]", "%*u"
-);
+];
 
 
 $count = 1;

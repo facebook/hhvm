@@ -1,6 +1,6 @@
 <?hh
 final class Test implements Iterator {
-  public $arr = array(1, 2, 3);
+  public $arr = varray[1, 2, 3];
   public $x = 0;
 
   public function rewind() {

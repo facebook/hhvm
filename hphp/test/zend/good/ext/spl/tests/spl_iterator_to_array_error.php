@@ -6,7 +6,7 @@ class MyArrayIterator extends ArrayIterator {
     }
 }
 <<__EntryPoint>> function main(): void {
-$it = new MyArrayIterator(array(4, 6, 2));
+$it = new MyArrayIterator(varray[4, 6, 2]);
 
 try {
     // get keys

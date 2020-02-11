@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$a = array(1,2,3);
-$b = array(1,2);
+$a = varray[1,2,3];
+$b = varray[1,2];
 
 $a = ~$b;
 var_dump($a);

@@ -13,10 +13,10 @@ date_default_timezone_set("Asia/Calcutta");
 $timestamp = mktime(8, 8, 8, 8, 8, 2008);
 
 //array of values to iterate over
-$inputs = array(
+$inputs = darray[
       'Newline character' => "%n",
       'Tab character' => "%t"
-);
+];
 
 // loop through each element of the array for timestamp
 

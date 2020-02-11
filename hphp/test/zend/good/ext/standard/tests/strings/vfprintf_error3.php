@@ -11,7 +11,7 @@ $file = 'vfprintf_error3.phpt.txt';
 $fp = fopen( $file, "a+" );
 
 echo "\n-- Testing vfprintf() function with wrong variable types as argument --\n";
-var_dump( vfprintf( $fp, array( 'foo %d', 'bar %s' ), 3.55552 ) );
+var_dump( vfprintf( $fp, varray[ 'foo %d', 'bar %s' ], 3.55552 ) );
 
 rewind( $fp );
 var_dump( stream_get_contents( $fp ) );

@@ -1,15 +1,15 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$ctxs = array(
+$ctxs = varray[
 	NULL,
 	'bogus',
 	123,
 	new stdclass,
-	array('a'),
+	varray['a'],
 	stream_context_create(),
-	stream_context_create(array('file')),
-	stream_context_create(array('file' => array('some_opt' => 'aaa')))
-);
+	stream_context_create(varray['file']),
+	stream_context_create(darray['file' => darray['some_opt' => 'aaa']])
+];
 
 
 foreach ($ctxs as $ctx) {

@@ -3,7 +3,7 @@ function test() {
   $aUser = new User();
   $aUser->sName = 'newUser';
 
-  $aUsers = array();
+  $aUsers = varray[];
   $aUsers[] = $aUser;
   $aUsers[] = $aUser;
   $aUsers[] = $aUser;
@@ -17,7 +17,7 @@ class User {
   public $sName;
 }
 <<__EntryPoint>> function main(): void {
-$server = new soapserver(null,array('uri'=>"http://testuri.org", 'soap_version'=>SOAP_1_2));
+$server = new soapserver(null,darray['uri'=>"http://testuri.org", 'soap_version'=>SOAP_1_2]);
 $server->addfunction("test");
 
 $HTTP_RAW_POST_DATA = <<<EOF

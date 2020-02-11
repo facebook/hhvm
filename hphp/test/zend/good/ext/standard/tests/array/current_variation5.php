@@ -21,7 +21,7 @@ echo "*** Testing current() : usage variations ***\n";
 
 echo "\n-- Function: reference parameter --\n";
 
-$a = array('yes', 'maybe', 'no');
+$a = varray['yes', 'maybe', 'no'];
 
 var_dump(current($a));
 var_dump(next(inout $a));
@@ -29,7 +29,7 @@ current_variation5($a);
 
 echo "\n-- Function: normal parameter --\n";
 
-$a = array('yes', 'maybe', 'no');
+$a = varray['yes', 'maybe', 'no'];
 
 var_dump(current($a));
 var_dump(next(inout $a));

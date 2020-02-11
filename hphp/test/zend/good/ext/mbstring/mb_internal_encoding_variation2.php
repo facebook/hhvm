@@ -13,7 +13,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing mb_internal_encoding() : usage variations ***\n";
 
-$encoding = array('UCS-4',            /*1*/
+$encoding = varray['UCS-4',            /*1*/
                   'UCS-4BE',
                   'UCS-4LE',
                   'UCS-2',
@@ -68,7 +68,7 @@ $encoding = array('UCS-4',            /*1*/
                   'Windows-1251',
                   'Windows-1252',
                   'CP866',            /*55*/
-                  'KOI8-R');        /*56*/
+                  'KOI8-R'];        /*56*/
 
 $iterator = 1;
 foreach($encoding as $enc) {

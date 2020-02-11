@@ -1,12 +1,12 @@
 <?hh <<__EntryPoint>> function main(): void {
 $num = 100000;
 
-$a = array();
+$a = darray[];
 for ($i=0; $i<$num; $i++) {
-  $a[$i] = array(1);
+  $a[$i] = varray[1];
 }
 
-$b = array();
+$b = darray[];
 for ($i=0; $i<$num; $i++) {
   $b[$i] = $a[$i][0];
 }

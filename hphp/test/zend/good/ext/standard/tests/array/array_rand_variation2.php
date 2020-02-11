@@ -22,14 +22,14 @@ function main(): void {
   echo "*** Testing array_rand() : unexpected values for 'num_req' parameter ***\n";
 
   // Initialise function arguments
-  $input = array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13);
+  $input = varray[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
 
   //get an unset variable
   $unset_var = 10;
   unset($unset_var);
 
   //array of values to iterate over
-  $values = array(
+  $values = varray[
           // int data
   /*1*/   0,
           1,
@@ -69,7 +69,7 @@ function main(): void {
 
           // unset data
   /*22*/  @$unset_var,
-  );
+  ];
 
   // loop through each element of the array for different values for 'num_req' argument
   $count = 1;

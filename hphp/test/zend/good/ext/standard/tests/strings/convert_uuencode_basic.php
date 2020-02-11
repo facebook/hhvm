@@ -8,7 +8,7 @@
 echo "*** Testing convert_uuencode() : basic functionality ***\n";
 
 // array with different values for $string
-$strings =  array (
+$strings =  varray [
 
   //double quoted strings
   b"123",
@@ -24,7 +24,7 @@ $strings =  array (
   b'1a2b3c',
   b'\t This String contains \t\t some control characters\r\n',
   
-);  
+];  
 
 // loop through with each element of the $strings array to test convert_uuencode() function
 $count = 1;

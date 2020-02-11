@@ -11,7 +11,7 @@
 echo "*** Test strrpos() function: binary safe ***\n";
 $haystack = "\0Hello\0World\0";
 
-$needles = array(
+$needles = varray[
   "Hello".chr(0)."World",
   chr(0)."Hello\0",
   chr(0),
@@ -19,7 +19,7 @@ $needles = array(
   "\0Hello\0world\0",
   "\0Hello",
   "Hello\0"
-);
+];
 
 for($index = 0; $index < count($needles); $index++ ) {
   var_dump( strrpos($haystack, $needles[$index]) );

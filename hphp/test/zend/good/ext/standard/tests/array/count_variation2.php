@@ -19,7 +19,7 @@ class classA
 echo "*** Testing count() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$var = array(1, 2, array ('one', 'two'));
+$var = varray[1, 2, varray ['one', 'two']];
 
 //get an unset variable
 $unset_var = 10;
@@ -34,7 +34,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $mode argument
-$inputs = array(
+$inputs = varray[
 
        // int data
 /*1*/  0,
@@ -79,7 +79,7 @@ $inputs = array(
 
        // resource variable
 /*24*/ $fp
-);
+];
 
 // loop through each element of $inputs to check the behavior of count()
 $iterator = 1;

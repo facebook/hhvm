@@ -24,7 +24,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $value argument
-$inputs = array(
+$inputs = varray[
        // null data
 /* 1*/ NULL,
        null,
@@ -56,7 +56,7 @@ $inputs = array(
 
        // resource variable
 /*16*/ $fp
-);
+];
 
 // loop through each element of $inputs to check the behaviour of floor()
 $iterator = 1;

@@ -1,19 +1,19 @@
 <?hh
 
 function f() {
-	$a = array();
+	$a = darray[];
 	$a[0] = $a;
 	var_dump($a);
-	$b = array(array());
+	$b = varray[array()];
 	$b[0][0] = $b;
 	var_dump($b);
 }
 <<__EntryPoint>>
 function main_entry(): void {
-  $a = array();
+  $a = darray[];
   $a[0] = $a;
   var_dump($a);
-  $b = array(array());
+  $b = varray[array()];
   $b[0][0] = $b;
   var_dump($b);
   f();

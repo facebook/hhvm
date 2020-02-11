@@ -20,8 +20,8 @@ var_dump(openssl_public_decrypt($wrong, inout $output3, $pubkey));
 var_dump($output3);
 var_dump(openssl_public_decrypt($encrypted, inout $output4, array()));
 var_dump($output4);
-var_dump(openssl_public_decrypt($encrypted, inout $output5, array($pubkey)));
+var_dump(openssl_public_decrypt($encrypted, inout $output5, varray[$pubkey]));
 var_dump($output5);
-var_dump(openssl_public_decrypt($encrypted, inout $output6, array($pubkey, "")));
+var_dump(openssl_public_decrypt($encrypted, inout $output6, varray[$pubkey, ""]));
 var_dump($output6);
 }

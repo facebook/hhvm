@@ -2,19 +2,19 @@
 require "connect.inc";
 
 $link = ldap_connect($host, $port);
-$controls = array(
-	array(
-		array("xid" => "1.2.752.58.10.1", "iscritical" => true),
-		array("xid" => "1.2.752.58.1.10", "value" => "magic"),
-	),
-	array(
-		array("oid" => "1.2.752.58.10.1", "iscritical" => true),
-		array("oid" => "1.2.752.58.1.10", "value" => "magic"),
+$controls = varray[
+	varray[
+		darray["xid" => "1.2.752.58.10.1", "iscritical" => true],
+		darray["xid" => "1.2.752.58.1.10", "value" => "magic"],
+	],
+	varray[
+		darray["oid" => "1.2.752.58.10.1", "iscritical" => true],
+		darray["oid" => "1.2.752.58.1.10", "value" => "magic"],
 		"weird"
-	),
+	],
 	array(
 	),
-);
+];
 
 // Too few parameters
 try { var_dump(ldap_set_option()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

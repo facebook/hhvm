@@ -14,7 +14,7 @@ echo "*** Testing strspn() : with different mask strings and default start and l
 
 // initialing required variables
 // defining different strings
-$strings = array(
+$strings = varray[
                    "",
            '',
            "\n",
@@ -32,10 +32,10 @@ $strings = array(
            'hello'.chr(0).'world',
            "hello\0\100\xaaaworld",
            'hello\0\100\xaaaworld'
-                   );
+                   ];
 
 // define the array of mask strings
-$mask_array = array(
+$mask_array = varray[
             "",
             '',
             "f\n\trelshti \l",
@@ -46,7 +46,7 @@ $mask_array = array(
             "felh\t\ ",
             " \t",
                     "fhel\t\i\100\xa"
-                   );
+                   ];
 
 
 // loop through each element of the array for mask argument

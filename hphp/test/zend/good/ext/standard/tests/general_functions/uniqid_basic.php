@@ -14,14 +14,14 @@ echo "\n\n";
 echo "uniqid() with a prefix\n";
 
 // Use a fixed prefix so we can ensure length of o/p id is fixed
-$prefix = array (
+$prefix = varray [
                 99999,
                 "99999",
                 10.5e2,
                 null,
                 true,
                 false
-                );
+                ];
 
 for ($i = 0; $i < count($prefix); $i++) {
     var_dump(uniqid((string)$prefix[$i]));

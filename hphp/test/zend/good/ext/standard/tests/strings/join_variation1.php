@@ -21,7 +21,7 @@ class test {
 function main(): void {
   echo "*** Testing join() : usage variations ***\n";
   // initialize all required variables
-  $pieces = array("element1", "element2");
+  $pieces = varray["element1", "element2"];
 
   // get an unset variable
   $unset_var = 'string_val';
@@ -31,7 +31,7 @@ function main(): void {
   $fp = fopen(__FILE__, "r");
 
   // array with different values
-  $values = array(
+  $values = varray[
     // integer values
     0,
     1,
@@ -47,10 +47,10 @@ function main(): void {
 
     // array values
     array(),
-    array(0),
-    array(1),
-    array(1, 2),
-    array('color' => 'red', 'item' => 'pen'),
+    varray[0],
+    varray[1],
+    varray[1, 2],
+    darray['color' => 'red', 'item' => 'pen'],
 
     // boolean values
     true,
@@ -77,7 +77,7 @@ function main(): void {
 
     // unset variable
     @$unset_var
-  );
+  ];
 
   // loop through each element of the array and check the working of join()
   // when $glue argument is supplied with different values

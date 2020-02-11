@@ -14,13 +14,13 @@ function callback1($a)
 }
 function callback2($a, $b)
 {
-  return array($a => $b);
+  return darray[$a => $b];
 }
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_map() : array with binary data for 'arr1' argument ***\n";
 
 // array with binary data
-$arr1 = array(b"hello", b"world", "1", b"22.22");
+$arr1 = varray[b"hello", b"world", "1", b"22.22"];
 
 echo "-- checking binary safe array with one parameter callback function --\n";
 var_dump( array_map(fun('callback1'), $arr1) );

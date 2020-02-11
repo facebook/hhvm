@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$doubles = array(
+$doubles = varray[
         290000000000000000,
         290000000000000,
         29000000000000,
@@ -15,7 +15,7 @@ $doubles = array(
         10000000000,
         999999999999999999,
         (float)0
-        );
+        ];
 
 foreach ($doubles as $d) {
         var_dump((string)$d);

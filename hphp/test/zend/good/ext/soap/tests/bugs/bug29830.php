@@ -9,7 +9,7 @@ class hello_world {
   }
 }
 <<__EntryPoint>> function main(): void {
-$server = new SoapServer(NULL, array("uri"=>"test://"));
+$server = new SoapServer(NULL, darray["uri"=>"test://"]);
 $server->setClass('hello_world');
 $functions = $server->getFunctions();
 foreach($functions as $func) {

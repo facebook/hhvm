@@ -6,16 +6,16 @@
 
 function ut_main()
 {
-    $locales = array(
+    $locales = varray[
         'en_UK',
         'en_US@California',
         'fr_CA',
-    );
+    ];
 
-    $loc_types = array(
+    $loc_types = darray[
         Locale::ACTUAL_LOCALE    => 'actual',
         Locale::VALID_LOCALE     => 'valid',
-    );
+    ];
 
     $res_str = '';
 

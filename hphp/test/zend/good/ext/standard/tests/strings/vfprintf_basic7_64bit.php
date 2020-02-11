@@ -11,9 +11,9 @@ $format = "format";
 $format1 = "%u";
 $format2 = "%u %u";
 $format3 = "%u %u %u";
-$arg1 = array(-1111);
-$arg2 = array(-1111,-1234567);
-$arg3 = array(-1111,-1234567,-2345432);
+$arg1 = varray[-1111];
+$arg2 = varray[-1111,-1234567];
+$arg3 = varray[-1111,-1234567,-2345432];
 
 /* creating dumping file */
 $data_file = dirname(__FILE__) . '/vfprintf_basic7_64bit.txt';

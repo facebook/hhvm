@@ -19,7 +19,7 @@ class classA
 echo "*** Testing array_merge() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$arr1 = array (1, 2);
+$arr1 = varray [1, 2];
 
 //get an unset variable
 $unset_var = 10;
@@ -34,7 +34,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $arr2 argument
-$inputs = array(
+$inputs = varray[
 
        // int data
 /*1*/  0,
@@ -80,7 +80,7 @@ $inputs = array(
 
        // resource variable
 /*25*/ $fp
-);
+];
 
 // loop through each element of $inputs to check the behavior of array_merge()
 $iterator = 1;

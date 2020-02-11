@@ -28,7 +28,7 @@ $file_handle = fopen(__FILE__, "r");
 
 
 /* array with different values */
-$lengths =  array (
+$lengths =  varray [
 
   /* float values */
   10.5,
@@ -45,10 +45,10 @@ $lengths =  array (
 
   /* array values */
   array(),
-  array(0),
-  array(1),
-  array(1, 2),
-  array('color' => 'red', 'item' => 'pen'),
+  varray[0],
+  varray[1],
+  varray[1, 2],
+  darray['color' => 'red', 'item' => 'pen'],
 
   /* boolean values */
   true,
@@ -75,7 +75,7 @@ $lengths =  array (
 
   /* object */
   new sample()
-);
+];
 
 /* loop through each element of the array and check the working of strncasecmp() */
 $counter = 1;

@@ -19,7 +19,7 @@ class returnObject implements Countable {
 
 class returnArray implements Countable {
     function count() {
-        return array(1,2,3);
+        return varray[1,2,3];
     }
 }
 

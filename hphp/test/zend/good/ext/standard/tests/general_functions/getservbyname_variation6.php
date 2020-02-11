@@ -17,10 +17,10 @@ echo "*** Test substituting argument 1 with object values ***\n";
 $protocol = "tcp";
 
 
-$variation_array = array(
+$variation_array = darray[
   'instance of classWithToString' => new classWithToString(),
   'instance of classWithoutToString' => new classWithoutToString(),
-  );
+  ];
 
 
 foreach ( $variation_array as $var ) {

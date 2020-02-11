@@ -1,13 +1,13 @@
 <?hh
 class A extends IntlDateFormatter {
-        static $ARGS = array("en_US" ,IntlDateFormatter::FULL, IntlDateFormatter::FULL,
-            'America/Los_Angeles', IntlDateFormatter::GREGORIAN);
+        static $ARGS = varray["en_US" ,IntlDateFormatter::FULL, IntlDateFormatter::FULL,
+            'America/Los_Angeles', IntlDateFormatter::GREGORIAN];
 }
 class B extends NumberFormatter {
-        static $ARGS = array('de_DE', NumberFormatter::DECIMAL);
+        static $ARGS = varray['de_DE', NumberFormatter::DECIMAL];
 }
 class C extends MessageFormatter {
-        static $ARGS = array("en_US", "foo");
+        static $ARGS = varray["en_US", "foo"];
 }
 class D extends Spoofchecker {
         static $ARGS = array();

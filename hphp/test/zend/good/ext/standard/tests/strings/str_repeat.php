@@ -6,7 +6,7 @@
 */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing str_repeat() with possible strings ***";
-$variations = array(
+$variations = varray[
   'a',
   'foo',
   'barbazbax',
@@ -18,7 +18,7 @@ $variations = array(
   1.23,
   "",
   " "
-);
+];
 
 /* variations in string and multiplier as an integer */
 foreach($variations as $input) {

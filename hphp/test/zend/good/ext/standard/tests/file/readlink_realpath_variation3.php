@@ -9,7 +9,7 @@
 echo "*** Testing readlink() and realpath() : usage variations ***\n";
 
 echo "\n*** Testing readlink() and realpath() with linkname as empty string, NULL and single space ***\n";
-$link_string = array (
+$link_string = varray [
   /* linkname as spaces */
   " ",
   ' ',
@@ -19,7 +19,7 @@ $link_string = array (
   '',
   NULL,
   null
- );
+ ];
 for($loop_counter = 0; $loop_counter < count($link_string); $loop_counter++) {
   echo "-- Iteration";
   echo $loop_counter + 1;

@@ -16,12 +16,12 @@ function book_to_xml($book) {
     throw new SoapFault("Client", "Conversion Error");
 }
 <<__EntryPoint>> function main(): void {
-$options=array(
+$options=darray[
         'actor' =>'http://schemas.nothing.com',
-        'typemap' => array(array("type_ns"   => "http://schemas.nothing.com",
+        'typemap' => varray[darray["type_ns"   => "http://schemas.nothing.com",
                                  "type_name" => "book",
-                                 "to_xml"  => "book_to_xml"))
-        );
+                                 "to_xml"  => "book_to_xml"]]
+        ];
 
 $client = new TestSoapClient(dirname(__FILE__)."/classmap.wsdl",$options);
 $book = new book();

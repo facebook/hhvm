@@ -3,7 +3,7 @@ class A
 {
     public function getB()
     {
-        $this->data = array();
+        $this->data = darray[];
         $this->data['foo'] = new B($this);
         $this->data['bar'] = new B($this);
         // Return either of the above

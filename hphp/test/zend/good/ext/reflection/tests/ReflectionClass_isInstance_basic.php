@@ -7,12 +7,12 @@ class C implements I {}
 
 class X {}
 <<__EntryPoint>> function main(): void {
-$classes = array("A", "B", "C", "I", "X");
+$classes = varray["A", "B", "C", "I", "X"];
 
-$instances = array(    "myA" => new A,
+$instances = darray[    "myA" => new A,
                     "myB" => new B,
                     "myC" => new C,
-                    "myX" => new X );
+                    "myX" => new X ];
 
 foreach ($classes as $class) {
     $rc = new ReflectionClass($class);

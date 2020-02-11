@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$values = array(
+$values = varray[
 'http://example.com/index.html',
 'http://www.example.com/index.php',
 'http://www.example/img/test.png',
@@ -27,7 +27,7 @@ array(),
 "http://example.com:-2",
 "http://example.com:65536",
 "http://example.com:65537",
-);
+];
 foreach ($values as $value) {
 	var_dump(filter_var($value, FILTER_VALIDATE_URL));
 }

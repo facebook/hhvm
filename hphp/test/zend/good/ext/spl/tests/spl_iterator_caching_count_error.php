@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$i = new ArrayIterator(array(1,1,1,1,1));
+$i = new ArrayIterator(varray[1,1,1,1,1]);
 $i = new CachingIterator($i);
 try {
   $i->count();

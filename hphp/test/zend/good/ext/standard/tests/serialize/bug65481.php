@@ -15,7 +15,7 @@ class Token implements \Serializable {
             $e->e = $c->e;
         }
 
-        return serialize(array(serialize($c)));
+        return serialize(varray[serialize($c)]);
     }
 
     public function unserialize($str)

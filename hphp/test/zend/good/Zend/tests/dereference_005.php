@@ -3,11 +3,11 @@
 class obj implements arrayaccess {
     private $container = array();
     public function __construct() {
-        $this->container = array(
+        $this->container = darray[
             "one"   => 1,
             "two"   => 2,
             "three" => 3,
-        );
+        ];
     }
     public function offsetSet($offset, $value) {
         $this->container[$offset] = $value;

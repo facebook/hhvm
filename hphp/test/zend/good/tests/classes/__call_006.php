@@ -42,7 +42,7 @@ try {
 
 echo "\n\n---> Invoke __call via callback.\n";
 try {
-    call_user_func(array($b, 'unknownCallback'), 1,2,3);
+    call_user_func(varray[$b, 'unknownCallback'], 1,2,3);
 } catch (Exception $e) {
     echo "Exception caught OK; continuing.\n";
 }

@@ -13,7 +13,7 @@ $dir2 = $pwd."/".$f.".dir2";
 $dir3 = $pwd."/".$f.".dir3";
 $iniFile = "php.ini";
 
-$newdirs = array($dir1, $dir2, $dir3);
+$newdirs = varray[$dir1, $dir2, $dir3];
 $pathSep = ":";
 $newIncludePath = "";
 if(substr(PHP_OS, 0, 3) == 'WIN' ) {
@@ -56,7 +56,7 @@ $iniFile = "php.ini";
 $dir1 = $pwd."/".$f.".dir1";
 $dir2 = $pwd."/".$f.".dir2";
 $dir3 = $pwd."/".$f.".dir3";
-$newdirs = array($dir1, $dir2, $dir3);
+$newdirs = varray[$dir1, $dir2, $dir3];
 $output_file = $dir2."/".$iniFile;
 
 // Tidy up after test

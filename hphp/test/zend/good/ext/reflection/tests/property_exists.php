@@ -57,8 +57,8 @@ $oA->e = 6;
 
 $oC = new C;
 
-$pc = array($oA, 'A', 'B', 'C', $oC);
-$pr = array('a', 'b', 'c', 'd', 'e');
+$pc = varray[$oA, 'A', 'B', 'C', $oC];
+$pr = varray['a', 'b', 'c', 'd', 'e'];
 
 foreach($pc as $p1) {
     if (is_object($p1)) {

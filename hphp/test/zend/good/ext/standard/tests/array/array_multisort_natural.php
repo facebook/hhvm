@@ -7,21 +7,21 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_multisort() : natural sorting\n";
 
-$a = array(
+$a = varray[
     'Second',
     'First',
     'Twentieth',
     'Tenth',
     'Third',
-);
+];
 
-$b = array(
+$b = varray[
     '2 a',
     '1 b',
     '20 c',
     '10 d',
     '3 e',
-);
+];
 
 $natural = SORT_NATURAL;
 array_multisort3(inout $b, inout $natural, inout $a);

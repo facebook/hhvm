@@ -11,7 +11,7 @@ echo "*** Testing idate() : usage variation ***\n";
 date_default_timezone_set("Asia/Calcutta");
 
 //array of values to iterate over
-$inputs = array(
+$inputs = darray[
 
       'Day of the month' => 'd',
       'Leap Year' =>'L',
@@ -22,7 +22,7 @@ $inputs = array(
       'Year (1 or 2 digits)' => 'y',
       'Year 4 digits' => 'Y',
       'Day of the year' => 'z',
-);
+];
 
 // loop through each element of the array for timestamp
 foreach($inputs as $key =>$value) {

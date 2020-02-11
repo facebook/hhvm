@@ -1,7 +1,7 @@
 <?hh <<__EntryPoint>> function main(): void {
 $a = new stdClass();
 
-$array = array(array('z',$a),array('q','s'));
+$array = varray[varray['z',$a],varray['q','s']];
 
 $rai = new RecursiveArrayIterator($array,RecursiveArrayIterator::CHILD_ARRAYS_ONLY);
 

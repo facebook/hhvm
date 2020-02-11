@@ -11,12 +11,12 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing mb_strtoupper() : usage variations ***\n";
 
-$uppers = array('Basic Latin' => b'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+$uppers = darray['Basic Latin' => b'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
                 'Characters With Accents' => base64_decode('w4DDgcOCw4PDhMOFw4bDh8OIw4nDisOLw4zDjcOOw4/DkMORw5LDk8OUw5XDlg=='),
-                'Russian' => base64_decode('0JDQkdCS0JPQlNCV0JbQlw=='));
-$lowers = array('Basic Latin' => b'abcdefghijklmnopqrstuvwxyz',
+                'Russian' => base64_decode('0JDQkdCS0JPQlNCV0JbQlw==')];
+$lowers = darray['Basic Latin' => b'abcdefghijklmnopqrstuvwxyz',
                 'Characters With Accents' => base64_decode('w6DDocOiw6PDpMOlw6bDp8Oow6nDqsOrw6zDrcOuw6/DsMOxw7LDs8O0w7XDtg=='),
-                'Russian' => base64_decode('0LDQsdCy0LPQtNC10LbQtw=='));
+                'Russian' => base64_decode('0LDQsdCy0LPQtNC10LbQtw==')];
 
 foreach ($lowers as $lang => $sourcestring) {
     echo "\n-- $lang --\n";

@@ -7,7 +7,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing realpath() : variation ***\n";
 
-$paths = array('c:\\', 
+$paths = varray['c:\\', 
                'c:', 
                'c' , 
                '\\' , 
@@ -17,7 +17,7 @@ $paths = array('c:\\',
                '/tmp/',
                '/tmp/\\', 
                '\\tmp',                 
-               '\\tmp\\');
+               '\\tmp\\'];
 
 foreach($paths as $path) {
       echo "\n--$path--\n";

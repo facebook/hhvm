@@ -39,14 +39,14 @@ hello\0world\0hello
 \0hello\0
 EOT;
 
-$heredoc_strings = array(
+$heredoc_strings = varray[
                    $empty_heredoc,
                    $heredoc_with_newline,
                    $heredoc_with_characters,
                    $heredoc_with_newline_and_tabs,
                    $heredoc_with_alphanumerics,
                    $heredoc_with_embedded_nulls
-                   );
+                   ];
 
 // loop through each element of the array and check the working of strtok()
 // when supplied with different string values

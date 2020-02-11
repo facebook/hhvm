@@ -25,7 +25,7 @@ unset($unset_var);
 $file_handle = fopen(__FILE__, "r");
 
 // array with different values for $input
-$pad_lengths =  array (
+$pad_lengths =  varray [
 
           // integer values
 /*1*/      0,
@@ -40,8 +40,8 @@ $pad_lengths =  array (
 
           // array values
 /*8*/      array(),
-          array(0),
-          array(1, 2),
+          varray[0],
+          varray[1, 2],
 
           // boolean values
 /*11*/      true,
@@ -64,7 +64,7 @@ $pad_lengths =  array (
 
           // unset variable
 /*20*/      @$unset_var
-);
+];
 
 //defining '$input' argument
 $input = "Test string";

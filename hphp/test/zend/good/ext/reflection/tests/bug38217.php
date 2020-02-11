@@ -18,7 +18,7 @@ function main_entry(): void {
 
   $class= new ReflectionClass('Object1');
   try { var_dump($class->newInstanceArgs()); } catch (Exception $e) { var_dump($e->getMessage()); }
-  var_dump($class->newInstanceArgs(array('test')));
+  var_dump($class->newInstanceArgs(varray['test']));
 
 
   echo "Done\n";

@@ -22,7 +22,7 @@ class sample  {
 $file_handle = fopen(__FILE__, "r");
 
 // array with different values for $str
-$inputs =  array (
+$inputs =  varray [
 
   // integer values
   0,
@@ -39,8 +39,8 @@ $inputs =  array (
 
   // array values
   array(),
-  array(0),
-  array(1, 2),
+  varray[0],
+  varray[1, 2],
 
   // boolean values
   true,
@@ -63,7 +63,7 @@ $inputs =  array (
 
   // unset variable
   @$unset_var
-);
+];
 
 // loop through with each element of the $inputs array to test function_exists() function
 $count = 1;

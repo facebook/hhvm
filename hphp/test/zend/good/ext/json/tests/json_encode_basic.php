@@ -25,7 +25,7 @@ $obj->MyNull = null;
 $obj->MyString = "Hello World";
 
 // array with different values for $string
-$inputs =  array (
+$inputs =  varray [
 
         // integers
 /*1*/    0,
@@ -56,9 +56,9 @@ $inputs =  array (
 
           // arrays
 /*18*/    array(),
-          array(1,2,3,4,5),
-         array(1 => "Sun", 2=>"Mon", 3 => "Tue", 4 => "Wed", 5 => "Thur", 6 => "Fri", 7 => "Sat"),
-          array("Jan" => 31, "Feb" => 29, "Mar" => 31, "April" => 30, "May" => 31, "June" => 30),
+          varray[1,2,3,4,5],
+         darray[1 => "Sun", 2=>"Mon", 3 => "Tue", 4 => "Wed", 5 => "Thur", 6 => "Fri", 7 => "Sat"],
+          darray["Jan" => 31, "Feb" => 29, "Mar" => 31, "April" => 30, "May" => 31, "June" => 30],
 
        // empty data
 /*22*/ "",
@@ -76,7 +76,7 @@ $inputs =  array (
       // object variable
 /*27*/ $obj
 
-);
+];
 
 // loop through with each element of the $inputs array to test json_encode() function
 $count = 1;

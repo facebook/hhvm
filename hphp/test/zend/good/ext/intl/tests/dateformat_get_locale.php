@@ -7,12 +7,12 @@
 
 function ut_main()
 {
-    $locale_arr = array (
+    $locale_arr = varray [
         'de-DE',
         'sl-IT-nedis',
         'en_UK',
         'hi'
-    );
+    ];
 
     $res_str = '';
 
@@ -24,7 +24,7 @@ function ut_main()
         $res_str .= "\nAfter call to get_locale :  locale= $locale";
         $res_str .= "\n";
     }
-    $badvals = array(100, -1, 4294901761);
+    $badvals = varray[100, -1, 4294901761];
     foreach($badvals as $badval) {
         if(ut_datefmt_get_locale($fmt, $badval)) {
             $res_str .= "datefmt_get_locale should return false for bad argument $badval\n";

@@ -1,13 +1,13 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 $filename = dirname(__FILE__)."/sha1.dat";
-$a = array(
+$a = varray[
 	"abc",
 	"abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
 	"a",
 	"0123456701234567012345670123456701234567012345670123456701234567",
 	""
-);
+];
 
 foreach ($a as $str) {
 	var_dump($val1 = sha1($str));

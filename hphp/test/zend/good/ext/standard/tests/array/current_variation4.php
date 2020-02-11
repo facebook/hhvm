@@ -12,7 +12,7 @@
 echo "*** Testing current() : usage variations ***\n";
 
 echo "\n-- Two Dimensional Array --\n";
-$multi_array = array ('zero', array (1, 2, 3), 'two');
+$multi_array = varray ['zero', varray [1, 2, 3], 'two'];
 echo "Initial Position: ";
 var_dump(current($multi_array));
 

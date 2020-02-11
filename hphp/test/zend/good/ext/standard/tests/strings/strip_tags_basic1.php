@@ -7,7 +7,7 @@
 echo "*** Testing strip_tags() : basic functionality ***\n";
 
 // array of arguments
-$string_array = array (
+$string_array = varray [
   "<html>hello</html>",
   '<html>hello</html>',
   "<?hh echo hello ?>",
@@ -22,7 +22,7 @@ $string_array = array (
   '<html><b>hello</b><p>world</p></html>',
   "<html><!-- COMMENT --></html>",
   '<html><!-- COMMENT --></html>'
-);
+];
 
 
 // Calling strip_tags() with default arguments

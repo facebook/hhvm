@@ -29,7 +29,7 @@ function main(): void {
   unset($unset_var);
 
   //array of different  values for 'num' argument
-  $values = array(
+  $values = varray[
             // float values
   /* 1  */  2.5,
             -2.5,
@@ -39,10 +39,10 @@ function main(): void {
 
             // array values
   /* 6  */  array(),
-            array(0),
-            array(1),
-            array(1, 2),
-            array('color' => 'red', 'item' => 'pen'),
+            varray[0],
+            varray[1],
+            varray[1, 2],
+            darray['color' => 'red', 'item' => 'pen'],
 
             // null values
   /* 11 */  NULL,
@@ -70,7 +70,7 @@ function main(): void {
 
             // unset variable
   /* 24 */  @$unset_var,
-  );
+  ];
 
   // loop through each element of the array for num
   // check the working of array_fill

@@ -11,11 +11,11 @@ echo "*** Testing gmstrftime() : usage variation ***\n";
 $timestamp = gmmktime(8, 8, 8, 8, 8, 2008);
 
 //array of values to iterate over
-$inputs = array(
+$inputs = darray[
       'Abbreviated month name' => "%b",
       'Full month name' => "%B",
       'Month as decimal' => "%m",
-);
+];
 
 // loop through each element of the array for timestamp
 

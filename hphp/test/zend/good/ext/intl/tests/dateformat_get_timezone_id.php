@@ -7,11 +7,11 @@
 
 function ut_main()
 {
-    $timezone_id_arr = array (
+    $timezone_id_arr = varray [
         'America/New_York',
         'US/Pacific',
         'US/Central'
-    );
+    ];
 
     $res_str = '';
 

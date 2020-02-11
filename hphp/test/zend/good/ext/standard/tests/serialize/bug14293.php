@@ -9,7 +9,7 @@ class t
     function __sleep()
     {
         echo "__sleep called\n";
-        return array('a','b');
+        return varray['a','b'];
     }
 }
 <<__EntryPoint>> function main(): void {

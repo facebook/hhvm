@@ -1,14 +1,14 @@
 <?hh <<__EntryPoint>> function main(): void {
 date_default_timezone_set('UTC');
 
-$tests = array(
-    array( 'Y-m-d',   '2001-11-29 13:20:01' ),
-    array( 'Y-m-d+',  '2001-11-29 13:20:01' ),
-    array( 'Y-m-d +', '2001-11-29 13:20:01' ),
-    array( 'Y-m-d+',  '2001-11-29' ),
-    array( 'Y-m-d +', '2001-11-29' ),
-    array( 'Y-m-d +', '2001-11-29 ' ),
-);
+$tests = varray[
+    varray[ 'Y-m-d',   '2001-11-29 13:20:01' ],
+    varray[ 'Y-m-d+',  '2001-11-29 13:20:01' ],
+    varray[ 'Y-m-d +', '2001-11-29 13:20:01' ],
+    varray[ 'Y-m-d+',  '2001-11-29' ],
+    varray[ 'Y-m-d +', '2001-11-29' ],
+    varray[ 'Y-m-d +', '2001-11-29 ' ],
+];
 foreach( $tests as $test )
 {
     list($format, $str) = $test;

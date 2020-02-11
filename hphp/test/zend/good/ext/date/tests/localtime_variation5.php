@@ -13,12 +13,12 @@ date_default_timezone_set("UTC");
 $is_associative = true;
 
 //array of values to iterate over
-$inputs = array(
+$inputs = darray[
 
       'Hexa-decimal 0' => 0x0,
       'Hexa-decimal 10' => 0xA,
       'Hexa-decimal -10' => -0XA
-);
+];
 
 foreach($inputs as $key =>$value) {
       echo "\n--$key--\n";

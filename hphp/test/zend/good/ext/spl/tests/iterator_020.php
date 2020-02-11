@@ -11,7 +11,7 @@ foreach($it as $key=>$val)
 
 echo "===Append===\n";
 
-$it->append(new ArrayIterator(array(0 => 'A', 1 => 'B')));
+$it->append(new ArrayIterator(darray[0 => 'A', 1 => 'B']));
 
 foreach($it as $key=>$val)
 {
@@ -27,7 +27,7 @@ foreach($it as $key=>$val)
 
 echo "===Append===\n";
 
-$it->append(new ArrayIterator(array(2 => 'C', 3 => 'D')));
+$it->append(new ArrayIterator(darray[2 => 'C', 3 => 'D']));
 
 foreach(new NoRewindIterator($it) as $key=>$val)
 {

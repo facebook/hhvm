@@ -27,7 +27,7 @@ echo "- Size of source file => ";
 var_dump( filesize($src_file_name) );
 clearstatcache();
 
-$dests = array(
+$dests = varray[
   $base_dir."/copy_copy_variation16.tmp",
   $base_dir."/copy_variation16_sub/copy_copy_variation16.tmp",
   "$sub_dir/copy_copy_variation16.tmp",
@@ -36,7 +36,7 @@ $dests = array(
   "$sub_dir/..///../copy_copy_variation16.tmp",
   "$sub_dir/..///../*",
   "$dirname_with_blank/copy_copy_variation16.tmp"
-);
+];
 
 echo "\n--- Now applying copy() on source file to create copies ---";
 $count = 1;

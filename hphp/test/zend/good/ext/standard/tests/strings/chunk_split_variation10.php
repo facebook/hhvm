@@ -18,7 +18,7 @@ $str = "This is to test chunk_split() with various 'single quoted' ending string
 $chunklen = 9.2;
 
 //different values for 'ending' argument
-$values = array (
+$values = varray [
   '',  //empty
   ' ',  //space
   'a',  //Single char
@@ -37,7 +37,7 @@ $values = array (
   ') ending string (',  //sentence as ending string
   ') numbers 1234 (',  //string with numbers
   ') speci@! ch@r$ ('  //string with special chars
-);
+];
 
 
 //loop through each element of values for 'ending'

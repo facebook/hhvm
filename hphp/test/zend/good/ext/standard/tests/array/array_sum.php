@@ -1,7 +1,7 @@
 <?hh <<__EntryPoint>> function main(): void {
 $i = 0;
-$a = array();
-$b = array();
+$a = varray[];
+$b = varray[];
 while ($i++ < 1000) {
     $a[] = $i;
     $b[] = (string)$i;
@@ -11,8 +11,8 @@ $s2 = array_sum($b);
 var_dump($s1, $s2);
 
 $j = 0;
-$c = array();
-$d = array();
+$c = varray[];
+$d = varray[];
 while ($j++ < 100000) {
     $c[] = $j;
     $d[] = (string) $j;

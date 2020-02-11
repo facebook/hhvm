@@ -1,5 +1,5 @@
 <?hh
-function f($a=array(namespace\bar)) {
+function f($a=varray[namespace\bar]) {
     return $a[0];
 }
 <<__EntryPoint>> function main(): void {

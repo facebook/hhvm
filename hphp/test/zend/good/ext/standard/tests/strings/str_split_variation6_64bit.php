@@ -16,7 +16,7 @@ echo "*** Testing str_split() : different intger values for 'split_length' ***\n
 $str = 'This is a string with 123 & escape char \t';
 
 //different values for 'split_length'
-$values = array (
+$values = varray [
   0,
   1,
   -123,  //negative integer
@@ -25,7 +25,7 @@ $values = array (
   2147483647,  //max positive integer number
   2147483648,  //max positive integer+1
   -2147483648,  //min negative integer
-);
+];
 
 //loop through each element of $values for 'split_length'
 for($count = 0; $count < count($values); $count++) {

@@ -32,7 +32,7 @@ function main_entry(): void {
   $client = new TestSoapClient(dirname(__FILE__).'/bug38055.wsdl');
   $boolA = 1;
   $boolB = '1';
-  $res = $client->Test(array('boolA'=>$boolA, 'boolB'=>$boolB));
+  $res = $client->Test(darray['boolA'=>$boolA, 'boolB'=>$boolB]);
   var_dump(ZendGoodExtSoapTestsBugsBug38055::$g1);
   var_dump(ZendGoodExtSoapTestsBugsBug38055::$g2);
 }

@@ -16,13 +16,13 @@ echo "*** Testing array_unshift() : single quoted strings for \$var argument ***
 $array = array('f' => "first", "s" => 'second', 1, 2.222);
 
 // different variations of single quoted strings to be passed to $var argument
-$vars = array (
+$vars = varray [
   '\$ -> This represents the dollar sign. hello dollar!!!',
   '\t\r\v The quick brown fo\fx jumped over the lazy dog',
   'This is a text with special chars: \!\@\#\$\%\^\&\*\(\)\\',
   'hello world\\t',
   'This is \ta text in bold letters\r\s\malong with slashes\n : HELLO WORLD\t'
-);
+];
 
 // loop through the various elements of $arrays to test array_unshift()
 $iterator = 1;

@@ -11,7 +11,7 @@ class foo {
 }
 
 <<__EntryPoint>> function main(): void {
-$arr = array('foo', 'abc');
+$arr = varray['foo', 'abc'];
 
 try {
     $arr();
@@ -23,7 +23,7 @@ catch (Exception $e) {
 echo "------\n";
 
 $foo = new foo;
-$arr = array($foo, 'abc');
+$arr = varray[$foo, 'abc'];
 
 try {
     $arr();
@@ -34,7 +34,7 @@ catch (Exception $e) {
 
 
 $foo = new foo;
-$arr = array($foo, '123');
+$arr = varray[$foo, '123'];
 
 try {
     $arr();

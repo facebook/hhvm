@@ -13,7 +13,7 @@ $dfp = opendir ( dirname(__FILE__) );
 closedir($dfp);
 
 // other types in an array
-$not_float_types = array (
+$not_float_types = darray [
            "-2147483648" => -2147483648, // max negative integer value
            "2147483647" => 2147483648,  // max positive integer value
            "file resoruce" => $fp,
@@ -30,7 +30,7 @@ $not_float_types = array (
            "true" => true,
            "NULL" => NULL,
            "null" => null,
-                 );
+                 ];
 /* loop through the $not_float_types to see working of
    floatval() on non float types, expected output: float value valid floating point numbers */
 echo "\n*** Testing floatval() on non floating types ***\n";

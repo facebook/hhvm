@@ -15,10 +15,10 @@
 echo "*** Testing asort() : usage variations ***\n";
 
 // an array contains unsorted octal values
-$unsorted_oct_array = array (
+$unsorted_oct_array = darray [
    01235 => 01235, 0321 => 0321, 0345 => 0345, 066 => 066, 0772 => 0772,
    077 => 077, -066 => -066, -0345 => -0345, 0 => 0
-);
+];
 
 echo "\n-- Testing asort() by supplying octal value array, 'flag' value is defualt  --\n";
 $temp_array = $unsorted_oct_array;

@@ -7,7 +7,7 @@ $obj->prop3 = '3';
 
 $reflect = new ReflectionObject($obj);
 
-$array = array();
+$array = darray[];
 foreach($reflect->getProperties() as $prop)
 {
 	$array[$prop->getName()] = $prop->getValue($obj);

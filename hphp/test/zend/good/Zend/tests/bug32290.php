@@ -40,7 +40,7 @@ class TestB extends TestA
         echo __METHOD__ . "($i)\n";
         $i++;
         if ($i >= 5) return 5;
-        $x = array("TestA", "doSomething");
+        $x = varray["TestA", "doSomething"];
         return $x($i);
     }
 
@@ -49,7 +49,7 @@ class TestB extends TestA
         echo __METHOD__ . "($i)\n";
         $i++;
         if ($i >= 5) return 5;
-        $x = array($this, "TestA::doSomethingThis");
+        $x = varray[$this, "TestA::doSomethingThis"];
         return $x($i);
     }
 
@@ -58,7 +58,7 @@ class TestB extends TestA
         echo __METHOD__ . "($i)\n";
         $i++;
         if ($i >= 5) return 5;
-        $x = array("parent", "doSomethingParent");
+        $x = varray["parent", "doSomethingParent"];
         return $x($i);
     }
 
@@ -67,7 +67,7 @@ class TestB extends TestA
         echo __METHOD__ . "($i)\n";
         $i++;
         if ($i >= 5) return 5;
-        $x = array($this, "parent::doSomethingParentThis");
+        $x = varray[$this, "parent::doSomethingParentThis"];
         return $x($i);
     }
 
@@ -76,7 +76,7 @@ class TestB extends TestA
         echo __METHOD__ . "($i)\n";
         $i++;
         if ($i >= 5) return 5;
-        $x = array("TestA", "doSomethingStatic");
+        $x = varray["TestA", "doSomethingStatic"];
         return $x($i);
     }
 }

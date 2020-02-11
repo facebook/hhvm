@@ -17,7 +17,7 @@ $str = "This is to test chunk_split() with various ending string";
 $chunklen = 6;
 
 //different values for 'ending' argument
-$values = array (
+$values = varray [
   "",  //empty
   " ",  //space
   "a",  //Single char
@@ -36,7 +36,7 @@ $values = array (
   ")ending string(",  //sentence as ending string
   ")numbers 1234(",
   ")speci@! ch@r$("
-);
+];
 
 //loop through element of values for 'ending'
 for($count = 0; $count < count($values); $count++) {

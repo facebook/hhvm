@@ -1,8 +1,8 @@
 <?hh <<__EntryPoint>> function main(): void {
-$coderange = array(
+$coderange = varray[
     range(0x0000, 0x1fff),
     range(0xff60, 0xff9f)
-);
+];
 
 
 foreach ($coderange as $r) {

@@ -24,7 +24,7 @@ function callback($a)
 echo "*** Testing array_map() : unexpected values for 'arr1' ***\n";
 
 //get an unset array variable
-$unset_var1 = array(1, 2);
+$unset_var1 = varray[1, 2];
 unset ($unset_var1);
 
 // get an unset variable
@@ -40,7 +40,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // different scalar/non-scalar values for array input
-$unexpected_inputs = array(
+$unexpected_inputs = varray[
 
        // int data
 /*1*/  0,
@@ -86,7 +86,7 @@ $unexpected_inputs = array(
 
        // resource variable
 /*25*/ $fp
-);
+];
 
 // loop through each element of $unexpected_inputs to check the behavior of array_map
 for($count = 0; $count < count($unexpected_inputs); $count++) {

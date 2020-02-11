@@ -13,7 +13,7 @@ $blank_line = <<<EOD
 
 EOD;
 
-$needles = array(
+$needles = varray[
   "\n",
   '\n',
   "\r",
@@ -21,7 +21,7 @@ $needles = array(
   "\t",
   "",
   $blank_line //needle as haystack
-);
+];
 
 //loop through to test strrchr() with each needle
 foreach($needles as $needle) {

@@ -13,7 +13,7 @@ echo "--- Testing sizeof() for all scalar types in default mode ---\n";
 $fp = fopen(__FILE__, "r");
 
 // array containing all scalar types 
-$values = array (
+$values = varray [
            // int values
   /* 1  */  0,
             1,
@@ -46,7 +46,7 @@ $values = array (
 
             // resource variable 
   /* 19 */  $fp
-);
+];
 
 // loop through the each value of the array for 'var' argument and check the behaviour of sizeof()
 $counter = 1;

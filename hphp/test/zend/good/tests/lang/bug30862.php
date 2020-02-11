@@ -1,13 +1,13 @@
 <?hh
 
 class T {
-    static $a = array(false=>"false", true=>"true");
+    static $a = darray[false=>"false", true=>"true"];
 }
 
 const X = 0;
 const Y = 1;
 class T2 {
-    static $a = array(X=>"false", Y=>"true");
+    static $a = darray[X=>"false", Y=>"true"];
 }
 
 <<__EntryPoint>> function main(): void {

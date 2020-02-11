@@ -14,7 +14,7 @@ Hello
 HERE_DOC;
 
 // array of possible valid values for 'val' argument
-$values = array (
+$values = varray [
   
   /* 1  */  NULL,
             0,
@@ -24,7 +24,7 @@ $values = array (
             "hi",
   /* 7  */  $heredoc
 
-);
+];
 
 $counter = 1;
 for($i = 0; $i < count($values); $i ++)

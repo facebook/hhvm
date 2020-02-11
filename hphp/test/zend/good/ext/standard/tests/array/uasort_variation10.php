@@ -37,13 +37,13 @@ $value2 = 100;
 $value3 = 0;
 
 
-$array_arg = array(
+$array_arg = darray[
   0 => 10,
   1 => $value1,
   2 => $value2,
   3 => 200,
   4 => $value3,
-);
+];
 
 echo "-- Sorting 'array_arg' containing different references --\n";
 var_dump( uasort(inout $array_arg, fun('cmp_function')) );  // expecting: bool(true)

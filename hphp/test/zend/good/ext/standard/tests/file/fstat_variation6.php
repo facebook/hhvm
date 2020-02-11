@@ -24,10 +24,10 @@ function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
 <<__EntryPoint>> function main(): void {
 set_error_handler(fun('test_error_handler'));
 
-$variation_array = array(
+$variation_array = darray[
   'instance of classWithToString' => new classWithToString(),
   'instance of classWithoutToString' => new classWithoutToString(),
-  );
+  ];
 
 
 foreach ( $variation_array as $var ) {

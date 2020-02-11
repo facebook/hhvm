@@ -28,10 +28,10 @@ function main_entry(): void {
   echo "*** Test substituting argument 1 with object values ***\n";
   set_error_handler(fun('test_error_handler'));
 
-  $variation_array = array(
+  $variation_array = darray[
     'instance of classWithToString' => new classWithToString(),
     'instance of classWithoutToString' => new classWithoutToString(),
-    );
+    ];
 
 
   foreach ( $variation_array as $var ) {

@@ -28,9 +28,9 @@ function callback($input)
 echo "*** Testing array_filter() : usage variations - 'input' containing references ***\n";
 
 // initializing variables
-$value1 = array(1, 2, 8);
-$value2 = array(5, 6, 4);
-$input = array($value1, 10, $value2, 'value');
+$value1 = varray[1, 2, 8];
+$value2 = varray[5, 6, 4];
+$input = varray[$value1, 10, $value2, 'value'];
 
 // with 'callback' argument
 var_dump( array_filter($input, fun('callback')) );

@@ -1,13 +1,13 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$array = array(
+$array = varray[
 	"127.0.0.1",
 	"10.0.0.1",
 	"255.255.255.255",
 	"255.255.255.0",
 	"0.0.0.0",
 	"66.163.161.116",
-);
+];
 
 foreach ($array as $ip) {
 	var_dump($long = ip2long($ip));

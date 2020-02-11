@@ -1,12 +1,12 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$funcs = array(
+$funcs = varray[
 	'is_writable',
 	'is_readable',
 	'is_executable',
 	'is_file',
 	'file_exists',
-);
+];
 
 $filename="";
 

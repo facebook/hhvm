@@ -18,49 +18,49 @@ $array = array ('zero',
                 1 => 1,
                 'two' => 2.00000000000001);
 
-$inputs = array (
+$inputs = varray [
 
 //default keys => string values
-/*1*/    array('2.00000000000001', '1', 'zero', 'a'),
+/*1*/    varray['2.00000000000001', '1', 'zero', 'a'],
 
 //numeric keys => string values
-/*2*/    array(2 => '2.00000000000001',
+/*2*/    darray[2 => '2.00000000000001',
               1 => '1',
               0 => 'zero',
-              3 => 'a'),
+              3 => 'a'],
 
 //string keys => string values
-/*3*/    array('2' => '2.00000000000001',
+/*3*/    darray['2' => '2.00000000000001',
               '1' => '1',
               '0' => 'zero',
-              '3' => 'a') ,
+              '3' => 'a'] ,
 
 //default keys => numeric values
-/*4*/    array(2, 1, 0),
+/*4*/    varray[2, 1, 0],
 
 //numeric keys => numeric values
-/*5*/    array(2 => 2,
+/*5*/    darray[2 => 2,
               1 => 1,
-              0 => 0),
+              0 => 0],
 
 //string keys => numeric values
-/*6*/    array('two' => 2,
+/*6*/    darray['two' => 2,
               '1' => 1,
-              '0' => 0),
+              '0' => 0],
 
 //defualt keys => float values
-/*7*/    array(2.00000000000001, 1.00, 0.01E-9),
+/*7*/    varray[2.00000000000001, 1.00, 0.01E-9],
 
 //numeric keys => float values
-/*8*/    array(2 => 2.00000000000001,
+/*8*/    darray[2 => 2.00000000000001,
               1 =>  1.00,
-              0 => 0.01E-9),
+              0 => 0.01E-9],
 
 //string keys => float values
-/*9*/    array ('two' => 2.00000000000001,
+/*9*/    darray ['two' => 2.00000000000001,
                '1' => 1.00,
-               '0' =>0.01E-9)
-);
+               '0' =>0.01E-9]
+];
 
 // loop through each element of $inputs to check the behavior of array_diff_assoc
 $iterator = 1;

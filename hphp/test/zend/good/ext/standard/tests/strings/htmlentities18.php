@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$tests = array(
+$tests = varray[
     "abc",
     "abc&amp;sfdsa",
     "test&#043;s &amp; some more &#68;",
@@ -10,7 +10,7 @@ $tests = array(
     "&",
     "&&amp;&",
     "&ab&amp;&",
-);
+];
 
 foreach ($tests as $test) {
     var_dump(htmlentities($test, ENT_QUOTES, '', FALSE));

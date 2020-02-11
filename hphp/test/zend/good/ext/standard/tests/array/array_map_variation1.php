@@ -5,13 +5,13 @@
  * Source code: ext/standard/array.c
 */
 
-function cb1 ($a) {return array ($a);};
-function cb2 ($a,$b) {return array ($a,$b);};
+function cb1 ($a) {return varray [$a];};
+function cb2 ($a,$b) {return varray [$a,$b];};
 
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_map() : string keys ***\n";
 
-$arr = array("stringkey" => "value");
+$arr = darray["stringkey" => "value"];
 var_dump( array_map(fun("cb1"), $arr));
 var_dump( array_map(fun("cb2"), $arr,$arr));
 var_dump( array_map(null,  $arr));

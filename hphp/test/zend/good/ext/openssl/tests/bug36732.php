@@ -1,17 +1,17 @@
 <?hh <<__EntryPoint>> function main(): void {
-$configargs = array(
+$configargs = darray[
         "req_extensions" => "v3_req",
         "x509_extensions" => "usr_cert",
         "config" => __DIR__."/openssl.cnf",
-);
+];
 
-$dn = array(
+$dn = darray[
         "countryName" => "GB",
         "stateOrProvinceName" => "Berkshire",
         "localityName" => "Newbury",
         "organizationName" => "My Company Ltd",
         "commonName" => "Demo Cert"
-);
+];
 
 $key = openssl_pkey_new();
 $csr = openssl_csr_new($dn, inout $key, $configargs);

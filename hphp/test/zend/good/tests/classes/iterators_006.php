@@ -5,7 +5,7 @@ class ai implements Iterator {
     private $array;
 
     function __construct() {
-        $this->array = array('foo', 'bar', 'baz');
+        $this->array = varray['foo', 'bar', 'baz'];
     }
 
     function rewind() {

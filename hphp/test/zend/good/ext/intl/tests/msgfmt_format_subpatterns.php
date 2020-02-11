@@ -29,12 +29,12 @@ $pattern=<<<_MSG_
 _MSG_;
 
 
-$args = array(
-      array('female', 0,  'Alice', 'Bob'),
-      array('male',   1,  'Alice', 'Bob'),
-      array('none',   2,  'Alice', 'Bob'),
-      array('female', 27, 'Alice', 'Bob'),
-);
+$args = varray[
+      varray['female', 0,  'Alice', 'Bob'],
+      varray['male',   1,  'Alice', 'Bob'],
+      varray['none',   2,  'Alice', 'Bob'],
+      varray['female', 27, 'Alice', 'Bob'],
+];
 
 $str_res = '';
 

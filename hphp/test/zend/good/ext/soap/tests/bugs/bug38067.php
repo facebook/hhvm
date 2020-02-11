@@ -28,9 +28,9 @@ abstract final class ZendGoodExtSoapTestsBugsBug38067 {
 function main_entry(): void {
 
   $client = new TestSoapClient(dirname(__FILE__).'/bug38067.wsdl',
-  	array('encoding' => 'ISO-8859-1'));
+  	darray['encoding' => 'ISO-8859-1']);
   $str = 'test: Ä';
-  $res = $client->Test(array('str'=>$str));
+  $res = $client->Test(darray['str'=>$str]);
   echo $str."\n";
   echo $res."\n";
   echo ZendGoodExtSoapTestsBugsBug38067::$g."\n";

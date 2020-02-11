@@ -16,22 +16,22 @@ $num = 2;
 
 
 //array of different types of array values for 'val' argument  
-$values = array(
+$values = varray[
            
   /* 1  */  array(),
-            array(1 , 2 , 3 , 4),
-            array(1 => "Hi" , 2 => "Hello"),
-            array("Saffron" , "White" , "Green"),
-  /* 5  */  array('color' => 'red' , 'item' => 'pen'),
-            array( 'color' => 'red' , 2 => 'green ' ),
-            array("colour" => "red" , "item" => "pen"),
-            array( TRUE => "red" , FALSE => "green" ),
-            array( true => "red" , FALSE => "green" ),
-  /* 10 */  array( 1 => "Hi" , "color" => "red" , 'item' => 'pen'),
-            array( NULL => "Hi", '1' => "Hello" , "1" => "Green"),
-            array( ""=>1, "color" => "green"), 
-  /* 13 */  array('Saffron' , 'White' , 'Green')
-);
+            varray[1 , 2 , 3 , 4],
+            darray[1 => "Hi" , 2 => "Hello"],
+            varray["Saffron" , "White" , "Green"],
+  /* 5  */  darray['color' => 'red' , 'item' => 'pen'],
+            darray[ 'color' => 'red' , 2 => 'green ' ],
+            darray["colour" => "red" , "item" => "pen"],
+            darray[ TRUE => "red" , FALSE => "green" ],
+            darray[ true => "red" , FALSE => "green" ],
+  /* 10 */  darray[ 1 => "Hi" , "color" => "red" , 'item' => 'pen'],
+            darray[ NULL => "Hi", '1' => "Hello" , "1" => "Green"],
+            darray[ ""=>1, "color" => "green"], 
+  /* 13 */  varray['Saffron' , 'White' , 'Green']
+];
 
 // loop through each element of the values array for 'val' argument 
 // check the working of array_fill()

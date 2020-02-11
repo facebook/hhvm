@@ -19,7 +19,7 @@ class classA
 <<__EntryPoint>> function main(): void {
 echo "\n*** Testing array_diff_assoc() : usage variations ***\n";
 
-$array = array(1, 2, 3);
+$array = varray[1, 2, 3];
 
 //get an unset variable
 $unset_var = 10;
@@ -34,7 +34,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 //array of unexpected values to be passed to $arr1 argument
-$inputs = array(
+$inputs = varray[
 
        // int data
 /*1*/  0,
@@ -83,7 +83,7 @@ $inputs = array(
 
        // resource variable
 /*26*/ $fp,
-);
+];
 
 // loop through each element of $inputs to check the behavior of array_diff_assoc
 $iterator = 1;

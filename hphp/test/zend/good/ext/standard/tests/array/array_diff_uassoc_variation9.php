@@ -8,13 +8,13 @@
 echo "*** Testing array_diff_uassoc() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$input_array = array(10 => 10, 12 => 12);
+$input_array = darray[10 => 10, 12 => 12];
 
-$input_arrays = array(
-      'decimal indexed' => array(10 => 10, -17 => -17),
-      'octal indexed' => array( 012 => 10, -011 => -011,),
-      'hexa  indexed' => array(0xA => 10, -0x7 => -0x7 ),
-);
+$input_arrays = darray[
+      'decimal indexed' => darray[10 => 10, -17 => -17],
+      'octal indexed' => darray[ 012 => 10, -011 => -011,],
+      'hexa  indexed' => darray[0xA => 10, -0x7 => -0x7 ],
+];
 
 foreach($input_arrays as $key =>$value) {
       echo "\n--$key--\n";

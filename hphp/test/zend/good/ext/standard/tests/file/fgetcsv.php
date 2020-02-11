@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$list = array(
+$list = varray[
     'aaa,bbb',
     'aaa,"bbb"',
     '"aaa","bbb"',
@@ -20,7 +20,7 @@ $list = array(
     'aaa"aaa","bbb"bbb',
     'aaa"aaa""",bbb',
     'aaa"\\"a","bbb"'
-);
+];
 
 $file = dirname(__FILE__) . 'fgetcsv.csv';
 @unlink($file);

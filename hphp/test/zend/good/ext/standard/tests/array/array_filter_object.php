@@ -75,13 +75,13 @@ function always_false($input)
 echo "*** Testing array_filter() : object functionality ***\n";
 
 // 'input' array containing objects as elements
-$input = array(
+$input = varray[
   new SimpleClass(),
   new EmptyClass(),
   new ChildClass(),
   new FinalClass(),
   new StaticClass()
-);
+];
 
 
 // with default callback

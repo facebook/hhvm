@@ -11,12 +11,12 @@
 echo "*** Testing array_sum() : with associative array ***\n";
 
 // array with numeric keys
-$input = array(0 => 1, 1 => 10, 2 => 0, 3 => -2, 4 => 23.56);
+$input = darray[0 => 1, 1 => 10, 2 => 0, 3 => -2, 4 => 23.56];
 echo "-- with numeric keys --\n";
 var_dump( array_sum($input) );
 
 // array with string keys
-$input = array('a' => 20, "b" => 50, 'c' => 0, 'd' => -30, "e" => 100);
+$input = darray['a' => 20, "b" => 50, 'c' => 0, 'd' => -30, "e" => 100];
 echo "-- with string keys --\n";
 var_dump( array_sum($input) );
 echo "Done";

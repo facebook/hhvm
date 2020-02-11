@@ -9,20 +9,20 @@ function ut_main()
 {
     $timezone = 'GMT+05:00';
 
-    $locale_arr = array (
+    $locale_arr = varray [
         'en_US'
-    );
+    ];
 
-    $datetype_arr = array (
+    $datetype_arr = varray [
                 IntlDateFormatter::FULL,
                 IntlDateFormatter::LONG,
                 IntlDateFormatter::MEDIUM
-        );
+        ];
 
         $res_str = '';
 
 
-    $time_arr = array (
+    $time_arr = varray [
         0,
         -1200000,
         1200000,
@@ -31,38 +31,38 @@ function ut_main()
         90099999,
         3600,
         -3600
-    );
+    ];
 
-    $localtime_arr1 = array (
+    $localtime_arr1 = darray [
         'tm_sec' => 24 ,
         'tm_min' => 3,
         'tm_hour' => 19,
         'tm_mday' => 3,
         'tm_mon' => 3,
         'tm_year' => 105,
-    );
-    $localtime_arr2 = array (
+    ];
+    $localtime_arr2 = darray [
         'tm_sec' => 21,
         'tm_min' => 5,
         'tm_hour' => 7,
         'tm_mday' => 13,
         'tm_mon' => 7,
         'tm_year' => 205,
-    );
-    $localtime_arr3 = array (
+    ];
+    $localtime_arr3 = darray [
             'tm_sec' => 11,
             'tm_min' => 13,
             'tm_hour' => 0,
             'tm_mday' => 17,
             'tm_mon' => 11,
             'tm_year' => -5
-        );
+        ];
 
-    $localtime_arr = array (
+    $localtime_arr = varray [
         $localtime_arr1,
         $localtime_arr2,
         $localtime_arr3
-    );
+    ];
 
     //Test format and parse with a timestamp : long
     foreach( $time_arr as $timestamp_entry){

@@ -1,10 +1,10 @@
 <?hh <<__EntryPoint>> function main(): void {
 $ch = curl_init();
 
-$opt = array(
+$opt = darray[
     CURLOPT_AUTOREFERER  => TRUE,
     CURLOPT_BINARYTRANSFER => TRUE
-);
+];
 
 curl_setopt( $ch, CURLOPT_AUTOREFERER  , TRUE );
 

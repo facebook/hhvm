@@ -8,7 +8,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing var_export() with valid strings ***\n";
 // different valid  string
-$valid_strings = array(
+$valid_strings = darray[
             "\"\"" => "",
             "\" \"" => " ",
             "''" => '',
@@ -25,7 +25,7 @@ $valid_strings = array(
             "'\\0'" => '\0',
             "'\\060'" => '\060',
             "\"\\070\"" => "\070"
-);
+];
 
 /* Loop to check for above strings with var_export() */
 echo "\n*** Output for strings ***\n";

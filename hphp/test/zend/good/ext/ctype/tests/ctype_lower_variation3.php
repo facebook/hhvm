@@ -13,7 +13,7 @@ echo "*** Testing ctype_lower() : usage variations ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");
 
-$values = array(
+$values = varray[
 /*1*/  "This string contains just letters and spaces", // Simple string
        "but this one contains some numbers too 123+456 = 678", // Mixed string
        "",
@@ -40,7 +40,7 @@ $values = array(
        "abcXYZ",
 /*25*/ "abc xyz",
 /*26*/ "abc+efg*xyz",
-);
+];
 
 $iterator = 1;
 foreach($values as $value) {

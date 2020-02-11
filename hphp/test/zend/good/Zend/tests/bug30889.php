@@ -3,7 +3,7 @@
   private $values;
   function __construct()
   {
-    $this->values = array('a' => 0);
+    $this->values = darray['a' => 0];
   }
   function __set($name, $value)
   {

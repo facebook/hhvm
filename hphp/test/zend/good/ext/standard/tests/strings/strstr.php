@@ -24,7 +24,7 @@ $string =
 abcd$:Hello world";
 
 /* needles in an array to get the string starts with needle, in $string */
-$needles = array(
+$needles = varray[
   "Hello world",
   "WORLD",
   "\0",
@@ -55,7 +55,7 @@ $needles = array(
   "12",
   "12twelve",
   $string
-);
+];
 
 /* loop through to get the string starts with "needle" in $string */
 for( $i = 0; $i < count($needles); $i++ ) {
@@ -91,7 +91,7 @@ var_dump(strstr("$obj_string", "$obj_needle"));
 
 
 echo "\n-- passing an array as string and needle --\n";
-$needles = array("hello", "?world", "!$%**()%**[][[[&@#~!");
+$needles = varray["hello", "?world", "!$%**()%**[][[[&@#~!"];
 try { var_dump( strstr($needles, $needles) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // won't work
 var_dump( strstr("hello?world,!$%**()%**[][[[&@#~!", (string)$needles[1]) );  // works
 var_dump( strstr("hello?world,!$%**()%**[][[[&@#~!", (string)$needles[2]) );  // works

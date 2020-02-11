@@ -9,7 +9,7 @@
 echo "*** Testing strrev() : with various double quoted strings ***\n";
 $str = "Hiiii";
 
-$strings = array(
+$strings = varray[
   //strings containing escape chars
   "hello\\world",
   "hello\$world",
@@ -52,7 +52,7 @@ $strings = array(
 
   //only special chars
   "!@#$%^&*()_+=-`~"
-);
+];
 
 $count = 1;
 for( $index = 0; $index < count($strings); $index++ ) {

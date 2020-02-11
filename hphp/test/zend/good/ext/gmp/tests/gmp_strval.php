@@ -21,9 +21,9 @@ var_dump(gmp_strval($g, -1));
 var_dump(gmp_strval($g, 100000));
 var_dump(gmp_strval($g, 10));
 
-try { var_dump(gmp_strval(array(1,2), array(1,2))); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(gmp_strval(varray[1,2], varray[1,2])); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump(gmp_strval(new stdclass, new stdclass)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-var_dump(gmp_strval(array(1,2)));
+var_dump(gmp_strval(varray[1,2]));
 var_dump(gmp_strval(new stdclass));
 
 echo "Done\n";

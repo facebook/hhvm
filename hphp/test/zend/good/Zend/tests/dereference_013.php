@@ -1,7 +1,7 @@
 <?hh
 
 class foo {
-    public $x = array(2);
+    public $x = varray[2];
 
     public function __call($x, $y) {
         if (count($this->x) == 1) {
@@ -15,7 +15,7 @@ error_reporting(E_ALL);
 
 $foo = new foo;
 
-$x = array(1);
+$x = varray[1];
 
 $foo->b($x)[1] = 3;
 

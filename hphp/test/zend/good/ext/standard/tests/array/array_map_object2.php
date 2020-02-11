@@ -23,10 +23,10 @@ class SimpleClass
 echo "*** Testing array_map() :  with non-existent class and method ***\n";
 
 echo "-- with non-existent class --\n";
-var_dump( array_map(array('non-existent', 'square'), array(1, 2)) );
+var_dump( array_map(varray['non-existent', 'square'], varray[1, 2]) );
 
 echo "-- with existent class and non-existent method --\n";
-var_dump( array_map(array('SimpleClass', 'non-existent'), array(1, 2)) );
+var_dump( array_map(varray['SimpleClass', 'non-existent'], varray[1, 2]) );
 
 echo "Done";
 }

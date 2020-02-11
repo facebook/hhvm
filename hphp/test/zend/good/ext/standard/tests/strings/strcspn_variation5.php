@@ -47,7 +47,7 @@ hello\0\100\xaaworld\0hello
 \0hello\0
 EOT;
 
-$heredoc_strings = array(
+$heredoc_strings = varray[
                    $empty_heredoc,
                    $heredoc_with_newline,
                    $heredoc_with_characters,
@@ -55,7 +55,7 @@ $heredoc_strings = array(
                    $heredoc_with_alphanumerics,
                    $heredoc_with_embedded_nulls,
                    $heredoc_with_hexa_octal
-                   );
+                   ];
 
 $mask = "fth12\ne67890\0\xaa\100o";
 

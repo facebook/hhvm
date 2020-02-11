@@ -3,7 +3,7 @@
 
 class Setter {
 
-    protected $vars = array('partnerName' => false);
+    protected $vars = darray['partnerName' => false];
 
     public function __call($m, $v) {
         if (stristr($m, 'set')) {
@@ -33,7 +33,7 @@ class mystring {
 
 <<__EntryPoint>> function main(): void {
 echo "#### Basic and Various operations ####\n";
-$str_array = array(
+$str_array = varray[
             "TesTing lcfirst.",
             "1.testing lcfirst",
             "HELLO wORLD",
@@ -65,7 +65,7 @@ $str_array = array(
                     "\t",
                     "12",
                     "12twelve",     // int + string
-              );
+              ];
 /* loop to test working of lcfirst with different values */
 foreach ($str_array as $string) {
   try { var_dump( lcfirst($string) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
@@ -76,7 +76,7 @@ foreach ($str_array as $string) {
 echo "\n#### Testing Miscelleneous inputs ####\n";
 
 echo "--- Testing arrays ---";
-$str_arr = array("Hello", "?world", "!$%**()%**[][[[&@#~!", array());
+$str_arr = varray["Hello", "?world", "!$%**()%**[][[[&@#~!", array()];
 try { var_dump( lcfirst($str_arr) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n--- Testing lowercamelcase action call example ---\n";

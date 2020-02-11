@@ -12,9 +12,9 @@ $format = "format";
 $format1 = "%e";
 $format2 = "%e %e";
 $format3 = "%e %e %e";
-$arg1 = array(1000);
-$arg2 = array(1000,2000);
-$arg3 = array(1000,2000,3000);
+$arg1 = varray[1000];
+$arg2 = varray[1000,2000];
+$arg3 = varray[1000,2000,3000];
 
 /* creating dumping file */
 $data_file = dirname(__FILE__) . '/vfprintf_basic6.txt';

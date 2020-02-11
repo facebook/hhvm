@@ -30,7 +30,7 @@ NULL
 EOD;
 
 // different valid  scalar vlaues
-$scalars = array(
+$scalars = varray[
   /* integers */
   0,
   1,
@@ -97,7 +97,7 @@ $scalars = array(
   $heredoc_string,
   $heredoc_numeric_string,
   $heredoc_empty_string
-);
+];
 /* loop to check that strval() recognizes different
    scalar values and retuns the string conversion of same */
 $loop_counter = 1;
@@ -115,19 +115,19 @@ $dfp = opendir( dirname(__FILE__) );
 $unset_var = 10;
 unset ($unset_var);
 
-$not_scalars = array (
+$not_scalars = varray [
   new foo, //object
   $fp,  // resource
   $dfp,
   array(),  // arrays
-  array(NULL),
-  array(1,2,3,4),
-  array("string"),
+  varray[NULL],
+  varray[1,2,3,4],
+  varray["string"],
   NULL,  // nulls
   null,
   @$unset_var,  // unset variable
   @$undefined_var
-);
+];
 /* loop through the $not_scalars to see working of
    strval() on objects, arrays, boolean and others */
 $loop_counter = 1;

@@ -17,7 +17,7 @@ class MyRecursiveRegexIterator extends RecursiveRegexIterator
     }
 }
 <<__EntryPoint>> function main(): void {
-$ar = new RecursiveArrayIterator(array('Foo', array('Bar'), 'FooBar', array('Baz'), 'Biz'));
+$ar = new RecursiveArrayIterator(varray['Foo', varray['Bar'], 'FooBar', varray['Baz'], 'Biz']);
 $it = new MyRecursiveRegexIterator($ar, '/Bar/');
 
 $it->show();

@@ -11,17 +11,17 @@ $file = dirname(__FILE__)."/flock.tmp";
 $fp = fopen($file, "w");
 
 /* array of operatons */
-$operations = array(
+$operations = varray[
   0,
   LOCK_NB,
   FALSE,
   NULL,
-  array(1,2,3),
+  varray[1,2,3],
   array(),
   "string",
   "",
   "\0"
-);
+];
 
 $i = 0;
 foreach($operations as $operation) {

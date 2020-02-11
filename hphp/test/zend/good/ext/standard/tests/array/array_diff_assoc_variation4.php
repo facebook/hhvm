@@ -12,7 +12,7 @@
 <<__EntryPoint>> function main(): void {
 echo "\n*** Testing array_diff_assoc() : usage variations ***\n";
 
-$array = array(1, 2, 3);
+$array = varray[1, 2, 3];
 
 //get an unset variable
 $unset_var = 10;
@@ -24,67 +24,67 @@ hello world
 EOT;
 
 //Different data types as keys to be passed to $arr1 argument
-$inputs = array(
+$inputs = darray[
 
        // int data
 /*1*/
-'int' => array(
+'int' => darray[
        0 => 'zero',
        1 => 'one',
        12345 => 'positive',
-       -2345 => 'negative'),
+       -2345 => 'negative'],
 
        // float data
 /*2*/
-'float' => array(
+'float' => darray[
        10.5 => 'float 1',
        -10.5 => 'float 2',
-       .5 => 'float 3'),
+       .5 => 'float 3'],
 
        // null data
 /*3*/
-'null' => array(
+'null' => darray[
        NULL => 'null 1',
-       null => 'null 2'),
+       null => 'null 2'],
 
        // boolean data
 /*4*/
-'bool' => array(
+'bool' => darray[
        true => 'boolt',
        false => 'boolf',
        TRUE => 'boolT',
-       FALSE => 'boolF'),
+       FALSE => 'boolF'],
 
        // empty data
 /*5*/
-'empty' => array(
+'empty' => darray[
       "" => 'emptyd',
-      '' => 'emptys'),
+      '' => 'emptys'],
 
        // string data
 /*6*/
-'string' => array(
+'string' => darray[
       "string" => 'stringd',
       'string' => 'strings',
-      $heredoc => 'stringh'),
+      $heredoc => 'stringh'],
 
        // binary data
 /*7*/
-'binary' => array(
+'binary' => darray[
       b"binary1" => 'binary 1',
-      (string)"binary2" => 'binary 2'),
+      (string)"binary2" => 'binary 2'],
 
        // undefined data
 /*8*/
-'undefined' => array(
-      @$undefined_var => 'undefined'),
+'undefined' => darray[
+      @$undefined_var => 'undefined'],
 
        // unset data
 /*9*/
-'unset' => array(
-      @$unset_var => 'unset'),
+'unset' => darray[
+      @$unset_var => 'unset'],
 
-);
+];
 
 // loop through each element of $inputs to check the behavior of array_diff_assoc
 $iterator = 1;

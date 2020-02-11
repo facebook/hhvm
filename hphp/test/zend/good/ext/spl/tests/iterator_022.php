@@ -110,7 +110,7 @@ class RecursiveArrayIteratorIterator extends RecursiveIteratorIterator
 <<__EntryPoint>> function main(): void {
 try
 {
-    foreach(new RecursiveArrayIteratorIterator(new MyRecursiveArrayIterator(array("a", array("ba", array("bba", "bbb"), array(array("bcaa"), array("bcba"))), array("ca"), "d")), 2) as $k=>$v)
+    foreach(new RecursiveArrayIteratorIterator(new MyRecursiveArrayIterator(varray["a", varray["ba", varray["bba", "bbb"], varray[varray["bcaa"], varray["bcba"]]], varray["ca"], "d"]), 2) as $k=>$v)
     {
         if (is_array($v)) $v = join('',$v);
         echo "$k=>$v\n";

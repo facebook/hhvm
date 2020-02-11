@@ -20,7 +20,7 @@ echo "--- Testing sizeof() for all kinds of unset variables in default, Normal a
 $fp = fopen(__FILE__, "r");
 
 // array containing different types of variables
-$values = array (
+$values = varray [
             // int values
   /* 1  */  0,
             1,
@@ -44,12 +44,12 @@ $values = array (
   /* 16 */  FALSE,
             // array values
   /* 17 */  array(),
-            array(1, 2, 3,4 , array(5, 6)),
+            varray[1, 2, 3,4 , varray[5, 6]],
             // object variable
   /* 19 */  new test(),
             // resource variable
   /* 20 */  $fp
-);
+];
 
 // loop through the each element of the $values array for 'var' argument
 // and check the functionality of sizeof()

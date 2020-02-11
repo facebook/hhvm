@@ -14,7 +14,7 @@ echo "root(recursive): '$name' -- namespaces: ", implode(', ', $namespaces), "\n
 $namespaces = $xml->getNamespaces(False);
 echo "root(non-recursive): '$name' -- namespaces: ", implode(', ', $namespaces), "\n";
 
-foreach (array('', '#ns1', '#ns2', '#ns3') as $ns)
+foreach (varray['', '#ns1', '#ns2', '#ns3'] as $ns)
 {
 	foreach ($xml->children($ns) as $child)
 	{

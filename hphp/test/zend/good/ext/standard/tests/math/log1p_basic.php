@@ -7,7 +7,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing log1p() : basic functionality ***\n";
 
-$values = array(23,
+$values = varray[23,
                 -23,
                 2.345e1,
                 -2.345e1,
@@ -18,7 +18,7 @@ $values = array(23,
                 "2.345e1",
                 null,
                 true,
-                false);
+                false];
 
 echo "\n LOG1p tests\n";
 

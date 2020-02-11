@@ -37,13 +37,13 @@ class book{
 	public $b="c";
 
 }
-$options=array(
+$options=darray[
 		'uri'     => "http://schemas.nothing.com",
 		'actor'   => 'http://schemas.nothing.com',
-		'typemap' => array(array("type_ns"   => "http://schemas.nothing.com",
+		'typemap' => varray[darray["type_ns"   => "http://schemas.nothing.com",
 		                         "type_name" => "book",
-		                         "from_xml"  => "book_from_xml"))
-		);
+		                         "from_xml"  => "book_from_xml"]]
+		];
 
 $server = new SoapServer(NULL,$options);
 $server->setClass("test");

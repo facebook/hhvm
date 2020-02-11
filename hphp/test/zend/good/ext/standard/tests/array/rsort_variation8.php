@@ -11,19 +11,19 @@
 echo "*** Testing rsort() : variation ***\n";
 
 // array of arrays
-$various_arrays = array (
+$various_arrays = varray [
   // null array
   array(),
 
   // array contains null sub array
-  array( array() ),
+  varray[ array() ],
 
   // array of arrays along with some values
-  array(44, 11, array(64, 61) ),
+  varray[44, 11, varray[64, 61] ],
 
   // array containing sub arrays
-  array(array(33, -5, 6), array(11), array(22, -55), array() )
-);
+  varray[varray[33, -5, 6], varray[11], varray[22, -55], array() ]
+];
 
 
 $count = 1;

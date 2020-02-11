@@ -8,8 +8,8 @@
 */
 function integer_word($matches) {
   // Maps from key values (0-9) to corresponding key written in words.
-  $replacement = array('zero', 'one', 'two', 'three', 'four',
-                       'five', 'six', 'seven', 'eight', 'nine');
+  $replacement = varray['zero', 'one', 'two', 'three', 'four',
+                       'five', 'six', 'seven', 'eight', 'nine'];
   // All examples will be looking for an integer value, if one is found it
   // will be stored in $matches[0] which corresponds to a key in the
   // $replacements array.

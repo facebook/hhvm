@@ -20,7 +20,7 @@ chdir(dirname(__FILE__));
 
 // Note invalid dirs in p8 result in (The system cannot find the path specified.)
 // rather than No Such File or Directory in php.net
-$allDirs = array(
+$allDirs = varray[
   // absolute paths
   "$absSubDir/",
   "$absSubDir/../".$subDir,
@@ -36,7 +36,7 @@ $allDirs = array(
   "./".$mainDir."/../".$mainDir."/".$subDir,
   "BADDIR",  
   
-);
+];
 
 $filename = 'FileGetContentsVar7.tmp';
 $absFile = $absSubDir.'/'.$filename;

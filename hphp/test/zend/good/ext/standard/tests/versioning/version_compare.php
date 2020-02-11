@@ -17,15 +17,15 @@ function test($v1, $v2) {
 }
 <<__EntryPoint>> function main(): void {
 print "TESTING COMPARE\n";
-$special_forms = array("-dev", "a1", "b1", "RC1", "rc1", "", "pl1");
-$operators = array(
+$special_forms = varray["-dev", "a1", "b1", "RC1", "rc1", "", "pl1"];
+$operators = varray[
     "lt", "<",
     "le", "<=",
     "gt", ">",
     "ge", ">=",
     "eq", "=", "==",
     "ne", "<>", "!="
-);
+];
 test("1", "2");
 test("10", "2");
 test("1.0", "1.1");

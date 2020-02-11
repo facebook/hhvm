@@ -14,7 +14,7 @@ echo "*** Testing ctype_punct() : usage variations ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");
 
-$values = array(
+$values = varray[
 /*1*/  "This string contains just letters and spaces", // Simple string
        "but this one contains some numbers too 123+456 = 678", // Mixed string
        "",
@@ -41,7 +41,7 @@ $values = array(
        "!$%@\n",
 /*25*/ "\"?!\"",
 /*26*/ "|\ @~",
-);
+];
 
 $iterator = 1;
 foreach($values as $value) {

@@ -1,6 +1,6 @@
 <?hh
 function s() {
-  $storage = array(array('x', 'y'));
+  $storage = varray[varray['x', 'y']];
   return $storage[0];
 }
 <<__EntryPoint>> function main(): void {

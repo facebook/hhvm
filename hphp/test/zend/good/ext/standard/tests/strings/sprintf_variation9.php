@@ -8,7 +8,7 @@ echo "*** Testing sprintf() : float formats with float values ***\n";
 
 // array of float type values
 
-$float_values = array (
+$float_values = varray [
 -2147483649, // float value
   2147483648,  // float value
   -0x80000001, // float value, beyond max negative int
@@ -39,15 +39,15 @@ $float_values = array (
   -.05E+44,
   .0034E-30,
   -.0034E-30
-);
+];
 
 // various float formats
-$float_formats = array(
+$float_formats = varray[
   "%f", "%hf", "%lf",
   "%Lf", " %f", "%f ",
   "\t%f", "\n%f", "%4f",
   "%30f", "%[0-9]", "%*f",
-);
+];
 
 $count = 1;
 foreach($float_values as $float_value) {

@@ -14,20 +14,20 @@
 echo "*** Testing ksort() : usage variations ***\n";
 
 // array with diff sub arrays to be sorted 
-$various_arrays = array (
+$various_arrays = darray [
   // null array
   1  => array(),
 
   // array contains null sub array
-  2 => array( 1 => array() ),
+  2 => darray[ 1 => array() ],
 
   // array of arrays along with some values
-  3 => array(4 => 44, 1 => 11, 3 => array(64,61) ),
+  3 => darray[4 => 44, 1 => 11, 3 => varray[64,61] ],
 
   // array contains sub arrays
-  4 => array ( 3 => array(33,-5,6), 1 => array(11), 
-               2 => array(22,-55), 0  => array() )
-);
+  4 => darray [ 3 => varray[33,-5,6], 1 => varray[11], 
+               2 => varray[22,-55], 0  => array() ]
+];
 
 
 $count = 1;

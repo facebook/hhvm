@@ -34,15 +34,15 @@ class SelfSerializingTest extends SerializingTest
     }
 }
 <<__EntryPoint>> function main(): void {
-$adata = array(
+$adata = darray[
     'str'    => 'foo',
     'int'    => 1,
     'float'    => 2.3,
     'bool'    => false,
     'nil'    => null,
-    'arr'    => array(1,2,3),
+    'arr'    => varray[1,2,3],
     'obj'    => new StdClass,
-);
+];
 
 $ndata = array_values($adata);
 $odata = new stdClass();
@@ -51,10 +51,10 @@ $odata->int = 1;
 $odata->float = 2.3;
 $odata->bool = false;
 $odata->nil = null;
-$odata->arr = array(1,2,3);
+$odata->arr = varray[1,2,3];
 $odata->obj = new stdClass();
 
-foreach(array('NonSerializingTest','SerializingTest','ValueSerializingTest','SelfSerializingTest') as $class) {
+foreach(varray['NonSerializingTest','SerializingTest','ValueSerializingTest','SelfSerializingTest'] as $class) {
     echo "==$class==\n";
     echo json_encode(new $class($adata)), "\n";
     echo json_encode(new $class($ndata)), "\n";

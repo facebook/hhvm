@@ -10,7 +10,7 @@ $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $dir_handle = opendir( $file_path );
 
 echo "*** Testing is_dir() with Invalid arguments: expected bool(false) ***\n";
-$dirnames = array(
+$dirnames = varray[
   /* Invalid dirnames */
   -2.34555,
   TRUE,
@@ -22,7 +22,7 @@ $dirnames = array(
   /* scalars */
   0,
   1234
-);
+];
 
 /* loop through to test each element the above array */
 foreach($dirnames as $dirname) {

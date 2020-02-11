@@ -3,7 +3,7 @@
 class foo {
     public $x = array();
     public function __construct() {
-        $h = array();
+        $h = varray[];
         $h[] = new stdclass;
         $this->x = $h;
     }

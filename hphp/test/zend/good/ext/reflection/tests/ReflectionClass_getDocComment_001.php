@@ -39,7 +39,7 @@ final class G extends C implements I {}
 <<__EntryPoint>>
 function main_entry(): void {
 
-  $classes = array('A', 'B', 'C', 'D', 'E', 'F', 'G', 'I');
+  $classes = varray['A', 'B', 'C', 'D', 'E', 'F', 'G', 'I'];
   foreach ($classes as $class) {
   	echo "\n\n---> Doc comment for class $class:\n";
   	$rc = new ReflectionClass($class);	

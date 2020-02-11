@@ -11,7 +11,7 @@
 echo "*** Testing strip_tags() : usage variations ***\n";
 
 // unexpected values for $string
-$strings = array (
+$strings = varray [
   "<abc>hello</abc> \t\tworld... <ppp>strip_tags_test</ppp>",
   '<abc>hello</abc> \t\tworld... <ppp>strip_tags_test</ppp>',
   "<%?php hello\t world?%>",
@@ -24,7 +24,7 @@ $strings = array (
   '<nnn>I am not a valid html text</nnn>',
   "<nnn>I am a quoted (\") string with special chars like \$,\!,\@,\%,\&</nnn>",
   '<nnn>I am a quoted (\") string with special chars like \$,\!,\@,\%,\&</nnn>',
-);
+];
 
 //valid html and php tags
 $quotes = "<p><a><?hh<html>";

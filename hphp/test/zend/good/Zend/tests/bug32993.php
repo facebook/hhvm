@@ -11,7 +11,7 @@ class Test implements Iterator {
 }
 <<__EntryPoint>> function main(): void {
 $t = new Test();
-$t->arr =  array(1, 2, 3);
+$t->arr =  varray[1, 2, 3];
 
 try {
     foreach ($t as $v) {

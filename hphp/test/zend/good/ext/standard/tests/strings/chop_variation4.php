@@ -11,7 +11,7 @@
 echo "*** Testing chop() : string with embedded nulls ***\n";
 
 // defining varous strings with embedded nulls
-$strings_with_nulls = array(
+$strings_with_nulls = varray[
                    "hello\0world",
                "\0hello",
                "hello\0",
@@ -22,7 +22,7 @@ $strings_with_nulls = array(
                chr(0).chr(0),
                     chr(0).'hello'.chr(0),
                'hello'.chr(0).'world'
-               );
+               ];
 
 $count = 1;
 foreach($strings_with_nulls as $string)  {

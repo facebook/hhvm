@@ -22,7 +22,7 @@ var_dump(strtolower($str));
 
 echo "\n*** Testing strtolower() with various strings ***";
 /* strings to pass strtolower() */
-$strings = array (
+$strings = varray [
   "",
   "string",
   "stRINg0234",
@@ -33,7 +33,7 @@ $strings = array (
   TRUE,
   FALSE,
   array()
-);
+];
 
 $count = 0;
 /* loop through to check possible variations */

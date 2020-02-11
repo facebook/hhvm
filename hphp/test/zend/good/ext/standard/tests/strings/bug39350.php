@@ -1,8 +1,8 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-implode('', array(null));
-implode('', array(false));
-implode('', array(""));
+implode('', varray[null]);
+implode('', varray[false]);
+implode('', varray[""]);
 
 echo "Done\n";
 }

@@ -54,21 +54,21 @@ class SeekableNumericArrayIterator extends NumericArrayIterator implements Seeka
     }
 }
 <<__EntryPoint>> function main(): void {
-$a = array(1, 2, 3, 4, 5);
+$a = varray[1, 2, 3, 4, 5];
 foreach (new LimitIterator(new NumericArrayIterator($a), 1, 3) as $v)
 {
     print "$v\n";
 }
 
 echo "===SEEKABLE===\n";
-$a = array(1, 2, 3, 4, 5);
+$a = varray[1, 2, 3, 4, 5];
 foreach(new LimitIterator(new SeekableNumericArrayIterator($a), 1, 3) as $v)
 {
     print "$v\n";
 }
 
 echo "===SEEKING===\n";
-$a = array(1, 2, 3, 4, 5);
+$a = varray[1, 2, 3, 4, 5];
 $l = new LimitIterator(new SeekableNumericArrayIterator($a));
 for($i = 1; $i < 4; $i++)
 {

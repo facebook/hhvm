@@ -9,7 +9,7 @@ class B implements Serializable {
     }
 }
 <<__EntryPoint>> function main(): void {
-$data = array(new B);
+$data = varray[new B];
 
 try {
     serialize($data);

@@ -10,9 +10,9 @@
 echo "*** Testing fgetc() : usage variations ***\n";
 echo "-- Testing fgetc() with files opened with different read modes --\n";
 
-$file_modes = array( "a+", "a+b", "a+t", 
+$file_modes = varray[ "a+", "a+b", "a+t", 
                      "x+", "x+b", "x+t", 
-                     "w+", "w+b", "w+t" );
+                     "w+", "w+b", "w+t" ];
 
 $test_dir = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $filename = $test_dir."/fgetc_variation4.tmp";

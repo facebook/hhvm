@@ -9,7 +9,7 @@ echo "*** Testing readfile() : variation ***\n";
 
 
 /* An array of files */ 
-$names_arr = array(
+$names_arr = varray[
   /* Invalid args */ 
   -1,
   TRUE,
@@ -24,7 +24,7 @@ $names_arr = array(
   "/no/such/file/dir", 
   "php/php"
 
-);
+];
 
 for( $i=0; $i<count($names_arr); $i++ ) {
   $name = $names_arr[$i];

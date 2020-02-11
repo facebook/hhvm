@@ -49,13 +49,13 @@ class MyArrayIterator extends ArrayIterator
     }
 }
 <<__EntryPoint>> function main(): void {
-$ar = new MyArrayIterator(array(1, 2, 3));
+$ar = new MyArrayIterator(varray[1, 2, 3]);
 
 test($ar, CachingIterator::CALL_TOSTRING);
 test($ar, CachingIterator::TOSTRING_USE_KEY);
 test($ar, CachingIterator::TOSTRING_USE_CURRENT);
 
-$ar = new MyArrayIterator(array(new MyItem(1), new MyItem(2), new MyItem(3)));
+$ar = new MyArrayIterator(varray[new MyItem(1), new MyItem(2), new MyItem(3)]);
 
 test($ar, CachingIterator::TOSTRING_USE_INNER);
 test($ar, CachingIterator::CALL_TOSTRING | CachingIterator::TOSTRING_USE_KEY);

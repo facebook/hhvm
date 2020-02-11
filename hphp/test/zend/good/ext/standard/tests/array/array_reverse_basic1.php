@@ -11,7 +11,7 @@
 echo "*** Testing array_reverse() : basic functionality ***\n";
 
 // Initialise the array
-$array = array("a", "green", "red", 'blue', 10, 13.33);
+$array = varray["a", "green", "red", 'blue', 10, 13.33];
 
 // Calling array_reverse() with default arguments
 var_dump( array_reverse($array) );

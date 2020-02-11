@@ -35,12 +35,12 @@ Hello, World\n
 Hello\0World
 identifier_str4;
 
-$strings = array(
+$strings = varray[
   $str1,
   $str2,
   $str3,
   $str4
-);
+];
 /* loop through to compare each string with the other string */
 $count = 1;
 for($index1 = 0; $index1 < count($strings); $index1++) {

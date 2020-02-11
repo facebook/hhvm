@@ -19,12 +19,12 @@ print "COUNT_NORMAL: should be 0, is ".count($arr, COUNT_NORMAL)."\n";
 print "COUNT_RECURSIVE: should be 0, is ".count($arr, COUNT_RECURSIVE)."\n";
 
 print "-- Testing arrays --\n";
-$arr = array(1, array(3, 4, array(6, array(8))));
+$arr = varray[1, varray[3, 4, varray[6, varray[8]]]];
 print "COUNT_NORMAL: should be 2, is ".count($arr, COUNT_NORMAL)."\n";
 print "COUNT_RECURSIVE: should be 8, is ".count($arr, COUNT_RECURSIVE)."\n";
 
 print "-- Testing hashes --\n";
-$arr = array("a" => 1, "b" => 2, array("c" => 3, array("d" => 5)));
+$arr = array("a" => 1, "b" => 2, array("c" => 3, darray["d" => 5]));
 print "COUNT_NORMAL: should be 3, is ".count($arr, COUNT_NORMAL)."\n";
 print "COUNT_RECURSIVE: should be 6, is ".count($arr, COUNT_RECURSIVE)."\n";
 
@@ -34,29 +34,29 @@ print "COUNT_RECURSIVE: should be 1, is ".count("string", COUNT_RECURSIVE)."\n";
 
 print "-- Testing various types with no second argument --\n";
 print "COUNT_NORMAL: should be 1, is ".count("string")."\n";
-print "COUNT_NORMAL: should be 2, is ".count(array("a", array("b")))."\n";
+print "COUNT_NORMAL: should be 2, is ".count(varray["a", varray["b"]])."\n";
 
-$arr = array('a'=>array(NULL, NULL, NULL), 1=>array(NULL=>1, 1=>NULL),
-    array(array(array(array(array(NULL))))));
+$arr = array('a'=>varray[NULL, NULL, NULL], 1=>darray[NULL=>1, 1=>NULL],
+    varray[varray[varray[varray[varray[NULL]]]]]);
 print "-- Testing really cool arrays --\n";
 print "COUNT_NORMAL: should be 3, is ".count($arr, COUNT_NORMAL)."\n";
 print "COUNT_RECURSIVE: should be 13, is ".count($arr, COUNT_RECURSIVE)."\n";
 
 echo "\n*** Testing possible variations of count() function on arrays ***";
-$count_array = array(
+$count_array = varray[
   array(),
-  array( 1 => "string"),
+  darray[ 1 => "string"],
   array( "" => "string", 0 => "a", NULL => "b", -1.00 => "c",
-         array(array(array(NULL)))),
-  array( -2.44444 => 12, array(array(1, 2, array(array("0"))))),
-  array( "a" => 1, "b" => -2.344, "b" => "string", "c" => NULL, "d" => -2.344),
+         varray[varray[varray[NULL]]]),
+  array( -2.44444 => 12, varray[varray[1, 2, varray[varray["0"]]]]),
+  darray[ "a" => 1, "b" => -2.344, "b" => "string", "c" => NULL, "d" => -2.344],
   array( 4 => 1, 3 => -2.344, "3" => "string", "2" => NULL,
          1 => -2.344, array()),
-  array( TRUE => TRUE, FALSE => FALSE, "" => "", " " => " ",
-     NULL => NULL, "\x000" => "\x000", "\000" => "\000"),
+  darray[ TRUE => TRUE, FALSE => FALSE, "" => "", " " => " ",
+     NULL => NULL, "\x000" => "\x000", "\000" => "\000"],
   array( NULL, 1.23 => "Hi", "string" => "hello",
-         array("" => "World", "-2.34" => "a", "0" => "b"))
-);
+         darray["" => "World", "-2.34" => "a", "0" => "b"])
+];
 
 $i = 0;
 foreach ($count_array as $count_value) {
@@ -79,7 +79,7 @@ print "COUNT_NORMAL: should be 0, is ".@count($a)."\n";
 
 
 print "\n-- Testing count() on an empty sub-array --\n";
-$arr = array(1, array(3, 4, array()));
+$arr = varray[1, varray[3, 4, array()]];
 print "COUNT_NORMAL: should be 2, is ".count($arr, COUNT_NORMAL)."\n";
 print "COUNT_RECURSIVE: should be 5, is ".count($arr, COUNT_RECURSIVE)."\n";
 
@@ -94,7 +94,7 @@ $resource1 = fopen( __FILE__, "r" );  // Creating file(stream type) resource
 $resource2 = opendir( "." );  // Creating dir resource
 
 /* creating an array with resources as elements */
-$arr_resource = array("a" => $resource1, "b" => $resource2);
+$arr_resource = darray["a" => $resource1, "b" => $resource2];
 var_dump(count($arr_resource));
 
 echo "\n-- Testing error conditions --";

@@ -26,7 +26,7 @@ unset($unset_var);
 $file_handle = fopen(__FILE__, "r");
 
 // array with different values
-$strings =  array (
+$strings =  varray [
 
           // integer values
 /*1*/      0,
@@ -40,8 +40,8 @@ $strings =  array (
 
           // array values
 /*7*/      array(),
-          array(0),
-          array(1, 2),
+          varray[0],
+          varray[1, 2],
 
           // boolean values
 /*10*/      true,
@@ -64,7 +64,7 @@ $strings =  array (
 
           // unset variable
 /*19*/      @$unset_var
-);
+];
 
 //defining 'from' argument
 $from = "012atm";

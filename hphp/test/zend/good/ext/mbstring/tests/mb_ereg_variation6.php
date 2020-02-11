@@ -40,14 +40,14 @@ function main_entry(): void {
   	echo "Could not set regex encoding to utf-8\n";
   }
 
-  $regex_char = array ('\w+' => b'\w+',
+  $regex_char = darray ['\w+' => b'\w+',
                        '\W+' => b'\W+',
                        '\s+' => b'\s+',
                        '\S+' => b'\S+',
                        '\d+' => b'\d+',
                        '\D+' => b'\D+',
                        '\b' =>  b'\b',
-                       '\B' =>  b'\B');
+                       '\B' =>  b'\B'];
 
   $string_ascii = b'This is an English string. 0123456789.';
   $string_mb = base64_decode('5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII=');

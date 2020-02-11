@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$dirs = array();
+$dirs = varray[];
 $empty_dir = __DIR__ . "/empty";
 @mkdir($empty_dir);
 

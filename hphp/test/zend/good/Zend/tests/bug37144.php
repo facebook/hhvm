@@ -1,7 +1,7 @@
 <?hh
 function foo() {
   $x = new stdClass();
-  $x->bar = array(1);
+  $x->bar = varray[1];
   return $x;
 }
 <<__EntryPoint>> function main(): void {

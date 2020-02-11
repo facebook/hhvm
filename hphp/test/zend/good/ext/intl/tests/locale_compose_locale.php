@@ -7,36 +7,36 @@
 
 function ut_main()
 {
-    $loc_parts_arr1 = array(
+    $loc_parts_arr1 = darray[
         Locale::LANG_TAG =>'sl' ,
         Locale::SCRIPT_TAG =>'Latn' ,
         Locale::REGION_TAG =>'IT'
-    );
-    $loc_parts_arr2 = array(
+    ];
+    $loc_parts_arr2 = darray[
         Locale::LANG_TAG =>'de' ,
         Locale::REGION_TAG =>'DE'
-    );
-    $loc_parts_arr3 = array(
+    ];
+    $loc_parts_arr3 = darray[
         Locale::LANG_TAG =>'hi'
-    );
-    $loc_parts_arr4 = array(
+    ];
+    $loc_parts_arr4 = darray[
         Locale::LANG_TAG =>'zh' ,
         Locale::SCRIPT_TAG =>'Hans' ,
         Locale::REGION_TAG =>'CN'
-    );
-    $loc_parts_arr5 = array(
+    ];
+    $loc_parts_arr5 = darray[
         Locale::LANG_TAG =>'es' ,
         Locale::SCRIPT_TAG =>'Hans' ,
         Locale::REGION_TAG =>'CN'
-    );
-    $loc_parts_arr6 = array(
+    ];
+    $loc_parts_arr6 = darray[
         Locale::LANG_TAG =>'en' ,
         Locale::SCRIPT_TAG =>'Hans' ,
         Locale::REGION_TAG =>'CN',
         Locale::VARIANT_TAG.'14' =>'rozaj' ,
         'variant1'=>'nedis'
-    );
-    $loc_parts_arr7 = array(
+    ];
+    $loc_parts_arr7 = darray[
         Locale::LANG_TAG =>'en' ,
         Locale::SCRIPT_TAG =>'Hans' ,
         Locale::REGION_TAG =>'CN',
@@ -44,8 +44,8 @@ function ut_main()
         'variant1'=>'nedis' ,
         'extlang0'=>'lng' ,
         'extlang1'=>'ing'
-    );
-    $loc_parts_arr8 = array(
+    ];
+    $loc_parts_arr8 = darray[
         Locale::LANG_TAG =>'en' ,
         Locale::SCRIPT_TAG =>'Hans' ,
         Locale::REGION_TAG =>'CN',
@@ -55,33 +55,33 @@ function ut_main()
         'extlang1'=>'ing',
         'private7'=>'prv1' ,
         'private9'=>'prv2'
-    );
-    $loc_parts_arr9 = array(
+    ];
+    $loc_parts_arr9 = darray[
         Locale::REGION_TAG =>'DE'
-    );
-    $loc_parts_arr10 = array(
+    ];
+    $loc_parts_arr10 = darray[
         Locale::LANG_TAG => 45,
         Locale::REGION_TAG => false,
         Locale::SCRIPT_TAG => 15
-    );
-    $loc_parts_arr11 = array(
+    ];
+    $loc_parts_arr11 = darray[
         Locale::LANG_TAG =>'de'  ,
         Locale::REGION_TAG =>'DE',
         'private0' => 13,
         'variant1' => array(),
         'extlang2' => false
-    );
-    $loc_parts_arr12 = array(
+    ];
+    $loc_parts_arr12 = darray[
         Locale::LANG_TAG =>'en' ,
         Locale::SCRIPT_TAG =>'Hans' ,
         Locale::REGION_TAG =>'CN',
-        Locale::VARIANT_TAG => array('nedis', 'rozaj'),
-        Locale::PRIVATE_TAG => array('prv1', 'prv2'),
-        Locale::EXTLANG_TAG => array('lng', 'ing')
-    );
+        Locale::VARIANT_TAG => varray['nedis', 'rozaj'],
+        Locale::PRIVATE_TAG => varray['prv1', 'prv2'],
+        Locale::EXTLANG_TAG => varray['lng', 'ing']
+    ];
 
 
-    $loc_parts_arr = array(
+    $loc_parts_arr = darray[
         'loc1' => $loc_parts_arr1,
         'loc2' => $loc_parts_arr2,
         'loc3' => $loc_parts_arr3,
@@ -94,7 +94,7 @@ function ut_main()
         'loc10' => $loc_parts_arr10,
         'loc11' => $loc_parts_arr11,
         'loc12' => $loc_parts_arr12
-    );
+    ];
 
     error_reporting( E_ERROR );
 

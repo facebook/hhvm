@@ -7,12 +7,12 @@
 
 function ut_main()
 {
-        $pattern_arr = array (
+        $pattern_arr = varray [
                 'DD-MM-YYYY hh:mm:ss',
         'yyyy-DDD.hh:mm:ss z',
                 "yyyy/MM/dd",
                 "yyyyMMdd"
-        );
+        ];
 
         $res_str = '';
 

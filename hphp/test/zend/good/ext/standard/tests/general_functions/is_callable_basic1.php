@@ -45,13 +45,13 @@ function Hello_World() {
 }
 <<__EntryPoint>> function main(): void {
 echo "\n*** Testing is_callable() on defined functions ***\n";
-$defined_functions = array (
+$defined_functions = varray [
   $functionVar1 = 'someFunction',
   $functionVar2 = 'x123',
   $functionVar3 = 'NULL',
   $functionVar4 = 'false',
   $functionVar5 = "Hello_World"
-);
+];
 /* use check_iscallable() to check whether given string is valid function name
  *  expected: true as it is valid callback
  */

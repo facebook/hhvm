@@ -33,7 +33,7 @@ class ArrayIteratorEx extends ArrayIterator
     }
 }
 <<__EntryPoint>> function main(): void {
-$ar = new ArrayIteratorEx(array(1,2));
+$ar = new ArrayIteratorEx(varray[1,2]);
 foreach($ar as $k => $v)
 {
     var_dump($k);

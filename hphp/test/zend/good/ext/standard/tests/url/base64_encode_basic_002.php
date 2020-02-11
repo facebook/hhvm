@@ -11,13 +11,13 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing base64_encode() : basic functionality ***\n";
 
-$values = array(
+$values = varray[
     "Hello World",
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!%^&*(){}[]",
     "\n\t Line with control characters\r\n",
     "\xC1\xC2\xC3\xC4\xC5\xC6",
     "\75\76\77\78\79\80"
-);
+];
 
 echo "\n--- Testing base64_encode() with binary string input ---\n";
 

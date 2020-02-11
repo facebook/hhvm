@@ -1,10 +1,10 @@
 <?hh <<__EntryPoint>> function main(): void {
-$variation_array = array(
+$variation_array = darray[
   'lowercase true' => true,
   'lowercase false' =>false,
   'uppercase TRUE' =>TRUE,
   'uppercase FALSE' =>FALSE,
-  );
+  ];
 
 
 foreach ( $variation_array as $var ) {

@@ -39,7 +39,7 @@ function list_system_locales() {
 echo "*** Testing setlocale() by passing multiple locales as argument ***\n";
 
 //set of currency symbol according to above list of locales
-$currency_symbol = array(
+$currency_symbol = darray[
   "en_US.utf8" => "USD",
   "en_AU.utf8" => "AUD",
   "ko_KR.utf8" => "KRW",
@@ -50,7 +50,7 @@ $currency_symbol = array(
   "ja_JP.utf8" => "JPY",
   "el_GR.utf8" => "EUR",
   "nl_NL.utf8" =>"EUR"
-);
+];
 
 // gather all the locales installed in the system
 $all_system_locales = list_system_locales();

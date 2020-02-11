@@ -1,6 +1,6 @@
 <?hh
 
-function foo($a = array(namespace\unknown => unknown))
+function foo($a = darray[namespace\unknown => unknown])
 {
 }
 <<__EntryPoint>> function main(): void {

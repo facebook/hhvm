@@ -16,9 +16,9 @@ $format3 = "%f %f %f";
 $format11 = "%F";
 $format22 = "%F %F";
 $format33 = "%F %F %F";
-$arg1 = array(11.11);
-$arg2 = array(11.11,22.22);
-$arg3 = array(11.11,22.22,33.33);
+$arg1 = varray[11.11];
+$arg2 = varray[11.11,22.22];
+$arg3 = varray[11.11,22.22,33.33];
 
 var_dump( vsprintf($format1,$arg1) );
 var_dump( vsprintf($format11,$arg1) );

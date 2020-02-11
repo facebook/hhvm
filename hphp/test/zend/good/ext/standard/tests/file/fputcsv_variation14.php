@@ -13,22 +13,22 @@ echo "*** Testing fputcsv() : with enclosure & delimiter of two chars and file o
    1st element is delimiter, 2nd element is enclosure 
    and 3rd element is csv fields
 */
-$csv_lists = array (
-  array(',', '"', array('water,fruit') ),
-  array(',', '"', array('"water","fruit') ),
-  array(',', '"', array('"water","fruit"') ),
-  array(' ', '^', array('^water^ ^fruit^')),
-  array(':', '&', array('&water&:&fruit&')),
-  array('=', '=', array('=water===fruit=')),
-  array('-', '-', array('-water--fruit-air')),
-  array('-', '-', array('-water---fruit---air-')),
-  array(':', '&', array('&""""&:&"&:,:":&,&:,,,,'))
+$csv_lists = varray [
+  varray[',', '"', varray['water,fruit'] ],
+  varray[',', '"', varray['"water","fruit'] ],
+  varray[',', '"', varray['"water","fruit"'] ],
+  varray[' ', '^', varray['^water^ ^fruit^']],
+  varray[':', '&', varray['&water&:&fruit&']],
+  varray['=', '=', varray['=water===fruit=']],
+  varray['-', '-', varray['-water--fruit-air']],
+  varray['-', '-', varray['-water---fruit---air-']],
+  varray[':', '&', varray['&""""&:&"&:,:":&,&:,,,,']]
 
-);
+];
 $file_path = dirname(__FILE__);
 $filename = "$file_path/fputcsv_variation14.tmp";
 
-$file_modes = array ("r", "rb", "rt");
+$file_modes = varray ["r", "rb", "rt"];
 
 // create the file
 $file_handle = fopen($filename, "w" );

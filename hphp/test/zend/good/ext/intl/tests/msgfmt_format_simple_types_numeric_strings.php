@@ -16,7 +16,7 @@ $mf = new MessageFormatter('en_US',"
 	");
 	
 $ex = "1336317965.5 str";
-var_dump($mf->format(array(
+var_dump($mf->format(darray[
 'a' => $ex,
 'b' => $ex,
 'c' => $ex,
@@ -27,5 +27,5 @@ var_dump($mf->format(array(
 'h' => $ex,
 'i' => $ex,
 'j' => $ex,
-)));
+]));
 echo "==DONE==";

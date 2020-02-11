@@ -12,10 +12,10 @@
 echo "*** Testing array_map() : non-permmited built-in functions ***\n";
 
 // array to be passed as arguments
-$arr1 = array(1, 2);
+$arr1 = varray[1, 2];
 
 // built-in functions & language constructs
-$callback_names = array(
+$callback_names = varray[
 /*1*/  'echo',
        'array',
 /*3*/  'eval',
@@ -23,7 +23,7 @@ $callback_names = array(
        'isset',
        'list',
 /*7*/  'print'
-);
+];
 for($count = 0; $count < count($callback_names); $count++)
 {
   echo "-- Iteration ".($count + 1)." --\n";

@@ -7,7 +7,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing gzopen() : variation ***\n";
 
-$modes = array('r+', 'rf', 'w+' , 'e');
+$modes = varray['r+', 'rf', 'w+' , 'e'];
 
 $file = dirname(__FILE__)."/004.txt.gz";
 

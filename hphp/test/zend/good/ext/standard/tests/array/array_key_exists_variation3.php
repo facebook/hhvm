@@ -12,9 +12,9 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_key_exists() : usage variations ***\n";
 
-$keys = array(1.2345678900E-10, 1.00000000000001, 1.99999999999999);
+$keys = varray[1.2345678900E-10, 1.00000000000001, 1.99999999999999];
 
-$search = array ('zero', 'one', 'two');
+$search = varray ['zero', 'one', 'two'];
 
 $iterator = 1;
 foreach($keys as $key) {

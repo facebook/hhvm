@@ -29,7 +29,7 @@ unset ($unset_var);
 $fp = fopen(__FILE__, "r");
 
 //array of values to iterate over
-$preserve_keys = array (
+$preserve_keys = varray [
 
        // int data
 /*1*/  0,
@@ -46,10 +46,10 @@ $preserve_keys = array (
 
        // array data
 /*10*/ array(),
-       array(0),
-       array(1),
-       array(1, 2),
-       array('color' => 'red', 'item' => 'pen'),
+       varray[0],
+       varray[1],
+       varray[1, 2],
+       darray['color' => 'red', 'item' => 'pen'],
 
        // null data
 /*15*/ NULL,
@@ -78,7 +78,7 @@ $preserve_keys = array (
        // resource variable
 /*26*/ $fp
 
-);
+];
 
 // loop through each element of the array $preserve_keys to check the behavior of array_reverse()
 $iterator = 1;

@@ -7,11 +7,11 @@
 echo "*** Testing array_unique() : basic functionality ***\n";
 
 // array with default keys
-$input = array(1, 2, "1", '2');
+$input = varray[1, 2, "1", '2'];
 var_dump( array_unique($input) );
 
 // associative array
-$input = array("1" => "one", 1 => "one", 2 => "two", '2' => "two");
+$input = darray["1" => "one", 1 => "one", 2 => "two", '2' => "two"];
 var_dump( array_unique($input) );
 
 // mixed array

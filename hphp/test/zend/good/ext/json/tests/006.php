@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$a = array('<foo>',"'bar'",'"baz"','&blong&');
+$a = varray['<foo>',"'bar'",'"baz"','&blong&'];
 
 echo "Normal: ", json_encode($a), "\n";
 echo "Tags: ",   json_encode($a,JSON_HEX_TAG), "\n";

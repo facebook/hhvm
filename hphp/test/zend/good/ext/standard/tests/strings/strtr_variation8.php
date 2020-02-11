@@ -29,7 +29,7 @@ $file_handle = fopen(__FILE__, "r");
 $str = "012atm";
 
 // array of inputs for 'replace_pairs' argument
-$replace_pairs_arr =  array (
+$replace_pairs_arr =  varray [
 
   // integer values
   0,
@@ -43,8 +43,8 @@ $replace_pairs_arr =  array (
 
   // array values
   array(),
-  array(0),
-  array(1, 2),
+  varray[0],
+  varray[1, 2],
 
   // boolean values
   true,
@@ -67,7 +67,7 @@ $replace_pairs_arr =  array (
 
   // unset variable
   @$unset_var
-);
+];
 
 // loop through with each element of the $replace_pairs array to test strtr() function
 $count = 1;

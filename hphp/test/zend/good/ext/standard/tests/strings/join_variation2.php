@@ -25,14 +25,14 @@ function main(): void {
   $glue = '::';
 
   // get an unset variable
-  $unset_var = array(1, 2);
+  $unset_var = varray[1, 2];
   unset($unset_var);
 
   // get a resouce variable
   $fp = fopen(__FILE__, "r");
 
   // array with different values
-  $values = array(
+  $values = varray[
     // integer values
     0,
     1,
@@ -75,7 +75,7 @@ function main(): void {
 
     // unset variable
     @$unset_var
-  );
+  ];
 
   // loop through each element of the array and check the working of join()
   // when $pieces argument is supplied with different values

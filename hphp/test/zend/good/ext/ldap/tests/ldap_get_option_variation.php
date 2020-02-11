@@ -6,10 +6,10 @@ function main_entry(): void {
   $link = ldap_connect($host, $port);
   $option = null;
 
-  $controls = array(
-  	array("oid" => "1.2.752.58.10.1", "iscritical" => true),
-  	array("oid" => "1.2.752.58.1.10", "value" => "magic"),
-  );
+  $controls = varray[
+  	darray["oid" => "1.2.752.58.10.1", "iscritical" => true],
+  	darray["oid" => "1.2.752.58.1.10", "value" => "magic"],
+  ];
 
   ldap_set_option($link, LDAP_OPT_DEREF, LDAP_DEREF_NEVER);
   ldap_set_option($link, LDAP_OPT_SIZELIMIT, 123);

@@ -7,7 +7,7 @@
 echo "*** Testing image_type_to_mime_type() : usage variations ***\n";
 
 error_reporting(E_ALL ^ E_NOTICE);
-$values =  array (
+$values =  varray [
   //Decimal values
   0,
   1,
@@ -25,7 +25,7 @@ $values =  array (
   0x1,
   0xABCD,
   -0xABCD
-);
+];
 
 // loop through each element of the array for imagetype
 $iterator = 1;

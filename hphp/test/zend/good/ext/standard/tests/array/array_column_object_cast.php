@@ -18,18 +18,18 @@ $value = new ValueClass();
 
 
 // Array representing a possible record set returned from a database
-$records = array(
-    array(
+$records = varray[
+    darray[
         'id' => $value,
         'first_name' => 'John',
         'last_name' => 'XXX'
-    ),
-    array(
+    ],
+    darray[
         'id' => 3245,
         'first_name' => 'Sally',
         'last_name' => 'Smith'
-    ),
-);
+    ],
+];
 $firstNames = array_column($records, $column_key, $index_key);
 print_r($firstNames);
 var_dump($column_key);

@@ -22,7 +22,7 @@ class classA
 echo "*** Testing array_combine() : Passing non-array values to \$values argument ***\n";
 
 // Initialize $keys array
-$keys = array(1, 2);
+$keys = varray[1, 2];
 
 //get an unset variable
 $unset_var = 10;
@@ -37,7 +37,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $values argument
-$values_passed = array(
+$values_passed = varray[
 
        // int data
 /*1*/  0,
@@ -82,7 +82,7 @@ $values_passed = array(
 
        // resource variable
 /*24*/ $fp
-);
+];
 
 // loop through each element within $values_passed to check the behavior of array_combine()
 $iterator = 1;

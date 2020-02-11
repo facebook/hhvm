@@ -29,7 +29,7 @@ function main(): void {
   unset($unset_var);
 
   //array of different values for 'val' argument
-  $values = array(
+  $values = varray[
             // empty string
   /* 1  */  "",
             '',
@@ -41,7 +41,7 @@ function main(): void {
 
             // unset variable
   /* 5  */  @$unset_var,
-  );
+  ];
 
   // loop through each element of the array for 'val' argument
   // check the working of array_fill()

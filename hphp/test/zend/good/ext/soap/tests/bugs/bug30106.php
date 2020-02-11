@@ -1,9 +1,9 @@
 <?hh
 
 function getContinentList() {
-	return array("getContinentListResult"=>array(
+	return darray["getContinentListResult"=>darray[
 	  "schema"=>"<xsd:schema><element name=\"test\" type=\"xsd:string\"/></xsd:schema>",
-	  "any"=>"<test>Hello World!</test><test>Bye World!</test>"));
+	  "any"=>"<test>Hello World!</test><test>Bye World!</test>"]];
 }
 
 class LocalSoapClient extends SoapClient {
@@ -30,6 +30,6 @@ function main_entry(): void {
   $client = new LocalSoapClient(dirname(__FILE__)."/bug30106.wsdl");
   var_dump($client->__getFunctions());
   var_dump($client->__getTypes());
-  $x = $client->getContinentList(array("AFFILIATE_ID"=>1,"PASSWORD"=>"x"));
+  $x = $client->getContinentList(darray["AFFILIATE_ID"=>1,"PASSWORD"=>"x"]);
   var_dump($x);
 }

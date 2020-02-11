@@ -17,7 +17,7 @@ var_dump(str_shuffle($str));
 
 // For a given i/p string ensure that all combinations are
 // generated given a reasonable sample of calls
-$a = array();
+$a = darray[];
 $trys = 1000;
 $ip = 'abcd';
 $len_ip = strlen($ip);

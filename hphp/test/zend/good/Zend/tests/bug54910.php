@@ -9,7 +9,7 @@ class A {
 
     protected function get() {
         $class = get_class($this);
-        $call = array($class, 'noSuchMethod');
+        $call = varray[$class, 'noSuchMethod'];
 
         //if (is_callable($call)) {
             $call();

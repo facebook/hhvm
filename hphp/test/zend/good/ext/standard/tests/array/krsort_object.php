@@ -38,19 +38,19 @@ class MyString
 echo "*** Testing krsort() : object functionality ***\n";
 
 // array of integer objects with different key values
-$unsorted_int_obj = array (
+$unsorted_int_obj = darray [
   10 => new MyInteger(11), 20 =>  new MyInteger(66),
   3 => new MyInteger(23), 4 => new MyInteger(-5),
   50 => new MyInteger(0.001), 6 => new MyInteger(0)
-);
+];
 
 // array of string objects with different key values
-$unsorted_str_obj = array (
+$unsorted_str_obj = darray [
   "axx" => new MyString("axx"), "t" => new MyString("t"),
   "w" => new MyString("w"), "py" => new MyString("py"),
   "apple" => new MyString("apple"), "Orange" => new MyString("Orange"),
   "Lemon" => new MyString("Lemon"), "aPPle" => new MyString("aPPle")
-);
+];
 
 
 echo "\n-- Testing krsort() by supplying various object arrays, 'flag' value is defualt --\n";

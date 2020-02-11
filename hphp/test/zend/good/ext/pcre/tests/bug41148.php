@@ -3,7 +3,7 @@
 $letexte="<br><br>";
 $ligne_horizontale = $puce = $debut_intertitre = $fin_intertitre = '';
 
-$cherche1 = array(
+$cherche1 = varray[
     /* 0 */     "/\n(----+|____+)/S",
     /* 1 */     "/\n-- */S",
     /* 2 */     "/\n- */S",
@@ -19,8 +19,8 @@ $cherche1 = array(
     /* 12 */    "/<p>([\n]*(<br[[:space:]]*\/?".">)*)*/S",
     /* 13 */    "/<quote>/S",
     /* 14 */    "/<\/quote>/S"
-);
-$remplace1 = array(
+];
+$remplace1 = varray[
     /* 0 */     "\n\n$ligne_horizontale\n\n",
     /* 1 */     "\n<br />&mdash;&nbsp;",
     /* 2 */     "\n<br />$puce&nbsp;",
@@ -36,7 +36,7 @@ $remplace1 = array(
     /* 12 */    "<p>",
     /* 13 */    "<blockquote class=\"spip\"><p>",
     /* 14 */    "</blockquote><p>"
-);
+];
 $letexte = preg_replace($cherche1, $remplace1, $letexte);
 $letexte = preg_replace("@^ <br />@S", "", $letexte);
 

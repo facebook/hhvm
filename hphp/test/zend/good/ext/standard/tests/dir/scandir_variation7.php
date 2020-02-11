@@ -15,7 +15,7 @@ $dir_path = dirname(__FILE__) . "/scandir_variation7";
 mkdir($dir_path);
 
 // different values for directory permissions
-$permission_values = array(
+$permission_values = varray[
 /*1*/  0477,  // owner has read only, other and group has rwx
        0677,  // owner has rw only, other and group has rwx
 
@@ -30,7 +30,7 @@ $permission_values = array(
 
 /*9*/  0670,  // owner has rw only, group has rwx & others have no permission
 /*10*/ 0607   // owner has rw only, group has no permission and others have rwx
-);
+];
 
 $iterator = 1;
 foreach ($permission_values as $perm) {

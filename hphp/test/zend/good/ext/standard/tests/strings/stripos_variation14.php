@@ -27,7 +27,7 @@ $haystack = "hello world";
 $needle = "world";
 
 // array with different values
-$offsets =  array (
+$offsets =  varray [
 
   // float values
   1.5,
@@ -38,10 +38,10 @@ $offsets =  array (
 
   // array values
   array(),
-  array(0),
-  array(1),
-  array(1, 2),
-  array('color' => 'red', 'item' => 'pen'),
+  varray[0],
+  varray[1],
+  varray[1, 2],
+  darray['color' => 'red', 'item' => 'pen'],
 
   // boolean values
   true,
@@ -68,7 +68,7 @@ $offsets =  array (
 
   // unset variable
   @$unset_var
-);
+];
 
 
 // loop through each element of the array and check the working of stripos()

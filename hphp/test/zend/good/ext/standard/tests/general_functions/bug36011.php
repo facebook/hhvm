@@ -9,17 +9,17 @@ class TestClass
 
     function whee()
     {
-        array_map(array('TestClass', 'test'), array('array_value'));
+        array_map(varray['TestClass', 'test'], varray['array_value']);
     }
 
     function whee4()
     {
-        call_user_func(array('TestClass', 'test'));
+        call_user_func(varray['TestClass', 'test']);
     }
 
     static function whee5()
     {
-        call_user_func(array('TestClass', 'test'));
+        call_user_func(varray['TestClass', 'test']);
     }
 }
 <<__EntryPoint>> function main(): void {

@@ -1,12 +1,12 @@
 <?hh <<__EntryPoint>> function main(): void {
-$a = array(
-    'a' => array(
+$a = darray[
+    'a' => varray[
         'A', 'B', 'C', 'D',
-    ),
-    'b' => array(
+    ],
+    'b' => varray[
         'AA', 'BB', 'CC', 'DD',
-    ),
-);
+    ],
+];
 
 // Set the pointer of $a to 'b' and the pointer of 'b' to 'CC'
 reset(inout $a);

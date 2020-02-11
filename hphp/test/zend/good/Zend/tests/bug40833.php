@@ -9,14 +9,14 @@ class entity
         if ( isset($this->data[$name]) )
             return $this->data[$name];
         else {
-            $this->data = array();
+            $this->data = darray[];
             return $this->data[$name] = new myset($this);
         }
     }
 
     function __set($name, $value)
     {
-        if ($this->modified === null) $this->modified = array();
+        if ($this->modified === null) $this->modified = darray[];
         $this->modified[$name] = $value;
     }
 }

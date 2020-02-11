@@ -16,10 +16,10 @@
 echo "*** Testing array_chunk() : usage variations ***\n";
 
 // input array
-$input_array = array(1, 2, 3);
+$input_array = varray[1, 2, 3];
 
 // different magnitude's
-$sizes = array(-1, count($input_array) + 1, 0, 1.5);
+$sizes = varray[-1, count($input_array) + 1, 0, 1.5];
 
 // loop through the array for size argument
 foreach ($sizes as $size){

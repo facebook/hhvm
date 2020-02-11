@@ -16,14 +16,14 @@ $value2 = "hello";
 $value3 = 0;
 
 
-$arr1 = array(
+$arr1 = darray[
   0 => 0,
   1 => $value2,
   2 => $value2,
   3 => "hello",
   4 => $value3,
   $value2 => $value2
-);
+];
 
 // initialize the second argument
 $arr2 = array($value2 => "hello", $value2);

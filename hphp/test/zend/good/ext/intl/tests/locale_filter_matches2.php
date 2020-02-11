@@ -7,16 +7,16 @@
 
 function ut_main()
 {
-    $loc_ranges = array(
+    $loc_ranges = varray[
         'de-de',
         'sl_IT',
         'sl_IT_Nedis',
         'jbo',
         'art-lojban',
         'sl_IT'
-    );
+    ];
 
-    $lang_tags = array(
+    $lang_tags = varray[
         'de-DEVA',
         'de-DE-1996',
         'de-DE',
@@ -33,7 +33,7 @@ function ut_main()
         'art-lojban',
         'jbo',
         'en_sl_IT'
-    );
+    ];
 
     $res_str = '';
     $isCanonical = false;

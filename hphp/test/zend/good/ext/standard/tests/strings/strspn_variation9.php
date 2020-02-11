@@ -15,7 +15,7 @@ echo "*** Testing strspn() : with different str and default start and len args *
 // initialing required variables
 // defining different strings
 
-$strings = array(
+$strings = varray[
                    "",
            '',
            "\n",
@@ -33,7 +33,7 @@ $strings = array(
            'hello'.chr(0).'world',
            "hello\0\100\xaaaworld",
            'hello\0\100\xaaaworld'
-                   );
+                   ];
 
 $mask = "sfth12\ne34lw56r78d90\0\xaa\100o";
 

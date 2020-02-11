@@ -10,7 +10,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_push() : usage variations ***\n";
 
-$stack = array ('one' => 'un', 'two' => 'deux');
+$stack = darray ['one' => 'un', 'two' => 'deux'];
 $var0 = 'zero';
 
 echo "\n-- Call array_push() --\n";

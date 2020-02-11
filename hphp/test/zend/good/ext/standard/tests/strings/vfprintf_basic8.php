@@ -11,9 +11,9 @@ $format = "format";
 $format1 = "%o";
 $format2 = "%o %o";
 $format3 = "%o %o %o";
-$arg1 = array(021);
-$arg2 = array(021,0347);
-$arg3 = array(021,0347,05678);
+$arg1 = varray[021];
+$arg2 = varray[021,0347];
+$arg3 = varray[021,0347,05678];
 
 /* creating dumping file */
 $data_file = dirname(__FILE__) . '/vfprintf_basic8.txt';

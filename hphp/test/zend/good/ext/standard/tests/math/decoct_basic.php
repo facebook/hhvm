@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$values = array(10,
+$values = varray[10,
                 3950.5,
                 3.9505e3,
                 039,
@@ -12,7 +12,7 @@ $values = array(10,
                 true,
                 false,
                 null,
-                );
+                ];
 
 for ($i = 0; $i < count($values); $i++) {
     $res = decoct($values[$i]);

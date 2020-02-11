@@ -7,7 +7,7 @@
 echo "*** Testing sprintf() : float formats with integer values ***\n";
 
 // array of int type values
-$integer_values = array (
+$integer_values = varray [
   0,
   1,
   -1,
@@ -26,15 +26,15 @@ $integer_values = array (
   01912,       // should be quivalent to octal 1
   -020000000000, // max negative integer as octal
   017777777777  // max positive integer as octal
-);
+];
 
 // various float formats
-$float_formats = array(
+$float_formats = varray[
   "%f", "%hf", "%lf",
   "%Lf", " %f", "%f ",
   "\t%f", "\n%f", "%4f",
   "%30f", "%[0-9]", "%*f"
-);
+];
 
 $count = 1;
 foreach($integer_values as $int_value) {

@@ -3,7 +3,7 @@ class foo {
         public $x = "bar";
 }
 <<__EntryPoint>> function main(): void {
-$z = array(new foo(), 2, "3");
+$z = varray[new foo(), 2, "3"];
 $s = serialize($z);
 
 var_dump(unserialize($s));

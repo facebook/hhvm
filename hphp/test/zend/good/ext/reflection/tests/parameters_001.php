@@ -10,14 +10,14 @@ $f = new ReflectionMethod('Test', 'func');
 var_dump($f->getNumberOfParameters());
 var_dump($f->getNumberOfRequiredParameters());
 
-$p = new ReflectionParameter(array('Test', 'func'), 'x');
+$p = new ReflectionParameter(varray['Test', 'func'], 'x');
 var_dump($p->isOptional());
 
-$p = new ReflectionParameter(array('Test', 'func'), 'y');
+$p = new ReflectionParameter(varray['Test', 'func'], 'y');
 var_dump($p->isOptional());
 
 try {
-    $p = new ReflectionParameter(array('Test', 'func'), 'z');
+    $p = new ReflectionParameter(varray['Test', 'func'], 'z');
     var_dump($p->isOptional());
 }
 catch (Exception $e) {

@@ -35,7 +35,7 @@ function main_entry(): void {
   var_dump($x->test(new foo()));
 
   $x = new LocalSoapClient(dirname(__FILE__)."/bug30928.wsdl", 
-                           array("classmap" => array('testType'=>'foo')));
+                           darray["classmap" => darray['testType'=>'foo']]);
   var_dump($x->test(new foo()));
 
   echo "ok\n";

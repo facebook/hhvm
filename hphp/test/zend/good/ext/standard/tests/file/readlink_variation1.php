@@ -8,7 +8,7 @@ $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $file_handle = fopen($file_path."/readlink_variation2.tmp", "w");
 
 echo "*** Testing Invalid file types ***\n";
-$filenames = array(
+$filenames = varray[
   /* Invalid filenames */
   -2.34555,
   "",
@@ -20,7 +20,7 @@ $filenames = array(
   /* scalars */
   1234,
   0
-);
+];
    
 /* loop through to test each element the above array */
 foreach( $filenames as $filename ) {

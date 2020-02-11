@@ -12,8 +12,8 @@ echo "*** Testing ctype_space() : usage variations ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");
 
-$octal_values = array (011, 012, 013, 014, 015, 040);
-$hex_values   = array (0x9, 0xA, 0xB, 0xC, 0xD, 0x20);
+$octal_values = varray [011, 012, 013, 014, 015, 040];
+$hex_values   = varray [0x9, 0xA, 0xB, 0xC, 0xD, 0x20];
 
 echo "\n-- Octal Values --\n";
 $iterator = 1;

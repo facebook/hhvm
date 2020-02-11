@@ -15,12 +15,12 @@ spanning multiple lines
 using heredoc syntax.
 EOD;
 
-$needles = array(
+$needles = varray[
   "ing", 
   "", 
   " ",
   $multi_line_str //needle as haystack 
-);
+];
 
 //loop through to test strrchr() with each needle
 foreach($needles as $needle) {  

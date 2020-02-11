@@ -42,30 +42,30 @@ $numeric_string = <<<EOT
 EOT;
 
 // arrays passed to $input argument
-$inputs = array (
-/*1*/  array(1, 2, 2, 1), // with default keys and numeric values
-       array(1.1, 2.2, 1.1), // with default keys & float values
-       array(false, true, false), // with default keys and boolean values
+$inputs = varray [
+/*1*/  varray[1, 2, 2, 1], // with default keys and numeric values
+       varray[1.1, 2.2, 1.1], // with default keys & float values
+       varray[false, true, false], // with default keys and boolean values
        array(), // empty array
-/*5*/  array(NULL, null), // with NULL
-       array("a\v\f", "aaaa\r", "b", "aaaa\r", "\[\]\!\@\#\$\%\^\&\*\(\)\{\}"),  // with double quoted strings
-       array('a\v\f', 'aaaa\r', 'b', 'aaaa\r', '\[\]\!\@\#\$\%\^\&\*\(\)\{\}'),  // with single quoted strings
+/*5*/  varray[NULL, null], // with NULL
+       varray["a\v\f", "aaaa\r", "b", "aaaa\r", "\[\]\!\@\#\$\%\^\&\*\(\)\{\}"],  // with double quoted strings
+       varray['a\v\f', 'aaaa\r', 'b', 'aaaa\r', '\[\]\!\@\#\$\%\^\&\*\(\)\{\}'],  // with single quoted strings
        array("h1" => $blank_line, "h2" => $multiline_string, "h3" => $diff_whitespaces, $blank_line),  // with heredocs
 
        // associative arrays
-/*9*/  array(1 => "one", 2 => "two", 2 => "two"),  // explicit numeric keys, string values
-       array("one" => 1, "two" => 2, "1" => 1 ),  // string keys & numeric values
-       array( 1 => 10, 2 => 20, 4 => 40, 5 => 10),  // explicit numeric keys and numeric values
-       array( "one" => "ten", "two" => "twenty", "10" => "ten"),  // string key/value
-       array("one" => 1, 2 => "two", 4 => "four"),  //mixed
+/*9*/  darray[1 => "one", 2 => "two", 2 => "two"],  // explicit numeric keys, string values
+       darray["one" => 1, "two" => 2, "1" => 1 ],  // string keys & numeric values
+       darray[ 1 => 10, 2 => 20, 4 => 40, 5 => 10],  // explicit numeric keys and numeric values
+       darray[ "one" => "ten", "two" => "twenty", "10" => "ten"],  // string key/value
+       darray["one" => 1, 2 => "two", 4 => "four"],  //mixed
 
        // associative array, containing null/empty/boolean values as key/value
-/*14*/ array(NULL => "NULL", null => "null", "NULL" => NULL, "null" => null),
-       array(true => "true", false => "false", "false" => false, "true" => true),
-       array("" => "emptyd", '' => 'emptys', "emptyd" => "", 'emptys' => ''),
-       array(1 => '', 2 => "", 3 => NULL, 4 => null, 5 => false, 6 => true),
-/*18*/ array('' => 1, "" => 2, NULL => 3, null => 4, false => 5, true => 6),
-);
+/*14*/ darray[NULL => "NULL", null => "null", "NULL" => NULL, "null" => null],
+       darray[true => "true", false => "false", "false" => false, "true" => true],
+       darray["" => "emptyd", '' => 'emptys', "emptyd" => "", 'emptys' => ''],
+       darray[1 => '', 2 => "", 3 => NULL, 4 => null, 5 => false, 6 => true],
+/*18*/ darray['' => 1, "" => 2, NULL => 3, null => 4, false => 5, true => 6],
+];
 
 // loop through each sub-array of $inputs to check the behavior of array_unique()
 $iterator = 1;

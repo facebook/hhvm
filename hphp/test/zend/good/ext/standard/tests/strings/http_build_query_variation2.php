@@ -7,21 +7,21 @@
 $mDimensional = array(
   20, 
   5 => 13, 
-  "9" => array(
+  "9" => darray[
     1 => "val1", 
     3 => "val2", 
     "string" => "string"
-  ),
+  ],
   "name" => "homepage", 
   "page" => 10,
   "sort" => array(
     "desc", 
     "admin" => array(
       "admin1", 
-      "admin2" => array(
+      "admin2" => darray[
         "who" => "admin2", 
         2 => "test"
-      )
+      ]
     )
   )
 );

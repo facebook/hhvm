@@ -7,7 +7,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing var_export() with integer values ***\n";
 // different integer vlaues
-$valid_ints = array(
+$valid_ints = darray[
                 '0' => '0',
                 '1' => '1',
                 '-1' => '-1',
@@ -26,7 +26,7 @@ $valid_ints = array(
                 "01912" => 01912,       // should be quivalent to octal 1
                 "-020000000000" => -020000000000, // max negative integer as octal
                 "017777777777" => 017777777777,  // max positive integer as octal
-);
+];
 
 /* Loop to check for above integer values with var_export() */
 echo "\n*** Output for integer values ***\n";

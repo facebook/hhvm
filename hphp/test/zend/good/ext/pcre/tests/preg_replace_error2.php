@@ -9,7 +9,7 @@ error_reporting(E_ALL&~E_NOTICE);
 */
 echo "*** Testing preg_replace() : error conditions ***\n";
 $regex = '/[a-zA-Z]/';
-$replace = array('this is a string', array('this is', 'a subarray'),);
+$replace = varray['this is a string', varray['this is', 'a subarray'],];
 $subject = 'test';
 foreach($replace as $value) {
     print "\nArg value is: $value\n";

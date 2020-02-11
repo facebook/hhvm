@@ -12,7 +12,7 @@
 */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing basic operations of fopen() and fclose() functions ***\n";
-$modes = array(
+$modes = varray[
   "w",
   "wb",
   "wt",
@@ -33,7 +33,7 @@ $modes = array(
   "a+",
   "a+t",
   "a+b"
-);
+];
 
 for( $i=0; $i<count($modes); $i++ ) {
   echo "\n-- Iteration with mode '$modes[$i]' --\n";
@@ -56,14 +56,14 @@ for( $i=0; $i<count($modes); $i++ ) {
 // remove the temp file
 unlink($filename);
 
-$x_modes = array(
+$x_modes = varray[
   "x",
   "xb",
   "xt",
   "x+",
   "x+b",
   "x+t"
-);
+];
 
 for( $i=0; $i<count($x_modes); $i++ ) {
   echo "\n-- Iteration with mode '$x_modes[$i]' --\n";

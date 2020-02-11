@@ -4,7 +4,7 @@
  * Source code: ext/standard/image.c
  */
 <<__EntryPoint>> function main(): void {
-$imagetype_filenames = array(
+$imagetype_filenames = darray[
       // GIF file
       "GIF image file" => "200x100.gif",
 
@@ -31,7 +31,7 @@ $imagetype_filenames = array(
 
       //IFF file
       "IFF image file" => "test4pix.iff"
-);
+];
 
 echo "*** Testing getimagesize() : basic functionality ***\n";
 

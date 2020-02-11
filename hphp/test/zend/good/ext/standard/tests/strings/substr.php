@@ -4,7 +4,7 @@
  * Description: Returns the portion of string specified by the start and length parameters.
  */
 <<__EntryPoint>> function main(): void {
-$strings_array = array( "", '12345', "abcdef", "123abc", "_123abc");
+$strings_array = varray[ "", '12345', "abcdef", "123abc", "_123abc"];
 
 
 /* Testing for error conditions */

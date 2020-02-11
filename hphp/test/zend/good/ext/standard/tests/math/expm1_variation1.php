@@ -27,7 +27,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $arg argument
-$inputs = array(
+$inputs = varray[
        // int data
 /*1*/  0,
        1,
@@ -63,7 +63,7 @@ $inputs = array(
 
        // array data
        array(),
-       array(1,2,4),
+       varray[1,2,4],
 
        // object data
 /*24*/ new classA(),
@@ -76,7 +76,7 @@ $inputs = array(
 
        // resource variable
 /*27*/ $fp
-);
+];
 
 // loop through each element of $inputs to check the behaviour of expm1()
 $iterator = 1;

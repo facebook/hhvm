@@ -35,9 +35,9 @@ clearstatcache();
 sleep(1);
 touch($filename);
 $next_meta = stat($filename);
-$type = array("dev", "ino", "mode", "nlink", "uid", "gid",
+$type = varray["dev", "ino", "mode", "nlink", "uid", "gid",
               "rdev", "size", "atime", "mtime", "ctime",
-              "blksize", "blocks");
+              "blksize", "blocks"];
 
 for ($i = 0; $i < count($type); $i++) {
    if ($init_meta[$i] != $next_meta[$i]) {

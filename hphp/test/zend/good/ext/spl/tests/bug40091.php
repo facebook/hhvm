@@ -7,10 +7,10 @@ class MyAutoloader {
 }
 <<__EntryPoint>> function main(): void {
 $autloader1 = new MyAutoloader('dir1');
-spl_autoload_register(array($autloader1, 'autoload'));
+spl_autoload_register(varray[$autloader1, 'autoload']);
 
 $autloader2 = new MyAutoloader('dir2');
-spl_autoload_register(array($autloader2, 'autoload'));
+spl_autoload_register(varray[$autloader2, 'autoload']);
 
 print_r(spl_autoload_functions());
 echo "===DONE===\n";

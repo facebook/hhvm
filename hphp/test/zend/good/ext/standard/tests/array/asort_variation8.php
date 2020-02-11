@@ -15,20 +15,20 @@
 echo "*** Testing asort() : usage variations ***\n";
 
 // array of arrays
-$various_arrays = array (
+$various_arrays = darray [
   // null array
   "array[0]" => array(),
 
   // array contains null sub array
-  "array[1]" => array( "sub_array[1][0]" => array() ),
+  "array[1]" => darray[ "sub_array[1][0]" => array() ],
 
   // array of arrays along with some values
-  "array[2]" => array("data[2,0]" => 44, "data[2,1]" => 11, "sub_array[2][0] " => array(64,61) ),
+  "array[2]" => darray["data[2,0]" => 44, "data[2,1]" => 11, "sub_array[2][0] " => varray[64,61] ],
 
   // array contains sub arrays
-  "array[3]" => array ( "sub_array[3][0]" => array(33,-5,6), "sub_array[3][1]" => array(11),
-                        "sub_array[3][2]" => array(22,-55), "sub_array[3][3]" => array() )
-);
+  "array[3]" => darray [ "sub_array[3][0]" => varray[33,-5,6], "sub_array[3][1]" => varray[11],
+                        "sub_array[3][2]" => varray[22,-55], "sub_array[3][3]" => array() ]
+];
 
 
 $count = 1;

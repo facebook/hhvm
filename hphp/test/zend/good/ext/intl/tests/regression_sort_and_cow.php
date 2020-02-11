@@ -35,8 +35,8 @@ function ut_main()
 {
     $res_str = '';
 
-    $a1 = array( 'b', 'a', 'c' );
-    $a2 = array( 'в', 'а', 'б' );
+    $a1 = varray[ 'b', 'a', 'c' ];
+    $a2 = varray[ 'в', 'а', 'б' ];
 
     $res_str .= test_COW( 'en_US', $a1 );
     $res_str .= test_COW( 'ru_RU', $a2 );

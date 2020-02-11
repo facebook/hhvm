@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$dates = array (
+$dates = varray [
     "1999-10-13",
     "Oct 13  1999",
     "2000-01-19",
@@ -20,7 +20,7 @@ $dates = array (
     "20011022T21:20+0215",
     "1997W011",
     "2004W101T05:00+0",
-);
+];
 
 echo "*** GMT0\n";
 date_default_timezone_set("GMT0");

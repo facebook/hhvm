@@ -11,7 +11,7 @@
 echo "*** Testing array_unshift() : basic functionality with default key array ***\n";
 
 // Initialise the array
-$array = array(1, 2);
+$array = varray[1, 2];
 
 // Calling array_unshift() with default argument
 $temp_array = $array;

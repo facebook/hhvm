@@ -16,7 +16,7 @@ fclose($file_write);
 
 $file_read = fopen($file_name, "r");
 
-$offset_arr = array(
+$offset_arr = varray[
   /* Positive offsets */
   0,
   1,
@@ -36,7 +36,7 @@ $offset_arr = array(
   -35,
   -36,
   -70
-);
+];
 
 for( $i=0; $i<count($offset_arr); $i++ ) {
   echo "-- Iteration $i --\n";

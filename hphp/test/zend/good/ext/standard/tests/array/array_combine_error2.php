@@ -13,15 +13,15 @@ var_dump( array_combine(array(), array()) );
 
 // Testing array_combine by passing empty array to $keys
 echo "\n-- Testing array_combine() function with empty array for \$keys argument --\n";
-var_dump( array_combine(array(), array(1, 2)) );
+var_dump( array_combine(array(), varray[1, 2]) );
 
 // Testing array_combine by passing empty array to $values
 echo "\n-- Testing array_combine() function with empty array for \$values argument --\n";
-var_dump( array_combine(array(1, 2), array()) );
+var_dump( array_combine(varray[1, 2], array()) );
 
 // Testing array_combine with arrays having unequal number of elements
 echo "\n-- Testing array_combine() function by passing array with unequal number of elements --\n";
-var_dump( array_combine(array(1, 2), array(1, 2, 3)) );
+var_dump( array_combine(varray[1, 2], varray[1, 2, 3]) );
 
 echo "Done";
 }

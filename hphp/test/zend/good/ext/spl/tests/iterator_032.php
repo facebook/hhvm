@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$it = new LimitIterator(new ArrayIterator(array(1,2,3,4)), 1, 2);
+$it = new LimitIterator(new ArrayIterator(varray[1,2,3,4]), 1, 2);
 
 foreach($it as $k=>$v)
 {

@@ -2,8 +2,8 @@
 //-=-=-=-=--=-=-=-=-=-=-=-=-=-=-=-=- TEST 1 -=-=-=-=-
 <<__EntryPoint>> function main(): void {
 $a = array(1,"big"=>2,2,6,3,5,3,3,454,'some_string',3,3,3,3,3,3,3,3,17);
-$b = array(2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,17,25,'some_string',7,8,9,109,78,17);
-$c = array(-1,2,1,15,25,17);
+$b = varray[2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,17,25,'some_string',7,8,9,109,78,17];
+$c = varray[-1,2,1,15,25,17];
 echo str_repeat("-=",10)." TEST 1 ".str_repeat("-=",20)."\n";
 echo '$a='.var_export($a,TRUE).";\n";
 echo '$b='.var_export($b,TRUE).";\n";
@@ -22,7 +22,7 @@ echo 'array_intersect_assoc($a,$b);'."\n";
 var_dump(array_intersect_assoc($a,$b));
 
 //-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=- TEST 2 -=-=-=-=-=-
-$a = array(
+$a = darray[
 'a'=>2,
 'b'=>'some',
 'c'=>'done',
@@ -39,10 +39,10 @@ $a = array(
 73=>'foo',
 95=>'some',
 'som3'=>'some',
-'want'=>'wanna');
+'want'=>'wanna'];
 
 
-$b = array(
+$b = darray[
 'a'=>7,
 7=>18,
 9=>13,
@@ -54,12 +54,12 @@ $b = array(
 'f'=>5,
 'z'=>'equal',
 'gate'=>'web'
-);
-$c = array(
+];
+$c = darray[
 'gate'=>'web',
 73=>'foo',
 95=>'some'
-);
+];
 
 echo str_repeat("-=",10)." TEST 2 ".str_repeat("-=",20)."\n";
 echo '$a='.var_export($a,TRUE).";\n";

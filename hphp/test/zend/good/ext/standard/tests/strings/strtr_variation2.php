@@ -22,7 +22,7 @@ text & @()
 EOD;
 
 //array of string inputs for $str
-$str_arr = array(
+$str_arr = varray[
   //double quoted strings
   "%",
   "#$*",
@@ -35,11 +35,11 @@ $str_arr = array(
 
   //heredoc string
   $heredoc_str
-);
+];
 
 $from = "%#$*&@()";
 $to = "specials";
-$replace_pairs = array("$" => "%", "%" => "$", "#*&@()" => "()@&*#");
+$replace_pairs = darray["$" => "%", "%" => "$", "#*&@()" => "()@&*#"];
 
 /* loop through to test strtr() with each element of $str_arr */
 for($index = 0; $index < count($str_arr); $index++) {

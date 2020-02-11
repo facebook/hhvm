@@ -12,8 +12,8 @@ echo "*** Testing ctype_alnum() : usage variations ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");
 
-$octal_values = array (060, 061, 062, 063);
-$hex_values = array(0x30, 0x31, 0x32, 0x33);
+$octal_values = varray [060, 061, 062, 063];
+$hex_values = varray[0x30, 0x31, 0x32, 0x33];
 
 echo "\n-- Octal Values --\n";
 $iterator = 1;

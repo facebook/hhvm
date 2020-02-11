@@ -9,6 +9,6 @@ function main_entry(): void {
     exit;
   }
   $proc->importStylesheet($phpfuncxsl);
-  var_dump($proc->registerPHPFunctions(array('ucwords')));
+  var_dump($proc->registerPHPFunctions(varray['ucwords']));
   var_dump($proc->transformToXml($dom));
 }

@@ -12,7 +12,7 @@
 echo "*** Testing array_change_key_case() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$array = array ('one' => 1, 'TWO' => 2, 'Three' => 3);
+$array = darray ['one' => 1, 'TWO' => 2, 'Three' => 3];
 
 //get an unset variable
 $unset_var = 10;
@@ -27,7 +27,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $case argument
-$inputs = array(
+$inputs = varray[
 
        // int data
 /*1*/  0,
@@ -67,7 +67,7 @@ $inputs = array(
 
        // unset data
 /*23*/ @$unset_var,
-);
+];
 
 // loop through each element of $inputs to check the behavior of array_change_key_case()
 $iterator = 1;

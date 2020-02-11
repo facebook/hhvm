@@ -5,7 +5,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing imagecolorallocate() : usage variations ***\n";
 
-$values = array(
+$values = darray[
       //Decimal integera data
       "Decimal 256" => 256,
 
@@ -14,7 +14,7 @@ $values = array(
 
       // hexa-decimal integer data
       "Hexa-decimal 0x100" => 0x100
-);
+];
 
 // loop through each element of the array for blue
 foreach($values as $key => $value) {

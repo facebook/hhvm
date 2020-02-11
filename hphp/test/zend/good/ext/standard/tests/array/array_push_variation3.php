@@ -13,8 +13,8 @@ echo "*** Testing array_push() : usage variations ***\n";
 
 echo "\n-- Pass array as \$var argument --\n";
 $three = 3;
-$array = array(1, 2, 3);
-$sub_array = array('one', 'two');
+$array = varray[1, 2, 3];
+$sub_array = varray['one', 'two'];
 var_dump(array_push(inout $array, $sub_array));
 var_dump($array);
 

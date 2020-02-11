@@ -40,24 +40,24 @@ hello\0world\0hello
 EOT;
 
 // defining array with values as heredoc strings
-$heredoc_array = array(
+$heredoc_array = varray[
   $empty_heredoc,
   $heredoc_with_newline,
   $heredoc_with_characters,
   $heredoc_with_newline_and_tabs,
   $heredoc_with_alphanumerics,
   $heredoc_with_embedded_nulls
-);
+];
 
 // defining array with keys as heredoc strings
-$heredoc_asso_array = array(
+$heredoc_asso_array = darray[
   $empty_heredoc => "heredoc1",
   $heredoc_with_newline => "heredoc2",
   $heredoc_with_characters => "heredoc3",
   $heredoc_with_newline_and_tabs => "heredoc3",
   $heredoc_with_alphanumerics => "heredoc4",
   $heredoc_with_embedded_nulls => "heredoc5"
-);
+];
 
 // test shuffle() with array containing heredoc strings as values
 echo "\n-- with array of heredoc strings --\n";

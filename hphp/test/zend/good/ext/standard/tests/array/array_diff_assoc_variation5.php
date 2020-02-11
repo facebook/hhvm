@@ -10,9 +10,9 @@
  */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_diff_assoc() : usage variations ***\n";
-$arr_default_int = array(1, 2, 3, 'a');
+$arr_default_int = varray[1, 2, 3, 'a'];
 $arr_float = array(0 => 1.00, 1.00 => 2.00, 2.00 => 3.00, 'b');
-$arr_string = array('1', '2', '3', 'c');
+$arr_string = varray['1', '2', '3', 'c'];
 $arr_string_float = array('0' => '1.00', '1.00' => '2.00', '2.00' => '3.00', 'd');
 
 echo "-- Result of comparing integers and floating point numbers: --\n";

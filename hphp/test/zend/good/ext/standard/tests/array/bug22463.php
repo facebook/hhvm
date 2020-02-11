@@ -8,17 +8,17 @@ function cb($v, $elem) {
     return $v + a($elem);
 }
 <<__EntryPoint>> function main(): void {
-$ary = array(
-    array(
-        array(
-            array(
-                array(
-                    array(0, 1, 2, 3, 4)
-                )
-            )
-        )
-    )
-);
+$ary = varray[
+    varray[
+        varray[
+            varray[
+                varray[
+                    varray[0, 1, 2, 3, 4]
+                ]
+            ]
+        ]
+    ]
+];
 
 var_dump(a($ary));
 }

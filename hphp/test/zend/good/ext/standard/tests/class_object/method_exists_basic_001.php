@@ -24,12 +24,12 @@ class C extends B {
 }
 
 <<__EntryPoint>> function main(): void {
-$methods = array(
+$methods = varray[
     'inherit_pub', 'inherit_prot', 'inherit_priv',
     'inherit_static_pub', 'inherit_static_prot', 'inherit_static_priv',
     'pub', 'prot', 'priv',
     'static_pub', 'static_prot', 'static_priv',
-    'non_existent');
+    'non_existent'];
 
 echo "\n ---(Using string class name)---\n";
 foreach ($methods as $method) {

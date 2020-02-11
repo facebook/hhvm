@@ -11,11 +11,11 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing join() : usage variations ***\n";
 
-$glues = array (
+$glues = varray [
   "TRUE",
   true,
   false,
-  array("key1", "key2"),
+  varray["key1", "key2"],
   "",
   " ",
   "string\x00between",
@@ -23,9 +23,9 @@ $glues = array (
   NULL,
   -0,
   '\0'
-);
+];
 
-$pieces = array (
+$pieces = varray [
   2,
   0,
   -639,
@@ -38,7 +38,7 @@ $pieces = array (
   " ",
   6999.99999999,
   "string\x00with\x00...\0"
-);
+];
 /* loop through  each element of $glues and call join */
 $counter = 1;
 for($index = 0; $index < count($glues); $index ++) {

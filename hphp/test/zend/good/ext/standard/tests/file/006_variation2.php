@@ -19,7 +19,7 @@ $dir_name = dirname(__FILE__)."/006_variation2";
 mkdir($dir_name);
 
 echo "\n*** Testing fileperms(), chmod() with miscellaneous permissions ***\n";
-$perms_array = array(
+$perms_array = varray[
   /* testing sticky bit */
   07777,
   00000,
@@ -43,7 +43,7 @@ $perms_array = array(
   "r+w+x",
   "u+rwx",
   "u+rwx, g+rw, o+wx"
-);
+];
 
 $count = 1;
 foreach($perms_array as $permission) {

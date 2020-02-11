@@ -35,10 +35,10 @@ $sym_linkname = "$file_path/$dirname/symlink_link_linkinfo_is_link_softlink_basi
 $linkname = "$file_path/$dirname/symlink_link_linkinfo_is_link_hardlink_basic1.tmp";
 
 // filename stored in array with single and double slash notation in its path
-$files = array (
+$files = varray [
   "$file_path/$dirname/symlink_link_linkinfo_is_link_basic1.tmp",
   "$file_path//$dirname//symlink_link_linkinfo_is_link_basic1.tmp"
-);
+];
 
 $counter = 1;
 /* create soft/hard link to  the file 

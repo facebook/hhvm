@@ -7,19 +7,19 @@
 echo "*** Testing array_flip() : basic functionality ***\n";
 
 // array with default keys - numeric values
-$input = array(1, 2);   
+$input = varray[1, 2];   
 var_dump( array_flip($input) );
 
 // array with default keys - string values
-$input = array('value1', "value2");
+$input = varray['value1', "value2"];
 var_dump( array_flip($input) );
 
 // associative arrays - key as string
-$input = array('key1' => 1, "key2" => 2); 
+$input = darray['key1' => 1, "key2" => 2]; 
 var_dump( array_flip($input) );
 
 // associative arrays - key as numeric
-$input = array(1 => 'one', 2 => "two");
+$input = darray[1 => 'one', 2 => "two"];
 var_dump( array_flip($input) );
 
 // combination of associative and non-associative array

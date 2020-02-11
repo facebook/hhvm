@@ -1,8 +1,8 @@
 <?hh <<__EntryPoint>> function main(): void {
-$descriptors = array(
-    0 => array('pipe', 'r'),
-    1 => array('pipe', 'w'),
-    2 => array('pipe', 'w'));
+$descriptors = darray[
+    0 => varray['pipe', 'r'],
+    1 => varray['pipe', 'w'],
+    2 => varray['pipe', 'w']];
 
 $pipes = array();
 

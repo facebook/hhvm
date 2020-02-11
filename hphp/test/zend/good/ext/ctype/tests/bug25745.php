@@ -1,9 +1,9 @@
 <?hh <<__EntryPoint>> function main(): void {
-$funcs = array(
+$funcs = varray[
     "ctype_alnum", "ctype_alpha", "ctype_cntrl", "ctype_digit",
     "ctype_graph", "ctype_lower", "ctype_print", "ctype_punct",
     "ctype_space", "ctype_upper", "ctype_xdigit"
-);
+];
 
 foreach ($funcs as $ctype_func) {
     for ($i = 0; $i < 256; $i++) {

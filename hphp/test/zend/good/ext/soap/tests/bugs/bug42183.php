@@ -11,8 +11,8 @@ function test() {
 	return new PHPObject();
 }
 
-$server = new SoapServer(NULL, array('uri' => 'http://ws.sit.com', 
-	'classmap' => array('Object' => 'PHPObject')));
+$server = new SoapServer(NULL, darray['uri' => 'http://ws.sit.com', 
+	'classmap' => darray['Object' => 'PHPObject']]);
 $server->addFunction("test");
 ob_start();
 $server->handle($req);

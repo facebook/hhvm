@@ -39,7 +39,7 @@ function list_system_locales() {
 echo "*** Testing setlocale() with an array containing list of locales ***\n";
 
 //set of locales to be used
-$common_locales = array(
+$common_locales = darray[
   "english_US"=> "en_US.utf8",
   "english_AU" => "en_AU.utf8",
   "korean_KR" => "ko_KR.utf8",
@@ -50,10 +50,10 @@ $common_locales = array(
   "japanees_JP" => "ja_JP.utf8",
   "greek_GR" => "el_GR.utf8",
   "dutch_NL" => "nl_NL.utf8"
-);
+];
 
 //set of currency symbol according to above list of locales
-$currency_symbol = array(
+$currency_symbol = darray[
   "en_US.utf8" => "USD",
   "en_AU.utf8" => "AUD",
   "ko_KR.utf8" => "KRW",
@@ -64,7 +64,7 @@ $currency_symbol = array(
   "ja_JP.utf8" => "JPY",
   "el_GR.utf8" => "EUR",
   "nl_NL.utf8" =>"EUR"
-);
+];
 
 // gather all the locales installed in the system
 $all_system_locales = list_system_locales();
@@ -73,7 +73,7 @@ $all_system_locales = list_system_locales();
 // and those known to this script ( as stored $common_locales) which can be
 // given as input to setlocale(), later verify the new locale setting by
 // checking the currency setting of the system(use localconv())
-$list_of_locales = array();
+$list_of_locales = varray[];
 foreach($common_locales as $value) {
   if( in_array($value, $all_system_locales) ) {
     $list_of_locales[] = $value;

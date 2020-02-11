@@ -413,6 +413,81 @@ TEST(Type, Specialized) {
   EXPECT_EQ(TCls, TCls - subCls);
 }
 
+TEST(Type, ArrayFitsSpec) {
+  auto const nonempty = RepoAuthType::Array::Empty::No;
+  auto const maybe_empty = RepoAuthType::Array::Empty::Maybe;
+  auto const str_rat = RepoAuthType(RepoAuthType::Tag::Str);
+  auto const int_rat = RepoAuthType(RepoAuthType::Tag::Int);
+
+  ArrayTypeTable::Builder builder;
+  auto const rat1 = builder.packed(nonempty, {int_rat, int_rat});
+  auto const rat2 = builder.packed(maybe_empty, {int_rat, str_rat});
+  auto const rat3 = builder.packedn(nonempty, int_rat);
+
+  auto const ratType1 = Type::Array(rat1);
+  auto const ratType2 = Type::Array(rat2);
+  auto const ratType3 = Type::Array(rat3);
+  auto const packedRatType1 = Type::Array(ArrayData::kPackedKind, rat1);
+  auto const packedRatType2 = Type::Array(ArrayData::kPackedKind, rat2);
+  auto const packedRatType3 = Type::Array(ArrayData::kPackedKind, rat3);
+
+  auto const varr1 = ArrayData::GetScalarArray(make_varray(2, 3));
+  auto const varr2 = ArrayData::GetScalarArray(make_varray(2, ""));
+  auto const varr3 = ArrayData::GetScalarArray(make_varray(2, 3, 5));
+
+  DArrayInit darr_init1{2};
+  darr_init1.set(make_tv<KindOfInt64>(0), 2);
+  darr_init1.set(make_tv<KindOfInt64>(1), 3);
+  auto const darr1 = ArrayData::GetScalarArray(darr_init1.toArray());
+
+  DArrayInit darr_init2{2};
+  darr_init2.set(make_tv<KindOfInt64>(17), 2);
+  darr_init2.set(make_tv<KindOfInt64>(19), 3);
+  auto const darr2 = ArrayData::GetScalarArray(darr_init2.toArray());
+
+  EXPECT_FALSE(Type::cns(staticEmptyVArray()) <= ratType1);
+  EXPECT_TRUE(Type::cns(staticEmptyVArray()) <= ratType2);
+  EXPECT_FALSE(Type::cns(staticEmptyVArray()) <= ratType3);
+  EXPECT_FALSE(Type::cns(staticEmptyVArray()) <= packedRatType1);
+  EXPECT_TRUE(Type::cns(staticEmptyVArray()) <= packedRatType2);
+  EXPECT_FALSE(Type::cns(staticEmptyVArray()) <= packedRatType3);
+
+  EXPECT_TRUE(Type::cns(varr1) <= ratType1);
+  EXPECT_FALSE(Type::cns(varr1) <= ratType2);
+  EXPECT_TRUE(Type::cns(varr1) <= ratType3);
+  EXPECT_TRUE(Type::cns(varr1) <= packedRatType1);
+  EXPECT_FALSE(Type::cns(varr1) <= packedRatType2);
+  EXPECT_TRUE(Type::cns(varr1) <= packedRatType3);
+
+  EXPECT_FALSE(Type::cns(varr2) <= ratType1);
+  EXPECT_TRUE(Type::cns(varr2) <= ratType2);
+  EXPECT_FALSE(Type::cns(varr2) <= ratType3);
+  EXPECT_FALSE(Type::cns(varr2) <= packedRatType1);
+  EXPECT_TRUE(Type::cns(varr2) <= packedRatType2);
+  EXPECT_FALSE(Type::cns(varr2) <= packedRatType3);
+
+  EXPECT_FALSE(Type::cns(varr3) <= ratType1);
+  EXPECT_FALSE(Type::cns(varr3) <= ratType2);
+  EXPECT_TRUE(Type::cns(varr3) <= ratType3);
+  EXPECT_FALSE(Type::cns(varr3) <= packedRatType1);
+  EXPECT_FALSE(Type::cns(varr3) <= packedRatType2);
+  EXPECT_TRUE(Type::cns(varr3) <= packedRatType3);
+
+  EXPECT_TRUE(Type::cns(darr1) <= ratType1);
+  EXPECT_FALSE(Type::cns(darr1) <= ratType2);
+  EXPECT_TRUE(Type::cns(darr1) <= ratType3);
+  EXPECT_FALSE(Type::cns(darr1) <= packedRatType1);
+  EXPECT_FALSE(Type::cns(darr1) <= packedRatType2);
+  EXPECT_FALSE(Type::cns(darr1) <= packedRatType3);
+
+  EXPECT_FALSE(Type::cns(darr2) <= ratType1);
+  EXPECT_FALSE(Type::cns(darr2) <= ratType2);
+  EXPECT_FALSE(Type::cns(darr2) <= ratType3);
+  EXPECT_FALSE(Type::cns(darr2) <= packedRatType1);
+  EXPECT_FALSE(Type::cns(darr2) <= packedRatType2);
+  EXPECT_FALSE(Type::cns(darr2) <= packedRatType3);
+}
+
 TEST(Type, SpecializedArrays) {
   EXPECT_FALSE(TArr.isSpecialized());
   EXPECT_FALSE(TArr.arrSpec());

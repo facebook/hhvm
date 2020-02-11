@@ -589,7 +589,7 @@ static bool arrayFitsSpec(const ArrayData* arr, const ArraySpec spec) {
   if (!arr->isVectorData()) return false;
   switch (type.tag()) {
     case A::Tag::Packed:
-      if (arr->size() != type.size()) break;
+      if (arr->size() != type.size()) return false;
       // fall through
     case A::Tag::PackedN: {
       int64_t k = 0;

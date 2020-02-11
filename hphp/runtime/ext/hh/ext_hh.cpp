@@ -91,8 +91,9 @@ bool HHVM_FUNCTION(autoload_set_paths,
 namespace {
 
 Variant autoload_symbol_to_path(const String& symbol, AutoloadMap::KindOf kind) {
-  if (!HHVM_FN(autoload_is_native)()) {
-    SystemLib::throwInvalidOperationExceptionObject("Only available if using native autoloader");
+  if (AutoloadHandler::s_instance->getAutoloadMap() == nullptr) {
+    SystemLib::throwInvalidOperationExceptionObject(
+      "Only available when autoloader is active");
   }
   auto path = AutoloadHandler::s_instance->getFile(
     symbol,

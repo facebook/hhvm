@@ -13,6 +13,7 @@ use oxidized::{
     ast_defs::{Id, ShapeFieldName},
     pos::Pos,
 };
+use std::borrow::Cow;
 
 pub enum Kind {
     Property,
@@ -22,47 +23,43 @@ pub enum Kind {
     UpperBound,
 }
 
-fn fmt_name_or_prim(tparams: &[&str], name: String) -> String {
-    if tparams.contains(&name.as_str())
-        || string_utils::is_self(&name)
-        || string_utils::is_parent(&name)
-    {
-        name
+fn fmt_name_or_prim<'a>(tparams: &[&str], name: &'a str) -> Cow<'a, str> {
+    if tparams.contains(&name) || string_utils::is_self(&name) || string_utils::is_parent(&name) {
+        name.into()
     } else {
         let id = class::Type::from_ast_name(&name);
         if string_utils::is_xhp(&string_utils::strip_ns(&name)) {
-            id.to_unmangled_str()
+            id.to_unmangled_str().into()
         } else {
-            id.into()
+            name.into()
         }
     }
 }
 
-pub fn prim_to_string(prim: &Tprim) -> String {
+pub fn prim_to_string(prim: &Tprim) -> Cow<'static, str> {
     use Tprim::*;
-    let res = match prim {
-        Tnull => typehints::NULL,
-        Tvoid => typehints::VOID,
-        Tint => typehints::INT,
-        Tbool => typehints::BOOL,
-        Tfloat => typehints::FLOAT,
-        Tstring => typehints::STRING,
-        Tresource => typehints::RESOURCE,
-        Tnum => typehints::NUM,
-        Tarraykey => typehints::ARRAYKEY,
-        Tnoreturn => typehints::NORETURN,
-        Tatom(s) => return format!(":@{}", s),
-    };
-    String::from(res)
+    match prim {
+        Tnull => typehints::NULL.into(),
+        Tvoid => typehints::VOID.into(),
+        Tint => typehints::INT.into(),
+        Tbool => typehints::BOOL.into(),
+        Tfloat => typehints::FLOAT.into(),
+        Tstring => typehints::STRING.into(),
+        Tresource => typehints::RESOURCE.into(),
+        Tnum => typehints::NUM.into(),
+        Tarraykey => typehints::ARRAYKEY.into(),
+        Tnoreturn => typehints::NORETURN.into(),
+        Tatom(s) => format!(":@{}", s).into(),
+    }
 }
 
-pub fn fmt_hint(tparams: &[&str], strip_tparams: bool, hint: Hint) -> Result<String> {
+pub fn fmt_hint(tparams: &[&str], strip_tparams: bool, hint: &Hint) -> Result<String> {
     let Hint(_, h) = hint;
-    Ok(match *h {
+    Ok(match h.as_ref() {
         Happly(Id(_, id), args) => {
             let name = fmt_name_or_prim(tparams, id);
             if args.is_empty() || strip_tparams {
-                name
+                name.to_string()
             } else {
                 format!("{}<{}>", name, fmt_hints(tparams, args)?)
             }
@@ -76,19 +73,19 @@ pub fn fmt_hint(tparams: &[&str], strip_tparams: bool, hint: Hint) -> Result<Str
             } else {
                 format!(
                     "(function ({}): {})",
-                    fmt_hints(tparams, hf.param_tys)?,
-                    fmt_hint(tparams, false, hf.return_ty)?
+                    fmt_hints(tparams, &hf.param_tys)?,
+                    fmt_hint(tparams, false, &hf.return_ty)?
                 )
             }
         }
         Haccess(Hint(_, hint), accesses) => {
-            if let Happly(Id(_, id), _) = *hint {
+            if let Happly(Id(_, id), _) = hint.as_ref() {
                 format!(
                     "{}::{}",
                     fmt_name_or_prim(tparams, id),
                     accesses
-                        .into_iter()
-                        .map(|Id(_, s)| s)
+                        .iter()
+                        .map(|Id(_, s)| s.as_str())
                         .collect::<Vec<_>>()
                         .join("::")
                 )
@@ -99,76 +96,75 @@ pub fn fmt_hint(tparams: &[&str], strip_tparams: bool, hint: Hint) -> Result<Str
             }
         }
         Hoption(hint) => {
-            let Hint(p, h) = hint;
-            if let Hsoft(t) = *h {
+            let Hint(_, h) = hint;
+            if let Hsoft(t) = h.as_ref() {
                 // Follow HHVM order: soft -> option
                 // Can we fix this eventually?
                 format!("@?{}", fmt_hint(tparams, false, t)?)
             } else {
-                format!("?{}", fmt_hint(tparams, false, Hint(p, h))?)
+                format!("?{}", fmt_hint(tparams, false, hint)?)
             }
         }
         // No guarantee that this is in the correct order when using map instead of list
         //  TODO: Check whether shape fields need to retain order *)
         Hshape(NastShapeInfo { field_map, .. }) => {
-            let fmt_field_name = |name| match name {
-                ShapeFieldName::SFlitInt((_, s)) => s,
+            let fmt_field_name = |name: &ShapeFieldName| match name {
+                ShapeFieldName::SFlitInt((_, s)) => s.to_owned(),
                 ShapeFieldName::SFlitStr((_, s)) => format!("'{}'", s),
                 ShapeFieldName::SFclassConst(Id(_, cid), (_, s)) => {
-                    format!("{}::{}", fmt_name_or_prim(tparams, cid), s)
+                    format!("{}::{}", fmt_name_or_prim(tparams, &cid), s)
                 }
             };
-            let fmt_field = |field: ShapeFieldInfo| {
+            let fmt_field = |field: &ShapeFieldInfo| {
                 let prefix = if field.optional { "?" } else { "" };
                 Ok(format!(
                     "{}{}=>{}",
                     prefix,
-                    fmt_field_name(field.name),
-                    fmt_hint(tparams, false, field.hint)?
+                    fmt_field_name(&field.name),
+                    fmt_hint(tparams, false, &field.hint)?
                 ))
             };
             let shape_fields = field_map
-                .into_iter()
+                .iter()
                 .map(fmt_field)
                 .collect::<Result<Vec<_>>>()
                 .map(|v| v.join(", "))?;
             string_utils::prefix_namespace("HH", &format!("shape({})", shape_fields).as_str())
         }
-        Htuple(hints) => format!("({})", fmt_hints(tparams, hints.to_owned())?),
-        Hlike(t) => format!("~{}", fmt_hint(tparams, false, t.to_owned())?),
-        Hsoft(t) => format!("@{}", fmt_hint(tparams, false, t.to_owned())?),
-        HpuAccess(h, Id(_, id)) => format!("({}:@{})", fmt_hint(tparams, false, h.to_owned())?, id),
+        Htuple(hints) => format!("({})", fmt_hints(tparams, hints)?),
+        Hlike(t) => format!("~{}", fmt_hint(tparams, false, t)?),
+        Hsoft(t) => format!("@{}", fmt_hint(tparams, false, t)?),
+        HpuAccess(h, Id(_, id)) => format!("({}:@{})", fmt_hint(tparams, false, h)?, id),
         Herr | Hany => {
             return Err(Unrecoverable(
                 "This should be an error caught in naming".into(),
             ))
         }
-        h => fmt_name_or_prim(tparams, hint_to_string(&h)),
+        h => fmt_name_or_prim(tparams, &hint_to_string(&h)).into(),
     })
 }
 
-fn hint_to_string(h: &Hint_) -> String {
-    let res = match h {
-        Hprim(p) => return prim_to_string(p),
-        Hmixed | Hunion(_) | Hintersection(_) => typehints::MIXED,
-        Hnonnull => typehints::NONNULL,
-        Habstr(s) => s,
-        Harray(_, _) => typehints::ARRAY,
-        Hdarray(_, _) => typehints::DARRAY,
-        Hvarray(_) => typehints::VARRAY,
-        HvarrayOrDarray(_, _) => typehints::VARRAY_OR_DARRAY,
-        Hthis => typehints::THIS,
-        Hdynamic => typehints::DYNAMIC,
-        Hnothing => typehints::NOTHING,
+fn hint_to_string<'a>(h: &'a Hint_) -> Cow<'a, str> {
+    match h {
+        Hprim(p) => prim_to_string(p),
+        Hmixed | Hunion(_) | Hintersection(_) => typehints::MIXED.into(),
+        Hnonnull => typehints::NONNULL.into(),
+        Habstr(s) => s.into(),
+        Harray(_, _) => typehints::ARRAY.into(),
+        Hdarray(_, _) => typehints::DARRAY.into(),
+        Hvarray(_) => typehints::VARRAY.into(),
+        HvarrayOrDarray(_, _) => typehints::VARRAY_OR_DARRAY.into(),
+        Hthis => typehints::THIS.into(),
+        Hdynamic => typehints::DYNAMIC.into(),
+        Hnothing => typehints::NOTHING.into(),
         _ => panic!("shouldn't invoke this function"),
-    };
-    String::from(res)
+    }
 }
 
-fn fmt_hints(tparams: &[&str], hints: Vec<Hint>) -> Result<String> {
+fn fmt_hints(tparams: &[&str], hints: &Vec<Hint>) -> Result<String> {
     hints
-        .into_iter()
-        .map(|h| fmt_hint(tparams, false, h))
+        .iter()
+        .map(|h| fmt_hint(tparams, false, &h))
         .collect::<Result<Vec<_>>>()
         .map(|v| v.join(", "))
 }
@@ -276,9 +272,9 @@ fn hint_to_type_constraint(
                 }
                 _ => (),
             };
-            happly_helper(tparams, kind, pos, s.to_string()).unwrap()
+            happly_helper(tparams, kind, pos, s).unwrap()
         }
-        h => happly_helper(tparams, kind, pos, hint_to_string(h)).unwrap(),
+        h => happly_helper(tparams, kind, pos, &hint_to_string(h)).unwrap(),
     })
 }
 
@@ -308,29 +304,24 @@ fn make_tc_with_flags_if_non_empty_flags(
     })
 }
 
-fn happly_helper(
-    tparams: &[&str],
-    kind: &Kind,
-    pos: &Pos,
-    name: String,
-) -> Result<constraint::Type> {
+fn happly_helper(tparams: &[&str], kind: &Kind, pos: &Pos, name: &str) -> Result<constraint::Type> {
     use constraint::{Flags, Type};
-    if tparams.contains(&name.as_str()) {
+    if tparams.contains(&name) {
         Ok(Type::make_with_raw_str(
             "",
             Flags::EXTENDED_HINT | Flags::TYPE_VAR,
         ))
-    } else if string_utils::is_self(&name) || string_utils::is_parent(&name) {
+    } else if string_utils::is_self(&name) || string_utils::is_parent(name) {
         if is_typedef(&kind) {
             Err(emit_fatal::raise_fatal_runtime(
                 pos,
                 format!("Cannot access {} when no class scope is active", name),
             ))
         } else {
-            Ok(Type::make(Some(name), Flags::empty()))
+            Ok(Type::make(Some(name.to_owned()), Flags::empty()))
         }
     } else {
-        let name: String = class::Type::from_ast_name(&name).into();
+        let name: String = class::Type::from_ast_name(name).into();
         Ok(Type::make(Some(name), Flags::empty()))
     }
 }
@@ -354,7 +345,7 @@ fn make_type_info(
     tc_name: Option<String>,
     tc_flags: constraint::Flags,
 ) -> Result<Info> {
-    let type_info_user_type = Some(fmt_hint(tparams, false, h.to_owned())?);
+    let type_info_user_type = Some(fmt_hint(tparams, false, h)?);
     let type_info_type_constraint = constraint::Type::make(tc_name, tc_flags);
     Ok(Info::make(type_info_user_type, type_info_type_constraint))
 }

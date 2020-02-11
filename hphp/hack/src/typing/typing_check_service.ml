@@ -108,10 +108,10 @@ let handle_exn_as_error : type res. Pos.t -> (unit -> res option) -> res option
 
 let type_fun (ctx : Provider_context.t) (fn : Relative_path.t) (x : string) :
     (Tast.def * Typing_inference_env.t_global_with_pos) option =
-  match Ast_provider.find_fun_in_file ~full:true fn x with
+  match Ast_provider.find_fun_in_file ~full:true ctx fn x with
   | Some f ->
     handle_exn_as_error f.Aast.f_span (fun () ->
-        let fun_ = Naming.fun_ f in
+        let fun_ = Naming.fun_ ctx f in
         Nast_check.def ctx (Aast.Fun fun_);
         let def_opt =
           Typing.fun_def ctx fun_
@@ -123,10 +123,10 @@ let type_fun (ctx : Provider_context.t) (fn : Relative_path.t) (x : string) :
 
 let type_class (ctx : Provider_context.t) (fn : Relative_path.t) (x : string) :
     (Tast.def * Typing_inference_env.t_global_with_pos list) option =
-  match Ast_provider.find_class_in_file ~full:true fn x with
+  match Ast_provider.find_class_in_file ~full:true ctx fn x with
   | Some cls ->
     handle_exn_as_error cls.Aast.c_span (fun () ->
-        let class_ = Naming.class_ cls in
+        let class_ = Naming.class_ ctx cls in
         Nast_check.def ctx (Aast.Class class_);
         let def_opt =
           Typing.class_def ctx class_
@@ -140,10 +140,10 @@ let type_class (ctx : Provider_context.t) (fn : Relative_path.t) (x : string) :
 let type_record_def
     (ctx : Provider_context.t) (fn : Relative_path.t) (x : string) :
     Tast.def option =
-  match Ast_provider.find_record_def_in_file ~full:true fn x with
+  match Ast_provider.find_record_def_in_file ~full:true ctx fn x with
   | Some rd ->
     handle_exn_as_error rd.Aast.rd_span (fun () ->
-        let rd = Naming.record_def rd in
+        let rd = Naming.record_def ctx rd in
         Nast_check.def ctx (Aast.RecordDef rd);
 
         let def = Aast.RecordDef (Typing.record_def_def ctx rd) in
@@ -153,10 +153,10 @@ let type_record_def
 
 let check_typedef (ctx : Provider_context.t) (fn : Relative_path.t) (x : string)
     : Tast.def option =
-  match Ast_provider.find_typedef_in_file ~full:true fn x with
+  match Ast_provider.find_typedef_in_file ~full:true ctx fn x with
   | Some t ->
     handle_exn_as_error Pos.none (fun () ->
-        let typedef = Naming.typedef t in
+        let typedef = Naming.typedef ctx t in
         Nast_check.def ctx (Aast.Typedef typedef);
         let ret = Typing.typedef_def ctx typedef in
         Typing_variance.typedef ctx x;
@@ -167,11 +167,11 @@ let check_typedef (ctx : Provider_context.t) (fn : Relative_path.t) (x : string)
 
 let check_const (ctx : Provider_context.t) (fn : Relative_path.t) (x : string) :
     Tast.def option =
-  match Ast_provider.find_gconst_in_file ~full:true fn x with
+  match Ast_provider.find_gconst_in_file ~full:true ctx fn x with
   | None -> None
   | Some cst ->
     handle_exn_as_error cst.Aast.cst_span (fun () ->
-        let cst = Naming.global_const cst in
+        let cst = Naming.global_const ctx cst in
         Nast_check.def ctx (Aast.Constant cst);
         let def = Aast.Constant (Typing.gconst_def ctx cst) in
         Tast_check.def ctx def;
@@ -196,7 +196,7 @@ let process_file
     (errors : Errors.t)
     (file : check_file_computation) : process_file_results =
   let fn = file.path in
-  let ast = Ast_provider.get_ast ~full:true fn in
+  let ast = Ast_provider.get_ast ~full:true ctx fn in
   let opts =
     {
       ctx.Provider_context.tcopt with

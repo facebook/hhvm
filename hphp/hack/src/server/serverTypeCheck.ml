@@ -400,13 +400,14 @@ let declare_names env fast_parsed =
           | Some v -> Relative_path.Map.add acc k v))
   in
   remove_decls env fast_parsed;
+  let ctx = Provider_utils.ctx_from_server_env env in
   let (errorl, failed_naming) =
     Relative_path.Map.fold
       fast_parsed
       ~f:
         begin
           fun k v (errorl, failed) ->
-          let (errorl', failed') = Naming_global.ndecl_file k v in
+          let (errorl', failed') = Naming_global.ndecl_file ctx k v in
           let errorl = Errors.merge errorl' errorl in
           let failed = Relative_path.Set.union failed' failed in
           (errorl, failed)

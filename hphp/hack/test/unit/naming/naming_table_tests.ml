@@ -108,12 +108,15 @@ let run_naming_table_test f =
         Naming_table.(save_results.files_added + save_results.symbols_added)
         "Expected to add eight rows (four files and four symbols)";
       let backed_naming_table = Naming_table.load_from_sqlite db_name in
-      f ~unbacked_naming_table ~backed_naming_table ~db_name;
+      let ctx =
+        Provider_context.empty_for_test ~tcopt:TypecheckerOptions.default
+      in
+      f ~ctx ~unbacked_naming_table ~backed_naming_table ~db_name;
       true)
 
 let test_get_pos () =
   run_naming_table_test
-    (fun ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_ ->
+    (fun ~ctx:_ ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_ ->
       Types_pos_asserter.assert_option_equals
         (Some
            ( FileInfo.File (FileInfo.Class, Relative_path.from_root "foo.php"),
@@ -138,26 +141,26 @@ let test_get_pos () =
 
 let test_get_canon_name () =
   run_naming_table_test
-    (fun ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_ ->
+    (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_ ->
       (* Since we're parsing but not naming, the canon heap must fall back to the
        files on disk, which is the situation we'd be in when loading from a
        saved state. *)
       Asserter.String_asserter.assert_option_equals
         (Some "\\Foo")
-        (Naming_table.Types.get_canon_name "\\foo")
+        (Naming_table.Types.get_canon_name ctx "\\foo")
         "Check for class canon name";
       Asserter.String_asserter.assert_option_equals
         (Some "\\bar")
-        (Naming_table.Funs.get_canon_name "\\bar")
+        (Naming_table.Funs.get_canon_name ctx "\\bar")
         "Check for function canon name";
       Asserter.String_asserter.assert_option_equals
         (Some "\\Baz")
-        (Naming_table.Types.get_canon_name "\\baz")
+        (Naming_table.Types.get_canon_name ctx "\\baz")
         "Check for typedef canon name")
 
 let test_remove () =
   run_naming_table_test
-    (fun ~unbacked_naming_table ~backed_naming_table ~db_name:_ ->
+    (fun ~ctx:_ ~unbacked_naming_table ~backed_naming_table ~db_name:_ ->
       let foo_path = Relative_path.from_root "foo.php" in
       assert (
         Naming_table.get_file_info unbacked_naming_table foo_path
@@ -181,7 +184,7 @@ let test_remove () =
 
 let test_get_sqlite_paths () =
   run_naming_table_test
-    (fun ~unbacked_naming_table:_ ~backed_naming_table ~db_name ->
+    (fun ~ctx:_ ~unbacked_naming_table:_ ~backed_naming_table ~db_name ->
       Asserter.String_asserter.assert_option_equals
         (Some db_name)
         (Naming_table.get_reverse_naming_fallback_path ())
@@ -194,7 +197,7 @@ let test_get_sqlite_paths () =
 
 let test_local_changes () =
   run_naming_table_test
-    (fun ~unbacked_naming_table:_ ~backed_naming_table ~db_name ->
+    (fun ~ctx:_ ~unbacked_naming_table:_ ~backed_naming_table ~db_name ->
       let a_name = "CONST_IN_A" in
 
       let a_file = Relative_path.from_root "a.php" in

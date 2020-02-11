@@ -143,6 +143,9 @@ let server_setup_for_deferral_tests () =
   let naming_table = Naming_table.create file_infos in
   (* Construct the reverse naming table (symbols-to-files) *)
   let fast = Naming_table.to_fast naming_table in
+  let ctx =
+    Provider_context.empty_for_test ~tcopt:(Global_naming_options.get ())
+  in
   Relative_path.Map.iter fast ~f:(fun name info ->
       let {
         FileInfo.n_classes = classes;
@@ -154,6 +157,7 @@ let server_setup_for_deferral_tests () =
         info
       in
       Naming_global.ndecl_file_fast
+        ctx
         name
         ~funs
         ~classes
@@ -166,9 +170,6 @@ let server_setup_for_deferral_tests () =
     two computations:
       - a declaration of \Bar
       - a (deferred) type check of \Foo *)
-  let ctx =
-    Provider_context.empty_for_test ~tcopt:(Global_naming_options.get ())
-  in
   (ctx, foo_path, foo_contents)
 
 (* In this test, we wish to establish that we enable deferring type checking
@@ -285,9 +286,9 @@ let test_compute_tast_counting () =
         (Telemetry_test_utils.int_exn telemetry "decl_accessors.count")
         "There should be 58 decl_accessor_count for local_memory provider";
       Asserter.Int_asserter.assert_equals
-        2
+        1
         (Telemetry_test_utils.int_exn telemetry "disk_cat.count")
-        "There should be 2 disk_cat_count for local_memory_provider");
+        "There should be 1 disk_cat_count for local_memory_provider");
 
   true
 

@@ -177,12 +177,10 @@ let go_comments_for_symbol_ctx
 
 (* Locate a symbol and return file, line, column, and base_class *)
 let go_locate_symbol
-    ~(env : ServerEnv.env) ~(symbol : string) ~(kind : SearchUtils.si_kind) :
-    DocblockService.dbs_symbol_location_result =
-  (* We may need env in the future, so avoid the warning *)
-  let _ = env in
+    ~(ctx : Provider_context.t) ~(symbol : string) ~(kind : SearchUtils.si_kind)
+    : DocblockService.dbs_symbol_location_result =
   (* Look up this class name *)
-  match SymbolIndex.get_position_for_symbol symbol kind with
+  match SymbolIndex.get_position_for_symbol ctx symbol kind with
   | None -> None
   | Some (path, line, column) ->
     let filename = Relative_path.to_absolute path in
@@ -252,10 +250,8 @@ let rec go_docblock_ctx
 
 (* Locate a symbol and return its docblock, no extra steps *)
 let go_docblock_for_symbol
-    ~(env : ServerEnv.env)
-    ~(ctx : Provider_context.t)
-    ~(symbol : string)
-    ~(kind : SearchUtils.si_kind) : DocblockService.result =
+    ~(ctx : Provider_context.t) ~(symbol : string) ~(kind : SearchUtils.si_kind)
+    : DocblockService.result =
   (* Shortcut for namespaces, since they don't have locations *)
   if kind = SearchUtils.SI_Namespace then
     let namespace_declaration = Printf.sprintf "namespace %s;" symbol in
@@ -264,7 +260,7 @@ let go_docblock_for_symbol
     let txt = Printf.sprintf "Hack language keyword: %s;" symbol in
     [DocblockService.HackSnippet txt]
   else
-    match go_locate_symbol ~env ~symbol ~kind with
+    match go_locate_symbol ~ctx ~symbol ~kind with
     | None ->
       let msg =
         Printf.sprintf

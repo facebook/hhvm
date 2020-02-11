@@ -12,21 +12,23 @@
  *)
 
 module GEnv : sig
-  val get_full_pos : FileInfo.pos * string -> Pos.t * string
+  val get_full_pos :
+    Provider_context.t -> FileInfo.pos * string -> Pos.t * string
 
-  val type_pos : string -> Pos.t option
+  val type_pos : Provider_context.t -> string -> Pos.t option
 
-  val type_canon_name : string -> string option
+  val type_canon_name : Provider_context.t -> string -> string option
 
-  val type_info : string -> (Pos.t * Naming_table.type_of_type) option
+  val type_info :
+    Provider_context.t -> string -> (Pos.t * Naming_table.type_of_type) option
 
-  val fun_pos : string -> Pos.t option
+  val fun_pos : Provider_context.t -> string -> Pos.t option
 
-  val fun_canon_name : string -> string option
+  val fun_canon_name : Provider_context.t -> string -> string option
 
-  val typedef_pos : string -> Pos.t option
+  val typedef_pos : Provider_context.t -> string -> Pos.t option
 
-  val gconst_pos : string -> Pos.t option
+  val gconst_pos : Provider_context.t -> string -> Pos.t option
 end
 
 (* Function building the original naming environment.
@@ -36,6 +38,7 @@ end
  * It all the entities passed as parameters and adds them to the shared heap.
  *)
 val make_env :
+  Provider_context.t ->
   funs:FileInfo.id list ->
   classes:FileInfo.id list ->
   record_defs:FileInfo.id list ->
@@ -53,6 +56,7 @@ val remove_decls :
   unit
 
 val ndecl_file_fast :
+  Provider_context.t ->
   Relative_path.t ->
   funs:SSet.t ->
   classes:SSet.t ->
@@ -61,4 +65,8 @@ val ndecl_file_fast :
   consts:SSet.t ->
   unit
 
-val ndecl_file : Relative_path.t -> FileInfo.t -> Errors.t * Relative_path.Set.t
+val ndecl_file :
+  Provider_context.t ->
+  Relative_path.t ->
+  FileInfo.t ->
+  Errors.t * Relative_path.Set.t

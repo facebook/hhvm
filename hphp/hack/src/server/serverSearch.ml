@@ -30,7 +30,7 @@ let result_to_json res =
 
 let re_colon_colon = Str.regexp "::"
 
-let go query_text type_ (sienv : SearchUtils.si_env) : SearchUtils.result =
+let go ctx query_text type_ (sienv : SearchUtils.si_env) : SearchUtils.result =
   let max_results = 100 in
   let start_time = Unix.gettimeofday () in
   let kind_filter = SearchUtils.string_to_kind type_ in
@@ -55,7 +55,10 @@ let go query_text type_ (sienv : SearchUtils.si_env) : SearchUtils.result =
       begin
         match class_ with
         | Some name ->
-          ClassMethodSearch.query_class_methods (Utils.add_ns name) method_query
+          ClassMethodSearch.query_class_methods
+            ctx
+            (Utils.add_ns name)
+            method_query
         | None ->
           (* When we can't find a class with a name similar to the given one,
            just return no search results. *)
@@ -70,7 +73,7 @@ let go query_text type_ (sienv : SearchUtils.si_env) : SearchUtils.result =
           ~context
           ~kind_filter
       in
-      AutocompleteService.add_position_to_results temp_results
+      AutocompleteService.add_position_to_results ctx temp_results
   in
   SymbolIndex.log_symbol_index_search
     ~sienv

@@ -12,22 +12,22 @@ open ServerCommandTypes.Symbol_info_service
 
 (* This module dumps all the symbol info(like fun-calls) in input files *)
 
-let recheck_naming filename_l =
+let recheck_naming ctx filename_l =
   List.iter filename_l (fun file ->
       Errors.ignore_ (fun () ->
           (* We only need to name to find references to locals *)
-          List.iter (Ast_provider.get_ast file) (function
+          List.iter (Ast_provider.get_ast ctx file) (function
               | Aast.Fun f ->
-                let _ = Naming.fun_ f in
+                let _ = Naming.fun_ ctx f in
                 ()
               | Aast.Class c ->
-                let _ = Naming.class_ c in
+                let _ = Naming.class_ ctx c in
                 ()
               | _ -> ())))
 
 let helper ctx acc filetuple_l =
   let filename_l = List.rev_map filetuple_l fst in
-  recheck_naming filename_l;
+  recheck_naming ctx filename_l;
   let tasts =
     List.map filename_l ~f:(fun path ->
         let (ctx, entry) =

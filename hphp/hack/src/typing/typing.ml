@@ -645,7 +645,7 @@ and fun_def ctx f :
       Reason.expr_display_id_map := IMap.empty;
       let pos = fst f.f_name in
       let decl_header = get_decl_function_header env (snd f.f_name) in
-      let nb = TNBody.func_body f in
+      let nb = TNBody.func_body ctx f in
       add_decl_errors
         (Option.map
            (Env.get_fun env (snd f.f_name))
@@ -7686,7 +7686,7 @@ and class_def ctx c =
   let tc = Env.get_class env (snd c.c_name) in
   let env = Env.set_env_pessimize env in
   add_decl_errors Option.(map tc (fun tc -> value_exn (Cls.decl_errors tc)));
-  let c = TNBody.class_meth_bodies c in
+  let c = TNBody.class_meth_bodies ctx c in
   NastCheck.class_ env c;
   NastInitCheck.class_ env c;
   match tc with

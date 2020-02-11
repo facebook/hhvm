@@ -173,15 +173,15 @@ let verify_call_targs env expr_pos decl_pos tparams targs =
     List.iter targs ~f:check_targ_hints );
   verify_targs env expr_pos decl_pos tparams targs
 
-let get_class_by_name classname =
+let get_class_by_name ctx classname =
   match Naming_table.Types.get_filename classname with
   | Some filename ->
     Ide_parser_cache.with_ide_cache @@ fun () ->
-    Ast_provider.find_class_in_file filename classname
+    Ast_provider.find_class_in_file ctx filename classname
   | _ -> None
 
-let get_static_method_by_name class_name method_name =
-  match get_class_by_name class_name with
+let get_static_method_by_name ctx class_name method_name =
+  match get_class_by_name ctx class_name with
   | Some cls ->
     List.hd
     @@ List.filter cls.Nast.c_methods (fun m ->
@@ -221,7 +221,12 @@ let handler =
               in
               (match Cls.get_smethod cls fname with
               | Some ce_m ->
-                (match get_static_method_by_name ce_m.ce_origin fname with
+                (match
+                   get_static_method_by_name
+                     (Tast_env.get_ctx env)
+                     ce_m.ce_origin
+                     fname
+                 with
                 | Some m ->
                   let check_type_hint = function
                     | (_, Some (t_pos, Habstr t))

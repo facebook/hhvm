@@ -11,21 +11,21 @@
  * Transform all the local names into a unique identifier
  *)
 
-val program : Nast.program -> Nast.program
+val program : Provider_context.t -> Nast.program -> Nast.program
 
 (* Solves the local names within a function *)
-val fun_ : Nast.fun_ -> Nast.fun_
+val fun_ : Provider_context.t -> Nast.fun_ -> Nast.fun_
 
 (* Solves the local names of a class *)
-val class_ : Nast.class_ -> Nast.class_
+val class_ : Provider_context.t -> Nast.class_ -> Nast.class_
 
-val record_def : Nast.record_def -> Nast.record_def
+val record_def : Provider_context.t -> Nast.record_def -> Nast.record_def
 
 (* Solves the local names in an typedef *)
-val typedef : Nast.typedef -> Nast.typedef
+val typedef : Provider_context.t -> Nast.typedef -> Nast.typedef
 
 (* Solves the local names in a global constant definition *)
-val global_const : Nast.gconst -> Nast.gconst
+val global_const : Provider_context.t -> Nast.gconst -> Nast.gconst
 
 module type GetLocals = sig
   type env = {
@@ -40,8 +40,8 @@ end
 
 module Make (GetLocals : GetLocals) : sig
   (* Solves the local names in a function body *)
-  val func_body : Nast.fun_ -> Nast.func_body
+  val func_body : Provider_context.t -> Nast.fun_ -> Nast.func_body
 
   (* Solves the local names in class method bodies *)
-  val class_meth_bodies : Nast.class_ -> Nast.class_
+  val class_meth_bodies : Provider_context.t -> Nast.class_ -> Nast.class_
 end

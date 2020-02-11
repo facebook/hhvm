@@ -10,6 +10,7 @@
 val find_class_in_file :
   ?full:bool ->
   ?case_insensitive:bool ->
+  Provider_context.t ->
   Relative_path.t ->
   string ->
   Nast.class_ option
@@ -17,6 +18,7 @@ val find_class_in_file :
 val find_record_def_in_file :
   ?full:bool ->
   ?case_insensitive:bool ->
+  Provider_context.t ->
   Relative_path.t ->
   string ->
   Nast.record_def option
@@ -24,6 +26,7 @@ val find_record_def_in_file :
 val find_fun_in_file :
   ?full:bool ->
   ?case_insensitive:bool ->
+  Provider_context.t ->
   Relative_path.t ->
   string ->
   Nast.fun_ option
@@ -31,14 +34,20 @@ val find_fun_in_file :
 val find_typedef_in_file :
   ?full:bool ->
   ?case_insensitive:bool ->
+  Provider_context.t ->
   Relative_path.t ->
   string ->
   Nast.typedef option
 
 val find_gconst_in_file :
-  ?full:bool -> Relative_path.t -> string -> Nast.gconst option
+  ?full:bool ->
+  Provider_context.t ->
+  Relative_path.t ->
+  string ->
+  Nast.gconst option
 
-val get_ast : ?full:bool -> Relative_path.t -> Nast.program
+val get_ast :
+  ?full:bool -> Provider_context.t -> Relative_path.t -> Nast.program
 
 val parse_file_input :
   ?full:bool ->

@@ -26,7 +26,6 @@ val go_docblock_ctx :
 
 (** Simplified one-step symbol/docblock *)
 val go_docblock_for_symbol :
-  env:ServerEnv.env ->
   ctx:Provider_context.t ->
   symbol:string ->
   kind:SearchUtils.si_kind ->

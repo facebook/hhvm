@@ -33,11 +33,12 @@ let autocomplete_identifier : (Pos.t * string) option ref = ref None
 (*
  * Take the results, look them up, and add file position information.
  *)
-let add_position_to_results (raw_results : SearchUtils.si_results) :
+let add_position_to_results
+    (ctx : Provider_context.t) (raw_results : SearchUtils.si_results) :
     SearchUtils.result =
   SearchUtils.(
     List.filter_map raw_results ~f:(fun r ->
-        match SymbolIndex.get_pos_for_item_opt r with
+        match SymbolIndex.get_pos_for_item_opt ctx r with
         | Some pos ->
           Some { name = r.si_fullname; pos; result_type = r.si_kind }
         | None -> None))

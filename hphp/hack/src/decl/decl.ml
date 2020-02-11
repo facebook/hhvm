@@ -234,7 +234,7 @@ let get_class_parents_and_traits env shallow_class =
 (*****************************************************************************)
 
 let rec ifun_decl (ctx : Provider_context.t) (f : Nast.fun_) =
-  let f = Errors.ignore_ (fun () -> Naming.fun_ f) in
+  let f = Errors.ignore_ (fun () -> Naming.fun_ ctx f) in
   fun_decl ctx f
 
 and fun_decl ctx f =
@@ -441,7 +441,7 @@ and class_type_decl class_env hint =
       match Naming_table.Types.get_filename_and_kind cid with
       | Some (fn, Naming_table.TClass) when not (Decl_heap.Classes.mem cid) ->
         (* We are supposed to redeclare the class *)
-        let class_opt = Ast_provider.find_class_in_file fn cid in
+        let class_opt = Ast_provider.find_class_in_file class_env.ctx fn cid in
         Errors.run_in_context fn Errors.Decl (fun () ->
             Option.Monad_infix.(
               class_opt
@@ -1077,8 +1077,8 @@ let record_def_decl rd : Typing_defs.record_def_type =
     rdt_errors = None;
   }
 
-let type_record_def_naming_and_decl (_ctx : Provider_context.t) rd =
-  let rd = Errors.ignore_ (fun () -> Naming.record_def rd) in
+let type_record_def_naming_and_decl (ctx : Provider_context.t) rd =
+  let rd = Errors.ignore_ (fun () -> Naming.record_def ctx rd) in
   let (errors, tdecl) = Errors.do_ (fun () -> record_def_decl rd) in
   record_record_def (snd rd.rd_name);
   let tdecl = { tdecl with rdt_errors = Some errors } in
@@ -1126,7 +1126,7 @@ and typedef_decl ctx tdef =
   { td_vis; td_tparams; td_constraint; td_type; td_pos; td_decl_errors }
 
 and type_typedef_naming_and_decl ctx tdef =
-  let tdef = Errors.ignore_ (fun () -> Naming.typedef tdef) in
+  let tdef = Errors.ignore_ (fun () -> Naming.typedef ctx tdef) in
   let (errors, tdecl) = Errors.do_ (fun () -> typedef_decl ctx tdef) in
   record_typedef (snd tdef.t_name);
   let tdecl = { tdecl with td_decl_errors = Some errors } in
@@ -1152,7 +1152,7 @@ let const_decl ctx cst =
     | None -> mk (Reason.Rwitness cst_pos, Typing_defs.make_tany ()))
 
 let iconst_decl ctx cst =
-  let cst = Errors.ignore_ (fun () -> Naming.global_const cst) in
+  let cst = Errors.ignore_ (fun () -> Naming.global_const ctx cst) in
   let (errors, hint_ty) = Errors.do_ (fun () -> const_decl ctx cst) in
   record_const (snd cst.cst_name);
   Decl_heap.GConsts.add (snd cst.cst_name) (hint_ty, errors);
@@ -1181,7 +1181,7 @@ let rec name_and_declare_types_program ctx prog =
         ())
 
 let make_env ctx fn =
-  let ast = Ast_provider.get_ast fn in
+  let ast = Ast_provider.get_ast ctx fn in
   name_and_declare_types_program ctx ast
 
 let err_not_found file name =
@@ -1191,28 +1191,28 @@ let err_not_found file name =
   raise (Decl_not_found err_str)
 
 let declare_class_in_file ctx file name =
-  match Ast_provider.find_class_in_file file name with
+  match Ast_provider.find_class_in_file ctx file name with
   | Some cls ->
     let class_env = { ctx; stack = SSet.empty } in
     class_decl_if_missing class_env cls
   | None -> err_not_found file name
 
 let declare_fun_in_file ctx file name =
-  match Ast_provider.find_fun_in_file file name with
+  match Ast_provider.find_fun_in_file ctx file name with
   | Some f -> ifun_decl ctx f
   | None -> err_not_found file name
 
 let declare_record_def_in_file ctx file name =
-  match Ast_provider.find_record_def_in_file file name with
+  match Ast_provider.find_record_def_in_file ctx file name with
   | Some rd -> type_record_def_naming_and_decl ctx rd
   | None -> err_not_found file name
 
 let declare_typedef_in_file ctx file name =
-  match Ast_provider.find_typedef_in_file file name with
+  match Ast_provider.find_typedef_in_file ctx file name with
   | Some t -> type_typedef_naming_and_decl ctx t
   | None -> err_not_found file name
 
 let declare_const_in_file ctx file name =
-  match Ast_provider.find_gconst_in_file file name with
+  match Ast_provider.find_gconst_in_file ctx file name with
   | Some cst -> iconst_decl ctx cst
   | None -> err_not_found file name

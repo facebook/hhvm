@@ -1437,7 +1437,7 @@ module Types = struct
 
   let is_defined id = get_pos id <> None
 
-  let get_canon_name id =
+  let get_canon_name ctx id =
     Core_kernel.(
       let map_result (path, entry_type) =
         let path_str = Relative_path.S.to_string path in
@@ -1445,7 +1445,7 @@ module Types = struct
         | TClass ->
           begin
             match
-              Ast_provider.find_class_in_file ~case_insensitive:true path id
+              Ast_provider.find_class_in_file ~case_insensitive:true ctx path id
             with
             | Some cls -> Some (snd cls.Aast.c_name)
             | None ->
@@ -1458,7 +1458,11 @@ module Types = struct
         | TTypedef ->
           begin
             match
-              Ast_provider.find_typedef_in_file ~case_insensitive:true path id
+              Ast_provider.find_typedef_in_file
+                ~case_insensitive:true
+                ctx
+                path
+                id
             with
             | Some typedef -> Some (snd typedef.Aast.t_name)
             | None ->
@@ -1470,7 +1474,7 @@ module Types = struct
           end
         | TRecordDef ->
           begin
-            match Ast_provider.find_record_def_in_file path id with
+            match Ast_provider.find_record_def_in_file ctx path id with
             | Some cls -> Some (snd cls.Aast.rd_name)
             | None ->
               Hh_logger.log
@@ -1556,11 +1560,11 @@ module Funs = struct
 
   let is_defined id = get_pos id <> None
 
-  let get_canon_name name =
+  let get_canon_name ctx name =
     Core_kernel.(
       let map_result path =
         match
-          Ast_provider.find_fun_in_file ~case_insensitive:true path name
+          Ast_provider.find_fun_in_file ~case_insensitive:true ctx path name
         with
         | Some f -> Some (snd f.Aast.f_name)
         | None ->

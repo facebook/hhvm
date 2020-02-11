@@ -23,7 +23,7 @@ let go_common
       match get_node ty with
       | Tclass ((_, str), _, _) ->
         begin
-          match Naming_global.GEnv.type_pos str with
+          match Naming_global.GEnv.type_pos ctx str with
           | None -> acc
           | Some pos -> (pos, str) :: acc
         end

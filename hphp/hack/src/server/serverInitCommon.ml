@@ -80,13 +80,14 @@ let update_files
 
 let naming (env : ServerEnv.env) (t : float) : ServerEnv.env * float =
   ServerProgress.send_progress_to_monitor "resolving symbol references";
+  let ctx = Provider_utils.ctx_from_server_env env in
   let env =
     Naming_table.fold
       env.naming_table
       ~f:
         begin
           fun k v env ->
-          let (errorl, failed_naming) = Naming_global.ndecl_file k v in
+          let (errorl, failed_naming) = Naming_global.ndecl_file ctx k v in
           {
             env with
             errorl = Errors.merge errorl env.errorl;

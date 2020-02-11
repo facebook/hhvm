@@ -151,13 +151,13 @@ module Types : sig
 
   val get_filename_and_kind : string -> (Relative_path.t * type_of_type) option
 
-  val get_canon_name : string -> string option
+  val get_canon_name : Provider_context.t -> string -> string option
 end
 
 module Funs : sig
   include ReverseNamingTable with type pos = FileInfo.pos
 
-  val get_canon_name : string -> string option
+  val get_canon_name : Provider_context.t -> string -> string option
 end
 
 module Consts : ReverseNamingTable with type pos = FileInfo.pos

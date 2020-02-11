@@ -25,7 +25,7 @@ let push_local_changes = Classes.LocalChanges.push_stack
 let pop_local_changes = Classes.LocalChanges.pop_stack
 
 let class_naming_and_decl ctx c =
-  let c = Errors.ignore_ (fun () -> Naming.class_ c) in
+  let c = Errors.ignore_ (fun () -> Naming.class_ ctx c) in
   Shallow_decl.class_ ctx c
 
 let shallow_decl_enabled () =
@@ -59,7 +59,7 @@ let err_not_found file name =
   raise (Decl_defs.Decl_not_found err_str)
 
 let declare_class_in_file ctx file name =
-  match Ast_provider.find_class_in_file file name with
+  match Ast_provider.find_class_in_file ctx file name with
   | Some cls -> class_decl_if_missing ctx cls
   | None -> err_not_found file name
 

@@ -25,28 +25,30 @@ module SN = Naming_special_names
 let canon_key = String.lowercase
 
 module GEnv = struct
-  let get_full_pos (pos, name) =
+  let get_full_pos ctx (pos, name) =
     try
       match pos with
       | FileInfo.Full p -> (p, name)
       | FileInfo.File (FileInfo.Class, fn) ->
-        let res = unsafe_opt (Ast_provider.find_class_in_file fn name) in
+        let res = unsafe_opt (Ast_provider.find_class_in_file ctx fn name) in
         let (p', _) = res.Aast.c_name in
         (p', name)
       | FileInfo.File (FileInfo.RecordDef, fn) ->
-        let res = unsafe_opt (Ast_provider.find_record_def_in_file fn name) in
+        let res =
+          unsafe_opt (Ast_provider.find_record_def_in_file ctx fn name)
+        in
         let (p', _) = res.Aast.rd_name in
         (p', name)
       | FileInfo.File (FileInfo.Typedef, fn) ->
-        let res = unsafe_opt (Ast_provider.find_typedef_in_file fn name) in
+        let res = unsafe_opt (Ast_provider.find_typedef_in_file ctx fn name) in
         let (p', _) = res.Aast.t_name in
         (p', name)
       | FileInfo.File (FileInfo.Const, fn) ->
-        let res = unsafe_opt (Ast_provider.find_gconst_in_file fn name) in
+        let res = unsafe_opt (Ast_provider.find_gconst_in_file ctx fn name) in
         let (p', _) = res.Aast.cst_name in
         (p', name)
       | FileInfo.File (FileInfo.Fun, fn) ->
-        let res = unsafe_opt (Ast_provider.find_fun_in_file fn name) in
+        let res = unsafe_opt (Ast_provider.find_fun_in_file ctx fn name) in
         let (p', _) = res.Aast.f_name in
         (p', name)
     with Invalid_argument _ ->
@@ -67,98 +69,100 @@ module GEnv = struct
       Hh_logger.log "Name missing: %s" name;
       raise File_provider.File_provider_stale
 
-  let type_canon_name name = Naming_table.Types.get_canon_name (canon_key name)
+  let type_canon_name ctx name =
+    Naming_table.Types.get_canon_name ctx (canon_key name)
 
-  let type_pos name =
-    let name = Option.value (type_canon_name name) ~default:name in
+  let type_pos ctx name =
+    let name = Option.value (type_canon_name ctx name) ~default:name in
     match Naming_table.Types.get_pos name with
     | Some (pos, Naming_table.TClass)
     | Some (pos, Naming_table.TTypedef)
     | Some (pos, Naming_table.TRecordDef) ->
-      let (p, _) = get_full_pos (pos, name) in
+      let (p, _) = get_full_pos ctx (pos, name) in
       Some p
     | None -> None
 
-  let type_canon_pos name =
-    let name = Option.value (type_canon_name name) ~default:name in
-    type_pos name
+  let type_canon_pos ctx name =
+    let name = Option.value (type_canon_name ctx name) ~default:name in
+    type_pos ctx name
 
-  let type_info name =
+  let type_info ctx name =
     match Naming_table.Types.get_pos name with
     | Some (pos, Naming_table.TClass) ->
-      let (p, _) = get_full_pos (pos, name) in
+      let (p, _) = get_full_pos ctx (pos, name) in
       Some (p, Naming_table.TClass)
     | Some (pos, Naming_table.TTypedef) ->
-      let (p, _) = get_full_pos (pos, name) in
+      let (p, _) = get_full_pos ctx (pos, name) in
       Some (p, Naming_table.TTypedef)
     | Some (pos, Naming_table.TRecordDef) ->
-      let (p, _) = get_full_pos (pos, name) in
+      let (p, _) = get_full_pos ctx (pos, name) in
       Some (p, Naming_table.TRecordDef)
     | None -> None
 
-  let fun_canon_name name = Naming_table.Funs.get_canon_name (canon_key name)
+  let fun_canon_name ctx name =
+    Naming_table.Funs.get_canon_name ctx (canon_key name)
 
-  let fun_pos name =
+  let fun_pos ctx name =
     match Naming_table.Funs.get_pos name with
     | Some pos ->
-      let (p, _) = get_full_pos (pos, name) in
+      let (p, _) = get_full_pos ctx (pos, name) in
       Some p
     | None -> None
 
-  let fun_canon_pos name =
-    let name = Option.value (fun_canon_name name) ~default:name in
-    fun_pos name
+  let fun_canon_pos ctx name =
+    let name = Option.value (fun_canon_name ctx name) ~default:name in
+    fun_pos ctx name
 
-  let typedef_pos name =
+  let typedef_pos ctx name =
     match Naming_table.Types.get_pos name with
     | Some (pos, Naming_table.TTypedef) ->
-      let (p, _) = get_full_pos (pos, name) in
+      let (p, _) = get_full_pos ctx (pos, name) in
       Some p
     | Some (_, Naming_table.TClass)
     | Some (_, Naming_table.TRecordDef)
     | None ->
       None
 
-  let gconst_pos name =
+  let gconst_pos ctx name =
     match Naming_table.Consts.get_pos name with
     | Some pos ->
-      let (p, _) = get_full_pos (pos, name) in
+      let (p, _) = get_full_pos ctx (pos, name) in
       Some p
     | None -> None
 
-  let compare_pos p q name =
+  let compare_pos ctx p q name =
     FileInfo.(
       match (p, q) with
       | (Full p', Full q') -> Pos.compare p' q' = 0
       | (Full q', (File _ as p'))
       | ((File _ as p'), Full q') ->
-        let p' = fst (get_full_pos (p', name)) in
+        let p' = fst (get_full_pos ctx (p', name)) in
         Pos.compare p' q' = 0
       | (File (x, fn1), File (y, fn2)) -> fn1 = fn2 && x = y)
 end
 
 (* The primitives to manipulate the naming environment *)
 module Env = struct
-  let check_not_typehint (p, name) =
+  let check_not_typehint ctx (p, name) =
     let x = canon_key (Utils.strip_all_ns name) in
     if
       SN.Typehints.is_reserved_hh_name x
       || SN.Typehints.is_reserved_global_name x
     then (
-      let (p, name) = GEnv.get_full_pos (p, name) in
+      let (p, name) = GEnv.get_full_pos ctx (p, name) in
       Errors.name_is_reserved name p;
       false
     ) else
       true
 
   (* Dont check for errors, just add to canonical heap *)
-  let new_fun_fast fn name =
+  let new_fun_fast ctx fn name =
     let name_key = canon_key name in
-    match Naming_table.Funs.get_canon_name name_key with
+    match Naming_table.Funs.get_canon_name ctx name_key with
     | Some _ -> ()
     | None -> Naming_table.Funs.add name (FileInfo.File (FileInfo.Fun, fn))
 
-  let new_cid_fast fn name cid_kind =
+  let new_cid_fast ctx fn name cid_kind =
     let name_key = canon_key name in
     let mode =
       match cid_kind with
@@ -166,31 +170,32 @@ module Env = struct
       | Naming_table.TTypedef -> FileInfo.Typedef
       | Naming_table.TRecordDef -> FileInfo.RecordDef
     in
-    match Naming_table.Types.get_canon_name name_key with
+    match Naming_table.Types.get_canon_name ctx name_key with
     | Some _ -> ()
     | None ->
       (* We store redundant info in this case, but if the position is a *)
       (* Full position, we don't store the kind, so this is necessary *)
       Naming_table.Types.add name (FileInfo.File (mode, fn), cid_kind)
 
-  let new_class_fast fn name = new_cid_fast fn name Naming_table.TClass
+  let new_class_fast ctx fn name = new_cid_fast ctx fn name Naming_table.TClass
 
-  let new_record_decl_fast fn name =
-    new_cid_fast fn name Naming_table.TRecordDef
+  let new_record_decl_fast ctx fn name =
+    new_cid_fast ctx fn name Naming_table.TRecordDef
 
-  let new_typedef_fast fn name = new_cid_fast fn name Naming_table.TTypedef
+  let new_typedef_fast ctx fn name =
+    new_cid_fast ctx fn name Naming_table.TTypedef
 
   let new_global_const_fast fn name =
     Naming_table.Consts.add name (FileInfo.File (FileInfo.Const, fn))
 
-  let new_fun (p, name) =
+  let new_fun ctx (p, name) =
     let name_key = canon_key name in
-    match Naming_table.Funs.get_canon_name name_key with
+    match Naming_table.Funs.get_canon_name ctx name_key with
     | Some canonical ->
       let p' = Option.value_exn (Naming_table.Funs.get_pos canonical) in
-      if not @@ GEnv.compare_pos p' p canonical then
-        let (p, name) = GEnv.get_full_pos (p, name) in
-        let (p', canonical) = GEnv.get_full_pos (p', canonical) in
+      if not @@ GEnv.compare_pos ctx p' p canonical then
+        let (p, name) = GEnv.get_full_pos ctx (p, name) in
+        let (p', canonical) = GEnv.get_full_pos ctx (p', canonical) in
         Errors.error_name_already_bound name canonical p p'
     | None -> Naming_table.Funs.add name p
 
@@ -199,7 +204,7 @@ module Env = struct
     (* lowercase because canon_key call *)
     (a, String.length a)
 
-  let new_cid cid_kind (p, name) =
+  let new_cid ctx cid_kind (p, name) =
     let validate canonical error =
       let (p', _) =
         match Naming_table.Types.get_pos canonical with
@@ -211,16 +216,16 @@ module Env = struct
             ^ " vs canonical "
             ^ canonical )
       in
-      if not @@ GEnv.compare_pos p' p canonical then
-        let (p, name) = GEnv.get_full_pos (p, name) in
-        let (p', canonical) = GEnv.get_full_pos (p', canonical) in
+      if not @@ GEnv.compare_pos ctx p' p canonical then
+        let (p, name) = GEnv.get_full_pos ctx (p, name) in
+        let (p', canonical) = GEnv.get_full_pos ctx (p', canonical) in
         error name canonical p p'
     in
-    if not (check_not_typehint (p, name)) then
+    if not (check_not_typehint ctx (p, name)) then
       ()
     else
       let name_key = canon_key name in
-      match Naming_table.Types.get_canon_name name_key with
+      match Naming_table.Types.get_canon_name ctx name_key with
       | Some canonical -> validate canonical Errors.error_name_already_bound
       | None ->
         (* Check to prevent collision with attribute classes
@@ -237,25 +242,25 @@ module Env = struct
             attr_prefix ^ String.sub name_key 1 (name_len - 1)
         in
         begin
-          match Naming_table.Types.get_canon_name alt_name_key with
+          match Naming_table.Types.get_canon_name ctx alt_name_key with
           | Some alt_canonical ->
             validate alt_canonical Errors.error_class_attribute_already_bound
           | None -> ()
         end;
         Naming_table.Types.add name (p, cid_kind)
 
-  let new_class = new_cid Naming_table.TClass
+  let new_class ctx = new_cid ctx Naming_table.TClass
 
-  let new_record_decl = new_cid Naming_table.TRecordDef
+  let new_record_decl ctx = new_cid ctx Naming_table.TRecordDef
 
-  let new_typedef = new_cid Naming_table.TTypedef
+  let new_typedef ctx = new_cid ctx Naming_table.TTypedef
 
-  let new_global_const (p, x) =
+  let new_global_const ctx (p, x) =
     match Naming_table.Consts.get_pos x with
     | Some p' ->
-      if not @@ GEnv.compare_pos p' p x then
-        let (p, x) = GEnv.get_full_pos (p, x) in
-        let (p', x) = GEnv.get_full_pos (p', x) in
+      if not @@ GEnv.compare_pos ctx p' p x then
+        let (p, x) = GEnv.get_full_pos ctx (p, x) in
+        let (p', x) = GEnv.get_full_pos ctx (p', x) in
         Errors.error_name_already_bound x x p p'
     | None -> Naming_table.Consts.add x p
 end
@@ -274,18 +279,18 @@ let remove_decls ~funs ~classes ~record_defs ~typedefs ~consts =
 (* The entry point to build the naming environment *)
 (*****************************************************************************)
 
-let make_env ~funs ~classes ~record_defs ~typedefs ~consts =
-  List.iter funs Env.new_fun;
-  List.iter classes Env.new_class;
-  List.iter record_defs Env.new_record_decl;
-  List.iter typedefs Env.new_typedef;
-  List.iter consts Env.new_global_const
+let make_env ctx ~funs ~classes ~record_defs ~typedefs ~consts =
+  List.iter funs (Env.new_fun ctx);
+  List.iter classes (Env.new_class ctx);
+  List.iter record_defs (Env.new_record_decl ctx);
+  List.iter typedefs (Env.new_typedef ctx);
+  List.iter consts (Env.new_global_const ctx)
 
-let make_env_from_fast fn ~funs ~classes ~record_defs ~typedefs ~consts =
-  SSet.iter (Env.new_fun_fast fn) funs;
-  SSet.iter (Env.new_class_fast fn) classes;
-  SSet.iter (Env.new_record_decl_fast fn) record_defs;
-  SSet.iter (Env.new_typedef_fast fn) typedefs;
+let make_env_from_fast ctx fn ~funs ~classes ~record_defs ~typedefs ~consts =
+  SSet.iter (Env.new_fun_fast ctx fn) funs;
+  SSet.iter (Env.new_class_fast ctx fn) classes;
+  SSet.iter (Env.new_record_decl_fast ctx fn) record_defs;
+  SSet.iter (Env.new_typedef_fast ctx fn) typedefs;
   SSet.iter (Env.new_global_const_fast fn) consts
 
 (*****************************************************************************)
@@ -306,10 +311,11 @@ let add_files_to_rename failed defl defs_in_env =
     ~init:failed
     defl
 
-let ndecl_file_fast fn ~funs ~classes ~record_defs ~typedefs ~consts =
-  make_env_from_fast fn ~funs ~classes ~record_defs ~typedefs ~consts
+let ndecl_file_fast ctx fn ~funs ~classes ~record_defs ~typedefs ~consts =
+  make_env_from_fast ctx fn ~funs ~classes ~record_defs ~typedefs ~consts
 
 let ndecl_file
+    ctx
     fn
     {
       FileInfo.file_mode = _;
@@ -321,10 +327,10 @@ let ndecl_file
       comments = _;
       hash = _;
     } =
-  let (errors, _) =
+  let (errors, ()) =
     Errors.do_with_context fn Errors.Naming (fun () ->
         Hh_logger.debug "Naming decl: %s" (Relative_path.to_absolute fn);
-        make_env ~funs ~classes ~record_defs ~typedefs ~consts)
+        make_env ctx ~funs ~classes ~record_defs ~typedefs ~consts)
   in
   if Errors.is_empty errors then
     (errors, Relative_path.Set.empty)
@@ -361,9 +367,13 @@ let ndecl_file
      * were actually duplicates?
      *)
     let failed = Relative_path.Set.singleton fn in
-    let failed = add_files_to_rename failed funs GEnv.fun_canon_pos in
-    let failed = add_files_to_rename failed classes GEnv.type_canon_pos in
-    let failed = add_files_to_rename failed record_defs GEnv.type_canon_pos in
-    let failed = add_files_to_rename failed typedefs GEnv.type_canon_pos in
-    let failed = add_files_to_rename failed consts GEnv.gconst_pos in
+    let failed = add_files_to_rename failed funs (GEnv.fun_canon_pos ctx) in
+    let failed = add_files_to_rename failed classes (GEnv.type_canon_pos ctx) in
+    let failed =
+      add_files_to_rename failed record_defs (GEnv.type_canon_pos ctx)
+    in
+    let failed =
+      add_files_to_rename failed typedefs (GEnv.type_canon_pos ctx)
+    in
+    let failed = add_files_to_rename failed consts (GEnv.gconst_pos ctx) in
     (errors, failed)

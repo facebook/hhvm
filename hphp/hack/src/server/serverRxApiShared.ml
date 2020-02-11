@@ -74,7 +74,7 @@ type ('a, 'r, 's) handlers = {
   result_to_string:
     ('r option, string) result -> Relative_path.t * int * int -> string;
   walker: 'a walker;
-  get_state: Relative_path.t -> 's;
+  get_state: Provider_context.t -> Relative_path.t -> 's;
   map_result: Provider_context.t -> 's -> 'a -> 'r;
 }
 
@@ -97,7 +97,7 @@ let helper h ctx acc pos_list =
   in
   List.fold pos_list ~init:acc ~f:(fun acc pos ->
       let (fn, line, char) = pos in
-      let s = h.get_state fn in
+      let s = h.get_state ctx fn in
       let result =
         Relative_path.Map.find_opt tasts fn
         |> Result.of_option ~error:"No such file or directory"

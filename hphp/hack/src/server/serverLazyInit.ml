@@ -240,8 +240,10 @@ let use_precomputed_state_exn
  * No errors are generated because we assume the fast is directly from
  * a clean state.
  *)
-let naming_with_fast (fast : FileInfo.names Relative_path.Map.t) (t : float) :
-    float =
+let naming_with_fast
+    (ctx : Provider_context.t)
+    (fast : FileInfo.names Relative_path.Map.t)
+    (t : float) : float =
   Relative_path.Map.iter fast ~f:(fun k info ->
       let {
         FileInfo.n_classes = classes;
@@ -253,6 +255,7 @@ let naming_with_fast (fast : FileInfo.names Relative_path.Map.t) (t : float) :
         info
       in
       Naming_global.ndecl_file_fast
+        ctx
         k
         ~funs
         ~classes
@@ -265,6 +268,7 @@ let naming_with_fast (fast : FileInfo.names Relative_path.Map.t) (t : float) :
   Hh_logger.log_duration "Naming fast" t
 
 let naming_from_saved_state
+    (ctx : Provider_context.t)
     (old_naming_table : Naming_table.t)
     (parsing_files : Relative_path.Set.t)
     (naming_table_fn : string option)
@@ -297,7 +301,7 @@ let naming_from_saved_state
       Naming_table.filter old_naming_table (fun k _v ->
           not (Relative_path.Set.mem parsing_files k))
     in
-    naming_with_fast (Naming_table.to_fast old_hack_names) t
+    naming_with_fast ctx (Naming_table.to_fast old_hack_names) t
 
 (* Prechecked files are gated with a flag and not supported in AI/check/saving
  * of saved state modes. *)
@@ -581,8 +585,10 @@ let load_naming_table (genv : ServerEnv.genv) (env : ServerEnv.env) :
         genv
         env
     in
+    let ctx = Provider_utils.ctx_from_server_env env in
     let t =
       naming_from_saved_state
+        ctx
         env.naming_table
         (Relative_path.set_of_list fnl)
         (Some naming_table_path)
@@ -781,7 +787,8 @@ let post_saved_state_initialization
 
   let t = update_files genv env.naming_table t in
   let t =
-    naming_from_saved_state old_naming_table parsing_files naming_table_fn t
+    let ctx = Provider_utils.ctx_from_server_env env in
+    naming_from_saved_state ctx old_naming_table parsing_files naming_table_fn t
   in
   (* Do global naming on all dirty files *)
   let (env, t) = naming env t in

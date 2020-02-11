@@ -236,17 +236,14 @@ let get_gconst defs name =
   in
   get None defs
 
-let get_ast ?(full = false) file_name =
+let get_ast ?(full = false) ctx file_name =
   Counters.count_get_ast @@ fun () ->
   (* If there's a ctx, and this file is in the ctx, then use ctx. *)
   (* Otherwise, the way we fetch/cache ASTs depends on the provider. *)
   let entry_opt =
-    match Provider_context.get_global_context () with
-    | None -> None
-    | Some ctx ->
-      Relative_path.Map.find_opt ctx.Provider_context.entries file_name
+    Relative_path.Map.find_opt ctx.Provider_context.entries file_name
   in
-  match (entry_opt, Provider_backend.get ()) with
+  match (entry_opt, ctx.Provider_context.backend) with
   | (Some entry, _) -> entry.Provider_context.ast
   | (None, Provider_backend.Shared_memory) ->
     begin
@@ -281,23 +278,23 @@ let get_ast ?(full = false) file_name =
     failwith "Ast_provider.get_ast not supported with decl memory provider"
 
 let find_class_in_file
-    ?(full = false) ?(case_insensitive = false) file_name class_name =
-  get_class (get_ast ~full file_name) ~case_insensitive class_name
+    ?(full = false) ?(case_insensitive = false) ctx file_name class_name =
+  get_class (get_ast ~full ctx file_name) ~case_insensitive class_name
 
 let find_record_def_in_file
-    ?(full = false) ?(case_insensitive = false) file_name record_name =
-  get_record_def (get_ast ~full file_name) ~case_insensitive record_name
+    ?(full = false) ?(case_insensitive = false) ctx file_name record_name =
+  get_record_def (get_ast ~full ctx file_name) ~case_insensitive record_name
 
 let find_fun_in_file
-    ?(full = false) ?(case_insensitive = false) file_name fun_name =
-  get_fun (get_ast ~full file_name) ~case_insensitive fun_name
+    ?(full = false) ?(case_insensitive = false) ctx file_name fun_name =
+  get_fun (get_ast ~full ctx file_name) ~case_insensitive fun_name
 
 let find_typedef_in_file
-    ?(full = false) ?(case_insensitive = false) file_name name =
-  get_typedef (get_ast ~full file_name) ~case_insensitive name
+    ?(full = false) ?(case_insensitive = false) ctx file_name name =
+  get_typedef (get_ast ~full ctx file_name) ~case_insensitive name
 
-let find_gconst_in_file ?(full = false) file_name name =
-  get_gconst (get_ast ~full file_name) name
+let find_gconst_in_file ?(full = false) ctx file_name name =
+  get_gconst (get_ast ~full ctx file_name) name
 
 let local_changes_push_stack () = ParserHeap.LocalChanges.push_stack ()
 

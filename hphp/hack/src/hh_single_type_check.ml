@@ -767,17 +767,18 @@ let check_file ctx ~verbosity errors files_info error_format max_errors =
   in
   errors
 
-let create_nasts files_info =
+let create_nasts ctx files_info =
   let build_nast fn _ =
-    let ast = Ast_provider.get_ast ~full:true fn in
-    Naming.program ast
+    let ast = Ast_provider.get_ast ~full:true ctx fn in
+    Naming.program ctx ast
   in
   Relative_path.Map.mapi ~f:build_nast files_info
 
-let parse_and_name popt files_contents =
+let parse_and_name ctx files_contents =
   let parsed_files =
     Relative_path.Map.mapi files_contents ~f:(fun fn contents ->
         Errors.run_in_context fn Errors.Parsing (fun () ->
+            let popt = ctx.Provider_context.tcopt in
             let parsed_file =
               Full_fidelity_ast.defensive_program popt fn contents
             in
@@ -820,15 +821,20 @@ let parse_and_name popt files_contents =
           let { FileInfo.funs; classes; record_defs; typedefs; consts; _ } =
             fileinfo
           in
-          Naming_global.make_env ~funs ~classes ~record_defs ~typedefs ~consts));
+          Naming_global.make_env
+            ctx
+            ~funs
+            ~classes
+            ~record_defs
+            ~typedefs
+            ~consts));
   (parsed_files, files_info)
 
-let parse_name_and_decl popt files_contents =
+let parse_name_and_decl ctx files_contents =
   Errors.do_ (fun () ->
-      let (parsed_files, files_info) = parse_and_name popt files_contents in
+      let (parsed_files, files_info) = parse_and_name ctx files_contents in
       Relative_path.Map.iter parsed_files (fun fn parsed_file ->
           Errors.run_in_context fn Errors.Decl (fun () ->
-              let ctx = Provider_context.empty_for_test ~tcopt:popt in
               Decl.name_and_declare_types_program
                 ctx
                 parsed_file.Parser_return.ast));
@@ -839,9 +845,7 @@ let parse_name_and_shallow_decl ctx filename file_contents :
     Shallow_decl_defs.shallow_class SMap.t =
   Errors.ignore_ (fun () ->
       let files_contents = Relative_path.Map.singleton filename file_contents in
-      let (parsed_files, _) =
-        parse_and_name ctx.Provider_context.tcopt files_contents
-      in
+      let (parsed_files, _) = parse_and_name ctx files_contents in
       let parsed_file = Relative_path.Map.values parsed_files |> List.hd_exn in
       parsed_file.Parser_return.ast
       |> List.filter_map ~f:(function
@@ -1002,7 +1006,7 @@ let test_decl_compare filenames popt builtins files_contents files_info =
     ()
 
 (* Returns a list of Tast defs, along with associated type environments. *)
-let compute_tasts opts files_info interesting_files :
+let compute_tasts ctx files_info interesting_files :
     Errors.t
     * ( Tast.program Relative_path.Map.t
       * Typing_inference_env.t_global_with_pos list ) =
@@ -1012,7 +1016,7 @@ let compute_tasts opts files_info interesting_files :
     | _ -> None
   in
   Errors.do_ (fun () ->
-      let nasts = create_nasts files_info in
+      let nasts = create_nasts ctx files_info in
       (* Interesting files are usually the non hhi ones. *)
       let filter_non_interesting nasts =
         Relative_path.Map.merge nasts interesting_files (fun _k nast x ->
@@ -1024,7 +1028,7 @@ let compute_tasts opts files_info interesting_files :
       let tasts_envs =
         Relative_path.Map.map
           nasts
-          ~f:(Typing.nast_to_tast_gienv ~do_tast_checks:true opts)
+          ~f:(Typing.nast_to_tast_gienv ~do_tast_checks:true ctx)
       in
       let tasts = Relative_path.Map.map tasts_envs ~f:fst in
       let genvs =
@@ -1145,11 +1149,10 @@ let dump_debug_glean_deps
 
 let scan_files_for_symbol_index
     (filename : Relative_path.t)
-    (popt : ParserOptions.t)
     (sienv : SearchUtils.si_env)
     (ctx : Provider_context.t) : SearchUtils.si_env =
   let files_contents = Multifile.file_to_files filename in
-  let (_, individual_file_info) = parse_name_and_decl popt files_contents in
+  let (_, individual_file_info) = parse_name_and_decl ctx files_contents in
   let fileinfo_list = Relative_path.Map.values individual_file_info in
   let transformed_list =
     List.map fileinfo_list ~f:(fun fileinfo ->
@@ -1232,7 +1235,7 @@ let handle_mode
         ~pos
         ~is_manually_invoked
     in
-    let sienv = scan_files_for_symbol_index path popt sienv ctx in
+    let sienv = scan_files_for_symbol_index path sienv ctx in
     let result =
       ServerAutoComplete.go_at_auto332_ctx
         ~ctx
@@ -1250,7 +1253,7 @@ let handle_mode
   | Ffp_autocomplete ->
     iter_over_files (fun filename ->
         try
-          let sienv = scan_files_for_symbol_index filename popt sienv ctx in
+          let sienv = scan_files_for_symbol_index filename sienv ctx in
           let file_text = cat (Relative_path.to_absolute filename) in
           (* TODO: Use a magic word/symbol to identify autocomplete location instead *)
           let args_regex = Str.regexp "AUTOCOMPLETE [1-9][0-9]* [1-9][0-9]*" in
@@ -1440,7 +1443,7 @@ let handle_mode
         FileOutline.print ~short_pos:true results)
   | Dump_nast ->
     iter_over_files (fun filename ->
-        let nasts = create_nasts files_info in
+        let nasts = create_nasts ctx files_info in
         let nast = Relative_path.Map.find nasts filename in
         Printf.printf "%s\n" (Nast.show_program nast))
   | Dump_tast ->
@@ -1579,7 +1582,7 @@ let handle_mode
             ~f:(fun () ->
               let files_contents = Multifile.file_to_files filename in
               let (parse_errors, individual_file_info) =
-                parse_name_and_decl popt files_contents
+                parse_name_and_decl ctx files_contents
               in
               let errors =
                 check_file
@@ -1605,12 +1608,12 @@ let handle_mode
                   k = filename)
             in
             let (_, individual_file_info) =
-              parse_name_and_decl popt files_contents
+              parse_name_and_decl ctx files_contents
             in
             try
               test_decl_compare
                 filename
-                popt
+                ctx
                 builtins
                 files_contents
                 individual_file_info;
@@ -1628,7 +1631,7 @@ let handle_mode
     if errors <> [] then exit 2
   | Decl_compare ->
     let filename = expect_single_file () in
-    test_decl_compare filename popt builtins files_contents files_info
+    test_decl_compare filename ctx builtins files_contents files_info
   | Shallow_class_diff ->
     print_errors_if_present parse_errors;
     let filename = expect_single_file () in
@@ -1815,8 +1818,8 @@ let decl_and_run_mode
       HashSet.add dbg_glean_deps (dep_left, dep_right)
     in
     Typing_deps.add_dependency_callback "get_debug_trace" get_debug_trace );
-  let (errors, files_info) = parse_name_and_decl popt to_decl in
   let ctx = Provider_context.empty_for_test ~tcopt in
+  let (errors, files_info) = parse_name_and_decl ctx to_decl in
   handle_mode
     mode
     files

@@ -32,25 +32,25 @@ and class_element_ =
   | Class_const
   | Typeconst
 
-let get_class_by_name x =
+let get_class_by_name ctx x =
   Naming_table.Types.get_filename x >>= fun fn ->
   Ide_parser_cache.with_ide_cache @@ fun () ->
-  Ast_provider.find_class_in_file fn x
+  Ast_provider.find_class_in_file ctx fn x
 
-let get_function_by_name x =
+let get_function_by_name ctx x =
   Naming_table.Funs.get_filename x >>= fun fn ->
   Ide_parser_cache.with_ide_cache @@ fun () ->
-  Ast_provider.find_fun_in_file fn x
+  Ast_provider.find_fun_in_file ctx fn x
 
-let get_gconst_by_name x =
+let get_gconst_by_name ctx x =
   Naming_table.Consts.get_filename x >>= fun fn ->
   Ide_parser_cache.with_ide_cache @@ fun () ->
-  Ast_provider.find_gconst_in_file fn x
+  Ast_provider.find_gconst_in_file ctx fn x
 
 (* Span information is stored only in parsing AST *)
-let get_member_def (x : class_element) =
+let get_member_def (ctx : Provider_context.t) (x : class_element) =
   let (type_, member_origin, member_name) = x in
-  get_class_by_name member_origin >>= fun c ->
+  get_class_by_name ctx member_origin >>= fun c ->
   let member_origin = Utils.strip_ns member_origin in
   match type_ with
   | Constructor
@@ -90,17 +90,17 @@ let get_local_var_def ast name p =
   Option.map def ~f:(FileOutline.summarize_local name)
 
 (* summarize a class, typedef or record *)
-let summarize_class_typedef x =
+let summarize_class_typedef ctx x =
   Naming_table.Types.get_filename_and_kind x >>= fun (fn, ct) ->
   match ct with
   | Naming_table.TClass ->
-    Ast_provider.find_class_in_file fn x >>= fun c ->
+    Ast_provider.find_class_in_file ctx fn x >>= fun c ->
     Some (FileOutline.summarize_class c ~no_children:true)
   | Naming_table.TTypedef ->
-    Ast_provider.find_typedef_in_file fn x >>= fun tdef ->
+    Ast_provider.find_typedef_in_file ctx fn x >>= fun tdef ->
     Some (FileOutline.summarize_typedef tdef)
   | Naming_table.TRecordDef ->
-    Ast_provider.find_record_def_in_file fn x >>= fun rd ->
+    Ast_provider.find_record_def_in_file ctx fn x >>= fun rd ->
     Some (FileOutline.summarize_record_decl rd)
 
 let go ctx ast result =
@@ -124,7 +124,7 @@ let go ctx ast result =
       |> List.hd
     in
     (match matching_method with
-    | Some meth -> get_member_def (Method, meth.ce_origin, method_name)
+    | Some meth -> get_member_def ctx (Method, meth.ce_origin, method_name)
     | None -> None)
   | SymbolOccurrence.Method (c_name, method_name) ->
     (* Classes on typing heap have all the methods from inheritance hierarchy
@@ -133,45 +133,45 @@ let go ctx ast result =
     Decl_provider.get_class ctx c_name >>= fun class_ ->
     if method_name = Naming_special_names.Members.__construct then
       match fst (Cls.construct class_) with
-      | Some m -> get_member_def (Constructor, m.ce_origin, method_name)
+      | Some m -> get_member_def ctx (Constructor, m.ce_origin, method_name)
       | None ->
-        get_class_by_name c_name >>= fun c ->
+        get_class_by_name ctx c_name >>= fun c ->
         Some (FileOutline.summarize_class c ~no_children:true)
     else (
       match Cls.get_method class_ method_name with
-      | Some m -> get_member_def (Method, m.ce_origin, method_name)
+      | Some m -> get_member_def ctx (Method, m.ce_origin, method_name)
       | None ->
         Cls.get_smethod class_ method_name >>= fun m ->
-        get_member_def (Static_method, m.ce_origin, method_name)
+        get_member_def ctx (Static_method, m.ce_origin, method_name)
     )
   | SymbolOccurrence.Property (c_name, property_name) ->
     Decl_provider.get_class ctx c_name >>= fun class_ ->
     let property_name = clean_member_name property_name in
     begin
       match Cls.get_prop class_ property_name with
-      | Some m -> get_member_def (Property, m.ce_origin, property_name)
+      | Some m -> get_member_def ctx (Property, m.ce_origin, property_name)
       | None ->
         Cls.get_sprop class_ ("$" ^ property_name) >>= fun m ->
-        get_member_def (Static_property, m.ce_origin, property_name)
+        get_member_def ctx (Static_property, m.ce_origin, property_name)
     end
   | SymbolOccurrence.ClassConst (c_name, const_name) ->
     Decl_provider.get_class ctx c_name >>= fun class_ ->
     Cls.get_const class_ const_name >>= fun m ->
-    get_member_def (Class_const, m.cc_origin, const_name)
+    get_member_def ctx (Class_const, m.cc_origin, const_name)
   | SymbolOccurrence.Function ->
-    get_function_by_name result.SymbolOccurrence.name >>= fun f ->
+    get_function_by_name ctx result.SymbolOccurrence.name >>= fun f ->
     Some (FileOutline.summarize_fun f)
   | SymbolOccurrence.GConst ->
-    get_gconst_by_name result.SymbolOccurrence.name >>= fun cst ->
+    get_gconst_by_name ctx result.SymbolOccurrence.name >>= fun cst ->
     Some (FileOutline.summarize_gconst cst)
   | SymbolOccurrence.Class ->
-    summarize_class_typedef result.SymbolOccurrence.name
+    summarize_class_typedef ctx result.SymbolOccurrence.name
   | SymbolOccurrence.Record ->
-    summarize_class_typedef result.SymbolOccurrence.name
+    summarize_class_typedef ctx result.SymbolOccurrence.name
   | SymbolOccurrence.Typeconst (c_name, typeconst_name) ->
     Decl_provider.get_class ctx c_name >>= fun class_ ->
     Cls.get_typeconst class_ typeconst_name >>= fun m ->
-    get_member_def (Typeconst, m.ttc_origin, typeconst_name)
+    get_member_def ctx (Typeconst, m.ttc_origin, typeconst_name)
   | SymbolOccurrence.LocalVar ->
     begin
       match ast with

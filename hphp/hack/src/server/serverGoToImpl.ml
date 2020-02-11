@@ -16,8 +16,10 @@ open Typing_defs
 let parallel_limit = 10
 
 let find_positions_of_classes
-    (acc : (string * Pos.t) list) (child_classes : string list) :
-    (string * Pos.t) list =
+    (tcopt : TypecheckerOptions.t)
+    (acc : (string * Pos.t) list)
+    (child_classes : string list) : (string * Pos.t) list =
+  let ctx = Provider_context.empty_for_worker ~tcopt in
   acc
   @ List.map child_classes ~f:(fun child_class ->
         match Naming_table.Types.get_pos child_class with
@@ -25,7 +27,7 @@ let find_positions_of_classes
           failwith ("Could not find definition of child class: " ^ child_class)
         | Some (FileInfo.Full pos, _type) -> (child_class, pos)
         | Some (FileInfo.File (FileInfo.Class, path), _type) ->
-          (match Ast_provider.find_class_in_file path child_class with
+          (match Ast_provider.find_class_in_file ctx path child_class with
           | None ->
             failwith
               (Printf.sprintf
@@ -42,11 +44,12 @@ let find_positions_of_classes
                child_class))
 
 let parallel_find_positions_of_classes
-    (child_classes : string list) (workers : MultiWorker.worker list option) :
-    (string * Pos.t) list =
+    (tcopt : TypecheckerOptions.t)
+    (child_classes : string list)
+    (workers : MultiWorker.worker list option) : (string * Pos.t) list =
   MultiWorker.call
     workers
-    ~job:find_positions_of_classes
+    ~job:(find_positions_of_classes tcopt)
     ~neutral:[]
     ~merge:List.append
     ~next:(MultiWorker.next workers child_classes)
@@ -125,9 +128,9 @@ let search_class
   @@ fun () ->
   let child_classes = find_child_classes class_name genv env in
   if List.length child_classes < parallel_limit then
-    find_positions_of_classes [] child_classes
+    find_positions_of_classes env.tcopt [] child_classes
   else
-    parallel_find_positions_of_classes child_classes genv.workers
+    parallel_find_positions_of_classes env.tcopt child_classes genv.workers
 
 let search_member
     (ctx : Provider_context.t)

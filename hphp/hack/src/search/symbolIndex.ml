@@ -253,7 +253,8 @@ let remove_files ~(sienv : SearchUtils.si_env) ~(paths : Relative_path.Set.t) :
         LocalSearchService.remove_file ~sienv ~path)
 
 (* Fetch best available position information for a symbol *)
-let get_position_for_symbol (symbol : string) (kind : si_kind) :
+let get_position_for_symbol
+    (ctx : Provider_context.t) (symbol : string) (kind : si_kind) :
     (Relative_path.t * int * int) option =
   (* Symbols can only be found if they are properly namespaced.
    * Even XHP classes must start with a backslash. *)
@@ -292,7 +293,7 @@ let get_position_for_symbol (symbol : string) (kind : si_kind) :
   match pos_opt with
   | None -> None
   | Some fi ->
-    let (pos, _) = Naming_global.GEnv.get_full_pos (fi, name_with_ns) in
+    let (pos, _) = Naming_global.GEnv.get_full_pos ctx (fi, name_with_ns) in
     let relpath = FileInfo.get_pos_filename fi in
     let (line, col, _) = Pos.info_pos pos in
     Some (relpath, line, col)
@@ -300,8 +301,9 @@ let get_position_for_symbol (symbol : string) (kind : si_kind) :
 let absolute_none = Pos.none |> Pos.to_absolute
 
 (* Shortcut to use the above method to get an absolute pos *)
-let get_pos_for_item_opt (item : si_item) : Pos.absolute option =
-  let result = get_position_for_symbol item.si_fullname item.si_kind in
+let get_pos_for_item_opt (ctx : Provider_context.t) (item : si_item) :
+    Pos.absolute option =
+  let result = get_position_for_symbol ctx item.si_fullname item.si_kind in
   match result with
   | None -> None
   | Some (relpath, line, col) ->
@@ -315,8 +317,9 @@ let get_pos_for_item_opt (item : si_item) : Pos.absolute option =
     Some (Pos.to_absolute pos)
 
 (* Shortcut to use the above method to get an absolute pos *)
-let get_pos_for_item (item : si_item) : Pos.absolute =
-  let result = get_pos_for_item_opt item in
+let get_pos_for_item (ctx : Provider_context.t) (item : si_item) : Pos.absolute
+    =
+  let result = get_pos_for_item_opt ctx item in
   match result with
   | None -> absolute_none
   | Some pos -> pos

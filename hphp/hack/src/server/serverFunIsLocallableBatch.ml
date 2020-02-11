@@ -57,7 +57,7 @@ let handlers =
   {
     S.result_to_string;
     S.walker;
-    S.get_state = (fun _ -> ());
+    S.get_state = (fun _ _ -> ());
     S.map_result = (fun _ () r -> r);
   }
 

@@ -14,7 +14,8 @@ let get_class_definition_file class_name =
   | Some (file, Naming_table.TClass) -> Some file
   | _ -> None
 
-let query_class_methods (class_name : string) (method_query : string) :
+let query_class_methods
+    (ctx : Provider_context.t) (class_name : string) (method_query : string) :
     SearchUtils.result =
   Option.Monad_infix.(
     let method_query = String.lowercase method_query in
@@ -26,7 +27,7 @@ let query_class_methods (class_name : string) (method_query : string) :
         true
     in
     get_class_definition_file class_name
-    >>= (fun file -> Ast_provider.find_class_in_file file class_name)
+    >>= (fun file -> Ast_provider.find_class_in_file ctx file class_name)
     >>| (fun class_ -> class_.Aast.c_methods)
     >>| List.filter_map ~f:(fun m ->
             let (pos, name) = m.Aast.m_name in

@@ -130,8 +130,8 @@ let make_nast_getter ~get_pos ~find_in_file ~naming =
     else
       let open Option in
       get_pos ctx name >>= fun pos ->
-      find_in_file (Pos.filename pos) name >>= fun nast ->
-      let nast = naming nast in
+      find_in_file ctx (Pos.filename pos) name >>= fun nast ->
+      let nast = naming ctx nast in
       nasts := SMap.add name nast !nasts;
       Some nast
 

@@ -19,7 +19,7 @@ type 'a walker = {
 type ('a, 'r, 's) handlers = {
   result_to_string: ('r option, string) result -> pos -> string;
   walker: 'a walker;
-  get_state: Relative_path.t -> 's;
+  get_state: Provider_context.t -> Relative_path.t -> 's;
   map_result: Provider_context.t -> 's -> 'a -> 'r;
 }
 

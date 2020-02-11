@@ -464,7 +464,6 @@ let handle_message :
     ClientIdeMessage.Completion_resolve.(
       let result =
         ServerDocblockAt.go_docblock_for_symbol
-          ~env:initialized_state.server_env
           ~ctx
           ~symbol:param.symbol
           ~kind:param.kind

@@ -164,8 +164,8 @@ let handlers =
       };
     S.get_state =
       begin
-        fun fn ->
-        Ast_provider.get_ast ~full:true fn
+        fun ctx fn ->
+        Ast_provider.get_ast ~full:true ctx fn
       end;
     S.map_result =
       begin

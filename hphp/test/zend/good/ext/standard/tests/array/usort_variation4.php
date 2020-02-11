@@ -57,7 +57,7 @@ var_dump( usort(inout $float_values, fun('cmp_function')) );
 var_dump($float_values);
 
 // empty array
-$empty_array = array();
+$empty_array = varray[];
 
 echo "\n-- Sorting empty array --\n";
 var_dump( usort(inout $empty_array, fun('cmp_function')) );

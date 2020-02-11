@@ -32,7 +32,7 @@ $strings = varray [
   NULL,
   TRUE,
   FALSE,
-  array()
+  varray[]
 ];
 
 $count = 0;

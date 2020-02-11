@@ -97,7 +97,7 @@ $not_bool_types = varray [
   NULL,
   
   /* arrays */
-  array(),
+  varray[],
   varray[0],
   varray[1],
   varray[NULL],

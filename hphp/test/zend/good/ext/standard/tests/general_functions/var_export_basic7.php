@@ -8,7 +8,7 @@
 echo "*** Testing var_export() with valid null values ***\n";
 
 // different valid  null vlaues
-$unset_var = array();
+$unset_var = varray[];
 unset ($unset_var); // now a null
 $null_var = NULL;
 

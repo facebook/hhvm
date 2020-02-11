@@ -73,7 +73,7 @@ $inputs = varray[
        $heredoc,
 
        // array data
-/*21*/ array(),
+/*21*/ varray[],
        $index_array,
        $assoc_array,
        varray['foo', $index_array, $assoc_array],

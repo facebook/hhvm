@@ -42,7 +42,7 @@ $replace_pairs_arr =  varray [
   10.5e10,
 
   // array values
-  array(),
+  varray[],
   varray[0],
   varray[1, 2],
 

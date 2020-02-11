@@ -43,7 +43,7 @@ function main_entry(): void {
         .5,
 
         // array data
-        array(),
+        varray[],
         varray[0],
         varray[1],
         varray[1, 2],

@@ -18,7 +18,7 @@ echo "*** Testing array_chunk() : usage variations ***\n";
 $input_arrays = darray [
 
   // array without elements
-  "array1" => array(),
+  "array1" => varray[],
 
   // array with one element
   "array2" => varray[1],

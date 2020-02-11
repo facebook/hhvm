@@ -9,7 +9,7 @@ abstract final class ZendGoodExtPcreTestsBug44214 {
   public static $array;
 }
 <<__EntryPoint>> function main(): void {
-ZendGoodExtPcreTestsBug44214::$array = array();
+ZendGoodExtPcreTestsBug44214::$array = varray[];
 
 $string = 'aaa bbb ccc ddd eee ccc aaa bbb';
 

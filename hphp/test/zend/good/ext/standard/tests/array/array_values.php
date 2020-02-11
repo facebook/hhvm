@@ -10,15 +10,15 @@ var_dump( array_values($basic_arr) );
 
 echo "\n*** Testing array_values() on various arrays ***";
 $arrays = varray [
-  array(), 
+  varray[], 
   varray[0],
   varray[-1],
-  varray[ array() ],
+  varray[ varray[] ],
   varray["Hello"],
   varray[""],  
-  varray["", array()],
+  varray["", varray[]],
   varray[1,2,3], 
-  varray[1,2,3, array()],
+  varray[1,2,3, varray[]],
   varray[1,2,3, varray[4,6]],
   darray["a" => 1, "b" => 2, "c" =>3],
   darray[0 => 0, 1 => 1, 2 => 2],  
@@ -26,7 +26,7 @@ $arrays = varray [
         "NULL", "\x000", "\000"],
   darray["Hi" => 1, "Hello" => 2, "World" => 3],
   darray["a" => "abcd", "a" => "", "ab" => -6, "cd" => -0.5 ],
-  darray[0 => array(), 1=> varray[0], 2 => varray[1], ""=> array(), ""=>"" ]
+  darray[0 => varray[], 1=> varray[0], 2 => varray[1], ""=> varray[], ""=>"" ]
 ];
 
 $i = 0;

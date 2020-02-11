@@ -57,7 +57,7 @@ var_dump( uasort(inout $float_values, fun('cmp_function')) );  // expecting: boo
 var_dump($float_values);
 
 // empty array
-$empty_array = array();
+$empty_array = varray[];
 echo "-- Sorting empty array --\n";
 var_dump( uasort(inout $empty_array, fun('cmp_function')) );  // expecting: bool(true)
 var_dump($empty_array);

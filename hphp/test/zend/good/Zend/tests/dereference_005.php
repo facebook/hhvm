@@ -1,7 +1,7 @@
 <?hh
 
 class obj implements arrayaccess {
-    private $container = array();
+    private $container = varray[];
     public function __construct() {
         $this->container = darray[
             "one"   => 1,

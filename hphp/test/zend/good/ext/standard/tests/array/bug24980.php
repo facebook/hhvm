@@ -32,7 +32,7 @@ var_dump(array_reduce($a, "foo"));
 
 /* test #3: basic test (used to leak memory) */
 $a = varray[1, 2, 3, 4, 5];
-$x = array();
+$x = varray[];
 $b = array_reduce($a, "rsum");
 $c = array_reduce($a, "rmul", 10);
 $d = array_reduce($x, "rsum", 1);

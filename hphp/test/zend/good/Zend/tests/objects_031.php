@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$x = array();
+$x = varray[];
 $x[] = clone new stdclass;
 $x[] = clone new stdclass;
 $x[] = clone new stdclass;

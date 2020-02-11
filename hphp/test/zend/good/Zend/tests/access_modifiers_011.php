@@ -16,7 +16,7 @@ class A {
     {
         return $this->$var;
     }
-    public function __call($func, array $args = array())
+    public function __call($func, array $args = varray[])
     {
         return $this->$func($args);
     }

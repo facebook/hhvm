@@ -110,7 +110,7 @@ $not_strings = varray [
   $dfp,
 
   /* arrays */
-  array(),
+  varray[],
   varray[0],
   varray[1],
   varray[NULL],

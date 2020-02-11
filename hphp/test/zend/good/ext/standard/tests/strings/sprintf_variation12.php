@@ -8,7 +8,7 @@ echo "*** Testing sprintf() : float formats with arrays ***\n";
 
 // array of array types
 $array_values = varray [
-  array(),
+  varray[],
   varray[0],
   varray[1],
   varray[NULL],

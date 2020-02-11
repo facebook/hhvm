@@ -27,7 +27,7 @@ $misc_array = array (
   "abcd\x00abcd\x00\abcd\x00abcdefghij",
   "abcd\nabcd\tabcd\rabcd\0abcd"
 );
-$array_type = varray[TRUE, FALSE, 1, 0, -1, "1", "0", "-1", NULL, array(), "PHP", ""];
+$array_type = varray[TRUE, FALSE, 1, 0, -1, "1", "0", "-1", NULL, varray[], "PHP", ""];
 /* loop to do loose and strict type check of elements in
    $array_type on elements in $misc_array using array_search();
    checking PHP type comparison tables

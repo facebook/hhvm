@@ -29,7 +29,7 @@ class Bar2 extends Foo2 {
 }
 
 <<__EntryPoint>> function main(): void {
-new Bar(array());
+new Bar(varray[]);
 
-new Bar2(array());
+new Bar2(varray[]);
 }

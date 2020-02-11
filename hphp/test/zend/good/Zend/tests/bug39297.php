@@ -5,7 +5,7 @@ function compareByRef(inout $first, $id, inout $second) {
 
 class MyTree implements ArrayAccess {
     public $parent;
-    public $children = array();
+    public $children = varray[];
 
     public function offsetExists($offset) {
     }

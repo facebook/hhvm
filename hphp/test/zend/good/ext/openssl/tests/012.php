@@ -10,6 +10,6 @@ openssl_seal($data, inout $sealed, inout $ekeys, varray[$pub_key], '', inout $iv
 openssl_seal($data, inout $sealed, inout $ekeys, varray[$pub_key, $pub_key], '', inout $iv);        // no output
 openssl_seal($data, inout $sealed, inout $ekeys, varray[$pub_key, $wrong], '', inout $iv);
 try { openssl_seal($data, inout $sealed, inout $ekeys, $pub_key, '', inout $iv); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-openssl_seal($data, inout $sealed, inout $ekeys, array(), '', inout $iv);
+openssl_seal($data, inout $sealed, inout $ekeys, varray[], '', inout $iv);
 openssl_seal($data, inout $sealed, inout $ekeys, varray[$wrong], '', inout $iv);
 }

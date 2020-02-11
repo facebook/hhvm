@@ -27,7 +27,7 @@ END;
 //array of values to iterate over
 $values = darray[
 
-/*1*/"empty array" => array(),
+/*1*/"empty array" => varray[],
 
 /*2*/
 "int" => varray[

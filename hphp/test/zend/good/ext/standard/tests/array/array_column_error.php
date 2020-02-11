@@ -12,7 +12,7 @@ echo "\n-- Testing array_column() function with Zero arguments --\n";
 try { var_dump(array_column()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing array_column() function with One argument --\n";
-try { var_dump(array_column(array())); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(array_column(varray[])); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing array_column() function with string as first parameter --\n";
 var_dump(array_column('foo', 0));
@@ -21,16 +21,16 @@ echo "\n-- Testing array_column() function with int as first parameter --\n";
 var_dump(array_column(1, 'foo'));
 
 echo "\n-- Testing array_column() column key parameter should be a string or an integer (testing bool) --\n";
-var_dump(array_column(array(), true));
+var_dump(array_column(varray[], true));
 
 echo "\n-- Testing array_column() column key parameter should be a string or integer (testing array) --\n";
-var_dump(array_column(array(), array()));
+var_dump(array_column(varray[], varray[]));
 
 echo "\n-- Testing array_column() index key parameter should be a string or an integer (testing bool) --\n";
-var_dump(array_column(array(), 'foo', true));
+var_dump(array_column(varray[], 'foo', true));
 
 echo "\n-- Testing array_column() index key parameter should be a string or integer (testing array) --\n";
-var_dump(array_column(array(), 'foo', array()));
+var_dump(array_column(varray[], 'foo', varray[]));
 
 echo "Done\n";
 }

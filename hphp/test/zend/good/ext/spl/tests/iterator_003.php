@@ -28,7 +28,7 @@ class StudentList implements IteratorAggregate
 
     public function __construct()
     {
-        $this->students = array();
+        $this->students = varray[];
     }
 
     public function add(Student $student)

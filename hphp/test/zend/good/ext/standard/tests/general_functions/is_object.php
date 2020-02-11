@@ -31,7 +31,7 @@ interface IValue {
 
 // implement the interface
 class Value implements IValue {
-  private $vars = array();
+  private $vars = varray[];
 
   public function setVal($name, $val) {
     $this->vars[$name] = $val;
@@ -113,7 +113,7 @@ function main(): void {
     0123,
     $fp,  // resource
     $dfp,
-    array(),
+    varray[],
     varray["string"],
     "0",
     "1",

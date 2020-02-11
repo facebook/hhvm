@@ -5,7 +5,7 @@
 <<__EntryPoint>> function main(): void {
 echo "\n*** Testing array_merge() basic functionality ***";
 $begin_array = varray[
-  array(),
+  varray[],
   darray[ 1 => "string"],
   darray[ "" => "string"],
   darray[ -2.44444 => 12],
@@ -16,7 +16,7 @@ $begin_array = varray[
 ];
 
 $end_array   = varray[
-  array(),
+  varray[],
   darray[ 1 => "string"],
   darray[ "" => "string"],
   darray[ -2.44444 => 12],
@@ -52,14 +52,14 @@ var_dump( array_merge( $end_array[0],
 var_dump( array_merge( $end_array[0],
                        $end_array[5],
                        varray["array on fly"],
-                       darray["nullarray" => array()]
+                       darray["nullarray" => varray[]]
                      )
         );
 
 
 echo "\n*** Testing single array argument ***\n";
 /* Empty array */
-var_dump(array_merge(array()));
+var_dump(array_merge(varray[]));
 
 /* associative array with string keys, which will not be re-indexed */
 var_dump(array_merge($begin_array[4]));

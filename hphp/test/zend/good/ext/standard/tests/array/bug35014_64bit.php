@@ -1,7 +1,7 @@
 <?hh <<__EntryPoint>> function main(): void {
 $tests = varray[
     'foo',
-    array(),
+    varray[],
     varray[0],
     varray[3],
     varray[3, 3],

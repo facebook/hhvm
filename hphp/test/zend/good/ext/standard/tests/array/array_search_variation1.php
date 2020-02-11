@@ -13,7 +13,7 @@ $arrays = varray [
   array(4, array(1, 2 => 3), "one" => 1, "5" => 5 ),
   array(-1, -2, -3, -4, -2.989888, "-0.005" => "neg0.005", 2.0 => "float2", "-.9" => -.9),
   varray[TRUE, FALSE],
-  varray["", array()],
+  varray["", varray[]],
   varray["abcd\x00abcd\x00abcd"],
   varray["abcd\tabcd\nabcd\rabcd\0abcdefghij"]
 ];
@@ -30,7 +30,7 @@ $array_compare = varray [
   "-.9",
   "True",
   "",
-  array(),
+  varray[],
   NULL,
   "ab",
   "abcd",

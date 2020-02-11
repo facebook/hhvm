@@ -2,7 +2,7 @@
 class myZip extends ZipArchive {
     private $test = 0;
     public $testp = 1;
-    private $testarray = array();
+    private $testarray = varray[];
 
     public function __construct() {
         $this->testarray[] = 1;

@@ -70,7 +70,7 @@ $variation_array = varray[
   NULL,
   null,
 
-  array(),  // arrays 
+  varray[],  // arrays 
   varray[NULL],
   varray[true],
   varray[0],

@@ -6,7 +6,7 @@ if (!$socket) {
 socket_set_block($socket);
 
 //wrong params
-$retval_1 = socket_set_option( $socket, SOL_SOCKET, SO_RCVTIMEO, array());
+$retval_1 = socket_set_option( $socket, SOL_SOCKET, SO_RCVTIMEO, varray[]);
 
 //set/get comparison
 $options = darray["sec" => 1, "usec" => 0];

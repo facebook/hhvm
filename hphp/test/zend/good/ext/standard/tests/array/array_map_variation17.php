@@ -50,7 +50,7 @@ $unexpected_callbacks = varray[
        '',
 
        // array data
-/*16*/ array(),
+/*16*/ varray[],
        varray[1, 2],
        varray[1, varray[2]],
 

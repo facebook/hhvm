@@ -10,7 +10,7 @@
         $colour_b = imagecolorallocate($im, 0, 0, 0);
 
         imagefilledrectangle($im, 0, 0, $sx - 1, $sy - 1, $colour_b);
-        imagefttext($im, $sy * 0.75, 0, 0, $sy - 1, $colour_w, $fontfile, "A", array());
+        imagefttext($im, $sy * 0.75, 0, 0, $sy - 1, $colour_w, $fontfile, "A", varray[]);
 
         $cnt = 0;
         for ($y = 0; $y < $sy; ++$y) {

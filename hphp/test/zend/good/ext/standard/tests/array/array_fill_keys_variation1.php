@@ -12,7 +12,7 @@ function main() {
 
   $nullVal = null;
   $simpleStr = "simple";
-  $emptyArr = array();
+  $emptyArr = varray[];
 
   echo "\n-- Testing array_fill_keys() function with empty arguments --\n";
   var_dump( array_fill_keys($emptyArr, $nullVal) );

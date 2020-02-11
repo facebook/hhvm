@@ -25,7 +25,7 @@ var_dump(serialize(varray[$x, $x]));
 $x = null;
 var_dump(serialize(varray[$x, $x]));
 
-$x = array();
+$x = varray[];
 var_dump(serialize(varray[$x, $x]));
 
 echo "Done";

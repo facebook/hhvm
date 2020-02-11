@@ -45,7 +45,7 @@ $numbers =  varray [
           10.1234567e10,
 
           // array values
-/*10*/      array(),
+/*10*/      varray[],
           varray[0],
           varray[1, 2],
 

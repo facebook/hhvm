@@ -5,7 +5,7 @@ function a() {
 }
 
 function b() {
-    return array();
+    return varray[];
 }
 
 class foo {

@@ -56,7 +56,7 @@ $arrays = varray [
 /*1*/  varray[1, 2], // array with default keys and numeric values
        varray[1.1, 2.2], // array with default keys & float values
        varray[false,true], // array with default keys and boolean values
-       array(), // empty array
+       varray[], // empty array
 /*5*/  varray[NULL], // array with NULL
        varray["a\v\f","aaaa\r","b","b\tbbb","c","\[\]\!\@\#\$\%\^\&\*\(\)\{\}"],  // array with double quoted strings
        varray['a\v\f','aaaa\r','b','b\tbbb','c','\[\]\!\@\#\$\%\^\&\*\(\)\{\}'],  // array with single quoted strings

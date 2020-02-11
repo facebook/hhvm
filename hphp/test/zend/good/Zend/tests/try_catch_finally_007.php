@@ -5,7 +5,7 @@ function foo($ret = FALSE) {
             do {
                 goto label;
             } while(0);
-            foreach (array() as $val) {
+            foreach (varray[] as $val) {
                 continue;
             }
         } finally {

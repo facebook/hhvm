@@ -5,7 +5,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing is_null() with valid null values ***\n";
 // different valid  null vlaues 
-$unset_array = array();
+$unset_array = varray[];
 $unset_int = 10;
 $unset_float = 10.5;
 $unset_bool = true;
@@ -103,7 +103,7 @@ $not_null_types = varray [
   $dfp,
 
   /* arrays */
-  array(),
+  varray[],
   varray[0],
   varray[1],
   varray[NULL],

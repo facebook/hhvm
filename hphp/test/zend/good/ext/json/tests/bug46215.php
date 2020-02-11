@@ -1,7 +1,7 @@
 <?hh
 
 class foo {
-    protected $a = array();
+    protected $a = varray[];
 }
 <<__EntryPoint>> function main(): void {
 $a = new foo;

@@ -25,7 +25,7 @@ EOT;
 $arrays = varray [
 
        // empty array
-/*1*/  array(),
+/*1*/  varray[],
 
        // arrays with integer keys
        darray[0 => "0"],

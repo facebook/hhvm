@@ -5,7 +5,7 @@ if (!$socket) {
         die('Unable to create AF_INET socket [socket]');
 }
 // wrong params
-$retval_1 = socket_set_option( $socket, SOL_SOCKET, SO_LINGER, array());
+$retval_1 = socket_set_option( $socket, SOL_SOCKET, SO_LINGER, varray[]);
 
 // set/get comparison
 $options = darray["l_onoff" => 1, "l_linger" => 1];

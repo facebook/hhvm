@@ -41,7 +41,7 @@ $values = varray[
           .5,
 
           // array data
-/*10*/      array(),
+/*10*/      varray[],
           varray[0],
           varray[1],
           varray[1, 2],

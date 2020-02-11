@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 $arr1 = varray['a','b','c'];
-$arr2 = array();
+$arr2 = varray[];
 $arr3 = array('c','key'=>'d');
 $arr4 = array("a\0b"=>'e','key'=>'d', 'f');
 

@@ -18,7 +18,7 @@ $values = varray[
 'http',
 '',
 -1,
-array(),
+varray[],
 'mailto:foo@bar.com',
 'news:news.php.net',
 'file://foo/bar',

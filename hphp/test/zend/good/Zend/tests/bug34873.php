@@ -3,7 +3,7 @@ class pwa {
     public $var;
 
     function __construct(){
-        $this->var = array();
+        $this->var = varray[];
     }
 
     function test (){

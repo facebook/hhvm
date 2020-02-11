@@ -38,7 +38,7 @@ $values =  varray [
   .5,
 
   // array values
-  array(),
+  varray[],
   varray[0],
   varray[1],
   varray[1, 2],

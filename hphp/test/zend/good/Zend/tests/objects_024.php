@@ -1,7 +1,7 @@
 <?hh
 
 class foo {
-    static $bar = array();
+    static $bar = varray[];
 
     public function __set($a, $b) {
         self::$bar[] = $b;

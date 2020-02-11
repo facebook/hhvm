@@ -46,7 +46,7 @@ $inputs = varray [
 /*1*/  varray[1, 2, 2, 1], // with default keys and numeric values
        varray[1.1, 2.2, 1.1], // with default keys & float values
        varray[false, true, false], // with default keys and boolean values
-       array(), // empty array
+       varray[], // empty array
 /*5*/  varray[NULL, null], // with NULL
        varray["a\v\f", "aaaa\r", "b", "aaaa\r", "\[\]\!\@\#\$\%\^\&\*\(\)\{\}"],  // with double quoted strings
        varray['a\v\f', 'aaaa\r', 'b', 'aaaa\r', '\[\]\!\@\#\$\%\^\&\*\(\)\{\}'],  // with single quoted strings

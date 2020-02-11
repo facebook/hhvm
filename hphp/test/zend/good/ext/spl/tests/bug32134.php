@@ -3,7 +3,7 @@
 class myArray extends ArrayIterator
 {
 
-    public function __construct($array = array())
+    public function __construct($array = varray[])
     {
         parent::__construct($array);
     }

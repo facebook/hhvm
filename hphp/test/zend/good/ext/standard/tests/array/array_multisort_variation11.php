@@ -7,7 +7,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_multisort() : Testing with empty array ***\n";
 
-$arr = array();
+$arr = varray[];
 var_dump(array_multisort1(inout $arr));
 
 echo "===DONE===\n";

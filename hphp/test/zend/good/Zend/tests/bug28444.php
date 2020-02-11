@@ -16,7 +16,7 @@ class Object
 
 class Overloaded
 {
-    public $props = array();
+    public $props = varray[];
     public $x;
 
     function __construct($x)

@@ -38,7 +38,7 @@ $inputs = varray[
        // empty data
 /* 7*/ "",
        '',
-       array(),
+       varray[],
 
        // string data
 /*10*/ "abcxyz",

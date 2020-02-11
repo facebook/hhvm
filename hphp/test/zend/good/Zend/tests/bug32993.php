@@ -1,7 +1,7 @@
 <?hh
 class Test implements Iterator {
 
-    public $arr = array();
+    public $arr = varray[];
 
     public function rewind()    { $arr = $this->arr; reset(inout $arr); $this->arr = $arr;  }
     public function current()   { throw new Exception(); }

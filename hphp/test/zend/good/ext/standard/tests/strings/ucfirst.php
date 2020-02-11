@@ -45,7 +45,7 @@ foreach ($str_array as $string) {
 echo "\n#### Testing Miscelleneous inputs ####\n";
 
 echo "--- Testing arrays ---";
-$str_arr = varray["hello", "?world", "!$%**()%**[][[[&@#~!", array()];
+$str_arr = varray["hello", "?world", "!$%**()%**[][[[&@#~!", varray[]];
 try { var_dump( ucfirst($str_arr) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n--- Testing objects ---\n";

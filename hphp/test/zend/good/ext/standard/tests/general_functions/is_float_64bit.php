@@ -72,7 +72,7 @@ function main(): void {
     $fp,  // resource
     $dfp,
 
-    array(),  // arrays
+    varray[],  // arrays
     varray[NULL],
     varray[0.5e10],
     varray[1,2,3,4],

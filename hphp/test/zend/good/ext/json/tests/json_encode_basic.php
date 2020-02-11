@@ -55,7 +55,7 @@ $inputs =  varray [
           "Hello\t\tWorld\n",
 
           // arrays
-/*18*/    array(),
+/*18*/    varray[],
           varray[1,2,3,4,5],
          darray[1 => "Sun", 2=>"Mon", 3 => "Tue", 4 => "Wed", 5 => "Thur", 6 => "Fri", 7 => "Sat"],
           darray["Jan" => 31, "Feb" => 29, "Mar" => 31, "April" => 30, "May" => 31, "June" => 30],

@@ -68,7 +68,7 @@ function ut_main()
         Locale::LANG_TAG =>'de'  ,
         Locale::REGION_TAG =>'DE',
         'private0' => 13,
-        'variant1' => array(),
+        'variant1' => varray[],
         'extlang2' => false
     ];
     $loc_parts_arr12 = darray[

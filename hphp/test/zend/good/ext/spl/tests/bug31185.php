@@ -1,7 +1,7 @@
 <?hh
 
 class FooBar implements ArrayAccess {
-    private $array = array();
+    private $array = varray[];
 
     public function offsetExists($index) {
         return isset($this->array[$index]);

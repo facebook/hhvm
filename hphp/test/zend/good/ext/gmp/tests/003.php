@@ -1,6 +1,6 @@
 <?hh
         /* Binary */
-        $test = array();
+        $test = varray[];
         $test[] = gmp_init("0b10011010010");
         $test[] = gmp_init("0b10011010010", 2);
         $test[] = gmp_init("10011010010");

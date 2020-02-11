@@ -1,7 +1,7 @@
 <?hh
 class foo {
     public $a1;
-    public $a2 = array();
+    public $a2 = varray[];
     public $a3;
     public $o2;
 
@@ -14,7 +14,7 @@ class foo {
     }
 
     public function f3() {
-        $this->a3 = array();
+        $this->a3 = varray[];
         return $this->a3;
     }
 

@@ -43,7 +43,7 @@ $input = varray[
   NULL,
   "0",
   '0',
-  array(),
+  varray[],
   !1,
   1==2,
   $empty_heredoc,

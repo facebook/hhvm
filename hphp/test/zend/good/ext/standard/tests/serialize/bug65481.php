@@ -1,6 +1,6 @@
 <?hh
 class A {
-    public $e = array();
+    public $e = varray[];
 }
 
 class Token implements \Serializable {

@@ -8,7 +8,7 @@ echo "*** Testing sprintf() : unsigned formats with array values ***\n";
 
 // array of array values 
 $array_values = varray[
-  array(),
+  varray[],
   varray[0],
   varray[1],
   varray[-12345],

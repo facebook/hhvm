@@ -14,9 +14,9 @@ var_dump(gmp_strval(gmp_xor($n, $n1)));
 
 try { var_dump(gmp_xor($n, $n1, 1)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump(gmp_xor(1)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-var_dump(gmp_xor(array(), 1));
-var_dump(gmp_xor(1, array()));
-var_dump(gmp_xor(array(), array()));
+var_dump(gmp_xor(varray[], 1));
+var_dump(gmp_xor(1, varray[]));
+var_dump(gmp_xor(varray[], varray[]));
 
 echo "Done\n";
 }

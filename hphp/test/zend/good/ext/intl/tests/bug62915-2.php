@@ -10,7 +10,7 @@ class C extends MessageFormatter {
         static $ARGS = varray["en_US", "foo"];
 }
 class D extends Spoofchecker {
-        static $ARGS = array();
+        static $ARGS = varray[];
 }
 <<__EntryPoint>> function main(): void {
 foreach (range('A', 'D') as $subclass) {

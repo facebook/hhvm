@@ -1,7 +1,7 @@
 <?hh
 class TheObj {
     public $RealVar1, $RealVar2, $RealVar3, $RealVar4;
-    public $Var = array();
+    public $Var = varray[];
 
     function __set($var, $val) {
         $this->Var[$var] = $val;

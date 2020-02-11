@@ -54,7 +54,7 @@ $inputs = varray[
        // empty data
 /*16*/ "",
        '',
-       array(),
+       varray[],
 
        // string data
 /*19*/ "abcxyz",
@@ -62,7 +62,7 @@ $inputs = varray[
        $heredoc,
 
        // array data
-       array(),
+       varray[],
        varray[1,2,4],
 
        // object data

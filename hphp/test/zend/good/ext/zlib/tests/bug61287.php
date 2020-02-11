@@ -2,7 +2,7 @@
 $array = darray[
     'region_id' => 1,
     'discipline' => 23,
-    'degrees' => array(),
+    'degrees' => varray[],
     'country_id' => 27
 ];
 

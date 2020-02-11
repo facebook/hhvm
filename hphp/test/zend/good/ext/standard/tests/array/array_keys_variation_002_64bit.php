@@ -14,7 +14,7 @@ var_dump(array_keys($arr_range));
 
 echo "\n*** Testing array_keys() on an array created on the fly ***\n";
 var_dump(array_keys(darray["a" => 1, "b" => 2, "c" => 3]));
-var_dump(array_keys(array()));  // null array
+var_dump(array_keys(varray[]));  // null array
 
 echo "Done\n";
 }

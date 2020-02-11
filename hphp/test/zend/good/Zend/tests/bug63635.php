@@ -1,7 +1,7 @@
 <?hh
 class Node {
     public $parent = NULL;
-    public $childs = array();
+    public $childs = varray[];
 
     function __construct(Node $parent=NULL) {
         if ($parent) {

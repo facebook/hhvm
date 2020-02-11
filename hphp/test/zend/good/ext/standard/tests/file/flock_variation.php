@@ -34,7 +34,7 @@ $wouldblocks = varray[
   FALSE,
   NULL,
   varray[1,2,3],
-  array(),
+  varray[],
   "string",
   "",
   /* binary input */

@@ -17,7 +17,7 @@ $vars = varray[
     "\0",
     9876545,
     0.10,
-    array(),
+    varray[],
     varray[1,2,3],
     false,
     true,

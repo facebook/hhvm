@@ -17,7 +17,7 @@ echo "*** Testing array_map() : array having subarrays ***\n";
 
 // different subarrays
 $arr1 = varray[
-  array(),
+  varray[],
   varray[1, 2],
   varray['a', 'b'],
   varray[1, 2, 'a', 'b'],

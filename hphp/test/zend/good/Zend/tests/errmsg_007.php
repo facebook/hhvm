@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$a = array();
+$a = varray[];
 isset($a[]);
 
 echo "Done\n";

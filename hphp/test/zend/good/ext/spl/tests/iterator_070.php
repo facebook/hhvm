@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$array = array();
+$array = varray[];
 $recArrIt = new RecursiveArrayIterator($array);
 
 $recItIt = new RecursiveIteratorIterator($recArrIt);

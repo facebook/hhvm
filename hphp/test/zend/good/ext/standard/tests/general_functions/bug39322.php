@@ -4,7 +4,7 @@ $descriptors = darray[
     1 => varray['pipe', 'w'],
     2 => varray['pipe', 'w']];
 
-$pipes = array();
+$pipes = varray[];
 
 $process = proc_open('/bin/sleep 120', $descriptors, inout $pipes);
 

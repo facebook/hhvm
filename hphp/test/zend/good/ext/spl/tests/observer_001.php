@@ -23,7 +23,7 @@ class ObserverImpl implements SplObserver
 class SubjectImpl implements SplSubject
 {
     protected $name = '';
-    protected $observers = array();
+    protected $observers = varray[];
 
     function __construct($name = 'sub')
     {

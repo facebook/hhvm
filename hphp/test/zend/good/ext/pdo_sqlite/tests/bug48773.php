@@ -7,7 +7,7 @@ class bar extends PDOStatement {
 
 class foo extends PDO {
     public $statementClass = 'bar';
-    function __construct($dsn, $username, $password, $driver_options = array()) {
+    function __construct($dsn, $username, $password, $driver_options = varray[]) {
         $driver_options[PDO::ATTR_ERRMODE] = PDO::ERRMODE_EXCEPTION;
         parent::__construct($dsn, $username, $password, $driver_options);
 

@@ -11,7 +11,7 @@ class MyContainer
         $this->_p[ $what ] = $value;
     }
 
-    private $_p = array();
+    private $_p = varray[];
 }
 <<__EntryPoint>> function main(): void {
 $c = new MyContainer();

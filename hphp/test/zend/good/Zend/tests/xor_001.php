@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 $a = varray[1,2,3];
-$b = array();
+$b = varray[];
 
 $c = $a ^ $b;
 var_dump($c);

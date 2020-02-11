@@ -18,7 +18,7 @@ $arrays = varray [
   varray[1.1,2.2],
   varray[varray[2],varray[1]],
   varray[false,true],
-  array(),
+  varray[],
   varray["a","aaaa","b","bbbb","c","ccccccccccccccccccccc"]
 ];
 /* loop to output string with ', ' as $glue, using implode() */

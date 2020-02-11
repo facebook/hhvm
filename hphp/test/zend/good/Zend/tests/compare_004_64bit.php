@@ -25,7 +25,7 @@ $a = varray[
     new stdclass,
     new stdclass,
     new test,
-    array(),
+    varray[],
     -PHP_INT_MAX-1,
     (string)(-PHP_INT_MAX-1),
 ];

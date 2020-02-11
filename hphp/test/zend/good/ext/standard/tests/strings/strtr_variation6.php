@@ -42,7 +42,7 @@ $from_arr =  varray [
           10.1234567e10,
 
           // array values
-/*7*/      array(),
+/*7*/      varray[],
           varray[0],
           varray[1, 2],
 

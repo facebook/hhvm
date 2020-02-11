@@ -29,7 +29,7 @@ $methodThatThrows = new ReflectionMethod("TestClass::willThrow");
 
 echo "Public method:\n";
 
-var_dump($foo->invokeArgs($testClassInstance, array()));
+var_dump($foo->invokeArgs($testClassInstance, varray[]));
 var_dump($foo->invokeArgs($testClassInstance, varray[true]));
 
 echo "\nMethod with args:\n";
@@ -39,7 +39,7 @@ var_dump($methodWithArgs->invokeArgs($testClassInstance, varray[1, "arg2", 3]));
 
 echo "\nMethod that throws an exception:\n";
 try {
-    $methodThatThrows->invokeArgs($testClassInstance, array());
+    $methodThatThrows->invokeArgs($testClassInstance, varray[]);
 } catch (Exception $e) {
     var_dump($e->getMessage());
 }

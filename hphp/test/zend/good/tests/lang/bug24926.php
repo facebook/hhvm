@@ -2,7 +2,7 @@
 
 class foo {
 
-    public $functions = array();
+    public $functions = varray[];
 
     function __construct()
     {

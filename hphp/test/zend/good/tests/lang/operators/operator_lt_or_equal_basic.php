@@ -1,6 +1,6 @@
 <?hh <<__EntryPoint>> function main(): void {
 $valid_true = varray[1, "1", "true", 1.0, varray[1]];
-$valid_false = varray[0, "", 0.0, array(), NULL];
+$valid_false = varray[0, "", 0.0, varray[], NULL];
 
 $int1 = 678;
 $int2 = -67836;

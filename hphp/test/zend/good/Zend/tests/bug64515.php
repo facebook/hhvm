@@ -1,5 +1,5 @@
 <?hh
-function foo($unused = null, $unused = null, $arg = array()) {
+function foo($unused = null, $unused = null, $arg = varray[]) {
   return 1;
 }
 <<__EntryPoint>> function main(): void {

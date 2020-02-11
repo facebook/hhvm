@@ -19,7 +19,7 @@ $invalid_files = varray[
   FALSE,
   NULL,
   " ",
-  @array(),
+  @varray[],
   @$file_handle
 ];
 /* loop through to test each element in the above array 

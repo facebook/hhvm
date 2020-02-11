@@ -43,7 +43,7 @@ $values = varray [
             false,
   /* 16 */  FALSE,
             // array values
-  /* 17 */  array(),
+  /* 17 */  varray[],
             varray[1, 2, 3,4 , varray[5, 6]],
             // object variable
   /* 19 */  new test(),

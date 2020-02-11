@@ -44,14 +44,14 @@ print "COUNT_RECURSIVE: should be 13, is ".count($arr, COUNT_RECURSIVE)."\n";
 
 echo "\n*** Testing possible variations of count() function on arrays ***";
 $count_array = varray[
-  array(),
+  varray[],
   darray[ 1 => "string"],
   array( "" => "string", 0 => "a", NULL => "b", -1.00 => "c",
          varray[varray[varray[NULL]]]),
   array( -2.44444 => 12, varray[varray[1, 2, varray[varray["0"]]]]),
   darray[ "a" => 1, "b" => -2.344, "b" => "string", "c" => NULL, "d" => -2.344],
   array( 4 => 1, 3 => -2.344, "3" => "string", "2" => NULL,
-         1 => -2.344, array()),
+         1 => -2.344, varray[]),
   darray[ TRUE => TRUE, FALSE => FALSE, "" => "", " " => " ",
      NULL => NULL, "\x000" => "\x000", "\000" => "\000"],
   array( NULL, 1.23 => "Hi", "string" => "hello",
@@ -79,7 +79,7 @@ print "COUNT_NORMAL: should be 0, is ".@count($a)."\n";
 
 
 print "\n-- Testing count() on an empty sub-array --\n";
-$arr = varray[1, varray[3, 4, array()]];
+$arr = varray[1, varray[3, 4, varray[]]];
 print "COUNT_NORMAL: should be 2, is ".count($arr, COUNT_NORMAL)."\n";
 print "COUNT_RECURSIVE: should be 5, is ".count($arr, COUNT_RECURSIVE)."\n";
 
@@ -99,11 +99,11 @@ var_dump(count($arr_resource));
 
 echo "\n-- Testing error conditions --";
 try { var_dump( count() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // No. of args = 0
-try { var_dump( count(array(), COUNT_NORMAL, 100) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // No. of args > expected
+try { var_dump( count(varray[], COUNT_NORMAL, 100) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // No. of args > expected
 
 /* Testing Invalid type arguments */
 try { var_dump( count(100, "string") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-try { var_dump( count(array(), "") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( count(varray[], "") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\nDone";
 

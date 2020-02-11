@@ -3,7 +3,7 @@
 namespace test;
 
 class foo {
-    public $e = array();
+    public $e = varray[];
 
     public function __construct() {
         $this->e[] = $this;

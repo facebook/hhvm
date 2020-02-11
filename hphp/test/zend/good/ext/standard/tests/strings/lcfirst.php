@@ -76,7 +76,7 @@ foreach ($str_array as $string) {
 echo "\n#### Testing Miscelleneous inputs ####\n";
 
 echo "--- Testing arrays ---";
-$str_arr = varray["Hello", "?world", "!$%**()%**[][[[&@#~!", array()];
+$str_arr = varray["Hello", "?world", "!$%**()%**[][[[&@#~!", varray[]];
 try { var_dump( lcfirst($str_arr) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n--- Testing lowercamelcase action call example ---\n";

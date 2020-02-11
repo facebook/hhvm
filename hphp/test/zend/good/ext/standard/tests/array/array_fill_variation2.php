@@ -38,7 +38,7 @@ function main(): void {
             .5,
 
             // array values
-  /* 6  */  array(),
+  /* 6  */  varray[],
             varray[0],
             varray[1],
             varray[1, 2],

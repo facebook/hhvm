@@ -18,7 +18,7 @@ $num = 2;
 //array of different types of array values for 'val' argument  
 $values = varray[
            
-  /* 1  */  array(),
+  /* 1  */  varray[],
             varray[1 , 2 , 3 , 4],
             darray[1 => "Hi" , 2 => "Hello"],
             varray["Saffron" , "White" , "Green"],

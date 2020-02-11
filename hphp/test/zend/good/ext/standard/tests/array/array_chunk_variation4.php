@@ -15,7 +15,7 @@ $size = 2;
 
 // input array
 $input_array = darray [
-  "array1" => array(),
+  "array1" => varray[],
   "array2" => varray[1, 2, 3],
   "array3" =>  varray[1]
 ];

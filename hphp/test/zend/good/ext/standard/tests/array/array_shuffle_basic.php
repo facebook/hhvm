@@ -6,7 +6,7 @@
 <<__EntryPoint>> function main(): void {
 $numbers = range(1, 20);
 echo "*** testing array_shuffle  \n";
-$a = array();
+$a = varray[];
 var_dump(shuffle(inout $a));
 var_dump($a);
 $a = varray[1];

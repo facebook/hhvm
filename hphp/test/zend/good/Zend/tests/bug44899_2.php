@@ -2,7 +2,7 @@
 
 class myclass
 {
-    private $_data = array();
+    private $_data = varray[];
 
     function __construct($data)
     {

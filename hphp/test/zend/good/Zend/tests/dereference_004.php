@@ -1,7 +1,7 @@
 <?hh
 
 class foo {
-    public $x = array();
+    public $x = varray[];
     public function __construct() {
         $h = varray[];
         $h[] = new stdclass;

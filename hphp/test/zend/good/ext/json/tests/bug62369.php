@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$array = array();
+$array = varray[];
 for ($i=0; $i<550; $i++) {
     $array = varray[$array];
 }

@@ -1,13 +1,13 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$empty_array = array();
+$empty_array = varray[];
 $number = 5;
 $str = "abc";
 
 
 /* Various combinations of arrays to be used for the test */
 $mixed_array = varray[
-  array(),
+  varray[],
   varray[ 1,2,3,4,5,6,7,8,9 ],
   varray[ "One", "_Two", "Three", "Four", "Five" ],
   varray[ 6, "six", 7, "seven", 8, "eight", 9, "nine" ],
@@ -17,7 +17,7 @@ $mixed_array = varray[
   darray[ "f" => "fff", "1" => "one", 4 => 6, "" => "blank", 2.4 => "float", "F" => "FFF",
          "blank" => "", 3.7 => 3.7, 5.4 => 7, 6 => 8.6, '5' => "Five", "4name" => "jonny", "a" => NULL, NULL => 3 ],
   varray[ 12, "name", 'age', '45' ],
-  varray[ varray["oNe", "tWo", 4], varray[10, 20, 30, 40, 50], array() ],
+  varray[ varray["oNe", "tWo", 4], varray[10, 20, 30, 40, 50], varray[] ],
   array( "one" => 1, "one" => 2, "three" => 3, 3, 4, 3 => 33, 4 => 44, 5, 6,
           5.4 => 54, 5.7 => 57, "5.4" => 554, "5.7" => 557 )
 ];

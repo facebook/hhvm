@@ -2,7 +2,7 @@
 
 class Test extends XMLReader
 {
-    private $testArr = array();
+    private $testArr = varray[];
     public function __construct()
     {
         $this->testArr[] = 1;

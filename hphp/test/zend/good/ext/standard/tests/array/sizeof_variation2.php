@@ -18,7 +18,7 @@ $values = varray [
   /* 1  */  array($fp, "resource" => $fp),
             varray[1, varray[3, 4, varray[6, varray[8]]]],
             array("a" => 1, 'b' => 2, array( "c" =>3, darray[ "d" => 5])),
-            array(),
+            varray[],
   /* 5  */  varray[1, 2, 3, 4],
             varray["Saffron", "White", "Green"],
             varray['saffron', 'white', 'green'],

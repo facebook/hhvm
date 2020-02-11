@@ -1,7 +1,7 @@
 <?hh
 
 class test {
-    static public $ar = array();
+    static public $ar = varray[];
 }
 <<__EntryPoint>> function main(): void {
 var_dump(test::$ar);

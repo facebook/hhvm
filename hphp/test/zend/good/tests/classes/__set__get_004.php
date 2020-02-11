@@ -1,6 +1,6 @@
 <?hh
 class Test {
-    protected $x = array();
+    protected $x = varray[];
 
     function __get($name) {
         if (isset($this->x[$name])) {

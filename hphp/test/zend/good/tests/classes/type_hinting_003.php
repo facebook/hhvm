@@ -14,7 +14,7 @@ class Test
         var_dump($ar);
     }
 
-    static function f3(array $ar = array())
+    static function f3(array $ar = varray[])
     {
         echo __METHOD__ . "()\n";
         var_dump($ar);

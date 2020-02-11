@@ -24,7 +24,7 @@ echo "Test again\n";
 var_dump(isset($i, $f, $s, $b));
 
 echo "\n\nArray test:\n";
-$arr = array();
+$arr = varray[];
 var_dump(isset($var));
 var_dump(isset($var[1]));
 var_dump(isset($var, $var[1]));

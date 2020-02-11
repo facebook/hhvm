@@ -10,7 +10,7 @@ echo "*** Testing sprintf() : string formats with array values ***\n";
 
 // different arrays used to test he function
 $array_values = varray[
-  array(),
+  varray[],
   varray[0],
   varray[1],
   varray[NULL],

@@ -12,7 +12,7 @@ $a = varray[
 	true,
 	false,
 	new stdclass,
-	array(),
+	varray[],
 	-PHP_INT_MAX-1,
 	(string)(-PHP_INT_MAX-1),
 ];

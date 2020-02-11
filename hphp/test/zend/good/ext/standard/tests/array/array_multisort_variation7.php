@@ -19,7 +19,7 @@ echo "*** Testing array_multisort() : usage variation  - test sort order of all 
 $inputs = array(
       'int 0' => 0,
       'float -10.5' => -10.5,
-      array(),
+      varray[],
       'uppercase NULL' => NULL,
       'lowercase true' => true,
       'empty string DQ' => "",

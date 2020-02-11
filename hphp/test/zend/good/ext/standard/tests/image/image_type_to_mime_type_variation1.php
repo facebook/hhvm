@@ -30,7 +30,7 @@ $values = varray[
       .5,
 
       // array data
-      array(),
+      varray[],
       darray['color' => 'red', 'item' => 'pen'],
 
       // null data

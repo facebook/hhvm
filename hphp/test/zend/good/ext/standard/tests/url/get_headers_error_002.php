@@ -14,7 +14,7 @@ try { var_dump( get_headers($url, "#PHPTestFest2009 Norway") ); } catch (Excepti
 
 // Format argument as type Array
 echo "\n-- Testing get_headers() function with format argument as type array --\n";
-try { var_dump( get_headers($url, array()) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( get_headers($url, varray[]) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // Format argument as type Object
 class testObject

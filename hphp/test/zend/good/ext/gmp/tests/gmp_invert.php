@@ -16,9 +16,9 @@ var_dump(gmp_strval(gmp_invert($n1, $n)));
 
 try { var_dump(gmp_invert($n1, $n, 10)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump(gmp_invert($n1)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-var_dump(gmp_invert(array(), 1));
-var_dump(gmp_invert(1, array()));
-var_dump(gmp_invert(array(), array()));
+var_dump(gmp_invert(varray[], 1));
+var_dump(gmp_invert(1, varray[]));
+var_dump(gmp_invert(varray[], varray[]));
 
 echo "Done\n";
 }

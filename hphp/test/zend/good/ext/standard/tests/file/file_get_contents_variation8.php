@@ -16,7 +16,7 @@ $names_arr = varray[
   "",
   " ",
   "\0",
-  array(),
+  varray[],
 
   /* prefix with path separator of a non existing directory*/
   "/no/such/file/dir", 

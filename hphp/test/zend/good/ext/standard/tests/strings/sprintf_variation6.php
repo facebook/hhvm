@@ -8,7 +8,7 @@ echo "*** Testing sprintf() : integer formats with arrays ***\n";
 
 // different arrays used to test the function
 $array_types = varray [
-  array(),
+  varray[],
   varray[0],
   varray[1],
   varray[-123],

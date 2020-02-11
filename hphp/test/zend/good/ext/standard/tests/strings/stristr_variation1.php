@@ -35,7 +35,7 @@ $inputs =  varray [
           10.1234567e10,
 
           // array values
-/*8*/      array(),
+/*8*/      varray[],
           varray[0],
           varray[1, 2],
 

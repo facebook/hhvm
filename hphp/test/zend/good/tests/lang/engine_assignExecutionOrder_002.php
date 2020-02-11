@@ -71,7 +71,7 @@ echo "$r $s $t $u $v $w $x\n";
 
 // expect y and z to be undefined
 try {
-  list($y,$z) = array();
+  list($y,$z) = varray[];
   echo "Y=$y,Z=$z\n";
 } catch (Exception $e) { echo $e->getMessage()."\n"; }
 

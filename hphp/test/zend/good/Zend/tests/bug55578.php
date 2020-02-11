@@ -11,7 +11,7 @@ function test($options, $queryPart) {
 }
 
 <<__EntryPoint>> function main(): void {
-$options = array();
+$options = varray[];
 
 var_dump(test($options, new Foo()));
 }

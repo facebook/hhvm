@@ -19,7 +19,7 @@ class ArrayProxy implements ArrayAccess
         echo __METHOD__ . "($element)\n";
         if (!$object->offsetExists($element))
         {
-            $object[$element] = array();
+            $object[$element] = varray[];
         }
         $this->object = $object;
         $this->element = $element;

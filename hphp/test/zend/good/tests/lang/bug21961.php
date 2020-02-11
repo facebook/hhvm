@@ -5,7 +5,7 @@ class man {
 
   function __construct() {
     $this->name = 'Mr. X';
-    $this->bars = array();
+    $this->bars = varray[];
   }
 
   function getdrunk($where) {

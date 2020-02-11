@@ -2,7 +2,7 @@
 
 class A
 {
-    public $a = array();
+    public $a = varray[];
 
     public function __construct()
     {

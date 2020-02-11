@@ -72,7 +72,7 @@ $not_int_types = varray [
   $dfp,
   
   /* arrays */
-  array(),
+  varray[],
   varray[0],
   varray[1],
   varray[NULL],

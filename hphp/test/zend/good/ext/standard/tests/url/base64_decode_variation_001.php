@@ -38,7 +38,7 @@ $values =  darray [
     ".5" => .5,
 
     // array data
-    "array()" =>   array(),
+    "array()" =>   varray[],
     "array(0)" =>  varray[0],
     "array(1)" =>  varray[1],
     "array(1, 2)" => varray[1, 2],

@@ -6,13 +6,13 @@
 echo "*** Testing is_array() on different type of arrays ***\n";
 /* different types of arrays */
 $arrays = varray[
-  array(),
+  varray[],
   varray[NULL],
   varray[null],
   varray[true],
   varray[""],
   varray[''],
-  varray[array(), array()],
+  varray[varray[], varray[]],
   varray[varray[1, 2], varray['a', 'b']],
   darray[1 => 'One'],
   darray["test" => "is_array"],

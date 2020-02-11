@@ -11,7 +11,7 @@ class testcase {
 		$this->chunk_size = $chunk_size;
 		$this->bom = $bom;
 		$this->prologue = !$omit_prologue;
-		$this->tags = array();
+		$this->tags = varray[];
 	}
 
 	function start_element($parser, $name, $attrs) {

@@ -1,7 +1,7 @@
 <?hh
 class Test
 {
-    protected $x = array();
+    protected $x = varray[];
 
     function __get($name) {
         echo __METHOD__ . "\n";
@@ -22,7 +22,7 @@ class Test
 
 class AutoGen
 {
-    protected $x = array();
+    protected $x = varray[];
 
     function __get($name) {
         echo __METHOD__ . "\n";

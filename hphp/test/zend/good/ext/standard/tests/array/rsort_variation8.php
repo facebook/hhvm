@@ -13,16 +13,16 @@ echo "*** Testing rsort() : variation ***\n";
 // array of arrays
 $various_arrays = varray [
   // null array
-  array(),
+  varray[],
 
   // array contains null sub array
-  varray[ array() ],
+  varray[ varray[] ],
 
   // array of arrays along with some values
   varray[44, 11, varray[64, 61] ],
 
   // array containing sub arrays
-  varray[varray[33, -5, 6], varray[11], varray[22, -55], array() ]
+  varray[varray[33, -5, 6], varray[11], varray[22, -55], varray[] ]
 ];
 
 

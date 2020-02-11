@@ -45,10 +45,10 @@ unset( $funset );
 // Test vfprintf()
 writeAndDump( $fp, "format", null );
 writeAndDump( $fp, "Foo is %d and %s", varray[ 30, 'bar' ] );
-writeAndDump( $fp, "Foobar testing", array() );
+writeAndDump( $fp, "Foobar testing", varray[] );
 writeAndDump( $fp, "%s %s %s", varray[ 'bar', 'bar', 'bar' ] );
 writeAndDump( $fp, "%02d", varray[ 50 ] );
-writeAndDump( $fp, "", array() );
+writeAndDump( $fp, "", varray[] );
 writeAndDump( $fp, "Testing %b %d %f %o %s %x %X", varray[ 9, 6, 2.5502, 24, "foobar", 15, 65 ] );
 @writeAndDump( $funset, "Foo with %s", varray[ 'string' ] );
 @writeAndDump( new FooClass(), "Foo with %s", varray[ 'string' ] );

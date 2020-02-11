@@ -39,7 +39,7 @@ $pad_lengths =  varray [
           10.12345e2,
 
           // array values
-/*8*/      array(),
+/*8*/      varray[],
           varray[0],
           varray[1, 2],
 

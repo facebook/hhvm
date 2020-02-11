@@ -37,7 +37,7 @@ EOT;
 $arrays = varray [
 
        // empty array
-/*1*/  array(),
+/*1*/  varray[],
 
        // arrays with integer values
        darray['0' => 0],

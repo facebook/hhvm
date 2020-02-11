@@ -18,7 +18,7 @@ var_dump(openssl_public_decrypt($encrypted, inout $output2, $wrong));
 var_dump($output2);
 var_dump(openssl_public_decrypt($wrong, inout $output3, $pubkey));
 var_dump($output3);
-var_dump(openssl_public_decrypt($encrypted, inout $output4, array()));
+var_dump(openssl_public_decrypt($encrypted, inout $output4, varray[]));
 var_dump($output4);
 var_dump(openssl_public_decrypt($encrypted, inout $output5, varray[$pubkey]));
 var_dump($output5);

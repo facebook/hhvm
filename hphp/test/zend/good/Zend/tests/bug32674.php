@@ -1,7 +1,7 @@
 <?hh
 class mycollection implements Iterator {
 
-  private $_elements = array();
+  private $_elements = varray[];
 
   public function __construct() {
   }

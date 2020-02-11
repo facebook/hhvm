@@ -1,4 +1,4 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$a = clone array();
+$a = clone varray[];
 }

@@ -3775,7 +3775,7 @@ bool fcallTryFold(
 ) {
   auto const foldableFunc = func.exactFunc();
   if (!foldableFunc) return false;
-  if (!canFold(env, foldableFunc, fca, context, maybeDynamic)) {
+  if (!shouldAttemptToFold(env, foldableFunc, fca, context, maybeDynamic)) {
     return false;
   }
 

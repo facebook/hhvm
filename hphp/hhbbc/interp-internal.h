@@ -408,7 +408,7 @@ folly::Optional<Type> parentClsExact(ISS& env) {
 //////////////////////////////////////////////////////////////////////
 // folding
 
-bool canFold(ISS& env, const php::Func* func, const FCallArgs& fca,
+bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,
              Type context, bool maybeDynamic) {
   if (!func ||
       fca.hasUnpack() ||
@@ -441,13 +441,8 @@ bool canFold(ISS& env, const php::Func* func, const FCallArgs& fca,
   // We only fold functions when numRets == 1
   if (func->hasInOutArgs) return false;
 
-  // Foldable builtins are always worth trying
-  if (func->attrs & AttrIsFoldable) return true;
-
-  // Any native functions at this point are known to be
-  // non-foldable, but other builtins might be, even if they
-  // don't have the __Foldable attribute.
-  if (func->nativeInfo) return false;
+  // Can't fold if we get the wrong amount of arguments
+  if (!check_nargs_in_range(func, fca.numArgs())) return false;
 
   // Don't try to fold functions which aren't guaranteed to be accessible at
   // this call site.
@@ -459,10 +454,15 @@ bool canFold(ISS& env, const php::Func* func, const FCallArgs& fca,
         !env.index.must_be_derived_from(func->cls, env.ctx.cls)) return false;
   }
 
-  if (func->params.size()) {
-    // Not worth trying if we're going to warn due to missing args
-    return check_nargs_in_range(func, fca.numArgs());
-  }
+  // Foldable builtins are always worth trying
+  if (func->attrs & AttrIsFoldable) return true;
+
+  // Any native functions at this point are known to be
+  // non-foldable, but other builtins might be, even if they
+  // don't have the __Foldable attribute.
+  if (func->nativeInfo) return false;
+
+  if (func->params.size()) return true;
 
   // The function has no args. Check if it's effect free and returns
   // a literal.

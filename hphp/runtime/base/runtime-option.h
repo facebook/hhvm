@@ -832,8 +832,8 @@ struct RuntimeOption {
   F(uint32_t, JitRetranslateAllSeconds, retranslateAllSecondsDefault()) \
   F(bool,     JitPGOLayoutSplitHotCold, pgoLayoutSplitHotColdDefault()) \
   F(bool,     JitPGOVasmBlockCounters, true)                            \
-  F(bool,     JitPGOVasmBlockCountersForceSaveSF, true)                 \
-  F(bool,     JitPGOVasmBlockCountersForceSaveGP, true)                 \
+  F(bool,     JitPGOVasmBlockCountersForceSaveSF, false)                \
+  F(bool,     JitPGOVasmBlockCountersForceSaveGP, false)                \
   F(bool, JitLayoutPrologueSplitHotCold, layoutPrologueSplitHotColdDefault()) \
   F(bool, JitLayoutProfileSplitHotCold, true)                           \
   F(double,   JitLayoutHotThreshold,   0.05)                            \

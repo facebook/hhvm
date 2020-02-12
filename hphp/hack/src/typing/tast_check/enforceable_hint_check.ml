@@ -51,7 +51,11 @@ let validator =
 
     method! on_tgeneric acc r name = this#check_generic acc r name
 
-    method! on_newtype acc r _ _ _ _ = this#invalid acc r "a newtype"
+    method! on_newtype acc r _ _ _ _ =
+      if acc.like_context then
+        acc
+      else
+        this#invalid acc r "a newtype"
 
     method! on_tlike acc r ty =
       if TypecheckerOptions.like_casts (Tast_env.get_tcopt acc.env) then
@@ -107,11 +111,14 @@ let validator =
       | None -> acc
 
     method! on_alias acc r id tyl ty =
-      if
-        List.is_empty tyl
-        || String.equal (snd id) Naming_special_names.FB.cIncorrectType
-      then
+      if List.is_empty tyl then
         this#on_type acc ty
+      else if
+        String.equal (snd id) Naming_special_names.FB.cIncorrectType
+        && Int.equal (List.length tyl) 1
+      then
+        let ty = List.hd_exn tyl in
+        this#on_type { acc with like_context = true } ty
       else
         this#invalid
           acc

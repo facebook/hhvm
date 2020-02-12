@@ -675,7 +675,8 @@ let tconst_subsumption env class_name parent_typeconst child_typeconst on_error
   in
   match (parent_typeconst.ttc_abstract, child_typeconst.ttc_abstract) with
   | (TCAbstract (Some _), TCAbstract None) ->
-    Errors.override_no_default_typeconst pos parent_pos
+    Errors.override_no_default_typeconst pos parent_pos;
+    env
   | _ ->
     (* Check that the child's constraint is compatible with the parent. If the
      * parent has a constraint then the child must also have a constraint if it
@@ -707,28 +708,32 @@ let tconst_subsumption env class_name parent_typeconst child_typeconst on_error
       else
         child_typeconst.ttc_constraint
     in
-    ignore
-    @@ Option.map2
-         child_cstr
-         parent_typeconst.ttc_constraint
-         ~f:
-           (Typing_ops.sub_type_decl_on_error
-              pos
-              Reason.URsubsume_tconst_cstr
-              env
-              on_error);
+    let env =
+      Option.value ~default:env
+      @@ Option.map2
+           child_cstr
+           parent_typeconst.ttc_constraint
+           ~f:
+             (Typing_ops.sub_type_decl_on_error
+                pos
+                Reason.URsubsume_tconst_cstr
+                env
+                on_error)
+    in
 
     (* Check that the child's assigned type satisifies parent constraint *)
-    ignore
-    @@ Option.map2
-         child_typeconst.ttc_type
-         parent_typeconst.ttc_constraint
-         ~f:
-           (Typing_ops.sub_type_decl_on_error
-              pos
-              Reason.URtypeconst_cstr
-              env
-              on_error);
+    let env =
+      Option.value ~default:env
+      @@ Option.map2
+           child_typeconst.ttc_type
+           parent_typeconst.ttc_constraint
+           ~f:
+             (Typing_ops.sub_type_decl_on_error
+                pos
+                Reason.URtypeconst_cstr
+                env
+                on_error)
+    in
 
     begin
       match
@@ -778,7 +783,7 @@ let tconst_subsumption env class_name parent_typeconst child_typeconst on_error
           y
           x
     in
-    ignore
+    Option.value ~default:env
     @@ Option.map2
          parent_typeconst.ttc_type
          child_typeconst.ttc_type
@@ -793,7 +798,7 @@ let check_typeconsts env parent_class class_ on_error =
   let tconst_check parent_tconst tconst () =
     tconst_subsumption env (Cls.name class_) parent_tconst tconst on_error
   in
-  List.iter ptypeconsts (fun (tconst_name, parent_tconst) ->
+  List.fold ptypeconsts ~init:env ~f:(fun env (tconst_name, parent_tconst) ->
       match Cls.get_typeconst class_ tconst_name with
       | Some tconst ->
         check_ambiguous_inheritance
@@ -809,7 +814,8 @@ let check_typeconsts env parent_class class_ on_error =
           tconst_name
           parent_pos
           pos
-          (fst parent_tconst.ttc_name))
+          (fst parent_tconst.ttc_name);
+        env)
 
 let check_consts env parent_class class_ psubst subst on_error =
   let (pconsts, consts) = (Cls.consts parent_class, Cls.consts class_) in
@@ -850,7 +856,7 @@ let check_consts env parent_class class_ psubst subst on_error =
  *)
 let check_class_implements
     env removals (parent_class, parent_ty) (class_, class_ty) on_error =
-  check_typeconsts env parent_class class_ on_error;
+  let env = check_typeconsts env parent_class class_ on_error in
   let (parent_pos, parent_class, parent_tparaml) = parent_class in
   let (pos, class_, tparaml) = class_ in
   let fully_known = Cls.members_fully_known class_ in

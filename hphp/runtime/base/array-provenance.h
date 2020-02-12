@@ -169,6 +169,21 @@ void reassignTag(ArrayData* ad);
  */
 ArrayData* tagStaticArr(ArrayData* ad, folly::Optional<Tag> tag = folly::none);
 
+/*
+ * Recursively tag the given TypedValue, tagging it (if necessary), and if it is
+ * an array-like, recursively tagging of its values (if necessary).
+ *
+ * This function will tag values within, say, a dict, even if it doesn't tag the
+ * dict itself. This behavior is important because it allows us to implement
+ * provenance for (nested) static arrays in ProvenanceSkipFrame functions.
+ *
+ * The only other type that can contain nested arrays are objects. This function
+ * does NOT tag through objects; instead, it raises notices that it found them.
+ *
+ * This method will return a new TypedValue or inc-ref `in`.
+ */
+TypedValue tagTvRecursively(TypedValue in);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}

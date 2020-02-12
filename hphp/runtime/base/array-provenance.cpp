@@ -36,6 +36,8 @@
 
 namespace HPHP { namespace arrprov {
 
+TRACE_SET_MOD(runtime);
+
 ////////////////////////////////////////////////////////////////////////////////
 
 std::string Tag::toString() const {
@@ -305,6 +307,95 @@ folly::Optional<Tag> tagFromPC() {
   auto const tag = fromLeaf(make_tag, skip_frame);
   assertx(!tag || tag->filename() != nullptr);
   return tag;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace {
+
+using ProvTag = folly::Optional<arrprov::Tag>;
+struct RecursiveState {
+  folly::Optional<ProvTag> tag = folly::none;
+  bool raised_object_notice = false;
+};
+
+// Returns a copy of the given array that the caller may mutate in place.
+// ArrayIter positions in the original array are also valid for the new one.
+ArrayData* copy_if_needed(ArrayData* in, bool cow) {
+  TRACE(3, "%s %d-element rc %d %s array\n",
+        cow ? "Copying" : "Reusing", safe_cast<int32_t>(in->size()),
+        in->count(), ArrayData::kindToString(in->kind()));
+  if (!cow) {
+    in->incRefCount();
+    return in;
+  }
+  auto const result = in->copy();
+  assertx(result->hasExactlyOneRef());
+  assertx(result->iter_end() == in->iter_end());
+  return result;
+}
+
+ArrayData* tag_prov_helper(ArrayData* ad, RecursiveState& state, bool cow);
+
+// Tag array inputs, if needed. Notice on objects. Leave other types alone.
+ArrayData* tag_prov_helper(TypedValue in, RecursiveState& state, bool cow) {
+  if (isObjectType(type(in)) && !state.raised_object_notice) {
+    raise_notice("tag_provenance_here called on object: %s",
+                 val(in).pobj->getClassName().data());
+    state.raised_object_notice = true;
+    return nullptr;
+  } else if (!isArrayLikeType(type(in))) {
+    return nullptr;
+  }
+  return tag_prov_helper(val(in).parr, state, cow);
+}
+
+// This function will return a non-null ArrayData if we needed to tag this
+// array or any of its descendents with a provenance tag. It does so with the
+// minimum number of copies, only copying when we must mutate array contents.
+//
+// If we have a refcount 1 array contained in a refcount 2 array, we still
+// have to copy the refcount 1 array on mutation. `cow` tracks this state.
+ArrayData* tag_prov_helper(ArrayData* in, RecursiveState& state, bool cow) {
+  cow |= in->cowCheck();
+  ArrayData* result = nullptr;
+
+  // Tag the array with a top-level tag if it wants one.
+  if (arrprov::arrayWantsTag(in)) {
+    if (!state.tag) state.tag = arrprov::tagFromPC();
+    if (!*state.tag) return nullptr;
+    result = copy_if_needed(in, cow);
+    arrprov::setTag<arrprov::Mode::Emplace>(result, **state.tag);
+  }
+
+  // Recursively tag the array's contents with tags if they want one.
+  //
+  // We use a local iter (which doesn't inc-ref or dec-ref its base) to make
+  // logic clearer here, but it isn't necessary, strictly speaking, since we
+  // check the `cow` flag instead of in->cowCheck() in copy_if_needed.
+  ArrayIter ai(in, ArrayIter::local);
+  for (auto done = in->empty(); !done; done = ai.nextLocal(in)) {
+    auto const ad = tag_prov_helper(ai.nvSecondLocal(in).tv(), state, cow);
+    if (!ad) continue;
+    result = result ? result : copy_if_needed(in, cow);
+    tvMove(make_array_like_tv(ad), ai.nvSecondLocal(result).as_lval());
+    while (!ai.nextLocal(result)) {
+      auto const rval = ai.nvSecondLocal(result).as_lval();
+      auto const ad = tag_prov_helper(rval.tv(), state, cow);
+      if (ad) tvMove(make_array_like_tv(ad), rval.as_lval());
+    }
+    break;
+  }
+  return result;
+}
+
+}
+
+TypedValue tagTvRecursively(TypedValue in) {
+  if (!RO::EvalArrayProvenance) return tvReturn(tvAsCVarRef(&in));
+  auto state = RecursiveState{};
+  auto const ad = tag_prov_helper(in, state, false);
+  return ad ? make_array_like_tv(ad) : tvReturn(tvAsCVarRef(&in));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

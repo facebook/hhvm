@@ -1,16 +1,17 @@
+Notice: tag_provenance_here called on object: HH\Set in %s/collection.php on line 16
 dict(2) {
   ["outer"]=>
   string(0) ""
   ["inner"]=>
-  string(%d) "%s/hphp/test/slow/array_provenance/collection.php:26"
+  string(%d) "%s/collection.php:26"
 }
 dict(2) {
   ["outer"]=>
   string(0) ""
   ["inner"]=>
-  string(%d) "%s/hphp/test/slow/array_provenance/collection.php:27"
+  string(%d) "%s/collection.php:27"
 }
 
-Fatal error: Uncaught Error: done in %s/hphp/test/slow/array_provenance/collection.php:28
+Fatal error: Uncaught Error: done in %s/collection.php:28
 Stack trace:
 %A

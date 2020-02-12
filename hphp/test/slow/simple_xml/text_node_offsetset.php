@@ -11,6 +11,6 @@ XML;
 
 $test = simplexml_load_string($xml);
 
-$test->tag['foo'] = 'bar';
-var_dump($test->tag['foo']);
+$test->tag->offsetSet('foo', 'bar');
+var_dump($test->tag->offsetGet('foo'));
 }

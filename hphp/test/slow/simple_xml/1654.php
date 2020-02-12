@@ -10,10 +10,10 @@ foreach ($foo_ns_bar as $v) var_dump((string)$v);
 var_dump($foo_ns_bar->getName());
 var_dump(count($foo_ns_bar->b1));
 var_dump((string)$foo_ns_bar->b1);
-var_dump((string)$foo_ns_bar->b1[0]);
+var_dump((string)$foo_ns_bar->b1->offsetGet(0));
 foreach ($foo_ns_bar->b1 as $v) var_dump((string)$v);
 var_dump(count($foo_ns_bar->b2));
-var_dump((string)$foo_ns_bar->b2[0]);
-var_dump((string)$foo_ns_bar->b2[1]);
+var_dump((string)$foo_ns_bar->b2->offsetGet(0));
+var_dump((string)$foo_ns_bar->b2->offsetGet(1));
 foreach ($foo_ns_bar->b2 as $v) var_dump((string)$v);
 }

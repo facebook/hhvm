@@ -1,7 +1,5 @@
 string(3) "bob"
-int(24)
 string(1) "3"
 string(3) "bob"
-int(24)
 string(1) "3"
 Undefined index: doesnt_exist

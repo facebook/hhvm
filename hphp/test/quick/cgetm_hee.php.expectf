@@ -1,9 +1,6 @@
-Constructing
 NULL
-string(8) "ticktick"
 string(4) "woof"
-Undefined index: 3
+Undefined index: 2
 NULL
-string(8) "tocktock"
 string(4) "meow"
-Undefined index: 3
+Undefined index: 2

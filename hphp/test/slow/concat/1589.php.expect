@@ -1,6 +1,4 @@
- FOO  hello  foo 
- GET  hello  get  GET  hello  get 
- GET  hello  get  GET  hello  get 
+ FOO  hello  foo
 set C
 set C
 get C

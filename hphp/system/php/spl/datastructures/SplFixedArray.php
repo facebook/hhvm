@@ -275,7 +275,7 @@ class SplFixedArray implements \HH\Iterator, ArrayAccess, Countable {
             'array must contain only positive integer keys'
           );
         }
-        $fixed_array[$key] = $value;
+        $fixed_array->offsetSet($key, $value);
       }
     } else {
       $fixed_array->data = array_values($array);

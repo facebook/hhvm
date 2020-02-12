@@ -20,31 +20,10 @@ function n_dump($x) {
 
 /* Array class with weird get and set routines to experiment with */
 
-class CounterArray implements ArrayAccess
+class CounterArray
 {
   private $container = array();
   public $counter = 0;
-
-  public function offsetSet($offset, $value) {
-    if (is_null($offset)) {
-      $this->container[] = $value;
-    } else {
-      $this->container[$offset] = $value;
-    }
-  }
-
-  public function offsetExists($offset) {
-    return isset($this->container[$offset]);
-  }
-
-  public function offsetUnset($offset) {
-    unset($this->container[$offset]);
-  }
-
-  public function offsetGet ($offset) {
-    $this->counter++;
-    return $this->counter;
-  }
 
   public function incrementCounter () {
     $this->counter++;
@@ -179,36 +158,6 @@ function test_array_get(): void {
   echo('test_array_get() $arr:');
   echo("\n");
   n_dump($arr);
-}
-
-function test_counter_array(): void {
-  echo("test_counter_array()\n");
-
-  $carr = new CounterArray;
-  $carr[] = 42;
-  $carr[] = 43;
-  $carr[] = 44;
-  VS($x0 ??= $carr[0], 1);
-  VS($x0, 1);
-  VS($carr->counter, 1);
-
-  VS($carr[0] ??= 71, 2);
-  VS($carr->counter, 2);
-
-  VS($carr[1] ??= $carr[2], 3);
-  VS($carr->counter, 3);
-
-  /*
-   * It turns out that `??=` checks `=== null`, not `isset()`.
-   * `isset($carr[3])` comes out false, but `$carr[3] ??= 72;` doesn't set
-   * $carr[3] to 72.
-  */
-  VS($carr[3] ??= 72, 4);
-
-  // Check that the right lvalues were set to the right things
-  echo('test_counter_array() $carr:');
-  echo("\n");
-  n_dump($carr);
 }
 
 function test_object_get(): void {
@@ -357,8 +306,6 @@ echo "\n";
 test_falsey();
 echo "\n";
 test_array_get();
-echo "\n";
-test_counter_array();
 echo "\n";
 test_object_get();
 echo "\n";

@@ -26,45 +26,15 @@ Notice: 'DateTime::getTimezone' called dynamically without using a function poin
 
 Notice: 'SplFixedArray::fromArray' called dynamically without using a function pointer in %s/builtins.php on line 28
 
-Notice: 'SplFixedArray::offsetSet' called dynamically without using a function pointer in %s/builtins.php on line 28
-
-Notice: 'SplFixedArray::offsetSet' called dynamically without using a function pointer in %s/builtins.php on line 28
-
-Notice: 'SplFixedArray::offsetSet' called dynamically without using a function pointer in %s/builtins.php on line 28
-
 Notice: 'SplFixedArray::fromArray' called dynamically without using a function pointer in %s/builtins.php on line 29
 
-Notice: 'SplFixedArray::offsetSet' called dynamically without using a function pointer in %s/builtins.php on line 29
-
-Notice: 'SplFixedArray::offsetSet' called dynamically without using a function pointer in %s/builtins.php on line 29
-
-Notice: 'SplFixedArray::offsetSet' called dynamically without using a function pointer in %s/builtins.php on line 29
-
 Notice: 'SplFixedArray::fromArray' called dynamically without using a function pointer in %s/builtins.php on line 30
-
-Notice: 'SplFixedArray::offsetSet' called dynamically without using a function pointer in %s/builtins.php on line 30
-
-Notice: 'SplFixedArray::offsetSet' called dynamically without using a function pointer in %s/builtins.php on line 30
-
-Notice: 'SplFixedArray::offsetSet' called dynamically without using a function pointer in %s/builtins.php on line 30
 
 Notice: 'SplFixedArray::toArray' called dynamically without using a function pointer in %s/builtins.php on line 31
 
 Notice: 'SplFixedArray::fromArray' called dynamically without using a function pointer in %s/builtins.php on line 32
 
-Notice: 'SplFixedArray::offsetSet' called dynamically without using a function pointer in %s/builtins.php on line 32
-
-Notice: 'SplFixedArray::offsetSet' called dynamically without using a function pointer in %s/builtins.php on line 32
-
-Notice: 'SplFixedArray::offsetSet' called dynamically without using a function pointer in %s/builtins.php on line 32
-
 Notice: 'SplFixedArray::fromArray' called dynamically without using a function pointer in %s/builtins.php on line 33
-
-Notice: 'SplFixedArray::offsetSet' called dynamically without using a function pointer in %s/builtins.php on line 33
-
-Notice: 'SplFixedArray::offsetSet' called dynamically without using a function pointer in %s/builtins.php on line 33
-
-Notice: 'SplFixedArray::offsetSet' called dynamically without using a function pointer in %s/builtins.php on line 33
 
 Notice: 'SplFixedArray::toArray' called dynamically without using a function pointer in %s/builtins.php on line 35
 
@@ -101,45 +71,15 @@ Notice: 'DateTime::getTimezone' called dynamically without using a function poin
 
 Notice: 'SplFixedArray::fromArray' called dynamically without using a function pointer in %s/builtins.php on line 28
 
-Notice: 'SplFixedArray::offsetSet' called dynamically without using a function pointer in %s/builtins.php on line 28
-
-Notice: 'SplFixedArray::offsetSet' called dynamically without using a function pointer in %s/builtins.php on line 28
-
-Notice: 'SplFixedArray::offsetSet' called dynamically without using a function pointer in %s/builtins.php on line 28
-
 Notice: 'SplFixedArray::fromArray' called dynamically without using a function pointer in %s/builtins.php on line 29
 
-Notice: 'SplFixedArray::offsetSet' called dynamically without using a function pointer in %s/builtins.php on line 29
-
-Notice: 'SplFixedArray::offsetSet' called dynamically without using a function pointer in %s/builtins.php on line 29
-
-Notice: 'SplFixedArray::offsetSet' called dynamically without using a function pointer in %s/builtins.php on line 29
-
 Notice: 'SplFixedArray::fromArray' called dynamically without using a function pointer in %s/builtins.php on line 30
-
-Notice: 'SplFixedArray::offsetSet' called dynamically without using a function pointer in %s/builtins.php on line 30
-
-Notice: 'SplFixedArray::offsetSet' called dynamically without using a function pointer in %s/builtins.php on line 30
-
-Notice: 'SplFixedArray::offsetSet' called dynamically without using a function pointer in %s/builtins.php on line 30
 
 Notice: 'SplFixedArray::toArray' called dynamically without using a function pointer in %s/builtins.php on line 31
 
 Notice: 'SplFixedArray::fromArray' called dynamically without using a function pointer in %s/builtins.php on line 32
 
-Notice: 'SplFixedArray::offsetSet' called dynamically without using a function pointer in %s/builtins.php on line 32
-
-Notice: 'SplFixedArray::offsetSet' called dynamically without using a function pointer in %s/builtins.php on line 32
-
-Notice: 'SplFixedArray::offsetSet' called dynamically without using a function pointer in %s/builtins.php on line 32
-
 Notice: 'SplFixedArray::fromArray' called dynamically without using a function pointer in %s/builtins.php on line 33
-
-Notice: 'SplFixedArray::offsetSet' called dynamically without using a function pointer in %s/builtins.php on line 33
-
-Notice: 'SplFixedArray::offsetSet' called dynamically without using a function pointer in %s/builtins.php on line 33
-
-Notice: 'SplFixedArray::offsetSet' called dynamically without using a function pointer in %s/builtins.php on line 33
 
 Notice: 'SplFixedArray::toArray' called dynamically without using a function pointer in %s/builtins.php on line 35
 

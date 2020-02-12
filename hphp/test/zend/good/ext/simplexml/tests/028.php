@@ -22,7 +22,7 @@ function traverse_xml($xml, $pad = '')
 
 $people = simplexml_load_string($xml);
 traverse_xml($people);
-$people->person['name'] = 'John';
+$people->person->offsetSet('name', 'John');
 traverse_xml($people);
 
 echo "===DONE===\n";

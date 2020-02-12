@@ -25,12 +25,6 @@
 
 namespace HPHP {
 
-const StaticString
-  s_offsetGet("offsetGet"),
-  s_offsetSet("offsetSet"),
-  s_offsetUnset("offsetUnset"),
-  s_offsetExists("offsetExists");
-
 StringData* prepareAnyKey(TypedValue* tv) {
   if (isStringType(tv->m_type)) {
     StringData* str = tv->m_data.pstr;
@@ -47,91 +41,6 @@ void unknownBaseType(DataType type) {
     "Unknown KindOf: {} in member operation base",
     static_cast<uint8_t>(type)
   );
-}
-
-void objArrayAccess(ObjectData* base) {
-  assertx(!base->isCollection());
-  if (!base->instanceof(SystemLib::s_ArrayAccessClass)) {
-    raise_error("Object does not implement ArrayAccess");
-  }
-  if (RuntimeOption::EvalNoticeOnArrayAccessUse) {
-    raise_notice("ArrayAccess via Object of class %s",
-                 base->getClassName().data());
-  }
-}
-
-TypedValue objOffsetGet(
-  ObjectData* base,
-  TypedValue offset,
-  bool validate /* = true */
-) {
-  if (validate) {
-    objArrayAccess(base);
-  }
-
-  assertx(!base->isCollection());
-
-  auto const method = base->methodNamed(s_offsetGet.get());
-  assertx(method != nullptr);
-
-  return g_context->invokeMethod(base, method, InvokeArgs(&offset, 1));
-}
-
-bool objOffsetIsset(ObjectData* base, TypedValue offset) {
-  objArrayAccess(base);
-
-  assertx(!base->isCollection());
-
-  auto const method = base->methodNamed(s_offsetExists.get());
-  assertx(method != nullptr);
-
-  auto result = g_context->invokeMethod(base, method, InvokeArgs(&offset, 1));
-  // In-place cast decrefs the function call result.
-  tvCastToBooleanInPlace(&result);
-
-  return result.m_data.num;
-}
-
-void objOffsetAppend(
-  ObjectData* base,
-  TypedValue* val,
-  bool validate /* = true */
-) {
-  assertx(!base->isCollection());
-  if (validate) {
-    objArrayAccess(base);
-  }
-  objOffsetSet(base, make_tv<KindOfNull>(), val, false);
-}
-
-void objOffsetSet(
-  ObjectData* base,
-  TypedValue offset,
-  TypedValue* val,
-  bool validate /* = true */
-) {
-  if (validate) {
-    objArrayAccess(base);
-  }
-
-  assertx(!base->isCollection());
-
-  auto const method = base->methodNamed(s_offsetSet.get());
-  assertx(method != nullptr);
-
-  TypedValue args[2] = { offset, *val };
-  g_context->invokeMethodV(base, method, folly::range(args));
-}
-
-void objOffsetUnset(ObjectData* base, TypedValue offset) {
-  objArrayAccess(base);
-
-  assertx(!base->isCollection());
-
-  auto const method = base->methodNamed(s_offsetUnset.get());
-  assertx(method != nullptr);
-
-  g_context->invokeMethodV(base, method, InvokeArgs(&offset, 1));
 }
 
 // Mutable collections support appending new elements using [] without a key

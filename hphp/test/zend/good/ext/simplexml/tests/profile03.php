@@ -5,6 +5,6 @@ $root = simplexml_load_string('<?xml version="1.0"?>
 </root>
 ');
 
-echo $root->child['attribute'];
+echo $root->child->offsetGet('attribute');
 echo "\n---Done---\n";
 }

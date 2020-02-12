@@ -1424,6 +1424,7 @@ static inline tv_lval ratchetRefs(tv_lval result,
         innerCount(*result),
         &tvRef, static_cast<data_type_t>(tvRef.m_type), innerCount(tvRef),
         &tvRef2, static_cast<data_type_t>(tvRef2.m_type), innerCount(tvRef2));
+  // TODO can remove following ArrayAccess magic removal?
   // Due to complications associated with ArrayAccess, it is possible to acquire
   // a reference as a side effect of vector operation processing. Such a
   // reference must be retained until after the next iteration is complete.

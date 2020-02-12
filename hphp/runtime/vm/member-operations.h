@@ -129,25 +129,11 @@ inline void releaseKey<KeyType::Str>(StringData*) {
   // do nothing. we don't own a reference to this string.
 }
 
-void objArrayAccess(ObjectData* base);
-
-TypedValue objOffsetGet(
-  ObjectData* base,
-  TypedValue offset,
-  bool validate = true
-);
-
-bool objOffsetIsset(ObjectData* base, TypedValue offset);
-
-void objOffsetSet(
-  ObjectData* base,
-  TypedValue offset,
-  TypedValue* val,
-  bool validate = true
-);
-
-void objOffsetAppend(ObjectData* base, TypedValue* val, bool validate = true);
-void objOffsetUnset(ObjectData* base, TypedValue offset);
+inline void failOnNonCollectionObjArrayAccess(ObjectData* obj) {
+  if (UNLIKELY(!obj->isCollection())) {
+    raise_error("Cannot use array access on an object");
+  }
+}
 
 inline ObjectData* instanceFromTv(tv_rval tv) {
   assertx(tvIsObject(tv));
@@ -502,22 +488,18 @@ template<MOpMode mode, KeyType keyType>
 inline tv_rval ElemObject(TypedValue& tvRef,
                           ObjectData* base,
                           key_type<keyType> key) {
+  failOnNonCollectionObjArrayAccess(base);
+
   auto scratch = initScratchKey(key);
-
-  if (LIKELY(base->isCollection())) {
-    if (mode == MOpMode::Warn) {
-      return collections::at(base, &scratch);
-    }
-    auto res = collections::get(base, &scratch);
-    if (!res) {
-      res = &tvRef;
-      tvWriteNull(res);
-    }
-    return res;
+  if (mode == MOpMode::Warn) {
+    return collections::at(base, &scratch);
   }
-
-  tvRef = objOffsetGet(base, scratch);
-  return &tvRef;
+  auto res = collections::get(base, &scratch);
+  if (!res) {
+    res = &tvRef;
+    tvWriteNull(res);
+  }
+  return res;
 }
 
 /**
@@ -923,15 +905,10 @@ inline tv_lval ElemDRecord(tv_lval base, key_type<keyType> key) {
 template<MOpMode mode, KeyType keyType>
 inline tv_lval ElemDObject(TypedValue& tvRef, tv_lval base,
                            key_type<keyType> key) {
-  auto scratchKey = initScratchKey(key);
   auto obj = base.val().pobj;
-
-  if (LIKELY(obj->isCollection())) {
-    return collections::atLval(obj, &scratchKey);
-  }
-
-  tvRef = objOffsetGet(instanceFromTv(base), scratchKey);
-  return tv_lval(&tvRef);
+  failOnNonCollectionObjArrayAccess(obj);
+  auto scratchKey = initScratchKey(key);
+  return collections::atLval(obj, &scratchKey);
 }
 
 /*
@@ -1186,12 +1163,10 @@ inline tv_lval ElemUKeyset(tv_lval base, key_type<keyType> key) {
 template <KeyType keyType>
 inline tv_lval ElemUObject(TypedValue& tvRef, tv_lval base,
                            key_type<keyType> key) {
+  auto obj = val(base).pobj;
+  failOnNonCollectionObjArrayAccess(obj);
   auto const scratchKey = initScratchKey(key);
-  if (LIKELY(val(base).pobj->isCollection())) {
-    return collections::atLval(val(base).pobj, &scratchKey);
-  }
-  tvRef = objOffsetGet(instanceFromTv(base), scratchKey);
-  return &tvRef;
+  return collections::atLval(obj, &scratchKey);
 }
 
 /*
@@ -1309,12 +1284,9 @@ inline tv_lval NewElemArray(tv_lval base) {
  * NewElem when base is an Object
  */
 inline tv_lval NewElemObject(TypedValue& tvRef, tv_lval base) {
-  if (val(base).pobj->isCollection()) {
-    throw_cannot_use_newelem_for_lval_read_col();
-    return nullptr;
-  }
-  tvRef = objOffsetGet(instanceFromTv(base), make_tv<KindOfNull>());
-  return &tvRef;
+  failOnNonCollectionObjArrayAccess(val(base).pobj);
+  throw_cannot_use_newelem_for_lval_read_col();
+  return nullptr;
 }
 
 /**
@@ -1509,12 +1481,10 @@ inline StringData* SetElemString(tv_lval base, key_type<keyType> key,
 template <KeyType keyType>
 inline void SetElemObject(tv_lval base, key_type<keyType> key,
                           TypedValue* value) {
+  auto obj = val(base).pobj;
+  failOnNonCollectionObjArrayAccess(obj);
   auto const scratchKey = initScratchKey(key);
-  if (LIKELY(val(base).pobj->isCollection())) {
-    collections::set(val(base).pobj, &scratchKey, value);
-  } else {
-    objOffsetSet(instanceFromTv(base), scratchKey, value);
-  }
+  collections::set(obj, &scratchKey, value);
 }
 
 /**
@@ -1955,11 +1925,9 @@ inline void SetNewElemKeyset(tv_lval base, TypedValue* value) {
  * SetNewElem when base is an Object
  */
 inline void SetNewElemObject(tv_lval base, TypedValue* value) {
-  if (LIKELY(val(base).pobj->isCollection())) {
-    collections::append(val(base).pobj, value);
-  } else {
-    objOffsetAppend(instanceFromTv(base), value);
-  }
+  auto obj = val(base).pobj;
+  failOnNonCollectionObjArrayAccess(obj);
+  collections::append(obj, value);
 }
 
 /**
@@ -2131,17 +2099,11 @@ inline tv_lval SetOpElem(TypedValue& tvRef,
       return handleArray();
 
     case KindOfObject: {
-      if (LIKELY(val(base).pobj->isCollection())) {
-        auto result = collections::atRw(val(base).pobj, &key);
-        setopBody(result, op, rhs);
-        return result;
-      } else {
-        tvRef = objOffsetGet(instanceFromTv(base), key);
-        auto result = &tvRef;
-        setopBody(result, op, rhs);
-        objOffsetSet(instanceFromTv(base), key, result, false);
-        return result;
-      }
+      auto obj = val(base).pobj;
+      failOnNonCollectionObjArrayAccess(obj);
+      auto result = collections::atRw(obj, &key);
+      setopBody(result, op, rhs);
+      return result;
     }
 
     case KindOfClsMeth:
@@ -2223,17 +2185,8 @@ inline tv_lval SetOpNewElem(TypedValue& tvRef,
       throwMissingElementException("Set-op");
 
     case KindOfObject: {
-      TypedValue* result;
-      if (val(base).pobj->isCollection()) {
-        throw_cannot_use_newelem_for_lval_read_col();
-        result = nullptr;
-      } else {
-        tvRef = objOffsetGet(instanceFromTv(base), make_tv<KindOfNull>());
-        result = &tvRef;
-        setopBody(result, op, rhs);
-        objOffsetAppend(instanceFromTv(base), result, false);
-      }
-      return result;
+      failOnNonCollectionObjArrayAccess(val(base).pobj);
+      throw_cannot_use_newelem_for_lval_read_col();
     }
 
     case KindOfClsMeth:
@@ -2382,14 +2335,10 @@ inline TypedValue IncDecElem(
     case KindOfObject: {
       tv_lval result;
       auto localTvRef = make_tv<KindOfUninit>();
-
-      if (LIKELY(val(base).pobj->isCollection())) {
-        result = collections::atRw(val(base).pobj, &key);
-        assertx(tvIsPlausible(*result));
-      } else {
-        localTvRef = objOffsetGet(instanceFromTv(base), key);
-        result = &localTvRef;
-      }
+      auto obj = val(base).pobj;
+      failOnNonCollectionObjArrayAccess(obj);
+      result = collections::atRw(obj, &key);
+      assertx(tvIsPlausible(*result));
 
       auto const dest = IncDecBody(op, result);
       tvDecRefGen(localTvRef);
@@ -2480,11 +2429,8 @@ inline TypedValue IncDecNewElem(
       throwMissingElementException("Inc/dec");
 
     case KindOfObject: {
-      if (val(base).pobj->isCollection()) {
-        throw_cannot_use_newelem_for_lval_read_col();
-      }
-      tvRef = objOffsetGet(instanceFromTv(base), make_tv<KindOfNull>());
-      return IncDecBody(op, &tvRef);
+      failOnNonCollectionObjArrayAccess(val(base).pobj);
+      throw_cannot_use_newelem_for_lval_read_col();
     }
 
     case KindOfClsMeth:
@@ -2711,12 +2657,10 @@ void UnsetElemSlow(tv_lval base, key_type<keyType> key) {
       return;
 
     case KindOfObject: {
+      auto obj = val(base).pobj;
+      failOnNonCollectionObjArrayAccess(obj);
       auto const& scratchKey = initScratchKey(key);
-      if (LIKELY(val(base).pobj->isCollection())) {
-        collections::unset(val(base).pobj, &scratchKey);
-      } else {
-        objOffsetUnset(instanceFromTv(base), scratchKey);
-      }
+      collections::unset(obj, &scratchKey);
       return;
     }
 
@@ -2762,12 +2706,9 @@ inline void UnsetElem(tv_lval base, key_type<keyType> key) {
  */
 template<KeyType keyType>
 bool IssetElemObj(ObjectData* instance, key_type<keyType> key) {
+  failOnNonCollectionObjArrayAccess(instance);
   auto scratchKey = initScratchKey(key);
-  if (LIKELY(instance->isCollection())) {
-    return collections::isset(instance, &scratchKey);
-  }
-
-  return objOffsetIsset(instance, scratchKey);
+  return collections::isset(instance, &scratchKey);
 }
 
 /**

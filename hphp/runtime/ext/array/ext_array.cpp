@@ -2927,10 +2927,6 @@ bool HHVM_FUNCTION(krsort,
   return php_ksort(array, sort_flags, false);
 }
 
-// NOTE: PHP's implementation of natsort and natcasesort accepts ArrayAccess
-// objects as well, which does not make much sense, and which is not supported
-// here.
-
 bool HHVM_FUNCTION(natsort, Variant& array) {
   if (checkIsClsMethAndRaise( __FUNCTION__+2, array)) return false;
   return php_asort(array, SORT_NATURAL, true);
@@ -3020,8 +3016,6 @@ bool HHVM_FUNCTION(uksort,
 TypedValue HHVM_FUNCTION(array_unique,
                          const Variant& array,
                          int sort_flags /* = 2 */) {
-  // NOTE, PHP array_unique accepts ArrayAccess objects as well,
-  // which is not supported here.
   getCheckedArray(array);
   switch (sort_flags) {
   case SORT_STRING:

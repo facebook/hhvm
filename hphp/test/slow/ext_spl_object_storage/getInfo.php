@@ -22,5 +22,5 @@ while($s->valid()) {
 
 // now mutate $o2 and ensure it sticks
 $s->attach($o2, "mutated");
-var_dump($s[$o2]);
+var_dump($s->offsetGet($o2));
 }

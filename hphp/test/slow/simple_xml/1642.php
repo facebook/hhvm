@@ -4,9 +4,9 @@ function convert_simplexml_to_array($sxml) {
   $arr = array();
   if ($sxml) {
     foreach ($sxml as $k => $v) {
-      if ($sxml['list']) {
-        if (isset($v['key'])) {
-          $arr[(string)$v['key']] = convert_simplexml_to_array($v);
+      if ($sxml->offsetGet('list')) {
+        if ($v->offsetExists('key') && $v->offsetGet('key') is nonnull) {
+          $arr[(string)$v->offsetGet('key')] = convert_simplexml_to_array($v);
         }
  else {
           $arr[] = convert_simplexml_to_array($v);

@@ -9,8 +9,8 @@ $root = simplexml_load_string('<?xml version="1.0"?>
 $rsattr = $root->child->attributes('reserved-ns');
 $spattr = $root->child->attributes('special-ns');
 
-echo $rsattr['attribute'];
+echo $rsattr->offsetGet('attribute');
 echo "\n";
-echo $spattr['attribute'];
+echo $spattr->offsetGet('attribute');
 echo "\n---Done---\n";
 }

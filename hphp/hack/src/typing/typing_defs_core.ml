@@ -290,9 +290,7 @@ and _ ty_ =
   | Tobject : locl_phase ty_
       (** Tobject is an object type compatible with all objects. This type is also
        * compatible with some string operations (since a class might implement
-       * __toString), but not with string type hints. In a similar way, Tobject
-       * is compatible with some array operations (since a class might implement
-       * ArrayAccess), but not with array type hints.
+       * __toString), but not with string type hints.
        *
        * Tobject is currently used to type code like:
        *   ../test/typecheck/return_unknown_class.php

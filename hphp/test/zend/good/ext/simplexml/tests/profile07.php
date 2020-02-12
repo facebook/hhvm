@@ -9,7 +9,7 @@ $root = simplexml_load_string('<?xml version="1.0"?>
 $rsattr = $root->child->attributes('reserved');
 $myattr = $root->child->attributes('reserved-ns');
 
-echo $rsattr['attribute'];
-echo $myattr['attribute'];
+echo $rsattr->offsetGet('attribute');
+echo $myattr->offsetGet('attribute');
 echo "\n---Done---\n";
 }

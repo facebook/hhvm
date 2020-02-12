@@ -2,19 +2,7 @@
 
 function foo() {
   print " FOO ";
-  return " foo ";
-}
-class A implements ArrayAccess {
-  public function offsetUnset($index) {
-}
-  public function offsetGet($index) {
-    print " GET ";
-    return " get ";
-  }
-  public function offsetSet($index, $value) {
-  }
-  public function offsetExists($index) {
- }
+  return " foo";
 }
 class C {
   public function __get( $what ) {
@@ -29,13 +17,6 @@ class C {
 }
 function bar() {
   print " hello " . foo() . "\n";
-  $a = new A;
-  $a[0] = 0;
-  $a[1] = 1;
-  echo " hello $a[0]";
-  echo " hello $a[1]\n";
-  print " hello $a[0]";
-  print " hello $a[1]\n";
   $b = new C;
   $b->a = 'aaaa';
   $b->b = 'bbbb';

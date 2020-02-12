@@ -7,4 +7,5 @@
  *
  *)
 
-val check_class : Typing_env_types.env -> Decl_provider.class_decl -> unit
+val check_class :
+  Typing_env_types.env -> Decl_provider.class_decl -> Typing_env_types.env

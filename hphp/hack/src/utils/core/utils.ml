@@ -229,6 +229,18 @@ let rec iter2_shortest f l1 l2 =
     f x1 x2;
     iter2_shortest f rl1 rl2
 
+let fold2_shortest l1 l2 ~init ~f =
+  let rec fold acc l1 l2 =
+    match (l1, l2) with
+    | ([], _)
+    | (_, []) ->
+      acc
+    | (x1 :: rl1, x2 :: rl2) ->
+      let acc = f acc x1 x2 in
+      fold acc rl1 rl2
+  in
+  fold init l1 l2
+
 let fold_fun_list acc fl = List.fold_left fl ~f:( |> ) ~init:acc
 
 let compose f g x = f (g x)

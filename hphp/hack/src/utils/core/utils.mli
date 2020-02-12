@@ -87,6 +87,9 @@ val split_class_from_method : string -> (string * string) option
 
 val iter2_shortest : ('a -> 'b -> 'c) -> 'a list -> 'b list -> unit
 
+val fold2_shortest :
+  'a list -> 'b list -> init:'acc -> f:('acc -> 'a -> 'b -> 'acc) -> 'acc
+
 val fold_fun_list : 'a -> ('a -> 'a) list -> 'a
 
 val compose : ('a -> 'b) -> ('c -> 'a) -> 'c -> 'b

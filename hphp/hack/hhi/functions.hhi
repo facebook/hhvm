@@ -127,4 +127,14 @@ namespace HH {
 
   <<__Rx>>
   function set_frame_metadata(mixed $metadata): void;
+
+  // Code coverage
+  function enable_per_file_coverage(keyset<string> $files): void;
+  function disable_per_file_coverage(keyset<string> $files): void;
+  function get_files_with_coverage(): keyset<string>;
+  function get_coverage_for_file(string $file): vec<int>;
+  function clear_coverage_for_file(string $file): void;
+  function disable_all_coverage(): void;
+  function get_all_coverage_data(): dict<string, vec<int>>;
+  function clear_all_coverage_data(): void;
 }

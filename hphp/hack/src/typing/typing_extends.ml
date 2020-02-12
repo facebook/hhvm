@@ -371,7 +371,8 @@ let check_override
           env
           on_error
           fty_child
-          fty_parent
+          fty_parent;
+        env
       ) else
         Typing_ops.unify_decl
           pos
@@ -379,8 +380,7 @@ let check_override
           env
           on_error
           fty_parent
-          fty_child;
-      env
+          fty_child
   ) else
     env
 
@@ -761,7 +761,7 @@ let tconst_subsumption env class_name parent_typeconst child_typeconst on_error
 
     (* If the parent cannot be overridden, we unify the types otherwise we ensure
      * the child's assigned type is compatible with the parent's *)
-    let check x y =
+    let check env x y =
       if is_final then
         Typing_ops.unify_decl
           pos
@@ -770,17 +770,22 @@ let tconst_subsumption env class_name parent_typeconst child_typeconst on_error
           on_error
           x
           y
-      else
+      else (
         Typing_ops.sub_type_decl_on_error
           pos
           Reason.URsubsume_tconst_assign
           env
           on_error
           y
-          x
+          x;
+        env
+      )
     in
     ignore
-    @@ Option.map2 parent_typeconst.ttc_type child_typeconst.ttc_type ~f:check
+    @@ Option.map2
+         parent_typeconst.ttc_type
+         child_typeconst.ttc_type
+         ~f:(check env)
 
 (* For type constants we need to check that a child respects the
  * constraints specified by its parent. *)

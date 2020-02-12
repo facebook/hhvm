@@ -102,7 +102,8 @@ let fresh_invariant_type_var env p =
   @@ wrap_inference_env_call env (fun env -> Inf.fresh_invariant_type_var env p)
 
 let new_global_tyvar env v r =
-  wrap_inference_env_call env (fun env -> Inf.new_global_tyvar env v r)
+  log_env_change_ "new_global_tyvar" env
+  @@ wrap_inference_env_call env (fun env -> Inf.new_global_tyvar env v r)
 
 let add_subtype_prop env prop =
   log_env_change "add_subtype_prop" env

@@ -148,12 +148,6 @@ val set_fn_kind : env -> Ast_defs.fun_kind -> env
 
 val set_inside_ppl_class : env -> bool -> env
 
-val add_anonymous : env -> anon -> env * int
-
-val get_anonymous : env -> int -> anon option
-
-val iter_anonymous : env -> (Pos.t -> locl_ty list -> unit) -> unit
-
 val set_self : env -> string -> locl_ty -> env
 
 val set_parent : env -> string -> decl_ty -> env

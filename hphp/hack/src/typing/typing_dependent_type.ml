@@ -125,8 +125,8 @@ module ExprDepTy = struct
         (env, mk (r, Tintersection tyl))
       (* TODO(T36532263) check if this is legal *)
       | ( _,
-          ( Tanon _ | Tobject | Tnonnull | Tprim _ | Tshape _ | Ttuple _
-          | Tdynamic | Tarraykind _ | Tfun _ | Tany _ | Tvar _ | Terr | Tpu _
+          ( Tobject | Tnonnull | Tprim _ | Tshape _ | Ttuple _ | Tdynamic
+          | Tarraykind _ | Tfun _ | Tany _ | Tvar _ | Terr | Tpu _
           | Tpu_type_access _ ) ) ->
         (env, ty)
     in

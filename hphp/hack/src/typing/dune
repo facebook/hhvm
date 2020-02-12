@@ -157,7 +157,6 @@
     typing_extends
     typing_exts
     typing_inheritance
-    typing_lambda_ambiguous
     typing_lenv
     typing_memoize
     typing_regex

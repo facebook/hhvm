@@ -245,8 +245,6 @@ val restore_pu_enum_env : env -> Tast.pu_enum -> env
     If you are using {!Tast_visitor}, you should have no need of this. *)
 val set_ppl_lambda : env -> env
 
-val get_anonymous_lambda_types : env -> int -> Tast.ty list
-
 val typing_env_as_tast_env : Typing_env_types.env -> env
 
 val tast_env_as_typing_env : env -> Typing_env_types.env

@@ -468,7 +468,6 @@ let rec array_get
       | Tprim _
       | Tfun _
       | Tclass _
-      | Tanon _
       | Tgeneric _
       | Tnewtype _
       | Tdependent _
@@ -576,9 +575,9 @@ let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
           (env, ty1)
       | ( _,
           ( Tnonnull | Tarraykind _ | Toption _ | Tprim _ | Tvar _ | Tfun _
-          | Tclass _ | Ttuple _ | Tanon _ | Tshape _ | Tunion _
-          | Tintersection _ | Tgeneric _ | Tnewtype _ | Tdependent _ | Tpu _
-          | Tpu_type_access _ ) ) ->
+          | Tclass _ | Ttuple _ | Tshape _ | Tunion _ | Tintersection _
+          | Tgeneric _ | Tnewtype _ | Tdependent _ | Tpu _ | Tpu_type_access _
+            ) ) ->
         error_assign_array_append env expr_pos ty1)
 
 let widen_for_assign_array_get ~expr_pos index_expr env ty =
@@ -825,7 +824,6 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
       | Tvar _
       | Tfun _
       | Tclass _
-      | Tanon _
       | Tpu _
       | Tpu_type_access _ ->
         Errors.array_access

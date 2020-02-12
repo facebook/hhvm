@@ -337,8 +337,6 @@ val array_cast : Pos.t -> unit
 
 val string_cast : Pos.t -> string -> unit
 
-val anonymous_recursive : Pos.t -> unit
-
 val static_outside_class : Pos.t -> unit
 
 val self_outside_class : Pos.t -> unit
@@ -419,8 +417,6 @@ val visibility : Pos.t -> string -> Pos.t -> string -> unit
 val typing_too_many_args : int -> int -> Pos.t -> Pos.t -> unit
 
 val typing_too_few_args : int -> int -> Pos.t -> Pos.t -> unit
-
-val anonymous_recursive_call : Pos.t -> unit
 
 val bad_call : Pos.t -> string -> unit
 

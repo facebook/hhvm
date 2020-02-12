@@ -262,8 +262,8 @@ module Typing = struct
   type t =
     | AbstractClassFinalDEPRECATED [@value 4001]
     | UninstantiableClass
-    | AnonymousRecursive
-    | AnonymousRecursiveCall
+    | AnonymousRecursiveDEPRECATED
+    | AnonymousRecursiveCallDEPRECATED
     | ArrayAccess
     | ArrayAppend
     | ArrayCast

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5a1fb15dfba7b33bd51c2256e6694be9>>
+// @generated SignedSource<<0ecc7fa29391c2c20e1878225a4b6490>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -229,8 +229,8 @@ pub enum NastCheck {
 pub enum Typing {
     AbstractClassFinalDEPRECATED = 4001,
     UninstantiableClass,
-    AnonymousRecursive,
-    AnonymousRecursiveCall,
+    AnonymousRecursiveDEPRECATED,
+    AnonymousRecursiveCallDEPRECATED,
     ArrayAccess,
     ArrayAppend,
     ArrayCast,

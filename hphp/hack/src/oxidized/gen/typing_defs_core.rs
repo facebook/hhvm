@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a4844e263b5d53c8113cb88766ad1f8d>>
+// @generated SignedSource<<dabec6000882d56f9cfd8439fda67a98>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -220,8 +220,7 @@ pub enum Ty_ {
     /// All the primitive types: int, string, void, etc.
     Tprim(aast::Tprim),
     /// A wrapper around fun_type, which contains the full type information for a
-    /// function, method, lambda, etc. Note that lambdas have an additional layer
-    /// of indirection before you get to Tfun -- see Tanon below.
+    /// function, method, lambda, etc.
     Tfun(FunType<Ty>),
     /// Tuple, with ordered list of the types of the elements of the tuple.
     Ttuple(Vec<Ty>),

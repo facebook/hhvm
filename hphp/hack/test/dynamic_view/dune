@@ -8,7 +8,7 @@
           (glob_files %{project_root}/test/dynamic_view/HH_FLAGS))
     (action (run %{project_root}/test/verify.py %{project_root}/test/dynamic_view
     --program %{exe:../../src/hh_single_type_check.exe}
-    --flags --new-inference-lambda
+    --flags
     --error-format raw)))
 
 (alias

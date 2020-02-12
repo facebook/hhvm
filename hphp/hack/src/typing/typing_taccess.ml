@@ -307,7 +307,6 @@ let rec expand ctx env root =
   | Tpu_type_access (base, _, _, _) ->
     let pos = get_pos base in
     raise_error (fun _ -> Errors.pu_expansion pos)
-  | Tanon _
   | Tobject
   | Tnonnull
   | Tprim _

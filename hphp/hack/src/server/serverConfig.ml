@@ -292,8 +292,6 @@ let load config_filename options =
       ?po_deregister_php_stdlib:(bool_opt "deregister_php_stdlib" config)
       ?po_allow_goto:(Option.map ~f:not (bool_opt "disallow_goto" config))
       ?po_disable_static_closures:(bool_opt "disable_static_closures" config)
-      ?tco_disallow_ambiguous_lambda:
-        (bool_opt "disallow_ambiguous_lambda" config)
       ?tco_disallow_array_typehint:(bool_opt "disallow_array_typehint" config)
       ?tco_disallow_array_literal:(bool_opt "disallow_array_literal" config)
       ?tco_defer_class_declaration_threshold:
@@ -319,7 +317,6 @@ let load config_filename options =
       ?tco_unsafe_rx:(bool_opt "unsafe_rx" config)
       ?tco_disallow_scrutinee_case_value_type_mismatch:
         (bool_opt "disallow_scrutinee_case_value_type_mismatch" config)
-      ?tco_new_inference_lambda:(bool_opt "new_inference_lambda" config)
       ?tco_timeout:(int_opt "timeout" config)
       ?tco_disallow_invalid_arraykey:
         (bool_opt "disallow_invalid_arraykey" config)

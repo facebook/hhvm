@@ -182,12 +182,6 @@ and pp_ty_ : type a. Format.formatter -> a ty_ -> unit =
     Format.fprintf fmt ",@ ";
     pp_ty fmt a1;
     Format.fprintf fmt "@])"
-  | Tanon (a0, a1) ->
-    Format.fprintf fmt "(@[<2>Tanon (@,";
-    pp_fun_arity fmt a0;
-    Format.fprintf fmt ",@ ";
-    Ident.pp fmt a1;
-    Format.fprintf fmt "@,))@]"
   | Tunion tyl ->
     Format.fprintf fmt "(@[<2>Tunion@ ";
     pp_ty_list fmt tyl

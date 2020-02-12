@@ -86,7 +86,6 @@ let rec walk_and_gather_xhp_ ~env ~pos cty =
   | Tvar _
   | Tfun _
   | Ttuple _
-  | Tanon (_, _)
   | Tobject
   | Tshape _ ->
     (env, [], [cty])

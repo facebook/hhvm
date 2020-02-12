@@ -31,9 +31,6 @@ class type ['env] type_mapper_type =
 
     method on_terr : 'env -> Reason.t -> 'env * locl_ty
 
-    method on_tanon :
-      'env -> Reason.t -> locl_fun_arity -> Ident.t -> 'env * locl_ty
-
     method on_tprim : 'env -> Reason.t -> Aast.tprim -> 'env * locl_ty
 
     method on_tarraykind_akempty : 'env -> Reason.t -> 'env * locl_ty
@@ -96,8 +93,6 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
 
     method on_terr env r = (env, mk (r, Terr))
 
-    method on_tanon env r fun_arity id = (env, mk (r, Tanon (fun_arity, id)))
-
     method on_tprim env r p = (env, mk (r, Tprim p))
 
     method on_tarraykind_akempty env r = (env, mk (r, Tarraykind AKempty))
@@ -142,7 +137,6 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
       | Tnonnull -> this#on_tnonnull env r
       | Tany _ -> this#on_tany env r
       | Terr -> this#on_terr env r
-      | Tanon (fun_arity, id) -> this#on_tanon env r fun_arity id
       | Tprim p -> this#on_tprim env r p
       | Tarraykind AKempty -> this#on_tarraykind_akempty env r
       | Tarraykind (AKvarray tv) -> this#on_tarraykind_akvarray env r tv

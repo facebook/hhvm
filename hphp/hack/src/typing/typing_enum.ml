@@ -86,7 +86,6 @@ let check_valid_array_key_type f_fail ~allow_any env p t =
     | Tdependent _
     | Tclass _
     | Ttuple _
-    | Tanon _
     | Tfun _
     | Tunion _
     | Tobject

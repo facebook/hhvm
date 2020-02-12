@@ -651,7 +651,6 @@ let rec class_get_pu_ env cty name =
   | Tprim _
   | Tfun _
   | Ttuple _
-  | Tanon (_, _)
   | Tobject
   | Tshape _ ->
     (env, None)

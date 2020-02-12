@@ -59,7 +59,6 @@ let overload_extract_from_awaitable env ~p opt_ty_maybe =
     | Tdependent _
     | Tclass _
     | Ttuple _
-    | Tanon (_, _)
     | Tobject
     | Tshape _
     | Tpu _
@@ -81,7 +80,6 @@ let overload_extract_from_awaitable env ~p opt_ty_maybe =
         | Tdependent _
         | Tclass _
         | Ttuple _
-        | Tanon _
         | Tintersection _
         | Toption _
         | Tunion _

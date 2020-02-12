@@ -29,7 +29,6 @@ let rec type_non_nullable env ty =
   | Tfun _
   | Ttuple _
   | Tshape _
-  | Tanon _
   | Tobject
   | Tclass _
   | Tarraykind _ ->
@@ -181,8 +180,6 @@ let rec truthiness env ty =
   | Tobject
   | Tfun _
   | Ttuple _
-  | Tanon _ ->
-    Always_truthy
   | Tpu _
   | Tpu_type_access _ ->
     (* TODO(T36532263) check if that's ok *) Unknown
@@ -254,7 +251,6 @@ let rec find_sketchy_types env acc ty =
   | Ttuple _
   | Tshape _
   | Tvar _
-  | Tanon _
   | Tarraykind _ ->
     acc
   | Tpu _ -> acc

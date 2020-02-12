@@ -268,13 +268,11 @@ and simplify_union_ env ty1 ty2 r =
     | ((_, Tfun ft1), (_, Tfun ft2)) ->
       let (env, ft) = union_funs env ft1 ft2 in
       (env, Some (mk (r, Tfun ft)))
-    | ((_, Tanon (_, id1)), (_, Tanon (_, id2))) when Ident.equal id1 id2 ->
-      (env, Some ty1)
     (* TODO with Tclass, union type arguments if covariant *)
     | ( ( _,
           ( ( Tarraykind _ | Tprim _ | Tdynamic | Tgeneric _ | Tnewtype _
-            | Tdependent _ | Tclass _ | Ttuple _ | Tanon _ | Tfun _ | Tobject
-            | Tshape _ | Terr
+            | Tdependent _ | Tclass _ | Ttuple _ | Tfun _ | Tobject | Tshape _
+            | Terr
             | Tvar _
             (* If T cannot be null, `union T nonnull = nonnull`. However, it's hard
              * to say whether a given T can be null - e.g. opaque newtypes, dependent

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4686850d5d68e0b09438ff69d98a5531>>
+// @generated SignedSource<<8b88a787366f347a9fd2283e8c1731df>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -240,8 +240,7 @@ pub enum DeserializationError {
     WrongPhase(String),
     /// The specific type or some component thereof is not one that we support
     /// deserializing, usually because not enough information was serialized to be
-    /// able to deserialize it again. For example, lambda types (`Tanon`) contain a
-    /// reference to an identifier (`Ident.t`), which is not serialized.
+    /// able to deserialize it again.
     NotSupported(String),
     /// The input JSON was invalid for some reason.
     DeserializationError(String),

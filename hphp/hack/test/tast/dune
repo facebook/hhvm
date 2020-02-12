@@ -31,8 +31,7 @@
           (glob_files %{project_root}/test/tast/xhp_modifier/*.php)
           (glob_files %{project_root}/test/tast/xhp_modifier/*.exp))
     (action (run %{project_root}/test/verify.py %{project_root}/test/tast
-    --program %{exe:../../src/hh_single_type_check.exe}
-    --flags --new-inference-lambda)))
+    --program %{exe:../../src/hh_single_type_check.exe})))
 
 (alias
     (name runtest)

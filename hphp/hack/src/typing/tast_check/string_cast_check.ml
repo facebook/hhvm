@@ -53,7 +53,6 @@ let rec is_stringish env ty =
   | Tarraykind _
   | Tvar _
   | Ttuple _
-  | Tanon (_, _)
   | Tfun _
   | Tshape _
   | Tpu_type_access _ ->

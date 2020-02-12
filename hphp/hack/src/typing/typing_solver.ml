@@ -78,7 +78,6 @@ let rec freshen_inside_ty env ty =
   | Tdynamic
   | Tobject
   | Tprim _
-  | Tanon _
   | Tgeneric _
   | Tdependent _ ->
     default ()
@@ -717,17 +716,7 @@ let unsolved_invariant_tyvars_under_union_and_intersection env ty =
   let rec find_tyvars (env, tyvars) ty =
     let (env, ty) = Env.expand_type env ty in
     match deref ty with
-    | (r, Tvar v) ->
-      let tyvars =
-        if
-          Env.get_tyvar_appears_invariantly env v
-          || TypecheckerOptions.new_inference_lambda (Env.get_tcopt env)
-        then
-          (r, v) :: tyvars
-        else
-          tyvars
-      in
-      (env, tyvars)
+    | (r, Tvar v) -> (env, (r, v) :: tyvars)
     | (_, Toption ty) -> find_tyvars (env, tyvars) ty
     | (_, Tunion tyl)
     | (_, Tintersection tyl) ->
@@ -735,7 +724,7 @@ let unsolved_invariant_tyvars_under_union_and_intersection env ty =
     | ( _,
         ( Terr | Tany _ | Tdynamic | Tnonnull | Tprim _ | Tclass _ | Tobject
         | Tgeneric _ | Tnewtype _ | Tdependent _ | Tarraykind _ | Ttuple _
-        | Tshape _ | Tfun _ | Tanon _ | Tpu _ | Tpu_type_access _ ) ) ->
+        | Tshape _ | Tfun _ | Tpu _ | Tpu_type_access _ ) ) ->
       (env, tyvars)
   in
   find_tyvars (env, []) ty

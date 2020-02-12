@@ -1146,8 +1146,8 @@ and simplify_subtype_i
            *)
           | ( ( _,
                 ( Tdynamic | Tprim _ | Tnonnull | Tfun _ | Ttuple _ | Tshape _
-                | Tanon _ | Tobject | Tclass _ | Tarraykind _ | Tany _ | Terr
-                | Tpu _ | Tpu_type_access _ ) ),
+                | Tobject | Tclass _ | Tarraykind _ | Tany _ | Terr | Tpu _
+                | Tpu_type_access _ ) ),
               _ ) ->
             simplify_subtype ~subtype_env ~this_ty lty_sub arg_ty_super env)
       )
@@ -1290,8 +1290,8 @@ and simplify_subtype_i
                 Nast.(
                   ( Tint | Tbool | Tfloat | Tstring | Tresource | Tnum
                   | Tarraykey | Tnoreturn | Tatom _ ))
-            | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tobject
-            | Tclass _ | Tarraykind _ | Tpu _ | Tpu_type_access _ ) ) ->
+            | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tobject | Tclass _
+            | Tarraykind _ | Tpu _ | Tpu_type_access _ ) ) ->
           valid ()
         | _ -> default_subtype env))
     | (_, Tdynamic) ->
@@ -1321,13 +1321,6 @@ and simplify_subtype_i
         | Tobject
         | Tclass _ ->
           valid ()
-        | _ -> default_subtype env))
-    | (_, Tanon (_, id_super)) ->
-      (match ety_sub with
-      | ConstraintType _ -> default_subtype env
-      | LoclType lty ->
-        (match get_node lty with
-        | Tanon (_, id_sub) when Ident.equal id_sub id_super -> valid ()
         | _ -> default_subtype env))
     | (r_super, Tany _) ->
       (match ety_sub with
@@ -1455,67 +1448,6 @@ and simplify_subtype_i
             r_super
             ft_super
             env
-        | (r_sub, Tanon (anon_arity, id)) ->
-          begin
-            match Env.get_anonymous env id with
-            | None ->
-              invalid_with (fun () ->
-                  Errors.anonymous_recursive_call (Reason.to_pos r_sub))
-            | Some
-                {
-                  rx = reactivity;
-                  is_coroutine;
-                  counter = ftys;
-                  typecheck = anon;
-                  _;
-                } ->
-              let p_super = Reason.to_pos r_super in
-              let p_sub = Reason.to_pos r_sub in
-              (* Add function type to set of types seen so far *)
-              ftys := TUtils.add_function_type env ty_super !ftys;
-              (env, TL.valid)
-              |> check_with
-                   (Aast.equal_is_coroutine
-                      is_coroutine
-                      ft_super.ft_is_coroutine)
-                   (fun () ->
-                     Errors.coroutinness_mismatch
-                       ft_super.ft_is_coroutine
-                       p_super
-                       p_sub
-                       subtype_env.on_error)
-              |> check_with
-                   (check_anon_arity
-                      ~ellipsis_is_variadic:true
-                      anon_arity
-                      ft_super.ft_arity)
-                   (fun () ->
-                     Errors.fun_arity_mismatch
-                       p_super
-                       p_sub
-                       subtype_env.on_error)
-              |> fun (env, prop) ->
-              let (env, _, ret) =
-                anon env ft_super.ft_params ft_super.ft_arity
-              in
-              (env, prop)
-              &&& (fun env ->
-                    if TypecheckerOptions.unsafe_rx (Env.get_tcopt env) then
-                      (env, TL.valid)
-                    else
-                      simplify_subtype_reactivity
-                        ~subtype_env
-                        p_sub
-                        reactivity
-                        p_super
-                        ft_super.ft_reactive
-                        env)
-              &&& simplify_subtype
-                    ~subtype_env
-                    ~this_ty
-                    ret
-                    ft_super.ft_ret.et_type
-          end
         | _ -> default_subtype env))
     | (_, Ttuple tyl_super) ->
       (match ety_sub with
@@ -1976,22 +1908,6 @@ and simplify_subtype_variance
         env |> simplify_subtype child super' &&& simplify_subtype super' child
     end
     &&& simplify_subtype_variance cid variance_reifiedl childrenl superl
-
-and check_anon_arity ~ellipsis_is_variadic anon_arity func_arity : bool =
-  match (anon_arity, func_arity) with
-  | (Fellipsis (a_min, _), Fvariadic (f_min, _)) when ellipsis_is_variadic ->
-    (* we want to allow use the "..." syntax in the declaration of
-     * anonymous function types to match named variadic arguments
-     * of the "...$args" form as well as unnamed ones *)
-    Int.equal a_min f_min
-  | (Fvariadic (a_min, _), Fstandard (f_min, _))
-  | (Fvariadic (a_min, _), Fvariadic (f_min, _))
-  | (Fellipsis (a_min, _), Fstandard (f_min, _))
-  | (Fellipsis (a_min, _), Fellipsis (f_min, _)) ->
-    a_min <= f_min
-  | (Fstandard (a_min, a_max), Fstandard (f_min, f_max)) ->
-    Int.equal a_min f_min && Int.equal a_max f_max
-  | (_, _) -> false
 
 and simplify_subtype_params
     ~(subtype_env : subtype_env)

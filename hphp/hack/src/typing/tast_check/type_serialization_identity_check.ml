@@ -29,7 +29,6 @@ let rec strip_ty ty =
     | Tobject -> ty
     | Tprim _ -> ty
     | Tvar _ -> ty
-    | Tanon _ -> ty
     | Tgeneric _ -> ty
     | Tarraykind AKempty -> ty
     | Tarraykind (AKdarray (ty1, ty2)) ->

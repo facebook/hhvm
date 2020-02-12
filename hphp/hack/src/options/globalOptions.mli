@@ -69,11 +69,6 @@ type t = {
   (* Print types of size bigger than 1000 after performing a type union. *)
   tco_log_inference_constraints: bool;
   (*
-   * Flag to disallow any lambda that has to be checked using the legacy
-   * per-use technique
-   *)
-  tco_disallow_ambiguous_lambda: bool;
-  (*
    * Flag to disallow array typehints
    *)
   tco_disallow_array_typehint: bool;
@@ -100,10 +95,6 @@ type t = {
    * of a switch expression are reported as type errors.
    *)
   tco_disallow_scrutinee_case_value_type_mismatch: bool;
-  (*
-   * Constraint-based type inference for lambdas
-   *)
-  tco_new_inference_lambda: bool;
   (*
    * If non-zero, give up type checking a class or function after this many seconds
    *)
@@ -258,13 +249,11 @@ val make :
   ?so_remote_worker_vfs_checkout_threshold:int ->
   ?so_naming_sqlite_path:string ->
   ?po_auto_namespace_map:(string * string) list ->
-  ?tco_disallow_ambiguous_lambda:bool ->
   ?tco_disallow_array_typehint:bool ->
   ?tco_disallow_array_literal:bool ->
   ?tco_language_feature_logging:bool ->
   ?tco_unsafe_rx:bool ->
   ?tco_disallow_scrutinee_case_value_type_mismatch:bool ->
-  ?tco_new_inference_lambda:bool ->
   ?tco_timeout:int ->
   ?tco_disallow_invalid_arraykey:bool ->
   ?tco_disallow_byref_dynamic_calls:bool ->
@@ -368,8 +357,6 @@ val po_codegen : t -> bool
 
 val tco_log_inference_constraints : t -> bool
 
-val tco_disallow_ambiguous_lambda : t -> bool
-
 val tco_disallow_array_typehint : t -> bool
 
 val tco_disallow_array_literal : t -> bool
@@ -379,8 +366,6 @@ val tco_language_feature_logging : t -> bool
 val tco_unsafe_rx : t -> bool
 
 val tco_disallow_scrutinee_case_value_type_mismatch : t -> bool
-
-val tco_new_inference_lambda : t -> bool
 
 val tco_timeout : t -> int
 

@@ -558,7 +558,6 @@ let empty ?(mode = FileInfo.Mstrict) ctx file ~droot =
         parent = None;
         fun_kind = Ast_defs.FSync;
         fun_mutable = None;
-        anons = IMap.empty;
         file;
       };
     global_tpenv = TPEnv.empty;
@@ -857,14 +856,6 @@ let set_fn_kind env fn_type =
 
 let set_inside_ppl_class env inside_ppl_class = { env with inside_ppl_class }
 
-let add_anonymous env x =
-  let genv = env.genv in
-  let anon_id = Ident.tmp () in
-  let genv = { genv with anons = IMap.add anon_id x genv.anons } in
-  ({ env with genv }, anon_id)
-
-let get_anonymous env x = IMap.find_opt x env.genv.anons
-
 let set_self env self_id self_ty =
   let genv = env.genv in
   let genv = { genv with self = Some (self_id, self_ty) } in
@@ -902,13 +893,6 @@ let get_allow_solve_globals env =
 let set_allow_solve_globals env flag =
   wrap_inference_env_call_env env (fun env ->
       Inf.set_allow_solve_globals env flag)
-
-let iter_anonymous env f =
-  IMap.iter
-    (fun _id { counter = ftys; pos; _ } ->
-      let (untyped, typed) = !ftys in
-      f pos (untyped @ typed))
-    env.genv.anons
 
 (*****************************************************************************)
 (* Locals *)
@@ -1285,8 +1269,7 @@ and get_tyvars_i env (ty : internal_type) =
     | Terr
     | Tdynamic
     | Tobject
-    | Tprim _
-    | Tanon _ ->
+    | Tprim _ ->
       (env, ISet.empty, ISet.empty)
     | Toption ty -> get_tyvars env ty
     | Ttuple tyl

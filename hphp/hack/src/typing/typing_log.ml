@@ -487,7 +487,6 @@ let genv_as_value env genv =
     val_kind;
     fun_kind;
     fun_mutable;
-    anons = _;
     file = _;
   } =
     genv

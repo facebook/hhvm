@@ -33,13 +33,11 @@ type t = {
   po_disable_static_closures: bool;
   po_allow_goto: bool;
   tco_log_inference_constraints: bool;
-  tco_disallow_ambiguous_lambda: bool;
   tco_disallow_array_typehint: bool;
   tco_disallow_array_literal: bool;
   tco_language_feature_logging: bool;
   tco_unsafe_rx: bool;
   tco_disallow_scrutinee_case_value_type_mismatch: bool;
-  tco_new_inference_lambda: bool;
   tco_timeout: int;
   tco_disallow_invalid_arraykey: bool;
   tco_disallow_byref_dynamic_calls: bool;
@@ -193,13 +191,11 @@ let default =
     po_disable_static_closures = false;
     po_allow_goto = true;
     tco_log_inference_constraints = false;
-    tco_disallow_ambiguous_lambda = false;
     tco_disallow_array_typehint = false;
     tco_disallow_array_literal = false;
     tco_language_feature_logging = false;
     tco_unsafe_rx = true;
     tco_disallow_scrutinee_case_value_type_mismatch = false;
-    tco_new_inference_lambda = false;
     tco_timeout = 0;
     tco_disallow_invalid_arraykey = false;
     tco_disallow_byref_dynamic_calls = false;
@@ -279,14 +275,12 @@ let make
       default.so_remote_worker_vfs_checkout_threshold)
     ?so_naming_sqlite_path
     ?(po_auto_namespace_map = default.po_auto_namespace_map)
-    ?(tco_disallow_ambiguous_lambda = default.tco_disallow_ambiguous_lambda)
     ?(tco_disallow_array_typehint = default.tco_disallow_array_typehint)
     ?(tco_disallow_array_literal = default.tco_disallow_array_literal)
     ?(tco_language_feature_logging = default.tco_language_feature_logging)
     ?(tco_unsafe_rx = default.tco_unsafe_rx)
     ?(tco_disallow_scrutinee_case_value_type_mismatch =
       default.tco_disallow_scrutinee_case_value_type_mismatch)
-    ?(tco_new_inference_lambda = default.tco_new_inference_lambda)
     ?(tco_timeout = default.tco_timeout)
     ?(tco_disallow_invalid_arraykey = default.tco_disallow_invalid_arraykey)
     ?(tco_disallow_byref_dynamic_calls =
@@ -379,13 +373,11 @@ let make
     po_disable_static_closures;
     po_allow_goto;
     tco_log_inference_constraints;
-    tco_disallow_ambiguous_lambda;
     tco_disallow_array_typehint;
     tco_disallow_array_literal;
     tco_language_feature_logging;
     tco_unsafe_rx;
     tco_disallow_scrutinee_case_value_type_mismatch;
-    tco_new_inference_lambda;
     tco_timeout;
     tco_disallow_invalid_arraykey;
     tco_disallow_byref_dynamic_calls;
@@ -491,8 +483,6 @@ let po_disallow_execution_operator t = t.po_disallow_execution_operator
 
 let po_disallow_toplevel_requires t = t.po_disallow_toplevel_requires
 
-let tco_disallow_ambiguous_lambda t = t.tco_disallow_ambiguous_lambda
-
 let tco_disallow_array_typehint t = t.tco_disallow_array_typehint
 
 let tco_disallow_array_literal t = t.tco_disallow_array_literal
@@ -503,8 +493,6 @@ let tco_unsafe_rx t = t.tco_unsafe_rx
 
 let tco_disallow_scrutinee_case_value_type_mismatch t =
   t.tco_disallow_scrutinee_case_value_type_mismatch
-
-let tco_new_inference_lambda t = t.tco_new_inference_lambda
 
 let tco_timeout t = t.tco_timeout
 

@@ -438,16 +438,6 @@ module Full = struct
     (* Don't strip_ns here! We want the FULL type, including the initial slash.
       *)
     | Ttuple tyl -> ttuple k tyl
-    | Tanon (_, id) ->
-      begin
-        match Env.get_anonymous env id with
-        | Some { rx = Reactive _; is_coroutine = true; _ } ->
-          text "[coroutine rx fun]"
-        | Some { rx = Nonreactive; is_coroutine = true; _ } ->
-          text "[coroutine fun]"
-        | Some { rx = Reactive _; is_coroutine = false; _ } -> text "[rx fun]"
-        | _ -> text "[fun]"
-      end
     | Tunion [] -> text "nothing"
     | Tunion tyl when TypecheckerOptions.like_type_hints (Env.get_tcopt env) ->
       let tyl =
@@ -774,7 +764,6 @@ module ErrorString = struct
       end
     | Tprim tp -> tprim tp
     | Tvar _ -> "some value"
-    | Tanon _ -> "a function"
     | Tfun _ -> "a function"
     | Tgeneric s when DependentKind.is_generic_dep_ty s ->
       "the expression dependent type " ^ s
@@ -995,7 +984,6 @@ module Json = struct
       let param fp = obj @@ callconv fp.fp_kind @ typ fp.fp_type.et_type in
       let params fps = [("params", JSON_Array (List.map fps param))] in
       obj @@ fun_kind @ params ft.ft_params @ result ft.ft_ret.et_type
-    | Tanon _ -> obj @@ kind "anon"
     | Tarraykind (AKvarray_or_darray (ty1, ty2)) ->
       obj @@ kind "varray_or_darray" @ args [ty1; ty2]
     | Tarraykind (AKdarray (ty1, ty2)) -> obj @@ kind "darray" @ args [ty1; ty2]
@@ -1388,10 +1376,6 @@ module Json = struct
                  ft_returns_mutable = false;
                  ft_returns_void_to_rx = false;
                })
-        | "anon" ->
-          not_supported
-            ~message:"Cannot deserialize lambda expression type"
-            ~keytrace
         | _ ->
           deserialization_error
             ~message:

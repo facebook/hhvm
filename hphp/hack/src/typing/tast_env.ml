@@ -233,13 +233,6 @@ let def_env ctx d =
 
 let set_ppl_lambda env = { env with Typing_env_types.inside_ppl_class = false }
 
-let get_anonymous_lambda_types env id =
-  match Typing_env.get_anonymous env id with
-  | Some { Typing_env_types.counter = ftys; _ } ->
-    let (untyped, typed) = !ftys in
-    untyped @ typed
-  | _ -> []
-
 let typing_env_as_tast_env env = env
 
 let tast_env_as_typing_env env = env

@@ -45,10 +45,6 @@ let show_genv _ = "<genv>"
 
 let pp_genv _ _ = Printf.printf "%s\n" "<genv>"
 
-let show_anon _ = "<anon>"
-
-let pp_anon _ _ = Printf.printf "%s\n" "<anon>"
-
 let show_tfun _ = "<tfun>"
 
 let pp_tfun _ _ = Printf.printf "%s\n" "<tfun>"
@@ -95,31 +91,7 @@ and genv = {
   fun_kind: Ast_defs.fun_kind;
   val_kind: Typing_defs.val_kind;
   fun_mutable: param_mutability option;
-  anons: anon IMap.t;
   file: Relative_path.t;
-}
-
-(* A type-checker for an anonymous function
- * Parameters are
- * - the environment
- * - types of the parameters under which the body should be checked
- * - the arity of the function
- * - the expected return type of the body (optional)
- *)
-and anon_log = locl_ty list * locl_ty list
-
-and anon = {
-  rx: reactivity;
-  is_coroutine: Aast.is_coroutine;
-  counter: anon_log ref;
-  pos: Pos.t;
-  typecheck:
-    ?el:Nast.expr list ->
-    ?ret_ty:locl_ty ->
-    env ->
-    locl_fun_params ->
-    locl_fun_arity ->
-    env * Tast.expr * locl_ty;
 }
 
 let env_reactivity env = env.lenv.local_reactive

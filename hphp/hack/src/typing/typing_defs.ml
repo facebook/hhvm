@@ -186,8 +186,7 @@ type deserialization_error =
   | Not_supported of string
       (** The specific type or some component thereof is not one that we support
           deserializing, usually because not enough information was serialized to be
-          able to deserialize it again. For example, lambda types (`Tanon`) contain a
-          reference to an identifier (`Ident.t`), which is not serialized. *)
+          able to deserialize it again. *)
   | Deserialization_error of string
       (** The input JSON was invalid for some reason. *)
 
@@ -307,7 +306,6 @@ let is_union_or_inter_type (ty : locl_ty) =
   | Tnewtype _
   | Tdependent _
   | Tgeneric _
-  | Tanon _
   | Tclass _
   | Tarraykind _ ->
     false
@@ -423,14 +421,13 @@ let ty_con_ordinal ty_ =
   | Tnewtype _ -> 10
   | Tgeneric _ -> 11
   | Tdependent _ -> 12
-  | Tanon _ -> 13
-  | Tunion _ -> 14
-  | Tintersection _ -> 15
-  | Tobject -> 16
-  | Tclass _ -> 17
-  | Tarraykind _ -> 18
-  | Tpu _ -> 19
-  | Tpu_type_access _ -> 20
+  | Tunion _ -> 13
+  | Tintersection _ -> 14
+  | Tobject -> 15
+  | Tclass _ -> 16
+  | Tarraykind _ -> 17
+  | Tpu _ -> 18
+  | Tpu_type_access _ -> 19
 
 (* Ordinal value for type constructor, for decl types *)
 let decl_ty_con_ordinal ty_ =
@@ -532,7 +529,6 @@ let rec ty__compare ?(normalize_lists = false) ty_1 ty_2 =
         | n -> n
       end
     | (Tvar v1, Tvar v2) -> compare v1 v2
-    | (Tanon (_, id1), Tanon (_, id2)) -> compare id1 id2
     | _ -> ty_con_ordinal ty_1 - ty_con_ordinal ty_2
   and shape_field_type_compare sft1 sft2 =
     match ty_compare sft1.sft_ty sft2.sft_ty with

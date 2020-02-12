@@ -2634,12 +2634,6 @@ let nullable_cast pos ty ty_pos =
       (ty_pos, "This is " ^ ty);
     ]
 
-let anonymous_recursive pos =
-  add
-    (Typing.err_code Typing.AnonymousRecursive)
-    pos
-    "Anonymous functions cannot be recursive"
-
 let static_outside_class pos =
   add
     (Typing.err_code Typing.StaticOutsideClass)
@@ -2948,12 +2942,6 @@ let typing_too_few_args required actual pos pos_def =
           actual );
       (pos_def, "Definition is here");
     ]
-
-let anonymous_recursive_call pos =
-  add
-    (Typing.err_code Typing.AnonymousRecursiveCall)
-    pos
-    "recursive call to anonymous function"
 
 let bad_call pos ty =
   add

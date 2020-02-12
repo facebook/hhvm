@@ -196,8 +196,6 @@ class type ['a] locl_type_visitor_type =
 
     method on_tintersection : 'a -> Reason.t -> locl_ty list -> 'a
 
-    method on_tanon : 'a -> Reason.t -> locl_fun_arity -> Ident.t -> 'a
-
     method on_tunion : 'a -> Reason.t -> locl_ty list -> 'a
 
     method on_tintersection : 'a -> Reason.t -> locl_ty list -> 'a
@@ -265,8 +263,6 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
 
     method on_ttuple acc _ tyl = List.fold_left tyl ~f:this#on_type ~init:acc
 
-    method on_tanon acc _ _ _ = acc
-
     method on_tunion acc _ tyl = List.fold_left tyl ~f:this#on_type ~init:acc
 
     method on_tintersection acc _ tyl =
@@ -307,7 +303,6 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
       | Tnewtype (x, tyl, ty) -> this#on_tnewtype acc r x tyl ty
       | Tdependent (x, ty) -> this#on_tdependent acc r x ty
       | Ttuple tyl -> this#on_ttuple acc r tyl
-      | Tanon (arity, id) -> this#on_tanon acc r arity id
       | Tunion tyl -> this#on_tunion acc r tyl
       | Tintersection tyl -> this#on_tintersection acc r tyl
       | Tobject -> this#on_tobject acc r

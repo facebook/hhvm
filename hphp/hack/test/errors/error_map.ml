@@ -253,8 +253,8 @@ PhpLambdaDisallowed = 3084
 Typing Errors:
 AbstractClassFinalDEPRECATED = 4001
 UninstantiableClass = 4002
-AnonymousRecursive = 4003
-AnonymousRecursiveCall = 4004
+AnonymousRecursiveDEPRECATED = 4003
+AnonymousRecursiveCallDEPRECATED = 4004
 ArrayAccess = 4005
 ArrayAppend = 4006
 ArrayCast = 4007

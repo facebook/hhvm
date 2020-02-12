@@ -9,8 +9,6 @@
 
 type t = GlobalOptions.t [@@deriving show]
 
-let disallow_ambiguous_lambda = GlobalOptions.tco_disallow_ambiguous_lambda
-
 let defer_class_declaration_threshold =
   GlobalOptions.tco_defer_class_declaration_threshold
 
@@ -86,8 +84,6 @@ let dynamic_view = GlobalOptions.tco_dynamic_view
 
 let disallow_scrutinee_case_value_type_mismatch =
   GlobalOptions.tco_disallow_scrutinee_case_value_type_mismatch
-
-let new_inference_lambda = GlobalOptions.tco_new_inference_lambda
 
 let timeout = GlobalOptions.tco_timeout
 

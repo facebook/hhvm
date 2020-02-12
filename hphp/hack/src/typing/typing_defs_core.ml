@@ -241,8 +241,7 @@ and _ ty_ =
       (** All the primitive types: int, string, void, etc. *)
   | Tfun : 'phase ty fun_type -> 'phase ty_
       (** A wrapper around fun_type, which contains the full type information for a
-       * function, method, lambda, etc. Note that lambdas have an additional layer
-       * of indirection before you get to Tfun -- see Tanon below. *)
+       * function, method, lambda, etc. *)
   | Ttuple : 'phase ty list -> 'phase ty_
       (** Tuple, with ordered list of the types of the elements of the tuple. *)
   | Tshape : shape_kind * 'phase shape_field_type Nast.ShapeMap.t -> 'phase ty_
@@ -273,10 +272,6 @@ and _ ty_ =
        *)
   | Tdependent : dependent_type * locl_ty -> locl_phase ty_
       (** see dependent_type *)
-  | Tanon : locl_fun_arity * Ident.t -> locl_phase ty_
-      (** An anonymous function, including the fun arity, and the identifier to
-       * type the body of the function. (The actual closure is stored in
-       * Typing_env.env.genv.anons) *)
   | Tunion : 'phase ty list -> 'phase ty_
       (** Union type.
        * The values that are members of this type are the union of the values

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c50e51bd434e0feb87162f8024f2257e>>
+// @generated SignedSource<<a5055d71b630e0ead9ce1c63528cbdcf>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -43,13 +43,11 @@ pub struct GlobalOptions {
     pub po_disable_static_closures: bool,
     pub po_allow_goto: bool,
     pub tco_log_inference_constraints: bool,
-    pub tco_disallow_ambiguous_lambda: bool,
     pub tco_disallow_array_typehint: bool,
     pub tco_disallow_array_literal: bool,
     pub tco_language_feature_logging: bool,
     pub tco_unsafe_rx: bool,
     pub tco_disallow_scrutinee_case_value_type_mismatch: bool,
-    pub tco_new_inference_lambda: bool,
     pub tco_timeout: isize,
     pub tco_disallow_invalid_arraykey: bool,
     pub tco_disallow_byref_dynamic_calls: bool,

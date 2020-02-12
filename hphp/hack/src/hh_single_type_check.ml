@@ -182,14 +182,12 @@ let parse_options () =
   let error_format = ref Errors.Context in
   let forbid_nullable_cast = ref false in
   let deregister_attributes = ref None in
-  let disallow_ambiguous_lambda = ref None in
   let disallow_array_typehint = ref None in
   let disallow_array_literal = ref None in
   let dynamic_view = ref None in
   let auto_namespace_map = ref None in
   let unsafe_rx = ref (Some false) in
   let log_inference_constraints = ref None in
-  let new_inference_lambda = ref (Some false) in
   let timeout = ref None in
   let disallow_invalid_arraykey = ref None in
   let disallow_byref_dynamic_calls = ref (Some false) in
@@ -351,9 +349,6 @@ let parse_options () =
       ( "--forbid_nullable_cast",
         Arg.Set forbid_nullable_cast,
         " Forbid casting from nullable values." );
-      ( "--disallow-ambiguous-lambda",
-        Arg.Unit (set_bool disallow_ambiguous_lambda),
-        " Disallow definition of lambdas that require use-site checking." );
       ( "--disallow-array-typehint",
         Arg.Unit (set_bool disallow_array_typehint),
         " Disallow usage of array typehints." );
@@ -372,9 +367,6 @@ let parse_options () =
       ( "--log-inference-constraints",
         Arg.Unit (set_bool log_inference_constraints),
         " Log inference constraints to Scuba." );
-      ( "--new-inference-lambda",
-        Arg.Unit (set_bool new_inference_lambda),
-        " Type inference of unannotated lambdas by constraint generation." );
       ( "--timeout",
         Arg.Int (fun secs -> timeout := Some secs),
         " Timeout in seconds for checking a function or a class." );
@@ -529,12 +521,10 @@ let parse_options () =
     GlobalOptions.make
       ?tco_unsafe_rx:!unsafe_rx
       ?po_deregister_php_stdlib:!deregister_attributes
-      ?tco_disallow_ambiguous_lambda:!disallow_ambiguous_lambda
       ?tco_disallow_array_typehint:!disallow_array_typehint
       ?tco_disallow_array_literal:!disallow_array_literal
       ?tco_dynamic_view:!dynamic_view
       ?tco_log_inference_constraints:!log_inference_constraints
-      ?tco_new_inference_lambda:!new_inference_lambda
       ?tco_timeout:!timeout
       ?tco_disallow_invalid_arraykey:!disallow_invalid_arraykey
       ?po_auto_namespace_map:!auto_namespace_map

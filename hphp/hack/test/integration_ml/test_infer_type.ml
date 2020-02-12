@@ -121,31 +121,6 @@ let loop_assignment_cases =
     (("loop_assignment.php", 14, 9), "(int | string)");
   ]
 
-let lambda1 =
-  "<?hh // strict
-function test_lambda1(): void {
-  $s = 'foo';
-  $f = $n ==> { return $n . $s . '\\n'; };
-//^4:3                      ^4:29
-  $x = $f(4);
-//^6:3 ^6:8
-  $y = $f('bar');
-//^8:3    ^8:11
-}
-"
-
-let lambda_cases =
-  [
-    (("lambda1.php", 4, 3), "[fun]");
-    (("lambda1.php", 4, 29), "string");
-    (("lambda1.php", 6, 3), "string");
-    (("lambda1.php", 6, 8), "[fun]");
-    (("lambda1.php", 6, 11), "int");
-    (("lambda1.php", 8, 3), "string");
-    (("lambda1.php", 8, 8), "[fun]");
-    (("lambda1.php", 8, 11), "string");
-  ]
-
 let callback =
   "<?hh // strict
 function test_callback((function(int): string) $cb): void {
@@ -251,9 +226,9 @@ function lambda_param(): void {
 
 let lambda_param_cases =
   [
-    (("lambda_param.php", 4, 9), "_");
+    (("lambda_param.php", 4, 9), "mixed");
     (("lambda_param.php", 6, 14), "int");
-    (("lambda_param.php", 4, 12), "[fun]");
+    (("lambda_param.php", 4, 12), "(function(mixed $s): int)");
     (("lambda_param.php", 6, 17), "(function(int $x): num)");
   ]
 
@@ -324,7 +299,6 @@ let files =
     ("MyPair.php", mypair);
     ("test_mypair.php", test_mypair);
     ("loop_assignment.php", loop_assignment);
-    ("lambda1.php", lambda1);
     ("callback.php", callback);
     ("nullthrows.php", nullthrows);
     ("nullvec.php", nullvec);
@@ -340,7 +314,6 @@ let cases =
   @ class_A_cases
   @ test_mypair_cases
   @ loop_assignment_cases
-  @ lambda_cases
   @ callback_cases
   @ nullthrows_cases
   @ nullvec_cases

@@ -14,8 +14,7 @@ module MakeType = Typing_make_type
 
 (* Eliminate residue of type inference:
  *   1. Tvars are replaced (deep) by the expanded type
- *   2. Tanon is replaced by a Tfun function type
- *   3. Singleton unions are eliminated
+ *   2. Singleton unions are eliminated
  * TODO TAST:
  *   Transform completely unconstrained types to Tmixed
  *   Consider using a fresh datatype for TAST types.
@@ -54,8 +53,6 @@ let expand_ty ?var_hook ?pos env ty =
           then
             Errors.unresolved_type_variable pos;
           mk (p, Tvar v))
-      (* TODO TAST: replace with Tfun type *)
-      | (p, Tanon (x, y)) -> mk (p, Tanon (x, y))
       | (p, Terr) -> MakeType.err p
       (* TODO(T36532263) see if that needs updating *)
       | (p, Tpu (base, enum)) -> mk (p, Tpu (exp_ty base, enum))

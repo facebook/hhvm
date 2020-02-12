@@ -51,7 +51,6 @@ let rec enforce_not_awaitable env p ty =
   | Tdependent _
   | Tclass _
   | Ttuple _
-  | Tanon _
   | Tobject
   | Tshape _
   | Tdynamic

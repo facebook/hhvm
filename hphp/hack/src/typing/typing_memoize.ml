@@ -94,7 +94,6 @@ let check_param : env -> Nast.fun_param -> unit =
       ()
     | Tfun _
     | Tvar _
-    | Tanon _
     | Tobject ->
       error ty
   in

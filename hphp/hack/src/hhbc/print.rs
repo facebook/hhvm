@@ -822,9 +822,29 @@ fn print_instr<W: Write>(w: &mut W, instr: &Instruct) -> Result<(), W::Error> {
         ISrcLoc(_) => not_impl!(),
         IAsync(_) => not_impl!(),
         IGenerator(_) => not_impl!(),
-        IIncludeEvalDefine(_) => not_impl!(),
+        IIncludeEvalDefine(ed) => print_include_eval_define(w, ed),
         IGenDelegation(_) => not_impl!(),
         _ => Err(Error::Fail("invalid instruction".into())),
+    }
+}
+
+fn print_include_eval_define<W: Write>(
+    w: &mut W,
+    ed: &InstructIncludeEvalDefine,
+) -> Result<(), W::Error> {
+    use InstructIncludeEvalDefine::*;
+    match ed {
+        Incl => w.write("Incl"),
+        InclOnce => w.write("InclOnce"),
+        Req => w.write("Req"),
+        ReqOnce => w.write("ReqOnce"),
+        ReqDoc => w.write("ReqDoc"),
+        Eval => w.write("Eval"),
+        DefCls(n) => concat_str_by(w, " ", ["DefCls", n.to_string().as_str()]),
+        DefClsNop(n) => concat_str_by(w, " ", ["DefClsNop", n.to_string().as_str()]),
+        DefRecord(n) => concat_str_by(w, " ", ["DefRecord", n.to_string().as_str()]),
+        DefCns(_) => not_impl!(),
+        DefTypeAlias(_) => not_impl!(),
     }
 }
 

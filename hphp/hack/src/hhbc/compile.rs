@@ -124,7 +124,7 @@ fn emit<'p>(
     env: &Env,
     opts: Options,
     is_hh: bool,
-    ast: &'p Tast::Program,
+    ast: &'p mut Tast::Program,
 ) -> (Result<HhasProgram<'p>, Error>, f64) {
     let mut flags = FromAstFlags::empty();
     if is_hh {
@@ -140,7 +140,7 @@ fn emit<'p>(
         flags |= FromAstFlags::IS_SYSTEMLIB;
     }
     let mut t = 0f64;
-    let r = profile(opts.log_extern_compiler_perf(), &mut t, || {
+    let r = profile(opts.log_extern_compiler_perf(), &mut t, move || {
         emit_program(opts, flags, &env.empty_namespace, ast)
     });
     (r, t)

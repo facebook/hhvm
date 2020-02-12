@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use closure_convert_rust::HoistKind;
+use closure_convert_rust as closure_convert;
 use emit_body_rust::{emit_body_with_default_args, make_body};
 use emit_class_rust::emit_classes_from_program;
 use emit_fatal_rust::emit_fatal;
@@ -57,7 +57,7 @@ pub fn emit_program<'p>(
     options: Options,
     flags: FromAstFlags,
     namespace: &namespace_env::Env,
-    tast: &'p Tast::Program,
+    tast: &'p mut Tast::Program,
 ) -> Result<HhasProgram<'p>> {
     let result = emit_program_(options.clone(), flags, namespace, tast);
     match result {
@@ -72,32 +72,23 @@ fn emit_program_<'p>(
     options: Options,
     flags: FromAstFlags,
     namespace: &namespace_env::Env,
-    prog: &'p Tast::Program,
+    prog: &'p mut Tast::Program,
 ) -> Result<HhasProgram<'p>> {
-    // TODO(hrust) real code in closure_convert.rs
-    fn closure_convert(
-        prog: &Tast::Program,
-    ) -> (Vec<(HoistKind, &Tast::Def)>, global_state::GlobalState) {
-        (
-            prog.iter()
-                .map(|d| (HoistKind::TopLevel, d))
-                .collect::<Vec<_>>(),
-            global_state::GlobalState::default(),
-        )
-    }
-
-    let (ast_defs, state) = closure_convert(prog);
     let mut emitter = Emitter::new(options);
-    global_state::set_state(&mut emitter, state);
+    closure_convert::convert_toplevel_prog(&mut emitter, prog);
     emitter
         .context_mut()
         .set_systemlib(flags.contains(FromAstFlags::IS_SYSTEMLIB));
 
+    let ast_defs = prog
+        .iter()
+        .map(|d| (closure_convert::HoistKind::TopLevel, d))
+        .collect::<Vec<_>>();
     let main = emit_main(&mut emitter, flags, namespace, prog)?;
-    let functions = emit_functions_from_program(&mut emitter, ast_defs)?;
     let record_defs = emit_record_defs_from_program(&mut emitter, prog)?;
     let classes = emit_classes_from_program(&mut emitter, prog)?;
     let file_attributes = emit_file_attributes_from_program(&mut emitter, prog)?;
+    let functions = emit_functions_from_program(&mut emitter, ast_defs)?;
 
     Ok(HhasProgram {
         main,

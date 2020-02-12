@@ -43,16 +43,16 @@ where
     attrs.iter().any(f)
 }
 
-pub fn is_no_injection(attrs: &[HhasAttribute]) -> bool {
+pub fn is_no_injection(attrs: impl AsRef<[HhasAttribute]>) -> bool {
     is_native_arg(native_arg::NO_INJECTION, attrs)
 }
 
-pub fn is_native_opcode_impl(attrs: &[HhasAttribute]) -> bool {
+pub fn is_native_opcode_impl(attrs: impl AsRef<[HhasAttribute]>) -> bool {
     is_native_arg(native_arg::OP_CODE_IMPL, attrs)
 }
 
-fn is_native_arg(s: &str, attrs: &[HhasAttribute]) -> bool {
-    attrs.iter().any(|attr| {
+fn is_native_arg(s: &str, attrs: impl AsRef<[HhasAttribute]>) -> bool {
+    attrs.as_ref().iter().any(|attr| {
         attr.is(ua::is_native)
             && attr.arguments.iter().any(|tv| match tv {
                 TypedValue::String(s0) => s0 == s,

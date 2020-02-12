@@ -166,11 +166,11 @@ where
     })
 }
 
-pub fn option<W: Write, T, F>(w: &mut W, i: Option<T>, f: F) -> Result<(), W::Error>
+pub fn option<W: Write, T, F>(w: &mut W, i: impl Into<Option<T>>, f: F) -> Result<(), W::Error>
 where
     F: Fn(&mut W, T) -> Result<(), W::Error>,
 {
-    match i {
+    match i.into() {
         None => Ok(()),
         Some(i) => f(w, i),
     }

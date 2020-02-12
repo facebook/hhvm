@@ -2,6 +2,9 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+#![allow(unused_variables)]
+#![allow(dead_code)]
+
 use ast_scope_rust::{Scope, ScopeItem};
 use emit_attribute_rust as emit_attribute;
 use emit_body_rust as emit_body;
@@ -60,7 +63,7 @@ pub fn make_info<'a>(
     for m in methods.iter() {
         // check methods
         if is_memoize(m) {
-            emit_memoize_helpers::check_memoize_possible(&m.name.0, &m.params[..], true);
+            emit_memoize_helpers::check_memoize_possible(&m.name.0, &m.params[..], true)?;
             let pos = &m.name.0;
             if class.kind.is_cinterface() {
                 return Err(emit_fatal::raise_fatal_parse(

@@ -11,6 +11,7 @@ use indexmap::IndexSet;
 use itertools::Itertools;
 pub use write::{Error, IoWrite, Result, Write};
 
+use env::Env as BodyEnv;
 use escaper::escape;
 use hhas_attribute_rust::{self as hhas_attribute, HhasAttribute};
 use hhas_body_rust::HhasBody;
@@ -30,6 +31,7 @@ use hhbc_string_utils_rust::{
     float, quote_string_with_escape, strip_global_ns, triple_quote_string,
 };
 use instruction_sequence_rust::InstrSeq;
+use label_rust::Label;
 use options::Options;
 use oxidized::{ast, ast_defs, doc_comment::DocComment, relative_path::RelativePath};
 use runtime::TypedValue;
@@ -115,6 +117,11 @@ impl<'a> Context<'a> {
     pub fn indent_dec(&mut self) {
         self.indent.dec();
     }
+}
+
+struct DefaultValuePrintingEnv<'e> {
+    pub codegen_env: Option<&'e BodyEnv<'e>>,
+    pub is_xhp: bool,
 }
 
 pub fn print_program<W: Write>(
@@ -213,10 +220,10 @@ fn print_fun_def<W: Write>(
         w.write(string_of_span(&fun_def.span))?;
         w.write(" ")?;
     }
-    option(w, body.return_type_info.as_ref(), print_type_info)?;
+    option(w, &body.return_type_info, print_type_info)?;
     w.write(" ")?;
     w.write(fun_def.name.to_raw_string())?;
-    print_params(w, fun_def.params())?;
+    print_params(w, fun_def.body.env.as_ref(), fun_def.params())?;
     if fun_def.is_generator() {
         w.write(" isGenerator")?;
     }
@@ -867,8 +874,99 @@ fn print_fatal_op<W: Write>(w: &mut W, f: &FatalOp) -> Result<(), W::Error> {
     }
 }
 
-fn print_params<W: Write>(w: &mut W, params: &[HhasParam]) -> Result<(), W::Error> {
+fn print_params<W: Write>(
+    w: &mut W,
+    body_env: Option<&BodyEnv>,
+    params: &[HhasParam],
+) -> Result<(), W::Error> {
+    wrap_by_paren(w, |w| {
+        concat_by(w, ", ", params, |w, i| print_param(w, body_env, i))
+    })
+}
+
+fn print_param<W: Write>(
+    w: &mut W,
+    body_env: Option<&BodyEnv>,
+    param: &HhasParam,
+) -> Result<(), W::Error> {
+    print_param_user_attributes(w, param)?;
+    if param.is_inout {
+        w.write("inout ")?;
+    }
+    if param.is_variadic {
+        w.write("...")?;
+    }
+    option(w, &param.type_info, print_type_info)?;
+    w.write(" ")?;
+    w.write(&param.name)?;
+    option(w, &param.default_value, |w, i| {
+        print_param_default_value(w, body_env, i)
+    })
+}
+
+fn print_param_default_value<W: Write>(
+    w: &mut W,
+    body_env: Option<&BodyEnv>,
+    default_val: &(Label, ast::Expr),
+) -> Result<(), W::Error> {
+    let default_value_env = DefaultValuePrintingEnv {
+        codegen_env: body_env,
+        is_xhp: false,
+    };
+    w.write(" = ")?;
+    print_label(w, &default_val.0)?;
+    wrap_by_paren(w, |w| {
+        wrap_by_(w, "\"\"\"", "\"\"\"", |w| {
+            print_expr(w, default_value_env, &default_val.1)
+        })
+    })
+}
+
+fn print_label<W: Write>(w: &mut W, label: &Label) -> Result<(), W::Error> {
+    match label {
+        Label::Regular(id) => {
+            w.write("L")?;
+            print_int(w, id)
+        }
+        Label::DefaultArg(id) => {
+            w.write("DV")?;
+            print_int(w, id)
+        }
+        Label::Named(id) => w.write(id),
+    }
+}
+
+fn print_int<W: Write>(w: &mut W, i: &usize) -> Result<(), W::Error> {
+    // TODO(shiqicao): avoid allocating intermediate string
+    w.write(format!("{}", i))
+}
+
+fn print_expr<W: Write>(
+    w: &mut W,
+    env: DefaultValuePrintingEnv,
+    ast::Expr(p, expr): &ast::Expr,
+) -> Result<(), W::Error> {
+    // TODO(shiqicao): avoid allocating string, fix escape
+    /* let adjust_id = |id: String| -> String {
+        match env.codegen_env {
+            Some(env) => {
+                if env.namespace.ns_name.is_none() &&
+            },
+            _ => id
+        }
+    };
+    match expr {
+        ast::Expr_::Id(id) => w.write(adjust_id(id)),
+        _ => not_impl!(),
+    } */
     not_impl!()
+}
+
+fn print_param_user_attributes<W: Write>(w: &mut W, param: &HhasParam) -> Result<(), W::Error> {
+    match &param.user_attributes[..] {
+        [] => Ok(()),
+        _ => not_impl!(),
+    }
 }
 
 fn string_of_span(&Span(line_begin, line_end): &Span) -> String {

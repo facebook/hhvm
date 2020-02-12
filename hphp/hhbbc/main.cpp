@@ -283,7 +283,6 @@ std::vector<SString> load_input(F&& fun) {
     RO::EvalHackArrCompatCheckCompareNonAnyArray =
     RO::EvalHackArrCompatCheckArrayPlus =
     RO::EvalHackArrCompatCheckArrayKeyCast =
-    RO::EvalHackArrCompatCheckNullHackArrayKey =
       gd.HackArrCompatNotices;
   RO::EvalForbidDynamicCallsToFunc = gd.ForbidDynamicCallsToFunc;
   RO::EvalForbidDynamicCallsToClsMeth =

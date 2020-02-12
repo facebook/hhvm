@@ -350,11 +350,6 @@ ALWAYS_INLINE bool checkHACArrayKeyCast() {
          RuntimeOption::EvalHackArrCompatCheckArrayKeyCast;
 }
 
-ALWAYS_INLINE bool checkHACNullHackArrayKey() {
-  return RuntimeOption::EvalHackArrCompatNotices &&
-         RuntimeOption::EvalHackArrCompatCheckNullHackArrayKey;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace arrprov_detail {

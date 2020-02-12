@@ -83,7 +83,7 @@ empty:
    array_key_exists($keyset, 0.0) => <Exception: "Invalid keyset key: expected a key of type int or string, double given">
    array_key_exists($keyset, false) => <Exception: "Invalid keyset key: expected a key of type int or string, bool given">
    array_key_exists($keyset, object) => <Exception: "Invalid keyset key: expected a key of type int or string, ToStringObj given">
-   array_key_exists($keyset, null) => bool(false)
+   array_key_exists($keyset, null) => <Exception: "Invalid keyset key: expected a key of type int or string, null given">
    array_key_exists($keyset, array) => <Exception: "Invalid keyset key: expected a key of type int or string, array given">
    array_key_exists($keyset, vec) => <Exception: "Invalid keyset key: expected a key of type int or string, vec given">
    array_key_exists($keyset, dict) => <Exception: "Invalid keyset key: expected a key of type int or string, dict given">
@@ -194,7 +194,7 @@ foreach with key:
    array_key_exists($keyset, 0.0) => <Exception: "Invalid keyset key: expected a key of type int or string, double given">
    array_key_exists($keyset, false) => <Exception: "Invalid keyset key: expected a key of type int or string, bool given">
    array_key_exists($keyset, object) => <Exception: "Invalid keyset key: expected a key of type int or string, ToStringObj given">
-   array_key_exists($keyset, null) => bool(false)
+   array_key_exists($keyset, null) => <Exception: "Invalid keyset key: expected a key of type int or string, null given">
    array_key_exists($keyset, array) => <Exception: "Invalid keyset key: expected a key of type int or string, array given">
    array_key_exists($keyset, vec) => <Exception: "Invalid keyset key: expected a key of type int or string, vec given">
    array_key_exists($keyset, dict) => <Exception: "Invalid keyset key: expected a key of type int or string, dict given">
@@ -317,7 +317,7 @@ foreach with key:
    array_key_exists($keyset, 0.0) => <Exception: "Invalid keyset key: expected a key of type int or string, double given">
    array_key_exists($keyset, false) => <Exception: "Invalid keyset key: expected a key of type int or string, bool given">
    array_key_exists($keyset, object) => <Exception: "Invalid keyset key: expected a key of type int or string, ToStringObj given">
-   array_key_exists($keyset, null) => bool(false)
+   array_key_exists($keyset, null) => <Exception: "Invalid keyset key: expected a key of type int or string, null given">
    array_key_exists($keyset, array) => <Exception: "Invalid keyset key: expected a key of type int or string, array given">
    array_key_exists($keyset, vec) => <Exception: "Invalid keyset key: expected a key of type int or string, vec given">
    array_key_exists($keyset, dict) => <Exception: "Invalid keyset key: expected a key of type int or string, dict given">
@@ -443,7 +443,7 @@ foreach with key:
    array_key_exists($keyset, 0.0) => <Exception: "Invalid keyset key: expected a key of type int or string, double given">
    array_key_exists($keyset, false) => <Exception: "Invalid keyset key: expected a key of type int or string, bool given">
    array_key_exists($keyset, object) => <Exception: "Invalid keyset key: expected a key of type int or string, ToStringObj given">
-   array_key_exists($keyset, null) => bool(false)
+   array_key_exists($keyset, null) => <Exception: "Invalid keyset key: expected a key of type int or string, null given">
    array_key_exists($keyset, array) => <Exception: "Invalid keyset key: expected a key of type int or string, array given">
    array_key_exists($keyset, vec) => <Exception: "Invalid keyset key: expected a key of type int or string, vec given">
    array_key_exists($keyset, dict) => <Exception: "Invalid keyset key: expected a key of type int or string, dict given">

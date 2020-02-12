@@ -47,8 +47,7 @@ namespace HPHP {
 
 const StaticString
   s_InvalidKeysetOperationMsg{"Invalid operation on keyset"},
-  s_VecUnsetMsg{"Vecs do not support unsetting non-end elements"},
-  s_NullHackArrayKey{"null used as key for Hack array in array_key_exists"};
+  s_VecUnsetMsg{"Vecs do not support unsetting non-end elements"};
 ///////////////////////////////////////////////////////////////////////////////
 
 __thread std::pair<const ArrayData*, size_t> s_cachedHash;
@@ -1292,10 +1291,6 @@ std::string makeHackArrCompatImplicitArrayKeyMsg(const TypedValue* key) {
 
 void raiseHackArrCompatImplicitArrayKey(const TypedValue* key) {
   raise_hac_array_key_cast_notice(makeHackArrCompatImplicitArrayKeyMsg(key));
-}
-
-StringData* getHackArrCompatNullHackArrayKeyMsg() {
-  return s_NullHackArrayKey.get();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

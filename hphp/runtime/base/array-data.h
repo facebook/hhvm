@@ -977,7 +977,6 @@ bool checkHACCompare();
 bool checkHACCompareNonAnyArray();
 bool checkHACArrayPlus();
 bool checkHACArrayKeyCast();
-bool checkHACNullHackArrayKey();
 
 /*
  * Like isStrictlyInteger() but changes behavior with the value of `ic'.

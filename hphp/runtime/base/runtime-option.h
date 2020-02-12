@@ -1066,7 +1066,6 @@ struct RuntimeOption {
   F(bool, HackArrCompatCheckCompareNonAnyArray, false)                  \
   F(bool, HackArrCompatCheckArrayPlus, false)                           \
   F(bool, HackArrCompatCheckArrayKeyCast, false)                        \
-  F(bool, HackArrCompatCheckNullHackArrayKey, false)                    \
   F(bool, HackArrCompatFBSerializeHackArraysNotices, false)             \
   /* Raise notices when is_array is called with any hack array */       \
   F(bool, HackArrCompatIsArrayNotices, false)                           \

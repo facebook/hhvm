@@ -2605,7 +2605,7 @@ void in(ISS& env, const bc::AKExists& /*op*/) {
         assertx(key.couldBe(validKey));
         return finish(
           elem.first.subtypeOf(BBottom) ? TFalse : TBool,
-          !key.subtypeOf(BOptArrKey)
+          !key.subtypeOf(BArrKey)
         );
       case ThrowMode::BadOperation:
         assertx(!key.couldBe(validKey));
@@ -2613,21 +2613,19 @@ void in(ISS& env, const bc::AKExists& /*op*/) {
     }
   };
 
-  // Vecs will throw for any key other than Int, Str, or Null, and will silently
-  // return false for the latter two.
+  // Vecs will throw for any key other than Int or Str, and will silently
+  // return false for Str.
   if (base.subtypeOrNull(BVec)) {
-    if (key.subtypeOrNull(BStr)) return finish(TFalse, false);
-    return hackArr(vec_elem(base, key, TBottom), TInt, TOptStr);
+    if (key.subtypeOf(BStr)) return finish(TFalse, false);
+    return hackArr(vec_elem(base, key, TBottom), TInt, TStr);
   }
 
-  // Dicts and keysets will throw for any key other than Int, Str, or Null,
-  // and will silently return false for Null.
+  // Dicts and keysets will throw for any key other than Int or Str.
   if (base.subtypeOfAny(TOptDict, TOptKeyset)) {
-    if (key.subtypeOf(BInitNull)) return finish(TFalse, false);
     auto const elem = base.subtypeOrNull(BDict)
       ? dict_elem(base, key, TBottom)
       : keyset_elem(base, key, TBottom);
-    return hackArr(elem, TArrKey, TInitNull);
+    return hackArr(elem, TArrKey, TBottom);
   }
 
   if (base.subtypeOrNull(BArr)) {

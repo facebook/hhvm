@@ -767,6 +767,7 @@ let localize_where_constraints ~ety_env (env : env) where_constraints =
 let sub_type_decl env ty1 ty2 on_error =
   let (env, ty1) = localize_with_self env ty1 in
   let (env, ty2) = localize_with_self env ty2 in
-  ignore (TUtils.sub_type env ty1 ty2 on_error)
+  let env = TUtils.sub_type env ty1 ty2 on_error in
+  env
 
 let () = TUtils.localize_with_self_ref := localize_with_self

@@ -818,8 +818,8 @@ let check_consts env parent_class class_ psubst subst on_error =
   let consts =
     List.fold consts ~init:SMap.empty ~f:(fun m (k, v) -> SMap.add k v m)
   in
-  List.iter pconsts (fun (const_name, parent_const) ->
-      if String.( <> ) const_name SN.Members.mClass then
+  List.fold pconsts ~init:env ~f:(fun env (const_name, parent_const) ->
+      if String.( <> ) const_name SN.Members.mClass then (
         match SMap.find_opt const_name consts with
         | Some const ->
           (* skip checks for typeconst derived class constants *)
@@ -833,14 +833,16 @@ let check_consts env parent_class class_ psubst subst on_error =
               parent_const
               const
               on_error
-          | Some _ -> ())
+          | Some _ -> env)
         | None ->
           Errors.member_not_implemented
             const_name
             parent_const.cc_pos
             (Cls.pos class_)
-            (Cls.pos parent_class));
-  ()
+            (Cls.pos parent_class);
+          env
+      ) else
+        env)
 
 (* Use the [on_error] callback if we need to wrap the basic error with a
  *   "Class ... does not correctly implement all required members"
@@ -854,7 +856,7 @@ let check_class_implements
   let fully_known = Cls.members_fully_known class_ in
   let psubst = Inst.make_subst (Cls.tparams parent_class) parent_tparaml in
   let subst = Inst.make_subst (Cls.tparams class_) tparaml in
-  check_consts env parent_class class_ psubst subst on_error;
+  let env = check_consts env parent_class class_ psubst subst on_error in
   let memberl = make_all_members ~parent_class ~child_class:class_ in
   let env =
     check_constructors

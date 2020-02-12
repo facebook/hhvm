@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 #![allow(dead_code)]
 
-use env::iterator::Iter;
+use env::iterator::Id as IterId;
 use hhbc_ast_rust::*;
 use label_rust as label;
 use label_rust::Label;
@@ -147,7 +147,7 @@ impl InstrSeq {
         Self::make_instr(Instruct::IIterator(InstructIterator::IterNext(args, label)))
     }
 
-    pub fn make_iternextk(id: Iter, label: Label, value: local::Type, key: local::Type) -> Self {
+    pub fn make_iternextk(id: IterId, label: Label, value: local::Type, key: local::Type) -> Self {
         let args = IterArgs {
             iter_id: id,
             key_id: Some(key),
@@ -156,7 +156,7 @@ impl InstrSeq {
         Self::make_instr(Instruct::IIterator(InstructIterator::IterNext(args, label)))
     }
 
-    pub fn make_iterfree(id: Iter) -> Self {
+    pub fn make_iterfree(id: IterId) -> Self {
         Self::make_instr(Instruct::IIterator(InstructIterator::IterFree(id)))
     }
 
@@ -192,7 +192,7 @@ impl InstrSeq {
         Self::make_instr(Instruct::ISpecialFlow(InstructSpecialFlow::Goto(label)))
     }
 
-    pub fn make_iter_break(label: Label, itrs: Vec<Iter>) -> Self {
+    pub fn make_iter_break(label: Label, itrs: Vec<IterId>) -> Self {
         let mut instrs = itrs
             .into_iter()
             .rev()
@@ -823,9 +823,9 @@ impl InstrSeq {
         ))
     }
 
-    pub fn make_defcns(s: &'static str) -> Self {
+    pub fn make_defcns(s: hhbc_id_rust::r#const::Type<'static>) -> Self {
         Self::make_instr(Instruct::IIncludeEvalDefine(
-            InstructIncludeEvalDefine::DefCns(hhbc_id_rust::r#const::from_raw_string(s)),
+            InstructIncludeEvalDefine::DefCns(s),
         ))
     }
 
@@ -849,7 +849,7 @@ impl InstrSeq {
         )))
     }
 
-    pub fn make_cont_assign_delegate(iter: Iter) -> Self {
+    pub fn make_cont_assign_delegate(iter: IterId) -> Self {
         Self::make_instr(Instruct::IGenDelegation(GenDelegation::ContAssignDelegate(
             iter,
         )))
@@ -859,20 +859,20 @@ impl InstrSeq {
         Self::make_instr(Instruct::IGenDelegation(GenDelegation::ContEnterDelegate))
     }
 
-    pub fn make_yield_from_delegate(iter: Iter, l: Label) -> Self {
+    pub fn make_yield_from_delegate(iter: IterId, l: Label) -> Self {
         Self::make_instr(Instruct::IGenDelegation(GenDelegation::YieldFromDelegate(
             iter, l,
         )))
     }
 
-    pub fn make_cont_unset_delegate_free(iter: Iter) -> Self {
+    pub fn make_cont_unset_delegate_free(iter: IterId) -> Self {
         Self::make_instr(Instruct::IGenDelegation(GenDelegation::ContUnsetDelegate(
             FreeIterator::FreeIter,
             iter,
         )))
     }
 
-    pub fn make_cont_unset_delegate_ignore(iter: Iter) -> Self {
+    pub fn make_cont_unset_delegate_ignore(iter: IterId) -> Self {
         Self::make_instr(Instruct::IGenDelegation(GenDelegation::ContUnsetDelegate(
             FreeIterator::IgnoreIter,
             iter,

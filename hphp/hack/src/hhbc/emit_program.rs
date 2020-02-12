@@ -86,8 +86,9 @@ fn emit_program_<'p>(
         )
     }
 
-    let (ast_defs, _global_state) = closure_convert(prog);
+    let (ast_defs, state) = closure_convert(prog);
     let mut emitter = Emitter::new(options);
+    global_state::set_state(&mut emitter, state);
     emitter
         .context_mut()
         .set_systemlib(flags.contains(FromAstFlags::IS_SYSTEMLIB));

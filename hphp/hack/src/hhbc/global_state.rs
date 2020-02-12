@@ -57,3 +57,7 @@ impl GlobalState {
 }
 
 env::lazy_emit_state!(global_state, GlobalState, GlobalState::init);
+
+pub fn set_state(e: &mut Emitter, global_state: GlobalState) {
+    *e.emit_state_mut() = global_state;
+}

@@ -7,13 +7,14 @@
 
 use crate::try_finally_rewriter as tfr;
 
-use emit_expression_rust::{self as emit_expr, Setrange};
+use emit_expression_rust::{self as emit_expr, emit_await, emit_expr, Setrange};
 use emit_fatal_rust as emit_fatal;
-use emit_pos_rust::emit_pos_then;
+use emit_pos_rust::{emit_pos, emit_pos_then};
 use env::{emitter::Emitter, Env};
 use hhbc_ast_rust::*;
 use hhbc_id_rust::{self as hhbc_id, Id};
 use instruction_sequence_rust::{Error::Unrecoverable, InstrSeq, Result};
+use label_rust::Label;
 use oxidized::{aast as a, ast as tast, ast_defs, pos::Pos};
 
 use lazy_static::lazy_static;
@@ -143,16 +144,23 @@ fn set_bytes_kind(name: &str) -> Option<Setrange> {
     })
 }
 
-fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
+pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
     let pos = &stmt.0;
     match &stmt.1 {
         a::Stmt_::Expr(e_) => match &(*e_).1 {
-            a::Expr_::YieldBreak => {
-                return Ok(InstrSeq::gather(vec![
-                    InstrSeq::make_null(),
-                    emit_return(e, env),
-                ]))
-            }
+            a::Expr_::YieldBreak => Ok(InstrSeq::gather(vec![
+                InstrSeq::make_null(),
+                emit_return(e, env),
+            ])),
+            a::Expr_::YieldFrom(_) => Ok(InstrSeq::gather(vec![
+                emit_yield_from_delegates(e, env, pos, e_)?,
+                emit_pos(e, pos),
+                InstrSeq::make_popc(),
+            ])),
+            a::Expr_::Await(a) => Ok(InstrSeq::gather(vec![
+                emit_await(e, env, &e_.0, a)?,
+                InstrSeq::make_popc(),
+            ])),
             a::Expr_::Call(c) => {
                 if let (_, a::Expr(_, a::Expr_::Id(sid)), _, exprs, None) = &**c {
                     let expr = &(**c).1;
@@ -179,14 +187,107 @@ fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
                             emit_expr::emit_ignored_expr(e, env, pos, expr)
                         }
                     };
-                }
+                };
+                unimplemented!("TODO(hrust)")
             }
-            _ => (),
+            _ => unimplemented!("TODO(hrust)"),
         },
-        a::Stmt_::DefInline(def) => return emit_def_inline(e, &**def),
-        _ => (),
+        a::Stmt_::Return(r_opt) => match &**r_opt {
+            Some(r) => {
+                let expr_instr = if let Some(e_) = r.1.as_await() {
+                    emit_await(e, env, &r.0, e_)?
+                } else if let Some(_) = r.1.as_yield_from() {
+                    emit_yield_from_delegates(e, env, pos, &r)?
+                } else {
+                    emit_expr(e, env, &r)?
+                };
+                Ok(InstrSeq::gather(vec![
+                    expr_instr,
+                    emit_pos(e, pos),
+                    emit_return(e, env),
+                ]))
+            }
+            None => Ok(InstrSeq::gather(vec![
+                InstrSeq::make_null(),
+                emit_pos(e, pos),
+                InstrSeq::make_popc(),
+            ])),
+        },
+        a::Stmt_::Goto(l) => tfr::emit_goto(false, l.1.clone(), env, e.local_gen_mut()),
+        a::Stmt_::GotoLabel(l) => Ok(InstrSeq::make_label(Label::Named(l.1.clone()))),
+        a::Stmt_::Break => Ok(emit_break(e, env, pos)),
+        a::Stmt_::Continue => Ok(emit_continue(e, env, pos)),
+        a::Stmt_::DefInline(def) => emit_def_inline(e, &**def),
+        a::Stmt_::Fallthrough | a::Stmt_::Noop => Ok(InstrSeq::Empty),
+        _ => unimplemented!("TODO(hrust)"),
     }
-    unimplemented!("TODO(hrust)")
+}
+
+fn emit_yield_from_delegates(
+    e: &mut Emitter,
+    env: &mut Env,
+    pos: &Pos,
+    expr: &tast::Expr,
+) -> Result {
+    let iter_num = e.iterator_mut().get();
+    let loop_label = e.label_gen_mut().next_regular();
+    Ok(InstrSeq::gather(vec![
+        emit_expr(e, env, expr)?,
+        emit_pos(e, pos),
+        InstrSeq::make_cont_assign_delegate(iter_num),
+        InstrSeq::create_try_catch(
+            e.label_gen_mut(),
+            None,
+            false,
+            InstrSeq::gather(vec![
+                InstrSeq::make_null(),
+                InstrSeq::make_label(loop_label.clone()),
+                InstrSeq::make_cont_enter_delegate(),
+                InstrSeq::make_yield_from_delegate(iter_num, loop_label),
+            ]),
+            InstrSeq::make_cont_unset_delegate_free(iter_num),
+        ),
+        InstrSeq::make_cont_unset_delegate_ignore(iter_num),
+    ]))
+}
+
+pub fn emit_dropthrough_return(e: &mut Emitter, env: &mut Env) -> InstrSeq {
+    let return_instrs = emit_return(e, env);
+    let state = e.emit_state();
+    match state.default_dropthrough.as_ref() {
+        Some(instrs) => instrs.clone(),
+        None => emit_pos_then(
+            e,
+            &(state.function_pos.last_char()),
+            InstrSeq::gather(vec![state.default_return_value.clone(), return_instrs]),
+        ),
+    }
+}
+
+pub fn emit_final_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
+    match &stmt.1 {
+        a::Stmt_::Throw(_) | a::Stmt_::Return(_) | a::Stmt_::Goto(_) => emit_stmt(e, env, stmt),
+        a::Stmt_::Expr(expr) if expr.1.is_yield_break() => emit_stmt(e, env, stmt),
+        _ => Ok(InstrSeq::gather(vec![
+            emit_stmt(e, env, stmt)?,
+            emit_dropthrough_return(e, env),
+        ])),
+    }
+}
+
+fn emit_final_stmts(e: &mut Emitter, env: &mut Env, block: &[tast::Stmt]) -> Result {
+    match block {
+        [] => Ok(emit_dropthrough_return(e, env)),
+        [s] => emit_final_stmt(e, env, s),
+        [s, ..] => Ok(InstrSeq::gather(vec![
+            emit_stmt(e, env, s)?,
+            emit_final_stmts(e, env, &block[1..])?,
+        ])),
+    }
+}
+
+pub fn emit_markup(_e: &mut Emitter, _env: &mut Env, _markup: &tast::Stmt_) -> Result {
+    Ok(InstrSeq::Empty)
 }
 
 fn emit_break(e: &mut Emitter, env: &mut Env, pos: &Pos) -> InstrSeq {

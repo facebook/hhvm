@@ -7,7 +7,7 @@ use hhbc_id_rust as hhbc_id;
 use label_rust as label;
 use local_rust as local;
 
-use env::iterator::Iter;
+use env::iterator::Id as IterId;
 use runtime::TypedValue;
 
 extern crate bitflags;
@@ -105,7 +105,7 @@ impl FcallArgs {
 
 #[derive(Clone, Debug)]
 pub struct IterArgs {
-    pub iter_id: Iter,
+    pub iter_id: IterId,
     pub key_id: Option<local::Type>,
     pub val_id: local::Type,
 }
@@ -503,7 +503,7 @@ pub enum InstructFinal {
 pub enum InstructIterator {
     IterInit(IterArgs, label::Label),
     IterNext(IterArgs, label::Label),
-    IterFree(Iter),
+    IterFree(IterId),
 }
 
 #[derive(Clone, Debug)]
@@ -596,10 +596,10 @@ pub enum GenCreationExecution {
 
 #[derive(Clone, Debug)]
 pub enum GenDelegation {
-    ContAssignDelegate(Iter),
+    ContAssignDelegate(IterId),
     ContEnterDelegate,
-    YieldFromDelegate(Iter, label::Label),
-    ContUnsetDelegate(FreeIterator, Iter),
+    YieldFromDelegate(IterId, label::Label),
+    ContUnsetDelegate(FreeIterator, IterId),
 }
 
 #[derive(Clone, Debug)]

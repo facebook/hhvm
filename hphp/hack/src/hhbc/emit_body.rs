@@ -11,7 +11,9 @@ mod try_finally_rewriter;
 use ast_scope_rust::{Scope, ScopeItem};
 use decl_vars_rust as decl_vars;
 use emit_adata_rust as emit_adata;
+use emit_expression_rust as emit_expression;
 use emit_param_rust as emit_param;
+use emit_pos_rust as emit_pos;
 use emit_type_hint_rust as emit_type_hint;
 use env::{emitter::Emitter, Env};
 use generator_rust as generator;
@@ -19,7 +21,8 @@ use global_state::LazyState;
 use hhas_body_rust::HhasBody;
 use hhas_param_rust::HhasParam;
 use hhas_type::Info as HhasTypeInfo;
-use hhbc_ast_rust::{Instruct, InstructControlFlow, InstructLitConst, ParamId};
+use hhbc_ast_rust::{Instruct, ParamId};
+use hhbc_id_rust::{r#const, Id};
 use hhbc_string_utils_rust as string_utils;
 use instruction_sequence_rust::{InstrSeq, Result};
 use label_rewriter_rust as label_rewriter;
@@ -37,34 +40,15 @@ use bitflags::bitflags;
 
 /// Optional arguments for emit_body; use Args::default() for defaults
 pub struct Args<'a, 'b> {
-    pub immediate_tparams: &'a Vec<tast::Tparam>,
-    pub ast_params: &'a Vec<tast::FunParam>,
+    pub immediate_tparams: &'b Vec<tast::Tparam>,
+    pub ast_params: &'b Vec<tast::FunParam>,
     pub ret: Option<&'a tast::Hint>,
     pub scope: &'b Scope<'a>,
-    pub pos: &'a Pos,
+    pub pos: &'b Pos,
     pub deprecation_info: &'b Option<&'b [TypedValue]>,
     pub doc_comment: Option<DocComment>,
     pub default_dropthrough: Option<InstrSeq>,
     pub flags: Flags,
-}
-impl Args<'_, '_> {
-    pub fn with_default<F, T>(f: F) -> T
-    where
-        F: FnOnce(Args) -> T,
-    {
-        let args = Args {
-            immediate_tparams: &vec![],
-            ast_params: &vec![],
-            ret: None,
-            scope: &Scope::toplevel(),
-            pos: &Pos::make_none(),
-            deprecation_info: &None,
-            doc_comment: None,
-            default_dropthrough: None,
-            flags: Flags::empty(),
-        };
-        f(args)
-    }
 }
 
 bitflags! {
@@ -79,34 +63,24 @@ bitflags! {
     }
 }
 
-pub fn emit_body_with_default_args<'a>(
-    _emitter: &mut Emitter,
-    _namespace: &namespace_env::Env,
-    body: &'a tast::Program,
-    _return_value: InstrSeq,
+pub fn emit_body_with_default_args<'a, 'b>(
+    emitter: &mut Emitter,
+    namespace: &namespace_env::Env,
+    body: &'b tast::Program,
+    return_value: InstrSeq,
 ) -> Result<HhasBody<'a>> {
-    // TODO(hrust): temporary replace the following code by a dummy Hhasbody
-    // in order to unblock end to end testing.
-    /*
-     let (res, _, _) =
-        Args::with_default(|mut args| emit_body(emitter, namespace, body, return_value, &mut args));
-    res
-    */
-    Ok(HhasBody {
-        body_instrs: InstrSeq::make_instrs(vec![
-            Instruct::ILitConst(InstructLitConst::Int(1)),
-            Instruct::IContFlow(InstructControlFlow::RetC),
-        ]),
-        decl_vars: vec![],
-        num_iters: 0,
-        is_memoize_wrapper: false,
-        is_memoize_wrapper_lsb: false,
-        upper_bounds: vec![],
-        params: vec![],
-        return_type_info: None,
+    let args = Args {
+        immediate_tparams: &vec![],
+        ast_params: &vec![],
+        ret: None,
+        scope: &Scope::toplevel(),
+        pos: &Pos::make_none(),
+        deprecation_info: &None,
         doc_comment: None,
-        env: None,
-    })
+        default_dropthrough: None,
+        flags: Flags::empty(),
+    };
+    emit_body(emitter, namespace, body, return_value, &args).0
 }
 
 pub fn emit_body<'a, 'b>(
@@ -114,7 +88,7 @@ pub fn emit_body<'a, 'b>(
     namespace: &namespace_env::Env,
     body: &'b tast::Program,
     return_value: InstrSeq,
-    args: &Args<'a, 'b>,
+    args: &Args<'a, '_>,
 ) -> (Result<HhasBody<'a>>, bool, bool) {
     if args.flags.contains(Flags::ASYNC)
         && args.flags.contains(Flags::SKIP_AWAITABLE)
@@ -246,7 +220,7 @@ fn make_body_instrs(
     let stmt_instrs = if is_native {
         InstrSeq::make_nativeimpl()
     } else {
-        env.do_function(body, emit_defs)
+        env.do_function(emitter, body, emit_defs)?
     };
 
     let (begin_label, default_value_setters) =
@@ -471,9 +445,57 @@ pub fn make_body<'a>(
     }
 }
 
-fn emit_defs(_env: &mut Env, _defs: &tast::Program) -> InstrSeq {
-    //TODO(hrust) implement
-    InstrSeq::Empty
+fn emit_defs(env: &mut Env, emitter: &mut Emitter, prog: &[tast::Def]) -> Result {
+    use tast::Def;
+    fn emit_def(env: &mut Env, emitter: &mut Emitter, def: &tast::Def) -> Result {
+        match def {
+            Def::Stmt(s) => emit_statement::emit_stmt(emitter, env, s),
+            Def::Constant(c) => {
+                let const_id: r#const::Type<'static> = r#const::Type::from_ast_name(&c.name.1)
+                    .to_raw_string()
+                    .to_owned()
+                    .into();
+                Ok(InstrSeq::gather(vec![
+                    emit_expression::emit_expr(emitter, env, &c.value)?,
+                    emit_pos::emit_pos_then(emitter, &c.span, InstrSeq::make_defcns(const_id)),
+                    InstrSeq::make_popc(),
+                ]))
+            }
+            Def::Namespace(ns) => emit_defs(env, emitter, &ns.1),
+            _ => Ok(InstrSeq::Empty),
+        }
+    };
+    fn aux(env: &mut Env, emitter: &mut Emitter, defs: &[tast::Def]) -> Result {
+        match defs {
+            [Def::SetNamespaceEnv(ns), ..] => {
+                env.namespace = (&**ns.as_ref()).clone();
+                aux(env, emitter, &defs[1..])
+            }
+            [] => Ok(emit_statement::emit_dropthrough_return(emitter, env)),
+            [Def::Stmt(s)] => emit_statement::emit_final_stmt(emitter, env, &s),
+            [Def::Stmt(s1), Def::Stmt(s2)] if s2.1.is_markup() => {
+                emit_statement::emit_final_stmt(emitter, env, &s1)
+            }
+            [def, ..] => Ok(InstrSeq::gather(vec![
+                emit_def(env, emitter, def)?,
+                aux(env, emitter, &defs[1..])?,
+            ])),
+        }
+    };
+    match prog {
+        [Def::Stmt(s), ..] if s.1.is_markup() => Ok(InstrSeq::gather(vec![
+            emit_statement::emit_markup(emitter, env, &s.1)?,
+            aux(env, emitter, &prog[1..])?,
+        ])),
+        [] | [_] => aux(env, emitter, &prog[..]),
+        [def, ..] => match emit_def(env, emitter, def)? {
+            InstrSeq::Empty => emit_defs(env, emitter, &prog[1..]),
+            instr => Ok(InstrSeq::gather(vec![
+                instr,
+                aux(env, emitter, &prog[1..])?,
+            ])),
+        },
+    }
 }
 
 pub fn emit_method_prolog(

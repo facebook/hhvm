@@ -537,7 +537,7 @@ fn emit_lambda(env: &Env, (fndef, ids): &(tast::Fun_, Vec<aast_defs::Lid>)) -> R
     unimplemented!("TODO(hrust)")
 }
 
-fn emit_await(emitter: &mut Emitter, env: &Env, pos: &Pos, expr: &tast::Expr) -> Result {
+pub fn emit_await(emitter: &mut Emitter, env: &Env, pos: &Pos, expr: &tast::Expr) -> Result {
     let tast::Expr(_, e) = expr;
     let cant_inline_gen_functions = emitter
         .options()

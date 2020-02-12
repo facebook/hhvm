@@ -16,7 +16,7 @@ impl fmt::Display for Id {
 
 #[derive(Debug, Clone)]
 pub struct Iter {
-    next: Id,
+    pub next: Id,
     count: usize,
 }
 impl Iter {

@@ -296,6 +296,25 @@ impl Pos {
         }
     }
 
+    pub fn last_char(&self) -> Cow<Self> {
+        if self.is_none() {
+            Cow::Borrowed(self)
+        } else {
+            Cow::Owned(Pos(match &self.0 {
+                Small { file, end, .. } => Small {
+                    file: file.clone(),
+                    start: *end,
+                    end: *end,
+                },
+                Large { file, end, .. } => Large {
+                    file: file.clone(),
+                    start: end.clone(),
+                    end: end.clone(),
+                },
+            }))
+        }
+    }
+
     pub fn first_char_of_line(&self) -> Cow<Self> {
         if self.is_none() {
             Cow::Borrowed(self)

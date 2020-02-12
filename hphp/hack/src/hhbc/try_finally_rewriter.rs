@@ -88,7 +88,7 @@ pub(super) fn emit_jump_to_label(l: Label, iters: Vec<Iter>) -> InstrSeq {
     if iters.is_empty() {
         InstrSeq::make_jmp(l)
     } else {
-        InstrSeq::make_iter_break(l, iters)
+        InstrSeq::make_iter_break(l, iters.iter().map(|i| i.next).collect())
     }
 }
 
@@ -113,7 +113,7 @@ fn get_pos_for_error<'a>(env: &'a Env<'a>) -> Cow<'a, Pos> {
     Cow::Owned(Pos::make_none())
 }
 
-fn emit_goto(
+pub fn emit_goto(
     in_finally_epilogue: bool,
     label: String,
     env: &mut Env,
@@ -196,8 +196,7 @@ pub(super) fn emit_return(e: &mut Emitter, in_finally_epilogue: bool, env: &mut 
                 jt_gen
                     .jump_targets()
                     .iterators()
-                    .cloned()
-                    .map(InstrSeq::make_iterfree)
+                    .map(|i| InstrSeq::make_iterfree(i.next))
                     .collect(),
             );
             let mut instrs = Vec::with_capacity(5);

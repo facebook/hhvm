@@ -101,7 +101,7 @@ pub fn emit_function<'a>(
                 a::Stmt_::Block(ast_body.clone()),
             ))],
             InstrSeq::make_null(),
-            &mut EmitBodyArgs {
+            &EmitBodyArgs {
                 flags,
                 deprecation_info: &deprecation_info,
                 default_dropthrough: None,

@@ -129,7 +129,7 @@ pub mod scope {
         InstrSeq::gather(
             iters
                 .into_iter()
-                .map(|i| InstrSeq::make_iterfree(i))
+                .map(|i| InstrSeq::make_iterfree(i.next))
                 .collect(),
         )
     }

@@ -102,7 +102,8 @@ public:
       return result;
     }();
 
-    out = fopen(filename.c_str(), "w");
+    out = fopen(filename.c_str(),
+                getenv("HPHP_TRACE_APPEND") ? "a" : "w");
     if (!out) {
       fprintf(
         stderr,

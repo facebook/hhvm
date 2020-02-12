@@ -80,7 +80,7 @@ async function foo(): Awaitable<void> {
   unset(array()[await genx()]);
   if (await genx()) {}
   throw (await genx());
-  switch (await genx()) {}
+  switch (await genx()) { default: break; }
   foreach ((await genx()) as $k => $v) {}
   foreach ((await genx()) await as $k => $v) {}
   for ((await genx()); 42; 43) {}

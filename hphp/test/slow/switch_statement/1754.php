@@ -141,8 +141,6 @@ function st($x) {
     print 'default';
   }
   switch($x){
-}
-  switch($x){
   default:
     print 'default';
   }

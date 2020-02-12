@@ -1,10 +1,10 @@
-((script 3044
-  ((list 3044
+((script 3061
+  ((list 3061
     ((markup_section 4
       ((missing 0 ()) (() markup 0 ())
        (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))
        (missing 0 ())))
-     (function_declaration 2988
+     (function_declaration 3005
       ((missing 0 ())
        (function_declaration_header 37
         ((list 5 ((((end_of_line 1)) async 5 ((whitespace 1)))))
@@ -19,9 +19,9 @@
                 ((simple_type_specifier 4 ((() void 4 ()))) (missing 0 ())))))
              (() > 1 ((whitespace 1)))))))
          (missing 0 ())))
-       (compound_statement 2950
+       (compound_statement 2967
         ((() { 1 ((end_of_line 1)))
-         (list 2944
+         (list 2961
           ((expression_statement 28
             ((binary_expression 27
               ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
@@ -1482,14 +1482,23 @@
                    (() ")" 1 ())))))
                (() ")" 1 ())))
              (() ";" 1 ((end_of_line 1)))))
-           (switch_statement 24
+           (switch_statement 41
             ((((whitespace 2)) switch 6 ((whitespace 1))) (() "(" 1 ())
              (prefix_unary_expression 12
               ((() await 5 ((whitespace 1)))
                (function_call_expression 6
                 ((() name 4 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
                  (() ")" 1 ())))))
-             (() ")" 1 ((whitespace 1))) (() { 1 ()) (missing 0 ())
+             (() ")" 1 ((whitespace 1))) (() { 1 ((whitespace 1)))
+             (list 15
+              ((switch_section 15
+                ((list 8
+                  ((default_label 8
+                    ((() default 7 ()) (() : 1 ((whitespace 1)))))))
+                 (list 6
+                  ((break_statement 6
+                    ((() break 5 ()) (() ";" 1 ((whitespace 1)))))))
+                 (missing 0 ())))))
              (() } 1 ((end_of_line 1)))))
            (foreach_statement 39
             ((((whitespace 2)) foreach 7 ((whitespace 1))) (() "(" 1 ())

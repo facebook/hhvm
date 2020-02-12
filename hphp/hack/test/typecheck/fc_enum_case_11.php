@@ -12,5 +12,6 @@ function f(MyEnum $e): void {
   }
 
   switch ($e) {
+    case MyEnum::A: break;
   }
 }

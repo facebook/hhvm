@@ -10,36 +10,6 @@ error_reporting(-1);
 
 $v = 10;
 
-/*
-// unlike C/C++, can't omit all labels and braces
-
-switch ($v)
-    echo "Here I am.\n";
-
-switch ($v)
-default: echo $v;
-*/
-
-///*
-// Can I have an empty body?
-
-switch ($v)     // yes
-{
-}
-
-//*/
-
-///*
-// presumably, body can be one or more empty statements
-
-switch ($v)
-{
-    ;       // 1 is okay, but no more!
-    //;
-    //;
-}
-//*/
-
 ///*
 switch ($v)
 {

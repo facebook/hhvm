@@ -930,3 +930,6 @@ pub const function_pointers_disabled: Error = Cow::Borrowed(
 
 pub const empty_expression_illegal: Error =
     Cow::Borrowed("The empty() expression has been removed from Hack.");
+
+pub const empty_switch_cases: Error =
+    Cow::Borrowed("Switch statements need to have at least one case or a default block");

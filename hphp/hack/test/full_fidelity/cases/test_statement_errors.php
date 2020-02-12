@@ -12,7 +12,7 @@ function bar() : void {
   try {} catch (Exception $ex) {} // no error
   try {} finally {} // no error
   try {} // error
-  switch ($x) { } // no error
+  switch ($x) { } // error
   switch ($x) { foo(); } // error
   switch ($x) { foo(); foo(); } // error
 }

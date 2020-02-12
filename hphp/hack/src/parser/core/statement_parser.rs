@@ -722,16 +722,13 @@ where
         let (left_paren_token, expr_node, right_paren_token) = self.parse_paren_expr();
         let left_brace_token = self.require_left_brace();
         let section_list = {
-            let mut parser1 = self.clone();
-            let token = parser1.next_token();
-            match token.kind() {
-                TokenKind::Semicolon if parser1.peek_token_kind() == TokenKind::RightBrace => {
-                    self.continue_from(parser1);
-                    S!(make_list, self, vec![], self.pos())
-                }
-                _ => {
-                    self.parse_terminated_list(|x| x.parse_switch_section(), TokenKind::RightBrace)
-                }
+            let list =
+                self.parse_terminated_list(|x| x.parse_switch_section(), TokenKind::RightBrace);
+            if list.is_missing() {
+                self.with_error(Errors::empty_switch_cases);
+                S!(make_missing, self, self.pos())
+            } else {
+                list
             }
         };
         let right_brace_token = self.require_right_brace();

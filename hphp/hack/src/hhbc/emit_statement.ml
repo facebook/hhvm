@@ -621,80 +621,77 @@ and emit_for (env : Emit_env.t) p (e1 : Tast.expr) e2 e3 b =
     ]
 
 and emit_switch (env : Emit_env.t) pos scrutinee_expr cl =
-  if List.is_empty cl then
-    emit_ignored_expr env scrutinee_expr
-  else
-    let (instr_init, instr_free, emit_check_case) =
-      match snd scrutinee_expr with
-      | A.Lvar _ ->
-        (* Special case for simple scrutinee *)
-        ( empty,
-          empty,
-          fun case_expr case_handler_label ->
-            let ((pos, _), _) = case_expr in
-            gather
-              [
-                emit_two_exprs env pos scrutinee_expr case_expr;
-                instr_eq;
-                instr_jmpnz case_handler_label;
-              ] )
-      | _ ->
-        ( emit_expr env scrutinee_expr,
-          instr_popc,
-          fun case_expr case_handler_label ->
-            let next_case_label = Label.next_regular () in
-            let ((pos, _), _) = case_expr in
-            gather
-              [
-                instr_dup;
-                emit_expr env case_expr;
-                emit_pos pos;
-                instr_eq;
-                instr_jmpz next_case_label;
-                instr_popc;
-                instr_jmp case_handler_label;
-                instr_label next_case_label;
-              ] )
+  let (instr_init, instr_free, emit_check_case) =
+    match snd scrutinee_expr with
+    | A.Lvar _ ->
+      (* Special case for simple scrutinee *)
+      ( empty,
+        empty,
+        fun case_expr case_handler_label ->
+          let ((pos, _), _) = case_expr in
+          gather
+            [
+              emit_two_exprs env pos scrutinee_expr case_expr;
+              instr_eq;
+              instr_jmpnz case_handler_label;
+            ] )
+    | _ ->
+      ( emit_expr env scrutinee_expr,
+        instr_popc,
+        fun case_expr case_handler_label ->
+          let next_case_label = Label.next_regular () in
+          let ((pos, _), _) = case_expr in
+          gather
+            [
+              instr_dup;
+              emit_expr env case_expr;
+              emit_pos pos;
+              instr_eq;
+              instr_jmpz next_case_label;
+              instr_popc;
+              instr_jmp case_handler_label;
+              instr_label next_case_label;
+            ] )
+  in
+  (* "continue" in a switch in PHP has the same semantics as break! *)
+  let break_label = Label.next_regular () in
+  let cl =
+    Emit_env.do_in_switch_body break_label env cl @@ fun env _ ->
+    List.map cl ~f:(emit_case env)
+  in
+  let instr_bodies = gather @@ List.map cl ~f:snd in
+  let default_label =
+    let default_labels =
+      List.filter_map cl ~f:(fun ((e, l), _) ->
+          if Option.is_none e then
+            Some l
+          else
+            None)
     in
-    (* "continue" in a switch in PHP has the same semantics as break! *)
-    let break_label = Label.next_regular () in
-    let cl =
-      Emit_env.do_in_switch_body break_label env cl @@ fun env _ ->
-      List.map cl ~f:(emit_case env)
-    in
-    let instr_bodies = gather @@ List.map cl ~f:snd in
-    let default_label =
-      let default_labels =
-        List.filter_map cl ~f:(fun ((e, l), _) ->
-            if Option.is_none e then
-              Some l
-            else
-              None)
-      in
-      match default_labels with
-      | [] -> break_label
-      | [l] -> l
-      | _ ->
-        Emit_fatal.raise_fatal_runtime
-          pos
-          "Switch statements may only contain one 'default' clause."
-    in
-    let instr_check_cases =
-      gather
-      @@ List.map cl ~f:(function
-             (* jmp to default case should be emitted as the very last 'else' case *)
-             | ((None, _), _) -> empty
-             | ((Some e, l), _) -> emit_check_case e l)
-    in
+    match default_labels with
+    | [] -> break_label
+    | [l] -> l
+    | _ ->
+      Emit_fatal.raise_fatal_runtime
+        pos
+        "Switch statements may only contain one 'default' clause."
+  in
+  let instr_check_cases =
     gather
-      [
-        instr_init;
-        instr_check_cases;
-        instr_free;
-        instr_jmp default_label;
-        instr_bodies;
-        instr_label break_label;
-      ]
+    @@ List.map cl ~f:(function
+           (* jmp to default case should be emitted as the very last 'else' case *)
+           | ((None, _), _) -> empty
+           | ((Some e, l), _) -> emit_check_case e l)
+  in
+  gather
+    [
+      instr_init;
+      instr_check_cases;
+      instr_free;
+      instr_jmp default_label;
+      instr_bodies;
+      instr_label break_label;
+    ]
 
 and block_pos b =
   let bpos = List.map b fst in

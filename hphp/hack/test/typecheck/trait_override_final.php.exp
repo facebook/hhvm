@@ -1,0 +1,9 @@
+File "trait_override_final.php--file3.php", line 3, characters 7-7:
+Class C does not correctly implement all required members  (Typing[4340])
+File "trait_override_final.php--file3.php", line 3, characters 17-17:
+Some members are incompatible with those declared in type B
+Read the following to see why:
+File "trait_override_final.php--file1.php", line 4, characters 25-25:
+You cannot override this method
+File "trait_override_final.php--file2.php", line 4, characters 25-25:
+It was declared as final

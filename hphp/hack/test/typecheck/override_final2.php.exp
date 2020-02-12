@@ -1,4 +1,9 @@
+File "override_final2.php", line 16, characters 7-9:
+Class Bar does not correctly implement all required members  (Typing[4340])
+File "override_final2.php", line 16, characters 19-21:
+Some members are incompatible with those declared in type Foo
+Read the following to see why:
 File "override_final2.php", line 17, characters 22-32:
-You cannot override this method (Typing[4070])
+You cannot override this method
 File "override_final2.php", line 13, characters 25-35:
 It was declared as final

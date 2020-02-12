@@ -714,7 +714,10 @@ and constructor_decl (pcstr, pconsist) class_ =
     | (None, _) -> pcstr
     | (Some method_, Some { elt_final = true; elt_origin; _ }) ->
       let fe = Decl_heap.Constructors.find_unsafe elt_origin in
-      Errors.override_final ~parent:fe.fe_pos ~child:(fst method_.sm_name);
+      Errors.override_final
+        ~parent:fe.fe_pos
+        ~child:(fst method_.sm_name)
+        ~on_error:None;
       let cstr = build_constructor class_ method_ in
       cstr
     | (Some method_, _) ->

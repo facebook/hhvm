@@ -589,7 +589,8 @@ val invalid_newable_type_argument : Pos.t * string -> Pos.t -> unit
 val invalid_newable_type_param_constraints :
   Pos.t * string -> string list -> unit
 
-val override_final : parent:Pos.t -> child:Pos.t -> unit
+val override_final :
+  parent:Pos.t -> child:Pos.t -> on_error:typing_error_callback option -> unit
 
 val override_memoizelsb : parent:Pos.t -> child:Pos.t -> unit
 

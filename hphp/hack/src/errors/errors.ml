@@ -4184,13 +4184,13 @@ let invalid_newable_type_param_constraints
   in
   add (Typing.err_code Typing.InvalidNewableTypeParamConstraints) tparam_pos msg
 
-let override_final ~parent ~child =
-  add_list
-    (Typing.err_code Typing.OverrideFinal)
-    [
-      (child, "You cannot override this method");
-      (parent, "It was declared as final");
-    ]
+let override_final ~parent ~child ~(on_error : typing_error_callback option) =
+  let msg1 = (child, "You cannot override this method") in
+  let msg2 = (parent, "It was declared as final") in
+  match on_error with
+  | Some on_error ->
+    on_error ~code:(Typing.err_code Typing.OverrideFinal) [msg1; msg2]
+  | None -> add_list (Typing.err_code Typing.OverrideFinal) [msg1; msg2]
 
 let override_memoizelsb ~parent ~child =
   add_list

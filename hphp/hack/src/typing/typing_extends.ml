@@ -122,7 +122,7 @@ let should_check_params parent_class class_ =
   else
     Cls.members_fully_known class_
 
-let check_final_method member_source parent_class_elt class_elt =
+let check_final_method member_source parent_class_elt class_elt on_error =
   (* we only check for final overrides on methods, not properties *)
   (* we don't check constructors, as they are already checked
    * in the decl phase *)
@@ -141,7 +141,10 @@ let check_final_method member_source parent_class_elt class_elt =
     (* we have a final method being overridden by a user-declared method *)
     let (lazy parent_pos) = parent_class_elt.ce_pos in
     let (lazy pos) = class_elt.ce_pos in
-    Errors.override_final parent_pos pos
+    Errors.override_final
+      ~parent:parent_pos
+      ~child:pos
+      ~on_error:(Some on_error)
 
 let check_memoizelsb_method member_source parent_class_elt class_elt =
   let is_method =
@@ -246,7 +249,7 @@ let check_override
       on_error
   in
   (* We first verify that we aren't overriding a final method *)
-  check_final_method mem_source parent_class_elt class_elt;
+  check_final_method mem_source parent_class_elt class_elt on_error;
   check_memoizelsb_method mem_source parent_class_elt class_elt;
 
   (* Verify that we are not overriding an __LSB property *)
@@ -644,7 +647,7 @@ let check_constructors
       match (fst (Cls.construct parent_class), fst (Cls.construct class_)) with
       | (Some parent_cstr, _) when parent_cstr.ce_synthesized -> ()
       | (Some parent_cstr, Some child_cstr) ->
-        check_final_method `FromMethod parent_cstr child_cstr;
+        check_final_method `FromMethod parent_cstr child_cstr on_error;
         check_class_elt_visibility parent_cstr child_cstr on_error
       | (_, _) -> ()
     end;

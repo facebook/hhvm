@@ -371,8 +371,7 @@ let check_override
           env
           on_error
           fty_child
-          fty_parent;
-        env
+          fty_parent
       ) else
         Typing_ops.unify_decl
           pos
@@ -770,16 +769,14 @@ let tconst_subsumption env class_name parent_typeconst child_typeconst on_error
           on_error
           x
           y
-      else (
+      else
         Typing_ops.sub_type_decl_on_error
           pos
           Reason.URsubsume_tconst_assign
           env
           on_error
           y
-          x;
-        env
-      )
+          x
     in
     ignore
     @@ Option.map2

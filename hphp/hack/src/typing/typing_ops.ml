@@ -52,7 +52,8 @@ let sub_type_decl_on_error p ur env on_error ty_sub ty_super =
   let localize_with_self = Typing_utils.localize_with_self ~pos:p ~quiet:true in
   let (env, ty_super) = localize_with_self env ty_super in
   let (env, ty_sub) = localize_with_self env ty_sub in
-  ignore (sub_type p ur env ty_sub ty_super on_error)
+  let env = sub_type p ur env ty_sub ty_super on_error in
+  env
 
 (* Ensure that types are equivalent i.e. subtypes of each other *)
 let unify_decl p ur env on_error ty1 ty2 =

@@ -46,7 +46,7 @@ let catch_exc pos (on_error : Errors.typing_error_callback) r f =
     List.iter (Errors.get_error_list other_errors) ~f:(fun error ->
         on_error (Errors.to_list error));
     v
-  with e ->
+  with Inf.InconsistentTypeVarState _ as e ->
     let e = Printf.sprintf "Exception: %s" (Exn.to_string e) in
     on_error [(pos, e)];
     r

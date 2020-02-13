@@ -294,6 +294,8 @@ module UserAttributes = struct
 
   let uaDisableTypecheckerInternal = "__DisableTypecheckerInternal"
 
+  let uaHasTopLevelCode = "__HasTopLevelCode"
+
   let as_map =
     AttributeKinds.(
       SMap.of_list
@@ -464,7 +466,6 @@ module StdlibFunctions = struct
   let array_mark_legacy = "\\HH\\array_mark_legacy"
 
   let is_php_array = "\\HH\\is_php_array"
-
 end
 
 module Typehints = struct

@@ -409,10 +409,8 @@ fn print_doc_comment<W: Write>(
     doc_comment: &Option<DocComment>,
 ) -> Result<(), W::Error> {
     if let Some(cmt) = doc_comment {
-        ctx.block(w, |ctx, w| {
-            ctx.newline(w)?;
-            w.write(format!(".doc {};", triple_quote_string(&cmt.0)))
-        })?;
+        ctx.newline(w)?;
+        w.write(format!(".doc {};", triple_quote_string(&cmt.0)))?;
     }
     Ok(())
 }
@@ -609,21 +607,24 @@ fn print_class_def<W: Write>(
     print_extends(w, class_def.base.as_ref().map(|x| x.to_raw_string()))?;
     print_implements(w, &class_def.implements)?;
     w.write(" {")?;
-    print_doc_comment(ctx, w, &class_def.doc_comment)?;
-    print_uses(ctx, w, class_def)?;
-    print_enum_ty(ctx, w, class_def)?;
-    for x in &class_def.requirements {
-        print_requirement(ctx, w, x)?;
-    }
-    for x in &class_def.type_constants {
-        print_type_constant(ctx, w, x)?;
-    }
-    for x in &class_def.properties {
-        print_property(ctx, w, class_def, x)?;
-    }
-    for m in &class_def.methods {
-        print_method_def(ctx, w, m)?;
-    }
+    ctx.block(w, |c, w| {
+        print_doc_comment(c, w, &class_def.doc_comment)?;
+        print_uses(c, w, class_def)?;
+        print_enum_ty(c, w, class_def)?;
+        for x in &class_def.requirements {
+            print_requirement(c, w, x)?;
+        }
+        for x in &class_def.type_constants {
+            print_type_constant(c, w, x)?;
+        }
+        for x in &class_def.properties {
+            print_property(c, w, class_def, x)?;
+        }
+        for m in &class_def.methods {
+            print_method_def(c, w, m)?;
+        }
+        Ok(())
+    })?;
     newline(w)?;
     w.write("}")?;
     newline(w)
@@ -767,8 +768,15 @@ fn print_main<W: Write>(ctx: &mut Context, w: &mut W, body: &HhasBody) -> Result
     newline(w)
 }
 
+fn is_bareword_char(c: &u8) -> bool {
+    match *c {
+        b'_' | b'.' | b'$' | b'\\' => true,
+        c => (c >= b'0' && c <= b'9') || (c >= b'a' && c <= b'z') || (c >= b'A' && c <= b'Z'),
+    }
+}
+
 fn print_body<W: Write>(ctx: &mut Context, w: &mut W, body: &HhasBody) -> Result<(), W::Error> {
-    // TODO(hrust): add `add_doc buf indent (Hhas_body.doc_comment body);`
+    print_doc_comment(ctx, w, &body.doc_comment)?;
     if body.is_memoize_wrapper {
         ctx.newline(w)?;
         w.write(".ismemoizewrapper;")?;
@@ -777,9 +785,22 @@ fn print_body<W: Write>(ctx: &mut Context, w: &mut W, body: &HhasBody) -> Result
         ctx.newline(w)?;
         w.write(".ismemoizewrapperlsb;")?;
     }
-    // TODO(hrust):
-    // add_num_iters buf indent (Hhas_body.num_iters body);
-    // add_decl_vars buf indent (Hhas_body.decl_vars body);
+    if body.num_iters > 0 {
+        ctx.newline(w)?;
+        w.write(format!(".number {};", body.num_iters))?;
+    }
+    if !body.decl_vars.is_empty() {
+        ctx.newline(w)?;
+        w.write(".declvars ")?;
+        concat_by(w, " ", &body.decl_vars, |w, var| {
+            if var.as_bytes().iter().all(is_bareword_char) {
+                w.write(var)
+            } else {
+                wrap_by_quotes(w, |w| w.write(escaper::escape(var)))
+            }
+        })?;
+        w.write(";")?;
+    }
     print_instructions(ctx, w, &body.body_instrs)
 }
 
@@ -964,9 +985,7 @@ fn print_param_default_value<W: Write>(
     w.write(" = ")?;
     print_label(w, &default_val.0)?;
     wrap_by_paren(w, |w| {
-        wrap_by_(w, "\"\"\"", "\"\"\"", |w| {
-            print_expr(w, &expr_env, &default_val.1)
-        })
+        wrap_by_triple_quotes(w, |w| print_expr(w, &expr_env, &default_val.1))
     })
 }
 

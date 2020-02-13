@@ -117,6 +117,13 @@ where
     wrap_by_(w, "\"", "\"", f)
 }
 
+pub fn wrap_by_triple_quotes<W: Write, F>(w: &mut W, f: F) -> Result<(), W::Error>
+where
+    F: FnOnce(&mut W) -> Result<(), W::Error>,
+{
+    wrap_by_(w, "\"\"\"", "\"\"\"", f)
+}
+
 pub fn wrap_by_angle<W: Write, F>(w: &mut W, f: F) -> Result<(), W::Error>
 where
     F: FnOnce(&mut W) -> Result<(), W::Error>,

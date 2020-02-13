@@ -74,7 +74,6 @@
     typing_intersection
     typing_log
     typing_logic_helpers
-    typing_make_type
     typing_mutability
     typing_object_get
     typing_ops
@@ -109,6 +108,7 @@
     naming
     symbol
     typechecker_options
+    type_mapper_generic
     typing_ast
     typing_defs
     global_config)
@@ -177,18 +177,41 @@
   (preprocess (pps ppx_deriving.std))) ; See T41851208
 
 (library
+  (name type_mapper_generic)
+  (wrapped false)
+  (modules
+    type_mapper_generic)
+  (libraries
+    common
+    core_kernel
+    typing_defs)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name type_mapper_forget)
+  (wrapped false)
+  (modules
+    type_mapper_forget)
+  (libraries
+    common
+    core_kernel
+    type_mapper_generic
+    typing_defs)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
   (name typing_ast)
   (wrapped false)
   (modules
     internal_type_set
     tast
-    type_mapper_generic
     type_parameter_env
     typing_log_value
     typing_logic
     typing_mutability_env
     typing_set
     typing_inference_env
+    typing_make_type
     typing_tyvar_occurrences
     type_visitor)
   (libraries
@@ -199,6 +222,7 @@
     errors
     naming_attributes
     nast
+    type_mapper_forget
     typing_defs
     typechecker_options)
   (preprocess (pps ppx_deriving.std)))

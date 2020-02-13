@@ -156,9 +156,13 @@ val extract_global_inference_env : t -> t * t_global
 
 val get_vars : t -> Ident.t list
 
+val is_empty_g : t_global -> bool
+
 val get_vars_g : t_global -> Ident.t list
 
 val initialize_tyvar_as_in : as_in:t_global -> t -> int -> t
+
+val get_tyvar_pos_exn_g : t_global -> Ident.t -> Pos.t
 
 val copy_tyvar_from_genv_to_env :
   Ident.t -> to_:t -> from:t_global -> t * Ident.t
@@ -195,3 +199,6 @@ val remove_var :
   search_in_upper_bounds_of:ISet.t ->
   search_in_lower_bounds_of:ISet.t ->
   t
+
+(** Remove any occurence of the tyvar from the global environment *)
+val forget_tyvar_g : t_global -> Ident.t -> t_global

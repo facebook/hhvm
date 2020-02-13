@@ -766,9 +766,15 @@ let global_tyvar_info_to_dummy_tyvar_info gtvinfo =
 
 let get_vars (env : t) = IMap.keys env.tvenv
 
+let is_empty_g (genv : t_global) = IMap.is_empty genv
+
 let get_vars_g (genv : t_global) = IMap.keys genv
 
 let get_tyvar_info_exn_g (genv : t_global) v = IMap.find v genv
+
+let get_tyvar_pos_exn_g (genv : t_global) var =
+  let tvinfo = get_tyvar_info_exn_g genv var in
+  tvinfo.tyvar_pos
 
 let has_var env v = Option.is_some (get_tyvar_info_opt env v)
 
@@ -1263,3 +1269,72 @@ let remove_var env var ~search_in_upper_bounds_of ~search_in_lower_bounds_of =
   let tyvars_stack = remove_var_from_tyvars_stack tyvars_stack var in
   let subtype_prop = replace_var_by_ty_in_prop subtype_prop var ty in
   { tvenv; tyvars_stack; tyvar_occurrences; subtype_prop; allow_solve_globals }
+
+let forget_tyvar_g genv var_to_forget =
+  let default_mapper_env = Type_mapper_forget.make_env var_to_forget in
+  let mapper = new Type_mapper_forget.forget_tyvar_mapper in
+  let process_solving_info : solving_info -> solving_info option = function
+    | TVIType locl_ty ->
+      let locl_ty = mapper#recurse_opt default_mapper_env locl_ty in
+      Option.map locl_ty ~f:(fun locl_ty -> TVIType locl_ty)
+    | TVIConstraints cstrs ->
+      let map_bound ity =
+        mapper#recurse_internal_type_opt default_mapper_env ity
+      in
+      let lower_bounds =
+        cstrs.lower_bounds
+        |> ITySet.elements
+        |> List.filter_map ~f:map_bound
+        |> ITySet.of_list
+      in
+      let upper_bounds =
+        cstrs.upper_bounds
+        |> ITySet.elements
+        |> List.filter_map ~f:map_bound
+        |> ITySet.of_list
+      in
+      let cstrs = { cstrs with lower_bounds; upper_bounds } in
+      Some (TVIConstraints cstrs)
+  in
+  let genv =
+    IMap.mapi
+      (fun var global_tyvar_info ->
+        if Int.equal var var_to_forget then
+          None
+        else
+          let solving_info =
+            process_solving_info global_tyvar_info.solving_info
+          in
+          Option.map solving_info ~f:(fun solving_info ->
+              { global_tyvar_info with solving_info }))
+      genv
+  in
+  let genv = IMap.filter_opt genv in
+  (* sanity check *)
+  let () =
+    let throw_on_var_to_forget =
+      object
+        inherit [unit] Type_mapper_generic.internal_type_mapper
+
+        method! on_tvar () r var =
+          if Int.equal var var_to_forget then
+            failwith
+            @@ Printf.sprintf "encountered %d, should have been removed" var
+          else
+            ((), mk (r, Tvar var))
+      end
+    in
+    IMap.iter
+      (fun _var global_tyvar_info ->
+        match global_tyvar_info.solving_info with
+        | TVIType locl_ty -> fst @@ throw_on_var_to_forget#on_type () locl_ty
+        | TVIConstraints cstrs ->
+          ITySet.iter
+            (fun ity -> fst @@ throw_on_var_to_forget#on_internal_type () ity)
+            cstrs.lower_bounds;
+          ITySet.iter
+            (fun ity -> fst @@ throw_on_var_to_forget#on_internal_type () ity)
+            cstrs.upper_bounds)
+      genv
+  in
+  genv

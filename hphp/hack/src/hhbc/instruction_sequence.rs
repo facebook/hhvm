@@ -9,6 +9,7 @@ use hhbc_ast_rust::*;
 use label_rust as label;
 use label_rust::Label;
 use local_rust as local;
+use oxidized::pos::Pos;
 use runtime::TypedValue;
 use thiserror::Error;
 
@@ -19,7 +20,7 @@ pub type Result<T = InstrSeq> = std::result::Result<T, Error>;
 #[derive(Error, Debug)]
 pub enum Error {
     #[error("IncludeTimeFatalException: FatalOp={0:?}, {1}")]
-    IncludeTimeFatalException(FatalOp, String),
+    IncludeTimeFatalException(FatalOp, Pos, String),
 
     #[error("Unrecoverable: {0}")]
     Unrecoverable(String),

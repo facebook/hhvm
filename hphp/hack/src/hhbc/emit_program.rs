@@ -28,11 +28,12 @@ pub fn emit_fatal_program<'p>(
     options: Options,
     is_systemlib: bool,
     op: FatalOp,
+    pos: &Pos,
     msg: impl AsRef<str>,
 ) -> Result<HhasProgram<'p>> {
     let mut emitter = Emitter::new(options);
     emitter.context_mut().set_systemlib(is_systemlib);
-    let body_instrs = emit_fatal(&emitter, op, &Pos::make_none(), msg);
+    let body_instrs = emit_fatal(&emitter, op, pos, msg);
     let main = make_body(
         &mut emitter,
         body_instrs,
@@ -61,9 +62,13 @@ pub fn emit_program<'p>(
 ) -> Result<HhasProgram<'p>> {
     let result = emit_program_(options.clone(), flags, namespace, tast);
     match result {
-        Err(Error::IncludeTimeFatalException(op, msg)) => {
-            emit_fatal_program(options, flags.contains(FromAstFlags::IS_SYSTEMLIB), op, msg)
-        }
+        Err(Error::IncludeTimeFatalException(op, pos, msg)) => emit_fatal_program(
+            options,
+            flags.contains(FromAstFlags::IS_SYSTEMLIB),
+            op,
+            &pos,
+            msg,
+        ),
         _ => result,
     }
 }

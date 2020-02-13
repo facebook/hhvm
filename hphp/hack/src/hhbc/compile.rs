@@ -8,7 +8,7 @@ use aast_parser::{
     rust_aast_parser_types::{Env as AastEnv, Result as AastResult},
     AastParser, Error as AastError,
 };
-use anyhow;
+use anyhow::{anyhow, *};
 use bitflags::bitflags;
 use emit_program_rust::{emit_fatal_program, emit_program, FromAstFlags};
 use hhas_program_rust::HhasProgram;
@@ -103,7 +103,7 @@ where
             emit_fatal(&env, *is_runtime_error, opts.clone(), pos, msg)
         }
     };
-    let program = program?;
+    let program = program.map_err(|e| anyhow!("Unhandled Emitter error: {}", e))?;
     ret.codegen_t = codegen_t;
 
     profile(log_extern_compiler_perf, &mut ret.printing_t, || {
@@ -161,7 +161,13 @@ fn emit_fatal<'a>(
     };
     let mut t = 0f64;
     let r = profile(opts.log_extern_compiler_perf(), &mut t, || {
-        emit_fatal_program(opts, env.flags.contains(EnvFlags::IS_SYSTEMLIB), op, msg)
+        emit_fatal_program(
+            opts,
+            env.flags.contains(EnvFlags::IS_SYSTEMLIB),
+            op,
+            pos,
+            msg,
+        )
     });
     (r, t)
 }

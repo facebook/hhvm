@@ -9,12 +9,12 @@ use hhbc_ast_rust::FatalOp;
 use instruction_sequence_rust::{Error, InstrSeq};
 use oxidized::pos::Pos;
 
-pub fn raise_fatal_runtime(pos: &Pos, msg: impl AsRef<str>) -> Error {
-    Error::IncludeTimeFatalException(FatalOp::Runtime, format!("{:?}: {}", pos, msg.as_ref()))
+pub fn raise_fatal_runtime(pos: &Pos, msg: impl Into<String>) -> Error {
+    Error::IncludeTimeFatalException(FatalOp::Runtime, pos.clone(), msg.into())
 }
 
-pub fn raise_fatal_parse(pos: &Pos, msg: impl AsRef<str>) -> Error {
-    Error::IncludeTimeFatalException(FatalOp::Parse, format!("{:?}: {}", pos, msg.as_ref()))
+pub fn raise_fatal_parse(pos: &Pos, msg: impl Into<String>) -> Error {
+    Error::IncludeTimeFatalException(FatalOp::Parse, pos.clone(), msg.into())
 }
 
 pub fn emit_fatal(emitter: &Emitter, op: FatalOp, pos: &Pos, msg: impl AsRef<str>) -> InstrSeq {

@@ -1,0 +1,9 @@
+File "redeclare_from_const_via_trait.php--file3.php", line 3, characters 7-7:
+Class D does not correctly implement all required members  (Typing[4340])
+File "redeclare_from_const_via_trait.php--file3.php", line 3, characters 17-17:
+Some members are incompatible with those declared in type C
+Read the following to see why:
+File "redeclare_from_const_via_trait.php--file1.php", line 4, characters 29-30:
+This property is __Const
+File "redeclare_from_const_via_trait.php--file2.php", line 4, characters 14-15:
+This property is not __Const

@@ -151,7 +151,8 @@ val mutating_const_property : Pos.t -> unit
 
 val self_const_parent_not : Pos.t -> unit
 
-val overriding_prop_const_mismatch : Pos.t -> bool -> Pos.t -> bool -> unit
+val overriding_prop_const_mismatch :
+  Pos.t -> bool -> Pos.t -> bool -> typing_error_callback -> unit
 
 val method_name_already_bound : Pos.t -> string -> unit
 
@@ -1191,7 +1192,8 @@ val invalid_unset_target_rx : Pos.t -> unit
 
 val lateinit_with_default : Pos.t -> unit
 
-val bad_lateinit_override : bool -> Pos.t -> Pos.t -> unit
+val bad_lateinit_override :
+  bool -> Pos.t -> Pos.t -> typing_error_callback -> unit
 
 val bad_xhp_attr_required_override :
   string -> string -> Pos.t -> Pos.t -> typing_error_callback -> unit

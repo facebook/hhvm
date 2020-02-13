@@ -1,0 +1,9 @@
+File "lateinit8.php--file3.php", line 3, characters 13-13:
+Class D does not correctly implement all required members  (Typing[4340])
+File "lateinit8.php--file3.php", line 3, characters 23-23:
+Some members are incompatible with those declared in type C
+Read the following to see why:
+File "lateinit8.php--file1.php", line 4, characters 10-12:
+Redeclared properties must be consistently declared __LateInit
+File "lateinit8.php--file2.php", line 5, characters 10-12:
+The property is declared __LateInit here

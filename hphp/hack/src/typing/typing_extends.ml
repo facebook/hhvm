@@ -180,7 +180,7 @@ let check_lsb_overrides member_source member_name parent_class_elt class_elt =
     let (lazy pos) = class_elt.ce_pos in
     Errors.override_lsb member_name parent_pos pos
 
-let check_lateinit parent_class_elt class_elt =
+let check_lateinit parent_class_elt class_elt on_error =
   let is_override =
     String.( <> ) parent_class_elt.ce_origin class_elt.ce_origin
   in
@@ -194,6 +194,7 @@ let check_lateinit parent_class_elt class_elt =
       parent_class_elt.ce_lateinit
       parent_pos
       child_pos
+      on_error
 
 let check_xhp_attr_required env parent_class_elt class_elt on_error =
   if not (TypecheckerOptions.check_xhp_attribute (Env.get_tcopt env)) then
@@ -254,7 +255,7 @@ let check_override
 
   (* Verify that we are not overriding an __LSB property *)
   check_lsb_overrides mem_source member_name parent_class_elt class_elt;
-  check_lateinit parent_class_elt class_elt;
+  check_lateinit parent_class_elt class_elt on_error;
   check_xhp_attr_required env parent_class_elt class_elt on_error;
   let check_params = should_check_params parent_class class_ in
   check_class_elt_visibility parent_class_elt class_elt on_error;
@@ -265,7 +266,8 @@ let check_override
       parent_pos
       parent_class_elt.ce_const
       pos
-      class_elt.ce_const;
+      class_elt.ce_const
+      on_error;
   if (not parent_class_elt.ce_abstract) && class_elt.ce_abstract then
     (* It is valid for abstract class to extend a concrete class, but it cannot
      * redefine already concrete members as abstract.

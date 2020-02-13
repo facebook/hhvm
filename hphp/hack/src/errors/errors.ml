@@ -4021,12 +4021,16 @@ let self_const_parent_not pos =
     pos
     "A __Const class may only extend other __Const classes"
 
-let overriding_prop_const_mismatch parent_pos parent_const child_pos child_const
-    =
+let overriding_prop_const_mismatch
+    parent_pos
+    parent_const
+    child_pos
+    child_const
+    (on_error : typing_error_callback) =
   let m1 = "This property is __Const" in
   let m2 = "This property is not __Const" in
-  add_list
-    (Typing.err_code Typing.OverridingPropConstMismatch)
+  on_error
+    ~code:(Typing.err_code Typing.OverridingPropConstMismatch)
     [
       ( parent_pos,
         if parent_const then
@@ -4758,15 +4762,16 @@ let lateinit_with_default pos =
     pos
     "A late-initialized property cannot have a default value"
 
-let bad_lateinit_override parent_is_lateinit parent_pos child_pos =
+let bad_lateinit_override
+    parent_is_lateinit parent_pos child_pos (on_error : typing_error_callback) =
   let verb =
     if parent_is_lateinit then
       "is"
     else
       "is not"
   in
-  add_list
-    (Typing.err_code Typing.BadLateInitOverride)
+  on_error
+    ~code:(Typing.err_code Typing.BadLateInitOverride)
     [
       ( child_pos,
         "Redeclared properties must be consistently declared __LateInit" );

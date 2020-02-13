@@ -36,6 +36,12 @@ pub enum Error<WE: Debug> {
     Fail(String),
 }
 
+impl<WE: Debug> Error<WE> {
+    pub fn fail(s: impl Into<String>) -> Self {
+        Self::Fail(s.into())
+    }
+}
+
 pub trait Write {
     type Error: Debug;
     fn write(&mut self, s: impl AsRef<str>) -> Result<(), Self::Error>;
@@ -116,6 +122,13 @@ where
     F: FnOnce(&mut W) -> Result<(), W::Error>,
 {
     wrap_by_(w, "<", ">", f)
+}
+
+pub fn wrap_by_square<W: Write, F>(w: &mut W, f: F) -> Result<(), W::Error>
+where
+    F: FnOnce(&mut W) -> Result<(), W::Error>,
+{
+    wrap_by_(w, "[", "]", f)
 }
 
 pub fn write_list<W: Write>(w: &mut W, items: &[impl AsRef<str>]) -> Result<(), W::Error> {

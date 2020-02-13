@@ -11,6 +11,8 @@ use indexmap::IndexSet;
 use itertools::Itertools;
 pub use write::{Error, IoWrite, Result, Write};
 
+use context::Context;
+use core_utils_rust::add_ns;
 use env::Env as BodyEnv;
 use escaper::escape;
 use hhas_attribute_rust::{self as hhas_attribute, HhasAttribute};
@@ -28,13 +30,14 @@ use hhas_type_const::HhasTypeConstant;
 use hhbc_ast_rust::*;
 use hhbc_id_rust::{class, Id};
 use hhbc_string_utils_rust::{
-    float, quote_string_with_escape, strip_global_ns, triple_quote_string,
+    float, integer, lstrip, quote_string_with_escape, strip_global_ns, strip_ns,
+    triple_quote_string, types,
 };
 use instruction_sequence_rust::InstrSeq;
 use label_rust::Label;
-use options::Options;
-use oxidized::{ast, ast_defs, doc_comment::DocComment, relative_path::RelativePath};
+use oxidized::{ast, ast_defs, doc_comment::DocComment};
 use runtime::TypedValue;
+use std::borrow::Cow;
 use write::*;
 
 const ADATA_ARRAY_PREFIX: &str = "a";
@@ -44,82 +47,99 @@ const ADATA_DICT_PREFIX: &str = "D";
 const ADATA_DARRAY_PREFIX: &str = "Y";
 const ADATA_KEYSET_PREFIX: &str = "k";
 
-/// Indent is an abstraction of indentation. Configurable indentation
-/// and perf tweaking will be easier.
-pub struct Indent(usize);
+pub mod context {
+    use crate::write::*;
+    use options::Options;
+    use oxidized::relative_path::RelativePath;
 
-impl Indent {
-    pub fn new() -> Self {
-        Self(0)
-    }
+    /// Indent is an abstraction of indentation. Configurable indentation
+    /// and perf tweaking will be easier.
+    struct Indent(usize);
 
-    pub fn inc(&mut self) {
-        self.0 += 1;
-    }
+    impl Indent {
+        pub fn new() -> Self {
+            Self(0)
+        }
 
-    pub fn dec(&mut self) {
-        self.0 -= 1;
-    }
+        pub fn inc(&mut self) {
+            self.0 += 1;
+        }
 
-    pub fn write<W: Write>(&self, w: &mut W) -> Result<(), W::Error> {
-        Ok(for _ in 0..self.0 {
-            w.write("  ")?;
-        })
-    }
-}
+        pub fn dec(&mut self) {
+            self.0 -= 1;
+        }
 
-pub struct Context<'a> {
-    pub opts: &'a Options,
-    pub path: Option<&'a RelativePath>,
-
-    dump_symbol_refs: bool,
-    indent: Indent,
-}
-
-impl<'a> Context<'a> {
-    pub fn new(opts: &'a Options, path: Option<&'a RelativePath>, dump_symbol_refs: bool) -> Self {
-        Self {
-            opts,
-            path,
-            dump_symbol_refs,
-            indent: Indent::new(),
+        pub fn write<W: Write>(&self, w: &mut W) -> Result<(), W::Error> {
+            Ok(for _ in 0..self.0 {
+                w.write("  ")?;
+            })
         }
     }
 
-    fn dump_symbol_refs(&self) -> bool {
-        self.dump_symbol_refs
+    pub struct Context<'a> {
+        pub opts: &'a Options,
+        pub path: Option<&'a RelativePath>,
+
+        dump_symbol_refs: bool,
+        indent: Indent,
+        is_system_lib: bool,
     }
 
-    /// Insert a newline with indentation
-    pub fn newline<W: Write>(&self, w: &mut W) -> Result<(), W::Error> {
-        newline(w)?;
-        self.indent.write(w)
-    }
+    impl<'a> Context<'a> {
+        pub fn new(
+            opts: &'a Options,
+            path: Option<&'a RelativePath>,
+            dump_symbol_refs: bool,
+            is_system_lib: bool,
+        ) -> Self {
+            Self {
+                opts,
+                path,
+                dump_symbol_refs,
+                indent: Indent::new(),
+                is_system_lib,
+            }
+        }
 
-    /// Start a new indented block
-    pub fn block<W, F>(&mut self, w: &mut W, f: F) -> Result<(), W::Error>
-    where
-        W: Write,
-        F: FnOnce(&mut Self, &mut W) -> Result<(), W::Error>,
-    {
-        self.indent.inc();
-        let r = f(self, w);
-        self.indent.dec();
-        r
-    }
+        pub fn dump_symbol_refs(&self) -> bool {
+            self.dump_symbol_refs
+        }
 
-    /// Printing instruction list requies manually control indentation,
-    /// where indent_inc/indent_dec are called
-    pub fn indent_inc(&mut self) {
-        self.indent.inc();
-    }
+        /// Insert a newline with indentation
+        pub fn newline<W: Write>(&self, w: &mut W) -> Result<(), W::Error> {
+            newline(w)?;
+            self.indent.write(w)
+        }
 
-    pub fn indent_dec(&mut self) {
-        self.indent.dec();
+        /// Start a new indented block
+        pub fn block<W, F>(&mut self, w: &mut W, f: F) -> Result<(), W::Error>
+        where
+            W: Write,
+            F: FnOnce(&mut Self, &mut W) -> Result<(), W::Error>,
+        {
+            self.indent.inc();
+            let r = f(self, w);
+            self.indent.dec();
+            r
+        }
+
+        /// Printing instruction list requies manually control indentation,
+        /// where indent_inc/indent_dec are called
+        pub fn indent_inc(&mut self) {
+            self.indent.inc();
+        }
+
+        pub fn indent_dec(&mut self) {
+            self.indent.dec();
+        }
+
+        pub fn is_system_lib(&self) -> bool {
+            self.is_system_lib
+        }
     }
 }
 
-struct DefaultValuePrintingEnv<'e> {
+struct ExprEnv<'e> {
     pub codegen_env: Option<&'e BodyEnv<'e>>,
     pub is_xhp: bool,
 }
@@ -216,7 +236,7 @@ fn print_fun_def<W: Write>(
     if ctx.opts.enforce_generic_ub() {
         print_upper_bounds(w, &body.upper_bounds)?;
     }
-    print_fun_attrs(w, fun_def)?;
+    print_fun_attrs(ctx, w, fun_def)?;
     if ctx.opts.source_map() {
         w.write(string_of_span(&fun_def.span))?;
         w.write(" ")?;
@@ -470,7 +490,7 @@ fn print_class_special_attributes<W: Write>(
     c: &HhasClass,
 ) -> Result<(), W::Error> {
     let user_attrs = &c.attributes;
-    let is_system_lib = false; // TODO(hrust)
+    let is_system_lib = ctx.is_system_lib();
 
     let mut special_attributes: Vec<&str> = vec![];
     if c.needs_no_reifiedinit() {
@@ -825,7 +845,7 @@ fn print_instr<W: Write>(w: &mut W, instr: &Instruct) -> Result<(), W::Error> {
         IGenerator(_) => not_impl!(),
         IIncludeEvalDefine(ed) => print_include_eval_define(w, ed),
         IGenDelegation(_) => not_impl!(),
-        _ => Err(Error::Fail("invalid instruction".into())),
+        _ => Err(Error::fail("invalid instruction")),
     }
 }
 
@@ -930,7 +950,7 @@ fn print_param_default_value<W: Write>(
     body_env: Option<&BodyEnv>,
     default_val: &(Label, ast::Expr),
 ) -> Result<(), W::Error> {
-    let default_value_env = DefaultValuePrintingEnv {
+    let expr_env = ExprEnv {
         codegen_env: body_env,
         is_xhp: false,
     };
@@ -938,7 +958,7 @@ fn print_param_default_value<W: Write>(
     print_label(w, &default_val.0)?;
     wrap_by_paren(w, |w| {
         wrap_by_(w, "\"\"\"", "\"\"\"", |w| {
-            print_expr(w, default_value_env, &default_val.1)
+            print_expr(w, &expr_env, &default_val.1)
         })
     })
 }
@@ -962,25 +982,250 @@ fn print_int<W: Write>(w: &mut W, i: &usize) -> Result<(), W::Error> {
     w.write(format!("{}", i))
 }
 
+fn print_key_value<W: Write>(
+    w: &mut W,
+    env: &ExprEnv,
+    k: &ast::Expr,
+    v: &ast::Expr,
+) -> Result<(), W::Error> {
+    print_expr(w, env, k)?;
+    w.write(" => ")?;
+    print_expr(w, env, v)
+}
+
+fn print_afield<W: Write>(w: &mut W, env: &ExprEnv, afield: &ast::Afield) -> Result<(), W::Error> {
+    use ast::Afield as A;
+    match afield {
+        A::AFvalue(e) => print_expr(w, env, &e),
+        A::AFkvalue(k, v) => print_key_value(w, env, &k, &v),
+    }
+}
+
+fn print_afields<W: Write>(
+    w: &mut W,
+    env: &ExprEnv,
+    afields: impl AsRef<[ast::Afield]>,
+) -> Result<(), W::Error> {
+    concat_by(w, ", ", afields, |w, i| print_afield(w, env, i))
+}
+
+fn print_uop<W: Write>(w: &mut W, op: ast::Uop) -> Result<(), W::Error> {
+    use ast::Uop as U;
+    w.write(match op {
+        U::Utild => "~",
+        U::Unot => "!",
+        U::Uplus => "+",
+        U::Uminus => "-",
+        U::Uincr => "++",
+        U::Udecr => "--",
+        U::Usilence => "@",
+        U::Upincr | U::Updecr => {
+            return Err(Error::fail(
+                "string_of_uop - should have been captures earlier",
+            ))
+        }
+    })
+}
+
+fn print_key_values<W: Write>(
+    w: &mut W,
+    env: &ExprEnv,
+    kvs: impl AsRef<[(ast::Expr, ast::Expr)]>,
+) -> Result<(), W::Error> {
+    concat_by(w, ", ", kvs, |w, (k, v)| print_key_value(w, env, k, v))
+}
+
 fn print_expr<W: Write>(
     w: &mut W,
-    env: DefaultValuePrintingEnv,
+    env: &ExprEnv,
     ast::Expr(p, expr): &ast::Expr,
 ) -> Result<(), W::Error> {
-    // TODO(shiqicao): avoid allocating string, fix escape
-    /* let adjust_id = |id: String| -> String {
-        match env.codegen_env {
+    fn adjust_id<'a>(env: &ExprEnv, id: &'a String) -> String {
+        let s: Cow<'a, str> = match env.codegen_env {
             Some(env) => {
-                if env.namespace.ns_name.is_none() &&
-            },
-            _ => id
-        }
-    };
+                if env.namespace.name.is_none()
+                    && id
+                        .as_bytes()
+                        .iter()
+                        .rposition(|c| *c == b'\\')
+                        .map_or(true, |i| i < 1)
+                {
+                    strip_global_ns(id).into()
+                } else {
+                    add_ns(id)
+                }
+            }
+            _ => id.into(),
+        };
+        // TODO(shiqicao): avoid allocating string, fix escape
+        escaper::escape(s.as_ref())
+    }
+    use ast::Expr_ as E_;
     match expr {
-        ast::Expr_::Id(id) => w.write(adjust_id(id)),
-        _ => not_impl!(),
-    } */
+        E_::Id(id) => w.write(adjust_id(env, &id.1)),
+        E_::Lvar(lid) => w.write(escaper::escape(&(lid.1).1)),
+        E_::Float(f) => not_impl!(),
+        E_::Int(i) => {
+            w.write(integer::to_decimal(i.as_str()).map_err(|_| Error::fail("ParseIntError"))?)
+        }
+        E_::String(s) => not_impl!(),
+        E_::Null => w.write("NULL"),
+        E_::True => w.write("true"),
+        E_::False => w.write("false"),
+        // For arrays and collections, we are making a conscious decision to not
+        // match HHMV has HHVM's emitter has inconsistencies in the pretty printer
+        // https://fburl.com/tzom2qoe
+        E_::Array(afl) => wrap_by_(w, "array(", ")", |w| print_afields(w, env, afl)),
+        E_::Collection(c) if (c.0).1 == "vec" || (c.0).1 == "dict" || (c.0).1 == "keyset" => {
+            w.write(&(c.0).1)?;
+            wrap_by_square(w, |w| print_afields(w, env, &c.2))
+        }
+        E_::Collection(c) => {
+            let name = strip_ns((c.0).1.as_str());
+            let name = types::fix_casing(&name);
+            match name {
+                "Set" | "Pair" | "Vector" | "Map" | "ImmSet" | "ImmVector" | "ImmMap" => {
+                    w.write("HH\\\\")?;
+                    w.write(name)?;
+                    wrap_by_(w, " {", "}", |w| {
+                        Ok(if !c.2.is_empty() {
+                            w.write(" ")?;
+                            print_afields(w, env, &c.2)?;
+                            w.write(" ")?;
+                        })
+                    })
+                }
+                _ => Err(Error::fail(format!(
+                    "Default value for an unknow collection - {}",
+                    name
+                ))),
+            }
+        }
+        E_::Shape(_) | E_::Binop(_) | E_::Call(_) | E_::New(_) => not_impl!(),
+        E_::Record(r) => {
+            w.write(lstrip(adjust_id(env, &(r.0).1).as_str(), "\\\\"))?;
+            print_key_values(w, env, &r.2)
+        }
+        E_::ClassConst(cc) => {
+            if let Some(e1) = (cc.0).1.as_ciexpr() {
+                not_impl!()
+            } else {
+                Err(Error::fail("TODO: Only expected CIexpr in class_const"))
+            }
+        }
+        E_::Unop(u) => match u.0 {
+            ast::Uop::Upincr => {
+                print_expr(w, env, &u.1)?;
+                w.write("++")
+            }
+            ast::Uop::Updecr => {
+                print_expr(w, env, &u.1)?;
+                w.write("--")
+            }
+            _ => {
+                print_uop(w, u.0)?;
+                print_expr(w, env, &u.1)
+            }
+        },
+        E_::ObjGet(og) => {
+            print_expr(w, env, &og.0)?;
+            w.write(match og.2 {
+                ast::OgNullFlavor::OGNullthrows => "->",
+                ast::OgNullFlavor::OGNullsafe => "\\?->",
+            })?;
+            print_expr(w, env, &og.1)
+        }
+        E_::Clone(e) => {
+            w.write("clone ")?;
+            print_expr(w, env, e)
+        }
+        E_::ArrayGet(ag) => not_impl!(),
+        E_::String2(ss) => concat_by(w, " . ", ss, |w, s| print_expr(w, env, s)),
+        E_::PrefixedString(s) => {
+            w.write(&s.0)?;
+            w.write(" . ")?;
+            print_expr(w, env, &s.1)
+        }
+        E_::Eif(eif) => {
+            print_expr(w, env, &eif.0)?;
+            w.write(" \\? ")?;
+            option(w, &eif.1, |w, etrue| print_expr(w, env, etrue))?;
+            w.write(" : ")?;
+            print_expr(w, env, &eif.2)
+        }
+        E_::BracedExpr(e) => wrap_by_braces(w, |w| print_expr(w, env, e)),
+        E_::ParenthesizedExpr(e) => wrap_by_paren(w, |w| print_expr(w, env, e)),
+        E_::Cast(c) => {
+            wrap_by_paren(w, |w| print_hint(w, &c.0))?;
+            print_expr(w, env, &c.1)
+        }
+        E_::Pipe(p) => {
+            print_expr(w, env, &p.1)?;
+            w.write(" |> ")?;
+            print_expr(w, env, &p.2)
+        }
+        E_::Is(i) => {
+            print_expr(w, env, &i.0)?;
+            w.write(" is ")?;
+            print_hint(w, &i.1)
+        }
+        E_::As(a) => {
+            print_expr(w, env, &a.0)?;
+            w.write(if a.2 { " ?as " } else { " as " })?;
+            print_hint(w, &a.1)
+        }
+        E_::Varray(va) => wrap_by_(w, "varray[", "]", |w| {
+            concat_by(w, ", ", &va.1, |w, e| print_expr(w, env, e))
+        }),
+        E_::Darray(da) => wrap_by_(w, "darray[", "]", |w| print_key_values(w, env, &da.1)),
+        E_::List(l) => wrap_by_(w, "list(", ")", |w| {
+            concat_by(w, ", ", l, |w, i| print_expr(w, env, i))
+        }),
+        E_::Yield(y) => {
+            w.write("yield ")?;
+            print_afield(w, env, y)
+        }
+        E_::Await(e) => {
+            w.write("await ")?;
+            print_expr(w, env, e)
+        }
+        E_::YieldBreak => w.write("return"),
+        E_::YieldFrom(e) => {
+            w.write("yield from ")?;
+            print_expr(w, env, e)
+        }
+        E_::Import(i) => {
+            print_import_flavor(w, &i.0)?;
+            w.write(" ")?;
+            print_expr(w, env, &i.1)
+        }
+        E_::Xml(_) => not_impl!(),
+        E_::Efun(_) => not_impl!(),
+        E_::Omitted => Ok(()),
+        E_::Lfun(_) => Err(Error::fail(
+            "expected Lfun to be converted to Efun during closure conversion print_expr",
+        )),
+        E_::Suspend(_) | E_::Callconv(_) | E_::ExprList(_) => {
+            Err(Error::fail("illegal default value"))
+        },
+        _ => Err(Error::fail(
+            "TODO Unimplemented: We are missing a lot of cases in the case match. Delete this catchall"
+        ))
+    }
+}
+
+fn print_hint<W: Write>(w: &mut W, hint: &ast::Hint) -> Result<(), W::Error> {
     not_impl!()
+}
+
+fn print_import_flavor<W: Write>(w: &mut W, flavor: &ast::ImportFlavor) -> Result<(), W::Error> {
+    use ast::ImportFlavor as F;
+    w.write(match flavor {
+        F::Include => "include",
+        F::Require => "require",
+        F::IncludeOnce => "include_once",
+        F::RequireOnce => "require_once",
+    })
 }
 
 fn print_param_user_attributes<W: Write>(w: &mut W, param: &HhasParam) -> Result<(), W::Error> {
@@ -994,7 +1239,11 @@ fn string_of_span(&Span(line_begin, line_end): &Span) -> String {
     format!("({},{})", line_begin, line_end)
 }
 
-fn print_fun_attrs<W: Write>(w: &mut W, fun_def: &HhasFunction) -> Result<(), W::Error> {
+fn print_fun_attrs<W: Write>(
+    ctx: &Context,
+    w: &mut W,
+    fun_def: &HhasFunction,
+) -> Result<(), W::Error> {
     not_impl!()
 }
 

@@ -13,7 +13,7 @@ use bitflags::bitflags;
 use emit_program_rust::{emit_fatal_program, emit_program, FromAstFlags};
 use hhas_program_rust::HhasProgram;
 use hhbc_ast_rust::FatalOp;
-use hhbc_hhas_rust::{print_program, Context, Write};
+use hhbc_hhas_rust::{context::Context, print_program, Write};
 use instruction_sequence_rust::Error;
 use itertools::{Either, Either::*};
 use ocamlrep::rc::RcOc;
@@ -112,6 +112,7 @@ where
                 &opts,
                 Some(&env.filepath),
                 env.flags.contains(EnvFlags::DUMP_SYMBOL_REFS),
+                env.flags.contains(EnvFlags::IS_SYSTEMLIB),
             ),
             writer,
             &program,

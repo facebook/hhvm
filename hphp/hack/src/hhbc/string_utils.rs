@@ -172,6 +172,22 @@ pub fn mangle_meth_caller(mangled_cls_name: &str, f_name: &str) -> String {
     format!("\\MethCaller${}${}", mangled_cls_name, f_name)
 }
 
+pub fn lstrip<'a>(s: &'a str, p: &str) -> &'a str {
+    if s.len() < p.len() {
+        s
+    } else {
+        let sb = s.as_bytes();
+        let pb = p.as_bytes();
+        for i in 0..pb.len() {
+            if sb[i] != pb[i] {
+                return s;
+            }
+        }
+        // s and p are valid then unwrap should never panic.
+        std::str::from_utf8(&sb[pb.len()..]).unwrap()
+    }
+}
+
 pub mod types {
     pub fn fix_casing(s: &str) -> &str {
         match s.to_lowercase().as_str() {
@@ -875,5 +891,17 @@ mod string_utils_tests {
                 "$__captured$reifiedgeneric$class$1"
             );
         }
+    }
+
+    #[test]
+    fn test_lstrip() {
+        use super::lstrip;
+        assert_eq!(lstrip("a", "a"), "");
+        assert_eq!(lstrip("a", "ab"), "a");
+        assert_eq!(lstrip("", "ab"), "");
+        assert_eq!(lstrip("", ""), "");
+        assert_eq!(lstrip("a", ""), "a");
+        assert_eq!(lstrip("aa", "a"), "a");
+        assert_eq!(lstrip("aa", "a"), "a");
     }
 }

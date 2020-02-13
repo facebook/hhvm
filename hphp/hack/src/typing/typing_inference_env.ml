@@ -870,15 +870,7 @@ module Size = struct
       pu_accesses
     |> fun m -> SMap.fold (fun _ x y -> x + y) m 0
 
-  let tyvar_info_size env tvinfo =
-    let {
-      tyvar_pos = _;
-      solving_info;
-      global_reason = _;
-      eager_solve_failed = _;
-    } =
-      tvinfo
-    in
+  let solving_info_size env solving_info =
     match solving_info with
     | TVIType ty -> ty_size env ty
     | TVIConstraints tvcstr ->
@@ -898,6 +890,17 @@ module Size = struct
       let pu_accesses_size = pu_accesses_size env pu_accesses in
       ubound_size + lbound_size + tconst_size + pu_accesses_size
 
+  let tyvar_info_size env tvinfo =
+    let {
+      tyvar_pos = _;
+      solving_info;
+      global_reason = _;
+      eager_solve_failed = _;
+    } =
+      tvinfo
+    in
+    solving_info_size env solving_info
+
   let inference_env_size env =
     let {
       tvenv;
@@ -910,6 +913,13 @@ module Size = struct
     in
     IMap.map (tyvar_info_size env) tvenv |> fun m ->
     IMap.fold (fun _ x y -> x + y) m 0
+
+  let global_inference_env_size (genv : t_global) =
+    let env = empty_inference_env in
+    IMap.map
+      (fun tyvar_info -> solving_info_size env tyvar_info.solving_info)
+      genv
+    |> fun m -> IMap.fold (fun _ x y -> x + y) m 0
 end
 
 let simple_merge env1 env2 =
@@ -1364,3 +1374,25 @@ let forget_tyvar_g genv var_to_forget =
       genv
   in
   genv
+
+let visit_types_g
+    (genv : t_global)
+    (mapper : 'a Type_mapper_generic.internal_type_mapper_type)
+    (acc : 'a) : 'a =
+  IMap.fold
+    (fun tyvar tyvar_info acc ->
+      let acc = fst @@ mapper#on_tvar acc tyvar_info.tyvar_reason tyvar in
+      match tyvar_info.solving_info with
+      | TVIType ty -> fst @@ mapper#on_type acc ty
+      | TVIConstraints cstrs ->
+        let process_bounds bounds acc =
+          ITySet.fold
+            (fun ity vars -> fst @@ mapper#on_internal_type vars ity)
+            bounds
+            acc
+        in
+        acc
+        |> process_bounds cstrs.lower_bounds
+        |> process_bounds cstrs.upper_bounds)
+    genv
+    acc

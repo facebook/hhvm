@@ -213,14 +213,33 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
                 InstrSeq::make_popc(),
             ])),
         },
-        a::Stmt_::Goto(l) => tfr::emit_goto(false, l.1.clone(), env, e.local_gen_mut()),
         a::Stmt_::GotoLabel(l) => Ok(InstrSeq::make_label(Label::Named(l.1.clone()))),
+        a::Stmt_::Goto(l) => tfr::emit_goto(false, l.1.clone(), env, e.local_gen_mut()),
+        a::Stmt_::Block(b) => emit_stmts(e, env, &b),
+        a::Stmt_::If(_) => unimplemented!("TODO(hrust)"),
+        a::Stmt_::While(_) => unimplemented!("TODO(hrust)"),
+        a::Stmt_::Using(_) => unimplemented!("TODO(hrust)"),
         a::Stmt_::Break => Ok(emit_break(e, env, pos)),
         a::Stmt_::Continue => Ok(emit_continue(e, env, pos)),
+        a::Stmt_::Do(_) => unimplemented!("TODO(hrust)"),
+        a::Stmt_::For(_) => unimplemented!("TODO(hrust)"),
+        a::Stmt_::Throw(_) => unimplemented!("TODO(hrust)"),
+        a::Stmt_::Try(_) => unimplemented!("TODO(hrust)"),
+        a::Stmt_::Switch(_) => unimplemented!("TODO(hrust)"),
+        a::Stmt_::Foreach(_) => unimplemented!("TODO(hrust)"),
         a::Stmt_::DefInline(def) => emit_def_inline(e, &**def),
+        a::Stmt_::Awaitall(_) => unimplemented!("TODO(hrust)"),
+        a::Stmt_::Markup(_) => unimplemented!("TODO(hrust)"),
         a::Stmt_::Fallthrough | a::Stmt_::Noop => Ok(InstrSeq::Empty),
-        _ => unimplemented!("TODO(hrust)"),
     }
+}
+
+fn emit_stmts(e: &mut Emitter, env: &mut Env, stl: &[tast::Stmt]) -> Result {
+    Ok(InstrSeq::gather(
+        stl.iter()
+            .map(|s| emit_stmt(e, env, s))
+            .collect::<Result<Vec<_>>>()?,
+    ))
 }
 
 fn emit_yield_from_delegates(

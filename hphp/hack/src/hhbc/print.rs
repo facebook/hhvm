@@ -37,8 +37,9 @@ use instruction_sequence_rust::InstrSeq;
 use label_rust::Label;
 use oxidized::{ast, ast_defs, doc_comment::DocComment};
 use runtime::TypedValue;
-use std::borrow::Cow;
 use write::*;
+
+use std::{borrow::Cow, convert::TryInto};
 
 const ADATA_ARRAY_PREFIX: &str = "a";
 const ADATA_VARRAY_PREFIX: &str = "y";
@@ -232,6 +233,7 @@ fn print_fun_def<W: Write>(
     fun_def: &HhasFunction,
 ) -> Result<(), W::Error> {
     let body = &fun_def.body;
+    newline(w)?;
     w.write(".function ")?;
     if ctx.opts.enforce_generic_ub() {
         print_upper_bounds(w, &body.upper_bounds)?;
@@ -258,7 +260,11 @@ fn print_fun_def<W: Write>(
         w.write(" isRxDisabled")?;
     }
     w.write(" ")?;
-    wrap_by_braces(w, |w| print_body(ctx, w, body))
+    wrap_by_braces(w, |w| {
+        ctx.block(w, |c, w| print_body(c, w, body))?;
+        newline(w)
+    })?;
+    newline(w)
 }
 
 fn print_requirement<W: Write>(
@@ -723,10 +729,11 @@ fn print_attribute<W: Write>(
 fn print_attributes<W: Write>(
     ctx: &mut Context,
     w: &mut W,
-    al: &Vec<HhasAttribute>,
+    al: impl AsRef<[HhasAttribute]>,
 ) -> Result<(), W::Error> {
     // Adjust for underscore coming before alphabet
     let al: Vec<&HhasAttribute> = al
+        .as_ref()
         .iter()
         .sorted_by_key(|a| (!a.name.starts_with("__"), &a.name))
         .collect();
@@ -1240,11 +1247,57 @@ fn string_of_span(&Span(line_begin, line_end): &Span) -> String {
 }
 
 fn print_fun_attrs<W: Write>(
-    ctx: &Context,
+    ctx: &mut Context,
     w: &mut W,
-    fun_def: &HhasFunction,
+    f: &HhasFunction,
 ) -> Result<(), W::Error> {
-    not_impl!()
+    use hhas_attribute::*;
+    let user_attrs = &f.attributes;
+    let mut special_attrs = vec![];
+    if let Ok(attr) = f.rx_level.try_into() {
+        special_attrs.push(attr);
+    }
+    if has_meth_caller(user_attrs) {
+        special_attrs.push("builtin");
+        special_attrs.push("is_meth_caller");
+    }
+    if f.is_interceptable() {
+        special_attrs.push("interceptable");
+    }
+    if has_foldable(user_attrs) {
+        special_attrs.push("foldable");
+    }
+    if has_provenance_skip_frame(user_attrs) {
+        special_attrs.push("prov_skip_frame");
+    }
+    if f.is_no_injection() {
+        special_attrs.push("no_injection");
+    }
+    if !f.is_top() {
+        special_attrs.push("nontop");
+    }
+    if ctx.is_system_lib() || (has_dynamically_callable(user_attrs) && !f.is_memoize_impl()) {
+        special_attrs.push("dyn_callable")
+    }
+    print_special_and_user_attrs(ctx, w, &special_attrs, user_attrs)
+}
+
+fn print_special_and_user_attrs<W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    specials: &[&str],
+    users: &[HhasAttribute],
+) -> Result<(), W::Error> {
+    if !users.is_empty() || !specials.is_empty() {
+        wrap_by_square(w, |w| {
+            concat_str_by(w, " ", specials)?;
+            if !specials.is_empty() && !users.is_empty() {
+                w.write(" ")?;
+            }
+            print_attributes(ctx, w, users)
+        })?;
+    }
+    Ok(())
 }
 
 fn print_upper_bounds<W: Write>(

@@ -58,6 +58,18 @@ impl<'a> HhasFunction<'a> {
         self.flags.contains(Flags::PAIR_GENERATOR)
     }
 
+    pub fn is_interceptable(&self) -> bool {
+        self.flags.contains(Flags::INTERCEPTABLE)
+    }
+
+    pub fn is_no_injection(&self) -> bool {
+        self.flags.contains(Flags::NO_INJECTION)
+    }
+
+    pub fn is_memoize_impl(&self) -> bool {
+        self.flags.contains(Flags::MEMOIZE_IMPL)
+    }
+
     pub fn rx_disabled(&self) -> bool {
         self.flags.contains(Flags::RX_DISABLED)
     }

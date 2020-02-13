@@ -77,20 +77,44 @@ fn is_const(attr: &HhasAttribute) -> bool {
     is("__Const", attr)
 }
 
+fn is_meth_caller(attr: &HhasAttribute) -> bool {
+    is("__MethCaller", attr)
+}
+
+fn is_provenance_skip_frame(attr: &HhasAttribute) -> bool {
+    is("__ProvenanceSkipFrame", attr)
+}
+
+fn is_dynamically_callable(attr: &HhasAttribute) -> bool {
+    is("__DynamicallyCallable", attr)
+}
+
 pub fn has_dynamically_constructible(attrs: &[HhasAttribute]) -> bool {
-    has(attrs, &is_dynamically_constructible)
+    has(attrs, is_dynamically_constructible)
 }
 
 pub fn has_foldable(attrs: &[HhasAttribute]) -> bool {
-    has(attrs, &is_foldable)
+    has(attrs, is_foldable)
 }
 
 pub fn has_sealed(attrs: &[HhasAttribute]) -> bool {
-    has(attrs, &is_sealed)
+    has(attrs, is_sealed)
 }
 
 pub fn has_const(attrs: &[HhasAttribute]) -> bool {
-    has(attrs, &is_const)
+    has(attrs, is_const)
+}
+
+pub fn has_meth_caller(attrs: &[HhasAttribute]) -> bool {
+    has(attrs, is_meth_caller)
+}
+
+pub fn has_provenance_skip_frame(attrs: &[HhasAttribute]) -> bool {
+    has(attrs, is_provenance_skip_frame)
+}
+
+pub fn has_dynamically_callable(attrs: &[HhasAttribute]) -> bool {
+    has(attrs, is_dynamically_callable)
 }
 
 pub fn deprecation_info<'a>(

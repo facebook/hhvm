@@ -91,6 +91,7 @@ struct RepoOptions {
   H(bool,           RustLowerer,                    true)             \
   H(bool,           EnableXHPClassModifier,         false)            \
   E(bool,           EmitGenericsUB,                 false)            \
+  H(bool,           DisableXHPElementMangling,      false)            \
   /**/
 
   /**/

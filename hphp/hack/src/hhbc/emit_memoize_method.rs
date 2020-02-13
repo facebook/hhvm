@@ -438,7 +438,7 @@ fn make_wrapper<'a>(
         vec![]
     };
     let env_copy = emit_body::make_env(
-        &NamespaceEnv::empty(vec![], false),
+        &NamespaceEnv::empty(vec![], false, false),
         env.flags.contains(env::Flags::NEEDS_LOCAL_THIS),
         &env.scope,
         env.flags.contains(env::Flags::IN_RX_BODY),

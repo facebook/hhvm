@@ -99,6 +99,7 @@ fn process_single_file_impl(
             const_uses: SMap::new(),
             name: None,
             auto_ns_map: vec![],
+            disable_xhp_element_mangling: false,
         }),
         config_jsons: vec![],
         config_list: vec![],

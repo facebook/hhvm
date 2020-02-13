@@ -200,6 +200,7 @@ impl<'a> Env<'a> {
             name: None,
             auto_ns_map: parser_options.po_auto_namespace_map.clone(),
             is_codegen: codegen,
+            disable_xhp_element_mangling: parser_options.po_disable_xhp_element_mangling,
         };
 
         Env {
@@ -2326,11 +2327,15 @@ where
                         })
                         .collect::<std::result::Result<Vec<_>, _>>()?;
 
+                    let id = if env.empty_ns_env.disable_xhp_element_mangling {
+                        ast::Id(name.0, name.1)
+                    } else {
+                        ast::Id(name.0, String::from(":") + &name.1)
+                    };
+
                     Ok(E_::mk_xml(
                         // TODO: update pos_name to support prefix
-                        ast::Id(name.0, String::from(":") + &name.1),
-                        attrs,
-                        exprs,
+                        id, attrs, exprs,
                     ))
                 } else {
                     Self::failwith("expect xhp open")
@@ -4358,6 +4363,11 @@ where
                             };
                             let init_expr =
                                 Self::mp_optional(Self::p_simple_initializer, init, env)?;
+                            let id = if env.empty_ns_env.disable_xhp_element_mangling {
+                                ast::Id(p, name)
+                            } else {
+                                ast::Id(p, String::from(":") + &name)
+                            };
                             let xhp_attr = ast::XhpAttr(
                                 ast::TypeHint((), hint.clone()),
                                 ast::ClassVar {
@@ -4366,7 +4376,7 @@ where
                                     abstract_: false,
                                     visibility: ast::Visibility::Public,
                                     type_: ast::TypeHint((), hint),
-                                    id: ast::Id(p, String::from(":") + &name),
+                                    id,
                                     expr: init_expr,
                                     user_attributes: vec![],
                                     doc_comment: None,

@@ -21,7 +21,7 @@ ocaml_ffi! {
         let indexed_source_text = IndexedSourceText::new(source_text);
         let mut res = AastParser::from_text(&env, &indexed_source_text, None).unwrap().aast.unwrap();
 
-        let empty_namespace = ocamlrep::rc::RcOc::new(namespace_env::Env::empty(vec![], false));
+        let empty_namespace = ocamlrep::rc::RcOc::new(namespace_env::Env::empty(vec![], false, false));
         elaborate_namespaces_visitor::elaborate_program(empty_namespace, &mut res);
 
         let mut options = Options::default();

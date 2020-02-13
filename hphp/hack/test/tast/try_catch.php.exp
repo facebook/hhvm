@@ -11,7 +11,7 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
         ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
-        ns_is_codegen = false };
+        ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       f_doc_comment =
       (Some "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */");
       f_static = false });
@@ -83,7 +83,7 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
          ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
-         ns_is_codegen = false };
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        f_doc_comment = None; f_static = false });
   (Class
      { c_span = [33:1-41]; c_annotation = (); c_mode = Mpartial;
@@ -101,7 +101,7 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
          ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
-         ns_is_codegen = false };
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        c_user_attributes = []; c_file_attributes = []; c_enum = None;
        c_pu_enums = []; c_doc_comment = None });
   (Class
@@ -120,7 +120,7 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
          ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
-         ns_is_codegen = false };
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        c_user_attributes = []; c_file_attributes = []; c_enum = None;
        c_pu_enums = []; c_doc_comment = None })
   ]

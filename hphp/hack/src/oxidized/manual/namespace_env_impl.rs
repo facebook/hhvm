@@ -9,7 +9,11 @@ use crate::s_map::SMap;
 use hh_autoimport_rust as hh_autoimport;
 
 impl Env {
-    pub fn empty(auto_ns_map: Vec<(String, String)>, is_codegen: bool) -> Self {
+    pub fn empty(
+        auto_ns_map: Vec<(String, String)>,
+        is_codegen: bool,
+        disable_xhp_element_mangling: bool,
+    ) -> Self {
         Env {
             ns_uses: hh_autoimport::NAMESPACES_MAP.clone(),
             class_uses: hh_autoimport::TYPES_MAP.clone(),
@@ -19,12 +23,13 @@ impl Env {
             name: None,
             auto_ns_map,
             is_codegen,
+            disable_xhp_element_mangling,
         }
     }
 }
 
 impl std::default::Default for Env {
     fn default() -> Self {
-        Self::empty(vec![], false)
+        Self::empty(vec![], false, false)
     }
 }

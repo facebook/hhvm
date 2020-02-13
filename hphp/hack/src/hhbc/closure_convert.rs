@@ -1078,7 +1078,7 @@ fn flatten_ns(defs: &mut Program) -> Program {
 }
 
 pub fn convert_toplevel_prog(e: &mut Emitter, defs: &mut Program) {
-    let empty_namespace = namespace_env::Env::empty(vec![], false);
+    let empty_namespace = namespace_env::Env::empty(vec![], false, false);
     if e.options()
         .hack_compiler_flags
         .contains(CompilerFlags::CONSTANT_FOLDING)

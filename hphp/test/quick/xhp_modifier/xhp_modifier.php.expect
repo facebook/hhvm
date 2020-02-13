@@ -1,0 +1,22 @@
+vec(2) {
+  int(18)
+  object(IExistInTheRootNamespace) (0) {
+  }
+}
+vec(3) {
+  int(19)
+  object(HerpDerp\foo\bar) (0) {
+  }
+  string(16) "HerpDerp\foo\bar"
+}
+vec(2) {
+  int(8)
+  object(IExistInTheRootNamespace) (0) {
+  }
+}
+vec(3) {
+  int(9)
+  object(foo\bar) (0) {
+  }
+  string(7) "foo\bar"
+}

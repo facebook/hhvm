@@ -72,6 +72,8 @@ module FullFidelityParseArgs = struct
     error_php_lambdas: bool;
     disallow_discarded_nullable_awaitables: bool;
     enable_first_class_function_pointers: bool;
+    disable_xhp_element_mangling: bool;
+    enable_xhp_class_modifier: bool;
   }
 
   let make
@@ -108,7 +110,9 @@ module FullFidelityParseArgs = struct
       disallow_func_ptrs_in_constants
       error_php_lambdas
       disallow_discarded_nullable_awaitables
-      enable_first_class_function_pointers =
+      enable_first_class_function_pointers
+      disable_xhp_element_mangling
+      enable_xhp_class_modifier =
     {
       full_fidelity_json;
       full_fidelity_dot;
@@ -144,6 +148,8 @@ module FullFidelityParseArgs = struct
       error_php_lambdas;
       disallow_discarded_nullable_awaitables;
       enable_first_class_function_pointers;
+      disable_xhp_element_mangling;
+      enable_xhp_class_modifier;
     }
 
   let parse_args () =
@@ -196,6 +202,8 @@ module FullFidelityParseArgs = struct
     let error_php_lambdas = ref false in
     let disallow_discarded_nullable_awaitables = ref false in
     let enable_first_class_function_pointers = ref false in
+    let disable_xhp_element_mangling = ref false in
+    let enable_xhp_class_modifier = ref false in
     let options =
       [
         (* modes *)
@@ -330,6 +338,13 @@ No errors are filtered out."
         ( "--enable-first-class-function-pointers",
           Arg.Set enable_first_class_function_pointers,
           "Enables parsing of first class function pointers" );
+        ( "--enable-xhp-class-modifier",
+          Arg.Set enable_xhp_class_modifier,
+          "Enables the 'xhp class foo' syntax" );
+        ( "--disable-xhp-element-mangling",
+          Arg.Set disable_xhp_element_mangling,
+          "Disable mangling of XHP elements :foo. That is, :foo:bar is now \\foo\\bar, not xhp_foo__bar"
+        );
       ]
     in
     Arg.parse options push_file usage;
@@ -385,6 +400,8 @@ No errors are filtered out."
       !error_php_lambdas
       !disallow_discarded_nullable_awaitables
       !enable_first_class_function_pointers
+      !disable_xhp_element_mangling
+      !enable_xhp_class_modifier
 end
 
 open FullFidelityParseArgs
@@ -458,6 +475,16 @@ let handle_existing_file args filename =
     ParserOptions.with_enable_first_class_function_pointers
       popt
       args.enable_first_class_function_pointers
+  in
+  let popt =
+    ParserOptions.with_disable_xhp_element_mangling
+      popt
+      args.disable_xhp_element_mangling
+  in
+  let popt =
+    ParserOptions.with_enable_xhp_class_modifier
+      popt
+      args.enable_xhp_class_modifier
   in
   (* Parse with the full fidelity parser *)
   let file = Relative_path.create Relative_path.Dummy filename in

@@ -18,7 +18,12 @@ let check_reifiable env tc attr_pos =
     match ty_opt with
     | Some ty ->
       let emit_err = Errors.reifiable_attr attr_pos kind in
-      Reified_check.validator#validate_type env (fst tc.ttc_name) ty emit_err
+      Reified_check.validator#validate_type
+        env
+        (fst tc.ttc_name)
+        ty
+        ~reification:Type_validator.Unresolved
+        emit_err
     | None -> ()
   in
   check_impl "type" tc.ttc_type;

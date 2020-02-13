@@ -8,8 +8,8 @@ File "reifiable3.php", line 17, characters 14-15:
 Invalid type (Typing[4322])
 File "reifiable3.php", line 16, characters 5-15:
 This type constant has the __Reifiable attribute
-File "reifiable3.php", line 14, characters 23-24:
-It cannot contain an abstract type constant without the __Reifiable attribute
+File "reifiable3.php", line 17, characters 19-22:
+It cannot contain the late static bound this type
 File "reifiable3.php", line 21, characters 14-15:
 Invalid type (Typing[4322])
 File "reifiable3.php", line 6, characters 5-15:
@@ -22,6 +22,12 @@ File "reifiable3.php", line 9, characters 5-15:
 This type constant has the __Reifiable attribute
 File "reifiable3.php", line 10, characters 32-42:
 It cannot contain an array type
+File "reifiable3.php", line 17, characters 14-15:
+Invalid type (Typing[4322])
+File "reifiable3.php", line 16, characters 5-15:
+This type constant has the __Reifiable attribute
+File "reifiable3.php", line 17, characters 19-22:
+It cannot contain the late static bound this type
 File "reifiable3.php", line 21, characters 14-15:
 Invalid type (Typing[4322])
 File "reifiable3.php", line 6, characters 5-15:

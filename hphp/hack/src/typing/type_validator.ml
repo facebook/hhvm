@@ -16,11 +16,17 @@ type validity =
   | Valid
   | Invalid : Reason.t * string -> validity
 
+(* In hint positions, reified types are not resolved *)
+type reification =
+  | Resolved
+  | Unresolved
+
 type validation_state = {
   env: Env.env;
   ety_env: expand_env;
   validity: validity;
   like_context: bool;
+  reification: reification;
   expanded_typedefs: SSet.t;
 }
 
@@ -132,7 +138,8 @@ class virtual type_validator =
             | _ -> this#on_alias acc r (pos, name) tyl td_type)
 
     (* Use_pos is the primary error position *)
-    method validate_type env use_pos root_ty emit_error =
+    method validate_type
+        env use_pos root_ty ?(reification = Unresolved) emit_error =
       let state =
         this#on_type
           {
@@ -152,6 +159,7 @@ class virtual type_validator =
             expanded_typedefs = SSet.empty;
             validity = Valid;
             like_context = false;
+            reification;
           }
           root_ty
       in
@@ -159,9 +167,9 @@ class virtual type_validator =
       | Invalid (r, msg) -> emit_error use_pos (Reason.to_pos r) msg
       | Valid -> ()
 
-    method validate_hint env hint emit_error =
+    method validate_hint env hint ?(reification = Unresolved) emit_error =
       let hint_ty = Env.hint_to_ty env hint in
-      this#validate_type env (fst hint) hint_ty emit_error
+      this#validate_type env (fst hint) hint_ty ~reification emit_error
 
     method invalid state r msg =
       match state.validity with

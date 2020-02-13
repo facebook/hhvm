@@ -57,6 +57,14 @@ let validator =
         in
         this#invalid acc r kind
 
+    method! on_taccess acc r (root, ids) =
+      let acc =
+        match acc.reification with
+        | Unresolved -> this#on_type acc root
+        | Resolved -> acc
+      in
+      super#on_taccess acc r (root, ids)
+
     method! on_tthis acc r =
       this#invalid acc r "the late static bound this type"
   end
@@ -114,7 +122,7 @@ let is_wildcard (_, hint) =
  *
  * where Tf does not exist at runtime.
  *)
-let verify_targ_valid env tparam ((_, hint) as targ) =
+let verify_targ_valid env reification tparam ((_, hint) as targ) =
   if
     Naming_attributes.mem UA.uaExplicit tparam.tp_user_attributes
     && is_wildcard targ
@@ -129,7 +137,7 @@ let verify_targ_valid env tparam ((_, hint) as targ) =
     | Nast.Reified
     | Nast.SoftReified ->
       let emit_error = Errors.invalid_reified_argument tparam.tp_name in
-      validator#validate_hint env (snd targ) emit_error
+      validator#validate_hint env (snd targ) ~reification emit_error
     | Nast.Erased -> () );
 
   if Naming_attributes.mem UA.uaEnforceable tparam.tp_user_attributes then
@@ -140,14 +148,6 @@ let verify_targ_valid env tparam ((_, hint) as targ) =
 
   if Naming_attributes.mem UA.uaNewable tparam.tp_user_attributes then
     valid_newable_hint env tparam.tp_name (snd targ)
-
-let verify_targs env expr_pos decl_pos tparams targs =
-  let all_wildcards = List.for_all ~f:is_wildcard targs in
-  if all_wildcards && tparams_has_reified tparams then
-    Errors.require_args_reify decl_pos expr_pos
-  else
-    (* Unequal_lengths case handled elsewhere *)
-    List.iter2 tparams targs ~f:(verify_targ_valid env) |> ignore
 
 let verify_call_targs env expr_pos decl_pos tparams targs =
   ( if tparams_has_reified tparams then
@@ -171,7 +171,12 @@ let verify_call_targs env expr_pos decl_pos tparams targs =
       | _ -> ()
     in
     List.iter targs ~f:check_targ_hints );
-  verify_targs env expr_pos decl_pos tparams targs
+  let all_wildcards = List.for_all ~f:is_wildcard targs in
+  if all_wildcards && tparams_has_reified tparams then
+    Errors.require_args_reify decl_pos expr_pos
+  else
+    (* Unequal_lengths case handled elsewhere *)
+    List.iter2 tparams targs ~f:(verify_targ_valid env Resolved) |> ignore
 
 let get_class_by_name ctx classname =
   match Naming_table.Types.get_filename classname with
@@ -299,7 +304,7 @@ let handler =
             let tparams = Cls.tparams tc in
             ignore
               (List.iter2 tparams hints ~f:(fun tp hint ->
-                   verify_targ_valid env tp ((), hint)));
+                   verify_targ_valid env Unresolved tp ((), hint)));
 
             (* TODO: This check could be unified with the existence check above,
              * but would require some consolidation T38941033. List.iter2 gives

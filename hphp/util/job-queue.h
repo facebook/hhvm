@@ -146,14 +146,15 @@ public:
    * the job object correctly.
    */
   TJob dequeueMaybeExpired(int id, int q, bool inc, bool* expired,
-                           bool highpri = false) {
+                           bool highpri = false, bool* workerStop = nullptr) {
     if (id == m_jobReaperId) {
       *expired = true;
       return dequeueOnlyExpiredImpl(id, q, inc);
     }
     timespec now;
     Timer::GetMonotonicTime(now);
-    return dequeueMaybeExpiredImpl(id, q, inc, now, expired, highpri);
+    return dequeueMaybeExpiredImpl(id, q, inc, now, expired,
+                                   highpri, workerStop);
   }
 
   /**
@@ -203,7 +204,8 @@ public:
  private:
   friend class JobQueue_Expiration_Test;
   TJob dequeueMaybeExpiredImpl(int id, int q, bool inc, const timespec& now,
-                               bool* expired, bool highPri = false) {
+                               bool* expired, bool highPri = false,
+                               bool* workerStop = nullptr) {
     *expired = false;
     Lock lock(this);
     bool flushed = false;
@@ -248,6 +250,11 @@ public:
       if (!ableToDeque) {
         ableToDeque = m_healthStatus->getHealthLevel() != HealthLevel::BackOff;
       }
+    }
+    // Stop immediately if the worker has been asked to stop, due to thread
+    // count adjustments.
+    if (workerStop && *workerStop) {
+      throw StopSignal();
     }
     if (inc) incActiveWorker();
     --m_jobCount;
@@ -432,7 +439,7 @@ struct JobQueueWorker {
       try {
         bool expired = false;
         TJob job = m_queue->dequeueMaybeExpired(m_id, s_numaNode, countActive,
-                                                &expired, highPri);
+                                                &expired, highPri, &m_stopped);
         if (expired) {
           abortJob(job);
         } else {
@@ -448,7 +455,8 @@ struct JobQueueWorker {
           }
         }
       } catch (const typename QueueType::StopSignal&) {
-        m_stopped = true; // queue is empty and stopped, so we are done
+        // Either queue is empty and stopped, or we've been asked to stop.
+        m_stopped = true;
       }
     }
     onThreadExit();

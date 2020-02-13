@@ -10,7 +10,7 @@ import itertools
 import logging
 import os
 import sys
-from typing import AnyStr, Dict, Iterator, List, Sequence, Optional, Tuple
+from typing import AnyStr, Dict, Iterator, List, Optional, Sequence, Tuple
 
 from hphp.hack.src.hh_asdiff import diff, parsing
 
@@ -139,6 +139,16 @@ def report_summary(exp_file: Iterator[AnyStr], act_file: Iterator[AnyStr]):
             print("|NotInExp|", k)
         elif from_act is None:
             print("|NotInAct|", k)
+        elif (
+            next(filter(lambda l: "#### NotImpl:" in l, iter(from_act)), None)
+            is not None
+        ):
+            print("|PrintNotImplA|", k)
+        elif (
+            next(filter(lambda l: "#### NotImpl:" in l, iter(from_exp)), None)
+            is not None
+        ):
+            print("|PrintNotImplE|", k)
         elif diff.equal_lines(iter(from_exp), iter(from_act)):
             print("|Identical|", k)
         else:

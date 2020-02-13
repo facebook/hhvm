@@ -198,6 +198,7 @@ fn handle_not_impl<E: std::fmt::Debug, F: FnOnce() -> Result<(), E>>(f: F) -> Re
     let r = f();
     match &r {
         Err(Error::NotImpl(msg)) => {
+            println!("#### NotImpl: {}", msg);
             eprintln!("NotImpl: {}", msg);
             Ok(())
         }

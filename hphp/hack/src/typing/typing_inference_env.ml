@@ -57,7 +57,7 @@ type tyvar_info = {
   tyvar_pos: Pos.t;
       (** Where was the type variable introduced? (e.g. generic method invocation,
           new object construction) *)
-  is_global: bool;
+  global_reason: Reason.t option;
   eager_solve_failed: bool;
   solving_info: solving_info;
 }
@@ -73,7 +73,7 @@ type t = {
 }
 
 type global_tyvar_info = {
-  tyvar_pos: Pos.t;
+  tyvar_reason: Reason.t;
   solving_info: solving_info;
 }
 
@@ -117,11 +117,15 @@ module Log = struct
       variant_as_value "TVIConstraints" (tyvar_constraints_as_value tvcstr)
 
   let tyvar_info_as_value tvinfo =
-    let { tyvar_pos; is_global; eager_solve_failed; solving_info } = tvinfo in
+    let { tyvar_pos; global_reason; eager_solve_failed; solving_info } =
+      tvinfo
+    in
     make_map
       [
         ("tyvar_pos", pos_as_value tyvar_pos);
-        ("is_global", bool_as_value is_global);
+        ( "global_reason",
+          list_as_value
+            (Option.to_list (Option.map ~f:reason_as_value global_reason)) );
         ("eager_solve_failed", bool_as_value eager_solve_failed);
         ("solving_info", solving_info_as_value solving_info);
       ]
@@ -159,10 +163,10 @@ module Log = struct
       ]
 
   let global_tyvar_info_as_value tvinfo =
-    let { tyvar_pos; solving_info } = tvinfo in
+    let { tyvar_reason; solving_info } = tvinfo in
     make_map
       [
-        ("tyvar_pos", pos_as_value tyvar_pos);
+        ("tyvar_reason", reason_as_value tyvar_reason);
         ("solving_info", solving_info_as_value solving_info);
       ]
 
@@ -182,10 +186,12 @@ module Log = struct
       (genv : t_global)
       (v : Ident.t) =
     let open Hh_json in
-    let pos_to_json p =
+    let reason_to_json r =
+      let p = Reason.to_pos r in
       let to_n x = JSON_Number (string_of_int x) in
       JSON_Object
         [
+          ("reason", JSON_String (Reason.to_constructor_string r));
           ("filename", JSON_String (Relative_path.suffix (Pos.filename p)));
           ("start_line", to_n @@ fst (Pos.line_column p));
           ("start_column", to_n @@ snd (Pos.line_column p));
@@ -222,10 +228,10 @@ module Log = struct
     in
     match IMap.find_opt v genv with
     | None -> JSON_Null
-    | Some { tyvar_pos; solving_info } ->
+    | Some { tyvar_reason; solving_info } ->
       JSON_Object
         [
-          ("tyvar_pos", pos_to_json tyvar_pos);
+          ("tyvar_reason", reason_to_json tyvar_reason);
           ("solving_info", solving_info_to_json solving_info);
         ]
 end
@@ -254,7 +260,7 @@ let empty_tyvar_constraints =
 let empty_tyvar_info pos =
   {
     tyvar_pos = pos;
-    is_global = false;
+    global_reason = None;
     eager_solve_failed = false;
     solving_info = TVIConstraints empty_tyvar_constraints;
   }
@@ -294,7 +300,7 @@ let contains_unsolved_tyvars env =
 let is_global_tyvar env v =
   match get_tyvar_info_opt env v with
   | None -> false
-  | Some tvinfo -> tvinfo.is_global
+  | Some tvinfo -> Option.is_some tvinfo.global_reason
 
 let tyvar_is_solved env var =
   match get_solving_info_opt env var with
@@ -411,15 +417,15 @@ let create_tyvar_constraints variance =
   in
   TVIConstraints tyvar_constraints
 
-let fresh_unsolved_tyvar env v ?variance ~is_global tyvar_pos =
+let fresh_unsolved_tyvar env v ?variance ~global_reason tyvar_pos =
   let solving_info = create_tyvar_constraints variance in
   let tvinfo =
-    { tyvar_pos; is_global; solving_info; eager_solve_failed = false }
+    { tyvar_pos; global_reason; solving_info; eager_solve_failed = false }
   in
   set_tyvar_info env v tvinfo
 
 let add_current_tyvar ?variance env p v =
-  let env = fresh_unsolved_tyvar env v ?variance ~is_global:false p in
+  let env = fresh_unsolved_tyvar env v ?variance ~global_reason:None p in
   match env.tyvars_stack with
   | (expr_pos, tyvars) :: rest ->
     { env with tyvars_stack = (expr_pos, v :: tyvars) :: rest }
@@ -440,10 +446,10 @@ let new_global_tyvar env v r =
     let p = Reason.to_pos r in
     match get_tyvar_info_opt env v with
     | Some tvinfo ->
-      assert tvinfo.is_global;
+      assert (Option.is_some tvinfo.global_reason);
       assert (Pos.equal tvinfo.tyvar_pos p);
       env
-    | None -> fresh_unsolved_tyvar env v ~is_global:true p
+    | None -> fresh_unsolved_tyvar env v ~global_reason:(Some r) p
   in
   (env, mk (r, Tvar v))
 
@@ -452,7 +458,7 @@ let wrap_ty_in_var env r ty =
   let tvinfo =
     {
       tyvar_pos = Reason.to_pos r;
-      is_global = false;
+      global_reason = None;
       eager_solve_failed = false;
       solving_info = TVIType ty;
     }
@@ -744,13 +750,15 @@ let expand_bounds_of_global_tyvars env (solving_info : solving_info) =
 let extract_global_tyvar_info : t -> tyvar_info -> t * global_tyvar_info option
     =
  fun env tvinfo ->
-  let { tyvar_pos; is_global; solving_info; eager_solve_failed = _ } = tvinfo in
-  if is_global then
+  let { tyvar_pos = _; global_reason; solving_info; eager_solve_failed = _ } =
+    tvinfo
+  in
+  match global_reason with
+  | Some global_reason ->
     let (env, solving_info) = expand_bounds_of_global_tyvars env solving_info in
-    let gtvinfo = { tyvar_pos; solving_info } in
+    let gtvinfo = { tyvar_reason = global_reason; solving_info } in
     (env, Some gtvinfo)
-  else
-    (env, None)
+  | None -> (env, None)
 
 let extract_global_inference_env : t -> t * t_global =
  fun env ->
@@ -761,8 +769,13 @@ let extract_global_inference_env : t -> t * t_global =
   (env, tvenv)
 
 let global_tyvar_info_to_dummy_tyvar_info gtvinfo =
-  let { solving_info; tyvar_pos } = gtvinfo in
-  { is_global = true; eager_solve_failed = false; solving_info; tyvar_pos }
+  let { solving_info; tyvar_reason } = gtvinfo in
+  {
+    global_reason = Some tyvar_reason;
+    eager_solve_failed = false;
+    solving_info;
+    tyvar_pos = Reason.to_pos tyvar_reason;
+  }
 
 let get_vars (env : t) = IMap.keys env.tvenv
 
@@ -772,9 +785,12 @@ let get_vars_g (genv : t_global) = IMap.keys genv
 
 let get_tyvar_info_exn_g (genv : t_global) v = IMap.find v genv
 
-let get_tyvar_pos_exn_g (genv : t_global) var =
+let get_tyvar_reason_exn_g (genv : t_global) var =
   let tvinfo = get_tyvar_info_exn_g genv var in
-  tvinfo.tyvar_pos
+  tvinfo.tyvar_reason
+
+let get_tyvar_pos_exn_g (genv : t_global) var =
+  Reason.to_pos (get_tyvar_reason_exn_g genv var)
 
 let has_var env v = Option.is_some (get_tyvar_info_opt env v)
 
@@ -855,7 +871,12 @@ module Size = struct
     |> fun m -> SMap.fold (fun _ x y -> x + y) m 0
 
   let tyvar_info_size env tvinfo =
-    let { tyvar_pos = _; solving_info; is_global = _; eager_solve_failed = _ } =
+    let {
+      tyvar_pos = _;
+      solving_info;
+      global_reason = _;
+      eager_solve_failed = _;
+    } =
       tvinfo
     in
     match solving_info with
@@ -921,7 +942,7 @@ let simple_merge env1 env2 =
         | (Some tvinfo1, Some tvinfo2) ->
           let {
             tyvar_pos = tyvar_pos1;
-            is_global = is_global1;
+            global_reason = global_reason1;
             eager_solve_failed = eager_solve_failed1;
             solving_info = sinfo1;
           } =
@@ -929,7 +950,7 @@ let simple_merge env1 env2 =
           in
           let {
             tyvar_pos = tyvar_pos2;
-            is_global = is_global2;
+            global_reason = global_reason2;
             eager_solve_failed = eager_solve_failed2;
             solving_info = sinfo2;
           } =
@@ -942,7 +963,11 @@ let simple_merge env1 env2 =
                   tyvar_pos2
                 else
                   tyvar_pos1 );
-              is_global = is_global1 || is_global2;
+              global_reason =
+                ( if Option.is_some global_reason1 then
+                  global_reason1
+                else
+                  global_reason2 );
               eager_solve_failed = eager_solve_failed1 || eager_solve_failed2;
               solving_info =
                 (match (sinfo1, sinfo2) with
@@ -1005,13 +1030,14 @@ let solving_info_carries_information = function
     || (not @@ SMap.is_empty pu_accesses)
 
 let tyvar_info_carries_information tvinfo =
-  let { tyvar_pos = _; solving_info; is_global = _; eager_solve_failed = _ } =
+  let { tyvar_pos = _; solving_info; global_reason = _; eager_solve_failed = _ }
+      =
     tvinfo
   in
   solving_info_carries_information solving_info
 
 let global_tyvar_info_carries_information tvinfo =
-  let { tyvar_pos = _; solving_info } = tvinfo in
+  let { tyvar_reason = _; solving_info } = tvinfo in
   solving_info_carries_information solving_info
 
 let compress env =

@@ -162,6 +162,8 @@ val get_vars_g : t_global -> Ident.t list
 
 val initialize_tyvar_as_in : as_in:t_global -> t -> int -> t
 
+val get_tyvar_reason_exn_g : t_global -> Ident.t -> Reason.t
+
 val get_tyvar_pos_exn_g : t_global -> Ident.t -> Pos.t
 
 val copy_tyvar_from_genv_to_env :

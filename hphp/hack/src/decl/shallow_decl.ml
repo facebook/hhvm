@@ -145,7 +145,7 @@ let prop env cv =
   let ty =
     global_inference_create_tyvar_from_hint
       env
-      (Reason.Rwitness cv_pos)
+      (Reason.Rglobal_class_prop cv_pos)
       (hint_of_type_hint cv.cv_type)
   in
   let const = Attrs.mem SN.UserAttributes.uaConst cv.cv_user_attributes in
@@ -171,7 +171,7 @@ and static_prop env c cv =
   let ty =
     global_inference_create_tyvar_from_hint
       env
-      (Reason.Rwitness cv_pos)
+      (Reason.Rglobal_class_prop cv_pos)
       (hint_of_type_hint cv.cv_type)
   in
   let id = "$" ^ cv_name in

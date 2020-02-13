@@ -121,6 +121,9 @@ struct
     | Renforceable p -> Renforceable (pos p)
     | Rdestructure p -> Rdestructure (pos p)
     | Rkey_value_collection_key p -> Rkey_value_collection_key (pos p)
+    | Rglobal_class_prop p -> Rglobal_class_prop (pos p)
+    | Rglobal_fun_param p -> Rglobal_fun_param (pos p)
+    | Rglobal_fun_ret p -> Rglobal_fun_ret (pos p)
 
   let pos_mapper =
     object

@@ -82,11 +82,11 @@ let global_inference_create_tyvar_from_hint env reason hint =
       None
   | Some hint -> Some (Decl_hint.hint env hint)
 
-let global_inference_create_tyvar ~is_lambda ~default env hint =
+let global_inference_create_tyvar ~is_lambda ~default env reason hint =
   if is_lambda then
     Option.map hint ~f:(Decl_hint.hint env) |> Option.value ~default
   else
-    global_inference_create_tyvar_from_hint env (get_reason default) hint
+    global_inference_create_tyvar_from_hint env reason hint
     |> Option.value ~default
 
 let make_param_ty env ~is_lambda param =
@@ -96,6 +96,7 @@ let make_param_ty env ~is_lambda param =
       ~is_lambda
       ~default:(mk (r, Typing_defs.make_tany ()))
       env
+      (Reason.Rglobal_fun_param param.param_pos)
       (hint_of_type_hint param.param_type_hint)
   in
   let ty =
@@ -142,7 +143,12 @@ let ret_from_fun_kind ?(is_constructor = false) ~is_lambda env pos kind =
     if is_constructor then
       mk (Reason.Rwitness pos, Tprim Tvoid)
     else
-      global_inference_create_tyvar ~is_lambda ~default env None
+      global_inference_create_tyvar
+        ~is_lambda
+        ~default
+        env
+        (Reason.Rglobal_fun_ret pos)
+        None
   in
   match kind with
   | Ast_defs.FGenerator ->

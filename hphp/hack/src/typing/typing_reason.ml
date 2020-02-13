@@ -106,6 +106,9 @@ type t =
   | Renforceable of Pos.t
   | Rdestructure of Pos.t
   | Rkey_value_collection_key of Pos.t
+  | Rglobal_class_prop of Pos.t
+  | Rglobal_fun_param of Pos.t
+  | Rglobal_fun_ret of Pos.t
 
 and arg_position =
   | Aonly
@@ -489,6 +492,9 @@ let rec to_string prefix r =
     [(p, prefix ^ " resulting from a list destructuring assignment or a splat")]
   | Rkey_value_collection_key _ ->
     [(p, "This is a key-value collection, which requires arraykey-typed keys")]
+  | Rglobal_class_prop p -> [(p, prefix)]
+  | Rglobal_fun_param p -> [(p, prefix)]
+  | Rglobal_fun_ret p -> [(p, prefix)]
 
 and to_pos = function
   | Rnone -> Pos.none
@@ -582,6 +588,9 @@ and to_pos = function
   | Renforceable p -> p
   | Rdestructure p -> p
   | Rkey_value_collection_key p -> p
+  | Rglobal_class_prop p -> p
+  | Rglobal_fun_param p -> p
+  | Rglobal_fun_ret p -> p
 
 (* This is a mapping from internal expression ids to a standardized int.
  * Used for outputting cleaner error messages to users
@@ -702,6 +711,9 @@ let to_constructor_string r =
   | Renforceable _ -> "Renforceable"
   | Rdestructure _ -> "Rdestructure"
   | Rkey_value_collection_key _ -> "Rkey_value_collection_key"
+  | Rglobal_class_prop _ -> "Rglobal_class_prop"
+  | Rglobal_fun_param _ -> "Rglobal_fun_param"
+  | Rglobal_fun_ret _ -> "Rglobal_fun_ret"
 
 let pp fmt r =
   let pos = to_pos r in

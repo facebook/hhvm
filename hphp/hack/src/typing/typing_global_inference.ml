@@ -133,13 +133,41 @@ module StateConstraintGraph = struct
   let merge_subgraph (env, errors) ((pos, subgraph) : Inf.t_global_with_pos) =
     Typing_log.GI.log_merging_subgraph env pos;
     let vars = Inf.get_vars_g subgraph in
-    let env =
-      List.fold vars ~init:env ~f:(Env.initialize_tyvar_as_in ~as_in:subgraph)
-    in
     List.fold vars ~init:(env, errors) ~f:(fun (env, errors) v ->
         merge_var (env, errors) (pos, subgraph) v)
 
-  let merge_subgraphs (env, errors) subgraphs =
+  let merge_subgraphs ?(tcopt = GlobalOptions.default) subgraphs =
+    (* Collect each global tyvar and map it to a global environment in
+     * which it lives. Give preference to the global environment which also
+     * has positional information for this type variable *)
+    let initial_tyvar_sources : (Pos.t * Inf.t_global) IMap.t =
+      List.fold subgraphs ~init:IMap.empty ~f:(fun m (_, genv) ->
+          List.fold (Inf.get_vars_g genv) ~init:m ~f:(fun m var ->
+              IMap.update
+                var
+                (function
+                  | Some (pos, genv) when not (Pos.equal pos Pos.none) ->
+                    Some (pos, genv)
+                  | None
+                  | Some (_, _) ->
+                    Some (Inf.get_tyvar_pos_exn_g genv var, genv))
+                m))
+    in
+    (* copy each initial variable to the new environment *)
+    let env =
+      Typing_env.empty
+        (Provider_context.empty_for_worker ~tcopt)
+        Relative_path.default
+        ~droot:None
+    in
+    let errors = StateErrors.mk_empty () in
+    let env =
+      IMap.fold
+        (fun var (_, genv) env ->
+          Env.initialize_tyvar_as_in ~as_in:genv env var)
+        initial_tyvar_sources
+        env
+    in
     List.fold ~f:merge_subgraph ~init:(env, errors) subgraphs
 end
 

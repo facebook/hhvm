@@ -666,10 +666,10 @@ let print_global_inference_envs ctx ~verbosity gienvs =
 let merge_global_inference_envs_opt ctx gienvs =
   if TypecheckerOptions.global_inference ctx.Provider_context.tcopt then
     let open Typing_global_inference in
-    let env = Typing_env.empty ctx Relative_path.default None in
-    let state_errors = StateErrors.mk_empty () in
     let (env, state_errors) =
-      StateConstraintGraph.merge_subgraphs (env, state_errors) gienvs
+      StateConstraintGraph.merge_subgraphs
+        ~tcopt:ctx.Provider_context.tcopt
+        gienvs
     in
     (* we are not going to print type variables without any bounds *)
     let env = { env with inference_env = Inf.compress env.inference_env } in

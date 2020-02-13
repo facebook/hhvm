@@ -41,7 +41,8 @@ module StateConstraintGraph : sig
 
   val save : string -> t -> unit
 
-  val merge_subgraphs : t -> StateSubConstraintGraphs.t -> t
+  val merge_subgraphs :
+    ?tcopt:TypecheckerOptions.t -> StateSubConstraintGraphs.t -> t
 end
 
 module StateSolvedGraph : sig

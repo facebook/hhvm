@@ -806,12 +806,13 @@ let copy_tyvar_from_genv_to_env v ~to_:(env : t) ~from:(genv : t_global) =
   let tvinfo =
     get_tyvar_info_exn_g genv v |> global_tyvar_info_to_dummy_tyvar_info
   in
-  let v' =
+  let rec get_tmp v =
     if has_var env v then
-      Ident.tmp ()
+      get_tmp (Ident.tmp ())
     else
       v
   in
+  let v' = get_tmp v in
   let env = set_tyvar_info env v' tvinfo in
   (env, v')
 

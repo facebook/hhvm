@@ -122,37 +122,12 @@ module Mode_merge = struct
     >>= fun (input, output) ->
     let subgraphs = Disk.readdir input in
     Hh_logger.log "GI: Merging %d files" (Array.length subgraphs);
-    let env =
-      Typing_env.empty
-        (Provider_context.empty_for_tool
-           ~tcopt:GlobalOptions.default
-           ~backend:Provider_backend.Shared_memory)
-        (Relative_path.from_root "")
-        ~droot:None
+    let subgraphs =
+      List.map (Array.to_list subgraphs) ~f:(Filename.concat input)
     in
-    let genv = env.genv in
-    let progress_i = ref 0 in
-    let log_progress fn =
-      Hh_logger.log
-        "GI: Merging %d/%d: %s"
-        (!progress_i + 1)
-        (Array.length subgraphs)
-        fn;
-      progress_i := !progress_i + 1;
-      fn
-    in
-    (* Merging happens here *)
-    let (env, errors) =
-      Array.foldi
-        ~f:(fun _ (env, errors) subgraph_file ->
-          Filename.concat input subgraph_file
-          |> log_progress
-          |> StateSubConstraintGraphs.load
-          |> StateConstraintGraph.merge_subgraphs (env, errors))
-        ~init:(env, StateErrors.mk_empty ())
-        subgraphs
-    in
-    let env = { env with genv } in
+    let subgraphs = List.map subgraphs ~f:StateSubConstraintGraphs.load in
+    let subgraphs = List.concat subgraphs in
+    let (env, errors) = StateConstraintGraph.merge_subgraphs subgraphs in
     Hh_logger.log "GI: Saving to %s" output;
     StateConstraintGraph.save output (env, errors);
     Ok ()

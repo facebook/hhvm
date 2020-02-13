@@ -736,7 +736,7 @@ class CommonTests(BarebonesTests):
             [
                 '{{"type":"string",'
                 + '"pos":{{"filename":"","line":0,"char_start":0,"char_end":0}},'
-                + '"full_type":{{"kind":"primitive","name":"string"}}}}'
+                + '"full_type":{{"src_pos":{{"filename":"{root}foo_3.php","line":3,"char_start":23,"char_end":28}},"kind":"primitive","name":"string"}}}}'
             ],
             options=["--type-at-pos", "{root}foo_3.php:11:14"],
         )
@@ -754,6 +754,7 @@ class CommonTests(BarebonesTests):
                 + '"line":11,'
                 + '"character":14}}'
                 + ',"type":{{'
+                + '"src_pos":{{"filename":"{root}foo_3.php","line":3,"char_start":23,"char_end":28}},'
                 + '"kind":"primitive",'
                 + '"name":"string"}}}}'
             ],

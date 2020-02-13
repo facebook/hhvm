@@ -897,6 +897,7 @@ module Json = struct
     let typ ty = [("type", from_type env ty)] in
     let result ty = [("result", from_type env ty)] in
     let obj x = JSON_Object x in
+    let pos p = [("src_pos", Pos.json (Pos.to_absolute p))] in
     let name x = [("name", JSON_String x)] in
     let optional x = [("optional", JSON_Bool x)] in
     let is_array x = [("is_array", JSON_Bool x)] in
@@ -917,61 +918,64 @@ module Json = struct
     in
     let fields fl = [("fields", JSON_Array (List.map fl make_field))] in
     let as_type ty = [("as", from_type env ty)] in
-    match get_node ty with
-    | Tvar n ->
+    match (get_pos ty, get_node ty) with
+    | (_, Tvar n) ->
       let (_, ty) = Typing_env.expand_type env (mk (get_reason ty, Tvar n)) in
       begin
-        match get_node ty with
-        | Tvar _ -> obj @@ kind "var"
+        match (get_pos ty, get_node ty) with
+        | (p, Tvar _) -> obj @@ pos p @ kind "var"
         | _ -> from_type env ty
       end
-    | Ttuple tys -> obj @@ kind "tuple" @ is_array false @ args tys
-    | Tany _
-    | Terr ->
-      obj @@ kind "any"
-    | Tnonnull -> obj @@ kind "nonnull"
-    | Tdynamic -> obj @@ kind "dynamic"
-    | Tgeneric s -> obj @@ kind "generic" @ is_array true @ name s
-    | Tnewtype (s, _, ty) when Typing_env.is_enum env s ->
-      obj @@ kind "enum" @ name s @ as_type ty
-    | Tnewtype (s, tys, ty) ->
-      obj @@ kind "newtype" @ name s @ args tys @ as_type ty
-    | Tdependent (DTcls c, ty) ->
+    | (p, Ttuple tys) -> obj @@ pos p @ kind "tuple" @ is_array false @ args tys
+    | (p, Tany _)
+    | (p, Terr) ->
+      obj @@ pos p @ kind "any"
+    | (p, Tnonnull) -> obj @@ pos p @ kind "nonnull"
+    | (p, Tdynamic) -> obj @@ pos p @ kind "dynamic"
+    | (p, Tgeneric s) -> obj @@ pos p @ kind "generic" @ is_array true @ name s
+    | (p, Tnewtype (s, _, ty)) when Typing_env.is_enum env s ->
+      obj @@ pos p @ kind "enum" @ name s @ as_type ty
+    | (p, Tnewtype (s, tys, ty)) ->
+      obj @@ pos p @ kind "newtype" @ name s @ args tys @ as_type ty
+    | (p, Tdependent (DTcls c, ty)) ->
       obj
-      @@ kind "path"
+      @@ pos p
+      @ kind "path"
       @ [("type", obj @@ kind "class" @ name c @ args [])]
       @ as_type ty
-    | Tdependent (DTexpr _, ty) ->
-      obj @@ kind "path" @ [("type", obj @@ kind "expr")] @ as_type ty
-    | Tdependent (DTthis, ty) ->
-      obj @@ kind "path" @ [("type", obj @@ kind "this")] @ as_type ty
-    | Toption ty ->
+    | (p, Tdependent (DTexpr _, ty)) ->
+      obj @@ pos p @ kind "path" @ [("type", obj @@ kind "expr")] @ as_type ty
+    | (p, Tdependent (DTthis, ty)) ->
+      obj @@ pos p @ kind "path" @ [("type", obj @@ kind "this")] @ as_type ty
+    | (p, Toption ty) ->
       begin
         match get_node ty with
-        | Tnonnull -> obj @@ kind "mixed"
+        | Tnonnull -> obj @@ pos p @ kind "mixed"
         | _ -> obj @@ kind "nullable" @ args [ty]
       end
-    | Tprim tp -> obj @@ kind "primitive" @ name (prim tp)
-    | Tclass ((_, cid), _, tys) -> obj @@ kind "class" @ name cid @ args tys
-    | Tobject -> obj @@ kind "object"
-    | Tshape (shape_kind, fl) ->
+    | (p, Tprim tp) -> obj @@ pos p @ kind "primitive" @ name (prim tp)
+    | (p, Tclass ((_, cid), _, tys)) ->
+      obj @@ pos p @ kind "class" @ name cid @ args tys
+    | (p, Tobject) -> obj @@ pos p @ kind "object"
+    | (p, Tshape (shape_kind, fl)) ->
       let fields_known =
         match shape_kind with
         | Closed_shape -> true
         | Open_shape -> false
       in
       obj
-      @@ kind "shape"
+      @@ pos p
+      @ kind "shape"
       @ is_array false
       @ [("fields_known", JSON_Bool fields_known)]
       @ fields (Nast.ShapeMap.bindings fl)
-    | Tunion [] -> obj @@ kind "nothing"
-    | Tunion [ty] -> from_type env ty
-    | Tunion tyl -> obj @@ kind "union" @ args tyl
-    | Tintersection [] -> obj @@ kind "mixed"
-    | Tintersection [ty] -> from_type env ty
-    | Tintersection tyl -> obj @@ kind "intersection" @ args tyl
-    | Tfun ft ->
+    | (p, Tunion []) -> obj @@ pos p @ kind "nothing"
+    | (_, Tunion [ty]) -> from_type env ty
+    | (p, Tunion tyl) -> obj @@ pos p @ kind "union" @ args tyl
+    | (p, Tintersection []) -> obj @@ pos p @ kind "mixed"
+    | (_, Tintersection [ty]) -> from_type env ty
+    | (p, Tintersection tyl) -> obj @@ pos p @ kind "intersection" @ args tyl
+    | (p, Tfun ft) ->
       let fun_kind =
         if ft.ft_is_coroutine then
           kind "coroutine"
@@ -983,17 +987,20 @@ module Json = struct
       in
       let param fp = obj @@ callconv fp.fp_kind @ typ fp.fp_type.et_type in
       let params fps = [("params", JSON_Array (List.map fps param))] in
-      obj @@ fun_kind @ params ft.ft_params @ result ft.ft_ret.et_type
-    | Tarraykind (AKvarray_or_darray (ty1, ty2)) ->
-      obj @@ kind "varray_or_darray" @ args [ty1; ty2]
-    | Tarraykind (AKdarray (ty1, ty2)) -> obj @@ kind "darray" @ args [ty1; ty2]
-    | Tarraykind (AKvarray ty) -> obj @@ kind "varray" @ args [ty]
-    | Tarraykind AKempty -> obj @@ kind "array" @ empty true @ args []
-    | Tpu (base, enum) ->
-      obj @@ kind "pocket_universe" @ args [base] @ name (snd enum)
-    | Tpu_type_access (base, enum, member, typ) ->
+      obj @@ pos p @ fun_kind @ params ft.ft_params @ result ft.ft_ret.et_type
+    | (p, Tarraykind (AKvarray_or_darray (ty1, ty2))) ->
+      obj @@ pos p @ kind "varray_or_darray" @ args [ty1; ty2]
+    | (p, Tarraykind (AKdarray (ty1, ty2))) ->
+      obj @@ pos p @ kind "darray" @ args [ty1; ty2]
+    | (p, Tarraykind (AKvarray ty)) -> obj @@ pos p @ kind "varray" @ args [ty]
+    | (p, Tarraykind AKempty) ->
+      obj @@ pos p @ kind "array" @ empty true @ args []
+    | (p, Tpu (base, enum)) ->
+      obj @@ pos p @ kind "pocket_universe" @ args [base] @ name (snd enum)
+    | (p, Tpu_type_access (base, enum, member, typ)) ->
       obj
-      @@ kind "pocket_universe_type_access"
+      @@ pos p
+      @ kind "pocket_universe_type_access"
       @ args [base; member]
       @ name (snd enum)
       @ name (snd typ)

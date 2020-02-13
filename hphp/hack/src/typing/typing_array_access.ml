@@ -56,6 +56,8 @@ let widen_for_array_get ~lhs_of_null_coalesce ~expr_pos index_expr env ty =
   match deref ty with
   (* The null type is valid only with a null-coalescing use of array get *)
   | (_, Tprim Tnull) when lhs_of_null_coalesce -> (env, Some ty)
+  (* dynamic is valid for array get *)
+  | (_, Tdynamic) -> (env, Some ty)
   (* All class-based containers, and keyset, vec and dict, are subtypes of
    * some instantiation of KeyedContainer
    *)
@@ -496,6 +498,8 @@ let rec array_get
  *)
 let widen_for_assign_array_append ~expr_pos env ty =
   match deref ty with
+  (* dynamic is valid for array append *)
+  | (_, Tdynamic) -> (env, Some ty)
   | (r, Tclass (((_, cn) as id), _, tyl))
     when String.equal cn SN.Collections.cVec
          || String.equal cn SN.Collections.cKeyset
@@ -588,6 +592,8 @@ let widen_for_assign_array_get ~expr_pos index_expr env ty =
           env
           [Log_head ("widen_for_assign_array_get", [Log_type ("ty", ty)])]));
   match deref ty with
+  (* dynamic is valid for assign array get *)
+  | (_, Tdynamic) -> (env, Some ty)
   | (r, Tclass (((_, cn) as id), _, tyl))
     when cn = SN.Collections.cVec
          || cn = SN.Collections.cKeyset

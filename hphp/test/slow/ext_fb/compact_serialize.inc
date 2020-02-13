@@ -22,7 +22,7 @@ function fb_cs_test(...$vv) {
 }
 
 function fb_cs_test_impl($v) {
-  printf("\n====\nx = %s\n", var_export($v, true));
+  printf("\n\n====\nx = %s\n", var_export($v, true));
 
   $ret = null;
   $v_ = $v;
@@ -37,12 +37,13 @@ function fb_cs_test_impl($v) {
   }
   foreach ($array_tests as $t) {
     printf(
-      "%s(x) === %s\n",
+      "%s: %s\n",
       $t, var_export($t($v_), true),
     );
   }
+  echo "\n";
   $s_ = fb_compact_serialize($v_);
-  var_dump($s_ is string);
+  echo "serialize output is string: " . var_export($s_ is string, true)."\n";
   var_dump(hexdump($s_));
   $ss_ = $s_;
   var_dump((bool)($ss_ ?? false));
@@ -51,9 +52,9 @@ function fb_cs_test_impl($v) {
   $err = null;
   $compact_unserialize_result = fb_compact_unserialize($s_, inout $ret, inout $err);
   printf(
-    "fb_compact_unserialize(fb_compact_serialize(%s)) === %s: %s\n"
-    ."gettype(fb_compact_unserialize(fb_compact_serialize(%s))) === %s\n"
-    ."fb_compact_unserialize success: %s\n",
+    "fb_cu(fb_s(%s)) === %s: %s\n"
+    ."type(fb_cu(fb_s(%s))) === %s\n"
+    ."fbcu success: %s\n",
     var_export($v_, true), var_export($compact_unserialize_result, true),
     var_export($compact_unserialize_result ===  $v_, true),
     gettype($v_), gettype($compact_unserialize_result),
@@ -61,18 +62,19 @@ function fb_cs_test_impl($v) {
   );
   foreach ($array_tests as $t) {
     printf(
-      "%s(fb_compact_unserialize(fb_compact_serialize(%s))) === %s\n",
+      "%s: fb_cu(fb_s(type:%s)) === %s\n",
       $t,
       gettype($v_),
       var_export($t($compact_unserialize_result), true),
     );
   }
+  echo "\n";
   $ret = null;
   $unserialize_result = fb_unserialize($s_, inout $ret);
   printf(
-    "fb_unserialize(fb_compact_serialize(x)) === x: %s\n"
-    ."gettype(fb_unserialize(fb_serialize(%s))) === %s\n"
-    ."fb_compact_unserialize success: %s\n",
+    "fb_u(fb_cs(x)) === x: %s\n"
+    ."type(fb_u(fb_s(type:%s))) === %s\n"
+    ."fbcu success: %s\n",
     var_export($unserialize_result === $v_, true),
     gettype($v_), gettype($unserialize_result),
     var_export($ret === true, true),
@@ -80,12 +82,13 @@ function fb_cs_test_impl($v) {
 
   foreach ($array_tests as $t) {
     printf(
-      "%s(fb_unserialize(fb_compact_serialize(%s))) === %s\n",
+      "%s: fb_u(fb_cs(type:%s)) === %s\n",
       $t,
       gettype($v_),
       var_export($t($unserialize_result), true),
     );
   }
+  echo "\n";
 }
 
 function fb_cs_entrypoint(): void {

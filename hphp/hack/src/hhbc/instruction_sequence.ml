@@ -228,6 +228,8 @@ let instr_add_new_elemc = instr (ILitConst AddNewElemC)
 
 let instr_switch labels = instr (IContFlow (Switch (Unbounded, 0, labels)))
 
+let instr_sswitch cases = instr (IContFlow (SSwitch cases))
+
 let instr_newobj = instr (ICall NewObj)
 
 let instr_newobjr = instr (ICall NewObjR)

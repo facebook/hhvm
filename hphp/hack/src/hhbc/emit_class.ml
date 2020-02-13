@@ -548,7 +548,8 @@ let emit_class (ast_class, hoisted) =
     List.filter_map class_constants (fun p ->
         match Hhas_constant.initializer_instrs p with
         | None -> None
-        | Some instrs -> Some (Hhas_constant.name p, instrs))
+        | Some instrs ->
+          Some (Hhas_constant.name p, Label.next_regular (), instrs))
   in
   let cinit_methods =
     if List.is_empty initialized_class_constants then
@@ -558,28 +559,42 @@ let emit_class (ast_class, hoisted) =
       let rec make_cinit_instrs cs =
         match cs with
         | [] -> Emit_pos.emit_pos_then ast_class.A.c_span @@ instr_retc
-        | (name, instrs) :: cs ->
+        | (_, label, instrs) :: cs ->
           if List.is_empty cs then
-            gather [instrs; instr_label return_label; make_cinit_instrs cs]
-          else
-            let label = Label.next_regular () in
             gather
               [
-                instr_cgetl (Local.Named "$constName");
-                instr_string name;
-                instr_eq;
-                instr_jmpz label;
+                instr_label label;
+                instrs;
+                instr_label return_label;
+                make_cinit_instrs cs;
+              ]
+          else
+            gather
+              [
+                instr_label label;
                 instrs;
                 Emit_pos.emit_pos ast_class.A.c_span;
                 instr_jmp return_label;
-                instr_label label;
                 make_cinit_instrs cs;
               ]
       in
-      let instrs =
-        Emit_pos.emit_pos_then ast_class.A.c_span
-        @@ make_cinit_instrs initialized_class_constants
+      let cases =
+        List.filter_map initialized_class_constants (fun p ->
+            match p with
+            | (name, label, _) -> Some (name, label))
       in
+      let body_instrs =
+        if List.length initialized_class_constants > 1 then
+          gather
+            [
+              instr_cgetl (Local.Named "$constName");
+              instr_sswitch cases;
+              make_cinit_instrs initialized_class_constants;
+            ]
+        else
+          make_cinit_instrs initialized_class_constants
+      in
+      let instrs = Emit_pos.emit_pos_then ast_class.A.c_span @@ body_instrs in
       let params = [Hhas_param.make "$constName" false false [] None None] in
       [
         make_86method

@@ -1630,6 +1630,7 @@ void dce(Env& env, const bc::This& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ThrowAsTypeStructException& op) {
   no_dce(env, op);
 }
+void dce(Env& env, const bc::ThrowNonExhaustiveSwitch& op) { no_dce(env, op); }
 void dce(Env& env, const bc::UGetCUNop& op) { no_dce(env, op); }
 void dce(Env& env, const bc::UnsetG& op) { no_dce(env, op); }
 void dce(Env& env, const bc::VerifyOutType& op) { no_dce(env, op); }

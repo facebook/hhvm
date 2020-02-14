@@ -627,6 +627,7 @@ let string_of_misc instruction =
   | NativeImpl -> "NativeImpl"
   | BreakTraceHint -> "BreakTraceHint"
   | LockObj -> "LockObj"
+  | ThrowNonExhaustiveSwitch -> "ThrowNonExhaustiveSwitch"
 
 let iterator_instruction_name_prefix instruction =
   let iterator_instruction_name =

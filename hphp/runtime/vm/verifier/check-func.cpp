@@ -1623,6 +1623,7 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::Fatal:
     case Op::Throw:
     case Op::ChainFaults:
+    case Op::ThrowNonExhaustiveSwitch:
       return true;
 
     // iteration (safe variants)

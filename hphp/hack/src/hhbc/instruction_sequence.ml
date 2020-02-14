@@ -437,6 +437,8 @@ let instr_trigger_sampled_error =
 
 let instr_nativeimpl = instr (IMisc NativeImpl)
 
+let instr_throw_non_exhaustive_switch = instr (IMisc ThrowNonExhaustiveSwitch)
+
 let create_try_catch
     ?opt_done_label ?(skip_throw = false) try_instrs catch_instrs =
   let done_label =

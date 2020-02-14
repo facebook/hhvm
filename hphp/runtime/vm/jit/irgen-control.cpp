@@ -289,6 +289,22 @@ void emitSSwitch(IRGS& env, const ImmVector& iv) {
   );
 }
 
+const StaticString s_nonexhaustive_switch(Strings::NONEXHAUSTIVE_SWITCH);
+
+void emitThrowNonExhaustiveSwitch(IRGS& env) {
+  switch (RuntimeOption::EvalThrowOnNonExhaustiveSwitch) {
+    case 0:
+      return;
+    case 1:
+      gen(env, RaiseWarning, cns(env, s_nonexhaustive_switch.get()));
+      return;
+    default:
+      interpOne(env);
+      return;
+  }
+  not_reached();
+}
+
 //////////////////////////////////////////////////////////////////////
 
 void emitSelect(IRGS& env) {

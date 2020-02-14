@@ -145,6 +145,8 @@ constexpr char CLASS_TO_STRING_IMPLICIT[] =
 constexpr char CLASS_TO_STRING[] = "Class to string conversion";
 constexpr char ARRAY_MARK_LEGACY_VEC[] = "array_mark_legacy() called on vec";
 constexpr char ARRAY_MARK_LEGACY_DICT[] = "array_mark_legacy() called on dict";
+constexpr char NONEXHAUSTIVE_SWITCH[] =
+  "The switch statement failed to match any of the cases";
 
 } // namespace Strings
 } // namespace HPHP

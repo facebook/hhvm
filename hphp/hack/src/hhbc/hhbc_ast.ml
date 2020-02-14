@@ -523,6 +523,7 @@ type instruct_misc =
   | MemoSet of (local_id * int) option
   | MemoSetEager of (local_id * int) option
   | LockObj
+  | ThrowNonExhaustiveSwitch
 
 type gen_creation_execution =
   | CreateCont

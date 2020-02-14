@@ -351,6 +351,8 @@ static const struct {
   { OpInitProp,    {Stack1,           None,         OutNone         }},
   { OpSilence,     {Local|DontGuardAny,
                                       Local,        OutNone         }},
+  { OpThrowNonExhaustiveSwitch,
+                   {None,             None,         OutNone         }},
   { OpAssertRATL,  {None,             None,         OutNone         }},
   { OpAssertRATStk,{None,             None,         OutNone         }},
   { OpBreakTraceHint,{None,           None,         OutNone         }},
@@ -1003,6 +1005,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::This:
   case Op::Throw:
   case Op::ThrowAsTypeStructException:
+  case Op::ThrowNonExhaustiveSwitch:
   case Op::True:
   case Op::UnsetL:
   case Op::VerifyParamType:
@@ -1075,6 +1078,8 @@ bool instrBreaksProfileBB(const NormalizedInstruction* inst) {
       inst->op() == OpAwait || // may branch to scheduler and suspend execution
       inst->op() == OpAwaitAll || // similar to Await
       inst->op() == OpClsCnsD || // side exits if misses in the RDS
+      (inst->op() == OpThrowNonExhaustiveSwitch && // control flow breaks bb
+       RuntimeOption::EvalThrowOnNonExhaustiveSwitch > 1) ||
       inst->op() == OpVerifyParamTypeTS || // avoids combinatorial explosion
       inst->op() == OpVerifyParamType) {   // with nullable types
     return true;

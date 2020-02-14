@@ -662,9 +662,9 @@ and emit_switch (env : Emit_env.t) pos scrutinee_expr cl =
         | _ -> false)
       cl
   in
-  let cl =
+  let (cl, emit_exhaustiveness) =
     if has_default then
-      cl
+      (cl, false)
     else
       let rec aux cl =
         match cl with
@@ -674,11 +674,12 @@ and emit_switch (env : Emit_env.t) pos scrutinee_expr cl =
         | [A.Case (e, b)] -> [A.Case (e, b @ [(Pos.none, A.Break)])]
         | c :: cl -> c :: aux cl
       in
-      aux cl
+      (* Add a default so that we can emit the warning/exception *)
+      (aux cl @ [A.Default (pos, [])], true)
   in
   let cl =
     Emit_env.do_in_switch_body break_label env cl @@ fun env _ ->
-    List.map cl ~f:(emit_case env)
+    List.map cl ~f:(emit_case ~emit_exhaustiveness env)
   in
   let instr_bodies = gather @@ List.map cl ~f:snd in
   let default_label =
@@ -1184,14 +1185,20 @@ and emit_stmts env stl =
   let results = List.map stl (emit_stmt env) in
   gather results
 
-and emit_case (env : Emit_env.t) c =
+and emit_case ~emit_exhaustiveness (env : Emit_env.t) c =
   let l = Label.next_regular () in
   let (b, e) =
     match c with
-    | A.Default (_, b) -> (b, None)
-    | A.Case (e, b) -> (b, Some e)
+    | A.Default (pos, []) when emit_exhaustiveness ->
+      (Emit_pos.emit_pos_then pos instr_throw_non_exhaustive_switch, None)
+    | _ ->
+      let (b, e) =
+        match c with
+        | A.Default (_, b) -> (b, None)
+        | A.Case (e, b) -> (b, Some e)
+      in
+      (emit_stmt env (Pos.none, A.Block b), e)
   in
-  let b = emit_stmt env (Pos.none, A.Block b) in
   ((e, l), gather [instr_label l; b])
 
 let emit_dropthrough_return env =

@@ -742,6 +742,13 @@ struct RuntimeOption {
    * 2 - Throw exception                                                \
    */                                                                   \
   F(int32_t, WarnOnUncalledPseudomain, 0)                               \
+  /* ThrowOnNonExhaustiveSwitch
+   * Generates warnings when switch statements are non exhaustive.
+   *  0 - Nothing
+   *  1 - Raise Warning
+   * >1 - Throw Exception
+   */                                                                   \
+  F(uint32_t, ThrowOnNonExhaustiveSwitch, 0)                            \
   /* CheckReturnTypeHints:
      <2 - Raises E_WARNING if a return type hint fails.
      2 - Raises E_RECOVERABLE_ERROR if regular return type hint fails,

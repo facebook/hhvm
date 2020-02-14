@@ -3384,6 +3384,14 @@ ResolveClsMethod <cls meth resolve op> [C C] -> [C]
   If the cls meth resolve op is Warn, then raises warning about parameters used
   in method not being string literals.
 
+ThrowNonExhaustiveSwitch [] -> []
+
+  Throws an exception indicating that the switch statement is non exhaustive.
+  This exception can be downgraded to a warning or a noop through a runtime
+  option.
+  This bytecode instruction does not do any checks, it assumes that it was
+  emitted correctly.
+
 14. Generator creation and execution
 ---------------------------------------
 

@@ -2824,6 +2824,20 @@ OPTBLD_INLINE void iopThrow(PC&) {
   throw req::root<Object>(std::move(obj));
 }
 
+OPTBLD_INLINE void iopThrowNonExhaustiveSwitch() {
+  switch (RuntimeOption::EvalThrowOnNonExhaustiveSwitch) {
+    case 0:
+      return;
+    case 1:
+      raise_warning(Strings::NONEXHAUSTIVE_SWITCH);
+      return;
+    default:
+      SystemLib::throwRuntimeExceptionObject(
+        String(Strings::NONEXHAUSTIVE_SWITCH));
+  }
+  not_reached();
+}
+
 OPTBLD_INLINE void iopClassGetC() {
   auto const cell = vmStack().topC();
   if (isStringType(cell->m_type)) {

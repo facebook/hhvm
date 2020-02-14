@@ -2327,6 +2327,8 @@ void in(ISS& env, const bc::Throw& /*op*/) {
   popC(env);
 }
 
+void in(ISS& env, const bc::ThrowNonExhaustiveSwitch& /*op*/) {}
+
 void in(ISS& env, const bc::ChainFaults&) {
   popC(env);
 }

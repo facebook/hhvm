@@ -789,4 +789,22 @@ and get_typarams ctx root env (ty : decl_ty) =
   | Tvarray ty -> get_typarams ctx root env ty
   | Tvarray_or_darray (ty1_opt, ty2) ->
     union (get_typarams_opt ty1_opt) (get_typarams ctx root env ty2)
-  | Tpu_access (base, _) -> get_typarams ctx root env base
+  | Tpu_access _ ->
+    let rec split ty =
+      match get_node ty with
+      | Tpu_access (base, sid) ->
+        let (base, trailing) = split base in
+        (base, sid :: trailing)
+      | _ -> (ty, [])
+    in
+    let (base, trailing) = split ty in
+    let param =
+      match trailing with
+      | [_typ; (_, member); _enum] ->
+        if SMap.mem member env then
+          empty
+        else
+          single member (get_reason ty)
+      | _ -> empty
+    in
+    union param (get_typarams ctx root env base)

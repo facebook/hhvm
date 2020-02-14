@@ -23,6 +23,7 @@ end
 val get_extend_deps : DepSet.elt -> DepSet.t -> DepSet.t
 
 val get_classes_deps :
+  Provider_context.t ->
   conservative_redecl:bool ->
   Classes.t option SMap.t ->
   Classes.t option SMap.t ->

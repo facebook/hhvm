@@ -451,8 +451,8 @@ let get_gconsts_deps ~conservative_redecl old_gconsts gconsts =
     gconsts
     (DepSet.empty, DepSet.empty, DepSet.empty)
 
-let shallow_decl_enabled () =
-  TypecheckerOptions.shallow_class_decl (Global_naming_options.get ())
+let shallow_decl_enabled (ctx : Provider_context.t) : bool =
+  TypecheckerOptions.shallow_class_decl ctx.Provider_context.tcopt
 
 (*****************************************************************************)
 (* Determine which functions/classes have to be rechecked after comparing
@@ -460,6 +460,7 @@ let shallow_decl_enabled () =
  *)
 (*****************************************************************************)
 let get_class_deps
+    ctx
     ~conservative_redecl
     old_classes
     new_classes
@@ -467,7 +468,7 @@ let get_class_deps
     cid
     (changed, to_redecl, to_recheck) =
   match (SMap.find cid old_classes, SMap.find cid new_classes) with
-  | _ when shallow_decl_enabled () ->
+  | _ when shallow_decl_enabled ctx ->
     get_all_dependencies
       ~conservative_redecl
       trace
@@ -550,9 +551,10 @@ let get_class_deps
     in
     (changed, to_redecl, DepSet.union deps to_recheck)
 
-let get_classes_deps ~conservative_redecl old_classes new_classes classes =
+let get_classes_deps ctx ~conservative_redecl old_classes new_classes classes =
   SSet.fold
     (get_class_deps
+       ctx
        ~conservative_redecl
        old_classes
        new_classes

@@ -58,10 +58,11 @@ let on_the_fly_decl_file ctx errors fn =
 (*****************************************************************************)
 
 let compute_classes_deps
-    ~conservative_redecl old_classes new_classes acc classes =
+    ctx ~conservative_redecl old_classes new_classes acc classes =
   let (changed, to_redecl, to_recheck) = acc in
   let (rc, rdd, rdc) =
     Decl_compare.get_classes_deps
+      ctx
       ~conservative_redecl
       old_classes
       new_classes
@@ -184,6 +185,7 @@ let compute_deps ctx ~conservative_redecl fast filel =
       let old_classes = Decl_heap.Classes.get_old_batch n_classes in
       let new_classes = Decl_heap.Classes.get_batch n_classes in
       compute_classes_deps
+        ctx
         ~conservative_redecl
         old_classes
         new_classes

@@ -1298,6 +1298,18 @@ Array VariableUnserializer::unserializeArray() {
 }
 
 folly::Optional<arrprov::Tag> VariableUnserializer::unserializeProvenanceTag() {
+  auto const read_filename = [&]() -> const StringData* {
+    if (peek() == 't') {
+      assertx(m_unitFilename);
+      expectChar('t');
+      return m_unitFilename;
+    } else {
+      expectChar('s');
+      expectChar(':');
+      return makeStaticString(unserializeString().get());
+    }
+  };
+
   if (type() != VariableUnserializer::Type::Internal) return {};
   if (peek() != 'p') return {};
   expectChar('p');
@@ -1306,12 +1318,10 @@ folly::Optional<arrprov::Tag> VariableUnserializer::unserializeProvenanceTag() {
   expectChar(':');
   auto const line = static_cast<int>(readInt());
   expectChar(';');
-  expectChar('s');
-  expectChar(':');
-  auto const filename = unserializeString();
+  auto const filename = read_filename();
   expectChar(';');
   if (!RuntimeOption::EvalArrayProvenance) return {};
-  return arrprov::Tag { makeStaticString(filename.get()), line };
+  return arrprov::Tag { filename, line };
 }
 
 Array VariableUnserializer::unserializeDict() {

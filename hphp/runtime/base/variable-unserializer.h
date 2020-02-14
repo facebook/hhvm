@@ -86,6 +86,12 @@ struct VariableUnserializer {
     m_dvOverrides = overrides;
   }
 
+  void setUnitFilename(const StringData* name) {
+    assertx(name->isStatic());
+    assertx(m_type == Type::Internal);
+    m_unitFilename = name;
+  }
+
  private:
   bool readOnly() const { return m_readOnly; }
 
@@ -199,6 +205,10 @@ private:
   const char* const m_begin;
   bool m_forceDArrays;
   bool m_legacyHackArrays;
+  /* unitFilename should be set when we are deserializing
+   * an adata from the repo--it is needed to *re*construct the
+   * correct provenance tag */
+  const StringData* m_unitFilename{nullptr};
   VariableSerializer::DVOverrides* m_dvOverrides = nullptr;
 
   void unserializeVariant(tv_lval self,

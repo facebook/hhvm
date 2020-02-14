@@ -1668,6 +1668,14 @@ void VariableSerializer::serializeArrayImpl(const ArrayData* arr) {
     kind
   );
 
+  auto const write_filename = [&](const StringData* name) {
+    if (m_unitFilename == name) {
+      m_buf->append("t;");
+    } else {
+      write(name->data(), name->size());
+    }
+  };
+
   if (m_type == Type::Internal &&
       RuntimeOption::EvalArrayProvenance &&
       arrprov::arrayWantsTag(arr)) {
@@ -1676,7 +1684,7 @@ void VariableSerializer::serializeArrayImpl(const ArrayData* arr) {
       auto const filename = tag->filename();
       m_buf->append("p:");
       write(line);
-      write(filename->data(), filename->size());
+      write_filename(filename);
     }
   }
 

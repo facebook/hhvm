@@ -482,9 +482,13 @@ RepoStatus UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
       // assembler, so just assume that they're okay here.
       MemoryManager::SuppressOOM so(*tl_heap);
 
-      auto const arr_str = internal_serialize(
-        VarNR(const_cast<ArrayData*>(m_arrays[i]))
-      ).toCppString();
+      auto const arr_str = [&]{
+        VariableSerializer vs{VariableSerializer::Type::Internal};
+        vs.setUnitFilename(m_filepath);
+        return vs.serializeValue(
+          VarNR(const_cast<ArrayData*>(m_arrays[i])), false
+        ).toCppString();
+      }();
 
       urp.insertUnitArray[repoId].insert(txn, usn, i, arr_str);
     }
@@ -1153,11 +1157,15 @@ void UnitRepoProxy::GetUnitArraysStmt
       Id arrayId;        /**/ query.getId(0, arrayId);
       std::string key;   /**/ query.getStdString(1, key);
 
-      Variant v = unserialize_from_buffer(
-        key.data(),
-        key.size(),
-        VariableUnserializer::Type::Internal
-      );
+      Variant v = [&]{
+        VariableUnserializer vu{
+          key.data(),
+          key.size(),
+          VariableUnserializer::Type::Internal
+        };
+        vu.setUnitFilename(ue.m_filepath);
+        return vu.unserialize();
+      }();
       assertx(v.isArray());
       ArrayData* ad = v.detach().m_data.parr;
       ArrayData::GetScalarArray(&ad);

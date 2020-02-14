@@ -126,6 +126,12 @@ struct VariableSerializer {
     m_dvOverrides = overrides;
   }
 
+  void setUnitFilename(const StringData* name) {
+    assertx(name->isStatic());
+    assertx(getType() == Type::Internal);
+    m_unitFilename = name;
+  }
+
 private:
   /**
    * Type specialized output functions.
@@ -297,6 +303,10 @@ private:
   };
   req::vector<ObjectInfo> m_objectInfos;
 
+  /* unitFilename should be set when we are serializing
+   * an adata for a unit in the repo--it is needed to correctly
+   * compress the provenance tag */
+  const StringData* m_unitFilename{nullptr};
   const DVOverrides* m_dvOverrides{nullptr};
   size_t m_dvOverridesIndex{0};
 };

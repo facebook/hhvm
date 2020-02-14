@@ -79,11 +79,6 @@ let get_fileinfo ~(entry : entry) : FileInfo.t =
 
 let get_global_context () : t option = !global_context
 
-let get_global_context_or_empty_FOR_MIGRATION () : t =
-  match !global_context with
-  | Some global_context -> global_context
-  | None -> empty_for_worker ~tcopt:(Global_naming_options.get ())
-
 let set_global_context_internal (t : t) : unit =
   match !global_context with
   | Some _ ->

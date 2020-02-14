@@ -29,7 +29,8 @@
   (name lru_cache)
   (modules lru_cache)
   (libraries
-    core_kernel)
+    core_kernel
+    utils_core)
   (preprocess (pps ppx_deriving.std)))
 
 (library

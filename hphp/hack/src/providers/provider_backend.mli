@@ -57,9 +57,6 @@ val t_to_string : t -> string
 
 val set_shared_memory_backend : unit -> unit
 
-val set_local_memory_backend :
-  max_num_decls:int -> max_num_shallow_decls:int -> unit
-
 val set_local_memory_backend_with_defaults : unit -> unit
 
 val set_decl_service_backend : Decl_service_client.t -> unit

@@ -265,8 +265,7 @@ let test_compute_tast_counting () =
 
   (* Now try the same with local_memory backend *)
   Utils.with_context
-    ~enter:(fun () ->
-      Provider_backend.set_local_memory_backend ~max_num_decls:1000)
+    ~enter:(fun () -> Provider_backend.set_local_memory_backend_with_defaults)
     ~exit:(fun () ->
       (* restore it back to shared_mem for the rest of the tests *)
       Provider_backend.set_shared_memory_backend ())

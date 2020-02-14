@@ -85,3 +85,10 @@ val set_global_context_internal : t -> unit
 (** Unset the current global context. Should not be used directly; use
 [Provider_utils.respect_but_quarantine_unsaved_changes] instead. *)
 val unset_global_context_internal : unit -> unit
+
+(** Telemetry for a provider_context includes the current cache state of its backend,
+plus 'counters' like how many times cache has been read or evicted. *)
+val get_telemetry : t -> Telemetry.t -> Telemetry.t
+
+(** This function resets the 'counters' associated with telemetry. *)
+val reset_telemetry : t -> unit

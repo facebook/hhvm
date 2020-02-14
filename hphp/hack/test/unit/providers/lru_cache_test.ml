@@ -119,40 +119,67 @@ let test_eviction_lru _test_ctxt =
 
 let test_telemetry _test_ctxt =
   let cache = Cache.make ~max_size:2 in
-  let { Cache.peak_size; num_evictions; time_spent } =
-    Cache.get_telemetry cache
-  in
-  Int_asserter.assert_equals 0 peak_size "peak size should be zero";
-  Int_asserter.assert_equals 0 num_evictions "no evictions have occurred";
-  assert_equal 0.0 time_spent;
+  let telemetry = Cache.get_telemetry cache in
+  Int_asserter.assert_equals
+    0
+    (Telemetry_test_utils.int_exn telemetry "total_size")
+    "init total size should be zero";
+  Int_asserter.assert_equals
+    0
+    (Telemetry_test_utils.int_exn telemetry "length")
+    "init length should be zero";
+  Int_asserter.assert_equals
+    0
+    (Telemetry_test_utils.int_exn telemetry "num_evictions")
+    "init no evictions have occurred";
+  Bool_asserter.assert_equals
+    true
+    (Telemetry_test_utils.float_exn telemetry "time_spent" = 0.0)
+    "init should have spent no time yet";
 
   Cache.add cache ~key:(Int_key 1) ~value:1;
   Cache.add cache ~key:(Int_key 2) ~value:2;
   Cache.add cache ~key:(Int_key 3) ~value:3;
 
-  let { Cache.peak_size; num_evictions; time_spent } =
-    Cache.get_telemetry cache
-  in
-  Int_asserter.assert_equals 2 peak_size "peak size should be current size";
-  Int_asserter.assert_equals 1 num_evictions "one eviction has occurred";
-  Bool_asserter.assert_equals
-    true
-    (time_spent > 0.0)
-    "should have spent >0 time on cache operations so far";
-
-  Cache.reset_telemetry cache;
-  let { Cache.peak_size; num_evictions; time_spent } =
-    Cache.get_telemetry cache
-  in
+  let telemetry = Cache.get_telemetry cache in
   Int_asserter.assert_equals
     2
-    peak_size
-    "peak size should STILL be current size";
+    (Telemetry_test_utils.int_exn telemetry "total_size")
+    "post-add size should be two";
+  Int_asserter.assert_equals
+    2
+    (Telemetry_test_utils.int_exn telemetry "length")
+    "post-add length should be two";
+  Int_asserter.assert_equals
+    1
+    (Telemetry_test_utils.int_exn telemetry "num_evictions")
+    "post-add one eviction hass occurred";
+  Bool_asserter.assert_equals
+    true
+    (Telemetry_test_utils.float_exn telemetry "time_spent" > 0.0)
+    "post-add should have spent >0 time on cache operations so far";
+
+  Cache.reset_telemetry cache;
+
+  let telemetry = Cache.get_telemetry cache in
+  Int_asserter.assert_equals
+    2
+    (Telemetry_test_utils.int_exn telemetry "total_size")
+    "post-reset size should be two";
+  Int_asserter.assert_equals
+    2
+    (Telemetry_test_utils.int_exn telemetry "length")
+    "post-reset length should be two";
   Int_asserter.assert_equals
     0
-    num_evictions
-    "record of previous eviction should have been lost";
-  assert_equal 0.0 time_spent
+    (Telemetry_test_utils.int_exn telemetry "num_evictions")
+    "post-reset no evictions";
+  Bool_asserter.assert_equals
+    true
+    (Telemetry_test_utils.float_exn telemetry "time_spent" = 0.0)
+    "post-reset should have 0 time spent";
+
+  ()
 
 let () =
   "lru_cache_test"

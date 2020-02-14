@@ -171,13 +171,8 @@ let compute_tast_and_errors_unquarantined_internal
   | (mode, _, _) ->
     (* prepare logging *)
     Deferred_decl.reset ~enable:false ~threshold_opt:None;
+    Provider_context.reset_telemetry ctx;
     let prev_tally_state = Counters.reset ~enable:true in
-    begin
-      match ctx.Provider_context.backend with
-      | Provider_backend.Local_memory { decl_cache; _ } ->
-        Provider_backend.Decl_cache.reset_telemetry decl_cache
-      | _ -> ()
-    end;
     let t = Unix.gettimeofday () in
 
     (* do the work *)
@@ -205,12 +200,10 @@ let compute_tast_and_errors_unquarantined_internal
     Counters.restore_state prev_tally_state;
     let telemetry =
       telemetry
+      |> Provider_context.get_telemetry ctx
       |> Telemetry.float_
            ~key:"duration_decl_and_typecheck"
            ~value:(Unix.gettimeofday () -. t)
-      |> Telemetry.string_
-           ~key:"provider"
-           ~value:(ctx.Provider_context.backend |> Provider_backend.t_to_string)
     in
     (* File size. *)
     let telemetry =
@@ -218,30 +211,6 @@ let compute_tast_and_errors_unquarantined_internal
       | ServerCommandTypes.FileName _ -> telemetry
       | ServerCommandTypes.FileContent s ->
         Telemetry.int_ telemetry ~key:"filesize" ~value:(String.length s)
-    in
-    (* Decl-provider cache overhead *)
-    let telemetry =
-      match ctx.Provider_context.backend with
-      | Provider_backend.Local_memory { decl_cache; _ } ->
-        let { Provider_backend.Decl_cache.time_spent; peak_size; num_evictions }
-            =
-          Provider_backend.Decl_cache.get_telemetry decl_cache
-        in
-        let bytes_per_word = Sys.word_size / 8 in
-        let local_cache_telemetry =
-          Telemetry.create ()
-          |> Telemetry.float_ ~key:"time" ~value:time_spent
-          |> Telemetry.int_ ~key:"peak_bytes" ~value:(peak_size * bytes_per_word)
-          |> Telemetry.int_ ~key:"num_evictions" ~value:num_evictions
-          |> Telemetry.int_
-               ~key:"num_entries"
-               ~value:(Provider_backend.Decl_cache.length decl_cache)
-        in
-        Telemetry.object_
-          telemetry
-          ~key:"local_cache"
-          ~value:local_cache_telemetry
-      | _ -> telemetry
     in
 
     Hh_logger.debug

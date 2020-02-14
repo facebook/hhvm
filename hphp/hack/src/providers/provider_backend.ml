@@ -51,7 +51,10 @@ module Shallow_decl_cache_entry = struct
 
   type 'a value = 'a
 
-  let get_size ~key:_ ~value:_ = 1
+  let get_size ~key:_ ~value =
+    let words = Obj.reachable_words (Obj.repr value) in
+    let bytes = words * Sys.word_size / 8 in
+    bytes
 
   let key_to_log_string : type a. a key -> string =
    (fun (Shallow_class_decl key) -> "ClasssShallow" ^ key)
@@ -78,22 +81,22 @@ let backend_ref = ref Shared_memory
 let set_shared_memory_backend () : unit = backend_ref := Shared_memory
 
 let set_local_memory_backend
-    ~(max_num_decls : int) ~(max_num_shallow_decls : int) : unit =
+    ~(max_num_decls : int) ~(max_bytes_shallow_decls : int) : unit =
   backend_ref :=
     Local_memory
       {
         decl_cache = Decl_cache.make ~max_size:max_num_decls;
         shallow_decl_cache =
-          Shallow_decl_cache.make ~max_size:max_num_shallow_decls;
+          Shallow_decl_cache.make ~max_size:max_bytes_shallow_decls;
       }
 
 let set_local_memory_backend_with_defaults () : unit =
   (* TODO(ljw): Figure out a good size. Some files read ~5k shallow
-  decls to typecheck, so I've guessed 10k. I don't know how big
-  a typical shallow decl is, nor how big a typical decl is. *)
-  let max_num_shallow_decls = 10000 in
+  decls to typecheck, at about 16k / shallow decl, fitting into 73Mb.
+  I figure that 140Mb feels right. *)
+  let max_bytes_shallow_decls = 140 * 1024 * 1024 in
   let max_num_decls = 5000 in
-  set_local_memory_backend ~max_num_decls ~max_num_shallow_decls
+  set_local_memory_backend ~max_num_decls ~max_bytes_shallow_decls
 
 let set_decl_service_backend (decl : Decl_service_client.t) : unit =
   backend_ref := Decl_service decl

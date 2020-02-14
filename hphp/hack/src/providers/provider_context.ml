@@ -89,3 +89,31 @@ let unset_global_context_internal () : unit =
   match !global_context with
   | Some _ -> global_context := None
   | None -> failwith "unset_global_context_internal: no global context is set"
+
+let get_telemetry (t : t) (telemetry : Telemetry.t) : Telemetry.t =
+  let telemetry =
+    telemetry
+    |> Telemetry.string_
+         ~key:"backend"
+         ~value:(t.backend |> Provider_backend.t_to_string)
+  in
+  match t.backend with
+  | Provider_backend.Local_memory { decl_cache; shallow_decl_cache; _ } ->
+    telemetry
+    |> Telemetry.object_
+         ~key:"decl_cache"
+         ~value:(Provider_backend.Decl_cache.get_telemetry decl_cache)
+    |> Telemetry.object_
+         ~key:"shallow_decl_cache"
+         ~value:
+           (Provider_backend.Shallow_decl_cache.get_telemetry
+              shallow_decl_cache)
+  | _ -> telemetry
+
+let reset_telemetry (t : t) : unit =
+  match t.backend with
+  | Provider_backend.Local_memory { decl_cache; shallow_decl_cache; _ } ->
+    Provider_backend.Decl_cache.reset_telemetry decl_cache;
+    Provider_backend.Shallow_decl_cache.reset_telemetry shallow_decl_cache;
+    ()
+  | _ -> ()

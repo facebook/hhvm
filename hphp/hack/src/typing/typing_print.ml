@@ -23,8 +23,8 @@ module Nast = Aast
 
 let strip_ns id = id |> Utils.strip_ns |> Hh_autoimport.reverse_type
 
-let shallow_decl_enabled () =
-  TypecheckerOptions.shallow_class_decl (Global_naming_options.get ())
+let shallow_decl_enabled (ctx : Provider_context.t) : bool =
+  TypecheckerOptions.shallow_class_decl ctx.Provider_context.tcopt
 
 (*****************************************************************************)
 (* Pretty-printer of the "full" type.                                        *)
@@ -1627,7 +1627,7 @@ module PrintClass = struct
     let tc_deferred_init_members =
       sset
       @@
-      if shallow_decl_enabled () then
+      if shallow_decl_enabled ctx then
         match Shallow_classes_provider.get ctx (Cls.name c) with
         | Some cls -> Typing_deferred_members.class_ tenv cls
         | None -> SSet.empty

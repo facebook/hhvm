@@ -1078,9 +1078,15 @@ SSATmp* opt_array_mark_legacy(IRGS& env, const ParamPrep& params) {
   auto const value = params[0].value;
   if (!RO::EvalHackArrDVArrs) {
     if (value->isA(TVec)) {
-      gen(env, RaiseWarning, cns(env, s_ARRAY_MARK_LEGACY_VEC.get()));
+      gen(env,
+          RaiseWarning,
+          make_opt_catch(env, params),
+          cns(env, s_ARRAY_MARK_LEGACY_VEC.get()));
     } else if (value->isA(TDict)) {
-      gen(env, RaiseWarning, cns(env, s_ARRAY_MARK_LEGACY_DICT.get()));
+      gen(env,
+          RaiseWarning,
+          make_opt_catch(env, params),
+          cns(env, s_ARRAY_MARK_LEGACY_DICT.get()));
     }
   }
   if (value->isA(TVec)) {

@@ -381,7 +381,7 @@ let rec class_decl_if_missing class_env (c : Nast.class_) =
          This is a code smell--we should use a function with a different
          signature when we only want this side effect. *)
     let (_ : shallow_class) =
-      Shallow_classes_provider.decl ~ctx:class_env.ctx ~use_cache:true c
+      Shallow_classes_provider.decl class_env.ctx ~use_cache:true c
     in
     None
   else
@@ -397,7 +397,7 @@ let rec class_decl_if_missing class_env (c : Nast.class_) =
 and class_naming_and_decl (class_env : class_env) cid c =
   let class_env = { class_env with stack = SSet.add cid class_env.stack } in
   let shallow_class =
-    Shallow_classes_provider.decl ~ctx:class_env.ctx ~use_cache:false c
+    Shallow_classes_provider.decl class_env.ctx ~use_cache:false c
   in
   let (errors, tc) =
     Errors.do_ (fun () ->

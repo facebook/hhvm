@@ -20,8 +20,7 @@ val get : Provider_context.t -> string -> shallow_class option
     declaration, store it in the cache, and return it.
 
     Raises [Failure] if [shallow_class_decl] is not enabled. *)
-val decl :
-  ctx:Provider_context.t -> use_cache:bool -> Nast.class_ -> shallow_class
+val decl : Provider_context.t -> use_cache:bool -> Nast.class_ -> shallow_class
 
 val get_batch : SSet.t -> shallow_class option SMap.t
 

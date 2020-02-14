@@ -19,8 +19,8 @@ decls, then we incidentally obtain shallow decls in the process of generating
 a folded decl, but the folded decl contains everything that one could ever need,
 and is never evicted, and nno one will ever go back to the shallow decl again,
 so keeping it around would just be a waste of memory. *)
-let decl ~(ctx : Provider_context.t) ~(use_cache : bool) (class_ : Nast.class_)
-    : shallow_class =
+let decl (ctx : Provider_context.t) ~(use_cache : bool) (class_ : Nast.class_) :
+    shallow_class =
   match ctx.Provider_context.backend with
   | Provider_backend.Shared_memory ->
     if use_cache then

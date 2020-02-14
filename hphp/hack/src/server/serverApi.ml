@@ -131,11 +131,11 @@ let make_remote_server_api
       Hh_logger.log_duration "Cleaned state associated with changed files" t
 
     let load_naming_table_changes_since_baseline
+        (ctx : Provider_context.t)
         ~(naming_table : Naming_table.t option)
         ~(naming_table_diff : Naming_table.changes_since_baseline) :
         (Naming_table.t option, string) result =
       Hh_logger.log "Loading naming table changes since baseline...";
-      let ctx = Provider_context.get_global_context_or_empty_FOR_MIGRATION () in
       match naming_table with
       | None -> Error "Expected naming table base"
       | Some naming_table ->

@@ -76,8 +76,8 @@ let make_remote_server_api () :
       Ok (ignore naming_table_base)
 
     let load_naming_table_changes_since_baseline
-        ~naming_table ~naming_table_diff =
-      Ok (ignore (naming_table, naming_table_diff))
+        ctx ~naming_table ~naming_table_diff =
+      Ok (ignore (ctx, naming_table, naming_table_diff))
   end : RemoteWorker.RemoteServerApi
     with type naming_table = unit )
 

@@ -8,7 +8,7 @@
 
 let init
     (workers : MultiWorker.worker list option)
-    (tcopt : TypecheckerOptions.t)
+    (ctx : Provider_context.t)
     ~(worker_key : string)
     ~(check_id : string)
     ~(bin_root : Path.t)
@@ -16,7 +16,7 @@ let init
   let (server
         : (module RemoteWorker.RemoteServerApi
              with type naming_table = Naming_table.t option)) =
-    ServerApi.make_remote_server_api workers tcopt
+    ServerApi.make_remote_server_api workers ctx.Provider_context.tcopt
   in
   let (worker_env : Naming_table.t option RemoteWorker.work_env) =
     RemoteWorker.
@@ -30,4 +30,4 @@ let init
         server;
       }
   in
-  RemoteWorker.go worker_env
+  RemoteWorker.go ctx worker_env

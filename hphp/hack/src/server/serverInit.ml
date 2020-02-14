@@ -99,6 +99,7 @@ let init
      These settings cannot be changed during the lifetime of the server. *)
   Parser_options_provider.set env.popt;
   Global_naming_options.set env.tcopt;
+  Provider_backend.set_shared_memory_backend ();
   let root = ServerArgs.root genv.options in
   let (lazy_lev, init_approach) =
     if GlobalOptions.tco_global_inference env.tcopt then (
@@ -114,9 +115,11 @@ let init
         failwith "Remote init is only supported in check (run once) mode";
       let bin_root = Path.make (Filename.dirname Sys.argv.(0)) in
       let t = Unix.gettimeofday () in
+      let backend = Provider_backend.get () in
+      let ctx = Provider_context.empty_for_tool env.tcopt backend in
       ServerRemoteInit.init
         genv.workers
-        env.tcopt
+        ctx
         ~worker_key
         ~check_id
         ~bin_root

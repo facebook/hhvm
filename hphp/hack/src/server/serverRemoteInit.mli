@@ -9,7 +9,7 @@
 
 val init :
   MultiWorker.worker list option ->
-  TypecheckerOptions.t ->
+  Provider_context.t ->
   worker_key:string ->
   check_id:string ->
   bin_root:Path.t ->

@@ -15,6 +15,7 @@ module type RemoteServerApi = sig
 
   (* Called by the worker to load the naming table before type checking *)
   val load_naming_table_changes_since_baseline :
+    Provider_context.t ->
     naming_table:naming_table ->
     naming_table_diff:Naming_table.changes_since_baseline ->
     (naming_table, string) result

@@ -720,8 +720,15 @@ TypedValue HHVM_FUNCTION(array_pad,
                          int pad_size,
                          const Variant& pad_value) {
   getCheckedArray(input);
-  auto arr =
-    UNLIKELY(input.isHackArray()) ? arr_input.toPHPArray() : arr_input;
+  auto arr = [&](){
+    if (UNLIKELY(input.isDict() || input.isKeyset())) {
+      return arr_input.toDArray();
+    } else if (UNLIKELY(input.isVecArray())) {
+      return arr_input.toVArray();
+    } else {
+      return arr_input;
+    }
+  }();
   if (pad_size > 0) {
     return tvReturn(ArrayUtil::PadRight(arr, pad_value, pad_size));
   } else {

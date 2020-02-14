@@ -75,7 +75,7 @@ let get_param_mutability user_attributes =
 let global_inference_create_tyvar_from_hint env reason hint =
   match hint with
   | None ->
-    let tco = Global_naming_options.get () in
+    let tco = env.Decl_env.ctx.Provider_context.tcopt in
     if GlobalOptions.tco_global_inference tco then
       Some (mk (reason, Tvar (Ident.tmp ())))
     else

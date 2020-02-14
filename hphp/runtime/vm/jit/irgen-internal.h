@@ -853,7 +853,8 @@ inline void decRefThis(IRGS& env) {
 template<class Body>
 Block* create_catch_block(
     IRGS& env, Body body,
-    EndCatchData::CatchMode mode = EndCatchData::CatchMode::UnwindOnly) {
+    EndCatchData::CatchMode mode = EndCatchData::CatchMode::UnwindOnly,
+    int32_t offsetToAdjustSPForCall = 0) {
   auto const catchBlock = defBlock(env, Block::Hint::Unused);
   BlockPusher bp(*env.irb, env.irb->curMarker(), catchBlock);
 
@@ -863,14 +864,25 @@ Block* create_catch_block(
   gen(env, BeginCatch);
   body();
   auto const stublogue = env.irb->fs().stublogue();
+  auto const spOffset = mode != EndCatchData::CatchMode::CallCatch
+    ? spOffBCFromIRSP(env)
+    : spOffBCFromIRSP(env) + offsetToAdjustSPForCall;
   auto const data = EndCatchData {
-    spOffBCFromIRSP(env),
+    spOffset,
     mode,
     stublogue ?
       EndCatchData::FrameMode::Stublogue : EndCatchData::FrameMode::Phplogue,
     stublogue ? EndCatchData::Teardown::NA : EndCatchData::Teardown::Full
   };
+  auto const marker = env.irb->curMarker();
+  auto const newMarker = [&] {
+    if (offsetToAdjustSPForCall == 0) return marker;
+    auto const newSP = marker.spOff() - offsetToAdjustSPForCall;
+    return marker.adjustSP(newSP);
+  }();
+  env.irb->setCurMarker(newMarker);
   gen(env, EndCatch, data, fp(env), sp(env));
+  env.irb->setCurMarker(marker);
   return catchBlock;
 }
 

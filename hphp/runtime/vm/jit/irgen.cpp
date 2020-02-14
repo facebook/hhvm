@@ -89,13 +89,25 @@ SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
      * information.
      */
     check_catch_stack_state(env, inst);
+    auto const offsetToAdjustSPForCall = [&]() -> int32_t {
+      if (inst->is(Call)) {
+        auto const extra = inst->extra<CallData>();
+        return extra->numInputs() + kNumActRecCells + extra->numOut - 1;
+      }
+      if (inst->is(CallUnpack)) {
+        auto const extra = inst->extra<CallUnpackData>();
+        return extra->numInputs() + kNumActRecCells + extra->numOut - 1;
+      }
+      return 0;
+    }();
     inst->setTaken(
       create_catch_block(
         env,
         []{},
-        inst->is(Call) ||
-        inst->is(CallUnpack) ?
-        EndCatchData::CatchMode::CallCatch : EndCatchData::CatchMode::UnwindOnly
+        inst->is(Call) || inst->is(CallUnpack)
+          ? EndCatchData::CatchMode::CallCatch
+          : EndCatchData::CatchMode::UnwindOnly,
+        offsetToAdjustSPForCall
       )
     );
   }

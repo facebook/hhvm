@@ -1628,7 +1628,7 @@ module PrintClass = struct
       sset
       @@
       if shallow_decl_enabled () then
-        match Shallow_classes_heap.get ctx (Cls.name c) with
+        match Shallow_classes_provider.get ctx (Cls.name c) with
         | Some cls -> Typing_deferred_members.class_ tenv cls
         | None -> SSet.empty
       else

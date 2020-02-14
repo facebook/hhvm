@@ -14,4 +14,7 @@ it's assumed to be deleted.
 Returns an updated [ServerEnv.env], but also
 modifies the global naming table state in [Naming_global]. *)
 val process_changed_file :
-  ServerEnv.env -> Provider_context.t -> Path.t -> ServerEnv.env Lwt.t
+  env:ServerEnv.env ->
+  ctx:Provider_context.t ->
+  path:Path.t ->
+  ServerEnv.env Lwt.t

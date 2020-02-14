@@ -76,6 +76,10 @@ val get_fileinfo : entry:entry -> FileInfo.t
 global context can be set at a time. *)
 val get_global_context : unit -> t option
 
+(** Like [get_global_context], but returns the empty context if no global
+context was set. *)
+val get_global_context_or_empty_FOR_MIGRATION : unit -> t
+
 (** Internal functions **)
 
 (** Set the current global context. Should not be used directly; use

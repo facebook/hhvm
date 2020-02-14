@@ -34,9 +34,11 @@ let compute_class_diffs
         SSet.union classes (get_classes_in_file filename))
   in
   let old_classes =
-    Shallow_classes_heap.get_old_batch possibly_changed_classes
+    Shallow_classes_provider.get_old_batch possibly_changed_classes
   in
-  let new_classes = Shallow_classes_heap.get_batch possibly_changed_classes in
+  let new_classes =
+    Shallow_classes_provider.get_batch possibly_changed_classes
+  in
   SSet.fold possibly_changed_classes ~init:[] ~f:(fun cid acc ->
       let diff = diff_class_in_changed_file old_classes new_classes cid in
       Decl_compare_utils.log_class_diff cid diff;

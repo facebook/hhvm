@@ -114,7 +114,7 @@ let check_extend_kinds ctx shallow_class =
   let class_kind = shallow_class.sc_kind in
   List.iter shallow_class.sc_extends ~f:(fun ty ->
       let (_, (parent_pos, parent_name), _) = Decl_utils.unwrap_class_type ty in
-      match Shallow_classes_heap.get ctx parent_name with
+      match Shallow_classes_provider.get ctx parent_name with
       | None -> ()
       | Some parent ->
         check_extend_kind parent_pos parent.sc_kind class_pos class_kind)
@@ -132,7 +132,7 @@ let check_trait_reuse ctx shallow_class =
          | None -> ()
          | Some parent_name ->
            let parent_pos =
-             Shallow_classes_heap.get ctx parent_name
+             Shallow_classes_provider.get ctx parent_name
              |> Option.value_map ~default:Pos.none ~f:(fun p -> fst p.sc_name)
            in
            Errors.trait_reuse

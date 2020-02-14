@@ -179,11 +179,7 @@ let initialize
     SharedMem.init ~num_workers:0 (ServerConfig.sharedmem_config server_config)
   in
 
-  (* At the time of this writing, one decl on average is about 45 KB. So 1000
-  decls is 45 MB, well under the 250 MB cap we would like to stay under. In
-  practice, we don't find ourselves needing more than a few hundred decls to
-  provide good performance and avoid most cache misses. *)
-  Provider_backend.set_local_memory_backend ~max_num_decls:1000;
+  Provider_backend.set_local_memory_backend_with_defaults ();
 
   let genv =
     ServerEnvBuild.make_genv server_args server_config server_local_config []
@@ -653,7 +649,21 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
       let%lwt server_env =
         try%lwt
           let%lwt server_env =
-            ClientIdeIncremental.process_changed_file server_env ctx next_file
+            Lwt_utils.with_context
+              ~enter:(fun () ->
+                Provider_context.set_global_context_internal ctx;
+                Lwt.return_unit)
+              ~exit:(fun () ->
+                Provider_context.unset_global_context_internal ();
+                Lwt.return_unit)
+              ~do_:(fun () ->
+                let%lwt server_env =
+                  ClientIdeIncremental.process_changed_file
+                    server_env
+                    ctx
+                    next_file
+                in
+                Lwt.return server_env)
           in
           Lwt.return server_env
         with exn ->

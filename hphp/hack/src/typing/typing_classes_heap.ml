@@ -52,9 +52,6 @@ let make_lazy_class_type ctx class_name sc =
     all_requirements;
   }
 
-let shallow_decl_enabled () =
-  TypecheckerOptions.shallow_class_decl (Global_naming_options.get ())
-
 module Classes = struct
   module Cache =
     SharedMem.LocalCache
@@ -113,8 +110,8 @@ module Classes = struct
          constructing [Eager] or [Lazy] classes, depending on whether
          shallow_class_decl is enabled. *)
       let class_type_variant =
-        if shallow_decl_enabled () then
-          match Shallow_classes_heap.get ctx class_name with
+        if TypecheckerOptions.shallow_class_decl ctx.Provider_context.tcopt then
+          match Shallow_classes_provider.get ctx class_name with
           | None -> raise Exit
           | Some sc -> Lazy (make_lazy_class_type ctx class_name sc)
         else

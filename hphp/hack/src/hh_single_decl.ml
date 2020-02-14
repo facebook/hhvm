@@ -172,12 +172,13 @@ let compare_decl ctx verbosity fn =
         decls.funs;
       compare
         "class(es)"
-        Shallow_decl_defs.(
-          fun ctx fn name ->
-            let class_ =
-              Shallow_classes_heap.declare_class_in_file ctx fn name
-            in
-            { class_ with sc_decl_errors = Errors.empty })
+        (fun ctx fn name ->
+          let class_ = Ast_provider.find_class_in_file ctx fn name in
+          let class_ = Option.value_exn class_ in
+          let class_ =
+            Shallow_classes_provider.decl ~ctx ~use_cache:true class_
+          in
+          { class_ with Shallow_decl_defs.sc_decl_errors = Errors.empty })
         Shallow_decl_defs.equal_shallow_class
         Shallow_decl_defs.show_shallow_class
         decls.classes;

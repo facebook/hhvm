@@ -32,7 +32,7 @@ type gconst_decl = Typing_defs.decl_ty * Errors.t
 let get_fun (ctx : Provider_context.t) (fun_name : fun_key) : fun_decl option =
   match ctx.Provider_context.backend with
   | Provider_backend.Shared_memory -> Typing_lazy_heap.get_fun ctx fun_name
-  | Provider_backend.Local_memory { decl_cache } ->
+  | Provider_backend.Local_memory { decl_cache; _ } ->
     Provider_backend.Decl_cache.find_or_add
       decl_cache
       ~key:(Provider_backend.Decl_cache_entry.Fun_decl fun_name)
@@ -52,7 +52,7 @@ let get_class (ctx : Provider_context.t) (class_name : class_key) :
     class_decl option =
   match ctx.Provider_context.backend with
   | Provider_backend.Shared_memory -> Typing_lazy_heap.get_class ctx class_name
-  | Provider_backend.Local_memory { decl_cache } ->
+  | Provider_backend.Local_memory { decl_cache; _ } ->
     let result : Obj.t option =
       Provider_backend.Decl_cache.find_or_add
         decl_cache
@@ -117,7 +117,7 @@ let get_typedef (ctx : Provider_context.t) (typedef_name : string) :
   match ctx.Provider_context.backend with
   | Provider_backend.Shared_memory ->
     Typing_lazy_heap.get_typedef ctx typedef_name
-  | Provider_backend.Local_memory { decl_cache } ->
+  | Provider_backend.Local_memory { decl_cache; _ } ->
     Provider_backend.Decl_cache.find_or_add
       decl_cache
       ~key:(Provider_backend.Decl_cache_entry.Typedef_decl typedef_name)
@@ -138,7 +138,7 @@ let get_record_def (ctx : Provider_context.t) (record_name : string) :
   match ctx.Provider_context.backend with
   | Provider_backend.Shared_memory ->
     Typing_lazy_heap.get_record_def ctx record_name
-  | Provider_backend.Local_memory { decl_cache } ->
+  | Provider_backend.Local_memory { decl_cache; _ } ->
     Provider_backend.Decl_cache.find_or_add
       decl_cache
       ~key:(Provider_backend.Decl_cache_entry.Record_decl record_name)
@@ -160,7 +160,7 @@ let get_gconst (ctx : Provider_context.t) (gconst_name : string) :
   match ctx.Provider_context.backend with
   | Provider_backend.Shared_memory ->
     Typing_lazy_heap.get_gconst ctx gconst_name
-  | Provider_backend.Local_memory { decl_cache } ->
+  | Provider_backend.Local_memory { decl_cache; _ } ->
     Provider_backend.Decl_cache.find_or_add
       decl_cache
       ~key:(Provider_backend.Decl_cache_entry.Gconst_decl gconst_name)
@@ -181,7 +181,7 @@ let invalidate_fun (ctx : Provider_context.t) (fun_name : fun_key) : unit =
   match ctx.Provider_context.backend with
   | Provider_backend.Shared_memory ->
     Decl_heap.Funs.remove_batch (SSet.singleton fun_name)
-  | Provider_backend.Local_memory { decl_cache } ->
+  | Provider_backend.Local_memory { decl_cache; _ } ->
     Provider_backend.Decl_cache.remove
       decl_cache
       (Provider_backend.Decl_cache_entry.Fun_decl fun_name)
@@ -194,7 +194,7 @@ let invalidate_class (ctx : Provider_context.t) (class_name : class_key) : unit
   match ctx.Provider_context.backend with
   | Provider_backend.Shared_memory ->
     Decl_heap.Classes.remove_batch (SSet.singleton class_name)
-  | Provider_backend.Local_memory { decl_cache } ->
+  | Provider_backend.Local_memory { decl_cache; _ } ->
     Provider_backend.Decl_cache.remove
       decl_cache
       (Provider_backend.Decl_cache_entry.Class_decl class_name)
@@ -207,7 +207,7 @@ let invalidate_record_def
   match ctx.Provider_context.backend with
   | Provider_backend.Shared_memory ->
     Decl_heap.RecordDefs.remove_batch (SSet.singleton record_name)
-  | Provider_backend.Local_memory { decl_cache } ->
+  | Provider_backend.Local_memory { decl_cache; _ } ->
     Provider_backend.Decl_cache.remove
       decl_cache
       (Provider_backend.Decl_cache_entry.Record_decl record_name)
@@ -220,7 +220,7 @@ let invalidate_typedef (ctx : Provider_context.t) (typedef_name : typedef_key) :
   match ctx.Provider_context.backend with
   | Provider_backend.Shared_memory ->
     Decl_heap.Typedefs.remove_batch (SSet.singleton typedef_name)
-  | Provider_backend.Local_memory { decl_cache } ->
+  | Provider_backend.Local_memory { decl_cache; _ } ->
     Provider_backend.Decl_cache.remove
       decl_cache
       (Provider_backend.Decl_cache_entry.Typedef_decl typedef_name)
@@ -233,7 +233,7 @@ let invalidate_gconst (ctx : Provider_context.t) (gconst_name : gconst_key) :
   match ctx.Provider_context.backend with
   | Provider_backend.Shared_memory ->
     Decl_heap.GConsts.remove_batch (SSet.singleton gconst_name)
-  | Provider_backend.Local_memory { decl_cache } ->
+  | Provider_backend.Local_memory { decl_cache; _ } ->
     Provider_backend.Decl_cache.remove
       decl_cache
       (Provider_backend.Decl_cache_entry.Gconst_decl gconst_name)
@@ -282,7 +282,7 @@ let local_changes_push_stack (ctx : Provider_context.t) =
   Decl_heap.Typedefs.LocalChanges.push_stack ();
   Decl_heap.GConsts.LocalChanges.push_stack ();
 
-  Shallow_classes_heap.push_local_changes ();
+  Shallow_classes_provider.push_local_changes ();
   Decl_linearize.push_local_changes ();
 
   invalidate_context_decls ~ctx
@@ -300,7 +300,7 @@ let local_changes_pop_stack (ctx : Provider_context.t) =
   Decl_heap.Typedefs.LocalChanges.pop_stack ();
   Decl_heap.GConsts.LocalChanges.pop_stack ();
 
-  Shallow_classes_heap.pop_local_changes ();
+  Shallow_classes_provider.pop_local_changes ();
   Decl_linearize.pop_local_changes ();
 
   invalidate_context_decls ~ctx

@@ -254,14 +254,19 @@ let update_naming_table
   { env with ServerEnv.naming_table }
 
 let invalidate_decls
-    (ctx : Provider_context.t) ~(old_file_info : FileInfo.t option) : unit =
+    ~(ctx : Provider_context.t) ~(old_file_info : FileInfo.t option) : unit =
+  (* TODO(ljw): this isn't right... It's correct for us to invalidate shallow
+  decls found in this file. But notionally, for correctness, we should also
+  invalidate all decls and all linearizations. *)
   match old_file_info with
   | None -> ()
   | Some { FileInfo.funs; classes; record_defs; typedefs; consts; _ } ->
     funs |> strip_positions |> SSet.iter ~f:(Decl_provider.invalidate_fun ctx);
     classes
     |> strip_positions
-    |> SSet.iter ~f:(Decl_provider.invalidate_class ctx);
+    |> SSet.iter ~f:(fun class_name ->
+           Decl_provider.invalidate_class ctx class_name;
+           Shallow_classes_provider.invalidate_class ctx class_name);
     record_defs
     |> strip_positions
     |> SSet.iter ~f:(Decl_provider.invalidate_record_def ctx);
@@ -294,7 +299,7 @@ let update_symbol_index
     { env with ServerEnv.local_symbol_table }
 
 let process_changed_file
-    (env : ServerEnv.env) (ctx : Provider_context.t) (path : Path.t) :
+    ~(env : ServerEnv.env) ~(ctx : Provider_context.t) ~(path : Path.t) :
     ServerEnv.env Lwt.t =
   let str_path = Path.to_string path in
   match Relative_path.strip_root_if_possible str_path with
@@ -309,7 +314,7 @@ let process_changed_file
       let%lwt (old_file_info, new_file_info, facts) =
         compute_fileinfo_for_path env path
       in
-      invalidate_decls ctx ~old_file_info;
+      invalidate_decls ~ctx ~old_file_info;
       let env = update_naming_table ~env ~path ~old_file_info ~new_file_info in
       let env = update_symbol_index ~env ~path ~facts in
       Lwt.return env

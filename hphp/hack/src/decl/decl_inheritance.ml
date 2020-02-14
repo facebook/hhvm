@@ -37,7 +37,7 @@ let get_shallow_classes_and_substs
     (ctx : Provider_context.t) (lin : linearization) :
     (mro_element * shallow_class * decl_subst) Sequence.t =
   Sequence.filter_map lin (fun mro ->
-      match Shallow_classes_heap.get ctx mro.mro_name with
+      match Shallow_classes_provider.get ctx mro.mro_name with
       | None -> None
       | Some cls ->
         let subst = Decl_subst.make_decl cls.sc_tparams mro.mro_type_args in
@@ -231,7 +231,7 @@ let consts ctx child_class_name get_ancestor lin =
      The [classname_const] here is the implicit constant [C::class], which has
      type [classname<C>]. *)
   let (classname_const, enum_kind) =
-    match Shallow_classes_heap.get ctx child_class_name with
+    match Shallow_classes_provider.get ctx child_class_name with
     | None -> (Sequence.empty, lazy None)
     | Some cls ->
       ( Sequence.singleton (DTT.classname_const cls.sc_name),

@@ -38,7 +38,7 @@
     full_fidelity
     naming
     shallow_class_diff
-    shallow_classes_heap
+    shallow_classes_provider
     shallow_decl_defs
     typing_defs)
   (preprocess (pps ppx_deriving.std)))
@@ -171,7 +171,7 @@
     decl_instantiate
     decl_linearize
     decl_to_typing
-    shallow_classes_heap
+    shallow_classes_provider
     typing_defs)
   (preprocess (pps ppx_deriving.std)))
 
@@ -205,7 +205,7 @@
     decl_subst
     decl_utils
     shallow_decl_defs
-    shallow_classes_heap
+    shallow_classes_provider
     typing_defs)
   (preprocess (pps ppx_deriving.std)))
 
@@ -331,7 +331,7 @@
     decl_defs
     shallow_class_diff
     shallow_class_fanout
-    shallow_classes_heap
+    shallow_classes_provider
     shallow_decl_defs
     typing_defs)
   (preprocess (pps ppx_deriving.std)))

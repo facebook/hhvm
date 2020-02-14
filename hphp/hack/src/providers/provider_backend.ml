@@ -35,9 +35,24 @@ end
 
 module Decl_cache = Lru_cache.Cache (Decl_cache_entry)
 
+module Shallow_decl_cache_entry = struct
+  type _ t = Shallow_class_decl : string -> Shallow_decl_defs.shallow_class t
+
+  type 'a key = 'a t
+
+  type 'a value = 'a
+
+  let get_size ~key:_ ~value:_ = 1
+end
+
+module Shallow_decl_cache = Lru_cache.Cache (Shallow_decl_cache_entry)
+
 type t =
   | Shared_memory
-  | Local_memory of { decl_cache: Decl_cache.t }
+  | Local_memory of {
+      decl_cache: Decl_cache.t;
+      shallow_decl_cache: Shallow_decl_cache.t;
+    }
   | Decl_service of Decl_service_client.t
 
 let t_to_string (t : t) : string =
@@ -50,9 +65,23 @@ let backend_ref = ref Shared_memory
 
 let set_shared_memory_backend () : unit = backend_ref := Shared_memory
 
-let set_local_memory_backend ~(max_num_decls : int) : unit =
+let set_local_memory_backend
+    ~(max_num_decls : int) ~(max_num_shallow_decls : int) : unit =
   backend_ref :=
-    Local_memory { decl_cache = Decl_cache.make ~max_size:max_num_decls }
+    Local_memory
+      {
+        decl_cache = Decl_cache.make ~max_size:max_num_decls;
+        shallow_decl_cache =
+          Shallow_decl_cache.make ~max_size:max_num_shallow_decls;
+      }
+
+let set_local_memory_backend_with_defaults () : unit =
+  (* TODO(ljw): Figure out a good size. Some files read ~5k shallow
+  decls to typecheck, so I've guessed 10k. I don't know how big
+  a typical shallow decl is, nor how big a typical decl is. *)
+  let max_num_shallow_decls = 10000 in
+  let max_num_decls = 5000 in
+  set_local_memory_backend ~max_num_decls ~max_num_shallow_decls
 
 let set_decl_service_backend (decl : Decl_service_client.t) : unit =
   backend_ref := Decl_service decl

@@ -27,16 +27,36 @@ module Decl_cache : sig
   include module type of Lru_cache.Cache (Decl_cache_entry)
 end
 
+module Shallow_decl_cache_entry : sig
+  type _ t = Shallow_class_decl : string -> Shallow_decl_defs.shallow_class t
+
+  type 'a key = 'a t
+
+  type 'a value = 'a
+
+  val get_size : key:'a key -> value:'a value -> int
+end
+
+module Shallow_decl_cache : sig
+  include module type of Lru_cache.Cache (Shallow_decl_cache_entry)
+end
+
 type t =
   | Shared_memory
-  | Local_memory of { decl_cache: Decl_cache.t }
+  | Local_memory of {
+      decl_cache: Decl_cache.t;
+      shallow_decl_cache: Shallow_decl_cache.t;
+    }
   | Decl_service of Decl_service_client.t
 
 val t_to_string : t -> string
 
 val set_shared_memory_backend : unit -> unit
 
-val set_local_memory_backend : max_num_decls:int -> unit
+val set_local_memory_backend :
+  max_num_decls:int -> max_num_shallow_decls:int -> unit
+
+val set_local_memory_backend_with_defaults : unit -> unit
 
 val set_decl_service_backend : Decl_service_client.t -> unit
 

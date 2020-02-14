@@ -6,16 +6,18 @@
 3. run commands below:
 
 ```
-$ cd third-party/mcrouter/src/mcrouter/lib/carbon
-$ mkdir -p ../../../../gen/mcrouter/lib/carbon
-$ docker run --rm -w $(pwd) -v $(pwd):$(pwd) -v $(realpath ../../../../gen/mcrouter/lib/carbon):$(pwd)/outdir $IMAGE_ID /home/install/bin/thrift1 -gen mstch_cpp2:stack_arguments,include_prefix=mcrouter/lib/carbon/ -o outdir carbon.thrift
-$ docker run --rm -w $(pwd) -v $(pwd):$(pwd) -v $(realpath ../../../../gen/mcrouter/lib/carbon):$(pwd)/outdir $IMAGE_ID /home/install/bin/thrift1 -gen mstch_cpp2:stack_arguments,include_prefix=mcrouter/lib/carbon/ -o outdir carbon_result.thrift
+cd third-party/mcrouter/src/mcrouter/lib/carbon
+rm -rf ../../../../gen/mcrouter/lib/carbon
+mkdir -p ../../../../gen/mcrouter/lib/carbon
+docker run --rm -w $(pwd) -v $(pwd):$(pwd) -v $(realpath ../../../../gen/mcrouter/lib/carbon):$(pwd)/outdir $IMAGE_ID /home/install/bin/thrift1 -gen mstch_cpp2:stack_arguments,include_prefix=mcrouter/lib/carbon/ -o outdir carbon.thrift
+docker run --rm -w $(pwd) -v $(pwd):$(pwd) -v $(realpath ../../../../gen/mcrouter/lib/carbon):$(pwd)/outdir $IMAGE_ID /home/install/bin/thrift1 -gen mstch_cpp2:stack_arguments,include_prefix=mcrouter/lib/carbon/ -o outdir carbon_result.thrift
 ```
 
 ```
-$ cd third-party/mcrouter/src/mcrouter/lib/network/gen
-$ mkdir -p ../../../../../gen/mcrouter/lib/network/gen
-$ docker run --rm -w $(pwd) -v $(realpath ../../../../):$(realpath ../../../../) -v $(realpath ../../../../../gen/mcrouter/lib/network/gen):$(pwd)/outdir $IMAGE_ID /home/install/bin/thrift1 -gen mstch_cpp2:stack_arguments,include_prefix=mcrouter/lib/network/gen/ -I ../../../../ -o outdir Common.thrift
-$ docker run --rm -w $(pwd) -v $(realpath ../../../../):$(realpath ../../../../) -v $(realpath ../../../../../gen/mcrouter/lib/network/gen):$(pwd)/outdir $IMAGE_ID /home/install/bin/thrift1 -gen mstch_cpp2:stack_arguments,include_prefix=mcrouter/lib/network/gen/ -I ../../../../ -o outdir Memcache.thrift
-$ docker run --rm -w $(pwd) -v $(realpath ../../../../):$(realpath ../../../../) -v $(realpath ../../../../../gen/mcrouter/lib/network/gen):$(pwd)/outdir $IMAGE_ID /home/install/bin/thrift1 -gen mstch_cpp2:stack_arguments,include_prefix=mcrouter/lib/network/gen/ -I ../../../../ -o outdir MemcacheService.thrift
+cd third-party/mcrouter/src/mcrouter/lib/network/gen
+rm -rf ../../../../../gen/mcrouter/lib/network/gen
+mkdir -p ../../../../../gen/mcrouter/lib/network/gen
+docker run --rm -w $(pwd) -v $(realpath ../../../../):$(realpath ../../../../) -v $(realpath ../../../../../gen/mcrouter/lib/network/gen):$(pwd)/outdir $IMAGE_ID /home/install/bin/thrift1 -gen mstch_cpp2:stack_arguments,include_prefix=mcrouter/lib/network/gen/ -I ../../../../ -o outdir Common.thrift
+docker run --rm -w $(pwd) -v $(realpath ../../../../):$(realpath ../../../../) -v $(realpath ../../../../../gen/mcrouter/lib/network/gen):$(pwd)/outdir $IMAGE_ID /home/install/bin/thrift1 -gen mstch_cpp2:stack_arguments,include_prefix=mcrouter/lib/network/gen/ -I ../../../../ -o outdir Memcache.thrift
+docker run --rm -w $(pwd) -v $(realpath ../../../../):$(realpath ../../../../) -v $(realpath ../../../../../gen/mcrouter/lib/network/gen):$(pwd)/outdir $IMAGE_ID /home/install/bin/thrift1 -gen mstch_cpp2:stack_arguments,include_prefix=mcrouter/lib/network/gen/ -I ../../../../ -o outdir MemcacheService.thrift
 ```

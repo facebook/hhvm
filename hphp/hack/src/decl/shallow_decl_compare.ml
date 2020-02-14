@@ -27,6 +27,7 @@ let diff_class_in_changed_file
     Major_change
 
 let compute_class_diffs
+    (ctx : Provider_context.t)
     ~(get_classes_in_file : Relative_path.t -> SSet.t)
     (changed_files : Relative_path.t list) : (string * ClassDiff.t) list =
   let possibly_changed_classes =
@@ -34,10 +35,10 @@ let compute_class_diffs
         SSet.union classes (get_classes_in_file filename))
   in
   let old_classes =
-    Shallow_classes_provider.get_old_batch possibly_changed_classes
+    Shallow_classes_provider.get_old_batch ctx possibly_changed_classes
   in
   let new_classes =
-    Shallow_classes_provider.get_batch possibly_changed_classes
+    Shallow_classes_provider.get_batch ctx possibly_changed_classes
   in
   SSet.fold possibly_changed_classes ~init:[] ~f:(fun cid acc ->
       let diff = diff_class_in_changed_file old_classes new_classes cid in
@@ -48,12 +49,13 @@ let compute_class_diffs
         (cid, diff) :: acc)
 
 let compute_class_fanout
+    (ctx : Provider_context.t)
     ~(get_classes_in_file : Relative_path.t -> SSet.t)
     (changed_files : Relative_path.t list) : AffectedDeps.t =
   let file_count = List.length changed_files in
   Hh_logger.log "Detecting changes to classes in %d files:" file_count;
 
-  let changes = compute_class_diffs ~get_classes_in_file changed_files in
+  let changes = compute_class_diffs ctx ~get_classes_in_file changed_files in
   let change_count = List.length changes in
   if List.is_empty changes then
     Hh_logger.log "No class changes detected"

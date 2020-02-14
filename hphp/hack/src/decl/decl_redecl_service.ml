@@ -262,10 +262,11 @@ let oldify_defs
     { FileInfo.n_funs; n_classes; n_record_defs; n_types; n_consts }
     elems
     ~collect_garbage =
+  let ctx = Provider_context.get_global_context_or_empty_FOR_MIGRATION () in
   Decl_heap.Funs.oldify_batch n_funs;
   Decl_class_elements.oldify_all elems;
   Decl_heap.Classes.oldify_batch n_classes;
-  Shallow_classes_provider.oldify_batch n_classes;
+  Shallow_classes_provider.oldify_batch ctx n_classes;
   Decl_heap.RecordDefs.oldify_batch n_record_defs;
   Decl_heap.Typedefs.oldify_batch n_types;
   Decl_heap.GConsts.oldify_batch n_consts;
@@ -274,10 +275,11 @@ let oldify_defs
 
 let remove_old_defs
     { FileInfo.n_funs; n_classes; n_record_defs; n_types; n_consts } elems =
+  let ctx = Provider_context.get_global_context_or_empty_FOR_MIGRATION () in
   Decl_heap.Funs.remove_old_batch n_funs;
   Decl_class_elements.remove_old_all elems;
   Decl_heap.Classes.remove_old_batch n_classes;
-  Shallow_classes_provider.remove_old_batch n_classes;
+  Shallow_classes_provider.remove_old_batch ctx n_classes;
   Decl_heap.RecordDefs.remove_old_batch n_record_defs;
   Decl_heap.Typedefs.remove_old_batch n_types;
   Decl_heap.GConsts.remove_old_batch n_consts;
@@ -288,10 +290,11 @@ let remove_defs
     { FileInfo.n_funs; n_classes; n_record_defs; n_types; n_consts }
     elems
     ~collect_garbage =
+  let ctx = Provider_context.get_global_context_or_empty_FOR_MIGRATION () in
   Decl_heap.Funs.remove_batch n_funs;
   Decl_class_elements.remove_all elems;
   Decl_heap.Classes.remove_batch n_classes;
-  Shallow_classes_provider.remove_batch n_classes;
+  Shallow_classes_provider.remove_batch ctx n_classes;
   Decl_linearize.remove_batch n_classes;
   Decl_heap.RecordDefs.remove_batch n_record_defs;
   Decl_heap.Typedefs.remove_batch n_types;
@@ -438,7 +441,7 @@ let redo_type_decl
   let (changed, to_recheck) =
     if shallow_decl_enabled () then (
       let AffectedDeps.{ changed = changed'; mro_invalidated; needs_recheck } =
-        Shallow_decl_compare.compute_class_fanout get_classes fnl
+        Shallow_decl_compare.compute_class_fanout ctx get_classes fnl
       in
       let changed = DepSet.union changed changed' in
       let to_recheck = DepSet.union to_recheck needs_recheck in

@@ -8,6 +8,7 @@
  *)
 
 val compute_class_fanout :
+  Provider_context.t ->
   get_classes_in_file:(Relative_path.t -> SSet.t) ->
   Relative_path.t list ->
   AffectedDeps.t

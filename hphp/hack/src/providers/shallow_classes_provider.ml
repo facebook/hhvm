@@ -55,8 +55,8 @@ let get (ctx : Provider_context.t) (name : string) : shallow_class option =
     | Provider_backend.Decl_service _ ->
       failwith "shallow class cache lookup not implemented for Decl_service"
 
-let get_batch (names : SSet.t) : shallow_class option SMap.t =
-  let ctx = Provider_context.get_global_context_or_empty_FOR_MIGRATION () in
+let get_batch (ctx : Provider_context.t) (names : SSet.t) :
+    shallow_class option SMap.t =
   match ctx.Provider_context.backend with
   | Provider_backend.Shared_memory -> Shallow_classes_heap.get_batch names
   | Provider_backend.Local_memory _ ->
@@ -64,8 +64,8 @@ let get_batch (names : SSet.t) : shallow_class option SMap.t =
   | Provider_backend.Decl_service _ ->
     failwith "get_batch not implemented for Decl_service"
 
-let get_old_batch (names : SSet.t) : shallow_class option SMap.t =
-  let ctx = Provider_context.get_global_context_or_empty_FOR_MIGRATION () in
+let get_old_batch (ctx : Provider_context.t) (names : SSet.t) :
+    shallow_class option SMap.t =
   match ctx.Provider_context.backend with
   | Provider_backend.Shared_memory -> Shallow_classes_heap.get_old_batch names
   | Provider_backend.Local_memory _ ->
@@ -73,8 +73,7 @@ let get_old_batch (names : SSet.t) : shallow_class option SMap.t =
   | Provider_backend.Decl_service _ ->
     failwith "get_old_batch not implemented for Decl_service"
 
-let oldify_batch (names : SSet.t) : unit =
-  let ctx = Provider_context.get_global_context_or_empty_FOR_MIGRATION () in
+let oldify_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
   match ctx.Provider_context.backend with
   | Provider_backend.Shared_memory -> Shallow_classes_heap.oldify_batch names
   | Provider_backend.Local_memory _ ->
@@ -82,8 +81,7 @@ let oldify_batch (names : SSet.t) : unit =
   | Provider_backend.Decl_service _ ->
     failwith "oldify_batch not implemented for Decl_service"
 
-let remove_old_batch (names : SSet.t) : unit =
-  let ctx = Provider_context.get_global_context_or_empty_FOR_MIGRATION () in
+let remove_old_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
   match ctx.Provider_context.backend with
   | Provider_backend.Shared_memory ->
     Shallow_classes_heap.remove_old_batch names
@@ -92,8 +90,7 @@ let remove_old_batch (names : SSet.t) : unit =
   | Provider_backend.Decl_service _ ->
     failwith "remove_old_batch not implemented for Decl_service"
 
-let remove_batch (names : SSet.t) : unit =
-  let ctx = Provider_context.get_global_context_or_empty_FOR_MIGRATION () in
+let remove_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
   match ctx.Provider_context.backend with
   | Provider_backend.Shared_memory -> Shallow_classes_heap.remove_batch names
   | Provider_backend.Local_memory _ ->
@@ -103,7 +100,8 @@ let remove_batch (names : SSet.t) : unit =
 
 let invalidate_class (ctx : Provider_context.t) (class_name : string) : unit =
   match ctx.Provider_context.backend with
-  | Provider_backend.Shared_memory -> remove_batch (SSet.singleton class_name)
+  | Provider_backend.Shared_memory ->
+    remove_batch ctx (SSet.singleton class_name)
   | Provider_backend.Local_memory { decl_cache = _; shallow_decl_cache } ->
     Provider_backend.Shallow_decl_cache.remove
       shallow_decl_cache
@@ -121,16 +119,14 @@ let invalidate_context_decls ~(ctx : Provider_context.t) : unit =
       List.iter classes ~f:(fun (_, class_name) ->
           invalidate_class ctx class_name))
 
-let push_local_changes () : unit =
-  let ctx = Provider_context.get_global_context_or_empty_FOR_MIGRATION () in
+let push_local_changes (ctx : Provider_context.t) : unit =
   match ctx.Provider_context.backend with
   | Provider_backend.Shared_memory -> Shallow_classes_heap.push_local_changes ()
   | Provider_backend.Local_memory _ -> invalidate_context_decls ctx
   | Provider_backend.Decl_service _ ->
     failwith "push_local_changes not implemented for Decl_service"
 
-let pop_local_changes () : unit =
-  let ctx = Provider_context.get_global_context_or_empty_FOR_MIGRATION () in
+let pop_local_changes (ctx : Provider_context.t) : unit =
   match ctx.Provider_context.backend with
   | Provider_backend.Shared_memory -> Shallow_classes_heap.pop_local_changes ()
   | Provider_backend.Local_memory _ -> invalidate_context_decls ctx

@@ -282,7 +282,7 @@ let local_changes_push_stack (ctx : Provider_context.t) =
   Decl_heap.Typedefs.LocalChanges.push_stack ();
   Decl_heap.GConsts.LocalChanges.push_stack ();
 
-  Shallow_classes_provider.push_local_changes ();
+  Shallow_classes_provider.push_local_changes ctx;
   Decl_linearize.push_local_changes ();
 
   invalidate_context_decls ~ctx
@@ -300,7 +300,7 @@ let local_changes_pop_stack (ctx : Provider_context.t) =
   Decl_heap.Typedefs.LocalChanges.pop_stack ();
   Decl_heap.GConsts.LocalChanges.pop_stack ();
 
-  Shallow_classes_provider.pop_local_changes ();
+  Shallow_classes_provider.pop_local_changes ctx;
   Decl_linearize.pop_local_changes ();
 
   invalidate_context_decls ~ctx

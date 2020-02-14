@@ -22,18 +22,18 @@ val get : Provider_context.t -> string -> shallow_class option
     Raises [Failure] if [shallow_class_decl] is not enabled. *)
 val decl : Provider_context.t -> use_cache:bool -> Nast.class_ -> shallow_class
 
-val get_batch : SSet.t -> shallow_class option SMap.t
+val get_batch : Provider_context.t -> SSet.t -> shallow_class option SMap.t
 
-val get_old_batch : SSet.t -> shallow_class option SMap.t
+val get_old_batch : Provider_context.t -> SSet.t -> shallow_class option SMap.t
 
-val oldify_batch : SSet.t -> unit
+val oldify_batch : Provider_context.t -> SSet.t -> unit
 
-val remove_old_batch : SSet.t -> unit
+val remove_old_batch : Provider_context.t -> SSet.t -> unit
 
-val remove_batch : SSet.t -> unit
+val remove_batch : Provider_context.t -> SSet.t -> unit
 
-val push_local_changes : unit -> unit
+val push_local_changes : Provider_context.t -> unit
 
-val pop_local_changes : unit -> unit
+val pop_local_changes : Provider_context.t -> unit
 
 val invalidate_class : Provider_context.t -> string -> unit

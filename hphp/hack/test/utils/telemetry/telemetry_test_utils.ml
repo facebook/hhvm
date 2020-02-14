@@ -12,30 +12,26 @@ let telemetry_to_multiline (telemetry : Telemetry.t) : string =
   |> Hh_json.json_of_string
   |> Hh_json.json_to_multiline
 
-(** e.g. inspecting "foo.bar" will return the integer foo.bar inside telemetry.
-We're in a test so we will enforce that the telemetry has the right shape:
-foo must be present, and "bar" if present must be null or an integer.
-Telemetry often has missing fields, so we allow "bar" to be absent or
-to have the value None. *)
-let int_opt (telemetry : Telemetry.t) (path : string) : int option =
+(** e.g. drilling for "foo.bar" will return that field.
+Raises exception if foo is absent or not an object, and if bar is absent or null *)
+let value_exn (telemetry : Telemetry.t) (path : string) : Hh_json.json =
   let json = telemetry |> Telemetry.to_string |> Hh_json.json_of_string in
   let accessors = Str.split (Str.regexp "\\.") path in
-  let rec drill (json : Hh_json.json) (accessors : string list) : int option =
+  let rec drill (json : Hh_json.json) (accessors : string list) : Hh_json.json =
     match accessors with
     | [] -> failwith "empty path provided"
     | [key] ->
       begin
         match Hh_json_helpers.Jget.val_opt (Some json) key with
-        | Some (Hh_json.JSON_Number s) -> Some (int_of_string s) (* may raise *)
-        | Some Hh_json.JSON_Null -> None
-        | None -> None
-        | _ ->
+        | Some Hh_json.JSON_Null
+        | None ->
           failwith
             (Printf.sprintf
-               "%s not correct: %s in %s"
+               "%s not found: %s in %s"
                key
                path
                (telemetry_to_multiline telemetry))
+        | Some v -> v
       end
     | key :: rest ->
       let obj = Hh_json_helpers.Jget.obj_opt (Some json) key in
@@ -51,14 +47,12 @@ let int_opt (telemetry : Telemetry.t) (path : string) : int option =
   in
   drill json accessors
 
-(** e.g. `inspect json "foo.bar"` will return the int foo.bar, and fail if
+(** e.g. inspecting "foo.bar"` will return the int foo.bar, and fail if
 it's not an int or if either foo/bar don't exist. *)
 let int_exn (telemetry : Telemetry.t) (path : string) : int =
-  match int_opt telemetry path with
-  | Some i -> i
-  | None ->
-    failwith
-      (Printf.sprintf
-         "not found: %s in %s"
-         path
-         (telemetry_to_multiline telemetry))
+  value_exn telemetry path |> Hh_json.get_number_int_exn
+
+(** e.g. inspecting "foo.bar"` will return the float foo.bar, and fail if
+it's not a float or if either foo/bar don't exist. *)
+let float_exn (telemetry : Telemetry.t) (path : string) : float =
+  value_exn telemetry path |> Hh_json.get_number_exn |> float_of_string

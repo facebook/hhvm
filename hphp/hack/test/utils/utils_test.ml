@@ -128,37 +128,20 @@ let test_telemetry_test () =
     ()
   in
 
-  Int_asserter.assert_option_equals
-    (Telemetry_test_utils.int_opt telemetry "e.a")
-    (Some 15)
-    "int_opt e.a should be 15";
-  Int_asserter.assert_option_equals
-    (Telemetry_test_utils.int_opt telemetry "e.b")
-    None
-    "int_opt e.b should be None";
+  Int_asserter.assert_equals
+    (Telemetry_test_utils.int_exn telemetry "d")
+    12
+    "int_exn d should be 12";
   assert_throws
-    (Telemetry_test_utils.int_opt telemetry)
-    "e.c"
-    "c not correct"
-    "int_opt e.c should throw";
-  Int_asserter.assert_option_equals
-    (Telemetry_test_utils.int_opt telemetry "e.d")
-    None
-    "int_opt e.d should be None";
-  Int_asserter.assert_option_equals
-    (Telemetry_test_utils.int_opt telemetry "d")
-    (Some 12)
-    "int_opt d should be 12";
-  assert_throws
-    (Telemetry_test_utils.int_opt telemetry)
+    (Telemetry_test_utils.int_exn telemetry)
     "e"
-    "not correct"
-    "int_opt e should throw";
+    "Assert_failure"
+    "int_exn e should throw";
   assert_throws
-    (Telemetry_test_utils.int_opt telemetry)
+    (Telemetry_test_utils.int_exn telemetry)
     ""
     "empty path"
-    "int_opt '' should throw";
+    "int_exn '' should throw";
   Int_asserter.assert_equals
     (Telemetry_test_utils.int_exn telemetry "e.a")
     15

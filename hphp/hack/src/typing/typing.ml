@@ -7357,7 +7357,7 @@ and is_array env ty p pred_name arg_expr =
       let env =
         SubType.add_constraint p env Ast_defs.Constraint_as refined_ty arg_ty
       in
-      (env, refined_ty))
+      Inter.intersect ~r env refined_ty arg_ty)
 
 and key_exists env pos shape field =
   let field = Tast.to_nast_expr field in

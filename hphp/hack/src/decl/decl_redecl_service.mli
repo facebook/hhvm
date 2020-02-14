@@ -35,6 +35,7 @@ val get_dependent_classes :
   SSet.t
 
 val oldify_type_decl :
+  Provider_context.t ->
   ?collect_garbage:bool ->
   MultiWorker.worker list option ->
   (Relative_path.t -> SSet.t) ->
@@ -44,7 +45,15 @@ val oldify_type_decl :
   unit
 
 val remove_defs :
-  FileInfo.names -> Decl_class_elements.t SMap.t -> collect_garbage:bool -> unit
+  Provider_context.t ->
+  FileInfo.names ->
+  Decl_class_elements.t SMap.t ->
+  collect_garbage:bool ->
+  unit
 
 val remove_old_defs :
-  bucket_size:int -> MultiWorker.worker list option -> FileInfo.names -> unit
+  Provider_context.t ->
+  bucket_size:int ->
+  MultiWorker.worker list option ->
+  FileInfo.names ->
+  unit

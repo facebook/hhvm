@@ -39,6 +39,7 @@ let test () =
       env
       [(foo_file_name, foo_contents); (bar_file_name, bar_contents)]
   in
+  let ctx = Provider_context.empty_for_test ~tcopt:env.ServerEnv.tcopt in
   let classes = [foo_name; bar_name] in
   let foo_path = Relative_path.from_root foo_file_name in
   let bar_path = Relative_path.from_root bar_file_name in
@@ -49,7 +50,7 @@ let test () =
     { FileInfo.empty_names with FileInfo.n_classes = SSet.of_list classes }
   in
   let elems = Decl_class_elements.get_for_classes ~old:false classes in
-  Decl_redecl_service.remove_defs ~collect_garbage:false defs elems;
+  Decl_redecl_service.remove_defs ctx ~collect_garbage:false defs elems;
   SharedMem.invalidate_caches ();
 
   (* Local caches need to be invalidated whenever things are removed from shared

@@ -843,16 +843,17 @@ functor
         ~(lazy_decl_later : FileInfo.names Relative_path.Map.t)
         ~(oldified_defs : FileInfo.names)
         ~(to_redecl_phase2_deps : Typing_deps.DepSet.t) : redecl_phase2_result =
+      let ctx = Provider_utils.ctx_from_server_env env in
       let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
       let defs_to_oldify = get_defs lazy_decl_later in
       Decl_redecl_service.oldify_type_decl
+        ctx
         ~bucket_size
         genv.workers
         (get_classes naming_table)
         oldified_defs
         defs_to_oldify;
       let oldified_defs = FileInfo.merge_names oldified_defs defs_to_oldify in
-      let ctx = Provider_utils.ctx_from_server_env env in
       let (errorl', _changes, _to_redecl2, to_recheck2) =
         Decl_redecl_service.redo_type_decl
           ~conservative_redecl:

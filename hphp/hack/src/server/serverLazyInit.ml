@@ -389,13 +389,14 @@ let get_files_to_recheck
     Relative_path.Map.fold dirty_fast ~init:FileInfo.empty_names ~f:(fun _ ->
         FileInfo.merge_names)
   in
+  let ctx = Provider_utils.ctx_from_server_env env in
   Decl_redecl_service.oldify_type_decl
+    ctx
     ~bucket_size
     genv.workers
     get_classes
     FileInfo.empty_names
     dirty_names;
-  let ctx = Provider_utils.ctx_from_server_env env in
   let (_, _, to_redecl, to_recheck) =
     Decl_redecl_service.redo_type_decl
       ~conservative_redecl:false
@@ -406,7 +407,7 @@ let get_files_to_recheck
       dirty_names
       fast
   in
-  Decl_redecl_service.remove_old_defs ~bucket_size genv.workers dirty_names;
+  Decl_redecl_service.remove_old_defs ctx ~bucket_size genv.workers dirty_names;
   let deps = Typing_deps.add_all_deps to_redecl in
   let deps = Typing_deps.DepSet.union deps to_recheck in
   Typing_deps.get_files deps

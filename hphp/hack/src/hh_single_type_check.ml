@@ -941,7 +941,7 @@ let compare_classes c1 c2 =
   let (_, is_unchanged) = Decl_compare.ClassEltDiff.compare c1 c2 in
   if is_unchanged = `Changed then fail_comparison "ClassEltDiff"
 
-let test_decl_compare filenames popt builtins files_contents files_info =
+let test_decl_compare ctx filenames builtins files_contents files_info =
   (* skip some edge cases that we don't handle now... ugly! *)
   if Relative_path.suffix filenames = "capitalization3.php" then
     ()
@@ -986,6 +986,7 @@ let test_decl_compare filenames popt builtins files_contents files_info =
     in
     (* We need to oldify, not remove, for ClassEltDiff to work *)
     Decl_redecl_service.oldify_type_decl
+      ctx
       None
       get_classes
       ~bucket_size:1
@@ -994,7 +995,7 @@ let test_decl_compare filenames popt builtins files_contents files_info =
       ~collect_garbage:false;
 
     let files_contents = Relative_path.Map.map files_contents ~f:add_newline in
-    let (_, _) = parse_name_and_decl popt files_contents in
+    let (_, _) = parse_name_and_decl ctx files_contents in
     let (typedefs2, funs2, classes2) = get_decls defs in
     List.iter2_exn typedefs1 typedefs2 compare_typedefs;
     List.iter2_exn funs1 funs2 compare_funs;
@@ -1608,8 +1609,8 @@ let handle_mode
             in
             try
               test_decl_compare
-                filename
                 ctx
+                filename
                 builtins
                 files_contents
                 individual_file_info;
@@ -1627,7 +1628,7 @@ let handle_mode
     if errors <> [] then exit 2
   | Decl_compare ->
     let filename = expect_single_file () in
-    test_decl_compare filename ctx builtins files_contents files_info
+    test_decl_compare ctx filename builtins files_contents files_info
   | Shallow_class_diff ->
     print_errors_if_present parse_errors;
     let filename = expect_single_file () in

@@ -655,6 +655,27 @@ and emit_switch (env : Emit_env.t) pos scrutinee_expr cl =
   in
   (* "continue" in a switch in PHP has the same semantics as break! *)
   let break_label = Label.next_regular () in
+  let has_default =
+    List.exists
+      ~f:(function
+        | A.Default _ -> true
+        | _ -> false)
+      cl
+  in
+  let cl =
+    if has_default then
+      cl
+    else
+      let rec aux cl =
+        match cl with
+        | [] ->
+          failwith "impossible - switch statements must have at least one case"
+        | [A.Default _] -> failwith "impossible - there shouldn't be a default"
+        | [A.Case (e, b)] -> [A.Case (e, b @ [(Pos.none, A.Break)])]
+        | c :: cl -> c :: aux cl
+      in
+      aux cl
+  in
   let cl =
     Emit_env.do_in_switch_body break_label env cl @@ fun env _ ->
     List.map cl ~f:(emit_case env)

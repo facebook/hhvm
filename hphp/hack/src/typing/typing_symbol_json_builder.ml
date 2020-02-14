@@ -30,6 +30,8 @@ type predicate =
   | ClassDeclaration
   | ClassDefinition
   | DeclarationLocation
+  | EnumDeclaration
+  | EnumDefinition
   | FileXRefs
   | InterfaceDeclaration
   | InterfaceDefinition
@@ -45,6 +47,8 @@ type glean_json = {
   classDeclaration: json list;
   classDefinition: json list;
   declarationLocation: json list;
+  enumDeclaration: json list;
+  enumDefinition: json list;
   fileXRefs: json list;
   interfaceDeclaration: json list;
   interfaceDefinition: json list;
@@ -64,6 +68,8 @@ let init_progress =
       classDeclaration = [];
       classDefinition = [];
       declarationLocation = [];
+      enumDeclaration = [];
+      enumDefinition = [];
       fileXRefs = [];
       interfaceDeclaration = [];
       interfaceDefinition = [];
@@ -107,6 +113,16 @@ let update_json_data predicate json progress =
       {
         progress.resultJson with
         declarationLocation = json :: progress.resultJson.declarationLocation;
+      }
+    | EnumDeclaration ->
+      {
+        progress.resultJson with
+        enumDeclaration = json :: progress.resultJson.enumDeclaration;
+      }
+    | EnumDefinition ->
+      {
+        progress.resultJson with
+        enumDefinition = json :: progress.resultJson.enumDefinition;
       }
     | FileXRefs ->
       {
@@ -169,9 +185,9 @@ let container_decl_predicate container_type =
 
 let get_container_kind clss =
   match clss.c_kind with
+  | Cenum -> raise (Failure "Unexpected enum as container kind")
   | Cinterface -> InterfaceContainer
   | Ctrait -> TraitContainer
-  (* TODO: process enum kind here *)
   | _ -> ClassContainer
 
 let json_of_name name =
@@ -233,6 +249,17 @@ let json_of_container_decl (container_type, decl_pred) _ctx name _elem progress
   let (_, fact_id, progress) = glean_json decl_pred json_fact progress in
   let container_decl = JSON_Object [(container_type, json_of_id fact_id)] in
   (container_decl, fact_id, progress)
+
+let json_of_enum_decl _ctx name _elem progress =
+  let json_fact = json_of_name name in
+  let (_, fact_id, progress) = glean_json EnumDeclaration json_fact progress in
+  let decl_json = json_of_id fact_id in
+  (decl_json, fact_id, progress)
+
+let json_of_enum_defn _elem decl_id progress =
+  let json_fact = JSON_Object [("declaration", json_of_id decl_id)] in
+  let (_, _, prog) = glean_json EnumDefinition json_fact progress in
+  prog
 
 let json_of_decl ctx decl_type json_decl_fun id elem progress =
   let (decl_json, fact_id, progress) = json_decl_fun ctx id elem progress in
@@ -330,6 +357,20 @@ let build_json ctx symbols =
   let progress =
     List.fold symbols.decls ~init:init_progress ~f:(fun acc symbol ->
         match symbol with
+        | Class en when phys_equal en.c_kind Cenum ->
+          let (pos, id) = en.c_name in
+          let (_, _, res) =
+            json_of_decl_loc
+              ctx
+              "enum_"
+              pos
+              json_of_enum_decl
+              json_of_enum_defn
+              id
+              en
+              acc
+          in
+          res
         | Class cd ->
           let (pos, id) = cd.c_name in
           let decl_pred = container_decl_predicate (get_container_kind cd) in
@@ -386,10 +427,12 @@ let build_json ctx symbols =
     by id only *)
     [
       ("hack.FileXRefs.1", progress.resultJson.fileXRefs);
+      ("hack.EnumDefinition.1", progress.resultJson.enumDefinition);
       ("hack.ClassDefinition.1", progress.resultJson.classDefinition);
       ("hack.TraitDefinition.1", progress.resultJson.traitDefinition);
       ("hack.InterfaceDefinition.1", progress.resultJson.interfaceDefinition);
       ("hack.DeclarationLocation.1", progress.resultJson.declarationLocation);
+      ("hack.EnumDeclaration.1", progress.resultJson.enumDeclaration);
       ("hack.ClassDeclaration.1", progress.resultJson.classDeclaration);
       ("hack.TraitDeclaration.1", progress.resultJson.traitDeclaration);
       ("hack.InterfaceDeclaration.1", progress.resultJson.interfaceDeclaration);

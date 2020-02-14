@@ -11,6 +11,8 @@ from glean.schema.hack.types import (
     ClassDeclaration,
     ClassDefinition,
     DeclarationLocation,
+    EnumDeclaration,
+    EnumDefinition,
     FileXRefs,
     InterfaceDeclaration,
     InterfaceDefinition,
@@ -92,14 +94,16 @@ max_workers = 2
 
     def predicate_name_to_type(self, predicate_name: str) -> Optional[Type[Struct]]:
         predicate_dict = {
-            "hack.FileXRefs.1": FileXRefs,
-            "hack.ClassDefinition.1": ClassDefinition,
-            "hack.TraitDefinition.1": TraitDefinition,
-            "hack.InterfaceDefinition.1": InterfaceDefinition,
-            "hack.DeclarationLocation.1": DeclarationLocation,
             "hack.ClassDeclaration.1": ClassDeclaration,
-            "hack.TraitDeclaration.1": TraitDeclaration,
+            "hack.ClassDefinition.1": ClassDefinition,
+            "hack.DeclarationLocation.1": DeclarationLocation,
+            "hack.EnumDeclaration.1": EnumDeclaration,
+            "hack.EnumDefinition.1": EnumDefinition,
+            "hack.FileXRefs.1": FileXRefs,
             "hack.InterfaceDeclaration.1": InterfaceDeclaration,
+            "hack.InterfaceDefinition.1": InterfaceDefinition,
+            "hack.TraitDeclaration.1": TraitDeclaration,
+            "hack.TraitDefinition.1": TraitDefinition,
         }
         return predicate_dict.get(predicate_name)
 

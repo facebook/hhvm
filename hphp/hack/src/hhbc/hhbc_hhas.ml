@@ -774,7 +774,10 @@ let quote_str_option s =
   | Some s -> SU.quote_string s
 
 let string_of_type_flags flags =
-  let flag_strs = List.map ~f:Hhas_type_constraint.string_of_flag flags in
+  let flag_strs =
+    List.map ~f:Hhas_type_constraint.string_of_flag flags
+    |> List.sort ~compare:String.compare
+  in
   let flags_text = String.concat ~sep:" " flag_strs in
   flags_text
 

@@ -25,6 +25,12 @@ module Cache_entry = struct
     match key with
     | Int_key _ -> 1
     | String_key _ -> String.length value
+
+  let key_to_log_string : type a. a key -> string =
+   fun key ->
+    match key with
+    | Int_key i -> Printf.sprintf "(Int)%d" i
+    | String_key s -> Printf.sprintf "(String)%s" s
 end
 
 module Cache = Lru_cache.Cache (Cache_entry)

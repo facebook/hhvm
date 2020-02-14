@@ -31,6 +31,15 @@ module Decl_cache_entry = struct
   type 'a value = 'a
 
   let get_size ~key:_ ~value:_ = 1
+
+  let key_to_log_string : type a. a key -> string =
+   fun key ->
+    match key with
+    | Fun_decl s -> "FunDecl" ^ s
+    | Class_decl s -> "ClassDecl" ^ s
+    | Record_decl s -> "RecordDecl" ^ s
+    | Typedef_decl s -> "TypedefDecl" ^ s
+    | Gconst_decl s -> "GconstDecl" ^ s
 end
 
 module Decl_cache = Lru_cache.Cache (Decl_cache_entry)
@@ -43,6 +52,9 @@ module Shallow_decl_cache_entry = struct
   type 'a value = 'a
 
   let get_size ~key:_ ~value:_ = 1
+
+  let key_to_log_string : type a. a key -> string =
+   (fun (Shallow_class_decl key) -> "ClasssShallow" ^ key)
 end
 
 module Shallow_decl_cache = Lru_cache.Cache (Shallow_decl_cache_entry)

@@ -18,6 +18,8 @@ module type Entry = sig
   type 'a value = 'a
 
   val get_size : key:'a key -> value:'a value -> size
+
+  val key_to_log_string : 'a key -> string
 end
 
 module Cache (Entry : Entry) = struct

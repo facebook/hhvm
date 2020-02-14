@@ -54,6 +54,9 @@ module type Entry = sig
   measure its size in bytes. If the size is always [1], this causes the cache to
   act as a regular LRU cache. *)
   val get_size : key:'a key -> value:'a value -> size
+
+  (** For logging/debugging *)
+  val key_to_log_string : 'a key -> string
 end
 
 module Cache (Entry : Entry) : sig

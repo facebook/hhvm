@@ -20,6 +20,8 @@ module Decl_cache_entry : sig
   type 'a value = 'a
 
   val get_size : key:'a key -> value:'a value -> int
+
+  val key_to_log_string : 'a key -> string
 end
 
 (** Maps decl names to types. *)
@@ -35,6 +37,8 @@ module Shallow_decl_cache_entry : sig
   type 'a value = 'a
 
   val get_size : key:'a key -> value:'a value -> int
+
+  val key_to_log_string : 'a key -> string
 end
 
 module Shallow_decl_cache : sig

@@ -7464,8 +7464,8 @@ and check_const_trait_members pos env use_list =
         if not ce.ce_const then Errors.trait_prop_const_class pos x)
   | _ -> ()
 
-and shallow_decl_enabled () =
-  TCO.shallow_class_decl (Global_naming_options.get ())
+and shallow_decl_enabled (ctx : Provider_context.t) : bool =
+  TypecheckerOptions.shallow_class_decl ctx.Provider_context.tcopt
 
 and class_def ctx c =
   let env = EnvFromDef.class_env ctx c in
@@ -7482,7 +7482,7 @@ and class_def ctx c =
     None
   | Some tc ->
     let env = Typing_requirements.check_class env tc in
-    if shallow_decl_enabled () then Typing_inheritance.check_class env tc;
+    if shallow_decl_enabled ctx then Typing_inheritance.check_class env tc;
     Some (class_def_ env c tc)
 
 (* The two following functions enable us to retrieve the function (or class)
@@ -7541,9 +7541,10 @@ and class_def_ env c tc =
     in
     Typing_attributes.check_def env new_object kind c.c_user_attributes
   in
+  let ctx = Env.get_ctx env in
   if
     Ast_defs.(equal_class_kind c.c_kind Cnormal)
-    && not (shallow_decl_enabled ())
+    && not (shallow_decl_enabled ctx)
   then (
     (* This check is only for eager mode. The same check is performed
      * for shallow mode in Typing_inheritance *)

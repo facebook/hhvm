@@ -28,28 +28,28 @@ let class_naming_and_decl ctx c =
   let c = Errors.ignore_ (fun () -> Naming.class_ ctx c) in
   Shallow_decl.class_ ctx c
 
-let shallow_decl_enabled () =
-  TypecheckerOptions.shallow_class_decl (Global_naming_options.get ())
+let shallow_decl_enabled (ctx : Provider_context.t) : bool =
+  TypecheckerOptions.shallow_class_decl ctx.Provider_context.tcopt
 
-let get_from_store cid =
-  if shallow_decl_enabled () then
+let get_from_store ctx cid =
+  if shallow_decl_enabled ctx then
     Classes.get cid
   else
     failwith "shallow_class_decl not enabled"
 
-let add_to_store cid c =
-  if shallow_decl_enabled () then
+let add_to_store ctx cid c =
+  if shallow_decl_enabled ctx then
     Classes.add cid c
   else
     failwith "shallow_class_decl not enabled"
 
 let class_decl_if_missing (ctx : Provider_context.t) (c : Nast.class_) =
   let (_, cid) = c.Aast.c_name in
-  match get_from_store cid with
+  match get_from_store ctx cid with
   | Some c -> c
   | None ->
     let c = class_naming_and_decl ctx c in
-    add_to_store cid c;
+    add_to_store ctx cid c;
     c
 
 let err_not_found file name =
@@ -69,7 +69,7 @@ let get_class_filename x =
   | _ -> None
 
 let get ctx cid =
-  match get_from_store cid with
+  match get_from_store ctx cid with
   | Some _ as c -> c
   | None ->
     (match get_class_filename cid with

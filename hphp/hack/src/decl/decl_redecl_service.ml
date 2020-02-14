@@ -17,8 +17,8 @@ open Hh_prelude
 open Reordered_argument_collections
 open Typing_deps
 
-let shallow_decl_enabled () =
-  TypecheckerOptions.shallow_class_decl (Global_naming_options.get ())
+let shallow_decl_enabled (ctx : Provider_context.t) =
+  TypecheckerOptions.shallow_class_decl ctx.Provider_context.tcopt
 
 (*****************************************************************************)
 (* The neutral element of declaration (cf procs/multiWorker.mli) *)
@@ -153,7 +153,7 @@ let otf_decl_files filel =
   (* Redeclaring the files *)
   redeclare_files filel
 
-let compute_deps ~conservative_redecl fast filel =
+let compute_deps ctx ~conservative_redecl fast filel =
   let infol = List.map filel (fun fn -> Relative_path.Map.find fast fn) in
   let names =
     List.fold_left infol ~f:FileInfo.merge_names ~init:FileInfo.empty_names
@@ -178,7 +178,7 @@ let compute_deps ~conservative_redecl fast filel =
   let old_consts = Decl_heap.GConsts.get_old_batch n_consts in
   let acc = compute_gconsts_deps ~conservative_redecl old_consts acc n_consts in
   let acc =
-    if shallow_decl_enabled () then
+    if shallow_decl_enabled ctx then
       acc
     else
       let old_classes = Decl_heap.Classes.get_old_batch n_classes in
@@ -204,10 +204,10 @@ let load_and_otf_decl_files ctx _ filel =
     Out_channel.flush stdout;
     raise e
 
-let load_and_compute_deps ~conservative_redecl _acc filel =
+let load_and_compute_deps ctx ~conservative_redecl _acc filel =
   try
     let fast = OnTheFlyStore.load () in
-    compute_deps ~conservative_redecl fast filel
+    compute_deps ctx ~conservative_redecl fast filel
   with e ->
     Printf.printf "Error: %s\n" (Exn.to_string e);
     Out_channel.flush stdout;
@@ -242,7 +242,7 @@ let parallel_otf_decl ~conservative_redecl ctx workers bucket_size fast fnl =
     let (changed, to_redecl, to_recheck) =
       MultiWorker.call
         workers
-        ~job:(load_and_compute_deps ~conservative_redecl)
+        ~job:(load_and_compute_deps ctx ~conservative_redecl)
         ~neutral:compute_deps_neutral
         ~merge:merge_compute_deps
         ~next:(MultiWorker.next ~max_size:bucket_size workers fnl)
@@ -305,10 +305,10 @@ let remove_defs
 
 let intersection_nonempty s1 mem_f s2 = SSet.exists s1 ~f:(mem_f s2)
 
-let is_dependent_class_of_any classes c =
+let is_dependent_class_of_any ctx classes c =
   if SSet.mem classes c then
     true
-  else if shallow_decl_enabled () then
+  else if shallow_decl_enabled ctx then
     true
   else
     match Decl_heap.Classes.get c with
@@ -339,27 +339,27 @@ let get_dependent_classes_files classes =
       Typing_deps.get_extend_deps ~visited ~source_class ~acc)
   |> Typing_deps.get_files
 
-let filter_dependent_classes classes maybe_dependent_classes =
-  List.filter maybe_dependent_classes ~f:(is_dependent_class_of_any classes)
+let filter_dependent_classes ctx classes maybe_dependent_classes =
+  List.filter maybe_dependent_classes ~f:(is_dependent_class_of_any ctx classes)
 
 module ClassSetStore = GlobalStorage.Make (struct
   type t = SSet.t
 end)
 
-let load_and_filter_dependent_classes maybe_dependent_classes =
+let load_and_filter_dependent_classes ctx maybe_dependent_classes =
   let classes = ClassSetStore.load () in
-  filter_dependent_classes classes maybe_dependent_classes
+  filter_dependent_classes ctx classes maybe_dependent_classes
 
 let filter_dependent_classes_parallel
-    workers ~bucket_size classes maybe_dependent_classes =
+    ctx workers ~bucket_size classes maybe_dependent_classes =
   if List.length maybe_dependent_classes < 10 then
-    filter_dependent_classes classes maybe_dependent_classes
+    filter_dependent_classes ctx classes maybe_dependent_classes
   else (
     ClassSetStore.store classes;
     let res =
       MultiWorker.call
         workers
-        ~job:(fun _ c -> load_and_filter_dependent_classes c)
+        ~job:(fun _ c -> load_and_filter_dependent_classes ctx c)
         ~merge:( @ )
         ~neutral:[]
         ~next:
@@ -372,14 +372,14 @@ let filter_dependent_classes_parallel
     res
   )
 
-let get_dependent_classes workers ~bucket_size get_classes classes =
+let get_dependent_classes ctx workers ~bucket_size get_classes classes =
   get_dependent_classes_files classes
   |> get_maybe_dependent_classes get_classes classes
-  |> filter_dependent_classes_parallel workers ~bucket_size classes
+  |> filter_dependent_classes_parallel ctx workers ~bucket_size classes
   |> SSet.of_list
 
-let get_elems workers ~bucket_size ~old defs =
-  if shallow_decl_enabled () then
+let get_elems ctx workers ~bucket_size ~old defs =
+  if shallow_decl_enabled ctx then
     SMap.empty
   else
     let classes = SSet.elements defs.FileInfo.n_classes in
@@ -420,7 +420,7 @@ let redo_type_decl
     Decl_utils.split_defs defs all_oldified_defs
   in
   (* Oldify the remaining defs along with their elements *)
-  let get_elems = get_elems workers ~bucket_size in
+  let get_elems = get_elems ctx workers ~bucket_size in
   let current_elems = get_elems current_defs ~old:false in
   oldify_defs ctx current_defs current_elems ~collect_garbage:true;
 
@@ -433,14 +433,14 @@ let redo_type_decl
     if List.length fnl < 10 then
       let errors = otf_decl_files ctx fnl in
       let (changed, to_redecl, to_recheck) =
-        compute_deps ~conservative_redecl fast fnl
+        compute_deps ctx ~conservative_redecl fast fnl
       in
       (errors, changed, to_redecl, to_recheck)
     else
       parallel_otf_decl ~conservative_redecl ctx workers bucket_size fast fnl
   in
   let (changed, to_recheck) =
-    if shallow_decl_enabled () then (
+    if shallow_decl_enabled ctx then (
       let AffectedDeps.{ changed = changed'; mro_invalidated; needs_recheck } =
         Shallow_decl_compare.compute_class_fanout ctx get_classes fnl
       in
@@ -478,7 +478,7 @@ let oldify_type_decl
   let (oldified_defs, current_defs) =
     Decl_utils.split_defs defs all_oldified_defs
   in
-  let get_elems = get_elems workers ~bucket_size in
+  let get_elems = get_elems ctx workers ~bucket_size in
   (* Oldify things that are not oldified yet *)
   let current_elems = get_elems current_defs ~old:false in
   oldify_defs ctx current_defs current_elems ~collect_garbage;
@@ -492,7 +492,7 @@ let oldify_type_decl
    * need to remove all of them too to avoid dangling references *)
   let all_classes = defs.FileInfo.n_classes in
   let dependent_classes =
-    get_dependent_classes workers get_classes ~bucket_size all_classes
+    get_dependent_classes ctx workers get_classes ~bucket_size all_classes
   in
   let dependent_classes =
     FileInfo.
@@ -501,5 +501,5 @@ let oldify_type_decl
   remove_defs ctx dependent_classes SMap.empty ~collect_garbage
 
 let remove_old_defs (ctx : Provider_context.t) ~bucket_size workers names =
-  let elems = get_elems workers ~bucket_size names ~old:true in
+  let elems = get_elems ctx workers ~bucket_size names ~old:true in
   remove_old_defs ctx names elems

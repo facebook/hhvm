@@ -33,6 +33,7 @@ let test () =
   let env = Test.setup_server () in
   let env = Test.setup_disk env files in
   Test.assert_no_errors env;
+  let ctx = Provider_utils.ctx_from_server_env env in
 
   let get_classes path =
     match Naming_table.get_file_info env.ServerEnv.naming_table path with
@@ -41,6 +42,7 @@ let test () =
   in
   let dependent_classes =
     Decl_redecl_service.get_dependent_classes
+      ctx
       None
       ~bucket_size:1
       get_classes

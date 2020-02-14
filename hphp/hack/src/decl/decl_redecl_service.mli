@@ -28,6 +28,7 @@ val redo_type_decl :
  * in a very particular use case of invalidate_type_decl.
  *)
 val get_dependent_classes :
+  Provider_context.t ->
   MultiWorker.worker list option ->
   bucket_size:int ->
   (Relative_path.t -> SSet.t) ->

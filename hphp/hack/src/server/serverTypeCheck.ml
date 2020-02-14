@@ -47,8 +47,8 @@ type check_results = {
   total_rechecked_count: int;
 }
 
-let shallow_decl_enabled () =
-  TypecheckerOptions.shallow_class_decl (Global_naming_options.get ())
+let shallow_decl_enabled (ctx : Provider_context.t) =
+  TypecheckerOptions.shallow_class_decl ctx.Provider_context.tcopt
 
 (*****************************************************************************)
 (* Debugging *)
@@ -1209,8 +1209,9 @@ functor
        redeclare definitions in files with parse errors.
 
        When shallow_class_decl is enabled, there is no need to do phase 2. *)
+      let ctx = Provider_utils.ctx_from_server_env env in
       let (fast_redecl_phase2_now, lazy_decl_later) =
-        if shallow_decl_enabled () then
+        if shallow_decl_enabled ctx then
           (Relative_path.Map.empty, Relative_path.Map.empty)
         else
           CheckKind.get_defs_to_redecl_phase2
@@ -1237,7 +1238,7 @@ functor
       in
       Hh_logger.log "Begin %s" logstring;
 
-      if not (shallow_decl_enabled ()) then (
+      if not (shallow_decl_enabled ctx) then (
         Hh_logger.log
           "(Recomputing type declarations for descendants of changed classes and determining full typechecking fanout)";
         Hh_logger.log
@@ -1257,7 +1258,7 @@ functor
 
        When shallow_class_decl is enabled, there is no need to do phase 2. *)
       let (errors, needs_phase2_redecl, to_recheck2) =
-        if shallow_decl_enabled () then
+        if shallow_decl_enabled ctx then
           (errors, Relative_path.Set.empty, Relative_path.Set.empty)
         else
           let { errors_after_phase2; needs_phase2_redecl; to_recheck2 } =

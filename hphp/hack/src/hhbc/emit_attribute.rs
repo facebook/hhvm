@@ -5,10 +5,10 @@
 
 use ast_constant_folder_rust as ast_constant_folder;
 use emit_fatal_rust as emit_fatal;
-use env::emitter::Emitter;
+use env::{emitter::Emitter, Env};
 use hhas_attribute_rust::HhasAttribute;
 use hhbc_id_rust::{self as hhbc_id, Id};
-use instruction_sequence_rust::Result;
+use instruction_sequence_rust::{Error, Result};
 use naming_special_names::user_attributes as ua;
 use naming_special_names_rust as naming_special_names;
 use oxidized::{ast as a, namespace_env::Env as Namespace};
@@ -90,4 +90,13 @@ pub fn add_reified_attribute(tparams: &[a::Tparam]) -> Option<HhasAttribute> {
         arguments.push(TypedValue::Int(bool2i64(warn)));
     }
     Some(HhasAttribute { name, arguments })
+}
+
+pub fn add_reified_parent_attribute(
+    _env: &Env,
+    _extends: &Vec<a::Hint>,
+) -> Result<Option<HhasAttribute>> {
+    Err(Error::Unrecoverable(
+        "emit_attribute::add_reified_parent_attribute".to_string(),
+    ))
 }

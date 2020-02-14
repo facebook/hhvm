@@ -492,26 +492,37 @@ dependencies = [
 name = "emit_class_rust"
 version = "0.0.0"
 dependencies = [
+ "ast_constant_folder_rust 0.0.0",
  "closure_convert_rust 0.0.0",
  "emit_attribute_rust 0.0.0",
  "emit_body_rust 0.0.0",
+ "emit_expression_rust 0.0.0",
  "emit_fatal_rust 0.0.0",
+ "emit_memoize_method_rust 0.0.0",
  "emit_method_rust 0.0.0",
  "emit_property_rust 0.0.0",
+ "emit_symbol_refs_rust 0.0.0",
  "emit_type_constant_rust 0.0.0",
  "emit_type_hint_rust 0.0.0",
+ "emit_xhp_rust 0.0.0",
  "env 0.0.0",
  "hhas_attribute_rust 0.0.0",
  "hhas_class_rust 0.0.0",
+ "hhas_constant_rust 0.0.0",
+ "hhas_method_rust 0.0.0",
+ "hhas_param_rust 0.0.0",
  "hhas_pos_rust 0.0.0",
  "hhas_property_rust 0.0.0",
  "hhas_type 0.0.0",
  "hhas_type_const 0.0.0",
  "hhas_xhp_attribute_rust 0.0.0",
  "hhbc_id_rust 0.0.0",
+ "hhbc_string_utils_rust 0.0.0",
  "instruction_sequence_rust 0.0.0",
  "naming_special_names_rust 0.0.0",
  "oxidized 0.0.0",
+ "runtime 0.0.0",
+ "rx_rust 0.0.0",
 ]
 
 [[package]]
@@ -567,6 +578,32 @@ dependencies = [
 ]
 
 [[package]]
+name = "emit_function_rust"
+version = "0.0.0"
+dependencies = [
+ "ast_scope_rust 0.0.0",
+ "closure_convert_rust 0.0.0",
+ "emit_attribute_rust 0.0.0",
+ "emit_body_rust 0.0.0",
+ "emit_fatal_rust 0.0.0",
+ "emit_memoize_helpers_rust 0.0.0",
+ "env 0.0.0",
+ "hhas_attribute_rust 0.0.0",
+ "hhas_body_rust 0.0.0",
+ "hhas_function_rust 0.0.0",
+ "hhas_pos_rust 0.0.0",
+ "hhbc_id_rust 0.0.0",
+ "instruction_sequence_rust 0.0.0",
+ "label_rust 0.0.0",
+ "local_rust 0.0.0",
+ "naming_special_names_rust 0.0.0",
+ "options 0.0.0",
+ "oxidized 0.0.0",
+ "runtime 0.0.0",
+ "rx_rust 0.0.0",
+]
+
+[[package]]
 name = "emit_memoize_helpers_rust"
 version = "0.0.0"
 dependencies = [
@@ -576,6 +613,37 @@ dependencies = [
  "instruction_sequence_rust 0.0.0",
  "local_rust 0.0.0",
  "oxidized 0.0.0",
+]
+
+[[package]]
+name = "emit_memoize_method_rust"
+version = "0.0.0"
+dependencies = [
+ "ast_scope_rust 0.0.0",
+ "bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "emit_attribute_rust 0.0.0",
+ "emit_body_rust 0.0.0",
+ "emit_fatal_rust 0.0.0",
+ "emit_memoize_helpers_rust 0.0.0",
+ "emit_param_rust 0.0.0",
+ "emit_pos_rust 0.0.0",
+ "env 0.0.0",
+ "hhas_attribute_rust 0.0.0",
+ "hhas_body_rust 0.0.0",
+ "hhas_method_rust 0.0.0",
+ "hhas_param_rust 0.0.0",
+ "hhas_pos_rust 0.0.0",
+ "hhas_type 0.0.0",
+ "hhbc_ast_rust 0.0.0",
+ "hhbc_id_rust 0.0.0",
+ "hhbc_string_utils_rust 0.0.0",
+ "instruction_sequence_rust 0.0.0",
+ "local_rust 0.0.0",
+ "naming_special_names_rust 0.0.0",
+ "options 0.0.0",
+ "oxidized 0.0.0",
+ "runtime 0.0.0",
+ "rx_rust 0.0.0",
 ]
 
 [[package]]
@@ -658,10 +726,12 @@ name = "emit_program_rust"
 version = "0.0.0"
 dependencies = [
  "bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "closure_convert_rust 0.0.0",
  "emit_body_rust 0.0.0",
  "emit_class_rust 0.0.0",
  "emit_fatal_rust 0.0.0",
  "emit_file_attributes_rust 0.0.0",
+ "emit_function_rust 0.0.0",
  "emit_record_def_rust 0.0.0",
  "env 0.0.0",
  "global_state 0.0.0",
@@ -747,6 +817,17 @@ dependencies = [
  "hhbc_string_utils_rust 0.0.0",
  "instruction_sequence_rust 0.0.0",
  "naming_special_names_rust 0.0.0",
+ "oxidized 0.0.0",
+]
+
+[[package]]
+name = "emit_xhp_rust"
+version = "0.0.0"
+dependencies = [
+ "hhas_method_rust 0.0.0",
+ "hhas_property_rust 0.0.0",
+ "hhas_xhp_attribute_rust 0.0.0",
+ "instruction_sequence_rust 0.0.0",
  "oxidized 0.0.0",
 ]
 
@@ -976,6 +1057,7 @@ dependencies = [
  "bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "closure_convert_rust 0.0.0",
  "hhas_attribute_rust 0.0.0",
+ "hhas_constant_rust 0.0.0",
  "hhas_method_rust 0.0.0",
  "hhas_pos_rust 0.0.0",
  "hhas_property_rust 0.0.0",
@@ -983,6 +1065,15 @@ dependencies = [
  "hhas_type_const 0.0.0",
  "hhbc_id_rust 0.0.0",
  "oxidized 0.0.0",
+]
+
+[[package]]
+name = "hhas_constant_rust"
+version = "0.0.0"
+dependencies = [
+ "hhbc_id_rust 0.0.0",
+ "instruction_sequence_rust 0.0.0",
+ "runtime 0.0.0",
 ]
 
 [[package]]
@@ -1118,10 +1209,13 @@ dependencies = [
 name = "hhbc_hhas_rust"
 version = "0.0.0"
 dependencies = [
+ "core_utils_rust 0.0.0",
+ "env 0.0.0",
  "escaper 0.0.0",
  "hhas_attribute_rust 0.0.0",
  "hhas_body_rust 0.0.0",
  "hhas_class_rust 0.0.0",
+ "hhas_constant_rust 0.0.0",
  "hhas_function_rust 0.0.0",
  "hhas_method_rust 0.0.0",
  "hhas_param_rust 0.0.0",
@@ -1137,6 +1231,7 @@ dependencies = [
  "indexmap 1.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "instruction_sequence_rust 0.0.0",
  "itertools 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "label_rust 0.0.0",
  "options 0.0.0",
  "oxidized 0.0.0",
  "runtime 0.0.0",
@@ -1192,6 +1287,7 @@ dependencies = [
  "itertools 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "label_rust 0.0.0",
  "local_rust 0.0.0",
+ "oxidized 0.0.0",
  "pretty_assertions 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "runtime 0.0.0",
  "thiserror 1.0.10 (registry+https://github.com/rust-lang/crates.io-index)",

@@ -7,6 +7,7 @@ use bitflags::bitflags;
 
 use closure_convert_rust as closure_convert;
 use hhas_attribute_rust::HhasAttribute;
+use hhas_constant_rust::HhasConstant;
 use hhas_method_rust::HhasMethod;
 use hhas_pos_rust::Span;
 use hhas_property_rust::HhasProperty;
@@ -42,7 +43,7 @@ pub struct HhasClass<'a> {
     pub enum_type: Option<hhas_type::Info>,
     pub methods: Vec<HhasMethod<'a>>,
     pub properties: Vec<HhasProperty<'a>>,
-    //pub constants : Vec<HhasConstant<'a>>, // TODO(hrust): needs HhasConstant
+    pub constants: Vec<HhasConstant<'a>>,
     pub type_constants: Vec<HhasTypeConstant>,
     pub requirements: Vec<(class::Type<'a>, TraitReqKind)>,
     pub upper_bounds: Vec<(String, Vec<hhas_type::Info>)>,

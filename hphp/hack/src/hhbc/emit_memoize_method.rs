@@ -56,7 +56,7 @@ fn is_memoize(method: &T::Method_) -> bool {
 }
 
 pub fn make_info<'a>(
-    class: T::Class_,
+    class: &T::Class_,
     class_id: class::Type<'a>,
     methods: &[T::Method_],
 ) -> Result<MemoizeInfo<'a>> {
@@ -106,7 +106,7 @@ pub fn emit_wrapper_methods<'a>(
     env: &mut Env<'a>,
     info: &MemoizeInfo,
     class: &T::Class_,
-    methods: &'static [T::Method_],
+    methods: &'a [T::Method_],
 ) -> Result<Vec<HhasMethod<'a>>> {
     // Wrapper methods may not have iterators
     emitter.iterator_mut().reset();

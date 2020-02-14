@@ -66,7 +66,7 @@ pub fn escape_char<'a>(c: u8, output: &mut Vec<u8>) {
         b'$' => output.extend_from_slice(b"$"),
         b'?' => output.extend_from_slice(b"\\?"),
         c if is_lit_printable(c) => output.push(c),
-        c => write!(output, "\\{:o}", c).unwrap(),
+        c => write!(output, "\\{:03o}", c).unwrap(),
     }
 }
 
@@ -487,6 +487,7 @@ mod tests {
         assert_eq!(escape_char_(b'a'), "a");
         assert_eq!(escape_char_(b'$'), "$");
         assert_eq!(escape_char_(b'\"'), "\\\"");
+        assert_eq!(escape_char_(0), "\\000");
         assert_eq!(escape("house"), "house");
         assert_eq!(escape("red\n\t\r$?"), "red\\n\\t\\r$\\?");
         assert_eq!(is_oct(b'5'), true);

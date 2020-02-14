@@ -18,6 +18,7 @@ use escaper::escape;
 use hhas_attribute_rust::{self as hhas_attribute, HhasAttribute};
 use hhas_body_rust::HhasBody;
 use hhas_class_rust::{self as hhas_class, HhasClass};
+use hhas_constant_rust::HhasConstant;
 use hhas_function_rust::HhasFunction;
 use hhas_method_rust::HhasMethod;
 use hhas_param_rust::HhasParam;
@@ -393,6 +394,25 @@ fn print_property<W: Write>(
     }
 }
 
+fn print_constant<W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    c: &HhasConstant,
+) -> Result<(), W::Error> {
+    w.write("\n  .const ")?;
+    w.write(c.name.to_raw_string())?;
+    match c.value.as_ref() {
+        Some(TypedValue::Uninit) => w.write(" = uninit")?,
+        Some(value) => {
+            w.write(" = \"\"\"")?;
+            print_adata(ctx, w, value)?;
+            w.write("\"\"\"")?
+        }
+        None => (),
+    }
+    w.write(";")
+}
+
 fn print_enum_ty<W: Write>(ctx: &mut Context, w: &mut W, c: &HhasClass) -> Result<(), W::Error> {
     if let Some(et) = c.enum_type.as_ref() {
         newline(w)?;
@@ -613,6 +633,9 @@ fn print_class_def<W: Write>(
         print_enum_ty(c, w, class_def)?;
         for x in &class_def.requirements {
             print_requirement(c, w, x)?;
+        }
+        for x in &class_def.constants {
+            print_constant(c, w, x)?;
         }
         for x in &class_def.type_constants {
             print_type_constant(c, w, x)?;

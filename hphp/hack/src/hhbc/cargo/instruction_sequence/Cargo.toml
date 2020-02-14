@@ -16,6 +16,7 @@ hhbc_ast_rust = { path = "../hhbc_ast" }
 hhbc_id_rust = { path = "../hhbc_id" }
 label_rust = { path = "../label" }
 local_rust = { path = "../local" }
+oxidized = { path = "../../../oxidized" }
 runtime = { path = "../runtime" }
 itertools = "0.8"
 thiserror = "1.0"

@@ -3,28 +3,137 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use ast_constant_folder_rust as ast_constant_folder;
 use closure_convert_rust as closure_convert;
 use emit_attribute_rust as emit_attribute;
 use emit_body_rust as emit_body;
+use emit_expression_rust as emit_expression;
 use emit_fatal_rust as emit_fatal;
+use emit_memoize_method_rust as emit_memoize_method;
 use emit_method_rust as emit_method;
 use emit_property_rust as emit_property;
+use emit_symbol_refs_rust as emit_symbol_refs;
 use emit_type_constant_rust as emit_type_constant;
 use emit_type_hint_rust as emit_type_hint;
+use emit_xhp_rust as emit_xhp;
 use env::{emitter::Emitter, Env};
 use hhas_attribute_rust as hhas_attribute;
 use hhas_class_rust::{HhasClass, HhasClassFlags, TraitReqKind};
+use hhas_constant_rust::HhasConstant;
+use hhas_method_rust::{HhasMethod, HhasMethodFlags};
+use hhas_param_rust::HhasParam;
+use hhas_pos_rust::Span;
 use hhas_property_rust::HhasProperty;
 use hhas_type_const::HhasTypeConstant;
 use hhas_xhp_attribute_rust::HhasXhpAttribute;
-use hhbc_id::{class, Id};
-use hhbc_id_rust as hhbc_id;
-use instruction_sequence_rust::Error::Unrecoverable;
-use instruction_sequence_rust::Result;
+use hhbc_id_rust::{self as hhbc_id, class, method, Id};
+use hhbc_string_utils_rust as string_utils;
+use instruction_sequence_rust::{Error::Unrecoverable, InstrSeq, Result};
 use naming_special_names_rust as special_names;
-use oxidized::{ast as tast, namespace_env};
+use oxidized::{
+    ast::{self as tast, Hint, ReifyKind, Visibility},
+    namespace_env,
+};
+use runtime::TypedValue;
+use rx_rust as rx;
 
 use std::collections::BTreeMap;
+
+fn add_symbol_refs(
+    emitter: &mut Emitter,
+    base: &Option<class::Type>,
+    implements: &Vec<class::Type>,
+    uses: &Vec<class::Type>,
+    requirements: &Vec<(class::Type, TraitReqKind)>,
+) {
+    base.iter()
+        .for_each(|x| emit_symbol_refs::State::add_class(emitter, x.clone()));
+    implements
+        .iter()
+        .for_each(|x| emit_symbol_refs::State::add_class(emitter, x.clone()));
+    uses.iter()
+        .for_each(|x| emit_symbol_refs::State::add_class(emitter, x.clone()));
+    requirements
+        .iter()
+        .for_each(|(x, _)| emit_symbol_refs::State::add_class(emitter, x.clone()));
+}
+
+fn make_86method<'a>(
+    emitter: &mut Emitter,
+    name: method::Type<'a>,
+    params: Vec<HhasParam>,
+    is_static: bool,
+    visibility: Visibility,
+    is_abstract: bool,
+    span: Span,
+    instrs: InstrSeq,
+) -> HhasMethod<'a> {
+    // TODO: move this. We just know that there are no iterators in 86methods
+    emitter.iterator_mut().reset();
+
+    let mut flags = HhasMethodFlags::empty();
+    flags.set(HhasMethodFlags::NO_INJECTION, true);
+    flags.set(HhasMethodFlags::IS_ABSTRACT, is_abstract);
+    flags.set(HhasMethodFlags::IS_STATIC, is_static);
+
+    let attributes = vec![];
+    let rx_level = rx::Level::NonRx;
+
+    let method_decl_vars = vec![];
+    let method_return_type = None;
+    let method_doc_comment = None;
+    let method_is_memoize_wrapper = false;
+    let method_is_memoize_wrapper_lsb = false;
+    let method_env = None;
+
+    let body = emit_body::make_body(
+        emitter,
+        instrs,
+        method_decl_vars,
+        method_is_memoize_wrapper,
+        method_is_memoize_wrapper_lsb,
+        vec![],
+        params,
+        method_return_type,
+        method_doc_comment,
+        method_env,
+    );
+
+    HhasMethod {
+        body,
+        attributes,
+        name,
+        flags,
+        span,
+        rx_level,
+        visibility,
+    }
+}
+
+fn from_constant<'a>(
+    emitter: &mut Emitter,
+    env: &Env,
+    id: &'a tast::Id,
+    expr: &Option<tast::Expr>,
+) -> Result<HhasConstant<'a>> {
+    let (value, initializer_instrs) = match expr {
+        None => (None, None),
+        Some(init) => {
+            match ast_constant_folder::expr_to_typed_value(emitter, &env.namespace, init) {
+                Ok(v) => (Some(v), None),
+                Err(_) => (
+                    Some(TypedValue::Uninit),
+                    Some(emit_expression::emit_expr(emitter, env, init)?),
+                ),
+            }
+        }
+    };
+    Ok(HhasConstant {
+        name: id.name().into(),
+        value,
+        initializer_instrs,
+    })
+}
 
 fn from_extends(is_enum: bool, extends: &Vec<tast::Hint>) -> Option<hhbc_id::class::Type> {
     if is_enum {
@@ -112,6 +221,18 @@ fn from_class_elt_classvars<'a>(
         .collect::<Result<Vec<_>>>()
 }
 
+fn from_class_elt_constants<'a>(
+    emitter: &mut Emitter,
+    env: &Env,
+    class_: &'a tast::Class_,
+) -> Result<Vec<HhasConstant<'a>>> {
+    class_
+        .consts
+        .iter()
+        .map(|x| from_constant(emitter, env, &x.id, &x.expr))
+        .collect()
+}
+
 fn from_class_elt_requirements<'a>(
     class_: &'a tast::Class_,
 ) -> Vec<(hhbc_id::class::Type, TraitReqKind)> {
@@ -153,22 +274,146 @@ fn from_enum_type(opt: Option<&tast::Enum_>) -> Result<Option<hhas_type::Info>> 
     .transpose()
 }
 
+fn validate_class_name(ns: &namespace_env::Env, tast::Id(p, class_name): &tast::Id) -> Result<()> {
+    let is_global_namespace = |ns: &namespace_env::Env| ns.name.is_none();
+    let is_hh_namespace = |ns: &namespace_env::Env| {
+        ns.name
+            .as_ref()
+            .map(|x| x.eq_ignore_ascii_case("hh"))
+            .unwrap_or(false)
+    };
+
+    // global names are always reserved in any namespace.
+    // hh_reserved names are checked either if
+    // - class is in global namespace
+    // - class is in HH namespace *)
+    let is_special_class = class_name.contains("$");
+    let check_hh_name = is_global_namespace(ns) || is_hh_namespace(ns);
+    let name = string_utils::strip_ns(class_name);
+    let lower_name = name.to_ascii_lowercase();
+    let is_reserved_global_name = special_names::typehints::is_reserved_global_name(&lower_name);
+    let name_is_reserved = !is_special_class
+        && (is_reserved_global_name
+            || (check_hh_name && special_names::typehints::is_reserved_hh_name(&lower_name)));
+    if name_is_reserved {
+        Err(emit_fatal::raise_fatal_parse(
+            p,
+            format!(
+                "Cannot use '{}' as class name as it is reserved",
+                if is_reserved_global_name {
+                    name
+                } else {
+                    string_utils::strip_ns(class_name)
+                }
+            ),
+        ))
+    } else {
+        Ok(())
+    }
+}
+
+fn emit_reified_init_body<'a>(
+    _env: &Env,
+    _num_reified: usize,
+    _ast_class: &'a tast::Class_,
+) -> InstrSeq {
+    // TODO(hrust)
+    InstrSeq::default()
+}
+
+fn emit_reified_init_method<'a>(
+    emitter: &mut Emitter,
+    env: &Env,
+    ast_class: &'a tast::Class_,
+) -> Option<HhasMethod<'a>> {
+    use hhas_type::{constraint::*, Info};
+
+    let num_reified = ast_class
+        .tparams
+        .list
+        .iter()
+        .filter(|x| x.reified != ReifyKind::Erased)
+        .count();
+    let maybe_has_reified_parents = match ast_class.extends.first().as_ref() {
+        Some(Hint(_, h)) if h.as_happly().map(|(_, l)| !l.is_empty()).unwrap_or(false) => true,
+        _ => false, // Hack classes can only extend a single parent
+    };
+    if num_reified == 0 && !maybe_has_reified_parents {
+        None
+    } else {
+        let tc = Type::make(Some("HH\\varray".into()), Flags::empty());
+        let params = vec![HhasParam {
+            name: string_utils::reified::INIT_METH_PARAM_NAME.to_string(),
+            is_variadic: false,
+            is_inout: false,
+            user_attributes: vec![],
+            type_info: Some(Info::make(Some("HH\\varray".into()), tc)),
+            default_value: None,
+        }];
+
+        let instrs = emit_reified_init_body(env, num_reified, ast_class);
+        Some(make_86method(
+            emitter,
+            string_utils::reified::INIT_METH_NAME.into(),
+            params,
+            false, // is_static
+            Visibility::Protected,
+            false, // is_abstract
+            ast_class.span.clone().into(),
+            instrs,
+        ))
+    }
+}
+
+fn make_init_method<'a, F>(
+    emitter: &mut Emitter,
+    properties: &[HhasProperty],
+    filter: F,
+    name: &'static str,
+    span: Span,
+) -> Option<HhasMethod<'a>>
+where
+    F: Fn(&HhasProperty) -> bool,
+{
+    if properties
+        .iter()
+        .any(|p: &HhasProperty| p.initializer_instrs.is_some() && filter(p))
+    {
+        // TODO(hrust)
+        let instrs = InstrSeq::default();
+        Some(make_86method(
+            emitter,
+            name.into(),
+            vec![],
+            true, // is_static
+            Visibility::Private,
+            false, // is_abstract
+            span,
+            instrs,
+        ))
+    } else {
+        None
+    }
+}
+
 pub fn emit_class<'a>(
     emitter: &mut Emitter,
     ast_class: &'a tast::Class_,
     hoisted: closure_convert::HoistKind,
 ) -> Result<HhasClass<'a>> {
     let namespace = &ast_class.namespace;
-    // TODO(hrust): validate_class_name
-    let _env = Env::make_class_env(ast_class);
+    validate_class_name(namespace, &ast_class.name)?;
+    let mut env = Env::make_class_env(ast_class);
     // TODO: communicate this without looking at the name
-    let is_closure_class = ast_class.name.1.starts_with("Closure$");
+    let is_closure = ast_class.name.1.starts_with("Closure$");
 
     let mut attributes = emit_attribute::from_asts(emitter, namespace, &ast_class.user_attributes)?;
-    if !is_closure_class {
+    if !is_closure {
         attributes
             .extend(emit_attribute::add_reified_attribute(&ast_class.tparams.list).into_iter());
-        // TODO(hrust): add_reified_parent_attribute
+        attributes.extend(
+            emit_attribute::add_reified_parent_attribute(&env, &ast_class.extends)?.into_iter(),
+        )
     }
 
     let is_const = hhas_attribute::has_const(&attributes);
@@ -254,7 +499,7 @@ pub fn emit_class<'a>(
     } else {
         None
     };
-    let _xhp_attributes: Vec<_> = ast_class
+    let xhp_attributes: Vec<_> = ast_class
         .xhp_attrs
         .iter()
         .map(
@@ -267,8 +512,8 @@ pub fn emit_class<'a>(
         )
         .collect();
 
-    let _xhp_children = ast_class.xhp_children.first().map(|(p, sl)| (p, vec![sl]));
-    let _xhp_categories: Option<(_, Vec<_>)> = ast_class
+    let xhp_children = ast_class.xhp_children.first().map(|(p, sl)| (p, vec![sl]));
+    let xhp_categories: Option<(_, Vec<_>)> = ast_class
         .xhp_category
         .as_ref()
         .map(|(p, c)| (p, c.iter().map(|x| &x.1).collect()));
@@ -292,7 +537,7 @@ pub fn emit_class<'a>(
 
     if base
         .as_ref()
-        .map(|cls| cls.to_raw_string().eq_ignore_ascii_case("closure") && !is_closure_class)
+        .map(|cls| cls.to_raw_string().eq_ignore_ascii_case("closure") && !is_closure)
         .unwrap_or(false)
     {
         Err(emit_fatal::raise_fatal_runtime(
@@ -306,11 +551,89 @@ pub fn emit_class<'a>(
         &ast_class.implements
     };
     let implements = from_implements(implements);
-    let span = ast_class.span.clone().into();
+    let span: Span = ast_class.span.clone().into();
+    let mut additional_methods: Vec<HhasMethod> = vec![];
+    if let Some(cats) = xhp_categories {
+        additional_methods.extend(emit_xhp::from_category_declaration(ast_class, &cats)?)
+    }
+    if let Some(children) = xhp_children {
+        additional_methods.extend(emit_xhp::from_children_declaration(ast_class, &children)?)
+    }
+    let no_xhp_attributes = xhp_attributes.is_empty() && ast_class.xhp_attr_uses.is_empty();
+    if !no_xhp_attributes {
+        additional_methods.extend(emit_xhp::from_attribute_declaration(
+            ast_class,
+            &xhp_attributes,
+            &ast_class.xhp_attr_uses,
+        )?)
+    }
+    emitter.label_gen_mut().reset();
+    let mut properties =
+        from_class_elt_classvars(emitter, namespace, &ast_class, is_const, &tparams)?;
+    let constants = from_class_elt_constants(emitter, &env, ast_class)?;
 
-    let properties = from_class_elt_classvars(emitter, namespace, &ast_class, is_const, &tparams)?;
     let requirements = from_class_elt_requirements(ast_class);
 
+    let pinit_filter = |p: &HhasProperty| !p.is_static();
+    let sinit_filter = |p: &HhasProperty| p.is_static() && !p.is_lsb();
+    let linit_filter = |p: &HhasProperty| p.is_static() && p.is_lsb();
+
+    let pinit_method =
+        make_init_method(emitter, &properties, &pinit_filter, "86pinit", span.clone());
+    let sinit_method =
+        make_init_method(emitter, &properties, &sinit_filter, "86sinit", span.clone());
+    let linit_method =
+        make_init_method(emitter, &properties, &linit_filter, "86linit", span.clone());
+
+    let initialized_constants: Vec<_> = constants
+        .iter()
+        .filter_map(|p| {
+            p.initializer_instrs
+                .as_ref()
+                .map(|instrs| Some((&p.name, instrs)))
+        })
+        .collect();
+    let cinit_method = if initialized_constants.is_empty() {
+        None
+    } else {
+        let instrs = InstrSeq::default(); // TODO(hrust)
+        let params = vec![HhasParam {
+            name: "$constName".to_string(),
+            is_variadic: false,
+            is_inout: false,
+            user_attributes: vec![],
+            type_info: None,
+            default_value: None,
+        }];
+
+        Some(make_86method(
+            emitter,
+            "86cinit".into(),
+            params,
+            true, /* is_static */
+            Visibility::Private,
+            is_interface, /* is_abstract */
+            span.clone(),
+            instrs,
+        ))
+    };
+
+    let should_emit_reified_init =
+        !(emitter.context().systemlib() || is_closure || is_interface || is_trait);
+    let reified_init_method = if should_emit_reified_init {
+        emit_reified_init_method(emitter, &env, ast_class)
+    } else {
+        None
+    };
+    let needs_no_reifiedinit = reified_init_method.is_some() && ast_class.extends.is_empty();
+    additional_methods.extend(reified_init_method.into_iter());
+    additional_methods.extend(pinit_method.into_iter());
+    additional_methods.extend(sinit_method.into_iter());
+    additional_methods.extend(linit_method.into_iter());
+    additional_methods.extend(cinit_method.into_iter());
+
+    let mut methods = emit_method::from_asts(emitter, ast_class, &ast_class.methods)?;
+    methods.extend(additional_methods.into_iter());
     let type_constants = from_class_elt_typeconsts(emitter, ast_class)?;
     let upper_bounds = if emitter.options().enforce_generic_ub() {
         emit_body::emit_generics_upper_bounds(&ast_class.tparams.list, false)
@@ -318,9 +641,19 @@ pub fn emit_class<'a>(
         vec![]
     };
 
-    let methods = emit_method::from_asts(emitter, ast_class, &ast_class.methods)?;
-
-    let needs_no_reifiedinit = false; // TODO(hrust)
+    if !no_xhp_attributes {
+        properties.extend(emit_xhp::properties_for_cache(
+            namespace, ast_class, is_const,
+        )?);
+    }
+    let info = emit_memoize_method::make_info(ast_class, name.clone(), &ast_class.methods)?;
+    methods.extend(emit_memoize_method::emit_wrapper_methods(
+        emitter,
+        &mut env,
+        &info,
+        ast_class,
+        &ast_class.methods,
+    )?);
     let doc_comment = ast_class.doc_comment.clone();
     let is_xhp = ast_class.is_xhp || ast_class.has_xhp_keyword;
 
@@ -335,6 +668,7 @@ pub fn emit_class<'a>(
     flags.set(HhasClassFlags::NO_DYNAMIC_PROPS, no_dynamic_props);
     flags.set(HhasClassFlags::NEEDS_NO_REIFIEDINIT, needs_no_reifiedinit);
 
+    add_symbol_refs(emitter, &base, &implements, &uses, &requirements);
     Ok(HhasClass {
         attributes,
         base,
@@ -354,6 +688,7 @@ pub fn emit_class<'a>(
         properties,
         requirements,
         type_constants,
+        constants,
     })
 }
 

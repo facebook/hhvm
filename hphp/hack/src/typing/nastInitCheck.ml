@@ -17,8 +17,8 @@ module DICheck = Decl_init_check
 module DeferredMembers = Typing_deferred_members
 module SN = Naming_special_names
 
-let shallow_decl_enabled () =
-  TypecheckerOptions.shallow_class_decl (Global_naming_options.get ())
+let shallow_decl_enabled (ctx : Provider_context.t) : bool =
+  TypecheckerOptions.shallow_class_decl ctx.Provider_context.tcopt
 
 module SSetWTop = struct
   type t =
@@ -102,16 +102,17 @@ module Env = struct
   }
 
   let rec make tenv c =
+    let ctx = Typing_env.get_ctx tenv in
     let (_, _, methods) = split_methods c in
     let methods = List.fold_left ~f:method_ ~init:SMap.empty methods in
-    let sc = Shallow_decl.class_ (Typing_env.get_ctx tenv) c in
-    ( if shallow_decl_enabled () then
+    let sc = Shallow_decl.class_ ctx c in
+    ( if shallow_decl_enabled ctx then
       (* Run DeferredMembers.class_ for its error-emitting side effects.
          When shallow_class_decl is disabled, these are emitted by Decl. *)
       let (_ : SSet.t) = DeferredMembers.class_ tenv sc in
       () );
     let (add_initialized_props, add_trait_props, add_parent_props, add_parent) =
-      if shallow_decl_enabled () then
+      if shallow_decl_enabled ctx then
         ( DeferredMembers.initialized_props,
           DeferredMembers.trait_props tenv,
           DeferredMembers.parent_props tenv,

@@ -301,7 +301,7 @@ fn make_memoize_method_with_params_code(
     param_count += add_refied;
     Ok(InstrSeq::gather(vec![
         begin_label,
-        emit_body::emit_method_prolog(env, pos, hhas_params, args.params, &[], false),
+        emit_body::emit_method_prolog(emitter, env, pos, hhas_params, args.params, &[], false)?,
         deprecation_body,
         if args.method.static_ {
             InstrSeq::Empty

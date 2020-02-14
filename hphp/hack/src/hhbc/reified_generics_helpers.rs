@@ -5,7 +5,8 @@
 
 #![allow(dead_code)]
 
-use env::Env;
+use emit_expression_rust::{emit_reified_arg, is_reified_tparam};
+use env::{emitter::Emitter, Env};
 use instruction_sequence_rust::*;
 use label_rust as label;
 use naming_special_names_rust as sn;
@@ -14,7 +15,7 @@ use oxidized::{aast, ast_defs::Id, pos::Pos};
 use std::collections::HashSet;
 
 #[derive(Debug, Clone)]
-pub(crate) enum ReificationLevel {
+pub enum ReificationLevel {
     /// There is a reified generic
     Definitely,
     /// There is no function or class reified generics, but there may be an inferred one
@@ -54,9 +55,6 @@ pub(crate) fn has_reified_type_constraint(env: &Env, h: &aast::Hint) -> Reificat
             }
             false
         })
-    }
-    fn is_reified_tparam(_env: &Env, _is_fun: bool, _id: &str) -> Option<bool> {
-        unimplemented!("TODO(hrust) move to emit_expression.rs");
     }
     match &*h.1 {
         Hint_::Happly(Id(_, id), hs) => {
@@ -148,28 +146,27 @@ pub(crate) fn convert_awaitable(env: &Env, h: aast::Hint) -> aast::Hint {
 }
 
 pub(crate) fn simplify_verify_type(
-    _env: &Env,
-    _pos: &Pos,
+    e: &mut Emitter,
+    env: &Env,
+    pos: &Pos,
     check: InstrSeq,
     hint: &aast::Hint,
     verify_instr: InstrSeq,
-    label_gen: &mut label::Gen,
-) -> InstrSeq {
-    let get_ts = |_hint: &aast::Hint| -> InstrSeq {
-        unimplemented!("TODO(hrust) once emit_expression.rs is ported")
-    };
+) -> Result {
+    let get_ts = |e, hint| Ok(emit_reified_arg(e, env, pos, false, hint)?.0);
     let aast::Hint(_, hint_) = hint;
     if let aast::Hint_::Hoption(ref hint) = **hint_ {
+        let label_gen = e.label_gen_mut();
         let done_label = label_gen.next_regular();
-        InstrSeq::gather(vec![
+        Ok(InstrSeq::gather(vec![
             check,
             InstrSeq::make_jmpnz(done_label.clone()),
-            get_ts(hint),
+            get_ts(e, hint)?,
             verify_instr,
             InstrSeq::make_label(done_label),
-        ])
+        ]))
     } else {
-        InstrSeq::gather(vec![get_ts(hint), verify_instr])
+        Ok(InstrSeq::gather(vec![get_ts(e, hint)?, verify_instr]))
     }
 }
 

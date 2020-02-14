@@ -255,7 +255,7 @@ pub fn get_type_structure_for_hint(
     opts: &Options,
     tparams: &[&str],
     targ_map: &BTreeMap<&str, i64>,
-    hint: aast::Hint,
+    hint: &aast::Hint,
 ) -> InstrSeq {
     let _tv =
         emit_type_constant::hint_to_type_constant(opts, tparams, targ_map, &hint, false, false);
@@ -866,6 +866,10 @@ pub fn emit_set_range_expr(
     ]))
 }
 
+pub fn is_reified_tparam(_env: &Env, _is_fun: bool, _id: &str) -> Option<bool> {
+    unimplemented!("TODO(hrust)");
+}
+
 /// Emit code for a base expression `expr` that forms part of
 /// an element access `expr[elem]` or field access `expr->fld`.
 /// The instructions are divided into three sections:
@@ -920,5 +924,15 @@ pub fn emit_ignored_expr(
     _pos: &Pos,
     _expr: &tast::Expr,
 ) -> Result {
+    unimplemented!("TODO(hrust)")
+}
+
+pub fn emit_reified_arg(
+    _emitter: &mut Emitter,
+    _env: &Env,
+    _pos: &Pos,
+    isas: bool,
+    hint: &tast::Hint,
+) -> Result<(InstrSeq, bool)> {
     unimplemented!("TODO(hrust)")
 }

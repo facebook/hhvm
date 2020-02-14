@@ -181,7 +181,7 @@ pub fn emit_goto(
     }
 }
 
-pub(super) fn emit_return(e: &mut Emitter, in_finally_epilogue: bool, env: &mut Env) -> InstrSeq {
+pub(super) fn emit_return(e: &mut Emitter, in_finally_epilogue: bool, env: &mut Env) -> Result {
     // check if there are try/finally region
     let jt_gen = &env.jump_targets_gen;
     match jt_gen.jump_targets().get_closest_enclosing_finally_label() {
@@ -206,40 +206,40 @@ pub(super) fn emit_return(e: &mut Emitter, in_finally_epilogue: bool, env: &mut 
                 instrs.push(load_retval_instr);
             }
             let verify_return_instr = verify_return.map_or_else(
-                || InstrSeq::make_empty(),
+                || Ok(InstrSeq::make_empty()),
                 |h| {
                     use reified::ReificationLevel;
                     let h = reified::convert_awaitable(env, h.clone());
                     let h = reified::remove_erased_generics(env, h);
                     match reified::has_reified_type_constraint(env, &h) {
-                        ReificationLevel::Unconstrained => InstrSeq::make_empty(),
-                        ReificationLevel::Not => InstrSeq::make_verify_ret_type_c(),
-                        ReificationLevel::Maybe => InstrSeq::gather(vec![
+                        ReificationLevel::Unconstrained => Ok(InstrSeq::make_empty()),
+                        ReificationLevel::Not => Ok(InstrSeq::make_verify_ret_type_c()),
+                        ReificationLevel::Maybe => Ok(InstrSeq::gather(vec![
                             emit_expression::get_type_structure_for_hint(
                                 e.options(),
                                 &[],
                                 &BTreeMap::new(),
-                                h,
+                                &h,
                             ),
                             InstrSeq::make_verify_ret_type_ts(),
-                        ]),
+                        ])),
                         ReificationLevel::Definitely => {
                             let check = InstrSeq::gather(vec![
                                 InstrSeq::make_dup(),
                                 InstrSeq::make_istypec(hhbc_ast::IstypeOp::OpNull),
                             ]);
                             reified::simplify_verify_type(
+                                e,
                                 env,
                                 &Pos::make_none(),
                                 check,
                                 &h,
                                 InstrSeq::make_verify_ret_type_ts(),
-                                e.label_gen_mut(),
                             )
                         }
                     }
                 },
-            );
+            )?;
             instrs.extend(vec![
                 verify_return_instr,
                 verify_out,
@@ -250,7 +250,7 @@ pub(super) fn emit_return(e: &mut Emitter, in_finally_epilogue: bool, env: &mut 
                     InstrSeq::make_retc()
                 },
             ]);
-            InstrSeq::gather(instrs)
+            Ok(InstrSeq::gather(instrs))
         }
         // ret is in finally block and there might be iterators to release -
         // jump to finally block via Jmp
@@ -266,13 +266,13 @@ pub(super) fn emit_return(e: &mut Emitter, in_finally_epilogue: bool, env: &mut 
                 ]);
                 InstrSeq::gather(vec![save_state, save_retval])
             };
-            InstrSeq::gather(vec![
+            Ok(InstrSeq::gather(vec![
                 preamble,
                 emit_jump_to_label(target_label, iterators_to_release),
                 // emit ret instr as an indicator for try/finally rewriter to generate
                 // finally epilogue, try/finally rewriter will remove it.
                 InstrSeq::make_retc(),
-            ])
+            ]))
         }
     }
 }
@@ -355,7 +355,7 @@ fn emit_finally_epilogue(
         };
         match i {
             &IContFlow(ref cont_flow) => match cont_flow {
-                RetC | RetCSuspended | RetM(_) => Ok(emit_return(e, true, env)),
+                RetC | RetCSuspended | RetM(_) => emit_return(e, true, env),
                 _ => fail(),
             },
             &ISpecialFlow(Break(level)) => Ok(emit_break_or_continue(

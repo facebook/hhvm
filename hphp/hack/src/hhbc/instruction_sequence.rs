@@ -337,6 +337,10 @@ impl InstrSeq {
         Self::make_instr(Instruct::IMisc(InstructMisc::This))
     }
 
+    pub fn make_initthisloc(id: local::Type) -> Self {
+        Self::make_instr(Instruct::IMisc(InstructMisc::InitThisLoc(id)))
+    }
+
     pub fn make_istypec(op: IstypeOp) -> Self {
         Self::make_instr(Instruct::IIsset(InstructIsset::IsTypeC(op)))
     }
@@ -607,6 +611,14 @@ impl InstrSeq {
 
     pub fn make_verify_out_type(i: ParamId) -> Self {
         Self::make_instr(Instruct::IMisc(InstructMisc::VerifyOutType(i)))
+    }
+
+    pub fn make_verify_param_type(i: ParamId) -> Self {
+        Self::make_instr(Instruct::IMisc(InstructMisc::VerifyParamType(i)))
+    }
+
+    pub fn make_verify_param_type_ts(i: ParamId) -> Self {
+        Self::make_instr(Instruct::IMisc(InstructMisc::VerifyParamTypeTS(i)))
     }
 
     pub fn make_dim(op: MemberOpMode, key: MemberKey) -> Self {

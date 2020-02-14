@@ -988,8 +988,10 @@ fn print_param<W: Write>(
     if param.is_variadic {
         w.write("...")?;
     }
-    option(w, &param.type_info, print_type_info)?;
-    w.write(" ")?;
+    option(w, &param.type_info, |w, ty| {
+        print_type_info(w, ty)?;
+        w.write(" ")
+    })?;
     w.write(&param.name)?;
     option(w, &param.default_value, |w, i| {
         print_param_default_value(w, body_env, i)
@@ -1338,6 +1340,7 @@ fn print_special_and_user_attrs<W: Write>(
             }
             print_attributes(ctx, w, users)
         })?;
+        w.write(" ")?;
     }
     Ok(())
 }

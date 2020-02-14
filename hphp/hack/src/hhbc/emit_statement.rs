@@ -75,7 +75,7 @@ fn get_level<Ex, Fb, En, Hi>(
 
 // Wrapper functions
 
-fn emit_return(e: &mut Emitter, env: &mut Env) -> InstrSeq {
+fn emit_return(e: &mut Emitter, env: &mut Env) -> Result {
     tfr::emit_return(e, false, env)
 }
 
@@ -150,7 +150,7 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
         a::Stmt_::Expr(e_) => match &(*e_).1 {
             a::Expr_::YieldBreak => Ok(InstrSeq::gather(vec![
                 InstrSeq::make_null(),
-                emit_return(e, env),
+                emit_return(e, env)?,
             ])),
             a::Expr_::YieldFrom(_) => Ok(InstrSeq::gather(vec![
                 emit_yield_from_delegates(e, env, pos, e_)?,
@@ -204,7 +204,7 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
                 Ok(InstrSeq::gather(vec![
                     expr_instr,
                     emit_pos(e, pos),
-                    emit_return(e, env),
+                    emit_return(e, env)?,
                 ]))
             }
             None => Ok(InstrSeq::gather(vec![
@@ -270,16 +270,16 @@ fn emit_yield_from_delegates(
     ]))
 }
 
-pub fn emit_dropthrough_return(e: &mut Emitter, env: &mut Env) -> InstrSeq {
-    let return_instrs = emit_return(e, env);
+pub fn emit_dropthrough_return(e: &mut Emitter, env: &mut Env) -> Result {
+    let return_instrs = emit_return(e, env)?;
     let state = e.emit_state();
     match state.default_dropthrough.as_ref() {
-        Some(instrs) => instrs.clone(),
-        None => emit_pos_then(
+        Some(instrs) => Ok(instrs.clone()),
+        None => Ok(emit_pos_then(
             e,
             &(state.function_pos.last_char()),
             InstrSeq::gather(vec![state.default_return_value.clone(), return_instrs]),
-        ),
+        )),
     }
 }
 
@@ -289,14 +289,14 @@ pub fn emit_final_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Res
         a::Stmt_::Expr(expr) if expr.1.is_yield_break() => emit_stmt(e, env, stmt),
         _ => Ok(InstrSeq::gather(vec![
             emit_stmt(e, env, stmt)?,
-            emit_dropthrough_return(e, env),
+            emit_dropthrough_return(e, env)?,
         ])),
     }
 }
 
 fn emit_final_stmts(e: &mut Emitter, env: &mut Env, block: &[tast::Stmt]) -> Result {
     match block {
-        [] => Ok(emit_dropthrough_return(e, env)),
+        [] => emit_dropthrough_return(e, env),
         [s] => emit_final_stmt(e, env, s),
         [s, ..] => Ok(InstrSeq::gather(vec![
             emit_stmt(e, env, s)?,

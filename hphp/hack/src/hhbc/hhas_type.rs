@@ -80,7 +80,7 @@ impl Info {
     }
 
     pub fn has_type_constraint(&self) -> bool {
-        !self.type_constraint.flags.is_empty()
+        self.type_constraint.name.is_some()
     }
 }
 

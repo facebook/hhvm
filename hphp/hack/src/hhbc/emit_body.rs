@@ -14,6 +14,7 @@ use emit_adata_rust as emit_adata;
 use emit_expression_rust as emit_expression;
 use emit_param_rust as emit_param;
 use emit_pos_rust as emit_pos;
+use emit_pos_rust::emit_pos;
 use emit_type_hint_rust as emit_type_hint;
 use env::{emitter::Emitter, Env};
 use generator_rust as generator;
@@ -21,16 +22,18 @@ use global_state::LazyState;
 use hhas_body_rust::HhasBody;
 use hhas_param_rust::HhasParam;
 use hhas_type::Info as HhasTypeInfo;
-use hhbc_ast_rust::{Instruct, ParamId};
+use hhbc_ast_rust::{Instruct, IstypeOp, ParamId};
 use hhbc_id_rust::{r#const, Id};
 use hhbc_string_utils_rust as string_utils;
-use instruction_sequence_rust::{InstrSeq, Result};
+use instruction_sequence_rust::{Error, InstrSeq, Result};
 use label_rewriter_rust as label_rewriter;
 use local_rust as local;
 use naming_special_names_rust::classes;
 use options::CompilerFlags;
 use oxidized::{aast, ast as tast, ast_defs, doc_comment::DocComment, namespace_env, pos::Pos};
+use reified_generics_helpers as RGH;
 use runtime::TypedValue;
+use std::collections::BTreeMap;
 
 static THIS: &'static str = "$this";
 
@@ -227,6 +230,7 @@ fn make_body_instrs(
         emit_param::emit_param_default_value_setter(emitter, env, is_native, args.pos, params)?;
 
     let header_content = make_header_content(
+        emitter,
         env,
         args,
         params,
@@ -235,7 +239,7 @@ fn make_body_instrs(
         need_local_this,
         is_native,
         is_generator,
-    );
+    )?;
     let first_instr_is_label = match InstrSeq::first(&stmt_instrs) {
         Some(Instruct::ILabel(_)) => true,
         _ => false,
@@ -254,6 +258,7 @@ fn make_body_instrs(
 }
 
 fn make_header_content(
+    emitter: &mut Emitter,
     env: &mut Env,
     args: &Args,
     params: &[HhasParam],
@@ -262,7 +267,7 @@ fn make_header_content(
     need_local_this: bool,
     is_native: bool,
     is_generator: bool,
-) -> InstrSeq {
+) -> Result {
     let method_prolog = if is_native {
         InstrSeq::Empty
     } else {
@@ -270,13 +275,14 @@ fn make_header_content(
             && (need_local_this
                 || (args.scope.is_toplevel() && decl_vars.contains(&THIS.to_string())));
         emit_method_prolog(
+            emitter,
             env,
             args.pos,
             params,
             args.ast_params,
             tparams,
             should_emit_init_this,
-        )
+        )?
     };
 
     let deprecation_warning = emit_deprecation_info(args.scope, args.deprecation_info);
@@ -287,7 +293,11 @@ fn make_header_content(
         InstrSeq::Empty
     };
 
-    InstrSeq::gather(vec![generator_info, deprecation_warning, method_prolog])
+    Ok(InstrSeq::gather(vec![
+        generator_info,
+        deprecation_warning,
+        method_prolog,
+    ]))
 }
 
 fn make_decl_vars(
@@ -471,7 +481,7 @@ fn emit_defs(env: &mut Env, emitter: &mut Emitter, prog: &[tast::Def]) -> Result
                 env.namespace = (&**ns.as_ref()).clone();
                 aux(env, emitter, &defs[1..])
             }
-            [] => Ok(emit_statement::emit_dropthrough_return(emitter, env)),
+            [] => emit_statement::emit_dropthrough_return(emitter, env),
             [Def::Stmt(s)] => emit_statement::emit_final_stmt(emitter, env, &s),
             [Def::Stmt(s1), Def::Stmt(s2)] if s2.1.is_markup() => {
                 emit_statement::emit_final_stmt(emitter, env, &s1)
@@ -498,16 +508,97 @@ fn emit_defs(env: &mut Env, emitter: &mut Emitter, prog: &[tast::Def]) -> Result
     }
 }
 
+pub fn has_type_constraint(
+    env: &Env,
+    ti: Option<&HhasTypeInfo>,
+    ast_param: &tast::FunParam,
+) -> (RGH::ReificationLevel, Option<tast::Hint>) {
+    use RGH::ReificationLevel as L;
+    match (ti, &ast_param.type_hint.1) {
+        (Some(ti), Some(h)) if ti.has_type_constraint() => {
+            // TODO(hrust): how to avoid clone on h
+            let h = RGH::remove_erased_generics(env, h.clone());
+            (RGH::has_reified_type_constraint(env, &h), Some(h))
+        }
+        _ => (L::Unconstrained, None),
+    }
+}
+
 pub fn emit_method_prolog(
-    _env: &mut Env,
-    _pos: &Pos,
-    _params: &[HhasParam],
-    _ast_params: &[tast::FunParam],
-    _tparams: &[tast::Tparam],
-    _should_emit_init_this: bool,
-) -> InstrSeq {
-    //TODO(hrust) implement
-    InstrSeq::Empty
+    emitter: &mut Emitter,
+    env: &mut Env,
+    pos: &Pos,
+    params: &[HhasParam],
+    ast_params: &[tast::FunParam],
+    tparams: &[tast::Tparam],
+    should_emit_init_this: bool,
+) -> Result {
+    let make_param_instr = |(param, ast_param): (&HhasParam, &tast::FunParam)| -> Option<Result> {
+        let param_name = &param.name;
+        let param_name = || ParamId::ParamNamed(param_name.into());
+        if param.is_variadic {
+            None
+        } else {
+            use RGH::ReificationLevel as L;
+            match has_type_constraint(env, param.type_info.as_ref(), ast_param) {
+                (L::Unconstrained, _) => None,
+                (L::Not, _) => Some(Ok(InstrSeq::make_verify_param_type(param_name()))),
+                (L::Maybe, Some(h)) => Some(Ok(InstrSeq::gather(vec![
+                    emit_expression::get_type_structure_for_hint(
+                        emitter.options(),
+                        tparams
+                            .iter()
+                            .map(|fp| fp.name.1.as_str())
+                            .collect::<Vec<_>>()
+                            .as_slice(),
+                        &BTreeMap::new(),
+                        &h,
+                    ),
+                    InstrSeq::make_verify_param_type(param_name()),
+                ]))),
+                (L::Definitely, Some(h)) => {
+                    let check = InstrSeq::make_istypel(
+                        local::Type::Named((&param.name).into()),
+                        IstypeOp::OpNull,
+                    );
+                    let verify_instr = InstrSeq::make_verify_param_type(param_name());
+                    Some(RGH::simplify_verify_type(
+                        emitter,
+                        env,
+                        pos,
+                        check,
+                        &h,
+                        verify_instr,
+                    ))
+                }
+                _ => Some(Err(Error::Unrecoverable("impossible".into()))),
+            }
+        }
+    };
+
+    let ast_params = ast_params
+        .iter()
+        .filter(|p| !(p.is_variadic && p.name == "..."))
+        .collect::<Vec<_>>();
+    if params.len() != ast_params.len() {
+        return Err(Error::Unrecoverable("lenth mismatch".into()));
+    }
+    let param_instrs = params
+        .iter()
+        .zip(ast_params.into_iter())
+        .filter_map(make_param_instr)
+        .collect::<Result<Vec<_>>>()?;
+
+    let mut instrs = vec![emit_pos(emitter, pos)];
+    if should_emit_init_this {
+        instrs.push(InstrSeq::make_initthisloc(local::Type::Named(THIS.into())))
+    }
+    instrs.extend_from_slice(param_instrs.as_slice());
+    if instrs.len() == 1 {
+        Ok(InstrSeq::Empty)
+    } else {
+        Ok(InstrSeq::gather(instrs))
+    }
 }
 
 pub fn emit_deprecation_info(

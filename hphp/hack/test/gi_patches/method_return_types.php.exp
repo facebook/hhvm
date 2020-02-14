@@ -1,0 +1,10 @@
+method_return_types.php:
+{
+  "char_start":56,
+  "char_end":57,
+  "line":4,
+  "col_start":31,
+  "col_end":31,
+  "patch_type":"insert",
+  "replacement":": <<__Soft>> int "
+}

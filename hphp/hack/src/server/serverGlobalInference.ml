@@ -232,12 +232,6 @@ let classify_ty ?(is_return = false) ~syntax_type ~pos ~file errors env ty =
     | None -> ({ log with status = SNonacceptable }, None)
 
 let log_ty log =
-  let status_str =
-    match log.status with
-    | SError -> "error"
-    | SNonacceptable -> "nonacceptable"
-    | SCorrect -> "correct"
-  in
   EventLogger.log_if_initialized @@ fun () ->
   Scuba.new_sample (Some scuba_table)
   |> Scuba.add_normal "file" log.file
@@ -270,12 +264,7 @@ let log_ty log =
        else
          0 )
   |> Scuba.add_normal "ty" log.ty
-  |> EventLogger.log;
-  Hh_logger.log
-    "[%s] %s, type %s"
-    status_str
-    (Pos.string (Pos.to_absolute log.pos))
-    log.ty
+  |> EventLogger.log
 
 let get_first_suggested_type_as_string ~syntax_type errors file type_map node =
   Option.Monad_infix.(
@@ -417,12 +406,9 @@ module Mode_rewrite = struct
         (env, SMap.add (Pos.filename pos) data map))
       positions
 
-  let execute files =
-    expect_1_file_read
-      ~error_message:"was expecting one file: [solvedenv]"
-      files
-    >>= fun input ->
-    let (env, errors, positions) = StateSolvedGraph.load input in
+  let get_patches (graph : StateSolvedGraph.t) : ServerRefactorTypes.patch list
+      =
+    let (env, errors, positions) = graph in
     let (_, positions_map) =
       build_positions_map (Tast_env.typing_env_as_tast_env env, positions)
     in
@@ -439,7 +425,13 @@ module Mode_rewrite = struct
         positions_map
         []
     in
-    Ok patches
+    patches
+
+  let execute files =
+    expect_1_file_read
+      ~error_message:"was expecting one file: [solvedenv]"
+      files
+    >>= fun input -> Ok (get_patches (StateSolvedGraph.load input))
 end
 
 (* Entry Point *)

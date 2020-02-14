@@ -365,7 +365,6 @@ let test_docblock_finder (harness : Test_harness.t) : bool =
   in
   ignore (handle : SharedMem.handle);
   Parser_options_provider.set ParserOptions.default;
-  Global_naming_options.set env.ServerEnv.tcopt;
 
   (* Search for docblocks for various items *)
   let ctx = Provider_utils.ctx_from_server_env env in

@@ -95,10 +95,9 @@ let init
     (genv : ServerEnv.genv)
     (env : ServerEnv.env) : ServerEnv.env * init_result =
   let lazy_lev = get_lazy_level genv in
-  (* Save the global settings for parsing, naming, and declaration.
+  (* Save the global settings for parsing.
      These settings cannot be changed during the lifetime of the server. *)
   Parser_options_provider.set env.popt;
-  Global_naming_options.set env.tcopt;
   Provider_backend.set_shared_memory_backend ();
   let root = ServerArgs.root genv.options in
   let (lazy_lev, init_approach) =

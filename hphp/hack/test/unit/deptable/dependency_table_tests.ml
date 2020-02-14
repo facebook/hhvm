@@ -131,9 +131,6 @@ let test_dep_graph_blob () =
             profile_type_check_twice = false;
           }
       in
-      (* Not setting global naming options before type checking
-        results in an exception, even though we pass opts in *)
-      Global_naming_options.set opts;
 
       (* Check reentrancy *)
       for i = 0 to 2 do

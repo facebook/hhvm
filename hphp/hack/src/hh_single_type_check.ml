@@ -1849,7 +1849,6 @@ let main_hack ({ tcopt; _ } as opts) (sienv : SearchUtils.si_env) : unit =
       Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
       Relative_path.set_path_prefix Relative_path.Tmp (Path.make "tmp");
       Parser_options_provider.set tcopt;
-      Global_naming_options.set tcopt;
       decl_and_run_mode opts tcopt hhi_root sienv;
       TypingLogger.flush_buffers ())
 

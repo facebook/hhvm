@@ -26,7 +26,6 @@ let init root : Provider_context.t =
       GlobalOptions.tco_shallow_class_decl = true;
     }
   in
-  Global_naming_options.set tcopt;
   let ctx =
     Provider_context.empty_for_tool
       ~tcopt

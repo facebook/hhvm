@@ -15,7 +15,6 @@
   (libraries
     ast
     collections
-    global_naming_options
     nast
     parser
     provider_backend
@@ -79,7 +78,6 @@
   (libraries
     decl_class
     decl_service_client
-    global_naming_options
     provider_backend
     shallow_classes_provider
     typing_heap)

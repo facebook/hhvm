@@ -66,16 +66,6 @@
   (preprocess (pps ppx_deriving.std))) ; See T41851208
 
 (library
-  (name global_naming_options)
-  (modules
-    global_naming_options)
-  (libraries
-    heap_shared_mem
-    provider_backend
-    typechecker_options)
-  (preprocess (pps ppx_deriving.std))) ; See T41851208
-
-(library
   (name naming_global)
   (modules
     naming_global)
@@ -104,7 +94,6 @@
     file_provider
     fileutils
     full_fidelity
-    global_naming_options
     naming_attributes
     naming_elaborate_namespaces_endo
     naming_table

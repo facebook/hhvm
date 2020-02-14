@@ -80,7 +80,6 @@
     decl_defs
     decl_heap
     decl_pos_utils
-    global_naming_options
     provider_context
     typechecker_options
     typing_defs

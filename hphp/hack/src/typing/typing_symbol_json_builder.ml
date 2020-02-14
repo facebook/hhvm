@@ -353,6 +353,24 @@ let add_container_xref
   let xrefs = add_xref target_json target_id symbol_pos xrefs in
   (xrefs, prog)
 
+let add_enum_xref
+    ctx
+    (symbol_def : Relative_path.t SymbolDefinition.t)
+    symbol_pos
+    (xrefs, progress) =
+  let (decl_json, target_id, prog) =
+    json_of_decl
+      ctx
+      "enum_"
+      json_of_enum_decl
+      symbol_def.name
+      symbol_def
+      progress
+  in
+  let target_json = json_of_decl_target decl_json in
+  let xrefs = add_xref target_json target_id symbol_pos xrefs in
+  (xrefs, prog)
+
 let build_json ctx symbols =
   let progress =
     List.fold symbols.decls ~init:init_progress ~f:(fun acc symbol ->
@@ -411,6 +429,7 @@ let build_json ctx symbols =
             | Trait ->
               let decl_pred = container_decl_predicate TraitContainer in
               add_container_xref ctx symbol_def occ.pos decl_pred (xrefs, prog)
+            | Enum -> add_enum_xref ctx symbol_def occ.pos (xrefs, prog)
             | _ -> (xrefs, prog)))
   in
   let progress =

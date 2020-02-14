@@ -317,8 +317,8 @@ let check_if_cyclic class_env (pos, cid) =
   if is_cyclic then Errors.cyclic_class_def stack pos;
   is_cyclic
 
-let shallow_decl_enabled () =
-  TypecheckerOptions.shallow_class_decl (Global_naming_options.get ())
+let shallow_decl_enabled (ctx : Provider_context.t) =
+  TypecheckerOptions.shallow_class_decl ctx.Provider_context.tcopt
 
 let pu_enum_fold acc spu =
   let tpu =
@@ -372,7 +372,7 @@ let rec class_decl_if_missing class_env (c : Nast.class_) =
   let ((_, cid) as c_name) = c.c_name in
   if check_if_cyclic class_env c_name then
     None
-  else if shallow_decl_enabled () then
+  else if shallow_decl_enabled class_env.ctx then
     (* This function is often called for its side effect of ensuring that the
          class is declared. When shallow-decl is enabled, we still want this
          side effect (for use cases like on-the-fly declaring entire files in
@@ -608,7 +608,7 @@ and class_decl ctx c =
   in
   let has_own_cstr = has_concrete_cstr && Option.is_some c.sc_constructor in
   let deferred_members =
-    if shallow_decl_enabled () then
+    if shallow_decl_enabled ctx then
       SSet.empty
     else
       Decl_init_check.class_ ~has_own_cstr env c

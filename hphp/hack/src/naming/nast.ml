@@ -83,6 +83,8 @@ type targ = unit Aast.targ
 
 type sid = Aast.sid
 
+type pu_loc = Aast.pu_loc
+
 module ShapeMap = Ast_defs.ShapeMap
 
 (* Expecting that Naming.func_body / Naming.class_meth_bodies has been

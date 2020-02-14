@@ -214,7 +214,7 @@ and _ ty_ =
        *)
   | Tnothing : decl_phase ty_
   | Tlike : decl_ty -> decl_phase ty_
-  | Tpu_access : decl_ty * Nast.sid -> decl_phase ty_
+  | Tpu_access : decl_ty * Nast.sid * Nast.pu_loc -> decl_phase ty_
       (** Access to a Pocket Universe Expression or Atom, denoted by
        * Foo:@Bar or Foo:@Bar:@X.
        * It might be unresolved at first (e.g. if Foo is a generic variable).

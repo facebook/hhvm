@@ -215,7 +215,7 @@ and _ ty_ =
    * It might be unresolved at first (e.g. if Foo is a generic variable).
    * Will be refined to Tpu once typechecking is successful
    *)
-  | Tpu_access : decl_ty * Nast.sid -> decl_phase ty_
+  | Tpu_access : decl_ty * Nast.sid * Nast.pu_loc -> decl_phase ty_
   (*========== Following Types Exist in Both Phases ==========*)
   | Tany : TanySentinel.t -> 'phase ty_
   | Terr

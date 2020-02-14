@@ -22,6 +22,11 @@ and sid = Ast_defs.id
 
 and is_reified = bool
 
+and pu_loc =
+  | Unknown
+  | TypeParameter
+  | Atom
+
 and call_type =
   | Cnormal [@visitors.name "call_type_Cnormal"]
       (** when the call looks like f() *)
@@ -117,7 +122,7 @@ and hint_ =
   | Hthis
   | Hdynamic
   | Hnothing
-  | Hpu_access of hint * sid
+  | Hpu_access of hint * sid * pu_loc
   | Hunion of hint list
   | Hintersection of hint list
 

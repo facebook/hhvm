@@ -134,7 +134,7 @@ pub fn fmt_hint(tparams: &[&str], strip_tparams: bool, hint: &Hint) -> Result<St
         Htuple(hints) => format!("({})", fmt_hints(tparams, hints)?),
         Hlike(t) => format!("~{}", fmt_hint(tparams, false, t)?),
         Hsoft(t) => format!("@{}", fmt_hint(tparams, false, t)?),
-        HpuAccess(h, Id(_, id)) => format!("({}:@{})", fmt_hint(tparams, false, h)?, id),
+        HpuAccess(h, Id(_, id), _) => format!("({}:@{})", fmt_hint(tparams, false, h)?, id),
         Herr | Hany => {
             return Err(Unrecoverable(
                 "This should be an error caught in naming".into(),
@@ -196,9 +196,13 @@ fn hint_to_type_constraint(
     use constraint::{Flags, Type};
     let Hint(pos, hint) = h;
     Ok(match &**hint {
-        Hdynamic | Hlike(_) | Hfun(_) | Hunion(_) | Hintersection(_) | Hmixed | HpuAccess(_, _) => {
-            Type::default()
-        }
+        Hdynamic
+        | Hlike(_)
+        | Hfun(_)
+        | Hunion(_)
+        | Hintersection(_)
+        | Hmixed
+        | HpuAccess(_, _, _) => Type::default(),
         Haccess(_, _) => Type::make_with_raw_str("", Flags::EXTENDED_HINT | Flags::TYPE_CONSTANT),
         Hshape(_) => Type::make_with_raw_str("HH\\darray", Flags::EXTENDED_HINT),
         Htuple(_) => Type::make_with_raw_str("HH\\varray", Flags::EXTENDED_HINT),

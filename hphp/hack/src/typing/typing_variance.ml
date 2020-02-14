@@ -572,7 +572,7 @@ and type_ ctx root variance env ty =
         type_ ctx root variance env sft_ty
       end
       ty_map
-  | Tpu_access (base, _) -> type_ ctx root variance env base
+  | Tpu_access (base, _, _) -> type_ ctx root variance env base
 
 (* `as` constraints on method type parameters must be contravariant
  * and `super` constraints on method type parameters are covariant. To
@@ -792,7 +792,7 @@ and get_typarams ctx root env (ty : decl_ty) =
   | Tpu_access _ ->
     let rec split ty =
       match get_node ty with
-      | Tpu_access (base, sid) ->
+      | Tpu_access (base, sid, _) ->
         let (base, trailing) = split base in
         (base, sid :: trailing)
       | _ -> (ty, [])

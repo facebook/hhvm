@@ -1634,12 +1634,23 @@ let pu_atom_unknown pos name kind loc unk =
        kind
        unk)
 
-let pu_localize pos msg =
+let pu_localize pos pu member =
+  let pu = strip_ns pu in
+  let member = strip_ns member in
+  add
+    (Naming.err_code Naming.PocketUniversesLocalization)
+    pos
+    (sprintf
+       "In %s, member %s is neither an atom nor a generic type parameter"
+       pu
+       member)
+
+let pu_localize_unknown pos msg =
   let msg = strip_ns msg in
   add
     (Naming.err_code Naming.PocketUniversesLocalization)
     pos
-    (sprintf "Illegal Pocket Universe invocation %s\n" msg)
+    (sprintf "Illegal Pocket Universe invocation %s" msg)
 
 let illegal_use_of_dynamically_callable attr_pos meth_pos visibility =
   add_list

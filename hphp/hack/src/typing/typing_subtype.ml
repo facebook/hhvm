@@ -44,7 +44,6 @@ type error_f = unit -> unit
 type pu_reduced_access =
   | PTA_Reduced of env * locl_ty
   | PTA_Rigid of env * locl_ty
-  | PTA_Not_found of env * error_f
   | PTA_Unsupported of env * error_f
 
 let reduce_pu_type_access env reason base enum member name =
@@ -55,9 +54,7 @@ let reduce_pu_type_access env reason base enum member name =
     (match
        class_get_pu_member_type env base (snd enum) atom_name (snd name)
      with
-    | (env, None) ->
-      let err () = Errors.pu_typing (Reason.to_pos reason) "member" atom_name in
-      PTA_Not_found (env, err)
+    | (_env, None) -> assert false (* already caught in localization *)
     | (env, Some lty) ->
       (* Not sure if this expand is necessary, ask Catg *)
       let (env, lty) = Env.expand_type env lty in
@@ -67,19 +64,10 @@ let reduce_pu_type_access env reason base enum member name =
       Typing_subtype_tconst.Pu.get_tyvar_pu_access env reason base enum var name
     in
     PTA_Reduced (env, lty)
-  (* During localize, we could only detect atoms vs "something else"
-     which we treated as a generic. Now we can check if it was indeed a valid
-     generic *)
-  | Tgeneric s ->
-    let tparam_names = Env.get_generic_parameters env in
-    if List.mem ~equal:String.equal tparam_names s then
-      PTA_Rigid (env, member)
-    else
-      (* Not a real generic *)
-      let err () =
-        Errors.pu_typing (Reason.to_pos reason) "generic parameter" s
-      in
-      PTA_Not_found (env, err)
+  (* During naming, we checked whether if was a type parameter or something
+     else. If it wasn't, we checked during localization whether it was an atom
+     or not, so if we end up here, it means it is a bound type parameter *)
+  | Tgeneric _ -> PTA_Rigid (env, member)
   (* TODO(T36532263) deal with unions of Tatoms ! *)
   | _ ->
     let err () =
@@ -622,7 +610,6 @@ and simplify_subtype_i
               simplify_subtype ~subtype_env ~this_ty ety_sub ty_super env
             | PTA_Rigid (env, _ety_sub) -> invalid_env env
             (* Missing atom, unknown generic or internal failure. *)
-            | PTA_Not_found (env, err) -> invalid_env_with env err
             | PTA_Unsupported (env, err) -> invalid_env_with env err)
           | (r_sub, Tany _) ->
             if subtype_env.no_top_bottom then
@@ -1407,13 +1394,9 @@ and simplify_subtype_i
               else
                 default_subtype env
             (* Missing atom, unknown generic or internal failure. *)
-            | PTA_Not_found (env, err)
-            | PTA_Unsupported (env, err) ->
-              invalid_env_with env err)
+            | PTA_Unsupported (env, err) -> invalid_env_with env err)
           (* Missing atom, unknown generic or internal failure. *)
-          | PTA_Not_found (env, err)
-          | PTA_Unsupported (env, err) ->
-            invalid_env_with env err)
+          | PTA_Unsupported (env, err) -> invalid_env_with env err)
         | (_, (Tunion _ | Tvar _ | Tintersection _)) -> default_subtype env
         | _ ->
           (* If the rhs can be resolved, continue. Otherwise abort (because the
@@ -1431,9 +1414,7 @@ and simplify_subtype_i
             simplify_subtype ~subtype_env ~this_ty ty_sub ty_super env
           | PTA_Rigid (_env, _ty_super) -> default_subtype env
           (* Missing atom, unknown generic or internal failure. *)
-          | PTA_Not_found (env, err)
-          | PTA_Unsupported (env, err) ->
-            invalid_env_with env err)))
+          | PTA_Unsupported (env, err) -> invalid_env_with env err)))
     | (r_super, Tfun ft_super) ->
       (match ety_sub with
       | ConstraintType _ -> default_subtype env

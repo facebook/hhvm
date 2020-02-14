@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fc8532b6cd0d9356cd83e2f267bd428a>>
+// @generated SignedSource<<5c78d4bd7fa392340d374ce0727ad04b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -29,6 +29,13 @@ pub struct Lid(pub Pos, pub LocalId);
 pub type Sid = ast_defs::Id;
 
 pub type IsReified = bool;
+
+#[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]
+pub enum PuLoc {
+    Unknown,
+    TypeParameter,
+    Atom,
+}
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]
 pub enum CallType {
@@ -138,7 +145,7 @@ pub enum Hint_ {
     Hthis,
     Hdynamic,
     Hnothing,
-    HpuAccess(Hint, Sid),
+    HpuAccess(Hint, Sid, PuLoc),
     Hunion(Vec<Hint>),
     Hintersection(Vec<Hint>),
 }

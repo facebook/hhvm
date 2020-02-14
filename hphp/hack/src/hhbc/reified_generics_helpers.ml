@@ -176,8 +176,8 @@ let remove_erased_generics env h =
       | Aast.Hfun _
       | Aast.Haccess _ ->
         h
-      | Aast.Hpu_access (h, (pos, id)) ->
-        Aast.Hpu_access (aux h, (pos, modify id))
+      | Aast.Hpu_access (h, (pos, id), pu_loc) ->
+        Aast.Hpu_access (aux h, (pos, modify id), pu_loc)
       | Aast.Herr
       | Aast.Hany
       | Aast.Hmixed

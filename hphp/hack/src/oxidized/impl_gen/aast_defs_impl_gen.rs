@@ -3,12 +3,41 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3f34519bdd8c4b0caef750fe3a9e1e87>>
+// @generated SignedSource<<8457ea731588a0b82c7b93a66b609cd5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
 use crate::aast_defs::*;
+impl PuLoc {
+    pub fn mk_unknown() -> Self {
+        PuLoc::Unknown
+    }
+    pub fn mk_type_parameter() -> Self {
+        PuLoc::TypeParameter
+    }
+    pub fn mk_atom() -> Self {
+        PuLoc::Atom
+    }
+    pub fn is_unknown(&self) -> bool {
+        match self {
+            PuLoc::Unknown => true,
+            _ => false,
+        }
+    }
+    pub fn is_type_parameter(&self) -> bool {
+        match self {
+            PuLoc::TypeParameter => true,
+            _ => false,
+        }
+    }
+    pub fn is_atom(&self) -> bool {
+        match self {
+            PuLoc::Atom => true,
+            _ => false,
+        }
+    }
+}
 impl CallType {
     pub fn mk_cnormal() -> Self {
         CallType::Cnormal
@@ -337,8 +366,8 @@ impl Hint_ {
     pub fn mk_hnothing() -> Self {
         Hint_::Hnothing
     }
-    pub fn mk_hpu_access(p0: Hint, p1: Sid) -> Self {
-        Hint_::HpuAccess(p0, p1)
+    pub fn mk_hpu_access(p0: Hint, p1: Sid, p2: PuLoc) -> Self {
+        Hint_::HpuAccess(p0, p1, p2)
     }
     pub fn mk_hunion(p0: Vec<Hint>) -> Self {
         Hint_::Hunion(p0)
@@ -574,9 +603,9 @@ impl Hint_ {
             _ => None,
         }
     }
-    pub fn as_hpu_access(&self) -> Option<(&Hint, &Sid)> {
+    pub fn as_hpu_access(&self) -> Option<(&Hint, &Sid, &PuLoc)> {
         match self {
-            Hint_::HpuAccess(p0, p1) => Some((p0, p1)),
+            Hint_::HpuAccess(p0, p1, p2) => Some((p0, p1, p2)),
             _ => None,
         }
     }
@@ -676,9 +705,9 @@ impl Hint_ {
             _ => None,
         }
     }
-    pub fn as_hpu_access_mut(&mut self) -> Option<(&mut Hint, &mut Sid)> {
+    pub fn as_hpu_access_mut(&mut self) -> Option<(&mut Hint, &mut Sid, &mut PuLoc)> {
         match self {
-            Hint_::HpuAccess(p0, p1) => Some((p0, p1)),
+            Hint_::HpuAccess(p0, p1, p2) => Some((p0, p1, p2)),
             _ => None,
         }
     }
@@ -778,9 +807,9 @@ impl Hint_ {
             _ => None,
         }
     }
-    pub fn as_hpu_access_into(self) -> Option<(Hint, Sid)> {
+    pub fn as_hpu_access_into(self) -> Option<(Hint, Sid, PuLoc)> {
         match self {
-            Hint_::HpuAccess(p0, p1) => Some((p0, p1)),
+            Hint_::HpuAccess(p0, p1, p2) => Some((p0, p1, p2)),
             _ => None,
         }
     }

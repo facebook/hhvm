@@ -885,7 +885,14 @@ module Make (GetLocals : GetLocals) = struct
     | Aast.Hnothing ->
       Errors.internal_error Pos.none "Unexpected hint not present on legacy AST";
       N.Herr
-    | Aast.Hpu_access (h, id) -> N.Hpu_access (hint ~allow_retonly env h, id)
+    | Aast.Hpu_access (h, id, pu_loc) ->
+      let (genv, _) = env in
+      let pu_loc =
+        match SMap.find_opt (snd id) genv.type_params with
+        | Some _ -> Aast.TypeParameter
+        | _ -> pu_loc
+      in
+      N.Hpu_access (hint ~allow_retonly env h, id, pu_loc)
 
   and hint_id
       ?(context = Errors.TypeNamespace)

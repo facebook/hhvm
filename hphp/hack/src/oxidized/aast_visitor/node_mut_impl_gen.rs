@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6c4738532551026d473f57a7821f8b91>>
+// @generated SignedSource<<30a675a2bdbc0de4f28980fb9d909bbc>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -1161,9 +1161,10 @@ impl<Context, Ex, Fb, En, Hi> NodeMut<Context, Ex, Fb, En, Hi> for Hint_ {
             Hint_::Hthis => {}
             Hint_::Hdynamic => {}
             Hint_::Hnothing => {}
-            Hint_::HpuAccess(a0, a1) => {
+            Hint_::HpuAccess(a0, a1, a2) => {
                 a0.accept(c, v);
                 a1.accept(c, v);
+                a2.accept(c, v);
             }
             Hint_::Hunion(a0) => {
                 a0.accept(c, v);
@@ -1445,6 +1446,26 @@ impl<Context, Ex, Fb, En, Hi> NodeMut<Context, Ex, Fb, En, Hi> for PuEnum<Ex, Fb
         self.case_types.accept(c, v);
         self.case_values.accept(c, v);
         self.members.accept(c, v);
+    }
+}
+impl<Context, Ex, Fb, En, Hi> NodeMut<Context, Ex, Fb, En, Hi> for PuLoc {
+    fn accept(
+        &mut self,
+        c: &mut Context,
+        v: &mut dyn VisitorMut<Context = Context, Ex = Ex, Fb = Fb, En = En, Hi = Hi>,
+    ) {
+        v.visit_pu_loc(c, self);
+    }
+    fn recurse(
+        &mut self,
+        c: &mut Context,
+        v: &mut dyn VisitorMut<Context = Context, Ex = Ex, Fb = Fb, En = En, Hi = Hi>,
+    ) {
+        match self {
+            PuLoc::Unknown => {}
+            PuLoc::TypeParameter => {}
+            PuLoc::Atom => {}
+        }
     }
 }
 impl<Context, Ex, Fb, En, Hi> NodeMut<Context, Ex, Fb, En, Hi> for PuMember<Ex, Fb, En, Hi> {

@@ -3206,9 +3206,9 @@ and fixup_type_arg (env : Emit_env.t) ~isas (hint : Aast.hint) =
           } )
     | Aast.Haccess _ -> (p, hint)
     | Aast.Hsoft h -> (p, Aast.Hsoft (aux h))
-    | Aast.Hpu_access (h, name) ->
+    | Aast.Hpu_access (h, name, pu_loc) ->
       let h = aux h in
-      (p, Aast.Hpu_access (h, name))
+      (p, Aast.Hpu_access (h, name, pu_loc))
     | _ -> failwith "todo"
   and aux_sf sfi = { sfi with Aast.sfi_hint = aux sfi.Aast.sfi_hint } in
   aux hint

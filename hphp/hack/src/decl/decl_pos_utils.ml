@@ -165,7 +165,8 @@ struct
     | Taccess (root_ty, ids) -> Taccess (ty root_ty, List.map ids string_id)
     | Tshape (shape_kind, fdm) ->
       Tshape (shape_kind, ShapeFieldMap.map_and_rekey fdm shape_field_name ty)
-    | Tpu_access (base, sid) -> Tpu_access (ty base, string_id sid)
+    | Tpu_access (base, sid, pu_loc) ->
+      Tpu_access (ty base, string_id sid, pu_loc)
 
   and ty_opt x = Option.map x ty
 

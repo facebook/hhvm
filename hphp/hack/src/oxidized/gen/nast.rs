@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0c427e025be601753b69a89ae1751d62>>
+// @generated SignedSource<<8634ada80905d2218a65d4b8661b36a1>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -18,6 +18,7 @@ use crate::pos;
 
 pub use crate::ast_defs::shape_map;
 
+pub use aast::PuLoc;
 pub use aast::Sid;
 
 #[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]

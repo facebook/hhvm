@@ -302,26 +302,43 @@ let rec localize ~ety_env env (dty : decl_ty) =
        member, one should use "C:@E" instead *)
     let rec build_access dty =
       match get_node dty with
-      | Tpu_access (base, sid) ->
+      | Tpu_access (base, sid, pu_loc) ->
         let (base, trailing) = build_access base in
-        (base, sid :: trailing)
+        (base, (sid, pu_loc) :: trailing)
       | _ -> (dty, [])
     in
     let (base, trailing) = build_access dty in
     let (env, base) = localize ~ety_env env base in
     (match trailing with
-    | [enum] -> (env, mk (r, Tpu (base, enum)))
-    | [typ; (_, member); enum] ->
-      let (env, res) = TUtils.class_get_pu_member env base (snd enum) member in
-      let (env, member) =
+    | [(enum, _)] -> (env, mk (r, Tpu (base, enum)))
+    | [(typ, _); ((_, member), pu_loc); (enum, _)] ->
+      (match pu_loc with
+      (* If we already checked that member was a type parameter, then that's
+           it: it's the most recent binder *)
+      | Aast_defs.TypeParameter ->
+        let (env, member) = localize ~ety_env env (mk (r, Tgeneric member)) in
+        (env, mk (r, Tpu_type_access (base, enum, member, typ)))
+      (* Otherwise, we check if it is an atom of the relevant PU *)
+      | _ ->
+        let (env, res) =
+          TUtils.class_get_pu_member env base (snd enum) member
+        in
         if Option.is_some res then
-          localize ~ety_env env (mk (r, Tprim (Aast_defs.Tatom member)))
-        else
-          localize ~ety_env env (mk (r, Tgeneric member))
-      in
-      (env, mk (r, Tpu_type_access (base, enum, member, typ)))
+          let (env, member) =
+            localize ~ety_env env (mk (r, Tprim (Aast_defs.Tatom member)))
+          in
+          (env, mk (r, Tpu_type_access (base, enum, member, typ)))
+        else (
+          (* If it is neither a type parameter nor an atom, report an error *)
+          Errors.pu_localize
+            (Reason.to_pos r)
+            (Typing_print.full_decl (Typing_env.get_ctx env) dty)
+            member;
+          (env, TUtils.terr env r)
+        ))
+    (* Invalid number of :@, report an error *)
     | _ ->
-      Errors.pu_localize
+      Errors.pu_localize_unknown
         (Reason.to_pos r)
         (Typing_print.full_decl (Typing_env.get_ctx env) dty);
       (env, TUtils.terr env r))

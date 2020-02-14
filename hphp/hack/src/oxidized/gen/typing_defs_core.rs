@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<dabec6000882d56f9cfd8439fda67a98>>
+// @generated SignedSource<<3dba843aa9a37b63c662ce8f386fd749>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -201,7 +201,7 @@ pub enum Ty_ {
     /// Foo:@Bar or Foo:@Bar:@X.
     /// It might be unresolved at first (e.g. if Foo is a generic variable).
     /// Will be refined to Tpu once typechecking is successful
-    TpuAccess(DeclTy, nast::Sid),
+    TpuAccess(DeclTy, nast::Sid, nast::PuLoc),
     Tany(tany_sentinel::TanySentinel),
     Terr,
     Tnonnull,

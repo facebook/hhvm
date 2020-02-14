@@ -91,7 +91,7 @@ pub(crate) fn has_reified_type_constraint(env: &Env, h: &aast::Hint) -> Reificat
         | Hint_::Hshape(_)
         | Hint_::Hfun(_)
         | Hint_::Haccess(_, _)
-        | Hint_::HpuAccess(_, _) => ReificationLevel::Not,
+        | Hint_::HpuAccess(_, _, _) => ReificationLevel::Not,
         // Not found in the original AST
         Hint_::Herr | Hint_::Hany => panic!("Should be a naming error"),
         Hint_::Habstr(_) => panic!("TODO Unimplemented: Not in the original AST"),
@@ -133,7 +133,9 @@ fn remove_awaitable(h: aast::Hint) -> aast::Hint {
         | Hint_::Hthis
         | Hint_::Hnothing
         | Hint_::Hdynamic => panic!("TODO Unimplemented Did not exist on legacy AST"),
-        Hint_::HpuAccess(_, _) => panic!("TODO(T36532263) awaitable in pocket universe type hint"),
+        Hint_::HpuAccess(_, _, _) => {
+            panic!("TODO(T36532263) awaitable in pocket universe type hint")
+        }
     }
 }
 
@@ -211,8 +213,8 @@ pub(crate) fn remove_erased_generics(env: &Env, h: aast::Hint) -> aast::Hint {
                 })
             }
             h_ @ Hint_::Hfun(_) | h_ @ Hint_::Haccess(_, _) => h_,
-            Hint_::HpuAccess(h, Id(pos, id)) => {
-                Hint_::HpuAccess(rec(env, h), Id(pos, modify(env, id)))
+            Hint_::HpuAccess(h, Id(pos, id), pu_loc) => {
+                Hint_::HpuAccess(rec(env, h), Id(pos, modify(env, id)), pu_loc)
             }
             Hint_::Herr
             | Hint_::Hany

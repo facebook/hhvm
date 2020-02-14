@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a74111ac94c8e8ed9ddbc92b4c7316b3>>
+// @generated SignedSource<<bc1de51854744bc67eef6f9539e1826f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -37,6 +37,7 @@ pub use aast_defs::OgNullFlavor;
 pub use aast_defs::ParamMutability;
 pub use aast_defs::Pos;
 pub use aast_defs::Pstring;
+pub use aast_defs::PuLoc;
 pub use aast_defs::ShapeFieldInfo;
 pub use aast_defs::ShapeMap;
 pub use aast_defs::Sid;

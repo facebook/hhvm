@@ -350,7 +350,7 @@ module Full = struct
     | Tunion tyl -> Concat [text "|"; ttuple k tyl]
     | Tintersection tyl -> Concat [text "&"; ttuple k tyl]
     | Tshape (shape_kind, fdm) -> tshape k to_doc shape_kind fdm
-    | Tpu_access (ty', (_, access)) -> pu_concat k ty' access
+    | Tpu_access (ty', (_, access), _) -> pu_concat k ty' access
 
   let rec locl_ty : _ -> _ -> _ -> locl_ty -> Doc.t =
    fun to_doc st env ty ->

@@ -462,7 +462,7 @@ let rec string_of_hint hint =
   | Hthis -> "this"
   | Hdynamic -> "dynamic"
   | Hnothing -> "nothing"
-  | Hpu_access (hint, (_, id)) -> string_of_hint hint ^ ":@" ^ id
+  | Hpu_access (hint, (_, id), _) -> string_of_hint hint ^ ":@" ^ id
   | Hunion hints ->
     Printf.sprintf "(%s)" (concat_map ~sep:" | " ~f:string_of_hint hints)
   | Hintersection hints ->

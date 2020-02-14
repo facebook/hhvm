@@ -329,7 +329,7 @@ fn hint_to_type_constant_list(
             vec![(TypedValue::String("like".into()), TypedValue::Bool(true))],
         ]
         .concat(),
-        HpuAccess(_, _) => {
+        HpuAccess(_, _, _) => {
             return Err(Unrecoverable(
                 "TODO(T36532263) hint_to_type_constant_list".into(),
             ))

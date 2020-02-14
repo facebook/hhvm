@@ -1,3 +1,9 @@
+File "reify2.bad.php", line 10, characters 16-16:
+Invalid reified hint (Typing[4305])
+File "reify2.bad.php", line 10, characters 16-16:
+This is not reified, it cannot be used as a reified type argument
+File "reify2.bad.php", line 3, characters 19-19:
+T is reified
 File "reify2.bad.php", line 12, characters 31-43:
 All type arguments must be specified because a type parameter is reified (Typing[4303])
 File "reify2.bad.php", line 3, characters 7-11:

@@ -7629,18 +7629,17 @@ and class_def_ env c tc =
             substs = Subst.make_locl tc_tparams tyl;
           }
         in
-        ignore
-          (Phase.check_where_constraints
-             ~in_class:true
-             ~use_pos:pc
-             ~definition_pos:p
-             ~ety_env
-             env
-             (Cls.where_constraints cls))
-      | _ -> ())
-    | _ -> ()
+        Phase.check_where_constraints
+          ~in_class:true
+          ~use_pos:pc
+          ~definition_pos:p
+          ~ety_env
+          env
+          (Cls.where_constraints cls)
+      | _ -> env)
+    | _ -> env
   in
-  List.iter impl (check_where_constraints env);
+  let env = List.fold impl ~init:env ~f:check_where_constraints in
   check_parent env c tc;
   check_parents_sealed env c tc;
 
@@ -7858,10 +7857,10 @@ and typeconst_def
     } =
   let (env, cstr) = opt Phase.localize_hint_with_self env c_tconst_constraint in
   let (env, ty) = opt Phase.localize_hint_with_self env hint in
-  let check t c =
+  let check env t c =
     Type.sub_type pos Reason.URtypeconst_cstr env t c Errors.unify_error
   in
-  ignore (Option.map2 ty cstr ~f:check);
+  let env = Option.value ~default:env @@ Option.map2 ty cstr ~f:(check env) in
   let env =
     match hint with
     | Some (pos, Hshape { nsi_field_map; _ }) ->
@@ -7944,13 +7943,16 @@ and pu_enum_def
         ~ety_env:(Phase.env_with_self env)
         (List.map ~f:make_ty_tparam pu_case_types)
     in
-    List.iter pu_case_values ~f:(fun (_sid, hint) ->
-        ignore (Phase.localize_hint_with_self env hint : _ * _));
+    let env =
+      List.fold pu_case_values ~init:env ~f:(fun env (_sid, hint) ->
+          let (env, _ty) = Phase.localize_hint_with_self env hint in
+          env)
+    in
     (env, constraints)
   in
   let env = SubType.add_constraints pos env constraints in
-  let members =
-    let process_member pum =
+  let (env, members) =
+    let process_member env pum =
       let (env, cstrs) =
         let pum_types = List.map ~f:make_aast_tparam pum.pum_types in
         Phase.localize_generic_parameters_with_bounds
@@ -7959,7 +7961,7 @@ and pu_enum_def
           pum_types
       in
       let env = SubType.add_constraints (fst pum.pum_atom) env cstrs in
-      let process_mapping (sid, map_expr) =
+      let process_mapping env (sid, map_expr) =
         let (env, ty, expected) =
           let equal ((_, s1) : sid) ((_, s2) : sid) = String.equal s1 s2 in
           let (env, ty) =
@@ -7977,23 +7979,30 @@ and pu_enum_def
           (env, ty, Some (ExpectedTy.make (fst sid) Reason.URhint ty))
         in
         let (env, expr, ty') = expr ?expected env map_expr in
-        ignore
-          (Typing_ops.sub_type
-             (fst sid)
-             Reason.URhint
-             env
-             ty'
-             ty
-             Errors.pocket_universes_typing);
-        (sid, expr)
+        let env =
+          Typing_ops.sub_type
+            (fst sid)
+            Reason.URhint
+            env
+            ty'
+            ty
+            Errors.pocket_universes_typing
+        in
+        (env, (sid, expr))
       in
-      {
-        Aast.pum_atom = pum.pum_atom;
-        Aast.pum_types = pum.pum_types;
-        Aast.pum_exprs = List.map ~f:process_mapping pum.pum_exprs;
-      }
+      let (env, pum_exprs) =
+        List.fold_map pum.pum_exprs ~init:env ~f:process_mapping
+      in
+      let members =
+        {
+          Aast.pum_atom = pum.pum_atom;
+          Aast.pum_types = pum.pum_types;
+          Aast.pum_exprs;
+        }
+      in
+      (env, members)
     in
-    List.map ~f:process_member pu_members
+    List.fold_map ~init:env ~f:process_member pu_members
   in
   let local_tpenv = Env.get_tpenv env in
   {

@@ -1113,7 +1113,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         // namespace stack. Then, in all of the various make_namespace_XXXX
         // methods, we pop the namespace (since we know we've just exited it).
         Ok(match kind {
-            TokenKind::Name | TokenKind::Variable => {
+            // There are a few types whose string representations we have to
+            // grab anyway, so just go ahead and treat them as generic names.
+            TokenKind::Name | TokenKind::Variable | TokenKind::Vec => {
                 let name = token_text(self);
                 if self.state.namespace_builder.is_building_namespace {
                     Rc::make_mut(&mut self.state.namespace_builder)
@@ -2099,6 +2101,23 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let pos = Pos::merge(&this.get_pos()?, &coloncolon.get_pos()?)?;
         Ok(Node_::Hint(
             HintValue::Access(Box::new((this, vec![Id(id.1, id.0)]))),
+            pos,
+        ))
+    }
+
+    fn make_vector_type_specifier(
+        &mut self,
+        vec: Self::R,
+        _arg1: Self::R,
+        inner: Self::R,
+        _arg3: Self::R,
+        greater_than: Self::R,
+    ) -> Self::R {
+        let (vec_name, vec_pos) = get_name("", &vec?)?;
+        let vec_name = prefix_slash(Cow::Owned(vec_name)).into_owned();
+        let pos = Pos::merge(&vec_pos, &greater_than?.get_pos()?)?;
+        Ok(Node_::Hint(
+            HintValue::Apply(Box::new((Id(vec_pos, vec_name), vec![inner?]))),
             pos,
         ))
     }

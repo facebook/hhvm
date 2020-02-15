@@ -210,7 +210,7 @@ public:
     Lock lock(this);
     bool flushed = false;
     bool ableToDeque = m_healthStatus == nullptr ||
-      m_healthStatus->getHealthLevel() != HealthLevel::BackOff;
+      m_healthStatus->getHealthLevel() < HealthLevel::NoMore;
 
     while (m_jobCount == 0 || !ableToDeque) {
       uint32_t kNumPriority = m_jobQueues.size();
@@ -248,7 +248,7 @@ public:
       }
 
       if (!ableToDeque) {
-        ableToDeque = m_healthStatus->getHealthLevel() != HealthLevel::BackOff;
+        ableToDeque = m_healthStatus->getHealthLevel() < HealthLevel::NoMore;
       }
     }
     // Stop immediately if the worker has been asked to stop, due to thread
@@ -696,8 +696,8 @@ struct JobQueueDispatcher : IHostHealthObserver {
   }
 
   void notifyNewStatus(HealthLevel newStatus) override {
-    bool curStopDequeue = (newStatus == HealthLevel::BackOff);
-    if (!curStopDequeue) {
+    if (m_healthStatus >= HealthLevel::NoMore &&
+        newStatus < HealthLevel::NoMore) {
       // release blocked requests in queue if any
       m_queue.releaseQueuedJobs();
     }

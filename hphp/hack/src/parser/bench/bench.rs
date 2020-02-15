@@ -10,7 +10,7 @@ extern crate test;
 
 fn main() {
     println!(
-        "\
+        r#"\
 Run this bench suite with:
 
   FILE_TO_PARSE=<file> buck run @mode/opt //hphp/hack/src/parser/bench:bench-unittest -- --bench
@@ -21,9 +21,9 @@ which is useful for not slowing down automated builds at diff or contbuild time.
 If you want to run this test suite under a performance analyzer, use the following commands
 (relative to the hack directory):
 
-  ./scripts/facebook/cargo.sh bench -p hack_parser_bench --no-run
-  perf record -g target/release/hack_parser_bench-* --bench <benchmark function to profile>
-  perf report -t perf.data"
+  FILE_TO_PARSE=<file> ./src/parser/bench/facebook/run_bench.sh
+
+This will leave a modified .buckconfig in your project root. Make sure to revert it before sending this out for diff!"#
     );
 }
 

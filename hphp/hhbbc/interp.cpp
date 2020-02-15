@@ -979,7 +979,8 @@ void in(ISS& env, const bc::NewDArray& op) {
 
 void in(ISS& env, const bc::NewRecord& op) {
   discard(env, op.keys.size());
-  push(env, TRecord);
+  auto const rrec = env.index.resolve_record(op.str1);
+  push(env, rrec ? exactRecord(*rrec) : TRecord);
 }
 
 void in(ISS& env, const bc::NewRecordArray& op) {

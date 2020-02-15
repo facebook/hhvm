@@ -1778,6 +1778,7 @@ Type Type::unctxHelper(Type t, bool& changed) {
   case DataTag::Dbl:
   case DataTag::Str:
   case DataTag::ArrLikeVal:
+  case DataTag::Record:
     break;
   }
   return t;
@@ -1915,6 +1916,7 @@ Ret Type::dd2nd(const Type& o, DDHelperFn<Ret,T,Function> f) const {
   case DataTag::Int:            return f();
   case DataTag::Dbl:            return f();
   case DataTag::Cls:            return f();
+  case DataTag::Record:         return f();
   case DataTag::Str:            return f(o.m_data.sval);
   case DataTag::ArrLikeVal:     return f(o.m_data.aval);
   case DataTag::ArrLikePacked:  return f(*o.m_data.packed);
@@ -1940,6 +1942,7 @@ Type::dualDispatchDataFn(const Type& o, Function f) const {
   case DataTag::Int:            return f();
   case DataTag::Dbl:            return f();
   case DataTag::Cls:            return f();
+  case DataTag::Record:         return f();
   case DataTag::Str:            return dd2nd(o, ddbind<R>(f, m_data.sval));
   case DataTag::ArrLikeVal:     return dd2nd(o, ddbind<R>(f, m_data.aval));
   case DataTag::ArrLikePacked:  return dd2nd(o, ddbind<R>(f, *m_data.packed));
@@ -1996,6 +1999,9 @@ bool Type::equivData(const Type& o) const {
     return m_data.dcls.type == o.m_data.dcls.type &&
            m_data.dcls.cls.same(o.m_data.dcls.cls) &&
            contextSensitiveCheck(m_data.dcls, o.m_data.dcls);
+  case DataTag::Record:
+    return m_data.drec.type == o.m_data.drec.type &&
+           m_data.drec.rec.same(o.m_data.drec.rec);
   case DataTag::ArrLikePacked:
     if (m_data.packed->elems.size() != o.m_data.packed->elems.size()) {
       return false;
@@ -2078,6 +2084,15 @@ bool Type::subtypeData(const Type& o) const {
       return m_data.dcls.cls.mustBeSubtypeOf(o.m_data.dcls.cls);
     }
     return false;
+  case DataTag::Record:
+    if (m_data.drec.type == o.m_data.drec.type &&
+        m_data.drec.rec.same(o.m_data.drec.rec)) {
+      return true;
+    }
+    if (o.m_data.drec.type == DRecord::Sub) {
+      return m_data.drec.rec.mustBeSubtypeOf(o.m_data.drec.rec);
+    }
+    return false;
   case DataTag::ArrLikeVal:
     return subtypeArrLike(m_data.aval, o.m_data.aval);
   case DataTag::Str:
@@ -2140,6 +2155,16 @@ bool Type::couldBeData(const Type& o) const {
       return m_data.dcls.cls.couldBe(o.m_data.dcls.cls);
     }
     return false;
+  case DataTag::Record:
+    if (m_data.drec.type == o.m_data.drec.type &&
+        m_data.drec.rec.same(o.m_data.drec.rec)) {
+      return true;
+    }
+    if (m_data.drec.type == DRecord::Sub ||
+        o.m_data.drec.type == DRecord::Sub) {
+      return m_data.drec.rec.couldBe(o.m_data.drec.rec);
+    }
+    return false;
   case DataTag::ArrLikeVal:
     return couldBeArrLike(m_data.aval, o.m_data.aval);
   case DataTag::Str:
@@ -2195,6 +2220,8 @@ size_t Type::hash() const {
           return (uintptr_t)m_data.dobj.cls.name();
         case DataTag::Cls:
           return (uintptr_t)m_data.dcls.cls.name();
+        case DataTag::Record:
+          return (uintptr_t)m_data.drec.rec.name();
         case DataTag::Str:
           return (uintptr_t)m_data.sval;
         case DataTag::Int:
@@ -2275,6 +2302,7 @@ Type project_data(Type t, trep bits) {
   case DataTag::Int:         return restrict_to(BInt);
   case DataTag::Dbl:         return restrict_to(BDbl);
   case DataTag::Obj:         return restrict_to(BObj);
+  case DataTag::Record:      return restrict_to(BRecord);
   case DataTag::Cls:         return restrict_to(BCls);
   case DataTag::Str:         return restrict_to(BStr);
   case DataTag::ArrLikePacked:
@@ -2323,6 +2351,7 @@ Type remove_counted(Type t) {
     case DataTag::Int:
     case DataTag::Dbl:
     case DataTag::Cls:
+    case DataTag::Record:
     case DataTag::Str:
     case DataTag::ArrLikeVal:
       return strip();
@@ -2584,6 +2613,7 @@ bool Type::checkInvariants() const {
   case DataTag::Int:    break;
   case DataTag::Cls:    break;
   case DataTag::Obj:    break;
+  case DataTag::Record: break;
   case DataTag::ArrLikeVal:
     assert(m_data.aval->isStatic());
     assert(!m_data.aval->empty() ||
@@ -2694,6 +2724,7 @@ ProvTag Type::getProvTag() const {
   case DataTag::Dbl:
   case DataTag::Obj:
   case DataTag::Cls:
+  case DataTag::Record:
   case DataTag::ArrLikePackedN:
   case DataTag::ArrLikeMapN:
     return ProvTag::Top;
@@ -2946,6 +2977,22 @@ Type skeyset_n(Type kv) {
   return mapn_impl(BSKeysetN, std::move(kv), std::move(v), ProvTag::Top);
 }
 
+Type exactRecord(res::Record val) {
+  auto r = Type { BRecord };
+  construct(r.m_data.drec, DRecord::Exact, val);
+  r.m_dataTag = DataTag::Record;
+  return r;
+}
+
+Type subRecord(res::Record val) {
+  auto r = Type { BRecord };
+  construct(r.m_data.drec,
+            val.couldBeOverriden() ? DRecord::Sub : DRecord::Exact,
+            val);
+  r.m_dataTag = DataTag::Record;
+  return r;
+}
+
 Type subObj(res::Class val) {
   auto r = Type { BObj };
   construct(r.m_data.dobj,
@@ -2986,6 +3033,7 @@ bool is_specialized_array_like(const Type& t) {
   case DataTag::Int:
   case DataTag::Dbl:
   case DataTag::Cls:
+  case DataTag::Record:
     return false;
   case DataTag::ArrLikeVal:
   case DataTag::ArrLikePacked:
@@ -3304,6 +3352,10 @@ bool is_specialized_obj(const Type& t) {
   return t.m_dataTag == DataTag::Obj;
 }
 
+bool is_specialized_record(const Type& t) {
+  return t.m_dataTag == DataTag::Record;
+}
+
 bool is_specialized_cls(const Type& t) {
   return t.m_dataTag == DataTag::Cls;
 }
@@ -3360,6 +3412,7 @@ folly::Optional<int64_t> arr_size(const Type& t) {
     case DataTag::ArrLikeMapN:
     case DataTag::Obj:
     case DataTag::Cls:
+    case DataTag::Record:
       return folly::none;
   }
   not_reached();
@@ -3417,6 +3470,7 @@ Type::ArrayCat categorize_array(const Type& t) {
     case DataTag::ArrLikeMapN:
     case DataTag::Obj:
     case DataTag::Cls:
+    case DataTag::Record:
       return {};
   }
 
@@ -3456,6 +3510,7 @@ CompactVector<LSString> get_string_keys(const Type& t) {
     case DataTag::ArrLikeMapN:
     case DataTag::Obj:
     case DataTag::Cls:
+    case DataTag::Record:
       always_assert(false);
   }
 
@@ -3651,6 +3706,7 @@ R tvImpl(const Type& t) {
     case DataTag::ArrLikeMapN:
     case DataTag::Obj:
     case DataTag::Cls:
+    case DataTag::Record:
     case DataTag::None:
       break;
     }
@@ -3696,6 +3752,7 @@ Type scalarize(Type t) {
     case DataTag::ArrLikeMapN:
     case DataTag::Obj:
     case DataTag::Cls:
+    case DataTag::Record:
       break;
   }
   not_reached();
@@ -3714,6 +3771,7 @@ folly::Optional<size_t> array_size(const Type& t) {
     case DataTag::ArrLikeMapN:
     case DataTag::Obj:
     case DataTag::Cls:
+    case DataTag::Record:
       return folly::none;
     case DataTag::ArrLikeVal:
       return t.m_data.aval->size();
@@ -3915,6 +3973,12 @@ DObj dobj_of(const Type& t) {
   assert(t.checkInvariants());
   assert(is_specialized_obj(t));
   return t.m_data.dobj;
+}
+
+DRecord drec_of(const Type& t) {
+  assert(t.checkInvariants());
+  assert(is_specialized_record(t));
+  return t.m_data.drec;
 }
 
 DCls dcls_of(Type t) {
@@ -4177,6 +4241,14 @@ Type intersection_of(Type a, Type b) {
             return fix(t);
           }
           return TBottom;
+        case DataTag::Record:
+          if (a.subtypeData<false>(b)) {
+            return fix(a);
+          }
+          if (b.subtypeData<false>(a)) {
+            return fix(b);
+          }
+          return TBottom;
         case DataTag::Str:
         case DataTag::ArrLikeVal:
         case DataTag::Int:
@@ -4196,7 +4268,7 @@ Type intersection_of(Type a, Type b) {
 
   if (t != TBottom) return t;
   auto const bits =
-    isect & ~(BInt|BDbl|BSStr|BArrN|BVecN|BDictN|BKeysetN|BObj);
+    isect & ~(BInt|BDbl|BSStr|BArrN|BVecN|BDictN|BKeysetN|BObj|BRecord);
   return Type { bits };
 }
 
@@ -4282,6 +4354,11 @@ Type union_of(Type a, Type b) {
     auto ret = t ? subObj(*t) : TObj;
     return setctx(nullify(ret), isCtx);
   }
+  if (is_specialized_record(a) && is_specialized_record(b)) {
+    auto t = a.m_data.drec.rec.commonAncestor(drec_of(b).rec);
+    auto ret = t ? subRecord(*t) : TRecord;
+    return nullify(ret);
+  }
   if (a.strictSubtypeOf(TCls) && b.strictSubtypeOf(TCls)) {
     auto t = a.m_data.dcls.cls.commonAncestor(dcls_of(b).cls);
     // Similar to above, this must always return an Obj<=Ancestor.
@@ -4359,6 +4436,7 @@ Type union_of(Type a, Type b) {
   Y(SStr)
   Y(Str)
   Y(Obj)
+  Y(Record)
 
   Y(SPArr)
   Y(PArrE)
@@ -4494,6 +4572,7 @@ void widen_type_impl(Type& t, uint32_t depth) {
     case DataTag::Int:
     case DataTag::Dbl:
     case DataTag::Cls:
+    case DataTag::Record:
     case DataTag::ArrLikeVal:
       return;
 
@@ -4593,6 +4672,7 @@ Type loosen_staticness(Type t) {
     case DataTag::Int:
     case DataTag::Dbl:
     case DataTag::Cls:
+    case DataTag::Record:
     case DataTag::ArrLikeVal:
       break;
 
@@ -4676,6 +4756,7 @@ Type loosen_provenance(Type t) {
     case DataTag::Int:
     case DataTag::Dbl:
     case DataTag::Cls:
+    case DataTag::Record:
       break;
 
     case DataTag::ArrLikeVal:
@@ -4754,6 +4835,7 @@ Type loosen_values(Type a) {
     case DataTag::None:
     case DataTag::Obj:
     case DataTag::Cls:
+    case DataTag::Record:
       return a;
     }
     not_reached();
@@ -4800,6 +4882,7 @@ Type loosen_likeness(Type t) {
   case DataTag::Int:
   case DataTag::Dbl:
   case DataTag::Cls:
+  case DataTag::Record:
     break;
 
   case DataTag::ArrLikeVal:
@@ -5491,6 +5574,7 @@ std::pair<Type, ThrowMode> array_like_elem(const Type& arr,
     case DataTag::Int:
     case DataTag::Dbl:
     case DataTag::Cls:
+    case DataTag::Record:
       not_reached();
 
     case DataTag::None: {
@@ -5638,6 +5722,7 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
   case DataTag::Int:
   case DataTag::Dbl:
   case DataTag::Cls:
+  case DataTag::Record:
     not_reached();
 
   case DataTag::None:
@@ -5778,6 +5863,7 @@ std::pair<Type,Type> array_like_newelem(Type arr,
   case DataTag::Int:
   case DataTag::Dbl:
   case DataTag::Cls:
+  case DataTag::Record:
     not_reached();
 
   case DataTag::None:
@@ -5944,6 +6030,7 @@ IterTypes iter_types(const Type& iterable) {
   case DataTag::Int:
   case DataTag::Dbl:
   case DataTag::Cls:
+  case DataTag::Record:
     always_assert(0);
   case DataTag::ArrLikeVal: {
     auto kv = val_key_values(iterable.m_data.aval);
@@ -6011,6 +6098,7 @@ bool could_contain_objects(const Type& t) {
   case DataTag::Int:
   case DataTag::Dbl:
   case DataTag::Cls:
+  case DataTag::Record:
     return true;
   case DataTag::ArrLikeVal: return false;
   case DataTag::ArrLikePacked:
@@ -6108,6 +6196,7 @@ bool inner_types_might_raise(const Type& t1, const Type& t2) {
       case DataTag::Int:
       case DataTag::Dbl:
       case DataTag::Cls:
+      case DataTag::Record:
         not_reached();
 
       case DataTag::ArrLikeVal:
@@ -6160,6 +6249,7 @@ bool inner_types_might_raise(const Type& t1, const Type& t2) {
         case DataTag::Int:
         case DataTag::Dbl:
         case DataTag::Cls:
+        case DataTag::Record:
           not_reached();
 
         case DataTag::ArrLikeVal:
@@ -6388,6 +6478,7 @@ RepoAuthType make_repo_type_arr(ArrayTypeTable::Builder& arrTable,
     case DataTag::Int:
     case DataTag::Dbl:
     case DataTag::Cls:
+    case DataTag::Record:
     case DataTag::ArrLikeVal:
     case DataTag::ArrLikeMap:
     case DataTag::ArrLikeMapN:

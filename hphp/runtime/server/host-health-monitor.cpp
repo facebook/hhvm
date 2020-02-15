@@ -58,7 +58,7 @@ void IHealthMonitorMetric::registerSelf() {
 }
 
 void HostHealthMonitor::start() {
-  if (!Enabled || !m_stopped) return;
+  if (!Enabled || !m_stopped.load(std::memory_order_acquire)) return;
   if (UpdateFreq < 10) UpdateFreq = 10;
   if (UpdateFreq > 10000) UpdateFreq = 10000;
 
@@ -76,14 +76,16 @@ void HostHealthMonitor::start() {
 }
 
 void HostHealthMonitor::stop() {
+  if (m_stopped.exchange(true, std::memory_order_acq_rel)) {
+    return;                             // already stopped.
+  }
   notifyObservers(HealthLevel::Bold);
-  std::unique_lock<std::mutex> guard(m_stopped_lock);
-  m_stopped = true;
+  std::unique_lock<std::mutex> guard(m_condvar_lock);
   m_condition.notify_one();
 }
 
 void HostHealthMonitor::waitForEnd() {
-  if (!m_stopped) stop();
+  stop();
   if (m_monitor_thread) {
     m_monitor_thread->join();
     m_monitor_thread.reset();
@@ -97,15 +99,14 @@ void HostHealthMonitor::monitor() {
                                   {ServiceData::StatsType::AVG},
                                   {std::chrono::seconds(5),
                                    std::chrono::seconds(60)});
-  std::unique_lock<std::mutex> guard(m_stopped_lock);
-  m_stopped = false;
-
+  m_stopped.store(false, std::memory_order_relaxed);
+  std::unique_lock<std::mutex> guard(m_condvar_lock);
   std::chrono::milliseconds dura(UpdateFreq);
-  while (!m_stopped) {
+  while (!m_stopped.load(std::memory_order_acquire)) {
     HealthLevel newStatus = evaluate();
     notifyObservers(newStatus);
     m_healthLevelCounter->addValue(healthLeveltToInt(newStatus));
-    m_condition.wait_for(guard, dura, [this] { return m_stopped; });
+    m_condition.wait_for(guard, dura, [this] { return shouldWakeup(); });
   }
   Logger::Info("Host health monitor exits.");
 }

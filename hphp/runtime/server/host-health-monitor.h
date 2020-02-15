@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_SERVER_MEMORY_PROTECTOR_H_
 #define incl_HPHP_SERVER_MEMORY_PROTECTOR_H_
 
+#include <atomic>
 #include <condition_variable>
 #include <memory>
 #include <mutex>
@@ -49,6 +50,11 @@ struct HostHealthMonitor {
 
  private:
   HealthLevel evaluate();
+  // true if the monitoring thread should wake up immediately, used with the
+  // condition variable.
+  bool shouldWakeup() const {
+    return m_stopped.load(std::memory_order_acquire);
+  }
   void notifyObservers(HealthLevel newStatus);
   void monitor();
 
@@ -57,9 +63,9 @@ struct HostHealthMonitor {
   std::mutex m_lock;                    // protects metrics/observers
   HealthLevel m_status{HealthLevel::Bold};
   ServiceData::ExportedTimeSeries* m_healthLevelCounter{nullptr};
-  std::mutex m_stopped_lock;
+  std::mutex m_condvar_lock;
   std::condition_variable m_condition;
-  bool m_stopped{true};
+  std::atomic_bool m_stopped{true};
   std::unique_ptr<std::thread> m_monitor_thread;
 };
 

@@ -396,6 +396,12 @@ pub struct PropertyDecl {
 }
 
 #[derive(Clone, Debug)]
+pub struct RequireClause {
+    require_type: Node_,
+    name: Node_,
+}
+
+#[derive(Clone, Debug)]
 pub struct ShapeFieldDecl {
     is_optional: bool,
     name: Node_,
@@ -435,6 +441,7 @@ pub enum Node_ {
     Function(Box<FunctionDecl>),
     Property(Box<PropertyDecl>),
     TraitUse(Box<Node_>),
+    RequireClause(Box<RequireClause>),
     ClassishBody(Vec<Node_>),
     TypeConstraint(Box<(ConstraintKind, Node_)>),
     ShapeFieldSpecifier(Box<ShapeFieldDecl>),
@@ -456,7 +463,9 @@ pub enum Node_ {
     Async,
     Class,
     DotDotDot,
+    Extends,
     Final,
+    Implements,
     Interface,
     Private,
     Protected,
@@ -1074,7 +1083,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             TokenKind::Async => Node_::Async,
             TokenKind::Class => Node_::Class,
             TokenKind::DotDotDot => Node_::DotDotDot,
+            TokenKind::Extends => Node_::Extends,
             TokenKind::Final => Node_::Final,
+            TokenKind::Implements => Node_::Implements,
             TokenKind::Interface => Node_::Interface,
             TokenKind::XHP => Node_::XHP,
             TokenKind::Yield => Node_::Yield,
@@ -1574,6 +1585,15 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                                 cls.uses.push(self.node_to_ty(name, &type_variables)?);
                             }
                         }
+                        Node_::RequireClause(require) => match require.require_type {
+                            Node_::Extends => cls
+                                .req_extends
+                                .push(self.node_to_ty(&require.name, &type_variables)?),
+                            Node_::Implements => cls
+                                .req_implements
+                                .push(self.node_to_ty(&require.name, &type_variables)?),
+                            _ => {}
+                        },
                         Node_::Property(decl) => {
                             let is_late_init = read_member_attributes(decl.attrs.iter());
                             let (is_static, visibility) =
@@ -1837,5 +1857,18 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
     fn make_trait_use(&mut self, _arg0: Self::R, used: Self::R, _arg2: Self::R) -> Self::R {
         Ok(Node_::TraitUse(Box::new(used?)))
+    }
+
+    fn make_require_clause(
+        &mut self,
+        _arg0: Self::R,
+        require_type: Self::R,
+        name: Self::R,
+        _arg3: Self::R,
+    ) -> Self::R {
+        Ok(Node_::RequireClause(Box::new(RequireClause {
+            require_type: require_type?,
+            name: name?,
+        })))
     }
 }

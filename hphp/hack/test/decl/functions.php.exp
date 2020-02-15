@@ -67,6 +67,34 @@ Parsed decls:
             ft_return_disposable = false; ft_mutable = none;
             ft_returns_mutable = false }));
       fe_deprecated = None;  };
+    "in_out" ->
+    { fe_pos = [35:10-16];
+      fe_type =
+      (Rwitness (root|functions.php line 35, characters 10-15),
+       (Tfun
+          { ft_is_coroutine = false; ft_arity = (Fstandard (1, 1));
+            ft_tparams = []; ft_where_constraints = [];
+            ft_params =
+            [{ fp_pos = [35:27-29]; fp_name = (Some "$x");
+               fp_type =
+               { et_enforced = false;
+                 et_type =
+                 (Rhint (root|functions.php line 35, characters 23-25),
+                  (Tprim Tint))
+                 };
+               fp_kind = FPinout; fp_accept_disposable = false;
+               fp_mutable = none }
+              ];
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|functions.php line 35, characters 32-35),
+               (Tprim Tvoid))
+              };
+            ft_fun_kind = sync; ft_reactive = Nonreactive;
+            ft_return_disposable = false; ft_mutable = none;
+            ft_returns_mutable = false }));
+      fe_deprecated = None;  };
     "simple_function" ->
     { fe_pos = [3:10-25];
       fe_type =

@@ -31,3 +31,5 @@ function test_returns_generic(): HH\Traversable<int> {
 }
 
 function takes_optional(?int $x): void {}
+
+function in_out(inout int $x): void {}

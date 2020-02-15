@@ -369,6 +369,7 @@ pub enum HintValue {
 
 #[derive(Clone, Debug)]
 pub struct VariableDecl {
+    kind: ParamMode,
     hint: Node_,
     name: String,
     pos: Pos,
@@ -469,6 +470,7 @@ pub enum Node_ {
     Extends,
     Final,
     Implements,
+    Inout,
     Interface,
     Private,
     Protected,
@@ -854,7 +856,12 @@ impl DirectDeclSmartConstructors<'_> {
                     .into_iter()
                     .fold(Ok(Vec::new()), |acc, variable| match (acc, variable) {
                         (Ok(mut variables), Node_::Variable(innards)) => {
-                            let VariableDecl { hint, name, pos } = *innards;
+                            let VariableDecl {
+                                kind,
+                                hint,
+                                name,
+                                pos,
+                            } = *innards;
                             variables.push(FunParam {
                                 pos,
                                 name: Some(name),
@@ -862,7 +869,7 @@ impl DirectDeclSmartConstructors<'_> {
                                     enforced: false,
                                     type_: self.node_to_ty(&hint, type_variables)?,
                                 },
-                                kind: ParamMode::FPnormal,
+                                kind,
                                 accept_disposable: false,
                                 mutability: None,
                                 rx_annotation: None,
@@ -1102,6 +1109,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             TokenKind::Extends => Node_::Extends,
             TokenKind::Final => Node_::Final,
             TokenKind::Implements => Node_::Implements,
+            TokenKind::Inout => Node_::Inout,
             TokenKind::Interface => Node_::Interface,
             TokenKind::XHP => Node_::XHP,
             TokenKind::Yield => Node_::Yield,
@@ -1307,14 +1315,23 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         &mut self,
         _arg0: Self::R,
         _arg1: Self::R,
-        _arg2: Self::R,
+        inout: Self::R,
         hint: Self::R,
         name: Self::R,
         _arg5: Self::R,
     ) -> Self::R {
         let (name, pos) = get_name("", &name?)?;
         let hint = hint?;
-        Ok(Node_::Variable(Box::new(VariableDecl { hint, name, pos })))
+        let kind = match inout? {
+            Node_::Inout => ParamMode::FPinout,
+            _ => ParamMode::FPnormal,
+        };
+        Ok(Node_::Variable(Box::new(VariableDecl {
+            kind,
+            hint,
+            name,
+            pos,
+        })))
     }
 
     fn make_function_declaration(

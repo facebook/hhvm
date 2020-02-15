@@ -43,7 +43,7 @@ Parsed decls:
                     ft_ret =
                     { et_enforced = false;
                       et_type =
-                      (Rhint (root|generic_classes.php line 6, characters 41-44),
+                      (Rwitness (root|generic_classes.php line 6, characters 19-29),
                        (Tprim Tvoid))
                       };
                     ft_fun_kind = sync; ft_reactive = Nonreactive;

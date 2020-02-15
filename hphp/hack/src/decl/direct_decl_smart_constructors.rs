@@ -21,6 +21,7 @@ use oxidized::{
     pos::Pos,
     shallow_decl_defs,
     shape_map::{ShapeField, ShapeMap},
+    tany_sentinel::TanySentinel,
     typing_defs,
     typing_defs::{
         DeclTy, FunArity, FunElt, FunParam, FunParams, FunTparamsKind, FunType, ParamMode,
@@ -772,7 +773,16 @@ impl DirectDeclSmartConstructors<'_> {
         let (type_params, mut type_variables) = self.into_type_params(header.type_params)?;
         type_variables.extend(outer_type_variables.into_iter().map(Rc::clone));
         let params = self.into_variables_list(header.param_list, &type_variables)?;
-        let type_ = self.node_to_ty(&header.ret_hint, &type_variables)?;
+        let type_ = match header.name {
+            Node_::Construct(pos) => Ty(
+                Reason::Rwitness(pos),
+                Box::new(Ty_::Tprim(aast::Tprim::Tvoid)),
+            ),
+            _ => match self.node_to_ty(&header.ret_hint, &type_variables) {
+                Ok(type_) => type_,
+                Err(_) => Ty(Reason::Rnone, Box::new(Ty_::Tany(TanySentinel {}))),
+            },
+        };
         let async_ = header.modifiers.iter().any(|node| match node {
             Node_::Async => true,
             _ => false,
@@ -1477,7 +1487,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
     fn make_classish_declaration(
         &mut self,
-        _arg0: Self::R,
+        attributes: Self::R,
         modifiers: Self::R,
         xhp_keyword: Self::R,
         class_keyword: Self::R,
@@ -1567,6 +1577,16 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             enum_type: None,
             decl_errors: Errors::empty(),
         };
+
+        for attribute in attributes?.into_iter() {
+            match attribute {
+                Node_::Name(name, pos) => cls.user_attributes.push(aast::UserAttribute {
+                    name: Id(pos, name),
+                    params: vec![],
+                }),
+                _ => (),
+            }
+        }
 
         for modifier in modifiers?.into_iter() {
             match modifier {

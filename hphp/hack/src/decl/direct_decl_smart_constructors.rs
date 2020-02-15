@@ -274,6 +274,10 @@ pub enum HintValue {
     ArrayKey,
     NoReturn,
     Apply(Box<(Id, Vec<Node_>)>),
+    Array(Box<(Node_, Node_)>),
+    Varray(Box<Node_>),
+    Darray(Box<(Node_, Node_)>),
+    Mixed,
     Tuple(Vec<Node_>),
     Shape(Box<ShapeDecl>),
 }
@@ -328,6 +332,9 @@ pub enum Node_ {
     Name(String, Pos),
     XhpName(String, Pos),
     QualifiedName(Vec<Node_>, Pos),
+    Array(Pos),
+    Darray(Pos),
+    Varray(Pos),
     StringLiteral(String, Pos), // For shape keys.
     Hint(HintValue, Pos),
     Backslash(Pos), // This needs a pos since it shows up in names.
@@ -382,6 +389,9 @@ impl Node_ {
             | Node_::LeftParen(pos)
             | Node_::RightParen(pos)
             | Node_::Shape(pos)
+            | Node_::Array(pos)
+            | Node_::Darray(pos)
+            | Node_::Varray(pos)
             | Node_::StringLiteral(_, pos) => Ok(pos.clone()),
             Node_::ListItem(items) => {
                 let fst = &items.0;
@@ -495,18 +505,56 @@ impl DirectDeclSmartConstructors<'_> {
                     HintValue::NoReturn => Ty_::Tprim(aast::Tprim::Tnoreturn),
                     HintValue::Apply(innards) => {
                         let (id, inner_types) = &**innards;
-                        let id = Id(
-                            id.0.clone(),
-                            self.rename_autoimport(Cow::Borrowed(&id.1)).into_owned(),
-                        );
-                        Ty_::Tapply(
-                            id,
-                            inner_types
-                                .iter()
-                                .map(|node| self.node_to_ty(node, type_variables))
-                                .collect::<Result<Vec<_>, String>>()?,
+                        match id.1.trim_start_matches("\\") {
+                            "varray_or_darray" => {
+                                match inner_types.as_slice() {
+                                    [tk, tv] => {
+                                        Ty_::TvarrayOrDarray(Some(self.node_to_ty(tk, type_variables)?), self.node_to_ty(tv, type_variables)?)
+                                    }
+                                    [tv] => {
+                                        Ty_::TvarrayOrDarray(None, self.node_to_ty(tv, type_variables)?)
+                                    }
+                                    _ => return Err(format!("Expected one or two type arguments on varray_or_darray, got {}", inner_types.len())),
+                                }
+                            }
+                            _ => {
+                                let id = Id(
+                                    id.0.clone(),
+                                    self.rename_autoimport(Cow::Borrowed(&id.1)).into_owned(),
+                                );
+                                Ty_::Tapply(
+                                    id,
+                                    inner_types
+                                        .iter()
+                                        .map(|node| self.node_to_ty(node, type_variables))
+                                        .collect::<Result<Vec<_>, String>>()?,
+                                )
+                            }
+                        }
+                    }
+                    HintValue::Array(innards) => {
+                        let (key_type, value_type) = &**innards;
+                        let key_type = match key_type {
+                            Node_::Ignored => None,
+                            n => Some(self.node_to_ty(n, type_variables)?),
+                        };
+                        let value_type = match value_type {
+                            Node_::Ignored => None,
+                            n => Some(self.node_to_ty(n, type_variables)?),
+                        };
+                        Ty_::Tarray(key_type, value_type)
+                    }
+                    HintValue::Darray(innards) => {
+                        let (key_type, value_type) = &**innards;
+                        Ty_::Tdarray(
+                            self.node_to_ty(key_type, type_variables)?,
+                            self.node_to_ty(value_type, type_variables)?,
                         )
                     }
+                    HintValue::Varray(inner) => {
+                        Ty_::Tvarray(self.node_to_ty(inner, type_variables)?)
+                    }
+                    HintValue::Mixed => Ty_::Tmixed,
                     HintValue::Tuple(items) => Ty_::Ttuple(
                         items
                             .iter()
@@ -538,14 +586,25 @@ impl DirectDeclSmartConstructors<'_> {
                 };
                 Ok(Ty(reason, Box::new(ty_)))
             }
+            Node_::Array(pos) => Ok(Ty(
+                Reason::Rhint(pos.clone()),
+                Box::new(Ty_::Tarray(None, None)),
+            )),
             node => {
                 let (name, pos) = get_name("", node)?;
                 let reason = Reason::Rhint(pos.clone());
                 let ty_ = if type_variables.contains(&name) {
                     Ty_::Tgeneric(name)
                 } else {
-                    let name = self.rename_autoimport(self.prefix_ns(Cow::Owned(name)));
-                    Ty_::Tapply(Id(pos, name.into_owned()), Vec::new())
+                    match name.as_ref() {
+                        "nothing" => Ty_::Tnothing,
+                        "nonnull" => Ty_::Tnonnull,
+                        "dynamic" => Ty_::Tdynamic,
+                        _ => {
+                            let name = self.rename_autoimport(self.prefix_ns(Cow::Owned(name)));
+                            Ty_::Tapply(Id(pos, name.into_owned()), Vec::new())
+                        }
+                    }
                 };
                 Ok(Ty(reason, Box::new(ty_)))
             }
@@ -910,7 +969,12 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 ))),
                 token_pos(self),
             ),
+            TokenKind::Mixed => Node_::Hint(HintValue::Mixed, token_pos(self)),
             TokenKind::Void => Node_::Hint(HintValue::Void, token_pos(self)),
+            TokenKind::Arraykey => Node_::Hint(HintValue::ArrayKey, token_pos(self)),
+            TokenKind::Array => Node_::Array(token_pos(self)),
+            TokenKind::Darray => Node_::Darray(token_pos(self)),
+            TokenKind::Varray => Node_::Varray(token_pos(self)),
             TokenKind::Backslash => {
                 if self.state.namespace_builder.is_building_namespace {
                     self.state
@@ -1064,7 +1128,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _attributes: Self::R,
         _keyword: Self::R,
         name: Self::R,
-        _generic_params: Self::R,
+        generic_params: Self::R,
         _constraint: Self::R,
         _equal: Self::R,
         aliased_type: Self::R,
@@ -1076,14 +1140,15 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             _ => {
                 let (name, pos) =
                     get_name(self.state.namespace_builder.current_namespace(), &name)?;
-                match self.node_to_ty(&aliased_type, &HashSet::new()) {
+                let (tparams, type_variables) = self.into_type_params(generic_params?)?;
+                match self.node_to_ty(&aliased_type, &type_variables) {
                     Ok(ty) => {
                         Rc::make_mut(&mut self.state.decls).typedefs.insert(
                             name,
                             Rc::new(TypedefType {
                                 pos,
                                 vis: aast::TypedefVisibility::Transparent,
-                                tparams: Vec::new(),
+                                tparams,
                                 constraint: None,
                                 type_: ty,
                                 decl_errors: None,
@@ -1538,5 +1603,63 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             name: name?,
             type_: type_?,
         })))
+    }
+
+    fn make_varray_type_specifier(
+        &mut self,
+        varray: Self::R,
+        _less_than: Self::R,
+        tparam: Self::R,
+        _arg3: Self::R,
+        greater_than: Self::R,
+    ) -> Self::R {
+        Ok(Node_::Hint(
+            HintValue::Varray(Box::new(tparam?)),
+            Pos::merge(&varray?.get_pos()?, &greater_than?.get_pos()?)?,
+        ))
+    }
+
+    fn make_vector_array_type_specifier(
+        &mut self,
+        array: Self::R,
+        _less_than: Self::R,
+        tparam: Self::R,
+        greater_than: Self::R,
+    ) -> Self::R {
+        Ok(Node_::Hint(
+            HintValue::Array(Box::new((tparam?, Node_::Ignored))),
+            Pos::merge(&array?.get_pos()?, &greater_than?.get_pos()?)?,
+        ))
+    }
+
+    fn make_darray_type_specifier(
+        &mut self,
+        darray: Self::R,
+        _less_than: Self::R,
+        key_type: Self::R,
+        _comma: Self::R,
+        value_type: Self::R,
+        _arg5: Self::R,
+        greater_than: Self::R,
+    ) -> Self::R {
+        Ok(Node_::Hint(
+            HintValue::Darray(Box::new((key_type?, value_type?))),
+            Pos::merge(&darray?.get_pos()?, &greater_than?.get_pos()?)?,
+        ))
+    }
+
+    fn make_map_array_type_specifier(
+        &mut self,
+        array: Self::R,
+        _less_than: Self::R,
+        key_type: Self::R,
+        _comma: Self::R,
+        value_type: Self::R,
+        greater_than: Self::R,
+    ) -> Self::R {
+        Ok(Node_::Hint(
+            HintValue::Array(Box::new((key_type?, value_type?))),
+            Pos::merge(&array?.get_pos()?, &greater_than?.get_pos()?)?,
+        ))
     }
 }

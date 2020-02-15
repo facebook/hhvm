@@ -33,3 +33,12 @@ function test_returns_generic(): HH\Traversable<int> {
 function takes_optional(?int $x): void {}
 
 function in_out(inout int $x): void {}
+
+function takes_returns_function_type<Tu>(
+  Tu $x,
+  (function(Tu): void) $unused,
+): (function((function(Tu): void)): void) {
+  return $x ==> {
+    return;
+  };
+}

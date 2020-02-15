@@ -365,6 +365,7 @@ pub enum HintValue {
     Tuple(Vec<Node_>),
     Shape(Box<ShapeDecl>),
     Nullable(Box<Node_>),
+    Closure(Box<ClosureTypeHint>),
 }
 
 #[derive(Clone, Debug)]
@@ -415,6 +416,12 @@ pub struct ShapeFieldDecl {
 pub struct ShapeDecl {
     kind: ShapeKind,
     fields: Vec<ShapeFieldDecl>,
+}
+
+#[derive(Clone, Debug)]
+pub struct ClosureTypeHint {
+    args: Node_,
+    ret_hint: Node_,
 }
 
 #[derive(Clone, Debug)]
@@ -699,6 +706,47 @@ impl DirectDeclSmartConstructors<'_> {
                     }
                     HintValue::Nullable(hint) => {
                         Ty_::Toption(self.node_to_ty(hint, type_variables)?)
+                    }
+                    HintValue::Closure(hint) => {
+                        let params = hint
+                            .args
+                            .iter()
+                            .map(|node| {
+                                Ok(FunParam {
+                                    pos: node.get_pos()?,
+                                    name: None,
+                                    type_: PossiblyEnforcedTy {
+                                        enforced: false,
+                                        type_: self.node_to_ty(node, type_variables)?,
+                                    },
+                                    kind: ParamMode::FPnormal,
+                                    accept_disposable: false,
+                                    mutability: None,
+                                    rx_annotation: None,
+                                })
+                            })
+                            .collect::<Result<Vec<_>, String>>()?;
+                        let ret = self.node_to_ty(&hint.ret_hint, type_variables)?;
+                        Ty_::Tfun(FunType {
+                            is_coroutine: false,
+                            arity: FunArity::Fstandard(
+                                params.len() as isize,
+                                params.len() as isize,
+                            ),
+                            tparams: (Vec::new(), FunTparamsKind::FTKtparams),
+                            where_constraints: Vec::new(),
+                            params,
+                            ret: PossiblyEnforcedTy {
+                                enforced: false,
+                                type_: ret,
+                            },
+                            fun_kind: FunKind::FSync,
+                            reactive: Reactivity::Nonreactive,
+                            return_disposable: false,
+                            mutability: None,
+                            returns_mutable: false,
+                            returns_void_to_rx: false,
+                        })
                     }
                 };
                 Ok(Ty(reason, Box::new(ty_)))
@@ -1749,15 +1797,15 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             Node_::FunctionHeader(header) => Ok(Node_::Function(Box::new(FunctionDecl {
                 header: *header,
                 body: match body? {
-                    // If we don't have a function body, use the closing token.
-                    // A closing token of '}' indicates a regular function,
+                    // If we don't have a FunctionDecl body, use the closing token.
+                    // A closing token of '}' indicates a regular FunctionDecl,
                     // while a closing token of ';' indicates an abstract
-                    // function.
+                    // FunctionDecl.
                     Node_::Ignored => closer?,
                     body => body,
                 },
             }))),
-            n => Err(format!("Expected a function header, but was {:?}", n)),
+            n => Err(format!("Expected a FunctionDecl header, but was {:?}", n)),
         }
     }
 
@@ -1921,5 +1969,30 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             HintValue::Nullable(Box::new(hint)),
             Pos::merge(&question_mark?.get_pos()?, &hint_pos)?,
         ))
+    }
+
+    fn make_closure_type_specifier(
+        &mut self,
+        left_paren: Self::R,
+        _arg1: Self::R,
+        _arg2: Self::R,
+        _arg3: Self::R,
+        args: Self::R,
+        _arg5: Self::R,
+        _arg6: Self::R,
+        ret_hint: Self::R,
+        right_paren: Self::R,
+    ) -> Self::R {
+        Ok(Node_::Hint(
+            HintValue::Closure(Box::new(ClosureTypeHint {
+                args: args?,
+                ret_hint: ret_hint?,
+            })),
+            Pos::merge(&left_paren?.get_pos()?, &right_paren?.get_pos()?)?,
+        ))
+    }
+
+    fn make_closure_parameter_type_specifier(&mut self, _arg0: Self::R, name: Self::R) -> Self::R {
+        name
     }
 }

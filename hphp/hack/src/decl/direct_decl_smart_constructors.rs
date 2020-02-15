@@ -434,6 +434,7 @@ pub enum Node_ {
     FunctionHeader(Box<FunctionHeader>),
     Function(Box<FunctionDecl>),
     Property(Box<PropertyDecl>),
+    TraitUse(Box<Node_>),
     ClassishBody(Vec<Node_>),
     TypeConstraint(Box<(ConstraintKind, Node_)>),
     ShapeFieldSpecifier(Box<ShapeFieldDecl>),
@@ -1568,6 +1569,11 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             Node_::ClassishBody(body) => {
                 for element in body {
                     match element {
+                        Node_::TraitUse(names) => {
+                            for name in names.iter() {
+                                cls.uses.push(self.node_to_ty(name, &type_variables)?);
+                            }
+                        }
                         Node_::Property(decl) => {
                             let is_late_init = read_member_attributes(decl.attrs.iter());
                             let (is_static, visibility) =
@@ -1827,5 +1833,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _arg3: Self::R,
     ) -> Self::R {
         name
+    }
+
+    fn make_trait_use(&mut self, _arg0: Self::R, used: Self::R, _arg2: Self::R) -> Self::R {
+        Ok(Node_::TraitUse(Box::new(used?)))
     }
 }

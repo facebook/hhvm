@@ -364,6 +364,7 @@ pub enum HintValue {
     Mixed,
     Tuple(Vec<Node_>),
     Shape(Box<ShapeDecl>),
+    Nullable(Box<Node_>),
 }
 
 #[derive(Clone, Debug)]
@@ -453,6 +454,7 @@ pub enum Node_ {
     LeftParen(Pos),   // This needs a pos since it shows up in tuples and shapes.
     RightParen(Pos),  // This needs a pos since it shows up in tuples and shapes.
     Shape(Pos),       // This needs a pos since it shows up in shapes.
+    Question(Pos),    // This needs a pos since it shows up in nullable types.
 
     // Box the insides of the vector so we don't need to reallocate them when
     // we pull them out of the TypeConstraint variant.
@@ -471,7 +473,6 @@ pub enum Node_ {
     Private,
     Protected,
     Public,
-    Question,
     Semicolon,
     Static,
     Super,
@@ -491,6 +492,7 @@ impl Node_ {
             | Node_::GreaterThan(pos)
             | Node_::LeftParen(pos)
             | Node_::RightParen(pos)
+            | Node_::Question(pos)
             | Node_::Shape(pos)
             | Node_::Array(pos)
             | Node_::Darray(pos)
@@ -692,6 +694,9 @@ impl DirectDeclSmartConstructors<'_> {
                             })
                             .collect::<Result<ShapeMap<_>, String>>()?,
                     )
+                    }
+                    HintValue::Nullable(hint) => {
+                        Ty_::Toption(self.node_to_ty(hint, type_variables)?)
                     }
                 };
                 Ok(Ty(reason, Box::new(ty_)))
@@ -1087,6 +1092,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             TokenKind::LeftParen => Node_::LeftParen(token_pos(self)),
             TokenKind::RightParen => Node_::RightParen(token_pos(self)),
             TokenKind::Shape => Node_::Shape(token_pos(self)),
+            TokenKind::Question => Node_::Question(token_pos(self)),
             TokenKind::Abstract => Node_::Abstract,
             TokenKind::As => Node_::As,
             TokenKind::Super => Node_::Super,
@@ -1124,7 +1130,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             TokenKind::Private => Node_::Private,
             TokenKind::Protected => Node_::Protected,
             TokenKind::Public => Node_::Public,
-            TokenKind::Question => Node_::Question,
             TokenKind::Static => Node_::Static,
             TokenKind::Trait => Node_::Trait,
             _ => Node_::Ignored,
@@ -1788,7 +1793,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         type_: Self::R,
     ) -> Self::R {
         let is_optional = match is_optional? {
-            Node_::Question => true,
+            Node_::Question(_) => true,
             _ => false,
         };
         Ok(Node_::ShapeFieldSpecifier(Box::new(ShapeFieldDecl {
@@ -1890,5 +1895,14 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             require_type: require_type?,
             name: name?,
         })))
+    }
+
+    fn make_nullable_type_specifier(&mut self, question_mark: Self::R, hint: Self::R) -> Self::R {
+        let hint = hint?;
+        let hint_pos = hint.get_pos()?;
+        Ok(Node_::Hint(
+            HintValue::Nullable(Box::new(hint)),
+            Pos::merge(&question_mark?.get_pos()?, &hint_pos)?,
+        ))
     }
 }

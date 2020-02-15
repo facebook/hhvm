@@ -118,6 +118,36 @@ Parsed decls:
             ft_return_disposable = false; ft_mutable = none;
             ft_returns_mutable = false }));
       fe_deprecated = None;  };
+    "takes_optional" ->
+    { fe_pos = [33:10-24];
+      fe_type =
+      (Rwitness (root|functions.php line 33, characters 10-23),
+       (Tfun
+          { ft_is_coroutine = false; ft_arity = (Fstandard (1, 1));
+            ft_tparams = []; ft_where_constraints = [];
+            ft_params =
+            [{ fp_pos = [33:30-32]; fp_name = (Some "$x");
+               fp_type =
+               { et_enforced = false;
+                 et_type =
+                 (Rhint (root|functions.php line 33, characters 25-28),
+                  (Toption
+                     (Rhint (root|functions.php line 33, characters 26-28),
+                      (Tprim Tint))))
+                 };
+               fp_kind = FPnormal; fp_accept_disposable = false;
+               fp_mutable = none }
+              ];
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|functions.php line 33, characters 35-38),
+               (Tprim Tvoid))
+              };
+            ft_fun_kind = sync; ft_reactive = Nonreactive;
+            ft_return_disposable = false; ft_mutable = none;
+            ft_returns_mutable = false }));
+      fe_deprecated = None;  };
     "test_constrained_generic_fun" ->
     { fe_pos = [22:10-38];
       fe_type =

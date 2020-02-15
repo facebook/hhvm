@@ -29,3 +29,5 @@ function test_constrained_generic_fun<T1 super int, T2 as string>(
 function test_returns_generic(): HH\Traversable<int> {
   return vec[5];
 }
+
+function takes_optional(?int $x): void {}

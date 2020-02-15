@@ -1,0 +1,149 @@
+Parsed decls:
+
+{ Direct_decl_parser.classes = {};
+  funs =
+  { "braced_id" ->
+    { fe_pos = [56:10-19];
+      fe_type =
+      (Rwitness (root|namespace_elaboration.php line 56, characters 10-18),
+       (Tfun
+          { ft_is_coroutine = false; ft_arity = (Fstandard (1, 1));
+            ft_tparams = []; ft_where_constraints = [];
+            ft_params =
+            [{ fp_pos = [56:33-35]; fp_name = (Some "$x");
+               fp_type =
+               { et_enforced = false;
+                 et_type =
+                 (Rhint (root|namespace_elaboration.php line 56, characters 20-31),
+                  (Tapply (([56:20-32], "\\MyNamespace\\MyBracedType"), [])))
+                 };
+               fp_kind = FPnormal; fp_accept_disposable = false;
+               fp_mutable = none }
+              ];
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|namespace_elaboration.php line 56, characters 38-50),
+               (Tapply (([56:38-51], "\\MyNamespace\\MyBracedType"), [])))
+              };
+            ft_fun_kind = sync; ft_reactive = Nonreactive;
+            ft_return_disposable = false; ft_mutable = none;
+            ft_returns_mutable = false }));
+      fe_deprecated = None;  };
+    "concatenated_id" ->
+    { fe_pos = [60:10-25];
+      fe_type =
+      (Rwitness (root|namespace_elaboration.php line 60, characters 10-24),
+       (Tfun
+          { ft_is_coroutine = false; ft_arity = (Fstandard (1, 1));
+            ft_tparams = []; ft_where_constraints = [];
+            ft_params =
+            [{ fp_pos = [60:45-47]; fp_name = (Some "$x");
+               fp_type =
+               { et_enforced = false;
+                 et_type =
+                 (Rhint (root|namespace_elaboration.php line 60, characters 26-43),
+                  (Tapply (([60:26-44], "\\MyConcatenatedType"), [])))
+                 };
+               fp_kind = FPnormal; fp_accept_disposable = false;
+               fp_mutable = none }
+              ];
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|namespace_elaboration.php line 60, characters 50-68),
+               (Tapply (([60:50-69], "\\MyNamespaceMyConcatenatedType"), [])))
+              };
+            ft_fun_kind = sync; ft_reactive = Nonreactive;
+            ft_return_disposable = false; ft_mutable = none;
+            ft_returns_mutable = false }));
+      fe_deprecated = None;  };
+    "id" ->
+    { fe_pos = [48:10-12];
+      fe_type =
+      (Rwitness (root|namespace_elaboration.php line 48, characters 10-11),
+       (Tfun
+          { ft_is_coroutine = false; ft_arity = (Fstandard (1, 1));
+            ft_tparams = []; ft_where_constraints = [];
+            ft_params =
+            [{ fp_pos = [48:20-22]; fp_name = (Some "$x");
+               fp_type =
+               { et_enforced = false;
+                 et_type =
+                 (Rhint (root|namespace_elaboration.php line 48, characters 13-18),
+                  (Tapply (([48:13-19], "\\MyNamespace\\MyType"), [])))
+                 };
+               fp_kind = FPnormal; fp_accept_disposable = false;
+               fp_mutable = none }
+              ];
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|namespace_elaboration.php line 48, characters 25-31),
+               (Tapply (([48:25-32], "\\MyNamespace\\MyType"), [])))
+              };
+            ft_fun_kind = sync; ft_reactive = Nonreactive;
+            ft_return_disposable = false; ft_mutable = none;
+            ft_returns_mutable = false }));
+      fe_deprecated = None;  };
+    "my_scoped_id" ->
+    { fe_pos = [43:12-24];
+      fe_type =
+      (Rwitness (root|namespace_elaboration.php line 43, characters 12-23),
+       (Tfun
+          { ft_is_coroutine = false; ft_arity = (Fstandard (1, 1));
+            ft_tparams = []; ft_where_constraints = [];
+            ft_params =
+            [{ fp_pos = [43:32-34]; fp_name = (Some "$x");
+               fp_type =
+               { et_enforced = false;
+                 et_type =
+                 (Rhint (root|namespace_elaboration.php line 43, characters 25-30),
+                  (Tapply (
+                     ([43:25-31], "\\MyNamespace\\MyScopedNamespace\\MyType"),
+                     [])))
+                 };
+               fp_kind = FPnormal; fp_accept_disposable = false;
+               fp_mutable = none }
+              ];
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|namespace_elaboration.php line 43, characters 37-43),
+               (Tapply (([43:37-44], "\\MyNamespace\\MyType"), [])))
+              };
+            ft_fun_kind = sync; ft_reactive = Nonreactive;
+            ft_return_disposable = false; ft_mutable = none;
+            ft_returns_mutable = false }));
+      fe_deprecated = None;  };
+    "other_id" ->
+    { fe_pos = [52:10-18];
+      fe_type =
+      (Rwitness (root|namespace_elaboration.php line 52, characters 10-17),
+       (Tfun
+          { ft_is_coroutine = false; ft_arity = (Fstandard (1, 1));
+            ft_tparams = []; ft_where_constraints = [];
+            ft_params =
+            [{ fp_pos = [52:31-33]; fp_name = (Some "$x");
+               fp_type =
+               { et_enforced = false;
+                 et_type =
+                 (Rhint (root|namespace_elaboration.php line 52, characters 19-29),
+                  (Tapply (([52:19-30], "\\MyNamespace\\MyOtherType"), [])))
+                 };
+               fp_kind = FPnormal; fp_accept_disposable = false;
+               fp_mutable = none }
+              ];
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|namespace_elaboration.php line 52, characters 36-47),
+               (Tapply (([52:36-48], "\\MyNamespace\\MyOtherType"), [])))
+              };
+            ft_fun_kind = sync; ft_reactive = Nonreactive;
+            ft_return_disposable = false; ft_mutable = none;
+            ft_returns_mutable = false }));
+      fe_deprecated = None;  } };
+  typedefs = {}; consts = {} }
+
+They matched!

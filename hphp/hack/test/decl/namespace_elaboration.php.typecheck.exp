@@ -1,0 +1,26 @@
+File "namespace_elaboration.php", line 31, characters 5-15:
+Expected group use prefix to end with '\' (Parsing[1002])
+File "namespace_elaboration.php", line 40, characters 1-122:
+No code may exist outside of namespace {} (Parsing[1002])
+File "namespace_elaboration.php", line 40, characters 1-122:
+Namespace declaration statement has to be the very first statement in the script (Parsing[1002])
+File "namespace_elaboration.php", line 43, characters 37-43:
+Unbound name: MyNamespace\MyType (Naming[2049])
+File "namespace_elaboration.php", line 43, characters 25-30:
+Unbound name: MyNamespace\MyScopedNamespace\MyType (Naming[2049])
+File "namespace_elaboration.php", line 48, characters 25-31:
+Unbound name: MyNamespace\MyType (Naming[2049])
+File "namespace_elaboration.php", line 48, characters 13-18:
+Unbound name: MyNamespace\MyType (Naming[2049])
+File "namespace_elaboration.php", line 52, characters 36-47:
+Unbound name: MyNamespace\MyOtherType (Naming[2049])
+File "namespace_elaboration.php", line 52, characters 19-29:
+Unbound name: MyNamespace\MyOtherType (Naming[2049])
+File "namespace_elaboration.php", line 56, characters 38-50:
+Unbound name: MyNamespace\MyBracedType (Naming[2049])
+File "namespace_elaboration.php", line 56, characters 20-31:
+Unbound name: MyNamespace\MyBracedType (Naming[2049])
+File "namespace_elaboration.php", line 60, characters 50-68:
+Unbound name: MyNamespaceMyConcatenatedType (Naming[2049])
+File "namespace_elaboration.php", line 60, characters 26-43:
+Unbound name: MyConcatenatedType (Naming[2049])

@@ -34,7 +34,7 @@ use parser_core_types::{
     token_kind::TokenKind, trivia_kind::TriviaKind,
 };
 use std::borrow::Cow;
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::rc::Rc;
 
 pub use crate::direct_decl_smart_constructors_generated::*;
@@ -151,6 +151,14 @@ pub fn get_name(namespace: &str, name: &Node_) -> Result<(String, Pos), String> 
     }
 }
 
+fn prefix_slash<'a>(name: Cow<'a, String>) -> Cow<'a, String> {
+    if name.starts_with("\\") {
+        name
+    } else {
+        Cow::Owned("\\".to_owned() + &name)
+    }
+}
+
 fn strip_dollar_prefix<'a>(name: Cow<'a, String>) -> Cow<'a, String> {
     if name.starts_with("$") {
         Cow::Owned(name.trim_start_matches("$").to_owned())
@@ -160,9 +168,15 @@ fn strip_dollar_prefix<'a>(name: Cow<'a, String>) -> Cow<'a, String> {
 }
 
 #[derive(Clone, Debug)]
+struct NamespaceInfo {
+    name: String,
+    imports: BTreeMap<String, String>,
+}
+
+#[derive(Clone, Debug)]
 enum NamespaceType {
-    Simple(String),
-    Delimited(Vec<String>),
+    Simple(NamespaceInfo),
+    Delimited(Vec<NamespaceInfo>),
 }
 
 #[derive(Clone, Debug)]
@@ -175,7 +189,10 @@ struct NamespaceBuilder {
 impl NamespaceBuilder {
     fn new() -> NamespaceBuilder {
         NamespaceBuilder {
-            namespace: NamespaceType::Delimited(Vec::new()),
+            namespace: NamespaceType::Delimited(vec![NamespaceInfo {
+                name: "".to_string(),
+                imports: BTreeMap::new(),
+            }]),
             in_progress_namespace: String::new(),
             is_building_namespace: false,
         }
@@ -185,7 +202,10 @@ impl NamespaceBuilder {
         // This clone isn't a perf mistake because we might keep mutating
         // self.in_progress_namespace and we don't want the current namespace to
         // reflect those changes.
-        self.namespace = NamespaceType::Simple(self.in_progress_namespace.clone());
+        self.namespace = NamespaceType::Simple(NamespaceInfo {
+            name: self.in_progress_namespace.clone(),
+            imports: BTreeMap::new(),
+        });
     }
 
     fn push_namespace(&mut self) {
@@ -197,7 +217,10 @@ impl NamespaceBuilder {
             // This clone isn't a perf mistake because we might keep mutating
             // self.in_progress_namespace and we don't want the namespace stack
             // to reflect those changes.
-            vec.push(self.in_progress_namespace.clone());
+            vec.push(NamespaceInfo {
+                name: self.in_progress_namespace.clone(),
+                imports: BTreeMap::new(),
+            });
         }
     }
 
@@ -216,15 +239,75 @@ impl NamespaceBuilder {
             // through coding error, so we panic instead.
             vec.pop()
                 .expect("Attempted to pop from the namespace stack when there were no entries");
+            if vec.is_empty() {
+                panic!("Popping from the namespace stack has left it empty");
+            }
             self.in_progress_namespace = self.current_namespace().to_string();
         }
     }
 
     fn current_namespace(&self) -> &str {
         match &self.namespace {
-            NamespaceType::Simple(s) => &s,
-            NamespaceType::Delimited(stack) => stack.last().map(|ns| ns.as_str()).unwrap_or(""),
+            NamespaceType::Simple(ni) => &ni.name,
+            NamespaceType::Delimited(stack) => {
+                stack.last().map(|ni| ni.name.as_str()).unwrap_or("")
+            }
         }
+    }
+
+    fn add_import(&mut self, name: String, aliased_name: Option<String>) {
+        let imports =
+            match self.namespace {
+                NamespaceType::Simple(ref mut ni) => &mut ni.imports,
+                NamespaceType::Delimited(ref mut nis) => &mut nis
+                    .last_mut()
+                    .expect(
+                        "Attempted to get the current import map, but namespace stack was empty",
+                    )
+                    .imports,
+            };
+        match aliased_name {
+            Some(aliased_name) => {
+                imports.insert(aliased_name, name);
+            }
+            None => {
+                let aliased_name = name
+                    .rsplit_terminator('\\')
+                    .nth(0)
+                    .expect("Expected at least one entry in import name")
+                    .to_string();
+                imports.insert(aliased_name, name);
+            }
+        };
+    }
+
+    fn rename_import<'a>(&'a self, name: Cow<'a, String>) -> Cow<'a, String> {
+        let should_prepend_slash = name.starts_with('\\');
+        let trimmed_name = name.trim_start_matches('\\');
+        let check_import_map = |import_map: &'a BTreeMap<String, String>| {
+            import_map.get(trimmed_name).map(|renamed| {
+                if should_prepend_slash {
+                    prefix_slash(Cow::Borrowed(renamed))
+                } else {
+                    Cow::Borrowed(renamed)
+                }
+            })
+        };
+        match &self.namespace {
+            NamespaceType::Simple(ni) => {
+                if let Some(name) = check_import_map(&ni.imports) {
+                    return name;
+                }
+            }
+            NamespaceType::Delimited(nis) => {
+                for ni in nis.iter().rev() {
+                    if let Some(name) = check_import_map(&ni.imports) {
+                        return name;
+                    }
+                }
+            }
+        }
+        check_import_map(&hh_autoimport::TYPES_MAP).unwrap_or(name)
     }
 }
 
@@ -246,7 +329,7 @@ enum FileModeBuilder {
 pub struct State<'a> {
     pub source_text: IndexedSourceText<'a>,
     pub decls: Rc<InProgressDecls>,
-    namespace_builder: Cow<'a, NamespaceBuilder>,
+    namespace_builder: Rc<NamespaceBuilder>,
 
     // We don't need to wrap this in a Cow because it's very small.
     file_mode_builder: FileModeBuilder,
@@ -257,7 +340,7 @@ impl<'a> State<'a> {
         State {
             source_text,
             decls: Rc::new(empty_decls()),
-            namespace_builder: Cow::Owned(NamespaceBuilder::new()),
+            namespace_builder: Rc::new(NamespaceBuilder::new()),
             file_mode_builder: FileModeBuilder::None,
         }
     }
@@ -325,6 +408,13 @@ pub struct ShapeDecl {
 }
 
 #[derive(Clone, Debug)]
+pub struct NamespaceUseClause {
+    name: String,
+    pos: Pos,
+    as_: Option<String>,
+}
+
+#[derive(Clone, Debug)]
 pub enum Node_ {
     List(Vec<Node_>),
     BracketedList(Box<(Pos, Vec<Node_>, Pos)>),
@@ -346,6 +436,7 @@ pub enum Node_ {
     ClassishBody(Vec<Node_>),
     TypeConstraint(Box<(ConstraintKind, Node_)>),
     ShapeFieldSpecifier(Box<ShapeFieldDecl>),
+    NamespaceUseClause(Box<NamespaceUseClause>),
     Construct(Pos),
     LessThan(Pos),    // This needs a pos since it shows up in generics.
     GreaterThan(Pos), // This needs a pos since it shows up in generics.
@@ -520,7 +611,7 @@ impl DirectDeclSmartConstructors<'_> {
                             _ => {
                                 let id = Id(
                                     id.0.clone(),
-                                    self.rename_autoimport(Cow::Borrowed(&id.1)).into_owned(),
+                                    self.state.namespace_builder.rename_import(Cow::Borrowed(&id.1)).into_owned(),
                                 );
                                 Ty_::Tapply(
                                     id,
@@ -601,7 +692,10 @@ impl DirectDeclSmartConstructors<'_> {
                         "nonnull" => Ty_::Tnonnull,
                         "dynamic" => Ty_::Tdynamic,
                         _ => {
-                            let name = self.rename_autoimport(self.prefix_ns(Cow::Owned(name)));
+                            let name = self
+                                .state
+                                .namespace_builder
+                                .rename_import(self.prefix_ns(Cow::Owned(name)));
                             Ty_::Tapply(Id(pos, name.into_owned()), Vec::new())
                         }
                     }
@@ -714,30 +808,6 @@ impl DirectDeclSmartConstructors<'_> {
                 "\\".to_owned() + self.state.namespace_builder.current_namespace() + "\\" + &name,
             )
         }
-    }
-
-    fn prefix_slash<'a>(&self, name: Cow<'a, String>) -> Cow<'a, String> {
-        if name.starts_with("\\") {
-            name
-        } else {
-            Cow::Owned("\\".to_owned() + &name)
-        }
-    }
-
-    fn rename_autoimport<'a>(&self, name: Cow<'a, String>) -> Cow<'a, String> {
-        let should_prepend_slash = name.starts_with("\\");
-        hh_autoimport::TYPES_MAP
-            .get(name.trim_start_matches("\\"))
-            .map_or_else(
-                || name,
-                |renamed| {
-                    if should_prepend_slash {
-                        Cow::Owned("\\".to_string() + &renamed)
-                    } else {
-                        Cow::Borrowed(renamed)
-                    }
-                },
-            )
     }
 
     fn into_variables_list(
@@ -925,9 +995,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             TokenKind::Name | TokenKind::Variable => {
                 let name = token_text(self);
                 if self.state.namespace_builder.is_building_namespace {
-                    self.state
-                        .namespace_builder
-                        .to_mut()
+                    Rc::make_mut(&mut self.state.namespace_builder)
                         .in_progress_namespace
                         .push_str(&name.to_string());
                     Node_::Ignored
@@ -977,9 +1045,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             TokenKind::Varray => Node_::Varray(token_pos(self)),
             TokenKind::Backslash => {
                 if self.state.namespace_builder.is_building_namespace {
-                    self.state
-                        .namespace_builder
-                        .to_mut()
+                    Rc::make_mut(&mut self.state.namespace_builder)
                         .in_progress_namespace
                         .push('\\');
                     Node_::Ignored
@@ -1004,11 +1070,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             TokenKind::XHP => Node_::XHP,
             TokenKind::Yield => Node_::Yield,
             TokenKind::Namespace => {
-                self.state.namespace_builder.to_mut().is_building_namespace = true;
+                Rc::make_mut(&mut self.state.namespace_builder).is_building_namespace = true;
                 if !self.state.namespace_builder.current_namespace().is_empty() {
-                    self.state
-                        .namespace_builder
-                        .to_mut()
+                    Rc::make_mut(&mut self.state.namespace_builder)
                         .in_progress_namespace
                         .push('\\')
                 }
@@ -1017,11 +1081,11 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             TokenKind::LeftBrace | TokenKind::Semicolon => {
                 if self.state.namespace_builder.is_building_namespace {
                     if kind == TokenKind::LeftBrace {
-                        self.state.namespace_builder.to_mut().push_namespace();
+                        Rc::make_mut(&mut self.state.namespace_builder).push_namespace();
                     } else {
-                        self.state.namespace_builder.to_mut().set_namespace();
+                        Rc::make_mut(&mut self.state.namespace_builder).set_namespace();
                     }
-                    self.state.namespace_builder.to_mut().is_building_namespace = false;
+                    Rc::make_mut(&mut self.state.namespace_builder).is_building_namespace = false;
                 }
                 // It's not necessary to track left braces, so just always
                 // return a semicolon.
@@ -1332,8 +1396,63 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _name: Self::R,
         _body: Self::R,
     ) -> Self::R {
-        self.state.namespace_builder.to_mut().pop_namespace();
+        Rc::make_mut(&mut self.state.namespace_builder).pop_namespace();
         Ok(Node_::Ignored)
+    }
+
+    fn make_namespace_use_declaration(
+        &mut self,
+        _arg0: Self::R,
+        _arg1: Self::R,
+        imports: Self::R,
+        _arg3: Self::R,
+    ) -> Self::R {
+        for import in imports?.into_iter() {
+            if let Node_::NamespaceUseClause(nuc) = import {
+                Rc::make_mut(&mut self.state.namespace_builder).add_import(nuc.name, nuc.as_);
+            }
+        }
+        Ok(Node_::Ignored)
+    }
+
+    fn make_namespace_group_use_declaration(
+        &mut self,
+        _arg0: Self::R,
+        _arg1: Self::R,
+        prefix: Self::R,
+        _arg3: Self::R,
+        imports: Self::R,
+        _arg5: Self::R,
+        _arg6: Self::R,
+    ) -> Self::R {
+        let (prefix, _) = get_name("", &prefix?)?;
+        for import in imports?.into_iter() {
+            if let Node_::NamespaceUseClause(nuc) = import {
+                Rc::make_mut(&mut self.state.namespace_builder)
+                    .add_import(prefix.clone() + &nuc.name, nuc.as_);
+            }
+        }
+        Ok(Node_::Ignored)
+    }
+
+    fn make_namespace_use_clause(
+        &mut self,
+        _arg0: Self::R,
+        name: Self::R,
+        as_: Self::R,
+        aliased_name: Self::R,
+    ) -> Self::R {
+        let (name, pos) = get_name("", &name?)?;
+        let as_ = if let Node_::As = as_? {
+            Some(get_name("", &aliased_name?)?.0)
+        } else {
+            None
+        };
+        Ok(Node_::NamespaceUseClause(Box::new(NamespaceUseClause {
+            name,
+            pos,
+            as_,
+        })))
     }
 
     fn make_classish_declaration(
@@ -1370,7 +1489,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
         let (name, pos) = get_name(self.state.namespace_builder.current_namespace(), &name?)?;
         let key = name.clone();
-        let name = self.prefix_slash(Cow::Owned(name));
+        let name = prefix_slash(Cow::Owned(name));
         let (type_params, type_variables) = self.into_type_params(tparams?)?;
         let mut cls = shallow_decl_defs::ShallowClass {
             mode: match self.state.file_mode_builder {

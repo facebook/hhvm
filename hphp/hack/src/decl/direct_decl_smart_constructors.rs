@@ -359,6 +359,7 @@ pub enum HintValue {
     ArrayKey,
     NoReturn,
     Apply(Box<(Id, Vec<Node_>)>),
+    Access(Box<(Node_, Vec<Id>)>),
     Array(Box<(Node_, Node_)>),
     Varray(Box<Node_>),
     Darray(Box<(Node_, Node_)>),
@@ -434,6 +435,13 @@ pub struct NamespaceUseClause {
 }
 
 #[derive(Clone, Debug)]
+pub struct TypeConstant {
+    name: String,
+    pos: Pos,
+    type_: Node_,
+}
+
+#[derive(Clone, Debug)]
 pub enum Node_ {
     List(Vec<Node_>),
     BracketedList(Box<(Pos, Vec<Node_>, Pos)>),
@@ -453,6 +461,7 @@ pub enum Node_ {
     Function(Box<FunctionDecl>),
     Property(Box<PropertyDecl>),
     TraitUse(Box<Node_>),
+    TypeConstant(Box<TypeConstant>),
     RequireClause(Box<RequireClause>),
     ClassishBody(Vec<Node_>),
     TypeConstraint(Box<(ConstraintKind, Node_)>),
@@ -465,6 +474,8 @@ pub enum Node_ {
     RightParen(Pos),  // This needs a pos since it shows up in tuples and shapes.
     Shape(Pos),       // This needs a pos since it shows up in shapes.
     Question(Pos),    // This needs a pos since it shows up in nullable types.
+    This(Pos),        // This needs a pos since it shows up in Taccess.
+    ColonColon(Pos),  // This needs a pos since it shows up in Taccess.
 
     // Box the insides of the vector so we don't need to reallocate them when
     // we pull them out of the TypeConstraint variant.
@@ -498,6 +509,7 @@ impl Node_ {
             Node_::Name(_, pos) => Ok(pos.clone()),
             Node_::Hint(_, pos) => Ok(pos.clone()),
             Node_::Backslash(pos)
+            | Node_::ColonColon(pos)
             | Node_::Construct(pos)
             | Node_::LessThan(pos)
             | Node_::GreaterThan(pos)
@@ -505,6 +517,7 @@ impl Node_ {
             | Node_::RightParen(pos)
             | Node_::Question(pos)
             | Node_::Shape(pos)
+            | Node_::This(pos)
             | Node_::Array(pos)
             | Node_::Darray(pos)
             | Node_::Varray(pos)
@@ -655,6 +668,13 @@ impl DirectDeclSmartConstructors<'_> {
                             }
                         }
                     }
+                    HintValue::Access(innards) => {
+                        let (ty, names) = &**innards;
+                        Ty_::Taccess(typing_defs::TaccessType(
+                            self.node_to_ty(ty, type_variables)?,
+                            names.to_vec(),
+                        ))
+                    }
                     HintValue::Array(innards) => {
                         let (key_type, value_type) = &**innards;
                         let key_type = match key_type {
@@ -757,6 +777,7 @@ impl DirectDeclSmartConstructors<'_> {
                 Reason::Rhint(pos.clone()),
                 Box::new(Ty_::Tarray(None, None)),
             )),
+            Node_::This(pos) => Ok(Ty(Reason::Rhint(pos.clone()), Box::new(Ty_::Tthis))),
             node => {
                 let (name, pos) = get_name("", node)?;
                 let reason = Reason::Rhint(pos.clone());
@@ -1160,6 +1181,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             TokenKind::RightParen => Node_::RightParen(token_pos(self)),
             TokenKind::Shape => Node_::Shape(token_pos(self)),
             TokenKind::Question => Node_::Question(token_pos(self)),
+            TokenKind::This => Node_::This(token_pos(self)),
+            TokenKind::ColonColon => Node_::ColonColon(token_pos(self)),
             TokenKind::Abstract => Node_::Abstract,
             TokenKind::As => Node_::As,
             TokenKind::Super => Node_::Super,
@@ -1688,6 +1711,19 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                                 cls.uses.push(self.node_to_ty(name, &type_variables)?);
                             }
                         }
+                        Node_::TypeConstant(constant) => {
+                            cls.typeconsts.push(shallow_decl_defs::ShallowTypeconst {
+                                abstract_: typing_defs::TypeconstAbstractKind::TCConcrete,
+                                constraint: None,
+                                name: Id(constant.pos, constant.name),
+                                type_: match self.node_to_ty(&constant.type_, &type_variables) {
+                                    Ok(ty) => Some(ty),
+                                    Err(_) => None,
+                                },
+                                enforceable: (Pos::make_none(), false),
+                                reifiable: None,
+                            })
+                        }
                         Node_::RequireClause(require) => match require.require_type {
                             Node_::Extends => cls
                                 .req_extends
@@ -2029,5 +2065,41 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
     fn make_closure_parameter_type_specifier(&mut self, _arg0: Self::R, name: Self::R) -> Self::R {
         name
+    }
+
+    fn make_type_const_declaration(
+        &mut self,
+        _arg0: Self::R,
+        _arg1: Self::R,
+        _arg2: Self::R,
+        _arg3: Self::R,
+        name: Self::R,
+        _arg5: Self::R,
+        _arg6: Self::R,
+        _arg7: Self::R,
+        type_: Self::R,
+        _arg9: Self::R,
+    ) -> Self::R {
+        let (name, pos) = get_name("", &name?)?;
+        Ok(Node_::TypeConstant(Box::new(TypeConstant {
+            name,
+            pos,
+            type_: type_?,
+        })))
+    }
+
+    fn make_type_constant(
+        &mut self,
+        this: Self::R,
+        coloncolon: Self::R,
+        constant_name: Self::R,
+    ) -> Self::R {
+        let (this, coloncolon, constant_name) = (this?, coloncolon?, constant_name?);
+        let id = get_name("", &constant_name)?;
+        let pos = Pos::merge(&this.get_pos()?, &coloncolon.get_pos()?)?;
+        Ok(Node_::Hint(
+            HintValue::Access(Box::new((this, vec![Id(id.1, id.0)]))),
+            pos,
+        ))
     }
 }

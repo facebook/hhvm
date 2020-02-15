@@ -7905,7 +7905,7 @@ static void add_assoc_image_info(Array &value, bool sub_array,
               break;
 
             case TAG_FMT_URATIONAL:
-              snprintf(buffer, sizeof(buffer), "%i/%i",
+              snprintf(buffer, sizeof(buffer), "%u/%u",
                        info_value->ur.num, info_value->ur.den);
               if (l==1) {
                 tmpi->set(String(name, CopyString),

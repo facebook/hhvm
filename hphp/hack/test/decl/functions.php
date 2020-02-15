@@ -42,3 +42,12 @@ function takes_returns_function_type<Tu>(
     return;
   };
 }
+
+<<__Rx>>
+function reactive_function(): void {}
+
+<<__RxShallow>>
+function shallow_reactive_function(): void {}
+
+<<__RxLocal>>
+function local_reactive_function(): void {}

@@ -95,6 +95,57 @@ Parsed decls:
             ft_return_disposable = false; ft_mutable = none;
             ft_returns_mutable = false }));
       fe_deprecated = None;  };
+    "local_reactive_function" ->
+    { fe_pos = [53:10-33];
+      fe_type =
+      (Rwitness (root|functions.php line 53, characters 10-32),
+       (Tfun
+          { ft_is_coroutine = false; ft_arity = (Fstandard (0, 0));
+            ft_tparams = []; ft_where_constraints = []; ft_params = [];
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|functions.php line 53, characters 37-40),
+               (Tprim Tvoid))
+              };
+            ft_fun_kind = sync; ft_reactive = Local {};
+            ft_return_disposable = false; ft_mutable = none;
+            ft_returns_mutable = false }));
+      fe_deprecated = None;  };
+    "reactive_function" ->
+    { fe_pos = [47:10-27];
+      fe_type =
+      (Rwitness (root|functions.php line 47, characters 10-26),
+       (Tfun
+          { ft_is_coroutine = false; ft_arity = (Fstandard (0, 0));
+            ft_tparams = []; ft_where_constraints = []; ft_params = [];
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|functions.php line 47, characters 31-34),
+               (Tprim Tvoid))
+              };
+            ft_fun_kind = sync; ft_reactive = Reactive {};
+            ft_return_disposable = false; ft_mutable = none;
+            ft_returns_mutable = false }));
+      fe_deprecated = None;  };
+    "shallow_reactive_function" ->
+    { fe_pos = [50:10-35];
+      fe_type =
+      (Rwitness (root|functions.php line 50, characters 10-34),
+       (Tfun
+          { ft_is_coroutine = false; ft_arity = (Fstandard (0, 0));
+            ft_tparams = []; ft_where_constraints = []; ft_params = [];
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|functions.php line 50, characters 39-42),
+               (Tprim Tvoid))
+              };
+            ft_fun_kind = sync; ft_reactive = Shallow {};
+            ft_return_disposable = false; ft_mutable = none;
+            ft_returns_mutable = false }));
+      fe_deprecated = None;  };
     "simple_function" ->
     { fe_pos = [3:10-25];
       fe_type =

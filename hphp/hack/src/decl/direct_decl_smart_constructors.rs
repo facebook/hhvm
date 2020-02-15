@@ -15,6 +15,7 @@ use flatten_smart_constructors::{FlattenOp, FlattenSmartConstructors};
 use oxidized::{
     aast,
     ast_defs::{ClassKind, ConstraintKind, FunKind, Id, ShapeFieldName, Variance},
+    decl_defs::MethodReactivity,
     errors::Errors,
     file_info::Mode,
     i_set::ISet,
@@ -387,6 +388,7 @@ pub struct FunctionHeader {
 
 #[derive(Clone, Debug)]
 pub struct FunctionDecl {
+    attributes: Node_,
     header: FunctionHeader,
     body: Node_,
 }
@@ -817,6 +819,7 @@ impl DirectDeclSmartConstructors<'_> {
 
     fn function_into_ty(
         &self,
+        attributes: Node_,
         header: FunctionHeader,
         body: Node_,
         outer_type_variables: &HashSet<Rc<String>>,
@@ -858,26 +861,35 @@ impl DirectDeclSmartConstructors<'_> {
                 FunKind::FSync
             }
         };
-        let ty = Ty(
-            Reason::Rwitness(pos.clone()),
-            Box::new(Ty_::Tfun(FunType {
-                is_coroutine: false,
-                arity: FunArity::Fstandard(params.len() as isize, params.len() as isize),
-                tparams: (type_params, FunTparamsKind::FTKtparams),
-                where_constraints: Vec::new(),
-                params,
-                ret: PossiblyEnforcedTy {
-                    enforced: false,
-                    type_,
-                },
-                fun_kind,
-                reactive: Reactivity::Nonreactive,
-                return_disposable: false,
-                mutability: None,
-                returns_mutable: false,
-                returns_void_to_rx: false,
-            })),
-        );
+        let mut ft = FunType {
+            is_coroutine: false,
+            arity: FunArity::Fstandard(params.len() as isize, params.len() as isize),
+            tparams: (type_params, FunTparamsKind::FTKtparams),
+            where_constraints: Vec::new(),
+            params,
+            ret: PossiblyEnforcedTy {
+                enforced: false,
+                type_,
+            },
+            fun_kind,
+            reactive: Reactivity::Nonreactive,
+            return_disposable: false,
+            mutability: None,
+            returns_mutable: false,
+            returns_void_to_rx: false,
+        };
+        for attribute in attributes.iter() {
+            if let Node_::Name(name, _) = attribute {
+                match name.as_ref() {
+                    "__Rx" => ft.reactive = Reactivity::Reactive(None),
+                    "__RxShallow" => ft.reactive = Reactivity::Shallow(None),
+                    "__RxLocal" => ft.reactive = Reactivity::Local(None),
+                    _ => (),
+                }
+            }
+        }
+
+        let ty = Ty(Reason::Rwitness(pos.clone()), Box::new(Ty_::Tfun(ft)));
         Ok((name, pos, ty))
     }
 
@@ -1384,13 +1396,14 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
     fn make_function_declaration(
         &mut self,
-        _attributes: Self::R,
+        attributes: Self::R,
         header: Self::R,
         body: Self::R,
     ) -> Self::R {
         Ok(match header? {
             Node_::FunctionHeader(decl) => {
-                let (name, pos, type_) = self.function_into_ty(*decl, body?, &HashSet::new())?;
+                let (name, pos, type_) =
+                    self.function_into_ty(attributes?, *decl, body?, &HashSet::new())?;
                 Rc::make_mut(&mut self.state.decls).funs.insert(
                     name,
                     Rc::new(FunElt {
@@ -1724,15 +1737,36 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                                 Node_::Construct(_) => true,
                                 _ => false,
                             };
-                            let (name, pos, ty) =
-                                self.function_into_ty(decl.header, decl.body, &type_variables)?;
+                            let reactivity =
+                                decl.attributes.iter().fold(None, |reactivity, attribute| {
+                                    if let Node_::Name(name, _) = attribute {
+                                        match name.as_ref() {
+                                            "__Rx" => Some(MethodReactivity::MethodReactive(None)),
+                                            "__RxShallow" => {
+                                                Some(MethodReactivity::MethodShallow(None))
+                                            }
+                                            "__RxLocal" => {
+                                                Some(MethodReactivity::MethodLocal(None))
+                                            }
+                                            _ => reactivity,
+                                        }
+                                    } else {
+                                        reactivity
+                                    }
+                                });
+                            let (name, pos, ty) = self.function_into_ty(
+                                decl.attributes,
+                                decl.header,
+                                decl.body,
+                                &type_variables,
+                            )?;
                             let method = shallow_decl_defs::ShallowMethod {
                                 abstract_,
                                 final_: false,
                                 memoizelsb: false,
                                 name: Id(pos, name),
                                 override_: false,
-                                reactivity: None,
+                                reactivity,
                                 type_: ty,
                                 visibility,
                                 fixme_codes: ISet::new(),
@@ -1788,13 +1822,14 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
     fn make_methodish_declaration(
         &mut self,
-        _arg0: Self::R,
+        attributes: Self::R,
         header: Self::R,
         body: Self::R,
         closer: Self::R,
     ) -> Self::R {
         match header? {
             Node_::FunctionHeader(header) => Ok(Node_::Function(Box::new(FunctionDecl {
+                attributes: attributes?,
                 header: *header,
                 body: match body? {
                     // If we don't have a FunctionDecl body, use the closing token.

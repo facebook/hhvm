@@ -185,6 +185,12 @@ bool RepoAuthType::operator==(RepoAuthType o) const {
   case T::OptSubCls:
   case T::OptExactCls:
     return clsName() == o.clsName();
+
+  case T::SubRecord:
+  case T::ExactRecord:
+  case T::OptSubRecord:
+  case T::OptExactRecord:
+    return recordName() == o.recordName();
   }
   not_reached();
 }
@@ -450,6 +456,27 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
       return tv.m_type == KindOfClass && tv.m_data.pclass == cls;
     }
 
+  case T::OptSubRecord:
+    if (initNull) return true;
+    // fallthrough
+  case T::SubRecord:
+    {
+      auto const rec = Unit::lookupRecordDesc(ty.recordName());
+      if (!rec) return false;
+      return tv.m_type == KindOfRecord &&
+             tv.m_data.prec->record()->recordDescOf(rec);
+    }
+
+  case T::OptExactRecord:
+    if (initNull) return true;
+    // fallthrough
+  case T::ExactRecord:
+    {
+      auto const rec = Unit::lookupRecordDesc(ty.recordName());
+      if (!rec) return false;
+      return tv.m_type == KindOfRecord && tv.m_data.prec->record() == rec;
+    }
+
   case T::InitUnc:
     if (tv.m_type == KindOfUninit) return false;
     // fallthrough
@@ -645,6 +672,19 @@ std::string show(RepoAuthType rat) {
       }
       ret += '=';
       ret += rat.clsName()->data();
+      return ret;
+    }
+  case T::OptSubRecord:
+  case T::OptExactRecord:
+  case T::SubRecord:
+  case T::ExactRecord:
+    {
+      auto ret = std::string{};
+      if (tag == T::OptSubRecord || tag == T::OptExactRecord) ret += '?';
+      ret += "Record";
+      if (tag == T::OptSubRecord || tag == T::SubRecord) ret += '<';
+      ret += '=';
+      ret += rat.recordName()->data();
       return ret;
     }
   }

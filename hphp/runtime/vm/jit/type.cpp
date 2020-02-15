@@ -1036,6 +1036,13 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
       }
       return base;
     }
+
+    case T::SubRecord:
+    case T::ExactRecord:
+      return TRecord;
+    case T::OptSubRecord:
+    case T::OptExactRecord:
+      return TRecord | TInitNull;
   }
   not_reached();
 }

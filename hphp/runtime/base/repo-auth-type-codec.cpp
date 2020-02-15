@@ -126,11 +126,15 @@ RepoAuthType decodeRATImpl(const unsigned char*& pc, LookupStr lookupStr,
   case T::SubCls:
   case T::OptExactCls:
   case T::OptSubCls:
+  case T::ExactRecord:
+  case T::SubRecord:
+  case T::OptExactRecord:
+  case T::OptSubRecord:
     assertx(!highBitSet);
     {
       uint32_t id = decode_iva(pc);
-      const StringData* const clsName = lookupStr(id);
-      return RepoAuthType{tag, clsName};
+      const StringData* const name = lookupStr(id);
+      return RepoAuthType{tag, name};
     }
   }
   not_reached();
@@ -254,6 +258,14 @@ void encodeRAT(UnitEmitter& ue, RepoAuthType rat) {
   case T::OptSubCls:
     ue.emitIVA(ue.mergeLitstr(rat.clsName()));
     break;
+
+  case T::ExactRecord:
+  case T::SubRecord:
+  case T::OptExactRecord:
+  case T::OptSubRecord:
+    ue.emitIVA(ue.mergeLitstr(rat.recordName()));
+    break;
+
   }
 }
 

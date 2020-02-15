@@ -4026,9 +4026,6 @@ Type from_cell(TypedValue cell) {
     always_assert(cell.m_data.parr->isKeyset());
     return keyset_val(cell.m_data.parr);
 
-  case KindOfRecord: // TODO(arnabde)
-    not_implemented();
-
   case KindOfPersistentDArray:
   case KindOfDArray:
   case KindOfPersistentVArray:
@@ -4044,9 +4041,11 @@ Type from_cell(TypedValue cell) {
   case KindOfFunc:
   case KindOfClass:
   case KindOfClsMeth:
+  case KindOfRecord:
     break;
   }
-  always_assert(0 && "reference counted/class/func/clsmeth type in from_cell");
+  always_assert(
+      0 && "reference counted/class/func/clsmeth/record type in from_cell");
 }
 
 Type from_DataType(DataType dt) {
@@ -6558,6 +6557,15 @@ RepoAuthType make_repo_type(ArrayTypeTable::Builder& arrTable, const Type& t) {
         ? (dcls.type == DCls::Exact ? T::OptExactCls : T::OptSubCls)
         : (dcls.type == DCls::Exact ? T::ExactCls : T::SubCls);
     return RepoAuthType { tag, dcls.cls.name() };
+  }
+
+  if (is_specialized_record(t) && t.subtypeOf(TOptRecord)) {
+    auto const drec = drec_of(t);
+    auto const tag =
+      is_opt(t)
+        ? (drec.type == DRecord::Exact ? T::OptExactRecord : T::OptSubRecord)
+        : (drec.type == DRecord::Exact ? T::ExactRecord : T::SubRecord);
+    return RepoAuthType { tag, drec.rec.name() };
   }
 
   if ((is_specialized_array(t) && t.subtypeOf(TOptArr)) ||

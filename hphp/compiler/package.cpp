@@ -466,6 +466,7 @@ bool Package::parseImpl(const std::string* fileName) {
           *fileName, sha1, Native::s_noNativeFuncs
         )) {
       addUnitEmitter(std::move(ue));
+      report(0);
       return true;
     }
   }

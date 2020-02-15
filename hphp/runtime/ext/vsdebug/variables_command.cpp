@@ -617,6 +617,8 @@ folly::dynamic VariablesCommand::serializeVariable(
 
     if (hasChildren) {
       var["variablesReference"] = id;
+    } else {
+      var["variablesReference"] = 0;
     }
   }
 

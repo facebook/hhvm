@@ -271,6 +271,7 @@ def run_test_program(
                 # pyre-ignore
                 input=test_case.input,
                 timeout=timeout,
+                errors="replace",
             )
         except subprocess.TimeoutExpired as e:
             output = "Timed out. " + str(e.output)

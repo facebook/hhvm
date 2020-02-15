@@ -389,6 +389,7 @@ pub struct FunctionDecl {
 
 #[derive(Clone, Debug)]
 pub struct PropertyDecl {
+    attrs: Node_,
     modifiers: Node_,
     hint: Node_,
     name: Node_,
@@ -1470,10 +1471,20 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _arg9: Self::R,
         body: Self::R,
     ) -> Self::R {
-        fn read_member_modifiers<'a, I>(modifiers: I) -> (bool, aast::Visibility)
-        where
-            I: IntoIterator<Item = &'a Node_>,
-        {
+        fn read_member_attributes<'a>(attributes: impl Iterator<Item = &'a Node_>) -> bool {
+            for attribute in attributes {
+                if let Node_::Name(name, _) = attribute {
+                    if name == "__LateInit" {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        fn read_member_modifiers<'a>(
+            modifiers: impl Iterator<Item = &'a Node_>,
+        ) -> (bool, aast::Visibility) {
             let mut is_static = false;
             let mut visibility = aast::Visibility::Private;
             for modifier in modifiers {
@@ -1543,6 +1554,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 for element in body {
                     match element {
                         Node_::Property(decl) => {
+                            let is_late_init = read_member_attributes(decl.attrs.iter());
                             let (is_static, visibility) =
                                 read_member_modifiers(decl.modifiers.iter());
                             let (name, pos) = get_name("", &decl.name)?;
@@ -1555,7 +1567,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                             let prop = shallow_decl_defs::ShallowProp {
                                 const_: false,
                                 xhp_attr: None,
-                                lateinit: false,
+                                lateinit: is_late_init,
                                 lsb: false,
                                 name: Id(pos, name),
                                 needs_init: true,
@@ -1617,7 +1629,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
     fn make_property_declaration(
         &mut self,
-        _arg0: Self::R,
+        attrs: Self::R,
         modifiers: Self::R,
         hint: Self::R,
         name: Self::R,
@@ -1632,6 +1644,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             name => name,
         };
         Ok(Node_::Property(Box::new(PropertyDecl {
+            attrs: attrs?,
             modifiers: modifiers?,
             hint: hint?,
             name,
@@ -1780,5 +1793,24 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             HintValue::Array(Box::new((key_type?, value_type?))),
             Pos::merge(&array?.get_pos()?, &greater_than?.get_pos()?)?,
         ))
+    }
+
+    fn make_old_attribute_specification(
+        &mut self,
+        _arg0: Self::R,
+        attrs: Self::R,
+        _arg2: Self::R,
+    ) -> Self::R {
+        attrs
+    }
+
+    fn make_constructor_call(
+        &mut self,
+        name: Self::R,
+        _arg1: Self::R,
+        _arg2: Self::R,
+        _arg3: Self::R,
+    ) -> Self::R {
+        name
     }
 }

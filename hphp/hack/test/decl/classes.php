@@ -4,6 +4,7 @@ class MyClass {
   private static string $staticProperty;
   public string $instanceProperty;
   protected int $protectedProperty;
+  <<__LateInit>> public arraykey $p;
 
   public function __construct(): void {}
 

@@ -554,6 +554,13 @@ impl Node_ {
             n => Err(format!("Expected a visibility modifier, but was {:?}", n)),
         }
     }
+
+    fn is_ignored(&self) -> bool {
+        match self {
+            Node_::Ignored => true,
+            _ => false,
+        }
+    }
 }
 
 pub type Node = Result<Node_, String>;
@@ -1465,9 +1472,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         name: Self::R,
         tparams: Self::R,
         _arg5: Self::R,
-        _arg6: Self::R,
+        extends: Self::R,
         _arg7: Self::R,
-        _arg8: Self::R,
+        implements: Self::R,
         _arg9: Self::R,
         body: Self::R,
     ) -> Self::R {
@@ -1521,13 +1528,21 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             name: Id(pos, name.into_owned()),
             tparams: type_params,
             where_constraints: Vec::new(),
-            extends: Vec::new(),
+            extends: extends?
+                .iter()
+                .filter(|node| !node.is_ignored())
+                .map(|node| self.node_to_ty(node, &type_variables))
+                .collect::<Result<Vec<_>, String>>()?,
             uses: Vec::new(),
             method_redeclarations: Vec::new(),
             xhp_attr_uses: Vec::new(),
             req_extends: Vec::new(),
             req_implements: Vec::new(),
-            implements: Vec::new(),
+            implements: implements?
+                .iter()
+                .filter(|node| !node.is_ignored())
+                .map(|node| self.node_to_ty(node, &type_variables))
+                .collect::<Result<Vec<_>, String>>()?,
             consts: Vec::new(),
             typeconsts: Vec::new(),
             pu_enums: Vec::new(),

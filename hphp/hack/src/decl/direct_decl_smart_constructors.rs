@@ -480,7 +480,7 @@ impl DirectDeclSmartConstructors<'_> {
         }
     }
 
-    fn node_to_ty(&self, node: &Node_, type_variables: &HashSet<String>) -> Result<Ty, String> {
+    fn node_to_ty(&self, node: &Node_, type_variables: &HashSet<Rc<String>>) -> Result<Ty, String> {
         match node {
             Node_::Hint(hv, pos) => {
                 let reason = Reason::Rhint(pos.clone());
@@ -552,18 +552,15 @@ impl DirectDeclSmartConstructors<'_> {
         }
     }
 
-    fn function_into_ty(
+    /// Converts any node that can represent a list of Node_::TypeParameter
+    /// into the type parameter list and a list of all type variables. Used for
+    /// classes, methods, and functions.
+    fn into_type_params(
         &self,
-        header: FunctionHeader,
-        body: Node_,
-    ) -> Result<(String, Pos, Ty), String> {
-        let (name, pos) = get_name(
-            self.state.namespace_builder.current_namespace(),
-            &header.name,
-        )?;
+        node: Node_,
+    ) -> Result<(Vec<Tparam<Ty>>, HashSet<Rc<String>>), String> {
         let mut type_variables = HashSet::new();
-        let type_params = header
-            .type_params
+        let type_params = node
             .into_iter()
             .map(|node| {
                 let (name, constraints) = match node {
@@ -578,7 +575,7 @@ impl DirectDeclSmartConstructors<'_> {
                         Ok((kind, self.node_to_ty(&value, &HashSet::new())?))
                     })
                     .collect::<Result<Vec<_>, String>>()?;
-                type_variables.insert(name.clone());
+                type_variables.insert(Rc::new(name.clone()));
                 Ok(Tparam {
                     variance: Variance::Invariant,
                     name: Id(pos, name),
@@ -588,6 +585,21 @@ impl DirectDeclSmartConstructors<'_> {
                 })
             })
             .collect::<Result<Vec<_>, String>>()?;
+        Ok((type_params, type_variables))
+    }
+
+    fn function_into_ty(
+        &self,
+        header: FunctionHeader,
+        body: Node_,
+        outer_type_variables: &HashSet<Rc<String>>,
+    ) -> Result<(String, Pos, Ty), String> {
+        let (name, pos) = get_name(
+            self.state.namespace_builder.current_namespace(),
+            &header.name,
+        )?;
+        let (type_params, mut type_variables) = self.into_type_params(header.type_params)?;
+        type_variables.extend(outer_type_variables.into_iter().map(Rc::clone));
         let params = self.into_variables_list(header.param_list, &type_variables)?;
         let type_ = self.node_to_ty(&header.ret_hint, &type_variables)?;
         let async_ = header.modifiers.iter().any(|node| match node {
@@ -672,7 +684,7 @@ impl DirectDeclSmartConstructors<'_> {
     fn into_variables_list(
         &self,
         list: Node_,
-        type_variables: &HashSet<String>,
+        type_variables: &HashSet<Rc<String>>,
     ) -> Result<FunParams<DeclTy>, String> {
         match list {
             Node_::List(nodes) => {
@@ -1149,7 +1161,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     ) -> Self::R {
         Ok(match header? {
             Node_::FunctionHeader(decl) => {
-                let (name, pos, type_) = self.function_into_ty(*decl, body?)?;
+                let (name, pos, type_) = self.function_into_ty(*decl, body?, &HashSet::new())?;
                 Rc::make_mut(&mut self.state.decls).funs.insert(
                     name,
                     Rc::new(FunElt {
@@ -1266,7 +1278,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         xhp_keyword: Self::R,
         class_keyword: Self::R,
         name: Self::R,
-        _arg4: Self::R,
+        tparams: Self::R,
         _arg5: Self::R,
         _arg6: Self::R,
         _arg7: Self::R,
@@ -1294,6 +1306,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let (name, pos) = get_name(self.state.namespace_builder.current_namespace(), &name?)?;
         let key = name.clone();
         let name = self.prefix_slash(Cow::Owned(name));
+        let (type_params, type_variables) = self.into_type_params(tparams?)?;
         let mut cls = shallow_decl_defs::ShallowClass {
             mode: match self.state.file_mode_builder {
                 FileModeBuilder::None | FileModeBuilder::Pending => Mode::Mstrict,
@@ -1311,7 +1324,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 _ => ClassKind::Cnormal,
             },
             name: Id(pos, name.into_owned()),
-            tparams: Vec::new(),
+            tparams: type_params,
             where_constraints: Vec::new(),
             extends: Vec::new(),
             uses: Vec::new(),
@@ -1354,7 +1367,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                             } else {
                                 strip_dollar_prefix(Cow::Owned(name)).into_owned()
                             };
-                            let ty = self.node_to_ty(&decl.hint, &HashSet::new())?;
+                            let ty = self.node_to_ty(&decl.hint, &type_variables)?;
                             let prop = shallow_decl_defs::ShallowProp {
                                 const_: false,
                                 xhp_attr: None,
@@ -1384,7 +1397,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                                 Node_::Construct(_) => true,
                                 _ => false,
                             };
-                            let (name, pos, ty) = self.function_into_ty(decl.header, decl.body)?;
+                            let (name, pos, ty) =
+                                self.function_into_ty(decl.header, decl.body, &type_variables)?;
                             let method = shallow_decl_defs::ShallowMethod {
                                 abstract_,
                                 final_: false,

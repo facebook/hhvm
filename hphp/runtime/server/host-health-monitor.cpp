@@ -102,11 +102,20 @@ void HostHealthMonitor::monitor() {
   m_stopped.store(false, std::memory_order_relaxed);
   std::unique_lock<std::mutex> guard(m_condvar_lock);
   std::chrono::milliseconds dura(UpdateFreq);
+  auto next = std::chrono::steady_clock::now();
   while (!m_stopped.load(std::memory_order_acquire)) {
     HealthLevel newStatus = evaluate();
     notifyObservers(newStatus);
     m_healthLevelCounter->addValue(healthLeveltToInt(newStatus));
-    m_condition.wait_for(guard, dura, [this] { return shouldWakeup(); });
+    next += dura;
+    auto const now = std::chrono::steady_clock::now();
+    if (next <= now) {                  // already late, update immediately
+      next = now;
+      continue;
+    }
+    // Make sure we wait at most dura before the next update
+    next = std::min(next, now + dura);
+    m_condition.wait_until(guard, next, [this] { return shouldWakeup(); });
   }
   Logger::Info("Host health monitor exits.");
 }

@@ -701,7 +701,8 @@ inline SSATmp* ldLocWarn(IRGS& env,
   auto warnUninit = [&] {
     if (loc.name == kInvalidLocalName) {
       // HHBBC incorrectly removed local name information for a local.
-      return gen(env, Unreachable, ASSERT_REASON);
+      gen(env, Unreachable, ASSERT_REASON);
+      return cns(env, TBottom);
     }
     auto const varName = curFunc(env)->localVarName(loc.name);
     if (varName != nullptr) {

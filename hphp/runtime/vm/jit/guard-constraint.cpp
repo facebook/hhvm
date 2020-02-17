@@ -49,12 +49,9 @@ bool typeFitsConstraint(Type t, GuardConstraint gc) {
       return true;
 
     case DataTypeCountness:
-      // Consumers using this constraint expect the type to be relaxed to
-      // Uncounted or left alone, so something like Arr|Obj isn't specific
-      // enough.
-      return !t.maybe(TCounted) ||
-             t.subtypeOfAny(TStr, TArr, TVec, TDict, TKeyset, TObj,
-                            TRes, TClsMeth, TRecord);
+      // When we use this constraint, we expect the type to either be relaxed
+      // to Uncounted or left alone, so if counted, it must have a DataType.
+      return t.isKnownDataType() || !t.maybe(TCounted);
 
     case DataTypeCountnessInit:
       return typeFitsConstraint(t, DataTypeCountness) &&
@@ -64,27 +61,19 @@ bool typeFitsConstraint(Type t, GuardConstraint gc) {
       return t.isKnownDataType();
 
     case DataTypeSpecialized:
-      // Type::isSpecialized() returns true for types like {Arr<Packed>|Int}
-      // and Arr has non-specialized subtypes, so we require that t is
-      // specialized, a strict subtype of Obj or Arr, and that it fits the
-      // specific requirements of gc.
-
+      // Type::isSpecialized() returns true for types like {Arr<Packed>|Int},
+      // so we need to check both for specialization and isKnownDataType.
       assertx(gc.wantClass() ^ gc.wantArrayKind());
-
-      if (t < TObj && t.clsSpec()) {
-        return gc.wantClass() &&
-               t.clsSpec().cls()->classof(gc.desiredClass());
+      if (!t.isKnownDataType()) return false;
+      if (gc.wantClass()) {
+        auto const clsSpec = t.clsSpec();
+        return clsSpec && clsSpec.cls()->classof(gc.desiredClass());
+      } else {
+        return static_cast<bool>(t.arrSpec().kind());
       }
-      if (t < TArr && t.arrSpec()) {
-        auto arrSpec = t.arrSpec();
-        if (gc.wantArrayKind() && !arrSpec.kind()) return false;
-        return true;
-      }
-
       return false;
   }
-
-  not_reached();
+  always_assert(false);
 }
 
 static void incCategory(DataTypeCategory& c) {
@@ -115,7 +104,7 @@ GuardConstraint relaxConstraint(GuardConstraint origGc,
       if (origGc.wantClass()) newGc.setDesiredClass(origGc.desiredClass());
     }
 
-    auto const relaxed = relaxType(toRelax, newGc.category);
+    auto const relaxed = relaxToConstraint(toRelax, newGc);
     auto const newDstType = relaxed & knownType;
     if (typeFitsConstraint(newDstType, origGc)) break;
 

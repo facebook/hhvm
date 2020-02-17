@@ -79,9 +79,7 @@ struct Env {
     , inlining(inlining)
   {
     irgs.formingRegion = true;
-    if (RuntimeOption::EvalRegionRelaxGuards) {
-      irgs.irb->enableConstrainGuards();
-    }
+    irgs.irb->enableConstrainGuards();
   }
 
   const RegionContext& ctx;
@@ -342,20 +340,24 @@ void recordDependencies(Env& env) {
                          const Location& loc,
                          Type type) {
     Trace::Indent indent;
-    ITRACE(3, "{}: {}\n", show(loc), type);
     assertx(type <= TCell);
-    auto& whichMap = guardMap;
-    auto inret = whichMap.insert(std::make_pair(loc, type));
+    auto const gc = folly::get_default(guards, guard);
+    auto gcToRelax = gc;
+    if (DataTypeGeneric < gc.category && gc.category < DataTypeSpecific) {
+      gcToRelax = DataTypeSpecific;
+    }
+    auto const relaxedType = relaxToConstraint(type, gcToRelax);
+    ITRACE(3, "{}: {} -> {} {}\n",
+           show(loc), type, relaxedType, gcToRelax.toString());
+
+    auto inret = guardMap.insert(std::make_pair(loc, relaxedType));
     if (inret.second) {
-      catMap[loc] = folly::get_default(guards, guard).category;
+      catMap[loc] = gc.category;
       return;
     }
-    auto& oldTy = inret.first->second;
-    oldTy &= type;
-
+    inret.first->second &= relaxedType;
     auto& oldCat = catMap[loc];
-    auto newCat = folly::get_default(guards, guard).category;
-    oldCat = std::max(oldCat, newCat);
+    oldCat = std::max(oldCat, gc.category);
   });
 
   for (auto& kv : guardMap) {
@@ -562,12 +564,6 @@ RegionDescPtr selectTracelet(const RegionContext& ctx, TransKind kind,
     // If the final block is empty because it would've only contained
     // instructions producing literal values, kill it.
     region->deleteBlock(region->blocks().back()->id());
-  }
-
-  if (RuntimeOption::EvalRegionRelaxGuards) {
-    FTRACE(1, "selectTracelet: before optimizeGuards:\n{}\n",
-           show(*region));
-    optimizeGuards(*region, kind == TransKind::Profile);
   }
 
   FTRACE(1, "selectTracelet returning, {}, {} tries:\n{}\n",

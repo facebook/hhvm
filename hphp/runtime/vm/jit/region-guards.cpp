@@ -517,27 +517,27 @@ void optimizeChain(RegionDesc&         region,
                    RegionDesc::BlockId rootId,
                    const ProfData&     profData) {
   auto blockData = createBlockData(region, rootId, profData);
-  FTRACE(2, "optimizeGuards(rootId {}): before relaxGuards:\n{}\n",
+  FTRACE(2, "optimizeChain(rootId {}): before relaxGuards:\n{}\n",
          rootId, show(blockData));
   relaxGuards(blockData);
 
-  FTRACE(2, "optimizeGuards(rootId {}): before removeDuplicates:\n{}\n",
+  FTRACE(2, "optimizeChain(rootId {}): before removeDuplicates:\n{}\n",
          rootId, show(blockData));
   removeDuplicates(blockData, region);
 
-  FTRACE(2, "optimizeGuards(rootId {}): before unrelaxGuards:\n{}\n",
+  FTRACE(2, "optimizeChain(rootId {}): before unrelaxGuards:\n{}\n",
          rootId, show(blockData));
   unrelaxGuards(blockData);
 
-  FTRACE(2, "optimizeGuards(rootId {}): before updateWeights:\n{}\n",
+  FTRACE(2, "optimizeChain(rootId {}): before updateWeights:\n{}\n",
          rootId, show(blockData));
   updateWeights(region, rootId, blockData, profData);
 
-  FTRACE(2, "optimizeGuards(rootId {}): before sortBlockData:\n{}\n",
+  FTRACE(2, "optimizeChain(rootId {}): before sortBlockData:\n{}\n",
          rootId, show(blockData));
   sortBlockData(blockData);
 
-  FTRACE(2, "optimizeGuards(rootId {}): before updateRegion:\n{}\n",
+  FTRACE(2, "optimizeChain(rootId {}): before updateRegion:\n{}\n",
          rootId, show(blockData));
   updateRegion(region, blockData, rootId);
 }
@@ -554,50 +554,6 @@ void optimizeProfiledGuards(RegionDesc& region, const ProfData& profData) {
   auto chainRoots = findRetransChainRoots(region);
   for (auto rootId : chainRoots) {
     optimizeChain(region, rootId, profData);
-  }
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void optimizeGuards(RegionDesc& region, bool simple) {
-  for (auto block : region.blocks()) {
-    bool relaxed = false;
-    GuardedLocations newPreConds;
-    auto& oldPreConds = block->typePreConditions();
-
-    for (auto& preCond : oldPreConds) {
-      assertx(preCond.type <= TCell);
-      auto category = preCond.category;
-      if (simple && category > DataTypeGeneric && category < DataTypeSpecific) {
-        category = DataTypeSpecific;
-      }
-      auto newType = relaxType(preCond.type, category);
-
-      if (newType != TCell) {
-        newPreConds.push_back({preCond.location, newType, preCond.category});
-      }
-
-      if (newType != preCond.type) {
-        assertx(preCond.type < newType);
-        FTRACE(1, "optimizeGuard: Block {}, {} [{}]: {} => {}\n",
-               block->id(), show(preCond.location),
-               typeCategoryName(category), preCond.type, newType);
-        relaxed = true;
-      }
-    }
-
-    if (relaxed) {
-      // Note that we don't update the original block, but instead
-      // make a copy and update it instead.  This allows the `region'
-      // to originally contain blocks stored in ProfData, which may be
-      // reused later with different guard-relaxation decisions.
-      auto newBlock = std::make_shared<RegionDesc::Block>(*block);
-      newBlock->clearPreConditions();
-      for (auto& preCond : newPreConds) {
-        newBlock->addPreCondition(preCond);
-      }
-      region.replaceBlock(block->id(), newBlock);
-    }
   }
 }
 

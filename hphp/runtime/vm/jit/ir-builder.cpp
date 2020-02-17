@@ -711,7 +711,7 @@ bool IRBuilder::constrainCheck(const IRInstruction* inst,
   // Relax typeParam with its current constraint.  This is used below to
   // recursively relax the constraint on the source, if needed.
   auto constraint = applyConstraint(m_constraints.guards[inst], guardGC);
-  auto const knownType = relaxType(typeParam, constraint.category);
+  auto const knownType = relaxToConstraint(typeParam, constraint);
 
   changed |= constrainAssert(inst, gc, srcType, knownType);
 

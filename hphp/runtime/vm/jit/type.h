@@ -46,6 +46,7 @@ struct TypedValue;
 namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
+struct GuardConstraint;
 struct ProfDataSerializer;
 struct ProfDataDeserializer;
 
@@ -907,9 +908,12 @@ Type negativeCheckType(Type typeParam, Type srcType);
 
 /*
  * Returns the least specific supertype of `t' that maintains the properties
- * required by `cat'.
+ * required by `cat' or by `gc'. The latter should be used where possible;
+ * we have constraints when forming tracelet regions, but we only keep around
+ * DataTypeCategory when we save them to the profile data.
  */
 Type relaxType(Type t, DataTypeCategory cat);
+Type relaxToConstraint(Type t, const GuardConstraint& gc);
 
 /*
  * Returns the smallest supertype of ty that we can reasonably guard on. Used

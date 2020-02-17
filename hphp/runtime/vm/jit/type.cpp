@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/tv-type.h"
+#include "hphp/runtime/vm/jit/guard-constraint.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/minstr-effects.h"
@@ -1182,6 +1183,20 @@ Type relaxType(Type t, DataTypeCategory cat) {
   }
 
   not_reached();
+}
+
+// This method currently behaves just like relaxType, but as we support finer
+// guard constraints for specialized types, that will change, such as:
+//
+//  1. When we introduce "vanilla" and "bespoke" array-likes, the "vanilla"
+//     guard-constraint on a TArr is weaker than the "kind" constraint, so we
+//     can relax TArr=PackedKind to TArr=Vanilla here.
+//
+//  2. Right now, we only guard object types on class equality. We may want to
+//     relax those guards to subclass guards, so Obj=Derived becomes Obj<=Base.
+//
+Type relaxToConstraint(Type t, const GuardConstraint& gc) {
+  return relaxType(t, gc.category);
 }
 
 Type relaxToGuardable(Type ty) {

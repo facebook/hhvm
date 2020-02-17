@@ -547,12 +547,6 @@ RegionVec regionizeFunc(const Func* func, std::string& transCFGAnnot);
 void optimizeProfiledGuards(RegionDesc& region, const ProfData& profData);
 
 /*
- * Optimize the guards of `region', optionally in `simple' mode (where
- * guards are only relaxed if they can be relaxed all the way to TCell).
- */
-void optimizeGuards(RegionDesc& region, bool simple);
-
-/*
  * Returns the PGO region selector to be used for the given `func'.
  * This depends on the value of RuntimeOption::EvalJitPGORegionSelector
  * and the given `func'.

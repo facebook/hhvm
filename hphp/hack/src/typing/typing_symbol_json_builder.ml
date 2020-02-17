@@ -26,6 +26,7 @@ type symbol_occurrences = {
   localvars: localvar list;
 }
 
+(* Predicate types for the JSON facts emitted *)
 type predicate =
   | ClassDeclaration
   | ClassDefinition
@@ -38,6 +39,7 @@ type predicate =
   | TraitDeclaration
   | TraitDefinition
 
+(* Containers that can be in inheritance relationships *)
 type container_type =
   | ClassContainer
   | InterfaceContainer
@@ -152,22 +154,25 @@ let update_json_data predicate json progress =
   in
   { resultJson = json; factIds = progress.factIds }
 
-let glean_json predicate json progress =
+(* Add a fact of the given predicte type to the running result, if an identical
+ fact has not yet been added. Return the fact's id (which can be referenced in
+ other facts), and the updated result. *)
+let add_fact predicate json_key progress =
   let (id, is_new, progress) =
-    match JMap.find_opt json progress.factIds with
+    match JMap.find_opt json_key progress.factIds with
     | Some fid -> (fid, false, progress)
     | None ->
       let newFactId = json_element_id () in
       let progress =
         {
           resultJson = progress.resultJson;
-          factIds = JMap.add json newFactId progress.factIds;
+          factIds = JMap.add json_key newFactId progress.factIds;
         }
       in
       (newFactId, true, progress)
   in
   let json_fact =
-    JSON_Object [("id", JSON_Number (string_of_int id)); ("key", json)]
+    JSON_Object [("id", JSON_Number (string_of_int id)); ("key", json_key)]
   in
   let progress =
     if is_new then
@@ -175,8 +180,9 @@ let glean_json predicate json progress =
     else
       progress
   in
-  (json_fact, id, progress)
+  (id, progress)
 
+(* Get the container name and predicate type for a given container kind. *)
 let container_decl_predicate container_type =
   match container_type with
   | ClassContainer -> ("class_", ClassDeclaration)
@@ -190,16 +196,19 @@ let get_container_kind clss =
   | Ctrait -> TraitContainer
   | _ -> ClassContainer
 
-let json_of_name name =
+(* JSON builder functions. These all return JSON objects, which
+may be used to build up larger objects. *)
+
+let build_name_json name =
   (* Remove leading slash, if present, so names such as
   Exception and \Exception are captured by the same fact *)
   let basename = String_utils.lstrip name "\\" in
   JSON_Object [("name", JSON_Object [("key", JSON_String basename)])]
 
-let json_of_id fact_id =
+let build_id_json fact_id =
   JSON_Object [("id", JSON_Number (string_of_int fact_id))]
 
-let json_of_bytespan pos =
+let build_bytespan_json pos =
   let start = fst (Pos.info_raw pos) in
   let length = Pos.length pos in
   JSON_Object
@@ -208,20 +217,56 @@ let json_of_bytespan pos =
       ("length", JSON_Number (string_of_int length));
     ]
 
-let json_of_rel_bytespan offset len =
+let build_rel_bytespan_json offset len =
   JSON_Object
     [
       ("offset", JSON_Number (string_of_int offset));
       ("length", JSON_Number (string_of_int len));
     ]
 
-let json_of_file filepath = JSON_Object [("key", JSON_String filepath)]
+let build_file_json filepath = JSON_Object [("key", JSON_String filepath)]
 
-let json_of_container_defn clss decl_id progress =
+let build_decl_target_json json = JSON_Object [("declaration", json)]
+
+let build_xrefs_json xref_map =
+  let xrefs =
+    IMap.fold
+      (fun _id (target_json, pos_list) acc ->
+        let sorted_pos = List.sort Pos.compare pos_list in
+        let (byte_spans, _) =
+          List.fold sorted_pos ~init:([], 0) ~f:(fun (spans, last_start) pos ->
+              let start = fst (Pos.info_raw pos) in
+              let length = Pos.length pos in
+              let span = build_rel_bytespan_json (start - last_start) length in
+              (span :: spans, start))
+        in
+        let xref =
+          JSON_Object
+            [("target", target_json); ("ranges", JSON_Array byte_spans)]
+        in
+        xref :: acc)
+      xref_map
+      []
+  in
+  JSON_Array xrefs
+
+(* These are functions for building JSON to reference some
+existing fact. *)
+
+let build_container_decl_json_ref container_type fact_id =
+  let container_json = JSON_Object [(container_type, build_id_json fact_id)] in
+  JSON_Object [("container", container_json)]
+
+let build_enum_decl_json_ref fact_id =
+  JSON_Object [("enum_", build_id_json fact_id)]
+
+(* These functions build up the JSON necessary and then add facts
+to the running result. *)
+
+let add_container_defn_fact clss decl_id progress =
   let base_defn defn_pred =
-    let json_fact = JSON_Object [("declaration", json_of_id decl_id)] in
-    let (_, _, prog) = glean_json defn_pred json_fact progress in
-    prog
+    let json_fact = JSON_Object [("declaration", build_id_json decl_id)] in
+    add_fact defn_pred json_fact progress
   in
   match get_container_kind clss with
   | InterfaceContainer -> base_defn InterfaceDefinition
@@ -235,84 +280,43 @@ let json_of_container_defn clss decl_id progress =
     let json_fact =
       JSON_Object
         [
-          ("declaration", json_of_id decl_id);
+          ("declaration", build_id_json decl_id);
           ("is_abstract", JSON_Bool is_abstract);
           ("is_final", JSON_Bool clss.c_final);
         ]
     in
-    let (_, _, progress) = glean_json ClassDefinition json_fact progress in
-    progress
+    add_fact ClassDefinition json_fact progress
 
-let json_of_container_decl (container_type, decl_pred) _ctx name _elem progress
-    =
-  let json_fact = json_of_name name in
-  let (_, fact_id, progress) = glean_json decl_pred json_fact progress in
-  let container_decl = JSON_Object [(container_type, json_of_id fact_id)] in
-  (container_decl, fact_id, progress)
+let add_container_decl_fact decl_pred name _elem progress =
+  add_fact decl_pred (build_name_json name) progress
 
-let json_of_enum_decl _ctx name _elem progress =
-  let json_fact = json_of_name name in
-  let (_, fact_id, progress) = glean_json EnumDeclaration json_fact progress in
-  let decl_json = json_of_id fact_id in
-  (decl_json, fact_id, progress)
+let add_enum_decl_fact name _elem progress =
+  add_fact EnumDeclaration (build_name_json name) progress
 
-let json_of_enum_defn _elem decl_id progress =
-  let json_fact = JSON_Object [("declaration", json_of_id decl_id)] in
-  let (_, _, prog) = glean_json EnumDefinition json_fact progress in
-  prog
+let add_enum_defn_fact _elem decl_id progress =
+  let json_fact = JSON_Object [("declaration", build_id_json decl_id)] in
+  add_fact EnumDefinition json_fact progress
 
-let json_of_decl ctx decl_type json_decl_fun id elem progress =
-  let (decl_json, fact_id, progress) = json_decl_fun ctx id elem progress in
-  let json = JSON_Object [(decl_type, decl_json)] in
-  (json, fact_id, progress)
-
-let json_of_decl_loc ctx decl_type pos decl_fun defn_fun id elem progress =
-  let (decl_json, decl_id, progress) =
-    json_of_decl ctx decl_type decl_fun id elem progress
-  in
-  let progress = defn_fun elem decl_id progress in
+let add_decl_loc_fact pos decl_json progress =
   let filepath = Relative_path.to_absolute (Pos.filename pos) in
   let json_fact =
     JSON_Object
       [
         ("declaration", decl_json);
-        ("file", json_of_file filepath);
-        ("span", json_of_bytespan pos);
+        ("file", build_file_json filepath);
+        ("span", build_bytespan_json pos);
       ]
   in
-  glean_json DeclarationLocation json_fact progress
+  add_fact DeclarationLocation json_fact progress
 
-let json_of_decl_target json = JSON_Object [("declaration", json)]
-
-let json_of_xrefs xref_map =
-  let xrefs =
-    IMap.fold
-      (fun _id (target_json, pos_list) acc ->
-        let sorted_pos = List.sort Pos.compare pos_list in
-        let (byte_spans, _) =
-          List.fold sorted_pos ~init:([], 0) ~f:(fun (spans, last_start) pos ->
-              let start = fst (Pos.info_raw pos) in
-              let length = Pos.length pos in
-              let span = json_of_rel_bytespan (start - last_start) length in
-              (span :: spans, start))
-        in
-        let xref =
-          JSON_Object
-            [("target", target_json); ("ranges", JSON_Array byte_spans)]
-        in
-        xref :: acc)
-      xref_map
-      []
-  in
-  JSON_Array xrefs
-
-let json_of_file_xrefs filepath xref_map progress =
+let add_file_xrefs_fact filepath xref_map progress =
   let json_fact =
     JSON_Object
-      [("file", json_of_file filepath); ("xrefs", json_of_xrefs xref_map)]
+      [("file", build_file_json filepath); ("xrefs", build_xrefs_json xref_map)]
   in
-  glean_json FileXRefs json_fact progress
+  add_fact FileXRefs json_fact progress
 
+(* For building the map of cross-references *)
 let add_xref target_json target_id ref_pos xrefs =
   let filepath = Relative_path.to_absolute (Pos.filename ref_pos) in
   SMap.update
@@ -334,79 +338,73 @@ let add_xref target_json target_id ref_pos xrefs =
         Some updated_xref_map)
     xrefs
 
-let add_container_xref
-    ctx
-    (symbol_def : Relative_path.t SymbolDefinition.t)
-    symbol_pos
-    decl_pred
-    (xrefs, progress) =
-  let (decl_json, target_id, prog) =
-    json_of_decl
-      ctx
-      "container"
-      (json_of_container_decl decl_pred)
-      symbol_def.name
-      symbol_def
-      progress
-  in
-  let target_json = json_of_decl_target decl_json in
-  let xrefs = add_xref target_json target_id symbol_pos xrefs in
-  (xrefs, prog)
+(* These functions define the process to go through when
+encountering symbols of a given type. *)
 
-let add_enum_xref
-    ctx
+let process_xref
+    decl_fun
+    decl_ref_fun
     (symbol_def : Relative_path.t SymbolDefinition.t)
     symbol_pos
     (xrefs, progress) =
-  let (decl_json, target_id, prog) =
-    json_of_decl
-      ctx
-      "enum_"
-      json_of_enum_decl
-      symbol_def.name
-      symbol_def
-      progress
-  in
-  let target_json = json_of_decl_target decl_json in
+  let (target_id, prog) = decl_fun symbol_def.name symbol_def progress in
+  let xref_json = decl_ref_fun target_id in
+  let target_json = build_decl_target_json xref_json in
   let xrefs = add_xref target_json target_id symbol_pos xrefs in
   (xrefs, prog)
 
+let process_container_xref
+    (con_type, decl_pred) symbol_def symbol_pos (xrefs, progress) =
+  process_xref
+    (add_container_decl_fact decl_pred)
+    (build_container_decl_json_ref con_type)
+    symbol_def
+    symbol_pos
+    (xrefs, progress)
+
+let process_decl_loc decl_fun defn_fun decl_ref_fun pos id elem progress =
+  let (decl_id, prog) = decl_fun id elem progress in
+  let (_, prog) = defn_fun elem decl_id prog in
+  let ref_json = decl_ref_fun decl_id in
+  let (_, prog) = add_decl_loc_fact pos ref_json prog in
+  prog
+
+let process_container_decl elem progress =
+  let (pos, id) = elem.c_name in
+  let (con_type, decl_pred) =
+    container_decl_predicate (get_container_kind elem)
+  in
+  process_decl_loc
+    (add_container_decl_fact decl_pred)
+    add_container_defn_fact
+    (build_container_decl_json_ref con_type)
+    pos
+    id
+    elem
+    progress
+
+let process_enum_decl elem progress =
+  let (pos, id) = elem.c_name in
+  process_decl_loc
+    add_enum_decl_fact
+    add_enum_defn_fact
+    build_enum_decl_json_ref
+    pos
+    id
+    elem
+    progress
+
+(* This function walks over the symbols in each file and gleans
+ facts along the way. *)
 let build_json ctx symbols =
   let progress =
     List.fold symbols.decls ~init:init_progress ~f:(fun acc symbol ->
         match symbol with
-        | Class en when phys_equal en.c_kind Cenum ->
-          let (pos, id) = en.c_name in
-          let (_, _, res) =
-            json_of_decl_loc
-              ctx
-              "enum_"
-              pos
-              json_of_enum_decl
-              json_of_enum_defn
-              id
-              en
-              acc
-          in
-          res
-        | Class cd ->
-          let (pos, id) = cd.c_name in
-          let decl_pred = container_decl_predicate (get_container_kind cd) in
-          let (_, _, res) =
-            json_of_decl_loc
-              ctx
-              "container"
-              pos
-              (json_of_container_decl decl_pred)
-              json_of_container_defn
-              id
-              cd
-              acc
-          in
-          res
+        | Class en when phys_equal en.c_kind Cenum -> process_enum_decl en acc
+        | Class cd -> process_container_decl cd acc
         | _ -> acc)
   in
-  (* file_xrefs : Hh_json.json * Relative_path.t Pos.pos list) IMap.t SMap.t *)
+  (* file_xrefs : (Hh_json.json * Relative_path.t Pos.pos list) IMap.t SMap.t *)
   let (file_xrefs, progress) =
     List.fold
       symbols.occurrences
@@ -421,21 +419,27 @@ let build_json ctx symbols =
           | Some symbol_def ->
             (match symbol_def.kind with
             | Class ->
-              let decl_pred = container_decl_predicate ClassContainer in
-              add_container_xref ctx symbol_def occ.pos decl_pred (xrefs, prog)
+              let con_kind = container_decl_predicate ClassContainer in
+              process_container_xref con_kind symbol_def occ.pos (xrefs, prog)
             | Interface ->
-              let decl_pred = container_decl_predicate InterfaceContainer in
-              add_container_xref ctx symbol_def occ.pos decl_pred (xrefs, prog)
+              let con_kind = container_decl_predicate InterfaceContainer in
+              process_container_xref con_kind symbol_def occ.pos (xrefs, prog)
             | Trait ->
-              let decl_pred = container_decl_predicate TraitContainer in
-              add_container_xref ctx symbol_def occ.pos decl_pred (xrefs, prog)
-            | Enum -> add_enum_xref ctx symbol_def occ.pos (xrefs, prog)
+              let con_kind = container_decl_predicate TraitContainer in
+              process_container_xref con_kind symbol_def occ.pos (xrefs, prog)
+            | Enum ->
+              process_xref
+                add_enum_decl_fact
+                build_enum_decl_json_ref
+                symbol_def
+                occ.pos
+                (xrefs, prog)
             | _ -> (xrefs, prog)))
   in
   let progress =
     SMap.fold
       (fun fp target_map acc ->
-        let (_, _, res) = json_of_file_xrefs fp target_map acc in
+        let (_, res) = add_file_xrefs_fact fp target_map acc in
         res)
       file_xrefs
       progress

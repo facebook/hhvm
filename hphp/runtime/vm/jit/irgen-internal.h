@@ -179,8 +179,8 @@ SSATmp* cond(IRGS& env, Branch branch, Next next, Taken taken) {
 
   env.irb->appendBlock(done_block);
   if (v1) {
-    auto const label = env.unit.defLabel(1, env.irb->nextBCContext());
-    done_block->push_back(label);
+    auto const bcctx = env.irb->nextBCContext();
+    auto const label = env.unit.defLabel(1, done_block, bcctx);
     auto const result = label->dst(0);
     result->setType(v1->type() | v2->type());
     return result;
@@ -203,15 +203,14 @@ std::pair<SSATmp*, SSATmp*> condPair(IRGS& env,
   gen(env, Jmp, done_block, v1.first, v1.second);
 
   env.irb->appendBlock(taken_block);
-
   auto const v2 = taken();
   assertx(v2.first);
   assertx(v2.second);
   gen(env, Jmp, done_block, v2.first, v2.second);
 
   env.irb->appendBlock(done_block);
-  auto const label = env.unit.defLabel(2, env.irb->nextBCContext());
-  done_block->push_back(label);
+  auto const bcctx = env.irb->nextBCContext();
+  auto const label = env.unit.defLabel(2, done_block, bcctx);
   auto const result1 = label->dst(0);
   auto const result2 = label->dst(1);
   result1->setType(v1.first->type() | v2.first->type());
@@ -245,7 +244,6 @@ void ifThenElse(IRGS& env, Branch branch, Next next, Taken taken) {
   // The above logic ensures that `branch_block' always ends with an
   // isBlockEnd() instruction, so its out state is meaningful.
   env.irb->fs().setSaveOutState(branch_block);
-
   env.irb->appendBlock(next_block);
   next();
 
@@ -257,9 +255,9 @@ void ifThenElse(IRGS& env, Branch branch, Next next, Taken taken) {
   } else if (!cur->back().isTerminal()) {
     cur->back().setNext(done_block);
   }
-  env.irb->appendBlock(taken_block, branch_block);
-
+  env.irb->appendBlock(taken_block);
   taken();
+
   // Patch the last block added by the Taken lambda to jump to the done block.
   // Note that last might not be taken_block.
   auto const last = env.irb->curBlock();
@@ -269,9 +267,6 @@ void ifThenElse(IRGS& env, Branch branch, Next next, Taken taken) {
     last->back().setNext(done_block);
   }
   env.irb->appendBlock(done_block);
-  if (done_block->numPreds() == 0) {
-    gen(env, Unreachable, ASSERT_REASON);
-  }
 }
 
 /*
@@ -299,7 +294,6 @@ void ifBranch(IRGS& env, Branch branch, Succ succ) {
   // The above logic ensures that `branch_block' always ends with an
   // isBlockEnd() instruction, so its out state is meaningful.
   env.irb->fs().setSaveOutState(branch_block);
-
   env.irb->appendBlock(succ_block);
   succ();
 
@@ -311,7 +305,7 @@ void ifBranch(IRGS& env, Branch branch, Succ succ) {
   } else if (!last->back().isTerminal()) {
     last->back().setNext(done_block);
   }
-  env.irb->appendBlock(done_block, branch_block);
+  env.irb->appendBlock(done_block);
 }
 
 /*
@@ -435,8 +429,7 @@ struct MultiCond {
     finished = true;
 
     env.irb->appendBlock(done);
-    auto const label = env.unit.defLabel(1, env.irb->nextBCContext());
-    done->push_back(label);
+    auto const label = env.unit.defLabel(1, done, env.irb->nextBCContext());
     auto const finalResult = label->dst(0);
     finalResult->setType(resultTy);
     return finalResult;

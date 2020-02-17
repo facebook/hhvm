@@ -212,16 +212,14 @@ struct IRBuilder {
   /*
    * Append `block' to the unit.
    *
-   * This is used by irgen in IR-level control-flow helpers.  In certain cases,
-   * these helpers may append unreachable blocks, which will not have a valid
-   * in-state in FrameStateMgr.
+   * This method is used to implement IR-level control-flow helpers. When doing
+   * control flow, we may simplify branching instructions into direct jumps to
+   * next or taken, in which case some blocks that we append are unreachable.
    *
-   * Rather than implicitly propagating the out state for m_curBlock, which is
-   * the default behavior, `pred' can be set to indicate the logical
-   * predecessor, in case `block' is unreachable.  If `block' is reachable,
-   * `pred' is ignored.
+   * We can detect this case by checking whether `block` has any predecessors -
+   * all incoming edges should be created before calling this method.
    */
-  void appendBlock(Block* block, Block* pred = nullptr);
+  void appendBlock(Block* block);
 
   /*
    * Clear the SrcKey-to-block map.
@@ -267,6 +265,12 @@ struct IRBuilder {
   SSATmp* optimizeInst(IRInstruction* inst,
                        CloneFlag doClone,
                        Block* srcBlock);
+
+  /*
+   * `inUnreachableState` will return true if IRBuilder has detected that our
+   * current position is unreachable from the unit entry.
+   */
+  bool inUnreachableState() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Internal API.

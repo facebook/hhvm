@@ -487,6 +487,12 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
                                     checkOuterTypeOnly);
     irb.resetGuardFailBlock();
 
+    if (irb.inUnreachableState()) {
+      FTRACE(1, "translateRegion: skipping unreachable block: {}\n", blockId);
+      processedBlocks.insert(blockId);
+      continue;
+    }
+
     // Generate IR for each bytecode instruction in this block.
     for (unsigned i = 0; i < block.length(); ++i, sk.advance(block.unit())) {
       ProfSrcKey psk { irgs.profTransID, sk };
@@ -548,6 +554,11 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
       }
 
       irgen::finishHHBC(irgs);
+
+      if (!lastInstr && irgs.irb->inUnreachableState()) {
+        FTRACE(1, "Breaking region at unreachable state at B{}\n", block.id());
+        break;
+      }
 
       // If this is the last instruction, handle block transitions.
       // If the block ends the region, then call irgen::endRegion to

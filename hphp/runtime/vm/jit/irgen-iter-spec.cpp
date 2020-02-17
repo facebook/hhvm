@@ -566,8 +566,8 @@ void profileDecRefs(IRGS& env, const IterArgs& data, SSATmp* base,
 // clear FrameState (we'll reuse the block) and phi in the new pos value.
 SSATmp* phiIterPos(IRGS& env, const Accessor& accessor) {
   env.irb->fs().clearForUnprocessedPred();
-  auto const label = env.unit.defLabel(1, env.irb->nextBCContext());
-  env.irb->curBlock()->push_back(label);
+  auto block = env.irb->curBlock();
+  auto const label = env.unit.defLabel(1, block, env.irb->nextBCContext());
   auto const pos = label->dst(0);
   pos->setType(accessor.pos_type);
   return pos;

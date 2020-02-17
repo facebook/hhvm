@@ -933,8 +933,7 @@ bool FrameStateMgr::hasStateFor(Block* block) const {
   return m_states.count(block);
 }
 
-void FrameStateMgr::startBlock(Block* block, bool hasUnprocessedPred,
-                               Block* pred) {
+void FrameStateMgr::startBlock(Block* block, bool hasUnprocessedPred) {
   ITRACE(3, "FrameStateMgr::startBlock: {}\n", block->id());
   auto const it = m_states.find(block);
   auto const end = m_states.end();
@@ -949,12 +948,9 @@ void FrameStateMgr::startBlock(Block* block, bool hasUnprocessedPred,
     if (m_stack.empty()) {
       always_assert_flog(0, "invalid startBlock for B{}", block->id());
     }
-  } else if (debug || pred) {
-    save(block, pred);
-    if (pred) {
-      assertx(hasStateFor(block));
-      m_stack = m_states[block].in;
-    }
+  } else if (debug) {
+    // NOTE: Highly suspect; different debug vs. non-debug behavior.
+    save(block, nullptr);
   }
   assertx(!m_stack.empty());
 

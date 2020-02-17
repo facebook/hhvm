@@ -122,21 +122,6 @@ FPInvOffset curSpOffset(const Env& env) {
   return env.irgs.irb->fs().bcSPOff();
 }
 
-bool irBlockReachable(Env& env, Block* block) {
-  auto const blockId = block->id();
-  auto it = env.irReachableBlocks.find(blockId);
-  if (it != env.irReachableBlocks.end()) return it->second;
-  bool result = block == env.irgs.irb->unit().entry();
-  for (auto& pred : block->preds()) {
-    if (irBlockReachable(env, pred.from())) {
-      result = true;
-      break;
-    }
-  }
-  env.irReachableBlocks[blockId] = result;
-  return result;
-}
-
 /*
  * Check if the current predicted type for the location in ii is specific
  * enough for what the current opcode wants. If not, return false.
@@ -489,27 +474,15 @@ RegionDescPtr form_region(Env& env) {
     // We successfully translated the instruction, so update env.sk.
     env.sk.advance(env.curBlock->unit());
 
-    auto const endsRegion = env.inst.endsRegion;
-
-    if (endsRegion) {
+    if (env.inst.endsRegion) {
       FTRACE(1, "selectTracelet: tracelet broken after {}\n", env.inst);
       break;
     } else {
       assertx(env.sk.func() == curFunc(env));
     }
 
-    auto const curIRBlock = env.irgs.irb->curBlock();
-    if (!irBlockReachable(env, curIRBlock)) {
-      FTRACE(1,
-             "selectTracelet: tracelet broken due "
-             "to unreachable code (block {})\n",
-             curIRBlock->id());
-      break;
-    }
-
-    if (curIRBlock->isExitNoThrow()) {
-      FTRACE(1, "selectTracelet: tracelet broken due to exiting IR instruction:"
-             "{}\n", curIRBlock->back());
+    if (env.irgs.irb->inUnreachableState()) {
+      FTRACE(1, "selectTracelet: tracelet ending at unreachable state\n");
       break;
     }
 

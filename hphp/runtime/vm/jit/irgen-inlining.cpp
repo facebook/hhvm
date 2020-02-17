@@ -557,9 +557,9 @@ bool implSuspendBlock(IRGS& env, bool exitOnAwait) {
   if (exitOnAwait) hint(env, Block::Hint::Unlikely);
 
   assertx(curFunc(env)->isAsyncFunction());
-  auto const label = env.unit.defLabel(1, env.irb->nextBCContext());
+  auto block = rt.suspendTarget;
+  auto const label = env.unit.defLabel(1, block, env.irb->nextBCContext());
   auto const wh = label->dst(0);
-  rt.suspendTarget->push_back(label);
   retypeDests(label, &env.unit);
 
   auto const inlineFrame = implInlineReturn(env, exitOnAwait);

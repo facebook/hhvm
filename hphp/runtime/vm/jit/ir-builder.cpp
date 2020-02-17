@@ -143,42 +143,23 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
 
   // If the block isn't empty, check if we need to create a new block.
   if (where != m_curBlock->begin()) {
-    auto prevIt = where;
-    --prevIt;
-    auto& prev = *prevIt;
-
+    auto& prev = m_curBlock->back();
     if (prev.isBlockEnd()) {
-      assertx(where == m_curBlock->end());
-
-      auto oldBlock = m_curBlock;
-
-      // First make the inst's next block, so we can save state to it in
-      // finishBlock.
+      assertx(!prev.isTerminal());
       m_curBlock = m_unit.defBlock(prev.block()->profCount());
-      if (!prev.isTerminal()) {
-        // New block is reachable from old block so link it.
-        prev.setNext(m_curBlock);
-        m_curBlock->setHint(prev.block()->hint());
-      }
-
-      m_state.finishBlock(oldBlock);
-
+      m_curBlock->setHint(prev.block()->hint());
+      prev.setNext(m_curBlock);
+      m_state.finishBlock(prev.block());
+      FTRACE(2, "lazily appending B{}\n", m_curBlock->id());
       m_state.startBlock(m_curBlock, false);
       where = m_curBlock->begin();
-
-      FTRACE(2, "lazily adding B{}\n", m_curBlock->id());
-
     }
   }
 
-  assertx(IMPLIES(inst->isBlockEnd(), where == m_curBlock->end()) &&
-         "Can't insert a BlockEnd instruction in the middle of a block");
-  if (debug && where != m_curBlock->begin()) {
-    UNUSED auto prevIt = where;
-    --prevIt;
-    assertx(!prevIt->isBlockEnd() &&
-           "Can't append an instruction after a BlockEnd instruction");
-  }
+  assertx(where == m_curBlock->end() &&
+          "Can't append an instruction in the middle of a block");
+  assertx((m_curBlock->empty() || !m_curBlock->back().isBlockEnd()) &&
+          "Can't append an instruction after a BlockEnd instruction");
 
   assertx(inst->marker().valid());
   if (!inst->is(Nop, DefConst)) {
@@ -258,9 +239,8 @@ SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
   if (!shouldConstrainGuards()) {
     if (newType == TBottom) {
       gen(Unreachable, ASSERT_REASON);
-      return inst->is(AssertType) ? m_unit.cns(TBottom) : nullptr;
+      return m_unit.cns(TBottom);
     }
-
     if (oldType <= newType) return fwdGuardSource(inst);
   }
 
@@ -456,7 +436,7 @@ SSATmp* IRBuilder::optimizeInst(IRInstruction* inst, CloneFlag doClone,
     if (auto const preOpt = preOptimize(inst)) {
       FTRACE(1, "  {}preOptimize returned: {}\n",
              indent(), preOpt->inst()->toString());
-      return preOpt;
+      return inst->hasDst() ? preOpt : nullptr;
     }
     if (inst->op() == Nop) return cloneAndAppendOriginal();
   }
@@ -835,13 +815,16 @@ void IRBuilder::setBlock(SrcKey sk, Block* block) {
   m_skToBlockMap[sk] = block;
 }
 
-void IRBuilder::appendBlock(Block* block, Block* pred) {
+void IRBuilder::appendBlock(Block* block) {
   m_state.finishBlock(m_curBlock);
-
   FTRACE(2, "appending B{}\n", block->id());
-  // Load up the state for the new block.
-  m_state.startBlock(block, false, pred);
+  m_state.startBlock(block, false);
   m_curBlock = block;
+
+  if (block->numPreds() == 0) {
+    FTRACE(2, "Newly-appended B{} is unreachable!\n", block->id());
+    gen(Unreachable, ASSERT_REASON);
+  }
 }
 
 void IRBuilder::resetBlock(Block* block, Block* pred) {
@@ -908,6 +891,10 @@ void IRBuilder::popBlock() {
   m_curBCContext = top.bcctx;
   m_exnStack = top.exnStack;
   m_savedBlocks.pop_back();
+}
+
+bool IRBuilder::inUnreachableState() const {
+  return !m_curBlock->empty() && m_curBlock->back().isTerminal();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

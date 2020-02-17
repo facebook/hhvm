@@ -307,8 +307,7 @@ SSATmp* insertPhi(IRUnit& unit, Block* blk,
   assertx(blk->numPreds() > 1);
   auto label = &blk->front();
   if (!label->is(DefLabel)) {
-    label = unit.defLabel(1, label->bcctx());
-    blk->insert(blk->begin(), label);
+    label = unit.defLabel(1, blk, label->bcctx());
   } else {
     for (auto d = label->numDsts(); d--; ) {
       auto result = label->dst(d);

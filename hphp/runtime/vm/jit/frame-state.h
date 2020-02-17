@@ -255,12 +255,8 @@ struct FrameStateMgr final {
    *
    * `hasUnprocessedPred' is set to indicate that the given block has a
    * predecessor in the region that might not yet be linked into the IR CFG.
-   *
-   * `pred' is the logical predecessor of `b' to be used in the event that `b'
-   * is unreachable.
    */
-  void startBlock(Block* b, bool hasUnprocessedPred,
-                  Block* pred = nullptr);
+  void startBlock(Block* b, bool hasUnprocessedPred);
 
   /*
    * Finish tracking state for `b' and save the current state to b->next()

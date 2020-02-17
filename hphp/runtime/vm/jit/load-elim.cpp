@@ -722,7 +722,7 @@ SSATmp* resolve_phis_work(Global& env,
   if (block->front().is(DefLabel)) {
     env.unit.expandLabel(&block->front(), 1);
   } else {
-    block->prepend(env.unit.defLabel(1, block->front().bcctx()));
+    env.unit.defLabel(1, block, block->front().bcctx());
   }
   auto const label = &block->front();
   mutated_labels.push_back(label);

@@ -35,6 +35,7 @@ void bindMem(IRGS& env, SSATmp* ptr, SSATmp* src) {
 }
 
 void destroyName(IRGS& env, SSATmp* name) {
+  if (env.irb->inUnreachableState()) return;
   assertx(name == topC(env));
   popDecRef(env);
 }

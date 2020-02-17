@@ -863,10 +863,9 @@ bool process(OptimizeContext& ctx, Block* pred, Block* succ,
     // Don't put DefLabel in a block with a BeginCatch. Splitting critical
     // edges should hoist BeginCatch for us.
     assertx(!succ->isCatch());
-    auto ret = ctx.unit->defLabel(1, succ->front().bcctx());
-    succ->insert(succ->begin(), ret);
-    ITRACE(4, "Creating succ DefLabel: {}\n", succ->front());
-    return ret;
+    auto result = ctx.unit->defLabel(1, succ, succ->front().bcctx());
+    ITRACE(4, "Creating succ DefLabel: {}\n", result);
+    return result;
   }();
 
   auto const phiIdx = label->numDsts() - 1;

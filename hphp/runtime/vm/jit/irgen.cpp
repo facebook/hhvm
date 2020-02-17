@@ -68,6 +68,11 @@ uint64_t calleeProfCount(const IRGS& env, const RegionDesc& calleeRegion) {
  */
 namespace detail {
 SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
+  if (env.irb->inUnreachableState()) {
+    FTRACE(1, "Skipping unreachable instruction: {}\n", inst->toString());
+    return inst->hasDst() ? cns(env, TBottom) : nullptr;
+  }
+
   if (inst->mayRaiseError() && inst->taken()) {
     FTRACE(1, "{}: asserting about catch block\n", inst->toString());
     /*
@@ -239,17 +244,10 @@ Type provenType(const IRGS& env, const Location& loc) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void endBlock(IRGS& env, Offset next) {
-  if (!fp(env)) {
-    // If there's no fp, we've already executed a RetCtrl or similar, so
-    // there's no reason to try to jump anywhere now.
-    return;
-  }
-  // Don't emit the jump if it would be unreachable.  This avoids
-  // unreachable blocks appearing to be reachable, which would cause
-  // translateRegion to process them.
-  if (auto const curBlock = env.irb->curBlock()) {
-    if (!curBlock->empty() && curBlock->back().isTerminal()) return;
-  }
+  // If there's no fp, we've already executed a RetCtrl or similar, so there's
+  // no reason to try to jump anywhere now. We can probably drop the fp check
+  // here and rely on the unreachable check alone.
+  if (!fp(env) || env.irb->inUnreachableState()) return;
   jmpImpl(env, next);
 }
 

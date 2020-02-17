@@ -575,10 +575,6 @@ void emitContEnter(IRGS& env) {
   push(env, retVal);
 }
 
-void emitContRaise(IRGS& /*env*/) {
-  PUNT(ContRaise);
-}
-
 void emitYield(IRGS& env) {
   implYield(env, false);
 }
@@ -607,57 +603,9 @@ void emitContValid(IRGS& env) {
     IsAsyncData(curClass(env)->classof(AsyncGenerator::getClass())), cont));
 }
 
-// Delegate generators aren't currently supported in the IR, so just use the
-// interpreter if we get into a situation where we need to use the delegate
-void interpIfHasDelegate(IRGS& env, SSATmp *cont) {
-  auto const delegateOffset = cns(env,
-      offsetof(Generator, m_delegate) - Generator::objectOff());
-  auto const delegate = gen(env, LdContField, TObj, cont, delegateOffset);
-  // Check if delegate is non-null. If it is, go to the interpreter
-  gen(env, CheckType, TNull, makeExitSlow(env), delegate);
-}
-
-void emitContKey(IRGS& env) {
-  assertx(curClass(env));
-  auto const cont = ldThis(env);
-  gen(env, ContStartedCheck, IsAsyncData(false), makeExitSlow(env), cont);
-
-  interpIfHasDelegate(env, cont);
-
-  auto const offset = cns(env,
-    offsetof(Generator, m_key) - Generator::objectOff());
-  auto const value = gen(env, LdContField, TCell, cont, offset);
-  pushIncRef(env, value);
-}
-
-void emitContCurrent(IRGS& env) {
-  assertx(curClass(env));
-  auto const cont = ldThis(env);
-  gen(env, ContStartedCheck, IsAsyncData(false), makeExitSlow(env), cont);
-
-  interpIfHasDelegate(env, cont);
-
-  // We reuse the same storage for the return value as the yield (`m_value`),
-  // so doing a blind read will cause `current` to return the wrong value on a
-  // finished generator. We should return NULL instead
-  ifThenElse(
-    env,
-    [&] (Block *taken) {
-      auto const done = gen(env, ContValid, IsAsyncData(false), cont);
-      gen(env, JmpZero, taken, done);
-    },
-    [&] {
-      auto const offset = cns(env,
-        offsetof(Generator, m_value) - Generator::objectOff());
-      auto const value = gen(env, LdContField, TCell, cont, offset);
-      pushIncRef(env, value);
-    },
-    [&] {
-      hint(env, Block::Hint::Unlikely);
-      emitNull(env);
-    }
-  );
-}
+void emitContKey(IRGS& env) { PUNT(ContKey); }
+void emitContRaise(IRGS& env) { PUNT(ContRaise); }
+void emitContCurrent(IRGS& env) { PUNT(ContCurrent); }
 
 //////////////////////////////////////////////////////////////////////
 

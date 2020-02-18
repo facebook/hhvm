@@ -92,16 +92,31 @@ let write_patches_to_buffer buf original_content patch_list =
         trim_leading_whitespace := true);
   add_original_content len
 
-let apply_patches_to_file fn patch_list =
-  let old_content = Sys_utils.cat fn in
+let apply_patches_to_string old_content patch_list =
   let buf = Buffer.create (String.length old_content) in
   let patch_list = List.sort compare_result patch_list in
   write_patches_to_buffer buf old_content patch_list;
-  let new_file_contents = Buffer.contents buf in
+  Buffer.contents buf
+
+let apply_patches_to_file fn patch_list =
+  let old_content = Sys_utils.cat fn in
+  let new_file_contents = apply_patches_to_string old_content patch_list in
   write_string_to_file fn new_file_contents
 
 let list_to_file_map =
   List.fold_left ~f:map_patches_to_filename ~init:SMap.empty
+
+let apply_patches_to_file_contents file_contents patches =
+  let file_map = list_to_file_map patches in
+  let apply fn patches =
+    let old_contents =
+      match SMap.find_opt fn file_contents with
+      | Some old_contents -> old_contents
+      | None -> failwith @@ Printf.sprintf "no file contents for %s" fn
+    in
+    apply_patches_to_string old_contents patches
+  in
+  SMap.mapi apply file_map
 
 let apply_patches patches =
   let file_map = list_to_file_map patches in

@@ -1,10 +1,5 @@
-function_return_types.php:
-{
-  "char_start":37,
-  "char_end":38,
-  "line":3,
-  "col_start":22,
-  "col_end":22,
-  "patch_type":"insert",
-  "replacement":": <<__Soft>> int "
+<?hh //partial
+
+function foo(int $x) : <<__Soft>> int {
+  return 1;
 }

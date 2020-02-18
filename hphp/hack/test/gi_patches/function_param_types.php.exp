@@ -1,20 +1,7 @@
-function_param_types.php:
-{
-  "char_start":29,
-  "char_end":30,
-  "line":3,
-  "col_start":14,
-  "col_end":14,
-  "patch_type":"insert",
-  "replacement":"<<__Soft>> int "
+<?hh //partial
+
+function foo(<<__Soft>> int $x, <<__Soft>> string $y): void {
+  bar($x, $y);
 }
-function_param_types.php:
-{
-  "char_start":33,
-  "char_end":34,
-  "line":3,
-  "col_start":18,
-  "col_end":18,
-  "patch_type":"insert",
-  "replacement":"<<__Soft>> string "
-}
+
+function bar(int $x, string $y): void {}

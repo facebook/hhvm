@@ -1171,10 +1171,15 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
     #define O(name) \
     case Op::name: { \
       auto const id = getImm(pc, 0).u_AA; \
-      if (id < 0 || id >= unit()->numArrays() || \
-          unit()->lookupArray(id)->toDataType() != KindOf##name) { \
-        ferror("{} references array data that is not a {}\n", \
+      if (id < 0 || id >= unit()->numArrays()) { \
+        ferror("{} references array data that is not a \n", \
                 #name, #name); \
+        return false; \
+      } \
+      auto const dt = unit()->lookupArray(id)->toDataType(); \
+      if (dt != KindOf##name) { \
+        ferror("{} references array data that is a {}\n", \
+                #name, dt); \
         return false; \
       } \
       break; \

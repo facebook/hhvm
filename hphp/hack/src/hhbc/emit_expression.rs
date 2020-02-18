@@ -16,7 +16,7 @@ use hhbc_string_utils_rust as string_utils;
 use instruction_sequence_rust::{Error::Unrecoverable, InstrSeq, Result};
 use label_rust::Label;
 use local_rust as local;
-use naming_special_names_rust::{pseudo_consts, special_idents, superglobals};
+use naming_special_names_rust::{pseudo_consts, special_idents, superglobals, user_attributes};
 use options::{HhvmFlags, Options};
 use oxidized::{aast, aast_defs, ast as tast, ast_defs, local_id, pos::Pos};
 use scope_rust::scope;
@@ -866,8 +866,25 @@ pub fn emit_set_range_expr(
     ]))
 }
 
-pub fn is_reified_tparam(_env: &Env, _is_fun: bool, _id: &str) -> Option<bool> {
-    unimplemented!("TODO(hrust)");
+pub fn is_reified_tparam(env: &Env, is_fun: bool, name: &str) -> Option<(usize, bool)> {
+    let is = |tparams: &Vec<tast::Tparam>| {
+        let is_soft = |ual: &Vec<tast::UserAttribute>| {
+            ual.iter().any(|ua| &ua.name.1 == user_attributes::SOFT)
+        };
+        use tast::ReifyKind::*;
+        tparams.iter().enumerate().find_map(|(i, tp)| {
+            if (tp.reified == Reified || tp.reified == SoftReified) && tp.name.1 == name {
+                Some((i, is_soft(&tp.user_attributes)))
+            } else {
+                None
+            }
+        })
+    };
+    if is_fun {
+        env.scope.get_fun_tparams().and_then(is)
+    } else {
+        is(&env.scope.get_class_params().list)
+    }
 }
 
 /// Emit code for a base expression `expr` that forms part of

@@ -200,6 +200,7 @@ type status_type =
 type syntax_type =
   | RetType
   | ParamType
+  | PropType
 
 type loggable = {
   file: string;
@@ -364,6 +365,66 @@ let get_patches
                 | _ -> None
               in
               Option.to_list opt)
+        | PropertyDeclaration
+            {
+              property_attribute_spec;
+              property_modifiers;
+              property_type;
+              property_declarators;
+              _;
+            }
+          when is_missing property_type ->
+          Option.value ~default:[]
+          @@
+          let declarator =
+            match syntax property_declarators with
+            | SyntaxList [li] ->
+              (match syntax li with
+              | ListItem { list_item = declarator; _ } -> Some declarator
+              | _ -> failwith "expected a ListItem")
+            | SyntaxList (_ :: _) ->
+              Hh_logger.log
+                "%s"
+                ( "warning: generate patch: can't generate patch for"
+                ^ " class property with multiple declarators." );
+              None
+            | _ -> failwith "expected a non-empty SyntaxList"
+          in
+          let modifier =
+            match syntax property_modifiers with
+            | SyntaxList (first_modifier :: _) -> Some first_modifier
+            | _ -> failwith "expected at least 1 property modifier"
+          in
+          modifier >>= fun modifier ->
+          declarator >>= fun declarator ->
+          (match syntax declarator with
+          | PropertyDeclarator { property_name; _ } ->
+            get_first_suggested_type_as_string
+              ~syntax_type:ParamType
+              errors
+              file
+              type_map
+              property_name
+          | _ -> failwith "expected a PropertyDeclarator")
+          >>= fun type_str ->
+          ( if is_missing property_attribute_spec then
+            position file modifier >>| fun pos ->
+            [
+              ServerRefactorTypes.(
+                Insert { pos = Pos.to_absolute pos; text = "<<__Soft>> " });
+            ]
+          else (
+            Hh_logger.log
+              "%s"
+              ( "warning: generate patch: can't generate patch for"
+              ^ " class property that already has property attributes." );
+            None
+          ) )
+          >>= fun soft_patch ->
+          position file declarator >>| fun pos ->
+          ServerRefactorTypes.(
+            Insert { pos = Pos.to_absolute pos; text = type_str ^ " " })
+          :: soft_patch
         | _ -> [])
     in
     let (patches, _) =

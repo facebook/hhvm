@@ -19,6 +19,7 @@
 #include <limits>
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
@@ -586,26 +587,10 @@ Array HHVM_FUNCTION(sys_getloadavg) {
   return make_varray(load[0], load[1], load[2]);
 }
 
-Variant HHVM_FUNCTION(array_mark_legacy, const Variant& v) {
-  if (!RO::EvalHackArrDVArrs) {
-    if (v.isVecArray()) {
-      raise_warning(Strings::ARRAY_MARK_LEGACY_VEC);
-      return v;
-    } else if (v.isDict()) {
-      raise_warning(Strings::ARRAY_MARK_LEGACY_DICT);
-      return v;
-    } else if (!v.isPHPArray() || v.asCArrRef()->isNotDVArray()) {
-      raise_warning("array_mark_legacy expects a varray or darray");
-      return v;
-    }
-  } else if (!v.isVecArray() && !v.isDict()) {
-      raise_warning("array_mark_legacy expects a dict or vec");
-      return v;
-  }
-
-  auto arr = v.asCArrRef().copy();
-  arr->setLegacyArray(true);
-  return arr;
+Variant HHVM_FUNCTION(array_mark_legacy, const Variant& v, bool recursive) {
+  auto const result = recursive ? arrprov::markTvRecursively(*v.asTypedValue())
+                                : arrprov::markTvShallow(*v.asTypedValue());
+  return Variant::attach(result);
 }
 
 bool HHVM_FUNCTION(is_array_marked_legacy, const Variant& v) {

@@ -1,0 +1,328 @@
+
+==============================================
+test_marking_nested_arrays($recursive=true):
+
+Printing marking for $x:
+array(3) {
+  [0]=>
+  vec(1) {
+    object(C) (0) {
+    }
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    object(C) (0) {
+    }
+  }
+  [2]=>
+  vec(3) {
+    array(2) {
+      ["c"]=>
+      object(C) (0) {
+      }
+      ["v"]=>
+      array(1) {
+        [0]=>
+        object(C) (0) {
+        }
+      }
+    }
+    vec(1) {
+      object(C) (0) {
+      }
+    }
+    array(1) {
+      [0]=>
+      object(C) (0) {
+      }
+    }
+  }
+}
+$x: unmarked
+$x[0]: unmarked
+$x[0][0]: <not an array>
+$x[1]: unmarked
+$x[1][0]: <not an array>
+$x[2]: unmarked
+$x[2][0]: unmarked
+$x[2][0][c]: <not an array>
+$x[2][0][v]: unmarked
+$x[2][0][v][0]: <not an array>
+$x[2][1]: unmarked
+$x[2][1][0]: <not an array>
+$x[2][2]: unmarked
+$x[2][2][0]: <not an array>
+
+Warning: array_mark_legacy() called on vec in %s/recursive-tagging.php on line 38
+
+Notice: array_mark_legacy called on object: C in %s/recursive-tagging.php on line 38
+
+Printing marking for $y:
+array(3) {
+  [0]=>
+  vec(1) {
+    object(C) (0) {
+    }
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    object(C) (0) {
+    }
+  }
+  [2]=>
+  vec(3) {
+    array(2) {
+      ["c"]=>
+      object(C) (0) {
+      }
+      ["v"]=>
+      array(1) {
+        [0]=>
+        object(C) (0) {
+        }
+      }
+    }
+    vec(1) {
+      object(C) (0) {
+      }
+    }
+    array(1) {
+      [0]=>
+      object(C) (0) {
+      }
+    }
+  }
+}
+$y: marked
+$y[0]: unmarked
+$y[0][0]: <not an array>
+$y[1]: marked
+$y[1][0]: <not an array>
+$y[2]: unmarked
+$y[2][0]: marked
+$y[2][0][c]: <not an array>
+$y[2][0][v]: marked
+$y[2][0][v][0]: <not an array>
+$y[2][1]: unmarked
+$y[2][1][0]: <not an array>
+$y[2][2]: marked
+$y[2][2][0]: <not an array>
+
+==============================================
+test_cow_optimizations($recursive=true):
+
+Notice: array_mark_legacy called on object: C in %s/recursive-tagging.php on line 46
+
+Printing marking for $x:
+array(1) {
+  [0]=>
+  array(1) {
+    [0]=>
+    object(C) (0) {
+    }
+  }
+}
+$x: marked
+$x[0]: marked
+$x[0][0]: <not an array>
+
+==============================================
+test_unable_to_cow($recursive=true):
+
+Notice: array_mark_legacy called on object: C in %s/recursive-tagging.php on line 55
+
+Printing marking for $x:
+array(1) {
+  ["a"]=>
+  array(1) {
+    ["b"]=>
+    array(1) {
+      [0]=>
+      object(C) (0) {
+      }
+    }
+  }
+}
+$x: unmarked
+$x[a]: unmarked
+$x[a][b]: unmarked
+$x[a][b][0]: <not an array>
+
+Printing marking for $y:
+array(1) {
+  [0]=>
+  array(1) {
+    ["b"]=>
+    array(1) {
+      [0]=>
+      object(C) (0) {
+      }
+    }
+  }
+}
+$y: marked
+$y[0]: marked
+$y[0][b]: marked
+$y[0][b][0]: <not an array>
+
+==============================================
+test_marking_nested_arrays($recursive=false):
+
+Printing marking for $x:
+array(3) {
+  [0]=>
+  vec(1) {
+    object(C) (0) {
+    }
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    object(C) (0) {
+    }
+  }
+  [2]=>
+  vec(3) {
+    array(2) {
+      ["c"]=>
+      object(C) (0) {
+      }
+      ["v"]=>
+      array(1) {
+        [0]=>
+        object(C) (0) {
+        }
+      }
+    }
+    vec(1) {
+      object(C) (0) {
+      }
+    }
+    array(1) {
+      [0]=>
+      object(C) (0) {
+      }
+    }
+  }
+}
+$x: unmarked
+$x[0]: unmarked
+$x[0][0]: <not an array>
+$x[1]: unmarked
+$x[1][0]: <not an array>
+$x[2]: unmarked
+$x[2][0]: unmarked
+$x[2][0][c]: <not an array>
+$x[2][0][v]: unmarked
+$x[2][0][v][0]: <not an array>
+$x[2][1]: unmarked
+$x[2][1][0]: <not an array>
+$x[2][2]: unmarked
+$x[2][2][0]: <not an array>
+
+Printing marking for $y:
+array(3) {
+  [0]=>
+  vec(1) {
+    object(C) (0) {
+    }
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    object(C) (0) {
+    }
+  }
+  [2]=>
+  vec(3) {
+    array(2) {
+      ["c"]=>
+      object(C) (0) {
+      }
+      ["v"]=>
+      array(1) {
+        [0]=>
+        object(C) (0) {
+        }
+      }
+    }
+    vec(1) {
+      object(C) (0) {
+      }
+    }
+    array(1) {
+      [0]=>
+      object(C) (0) {
+      }
+    }
+  }
+}
+$y: marked
+$y[0]: unmarked
+$y[0][0]: <not an array>
+$y[1]: unmarked
+$y[1][0]: <not an array>
+$y[2]: unmarked
+$y[2][0]: unmarked
+$y[2][0][c]: <not an array>
+$y[2][0][v]: unmarked
+$y[2][0][v][0]: <not an array>
+$y[2][1]: unmarked
+$y[2][1][0]: <not an array>
+$y[2][2]: unmarked
+$y[2][2][0]: <not an array>
+
+==============================================
+test_cow_optimizations($recursive=false):
+
+Printing marking for $x:
+array(1) {
+  [0]=>
+  array(1) {
+    [0]=>
+    object(C) (0) {
+    }
+  }
+}
+$x: marked
+$x[0]: unmarked
+$x[0][0]: <not an array>
+
+==============================================
+test_unable_to_cow($recursive=false):
+
+Printing marking for $x:
+array(1) {
+  ["a"]=>
+  array(1) {
+    ["b"]=>
+    array(1) {
+      [0]=>
+      object(C) (0) {
+      }
+    }
+  }
+}
+$x: unmarked
+$x[a]: unmarked
+$x[a][b]: unmarked
+$x[a][b][0]: <not an array>
+
+Printing marking for $y:
+array(1) {
+  [0]=>
+  array(1) {
+    ["b"]=>
+    array(1) {
+      [0]=>
+      object(C) (0) {
+      }
+    }
+  }
+}
+$y: marked
+$y[0]: unmarked
+$y[0][b]: unmarked
+$y[0][b][0]: <not an array>

@@ -313,9 +313,11 @@ folly::Optional<Tag> tagFromPC() {
 
 namespace {
 
-using ProvTag = folly::Optional<arrprov::Tag>;
-struct RecursiveState {
-  folly::Optional<ProvTag> tag = folly::none;
+template <typename Mutation>
+struct MutationState {
+  Mutation& mutation;
+  const char* function_name;
+  bool recursive = true;
   bool raised_object_notice = false;
 };
 
@@ -325,63 +327,61 @@ ArrayData* copy_if_needed(ArrayData* in, bool cow) {
   TRACE(3, "%s %d-element rc %d %s array\n",
         cow ? "Copying" : "Reusing", safe_cast<int32_t>(in->size()),
         in->count(), ArrayData::kindToString(in->kind()));
-  if (!cow) {
-    in->incRefCount();
-    return in;
-  }
-  auto const result = in->copy();
+  auto const result = cow ? in->copy() : in;
   assertx(result->hasExactlyOneRef());
   assertx(result->iter_end() == in->iter_end());
   return result;
 }
 
-ArrayData* tag_prov_helper(ArrayData* ad, RecursiveState& state, bool cow);
-
-// Tag array inputs, if needed. Notice on objects. Leave other types alone.
-ArrayData* tag_prov_helper(TypedValue in, RecursiveState& state, bool cow) {
-  if (isObjectType(type(in)) && !state.raised_object_notice) {
-    raise_notice("tag_provenance_here called on object: %s",
-                 val(in).pobj->getClassName().data());
+// This function applies `state.mutation` to `tv` to get a modified array-like.
+// Then, if `state.recursive` is set, it recursively applies the mutation to
+// the values of the array-like. It does so with the minimum number of copies,
+// mutating each array in-place if possible.
+//
+// `state.mutation` should take an ArrayData* and a `cow` param. If it doesn't
+// need to mutate the array-like, it should return nullptr; otherwise, it must
+// copy the array if needed (based on `cow`) and return the updated result.
+//
+// We pass the mutation callback a `cow` param instead of checking ad->cowCheck
+// to handle cases such as a refcount 1 array contained in a refcount 2 array;
+// even though cowCheck return false for the refcount 1 array, we still need to
+// copy it to get a new value to store in the COW-ed containing array.
+//
+// This method doesn't recurse into object properties; instead, if we encounter
+// an object, we'll log (up to one) notice including `state.function_name`.
+template <typename State>
+ArrayData* apply_mutation(TypedValue tv, State& state, bool cow = false) {
+  if (isObjectType(type(tv)) && !state.raised_object_notice) {
+    auto const cls = val(tv).pobj->getClassName().data();
+    raise_notice("%s called on object: %s", state.function_name, cls);
     state.raised_object_notice = true;
     return nullptr;
-  } else if (!isArrayLikeType(type(in))) {
+  } else if (!isArrayLikeType(type(tv))) {
     return nullptr;
   }
-  return tag_prov_helper(val(in).parr, state, cow);
-}
 
-// This function will return a non-null ArrayData if we needed to tag this
-// array or any of its descendents with a provenance tag. It does so with the
-// minimum number of copies, only copying when we must mutate array contents.
-//
-// If we have a refcount 1 array contained in a refcount 2 array, we still
-// have to copy the refcount 1 array on mutation. `cow` tracks this state.
-ArrayData* tag_prov_helper(ArrayData* in, RecursiveState& state, bool cow) {
+  // Apply the mutation to the top-level array.
+  auto const in = val(tv).parr;
   cow |= in->cowCheck();
-  ArrayData* result = nullptr;
+  auto result = state.mutation(in, cow);
+  if (result == in) result->incRefCount();
+  if (!state.recursive) return result;
 
-  // Tag the array with a top-level tag if it wants one.
-  if (arrprov::arrayWantsTag(in)) {
-    if (!state.tag) state.tag = arrprov::tagFromPC();
-    if (!*state.tag) return nullptr;
-    result = copy_if_needed(in, cow);
-    arrprov::setTag<arrprov::Mode::Emplace>(result, **state.tag);
-  }
-
-  // Recursively tag the array's contents with tags if they want one.
+  // Recursively apply the mutation to the array's contents.
   //
   // We use a local iter (which doesn't inc-ref or dec-ref its base) to make
   // logic clearer here, but it isn't necessary, strictly speaking, since we
   // check the `cow` flag instead of in->cowCheck() in copy_if_needed.
   ArrayIter ai(in, ArrayIter::local);
   for (auto done = in->empty(); !done; done = ai.nextLocal(in)) {
-    auto const ad = tag_prov_helper(ai.nvSecondLocal(in).tv(), state, cow);
+    auto const ad = apply_mutation(ai.nvSecondLocal(in).tv(), state, cow);
     if (!ad) continue;
     result = result ? result : copy_if_needed(in, cow);
+    if (result == in) result->incRefCount();
     tvMove(make_array_like_tv(ad), ai.nvSecondLocal(result).as_lval());
     while (!ai.nextLocal(result)) {
       auto const rval = ai.nvSecondLocal(result).as_lval();
-      auto const ad = tag_prov_helper(rval.tv(), state, cow);
+      auto const ad = apply_mutation(rval.tv(), state, cow);
       if (ad) tvMove(make_array_like_tv(ad), rval.as_lval());
     }
     break;
@@ -389,13 +389,84 @@ ArrayData* tag_prov_helper(ArrayData* in, RecursiveState& state, bool cow) {
   return result;
 }
 
+TypedValue markTvImpl(TypedValue in, bool recursive) {
+  // Closure state: whether or not we've raised notices for array-likes.
+  auto raised_hack_array_notice = false;
+  auto raised_non_hack_array_notice = false;
+  auto warn_once = [](bool& warned, const char* message) {
+    if (!warned) raise_warning("%s", message);
+    warned = true;
+  };
+
+  // The closure: pre-HAM, tag dvarrays and notice on vec / dicts / PHP arrays;
+  // post-HAM, tag vecs and dicts and notice on any other array-like inputs.
+  auto const mark_tv = [&](ArrayData* ad, bool cow) -> ArrayData* {
+    if (!RO::EvalHackArrDVArrs) {
+      if (ad->isVecArray()) {
+        warn_once(raised_hack_array_notice, Strings::ARRAY_MARK_LEGACY_VEC);
+        return nullptr;
+      } else if (ad->isDict()) {
+        warn_once(raised_hack_array_notice, Strings::ARRAY_MARK_LEGACY_DICT);
+        return nullptr;
+      } else if (ad->isNotDVArray()) {
+        warn_once(raised_non_hack_array_notice,
+                  "array_mark_legacy expects a varray or darray");
+        return nullptr;
+      }
+    } else if (!ad->isVecArray() && !ad->isDict()) {
+      warn_once(raised_non_hack_array_notice,
+                "array_mark_legacy expects a dict or vec");
+      return nullptr;
+    }
+
+    if (!RO::EvalHackArrDVArrs) assertx(ad->isDVArray());
+    if (RO::EvalHackArrDVArrs) assertx(ad->isVecArray() || ad->isDict());
+    if (ad->isLegacyArray()) return ad;
+
+    auto result = copy_if_needed(ad, cow);
+    result->setLegacyArray(true);
+    return result;
+  };
+
+  auto state = MutationState<decltype(mark_tv)>{
+    mark_tv, "array_mark_legacy", recursive};
+  auto const ad = apply_mutation(in, state);
+  return ad ? make_array_like_tv(ad) : tvReturn(tvAsCVarRef(&in));
+}
+
+TypedValue tagTvImpl(TypedValue in) {
+  // Closure state: an expensive-to-compute provenance tag.
+  using ProvTag = folly::Optional<arrprov::Tag>;
+  folly::Optional<ProvTag> tag = folly::none;
+
+  // The closure: tag array-likes if they want tags, else leave them alone.
+  auto const tag_tv = [&](ArrayData* ad, bool cow) -> ArrayData* {
+    if (!arrprov::arrayWantsTag(ad)) return nullptr;
+    if (!tag) tag = arrprov::tagFromPC();
+    if (!*tag) return nullptr;
+    auto result = copy_if_needed(ad, cow);
+    arrprov::setTag<arrprov::Mode::Emplace>(result, **tag);
+    return result;
+  };
+
+  auto state = MutationState<decltype(tag_tv)>{tag_tv, "tag_provenance_here"};
+  auto const ad = apply_mutation(in, state);
+  return ad ? make_array_like_tv(ad) : tvReturn(tvAsCVarRef(&in));
+}
+
 }
 
 TypedValue tagTvRecursively(TypedValue in) {
   if (!RO::EvalArrayProvenance) return tvReturn(tvAsCVarRef(&in));
-  auto state = RecursiveState{};
-  auto const ad = tag_prov_helper(in, state, false);
-  return ad ? make_array_like_tv(ad) : tvReturn(tvAsCVarRef(&in));
+  return tagTvImpl(in);
+}
+
+TypedValue markTvRecursively(TypedValue in) {
+  return markTvImpl(in, /*recursive=*/true);
+}
+
+TypedValue markTvShallow(TypedValue in) {
+  return markTvImpl(in, /*recursive=*/false);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

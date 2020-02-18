@@ -169,6 +169,8 @@ void reassignTag(ArrayData* ad);
  */
 ArrayData* tagStaticArr(ArrayData* ad, folly::Optional<Tag> tag = folly::none);
 
+///////////////////////////////////////////////////////////////////////////////
+
 /*
  * Recursively tag the given TypedValue, tagging it (if necessary), and if it is
  * an array-like, recursively tagging of its values (if necessary).
@@ -179,10 +181,31 @@ ArrayData* tagStaticArr(ArrayData* ad, folly::Optional<Tag> tag = folly::none);
  *
  * The only other type that can contain nested arrays are objects. This function
  * does NOT tag through objects; instead, it raises notices that it found them.
+ * (It will emit at most one notice per call.)
  *
- * This method will return a new TypedValue or inc-ref `in`.
+ * This method will return a new TypedValue or modify and inc-ref `in`.
  */
 TypedValue tagTvRecursively(TypedValue in);
+
+/*
+ * Recursively mark the given TV as being a legacy array. This function has the
+ * same recursive behavior as tagTvRecursively, except that in addition to
+ * raising a notice on encountering an object, it will also raise (up to one)
+ * notice on encountering a vec or dict.
+ *
+ * The extra notice is needed because we won't be able to distinguish between
+ * vecs and varrays, or between dicts and darrays, post the HAM flag flip.
+ *
+ * This method will return a new TypedValue or modify and inc-ref `in`.
+ */
+TypedValue markTvRecursively(TypedValue in);
+
+/*
+ * Mark the given TV as being a legacy array.
+ *
+ * This method will return a new TypedValue or modify and inc-ref `in`.
+ */
+TypedValue markTvShallow(TypedValue in);
 
 ///////////////////////////////////////////////////////////////////////////////
 

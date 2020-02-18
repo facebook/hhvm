@@ -41,13 +41,13 @@ function server_warmup_status_monotonic(): string;
 function execution_context(): string;
 
 <<__Rx, __Native, __IsFoldable>>
-function mark_legacy_hack_array(mixed $v): mixed;
+function mark_legacy_hack_array(mixed $v, bool $recursive = false): mixed;
 
 <<__Rx, __Native, __IsFoldable>>
 function is_marked_legacy_hack_array(mixed $v): bool;
 
 <<__Rx, __Native, __IsFoldable>>
-function enable_legacy_behavior(mixed $v): mixed;
+function enable_legacy_behavior(mixed $v, bool $recursive = false): mixed;
 
 <<__Rx, __Native, __IsFoldable>>
 function is_legacy_behavior_enabled(mixed $v): bool;
@@ -56,7 +56,7 @@ function is_legacy_behavior_enabled(mixed $v): bool;
  * TODO(jgriego) delete the above aliases, these are the preferred names
 */
 <<__Rx, __Native, __IsFoldable>>
-function array_mark_legacy(mixed $v): mixed;
+function array_mark_legacy(mixed $v, bool $recursive = false): mixed;
 
 <<__Rx, __Native, __IsFoldable>>
 function is_array_marked_legacy(mixed $v): bool;

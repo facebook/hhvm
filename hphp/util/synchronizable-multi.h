@@ -51,6 +51,7 @@ struct SynchronizableMulti {
   void wait(int id, int q, Priority pri);
   bool wait(int id, int q, Priority pri, long seconds); // false if timed out
   bool wait(int id, int q, Priority pri, long seconds, long long nanosecs);
+  void notifySpecific(int id);
   void notify();
   void notifyAll();
   void setNumGroups(int num_groups);

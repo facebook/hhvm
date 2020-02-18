@@ -218,7 +218,9 @@ public:
         break;
       }
 
-      if (m_stopped) {
+      // Stop trying to dequeue, if the queue itself has stopped, or if the
+      // worker has been asked to stop due to thread count adjustment.
+      if (m_stopped || (workerStop && *workerStop)) {
         throw StopSignal();
       }
 
@@ -748,7 +750,9 @@ struct JobQueueDispatcher : IHostHealthObserver {
 
     // We have too many active threads; we need to stop the excess.
     for (auto it = m_workers.begin() + mtc; it != m_workers.end(); ++it) {
-      (*it)->stop();
+      auto worker = *it;
+      worker->stop();
+      m_queue.notifySpecific(worker->id()); // wake it up, if it is waiting.
     }
     m_stoppedWorkers.insert(m_workers.begin() + mtc, m_workers.end());
     m_workers.resize(mtc);

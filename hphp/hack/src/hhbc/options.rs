@@ -189,7 +189,7 @@ impl Default for HhvmFlags {
 #[derive(Clone, Serialize, Deserialize, Debug, Default, PartialEq)]
 pub struct Hhvm {
     #[serde(default)]
-    pub aliased_namespaces: Arg<BTreeMap<String, String>>,
+    pub aliased_namespaces: Arg<BTreeMapOrEmptyVec<String, String>>,
 
     #[serde(default)]
     pub dynamic_invoke_functions: Arg<BTreeSet<String>>,
@@ -530,6 +530,47 @@ fn deserialize_flags<'de, D: Deserializer<'de>, P: PrefixedFlags>(
     deserializer.deserialize_map(Phantom(PhantomData::<P>))
 }
 
+/// Wrapper that serves as a workaround for a bug in the HHVM's serialization
+/// empty JSON objects ({}) are silently converted to [] (darray vs varray):
+/// - (de)serialize [] as Empty (instead of {});
+/// - (de)serialize missing values as [].
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
+#[serde(untagged)]
+pub enum BTreeMapOrEmptyVec<K: std::cmp::Ord, V> {
+    Nonempty(BTreeMap<K, V>),
+    Empty(Vec<V>),
+}
+impl<K: std::cmp::Ord, V> BTreeMapOrEmptyVec<K, V> {
+    pub fn as_map(&self) -> Option<&BTreeMap<K, V>> {
+        match &self {
+            &BTreeMapOrEmptyVec::Nonempty(m) => Some(m),
+            _ => None,
+        }
+    }
+}
+impl<K: std::cmp::Ord, V> Into<BTreeMap<K, V>> for BTreeMapOrEmptyVec<K, V> {
+    fn into(self) -> BTreeMap<K, V> {
+        match self {
+            BTreeMapOrEmptyVec::Nonempty(m) => m,
+            _ => BTreeMap::new(),
+        }
+    }
+}
+impl<K: std::cmp::Ord, V> From<BTreeMap<K, V>> for BTreeMapOrEmptyVec<K, V> {
+    fn from(m: BTreeMap<K, V>) -> Self {
+        if m.is_empty() {
+            BTreeMapOrEmptyVec::Empty(vec![])
+        } else {
+            BTreeMapOrEmptyVec::Nonempty(m)
+        }
+    }
+}
+impl<K: std::cmp::Ord, V> Default for BTreeMapOrEmptyVec<K, V> {
+    fn default() -> Self {
+        BTreeMapOrEmptyVec::Empty(vec![])
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -639,7 +680,7 @@ mod tests {
                 let mut m = BTreeMap::new();
                 m.insert("foo".to_owned(), "bar".to_owned());
                 m.insert("bar".to_owned(), "baz".to_owned());
-                m
+                m.into()
             }),
             flags: HhvmFlags::EMIT_FUNC_POINTERS,
             ..Default::default()
@@ -729,11 +770,20 @@ mod tests {
             "hhvm.aliased_namespaces": { "global_value": {"ns1": "ns2"} }
         }))
         .unwrap();
-        assert_eq!(*act.hhvm.aliased_namespaces.get(), {
+        assert_eq!(act.hhvm.aliased_namespaces.get().as_map().unwrap(), &{
             let mut m = BTreeMap::new();
             m.insert("ns1".to_owned(), "ns2".to_owned());
             m
         },);
+    }
+
+    #[test]
+    fn test_options_map_str_str_as_empty_array_json_de() {
+        let act: Options = serde_json::value::from_value(json!({
+            "hhvm.aliased_namespaces": { "global_value": [] }
+        }))
+        .unwrap();
+        assert_eq!(act.hhvm.aliased_namespaces.get().as_map(), None);
     }
 
     #[test]

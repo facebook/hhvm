@@ -170,7 +170,7 @@ let test_ffi_defaults_consistent _ =
   assert_equal caml rust;
   ()
 
-let test_aliased_namespaces_configs_to_json_ffi _ =
+let test_aliased_namespaces_object_configs_to_json_ffi _ =
   let opts =
     Options_ffi.from_configs
       ~args:[]
@@ -182,6 +182,34 @@ let test_aliased_namespaces_configs_to_json_ffi _ =
         ]
   in
   assert_equal [("foo", "bar")] Hhbc_options.(aliased_namespaces opts);
+  ()
+
+let test_aliased_namespaces_empty_configs_to_json_ffi _ =
+  (* Note: HackC must understand [] as {} for hhvm.aliased_namespaces *)
+  let opts =
+    Options_ffi.from_configs
+      ~args:[]
+      ~jsons:
+        [
+          "
+      { \"hhvm.aliased_namespaces\": { \"global_value\": [] } }
+      ";
+        ]
+  in
+  assert_equal [] Hhbc_options.(aliased_namespaces opts);
+
+  (* Test forward compatibility; i.e., deserialization from {} (empty map) *)
+  let opts =
+    Options_ffi.from_configs
+      ~args:[]
+      ~jsons:
+        [
+          "
+      { \"hhvm.aliased_namespaces\": { \"global_value\": {} } }
+      ";
+        ]
+  in
+  assert_equal [] Hhbc_options.(aliased_namespaces opts);
   ()
 
 let caml_from_configs config_list config_jsons =
@@ -241,8 +269,10 @@ let () =
          "test_override_2bools_single_JSON_FFI"
          >:: test_override_2bools_configs_to_json_ffi;
          "test_ffi_defaults_consistent" >:: test_ffi_defaults_consistent;
-         "test_aliased_namespaces_configs_to_json_ffi"
-         >:: test_aliased_namespaces_configs_to_json_ffi;
+         "test_aliased_namespaces_object_configs_to_json_ffi"
+         >:: test_aliased_namespaces_object_configs_to_json_ffi;
+         "test_aliased_namespaces_empty_configs_to_json_ffi"
+         >:: test_aliased_namespaces_empty_configs_to_json_ffi;
          "test_json_configs_stackable" >:: test_json_configs_stackable;
        ]
   |> run_test_tt_main

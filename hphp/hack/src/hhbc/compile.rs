@@ -176,13 +176,13 @@ fn create_parser_options(opts: &Options) -> ParserOptions {
     let hack_lang_flags = |flag| opts.hhvm.hack_lang_flags.contains(flag);
     let phpism_flags = |flag| opts.phpism_flags.contains(flag);
     let mut popt = ParserOptions::default();
-    popt.po_auto_namespace_map = opts
-        .hhvm
-        .aliased_namespaces
-        .get()
-        .iter()
-        .map(|(x, y)| (x.to_owned(), y.to_owned()))
-        .collect();
+    popt.po_auto_namespace_map = match opts.hhvm.aliased_namespaces.get() {
+        options::BTreeMapOrEmptyVec::Nonempty(m) => m
+            .iter()
+            .map(|(x, y)| (x.to_owned(), y.to_owned()))
+            .collect(),
+        _ => vec![],
+    };
     popt.po_codegen = true;
     popt.po_disallow_silence = false;
     popt.po_disallow_execution_operator = phpism_flags(PhpismFlags::DISALLOW_EXECUTION_OPERATOR);

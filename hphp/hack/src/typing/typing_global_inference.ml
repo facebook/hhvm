@@ -58,16 +58,12 @@ end
 module StateFunctor (M : MarshalledData) = struct
   type t = M.t
 
-  let load path =
-    let channel = In_channel.create path in
-    let data : t = Marshal.from_channel channel in
-    In_channel.close channel;
-    data
+  let load (path : string) : t =
+    In_channel.with_file path ~f:Marshal.from_channel
 
-  let save path t =
-    let out_channel = Out_channel.create path in
-    Marshal.to_channel out_channel t [];
-    Out_channel.close out_channel
+  let save (path : string) (t : t) : unit =
+    Out_channel.with_file path ~f:(fun channel ->
+        Marshal.to_channel channel t [])
 end
 
 let artifacts_path : string ref = ref ""

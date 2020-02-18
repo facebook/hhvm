@@ -1,9 +1,1 @@
-Typing[4305] Invalid reified hint
-   --> reify.good.php
-  3 | class Param<reify T> {
-    |                   ^ T is reified
- 10 |     case Param<S> data;
-    |                ^
-    |                ^ This is not reified, it cannot be used as a reified type argument
-
-1 error found.
+No errors

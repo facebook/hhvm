@@ -49,6 +49,8 @@ module MakeType = Typing_make_type
 module Cls = Decl_provider.Class
 module Partial = Partial_provider
 module Fake = Typing_fake_members
+module TySet = Typing_set
+module TPEnv = Type_parameter_env
 
 exception InvalidPocketUniverse
 
@@ -8005,6 +8007,24 @@ and pu_enum_def
     List.fold_map ~init:env ~f:process_member pu_members
   in
   let local_tpenv = Env.get_tpenv env in
+  let local_tpenv =
+    List.fold
+      ~init:local_tpenv
+      ~f:(fun tpenv ((_, name), reified) ->
+        let tpinfo =
+          TPEnv.
+            {
+              lower_bounds = TySet.empty;
+              upper_bounds = TySet.empty;
+              reified;
+              enforceable = false;
+              (* TODO(T35357243) improve to support that *)
+              newable = false (* TODO(T35357243) improve to support that *);
+            }
+        in
+        TPEnv.add name tpinfo tpenv)
+      pu_case_types
+  in
   {
     Aast.pu_annotation = Env.save local_tpenv env;
     Aast.pu_name;

@@ -806,12 +806,13 @@ let string_of_typedef_info ti =
   let flags =
     List.filter ~f:(fun f -> f = Hhas_type_constraint.Nullable) flags
   in
-  let flags_text = string_of_type_flags flags in
-  "<"
-  ^ SU.quote_string (Option.value ~default:"" name)
-  ^ " "
-  ^ flags_text
-  ^ " >"
+  let flags_text =
+    if not (List.is_empty flags) then
+      " " ^ string_of_type_flags flags ^ " "
+    else
+      ""
+  in
+  "<" ^ SU.quote_string (Option.value ~default:"" name) ^ flags_text ^ ">"
 
 let string_of_type_info_option tio =
   match tio with

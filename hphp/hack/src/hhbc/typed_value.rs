@@ -30,7 +30,7 @@ pub enum TypedValue {
     // Classic PHP arrays with explicit (key,value) entries
     HhasAdata(String),
     Array(Vec<(TypedValue, TypedValue)>),
-    VArray(Vec<Self>),
+    VArray((Vec<Self>, ProvTag)),
     DArray((Vec<(TypedValue, TypedValue)>, ProvTag)),
     // Hack arrays: vectors, keysets, and dictionaries
     Vec((Vec<TypedValue>, ProvTag)),
@@ -66,7 +66,7 @@ impl From<TypedValue> for bool {
             TypedValue::Float(f) => f != 0.0,
             // Empty collections cast to false if empty, otherwise true
             TypedValue::Array(v) => !v.is_empty(),
-            TypedValue::VArray(v) => !v.is_empty(),
+            TypedValue::VArray((v, _)) => !v.is_empty(),
             TypedValue::DArray((v, _)) => !v.is_empty(),
             TypedValue::Vec((v, _)) => !v.is_empty(),
             TypedValue::Keyset(v) => !v.is_empty(),

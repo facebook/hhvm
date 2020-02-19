@@ -276,9 +276,9 @@ fn hint_to_type_constraint(
                 }
                 _ => (),
             };
-            happly_helper(tparams, kind, pos, s).unwrap()
+            happly_helper(tparams, kind, pos, s)?
         }
-        h => happly_helper(tparams, kind, pos, &hint_to_string(h)).unwrap(),
+        h => happly_helper(tparams, kind, pos, &hint_to_string(h))?,
     })
 }
 
@@ -311,8 +311,8 @@ fn make_tc_with_flags_if_non_empty_flags(
 fn happly_helper(tparams: &[&str], kind: &Kind, pos: &Pos, name: &str) -> Result<constraint::Type> {
     use constraint::{Flags, Type};
     if tparams.contains(&name) {
-        Ok(Type::make_with_raw_str(
-            "",
+        Ok(Type::make(
+            Some("".into()),
             Flags::EXTENDED_HINT | Flags::TYPE_VAR,
         ))
     } else if string_utils::is_self(&name) || string_utils::is_parent(name) {
@@ -354,6 +354,58 @@ fn make_type_info(
     Ok(Info::make(type_info_user_type, type_info_type_constraint))
 }
 
+fn param_hint_to_type_info(
+    kind: &Kind,
+    skipawaitable: bool,
+    nullable: bool,
+    tparams: &[&str],
+    hint: &Hint,
+) -> Result<Info> {
+    let Hint(_, h) = hint;
+    let is_simple_hint = match h.as_ref() {
+        Hsoft(_)
+        | Hoption(_)
+        | Haccess(_, _)
+        | Hfun(_)
+        | Hdynamic
+        | Hnonnull
+        | Hmixed
+        | Harray(Some(_), Some(_))
+        | Hdarray(_, _) => false,
+        Happly(Id(_, s), hs) => {
+            if !hs.is_empty() {
+                false
+            } else if s == "\\HH\\dynamic" || s == "\\HH\\nonnull" || s == "\\HH\\mixed" {
+                false
+            } else {
+                !tparams.contains(&s.as_str())
+            }
+        }
+        Habstr(s) => !tparams.contains(&s.as_str()),
+        Herr | Hany => {
+            return Err(Unrecoverable(
+                "Expected error on Tany in naming: param_hint_to_type_info".into(),
+            ))
+        }
+        _ => true,
+    };
+    let tc = hint_to_type_constraint(kind, tparams, skipawaitable, hint)?;
+    make_type_info(
+        tparams,
+        hint,
+        tc.name,
+        try_add_nullable(
+            nullable,
+            hint,
+            if is_simple_hint {
+                constraint::Flags::empty()
+            } else {
+                tc.flags
+            },
+        ),
+    )
+}
+
 pub fn hint_to_type_info(
     kind: &Kind,
     skipawaitable: bool,
@@ -361,15 +413,10 @@ pub fn hint_to_type_info(
     tparams: &[&str],
     hint: &Hint,
 ) -> Result<Info> {
-    let tc = hint_to_type_constraint(kind, tparams, skipawaitable, hint)?;
     if let Kind::Param = kind {
-        return make_type_info(
-            tparams,
-            hint,
-            tc.name,
-            try_add_nullable(nullable, hint, tc.flags),
-        );
+        return param_hint_to_type_info(kind, skipawaitable, nullable, tparams, hint);
     };
+    let tc = hint_to_type_constraint(kind, tparams, skipawaitable, hint)?;
     let flags = match kind {
         Kind::Return | Kind::Property if tc.name.is_some() => {
             constraint::Flags::EXTENDED_HINT | tc.flags

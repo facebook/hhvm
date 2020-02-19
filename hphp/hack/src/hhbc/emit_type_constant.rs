@@ -27,7 +27,7 @@ fn vec_or_varray(opts: &Options, l: Vec<TypedValue>) -> TypedValue {
     if hack_arr_dv_arrs(opts) {
         TypedValue::Vec((l, None))
     } else {
-        TypedValue::VArray(l)
+        TypedValue::VArray((l, None))
     }
 }
 
@@ -243,25 +243,21 @@ fn hint_to_type_constant_list(
         Happly(s, hints) => {
             let ast_defs::Id(_, name) = s;
             if hints.is_empty() {
-                let id = *targ_map
-                    .get(&name.as_str())
-                    .expect("Hints not available on the original AST");
-                [
-                    vec![(TypedValue::String("id".into()), TypedValue::Int(id))],
-                    get_kind(tparams, "$$internal$$reifiedtype"),
-                ]
-                .concat()
-            } else {
-                let generic_types = if name.eq_ignore_ascii_case(classes::CLASS_NAME)
-                    || name.eq_ignore_ascii_case(classes::TYPE_NAME)
-                {
-                    vec![]
-                } else {
-                    get_generic_types(opts, tparams, targ_map, hints)?
-                };
-                let (classname, kind) = resolve_classname(tparams, name.to_owned());
-                [generic_types, classname, kind].concat()
+                if let Some(id) = targ_map.get(name.as_str()) {
+                    let mut r = get_kind(tparams, "$$internal$$reifiedtype");
+                    r.push((TypedValue::String("id".into()), TypedValue::Int(*id)));
+                    return Ok(r);
+                }
             }
+            let (mut classname, kind) = resolve_classname(tparams, name.to_owned());
+            let mut r = kind;
+            r.append(&mut classname);
+            if !(name.eq_ignore_ascii_case(classes::CLASS_NAME)
+                || name.eq_ignore_ascii_case(classes::TYPE_NAME))
+            {
+                r.append(&mut get_generic_types(opts, tparams, targ_map, hints)?);
+            };
+            r
         }
         Hshape(si) => [
             vec![(
@@ -300,7 +296,7 @@ fn hint_to_type_constant_list(
                     TypedValue::String("param_types".into()),
                     hints_to_type_constant(opts, tparams, targ_map, &hf.param_tys)?,
                 )];
-                [variadic_type, param_types, return_type, kind].concat()
+                [kind, return_type, param_types, variadic_type].concat()
             }
         }
         Htuple(hints) => {
@@ -309,7 +305,7 @@ fn hint_to_type_constant_list(
                 TypedValue::String("elem_types".into()),
                 hints_to_type_constant(opts, tparams, targ_map, hints)?,
             )];
-            [elem_types, kind].concat()
+            [kind, elem_types].concat()
         }
         Hoption(h) => [
             hint_to_type_constant_list(opts, tparams, targ_map, h)?,
@@ -320,13 +316,13 @@ fn hint_to_type_constant_list(
         ]
         .concat(),
         Hsoft(h) => [
-            hint_to_type_constant_list(opts, tparams, targ_map, h)?,
             vec![(TypedValue::String("soft".into()), TypedValue::Bool(true))],
+            hint_to_type_constant_list(opts, tparams, targ_map, h)?,
         ]
         .concat(),
         Hlike(h) => [
-            hint_to_type_constant_list(opts, tparams, targ_map, h)?,
             vec![(TypedValue::String("like".into()), TypedValue::Bool(true))],
+            hint_to_type_constant_list(opts, tparams, targ_map, h)?,
         ]
         .concat(),
         HpuAccess(_, _, _) => {

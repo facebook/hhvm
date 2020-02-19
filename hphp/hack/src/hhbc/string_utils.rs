@@ -92,7 +92,7 @@ pub fn mangle(mut name: String) -> String {
 }
 
 pub fn quote_string(s: &str) -> String {
-    format!("\\{}\\", escape(s))
+    format!("\"{}\"", escape(s))
 }
 
 pub fn quote_string_with_escape(s: &str) -> String {
@@ -373,7 +373,7 @@ mod string_utils_tests {
     #[test]
     fn quote_string_test() {
         let some_string = "test";
-        assert_eq!(super::quote_string(&some_string), "\\test\\");
+        assert_eq!(super::quote_string(&some_string), "\"test\"");
     }
 
     #[test]

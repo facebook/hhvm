@@ -136,9 +136,10 @@ impl InstrSeq {
         Self::make_instr(Instruct::ILitConst(l))
     }
 
-    pub fn make_lit_empty_varray() -> Self {
+    /* TODO(hrust): re-enable it with arg
+     pub fn make_lit_empty_varray() -> Self {
         Self::make_lit_const(InstructLitConst::TypedValue(TypedValue::VArray(vec![])))
-    }
+    } */
 
     pub fn make_iterinit(args: IterArgs, label: Label) -> Self {
         Self::make_instr(Instruct::IIterator(InstructIterator::IterInit(args, label)))

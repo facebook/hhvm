@@ -28,10 +28,11 @@ use hhas_property_rust::HhasProperty;
 use hhas_record_def_rust::{Field, HhasRecord};
 use hhas_type::{constraint, Info as HhasTypeInfo};
 use hhas_type_const::HhasTypeConstant;
+use hhas_typedef_rust::Typedef as HhasTypedef;
 use hhbc_ast_rust::*;
 use hhbc_id_rust::{class, Id};
 use hhbc_string_utils_rust::{
-    float, integer, lstrip, quote_string_with_escape, strip_global_ns, strip_ns,
+    float, integer, lstrip, quote_string, quote_string_with_escape, strip_global_ns, strip_ns,
     triple_quote_string, types,
 };
 use instruction_sequence_rust::InstrSeq;
@@ -199,12 +200,37 @@ fn print_program_<W: Write>(
     concat(w, &prog.functions, |w, f| print_fun_def(ctx, w, f))?;
     concat(w, &prog.record_defs, |w, rd| print_record_def(ctx, w, rd))?;
     concat(w, &prog.classes, |w, cd| print_class_def(ctx, w, cd))?;
+    concat(w, &prog.typedefs, |w, td| print_typedef(ctx, w, td))?;
     print_file_attributes(ctx, w, &prog.file_attributes)?;
 
     if ctx.dump_symbol_refs() {
         return not_impl!();
     }
     Ok(())
+}
+
+fn print_typedef<W: Write>(ctx: &mut Context, w: &mut W, td: &HhasTypedef) -> Result<(), W::Error> {
+    newline(w)?;
+    w.write(".alias ")?;
+    print_typedef_attributes(ctx, w, td)?;
+    w.write(td.name.to_raw_string())?;
+    w.write(" = ")?;
+    print_typedef_info(w, &td.type_info)?;
+    w.write(" ")?;
+    wrap_by_triple_quotes(w, |w| print_adata(ctx, w, &td.type_structure))?;
+    w.write(";")
+}
+
+fn print_typedef_attributes<W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    td: &HhasTypedef,
+) -> Result<(), W::Error> {
+    let mut specials = vec![];
+    if ctx.is_system_lib() {
+        specials.push("persistent");
+    }
+    print_special_and_user_attrs(ctx, w, &specials[..], td.attributes.as_slice())
 }
 
 fn print_data_region_element<W: Write>(w: &mut W, fake_elem: usize) -> Result<(), W::Error> {
@@ -731,7 +757,10 @@ fn print_adata<W: Write>(ctx: &mut Context, w: &mut W, tv: &TypedValue) -> Resul
         TypedValue::Keyset(values) => {
             print_adata_collection_argument(ctx, w, ADATA_KEYSET_PREFIX, &None, values)
         }
-        _ => not_impl!(),
+        TypedValue::VArray((values, loc)) => {
+            print_adata_collection_argument(ctx, w, ADATA_VARRAY_PREFIX, loc, values)
+        }
+        TypedValue::HhasAdata(_) => not_impl!(),
     }
 }
 
@@ -915,8 +944,11 @@ fn print_include_eval_define<W: Write>(
         DefCls(n) => concat_str_by(w, " ", ["DefCls", n.to_string().as_str()]),
         DefClsNop(n) => concat_str_by(w, " ", ["DefClsNop", n.to_string().as_str()]),
         DefRecord(n) => concat_str_by(w, " ", ["DefRecord", n.to_string().as_str()]),
-        DefCns(_) => not_impl!(),
-        DefTypeAlias(_) => not_impl!(),
+        DefCns(id) => {
+            w.write("DefCns ")?;
+            print_hhbc_id(w, id)
+        }
+        DefTypeAlias(id) => w.write(format!("DefTypeAlias {}", id)),
     }
 }
 
@@ -943,26 +975,25 @@ fn print_lit_const<W: Write>(w: &mut W, lit: &InstructLitConst) -> Result<(), W:
         Int(i) => concat_str_by(w, " ", ["Int", i.to_string().as_str()]),
         String(s) => {
             w.write("String ")?;
-            wrap_by_quotes(w, |w| w.write(s))
+            wrap_by_quotes(w, |w| w.write(escape(s)))
         }
         _ => not_impl!(),
     }
 }
 
 fn print_op<W: Write>(w: &mut W, op: &InstructOperator) -> Result<(), W::Error> {
-    use InstructOperator::*;
+    use InstructOperator as I;
     match op {
-        Fatal(fatal_op) => print_fatal_op(w, fatal_op),
+        I::Fatal(fatal_op) => print_fatal_op(w, fatal_op),
         _ => not_impl!(),
     }
 }
 
 fn print_fatal_op<W: Write>(w: &mut W, f: &FatalOp) -> Result<(), W::Error> {
-    use FatalOp::*;
     match f {
-        Parse => w.write("Fatal Parse"),
-        Runtime => w.write("Fatal Runtime"),
-        RuntimeOmitFrame => w.write("Fatal RuntimeOmitFrame"),
+        FatalOp::Parse => w.write("Fatal Parse"),
+        FatalOp::Runtime => w.write("Fatal Runtime"),
+        FatalOp::RuntimeOmitFrame => w.write("Fatal RuntimeOmitFrame"),
     }
 }
 
@@ -1366,50 +1397,51 @@ fn print_type_info<W: Write>(w: &mut W, ti: &HhasTypeInfo) -> Result<(), W::Erro
     print_type_info_(w, false, ti)
 }
 
-fn print_type_info_<W: Write>(w: &mut W, is_enum: bool, ti: &HhasTypeInfo) -> Result<(), W::Error> {
-    let print_flag = |w: &mut W, flag: constraint::Flags| {
-        let mut first = true;
-        let mut print_space = |w: &mut W| -> Result<(), W::Error> {
-            if !first {
-                w.write(" ")
-            } else {
-                Ok(first = false)
-            }
-        };
-        use constraint::Flags as F;
-        if flag.contains(F::DISPLAY_NULLABLE) {
-            print_space(w)?;
-            w.write("display_nullable")?;
+fn print_type_flags<W: Write>(w: &mut W, flag: constraint::Flags) -> Result<(), W::Error> {
+    let mut first = true;
+    let mut print_space = |w: &mut W| -> Result<(), W::Error> {
+        if !first {
+            w.write(" ")
+        } else {
+            Ok(first = false)
         }
-        if flag.contains(F::EXTENDED_HINT) {
-            print_space(w)?;
-            w.write("extended_hint")?;
-        }
-        if flag.contains(F::NULLABLE) {
-            print_space(w)?;
-            w.write("nullable")?;
-        }
-
-        if flag.contains(F::SOFT) {
-            print_space(w)?;
-            w.write("soft")?;
-        }
-        if flag.contains(F::TYPE_CONSTANT) {
-            print_space(w)?;
-            w.write("type_constant")?;
-        }
-
-        if flag.contains(F::TYPE_VAR) {
-            print_space(w)?;
-            w.write("type_var")?;
-        }
-
-        if flag.contains(F::UPPERBOUND) {
-            print_space(w)?;
-            w.write("upperbound")?;
-        }
-        Ok(())
     };
+    use constraint::Flags as F;
+    if flag.contains(F::DISPLAY_NULLABLE) {
+        print_space(w)?;
+        w.write("display_nullable")?;
+    }
+    if flag.contains(F::EXTENDED_HINT) {
+        print_space(w)?;
+        w.write("extended_hint")?;
+    }
+    if flag.contains(F::NULLABLE) {
+        print_space(w)?;
+        w.write("nullable")?;
+    }
+
+    if flag.contains(F::SOFT) {
+        print_space(w)?;
+        w.write("soft")?;
+    }
+    if flag.contains(F::TYPE_CONSTANT) {
+        print_space(w)?;
+        w.write("type_constant")?;
+    }
+
+    if flag.contains(F::TYPE_VAR) {
+        print_space(w)?;
+        w.write("type_var")?;
+    }
+
+    if flag.contains(F::UPPERBOUND) {
+        print_space(w)?;
+        w.write("upperbound")?;
+    }
+    Ok(())
+}
+
+fn print_type_info_<W: Write>(w: &mut W, is_enum: bool, ti: &HhasTypeInfo) -> Result<(), W::Error> {
     let print_quote_str = |w: &mut W, opt: &Option<String>| {
         option_or(
             w,
@@ -1426,7 +1458,22 @@ fn print_type_info_<W: Write>(w: &mut W, is_enum: bool, ti: &HhasTypeInfo) -> Re
             print_quote_str(w, &ti.type_constraint.name)?;
             w.write(" ")?;
         }
-        print_flag(w, ti.type_constraint.flags)
+        print_type_flags(w, ti.type_constraint.flags)
+    })
+}
+
+fn print_typedef_info<W: Write>(w: &mut W, ti: &HhasTypeInfo) -> Result<(), W::Error> {
+    wrap_by_angle(w, |w| {
+        w.write(quote_string(
+            ti.type_constraint.name.as_ref().map_or("", |n| n.as_str()),
+        ))?;
+        let flags = ti.type_constraint.flags & constraint::Flags::NULLABLE;
+        if !flags.is_empty() {
+            wrap_by(w, " ", |w| {
+                print_type_flags(w, ti.type_constraint.flags & constraint::Flags::NULLABLE)
+            })?;
+        }
+        Ok(())
     })
 }
 
@@ -1455,7 +1502,7 @@ fn print_record_field<W: Write>(
         c.newline(w)?;
         match intial_value {
             None => w.write("uninit")?,
-            Some(value) => wrap_by_quotes(w, |w| print_adata(c, w, value))?,
+            Some(value) => wrap_by_triple_quotes(w, |w| print_adata(c, w, value))?,
         }
         w.write(";")
     })
@@ -1482,4 +1529,8 @@ fn print_record_def<W: Write>(
         ctx.newline(w)
     })?;
     newline(w)
+}
+
+fn print_hhbc_id<'a, W: Write, I: Id<'a>>(w: &mut W, id: &I) -> Result<(), W::Error> {
+    wrap_by_quotes(w, |w| w.write(escape(id.to_raw_string())))
 }

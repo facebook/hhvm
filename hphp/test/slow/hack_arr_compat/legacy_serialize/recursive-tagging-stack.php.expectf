@@ -1,0 +1,2 @@
+Notice: array_mark_legacy stack depth exceeded! in %s/recursive-tagging-stack.php on line 30
+First unmarked array at depth 512.

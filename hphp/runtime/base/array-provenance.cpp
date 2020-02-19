@@ -313,12 +313,15 @@ folly::Optional<Tag> tagFromPC() {
 
 namespace {
 
+static auto const kMaxMutationStackDepth = 512;
+
 template <typename Mutation>
 struct MutationState {
   Mutation& mutation;
   const char* function_name;
   bool recursive = true;
   bool raised_object_notice = false;
+  bool raised_stack_notice = false;
 };
 
 // Returns a copy of the given array that the caller may mutate in place.
@@ -350,7 +353,16 @@ ArrayData* copy_if_needed(ArrayData* in, bool cow) {
 // This method doesn't recurse into object properties; instead, if we encounter
 // an object, we'll log (up to one) notice including `state.function_name`.
 template <typename State>
-ArrayData* apply_mutation(TypedValue tv, State& state, bool cow = false) {
+ArrayData* apply_mutation(TypedValue tv, State& state,
+                          bool cow = false, uint32_t depth = 0) {
+  if (depth == kMaxMutationStackDepth) {
+    if (!state.raised_stack_notice) {
+      raise_notice("%s stack depth exceeded!", state.function_name);
+      state.raised_stack_notice = true;
+    }
+    return nullptr;
+  }
+
   if (isObjectType(type(tv)) && !state.raised_object_notice) {
     auto const cls = val(tv).pobj->getClassName().data();
     raise_notice("%s called on object: %s", state.function_name, cls);
@@ -374,14 +386,15 @@ ArrayData* apply_mutation(TypedValue tv, State& state, bool cow = false) {
   // check the `cow` flag instead of in->cowCheck() in copy_if_needed.
   ArrayIter ai(in, ArrayIter::local);
   for (auto done = in->empty(); !done; done = ai.nextLocal(in)) {
-    auto const ad = apply_mutation(ai.nvSecondLocal(in).tv(), state, cow);
+    auto const rval = ai.nvSecondLocal(in);
+    auto const ad = apply_mutation(rval.tv(), state, cow, depth + 1);
     if (!ad) continue;
     result = result ? result : copy_if_needed(in, cow);
     if (result == in) result->incRefCount();
     tvMove(make_array_like_tv(ad), ai.nvSecondLocal(result).as_lval());
     while (!ai.nextLocal(result)) {
-      auto const rval = ai.nvSecondLocal(result).as_lval();
-      auto const ad = apply_mutation(rval.tv(), state, cow);
+      auto const rval = ai.nvSecondLocal(result);
+      auto const ad = apply_mutation(rval.tv(), state, cow, depth + 1);
       if (ad) tvMove(make_array_like_tv(ad), rval.as_lval());
     }
     break;

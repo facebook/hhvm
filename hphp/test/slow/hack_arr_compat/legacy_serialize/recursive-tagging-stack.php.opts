@@ -1,0 +1,4 @@
+-vEval.ArrayProvenance=1
+-vEval.LogArrayProvenance=1
+-vEval.ArrProvHackArrays=0
+-vEval.ArrProvDVArrays=1

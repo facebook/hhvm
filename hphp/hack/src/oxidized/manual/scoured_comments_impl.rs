@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::{
+    errors::ErrorCode,
     i_map::IMap,
     pos::Pos,
     scoured_comments::{Fixmes, ScouredComments},
@@ -17,6 +18,11 @@ impl ScouredComments {
             misuses: IMap::new(),
             error_pos: vec![],
         }
+    }
+
+    pub fn get_fixme(&self, pos: &Pos, code: ErrorCode) -> Option<&Pos> {
+        let line = pos.info_pos().0 as isize;
+        self.fixmes.get(&line).and_then(|m| m.get(&code))
     }
 
     pub fn add_to_fixmes(&mut self, line: isize, code: isize, pos: Pos) {

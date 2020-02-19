@@ -18,6 +18,10 @@ impl<P> Error_<P> {
         let (pos, _msg) = messages.first().unwrap();
         pos
     }
+
+    pub fn code(&self) -> ErrorCode {
+        self.0
+    }
 }
 
 impl<P: Ord> Ord for Error_<P> {

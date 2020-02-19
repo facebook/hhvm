@@ -59,8 +59,8 @@ impl Pos {
     }
 
     /// Returns a closed interval that's incorrect for multi-line spans.
-    pub fn info_pos(self) -> (usize, usize, usize) {
-        fn compute<P: FilePos>(pos_start: P, pos_end: P) -> (usize, usize, usize) {
+    pub fn info_pos(&self) -> (usize, usize, usize) {
+        fn compute<P: FilePos>(pos_start: &P, pos_end: &P) -> (usize, usize, usize) {
             let (line, start_minus1, bol) = pos_start.line_column_beg();
             let start = start_minus1 + 1;
             let end_offset = pos_end.offset();
@@ -74,14 +74,14 @@ impl Pos {
             }
             (line, start, end)
         }
-        match self.0 {
+        match &self.0 {
             Small { start, end, .. } => compute(start, end),
-            Large { start, end, .. } => compute(*start, *end),
+            Large { start, end, .. } => compute(start.as_ref(), end.as_ref()),
         }
     }
 
     pub fn info_pos_extended(&self) -> (usize, usize, usize, usize) {
-        let (line_begin, start, end) = self.clone().info_pos();
+        let (line_begin, start, end) = self.info_pos();
         let line_end = match &self.0 {
             Small { end, .. } => end.line_column_beg(),
             Large { end, .. } => (*end).line_column_beg(),

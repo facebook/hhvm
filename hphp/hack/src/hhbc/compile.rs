@@ -22,7 +22,9 @@ use oxidized::{
     ast as Tast, namespace_env::Env as NamespaceEnv, parser_options::ParserOptions, pos::Pos,
     relative_path::RelativePath,
 };
-use parser_core_types::{indexed_source_text::IndexedSourceText, source_text::SourceText};
+use parser_core_types::{
+    indexed_source_text::IndexedSourceText, source_text::SourceText, syntax_error::ErrorType,
+};
 use stack_limit::StackLimit;
 
 /// Common input needed for compilation.  Extra care is taken
@@ -232,7 +234,18 @@ fn parse_file(
             Left((pos, syntax_error.message.to_string(), false))
         }
         Ok(ast) => match ast {
-            AastResult { syntax_errors, .. } if !syntax_errors.is_empty() => unimplemented!(),
+            AastResult { syntax_errors, .. } if !syntax_errors.is_empty() => {
+                let error = syntax_errors
+                    .iter()
+                    .find(|e| e.error_type == ErrorType::RuntimeError)
+                    .unwrap_or(&syntax_errors[0]);
+                let pos = indexed_source_text.relative_pos(error.start_offset, error.end_offset);
+                Left((
+                    pos,
+                    error.message.to_string(),
+                    error.error_type == ErrorType::RuntimeError,
+                ))
+            }
             AastResult { lowpri_errors, .. } if !lowpri_errors.is_empty() => {
                 let (pos, msg) = lowpri_errors.into_iter().next().unwrap();
                 Left((pos, msg, false))
@@ -244,8 +257,17 @@ fn parse_file(
                 file_mode,
                 ..
             } => {
-                if !errors.is_empty() {
-                    unimplemented!()
+                let mut errors = errors.iter().filter(|e| {
+                    scoured_comments.get_fixme(e.pos(), e.code()).is_none()
+                        /* Ignore these errors to match legacy AST behavior */
+                        && e.code() != 2086
+                        /* Naming.MethodNeedsVisibility */
+                        && e.code() != 2102
+                        /* Naming.UnsupportedTraitUseAs */
+                        && e.code() != 2103
+                });
+                if let Some(_) = errors.next() {
+                    Left((Pos::make_none(), String::new(), false))
                 } else {
                     match aast {
                         Ok(aast) => Right((aast, file_mode.is_hh_file())),

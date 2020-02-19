@@ -143,7 +143,7 @@ enum Attr {
                                          //       |          |         //
   // Indicates that the function, class or static property can be loaded
   // once and then persisted across all requests. |          |         //
-  AttrPersistent           = (1u << 17), //    X  |    X     |    X    //
+  AttrPersistent           = (1u << 18), //    X  |    X     |    X    //
                                          //       |          |         //
   // Set on functions to mark them as being able to be dynamically called
   AttrDynamicallyCallable  = (1u << 19), //       |          |    X    //

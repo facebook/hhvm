@@ -240,11 +240,12 @@ void cgLdFuncRxLevel(IRLS& env, const IRInstruction* inst) {
 
   static_assert(AttrRxLevel0 == (1u << 14), "");
   static_assert(AttrRxLevel1 == (1u << 15), "");
+  static_assert(AttrRxLevel2 == (1u << 16), "");
   auto const attrs = v.makeReg();
   auto const shifted = v.makeReg();
   v << loadzlq{func[Func::attrsOff()], attrs};
   v << shrqi{14, attrs, shifted, v.makeReg()};
-  v << andqi{3, shifted, dst, v.makeReg()};
+  v << andqi{7, shifted, dst, v.makeReg()};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

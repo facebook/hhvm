@@ -25,9 +25,11 @@ inline Attr rxAttrsFromAttrString(const std::string& a) {
   if (a == "conditional_rx_local")   return rxMakeAttr(RxLevel::Local, true);
   if (a == "conditional_rx_shallow") return rxMakeAttr(RxLevel::Shallow, true);
   if (a == "conditional_rx")         return rxMakeAttr(RxLevel::Rx, true);
+  if (a == "conditional_pure")       return rxMakeAttr(RxLevel::Pure, true);
   if (a == "rx_local")               return rxMakeAttr(RxLevel::Local, false);
   if (a == "rx_shallow")             return rxMakeAttr(RxLevel::Shallow, false);
   if (a == "rx")                     return rxMakeAttr(RxLevel::Rx, false);
+  if (a == "pure")                   return rxMakeAttr(RxLevel::Pure, false);
   return static_cast<Attr>(0);
 }
 
@@ -38,6 +40,7 @@ inline const char* rxAttrsToAttrString(Attr attrs) {
     case RxLevel::Local:   return c ? "conditional_rx_local" : "rx_local";
     case RxLevel::Shallow: return c ? "conditional_rx_shallow" : "rx_shallow";
     case RxLevel::Rx:      return c ? "conditional_rx" : "rx";
+    case RxLevel::Pure:    return c ? "conditional_pure" : "pure";
   }
   not_reached();
 }
@@ -48,6 +51,7 @@ inline const char* rxLevelToString(RxLevel level) {
     case RxLevel::Local:   return "local reactive";
     case RxLevel::Shallow: return "shallow reactive";
     case RxLevel::Rx:      return "reactive";
+    case RxLevel::Pure:    return "pure";
   }
   not_reached();
 }
@@ -63,6 +67,7 @@ inline RxLevel rxRequiredCalleeLevel(RxLevel level) {
     case RxLevel::Local:   not_reached();
     case RxLevel::Shallow: return RxLevel::Local;
     case RxLevel::Rx:      return RxLevel::Rx;
+    case RxLevel::Pure:    return RxLevel::Pure;
   }
   not_reached();
 }

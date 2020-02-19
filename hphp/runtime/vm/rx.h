@@ -27,6 +27,7 @@ enum class RxLevel : uint8_t {
   Local              = 1,
   Shallow            = 2,
   Rx                 = 3,
+  Pure               = 4,
 };
 
 constexpr int kRxAttrShift = 14;
@@ -35,12 +36,13 @@ constexpr int kRxAttrShift = 14;
 ASSERT_LEVEL(AttrRxLevel0, Local);
 ASSERT_LEVEL(AttrRxLevel1, Shallow);
 ASSERT_LEVEL((AttrRxLevel0 | AttrRxLevel1), Rx);
+ASSERT_LEVEL(AttrRxLevel2, Pure);
 #undef ASSERT_LEVEL
 
-constexpr uint32_t kRxAttrMask = AttrRxLevel0 | AttrRxLevel1;
-constexpr uint32_t kRxLevelMask = 3u;
+constexpr uint32_t kRxAttrMask = AttrRxLevel0 | AttrRxLevel1 | AttrRxLevel2;
+constexpr uint32_t kRxLevelMask = 7u;
 static_assert(kRxAttrMask >> kRxAttrShift == kRxLevelMask, "");
-static_assert(AttrRxNonConditional == (4u << kRxAttrShift), "");
+static_assert(AttrRxNonConditional == (8u << kRxAttrShift), "");
 
 
 constexpr RxLevel rxLevelFromAttr(Attr attrs) {

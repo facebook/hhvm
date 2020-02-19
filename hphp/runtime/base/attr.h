@@ -139,7 +139,8 @@ enum Attr {
   // of a function. RxNonConditional indicates level conditionality.
   AttrRxLevel0             = (1u << 14), //       |          |    X    //
   AttrRxLevel1             = (1u << 15), //       |          |    X    //
-  AttrRxNonConditional     = (1u << 16), //       |          |    X    //
+  AttrRxLevel2             = (1u << 16), //       |          |    X    //
+  AttrRxNonConditional     = (1u << 17), //       |          |    X    //
                                          //       |          |         //
   // Indicates that the function, class or static property can be loaded
   // once and then persisted across all requests. |          |         //

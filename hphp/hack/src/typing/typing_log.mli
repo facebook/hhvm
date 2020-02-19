@@ -11,6 +11,13 @@ val out_channel : Pervasives.out_channel ref
 
 val log_key : string -> unit
 
+val log_env_diff :
+  Pos.t ->
+  ?function_name:string ->
+  Typing_env_types.env ->
+  Typing_env_types.env ->
+  unit
+
 val hh_show_env : Pos.t -> Typing_env_types.env -> unit
 
 val hh_show_full_env : Pos.t -> Typing_env_types.env -> unit

@@ -438,7 +438,7 @@ let get_patches
     patches
 
 module Mode_rewrite = struct
-  (** Returns a map indexed by filenames. *)
+  (** Returns a map of types indexed by filenames and positions *)
   let build_positions_map :
       Tast_env.env * (Pos.t * Ident.t) list ->
       Tast_env.env * (Tast_env.env * phase_ty) list Pos.AbsolutePosMap.t SMap.t

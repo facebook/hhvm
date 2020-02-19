@@ -1445,8 +1445,8 @@ fn print_type_info_<W: Write>(w: &mut W, is_enum: bool, ti: &HhasTypeInfo) -> Re
     let print_quote_str = |w: &mut W, opt: &Option<String>| {
         option_or(
             w,
-            opt.as_ref(),
-            |w, s| wrap_by_quotes(w, |w| w.write(escape(s.as_ref()))),
+            opt,
+            |w, s: &String| wrap_by_quotes(w, |w| w.write(escape(s.as_ref()))),
             "N",
         )
     };

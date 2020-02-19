@@ -198,14 +198,14 @@ where
 
 pub fn option_or<W: Write, T, F>(
     w: &mut W,
-    i: Option<T>,
+    i: impl Into<Option<T>>,
     f: F,
     default: impl AsRef<str>,
 ) -> Result<(), W::Error>
 where
     F: Fn(&mut W, T) -> Result<(), W::Error>,
 {
-    match i {
+    match i.into() {
         None => w.write(default),
         Some(i) => f(w, i),
     }

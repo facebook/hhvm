@@ -285,6 +285,10 @@ impl TypedValue {
             _ => Self::cast_to_int(self),
         }
     }
+
+    pub fn string(s: impl Into<String>) -> TypedValue {
+        Self::String(s.into())
+    }
 }
 
 #[cfg(test)]

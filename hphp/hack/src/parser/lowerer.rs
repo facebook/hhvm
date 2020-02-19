@@ -4371,11 +4371,6 @@ where
                             };
                             let init_expr =
                                 Self::mp_optional(Self::p_simple_initializer, init, env)?;
-                            let id = if env.empty_ns_env.disable_xhp_element_mangling {
-                                ast::Id(p, name)
-                            } else {
-                                ast::Id(p, String::from(":") + &name)
-                            };
                             let xhp_attr = ast::XhpAttr(
                                 ast::TypeHint((), hint.clone()),
                                 ast::ClassVar {
@@ -4384,7 +4379,7 @@ where
                                     abstract_: false,
                                     visibility: ast::Visibility::Public,
                                     type_: ast::TypeHint((), hint),
-                                    id,
+                                    id: ast::Id(p, String::from(":") + &name),
                                     expr: init_expr,
                                     user_attributes: vec![],
                                     doc_comment: None,

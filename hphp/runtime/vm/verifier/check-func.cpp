@@ -1168,6 +1168,19 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
       }
       break;
     }
+    case Op::Array: {
+      auto const id = getImm(pc, 0).u_AA;
+      if (id < 0 || id >= unit()->numArrays()) {
+        ferror("Array references array data that is not an Array\n");
+        return false;
+      }
+      auto const dt = unit()->lookupArray(id)->toDataType();
+      if (!equivDataTypes(KindOfArray, dt)) {
+        ferror("Array references array data that is a {}\n", dt);
+        return false;
+      }
+      break;
+    }
     #define O(name) \
     case Op::name: { \
       auto const id = getImm(pc, 0).u_AA; \
@@ -1185,7 +1198,6 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
       break; \
     }
     O(Keyset)
-    O(Array)
     O(Dict)
     O(Vec)
     #undef O

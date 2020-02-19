@@ -1,5 +1,5 @@
 --count=4
--vEval.ForbidDynamicCallsToFunc=1
--vEval.ForbidDynamicCallsToClsMeth=1
--vEval.EmitClsMethPointers=1
--vEval.EmitFuncPointers=1
+-vEval.ForbidDynamicCallsToFunc=2
+-vEval.ForbidDynamicCallsToClsMeth=2
+-vEval.DynamicFunLevel=2
+-vEval.DynamicClsMethLevel=2

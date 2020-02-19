@@ -1,25 +1,36 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function foo() {}
+function LV($x) { return __hhvm_intrinsics\launder_value($x); }
+
+function wrap($f) {
+  try {
+    $f()();
+  } catch (Exception $e) {
+    echo "Caught: ".$e->getMessage()."\n";
+  }
+}
 
 <<__DynamicallyCallable>>
-function bar() {}
+function foo() { var_dump(__FUNCTION__); }
+function bar() { var_dump(__FUNCTION__); }
 
 class Cls {
-  public static function foo() {}
-
   <<__DynamicallyCallable>>
-  public static function bar() {}
+  static function foo() { var_dump(__METHOD__); }
+  static function bar() { var_dump(__METHOD__); }
+  protected static function prot() { var_dump(__METHOD__); }
+  private static function priv() { var_dump(__METHOD__); }
+  function inst() { var_dump(__METHOD__); }
 }
 
 <<__EntryPoint>>
-function main_exit() {
-  $foo = 'foo';
-  $bar = 'bar';
-  $cls = 'Cls';
-  var_dump(HH\dynamic_fun_force($foo));
-  var_dump(HH\dynamic_fun_force($bar));
-  var_dump(HH\dynamic_class_meth_force($cls, $foo));
-  var_dump(HH\dynamic_class_meth_force($cls, $bar));
+function force_builtin_main() {
+  foreach (vec['foo', 'bar'] as $f) {
+    wrap(() ==> HH\dynamic_fun_force(LV($f)));
+  }
+
+  foreach (vec['foo', 'bar', 'prot', 'priv', 'inst'] as $m) {
+    wrap(() ==> HH\dynamic_class_meth_force(Cls::class, LV($m)));
+  }
 }

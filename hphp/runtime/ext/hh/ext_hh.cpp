@@ -705,14 +705,17 @@ Array HHVM_FUNCTION(get_compiled_units, int64_t kind) {
 
 namespace {
 
-TypedValue dynamicFun(const StringData* fun, bool bypassUnmarked = false) {
+enum class DynamicAttr : int8_t { Ignore, Require };
+
+template <DynamicAttr DA = DynamicAttr::Require>
+TypedValue dynamicFun(const StringData* fun) {
   auto const func = Unit::loadFunc(fun);
   if (!func) {
     SystemLib::throwInvalidArgumentExceptionObject(
       folly::sformat("Unable to find function {}", fun->data())
     );
   }
-  if (!func->isDynamicallyCallable() && !bypassUnmarked) {
+  if (!func->isDynamicallyCallable() && DA == DynamicAttr::Require) {
     auto const level = RuntimeOption::EvalDynamicFunLevel;
     if (level == 2) {
       SystemLib::throwInvalidArgumentExceptionObject(
@@ -726,8 +729,8 @@ TypedValue dynamicFun(const StringData* fun, bool bypassUnmarked = false) {
   return tvReturn(func);
 }
 
-TypedValue dynamicClassMeth(const StringData* cls, const StringData* meth,
-                            bool bypassUnmarked = false) {
+template <DynamicAttr DA = DynamicAttr::Require, bool checkVis = true>
+TypedValue dynamicClassMeth(const StringData* cls, const StringData* meth) {
   auto const c = Unit::loadClass(cls);
   if (!c) {
     SystemLib::throwInvalidArgumentExceptionObject(
@@ -747,7 +750,7 @@ TypedValue dynamicClassMeth(const StringData* cls, const StringData* meth,
                      cls->data(), meth->data())
     );
   }
-  if (!func->isPublic()) {
+  if (!func->isPublic() && checkVis) {
     auto const ctx = fromCaller(
       [] (const ActRec* fp, Offset) { return fp->func()->cls(); }
     );
@@ -767,7 +770,7 @@ TypedValue dynamicClassMeth(const StringData* cls, const StringData* meth,
       }
     }
   }
-  if (!func->isDynamicallyCallable() && !bypassUnmarked) {
+  if (!func->isDynamicallyCallable() && DA == DynamicAttr::Require) {
     auto const level = RuntimeOption::EvalDynamicClsMethLevel;
     if (level == 2) {
       SystemLib::throwInvalidArgumentExceptionObject(
@@ -791,11 +794,9 @@ TypedValue HHVM_FUNCTION(dynamic_fun, StringArg fun) {
 
 TypedValue HHVM_FUNCTION(dynamic_fun_force, StringArg fun) {
   if (RuntimeOption::RepoAuthoritative) {
-    raise_error(
-      "You can't use dynamic_fun_force in RepoAuthoritative mode"
-    );
+    raise_error("You can't use %s() in RepoAuthoritative mode", __FUNCTION__+2);
   }
-  return dynamicFun(fun.get(), true);
+  return dynamicFun<DynamicAttr::Ignore>(fun.get());
 }
 
 TypedValue HHVM_FUNCTION(dynamic_class_meth, StringArg cls, StringArg meth) {
@@ -805,11 +806,9 @@ TypedValue HHVM_FUNCTION(dynamic_class_meth, StringArg cls, StringArg meth) {
 TypedValue HHVM_FUNCTION(dynamic_class_meth_force, StringArg cls,
                          StringArg meth) {
   if (RuntimeOption::RepoAuthoritative) {
-    raise_error(
-      "You can't use dynamic_class_meth_force in RepoAuthoritative mode"
-    );
+    raise_error("You can't use %s() in RepoAuthoritative mode", __FUNCTION__+2);
   }
-  return dynamicClassMeth(cls.get(), meth.get(), true);
+  return dynamicClassMeth<DynamicAttr::Ignore, false>(cls.get(), meth.get());
 }
 
 const StaticString

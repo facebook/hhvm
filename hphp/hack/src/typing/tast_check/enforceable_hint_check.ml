@@ -80,15 +80,11 @@ let validator =
                       let covariant =
                         Ast_defs.(equal_variance tparam.tp_variance Covariant)
                       in
-                      let like_casts_enabled =
-                        TypecheckerOptions.like_casts
-                          (Tast_env.get_tcopt acc.env)
-                      in
                       if this#is_wildcard targ then
                         acc
                       else if
                         Aast.(equal_reify_kind tparam.tp_reified Reified)
-                        || (acc.like_context && covariant && like_casts_enabled)
+                        || (acc.like_context && covariant)
                       then
                         this#on_type acc targ
                       else
@@ -96,7 +92,10 @@ let validator =
                           "a type with an erased generic type argument"
                         in
                         let error_message =
-                          if like_casts_enabled then
+                          if
+                            TypecheckerOptions.like_casts
+                              (Tast_env.get_tcopt acc.env)
+                          then
                             error_message
                             ^ ", except in a like cast when the corresponding type parameter is covariant"
                           else
@@ -119,6 +118,8 @@ let validator =
       then
         let ty = List.hd_exn tyl in
         this#on_type { acc with like_context = true } ty
+      else if acc.like_context then
+        super#on_alias acc r id tyl ty
       else
         this#invalid
           acc

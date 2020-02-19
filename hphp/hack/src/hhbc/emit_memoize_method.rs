@@ -12,7 +12,10 @@ use emit_fatal_rust as emit_fatal;
 use emit_memoize_helpers_rust as emit_memoize_helpers;
 use emit_param_rust as emit_param;
 use emit_pos_rust::emit_pos_then;
-use env::{emitter::Emitter, Env};
+use env::{
+    emitter::{Context, Emitter},
+    Env,
+};
 use hhas_attribute_rust::deprecation_info;
 use hhas_body_rust::HhasBody;
 use hhas_method_rust::{HhasMethod, HhasMethodFlags};
@@ -243,7 +246,7 @@ fn make_memoize_method_code(
     args: &Args,
 ) -> Result<InstrSeq> {
     if !args.params.is_empty() && !args.flags.contains(Flags::IS_REFIED) {
-        Ok(make_memoize_method_no_params_code(emitter, args))
+        make_memoize_method_no_params_code(emitter, args)
     } else {
         make_memoize_method_with_params_code(emitter, env, pos, hhas_params, args)
     }
@@ -265,7 +268,8 @@ fn make_memoize_method_with_params_code(
     // so the first local is parameter count + 1 when there are reified = generics
     let add_refied = usize::from(args.flags.contains(Flags::IS_REFIED));
     let first_local = local::Type::Unnamed(param_count + add_refied);
-    let deprecation_body = emit_body::emit_deprecation_info(args.scope, &args.deprecation_info);
+    let deprecation_body =
+        emit_body::emit_deprecation_info(args.scope, &args.deprecation_info, emitter.systemlib())?;
     let (begin_label, default_value_setters) =
         // Default value setters belong in the wrapper method not in the original method
         emit_param::emit_param_default_value_setter(emitter, env, false, pos, hhas_params)?;
@@ -363,17 +367,18 @@ fn make_memoize_method_with_params_code(
     ]))
 }
 
-fn make_memoize_method_no_params_code(emitter: &mut Emitter, args: &Args) -> InstrSeq {
+fn make_memoize_method_no_params_code(emitter: &mut Emitter, args: &Args) -> Result {
     let notfound = emitter.label_gen_mut().next_regular();
     let suspended_get = emitter.label_gen_mut().next_regular();
     let eager_set = emitter.label_gen_mut().next_regular();
-    let deprecation_body = emit_body::emit_deprecation_info(args.scope, &args.deprecation_info);
+    let deprecation_body =
+        emit_body::emit_deprecation_info(args.scope, &args.deprecation_info, emitter.systemlib())?;
     let fcall_args = if args.flags.contains(Flags::IS_ASYNC) {
         FcallArgs::new(None, None, None, Some(eager_set.clone()), 0)
     } else {
         FcallArgs::new(None, None, None, None, 0)
     };
-    InstrSeq::gather(vec![
+    Ok(InstrSeq::gather(vec![
         deprecation_body,
         if args.method.static_ {
             InstrSeq::Empty
@@ -420,7 +425,7 @@ fn make_memoize_method_no_params_code(emitter: &mut Emitter, args: &Args) -> Ins
         } else {
             InstrSeq::gather(vec![InstrSeq::make_retc()])
         },
-    ])
+    ]))
 }
 
 // Construct the wrapper function

@@ -210,7 +210,7 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
             None => Ok(InstrSeq::gather(vec![
                 InstrSeq::make_null(),
                 emit_pos(e, pos),
-                InstrSeq::make_popc(),
+                emit_return(e, env)?,
             ])),
         },
         a::Stmt_::GotoLabel(l) => Ok(InstrSeq::make_label(Label::Named(l.1.clone()))),
@@ -287,6 +287,7 @@ pub fn emit_final_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Res
     match &stmt.1 {
         a::Stmt_::Throw(_) | a::Stmt_::Return(_) | a::Stmt_::Goto(_) => emit_stmt(e, env, stmt),
         a::Stmt_::Expr(expr) if expr.1.is_yield_break() => emit_stmt(e, env, stmt),
+        a::Stmt_::Block(stmts) => emit_final_stmts(e, env, stmts),
         _ => Ok(InstrSeq::gather(vec![
             emit_stmt(e, env, stmt)?,
             emit_dropthrough_return(e, env)?,

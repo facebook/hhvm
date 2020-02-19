@@ -16,7 +16,10 @@ use emit_param_rust as emit_param;
 use emit_pos_rust as emit_pos;
 use emit_pos_rust::emit_pos;
 use emit_type_hint_rust as emit_type_hint;
-use env::{emitter::Emitter, Env};
+use env::{
+    emitter::{Context, Emitter},
+    Env,
+};
 use generator_rust as generator;
 use global_state::LazyState;
 use hhas_body_rust::HhasBody;
@@ -285,7 +288,8 @@ fn make_header_content(
         )?
     };
 
-    let deprecation_warning = emit_deprecation_info(args.scope, args.deprecation_info);
+    let deprecation_warning =
+        emit_deprecation_info(args.scope, args.deprecation_info, emitter.systemlib())?;
 
     let generator_info = if is_generator {
         InstrSeq::gather(vec![InstrSeq::make_createcont(), InstrSeq::make_popc()])
@@ -498,13 +502,14 @@ fn emit_defs(env: &mut Env, emitter: &mut Emitter, prog: &[tast::Def]) -> Result
             aux(env, emitter, &prog[1..])?,
         ])),
         [] | [_] => aux(env, emitter, &prog[..]),
-        [def, ..] => match emit_def(env, emitter, def)? {
-            InstrSeq::Empty => emit_defs(env, emitter, &prog[1..]),
-            instr => Ok(InstrSeq::gather(vec![
-                instr,
-                aux(env, emitter, &prog[1..])?,
-            ])),
-        },
+        [def, ..] => {
+            let i1 = emit_def(env, emitter, def)?;
+            if i1.is_empty() {
+                emit_defs(env, emitter, &prog[1..])
+            } else {
+                Ok(InstrSeq::gather(vec![i1, aux(env, emitter, &prog[1..])?]))
+            }
+        }
     }
 }
 
@@ -602,11 +607,84 @@ pub fn emit_method_prolog(
 }
 
 pub fn emit_deprecation_info(
-    _scope: &Scope,
-    _deprecation_info: &Option<&[TypedValue]>,
-) -> InstrSeq {
-    //TODO(hrust) implement
-    InstrSeq::Empty
+    scope: &Scope,
+    deprecation_info: &Option<&[TypedValue]>,
+    is_systemlib: bool,
+) -> Result<InstrSeq> {
+    Ok(match deprecation_info {
+        None => InstrSeq::Empty,
+        Some(args) => {
+            fn strip_id<'a>(id: &'a tast::Id) -> &'a str {
+                string_utils::strip_global_ns(id.1.as_str())
+            }
+            let (class_name, trait_instrs, concat_instruction): (String, _, _) =
+                match scope.get_class() {
+                    None => ("".into(), InstrSeq::Empty, InstrSeq::Empty),
+                    Some(c) if c.kind == tast::ClassKind::Ctrait => (
+                        "::".into(),
+                        InstrSeq::gather(vec![InstrSeq::make_self(), InstrSeq::make_classname()]),
+                        InstrSeq::make_concat(),
+                    ),
+                    Some(c) => (
+                        strip_id(&c.name).to_string() + "::",
+                        InstrSeq::Empty,
+                        InstrSeq::Empty,
+                    ),
+                };
+
+            let fn_name = match scope.items.get(0) {
+                Some(ScopeItem::Function(f)) => strip_id(&f.name),
+                Some(ScopeItem::Method(m)) => strip_id(&m.name),
+                _ => {
+                    return Err(Error::Unrecoverable(
+                        "deprecated functions must have names".into(),
+                    ))
+                }
+            };
+            let deprecation_string = class_name
+                + fn_name
+                + ": "
+                + (if args.is_empty() {
+                    "deprecated function"
+                } else if let TypedValue::String(s) = &args[0] {
+                    s.as_str()
+                } else {
+                    return Err(Error::Unrecoverable(
+                        "deprecated attribute first argument is not a string".into(),
+                    ));
+                });
+            let sampling_rate = if args.len() <= 1 {
+                1i64
+            } else if let Some(TypedValue::Int(i)) = args.get(1) {
+                *i
+            } else {
+                return Err(Error::Unrecoverable(
+                    "deprecated attribute second argument is not an integer".into(),
+                ));
+            };
+            let error_code = if is_systemlib {
+                /*E_DEPRECATED*/
+                8192
+            } else {
+                /*E_USER_DEPRECATED*/
+                16384
+            };
+
+            if sampling_rate <= 0 {
+                InstrSeq::Empty
+            } else {
+                InstrSeq::gather(vec![
+                    trait_instrs,
+                    InstrSeq::make_string(deprecation_string),
+                    concat_instruction,
+                    InstrSeq::make_int64(sampling_rate),
+                    InstrSeq::make_int(error_code),
+                    InstrSeq::make_trigger_sampled_error(),
+                    InstrSeq::make_popc(),
+                ])
+            }
+        }
+    })
 }
 
 fn set_emit_statement_state(

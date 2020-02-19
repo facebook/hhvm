@@ -328,10 +328,8 @@ impl InstrSeq {
         )))
     }
 
-    pub fn make_string(litstr: &str) -> Self {
-        Self::make_instr(Instruct::ILitConst(InstructLitConst::String(
-            litstr.to_string(),
-        )))
+    pub fn make_string(litstr: impl Into<String>) -> Self {
+        Self::make_instr(Instruct::ILitConst(InstructLitConst::String(litstr.into())))
     }
 
     pub fn make_this() -> Self {

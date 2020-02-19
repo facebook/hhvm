@@ -233,10 +233,8 @@ fn parse_file(
         }
         Ok(ast) => match ast {
             AastResult { syntax_errors, .. } if !syntax_errors.is_empty() => unimplemented!(),
-            AastResult {
-                mut lowpri_errors, ..
-            } if !lowpri_errors.is_empty() => {
-                let (pos, msg) = lowpri_errors.pop().unwrap();
+            AastResult { lowpri_errors, .. } if !lowpri_errors.is_empty() => {
+                let (pos, msg) = lowpri_errors.into_iter().next().unwrap();
                 Left((pos, msg, false))
             }
             AastResult {

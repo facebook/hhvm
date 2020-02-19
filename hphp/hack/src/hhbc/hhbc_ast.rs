@@ -176,7 +176,6 @@ pub enum InstructBasic {
     Nop,
     EntryNop,
     PopC,
-    PopV,
     PopU,
     Dup,
 }

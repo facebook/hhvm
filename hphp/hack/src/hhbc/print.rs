@@ -903,14 +903,39 @@ fn print_instructions<W: Write>(
 }
 
 fn print_instr<W: Write>(w: &mut W, instr: &Instruct) -> Result<(), W::Error> {
+    fn print_call<W: Write>(w: &mut W, call: &InstructCall) -> Result<(), W::Error> {
+        use InstructCall as I;
+        match call {
+            I::FCallBuiltin(n, un, io, id) => concat_str_by(
+                w,
+                " ",
+                [
+                    "FCallBuiltin",
+                    n.to_string().as_str(),
+                    un.to_string().as_str(),
+                    io.to_string().as_str(),
+                    quote_string(id).as_str(),
+                ],
+            ),
+            _ => return not_impl!(),
+        }
+    }
+
     use Instruct::*;
+    use InstructBasic as IB;
     match instr {
         IIterator(_) => not_impl!(),
-        IBasic(_) => not_impl!(),
+        IBasic(b) => w.write(match b {
+            IB::Nop => "Nop",
+            IB::EntryNop => "EntryNop",
+            IB::PopC => "PopC",
+            IB::PopU => "PopU",
+            IB::Dup => "Dup",
+        }),
         ILitConst(lit) => print_lit_const(w, lit),
         IOp(op) => print_op(w, op),
         IContFlow(cf) => print_control_flow(w, cf),
-        ICall(_) => not_impl!(),
+        ICall(c) => print_call(w, c),
         IMisc(_) => not_impl!(),
         IGet(_) => not_impl!(),
         IMutator(_) => not_impl!(),

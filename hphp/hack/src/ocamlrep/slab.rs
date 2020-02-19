@@ -16,7 +16,7 @@
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
 use std::fmt::{self, Debug};
-use std::mem;
+use std::mem::{self, MaybeUninit};
 
 use crate::block::NO_SCAN_TAG;
 use crate::{OpaqueValue, SlabIntegrityError, Value};
@@ -65,7 +65,7 @@ type Slab<'a> = [OpaqueValue<'a>];
 // but we can define trait methods instead).
 trait SlabTrait {
     fn from_bytes(bytes: &[u8]) -> &Self;
-    fn from_bytes_mut(bytes: &mut [u8]) -> &mut Self;
+    fn from_bytes_mut(bytes: &mut [MaybeUninit<u8>]) -> &mut Self;
 
     // metadata accessors
     fn base(&self) -> usize;
@@ -87,11 +87,15 @@ trait SlabTrait {
 // When embedding a Slab in a byte string, we need to include leading padding
 // bytes so that the Slab is word-aligned.
 #[inline]
-fn leading_padding(bytes: &[u8]) -> usize {
+fn leading_padding(bytes: &[impl Byte]) -> usize {
     let misalignment = bytes.as_ptr() as usize % WORD_SIZE;
     let padding = (WORD_SIZE - misalignment) % WORD_SIZE;
     std::cmp::min(padding, bytes.len())
 }
+
+trait Byte {}
+impl Byte for u8 {}
+impl Byte for MaybeUninit<u8> {}
 
 impl<'a> SlabTrait for Slab<'a> {
     fn from_bytes(bytes: &[u8]) -> &Self {
@@ -100,7 +104,7 @@ impl<'a> SlabTrait for Slab<'a> {
         unsafe { std::slice::from_raw_parts(ptr, bytes.len() / WORD_SIZE) }
     }
 
-    fn from_bytes_mut(bytes: &mut [u8]) -> &mut Self {
+    fn from_bytes_mut(bytes: &mut [MaybeUninit<u8>]) -> &mut Self {
         let padding = leading_padding(bytes);
         let ptr = bytes[padding..].as_mut_ptr() as *mut OpaqueValue<'a>;
         unsafe { std::slice::from_raw_parts_mut(ptr, bytes.len() / WORD_SIZE) }
@@ -414,7 +418,11 @@ fn words_reachable<'a>(seen: &mut HashSet<Value<'a>>, value: Value<'a>) -> usize
 /// # Panics
 ///
 /// This function will panic if `src` and `dest` have different lengths.
-pub fn copy_slab(src: &[u8], dest: &mut [u8], dest_addr: usize) -> Result<(), SlabIntegrityError> {
+pub fn copy_slab(
+    src: &[u8],
+    dest: &mut [MaybeUninit<u8>],
+    dest_addr: usize,
+) -> Result<(), SlabIntegrityError> {
     let new_base = dest_addr + leading_padding(dest);
 
     let src_slab = Slab::from_bytes(src);
@@ -451,9 +459,11 @@ impl OwnedSlab {
         // it makes life easier until we have a Vec-based Arena.
         let padding = WORD_SIZE - 1;
         let size_in_bytes = size_in_words * WORD_SIZE + padding;
-        let mut vec = vec![0u8; size_in_bytes];
+        let mut vec = vec![MaybeUninit::new(0u8); size_in_bytes];
         let slab = Slab::from_bytes_mut(&mut vec);
         unsafe { SlabBuilder::build_from_value(slab, value) };
+        // Slab has been initialized.
+        let vec = unsafe { mem::transmute::<Vec<MaybeUninit<u8>>, Vec<u8>>(vec) };
         Some(OwnedSlab(vec))
     }
 
@@ -564,7 +574,7 @@ mod test_integrity_check {
 
     #[test]
     fn bad_root_value() {
-        let mut bytes = vec![0u8; TUPLE_42_A_SIZE_IN_BYTES];
+        let mut bytes = vec![MaybeUninit::new(0u8); TUPLE_42_A_SIZE_IN_BYTES];
         let mut slab = Slab::from_bytes_mut(&mut bytes);
         write_tuple_42_a(&mut slab);
         let tuple_offset = slab.root_value_offset();
@@ -584,7 +594,7 @@ mod test_integrity_check {
 
     #[test]
     fn bad_base_ptr() {
-        let mut bytes = vec![0u8; TUPLE_42_A_SIZE_IN_BYTES];
+        let mut bytes = vec![MaybeUninit::new(0u8); TUPLE_42_A_SIZE_IN_BYTES];
         let mut slab = Slab::from_bytes_mut(&mut bytes);
         write_tuple_42_a(&mut slab);
         assert!(slab.check_integrity().is_ok());

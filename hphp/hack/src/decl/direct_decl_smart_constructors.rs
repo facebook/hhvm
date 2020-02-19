@@ -785,7 +785,7 @@ impl DirectDeclSmartConstructors<'_> {
                     Ty_::Tgeneric(name)
                 } else {
                     match name.as_ref() {
-                        "nothing" => Ty_::Tnothing,
+                        "nothing" => Ty_::Tunion(Vec::new()),
                         "nonnull" => Ty_::Tnonnull,
                         "dynamic" => Ty_::Tdynamic,
                         _ => {

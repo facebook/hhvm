@@ -208,7 +208,6 @@ and _ ty_ =
    * during the localization phase.
    *)
   | Tmixed : decl_phase ty_
-  | Tnothing : decl_phase ty_
   | Tlike : decl_ty -> decl_phase ty_
   (* Access to a Pocket Universe Expression or Atom, denoted by
    * Foo:@Bar or Foo:@Bar:@X.
@@ -256,6 +255,16 @@ and _ ty_ =
    * Typing_phase.localize_generic_parameters_with_bounds.
    *)
   | Tgeneric : string -> 'phase ty_
+  (* Union type.
+   * The values that are members of this type are the union of the values
+   * that are members of the components of the union.
+   * Some examples (writing | for binary union)
+   *   Tunion []  is the "nothing" type, with no values
+   *   Tunion [int;float] is the same as num
+   *   Tunion [null;t] is the same as Toption t
+   *)
+  | Tunion : 'phase ty list -> 'phase ty_
+  | Tintersection : 'phase ty list -> 'phase ty_
   (*========== Below Are Types That Cannot Be Declared In User Code ==========*)
 
   (* The type of an opaque type (e.g. a "newtype" outside of the file where it
@@ -274,16 +283,6 @@ and _ ty_ =
   | Tnewtype : string * locl_ty list * locl_ty -> locl_phase ty_
   (* see dependent_type *)
   | Tdependent : dependent_type * locl_ty -> locl_phase ty_
-  (* Union type.
-   * The values that are members of this type are the union of the values
-   * that are members of the components of the union.
-   * Some examples (writing | for binary union)
-   *   Tunion []  is the "nothing" type, with no values
-   *   Tunion [int;float] is the same as num
-   *   Tunion [null;t] is the same as Toption t
-   *)
-  | Tunion : 'phase ty list -> 'phase ty_
-  | Tintersection : 'phase ty list -> 'phase ty_
   (* Tobject is an object type compatible with all objects. This type is also
    * compatible with some string operations (since a class might implement
    * __toString), but not with string type hints.

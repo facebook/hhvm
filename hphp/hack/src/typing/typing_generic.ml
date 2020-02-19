@@ -27,7 +27,6 @@ end = struct
       | Tgeneric x -> raise (Found (get_pos t, x))
       | Tthis -> ()
       | Tmixed -> ()
-      | Tnothing -> ()
       | Tdynamic
       | Tany _
       | Terr

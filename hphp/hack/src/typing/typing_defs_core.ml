@@ -212,7 +212,6 @@ and _ ty_ =
        * mixed exists only in the decl_phase phase because it is desugared into ?nonnull
        * during the localization phase.
        *)
-  | Tnothing : decl_phase ty_
   | Tlike : decl_ty -> decl_phase ty_
   | Tpu_access : decl_ty * Nast.sid * Nast.pu_loc -> decl_phase ty_
       (** Access to a Pocket Universe Expression or Atom, denoted by
@@ -255,6 +254,16 @@ and _ ty_ =
        * is set up when checking the body of a function or method. See uses of
        * Typing_phase.localize_generic_parameters_with_bounds.
        *)
+  | Tunion : 'phase ty list -> 'phase ty_
+      (** Union type.
+       * The values that are members of this type are the union of the values
+       * that are members of the components of the union.
+       * Some examples (writing | for binary union)
+       *   Tunion []  is the "nothing" type, with no values
+       *   Tunion [int;float] is the same as num
+       *   Tunion [null;t] is the same as Toption t
+       *)
+  | Tintersection : 'phase ty list -> 'phase ty_
   (*========== Below Are Types That Cannot Be Declared In User Code ==========*)
   | Tnewtype : string * locl_ty list * locl_ty -> locl_phase ty_
       (** The type of an opaque type (e.g. a "newtype" outside of the file where it
@@ -272,16 +281,6 @@ and _ ty_ =
        *)
   | Tdependent : dependent_type * locl_ty -> locl_phase ty_
       (** see dependent_type *)
-  | Tunion : 'phase ty list -> 'phase ty_
-      (** Union type.
-       * The values that are members of this type are the union of the values
-       * that are members of the components of the union.
-       * Some examples (writing | for binary union)
-       *   Tunion []  is the "nothing" type, with no values
-       *   Tunion [int;float] is the same as num
-       *   Tunion [null;t] is the same as Toption t
-       *)
-  | Tintersection : 'phase ty list -> 'phase ty_
   | Tobject : locl_phase ty_
       (** Tobject is an object type compatible with all objects. This type is also
        * compatible with some string operations (since a class might implement

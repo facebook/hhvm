@@ -117,7 +117,6 @@ let rec localize ~ety_env env (dty : decl_ty) =
   | (r, Tvar var) -> Env.new_global_tyvar env var r
   | (r, ((Tnonnull | Tprim _ | Tdynamic) as x)) -> (env, mk (r, x))
   | (r, Tmixed) -> (env, MakeType.mixed r)
-  | (r, Tnothing) -> (env, MakeType.nothing r)
   | (r, Tthis) ->
     let ty =
       match deref ety_env.this_ty with

@@ -497,7 +497,6 @@ and type_ ctx root variance env ty =
   | Tnonnull
   | Terr
   | Tdynamic
-  | Tnothing
   | Tvar _ ->
     ()
   | Tarray (ty1, ty2) ->
@@ -678,7 +677,6 @@ and get_typarams ctx root env (ty : decl_ty) =
   | Tnonnull
   | Tdynamic
   | Tprim _
-  | Tnothing
   | Tany _
   | Terr
   | Tthis

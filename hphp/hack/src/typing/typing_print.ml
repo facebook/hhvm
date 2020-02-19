@@ -321,7 +321,6 @@ module Full = struct
     | Tmixed -> text "mixed"
     | Tdynamic -> text "dynamic"
     | Tnonnull -> text "nonnull"
-    | Tnothing -> text "nothing"
     | Tdarray (x, y) -> tdarray k x y
     | Tvarray x -> tvarray k x
     | Tvarray_or_darray (x, y) -> tvarray_or_darray k x y

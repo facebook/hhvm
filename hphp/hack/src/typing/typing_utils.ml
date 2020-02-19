@@ -525,7 +525,7 @@ let unwrap_class_type ty =
   match deref ty with
   | (r, Tapply (name, tparaml)) -> (r, name, tparaml)
   | ( _,
-      ( Terr | Tdynamic | Tany _ | Tmixed | Tnonnull | Tnothing
+      ( Terr | Tdynamic | Tany _ | Tmixed | Tnonnull
       | Tarray (_, _)
       | Tdarray (_, _)
       | Tvarray _ | Tvarray_or_darray _ | Tgeneric _ | Toption _ | Tlike _

@@ -449,19 +449,18 @@ let decl_ty_con_ordinal ty_ =
   | Tvarray _ -> 7
   | Tvarray_or_darray _ -> 8
   | Tmixed -> 9
-  | Tnothing -> 10
-  | Tlike _ -> 11
-  | Tnonnull -> 12
-  | Tdynamic -> 13
-  | Toption _ -> 14
-  | Tprim _ -> 15
-  | Tfun _ -> 16
-  | Ttuple _ -> 17
-  | Tshape _ -> 18
-  | Tpu_access _ -> 19
-  | Tvar _ -> 20
-  | Tunion _ -> 21
-  | Tintersection _ -> 22
+  | Tlike _ -> 10
+  | Tnonnull -> 11
+  | Tdynamic -> 12
+  | Toption _ -> 13
+  | Tprim _ -> 14
+  | Tfun _ -> 15
+  | Ttuple _ -> 16
+  | Tshape _ -> 17
+  | Tpu_access _ -> 18
+  | Tvar _ -> 19
+  | Tunion _ -> 20
+  | Tintersection _ -> 21
 
 let array_kind_con_ordinal ak =
   match ak with
@@ -737,7 +736,6 @@ let rec equal_decl_ty_ ty_1 ty_2 =
   | (Terr, Terr) -> true
   | (Tthis, Tthis) -> true
   | (Tmixed, Tmixed) -> true
-  | (Tnothing, Tnothing) -> true
   | (Tnonnull, Tnonnull) -> true
   | (Tdynamic, Tdynamic) -> true
   | (Tapply (id1, tyl1), Tapply (id2, tyl2)) ->
@@ -781,7 +779,6 @@ let rec equal_decl_ty_ ty_1 ty_2 =
   | (Tvarray _, _)
   | (Tvarray_or_darray _, _)
   | (Tmixed, _)
-  | (Tnothing, _)
   | (Tlike _, _)
   | (Tnonnull, _)
   | (Tdynamic, _)

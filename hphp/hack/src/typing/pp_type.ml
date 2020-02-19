@@ -59,7 +59,6 @@ and pp_ty_ : type a. Format.formatter -> a ty_ -> unit =
   | Tmixed -> Format.pp_print_string fmt "Tmixed"
   | Tdynamic -> Format.pp_print_string fmt "Tdynamic"
   | Tnonnull -> Format.pp_print_string fmt "Tnonnull"
-  | Tnothing -> Format.pp_print_string fmt "Tnothing"
   | Tapply (a0, a1) ->
     Format.fprintf fmt "(@[<2>Tapply (@,";
     let () = Aast.pp_sid fmt a0 in

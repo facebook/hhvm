@@ -40,7 +40,7 @@ and hint_ p env = function
   | Hnonnull -> Tnonnull
   | Hthis -> Tthis
   | Hdynamic -> Tdynamic
-  | Hnothing -> Tnothing
+  | Hnothing -> Tunion []
   | Harray (h1, h2) ->
     if Partial.should_check_error env.Decl_env.mode 4045 && Option.is_none h1
     then

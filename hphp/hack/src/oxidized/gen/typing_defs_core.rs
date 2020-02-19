@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3dba843aa9a37b63c662ce8f386fd749>>
+// @generated SignedSource<<b6f99b17d62977268ded970ad5d06ced>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -195,7 +195,6 @@ pub enum Ty_ {
     /// mixed exists only in the decl_phase phase because it is desugared into ?nonnull
     /// during the localization phase.
     Tmixed,
-    Tnothing,
     Tlike(DeclTy),
     /// Access to a Pocket Universe Expression or Atom, denoted by
     /// Foo:@Bar or Foo:@Bar:@X.

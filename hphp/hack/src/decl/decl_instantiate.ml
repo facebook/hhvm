@@ -56,8 +56,8 @@ and instantiate_ subst x =
     let ty1 = Option.map ty1 (instantiate subst) in
     let ty2 = instantiate subst ty2 in
     Tvarray_or_darray (ty1, ty2)
-  | ( Tthis | Tvar _ | Tmixed | Tdynamic | Tnonnull | Tany _ | Terr | Tprim _
-    | Tnothing ) as x ->
+  | (Tthis | Tvar _ | Tmixed | Tdynamic | Tnonnull | Tany _ | Terr | Tprim _) as
+    x ->
     x
   | Ttuple tyl ->
     let tyl = List.map tyl (instantiate subst) in

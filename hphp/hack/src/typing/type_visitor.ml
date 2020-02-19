@@ -23,8 +23,6 @@ class type ['a] decl_type_visitor_type =
 
     method on_tdynamic : 'a -> Reason.t -> 'a
 
-    method on_tnothing : 'a -> Reason.t -> 'a
-
     method on_tthis : 'a -> Reason.t -> 'a
 
     method on_tarray : 'a -> Reason.t -> decl_ty option -> decl_ty option -> 'a
@@ -75,8 +73,6 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
     method on_tnonnull acc _ = acc
 
     method on_tdynamic acc _ = acc
-
-    method on_tnothing acc _ = acc
 
     method on_tthis acc _ = acc
 
@@ -140,7 +136,6 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
       | Tmixed -> this#on_tmixed acc r
       | Tnonnull -> this#on_tnonnull acc r
       | Tdynamic -> this#on_tdynamic acc r
-      | Tnothing -> this#on_tnothing acc r
       | Tthis -> this#on_tthis acc r
       | Tarray (ty1_opt, ty2_opt) -> this#on_tarray acc r ty1_opt ty2_opt
       | Tdarray (ty1, ty2) ->

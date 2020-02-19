@@ -102,7 +102,7 @@ Parsed decls:
     { td_pos = [22:6-15]; td_vis = Transparent; td_tparams = [];
       td_constraint = None;
       td_type =
-      (Rhint (root|typedefs.php line 22, characters 18-24), Tnothing) };
+        (Rhint (root|typedefs.php line 22, characters 18-24), (Tunion [])) };
     "MyNum" ->
     { td_pos = [19:6-11]; td_vis = Transparent; td_tparams = [];
       td_constraint = None;

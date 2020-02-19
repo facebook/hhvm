@@ -212,8 +212,8 @@ let test_aliased_namespaces_empty_configs_to_json_ffi _ =
   assert_equal [] Hhbc_options.(aliased_namespaces opts);
   ()
 
-let caml_from_configs config_list config_jsons =
-  Hhbc_options.apply_config_overrides_statelessly config_list config_jsons
+let caml_from_configs ~jsons ~args =
+  Hhbc_options.apply_config_overrides_statelessly args jsons
 
 let test_json_configs_stackable _ =
   (* See hhbc/options.rs test_options_de_multiple_jsons for comments *)
@@ -238,7 +238,7 @@ let test_json_configs_stackable _ =
     List.map ~f:(fun s -> Some (Hh_json.json_of_string s)) json_configs
   in
   (* Sanity checks *)
-  let caml_opts = caml_from_configs [] caml_configs in
+  let caml_opts = caml_from_configs ~jsons:caml_configs ~args:[] in
   (* set to 0 in the first JSON, so it must stay 0 *)
   assert_equal false Hhbc_options.(enable_coroutines caml_opts);
 
@@ -261,6 +261,12 @@ let test_json_configs_stackable _ =
     Hhbc_options.(rx_is_enabled rust_opts);
   ()
 
+let test_no_overrides _ =
+  let caml_opts = caml_from_configs ~jsons:[] ~args:[] in
+  let rust_opts = Options_ffi.from_configs ~jsons:[] ~args:[] in
+  _assert_opts_equal caml_opts rust_opts;
+  ()
+
 let () =
   "hhbc_options_migration"
   >::: [
@@ -274,5 +280,6 @@ let () =
          "test_aliased_namespaces_empty_configs_to_json_ffi"
          >:: test_aliased_namespaces_empty_configs_to_json_ffi;
          "test_json_configs_stackable" >:: test_json_configs_stackable;
+         "test_no_overrides" >:: test_no_overrides;
        ]
   |> run_test_tt_main

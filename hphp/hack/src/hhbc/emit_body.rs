@@ -12,6 +12,7 @@ use ast_scope_rust::{Scope, ScopeItem};
 use decl_vars_rust as decl_vars;
 use emit_adata_rust as emit_adata;
 use emit_expression_rust as emit_expression;
+use emit_fatal_rust::raise_fatal_runtime;
 use emit_param_rust as emit_param;
 use emit_pos_rust as emit_pos;
 use emit_pos_rust::emit_pos;
@@ -86,7 +87,7 @@ pub fn emit_body_with_default_args<'a, 'b>(
         default_dropthrough: None,
         flags: Flags::empty(),
     };
-    emit_body(emitter, namespace, body, return_value, &args).0
+    emit_body(emitter, namespace, body, return_value, &args).map(|r| r.0)
 }
 
 pub fn emit_body<'a, 'b>(
@@ -95,7 +96,7 @@ pub fn emit_body<'a, 'b>(
     body: &'b tast::Program,
     return_value: InstrSeq,
     args: &Args<'a, '_>,
-) -> (Result<HhasBody<'a>>, bool, bool) {
+) -> Result<(HhasBody<'a>, bool, bool)> {
     if args.flags.contains(Flags::ASYNC)
         && args.flags.contains(Flags::SKIP_AWAITABLE)
         && args.ret.map_or(false, |hint| !is_awaitable(&hint))
@@ -104,7 +105,7 @@ pub fn emit_body<'a, 'b>(
             args.flags.contains(Flags::CLOSURE_BODY),
             args.scope,
             args.pos,
-        );
+        )?
     };
 
     let tparams = args
@@ -119,25 +120,20 @@ pub fn emit_body<'a, 'b>(
     emitter.label_gen_mut().reset();
     emitter.iterator_mut().reset();
 
-    let return_type_info = match make_return_type_info(
+    let return_type_info = make_return_type_info(
         args.flags.contains(Flags::SKIP_AWAITABLE),
         args.flags.contains(Flags::NATIVE),
         args.ret,
         &tp_names,
-    ) {
-        Err(x) => return (Err(x), is_generator, is_pair_generator),
-        Ok(x) => x,
-    };
-    let params = match make_params(
+    )?;
+
+    let params = make_params(
         emitter,
         namespace,
         &mut tp_names,
         args,
         !args.flags.contains(Flags::MEMOIZE),
-    ) {
-        Err(x) => return (Err(x), is_generator, is_pair_generator),
-        Ok(x) => x,
-    };
+    )?;
     let upper_bounds = make_upper_bounds(
         emitter,
         args.immediate_tparams,
@@ -175,7 +171,7 @@ pub fn emit_body<'a, 'b>(
         local_gen.reserve_retval_and_label_id_locals();
     };
 
-    let body_instrs = match make_body_instrs(
+    let body_instrs = make_body_instrs(
         emitter,
         &mut env,
         &args,
@@ -187,13 +183,9 @@ pub fn emit_body<'a, 'b>(
         is_generator,
         args.flags.contains(Flags::NATIVE),
         args.flags.contains(Flags::DEBUGGER_MODIFY_PROGRAM),
-    ) {
-        Err(x) => return (Err(x), is_generator, is_pair_generator),
-        Ok(x) => x,
-    };
-
-    (
-        Ok(make_body(
+    )?;
+    Ok((
+        make_body(
             emitter,
             body_instrs,
             decl_vars,
@@ -204,10 +196,10 @@ pub fn emit_body<'a, 'b>(
             Some(return_type_info),
             args.doc_comment.to_owned(),
             Some(env),
-        )),
+        ),
         is_generator,
         is_pair_generator,
-    )
+    ))
 }
 
 fn make_body_instrs(
@@ -857,6 +849,26 @@ fn is_awaitable(hint: &tast::Hint) -> bool {
     }
 }
 
-fn report_error(_is_closure_body: bool, _scope: &Scope, _pos: &Pos) {
-    //TODO(hrust) implement
+fn report_error(is_closure_body: bool, scope: &Scope, pos: &Pos) -> Result<()> {
+    let msg: String = if is_closure_body {
+        "Return type hint for async closure must be awaitable".into()
+    } else {
+        let mut scope = scope.items.iter();
+        let s1 = scope.next();
+        let s2 = scope.next();
+        use ScopeItem as S;
+        let (kind, name) = match (s1, s2) {
+            (Some(S::Function(f)), _) => ("function", string_utils::strip_ns(&f.name.1).to_owned()),
+            (Some(S::Method(m)), Some(S::Class(c))) => (
+                "method",
+                string_utils::strip_ns(&c.name.1).to_owned() + "::" + m.name.1.as_str(),
+            ),
+            _ => return Err(Error::Unrecoverable("Unexpected".into())),
+        };
+        format!(
+            "Return type hint for async {} {}() must be awaitable",
+            kind, name
+        )
+    };
+    Err(raise_fatal_runtime(pos, msg))
 }

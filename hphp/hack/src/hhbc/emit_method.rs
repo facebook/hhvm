@@ -175,7 +175,7 @@ pub fn from_ast<'a>(
                 &method.name,
                 &method.params,
                 method.ret.1.as_ref(),
-            ),
+            )?,
             false,
             false,
         )
@@ -209,7 +209,7 @@ pub fn from_ast<'a>(
                 default_dropthrough,
                 flags,
             },
-        )
+        )?
     };
     let name = {
         let mut name = method::Type::from_ast_name(&method.name.1);
@@ -240,7 +240,7 @@ pub fn from_ast<'a>(
         attributes,
         visibility,
         name,
-        body: body?,
+        body,
         span,
         rx_level,
         flags,

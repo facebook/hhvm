@@ -80,15 +80,19 @@ pub fn emit_function<'a>(
     };
 
     let deprecation_info = hhas_attribute::deprecation_info(attrs.iter());
-    let (body, is_gen, is_pair_gen): (Result<HhasBody>, bool, bool) = {
+    let (body, is_gen, is_pair_gen) = {
         let deprecation_info = if memoized { None } else { deprecation_info };
         let native = attrs.iter().any(|a| ua::is_native(&a.name));
         use emit_body::{Args as EmitBodyArgs, Flags as EmitBodyFlags};
-        let mut flags = EmitBodyFlags::empty();
-        flags.set(EmitBodyFlags::RX_BODY, rx_body);
-        flags.set(EmitBodyFlags::NATIVE, native);
-        flags.set(EmitBodyFlags::MEMOIZE, memoized);
-        flags.set(
+        let mut body_flags = EmitBodyFlags::empty();
+        body_flags.set(
+            EmitBodyFlags::ASYNC,
+            flags.contains(hhas_function::Flags::ASYNC),
+        );
+        body_flags.set(EmitBodyFlags::RX_BODY, rx_body);
+        body_flags.set(EmitBodyFlags::NATIVE, native);
+        body_flags.set(EmitBodyFlags::MEMOIZE, memoized);
+        body_flags.set(
             EmitBodyFlags::SKIP_AWAITABLE,
             f.fun_kind == ast_defs::FunKind::FAsync,
         );
@@ -102,7 +106,7 @@ pub fn emit_function<'a>(
             ))],
             InstrSeq::make_null(),
             &EmitBodyArgs {
-                flags,
+                flags: body_flags,
                 deprecation_info: &deprecation_info,
                 default_dropthrough: None,
                 doc_comment: f.doc_comment.clone(),
@@ -112,7 +116,7 @@ pub fn emit_function<'a>(
                 ast_params: &f.params,
                 immediate_tparams: &f.tparams,
             },
-        )
+        )?
     };
     flags.set(hhas_function::Flags::GENERATOR, is_gen);
     flags.set(hhas_function::Flags::PAIR_GENERATOR, is_pair_gen);
@@ -127,7 +131,6 @@ pub fn emit_function<'a>(
         None
     };
     let name: String = renamed_id.into();
-    let body = body?;
     let normal_function = HhasFunction {
         attributes: attrs,
         name: name.into(),

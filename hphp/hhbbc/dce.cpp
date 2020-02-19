@@ -1963,7 +1963,7 @@ dce_visit(const Index& index,
     auto const handled = [&] {
       if (dceState.minstrUI) {
         if (visit_env.flags.wasPEI) {
-          dceState.minstrUI.clear();
+          dceState.minstrUI.reset();
           return false;
         }
         if (isMemberDimOp(op.op)) {
@@ -1987,7 +1987,7 @@ dce_visit(const Index& index,
             dceState.minstrUI->actions[visit_env.id] = DceAction::Kill;
           }
           commitActions(visit_env, false, dceState.minstrUI->actions);
-          dceState.minstrUI.clear();
+          dceState.minstrUI.reset();
           return true;
         }
       }
@@ -2035,7 +2035,7 @@ dce_visit(const Index& index,
     assert(dceState.stack.size() == states[idx].first.stack.size());
   }
 
-  dceState.minstrUI.clear();
+  dceState.minstrUI.reset();
   return dceState;
 }
 

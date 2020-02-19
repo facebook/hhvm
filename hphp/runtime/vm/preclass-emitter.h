@@ -129,7 +129,7 @@ struct PreClassEmitter {
       : m_name(n), m_typeConstraint(typeConstraint), m_phpCode(phpCode),
         m_typeconst(typeconst) {
       if (!val) {
-        m_val.clear();
+        m_val.reset();
       } else {
         m_val = *val;
       }

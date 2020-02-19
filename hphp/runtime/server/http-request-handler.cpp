@@ -215,7 +215,7 @@ void HttpRequestHandler::teardownRequest(Transport* transport) noexcept {
   // HPHP logs may need to access data in ServerStats, so we have to clear the
   // hashtable after writing the log entry.
   ServerStats::Reset();
-  m_sourceRootInfo.clear();
+  m_sourceRootInfo.reset();
 
   if (is_hphp_session_initialized()) {
     hphp_session_exit(transport);

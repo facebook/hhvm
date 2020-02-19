@@ -1043,7 +1043,7 @@ size_t relocateImpl(Env& env) {
           // or veneers, so we do not need a jump to fallthru properly.
           env.destBlock.setFrontier(destAddrBefore);
           env.rel.recordAddress(srcAddr, destAddrBefore - kInstructionSize, 0);
-          env.meta.fallthru.clear();
+          env.meta.fallthru.reset();
         } else {
           // Adjust the fallthru jmp.
           auto const success =

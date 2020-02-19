@@ -1460,7 +1460,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
     }
   } else if (isMemberFinalOp(op)) {
     cur->mbr_live = false;
-    cur->mbr_mode.clear();
+    cur->mbr_mode.reset();
   }
 
   return ok;
@@ -1920,7 +1920,7 @@ void FuncChecker::initState(State* s) {
   for (int i = 0, n = numIters(); i < n; ++i) s->iters[i] = false;
   s->stklen = 0;
   s->mbr_live = false;
-  s->mbr_mode.clear();
+  s->mbr_mode.reset();
   s->silences.clear();
   s->guaranteedThis = m_func->pce() && !(m_func->attrs & AttrStatic);
   s->mbrMustContainMutableLocalOrThis = false;

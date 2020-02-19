@@ -1827,7 +1827,7 @@ TypeParserImpl::determineArrayBound(Dwarf_Die die) {
     }
   );
 
-  if (bound && !*bound) bound.clear();
+  if (bound && !*bound) bound.reset();
   return bound;
 }
 

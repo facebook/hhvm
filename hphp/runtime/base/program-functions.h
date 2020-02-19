@@ -150,7 +150,7 @@ struct HphpSessionAndThread {
     session.emplace(sk);
   }
   ~HphpSessionAndThread() {
-    session.clear();
+    session.reset();
     hphp_thread_exit();
   }
   HphpSessionAndThread(const HphpSessionAndThread&) = delete;

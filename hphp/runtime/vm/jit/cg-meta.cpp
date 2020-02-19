@@ -270,7 +270,7 @@ void CGMeta::clear() {
   alignments.clear();
   reusedStubs.clear();
   addressImmediates.clear();
-  fallthru.clear();
+  fallthru.reset();
   codePointers.clear();
   inProgressTailJumps.clear();
   bcMap.clear();

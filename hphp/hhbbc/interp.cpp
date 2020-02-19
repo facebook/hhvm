@@ -5716,7 +5716,7 @@ void interpStep(ISS& env, const Bytecode& bc) {
       env.propagate(env.blk.throwExit, &*env.stateBefore);
     }
   }
-  env.stateBefore.clear();
+  env.stateBefore.reset();
 
   record(env, bc);
 }

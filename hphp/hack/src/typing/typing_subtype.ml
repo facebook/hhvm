@@ -2703,7 +2703,11 @@ and add_tyvar_upper_bound_and_close
     ~treat_dynamic_as_bottom (env, prop) var ty on_error =
   let upper_bounds_before = Env.get_tyvar_upper_bounds env var in
   let env =
-    Env.add_tyvar_upper_bound ~intersect:(try_intersect_i env) env var ty
+    Env.add_tyvar_upper_bound_and_update_variances
+      ~intersect:(try_intersect_i env)
+      env
+      var
+      ty
   in
   let upper_bounds_after = Env.get_tyvar_upper_bounds env var in
   let added_upper_bounds = ITySet.diff upper_bounds_after upper_bounds_before in
@@ -2744,7 +2748,13 @@ and add_tyvar_upper_bound_and_close
 and add_tyvar_lower_bound_and_close
     ~treat_dynamic_as_bottom (env, prop) var ty on_error =
   let lower_bounds_before = Env.get_tyvar_lower_bounds env var in
-  let env = Env.add_tyvar_lower_bound ~union:(try_union_i env) env var ty in
+  let env =
+    Env.add_tyvar_lower_bound_and_update_variances
+      ~union:(try_union_i env)
+      env
+      var
+      ty
+  in
   let lower_bounds_after = Env.get_tyvar_lower_bounds env var in
   let added_lower_bounds = ITySet.diff lower_bounds_after lower_bounds_before in
   let upper_bounds = Env.get_tyvar_upper_bounds env var in
@@ -3512,6 +3522,13 @@ let sub_type_with_dynamic_as_bottom
       old_env
   in
   env_change_log env
+
+let simplify_subtype_i env ty_sub ty_super ~on_error =
+  simplify_subtype_i
+    ~subtype_env:(make_subtype_env ~no_top_bottom:true on_error)
+    ty_sub
+    ty_super
+    env
 
 (*****************************************************************************)
 (* Exporting *)

@@ -178,6 +178,8 @@ type t = {
   po_allow_new_attribute_syntax: bool;
   (* Perform global inference globally on the code base to infer missing type annotations. *)
   tco_global_inference: bool;
+  tco_ordered_solving: bool;
+      (** Whether to solve typing inference constraints using ordered solving or transitive closure. *)
   (* Enable const static properties *)
   tco_const_static_props: bool;
   (* Disable <<...>> attribute syntax *)
@@ -290,6 +292,7 @@ val make :
   ?po_disallowed_decl_fixmes:ISet.t ->
   ?po_allow_new_attribute_syntax:bool ->
   ?tco_global_inference:bool ->
+  ?tco_ordered_solving:bool ->
   ?tco_const_static_props:bool ->
   ?po_disable_legacy_attribute_syntax:bool ->
   ?tco_const_attribute:bool ->
@@ -460,6 +463,8 @@ val po_allow_new_attribute_syntax : t -> bool
 
 val tco_global_inference : t -> bool
 
+val tco_ordered_solving : t -> bool
+
 val tco_const_static_props : t -> bool
 
 val po_disable_legacy_attribute_syntax : t -> bool
@@ -475,6 +480,8 @@ val po_abstract_static_props : t -> bool
 val po_disable_unset_class_const : t -> bool
 
 val set_global_inference : t -> t
+
+val set_ordered_solving : t -> bool -> t
 
 val po_parser_errors_only : t -> bool
 

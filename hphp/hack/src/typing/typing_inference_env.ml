@@ -74,7 +74,7 @@ type t = {
 
 type global_tyvar_info = {
   tyvar_reason: Reason.t;
-  solving_info: solving_info;
+  solving_info_g: solving_info;
 }
 
 type global_tvenv = global_tyvar_info IMap.t
@@ -163,11 +163,11 @@ module Log = struct
       ]
 
   let global_tyvar_info_as_value tvinfo =
-    let { tyvar_reason; solving_info } = tvinfo in
+    let { tyvar_reason; solving_info_g } = tvinfo in
     make_map
       [
         ("tyvar_reason", reason_as_value tyvar_reason);
-        ("solving_info", solving_info_as_value solving_info);
+        ("solving_info", solving_info_as_value solving_info_g);
       ]
 
   let global_tvenv_as_value genv =
@@ -228,11 +228,11 @@ module Log = struct
     in
     match IMap.find_opt v genv with
     | None -> JSON_Null
-    | Some { tyvar_reason; solving_info } ->
+    | Some { tyvar_reason; solving_info_g } ->
       JSON_Object
         [
           ("tyvar_reason", reason_to_json tyvar_reason);
-          ("solving_info", solving_info_to_json solving_info);
+          ("solving_info", solving_info_to_json solving_info_g);
         ]
 end
 
@@ -755,8 +755,10 @@ let extract_global_tyvar_info : t -> tyvar_info -> t * global_tyvar_info option
   in
   match global_reason with
   | Some global_reason ->
-    let (env, solving_info) = expand_bounds_of_global_tyvars env solving_info in
-    let gtvinfo = { tyvar_reason = global_reason; solving_info } in
+    let (env, solving_info_g) =
+      expand_bounds_of_global_tyvars env solving_info
+    in
+    let gtvinfo = { tyvar_reason = global_reason; solving_info_g } in
     (env, Some gtvinfo)
   | None -> (env, None)
 
@@ -769,11 +771,11 @@ let extract_global_inference_env : t -> t * t_global =
   (env, tvenv)
 
 let global_tyvar_info_to_dummy_tyvar_info gtvinfo =
-  let { solving_info; tyvar_reason } = gtvinfo in
+  let { solving_info_g; tyvar_reason } = gtvinfo in
   {
     global_reason = Some tyvar_reason;
     eager_solve_failed = false;
-    solving_info;
+    solving_info = solving_info_g;
     tyvar_pos = Reason.to_pos tyvar_reason;
   }
 
@@ -782,6 +784,15 @@ let get_vars (env : t) = IMap.keys env.tvenv
 let is_empty_g (genv : t_global) = IMap.is_empty genv
 
 let get_vars_g (genv : t_global) = IMap.keys genv
+
+let get_unsolved_vars (env : t) : Ident.t list =
+  IMap.fold
+    (fun v tvinfo vars ->
+      match tvinfo.solving_info with
+      | TVIConstraints _ -> v :: vars
+      | TVIType _ -> vars)
+    env.tvenv
+    []
 
 let get_tyvar_info_exn_g (genv : t_global) v = IMap.find v genv
 
@@ -918,10 +929,136 @@ module Size = struct
   let global_inference_env_size (genv : t_global) =
     let env = empty_inference_env in
     IMap.map
-      (fun tyvar_info -> solving_info_size env tyvar_info.solving_info)
+      (fun tyvar_info -> solving_info_size env tyvar_info.solving_info_g)
       genv
     |> fun m -> IMap.fold (fun _ x y -> x + y) m 0
 end
+
+(* The following merging logic is used to gather all the information we have
+ * on a global type variable from multiple sub-graphs. It simply unions
+ * all the constraints and does not try to do anything clever like
+ * keeping the graph transitively closed. *)
+
+let merge_constraints cstr1 cstr2 =
+  let {
+    lower_bounds = lb1;
+    upper_bounds = ub1;
+    type_constants = tc1;
+    pu_accesses = pu1;
+    appears_covariantly = cov1;
+    appears_contravariantly = contra1;
+  } =
+    cstr1
+  in
+  let {
+    lower_bounds = lb2;
+    upper_bounds = ub2;
+    type_constants = tc2;
+    pu_accesses = pu2;
+    appears_covariantly = cov2;
+    appears_contravariantly = contra2;
+  } =
+    cstr2
+  in
+  {
+    lower_bounds = ITySet.union lb1 lb2;
+    upper_bounds = ITySet.union ub1 ub2;
+    appears_covariantly = cov1 || cov2;
+    appears_contravariantly = contra1 || contra2;
+    type_constants =
+      (* Type constants must already have been made equivalent, so picking any should be fine *)
+      (* TODO: that might actually not be true during initial merging, but let's fix that later. *)
+      SMap.union tc1 tc2;
+    pu_accesses = SMap.union pu1 pu2;
+  }
+
+let solving_info_as_constraints sinfo =
+  match sinfo with
+  | TVIConstraints c -> c
+  | TVIType ty ->
+    {
+      lower_bounds = ITySet.singleton (LoclType ty);
+      upper_bounds = ITySet.singleton (LoclType ty);
+      appears_covariantly = false;
+      appears_contravariantly = false;
+      type_constants = SMap.empty;
+      pu_accesses = SMap.empty;
+    }
+
+let merge_solving_infos sinfo1 sinfo2 =
+  let cstr1 = solving_info_as_constraints sinfo1 in
+  let cstr2 = solving_info_as_constraints sinfo2 in
+  let cstr = merge_constraints cstr1 cstr2 in
+  TVIConstraints cstr
+
+let merge_tyvar_infos tvinfo1 tvinfo2 =
+  let {
+    tyvar_pos = pos1;
+    global_reason = gl1;
+    eager_solve_failed = esf1;
+    solving_info = sinfo1;
+  } =
+    tvinfo1
+  in
+  let {
+    tyvar_pos = pos2;
+    global_reason = gl2;
+    eager_solve_failed = esf2;
+    solving_info = sinfo2;
+  } =
+    tvinfo2
+  in
+  let global_reason =
+    match (gl1, gl2) with
+    | (Some r1, Some r2) ->
+      if Reason.(equal r1 none) then
+        Some r2
+      else
+        Some r1
+    | (Some r, None)
+    | (None, Some r) ->
+      Some r
+    | (None, None) -> None
+  in
+  {
+    tyvar_pos =
+      ( if Pos.equal pos1 Pos.none then
+        pos2
+      else
+        pos1 );
+    global_reason;
+    eager_solve_failed = esf1 || esf2;
+    solving_info = merge_solving_infos sinfo1 sinfo2;
+  }
+
+let merge_tyvars env v1 v2 =
+  if Ident.equal v1 v2 then
+    env
+  else
+    let tvenv = env.tvenv in
+    let tvinfo1 = IMap.find v1 env.tvenv in
+    let tvinfo2 = IMap.find v2 env.tvenv in
+    let tvinfo = merge_tyvar_infos tvinfo1 tvinfo2 in
+    let tvenv = IMap.add v2 tvinfo tvenv in
+    let env = { env with tvenv } in
+    let env = add env v1 (mk (Reason.none, Tvar v2)) in
+    let env = remove_tyvar_lower_bound env v2 v2 in
+    let env = remove_tyvar_upper_bound env v2 v2 in
+    env
+
+let move_tyvar_from_genv_to_env v ~to_:(env : t) ~from:(genv : t_global) =
+  let tvinfo1 =
+    get_tyvar_info_exn_g genv v |> global_tyvar_info_to_dummy_tyvar_info
+  in
+  let tvenv = env.tvenv in
+  let tvinfo =
+    match IMap.find_opt v tvenv with
+    | None -> tvinfo1
+    | Some tvinfo2 -> merge_tyvar_infos tvinfo1 tvinfo2
+  in
+  let tvenv = IMap.add v tvinfo tvenv in
+  let env = { env with tvenv } in
+  env
 
 let simple_merge env1 env2 =
   let {
@@ -1048,8 +1185,8 @@ let tyvar_info_carries_information tvinfo =
   solving_info_carries_information solving_info
 
 let global_tyvar_info_carries_information tvinfo =
-  let { tyvar_reason = _; solving_info } = tvinfo in
-  solving_info_carries_information solving_info
+  let { tyvar_reason = _; solving_info_g } = tvinfo in
+  solving_info_carries_information solving_info_g
 
 let compress env =
   let {
@@ -1116,7 +1253,7 @@ let construct_undirected_tyvar_graph genvs :
     IMap.fold
       (fun tyvar infos edges ->
         List.fold infos ~init:edges ~f:(fun edges (_, tyvar_info) ->
-            match tyvar_info.solving_info with
+            match tyvar_info.solving_info_g with
             | TVIType ty -> walk tyvar (LoclType ty) edges
             | TVIConstraints cstrs ->
               ITySet.fold (walk tyvar) cstrs.lower_bounds edges
@@ -1307,7 +1444,7 @@ let remove_var env var ~search_in_upper_bounds_of ~search_in_lower_bounds_of =
   let subtype_prop = replace_var_by_ty_in_prop subtype_prop var ty in
   { tvenv; tyvars_stack; tyvar_occurrences; subtype_prop; allow_solve_globals }
 
-let forget_tyvar_g genv var_to_forget =
+let forget_tyvar_g (genv : t_global) var_to_forget =
   let default_mapper_env = Type_mapper_forget.make_env var_to_forget in
   let mapper = new Type_mapper_forget.forget_tyvar_mapper in
   let process_solving_info : solving_info -> solving_info option = function
@@ -1339,11 +1476,11 @@ let forget_tyvar_g genv var_to_forget =
         if Int.equal var var_to_forget then
           None
         else
-          let solving_info =
-            process_solving_info global_tyvar_info.solving_info
+          let solving_info_g =
+            process_solving_info global_tyvar_info.solving_info_g
           in
-          Option.map solving_info ~f:(fun solving_info ->
-              { global_tyvar_info with solving_info }))
+          Option.map solving_info_g ~f:(fun solving_info_g ->
+              { global_tyvar_info with solving_info_g }))
       genv
   in
   let genv = IMap.filter_opt genv in
@@ -1363,7 +1500,7 @@ let forget_tyvar_g genv var_to_forget =
     in
     IMap.iter
       (fun _var global_tyvar_info ->
-        match global_tyvar_info.solving_info with
+        match global_tyvar_info.solving_info_g with
         | TVIType locl_ty -> fst @@ throw_on_var_to_forget#on_type () locl_ty
         | TVIConstraints cstrs ->
           ITySet.iter
@@ -1383,7 +1520,7 @@ let visit_types_g
   IMap.fold
     (fun tyvar tyvar_info acc ->
       let acc = fst @@ mapper#on_tvar acc tyvar_info.tyvar_reason tyvar in
-      match tyvar_info.solving_info with
+      match tyvar_info.solving_info_g with
       | TVIType ty -> fst @@ mapper#on_type acc ty
       | TVIConstraints cstrs ->
         let process_bounds bounds acc =
@@ -1397,3 +1534,55 @@ let visit_types_g
         |> process_bounds cstrs.upper_bounds)
     genv
     acc
+
+(** This is a horrible thing meant to throw a warning when some invariant turns out
+    to be wrong (namely a variable should not yet be solved) and to help us get back
+    on our feet when this happens. Once we figure out why this invariant is wrong,
+    this function should die. *)
+let unsolve env v =
+  let {
+    tvenv;
+    tyvars_stack;
+    subtype_prop;
+    tyvar_occurrences;
+    allow_solve_globals;
+  } =
+    env
+  in
+  match IMap.find_opt v tvenv with
+  | None -> env
+  | Some tvinfo ->
+    let { solving_info; tyvar_pos; global_reason; eager_solve_failed } =
+      tvinfo
+    in
+    (match solving_info with
+    | TVIConstraints _ -> env
+    | TVIType ty ->
+      let stack = Caml.Printexc.get_callstack 50 in
+      Printf.eprintf
+        "Did not expect variable #%d to be solved already. Unsolving it.\n"
+        v;
+      Caml.Printexc.print_raw_backtrace stderr stack;
+      Printf.eprintf "%!";
+      let solving_info =
+        TVIConstraints
+          {
+            appears_covariantly = false;
+            appears_contravariantly = false;
+            upper_bounds = ITySet.singleton (LoclType ty);
+            lower_bounds = ITySet.singleton (LoclType ty);
+            type_constants = SMap.empty;
+            pu_accesses = SMap.empty;
+          }
+      in
+      let tvinfo =
+        { solving_info; tyvar_pos; global_reason; eager_solve_failed }
+      in
+      let tvenv = IMap.add v tvinfo tvenv in
+      {
+        tvenv;
+        tyvars_stack;
+        subtype_prop;
+        tyvar_occurrences;
+        allow_solve_globals;
+      })

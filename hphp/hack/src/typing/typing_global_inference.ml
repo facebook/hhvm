@@ -16,6 +16,7 @@ module MakeType = Typing_make_type
 module StateErrors = struct
   module IdentMap = WrappedMap.Make (Ident)
 
+  (** Mapping from type variable id to a list of errors. *)
   type t = Errors.error list IdentMap.t ref
 
   let mk_empty () = ref IdentMap.empty
@@ -37,7 +38,12 @@ let make_error_callback errors var ?code msgl =
   in
   StateErrors.add errors var (Errors.make_error code msgl)
 
-let catch_exc pos (on_error : Errors.typing_error_callback) r f =
+let catch_exc
+    pos
+    (on_error : Errors.typing_error_callback)
+    (r : 'a)
+    ?(verbose = false)
+    (f : Errors.typing_error_callback -> 'a) : 'a =
   try
     let (other_errors, v) =
       Errors.do_with_context (Pos.filename pos) Errors.Typing (fun () ->
@@ -47,9 +53,16 @@ let catch_exc pos (on_error : Errors.typing_error_callback) r f =
         on_error (Errors.to_list error));
     v
   with Inf.InconsistentTypeVarState _ as e ->
+    if verbose then (
+      let stack = Caml.Printexc.get_raw_backtrace () in
+      prerr_endline (Caml.Printexc.to_string e);
+      Caml.Printexc.print_raw_backtrace stderr stack
+    );
     let e = Printf.sprintf "Exception: %s" (Exn.to_string e) in
     on_error [(pos, e)];
     r
+
+let is_ordered_solving env = GlobalOptions.tco_ordered_solving env.genv.tcopt
 
 module type MarshalledData = sig
   type t
@@ -133,23 +146,6 @@ module StateConstraintGraph = struct
         merge_var (env, errors) (pos, subgraph) v)
 
   let merge_subgraphs ?(tcopt = GlobalOptions.default) subgraphs =
-    (* Collect each global tyvar and map it to a global environment in
-     * which it lives. Give preference to the global environment which also
-     * has positional information for this type variable *)
-    let initial_tyvar_sources : (Pos.t * Inf.t_global) IMap.t =
-      List.fold subgraphs ~init:IMap.empty ~f:(fun m (_, genv) ->
-          List.fold (Inf.get_vars_g genv) ~init:m ~f:(fun m var ->
-              IMap.update
-                var
-                (function
-                  | Some (pos, genv) when not (Pos.equal pos Pos.none) ->
-                    Some (pos, genv)
-                  | None
-                  | Some (_, _) ->
-                    Some (Inf.get_tyvar_pos_exn_g genv var, genv))
-                m))
-    in
-    (* copy each initial variable to the new environment *)
     let env =
       Typing_env.empty
         (Provider_context.empty_for_worker ~tcopt)
@@ -157,14 +153,35 @@ module StateConstraintGraph = struct
         ~droot:None
     in
     let errors = StateErrors.mk_empty () in
-    let env =
-      IMap.fold
-        (fun var (_, genv) env ->
-          Env.initialize_tyvar_as_in ~as_in:genv env var)
-        initial_tyvar_sources
-        env
-    in
-    List.fold ~f:merge_subgraph ~init:(env, errors) subgraphs
+    if is_ordered_solving env then
+      let env = Typing_ordered_solver.merge_graphs env subgraphs in
+      (env, errors)
+    else
+      (* Collect each global tyvar and map it to a global environment in
+      * which it lives. Give preference to the global environment which also
+      * has positional information for this type variable *)
+      let initial_tyvar_sources : (Pos.t * Inf.t_global) IMap.t =
+        List.fold subgraphs ~init:IMap.empty ~f:(fun m (_, genv) ->
+            List.fold (Inf.get_vars_g genv) ~init:m ~f:(fun m var ->
+                IMap.update
+                  var
+                  (function
+                    | Some (pos, genv) when not (Pos.equal pos Pos.none) ->
+                      Some (pos, genv)
+                    | None
+                    | Some (_, _) ->
+                      Some (Inf.get_tyvar_pos_exn_g genv var, genv))
+                  m))
+      in
+      (* copy each initial variable to the new environment *)
+      let env =
+        IMap.fold
+          (fun var (_, genv) env ->
+            Env.initialize_tyvar_as_in ~as_in:genv env var)
+          initial_tyvar_sources
+          env
+      in
+      List.fold ~f:merge_subgraph ~init:(env, errors) subgraphs
 end
 
 module StateSubConstraintGraphs = struct
@@ -214,11 +231,13 @@ module StateSolvedGraph = struct
           else
             env)
     in
+    let make_on_error = make_error_callback errors in
     let env =
-      catch_exc Pos.none (make_error_callback errors 0) env @@ fun _ ->
-      Typing_solver.solve_all_unsolved_tyvars_gi
-        env
-        (make_error_callback errors)
+      catch_exc Pos.none (make_on_error 0) env @@ fun _ ->
+      if is_ordered_solving env then
+        Typing_ordered_solver.solve_env env make_on_error
+      else
+        Typing_solver.solve_all_unsolved_tyvars_gi env make_on_error
     in
     (env, errors, positions)
 end

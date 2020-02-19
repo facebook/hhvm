@@ -90,3 +90,10 @@ val add_constraints :
 
 (** Hack to allow for circular dependencies between Ocaml modules. *)
 val set_fun_refs : unit -> unit
+
+val simplify_subtype_i :
+  env ->
+  internal_type ->
+  internal_type ->
+  on_error:Errors.typing_error_callback ->
+  env * Typing_logic.subtype_prop

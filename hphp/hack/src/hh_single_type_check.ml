@@ -214,6 +214,7 @@ let parse_options () =
   let allow_new_attribute_syntax = ref false in
   let allow_toplevel_requires = ref false in
   let global_inference = ref false in
+  let ordered_solving = ref false in
   let const_static_props = ref false in
   let disable_legacy_attribute_syntax = ref false in
   let const_attribute = ref false in
@@ -323,6 +324,9 @@ let parse_options () =
       ( "--global-inference",
         Arg.Set global_inference,
         "Global type inference to infer missing type annotations." );
+      ( "--ordered-solving",
+        Arg.Set ordered_solving,
+        "Optimized solver for type variables. Experimental." );
       ( "--find-refs",
         Arg.Tuple
           [
@@ -560,6 +564,7 @@ let parse_options () =
       ~po_disallow_toplevel_requires:(not !allow_toplevel_requires)
       ~tco_const_static_props:!const_static_props
       ~tco_global_inference:!global_inference
+      ~tco_ordered_solving:!ordered_solving
       ~po_disable_legacy_attribute_syntax:!disable_legacy_attribute_syntax
       ~tco_const_attribute:!const_attribute
       ~po_allow_goto:(not !disallow_goto)

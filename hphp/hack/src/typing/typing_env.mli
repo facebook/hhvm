@@ -289,7 +289,21 @@ val add_tyvar_upper_bound :
   internal_type ->
   env
 
+val add_tyvar_upper_bound_and_update_variances :
+  ?intersect:(internal_type -> internal_type list -> internal_type list) ->
+  env ->
+  Ident.t ->
+  internal_type ->
+  env
+
 val add_tyvar_lower_bound :
+  ?union:(internal_type -> internal_type list -> internal_type list) ->
+  env ->
+  Ident.t ->
+  internal_type ->
+  env
+
+val add_tyvar_lower_bound_and_update_variances :
   ?union:(internal_type -> internal_type list -> internal_type list) ->
   env ->
   Ident.t ->
@@ -416,3 +430,5 @@ val remove_var :
   search_in_upper_bounds_of:ISet.t ->
   search_in_lower_bounds_of:ISet.t ->
   env
+
+val unsolve : env -> Ident.t -> env

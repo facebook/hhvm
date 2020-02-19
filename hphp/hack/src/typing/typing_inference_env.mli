@@ -57,6 +57,8 @@ val get_current_tyvars : t -> Ident.t list
 
 val close_tyvars : t -> t
 
+val tyvar_is_solved : t -> Ident.t -> bool
+
 val tyvar_is_solved_or_skip_global : t -> Ident.t -> bool
 
 val tyvar_occurs_in_tyvar : t -> Ident.t -> in_:Ident.t -> bool
@@ -154,11 +156,15 @@ val get_current_pos_from_tyvar_stack : t -> Pos.t option
 inference env, which should only contain global type variables. *)
 val extract_global_inference_env : t -> t * t_global
 
+(** Get the list of all type variables in the environment *)
 val get_vars : t -> Ident.t list
 
 val is_empty_g : t_global -> bool
 
 val get_vars_g : t_global -> Ident.t list
+
+(** Get the list of all unsolved type variables in the environment *)
+val get_unsolved_vars : t -> Ident.t list
 
 val initialize_tyvar_as_in : as_in:t_global -> t -> int -> t
 
@@ -166,6 +172,13 @@ val get_tyvar_reason_exn_g : t_global -> Ident.t -> Reason.t
 
 val get_tyvar_pos_exn_g : t_global -> Ident.t -> Pos.t
 
+(** Move a type variable from a global env to an env. If the variable
+    already exists in the env, union the constraints of both variables.
+    Doesn't perform any transitive closure. *)
+val move_tyvar_from_genv_to_env : Ident.t -> to_:t -> from:t_global -> t
+
+(** Move a type variable from a global env to an env. If the variable
+    already exists in the env, create a new identifier for it and return it. *)
 val copy_tyvar_from_genv_to_env :
   Ident.t -> to_:t -> from:t_global -> t * Ident.t
 
@@ -179,6 +192,12 @@ end
 
 (** Only merge the tvenv parts. Resolve conflicts stupidly by taking the first mapping of the two. *)
 val simple_merge : t -> t -> t
+
+(** Merge type variables by transferring all constraints from the first to the second
+    and binding the first to the second.
+    Does not perform anything clever, especially does not perform any transitive closure.
+    Will throw an exception of the type variables are already solved. *)
+val merge_tyvars : t -> Ident.t -> Ident.t -> t
 
 (** Gets the part of the subtype proposition that should not be added to the
 constraint graph (e.g. because it contains disjunctions). *)
@@ -218,3 +237,5 @@ val forget_tyvar_g : t_global -> Ident.t -> t_global
   *)
 val visit_types_g :
   t_global -> 'a Type_mapper_generic.internal_type_mapper_type -> 'a -> 'a
+
+val unsolve : t -> Ident.t -> t

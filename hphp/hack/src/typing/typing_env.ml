@@ -1534,6 +1534,11 @@ let set_tyvar_variance_i env ?(flip = false) ty =
 let set_tyvar_variance env ?(flip = false) ty =
   set_tyvar_variance_i env ~flip (LoclType ty)
 
+let add_tyvar_upper_bound ?intersect env var (ty : internal_type) =
+  log_env_change "add_tyvar_upper_bound" env
+  @@ wrap_inference_env_call_env env (fun env ->
+         Inf.add_tyvar_upper_bound ?intersect env var ty)
+
 (* Add a single new upper bound [ty] to type variable [var] in [env.inference_env].
  * If the optional [intersect] operation is supplied, then use this to avoid
  * adding redundant bounds by merging the type with existing bounds. This makes
@@ -1542,13 +1547,11 @@ let set_tyvar_variance env ?(flip = false) ty =
  * is equivalent to a single upper bound
  *   v <: (t1 & ... & tn)
  *)
-let add_tyvar_upper_bound ?intersect env var (ty : internal_type) =
+let add_tyvar_upper_bound_and_update_variances
+    ?intersect env var (ty : internal_type) =
   log_env_change "add_tyvar_upper_bound" env
   @@
-  let env =
-    wrap_inference_env_call_env env (fun env ->
-        Inf.add_tyvar_upper_bound ?intersect env var ty)
-  in
+  let env = add_tyvar_upper_bound ?intersect env var ty in
   if get_tyvar_appears_contravariantly env var then
     update_variance_of_tyvars_occurring_in_upper_bound env ty
   else
@@ -1568,6 +1571,11 @@ let remove_tyvar_lower_bound env var lower_var =
   @@ wrap_inference_env_call_env env (fun env ->
          Inf.remove_tyvar_lower_bound env var lower_var)
 
+let add_tyvar_lower_bound ?union env var ty =
+  log_env_change "add_tyvar_lower_bound" env
+  @@ wrap_inference_env_call_env env (fun env ->
+         Inf.add_tyvar_lower_bound ?union env var ty)
+
 (* Add a single new lower bound [ty] to type variable [var] in [env.tvenv].
  * If the optional [union] operation is supplied, then use this to avoid
  * adding redundant bounds by merging the type with existing bounds. This makes
@@ -1576,13 +1584,10 @@ let remove_tyvar_lower_bound env var lower_var =
  * is equivalent to a single lower bound
  *   (t1 | ... | tn) <: v
  *)
-let add_tyvar_lower_bound ?union env var ty =
+let add_tyvar_lower_bound_and_update_variances ?union env var ty =
   log_env_change "add_tyvar_lower_bound" env
   @@
-  let env =
-    wrap_inference_env_call_env env (fun env ->
-        Inf.add_tyvar_lower_bound ?union env var ty)
-  in
+  let env = add_tyvar_lower_bound ?union env var ty in
   if get_tyvar_appears_covariantly env var then
     update_variance_of_tyvars_occurring_in_lower_bound env ty
   else
@@ -1609,3 +1614,6 @@ let remove_var env var ~search_in_upper_bounds_of ~search_in_lower_bounds_of =
            var
            ~search_in_upper_bounds_of
            ~search_in_lower_bounds_of)
+
+let unsolve env v =
+  wrap_inference_env_call_env env (fun env -> Inf.unsolve env v)

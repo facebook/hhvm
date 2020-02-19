@@ -216,6 +216,11 @@ let get_var t =
   | Tvar v -> Some v
   | _ -> None
 
+let get_var_i t =
+  match t with
+  | LoclType t -> get_var t
+  | ConstraintType _ -> None
+
 let is_tyvar t = Option.is_some (get_var t)
 
 let is_var_v t v =

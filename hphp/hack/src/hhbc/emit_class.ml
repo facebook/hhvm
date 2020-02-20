@@ -558,16 +558,16 @@ let emit_class (ast_class, hoisted) =
       let return_label = Label.next_regular () in
       let rec make_cinit_instrs cs =
         match cs with
-        | [] -> Emit_pos.emit_pos_then ast_class.A.c_span @@ instr_retc
+        | [] ->
+          gather
+            [
+              instr_label return_label;
+              Emit_pos.emit_pos ast_class.A.c_span;
+              instr_retc;
+            ]
         | (_, label, instrs) :: cs ->
           if List.is_empty cs then
-            gather
-              [
-                instr_label label;
-                instrs;
-                instr_label return_label;
-                make_cinit_instrs cs;
-              ]
+            gather [instr_label label; instrs; make_cinit_instrs cs]
           else
             gather
               [
@@ -578,13 +578,13 @@ let emit_class (ast_class, hoisted) =
                 make_cinit_instrs cs;
               ]
       in
-      let cases =
-        List.filter_map initialized_class_constants (fun p ->
-            match p with
-            | (name, label, _) -> Some (name, label))
-      in
       let body_instrs =
         if List.length initialized_class_constants > 1 then
+          let cases =
+            List.filter_map initialized_class_constants (fun p ->
+                match p with
+                | (name, label, _) -> Some (name, label))
+          in
           gather
             [
               instr_cgetl (Local.Named "$constName");

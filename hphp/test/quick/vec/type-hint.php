@@ -51,9 +51,6 @@ function takes_xhp_child(@XHPChild $x): XHPChild {
 function takes_foo(@Foo $f): Foo {
   return $f;
 }
-function takes_array_access(@ArrayAccess<int, Foo> $a): ArrayAccess<int, Foo> {
-  return $a;
-}
 function takes_vector_container(@Vector $v): Vector {
   return $v;
 }
@@ -98,7 +95,6 @@ function test_all_hints($x) {
     |> takes_array2($$)
     |> takes_xhp_child($$)
     |> takes_foo($$)
-    |> takes_array_access($$)
     |> takes_vector_container($$)
     |> takes_map_container($$)
     |> takes_null($$)

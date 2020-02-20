@@ -65,9 +65,6 @@ function test_is_a($a, $interfaces) {
   echo "is XHPChild: ";
   var_dump($a is XHPChild);
 
-  echo "is ArrayAccess: ";
-  var_dump($a is ArrayAccess);
-
   echo "is Vector: ";
   var_dump($a is Vector);
 
@@ -101,7 +98,6 @@ function test_is_vec($val) {
     "HH\\Container",
     "HH\\KeyedContainer",
     "XHPChild",
-    "ArrayAccess",
     "Vector",
     "Map",
     "Foo",

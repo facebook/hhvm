@@ -733,6 +733,7 @@ dependencies = [
  "emit_file_attributes_rust 0.0.0",
  "emit_function_rust 0.0.0",
  "emit_record_def_rust 0.0.0",
+ "emit_typedef_rust 0.0.0",
  "env 0.0.0",
  "global_state 0.0.0",
  "hhas_body_rust 0.0.0",
@@ -818,6 +819,24 @@ dependencies = [
  "instruction_sequence_rust 0.0.0",
  "naming_special_names_rust 0.0.0",
  "oxidized 0.0.0",
+]
+
+[[package]]
+name = "emit_typedef_rust"
+version = "0.0.0"
+dependencies = [
+ "ast_constant_folder_rust 0.0.0",
+ "emit_attribute_rust 0.0.0",
+ "emit_body_rust 0.0.0",
+ "emit_type_constant_rust 0.0.0",
+ "emit_type_hint_rust 0.0.0",
+ "env 0.0.0",
+ "hhas_type 0.0.0",
+ "hhas_typedef_rust 0.0.0",
+ "hhbc_id_rust 0.0.0",
+ "instruction_sequence_rust 0.0.0",
+ "oxidized 0.0.0",
+ "runtime 0.0.0",
 ]
 
 [[package]]
@@ -1225,6 +1244,7 @@ dependencies = [
  "hhas_record_def_rust 0.0.0",
  "hhas_type 0.0.0",
  "hhas_type_const 0.0.0",
+ "hhas_typedef_rust 0.0.0",
  "hhbc_ast_rust 0.0.0",
  "hhbc_id_rust 0.0.0",
  "hhbc_string_utils_rust 0.0.0",

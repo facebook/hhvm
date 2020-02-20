@@ -27,6 +27,7 @@ hhas_property_rust = { path = "../hhas_property" }
 hhas_record_def_rust = { path = "../hhas_record_def" }
 hhas_type = { path = "../hhas_type" }
 hhas_type_const = { path = "../hhas_type_const" }
+hhas_typedef_rust = { path = "../hhas_typedef" }
 hhbc_ast_rust = { path = "../hhbc_ast" }
 hhbc_id_rust = { path = "../hhbc_id" }
 hhbc_string_utils_rust = { path = "../string_utils" }

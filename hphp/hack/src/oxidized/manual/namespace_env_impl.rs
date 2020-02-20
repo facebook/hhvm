@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::gen::namespace_env::Env;
+use crate::parser_options::ParserOptions;
 use crate::s_map::SMap;
 
 use hh_autoimport_rust as hh_autoimport;
@@ -25,6 +26,14 @@ impl Env {
             is_codegen,
             disable_xhp_element_mangling,
         }
+    }
+
+    pub fn empty_from_popt(opts: &ParserOptions) -> Self {
+        Self::empty(
+            opts.po_auto_namespace_map.clone(),
+            opts.po_codegen,
+            opts.po_disable_xhp_element_mangling,
+        )
     }
 }
 

@@ -59,6 +59,9 @@ module Getters : sig
   val float_ :
     string -> ?prefix:string option -> default:float -> string SMap.t -> float
 
+  val string_list_opt :
+    string -> ?prefix:string option -> string SMap.t -> string list option
+
   val string_list :
     delim:Str.regexp ->
     string ->

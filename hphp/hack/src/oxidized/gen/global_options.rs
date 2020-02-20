@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<608c7c2320a58ee58df8f64a3a7182cd>>
+// @generated SignedSource<<024c4c1b4fd9cbc695ed9d6c472c8bc4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -78,6 +78,7 @@ pub struct GlobalOptions {
     pub po_disallowed_decl_fixmes: i_set::ISet,
     pub po_allow_new_attribute_syntax: bool,
     pub tco_global_inference: bool,
+    pub tco_gi_reinfer_types: Vec<String>,
     pub tco_ordered_solving: bool,
     pub tco_const_static_props: bool,
     pub po_disable_legacy_attribute_syntax: bool,

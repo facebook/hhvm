@@ -68,6 +68,7 @@ type t = {
   po_disallowed_decl_fixmes: ISet.t;
   po_allow_new_attribute_syntax: bool;
   tco_global_inference: bool;
+  tco_gi_reinfer_types: string list;
   tco_ordered_solving: bool;
   tco_const_static_props: bool;
   po_disable_legacy_attribute_syntax: bool;
@@ -228,6 +229,7 @@ let default =
     po_disallowed_decl_fixmes = ISet.of_list [];
     po_allow_new_attribute_syntax = false;
     tco_global_inference = false;
+    tco_gi_reinfer_types = [];
     tco_ordered_solving = false;
     tco_const_static_props = false;
     po_disable_legacy_attribute_syntax = false;
@@ -324,6 +326,7 @@ let make
     ?(po_disallowed_decl_fixmes = default.po_disallowed_decl_fixmes)
     ?(po_allow_new_attribute_syntax = default.po_allow_new_attribute_syntax)
     ?(tco_global_inference = default.tco_global_inference)
+    ?(tco_gi_reinfer_types = default.tco_gi_reinfer_types)
     ?(tco_ordered_solving = default.tco_ordered_solving)
     ?(tco_const_static_props = default.tco_const_static_props)
     ?(po_disable_legacy_attribute_syntax =
@@ -412,6 +415,7 @@ let make
     po_disallowed_decl_fixmes;
     po_allow_new_attribute_syntax;
     tco_global_inference;
+    tco_gi_reinfer_types;
     tco_ordered_solving;
     tco_const_static_props;
     po_disable_legacy_attribute_syntax;
@@ -566,6 +570,8 @@ let po_disallowed_decl_fixmes t = t.po_disallowed_decl_fixmes
 let po_allow_new_attribute_syntax t = t.po_allow_new_attribute_syntax
 
 let tco_global_inference t = t.tco_global_inference
+
+let tco_gi_reinfer_types t = t.tco_gi_reinfer_types
 
 let tco_ordered_solving t = t.tco_ordered_solving
 

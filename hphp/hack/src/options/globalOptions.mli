@@ -178,6 +178,8 @@ type t = {
   po_allow_new_attribute_syntax: bool;
   (* Perform global inference globally on the code base to infer missing type annotations. *)
   tco_global_inference: bool;
+  tco_gi_reinfer_types: string list;
+      (** Types we want to remove and replace by infered types during global inference. *)
   tco_ordered_solving: bool;
       (** Whether to solve typing inference constraints using ordered solving or transitive closure. *)
   (* Enable const static properties *)
@@ -292,6 +294,7 @@ val make :
   ?po_disallowed_decl_fixmes:ISet.t ->
   ?po_allow_new_attribute_syntax:bool ->
   ?tco_global_inference:bool ->
+  ?tco_gi_reinfer_types:string list ->
   ?tco_ordered_solving:bool ->
   ?tco_const_static_props:bool ->
   ?po_disable_legacy_attribute_syntax:bool ->
@@ -462,6 +465,8 @@ val po_disallowed_decl_fixmes : t -> ISet.t
 val po_allow_new_attribute_syntax : t -> bool
 
 val tco_global_inference : t -> bool
+
+val tco_gi_reinfer_types : t -> string list
 
 val tco_ordered_solving : t -> bool
 

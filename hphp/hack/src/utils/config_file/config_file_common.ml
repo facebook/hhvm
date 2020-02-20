@@ -112,6 +112,11 @@ module Getters = struct
     let key = make_key key ~prefix in
     Option.map (SMap.find_opt key config) ~f:bool_of_string
 
+  let string_list_opt key ?(prefix = None) config =
+    let key = make_key key ~prefix in
+    SMap.find_opt key config
+    |> Option.map ~f:(Str.split (Str.regexp ",[ \n\r\x0c\t]*"))
+
   let string_list ~delim key ?(prefix = None) ~default config =
     let key = make_key key ~prefix in
     Option.value_map (SMap.find_opt key config) ~default ~f:(Str.split delim)

@@ -687,6 +687,18 @@ fn pos_to_prov_tag(ctx: &Context, loc: &Option<ast_defs::Pos>) -> String {
     }
 }
 
+fn print_class_id<W: Write>(w: &mut W, id: &ClassId) -> Result<(), W::Error> {
+    wrap_by_quotes(w, |w| w.write(escape(id.to_raw_string())))
+}
+
+fn print_const_id<W: Write>(w: &mut W, id: &ConstId) -> Result<(), W::Error> {
+    wrap_by_quotes(w, |w| w.write(escape(id.to_raw_string())))
+}
+
+fn print_adata_id<W: Write>(w: &mut W, id: &AdataId) -> Result<(), W::Error> {
+    concat_str(w, ["@", id.as_str()])
+}
+
 fn print_adata_mapped_argument<W: Write, F, V>(
     ctx: &mut Context,
     w: &mut W,
@@ -1068,16 +1080,116 @@ fn print_control_flow<W: Write>(w: &mut W, cf: &InstructControlFlow) -> Result<(
 }
 
 fn print_lit_const<W: Write>(w: &mut W, lit: &InstructLitConst) -> Result<(), W::Error> {
-    use InstructLitConst::*;
+    use InstructLitConst as LC;
     match lit {
-        Null => w.write("Null"),
-        Int(i) => concat_str_by(w, " ", ["Int", i.to_string().as_str()]),
-        String(s) => {
+        LC::Null => w.write("Null"),
+        LC::Int(i) => concat_str_by(w, " ", ["Int", i.to_string().as_str()]),
+        LC::String(s) => {
             w.write("String ")?;
             wrap_by_quotes(w, |w| w.write(escape(s)))
         }
+        LC::True => w.write("True"),
+        LC::False => w.write("False"),
+        LC::Double(d) => concat_str_by(w, " ", ["Double", d.as_str()]),
+        LC::AddElemC => w.write("AddElemC"),
+        LC::AddNewElemC => w.write("AddNewElemC"),
+        LC::NewPair => w.write("NewPair"),
+        LC::File => w.write("File"),
+        LC::Dir => w.write("Dir"),
+        LC::Method => w.write("Method"),
+        LC::FuncCred => w.write("FuncCred"),
+        LC::Array(id) => {
+            w.write("Array ")?;
+            print_adata_id(w, id)
+        }
+        LC::Dict(id) => {
+            w.write("Dict ")?;
+            print_adata_id(w, id)
+        }
+        LC::Keyset(id) => {
+            w.write("Keyset ")?;
+            print_adata_id(w, id)
+        }
+        LC::Vec(id) => {
+            w.write("Vec ")?;
+            print_adata_id(w, id)
+        }
+        LC::NewArray(i) => concat_str_by(w, " ", ["NewArray", i.to_string().as_str()]),
+        LC::NewMixedArray(i) => concat_str_by(w, " ", ["NewMixedArray", i.to_string().as_str()]),
+        LC::NewDictArray(i) => concat_str_by(w, " ", ["NewDictArray", i.to_string().as_str()]),
+        LC::NewDArray(i) => concat_str_by(w, " ", ["NewDArray", i.to_string().as_str()]),
+        LC::NewPackedArray(i) => concat_str_by(w, " ", ["NewPackedArray", i.to_string().as_str()]),
+        LC::NewVArray(i) => concat_str_by(w, " ", ["NewVArray", i.to_string().as_str()]),
+        LC::NewVecArray(i) => concat_str_by(w, " ", ["NewVecArray", i.to_string().as_str()]),
+        LC::NewKeysetArray(i) => concat_str_by(w, " ", ["NewKeysetArray", i.to_string().as_str()]),
+        LC::NewLikeArrayL(local, i) => {
+            w.write("NewLikeArrayL ")?;
+            print_local(w, local)?;
+            w.write(" ")?;
+            w.write(i.to_string().as_str())
+        }
+        LC::NewStructArray(l) => {
+            w.write("NewStructArray ")?;
+            wrap_by_angle(w, |w| print_shape_fields(w, l))
+        }
+        LC::NewStructDArray(l) => {
+            w.write("NewStructDArray ")?;
+            wrap_by_angle(w, |w| print_shape_fields(w, l))
+        }
+        LC::NewStructDict(l) => {
+            w.write("NewStructDict ")?;
+            wrap_by_angle(w, |w| print_shape_fields(w, l))
+        }
+        LC::NewRecord(cid, l) => {
+            w.write("NewRecord ")?;
+            print_class_id(w, cid)?;
+            wrap_by_angle(w, |w| print_shape_fields(w, l))
+        }
+        LC::NewRecordArray(cid, l) => {
+            w.write("NewRecordArray ")?;
+            print_class_id(w, cid)?;
+            wrap_by_angle(w, |w| print_shape_fields(w, l))
+        }
+        LC::CnsE(id) => {
+            w.write("CnsE ")?;
+            print_const_id(w, id)
+        }
+        LC::ClsCns(id) => {
+            w.write("ClsCns ")?;
+            print_const_id(w, id)
+        }
+        LC::ClsCnsD(const_id, cid) => {
+            w.write("ClsCnsD ")?;
+            print_const_id(w, const_id)?;
+            print_class_id(w, cid)
+        }
+        LC::NewCol(ct) => {
+            w.write("NewCol ")?;
+            print_collection_type(w, ct)
+        }
+        LC::ColFromArray(ct) => {
+            w.write("ColFromArray ")?;
+            print_collection_type(w, ct)
+        }
         _ => not_impl!(),
     }
+}
+
+fn print_collection_type<W: Write>(w: &mut W, ct: &CollectionType) -> Result<(), W::Error> {
+    use CollectionType as CT;
+    match ct {
+        CT::Vector => w.write("Vector"),
+        CT::Map => w.write("Map"),
+        CT::Set => w.write("Set"),
+        CT::Pair => w.write("Pair"),
+        CT::ImmVector => w.write("ImmVector"),
+        CT::ImmMap => w.write("ImmMap"),
+        CT::ImmSet => w.write("ImmSet"),
+    }
+}
+
+fn print_shape_fields<W: Write>(w: &mut W, sf: &Vec<String>) -> Result<(), W::Error> {
+    concat_by(w, " ", sf, |w, f| wrap_by_quotes(w, |w| w.write(escape(f))))
 }
 
 fn print_op<W: Write>(w: &mut W, op: &InstructOperator) -> Result<(), W::Error> {

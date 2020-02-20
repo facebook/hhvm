@@ -488,12 +488,10 @@ bool opcodeMayRaise(Opcode opc) {
   case SuspendHookAwaitR:
   case SuspendHookCreateCont:
   case SuspendHookYield:
-  case ThrowArithmeticError:
   case ThrowAsTypeStructException:
   case ThrowArrayIndexException:
   case ThrowArrayKeyException:
   case ThrowCallReifiedFunctionWithoutGenerics:
-  case ThrowDivisionByZeroError:
   case ThrowDivisionByZeroException:
   case ThrowHasThisNeedStatic:
   case ThrowInvalidArrayKey:

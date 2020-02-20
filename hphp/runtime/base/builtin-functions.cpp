@@ -738,14 +738,6 @@ void throw_invalid_operation_exception(StringData* str) {
   SystemLib::throwInvalidOperationExceptionObject(Variant{str});
 }
 
-void throw_arithmetic_error(StringData* str) {
-  SystemLib::throwArithmeticErrorObject(Variant{str});
-}
-
-void throw_division_by_zero_error(StringData *str) {
-  SystemLib::throwDivisionByZeroErrorObject(Variant{str});
-}
-
 void throw_division_by_zero_exception() {
   SystemLib::throwDivisionByZeroExceptionObject();
 }

@@ -343,8 +343,6 @@ bool is_constructor_name(const char* func);
 
 [[noreturn]] void throw_invalid_collection_parameter();
 [[noreturn]] void throw_invalid_operation_exception(StringData*);
-[[noreturn]] void throw_arithmetic_error(StringData*);
-[[noreturn]] void throw_division_by_zero_error(StringData*);
 [[noreturn]] void throw_division_by_zero_exception();
 [[noreturn]] void throw_iterator_not_valid();
 [[noreturn]] void throw_collection_property_exception();

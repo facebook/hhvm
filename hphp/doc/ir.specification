@@ -3261,14 +3261,6 @@ fields of that struct for holding intermediate values.
 
   Throws an InvalidOperationException with a message indicating S0.
 
-| ThrowArithmeticError, ND, S(Str), T
-
-  Throws an ArithmeticError with a message indicating S0.
-
-| ThrowDivisionByZeroError, ND, S(Str), T
-
-  Throws a DivisionByZeroError with a message indicating S0.
-
 | ThrowDivisionByZeroException, ND, NA, T
 
   Throws a DivisionByZeroException.

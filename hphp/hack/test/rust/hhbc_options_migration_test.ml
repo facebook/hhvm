@@ -128,6 +128,9 @@ let _assert_opts_equal caml rust =
   assert_equal
     Hhbc_options.(check_int_overflow caml)
     Hhbc_options.(check_int_overflow rust);
+  assert_equal
+    Hhbc_options.(enable_first_class_function_pointers caml)
+    Hhbc_options.(enable_first_class_function_pointers rust);
   ()
 
 let json_override_2bools =

@@ -227,6 +227,7 @@ prefixed_flags!(
     DISALLOW_FUNC_PTRS_IN_CONSTANTS,
     ENABLE_CLASS_LEVEL_WHERE_CLAUSES,
     ENABLE_COROUTINES,
+    ENABLE_FIRST_CLASS_FUNCTION_POINTERS,
     ENABLE_POCKET_UNIVERSES,
     ENABLE_XHP_CLASS_MODIFIER,
     HACKSPERIMENTAL,
@@ -638,6 +639,9 @@ mod tests {
   "hhvm.hack.lang.enable_coroutines": {
     "global_value": true
   },
+  "hhvm.hack.lang.enable_first_class_function_pointers": {
+    "global_value": false
+  },
   "hhvm.hack.lang.enable_pocket_universes": {
     "global_value": false
   },
@@ -1013,5 +1017,6 @@ bitflags! {
         const EMIT_GENERICS_UB = 1 << 44;
         const CHECK_INT_OVERFLOW = 1 << 45;
         const ENABLE_XHP_CLASS_MODIFIER = 1 << 46;
+        const ENABLE_FIRST_CLASS_FUNCTION_POINTERS = 1 << 47;
     }
 }

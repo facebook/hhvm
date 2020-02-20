@@ -11,7 +11,26 @@ module PositionedSyntaxTree : sig
       Full_fidelity_syntax_tree.WithSyntax (Full_fidelity_positioned_syntax)
 end
 
-(** The information associated with a given file. *)
+(** Various information associated with a given file.
+
+It's important to create an [entry] when processing data about a single file for
+two reasons:
+
+  - To ensure that subsequent operations on the same file have a consistent view
+    of the same file. That is, they won't read the file from disk twice and
+    potentially introduce a race condition.
+  - To ensure that subsequent operations on the same file don't recalculate the
+    same data (such as an AST). This is important for performance, particularly
+    for IDE operation latency.
+
+To create a new entry for a file, use [Provider_utils.update_context].
+
+There should generally be no more than one or two entries inside the
+[Provider_context.t] at a given time. Be careful not to try to store every
+single file's data in memory at once. Once you're done processing a file (e.g.
+you have the TAST and don't need to access further data), then you should
+discard the [entry] and the [Provider_context.t] that it came from.
+*)
 type entry = {
   file_input: ServerCommandTypes.file_input;
   path: Relative_path.t;
@@ -25,12 +44,19 @@ type entry = {
   mutable symbols: Relative_path.t SymbolOccurrence.t list option;
 }
 
-(** A context mapping from file to the [entry] for that file.
+(** A context allowing the caller access to data for files and symbols in the
+codebase. In particular, this is used as a parameter to [Decl_provider]
+functions to access the decl for a given symbol.
 
-This acts as an "overlay" or "delta" on the state of the world, relative to the
-files that exist in the repo on disk.
+Depending on the [backend] setting, data may be cached in local memory, in
+shared memory, out of process, etc.
 
-To load this state of the world for use in a given operation, use
+You can examine an individual file in the codebase by constructing an [entry]
+for it. For example, you can call [Provider_utils.update_context] to create a
+new [entry], and then [Provider_utils.compute_tast_and_errors_unquarantined].
+
+Some operations may make changes to global state (e.g. write to shared memory
+heaps). To ensure that no changes escape the scope of your operation, use
 [Provider_utils.respect_but_quarantine_unsaved_changes]. *)
 type t = {
   tcopt: TypecheckerOptions.t;
@@ -39,7 +65,10 @@ type t = {
 }
 
 (** The empty context, for use at the top-level of stand-alone tools which don't
-have a [ServerEnv.env]. *)
+have a [ServerEnv.env].
+
+If you have a [ServerEnv.env], you probably want to use
+[Provider_utils.ctx_from_server_env] instead. *)
 val empty_for_tool :
   tcopt:TypecheckerOptions.t -> backend:Provider_backend.t -> t
 

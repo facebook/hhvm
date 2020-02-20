@@ -646,7 +646,7 @@ const StaticString
   s_STDERR("STDERR");
 
 void define_stdio_constants() {
-  auto defcns = [] (const StringData* name, const Variant& (*func)()) {
+  auto defcns = [] (const StringData* name, Native::ConstantCallback func) {
     auto handle = makeCnsHandle(name);
     always_assert(rds::isHandleBound(handle));
 
@@ -657,9 +657,9 @@ void define_stdio_constants() {
     cns->m_data.pcnt = reinterpret_cast<MaybeCountable*>(func);
   };
 
-  defcns(s_STDIN.get(),  BuiltinFiles::GetSTDIN);
-  defcns(s_STDOUT.get(), BuiltinFiles::GetSTDOUT);
-  defcns(s_STDERR.get(), BuiltinFiles::GetSTDERR);
+  defcns(s_STDIN.get(),  BuiltinFiles::getSTDIN);
+  defcns(s_STDOUT.get(), BuiltinFiles::getSTDOUT);
+  defcns(s_STDERR.get(), BuiltinFiles::getSTDERR);
 }
 
 const StaticString

@@ -78,13 +78,13 @@ PhpStreamWrapper::open(const String& filename, const String& mode,
   };
 
   if (!strcasecmp(req, "stdin")) {
-    return make_from(BuiltinFiles::GetSTDIN());
+    return make_from(BuiltinFiles::getSTDIN());
   }
   if (!strcasecmp(req, "stdout")) {
-    return make_from(BuiltinFiles::GetSTDOUT());
+    return make_from(BuiltinFiles::getSTDOUT());
   }
   if (!strcasecmp(req, "stderr")) {
-    return make_from(BuiltinFiles::GetSTDERR());
+    return make_from(BuiltinFiles::getSTDERR());
   }
   if (!strncasecmp(req, "fd/", sizeof("fd/") - 1)) {
     return openFD(req + sizeof("fd/") - 1);

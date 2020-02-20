@@ -75,18 +75,7 @@ void cgLdCns(IRLS& env, const IRInstruction* inst) {
     auto const sf = checkRDSHandleInitialized(v, ch);
     fwdJcc(v, env, CC_NE, sf, inst->taken());
     loadTV(v, inst->dst(), dst, rvmtl()[ch]);
-
-    // When a CLIServer is active requests running in script mode will define
-    // the stdio constants which require lookup via special callbacks. To not
-    // interfere with the server these constants will be defined as
-    // non-persistent.
-    if (!RuntimeOption::RepoAuthoritative) {
-      if (strcasecmp(cnsName->data(), "stdin") == 0 ||
-          strcasecmp(cnsName->data(), "stdout") == 0 ||
-          strcasecmp(cnsName->data(), "stderr") == 0) {
-        checkUninit();
-      }
-    }
+    checkUninit();
     return;
   }
 
@@ -142,10 +131,8 @@ void cgLdCns(IRLS& env, const IRInstruction* inst) {
 
 TypedValue lookupCnsEHelper(StringData* nm) {
   auto const cns = Unit::loadCns(nm);
-  if (LIKELY(cns != nullptr)) {
-    TypedValue c1;
-    tvDup(*cns, c1);
-    return c1;
+  if (LIKELY(type(cns) != KindOfUninit)) {
+    return cns;
   }
   raise_error("Undefined constant '%s'", nm->data());
 }
@@ -158,16 +145,19 @@ TypedValue lookupCnsEHelperNormal(rds::Handle tv_handle,
     if (tv->m_data.pcnt != nullptr) {
       auto callback =
         reinterpret_cast<Native::ConstantCallback>(tv->m_data.pcnt);
-      const TypedValue* cns = callback().asTypedValue();
-      if (LIKELY(cns->m_type != KindOfUninit)) {
-        TypedValue c1;
-        tvDup(*cns, c1);
-        return c1;
+      Variant v = callback(nm);
+      const TypedValue cns = v.detach();
+      assertx(tvIsPlausible(cns));
+      assertx(tvAsCVarRef(&cns).isAllowedAsConstantValue());
+      // Resources are allowed as constant but we can't cache them
+      if (type(cns) != KindOfResource) {
+        tvIncRefGen(cns);
+        rds::handleToRef<TypedValue, rds::Mode::Normal>(tv_handle) = cns;
       }
+      return cns;
     }
   }
   assertx(!rds::isHandleInit(tv_handle));
-
   return lookupCnsEHelper(nm);
 }
 
@@ -175,17 +165,16 @@ TypedValue lookupCnsEHelperPersistent(rds::Handle tv_handle,
                                StringData* nm) {
   assertx(rds::isPersistentHandle(tv_handle));
   auto tv = rds::handleToPtr<TypedValue, rds::Mode::Persistent>(tv_handle);
-  assertx(tv->m_type == KindOfUninit);
+  assertx(type(tv) == KindOfUninit);
 
   // Deferred system constants.
   if (UNLIKELY(tv->m_data.pcnt != nullptr)) {
     auto callback = reinterpret_cast<Native::ConstantCallback>(tv->m_data.pcnt);
-    const TypedValue* cns = callback().asTypedValue();
-    if (LIKELY(cns->m_type != KindOfUninit)) {
-      TypedValue c1;
-      tvDup(*cns, c1);
-      return c1;
-    }
+    Variant v = callback(nm);
+    const TypedValue cns = v.detach();
+    assertx(tvIsPlausible(cns));
+    assertx(tvAsCVarRef(&cns).isAllowedAsConstantValue());
+    return cns;
   }
   return lookupCnsEHelper(nm);
 }

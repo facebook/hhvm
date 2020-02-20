@@ -29,6 +29,7 @@
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/vm/as-shared.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/constant.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/hhbc.h"
@@ -643,7 +644,7 @@ std::string member_tv_initializer(TypedValue cell) {
   return escaped_long(cell);
 }
 
-void print_constant(Output& out, const PreClass::Const* cns) {
+void print_class_constant(Output& out, const PreClass::Const* cns) {
   if (cns->isAbstract()) {
     out.fmtln(".const {}{};", cns->name(),
               cns->isType() ? " isType" : "");
@@ -785,7 +786,7 @@ void print_cls_directives(Output& out, const PreClass* cls) {
   print_cls_enum_ty(out, cls);
   print_cls_used_traits(out, cls);
   for (auto& r : cls->requirements())  print_requirement(out, r);
-  for (auto& c : cls->allConstants())  print_constant(out, &c);
+  for (auto& c : cls->allConstants())  print_class_constant(out, &c);
   for (auto& p : cls->allProperties()) print_property(out, &p);
   for (auto* m : cls->allMethods())    print_method(out, m);
 }
@@ -848,6 +849,13 @@ void print_alias(Output& out, const TypeAlias& alias) {
             escaped_long(alias.typeStructure.get()));
 }
 
+void print_constant(Output& out, const Constant& cns) {
+  out.fmtln(".const{} {} = {};",
+            opt_attrs(AttrContext::Constant, cns.attrs),
+            cns.name,
+            member_tv_initializer(cns.val));
+}
+
 void print_hh_file(Output& out, const Unit* unit) {
   out.nl();
   if (unit->isHHFile()) out.fmtln(".hh_file 1;");
@@ -890,6 +898,7 @@ void print_unit(Output& out, const Unit* unit) {
   for (auto& cls : unit->preclasses())    print_cls(out, cls.get());
   for (auto& rec : unit->prerecords())    print_rec(out, rec.get());
   for (auto& alias : unit->typeAliases()) print_alias(out, alias);
+  for (auto& c : unit->constants())       print_constant(out, c);
   out.fmtln("# {} ends here", unit->filepath());
 }
 

@@ -1216,28 +1216,34 @@ RecordDesc* Unit::getRecordDesc(const NamedEntity* ne,
 ///////////////////////////////////////////////////////////////////////////////
 // Constant lookup.
 
-tv_rval Unit::lookupCns(const StringData* cnsName) {
+TypedValue Unit::lookupCns(const StringData* cnsName) {
   auto const handle = lookupCnsHandle(cnsName);
 
   if (LIKELY(rds::isHandleBound(handle) &&
              rds::isHandleInit(handle))) {
     auto const& tv = rds::handleToRef<TypedValue, rds::Mode::NonLocal>(handle);
 
-    if (LIKELY(tv.m_type != KindOfUninit)) {
+    if (LIKELY(type(tv) != KindOfUninit)) {
       assertx(tvIsPlausible(tv));
-      return &tv;
+      tvIncRefGen(tv);
+      return tv;
     }
 
     assertx(tv.m_data.pcnt != nullptr);
     auto const callback =
       reinterpret_cast<Native::ConstantCallback>(tv.m_data.pcnt);
-    const TypedValue* tvRet = callback().asTypedValue();
-    assertx(tvIsPlausible(*tvRet));
-    if (LIKELY(tvRet->m_type != KindOfUninit)) {
-      return tvRet;
+    Variant v = callback(cnsName);
+    const TypedValue tvRet = v.detach();
+    assertx(tvIsPlausible(tvRet));
+    assertx(tvAsCVarRef(&tvRet).isAllowedAsConstantValue());
+
+    if (rds::isNormalHandle(handle) && type(tvRet) != KindOfResource) {
+      tvIncRefGen(tvRet);
+      rds::handleToRef<TypedValue, rds::Mode::Normal>(handle) = tvRet;
     }
+    return tvRet;
   }
-  return nullptr;
+  return make_tv<KindOfUninit>();
 }
 
 const TypedValue* Unit::lookupPersistentCns(const StringData* cnsName) {
@@ -1250,9 +1256,9 @@ const TypedValue* Unit::lookupPersistentCns(const StringData* cnsName) {
   return ret;
 }
 
-tv_rval Unit::loadCns(const StringData* cnsName) {
+TypedValue Unit::loadCns(const StringData* cnsName) {
   auto const tv = lookupCns(cnsName);
-  if (LIKELY(tv != nullptr)) return tv;
+  if (LIKELY(type(tv) != KindOfUninit)) return tv;
 
   if (needsNSNormalization(cnsName)) {
     return loadCns(normalizeNS(cnsName));
@@ -1260,12 +1266,33 @@ tv_rval Unit::loadCns(const StringData* cnsName) {
 
   if (!AutoloadHandler::s_instance->autoloadConstant(
         const_cast<StringData*>(cnsName))) {
-    return nullptr;
+    return make_tv<KindOfUninit>();
   }
   return lookupCns(cnsName);
 }
 
-void Unit::defCns(const StringData* cnsName, const TypedValue* value) {
+Variant Unit::getCns(const StringData* name) {
+  const StringData* func_name = Constant::funcNameFromName(name);
+  Func* func = Unit::lookupFunc(func_name);
+  assertx(
+    func &&
+    "The function should have been autoloaded when we loaded the constant");
+  return Variant::attach(
+    g_context->invokeFuncFew(func, nullptr, nullptr, 0, nullptr, false, false)
+  );
+}
+
+void Unit::defCns(Id id) {
+  assertx(id < m_constants.size());
+  auto constant = &m_constants[id];
+  auto const cnsName = constant->name;
+  auto const cnsVal = constant->val;
+
+  if (constant->attrs & Attr::AttrPersistent &&
+      bindPersistentCns(cnsName, cnsVal)) {
+    return;
+  }
+
   auto const ch = makeCnsHandle(cnsName);
   assertx(rds::isHandleBound(ch));
   auto cns = rds::handleToPtr<TypedValue, rds::Mode::NonLocal>(ch);
@@ -1280,12 +1307,12 @@ void Unit::defCns(const StringData* cnsName, const TypedValue* value) {
     raise_error(Strings::CONSTANT_ALREADY_DEFINED, cnsName->data());
   }
 
-  if (UNLIKELY(!tvAsCVarRef(value).isAllowedAsConstantValue())) {
-    raise_error(Strings::CONSTANTS_MUST_BE_SCALAR);
-  }
+  assertx(tvAsCVarRef(&cnsVal).isAllowedAsConstantValue() ||
+          (cnsVal.m_type == KindOfUninit &&
+           cnsVal.m_data.pcnt != nullptr));
 
   assertx(rds::isNormalHandle(ch));
-  tvDup(*value, *cns);
+  tvDup(cnsVal, *cns);
   rds::initHandle(ch);
 }
 
@@ -1644,17 +1671,11 @@ void Unit::initialMerge() {
               needsCompact = true;
             }
             break;
-          case MergeKind::PersistentDefine:
-            needsCompact = true;
           case MergeKind::Define: {
-            auto const s = (StringData*)((char*)obj - (int)k);
-            auto const v = (TypedValueAux*)mi->mergeableData(ix + 1);
-            if (k == MergeKind::PersistentDefine && bindPersistentCns(s, *v)) {
-              Stats::inc(Stats::UnitMerge_mergeable);
-              Stats::inc(Stats::UnitMerge_mergeable_persistent_define);
+            auto const constantId = static_cast<Id>(intptr_t(obj)) >> 3;
+            if (m_constants[constantId].attrs & AttrPersistent) {
+              needsCompact = true;
             }
-            ix += sizeof(*v) / sizeof(void*);
-            v->rdsHandle() = makeCnsHandle(s);
             break;
           }
         }
@@ -1689,7 +1710,8 @@ void Unit::merge() {
 }
 
 static size_t compactMergeInfo(Unit::MergeInfo* in, Unit::MergeInfo* out,
-                               const Unit::TypeAliasVec& aliasInfo) {
+                               const Unit::TypeAliasVec& aliasInfo,
+                               const Unit::ConstantVec& constantInfo) {
   using MergeKind = Unit::MergeKind;
 
   Func** it = in->funcHoistableBegin();
@@ -1773,27 +1795,15 @@ static size_t compactMergeInfo(Unit::MergeInfo* in, Unit::MergeInfo* out,
       }
       case MergeKind::UniqueDefinedClass:
         not_reached();
-
-      case MergeKind::PersistentDefine: {
-        auto const v = (TypedValueAux*)in->mergeableData(ix);
-        if (rds::isPersistentHandle(v->rdsHandle())) {
-          delta += 1 + sizeof(TypedValueAux) / sizeof(void*);
-          ix += sizeof(TypedValueAux) / sizeof(void*);
-          break;
-        }
-        obj = (char*)obj - (int)MergeKind::PersistentDefine +
-          (int)MergeKind::Define;
-        // fall through
-      }
-      case MergeKind::Define:
-        if (out) {
+      case MergeKind::Define: {
+        auto const constantId = static_cast<Id>(intptr_t(obj)) >> 3;
+        if (constantInfo[constantId].attrs & AttrPersistent) {
+          delta++;
+        } else if (out) {
           out->mergeableObj(oix++) = obj;
-          *(TypedValueAux*)out->mergeableData(oix) =
-            *(TypedValueAux*)in->mergeableData(ix);
-          oix += sizeof(TypedValueAux) / sizeof(void*);
         }
-        ix += sizeof(TypedValueAux) / sizeof(void*);
         break;
+      }
 
       case MergeKind::Done:
         not_reached();
@@ -1987,42 +1997,13 @@ void Unit::mergeImpl(MergeInfo* mi) {
         } while (k == MergeKind::UniqueDefinedClass);
         continue;
 
-      case MergeKind::PersistentDefine:
-        // will be removed by compactMergeInfo but will be hit at
-        // least once before that happens.
-        do {
-          auto const v = (TypedValueAux*)mi->mergeableData(ix + 1);
-          if (!rds::isPersistentHandle(v->rdsHandle())) {
-            obj = (char*)obj - (int)MergeKind::PersistentDefine +
-              (int)MergeKind::Define;
-            k = MergeKind::Define;
-            break;
-          }
-          ix += 1 + sizeof(TypedValueAux) / sizeof(void*);
-          obj = mi->mergeableObj(ix);
-          k = MergeKind(uintptr_t(obj) & 7);
-        } while (k == MergeKind::PersistentDefine);
-        continue;
-
       case MergeKind::Define:
         do {
           Stats::inc(Stats::UnitMerge_mergeable);
           Stats::inc(Stats::UnitMerge_mergeable_define);
-
-          auto const name = (StringData*)((char*)obj - (int)k);
-          auto const v = (TypedValueAux*)mi->mergeableData(ix + 1);
-          assertx(v->m_type != KindOfUninit);
-
-          auto const handle = v->rdsHandle();
-          assertx(rds::isNormalHandle(handle));
-          if (UNLIKELY(rds::isHandleInit(handle, rds::NormalTag{}))) {
-            raise_error(Strings::CONSTANT_ALREADY_DEFINED, name->data());
-          } else {
-            rds::handleToRef<TypedValue, rds::Mode::Normal>(handle) = *v;
-            rds::initHandle(handle);
-          }
-          ix += 1 + sizeof(*v) / sizeof(void*);
-          obj = mi->mergeableObj(ix);
+          auto const constantId = static_cast<Id>(intptr_t(obj)) >> 3;
+          defCns(constantId);
+          obj = mi->mergeableObj(++ix);
           k = MergeKind(uintptr_t(obj) & 7);
         } while (k == MergeKind::Define);
         continue;
@@ -2062,7 +2043,8 @@ void Unit::mergeImpl(MergeInfo* mi) {
              * We can also remove any Persistent Class/Func*'s,
              * and any requires of modules that are (now) empty
              */
-            size_t delta = compactMergeInfo(mi, nullptr, m_typeAliases);
+            size_t delta = compactMergeInfo(mi, nullptr, m_typeAliases,
+                                            m_constants);
             MergeInfo* newMi = mi;
             if (delta) {
               newMi = MergeInfo::alloc(mi->m_mergeablesSize - delta);
@@ -2074,7 +2056,7 @@ void Unit::mergeImpl(MergeInfo* mi) {
              * readers. But thats ok, because it doesnt matter
              * whether they see the old contents or the new.
              */
-            compactMergeInfo(mi, newMi, m_typeAliases);
+            compactMergeInfo(mi, newMi, m_typeAliases, m_constants);
             if (newMi != mi) {
               this->m_mergeInfo.store(newMi, std::memory_order_release);
               Treadmill::deferredFree(mi);
@@ -2216,6 +2198,9 @@ std::string Unit::toString() const {
   }
   for (auto& func : funcs()) {
     func->prettyPrint(ss);
+  }
+  for (auto& cns : constants()) {
+    cns.prettyPrint(ss);
   }
   return ss.str();
 }

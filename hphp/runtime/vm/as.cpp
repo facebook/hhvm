@@ -2880,7 +2880,7 @@ void parse_record_field(AsmState& as) {
  *                 | identifier const-flags ';'
  *                 ;
  */
-void parse_constant(AsmState& as) {
+void parse_class_constant(AsmState& as) {
   as.in.skipWhitespace();
 
   std::string name;
@@ -3104,7 +3104,7 @@ void parse_class_body(AsmState& as, bool class_is_const,
       continue;
     }
     if (directive == ".method")       { parse_method(as, class_ubs); continue; }
-    if (directive == ".const")        { parse_constant(as);       continue; }
+    if (directive == ".const")        { parse_class_constant(as); continue; }
     if (directive == ".use")          { parse_use(as);            continue; }
     if (directive == ".default_ctor") { parse_default_ctor(as);   continue; }
     if (directive == ".enum_ty")      { parse_enum_ty(as);        continue; }
@@ -3423,9 +3423,34 @@ void parse_alias(AsmState& as) {
     record.typeStructure = ArrNR(ArrayData::GetScalarArray(std::move(ts)));
   }
   auto aliasId = as.ue->addTypeAlias(record);
-  as.ue->pushMergeableTypeAlias(aliasId);
+  as.ue->pushMergeableId(Unit::MergeKind::TypeAlias, aliasId);
 
   as.in.expectWs(';');
+}
+
+void parse_constant(AsmState& as) {
+  as.in.skipWhitespace();
+
+  Constant constant;
+  Attr attrs = parse_attribute_list(as, AttrContext::Constant);
+  if (!SystemLib::s_inited) {
+    attrs |= AttrPersistent;
+  }
+
+  std::string name;
+  if (!as.in.readword(name)) {
+    as.error("expected name for constant");
+  }
+
+  as.in.skipWhitespace();
+
+  constant.name = makeStaticString(name);
+  constant.val = parse_member_tv_initializer(as);
+  constant.attrs = attrs;
+  if (type(constant.val) == KindOfUninit) {
+    constant.val.m_data.pcnt = reinterpret_cast<MaybeCountable*>(Unit::getCns);
+  }
+  as.ue->addConstant(constant);
 }
 
 /*
@@ -3571,6 +3596,7 @@ void parse(AsmState& as) {
     if (directive == ".alias")         { parse_alias(as)         ; continue; }
     if (directive == ".hh_file")       { parse_hh_file(as)       ; continue; }
     if (directive == ".includes")      { parse_includes(as)      ; continue; }
+    if (directive == ".const")         { parse_constant(as)      ; continue; }
     if (directive == ".constant_refs") { parse_constant_refs(as) ; continue; }
     if (directive == ".function_refs") { parse_function_refs(as) ; continue; }
     if (directive == ".class_refs")    { parse_class_refs(as)    ; continue; }

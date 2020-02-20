@@ -32,6 +32,7 @@
 #include "hphp/util/sha1.h"
 
 #include "hphp/runtime/base/user-attributes.h"
+#include "hphp/runtime/vm/constant.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/preclass.h"
 #include "hphp/runtime/vm/type-alias.h"
@@ -567,6 +568,7 @@ struct Class : ClassBase {
 //////////////////////////////////////////////////////////////////////
 
 using TypeAlias = ::HPHP::TypeAlias;
+using Constant = ::HPHP::Constant;
 
 //////////////////////////////////////////////////////////////////////
 /*
@@ -610,6 +612,7 @@ struct Unit {
   CompactVector<std::unique_ptr<Class>> classes;
   CompactVector<std::unique_ptr<Record>> records;
   CompactVector<std::unique_ptr<TypeAlias>> typeAliases;
+  CompactVector<std::unique_ptr<Constant>> constants;
   CompactVector<SrcLoc> srcLocs;
   UserAttributeMap metaData;
   UserAttributeMap fileAttributes;

@@ -361,10 +361,9 @@ Array lookupDefinedConstants(bool categorize /*= false */) {
     } else {
       assertx(val(tv).pcnt);
       auto callback = reinterpret_cast<Native::ConstantCallback>(val(tv).pcnt);
-      auto cns = callback();
-      if (cns.isInitialized()) {
-        tbl->set(key, cns, true);
-      }
+      auto cns = callback(key.get());
+      assertx(cns.isAllowedAsConstantValue());
+      tbl->set(key, cns, true);
     }
   }
 

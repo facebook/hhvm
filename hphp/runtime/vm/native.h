@@ -611,7 +611,7 @@ const ConstantMap& getConstants() {
   return s_constant_map;
 }
 
-using ConstantCallback = const Variant& (*)();
+using ConstantCallback = Variant (*)(const StringData*);
 bool registerConstant(const StringData*, ConstantCallback);
 
 //////////////////////////////////////////////////////////////////////////////

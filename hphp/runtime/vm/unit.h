@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/constant.h"
 #include "hphp/runtime/vm/containers.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/named-entity.h"
@@ -300,10 +301,9 @@ public:
     Class               = 0,  // Class is required to be 0 for correctness.
     UniqueDefinedClass  = 1,
     Define              = 2,  // Toplevel scalar define.
-    PersistentDefine    = 3,  // Cross-request persistent toplevel defines.
-    TypeAlias           = 4,
-    Done                = 5,
-    // We can add two more kind here; this has to fit in 3 bits.
+    TypeAlias           = 3,
+    Done                = 4,
+    // We can add three more kind here; this has to fit in 3 bits.
   };
 
   /*
@@ -321,6 +321,7 @@ public:
 
   using PreClassPtrVec = VMCompactVector<PreClassPtr>;
   using TypeAliasVec = VMFixedVector<TypeAlias>;
+  using ConstantVec = VMFixedVector<Constant>;
 
   /////////////////////////////////////////////////////////////////////////////
   // Construction and destruction.
@@ -711,6 +712,19 @@ public:
   static RecordDesc* getRecordDesc(const StringData* name, bool tryAutoload);
 
   /////////////////////////////////////////////////////////////////////////////
+  // Constants.
+
+  folly::Range<Constant*> constants();
+  folly::Range<const Constant*> constants() const;
+
+  /*
+   * Define the constant given by `id'
+   */
+  void defCns(Id id);
+
+  static Variant getCns(const StringData* name);
+
+  /////////////////////////////////////////////////////////////////////////////
   // Constant lookup.                                                  [static]
 
   /*
@@ -719,7 +733,7 @@ public:
    *
    * Return nullptr if no such constant is defined.
    */
-  static tv_rval lookupCns(const StringData* cnsName);
+  static TypedValue lookupCns(const StringData* cnsName);
 
   /*
    * Look up the value of the persistent constant with name `cnsName'.
@@ -733,16 +747,7 @@ public:
    * Look up, or autoload and define, the value of the constant with name
    * `cnsName' for this request.
    */
-  static tv_rval loadCns(const StringData* cnsName);
-
-  /*
-   * Define a constant (either request-local or persistent) with name `cnsName'
-   * and value `value'.
-   *
-   * Raise an error if a constant with the given name is already defined or if
-   * value is invalid.
-   */
-  static void defCns(const StringData* cnsName, const TypedValue* value);
+  static TypedValue loadCns(const StringData* cnsName);
 
   /*
    * Define a constant with name `cnsName' with a magic callback. The
@@ -968,6 +973,7 @@ private:
   TypedValue m_mainReturn;
   PreClassPtrVec m_preClasses;
   TypeAliasVec m_typeAliases;
+  ConstantVec m_constants;
   CompactVector<PreRecordDescPtr> m_preRecords;
   /*
    * Cached the EntryPoint for an unit, since compactMergeInfo() inside of

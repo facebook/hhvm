@@ -3030,12 +3030,10 @@ DefClsNop <class id>  []  ->  []
   pseudo-main where a DefCls would've existed, but doesn't need to be. (It is
   used as a place to raise errors from if the class fails to define.)
 
-DefCns <litstr id>    [C]  ->  [C]
+DefCns <constant id>    []  ->  []
 
-  Define constant. If there is already a global constant named %1, raises a
-  notice and pushes false. If $1 isn't a scalar, array, vec, dict, or keyset,
-  raises a notice, and pushes false. Otherwise defines the constant named %1 to
-  have the value $1, and pushes true.
+  Define constant. If there is already a global constant with the same name,
+  this instruction throws a fatal error.
 
 DefTypeAlias <litstr id>   []  ->  []
 

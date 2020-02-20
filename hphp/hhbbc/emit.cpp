@@ -92,8 +92,10 @@ struct EmitUnitState {
   std::vector<PceInfo> pceInfo;
   std::vector<FeInfo>  feInfo;
   std::vector<Id>      typeAliasInfo;
+  std::vector<Id>      constantInfo;
 
   std::unordered_set<Id> processedTypeAlias;
+  std::unordered_set<Id> processedConstant;
 };
 
 /*
@@ -106,7 +108,9 @@ struct OpInfoHelper {
     T::op == Op::DefCls      ||
     T::op == Op::DefClsNop   ||
     T::op == Op::CreateCl    ||
+    T::op == Op::DefCns      ||
     T::op == Op::DefTypeAlias;
+
 
   using type = typename std::conditional<by_value, T, const T&>::type;
 };
@@ -321,20 +325,14 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 
       case Op::DefCns: {
         if (ue.m_returnSeen || tos.subtypeOf(BBottom)) break;
-        auto top = tv(tos);
-        assertx(top);
-        auto val = euState.index.lookup_persistent_constant(bc.DefCns.str1);
-        // If there's a persistent constant with the same name, either
-        // this is the one and only definition, or the persistent
-        // definition is in systemlib (and this one will always fail).
-        auto const kind = val && tvSame(*val, *top) ?
-          Unit::MergeKind::PersistentDefine : Unit::MergeKind::Define;
-        ue.pushMergeableDef(kind, bc.DefCns.str1, *top);
+        auto cid = bc.DefCns.arg1;
+        ue.pushMergeableId(Unit::MergeKind::Define, cid);
+        euState.processedConstant.insert(cid);
         return;
       }
       case Op::DefTypeAlias: {
         auto tid = bc.DefTypeAlias.arg1;
-        ue.pushMergeableTypeAlias(tid);
+        ue.pushMergeableId(Unit::MergeKind::TypeAlias, tid);
         euState.processedTypeAlias.insert(tid);
         return;
       }
@@ -493,9 +491,13 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     auto defcls    = [&] (auto& data) { clsid_impl(data.arg1, false); };
     auto defclsnop = [&] (auto& data) { clsid_impl(data.arg1, false); };
     auto createcl  = [&] (auto& data) { clsid_impl(data.arg2, true); };
-    auto deftype   = [&] (auto& data) {
+    auto deftypealias = [&] (auto& data) {
       euState.typeAliasInfo.push_back(data.arg1);
       data.arg1 = euState.typeAliasInfo.size() - 1;
+    };
+    auto defconstant  = [&] (auto& data) {
+      euState.constantInfo.push_back(data.arg1);
+      data.arg1 = euState.constantInfo.size() - 1;
     };
 
     auto emit_named_local = [&](NamedLocal loc) {
@@ -601,7 +603,8 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       caller<Op::DefCls>(defcls, data);                         \
       caller<Op::DefClsNop>(defclsnop, data);                   \
       caller<Op::CreateCl>(createcl, data);                     \
-      caller<Op::DefTypeAlias>(deftype, data);                  \
+      caller<Op::DefTypeAlias>(deftypealias, data);             \
+      caller<Op::DefCns>(defconstant, data);                    \
                                                                 \
       if (isRet(Op::opcode)) ret_assert();                      \
       ue.emitOp(Op::opcode);                                    \
@@ -1440,7 +1443,15 @@ void emit_typealias(UnitEmitter& ue, const php::TypeAlias& alias,
                     const EmitUnitState& state) {
   auto const id = ue.addTypeAlias(alias);
   if (state.processedTypeAlias.find(id) == state.processedTypeAlias.end()) {
-    ue.pushMergeableTypeAlias(id);
+    ue.pushMergeableId(Unit::MergeKind::TypeAlias, id);
+  }
+}
+
+void emit_constant(UnitEmitter& ue, const Constant& constant,
+                   const EmitUnitState& state) {
+  auto const id = ue.addConstant(constant);
+  if (state.processedConstant.find(id) == state.processedConstant.end()) {
+    ue.pushMergeableId(Unit::MergeKind::Define, id);
   }
 }
 
@@ -1471,15 +1482,33 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
 
   emit_pseudomain(state, *ue, unit);
 
-  std::vector<std::unique_ptr<FuncEmitter> > top_fes;
+  // Go thought all constant and see if they still need their matching 86cinit
+  // func. In repo mode we are able to optimize away most of them away. And if
+  // the const don't need them anymore we should not emit them.
+  std::unordered_set<
+    const StringData*,
+    string_data_hash,
+    string_data_same
+  > const_86cinit_funcs;
+  for (auto cid : state.constantInfo) {
+    auto& c = unit.constants[cid];
+    if (type(c->val) != KindOfUninit) {
+      const_86cinit_funcs.insert(Constant::funcNameFromName(c->name));
+    }
+  }
+
   /*
    * Top level funcs are always defined when the unit is loaded, and
    * don't have a DefFunc bytecode. Process them up front.
    */
+  std::vector<std::unique_ptr<FuncEmitter> > top_fes;
   for (size_t id = 0; id < unit.funcs.size(); ++id) {
     auto const f = unit.funcs[id].get();
     assertx(f != unit.pseudomain.get());
     if (!f->top) continue;
+    if (const_86cinit_funcs.find(f->name) != const_86cinit_funcs.end()) {
+      continue;
+    }
     top_fes.push_back(std::make_unique<FuncEmitter>(*ue, -1, -1, f->name));
     emit_func(state, *ue, top_fes.back().get(), *f);
   }
@@ -1517,12 +1546,18 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
       // DefFunc ids are off by one wrt unit.funcs because we don't
       // store the pseudomain there.
       auto const& f = unit.funcs[feInfo.origId - 1];
+
+      assertx(!f->top);
       emit_func(state, *ue, feInfo.fe, *f);
     }
   } while (pceId < state.pceInfo.size());
 
   for (auto tid : state.typeAliasInfo) {
     emit_typealias(*ue, *unit.typeAliases[tid], state);
+  }
+
+  for (auto cid : state.constantInfo) {
+    emit_constant(*ue, *unit.constants[cid], state);
   }
 
   for (size_t id = 0; id < unit.records.size(); ++id) {

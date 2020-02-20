@@ -309,6 +309,17 @@ inline folly::Range<const TypeAlias*> Unit::typeAliases() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Constants
+
+inline folly::Range<Constant*> Unit::constants() {
+  return { m_constants.begin(), m_constants.end() };
+}
+
+inline folly::Range<const Constant*> Unit::constants() const {
+  return { m_constants.begin(), m_constants.end() };
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // File attributes
 
 inline const UserAttributeMap& Unit::fileAttributes() const {

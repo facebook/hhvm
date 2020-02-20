@@ -74,6 +74,27 @@ struct Program;
 
 //////////////////////////////////////////////////////////////////////
 
+enum class Dep : uintptr_t {
+  /* This dependency should trigger when the return type changes */
+  ReturnTy = (1u << 0),
+  /* This dependency should trigger when a DefCns is resolved */
+  ConstVal = (1u << 1),
+  /* This dependency should trigger when a class constant is resolved */
+  ClsConst = (1u << 2),
+  /* This dependency should trigger when the bad initial prop value bit for a
+   * class changes */
+  PropBadInitialValues = (1u << 3),
+  /* This dependency should trigger when a public static property with a
+   * particular name changes */
+  PublicSPropName = (1u << 4),
+  /* This dependency means that we refused to do inline analysis on
+   * this function due to inline analysis depth. The dependency will
+   * trigger if the target function becomes effect-free, or gets a
+   * literal return value.
+   */
+  InlineDepthLimit = (1u << 5),
+};
+
 /*
  * A DependencyContext encodes enough of the context to record a dependency - a
  * php::Func, if we're doing private property analysis and its a suitable class,
@@ -722,17 +743,8 @@ struct Index {
   /*
    * Lookup what the best known Type for a constant would be, using a
    * given Index and Context, if a constant of that name were defined.
-   *
-   * Returns folly::none if the constant isn't in the index.
    */
-  folly::Optional<Type> lookup_constant(Context ctx,
-                                        SString cnsName) const;
-
-  /*
-   * See if the named constant has a unique scalar definition, and
-   * return its value if so.
-   */
-  folly::Optional<TypedValue> lookup_persistent_constant(SString cnsName) const;
+  Type lookup_constant(Context ctx, SString cnsName) const;
 
   /*
    * Return true if the return value of the function might depend on arg.
@@ -751,7 +763,7 @@ struct Index {
    * Return the best known return type for a resolved function, in a
    * context insensitive way.  Returns TInitCell at worst.
    */
-  Type lookup_return_type(Context, res::Func) const;
+  Type lookup_return_type(Context, res::Func, Dep dep = Dep::ReturnTy) const;
 
   /*
    * Return the best known return type for a resolved function, given
@@ -763,7 +775,8 @@ struct Index {
   Type lookup_return_type(Context caller,
                           const CompactVector<Type>& args,
                           const Type& context,
-                          res::Func) const;
+                          res::Func,
+                          Dep dep = Dep::ReturnTy) const;
 
   /*
    * Look up the return type for an unresolved function.  The

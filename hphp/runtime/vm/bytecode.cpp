@@ -1816,16 +1816,15 @@ OPTBLD_INLINE void iopColFromArray(CollectionType cType) {
 
 OPTBLD_INLINE void iopCnsE(const StringData* s) {
   auto const cns = Unit::loadCns(s);
-  if (cns == nullptr) {
+  if (type(cns) == KindOfUninit) {
     raise_error("Undefined constant '%s'", s->data());
   }
   auto const c1 = vmStack().allocC();
-  tvDup(*cns, *c1);
+  tvCopy(cns, *c1);
 }
 
-OPTBLD_INLINE void iopDefCns(const StringData* s) {
-  Unit::defCns(s, vmStack().topTV());
-  vmStack().replaceTV<KindOfBoolean>(true);
+OPTBLD_INLINE void iopDefCns(uint32_t cid) {
+  vmfp()->func()->unit()->defCns(cid);
 }
 
 OPTBLD_INLINE void iopClsCns(const StringData* clsCnsName) {

@@ -1111,6 +1111,12 @@ void parse_unit(php::Program& prog, const UnitEmitter* uep) {
     );
   }
 
+  for (auto& c : ue.constants()) {
+    ret->constants.push_back(
+      std::make_unique<Constant>(c)
+    );
+  }
+
   find_additional_metadata(puState, ret.get());
 
   assert(check(*ret));

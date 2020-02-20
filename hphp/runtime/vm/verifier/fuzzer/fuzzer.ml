@@ -619,6 +619,11 @@ let mutate_metadata (input : HP.t)  =
       (body |> Hhas_body.return_type            |> option_lift mutate_type_info)
       (body |> Hhas_body.doc_comment)
       (body |> Hhas_body.env) in
+  let mutate_constant (const : Hhas_constant.t) : Hhas_constant.t =
+    Hhas_constant.make
+      (const |> Hhas_constant.name)
+      (const |> Hhas_constant.value |> option_lift mutate_typed_value)
+      (const |> Hhas_constant.initializer_instrs |> mutate_option) in
   let mutate_class_data (ids : Hhbc_id.Class.t list) (cls : Hhas_class.t) =
     let module HC = Hhas_class in
     let mutate_cls_id (id : Hhbc_id.Class.t) : Hhbc_id.Class.t =
@@ -662,11 +667,6 @@ let mutate_metadata (input : HP.t)  =
         (prop |> Hhas_property.type_info          |> mutate_type_info)
         (prop |> Hhas_property.doc_comment)
     in
-    let mutate_constant (const : Hhas_constant.t) : Hhas_constant.t =
-      Hhas_constant.make
-        (const |> Hhas_constant.name)
-        (const |> Hhas_constant.value |> option_lift mutate_typed_value)
-        (const |> Hhas_constant.initializer_instrs |> mutate_option) in
     let mutate_typed_constant (const : Hhas_type_constant.t) =
       Hhas_type_constant.make
         (const |> Hhas_type_constant.name)
@@ -740,6 +740,7 @@ let mutate_metadata (input : HP.t)  =
       (prog |> HP.classes         |> delete_map (mutate_class_data ids))
       []
       (prog |> HP.typedefs        |> delete_map mutate_typedef)
+      (prog |> HP.constants       |> delete_map mutate_constant)
       (prog |> HP.file_attributes |> delete_map mutate_attribute)
       (prog |> HP.main            |> mutate_body_data)
       Emit_symbol_refs.empty_symbol_refs in

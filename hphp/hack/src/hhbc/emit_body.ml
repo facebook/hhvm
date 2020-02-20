@@ -95,16 +95,6 @@ let tparams_to_strings tparams = List.map tparams (fun t -> snd t.A.tp_name)
 let rec emit_def env def =
   match def with
   | A.Stmt s -> Emit_statement.emit_stmt env s
-  | A.Constant c ->
-    let cns_name = snd c.A.cst_name in
-    let cns_id = Hhbc_id.Const.from_ast_name cns_name in
-    gather
-      [
-        Emit_expression.emit_expr env c.A.cst_value;
-        Emit_pos.emit_pos_then c.A.cst_span
-        @@ instr (IIncludeEvalDefine (DefCns cns_id));
-        instr_popc;
-      ]
   (* We assume that SetNamespaceEnv does namespace setting *)
   | A.Namespace (_, defs) -> emit_defs env defs
   | _ -> empty

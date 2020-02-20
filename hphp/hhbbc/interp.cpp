@@ -1226,22 +1226,12 @@ void in(ISS& env, const bc::ColFromArray& op) {
 
 void in(ISS& env, const bc::CnsE& op) {
   auto t = env.index.lookup_constant(env.ctx, op.str1);
-  if (!t) {
-    // There's no entry for this constant in the index. It must be
-    // the first iteration, so we'll add a dummy entry to make sure
-    // there /is/ something next time around.
-    TypedValue val;
-    val.m_type = kReadOnlyConstant;
-    env.collect.cnsMap.emplace(op.str1, val);
-    t = TInitCell;
-    // make sure we're re-analyzed
-    env.collect.readsUntrackedConstants = true;
-  } else if (t->strictSubtypeOf(TInitCell)) {
+  if (t.strictSubtypeOf(TInitCell)) {
     // constprop will take care of nothrow *if* its a constant; and if
     // its not, we might trigger autoload.
     constprop(env);
   }
-  push(env, std::move(*t));
+  push(env, std::move(t));
 }
 
 void in(ISS& env, const bc::ClsCns& op) {
@@ -3920,18 +3910,6 @@ void fcallKnownImpl(
     handle_function_exists(env, topT(env, numExtraInputs + numArgs - 1));
   }
 
-  if (func.name()->isame(s_defined.get()) &&
-      numArgs == 1 && !fca.hasUnpack() && !fca.hasGenerics()) {
-    // If someone calls defined('foo') they probably want foo to be
-    // defined normally; ie not a persistent constant.
-    if (auto const v = tv(topCV(env, numExtraInputs))) {
-      if (isStringType(v->m_type) &&
-          !env.index.lookup_constant(env.ctx, v->m_data.pstr)) {
-        env.collect.cnsMap[v->m_data.pstr].m_type = kDynamicConstant;
-      }
-    }
-  }
-
   for (auto i = uint32_t{0}; i < numExtraInputs; ++i) popC(env);
   if (fca.hasGenerics()) popC(env);
   if (fca.hasUnpack()) popC(env);
@@ -4763,25 +4741,7 @@ void in(ISS& env, const bc::Eval&)      { inclOpImpl(env); }
 void in(ISS& /*env*/, const bc::DefCls&) {}
 void in(ISS& /*env*/, const bc::DefRecord&) {}
 void in(ISS& /*env*/, const bc::DefClsNop&) {}
-
-void in(ISS& env, const bc::DefCns& op) {
-  auto const t = popC(env);
-  auto const v = tv(t);
-  auto const val = v && tvAsCVarRef(&*v).isAllowedAsConstantValue() ?
-    *v : make_tv<KindOfUninit>();
-  auto const res = env.collect.cnsMap.emplace(op.str1, val);
-  if (!res.second) {
-    if (res.first->second.m_type == kReadOnlyConstant) {
-      // we only saw a read of this constant
-      res.first->second = val;
-    } else {
-      // more than one definition in this function
-      res.first->second.m_type = kDynamicConstant;
-    }
-  }
-  push(env, TBool);
-}
-
+void in(ISS& /*env*/, const bc::DefCns&) {}
 void in(ISS& /*env*/, const bc::DefTypeAlias&) {}
 
 void in(ISS& env, const bc::This&) {

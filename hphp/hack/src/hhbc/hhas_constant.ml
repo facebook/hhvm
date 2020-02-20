@@ -26,3 +26,20 @@ let name hhas_constant = hhas_constant.constant_name
 let value hhas_constant = hhas_constant.constant_value
 
 let initializer_instrs hhas_constant = hhas_constant.constant_initializer_instrs
+
+let from_ast env name expr =
+  let (_, name) = name in
+  let (value, init_instrs) =
+    match expr with
+    | None -> (None, None)
+    | Some init ->
+      (match
+         Ast_constant_folder.expr_to_opt_typed_value
+           (Emit_env.get_namespace env)
+           init
+       with
+      | Some v -> (Some v, None)
+      | None ->
+        (Some Typed_value.Uninit, Some (Emit_expression.emit_expr env init)))
+  in
+  make name value init_instrs

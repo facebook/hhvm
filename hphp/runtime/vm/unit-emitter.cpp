@@ -326,6 +326,15 @@ Id UnitEmitter::addTypeAlias(const TypeAlias& td) {
   return id;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// Constants.
+
+Id UnitEmitter::addConstant(const Constant& c) {
+  Id id = m_constants.size();
+  TRACE(1, "Add Constant %d %s %d\n", id, c.name->data(), c.attrs);
+  m_constants.push_back(c);
+  return id;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Source locations.
@@ -401,32 +410,15 @@ void UnitEmitter::pushMergeableClass(PreClassEmitter* e) {
   m_mergeableStmts.push_back(std::make_pair(MergeKind::Class, e->id()));
 }
 
-void UnitEmitter::pushMergeableDef(Unit::MergeKind kind,
-                                   const StringData* name,
-                                   const TypedValue& tv) {
-  m_mergeableStmts.push_back(std::make_pair(kind, m_mergeableValues.size()));
-  m_mergeableValues.push_back(std::make_pair(mergeLitstr(name), tv));
+void UnitEmitter::pushMergeableId(Unit::MergeKind kind, const Id id) {
+  m_mergeableStmts.push_back(std::make_pair(kind, id));
   m_allClassesHoistable = false;
 }
 
-void UnitEmitter::insertMergeableDef(int ix, Unit::MergeKind kind,
-                                     Id id, const TypedValue& tv) {
+void UnitEmitter::insertMergeableId(Unit::MergeKind kind, int ix, const Id id) {
   assertx(size_t(ix) <= m_mergeableStmts.size());
   m_mergeableStmts.insert(m_mergeableStmts.begin() + ix,
-                          std::make_pair(kind, m_mergeableValues.size()));
-  m_mergeableValues.push_back(std::make_pair(id, tv));
-  m_allClassesHoistable = false;
-}
-
-void UnitEmitter::pushMergeableTypeAlias(const Id id) {
-  m_mergeableStmts.push_back(std::make_pair(Unit::MergeKind::TypeAlias, id));
-  m_allClassesHoistable = false;
-}
-
-void UnitEmitter::insertMergeableTypeAlias(int ix, const Id id) {
-  assertx(size_t(ix) <= m_mergeableStmts.size());
-  m_mergeableStmts.insert(m_mergeableStmts.begin() + ix,
-                          std::make_pair(Unit::MergeKind::TypeAlias, id));
+                          std::make_pair(kind, id));
   m_allClassesHoistable = false;
 }
 
@@ -477,6 +469,9 @@ RepoStatus UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
       urp.insertUnitTypeAlias[repoId].insert(*this, txn, usn, i,
                                              m_typeAliases[i]);
     }
+    for (unsigned i = 0; i < m_constants.size(); ++i) {
+      urp.insertUnitConstant[repoId].insert(*this, txn, usn, i, m_constants[i]);
+    }
     for (unsigned i = 0; i < m_arrays.size(); ++i) {
       // We check that arrays do not exceed a configurable maximum size in the
       // assembler, so just assume that they're okay here.
@@ -508,20 +503,13 @@ RepoStatus UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
         case MergeKind::Done:
         case MergeKind::UniqueDefinedClass:
           not_reached();
-        case MergeKind::Class: break;
-        case MergeKind::TypeAlias: {
-          urp.insertUnitMergeable[repoId].insert(
-            txn, usn, i,
-            m_mergeableStmts[i].first, m_mergeableStmts[i].second, nullptr);
+        case MergeKind::Class:
           break;
-        }
-        case MergeKind::Define:
-        case MergeKind::PersistentDefine: {
-          int ix = m_mergeableStmts[i].second;
+        case MergeKind::TypeAlias:
+        case MergeKind::Define: {
           urp.insertUnitMergeable[repoId].insert(
             txn, usn, i,
-            m_mergeableStmts[i].first,
-            m_mergeableValues[ix].first, &m_mergeableValues[ix].second);
+            m_mergeableStmts[i].first, m_mergeableStmts[i].second);
           break;
         }
       }
@@ -640,6 +628,7 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
     u->m_preRecords.push_back(PreRecordDescPtr(re->create(*u)));
   }
   u->m_typeAliases = m_typeAliases;
+  u->m_constants = m_constants;
   u->m_metaData = m_metaData;
   u->m_fileAttributes = m_fileAttributes;
   u->m_ICE = m_ICE;
@@ -654,15 +643,6 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
           extra = 0;
           u->m_mergeOnly = false;
           break;
-        }
-      } else {
-        switch (mergeable.first) {
-          case MergeKind::PersistentDefine:
-          case MergeKind::Define:
-            extra += sizeof(TypedValueAux) / sizeof(void*);
-            break;
-          default:
-            break;
         }
       }
     }
@@ -699,26 +679,12 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
         case MergeKind::Class:
           mi->mergeableObj(ix++) = u->m_preClasses[mergeable.second].get();
           break;
+        case MergeKind::Define:
+          assertx(RuntimeOption::RepoAuthoritative);
         case MergeKind::TypeAlias:
           mi->mergeableObj(ix++) =
             (void*)((intptr_t(mergeable.second) << 3) + (int)mergeable.first);
           break;
-        case MergeKind::Define:
-          assertx(RuntimeOption::RepoAuthoritative);
-        case MergeKind::PersistentDefine: {
-          void* name = const_cast<StringData*>(
-            lookupLitstr(m_mergeableValues[mergeable.second].first)
-          );
-          mi->mergeableObj(ix++) = (char*)name + (int)mergeable.first;
-          auto& tv = m_mergeableValues[mergeable.second].second;
-          auto* tva = (TypedValueAux*)mi->mergeableData(ix);
-          tva->m_data = tv.m_data;
-          tva->m_type = tv.m_type;
-          // leave tva->m_aux uninitialized
-          ix += sizeof(*tva) / sizeof(void*);
-          assertx(sizeof(*tva) % sizeof(void*) == 0);
-          break;
-        }
         case MergeKind::Done:
         case MergeKind::UniqueDefinedClass:
           not_reached();
@@ -858,6 +824,14 @@ void UnitRepoProxy::createSchema(int repoId, RepoTxn& txn) {
   {
     auto createQuery = folly::sformat(
       "CREATE TABLE {} "
+      "(unitSn INTEGER, constantId INTEGER, name TEXT, data BLOB, "
+      " PRIMARY KEY (unitSn, constantId));",
+      m_repo.table(repoId, "UnitConstant"));
+    txn.exec(createQuery);
+  }
+  {
+    auto createQuery = folly::sformat(
+      "CREATE TABLE {} "
       "(unitSn INTEGER, arrayId INTEGER, array BLOB, "
       " PRIMARY KEY (unitSn, arrayId));",
       m_repo.table(repoId, "UnitArray"));
@@ -874,7 +848,7 @@ void UnitRepoProxy::createSchema(int repoId, RepoTxn& txn) {
     auto createQuery = folly::sformat(
       "CREATE TABLE {} "
       "(unitSn INTEGER, mergeableIx INTEGER, mergeableKind INTEGER, "
-      " mergeableId INTEGER, mergeableValue BLOB, "
+      " mergeableId INTEGER, "
       " PRIMARY KEY (unitSn, mergeableIx));",
       m_repo.table(repoId, "UnitMergeables"));
     txn.exec(createQuery);
@@ -925,6 +899,7 @@ std::unique_ptr<UnitEmitter> UnitRepoProxy::loadEmitter(
     m_repo.pcrp().getPreClasses[repoId].get(*ue);
     m_repo.rrp().getRecords[repoId].get(*ue);
     getUnitTypeAliases[repoId].get(*ue);
+    getUnitConstants[repoId].get(*ue);
     getUnitMergeables[repoId].get(*ue);
     getUnitLineTable[repoId].get(ue->m_sn, ue->m_lineTable);
     m_repo.frp().getFuncs[repoId].get(*ue);
@@ -1178,12 +1153,12 @@ void UnitRepoProxy::GetUnitArraysStmt
 
 void UnitRepoProxy::InsertUnitMergeableStmt
                   ::insert(RepoTxn& txn, int64_t unitSn,
-                           int ix, Unit::MergeKind kind, Id id,
-                           TypedValue* value) {
+                           int ix, Unit::MergeKind kind, Id id) {
+  assertx(kind == MergeKind::TypeAlias || kind == MergeKind::Define);
   if (!prepared()) {
     auto insertQuery = folly::sformat(
       "INSERT INTO {} VALUES("
-      " @unitSn, @mergeableIx, @mergeableKind, @mergeableId, @mergeableValue);",
+      " @unitSn, @mergeableIx, @mergeableKind, @mergeableId);",
       m_repo.table(m_repoId, "UnitMergeables"));
     txn.prepare(*this, insertQuery);
   }
@@ -1193,14 +1168,6 @@ void UnitRepoProxy::InsertUnitMergeableStmt
   query.bindInt("@mergeableIx", ix);
   query.bindInt("@mergeableKind", (int)kind);
   query.bindId("@mergeableId", id);
-  if (value) {
-    assertx(kind == MergeKind::Define ||
-           kind == MergeKind::PersistentDefine);
-    query.bindTypedValue("@mergeableValue", *value);
-  } else {
-    assertx(kind == MergeKind::TypeAlias);
-    query.bindNull("@mergeableValue");
-  }
   query.exec();
 }
 
@@ -1209,7 +1176,7 @@ void UnitRepoProxy::GetUnitMergeablesStmt
   auto txn = RepoTxn{m_repo.begin()};
   if (!prepared()) {
     auto selectQuery = folly::sformat(
-      "SELECT mergeableIx, mergeableKind, mergeableId, mergeableValue "
+      "SELECT mergeableIx, mergeableKind, mergeableId "
       "FROM {} "
       "WHERE unitSn == @unitSn ORDER BY mergeableIx ASC;",
       m_repo.table(m_repoId, "UnitMergeables"));
@@ -1236,22 +1203,16 @@ void UnitRepoProxy::GetUnitMergeablesStmt
          * The two exceptions are persistent constants and
          * TypeAliases which are allowed in systemlib.
          */
-        if ((k != MergeKind::PersistentDefine && k != MergeKind::TypeAlias)
+        if ((k != MergeKind::Define && k != MergeKind::TypeAlias)
             || SystemLib::s_inited) {
           ue.m_mergeOnly = false;
         }
       }
       switch (k) {
+        case MergeKind::Define:
         case MergeKind::TypeAlias:
-          ue.insertMergeableTypeAlias(mergeableIx, mergeableId);
+          ue.insertMergeableId(k, mergeableIx, mergeableId);
           break;
-        case MergeKind::PersistentDefine:
-        case MergeKind::Define: {
-          TypedValue mergeableValue; /**/ query.getTypedValue(3,
-                                                              mergeableValue);
-          ue.insertMergeableDef(mergeableIx, k, mergeableId, mergeableValue);
-          break;
-        }
         default: break;
       }
     }
@@ -1360,6 +1321,65 @@ void UnitRepoProxy::GetUnitTypeAliasesStmt::get(UnitEmitter& ue) {
       dataBlob(ta);
       Id id UNUSED = ue.addTypeAlias(ta);
       assertx(id == typeAliasId);
+    }
+  } while (!query.done());
+  txn.commit();
+}
+
+void UnitRepoProxy::InsertUnitConstantStmt
+                  ::insert(const UnitEmitter& ue,
+                           RepoTxn& txn,
+                           int64_t unitSn,
+                           Id constantId,
+                           const Constant& constant) {
+  if (!prepared()) {
+    auto insertQuery = folly::sformat(
+      "INSERT INTO {} VALUES (@unitSn, @constantId, @name, @data);",
+      m_repo.table(m_repoId, "UnitConstant"));
+    txn.prepare(*this, insertQuery);
+  }
+
+  BlobEncoder dataBlob{ue.useGlobalIds()};
+  RepoTxnQuery query(txn, *this);
+  query.bindInt64("@unitSn", unitSn);
+  query.bindInt64("@constantId", constantId);
+  query.bindStaticString("@name", constant.name);
+
+  dataBlob(constant);
+  query.bindBlob("@data", dataBlob, /* static */ true);
+  query.exec();
+}
+
+void UnitRepoProxy::GetUnitConstantsStmt::get(UnitEmitter& ue) {
+  auto txn = RepoTxn{m_repo.begin()};
+  if (!prepared()) {
+    auto selectQuery = folly::sformat(
+      "SELECT constantId, name, data FROM {} WHERE unitSn == @unitSn;",
+      m_repo.table(m_repoId, "UnitConstant"));
+    txn.prepare(*this, selectQuery);
+  }
+  RepoTxnQuery query(txn, *this);
+
+  query.bindInt64("@unitSn", ue.m_sn);
+  do {
+    query.step();
+    if (query.row()) {
+      Constant c;
+      Id constantId;        /**/ query.getId(0, constantId);
+      StringData *name;      /**/ query.getStaticString(1, name);
+      c.name = makeStaticString(name);
+      BlobDecoder dataBlob = /**/ query.getBlob(2, ue.useGlobalIds());
+
+      // We check that arrays do not exceed a configurable maximum size in the
+      // assembler, so just assume that they're okay here.
+      MemoryManager::SuppressOOM so(*tl_heap);
+
+      dataBlob(c);
+      if (type(c.val) == KindOfUninit) {
+        c.val.m_data.pcnt = reinterpret_cast<MaybeCountable*>(Unit::getCns);
+      }
+      Id id UNUSED = ue.addConstant(c);
+      assertx(id == constantId);
     }
   } while (!query.done());
   txn.commit();

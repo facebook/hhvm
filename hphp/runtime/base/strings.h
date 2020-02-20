@@ -24,8 +24,6 @@ constexpr char FATAL_NULL_THIS[] = "$this is null";
 constexpr char WARN_NULL_THIS[] = "Undefined variable: this";
 constexpr char FUNCTION_ALREADY_DEFINED[] = "Function already defined: %s";
 constexpr char CONSTANT_ALREADY_DEFINED[] = "Constant %s already defined";
-constexpr char CONSTANTS_MUST_BE_SCALAR[] =
-  "Constants may only evaluate to scalar values or arrays";
 constexpr char DIVISION_BY_ZERO[] =
   "Division by zero";
 constexpr char INTEGER_OVERFLOW[] = "Integer overflow";

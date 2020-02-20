@@ -28,6 +28,9 @@ namespace HPHP {
 
 const StaticString s_plainfile("plainfile");
 const StaticString s_stdio("STDIO");
+const StaticString s_stdin("STDIN");
+const StaticString s_stdout("STDOUT");
+const StaticString s_stderr("STDERR");
 
 struct StdFiles {
   FILE* stdin{nullptr};
@@ -318,9 +321,9 @@ void BuiltinFile::sweep() {
 IMPLEMENT_REQUEST_LOCAL(BuiltinFiles, g_builtin_files);
 
 void BuiltinFiles::requestInit() {
-  GetSTDIN();
-  GetSTDOUT();
-  GetSTDERR();
+  getSTDIN();
+  getSTDOUT();
+  getSTDERR();
 }
 
 void BuiltinFiles::requestShutdown() {
@@ -329,37 +332,42 @@ void BuiltinFiles::requestShutdown() {
   m_stderr.releaseForSweep();
 }
 
-const Variant& BuiltinFiles::GetSTDIN() {
-  if (g_builtin_files->m_stdin.isNull()) {
-    auto f = req::make<BuiltinFile>(
-        rl_stdfiles->stdin ? rl_stdfiles->stdin : stdin);
-    g_builtin_files->m_stdin = f;
-    f->setId(1);
-    assertx(f->getId() == 1);
+static const Variant& getHelper(Variant& global_fd, FILE* rds_fd, FILE* fd,
+                         int fd_num) {
+  if (global_fd.isNull()) {
+    auto f = req::make<BuiltinFile>(rds_fd ? rds_fd : fd);
+    global_fd = f;
+    f->setId(fd_num);
+    assertx(f->getId() == fd_num);
   }
-  return g_builtin_files->m_stdin;
+  return global_fd;
 }
 
-const Variant& BuiltinFiles::GetSTDOUT() {
-  if (g_builtin_files->m_stdout.isNull()) {
-    auto f = req::make<BuiltinFile>(
-        rl_stdfiles->stdout ? rl_stdfiles->stdout : stdout);
-    g_builtin_files->m_stdout = f;
-    f->setId(2);
-    assertx(f->getId() == 2);
-  }
-  return g_builtin_files->m_stdout;
+Variant BuiltinFiles::getSTDIN(const StringData* name) {
+  assertx(s_stdin.same(name));
+  return getSTDIN();
 }
 
-const Variant& BuiltinFiles::GetSTDERR() {
-  if (g_builtin_files->m_stderr.isNull()) {
-    auto f = req::make<BuiltinFile>(rl_stdfiles->stderr ?
-        rl_stdfiles->stderr : stderr);
-    g_builtin_files->m_stderr = f;
-    f->setId(3);
-    assertx(f->getId() == 3);
-  }
-  return g_builtin_files->m_stderr;
+Variant BuiltinFiles::getSTDOUT(const StringData* name) {
+  assertx(s_stdout.same(name));
+  return getSTDOUT();
+}
+
+Variant BuiltinFiles::getSTDERR(const StringData* name) {
+  assertx(s_stderr.same(name));
+  return getSTDERR();
+}
+
+const Variant& BuiltinFiles::getSTDIN() {
+  return getHelper(g_builtin_files->m_stdin, rl_stdfiles->stdin, stdin, 1);
+}
+
+const Variant& BuiltinFiles::getSTDOUT() {
+  return getHelper(g_builtin_files->m_stdout, rl_stdfiles->stdout, stdout, 2);
+}
+
+const Variant& BuiltinFiles::getSTDERR() {
+  return getHelper(g_builtin_files->m_stderr, rl_stdfiles->stderr, stderr, 3);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

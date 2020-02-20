@@ -214,7 +214,7 @@ let all_instrs (_ : IS.t) : lazy_instruct list =
     (fun () -> IIncludeEvalDefine Eval);
     (fun () -> IIncludeEvalDefine (DefCls (Random.int 10)));
     (fun () -> IIncludeEvalDefine (DefClsNop (Random.int 10)));
-    (fun () -> IIncludeEvalDefine (DefCns (Const.from_raw_string "")));
+    (fun () -> IIncludeEvalDefine (DefCns (Random.int 10)));
     (fun () -> IIncludeEvalDefine (DefTypeAlias (Random.int 10)));
     (fun () -> IMisc This);
     (fun () -> IMisc (BareThis (random_bare_op())));

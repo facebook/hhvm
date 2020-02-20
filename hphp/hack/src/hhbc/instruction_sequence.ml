@@ -393,8 +393,7 @@ let instr_defrecord n = instr (IIncludeEvalDefine (DefRecord n))
 
 let instr_deftypealias n = instr (IIncludeEvalDefine (DefTypeAlias n))
 
-let instr_defcns s =
-  instr (IIncludeEvalDefine (DefCns (Hhbc_id.Const.from_raw_string s)))
+let instr_defcns n = instr (IIncludeEvalDefine (DefCns n))
 
 let instr_eval = instr (IIncludeEvalDefine Eval)
 

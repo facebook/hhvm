@@ -391,13 +391,13 @@ Variant HHVM_FUNCTION(constant, const String& name) {
     if (cls) {
       String cnsName(constantName, data + len - constantName, CopyString);
       TypedValue cns = cls->clsCnsGet(cnsName.get());
-      if (cns.m_type != KindOfUninit) {
+      if (type(cns) != KindOfUninit) {
         return tvAsCVarRef(cns);
       }
     }
   } else {
     auto const cns = Unit::loadCns(name.get());
-    if (cns) return Variant::wrap(*cns);
+    if (type(cns) != KindOfUninit) return Variant::attach(cns);
   }
 
   raise_warning("constant(): Couldn't find constant %s", data);
@@ -422,7 +422,7 @@ bool HHVM_FUNCTION(defined, const String& name, bool autoload /* = true */) {
     return false;
   } else {
     auto* cb = autoload ? Unit::loadCns : Unit::lookupCns;
-    return cb(name.get()).is_set();
+    return type(cb(name.get())) != KindOfUninit;
   }
 }
 

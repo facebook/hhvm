@@ -39,6 +39,8 @@ let string_of_class_num id = string_of_int id
 
 let string_of_typedef_num id = string_of_int id
 
+let string_of_const_num id = string_of_int id
+
 let string_of_pos pos =
   let { H.line_begin; line_end; col_begin; col_end } = pos in
   Printf.sprintf "%d:%d,%d:%d" line_begin col_begin line_end col_end
@@ -686,7 +688,7 @@ let string_of_include_eval_define = function
   | DefCls id -> sep ["DefCls"; string_of_class_num id]
   | DefClsNop id -> sep ["DefClsNop"; string_of_class_num id]
   | DefRecord id -> sep ["DefRecord"; string_of_class_num id]
-  | DefCns id -> sep ["DefCns"; string_of_const_id id]
+  | DefCns id -> sep ["DefCns"; string_of_const_num id]
   | DefTypeAlias id -> sep ["DefTypeAlias"; string_of_typedef_num id]
 
 let string_of_free_iterator = function
@@ -1962,11 +1964,13 @@ let add_property (class_def : Hhas_class.t) buf property =
     Acc.add buf "\"\"\";"
   )
 
-let add_constant buf c =
+let add_constant ?(prefix = "") buf c =
   let name = Hhas_constant.name c in
   let value = Hhas_constant.value c in
-  Acc.add buf "\n  .const ";
-  Acc.add buf name;
+  Acc.add buf "\n";
+  Acc.add buf prefix;
+  Acc.add buf ".const ";
+  Acc.add buf (Hhbc_id.Const.from_ast_name name |> Hhbc_id.Const.to_raw_string);
   begin
     match value with
     | Some Typed_value.Uninit -> Acc.add buf " = uninit"
@@ -2104,7 +2108,7 @@ let add_class_def buf class_def =
   add_uses buf class_def;
   add_enum_ty buf class_def;
   List.iter ~f:(add_requirement buf) (Hhas_class.requirements class_def);
-  List.iter ~f:(add_constant buf) (Hhas_class.constants class_def);
+  List.iter ~f:(add_constant buf ~prefix:"  ") (Hhas_class.constants class_def);
   List.iter ~f:(add_type_constant buf) (Hhas_class.type_constants class_def);
   List.iter ~f:(add_property class_def buf) (Hhas_class.properties class_def);
   List.iter ~f:(add_method_def buf) (Hhas_class.methods class_def);
@@ -2269,6 +2273,7 @@ let add_program_content ?path dump_symbol_refs buf hhas_prog =
   let main = Hhas_program.main hhas_prog in
   let classes = Hhas_program.classes hhas_prog in
   let records = Hhas_program.record_defs hhas_prog in
+  let constants = Hhas_program.constants hhas_prog in
   let adata = Hhas_program.adata hhas_prog in
   let symbol_refs = Hhas_program.symbol_refs hhas_prog in
   add_data_region buf adata;
@@ -2276,6 +2281,7 @@ let add_program_content ?path dump_symbol_refs buf hhas_prog =
   List.iter ~f:(add_fun_def buf) functions;
   List.iter ~f:(add_class_def buf) classes;
   List.iter ~f:(add_record_def buf) records;
+  List.iter ~f:(add_constant buf) constants;
   List.iter ~f:(add_typedef buf) (Hhas_program.typedefs hhas_prog);
   add_file_attributes buf (Hhas_program.file_attributes hhas_prog);
   if dump_symbol_refs then (

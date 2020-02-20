@@ -66,11 +66,6 @@ struct FuncAnalysisResult {
   ClosureUseVarMap closureUseTypes;
 
   /*
-   * The set of constants that this function could define.
-   */
-  ConstantMap cnsMap;
-
-  /*
    * The inferred function return type.  May be TBottom if the
    * function never returns.
    */
@@ -82,12 +77,6 @@ struct FuncAnalysisResult {
    * parameter.
    */
   LocalId retParam{MaxLocalId};
-
-  /*
-   * Reads a constant thats not in the index (yet - this can only
-   * happen on the first iteration). We'll need to revisit it.
-   */
-  bool readsUntrackedConstants{false};
 
   /*
    * Flag to indicate that the function does something that requires a

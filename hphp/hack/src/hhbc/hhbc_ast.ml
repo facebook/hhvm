@@ -33,6 +33,8 @@ type class_num = int
 
 type record_num = int
 
+type constant_num = int
+
 type typedef_num = int
 
 type function_id = Hhbc_id.Function.t
@@ -470,7 +472,7 @@ type instruct_include_eval_define =
   | DefCls of class_num
   | DefClsNop of class_num
   | DefRecord of record_num
-  | DefCns of const_id
+  | DefCns of constant_num
   | DefTypeAlias of typedef_num
 
 type bare_this_op =

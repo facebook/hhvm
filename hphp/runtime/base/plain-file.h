@@ -89,9 +89,12 @@ static_assert(sizeof(BuiltinFile) == sizeof(PlainFile),
  * STDIN, STDOUT, and STDERR.
  */
 struct BuiltinFiles final : RequestEventHandler {
-  static const Variant& GetSTDIN();
-  static const Variant& GetSTDOUT();
-  static const Variant& GetSTDERR();
+  static const Variant& getSTDIN();
+  static const Variant& getSTDOUT();
+  static const Variant& getSTDERR();
+  static Variant getSTDIN(const StringData* name);
+  static Variant getSTDOUT(const StringData* name);
+  static Variant getSTDERR(const StringData* name);
 
   void requestInit() override;
   void requestShutdown() override;

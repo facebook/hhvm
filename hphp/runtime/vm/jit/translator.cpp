@@ -312,7 +312,7 @@ static const struct {
   { OpDefTypeAlias,{None,             None,         OutNone         }},
   { OpDefCls,      {None,             None,         OutNone         }},
   { OpDefRecord,   {None,             None,         OutNone         }},
-  { OpDefCns,      {Stack1,           Stack1,       OutBoolean      }},
+  { OpDefCns,      {None,             None,         OutNone         }},
 
   /*** 13. Miscellaneous instructions ***/
 

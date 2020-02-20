@@ -371,7 +371,7 @@ void emitReqDoc(IRGS& env)                    { interpOne(env); }
 void emitReqOnce(IRGS& env)                   { interpOne(env); }
 void emitEval(IRGS& env)                      { interpOne(env); }
 void emitDefTypeAlias(IRGS& env, uint32_t)    { interpOne(env); }
-void emitDefCns(IRGS& env, const StringData*) { interpOne(env); }
+void emitDefCns(IRGS& env, uint32_t)          { interpOne(env); }
 void emitDefCls(IRGS& env, uint32_t)          { interpOne(env); }
 void emitDefRecord(IRGS& env, uint32_t)       { interpOne(env); }
 void emitChainFaults(IRGS& env)               { interpOne(env); }

@@ -14,6 +14,7 @@ type t = {
   hhas_classes: Hhas_class.t list;
   hhas_record_defs: Hhas_record_def.t list;
   hhas_typedefs: Hhas_typedef.t list;
+  hhas_constants: Hhas_constant.t list;
   hhas_file_attributes: Hhas_attribute.t list;
   hhas_main: Hhas_body.t;
   hhas_symbol_refs: Hhas_symbol_refs.t;
@@ -26,6 +27,7 @@ let make
     hhas_classes
     hhas_record_defs
     hhas_typedefs
+    hhas_constants
     hhas_file_attributes
     hhas_main
     hhas_symbol_refs =
@@ -36,6 +38,7 @@ let make
     hhas_classes;
     hhas_record_defs;
     hhas_typedefs;
+    hhas_constants;
     hhas_file_attributes;
     hhas_main;
     hhas_symbol_refs;
@@ -50,6 +53,8 @@ let classes hhas_prog = hhas_prog.hhas_classes
 let record_defs hhas_prog = hhas_prog.hhas_record_defs
 
 let typedefs hhas_prog = hhas_prog.hhas_typedefs
+
+let constants hhas_prog = hhas_prog.hhas_constants
 
 let file_attributes hhas_prog = hhas_prog.hhas_file_attributes
 

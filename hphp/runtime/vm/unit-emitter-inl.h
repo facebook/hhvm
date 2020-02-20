@@ -94,6 +94,13 @@ inline const std::vector<TypeAlias>& UnitEmitter::typeAliases() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Constants.
+
+inline const std::vector<Constant>& UnitEmitter::constants() const {
+  return m_constants;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Source locations.
 
 inline bool UnitEmitter::hasSourceLocInfo() const {

@@ -152,17 +152,6 @@ bool builtin_strlen(ISS& env, const bc::FCallBuiltin& op) {
   return true;
 }
 
-bool builtin_defined(ISS& env, const bc::FCallBuiltin& op) {
-  if (op.arg1 != 2) return false;
-  if (auto const v = tv(topT(env, 1))) {
-    if (isStringType(v->m_type) &&
-        !env.index.lookup_constant(env.ctx, v->m_data.pstr)) {
-      env.collect.cnsMap[v->m_data.pstr].m_type = kDynamicConstant;
-    }
-  }
-  return false;
-}
-
 bool builtin_function_exists(ISS& env, const bc::FCallBuiltin& op) {
   if (op.arg1 < 1 || op.arg1 > 2) return false;
   if (!handle_function_exists(env, topT(env, op.arg1 - 1))) return false;
@@ -450,7 +439,6 @@ bool builtin_shapes_idx(ISS& env, const bc::FCallBuiltin& op) {
   X(min2, min2)                                                         \
   X(mt_rand, mt_rand)                                                   \
   X(strlen, strlen)                                                     \
-  X(defined, defined)                                                   \
   X(function_exists, function_exists)                                   \
   X(class_exists, class_exists)                                         \
   X(interface_exists, interface_exists)                                 \

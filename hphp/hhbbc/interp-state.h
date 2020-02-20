@@ -516,13 +516,11 @@ struct CollectedInfo {
 
   ClosureUseVarMap closureUseTypes;
   PropertiesInfo props;
-  ConstantMap cnsMap;
   hphp_fast_set<std::pair<const php::Func*, BlockId>>
     unfoldableFuncs;
   bool mayUseVV{false};
   bool effectFree{true};
   bool hasInvariantIterBase{false};
-  bool readsUntrackedConstants{false};
   CollectionOpts opts{};
   bool (*propagate_constants)(const Bytecode& bc, State& state,
                               BytecodeVec& out) = nullptr;

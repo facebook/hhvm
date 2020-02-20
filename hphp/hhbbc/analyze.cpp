@@ -438,8 +438,6 @@ FuncAnalysis do_analyze_collect(const Index& index,
   } while (!incompleteQ.empty());
 
   ai.closureUseTypes = std::move(collect.closureUseTypes);
-  ai.cnsMap = std::move(collect.cnsMap);
-  ai.readsUntrackedConstants = collect.readsUntrackedConstants;
   ai.mayUseVV = collect.mayUseVV;
   ai.effectFree = collect.effectFree;
   ai.hasInvariantIterBase = collect.hasInvariantIterBase;

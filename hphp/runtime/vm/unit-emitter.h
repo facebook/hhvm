@@ -28,6 +28,7 @@
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
+#include "hphp/runtime/vm/constant.h"
 #include "hphp/runtime/vm/preclass.h"
 #include "hphp/runtime/vm/repo-helpers.h"
 #include "hphp/runtime/vm/repo-status.h"
@@ -304,6 +305,18 @@ struct UnitEmitter {
    */
   Id addTypeAlias(const TypeAlias& td);
 
+  /////////////////////////////////////////////////////////////////////////////
+  // Constants.
+
+  /*
+   * Const reference to all of the Unit's type aliases.
+   */
+  const std::vector<Constant>& constants() const;
+
+  /*
+   * Add a new constant to the Unit.
+   */
+  Id addConstant(const Constant& c);
 
   /////////////////////////////////////////////////////////////////////////////
   // Source locations.
@@ -348,24 +361,10 @@ struct UnitEmitter {
   void pushMergeableClass(PreClassEmitter* e);
 
   /*
-   * Add a constant definition to the UnitEmitter's list of mergeables.
-   *
-   * The `push' flavor first merges the litstr `unitName', and then appends the
-   * mergeable object reference to the list.  The `insert' flavor inserts the
-   * mergeable (kind, id) at `ix' in the list.
-   *
-   * The mergeable value is appended or inserted likewise.
-   */
-  void pushMergeableDef(Unit::MergeKind kind, const StringData* name,
-                        const TypedValue& tv);
-  void insertMergeableDef(int ix, Unit::MergeKind kind, Id id,
-                          const TypedValue& tv);
-
-  /*
    * Add a TypeAlias to the UnitEmitter's list of mergeables.
    */
-  void pushMergeableTypeAlias(const Id id);
-  void insertMergeableTypeAlias(int ix, const Id id);
+  void pushMergeableId(Unit::MergeKind kind, const Id id);
+  void insertMergeableId(Unit::MergeKind kind, int ix, const Id id);
 
   /////////////////////////////////////////////////////////////////////////////
   // Bytecode emit.
@@ -463,6 +462,11 @@ private:
   std::vector<TypeAlias> m_typeAliases;
 
   /*
+   * Constants table.
+   */
+  std::vector<Constant> m_constants;
+
+  /*
    * FuncEmitter tables.
    */
   std::vector<std::unique_ptr<FuncEmitter> > m_fes;
@@ -490,7 +494,6 @@ private:
    * Mergeables tables.
    */
   std::vector<std::pair<Unit::MergeKind, Id>> m_mergeableStmts;
-  std::vector<std::pair<Id, TypedValue>> m_mergeableValues;
 
   /*
    * Source location tables.
@@ -550,6 +553,19 @@ struct UnitRepoProxy : public RepoProxy {
     void get(UnitEmitter& ue);
   };
 
+  struct InsertUnitConstantStmt : public RepoProxy::Stmt {
+    InsertUnitConstantStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    void insert(const UnitEmitter& ue,
+                RepoTxn& txn,
+                int64_t unitSn,
+                Id constantId,
+                const Constant& constant); // throws(RepoExc)
+  };
+  struct GetUnitConstantsStmt : public RepoProxy::Stmt {
+    GetUnitConstantsStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    void get(UnitEmitter& ue);
+  };
+
   struct InsertUnitStmt : public RepoProxy::Stmt {
     InsertUnitStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void insert(const UnitEmitter& ue,
@@ -594,7 +610,7 @@ struct UnitRepoProxy : public RepoProxy {
     InsertUnitMergeableStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void insert(RepoTxn& txn, int64_t unitSn,
                 int ix, Unit::MergeKind kind,
-                Id id, TypedValue* value); // throws(RepoExc)
+                Id id); // throws(RepoExc)
   };
   struct GetUnitMergeablesStmt : public RepoProxy::Stmt {
     GetUnitMergeablesStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
@@ -625,6 +641,8 @@ struct UnitRepoProxy : public RepoProxy {
   URP_GOP(UnitArrayTypeTable) \
   URP_IOP(UnitArray) \
   URP_GOP(UnitArrays) \
+  URP_IOP(UnitConstant) \
+  URP_GOP(UnitConstants) \
   URP_IOP(UnitMergeable) \
   URP_GOP(UnitMergeables) \
   URP_IOP(UnitSourceLoc) \

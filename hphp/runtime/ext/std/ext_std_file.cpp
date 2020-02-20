@@ -2150,9 +2150,9 @@ void StandardExtension::initFile() {
   HHVM_RC_INT_SAME(SEEK_CUR);
   HHVM_RC_INT_SAME(SEEK_END);
 
-  Native::registerConstant(s_STDIN.get(),  BuiltinFiles::GetSTDIN);
-  Native::registerConstant(s_STDOUT.get(), BuiltinFiles::GetSTDOUT);
-  Native::registerConstant(s_STDERR.get(), BuiltinFiles::GetSTDERR);
+  Native::registerConstant(s_STDIN.get(),  BuiltinFiles::getSTDIN);
+  Native::registerConstant(s_STDOUT.get(), BuiltinFiles::getSTDOUT);
+  Native::registerConstant(s_STDERR.get(), BuiltinFiles::getSTDERR);
 
   HHVM_RC_INT(INI_SCANNER_NORMAL, k_INI_SCANNER_NORMAL);
   HHVM_RC_INT(INI_SCANNER_RAW,    k_INI_SCANNER_RAW);

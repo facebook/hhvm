@@ -70,6 +70,9 @@ let emit_def_inline def =
   | A.RecordDef rd ->
     Emit_pos.emit_pos_then (fst rd.A.rd_name)
     @@ instr_defrecord (int_of_string (snd rd.A.rd_name))
+  | A.Constant c ->
+    Emit_pos.emit_pos_then (fst c.A.cst_name)
+    @@ instr_defcns (int_of_string (snd c.A.cst_name))
   | _ -> failwith "Define inline: Invalid inline definition"
 
 let emit_markup env s echo_expr_opt ~check_for_hashbang =

@@ -34,6 +34,7 @@ constexpr auto F = static_cast<ContextMask>(AttrContext::Func);
 constexpr auto P = static_cast<ContextMask>(AttrContext::Prop);
 constexpr auto T = static_cast<ContextMask>(AttrContext::TraitImport);
 constexpr auto A = static_cast<ContextMask>(AttrContext::Alias);
+constexpr auto K = static_cast<ContextMask>(AttrContext::Constant);
 
 constexpr bool supported(ContextMask mask, AttrContext a) {
   return mask & static_cast<ContextMask>(a);
@@ -55,7 +56,7 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
   X(AttrTrait,                    C|F|P,   "trait");                \
   X(AttrUnique,                   C|F,     "unique");               \
   X(AttrBuiltin,                  C|F,     "builtin");              \
-  X(AttrPersistent,               C|F|A,   "persistent");           \
+  X(AttrPersistent,               C|F|A|K, "persistent");           \
   X(AttrIsConst,                  C|P,     "is_const");             \
   X(AttrForbidDynamicProps,       C,       "no_dynamic_props");     \
   X(AttrNoOverrideMagicGet,       C,       "nov_get");              \

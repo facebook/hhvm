@@ -1626,13 +1626,13 @@ and convert_record_fields env st fields =
   in
   aux st fields
 
-and convert_defs env class_count record_count typedef_count st dl =
+and convert_defs env class_count record_count typedef_count const_count st dl =
   match dl with
   | [] -> (st, [])
   | Fun fd :: dl ->
     let (st, fd) = convert_fun env st fd in
     let (st, dl) =
-      convert_defs env class_count record_count typedef_count st dl
+      convert_defs env class_count record_count typedef_count const_count st dl
     in
     (st, (TopLevel, Fun fd) :: dl)
   (* Convert a top-level class definition into a true class definition and
@@ -1641,7 +1641,14 @@ and convert_defs env class_count record_count typedef_count st dl =
     let (st, cd) = convert_class env st cd in
     let stub_class = make_defcls cd class_count in
     let (st, dl) =
-      convert_defs env (class_count + 1) record_count typedef_count st dl
+      convert_defs
+        env
+        (class_count + 1)
+        record_count
+        typedef_count
+        const_count
+        st
+        dl
     in
     ( st,
       (TopLevel, Class cd)
@@ -1650,7 +1657,7 @@ and convert_defs env class_count record_count typedef_count st dl =
   | Stmt stmt :: dl ->
     let (st, stmt) = convert_stmt env st stmt in
     let (st, dl) =
-      convert_defs env class_count record_count typedef_count st dl
+      convert_defs env class_count record_count typedef_count const_count st dl
     in
     (st, (TopLevel, Stmt stmt) :: dl)
   | RecordDef rd :: dl ->
@@ -1658,14 +1665,28 @@ and convert_defs env class_count record_count typedef_count st dl =
     let stub_record = make_defrecord rd record_count in
     let stub_stmt = Stmt (Pos.none, Def_inline (RecordDef stub_record)) in
     let (st, dl) =
-      convert_defs env class_count (record_count + 1) typedef_count st dl
+      convert_defs
+        env
+        class_count
+        (record_count + 1)
+        typedef_count
+        const_count
+        st
+        dl
     in
     ( st,
       (TopLevel, RecordDef { rd with rd_fields }) :: (TopLevel, stub_stmt) :: dl
     )
   | Typedef td :: dl ->
     let (st, dl) =
-      convert_defs env class_count record_count (typedef_count + 1) st dl
+      convert_defs
+        env
+        class_count
+        record_count
+        (typedef_count + 1)
+        const_count
+        st
+        dl
     in
     let (st, t_user_attributes) =
       convert_user_attributes env st td.t_user_attributes
@@ -1681,25 +1702,45 @@ and convert_defs env class_count record_count typedef_count st dl =
   | Constant c :: dl ->
     let (st, c) = convert_gconst env st c in
     let (st, dl) =
-      convert_defs env class_count record_count typedef_count st dl
+      convert_defs
+        env
+        class_count
+        record_count
+        typedef_count
+        (const_count + 1)
+        st
+        dl
     in
-    (st, (TopLevel, Constant c) :: dl)
+    let stub_c =
+      { c with cst_name = (fst c.cst_name, string_of_int const_count) }
+    in
+    ( st,
+      (TopLevel, Constant c)
+      :: (TopLevel, Stmt (Pos.none, Def_inline (Constant stub_c)))
+      :: dl )
   | Namespace (_id, dl) :: dl' ->
-    convert_defs env class_count record_count typedef_count st (dl @ dl')
+    convert_defs
+      env
+      class_count
+      record_count
+      typedef_count
+      const_count
+      st
+      (dl @ dl')
   | NamespaceUse x :: dl ->
     let (st, dl) =
-      convert_defs env class_count record_count typedef_count st dl
+      convert_defs env class_count record_count typedef_count const_count st dl
     in
     (st, (TopLevel, NamespaceUse x) :: dl)
   | SetNamespaceEnv ns :: dl ->
     let st = set_namespace st ns in
     let (st, dl) =
-      convert_defs env class_count record_count typedef_count st dl
+      convert_defs env class_count record_count typedef_count const_count st dl
     in
     (st, (TopLevel, SetNamespaceEnv ns) :: dl)
   | FileAttributes fa :: dl ->
     let (st, dl) =
-      convert_defs env class_count record_count typedef_count st dl
+      convert_defs env class_count record_count typedef_count const_count st dl
     in
     let (st, fa_user_attributes) =
       convert_user_attributes env st fa.fa_user_attributes
@@ -1743,7 +1784,7 @@ let convert_toplevel_prog ~empty_namespace defs =
    * function and we place hoisted functions just after that *)
   let env = env_toplevel (count_classes defs) (count_records defs) 1 defs in
   let st = initial_state empty_namespace in
-  let (st, original_defs) = convert_defs env 0 0 0 st defs in
+  let (st, original_defs) = convert_defs env 0 0 0 0 st defs in
   let main_state = st.current_function_state in
   let st =
     record_function_state

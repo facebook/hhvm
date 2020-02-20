@@ -98,6 +98,14 @@ template<class T> using ISStringToMany =
     string_data_isame
   >;
 
+template<class T> using SStringToMany =
+  std::unordered_multimap<
+    SString,
+    T*,
+    string_data_hash,
+    string_data_same
+  >;
+
 /*
  * One-to-one case insensitive map, where the keys are static strings
  * and the values are some T.
@@ -148,27 +156,6 @@ copy_range(const MultiMap& map, typename MultiMap::key_type key) {
 }
 
 //////////////////////////////////////////////////////////////////////
-
-enum class Dep : uintptr_t {
-  /* This dependency should trigger when the return type changes */
-  ReturnTy = (1u << 0),
-  /* This dependency should trigger when a DefCns is resolved */
-  ConstVal = (1u << 1),
-  /* This dependency should trigger when a class constant is resolved */
-  ClsConst = (1u << 2),
-  /* This dependency should trigger when the bad initial prop value bit for a
-   * class changes */
-  PropBadInitialValues = (1u << 3),
-  /* This dependency should trigger when a public static property with a
-   * particular name changes */
-  PublicSPropName = (1u << 4),
-  /* This dependency means that we refused to do inline analysis on
-   * this function due to inline analysis depth. The dependency will
-   * trigger if the target function becomes effect-free, or gets a
-   * literal return value.
-   */
-  InlineDepthLimit = (1u << 5),
-};
 
 Dep operator|(Dep a, Dep b) {
   return static_cast<Dep>(
@@ -1131,7 +1118,7 @@ struct Index::IndexData {
   ISStringToMany<const php::Func>        funcs;
   ISStringToMany<const php::TypeAlias>   typeAliases;
   ISStringToMany<const php::Class>       enums;
-  ConstInfoConcurrentMap                 constants;
+  SStringToMany<const php::Constant>     constants;
   ISStringToMany<const php::Record>      records;
 
   // Map from each class to all the closures that are allocated in
@@ -1931,16 +1918,12 @@ void add_system_constants_to_index(IndexData& index) {
   for (auto cnsPair : Native::getConstants()) {
     assertx(cnsPair.second.m_type != KindOfUninit ||
             cnsPair.second.dynamic());
-    auto t = cnsPair.second.dynamic() ?
-      TInitCell : from_cell(cnsPair.second);
+    auto c = new Constant();
+    c->name = cnsPair.first;
+    c->val = cnsPair.second;
+    c->attrs = AttrNone;
 
-    ConstInfoConcurrentMap::accessor acc;
-    if (index.constants.insert(acc, cnsPair.first)) {
-      acc->second.func = nullptr;
-      acc->second.type = t;
-      acc->second.system = true;
-      acc->second.readonly = false;
-    }
+    index.constants.insert({c->name, c});
   }
 }
 
@@ -2128,6 +2111,10 @@ void add_unit_to_index(IndexData& index, const php::Unit& unit) {
 
   for (auto& ta : unit.typeAliases) {
     index.typeAliases.insert({ta->name, ta.get()});
+  }
+
+  for (auto& c : unit.constants) {
+    index.constants.insert({c->name, c.get()});
   }
 
   for (auto& rec : unit.records) {
@@ -3373,12 +3360,15 @@ void mark_no_override_methods(IndexData& index) {
   }
 }
 
-template <class T, class F>
-void mark_unique_entities(ISStringToMany<T>& entities, F marker) {
+template <class T, class S, class F>
+void mark_unique_entities(
+    std::unordered_multimap<SString, T*, string_data_hash, S> entities,
+    F marker) {
+  auto key_eq = entities.key_eq();
   for (auto it = entities.begin(), end = entities.end(); it != end; ) {
     auto first = it++;
     auto flag = true;
-    while (it != end && it->first->isame(first->first)) {
+    while (it != end && key_eq(it->first, first->first)) {
       marker(it++->second, false);
       flag = false;
     }
@@ -3968,15 +3958,22 @@ Index::Index(php::Program* program)
     preresolveTypes(env, cid, m_data->classInfo);
   }
 
-  mark_unique_entities(m_data->typeAliases,
-                       [&] (const php::TypeAlias* ta, bool flag) {
-                         attribute_setter(
-                           ta->attrs,
-                           flag &&
-                           !m_data->classInfo.count(ta->name) &&
-                           !m_data->records.count(ta->name),
-                           AttrUnique);
-                       });
+  mark_unique_entities(
+    m_data->typeAliases,
+    [&] (const php::TypeAlias* ta, bool flag) {
+      attribute_setter(
+        ta->attrs,
+        flag &&
+        !m_data->classInfo.count(ta->name) &&
+        !m_data->records.count(ta->name),
+        AttrUnique);
+    });
+
+  mark_unique_entities(
+    m_data->constants,
+    [&] (const php::Constant* c, bool flag) {
+      attribute_setter(c->attrs, flag, AttrUnique);
+    });
 
   for (auto& rinfo : m_data->allRecordInfos) {
     auto const set = [&] {
@@ -4019,10 +4016,11 @@ Index::Index(php::Program* program)
     attribute_setter(cinfo->cls->attrs, set, AttrUnique);
   }
 
-  mark_unique_entities(m_data->funcs,
-                       [&] (const php::Func* func, bool flag) {
-                         attribute_setter(func->attrs, flag, AttrUnique);
-                       });
+  mark_unique_entities(
+    m_data->funcs,
+    [&] (const php::Func* func, bool flag) {
+      attribute_setter(func->attrs, flag, AttrUnique);
+    });
 
   m_data->funcInfo.resize(program->nextFuncId);
 
@@ -4091,6 +4089,12 @@ void Index::mark_persistent_types_and_functions(php::Program& program) {
     for (auto& t : unit->typeAliases) {
       attribute_setter(t->attrs,
                        persistent && (t->attrs & AttrUnique),
+                       AttrPersistent);
+    }
+
+    for (auto& c : unit->constants) {
+      attribute_setter(c->attrs,
+                       persistent && (c->attrs & AttrUnique),
                        AttrPersistent);
     }
   }
@@ -5316,29 +5320,23 @@ Type Index::lookup_class_constant(Context ctx,
   return from_cell(cnst->val.value());
 }
 
-folly::Optional<Type> Index::lookup_constant(Context ctx,
-                                             SString cnsName) const {
-  ConstInfoConcurrentMap::const_accessor acc;
-  if (!m_data->constants.find(acc, cnsName)) {
-    // flag to indicate that the constant isn't in the index yet.
-    return folly::none;
+Type Index::lookup_constant(Context ctx, SString cnsName) const {
+  auto constants = find_range(m_data->constants, cnsName);
+  if (begin(constants) == end(constants) ||
+      std::next(begin(constants)) != end(constants)) {
+    return TInitCell;
   }
 
-  if (acc->second.func &&
-      !acc->second.readonly &&
-      !acc->second.system &&
-      !tv(acc->second.type)) {
-    // we might refine the type
-    add_dependency(*m_data, acc->second.func, ctx, Dep::ConstVal);
+  auto constant = begin(constants)->second;
+  if (type(constant->val) != KindOfUninit) {
+    return from_cell(constant->val);
   }
 
-  return acc->second.type;
-}
+  auto const func_name = Constant::funcNameFromName(cnsName);
+  assertx(func_name && "func_name will never be nullptr");
 
-folly::Optional<TypedValue> Index::lookup_persistent_constant(SString cnsName) const {
-  ConstInfoConcurrentMap::const_accessor acc;
-  if (!m_data->constants.find(acc, cnsName)) return folly::none;
-  return tv(acc->second.type);
+  auto rfunc = resolve_func(ctx, func_name);
+  return lookup_return_type(ctx, rfunc, Dep::ConstVal);
 }
 
 bool Index::func_depends_on_arg(const php::Func* func, int arg) const {
@@ -5442,17 +5440,17 @@ Type Index::lookup_foldable_return_type(Context ctx,
   return contextType;
 }
 
-Type Index::lookup_return_type(Context ctx, res::Func rfunc) const {
+Type Index::lookup_return_type(Context ctx, res::Func rfunc, Dep dep) const {
   return match<Type>(
     rfunc.val,
     [&](res::Func::FuncName)   { return TInitCell; },
     [&](res::Func::MethodName) { return TInitCell; },
     [&](FuncInfo* finfo) {
-      add_dependency(*m_data, finfo->func, ctx, Dep::ReturnTy);
+      add_dependency(*m_data, finfo->func, ctx, dep);
       return unctx(finfo->returnTy);
     },
     [&](const MethTabEntryPair* mte) {
-      add_dependency(*m_data, mte->second.func, ctx, Dep::ReturnTy);
+      add_dependency(*m_data, mte->second.func, ctx, dep);
       auto const finfo = func_info(*m_data, mte->second.func);
       if (!finfo->func) return TInitCell;
       return unctx(finfo->returnTy);
@@ -5460,7 +5458,7 @@ Type Index::lookup_return_type(Context ctx, res::Func rfunc) const {
     [&](FuncFamily* fam) {
       auto ret = TBottom;
       for (auto const pf : fam->possibleFuncs()) {
-        add_dependency(*m_data, pf->second.func, ctx, Dep::ReturnTy);
+        add_dependency(*m_data, pf->second.func, ctx, dep);
         auto const finfo = func_info(*m_data, pf->second.func);
         if (!finfo->func) return TInitCell;
         ret |= unctx(finfo->returnTy);
@@ -5472,7 +5470,8 @@ Type Index::lookup_return_type(Context ctx, res::Func rfunc) const {
 Type Index::lookup_return_type(Context caller,
                                const CompactVector<Type>& args,
                                const Type& context,
-                               res::Func rfunc) const {
+                               res::Func rfunc,
+                               Dep dep) const {
   return match<Type>(
     rfunc.val,
     [&](res::Func::FuncName) {
@@ -5482,12 +5481,12 @@ Type Index::lookup_return_type(Context caller,
       return lookup_return_type(caller, rfunc);
     },
     [&](FuncInfo* finfo) {
-      add_dependency(*m_data, finfo->func, caller, Dep::ReturnTy);
+      add_dependency(*m_data, finfo->func, caller, dep);
       return context_sensitive_return_type(*m_data,
                                            { finfo->func, args, context });
     },
     [&](const MethTabEntryPair* mte) {
-      add_dependency(*m_data, mte->second.func, caller, Dep::ReturnTy);
+      add_dependency(*m_data, mte->second.func, caller, dep);
       auto const finfo = func_info(*m_data, mte->second.func);
       if (!finfo->func) return TInitCell;
       return context_sensitive_return_type(*m_data,
@@ -5496,7 +5495,7 @@ Type Index::lookup_return_type(Context caller,
     [&] (FuncFamily* fam) {
       auto ret = TBottom;
       for (auto& pf : fam->possibleFuncs()) {
-        add_dependency(*m_data, pf->second.func, caller, Dep::ReturnTy);
+        add_dependency(*m_data, pf->second.func, caller, dep);
         auto const finfo = func_info(*m_data, pf->second.func);
         if (!finfo->func) ret |= TInitCell;
         else ret |= return_with_context(finfo->returnTy, context);
@@ -5878,68 +5877,24 @@ void Index::refine_class_constants(
 void Index::refine_constants(const FuncAnalysisResult& fa,
                              DependencyContextSet& deps) {
   auto const func = fa.ctx.func;
-  for (auto const& it : fa.cnsMap) {
-    if (it.second.m_type == kReadOnlyConstant) {
-      // this constant was read, but there was nothing mentioning it
-      // in the index. Should only happen on the first iteration. We
-      // need to reprocess this func.
-      assert(fa.readsUntrackedConstants);
-      // if there's already an entry, we don't want to do anything,
-      // otherwise just insert a dummy entry to indicate that it was
-      // read.
-      ConstInfoConcurrentMap::accessor acc;
-      if (m_data->constants.insert(acc, it.first)) {
-        acc->second = ConstInfo {func, TInitCell, false, true};
-      }
-      continue;
-    }
+  if (func->cls != nullptr) return;
 
-    if (it.second.m_type == kDynamicConstant || !is_pseudomain(func)) {
-      // two definitions, or a non-pseuodmain definition
-      ConstInfoConcurrentMap::accessor acc;
-      m_data->constants.insert(acc, it.first);
-      auto& c = acc->second;
-      if (!c.system) {
-        c.func = nullptr;
-        c.type = TInitCell;
-        c.readonly = false;
-      }
-      continue;
-    }
+  auto const val = tv(fa.inferredReturn);
+  if (!val) return;
 
-    auto t = it.second.m_type == KindOfUninit ?
-      TInitCell : from_cell(it.second);
+  auto const cns_name = Constant::nameFromFuncName(func->name);
+  if (!cns_name) return;
 
-    assertx(t.equivalentlyRefined(unctx(t)));
-
-    ConstInfoConcurrentMap::accessor acc;
-    if (m_data->constants.insert(acc, it.first)) {
-      acc->second = ConstInfo {func, t};
-      continue;
-    }
-
-    if (acc->second.system) continue;
-
-    if (acc->second.readonly) {
-      acc->second.func = func;
-      acc->second.type = t;
-      acc->second.readonly = false;
-      continue;
-    }
-
-    if (acc->second.func != func) {
-      acc->second.func = nullptr;
-      acc->second.type = TInitCell;
-      continue;
-    }
-
-    assertx(t.moreRefined(acc->second.type));
-    if (!t.equivalentlyRefined(acc->second.type)) {
-      acc->second.type = t;
-      find_deps(*m_data, func, Dep::ConstVal, deps);
-    }
-  }
-  if (fa.readsUntrackedConstants) deps.emplace(dep_context(*m_data, fa.ctx));
+  auto& cs = fa.ctx.unit->constants;
+  auto it = std::find_if(
+    cs.begin(),
+    cs.end(),
+    [&] (auto const& c) {
+      return cns_name->same(c->name);
+    });
+  assertx(it != cs.end() && "Did not find constant");
+  (*it)->val = val.value();
+  find_deps(*m_data, func, Dep::ConstVal, deps);
 }
 
 void Index::fixup_return_type(const php::Func* func,

@@ -28,7 +28,7 @@ use oxidized::{
 use rx_rust as rx;
 use unique_list_rust::UniqueList;
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum HoistKind {
     /// Def that is already at top-level
     TopLevel,
@@ -1077,7 +1077,7 @@ fn flatten_ns(defs: &mut Program) -> Program {
         .collect()
 }
 
-pub fn convert_toplevel_prog(e: &mut Emitter, defs: &mut Program) {
+pub fn convert_toplevel_prog(e: &mut Emitter, defs: &mut Program) -> Vec<HoistKind> {
     let empty_namespace = namespace_env::Env::empty(vec![], false, false);
     if e.options()
         .hack_compiler_flags
@@ -1145,12 +1145,11 @@ pub fn convert_toplevel_prog(e: &mut Emitter, defs: &mut Program) {
     *defs = new_defs;
     hoist_toplevel_functions(defs);
 
-    defs.extend(
-        visitor
-            .state
-            .hoisted_classes
-            .into_iter()
-            .map(|x| Def::mk_class(x)),
-    );
-    *e.emit_state_mut() = visitor.state.global_state
+    let mut hoist_kinds = defs.iter().map(|_| HoistKind::TopLevel).collect::<Vec<_>>();
+    for class in visitor.state.hoisted_classes.into_iter() {
+        defs.push(Def::mk_class(class));
+        hoist_kinds.push(HoistKind::Hoisted);
+    }
+    *e.emit_state_mut() = visitor.state.global_state;
+    hoist_kinds
 }

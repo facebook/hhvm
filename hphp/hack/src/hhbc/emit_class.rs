@@ -698,17 +698,14 @@ pub fn emit_class<'a>(
 
 pub fn emit_classes_from_program<'a>(
     emitter: &mut Emitter,
+    hoist_kinds: Vec<closure_convert::HoistKind>,
     tast: &'a tast::Program,
 ) -> Result<Vec<HhasClass<'a>>> {
     tast.iter()
-        .filter_map(|x| {
-            if let tast::Def::Class(cd) = x {
-                Some(emit_class(
-                    emitter,
-                    cd,
-                    // TODO(hrust): pass the real hoist kind
-                    closure_convert::HoistKind::TopLevel,
-                ))
+        .zip(hoist_kinds)
+        .filter_map(|(class, hoist_kind)| {
+            if let tast::Def::Class(cd) = class {
+                Some(emit_class(emitter, cd, hoist_kind))
             } else {
                 None
             }

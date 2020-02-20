@@ -149,10 +149,12 @@ pub fn emit_function<'a>(
 
 pub fn emit_functions_from_program<'a>(
     e: &mut Emitter,
-    prog: Vec<(HoistKind, &'a tast::Def)>,
+    hoist_kinds: Vec<HoistKind>,
+    prog: &'a tast::Program,
 ) -> Result<Vec<HhasFunction<'a>>> {
-    Ok(prog
+    Ok(hoist_kinds
         .into_iter()
+        .zip(prog)
         .filter_map(|(hoist_kind, d)| d.as_fun().map(|f| emit_function(e, f, hoist_kind)))
         .collect::<Result<Vec<Vec<_>>>>()?
         .into_iter()

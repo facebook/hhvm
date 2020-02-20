@@ -81,21 +81,17 @@ fn emit_program_<'p>(
     prog: &'p mut Tast::Program,
 ) -> Result<HhasProgram<'p>> {
     let mut emitter = Emitter::new(options);
-    closure_convert::convert_toplevel_prog(&mut emitter, prog);
+    let hoist_kinds = closure_convert::convert_toplevel_prog(&mut emitter, prog);
     emitter
         .context_mut()
         .set_systemlib(flags.contains(FromAstFlags::IS_SYSTEMLIB));
 
-    let ast_defs = prog
-        .iter()
-        .map(|d| (closure_convert::HoistKind::TopLevel, d))
-        .collect::<Vec<_>>();
     let main = emit_main(&mut emitter, flags, namespace, prog)?;
     let record_defs = emit_record_defs_from_program(&mut emitter, prog)?;
-    let classes = emit_classes_from_program(&mut emitter, prog)?;
     let file_attributes = emit_file_attributes_from_program(&mut emitter, prog)?;
-    let functions = emit_functions_from_program(&mut emitter, ast_defs)?;
     let typedefs = emit_typedefs_from_program(&mut emitter, prog)?;
+    let classes = emit_classes_from_program(&mut emitter, hoist_kinds.clone(), prog)?;
+    let functions = emit_functions_from_program(&mut emitter, hoist_kinds, prog)?;
 
     Ok(HhasProgram {
         main,

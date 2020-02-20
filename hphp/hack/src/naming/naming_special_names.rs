@@ -218,6 +218,8 @@ pub mod user_attributes {
 
     pub const RETURN_DISPOSABLE: &str = "__ReturnDisposable";
 
+    pub const PURE: &str = "__Pure";
+
     pub const REACTIVE: &str = "__Rx";
 
     pub const LOCAL_REACTIVE: &str = "__RxLocal";
@@ -285,6 +287,7 @@ pub mod user_attributes {
             HIPHOP_SPECIFIC,
             ACCEPT_DISPOSABLE,
             RETURN_DISPOSABLE,
+            PURE,
             REACTIVE,
             LOCAL_REACTIVE,
             MUTABLE,
@@ -754,6 +757,8 @@ pub mod rx {
 
     pub const MOVE: &str = "\\HH\\Rx\\move";
 
+    pub const PURE: &str = "Pure";
+
     pub const RX: &str = "Rx";
 
     pub const RX_LOCAL: &str = "RxLocal";
@@ -772,6 +777,7 @@ pub mod rx {
 
         lazy_static! {
             static ref REACTIVE_TYPEHINTS: HashSet<&'static str> = vec![
+                PURE,
                 RX,
                 RX_LOCAL,
                 RX_SHALLOW,

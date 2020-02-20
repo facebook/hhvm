@@ -476,7 +476,7 @@ pub const type_alias_to_type_constant: Error =
 pub const interface_with_memoize: Error =
     Cow::Borrowed("Memoize is not allowed on interface methods");
 pub const multiple_reactivity_annotations: Error = Cow::Borrowed(
-    "Only one of following annotations is allowed: __Rx, __RxShallow, __RxLocal, __NonRx.",
+    "Only one of following annotations is allowed: __Pure, __Rx, __RxShallow, __RxLocal, __NonRx.",
 );
 pub const functions_cannot_implement_reactive: Error =
     Cow::Borrowed("__OnlyRxIfImpl annotations are only valid on class methods.");

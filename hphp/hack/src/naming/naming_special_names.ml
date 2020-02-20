@@ -238,6 +238,8 @@ module UserAttributes = struct
 
   let uaReturnDisposable = "__ReturnDisposable"
 
+  let uaPure = "__Pure"
+
   let uaReactive = "__Rx"
 
   let uaLocalReactive = "__RxLocal"

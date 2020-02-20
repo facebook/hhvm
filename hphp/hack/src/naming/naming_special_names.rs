@@ -731,12 +731,6 @@ pub mod fb {
 }
 
 pub mod hh {
-    pub const ASIO_VA: &str = "\\HH\\Asio\\va";
-
-    pub const LIB_TUPLE_FROM_ASYNC: &str = "\\HH\\Lib\\Tuple\\from_async";
-
-    pub const LIB_TUPLE_GEN: &str = "\\HH\\Lib\\Tuple\\gen";
-
     pub const CONTAINS: &str = "\\HH\\Lib\\C\\contains";
 
     pub const CONTAINS_KEY: &str = "\\HH\\Lib\\C\\contains_key";

@@ -647,12 +647,6 @@ module FB = struct
 end
 
 module HH = struct
-  let asio_va = "\\HH\\Asio\\va"
-
-  let lib_tuple_from_async = "\\HH\\Lib\\Tuple\\from_async"
-
-  let lib_tuple_gen = "\\HH\\Lib\\Tuple\\gen"
-
   let contains = "\\HH\\Lib\\C\\contains"
 
   let contains_key = "\\HH\\Lib\\C\\contains_key"

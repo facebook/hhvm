@@ -6,5 +6,5 @@
  * vector like).
  */
 function test(): array<int> {
-  return array_filter(array(1, 2, 3));
+  return array_filter(varray[1, 2, 3]);
 }

@@ -4,5 +4,5 @@
 function foo() {}
 
 function f() {
-  array_map(fun('foo'), array());
+  array_map(fun('foo'), varray[]);
 }

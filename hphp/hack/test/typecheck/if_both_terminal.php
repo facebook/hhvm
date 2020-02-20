@@ -13,7 +13,7 @@ function g(int $x): void {}
 
 function f(): void {
   $x = 2;
-  foreach (array() as $_) {
+  foreach (varray[] as $_) {
     g($x);
 
     if (true) {

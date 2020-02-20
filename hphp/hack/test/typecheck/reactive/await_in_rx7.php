@@ -7,6 +7,6 @@ async function f(): Awaitable<int> {
 
 async function g(): Awaitable<void> {
   // OK
-  $l = array(f(), f());
+  $l = varray[f(), f()];
   $a = await gena($l);
 }

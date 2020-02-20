@@ -37,7 +37,7 @@ function foreach_loop_3(array<int> $arr): int {
 
 function foreach_loop_kv_1(array<string, int> $arr): int {
   $sum = 0;
-  $lol = array();
+  $lol = varray[];
   foreach ($arr as $k => $x) {
     echo $k, "\n";
     $sum += $x;
@@ -46,12 +46,12 @@ function foreach_loop_kv_1(array<string, int> $arr): int {
 }
 
 function test(): void {
-  $test_vecs = array(
-    array(1,2,3,4),
-    array(1,2,-2,3,4),
-    array(1,2,-1,3,4),
-    array(1,2,-3,3,4)
-  );
+  $test_vecs = varray[
+    varray[1,2,3,4],
+    varray[1,2,-2,3,4],
+    varray[1,2,-1,3,4],
+    varray[1,2,-3,3,4]
+  ];
 
 
   foreach ($test_vecs as $test) {
@@ -60,9 +60,9 @@ function test(): void {
     var_dump(foreach_loop_3($test));
   }
 
-  $test_vecs = array(
-    array('a' => 1, 'b' => 2, 'c' => 3, 'd' => 4),
-  );
+  $test_vecs = varray[
+    darray['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4],
+  ];
   foreach ($test_vecs as $test) {
     var_dump(foreach_loop_kv_1($test));
   }

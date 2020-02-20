@@ -3,7 +3,7 @@
 function f(string $foo): void {}
 
 function test(): void {
-  $args = array();
+  $args = varray[];
   // arity error
   f('string', ...$args);
 }

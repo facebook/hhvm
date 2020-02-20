@@ -5,7 +5,7 @@
  */
 
 function test(): void {
-  $a = array();
+  $a = darray[];
   $a['k1'] = 4;
   $a['k2'] = 'aaa';
   take_string($a['k1']);

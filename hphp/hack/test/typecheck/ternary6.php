@@ -20,6 +20,6 @@ function f($x, Foo $y) {
    * to creating a Tunion if unification failed; this would hide errors
    * like the one below.
    */
-  $a = $x ? array(g()) : $y->h();
+  $a = $x ? varray[g()] : $y->h();
   takes_string($a[0]);
 }

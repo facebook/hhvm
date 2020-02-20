@@ -19,7 +19,7 @@ async function f(): Awaitable<void> {
   if (true) {
     $x = any();
   } else {
-    $x = cached_result(array(1, false));
+    $x = cached_result(varray[1, false]);
   }
 
   $x = await $x;

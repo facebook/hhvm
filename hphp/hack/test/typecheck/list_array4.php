@@ -12,7 +12,7 @@
 function g(int $i): void {}
 
 function get_untyped_val() {
-  return array(1, 2);
+  return varray[1, 2];
 }
 
 function f(array $x): void {

@@ -2,7 +2,7 @@
 
 <<Foo('hi')>>
 class C {
-  <<Foo(array(1000),6), Bar('lel'), Baz(7)>>
+  <<Foo(varray[1000],6), Bar('lel'), Baz(7)>>
   public function foo(int $n): void {}
 }
 

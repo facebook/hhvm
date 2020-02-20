@@ -11,11 +11,11 @@
 
 function f() {}
 
-function getArr(): array<int> { return array(); }
+function getArr(): array<int> { return varray[]; }
 
 function g(): void {
   $a = getArr();
-  $b = array();
+  $b = varray[];
   $idx = f();
 
   // not entirely sure why, but this if statement is needed to trigger an error

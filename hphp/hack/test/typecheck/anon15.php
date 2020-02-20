@@ -10,8 +10,8 @@
  */
 
 $foo = function(array<string, mixed> $rel): array<string, mixed> {
-  return array(
+  return darray[
     'id'       => $rel['id'],
     'relation' => $rel['relation_type'],
-  );
+  ];
 };

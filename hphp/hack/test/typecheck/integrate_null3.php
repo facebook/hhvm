@@ -10,7 +10,7 @@
  */
 
 function get_arr(): array<?int> {
-  return array(1, null, 2);
+  return varray[1, null, 2];
 }
 
 function f(int $x) {}

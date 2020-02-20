@@ -10,7 +10,7 @@
  */
 
 function get_arr(): array<int> {
-  return array(1, 2, 3);
+  return varray[1, 2, 3];
 }
 
 function use_arr(array<mixed> $arr): void {

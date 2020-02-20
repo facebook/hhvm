@@ -2,7 +2,7 @@
 
 /* HH_IGNORE_ERROR[4101] */
 function foo(KeyedContainer $_): void {
-  foo(array());
+  foo(varray[]);
   foo(varray[]);
   foo(darray[]);
   foo(darray[1 => 2]);

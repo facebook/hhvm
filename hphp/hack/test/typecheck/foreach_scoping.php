@@ -11,7 +11,7 @@
 
 function test_func(): int {
   $var = null;
-  foreach (array() as $_) {
+  foreach (varray[] as $_) {
     $var = 1;
   }
   return $var; // this should be type `int & ?_`, but hack thinks it's `int`

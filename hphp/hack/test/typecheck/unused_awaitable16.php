@@ -5,6 +5,6 @@ async function f(): Awaitable<string> {
 }
 
 async function g(): Awaitable<void> {
-  $gens = array('a' => f(), 'b' => f(), 'c' => f());
+  $gens = darray['a' => f(), 'b' => f(), 'c' => f()];
   $gens = array_map($item ==> (bool)$item, $gens);
 }

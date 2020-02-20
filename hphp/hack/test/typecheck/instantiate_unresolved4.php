@@ -14,7 +14,7 @@ function foo<T>(mixed $x): array<T> {
 }
 
 function a<T>(): array<T> {
-  return array();
+  return varray[];
 }
 
 function f(): void {

@@ -12,6 +12,6 @@
 class C {}
 
 function f(): void {
-  $a = array('foo' => 'C');
+  $a = darray['foo' => 'C'];
   new $a['foo']();
 }

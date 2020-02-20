@@ -13,7 +13,7 @@
 class Test {
   public function bloo() {
     $b = 5;
-    $map = array();
+    $map = darray[];
     {
       // UNSAFE
       $map['a'] = $b;

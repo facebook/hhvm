@@ -40,7 +40,7 @@ function dump_func(string $name): void {
 function dump_class(string $name): void {
   /* HH_FIXME[2049] */
   $cls = new ReflectionClass($name);
-  $a = array();
+  $a = darray[];
   foreach ($cls->getMethods() as $meth) $a[$meth->getShortName()] = $meth;
   /* HH_FIXME[2049] */
   /* HH_FIXME[4107] */

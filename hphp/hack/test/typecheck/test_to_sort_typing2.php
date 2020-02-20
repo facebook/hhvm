@@ -82,7 +82,7 @@ function g($x){
 */
 
 function g($x){
-  $x = array('gg' => 0);
+  $x = darray['gg' => 0];
 
   if (true) {
     $x['d'] = 0;

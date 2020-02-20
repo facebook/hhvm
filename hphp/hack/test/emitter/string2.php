@@ -8,7 +8,7 @@ function test(): void {
   echo "$x$y";
   echo "a $x b $y c\n";
   echo "{btyfd\n";
-  $a = array(10,20);
+  $a = varray[10,20];
   echo "{$a[0]}\n";
   echo "{ { {";
   echo "\n";

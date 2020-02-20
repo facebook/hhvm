@@ -10,9 +10,9 @@
  */
 
 function test(): void {
-  $x = array('k' => 0, 'k2' => my_php_function());
+  $x = darray['k' => 0, 'k2' => my_php_function()];
   $x['k2'][0] = 0;
-  $y = array(0, my_php_function());
+  $y = varray[0, my_php_function()];
 
   $index = 0;
   $y[$index] = 0; // force conversion from tuple-like to vec-like

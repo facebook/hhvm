@@ -34,5 +34,5 @@ function call_test3(): int {
 }
 
 function direct_call(): string {
-  return (new Foo())->call('batman', array());
+  return (new Foo())->call('batman', varray[]);
 }

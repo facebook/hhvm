@@ -34,7 +34,7 @@ function wait(): Awaitable<void> {
 class Argh {
   public static async function afoo(int $x): Awaitable<void> {
     await wait();
-    $a = array($x, $x+1, $x+2);
+    $a = varray[$x, $x+1, $x+2];
     $y = await gena_(array_map(async $y ==> $x * $x * $y + foo($x), $a));
     var_dump($y);
   }
@@ -52,12 +52,12 @@ async function gena_<Tk, Tv>(
 
 async function lurr(): Awaitable<void> {
   $i = 12;
-  await gena_(array(Argh::afoo(100),
+  await gena_(varray[Argh::afoo(100),
                     async {
                       await wait();
                       return await Argh::afoo($i);
                     }
-                   ));
+                   ]);
 }
 
 final class C2 {

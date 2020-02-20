@@ -6,7 +6,7 @@
  */
 
 function test(): void {
-  $a = array('aaa', 4);
+  $a = varray['aaa', 4];
 
   take_traversable($a);
   take_container($a);

@@ -8,7 +8,7 @@ class bar {
   public function foo() {
     return array_map(
       $y ==> $this->x,
-      array(1,2,3,4)
+      varray[1,2,3,4]
     );
   }
 

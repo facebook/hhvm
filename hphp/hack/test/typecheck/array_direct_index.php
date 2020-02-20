@@ -11,12 +11,12 @@
 
 class Toto {
   public static function f1(): float {
-    $x = array(5 => 5.0);
+    $x = darray[5 => 5.0];
     return $x[5];
   }
 
   public static function f2(): float {
-    return (array(5 => 5.0))[5];
+    return (darray[5 => 5.0])[5];
   }
 
   public static function f3(): float {

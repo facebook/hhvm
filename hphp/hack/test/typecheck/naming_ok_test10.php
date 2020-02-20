@@ -36,11 +36,11 @@ class BirthdayStoryPreparable extends Preparable {
             $this->viewerContext,
             $this->userIDs,
             $this->users,
-            array(
+            varray[
               Ent::load('BasicInfo'),
               Ent::load('Birthday'),
               Ent::load('ProfilePic', PicSizeConst::SQUARE),
-            ),
+            ],
           ),
         );
 

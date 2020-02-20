@@ -71,8 +71,8 @@ function testMapArray(string $key): void {
 
   $m = new MyContainer();
 
-  $m->setMapArray(array($key => $x[0]));
-  $m->setMapArray(array($key => $y[0]));
+  $m->setMapArray(darray[$key => $x[0]]);
+  $m->setMapArray(darray[$key => $y[0]]);
 
   take_int($x[0]);
 }
@@ -83,8 +83,8 @@ function testVectorArray(): void {
 
   $m = new MyContainer();
 
-  $m->setVectorArray(array($x[0]));
-  $m->setVectorArray(array($y[0]));
+  $m->setVectorArray(varray[$x[0]]);
+  $m->setVectorArray(varray[$y[0]]);
 
   take_int($x[0]);
 }
@@ -107,8 +107,8 @@ function testShapeLikeArray(): void {
 
   $m = new MyContainer();
 
-  $m->setMapArray(array('x' => $x[0]));
-  $m->setMapArray(array('x' => $y[0]));
+  $m->setMapArray(darray['x' => $x[0]]);
+  $m->setMapArray(darray['x' => $y[0]]);
 
   take_int($x[0]);
 }

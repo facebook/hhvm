@@ -77,7 +77,7 @@ function sorted<T>(
 }
 
 function TestSort():void {
-  $v = sorted(array(),
+  $v = sorted(varray[],
               function ($x, $y) { hh_show($x); hh_show($y); return $x - $y; });
 }
 

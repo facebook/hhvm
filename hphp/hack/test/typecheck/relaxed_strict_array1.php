@@ -3,7 +3,7 @@
 
 class Foo {
   public static function bar(): array {
-    return array();
+    return varray[];
   }
 
   public static function duck() {

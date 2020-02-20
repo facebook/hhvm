@@ -2,10 +2,10 @@
 
 function foo(): array<string> {
   echo "foo\n";
-  return array('hello', 'world');
+  return varray['hello', 'world'];
 }
 function foo2(): array<array<string>> {
-  return array(array(), foo());
+  return varray[varray[], foo()];
 }
 
 function unpack1(): void {
@@ -28,7 +28,7 @@ function f(int $x): int {
 }
 
 function unpack3(): void {
-  $x = array();
+  $x = darray[];
   list($x[f(0)], $x[f(1)]) = foo();
   var_dump($x);
 }

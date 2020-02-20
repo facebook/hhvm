@@ -16,7 +16,7 @@ function testmap(): Map<arraykey, mixed> {
 }
 
 function testarray(): array<mixed, int> {
-  $a = array("s" => 1, "t" => 2);
+  $a = darray["s" => 1, "t" => 2];
   $a[2] = 100;
   return $a;
 }

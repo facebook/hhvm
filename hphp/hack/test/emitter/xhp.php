@@ -42,7 +42,7 @@ abstract class :base {
 
   protected static function __xhpAttributeDeclaration():
     array<string, array<int, mixed>> {
-    return array();
+    return darray[];
   }
   public static function xhpAttributeDeclaration():
     array<string, array<int, mixed>> {
@@ -50,7 +50,7 @@ abstract class :base {
   }
 
   protected function __xhpCategoryDeclaration(): array<string, int> {
-    return array();
+    return darray[];
   }
   public static function xhpCategoryDeclaration(): array<string, int> {
     /* HH_FIXME[4090]: __xhpCategoryDeclaration ought to be static but is not.

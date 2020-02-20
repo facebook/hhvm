@@ -1,7 +1,7 @@
 <?hh // partial
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function dyn(): dynamic { return array(4, 5, 6); }
+function dyn(): dynamic { return varray[4, 5, 6]; }
 
 // not all HHVM arrays are considered varray_or_darray,
 // so dynamic ~> varray_or_darray is invalid

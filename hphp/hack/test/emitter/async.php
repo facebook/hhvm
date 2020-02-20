@@ -27,12 +27,12 @@ async function foo1(): Awaitable<int> {
 }
 
 async function foo2(): Awaitable<int> {
-  list($x, $y) = await gena_(array(genNum(f(1)), genNum(f(2))));
+  list($x, $y) = await gena_(varray[genNum(f(1)), genNum(f(2))]);
   return $x + $y;
 }
 
 async function foo3(): Awaitable<array<int, int>> {
-  $nus = array();
+  $nus = darray[];
   $nus[f(0)] = await genNum2(f(1), f(2));
   return $nus;
 }

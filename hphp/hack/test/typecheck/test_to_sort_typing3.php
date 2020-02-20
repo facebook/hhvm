@@ -22,7 +22,7 @@ class A {
 
   public function main($a) {
     $x = $this->myfun($a);
-    $t = array('e' => 1);
+    $t = darray['e' => 1];
     $z = $t['f'];
   }
 }

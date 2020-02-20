@@ -3,7 +3,7 @@
 function function_scope() {
   // Shouldn't try to capture $k
   $bar = () ==> {
-    foreach (array(1,2,3,4) as $k) {
+    foreach (varray[1,2,3,4] as $k) {
       var_dump($k);
     }
   };

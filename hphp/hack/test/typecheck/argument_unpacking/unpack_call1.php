@@ -34,7 +34,7 @@ function make_str_args(): Vector<string> {
 }
 
 function test_basic(): void {
-  $args = array(1, 2, 3);
+  $args = varray[1, 2, 3];
   f(...$args);
   $inst = new C1(...$args);
   $inst->f(...$args);
@@ -65,7 +65,7 @@ function test_basic(): void {
 
 function test_limitations() {
   // fails at runtime, but we don't track array arity!
-  $args = array();
+  $args = darray[];
   f(...$args);
 
   // fails at runtime, but we don't ensure that container doesn't have
@@ -77,7 +77,7 @@ function test_limitations() {
   $args = Map { 'a' => 1, 'b' => 2, };
   f(1, ...$args);
 
-  $args = array( 'a' => 1, 'b' => 2 );
+  $args = darray[ 'a' => 1, 'b' => 2 ];
   f(1, ...$args);
 
   // fails at runtime, but we don't unpack the container's content type

@@ -10,6 +10,6 @@
  */
 
 function test(): void {
-  $x = array('foo' => 1);
-  $y = array(0 => 1);
+  $x = darray['foo' => 1];
+  $y = darray[0 => 1];
 }

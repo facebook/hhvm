@@ -76,7 +76,7 @@ function indexing(array<array<int>> $x): int {
 }
 
 function make_array(): array<int> {
-  $x = array();
+  $x = varray[];
   $x[] = 5;
   $x[] = 4;
   $x[] = 12;
@@ -86,10 +86,10 @@ function make_array(): array<int> {
 }
 
 function interesting_array(int $x): array<int> {
-  return array(0, $x, 1);
+  return varray[0, $x, 1];
 }
 function interesting_kv_array(int $x): array<string, int> {
-  return array('a' => 0, 'b' => $x, 'c' => 1);
+  return darray['a' => 0, 'b' => $x, 'c' => 1];
 }
 
 function if_conditional1(int $x): string {
@@ -215,7 +215,7 @@ interface INus {
 function nus(): Nus {
   $y = new Nus();
   $z = 1;
-  $za = array(0);
+  $za = varray[0];
   var_dump($y->foo(0, 1));
   var_dump($y->bar($za[0]));
   var_dump($y->bar($z));

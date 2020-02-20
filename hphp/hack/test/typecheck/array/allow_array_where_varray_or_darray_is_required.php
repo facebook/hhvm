@@ -4,7 +4,7 @@
 function expect_untyped_varray_or_darray(varray_or_darray $x): void {}
 
 function return_untyped_array(): array {
-  return array();
+  return varray[];
 }
 
 function main(): void {

@@ -6,7 +6,7 @@
  */
 
 function test(): void {
-  $a = array(4, 3.14);
+  $a = varray[4, 3.14];
 
   foreach ($a as $v) {
     take_num($v);

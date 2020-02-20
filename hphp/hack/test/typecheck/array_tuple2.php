@@ -11,7 +11,7 @@
 
 function expect_arraykey(arraykey $ak):void { }
 function test(): void {
-  $array = array(array('', 0), array('', 0));
+  $array = varray[varray['', 0], varray['', 0]];
 
   foreach ($array as $update) {
     $index = 1;

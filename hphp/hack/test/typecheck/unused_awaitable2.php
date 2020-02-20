@@ -13,7 +13,7 @@ abstract class C {
   public async function gen(): Awaitable<void> {}
 
   public function f(): void {
-    foreach (array() as $_) {
+    foreach (varray[] as $_) {
     }
     $this->gen();
   }

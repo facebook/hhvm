@@ -14,6 +14,6 @@ class B extends A {}
 class C extends A {}
 
 function test($x): array<int, A> {
-  $v = array(0 => new A(), 1 => new B(), 2 => new C());
+  $v = darray[0 => new A(), 1 => new B(), 2 => new C()];
   return $v;
 }

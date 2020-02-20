@@ -10,6 +10,6 @@
  */
 
 function test(): void {
-  $v = array(0, 1);
+  $v = varray[0, 1];
   $v[1] = 1;
 }

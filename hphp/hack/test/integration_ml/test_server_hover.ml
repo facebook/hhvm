@@ -1037,12 +1037,10 @@ let test () =
           Printf.sprintf "%s:%d:%d: [%s]" file line column inner
         in
         let path = Relative_path.from_root file in
-        let file_input = ServerCommandTypes.FileName ("/" ^ file) in
         let (ctx, entry) =
-          Provider_utils.update_context
+          Provider_utils.add_entry
             ~ctx:(Provider_utils.ctx_from_server_env env)
             ~path
-            ~file_input
         in
         let hover =
           Provider_utils.respect_but_quarantine_unsaved_changes

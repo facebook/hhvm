@@ -442,70 +442,69 @@ let go ctx action genv env =
            ~f:(fun patch -> patch :: changes))
 
 let go_ide ctx (filename, line, column) new_name genv env =
-  SymbolDefinition.(
-    let (ctx, entry) =
-      Provider_utils.update_context
-        ~ctx
-        ~path:(Relative_path.create_detect_prefix filename)
-        ~file_input:(ServerCommandTypes.FileName filename)
-    in
-    let file_content =
-      entry.Provider_context.source_text.Full_fidelity_source_text.text
-    in
-    let definitions =
-      ServerIdentifyFunction.go_quarantined_absolute ~ctx ~entry ~line ~column
-    in
-    match definitions with
-    | [(_, Some definition)] ->
-      let { full_name; kind; _ } = definition in
-      let pieces = Str.split (Str.regexp "::") full_name in
-      (match (kind, pieces) with
-      | (Function, [function_name]) ->
-        let command =
-          ServerRefactorTypes.FunctionRename
-            {
-              filename = Some filename;
-              definition = Some definition;
-              old_name = function_name;
-              new_name;
-            }
-        in
-        Ok (go ctx command genv env)
-      | (Enum, [enum_name]) ->
-        let command = ServerRefactorTypes.ClassRename (enum_name, new_name) in
-        Ok (go ctx command genv env)
-      | (Class, [class_name]) ->
-        let command = ServerRefactorTypes.ClassRename (class_name, new_name) in
-        Ok (go ctx command genv env)
-      | (Const, [class_name; const_name]) ->
-        let command =
-          ServerRefactorTypes.ClassConstRename (class_name, const_name, new_name)
-        in
-        Ok (go ctx command genv env)
-      | (Method, [class_name; method_name]) ->
-        let command =
-          ServerRefactorTypes.MethodRename
-            {
-              filename = Some filename;
-              definition = Some definition;
-              class_name;
-              old_name = method_name;
-              new_name;
-            }
-        in
-        Ok (go ctx command genv env)
-      | (LocalVar, _) ->
-        let command =
-          ServerRefactorTypes.LocalVarRename
-            {
-              filename = Relative_path.create_detect_prefix filename;
-              file_content;
-              line;
-              char = column;
-              new_name = maybe_add_dollar new_name;
-            }
-        in
-        Ok (go ctx command genv env)
-      | (_, _) -> Error "Tried to rename a non-renameable symbol")
-    (* We have 0 or >1 definitions so correct behavior is unknown *)
-    | _ -> Error "Tried to rename a non-renameable symbol")
+  let open SymbolDefinition in
+  let (ctx, entry) =
+    Provider_utils.add_entry
+      ~ctx
+      ~path:(Relative_path.create_detect_prefix filename)
+  in
+  let file_content =
+    entry.Provider_context.source_text.Full_fidelity_source_text.text
+  in
+  let definitions =
+    ServerIdentifyFunction.go_quarantined_absolute ~ctx ~entry ~line ~column
+  in
+  match definitions with
+  | [(_, Some definition)] ->
+    let { full_name; kind; _ } = definition in
+    let pieces = Str.split (Str.regexp "::") full_name in
+    (match (kind, pieces) with
+    | (Function, [function_name]) ->
+      let command =
+        ServerRefactorTypes.FunctionRename
+          {
+            filename = Some filename;
+            definition = Some definition;
+            old_name = function_name;
+            new_name;
+          }
+      in
+      Ok (go ctx command genv env)
+    | (Enum, [enum_name]) ->
+      let command = ServerRefactorTypes.ClassRename (enum_name, new_name) in
+      Ok (go ctx command genv env)
+    | (Class, [class_name]) ->
+      let command = ServerRefactorTypes.ClassRename (class_name, new_name) in
+      Ok (go ctx command genv env)
+    | (Const, [class_name; const_name]) ->
+      let command =
+        ServerRefactorTypes.ClassConstRename (class_name, const_name, new_name)
+      in
+      Ok (go ctx command genv env)
+    | (Method, [class_name; method_name]) ->
+      let command =
+        ServerRefactorTypes.MethodRename
+          {
+            filename = Some filename;
+            definition = Some definition;
+            class_name;
+            old_name = method_name;
+            new_name;
+          }
+      in
+      Ok (go ctx command genv env)
+    | (LocalVar, _) ->
+      let command =
+        ServerRefactorTypes.LocalVarRename
+          {
+            filename = Relative_path.create_detect_prefix filename;
+            file_content;
+            line;
+            char = column;
+            new_name = maybe_add_dollar new_name;
+          }
+      in
+      Ok (go ctx command genv env)
+    | (_, _) -> Error "Tried to rename a non-renameable symbol")
+  (* We have 0 or >1 definitions so correct behavior is unknown *)
+  | _ -> Error "Tried to rename a non-renameable symbol"

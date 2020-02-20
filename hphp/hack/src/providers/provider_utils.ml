@@ -122,7 +122,7 @@ let internal_load_entry
     symbols = None;
   }
 
-let update_context
+let add_entry_from_file_input
     ~(ctx : Provider_context.t)
     ~(path : Relative_path.t)
     ~(file_input : ServerCommandTypes.file_input) :
@@ -136,6 +136,19 @@ let update_context
     }
   in
   (ctx, entry)
+
+let add_entry ~(ctx : Provider_context.t) ~(path : Relative_path.t) :
+    Provider_context.t * Provider_context.entry =
+  let file_input =
+    ServerCommandTypes.FileName (Relative_path.to_absolute path)
+  in
+  add_entry_from_file_input ~ctx ~path ~file_input
+
+let add_entry_from_file_contents
+    ~(ctx : Provider_context.t) ~(path : Relative_path.t) ~(contents : string) :
+    Provider_context.t * Provider_context.entry =
+  let file_input = ServerCommandTypes.FileContent contents in
+  add_entry_from_file_input ~ctx ~path ~file_input
 
 let find_entry ~(ctx : Provider_context.t) ~(path : Relative_path.t) :
     Provider_context.entry option =

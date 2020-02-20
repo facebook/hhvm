@@ -15,7 +15,9 @@ let go file_input ctx =
     | FileName file_name -> Relative_path.create_detect_prefix file_name
     | FileContent _ -> Relative_path.default
   in
-  let (_ctx, entry) = Provider_utils.update_context ~ctx ~path ~file_input in
+  let (_ctx, entry) =
+    Provider_utils.add_entry_from_file_input ~ctx ~path ~file_input
+  in
   let { Provider_utils.Compute_tast_and_errors.errors; _ } =
     Provider_utils.compute_tast_and_errors_unquarantined ~ctx ~entry
   in

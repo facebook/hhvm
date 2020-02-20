@@ -342,17 +342,13 @@ let test () =
       let fmt = Printf.sprintf "%s:%d:%d %s" file line col in
       Test.assertEqual (fmt expected) (fmt ty_str)
     in
-    let fn = ServerCommandTypes.FileName ("/" ^ file) in
     let ctx =
       Provider_utils.ctx_from_server_env env
       |> Provider_context.map_tcopt ~f:(fun tcopt ->
              { tcopt with GlobalOptions.tco_dynamic_view = dynamic })
     in
     let (ctx, entry) =
-      Provider_utils.update_context
-        ~ctx
-        ~path:(Relative_path.from_root file)
-        ~file_input:fn
+      Provider_utils.add_entry ~ctx ~path:(Relative_path.from_root file)
     in
     let { Provider_utils.Compute_tast.tast; _ } =
       Provider_utils.compute_tast_unquarantined ~ctx ~entry

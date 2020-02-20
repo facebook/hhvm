@@ -39,10 +39,10 @@ let run
     || is_complete_class_member context
   then
     let (ctx, entry) =
-      Provider_utils.update_context
+      Provider_utils.add_entry_from_file_contents
         ~ctx
         ~path:(Relative_path.create_detect_prefix "")
-        ~file_input:(ServerCommandTypes.FileContent file_content)
+        ~contents:file_content
     in
     let ac_results =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->

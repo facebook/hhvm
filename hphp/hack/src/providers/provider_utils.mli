@@ -25,9 +25,34 @@ end
 contained within a [ServerEnv.env]. *)
 val ctx_from_server_env : ServerEnv.env -> Provider_context.t
 
-(** Compute the given AST for the given path, and return an updated [t]
-containing that entry. *)
-val update_context :
+(** Read the contents at [path] from disk and create a new
+[Provider_context.entry] representing that file. The returned
+[Provider_context.t] contains that new entry.
+
+If an [entry] is already present for the given [path], then this function
+overwrites that entry in the returned [Provider_context.t]. If you want to see
+if an entry already exists, you can use [Provider_utils.find_entry].
+
+It's important to pass around the resulting [Provider_context.t]. That way, if a
+subsequent operation tries to access data about the same file, it will be
+returned the same [entry]. *)
+val add_entry :
+  ctx:Provider_context.t ->
+  path:Relative_path.t ->
+  Provider_context.t * Provider_context.entry
+
+(** Same as [add_entry], but using the provided file contents. This is primarily
+useful in the IDE (which may have unsaved changes), or for testing (to pretend
+that a certain file exists on disk). *)
+val add_entry_from_file_contents :
+  ctx:Provider_context.t ->
+  path:Relative_path.t ->
+  contents:string ->
+  Provider_context.t * Provider_context.entry
+
+(** Same as [add_entry], but using the provided [ServerCommandTypes.file_input].
+This is useful in some IDE code paths. *)
+val add_entry_from_file_input :
   ctx:Provider_context.t ->
   path:Relative_path.t ->
   file_input:ServerCommandTypes.file_input ->

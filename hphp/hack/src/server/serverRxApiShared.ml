@@ -27,13 +27,7 @@ let recheck_typing ctx (pos_list : pos list) =
     |> List.remove_consecutive_duplicates ~equal:( = )
   in
   List.map files_to_check ~f:(fun path ->
-      let (_ctx, entry) =
-        Provider_utils.update_context
-          ~ctx
-          ~path
-          ~file_input:
-            (ServerCommandTypes.FileName (Relative_path.to_absolute path))
-      in
+      let (_ctx, entry) = Provider_utils.add_entry ~ctx ~path in
       let { Provider_utils.Compute_tast.tast; _ } =
         Provider_utils.compute_tast_unquarantined ~ctx ~entry
       in

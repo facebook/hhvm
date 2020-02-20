@@ -58,12 +58,6 @@ let map_tcopt (t : t) ~(f : TypecheckerOptions.t -> TypecheckerOptions.t) : t =
 
 let global_context : t option ref = ref None
 
-let get_file_input ~(ctx : t) ~(path : Relative_path.t) :
-    ServerCommandTypes.file_input =
-  match Relative_path.Map.find_opt ctx.entries path with
-  | Some { file_input; _ } -> file_input
-  | None -> ServerCommandTypes.FileName (Relative_path.to_absolute path)
-
 let get_fileinfo ~(entry : entry) : FileInfo.t =
   let (funs, classes, record_defs, typedefs, consts) =
     Nast.get_defs entry.ast

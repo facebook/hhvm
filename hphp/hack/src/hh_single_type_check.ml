@@ -1230,26 +1230,23 @@ let handle_mode
   | Autocomplete
   | Autocomplete_manually_invoked ->
     let path = expect_single_file () in
-    let content = cat (Relative_path.to_absolute path) in
+    let contents = cat (Relative_path.to_absolute path) in
     (* Search backwards: there should only be one /real/ case. If there's multiple, *)
     (* guess that the others are preceding explanation comments *)
     let offset =
       Str.search_backward
         (Str.regexp AutocompleteTypes.autocomplete_token)
-        content
-        (String.length content)
+        contents
+        (String.length contents)
     in
-    let pos = File_content.offset_to_position content offset in
+    let pos = File_content.offset_to_position contents offset in
     let is_manually_invoked = mode = Autocomplete_manually_invoked in
     let (ctx, entry) =
-      Provider_utils.update_context
-        ~ctx
-        ~path
-        ~file_input:(ServerCommandTypes.FileContent content)
+      Provider_utils.add_entry_from_file_contents ~ctx ~path ~contents
     in
     let autocomplete_context =
       ServerAutoComplete.get_autocomplete_context
-        ~file_content:content
+        ~file_content:contents
         ~pos
         ~is_manually_invoked
     in
@@ -1322,13 +1319,7 @@ let handle_mode
           print_coverage type_acc)
   | Cst_search ->
     let path = expect_single_file () in
-    let (ctx, entry) =
-      Provider_utils.update_context
-        ~ctx
-        ~path
-        ~file_input:
-          (ServerCommandTypes.FileName (Relative_path.to_absolute path))
-    in
+    let (ctx, entry) = Provider_utils.add_entry ~ctx ~path in
     let result =
       let open Result.Monad_infix in
       Sys_utils.read_stdin_to_string ()
@@ -1430,10 +1421,7 @@ let handle_mode
         ))
   | Identify_symbol (line, column) ->
     let path = expect_single_file () in
-    let file_input =
-      ServerCommandTypes.FileName (Relative_path.to_absolute path)
-    in
-    let (ctx, entry) = Provider_utils.update_context ~ctx ~path ~file_input in
+    let (ctx, entry) = Provider_utils.add_entry ~ctx ~path in
     (* TODO(ljw): surely this doesn't need quarantine? *)
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
@@ -1532,7 +1520,7 @@ let handle_mode
             Out_channel.output_string stdout new_contents)
           patched)
   | Find_refs (line, column) ->
-    let filename = expect_single_file () in
+    let path = expect_single_file () in
     let naming_table = Naming_table.create files_info in
     Naming_table.iter naming_table Typing_deps.update_file;
     let genv = ServerEnvBuild.default_genv in
@@ -1543,14 +1531,11 @@ let handle_mode
         ServerEnv.tcopt = ctx.Provider_context.tcopt;
       }
     in
-    let filename = Relative_path.to_absolute filename in
-    let content = cat filename in
     let include_defs = true in
     let (ctx, entry) =
-      Provider_utils.update_context
+      Provider_utils.add_entry
         ~ctx:(Provider_utils.ctx_from_server_env env)
-        ~path:(Relative_path.create_detect_prefix filename)
-        ~file_input:(ServerCommandTypes.FileContent content)
+        ~path
     in
     let open Option.Monad_infix in
     let open ServerCommandTypes.Done_or_retry in
@@ -1582,12 +1567,12 @@ let handle_mode
       }
     in
     let filename = Relative_path.to_absolute filename in
-    let content = cat filename in
+    let contents = cat filename in
     let (ctx, entry) =
-      Provider_utils.update_context
+      Provider_utils.add_entry_from_file_contents
         ~ctx:(Provider_utils.ctx_from_server_env env)
         ~path:(Relative_path.create_detect_prefix filename)
-        ~file_input:(ServerCommandTypes.FileContent content)
+        ~contents
     in
     Option.Monad_infix.(
       ServerCommandTypes.Done_or_retry.(
@@ -1607,10 +1592,7 @@ let handle_mode
         ClientFindRefs.print_ide_readable results))
   | Highlight_refs (line, column) ->
     let path = expect_single_file () in
-    let file_input =
-      ServerCommandTypes.FileName (Relative_path.to_absolute path)
-    in
-    let (ctx, entry) = Provider_utils.update_context ~ctx ~path ~file_input in
+    let (ctx, entry) = Provider_utils.add_entry ~ctx ~path in
     let results =
       ServerHighlightRefs.go_quarantined ~ctx ~entry ~line ~column
     in

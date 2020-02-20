@@ -23,7 +23,7 @@ two reasons:
     same data (such as an AST). This is important for performance, particularly
     for IDE operation latency.
 
-To create a new entry for a file, use [Provider_utils.update_context].
+To create a new entry for a file, use [Provider_utils.add_entry].
 
 There should generally be no more than one or two entries inside the
 [Provider_context.t] at a given time. Be careful not to try to store every
@@ -52,8 +52,8 @@ Depending on the [backend] setting, data may be cached in local memory, in
 shared memory, out of process, etc.
 
 You can examine an individual file in the codebase by constructing an [entry]
-for it. For example, you can call [Provider_utils.update_context] to create a
-new [entry], and then [Provider_utils.compute_tast_and_errors_unquarantined].
+for it. For example, you can call [Provider_utils.add_entry] to create a new
+[entry], and then [Provider_utils.compute_tast_and_errors_unquarantined].
 
 Some operations may make changes to global state (e.g. write to shared memory
 heaps). To ensure that no changes escape the scope of your operation, use
@@ -88,14 +88,6 @@ val empty_for_debugging : tcopt:TypecheckerOptions.t -> t
 
 (** Update the [TypecheckerOptions.t] contained within the [t]. *)
 val map_tcopt : t -> f:(TypecheckerOptions.t -> TypecheckerOptions.t) -> t
-
-(** Returns a [ServerCommandTypes.file_input] corresponding to the given [path].
-
-If the [path] is in the context, returns its associated
-[ServerCommandTypes.FileContent]. Otherwise returns the
-[ServerCommandTypes.FileName] corresponding to that file on disk. *)
-val get_file_input :
-  ctx:t -> path:Relative_path.t -> ServerCommandTypes.file_input
 
 (** Get the [FileInfo.t] associated with the given [entry]. *)
 val get_fileinfo : entry:entry -> FileInfo.t

@@ -620,13 +620,7 @@ let go
     List.fold inputs ~init:acc ~f:(fun acc (path, pattern) ->
         try
           let ctx = Provider_context.empty_for_worker ~tcopt in
-          let (ctx, entry) =
-            Provider_utils.update_context
-              ~ctx
-              ~path
-              ~file_input:
-                (ServerCommandTypes.FileName (Relative_path.to_absolute path))
-          in
+          let (ctx, entry) = Provider_utils.add_entry ~ctx ~path in
           match search ctx entry pattern with
           | Some result -> (path, result) :: acc
           | None -> acc

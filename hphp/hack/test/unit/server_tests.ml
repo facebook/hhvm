@@ -246,12 +246,13 @@ let test_process_file_deferring () =
 (* This test verifies that the deferral/counting machinery works for
    ProviderUtils.compute_tast_and_errors_unquarantined. *)
 let test_compute_tast_counting () =
-  let (ctx, path, content) = server_setup_for_deferral_tests () in
+  let (ctx, path, contents) = server_setup_for_deferral_tests () in
   Parser_options_provider.set ParserOptions.default;
   EventLogger.init_fake ();
 
-  let file_input = ServerCommandTypes.FileContent content in
-  let (ctx, entry) = Provider_utils.update_context ctx path file_input in
+  let (ctx, entry) =
+    Provider_utils.add_entry_from_file_contents ~ctx ~path ~contents
+  in
   let { Provider_utils.Compute_tast_and_errors.telemetry; _ } =
     Provider_utils.compute_tast_and_errors_unquarantined ~ctx ~entry
   in
@@ -278,7 +279,7 @@ let test_compute_tast_counting () =
           ~tcopt:TypecheckerOptions.default
           ~backend:(Provider_backend.get ())
       in
-      let (ctx, entry) = Provider_utils.update_context ctx path file_input in
+      let (ctx, entry) = Provider_utils.add_entry ~ctx ~path in
       let { Provider_utils.Compute_tast_and_errors.telemetry; _ } =
         Provider_utils.compute_tast_and_errors_unquarantined ~ctx ~entry
       in

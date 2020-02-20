@@ -276,7 +276,9 @@ let make_context_from_file_input
   let ctx = initialized_state.ctx in
   match Provider_utils.find_entry ~ctx ~path with
   | None ->
-    let (ctx, entry) = Provider_utils.update_context ~ctx ~path ~file_input in
+    let (ctx, entry) =
+      Provider_utils.add_entry_from_file_input ~ctx ~path ~file_input
+    in
     (Initialized { initialized_state with ctx }, ctx, entry)
   | Some entry ->
     (* Only reparse the file if the contents have actually changed.
@@ -290,7 +292,9 @@ let make_context_from_file_input
         <> entry.Provider_context.source_text.Full_fidelity_source_text.text
     in
     if any_changes then
-      let (ctx, entry) = Provider_utils.update_context ~ctx ~path ~file_input in
+      let (ctx, entry) =
+        Provider_utils.add_entry_from_file_input ~ctx ~path ~file_input
+      in
       (Initialized { initialized_state with ctx }, ctx, entry)
     else
       (Initialized initialized_state, ctx, entry)

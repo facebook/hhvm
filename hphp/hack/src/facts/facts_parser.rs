@@ -19,6 +19,8 @@ pub struct ExtractAsJsonOpts {
     pub php5_compat_mode: bool,
     pub hhvm_compat_mode: bool,
     pub allow_new_attribute_syntax: bool,
+    pub enable_xhp_class_modifier: bool,
+    pub disable_xhp_element_mangling: bool,
     pub filename: RelativePath,
 }
 
@@ -31,6 +33,8 @@ pub fn from_text(text: &[u8], opts: ExtractAsJsonOpts) -> Option<Facts> {
         php5_compat_mode,
         hhvm_compat_mode,
         allow_new_attribute_syntax,
+        enable_xhp_class_modifier,
+        disable_xhp_element_mangling,
         filename,
     } = opts;
     let text = SourceText::make(RcOc::new(filename), text);
@@ -43,6 +47,8 @@ pub fn from_text(text: &[u8], opts: ExtractAsJsonOpts) -> Option<Facts> {
         hhvm_compat_mode,
         is_experimental_mode,
         allow_new_attribute_syntax,
+        enable_xhp_class_modifier,
+        disable_xhp_element_mangling,
         ..ParserEnv::default()
     };
     let (root, errors, has_script_content) = facts_parser::parse_script(&text, env, None);
@@ -51,7 +57,8 @@ pub fn from_text(text: &[u8], opts: ExtractAsJsonOpts) -> Option<Facts> {
     if has_script_content.0 && !errors.is_empty() {
         None
     } else {
-        Some(collect(("".to_owned(), Facts::default()), root).1)
+        let namespaced_xhp = disable_xhp_element_mangling;
+        Some(collect(("".to_owned(), Facts::default(), namespaced_xhp), root).1)
     }
 }
 
@@ -60,7 +67,7 @@ pub fn from_text(text: &[u8], opts: ExtractAsJsonOpts) -> Option<Facts> {
 use std::string::String;
 use Node::*; // Ensure String doesn't refer to Node::String
 
-fn qualified_name(namespace: &str, name: Node) -> Option<String> {
+fn qualified_name(namespace: &str, name: Node, namespaced_xhp: bool) -> Option<String> {
     fn qualified_name_from_parts(namespace: &str, parts: Vec<Node>) -> Option<String> {
         let mut qualified_name = String::new();
         let mut leading_backslash = false;
@@ -97,9 +104,23 @@ fn qualified_name(namespace: &str, name: Node) -> Option<String> {
             })
         }
         XhpName(name) => {
-            // xhp names are always unqualified
             let name = name.to_string();
-            Some(mangle_xhp_id(name))
+            Some(if namespaced_xhp {
+                let qualified = if name.starts_with(":") {
+                    name.replace(":", "\\").get(1..).unwrap().to_string()
+                } else {
+                    name.replace(":", "\\")
+                };
+
+                if namespace.is_empty() {
+                    qualified
+                } else {
+                    namespace.to_owned() + "\\" + &qualified
+                }
+            } else {
+                // Mangled xhp names are always unqualified
+                mangle_xhp_id(name)
+            })
         }
         Node::QualifiedName(parts) => qualified_name_from_parts(namespace, parts),
         _ => None,
@@ -121,10 +142,10 @@ fn modifiers_to_flags(modifiers: &Node) -> Flags {
     flags
 }
 
-fn typenames_from_list(list: Node, namespace: &str, names: &mut StringSet) {
+fn typenames_from_list(list: Node, namespace: &str, names: &mut StringSet, namespaced_xhp: bool) {
     match list {
         Node::List(nodes) => nodes.into_iter().for_each(|name| {
-            if let Some(name) = qualified_name(namespace, name) {
+            if let Some(name) = qualified_name(namespace, name, namespaced_xhp) {
                 names.insert(name);
             }
         }),
@@ -160,22 +181,23 @@ fn type_info_from_class_body(
     body: Node,
     facts: &mut Facts,
     type_facts: &mut TypeFacts,
+    namespaced_xhp: bool,
 ) {
     let aux = |mut constants: Vec<String>, node| {
         if let RequireExtendsClause(name) = node {
             if check_require {
-                if let Some(name) = qualified_name(namespace, *name) {
+                if let Some(name) = qualified_name(namespace, *name, namespaced_xhp) {
                     type_facts.require_extends.insert(name);
                 }
             }
         } else if let RequireImplementsClause(name) = node {
             if check_require {
-                if let Some(name) = qualified_name(namespace, *name) {
+                if let Some(name) = qualified_name(namespace, *name, namespaced_xhp) {
                     type_facts.require_implements.insert(name);
                 }
             }
         } else if let TraitUseClause(uses) = node {
-            typenames_from_list(*uses, namespace, &mut type_facts.base_types);
+            typenames_from_list(*uses, namespace, &mut type_facts.base_types, namespaced_xhp);
         } else if let MethodDecl(body) = node {
             if namespace.is_empty() {
                 // in methods we collect only defines
@@ -255,8 +277,13 @@ fn attributes_into_facts(namespace: &str, attributes: Node) -> Attributes {
     }
 }
 
-fn class_decl_into_facts(decl: ClassDeclChildren, namespace: &str, mut facts: &mut Facts) {
-    if let Some(name) = qualified_name(namespace, decl.name) {
+fn class_decl_into_facts(
+    decl: ClassDeclChildren,
+    namespace: &str,
+    mut facts: &mut Facts,
+    namespaced_xhp: bool,
+) {
+    if let Some(name) = qualified_name(namespace, decl.name, namespaced_xhp) {
         let (kind, flags) = match decl.kind {
             Node::Class => (TypeKind::Class, modifiers_to_flags(&decl.modifiers)),
             Node::Interface => (TypeKind::Interface, Flag::Abstract.as_flags()),
@@ -282,10 +309,21 @@ fn class_decl_into_facts(decl: ClassDeclChildren, namespace: &str, mut facts: &m
             decl.body,
             &mut facts,
             &mut decl_facts,
+            namespaced_xhp,
         );
         // trait uses are already added to base_types, so just add extends & implements
-        typenames_from_list(decl.extends, namespace, &mut decl_facts.base_types);
-        typenames_from_list(decl.implements, namespace, &mut decl_facts.base_types);
+        typenames_from_list(
+            decl.extends,
+            namespace,
+            &mut decl_facts.base_types,
+            namespaced_xhp,
+        );
+        typenames_from_list(
+            decl.implements,
+            namespace,
+            &mut decl_facts.base_types,
+            namespaced_xhp,
+        );
         add_or_update_classish_decl(name, decl_facts, &mut facts.types);
     }
 }
@@ -312,15 +350,15 @@ fn add_or_update_classish_decl(name: String, mut delta: TypeFacts, types: &mut T
         });
 }
 
-type CollectAcc = (String, Facts);
+type CollectAcc = (String, Facts, bool);
 fn collect(mut acc: CollectAcc, node: Node) -> CollectAcc {
     match node {
         List(nodes) => acc = nodes.into_iter().fold(acc, collect),
         ClassDecl(decl) => {
-            class_decl_into_facts(*decl, &acc.0, &mut acc.1);
+            class_decl_into_facts(*decl, &acc.0, &mut acc.1, acc.2);
         }
         EnumDecl(decl) => {
-            if let Some(name) = qualified_name(&acc.0, decl.name) {
+            if let Some(name) = qualified_name(&acc.0, decl.name, acc.2) {
                 let attributes = attributes_into_facts(&acc.0, decl.attributes);
                 let enum_facts = TypeFacts {
                     flags: Flag::Final as isize,
@@ -334,17 +372,17 @@ fn collect(mut acc: CollectAcc, node: Node) -> CollectAcc {
             }
         }
         FunctionDecl(name) => {
-            if let Some(name) = qualified_name(&acc.0, *name) {
+            if let Some(name) = qualified_name(&acc.0, *name, acc.2) {
                 acc.1.functions.push(name);
             }
         }
         ConstDecl(name) => {
-            if let Some(name) = qualified_name(&acc.0, *name) {
+            if let Some(name) = qualified_name(&acc.0, *name, acc.2) {
                 acc.1.constants.push(name);
             }
         }
         TypeAliasDecl(decl) => {
-            if let Some(name) = qualified_name(&acc.0, decl.name) {
+            if let Some(name) = qualified_name(&acc.0, decl.name, acc.2) {
                 let attributes = attributes_into_facts(&acc.0, decl.attributes);
                 let type_alias_facts = TypeFacts {
                     flags: Flag::default() as isize,
@@ -367,17 +405,17 @@ fn collect(mut acc: CollectAcc, node: Node) -> CollectAcc {
         }
         NamespaceDecl(name, body) => {
             if let Node::EmptyBody = *body {
-                if let Some(name) = qualified_name("", *name) {
+                if let Some(name) = qualified_name("", *name, acc.2) {
                     acc.0 = name;
                 }
             } else {
                 let name = if let Ignored = *name {
                     Some(acc.0.clone())
                 } else {
-                    qualified_name(&acc.0, *name)
+                    qualified_name(&acc.0, *name, acc.2)
                 };
                 if let Some(name) = name {
-                    acc.1 = collect((name, acc.1), *body).1;
+                    acc.1 = collect((name, acc.1, acc.2), *body).1;
                 }
             }
         }

@@ -23,6 +23,8 @@ let extract_as_json_string
     ~(disable_legacy_soft_typehints : bool)
     ~(allow_new_attribute_syntax : bool)
     ~(disable_legacy_attribute_syntax : bool)
+    ~(enable_xhp_class_modifier : bool)
+    ~(disable_xhp_element_mangling : bool)
     ~(filename : Relative_path.t)
     ~(text : string) =
   (* return empty string if file has syntax errors *)
@@ -38,7 +40,9 @@ let extract_as_json_string
   Rust_facts_ffi.extract_as_json_ffi
     ( (bool2int php5_compat_mode lsl 0)
     lor (bool2int hhvm_compat_mode lsl 1)
-    lor (bool2int allow_new_attribute_syntax lsl 2) )
+    lor (bool2int allow_new_attribute_syntax lsl 2)
+    lor (bool2int enable_xhp_class_modifier lsl 3)
+    lor (bool2int disable_xhp_element_mangling lsl 4) )
     filename
     text
     !mangle_xhp_mode
@@ -54,6 +58,8 @@ let from_text
     ~(disable_legacy_soft_typehints : bool)
     ~(allow_new_attribute_syntax : bool)
     ~(disable_legacy_attribute_syntax : bool)
+    ~(enable_xhp_class_modifier : bool)
+    ~(disable_xhp_element_mangling : bool)
     ~(filename : Relative_path.t)
     ~(text : string) =
   Option.bind
@@ -64,6 +70,8 @@ let from_text
         ~disable_legacy_soft_typehints
         ~allow_new_attribute_syntax
         ~disable_legacy_attribute_syntax
+        ~enable_xhp_class_modifier
+        ~disable_xhp_element_mangling
         ~filename
         ~text
     |> Option.map ~f:Hh_json.json_of_string )

@@ -2336,8 +2336,8 @@ To string conversions:
 
 | AKExistsObj, D(Bool), S(Obj) S(Int,Str), NF
 
-  Has the effects of array_key_exists(S0, S1) on an object S0. This either does
-  collection accesses, or uses the ArrayAccess API.
+  Has the effects of array_key_exists(S0, S1) on an object S0. This does
+  collection accesses.
 
 | GetMemoKey, DMemoKey, S(Cell), PRc
 

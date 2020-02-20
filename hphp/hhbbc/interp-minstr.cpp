@@ -959,8 +959,7 @@ void miElem(ISS& env, MOpMode mode, Type key, LocalId keyLoc) {
   }
 
   /*
-   * Other cases could leave the base as anything (if nothing else, via
-   * ArrayAccess on an object).
+   * Other cases could leave the base as anything.
    *
    * The resulting BaseLoc is either inside an array, is the global
    * init_null_variant, or inside tvScratch.  We represent this with the

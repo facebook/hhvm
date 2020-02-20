@@ -2051,15 +2051,12 @@ ElemL <local variable id>    [B]  ->  [B]
          ElemC   | $2 | $1
          ElemL   | %1 | $1
 
-  Then, if y is an array, this operation outputs a base that points to the
-  element at index x from array y. If there is no element at index x, this
-  operation outputs a base that points to null.
+  Then, if y is an array, hack array, or hack collection this operation outputs
+  a base that points to the element at index x in y. If there is no element at
+  index x, this operation outputs a base that points to null.
 
-  If y is an object that implements the ArrayAccess interface, this operation
-  outputs a base that points to the result of y->offsetGet(x).
-
-  If y is an object that does not implement the ArrayAccess interface, this
-  operation throws a fatal error.
+  If y is an object that is not a hack collection, this operation throws a
+  fatal error.
 
   If y is a string, this operation computes z = (int)x. If z >= 0 and z <
   strlen(z), this operation builds a new string consisting of the character at
@@ -2082,15 +2079,13 @@ ElemLW <local variable id>    [B]  ->  [B]
          ElemCW  | $2 | $1
          ElemLW  | %1 | $1
 
-  If y is an array, this operation outputs a base that points to the element at
-  index x from array y. If there is no element at index x, this operation
-  outputs a base that points to null and raises a warning.
+  If y is an array, hack array, or hack collection this operation outputs a
+  base that points to the element at index x in y. If there is no element at
+  index x, this operation outputs a base that points to null and raises a
+  warning.
 
-  If y is an object that implements the ArrayAccess interface, this operation
-  outputs a base that points to the result of y->offsetGet(x).
-
-  If y is an object that does not implement the ArrayAccess interface, this
-  operation throws a fatal error.
+  If y is an object that is not a hack collection, this operation throws a
+  fatal error.
 
   If y is a string, this operation continues to compute z = (int)x. If z >= 0
   and z < strlen(z), this operation builds a new string consisting of the
@@ -2114,15 +2109,13 @@ ElemLD <local variable id>    [B]  ->  [B]
          ElemCD  | $2 | $1
          ElemLD  | %1 | $1
 
-  If y is an array, this operation outputs a base that references the element
-  at index x. If there is no element at index x, this operation creates an
-  element at index x, and outputs a base that references the element.
+  If y is an array, hack array, or hack collection this operation outputs a
+  base that references the element at index x. If there is no element at index
+  x, this operation creates an element at index x, and outputs a base that
+  references the element.
 
-  If y is an object that implements the ArrayAccess interface, this operation
-  outputs a base that contains the result of y->offsetGet(x).
-
-  If y is non-empty string or an object that does not implement the ArrayAccess
-  interface, this operation throws a fatal error.
+  If y is non-empty string or an object that is not a hack collection, this
+  operation throws a fatal error.
 
   If y is null, the empty string, or false, this operation will set y to a new
   empty array, create an element at index x, and output a base that points to
@@ -2144,15 +2137,12 @@ ElemLU <local variable id>    [B]  ->  [B]
          ElemCU  | $2 | $1
          ElemLU  | %1 | $1
 
-  If y is an array, this operation outputs a base that points to the element
-  at index x from array y. If there is no element at index x, this operation
-  outputs a base that points to null.
+  If y is an array, hack array, or hack collection this operation outputs a
+  base that points to the element at index x in y. If there is no element at
+  index x, this operation outputs a base that points to null.
 
-  If y is an object that implements the ArrayAccess interface, this operation
-  outputs a base that points to the result of y->offsetGet(x).
-
-  If y is an object that does not implement the ArrayAccess interface, this
-  operation throws a fatal error.
+  If y is an object that is not a hack collection, this operation throws a
+  fatal error.
 
   If y is a string, this operation throws a fatal error.
 
@@ -2161,15 +2151,12 @@ ElemLU <local variable id>    [B]  ->  [B]
 
 NewElem    [B]  ->  [B]
 
-  Fetch new element. If $1 is an array, this operation creates a new element
-  with the next available numeric key in array $1 and outputs a base that
-  points to the new element.
+  Fetch new element. If $1 is an array, hack array, or hack collection this
+  operation creates a new element with the next available numeric key in $1
+  and outputs a base that points to the new element.
 
-  If $1 is an object that implements the ArrayAccess interface, this operation
-  outputs a base that points to the result of $1->offsetGet(null).
-
-  If $1 is a non-empty string or an object that does not implement the
-  ArrayAccess interface, this operation throws a fatal error.
+  If $1 is a non-empty string or an object that is not a hack collection, this
+  operation throws a fatal error.
 
   If $1 is null, false, or the empty string, this operation sets $1 to a new
   empty array, creates a new element with the next available numeric key in
@@ -2312,15 +2299,13 @@ CGetElemL <local variable id>    [B]  ->  [C]
         CGetElemC  | $2 | $1
         CGetElemL  | %1 | $1
 
-  If y is an array, this operation retrieves the element at index x from array
-  y and pushes it onto the stack as a cell. If there is no element at index x,
-  this operation raises a warning and pushes null onto the stack.
+  If y is an array, hack array, or hack collection this operation retrieves
+  the element at index x from y and pushes it onto the stack as a cell. If
+  there is no element at index x, this operation raises a warning and pushes
+  null onto the stack.
 
-  If y is an object that implements the ArrayAccess interface, this operation
-  pushes x->offsetGet($2) onto the stack.
-
-  If y is an object that does not implement the ArrayAccess interface, this
-  operation throws a fatal error.
+  If y is an object that is not a hack collection, this operation throws a
+  fatal error.
 
   If y is a string, this operation continues to compute z = (int)x. If z >= 0
   and z < strlen(z), this operation builds a new string consisting of the
@@ -2343,13 +2328,11 @@ IssetElemL <local variable id>    [B]  ->  [C:Bool]
         IssetElemC | $2 | $1
         IssetElemL | %1 | $1
 
-  If y is an array, this operation pushes !is_null(y[x]) onto the stack.
+  If y is an array, hack array, or hack collection this operation pushes
+  !is_null(y[x]) onto the stack.
 
-  If y is an object that implements the ArrayAccess interface, this operation
-  pushes y->offsetExists(x) onto the stack.
-
-  If y is an object that does not implement the ArrayAccess interface, this
-  operation throws a fatal error.
+  If y is an object that is not a hack collection, this operation throws a
+  fatal error.
 
   If y is a string, this operation computes z = (int)x and then it pushes (z >=
   0 && z < strlen(y)) onto the stack.
@@ -2359,14 +2342,11 @@ IssetElemL <local variable id>    [B]  ->  [C:Bool]
 
 SetElemC    [C C B]  ->  [C]
 
-  Set element. If $1 is an array, this operation executes $1[$3] = $2 and then
-  pushes $2 onto the stack.
+  Set element. If $1 is an array, hack array, or hack collection this operation
+  executes $1[$3] = $2 and then pushes $2 onto the stack.
 
-  If $1 is an object that implements the ArrayAccess interface, this operation
-  executes $1->offsetSet($3, $2) and then pushes $2 onto the stack.
-
-  If $1 is an object that does not implement the ArrayAccess interface, this
-  operation throws a fatal error.
+  If $1 is an object that is not a hack collection, this operation throws a
+  fatal error.
 
   If $1 is null, the empty string, or false, this operation sets $1 to a new
   empty array, executes $1[$3] = $2, and then pushes $2 onto the stack.
@@ -2384,14 +2364,11 @@ SetElemC    [C C B]  ->  [C]
 
 SetElemL <local variable id>    [C B]  ->  [C]
 
-  Set element. If $1 is an array, this operation executes $1[%1] = $2 and then
-  pushes $2 onto the stack.
+  Set element. If $1 is an array, hack array, or hack collection this operation
+  executes $1[%1] = $2 and then pushes $2 onto the stack.
 
-  If $1 is an object that implements the ArrayAccess interface, this operation
-  executes $1->offsetSet(%1, $2) and then pushes $2 onto the stack.
-
-  If $1 is an object that does not implement the ArrayAccess interface, this
-  operation throws a fatal error.
+  If $1 is an object that is not a hack collection, this operation throws a
+  fatal error.
 
   If $1 is null, the empty string, or false, this operation sets $1 to a new
   empty array, executes $1[%1] = $2, and then pushes $2 onto the stack.
@@ -2409,90 +2386,72 @@ SetElemL <local variable id>    [C B]  ->  [C]
 
 SetOpElemC <op>    [C C B]  ->  [C]
 
-  Set element op. If $1 is an array, this operation first checks $1 contains an
-  element at offset $2. If it does not, this operation creates an element at
-  offset $2, sets it to null, and raises a warning. Next, this operation
-  executes x = $1[$3], y = x <op> $2, and $1[$3] = y, and then it pushes y onto
-  the stack as a cell.
+  Set element op. If $1 is an array, hack array, or hack collection this
+  operation first checks if $1 contains an element at offset $2. If it does
+  not, this operation creates an element at offset $2, sets it to null, and
+  raises a warning. Next, this operation executes x = $1[$3], y = x <op> $2,
+  and $1[$3] = y, and then it pushes y onto the stack as a cell.
 
   If $1 is null, false, or the empty string, this operation first sets $1 to a
   new empty array. Then it follows the rules described in the case above.
 
-  If $1 is an object that implements the ArrayAccess interface, this operation
-  executes x = $1->offsetGet($3), y = x <op> $2, and $1->offsetSet($3, y), and
-  then it pushes y onto the stack as a cell.
-
-  If $1 is a non-empty string or an object that does not implement the
-  ArrayAccess interface, this operation throws a fatal error.
+  If $1 is a non-empty string or an object that is not a hack collection, this
+  operation throws a fatal error.
 
   If $1 is true, integer, or double, this operation raises a warning and pushes
   null onto the stack.
 
 SetOpElemL <op> <local variable id>    [C B]  ->  [C]
 
-  Set element op. If $1 is an array, this operation first checks $1 contains an
-  element at offset $2. If it does not, this operation creates an element at
-  offset $2, sets it to null, and raises a warning. Next, this operation
-  executes x = $1[%1], y = x <op> $2, and $1[%1] = y, and then it pushes y onto
-  the stack as a cell.
+  Set element op. If $1 is an array, hack array, or hack collection this
+  operation first checks if $1 contains an element at offset $2. If it does
+  not, this operation creates an element at offset $2, sets it to null, and
+  raises a warning. Next, this operation executes x = $1[%1], y = x <op> $2,
+  and $1[%1] = y, and then it pushes y onto the stack as a cell.
 
   If $1 is null, false, or the empty string, this operation first sets $1 to a
   new empty array. Then it follows the rules described in the case above.
 
-  If $1 is an object that implements the ArrayAccess interface, this operation
-  executes x = $1->offsetGet(%1), y = x <op> $2, and $1->offsetSet(%1, y), and
-  then it pushes y onto the stack as a cell.
-
-  If $1 is a non-empty string or an object that does not implement the
-  ArrayAccess interface, this operation throws a fatal error.
+  If $1 is a non-empty string or an object that is not a hack collection, this
+  operation throws a fatal error.
 
   If $1 is true, integer, or double, this operation raises a warning and pushes
   null onto the stack.
 
 IncDecElemC <op>    [C B]  ->  [C]
 
-  Increment/decrement element. If $1 is an array, this operation checks if $1
-  contains an element at offset $2. If it does not, this operation creates an
-  element at offset $2, sets it to null, and raises a warning. Next, this
-  operation executes x = $1[$2], y = x, and either ++y (if op is PreInc or
-  PostInc) or --y (if op is PreDec or PostDec). Then it assigns y to $1[$2] and
-  pushes either y (if op is PreInc or PreDec) or x (if op is PostInc or
-  PostDec) onto the stack.
+  Increment/decrement element. If $1 is an array, hack array, or hack
+  collection this operation checks if $1 contains an element at offset $2. If
+  it does not, this operation creates an element at offset $2, sets it to null,
+  and raises a warning. Next, this operation executes x = $1[$2], y = x, and
+  either ++y (if op is PreInc or PostInc) or --y (if op is PreDec or PostDec).
+  Then it assigns y to $1[$2] and pushes either y (if op is PreInc or PreDec)
+  or x (if op is PostInc or PostDec) onto the stack.
 
   If $1 is null, false, or the empty string, this operation first sets $1 to an
   empty array. Then it follows the rules described in the case above.
 
-  If $1 is a non-empty string or an object that does not implement the
-  ArrayAccess interface, this operation throws a fatal error.
-
-  If $1 is an object that implements ArrayAccess, this operation executes x =
-  $1->offsetGet($2), y = x, and either ++y (if op is PreInc or PostInc) or --y
-  (if op is PreDec or PostDec). Then it pushes either y (if op is PreInc or
-  PreDec) or x (if op is PostInc or PostDec) onto the stack.
+  If $1 is a non-empty string or an object that is not a hack collection, this
+  operation throws a fatal error.
 
   If $1 is true, integer, or double, this operation raises a warning and pushes
   null onto the stack.
 
 IncDecElemL <op> <local variable id>    [B]  ->  [C]
 
-  Increment/decrement element. If $1 is an array, this operation checks if $1
-  contains an element at offset %1. If it does not, this operation creates an
-  element at offset %1, sets it to null, and raises a warning. Next, this
-  operation executes x = $1[%1], y = x, and either ++y (if op is PreInc or
-  PostInc) or --y (if op is PreDec or PostDec). Then it assigns y to $1[%1] and
-  pushes either y (if op is PreInc or PreDec) or x (if op is PostInc or
-  PostDec) onto the stack.
+  Increment/decrement element. If $1 is an array, hack array or hack collection
+  this operation checks if $1 contains an element at offset %1. If it does not,
+  this operation creates an element at offset %1, sets it to null, and raises
+  a warning. Next, this operation executes x = $1[%1], y = x, and either ++y
+  (if op is PreInc or PostInc) or --y (if op is PreDec or PostDec). Then it
+  assigns y to $1[%1] and pushes either y (if op is PreInc or PreDec) or x (if
+  op is PostInc or PostDec) onto the stack.
 
   If $1 is null, false, or the empty string, this operation first sets $1 to an
   empty array. Then it follows the rules described in the case above.
 
-  If $1 is a non-empty string or an object that does not implement the
-  ArrayAccess interface, this operation throws a fatal error.
-
-  If $1 is an object that implements ArrayAccess, this operation executes x =
-  $1->offsetGet(%1), y = x, and either ++y (if op is PreInc or PostInc) or --y
-  (if op is PreDec or PostDec). Then it pushes either y (if op is PreInc or
-  PreDec) or x (if op is PostInc or PostDec) onto the stack.
+  If $1 is a non-empty string or an object that is not a hack collection, this
+  operation throws a fatal error.
 
   If $1 is true, integer, or double, this operation raises a warning and pushes
   null onto the stack.
@@ -2510,13 +2469,11 @@ UnsetElemL <local variable id>    [B]  ->  []
         UnsetElemL | %1 | $1
         UnsetElemC | $2 | $1
 
-  If y is an array, this operation removes the element at index x from array y.
+  If y is an array, hack array, or hack collection this operation removes the
+  element at index x from y.
 
-  If y is an object that implements ArrayAccess interface, this operation
-  executes y->offsetUnset(x).
-
-  If y is an object that does not implement the ArrayAccess interface, this
-  operation throws a fatal error.
+  If y is an object that is not a hack collection, this operation throws a
+  fatal error.
 
   If y is a string, this operation throws a fatal error.
 
@@ -2524,60 +2481,48 @@ UnsetElemL <local variable id>    [B]  ->  []
 
 SetNewElem    [C B]  ->  [C]
 
-  Set new element. If $1 is an array, this operation executes $1[] = $2 and
-  then pushes $2 onto the stack.
+  Set new element. If $1 is an array, hack array, or hack collection this
+  operation executes $1[] = $2 and then pushes $2 onto the stack.
 
   If $1 is null, false, or the empty string, this operation sets $1 to a new
   empty array, and then it executes $1[] = $2 and pushes $2 onto the stack.
 
-  If $1 is a non-empty string or an object that does not implement the
-  ArrayAccess interface, this operation throws a fatal error.
-
-  If $1 is an object that implements the ArrayAccess interface, this operation
-  executes $1->offsetSet(null, $2) and then pushes $2 onto the stack.
+  If $1 is a non-empty string or an object that is not a hack collection, this
+  operation throws a fatal error.
 
   If $1 is true, integer, or double, this operation raises a warning and pushes
   null onto the stack.
 
 SetOpNewElem <op>    [C B]  ->  [C]
 
-  Set op new element. If $1 is an array, this operation first determines the
-  next available integer offset k in array $1. Next, this operation executes
-  $1[k] = null, x = $1[k], and y = x <op> $2. Then it assigns y to $1[k] and
-  pushes y onto the stack.
+  Set op new element. If $1 is an array, hack array, or hack collection this
+  operation first determines the next available integer offset k in $1. Next,
+  this operation executes $1[k] = null, x = $1[k], and y = x <op> $2. Then it
+  assigns y to $1[k] and pushes y onto the stack.
 
   If $1 is null, false, or the empty string, this operation first sets $1 to an
   empty array. Then it follows the rules described in the case above.
 
-  If $1 is a non-empty string or an object that does not implement the
-  ArrayAccess interface, this operation throws a fatal error.
-
-  If $1 is an object that implements ArrayAccess, this operation executes x =
-  $1->offsetGet(null), y = x <op> $2, and $1->offsetSet(null, y). Then it
-  pushes y onto the stack.
+  If $1 is a non-empty string or an object that is not a hack collection, this
+  operation throws a fatal error.
 
   If $1 is true, integer, or double, this operation raises a warning and pushes
   null onto the stack.
 
 IncDecNewElem <op>    [B]  ->  [C]
 
-  Increment/decrement new element. If $1 is an array, this operation first
-  determines the next available integer offset k in array $1. Next, this
-  operation executes $1[k] = null, x = $1[k], y = x, and either ++y (if op is
-  PreInc or PostInc) or --y (if op is PreDec or PostDec). Then it assigns y to
-  $1[k] and pushes either y (if op is PreInc or PreDec) or x (if op is PostInc
-  or PostDec) onto the stack.
+  Increment/decrement new element. If $1 is an array, hack array, or hack
+  collection this operation first determines the next available integer offset
+  k in $1. Next, this operation executes $1[k] = null, x = $1[k], y = x, and
+  either ++y (if op is PreInc or PostInc) or --y (if op is PreDec or PostDec).
+  Then it assigns y to $1[k] and pushes either y (if op is PreInc or PreDec) or
+  x (if op is PostInc or PostDec) onto the stack.
 
   If $1 is null, false, or the empty string, this operation first sets $1 to an
   empty array. Then it follows the rules described in the case above.
 
-  If $1 is a non-empty string or an object that does not implement the
-  ArrayAccess interface, this operation throws a fatal error.
-
-  If $1 is an object that implements ArrayAccess, this operation executes x =
-  $1->offsetGet(null), y = x, and either ++y (if op is PreInc or PostInc) or
-  --y (if op is PreDec or PostDec). Then it pushes either y (if op is PreInc or
-  PreDec) or x (if op is PostInc or PostDec) onto the stack.
+  If $1 is a non-empty string or an object that is not a hack collection, this
+  operation throws a fatal error.
 
   If $1 is true, integer, or double, this operation raises a warning and pushes
   null onto the stack.
@@ -3259,9 +3204,8 @@ CreateCl <num args> <class id>  [C|U..C|U]  ->  [C]
 Idx         [C C C] -> [C]
 
   Checks if object in $3 contains key in $2 and pushes the result onto the
-  stack if found. Otherwise, $1 is pushed onto the stack. $3 must be an object
-  that supports array or indexed access (e.g. arrays, collections,
-  implementations of ArrayAccess).
+  stack if found. Otherwise, $1 is pushed onto the stack. $3 must be an array,
+  hack array, or hack collection.
 
 ArrayIdx    [C C C] -> [C]
 

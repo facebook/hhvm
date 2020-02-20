@@ -1,7 +1,5 @@
-Errors:
-  [3:16-31] Was expecting a return type hint
 [(Fun
-    { f_span = [3:1-5:2]; f_annotation = (); f_mode = Mstrict;
+    { f_span = [3:1-5:2]; f_annotation = (); f_mode = Mpartial;
       f_ret = ((Awaitable<int>), None);
       f_name = ([3:16-31], "\\returnAwaitable"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];

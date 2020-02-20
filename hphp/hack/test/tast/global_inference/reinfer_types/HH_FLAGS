@@ -1,0 +1,3 @@
+--tast
+--global-inference
+--reinfer-types=mixed,dynamic,UNSAFE_TYPE_HH_FIXME,HH_FIXME::MISSING_TYPE

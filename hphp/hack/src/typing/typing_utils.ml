@@ -236,6 +236,22 @@ let contains_unresolved_tyvars env ty =
   in
   finder#on_type (env, false) ty
 
+let contains_tvar_decl (t : decl_ty) =
+  let finder =
+    object
+      inherit [bool] Type_visitor.decl_type_visitor as parent
+
+      method! on_tvar _found _r _v = true
+
+      method! on_type found ty =
+        if found then
+          true
+        else
+          parent#on_type found ty
+    end
+  in
+  finder#on_type false t
+
 let wrap_union_inter_ty_in_var env r ty =
   if is_union_or_inter_type ty then
     let (env, contains_unresolved_tyvars) = contains_unresolved_tyvars env ty in

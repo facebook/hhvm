@@ -341,11 +341,16 @@ let fun_reactivity env attrs params =
   in
   r
 
-let merge_hint_with_decl_hint env type_hint decl_hint =
-  match (type_hint, decl_hint) with
-  | (None, Some hint) -> Some hint
-  | (Some hint, _) -> Some (Decl_hint.hint env.decl_env hint)
-  | (None, None) -> None
+let merge_hint_with_decl_hint env type_hint decl_ty =
+  let contains_tvar decl_ty =
+    match decl_ty with
+    | None -> false
+    | Some decl_ty -> TUtils.contains_tvar_decl decl_ty
+  in
+  if contains_tvar decl_ty then
+    decl_ty
+  else
+    Option.map type_hint ~f:(Decl_hint.hint env.decl_env)
 
 (* This function is used to determine the type of an argument.
  * When we want to type-check the body of a function, we need to

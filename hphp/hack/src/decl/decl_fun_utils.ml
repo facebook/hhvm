@@ -70,29 +70,81 @@ let get_param_mutability user_attributes =
   else
     None
 
-(* If global inference is on this will create a new type variable and store it in
-  the global tvenv. Otherwise we return the default type given as parameter *)
-let global_inference_create_tyvar_from_hint env reason hint =
-  match hint with
-  | None ->
-    let tco = env.Decl_env.ctx.Provider_context.tcopt in
-    if GlobalOptions.tco_global_inference tco then
-      Some (mk (reason, Tvar (Ident.tmp ())))
-    else
-      None
-  | Some hint -> Some (Decl_hint.hint env hint)
+exception Gi_reinfer_type_not_supported
 
-let global_inference_create_tyvar ~is_lambda ~default env reason hint =
-  if is_lambda then
-    Option.map hint ~f:(Decl_hint.hint env) |> Option.value ~default
+let rec reinfer_type_to_string_exn ty =
+  match ty with
+  | Tmixed -> "mixed"
+  | Tnonnull -> "nonnull"
+  | Tdynamic -> "dynamic"
+  | Tnothing -> "nothing"
+  | Tthis -> "this"
+  | Tprim prim ->
+    (match prim with
+    | Tnull -> "null"
+    | Tvoid -> "void"
+    | Tint -> "int"
+    | Tnum -> "num"
+    | Tfloat -> "float"
+    | Tstring -> "string"
+    | Tarraykey -> "arraykey"
+    | Tresource -> "resource"
+    | Tnoreturn -> "noreturn"
+    | Tbool -> "bool"
+    | Tatom _id -> "atom")
+  | Tapply ((_p, id), _tyl) ->
+    let ids = String.split id ~on:'\\' in
+    List.last_exn ids
+  | Taccess (ty, ids) ->
+    let s = reinfer_type_to_string_exn (get_node ty) in
+    List.fold ids ~init:s ~f:(fun s (_p, id) -> Printf.sprintf "%s::%s" s id)
+  | _ -> raise Gi_reinfer_type_not_supported
+
+let reinfer_type_to_string_opt ty =
+  try Some (reinfer_type_to_string_exn ty)
+  with Gi_reinfer_type_not_supported -> None
+
+let must_reinfer_type tcopt (ty : decl_phase ty_) =
+  let reinfer_types = GlobalOptions.tco_gi_reinfer_types tcopt in
+  match reinfer_type_to_string_opt ty with
+  | None -> false
+  | Some ty_str -> List.mem reinfer_types ty_str ~equal:String.equal
+
+let hint_to_type_opt ~is_lambda env reason hint =
+  let ty = Option.map hint ~f:(Decl_hint.hint env) in
+  let tcopt = env.Decl_env.ctx.Provider_context.tcopt in
+  let tco_global_inference = GlobalOptions.tco_global_inference tcopt in
+  let mk_tvar r = mk (r, Tvar (Ident.tmp ())) in
+  if tco_global_inference && not is_lambda then
+    let ty =
+      match ty with
+      | None -> mk_tvar reason
+      | Some ty ->
+        (match deref ty with
+        | (r, Tapply (id, [ty']))
+          when String.equal (snd id) SN.Classes.cAwaitable ->
+          let (r', ty_') = deref ty' in
+          if must_reinfer_type tcopt ty_' then
+            mk (r, Tapply (id, [mk_tvar r']))
+          else
+            ty
+        | (r, ty_) ->
+          if must_reinfer_type tcopt ty_ then
+            mk_tvar r
+          else
+            ty)
+    in
+    Some ty
   else
-    global_inference_create_tyvar_from_hint env reason hint
-    |> Option.value ~default
+    ty
+
+let hint_to_type ~is_lambda ~default env reason hint =
+  Option.value (hint_to_type_opt ~is_lambda env reason hint) ~default
 
 let make_param_ty env ~is_lambda param =
   let ty =
     let r = Reason.Rwitness param.param_pos in
-    global_inference_create_tyvar
+    hint_to_type
       ~is_lambda
       ~default:(mk (r, Typing_defs.make_tany ()))
       env
@@ -137,39 +189,37 @@ let make_param_ty env ~is_lambda param =
     fp_rx_annotation = rx_annotation;
   }
 
-let ret_from_fun_kind ?(is_constructor = false) ~is_lambda env pos kind =
+let ret_from_fun_kind ?(is_constructor = false) ~is_lambda env pos kind hint =
   let default = mk (Reason.Rwitness pos, Typing_defs.make_tany ()) in
   let ret_ty () =
     if is_constructor then
       mk (Reason.Rwitness pos, Tprim Tvoid)
     else
-      global_inference_create_tyvar
-        ~is_lambda
-        ~default
-        env
-        (Reason.Rglobal_fun_ret pos)
-        None
+      hint_to_type ~is_lambda ~default env (Reason.Rglobal_fun_ret pos) hint
   in
-  match kind with
-  | Ast_defs.FGenerator ->
-    let r = Reason.Rret_fun_kind (pos, kind) in
-    mk
-      ( r,
-        Tapply ((pos, SN.Classes.cGenerator), [ret_ty (); ret_ty (); ret_ty ()])
-      )
-  | Ast_defs.FAsyncGenerator ->
-    let r = Reason.Rret_fun_kind (pos, kind) in
-    mk
-      ( r,
-        Tapply
-          ((pos, SN.Classes.cAsyncGenerator), [ret_ty (); ret_ty (); ret_ty ()])
-      )
-  | Ast_defs.FAsync ->
-    let r = Reason.Rret_fun_kind (pos, kind) in
-    mk (r, Tapply ((pos, SN.Classes.cAwaitable), [ret_ty ()]))
-  | Ast_defs.FSync
-  | Ast_defs.FCoroutine ->
-    ret_ty ()
+  match hint with
+  | None ->
+    (match kind with
+    | Ast_defs.FGenerator ->
+      let r = Reason.Rret_fun_kind (pos, kind) in
+      mk
+        ( r,
+          Tapply
+            ((pos, SN.Classes.cGenerator), [ret_ty (); ret_ty (); ret_ty ()]) )
+    | Ast_defs.FAsyncGenerator ->
+      let r = Reason.Rret_fun_kind (pos, kind) in
+      mk
+        ( r,
+          Tapply
+            ( (pos, SN.Classes.cAsyncGenerator),
+              [ret_ty (); ret_ty (); ret_ty ()] ) )
+    | Ast_defs.FAsync ->
+      let r = Reason.Rret_fun_kind (pos, kind) in
+      mk (r, Tapply ((pos, SN.Classes.cAwaitable), [ret_ty ()]))
+    | Ast_defs.FSync
+    | Ast_defs.FCoroutine ->
+      ret_ty ())
+  | Some _ -> ret_ty ()
 
 let type_param env (t : Nast.tparam) =
   {

@@ -143,8 +143,9 @@ let make_xhp_attr cv =
 let prop env cv =
   let cv_pos = fst cv.cv_id in
   let ty =
-    global_inference_create_tyvar_from_hint
+    hint_to_type_opt
       env
+      ~is_lambda:false
       (Reason.Rglobal_class_prop cv_pos)
       (hint_of_type_hint cv.cv_type)
   in
@@ -169,8 +170,9 @@ let prop env cv =
 and static_prop env c cv =
   let (cv_pos, cv_name) = cv.cv_id in
   let ty =
-    global_inference_create_tyvar_from_hint
+    hint_to_type_opt
       env
+      ~is_lambda:false
       (Reason.Rglobal_class_prop cv_pos)
       (hint_of_type_hint cv.cv_type)
   in
@@ -215,15 +217,13 @@ let method_type env m =
   let arity_min = minimum_arity m.m_params in
   let params = make_params env ~is_lambda:false m.m_params in
   let ret =
-    match hint_of_type_hint m.m_ret with
-    | None ->
-      ret_from_fun_kind
-        ~is_lambda:false
-        ~is_constructor:(String.equal (snd m.m_name) SN.Members.__construct)
-        env
-        (fst m.m_name)
-        m.m_fun_kind
-    | Some ret -> Decl_hint.hint env ret
+    ret_from_fun_kind
+      ~is_lambda:false
+      ~is_constructor:(String.equal (snd m.m_name) SN.Members.__construct)
+      env
+      (fst m.m_name)
+      m.m_fun_kind
+      (hint_of_type_hint m.m_ret)
   in
   let arity =
     match m.m_variadic with
@@ -258,15 +258,13 @@ let method_redeclaration_type env m =
   let arity_min = minimum_arity m.mt_params in
   let params = make_params env ~is_lambda:false m.mt_params in
   let ret =
-    match hint_of_type_hint m.mt_ret with
-    | None ->
-      ret_from_fun_kind
-        ~is_lambda:false
-        ~is_constructor:(String.equal (snd m.mt_name) SN.Members.__construct)
-        env
-        (fst m.mt_name)
-        m.mt_fun_kind
-    | Some ret -> Decl_hint.hint env ret
+    ret_from_fun_kind
+      ~is_lambda:false
+      ~is_constructor:(String.equal (snd m.mt_name) SN.Members.__construct)
+      env
+      (fst m.mt_name)
+      m.mt_fun_kind
+      (hint_of_type_hint m.mt_ret)
   in
   let arity =
     match m.mt_variadic with

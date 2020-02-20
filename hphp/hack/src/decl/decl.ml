@@ -258,9 +258,12 @@ and fun_decl_in_env env ~is_lambda f =
   let arity_min = minimum_arity f.f_params in
   let params = make_params env ~is_lambda f.f_params in
   let ret_ty =
-    match hint_of_type_hint f.f_ret with
-    | None -> ret_from_fun_kind ~is_lambda env (fst f.f_name) f.f_fun_kind
-    | Some ty -> Decl_hint.hint env ty
+    ret_from_fun_kind
+      ~is_lambda
+      env
+      (fst f.f_name)
+      f.f_fun_kind
+      (hint_of_type_hint f.f_ret)
   in
   let arity =
     match f.f_variadic with

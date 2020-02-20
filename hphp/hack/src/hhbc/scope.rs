@@ -3,34 +3,33 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 pub mod scope {
-    use env::{emitter::Emitter, iterator::Iter};
-    use instruction_sequence_rust::InstrSeq;
+    use env::{emitter::Emitter, iterator::Iter, local};
+    use instruction_sequence_rust::{InstrSeq, Result};
     use label_rust as label;
-    use local_rust as local;
 
     /// Run emit () in a new unnamed local scope, which produces three instruction
     /// blocks -- before, inner, after. If emit () registered any unnamed locals, the
     /// inner block will be wrapped in a try/catch that will unset these unnamed
     /// locals upon exception.
-    pub fn with_unnamed_locals<F>(emitter: &mut Emitter, emit: F) -> InstrSeq
+    pub fn with_unnamed_locals<F>(emitter: &mut Emitter, emit: F) -> Result
     where
-        F: FnOnce() -> (InstrSeq, InstrSeq, InstrSeq),
+        F: FnOnce(&mut Emitter) -> Result<(InstrSeq, InstrSeq, InstrSeq)>,
     {
         let next_local = emitter.local_gen_mut();
         next_local.store_current_state();
 
-        let (before, inner, after) = emit();
+        let (before, inner, after) = emit(emitter)?;
 
-        if !next_local.state_has_changed() {
-            InstrSeq::gather(vec![before, inner, after])
+        if !emitter.local_gen().state_has_changed() {
+            Ok(InstrSeq::gather(vec![before, inner, after]))
         } else {
-            let local_ids_to_unset = next_local.revert_state();
+            let local_ids_to_unset = emitter.local_gen_mut().revert_state();
             let unset_locals = unset_unnamed_locals(local_ids_to_unset);
-            wrap_inner_in_try_catch(
+            Ok(wrap_inner_in_try_catch(
                 emitter.label_gen_mut(),
                 (before, inner, after),
                 unset_locals,
-            )
+            ))
         }
     }
 
@@ -66,25 +65,26 @@ pub mod scope {
 
     /// An equivalent of with_unnamed_locals that allocates a single local and
     /// passes it to emit
-    pub fn with_unnamed_local<F>(emitter: &mut Emitter, emit: F) -> InstrSeq
+    pub fn with_unnamed_local<F>(emitter: &mut Emitter, emit: F) -> Result
     where
-        F: FnOnce(local::Type) -> (InstrSeq, InstrSeq, InstrSeq),
+        F: FnOnce(&mut Emitter, local::Type) -> Result<(InstrSeq, InstrSeq, InstrSeq)>,
     {
         let next_local = emitter.local_gen_mut();
         next_local.store_current_state();
+        let local = next_local.get_unnamed();
 
-        let (before, inner, after) = emit(next_local.get_unnamed());
+        let (before, inner, after) = emit(emitter, local)?;
 
-        if !next_local.state_has_changed() {
-            InstrSeq::gather(vec![before, inner, after])
+        if !emitter.local_gen().state_has_changed() {
+            Ok(InstrSeq::gather(vec![before, inner, after]))
         } else {
-            let local_ids_to_unset = next_local.revert_state();
+            let local_ids_to_unset = emitter.local_gen_mut().revert_state();
             let unset_locals = unset_unnamed_locals(local_ids_to_unset);
-            wrap_inner_in_try_catch(
+            Ok(wrap_inner_in_try_catch(
                 emitter.label_gen_mut(),
                 (before, inner, after),
                 unset_locals,
-            )
+            ))
         }
     }
 

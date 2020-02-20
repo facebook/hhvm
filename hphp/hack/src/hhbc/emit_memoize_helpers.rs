@@ -4,9 +4,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use emit_fatal_rust as emit_fatal;
+use env::local;
 use hhas_param_rust::HhasParam;
 use instruction_sequence_rust::{InstrSeq, Result};
-use local_rust as local;
 use oxidized::{aast::FunParam, pos::Pos};
 
 pub const MEMOIZE_SUFFIX: &str = "$memoize_impl";

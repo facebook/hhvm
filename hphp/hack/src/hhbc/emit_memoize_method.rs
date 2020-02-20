@@ -14,7 +14,7 @@ use emit_param_rust as emit_param;
 use emit_pos_rust::emit_pos_then;
 use env::{
     emitter::{Context, Emitter},
-    Env,
+    local, Env,
 };
 use hhas_attribute_rust::deprecation_info;
 use hhas_body_rust::HhasBody;
@@ -26,7 +26,6 @@ use hhbc_ast_rust::{FcallArgs, FcallFlags, SpecialClsRef};
 use hhbc_id_rust::{class, method, Id};
 use hhbc_string_utils_rust::reified;
 use instruction_sequence_rust::{InstrSeq, Result};
-use local_rust as local;
 use naming_special_names_rust::{members, user_attributes as ua};
 use options::{HhvmFlags, Options};
 use oxidized::{ast as T, namespace_env::Env as NamespaceEnv, pos::Pos};

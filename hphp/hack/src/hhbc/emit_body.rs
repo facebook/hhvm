@@ -19,7 +19,7 @@ use emit_pos_rust::emit_pos;
 use emit_type_hint_rust as emit_type_hint;
 use env::{
     emitter::{Context, Emitter},
-    Env,
+    local, Env,
 };
 use generator_rust as generator;
 use global_state::LazyState;
@@ -31,7 +31,6 @@ use hhbc_id_rust::{r#const, Id};
 use hhbc_string_utils_rust as string_utils;
 use instruction_sequence_rust::{Error, InstrSeq, Result};
 use label_rewriter_rust as label_rewriter;
-use local_rust as local;
 use naming_special_names_rust::classes;
 use options::CompilerFlags;
 use oxidized::{aast, ast as tast, ast_defs, doc_comment::DocComment, namespace_env, pos::Pos};

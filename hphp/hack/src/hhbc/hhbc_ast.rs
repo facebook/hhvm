@@ -5,9 +5,8 @@
 
 use hhbc_id_rust as hhbc_id;
 use label_rust as label;
-use local_rust as local;
 
-use env::iterator::Id as IterId;
+use env::{iterator::Id as IterId, local};
 use runtime::TypedValue;
 
 extern crate bitflags;

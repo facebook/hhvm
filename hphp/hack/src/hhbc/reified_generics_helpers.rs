@@ -8,7 +8,6 @@
 use emit_expression_rust::{emit_reified_arg, is_reified_tparam};
 use env::{emitter::Emitter, Env};
 use instruction_sequence_rust::*;
-use label_rust as label;
 use naming_special_names_rust as sn;
 use oxidized::{aast, ast_defs::Id, pos::Pos};
 

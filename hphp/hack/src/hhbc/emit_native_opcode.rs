@@ -8,10 +8,9 @@ use ast_scope_rust::Scope;
 use emit_body_rust as emit_body;
 use emit_fatal_rust as emit_fatal;
 use emit_param_rust as emit_param;
-use env::emitter::Emitter;
+use env::{emitter::Emitter, local};
 use hhas_body_rust::HhasBody;
 use instruction_sequence_rust::{Error::Unrecoverable, InstrSeq, Result};
-use local_rust as local;
 use oxidized::{aast, ast as tast, namespace_env, pos::Pos};
 
 pub fn emit_body<'a>(

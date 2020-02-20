@@ -4,11 +4,10 @@
 // LICENSE file in the "hack" directory of this source tree.
 #![allow(dead_code)]
 
-use env::iterator::Id as IterId;
+use env::{iterator::Id as IterId, local};
 use hhbc_ast_rust::*;
 use label_rust as label;
 use label_rust::Label;
-use local_rust as local;
 use oxidized::pos::Pos;
 use runtime::TypedValue;
 use thiserror::Error;
@@ -43,6 +42,12 @@ pub enum InstrSeq {
 impl Default for InstrSeq {
     fn default() -> Self {
         Self::Empty
+    }
+}
+
+impl From<(InstrSeq, InstrSeq)> for InstrSeq {
+    fn from((i1, i2): (InstrSeq, InstrSeq)) -> Self {
+        InstrSeq::gather(vec![i1, i2])
     }
 }
 
@@ -348,8 +353,28 @@ impl InstrSeq {
         Self::make_instr(Instruct::IIsset(InstructIsset::IsTypeL(id, op)))
     }
 
+    pub fn make_add() -> Self {
+        Self::make_instr(Instruct::IOp(InstructOperator::Add))
+    }
+
+    pub fn make_addo() -> Self {
+        Self::make_instr(Instruct::IOp(InstructOperator::AddO))
+    }
+
+    pub fn make_sub() -> Self {
+        Self::make_instr(Instruct::IOp(InstructOperator::Sub))
+    }
+
+    pub fn make_subo() -> Self {
+        Self::make_instr(Instruct::IOp(InstructOperator::SubO))
+    }
+
     pub fn make_not() -> Self {
         Self::make_instr(Instruct::IOp(InstructOperator::Not))
+    }
+
+    pub fn make_bitnot() -> Self {
+        Self::make_instr(Instruct::IOp(InstructOperator::BitNot))
     }
 
     pub fn make_sets() -> Self {

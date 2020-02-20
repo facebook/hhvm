@@ -176,15 +176,6 @@ and emit_stmt env (pos, stmt) =
         emit_set_range_expr env pos s kind exprl
       | None -> emit_ignored_expr ~pop_pos:pos env expr
     )
-  | A.Return (Some ((inner_pos, _), A.Await e)) ->
-    gather [emit_await env inner_pos e; Emit_pos.emit_pos pos; emit_return env]
-  | A.Return (Some (_, A.Yield_from e)) ->
-    gather
-      [
-        emit_yield_from_delegates env pos e;
-        Emit_pos.emit_pos pos;
-        emit_return env;
-      ]
   | A.Expr (ann, A.Await e) -> gather [emit_await env (fst ann) e; instr_popc]
   | A.Expr
       ( _,
@@ -227,6 +218,15 @@ and emit_stmt env (pos, stmt) =
         instr_popc;
       ]
   | A.Expr expr -> emit_ignored_expr ~pop_pos:pos env expr
+  | A.Return (Some ((inner_pos, _), A.Await e)) ->
+    gather [emit_await env inner_pos e; Emit_pos.emit_pos pos; emit_return env]
+  | A.Return (Some (_, A.Yield_from e)) ->
+    gather
+      [
+        emit_yield_from_delegates env pos e;
+        Emit_pos.emit_pos pos;
+        emit_return env;
+      ]
   | A.Return None -> gather [instr_null; Emit_pos.emit_pos pos; emit_return env]
   | A.Return (Some expr) ->
     gather [emit_expr env expr; Emit_pos.emit_pos pos; emit_return env]

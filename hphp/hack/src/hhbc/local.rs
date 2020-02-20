@@ -21,8 +21,8 @@ pub type Id = usize;
 
 #[derive(Default, Debug)]
 pub struct Gen {
-    counter: Counter,
-    dedicated: Dedicated,
+    pub(crate) counter: Counter,
+    pub(crate) dedicated: Dedicated,
 }
 
 impl Gen {
@@ -84,11 +84,11 @@ impl Gen {
         self.get_retval();
     }
 
-    pub fn scope<R, F: FnOnce() -> R>(&mut self, f: F) -> R {
+    pub fn scope<R, F: FnOnce(&mut Self) -> R>(&mut self, f: F) -> R {
         // TODO(hrust) copying HashMap may be a performance bottleneck
         // but we cannot do better without immutable collections
         let (counter, temp_map) = (self.counter, self.dedicated.temp_map.clone());
-        let result = f();
+        let result = f(self);
         self.counter = counter;
         self.dedicated.temp_map = temp_map;
         result
@@ -102,7 +102,7 @@ impl Gen {
     }
 
     pub fn state_has_changed(&self) -> bool {
-        STORED.with(|stored| self.counter.eq(&*stored.borrow().get_counter()))
+        STORED.with(|stored| self.counter.eq(*stored.borrow().get_counter()))
     }
 
     /// Revert to the old state stored in STORED, and return the ids of newly registered
@@ -110,7 +110,7 @@ impl Gen {
     pub fn revert_state(&mut self) -> Vec<Id> {
         STORED.with(|stored| {
             let stored: &Stored = &*stored.borrow();
-            let old_counter = stored.get_counter().clone();
+            let old_counter = *stored.get_counter();
             let old_temp_map = stored.get_temp_map().clone();
             let (Counter(new_id), Counter(old_id)) = (self.counter, old_counter);
             let local_ids_to_unset = vec![old_id; new_id];
@@ -155,14 +155,14 @@ impl Stored {
 // implementation details
 
 #[derive(Default, Debug)]
-struct Dedicated {
+pub(crate) struct Dedicated {
     label: Option<Type>,
     retval: Option<Type>,
-    temp_map: HashMap<String, Type>,
+    pub(crate) temp_map: HashMap<String, Type>,
 }
 
 #[derive(Default, Clone, Copy, Debug)]
-struct Counter(Id);
+pub(crate) struct Counter(Id);
 
 impl Counter {
     fn get_unnamed_id(&mut self, dedicated: &Dedicated) -> Id {
@@ -179,8 +179,8 @@ impl Counter {
         }
     }
 
-    fn eq(&self, other: &Self) -> bool {
+    fn eq(self, other: Self) -> bool {
         let (Counter(id1), Counter(id2)) = (self, other);
-        *id1 == *id2
+        id1 == id2
     }
 }

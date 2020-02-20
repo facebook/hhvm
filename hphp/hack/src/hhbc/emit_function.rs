@@ -12,7 +12,6 @@ use emit_body_rust::{self as emit_body};
 use emit_memoize_helpers_rust as emit_memoize_helpers;
 use env::emitter::Emitter;
 use hhas_attribute_rust::{self as hhas_attribute, HhasAttribute};
-use hhas_body_rust::HhasBody;
 use hhas_function_rust::{self as hhas_function, HhasFunction};
 use hhbc_id_rust::{self as hhbc_id, Id};
 use instruction_sequence_rust::{InstrSeq, Result};

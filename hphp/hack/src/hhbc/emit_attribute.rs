@@ -14,10 +14,6 @@ use naming_special_names_rust as naming_special_names;
 use oxidized::{ast as a, namespace_env::Env as Namespace};
 use runtime::TypedValue;
 
-extern crate itertools;
-
-use itertools::*;
-
 pub fn from_asts(
     e: &mut Emitter,
     namespace: &Namespace,

@@ -3,11 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-#![allow(dead_code)]
+#![allow(dead_code, unused_variables)]
 
 use crate::try_finally_rewriter as tfr;
 
-use emit_expression_rust::{self as emit_expr, emit_await, emit_expr, Setrange};
+use emit_expression_rust::{self as emit_expr, emit_await, emit_expr, LValOp, Setrange};
 use emit_fatal_rust as emit_fatal;
 use emit_pos_rust::{emit_pos, emit_pos_then};
 use env::{emitter::Emitter, Env};
@@ -17,6 +17,7 @@ use instruction_sequence_rust::{Error::Unrecoverable, InstrSeq, Result};
 use label_rust::Label;
 use naming_special_names_rust::special_functions;
 use oxidized::{aast as a, ast as tast, ast_defs, pos::Pos};
+use scope_rust::scope;
 
 use lazy_static::lazy_static;
 use regex::Regex;
@@ -148,12 +149,12 @@ fn set_bytes_kind(name: &str) -> Option<Setrange> {
 pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
     let pos = &stmt.0;
     match &stmt.1 {
-        a::Stmt_::Expr(e_) => match &(*e_).1 {
+        a::Stmt_::Expr(e_) => match &e_.1 {
             a::Expr_::YieldBreak => Ok(InstrSeq::gather(vec![
                 InstrSeq::make_null(),
                 emit_return(e, env)?,
             ])),
-            a::Expr_::YieldFrom(_) => Ok(InstrSeq::gather(vec![
+            a::Expr_::YieldFrom(e_) => Ok(InstrSeq::gather(vec![
                 emit_yield_from_delegates(e, env, pos, e_)?,
                 emit_pos(e, pos),
                 InstrSeq::make_popc(),
@@ -163,11 +164,11 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
                 InstrSeq::make_popc(),
             ])),
             a::Expr_::Call(c) => {
-                if let (_, a::Expr(_, a::Expr_::Id(sid)), _, exprs, None) = &**c {
-                    let expr = &(**c).1;
-                    let ft = hhbc_id::function::Type::from_ast_name(&(*sid).1);
+                if let (_, a::Expr(_, a::Expr_::Id(sid)), _, exprs, None) = c.as_ref() {
+                    let expr = &c.1;
+                    let ft = hhbc_id::function::Type::from_ast_name(&sid.1);
                     let fname = ft.to_raw_string();
-                    return if fname.eq_ignore_ascii_case("unset") {
+                    if fname.eq_ignore_ascii_case("unset") {
                         Ok(InstrSeq::gather(
                             exprs
                                 .iter()
@@ -178,7 +179,7 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
                         if let Some(kind) = set_bytes_kind(fname) {
                             let (args, arg) = match exprs.last() {
                                 Some(a::Expr(_, a::Expr_::Callconv(cc))) => {
-                                    let (ast_defs::ParamKind::Pinout, ex) = &**cc;
+                                    let (ast_defs::ParamKind::Pinout, ex) = cc.as_ref();
                                     (&exprs.as_slice()[..exprs.len() - 1], Some(ex))
                                 }
                                 _ => (exprs.as_slice(), None),
@@ -187,13 +188,78 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
                         } else {
                             emit_expr::emit_ignored_expr(e, env, pos, expr)
                         }
-                    };
-                };
-                unimplemented!("TODO(hrust)")
+                    }
+                } else {
+                    emit_expr::emit_ignored_expr(e, env, pos, e_)
+                }
             }
-            _ => unimplemented!("TODO(hrust)"),
+            a::Expr_::Binop(bop) => {
+                if let (ast_defs::Bop::Eq(None), e_lhs, e_rhs) = bop.as_ref() {
+                    if let Some(e_await) = e_rhs.1.as_await() {
+                        let await_pos = &e_rhs.0;
+                        if let Some(l) = e_lhs.1.as_list() {
+                            let awaited_instrs = emit_await(e, env, await_pos, e_await)?;
+                            let has_elements = l.iter().any(|e| !e.1.is_omitted());
+                            if has_elements {
+                                scope::with_unnamed_local(e, |e, temp| {
+                                    Ok((
+                                        InstrSeq::gather(vec![
+                                            awaited_instrs,
+                                            InstrSeq::make_popl(temp.clone()),
+                                        ]),
+                                        emit_expr::emit_lval_op_list(
+                                            e,
+                                            env,
+                                            pos,
+                                            Some(temp.clone()),
+                                            &[],
+                                            e_lhs,
+                                            false,
+                                        )?
+                                        .into(),
+                                        InstrSeq::make_unsetl(temp),
+                                    ))
+                                })
+                            } else {
+                                Ok(InstrSeq::gather(vec![
+                                    awaited_instrs,
+                                    InstrSeq::make_popc(),
+                                ]))
+                            }
+                        } else {
+                            emit_await_assignment(e, env, await_pos, e_lhs, e_await)
+                        }
+                    } else if let Some(e_yeild) = e_rhs.1.as_yield_from() {
+                        e.local_scope(|e| {
+                            let temp = e.local_gen_mut().get_unnamed();
+                            let rhs_instrs = InstrSeq::make_pushl(temp.clone());
+                            Ok(InstrSeq::gather(vec![
+                                emit_yield_from_delegates(e, env, pos, e_yeild)?,
+                                InstrSeq::make_setl(temp),
+                                InstrSeq::make_popc(),
+                                emit_expr::emit_lval_op_nonlist(
+                                    e,
+                                    env,
+                                    pos,
+                                    LValOp::Set,
+                                    e_lhs,
+                                    rhs_instrs,
+                                    1,
+                                    false,
+                                )?,
+                                InstrSeq::make_popc(),
+                            ]))
+                        })
+                    } else {
+                        emit_expr::emit_ignored_expr(e, env, pos, e_)
+                    }
+                } else {
+                    emit_expr::emit_ignored_expr(e, env, pos, e_)
+                }
+            }
+            _ => emit_expr::emit_ignored_expr(e, env, pos, e_),
         },
-        a::Stmt_::Return(r_opt) => match &**r_opt {
+        a::Stmt_::Return(r_opt) => match r_opt.as_ref() {
             Some(r) => {
                 let expr_instr = if let Some(e_) = r.1.as_await() {
                     emit_await(e, env, &r.0, e_)?
@@ -384,4 +450,14 @@ fn emit_temp_break(e: &mut Emitter, env: &mut Env, pos: &Pos, level: Level) -> I
 fn emit_temp_continue(e: &mut Emitter, env: &mut Env, pos: &Pos, level: Level) -> InstrSeq {
     use tfr::EmitBreakOrContinueFlags as Flags;
     tfr::emit_break_or_continue(e, Flags::empty(), env, pos, level)
+}
+
+fn emit_await_assignment(
+    e: &mut Emitter,
+    env: &mut Env,
+    pos: &Pos,
+    lval: &tast::Expr,
+    r: &tast::Expr,
+) -> Result {
+    unimplemented!()
 }

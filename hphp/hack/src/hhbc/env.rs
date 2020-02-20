@@ -6,6 +6,7 @@
 pub mod emitter; // emitter is public API for mutating state
 pub mod iterator;
 pub mod jump_targets;
+pub mod local;
 
 use ast_scope_rust::{Scope, ScopeItem};
 use emitter::Emitter;

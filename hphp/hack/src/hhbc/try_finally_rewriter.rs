@@ -12,12 +12,11 @@ use ast_scope_rust as ast_scope;
 use emit_expression_rust as emit_expression;
 use emit_fatal_rust as emit_fatal;
 use emit_pos_rust::emit_pos;
-use env::{emitter::Emitter, iterator::Iter, jump_targets as jt, Env};
+use env::{emitter::Emitter, iterator::Iter, jump_targets as jt, local, Env};
 use hhbc_ast_rust::{self as hhbc_ast, Instruct};
 use instruction_sequence_rust::{InstrSeq, Result};
 use label::Label;
 use label_rust as label;
-use local_rust as local;
 use oxidized::pos::Pos;
 
 use bitflags::bitflags;

@@ -3148,7 +3148,7 @@ and emit_base_worker
 and emit_ignored_expr env ?(pop_pos : Pos.t = Pos.none) (e : Tast.expr) =
   match snd e with
   | A.Expr_list es -> gather @@ List.map ~f:(emit_ignored_expr env ~pop_pos) es
-  | _ -> gather [emit_expr env e; emit_pos_then pop_pos @@ instr_popc]
+  | _ -> gather [emit_expr env e; emit_pos_then pop_pos instr_popc]
 
 (*
  * Replaces erased generics with underscores or
@@ -4542,17 +4542,10 @@ and from_unop op =
 
 and emit_unop env pos op e =
   match op with
-  | Ast_defs.Utild ->
+  | Ast_defs.Utild
+  | Ast_defs.Unot ->
     gather [emit_expr env e; emit_pos_then pos @@ from_unop op]
-  | Ast_defs.Unot -> gather [emit_expr env e; emit_pos_then pos @@ from_unop op]
-  | Ast_defs.Uplus ->
-    gather
-      [
-        emit_pos pos;
-        instr (ILitConst (Int Int64.zero));
-        emit_expr env e;
-        emit_pos_then pos @@ from_unop op;
-      ]
+  | Ast_defs.Uplus
   | Ast_defs.Uminus ->
     gather
       [

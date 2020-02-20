@@ -3,8 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use crate::local;
 use label_rust as label;
-use local_rust as local;
 use options::Options;
 
 use super::iterator::Iter;
@@ -79,12 +79,25 @@ impl Emitter {
         &mut self.local_gen
     }
 
+    pub fn local_gen(&self) -> &local::Gen {
+        &self.local_gen
+    }
+
     pub fn refined_state_mut(&mut self) -> StateRef {
         StateRef {
             label_gen: &mut self.label_gen,
             local_gen: &mut self.local_gen,
             iterator: &mut self.iterator,
         }
+    }
+
+    pub fn local_scope<R, F: FnOnce(&mut Self) -> R>(&mut self, f: F) -> R {
+        let counter = self.local_gen.counter;
+        let temp_map = self.local_gen.dedicated.temp_map.clone();
+        let r = f(self);
+        self.local_gen.counter = counter;
+        self.local_gen.dedicated.temp_map = temp_map;
+        r
     }
 }
 

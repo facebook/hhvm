@@ -9,15 +9,14 @@ use ast_constant_folder_rust as ast_constant_folder;
 use ast_scope_rust::Scope;
 use emit_fatal_rust as emit_fatal;
 use emit_type_constant_rust as emit_type_constant;
-use env::{emitter::Emitter, Env};
+use env::{emitter::Emitter, local, Env};
 use hhbc_ast_rust::*;
 use hhbc_id_rust::{class, method, r#const, Id};
 use hhbc_string_utils_rust as string_utils;
 use instruction_sequence_rust::{Error::Unrecoverable, InstrSeq, Result};
 use label_rust::Label;
-use local_rust as local;
 use naming_special_names_rust::{pseudo_consts, special_idents, superglobals, user_attributes};
-use options::{HhvmFlags, Options};
+use options::{HhvmFlags, LangFlags, Options};
 use oxidized::{aast, aast_defs, ast as tast, ast_defs, local_id, pos::Pos};
 use scope_rust::scope;
 
@@ -349,7 +348,7 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
             ]))
         }
         Expr_::ClassConst(e) => emit_class_const(env, pos, &**e),
-        Expr_::Unop(e) => emit_unop(env, pos, &**e),
+        Expr_::Unop(e) => emit_unop(emitter, env, pos, &**e),
         Expr_::Binop(e) => emit_binop(env, pos, &**e),
         Expr_::Pipe(e) => emit_pipe(env, &**e),
         Expr_::Is(is_expr) => {
@@ -580,7 +579,7 @@ fn inline_gena_call(emitter: &mut Emitter, env: &Env, arg: &tast::Expr) -> Resul
     let async_eager_label = emitter.label_gen_mut().next_regular();
     let hack_arr_dv_arrs = hack_arr_dv_arrs(emitter.options());
 
-    Ok(scope::with_unnamed_local(emitter, |arr_local| {
+    scope::with_unnamed_local(emitter, |_, arr_local| {
         let before = InstrSeq::gather(vec![
             load_arr,
             if hack_arr_dv_arrs {
@@ -626,8 +625,8 @@ fn inline_gena_call(emitter: &mut Emitter, env: &Env, arg: &tast::Expr) -> Resul
 
         let after = InstrSeq::make_pushl(arr_local);
 
-        (before, inner, after)
-    }))
+        Ok((before, inner, after))
+    })
 }
 
 fn emit_iter<F: FnOnce(local::Type, local::Type) -> InstrSeq>(
@@ -765,8 +764,104 @@ fn emit_class_const(env: &Env, pos: &Pos, (ci, id): &(tast::ClassId, ast_defs::P
     unimplemented!("TODO(hrust)")
 }
 
-fn emit_unop(env: &Env, pos: &Pos, (uop, e): &(ast_defs::Uop, tast::Expr)) -> Result {
-    unimplemented!("TODO(hrust)")
+fn emit_unop(
+    e: &mut Emitter,
+    env: &Env,
+    pos: &Pos,
+    (uop, expr): &(ast_defs::Uop, tast::Expr),
+) -> Result {
+    use ast_defs::Uop as U;
+    match uop {
+        U::Utild | U::Unot => Ok(InstrSeq::gather(vec![
+            emit_expr(e, env, expr)?,
+            emit_pos_then(e, pos, from_unop(e.options(), uop)?)?,
+        ])),
+        U::Uplus | U::Uminus => Ok(InstrSeq::gather(vec![
+            emit_pos(e, pos)?,
+            InstrSeq::make_int(0),
+            emit_expr(e, env, expr)?,
+            emit_pos_then(e, pos, from_unop(e.options(), uop)?)?,
+        ])),
+        U::Uincr | U::Udecr | U::Upincr | U::Updecr => emit_lval_op(
+            e,
+            env,
+            pos,
+            LValOp::IncDec(unop_to_incdec_op(e.options(), uop)?),
+            expr,
+            None,
+            false,
+        ),
+        U::Usilence => e.local_scope(|e| {
+            let temp_local = e.local_gen_mut().get_unnamed();
+            Ok(InstrSeq::gather(vec![
+                emit_pos(e, pos)?,
+                InstrSeq::make_silence_start(temp_local.clone()),
+                {
+                    let try_instrs = emit_expr(e, env, expr)?;
+                    let catch_instrs = InstrSeq::gather(vec![
+                        emit_pos(e, pos)?,
+                        InstrSeq::make_silence_end(temp_local.clone()),
+                    ]);
+                    InstrSeq::create_try_catch(
+                        e.label_gen_mut(),
+                        None,
+                        false, /* skip_throw */
+                        try_instrs,
+                        catch_instrs,
+                    )
+                },
+                emit_pos(e, pos)?,
+                InstrSeq::make_silence_end(temp_local),
+            ]))
+        }),
+    }
+}
+
+fn unop_to_incdec_op(opts: &Options, op: &ast_defs::Uop) -> Result<IncdecOp> {
+    let check_int_overflow = opts
+        .hhvm
+        .hack_lang_flags
+        .contains(LangFlags::CHECK_INT_OVERFLOW);
+    let if_check_or = |op1, op2| Ok(if check_int_overflow { op1 } else { op2 });
+    use {ast_defs::Uop as U, IncdecOp as I};
+    match op {
+        U::Uincr => if_check_or(I::PreIncO, I::PreInc),
+        U::Udecr => if_check_or(I::PreDecO, I::PreDec),
+        U::Upincr => if_check_or(I::PostIncO, I::PostInc),
+        U::Updecr => if_check_or(I::PostDecO, I::PostDec),
+        _ => Err(Unrecoverable("invalid incdec op".into())),
+    }
+}
+
+fn from_unop(opts: &Options, op: &ast_defs::Uop) -> Result {
+    let check_int_overflow = opts
+        .hhvm
+        .hack_lang_flags
+        .contains(LangFlags::CHECK_INT_OVERFLOW);
+    use ast_defs::Uop as U;
+    Ok(match op {
+        U::Utild => InstrSeq::make_bitnot(),
+        U::Unot => InstrSeq::make_not(),
+        U::Uplus => {
+            if check_int_overflow {
+                InstrSeq::make_addo()
+            } else {
+                InstrSeq::make_add()
+            }
+        }
+        U::Uminus => {
+            if check_int_overflow {
+                InstrSeq::make_addo()
+            } else {
+                InstrSeq::make_add()
+            }
+        }
+        _ => {
+            return Err(Unrecoverable(
+                "this unary operation cannot be translated".into(),
+            ))
+        }
+    })
 }
 
 fn emit_binop(
@@ -948,6 +1043,43 @@ pub fn emit_ignored_expr(emitter: &mut Emitter, env: &Env, pos: &Pos, expr: &tas
             emit_pos_then(emitter, pos, InstrSeq::make_popc())?,
         ]))
     }
+}
+
+pub fn emit_lval_op(
+    e: &mut Emitter,
+    env: &Env,
+    pos: &Pos,
+    op: LValOp,
+    expr1: &tast::Expr,
+    expr2: Option<&tast::Expr>,
+    null_coalesce_assignment: bool,
+) -> Result {
+    unimplemented!()
+}
+
+pub fn emit_lval_op_list(
+    e: &mut Emitter,
+    env: &Env,
+    outer_pos: &Pos,
+    local: Option<local::Type>,
+    indices: &[isize],
+    expr: &tast::Expr,
+    last_usage: bool,
+) -> Result<(InstrSeq, InstrSeq)> {
+    unimplemented!()
+}
+
+pub fn emit_lval_op_nonlist(
+    e: &mut Emitter,
+    env: &Env,
+    outer_pos: &Pos,
+    op: LValOp,
+    expr: &tast::Expr,
+    rhs_instrs: InstrSeq,
+    rhs_stack_size: usize,
+    null_coalesce_assignment: bool,
+) -> Result {
+    unimplemented!()
 }
 
 pub fn emit_reified_arg(

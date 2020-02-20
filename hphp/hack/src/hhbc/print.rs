@@ -13,7 +13,7 @@ pub use write::{Error, IoWrite, Result, Write};
 
 use context::Context;
 use core_utils_rust::add_ns;
-use env::Env as BodyEnv;
+use env::{local::Type as Local, Env as BodyEnv};
 use escaper::escape;
 use hhas_attribute_rust::{self as hhas_attribute, HhasAttribute};
 use hhas_body_rust::HhasBody;
@@ -37,7 +37,6 @@ use hhbc_string_utils_rust::{
 };
 use instruction_sequence_rust::InstrSeq;
 use label_rust::Label;
-use local_rust::Type as Local;
 use oxidized::{ast, ast_defs, doc_comment::DocComment};
 use runtime::TypedValue;
 use write::*;

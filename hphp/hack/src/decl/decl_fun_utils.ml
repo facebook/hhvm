@@ -77,7 +77,6 @@ let rec reinfer_type_to_string_exn ty =
   | Tmixed -> "mixed"
   | Tnonnull -> "nonnull"
   | Tdynamic -> "dynamic"
-  | Tnothing -> "nothing"
   | Tthis -> "this"
   | Tprim prim ->
     (match prim with

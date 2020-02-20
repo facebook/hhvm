@@ -34,19 +34,19 @@ let get_all_ancestors ctx class_name =
   helper [class_name] [] SSet.empty
 
 let get_docblock_for_member ctx class_info member_name =
-  Option.Monad_infix.(
-    Cls.get_method class_info member_name >>= fun member ->
-    match Typing_defs.get_node @@ Lazy.force member.Typing_defs.ce_type with
-    | Typing_defs.Tfun _ ->
-      let pos = Lazy.force member.Typing_defs.ce_pos in
-      let path = Pos.filename pos in
-      let entry = Provider_utils.get_entry_VOLATILE ~ctx ~path in
-      ServerSymbolDefinition.get_definition_cst_node_ctx
-        ~entry
-        ~kind:SymbolDefinition.Method
-        ~pos
-      >>= Docblock_finder.get_docblock
-    | _ -> None)
+  let open Option.Monad_infix in
+  Cls.get_method class_info member_name >>= fun member ->
+  match Typing_defs.get_node @@ Lazy.force member.Typing_defs.ce_type with
+  | Typing_defs.Tfun _ ->
+    let pos = Lazy.force member.Typing_defs.ce_pos in
+    let path = Pos.filename pos in
+    let (_ctx, entry) = Provider_utils.add_entry ~ctx ~path in
+    ServerSymbolDefinition.get_definition_cst_node_ctx
+      ~entry
+      ~kind:SymbolDefinition.Method
+      ~pos
+    >>= Docblock_finder.get_docblock
+  | _ -> None
 
 let render_ancestor_docblocks docblocks =
   let docblocks_to_ancestor =
@@ -271,8 +271,8 @@ let go_docblock_for_symbol
       [DocblockService.Markdown msg]
     | Some location ->
       DocblockService.(
-        let entry =
-          Provider_utils.get_entry_VOLATILE
+        let (ctx, entry) =
+          Provider_utils.add_entry
             ~ctx
             ~path:(Relative_path.create_detect_prefix location.dbs_filename)
         in

@@ -104,8 +104,8 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     (env, result)
   | DOCBLOCK_AT (filename, line, column, _, kind) ->
     let ctx = Provider_utils.ctx_from_server_env env in
-    let entry =
-      Provider_utils.get_entry_VOLATILE
+    let (ctx, entry) =
+      Provider_utils.add_entry
         ~ctx
         ~path:(Relative_path.create_detect_prefix filename)
     in

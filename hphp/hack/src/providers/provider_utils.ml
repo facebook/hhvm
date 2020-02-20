@@ -154,16 +154,6 @@ let find_entry ~(ctx : Provider_context.t) ~(path : Relative_path.t) :
     Provider_context.entry option =
   Relative_path.Map.find_opt ctx.Provider_context.entries path
 
-let get_entry_VOLATILE ~(ctx : Provider_context.t) ~(path : Relative_path.t) :
-    Provider_context.entry =
-  match find_entry ~ctx ~path with
-  | Some entry -> entry
-  | None ->
-    let file_input =
-      ServerCommandTypes.FileName (Relative_path.to_absolute path)
-    in
-    internal_load_entry ~path ~file_input
-
 type _ compute_tast_mode =
   | Compute_tast_only : Compute_tast.t compute_tast_mode
   | Compute_tast_and_errors : Compute_tast_and_errors.t compute_tast_mode

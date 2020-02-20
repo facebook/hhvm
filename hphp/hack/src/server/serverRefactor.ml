@@ -313,8 +313,8 @@ let get_deprecated_wrapper_patch ~filename ~definition ~ctx new_name =
   *)
         let (_, col_start_plus1, _, _) = Pos.destruct_range definition.span in
         let col_start = col_start_plus1 - 1 in
-        let entry =
-          Provider_utils.get_entry_VOLATILE
+        let (_ctx, entry) =
+          Provider_utils.add_entry
             ~ctx
             ~path:(Relative_path.create_detect_prefix filename)
         in

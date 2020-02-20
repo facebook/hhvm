@@ -150,7 +150,7 @@ prefixed_flags!(
     CompilerFlags,
     "hack.compiler.",
     CONSTANT_FOLDING,
-    ENFORCE_GENERICS_UB,
+    EMIT_GENERICS_UB,
     OPTIMIZE_NULL_CHECKS,
     RELABEL,
 );
@@ -166,14 +166,14 @@ prefixed_flags!(
     ARRAY_PROVENANCE,
     EMIT_CLS_METH_POINTERS,
     EMIT_FUNC_POINTERS,
+    EMIT_GENERICS_UB,
     EMIT_INST_METH_POINTERS,
     EMIT_METH_CALLER_FUNC_POINTERS,
     ENABLE_INTRINSICS_EXTENSION,
-    ENFORCE_GENERICS_UB,
-    LOG_EXTERN_COMPILER_PERF,
-    JIT_ENABLE_RENAME_FUNCTION,
     HACK_ARR_COMPAT_NOTICES,
     HACK_ARR_DV_ARRS,
+    JIT_ENABLE_RENAME_FUNCTION,
+    LOG_EXTERN_COMPILER_PERF,
     RX_IS_ENABLED,
 );
 impl Default for HhvmFlags {
@@ -443,11 +443,6 @@ impl Options {
             .contains(EvalFlags::DISASSEMBLER_SOURCE_MAPPING)
     }
 
-    pub fn enforce_generic_ub(&self) -> bool {
-        self.hack_compiler_flags
-            .contains(CompilerFlags::ENFORCE_GENERICS_UB)
-    }
-
     pub fn array_provenance(&self) -> bool {
         self.hhvm.flags.contains(HhvmFlags::ARRAY_PROVENANCE)
     }
@@ -595,6 +590,9 @@ mod tests {
   "hhvm.emit_func_pointers": {
     "global_value": true
   },
+  "hhvm.emit_generics_ub": {
+    "global_value": false
+  },
   "hhvm.emit_inst_meth_pointers": {
     "global_value": false
   },
@@ -602,9 +600,6 @@ mod tests {
     "global_value": false
   },
   "hhvm.enable_intrinsics_extension": {
-    "global_value": false
-  },
-  "hhvm.enforce_generics_ub": {
     "global_value": false
   },
   "hhvm.hack.lang.abstract_static_props": {
@@ -1015,7 +1010,7 @@ bitflags! {
         const ABSTRACT_STATIC_PROPS = 1 << 41;
         const DISABLE_UNSET_CLASS_CONST = 1 << 42;
         const DISALLOW_FUNC_PTRS_IN_CONSTANTS = 1 << 43;
-        const ENFORCE_GENERICS_UB = 1 << 44;
+        const EMIT_GENERICS_UB = 1 << 44;
         const CHECK_INT_OVERFLOW = 1 << 45;
         const ENABLE_XHP_CLASS_MODIFIER = 1 << 46;
     }

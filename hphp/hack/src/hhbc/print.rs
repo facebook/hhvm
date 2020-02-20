@@ -262,7 +262,11 @@ fn print_fun_def<W: Write>(
     let body = &fun_def.body;
     newline(w)?;
     w.write(".function ")?;
-    if ctx.opts.enforce_generic_ub() {
+    if ctx
+        .opts
+        .hack_compiler_flags
+        .contains(options::CompilerFlags::EMIT_GENERICS_UB)
+    {
         print_upper_bounds(w, &body.upper_bounds)?;
     }
     print_fun_attrs(ctx, w, fun_def)?;
@@ -642,7 +646,11 @@ fn print_class_def<W: Write>(
 ) -> Result<(), W::Error> {
     newline(w)?;
     w.write(".class ")?;
-    if ctx.opts.enforce_generic_ub() {
+    if ctx
+        .opts
+        .hack_compiler_flags
+        .contains(options::CompilerFlags::EMIT_GENERICS_UB)
+    {
         print_upper_bounds(w, &class_def.upper_bounds)?;
     }
     print_class_special_attributes(ctx, w, class_def)?;

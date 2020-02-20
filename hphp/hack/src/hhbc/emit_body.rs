@@ -379,7 +379,7 @@ fn make_upper_bounds(
     if emitter
         .options()
         .hack_compiler_flags
-        .contains(CompilerFlags::ENFORCE_GENERICS_UB)
+        .contains(CompilerFlags::EMIT_GENERICS_UB)
     {
         emit_generics_upper_bounds(immediate_tparams, skip_awaitable)
     } else {

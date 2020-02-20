@@ -90,7 +90,7 @@ val empty_for_debugging : tcopt:TypecheckerOptions.t -> t
 val map_tcopt : t -> f:(TypecheckerOptions.t -> TypecheckerOptions.t) -> t
 
 (** Get the [FileInfo.t] associated with the given [entry]. *)
-val get_fileinfo : entry:entry -> FileInfo.t
+val get_file_info : entry:entry -> FileInfo.t
 
 (** Get the current global context (which is set with
 [Provider_utils.respect_but_quarantine_unsaved_changes]), if any. Only one

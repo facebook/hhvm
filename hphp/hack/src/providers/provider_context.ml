@@ -58,7 +58,7 @@ let map_tcopt (t : t) ~(f : TypecheckerOptions.t -> TypecheckerOptions.t) : t =
 
 let global_context : t option ref = ref None
 
-let get_fileinfo ~(entry : entry) : FileInfo.t =
+let get_file_info ~(entry : entry) : FileInfo.t =
   let (funs, classes, record_defs, typedefs, consts) =
     Nast.get_defs entry.ast
   in

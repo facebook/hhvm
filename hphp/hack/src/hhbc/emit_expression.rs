@@ -935,13 +935,19 @@ struct EmitBaseArgs {
     rhs_stack_size: StackIndex,
 }
 
-pub fn emit_ignored_expr(
-    _emitter: &mut Emitter,
-    _env: &Env,
-    _pos: &Pos,
-    _expr: &tast::Expr,
-) -> Result {
-    unimplemented!("TODO(hrust)")
+pub fn emit_ignored_expr(emitter: &mut Emitter, env: &Env, pos: &Pos, expr: &tast::Expr) -> Result {
+    if let Some(es) = expr.1.as_expr_list() {
+        Ok(InstrSeq::gather(
+            es.iter()
+                .map(|e| emit_ignored_expr(emitter, env, pos, e))
+                .collect::<Result<Vec<_>>>()?,
+        ))
+    } else {
+        Ok(InstrSeq::gather(vec![
+            emit_expr(emitter, env, expr)?,
+            emit_pos_then(emitter, pos, InstrSeq::make_popc())?,
+        ]))
+    }
 }
 
 pub fn emit_reified_arg(

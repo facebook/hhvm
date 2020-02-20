@@ -37,6 +37,7 @@ use hhbc_string_utils_rust::{
 };
 use instruction_sequence_rust::InstrSeq;
 use label_rust::Label;
+use local_rust::Type as Local;
 use oxidized::{ast, ast_defs, doc_comment::DocComment};
 use runtime::TypedValue;
 use write::*;
@@ -936,10 +937,13 @@ fn print_instr<W: Write>(w: &mut W, instr: &Instruct) -> Result<(), W::Error> {
         IOp(op) => print_op(w, op),
         IContFlow(cf) => print_control_flow(w, cf),
         ICall(c) => print_call(w, c),
-        IMisc(_) => not_impl!(),
+        IMisc(misc) => print_misc(w, misc),
         IGet(_) => not_impl!(),
-        IMutator(_) => not_impl!(),
-        ILabel(_) => not_impl!(),
+        IMutator(mutator) => print_mutator(w, mutator),
+        ILabel(l) => {
+            print_label(w, l)?;
+            w.write(":")
+        }
         IIsset(_) => not_impl!(),
         IBase(_) => not_impl!(),
         IFinal(_) => not_impl!(),
@@ -947,10 +951,68 @@ fn print_instr<W: Write>(w: &mut W, instr: &Instruct) -> Result<(), W::Error> {
         IComment(s) => concat_str_by(w, " ", ["#", s.as_str()]),
         ISrcLoc(_) => not_impl!(),
         IAsync(_) => not_impl!(),
-        IGenerator(_) => not_impl!(),
+        IGenerator(gen) => print_gen_creation_execution(w, gen),
         IIncludeEvalDefine(ed) => print_include_eval_define(w, ed),
         IGenDelegation(_) => not_impl!(),
         _ => Err(Error::fail("invalid instruction")),
+    }
+}
+
+fn print_mutator<W: Write>(w: &mut W, mutator: &InstructMutator) -> Result<(), W::Error> {
+    use InstructMutator as M;
+    match mutator {
+        M::SetL(local) => {
+            w.write("SetL ")?;
+            print_local(w, local)
+        }
+        _ => not_impl!(),
+    }
+}
+
+fn print_gen_creation_execution<W: Write>(
+    w: &mut W,
+    gen: &GenCreationExecution,
+) -> Result<(), W::Error> {
+    use GenCreationExecution as G;
+    match gen {
+        G::CreateCont => w.write("CreateCont"),
+        G::ContEnter => w.write("ContEnter"),
+        G::ContRaise => w.write("ContRaise"),
+        G::Yield => w.write("Yield"),
+        G::YieldK => w.write("YieldK"),
+        G::ContCheck(CheckStarted::IgnoreStarted) => w.write("ContCheck IgnoreStarted"),
+        G::ContCheck(CheckStarted::CheckStarted) => w.write("ContCheck CheckStarted"),
+        G::ContValid => w.write("ContValid"),
+        G::ContKey => w.write("ContKey"),
+        G::ContGetReturn => w.write("ContGetReturn"),
+        G::ContCurrent => w.write("ContCurrent"),
+    }
+}
+
+fn print_misc<W: Write>(w: &mut W, misc: &InstructMisc) -> Result<(), W::Error> {
+    use InstructMisc as M;
+    match misc {
+        M::This => w.write("This"),
+        M::CheckThis => w.write("CheckThis"),
+        M::FuncNumArgs => w.write("FuncNumArgs"),
+        M::ChainFaults => w.write("ChainFaults"),
+        M::VerifyRetTypeC => w.write("VerifyRetTypeC"),
+        M::VerifyRetTypeTS => w.write("VerifyRetTypeTS"),
+        M::Self_ => w.write("Self_"),
+        M::Parent => w.write("Parent"),
+        M::LateBoundCls => w.write("LateBoundCls"),
+        M::ClassName => w.write("ClassName"),
+        M::RecordReifiedGeneric => w.write("RecordReifiedGeneric"),
+        M::CheckReifiedGenericMismatch => w.write("CheckReifiedGenericMismatch"),
+        M::NativeImpl => w.write("NativeImpl"),
+        M::AKExists => w.write("AKExists"),
+        M::Idx => w.write("Idx"),
+        M::ArrayIdx => w.write("ArrayIdx"),
+        M::BreakTraceHint => w.write("BreakTraceHint"),
+        M::CGetCUNop => w.write("CGetCUNop"),
+        M::UGetCUNop => w.write("UGetCUNop"),
+        M::LockObj => w.write("LockObj"),
+        _ => not_impl!(),
     }
 }
 
@@ -978,18 +1040,30 @@ fn print_include_eval_define<W: Write>(
 }
 
 fn print_control_flow<W: Write>(w: &mut W, cf: &InstructControlFlow) -> Result<(), W::Error> {
-    use InstructControlFlow::*;
+    use InstructControlFlow as CF;
     match cf {
-        Jmp(l) => not_impl!(),
-        JmpNS(l) => not_impl!(),
-        JmpZ(l) => not_impl!(),
-        JmpNZ(l) => not_impl!(),
-        RetC => w.write("RetC"),
-        RetCSuspended => w.write("RetCSuspended"),
-        RetM(p) => not_impl!(),
-        Throw => w.write("Throw"),
-        Switch(_, _, _) => not_impl!(),
-        SSwitch(_) => not_impl!(),
+        CF::Jmp(l) => {
+            w.write("Jmp ")?;
+            print_label(w, l)
+        }
+        CF::JmpNS(l) => {
+            w.write("JmpNS ")?;
+            print_label(w, l)
+        }
+        CF::JmpZ(l) => {
+            w.write("JmpZ ")?;
+            print_label(w, l)
+        }
+        CF::JmpNZ(l) => {
+            w.write("JmpNZ ")?;
+            print_label(w, l)
+        }
+        CF::RetC => w.write("RetC"),
+        CF::RetCSuspended => w.write("RetCSuspended"),
+        CF::RetM(p) => not_impl!(),
+        CF::Throw => w.write("Throw"),
+        CF::Switch(_, _, _) => not_impl!(),
+        CF::SSwitch(_) => not_impl!(),
     }
 }
 
@@ -1081,6 +1155,16 @@ fn print_label<W: Write>(w: &mut W, label: &Label) -> Result<(), W::Error> {
             print_int(w, id)
         }
         Label::Named(id) => w.write(id),
+    }
+}
+
+fn print_local<W: Write>(w: &mut W, local: &Local) -> Result<(), W::Error> {
+    match local {
+        Local::Unnamed(id) => {
+            w.write("_")?;
+            print_int(w, id)
+        }
+        Local::Named(id) => w.write(id),
     }
 }
 

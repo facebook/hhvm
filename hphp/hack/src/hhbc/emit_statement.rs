@@ -15,6 +15,7 @@ use hhbc_ast_rust::*;
 use hhbc_id_rust::{self as hhbc_id, Id};
 use instruction_sequence_rust::{Error::Unrecoverable, InstrSeq, Result};
 use label_rust::Label;
+use naming_special_names_rust::special_functions;
 use oxidized::{aast as a, ast as tast, ast_defs, pos::Pos};
 
 use lazy_static::lazy_static;
@@ -229,7 +230,7 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
         a::Stmt_::Foreach(_) => unimplemented!("TODO(hrust)"),
         a::Stmt_::DefInline(def) => emit_def_inline(e, &**def),
         a::Stmt_::Awaitall(_) => unimplemented!("TODO(hrust)"),
-        a::Stmt_::Markup(_) => unimplemented!("TODO(hrust)"),
+        a::Stmt_::Markup(x) => emit_markup(e, env, (&x.0, &x.1), false),
         a::Stmt_::Fallthrough | a::Stmt_::Noop => Ok(InstrSeq::Empty),
     }
 }
@@ -306,8 +307,63 @@ fn emit_final_stmts(e: &mut Emitter, env: &mut Env, block: &[tast::Stmt]) -> Res
     }
 }
 
-pub fn emit_markup(_e: &mut Emitter, _env: &mut Env, _markup: &tast::Stmt_) -> Result {
-    Ok(InstrSeq::Empty)
+pub fn emit_markup(
+    e: &mut Emitter,
+    env: &mut Env,
+    ((_, s), echo_expr_opt): (&tast::Pstring, &Option<tast::Expr>),
+    check_for_hashbang: bool,
+) -> Result {
+    let mut emit_ignored_call_expr = |fname: String, expr: tast::Expr| {
+        let call_expr = tast::Expr(
+            Pos::make_none(),
+            tast::Expr_::mk_call(
+                tast::CallType::Cnormal,
+                tast::Expr(
+                    Pos::make_none(),
+                    tast::Expr_::mk_id(ast_defs::Id(Pos::make_none(), fname)),
+                ),
+                vec![],
+                vec![expr],
+                None,
+            ),
+        );
+        emit_expr::emit_ignored_expr(e, env, &Pos::make_none(), &call_expr)
+    };
+    let mut emit_ignored_call_expr_for_nonempty_str = |fname: String, expr_str: String| {
+        if expr_str.is_empty() {
+            Ok(InstrSeq::Empty)
+        } else {
+            emit_ignored_call_expr(
+                fname,
+                tast::Expr(Pos::make_none(), tast::Expr_::mk_string(expr_str)),
+            )
+        }
+    };
+    let markup = if s.is_empty() {
+        InstrSeq::Empty
+    } else {
+        lazy_static! {
+            static ref HASHBANG_PAT: regex::Regex = regex::Regex::new(r"^#!.*\n").unwrap();
+        }
+        let tail = String::from(match HASHBANG_PAT.shortest_match(&s) {
+            Some(i) if check_for_hashbang => {
+                // if markup text starts with #!
+                // - extract a line with hashbang
+                // - it will be emitted as a call to print_hashbang function
+                // - emit remaining part of text as regular markup
+                &s[i..]
+            }
+            _ => s,
+        });
+        emit_ignored_call_expr_for_nonempty_str(special_functions::ECHO.into(), tail)?
+    };
+    let echo = match echo_expr_opt {
+        None => InstrSeq::Empty,
+        Some(echo_expr) => {
+            emit_ignored_call_expr(special_functions::ECHO.into(), echo_expr.clone())?
+        }
+    };
+    Ok(InstrSeq::gather(vec![markup, echo]))
 }
 
 fn emit_break(e: &mut Emitter, env: &mut Env, pos: &Pos) -> InstrSeq {

@@ -127,13 +127,8 @@ pub fn emit_body<'a, 'b>(
         &tp_names,
     )?;
 
-    let params = make_params(
-        emitter,
-        namespace,
-        &mut tp_names,
-        args,
-        !args.flags.contains(Flags::MEMOIZE),
-    )?;
+    let params = make_params(emitter, namespace, &mut tp_names, args)?;
+
     let upper_bounds = make_upper_bounds(
         emitter,
         args.immediate_tparams,
@@ -181,8 +176,6 @@ pub fn emit_body<'a, 'b>(
         &body,
         need_local_this,
         is_generator,
-        args.flags.contains(Flags::NATIVE),
-        args.flags.contains(Flags::DEBUGGER_MODIFY_PROGRAM),
     )?;
     Ok((
         make_body(
@@ -211,18 +204,21 @@ fn make_body_instrs(
     decl_vars: &[String],
     body: &tast::Program,
     need_local_this: bool,
-    is_native: bool,
     is_generator: bool,
-    debugger_modify_program: bool,
 ) -> Result {
-    let stmt_instrs = if is_native {
+    let stmt_instrs = if args.flags.contains(Flags::NATIVE) {
         InstrSeq::make_nativeimpl()
     } else {
         env.do_function(emitter, body, emit_defs)?
     };
 
-    let (begin_label, default_value_setters) =
-        emit_param::emit_param_default_value_setter(emitter, env, is_native, args.pos, params)?;
+    let (begin_label, default_value_setters) = emit_param::emit_param_default_value_setter(
+        emitter,
+        env,
+        args.flags.contains(Flags::NATIVE),
+        args.pos,
+        params,
+    )?;
 
     let header_content = make_header_content(
         emitter,
@@ -232,7 +228,6 @@ fn make_body_instrs(
         tparams,
         decl_vars,
         need_local_this,
-        is_native,
         is_generator,
     )?;
     let first_instr_is_label = match InstrSeq::first(&stmt_instrs) {
@@ -246,7 +241,7 @@ fn make_body_instrs(
     };
 
     let mut body_instrs = InstrSeq::gather(vec![header, stmt_instrs, default_value_setters]);
-    if debugger_modify_program {
+    if args.flags.contains(Flags::DEBUGGER_MODIFY_PROGRAM) {
         modify_prog_for_debugger_eval(&mut body_instrs);
     };
     Ok(body_instrs)
@@ -260,10 +255,9 @@ fn make_header_content(
     tparams: &[tast::Tparam],
     decl_vars: &[String],
     need_local_this: bool,
-    is_native: bool,
     is_generator: bool,
 ) -> Result {
-    let method_prolog = if is_native {
+    let method_prolog = if args.flags.contains(Flags::NATIVE) {
         InstrSeq::Empty
     } else {
         let should_emit_init_this = !args.scope.is_in_static_method()
@@ -399,8 +393,8 @@ fn make_params(
     namespace: &namespace_env::Env,
     tp_names: &mut Vec<&str>,
     args: &Args,
-    generate_defaults: bool,
 ) -> Result<Vec<HhasParam>> {
+    let generate_defaults = !args.flags.contains(Flags::MEMOIZE);
     emit_param::from_asts(
         emitter,
         tp_names,
@@ -478,10 +472,19 @@ fn emit_defs(env: &mut Env, emitter: &mut Emitter, prog: &[tast::Def]) -> Result
                 aux(env, emitter, &defs[1..])
             }
             [] => emit_statement::emit_dropthrough_return(emitter, env),
-            [Def::Stmt(s)] => emit_statement::emit_final_stmt(emitter, env, &s),
-            [Def::Stmt(s1), Def::Stmt(s2)] if s2.1.is_markup() => {
-                emit_statement::emit_final_stmt(emitter, env, &s1)
+            [Def::Stmt(s)] => {
+                // emit last statement in the list as final statement
+                emit_statement::emit_final_stmt(emitter, env, &s)
             }
+            [Def::Stmt(s1), Def::Stmt(s2)] => match s2.1.as_markup() {
+                Some((id, None)) if id.1.is_empty() => {
+                    emit_statement::emit_final_stmt(emitter, env, &s1)
+                }
+                _ => Ok(InstrSeq::gather(vec![
+                    emit_statement::emit_stmt(emitter, env, s1)?,
+                    emit_statement::emit_final_stmt(emitter, env, &s2)?,
+                ])),
+            },
             [def, ..] => Ok(InstrSeq::gather(vec![
                 emit_def(env, emitter, def)?,
                 aux(env, emitter, &defs[1..])?,
@@ -490,7 +493,7 @@ fn emit_defs(env: &mut Env, emitter: &mut Emitter, prog: &[tast::Def]) -> Result
     };
     match prog {
         [Def::Stmt(s), ..] if s.1.is_markup() => Ok(InstrSeq::gather(vec![
-            emit_statement::emit_markup(emitter, env, &s.1)?,
+            emit_statement::emit_markup(emitter, env, s.1.as_markup().unwrap(), true)?,
             aux(env, emitter, &prog[1..])?,
         ])),
         [] | [_] => aux(env, emitter, &prog[..]),

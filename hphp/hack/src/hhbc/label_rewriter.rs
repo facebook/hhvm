@@ -163,16 +163,22 @@ fn rewrite_params_and_body(
             .get(&lookup_def(&id, defs))
             .expect("relabel_instrseq: offset not in refs")
     };
-    let relabel_define_label_id = |id: &mut Id| {
+    let relabel_define_label_id = |id: Id| {
         if used.contains(&id) {
-            *id = refs.get(&lookup_def(&id, defs)).map(|x| *x).unwrap_or(*id);
+            refs.get(&lookup_def(&id, defs)).map(|x| *x)
+        } else {
+            None
         }
     };
     let mut rewrite_instr = |instr: &mut Instruct| {
         if let Instruct::ILabel(l) = instr {
-            l.map_mut(relabel_define_label_id);
+            match l.option_map(relabel_define_label_id) {
+                Ok(Some(l)) => Some(Instruct::ILabel(l)),
+                _ => None,
+            }
         } else {
             relabel_instr(instr, &mut |l| l.map_mut(relabel_id));
+            Some(instr.to_owned())
         }
     };
     let rewrite_param = |param: &mut HhasParam| {
@@ -181,7 +187,7 @@ fn rewrite_params_and_body(
         }
     };
     params.iter_mut().for_each(|param| rewrite_param(param));
-    body.map_mut(&mut rewrite_instr);
+    body.filter_map_mut(&mut rewrite_instr);
 }
 
 pub fn relabel_function(params: &mut Vec<HhasParam>, body: &mut InstrSeq) {

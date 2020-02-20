@@ -1170,7 +1170,7 @@ impl InstrSeq {
         match self {
             Self::Empty => Self::Empty,
             Self::One(x) => match f(x) {
-                Some(x) => Self::make_instr(x.clone()),
+                Some(x) => Self::make_instr(x),
                 None => Self::Empty,
             },
             Self::List(instr_lst) => Self::List(instr_lst.iter().filter_map(f).collect::<Vec<_>>()),
@@ -1180,6 +1180,25 @@ impl InstrSeq {
                     .map(|x| x.filter_map(f))
                     .collect::<Vec<_>>(),
             ),
+        }
+    }
+
+    pub fn filter_map_mut<F>(&mut self, f: &mut F)
+    where
+        F: FnMut(&mut Instruct) -> Option<Instruct>,
+    {
+        match self {
+            Self::Empty => (),
+            Self::One(x) => {
+                *self = match f(x) {
+                    Some(x) => Self::make_instr(x),
+                    None => Self::Empty,
+                }
+            }
+            Self::List(instr_lst) => {
+                *instr_lst = instr_lst.iter_mut().filter_map(f).collect::<Vec<_>>()
+            }
+            Self::Concat(instrseq_lst) => instrseq_lst.iter_mut().for_each(|x| x.filter_map_mut(f)),
         }
     }
 

@@ -81,7 +81,7 @@ fn rename_params(mut params: Vec<HhasParam>) -> Vec<HhasParam> {
         .iter_mut()
         .rev()
         .for_each(|p| rename(&names, &mut param_counts, p));
-    params.into_iter().rev().collect()
+    params.into_iter().collect()
 }
 
 fn from_ast(

@@ -582,7 +582,7 @@ let rec bind_param env (ty1, param) =
 
 (* In strict mode, we force you to give a type declaration on a parameter *)
 (* But the type checker is nice: it makes a suggestion :-) *)
-and check_param env param ty is_code_error =
+and check_param_has_hint env param ty is_code_error =
   let env =
     if is_code_error 4231 then
       Typing_attributes.check_def
@@ -632,7 +632,7 @@ and get_callable_variadicity
   function
   | FVvariadicArg vparam ->
     let (env, ty) = make_param_local_ty env variadicity_decl_ty vparam in
-    check_param env vparam ty partial_callback;
+    check_param_has_hint env vparam ty partial_callback;
     let (env, t_variadic) = bind_param env (ty, vparam) in
     (env, Aast.FVvariadicArg t_variadic)
   | FVellipsis p ->
@@ -688,7 +688,7 @@ and fun_def ctx f :
         Phase.localize_where_constraints ~ety_env env f.f_where_constraints
       in
       let env = Env.set_fn_kind env f.f_fun_kind in
-      let (decl_ty, params_decl_ty, variadicity_decl_ty) =
+      let (return_decl_ty, params_decl_ty, variadicity_decl_ty) =
         merge_decl_header_with_hints
           ~params:f.f_params
           ~ret:f.f_ret
@@ -696,8 +696,8 @@ and fun_def ctx f :
           decl_header
           env
       in
-      let (env, locl_ty) =
-        match decl_ty with
+      let (env, return_ty) =
+        match return_decl_ty with
         | None ->
           (env, Typing_return.make_default_return ~is_method:false env f.f_name)
         | Some ty ->
@@ -710,8 +710,8 @@ and fun_def ctx f :
           f.f_user_attributes
           env
           ~is_explicit:(Option.is_some (hint_of_type_hint f.f_ret))
-          locl_ty
-          decl_ty
+          return_ty
+          return_decl_ty
       in
       let (env, param_tys) =
         List.zip_exn f.f_params params_decl_ty
@@ -719,8 +719,8 @@ and fun_def ctx f :
                make_param_local_ty env hint param)
       in
       let partial_callback = Partial.should_check_error (Env.get_mode env) in
-      let param_fn p t = check_param env p t partial_callback in
-      List.iter2_exn ~f:param_fn f.f_params param_tys;
+      let check_has_hint p t = check_param_has_hint env p t partial_callback in
+      List.iter2_exn ~f:check_has_hint f.f_params param_tys;
       Typing_memoize.check_function env f;
       let (env, typed_params) =
         List.map_env env (List.zip_exn param_tys f.f_params) bind_param
@@ -734,7 +734,7 @@ and fun_def ctx f :
           variadicity_decl_ty
           f.f_variadic
       in
-      let env = set_tyvars_variance_in_callable env locl_ty param_tys in
+      let env = set_tyvars_variance_in_callable env return_ty param_tys in
       let local_tpenv = Env.get_tpenv env in
       let disable =
         Naming_attributes.mem
@@ -766,7 +766,7 @@ and fun_def ctx f :
           Aast.f_annotation = Env.save local_tpenv env;
           Aast.f_span = f.f_span;
           Aast.f_mode = f.f_mode;
-          Aast.f_ret = (locl_ty, hint_of_type_hint f.f_ret);
+          Aast.f_ret = (return_ty, hint_of_type_hint f.f_ret);
           Aast.f_name = f.f_name;
           Aast.f_tparams = tparams;
           Aast.f_where_constraints = f.f_where_constraints;
@@ -8468,7 +8468,7 @@ and method_def env cls m =
                make_param_local_ty env hint param)
       in
       let partial_callback = Partial.should_check_error (Env.get_mode env) in
-      let param_fn p t = check_param env p t partial_callback in
+      let param_fn p t = check_param_has_hint env p t partial_callback in
       List.iter2_exn ~f:param_fn m.m_params param_tys;
       Typing_memoize.check_method env m;
       let (env, typed_params) =

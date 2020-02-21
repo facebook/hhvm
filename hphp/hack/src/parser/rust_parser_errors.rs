@@ -5149,6 +5149,29 @@ where
         }
     }
 
+    fn check_qualified_name(&mut self, node: &'a Syntax<Token, Value>) {
+        // The last segment in a qualified name should not have a trailing backslash
+        // i.e. `Foospace\Bar\` except as the prefix of a GroupUseClause
+        if let Some(Syntax {
+            syntax: NamespaceGroupUseDeclaration(_),
+            ..
+        }) = self.parents.last()
+        {
+        } else {
+            if let QualifiedName(x) = &node.syntax {
+                let name_parts = &x.qualified_name_parts;
+                let mut parts = Self::syntax_to_list_with_separators(name_parts);
+                let last_part = parts.nth_back(0);
+                match last_part {
+                    Some(t) if Self::token_kind(t) == Some(TokenKind::Backslash) => self
+                        .errors
+                        .push(Self::make_error_from_node(t, errors::error0008)),
+                    _ => (),
+                }
+            }
+        }
+    }
+
     fn strip_ns(name: &str) -> &str {
         match name.chars().next() {
             Some('\\') => &name[1..],
@@ -5328,6 +5351,7 @@ where
             OldAttributeSpecification(_) => self.disabled_legacy_attribute_syntax_errors(node),
             SoftTypeSpecifier(_) => self.disabled_legacy_soft_typehint_errors(node),
             FunctionPointerExpression(_) => self.disabled_function_pointer_expression_error(node),
+            QualifiedName(_) => self.check_qualified_name(node),
             _ => {}
         }
         self.lval_errors(node);

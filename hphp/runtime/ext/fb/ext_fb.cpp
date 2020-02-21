@@ -535,6 +535,13 @@ static int fb_compact_serialize_variant(
       Array arr = var.toArray();
       assertx(arr->isPHPArray());
       int64_t index_limit;
+      if (UNLIKELY(RuntimeOption::EvalLogArrayProvenance) &&
+          arrprov::arrayWantsTag(arr.get())) {
+        raise_array_serialization_notice(
+          SerializationSite::FBCompactSerialize,
+          arr.get()
+        );
+      }
       if (fb_compact_serialize_is_list(arr, index_limit)) {
         fb_compact_serialize_array_as_list_map(
           sb, std::move(arr), index_limit, depth);

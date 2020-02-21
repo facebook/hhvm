@@ -14,7 +14,6 @@ path = "../../hhbc_ast.rs"
 env = { path = "../env" }
 hhbc_id_rust = { path = "../hhbc_id" }
 label_rust = { path = "../label" }
-local_rust = { path = "../local" }
 runtime = { path = "../runtime" }
 bitflags = "1.2"
 # @end of Signature

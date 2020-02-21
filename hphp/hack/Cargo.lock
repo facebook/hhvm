@@ -480,12 +480,12 @@ dependencies = [
  "label_rewriter_rust 0.0.0",
  "label_rust 0.0.0",
  "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "local_rust 0.0.0",
  "naming_special_names_rust 0.0.0",
  "options 0.0.0",
  "oxidized 0.0.0",
  "regex 1.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "runtime 0.0.0",
+ "scope_rust 0.0.0",
 ]
 
 [[package]]
@@ -520,6 +520,7 @@ dependencies = [
  "hhbc_string_utils_rust 0.0.0",
  "instruction_sequence_rust 0.0.0",
  "naming_special_names_rust 0.0.0",
+ "options 0.0.0",
  "oxidized 0.0.0",
  "runtime 0.0.0",
  "rx_rust 0.0.0",
@@ -545,7 +546,6 @@ dependencies = [
  "hhbc_string_utils_rust 0.0.0",
  "instruction_sequence_rust 0.0.0",
  "label_rust 0.0.0",
- "local_rust 0.0.0",
  "naming_special_names_rust 0.0.0",
  "options 0.0.0",
  "oxidized 0.0.0",
@@ -595,7 +595,6 @@ dependencies = [
  "hhbc_id_rust 0.0.0",
  "instruction_sequence_rust 0.0.0",
  "label_rust 0.0.0",
- "local_rust 0.0.0",
  "naming_special_names_rust 0.0.0",
  "options 0.0.0",
  "oxidized 0.0.0",
@@ -608,10 +607,10 @@ name = "emit_memoize_helpers_rust"
 version = "0.0.0"
 dependencies = [
  "emit_fatal_rust 0.0.0",
+ "env 0.0.0",
  "hhas_param_rust 0.0.0",
  "hhbc_ast_rust 0.0.0",
  "instruction_sequence_rust 0.0.0",
- "local_rust 0.0.0",
  "oxidized 0.0.0",
 ]
 
@@ -638,7 +637,6 @@ dependencies = [
  "hhbc_id_rust 0.0.0",
  "hhbc_string_utils_rust 0.0.0",
  "instruction_sequence_rust 0.0.0",
- "local_rust 0.0.0",
  "naming_special_names_rust 0.0.0",
  "options 0.0.0",
  "oxidized 0.0.0",
@@ -682,7 +680,6 @@ dependencies = [
  "env 0.0.0",
  "hhas_body_rust 0.0.0",
  "instruction_sequence_rust 0.0.0",
- "local_rust 0.0.0",
  "oxidized 0.0.0",
 ]
 
@@ -705,7 +702,6 @@ dependencies = [
  "hhbc_string_utils_rust 0.0.0",
  "instruction_sequence_rust 0.0.0",
  "label_rust 0.0.0",
- "local_rust 0.0.0",
  "options 0.0.0",
  "oxidized 0.0.0",
 ]
@@ -857,7 +853,8 @@ dependencies = [
  "ast_scope_rust 0.0.0",
  "bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "label_rust 0.0.0",
- "local_rust 0.0.0",
+ "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "naming_special_names_rust 0.0.0",
  "options 0.0.0",
  "oxidized 0.0.0",
  "rx_rust 0.0.0",
@@ -1220,7 +1217,6 @@ dependencies = [
  "env 0.0.0",
  "hhbc_id_rust 0.0.0",
  "label_rust 0.0.0",
- "local_rust 0.0.0",
  "runtime 0.0.0",
 ]
 
@@ -1306,7 +1302,6 @@ dependencies = [
  "hhbc_id_rust 0.0.0",
  "itertools 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "label_rust 0.0.0",
- "local_rust 0.0.0",
  "oxidized 0.0.0",
  "pretty_assertions 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "runtime 0.0.0",
@@ -1379,14 +1374,6 @@ dependencies = [
  "ocamlrep 0.0.0",
  "ocamlrep_derive 0.0.0",
  "oxidized 0.0.0",
-]
-
-[[package]]
-name = "local_rust"
-version = "0.0.0"
-dependencies = [
- "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "naming_special_names_rust 0.0.0",
 ]
 
 [[package]]
@@ -2035,7 +2022,6 @@ dependencies = [
  "env 0.0.0",
  "instruction_sequence_rust 0.0.0",
  "label_rust 0.0.0",
- "local_rust 0.0.0",
 ]
 
 [[package]]

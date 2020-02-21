@@ -5,7 +5,7 @@
 name = "env"
 edition = "2018"
 version = "0.0.0"
-include = ["../../emitter.rs", "../../env.rs", "../../iterator.rs", "../../jump_targets.rs"]
+include = ["../../emitter.rs", "../../env.rs", "../../iterator.rs", "../../jump_targets.rs", "../../local.rs"]
 
 [lib]
 path = "../../env.rs"
@@ -13,9 +13,10 @@ path = "../../env.rs"
 [dependencies]
 ast_scope_rust = { path = "../ast_scope" }
 label_rust = { path = "../label" }
-local_rust = { path = "../local" }
+naming_special_names_rust = { path = "../../../naming" }
 options = { path = "../options" }
 oxidized = { path = "../../../oxidized" }
 rx_rust = { path = "../rx" }
 bitflags = "1.2"
+lazy_static = "1.0"
 # @end of Signature

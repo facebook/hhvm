@@ -14,5 +14,4 @@ path = "../../scope.rs"
 env = { path = "../env" }
 instruction_sequence_rust = { path = "../instruction_sequence" }
 label_rust = { path = "../label" }
-local_rust = { path = "../local" }
 # @end of Signature

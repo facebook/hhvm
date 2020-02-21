@@ -308,26 +308,31 @@ let get_patches
         | FunctionDeclarationHeader
             { function_type; function_name; function_parameter_list; _ } ->
           begin
-            if is_missing function_type then
-              let patch =
-                get_first_suggested_type_as_string
-                  ~syntax_type:RetType
-                  errors
-                  file
-                  type_map
-                  function_name
-                >>= fun type_str ->
-                position_exclusive file function_type >>| fun pos ->
+            let patch =
+              get_first_suggested_type_as_string
+                ~syntax_type:RetType
+                errors
+                file
+                type_map
+                function_name
+              >>= fun type_str ->
+              position_exclusive file function_type >>| fun pos ->
+              if is_missing function_type then
                 ServerRefactorTypes.Insert
                   ServerRefactorTypes.
                     {
                       pos = Pos.to_absolute pos;
                       text = Printf.sprintf ": <<__Soft>> %s " type_str;
                     }
-              in
-              Option.to_list patch
-            else
-              []
+              else
+                ServerRefactorTypes.Replace
+                  ServerRefactorTypes.
+                    {
+                      pos = Pos.to_absolute pos;
+                      text = Printf.sprintf "<<__Soft>> %s" type_str;
+                    }
+            in
+            Option.to_list patch
           end
           @
           let lst =
@@ -342,26 +347,35 @@ let get_patches
                     {
                       list_item =
                         {
-                          syntax = ParameterDeclaration { parameter_type; _ };
+                          syntax =
+                            ParameterDeclaration
+                              { parameter_type; parameter_name; _ };
                           _;
-                        } as list_item;
+                        };
                       _;
-                    }
-                  when is_missing parameter_type ->
+                    } ->
                   get_first_suggested_type_as_string
                     ~syntax_type:ParamType
                     errors
                     file
                     type_map
-                    list_item
+                    parameter_name
                   >>= fun type_str ->
-                  position file list_item >>| fun pos ->
-                  ServerRefactorTypes.Insert
-                    ServerRefactorTypes.
-                      {
-                        pos = Pos.to_absolute pos;
-                        text = "<<__Soft>> " ^ type_str ^ " ";
-                      }
+                  position_exclusive file parameter_type >>| fun pos ->
+                  if is_missing parameter_type then
+                    ServerRefactorTypes.Insert
+                      ServerRefactorTypes.
+                        {
+                          pos = Pos.to_absolute pos;
+                          text = "<<__Soft>> " ^ type_str ^ " ";
+                        }
+                  else
+                    ServerRefactorTypes.Replace
+                      ServerRefactorTypes.
+                        {
+                          pos = Pos.to_absolute pos;
+                          text = "<<__Soft>> " ^ type_str;
+                        }
                 | _ -> None
               in
               Option.to_list opt)
@@ -372,22 +386,16 @@ let get_patches
               property_type;
               property_declarators;
               _;
-            }
-          when is_missing property_type ->
+            } ->
           Option.value ~default:[]
           @@
-          let declarator =
+          let declarator_and_has_multiple =
             match syntax property_declarators with
-            | SyntaxList [li] ->
+            | SyntaxList (li :: tl) ->
               (match syntax li with
-              | ListItem { list_item = declarator; _ } -> Some declarator
+              | ListItem { list_item = declarator; _ } ->
+                Some (declarator, not @@ List.is_empty tl)
               | _ -> failwith "expected a ListItem")
-            | SyntaxList (_ :: _) ->
-              Hh_logger.log
-                "%s"
-                ( "warning: generate patch: can't generate patch for"
-                ^ " class property with multiple declarators." );
-              None
             | _ -> failwith "expected a non-empty SyntaxList"
           in
           let modifier =
@@ -396,11 +404,20 @@ let get_patches
             | _ -> failwith "expected at least 1 property modifier"
           in
           modifier >>= fun modifier ->
-          declarator >>= fun declarator ->
+          declarator_and_has_multiple >>= fun (declarator, has_multiple) ->
+          ( if has_multiple then begin
+            Hh_logger.log
+              "%s"
+              ( "warning: generate patch: can't generate patch for"
+              ^ " class property with multiple declarators." );
+            None
+          end else
+            Some () )
+          >>= fun () ->
           (match syntax declarator with
           | PropertyDeclarator { property_name; _ } ->
             get_first_suggested_type_as_string
-              ~syntax_type:ParamType
+              ~syntax_type:PropType
               errors
               file
               type_map
@@ -421,10 +438,16 @@ let get_patches
             None
           ) )
           >>= fun soft_patch ->
-          position file declarator >>| fun pos ->
-          ServerRefactorTypes.(
-            Insert { pos = Pos.to_absolute pos; text = type_str ^ " " })
-          :: soft_patch
+          position_exclusive file property_type >>| fun pos ->
+          let patch =
+            if is_missing property_type then
+              ServerRefactorTypes.(
+                Insert { pos = Pos.to_absolute pos; text = type_str ^ " " })
+            else
+              ServerRefactorTypes.(
+                Replace { pos = Pos.to_absolute pos; text = type_str })
+          in
+          patch :: soft_patch
         | _ -> [])
     in
     let (patches, _) =

@@ -123,14 +123,14 @@ let hint_to_type_opt ~is_lambda env reason hint =
         (match deref ty with
         | (r, Tapply (id, [ty']))
           when String.equal (snd id) SN.Classes.cAwaitable ->
-          let (r', ty_') = deref ty' in
+          let ty_' = get_node ty' in
           if must_reinfer_type tcopt ty_' then
-            mk (r, Tapply (id, [mk_tvar r']))
+            mk (r, Tapply (id, [mk_tvar reason]))
           else
             ty
-        | (r, ty_) ->
+        | (_r, ty_) ->
           if must_reinfer_type tcopt ty_ then
-            mk_tvar r
+            mk_tvar reason
           else
             ty)
     in

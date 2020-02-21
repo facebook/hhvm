@@ -41,7 +41,7 @@
 
 namespace HPHP {
 
-TRACE_SET_MOD(tmp0);
+TRACE_SET_MOD(disas);
 
 namespace {
 

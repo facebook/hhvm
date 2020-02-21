@@ -73,14 +73,6 @@ let debug_describe_cmd : type a. a command -> string = function
   | Rpc rpc -> debug_describe_t rpc
   | Debug -> "Debug"
 
-let source_tree_of_file_input file_input =
-  match file_input with
-  | ServerCommandTypes.FileName filename ->
-    Full_fidelity_source_text.from_file
-      (Relative_path.create_detect_prefix filename)
-  | ServerCommandTypes.FileContent content ->
-    Full_fidelity_source_text.make Relative_path.default content
-
 let extract_labelled_file (labelled_file : ServerCommandTypes.labelled_file) :
     Relative_path.t * ServerCommandTypes.file_input =
   match labelled_file with

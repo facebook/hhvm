@@ -1266,14 +1266,15 @@ let handle_mode
         end
       result.Utils.With_complete_flag.value
   | Ffp_autocomplete ->
-    iter_over_files (fun filename ->
+    iter_over_files (fun path ->
         try
-          let sienv = scan_files_for_symbol_index filename sienv ctx in
-          let file_text = cat (Relative_path.to_absolute filename) in
+          let sienv = scan_files_for_symbol_index path sienv ctx in
+          let (ctx, entry) = Provider_utils.add_entry ~ctx ~path in
           (* TODO: Use a magic word/symbol to identify autocomplete location instead *)
           let args_regex = Str.regexp "AUTOCOMPLETE [1-9][0-9]* [1-9][0-9]*" in
           let position =
             try
+              let file_text = entry.Provider_context.contents in
               let _ = Str.search_forward args_regex file_text 0 in
               let raw_flags = Str.matched_string file_text in
               match split ' ' raw_flags with
@@ -1286,7 +1287,7 @@ let handle_mode
           let result =
             FfpAutocompleteService.auto_complete
               ctx
-              file_text
+              entry
               position
               ~filter_by_token:true
               ~sienv

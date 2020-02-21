@@ -41,10 +41,9 @@ let make_hover_doc_block ctx entry occurrence def_opt =
 let make_hover_const_definition entry def_opt =
   match def_opt with
   | Some def ->
-    let source_text = entry.Provider_context.source_text in
     [
       Pos.get_text_from_pos
-        (Full_fidelity_source_text.text source_text)
+        entry.Provider_context.contents
         def.SymbolDefinition.span;
     ]
   | _ -> []

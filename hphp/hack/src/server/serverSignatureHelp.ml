@@ -138,13 +138,9 @@ let go_quarantined
     ~(entry : Provider_context.entry)
     ~(line : int)
     ~(column : int) : Lsp.SignatureHelp.result =
-  let offset =
-    SourceText.position_to_offset
-      entry.Provider_context.source_text
-      (line, column)
-  in
+  let source_text = Provider_utils.compute_source_text ~entry in
+  let offset = SourceText.position_to_offset source_text (line, column) in
   let cst = Provider_utils.compute_cst ~ctx ~entry in
-  let nast = entry.Provider_context.ast in
   match
     get_positional_info (Provider_context.PositionedSyntaxTree.root cst) offset
   with
@@ -168,63 +164,62 @@ let go_quarantined
     (match List.hd results with
     | None -> None
     | Some head_result ->
-      (match get_occurrence_info env ctx nast head_result with
+      let ast = Provider_utils.compute_ast ~ctx ~entry in
+      (match get_occurrence_info env ctx ast head_result with
       | None -> None
       | Some (occurrence, fe, def_opt) ->
-        Typing_defs.(
-          Lsp.SignatureHelp.(
-            let tast_env = Tast_env.empty ctx in
-            let siginfo_label =
-              Tast_env.print_ty_with_identity
-                tast_env
-                (DeclTy fe.fe_type)
-                occurrence
-                def_opt
-            in
-            let siginfo_documentation =
-              let base_class_name =
-                SymbolOccurrence.enclosing_class occurrence
+        let open Typing_defs in
+        let open Lsp.SignatureHelp in
+        let tast_env = Tast_env.empty ctx in
+        let siginfo_label =
+          Tast_env.print_ty_with_identity
+            tast_env
+            (DeclTy fe.fe_type)
+            occurrence
+            def_opt
+        in
+        let siginfo_documentation =
+          let base_class_name = SymbolOccurrence.enclosing_class occurrence in
+          def_opt >>= fun def ->
+          let path = def.SymbolDefinition.pos |> Pos.filename in
+          let (ctx, entry) = Provider_utils.add_entry ~ctx ~path in
+          ServerDocblockAt.go_comments_for_symbol_ctx
+            ~ctx
+            ~entry
+            ~def
+            ~base_class_name
+        in
+        let param_docs =
+          match siginfo_documentation with
+          | Some siginfo_documentation ->
+            Some (Docblock_parser.get_param_docs siginfo_documentation)
+          | None -> None
+        in
+        let ft_params =
+          match get_node fe.fe_type with
+          | Tfun ft -> ft.ft_params
+          | _ -> []
+        in
+        let params =
+          List.map ft_params ~f:(fun param ->
+              let parinfo_label =
+                match param.fp_name with
+                | Some s -> s
+                | None -> Tast_env.print_decl_ty tast_env fe.fe_type
               in
-              def_opt >>= fun def ->
-              let path = def.SymbolDefinition.pos |> Pos.filename in
-              let (ctx, entry) = Provider_utils.add_entry ~ctx ~path in
-              ServerDocblockAt.go_comments_for_symbol_ctx
-                ~ctx
-                ~entry
-                ~def
-                ~base_class_name
-            in
-            let param_docs =
-              match siginfo_documentation with
-              | Some siginfo_documentation ->
-                Some (Docblock_parser.get_param_docs siginfo_documentation)
-              | None -> None
-            in
-            let ft_params =
-              match get_node fe.fe_type with
-              | Tfun ft -> ft.ft_params
-              | _ -> []
-            in
-            let params =
-              List.map ft_params ~f:(fun param ->
-                  let parinfo_label =
-                    match param.fp_name with
-                    | Some s -> s
-                    | None -> Tast_env.print_decl_ty tast_env fe.fe_type
-                  in
-                  let parinfo_documentation =
-                    match param_docs with
-                    | Some param_docs -> Map.find param_docs parinfo_label
-                    | None -> None
-                  in
-                  { parinfo_label; parinfo_documentation })
-            in
-            let signature_information =
-              { siginfo_label; siginfo_documentation; parameters = params }
-            in
-            Some
-              {
-                signatures = [signature_information];
-                activeSignature = 0;
-                activeParameter = argument_idx;
-              }))))
+              let parinfo_documentation =
+                match param_docs with
+                | Some param_docs -> Map.find param_docs parinfo_label
+                | None -> None
+              in
+              { parinfo_label; parinfo_documentation })
+        in
+        let signature_information =
+          { siginfo_label; siginfo_documentation; parameters = params }
+        in
+        Some
+          {
+            signatures = [signature_information];
+            activeSignature = 0;
+            activeParameter = argument_idx;
+          }))

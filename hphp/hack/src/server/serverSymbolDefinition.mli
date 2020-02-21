@@ -14,6 +14,7 @@ val go :
   Relative_path.t SymbolDefinition.t option
 
 val get_definition_cst_node_ctx :
+  ctx:Provider_context.t ->
   entry:Provider_context.entry ->
   kind:SymbolDefinition.kind ->
   pos:'a Pos.pos ->

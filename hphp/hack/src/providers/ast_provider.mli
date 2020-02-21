@@ -49,12 +49,11 @@ val find_gconst_in_file :
 val get_ast :
   ?full:bool -> Provider_context.t -> Relative_path.t -> Nast.program
 
-val parse_file_input :
-  ?full:bool ->
-  ?keep_errors:bool ->
-  Relative_path.t ->
-  ServerCommandTypes.file_input ->
-  Full_fidelity_source_text.t * Nast.program * Parser_return.comments
+val parse :
+  full:bool ->
+  keep_errors:bool ->
+  source_text:Full_fidelity_source_text.t ->
+  Parser_return.t
 
 val local_changes_push_stack : unit -> unit
 

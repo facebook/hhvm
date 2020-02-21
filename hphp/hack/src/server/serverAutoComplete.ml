@@ -112,9 +112,7 @@ let go_ctx
   let open File_content in
   (* We have to edit the file content to add the text AUTO332.
     TODO: Switch to FFP Autocomplete to avoid doing this file edit *)
-  let file_content =
-    entry.Provider_context.source_text.Full_fidelity_source_text.text
-  in
+  let file_content = entry.Provider_context.contents in
   let pos = { line; column } in
   let edits =
     [

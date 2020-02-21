@@ -288,8 +288,7 @@ let make_context_from_file_input
       match file_input with
       | ServerCommandTypes.FileName _ -> false
       | ServerCommandTypes.FileContent content ->
-        content
-        <> entry.Provider_context.source_text.Full_fidelity_source_text.text
+        content <> entry.Provider_context.contents
     in
     if any_changes then
       let (ctx, entry) =

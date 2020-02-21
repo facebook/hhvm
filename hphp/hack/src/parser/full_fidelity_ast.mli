@@ -33,6 +33,9 @@ val make_env (* Optional parts *) :
   Relative_path.t ->
   env
 
+val from_source_text_with_legacy :
+  env -> Full_fidelity_source_text.t -> Parser_return.t
+
 val from_text_with_legacy : env -> string -> Parser_return.t
 
 val parse_text :

@@ -30,6 +30,137 @@ let ctx_from_server_env (env : ServerEnv.env) : Provider_context.t =
     entries = Relative_path.Map.empty;
   }
 
+let make_entry
+    ~(ctx : Provider_context.t) ~(path : Relative_path.t) ~(contents : string) :
+    Provider_context.t * Provider_context.entry =
+  let entry =
+    {
+      Provider_context.path;
+      contents;
+      source_text = None;
+      parser_return = None;
+      ast_errors = None;
+      cst = None;
+      tast = None;
+      tast_errors = None;
+      symbols = None;
+    }
+  in
+  let ctx =
+    {
+      ctx with
+      Provider_context.entries =
+        Relative_path.Map.add ctx.Provider_context.entries path entry;
+    }
+  in
+  (ctx, entry)
+
+let add_entry_from_file_input
+    ~(ctx : Provider_context.t)
+    ~(path : Relative_path.t)
+    ~(file_input : ServerCommandTypes.file_input) :
+    Provider_context.t * Provider_context.entry =
+  let contents =
+    match file_input with
+    | ServerCommandTypes.FileName path -> Sys_utils.cat path
+    | ServerCommandTypes.FileContent contents -> contents
+  in
+  make_entry ~ctx ~path ~contents
+
+let add_entry ~(ctx : Provider_context.t) ~(path : Relative_path.t) :
+    Provider_context.t * Provider_context.entry =
+  let contents = Sys_utils.cat (Relative_path.to_absolute path) in
+  make_entry ~ctx ~path ~contents
+
+let add_entry_from_file_contents
+    ~(ctx : Provider_context.t) ~(path : Relative_path.t) ~(contents : string) :
+    Provider_context.t * Provider_context.entry =
+  make_entry ~ctx ~path ~contents
+
+let find_entry ~(ctx : Provider_context.t) ~(path : Relative_path.t) :
+    Provider_context.entry option =
+  Relative_path.Map.find_opt ctx.Provider_context.entries path
+
+let compute_source_text ~(entry : Provider_context.entry) :
+    Full_fidelity_source_text.t =
+  match entry with
+  | { Provider_context.source_text = Some source_text; _ } -> source_text
+  | _ ->
+    let source_text =
+      Full_fidelity_source_text.make
+        entry.Provider_context.path
+        entry.Provider_context.contents
+    in
+    entry.Provider_context.source_text <- Some source_text;
+    source_text
+
+(* Note that some callers may not actually need the AST errors. This could be
+improved with a method similar to the TAST-and-errors generation, where the TAST
+errors are not generated unless necessary. *)
+let compute_parser_return_and_ast_errors
+    ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
+    Parser_return.t * Errors.t =
+  match entry with
+  | {
+   Provider_context.ast_errors = Some ast_errors;
+   parser_return = Some parser_return;
+   _;
+  } ->
+    (parser_return, ast_errors)
+  | _ ->
+    (* Not used yet, but we will eventually want to extract the parser options
+  from the [Provider_context.t]. *)
+    let (_ : Provider_context.t) = ctx in
+    let source_text = compute_source_text entry in
+    let (ast_errors, parser_return) =
+      Errors.do_with_context
+        entry.Provider_context.path
+        Errors.Parsing
+        (fun () -> Ast_provider.parse ~full:true ~keep_errors:true ~source_text)
+    in
+    entry.Provider_context.ast_errors <- Some ast_errors;
+    entry.Provider_context.parser_return <- Some parser_return;
+    (parser_return, ast_errors)
+
+let compute_ast ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
+    Nast.program =
+  let ({ Parser_return.ast; _ }, _ast_errors) =
+    compute_parser_return_and_ast_errors ~ctx ~entry
+  in
+  ast
+
+let compute_comments
+    ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
+    Parser_return.comments =
+  let ({ Parser_return.comments; _ }, _ast_errors) =
+    compute_parser_return_and_ast_errors ~ctx ~entry
+  in
+  comments
+
+let compute_file_info
+    ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) : FileInfo.t =
+  let ast = compute_ast ~ctx ~entry in
+  let (funs, classes, record_defs, typedefs, consts) = Nast.get_defs ast in
+  {
+    FileInfo.empty_t with
+    FileInfo.funs;
+    classes;
+    record_defs;
+    typedefs;
+    consts;
+  }
+
+let compute_cst ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
+    Provider_context.PositionedSyntaxTree.t =
+  let _ = ctx in
+  match entry.Provider_context.cst with
+  | Some cst -> cst
+  | None ->
+    let source_text = compute_source_text ~entry in
+    let cst = Provider_context.PositionedSyntaxTree.make source_text in
+    entry.Provider_context.cst <- Some cst;
+    cst
+
 let respect_but_quarantine_unsaved_changes
     ~(ctx : Provider_context.t) ~(f : unit -> 'a) : 'a =
   let make_then_revert_local_changes f () =
@@ -71,7 +202,8 @@ let respect_but_quarantine_unsaved_changes
     @@ make_then_revert_local_changes (fun () ->
            Relative_path.Map.iter
              ctx.Provider_context.entries
-             ~f:(fun _path { Provider_context.ast; _ } ->
+             ~f:(fun _path entry ->
+               let ast = compute_ast ctx entry in
                let (funs, classes, record_defs, typedefs, consts) =
                  Nast.get_defs ast
                in
@@ -98,62 +230,6 @@ let respect_but_quarantine_unsaved_changes
   in
   result
 
-let internal_load_entry
-    ~(path : Relative_path.t) ~(file_input : ServerCommandTypes.file_input) :
-    Provider_context.entry =
-  let (ast_errors, (source_text, ast, comments)) =
-    Errors.do_with_context path Errors.Parsing (fun () ->
-        Ast_provider.parse_file_input
-          ~full:true
-          ~keep_errors:true
-          path
-          file_input)
-  in
-  {
-    Provider_context.path;
-    file_input;
-    source_text;
-    ast;
-    ast_errors;
-    comments;
-    cst = None;
-    tast = None;
-    tast_errors = None;
-    symbols = None;
-  }
-
-let add_entry_from_file_input
-    ~(ctx : Provider_context.t)
-    ~(path : Relative_path.t)
-    ~(file_input : ServerCommandTypes.file_input) :
-    Provider_context.t * Provider_context.entry =
-  let entry = internal_load_entry ~path ~file_input in
-  let ctx =
-    {
-      ctx with
-      Provider_context.entries =
-        Relative_path.Map.add ctx.Provider_context.entries path entry;
-    }
-  in
-  (ctx, entry)
-
-let add_entry ~(ctx : Provider_context.t) ~(path : Relative_path.t) :
-    Provider_context.t * Provider_context.entry =
-  let file_input =
-    ServerCommandTypes.FileName (Relative_path.to_absolute path)
-  in
-  add_entry_from_file_input ~ctx ~path ~file_input
-
-let add_entry_from_file_contents
-    ~(ctx : Provider_context.t) ~(path : Relative_path.t) ~(contents : string) :
-    Provider_context.t * Provider_context.entry =
-  let file_input = ServerCommandTypes.FileContent contents in
-  add_entry_from_file_input ~ctx ~path ~file_input
-
-let find_entry ~(ctx : Provider_context.t) ~(path : Relative_path.t) :
-    Provider_context.entry option =
-  Relative_path.Map.find_opt ctx.Provider_context.entries path
-
 type _ compute_tast_mode =
   | Compute_tast_only : Compute_tast.t compute_tast_mode
   | Compute_tast_and_errors : Compute_tast_and_errors.t compute_tast_mode
@@ -169,7 +245,10 @@ let compute_tast_and_errors_unquarantined_internal
   | (Compute_tast_only, Some tast, _) ->
     { Compute_tast.tast; telemetry = Telemetry.create () }
   | (Compute_tast_and_errors, Some tast, Some tast_errors) ->
-    let errors = Errors.merge entry.Provider_context.ast_errors tast_errors in
+    let (_parser_return, ast_errors) =
+      compute_parser_return_and_ast_errors ~ctx ~entry
+    in
+    let errors = Errors.merge ast_errors tast_errors in
     { Compute_tast_and_errors.tast; errors; telemetry = Telemetry.create () }
   | (mode, _, _) ->
     (* prepare logging *)
@@ -179,11 +258,14 @@ let compute_tast_and_errors_unquarantined_internal
     let t = Unix.gettimeofday () in
 
     (* do the work *)
+    let ({ Parser_return.ast; _ }, ast_errors) =
+      compute_parser_return_and_ast_errors ~ctx ~entry
+    in
     let (nast_errors, nast) =
       Errors.do_with_context
         entry.Provider_context.path
         Errors.Naming
-        (fun () -> Naming.program ctx entry.Provider_context.ast)
+        (fun () -> Naming.program ctx ast)
     in
     let (tast_errors, tast) =
       let do_tast_checks =
@@ -210,10 +292,10 @@ let compute_tast_and_errors_unquarantined_internal
     in
     (* File size. *)
     let telemetry =
-      match entry.Provider_context.file_input with
-      | ServerCommandTypes.FileName _ -> telemetry
-      | ServerCommandTypes.FileContent s ->
-        Telemetry.int_ telemetry ~key:"filesize" ~value:(String.length s)
+      Telemetry.int_
+        telemetry
+        ~key:"filesize"
+        ~value:(String.length entry.Provider_context.contents)
     in
 
     Hh_logger.debug
@@ -228,7 +310,7 @@ let compute_tast_and_errors_unquarantined_internal
     | Compute_tast_and_errors ->
       entry.Provider_context.tast <- Some tast;
       entry.Provider_context.tast_errors <- Some tast_errors;
-      let errors = Errors.merge entry.Provider_context.ast_errors tast_errors in
+      let errors = Errors.merge ast_errors tast_errors in
       { Compute_tast_and_errors.tast; errors; telemetry }
     | Compute_tast_only ->
       entry.Provider_context.tast <- Some tast;
@@ -256,7 +338,10 @@ let compute_tast_and_errors_quarantined
   (* If results have already been memoized, don't bother quarantining anything *)
   match (entry.Provider_context.tast, entry.Provider_context.tast_errors) with
   | (Some tast, Some tast_errors) ->
-    let errors = Errors.merge entry.Provider_context.ast_errors tast_errors in
+    let (_parser_return, ast_errors) =
+      compute_parser_return_and_ast_errors ~ctx ~entry
+    in
+    let errors = Errors.merge ast_errors tast_errors in
     { Compute_tast_and_errors.tast; errors; telemetry = Telemetry.create () }
   (* Okay, we don't have memoized results, let's ensure we are quarantined before computing *)
   | _ ->
@@ -284,16 +369,3 @@ let compute_tast_quarantined
     (match Provider_context.get_global_context () with
     | None -> respect_but_quarantine_unsaved_changes ~ctx ~f
     | Some _ -> f ())
-
-let compute_cst ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
-    Provider_context.PositionedSyntaxTree.t =
-  let _ = ctx in
-  match entry.Provider_context.cst with
-  | Some cst -> cst
-  | None ->
-    let cst =
-      Provider_context.PositionedSyntaxTree.make
-        entry.Provider_context.source_text
-    in
-    entry.Provider_context.cst <- Some cst;
-    cst

@@ -40,8 +40,9 @@ let get_docblock_for_member ctx class_info member_name =
   | Typing_defs.Tfun _ ->
     let pos = Lazy.force member.Typing_defs.ce_pos in
     let path = Pos.filename pos in
-    let (_ctx, entry) = Provider_utils.add_entry ~ctx ~path in
+    let (ctx, entry) = Provider_utils.add_entry ~ctx ~path in
     ServerSymbolDefinition.get_definition_cst_node_ctx
+      ~ctx
       ~entry
       ~kind:SymbolDefinition.Method
       ~pos
@@ -141,7 +142,7 @@ let go_comments_from_source_text
   in
   let pos = Pos.make_from_lexing_pos filename lp lp in
   let ffps_opt =
-    ServerSymbolDefinition.get_definition_cst_node_ctx ~entry ~kind ~pos
+    ServerSymbolDefinition.get_definition_cst_node_ctx ~ctx ~entry ~kind ~pos
   in
   match ffps_opt with
   | None -> None
@@ -161,6 +162,7 @@ let go_comments_for_symbol_ctx
   | None ->
     (match
        ServerSymbolDefinition.get_definition_cst_node_ctx
+         ~ctx
          ~entry
          ~kind:def.SymbolDefinition.kind
          ~pos:def.SymbolDefinition.pos

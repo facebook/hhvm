@@ -32,12 +32,11 @@ you have the TAST and don't need to access further data), then you should
 discard the [entry] and the [Provider_context.t] that it came from.
 *)
 type entry = {
-  file_input: ServerCommandTypes.file_input;
   path: Relative_path.t;
-  source_text: Full_fidelity_source_text.t;
-  comments: Parser_return.comments;
-  ast: Nast.program;
-  ast_errors: Errors.t;
+  contents: string;
+  mutable source_text: Full_fidelity_source_text.t option;
+  mutable parser_return: Parser_return.t option;
+  mutable ast_errors: Errors.t option;
   mutable cst: PositionedSyntaxTree.t option;
   mutable tast: Tast.program option;
   mutable tast_errors: Errors.t option;
@@ -88,9 +87,6 @@ val empty_for_debugging : tcopt:TypecheckerOptions.t -> t
 
 (** Update the [TypecheckerOptions.t] contained within the [t]. *)
 val map_tcopt : t -> f:(TypecheckerOptions.t -> TypecheckerOptions.t) -> t
-
-(** Get the [FileInfo.t] associated with the given [entry]. *)
-val get_file_info : entry:entry -> FileInfo.t
 
 (** Get the current global context (which is set with
 [Provider_utils.respect_but_quarantine_unsaved_changes]), if any. Only one

@@ -8890,7 +8890,11 @@ let nast_to_tast_gienv ~(do_tast_checks : bool) ctx nast :
         | Some (c, envs) -> (Aast.Class c, envs)
         | None ->
           failwith
-          @@ Printf.sprintf "Error in declaration of class: %s" (snd c.c_name)
+          @@ Printf.sprintf
+               "Error in declaration of class: %s\n%s"
+               (snd c.c_name)
+               ( Caml.Printexc.get_callstack 99
+               |> Caml.Printexc.raw_backtrace_to_string )
       end
     | RecordDef rd -> (Aast.RecordDef (record_def_def ctx rd), [])
     (* We don't typecheck top level statements:

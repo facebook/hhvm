@@ -320,6 +320,7 @@ let get_deprecated_wrapper_patch ~filename ~definition ~ctx new_name =
         in
         let cst_node =
           ServerSymbolDefinition.get_definition_cst_node_ctx
+            ~ctx
             ~entry
             ~kind:definition.kind
             ~pos:definition.pos
@@ -448,9 +449,7 @@ let go_ide ctx (filename, line, column) new_name genv env =
       ~ctx
       ~path:(Relative_path.create_detect_prefix filename)
   in
-  let file_content =
-    entry.Provider_context.source_text.Full_fidelity_source_text.text
-  in
+  let file_content = entry.Provider_context.contents in
   let definitions =
     ServerIdentifyFunction.go_quarantined_absolute ~ctx ~entry ~line ~column
   in

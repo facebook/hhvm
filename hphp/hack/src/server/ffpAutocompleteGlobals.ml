@@ -13,39 +13,39 @@ open FfpAutocompleteContextParser
 open AutocompleteTypes
 
 let should_complete_class (context : context) : bool =
-  ContextPredicates.(
-    Container.(
-      Predecessor.(
-        is_expression_valid context
-        || is_type_valid context
-        || ( context.closest_parent_container = CompoundStatement
-           || context.closest_parent_container = AssignmentExpression )
-           && context.predecessor = KeywordNew
-        || ( context.closest_parent_container = ClassHeader
-           || context.closest_parent_container = ClassBody )
-           && context.predecessor = KeywordExtends)))
+  let open ContextPredicates in
+  let open Container in
+  let open Predecessor in
+  is_expression_valid context
+  || is_type_valid context
+  || ( context.closest_parent_container = CompoundStatement
+     || context.closest_parent_container = AssignmentExpression )
+     && context.predecessor = KeywordNew
+  || ( context.closest_parent_container = ClassHeader
+     || context.closest_parent_container = ClassBody )
+     && context.predecessor = KeywordExtends
 
 let should_complete_interface (context : context) : bool =
-  ContextPredicates.(
-    Container.(
-      Predecessor.(
-        is_expression_valid context
-        || is_type_valid context
-        || ( context.closest_parent_container = InterfaceHeader
-           || context.closest_parent_container = InterfaceBody )
-           && context.predecessor = KeywordExtends
-        || ( context.closest_parent_container = ClassHeader
-           || context.closest_parent_container = ClassBody )
-           && context.predecessor = KeywordImplements)))
+  let open ContextPredicates in
+  let open Container in
+  let open Predecessor in
+  is_expression_valid context
+  || is_type_valid context
+  || ( context.closest_parent_container = InterfaceHeader
+     || context.closest_parent_container = InterfaceBody )
+     && context.predecessor = KeywordExtends
+  || ( context.closest_parent_container = ClassHeader
+     || context.closest_parent_container = ClassBody )
+     && context.predecessor = KeywordImplements
 
 let should_complete_trait (context : context) : bool =
-  ContextPredicates.(
-    Container.(
-      Predecessor.(
-        is_expression_valid context
-        || context.closest_parent_container = ClassBody
-           && context.inside_class_body
-           && context.predecessor = KeywordUse)))
+  let open ContextPredicates in
+  let open Container in
+  let open Predecessor in
+  is_expression_valid context
+  || context.closest_parent_container = ClassBody
+     && context.inside_class_body
+     && context.predecessor = KeywordUse
 
 (* TODO: Port over the namespace completion code from autocompleteService.ml *)
 let should_get_globals (context : context) : bool =
@@ -109,39 +109,39 @@ let make_trait_completion
 
 let get_same_file_definitions (positioned_tree : PositionedSyntax.t) :
     string list * string list * string list =
-  PositionedSyntax.(
-    PositionedToken.(
-      TokenKind.(
-        let aux (classes, interfaces, traits) node =
-          match syntax node with
-          | ClassishDeclaration
-              {
-                classish_keyword = { syntax = Token { kind = Class; _ }; _ };
-                classish_name;
-                _;
-              } ->
-            (PositionedSyntax.text classish_name :: classes, interfaces, traits)
-          | ClassishDeclaration
-              {
-                classish_keyword = { syntax = Token { kind = Interface; _ }; _ };
-                classish_name;
-                _;
-              } ->
-            (classes, PositionedSyntax.text classish_name :: interfaces, traits)
-          | ClassishDeclaration
-              {
-                classish_keyword = { syntax = Token { kind = Trait; _ }; _ };
-                classish_name;
-                _;
-              } ->
-            (classes, interfaces, PositionedSyntax.text classish_name :: traits)
-          | _ -> (classes, interfaces, traits)
-        in
-        let rec fold acc node =
-          let acc = aux acc node in
-          List.fold_left ~f:fold ~init:acc (PositionedSyntax.children node)
-        in
-        fold ([], [], []) positioned_tree)))
+  let open PositionedSyntax in
+  let open PositionedToken in
+  let open TokenKind in
+  let aux (classes, interfaces, traits) node =
+    match syntax node with
+    | ClassishDeclaration
+        {
+          classish_keyword = { syntax = Token { kind = Class; _ }; _ };
+          classish_name;
+          _;
+        } ->
+      (PositionedSyntax.text classish_name :: classes, interfaces, traits)
+    | ClassishDeclaration
+        {
+          classish_keyword = { syntax = Token { kind = Interface; _ }; _ };
+          classish_name;
+          _;
+        } ->
+      (classes, PositionedSyntax.text classish_name :: interfaces, traits)
+    | ClassishDeclaration
+        {
+          classish_keyword = { syntax = Token { kind = Trait; _ }; _ };
+          classish_name;
+          _;
+        } ->
+      (classes, interfaces, PositionedSyntax.text classish_name :: traits)
+    | _ -> (classes, interfaces, traits)
+  in
+  let rec fold acc node =
+    let acc = aux acc node in
+    List.fold_left ~f:fold ~init:acc (PositionedSyntax.children node)
+  in
+  fold ([], [], []) positioned_tree
 
 let get_globals
     (sienv : SearchUtils.si_env)

@@ -11,12 +11,11 @@ module PositionedSyntaxTree =
   Full_fidelity_syntax_tree.WithSyntax (Full_fidelity_positioned_syntax)
 
 type entry = {
-  file_input: ServerCommandTypes.file_input;
   path: Relative_path.t;
-  source_text: Full_fidelity_source_text.t;
-  comments: Parser_return.comments;
-  ast: Nast.program;
-  ast_errors: Errors.t;
+  contents: string;
+  mutable source_text: Full_fidelity_source_text.t option;
+  mutable parser_return: Parser_return.t option;
+  mutable ast_errors: Errors.t option;
   mutable cst: PositionedSyntaxTree.t option;
   mutable tast: Tast.program option;
   mutable tast_errors: Errors.t option;
@@ -57,19 +56,6 @@ let map_tcopt (t : t) ~(f : TypecheckerOptions.t -> TypecheckerOptions.t) : t =
   { t with tcopt = f t.tcopt }
 
 let global_context : t option ref = ref None
-
-let get_file_info ~(entry : entry) : FileInfo.t =
-  let (funs, classes, record_defs, typedefs, consts) =
-    Nast.get_defs entry.ast
-  in
-  {
-    FileInfo.empty_t with
-    FileInfo.funs;
-    classes;
-    record_defs;
-    typedefs;
-    consts;
-  }
 
 let get_global_context () : t option = !global_context
 

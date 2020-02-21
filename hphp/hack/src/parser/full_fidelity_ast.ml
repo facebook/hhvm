@@ -403,9 +403,13 @@ let legacy (env : env) (x : aast_result) : Parser_return.t =
     Parser_return.content = x.content;
   }
 
+let from_source_text_with_legacy
+    (env : env) (source_text : Full_fidelity_source_text.t) : Parser_return.t =
+  legacy env @@ from_text env source_text
+
 let from_text_with_legacy (env : env) (content : string) : Parser_return.t =
   let source_text = SourceText.make env.file content in
-  legacy env @@ from_text env source_text
+  from_source_text_with_legacy env source_text
 
 let from_file_with_legacy env = legacy env (from_file env)
 

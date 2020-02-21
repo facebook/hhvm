@@ -27,10 +27,10 @@ let is_complete_class_member context =
 
 let run
     ~(context : context)
-    ~(file_content : string)
+    ~(ctx : Provider_context.t)
+    ~(entry : Provider_context.entry)
     ~(stub : string)
     ~(pos : File_content.position)
-    ~(ctx : Provider_context.t)
     ~(sienv : SearchUtils.si_env) :
     AutocompleteTypes.complete_autocomplete_result list =
   if
@@ -38,12 +38,6 @@ let run
     || should_complete_function context
     || is_complete_class_member context
   then
-    let (ctx, entry) =
-      Provider_utils.add_entry_from_file_contents
-        ~ctx
-        ~path:(Relative_path.create_detect_prefix "")
-        ~contents:file_content
-    in
     let ac_results =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerAutoComplete.go_ctx

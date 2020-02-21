@@ -373,17 +373,23 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     (env, results)
   | IDE_FFP_AUTOCOMPLETE (path, pos) ->
     let pos = pos |> Ide_api_types.ide_pos_to_fc in
-    let content =
+    let contents =
       ServerFileSync.get_file_content (ServerCommandTypes.FileName path)
     in
-    let offset = File_content.get_offset content pos in
+    let offset = File_content.get_offset contents pos in
     (* will raise if out of bounds *)
-    let char_at_pos = File_content.get_char content offset in
+    let char_at_pos = File_content.get_char contents offset in
     let ctx = Provider_utils.ctx_from_server_env env in
+    let (ctx, entry) =
+      Provider_utils.add_entry_from_file_contents
+        ~ctx
+        ~path:(Relative_path.create_detect_prefix path)
+        ~contents
+    in
     let result =
       FfpAutocompleteService.auto_complete
         ctx
-        content
+        entry
         pos
         ~filter_by_token:false
         ~sienv:env.ServerEnv.local_symbol_table

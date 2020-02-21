@@ -41,38 +41,33 @@ module LocalParserCache =
       let description = "ParserLocal"
     end)
 
-let parse_file_input
-    ?(full = false)
-    ?(keep_errors = false)
-    (file_name : Relative_path.t)
-    (file_input : ServerCommandTypes.file_input) :
-    Full_fidelity_source_text.t * Nast.program * Parser_return.comments =
+let parse
+    ~(full : bool)
+    ~(keep_errors : bool)
+    ~(source_text : Full_fidelity_source_text.t) : Parser_return.t =
   let popt = Parser_options_provider.get () in
+  let path = source_text.Full_fidelity_source_text.file_path in
   let parser_env =
     Full_fidelity_ast.make_env
       ~quick_mode:(not full)
       ~keep_errors
       ~parser_options:popt
-      file_name
+      path
   in
-  let source = ServerCommandTypesUtils.source_tree_of_file_input file_input in
   let result =
-    Full_fidelity_ast.from_text_with_legacy
-      parser_env
-      source.Full_fidelity_source_text.text
+    Full_fidelity_ast.from_source_text_with_legacy parser_env source_text
   in
   let ast = result.Parser_return.ast in
-  let comments = result.Parser_return.comments in
   let ast =
     if
-      Relative_path.prefix file_name = Relative_path.Hhi
+      Relative_path.prefix path = Relative_path.Hhi
       && ParserOptions.deregister_php_stdlib popt
     then
       Nast.deregister_ignored_attributes ast
     else
       ast
   in
-  (source, ast, comments)
+  { result with Parser_return.ast }
 
 let get_from_local_cache ~full file_name =
   let fn = Relative_path.to_absolute file_name in
@@ -236,45 +231,46 @@ let get_gconst defs name =
   in
   get None defs
 
-let get_ast ?(full = false) ctx file_name =
+let get_ast ?(full = false) ctx path =
   Counters.count_get_ast @@ fun () ->
   (* If there's a ctx, and this file is in the ctx, then use ctx. *)
   (* Otherwise, the way we fetch/cache ASTs depends on the provider. *)
   let entry_opt =
-    Relative_path.Map.find_opt ctx.Provider_context.entries file_name
+    Relative_path.Map.find_opt ctx.Provider_context.entries path
   in
   match (entry_opt, ctx.Provider_context.backend) with
-  | (Some entry, _) -> entry.Provider_context.ast
-  | (None, Provider_backend.Shared_memory) ->
+  | ( Some { Provider_context.parser_return = Some { Parser_return.ast; _ }; _ },
+      _ ) ->
+    ast
+  | (_, Provider_backend.Shared_memory) ->
     begin
       (* Note that we might be looking up the shared ParserHeap directly, *)
       (* or maybe into a local-change-stack due to quarantine. *)
-      match (ParserHeap.get file_name, full) with
+      match (ParserHeap.get path, full) with
       | (None, true)
       | (Some (_, Decl), true) ->
         (* If we need full, and parser-heap can't provide it, then we *)
         (* don't want to write a full decl into the parser heap. *)
-        get_from_local_cache ~full file_name
+        get_from_local_cache ~full path
       | (None, false) ->
         (* This is the case where we will write into the parser heap. *)
-        let ast = get_from_local_cache ~full file_name in
-        ParserHeap.add file_name (ast, Decl);
+        let ast = get_from_local_cache ~full path in
+        ParserHeap.add path (ast, Decl);
         ast
       | (Some (ast, _), _) ->
         (* It's in the parser-heap! hurrah! *)
         ast
     end
-  | (None, Provider_backend.Local_memory _) ->
+  | (_, Provider_backend.Local_memory _) ->
     (* We never cache ASTs for this provider. There'd be no use. *)
     (* The only valuable caching is to cache decls. *)
-    let (_, ast, _) =
-      parse_file_input
-        ~full
-        file_name
-        (ServerCommandTypes.FileName (Relative_path.to_absolute file_name))
+    let contents = Sys_utils.cat (Relative_path.to_absolute path) in
+    let source_text = Full_fidelity_source_text.make path contents in
+    let { Parser_return.ast; _ } =
+      parse ~full ~keep_errors:false ~source_text
     in
     ast
-  | (None, Provider_backend.Decl_service _) ->
+  | (_, Provider_backend.Decl_service _) ->
     failwith "Ast_provider.get_ast not supported with decl memory provider"
 
 let find_class_in_file

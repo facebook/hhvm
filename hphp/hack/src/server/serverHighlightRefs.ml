@@ -34,7 +34,7 @@ let highlight_symbol ctx entry line column symbol =
       let results = FindRefsService.find_refs_ctx ~ctx ~entry ~target in
       List.rev (List.map results snd)
     | None when symbol.SymbolOccurrence.type_ = SymbolOccurrence.LocalVar ->
-      let ast = entry.Provider_context.ast in
+      let ast = Provider_utils.compute_ast ~ctx ~entry in
       ServerFindLocals.go_from_ast ast line column
     | None -> []
   in

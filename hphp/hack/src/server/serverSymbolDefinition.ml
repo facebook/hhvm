@@ -14,8 +14,7 @@ open Typing_defs
 module SourceText = Full_fidelity_source_text
 module Syntax = Full_fidelity_positioned_syntax
 module SyntaxKind = Full_fidelity_syntax_kind
-module SyntaxTree =
-  Full_fidelity_syntax_tree.WithSyntax (Full_fidelity_positioned_syntax)
+module SyntaxTree = Provider_context.PositionedSyntaxTree
 module Cls = Decl_provider.Class
 open Aast
 
@@ -184,14 +183,14 @@ let go ctx ast result =
     end
   | SymbolOccurrence.Attribute _ -> None
 
-let get_definition_cst_node_from_pos kind source_text pos =
+let get_definition_cst_node_from_pos ctx entry kind pos =
   try
+    let source_text = Provider_utils.compute_source_text entry in
     let tree =
       if Ide_parser_cache.is_enabled () then
         Ide_parser_cache.(with_ide_cache @@ fun () -> get_cst source_text)
       else
-        let env = Full_fidelity_parser_env.default in
-        SyntaxTree.make ~env source_text
+        Provider_utils.compute_cst ctx entry
     in
     let (line, start, _) = Pos.info_pos pos in
     let offset = SourceText.position_to_offset source_text (line, start) in
@@ -216,8 +215,8 @@ let get_definition_cst_node_from_pos kind source_text pos =
   with _ -> None
 
 let get_definition_cst_node_ctx
+    ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
     ~(kind : SymbolDefinition.kind)
     ~(pos : 'a Pos.pos) : Full_fidelity_positioned_syntax.t option =
-  let source_text = entry.Provider_context.source_text in
-  get_definition_cst_node_from_pos kind source_text pos
+  get_definition_cst_node_from_pos ctx entry kind pos

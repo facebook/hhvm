@@ -74,6 +74,8 @@ struct UserAutoloadMap : AutoloadMap {
     return false;
   }
 
+  virtual Array getAllFiles() const override;
+
   virtual folly::Optional<String> getTypeFile(
       const String& typeName) override;
   virtual folly::Optional<String> getFunctionFile(

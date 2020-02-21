@@ -104,6 +104,13 @@ struct AutoloadMap {
   }
 
   /**
+   * Get all filepaths known to the autoloader at this point in time.
+   *
+   * Each path must be an absolute path with all symlinks dereferenced.
+   */
+  virtual Array getAllFiles() const = 0;
+
+  /**
    * Map symbols to files
    */
   virtual folly::Optional<String> getTypeFile(

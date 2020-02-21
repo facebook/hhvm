@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/user-autoload-map.h"
 
 #include "hphp/runtime/base/builtin-functions.h"
@@ -47,7 +48,7 @@ const StaticString& getStringRepr(AutoloadMap::KindOf kind) {
 Array getSubMapFromMap(const Array& map, const StaticString& key) {
   auto const& subMap = map[key];
   if (!subMap.isArray() && !subMap.isDict()) {
-    return {};
+    return Array::CreateDict();
   }
   return Array{subMap.toDict()};
 }
@@ -69,6 +70,43 @@ UserAutoloadMap UserAutoloadMap::fromFullMap(const Array& fullMap,
       std::move(constantFile),
       std::move(typeAliasFile),
       std::move(failFunc)};
+}
+
+Array UserAutoloadMap::getAllFiles() const {
+  auto maxSize = std::max({
+    m_typeFile.size(), m_functionFile.size(), m_constantFile.size(),
+    m_typeAliasFile.size()});
+  if (UNLIKELY(maxSize < 0)) maxSize = 0;
+  auto ret = Array::CreateKeyset();
+  auto addToRet = [&](const Array& src) {
+    IterateV(src.get(), [&](const TypedValue& v) {
+      switch (type(v)) {
+        case DataType::String:
+        case DataType::PersistentString:
+        {
+          StringData* path = val(v).pstr;
+          if (path->empty()) {
+            return;
+          }
+          if (path->data()[0] == '/') {
+            ret.append(String{path});
+          } else {
+            ret.append(m_root + String{path});
+          }
+          return;
+        }
+        default:
+          break;
+      }
+    });
+  };
+
+  addToRet(m_typeFile);
+  addToRet(m_functionFile);
+  addToRet(m_constantFile);
+  addToRet(m_typeAliasFile);
+
+  return ret.toVec();
 }
 
 folly::Optional<String> UserAutoloadMap::getTypeFile(

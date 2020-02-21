@@ -139,13 +139,7 @@ if(NOT PCRE_LIBRARY)
 endif()
 
 # Add bundled libzip if the system one will not be used
-if(NOT LIBZIP_LIBRARY)
-  list(APPEND THIRD_PARTY_MODULES libzip)
-  list(APPEND EXTRA_INCLUDE_PATHS
-    "${CMAKE_CURRENT_BINARY_DIR}/libzip/src/lib"
-    "${TP_DIR}/libzip/src/lib"
-  )
-endif()
+add_subdirectory(libzip)
 
 list(APPEND THIRD_PARTY_MODULES ocaml)
 
@@ -158,7 +152,7 @@ endif()
 
 ##### boost #####
 
-# boost checks     
+# boost checks
 find_package(Boost 1.62.0 COMPONENTS context fiber filesystem iostreams program_options regex system thread)
 if ("${Boost_VERSION}" EQUAL "107000")
   # https://github.com/boostorg/variant/issues/69

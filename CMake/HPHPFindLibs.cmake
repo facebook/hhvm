@@ -138,23 +138,6 @@ if (FASTLZ_INCLUDE_DIR)
   include_directories(${FASTLZ_INCLUDE_DIR})
 endif()
 
-# libzip < 1.3.0 may be affected by CVE-2017-12858 and CVE-2017-14107
-find_package(LibZip)
-if (LIBZIP_INCLUDE_DIR_ZIP AND LIBZIP_INCLUDE_DIR_ZIPCONF)
-  if (LIBZIP_VERSION VERSION_LESS "1.3.0")
-    unset(LIBZIP_FOUND CACHE)
-    unset(LIBZIP_LIBRARY CACHE)
-    unset(LIBZIP_INCLUDE_DIR_ZIP CACHE)
-    unset(LIBZIP_INCLUDE_DIR_ZIPCONF CACHE)
-    message(STATUS "libzip is too old, found ${LIBZIP_VERSION} and we need 1.3.0+, using third-party bundled libzip")
-  else ()
-    include_directories(${LIBZIP_INCLUDE_DIR_ZIP} ${LIBZIP_INCLUDE_DIR_ZIPCONF})
-    message(STATUS "Found libzip: ${LIBZIP_LIBRARY} ${LIBZIP_VERSION}")
-  endif ()
-else ()
-  message(STATUS "Using third-party bundled libzip")
-endif()
-
 # ICU
 find_package(ICU REQUIRED)
 if (ICU_FOUND)
@@ -507,11 +490,7 @@ macro(hphp_link target)
   # The syntax used for these warnings is unparsable by Apple's Clang
   add_definitions("-DLZ4_DISABLE_DEPRECATE_WARNINGS=1")
 
-  if (LIBZIP_LIBRARY)
-    target_link_libraries(${target} ${LIBZIP_LIBRARY})
-  else()
-    target_link_libraries(${target} zip_static)
-  endif()
+  target_link_libraries(${target} libzip)
 
   if (PCRE_LIBRARY)
     target_link_libraries(${target} ${PCRE_LIBRARY})

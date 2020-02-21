@@ -70,13 +70,12 @@ const StringData* PreRecordDesc::mangleFieldName(
   return PreClass::manglePropName(recordName, fieldName, attrs);
 }
 
-void PreRecordDesc::checkFieldDefaultValues() const {
-  for (auto const& field : allFields()) {
-    auto const& val = field.val();
-    if (val.m_type == KindOfUninit) continue;
-    auto const& tc = field.typeConstraint();
-    if (tc.isCheckable()) tc.verifyRecField(&val, m_name, field.name());
-  }
+void PreRecordDesc::checkDefaultValueType(
+    const PreRecordDesc::Field& field) const {
+  auto const& val = field.val();
+  if (val.m_type == KindOfUninit) return;
+  auto const& tc = field.typeConstraint();
+  if (tc.isCheckable()) tc.verifyRecField(&val, m_name, field.name());
 }
 
 void RecordDesc::atomicRelease() {
@@ -185,6 +184,7 @@ void RecordDesc::setFields() {
                   name()->data(),
                   preField.name()->data());
     }
+    m_preRec->checkDefaultValueType(preField);
     curFieldMap.add(preField.name(), preField);
   }
   m_fields.create(curFieldMap);

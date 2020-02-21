@@ -5066,7 +5066,6 @@ OPTBLD_INLINE void iopDefCls(uint32_t cid) {
 
 OPTBLD_INLINE void iopDefRecord(uint32_t cid) {
   auto const r = vmfp()->m_func->unit()->lookupPreRecordId(cid);
-  r->checkFieldDefaultValues();
   Unit::defRecordDesc(r);
 }
 

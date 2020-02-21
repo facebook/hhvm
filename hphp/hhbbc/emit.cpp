@@ -336,6 +336,11 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
         euState.processedTypeAlias.insert(tid);
         return;
       }
+      case Op::DefRecord: {
+        auto rid = bc.DefRecord.arg1;
+        ue.pushMergeableRecord(rid);
+        return;
+      }
 
       case Op::Null:   tos = TInitNull; return;
       case Op::True:   tos = TTrue; return;

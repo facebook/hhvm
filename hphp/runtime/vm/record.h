@@ -93,6 +93,7 @@ struct PreRecordDesc : AtomicCountable {
 
 private:
   using FieldMap = IndexedStringMap<Field,true,Slot>;
+  void checkDefaultValueType(const Field&) const;
 
 public:
   PreRecordDesc(Unit* unit, int line1, int line2, const StringData* name,
@@ -120,7 +121,6 @@ public:
   FieldRange allFields() const {
     return FieldRange(m_fields.accessList(), m_fields.size());
   }
-  void checkFieldDefaultValues() const;
 
   bool isUnique() const { return m_attrs & AttrUnique; }
   bool isPersistent() const { return m_attrs & AttrPersistent; }

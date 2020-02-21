@@ -269,14 +269,7 @@ struct UnitEmitter {
   PreClassEmitter* newBarePreClassEmitter(const std::string& name,
                                           PreClass::Hoistable hoistable);
 
-  void addRecordEmitter(RecordEmitter* re);
   RecordEmitter* newRecordEmitter(const std::string& name);
-  /*
-   * Create a new RecordEmitter without adding it to the hoistability
-   * tracking data structures.
-   * It should be added later with addRecordEmitter.
-   */
-  RecordEmitter* newBareRecordEmitter(const std::string& name);
 
   /////////////////////////////////////////////////////////////////////////////
   // RecordEmitters.
@@ -365,6 +358,12 @@ struct UnitEmitter {
    */
   void pushMergeableId(Unit::MergeKind kind, const Id id);
   void insertMergeableId(Unit::MergeKind kind, int ix, const Id id);
+
+  /*
+   * Add a Record to the UnitEmitter's list of mergeables.
+   */
+  void pushMergeableRecord(const Id id);
+  void insertMergeableRecord(int ix, const Id id);
 
   /////////////////////////////////////////////////////////////////////////////
   // Bytecode emit.

@@ -3,13 +3,10 @@
 HH\autoload_set_paths(
   array(
     'type' => array('bar' => 'record-alias.inc', 'baz' => 'record-alias2.inc'),
+    'class' => array('foo' => 'record_decl.1.inc'),
   ),
   __DIR__.'/'
 );
-
-record Foo {
-  int x;
-}
 
 function foo(Bar $r): Bar {
   $r['x'] = $r['x'] + 1;

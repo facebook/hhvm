@@ -648,12 +648,6 @@ struct AsmState {
     enumTySet = false;
   }
 
-  void finishRecord() {
-    assertx(!fe && !pce);
-    ue->addRecordEmitter(re);
-    re = nullptr;
-  }
-
   void patchLabelOffsets(const Label& label) {
     for (auto const& source : label.sources) {
       ue->emitInt32(label.target - source.second, source.first);
@@ -3301,7 +3295,7 @@ void parse_record(AsmState& as) {
     }
   }
 
-  as.re = as.ue->newBareRecordEmitter(name);
+  as.re = as.ue->newRecordEmitter(name);
   as.re->init(line0,
               line1,
               attrs,
@@ -3311,7 +3305,9 @@ void parse_record(AsmState& as) {
   as.in.expectWs('{');
   parse_record_body(as);
 
-  as.finishRecord();
+  as.ue->pushMergeableRecord(as.re->id());
+  assertx(!as.fe && !as.pce);
+  as.re = nullptr;
 }
 
 /*

@@ -302,8 +302,9 @@ public:
     UniqueDefinedClass  = 1,
     Define              = 2,  // Toplevel scalar define.
     TypeAlias           = 3,
-    Done                = 4,
-    // We can add three more kind here; this has to fit in 3 bits.
+    Record              = 4,
+    Done                = 5,
+    // We can add two more kind here; this has to fit in 3 bits.
   };
 
   /*

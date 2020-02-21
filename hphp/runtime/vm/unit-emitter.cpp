@@ -290,21 +290,9 @@ PreClassEmitter* UnitEmitter::newPreClassEmitter(
   return pce;
 }
 
-void UnitEmitter::addRecordEmitter(RecordEmitter* re) {
-  // NOTE: Records don't have m_hoistable yet. So this does nothing.
-  return;
-}
-
-
-RecordEmitter* UnitEmitter::newBareRecordEmitter(const std::string& name) {
+RecordEmitter* UnitEmitter::newRecordEmitter(const std::string& name) {
   auto const re = new RecordEmitter(*this, m_reVec.size(), name);
   m_reVec.push_back(re);
-  return re;
-}
-
-RecordEmitter* UnitEmitter::newRecordEmitter(const std::string& name) {
-  auto const re = newBareRecordEmitter(name);
-  addRecordEmitter(re);
   return re;
 }
 
@@ -422,6 +410,18 @@ void UnitEmitter::insertMergeableId(Unit::MergeKind kind, int ix, const Id id) {
   m_allClassesHoistable = false;
 }
 
+void UnitEmitter::pushMergeableRecord(const Id id) {
+  m_mergeableStmts.push_back(std::make_pair(Unit::MergeKind::Record, id));
+  m_allClassesHoistable = false;
+}
+
+void UnitEmitter::insertMergeableRecord(int ix, const Id id) {
+  assertx(size_t(ix) <= m_mergeableStmts.size());
+  m_mergeableStmts.insert(m_mergeableStmts.begin() + ix,
+                          std::make_pair(Unit::MergeKind::Record, id));
+  m_allClassesHoistable = false;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Initialization and execution.
 
@@ -506,6 +506,7 @@ RepoStatus UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
         case MergeKind::Class:
           break;
         case MergeKind::TypeAlias:
+        case MergeKind::Record:
         case MergeKind::Define: {
           urp.insertUnitMergeable[repoId].insert(
             txn, usn, i,
@@ -681,6 +682,7 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
           break;
         case MergeKind::Define:
           assertx(RuntimeOption::RepoAuthoritative);
+        case MergeKind::Record:
         case MergeKind::TypeAlias:
           mi->mergeableObj(ix++) =
             (void*)((intptr_t(mergeable.second) << 3) + (int)mergeable.first);
@@ -1154,7 +1156,9 @@ void UnitRepoProxy::GetUnitArraysStmt
 void UnitRepoProxy::InsertUnitMergeableStmt
                   ::insert(RepoTxn& txn, int64_t unitSn,
                            int ix, Unit::MergeKind kind, Id id) {
-  assertx(kind == MergeKind::TypeAlias || kind == MergeKind::Define);
+  assertx(kind == MergeKind::TypeAlias ||
+          kind == MergeKind::Define ||
+          kind == MergeKind::Record);
   if (!prepared()) {
     auto insertQuery = folly::sformat(
       "INSERT INTO {} VALUES("
@@ -1212,6 +1216,9 @@ void UnitRepoProxy::GetUnitMergeablesStmt
         case MergeKind::Define:
         case MergeKind::TypeAlias:
           ue.insertMergeableId(k, mergeableIx, mergeableId);
+          break;
+        case MergeKind::Record:
+          ue.insertMergeableRecord(mergeableIx, mergeableId);
           break;
         default: break;
       }

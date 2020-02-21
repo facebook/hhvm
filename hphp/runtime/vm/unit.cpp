@@ -1671,6 +1671,8 @@ void Unit::initialMerge() {
               needsCompact = true;
             }
             break;
+          case MergeKind::Record:
+            break;
           case MergeKind::Define: {
             auto const constantId = static_cast<Id>(intptr_t(obj)) >> 3;
             if (m_constants[constantId].attrs & AttrPersistent) {
@@ -1702,10 +1704,6 @@ void Unit::merge() {
     mergeImpl<true>(mergeInfo());
   } else {
     mergeImpl<false>(mergeInfo());
-  }
-
-  for (auto& r : prerecords()) {
-    defRecordDesc(r.get());
   }
 }
 
@@ -1782,6 +1780,10 @@ static size_t compactMergeInfo(Unit::MergeInfo* in, Unit::MergeInfo* out,
         } else if (out) {
           out->mergeableObj(oix++) = obj;
         }
+        break;
+      }
+      case MergeKind::Record: {
+        if (out) out->mergeableObj(oix++) = obj;
         break;
       }
       case MergeKind::TypeAlias: {
@@ -2023,6 +2025,19 @@ void Unit::mergeImpl(MergeInfo* mi) {
           k = MergeKind(uintptr_t(obj) & 7);
         } while (k == MergeKind::TypeAlias);
         continue;
+
+      case MergeKind::Record:
+        do {
+          Stats::inc(Stats::UnitMerge_mergeable);
+          Stats::inc(Stats::UnitMerge_mergeable_record);
+          auto const recordId = static_cast<Id>(intptr_t(obj)) >> 3;
+          auto const r = lookupPreRecordId(recordId);
+          defRecordDesc(r, true /*failIsFatal*/);
+          obj = mi->mergeableObj(++ix);
+          k = MergeKind(uintptr_t(obj) & 7);
+        } while (k == MergeKind::Record);
+        continue;
+
       case MergeKind::Done:
         assertx((unsigned)ix == mi->m_mergeablesSize);
         if (UNLIKELY(m_mergeState.load(std::memory_order_relaxed) &

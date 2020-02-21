@@ -6,4 +6,4 @@ class C {
   }
 }
 
-function f($x = array(C::f())): void{}
+function f($x = varray[C::f()]): void{}

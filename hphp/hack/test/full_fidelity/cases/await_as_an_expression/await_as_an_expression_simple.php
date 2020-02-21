@@ -11,14 +11,14 @@ async function foo(): Awaitable<void> {
   $x = (await genx()) is int;
   $x = (await genx()) as int;
   $x = (await genx()) ?as int;
-  $x = isset(array()[await genx()]);
+  $x = isset(varray[][await genx()]);
   $x = Map { (await genx()) => (await geny()) };
   $x = Vector { (await genx()) };
   $x = Set { (await genx()) };
   $x = new (await genx())(await geny());
   $x = shape('key' => (await genx()));
   $x = tuple((await genx()), (await geny()));
-  $x = array((await genx()), (await geny()) => (await genz()));
+  $x = darray[0 => (await genx()), (await geny()) => (await genz())];
   $x = darray[(await genx()) => (await geny())];
   $x = varray[(await genx()), (await geny())];
   $x = dict[(await genx()) => (await geny())];
@@ -77,7 +77,7 @@ async function foo(): Awaitable<void> {
 
   await genx();
   return await genx();
-  unset(array()[await genx()]);
+  unset(varray[][await genx()]);
   if (await genx()) {}
   throw (await genx());
   switch (await genx()) { default: break; }

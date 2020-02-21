@@ -1,15 +1,15 @@
-((script 77
-  ((list 77
+((script 78
+  ((list 78
     ((markup_section 5
       ((missing 0 ()) (() markup 0 ())
        (markup_suffix 5 ((() <? 2 ()) (() name 3 ((end_of_line 1)))))
        (missing 0 ())))
-     (expression_statement 23
-      ((binary_expression 22
+     (expression_statement 24
+      ((binary_expression 23
         ((variable 2 ((((end_of_line 1)) variable 2 ((whitespace 1)))))
          (() = 1 ((whitespace 1)))
-         (array_intrinsic_expression 17
-          ((() array 5 ()) (() "(" 1 ())
+         (darray_intrinsic_expression 18
+          ((() darray 6 ()) (missing 0 ()) (() [ 1 ())
            (list 10
             ((list_item 10
               ((element_initializer 10
@@ -17,7 +17,7 @@
                  (() => 2 ())
                  (literal 5 ((() single_quoted_string_literal 5 ())))))
                (missing 0 ())))))
-           (() ")" 1 ())))))
+           (() ] 1 ())))))
        (() ";" 1 ((end_of_line 1)))))
      (expression_statement 46
       ((function_call_expression 45

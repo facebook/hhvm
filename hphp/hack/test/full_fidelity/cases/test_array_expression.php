@@ -1,7 +1,7 @@
 <?hh
 function f(){
-  array();
-  array($a);
-  array($a,);
-  array($a, $b, $c);
+  varray[];
+  varray[$a];
+  varray[$a,];
+  varray[$a, $b, $c];
 }

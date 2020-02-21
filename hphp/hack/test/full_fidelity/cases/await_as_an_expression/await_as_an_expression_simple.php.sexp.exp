@@ -1,10 +1,10 @@
-((script 3061
-  ((list 3061
+((script 3069
+  ((list 3069
     ((markup_section 4
       ((missing 0 ()) (() markup 0 ())
        (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))
        (missing 0 ())))
-     (function_declaration 3005
+     (function_declaration 3013
       ((missing 0 ())
        (function_declaration_header 37
         ((list 5 ((((end_of_line 1)) async 5 ((whitespace 1)))))
@@ -19,9 +19,9 @@
                 ((simple_type_specifier 4 ((() void 4 ()))) (missing 0 ())))))
              (() > 1 ((whitespace 1)))))))
          (missing 0 ())))
-       (compound_statement 2967
+       (compound_statement 2975
         ((() { 1 ((end_of_line 1)))
-         (list 2961
+         (list 2969
           ((expression_statement 28
             ((binary_expression 27
               ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
@@ -190,18 +190,18 @@
                  (() ?as 3 ((whitespace 1)))
                  (simple_type_specifier 3 ((() int 3 ())))))))
              (() ";" 1 ((end_of_line 1)))))
-           (expression_statement 34
-            ((binary_expression 33
+           (expression_statement 35
+            ((binary_expression 34
               ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
                (() = 1 ((whitespace 1)))
-               (isset_expression 28
+               (isset_expression 29
                 ((() isset 5 ()) (() "(" 1 ())
-                 (list 21
-                  ((list_item 21
-                    ((subscript_expression 21
-                      ((array_intrinsic_expression 7
-                        ((() array 5 ()) (() "(" 1 ()) (missing 0 ())
-                         (() ")" 1 ())))
+                 (list 22
+                  ((list_item 22
+                    ((subscript_expression 22
+                      ((varray_intrinsic_expression 8
+                        ((() varray 6 ()) (missing 0 ()) (() [ 1 ())
+                         (missing 0 ()) (() ] 1 ())))
                        (() [ 1 ())
                        (prefix_unary_expression 12
                         ((() await 5 ((whitespace 1)))
@@ -360,22 +360,25 @@
                      (missing 0 ())))))
                  (() ")" 1 ())))))
              (() ";" 1 ((end_of_line 1)))))
-           (expression_statement 61
-            ((binary_expression 60
+           (expression_statement 67
+            ((binary_expression 66
               ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
                (() = 1 ((whitespace 1)))
-               (array_intrinsic_expression 55
-                ((() array 5 ()) (() "(" 1 ())
-                 (list 48
-                  ((list_item 15
-                    ((parenthesized_expression 14
-                      ((() "(" 1 ())
-                       (prefix_unary_expression 12
-                        ((() await 5 ((whitespace 1)))
-                         (function_call_expression 6
-                          ((() name 4 ()) (missing 0 ()) (() "(" 1 ())
-                           (missing 0 ()) (() ")" 1 ())))))
-                       (() ")" 1 ())))
+               (darray_intrinsic_expression 61
+                ((() darray 6 ()) (missing 0 ()) (() [ 1 ())
+                 (list 53
+                  ((list_item 20
+                    ((element_initializer 19
+                      ((literal 1 ((() decimal_literal 1 ((whitespace 1)))))
+                       (() => 2 ((whitespace 1)))
+                       (parenthesized_expression 14
+                        ((() "(" 1 ())
+                         (prefix_unary_expression 12
+                          ((() await 5 ((whitespace 1)))
+                           (function_call_expression 6
+                            ((() name 4 ()) (missing 0 ()) (() "(" 1 ())
+                             (missing 0 ()) (() ")" 1 ())))))
+                         (() ")" 1 ())))))
                      (() , 1 ((whitespace 1)))))
                    (list_item 32
                     ((element_initializer 32
@@ -397,7 +400,7 @@
                              (missing 0 ()) (() ")" 1 ())))))
                          (() ")" 1 ())))))
                      (missing 0 ())))))
-                 (() ")" 1 ())))))
+                 (() ] 1 ())))))
              (() ";" 1 ((end_of_line 1)))))
            (expression_statement 46
             ((binary_expression 45
@@ -1443,14 +1446,14 @@
                 ((() name 4 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
                  (() ")" 1 ())))))
              (() ";" 1 ((end_of_line 1)))))
-           (unset_statement 29
+           (unset_statement 30
             ((((whitespace 2)) unset 5 ()) (() "(" 1 ())
-             (list 21
-              ((list_item 21
-                ((subscript_expression 21
-                  ((array_intrinsic_expression 7
-                    ((() array 5 ()) (() "(" 1 ()) (missing 0 ())
-                     (() ")" 1 ())))
+             (list 22
+              ((list_item 22
+                ((subscript_expression 22
+                  ((varray_intrinsic_expression 8
+                    ((() varray 6 ()) (missing 0 ()) (() [ 1 ())
+                     (missing 0 ()) (() ] 1 ())))
                    (() [ 1 ())
                    (prefix_unary_expression 12
                     ((() await 5 ((whitespace 1)))

@@ -1,5 +1,5 @@
-((script 111
-  ((list 111
+((script 112
+  ((list 112
     ((markup_section 5
       ((missing 0 ()) (() markup 0 ())
        (markup_suffix 5 ((() <? 2 ()) (() name 3 ((end_of_line 1)))))
@@ -31,20 +31,20 @@
                (((whitespace 2)) } 1 ((end_of_line 1)))))
              (missing 0 ())))))
          (() } 1 ((end_of_line 1)))))))
-     (function_declaration 38
+     (function_declaration 39
       ((missing 0 ())
-       (function_declaration_header 36
+       (function_declaration_header 37
         ((missing 0 ()) (((end_of_line 1)) function 8 ((whitespace 1)))
          (() name 1 ()) (missing 0 ()) (() "(" 1 ())
-         (list 18
-          ((list_item 18
-            ((parameter_declaration 18
+         (list 19
+          ((list_item 19
+            ((parameter_declaration 19
               ((missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
                (() variable 2 ((whitespace 1)))
-               (simple_initializer 15
+               (simple_initializer 16
                 ((() = 1 ((whitespace 1)))
-                 (array_intrinsic_expression 13
-                  ((() array 5 ()) (() "(" 1 ())
+                 (varray_intrinsic_expression 14
+                  ((() varray 6 ()) (missing 0 ()) (() [ 1 ())
                    (list 6
                     ((list_item 6
                       ((function_call_expression 6
@@ -53,7 +53,7 @@
                          (missing 0 ()) (() "(" 1 ()) (missing 0 ())
                          (() ")" 1 ())))
                        (missing 0 ())))))
-                   (() ")" 1 ())))))))
+                   (() ] 1 ())))))))
              (missing 0 ())))))
          (() ")" 1 ()) (() : 1 ((whitespace 1)))
          (simple_type_specifier 4 ((() void 4 ()))) (missing 0 ())))

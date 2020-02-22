@@ -1216,113 +1216,16 @@ bool ExecutionContext::setHeaderCallback(const Variant& callback) {
   return true;
 }
 
-bool sideEffect(Op op) {
-  switch (op) {
-    case Op::DefCls:
-    case Op::DefTypeAlias:
-    case Op::DefCns:
-    case Op::Int:
-    case Op::PopC:
-    case Op::String:
-    case Op::Double:
-    case Op::Null:
-    case Op::True:
-    case Op::False:
-    case Op::NewArray:
-    case Op::NullUninit:
-    case Op::Vec:
-    case Op::Keyset:
-    case Op::RetC:
-    case Op::RetCSuspended:
-    case Op::Array:
-    case Op::Dict:
-    case Op::CnsE:
-    case Op::ClsCnsD:
-    case Op::ClsCns:
-    case Op::NewMixedArray:
-    case Op::NewLikeArrayL:
-    case Op::NewPackedArray:
-    case Op::NewStructArray:
-    case Op::NewStructDArray:
-    case Op::NewStructDict:
-    case Op::NewVecArray:
-    case Op::NewKeysetArray:
-    case Op::NewVArray:
-    case Op::NewDArray:
-    case Op::NewDictArray:
-    case Op::NewRecord:
-    case Op::Nop:
-    case Op::EntryNop:
-    case Op::AssertRATL:
-    case Op::AssertRATStk:
-      return false;
-    default:
-      return true;
-  }
-}
-
-/*
- * RetC has no side-effect only if when it is the last statement,
- * and it precedent op is Int 1, like return 0 in c/c++
- */
-bool checkForRet(Op op, bool isLast, PC lastOp) {
-
-  if (op == Op::RetC) {
-    return !isLast || decode_op(lastOp) != Op::Int ||
-      decode_raw<int64_t>(lastOp) != 1;
-  }
-  return false;
-}
-
-/*
- * PopC has no side-effect only if it precedes by a DefCns ops, e.g.
- * const foo = 12;
- */
-bool checkPopc(Op op, PC lastOp) {
-  if (op == Op::PopC) {
-    return peek_op(lastOp) != Op::DefCns;
-  }
-  return false;
-}
-
-void pseudomainHelper(const Unit* unit, bool callByHPHPInvoke) {
-  auto pseudomain = unit->getMain(nullptr, false);
-  auto e = pseudomain->getEntry();
-  bool isLast = false;
-  PC lastOp = e;
-  while (e < unit->entry() + pseudomain->past()) {
-    if (e + instrLen(e) >= unit->entry() + pseudomain->past()) {
-      isLast = true;
+const StaticString s___HasTopLevelCode("__HasTopLevelCode");
+void checkPseudomain(const Unit* unit) {
+  auto& attrs = unit->fileAttributes();
+  if (attrs.find(s___HasTopLevelCode.get()) != attrs.end()) {
+    if (RuntimeOption::EvalWarnOnPseudomain == 1) {
+      raise_warning("Found top-level code in %s", unit->filepath()->data());
+      return;
+    } else if (RuntimeOption::EvalWarnOnPseudomain == 2) {
+      throw TopLevelCodeBannedException(unit->filepath()->data());
     }
-    if (checkPopc(peek_op(e), lastOp) ||
-        sideEffect(peek_op(e)) ||
-        checkForRet(peek_op(e), isLast, lastOp)) {
-      if (callByHPHPInvoke) {
-        if (RuntimeOption::EvalWarnOnRealPseudomain) {
-          raise_warning("The top-level code has side effects in %s"
-                        " which is called by top level code",
-                        unit->filepath()->data());
-          break;
-        }
-      } else {
-        if (RuntimeOption::EvalWarnOnUncalledPseudomain == 1) {
-          raise_warning("The top-level code has side effect in %s "
-                        "by top level code that isn't invoked by pseudomain",
-                        unit->filepath()->data());
-          break;
-        } else if (RuntimeOption::EvalWarnOnUncalledPseudomain == 2) {
-          raise_fatal_error(
-            folly::sformat("The top-level code has side effect in %s"
-                           "by top level code that isn't invoked by pseudomain,"
-                           " fatal error",
-                            unit->filepath()->data()).c_str());
-        }
-      }
-    }
-    if (peek_op(e) != Op::AssertRATStk && peek_op(e) != Op::AssertRATL) {
-      lastOp = e;
-    }
-    e += instrLen(e);
   }
 }
 
@@ -1338,8 +1241,6 @@ TypedValue ExecutionContext::invokeUnit(const Unit* unit,
   }
 
   auto ret = invokePseudoMain(unit->getMain(nullptr, false), m_globalVarEnv);
-
-  pseudomainHelper(unit, callByHPHPInvoke);
 
   auto it = unit->getCachedEntryPoint();
   if (callByHPHPInvoke && it != nullptr) {
@@ -1658,6 +1559,8 @@ TypedValue ExecutionContext::invokePseudoMain(const Func* f,
     return *toMerge->getMainReturn();
   }
 
+  checkPseudomain(toMerge);
+
   Stats::inc(Stats::PseudoMain_Executed);
   VMRegAnchor _;
 
@@ -1931,6 +1834,9 @@ bool ExecutionContext::evalUnit(Unit* unit, PC callPC, PC& pc, int funcType) {
     *vmStack().allocTV() = *unit->getMainReturn();
     return false;
   }
+
+  checkPseudomain(unit);
+
   Stats::inc(Stats::PseudoMain_Executed);
 
   ActRec* ar = vmStack().allocA();

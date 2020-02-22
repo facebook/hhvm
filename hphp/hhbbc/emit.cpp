@@ -1274,6 +1274,7 @@ void emit_func(EmitUnitState& state, UnitEmitter& ue,
   emit_finish_func(state, func, *fe, info);
 }
 
+const StaticString s___HasTopLevelCode("__HasTopLevelCode");
 void emit_pseudomain(EmitUnitState& state,
                      UnitEmitter& ue,
                      const php::Unit& unit) {
@@ -1289,8 +1290,10 @@ void emit_pseudomain(EmitUnitState& state,
     auto const tv = make_tv<KindOfInt64>(1);
     ue.m_mainReturn = tv;
   } else {
-    ue.m_mergeOnly =
-      ue.m_returnSeen && ue.m_mainReturn.m_type != KindOfUninit;
+    ue.m_mergeOnly = ue.m_returnSeen
+      && ue.m_mainReturn.m_type != KindOfUninit
+      && ue.m_fileAttributes.find(s___HasTopLevelCode.get())
+         == ue.m_fileAttributes.end();
   }
 
   emit_finish_func(state, pm, *fe, info);

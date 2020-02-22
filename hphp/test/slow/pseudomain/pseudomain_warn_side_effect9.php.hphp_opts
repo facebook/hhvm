@@ -1,0 +1,1 @@
+--ffile=test/slow/pseudomain/pseudomain_warn_side_effect9.inc --ffile=hphp/test/slow/pseudomain/pseudomain_warn_side_effect9.inc

@@ -1,0 +1,3 @@
+Warning: Found top-level code in %s/pseudomain_warn_side_effect8.inc in %s/pseudomain_warn_side_effect8.php on line 5
+foo
+int(42)

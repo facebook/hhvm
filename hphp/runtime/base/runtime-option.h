@@ -732,16 +732,12 @@ struct RuntimeOption {
   F(bool, UseHHBBC,                    !getenv("HHVM_DISABLE_HHBBC"))   \
   F(bool, EnablePerRepoOptions,        true)                            \
   F(bool, CachePerRepoOptionsPath,     true)                            \
-  /* Generate warning of side effect of the pseudomain is called by     \
-     top-level code.*/                                                  \
-  F(bool, WarnOnRealPseudomain, false)                                  \
-  /* Generate warnings of side effect on top-level code that is not     \
-   * called by pseudomain directly (include from other file)            \
+  /* Generate warnings of side effect on top-level code                 \
    * 0 - Nothing                                                        \
    * 1 - Raise Warning                                                  \
    * 2 - Throw exception                                                \
    */                                                                   \
-  F(int32_t, WarnOnUncalledPseudomain, 0)                               \
+  F(int32_t, WarnOnPseudomain, 0)                                       \
   /* ThrowOnNonExhaustiveSwitch
    * Generates warnings when switch statements are non exhaustive.
    *  0 - Nothing

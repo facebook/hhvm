@@ -27,6 +27,8 @@ ocaml_ffi_no_panic! {
             ((1 << 0) & flags) != 0, // php5_compat_mode
             ((1 << 1) & flags) != 0, // hhvm_compat_mode
             ((1 << 2) & flags) != 0, // allow_new_attribute_syntax
+            ((1 << 3) & flags) != 0, // enable_xhp_class_modifier
+            ((1 << 4) & flags) != 0, // disable_xhp_element_mangling
             filename,
             text,
             mangle_xhp,
@@ -38,6 +40,8 @@ fn extract_as_json_ffi0(
     php5_compat_mode: bool,
     hhvm_compat_mode: bool,
     allow_new_attribute_syntax: bool,
+    enable_xhp_class_modifier: bool,
+    disable_xhp_element_mangling: bool,
     filename: RelativePath,
     text: &[u8],
     mangle_xhp: bool,
@@ -46,6 +50,8 @@ fn extract_as_json_ffi0(
         php5_compat_mode,
         hhvm_compat_mode,
         allow_new_attribute_syntax,
+        enable_xhp_class_modifier,
+        disable_xhp_element_mangling,
         filename,
     };
     if mangle_xhp {

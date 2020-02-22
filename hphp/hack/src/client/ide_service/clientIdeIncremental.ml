@@ -106,6 +106,7 @@ let compute_fileinfo_for_path (env : ServerEnv.env) (path : Relative_path.t) :
       (* We don't want our symbols to be mangled for export.  Mangling would
        * convert :xhp:myclass to __xhp_myclass, which would fail name lookup *)
       Facts_parser.mangle_xhp_mode := false;
+      let popt = env.ServerEnv.popt in
       let facts =
         Facts_parser.from_text
           ~php5_compat_mode:false
@@ -114,6 +115,10 @@ let compute_fileinfo_for_path (env : ServerEnv.env) (path : Relative_path.t) :
           ~disable_legacy_soft_typehints:false
           ~allow_new_attribute_syntax:false
           ~disable_legacy_attribute_syntax:false
+          ~enable_xhp_class_modifier:
+            (ParserOptions.enable_xhp_class_modifier popt)
+          ~disable_xhp_element_mangling:
+            (ParserOptions.disable_xhp_element_mangling popt)
           ~filename:path
           ~text:contents
       in

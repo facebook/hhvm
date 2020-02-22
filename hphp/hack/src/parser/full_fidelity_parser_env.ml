@@ -20,6 +20,7 @@ type t = {
   disable_legacy_attribute_syntax: bool;
   leak_rust_tree: bool;
   enable_xhp_class_modifier: bool;
+  disable_xhp_element_mangling: bool;
 }
 [@@deriving show]
 
@@ -37,6 +38,7 @@ let default =
     disable_legacy_attribute_syntax = false;
     leak_rust_tree = false;
     enable_xhp_class_modifier = false;
+    disable_xhp_element_mangling = false;
   }
 
 let make
@@ -55,6 +57,7 @@ let make
   * it's eventually disposed to avoid memory leak. *)
     leak_rust_tree = default.leak_rust_tree)
     ?(enable_xhp_class_modifier = default.enable_xhp_class_modifier)
+    ?(disable_xhp_element_mangling = default.disable_xhp_element_mangling)
     () =
   {
     hhvm_compat_mode;
@@ -69,6 +72,7 @@ let make
     disable_legacy_attribute_syntax;
     leak_rust_tree;
     enable_xhp_class_modifier;
+    disable_xhp_element_mangling;
   }
 
 let hhvm_compat_mode e = e.hhvm_compat_mode
@@ -98,3 +102,5 @@ let disable_legacy_attribute_syntax e = e.disable_legacy_attribute_syntax
 let leak_rust_tree e = e.leak_rust_tree
 
 let enable_xhp_class_modifier e = e.enable_xhp_class_modifier
+
+let disable_xhp_element_mangling e = e.disable_xhp_element_mangling

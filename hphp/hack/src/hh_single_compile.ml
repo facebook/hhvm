@@ -329,6 +329,8 @@ let extract_facts ~compiler_options ~config_jsons ~filename text =
         ~disable_legacy_soft_typehints:(disable_legacy_soft_typehints co)
         ~allow_new_attribute_syntax:(allow_new_attribute_syntax co)
         ~disable_legacy_attribute_syntax:(disable_legacy_attribute_syntax co)
+        ~enable_xhp_class_modifier:(enable_xhp_class_modifier co)
+        ~disable_xhp_element_mangling:(disable_xhp_element_mangling co)
         ~filename
         ~text
       |> Option.value ~default:"");
@@ -355,6 +357,7 @@ let parse_hh_file ~config_jsons ~compiler_options filename body =
         ~allow_new_attribute_syntax:(allow_new_attribute_syntax co)
         ~disable_legacy_attribute_syntax:(disable_legacy_attribute_syntax co)
         ~enable_xhp_class_modifier:(enable_xhp_class_modifier co)
+        ~disable_xhp_element_mangling:(disable_xhp_element_mangling co)
         ?mode
         ()
     in

@@ -63,6 +63,8 @@ let compare_decl ctx verbosity fn =
          ~disable_legacy_soft_typehints:false
          ~allow_new_attribute_syntax:true
          ~disable_legacy_attribute_syntax:false
+         ~enable_xhp_class_modifier:false
+         ~disable_xhp_element_mangling:false
          ~filename:fn
          ~text)
   in

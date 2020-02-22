@@ -54,13 +54,19 @@ struct SQLite {
   SQLite& operator=(SQLite&&) noexcept;
   ~SQLite();
 
+  enum class OpenMode {
+    ReadOnly = 1,
+    ReadWrite = 2
+  };
+
   /**
    * Return a new SQLite connection, creating the DB file if necessary.
    *
    * path is the location of the DB in your filesystem, or ":memory:"
    * if you want to store data in memory instead.
    */
-  static SQLite connect(const folly::StringPiece path);
+  static SQLite connect(const folly::StringPiece path,
+                        OpenMode mode = OpenMode::ReadWrite);
 
   /**
    * Compile the given SQL query into a statement object which can run and rerun

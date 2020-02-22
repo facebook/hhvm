@@ -64,11 +64,22 @@ SQLite::~SQLite() {
   m_dbc = nullptr;
 }
 
-SQLite SQLite::connect(const folly::StringPiece path) {
+SQLite SQLite::connect(const folly::StringPiece path, OpenMode mode) {
+
+  int flags = [&] {
+    switch (mode) {
+      case OpenMode::ReadOnly:
+        return SQLITE_OPEN_READONLY;
+      case OpenMode::ReadWrite:
+        return SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
+    }
+    not_reached();
+  }();
+
   sqlite3* dbc = nullptr;
   int rc = sqlite3_open_v2(
       path.data(), &dbc,
-      SQLITE_OPEN_NOMUTEX | SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE,
+      SQLITE_OPEN_NOMUTEX | flags,
       nullptr);
   if (rc) {
     throw SQLiteExc{rc, ""};
@@ -107,17 +118,19 @@ SQLite::SQLite(sqlite3* dbc)
   setBusyTimeout(60'000);
   SQLiteStmt foreignKeysStmt{*this, "PRAGMA foreign_keys = ON"};
   foreignKeysStmt.query().step();
-  SQLiteStmt walModeStmt{*this, "PRAGMA journal_mode = WAL"};
-  try {
-    walModeStmt.query().step();
-  } catch (SQLiteExc& e) {
-    switch (e.m_code) {
-      case SQLITE_BUSY:
-        // This happens if multiple connections attempt to set WAL mode at the
-        // same time. We only need one connection to succeed.
-        break;
-      default:
-        throw;
+  if (sqlite3_db_readonly(m_dbc, "main") == 0) {
+    SQLiteStmt walModeStmt{*this, "PRAGMA journal_mode = WAL"};
+    try {
+      walModeStmt.query().step();
+    } catch (SQLiteExc& e) {
+      switch (e.m_code) {
+        case SQLITE_BUSY:
+          // This happens if multiple connections attempt to set WAL mode at
+          // the same time. We only need one connection to succeed.
+          break;
+        default:
+          throw;
+      }
     }
   }
 }

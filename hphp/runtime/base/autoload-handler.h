@@ -236,8 +236,7 @@ struct AutoloadMapFactory {
    * Return an AutoloadMap corresponding to the given root. If one
    * doesn't exist yet, create it.
    */
-  virtual AutoloadMap* getForRoot(const std::string& queryExprStr,
-                                  const folly::fs::path& root) = 0;
+  virtual AutoloadMap* getForRoot(const folly::fs::path& root) = 0;
 };
 
 }

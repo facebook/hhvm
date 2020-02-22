@@ -355,12 +355,7 @@ void AutoloadHandler::setAutoloadMapFromFactory(
 
   auto repoRoot = folly::fs::canonical(repoOptions->path()).parent_path();
 
-  auto queryExprStr = repoOptions->autoloadQuery();
-  if (queryExprStr.empty()) {
-    return;
-  }
-
-  auto* map = factory.getForRoot(queryExprStr, repoRoot);
+  auto* map = factory.getForRoot(repoRoot);
   if (!map) {
     return;
   }

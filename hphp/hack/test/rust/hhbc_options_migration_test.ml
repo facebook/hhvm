@@ -134,6 +134,9 @@ let _assert_opts_equal caml rust =
   assert_equal
     Hhbc_options.(widen_is_array caml)
     Hhbc_options.(widen_is_array rust);
+  assert_equal
+    Hhbc_options.(disable_xhp_element_mangling caml)
+    Hhbc_options.(disable_xhp_element_mangling rust);
   ()
 
 let json_override_2bools =

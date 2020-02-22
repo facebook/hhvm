@@ -225,6 +225,7 @@ prefixed_flags!(
     DISABLE_LEGACY_SOFT_TYPEHINTS,
     DISABLE_LVAL_AS_AN_EXPRESSION,
     DISABLE_UNSET_CLASS_CONST,
+    DISABLE_XHP_ELEMENT_MANGLING,
     DISALLOW_FUNC_PTRS_IN_CONSTANTS,
     ENABLE_CLASS_LEVEL_WHERE_CLAUSES,
     ENABLE_COROUTINES,
@@ -631,6 +632,9 @@ mod tests {
   "hhvm.hack.lang.disable_unset_class_const": {
     "global_value": false
   },
+  "hhvm.hack.lang.disable_xhp_element_mangling": {
+    "global_value": false
+  },
   "hhvm.hack.lang.disallow_func_ptrs_in_constants": {
     "global_value": false
   },
@@ -1025,5 +1029,6 @@ bitflags! {
         /// Widen the default behavior of `is_array` from "is exactly a PHP array" to
         /// "is any kind of CoW container" (i.e. `HH\is_any_array`)
         const WIDEN_IS_ARRAY = 1 << 48;
+        const DISABLE_XHP_ELEMENT_MANGLING = 1 << 49;
     }
 }

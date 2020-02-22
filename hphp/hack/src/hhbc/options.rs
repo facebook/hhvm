@@ -175,6 +175,7 @@ prefixed_flags!(
     JIT_ENABLE_RENAME_FUNCTION,
     LOG_EXTERN_COMPILER_PERF,
     RX_IS_ENABLED,
+    WIDEN_IS_ARRAY,
 );
 impl Default for HhvmFlags {
     fn default() -> HhvmFlags {
@@ -668,6 +669,9 @@ mod tests {
   },
   "hhvm.rx_is_enabled": {
     "global_value": false
+  },
+  "hhvm.widen_is_array": {
+    "global_value": false
   }
 }"#;
 
@@ -1018,5 +1022,8 @@ bitflags! {
         const CHECK_INT_OVERFLOW = 1 << 45;
         const ENABLE_XHP_CLASS_MODIFIER = 1 << 46;
         const ENABLE_FIRST_CLASS_FUNCTION_POINTERS = 1 << 47;
+        /// Widen the default behavior of `is_array` from "is exactly a PHP array" to
+        /// "is any kind of CoW container" (i.e. `HH\is_any_array`)
+        const WIDEN_IS_ARRAY = 1 << 48;
     }
 }

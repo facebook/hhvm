@@ -2321,7 +2321,10 @@ and simplify_subtype_param_rx_if_impl
     }
    *)
   | (Some cond_type_sub, Some cond_type_super) ->
-    simplify_subtype ~subtype_env cond_type_super cond_type_sub env
+    if is_param then
+      simplify_subtype ~subtype_env cond_type_sub cond_type_super env
+    else
+      simplify_subtype ~subtype_env cond_type_super cond_type_sub env
   (* condition type is set for super type, check if declared type of
      subtype is a subtype of condition type
      interface Rx {
@@ -2337,7 +2340,9 @@ and simplify_subtype_param_rx_if_impl
      class B extends A<int> implements Rx {
      } *)
   | (Some cond_type_sub, None) ->
-    begin
+    if is_param then
+      valid env
+    else begin
       match declared_type_sub with
       | None -> invalid ()
       | Some declared_type_sub ->

@@ -106,7 +106,7 @@ void HostHealthMonitor::monitor() {
   while (!m_stopped.load(std::memory_order_acquire)) {
     HealthLevel newStatus = evaluate();
     notifyObservers(newStatus);
-    m_healthLevelCounter->addValue(healthLeveltToInt(newStatus));
+    m_healthLevelCounter->addValue(healthLevelToInt(newStatus));
     next += dura;
     auto const now = std::chrono::steady_clock::now();
     if (next <= now) {                  // already late, update immediately

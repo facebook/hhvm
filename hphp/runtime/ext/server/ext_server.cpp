@@ -278,12 +278,12 @@ bool HHVM_FUNCTION(server_is_prepared_to_stop) {
 int64_t HHVM_FUNCTION(server_health_level) {
   if (HttpServer::Server) {
     if (auto const server = HttpServer::Server->getPageServer()) {
-      return healthLeveltToInt(server->getHealthLevel());
+      return healthLevelToInt(server->getHealthLevel());
     }
   }
   // If server is not yet started, e.g., when not running in server
   // mode, or before server starts, we assume everything is OK.
-  return healthLeveltToInt(HealthLevel::Bold);
+  return healthLevelToInt(HealthLevel::Bold);
 }
 
 int64_t HHVM_FUNCTION(server_uptime) {

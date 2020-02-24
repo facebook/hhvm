@@ -49,8 +49,9 @@ TRACE_SET_MOD(hhbbc);
 TYPES(X)
 #undef X
 
-ProvTag ProvTag::Top = ProvTag{};
-ProvTag ProvTag::NoTag = ProvTag { nullptr, -1 };
+ProvTag ProvTag::SomeTag = arrprov::Tag::RepoUnion();
+ProvTag ProvTag::Top = {};
+ProvTag ProvTag::NoTag = ProvTag::KnownEmpty{};
 
 namespace {
 
@@ -528,14 +529,25 @@ trep promote_varray(trep a) {
  * Determine if one provenance tag is a (non-strict) subtype of another
  */
 bool subtypeProvTag(ProvTag p1, ProvTag p2) {
-  return p2 == ProvTag::Top || p1 == p2;
+  return p2 == ProvTag::Top ||
+    (p2 == ProvTag::SomeTag && p1 != ProvTag::NoTag) ||
+    p1 == p2;
 }
 
 /*
  * Compute the union of two provenance tags
  */
 ProvTag unionProvTag(ProvTag p1, ProvTag p2) {
-  return p1 == p2 ? p1 : ProvTag::Top;
+  if (p1 == p2) {
+    return p1;
+  } else if (p1 == ProvTag::NoTag ||
+             p2 == ProvTag::NoTag ||
+             p1 == ProvTag::Top ||
+             p2 == ProvTag::Top) {
+    return ProvTag::Top;
+  } else {
+    return ProvTag::SomeTag;
+  }
 }
 
 /*
@@ -547,7 +559,21 @@ ProvTag unionProvTag(ProvTag p1, ProvTag p2) {
  * wider than either input type.
  */
 ProvTag intersectProvTag(ProvTag p1, ProvTag p2) {
-  return p1 == ProvTag::Top ? p2 : (p1 == p2 ? p2 : ProvTag::Top);
+  if (p1 == ProvTag::Top) {
+    return p2;
+  } else if (p2 == ProvTag::Top) {
+    return p1;
+  } else if (p1 == p2) {
+    return p1;
+  } else if (p1 == ProvTag::NoTag || p2 == ProvTag::NoTag) {
+    return ProvTag::Top;
+  } else if (p1 == ProvTag::SomeTag) {
+    return p2;
+  } else if (p2 == ProvTag::SomeTag) {
+    return p1;
+  } else {
+    return ProvTag::Top;
+  }
 }
 
 /*
@@ -558,7 +584,11 @@ ProvTag intersectProvTag(ProvTag p1, ProvTag p2) {
  * they do not match.
  */
 bool couldBeProvTag(ProvTag p1, ProvTag p2) {
-  return p1 == ProvTag::Top || p2 == ProvTag::Top || p1 == p2;
+  return p1 == ProvTag::Top ||
+    p2 == ProvTag::Top ||
+    (p1 == ProvTag::SomeTag && p2 != ProvTag::NoTag) ||
+    (p2 == ProvTag::SomeTag && p1 != ProvTag::NoTag) ||
+    p1 == p2;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -2636,7 +2666,7 @@ bool Type::checkInvariants() const {
     assertx(!m_data.aval->hasProvenanceData() || RO::EvalArrayProvenance);
     assertx(!m_data.aval->hasProvenanceData() || m_bits & kProvBits);
     assertx(!m_data.aval->hasProvenanceData() ||
-            arrprov::getTag(m_data.aval)->filename());
+            arrprov::getTag(m_data.aval).valid());
     break;
   case DataTag::ArrLikePacked: {
     assert(!m_data.packed->elems.empty());

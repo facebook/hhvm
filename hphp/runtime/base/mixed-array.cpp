@@ -547,8 +547,9 @@ NEVER_INLINE ArrayData* MixedArray::CopyStatic(const ArrayData* in) {
 
   if (RuntimeOption::EvalArrayProvenance) {
     assertx(!ret->hasProvenanceData());
-    if (auto const tag = arrprov::getTag(in)) {
-      arrprov::setTag(ret, *tag);
+    auto const tag = arrprov::getTag(in);
+    if (tag.valid()) {
+      arrprov::setTag(ret, tag);
     }
   }
   assertx(!arrprov::arrayWantsTag(ret) ||

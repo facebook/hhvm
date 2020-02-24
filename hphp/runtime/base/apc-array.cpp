@@ -100,7 +100,7 @@ APCArray::MakeSharedArray(ArrayData* arr, APCHandleLevel level,
           RO::EvalArrProvDVArrays
         )) {
           if (auto const tag = arrprov::getTag(arr)) {
-            arrprov::setTag(APCArray::fromHandle(pair.handle), *tag);
+            arrprov::setTag(APCArray::fromHandle(pair.handle), tag);
           }
         }
         return pair;
@@ -141,7 +141,7 @@ APCArray::MakeSharedVec(ArrayData* vec, APCHandleLevel level,
         RO::EvalArrProvHackArrays
       )) {
         if (auto const tag = arrprov::getTag(vec)) {
-          arrprov::setTag(APCArray::fromHandle(pair.handle), *tag);
+          arrprov::setTag(APCArray::fromHandle(pair.handle), tag);
         }
       }
       return pair;
@@ -169,7 +169,7 @@ APCArray::MakeSharedDict(ArrayData* dict, APCHandleLevel level,
         RO::EvalArrProvHackArrays
       )) {
         if (auto const tag = arrprov::getTag(dict)) {
-          arrprov::setTag(APCArray::fromHandle(pair.handle), *tag);
+          arrprov::setTag(APCArray::fromHandle(pair.handle), tag);
         }
       }
       return pair;

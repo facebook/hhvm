@@ -640,7 +640,7 @@ void staticArrayStreamer(const ArrayData* ad, std::string& out) {
   if (ad->hasProvenanceData() && RuntimeOption::EvalArrayProvenance) {
     out += " [";
     if (auto const tag = arrprov::getTag(ad)) {
-      out += tag->toString();
+      out += tag.toString();
     }
     out += "]";
   }

@@ -1679,12 +1679,28 @@ void VariableSerializer::serializeArrayImpl(const ArrayData* arr) {
   if (m_type == Type::Internal &&
       RuntimeOption::EvalArrayProvenance &&
       arrprov::arrayWantsTag(arr)) {
-    if (auto tag = arrprov::getTag(arr)) {
-      auto const line = tag->line();
-      auto const filename = tag->filename();
-      m_buf->append("p:");
-      write(line);
-      write_filename(filename);
+    auto const tag = arrprov::getTag(arr);
+    if (tag.valid()) {
+      switch (tag.kind()) {
+      case arrprov::Tag::Kind::Invalid: always_assert(false);
+      case arrprov::Tag::Kind::Known: {
+        auto const line = tag.line();
+        auto const filename = tag.filename();
+        m_buf->append("p:");
+        write(line);
+        write_filename(filename);
+        break;
+      };
+      case arrprov::Tag::Kind::UnknownRepo: {
+        m_buf->append("P;");
+        break;
+      }
+      case arrprov::Tag::Kind::KnownTraitMerge: {
+        m_buf->append("r:");
+        write_filename(tag.filename());
+        break;
+      }
+      }
     }
   }
 

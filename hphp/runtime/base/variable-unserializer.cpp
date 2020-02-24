@@ -1297,7 +1297,12 @@ Array VariableUnserializer::unserializeArray() {
   return arr;
 }
 
-folly::Optional<arrprov::Tag> VariableUnserializer::unserializeProvenanceTag() {
+arrprov::Tag VariableUnserializer::unserializeProvenanceTag() {
+  auto const finish = [&] (auto tag) -> arrprov::Tag {
+    if (!RuntimeOption::EvalArrayProvenance) return {};
+    return tag;
+  };
+
   auto const read_filename = [&]() -> const StringData* {
     if (peek() == 't') {
       assertx(m_unitFilename);
@@ -1311,17 +1316,35 @@ folly::Optional<arrprov::Tag> VariableUnserializer::unserializeProvenanceTag() {
   };
 
   if (type() != VariableUnserializer::Type::Internal) return {};
-  if (peek() != 'p') return {};
-  expectChar('p');
-  expectChar(':');
-  expectChar('i');
-  expectChar(':');
-  auto const line = static_cast<int>(readInt());
-  expectChar(';');
-  auto const filename = read_filename();
-  expectChar(';');
-  if (!RuntimeOption::EvalArrayProvenance) return {};
-  return arrprov::Tag { filename, line };
+  if (peek() == 'p') {
+    expectChar('p');
+    expectChar(':');
+    expectChar('i');
+    expectChar(':');
+    auto const line = static_cast<int>(readInt());
+    expectChar(';');
+    auto const filename = read_filename();
+    expectChar(';');
+    return finish(
+      arrprov::Tag { filename, line }
+    );
+  } else if (peek() == 'P') {
+    expectChar('P');
+    expectChar(';');
+    return finish(
+      arrprov::Tag::RepoUnion()
+    );
+  } else if (peek() == 'r') {
+    expectChar('r');
+    expectChar(':');
+    auto const filename = read_filename();
+    expectChar(';');
+    return finish(
+      arrprov::Tag::TraitMerge(filename)
+    );
+  } else {
+    return {};
+  }
 }
 
 Array VariableUnserializer::unserializeDict() {
@@ -1332,7 +1355,7 @@ Array VariableUnserializer::unserializeDict() {
   expectChar('{');
 
   auto provTag = unserializeProvenanceTag();
-  if (!RO::EvalArrProvHackArrays) provTag = folly::none;
+  if (!RO::EvalArrProvHackArrays) provTag = {};
 
   if (size == 0) {
     expectChar('}');
@@ -1383,7 +1406,7 @@ Array VariableUnserializer::unserializeDict() {
 
   check_non_safepoint_surprise();
   expectChar('}');
-  if (provTag) arrprov::setTag<arrprov::Mode::Emplace>(arr.get(), *provTag);
+  if (provTag) arrprov::setTag<arrprov::Mode::Emplace>(arr.get(), provTag);
   return arr;
 }
 
@@ -1395,7 +1418,7 @@ Array VariableUnserializer::unserializeVec() {
   expectChar('{');
 
   auto provTag = unserializeProvenanceTag();
-  if (!RO::EvalArrProvHackArrays) provTag = folly::none;
+  if (!RO::EvalArrProvHackArrays) provTag = {};
 
   if (size == 0) {
     expectChar('}');
@@ -1432,7 +1455,7 @@ Array VariableUnserializer::unserializeVec() {
   }
   check_non_safepoint_surprise();
   expectChar('}');
-  if (provTag) arrprov::setTag<arrprov::Mode::Emplace>(arr.get(), *provTag);
+  if (provTag) arrprov::setTag<arrprov::Mode::Emplace>(arr.get(), provTag);
   return arr;
 }
 
@@ -1444,7 +1467,7 @@ Array VariableUnserializer::unserializeVArray() {
   expectChar('{');
 
   auto provTag = unserializeProvenanceTag();
-  if (!RO::EvalArrProvDVArrays) provTag = folly::none;
+  if (!RO::EvalArrProvDVArrays) provTag = {};
 
   if (size == 0) {
     expectChar('}');
@@ -1510,7 +1533,7 @@ Array VariableUnserializer::unserializeVArray() {
 
   check_non_safepoint_surprise();
   expectChar('}');
-  if (provTag) arrprov::setTag<arrprov::Mode::Emplace>(arr.get(), *provTag);
+  if (provTag) arrprov::setTag<arrprov::Mode::Emplace>(arr.get(), provTag);
   return arr;
 }
 
@@ -1522,7 +1545,7 @@ Array VariableUnserializer::unserializeDArray() {
   expectChar('{');
 
   auto provTag = unserializeProvenanceTag();
-  if (!RO::EvalArrProvDVArrays) provTag = folly::none;
+  if (!RO::EvalArrProvDVArrays) provTag = {};
 
   if (size == 0) {
     expectChar('}');
@@ -1577,7 +1600,7 @@ Array VariableUnserializer::unserializeDArray() {
 
   check_non_safepoint_surprise();
   expectChar('}');
-  if (provTag) arrprov::setTag<arrprov::Mode::Emplace>(arr.get(), *provTag);
+  if (provTag) arrprov::setTag<arrprov::Mode::Emplace>(arr.get(), provTag);
   return arr;
 }
 

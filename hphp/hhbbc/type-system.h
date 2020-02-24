@@ -539,11 +539,17 @@ struct IterTypes;
  * ProvTag::Top means the array type could have a provenance tag from anywhere,
  * or no tag at all. (i.e. its provenance is unknown completely, a.k.a. NoTag).
  *
+ * ProvTag::Some means the array type has one of several known tags and will
+ * be written out with a RepoUnion tag
+ *
  * This information forms a sublattice like:
  *
- *        top (folly::none)
- *    ____/|\_______________________________________________
- *   /     |            \                                   \
+ *                                     top
+ *           __________________________/ \_________________
+ *          /                                              \
+ *       some tag                                           |
+ *    ____/|\___________                                    |
+ *   /     |            \                                   |
  *  t_1   t_2     ...   t_n (specific arrprov::Tag's)     no tag
  *   \____ | ___________/___________________________________/
  *        \|/
@@ -553,40 +559,46 @@ struct IterTypes;
  * widen the result to ProvTag::Top.
  */
 struct ProvTag {
-  template<typename... Args>
-  explicit constexpr ProvTag(Args... args)
-    : m_tag(std::forward<Args>(args)...)
-  {}
+  ProvTag() {}
+  /* implicit */ ProvTag(const arrprov::Tag& t)
+    : m_tag(t) {}
 
-  /* implicit */ ProvTag(arrprov::Tag tag) : m_tag{tag} {}
+  enum class KnownEmpty {};
+  /* implicit */ ProvTag(KnownEmpty)
+    : m_knownEmpty(true)
+    , m_tag() {}
 
   static ProvTag Top;
   static ProvTag NoTag;
+  static ProvTag SomeTag;
 
   static ProvTag FromSArr(SArray a) {
-    assertx(RuntimeOption::EvalArrayProvenance);
+    assertx(RO::EvalArrayProvenance);
     // It would be nice to assert a->isStatic() here, but, of course, SArrays
     // (like the ones representing bytecode immediates) are not always static
     // because we muck with them during various optimization passes.
-    auto const tag = arrprov::getTag(a);
-    return tag ? *tag : ProvTag::NoTag;
+    return arrprov::getTag(a);
   }
-
-  const arrprov::Tag* operator->() const { return &m_tag; }
-        arrprov::Tag* operator->() { return &m_tag; }
 
   /*
    * Do we have a known provenance tag.
    */
-  bool valid() const { return m_tag.filename() != nullptr; }
+  bool valid() const {
+    return !m_knownEmpty && m_tag.valid();
+  }
 
   arrprov::Tag get() const { return m_tag; }
 
-  bool operator==(ProvTag o) const { return m_tag == o.m_tag; }
-  bool operator!=(ProvTag o) const { return m_tag != o.m_tag; }
+  bool operator==(const ProvTag& o) const {
+    return m_knownEmpty == o.m_knownEmpty && m_tag == o.m_tag;
+  }
+  bool operator!=(const ProvTag& o) const {
+    return m_knownEmpty != o.m_knownEmpty || m_tag != o.m_tag;
+  }
 
 private:
-  arrprov::Tag m_tag;
+  bool m_knownEmpty{false};
+  arrprov::Tag m_tag{};
 };
 
 constexpr auto kProvBits = BVec | BDict | BVArr | BDArr;

@@ -3361,10 +3361,9 @@ String HHVM_FUNCTION(HH_get_provenance, const Variant& in) {
   if (!RuntimeOption::EvalArrayProvenance) return "";
 
   auto const& arr = in.asCArrRef();
-  if (auto const ann = arrprov::getTag(arr.get())) {
-    return folly::sformat("{}:{}",
-                          ann->filename()->slice(),
-                          ann->line());
+  auto const tag = arrprov::getTag(arr.get());
+  if (tag.valid()) {
+    return tag.toString();
   } else {
     return "<none>";
   }

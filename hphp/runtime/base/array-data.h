@@ -669,7 +669,7 @@ public:
    * static array.  (A set `tag` overrides the provenance of `arr`.)
    */
   static void GetScalarArray(ArrayData** arr,
-                             folly::Optional<arrprov::Tag> tag = folly::none);
+                             arrprov::Tag tag = {});
 
   /*
    * Promote the array referenced by `arr` to a static array and return it.

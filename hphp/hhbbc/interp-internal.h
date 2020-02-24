@@ -1081,15 +1081,15 @@ bool canSkipMergeOnConstProp(ISS&env, Type tcls, SString propName) {
 // misc
 
 ProvTag provTagHere(ISS& env) {
-  if (!RuntimeOption::EvalArrayProvenance) return ProvTag::Top;
+  if (!RuntimeOption::EvalArrayProvenance) return arrprov::Tag{};
   auto const idx = env.srcLoc;
   // We might have a negative index into the srcLoc table if the
   // bytecode was copied from another unit, e.g. from a trait ${X}inits
-  if (idx < 0) return ProvTag { env.ctx.unit->filename, -1 };
+  if (idx < 0) return arrprov::Tag::TraitMerge(env.ctx.unit->filename);
   auto const unit = env.ctx.func && env.ctx.func->originalUnit
     ? env.ctx.func->originalUnit
     : env.ctx.unit;
-  return ProvTag {
+  return arrprov::Tag {
     unit->filename,
     static_cast<int>(unit->srcLocs[idx].past.line)
   };

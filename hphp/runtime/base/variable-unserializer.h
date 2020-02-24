@@ -214,7 +214,7 @@ private:
   void unserializeVariant(tv_lval self,
                           UnserializeMode mode = UnserializeMode::Value);
   Array unserializeArray();
-  folly::Optional<arrprov::Tag> unserializeProvenanceTag();
+  arrprov::Tag unserializeProvenanceTag();
   Array unserializeDict();
   Array unserializeVec();
   Array unserializeKeyset();

@@ -42,31 +42,129 @@ namespace arrprov {
 /*
  * A provenance annotation
  *
- * We need to store the filename and line since when assembling units, we
- * don't necessarily have the final Unit allocated yet. It may be faster to
- * make this a tagged union or store a different Tag type for static arrays
+ * We store filenames and line numbers rather than units since we need to
+ * manipulate these tags during the repo build. Additionally, we also have
+ * several tag types denoting explicitly unknown tags: e.g. when a tag is a
+ * result of a union of otherwise-identical arrays in the repo build.
  */
 struct Tag {
+  enum class Kind {
+    /* uninitialized */
+    Invalid,
+    /* known unit + line number */
+    Known,
+    /* result of a union in a repo build */
+    UnknownRepo,
+    /* lost original line number as a result of trait ${x}init merges */
+    KnownTraitMerge,
+  };
+
+private:
+  static auto constexpr kKindMask = 0x3;
+
+  template <typename T>
+  static const char* ptrAndKind(Kind k,
+                                          const T* filename) {
+    auto const ptr = reinterpret_cast<uintptr_t>(filename);
+    assertx(!(ptr & kKindMask));
+    return reinterpret_cast<const char*>(
+      ptr + static_cast<uintptr_t>(k)
+    );
+  }
+
+  static const char* ptrAndKind(Kind k, std::nullptr_t) {
+    return reinterpret_cast<const char*>(
+      static_cast<uintptr_t>(k)
+    );
+  }
+
+  template <typename T>
+  static const T* removeKind(const char* filename) {
+    return reinterpret_cast<T*>(
+      reinterpret_cast<uintptr_t>(filename) & ~kKindMask
+    );
+  }
+
+  static Kind extractKind(const char* filename) {
+    return static_cast<Kind>(
+      reinterpret_cast<uintptr_t>(filename) & kKindMask
+    );
+  }
+
+public:
   constexpr Tag() = default;
-  constexpr Tag(const StringData* filename, int line)
-    : m_filename(filename)
+  Tag(const StringData* filename, int32_t line)
+    : m_filename(ptrAndKind(Kind::Known, filename))
     , m_line(line)
   {}
 
-  const StringData* filename() const { return m_filename; }
-  int line() const { return m_line; }
+  static Tag RepoUnion() {
+    Tag tag;
+    tag.m_filename = ptrAndKind(Kind::UnknownRepo, nullptr);
+    tag.m_line = -1;
+    return tag;
+  }
+
+  static Tag TraitMerge(const StringData* filename) {
+    Tag tag;
+    tag.m_filename = ptrAndKind(Kind::KnownTraitMerge, filename);
+    tag.m_line = -1;
+    return tag;
+  }
+
+  Kind kind() const { return extractKind(m_filename.get()); }
+  const StringData* filename() const {
+    return removeKind<StringData>(m_filename.get());
+  }
+  int32_t line() const { return m_line; }
+
+  /* return true if this tag is not default-constructed */
+  bool valid() const { return kind() != Kind::Invalid; }
+
+  /*
+   * return true if this tag represents a concretely-known location
+   * and should be propagated
+   *
+   * i.e. if this function returns false, we treat an array with this tag
+   * as needing a new one if we get the opportunity to retag it
+   */
+  bool concrete() const {
+    switch (kind()) {
+    case Kind::Invalid: return false;
+    case Kind::Known: return true;
+    case Kind::UnknownRepo: return false;
+    case Kind::KnownTraitMerge: return true;
+    }
+    always_assert(false);
+  }
+
+  operator bool() const {
+    return concrete();
+  }
 
   bool operator==(const Tag& other) const {
-    return m_filename == other.m_filename &&
-           m_line == other.m_line;
+    if (kind() != other.kind()) return false;
+    switch (kind()) {
+    case Kind::Invalid:
+    case Kind::UnknownRepo:
+      return true;
+    case Kind::KnownTraitMerge:
+      return m_filename == other.m_filename;
+    case Kind::Known:
+      return m_filename == other.m_filename &&
+        m_line == other.m_line;
+    }
+    always_assert(false);
   }
   bool operator!=(const Tag& other) const { return !(*this == other); }
 
   std::string toString() const;
 
 private:
-  const StringData* m_filename{nullptr};
-  int m_line{0};
+  /* dumb pointee type because we don't want to break aliasing
+   * rules and don't guarantee the actual type of this pointer */
+  LowPtr<const char> m_filename{nullptr};
+  int32_t m_line{0};
 };
 
 /*
@@ -91,7 +189,7 @@ struct ArrayProvenanceTable {
  *
  * Attempts to sync VM regs and returns folly::none on failure.
  */
-folly::Optional<Tag> tagFromPC();
+Tag tagFromPC();
 
 /*
  * RAII struct for modifying the behavior of tagFromPC().
@@ -125,9 +223,9 @@ bool arrayWantsTag(const AsioExternalThreadEvent* a);
 /*
  * Get the provenance tag for `a`.
  */
-folly::Optional<Tag> getTag(const ArrayData* a);
-folly::Optional<Tag> getTag(const APCArray* a);
-folly::Optional<Tag> getTag(const AsioExternalThreadEvent* ev);
+Tag getTag(const ArrayData* a);
+Tag getTag(const APCArray* a);
+Tag getTag(const AsioExternalThreadEvent* ev);
 
 /*
  * Set mode: insert or emplace.
@@ -164,10 +262,10 @@ void reassignTag(ArrayData* ad);
 /*
  * Produce a static array with the given provenance tag.
  *
- * If no tag is provided, we attempt to make one from vmpc(), and failing that
- * we just return the input array.
+ * If an invalid tag is provided, we attempt to make one from vmpc(), and
+ * failing that we just return the input array.
  */
-ArrayData* tagStaticArr(ArrayData* ad, folly::Optional<Tag> tag = folly::none);
+ArrayData* tagStaticArr(ArrayData* ad, Tag tag = {});
 
 ///////////////////////////////////////////////////////////////////////////////
 

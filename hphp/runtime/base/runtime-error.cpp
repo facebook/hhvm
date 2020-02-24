@@ -352,34 +352,32 @@ void raise_array_serialization_notice(SerializationSite src,
 
   counterFor(src, arrayType)->addValue(1);
 
-  auto const bail = [&]() {
+  auto const bail = [&](arrprov::Tag tag) {
     auto const isEmpty = arr->empty();
     auto const isStatic = arr->isStatic();
     auto const counterIdx = (isEmpty ? 2 : 0) + (isStatic ? 1 : 0);
     unknownCounters[counterIdx]->addValue(1);
     raise_dynamically_sampled_notice(
-      "Observing {}{}{} in {} from unknown location",
+      "Observing {}{}{} in {} from {}",
       isEmpty ? "empty, " : "",
       isStatic ? "static, " : "",
       arrayTypeName(arrayType),
-      srcName(src));
+      srcName(src),
+      tag.toString()
+    );
   };
 
   static auto const sampl_threshold =
     RAND_MAX / RuntimeOption::EvalLogArrayProvenanceSampleRatio;
   if (std::rand() >= sampl_threshold) return;
-  auto const ann = arrprov::getTag(arr);
-  if (!ann) { bail(); return; }
-
-  auto const line = ann->line();
-  auto const name = ann->filename();
-
-  if (!name) { bail(); return; }
+  auto const tag = arrprov::getTag(arr);
+  if (!tag.concrete()) { bail(tag); return; }
 
   knownCounter->addValue(1);
-  raise_dynamically_sampled_notice("Observing {} in {} from {}:{}",
+  raise_dynamically_sampled_notice("Observing {} in {} from {}",
                                    arrayTypeName(arrayType),
-                                   srcName(src), name->slice(), line);
+                                   srcName(src),
+                                   tag.toString());
 }
 
 void

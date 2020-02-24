@@ -75,7 +75,7 @@ c_ExternalThreadEventWaitHandle::Create(
 
   if (RO::EvalArrayProvenance) {
     if (auto const tag = arrprov::tagFromPC()) {
-      setTag(event, *tag);
+      setTag(event, tag);
     }
   }
 
@@ -188,8 +188,8 @@ void c_ExternalThreadEventWaitHandle::process() {
         m_event->unserialize(result);
       } else {
         auto const tag = arrprov::getTag(m_event);
-        assertx(tag);
-        arrprov::TagOverride to{*tag};
+        assertx(tag.concrete());
+        arrprov::TagOverride to{tag};
         m_event->unserialize(result);
       }
     } catch (ExtendedException& exception) {

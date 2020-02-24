@@ -339,8 +339,9 @@ ArrayData* PackedArray::CopyStatic(const ArrayData* adIn) {
 
   if (RuntimeOption::EvalArrayProvenance) {
     assertx(!ad->hasProvenanceData());
-    if (auto const tag = arrprov::getTag(adIn)) {
-      arrprov::setTag(ad, *tag);
+    auto const tag = arrprov::getTag(adIn);
+    if (tag.valid()) {
+      arrprov::setTag(ad, tag);
     }
   }
 
@@ -379,8 +380,9 @@ ArrayData* PackedArray::ConvertStatic(const ArrayData* arr) {
 
   if (RuntimeOption::EvalArrayProvenance) {
     assertx(!ad->hasProvenanceData());
-    if (auto const tag = arrprov::getTag(arr)) {
-      arrprov::setTag(ad, *tag);
+    auto const tag = arrprov::getTag(ad);
+    if (tag.valid()) {
+      arrprov::setTag(ad, tag);
     }
   }
 

@@ -41,8 +41,17 @@ TRACE_SET_MOD(runtime);
 ////////////////////////////////////////////////////////////////////////////////
 
 std::string Tag::toString() const {
-  assertx(m_filename);
-  return folly::sformat("{}:{}", m_filename->slice(), m_line);
+  switch (kind()) {
+  case Kind::Invalid:
+    return "unknown location (no tag)";
+  case Kind::Known:
+    return folly::sformat("{}:{}", filename()->slice(), line());
+  case Kind::UnknownRepo:
+    return "unknown location (repo union)";
+  case Kind::KnownTraitMerge:
+    return folly::sformat("{}:{} (trait xinit merge)", filename()->slice(), -1);
+  }
+  always_assert(false);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -128,7 +137,7 @@ namespace {
 thread_local folly::Optional<Tag> tl_tag_override = folly::none;
 
 template<typename A>
-folly::Optional<Tag> getTagImpl(const A* a) {
+Tag getTagImpl(const A* a) {
   using ProvenanceTable = decltype(s_static_array_provenance);
 
   static_assert(std::is_same<
@@ -139,10 +148,10 @@ folly::Optional<Tag> getTagImpl(const A* a) {
   auto const get = [] (
     const A* a,
     const ProvenanceTable& tbl
-  ) -> folly::Optional<Tag> {
+  ) -> Tag {
     auto const it = tbl.find(a);
-    if (it == tbl.cend()) return folly::none;
-    assertx(it->second.filename() != nullptr);
+    if (it == tbl.cend()) return {};
+    assertx(it->second.valid());
     return it->second;
   };
 
@@ -156,7 +165,9 @@ folly::Optional<Tag> getTagImpl(const A* a) {
 
 template<Mode mode, typename A>
 bool setTagImpl(A* a, Tag tag) {
+  assertx(tag.valid());
   if (!arrayWantsTag(a)) return false;
+  assertx(tag.valid());
   assertx(mode == Mode::Emplace || !getTag(a) || tl_tag_override);
 
   if (wants_local_prov(a)) {
@@ -183,17 +194,17 @@ void clearTagImpl(const A* a) {
 
 } // namespace
 
-folly::Optional<Tag> getTag(const ArrayData* ad) {
-  if (tl_tag_override) return tl_tag_override;
-  if (!ad->hasProvenanceData()) return folly::none;
+Tag getTag(const ArrayData* ad) {
+  if (tl_tag_override) return *tl_tag_override;
+  if (!ad->hasProvenanceData()) return {};
   auto const tag = getTagImpl(ad);
-  assertx(tag);
+  assertx(tag.valid());
   return tag;
 }
-folly::Optional<Tag> getTag(const APCArray* a) {
+Tag getTag(const APCArray* a) {
   return getTagImpl(a);
 }
-folly::Optional<Tag> getTag(const AsioExternalThreadEvent* ev) {
+Tag getTag(const AsioExternalThreadEvent* ev) {
   return getTagImpl(ev);
 }
 
@@ -234,7 +245,7 @@ void clearTag(AsioExternalThreadEvent* ev) {
 void reassignTag(ArrayData* ad) {
   if (arrayWantsTag(ad)) {
     if (auto const tag = tagFromPC()) {
-      setTag<Mode::Emplace>(ad, *tag);
+      setTag<Mode::Emplace>(ad, tag);
       return;
     }
   }
@@ -242,13 +253,13 @@ void reassignTag(ArrayData* ad) {
   clearTag(ad);
 }
 
-ArrayData* tagStaticArr(ArrayData* ad, folly::Optional<Tag> tag) {
+ArrayData* tagStaticArr(ArrayData* ad, Tag tag /* = {} */) {
   assertx(RO::EvalArrayProvenance);
   assertx(ad->isStatic());
   assertx(arrayWantsTag(ad));
 
-  if (!tag) tag = tagFromPC();
-  if (!tag) return ad;
+  if (!tag.valid()) tag = tagFromPC();
+  if (!tag.valid()) return ad;
 
   tl_tag_override = tag;
   SCOPE_EXIT { tl_tag_override = folly::none; };
@@ -275,7 +286,7 @@ TagOverride::~TagOverride() {
   }
 }
 
-folly::Optional<Tag> tagFromPC() {
+Tag tagFromPC() {
   if (rl_tag_override.getInited()) return *rl_tag_override;
 
   VMRegAnchor _(VMRegAnchor::Soft);
@@ -283,13 +294,13 @@ folly::Optional<Tag> tagFromPC() {
   if (tl_regState != VMRegState::CLEAN ||
       rds::header() == nullptr ||
       vmfp() == nullptr) {
-    return folly::none;
+    return {};
   }
 
   auto const make_tag = [&] (
     const ActRec* fp,
     Offset offset
-  ) -> folly::Optional<Tag> {
+  ) {
     auto const func = fp->func();
     auto const unit = fp->unit();
     // grab the filename off the Func* since it might be different
@@ -305,7 +316,7 @@ folly::Optional<Tag> tagFromPC() {
   };
 
   auto const tag = fromLeaf(make_tag, skip_frame);
-  assertx(!tag || tag->filename() != nullptr);
+  assertx(!tag.valid() || tag.concrete());
   return tag;
 }
 
@@ -449,16 +460,15 @@ TypedValue markTvImpl(TypedValue in, bool recursive) {
 
 TypedValue tagTvImpl(TypedValue in) {
   // Closure state: an expensive-to-compute provenance tag.
-  using ProvTag = folly::Optional<arrprov::Tag>;
-  folly::Optional<ProvTag> tag = folly::none;
+  folly::Optional<arrprov::Tag> tag = folly::none;
 
   // The closure: tag array-likes if they want tags, else leave them alone.
   auto const tag_tv = [&](ArrayData* ad, bool cow) -> ArrayData* {
     if (!arrprov::arrayWantsTag(ad)) return nullptr;
     if (!tag) tag = arrprov::tagFromPC();
-    if (!*tag) return nullptr;
+    if (!tag->valid()) return nullptr;
     auto result = copy_if_needed(ad, cow);
-    arrprov::setTag<arrprov::Mode::Emplace>(result, **tag);
+    arrprov::setTag<arrprov::Mode::Emplace>(result, *tag);
     return result;
   };
 

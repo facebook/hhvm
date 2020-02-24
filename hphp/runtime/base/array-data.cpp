@@ -69,8 +69,7 @@ struct ScalarHash {
     if (arr == s_cachedHash.first) return s_cachedHash.second;
     return raw_hash(arr);
   }
-  size_t raw_hash(const ArrayData* arr,
-                  folly::Optional<arrprov::Tag> tag = folly::none) const {
+  size_t raw_hash(const ArrayData* arr, arrprov::Tag tag = {}) const {
     auto ret = uint64_t{
       arr->isHackArray()
       ? arr->kind()
@@ -80,10 +79,11 @@ struct ScalarHash {
     ret |= (uint64_t{arr->isLegacyArray()} << 33);
 
     if (RuntimeOption::EvalArrayProvenance) {
-      if (!tag) tag = arrprov::getTag(arr);
-      if (tag) {
-        ret = folly::hash::hash_combine(ret, tag->line());
-        ret = folly::hash::hash_combine(ret, tag->filename());
+      if (!tag.valid()) tag = arrprov::getTag(arr);
+      if (tag.valid()) {
+        ret = folly::hash::hash_combine(ret, static_cast<int>(tag.kind()));
+        ret = folly::hash::hash_combine(ret, tag.line());
+        ret = folly::hash::hash_combine(ret, tag.filename());
       }
     }
     IterateKV(
@@ -188,12 +188,11 @@ ArrayDataMap s_arrayDataMap;
 }
 ///////////////////////////////////////////////////////////////////////////////
 
-void ArrayData::GetScalarArray(ArrayData** parr,
-                               folly::Optional<arrprov::Tag> tag) {
+void ArrayData::GetScalarArray(ArrayData** parr, arrprov::Tag tag) {
   auto const arr = *parr;
-  auto const arrprov_enabled = RuntimeOption::EvalArrayProvenance && tag;
+  auto const requested_tag = RuntimeOption::EvalArrayProvenance && tag.valid();
 
-  if (arr->isStatic() && LIKELY(!arrprov_enabled)) return;
+  if (arr->isStatic() && LIKELY(!requested_tag)) return;
 
   auto replace = [&] (ArrayData* rep) {
     *parr = rep;
@@ -201,7 +200,7 @@ void ArrayData::GetScalarArray(ArrayData** parr,
     s_cachedHash.first = nullptr;
   };
 
-  if (arr->empty() && LIKELY(!arrprov_enabled)) {
+  if (arr->empty() && LIKELY(!requested_tag)) {
     if (arr->isKeyset())   return replace(staticEmptyKeysetArray());
     if (arr->isVArray())   return replace(staticEmptyVArray());
     if (arr->isDArray())   return replace(staticEmptyDArray());
@@ -243,7 +242,7 @@ void ArrayData::GetScalarArray(ArrayData** parr,
   auto const DEBUG_ONLY inserted = s_arrayDataMap.insert(ad).second;
   assertx(inserted);
 
-  if (tag) arrprov::setTag<arrprov::Mode::Emplace>(ad, *tag);
+  if (tag.valid()) arrprov::setTag<arrprov::Mode::Emplace>(ad, tag);
   return replace(ad);
 }
 
@@ -1312,9 +1311,9 @@ ArrayData* tagArrProvImpl(ArrayData* ad, const SrcArr* src) {
   };
 
   if (src != nullptr) {
-    if (auto const tag = arrprov::getTag(src)) return do_tag(ad, *tag);
+    if (auto const tag = arrprov::getTag(src)) return do_tag(ad, tag);
   }
-  if (auto const tag = arrprov::tagFromPC()) return do_tag(ad, *tag);
+  if (auto const tag = arrprov::tagFromPC()) return do_tag(ad, tag);
 
   return ad;
 }

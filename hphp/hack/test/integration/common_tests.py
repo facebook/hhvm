@@ -30,10 +30,12 @@ class DebugSubscription(object):
         hello = self.read_msg()
         assert hello["data"] == "hello"
 
+    # pyre-fixme[11]: Annotation `Json` is not defined as a type.
     def read_msg(self) -> Json:
         line = self.proc.stdout.readline()
         return json.loads(line)
 
+    # pyre-fixme[11]: Annotation `JsonObject` is not defined as a type.
     def get_incremental_logs(self) -> JsonObject:
         msgs = {}
         while True:
@@ -44,6 +46,12 @@ class DebugSubscription(object):
         return msgs
 
 
+# pyre-fixme[13]: Attribute `base_tmp_dir` is never initialized.
+# pyre-fixme[13]: Attribute `bin_dir` is never initialized.
+# pyre-fixme[13]: Attribute `hh_tmp_dir` is never initialized.
+# pyre-fixme[13]: Attribute `repo_dir` is never initialized.
+# pyre-fixme[13]: Attribute `template_repo` is never initialized.
+# pyre-fixme[13]: Attribute `test_env` is never initialized.
 class CommonTestDriver(TestDriver):
 
     # This needs to be overridden in child classes. The files in this

@@ -27,8 +27,15 @@ from jsonrpc_stream import JsonRpcStreamReader, JsonRpcStreamWriter
 from utils import Json
 
 
+# pyre-fixme[4]: Attribute must be annotated.
 class TranscriptEntry(NamedTuple):
+    # pyre-fixme[11]: Annotation `Json` is not defined as a type.
+    # pyre-fixme[11]: Annotation `Json` is not defined as a type.
+    # pyre-fixme[11]: Annotation `Json` is not defined as a type.
     sent: Optional[Json]
+    # pyre-fixme[11]: Annotation `Json` is not defined as a type.
+    # pyre-fixme[11]: Annotation `Json` is not defined as a type.
+    # pyre-fixme[11]: Annotation `Json` is not defined as a type.
     received: Optional[Json]
 
     def __repr__(self) -> str:
@@ -93,6 +100,7 @@ class LspCommandProcessor:
     # be errors or server notifications.
     def communicate(
         self,
+        # pyre-fixme[11]: Annotation `Json` is not defined as a type.
         json_commands: Sequence[Json],
         request_timeout: float = 30,
         notify_timeout: float = 1,
@@ -108,7 +116,10 @@ class LspCommandProcessor:
         return {k: v for k, v in transcript.items() if k != dummy_id}
 
     def _send_commands(
-        self, transcript: Transcript, commands: Sequence[Json]
+        self,
+        transcript: Transcript,
+        # pyre-fixme[11]: Annotation `Json` is not defined as a type.
+        commands: Sequence[Json],
     ) -> Transcript:
         processed_transcript_ids = set()
         for command in commands:
@@ -194,7 +205,10 @@ class LspCommandProcessor:
         return self._wait_for_response(transcript, shutdown_command["id"])
 
     def _wait_for_response(
-        self, transcript: Transcript, request_id: Json
+        self,
+        transcript: Transcript,
+        # pyre-fixme[11]: Annotation `Json` is not defined as a type.
+        request_id: Json,
     ) -> Transcript:
         transcript_id = self._client_request_id(request_id)
         request = transcript[transcript_id].sent
@@ -214,8 +228,11 @@ class LspCommandProcessor:
         transcript: Transcript,
         comment: Optional[str],
         method: str,
+        # pyre-fixme[11]: Annotation `Json` is not defined as a type.
+        # pyre-fixme[11]: Annotation `Json` is not defined as a type.
         params: Json,
         processed_transcript_ids: Set[int],
+        # pyre-fixme[11]: Annotation `Json` is not defined as a type.
     ) -> Tuple[Transcript, str, Json]:
         def is_target_message(transcript_id: str, entry: TranscriptEntry) -> bool:
             return (
@@ -255,7 +272,11 @@ Transcript of all the messages we saw:
         return (transcript, transcript_id, message)
 
     def _wait_for_request(
-        self, transcript: Transcript, command: Json, processed_transcript_ids: Set[str]
+        self,
+        transcript: Transcript,
+        # pyre-fixme[11]: Annotation `Json` is not defined as a type.
+        command: Json,
+        processed_transcript_ids: Set[str],
     ) -> Tuple[Transcript, Set[str]]:
         comment = command["comment"]
         method = command["params"]["method"]
@@ -294,7 +315,11 @@ Transcript of all the messages we saw:
         return (transcript, processed_transcript_ids)
 
     def _wait_for_notification(
-        self, transcript: Transcript, command: Json, processed_transcript_ids: Set[str]
+        self,
+        transcript: Transcript,
+        # pyre-fixme[11]: Annotation `Json` is not defined as a type.
+        command: Json,
+        processed_transcript_ids: Set[str],
     ) -> Tuple[Transcript, Set[str]]:
         comment = command["comment"]
         method = command["params"]["method"]
@@ -310,6 +335,7 @@ Transcript of all the messages we saw:
         processed_transcript_ids.add(transcript_id)
         return (transcript, processed_transcript_ids)
 
+    # pyre-fixme[11]: Annotation `Json` is not defined as a type.
     def _write_to_disk(self, command: Json) -> None:
         params = command["params"]
         path = urllib.parse.urlparse(params["uri"]).path
@@ -321,7 +347,11 @@ Transcript of all the messages we saw:
             os.remove(path)
 
     def _read_request_responses(
-        self, transcript: Transcript, commands: Sequence[Json], timeout_seconds: float
+        self,
+        transcript: Transcript,
+        # pyre-fixme[11]: Annotation `Json` is not defined as a type.
+        commands: Sequence[Json],
+        timeout_seconds: float,
     ) -> Transcript:
         for _ in self._requests_in(commands):
             response = self._try_read_logged(timeout_seconds)
@@ -340,7 +370,12 @@ Transcript of all the messages we saw:
         return transcript
 
     def _scribe(
-        self, transcript: Transcript, sent: Optional[Json], received: Optional[Json]
+        self,
+        transcript: Transcript,
+        # pyre-fixme[11]: Annotation `Json` is not defined as a type.
+        sent: Optional[Json],
+        # pyre-fixme[11]: Annotation `Json` is not defined as a type.
+        received: Optional[Json],
     ) -> Transcript:
         transcript = dict(transcript)
         id = self._transcript_id(sent, received)
@@ -355,11 +390,16 @@ Transcript of all the messages we saw:
         transcript[id] = TranscriptEntry(sent=sent, received=received)
         return transcript
 
+    # pyre-fixme[11]: Annotation `Json` is not defined as a type.
+    # pyre-fixme[11]: Annotation `Json` is not defined as a type.
     def _transcript_id(self, sent: Optional[Json], received: Optional[Json]) -> str:
         assert sent is not None or received is not None
 
         def make_id(
-            json: Json, is_client_request: bool, idgen: Callable[[], str]
+            # pyre-fixme[11]: Annotation `Json` is not defined as a type.
+            json: Json,
+            is_client_request: bool,
+            idgen: Callable[[], str],
         ) -> str:
             if LspCommandProcessor._has_id(json):
                 if is_client_request:
@@ -382,18 +422,23 @@ Transcript of all the messages we saw:
         else:
             raise Exception("This should have failed up above in the assert")
 
+    # pyre-fixme[11]: Annotation `Json` is not defined as a type.
+    # pyre-fixme[11]: Annotation `Json` is not defined as a type.
     def _requests_in(self, commands: Sequence[Json]) -> Sequence[Json]:
         return [c for c in commands if LspCommandProcessor._has_id(c)]
 
+    # pyre-fixme[11]: Annotation `Json` is not defined as a type.
     def _try_read_logged(self, timeout_seconds: float) -> Optional[Json]:
         response = self.reader.read(timeout_seconds)
         return response
 
     @staticmethod
+    # pyre-fixme[11]: Annotation `Json` is not defined as a type.
     def _has_id(json: Json) -> bool:
         return "id" in json
 
     @staticmethod
+    # pyre-fixme[11]: Annotation `Json` is not defined as a type.
     def _is_request(json: Json) -> bool:
         return "id" in json and "method" in json
 
@@ -410,10 +455,12 @@ Transcript of all the messages we saw:
         return prefix + str(uuid.uuid4())
 
     @staticmethod
+    # pyre-fixme[11]: Annotation `Json` is not defined as a type.
     def _client_request_id(id: Json) -> str:
         return "REQUEST_CLIENT_TO_SERVER_" + str(id)
 
     @staticmethod
+    # pyre-fixme[11]: Annotation `Json` is not defined as a type.
     def _server_request_id(id: Json) -> str:
         return "REQUEST_SERVER_TO_CLIENT_" + str(id)
 

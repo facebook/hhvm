@@ -42,19 +42,52 @@ static int gdColorMatch(gdImagePtr im, int col1, int col2, float threshold);
  */
 gdImagePtr gdImageCrop(gdImagePtr src, const gdRectPtr crop) {
   gdImagePtr dst;
-  int alphaBlendingFlag;
 
-  if (gdImageTrueColor(src)) {
+  if (src->trueColor) {
     dst = gdImageCreateTrueColor(crop->width, crop->height);
+    if (dst == nullptr) {
+      return nullptr;
+    }
+    gdImageSaveAlpha(dst, 1);
   } else {
     dst = gdImageCreate(crop->width, crop->height);
+    if (dst == nullptr) {
+      return nullptr;
+    }
+    gdImagePaletteCopy(dst, src);
   }
-  if (!dst) return NULL;
-  alphaBlendingFlag = dst->alphaBlendingFlag;
-  gdImageAlphaBlending(dst, gdEffectReplace);
-  gdImageCopy(dst, src, 0, 0, crop->x, crop->y, crop->width, crop->height);
-  gdImageAlphaBlending(dst, alphaBlendingFlag);
+  dst->transparent = src->transparent;
 
+  if (src->sx < (crop->x + crop->width -1)) {
+    crop->width = src->sx - crop->x + 1;
+  }
+  if (src->sy < (crop->y + crop->height -1)) {
+    crop->height = src->sy - crop->y + 1;
+  }
+
+  if (crop->x < 0 || crop->x>=src->sx || crop->y<0 || crop->y>=src->sy) {
+    return dst;
+  }
+#if 0
+printf("rect->x: %i\nrect->y: %i\nrect->width: %i\nrect->height: %i\n",
+       crop->x, crop->y, crop->width, crop->height);
+#endif
+  int y = crop->y;
+  if (src->trueColor) {
+    unsigned int dst_y = 0;
+    while (y < (crop->y + (crop->height - 1))) {
+      /* TODO: replace 4 w/byte per channel||pitch once available */
+      memcpy(dst->tpixels[dst_y++], src->tpixels[y++] + crop->x,
+             crop->width * 4);
+    }
+  } else {
+    int x;
+    for (y = crop->y; y < (crop->y + (crop->height - 1)); y++) {
+      for (x = crop->x; x < (crop->x + (crop->width - 1)); x++) {
+        dst->pixels[y - crop->y][x - crop->x] = src->pixels[y][x];
+      }
+    }
+  }
   return dst;
 }
 
@@ -125,12 +158,14 @@ gdImagePtr gdImageCropAuto(gdImagePtr im, const unsigned int mode) {
     }
   }
 
-  /* Whole image would be cropped > bye */
-  if (match) {
+  /* Nothing to do > bye
+   * Duplicate the image?
+   */
+  if (y == height - 1) {
     return nullptr;
   }
 
-  crop.y = y - 1;
+  crop.y = y -1;
   match = 1;
   for (y = height - 1; match && y >= 0; y--) {
     for (x = 0; match && x < width; x++) {
@@ -138,11 +173,15 @@ gdImagePtr gdImageCropAuto(gdImagePtr im, const unsigned int mode) {
     }
   }
 
-  crop.height = y - crop.y + 2;
+  if (y == 0) {
+    crop.height = height - crop.y + 1;
+  } else {
+    crop.height = y - crop.y + 2;
+  }
 
   match = 1;
   for (x = 0; match && x < width; x++) {
-    for (y = 0; match && y < crop.y + crop.height; y++) {
+    for (y = 0; match && y < crop.y + crop.height - 1; y++) {
       match = (color == gdImageGetPixel(im, x,y));
     }
   }
@@ -150,12 +189,14 @@ gdImagePtr gdImageCropAuto(gdImagePtr im, const unsigned int mode) {
 
   match = 1;
   for (x = width - 1; match && x >= 0; x--) {
-    for (y = 0; match &&  y < crop.y + crop.height; y++) {
+    for (y = 0; match &&  y < crop.y + crop.height - 1; y++) {
       match = (color == gdImageGetPixel(im, x,y));
     }
   }
   crop.width = x - crop.x + 2;
-
+  if (crop.x <= 0 || crop.y <= 0 || crop.width <= 0 || crop.height <= 0) {
+    return nullptr;
+  }
   return gdImageCrop(im, &crop);
 }
 /*TODOs: Implement DeltaE instead, way better perceptual differences */
@@ -193,7 +234,7 @@ gdImagePtr gdImageCropThreshold(gdImagePtr im, const unsigned int color,
   crop.height = 0;
 
   /* Pierre: crop everything sounds bad */
-  if (threshold > 100.0) {
+  if (threshold > 1.0) {
     return nullptr;
   }
 
@@ -213,12 +254,15 @@ gdImagePtr gdImageCropThreshold(gdImagePtr im, const unsigned int color,
     }
   }
 
-  /* Whole image would be cropped > bye */
-  if (match) {
+  /* Pierre
+   * Nothing to do > bye
+   * Duplicate the image?
+   */
+  if (y == height - 1) {
     return nullptr;
   }
 
-  crop.y = y - 1;
+  crop.y = y -1;
   match = 1;
   for (y = height - 1; match && y >= 0; y--) {
     for (x = 0; match && x < width; x++) {
@@ -227,11 +271,15 @@ gdImagePtr gdImageCropThreshold(gdImagePtr im, const unsigned int color,
     }
   }
 
-  crop.height = y - crop.y + 2;
+  if (y == 0) {
+    crop.height = height - crop.y + 1;
+  } else {
+    crop.height = y - crop.y + 2;
+  }
 
   match = 1;
   for (x = 0; match && x < width; x++) {
-    for (y = 0; match && y < crop.y + crop.height; y++) {
+    for (y = 0; match && y < crop.y + crop.height - 1; y++) {
       match =
         (gdColorMatch(im, color, gdImageGetPixel(im, x,y), threshold)) > 0;
     }
@@ -240,7 +288,7 @@ gdImagePtr gdImageCropThreshold(gdImagePtr im, const unsigned int color,
 
   match = 1;
   for (x = width - 1; match && x >= 0; x--) {
-    for (y = 0; match &&  y < crop.y + crop.height; y++) {
+    for (y = 0; match &&  y < crop.y + crop.height - 1; y++) {
       match =
         (gdColorMatch(im, color, gdImageGetPixel(im, x,y), threshold)) > 0;
     }
@@ -277,7 +325,7 @@ static int gdGuessBackgroundColorFromCorners(gdImagePtr im, int *color) {
   } else if (tl == tr  || tl == bl || tl == br) {
     *color = tl;
     return 2;
-  } else if (tr == bl || tr == br) {
+  } else if (tr == bl) {
     *color = tr;
     return 2;
   } else if (br == bl) {
@@ -305,9 +353,11 @@ static int gdColorMatch(gdImagePtr im, int col1, int col2, float threshold)
   const int dg = gdImageGreen(im, col1) - gdImageGreen(im, col2);
   const int db = gdImageBlue(im, col1) - gdImageBlue(im, col2);
   const int da = gdImageAlpha(im, col1) - gdImageAlpha(im, col2);
-  const int dist = dr * dr + dg * dg + db * db + da * da;
-
-  return (100.0 * dist / 195075) < threshold;}
+  const double dist = sqrt(dr * dr + dg * dg + db * db + da * da);
+  const double dist_perc = sqrt(dist / ((255^2) + (255^2) + (255^2)));
+  return (dist_perc <= threshold);
+  //return (100.0 * dist / 195075) < threshold;
+}
 
 /*
  * To be implemented when we have more image formats.

@@ -1,0 +1,22 @@
+object(HH\Lib\OS\FileDescriptor) (3) {
+  ["fd"]=>
+  int(%d)
+  ["valid"]=>
+  bool(true)
+  ["source"]=>
+  string(%d) "open('%s', %d, %d)"
+}
+string(13) "Hello, world
+"
+object(HH\Lib\OS\FileDescriptor) (3) {
+  ["fd"]=>
+  int(%d)
+  ["valid"]=>
+  bool(false)
+  ["source"]=>
+  string(%d) "open('%s', %d, %d)"
+}
+Expecting exception EBADF
+> Caught exception HH\Lib\_Private\_OS\ErrnoException with code (%d): %s
+Expecting exception EEXIST
+> Caught exception HH\Lib\_Private\_OS\ErrnoException with code (%d): %s

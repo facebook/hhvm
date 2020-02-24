@@ -14,3 +14,4 @@
 *.hhcodegen_config.json
 *.debug_out
 *.type_check_raised_out
+oUnit-*.cache

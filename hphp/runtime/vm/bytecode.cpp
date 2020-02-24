@@ -621,35 +621,7 @@ static std::string toStringElm(const TypedValue* tv) {
     }
   };
 
-  switch (tv->m_type) {
-  case KindOfUninit:
-  case KindOfNull:
-  case KindOfBoolean:
-  case KindOfInt64:
-  case KindOfDouble:
-  case KindOfPersistentString:
-  case KindOfString:
-  case KindOfPersistentVec:
-  case KindOfVec:
-  case KindOfPersistentDict:
-  case KindOfDict:
-  case KindOfPersistentKeyset:
-  case KindOfKeyset:
-  case KindOfPersistentDArray:
-  case KindOfDArray:
-  case KindOfPersistentVArray:
-  case KindOfVArray:
-  case KindOfPersistentArray:
-  case KindOfArray:
-  case KindOfObject:
-  case KindOfResource:
-  case KindOfFunc:
-  case KindOfClass:
-  case KindOfClsMeth:
-  case KindOfRecord:
-    os << "C:";
-    break;
-  }
+  os << "C:";
 
   do {
     switch (tv->m_type) {

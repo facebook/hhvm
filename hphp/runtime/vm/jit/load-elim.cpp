@@ -40,6 +40,7 @@
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/memory-effects.h"
+#include "hphp/runtime/vm/jit/minstr-effects.h"
 #include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/pass-tracer.h"
 #include "hphp/runtime/vm/jit/simplify.h"
@@ -397,6 +398,34 @@ void store(Local& env, AliasClass acls, SSATmp* value) {
   FTRACE(5, "       av: {}\n", show(env.state.avail));
 }
 
+bool handle_minstr(Local& env, const IRInstruction& inst, GeneralEffects m) {
+  if (!MInstrEffects::supported(&inst)) return false;
+  auto const base = inst.src(minstrBaseIdx(inst.op()));
+  if (!base->isA(TLvalToCell)) return false;
+  auto const acls = canonicalize(pointee(base));
+  auto const meta = env.global.ainfo.find(acls);
+  if (!meta || !env.state.avail[meta->index]) return false;
+
+  auto const old_val = env.state.tracked[meta->index];
+  auto const effects = MInstrEffects(inst.op(), old_val.knownType);
+  store(env, m.stores, nullptr);
+
+  SCOPE_ASSERT_DETAIL("handle_minstr") { return inst.toString(); };
+  always_assert(!env.state.avail[meta->index]);
+  auto& new_val = env.state.tracked[meta->index];
+  if (effects.baseValChanged) {
+    new_val.knownValue = nullptr;
+    new_val.knownType  = effects.baseType;
+    FTRACE(5, "      Base changed. New type: {}\n", effects.baseType);
+  } else {
+    new_val.knownValue = old_val.knownValue;
+    new_val.knownType  = old_val.knownType;
+    FTRACE(5, "      Base unchanged. Keeping type: {}\n", old_val.knownType);
+  }
+  env.state.avail.set(meta->index);
+  return true;
+}
+
 Flags handle_general_effects(Local& env,
                              const IRInstruction& inst,
                              GeneralEffects m) {
@@ -404,6 +433,8 @@ Flags handle_general_effects(Local& env,
     // DecRef can only free things, which means from load-elim's point
     // of view it only has a kill set, which load-elim
     // ignores. DecRefNZ is always a no-op.
+    return FNone{};
+  } else if (handle_minstr(env, inst, m)) {
     return FNone{};
   }
 

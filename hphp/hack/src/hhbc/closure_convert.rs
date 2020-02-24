@@ -13,17 +13,22 @@ use std::{
 use ast_constant_folder_rust as ast_constant_folder;
 use ast_scope_rust as ast_scope;
 use decl_vars_rust as decl_vars;
+use emit_fatal_rust as emit_fatal;
 use env::emitter::Emitter;
 use global_state::{ClosureEnclosingClassInfo, GlobalState, LazyState};
+use hhbc_id::class;
+use hhbc_id_rust as hhbc_id;
 use hhbc_string_utils_rust as string_utils;
 use naming_special_names_rust::{fb, pseudo_consts, special_idents, superglobals};
-use options::CompilerFlags;
+use options::{CompilerFlags, HhvmFlags, Options};
 use oxidized::{
     aast_defs,
     aast_visitor::{NodeMut, VisitorMut},
     ast::*,
     ast_defs::*,
+    file_info::Mode,
     local_id, namespace_env,
+    s_map::SMap,
 };
 use rx_rust as rx;
 use unique_list_rust::UniqueList;
@@ -58,8 +63,10 @@ struct Env<'a> {
     defined_record_count: usize,
     /// How many existing functions are there?
     defined_function_count: usize,
-    // if we are immediately in using statement
+    /// Are we immediately in a using statement?
     in_using: bool,
+    /// Global compiler/hack options
+    options: &'a Options,
 }
 
 #[derive(Default, Clone)]
@@ -75,6 +82,7 @@ impl<'a> Env<'a> {
         record_count: usize,
         function_count: usize,
         defs: &Program,
+        options: &'a Options,
     ) -> Self {
         let scope = ast_scope::Scope::toplevel();
         let all_vars = get_vars(&scope, false, &vec![], Either::Left(&defs));
@@ -89,6 +97,7 @@ impl<'a> Env<'a> {
             defined_record_count: record_count,
             defined_function_count: function_count,
             in_using: false,
+            options,
         }
     }
 
@@ -183,6 +192,8 @@ struct State {
     captured_generics: UniqueList<String>,
     // Closure classes and hoisted inline classes
     hoisted_classes: Vec<Class_>,
+    /// Hoisted meth_caller functions
+    named_hoisted_functions: SMap<Fun_>,
     // The current namespace environment
     namespace: namespace_env::Env,
     // Empty namespace as constructed by parser
@@ -203,6 +214,7 @@ impl State {
             captured_this: false,
             captured_generics: UniqueList::new(),
             hoisted_classes: vec![],
+            named_hoisted_functions: SMap::new(),
             current_function_state: PerFunctionState::default(),
             global_state: GlobalState::default(),
         }
@@ -564,6 +576,12 @@ fn convert_id(env: &Env, Id(p, s): Id) -> Expr_ {
     }
 }
 
+fn visit_class_id<'a>(env: &mut Env<'a>, self_: &mut ClosureConvertVisitor<'a>, cid: &mut ClassId) {
+    if let ClassId(_, ClassId_::CIexpr(e)) = cid {
+        self_.visit_expr(env, e);
+    }
+}
+
 fn make_info(c: &Class_) -> ClosureEnclosingClassInfo {
     ClosureEnclosingClassInfo {
         kind: c.kind,
@@ -734,6 +752,137 @@ fn convert_lambda<'a>(
 
     st.hoisted_classes.push(cd);
     Expr_::mk_efun(inline_fundef, use_vars)
+}
+
+fn convert_meth_caller_to_func_ptr<'a>(
+    env: &Env,
+    st: &mut ClosureConvertVisitor,
+    pos: &Pos,
+    pc: &Pos,
+    cls: &String,
+    pf: &Pos,
+    fname: &String,
+) -> Expr_ {
+    fn get_scope_fmode(scope: &ast_scope::Scope) -> Mode {
+        scope
+            .iter()
+            .find_map(|item| match item {
+                ast_scope::ScopeItem::Class(cd) => Some(cd.mode),
+                ast_scope::ScopeItem::Function(fd) => Some(fd.mode),
+                _ => None,
+            })
+            .unwrap_or(Mode::Mstrict)
+    }
+    // TODO: Move dummy variable to tasl.rs once it exists.
+    let dummy_saved_env = ();
+    let pos = || pos.clone();
+    let expr_id = |name: String| Expr(pos(), Expr_::mk_id(Id(pos(), name)));
+    let make_fn_param = |lid: &LocalId, is_variadic: bool| -> FunParam {
+        FunParam {
+            annotation: pos(),
+            type_hint: TypeHint((), None),
+            is_variadic,
+            pos: pos(),
+            name: local_id::get_name(lid).clone(),
+            expr: None,
+            callconv: None,
+            user_attributes: vec![],
+            visibility: None,
+        }
+    };
+    let mangle_name = string_utils::mangle_meth_caller(cls, fname);
+    let fun_handle: Expr_ = Expr_::mk_call(
+        CallType::Cnormal,
+        expr_id("\\__systemlib\\fun".into()),
+        vec![],
+        vec![Expr(pos(), Expr_::mk_string(mangle_name.clone()))],
+        None,
+    );
+    if st.state.named_hoisted_functions.contains_key(&mangle_name) {
+        return fun_handle;
+    }
+    // AST for: invariant(is_a($o, <cls>), 'object must be an instance of <cls>');
+    let obj_var = Box::new(Lid(pos(), local_id::make_unscoped("$o".into())));
+    let obj_lvar = Expr(pos(), Expr_::Lvar(obj_var.clone()));
+    let assert_invariant = Expr(
+        pos(),
+        Expr_::mk_call(
+            CallType::Cnormal,
+            expr_id("\\HH\\invariant".into()),
+            vec![],
+            vec![
+                Expr(
+                    pos(),
+                    Expr_::mk_call(
+                        CallType::Cnormal,
+                        expr_id("\\is_a".into()),
+                        vec![],
+                        vec![
+                            obj_lvar.clone(),
+                            Expr(pc.clone(), Expr_::String(cls.into())),
+                        ],
+                        None,
+                    ),
+                ),
+                Expr(
+                    pos(),
+                    Expr_::String(format!("object must be an instance of ({})", cls)),
+                ),
+            ],
+            None,
+        ),
+    );
+    // AST for: return $o-><func>(...$args);
+    let args_var = Box::new(Lid(pos(), local_id::make_unscoped("$args".into())));
+    let meth_caller_handle = Expr(
+        pos(),
+        Expr_::mk_call(
+            CallType::Cnormal,
+            Expr(
+                pos(),
+                Expr_::ObjGet(Box::new((
+                    obj_lvar.clone(),
+                    Expr(pos(), Expr_::mk_id(Id(pf.clone(), fname.clone()))),
+                    OgNullFlavor::OGNullthrows,
+                ))),
+            ),
+            vec![],
+            vec![],
+            Some(Expr(pos(), Expr_::Lvar(args_var.clone()))),
+        ),
+    );
+
+    let variadic_param = make_fn_param(&args_var.1, true);
+    let fd = Fun_ {
+        span: pos(),
+        annotation: dummy_saved_env,
+        mode: get_scope_fmode(&env.scope),
+        ret: TypeHint((), None),
+        name: Id(pos(), mangle_name.clone()),
+        tparams: vec![],
+        where_constraints: vec![],
+        variadic: FunVariadicity::FVvariadicArg(variadic_param.clone()),
+        params: vec![make_fn_param(&obj_var.1, false), variadic_param.clone()],
+        body: FuncBody {
+            ast: vec![
+                Stmt(pos(), Stmt_::Expr(Box::new(assert_invariant))),
+                Stmt(pos(), Stmt_::Return(Box::new(Some(meth_caller_handle)))),
+            ],
+            annotation: (), // FuncBodyAnn::Named,
+        },
+        fun_kind: FunKind::FSync,
+        user_attributes: vec![UserAttribute {
+            name: Id(pos(), "__MethCaller".into()),
+            params: vec![],
+        }],
+        file_attributes: vec![],
+        external: false,
+        namespace: ocamlrep::rc::RcOc::new(st.state.empty_namespace.clone()),
+        doc_comment: None,
+        static_: false,
+    };
+    st.state.named_hoisted_functions.insert(mangle_name, fd);
+    return fun_handle;
 }
 
 fn convert_function_like_body<'a>(
@@ -960,7 +1109,6 @@ impl<'a> VisitorMut for ClosureConvertVisitor<'a> {
     }
 
     //TODO(hrust): do we need special handling for Awaitall?
-
     fn visit_expr(&mut self, env: &mut Env<'a>, Expr(pos, e): &mut Expr) {
         let null = Expr_::mk_null();
         let e_owned = std::mem::replace(e, null);
@@ -979,6 +1127,103 @@ impl<'a> VisitorMut for ClosureConvertVisitor<'a> {
             Expr_::Id(id) => {
                 add_generic(env, &mut self.state, id.name());
                 convert_id(env, *id)
+            }
+            Expr_::Call(mut x)
+                if {
+                    if let Expr_::Id(ref id) = (x.1).1 {
+                        let name = strip_id(id);
+                        (["hh\\meth_caller", "meth_caller"]
+                            .iter()
+                            .any(|n| n.eq_ignore_ascii_case(name))
+                            && env
+                                .options
+                                .hhvm
+                                .flags
+                                .contains(HhvmFlags::EMIT_METH_CALLER_FUNC_POINTERS))
+                    } else {
+                        false
+                    }
+                } =>
+            {
+                let (pc, cls, pf, func) = {
+                    if let [Expr(pc, cls), Expr(pf, fname)] = &mut *x.3 {
+                        (pc, cls, pf, fname)
+                    } else {
+                        // TODO: Remove panic! when error-handling is added to function.
+                        panic!(
+                            "Err={:?}",
+                            emit_fatal::raise_fatal_parse(
+                                pos,
+                                format!(
+                                    "meth_caller must have exactly two arguments. Received {}",
+                                    x.3.len()
+                                )
+                            )
+                        )
+                    }
+                };
+                match (cls, func.as_string()) {
+                    (cls, Some(fname))
+                        if cls
+                            .as_class_const()
+                            .and_then(|(_, (_, cs))| Some(cs.as_str()))
+                            .map(string_utils::is_class)
+                            .unwrap_or(false) =>
+                    {
+                        let mut cls_const = cls.as_class_const_mut();
+                        let (cid, _) = match cls_const {
+                            None => unreachable!(),
+                            Some((ref mut cid, (_, cs))) => (cid, cs),
+                        };
+                        use hhbc_id::Id;
+                        visit_class_id(env, self, cid);
+                        match &cid.1 {
+                            cid if cid
+                                .as_ciexpr()
+                                .and_then(|x| x.as_id())
+                                .map(|id| {
+                                    !(string_utils::is_self(id)
+                                        || string_utils::is_parent(id)
+                                        || string_utils::is_static(id))
+                                })
+                                .unwrap_or(false) =>
+                            {
+                                let id = cid.as_ciexpr().unwrap().as_id().unwrap();
+                                let mangled_class_name = class::Type::from_ast_name(id.as_ref())
+                                    .to_raw_string()
+                                    .into();
+                                convert_meth_caller_to_func_ptr(
+                                    env,
+                                    self,
+                                    &*pos,
+                                    pc,
+                                    &mangled_class_name,
+                                    pf,
+                                    fname,
+                                )
+                            }
+                            e => {
+                                // TODO: Print and soft "accept" are WRONG. Change when error-handling is ready.
+                                eprintln!(
+                                    "{:?}",
+                                    emit_fatal::raise_fatal_parse(
+                                        pos,
+                                        format!(
+                                            "Class must be a Class or string type. Got '{:?}'",
+                                            e
+                                        ),
+                                    )
+                                );
+                                Expr_::Call(x)
+                            }
+                        }
+                    }
+                    (Expr_::String(cls_name), Some(fname)) => {
+                        convert_meth_caller_to_func_ptr(env, self, &*pos, pc, &cls_name, pf, fname)
+                    }
+                    // For other cases, fallback to create __SystemLib\MethCallerHelper
+                    _ => Expr_::Call(x),
+                }
             }
             Expr_::Call(x)
                 if (x.1)
@@ -1059,13 +1304,12 @@ impl<'a> VisitorMut for ClosureConvertVisitor<'a> {
 
 fn hoist_toplevel_functions(defs: &mut Program) {
     // Reorder the functions so that they appear first.
-    use std::cmp::Ordering::*;
-    defs.sort_by(|x, y| match (x, y) {
-        (Def::Fun(_), Def::Fun(_)) => Equal,
-        (Def::Fun(_), _) => Less,
-        (_, Def::Fun(_)) => Greater,
-        _ => Equal,
-    })
+    let (funs, nonfuns): (Vec<Def>, Vec<Def>) = defs.drain(..).partition(|x| match x {
+        Def::Fun(_) => true,
+        _ => false,
+    });
+    defs.extend(funs);
+    defs.extend(nonfuns);
 }
 
 fn flatten_ns(defs: &mut Program) -> Program {
@@ -1086,7 +1330,13 @@ pub fn convert_toplevel_prog(e: &mut Emitter, defs: &mut Program) -> Vec<HoistKi
         ast_constant_folder::fold_program(defs, e, &empty_namespace);
     }
 
-    let mut env = Env::toplevel(count_classes(defs), count_records(defs), 1, defs);
+    let mut env = Env::toplevel(
+        count_classes(defs),
+        count_records(defs),
+        1,
+        defs,
+        e.options(),
+    );
     *defs = flatten_ns(defs);
 
     let mut visitor = ClosureConvertVisitor {
@@ -1141,10 +1391,14 @@ pub fn convert_toplevel_prog(e: &mut Emitter, defs: &mut Program) -> Vec<HoistKi
         visitor.state.current_function_state.clone(),
         rx::Level::NonRx,
     );
-
-    *defs = new_defs;
-    hoist_toplevel_functions(defs);
-
+    hoist_toplevel_functions(&mut new_defs);
+    let named_fun_defs = visitor
+        .state
+        .named_hoisted_functions
+        .into_iter()
+        .map(|(_, fd)| Def::mk_fun(fd));
+    *defs = named_fun_defs.collect();
+    defs.extend(new_defs.drain(..));
     let mut hoist_kinds = defs.iter().map(|_| HoistKind::TopLevel).collect::<Vec<_>>();
     for class in visitor.state.hoisted_classes.into_iter() {
         defs.push(Def::mk_class(class));

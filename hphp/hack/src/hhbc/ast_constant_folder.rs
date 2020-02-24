@@ -115,6 +115,37 @@ fn array_to_typed_value(
     }))
 }
 
+fn varray_to_typed_value(
+    emitter: &Emitter,
+    ns: &Namespace,
+    fields: &Vec<tast::Expr>,
+    pos: &ast_defs::Pos,
+) -> Result<TypedValue, Error> {
+    let tv_fields: Result<Vec<TypedValue>, Error> = fields
+        .iter()
+        .map(|x| Ok(expr_to_typed_value(emitter, ns, x)?))
+        .collect();
+    Ok(TypedValue::VArray((tv_fields?, Some(pos.clone()))))
+}
+
+fn darray_to_typed_value(
+    emitter: &Emitter,
+    ns: &Namespace,
+    fields: &Vec<(tast::Expr, tast::Expr)>,
+    pos: &ast_defs::Pos,
+) -> Result<TypedValue, Error> {
+    let tv_fields: Result<Vec<(TypedValue, TypedValue)>, Error> = fields
+        .iter()
+        .map(|(k, v)| {
+            Ok((
+                key_expr_to_typed_value(emitter, ns, k)?,
+                key_expr_to_typed_value(emitter, ns, v)?,
+            ))
+        })
+        .collect();
+    Ok(TypedValue::DArray((tv_fields?, Some(pos.clone()))))
+}
+
 fn afield_to_typed_value_pair(
     emitter: &Emitter,
     ns: &Namespace,
@@ -192,6 +223,8 @@ pub fn expr_to_typed_value(
     expr: &tast::Expr,
 ) -> Result<TypedValue, Error> {
     use aast::Expr_::*;
+    // TODO: ML equivalent has this as an implicit parameter that defaults to false.
+    let allow_maps = false;
     let pos = &expr.0;
     match &expr.1 {
         Int(s) => Ok(TypedValue::Int(
@@ -217,8 +250,8 @@ pub fn expr_to_typed_value(
             unimplemented!()
         }
         Array(fields) => array_to_typed_value(emitter, ns, &fields),
-        Varray(_) => unimplemented!(),
-        Darray(_) => unimplemented!(),
+        Varray(fields) => varray_to_typed_value(emitter, ns, &fields.1, pos),
+        Darray(fields) => darray_to_typed_value(emitter, ns, &fields.1, pos),
         Collection(x) if x.0.name().eq("vec") => Ok(TypedValue::Vec((
             x.2.iter()
                 .map(|x| value_afield_to_typed_value(emitter, ns, x))
@@ -244,15 +277,15 @@ pub fn expr_to_typed_value(
                     .collect::<Result<_, _>>()?;
             Ok(TypedValue::Dict((values, Some(pos.clone()))))
         }
-        KeyValCollection(_) => unimplemented!(),
-        Collection(_) => unimplemented!(),
+        KeyValCollection(_) if allow_maps => unimplemented!(),
+        Collection(_) if allow_maps => unimplemented!(),
         ValCollection(x) if x.0 == tast::VcKind::Set || x.0 == tast::VcKind::ImmSet => {
             unimplemented!()
         }
         Shape(fields) => shape_to_typed_value(emitter, ns, fields, pos),
         ClassConst(x) => class_const_to_typed_value(emitter, &x.0, &x.1),
         BracedExpr(_) => unimplemented!(),
-        Id(_) | ClassGet(_) => unimplemented!(),
+        Id(_) | ClassGet(_) => Err(Error::UserDefinedConstant),
         As(x) if (x.1).1.is_hlike() => unimplemented!(),
         _ => Err(Error::NotLiteral),
     }

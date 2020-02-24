@@ -152,20 +152,20 @@ pub fn cmp(s1: &str, s2: &str, case_sensitive: bool, ignore_ns: bool) -> bool {
     }
 }
 
-pub fn is_self(s: &str) -> bool {
-    s.eq_ignore_ascii_case(ns_classes::SELF)
+pub fn is_self(s: impl AsRef<str>) -> bool {
+    s.as_ref().eq_ignore_ascii_case(ns_classes::SELF)
 }
 
 pub fn is_parent(s: impl AsRef<str>) -> bool {
     s.as_ref().eq_ignore_ascii_case(ns_classes::PARENT)
 }
 
-pub fn is_static(s: &str) -> bool {
-    s.eq_ignore_ascii_case(ns_classes::STATIC)
+pub fn is_static(s: impl AsRef<str>) -> bool {
+    s.as_ref().eq_ignore_ascii_case(ns_classes::STATIC)
 }
 
-pub fn is_class(s: &str) -> bool {
-    s.eq_ignore_ascii_case(members::M_CLASS)
+pub fn is_class(s: impl AsRef<str>) -> bool {
+    s.as_ref().eq_ignore_ascii_case(members::M_CLASS)
 }
 
 pub fn mangle_meth_caller(mangled_cls_name: &str, f_name: &str) -> String {

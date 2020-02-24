@@ -681,9 +681,6 @@ module ClosureConvertTest_ = struct
     let path = Relative_path.to_absolute file in
     let parser_options = ParserOptions.default in
     let empty_namespace = Namespace_env.empty_from_popt parser_options in
-    Hhbc_options.(
-      set_compiler_options
-        { !compiler_options with option_emit_meth_caller_func_pointers = false });
     Printf.printf "Start %s\n" path;
     flush stdout;
     let lower_env =

@@ -1,0 +1,10 @@
+object(Closure%S$g;%s) (1) {
+  ["static"]=>
+  array(1) {
+    ["c"]=>
+    object(D) (0) {
+    }
+  }
+}
+object(D) (0) {
+}

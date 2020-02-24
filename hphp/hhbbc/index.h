@@ -232,6 +232,12 @@ struct Class {
   bool couldBeInterfaceOrTrait() const;
 
   /*
+   * Whether this class must be an interface.
+   *
+   * True means it is, false means it might not be.
+   */
+  bool mustBeInterface() const;
+  /*
    * Returns whether this type has the no override attribute, that is, if it
    * is a final class (explicitly marked by the user or known by the static
    * analysis).

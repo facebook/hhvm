@@ -778,6 +778,15 @@ bool Class::couldBeInterface() const {
   );
 }
 
+bool Class::mustBeInterface() const {
+  return val.match(
+    [] (SString) { return false; },
+    [] (ClassInfo* cinfo) {
+      return cinfo->cls->attrs & AttrInterface;
+    }
+  );
+}
+
 bool Class::couldBeOverriden() const {
   return val.match(
     [] (SString) { return true; },
@@ -5973,6 +5982,19 @@ void Index::init_return_type(const php::Func* func) {
   finfo->returnTy = std::move(tcT);
 }
 
+static bool moreRefinedForIndex(const Type& newType,
+                                const Type& oldType)
+{
+  if (newType.moreRefined(oldType)) return true;
+  if (!newType.subtypeOf(BOptObj) ||
+      !oldType.subtypeOf(BOptObj) ||
+      !oldType.couldBe(BObj) ||
+      !is_specialized_obj(oldType)) {
+    return false;
+  }
+  return dobj_of(oldType).cls.mustBeInterface();
+}
+
 void Index::refine_return_info(const FuncAnalysisResult& fa,
                                DependencyContextSet& deps) {
   auto const& t = fa.inferredReturn;
@@ -6024,7 +6046,7 @@ void Index::refine_return_info(const FuncAnalysisResult& fa,
     }
   } else {
     always_assert_flog(
-        t.moreRefined(finfo->returnTy),
+        moreRefinedForIndex(t, finfo->returnTy),
         "Index return type invariant violated in {}.\n"
         "   {} is not at least as refined as {}\n",
         error_loc(),
@@ -6073,10 +6095,18 @@ bool Index::refine_closure_use_vars(const php::Class* cls,
 
   auto changed = false;
   for (auto i = uint32_t{0}; i < vars.size(); ++i) {
-    always_assert(vars[i].subtypeOf(current[i]));
     if (vars[i].strictSubtypeOf(current[i])) {
       changed = true;
       current[i] = vars[i];
+    } else {
+      always_assert_flog(
+        moreRefinedForIndex(vars[i], current[i]),
+        "Index closure_use_var invariant violated in {}.\n"
+        "   {} is not at least as refined as {}\n",
+        cls->name,
+        show(vars[i]),
+        show(current[i])
+      );
     }
   }
 
@@ -6104,7 +6134,7 @@ void refine_private_propstate(Container& cont,
     auto& target = elm->second[kv.first];
     assertx(target.tc == kv.second.tc);
     always_assert_flog(
-      kv.second.ty.moreRefined(target.ty),
+      moreRefinedForIndex(kv.second.ty, target.ty),
       "PropState refinement failed on {}::${} -- {} was not a subtype of {}\n",
       cls->name->data(),
       kv.first->data(),

@@ -55,6 +55,7 @@
     typing_arrays
     typing_async
     typing_coercion
+    typing_cont_key
     typing_continuations
     typing_deferred_members
     typing_dependent_type

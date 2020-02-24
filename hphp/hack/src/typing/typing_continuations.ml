@@ -8,38 +8,12 @@
  *)
 
 open Hh_prelude
-
-module Continuations = struct
-  type t =
-    | Next
-    | Continue
-    | Break
-    | Catch
-    | Do
-    | Exit
-    | Fallthrough
-    | Finally
-    | Goto of string
-  [@@deriving eq, ord, show]
-
-  let to_string = function
-    | Next -> "Next"
-    | Continue -> "Continue"
-    | Break -> "Break"
-    | Catch -> "Catch"
-    | Do -> "Do"
-    | Exit -> "Exit"
-    | Fallthrough -> "Fallthrough"
-    | Finally -> "Finally"
-    | Goto l -> "Goto " ^ l
-end
-
-include Continuations
+include Typing_cont_key
 
 module Map = struct
   let show _ = "<WrappedMap.Make(Continuations)>"
 
   let pp _ _ = Printf.printf "%s\n" "<WrappedMap.Make(Continuations)>"
 
-  include WrappedMap.Make (Continuations)
+  include WrappedMap.Make (Typing_cont_key)
 end

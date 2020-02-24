@@ -221,8 +221,24 @@ impl InstrSeq {
         Self::make_instr(Instruct::IOp(InstructOperator::Eq))
     }
 
+    pub fn make_neq() -> Self {
+        Self::make_instr(Instruct::IOp(InstructOperator::Neq))
+    }
+
     pub fn make_gt() -> Self {
         Self::make_instr(Instruct::IOp(InstructOperator::Gt))
+    }
+
+    pub fn make_gte() -> Self {
+        Self::make_instr(Instruct::IOp(InstructOperator::Gte))
+    }
+
+    pub fn make_lt() -> Self {
+        Self::make_instr(Instruct::IOp(InstructOperator::Lt))
+    }
+
+    pub fn make_lte() -> Self {
+        Self::make_instr(Instruct::IOp(InstructOperator::Lte))
     }
 
     pub fn make_concat() -> Self {
@@ -369,12 +385,68 @@ impl InstrSeq {
         Self::make_instr(Instruct::IOp(InstructOperator::SubO))
     }
 
+    pub fn make_mul() -> Self {
+        Self::make_instr(Instruct::IOp(InstructOperator::Mul))
+    }
+
+    pub fn make_mulo() -> Self {
+        Self::make_instr(Instruct::IOp(InstructOperator::MulO))
+    }
+
+    pub fn make_shl() -> Self {
+        Self::make_instr(Instruct::IOp(InstructOperator::Shl))
+    }
+
+    pub fn make_shr() -> Self {
+        Self::make_instr(Instruct::IOp(InstructOperator::Shr))
+    }
+
+    pub fn make_cmp() -> Self {
+        Self::make_instr(Instruct::IOp(InstructOperator::Cmp))
+    }
+
+    pub fn make_mod() -> Self {
+        Self::make_instr(Instruct::IOp(InstructOperator::Mod))
+    }
+
+    pub fn make_div() -> Self {
+        Self::make_instr(Instruct::IOp(InstructOperator::Div))
+    }
+
+    pub fn make_same() -> Self {
+        Self::make_instr(Instruct::IOp(InstructOperator::Same))
+    }
+
+    pub fn make_pow() -> Self {
+        Self::make_instr(Instruct::IOp(InstructOperator::Pow))
+    }
+
+    pub fn make_nsame() -> Self {
+        Self::make_instr(Instruct::IOp(InstructOperator::NSame))
+    }
+
     pub fn make_not() -> Self {
         Self::make_instr(Instruct::IOp(InstructOperator::Not))
     }
 
+    pub fn make_xor() -> Self {
+        Self::make_instr(Instruct::IOp(InstructOperator::Xor))
+    }
+
     pub fn make_bitnot() -> Self {
         Self::make_instr(Instruct::IOp(InstructOperator::BitNot))
+    }
+
+    pub fn make_bitand() -> Self {
+        Self::make_instr(Instruct::IOp(InstructOperator::BitAnd))
+    }
+
+    pub fn make_bitor() -> Self {
+        Self::make_instr(Instruct::IOp(InstructOperator::BitOr))
+    }
+
+    pub fn make_bitxor() -> Self {
+        Self::make_instr(Instruct::IOp(InstructOperator::BitXor))
     }
 
     pub fn make_sets() -> Self {
@@ -385,8 +457,32 @@ impl InstrSeq {
         Self::make_instr(Instruct::IMutator(InstructMutator::SetL(local)))
     }
 
+    pub fn make_setg() -> Self {
+        Self::make_instr(Instruct::IMutator(InstructMutator::SetG))
+    }
+
     pub fn make_unsetl(local: local::Type) -> Self {
         Self::make_instr(Instruct::IMutator(InstructMutator::UnsetL(local)))
+    }
+
+    pub fn make_unsetg() -> Self {
+        Self::make_instr(Instruct::IMutator(InstructMutator::UnsetG))
+    }
+
+    pub fn make_incdecl(local: local::Type, op: IncdecOp) -> Self {
+        Self::make_instr(Instruct::IMutator(InstructMutator::IncDecL(local, op)))
+    }
+
+    pub fn make_incdecg(op: IncdecOp) -> Self {
+        Self::make_instr(Instruct::IMutator(InstructMutator::IncDecG(op)))
+    }
+
+    pub fn make_setopg(op: EqOp) -> Self {
+        Self::make_instr(Instruct::IMutator(InstructMutator::SetOpG(op)))
+    }
+
+    pub fn make_setopl(local: local::Type, op: EqOp) -> Self {
+        Self::make_instr(Instruct::IMutator(InstructMutator::SetOpL(local, op)))
     }
 
     pub fn make_issetl(local: local::Type) -> Self {
@@ -1234,7 +1330,7 @@ impl InstrSeq {
         match self {
             Self::Empty => (),
             Self::One(x) => f(x),
-            Self::List(instr_lst) => instr_lst.iter_mut().for_each(|x| f(x)),
+            Self::List(instr_lst) => instr_lst.iter_mut().for_each(f),
             Self::Concat(instrseq_lst) => instrseq_lst.iter_mut().for_each(|x| x.map_mut(f)),
         }
     }

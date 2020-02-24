@@ -146,7 +146,7 @@ pub(crate) fn convert_awaitable(env: &Env, h: aast::Hint) -> aast::Hint {
 
 pub(crate) fn simplify_verify_type(
     e: &mut Emitter,
-    env: &Env,
+    env: &mut Env,
     pos: &Pos,
     check: InstrSeq,
     hint: &aast::Hint,

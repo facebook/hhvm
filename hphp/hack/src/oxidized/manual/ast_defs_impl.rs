@@ -33,3 +33,12 @@ impl Id {
         &self.1
     }
 }
+
+impl Bop {
+    pub fn is_any_eq(&self) -> bool {
+        match self {
+            Self::Eq(_) => true,
+            _ => false,
+        }
+    }
+}

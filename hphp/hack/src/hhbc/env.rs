@@ -29,18 +29,30 @@ bitflags! {
     }
 }
 
-#[derive(Default, Debug)]
+#[derive(Clone, Default, Debug)]
 pub struct Env<'a> {
     pub flags: Flags,
     pub jump_targets_gen: jump_targets::Gen,
     pub scope: Scope<'a>,
     pub namespace: NamespaceEnv,
+
+    allows_array_append: bool,
     // TODO(hrust)
     // - pipe_var after porting Local
-    // - namespace after porting Namespace_env
 }
 
 impl<'a> Env<'a> {
+    pub fn with_allows_array_append<F, R>(&mut self, f: F) -> R
+    where
+        F: FnOnce(&mut Self) -> R,
+    {
+        let old = self.allows_array_append;
+        self.allows_array_append = true;
+        let r = f(self);
+        self.allows_array_append = old;
+        r
+    }
+
     pub fn with_need_local_this(&mut self, need_local_this: bool) {
         if need_local_this {
             self.flags = self.flags | Flags::NEEDS_LOCAL_THIS;

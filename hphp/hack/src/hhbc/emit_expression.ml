@@ -1683,7 +1683,8 @@ and emit_expr (env : Emit_env.t) (expr : Tast.expr) =
   | A.Id id -> emit_pos_then pos @@ emit_id env id
   | A.Xml (id, attributes, children) ->
     emit_xhp env (fst expr) id attributes children
-  | A.Callconv (kind, e) -> emit_callconv env kind e
+  | A.Callconv (_, _) ->
+    failwith "emit_expr: This should have been caught at emit_arg"
   | A.Import (flavor, e) -> emit_import env annot flavor e
   | A.Omitted -> empty
   | A.Suspend _ -> failwith "Codegen for 'suspend' operator is not supported"

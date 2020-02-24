@@ -126,6 +126,17 @@ pub mod context {
             r
         }
 
+        pub fn unblock<W, F>(&mut self, w: &mut W, f: F) -> Result<(), W::Error>
+        where
+            W: Write,
+            F: FnOnce(&mut Self, &mut W) -> Result<(), W::Error>,
+        {
+            self.indent.dec();
+            let r = f(self, w);
+            self.indent.inc();
+            r
+        }
+
         /// Printing instruction list requies manually control indentation,
         /// where indent_inc/indent_dec are called
         pub fn indent_inc(&mut self) {
@@ -891,23 +902,19 @@ fn print_instructions<W: Write>(
                 newline(w)?;
                 print_instr(w, instr)?;
             }
-            ILabel(_) => {
-                ctx.indent_dec();
-                ctx.newline(w)?;
-                print_instr(w, instr)?;
-                ctx.indent_inc();
-            }
+            ILabel(_) => ctx.unblock(w, |c, w| {
+                c.newline(w)?;
+                print_instr(w, instr)
+            })?,
             ITry(TryCatchBegin) => {
                 ctx.newline(w)?;
                 print_instr(w, instr)?;
                 ctx.indent_inc();
             }
-            ITry(TryCatchMiddle) => {
-                ctx.indent_dec();
-                ctx.newline(w)?;
-                print_instr(w, instr)?;
-                ctx.indent_inc();
-            }
+            ITry(TryCatchMiddle) => ctx.unblock(w, |c, w| {
+                c.newline(w)?;
+                print_instr(w, instr)
+            })?,
             ITry(TryCatchEnd) => {
                 ctx.indent_dec();
                 ctx.newline(w)?;

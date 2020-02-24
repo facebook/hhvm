@@ -10,14 +10,14 @@ use std::collections::{BTreeMap, HashSet};
 type Id = usize;
 type LabelSet = HashSet<String>;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct LoopLabels {
     label_break: Label,
     label_continue: Label,
     iterator: Option<Iter>,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum Region {
     Loop(LoopLabels, LabelSet),
     Switch(Label, LabelSet),
@@ -27,7 +27,7 @@ pub enum Region {
     Using(Label, LabelSet),
 }
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct JumpTargets(Vec<Region>);
 impl JumpTargets {
     pub fn as_slice(&self) -> &[Region] {
@@ -183,13 +183,13 @@ impl JumpTargets {
     }
 }
 
-#[derive(PartialEq, Eq, std::cmp::Ord, std::cmp::PartialOrd, Debug)]
+#[derive(Clone, PartialEq, Eq, std::cmp::Ord, std::cmp::PartialOrd, Debug)]
 pub enum IdKey {
     IdReturn,
     IdLabel(Label),
 }
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Gen {
     label_id_map: BTreeMap<IdKey, Id>,
     labels_in_function: BTreeMap<String, bool>,

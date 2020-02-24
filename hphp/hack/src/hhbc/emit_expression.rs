@@ -11,26 +11,30 @@ use emit_fatal_rust as emit_fatal;
 use emit_type_constant_rust as emit_type_constant;
 use env::{emitter::Emitter, local, Env};
 use hhbc_ast_rust::*;
-use hhbc_id_rust::{class, method, r#const, Id};
+use hhbc_id_rust::{class, method};
 use hhbc_string_utils_rust as string_utils;
 use instruction_sequence_rust::{Error::Unrecoverable, InstrSeq, Result};
 use label_rust::Label;
-use naming_special_names_rust::{pseudo_consts, special_idents, superglobals, user_attributes};
-use options::{HhvmFlags, LangFlags, Options};
+use naming_special_names_rust::{
+    pseudo_consts, special_functions, special_idents, superglobals, user_attributes,
+};
+use options::{CompilerFlags, HhvmFlags, LangFlags, Options};
 use oxidized::{aast, aast_defs, ast as tast, ast_defs, local_id, pos::Pos};
 use scope_rust::scope;
 
 use std::{collections::BTreeMap, convert::TryInto};
 
+#[derive(Debug)]
 pub struct EmitJmpResult {
     // generated instruction sequence
-    instrs: InstrSeq,
+    pub instrs: InstrSeq,
     // does instruction sequence fall through
     is_fallthrough: bool,
     // was label associated with emit operation used
     is_label_used: bool,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum LValOp {
     Set,
     SetOp(EqOp),
@@ -349,7 +353,7 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
         }
         Expr_::ClassConst(e) => emit_class_const(env, pos, &**e),
         Expr_::Unop(e) => emit_unop(emitter, env, pos, &**e),
-        Expr_::Binop(e) => emit_binop(env, pos, &**e),
+        Expr_::Binop(e) => emit_binop(emitter, env, pos, e.as_ref()),
         Expr_::Pipe(e) => emit_pipe(env, &**e),
         Expr_::Is(is_expr) => {
             let (e, h) = &**is_expr;
@@ -429,7 +433,7 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
         Expr_::Clone(e) => emit_pos_then(emitter, pos, emit_clone(env, &**e)?),
         Expr_::Shape(e) => emit_pos_then(emitter, pos, emit_shape(env, expression, e)?),
         Expr_::Await(e) => emit_await(emitter, env, pos, &**e),
-        Expr_::Yield(e) => emit_yield(env, pos, &**e),
+        Expr_::Yield(e) => emit_yield(emitter, env, pos, &**e),
         Expr_::Efun(e) => emit_pos_then(emitter, pos, emit_lambda(env, &**e)?),
         Expr_::ClassGet(e) => emit_class_get(env, QueryOp::CGet, &**e),
         Expr_::String2(es) => emit_string2(env, pos, es),
@@ -439,7 +443,9 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
             emit_pos_then(emitter, pos, instrs)
         }
         Expr_::Xml(e) => emit_xhp(env, pos, &**e),
-        Expr_::Callconv(e) => emit_callconv(&**e),
+        Expr_::Callconv(e) => Err(Unrecoverable(
+            "emit_callconv: This should have been caught at emit_arg".into(),
+        )),
         Expr_::Import(e) => emit_import(env, pos, &**e),
         Expr_::Omitted => Ok(InstrSeq::Empty),
         Expr_::YieldBreak => Err(Unrecoverable(
@@ -501,13 +507,6 @@ fn emit_exit(emitter: &mut Emitter, env: &Env, expr_opt: Option<&tast::Expr>) ->
     ]))
 }
 
-fn emit_callconv((kind, _): &(ast_defs::ParamKind, tast::Expr)) -> Result {
-    if let ast_defs::ParamKind::Pinout = kind {
-        panic!("emit_callconv: This should have been caught at emit_arg")
-    };
-    unimplemented!("TODO(hrust)")
-}
-
 fn emit_xhp(
     env: &Env,
     pos: &Pos,
@@ -516,7 +515,7 @@ fn emit_xhp(
     unimplemented!("TODO(hrust)")
 }
 
-fn emit_yield(env: &Env, pos: &Pos, af: &tast::Afield) -> Result {
+fn emit_yield(e: &mut Emitter, env: &Env, pos: &Pos, af: &tast::Afield) -> Result {
     unimplemented!("TODO(hrust)")
 }
 
@@ -864,12 +863,194 @@ fn from_unop(opts: &Options, op: &ast_defs::Uop) -> Result {
     })
 }
 
+fn binop_to_eqop(opts: &Options, op: &ast_defs::Bop) -> Option<EqOp> {
+    use {ast_defs::Bop as B, EqOp::*};
+    let check_int_overflow = opts
+        .hhvm
+        .hack_lang_flags
+        .contains(LangFlags::CHECK_INT_OVERFLOW);
+    match op {
+        B::Plus => Some(if check_int_overflow {
+            PlusEqualO
+        } else {
+            PlusEqual
+        }),
+        B::Minus => Some(if check_int_overflow {
+            MinusEqualO
+        } else {
+            MinusEqual
+        }),
+        B::Star => Some(if check_int_overflow {
+            MulEqualO
+        } else {
+            MulEqual
+        }),
+        B::Slash => Some(DivEqual),
+        B::Starstar => Some(PowEqual),
+        B::Amp => Some(AndEqual),
+        B::Bar => Some(OrEqual),
+        B::Xor => Some(XorEqual),
+        B::Ltlt => Some(SlEqual),
+        B::Gtgt => Some(SrEqual),
+        B::Percent => Some(ModEqual),
+        B::Dot => Some(ConcatEqual),
+        _ => None,
+    }
+}
+
+fn optimize_null_checks(e: &Emitter) -> bool {
+    e.options()
+        .hack_compiler_flags
+        .contains(CompilerFlags::OPTIMIZE_NULL_CHECKS)
+}
+
+fn from_binop(opts: &Options, op: &ast_defs::Bop) -> Result {
+    let check_int_overflow = opts
+        .hhvm
+        .hack_lang_flags
+        .contains(LangFlags::CHECK_INT_OVERFLOW);
+    use ast_defs::Bop as B;
+    Ok(match op {
+        B::Plus => {
+            if check_int_overflow {
+                InstrSeq::make_addo()
+            } else {
+                InstrSeq::make_add()
+            }
+        }
+        B::Minus => {
+            if check_int_overflow {
+                InstrSeq::make_subo()
+            } else {
+                InstrSeq::make_sub()
+            }
+        }
+        B::Star => {
+            if check_int_overflow {
+                InstrSeq::make_mulo()
+            } else {
+                InstrSeq::make_mul()
+            }
+        }
+        B::Slash => InstrSeq::make_div(),
+        B::Eqeq => InstrSeq::make_eq(),
+        B::Eqeqeq => InstrSeq::make_same(),
+        B::Starstar => InstrSeq::make_pow(),
+        B::Diff => InstrSeq::make_neq(),
+        B::Diff2 => InstrSeq::make_nsame(),
+        B::Lt => InstrSeq::make_lt(),
+        B::Lte => InstrSeq::make_lte(),
+        B::Gt => InstrSeq::make_gt(),
+        B::Gte => InstrSeq::make_gte(),
+        B::Dot => InstrSeq::make_concat(),
+        B::Amp => InstrSeq::make_bitand(),
+        B::Bar => InstrSeq::make_bitor(),
+        B::Ltlt => InstrSeq::make_shl(),
+        B::Gtgt => InstrSeq::make_shr(),
+        B::Cmp => InstrSeq::make_cmp(),
+        B::Percent => InstrSeq::make_mod(),
+        B::Xor => InstrSeq::make_bitxor(),
+        B::LogXor => InstrSeq::make_xor(),
+        B::Eq(_) => return Err(Unrecoverable("assignment is emitted differently".into())),
+        B::QuestionQuestion => {
+            return Err(Unrecoverable(
+                "null coalescence is emitted differently".into(),
+            ))
+        }
+        B::Barbar | B::Ampamp => {
+            return Err(Unrecoverable(
+                "short-circuiting operator cannot be generated as a simple binop".into(),
+            ))
+        }
+    })
+}
+
+fn emit_two_exprs(
+    e: &mut Emitter,
+    env: &Env,
+    outer_pos: &Pos,
+    e1: &tast::Expr,
+    e2: &tast::Expr,
+) -> Result {
+    unimplemented!()
+}
+
+fn emit_quiet_expr(
+    e: &mut Emitter,
+    env: &Env,
+    pos: &Pos,
+    expr: &tast::Expr,
+    null_coalesce_assignment: bool,
+) -> Result<(InstrSeq, Option<NumParams>)> {
+    unimplemented!()
+}
+
+fn emit_null_coalesce_assignment(
+    e: &mut Emitter,
+    env: &Env,
+    pos: &Pos,
+    e1: &tast::Expr,
+    e2: &tast::Expr,
+) -> Result {
+    unimplemented!()
+}
+
 fn emit_binop(
+    e: &mut Emitter,
     env: &Env,
     pos: &Pos,
     (op, e1, e2): &(ast_defs::Bop, tast::Expr, tast::Expr),
 ) -> Result {
-    unimplemented!("TODO(hrust)")
+    use ast_defs::Bop as B;
+    match op {
+        B::Ampamp | B::Barbar => unimplemented!("TODO(hrust)"),
+        B::Eq(None) => emit_lval_op(e, env, pos, LValOp::Set, e1, Some(e2), false),
+        B::Eq(Some(eop)) if eop.is_question_question() => {
+            emit_null_coalesce_assignment(e, env, pos, e1, e2)
+        }
+        B::Eq(Some(eop)) => match binop_to_eqop(e.options(), eop) {
+            None => Err(Unrecoverable("illegal eq op".into())),
+            Some(op) => emit_lval_op(e, env, pos, LValOp::SetOp(op), e1, Some(e2), false),
+        },
+        B::QuestionQuestion => {
+            let end_label = e.label_gen_mut().next_regular();
+            Ok(InstrSeq::gather(vec![
+                emit_quiet_expr(e, env, pos, e1, false)?.0,
+                InstrSeq::make_dup(),
+                InstrSeq::make_istypec(IstypeOp::OpNull),
+                InstrSeq::make_not(),
+                InstrSeq::make_jmpnz(end_label.clone()),
+                InstrSeq::make_popc(),
+                emit_expr(e, env, e2)?,
+                InstrSeq::make_label(end_label),
+            ]))
+        }
+        _ => {
+            let default = |e: &mut Emitter| {
+                Ok(InstrSeq::gather(vec![
+                    emit_two_exprs(e, env, pos, e1, e2)?,
+                    from_binop(e.options(), op)?,
+                ]))
+            };
+            if optimize_null_checks(e) {
+                match op {
+                    B::Eqeqeq if e2.1.is_null() => emit_is_null(e, env, e1),
+                    B::Eqeqeq if e1.1.is_null() => emit_is_null(e, env, e2),
+                    B::Diff2 if e2.1.is_null() => Ok(InstrSeq::gather(vec![
+                        emit_is_null(e, env, e1)?,
+                        InstrSeq::make_not(),
+                    ])),
+                    B::Diff2 if e1.1.is_null() => Ok(InstrSeq::gather(vec![
+                        emit_is_null(e, env, e2)?,
+                        InstrSeq::make_not(),
+                    ])),
+                    _ => default(e),
+                }
+            } else {
+                default(e)
+            }
+        }
+    }
 }
 
 fn emit_pipe(env: &Env, (_, e1, e2): &(aast_defs::Lid, tast::Expr, tast::Expr)) -> Result {
@@ -1054,7 +1235,105 @@ pub fn emit_lval_op(
     expr2: Option<&tast::Expr>,
     null_coalesce_assignment: bool,
 ) -> Result {
-    unimplemented!()
+    match (op, &expr1.1, expr2) {
+        (LValOp::Set, tast::Expr_::List(l), Some(expr2)) => {
+            let instr_rhs = emit_expr(e, env, expr2)?;
+            let has_elements = l.iter().any(|e| !e.1.is_omitted());
+            if !has_elements {
+                Ok(instr_rhs)
+            } else {
+                scope::with_unnamed_local(e, |e, local| {
+                    let loc = if can_use_as_rhs_in_list_assignment(&expr2.1)? {
+                        Some(local.clone())
+                    } else {
+                        None
+                    };
+                    let (instr_lhs, instr_assign) =
+                        emit_lval_op_list(e, env, pos, loc, &[], expr1, false)?;
+                    Ok((
+                        InstrSeq::gather(vec![
+                            instr_lhs,
+                            instr_rhs,
+                            InstrSeq::make_popl(local.clone()),
+                        ]),
+                        instr_assign,
+                        InstrSeq::make_pushl(local),
+                    ))
+                })
+            }
+        }
+        _ => e.local_scope(|e| {
+            let (rhs_instrs, rhs_stack_size) = match expr2 {
+                None => (InstrSeq::Empty, 0),
+                Some(tast::Expr(_, tast::Expr_::Yield(af))) => {
+                    let temp = e.local_gen_mut().get_unnamed();
+                    (
+                        InstrSeq::gather(vec![
+                            emit_yield(e, env, pos, af)?,
+                            InstrSeq::make_setl(temp.clone()),
+                            InstrSeq::make_popc(),
+                            InstrSeq::make_pushl(temp),
+                        ]),
+                        1,
+                    )
+                }
+                Some(expr) => (emit_expr(e, env, expr)?, 1),
+            };
+            emit_lval_op_nonlist(
+                e,
+                env,
+                pos,
+                op,
+                expr1,
+                rhs_instrs,
+                rhs_stack_size,
+                null_coalesce_assignment,
+            )
+        }),
+    }
+}
+
+fn can_use_as_rhs_in_list_assignment(expr: &tast::Expr_) -> Result<bool> {
+    use aast::Expr_ as E_;
+    Ok(match expr {
+        E_::Call(c)
+            if ((c.1).1)
+                .as_id()
+                .map_or(false, |id| id.1 == special_functions::ECHO) =>
+        {
+            false
+        }
+        E_::Lvar(_)
+        | E_::ArrayGet(_)
+        | E_::ObjGet(_)
+        | E_::ClassGet(_)
+        | E_::PUAtom(_)
+        | E_::Call(_)
+        | E_::FunctionPointer(_)
+        | E_::New(_)
+        | E_::Record(_)
+        | E_::ExprList(_)
+        | E_::Yield(_)
+        | E_::Cast(_)
+        | E_::Eif(_)
+        | E_::Array(_)
+        | E_::Varray(_)
+        | E_::Darray(_)
+        | E_::Collection(_)
+        | E_::Clone(_)
+        | E_::Unop(_)
+        | E_::As(_)
+        | E_::Await(_) => true,
+        E_::Pipe(p) => can_use_as_rhs_in_list_assignment(&(p.2).1)?,
+        E_::Binop(b) if b.0.is_eq() => can_use_as_rhs_in_list_assignment(&(b.2).1)?,
+        E_::Binop(b) => b.0.is_plus() || b.0.is_question_question() || b.0.is_any_eq(),
+        E_::PUIdentifier(_) => {
+            return Err(Unrecoverable(
+                "TODO(T35357243): Pocket Universes syntax must be erased by now".into(),
+            ))
+        }
+        _ => false,
+    })
 }
 
 pub fn emit_lval_op_list(
@@ -1079,7 +1358,111 @@ pub fn emit_lval_op_nonlist(
     rhs_stack_size: usize,
     null_coalesce_assignment: bool,
 ) -> Result {
-    unimplemented!()
+    emit_lval_op_nonlist_steps(
+        e,
+        env,
+        outer_pos,
+        op,
+        expr,
+        rhs_instrs,
+        rhs_stack_size,
+        null_coalesce_assignment,
+    )
+    .map(|(lhs, rhs, setop)| InstrSeq::gather(vec![lhs, rhs, setop]))
+}
+
+pub fn emit_final_global_op(e: &mut Emitter, pos: &Pos, op: LValOp) -> Result {
+    use LValOp as L;
+    match op {
+        L::Set => emit_pos_then(e, pos, InstrSeq::make_setg()),
+        L::SetOp(op) => Ok(InstrSeq::make_setopg(op)),
+        L::IncDec(op) => Ok(InstrSeq::make_incdecg(op)),
+        L::Unset => emit_pos_then(e, pos, InstrSeq::make_unsetg()),
+    }
+}
+
+pub fn emit_final_local_op(e: &mut Emitter, pos: &Pos, op: LValOp, lid: local::Type) -> Result {
+    use LValOp as L;
+    emit_pos_then(
+        e,
+        pos,
+        match op {
+            L::Set => InstrSeq::make_setl(lid),
+            L::SetOp(op) => InstrSeq::make_setopl(lid, op),
+            L::IncDec(op) => InstrSeq::make_incdecl(lid, op),
+            L::Unset => InstrSeq::make_unsetl(lid),
+        },
+    )
+}
+
+pub fn emit_lval_op_nonlist_steps(
+    e: &mut Emitter,
+    env: &Env,
+    outer_pos: &Pos,
+    op: LValOp,
+    expr: &tast::Expr,
+    rhs_instrs: InstrSeq,
+    rhs_stack_size: usize,
+    null_coalesce_assignment: bool,
+) -> Result<(InstrSeq, InstrSeq, InstrSeq)> {
+    let f = |env: &mut Env| {
+        use tast::Expr_ as E_;
+        let pos = &expr.0;
+        Ok(match &expr.1 {
+            E_::Lvar(v) if superglobals::is_any_global(local_id::get_name(&v.1)) => (
+                emit_pos_then(
+                    e,
+                    &v.0,
+                    InstrSeq::make_string(string_utils::lstrip(local_id::get_name(&v.1), "$")),
+                )?,
+                rhs_instrs,
+                emit_final_global_op(e, outer_pos, op)?,
+            ),
+            E_::Lvar(v) if is_local_this(env, &v.1) && op.is_incdec() => (
+                emit_local(env, BareThisOp::Notice, v)?,
+                rhs_instrs,
+                InstrSeq::Empty,
+            ),
+            E_::Lvar(v) if !is_local_this(env, &v.1) || op == LValOp::Unset => {
+                (InstrSeq::Empty, rhs_instrs, {
+                    let lid = get_local(e, env, &v.0, &(v.1).1)?;
+                    emit_final_local_op(e, outer_pos, op, lid)?
+                })
+            }
+            E_::ArrayGet(_) => unimplemented!(),
+            E_::ObjGet(_) => unimplemented!(),
+            E_::ClassGet(_) => unimplemented!(),
+            E_::Unop(uop) => (
+                InstrSeq::Empty,
+                rhs_instrs,
+                InstrSeq::gather(vec![
+                    emit_lval_op_nonlist(
+                        e,
+                        env,
+                        pos,
+                        op,
+                        &uop.1,
+                        InstrSeq::Empty,
+                        rhs_stack_size,
+                        false,
+                    )?,
+                    from_unop(e.options(), &uop.0)?,
+                ]),
+            ),
+            _ => {
+                return Err(emit_fatal::raise_fatal_parse(
+                    pos,
+                    "Can't use return value in write context",
+                ))
+            }
+        })
+    };
+    // TODO(shiqicao): remove clone!
+    let mut env = env.clone();
+    match op {
+        LValOp::Set | LValOp::SetOp(_) | LValOp::IncDec(_) => env.with_allows_array_append(f),
+        _ => f(&mut env),
+    }
 }
 
 pub fn emit_reified_arg(
@@ -1090,4 +1473,127 @@ pub fn emit_reified_arg(
     hint: &tast::Hint,
 ) -> Result<(InstrSeq, bool)> {
     unimplemented!("TODO(hrust)")
+}
+
+pub fn get_local(e: &mut Emitter, env: &Env, pos: &Pos, s: &str) -> Result<local::Type> {
+    if s == special_idents::DOLLAR_DOLLAR {
+        unimplemented!()
+    } else if special_idents::is_tmp_var(s) {
+        Ok(e.local_gen().get_unnamed_for_tempname(s).clone())
+    } else {
+        Ok(local::Type::Named(s.into()))
+    }
+}
+
+pub fn emit_is_null(e: &mut Emitter, env: &Env, expr: &tast::Expr) -> Result {
+    if let Some(tast::Lid(pos, id)) = expr.1.as_lvar() {
+        if !is_local_this(env, id) {
+            return Ok(InstrSeq::make_istypel(
+                get_local(e, env, pos, local_id::get_name(id))?,
+                IstypeOp::OpNull,
+            ));
+        }
+    }
+
+    Ok(InstrSeq::gather(vec![
+        emit_expr(e, env, expr)?,
+        InstrSeq::make_istypec(IstypeOp::OpNull),
+    ]))
+}
+
+pub fn emit_jmpnz(
+    e: &mut Emitter,
+    env: &Env,
+    pos: &Pos,
+    expr_: &tast::Expr_,
+    label: &Label,
+) -> Result<EmitJmpResult> {
+    unimplemented!()
+}
+
+pub fn emit_jmpz(
+    e: &mut Emitter,
+    env: &Env,
+    expr: &tast::Expr,
+    label: &Label,
+) -> Result<EmitJmpResult> {
+    let tast::Expr(pos, expr_) = expr;
+    let opt = optimize_null_checks(e);
+    Ok(
+        match ast_constant_folder::expr_to_typed_value(e, &env.namespace, expr) {
+            Ok(v) => {
+                let b: bool = v.into();
+                if b {
+                    EmitJmpResult {
+                        instrs: emit_pos_then(e, pos, InstrSeq::Empty)?,
+                        is_fallthrough: true,
+                        is_label_used: false,
+                    }
+                } else {
+                    EmitJmpResult {
+                        instrs: emit_pos_then(e, pos, InstrSeq::make_jmp(label.clone()))?,
+                        is_fallthrough: false,
+                        is_label_used: true,
+                    }
+                }
+            }
+            Err(_) => {
+                use {ast_defs::Uop as U, tast::Expr_ as E};
+                match expr_ {
+                    E::Unop(uo) if uo.0 == U::Unot => {
+                        emit_jmpnz(e, env, &(uo.1).0, &(uo.1).1, label)?
+                    }
+                    E::Binop(bo) if bo.0.is_barbar() => unimplemented!(),
+                    E::Binop(bo) if bo.0.is_ampamp() => unimplemented!(),
+                    E::Binop(bo)
+                        if bo.0.is_eqeqeq()
+                            && ((bo.1).1.is_null() || (bo.2).1.is_null())
+                            && opt =>
+                    {
+                        let is_null =
+                            emit_is_null(e, env, if (bo.1).1.is_null() { &bo.2 } else { &bo.1 })?;
+                        EmitJmpResult {
+                            instrs: emit_pos_then(
+                                e,
+                                pos,
+                                InstrSeq::gather(vec![is_null, InstrSeq::make_jmpz(label.clone())]),
+                            )?,
+                            is_fallthrough: true,
+                            is_label_used: true,
+                        }
+                    }
+                    E::Binop(bo)
+                        if bo.0.is_diff2() && ((bo.1).1.is_null() || (bo.2).1.is_null()) && opt =>
+                    {
+                        let is_null =
+                            emit_is_null(e, env, if (bo.1).1.is_null() { &bo.2 } else { &bo.1 })?;
+                        EmitJmpResult {
+                            instrs: emit_pos_then(
+                                e,
+                                pos,
+                                InstrSeq::gather(vec![
+                                    is_null,
+                                    InstrSeq::make_jmpnz(label.clone()),
+                                ]),
+                            )?,
+                            is_fallthrough: true,
+                            is_label_used: true,
+                        }
+                    }
+                    _ => {
+                        let instr = emit_expr(e, env, expr)?;
+                        EmitJmpResult {
+                            instrs: emit_pos_then(
+                                e,
+                                pos,
+                                InstrSeq::gather(vec![instr, InstrSeq::make_jmpz(label.clone())]),
+                            )?,
+                            is_fallthrough: true,
+                            is_label_used: true,
+                        }
+                    }
+                }
+            }
+        },
+    )
 }

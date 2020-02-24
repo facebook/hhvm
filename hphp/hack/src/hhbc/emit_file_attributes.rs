@@ -6,6 +6,7 @@ use emit_attribute_rust::from_asts;
 use env::emitter::Emitter;
 use hhas_attribute_rust::HhasAttribute;
 use instruction_sequence_rust::Result;
+use naming_special_names_rust as sn;
 use oxidized::ast as tast;
 
 extern crate itertools;
@@ -19,6 +20,21 @@ pub fn emit_file_attributes_from_program(
     e: &mut Emitter,
     prog: &tast::Program,
 ) -> Result<Vec<HhasAttribute>> {
+    let contains_toplevel_code = prog.iter().any(|d| {
+        if let Some(tast::Stmt(_, s_)) = d.as_stmt() {
+            !s_.is_def_inline() && !s_.is_markup()
+        } else {
+            false
+        }
+    });
+    let r = if contains_toplevel_code {
+        vec![HhasAttribute {
+            name: sn::user_attributes::HAS_TOP_LEVEL_CODE.into(),
+            arguments: vec![],
+        }]
+    } else {
+        vec![]
+    };
     prog.iter()
         .filter_map(|node| {
             if let tast::Def::FileAttributes(fa) = node {
@@ -27,7 +43,7 @@ pub fn emit_file_attributes_from_program(
                 None
             }
         })
-        .fold_results(vec![], |mut acc, attrs| {
+        .fold_results(r, |mut acc, attrs| {
             acc.extend(attrs);
             acc
         })

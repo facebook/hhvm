@@ -4,7 +4,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use env::emitter::Emitter;
+use hhbc_ast_rust::{Instruct, InstructLitConst};
 use instruction_sequence_rust::InstrSeq;
+use runtime::TypedValue as TV;
 
 struct State {
     // TODO(hrust)
@@ -17,8 +19,19 @@ impl State {
 }
 env::lazy_emit_state!(adata_state, State, State::init);
 
-pub fn rewrite_typed_value(_instrseq: &mut InstrSeq) {
-    //TODO(hrust) implement
+pub fn rewrite_typed_value(instrs: &mut InstrSeq) {
+    use {Instruct as I, InstructLitConst::*};
+    instrs.map_mut(&mut |i: &mut I| match &i {
+        I::ILitConst(TypedValue(tv)) => match tv {
+            TV::Null => *i = I::ILitConst(Null),
+            TV::Bool(false) => *i = I::ILitConst(False),
+            TV::Bool(true) => *i = I::ILitConst(True),
+            TV::Int(n) => *i = I::ILitConst(Int(*n)),
+            TV::String(s) => *i = I::ILitConst(String(s.into())),
+            _ => unimplemented!(),
+        },
+        _ => {}
+    })
 }
 
 #[cfg(test)]

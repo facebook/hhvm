@@ -283,7 +283,7 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
         a::Stmt_::GotoLabel(l) => Ok(InstrSeq::make_label(Label::Named(l.1.clone()))),
         a::Stmt_::Goto(l) => tfr::emit_goto(false, l.1.clone(), env, e.local_gen_mut()),
         a::Stmt_::Block(b) => emit_stmts(e, env, &b),
-        a::Stmt_::If(_) => unimplemented!("TODO(hrust)"),
+        a::Stmt_::If(f) => emit_if(e, env, pos, &f.0, &f.1, &f.2),
         a::Stmt_::While(_) => unimplemented!("TODO(hrust)"),
         a::Stmt_::Using(_) => unimplemented!("TODO(hrust)"),
         a::Stmt_::Break => Ok(emit_break(e, env, pos)),
@@ -301,10 +301,15 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
     }
 }
 
-fn emit_stmts(e: &mut Emitter, env: &mut Env, stl: &[tast::Stmt]) -> Result {
+fn emit_stmts(e: &mut Emitter, env: &Env, stl: &[tast::Stmt]) -> Result {
+    // TODO(shiqicao):
+    //     Ocaml's env is immutable, we need to match the same behavior
+    //     during porting. Simulating immutability will change every `&Env`
+    //     to `&mut Env`. The following is a hack to build.
+    let mut new_env: Env = env.clone();
     Ok(InstrSeq::gather(
         stl.iter()
-            .map(|s| emit_stmt(e, env, s))
+            .map(|s| emit_stmt(e, &mut new_env, s))
             .collect::<Result<Vec<_>>>()?,
     ))
 }
@@ -460,4 +465,36 @@ fn emit_await_assignment(
     r: &tast::Expr,
 ) -> Result {
     unimplemented!()
+}
+
+fn emit_if(
+    e: &mut Emitter,
+    env: &Env,
+    pos: &Pos,
+    condition: &tast::Expr,
+    consequence: &[tast::Stmt],
+    alternative: &[tast::Stmt],
+) -> Result {
+    if alternative.is_empty() || (alternative.len() == 1 && alternative[0].1.is_noop()) {
+        let done_label = e.label_gen_mut().next_regular();
+        Ok(InstrSeq::gather(vec![
+            emit_expr::emit_jmpz(e, env, condition, &done_label)?.instrs,
+            emit_stmts(e, env, consequence)?,
+            InstrSeq::make_label(done_label),
+        ]))
+    } else {
+        let alternative_label = e.label_gen_mut().next_regular();
+        let done_label = e.label_gen_mut().next_regular();
+        let consequence_instr = emit_stmts(e, env, consequence)?;
+        let alternative_instr = emit_stmts(e, env, alternative)?;
+        Ok(InstrSeq::gather(vec![
+            emit_expr::emit_jmpz(e, env, condition, &alternative_label)?.instrs,
+            consequence_instr,
+            emit_pos(e, pos),
+            InstrSeq::make_jmp(done_label.clone()),
+            InstrSeq::make_label(alternative_label),
+            alternative_instr,
+            InstrSeq::make_label(done_label),
+        ]))
+    }
 }

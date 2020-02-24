@@ -424,7 +424,7 @@ pub fn make_body<'a>(
         .contains(CompilerFlags::RELABEL)
     {
         label_rewriter::relabel_function(&mut params, &mut body_instrs);
-    };
+    }
     let num_iters = if is_memoize_wrapper {
         0
     } else {

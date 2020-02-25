@@ -663,6 +663,9 @@ let print_coverage type_acc =
   ClientCoverageMetric.go ~json:false (Some (Coverage_level_defs.Leaf type_acc))
 
 let print_global_inference_envs ctx ~verbosity gienvs =
+  let gienvs =
+    Typing_global_inference.StateSubConstraintGraphs.global_tvenvs gienvs
+  in
   let tco_global_inference =
     TypecheckerOptions.global_inference ctx.Provider_context.tcopt
   in
@@ -685,17 +688,18 @@ let print_global_inference_envs ctx ~verbosity gienvs =
     |> List.iter ~f:(fun (pos, gienv) ->
            Typing_log.log_global_inference_env pos env gienv)
 
-let merge_global_inference_envs_opt ctx gienvs =
+let merge_global_inference_envs_opt ctx gienvs :
+    Typing_global_inference.StateConstraintGraph.t option =
   if TypecheckerOptions.global_inference ctx.Provider_context.tcopt then
     let open Typing_global_inference in
-    let (env, state_errors) =
+    let (type_map, env, state_errors) =
       StateConstraintGraph.merge_subgraphs
         ~tcopt:ctx.Provider_context.tcopt
-        gienvs
+        [gienvs]
     in
     (* we are not going to print type variables without any bounds *)
     let env = { env with inference_env = Inf.compress env.inference_env } in
-    Some (env, state_errors)
+    Some (type_map, env, state_errors)
   else
     None
 
@@ -718,11 +722,15 @@ let print_global_inference_env
       print_error_list error_format errl max_errors);
   Out_channel.flush stderr
 
-let print_merged_global_inference_env ~verbosity gienv error_format max_errors =
+let print_merged_global_inference_env
+    ~verbosity
+    (gienv : Typing_global_inference.StateConstraintGraph.t option)
+    error_format
+    max_errors =
   if verbosity >= 1 then
     match gienv with
     | None -> ()
-    | Some (gienv, state_errors) ->
+    | Some (_type_map, gienv, state_errors) ->
       print_global_inference_env
         gienv
         ~step_name:"Merge"
@@ -730,11 +738,15 @@ let print_merged_global_inference_env ~verbosity gienv error_format max_errors =
         error_format
         max_errors
 
-let print_solved_global_inference_env ~verbosity gienv error_format max_errors =
+let print_solved_global_inference_env
+    ~verbosity
+    (gienv : Typing_global_inference.StateSolvedGraph.t option)
+    error_format
+    max_errors =
   if verbosity >= 1 then
     match gienv with
     | None -> ()
-    | Some (gienv, state_errors, _) ->
+    | Some (gienv, state_errors, _, _) ->
       print_global_inference_env
         gienv
         ~step_name:"Solve"
@@ -742,7 +754,9 @@ let print_solved_global_inference_env ~verbosity gienv error_format max_errors =
         error_format
         max_errors
 
-let solve_global_inference_env gienv =
+let solve_global_inference_env
+    (gienv : Typing_global_inference.StateConstraintGraph.t) :
+    Typing_global_inference.StateSolvedGraph.t =
   Typing_global_inference.StateSolvedGraph.from_constraint_graph gienv
 
 let global_inference_merge_and_solve
@@ -755,19 +769,23 @@ let global_inference_merge_and_solve
   gienv
 
 let check_file ctx ~verbosity errors files_info error_format max_errors =
-  let (errors, gienvs) =
+  let (errors, tasts, genvs) =
     Relative_path.Map.fold
       files_info
       ~f:
         begin
-          fun fn fileinfo (errors, global_tvenvs) ->
-          let (_, lazy_global_tvenvs, new_errors) =
+          fun fn fileinfo (errors, tasts, genvs) ->
+          let (new_tasts, new_genvs, new_errors) =
             Typing_check_utils.type_file_with_global_tvenvs ctx fn fileinfo
           in
           ( errors @ Errors.get_error_list new_errors,
-            global_tvenvs @ Lazy.force lazy_global_tvenvs )
+            new_tasts @ tasts,
+            Lazy.force new_genvs @ genvs )
         end
-      ~init:(errors, [])
+      ~init:(errors, [], [])
+  in
+  let gienvs =
+    Typing_global_inference.StateSubConstraintGraphs.build tasts genvs
   in
   let _gienv =
     global_inference_merge_and_solve
@@ -1075,10 +1093,15 @@ let compute_tasts_expand_types ctx ~verbosity files_info interesting_files =
   let (errors, (tasts, gienvs)) =
     compute_tasts ctx files_info interesting_files
   in
+  let subconstraints =
+    Typing_global_inference.StateSubConstraintGraphs.build
+      (List.concat (Relative_path.Map.values tasts))
+      gienvs
+  in
   let (tasts, gi_solved) =
-    match global_inference_merge_and_solve ctx ~verbosity gienvs with
+    match global_inference_merge_and_solve ctx ~verbosity subconstraints with
     | None -> (tasts, None)
-    | Some ((gienv, _, _) as gi_solved) ->
+    | Some ((gienv, _, _, _) as gi_solved) ->
       let tasts =
         Relative_path.Map.map
           tasts

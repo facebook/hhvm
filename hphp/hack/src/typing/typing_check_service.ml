@@ -216,27 +216,29 @@ let process_file
   let ignore_check_typedef opts fn name = ignore (check_typedef opts fn name) in
   let ignore_check_const opts fn name = ignore (check_const opts fn name) in
   try
-    let (errors', global_tvenvs) =
+    let (errors', (tasts, global_tvenvs)) =
       Errors.do_with_context fn Errors.Typing (fun () ->
-          let fun_global_tvenvs =
+          let (fun_tasts, fun_global_tvenvs) =
             List.map funs ~f:snd
             |> List.filter_map ~f:(type_fun ctx fn)
-            |> List.map ~f:snd
+            |> List.unzip
           in
-          let class_global_tvenvs =
+          let (class_tasts, class_global_tvenvs) =
             List.map classes ~f:snd
             |> List.filter_map ~f:(type_class ctx fn)
-            |> List.map ~f:snd
-            |> List.concat
+            |> List.unzip
           in
+          let class_global_tvenvs = List.concat class_global_tvenvs in
           List.map record_defs ~f:snd
           |> List.iter ~f:(ignore_type_record_def ctx fn);
           List.map typedefs ~f:snd |> List.iter ~f:(ignore_check_typedef ctx fn);
           List.map gconsts ~f:snd |> List.iter ~f:(ignore_check_const ctx fn);
-          fun_global_tvenvs @ class_global_tvenvs)
+          (fun_tasts @ class_tasts, fun_global_tvenvs @ class_global_tvenvs))
     in
     if GlobalOptions.tco_global_inference opts then
-      Typing_global_inference.StateSubConstraintGraphs.save global_tvenvs;
+      Typing_global_inference.StateSubConstraintGraphs.build_and_save
+        tasts
+        global_tvenvs;
     let deferred_files = Deferred_decl.get_deferments ~f:(fun d -> Declare d) in
     let counters = Counters.get_counters () in
     Counters.restore_state prev_counters_state;

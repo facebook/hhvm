@@ -8,6 +8,8 @@
 
 open Typing_env_types
 
+type global_type_map = (Typing_defs.locl_ty * Ident.t) Pos.AbsolutePosMap.t
+
 module StateErrors : sig
   type t
 
@@ -25,28 +27,37 @@ module StateErrors : sig
 end
 
 module StateSubConstraintGraphs : sig
-  type t = Typing_inference_env.t_global_with_pos list
+  type t = global_type_map * Typing_inference_env.t_global_with_pos list
+
+  val global_tvenvs : t -> Typing_inference_env.t_global_with_pos list
+
+  val global_type_map : t -> global_type_map
+
+  val build : Tast.def list -> Typing_inference_env.t_global_with_pos list -> t
 
   val load : string -> t
 
   val save : t -> unit
 
   val save_to : string -> t -> unit
+
+  val build_and_save :
+    Tast.def list -> Typing_inference_env.t_global_with_pos list -> unit
 end
 
 module StateConstraintGraph : sig
-  type t = env * StateErrors.t
+  type t = global_type_map * env * StateErrors.t
 
   val load : string -> t
 
   val save : string -> t -> unit
 
   val merge_subgraphs :
-    ?tcopt:TypecheckerOptions.t -> StateSubConstraintGraphs.t -> t
+    ?tcopt:TypecheckerOptions.t -> StateSubConstraintGraphs.t list -> t
 end
 
 module StateSolvedGraph : sig
-  type t = env * StateErrors.t * (Pos.t * int) list
+  type t = env * StateErrors.t * global_type_map * (Pos.t * int) list
 
   val load : string -> t
 

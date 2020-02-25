@@ -13,6 +13,7 @@ module Syntax = Full_fidelity_editable_positioned_syntax
 module Rewriter = Full_fidelity_rewriter.WithSyntax (Syntax)
 module PositionedTree =
   Full_fidelity_syntax_tree.WithSyntax (Full_fidelity_positioned_syntax)
+module Reason = Typing_reason
 open Syntax
 
 let scuba_table = Scuba.Table.of_name "hh_global_inference"
@@ -126,10 +127,9 @@ module Mode_merge = struct
       List.map (Array.to_list subgraphs) ~f:(Filename.concat input)
     in
     let subgraphs = List.map subgraphs ~f:StateSubConstraintGraphs.load in
-    let subgraphs = List.concat subgraphs in
-    let (env, errors) = StateConstraintGraph.merge_subgraphs subgraphs in
+    let merged_graph = StateConstraintGraph.merge_subgraphs subgraphs in
     Hh_logger.log "GI: Saving to %s" output;
-    StateConstraintGraph.save output (env, errors);
+    StateConstraintGraph.save output merged_graph;
     Ok ()
 end
 
@@ -151,7 +151,7 @@ module Mode_export_json = struct
       ~error_message:"was expecting two files: [env] [json env]"
       files
     >>= fun (input, output) ->
-    let (env, _errors) = StateConstraintGraph.load input in
+    let (_type_map, env, _errors) = StateConstraintGraph.load input in
     (* Now gonna convert it to json in order to do further
           analysis in python *)
     let out = Out_channel.create output in
@@ -210,6 +210,26 @@ type loggable = {
   syntax_type: syntax_type;
 }
 
+let remove_namespace_prefix type_str =
+  let remove_all_occurrences needle haystack =
+    let substring_index = String_utils.substring_index needle in
+    let rec f haystack =
+      let start_index = substring_index haystack in
+      if start_index > -1 then
+        let prefix = String_utils.string_before haystack start_index in
+        let suffix =
+          String_utils.string_after haystack (start_index + String.length needle)
+        in
+        f (prefix ^ suffix)
+      else
+        haystack
+    in
+    f haystack
+  in
+  type_str
+  |> remove_all_occurrences "HH\\Lib\\"
+  |> remove_all_occurrences "HH\\"
+
 let classify_ty ?(is_return = false) ~syntax_type ~pos ~file errors env ty =
   let has_error = ref false in
   let var_hook var =
@@ -229,7 +249,7 @@ let classify_ty ?(is_return = false) ~syntax_type ~pos ~file errors env ty =
     ({ log with status = SError }, None)
   else
     match print_ty ~is_return ty with
-    | Some type_str -> (log, Some type_str)
+    | Some type_str -> (log, Some (remove_namespace_prefix type_str))
     | None -> ({ log with status = SNonacceptable }, None)
 
 let log_ty log =
@@ -463,38 +483,63 @@ let get_patches
 module Mode_rewrite = struct
   (** Returns a map of types indexed by filenames and positions *)
   let build_positions_map :
-      Tast_env.env * (Pos.t * Ident.t) list ->
-      Tast_env.env * (Tast_env.env * phase_ty) list Pos.AbsolutePosMap.t SMap.t
-      =
-   fun (env, positions) ->
-    let positions =
-      List.map ~f:(fun (p, v) -> (Pos.to_absolute p, v)) positions
+      Tast_env.env ->
+      global_type_map ->
+      (Pos.t * Ident.t) list ->
+      (Tast_env.env * phase_ty) list Pos.AbsolutePosMap.t SMap.t =
+   fun env pos_to_type_map positions ->
+    (* note: this function only updates the type for a position, if no
+     * type was registered previously *)
+    let register_ty pos (ty : phase_ty) final_map =
+      let filename = Pos.filename pos in
+      SMap.update
+        filename
+        (function
+          | None -> Some (Pos.AbsolutePosMap.singleton pos [(env, ty)])
+          | Some m ->
+            Some
+              (Pos.AbsolutePosMap.update
+                 pos
+                 (function
+                   | None -> Some [(env, ty)]
+                   | Some m -> Some m)
+                 m))
+        final_map
     in
-    List.fold
-      ~init:(env, SMap.empty)
-      ~f:(fun (env, map) (pos, var) ->
-        let previous_pos_map =
-          SMap.find_opt (Pos.filename pos) map
-          |> Option.value ~default:Pos.AbsolutePosMap.empty
-        in
-        let ty = Typing_defs.(mk (Reason.none, Tvar var)) in
-        let element =
-          Pos.AbsolutePosMap.singleton pos [(env, Typing_defs.LoclTy ty)]
-        in
-        let data =
-          Pos.AbsolutePosMap.union
-            ~combine:(fun _ a b -> Some (a @ b))
-            previous_pos_map
-            element
-        in
-        (env, SMap.add (Pos.filename pos) data map))
-      positions
+
+    (* first find types in pos -> ty map *)
+    let final_map = SMap.empty in
+    let final_map =
+      Pos.AbsolutePosMap.fold
+        (fun pos (ty, _tvar) -> register_ty pos (LoclTy ty))
+        pos_to_type_map
+        final_map
+    in
+
+    (* see if we can find some types in the legacy map as well *)
+    (* note: this will not overwrite types registered above *)
+    let pos_to_tvar_map =
+      List.fold
+        positions
+        ~init:Pos.AbsolutePosMap.empty
+        ~f:(fun m (pos, tvar) ->
+          Pos.AbsolutePosMap.add (Pos.to_absolute pos) tvar m)
+    in
+    Pos.AbsolutePosMap.fold
+      (fun pos tvar ->
+        let ty = Typing_defs.(mk (Reason.none, Tvar tvar)) in
+        register_ty pos (LoclTy ty))
+      pos_to_tvar_map
+      final_map
 
   let get_patches (graph : StateSolvedGraph.t) : ServerRefactorTypes.patch list
       =
-    let (env, errors, positions) = graph in
-    let (_, positions_map) =
-      build_positions_map (Tast_env.typing_env_as_tast_env env, positions)
+    let (env, errors, type_map, positions) = graph in
+    let positions_map =
+      build_positions_map
+        (Tast_env.typing_env_as_tast_env env)
+        type_map
+        positions
     in
     let positions_map =
       SMap.filter

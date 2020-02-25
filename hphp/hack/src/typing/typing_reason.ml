@@ -849,3 +849,17 @@ let explain_generic_constraint p_inst reason name error =
     ~definition_pos:pos
     ~param_name:name
     error
+
+(** This is baaaaad. At least the integration tests will tell you when you
+ * forget to add a reason.
+ *
+ * In the future we might do away with this anyways, because we'll deterime
+ * whether a tyvar is global or not by inspecting a bit, or querying its
+ * `global_reason` in the env (which is None for local type vars).
+ *)
+let is_global = function
+  | Rglobal_class_prop _
+  | Rglobal_fun_param _
+  | Rglobal_fun_ret _ ->
+    true
+  | _ -> false

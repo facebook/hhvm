@@ -1320,10 +1320,10 @@ let split_undirected_tyvar_graph (graph : ISet.t IMap.t) : ISet.t list =
 
 let connected_components_g genvs =
   let (nodes, graph) = construct_undirected_tyvar_graph genvs in
-  let components = split_undirected_tyvar_graph graph in
+  let component_tyvars = split_undirected_tyvar_graph graph in
   (* collect tyvar information *)
   let components : (Pos.t * global_tyvar_info) list IMap.t list =
-    List.map components ~f:(fun vars ->
+    List.map component_tyvars ~f:(fun vars ->
         ISet.fold
           (fun var ->
             IMap.update var @@ function
@@ -1346,7 +1346,8 @@ let connected_components_g genvs =
       component
       []
   in
-  List.map components ~f:component_to_subgraph
+  let components = List.map components ~f:component_to_subgraph in
+  List.zip_exn component_tyvars components
 
 let remove_var_from_bounds
     env v ~search_in_upper_bounds_of ~search_in_lower_bounds_of =

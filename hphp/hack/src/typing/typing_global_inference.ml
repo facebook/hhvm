@@ -81,9 +81,91 @@ end
 
 let artifacts_path : string ref = ref ""
 
+type global_type_map = (Typing_defs.locl_ty * Ident.t) Pos.AbsolutePosMap.t
+
+let build_ty_map (tast : Tast.def) : global_type_map =
+  let get_global_var_pos (ty : locl_ty) =
+    (object
+       inherit [(Pos.t * Ident.t) option] Type_visitor.locl_type_visitor
+
+       method! on_tvar pos r tvar =
+         match pos with
+         | Some pos -> Some pos
+         | None ->
+           if Reason.is_global r then
+             (* here we extract the position from the reason attached to the
+              * type variable, instead of the type itself. This is currently
+              * how patch positions are encoded. This should change *)
+             Some (Reason.to_pos r, tvar)
+           else
+             None
+    end)
+      #on_type
+      None
+      ty
+  in
+  let builder =
+    object
+      inherit [_] Aast.iter
+
+      method! on_'hi ty_map hi =
+        match get_global_var_pos hi with
+        | None -> ()
+        | Some (pos, tvar) ->
+          let pos = Pos.to_absolute pos in
+          ty_map := Pos.AbsolutePosMap.add pos (hi, tvar) !ty_map
+    end
+  in
+  let state = ref Pos.AbsolutePosMap.empty in
+  let () = builder#on_def state tast in
+  !state
+
+module StateSubConstraintGraphs = struct
+  include StateFunctor (struct
+    type t = global_type_map * Inf.t_global_with_pos list
+  end)
+
+  let global_tvenvs (t : t) : Typing_inference_env.t_global_with_pos list =
+    snd t
+
+  let global_type_map (t : t) : global_type_map = fst t
+
+  let build (tasts : Tast.def list) (genvs : Inf.t_global_with_pos list) : t =
+    let type_map =
+      List.fold
+        tasts
+        ~f:(fun pos_map tast ->
+          Pos.AbsolutePosMap.union pos_map @@ build_ty_map tast)
+        ~init:Pos.AbsolutePosMap.empty
+    in
+    (type_map, genvs)
+
+  let save_to : string -> t -> unit = save
+
+  let save (type_map, subconstraints) : unit =
+    let subconstraints =
+      List.map subconstraints ~f:(fun (p, env) -> (p, Inf.compress_g env))
+    in
+    let is_not_empty_graph (_p, g) = not @@ List.is_empty (Inf.get_vars_g g) in
+    let subconstraints = List.filter ~f:is_not_empty_graph subconstraints in
+    if List.is_empty subconstraints && Pos.AbsolutePosMap.is_empty type_map then
+      ()
+    else
+      let path =
+        Filename.concat
+          !artifacts_path
+          ("subgraph_" ^ string_of_int (Ident.tmp ()))
+      in
+      save path (type_map, subconstraints)
+
+  let build_and_save
+      (tasts : Tast.def list) (genvs : Inf.t_global_with_pos list) : unit =
+    build tasts genvs |> save
+end
+
 module StateConstraintGraph = struct
   include StateFunctor (struct
-    type t = env * StateErrors.t
+    type t = global_type_map * env * StateErrors.t
   end)
 
   let merge_var (env, errors) (pos, subgraph) var =
@@ -145,7 +227,17 @@ module StateConstraintGraph = struct
     List.fold vars ~init:(env, errors) ~f:(fun (env, errors) v ->
         merge_var (env, errors) (pos, subgraph) v)
 
-  let merge_subgraphs ?(tcopt = GlobalOptions.default) subgraphs =
+  let merge_subgraphs
+      ?(tcopt = GlobalOptions.default)
+      (subgraphs : StateSubConstraintGraphs.t list) : t =
+    let (type_maps, subgraphs) = List.unzip subgraphs in
+    let type_map =
+      List.fold
+        type_maps
+        ~f:Pos.AbsolutePosMap.union
+        ~init:Pos.AbsolutePosMap.empty
+    in
+    let subgraphs = List.concat subgraphs in
     let env =
       Typing_env.empty
         (Provider_context.empty_for_worker ~tcopt)
@@ -155,7 +247,7 @@ module StateConstraintGraph = struct
     let errors = StateErrors.mk_empty () in
     if is_ordered_solving env then
       let env = Typing_ordered_solver.merge_graphs env subgraphs in
-      (env, errors)
+      (type_map, env, errors)
     else
       (* Collect each global tyvar and map it to a global environment in
       * which it lives. Give preference to the global environment which also
@@ -181,42 +273,22 @@ module StateConstraintGraph = struct
           initial_tyvar_sources
           env
       in
-      List.fold ~f:merge_subgraph ~init:(env, errors) subgraphs
-end
-
-module StateSubConstraintGraphs = struct
-  include StateFunctor (struct
-    type t = Inf.t_global_with_pos list
-  end)
-
-  let save_to = save
-
-  let save subconstraints =
-    let subconstraints =
-      List.map subconstraints ~f:(fun (p, env) -> (p, Inf.compress_g env))
-    in
-    let is_not_empty_graph (_p, g) = not @@ List.is_empty (Inf.get_vars_g g) in
-    let subconstraints = List.filter ~f:is_not_empty_graph subconstraints in
-    if List.is_empty subconstraints then
-      ()
-    else
-      let path =
-        Filename.concat
-          !artifacts_path
-          ("subgraph_" ^ string_of_int (Ident.tmp ()))
+      let (env, errors) =
+        List.fold ~f:merge_subgraph ~init:(env, errors) subgraphs
       in
-      save path subconstraints
+      (type_map, env, errors)
 end
 
 module StateSolvedGraph = struct
   include StateFunctor (struct
-    type t = env * StateErrors.t * (Pos.t * Ident.t) list
+    type t = env * StateErrors.t * global_type_map * (Pos.t * Ident.t) list
   end)
 
   let save path t = save path t
 
   (** Solve the constraint graph. *)
-  let from_constraint_graph (env, errors) =
+  let from_constraint_graph ((type_map, env, errors) : StateConstraintGraph.t) :
+      t =
     let vars = Env.get_all_tyvars env in
     let positions =
       List.map vars ~f:(fun var -> (Env.get_tyvar_pos env var, var))
@@ -239,7 +311,7 @@ module StateSolvedGraph = struct
       else
         Typing_solver.solve_all_unsolved_tyvars_gi env make_on_error
     in
-    (env, errors, positions)
+    (env, errors, type_map, positions)
 end
 
 let set_path () =

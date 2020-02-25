@@ -1,0 +1,2 @@
+File "use_conflict_const2.php", line 5, characters 11-12:
+Cannot declare FOO because the name was explicitly used earlier via a `use' statement on line 3 (Parsing[1002])

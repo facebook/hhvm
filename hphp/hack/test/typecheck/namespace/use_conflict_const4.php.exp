@@ -1,0 +1,2 @@
+File "use_conflict_const4.php", line 5, characters 11-15:
+Cannot use const NS\FOO as FOO because the name is already in use (Parsing[1002])

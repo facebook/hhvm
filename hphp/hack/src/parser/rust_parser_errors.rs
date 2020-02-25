@@ -4625,15 +4625,34 @@ where
                     constant_name,
                 );
 
-                if self.names.constants.mem(constant_name) {
+                match (
+                    self.names.constants.get(constant_name),
+                    self.first_parent_class_name(),
+                ) {
                     // Only error if this is inside a class
-                    if let Some(class_name) = self.first_parent_class_name() {
+                    (Some(_), Some(class_name)) => {
                         let full_name = class_name.to_string() + "::" + constant_name;
                         self.errors.push(Self::make_error_from_node(
                             node,
                             errors::redeclaration_error(&full_name),
                         ))
                     }
+                    (Some(prev_def), None) if prev_def.kind != NameDef => {
+                        let (line_num, _) = self
+                            .env
+                            .text
+                            .offset_to_position(prev_def.location.start_offset as isize);
+                        let line_num = line_num as usize;
+
+                        self.errors.push(Self::make_name_already_used_error(
+                            &cd.constant_declarator_name,
+                            &combine_names(&self.namespace_name, &constant_name),
+                            &constant_name,
+                            &def.location,
+                            &|x, y| errors::declared_name_is_already_in_use(line_num, x, y),
+                        ))
+                    }
+                    _ => (),
                 }
                 self.names.constants.add(constant_name, def)
             }

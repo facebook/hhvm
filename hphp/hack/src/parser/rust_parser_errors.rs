@@ -4872,6 +4872,12 @@ where
                     errors::no_const_interfaces_traits_enums,
                 ))
             }
+
+            if !x.enum_name.is_missing() {
+                let name = self.text(&x.enum_name);
+                let location = Self::make_location_of_node(&x.enum_name);
+                self.check_type_name(&x.enum_name, name, location)
+            }
         }
     }
 

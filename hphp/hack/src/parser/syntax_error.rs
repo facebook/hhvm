@@ -721,7 +721,7 @@ pub fn declared_name_is_already_in_use_implicit_hh(
 ) -> Error {
     Cow::Owned(format!(
         concat!(
-            "Cannot declare class {} because the name was implicitly used on line {}; ",
+            "Cannot declare {} because the name was implicitly used on line {}; ",
             "implicit use of names from the HH namespace can be suppressed by adding an explicit ",
             "`use' statement earlier in the current namespace block",
         ),
@@ -732,7 +732,7 @@ pub fn declared_name_is_already_in_use_implicit_hh(
 pub fn declared_name_is_already_in_use(line_num: usize, name: &str, _short_name: &str) -> Error {
     Cow::Owned(format!(
         concat!(
-            "Cannot declare class {} because the name was explicitly used earlier via a `use' ",
+            "Cannot declare {} because the name was explicitly used earlier via a `use' ",
             "statement on line {}",
         ),
         name.to_string(),

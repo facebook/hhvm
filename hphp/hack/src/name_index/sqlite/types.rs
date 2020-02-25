@@ -51,11 +51,12 @@ fn insert(connection: &Connection, items: &[TypeItem]) -> Result<()> {
     Ok(())
 }
 
-pub fn get_path(connection: &Connection, name: &str) -> Result<Option<RelativePath>> {
+pub fn get_path(connection: &Connection, name: &str) -> Result<Option<(RelativePath, TypeOfType)>> {
     let select_statement = "
         SELECT
             NAMING_FILE_INFO.PATH_PREFIX_TYPE,
-            NAMING_FILE_INFO.PATH_SUFFIX
+            NAMING_FILE_INFO.PATH_SUFFIX,
+            NAMING_TYPES.FLAGS
         FROM
             NAMING_TYPES
         LEFT JOIN
@@ -69,10 +70,11 @@ pub fn get_path(connection: &Connection, name: &str) -> Result<Option<RelativePa
     let mut select_statement = connection.prepare_cached(&select_statement)?;
     let hash = convert::name_to_hash(&name);
     select_statement
-        .query_row::<RelativePath, _, _>(params![hash], |row| {
+        .query_row(params![hash], |row| {
             let prefix: SqlitePrefix = row.get(0)?;
             let suffix: SqlitePathBuf = row.get(1)?;
-            Ok(RelativePath::make(prefix.value, suffix.value))
+            let kind: SqliteTypeOfType = row.get(2)?;
+            Ok((RelativePath::make(prefix.value, suffix.value), kind.value))
         })
         .optional()
 }

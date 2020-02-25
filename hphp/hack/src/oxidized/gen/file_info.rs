@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6585564e17ab481ad73d4c350bf87364>>
+// @generated SignedSource<<f19c8902272144444868dc7efab364c9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -35,11 +35,11 @@ pub enum Mode {
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]
 pub enum NameType {
-    Fun,
-    Class,
-    RecordDef,
-    Typedef,
-    Const,
+    Fun = 0,
+    Class = 1,
+    RecordDef = 2,
+    Typedef = 3,
+    Const = 4,
 }
 
 /// We define two types of positions establishing the location of a given name:

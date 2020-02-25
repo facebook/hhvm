@@ -73,12 +73,12 @@ let pp_mode fmt mode =
 (*****************************************************************************)
 
 type name_type =
-  | Fun
-  | Class
-  | RecordDef
-  | Typedef
-  | Const
-[@@deriving eq, show]
+  | Fun [@value 0]
+  | Class [@value 1]
+  | RecordDef [@value 2]
+  | Typedef [@value 3]
+  | Const [@value 4]
+[@@deriving eq, show, enum]
 
 (** We define two types of positions establishing the location of a given name:
  * a Full position contains the exact position of a name in a file, and a

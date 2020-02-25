@@ -8,6 +8,7 @@ use crypto::md5::Md5;
 use oxidized::file_info::{Id, Mode};
 use std::default::Default;
 
+use oxidized::naming_table::TypeOfType;
 use oxidized::relative_path::Prefix;
 use rusqlite::types::FromSql;
 use rusqlite::types::{FromSqlError, FromSqlResult, ValueRef};
@@ -20,6 +21,10 @@ pub(crate) struct SqlitePrefix {
 
 pub(crate) struct SqlitePathBuf {
     pub value: PathBuf,
+}
+
+pub(crate) struct SqliteTypeOfType {
+    pub value: TypeOfType,
 }
 
 impl FromSql for SqlitePrefix {
@@ -40,6 +45,18 @@ impl FromSql for SqlitePathBuf {
             Ok(s) => Ok(SqlitePathBuf {
                 value: PathBuf::from(s),
             }),
+            _ => Err(FromSqlError::InvalidType),
+        }
+    }
+}
+
+impl FromSql for SqliteTypeOfType {
+    fn column_result(value: ValueRef) -> FromSqlResult<Self> {
+        match value {
+            ValueRef::Integer(i) => match TypeOfType::try_from(i) {
+                Ok(value) => Ok(Self { value }),
+                Err(_) => Err(FromSqlError::OutOfRange(i)),
+            },
             _ => Err(FromSqlError::InvalidType),
         }
     }

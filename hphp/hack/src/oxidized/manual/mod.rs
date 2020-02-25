@@ -18,6 +18,7 @@ pub mod i_map;
 pub mod i_set;
 pub mod local_id;
 pub mod namespace_env_impl;
+pub mod naming_table_impl;
 pub mod phase_map;
 pub mod pos;
 pub mod relative_path;

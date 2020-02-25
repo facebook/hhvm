@@ -44,12 +44,12 @@ val is_hh_file : mode -> bool
 (*****************************************************************************)
 
 type name_type =
-  | Fun
-  | Class
-  | RecordDef
-  | Typedef
-  | Const
-[@@deriving eq, show]
+  | Fun [@value 0]
+  | Class [@value 1]
+  | RecordDef [@value 2]
+  | Typedef [@value 3]
+  | Const [@value 4]
+[@@deriving eq, show, enum]
 
 type pos =
   | Full of Pos.t

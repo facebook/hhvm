@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/hash/ext_hash.h"
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/ext/hash/hash_adler32.h"
 #include "hphp/runtime/ext/hash/hash_crc32.h"
@@ -215,12 +216,11 @@ static req::ptr<HashContext> get_valid_hash_context_resource(const Resource& con
 // hash functions
 
 Array HHVM_FUNCTION(hash_algos) {
-  Array ret;
-  for (HashEngineMap::const_iterator iter = HashEngines.begin();
-       iter != HashEngines.end(); ++iter) {
-    ret.append(String(iter->first));
+  VArrayInit ret(HashEngines.size());
+  for (auto const& engine : HashEngines) {
+    ret.append(String(engine.first));
   }
-  return ret;
+  return ret.toArray();
 }
 
 static HashEnginePtr php_hash_fetch_ops(const String& algo) {

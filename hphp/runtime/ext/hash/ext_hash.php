@@ -26,7 +26,7 @@ function hash(string $algo, string $data,
  *                  supported hashing algorithms.
  */
 <<__Native,__IsFoldable, __Rx>>
-function hash_algos(): array<string>;
+function hash_algos(): varray<string>;
 
 /**
  * hash_file() - http://php.net/function.hash-file

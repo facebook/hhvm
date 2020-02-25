@@ -451,6 +451,8 @@ void HttpServer::runOrExitProcess() {
     while (!m_stopped) {
       wait();
     }
+    Logger::Info("Server is stopping");
+
     if (m_stopReason) {
       Logger::Warning("Server stopping with reason: %s", m_stopReason);
     } else if (auto signo = SignalReceived.load(std::memory_order_acquire)) {
@@ -482,7 +484,10 @@ void HttpServer::waitForServers() {
 
 void HttpServer::ProfileFlush() {
   #ifdef __linux__
-  if (__gcov_flush) __gcov_flush();
+  if (__gcov_flush) {
+    Logger::Info("Flushing profile");
+    __gcov_flush();
+  }
   #endif
 }
 
@@ -498,6 +503,7 @@ void HttpServer::stop(const char* stopReason) {
   RequestInfo::BroadcastSignal(SIGTERM);
 
   // we're shutting down flush http logs
+  Logger::Info("Flushing http logs");
   Logger::FlushAll();
   HttpRequestHandler::GetAccessLog().flushAllWriters();
   Process::OOMScoreAdj(1000);
@@ -531,6 +537,7 @@ void HttpServer::stop(const char* stopReason) {
   Lock lock(this);
   m_stopped = true;
   m_stopReason = stopReason;
+  Logger::Info("Waking up server thread to stop");
   notify();
 }
 

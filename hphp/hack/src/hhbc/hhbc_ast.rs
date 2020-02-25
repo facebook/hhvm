@@ -87,20 +87,16 @@ pub struct FcallArgs(
 // ported from instruction_sequence in OCaml
 impl FcallArgs {
     pub fn new(
-        mut flags: Option<FcallFlags>,
-        num_rets: Option<usize>,
-        by_refs: Option<Vec<bool>>,
+        flags: FcallFlags,
+        num_rets: usize,
+        inouts: Vec<bool>,
         async_eager_label: Option<label::Label>,
         num_args: usize,
     ) -> FcallArgs {
-        let flags = *flags.get_or_insert_with(FcallFlags::default);
-        let num_rets = num_rets.unwrap_or(1);
-        let by_refs = by_refs.unwrap_or(vec![]);
-
-        if !by_refs.is_empty() && by_refs.len() != num_args {
+        if !inouts.is_empty() && inouts.len() != num_args {
             panic!("length of by_refs must be either zero or num_args");
         }
-        FcallArgs(flags, num_args, num_rets, by_refs, async_eager_label)
+        FcallArgs(flags, num_args, num_rets, inouts, async_eager_label)
     }
 }
 
@@ -472,7 +468,7 @@ pub enum InstructCall {
     FCallClsMethodS(FcallArgs, SpecialClsRef),
     FCallClsMethodSD(FcallArgs, SpecialClsRef, MethodId),
     FCallCtor(FcallArgs),
-    FCallFunc(FcallArgs, ParamLocations),
+    FCallFunc(FcallArgs),
     FCallFuncD(FcallArgs, FunctionId),
     FCallObjMethod(FcallArgs, ObjNullFlavor, ParamLocations),
     FCallObjMethodD(FcallArgs, ObjNullFlavor, MethodId),

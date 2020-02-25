@@ -278,15 +278,9 @@ fn make_memoize_method_with_params_code(
             fcall_flags |= FcallFlags::HAS_GENERICS;
         };
         if args.flags.contains(Flags::IS_ASYNC) {
-            FcallArgs::new(
-                Some(fcall_flags),
-                None,
-                None,
-                Some(eager_set.clone()),
-                param_count,
-            )
+            FcallArgs::new(fcall_flags, 1, vec![], Some(eager_set.clone()), param_count)
         } else {
-            FcallArgs::new(Some(fcall_flags), None, None, None, param_count)
+            FcallArgs::new(fcall_flags, 1, vec![], None, param_count)
         }
     };
     let (reified_get, reified_memokeym) = if !args.flags.contains(Flags::IS_ASYNC) {
@@ -372,11 +366,18 @@ fn make_memoize_method_no_params_code(emitter: &mut Emitter, args: &Args) -> Res
     let eager_set = emitter.label_gen_mut().next_regular();
     let deprecation_body =
         emit_body::emit_deprecation_info(args.scope, &args.deprecation_info, emitter.systemlib())?;
-    let fcall_args = if args.flags.contains(Flags::IS_ASYNC) {
-        FcallArgs::new(None, None, None, Some(eager_set.clone()), 0)
-    } else {
-        FcallArgs::new(None, None, None, None, 0)
-    };
+
+    let fcall_args = FcallArgs::new(
+        FcallFlags::default(),
+        1,
+        vec![],
+        if args.flags.contains(Flags::IS_ASYNC) {
+            Some(eager_set.clone())
+        } else {
+            None
+        },
+        0,
+    );
     Ok(InstrSeq::gather(vec![
         deprecation_body,
         if args.method.static_ {

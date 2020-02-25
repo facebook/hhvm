@@ -3579,15 +3579,14 @@ and emit_call_lhs_and_fcall
             ] )
     end
   | A.Id (_, s) ->
-    let fq_id = Hhbc_id.Function.from_ast_name s in
+    let (flags, num_args, _, _, _) = fcall_args in
     let fq_id =
-      let (flags, num_args, _, _, _) = fcall_args in
       match SU.strip_global_ns s with
       | "min" when num_args = 2 && not flags.has_unpack ->
         Hhbc_id.Function.from_raw_string "__SystemLib\\min2"
       | "max" when num_args = 2 && not flags.has_unpack ->
         Hhbc_id.Function.from_raw_string "__SystemLib\\max2"
-      | _ -> fq_id
+      | _ -> Hhbc_id.Function.from_ast_name s
     in
     let (generics, fcall_args) = emit_generics fcall_args in
     ( gather [instr_nulluninit; instr_nulluninit; instr_nulluninit],
@@ -3962,8 +3961,8 @@ and emit_call
         ],
       empty )
   in
-  match (expr_, args) with
-  | (A.Id (_, id), _) ->
+  match expr_ with
+  | A.Id (_, id) ->
     let special_fn_opt =
       emit_special_function env pos annot id args uarg default
     in

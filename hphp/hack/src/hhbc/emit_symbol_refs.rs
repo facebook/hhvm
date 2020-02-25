@@ -44,12 +44,6 @@ impl State {
         }
     }
 
-    pub fn add_function(e: &mut Emitter, s: function::Type) {
-        if !s.to_raw_string().is_empty() {
-            e.emit_state_mut().symbol_refs.functions.insert(s.into());
-        }
-    }
-
     pub fn add_class(e: &mut Emitter, s: class::Type) {
         if !s.to_raw_string().is_empty() {
             e.emit_state_mut().symbol_refs.classes.insert(s.into());
@@ -63,6 +57,12 @@ impl State {
             functions: BTreeSet::new(),
             classes: BTreeSet::new(),
         };
+    }
+}
+
+pub fn add_function(e: &mut Emitter, s: function::Type) {
+    if !s.to_raw_string().is_empty() {
+        e.emit_state_mut().symbol_refs.functions.insert(s.into());
     }
 }
 

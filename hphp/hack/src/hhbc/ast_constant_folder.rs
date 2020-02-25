@@ -218,9 +218,18 @@ fn shape_to_typed_value(
 }
 
 pub fn expr_to_typed_value(
+    e: &Emitter,
+    ns: &Namespace,
+    expr: &tast::Expr,
+) -> Result<TypedValue, Error> {
+    expr_to_typed_value_(e, ns, expr, false /*allow_maps*/)
+}
+
+pub fn expr_to_typed_value_(
     emitter: &Emitter,
     ns: &Namespace,
     expr: &tast::Expr,
+    _allow_maps: bool,
 ) -> Result<TypedValue, Error> {
     use aast::Expr_::*;
     // TODO: ML equivalent has this as an implicit parameter that defaults to false.

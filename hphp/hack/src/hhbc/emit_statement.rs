@@ -187,7 +187,7 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
                             };
                             emit_expr::emit_set_range_expr(e, env, pos, fname, kind, args, arg)
                         } else {
-                            emit_expr::emit_ignored_expr(e, env, pos, expr)
+                            emit_expr::emit_ignored_expr(e, env, pos, e_)
                         }
                     }
                 } else {

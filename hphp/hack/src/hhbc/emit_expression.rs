@@ -8,21 +8,24 @@
 use ast_constant_folder_rust as ast_constant_folder;
 use ast_scope_rust::Scope;
 use emit_fatal_rust as emit_fatal;
+use emit_symbol_refs_rust as emit_symbol_refs;
 use emit_type_constant_rust as emit_type_constant;
 use env::{emitter::Emitter, local, Env};
 use hhbc_ast_rust::*;
-use hhbc_id_rust::{class, method};
+use hhbc_id_rust::{class, function, method, Id};
 use hhbc_string_utils_rust as string_utils;
-use instruction_sequence_rust::{Error::Unrecoverable, InstrSeq, Result};
+use instruction_sequence_rust::{unrecoverable, Error::Unrecoverable, InstrSeq, Result};
 use label_rust::Label;
 use naming_special_names_rust::{
-    pseudo_consts, special_functions, special_idents, superglobals, user_attributes,
+    emitter_special_functions, fb, pseudo_consts, pseudo_functions, special_functions,
+    special_idents, superglobals, user_attributes,
 };
 use options::{CompilerFlags, HhvmFlags, LangFlags, Options};
 use oxidized::{aast, aast_defs, ast as tast, ast_defs, local_id, pos::Pos};
+use runtime::TypedValue;
 use scope_rust::scope;
 
-use std::{collections::BTreeMap, convert::TryInto};
+use std::{collections::BTreeMap, convert::TryInto, iter};
 
 #[derive(Debug)]
 pub struct EmitJmpResult {
@@ -339,7 +342,7 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
         | Expr_::False
         | Expr_::True => {
             let v = ast_constant_folder::expr_to_typed_value(emitter, &env.namespace, expression)
-                .unwrap();
+                .map_err(|_| unrecoverable("expr_to_typed_value failed"))?;
             emit_pos_then(emitter, pos, InstrSeq::make_typedvalue(v))
         }
         Expr_::PrefixedString(e) => emit_expr(emitter, env, &(&**e).1),
@@ -384,7 +387,7 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
             }
         }
         Expr_::ObjGet(e) => emit_obj_get(env, pos, QueryOp::CGet, &**e),
-        Expr_::Call(_) => emit_call_expr(env, pos, None, expr.as_call().unwrap()),
+        Expr_::Call(c) => emit_call_expr(emitter, env, pos, None, &*c),
         Expr_::New(e) => emit_new(env, pos, &**e),
         Expr_::Record(e) => emit_record(env, pos, &**e),
         Expr_::Array(es) => emit_pos_then(emitter, pos, emit_collection(env, expression, es)?),
@@ -459,6 +462,19 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
     }
 }
 
+fn emit_exprs(e: &mut Emitter, env: &Env, exprs: &[tast::Expr]) -> Result {
+    if exprs.is_empty() {
+        Ok(InstrSeq::Empty)
+    } else {
+        Ok(InstrSeq::gather(
+            exprs
+                .iter()
+                .map(|expr| emit_expr(e, env, expr))
+                .collect::<Result<Vec<_>>>()?,
+        ))
+    }
+}
+
 fn emit_pos_then(emitter: &Emitter, pos: &Pos, instrs: InstrSeq) -> Result {
     Ok(emit_pos_rust::emit_pos_then(emitter, pos, instrs))
 }
@@ -480,18 +496,16 @@ fn emit_id(emitter: &mut Emitter, env: &Env, id: &tast::Sid) -> Result {
         G__CLASS__ => InstrSeq::gather(vec![InstrSeq::make_self(), InstrSeq::make_classname()]),
         G__COMPILER_FRONTEND__ => InstrSeq::make_string("hackc"),
         G__LINE__ => InstrSeq::make_int(p.info_pos_extended().1.try_into().map_err(|_| {
-            emit_fatal::raise_fatal_parse(
-                p,
-                "error converting end of line from usize to isize".to_string(),
-            )
+            emit_fatal::raise_fatal_parse(p, "error converting end of line from usize to isize")
         })?),
         G__NAMESPACE__ => InstrSeq::make_string(env.namespace.name.as_ref().map_or("", |s| &s[..])),
         EXIT | DIE => return emit_exit(emitter, env, None),
         _ => {
-            panic!("TODO: uncomment after D19350786 lands")
-            // let cid: ConstId = r#const::Type::from_ast_name(&s);
-            // emit_symbol_refs::State::add_constant(emitter, cid.clone());
-            // return emit_pos_then(emitter, p, InstrSeq::make_lit_const(CnsE(cid)));
+            //panic!("TODO: uncomment after D19350786 lands")
+            //let cid: ConstId = r#const::Type::from_ast_name(&s);
+            let cid: ConstId = string_utils::strip_global_ns(&s).to_string().into();
+            emit_symbol_refs::State::add_constant(emitter, cid.clone());
+            return emit_pos_then(emitter, p, InstrSeq::make_lit_const(CnsE(cid)));
         }
     };
     Ok(res)
@@ -499,10 +513,7 @@ fn emit_id(emitter: &mut Emitter, env: &Env, id: &tast::Sid) -> Result {
 
 fn emit_exit(emitter: &mut Emitter, env: &Env, expr_opt: Option<&tast::Expr>) -> Result {
     Ok(InstrSeq::gather(vec![
-        expr_opt.map_or_else(
-            || InstrSeq::make_int(0),
-            |e| emit_expr(emitter, env, e).unwrap_or_default(),
-        ),
+        expr_opt.map_or_else(|| Ok(InstrSeq::make_int(0)), |e| emit_expr(emitter, env, e))?,
         InstrSeq::make_exit(),
     ]))
 }
@@ -552,9 +563,11 @@ pub fn emit_await(emitter: &mut Emitter, env: &Env, pos: &Pos, expr: &tast::Expr
         }
         _ => {
             let after_await = emitter.label_gen_mut().next_regular();
-            let instrs = match e.as_call() {
-                Some(call_expr) => emit_call_expr(env, pos, Some(after_await.clone()), call_expr)?,
-                None => emit_expr(emitter, env, expr)?,
+            let instrs = match e {
+                tast::Expr_::Call(c) => {
+                    emit_call_expr(emitter, env, pos, Some(after_await.clone()), &*c)?
+                }
+                _ => emit_expr(emitter, env, expr)?,
             };
             Ok(InstrSeq::gather(vec![
                 instrs,
@@ -595,7 +608,13 @@ fn inline_gena_call(emitter: &mut Emitter, env: &Env, arg: &tast::Expr) -> Resul
             InstrSeq::make_nulluninit(),
             InstrSeq::make_cgetl(arr_local.clone()),
             InstrSeq::make_fcallclsmethodd(
-                FcallArgs::new(None, None, None, Some(async_eager_label.clone()), 1),
+                FcallArgs::new(
+                    FcallFlags::default(),
+                    1,
+                    vec![],
+                    Some(async_eager_label.clone()),
+                    1,
+                ),
                 method::from_raw_string(if hack_arr_dv_arrs {
                     "fromDict"
                 } else {
@@ -679,7 +698,7 @@ fn mk_afvalues(es: &Vec<tast::Expr>) -> Vec<tast::Afield> {
         .collect()
 }
 
-fn emit_collection(env: &Env, expression: &tast::Expr, fields: &Vec<tast::Afield>) -> Result {
+fn emit_collection(env: &Env, expr: &tast::Expr, fields: &Vec<tast::Afield>) -> Result {
     unimplemented!("TODO(hrust)")
 }
 
@@ -692,19 +711,360 @@ fn emit_record(
     unimplemented!("TODO(hrust)")
 }
 
+fn emit_call_isset_exprs(e: &mut Emitter, env: &Env, pos: &Pos, exprs: &[tast::Expr]) -> Result {
+    unimplemented!()
+}
+
+fn emit_idx(e: &mut Emitter, env: &Env, pos: &Pos, es: &[tast::Expr]) -> Result {
+    let default = if es.len() == 2 {
+        InstrSeq::make_null()
+    } else {
+        InstrSeq::Empty
+    };
+    Ok(InstrSeq::gather(vec![
+        emit_exprs(e, env, es)?,
+        emit_pos(e, pos)?,
+        default,
+        InstrSeq::make_idx(),
+    ]))
+}
+
+fn emit_call(
+    e: &mut Emitter,
+    env: &Env,
+    pos: &Pos,
+    expr: &tast::Expr,
+    targs: &[tast::Targ],
+    args: &[tast::Expr],
+    uarg: Option<&tast::Expr>,
+    async_eager_label: Option<Label>,
+) -> Result {
+    if let Some(ast_defs::Id(_, s)) = expr.as_id() {
+        let fid = function::Type::from_ast_name(s);
+        emit_symbol_refs::add_function(e, fid);
+    }
+    let fcall_args = get_fcall_args(args, uarg, async_eager_label, false);
+    let FcallArgs(_, _, num_ret, _, _) = &fcall_args;
+    let num_uninit = num_ret - 1;
+    let default = scope::with_unnamed_locals(e, |e| {
+        let (lhs, fcall) = emit_call_lhs_and_fcall(e, env, expr, fcall_args, targs)?;
+        let (args, inout_setters) = emit_args_inout_setters(e, env, args)?;
+        let uargs = uarg.map_or(Ok(InstrSeq::Empty), |uarg| emit_expr(e, env, uarg))?;
+        Ok((
+            InstrSeq::Empty,
+            InstrSeq::gather(vec![
+                InstrSeq::gather(
+                    iter::repeat(InstrSeq::make_nulluninit())
+                        .take(num_uninit)
+                        .collect::<Vec<_>>(),
+                ),
+                lhs,
+                args,
+                emit_pos(e, pos)?,
+                fcall,
+                inout_setters,
+            ]),
+            InstrSeq::Empty,
+        ))
+    })?;
+    expr.1
+        .as_id()
+        .and_then(|ast_defs::Id(_, id)| {
+            emit_special_function(e, env, pos, &expr.0, &id, args, uarg, &default).transpose()
+        })
+        .unwrap_or(Ok(default))
+}
+
+fn emit_reified_targs(e: &mut Emitter, env: &Env, pos: &Pos, targs: &[&tast::Hint]) -> Result {
+    unimplemented!()
+}
+
+fn get_erased_tparams<'a>(env: &'a Env<'a>) -> Vec<&'a str> {
+    env.scope
+        .get_tparams()
+        .iter()
+        .filter_map(|tparam| match tparam.reified {
+            tast::ReifyKind::Erased => Some(tparam.name.1.as_str()),
+            _ => None,
+        })
+        .collect()
+}
+
+fn has_non_tparam_generics_targs(env: &Env, targs: &[tast::Targ]) -> bool {
+    let erased_tparams = get_erased_tparams(env);
+    targs.iter().any(|targ| {
+        (targ.1)
+            .1
+            .as_happly()
+            .map_or(true, |(id, _)| !erased_tparams.contains(&id.1.as_str()))
+    })
+}
+
+fn emit_call_lhs_and_fcall(
+    e: &mut Emitter,
+    env: &Env,
+    expr: &tast::Expr,
+    mut fcall_args: FcallArgs,
+    targs: &[tast::Targ],
+) -> Result<(InstrSeq, InstrSeq)> {
+    let tast::Expr(pos, expr_) = expr;
+    use tast::Expr_ as E_;
+
+    let emit_generics = |e, env, fcall_args: &mut FcallArgs| {
+        let does_not_have_non_tparam_generics = !has_non_tparam_generics_targs(env, targs);
+        if does_not_have_non_tparam_generics {
+            Ok(InstrSeq::Empty)
+        } else {
+            *(&mut fcall_args.0) = fcall_args.0 | FcallFlags::HAS_GENERICS;
+            emit_reified_targs(
+                e,
+                env,
+                pos,
+                targs
+                    .iter()
+                    .map(|targ| &targ.1)
+                    .collect::<Vec<_>>()
+                    .as_slice(),
+            )
+        }
+    };
+
+    match expr_ {
+        E_::ObjGet(_) => unimplemented!(),
+        E_::ClassConst(_) => unimplemented!(),
+        E_::ClassGet(_) => unimplemented!(),
+        E_::Id(id) => {
+            let FcallArgs(flags, num_args, _, _, _) = fcall_args;
+            let fq_id = match string_utils::strip_global_ns(&id.1) {
+                "min" if num_args == 2 && flags.contains(FcallFlags::HAS_UNPACK) => {
+                    function::Type::from_ast_name("__SystemLib\\min2")
+                }
+                "max" if num_args == 2 && flags.contains(FcallFlags::HAS_UNPACK) => {
+                    function::Type::from_ast_name("__SystemLib\\max2")
+                }
+                _ => {
+                    //TODO(hrust): enable `function::Type::from_ast_name(&id.1)`
+                    string_utils::strip_global_ns(&id.1).to_string().into()
+                }
+            };
+            let generics = emit_generics(e, env, &mut fcall_args)?;
+            Ok((
+                InstrSeq::gather(vec![
+                    InstrSeq::make_nulluninit(),
+                    InstrSeq::make_nulluninit(),
+                    InstrSeq::make_nulluninit(),
+                ]),
+                InstrSeq::gather(vec![generics, InstrSeq::make_fcallfuncd(fcall_args, fq_id)]),
+            ))
+        }
+        E_::String(s) => unimplemented!(),
+        _ => {
+            let tmp = e.local_gen_mut().get_unnamed();
+            Ok((
+                InstrSeq::gather(vec![
+                    InstrSeq::make_nulluninit(),
+                    InstrSeq::make_nulluninit(),
+                    InstrSeq::make_nulluninit(),
+                    emit_expr(e, env, expr)?,
+                    InstrSeq::make_popl(tmp.clone()),
+                ]),
+                InstrSeq::gather(vec![
+                    InstrSeq::make_pushl(tmp),
+                    InstrSeq::make_fcallfunc(fcall_args),
+                ]),
+            ))
+        }
+    }
+}
+
+fn emit_args_inout_setters(
+    e: &mut Emitter,
+    env: &Env,
+    args: &[tast::Expr],
+) -> Result<(InstrSeq, InstrSeq)> {
+    fn emit_arg_and_inout_setter(
+        e: &mut Emitter,
+        env: &Env,
+        i: usize,
+        arg: &tast::Expr,
+    ) -> Result<(InstrSeq, InstrSeq)> {
+        use tast::Expr_ as E_;
+        match &arg.1 {
+            E_::Callconv(cc) => {
+                match &(cc.1).1 {
+                    // inout $var
+                    E_::Lvar(l) => unimplemented!(),
+                    // inout $arr[...][...]
+                    E_::ArrayGet(ag) => unimplemented!(),
+                    _ => Err(unrecoverable(
+                        "emit_arg_and_inout_setter: Unexpected inout expression type",
+                    )),
+                }
+            }
+            _ => Ok((emit_expr(e, env, arg)?, InstrSeq::Empty)),
+        }
+    }
+    let (instr_args, instr_setters): (Vec<InstrSeq>, Vec<InstrSeq>) = args
+        .iter()
+        .enumerate()
+        .map(|(i, arg)| emit_arg_and_inout_setter(e, env, i, arg))
+        .collect::<Result<Vec<_>>>()?
+        .into_iter()
+        .unzip();
+    let instr_args = InstrSeq::gather(instr_args);
+    let instr_setters = InstrSeq::gather(instr_setters);
+    if has_inout_arg(args) {
+        let retval = e.local_gen_mut().get_unnamed();
+        Ok((
+            instr_args,
+            InstrSeq::gather(vec![
+                InstrSeq::make_popl(retval.clone()),
+                instr_setters,
+                InstrSeq::make_pushl(retval),
+            ]),
+        ))
+    } else {
+        Ok((instr_args, InstrSeq::Empty))
+    }
+}
+
+fn get_fcall_args(
+    args: &[tast::Expr],
+    uarg: Option<&tast::Expr>,
+    async_eager_label: Option<Label>,
+    lock_while_unwinding: bool,
+) -> FcallArgs {
+    let num_args = args.len();
+    let num_rets = 1 + args.iter().filter(|x| is_inout_arg(*x)).count();
+    let mut flags = FcallFlags::default();
+    flags.set(FcallFlags::HAS_UNPACK, uarg.is_some());
+    flags.set(FcallFlags::LOCK_WHILE_UNWINDING, lock_while_unwinding);
+    let inouts: Vec<bool> = args.iter().map(is_inout_arg).collect();
+    FcallArgs::new(flags, num_rets, inouts, async_eager_label, num_args)
+}
+
+fn is_inout_arg(e: &tast::Expr) -> bool {
+    e.1.as_callconv().map_or(false, |cc| cc.0.is_pinout())
+}
+
+fn has_inout_arg(es: &[tast::Expr]) -> bool {
+    es.iter().any(is_inout_arg)
+}
+
+fn emit_special_function(
+    e: &mut Emitter,
+    env: &Env,
+    outer_pos: &Pos,
+    pos: &Pos,
+    id: &str,
+    args: &[tast::Expr],
+    uarg: Option<&tast::Expr>,
+    default: &InstrSeq,
+) -> Result<Option<InstrSeq>> {
+    let nargs = args.len() + uarg.map_or(0, |_| 1);
+    let fq = function::Type::from_ast_name(id);
+    let lower_fq_name = fq.to_raw_string();
+    match (lower_fq_name, args) {
+        (id, _) if id == special_functions::ECHO => Ok(Some(InstrSeq::gather(
+            args.iter()
+                .enumerate()
+                .map(|(i, arg)| {
+                    Ok(InstrSeq::gather(vec![
+                        emit_expr(e, env, arg)?,
+                        emit_pos(e, pos)?,
+                        InstrSeq::make_print(),
+                        if i == nargs - 1 {
+                            InstrSeq::Empty
+                        } else {
+                            InstrSeq::make_popc()
+                        },
+                    ]))
+                })
+                .collect::<Result<_>>()?,
+        ))),
+        _ => unimplemented!(),
+    }
+}
+
+fn emit_eval(e: &mut Emitter, env: &Env, pos: &Pos, expr: &tast::Expr) -> Result {
+    Ok(InstrSeq::gather(vec![
+        emit_expr(e, env, expr)?,
+        emit_pos(e, pos)?,
+        InstrSeq::make_eval(),
+    ]))
+}
+
 fn emit_call_expr(
+    e: &mut Emitter,
     env: &Env,
     pos: &Pos,
     async_eager_label: Option<Label>,
-    (_, e, targs, args, uarg): (
-        &tast::CallType,
-        &tast::Expr,
-        &Vec<tast::Targ>,
-        &Vec<tast::Expr>,
-        &Option<tast::Expr>,
+    (_, expr, targs, args, uarg): &(
+        tast::CallType,
+        tast::Expr,
+        Vec<tast::Targ>,
+        Vec<tast::Expr>,
+        Option<tast::Expr>,
     ),
 ) -> Result {
-    unimplemented!("TODO(hrust)")
+    let jit_enable_rename_function = e
+        .options()
+        .hhvm
+        .flags
+        .contains(HhvmFlags::JIT_ENABLE_RENAME_FUNCTION);
+    use {tast::Expr as E, tast::Expr_ as E_};
+    match (&expr.1, &args[..], uarg) {
+        (E_::Id(id), [E(_, E_::String(data))], None) if id.1 == special_functions::HHAS_ADATA => {
+            let v = TypedValue::HhasAdata(data.into());
+            emit_pos_then(e, pos, InstrSeq::make_typedvalue(v))
+        }
+        (E_::Id(id), _, None) if id.1 == pseudo_functions::ISSET => {
+            emit_call_isset_exprs(e, env, pos, args)
+        }
+        (E_::Id(id), args, None)
+            if id.1 == fb::IDX
+                && !jit_enable_rename_function
+                && (args.len() == 2 || args.len() == 3) =>
+        {
+            emit_idx(e, env, pos, args)
+        }
+        (E_::Id(id), [arg1], None) if id.1 == emitter_special_functions::EVAL => {
+            emit_eval(e, env, pos, arg1)
+        }
+        (E_::Id(id), [arg1], None) if id.1 == emitter_special_functions::SET_FRAME_METADATA => {
+            Ok(InstrSeq::gather(vec![
+                emit_expr(e, env, arg1)?,
+                emit_pos(e, pos)?,
+                InstrSeq::make_popl(local::Type::Named("$86metadata".into())),
+                InstrSeq::make_null(),
+            ]))
+        }
+        (E_::Id(id), [], None)
+            if id.1 == pseudo_functions::EXIT || id.1 == pseudo_functions::DIE =>
+        {
+            let exit = emit_exit(e, env, None)?;
+            emit_pos_then(e, pos, exit)
+        }
+        (E_::Id(id), [arg1], None)
+            if id.1 == pseudo_functions::EXIT || id.1 == pseudo_functions::DIE =>
+        {
+            let exit = emit_exit(e, env, Some(arg1))?;
+            emit_pos_then(e, pos, exit)
+        }
+        (_, _, _) => {
+            let instrs = emit_call(
+                e,
+                env,
+                pos,
+                expr,
+                targs,
+                args,
+                uarg.as_ref(),
+                async_eager_label,
+            )?;
+            emit_pos_then(e, pos, instrs)
+        }
+    }
 }
 
 fn emit_new(

@@ -25,6 +25,10 @@ pub enum Error {
     Unrecoverable(String),
 }
 
+pub fn unrecoverable(msg: impl Into<String>) -> Error {
+    Error::Unrecoverable(msg.into())
+}
+
 /// The various from_X functions below take some kind of AST (expression,
 /// statement, etc.) and produce what is logically a sequence of instructions.
 /// This could simply be represented by a list, but then we would need to
@@ -799,10 +803,8 @@ impl InstrSeq {
         Self::make_instr(Instruct::ICall(InstructCall::FCallCtor(fcall_args)))
     }
 
-    pub fn make_fcallfunc(fcall_args: FcallArgs, param_locs: ParamLocations) -> Self {
-        Self::make_instr(Instruct::ICall(InstructCall::FCallFunc(
-            fcall_args, param_locs,
-        )))
+    pub fn make_fcallfunc(fcall_args: FcallArgs) -> Self {
+        Self::make_instr(Instruct::ICall(InstructCall::FCallFunc(fcall_args)))
     }
 
     pub fn make_fcallfuncd(fcall_args: FcallArgs, id: FunctionId) -> Self {

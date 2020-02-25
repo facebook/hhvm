@@ -707,6 +707,10 @@ fn pos_to_prov_tag(ctx: &Context, loc: &Option<ast_defs::Pos>) -> String {
     }
 }
 
+fn print_function_id<W: Write>(w: &mut W, id: &FunctionId) -> Result<(), W::Error> {
+    wrap_by_quotes(w, |w| w.write(escape(id.to_raw_string())))
+}
+
 fn print_class_id<W: Write>(w: &mut W, id: &ClassId) -> Result<(), W::Error> {
     wrap_by_quotes(w, |w| w.write(escape(id.to_raw_string())))
 }
@@ -1208,8 +1212,91 @@ fn print_shape_fields<W: Write>(w: &mut W, sf: &Vec<String>) -> Result<(), W::Er
 fn print_op<W: Write>(w: &mut W, op: &InstructOperator) -> Result<(), W::Error> {
     use InstructOperator as I;
     match op {
+        I::Concat => w.write("Concat"),
+        I::ConcatN(n) => concat_str_by(w, " ", ["ConcatN", n.to_string().as_str()]),
+        I::Abs => w.write("Abs"),
+        I::Add => w.write("Add"),
+        I::Sub => w.write("Sub"),
+        I::Mul => w.write("Mul"),
+        I::AddO => w.write("AddO"),
+        I::SubO => w.write("SubO"),
+        I::MulO => w.write("MulO"),
+        I::Div => w.write("Div"),
+        I::Mod => w.write("Mod"),
+        I::Pow => w.write("Pow"),
+        I::Sqrt => w.write("Sqrt"),
+        I::Xor => w.write("Xor"),
+        I::Not => w.write("Not"),
+        I::Same => w.write("Same"),
+        I::NSame => w.write("NSame"),
+        I::Eq => w.write("Eq"),
+        I::Neq => w.write("Neq"),
+        I::Lt => w.write("Lt"),
+        I::Lte => w.write("Lte"),
+        I::Gt => w.write("Gt"),
+        I::Gte => w.write("Gte"),
+        I::Cmp => w.write("Cmp"),
+        I::BitAnd => w.write("BitAnd"),
+        I::BitOr => w.write("BitOr"),
+        I::BitXor => w.write("BitXor"),
+        I::BitNot => w.write("BitNot"),
+        I::Shl => w.write("Shl"),
+        I::Shr => w.write("Shr"),
+        I::Floor => w.write("Floor"),
+        I::Ceil => w.write("Ceil"),
+        I::CastBool => w.write("CastBool"),
+        I::CastInt => w.write("CastInt"),
+        I::CastDouble => w.write("CastDouble"),
+        I::CastString => w.write("CastString"),
+        I::CastArray => w.write("CastArray"),
+        I::CastVec => w.write("CastVec"),
+        I::CastDict => w.write("CastDict"),
+        I::CastKeyset => w.write("CastKeyset"),
+        I::CastVArray => w.write("CastVArray"),
+        I::CastDArray => w.write("CastDArray"),
+        I::InstanceOf => w.write("InstanceOf"),
+        I::InstanceOfD(id) => {
+            w.write("InstanceOfD ")?;
+            print_class_id(w, id)
+        }
+        I::IsLateBoundCls => w.write("IsLateBoundCls"),
+        I::IsTypeStructC(op) => concat_str_by(
+            w,
+            " ",
+            [
+                "IsTypeStructC",
+                match op {
+                    TypestructResolveOp::Resolve => "Resolve",
+                    TypestructResolveOp::DontResolve => "DontResolve",
+                },
+            ],
+        ),
+        I::ThrowAsTypeStructException => w.write("ThrowAsTypeStructException"),
+        I::CombineAndResolveTypeStruct(n) => concat_str_by(
+            w,
+            " ",
+            ["CombineAndResolveTypeStruct", n.to_string().as_str()],
+        ),
+        I::Print => w.write("Print"),
+        I::Clone => w.write("Clone"),
+        I::Exit => w.write("Exit"),
+        I::ResolveFunc(id) => {
+            w.write("ResolveFunc")?;
+            print_function_id(w, id)
+        }
+        I::ResolveObjMethod => w.write("ResolveObjMethod"),
+        I::ResolveClsMethod(op) => concat_str_by(
+            w,
+            " ",
+            [
+                "ResolveClsMethod",
+                match op {
+                    ClsMethResolveOp::Warn => "Warn",
+                    ClsMethResolveOp::NoWarn => "NoWarn",
+                },
+            ],
+        ),
         I::Fatal(fatal_op) => print_fatal_op(w, fatal_op),
-        _ => not_impl!(),
     }
 }
 
@@ -1769,8 +1856,4 @@ fn print_record_def<W: Write>(
         ctx.newline(w)
     })?;
     newline(w)
-}
-
-fn _print_quoted_id<'a, W: Write, I: Id<'a>>(w: &mut W, id: &I) -> Result<(), W::Error> {
-    wrap_by_quotes(w, |w| w.write(escape(id.to_raw_string())))
 }

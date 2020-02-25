@@ -57,7 +57,7 @@ fn get_regular_labels(instr: &Instruct) -> Vec<Label> {
         | ICall(FCallClsMethodD(FcallArgs(_, _, _, _, Some(l)), _, _))
         | ICall(FCallClsMethodS(FcallArgs(_, _, _, _, Some(l)), _))
         | ICall(FCallClsMethodSD(FcallArgs(_, _, _, _, Some(l)), _, _))
-        | ICall(FCallFunc(FcallArgs(_, _, _, _, Some(l)), _))
+        | ICall(FCallFunc(FcallArgs(_, _, _, _, Some(l))))
         | ICall(FCallFuncD(FcallArgs(_, _, _, _, Some(l)), _))
         | ICall(FCallObjMethod(FcallArgs(_, _, _, _, Some(l)), _, _))
         | ICall(FCallObjMethodD(FcallArgs(_, _, _, _, Some(l)), _, _)) => vec![l.clone()],
@@ -131,7 +131,7 @@ where
         | ICall(FCallClsMethodD(FcallArgs(_, _, _, _, Some(l)), _, _))
         | ICall(FCallClsMethodS(FcallArgs(_, _, _, _, Some(l)), _))
         | ICall(FCallClsMethodSD(FcallArgs(_, _, _, _, Some(l)), _, _))
-        | ICall(FCallFunc(FcallArgs(_, _, _, _, Some(l)), _))
+        | ICall(FCallFunc(FcallArgs(_, _, _, _, Some(l))))
         | ICall(FCallFuncD(FcallArgs(_, _, _, _, Some(l)), _))
         | ICall(FCallObjMethod(FcallArgs(_, _, _, _, Some(l)), _, _))
         | ICall(FCallObjMethodD(FcallArgs(_, _, _, _, Some(l)), _, _))

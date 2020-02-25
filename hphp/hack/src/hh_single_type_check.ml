@@ -1522,7 +1522,9 @@ let handle_mode
         ^ " inference is turend off (use --global-inference)" );
       exit 1
     | Some gi_solved ->
-      let patches = ServerGlobalInference.Mode_rewrite.get_patches gi_solved in
+      let patches =
+        ServerGlobalInference.Mode_rewrite.get_patches ~files_contents gi_solved
+      in
       if List.length patches <= 0 then
         print_endline "No patches"
       else
@@ -1540,7 +1542,7 @@ let handle_mode
         let print_filename = not @@ Int.equal (SMap.cardinal patched) 1 in
         SMap.iter
           (fun fn new_contents ->
-            if print_filename then Printf.printf "//// %s" fn;
+            if print_filename then Printf.printf "//// %s\n" fn;
             Out_channel.output_string stdout new_contents)
           patched)
   | Find_refs (line, column) ->

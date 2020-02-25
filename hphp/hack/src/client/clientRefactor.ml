@@ -108,15 +108,12 @@ let list_to_file_map =
 
 let apply_patches_to_file_contents file_contents patches =
   let file_map = list_to_file_map patches in
-  let apply fn patches =
-    let old_contents =
-      match SMap.find_opt fn file_contents with
-      | Some old_contents -> old_contents
-      | None -> failwith @@ Printf.sprintf "no file contents for %s" fn
-    in
-    apply_patches_to_string old_contents patches
+  let apply fn old_contents =
+    match SMap.find_opt fn file_map with
+    | Some patches -> apply_patches_to_string old_contents patches
+    | None -> old_contents
   in
-  SMap.mapi apply file_map
+  SMap.mapi apply file_contents
 
 let apply_patches patches =
   let file_map = list_to_file_map patches in

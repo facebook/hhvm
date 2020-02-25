@@ -310,13 +310,29 @@ let get_first_suggested_type_as_string ~syntax_type errors file type_map node =
         | Typing_defs.DeclTy _ -> None))
 
 let get_patches
-    errors (type_map : (Tast_env.env * phase_ty) list Pos.AbsolutePosMap.t) file
-    =
+    ?(files_contents : string Relative_path.Map.t option)
+    errors
+    (type_map : (Tast_env.env * phase_ty) list Pos.AbsolutePosMap.t)
+    file =
   let file = Relative_path.create_detect_prefix file in
   if Relative_path.prefix file = Relative_path.Hhi then
     []
   else
-    let source_text = Full_fidelity_source_text.from_file file in
+    let source_text =
+      match files_contents with
+      | Some files_contents ->
+        let contents =
+          match Relative_path.Map.find_opt files_contents file with
+          | Some contents -> contents
+          | None ->
+            failwith
+            @@ Printf.sprintf
+                 "patches: no file contents for %s"
+                 (Relative_path.suffix file)
+        in
+        Full_fidelity_source_text.make file contents
+      | None -> Full_fidelity_source_text.from_file file
+    in
     let positioned_tree = PositionedTree.make source_text in
     let root =
       Full_fidelity_editable_positioned_syntax.from_positioned_syntax
@@ -532,8 +548,9 @@ module Mode_rewrite = struct
       pos_to_tvar_map
       final_map
 
-  let get_patches (graph : StateSolvedGraph.t) : ServerRefactorTypes.patch list
-      =
+  let get_patches
+      ?(files_contents : string Relative_path.Map.t option)
+      (graph : StateSolvedGraph.t) : ServerRefactorTypes.patch list =
     let (env, errors, type_map, positions) = graph in
     let positions_map =
       build_positions_map
@@ -549,7 +566,9 @@ module Mode_rewrite = struct
     let patches =
       SMap.fold
         (fun filename type_map patches ->
-          let new_patches = get_patches errors type_map filename in
+          let new_patches =
+            get_patches ?files_contents errors type_map filename
+          in
           new_patches @ patches)
         positions_map
         []

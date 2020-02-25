@@ -54,9 +54,9 @@ function testApc($before) {
 }
 
 function testKeyTypes() {
-  apc_add("keysarray", array(2 => 'two', '3' => 'three'));
+  apc_add("keysarray", darray[2 => 'two', '3' => 'three']);
   $arr = __hhvm_intrinsics\apc_fetch_no_check("keysarray");
-  foreach (array(2, 3, '2', '3') as $k) {
+  foreach (varray[2, 3, '2', '3'] as $k) {
     try { var_dump($arr[$k]); } catch (Exception $e) { echo $e->getMessage()."\n"; }
   }
 }
@@ -65,19 +65,19 @@ function testInvalidKeys() {
     // Reject keys with null bytes
     apc_add("bar\x00baz", 10);
     apc_store("test\x00xyz", "hello");
-    apc_store(array("validkey" => "validvalue", "invalid\x00key" => "value"));
-    foreach (array('bar', 'test', 'validkey', 'invalid') as $k) {
+    apc_store(darray["validkey" => "validvalue", "invalid\x00key" => "value"]);
+    foreach (varray['bar', 'test', 'validkey', 'invalid'] as $k) {
         var_dump(__hhvm_intrinsics\apc_fetch_no_check($k));
     }
 }
 
 <<__EntryPoint>> function main(): void {
-  testApc(array(7, 4, 1776));
-  testApc(array("sv0", "sv1"));
-  testApc(array("sk0" => "sv0", "sk1" => "sv1"));
+  testApc(varray[7, 4, 1776]);
+  testApc(varray["sv0", "sv1"]);
+  testApc(darray["sk0" => "sv0", "sk1" => "sv1"]);
 
   // Also check that foreign arrays work for indirect calls
-  apc_store('foo', array("a"));
+  apc_store('foo', varray["a"]);
   $a = __hhvm_intrinsics\apc_fetch_no_check('foo');
   $b = call_user_func_array(fun("strtoupper"), $a);
   var_dump($b);

@@ -3,7 +3,7 @@
 <<__EntryPoint>>
 function main() {
 
-  $a = array();
+  $a = darray[];
   $a[0] = 10;
   $a[1] = 11;
   $a["hi"] = "HI";
@@ -23,7 +23,7 @@ function main() {
 
   // Regression test for a translator bug
   $k = strtolower('blah');  // make it a dynamic string
-  $s = array($k => 123);
+  $s = darray[$k => 123];
   unset($s[$k]);
   unset($s[$k]);  // should have no effect
   var_dump($s);

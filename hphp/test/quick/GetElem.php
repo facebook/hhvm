@@ -4,7 +4,7 @@
 function main(): void {
   error_reporting(0);
 
-  $a = array(0, "b", "c");
+  $a = varray[0, "b", "c"];
 
   print $a[0];
   $a[0] = 1;

@@ -2,7 +2,7 @@
 <<__EntryPoint>> function main(): void {
 error_reporting(0);
 
-$a = array(10, 20, 30);
+$a = varray[10, 20, 30];
 print $a[0] . "\n";
 print $a[1] . "\n";
 print $a[2] . "\n";

@@ -2,7 +2,7 @@
 
 <<__EntryPoint>> function main(): void {
 
-  $a = array('1' => '2', 'hello' => 'world', '' => 'empty');
+  $a = darray['1' => '2', 'hello' => 'world', '' => 'empty'];
   $b = null;
 
   var_dump(hphp_array_idx($a, '1', 3));

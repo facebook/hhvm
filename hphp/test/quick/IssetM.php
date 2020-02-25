@@ -5,15 +5,15 @@ function r($r) {
 }
 
 function build() {
-  $a = array("A0" => 0,
-             "A1" => "a1");
-  $b = array("A" => $a,
+  $a = darray["A0" => 0,
+             "A1" => "a1"];
+  $b = darray["A" => $a,
              "B0" => 0,
-             "B1" => "b1");
-  $c = array("A" => $a,
+             "B1" => "b1"];
+  $c = darray["A" => $a,
              "B" => $b,
              "C0" => 0,
-             "C1" => "c1");
+             "C1" => "c1"];
 
   return $c;
 }

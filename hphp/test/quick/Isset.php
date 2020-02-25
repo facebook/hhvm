@@ -25,7 +25,7 @@ function f() {
   print ":".isset($GLOBALS['y']).":\n";
   print ":".isset(quickIsset::$y).":\n";
 
-  $a = array();
+  $a = darray[];
   $a["foo"] = null;
   var_dump(isset($a["foo"]));
 }
@@ -36,7 +36,7 @@ function get_index() {
 }
 
 function g($dontTake, inout $toFillIn, $id, $key, $value) {
-  $toFillIn = array();
+  $toFillIn = darray[];
   if (isset($toFillIn[$id])) {
     $cur = $toFillIn[$id];
   }
@@ -48,7 +48,7 @@ function g($dontTake, inout $toFillIn, $id, $key, $value) {
 f();
 
 $a = 4;
-$arr = array("get_index should not be called");
+$arr = varray["get_index should not be called"];
 var_dump(isset($a, $b, $arr[get_index()]));
 
 /**

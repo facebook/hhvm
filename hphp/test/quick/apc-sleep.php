@@ -9,7 +9,7 @@ class Foo {
   }
   public function __sleep() {
     echo "I'm going to sleep\n";
-    return array('foo');
+    return varray['foo'];
   }
   public function __wakeup() {
     echo "I'm waking up\n";

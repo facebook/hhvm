@@ -8,7 +8,7 @@ class HasCall {
 }
 <<__EntryPoint>> function main(): void {
 $hc = new HasCall();
-$hc->CasePreserving(array(1=>2, 3=>15));
+$hc->CasePreserving(darray[1=>2, 3=>15]);
 
 $methName = "SnooZZZ";
 $hc->$methName("llberries");

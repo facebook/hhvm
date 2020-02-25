@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>> function main(): void {
-  $x = array();
+  $x = darray[];
   $x[4] = 43;
   print $x[4] . "\n";
 

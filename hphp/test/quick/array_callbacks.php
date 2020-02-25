@@ -15,11 +15,11 @@ class Callbacks {
 }
 
 <<__EntryPoint>> function main(): void {
-  $a = array(1,2,3,4,5,6,7,8);
+  $a = varray[1,2,3,4,5,6,7,8];
   $cb = new Callbacks();
-  var_dump(array_filter($a, array($cb, 'filter')));
+  var_dump(array_filter($a, varray[$cb, 'filter']));
   echo $cb->count . " times\n";
 
-  var_dump(array_filter($a, array('Callbacks', 'sfilter')));
+  var_dump(array_filter($a, varray['Callbacks', 'sfilter']));
   echo Callbacks::$scount . " times\n";
 }

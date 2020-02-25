@@ -4,7 +4,7 @@ function foo() {
   $GLOBALS['x']++;
   $GLOBALS['x2'] = 44;
   $GLOBALS['a'][] = "a";
-  $GLOBALS['a2'] = array("a2");
+  $GLOBALS['a2'] = varray["a2"];
 }
 
 function bar() {

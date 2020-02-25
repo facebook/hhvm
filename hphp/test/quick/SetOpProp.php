@@ -5,7 +5,7 @@ class C {
 }
 
 class D {
-  private $container = array("a" => "D::a", "b" => 42);
+  private $container = darray["a" => "D::a", "b" => 42];
   public $p = 0;
   public function __get($k) {
     print "In D::__get($k)\n";
@@ -14,7 +14,7 @@ class D {
 }
 
 class E {
-  private $container = array("a" => "E::a", "b" => 42);
+  private $container = darray["a" => "E::a", "b" => 42];
   public $p = 0;
   public function __get($k) {
     print "In E::__get($k)\n";

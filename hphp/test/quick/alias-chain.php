@@ -12,9 +12,9 @@ function fiz(Bar $r): Bar {
 function main_entry(): void {
 
   HH\autoload_set_paths(
-    array(
-      'type' => array('bar' => 'alias-chain-1.inc', 'baz' => 'alias-chain-2.inc'),
-    ),
+    darray[
+      'type' => darray['bar' => 'alias-chain-1.inc', 'baz' => 'alias-chain-2.inc'],
+    ],
     __DIR__.'/'
   );
 

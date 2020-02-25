@@ -9,7 +9,7 @@ function makeNonStatic($n) {
 }
 
 <<__EntryPoint>> function main(): void {
-  $a = array();
+  $a = darray[];
   // Insert an object to force $a to become ref-counted in APC.
   $a['obj'] = new stdClass;
   $a['unc'] = makeNonStatic(10);

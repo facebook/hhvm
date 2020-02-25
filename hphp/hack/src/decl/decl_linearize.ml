@@ -471,6 +471,7 @@ and next_state
     | (Synthesized_elts [], _) ->
       let key = (class_name, env.linearization_kind) in
       Cache.add key (List.rev acc);
+      LocalCache.remove key;
       Done)
 
 and get_linearization (env : env) (class_name : string) : linearization =

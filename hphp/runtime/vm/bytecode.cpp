@@ -1026,7 +1026,7 @@ static void shuffleExtraStackArgs(ActRec* ar) {
 // The stack contains numArgs arguments plus an extra cell containing
 // arguments to unpack.
 uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
-                           bool checkInOutAnnot, ActRec* ar) {
+                           bool checkInOutAnnot) {
   auto& stack = vmStack();
   auto unpackArgs = popUnpackArgs();
   SCOPE_EXIT { tvDecRefGen(unpackArgs); };
@@ -1054,7 +1054,6 @@ uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
   if (LIKELY(numArgs < numParams)) {
     for (auto i = numArgs; iter && (i < numParams); ++i, ++iter) {
       if (UNLIKELY(checkInOutAnnot && func->isInOut(i))) {
-        if (ar) ar->setNumArgs(i);
         throwParamInOutMismatch(func, i);
       }
       auto const from = iter.secondValPlus();
@@ -4025,8 +4024,8 @@ bool doFCall(ActRec* ar, uint32_t numArgs, bool hasUnpack,
 
     if (hasUnpack) {
       checkStack(vmStack(), ar->func(), 0);
-      numArgs = prepareUnpackArgs(ar->func(), numArgs, true, ar);
-      ar->setNumArgs(numArgs);
+      auto const newNumArgs = prepareUnpackArgs(ar->func(), numArgs, true);
+      ar->setNumArgs(newNumArgs);
     }
 
     prepareFuncEntry(
@@ -4047,7 +4046,7 @@ bool doFCall(ActRec* ar, uint32_t numArgs, bool hasUnpack,
     auto const numInOutParams = [&] () -> uint32_t {
       if (!func->takesInOutParams()) return 0;
       uint32_t i = 0;
-      for (int p = 0; p < ar->numArgs(); ++p) i += func->isInOut(p);
+      for (int p = 0; p < numArgs; ++p) i += func->isInOut(p);
       return i;
     }();
 

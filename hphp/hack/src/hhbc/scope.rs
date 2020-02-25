@@ -39,15 +39,17 @@ pub mod scope {
     /// unset these unnamed locals and free these iterators upon exception.
     pub fn with_unnamed_locals_and_iterators<F>(emitter: &mut Emitter, emit: F) -> InstrSeq
     where
-        F: FnOnce() -> (InstrSeq, InstrSeq, InstrSeq),
+        F: FnOnce(&mut Emitter) -> (InstrSeq, InstrSeq, InstrSeq),
     {
         let stateref = emitter.refined_state_mut();
         let (next_local, next_iterator) = (stateref.local_gen, stateref.iterator);
         next_local.store_current_state();
         next_iterator.store_current_state();
 
-        let (before, inner, after) = emit();
+        let (before, inner, after) = emit(emitter);
 
+        let stateref = emitter.refined_state_mut();
+        let (next_local, next_iterator) = (stateref.local_gen, stateref.iterator);
         if !next_local.state_has_changed() && !next_iterator.state_has_changed() {
             InstrSeq::gather(vec![before, inner, after])
         } else {

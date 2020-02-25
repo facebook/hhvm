@@ -591,7 +591,7 @@ fn inline_gena_call(emitter: &mut Emitter, env: &Env, arg: &tast::Expr) -> Resul
     let async_eager_label = emitter.label_gen_mut().next_regular();
     let hack_arr_dv_arrs = hack_arr_dv_arrs(emitter.options());
 
-    scope::with_unnamed_local(emitter, |_, arr_local| {
+    scope::with_unnamed_local(emitter, |e, arr_local| {
         let before = InstrSeq::gather(vec![
             load_arr,
             if hack_arr_dv_arrs {
@@ -626,8 +626,7 @@ fn inline_gena_call(emitter: &mut Emitter, env: &Env, arg: &tast::Expr) -> Resul
             InstrSeq::make_label(async_eager_label.clone()),
             InstrSeq::make_popc(),
             emit_iter(
-                //TODO(milliechen) this needs to take in &mut Emitter
-                // which isn't allowed while emitter's already being mutably borrowed
+                e,
                 InstrSeq::make_cgetl(arr_local.clone()),
                 |key_local, val_local| {
                     InstrSeq::gather(vec![
@@ -648,10 +647,37 @@ fn inline_gena_call(emitter: &mut Emitter, env: &Env, arg: &tast::Expr) -> Resul
 }
 
 fn emit_iter<F: FnOnce(local::Type, local::Type) -> InstrSeq>(
+    e: &mut Emitter,
     collection: InstrSeq,
     f: F,
 ) -> InstrSeq {
-    unimplemented!("")
+    scope::with_unnamed_locals_and_iterators(e, |e| {
+        let iter_id = e.iterator_mut().get();
+        let val_id = e.local_gen_mut().get_unnamed();
+        let key_id = e.local_gen_mut().get_unnamed();
+        let loop_end = e.label_gen_mut().next_regular();
+        let loop_next = e.label_gen_mut().next_regular();
+        let iter_args = IterArgs {
+            iter_id,
+            key_id: Some(key_id.clone()),
+            val_id: val_id.clone(),
+        };
+        let iter_init = InstrSeq::gather(vec![
+            collection,
+            InstrSeq::make_iterinit(iter_args.clone(), loop_end.clone()),
+        ]);
+        let iterate = InstrSeq::gather(vec![
+            InstrSeq::make_label(loop_next.clone()),
+            f(val_id.clone(), key_id.clone()),
+            InstrSeq::make_iternext(iter_args, loop_next),
+        ]);
+        let iter_done = InstrSeq::gather(vec![
+            InstrSeq::make_unsetl(val_id),
+            InstrSeq::make_unsetl(key_id),
+            InstrSeq::make_label(loop_end),
+        ]);
+        (iter_init, iterate, iter_done)
+    })
 }
 
 fn emit_shape(

@@ -53,9 +53,11 @@ void raiseNotice(const StringData* sd);
 [[noreturn]] void throwArrayKeyException(const StringData* key, bool isInOut);
 std::string formatParamInOutMismatch(const char* fname, uint32_t index,
                                    bool funcByRef);
-void throwParamInOutMismatch(const Func* func, uint32_t index);
-void throwParamInOutMismatchRange(const Func* func, unsigned firstBit,
-                                  uint64_t mask, uint64_t vals);
+[[noreturn]] void throwParamInOutMismatch(const Func* func, uint32_t index);
+[[noreturn]] void throwParamInOutMismatchRange(const Func* func,
+                                               unsigned firstBit, uint64_t mask,
+                                               uint64_t vals);
+[[noreturn]] void throwInvalidUnpackArgs();
 void raiseRxCallViolation(const ActRec* caller, const Func* callee);
 
 inline Iter*

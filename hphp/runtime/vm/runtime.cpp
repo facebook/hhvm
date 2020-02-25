@@ -227,6 +227,11 @@ void throwParamInOutMismatchRange(const Func* func, unsigned firstVal,
   not_reached();
 }
 
+void throwInvalidUnpackArgs() {
+  SystemLib::throwInvalidArgumentExceptionObject(
+    "Only containers may be unpacked");
+}
+
 void raiseRxCallViolation(const ActRec* caller, const Func* callee) {
   assertx(RuntimeOption::EvalRxEnforceCalls > 0);
   auto const errMsg = folly::sformat(

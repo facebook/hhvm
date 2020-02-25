@@ -928,24 +928,6 @@ Array getDefinedVariables(const ActRec* fp) {
   return ret.toArray();
 }
 
-namespace {
-
-TypedValue popUnpackArgs() {
-  auto& stack = vmStack();
-  TypedValue unpackArgs = *stack.topC();
-  if (LIKELY(isContainer(unpackArgs))) {
-    stack.discard();
-    return unpackArgs;
-  }
-
-  // argument_unpacking RFC dictates "containers and Traversables"
-  stack.popC();
-  raise_warning_unsampled("Only containers may be unpacked");
-  return make_persistent_array_like_tv(ArrayData::CreateVArray());
-}
-
-}
-
 void shuffleMagicArgs(String&& invName, uint32_t numArgs, bool hasUnpack) {
   assertx(!invName.isNull());
   auto& stack = vmStack();
@@ -966,9 +948,10 @@ void shuffleMagicArgs(String&& invName, uint32_t numArgs, bool hasUnpack) {
 
   // Unpack arguments to the end of the argument array.
   if (UNLIKELY(hasUnpack)) {
-    auto const args = popUnpackArgs();
+    auto const args = *stack.topC();
+    if (!isContainer(args)) throwInvalidUnpackArgs();
+    stack.discard();
     SCOPE_EXIT { tvDecRefGen(args); };
-    assertx(isContainer(args));
     IterateV(
       args,
       [](ArrayData*) { return false; },
@@ -1028,9 +1011,10 @@ static void shuffleExtraStackArgs(ActRec* ar) {
 uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
                            bool checkInOutAnnot) {
   auto& stack = vmStack();
-  auto unpackArgs = popUnpackArgs();
+  auto unpackArgs = *stack.topC();
+  if (!isContainer(unpackArgs)) throwInvalidUnpackArgs();
+  stack.discard();
   SCOPE_EXIT { tvDecRefGen(unpackArgs); };
-  assertx(isContainer(unpackArgs));
 
   auto const numUnpackArgs = getContainerSize(unpackArgs);
   auto const numParams = func->numNonVariadicParams();

@@ -62,13 +62,52 @@ end
 
 module Shallow_decl_cache = Lru_cache.Cache (Shallow_decl_cache_entry)
 
+type fixme_map = Pos.t IMap.t IMap.t
+
+module Fixme_store = struct
+  type t = fixme_map Relative_path.Map.t ref
+
+  let empty = ref Relative_path.Map.empty
+
+  let get t filename = Relative_path.Map.find_opt !t filename
+
+  let add t filename fixmes = t := Relative_path.Map.add !t filename fixmes
+
+  let remove t filename = t := Relative_path.Map.remove !t filename
+
+  let remove_batch t filenames =
+    t :=
+      Relative_path.Set.fold filenames ~init:!t ~f:(fun filename map ->
+          Relative_path.Map.remove map filename)
+end
+
+module Fixmes = struct
+  type t = {
+    hh_fixmes: Fixme_store.t;
+    decl_hh_fixmes: Fixme_store.t;
+    disallowed_fixmes: Fixme_store.t;
+  }
+end
+
+let empty_fixmes =
+  Fixmes.
+    {
+      hh_fixmes = Fixme_store.empty;
+      decl_hh_fixmes = Fixme_store.empty;
+      disallowed_fixmes = Fixme_store.empty;
+    }
+
 type t =
   | Shared_memory
   | Local_memory of {
       decl_cache: Decl_cache.t;
       shallow_decl_cache: Shallow_decl_cache.t;
+      fixmes: Fixmes.t;
     }
-  | Decl_service of Decl_service_client.t
+  | Decl_service of {
+      decl: Decl_service_client.t;
+      fixmes: Fixmes.t;
+    }
 
 let t_to_string (t : t) : string =
   match t with
@@ -88,6 +127,7 @@ let set_local_memory_backend
         decl_cache = Decl_cache.make ~max_size:max_num_decls;
         shallow_decl_cache =
           Shallow_decl_cache.make ~max_size:max_bytes_shallow_decls;
+        fixmes = empty_fixmes;
       }
 
 let set_local_memory_backend_with_defaults () : unit =
@@ -99,6 +139,6 @@ let set_local_memory_backend_with_defaults () : unit =
   set_local_memory_backend ~max_num_decls ~max_bytes_shallow_decls
 
 let set_decl_service_backend (decl : Decl_service_client.t) : unit =
-  backend_ref := Decl_service decl
+  backend_ref := Decl_service { decl; fixmes = empty_fixmes }
 
 let get () : t = !backend_ref

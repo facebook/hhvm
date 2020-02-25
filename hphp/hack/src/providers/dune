@@ -2,9 +2,12 @@
   (name provider_backend)
   (modules provider_backend)
   (libraries
+    collections
     decl_service_client
     heap_shared_mem
     lru_cache
+    pos
+    relative_path
     shallow_decl_defs
     typing_defs)
   (preprocess (pps ppx_deriving.std)))

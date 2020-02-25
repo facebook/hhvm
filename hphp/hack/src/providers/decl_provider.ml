@@ -173,7 +173,7 @@ let get_gconst (ctx : Provider_context.t) (gconst_name : string) :
           in
           Some gconst
         | None -> None)
-  | Provider_backend.Decl_service decl ->
+  | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_gconst decl gconst_name
     |> Option.map ~f:(fun decl -> (decl, Errors.empty))
 

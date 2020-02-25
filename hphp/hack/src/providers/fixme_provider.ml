@@ -8,6 +8,8 @@
  *)
 
 open Core_kernel
+module Fixme_store = Provider_backend.Fixme_store
+open Provider_backend.Fixmes
 
 (*****************************************************************************)
 (* Table containing all the HH_FIXMEs found in the source code.
@@ -19,7 +21,7 @@ open Core_kernel
  *)
 (*****************************************************************************)
 
-type fixme_map = Pos.t IMap.t IMap.t
+type fixme_map = Provider_backend.fixme_map
 
 module HH_FIXMES =
   SharedMem.WithCache (SharedMem.ProfiledImmediate) (Relative_path.S)
@@ -52,9 +54,16 @@ module DISALLOWED_FIXMES =
     end)
 
 let get_fixmes filename =
-  match HH_FIXMES.get filename with
-  | None -> DECL_HH_FIXMES.get filename
-  | Some x -> Some x
+  match Provider_backend.get () with
+  | Provider_backend.Shared_memory ->
+    (match HH_FIXMES.get filename with
+    | None -> DECL_HH_FIXMES.get filename
+    | Some x -> Some x)
+  | Provider_backend.Local_memory { fixmes; _ }
+  | Provider_backend.Decl_service { fixmes; _ } ->
+    (match Fixme_store.get fixmes.hh_fixmes filename with
+    | None -> Fixme_store.get fixmes.decl_hh_fixmes filename
+    | Some x -> Some x)
 
 let get_hh_fixmes filename =
   match Provider_backend.get () with
@@ -83,31 +92,38 @@ let get_disallowed_fixmes filename =
          "get_hh_fixmes not implemented for backend %s"
          (Provider_backend.t_to_string backend))
 
-let provide_hh_fixmes filename fixmes =
+let provide_hh_fixmes filename fixme_map =
   match Provider_backend.get () with
-  | Provider_backend.Shared_memory -> HH_FIXMES.add filename fixmes
-  | Provider_backend.Local_memory _
-  | Provider_backend.Decl_service _ ->
-    ()
+  | Provider_backend.Shared_memory -> HH_FIXMES.add filename fixme_map
+  | Provider_backend.Local_memory { fixmes; _ }
+  | Provider_backend.Decl_service { fixmes; _ } ->
+    Fixme_store.add fixmes.hh_fixmes filename fixme_map
 
-let provide_decl_hh_fixmes filename fixmes =
+let provide_decl_hh_fixmes filename fixme_map =
   match Provider_backend.get () with
-  | Provider_backend.Shared_memory -> DECL_HH_FIXMES.add filename fixmes
-  | Provider_backend.Local_memory _
-  | Provider_backend.Decl_service _ ->
-    ()
+  | Provider_backend.Shared_memory -> DECL_HH_FIXMES.add filename fixme_map
+  | Provider_backend.Local_memory { fixmes; _ }
+  | Provider_backend.Decl_service { fixmes; _ } ->
+    Fixme_store.add fixmes.decl_hh_fixmes filename fixme_map
 
-let provide_disallowed_fixmes filename fixmes =
+let provide_disallowed_fixmes filename fixme_map =
   match Provider_backend.get () with
-  | Provider_backend.Shared_memory -> DISALLOWED_FIXMES.add filename fixmes
-  | Provider_backend.Local_memory _
-  | Provider_backend.Decl_service _ ->
-    ()
+  | Provider_backend.Shared_memory -> DISALLOWED_FIXMES.add filename fixme_map
+  | Provider_backend.Local_memory { fixmes; _ }
+  | Provider_backend.Decl_service { fixmes; _ } ->
+    Fixme_store.add fixmes.disallowed_fixmes filename fixme_map
 
 let remove_batch paths =
-  HH_FIXMES.remove_batch paths;
-  DECL_HH_FIXMES.remove_batch paths;
-  DISALLOWED_FIXMES.remove_batch paths
+  match Provider_backend.get () with
+  | Provider_backend.Shared_memory ->
+    HH_FIXMES.remove_batch paths;
+    DECL_HH_FIXMES.remove_batch paths;
+    DISALLOWED_FIXMES.remove_batch paths
+  | Provider_backend.Local_memory { fixmes; _ }
+  | Provider_backend.Decl_service { fixmes; _ } ->
+    Fixme_store.remove_batch fixmes.hh_fixmes paths;
+    Fixme_store.remove_batch fixmes.decl_hh_fixmes paths;
+    Fixme_store.remove_batch fixmes.disallowed_fixmes paths
 
 let local_changes_push_stack () =
   HH_FIXMES.LocalChanges.push_stack ();
@@ -200,18 +216,12 @@ let get_unused_fixmes ~codes ~applied_fixmes ~fold ~files_info =
  *)
 (*****************************************************************************)
 let get_fixmes_for_pos pos =
-  match Provider_backend.get () with
-  | Provider_backend.Shared_memory
-  | Provider_backend.Local_memory _ ->
-    let filename = Pos.filename pos in
-    let (line, _, _) = Pos.info_pos pos in
-    get_fixmes filename
-    |> Option.value ~default:IMap.empty
-    |> IMap.find_opt line
-    |> Option.value ~default:IMap.empty
-  | Provider_backend.Decl_service _ ->
-    (* TODO: implement this! *)
-    IMap.empty
+  let filename = Pos.filename pos in
+  let (line, _, _) = Pos.info_pos pos in
+  get_fixmes filename
+  |> Option.value ~default:IMap.empty
+  |> IMap.find_opt line
+  |> Option.value ~default:IMap.empty
 
 let get_fixme_codes_for_pos pos =
   get_fixmes_for_pos pos |> IMap.keys |> ISet.of_list

@@ -102,7 +102,7 @@ let invalidate_class (ctx : Provider_context.t) (class_name : string) : unit =
   match ctx.Provider_context.backend with
   | Provider_backend.Shared_memory ->
     remove_batch ctx (SSet.singleton class_name)
-  | Provider_backend.Local_memory { decl_cache = _; shallow_decl_cache } ->
+  | Provider_backend.Local_memory { shallow_decl_cache; _ } ->
     Provider_backend.Shallow_decl_cache.remove
       shallow_decl_cache
       ~key:

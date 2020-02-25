@@ -403,6 +403,32 @@ impl PartialEq for Pos {
 
 impl Eq for Pos {}
 
+impl Pos {
+    /// Returns a struct implementing Display which produces the same format as
+    /// `Pos.string` in OCaml.
+    pub fn string(&self) -> PosString {
+        PosString(self)
+    }
+}
+
+/// This struct has an impl of Display which produces the same format as
+/// `Pos.string` in OCaml.
+pub struct PosString<'a>(&'a Pos);
+
+impl std::fmt::Display for PosString<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let (line, start, end) = self.0.info_pos();
+        write!(
+            f,
+            "File {:?}, line {}, characters {}-{}:",
+            self.0.filename().path(),
+            line,
+            start,
+            end
+        )
+    }
+}
+
 // TODO(hrust) eventually move this into a separate file used by Small & Large
 trait FilePos {
     fn offset(&self) -> usize;

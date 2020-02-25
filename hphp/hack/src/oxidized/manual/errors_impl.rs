@@ -66,20 +66,44 @@ impl<P: Ord + Eq> Eq for Error_<P> {}
 
 impl Error_<Pos> {
     /// Return a struct with a `std::fmt::Display` implementation that displays
-    /// the position, error code, and first error message only (omitting the
-    /// subsequent messages further explaining the error).
-    pub fn display_first_message(&self) -> DisplayFirstErrorMessage<'_> {
-        DisplayFirstErrorMessage(self)
+    /// the error in the "raw" format expected by our typecheck test cases.
+    pub fn display_raw(&self) -> DisplayRaw<'_> {
+        DisplayRaw(self)
     }
 }
 
-pub struct DisplayFirstErrorMessage<'a>(&'a Error_<Pos>);
+pub struct DisplayRaw<'a>(&'a Error_<Pos>);
 
-impl<'a> std::fmt::Display for DisplayFirstErrorMessage<'a> {
+impl<'a> std::fmt::Display for DisplayRaw<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let Error_(code, messages) = self.0;
         let (pos, msg) = messages.first().unwrap();
-        write!(f, "{} - [{}] - {}", pos, code, msg)
+        let code = DisplayErrorCode(*code);
+        write!(f, "{}\n{} ({})", pos.string(), msg, code)?;
+        for (pos, msg) in messages.iter().skip(1) {
+            write!(f, "  {}\n{}", pos.string(), msg)?;
+        }
+        Ok(())
+    }
+}
+
+fn error_kind(error_code: ErrorCode) -> &'static str {
+    match error_code / 1000 {
+        1 => "Parsing",
+        2 => "Naming",
+        3 => "NastCheck",
+        4 => "Typing",
+        5 => "Lint",
+        8 => "Init",
+        _ => "Other",
+    }
+}
+
+struct DisplayErrorCode(ErrorCode);
+
+impl std::fmt::Display for DisplayErrorCode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}[{:04}]", error_kind(self.0), self.0)
     }
 }
 

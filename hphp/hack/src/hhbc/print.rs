@@ -289,7 +289,7 @@ fn print_fun_def<W: Write>(
     option(w, &body.return_type_info, print_type_info)?;
     w.write(" ")?;
     w.write(fun_def.name.to_raw_string())?;
-    print_params(w, fun_def.body.env.as_ref(), fun_def.params())?;
+    print_params(ctx, w, fun_def.body.env.as_ref(), fun_def.params())?;
     if fun_def.is_generator() {
         w.write(" isGenerator")?;
     }
@@ -1222,21 +1222,23 @@ fn print_fatal_op<W: Write>(w: &mut W, f: &FatalOp) -> Result<(), W::Error> {
 }
 
 fn print_params<W: Write>(
+    ctx: &mut Context,
     w: &mut W,
     body_env: Option<&BodyEnv>,
     params: &[HhasParam],
 ) -> Result<(), W::Error> {
     wrap_by_paren(w, |w| {
-        concat_by(w, ", ", params, |w, i| print_param(w, body_env, i))
+        concat_by(w, ", ", params, |w, i| print_param(ctx, w, body_env, i))
     })
 }
 
 fn print_param<W: Write>(
+    ctx: &mut Context,
     w: &mut W,
     body_env: Option<&BodyEnv>,
     param: &HhasParam,
 ) -> Result<(), W::Error> {
-    print_param_user_attributes(w, param)?;
+    print_param_user_attributes(ctx, w, param)?;
     if param.is_inout {
         w.write("inout ")?;
     }
@@ -1544,10 +1546,14 @@ fn print_import_flavor<W: Write>(w: &mut W, flavor: &ast::ImportFlavor) -> Resul
     })
 }
 
-fn print_param_user_attributes<W: Write>(w: &mut W, param: &HhasParam) -> Result<(), W::Error> {
+fn print_param_user_attributes<W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    param: &HhasParam,
+) -> Result<(), W::Error> {
     match &param.user_attributes[..] {
         [] => Ok(()),
-        _ => not_impl!(),
+        _ => wrap_by_square(w, |w| print_attributes(ctx, w, &param.user_attributes)),
     }
 }
 

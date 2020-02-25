@@ -87,6 +87,45 @@ struct SQLite {
    */
   void setBusyTimeout(int ms) noexcept;
 
+  enum class JournalMode {
+    // Default behavior. During each transaction, create a rollback journal
+    // with the extension `.sql3-journal` file during each transaction, and
+    // delete it when the transaction is committed or rolled back.
+    DELETE,
+
+    // Truncate the rollback journal to 0 bytes instead of deleting it from
+    // the filesystem.
+    TRUNCATE,
+
+    // Instead of deleting or truncating the rollback journal, overwrite the
+    // header with null bytes.
+    PERSIST,
+
+    // Instead of creating the rollback journal on-disk, store the journal
+    // in-memory. This may cause your database to become corrupt if your
+    // application crashes in the middle of a write transaction.
+    MEMORY,
+
+    // Instead of creating a rollback journal, create a write-ahead log file
+    // with the extension `.sql3-wal`.
+    WAL,
+
+    // Don't use a rollback journal at all. The behavior of the ROLLBACK
+    // command will be undefined if you enable this, and application crashes
+    // in the middle of a transaction can easily cause the db to become
+    // corrupt.
+    OFF
+  };
+
+  /**
+   * Set SQLite's journaling mode.
+   *
+   * Journaling is the mechanism that SQLite uses to rollback transactions,
+   * recover from crashes and exceptions, and prevent other processes/threads
+   * from seeing data that hasn't officially been committed yet.
+   */
+  void setJournalMode(JournalMode mode);
+
   enum class SynchronousLevel {
     // Trust the filesystem to fsync for you. This may result in database
     // corruption if power loss occurs.
@@ -109,6 +148,16 @@ struct SQLite {
    * https://www.sqlite.org/pragma.html#pragma_synchronous
    */
   void setSynchronousLevel(SynchronousLevel lvl);
+
+  /**
+   * True iff the database is read-only.
+   *
+   * dbName: The name you've given to a database you ATTACHed to your
+   * connection, or "main" by default.
+   */
+  bool isReadOnly() const;
+  bool isReadOnly(folly::StringPiece dbName) const;
+  bool isReadOnly(const char* dbName) const;
 
   /**
    * Return the most recent error message from SQLite.

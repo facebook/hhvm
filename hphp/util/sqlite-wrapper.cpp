@@ -24,6 +24,29 @@ namespace HPHP {
 //==============================================================================
 // SQLite.
 
+namespace {
+
+folly::StringPiece journalModeName(
+  SQLite::JournalMode mode) noexcept {
+  switch (mode) {
+    case SQLite::JournalMode::DELETE:
+      return "DELETE";
+    case SQLite::JournalMode::TRUNCATE:
+      return "TRUNCATE";
+    case SQLite::JournalMode::PERSIST:
+      return "PERSIST";
+    case SQLite::JournalMode::MEMORY:
+      return "MEMORY";
+    case SQLite::JournalMode::WAL:
+      return "WAL";
+    case SQLite::JournalMode::OFF:
+      return "OFF";
+  }
+  not_reached();
+}
+
+} // namespace
+
 SQLite::SQLite(SQLite&& old) noexcept
     : m_dbc{old.m_dbc},
       m_beginStmt{std::move(old.m_beginStmt)},
@@ -101,11 +124,29 @@ void SQLite::setBusyTimeout(int ms) noexcept {
   sqlite3_busy_timeout(m_dbc, ms);
 }
 
+void SQLite::setJournalMode(JournalMode mode) {
+  SQLiteStmt journalModeStmt{
+    *this, folly::sformat("PRAGMA journal_mode = {}", journalModeName(mode))};
+  journalModeStmt.query().step();
+}
+
 void SQLite::setSynchronousLevel(SynchronousLevel lvl) {
   SQLiteStmt stmt{
     *this,
     folly::sformat("PRAGMA synchronous = {}", static_cast<int>(lvl))};
   stmt.query().step();
+}
+
+bool SQLite::isReadOnly() const {
+  return isReadOnly("main");
+}
+
+bool SQLite::isReadOnly(folly::StringPiece dbName) const {
+  return isReadOnly(dbName.data());
+}
+
+bool SQLite::isReadOnly(const char* dbName) const {
+  return bool(sqlite3_db_readonly(m_dbc, dbName));
 }
 
 std::string SQLite::errMsg() const noexcept { return {sqlite3_errmsg(m_dbc)}; }
@@ -118,21 +159,6 @@ SQLite::SQLite(sqlite3* dbc)
   setBusyTimeout(60'000);
   SQLiteStmt foreignKeysStmt{*this, "PRAGMA foreign_keys = ON"};
   foreignKeysStmt.query().step();
-  if (sqlite3_db_readonly(m_dbc, "main") == 0) {
-    SQLiteStmt walModeStmt{*this, "PRAGMA journal_mode = WAL"};
-    try {
-      walModeStmt.query().step();
-    } catch (SQLiteExc& e) {
-      switch (e.m_code) {
-        case SQLITE_BUSY:
-          // This happens if multiple connections attempt to set WAL mode at
-          // the same time. We only need one connection to succeed.
-          break;
-        default:
-          throw;
-      }
-    }
-  }
 }
 
 void SQLite::txPush() {

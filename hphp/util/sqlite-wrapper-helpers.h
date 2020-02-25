@@ -190,6 +190,52 @@ struct SQLiteExc : std::runtime_error::runtime_error {
   SQLiteExc(int code, std::string sql);
   SQLiteExc() = delete;
 
+  // Nonexhaustive list of SQLite error codes.
+  enum class Code {
+    OK = 0,
+    ERROR = 1,
+    INTERNAL = 2,
+    PERM = 3,
+    ABORT = 4,
+    BUSY = 5,
+    LOCKED = 6,
+    NOMEM = 7,
+    READONLY = 8,
+    INTERRUPT = 9,
+    IOERR = 10,
+    CORRUPT = 11,
+    NOTFOUND = 12,
+    FULL = 13,
+    CANTOPEN = 14,
+    PROTOCOL = 15,
+    EMPTY = 16,
+    SCHEMA = 17,
+    TOOBIG = 18,
+    CONSTRAINT = 19,
+    MISMATCH = 20,
+    MISUSE = 21,
+    NOLFS = 22,
+    AUTH = 23,
+    FORMAT = 24,
+    RANGE = 25,
+    NOTADB = 26,
+    NOTICE = 27,
+    WARNING = 28,
+    __NumberOfCodes // must be last element
+  };
+
+  /**
+   * Return the error code as an enum value.
+   *
+   * Unknown error codes will be coerced to ERROR.
+   */
+  Code code() const noexcept {
+    if (m_code < 0 || m_code > static_cast<int>(Code::__NumberOfCodes)) {
+      return Code::ERROR;
+    }
+    return static_cast<Code>(m_code);
+  }
+
   int m_code;
   std::string m_sql;
 };

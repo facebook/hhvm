@@ -307,7 +307,7 @@ let from_string keyword ~only_reserved =
   | "keyset"          when not only_reserved -> Some Keyset
   | "list"                                   -> Some List
   | "mixed"           when not only_reserved -> Some Mixed
-  | "namespace"       when not only_reserved -> Some Namespace
+  | "namespace"                              -> Some Namespace
   | "new"                                    -> Some New
   | "newtype"         when not only_reserved -> Some Newtype
   | "noreturn"        when not only_reserved -> Some Noreturn

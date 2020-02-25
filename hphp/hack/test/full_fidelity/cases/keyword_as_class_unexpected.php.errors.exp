@@ -78,6 +78,8 @@
 (42,7)-(42,12) Encountered unexpected token 'isset'.
 (43,7)-(43,7) A name is expected here.
 (43,7)-(43,11) Encountered unexpected token 'list'.
+(44,7)-(44,7) A name is expected here.
+(44,7)-(44,16) Encountered unexpected token 'namespace'.
 (45,7)-(45,7) A name is expected here.
 (45,7)-(45,10) Encountered unexpected token 'new'.
 (46,7)-(46,7) A name is expected here.
@@ -199,6 +201,7 @@
 (106,5)-(106,11) Unexpected node on right hand side of new or instanceof: isset_expression
 (107,5)-(107,10) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new list()()'?
 (107,5)-(107,10) Unexpected node on right hand side of new or instanceof: list_expression
+(108,5)-(108,13) Unexpected node on right hand side of new or instanceof: token
 (109,5)-(109,9) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new new()()'?
 (109,5)-(109,9) Unexpected node on right hand side of new or instanceof: object_creation_expression
 (109,8)-(109,9) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new ()()'?

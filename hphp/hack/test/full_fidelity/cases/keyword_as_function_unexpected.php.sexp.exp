@@ -369,10 +369,10 @@
      (function_declaration 23
       ((missing 0 ())
        (function_declaration_header 20
-        ((missing 0 ()) (() function 8 ((whitespace 1))) (() name 9 ())
-         (missing 0 ()) (() "(" 1 ()) (missing 0 ())
-         (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
-         (missing 0 ())))
+        ((missing 0 ()) (() function 8 ((whitespace 1)))
+         (error 9 ((() namespace 9 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
        (compound_statement 2
         ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
      (function_declaration 17

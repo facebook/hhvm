@@ -1,0 +1,4 @@
+(5,7)-(5,7) A name is expected here.
+(5,7)-(5,16) Encountered unexpected token 'namespace'.
+(8,12)-(8,20) Unexpected node on right hand side of new or instanceof: token
+(11,19)-(11,19) A name or __construct keyword is expected here.

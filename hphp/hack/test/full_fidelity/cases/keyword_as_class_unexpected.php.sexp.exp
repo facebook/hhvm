@@ -327,11 +327,12 @@
          (() } 1 ((end_of_line 1)))))))
      (classish_declaration 18
       ((missing 0 ()) (missing 0 ()) (missing 0 ())
-       (() class 5 ((whitespace 1))) (() name 9 ((whitespace 1)))
+       (() class 5 ((whitespace 1))) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (missing 0 ()) (missing 0 ())
+       (missing 0 ())
        (classish_body 2
-        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+        ((((extra_token_error 9) (whitespace 1)) { 1 ()) (missing 0 ())
+         (() } 1 ((end_of_line 1)))))))
      (classish_declaration 12
       ((missing 0 ()) (missing 0 ()) (missing 0 ())
        (() class 5 ((whitespace 1))) (missing 0 ()) (missing 0 ())
@@ -763,7 +764,7 @@
       ((object_creation_expression 15
         ((() new 3 ((whitespace 1)))
          (constructor_call 11
-          ((() name 9 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))))
+          ((() namespace 9 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))))
        (() ";" 1 ((end_of_line 1)))))
      (expression_statement 10
       ((object_creation_expression 9

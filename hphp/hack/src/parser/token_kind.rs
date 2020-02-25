@@ -533,7 +533,7 @@ impl TokenKind {
             "keyset" if !only_reserved => Some(TokenKind::Keyset),
             "list" => Some(TokenKind::List),
             "mixed" if !only_reserved => Some(TokenKind::Mixed),
-            "namespace" if !only_reserved => Some(TokenKind::Namespace),
+            "namespace" => Some(TokenKind::Namespace),
             "new" => Some(TokenKind::New),
             "newtype" if !only_reserved => Some(TokenKind::Newtype),
             "noreturn" if !only_reserved => Some(TokenKind::Noreturn),

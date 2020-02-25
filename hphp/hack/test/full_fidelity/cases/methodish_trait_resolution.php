@@ -21,5 +21,5 @@ class C {
 class D {
   public function animal(): void = animal;
   public function animal(): void = T1::class;
-  public function animal(): void = \Namespace\T2::foo; // ok
+  public function animal(): void = \MyNamespace\T2::foo; // ok
 }

@@ -237,7 +237,7 @@ where
     fn next_xhp_class_name_or_other(&mut self) -> S::R {
         let token = self.next_xhp_class_name_or_other_token();
         match token.kind() {
-            TokenKind::Name => {
+            TokenKind::Namespace | TokenKind::Name => {
                 let name_token = S!(make_token, self, token);
                 self.scan_remaining_qualified_name(name_token)
             }
@@ -413,7 +413,6 @@ where
                     self.continue_from(parser1);
                     let token = S!(make_token, self, token);
                     let part = S!(make_list_item, self, name_opt.unwrap(), token);
-                    // TODO(T25649779)
                     parts.push(part);
                     has_backslash = true;
                     name_opt = None;
@@ -508,7 +507,7 @@ where
         let mut parser1 = self.clone();
         let token = parser1.next_token_non_reserved_as_name();
         match token.kind() {
-            TokenKind::Name => {
+            TokenKind::Namespace | TokenKind::Name => {
                 self.continue_from(parser1);
                 let token = S!(make_token, self, token);
                 self.scan_remaining_qualified_name(token)
@@ -574,7 +573,7 @@ where
         };
 
         match name.kind() {
-            TokenKind::Name | TokenKind::XHPClassName => {
+            TokenKind::Namespace | TokenKind::Name | TokenKind::XHPClassName => {
                 self.continue_from(parser1);
                 let token = S!(make_token, self, name);
                 self.scan_remaining_qualified_name(token)
@@ -691,7 +690,7 @@ where
         let mut parser1 = self.clone();
         let token = parser1.next_token_as_name();
         match token.kind() {
-            TokenKind::Name => {
+            TokenKind::Namespace | TokenKind::Name => {
                 self.continue_from(parser1);
                 let token = S!(make_token, self, token);
                 self.scan_remaining_qualified_name(token)

@@ -1,1 +1,2 @@
-No errors
+File "namespace_namespace3.php", line 4, characters 19-19:
+A name or __construct keyword is expected here. (Parsing[1002])

@@ -1,5 +1,5 @@
-((script 380
-  ((list 380
+((script 382
+  ((list 382
     ((markup_section 4
       ((missing 0 ()) (() markup 0 ())
        (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))
@@ -97,14 +97,14 @@
                (() name 6 ())))
              (() ";" 1 ((end_of_line 1)))))))
          (() } 1 ((end_of_line 1)))))))
-     (classish_declaration 161
+     (classish_declaration 163
       ((missing 0 ()) (missing 0 ()) (missing 0 ())
        (((end_of_line 1)) class 5 ((whitespace 1)))
        (() name 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (classish_body 153
+       (classish_body 155
         ((() { 1 ((end_of_line 1)))
-         (list 141
+         (list 143
           ((methodish_trait_resolution 40
             ((missing 0 ())
              (function_declaration_header 30
@@ -133,7 +133,7 @@
               ((simple_type_specifier 2 ((() name 2 ()))) (() :: 2 ())
                (missing 0 ())))
              (((extra_token_error 5)) ";" 1 ((end_of_line 1)))))
-           (methodish_trait_resolution 52
+           (methodish_trait_resolution 54
             ((missing 0 ())
              (function_declaration_header 30
               ((list 6 ((((whitespace 2)) public 6 ((whitespace 1)))))
@@ -143,12 +143,12 @@
                (simple_type_specifier 4 ((() void 4 ((whitespace 1)))))
                (missing 0 ())))
              (() = 1 ((whitespace 1)))
-             (scope_resolution_expression 18
-              ((simple_type_specifier 13
-                ((qualified_name 13
-                  ((list 13
+             (scope_resolution_expression 20
+              ((simple_type_specifier 15
+                ((qualified_name 15
+                  ((list 15
                     ((list_item 1 ((missing 0 ()) (() "\\" 1 ())))
-                     (list_item 10 ((() name 9 ()) (() "\\" 1 ())))
+                     (list_item 12 ((() name 11 ()) (() "\\" 1 ())))
                      (list_item 2 ((() name 2 ()) (missing 0 ())))))))))
                (() :: 2 ()) (() name 3 ())))
              (() ";" 1

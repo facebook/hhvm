@@ -1,0 +1,4 @@
+(6,1)-(6,9) No code may exist outside of namespace {}
+(6,11)-(6,11) A name is expected here.
+(6,11)-(6,26) Cannot use collection initialization for non-collection class.
+(6,27)-(7,1) A semicolon (';') is expected here.

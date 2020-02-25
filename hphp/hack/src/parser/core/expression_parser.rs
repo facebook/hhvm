@@ -295,7 +295,7 @@ where
         let mut parser1 = self.clone();
         let token = parser1.next_token_non_reserved_as_name();
         match token.kind() {
-            TokenKind::Name => {
+            TokenKind::Namespace | TokenKind::Name => {
                 self.continue_from(parser1);
                 let token = S!(make_token, self, token);
                 let name = self.scan_remaining_qualified_name(token);

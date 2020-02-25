@@ -339,18 +339,36 @@ let get_patches
         (PositionedTree.root positioned_tree)
     in
     let get_patches node =
+      (* In the code below, you'll see a re-occurring pattern: the use of
+       * Option.is_some and two calls to get_first_suggested_type_as_string.
+       *
+       * We support two types of positions in the position-to-type map:
+       *
+       * 1. When the return type is missing, the position encoded in the
+       *    reason is that of the function symbol.
+       *
+       * 2. When the return type is not missing, the position encoded in
+       *    the reason might be that of the original return type).
+       *)
       Option.Monad_infix.(
         match syntax node with
         | FunctionDeclarationHeader
             { function_type; function_name; function_parameter_list; _ } ->
           begin
             let patch =
-              get_first_suggested_type_as_string
-                ~syntax_type:RetType
-                errors
-                file
-                type_map
-                function_name
+              Option.first_some
+                (get_first_suggested_type_as_string
+                   ~syntax_type:RetType
+                   errors
+                   file
+                   type_map
+                   function_name)
+                (get_first_suggested_type_as_string
+                   ~syntax_type:RetType
+                   errors
+                   file
+                   type_map
+                   function_type)
               >>= fun type_str ->
               position_exclusive file function_type >>| fun pos ->
               if is_missing function_type then
@@ -390,12 +408,19 @@ let get_patches
                         };
                       _;
                     } ->
-                  get_first_suggested_type_as_string
-                    ~syntax_type:ParamType
-                    errors
-                    file
-                    type_map
-                    parameter_name
+                  Option.first_some
+                    (get_first_suggested_type_as_string
+                       ~syntax_type:ParamType
+                       errors
+                       file
+                       type_map
+                       parameter_name)
+                    (get_first_suggested_type_as_string
+                       ~syntax_type:ParamType
+                       errors
+                       file
+                       type_map
+                       parameter_type)
                   >>= fun type_str ->
                   position_exclusive file parameter_type >>| fun pos ->
                   if is_missing parameter_type then
@@ -450,15 +475,22 @@ let get_patches
           end else
             Some () )
           >>= fun () ->
-          (match syntax declarator with
-          | PropertyDeclarator { property_name; _ } ->
-            get_first_suggested_type_as_string
-              ~syntax_type:PropType
-              errors
-              file
-              type_map
-              property_name
-          | _ -> failwith "expected a PropertyDeclarator")
+          Option.first_some
+            (match syntax declarator with
+            | PropertyDeclarator { property_name; _ } ->
+              get_first_suggested_type_as_string
+                ~syntax_type:PropType
+                errors
+                file
+                type_map
+                property_name
+            | _ -> failwith "expected a PropertyDeclarator")
+            (get_first_suggested_type_as_string
+               ~syntax_type:PropType
+               errors
+               file
+               type_map
+               property_type)
           >>= fun type_str ->
           ( if is_missing property_attribute_spec then
             position file modifier >>| fun pos ->

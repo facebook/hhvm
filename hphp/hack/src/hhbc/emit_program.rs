@@ -6,12 +6,13 @@
 use closure_convert_rust as closure_convert;
 use emit_body_rust::{emit_body_with_default_args, make_body};
 use emit_class_rust::emit_classes_from_program;
+use emit_constant_rust::emit_constants_from_program;
 use emit_fatal_rust::emit_fatal;
 use emit_file_attributes_rust::emit_file_attributes_from_program;
 use emit_function_rust::emit_functions_from_program;
 use emit_record_def_rust::emit_record_defs_from_program;
 use emit_typedef_rust::emit_typedefs_from_program;
-use env::{self, emitter::Emitter};
+use env::{self, emitter::Emitter, Env};
 use hhas_body_rust::HhasBody;
 use hhas_program_rust::HhasProgram;
 use hhbc_ast_rust::FatalOp;
@@ -89,9 +90,16 @@ fn emit_program_<'p>(
     let main = emit_main(&mut emitter, flags, namespace, prog)?;
     let record_defs = emit_record_defs_from_program(&mut emitter, prog)?;
     let file_attributes = emit_file_attributes_from_program(&mut emitter, prog)?;
+    let (constants, mut const_inits) = {
+        let mut env = Env::default();
+        // TODO(hrust), why clone is needed here? Try Rc,
+        env.namespace = namespace.clone();
+        emit_constants_from_program(&mut emitter, &mut env, prog)?
+    };
     let typedefs = emit_typedefs_from_program(&mut emitter, prog)?;
-    let classes = emit_classes_from_program(&mut emitter, hoist_kinds.clone(), prog)?;
-    let functions = emit_functions_from_program(&mut emitter, hoist_kinds, prog)?;
+    let classes = emit_classes_from_program(&mut emitter, &hoist_kinds, prog)?;
+    let mut functions = emit_functions_from_program(&mut emitter, &hoist_kinds, prog)?;
+    functions.append(&mut const_inits);
 
     Ok(HhasProgram {
         main,
@@ -99,6 +107,7 @@ fn emit_program_<'p>(
         classes,
         functions,
         typedefs,
+        constants,
         is_hh: flags.contains(FromAstFlags::IS_HH_FILE),
         file_attributes,
         ..HhasProgram::default()

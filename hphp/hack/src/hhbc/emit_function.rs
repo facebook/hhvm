@@ -13,6 +13,7 @@ use emit_memoize_helpers_rust as emit_memoize_helpers;
 use env::emitter::Emitter;
 use hhas_attribute_rust::{self as hhas_attribute, HhasAttribute};
 use hhas_function_rust::{self as hhas_function, HhasFunction};
+use hhas_pos_rust::Span;
 use hhbc_id_rust::{self as hhbc_id, Id};
 use instruction_sequence_rust::{InstrSeq, Result};
 use naming_special_names_rust::user_attributes as ua;
@@ -133,7 +134,7 @@ pub fn emit_function<'a>(
     let normal_function = HhasFunction {
         attributes: attrs,
         name: name.into(),
-        span: (&f.span).clone().into(),
+        span: Span::from_pos(&f.span),
         rx_level,
         body,
         hoisted,
@@ -149,13 +150,13 @@ pub fn emit_function<'a>(
 
 pub fn emit_functions_from_program<'a>(
     e: &mut Emitter,
-    hoist_kinds: Vec<HoistKind>,
+    hoist_kinds: &[HoistKind],
     prog: &'a tast::Program,
 ) -> Result<Vec<HhasFunction<'a>>> {
     Ok(hoist_kinds
         .into_iter()
         .zip(prog)
-        .filter_map(|(hoist_kind, d)| d.as_fun().map(|f| emit_function(e, f, hoist_kind)))
+        .filter_map(|(hoist_kind, d)| d.as_fun().map(|f| emit_function(e, f, *hoist_kind)))
         .collect::<Result<Vec<Vec<_>>>>()?
         .into_iter()
         .flatten()

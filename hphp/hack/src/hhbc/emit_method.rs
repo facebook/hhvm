@@ -222,7 +222,7 @@ pub fn from_ast<'a>(
     let span = if is_native_opcode_impl {
         Span(0, 0)
     } else {
-        Span::from(method.span.clone())
+        Span::from_pos(&method.span)
     };
     let mut flags = HhasMethodFlags::empty();
     flags.set(HhasMethodFlags::IS_STATIC, method.static_);

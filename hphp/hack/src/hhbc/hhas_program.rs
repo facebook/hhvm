@@ -6,6 +6,7 @@
 use hhas_attribute_rust::HhasAttribute;
 use hhas_body_rust::HhasBody;
 use hhas_class_rust::HhasClass;
+use hhas_constant_rust::HhasConstant;
 use hhas_function_rust::HhasFunction;
 use hhas_record_def_rust::HhasRecord;
 use hhas_symbol_refs_rust::HhasSymbolRefs;
@@ -22,4 +23,5 @@ pub struct HhasProgram<'a> {
     pub file_attributes: Vec<HhasAttribute>,
     pub main: HhasBody<'a>,
     pub symbol_refs: Vec<HhasSymbolRefs>,
+    pub constants: Vec<HhasConstant<'a>>,
 }

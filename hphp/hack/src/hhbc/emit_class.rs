@@ -3,11 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ast_constant_folder_rust as ast_constant_folder;
 use closure_convert_rust as closure_convert;
 use emit_attribute_rust as emit_attribute;
 use emit_body_rust as emit_body;
-use emit_expression_rust as emit_expression;
 use emit_fatal_rust as emit_fatal;
 use emit_memoize_method_rust as emit_memoize_method;
 use emit_method_rust as emit_method;
@@ -19,7 +17,7 @@ use emit_xhp_rust as emit_xhp;
 use env::{emitter::Emitter, Env};
 use hhas_attribute_rust as hhas_attribute;
 use hhas_class_rust::{HhasClass, HhasClassFlags, TraitReqKind};
-use hhas_constant_rust::HhasConstant;
+use hhas_constant_rust::{self as hhas_constant, HhasConstant};
 use hhas_method_rust::{HhasMethod, HhasMethodFlags};
 use hhas_param_rust::HhasParam;
 use hhas_pos_rust::Span;
@@ -34,7 +32,6 @@ use oxidized::{
     ast::{self as tast, Hint, ReifyKind, Visibility},
     namespace_env,
 };
-use runtime::TypedValue;
 use rx_rust as rx;
 
 use std::collections::BTreeMap;
@@ -108,31 +105,6 @@ fn make_86method<'a>(
         rx_level,
         visibility,
     }
-}
-
-fn from_constant<'a>(
-    emitter: &mut Emitter,
-    env: &Env,
-    id: &'a tast::Id,
-    expr: &Option<tast::Expr>,
-) -> Result<HhasConstant<'a>> {
-    let (value, initializer_instrs) = match expr {
-        None => (None, None),
-        Some(init) => {
-            match ast_constant_folder::expr_to_typed_value(emitter, &env.namespace, init) {
-                Ok(v) => (Some(v), None),
-                Err(_) => (
-                    Some(TypedValue::Uninit),
-                    Some(emit_expression::emit_expr(emitter, env, init)?),
-                ),
-            }
-        }
-    };
-    Ok(HhasConstant {
-        name: id.name().into(),
-        value,
-        initializer_instrs,
-    })
 }
 
 fn from_extends(is_enum: bool, extends: &Vec<tast::Hint>) -> Option<hhbc_id::class::Type> {
@@ -229,7 +201,7 @@ fn from_class_elt_constants<'a>(
     class_
         .consts
         .iter()
-        .map(|x| from_constant(emitter, env, &x.id, &x.expr))
+        .map(|x| hhas_constant::from_ast(emitter, env, &x.id, x.expr.as_ref()))
         .collect()
 }
 
@@ -359,7 +331,7 @@ fn emit_reified_init_method<'a>(
             false, // is_static
             Visibility::Protected,
             false, // is_abstract
-            ast_class.span.clone().into(),
+            Span::from_pos(&ast_class.span),
             instrs,
         ))
     }
@@ -551,7 +523,7 @@ pub fn emit_class<'a>(
         &ast_class.implements
     };
     let implements = from_implements(implements);
-    let span: Span = ast_class.span.clone().into();
+    let span = Span::from_pos(&ast_class.span);
     let mut additional_methods: Vec<HhasMethod> = vec![];
     if let Some(cats) = xhp_categories {
         additional_methods.extend(emit_xhp::from_category_declaration(ast_class, &cats)?)
@@ -698,14 +670,14 @@ pub fn emit_class<'a>(
 
 pub fn emit_classes_from_program<'a>(
     emitter: &mut Emitter,
-    hoist_kinds: Vec<closure_convert::HoistKind>,
+    hoist_kinds: &[closure_convert::HoistKind],
     tast: &'a tast::Program,
 ) -> Result<Vec<HhasClass<'a>>> {
     tast.iter()
         .zip(hoist_kinds)
         .filter_map(|(class, hoist_kind)| {
             if let tast::Def::Class(cd) = class {
-                Some(emit_class(emitter, cd, hoist_kind))
+                Some(emit_class(emitter, cd, *hoist_kind))
             } else {
                 None
             }

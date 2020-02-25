@@ -33,7 +33,7 @@ use oxidized::{
 use rx_rust as rx;
 use unique_list_rust::UniqueList;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum HoistKind {
     /// Def that is already at top-level
     TopLevel,
@@ -1348,6 +1348,7 @@ pub fn convert_toplevel_prog(e: &mut Emitter, defs: &mut Program) -> Vec<HoistKi
     let mut class_count = 0;
     let mut record_count = 0;
     let mut typedef_count = 0;
+    let mut const_count = 0;
 
     for mut def in defs.drain(..) {
         visitor.visit_def(&mut env, &mut def);
@@ -1378,6 +1379,16 @@ pub fn convert_toplevel_prog(e: &mut Emitter, defs: &mut Program) -> Vec<HoistKi
                 new_defs.push(Def::mk_stmt(Stmt(
                     Pos::make_none(),
                     Stmt_::mk_def_inline(Def::Typedef(stub_td)),
+                )));
+            }
+            Def::Constant(x) => {
+                let mut stub_c = x.clone();
+                stub_c.name = Id(stub_c.name.0, const_count.to_string());
+                const_count += 1;
+                new_defs.push(Def::Constant(x));
+                new_defs.push(Def::mk_stmt(Stmt(
+                    Pos::make_none(),
+                    Stmt_::mk_def_inline(Def::Constant(stub_c)),
                 )));
             }
             Def::Namespace(x) => new_defs.extend_from_slice((*x).1.as_slice()),

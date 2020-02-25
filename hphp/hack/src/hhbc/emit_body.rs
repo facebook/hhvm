@@ -14,7 +14,6 @@ use emit_adata_rust as emit_adata;
 use emit_expression_rust as emit_expression;
 use emit_fatal_rust::raise_fatal_runtime;
 use emit_param_rust as emit_param;
-use emit_pos_rust as emit_pos;
 use emit_pos_rust::emit_pos;
 use emit_type_hint_rust as emit_type_hint;
 use env::{
@@ -27,7 +26,6 @@ use hhas_body_rust::HhasBody;
 use hhas_param_rust::HhasParam;
 use hhas_type::Info as HhasTypeInfo;
 use hhbc_ast_rust::{Instruct, IstypeOp, ParamId};
-use hhbc_id_rust::{r#const, Id};
 use hhbc_string_utils_rust as string_utils;
 use instruction_sequence_rust::{Error, InstrSeq, Result};
 use label_rewriter_rust as label_rewriter;
@@ -449,17 +447,6 @@ fn emit_defs(env: &mut Env, emitter: &mut Emitter, prog: &[tast::Def]) -> Result
     fn emit_def(env: &mut Env, emitter: &mut Emitter, def: &tast::Def) -> Result {
         match def {
             Def::Stmt(s) => emit_statement::emit_stmt(emitter, env, s),
-            Def::Constant(c) => {
-                let const_id: r#const::Type<'static> = r#const::Type::from_ast_name(&c.name.1)
-                    .to_raw_string()
-                    .to_owned()
-                    .into();
-                Ok(InstrSeq::gather(vec![
-                    emit_expression::emit_expr(emitter, env, &c.value)?,
-                    emit_pos::emit_pos_then(emitter, &c.span, InstrSeq::make_defcns(const_id)),
-                    InstrSeq::make_popc(),
-                ]))
-            }
             Def::Namespace(ns) => emit_defs(env, emitter, &ns.1),
             _ => Ok(InstrSeq::Empty),
         }

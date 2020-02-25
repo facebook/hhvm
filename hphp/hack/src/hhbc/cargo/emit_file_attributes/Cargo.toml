@@ -16,6 +16,7 @@ emit_fatal_rust = { path = "../emit_fatal" }
 env = { path = "../env" }
 hhas_attribute_rust = { path = "../hhas_attribute" }
 instruction_sequence_rust = { path = "../instruction_sequence" }
+naming_special_names_rust = { path = "../../../naming" }
 oxidized = { path = "../../../oxidized" }
 itertools = "0.8"
 # @end of Signature

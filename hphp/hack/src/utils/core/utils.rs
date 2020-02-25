@@ -30,6 +30,15 @@ pub fn strip_ns(s: &str) -> &str {
     }
 }
 
+/// \A\B\C -> (\A\B\, C)
+/// A -> (\, A)
+pub fn split_ns_from_name(s: &str) -> (&str, &str) {
+    match s.rfind('\\') {
+        Some(p) => s.split_at(p + 1),
+        None => ("\\", s),
+    }
+}
+
 #[cfg(test)]
 mod utils_tests {
     use pretty_assertions::assert_eq;
@@ -68,5 +77,15 @@ mod utils_tests {
 
         let test_string5 = "";
         assert_eq!(super::strip_ns(&test_string5), "");
+    }
+
+    #[test]
+    fn split_ns_from_name_test() {
+        let f = |s| super::split_ns_from_name(s);
+        assert_eq!(f("\\A\\B"), ("\\A\\", "B"));
+        assert_eq!(f("\\A\\"), ("\\A\\", ""));
+        assert_eq!(f(""), ("\\", ""));
+        assert_eq!(f("\\"), ("\\", ""));
+        assert_eq!(f("A\\B"), ("A\\", "B"));
     }
 }

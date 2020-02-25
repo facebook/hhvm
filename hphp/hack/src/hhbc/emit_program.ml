@@ -130,12 +130,7 @@ let emit_program ~is_hh_file ~is_evaled ~for_debugger_eval ~empty_namespace tast
           let compiled_typedefs =
             Emit_typedef.emit_typedefs_from_program flat_closed_ast
           in
-          let env =
-            Emit_env.(
-              empty
-              |> with_namespace empty_namespace
-              |> with_scope Ast_scope.Scope.toplevel)
-          in
+          let env = Emit_env.(empty |> with_namespace empty_namespace) in
           let (compiled_constants, compiled_constant_funs) =
             Emit_constant.emit_constants_from_program env flat_closed_ast
           in

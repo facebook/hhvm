@@ -43,6 +43,8 @@ pub type TypedefNum = isize;
 
 pub type ClassNum = isize;
 
+pub type ConstNum = isize;
+
 // TODO(hrust) re-think about these lifetimes
 
 pub type ClassId = hhbc_id::class::Type<'static>;
@@ -515,7 +517,7 @@ pub enum InstructIncludeEvalDefine {
     DefCls(ClassNum),
     DefClsNop(ClassNum),
     DefRecord(RecordNum),
-    DefCns(ConstId),
+    DefCns(ConstNum),
     DefTypeAlias(TypedefNum),
 }
 

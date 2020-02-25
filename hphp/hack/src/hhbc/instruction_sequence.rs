@@ -956,9 +956,9 @@ impl InstrSeq {
         ))
     }
 
-    pub fn make_defcns(s: hhbc_id_rust::r#const::Type<'static>) -> Self {
+    pub fn make_defcns(n: ConstNum) -> Self {
         Self::make_instr(Instruct::IIncludeEvalDefine(
-            InstructIncludeEvalDefine::DefCns(s),
+            InstructIncludeEvalDefine::DefCns(n),
         ))
     }
 

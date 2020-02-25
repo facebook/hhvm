@@ -12,7 +12,9 @@ path = "../../emit_adata.rs"
 
 [dependencies]
 env = { path = "../env" }
+hhbc_ast_rust = { path = "../hhbc_ast" }
 instruction_sequence_rust = { path = "../instruction_sequence" }
 options = { path = "../options" }
+runtime = { path = "../runtime" }
 bitflags = "1.2"
 # @end of Signature

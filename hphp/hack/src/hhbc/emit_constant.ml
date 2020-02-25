@@ -93,7 +93,5 @@ let emit_constants_from_program env (ast : Tast.def list) :
   in
   let constant_tuples = List.filter_map ast ~f:aux in
   let (constants, constant_cinits_optionals) = List.unzip constant_tuples in
-  let constant_cinits =
-    List.filter_map ~f:(fun x -> x) constant_cinits_optionals
-  in
+  let constant_cinits = List.filter_opt constant_cinits_optionals in
   (constants, constant_cinits)

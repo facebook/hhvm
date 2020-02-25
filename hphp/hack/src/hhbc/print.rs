@@ -209,8 +209,9 @@ fn print_program_<W: Write>(
     print_data_region(w, vec![])?;
     print_main(ctx, w, &prog.main)?;
     concat(w, &prog.functions, |w, f| print_fun_def(ctx, w, f))?;
-    concat(w, &prog.record_defs, |w, rd| print_record_def(ctx, w, rd))?;
     concat(w, &prog.classes, |w, cd| print_class_def(ctx, w, cd))?;
+    concat(w, &prog.record_defs, |w, rd| print_record_def(ctx, w, rd))?;
+    concat(w, &prog.constants, |w, c| print_constant(ctx, w, c))?;
     concat(w, &prog.typedefs, |w, td| print_typedef(ctx, w, td))?;
     print_file_attributes(ctx, w, &prog.file_attributes)?;
 
@@ -440,7 +441,8 @@ fn print_constant<W: Write>(
     w: &mut W,
     c: &HhasConstant,
 ) -> Result<(), W::Error> {
-    w.write("\n  .const ")?;
+    ctx.newline(w)?;
+    w.write(".const ")?;
     w.write(c.name.to_raw_string())?;
     match c.value.as_ref() {
         Some(TypedValue::Uninit) => w.write(" = uninit")?,
@@ -1057,10 +1059,7 @@ fn print_include_eval_define<W: Write>(
         DefCls(n) => concat_str_by(w, " ", ["DefCls", n.to_string().as_str()]),
         DefClsNop(n) => concat_str_by(w, " ", ["DefClsNop", n.to_string().as_str()]),
         DefRecord(n) => concat_str_by(w, " ", ["DefRecord", n.to_string().as_str()]),
-        DefCns(id) => {
-            w.write("DefCns ")?;
-            print_hhbc_id(w, id)
-        }
+        DefCns(n) => concat_str_by(w, " ", ["DefCns", n.to_string().as_str()]),
         DefTypeAlias(id) => w.write(format!("DefTypeAlias {}", id)),
     }
 }
@@ -1766,6 +1765,6 @@ fn print_record_def<W: Write>(
     newline(w)
 }
 
-fn print_hhbc_id<'a, W: Write, I: Id<'a>>(w: &mut W, id: &I) -> Result<(), W::Error> {
+fn _print_quoted_id<'a, W: Write, I: Id<'a>>(w: &mut W, id: &I) -> Result<(), W::Error> {
     wrap_by_quotes(w, |w| w.write(escape(id.to_raw_string())))
 }

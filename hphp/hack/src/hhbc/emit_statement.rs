@@ -116,7 +116,8 @@ fn emit_def_inline<Ex, Fb, En, Hi>(e: &mut Emitter, def: &a::Def<Ex, Fb, En, Hi>
 
 fn set_bytes_kind(name: &str) -> Option<Setrange> {
     lazy_static! {
-        static ref RE: Regex = Regex::new("(?i)^hh\\set_bytes(_rev|)_([a-z0-9]+)(_vec|)$").unwrap();
+        static ref RE: Regex =
+            Regex::new(r#"(?i)^hh\\set_bytes(_rev)_([a-z0-9]+)(_vec)$"#).unwrap();
     }
     RE.captures(name).map_or(None, |groups| {
         let op = if !groups.get(1).unwrap().as_str().is_empty() {

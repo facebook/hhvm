@@ -182,7 +182,7 @@ fn make_memoize_wrapper_method<'a>(
         visibility: method.visibility,
         name,
         body,
-        span: Span::from(method.span.clone()),
+        span: Span::from_pos(&method.span),
         rx_level,
         flags,
     })

@@ -343,6 +343,11 @@ and pp_reactivity : Format.formatter -> reactivity -> unit =
     Format.pp_print_string fmt "Reactive {";
     pp_ty fmt ty;
     Format.pp_print_string fmt "}"
+  | Pure None -> Format.pp_print_string fmt "Pure {}"
+  | Pure (Some ty) ->
+    Format.pp_print_string fmt "Pure {";
+    pp_ty fmt ty;
+    Format.pp_print_string fmt "}"
 
 and show_reactivity : reactivity -> string =
  (fun x -> Format.asprintf "%a" pp_reactivity x)

@@ -491,6 +491,8 @@ let reactivity_to_string env r =
   in
   let rec aux r =
     match r with
+    | Pure None -> "pure"
+    | Pure (Some ty) -> cond_reactive "conditionally pure" ty
     | Reactive None -> "reactive"
     | Reactive (Some ty) -> cond_reactive "conditionally reactive" ty
     | Shallow None -> "shallow reactive"

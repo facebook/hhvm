@@ -827,17 +827,12 @@ and equal_reactivity r1 r2 =
   | (Nonreactive, Nonreactive) -> true
   | (Local ty1, Local ty2)
   | (Shallow ty1, Shallow ty2)
-  | (Reactive ty1, Reactive ty2) ->
+  | (Reactive ty1, Reactive ty2)
+  | (Pure ty1, Pure ty2) ->
     Option.equal equal_decl_ty ty1 ty2
   | (MaybeReactive r1, MaybeReactive r2) -> equal_reactivity r1 r2
   | (RxVar r1, RxVar r2) -> Option.equal equal_reactivity r1 r2
-  | (Nonreactive, _)
-  | (Local _, _)
-  | (Shallow _, _)
-  | (Reactive _, _)
-  | (MaybeReactive _, _)
-  | (RxVar _, _) ->
-    false
+  | _ -> false
 
 and equal_param_rx_annotation pa1 pa2 =
   match (pa1, pa2) with

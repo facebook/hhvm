@@ -35,6 +35,7 @@ let get_tcopt env = env.ctx.Provider_context.tcopt
 
 let is_some_reactivity_attribute { ua_name = (_, name); _ } =
   String.equal name SN.UserAttributes.uaReactive
+  || String.equal name SN.UserAttributes.uaPure
   || String.equal name SN.UserAttributes.uaLocalReactive
   || String.equal name SN.UserAttributes.uaShallowReactive
 

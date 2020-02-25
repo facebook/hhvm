@@ -390,6 +390,7 @@ and reactivity =
   | Local of decl_ty option
   | Shallow of decl_ty option
   | Reactive of decl_ty option
+  | Pure of decl_ty option
   | MaybeReactive of reactivity
   | RxVar of reactivity option
 

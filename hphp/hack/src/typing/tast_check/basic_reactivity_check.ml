@@ -498,7 +498,9 @@ let get_reactivity_from_user_attributes user_attributes =
     match attrs with
     | [] -> None
     | { ua_name = (_, n); _ } :: tl ->
-      if String.equal n UA.uaReactive then
+      if String.equal n UA.uaPure then
+        Some (Pure None)
+      else if String.equal n UA.uaReactive then
         Some (Reactive None)
       else if String.equal n UA.uaShallowReactive then
         Some (Shallow None)
@@ -727,6 +729,7 @@ let check =
 
 let check_redundant_rx_condition env pos r =
   match r with
+  | Pure (Some cond_ty)
   | Reactive (Some cond_ty)
   | Local (Some cond_ty)
   | Shallow (Some cond_ty) ->

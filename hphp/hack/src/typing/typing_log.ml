@@ -428,26 +428,19 @@ let val_kind_to_string k =
   | LvalSubexpr -> "lval subexpression"
 
 let rec reactivity_to_string env r =
+  let from_decl opt_ty prefix =
+    prefix
+    ^
+    match opt_ty with
+    | None -> ""
+    | Some ty -> " " ^ Typing_print.debug_decl env ty
+  in
   match r with
   | Nonreactive -> "nonreactive"
-  | Local opt_ty ->
-    "local"
-    ^
-    (match opt_ty with
-    | None -> ""
-    | Some ty -> " " ^ Typing_print.debug_decl env ty)
-  | Shallow opt_ty ->
-    "shallow"
-    ^
-    (match opt_ty with
-    | None -> ""
-    | Some ty -> " " ^ Typing_print.debug_decl env ty)
-  | Reactive opt_ty ->
-    "reactive"
-    ^
-    (match opt_ty with
-    | None -> ""
-    | Some ty -> " " ^ Typing_print.debug_decl env ty)
+  | Local opt_ty -> from_decl opt_ty "local"
+  | Shallow opt_ty -> from_decl opt_ty "shallow"
+  | Reactive opt_ty -> from_decl opt_ty "reactive"
+  | Pure opt_ty -> from_decl opt_ty "pure"
   | MaybeReactive r -> "maybereactive " ^ reactivity_to_string env r
   | RxVar opt_r ->
     "rxvar"

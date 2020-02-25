@@ -7,7 +7,7 @@
 // Implementation of string escaping logic.
 // See http://php.net/manual/en/language.types.string.php
 
-use std::{error::Error, fmt, io::Write};
+use std::{borrow::Cow, error::Error, fmt, io::Write};
 
 #[derive(Debug)]
 pub struct InvalidString {
@@ -50,37 +50,80 @@ fn is_oct(c: u8) -> bool {
     c >= b'0' && c <= b'7'
 }
 
-// This escapes a string using the format understood by the assembler
-// and php serialization. The assembler and php serialization probably
-// don't actually have the same rules but this should safely fit in both.
-// It will escape $ in octal so that it can also be used as a PHP double
-// string.
-
-pub fn escape_char<'a>(c: u8, output: &mut Vec<u8>) {
+/// This escapes a string using the format understood by the assembler
+/// and php serialization. The assembler and php serialization probably
+/// don't actually have the same rules but this should safely fit in both.
+/// It will escape $ in octal so that it can also be used as a PHP double
+/// string.
+pub fn escape_char(c: u8) -> Option<Cow<'static, [u8]>> {
     match c {
-        b'\n' => output.extend_from_slice(b"\\n"),
-        b'\r' => output.extend_from_slice(b"\\r"),
-        b'\t' => output.extend_from_slice(b"\\t"),
-        b'\\' => output.extend_from_slice(b"\\\\"),
-        b'"' => output.extend_from_slice(b"\\\""),
-        b'$' => output.extend_from_slice(b"$"),
-        b'?' => output.extend_from_slice(b"\\?"),
-        c if is_lit_printable(c) => output.push(c),
-        c => write!(output, "\\{:03o}", c).unwrap(),
+        b'\n' => Some((&b"\\n"[..]).into()),
+        b'\r' => Some((&b"\\r"[..]).into()),
+        b'\t' => Some((&b"\\t"[..]).into()),
+        b'\\' => Some((&b"\\\\"[..]).into()),
+        b'"' => Some((&b"\\\""[..]).into()),
+        b'$' => None,
+        b'?' => Some((&b"\\?"[..]).into()),
+        c if is_lit_printable(c) => None,
+        c => {
+            let mut r = vec![];
+            write!(r, "\\{:03o}", c).unwrap();
+            Some(r.into())
+        }
     }
 }
 
-pub fn escape(s: &str) -> String {
-    let r = escape_(s.as_bytes());
-    unsafe { String::from_utf8_unchecked(r) }
+/// `impl Into<..>` allows escape to take a String, consider the following,
+/// let a = {
+///    let b = String::from("b");
+///     escape(b)
+/// };
+///
+/// Replacing `escape(b)` by `escape(&b)` leaks a reference of b to outer scope hence
+/// compilation error.
+pub fn escape<'a>(s: impl Into<Cow<'a, str>>) -> Cow<'a, str> {
+    escape_by(s.into(), escape_char)
 }
 
-fn escape_(s: &[u8]) -> Vec<u8> {
-    let mut output: Vec<u8> = Vec::with_capacity(s.len());
-    for c in s.iter() {
-        escape_char(*c, &mut output);
+fn cow_to_bytes(s: Cow<str>) -> Cow<[u8]> {
+    match s {
+        Cow::Borrowed(s) => s.as_bytes().into(),
+        Cow::Owned(s) => Vec::<u8>::from(s).into(),
     }
-    output
+}
+
+pub fn escape_by<F: Fn(u8) -> Option<Cow<'static, [u8]>>>(s: Cow<str>, f: F) -> Cow<str> {
+    let r = escape_byte_by(cow_to_bytes(s), f);
+    match r {
+        Cow::Borrowed(s) => unsafe { std::str::from_utf8_unchecked(s) }.into(),
+        Cow::Owned(s) => unsafe { String::from_utf8_unchecked(s) }.into(),
+    }
+}
+
+fn escape_byte_by<F: Fn(u8) -> Option<Cow<'static, [u8]>>>(cow: Cow<[u8]>, f: F) -> Cow<[u8]> {
+    let mut c = vec![];
+    let mut copied = false;
+    let s = cow.as_ref();
+    for i in 0..s.len() {
+        match f(s[i]) {
+            None if copied => c.push(s[i]),
+            Some(cc) => {
+                if copied {
+                    c.extend_from_slice(cc.as_ref());
+                } else {
+                    c.extend_from_slice(&s[..i]);
+                    c.extend_from_slice(cc.as_ref());
+                    copied = true;
+                }
+            }
+            _ => {}
+        }
+    }
+    if copied {
+        c.into()
+    } else {
+        cow
+    }
 }
 
 fn codepoint_to_utf8(n: u32, output: &mut Vec<u8>) -> Result<(), InvalidString> {
@@ -479,9 +522,8 @@ mod tests {
     #[test]
     fn escape_char_test() {
         let escape_char_ = |c: u8| -> String {
-            let mut s = vec![];
-            escape_char(c, &mut s);
-            unsafe { String::from_utf8_unchecked(s) }
+            let r = escape_char(c).unwrap_or(vec![c].into()).into_owned();
+            unsafe { String::from_utf8_unchecked(r) }
         };
 
         assert_eq!(escape_char_(b'a'), "a");
@@ -489,6 +531,7 @@ mod tests {
         assert_eq!(escape_char_(b'\"'), "\\\"");
         assert_eq!(escape_char_(0), "\\000");
         assert_eq!(escape("house"), "house");
+        assert_eq!(escape("\n"), "\\n");
         assert_eq!(escape("red\n\t\r$?"), "red\\n\\t\\r$\\?");
         assert_eq!(is_oct(b'5'), true);
         assert_eq!(is_oct(b'a'), false);

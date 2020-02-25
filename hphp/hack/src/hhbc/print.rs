@@ -14,7 +14,7 @@ pub use write::{Error, IoWrite, Result, Write};
 use context::Context;
 use core_utils_rust::add_ns;
 use env::{local::Type as Local, Env as BodyEnv};
-use escaper::escape;
+use escaper::{escape, escape_by, is_lit_printable};
 use hhas_attribute_rust::{self as hhas_attribute, HhasAttribute};
 use hhas_body_rust::HhasBody;
 use hhas_class_rust::{self as hhas_class, HhasClass};
@@ -41,7 +41,7 @@ use oxidized::{ast, ast_defs, doc_comment::DocComment};
 use runtime::TypedValue;
 use write::*;
 
-use std::{borrow::Cow, convert::TryInto};
+use std::{borrow::Cow, convert::TryInto, io::Write as _};
 
 const ADATA_ARRAY_PREFIX: &str = "a";
 const ADATA_VARRAY_PREFIX: &str = "y";
@@ -165,9 +165,10 @@ pub fn print_program<W: Write>(
 ) -> Result<(), W::Error> {
     match ctx.path {
         Some(p) => {
-            let p = &escape(p.to_absoute().to_str().ok_or(Error::InvalidUTF8)?);
+            let abs = p.to_absoute();
+            let p = escape(abs.to_str().ok_or(Error::InvalidUTF8)?);
 
-            concat_str_by(w, " ", ["#", p, "starts here"])?;
+            concat_str_by(w, " ", ["#", p.as_ref(), "starts here"])?;
 
             newline(w)?;
 
@@ -178,7 +179,7 @@ pub fn print_program<W: Write>(
             handle_not_impl(|| print_program_(ctx, w, prog))?;
 
             newline(w)?;
-            concat_str_by(w, " ", ["#", p, "ends here"])?;
+            concat_str_by(w, " ", ["#", p.as_ref(), "ends here"])?;
 
             newline(w)
         }
@@ -1445,7 +1446,7 @@ fn print_expr<W: Write>(
     env: &ExprEnv,
     ast::Expr(p, expr): &ast::Expr,
 ) -> Result<(), W::Error> {
-    fn adjust_id<'a>(env: &ExprEnv, id: &'a String) -> String {
+    fn adjust_id<'a>(env: &ExprEnv, id: &'a String) -> Cow<'a, str> {
         let s: Cow<'a, str> = match env.codegen_env {
             Some(env) => {
                 if env.namespace.name.is_none()
@@ -1462,8 +1463,7 @@ fn print_expr<W: Write>(
             }
             _ => id.into(),
         };
-        // TODO(shiqicao): avoid allocating string, fix escape
-        escaper::escape(s.as_ref())
+        escaper::escape(s)
     }
     use ast::Expr_ as E_;
     match expr {
@@ -1473,7 +1473,26 @@ fn print_expr<W: Write>(
         E_::Int(i) => {
             w.write(integer::to_decimal(i.as_str()).map_err(|_| Error::fail("ParseIntError"))?)
         }
-        E_::String(s) => not_impl!(),
+        E_::String(s) => {
+            fn escape_char(c: u8) -> Option<Cow<'static, [u8]>> {
+                match c {
+                    b'\n' => Some((&b"\\\\n"[..]).into()),
+                    b'\r' => Some((&b"\\\\r"[..]).into()),
+                    b'\t' => Some((&b"\\\\t"[..]).into()),
+                    b'\\' => Some((&b"\\\\\\\\"[..]).into()),
+                    b'"' => Some((&b"\\\\\\\""[..]).into()),
+                    b'$' => Some((&b"\\\\$"[..]).into()),
+                    b'?' => Some((&b"\\?"[..]).into()),
+                    c if is_lit_printable(c) => None,
+                    c => {
+                        let mut r = vec![];
+                        write!(r, "\\\\{:03o}", c).unwrap();
+                        Some(r.into())
+                    }
+                }
+            }
+            wrap_by(w, "\\\"", |w| w.write( escape_by(s.into(), escape_char ) )  )
+        }
         E_::Null => w.write("NULL"),
         E_::True => w.write("true"),
         E_::False => w.write("false"),
@@ -1508,7 +1527,7 @@ fn print_expr<W: Write>(
         }
         E_::Shape(_) | E_::Binop(_) | E_::Call(_) | E_::New(_) => not_impl!(),
         E_::Record(r) => {
-            w.write(lstrip(adjust_id(env, &(r.0).1).as_str(), "\\\\"))?;
+            w.write(lstrip(adjust_id(env, &(r.0).1).as_ref(), "\\\\"))?;
             print_key_values(w, env, &r.2)
         }
         E_::ClassConst(cc) => {
@@ -1773,7 +1792,7 @@ fn print_type_info_<W: Write>(w: &mut W, is_enum: bool, ti: &HhasTypeInfo) -> Re
         option_or(
             w,
             opt,
-            |w, s: &String| wrap_by_quotes(w, |w| w.write(escape(s.as_ref()))),
+            |w, s: &String| wrap_by_quotes(w, |w| w.write(escape(s))),
             "N",
         )
     };

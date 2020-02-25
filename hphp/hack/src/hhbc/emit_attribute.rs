@@ -45,7 +45,7 @@ pub fn from_ast(
         // don't do anything to builtin attributes
         attr.name.1.to_owned()
     } else {
-        escaper::escape(hhbc_id::class::Type::from_ast_name(&attr.name.1).to_raw_string())
+        escaper::escape(hhbc_id::class::Type::from_ast_name(&attr.name.1).to_raw_string()).into()
     };
     Ok(HhasAttribute {
         name: fully_qualified_id,

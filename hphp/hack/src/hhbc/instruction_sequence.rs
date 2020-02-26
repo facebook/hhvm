@@ -125,6 +125,14 @@ impl InstrSeq {
         }
     }
 
+    pub fn optional(pred: bool, instrs: Vec<Self>) -> Self {
+        if pred {
+            Self::gather(instrs)
+        } else {
+            Self::Empty
+        }
+    }
+
     pub fn iter(&self) -> InstrIter {
         InstrIter::new(self)
     }

@@ -1890,11 +1890,139 @@ pub fn emit_is_null(e: &mut Emitter, env: &Env, expr: &tast::Expr) -> Result {
 pub fn emit_jmpnz(
     e: &mut Emitter,
     env: &Env,
-    pos: &Pos,
-    expr_: &tast::Expr_,
+    expr: &tast::Expr,
     label: &Label,
 ) -> Result<EmitJmpResult> {
-    unimplemented!()
+    let tast::Expr(pos, expr_) = expr;
+    let opt = optimize_null_checks(e);
+    Ok(
+        match ast_constant_folder::expr_to_typed_value(e, &env.namespace, expr) {
+            Ok(tv) => {
+                if tv.cast_to_bool().is_some() {
+                    EmitJmpResult {
+                        instrs: emit_pos_then(e, pos, InstrSeq::make_jmp(label.clone()))?,
+                        is_fallthrough: false,
+                        is_label_used: true,
+                    }
+                } else {
+                    EmitJmpResult {
+                        instrs: emit_pos_then(e, pos, InstrSeq::Empty)?,
+                        is_fallthrough: true,
+                        is_label_used: false,
+                    }
+                }
+            }
+            Err(_) => {
+                use {ast_defs::Uop as U, tast::Expr_ as E};
+                match expr_ {
+                    E::Unop(uo) if uo.0 == U::Unot => emit_jmpz(e, env, &uo.1, label)?,
+                    E::Binop(bo) if bo.0.is_barbar() => {
+                        let r1 = emit_jmpnz(e, env, &bo.1, label)?;
+                        if r1.is_fallthrough {
+                            let r2 = emit_jmpnz(e, env, &bo.2, label)?;
+                            EmitJmpResult {
+                                instrs: emit_pos_then(
+                                    e,
+                                    pos,
+                                    InstrSeq::gather(vec![r1.instrs, r2.instrs]),
+                                )?,
+                                is_fallthrough: r2.is_fallthrough,
+                                is_label_used: r1.is_label_used || r2.is_label_used,
+                            }
+                        } else {
+                            r1
+                        }
+                    }
+                    E::Binop(bo) if bo.0.is_ampamp() => {
+                        let skip_label = e.label_gen_mut().next_regular();
+                        let r1 = emit_jmpz(e, env, &bo.1, &skip_label)?;
+                        if !r1.is_fallthrough {
+                            EmitJmpResult {
+                                instrs: emit_pos_then(
+                                    e,
+                                    pos,
+                                    InstrSeq::gather(vec![
+                                        r1.instrs,
+                                        InstrSeq::optional(
+                                            r1.is_label_used,
+                                            vec![InstrSeq::make_label(skip_label)],
+                                        ),
+                                    ]),
+                                )?,
+                                is_fallthrough: r1.is_label_used,
+                                is_label_used: false,
+                            }
+                        } else {
+                            let r2 = emit_jmpnz(e, env, &bo.2, label)?;
+                            EmitJmpResult {
+                                instrs: emit_pos_then(
+                                    e,
+                                    pos,
+                                    InstrSeq::gather(vec![
+                                        r1.instrs,
+                                        r2.instrs,
+                                        InstrSeq::optional(
+                                            r1.is_label_used,
+                                            vec![InstrSeq::make_label(skip_label)],
+                                        ),
+                                    ]),
+                                )?,
+                                is_fallthrough: r2.is_fallthrough || r1.is_label_used,
+                                is_label_used: r2.is_label_used,
+                            }
+                        }
+                    }
+                    E::Binop(bo)
+                        if bo.0.is_eqeqeq()
+                            && ((bo.1).1.is_null() || (bo.2).1.is_null())
+                            && opt =>
+                    {
+                        let is_null =
+                            emit_is_null(e, env, if (bo.1).1.is_null() { &bo.2 } else { &bo.1 })?;
+                        EmitJmpResult {
+                            instrs: emit_pos_then(
+                                e,
+                                pos,
+                                InstrSeq::gather(vec![
+                                    is_null,
+                                    InstrSeq::make_jmpnz(label.clone()),
+                                ]),
+                            )?,
+                            is_fallthrough: true,
+                            is_label_used: true,
+                        }
+                    }
+                    E::Binop(bo)
+                        if bo.0.is_diff2() && ((bo.1).1.is_null() || (bo.2).1.is_null()) && opt =>
+                    {
+                        let is_null =
+                            emit_is_null(e, env, if (bo.1).1.is_null() { &bo.2 } else { &bo.1 })?;
+                        EmitJmpResult {
+                            instrs: emit_pos_then(
+                                e,
+                                pos,
+                                InstrSeq::gather(vec![is_null, InstrSeq::make_jmpz(label.clone())]),
+                            )?,
+                            is_fallthrough: true,
+                            is_label_used: true,
+                        }
+                    }
+                    _ => {
+                        let instr = emit_expr(e, env, expr)?;
+                        EmitJmpResult {
+                            instrs: emit_pos_then(
+                                e,
+                                pos,
+                                InstrSeq::gather(vec![instr, InstrSeq::make_jmpnz(label.clone())]),
+                            )?,
+                            is_fallthrough: true,
+                            is_label_used: true,
+                        }
+                    }
+                }
+            }
+        },
+    )
 }
 
 pub fn emit_jmpz(
@@ -1926,11 +2054,67 @@ pub fn emit_jmpz(
             Err(_) => {
                 use {ast_defs::Uop as U, tast::Expr_ as E};
                 match expr_ {
-                    E::Unop(uo) if uo.0 == U::Unot => {
-                        emit_jmpnz(e, env, &(uo.1).0, &(uo.1).1, label)?
+                    E::Unop(uo) if uo.0 == U::Unot => emit_jmpnz(e, env, &uo.1, label)?,
+                    E::Binop(bo) if bo.0.is_barbar() => {
+                        let skip_label = e.label_gen_mut().next_regular();
+                        let r1 = emit_jmpz(e, env, &bo.1, &skip_label)?;
+                        if !r1.is_fallthrough {
+                            EmitJmpResult {
+                                instrs: emit_pos_then(
+                                    e,
+                                    pos,
+                                    InstrSeq::gather(vec![
+                                        r1.instrs,
+                                        InstrSeq::optional(
+                                            r1.is_label_used,
+                                            vec![InstrSeq::make_label(skip_label)],
+                                        ),
+                                    ]),
+                                )?,
+                                is_fallthrough: r1.is_label_used,
+                                is_label_used: false,
+                            }
+                        } else {
+                            let r2 = emit_jmpz(e, env, &bo.2, label)?;
+                            EmitJmpResult {
+                                instrs: emit_pos_then(
+                                    e,
+                                    pos,
+                                    InstrSeq::gather(vec![
+                                        r1.instrs,
+                                        r2.instrs,
+                                        InstrSeq::optional(
+                                            r1.is_label_used,
+                                            vec![InstrSeq::make_label(skip_label)],
+                                        ),
+                                    ]),
+                                )?,
+                                is_fallthrough: r2.is_fallthrough || r1.is_label_used,
+                                is_label_used: r2.is_label_used,
+                            }
+                        }
                     }
-                    E::Binop(bo) if bo.0.is_barbar() => unimplemented!(),
-                    E::Binop(bo) if bo.0.is_ampamp() => unimplemented!(),
+                    E::Binop(bo) if bo.0.is_ampamp() => {
+                        let r1 = emit_jmpz(e, env, &bo.1, label)?;
+                        if r1.is_fallthrough {
+                            let r2 = emit_jmpnz(e, env, &bo.2, label)?;
+                            EmitJmpResult {
+                                instrs: emit_pos_then(
+                                    e,
+                                    pos,
+                                    InstrSeq::gather(vec![r1.instrs, r2.instrs]),
+                                )?,
+                                is_fallthrough: r2.is_fallthrough,
+                                is_label_used: r1.is_label_used || r2.is_label_used,
+                            }
+                        } else {
+                            EmitJmpResult {
+                                instrs: emit_pos_then(e, pos, r1.instrs)?,
+                                is_fallthrough: false,
+                                is_label_used: r1.is_label_used,
+                            }
+                        }
+                    }
                     E::Binop(bo)
                         if bo.0.is_eqeqeq()
                             && ((bo.1).1.is_null() || (bo.2).1.is_null())

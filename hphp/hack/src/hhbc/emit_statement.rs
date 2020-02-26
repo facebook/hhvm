@@ -346,7 +346,7 @@ fn emit_for(
             Ok(if jmpz {
                 emit_expr::emit_jmpz(emitter, env, cond, label)
             } else {
-                emit_expr::emit_jmpnz(emitter, env, &cond.0, &cond.1, label)
+                emit_expr::emit_jmpnz(emitter, env, cond, label)
             }?
             .instrs)
         };

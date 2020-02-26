@@ -316,6 +316,12 @@ public:
   }
 
   ALWAYS_INLINE
+  void retNoTrash() {
+    m_top += kNumActRecCells - 1;
+    assertx((uintptr_t)m_top <= (uintptr_t)m_base);
+  }
+
+  ALWAYS_INLINE
   void ret() {
     // Leave part of the activation on the stack, since the return value now
     // resides there.

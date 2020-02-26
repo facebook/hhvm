@@ -387,6 +387,8 @@ struct UniqueStubs {
   TCA endCatchHelper;
   TCA endCatchHelperPast;
   TCA endCatchStublogueHelper;
+  TCA unwinderAsyncRet;
+  TCA unwinderAsyncNullRet;
 
   /*
    * Throws an exception from the unwinder to enter the itanium unwinder

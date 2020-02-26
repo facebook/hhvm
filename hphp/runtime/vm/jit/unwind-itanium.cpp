@@ -245,23 +245,6 @@ tc_unwind_personality(int version,
 }
 
 TCUnwindInfo tc_unwind_resume(ActRec* fp) {
-  if (g_unwind_rds->shouldCallResume) {
-    ITRACE(3, "shouldCallResume is set\n");
-    g_unwind_rds->shouldCallResume = false;
-    if (g_unwind_rds->shouldSkipCall) {
-      auto& pc = vmRegsUnsafe().pc;
-      pc = skipCall(pc);
-      ITRACE(3, "vmpc is moved by skipping call\n");
-      g_unwind_rds->shouldSkipCall = false;
-    }
-    if (Trace::moduleEnabled(TRACEMOD, 1)) {
-      DEBUG_ONLY auto& regs = vmRegsUnsafe();
-      ITRACE(1, "Resuming at {} from offset {}\n",
-             regs.fp, regs.fp->func()->unit()->offsetOf(regs.pc));
-    }
-    return {tc::ustubs().resumeHelper, fp};
-  }
-
   while (true) {
     auto const sfp = fp->m_sfp;
 
@@ -295,25 +278,22 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp) {
           g_unwind_rds->doSideExit = true;
           g_unwind_rds->sideEnter = false;
 
-          // If we have a failed static wait handle, we need to run the next
-          // catch trace as well to clean up the stack
           if (result & UnwindFSWH) {
-            auto& regs = vmRegs();
-            if (regs.fp == sfp) {
-              if (auto catchTrace = lookup_catch_trace(savedRip)) {
-                g_unwind_rds->shouldCallResume = true;
-                if (result & UnwindSkipCall) {
-                  g_unwind_rds->shouldSkipCall = true;
-                }
-                ITRACE(1, "tc_unwind_resume returning catch trace {} "
-                          "with fp: {}\n",
-                          catchTrace, sfp);
-                tl_regState = VMRegState::DIRTY;
-                return {catchTrace, sfp};
-              }
+            auto const vmfp_ = vmfp();
+            if (!vmfp_ || vmfp_ == sfp) {
+              g_unwind_rds->savedRip = savedRip;
+              ITRACE(3, "vmsp() is {}\n", vmsp());
+              tl_regState = VMRegState::DIRTY;
+              auto const ret = g_unwind_rds->fswh
+                ? tc::ustubs().unwinderAsyncRet
+                : tc::ustubs().unwinderAsyncNullRet;
+              ITRACE(1, "tc_unwind_resume returning to {} with fp {}\n",
+                        tc::ustubs().describe(ret), sfp);
+              return {ret, sfp};
             }
-            // Either no catch trace or we haven't unwound enough yet
-            if (result & UnwindSkipCall) regs.pc = skipCall(regs.pc);
+            // we haven't fully unwound but we need to resume execution since
+            // we have a FSWH on our hand
+            ITRACE(2, "Got FSWH but vmfp: {}, sfp: {}\n", vmfp_, sfp);
           }
           tl_regState = VMRegState::DIRTY;
           FTRACE(1, "Resuming from resumeHelper with fp {}\n", fp);

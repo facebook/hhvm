@@ -1096,6 +1096,29 @@ TCA emitEndCatchStublogueHelper(CodeBlock& cb, DataBlock& data,
   });
 }
 
+TCA emitUnwinderAsyncRet(CodeBlock& cb, DataBlock& data) {
+  alignCacheLine(cb);
+  alignJmpTarget(cb);
+  return vwrap(cb, data, [&] (Vout& v) {
+    v << load{rvmtl()[unwinderFSWHOff()], rret_data()};
+    v << movzbq{v.cns(KindOfObject), rret_type()};
+    v << pushm{rvmtl()[unwinderSavedRipOff()]};
+    v << load{rvmtl()[rds::kVmspOff], rvmsp()};
+    v << ret{php_return_regs()};
+  });
+}
+
+TCA emitUnwinderAsyncNullRet(CodeBlock& cb, DataBlock& data) {
+  alignCacheLine(cb);
+  alignJmpTarget(cb);
+  return vwrap(cb, data, [&] (Vout& v) {
+    v << movzbq{v.cns(KindOfUninit), rret_type()};
+    v << pushm{rvmtl()[unwinderSavedRipOff()]};
+    v << load{rvmtl()[rds::kVmspOff], rvmsp()};
+    v << ret{php_return_regs()};
+  });
+}
+
 namespace {
 
 [[noreturn]] static void throw_exception_while_unwinding() {
@@ -1169,6 +1192,8 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   ADD(endCatchStublogueHelper,
       hotView(),
       emitEndCatchStublogueHelper(hot(), data, *this));
+  ADD(unwinderAsyncRet, hotView(), emitUnwinderAsyncRet(hot(), data));
+  ADD(unwinderAsyncNullRet, hotView(), emitUnwinderAsyncNullRet(hot(), data));
   ADD(throwExceptionWhileUnwinding,
       hotView(),
       emitThrowExceptionWhileUnwinding(hot(), data));

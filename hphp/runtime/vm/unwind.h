@@ -37,8 +37,6 @@ enum UnwinderResult {
    UnwindFSWH        = (1u << 0),
    // Unwound until the given fp, i.e. did not reach the end of the vm nesting
    UnwindReachedGoal = (1u << 1),
-   // Skip call
-   UnwindSkipCall    = (1u << 2),
 };
 
 constexpr UnwinderResult operator|(UnwinderResult a, UnwinderResult b) {

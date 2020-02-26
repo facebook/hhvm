@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
 
 #include "hphp/runtime/vm/jit/types.h"
 
@@ -48,8 +49,17 @@ namespace jit {
  * Used to pass values between unwinder code and catch traces.
  */
 struct UnwindRDS {
-  /* PHP or C++ exception, nullptr if SetM exception */
-  Either<ObjectData*, Exception*> exn;
+  /* PHP/C++ exception or Failed Static WaitHandle, nullptr if SetM exception */
+  union {
+    Either<ObjectData*, Exception*> exn;
+    c_StaticWaitHandle* fswh;
+  };
+
+  TYPE_SCAN_CUSTOM_FIELD(exn) {
+    if (exn.isNull()) return;
+    if (exn.left()) scanner.scan(exn.left());
+    else scanner.scan(exn.right());
+  }
 
   /* Some helpers need to signal an error along with a TypedValue to be pushed
    * on the eval stack. When present, that value lives here. */
@@ -59,14 +69,6 @@ struct UnwindRDS {
    * to somewhere else in the TC, rather than resuming the unwind process. */
   bool doSideExit;
 
-  /* Whether the tc_unwind_resume should resume from resumeHandler unique stub
-   */
-  bool shouldCallResume;
-
-  /* Whether tc_unwind_resume should increment the vmpc
-   */
-  bool shouldSkipCall;
-
   /* Indicates that we entered tc_unwind_resume directly rather than through
    * itanium ABI
    */
@@ -75,6 +77,10 @@ struct UnwindRDS {
   /* Indicates whether this is the first frame the unwinder will unwind
    */
   bool isFirstFrame;
+
+  /* The instruction pointer that async functions will use to return to
+   */
+  TCA savedRip;
 };
 extern rds::Link<UnwindRDS, rds::Mode::Normal> g_unwind_rds;
 
@@ -83,9 +89,11 @@ extern rds::Link<UnwindRDS, rds::Mode::Normal> g_unwind_rds;
     return g_unwind_rds.handle() + offsetof(UnwindRDS, member); \
   }
 IMPLEMENT_OFF(Exn, exn)
+IMPLEMENT_OFF(FSWH, fswh)
 IMPLEMENT_OFF(TV, tv)
 IMPLEMENT_OFF(SideExit, doSideExit)
 IMPLEMENT_OFF(SideEnter, sideEnter)
+IMPLEMENT_OFF(SavedRip, savedRip)
 #undef IMPLEMENT_OFF
 
 ///////////////////////////////////////////////////////////////////////////////

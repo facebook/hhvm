@@ -38,6 +38,8 @@
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
+#include "hphp/runtime/vm/jit/unwind-itanium.h"
+
 namespace HPHP {
 
 TRACE_SET_MOD(unwind);
@@ -101,7 +103,7 @@ void discardMemberTVRefs(PC pc) {
  * if the VM execution should be resumed.
  */
 ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
-                          ObjectData* phpException) {
+                          ObjectData* phpException, bool jit) {
   auto const func = fp->func();
   auto const prevFp = fp->sfp();
   auto const callOff = fp->callOffset();
@@ -109,9 +111,10 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
   ITRACE(1, "tearDownFrame: {} ({})\n",
          func->fullName()->data(),
          func->unit()->filepath()->data());
-  ITRACE(1, "  fp {} prevFp {}\n",
+  ITRACE(1, "  fp {}, prevFp {}, jit {}\n",
          implicit_cast<void*>(fp),
-         implicit_cast<void*>(prevFp));
+         implicit_cast<void*>(prevFp),
+         jit);
 
   auto const decRefLocals = [&] {
     /*
@@ -155,10 +158,17 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
       auto const waitHandle = c_StaticWaitHandle::CreateFailed(phpException);
       phpException = nullptr;
       stack.ndiscard(func->numSlotsInFrame());
-      stack.ret();
-      assertx(stack.topTV() == fp->retSlot());
-      tvCopy(make_tv<KindOfObject>(waitHandle), *fp->retSlot());
-      fp->retSlot()->m_aux.u_asyncEagerReturnFlag = 0;
+      if (jit) {
+        jit::g_unwind_rds->fswh = waitHandle;
+        // Don't trash the ActRec since service-request-handlers might not need
+        // to read the call offset and func pointer
+        stack.retNoTrash();
+      } else {
+        stack.ret();
+        assertx(stack.topTV() == fp->retSlot());
+        tvCopy(make_tv<KindOfObject>(waitHandle), *fp->retSlot());
+        fp->retSlot()->m_aux.u_asyncEagerReturnFlag = 0;
+      }
     } else {
       // We need to discard the NullUninits from inout on the stack but if the
       // function was called with the wrong arity (resulting in an excpetion),
@@ -185,6 +195,7 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
       waitHandle->fail(phpException);
       decRefObj(waitHandle);
       phpException = nullptr;
+      if (jit) jit::g_unwind_rds->fswh = nullptr;
     } else if (waitHandle->isRunning()) {
       // Let the C++ exception propagate. If the current frame represents async
       // function that is running, mark it as abruptly interrupted. Some opcodes
@@ -202,7 +213,16 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
       auto eagerResult = gen->fail(phpException);
       phpException = nullptr;
       if (eagerResult) {
-        stack.pushObjectNoRc(eagerResult);
+        if (jit) {
+          jit::g_unwind_rds->fswh = eagerResult;
+          // Allocate space on the stack for the eagerResult to be written later
+          // SP needs to be consistent between interp and jit
+          stack.top()--;
+        } else {
+          stack.pushObjectNoRc(eagerResult);
+        }
+      } else {
+        jit::g_unwind_rds->fswh = nullptr;
       }
     } else if (gen->isEagerlyExecuted() || gen->getWaitHandle()->isRunning()) {
       // Fail the async generator and let the C++ exception propagate.
@@ -403,7 +423,8 @@ UnwinderResult unwindVM(Either<ObjectData*, Exception*> exception,
     }
 
     // We found no more handlers in this frame.
-    phpException = tearDownFrame(fp, stack, pc, phpException);
+    auto const jit = fpToUnwind != nullptr && fpToUnwind == fp->m_sfp;
+    phpException = tearDownFrame(fp, stack, pc, phpException, jit);
 
     // If we entered from the JIT and this is the last iteration, we can't
     // trust the PC since catch traces for inlined frames may add more
@@ -412,13 +433,9 @@ UnwinderResult unwindVM(Either<ObjectData*, Exception*> exception,
 
     if (exception.left() != phpException) {
       assertx(phpException == nullptr);
-      auto retCode = UnwindNone;
-      if (fp) {
-        if (!fpToUnwind) pc = skipCall(pc);
-        retCode = UnwindSkipCall;
-      }
+      if (fp && !jit) pc = skipCall(pc);
       ITRACE(1, "Returning with exception == null\n");
-      return retCode | UnwindFSWH;
+      return UnwindFSWH;
     }
 
     if (!fp || (fpToUnwind && fp == fpToUnwind)) break;

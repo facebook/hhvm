@@ -13,7 +13,7 @@ class Test {
 }
 <<__EntryPoint>> function main(): void {
 $test = new Test();
-call_user_func_array(array($test, 'magic'), array('bur' => 'bar'));
-call_user_func_array(array($test, 'normal'), array('badum' => 'tss'));
+call_user_func_array(varray[$test, 'magic'], darray['bur' => 'bar']);
+call_user_func_array(varray[$test, 'normal'], darray['badum' => 'tss']);
 $test->hi('hello world!');
 }

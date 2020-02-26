@@ -7,7 +7,7 @@ function main($o, inout $x) {
 }
 <<__EntryPoint>> function main_entry(): void {
 $o = new stdclass;
-$o->prop = array(23 => 'hi');
+$o->prop = darray[23 => 'hi'];
 $y = null;
 echo main($o, inout $y) ? "true\n" : "false\n";
 }

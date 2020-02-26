@@ -5,6 +5,6 @@ function __autoload($cls) {
     include 'autoload1.inc';
   }
 }
-$arr = array("C");
+$arr = varray["C"];
 $obj = new $arr[0];
 

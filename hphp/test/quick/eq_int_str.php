@@ -72,7 +72,7 @@ function is($x, $y) {
 }
 
 <<__EntryPoint>> function cmpr(): void {
-  $s = array(
+  $s = varray[
     "",
     "123",
     "123q",
@@ -82,10 +82,10 @@ function is($x, $y) {
     "7.80",
     "9000000000",
     "9e10",
-  );
-  $i = array(
+  ];
+  $i = varray[
     0, 123, -456, 7.8, 90000000000,
-  );
+  ];
 
   for ($ji = 0; $ji < 5; ++$ji) {
     cs($i[$ji]);

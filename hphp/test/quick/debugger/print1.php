@@ -14,7 +14,7 @@ $c = new C();
 
 class D {
   public function __toDebugDisplay() {
-    return array('c'=>new C());
+    return darray['c'=>new C()];
   }
 }
 $d = new D();

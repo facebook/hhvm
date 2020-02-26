@@ -51,7 +51,7 @@ class HijriConverter {
       if ($m < 10)
         $m = "0".$m;
 
-      return array($y, $m, $d);
+      return varray[$y, $m, $d];
     }
     return array();
   }

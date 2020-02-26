@@ -18,33 +18,33 @@ class E {
   $d = new D();
   $e = new E();
 
-  call_user_func(array($c, 'foo'));
-  call_user_func(array($c, 'C::foo'));
-  call_user_func(array($c, 'D::foo')); // warns and bails returning null
-  call_user_func(array($c, 'E::foo')); // warns and bails returning null
+  call_user_func(varray[$c, 'foo']);
+  call_user_func(varray[$c, 'C::foo']);
+  call_user_func(varray[$c, 'D::foo']); // warns and bails returning null
+  call_user_func(varray[$c, 'E::foo']); // warns and bails returning null
 
-  call_user_func(array('C', 'bar'));
-  call_user_func(array('C', 'C::bar'));
-  call_user_func(array('C', 'D::bar')); // warns and bails returning null
-  call_user_func(array('C', 'E::bar')); // warns and bails returning null
+  call_user_func(varray['C', 'bar']);
+  call_user_func(varray['C', 'C::bar']);
+  call_user_func(varray['C', 'D::bar']); // warns and bails returning null
+  call_user_func(varray['C', 'E::bar']); // warns and bails returning null
 
-  call_user_func(array($d, 'foo'));
-  call_user_func(array($d, 'C::foo'));
-  call_user_func(array($d, 'D::foo'));
-  call_user_func(array($d, 'E::foo')); // warns and bails returning null
+  call_user_func(varray[$d, 'foo']);
+  call_user_func(varray[$d, 'C::foo']);
+  call_user_func(varray[$d, 'D::foo']);
+  call_user_func(varray[$d, 'E::foo']); // warns and bails returning null
 
-  call_user_func(array('D', 'bar'));
-  call_user_func(array('D', 'C::bar'));
-  call_user_func(array('D', 'D::bar'));
-  call_user_func(array('D', 'E::bar')); // warns and bails returning null
+  call_user_func(varray['D', 'bar']);
+  call_user_func(varray['D', 'C::bar']);
+  call_user_func(varray['D', 'D::bar']);
+  call_user_func(varray['D', 'E::bar']); // warns and bails returning null
 
-  call_user_func(array($e, 'foo'));
-  call_user_func(array($e, 'C::foo'));
-  call_user_func(array($e, 'D::foo'));
-  call_user_func(array($e, 'E::foo')); // warns and bails returning null
+  call_user_func(varray[$e, 'foo']);
+  call_user_func(varray[$e, 'C::foo']);
+  call_user_func(varray[$e, 'D::foo']);
+  call_user_func(varray[$e, 'E::foo']); // warns and bails returning null
 
-  call_user_func(array('E', 'bar'));
-  call_user_func(array('E', 'C::bar'));
-  call_user_func(array('E', 'D::bar'));
-  call_user_func(array('E', 'E::bar')); // warns and bails returning null
+  call_user_func(varray['E', 'bar']);
+  call_user_func(varray['E', 'C::bar']);
+  call_user_func(varray['E', 'D::bar']);
+  call_user_func(varray['E', 'E::bar']); // warns and bails returning null
 }

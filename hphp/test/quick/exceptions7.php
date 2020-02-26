@@ -70,14 +70,14 @@ function main_entry(): void {
   // Intercept static method
   fb_intercept('Blark::sfrap', 'handler');
   try {
-    call_user_func(array('Blark', 'sfrap'));
+    call_user_func(varray['Blark', 'sfrap']);
   } catch (Exception $e) {
     echo "caught static call 1\n";
   }
 
   fb_intercept('Blark::sfrap', 'passthrough_handler');
   try {
-    call_user_func(array('Blark', 'sfrap'));
+    call_user_func(varray['Blark', 'sfrap']);
   } catch (Exception $e) {
     echo "caught static call 2\n";
   }
@@ -86,14 +86,14 @@ function main_entry(): void {
   $b = new Blark();
   fb_intercept('Blark::frap', 'handler');
   try {
-    call_user_func(array($b, 'frap'));
+    call_user_func(varray[$b, 'frap']);
   } catch (Exception $e) {
     echo "caught non-static call 1\n";
   }
 
   fb_intercept('Blark::frap', 'passthrough_handler');
   try {
-    call_user_func(array($b, 'frap'));
+    call_user_func(varray[$b, 'frap']);
   } catch (Exception $e) {
     echo "caught non-static call 2\n";
   }
@@ -110,13 +110,13 @@ function main_entry(): void {
   // Intercept __call
   fb_intercept('MagicCall::__call', 'handler');
   try {
-    call_user_func(array($mc, "blark"), 'hi');
+    call_user_func(varray[$mc, "blark"], 'hi');
   } catch (Exception $e) {
     echo "caught __call 1\n";
   }
   fb_intercept('MagicCall::__call', 'passthrough_handler');
   try {
-    call_user_func(array($mc, "blark"), 'ho');
+    call_user_func(varray[$mc, "blark"], 'ho');
   } catch (Exception $e) {
     echo "caught __call 2\n";
   }

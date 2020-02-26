@@ -7,8 +7,8 @@ function bare_break_continue() {
 }
 
 <<__EntryPoint>> function test(): void {
-  $three = array(1, 2, 3);
-  $four  = array(1, 2, 3, 4);
+  $three = varray[1, 2, 3];
+  $four  = varray[1, 2, 3, 4];
 
   foreach ($three as $x) {
     if ($x == 2) {

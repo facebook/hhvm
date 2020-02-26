@@ -32,7 +32,7 @@ function main() {
   var_dump(trait_exists('iiii'));
   var_dump(trait_exists('zzzz'));
 
-  foreach (array('tttt', 'cccc', 'iiii', 'zzzz') as $n) {
+  foreach (varray['tttt', 'cccc', 'iiii', 'zzzz'] as $n) {
     var_dump(class_exists($n));
     var_dump(interface_exists($n));
     var_dump(trait_exists($n));

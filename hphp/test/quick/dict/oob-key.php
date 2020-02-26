@@ -50,6 +50,6 @@ function manipulate($arr) {
     |> get($$, 'foobar')
     |> var_dump($$);
 
-  $arr = array('foo' => dict[1 => 'hello', '2' => 'world', 3 => array()]);
+  $arr = darray['foo' => dict[1 => 'hello', '2' => 'world', 3 => array()]];
   manipulate($arr);
 }

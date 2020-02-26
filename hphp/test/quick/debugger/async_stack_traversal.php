@@ -24,11 +24,11 @@ async function genFoo($a) {
   $v1 = "v1-genFoo";
   $a++;
   await AwaitAllWaitHandle::fromArray(
-    array(
+    varray[
       genBar($a),
       gen2($a + 2),
       gen2($a + 3)
-    )
+    ]
   );
 }
 

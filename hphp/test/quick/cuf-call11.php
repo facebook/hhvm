@@ -13,7 +13,7 @@ class D5 {
   }
   public function test() {
     call_user_func('F5::foo');
-    call_user_func(array('F5','foo'));
+    call_user_func(varray['F5','foo']);
   }
 }
 class E5 extends D5 {

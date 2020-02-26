@@ -10,7 +10,7 @@ function foo2(): void {
   var_dump(foo(9007199254740992));
   var_dump(foo(1.1));
   var_dump(foo("abc"));
-  var_dump(foo(array(123)));
+  var_dump(foo(varray[123]));
   var_dump(foo(new C));
 }
 class C { public $foo = "bar"; }
@@ -37,7 +37,7 @@ function real($i) {
     $v8 = "abc";
     $v9 = new C;
     $v10 = array();
-    $v11 = array(123);
+    $v11 = varray[123];
   }
   var_dump((float)$v1);
   var_dump((float)$v2);

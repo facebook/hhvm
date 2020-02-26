@@ -28,7 +28,7 @@ function probe($l, $r) {
 function main() {
   f();
   $i = 0x3;
-  $data = array(15, "7", "not an int. at all.");
+  $data = varray[15, "7", "not an int. at all."];
   foreach ($data as $left) {
     foreach ($data as $right) {
       probe($left, $right);

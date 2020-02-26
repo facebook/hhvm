@@ -12,11 +12,11 @@ function my_autoload_func($cls) {
   }
 }
 
-var_dump(is_callable(array('D', 'foo')));
+var_dump(is_callable(varray['D', 'foo']));
 spl_autoload_register('my_autoload_func');
-var_dump(is_callable(array('D', 'foo')));
+var_dump(is_callable(varray['D', 'foo']));
 
-var_dump(is_callable(array('C', 'foo')));
+var_dump(is_callable(varray['C', 'foo']));
 spl_autoload_register('__autoload');
-var_dump(is_callable(array('C', 'foo')));
+var_dump(is_callable(varray['C', 'foo']));
 

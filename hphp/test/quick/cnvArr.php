@@ -28,7 +28,7 @@ function bar($i) {
     $v8 = "abc";
     $v9 = new C();
     $v10 = array();
-    $v11 = array(123);
+    $v11 = varray[123];
   }
   var_dump((array)$v1);
   var_dump((array)$v2);
@@ -51,7 +51,7 @@ function main_entry(): void {
   var_dump(foo(1));
   var_dump(foo(1.1));
   var_dump(foo("abc"));
-  var_dump(foo(array(123)));
+  var_dump(foo(varray[123]));
   var_dump(foo(new C));
 
   bar(1);

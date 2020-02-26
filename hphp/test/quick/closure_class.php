@@ -3,10 +3,10 @@
 trait A {
   public function b() {
     return function() {
-      return array(
+      return varray[
         __CLASS__,
         get_class($this)
-      );
+      ];
     };
   }
 }
@@ -15,10 +15,10 @@ class C {
   use A;
   public function d() {
     return function() {
-      return array(
+      return varray[
         __CLASS__,
         get_class($this)
-      );
+      ];
     };
   }
 }

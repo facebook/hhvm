@@ -27,7 +27,7 @@ class A {
     $a();
   }
   static function d() {
-    var_dump(array_map(function($a) { return $a; }, array(1,2,3)));
+    var_dump(array_map(function($a) { return $a; }, varray[1,2,3]));
   }
 }
 <<__EntryPoint>> function main(): void {

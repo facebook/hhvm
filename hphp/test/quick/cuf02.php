@@ -14,9 +14,9 @@ class E {
 
 
 <<__EntryPoint>> function main(): void {
-  call_user_func(array(new C(), 'foo'));
-  call_user_func(array(new D(), 'foo'));
-  call_user_func(array(new E(), 'foo'));
+  call_user_func(varray[new C(), 'foo']);
+  call_user_func(varray[new D(), 'foo']);
+  call_user_func(varray[new E(), 'foo']);
 
   call_user_func('C::bar');
   call_user_func('D::bar');

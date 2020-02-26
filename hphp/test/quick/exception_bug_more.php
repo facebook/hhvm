@@ -5,7 +5,7 @@ function thrower() {
 }
 
 function foo() {
-  foreach (array(1,2,3) as $x) {
+  foreach (varray[1,2,3] as $x) {
     try {
       thrower();
     } catch (MyJunk $z) { echo "Not Here\n"; }

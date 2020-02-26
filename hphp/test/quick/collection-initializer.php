@@ -8,18 +8,18 @@ class C {
   static public $z = Vector {};
 }
 class V {
-  public $x = array('a' => 1);
+  public $x = darray['a' => 1];
   public $y = Map {'a' => 1};
 }
 class W extends V {
   public $x = Map {'a' => 1};
-  public $y = array('a' => 1);
+  public $y = darray['a' => 1];
 }
 class X {
-  public $prop = array(Map {'a' => 1});
+  public $prop = varray[Map {'a' => 1}];
 }
 class Y {
-  public $prop = Vector {array(Map {'a' => 1})};
+  public $prop = Vector {varray[Map {'a' => 1}]};
 }
 class Z {
   const FOO = 456;
@@ -27,7 +27,7 @@ class Z {
   public $prop = Map {Z::FOO => Z::BAR};
 }
 class T {
-  public $prop = array(Set {'a'});
+  public $prop = varray[Set {'a'}];
 }
 
 <<__EntryPoint>> function main(): void {

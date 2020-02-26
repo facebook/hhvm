@@ -11,12 +11,12 @@ function main1() {
   $obj = new C1;
 
   // call_user_func
-  call_user_func(array($obj, "__call"), "a", "b", "c", "d");
-  call_user_func(array($obj, "foo"), "a", "b", "c", "d");
+  call_user_func(varray[$obj, "__call"], "a", "b", "c", "d");
+  call_user_func(varray[$obj, "foo"], "a", "b", "c", "d");
 
   // call_user_func_array
-  call_user_func_array(array($obj, "__call"), array("a", "b", "c", "d"));
-  call_user_func_array(array($obj, "foo"), array("a", "b", "c", "d"));
+  call_user_func_array(varray[$obj, "__call"], varray["a", "b", "c", "d"]);
+  call_user_func_array(varray[$obj, "foo"], varray["a", "b", "c", "d"]);
 }
 main1();
 
@@ -52,7 +52,7 @@ class C3 {
 
   public static function test() {
     // FCallClsMethodD
-    call_user_func(array('C3', 'foo'), "a", "b", "c", "d");
+    call_user_func(varray['C3', 'foo'], "a", "b", "c", "d");
   }
 }
 
@@ -73,7 +73,7 @@ class C4 extends B4 {
 
 function main4() {
   $obj = new C4;
-  call_user_func(array($obj, 'foo'), "a", "b", "c", "d");
+  call_user_func(varray[$obj, 'foo'], "a", "b", "c", "d");
 }
 main4();
 
@@ -93,7 +93,7 @@ class C5 extends B5 {
 
 function main5() {
   $obj = new C5;
-  call_user_func(array($obj, 'foo'), "a", "b", "c", "d");
+  call_user_func(varray[$obj, 'foo'], "a", "b", "c", "d");
 }
 main5();
 
@@ -102,7 +102,7 @@ class A6 {
 class B6 extends A6 {
   public function test() {
     call_user_func('A6::foo', 1, 2, 3);
-    call_user_func(array('A6','foo'), 1, 2, 3);
+    call_user_func(varray['A6','foo'], 1, 2, 3);
   }
 }
 class C6 extends B6 {
@@ -127,8 +127,8 @@ class A7 {
 }
 class B7 extends A7 {
   public function test() {
-    call_user_func(array($this, 'foo'), 1, 2, 3);
-    call_user_func(array($this, 'foo'), 1, 2, 3);
+    call_user_func(varray[$this, 'foo'], 1, 2, 3);
+    call_user_func(varray[$this, 'foo'], 1, 2, 3);
   }
 }
 class C7 extends B7 {
@@ -151,7 +151,7 @@ class A8 {
 class B8 {
   public function test() {
     call_user_func('A8::foo', 1, 2, 3);
-    call_user_func(array('A8', 'foo'), 1, 2, 3);
+    call_user_func(varray['A8', 'foo'], 1, 2, 3);
   }
 }
 class C8 extends B8 {
@@ -175,9 +175,9 @@ class E9 extends D9 {
     echo "E9::__call\n";
   }
   public function test() {
-    call_user_func(array($this, 'foo'));
-    call_user_func(array(new E9, 'foo'));
-    call_user_func(array(new E9, 'foo'));
+    call_user_func(varray[$this, 'foo']);
+    call_user_func(varray[new E9, 'foo']);
+    call_user_func(varray[new E9, 'foo']);
   }
 }
 class F9 extends D9 {
@@ -190,7 +190,7 @@ function main9() {
   $obj = new E9;
   $obj->test();
 
-  call_user_func(array($obj, 'foo'));
-  call_user_func(array('D9', 'foo'));
+  call_user_func(varray[$obj, 'foo']);
+  call_user_func(varray['D9', 'foo']);
 }
 main9();

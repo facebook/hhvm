@@ -1,7 +1,7 @@
 <?hh
 
 function test($a, $b, $c, $d, $e) {
-  $k = array();
+  $k = darray[];
   foreach ($a as $id) {
     try { $k[$id] = foo($id, $b, $c, $d, $e); }
     catch (Exception $e) { echo $e->getMessage()."\n"; }
@@ -15,5 +15,5 @@ function foo($a, $b) {
 }
 
 <<__EntryPoint>> function main(): void {
-  test(array(array('foo'), array('bar'), array('baz')), null, 1, 2, 3);
+  test(varray[varray['foo'], varray['bar'], varray['baz']], null, 1, 2, 3);
 }

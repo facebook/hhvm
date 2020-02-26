@@ -9,7 +9,7 @@ const DTRUE = true;
 
 class A {
   const foo = 'ABC';
-  public function a(array  $a0 = null, array  $a1 = array(), array  $a2 = array(1, 2, 3)) {}
+  public function a(array  $a0 = null, array  $a1 = array(), array  $a2 = varray[1, 2, 3]) {}
   public function b(bool   $b0 = null, bool $b1 = true, bool $b2 = false, bool $b3 = DTRUE) {}
   public function d(float $d0 = null, float $d1 = 1.0, float $d2 = DD2, float $d3 = 3.0) {}
   public function f(float  $f0 = null, float  $f1 = 1.0, float  $f2 = DD2, float  $f3 = 3.0) {}

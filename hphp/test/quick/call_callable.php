@@ -16,7 +16,7 @@ class Base {
 class C extends Base {
   private function blah() { echo __CLASS__, "\n"; }
   public function exposeBlah() {
-    return array($this, 'blah');
+    return varray[$this, 'blah'];
   }
 
   public static function intval($x) {
@@ -36,7 +36,7 @@ class CMagic {
 
 
 class Foo extends Base {
-  public function get() { return array($this, 'blah'); }
+  public function get() { return varray[$this, 'blah']; }
 }
 
 function invoker($x) {
@@ -59,13 +59,13 @@ function test_invocation_syntaxes() {
   $inst = new C();
   $inst_magic = new CMagic();
   $call_func_string = 'intval';
-  $call_static_arr = array('C', 'intval');
+  $call_static_arr = varray['C', 'intval'];
   $call_static_string = 'C::intval';
-  $call_instance = array($inst, 'inst_intval');
-  $call_static_on_instance = array($inst, 'intval');
+  $call_instance = varray[$inst, 'inst_intval'];
+  $call_static_on_instance = varray[$inst, 'intval'];
   $call_closure = function($x) {return C::intval($x);};
-  $call_magic_instance = array($inst_magic, 'inst_intval');
-  $call_invalid = array('C', 'noSuchMethod');
+  $call_magic_instance = varray[$inst_magic, 'inst_intval'];
+  $call_invalid = varray['C', 'noSuchMethod'];
 
   echo "* call_user_func ********************\n";
   var_dump(call_user_func($call_func_string, $test));

@@ -11,7 +11,7 @@ class Sleeper {
   public function __sleep() {
     echo "sleep\n";
     bar($this);
-    return array('foo');
+    return varray['foo'];
   }
 
   public function __wakeup() {

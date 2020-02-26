@@ -107,7 +107,7 @@ function DataTimeFromString() {
 <<__EntryPoint>> function main_entry(): void {
 date_default_timezone_set('America/Los_Angeles');
 
-test("DateTime", array("2012-06-23T11:00:00"));
+test("DateTime", varray["2012-06-23T11:00:00"]);
 
 main();
 

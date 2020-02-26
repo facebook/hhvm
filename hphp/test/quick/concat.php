@@ -25,7 +25,7 @@ function main() {
   $s .= "a";
   print $s."\n";
 
-  $b = array(array());
+  $b = varray[array()];
   $a = $b[0];
   $s = $a . "a";
   print $s."\n";

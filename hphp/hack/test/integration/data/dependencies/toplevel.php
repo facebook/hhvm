@@ -135,3 +135,14 @@ type UNSAFE_TYPE_HH_FIXME = UNSAFE_TYPE_HH_FIXME_;
 function with_unsafe_type_hh_fixme(UNSAFE_TYPE_HH_FIXME $x): int {
   return $x;
 }
+
+type Option<T> = Id<?T>;
+type Id<T> = T;
+
+class WithTypeAliasHint {
+  private Option<int> $x = null;
+
+  public function getX(): Option<int> {
+    return $this->x;
+  }
+}

@@ -59,7 +59,7 @@ fn emit_constant_cinit<'a>(
                 return_type_info,
                 None, /* doc_comment */
                 Some(env.clone()),
-            );
+            )?;
             Ok(HhasFunction {
                 attributes: vec![],
                 name: original_id.into(),

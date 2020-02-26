@@ -15,6 +15,9 @@ use context::Context;
 use core_utils_rust::add_ns;
 use env::{local::Type as Local, Env as BodyEnv};
 use escaper::{escape, escape_by, is_lit_printable};
+use hhas_adata_rust::{
+    ARRAY_PREFIX, DARRAY_PREFIX, DICT_PREFIX, KEYSET_PREFIX, VARRAY_PREFIX, VEC_PREFIX,
+};
 use hhas_attribute_rust::{self as hhas_attribute, HhasAttribute};
 use hhas_body_rust::HhasBody;
 use hhas_class_rust::{self as hhas_class, HhasClass};
@@ -42,13 +45,6 @@ use runtime::TypedValue;
 use write::*;
 
 use std::{borrow::Cow, convert::TryInto, io::Write as _};
-
-const ADATA_ARRAY_PREFIX: &str = "a";
-const ADATA_VARRAY_PREFIX: &str = "y";
-const ADATA_VEC_PREFIX: &str = "v";
-const ADATA_DICT_PREFIX: &str = "D";
-const ADATA_DARRAY_PREFIX: &str = "Y";
-const ADATA_KEYSET_PREFIX: &str = "k";
 
 pub mod context {
     use crate::write::*;
@@ -781,22 +777,22 @@ fn print_adata<W: Write>(ctx: &mut Context, w: &mut W, tv: &TypedValue) -> Resul
         TypedValue::Bool(false) => w.write("b:0;"),
         TypedValue::Bool(true) => w.write("b:1;"),
         TypedValue::Dict((pairs, loc)) => {
-            print_adata_dict_collection_argument(ctx, w, ADATA_DICT_PREFIX, loc, pairs)
+            print_adata_dict_collection_argument(ctx, w, DICT_PREFIX, loc, pairs)
         }
         TypedValue::Vec((values, loc)) => {
-            print_adata_collection_argument(ctx, w, ADATA_VEC_PREFIX, loc, values)
+            print_adata_collection_argument(ctx, w, VEC_PREFIX, loc, values)
         }
         TypedValue::DArray((pairs, loc)) => {
-            print_adata_dict_collection_argument(ctx, w, ADATA_DARRAY_PREFIX, loc, pairs)
+            print_adata_dict_collection_argument(ctx, w, DARRAY_PREFIX, loc, pairs)
         }
         TypedValue::Array(pairs) => {
-            print_adata_dict_collection_argument(ctx, w, ADATA_ARRAY_PREFIX, &None, pairs)
+            print_adata_dict_collection_argument(ctx, w, ARRAY_PREFIX, &None, pairs)
         }
         TypedValue::Keyset(values) => {
-            print_adata_collection_argument(ctx, w, ADATA_KEYSET_PREFIX, &None, values)
+            print_adata_collection_argument(ctx, w, KEYSET_PREFIX, &None, values)
         }
         TypedValue::VArray((values, loc)) => {
-            print_adata_collection_argument(ctx, w, ADATA_VARRAY_PREFIX, loc, values)
+            print_adata_collection_argument(ctx, w, VARRAY_PREFIX, loc, values)
         }
         TypedValue::HhasAdata(_) => not_impl!(),
     }
@@ -810,7 +806,7 @@ fn print_attribute<W: Write>(
     w.write(format!(
         "\"{}\"(\"\"\"{}:{}:{{",
         a.name,
-        ADATA_VARRAY_PREFIX,
+        VARRAY_PREFIX,
         a.arguments.len()
     ))?;
     concat(w, &a.arguments, |w, arg| print_adata(ctx, w, arg))?;
@@ -1796,7 +1792,6 @@ fn print_type_info_<W: Write>(w: &mut W, is_enum: bool, ti: &HhasTypeInfo) -> Re
             "N",
         )
     };
-
     wrap_by_angle(w, |w| {
         print_quote_str(w, &ti.user_type)?;
         w.write(" ")?;

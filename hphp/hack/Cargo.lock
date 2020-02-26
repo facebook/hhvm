@@ -434,7 +434,9 @@ version = "0.0.0"
 dependencies = [
  "bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "env 0.0.0",
+ "hhas_adata_rust 0.0.0",
  "hhbc_ast_rust 0.0.0",
+ "hhbc_string_utils_rust 0.0.0",
  "instruction_sequence_rust 0.0.0",
  "options 0.0.0",
  "runtime 0.0.0",
@@ -1074,6 +1076,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "hhas_adata_rust"
+version = "0.0.0"
+dependencies = [
+ "hhbc_ast_rust 0.0.0",
+ "runtime 0.0.0",
+]
+
+[[package]]
 name = "hhas_attribute_rust"
 version = "0.0.0"
 dependencies = [
@@ -1259,6 +1269,7 @@ dependencies = [
  "core_utils_rust 0.0.0",
  "env 0.0.0",
  "escaper 0.0.0",
+ "hhas_adata_rust 0.0.0",
  "hhas_attribute_rust 0.0.0",
  "hhas_body_rust 0.0.0",
  "hhas_class_rust 0.0.0",

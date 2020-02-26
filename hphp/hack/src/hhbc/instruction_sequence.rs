@@ -1337,6 +1337,21 @@ impl InstrSeq {
         }
     }
 
+    pub fn map_result_mut<F>(&mut self, f: &mut F) -> Result<()>
+    where
+        F: FnMut(&mut Instruct) -> Result<()>,
+    {
+        match self {
+            Self::Empty => Ok(()),
+            Self::One(x) => f(x),
+            Self::List(instr_lst) => instr_lst.iter_mut().map(|x| f(x)).collect::<Result<()>>(),
+            Self::Concat(instrseq_lst) => instrseq_lst
+                .iter_mut()
+                .map(|x| x.map_result_mut(f))
+                .collect::<Result<()>>(),
+        }
+    }
+
     pub fn map<F>(&self, f: &mut F) -> Self
     where
         F: FnMut(Instruct) -> Instruct,

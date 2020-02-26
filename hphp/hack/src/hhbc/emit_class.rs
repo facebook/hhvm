@@ -64,7 +64,7 @@ fn make_86method<'a>(
     is_abstract: bool,
     span: Span,
     instrs: InstrSeq,
-) -> HhasMethod<'a> {
+) -> Result<HhasMethod<'a>> {
     // TODO: move this. We just know that there are no iterators in 86methods
     emitter.iterator_mut().reset();
 
@@ -94,9 +94,9 @@ fn make_86method<'a>(
         method_return_type,
         method_doc_comment,
         method_env,
-    );
+    )?;
 
-    HhasMethod {
+    Ok(HhasMethod {
         body,
         attributes,
         name,
@@ -104,7 +104,7 @@ fn make_86method<'a>(
         span,
         rx_level,
         visibility,
-    }
+    })
 }
 
 fn from_extends(is_enum: bool, extends: &Vec<tast::Hint>) -> Option<hhbc_id::class::Type> {
@@ -297,7 +297,7 @@ fn emit_reified_init_method<'a>(
     emitter: &mut Emitter,
     env: &Env,
     ast_class: &'a tast::Class_,
-) -> Option<HhasMethod<'a>> {
+) -> Result<Option<HhasMethod<'a>>> {
     use hhas_type::{constraint::*, Info};
 
     let num_reified = ast_class
@@ -311,7 +311,7 @@ fn emit_reified_init_method<'a>(
         _ => false, // Hack classes can only extend a single parent
     };
     if num_reified == 0 && !maybe_has_reified_parents {
-        None
+        Ok(None)
     } else {
         let tc = Type::make(Some("HH\\varray".into()), Flags::empty());
         let params = vec![HhasParam {
@@ -324,7 +324,7 @@ fn emit_reified_init_method<'a>(
         }];
 
         let instrs = emit_reified_init_body(env, num_reified, ast_class);
-        Some(make_86method(
+        Ok(Some(make_86method(
             emitter,
             string_utils::reified::INIT_METH_NAME.into(),
             params,
@@ -333,7 +333,7 @@ fn emit_reified_init_method<'a>(
             false, // is_abstract
             Span::from_pos(&ast_class.span),
             instrs,
-        ))
+        )?))
     }
 }
 
@@ -343,7 +343,7 @@ fn make_init_method<'a, F>(
     filter: F,
     name: &'static str,
     span: Span,
-) -> Option<HhasMethod<'a>>
+) -> Result<Option<HhasMethod<'a>>>
 where
     F: Fn(&HhasProperty) -> bool,
 {
@@ -353,7 +353,7 @@ where
     {
         // TODO(hrust)
         let instrs = InstrSeq::default();
-        Some(make_86method(
+        Ok(Some(make_86method(
             emitter,
             name.into(),
             vec![],
@@ -362,9 +362,9 @@ where
             false, // is_abstract
             span,
             instrs,
-        ))
+        )?))
     } else {
-        None
+        Ok(None)
     }
 }
 
@@ -551,11 +551,11 @@ pub fn emit_class<'a>(
     let linit_filter = |p: &HhasProperty| p.is_static() && p.is_lsb();
 
     let pinit_method =
-        make_init_method(emitter, &properties, &pinit_filter, "86pinit", span.clone());
+        make_init_method(emitter, &properties, &pinit_filter, "86pinit", span.clone())?;
     let sinit_method =
-        make_init_method(emitter, &properties, &sinit_filter, "86sinit", span.clone());
+        make_init_method(emitter, &properties, &sinit_filter, "86sinit", span.clone())?;
     let linit_method =
-        make_init_method(emitter, &properties, &linit_filter, "86linit", span.clone());
+        make_init_method(emitter, &properties, &linit_filter, "86linit", span.clone())?;
 
     let initialized_constants: Vec<_> = constants
         .iter()
@@ -587,13 +587,13 @@ pub fn emit_class<'a>(
             is_interface, /* is_abstract */
             span.clone(),
             instrs,
-        ))
+        )?)
     };
 
     let should_emit_reified_init =
         !(emitter.context().systemlib() || is_closure || is_interface || is_trait);
     let reified_init_method = if should_emit_reified_init {
-        emit_reified_init_method(emitter, &env, ast_class)
+        emit_reified_init_method(emitter, &env, ast_class)?
     } else {
         None
     };

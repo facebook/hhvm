@@ -14,6 +14,7 @@ path = "../../print.rs"
 core_utils_rust = { path = "../../../utils/core" }
 env = { path = "../env" }
 escaper = { path = "../../../utils/escaper" }
+hhas_adata_rust = { path = "../hhas_adata" }
 hhas_attribute_rust = { path = "../hhas_attribute" }
 hhas_body_rust = { path = "../hhas_body" }
 hhas_class_rust = { path = "../hhas_class" }

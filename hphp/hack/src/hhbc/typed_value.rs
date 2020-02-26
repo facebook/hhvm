@@ -2,7 +2,6 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-
 extern crate lazy_static;
 
 use oxidized::ast_defs;
@@ -16,7 +15,7 @@ use std::{
 /// ensure independence from usage: for example, it can be used for optimization
 /// on ASTs, or on bytecode, or (in future) on a compiler intermediate language.
 /// HHVM takes a similar approach: see runtime/base/typed-value.h
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialOrd)]
 pub enum TypedValue {
     /// Used for fields that are initialized in the 86pinit method
     Uninit,
@@ -136,6 +135,32 @@ impl TryFrom<TypedValue> for String {
         }
     }
 }
+
+impl Ord for TypedValue {
+    fn cmp(&self, other: &TypedValue) -> std::cmp::Ordering {
+        match (self, other) {
+            (TypedValue::Float(f1), TypedValue::Float(f2)) => {
+                f1.partial_cmp(f2).unwrap_or(std::cmp::Ordering::Equal)
+            }
+            (TypedValue::Int(i1), TypedValue::Int(i2)) => i1.cmp(i2),
+            _ => self.cmp(other),
+        }
+    }
+}
+
+impl PartialEq for TypedValue {
+    fn eq(&self, other: &TypedValue) -> bool {
+        match (self, other) {
+            (TypedValue::Float(f1), TypedValue::Float(f2)) => {
+                f1.to_be_bytes().eq(&f2.to_be_bytes())
+            }
+            (TypedValue::Int(i1), TypedValue::Int(i2)) => i1.eq(i2),
+            _ => self.eq(other),
+        }
+    }
+}
+
+impl Eq for TypedValue {}
 
 impl TypedValue {
     // Integer operations. For now, we don't attempt to implement the

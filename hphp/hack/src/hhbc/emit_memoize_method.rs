@@ -227,14 +227,7 @@ fn emit<'a>(
     let pos = &args.method.span;
     let instrs = make_memoize_method_code(emitter, env, pos, &hhas_params[..], args)?;
     let instrs = emit_pos_then(emitter, pos, instrs);
-    Ok(make_wrapper(
-        emitter,
-        env,
-        instrs,
-        hhas_params,
-        return_type_info,
-        args,
-    ))
+    make_wrapper(emitter, env, instrs, hhas_params, return_type_info, args)
 }
 
 fn make_memoize_method_code(
@@ -436,7 +429,7 @@ fn make_wrapper<'a>(
     params: Vec<HhasParam>,
     return_type_info: HhasTypeInfo,
     args: &Args,
-) -> HhasBody<'a> {
+) -> Result<HhasBody<'a>> {
     let decl_vars = if args.flags.contains(Flags::IS_REFIED) {
         vec![reified::GENERICS_LOCAL_NAME.into()]
     } else {

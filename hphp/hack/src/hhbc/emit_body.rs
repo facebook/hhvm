@@ -186,7 +186,7 @@ pub fn emit_body<'a, 'b>(
             Some(return_type_info),
             args.doc_comment.to_owned(),
             Some(env),
-        ),
+        )?,
         is_generator,
         is_pair_generator,
     ))
@@ -413,9 +413,9 @@ pub fn make_body<'a>(
     return_type_info: Option<HhasTypeInfo>,
     doc_comment: Option<DocComment>,
     env: Option<Env<'a>>,
-) -> HhasBody<'a> {
+) -> Result<HhasBody<'a>> {
     body_instrs.rewrite_user_labels(emitter.label_gen_mut());
-    emit_adata::rewrite_typed_value(&mut body_instrs);
+    emit_adata::rewrite_typed_values(emitter, &mut body_instrs)?;
     if emitter
         .options()
         .hack_compiler_flags
@@ -428,7 +428,7 @@ pub fn make_body<'a>(
     } else {
         emitter.iterator().count()
     };
-    HhasBody {
+    Ok(HhasBody {
         body_instrs,
         decl_vars,
         num_iters,
@@ -439,7 +439,7 @@ pub fn make_body<'a>(
         return_type_info,
         doc_comment,
         env,
-    }
+    })
 }
 
 fn emit_defs(env: &mut Env, emitter: &mut Emitter, prog: &[tast::Def]) -> Result {

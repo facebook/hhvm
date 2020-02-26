@@ -47,7 +47,7 @@ pub fn emit_fatal_program<'p>(
         None,
         None,
         None,
-    );
+    )?;
     Ok(HhasProgram {
         is_hh: true,
         main,

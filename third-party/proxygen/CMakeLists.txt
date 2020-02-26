@@ -7,7 +7,7 @@ set(PROXYGEN_FBCODE_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(PROXYGEN_GENERATED_ROOT ${CMAKE_CURRENT_BINARY_DIR}/generated)
 file(MAKE_DIRECTORY ${PROXYGEN_GENERATED_ROOT})
 
-find_program(PROXYGEN_PYTHON python)
+find_program(PROXYGEN_PYTHON python3 python)
 if(NOT PROXYGEN_PYTHON)
   message(FATAL_ERROR "python is required for the proxygen build")
 endif()

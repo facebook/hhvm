@@ -413,9 +413,11 @@ val get_condition_type : env -> SMap.key -> Typing_defs.decl_ty option
 
 val add_subtype_prop : env -> Typing_logic.subtype_prop -> env
 
-val set_tyvar_variance_i : env -> ?flip:bool -> Typing_defs.internal_type -> env
+val set_tyvar_variance_i :
+  env -> ?flip:bool -> ?for_all_vars:bool -> Typing_defs.internal_type -> env
 
-val set_tyvar_variance : env -> ?flip:bool -> Typing_defs.locl_ty -> env
+val set_tyvar_variance :
+  env -> ?flip:bool -> ?for_all_vars:bool -> Typing_defs.locl_ty -> env
 
 val update_variance_after_bind : env -> int -> Typing_defs.locl_ty -> env
 

@@ -219,18 +219,15 @@ let rec localize ~ety_env env (dty : decl_ty) =
       in
       (env, mk (r, Tnewtype (x, [], cstr)))
   | (r, Tapply (((_, cid) as cls), tyl)) ->
-    let can_infer_tparams =
-      TypecheckerOptions.global_inference (Env.get_tcopt env)
-    in
     let (env, tyl) =
       match Env.get_class env cid with
       | None -> List.map_env env tyl (localize ~ety_env)
       | Some class_info ->
         let tparams = Cls.tparams class_info in
         if
-          (not (List.is_empty tparams))
+          TypecheckerOptions.global_inference (Env.get_tcopt env)
+          && (not (List.is_empty tparams))
           && List.is_empty tyl
-          && can_infer_tparams
         then
           (* In this case we will infer the missing type parameters *)
           localize_missing_tparams_class env r cls class_info
@@ -676,14 +673,18 @@ and localize_hint ~ety_env env hint =
 and localize_missing_tparams_class env r sid class_ =
   let use_pos = Reason.to_pos r in
   let use_name = Utils.strip_ns (snd sid) in
-  let (env, tyl) =
-    List.map_env env (Cls.tparams class_) (fun env tparam ->
-        Env.fresh_type_reason
-          env
-          (Reason.Rtype_variable_generics (use_pos, snd tparam.tp_name, use_name)))
+  let ((env, _i), tyl) =
+    List.fold_map (Cls.tparams class_) ~init:(env, 0) ~f:(fun (env, i) tparam ->
+        let (env, ty) =
+          Env.new_global_tyvar
+            env
+            (Ident.from_string_hash
+               (Printf.sprintf "%s#%d" (Pos.print_verbose_relative use_pos) i))
+            (Reason.Rglobal_partial_annot (use_pos, snd tparam.tp_name, use_name))
+        in
+        ((env, i + 1), ty))
   in
   let c_ty = mk (r, Tclass (sid, Nonexact, tyl)) in
-  let env = Env.set_tyvar_variance env c_ty in
   let ety_env =
     {
       type_expansions = [];

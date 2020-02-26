@@ -1505,16 +1505,21 @@ let update_variance_after_bind env var ty =
   in
   env
 
-let set_tyvar_variance_i env ?(flip = false) ty =
+let set_tyvar_variance_i env ?(flip = false) ?(for_all_vars = false) ty =
   log_env_change "set_tyvar_variance" env
   @@
-  let tyvars = get_current_tyvars env in
   let (env, positive, negative) = get_tyvars_i env ty in
   let (positive, negative) =
     if flip then
       (negative, positive)
     else
       (positive, negative)
+  in
+  let tyvars =
+    if for_all_vars then
+      ISet.union positive negative |> ISet.elements
+    else
+      get_current_tyvars env
   in
   List.fold_left tyvars ~init:env ~f:(fun env var ->
       let env =
@@ -1531,8 +1536,8 @@ let set_tyvar_variance_i env ?(flip = false) ty =
       in
       env)
 
-let set_tyvar_variance env ?(flip = false) ty =
-  set_tyvar_variance_i env ~flip (LoclType ty)
+let set_tyvar_variance env ?(flip = false) ?(for_all_vars = false) ty =
+  set_tyvar_variance_i env ~flip ~for_all_vars (LoclType ty)
 
 let add_tyvar_upper_bound ?intersect env var (ty : internal_type) =
   log_env_change "add_tyvar_upper_bound" env

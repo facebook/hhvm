@@ -734,7 +734,9 @@ and fun_def ctx f :
           variadicity_decl_ty
           f.f_variadic
       in
-      let env = set_tyvars_variance_in_callable env return_ty param_tys in
+      let env =
+        set_tyvars_variance_in_callable env return_ty param_tys t_variadic
+      in
       let local_tpenv = Env.get_tpenv env in
       let disable =
         Naming_attributes.mem
@@ -8298,21 +8300,22 @@ and class_type_param env ct =
 (* If the localized types of the return type is a tyvar we force it to be covariant.
   The same goes for parameter types, but this time we force them to be contravariant
 *)
-and set_tyvars_variance_in_callable env return_ty param_tys =
-  let (env, return_ty) = Env.expand_type env return_ty in
+and set_tyvars_variance_in_callable env return_ty param_tys variadic_param_ty =
+  Env.log_env_change "set_tyvars_variance_in_callable" env
+  @@
+  let set_variance = Env.set_tyvar_variance ~for_all_vars:true in
+  let env = set_variance env return_ty in
+  let env = List.fold param_tys ~init:env ~f:(set_variance ~flip:true) in
   let env =
-    match get_node return_ty with
-    | Tvar v -> Env.set_tyvar_appears_covariantly env v
-    | _ -> env
+    match variadic_param_ty with
+    | FVvariadicArg vparam ->
+      let (_p, ty) = vparam.param_annotation in
+      set_variance env ty ~flip:true
+    | FVellipsis _
+    | FVnonVariadic ->
+      env
   in
-  List.fold
-    ~init:env
-    ~f:(fun env ty ->
-      let (env, ty) = Env.expand_type env ty in
-      match get_node ty with
-      | Tvar v -> Env.set_tyvar_appears_contravariantly env v
-      | _ -> env)
-    param_tys
+  env
 
 (* During the decl phase we can, for global inference, add "improved type hints".
    That is we can say that some missing type hints are in fact global tyvars.
@@ -8482,7 +8485,9 @@ and method_def env cls m =
           variadicity_decl_ty
           m.m_variadic
       in
-      let env = set_tyvars_variance_in_callable env locl_ty param_tys in
+      let env =
+        set_tyvars_variance_in_callable env locl_ty param_tys t_variadic
+      in
       let nb = Nast.assert_named_body m.m_body in
       let local_tpenv = Env.get_tpenv env in
       let disable =

@@ -8,7 +8,7 @@
 
 open Typing_env_types
 
-type global_type_map = (Typing_defs.locl_ty * Ident.t) Pos.AbsolutePosMap.t
+type global_type_map = Typing_defs.locl_ty Pos.AbsolutePosMap.t
 
 module StateErrors : sig
   type t
@@ -64,7 +64,7 @@ module StateConstraintGraph : sig
 end
 
 module StateSolvedGraph : sig
-  type t = env * StateErrors.t * global_type_map * (Pos.t * int) list
+  type t = env * StateErrors.t * global_type_map
 
   val load : string -> t
 

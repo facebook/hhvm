@@ -297,10 +297,12 @@ let get_tyvars_in_tyvar env = Occ.get_tyvars_in_tyvar env.tyvar_occurrences
 let contains_unsolved_tyvars env =
   Occ.contains_unsolved_tyvars env.tyvar_occurrences
 
-let is_global_tyvar env v =
+let get_global_tyvar_reason env v =
   match get_tyvar_info_opt env v with
-  | None -> false
-  | Some tvinfo -> Option.is_some tvinfo.global_reason
+  | None -> None
+  | Some tvinfo -> tvinfo.global_reason
+
+let is_global_tyvar env v = Option.is_some (get_global_tyvar_reason env v)
 
 let tyvar_is_solved env var =
   match get_solving_info_opt env var with

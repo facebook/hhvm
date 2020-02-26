@@ -112,6 +112,10 @@ let add_subtype_prop env prop =
 let is_global_tyvar env var =
   wrap_inference_env_call_res env (fun env -> Inf.is_global_tyvar env var)
 
+let get_global_tyvar_reason env var =
+  wrap_inference_env_call_res env (fun env ->
+      Inf.get_global_tyvar_reason env var)
+
 let empty_bounds = TySet.empty
 
 let tyvar_is_solved_or_skip_global env var =

@@ -746,7 +746,7 @@ let print_solved_global_inference_env
   if verbosity >= 1 then
     match gienv with
     | None -> ()
-    | Some (gienv, state_errors, _, _) ->
+    | Some (gienv, state_errors, _type_map) ->
       print_global_inference_env
         gienv
         ~step_name:"Solve"
@@ -1102,7 +1102,7 @@ let compute_tasts_expand_types ctx ~verbosity files_info interesting_files =
   let (tasts, gi_solved) =
     match global_inference_merge_and_solve ctx ~verbosity subconstraints with
     | None -> (tasts, None)
-    | Some ((gienv, _, _, _) as gi_solved) ->
+    | Some ((gienv, _, _) as gi_solved) ->
       let tasts =
         Relative_path.Map.map
           tasts

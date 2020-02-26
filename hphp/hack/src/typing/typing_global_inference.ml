@@ -81,24 +81,25 @@ end
 
 let artifacts_path : string ref = ref ""
 
-type global_type_map = (Typing_defs.locl_ty * Ident.t) Pos.AbsolutePosMap.t
+type global_type_map = Typing_defs.locl_ty Pos.AbsolutePosMap.t
 
-let build_ty_map (tast : Tast.def) : global_type_map =
-  let get_global_var_pos (ty : locl_ty) =
+let build_ty_map (ctx : Provider_context.t) (tast : Tast.def) : global_type_map
+    =
+  let get_global_var_pos env (ty : locl_ty) =
     (object
-       inherit [(Pos.t * Ident.t) option] Type_visitor.locl_type_visitor
+       inherit [Pos.t option] Type_visitor.locl_type_visitor
 
-       method! on_tvar pos r tvar =
+       method! on_tvar pos _ tvar =
          match pos with
          | Some pos -> Some pos
          | None ->
-           if Reason.is_global r then
+           (match Env.get_global_tyvar_reason env tvar with
+           | Some r ->
              (* here we extract the position from the reason attached to the
               * type variable, instead of the type itself. This is currently
               * how patch positions are encoded. This should change *)
-             Some (Reason.to_pos r, tvar)
-           else
-             None
+             Some (Reason.to_pos r)
+           | None -> None)
     end)
       #on_type
       None
@@ -106,18 +107,18 @@ let build_ty_map (tast : Tast.def) : global_type_map =
   in
   let builder =
     object
-      inherit [_] Aast.iter
+      inherit [_] Tast_visitor.iter_with_state
 
-      method! on_'hi ty_map hi =
-        match get_global_var_pos hi with
+      method! on_'hi (env, ty_map) hi =
+        match get_global_var_pos (Tast_env.tast_env_as_typing_env env) hi with
         | None -> ()
-        | Some (pos, tvar) ->
+        | Some pos ->
           let pos = Pos.to_absolute pos in
-          ty_map := Pos.AbsolutePosMap.add pos (hi, tvar) !ty_map
+          ty_map := Pos.AbsolutePosMap.add pos hi !ty_map
     end
   in
   let state = ref Pos.AbsolutePosMap.empty in
-  let () = builder#on_def state tast in
+  let () = builder#go_def ctx state tast in
   !state
 
 module StateSubConstraintGraphs = struct
@@ -139,7 +140,7 @@ module StateSubConstraintGraphs = struct
       List.fold
         tasts
         ~f:(fun pos_map tast ->
-          Pos.AbsolutePosMap.union pos_map @@ build_ty_map tast)
+          Pos.AbsolutePosMap.union pos_map @@ build_ty_map ctx tast)
         ~init:Pos.AbsolutePosMap.empty
     in
     (type_map, genvs)
@@ -287,7 +288,7 @@ end
 
 module StateSolvedGraph = struct
   include StateFunctor (struct
-    type t = env * StateErrors.t * global_type_map * (Pos.t * Ident.t) list
+    type t = env * StateErrors.t * global_type_map
   end)
 
   let save path t = save path t
@@ -295,13 +296,9 @@ module StateSolvedGraph = struct
   (** Solve the constraint graph. *)
   let from_constraint_graph ((type_map, env, errors) : StateConstraintGraph.t) :
       t =
-    let vars = Env.get_all_tyvars env in
-    let positions =
-      List.map vars ~f:(fun var -> (Env.get_tyvar_pos env var, var))
-    in
-
     (* For any errors seen during the last step (that is graph merging), we bind
     the corresponding tyvar to Terr *)
+    let vars = Env.get_all_tyvars env in
     let env =
       List.fold vars ~init:env ~f:(fun env var ->
           if StateErrors.has_error errors var then
@@ -317,7 +314,7 @@ module StateSolvedGraph = struct
       else
         Typing_solver.solve_all_unsolved_tyvars_gi env make_on_error
     in
-    (env, errors, type_map, positions)
+    (env, errors, type_map)
 end
 
 let set_path () =

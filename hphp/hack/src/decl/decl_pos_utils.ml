@@ -124,7 +124,6 @@ struct
     | Rglobal_class_prop p -> Rglobal_class_prop (pos p)
     | Rglobal_fun_param p -> Rglobal_fun_param (pos p)
     | Rglobal_fun_ret p -> Rglobal_fun_ret (pos p)
-    | Rglobal_partial_annot (p, t, s) -> Rglobal_partial_annot (pos p, t, s)
 
   let pos_mapper =
     object

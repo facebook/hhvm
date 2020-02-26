@@ -533,62 +533,25 @@ module Mode_rewrite = struct
   let build_positions_map :
       Tast_env.env ->
       global_type_map ->
-      (Pos.t * Ident.t) list ->
       (Tast_env.env * phase_ty) list Pos.AbsolutePosMap.t SMap.t =
-   fun env pos_to_type_map positions ->
-    (* note: this function only updates the type for a position, if no
-     * type was registered previously *)
-    let register_ty pos (ty : phase_ty) final_map =
-      let filename = Pos.filename pos in
-      SMap.update
-        filename
-        (function
-          | None -> Some (Pos.AbsolutePosMap.singleton pos [(env, ty)])
-          | Some m ->
-            Some
-              (Pos.AbsolutePosMap.update
-                 pos
-                 (function
-                   | None -> Some [(env, ty)]
-                   | Some m -> Some m)
-                 m))
-        final_map
-    in
-
-    (* first find types in pos -> ty map *)
-    let final_map = SMap.empty in
-    let final_map =
-      Pos.AbsolutePosMap.fold
-        (fun pos (ty, _tvar) -> register_ty pos (LoclTy ty))
-        pos_to_type_map
-        final_map
-    in
-
-    (* see if we can find some types in the legacy map as well *)
-    (* note: this will not overwrite types registered above *)
-    let pos_to_tvar_map =
-      List.fold
-        positions
-        ~init:Pos.AbsolutePosMap.empty
-        ~f:(fun m (pos, tvar) ->
-          Pos.AbsolutePosMap.add (Pos.to_absolute pos) tvar m)
-    in
+   fun env pos_to_type_map ->
+    (* find the types in the pos -> ty map, and convert to a
+     * filename -> pos -> [(env, ty)] map *)
     Pos.AbsolutePosMap.fold
-      (fun pos tvar ->
-        let ty = Typing_defs.(mk (Reason.none, Tvar tvar)) in
-        register_ty pos (LoclTy ty))
-      pos_to_tvar_map
-      final_map
+      (fun pos ty ->
+        let ty = LoclTy ty in
+        SMap.update (Pos.filename pos) @@ function
+        | None -> Some (Pos.AbsolutePosMap.singleton pos [(env, ty)])
+        | Some m -> Some (Pos.AbsolutePosMap.add pos [(env, ty)] m))
+      pos_to_type_map
+      SMap.empty
 
   let get_patches
       ?(files_contents : string Relative_path.Map.t option)
       (graph : StateSolvedGraph.t) : ServerRefactorTypes.patch list =
-    let (env, errors, type_map, positions) = graph in
+    let (env, errors, type_map) = graph in
     let positions_map =
-      build_positions_map
-        (Tast_env.typing_env_as_tast_env env)
-        type_map
-        positions
+      build_positions_map (Tast_env.typing_env_as_tast_env env) type_map
     in
     let positions_map =
       SMap.filter

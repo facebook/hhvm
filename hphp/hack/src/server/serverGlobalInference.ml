@@ -403,7 +403,14 @@ let get_patches
                         {
                           syntax =
                             ParameterDeclaration
-                              { parameter_type; parameter_name; _ };
+                              {
+                                parameter_attribute;
+                                parameter_visibility;
+                                parameter_call_convention;
+                                parameter_type;
+                                parameter_name;
+                                parameter_default_value = _;
+                              };
                           _;
                         };
                       _;
@@ -422,8 +429,28 @@ let get_patches
                        type_map
                        parameter_type)
                   >>= fun type_str ->
-                  position_exclusive file parameter_type >>| fun pos ->
                   if is_missing parameter_type then
+                    (* if there is nothing in front of the parameter name,
+                     * we will use the paramter name's position, instead
+                     * of the parameter type's position. Because, in this
+                     * case, if the parameter name is the first thing on
+                     * a line, we will get Pos 1:1 for the parameter's
+                     * position, regardless of leading whitespace *)
+                    let pos =
+                      if
+                        List.for_all
+                          [
+                            parameter_attribute;
+                            parameter_visibility;
+                            parameter_call_convention;
+                          ]
+                          ~f:is_missing
+                      then
+                        position_exclusive file parameter_name
+                      else
+                        position_exclusive file parameter_type
+                    in
+                    pos >>| fun pos ->
                     ServerRefactorTypes.Insert
                       ServerRefactorTypes.
                         {
@@ -431,6 +458,7 @@ let get_patches
                           text = "<<__Soft>> " ^ type_str ^ " ";
                         }
                   else
+                    position_exclusive file parameter_type >>| fun pos ->
                     ServerRefactorTypes.Replace
                       ServerRefactorTypes.
                         {

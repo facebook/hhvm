@@ -237,6 +237,7 @@ let process_file
     in
     if GlobalOptions.tco_global_inference opts then
       Typing_global_inference.StateSubConstraintGraphs.build_and_save
+        ctx
         tasts
         global_tvenvs;
     let deferred_files = Deferred_decl.get_deferments ~f:(fun d -> Declare d) in

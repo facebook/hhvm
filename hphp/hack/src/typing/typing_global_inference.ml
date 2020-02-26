@@ -130,7 +130,11 @@ module StateSubConstraintGraphs = struct
 
   let global_type_map (t : t) : global_type_map = fst t
 
-  let build (tasts : Tast.def list) (genvs : Inf.t_global_with_pos list) : t =
+  let build
+      (ctx : Provider_context.t)
+      (tasts : Tast.def list)
+      (genvs : Inf.t_global_with_pos list) : t =
+    let tasts = Tast_expand.expand_program ctx tasts in
     let type_map =
       List.fold
         tasts
@@ -159,8 +163,10 @@ module StateSubConstraintGraphs = struct
       save path (type_map, subconstraints)
 
   let build_and_save
-      (tasts : Tast.def list) (genvs : Inf.t_global_with_pos list) : unit =
-    build tasts genvs |> save
+      (ctx : Provider_context.t)
+      (tasts : Tast.program)
+      (genvs : Inf.t_global_with_pos list) : unit =
+    build ctx tasts genvs |> save
 end
 
 module StateConstraintGraph = struct

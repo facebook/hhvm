@@ -33,7 +33,11 @@ module StateSubConstraintGraphs : sig
 
   val global_type_map : t -> global_type_map
 
-  val build : Tast.def list -> Typing_inference_env.t_global_with_pos list -> t
+  val build :
+    Provider_context.t ->
+    Tast.program ->
+    Typing_inference_env.t_global_with_pos list ->
+    t
 
   val load : string -> t
 
@@ -42,7 +46,10 @@ module StateSubConstraintGraphs : sig
   val save_to : string -> t -> unit
 
   val build_and_save :
-    Tast.def list -> Typing_inference_env.t_global_with_pos list -> unit
+    Provider_context.t ->
+    Tast.program ->
+    Typing_inference_env.t_global_with_pos list ->
+    unit
 end
 
 module StateConstraintGraph : sig

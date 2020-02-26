@@ -26,6 +26,8 @@ module type S = sig
 
   val default_options : root:string -> options
 
+  val default_options_with_check_mode : root:string -> options
+
   val parse_options : unit -> options
 
   (****************************************************************************)

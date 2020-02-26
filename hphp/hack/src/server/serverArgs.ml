@@ -360,6 +360,11 @@ let default_options ~root =
     write_symbol_info = None;
   }
 
+(** Useful for executables which don't want to make a subscription to a
+file-watching service. *)
+let default_options_with_check_mode ~root =
+  { (default_options ~root) with check_mode = true }
+
 (*****************************************************************************)
 (* Accessors *)
 (*****************************************************************************)

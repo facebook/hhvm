@@ -31,32 +31,32 @@ var_dump(is_callable('asdfjkl'));
 echo "\n";
 
 // user public static method
-var_dump(is_callable(array('C','foo')));
+var_dump(is_callable(varray['C','foo']));
 // user private static method
-var_dump(is_callable(array('C','bar')));
+var_dump(is_callable(varray['C','bar']));
 // nonexistent static method
-var_dump(is_callable(array('C','asdfjkl')));
+var_dump(is_callable(varray['C','asdfjkl']));
 echo "\n";
 
 $obj = new D;
 // user public instance method
-var_dump(is_callable(array($obj,'foo')));
+var_dump(is_callable(varray[$obj,'foo']));
 // user private instance method
-var_dump(is_callable(array($obj,'bar')));
+var_dump(is_callable(varray[$obj,'bar']));
 // nonexistent instance method
-var_dump(is_callable(array($obj,'asdfjkl')));
+var_dump(is_callable(varray[$obj,'asdfjkl']));
 echo "\n";
 
 // user interface method
-var_dump(is_callable(array('I','foo')));
+var_dump(is_callable(varray['I','foo']));
 // nonexistent interface method
-var_dump(is_callable(array('I','asdfjkl')));
+var_dump(is_callable(varray['I','asdfjkl']));
 echo "\n";
 
 // user abstract class non-abstract function
-var_dump(is_callable(array('A', 'foo')));
+var_dump(is_callable(varray['A', 'foo']));
 // user abstract class abstract function
-var_dump(is_callable(array('A', 'bar')));
+var_dump(is_callable(varray['A', 'bar']));
 // nonexistent abstract class method
-var_dump(is_callable(array('A', 'asdfghjk')));
+var_dump(is_callable(varray['A', 'asdfghjk']));
 }

@@ -22,12 +22,12 @@ function create() {
 
 function unusedarg($x, $y) {
   $z = 5;
-  yield array('x' => $x, 'z' => $z);
+  yield darray['x' => $x, 'z' => $z];
   $s = 'foo';
   yield 'almost there';
   $foo = 'inside foo';
-  yield array('foo' => $foo, 's' => $s);
-  yield array('x' => $x, 'y' => $y, 'foo' => $foo, 'z' => $z);
+  yield darray['foo' => $foo, 's' => $s];
+  yield darray['x' => $x, 'y' => $y, 'foo' => $foo, 'z' => $z];
 }
 
 function dumpgen($g) {
@@ -60,11 +60,11 @@ function manylocals() {
   $j = 10;
   $k = 11;
   $l = 12;
-  $a = yield array('a' => $a, 'b' => $b, 'c' => $c, 'd' => $d, 'e' => $e, 'f' => $f, 'g' => $g, 'h' => $h, 'i' => $i, 'j' => $j, 'k' => $k, 'l' => $l);
+  $a = yield darray['a' => $a, 'b' => $b, 'c' => $c, 'd' => $d, 'e' => $e, 'f' => $f, 'g' => $g, 'h' => $h, 'i' => $i, 'j' => $j, 'k' => $k, 'l' => $l];
   $b = 0xdeadbeef;
-  $c = yield array('a' => $a, 'b' => $b, 'c' => $c, 'd' => $d, 'e' => $e, 'f' => $f, 'g' => $g, 'h' => $h, 'i' => $i, 'j' => $j, 'k' => $k, 'l' => $l);
+  $c = yield darray['a' => $a, 'b' => $b, 'c' => $c, 'd' => $d, 'e' => $e, 'f' => $f, 'g' => $g, 'h' => $h, 'i' => $i, 'j' => $j, 'k' => $k, 'l' => $l];
   $d = $e = 0xba53b411;
-  yield array('a' => $a, 'b' => $b, 'c' => $c, 'd' => $d, 'e' => $e, 'f' => $f, 'g' => $g, 'h' => $h, 'i' => $i, 'j' => $j, 'k' => $k, 'l' => $l);
+  yield darray['a' => $a, 'b' => $b, 'c' => $c, 'd' => $d, 'e' => $e, 'f' => $f, 'g' => $g, 'h' => $h, 'i' => $i, 'j' => $j, 'k' => $k, 'l' => $l];
 }
 
 <<__EntryPoint>> function main(): void {

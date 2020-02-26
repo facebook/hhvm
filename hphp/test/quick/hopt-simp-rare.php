@@ -9,7 +9,7 @@ function f2($x) {
 }
 
 function f3($x) {
-  $y = array(1);
+  $y = varray[1];
   return $x == $y;
 }
 

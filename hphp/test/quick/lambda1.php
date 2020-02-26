@@ -4,6 +4,6 @@
   $y = "asd";
   array_map(
     $k ==> { echo $k . $y . "\n"; },
-    array(1,2,3,4)
+    varray[1,2,3,4]
   );
 }

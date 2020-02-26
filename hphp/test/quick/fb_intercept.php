@@ -95,33 +95,33 @@ function test_methods() {
   // Intercept static method
   fb_intercept('SubBlark2::sfrap', 'handler');
   Blark::sfrap();
-  call_user_func(array('Blark', 'sfrap'));
+  call_user_func(varray['Blark', 'sfrap']);
   SubBlark::sfrap();
-  call_user_func(array('SubBlark', 'sfrap'));
+  call_user_func(varray['SubBlark', 'sfrap']);
   SubBlark2::sfrap();
-  call_user_func(array('SubBlark2', 'sfrap'));
+  call_user_func(varray['SubBlark2', 'sfrap']);
 
   fb_intercept('Blark::sfrap', 'handler');
   Blark::sfrap();
-  call_user_func(array('Blark', 'sfrap'));
+  call_user_func(varray['Blark', 'sfrap']);
   SubBlark::sfrap();
-  call_user_func(array('SubBlark', 'sfrap'));
+  call_user_func(varray['SubBlark', 'sfrap']);
   SubBlark2::sfrap();
-  call_user_func(array('SubBlark2', 'sfrap'));
+  call_user_func(varray['SubBlark2', 'sfrap']);
 
   fb_intercept('Blark::sfrap', 'passthrough_handler');
   Blark::sfrap();
-  call_user_func(array('Blark', 'sfrap'));
+  call_user_func(varray['Blark', 'sfrap']);
 
   // Intercept non-static method
   $b = new Blark();
   fb_intercept('Blark::frap', 'handler');
   $b->frap();
-  call_user_func(array($b, 'frap'));
+  call_user_func(varray[$b, 'frap']);
 
   fb_intercept('Blark::frap', 'passthrough_handler');
   $b->frap();
-  call_user_func(array($b, 'frap'));
+  call_user_func(varray[$b, 'frap']);
 
   // MULTI-INTERCEPT!
   fb_intercept('frap', 'handler');

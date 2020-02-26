@@ -22,7 +22,7 @@ function main() {
   $go = new goer;
   $one = new one;
   $two = new two;
-  foreach (array(1,2) as $k) {
+  foreach (varray[1,2] as $k) {
     $go->go($one);
     $go->go($one);
     $go->go($one);
@@ -45,7 +45,7 @@ function main2() {
   $go = new goer;
   $one = new related_one;
   $two = new related_two;
-  foreach (array(1,2) as $k) {
+  foreach (varray[1,2] as $k) {
     $go->go($one);
     $go->go($one);
     $go->go($one);

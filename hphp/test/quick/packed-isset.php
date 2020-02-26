@@ -1,7 +1,7 @@
 <?hh
 
 function foo() {
-  $arr = array();
+  $arr = darray[];
   for ($i = 0; $i < 4; $i++) {
     $arr[$i] = $i;
   }
@@ -14,7 +14,7 @@ function foo() {
 }
 
 function foo2() {
-  $arr = array();
+  $arr = darray[];
   for ($i = 0; $i < 4; $i++) {
     $arr[$i] = null;
   }

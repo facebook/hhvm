@@ -59,7 +59,7 @@ function foo12() {
 }
 
 function foo13() {
-  $x = array(1,2,3);
+  $x = varray[1,2,3];
   return (int)$x;
 }
 <<__EntryPoint>> function main(): void {

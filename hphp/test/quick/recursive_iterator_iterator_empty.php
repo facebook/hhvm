@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$array = array('k1' => array());
+$array = darray['k1' => array()];
 
 $it = new RecursiveIteratorIterator(
   new RecursiveArrayIterator($array)
@@ -8,10 +8,10 @@ $it = new RecursiveIteratorIterator(
 
 for (true; $it->valid(); $it->next()) {
   var_export(
-    array(
+    darray[
       'key' => $it->key(),
       'value' => $it->current(),
-    )
+    ]
   );
 }
 print("\n===DONE===\n");

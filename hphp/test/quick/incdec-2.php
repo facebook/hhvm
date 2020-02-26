@@ -5,7 +5,7 @@ function test($a, $b) {
   var_dump($a,$b);
   }
 <<__EntryPoint>> function main(): void {
-$a = array();
+$a = varray[];
 $a[] = 1;
 test(false, $a);
 test(true, $a);

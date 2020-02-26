@@ -44,7 +44,7 @@ class C {
 
 abstract final class PrandobjStatics {
   public static $state = 0;
-  public static $names = array('A', 'B', 'C');
+  public static $names = varray['A', 'B', 'C'];
 }
 
 function pRandObj() {
@@ -68,7 +68,7 @@ class MagicBox {
   }
   function __call($nm, $arr) {
     echo "--";
-    call_user_func_array(array($this->inner, $nm), $arr);
+    call_user_func_array(varray[$this->inner, $nm], $arr);
   }
 }
 
@@ -84,7 +84,7 @@ class MagicBox {
       pRandObj()->dubiousArgs($i, $i,$i, $i,$i, $i,$i, $i,$i, $i,$i, $i,$i,
       $i,$i, $i,$i, $i,$i, $i,$i, $i,$i, $i,$i, $i,$i, $i,$i, $i);
       $m->$s();
-      call_user_func_array(array($m, 'noSuchMethodBoyeee'), randArr());
+      call_user_func_array(varray[$m, 'noSuchMethodBoyeee'], randArr());
     } catch (Exception $e) { echo get_class($e), ": ", $e->getMessage(), "\n"; }
   }
 }

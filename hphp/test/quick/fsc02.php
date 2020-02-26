@@ -13,7 +13,7 @@ class B {
 class C extends B {
   public function g() {
     $obj = new B;
-    $f = (array('B', 'f1'));
+    $f = (varray['B', 'f1']);
     $f();
   }
 }

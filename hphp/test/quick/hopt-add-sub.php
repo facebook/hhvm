@@ -16,14 +16,14 @@ function foo4($a, $b) {
   return ($a - 4) + ($b + 9);
 }
 <<__EntryPoint>> function main(): void {
-$vals = array(
-  array(0, 0),
-  array(1, 1),
-  array(-3, 5),
-  array(5, -3),
-  array(20, -50),
-  array(20, 0),
-);
+$vals = varray[
+  varray[0, 0],
+  varray[1, 1],
+  varray[-3, 5],
+  varray[5, -3],
+  varray[20, -50],
+  varray[20, 0],
+];
 
 foreach ($vals as list($a, $b)) {
   var_dump(foo1($a, $b));

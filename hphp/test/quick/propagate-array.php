@@ -1,7 +1,7 @@
 <?hh
 
 function foo(inout $x, $y) {
-  $x = array(1,2);
+  $x = varray[1,2];
   $y = $x;
   return $y;
 }

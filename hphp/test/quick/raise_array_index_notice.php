@@ -1,7 +1,7 @@
 <?hh
 
 function rain() {
-  $arr = array();
+  $arr = darray[];
   for ($i = 0; $i < 4; $i++) {
     $arr[$i] = $i;
   }

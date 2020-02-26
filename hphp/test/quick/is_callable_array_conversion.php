@@ -9,6 +9,6 @@ function myErrorHandler($errno, $errstr, $errfile, $errline)
 <<__EntryPoint>> function main(): void {
 set_error_handler(fun("myErrorHandler"));
 $name = null;
-var_dump( is_callable_with_name(array(1,2,3), true, inout $name ) );
+var_dump( is_callable_with_name(varray[1,2,3], true, inout $name ) );
 echo $name . "\n";
 }

@@ -17,36 +17,36 @@ class C {
   var_dump($min - 1);
   var_dump($max * 5);
 
-  $ops = array(
+  $ops = varray[
     // initial sanity checks for no overflow
-    array($add, 3, 5),
-    array($sub, 3, 5),
-    array($mul, 7, 4),
+    varray[$add, 3, 5],
+    varray[$sub, 3, 5],
+    varray[$mul, 7, 4],
 
     // check runtime operators on just ints
-    array($add, $max, 1),
-    array($add, $min, -1),
+    varray[$add, $max, 1],
+    varray[$add, $min, -1],
 
-    array($sub, $min, 1),
-    array($sub, $max, -1),
+    varray[$sub, $min, 1],
+    varray[$sub, $max, -1],
 
-    array($mul, $max / 2, 3),
-    array($mul, $min, 2),
-    array($mul, $max, -2),
-    array($mul, $min, -3),
+    varray[$mul, $max / 2, 3],
+    varray[$mul, $min, 2],
+    varray[$mul, $max, -2],
+    varray[$mul, $min, -3],
 
     // check numeric strings
-    array($add, "$max", 1),
-    array($add, $max, '1'),
-    array($add, "$max", '1'),
-  );
+    varray[$add, "$max", 1],
+    varray[$add, $max, '1'],
+    varray[$add, "$max", '1'],
+  ];
 
   foreach ($ops as list($op, $lhs, $rhs)) {
     $res = $op($lhs, $rhs);
     var_dump($res);
   }
 
-  $unary = array($min, $max, -4, 0, 5, "12", 5.2, "1.5", "abc", "", null);
+  $unary = varray[$min, $max, -4, 0, 5, "12", 5.2, "1.5", "abc", "", null];
 
   // inc/dec
   foreach ($unary as $val) {

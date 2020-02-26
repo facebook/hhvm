@@ -45,6 +45,6 @@ function manipulate($arr) {
     |> get($$, 'foobar')
     |> var_dump($$);
 
-  $arr = array('foo' => keyset[$foo[1], '2', 3]);
+  $arr = darray['foo' => keyset[$foo[1], '2', 3]];
   manipulate($arr);
 }

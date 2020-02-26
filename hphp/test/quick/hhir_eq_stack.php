@@ -11,7 +11,7 @@ function some() {
 function wat() {
   $z = 'asd' . mt_rand();
   $k = new Foo();
-  $l = array($z, $z);
+  $l = varray[$z, $z];
   $y = $k == $z;
   $k = null;
   return $y;

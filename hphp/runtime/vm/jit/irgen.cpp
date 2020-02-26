@@ -97,11 +97,11 @@ SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
     auto const offsetToAdjustSPForCall = [&]() -> int32_t {
       if (inst->is(Call)) {
         auto const extra = inst->extra<CallData>();
-        return extra->numInputs() + kNumActRecCells + extra->numOut - 1;
+        return extra->numInputs() + kNumActRecCells + extra->numOut;
       }
       if (inst->is(CallUnpack)) {
         auto const extra = inst->extra<CallUnpackData>();
-        return extra->numInputs() + kNumActRecCells + extra->numOut - 1;
+        return extra->numInputs() + kNumActRecCells + extra->numOut;
       }
       return 0;
     }();

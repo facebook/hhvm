@@ -811,11 +811,11 @@ void throwMissingArgument(const Func* func, int got) {
 }
 
 void raiseTooManyArguments(const Func* func, int got) {
+  assertx(!func->hasVariadicCaptureParam());
+
   if (!RuntimeOption::EvalWarnOnTooManyArguments && !func->isCPPBuiltin()) {
     return;
   }
-  // FIXME: assert that this is not true
-  if (func->hasVariadicCaptureParam()) return;
 
   auto const total = func->numNonVariadicParams();
   assertx(got > total);

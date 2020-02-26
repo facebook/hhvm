@@ -710,16 +710,9 @@ jit::TCA dispatchBB();
 void pushFrameSlots(const Func* func, int nparams = 0);
 Array getDefinedVariables(const ActRec*);
 
-enum class StackArgsState { // tells prepareFuncEntry how much work to do
-  // the stack may contain more arguments than the function expects
-  Untrimmed,
-  // the stack has already been trimmed of any extra arguments, which
-  // have been teleported away into a variadic param
-  Trimmed
-};
 void enterVMAtPseudoMain(ActRec* enterFnAr, VarEnv* varEnv);
-void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, Array&& generics,
-                   bool hasInOut, bool dynamicCall, bool allowDynCallNoPointer);
+void enterVMAtFunc(ActRec* enterFnAr, Array&& generics, bool hasInOut,
+                   bool dynamicCall, bool allowDynCallNoPointer);
 void enterVMAtCurPC();
 void shuffleMagicArgs(String&& invName, uint32_t numArgs, bool hasUnpack);
 uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,

@@ -975,36 +975,6 @@ void shuffleMagicArgs(String&& invName, uint32_t numArgs, bool hasUnpack) {
   }
 }
 
-NEVER_INLINE
-static void shuffleExtraStackArgs(ActRec* ar) {
-  const Func* func = ar->m_func;
-  assertx(func);
-  assertx(func->hasVariadicCaptureParam());
-
-  // the last (variadic) param is included in numParams (since it has a
-  // name), but the arg in that slot should be included as the first
-  // element of the variadic array
-  const auto numArgs = ar->numArgs();
-  const auto numVarArgs = numArgs - func->numNonVariadicParams();
-  assertx(numVarArgs > 0);
-
-  auto& stack = vmStack();
-  auto tvArgs = reinterpret_cast<TypedValue*>(ar) - numArgs + numVarArgs - 1;
-  VArrayInit ai{numVarArgs};
-  for (uint32_t i = 0; i < numVarArgs; ++i) {
-    ai.append(*(tvArgs--));
-  }
-  // Discard the arguments from the stack
-  for (uint32_t i = 0; i < numVarArgs; ++i) stack.popTV();
-  if (RuntimeOption::EvalHackArrDVArrs) {
-    stack.pushVecNoRc(ai.create());
-  } else {
-    stack.pushArrayNoRc(ai.create());
-  }
-  assertx(func->numParams() == (numArgs - numVarArgs + 1));
-  ar->setNumArgs(func->numParams());
-}
-
 // Unpack or repack arguments as needed to match the function signature.
 // The stack contains numArgs arguments plus an extra cell containing
 // arguments to unpack.
@@ -1021,8 +991,6 @@ uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
   if (LIKELY(numArgs == numParams)) {
     // Nothing to unpack.
     if (numUnpackArgs == 0) return numParams;
-    // Nowhere to unpack. FIXME: emit too many args warning
-    if (!func->hasVariadicCaptureParam()) return numParams;
     // Convert unpack args to the proper type.
     if (RuntimeOption::EvalHackArrDVArrs) {
       tvCastToVecInPlace(&unpackArgs);
@@ -1057,21 +1025,6 @@ uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
   // ... unpack operator and/or still remaining in argArray
   assertx(numArgs + numUnpackArgs > numParams);
   assertx(numArgs > numParams || !!iter);
-  if (LIKELY(!func->hasVariadicCaptureParam())) {
-    // FIXME: emit too many args warning
-    if (UNLIKELY(numArgs > numParams)) {
-      // if unpacking, any regularly passed arguments on the stack
-      // in excess of those expected by the function need to be discarded
-      // in addition to the ones held in the arry
-      for (auto i = numParams; i < numArgs; ++i) {
-        stack.popTV();
-      }
-    }
-
-    // the extra args are not used in the function; no reason to add them
-    // to the stack
-    return numParams;
-  }
 
   auto const numNewUnpackArgs = numArgs + numUnpackArgs - numParams;
   VArrayInit ai(numNewUnpackArgs);
@@ -1099,7 +1052,7 @@ uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
   return numParams + 1;
 }
 
-static void prepareFuncEntry(ActRec *ar, StackArgsState stk, Array&& generics) {
+static void prepareFuncEntry(ActRec *ar, Array&& generics) {
   assertx(!isResumed(ar));
   const Func* func = ar->m_func;
   Offset firstDVInitializer = kInvalidOffset;
@@ -1112,23 +1065,21 @@ static void prepareFuncEntry(ActRec *ar, StackArgsState stk, Array&& generics) {
     ar->setVarEnv(nullptr);
   }
 
-  int nargs = ar->numArgs();
+  auto const nargs = ar->numArgs();
+  assertx(((TypedValue*)ar - stack.top()) == nargs);
+
   if (UNLIKELY(nargs > nparams)) {
-    if (LIKELY(stk != StackArgsState::Trimmed &&
-               !func->hasVariadicCaptureParam())) {
-      // In the common case, the function won't use the extra arguments,
-      // so act as if they were never passed (NOTE: this has the effect
-      // of slightly misleading backtraces that don't reflect the
-      // discarded args)
-      for (int i = nparams; i < nargs; ++i) { stack.popTV(); }
+    // All extra arguments are expected to be packed in a varray.
+    assertx(nargs == nparams + 1);
+    assertx(tvIsVecOrVArray(stack.topC()));
+    auto const unpackArgs = stack.topC()->m_data.parr;
+    assertx(!unpackArgs->empty());
+    if (!func->hasVariadicCaptureParam()) {
+      // Record the number of args for the warning before dropping extra args.
+      raiseTooManyArgumentsWarnings = nparams + unpackArgs->size();
+      stack.popC();
       ar->setNumArgs(nparams);
-    } else if (stk == StackArgsState::Trimmed) {
-      assertx(nargs == func->numParams());
-      assertx(((TypedValue*)ar - stack.top()) == func->numParams());
-    } else {
-      shuffleExtraStackArgs(ar);
     }
-    raiseTooManyArgumentsWarnings = nargs;
   } else {
     if (nargs < nparams) {
       // This is where we are going to enter, assuming we don't fail on
@@ -1188,8 +1139,6 @@ static void prepareFuncEntry(ActRec *ar, StackArgsState stk, Array&& generics) {
     HPHP::jit::throwMissingArgument(func, nargs);
   }
   if (raiseTooManyArgumentsWarnings) {
-    // since shuffleExtraStackArgs changes ar->numArgs() we need to communicate
-    // the value before it gets changed
     HPHP::jit::raiseTooManyArguments(func, *raiseTooManyArgumentsWarnings);
   }
 }
@@ -1247,15 +1196,14 @@ void enterVMAtPseudoMain(ActRec* enterFnAr, VarEnv* varEnv) {
   }
 }
 
-void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, Array&& generics,
-                   bool hasInOut, bool dynamicCall,
-                   bool allowDynCallNoPointer) {
+void enterVMAtFunc(ActRec* enterFnAr, Array&& generics, bool hasInOut,
+                   bool dynamicCall, bool allowDynCallNoPointer) {
   assertx(enterFnAr);
   assertx(!isResumed(enterFnAr));
   Stats::inc(Stats::VMEnter);
 
   auto const hasGenerics = !generics.isNull();
-  prepareFuncEntry(enterFnAr, stk, std::move(generics));
+  prepareFuncEntry(enterFnAr, std::move(generics));
 
   checkForReifiedGenericsErrors(enterFnAr, hasGenerics);
   calleeDynamicCallChecks(enterFnAr->func(), dynamicCall,
@@ -4006,17 +3954,21 @@ bool doFCall(ActRec* ar, uint32_t numArgs, bool hasUnpack,
       ? Array::attach(vmStack().topC()->m_data.parr) : Array();
     if (callFlags.hasGenerics()) vmStack().discard();
 
+    auto const func = ar->func();
     if (hasUnpack) {
-      checkStack(vmStack(), ar->func(), 0);
-      auto const newNumArgs = prepareUnpackArgs(ar->func(), numArgs, true);
+      checkStack(vmStack(), func, 0);
+      auto const newNumArgs = prepareUnpackArgs(func, numArgs, true);
       ar->setNumArgs(newNumArgs);
+    } else if (UNLIKELY(numArgs > func->numNonVariadicParams())) {
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        iopNewVecArray(numArgs - func->numNonVariadicParams());
+      } else {
+        iopNewVArray(numArgs - func->numNonVariadicParams());
+      }
+      ar->setNumArgs(func->numNonVariadicParams() + 1);
     }
 
-    prepareFuncEntry(
-      ar,
-      hasUnpack ? StackArgsState::Trimmed : StackArgsState::Untrimmed,
-      std::move(generics)
-    );
+    prepareFuncEntry(ar, std::move(generics));
 
     checkForReifiedGenericsErrors(ar, callFlags.hasGenerics());
     calleeDynamicCallChecks(ar->func(), callFlags.isDynamicCall());

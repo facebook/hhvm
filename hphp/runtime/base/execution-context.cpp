@@ -1608,7 +1608,7 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
       !(f->numParams() <= kStackCheckReenterPadding - kNumActRecCells)) {
     // Check both the native stack and VM stack for overflow, numParams
     // is already included in f->maxStackCells().
-    checkStack(vmStack(), f, kNumActRecCells);
+    checkStack(vmStack(), f, f->numInOutParams() + kNumActRecCells);
   } else {
     // invokeFunc() must always check the native stack for overflow no
     // matter what.
@@ -1643,8 +1643,8 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
   if (dynamic) callerDynamicCallChecks(f, allowDynCallNoPointer);
 
   auto const doEnterVM = [&] (ActRec* ar) {
-    enterVMAtFunc(ar, StackArgsState::Trimmed, std::move(reifiedGenerics),
-                  f->takesInOutParams(), dynamic, allowDynCallNoPointer);
+    enterVMAtFunc(ar, std::move(reifiedGenerics), f->takesInOutParams(),
+                  dynamic, allowDynCallNoPointer);
   };
 
   return invokeFuncImpl(f, thiz, cls, numArgs, doEnterVM);
@@ -1661,27 +1661,48 @@ TypedValue ExecutionContext::invokeFuncFew(
   /* = false */
 ) {
   VMRegAnchor _;
+  auto& stack = vmStack();
 
   // See comments in invokeFunc().
   if (f->isPhpLeafFn() ||
       !(numArgs <= kStackCheckReenterPadding - kNumActRecCells)) {
-    checkStack(vmStack(), f, numArgs + kNumActRecCells);
+    checkStack(stack, f, f->numInOutParams() + kNumActRecCells);
   } else {
     checkNativeStack();
   }
 
   // Reserve space for inout outputs and ActRec.
-  for (auto i = f->numInOutParams(); i > 0; --i) vmStack().pushUninit();
-  for (auto i = kNumActRecCells; i > 0; --i) vmStack().pushUninit();
+  for (auto i = f->numInOutParams(); i > 0; --i) stack.pushUninit();
+  for (auto i = kNumActRecCells; i > 0; --i) stack.pushUninit();
 
-  // Push arguments.
-  for (auto i = 0; i < numArgs; ++i) {
-    const TypedValue *from = &argv[i];
-    TypedValue* to = vmStack().allocTV();
-    tvDup(*from, *to);
-  }
-  if (UNLIKELY(invName != nullptr)) {
-    shuffleMagicArgs(String::attach(invName), numArgs, false);
+  auto const pushPackedArgs = [&](uint32_t from) {
+    VArrayInit ai{numArgs - from};
+    for (auto i = from; i < numArgs; ++i) ai.append(argv[i]);
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      stack.pushVecNoRc(ai.create());
+    } else {
+      stack.pushArrayNoRc(ai.create());
+    }
+  };
+
+  if (LIKELY(invName == nullptr)) {
+    // Push non-variadic arguments.
+    auto const numParams = f->numNonVariadicParams();
+    for (auto i = 0; i < numArgs && i < numParams; ++i) {
+      const TypedValue *from = &argv[i];
+      TypedValue* to = stack.allocTV();
+      tvDup(*from, *to);
+    }
+
+    // Push variadic arguments.
+    if (UNLIKELY(numParams < numArgs)) {
+      pushPackedArgs(numParams);
+      numArgs = numParams + 1;
+    }
+  } else {
+    // Push method name plus varray of args for magic __call().
+    stack.pushStringNoRc(invName);
+    pushPackedArgs(0);
     numArgs = 2;
   }
 
@@ -1689,8 +1710,7 @@ TypedValue ExecutionContext::invokeFuncFew(
   if (dynamic) callerDynamicCallChecks(f, allowDynCallNoPointer);
 
   auto const doEnterVM = [&] (ActRec* ar) {
-    enterVMAtFunc(ar, StackArgsState::Untrimmed, Array(),
-                  f->takesInOutParams(), dynamic, false);
+    enterVMAtFunc(ar, Array(), f->takesInOutParams(), dynamic, false);
   };
 
   return invokeFuncImpl(f,

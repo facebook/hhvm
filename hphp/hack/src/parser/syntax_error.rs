@@ -933,3 +933,5 @@ pub const empty_expression_illegal: Error =
 
 pub const empty_switch_cases: Error =
     Cow::Borrowed("Switch statements need to have at least one case or a default block");
+
+pub const preceding_backslash: Error = Cow::Borrowed("Unnecessary preceding backslash");

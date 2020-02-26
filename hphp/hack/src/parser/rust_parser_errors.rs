@@ -4312,16 +4312,22 @@ where
                     self.use_class_or_namespace_clause_errors(None, &x.namespace_use_kind, clause)
                 })
             }
-            NamespaceGroupUseDeclaration(x) => Self::syntax_to_list_no_separators(
-                &x.namespace_group_use_clauses,
-            )
-            .for_each(|clause| {
-                self.use_class_or_namespace_clause_errors(
-                    Some(self.text(&x.namespace_group_use_prefix)),
-                    &x.namespace_group_use_kind,
-                    clause,
+            NamespaceGroupUseDeclaration(x) => {
+                Self::syntax_to_list_no_separators(&x.namespace_group_use_clauses).for_each(
+                    |clause| {
+                        match &clause.syntax {
+                            NamespaceUseClause(x) if !x.namespace_use_name.is_missing() => self
+                                .check_preceding_backslashes_qualified_name(&x.namespace_use_name),
+                            _ => (),
+                        }
+                        self.use_class_or_namespace_clause_errors(
+                            Some(self.text(&x.namespace_group_use_prefix)),
+                            &x.namespace_group_use_kind,
+                            clause,
+                        )
+                    },
                 )
-            }),
+            }
             _ => {}
         }
     }
@@ -5208,6 +5214,24 @@ where
                         .push(Self::make_error_from_node(t, errors::error0008)),
                     _ => (),
                 }
+            }
+        }
+    }
+
+    fn check_preceding_backslashes_qualified_name(&mut self, node: &'a Syntax<Token, Value>) {
+        // Qualified names as part of file level declarations
+        // (group use, namespace use, namespace declarations) should not have preceding backslashes
+        // `use namespace A\{\B}` will throw this error.
+        if let QualifiedName(x) = &node.syntax {
+            let name_parts = &x.qualified_name_parts;
+            let mut parts = Self::syntax_to_list_with_separators(name_parts);
+            let first_part = parts.find(|x| !x.is_missing());
+
+            match first_part {
+                Some(t) if Self::token_kind(t) == Some(TokenKind::Backslash) => self.errors.push(
+                    Self::make_error_from_node(node, errors::preceding_backslash),
+                ),
+                _ => (),
             }
         }
     }

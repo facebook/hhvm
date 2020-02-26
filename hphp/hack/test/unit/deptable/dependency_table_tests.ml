@@ -16,13 +16,13 @@
 open Core_kernel
 
 module Types_pos_asserter = Asserter.Make_asserter (struct
-  type t = Naming_table.Types.pos
+  type t = FileInfo.pos * Naming_types.kind_of_type
 
   let to_string (pos, type_of_type) =
     Printf.sprintf
       "(%s, %d)"
       (FileInfo.show_pos pos)
-      (Naming_table.type_of_type_to_enum type_of_type)
+      (Naming_types.kind_of_type_to_enum type_of_type)
 
   let is_equal = ( = )
 end)
@@ -107,7 +107,7 @@ let run_test f =
       let save_results = Naming_table.save unbacked_naming_table db_name in
       Asserter.Int_asserter.assert_equals
         8
-        Naming_table.(save_results.files_added + save_results.symbols_added)
+        Naming_sqlite.(save_results.files_added + save_results.symbols_added)
         "Expected to add eight rows (four files and four symbols)";
       let _backed_naming_table = Naming_table.load_from_sqlite in
       f ();

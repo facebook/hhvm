@@ -37,7 +37,7 @@ let make_local_server_api
             source_path
             source_path;
           FileUtil.cp [source_path] destination_path;
-          let (_ : Naming_table.save_result) =
+          let (_ : Naming_sqlite.save_result) =
             Naming_table.save naming_table destination_path
           in
           ()

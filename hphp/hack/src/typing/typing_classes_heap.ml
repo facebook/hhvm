@@ -84,12 +84,12 @@ module Classes = struct
         match cached with
         | Some dc -> dc
         | None ->
-          (match Naming_table.Types.get_filename_and_kind class_name with
-          | Some (_, Naming_table.TTypedef)
-          | Some (_, Naming_table.TRecordDef)
+          (match Naming_heap.Types.get_filename_and_kind class_name with
+          | Some (_, Naming_types.TTypedef)
+          | Some (_, Naming_types.TRecordDef)
           | None ->
             raise Exit
-          | Some (file, Naming_table.TClass) ->
+          | Some (file, Naming_types.TClass) ->
             Deferred_decl.raise_if_should_defer ~d:file;
             let class_type =
               Errors.run_in_decl_mode file (fun () ->

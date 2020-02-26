@@ -12,12 +12,12 @@ open Hh_prelude
 let check_cache_consistency x expected_kind expected_result =
   if
     Relative_path.equal expected_result Relative_path.default
-    && (not @@ Naming_table.has_local_changes ())
+    && (not @@ Naming_heap.has_local_changes ())
   then (
     Hh_logger.log "WARNING: found dummy path in shared heap for %s" x;
-    match Naming_table.Types.get_pos ~bypass_cache:true x with
+    match Naming_heap.Types.get_pos ~bypass_cache:true x with
     | Some (pos, kind)
-      when Naming_table.equal_type_of_type kind expected_kind
+      when Naming_types.equal_kind_of_type kind expected_kind
            && Relative_path.equal
                 (FileInfo.get_pos_filename pos)
                 expected_result ->
@@ -28,8 +28,8 @@ let check_cache_consistency x expected_kind expected_result =
 
 let get_type_id_filename x expected_kind =
   Counters.count_decl_accessor @@ fun () ->
-  match Naming_table.Types.get_filename_and_kind x with
-  | Some (fn, kind) when Naming_table.equal_type_of_type kind expected_kind ->
+  match Naming_heap.Types.get_filename_and_kind x with
+  | Some (fn, kind) when Naming_types.equal_kind_of_type kind expected_kind ->
     check_cache_consistency x expected_kind fn;
     Some fn
   | _ -> None
@@ -41,7 +41,7 @@ let get_fun ctx x =
   match Typing_heap.Funs.get x with
   | Some c -> Some c
   | None ->
-    (match Naming_table.Funs.get_filename x with
+    (match Naming_heap.Funs.get_filename x with
     | Some filename ->
       let ft =
         Errors.run_in_decl_mode filename (fun () ->
@@ -55,7 +55,7 @@ let get_gconst ctx cst_name =
   match Typing_heap.GConsts.get cst_name with
   | Some c -> Some c
   | None ->
-    (match Naming_table.Consts.get_filename cst_name with
+    (match Naming_heap.Consts.get_filename cst_name with
     | Some filename ->
       let gconst =
         Errors.run_in_decl_mode filename (fun () ->
@@ -69,7 +69,7 @@ let get_record_def ctx x =
   match Typing_heap.RecordDefs.get x with
   | Some c -> Some c
   | None ->
-    (match get_type_id_filename x Naming_table.TRecordDef with
+    (match get_type_id_filename x Naming_types.TRecordDef with
     | Some filename ->
       let tdecl =
         Errors.run_in_decl_mode filename (fun () ->
@@ -83,7 +83,7 @@ let get_typedef ctx x =
   match Typing_heap.Typedefs.get x with
   | Some c -> Some c
   | None ->
-    (match get_type_id_filename x Naming_table.TTypedef with
+    (match get_type_id_filename x Naming_types.TTypedef with
     | Some filename ->
       let tdecl =
         Errors.run_in_decl_mode filename (fun () ->

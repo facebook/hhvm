@@ -628,8 +628,8 @@ let get_typedef env x =
   Decl_provider.get_typedef (get_ctx env) x
 
 let is_typedef x =
-  match Naming_table.Types.get_kind x with
-  | Some Naming_table.TTypedef -> true
+  match Naming_heap.Types.get_kind x with
+  | Some Naming_types.TTypedef -> true
   | _ -> false
 
 let get_class env x =

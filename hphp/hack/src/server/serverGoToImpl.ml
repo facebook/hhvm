@@ -22,7 +22,7 @@ let find_positions_of_classes
   let ctx = Provider_context.empty_for_worker ~tcopt in
   acc
   @ List.map child_classes ~f:(fun child_class ->
-        match Naming_table.Types.get_pos child_class with
+        match Naming_heap.Types.get_pos child_class with
         | None ->
           failwith ("Could not find definition of child class: " ^ child_class)
         | Some (FileInfo.Full pos, _type) -> (child_class, pos)

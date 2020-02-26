@@ -270,13 +270,13 @@ let get_position_for_symbol
     | SI_Constructor
     | SI_RecordDef ->
       let fipos =
-        match Naming_table.Types.get_pos name_with_ns with
+        match Naming_heap.Types.get_pos name_with_ns with
         | None -> None
         | Some (pos, _) -> Some pos
       in
       fipos
-    | SI_Function -> Naming_table.Funs.get_pos name_with_ns
-    | SI_GlobalConstant -> Naming_table.Consts.get_pos name_with_ns
+    | SI_Function -> Naming_heap.Funs.get_pos name_with_ns
+    | SI_GlobalConstant -> Naming_heap.Consts.get_pos name_with_ns
     (* Items below this are not global symbols and cannot be 'position'ed *)
     | SI_Unknown
     | SI_Namespace

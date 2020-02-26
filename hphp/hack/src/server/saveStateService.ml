@@ -255,8 +255,8 @@ let go_naming (naming_table : Naming_table.t) (output_filename : string) :
   Utils.try_with_stack (fun () ->
       let save_result = Naming_table.save naming_table output_filename in
       {
-        nt_files_added = save_result.Naming_table.files_added;
-        nt_symbols_added = save_result.Naming_table.symbols_added;
+        nt_files_added = save_result.Naming_sqlite.files_added;
+        nt_symbols_added = save_result.Naming_sqlite.symbols_added;
       })
   |> Result.map_error ~f:(fun (exn, _stack) -> Exn.to_string exn)
 

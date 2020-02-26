@@ -64,8 +64,8 @@ let declare_class_in_file ctx file name =
   | None -> err_not_found file name
 
 let get_class_filename x =
-  match Naming_table.Types.get_filename_and_kind x with
-  | Some (fn, Naming_table.TClass) -> Some fn
+  match Naming_heap.Types.get_filename_and_kind x with
+  | Some (fn, Naming_types.TClass) -> Some fn
   | _ -> None
 
 let get ctx cid =

@@ -243,15 +243,15 @@ let update_naming_table
       is. *)
       let open FileInfo in
       List.iter new_file_info.funs ~f:(fun (pos, fun_name) ->
-          Naming_table.Funs.add fun_name pos);
+          Naming_heap.Funs.add fun_name pos);
       List.iter new_file_info.classes ~f:(fun (pos, class_name) ->
-          Naming_table.Types.add class_name (pos, Naming_table.TClass));
+          Naming_heap.Types.add class_name (pos, Naming_types.TClass));
       List.iter new_file_info.record_defs ~f:(fun (pos, record_def_name) ->
-          Naming_table.Types.add record_def_name (pos, Naming_table.TRecordDef));
+          Naming_heap.Types.add record_def_name (pos, Naming_types.TRecordDef));
       List.iter new_file_info.typedefs ~f:(fun (pos, typedef_name) ->
-          Naming_table.Types.add typedef_name (pos, Naming_table.TTypedef));
+          Naming_heap.Types.add typedef_name (pos, Naming_types.TTypedef));
       List.iter new_file_info.consts ~f:(fun (pos, const_name) ->
-          Naming_table.Consts.add const_name pos);
+          Naming_heap.Consts.add const_name pos);
 
       (* Update and return the forward naming table *)
       Naming_table.update naming_table path new_file_info

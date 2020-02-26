@@ -70,14 +70,14 @@ module GEnv = struct
       raise File_provider.File_provider_stale
 
   let type_canon_name ctx name =
-    Naming_table.Types.get_canon_name ctx (canon_key name)
+    Naming_heap.Types.get_canon_name ctx (canon_key name)
 
   let type_pos ctx name =
     let name = Option.value (type_canon_name ctx name) ~default:name in
-    match Naming_table.Types.get_pos name with
-    | Some (pos, Naming_table.TClass)
-    | Some (pos, Naming_table.TTypedef)
-    | Some (pos, Naming_table.TRecordDef) ->
+    match Naming_heap.Types.get_pos name with
+    | Some (pos, Naming_types.TClass)
+    | Some (pos, Naming_types.TTypedef)
+    | Some (pos, Naming_types.TRecordDef) ->
       let (p, _) = get_full_pos ctx (pos, name) in
       Some p
     | None -> None
@@ -87,23 +87,23 @@ module GEnv = struct
     type_pos ctx name
 
   let type_info ctx name =
-    match Naming_table.Types.get_pos name with
-    | Some (pos, Naming_table.TClass) ->
+    match Naming_heap.Types.get_pos name with
+    | Some (pos, Naming_types.TClass) ->
       let (p, _) = get_full_pos ctx (pos, name) in
-      Some (p, Naming_table.TClass)
-    | Some (pos, Naming_table.TTypedef) ->
+      Some (p, Naming_types.TClass)
+    | Some (pos, Naming_types.TTypedef) ->
       let (p, _) = get_full_pos ctx (pos, name) in
-      Some (p, Naming_table.TTypedef)
-    | Some (pos, Naming_table.TRecordDef) ->
+      Some (p, Naming_types.TTypedef)
+    | Some (pos, Naming_types.TRecordDef) ->
       let (p, _) = get_full_pos ctx (pos, name) in
-      Some (p, Naming_table.TRecordDef)
+      Some (p, Naming_types.TRecordDef)
     | None -> None
 
   let fun_canon_name ctx name =
-    Naming_table.Funs.get_canon_name ctx (canon_key name)
+    Naming_heap.Funs.get_canon_name ctx (canon_key name)
 
   let fun_pos ctx name =
-    match Naming_table.Funs.get_pos name with
+    match Naming_heap.Funs.get_pos name with
     | Some pos ->
       let (p, _) = get_full_pos ctx (pos, name) in
       Some p
@@ -114,17 +114,17 @@ module GEnv = struct
     fun_pos ctx name
 
   let typedef_pos ctx name =
-    match Naming_table.Types.get_pos name with
-    | Some (pos, Naming_table.TTypedef) ->
+    match Naming_heap.Types.get_pos name with
+    | Some (pos, Naming_types.TTypedef) ->
       let (p, _) = get_full_pos ctx (pos, name) in
       Some p
-    | Some (_, Naming_table.TClass)
-    | Some (_, Naming_table.TRecordDef)
+    | Some (_, Naming_types.TClass)
+    | Some (_, Naming_types.TRecordDef)
     | None ->
       None
 
   let gconst_pos ctx name =
-    match Naming_table.Consts.get_pos name with
+    match Naming_heap.Consts.get_pos name with
     | Some pos ->
       let (p, _) = get_full_pos ctx (pos, name) in
       Some p
@@ -158,46 +158,46 @@ module Env = struct
   (* Dont check for errors, just add to canonical heap *)
   let new_fun_fast ctx fn name =
     let name_key = canon_key name in
-    match Naming_table.Funs.get_canon_name ctx name_key with
+    match Naming_heap.Funs.get_canon_name ctx name_key with
     | Some _ -> ()
-    | None -> Naming_table.Funs.add name (FileInfo.File (FileInfo.Fun, fn))
+    | None -> Naming_heap.Funs.add name (FileInfo.File (FileInfo.Fun, fn))
 
   let new_cid_fast ctx fn name cid_kind =
     let name_key = canon_key name in
     let mode =
       match cid_kind with
-      | Naming_table.TClass -> FileInfo.Class
-      | Naming_table.TTypedef -> FileInfo.Typedef
-      | Naming_table.TRecordDef -> FileInfo.RecordDef
+      | Naming_types.TClass -> FileInfo.Class
+      | Naming_types.TTypedef -> FileInfo.Typedef
+      | Naming_types.TRecordDef -> FileInfo.RecordDef
     in
-    match Naming_table.Types.get_canon_name ctx name_key with
+    match Naming_heap.Types.get_canon_name ctx name_key with
     | Some _ -> ()
     | None ->
       (* We store redundant info in this case, but if the position is a *)
       (* Full position, we don't store the kind, so this is necessary *)
-      Naming_table.Types.add name (FileInfo.File (mode, fn), cid_kind)
+      Naming_heap.Types.add name (FileInfo.File (mode, fn), cid_kind)
 
-  let new_class_fast ctx fn name = new_cid_fast ctx fn name Naming_table.TClass
+  let new_class_fast ctx fn name = new_cid_fast ctx fn name Naming_types.TClass
 
   let new_record_decl_fast ctx fn name =
-    new_cid_fast ctx fn name Naming_table.TRecordDef
+    new_cid_fast ctx fn name Naming_types.TRecordDef
 
   let new_typedef_fast ctx fn name =
-    new_cid_fast ctx fn name Naming_table.TTypedef
+    new_cid_fast ctx fn name Naming_types.TTypedef
 
   let new_global_const_fast fn name =
-    Naming_table.Consts.add name (FileInfo.File (FileInfo.Const, fn))
+    Naming_heap.Consts.add name (FileInfo.File (FileInfo.Const, fn))
 
   let new_fun ctx (p, name) =
     let name_key = canon_key name in
-    match Naming_table.Funs.get_canon_name ctx name_key with
+    match Naming_heap.Funs.get_canon_name ctx name_key with
     | Some canonical ->
-      let p' = Option.value_exn (Naming_table.Funs.get_pos canonical) in
+      let p' = Option.value_exn (Naming_heap.Funs.get_pos canonical) in
       if not @@ GEnv.compare_pos ctx p' p canonical then
         let (p, name) = GEnv.get_full_pos ctx (p, name) in
         let (p', canonical) = GEnv.get_full_pos ctx (p', canonical) in
         Errors.error_name_already_bound name canonical p p'
-    | None -> Naming_table.Funs.add name p
+    | None -> Naming_heap.Funs.add name p
 
   let (attr_prefix, attr_prefix_len) =
     let a = "\\__attribute__" in
@@ -207,7 +207,7 @@ module Env = struct
   let new_cid ctx cid_kind (p, name) =
     let validate canonical error =
       let (p', _) =
-        match Naming_table.Types.get_pos canonical with
+        match Naming_heap.Types.get_pos canonical with
         | Some x -> x
         | None ->
           failwith
@@ -225,7 +225,7 @@ module Env = struct
       ()
     else
       let name_key = canon_key name in
-      match Naming_table.Types.get_canon_name ctx name_key with
+      match Naming_heap.Types.get_canon_name ctx name_key with
       | Some canonical -> validate canonical Errors.error_name_already_bound
       | None ->
         (* Check to prevent collision with attribute classes
@@ -242,27 +242,27 @@ module Env = struct
             attr_prefix ^ String.sub name_key 1 (name_len - 1)
         in
         begin
-          match Naming_table.Types.get_canon_name ctx alt_name_key with
+          match Naming_heap.Types.get_canon_name ctx alt_name_key with
           | Some alt_canonical ->
             validate alt_canonical Errors.error_class_attribute_already_bound
           | None -> ()
         end;
-        Naming_table.Types.add name (p, cid_kind)
+        Naming_heap.Types.add name (p, cid_kind)
 
-  let new_class ctx = new_cid ctx Naming_table.TClass
+  let new_class ctx = new_cid ctx Naming_types.TClass
 
-  let new_record_decl ctx = new_cid ctx Naming_table.TRecordDef
+  let new_record_decl ctx = new_cid ctx Naming_types.TRecordDef
 
-  let new_typedef ctx = new_cid ctx Naming_table.TTypedef
+  let new_typedef ctx = new_cid ctx Naming_types.TTypedef
 
   let new_global_const ctx (p, x) =
-    match Naming_table.Consts.get_pos x with
+    match Naming_heap.Consts.get_pos x with
     | Some p' ->
       if not @@ GEnv.compare_pos ctx p' p x then
         let (p, x) = GEnv.get_full_pos ctx (p, x) in
         let (p', x) = GEnv.get_full_pos ctx (p', x) in
         Errors.error_name_already_bound x x p p'
-    | None -> Naming_table.Consts.add x p
+    | None -> Naming_heap.Consts.add x p
 end
 
 (*****************************************************************************)
@@ -271,9 +271,9 @@ end
 let remove_decls ~funs ~classes ~record_defs ~typedefs ~consts =
   let types = SSet.union classes typedefs in
   let types = SSet.union types record_defs in
-  Naming_table.Types.remove_batch types;
-  Naming_table.Funs.remove_batch funs;
-  Naming_table.Consts.remove_batch consts
+  Naming_heap.Types.remove_batch types;
+  Naming_heap.Funs.remove_batch funs;
+  Naming_heap.Consts.remove_batch consts
 
 (*****************************************************************************)
 (* The entry point to build the naming environment *)

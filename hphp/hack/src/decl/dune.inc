@@ -37,6 +37,7 @@
     decl_to_typing
     full_fidelity
     naming
+    naming_heap
     shallow_class_diff
     shallow_classes_provider
     shallow_decl_defs
@@ -130,6 +131,7 @@
     decl_defs
     decl_heap
     naming
+    naming_heap
     utils_core)
   (preprocess (pps ppx_deriving.std)))
 
@@ -305,6 +307,7 @@
     decl_defs
     heap_shared_mem
     naming
+    naming_heap
     shallow_decl
     shallow_decl_defs
     typing_defs)

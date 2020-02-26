@@ -42,6 +42,38 @@
   (preprocess (pps ppx_deriving.std))) ; See T41851208
 
 (library
+  (name naming_types)
+  (modules
+    naming_types)
+  (preprocess (pps ppx_deriving.std))) ; See T41851208
+
+(library
+  (name naming_sqlite)
+  (modules
+    naming_sqlite)
+  (libraries
+    file_info
+    heap_shared_mem
+    naming_types
+    sqlite3
+    sqlite_utils
+    relative_path)
+  (preprocess (pps ppx_deriving.std))) ; See T41851208
+
+(library
+  (name naming_heap)
+  (modules
+    naming_heap)
+  (libraries
+    ast_provider
+    file_info
+    naming_sqlite
+    naming_types
+    provider_context
+    relative_path)
+  (preprocess (pps ppx_deriving.std))) ; See T41851208
+
+(library
   (name naming_table)
   (modules
     naming_table)
@@ -49,10 +81,9 @@
     ast_provider
     file_info
     fileutils
-    heap_shared_mem
-    relative_path
-    sqlite3
-    sqlite_utils)
+    naming_heap
+    naming_sqlite
+    relative_path)
   (preprocess (pps ppx_deriving.std))) ; See T41851208
 
 (library
@@ -62,6 +93,7 @@
   (libraries
     ast_provider
     naming
+    naming_heap
     naming_table)
   (preprocess (pps ppx_deriving.std))) ; See T41851208
 
@@ -71,6 +103,7 @@
     naming_global)
   (libraries
     file_info
+    naming_heap
     naming_table)
   (preprocess (pps ppx_deriving.std)))
 

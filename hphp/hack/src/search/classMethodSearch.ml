@@ -10,8 +10,8 @@
 open Core_kernel
 
 let get_class_definition_file class_name =
-  match Naming_table.Types.get_filename_and_kind class_name with
-  | Some (file, Naming_table.TClass) -> Some file
+  match Naming_heap.Types.get_filename_and_kind class_name with
+  | Some (file, Naming_types.TClass) -> Some file
   | _ -> None
 
 let query_class_methods

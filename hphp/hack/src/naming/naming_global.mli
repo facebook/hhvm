@@ -20,7 +20,7 @@ module GEnv : sig
   val type_canon_name : Provider_context.t -> string -> string option
 
   val type_info :
-    Provider_context.t -> string -> (Pos.t * Naming_table.type_of_type) option
+    Provider_context.t -> string -> (Pos.t * Naming_types.kind_of_type) option
 
   val fun_pos : Provider_context.t -> string -> Pos.t option
 

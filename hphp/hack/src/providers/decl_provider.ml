@@ -37,7 +37,7 @@ let get_fun (ctx : Provider_context.t) (fun_name : fun_key) : fun_decl option =
       decl_cache
       ~key:(Provider_backend.Decl_cache_entry.Fun_decl fun_name)
       ~default:(fun () ->
-        match Naming_table.Funs.get_filename fun_name with
+        match Naming_heap.Funs.get_filename fun_name with
         | Some filename ->
           let ft =
             Errors.run_in_decl_mode filename (fun () ->
@@ -108,7 +108,7 @@ let get_static_method
     convert_class_elt_to_fun_decl smeth
 
 let get_type_id_filename x expected_kind =
-  match Naming_table.Types.get_filename_and_kind x with
+  match Naming_heap.Types.get_filename_and_kind x with
   | Some (fn, kind) when kind = expected_kind -> Some fn
   | _ -> None
 
@@ -122,7 +122,7 @@ let get_typedef (ctx : Provider_context.t) (typedef_name : string) :
       decl_cache
       ~key:(Provider_backend.Decl_cache_entry.Typedef_decl typedef_name)
       ~default:(fun () ->
-        match get_type_id_filename typedef_name Naming_table.TTypedef with
+        match get_type_id_filename typedef_name Naming_types.TTypedef with
         | Some filename ->
           let tdecl =
             Errors.run_in_decl_mode filename (fun () ->
@@ -143,7 +143,7 @@ let get_record_def (ctx : Provider_context.t) (record_name : string) :
       decl_cache
       ~key:(Provider_backend.Decl_cache_entry.Record_decl record_name)
       ~default:(fun () ->
-        match Naming_table.Consts.get_filename record_name with
+        match Naming_heap.Consts.get_filename record_name with
         | Some filename ->
           let rdecl =
             Errors.run_in_decl_mode filename (fun () ->
@@ -165,7 +165,7 @@ let get_gconst (ctx : Provider_context.t) (gconst_name : string) :
       decl_cache
       ~key:(Provider_backend.Decl_cache_entry.Gconst_decl gconst_name)
       ~default:(fun () ->
-        match Naming_table.Consts.get_filename gconst_name with
+        match Naming_heap.Consts.get_filename gconst_name with
         | Some filename ->
           let gconst =
             Errors.run_in_decl_mode filename (fun () ->

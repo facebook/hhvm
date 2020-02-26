@@ -411,7 +411,7 @@ end = struct
     match Provider_backend.get () with
     | Provider_backend.Shared_memory
     | Provider_backend.Local_memory _ ->
-      if_unbound_then_dep_edge_and_report genv Naming_table.Consts.is_defined x;
+      if_unbound_then_dep_edge_and_report genv Naming_heap.Consts.is_defined x;
       x
     | Provider_backend.Decl_service _ ->
       (* TODO: we need to refactor this so naming phase doesn't report *)
@@ -437,8 +437,8 @@ end = struct
       end;
       x
     | None ->
-      (match Naming_table.Types.get_pos name with
-      | Some (_def_pos, Naming_table.TClass) ->
+      (match Naming_heap.Types.get_pos name with
+      | Some (_def_pos, Naming_types.TClass) ->
         (* Don't let people use strictly internal classes
          * (except when they are being declared in .hhi files) *)
         if
@@ -448,19 +448,19 @@ end = struct
         then
           Errors.using_internal_class p (strip_ns name);
         x
-      | Some (def_pos, Naming_table.TTypedef) when not allow_typedef ->
+      | Some (def_pos, Naming_types.TTypedef) when not allow_typedef ->
         let (full_pos, _) = GEnv.get_full_pos genv.ctx (def_pos, name) in
         Errors.unexpected_typedef p full_pos;
         x
-      | Some (_def_pos, Naming_table.TTypedef) -> x
-      | Some (_def_pos, Naming_table.TRecordDef) -> x
+      | Some (_def_pos, Naming_types.TTypedef) -> x
+      | Some (_def_pos, Naming_types.TRecordDef) -> x
       | None ->
         handle_unbound_name genv GEnv.type_pos GEnv.type_canon_name x context)
 
   let fun_id (genv, _) x =
     canonicalize
       genv
-      Naming_table.Funs.is_defined
+      Naming_heap.Funs.is_defined
       GEnv.fun_pos
       GEnv.fun_canon_name
       x
@@ -1439,7 +1439,7 @@ module Make (GetLocals : GetLocals) = struct
         let (pos, name) =
           NS.elaborate_id genv.namespace NS.ElaborateClass t.Aast.tp_name
         in
-        match Naming_table.Types.get_pos name with
+        match Naming_heap.Types.get_pos name with
         | Some (def_pos, _) ->
           let (def_pos, _) = GEnv.get_full_pos genv.ctx (def_pos, name) in
           Errors.error_name_already_bound name name pos def_pos
@@ -2241,8 +2241,8 @@ module Make (GetLocals : GetLocals) = struct
       let (genv, _) = env in
       let (_, name) = NS.elaborate_id genv.namespace NS.ElaborateClass x1 in
       begin
-        match Naming_table.Types.get_kind name with
-        | Some Naming_table.TTypedef when snd x2 = "class" ->
+        match Naming_heap.Types.get_kind name with
+        | Some Naming_types.TTypedef when snd x2 = "class" ->
           N.Typename
             (Env.type_name
                ~context:Errors.ClassContext
@@ -2257,8 +2257,8 @@ module Make (GetLocals : GetLocals) = struct
       let (genv, _) = env in
       let (_, name) = NS.elaborate_id genv.namespace NS.ElaborateClass x1 in
       begin
-        match Naming_table.Types.get_kind name with
-        | Some Naming_table.TTypedef when snd x2 = "class" ->
+        match Naming_heap.Types.get_kind name with
+        | Some Naming_types.TTypedef when snd x2 = "class" ->
           N.Typename
             (Env.type_name
                ~context:Errors.ClassContext

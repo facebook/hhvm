@@ -22,11 +22,6 @@ type fast = FileInfo.names Relative_path.Map.t
 
 type saved_state_info = FileInfo.saved Relative_path.Map.t
 
-type save_result = {
-  files_added: int;
-  symbols_added: int;
-}
-
 (* Querying and updating forward naming tables. *)
 val combine : t -> t -> t
 
@@ -61,7 +56,7 @@ val update : t -> Relative_path.t -> FileInfo.t -> t
 
 val update_many : t -> FileInfo.t Relative_path.Map.t -> t
 
-val save : t -> string -> save_result
+val save : t -> string -> Naming_sqlite.save_result
 
 (* Creation functions. *)
 val create : FileInfo.t Relative_path.Map.t -> t
@@ -120,55 +115,6 @@ val to_fast : t -> fast
 val saved_to_fast : saved_state_info -> fast
 
 val save_changes_since_baseline : t -> destination_path:string -> unit
-
-(* Querying and updating reverse naming tables. *)
-module type ReverseNamingTable = sig
-  type pos
-
-  val add : string -> pos -> unit
-
-  val get_pos : ?bypass_cache:bool -> string -> pos option
-
-  val get_filename : string -> Relative_path.t option
-
-  val is_defined : string -> bool
-
-  val remove_batch : SSet.t -> unit
-
-  val heap_string_of_key : string -> string
-end
-
-type type_of_type =
-  | TClass
-  | TTypedef
-  | TRecordDef
-[@@deriving eq, enum]
-
-module Types : sig
-  include ReverseNamingTable with type pos = FileInfo.pos * type_of_type
-
-  val get_kind : string -> type_of_type option
-
-  val get_filename_and_kind : string -> (Relative_path.t * type_of_type) option
-
-  val get_canon_name : Provider_context.t -> string -> string option
-end
-
-module Funs : sig
-  include ReverseNamingTable with type pos = FileInfo.pos
-
-  val get_canon_name : Provider_context.t -> string -> string option
-end
-
-module Consts : ReverseNamingTable with type pos = FileInfo.pos
-
-val to_canon_name_key : string -> string
-
-val push_local_changes : unit -> unit
-
-val pop_local_changes : unit -> unit
-
-val has_local_changes : unit -> bool
 
 (* Test functions, do not use. *)
 val assert_is_backed : t -> bool -> unit

@@ -32,17 +32,17 @@ and class_element_ =
   | Typeconst
 
 let get_class_by_name ctx x =
-  Naming_table.Types.get_filename x >>= fun fn ->
+  Naming_heap.Types.get_filename x >>= fun fn ->
   Ide_parser_cache.with_ide_cache @@ fun () ->
   Ast_provider.find_class_in_file ctx fn x
 
 let get_function_by_name ctx x =
-  Naming_table.Funs.get_filename x >>= fun fn ->
+  Naming_heap.Funs.get_filename x >>= fun fn ->
   Ide_parser_cache.with_ide_cache @@ fun () ->
   Ast_provider.find_fun_in_file ctx fn x
 
 let get_gconst_by_name ctx x =
-  Naming_table.Consts.get_filename x >>= fun fn ->
+  Naming_heap.Consts.get_filename x >>= fun fn ->
   Ide_parser_cache.with_ide_cache @@ fun () ->
   Ast_provider.find_gconst_in_file ctx fn x
 
@@ -90,15 +90,15 @@ let get_local_var_def ast name p =
 
 (* summarize a class, typedef or record *)
 let summarize_class_typedef ctx x =
-  Naming_table.Types.get_filename_and_kind x >>= fun (fn, ct) ->
+  Naming_heap.Types.get_filename_and_kind x >>= fun (fn, ct) ->
   match ct with
-  | Naming_table.TClass ->
+  | Naming_types.TClass ->
     Ast_provider.find_class_in_file ctx fn x >>= fun c ->
     Some (FileOutline.summarize_class c ~no_children:true)
-  | Naming_table.TTypedef ->
+  | Naming_types.TTypedef ->
     Ast_provider.find_typedef_in_file ctx fn x >>= fun tdef ->
     Some (FileOutline.summarize_typedef tdef)
-  | Naming_table.TRecordDef ->
+  | Naming_types.TRecordDef ->
     Ast_provider.find_record_def_in_file ctx fn x >>= fun rd ->
     Some (FileOutline.summarize_record_decl rd)
 

@@ -286,13 +286,13 @@ let naming_from_saved_state
            * it could be a new file that was added. *)
           ()
         | Some v ->
-          Naming_table.Types.remove_batch
+          Naming_heap.Types.remove_batch
             (v.FileInfo.classes |> List.map ~f:snd |> SSet.of_list);
-          Naming_table.Types.remove_batch
+          Naming_heap.Types.remove_batch
             (v.FileInfo.typedefs |> List.map ~f:snd |> SSet.of_list);
-          Naming_table.Funs.remove_batch
+          Naming_heap.Funs.remove_batch
             (v.FileInfo.funs |> List.map ~f:snd |> SSet.of_list);
-          Naming_table.Consts.remove_batch
+          Naming_heap.Consts.remove_batch
             (v.FileInfo.consts |> List.map ~f:snd |> SSet.of_list));
     Unix.gettimeofday ()
   | None ->

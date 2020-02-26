@@ -16,13 +16,13 @@
 open Core_kernel
 
 module Types_pos_asserter = Asserter.Make_asserter (struct
-  type t = Naming_table.Types.pos
+  type t = FileInfo.pos * Naming_types.kind_of_type
 
   let to_string (pos, type_of_type) =
     Printf.sprintf
       "(%s, %d)"
       (FileInfo.show_pos pos)
-      (Naming_table.type_of_type_to_enum type_of_type)
+      (Naming_types.kind_of_type_to_enum type_of_type)
 
   let is_equal = ( = )
 end)
@@ -105,7 +105,7 @@ let run_naming_table_test f =
       let save_results = Naming_table.save unbacked_naming_table db_name in
       Asserter.Int_asserter.assert_equals
         8
-        Naming_table.(save_results.files_added + save_results.symbols_added)
+        Naming_sqlite.(save_results.files_added + save_results.symbols_added)
         "Expected to add eight rows (four files and four symbols)";
       let backed_naming_table = Naming_table.load_from_sqlite db_name in
       let ctx =
@@ -120,23 +120,23 @@ let test_get_pos () =
       Types_pos_asserter.assert_option_equals
         (Some
            ( FileInfo.File (FileInfo.Class, Relative_path.from_root "foo.php"),
-             Naming_table.TClass ))
-        (Naming_table.Types.get_pos "\\Foo")
+             Naming_types.TClass ))
+        (Naming_heap.Types.get_pos "\\Foo")
         "Check for class type";
       Pos_asserter.assert_option_equals
         (Some (FileInfo.File (FileInfo.Fun, Relative_path.from_root "bar.php")))
-        (Naming_table.Funs.get_pos "\\bar")
+        (Naming_heap.Funs.get_pos "\\bar")
         "Check for function";
       Types_pos_asserter.assert_option_equals
         (Some
            ( FileInfo.File (FileInfo.Typedef, Relative_path.from_root "baz.php"),
-             Naming_table.TTypedef ))
-        (Naming_table.Types.get_pos "\\Baz")
+             Naming_types.TTypedef ))
+        (Naming_heap.Types.get_pos "\\Baz")
         "Check for typedef type";
       Pos_asserter.assert_option_equals
         (Some
            (FileInfo.File (FileInfo.Const, Relative_path.from_root "qux.php")))
-        (Naming_table.Consts.get_pos "\\Qux")
+        (Naming_heap.Consts.get_pos "\\Qux")
         "Check for const")
 
 let test_get_canon_name () =
@@ -147,15 +147,15 @@ let test_get_canon_name () =
        saved state. *)
       Asserter.String_asserter.assert_option_equals
         (Some "\\Foo")
-        (Naming_table.Types.get_canon_name ctx "\\foo")
+        (Naming_heap.Types.get_canon_name ctx "\\foo")
         "Check for class canon name";
       Asserter.String_asserter.assert_option_equals
         (Some "\\bar")
-        (Naming_table.Funs.get_canon_name ctx "\\bar")
+        (Naming_heap.Funs.get_canon_name ctx "\\bar")
         "Check for function canon name";
       Asserter.String_asserter.assert_option_equals
         (Some "\\Baz")
-        (Naming_table.Types.get_canon_name ctx "\\baz")
+        (Naming_heap.Types.get_canon_name ctx "\\baz")
         "Check for typedef canon name")
 
 let test_remove () =
@@ -233,7 +233,7 @@ let test_local_changes () =
         (a_file_info = a_file_info')
         "Expected file info to be found in the naming table";
 
-      let a_pos' = Option.value_exn (Naming_table.Consts.get_pos a_name) in
+      let a_pos' = Option.value_exn (Naming_heap.Consts.get_pos a_name) in
       Asserter.Bool_asserter.assert_equals
         true
         (a_pos = a_pos')

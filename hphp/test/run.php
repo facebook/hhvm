@@ -908,6 +908,7 @@ function hhvm_cmd_impl($options, $config, $test, ...$extra_args) {
       '-vEval.EnableArgsInBacktraces=false',
       '-vEval.EnableIntrinsicsExtension=true',
       '-vEval.HHIRInliningIgnoreHints=false',
+      '-vEval.HHIRAlwaysInterpIgnoreHint=false',
       '-vAutoload.DBPath='.escapeshellarg("$test.$mode_num.autoloadDB"),
       $mode,
       isset($options['wholecfg']) ? '-vEval.JitPGORegionSelector=wholecfg' : '',

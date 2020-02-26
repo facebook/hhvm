@@ -112,6 +112,8 @@ bool liveFrameIsPseudoMain() {
   return ar->hasVarEnv() && ar->getVarEnv()->isGlobalScope();
 }
 
+const StaticString s_AlwaysInterp("__ALWAYS_INTERP");
+
 /*
  * Create a translation for the SrcKey specified in args.
  *
@@ -146,7 +148,14 @@ TCA getTranslation(TransArgs args) {
 
   if (UNLIKELY(!RO::RepoAuthoritative && sk.unit()->isCoverageEnabled())) {
     assertx(RO::EvalEnablePerFileCoverage);
-    SKTRACE(2, sk, "punting because per file code coverage is enabled");
+    SKTRACE(2, sk, "punting because per file code coverage is enabled\n");
+    return nullptr;
+  }
+
+  if (UNLIKELY(!RO::EvalHHIRAlwaysInterpIgnoreHint &&
+               sk.func()->userAttributes().count(s_AlwaysInterp.get()))) {
+    SKTRACE(2, sk,
+            "punting because function is annotated with __ALWAYS_INTERP\n");
     return nullptr;
   }
 

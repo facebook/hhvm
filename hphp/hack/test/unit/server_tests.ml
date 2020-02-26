@@ -10,6 +10,10 @@
 
 open Core_kernel
 
+let fake_dir = Printf.sprintf "%s/fake" (Filename.get_temp_dir_name ())
+
+let in_fake_dir path = Printf.sprintf "%s/%s" fake_dir path
+
 let test_process_data =
   ServerProcess.
     {
@@ -43,13 +47,16 @@ let test_deferred_decl_add () =
   Deferred_decl.reset ~enable:true ~threshold_opt:None;
   ensure_count 0;
 
-  Deferred_decl.add_deferment (Relative_path.create Relative_path.Dummy "foo");
+  Deferred_decl.add_deferment
+    ~d:(Relative_path.create Relative_path.Dummy "foo");
   ensure_count 1;
 
-  Deferred_decl.add_deferment (Relative_path.create Relative_path.Dummy "foo");
+  Deferred_decl.add_deferment
+    ~d:(Relative_path.create Relative_path.Dummy "foo");
   ensure_count 1;
 
-  Deferred_decl.add_deferment (Relative_path.create Relative_path.Dummy "bar");
+  Deferred_decl.add_deferment
+    ~d:(Relative_path.create Relative_path.Dummy "bar");
   ensure_count 2;
 
   Deferred_decl.reset ~enable:true ~threshold_opt:None;
@@ -121,15 +128,21 @@ let bar_contents =
 
 let server_setup_for_deferral_tests () =
   (* Set up a simple fake repo *)
-  Disk.mkdir_p "/fake/root/";
-  Relative_path.set_path_prefix Relative_path.Root (Path.make "/fake/root/");
+  Disk.mkdir_p @@ in_fake_dir "root/";
+  Relative_path.set_path_prefix
+    Relative_path.Root
+    (Path.make @@ in_fake_dir "root/");
 
   (* We'll need to parse these files in order to create a naming table, which
     will be used for look up of symbols in type checking. *)
-  Disk.write_file ~file:"/fake/root/Foo.php" ~contents:foo_contents;
-  Disk.write_file ~file:"/fake/root/Bar.php" ~contents:bar_contents;
-  let foo_path = Relative_path.create Relative_path.Root "/fake/root/Foo.php" in
-  let bar_path = Relative_path.create Relative_path.Root "/fake/root/Bar.php" in
+  Disk.write_file ~file:(in_fake_dir "root/Foo.php") ~contents:foo_contents;
+  Disk.write_file ~file:(in_fake_dir "root/Bar.php") ~contents:bar_contents;
+  let foo_path =
+    Relative_path.create Relative_path.Root @@ in_fake_dir "root/Foo.php"
+  in
+  let bar_path =
+    Relative_path.create Relative_path.Root @@ in_fake_dir "root/Bar.php"
+  in
   (* Parsing produces the file infos that the naming table module can use
     to construct the forward naming table (files-to-symbols) *)
   let (file_infos, _errors, _failed_parsing) =
@@ -295,7 +308,9 @@ let test_compute_tast_counting () =
   true
 
 let test_should_enable_deferring () =
-  Relative_path.set_path_prefix Relative_path.Root (Path.make "/fake/www");
+  Relative_path.set_path_prefix
+    Relative_path.Root
+    (Path.make @@ in_fake_dir "www");
 
   let opts =
     GlobalOptions.{ default with tco_max_times_to_defer_type_checking = Some 2 }
@@ -303,7 +318,8 @@ let test_should_enable_deferring () =
   let file =
     Typing_check_service.
       {
-        path = Relative_path.create Relative_path.Root "/fake/www/Foo.php";
+        path =
+          Relative_path.create Relative_path.Root @@ in_fake_dir "www/Foo.php";
         deferred_count = 1;
       }
   in

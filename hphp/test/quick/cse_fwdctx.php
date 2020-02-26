@@ -53,7 +53,7 @@ class HijriConverter {
 
       return varray[$y, $m, $d];
     }
-    return array();
+    return varray[];
   }
 }
 

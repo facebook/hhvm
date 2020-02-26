@@ -15,6 +15,6 @@ function bar() {
 }
 
 $x = 42;
-$a = array();
+$a = varray[];
 foo();
 bar();

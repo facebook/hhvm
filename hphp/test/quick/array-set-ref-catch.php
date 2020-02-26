@@ -14,6 +14,6 @@ function test(inout $a, $b) {
   var_dump($a);
 }
 <<__EntryPoint>> function main(): void {
-$y = array();
+$y = darray[];
 test(inout $y, 5);
 }

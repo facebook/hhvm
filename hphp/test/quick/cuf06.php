@@ -7,7 +7,7 @@ function handler($a, $b) {
 function foo() {}
 
 function test() {
-  call_user_func_array('foo', array());
+  call_user_func_array('foo', varray[]);
 }
 
 function main() {

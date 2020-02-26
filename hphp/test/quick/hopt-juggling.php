@@ -54,7 +54,7 @@ function foo11($x, $y) {
 }
 
 function foo12() {
-  $x = array();
+  $x = varray[];
   return (int)$x;
 }
 

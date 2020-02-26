@@ -3,7 +3,7 @@
 function run(inout $a, inout $b, inout $c) {
   $a = "hello";
   $b = 2;
-  $c = array();
+  $c = varray[];
 
   return $a;
 }

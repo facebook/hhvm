@@ -4,7 +4,7 @@ abstract class :base {
   // This is necessary because the generated __xhpAttributeDeclaration() has a
   // call to parent::__xhpAttributeDeclaration().
   protected static function __xhpAttributeDeclaration() {
-    return array();
+    return darray[];
   }
 
   public static function xhpAttributeDeclaration() {

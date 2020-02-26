@@ -4,7 +4,7 @@ class blah {
 
   private static $breakerX = 0;
   private function breaker() {
-    return self::$breakerX++ == 0 ? array() : null;
+    return self::$breakerX++ == 0 ? varray[] : null;
   }
 
   public function foo() {

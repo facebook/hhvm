@@ -36,7 +36,7 @@ function foo7($x) {
 }
 
 function foo8() {
-  $x = array();
+  $x = varray[];
   return (bool)$x;
 }
 
@@ -46,7 +46,7 @@ function foo9() {
 }
 
 function foo10() {
-  $x = array();
+  $x = varray[];
   return (string)$x;
 }
 

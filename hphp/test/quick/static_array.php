@@ -1,7 +1,7 @@
 <?hh
 # Static arrays.
 <<__EntryPoint>> function main(): void {
-$a = array();
+$a = varray[];
 var_dump($a);
 
 $a = varray[null];
@@ -19,7 +19,7 @@ var_dump($a);
 $a = varray["hello"];
 var_dump($a);
 
-$a = varray[array()];
+$a = varray[varray[]];
 var_dump($a);
 
 $a = varray[null, true, 42, 12.34, "hello", varray[1, varray[2, varray[3]]]];
@@ -48,7 +48,7 @@ var_dump($a);
 $a = darray["hello" => "world"];
 var_dump($a);
 
-$a = darray[0 => "0", true => "1", "hello" => "world", 12.34 => array()];
+$a = darray[0 => "0", true => "1", "hello" => "world", 12.34 => darray[]];
 var_dump($a);
 
 # Non-static arrays.
@@ -85,7 +85,7 @@ $a = varray[varray[0], varray[$v]];
 var_dump($a);
 
 # Invalid key, prevents static array optimization.
-$a = darray[array() => 1];
+$a = darray[darray[] => 1];
 var_dump($a);
 
 $a = darray[INF => 0];

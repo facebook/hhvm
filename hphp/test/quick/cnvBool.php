@@ -32,7 +32,7 @@ function bar($i) {
     $v7 = 1.1;
     $v8 = "false";
     $v9 = new C();
-    $v10 = array();
+    $v10 = varray[];
     $v11 = varray[1];
 
     $empty_col_1 = Set {};

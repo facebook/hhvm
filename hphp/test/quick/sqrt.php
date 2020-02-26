@@ -46,7 +46,7 @@ function main($f) {
     var_dump($e->getMessage());
   }
   try {
-    var_dump(sqrt(array()));
+    var_dump(sqrt(varray[]));
   } catch (Exception $e) {
     var_dump($e->getMessage());
   }

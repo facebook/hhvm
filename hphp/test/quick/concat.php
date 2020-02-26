@@ -4,13 +4,13 @@ function main() {
   $s = "a" . "b";
   print $s."\n";
 
-  $s = "a" . array();
+  $s = "a" . varray[];
   print $s."\n";
 
-  $s = array() . "b";
+  $s = varray[] . "b";
   print $s."\n";
 
-  $s = array() . array();
+  $s = varray[] . varray[];
   print $s."\n";
 
   $s = "a" . 3;
@@ -25,7 +25,7 @@ function main() {
   $s .= "a";
   print $s."\n";
 
-  $b = varray[array()];
+  $b = varray[varray[]];
   $a = $b[0];
   $s = $a . "a";
   print $s."\n";

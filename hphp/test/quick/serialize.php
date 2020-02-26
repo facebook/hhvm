@@ -75,13 +75,19 @@ function test_serialization($obj, $class_whitelist) {
   test_serialization(new A, varray[]);
   test_serialization(new B, varray['A', 'B']);
   test_serialization(new C, varray['C']);
-  test_serialization(new DangerousClass, array());
+  test_serialization(new DangerousClass, varray[]);
   test_serialization(new E, varray['E']);
   test_serialization(new F, varray['F']);
   test_serialization(new G, varray['G']);
-  test_serialization(varray["Hello World<>$%", acos(1.01), log(0.0), 50], array());
+  test_serialization(varray["Hello World<>$%", acos(1.01), log(0.0), 50], varray[]);
   test_serialization(
     varray[ new A, varray[new B, varray[new C, varray[new E, varray[new F]]]]],
-    array('abc' => 'A', 5 => 'C', 'E', 'B', 'F')
+    darray[
+      'abc' => 'A',
+      5 => 'C',
+      6 => 'E',
+      7 => 'B',
+      8 => 'F'
+    ]
   );
 }

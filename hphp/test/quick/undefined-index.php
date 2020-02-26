@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$arr = array();
+$arr = varray[];
 try {
   $a = $arr[123];
   echo $a;

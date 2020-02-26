@@ -15,18 +15,18 @@ function gt($x, $y) {
 echo "======\n";
 
 eq('Array', varray[1,2]);
-eq('Array', array());
-eq(array(), 'Array');
+eq('Array', varray[]);
+eq(varray[], 'Array');
 eq(varray['a', 'b'], 'Array');
 echo "\n";
 lt('Array', varray[1,2]);
-lt('Array', array());
-lt(array(), 'Array');
+lt('Array', varray[]);
+lt(varray[], 'Array');
 lt(varray['a', 'b'], 'Array');
 echo "\n";
 gt('Array', varray[1,2]);
-gt('Array', array());
-gt(array(), 'Array');
+gt('Array', varray[]);
+gt(varray[], 'Array');
 gt(varray['a', 'b'], 'Array');
 
 echo "======\n";

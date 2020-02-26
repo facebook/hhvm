@@ -14,7 +14,7 @@ class A {
   }
 }
 <<__EntryPoint>> function main(): void {
-$a = new A('hi', 3, array());
+$a = new A('hi', 3, darray[]);
 foreach ($a as $k => $v) {
   var_dump($k, $v);
 }

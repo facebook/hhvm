@@ -4,7 +4,7 @@
 class C {
   public function foo() {
     echo "foo\n";
-    $x = array();
+    $x = varray[];
     if ($x) {
       print_r($x);
     } else {

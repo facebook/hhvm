@@ -1,13 +1,13 @@
 <?hh
 
 function f() {
-  $a = array();
+  $a = darray[];
   try { echo $a[15410]; } catch (Exception $e) { echo $e->getMessage()."\n"; }
   echo "In f: " . error_reporting() . "\n";
 }
 
 function g() {
-  $a = array();
+  $a = darray[];
   try { echo $a[15411]; } catch (Exception $e) { echo $e->getMessage()."\n"; }
   echo "In f: " . error_reporting() . "\n";
   echo "In g: " . error_reporting() . "\n";
@@ -27,6 +27,6 @@ function main_entry(): void {
   @g();
   echo error_reporting() . "\n";
 
-  $arr = array();
+  $arr = darray[];
   try { echo @$arr['nope']; } catch (Exception $e) { echo $e->getMessage()."\n"; }
 }

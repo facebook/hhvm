@@ -22,7 +22,7 @@
     var_dump("Got ".$e->getMessage());
   }
   try {
-    $h = keyset[array()];
+    $h = keyset[varray[]];
   } catch (Exception $e) {
     var_dump("Got ".$e->getMessage());
   }

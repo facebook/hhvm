@@ -10,13 +10,13 @@ public function blah() { return 650; }
 class C {
 public static $x = 100;
 public static $y = varray[200];
-public static $z = array();
+public static $z = varray[];
 public static function foo1() { return 150; }
 public static function foo2() { return 250; }
 public $bar1 = 400;
 public function bar2() { return 450; }
 public $baz;
-public $w = array();
+public $w = varray[];
 public function __construct() {
 $this->baz = new D();
 $this->w[] = new D();

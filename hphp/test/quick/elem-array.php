@@ -10,6 +10,6 @@ function go($a) {
   return false;
 }
 <<__EntryPoint>> function main(): void {
-$a = array();
+$a = darray[];
 var_dump(go($a));
 }

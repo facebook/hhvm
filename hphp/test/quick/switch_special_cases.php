@@ -52,7 +52,7 @@ function main() {
     'blar',
     '',
     4,
-    array(),
+    varray[],
     varray['foo', 'floo'],
     new stdclass(),
     new c(),

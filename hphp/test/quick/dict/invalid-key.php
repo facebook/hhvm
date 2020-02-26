@@ -22,7 +22,7 @@ function run(inout $ref, inout $badref) {
   set(dict[], "1", "hello")
     |> set($$, 1, "goodbye")
     |> set($$, null, "null")
-    |> set($$, array(), "arr")
+    |> set($$, darray[], "arr")
     |> set($$, new stdclass, "cls")
     |> set($$, 1.2, "double")
     |> set($$, $ref, "num-ref")
@@ -31,7 +31,7 @@ function run(inout $ref, inout $badref) {
     |> get($$, 1)
     |> get($$, "1")
     |> get($$, null)
-    |> get($$, array())
+    |> get($$, darray[])
     |> get($$, new stdclass)
     |> get($$, 1.2)
     |> get($$, $ref)
@@ -43,6 +43,6 @@ function run(inout $ref, inout $badref) {
 <<__EntryPoint>>
 function main() {
   $foo = 12;
-  $bar = array();
+  $bar = darray[];
   run(inout $foo, inout $bar);
 }

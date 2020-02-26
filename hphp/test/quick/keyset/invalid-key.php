@@ -23,7 +23,7 @@ function run(inout $ref, inout $badref) {
   add(keyset[$dyn], 1)
     |> add($$, "1")
     |> add($$, null)
-    |> add($$, array())
+    |> add($$, darray[])
     |> add($$, new stdclass)
     |> add($$, 1.2)
     |> add($$, $ref)
@@ -32,7 +32,7 @@ function run(inout $ref, inout $badref) {
     |> get($$, 1)
     |> get($$, "1")
     |> get($$, null)
-    |> get($$, array())
+    |> get($$, darray[])
     |> get($$, new stdclass)
     |> get($$, 1.2)
     |> get($$, $ref)
@@ -44,6 +44,6 @@ function run(inout $ref, inout $badref) {
 <<__EntryPoint>>
 function main() {
   $foo = 12;
-  $bar = array();
+  $bar = darray[];
   run(inout $foo, inout $bar);
 }

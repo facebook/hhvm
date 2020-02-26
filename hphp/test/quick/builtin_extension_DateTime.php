@@ -7,7 +7,7 @@ class A_DateTime extends DateTime {
   }
 }
 
-function test($cls, $args = array()) {
+function test($cls, $args = varray[]) {
   echo $cls . "\n";
   $a = (new ReflectionClass($cls))->newInstanceArgs($args);
   var_dump($a);

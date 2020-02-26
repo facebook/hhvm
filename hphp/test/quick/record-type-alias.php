@@ -1,10 +1,10 @@
 <?hh
 
 HH\autoload_set_paths(
-  array(
-    'type' => array('bar' => 'record-alias.inc', 'baz' => 'record-alias2.inc'),
-    'class' => array('foo' => 'record_decl.1.inc'),
-  ),
+  darray[
+    'type' => darray['bar' => 'record-alias.inc', 'baz' => 'record-alias2.inc'],
+    'class' => darray['foo' => 'record_decl.1.inc'],
+  ],
   __DIR__.'/'
 );
 

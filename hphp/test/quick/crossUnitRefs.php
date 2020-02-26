@@ -6,7 +6,7 @@ include_once "crossUnitRefsInc.php";
 class A {
   public $foo;
   public function f() {
-    inOtherUnit($this->foo, array());
+    inOtherUnit($this->foo, varray[]);
   }
 }
 

@@ -43,7 +43,7 @@ function testApc($before) {
   }
 
   # setM
-  $after['newKey'] = array();
+  $after['newKey'] = varray[];
   var_dump($after);
 
   # unsetm

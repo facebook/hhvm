@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$array = darray['k1' => array()];
+$array = darray['k1' => darray[]];
 
 $it = new RecursiveIteratorIterator(
   new RecursiveArrayIterator($array)

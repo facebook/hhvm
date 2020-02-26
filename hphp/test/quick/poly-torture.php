@@ -73,7 +73,6 @@ class MagicBox {
 }
 
 <<__EntryPoint>> function main(): void {
-  $a = array();
   for ($i = 0; $i < 5; $i++) {
     $m = new MagicBox(pRandObj());
     if ($i % 3 == 0) {

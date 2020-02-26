@@ -20,7 +20,7 @@ try {
   var_dump("Got ".$e->getMessage());
 }
 try {
-  $h = dict[array() => 1];
+  $h = dict[darray[] => 1];
 } catch (Exception $e) {
   var_dump("Got ".$e->getMessage());
 }

@@ -5,7 +5,7 @@ function id($x) {
   return $x;
 }
 <<__EntryPoint>> function main(): void {
-$arr = varray[null, true, false, 0, 1, 0.0, 1.0, "", "foo", array(), varray[1]];
+$arr = varray[null, true, false, 0, 1, 0.0, 1.0, "", "foo", varray[], varray[1]];
 
 for ($i = 0; $i < count($arr); ++$i) {
   $x = $arr[$i];

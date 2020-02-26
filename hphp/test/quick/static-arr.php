@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>> function main(): void {
-  $x = array();
+  $x = varray[];
   $x += varray[1, 2, 3];
   var_dump($x);
 

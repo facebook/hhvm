@@ -36,7 +36,7 @@ function bar($i) {
     $v7 = "1.1";
     $v8 = "abc";
     $v9 = new C;
-    $v10 = array();
+    $v10 = varray[];
     $v11 = varray[123];
   }
   var_dump((int)$v1);

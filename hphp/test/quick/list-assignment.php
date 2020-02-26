@@ -23,7 +23,7 @@ function main_entry(): void {
 
   // Medium 3
   try {
-    list($a, $b) = array();
+    list($a, $b) = varray[];
     var_dump($a, $b);
   } catch (Exception $e) { echo $e->getMessage()."\n"; }
   var_dump($a, $b);

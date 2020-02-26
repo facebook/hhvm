@@ -12,7 +12,7 @@ abstract class A {
   const i0 = 0;
   const sabc = 'abc';
   const f3 = 3.0;
-  abstract public function a(array $a1 = null, array  $a2 = array());
+  abstract public function a(?varray $a1 = null, varray $a2 = varray[]);
   abstract public function b(bool $b1 = null);
   abstract public function c(A $c1 = null);
   abstract public function d(float $d1 = null, float $d2 = 2.0);
@@ -25,7 +25,7 @@ class B extends A {
   const btrue = true;
   const d3 = 3.0;
   const ibig = 9123123123123;
-  public function a(array   $a1 = null, array   $a2 = array(), array $a3 = varray[1, 2, 3], array $a4 = varray["abc"]) {}
+  public function a(?varray $a1 = null, varray $a2 = varray[], varray $a3 = varray[1, 2, 3], varray $a4 = varray["abc"]) {}
   public function b(bool $b1 = null, bool $b2 = false, bool  $b3 = DTRUE, bool $b4 = B::btrue) {}
   public function c(A       $c1 = null) {}
   public function d(float  $d1 = null, float  $d2 = 1.0) {} // , double $d3 = DD2, double $d4 = B::d3) {}

@@ -20,7 +20,7 @@ function main() {
       asdf(new Foo());
     } catch (Exception $e) {}
     try {
-      asdf(array());
+      asdf(varray[]);
     } catch (Exception $e) {}
   }
 }

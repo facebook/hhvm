@@ -6,7 +6,7 @@
   if (isset($GLOBALS['b'])) $a = 1.2;
   if (isset($GLOBALS['c'])) $a = '1';
   if (isset($GLOBALS['d'])) $a = new stdclass;
-  if (isset($GLOBALS['e'])) $a = array();
+  if (isset($GLOBALS['e'])) $a = varray[];
   if (isset($GLOBALS['f'])) $a = false;
   if (isset($GLOBALS['g'])) $a = null;
 

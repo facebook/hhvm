@@ -1,6 +1,6 @@
 <?hh
 
-function f() { return array(); }
+function f() { return darray[]; }
 
 function populateArray($max) {
   $a = f();

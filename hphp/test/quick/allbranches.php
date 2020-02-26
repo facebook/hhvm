@@ -95,7 +95,7 @@ class DifferentTypes {
   use T;
   function __construct() {
     banner("weirdTypes");
-    $a = varray[0, true, null, 0.3, "str", array(), new C()];
+    $a = varray[0, true, null, 0.3, "str", varray[], new C()];
     $this->unary($a);
   }
 }

@@ -26,7 +26,7 @@ class UnexpectedSerializedClass extends Exception {}
   foreach (vec[false, true] as $subclasses) {
     $check = $xs ==> $run(shape('include_subclasses' => $subclasses,
                                 'allowed_classes' => $xs));
-    $check(array());
+    $check(varray[]);
     $check(varray['A']);
     $check(varray['B']);
     $check(varray['C']);

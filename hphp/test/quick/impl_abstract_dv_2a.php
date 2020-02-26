@@ -4,6 +4,6 @@ class B extends A {          public function foo(int $x)   {} }
 class C extends B {          public function foo(array $x) {} }
 <<__EntryPoint>> function main(): void {
 $o = new C;
-$o->foo(array());
+$o->foo(varray[]);
 echo "OK\n";
 }

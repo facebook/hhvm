@@ -191,7 +191,7 @@ inline folly::Optional<CollectionType> stringToType(const std::string& s) {
 }
 
 inline bool isTypeName(const StringData* str) {
-  return stringToType(str).hasValue();
+  return stringToType(str).has_value();
 }
 
 /////////////////////////////////////////////////////////////////////////////

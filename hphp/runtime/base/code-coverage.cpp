@@ -88,7 +88,7 @@ namespace HPHP {
  * So right now it is just simpler to ignore line1.
  */
 void CodeCoverage::Record(const char *filename, int line0, int line1) {
-  assertx(m_hits.hasValue());
+  assertx(m_hits.has_value());
   if (!filename || !*filename || line0 <= 0 || line1 <= 0 || line0 > line1) {
     return;
   }
@@ -114,7 +114,7 @@ void CodeCoverage::Record(const char *filename, int line0, int line1) {
 
 Array CodeCoverage::Report(bool report_frequency /* = false*/,
                            bool sys /* = true */) {
-  assertx(m_hits.hasValue());
+  assertx(m_hits.has_value());
   Array ret = Array::CreateDArray();
   for (const auto& iter : *m_hits) {
     if (!sys && Extension::IsSystemlibPath(iter.first)) {
@@ -141,7 +141,7 @@ Array CodeCoverage::Report(bool report_frequency /* = false*/,
 }
 
 void CodeCoverage::Report(const std::string &filename) {
-  assertx(m_hits.hasValue());
+  assertx(m_hits.has_value());
   std::ofstream f(filename.c_str());
   if (!f) {
     Logger::Error("unable to open %s", filename.c_str());
@@ -165,7 +165,7 @@ void CodeCoverage::Report(const std::string &filename) {
 }
 
 void CodeCoverage::Reset() {
-  assertx(m_hits.hasValue());
+  assertx(m_hits.has_value());
   m_hits->clear();
   resetCoverageCounters();
 }

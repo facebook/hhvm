@@ -862,7 +862,7 @@ struct LocalSettings {
     return settings.value();
   }
   void clear() { settings.clear(); }
-  bool empty() { return !settings.hasValue() || settings.value().empty(); }
+  bool empty() { return !settings.has_value() || settings.value().empty(); }
 };
 
 // Set by a .ini file at the start
@@ -876,7 +876,7 @@ struct IniSettingExtension final : Extension {
 
   // s_saved_defaults should be clear at the beginning of any request
   void requestInit() override {
-    assertx(!s_saved_defaults->settings.hasValue());
+    assertx(!s_saved_defaults->settings.has_value());
   }
 } s_ini_extension;
 

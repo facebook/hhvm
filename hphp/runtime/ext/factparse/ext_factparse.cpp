@@ -85,7 +85,7 @@ struct HackCFactsExtractor {
     const HPHP::String& path
   ) {
     try {
-      if (workerResult.hasValue() && !workerResult.value().value.empty()) {
+      if (workerResult.has_value() && !workerResult.value().value.empty()) {
         outResArr.set(
           path,
           Variant::attach(

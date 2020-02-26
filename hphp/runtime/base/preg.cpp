@@ -295,7 +295,7 @@ pcre_literal_data::pcre_literal_data(const char* pattern, int coptions) {
 }
 
 bool pcre_literal_data::isLiteral() const {
-  return literal_str.hasValue();
+  return literal_str.has_value();
 }
 
 bool pcre_literal_data::matches(const StringData* subject,

@@ -4730,7 +4730,7 @@ Index::resolve_closure_class(Context ctx, int32_t idx) const {
 res::Class Index::builtin_class(SString name) const {
   auto const rcls = resolve_class(Context {}, name);
   always_assert_flog(
-    rcls.hasValue() &&
+    rcls.has_value() &&
     rcls->val.right() &&
     (rcls->val.right()->cls->attrs & AttrBuiltin),
     "A builtin class ({}) failed to resolve",
@@ -5301,7 +5301,7 @@ const php::Const* Index::lookup_class_const_ptr(Context ctx,
 
   auto const it = cinfo->clsConstants.find(cnsName);
   if (it != end(cinfo->clsConstants)) {
-    if (!it->second->val.hasValue() ||
+    if (!it->second->val.has_value() ||
         (!allow_tconst && it->second->isTypeconst)) {
       // This is an abstract class constant or typeconstant
       return nullptr;

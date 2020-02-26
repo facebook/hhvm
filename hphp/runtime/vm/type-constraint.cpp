@@ -1413,7 +1413,7 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
   switch (tc.metaType()) {
     case AnnotMetaType::Precise: {
       auto const dt = tc.underlyingDataType();
-      assertx(dt.hasValue());
+      assertx(dt.has_value());
       switch (*dt) {
         case KindOfBoolean:
           return tc.isNullable() ? MK::BoolOrNull : MK::Bool;

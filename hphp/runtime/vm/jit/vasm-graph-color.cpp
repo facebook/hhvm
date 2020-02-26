@@ -3699,7 +3699,7 @@ spill_weight_at_impl(State& state,
             // a spill on the back edge (so it removes some of the
             // penalty).
             auto const& spillerState = spillerResults.perBlock[succ].inPhi;
-            assertx(spillerState.hasValue());
+            assertx(spillerState.has_value());
             assertx(spillerState->size() == srcs.size());
 
             for (size_t j = 0; j < srcs.size(); ++j) {
@@ -3787,7 +3787,7 @@ spill_weight_at_impl(State& state,
     // if there's a single successor because we've split critical
     // edges.
     auto const& spillerState = spillerResults.perBlock[succ].in;
-    assertx(spillerState.hasValue());
+    assertx(spillerState.has_value());
 
     auto const s = spillerState->forReg(reg);
     assertx(s);

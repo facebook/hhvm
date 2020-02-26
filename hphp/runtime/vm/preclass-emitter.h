@@ -141,7 +141,7 @@ struct PreClassEmitter {
     const TypedValue& val() const { return m_val.value(); }
     const folly::Optional<TypedValue>& valOption() const { return m_val; }
     const StringData* phpCode() const { return m_phpCode; }
-    bool isAbstract()       const { return !m_val.hasValue(); }
+    bool isAbstract()       const { return !m_val.has_value(); }
     bool isTypeconst() const { return m_typeconst; }
 
     template<class SerDe> void serde(SerDe& sd) {

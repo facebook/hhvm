@@ -1356,7 +1356,7 @@ void emit_class(EmitUnitState& state,
     if (nativeConsts && nativeConsts->count(cconst.name)) {
       break;
     }
-    if (!cconst.val.hasValue()) {
+    if (!cconst.val.has_value()) {
       pce->addAbstractConstant(
         cconst.name,
         cconst.typeConstraint,

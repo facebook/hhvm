@@ -172,7 +172,7 @@ relocateTranslation(TransMetaInfo& info, OptView optSrcView, CodeMetaLock* locke
   auto range = info.range;
   auto& fixups = info.meta;
   auto& tr = info.transRec;
-  bool needsRelocate = optSrcView.hasValue();
+  bool needsRelocate = optSrcView.has_value();
 
   always_assert(
     needsRelocate ||

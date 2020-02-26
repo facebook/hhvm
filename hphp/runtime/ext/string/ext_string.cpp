@@ -817,11 +817,11 @@ static Variant substr_replace(const Variant& str, const Variant& replacement,
       // If 'start' or 'length' are arrays and we've gone past the end, default
       // to 0 for start and the length of the input string for length.
       int nStart =
-        (opStart.hasValue()
+        (opStart.has_value()
          ? opStart.value()
          : (startIter ? startIter.second().toInt32() : 0));
       int nLength =
-        (opLength.hasValue()
+        (opLength.has_value()
          ? opLength.value()
          : (lengthIter ? lengthIter.second().toInt32() : str.length()));
       if (startIter) ++startIter;
@@ -842,11 +842,11 @@ static Variant substr_replace(const Variant& str, const Variant& replacement,
     for (ArrayIter iter(strArr); iter; ++iter) {
       auto str = iter.second().toString();
       int nStart =
-        (opStart.hasValue()
+        (opStart.has_value()
          ? opStart.value()
          : (startIter ? startIter.second().toInt32() : 0));
       int nLength =
-        (opLength.hasValue()
+        (opLength.has_value()
          ? opLength.value()
          : (lengthIter ? lengthIter.second().toInt32() : str.length()));
       if (startIter) ++startIter;

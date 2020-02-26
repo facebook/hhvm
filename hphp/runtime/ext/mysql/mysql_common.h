@@ -303,7 +303,7 @@ struct MySQLResult : SweepableResourceData {
 
   bool isInvalid() const override {
     if (isLocalized()) {
-      return !m_rows.hasValue();
+      return !m_rows.has_value();
     }
     return m_res == nullptr;
   }

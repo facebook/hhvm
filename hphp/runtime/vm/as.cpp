@@ -476,7 +476,7 @@ struct StackDepth {
   void addListener(AsmState& as, StackDepth* target);
   void setBase(AsmState& as, int stackDepth);
   int absoluteDepth() {
-    assertx(baseValue.hasValue());
+    assertx(baseValue.has_value());
     return baseValue.value() + currentOffset;
   }
 

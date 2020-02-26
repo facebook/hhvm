@@ -731,7 +731,7 @@ Object HHVM_FUNCTION(HH_watchman_sync_sub,
     auto res_future = sub_entry->second.watchmanFlush(timeout)
       .thenValue([timeout, start_time, name](folly::Optional<folly::dynamic> flush) {
         // (ASYNC)
-        if (!flush.hasValue()) {
+        if (!flush.has_value()) {
           // Subscription is broken - no updates to process.
           return folly::makeFuture(true);
         }

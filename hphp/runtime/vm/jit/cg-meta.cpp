@@ -292,7 +292,7 @@ bool CGMeta::empty() const {
     alignments.empty() &&
     reusedStubs.empty() &&
     addressImmediates.empty() &&
-    !fallthru.hasValue() &&
+    !fallthru.has_value() &&
     codePointers.empty() &&
     inProgressTailJumps.empty() &&
     bcMap.empty() &&

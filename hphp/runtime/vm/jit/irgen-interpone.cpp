@@ -215,7 +215,7 @@ interpOutputLocals(IRGS& env,
   switch (sk.op()) {
     case OpSetOpL:
     case OpIncDecL: {
-      assertx(pushedType.hasValue());
+      assertx(pushedType.has_value());
 
       auto stackType = pushedType.value();
       setImmLocType(0, stackType);
@@ -298,7 +298,7 @@ void interpOne(IRGS& env) {
   auto pushed = getStackPushed(sk.pc());
   FTRACE(1, "emitting InterpOne for {}, result = {}, popped {}, pushed {}\n",
          instrToString(sk.pc(), sk.unit()),
-         stackType.hasValue() ? stackType->toString() : "<none>",
+         stackType.has_value() ? stackType->toString() : "<none>",
          popped, pushed);
 
   InterpOneData idata { spOffBCFromIRSP(env) };

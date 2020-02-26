@@ -276,7 +276,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
                             vhost->getName().c_str());
 
   // resolve source root
-  always_assert(!m_sourceRootInfo.hasValue());
+  always_assert(!m_sourceRootInfo.has_value());
   m_sourceRootInfo.emplace(transport);
   if (m_sourceRootInfo->error()) {
     m_sourceRootInfo->handleError(transport);

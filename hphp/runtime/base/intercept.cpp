@@ -53,7 +53,7 @@ struct InterceptRequestData final : RequestEventHandler {
     return *m_intercept_handlers;
   }
   bool empty() const {
-    return !m_intercept_handlers.hasValue() ||
+    return !m_intercept_handlers.has_value() ||
             m_intercept_handlers->empty();
   }
   void clearHandlers() {

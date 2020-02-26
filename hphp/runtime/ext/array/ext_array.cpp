@@ -259,7 +259,7 @@ TypedValue HHVM_FUNCTION(array_fill_keys,
                   "an array or collection");
     return make_tv<KindOfNull>();
   }
-  assertx(ai.hasValue());
+  assertx(ai.has_value());
   return tvReturn(ai->toVariant());
 }
 
@@ -1254,7 +1254,7 @@ TypedValue HHVM_FUNCTION(array_values,
     return make_tv<KindOfNull>();
   }
 
-  assertx(ai.hasValue());
+  assertx(ai.has_value());
   return tvReturn(ai->toArray());
 }
 

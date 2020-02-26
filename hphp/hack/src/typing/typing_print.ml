@@ -891,12 +891,13 @@ module Json = struct
   let rec from_type : env -> locl_ty -> json =
    fun env ty ->
     (* Helpers to construct fields that appear in JSON rendering of type *)
-    let kind k = [("kind", JSON_String k)] in
+    let kind p k =
+      [("src_pos", Pos.json (Pos.to_absolute p)); ("kind", JSON_String k)]
+    in
     let args tys = [("args", JSON_Array (List.map tys (from_type env)))] in
     let typ ty = [("type", from_type env ty)] in
     let result ty = [("result", from_type env ty)] in
     let obj x = JSON_Object x in
-    let pos p = [("src_pos", Pos.json (Pos.to_absolute p))] in
     let name x = [("name", JSON_String x)] in
     let optional x = [("optional", JSON_Bool x)] in
     let is_array x = [("is_array", JSON_Bool x)] in
@@ -922,40 +923,45 @@ module Json = struct
       let (_, ty) = Typing_env.expand_type env (mk (get_reason ty, Tvar n)) in
       begin
         match (get_pos ty, get_node ty) with
-        | (p, Tvar _) -> obj @@ pos p @ kind "var"
+        | (p, Tvar _) -> obj @@ kind p "var"
         | _ -> from_type env ty
       end
-    | (p, Ttuple tys) -> obj @@ pos p @ kind "tuple" @ is_array false @ args tys
+    | (p, Ttuple tys) -> obj @@ kind p "tuple" @ is_array false @ args tys
     | (p, Tany _)
     | (p, Terr) ->
-      obj @@ pos p @ kind "any"
-    | (p, Tnonnull) -> obj @@ pos p @ kind "nonnull"
-    | (p, Tdynamic) -> obj @@ pos p @ kind "dynamic"
-    | (p, Tgeneric s) -> obj @@ pos p @ kind "generic" @ is_array true @ name s
+      obj @@ kind p "any"
+    | (p, Tnonnull) -> obj @@ kind p "nonnull"
+    | (p, Tdynamic) -> obj @@ kind p "dynamic"
+    | (p, Tgeneric s) -> obj @@ kind p "generic" @ is_array true @ name s
     | (p, Tnewtype (s, _, ty)) when Typing_env.is_enum env s ->
-      obj @@ pos p @ kind "enum" @ name s @ as_type ty
+      obj @@ kind p "enum" @ name s @ as_type ty
     | (p, Tnewtype (s, tys, ty)) ->
-      obj @@ pos p @ kind "newtype" @ name s @ args tys @ as_type ty
+      obj @@ kind p "newtype" @ name s @ args tys @ as_type ty
     | (p, Tdependent (DTcls c, ty)) ->
       obj
-      @@ pos p
-      @ kind "path"
-      @ [("type", obj @@ kind "class" @ name c @ args [])]
+      @@ kind p "path"
+      @ [("type", obj @@ kind (get_pos ty) "class" @ name c @ args [])]
       @ as_type ty
     | (p, Tdependent (DTexpr _, ty)) ->
-      obj @@ pos p @ kind "path" @ [("type", obj @@ kind "expr")] @ as_type ty
+      obj
+      @@ kind p "path"
+      @ [("type", obj @@ kind (get_pos ty) "expr")]
+      @ as_type ty
     | (p, Tdependent (DTthis, ty)) ->
-      obj @@ pos p @ kind "path" @ [("type", obj @@ kind "this")] @ as_type ty
+      obj
+      @@ kind p "path"
+      @ [("type", obj @@ kind (get_pos ty) "this")]
+      @ as_type ty
     | (p, Toption ty) ->
       begin
         match get_node ty with
-        | Tnonnull -> obj @@ pos p @ kind "mixed"
-        | _ -> obj @@ kind "nullable" @ args [ty]
+        | Tnonnull -> obj @@ kind p "mixed"
+        | _ -> obj @@ kind p "nullable" @ args [ty]
       end
-    | (p, Tprim tp) -> obj @@ pos p @ kind "primitive" @ name (prim tp)
+    | (p, Tprim tp) -> obj @@ kind p "primitive" @ name (prim tp)
     | (p, Tclass ((_, cid), _, tys)) ->
-      obj @@ pos p @ kind "class" @ name cid @ args tys
-    | (p, Tobject) -> obj @@ pos p @ kind "object"
+      obj @@ kind p "class" @ name cid @ args tys
+    | (p, Tobject) -> obj @@ kind p "object"
     | (p, Tshape (shape_kind, fl)) ->
       let fields_known =
         match shape_kind with
@@ -963,43 +969,40 @@ module Json = struct
         | Open_shape -> false
       in
       obj
-      @@ pos p
-      @ kind "shape"
+      @@ kind p "shape"
       @ is_array false
       @ [("fields_known", JSON_Bool fields_known)]
       @ fields (Nast.ShapeMap.bindings fl)
-    | (p, Tunion []) -> obj @@ pos p @ kind "nothing"
+    | (p, Tunion []) -> obj @@ kind p "nothing"
     | (_, Tunion [ty]) -> from_type env ty
-    | (p, Tunion tyl) -> obj @@ pos p @ kind "union" @ args tyl
-    | (p, Tintersection []) -> obj @@ pos p @ kind "mixed"
+    | (p, Tunion tyl) -> obj @@ kind p "union" @ args tyl
+    | (p, Tintersection []) -> obj @@ kind p "mixed"
     | (_, Tintersection [ty]) -> from_type env ty
-    | (p, Tintersection tyl) -> obj @@ pos p @ kind "intersection" @ args tyl
+    | (p, Tintersection tyl) -> obj @@ kind p "intersection" @ args tyl
     | (p, Tfun ft) ->
-      let fun_kind =
+      let fun_kind p =
         if ft.ft_is_coroutine then
-          kind "coroutine"
+          kind p "coroutine"
         else
-          kind "function"
+          kind p "function"
       in
       let callconv cc =
         [("callConvention", JSON_String (param_mode_to_string cc))]
       in
       let param fp = obj @@ callconv fp.fp_kind @ typ fp.fp_type.et_type in
       let params fps = [("params", JSON_Array (List.map fps param))] in
-      obj @@ pos p @ fun_kind @ params ft.ft_params @ result ft.ft_ret.et_type
+      obj @@ fun_kind p @ params ft.ft_params @ result ft.ft_ret.et_type
     | (p, Tarraykind (AKvarray_or_darray (ty1, ty2))) ->
-      obj @@ pos p @ kind "varray_or_darray" @ args [ty1; ty2]
+      obj @@ kind p "varray_or_darray" @ args [ty1; ty2]
     | (p, Tarraykind (AKdarray (ty1, ty2))) ->
-      obj @@ pos p @ kind "darray" @ args [ty1; ty2]
-    | (p, Tarraykind (AKvarray ty)) -> obj @@ pos p @ kind "varray" @ args [ty]
-    | (p, Tarraykind AKempty) ->
-      obj @@ pos p @ kind "array" @ empty true @ args []
+      obj @@ kind p "darray" @ args [ty1; ty2]
+    | (p, Tarraykind (AKvarray ty)) -> obj @@ kind p "varray" @ args [ty]
+    | (p, Tarraykind AKempty) -> obj @@ kind p "array" @ empty true @ args []
     | (p, Tpu (base, enum)) ->
-      obj @@ pos p @ kind "pocket_universe" @ args [base] @ name (snd enum)
+      obj @@ kind p "pocket_universe" @ args [base] @ name (snd enum)
     | (p, Tpu_type_access (base, enum, member, typ)) ->
       obj
-      @@ pos p
-      @ kind "pocket_universe_type_access"
+      @@ kind p "pocket_universe_type_access"
       @ args [base; member]
       @ name (snd enum)
       @ name (snd typ)

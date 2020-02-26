@@ -121,8 +121,8 @@ pub fn from_ast<'a>(
     };
     let mut scope = Scope {
         items: vec![
-            ScopeItem::Method(Cow::Borrowed(method)),
             ScopeItem::Class(Cow::Borrowed(class)),
+            ScopeItem::Method(Cow::Borrowed(method)),
         ],
     };
     if is_closure_body {

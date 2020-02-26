@@ -2,6 +2,8 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+#![feature(slice_patterns)]
+
 use oxidized::{
     ast,
     ast_defs::{FunKind, Id},
@@ -289,17 +291,16 @@ impl<'a> Scope<'a> {
     // get captured variables when in closure scope
     pub fn get_captured_vars(&self) -> Vec<String> {
         // closure scope: lambda -> method -> class
-        if let ScopeItem::Class(ast_cls) = &self.items[2] {
-            ast_cls
+        match &self.items[..] {
+            [.., ScopeItem::Class(ast_cls), _, _] => ast_cls
                 .vars
                 .iter()
                 .map(|var| {
                     let Id(_, id) = &var.id;
                     format!("${}", id)
                 })
-                .collect::<Vec<_>>()
-        } else {
-            panic!("closure scope should be lambda -> method -> class")
+                .collect::<Vec<_>>(),
+            _ => panic!("closure scope should be lambda -> method -> class"),
         }
     }
 }

@@ -131,14 +131,7 @@ pub fn emit_body<'a, 'b>(
         args.immediate_tparams,
         args.flags.contains(Flags::SKIP_AWAITABLE),
     );
-    let (need_local_this, decl_vars) = make_decl_vars(
-        emitter,
-        args.scope,
-        args.immediate_tparams,
-        &params,
-        &body,
-        args.flags.contains(Flags::CLOSURE_BODY),
-    );
+    let (need_local_this, decl_vars) = make_decl_vars(emitter, args, &params, &body);
     let mut env = make_env(
         namespace,
         need_local_this,
@@ -289,30 +282,33 @@ fn make_header_content(
 
 fn make_decl_vars(
     emitter: &mut Emitter,
-    scope: &Scope,
-    immediate_params: &[tast::Tparam],
+    args: &Args,
     params: &[HhasParam],
     body: &tast::Program,
-    is_closure_body: bool,
 ) -> (bool, Vec<String>) {
-    use decl_vars::Flags;
-    let mut flags = Flags::empty();
-    flags.set(Flags::HAS_THIS, scope.has_this());
-    flags.set(Flags::IS_TOPLEVEL, scope.is_toplevel());
-    flags.set(Flags::IS_IN_STATIC_METHOD, scope.is_in_static_method());
-    flags.set(Flags::IS_CLOSURE_BODY, is_closure_body);
+    let mut flags = decl_vars::Flags::empty();
+    flags.set(decl_vars::Flags::HAS_THIS, args.scope.has_this());
+    flags.set(decl_vars::Flags::IS_TOPLEVEL, args.scope.is_toplevel());
+    flags.set(
+        decl_vars::Flags::IS_IN_STATIC_METHOD,
+        args.scope.is_in_static_method(),
+    );
+    flags.set(
+        decl_vars::Flags::IS_CLOSURE_BODY,
+        args.flags.contains(Flags::CLOSURE_BODY),
+    );
 
     let explicit_use_set = &emitter.emit_state().explicit_use_set;
 
     let (need_local_this, mut decl_vars) =
         decl_vars::from_ast(params, body, flags, explicit_use_set);
 
-    if is_closure_body {
-        let captured_vars = scope.get_captured_vars();
+    if args.flags.contains(Flags::CLOSURE_BODY) {
+        let mut captured_vars = args.scope.get_captured_vars();
         move_this(&mut decl_vars);
         decl_vars.retain(|v| !captured_vars.contains(v));
-        decl_vars.extend_from_slice(&captured_vars.as_slice());
-    } else if has_reified(immediate_params) {
+        captured_vars.extend_from_slice(&decl_vars.as_slice());
+    } else if has_reified(args.immediate_tparams) {
         decl_vars.push(String::from(string_utils::reified::GENERICS_LOCAL_NAME));
     }
 

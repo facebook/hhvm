@@ -293,9 +293,9 @@ pub fn expr_to_typed_value_(
         }
         Shape(fields) => shape_to_typed_value(emitter, ns, fields, pos),
         ClassConst(x) => class_const_to_typed_value(emitter, &x.0, &x.1),
-        BracedExpr(_) => unimplemented!(),
+        BracedExpr(x) => expr_to_typed_value(emitter, ns, x),
         Id(_) | ClassGet(_) => Err(Error::UserDefinedConstant),
-        As(x) if (x.1).1.is_hlike() => unimplemented!(),
+        As(x) if (x.1).1.is_hlike() => expr_to_typed_value(emitter, ns, &x.0),
         _ => Err(Error::NotLiteral),
     }
 }

@@ -246,3 +246,20 @@ trait TFlobby {
     return $this as Flobby;
   }
 }
+
+<<__Sealed(Mumble::class)>>
+interface SealedInterface {
+  public function method(): void;
+  public function otherMethod(): void;
+}
+
+<<__Sealed(Mumble::class)>>
+trait SealedTrait {
+  require implements SealedInterface;
+  public function method(): void {}
+  public function otherMethod(): void {}
+}
+
+final class Mumble implements SealedInterface {
+  use SealedTrait;
+}

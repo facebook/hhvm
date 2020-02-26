@@ -1378,6 +1378,7 @@ let collect_dependencies ctx target =
         let (_ : (Tast.def * Typing_inference_env.t_global_with_pos) option) =
           Typing_check_service.type_fun ctx filename func
         in
+        add_implementation_dependencies ctx env;
         HashSet.remove env.dependencies (Fun func);
         HashSet.remove env.dependencies (FunName func)
       | Method (cls, m) ->
@@ -1386,10 +1387,12 @@ let collect_dependencies ctx target =
             =
           Typing_check_service.type_class ctx filename cls
         in
+        HashSet.add env.dependencies (Method (cls, m));
+        HashSet.add env.dependencies (SMethod (cls, m));
+        add_implementation_dependencies ctx env;
         HashSet.remove env.dependencies (Method (cls, m));
         HashSet.remove env.dependencies (SMethod (cls, m)))
   in
-  add_implementation_dependencies ctx env;
   env
 
 let group_class_dependencies_by_class ctx dependencies =

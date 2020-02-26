@@ -238,7 +238,7 @@ static php_iconv_err_t _php_iconv_appendl(StringBuffer &d, const char *s,
 
   if (in_p != NULL) {
     while (in_left > 0) {
-      out_left = buf_growth - out_left;
+      out_left = buf_growth;
       out_p = d.appendCursor(out_left);
 
       if (iconv(cd, (ICONV_CONST char **)&in_p, &in_left, (char **)&out_p, &out_left) ==
@@ -265,7 +265,7 @@ static php_iconv_err_t _php_iconv_appendl(StringBuffer &d, const char *s,
     }
   } else {
     for (;;) {
-      out_left = buf_growth - out_left;
+      out_left = buf_growth;
       out_p = d.appendCursor(out_left);
 
       if (iconv(cd, NULL, NULL, (char **)&out_p, &out_left) == (size_t)0) {

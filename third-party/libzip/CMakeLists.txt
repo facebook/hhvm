@@ -20,7 +20,6 @@ endif()
 if (NOT LIBZIP_FOUND)
   cmake_minimum_required(VERSION 2.8.0)
   include(ExternalProject)
-  include(GNUInstallDirs)
 
   set(LIBZIP_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/libzip-install")
 
@@ -44,12 +43,12 @@ if (NOT LIBZIP_FOUND)
     -DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}
     -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
     -DCMAKE_INSTALL_PREFIX=${LIBZIP_PREFIX}
+    -DCMAKE_INSTALL_INCLUDEDIR=include
     -DCMAKE_INSTALL_LIBDIR=lib
   )
 
   add_dependencies(libzip libzipBuild)
-  target_include_directories(libzip INTERFACE
-    "${LIBZIP_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}")
+  target_include_directories(libzip INTERFACE "${LIBZIP_PREFIX}/include")
   target_link_libraries(libzip INTERFACE
     "${LIBZIP_PREFIX}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}zip${CMAKE_STATIC_LIBRARY_SUFFIX}")
 endif ()

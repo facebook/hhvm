@@ -58,7 +58,7 @@ dump(:node2::xhpAttributeDeclaration());
 
 // Verify that the value is cached
 // Only node3 should have attr0
-:base::updateBase(darray["attr0" => array(6, null, null, 0)]);
+:base::updateBase(darray["attr0" => varray[6, null, null, 0]]);
 echo repr(array_key_exists("attr0", :base::xhpAttributeDeclaration())) . "\n";
 echo repr(array_key_exists("attr0", :node1::xhpAttributeDeclaration())) . "\n";
 echo repr(array_key_exists("attr0", :node2::xhpAttributeDeclaration())) . "\n";

@@ -14,7 +14,7 @@ function tst1(inout $abc) {
   var_dump(!($abc->foo->bar ?? false));
 }
 function tst2(inout $abc) {
-  $abc->foo = array('bar' => 'baz');
+  $abc->foo = darray['bar' => 'baz'];
   var_dump(isset($abc->foo));
   var_dump(!($abc->foo ?? false));
   var_dump(isset($abc->foo['bar']));
@@ -38,7 +38,7 @@ function tst3(inout $abc) {
 <<__EntryPoint>>
 function main_entry(): void {
 
-  $x = array("a","b","c");
+  $x = varray["a","b","c"];
   $y = 0;
   var_dump(isset($x[$y]));
   var_dump(!($x[$y] ?? false));
@@ -46,7 +46,7 @@ function main_entry(): void {
   var_dump(!($x->$y ?? false));
   var_dump($x);
 
-  $x = array("a","b","c");
+  $x = varray["a","b","c"];
   $y = "0";
   var_dump(isset($x[$y]));
   var_dump(!($x[$y] ?? false));
@@ -56,7 +56,7 @@ function main_entry(): void {
 
   echo "**************************\n";
 
-  $x = array(null);
+  $x = varray[null];
   $y = 0;
   var_dump(isset($x[$y]));
   var_dump(!($x[$y] ?? false));
@@ -64,7 +64,7 @@ function main_entry(): void {
   var_dump(!($x->$y ?? false));
   var_dump($x);
 
-  $x = array(null);
+  $x = varray[null];
   $y = "0";
   var_dump(isset($x[$y]));
   var_dump(!($x[$y] ?? false));
@@ -92,13 +92,13 @@ function main_entry(): void {
 
   echo "**************************\n";
 
-  $abc = array('foo' => array('bar' => 'baz'));
+  $abc = darray['foo' => darray['bar' => 'baz']];
   tst1(inout $abc);  // make $abc a Var
 
   echo "**************************\n";
 
   $abc = new stdclass;
-  $abc->foo = array('bar' => 'baz');
+  $abc->foo = darray['bar' => 'baz'];
   var_dump(isset($abc->foo));
   var_dump(!($abc->foo ?? false));
   var_dump(isset($abc->foo['bar']));
@@ -115,7 +115,7 @@ function main_entry(): void {
 
   echo "**************************\n";
 
-  $abc = array('foo' => new stdclass);
+  $abc = darray['foo' => new stdclass];
   $abc['foo']->bar = 'baz';
   var_dump(isset($abc['foo']));
   var_dump(!($abc['foo'] ?? false));
@@ -131,7 +131,7 @@ function main_entry(): void {
 
   echo "**************************\n";
 
-  $abc = array('foo' => new stdclass);
+  $abc = darray['foo' => new stdclass];
 
   tst3(inout $abc);  // make $abc a Var
   unset($abc);

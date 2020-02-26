@@ -3,7 +3,7 @@
 class A {
   public $a = 1;
   private $b = "hello";
-  protected $c = array(1, 2);
+  protected $c = varray[1, 2];
 }
 
 class B extends A {
@@ -23,7 +23,7 @@ class C {
   }
   function __sleep() {
     echo "C sleeps safely.\n";
-    return array('a', 'b', 'c');
+    return varray['a', 'b', 'c'];
   }
 }
 
@@ -37,7 +37,7 @@ class DangerousClass {
   }
   function __sleep() {
     echo "I sleep dangerously.\n";
-    return array('danger');
+    return varray['danger'];
   }
 }
 
@@ -73,15 +73,15 @@ function test_serialization($obj, $class_whitelist) {
 
 <<__EntryPoint>> function main(): void {
   test_serialization(new A, varray[]);
-  test_serialization(new B, array('A', 'B'));
-  test_serialization(new C, array('C'));
+  test_serialization(new B, varray['A', 'B']);
+  test_serialization(new C, varray['C']);
   test_serialization(new DangerousClass, array());
-  test_serialization(new E, array('E'));
-  test_serialization(new F, array('F'));
-  test_serialization(new G, array('G'));
-  test_serialization(array("Hello World<>$%", acos(1.01), log(0.0), 50), array());
+  test_serialization(new E, varray['E']);
+  test_serialization(new F, varray['F']);
+  test_serialization(new G, varray['G']);
+  test_serialization(varray["Hello World<>$%", acos(1.01), log(0.0), 50], array());
   test_serialization(
-    array( new A, array(new B, array(new C, array(new E, array(new F))))),
+    varray[ new A, varray[new B, varray[new C, varray[new E, varray[new F]]]]],
     array('abc' => 'A', 5 => 'C', 'E', 'B', 'F')
   );
 }

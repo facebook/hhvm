@@ -1,7 +1,7 @@
 <?hh
 
 function main($str) {
-  $arr = array();
+  $arr = varray[];
   for ($i = 0; $i < 3; ++$i) {
     $str[2] = (string)$i;
     $arr[] = $str;
@@ -9,7 +9,7 @@ function main($str) {
   var_dump($arr);
 }
 <<__EntryPoint>> function main_entry(): void {
-$a = array('hello there' => 0);
+$a = darray['hello there' => 0];
 foreach ($a as $key => $value) {
   main($key);
 }

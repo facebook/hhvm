@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$a = array();
+$a = darray[];
 $a[0x1234] = 0x5678;
 $b = 0xabcd;
 

@@ -1,7 +1,7 @@
 <?hh
 function f() { $a = array(); $a[] = 1; return $a; }
 function nonHphpArray( ) {
-  apc_add('foo', array(1, 2, 3));
+  apc_add('foo', varray[1, 2, 3]);
   return __hhvm_intrinsics\apc_fetch_no_check('foo');
 }
 function test1() {

@@ -39,7 +39,7 @@ class c {}
 
 function main() {
   $f = fopen("/dev/null", "w");
-  $things = array(
+  $things = varray[
     null,
     true,
     false,
@@ -53,11 +53,11 @@ function main() {
     '',
     4,
     array(),
-    array('foo', 'floo'),
+    varray['foo', 'floo'],
     new stdclass(),
     new c(),
     $f
-  );
+  ];
   var_dump($f == 4);
   foreach ($things as $t) {
     doswitch($t);

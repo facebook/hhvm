@@ -14,20 +14,20 @@ function gt($x, $y) {
 <<__EntryPoint>> function main(): void {
 echo "======\n";
 
-eq('Array', array(1,2));
+eq('Array', varray[1,2]);
 eq('Array', array());
 eq(array(), 'Array');
-eq(array('a', 'b'), 'Array');
+eq(varray['a', 'b'], 'Array');
 echo "\n";
-lt('Array', array(1,2));
+lt('Array', varray[1,2]);
 lt('Array', array());
 lt(array(), 'Array');
-lt(array('a', 'b'), 'Array');
+lt(varray['a', 'b'], 'Array');
 echo "\n";
-gt('Array', array(1,2));
+gt('Array', varray[1,2]);
 gt('Array', array());
 gt(array(), 'Array');
-gt(array('a', 'b'), 'Array');
+gt(varray['a', 'b'], 'Array');
 
 echo "======\n";
 

@@ -6,9 +6,9 @@ class c {
   private static $otherthing;
 
   public static function doit($id, $value) {
-    self::$thing = array();
+    self::$thing = darray[];
     self::$thing[(string)$id] = $value;
-    self::$otherthing = array();
+    self::$otherthing = darray[];
     self::$otherthing[(string)$id] = $value;
   }
 

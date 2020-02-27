@@ -209,10 +209,10 @@ public:
     *expired = false;
     Lock lock(this);
     bool flushed = false;
-    bool ableToDeque = m_healthStatus == nullptr ||
-      m_healthStatus->getHealthLevel() < HealthLevel::NoMore;
 
-    while (m_jobCount == 0 || !ableToDeque) {
+    while (m_jobCount == 0 ||
+           (m_healthStatus &&
+            m_healthStatus->getHealthLevel() >= HealthLevel::NoMore)) {
       uint32_t kNumPriority = m_jobQueues.size();
       if (m_jobQueues[kNumPriority - 1].size() > 0) {
         break;
@@ -247,10 +247,6 @@ public:
         // m_dropCacheTimeout <= 0, a thread that starts waiting more recently
         // should be given a task first (LIFO), same as unflushed threads.
         wait(id, q, highPri ? Priority::Highest : Priority::Normal);
-      }
-
-      if (!ableToDeque) {
-        ableToDeque = m_healthStatus->getHealthLevel() < HealthLevel::NoMore;
       }
     }
     // Stop immediately if the worker has been asked to stop, due to thread

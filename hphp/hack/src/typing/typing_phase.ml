@@ -680,7 +680,8 @@ and localize_missing_tparams_class env r sid class_ =
             env
             (Ident.from_string_hash
                (Printf.sprintf "%s#%d" (Pos.print_verbose_relative use_pos) i))
-            (Reason.Rglobal_partial_annot (use_pos, snd tparam.tp_name, use_name))
+            (Reason.Rtype_variable_generics
+               (use_pos, snd tparam.tp_name, use_name))
         in
         ((env, i + 1), ty))
   in

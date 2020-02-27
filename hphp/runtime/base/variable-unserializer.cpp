@@ -1342,6 +1342,14 @@ arrprov::Tag VariableUnserializer::unserializeProvenanceTag() {
     return finish(
       arrprov::Tag::TraitMerge(filename)
     );
+  } else if (peek() == 'e') {
+    expectChar('e');
+    expectChar(':');
+    auto const filename = read_filename();
+    expectChar(';');
+    return finish(
+      arrprov::Tag::LargeEnum(filename)
+    );
   } else {
     return {};
   }

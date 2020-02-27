@@ -50,6 +50,8 @@ std::string Tag::toString() const {
     return "unknown location (repo union)";
   case Kind::KnownTraitMerge:
     return folly::sformat("{}:{} (trait xinit merge)", filename()->slice(), -1);
+  case Kind::KnownLargeEnum:
+    return folly::sformat("{}:{} (large enum)", filename()->slice(), -1);
   }
   always_assert(false);
 }
@@ -167,7 +169,6 @@ template<Mode mode, typename A>
 bool setTagImpl(A* a, Tag tag) {
   assertx(tag.valid());
   if (!arrayWantsTag(a)) return false;
-  assertx(tag.valid());
   assertx(mode == Mode::Emplace || !getTag(a) || tl_tag_override);
 
   if (wants_local_prov(a)) {

@@ -1700,6 +1700,11 @@ void VariableSerializer::serializeArrayImpl(const ArrayData* arr) {
         write_filename(tag.filename());
         break;
       }
+      case arrprov::Tag::Kind::KnownLargeEnum: {
+        m_buf->append("e:");
+        write_filename(tag.filename());
+        break;
+      }
       }
     }
   }

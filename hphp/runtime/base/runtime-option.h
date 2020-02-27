@@ -1115,6 +1115,8 @@ struct RuntimeOption {
   F(bool, LogArrayProvenance, false)                                    \
   /* Log only out out of this many array headers when serializing */    \
   F(uint32_t, LogArrayProvenanceSampleRatio, 1000)                      \
+  /* Use dummy tags for enums with this many values, to avoid copies */ \
+  F(uint32_t, ArrayProvenanceLargeEnumLimit, 256)                       \
   /* Emit values using the KindOfDArray and KindOfVArray types          |
    * EXPERIMENTAL: Enabling this will cause undefined behvaior. */      \
   F(bool, EmitDVArray, false)                                           \

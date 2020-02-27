@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
+#include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/enum-cache.h"
 #include "hphp/runtime/base/tv-type.h"
 
@@ -164,6 +164,14 @@ const EnumValues* EnumCache::loadEnumValues(const Class* klass,
 
   assertx(names.isDictOrDArray());
   assertx(values.isDictOrDArray());
+
+  // Tag all enums with the large enum tag. Small enums will be tagged again
+  // based on the actual PC by the reflection methods that access this cache.
+  if (RO::EvalLogArrayProvenance) {
+    auto const tag = arrprov::Tag::LargeEnum(klass->name());
+    arrprov::setTag<arrprov::Mode::Emplace>(names.get(), tag);
+    arrprov::setTag<arrprov::Mode::Emplace>(values.get(), tag);
+  }
 
   // If we saw dynamic constants we cannot cache the enum values across requests
   // as they may not be the same in every request.

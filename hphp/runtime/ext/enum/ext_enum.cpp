@@ -15,6 +15,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/enum-cache.h"
@@ -23,12 +24,27 @@
 
 namespace HPHP {
 
+namespace {
+
+// Large enums get the dummy LargeEnum tag (so that we can cache a single
+// static value for these enums). Small enums get a tag based on the caller.
+Array tagEnumWithProvenance(Array input) {
+  assertx(arrprov::getTag(input.get()));
+  if (input.size() > RO::EvalArrayProvenanceLargeEnumLimit) return input;
+  auto const ad = input->copy();
+  arrprov::setTag<arrprov::Mode::Emplace>(ad, arrprov::tagFromPC());
+  return Array::attach(ad);
+}
+
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // class BuiltinEnum
 static Array HHVM_STATIC_METHOD(BuiltinEnum, getValues) {
   const EnumValues* values = EnumCache::getValuesBuiltin(self_);
   assertx(values->values.isDictOrDArray());
-  return values->values;
+  if (!RO::EvalLogArrayProvenance) return values->values;
+  return tagEnumWithProvenance(values->values);
 }
 
 const StaticString
@@ -45,7 +61,8 @@ static Array HHVM_STATIC_METHOD(BuiltinEnum, getNames) {
   }
 
   assertx(values->names.isDictOrDArray());
-  return values->names;
+  if (!RO::EvalLogArrayProvenance) return values->names;
+  return tagEnumWithProvenance(values->names);
 }
 
 static bool HHVM_STATIC_METHOD(BuiltinEnum, isValid, const Variant &value) {

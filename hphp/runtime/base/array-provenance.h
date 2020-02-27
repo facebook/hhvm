@@ -57,10 +57,12 @@ struct Tag {
     UnknownRepo,
     /* lost original line number as a result of trait ${x}init merges */
     KnownTraitMerge,
+    /* Dummy tag for all large enums, which we cache as static arrays */
+    KnownLargeEnum,
   };
 
 private:
-  static auto constexpr kKindMask = 0x3;
+  static auto constexpr kKindMask = 0x7;
 
   template <typename T>
   static const char* ptrAndKind(Kind k,
@@ -112,6 +114,13 @@ public:
     return tag;
   }
 
+  static Tag LargeEnum(const StringData* classname) {
+    Tag tag;
+    tag.m_filename = ptrAndKind(Kind::KnownLargeEnum, classname);
+    tag.m_line = -1;
+    return tag;
+  }
+
   Kind kind() const { return extractKind(m_filename.get()); }
   const StringData* filename() const {
     return removeKind<StringData>(m_filename.get());
@@ -134,6 +143,7 @@ public:
     case Kind::Known: return true;
     case Kind::UnknownRepo: return false;
     case Kind::KnownTraitMerge: return true;
+    case Kind::KnownLargeEnum: return true;
     }
     always_assert(false);
   }
@@ -149,6 +159,7 @@ public:
     case Kind::UnknownRepo:
       return true;
     case Kind::KnownTraitMerge:
+    case Kind::KnownLargeEnum:
       return m_filename == other.m_filename;
     case Kind::Known:
       return m_filename == other.m_filename &&

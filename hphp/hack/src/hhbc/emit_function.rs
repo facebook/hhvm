@@ -63,8 +63,8 @@ pub fn emit_function<'a>(
 
     let rx_level = rx::Level::from_ast(&f.user_attributes).unwrap_or(rx::Level::NonRx);
     let (ast_body, rx_body) = {
-        match rx_level {
-            rx::Level::NonRx => match rx::halves_of_is_enabled_body(&f.body) {
+        if rx_level != rx::Level::NonRx {
+            match rx::halves_of_is_enabled_body(&f.body) {
                 Some((enabled_body, disabled_body)) => {
                     if e.options().hhvm.flags.contains(HhvmFlags::RX_IS_ENABLED) {
                         (enabled_body, true)
@@ -73,9 +73,10 @@ pub fn emit_function<'a>(
                         (disabled_body, false)
                     }
                 }
-                _ => (&f.body.ast, true),
-            },
-            _ => (&f.body.ast, false),
+                None => (&f.body.ast, true),
+            }
+        } else {
+            (&f.body.ast, false)
         }
     };
 

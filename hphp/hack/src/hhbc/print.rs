@@ -712,6 +712,10 @@ fn print_class_id<W: Write>(w: &mut W, id: &ClassId) -> Result<(), W::Error> {
     wrap_by_quotes(w, |w| w.write(escape(id.to_raw_string())))
 }
 
+fn print_method_id<W: Write>(w: &mut W, id: &MethodId) -> Result<(), W::Error> {
+    wrap_by_quotes(w, |w| w.write(escape(id.to_raw_string())))
+}
+
 fn print_const_id<W: Write>(w: &mut W, id: &ConstId) -> Result<(), W::Error> {
     wrap_by_quotes(w, |w| w.write(escape(id.to_raw_string())))
 }
@@ -932,10 +936,79 @@ fn print_instructions<W: Write>(
     Ok(())
 }
 
+fn if_then<F: FnOnce() -> R, R>(cond: bool, f: F) -> Option<R> {
+    if cond {
+        Some(f())
+    } else {
+        None
+    }
+}
+
+fn print_fcall_args<W: Write>(
+    w: &mut W,
+    FcallArgs(fls, num_args, num_rets, inouts, async_eager_label): &FcallArgs,
+) -> Result<(), W::Error> {
+    use FcallFlags as F;
+    let mut flags = vec![];
+    if_then(fls.contains(F::HAS_UNPACK), || flags.push("Unpack"));
+    if_then(fls.contains(F::HAS_GENERICS), || flags.push("Generics"));
+    if_then(fls.contains(F::SUPPORTS_ASYNC_EAGER_RETURN), || {
+        flags.push("SupportsAER")
+    });
+    if_then(fls.contains(F::LOCK_WHILE_UNWINDING), || {
+        flags.push("LockWhileUnwinding")
+    });
+    wrap_by_angle(w, |w| concat_str_by(w, " ", flags))?;
+    w.write(" ")?;
+    print_int(w, num_args)?;
+    w.write(" ")?;
+    print_int(w, num_rets)?;
+    w.write(" ")?;
+    wrap_by_quotes(w, |w| {
+        concat_by(w, "", inouts, |w, i| w.write(if *i { "1" } else { "0" }))
+    })?;
+    w.write(" ")?;
+    option_or(w, async_eager_label, print_label, "-")
+}
+
+fn print_special_cls_ref<W: Write>(w: &mut W, cls_ref: &SpecialClsRef) -> Result<(), W::Error> {
+    w.write(match cls_ref {
+        SpecialClsRef::Static => "Static",
+        SpecialClsRef::Self_ => "Self",
+        SpecialClsRef::Parent => "Parent",
+    })
+}
+
+fn print_null_flavor<W: Write>(w: &mut W, f: &ObjNullFlavor) -> Result<(), W::Error> {
+    w.write(match f {
+        ObjNullFlavor::NullThrows => "NullThrows",
+        ObjNullFlavor::NullSafe => "NullSafe",
+    })
+}
+
 fn print_instr<W: Write>(w: &mut W, instr: &Instruct) -> Result<(), W::Error> {
     fn print_call<W: Write>(w: &mut W, call: &InstructCall) -> Result<(), W::Error> {
         use InstructCall as I;
         match call {
+            I::NewObj => w.write("NewObj"),
+            I::NewObjR => w.write("NewObjR"),
+            I::NewObjD(cid) => {
+                w.write("NewObjD")?;
+                print_class_id(w, cid)
+            }
+            I::NewObjRD(cid) => {
+                w.write("NewObjRD")?;
+                print_class_id(w, cid)
+            }
+            I::NewObjS(r) => {
+                w.write("NewObjS ")?;
+                print_special_cls_ref(w, r)
+            }
+            I::FCall(fcall_args) => {
+                w.write("FCall ")?;
+                print_fcall_args(w, &fcall_args)?;
+                w.write(r#" "" """#)
+            }
             I::FCallBuiltin(n, un, io, id) => concat_str_by(
                 w,
                 " ",
@@ -947,7 +1020,96 @@ fn print_instr<W: Write>(w: &mut W, instr: &Instruct) -> Result<(), W::Error> {
                     quote_string(id).as_str(),
                 ],
             ),
-            _ => return not_impl!(),
+            I::FCallClsMethod(fcall_args, is_log_as_dynamic_call) => {
+                w.write("FCallClsMethod ")?;
+                print_fcall_args(w, fcall_args)?;
+                w.write(r#" "" "#)?;
+                w.write(match is_log_as_dynamic_call {
+                    IsLogAsDynamicCallOp::LogAsDynamicCall => "LogAsDynamicCall",
+                    IsLogAsDynamicCallOp::DontLogAsDynamicCall => "DontLogAsDynamicCall",
+                })
+            }
+            I::FCallClsMethodD(fcall_args, cid, mid) => {
+                w.write("FCallClsMethodD ")?;
+                print_fcall_args(w, fcall_args)?;
+                w.write(r#" "" "#)?;
+                print_class_id(w, cid)?;
+                w.write(" ")?;
+                print_method_id(w, mid)
+            }
+            I::FCallClsMethodS(fcall_args, r) => {
+                w.write("FCallClsMethodS ")?;
+                print_fcall_args(w, fcall_args)?;
+                w.write(r#" "" "#)?;
+                print_special_cls_ref(w, r)
+            }
+            I::FCallClsMethodSD(fcall_args, r, mid) => {
+                w.write("FCallClsMethodSD ")?;
+                print_fcall_args(w, fcall_args)?;
+                w.write(r#" "" "#)?;
+                print_special_cls_ref(w, r)?;
+                w.write(" ")?;
+                print_method_id(w, mid)
+            }
+            I::FCallCtor(fcall_args) => {
+                w.write("FCallCtor ")?;
+                print_fcall_args(w, fcall_args)?;
+                w.write(r#" """#)
+            }
+            I::FCallFunc(fcall_args) => {
+                w.write("FCallFunc ")?;
+                print_fcall_args(w, fcall_args)
+            }
+            I::FCallFuncD(fcall_args, id) => {
+                w.write("FCallFuncD ")?;
+                print_fcall_args(w, fcall_args)?;
+                w.write(" ")?;
+                print_function_id(w, id)
+            }
+            I::FCallObjMethod(fcall_args, nf) => {
+                w.write("FCallObjMethod ")?;
+                print_fcall_args(w, fcall_args)?;
+                w.write(r#" "" "#)?;
+                print_null_flavor(w, nf)
+            }
+            I::FCallObjMethodD(fcall_args, nf, id) => {
+                w.write("FCallObjMethodD ")?;
+                print_fcall_args(w, fcall_args)?;
+                w.write(r#" "" "#)?;
+                print_null_flavor(w, nf)?;
+                w.write(" ")?;
+                print_method_id(w, id)
+            }
+        }
+    }
+
+    fn print_get<W: Write>(w: &mut W, get: &InstructGet) -> Result<(), W::Error> {
+        use InstructGet as IG;
+        match get {
+            IG::CGetL(id) => {
+                w.write("CGetL ")?;
+                print_local(w, id)
+            }
+            IG::CGetQuietL(id) => {
+                w.write("CGetQuietL ")?;
+                print_local(w, id)
+            }
+            IG::CGetL2(id) => {
+                w.write("CGetL2 ")?;
+                print_local(w, id)
+            }
+            IG::CUGetL(id) => {
+                w.write("CUGetL ")?;
+                print_local(w, id)
+            }
+            IG::PushL(id) => {
+                w.write("PushL ")?;
+                print_local(w, id)
+            }
+            IG::CGetG => w.write("CGetG"),
+            IG::CGetS => w.write("CGetS"),
+            IG::ClassGetC => w.write("ClassGetC"),
+            IG::ClassGetTS => w.write("ClassGetTS"),
         }
     }
 
@@ -967,7 +1129,7 @@ fn print_instr<W: Write>(w: &mut W, instr: &Instruct) -> Result<(), W::Error> {
         IContFlow(cf) => print_control_flow(w, cf),
         ICall(c) => print_call(w, c),
         IMisc(misc) => print_misc(w, misc),
-        IGet(_) => not_impl!(),
+        IGet(iget) => print_get(w, iget),
         IMutator(mutator) => print_mutator(w, mutator),
         ILabel(l) => {
             print_label(w, l)?;
@@ -976,7 +1138,11 @@ fn print_instr<W: Write>(w: &mut W, instr: &Instruct) -> Result<(), W::Error> {
         IIsset(_) => not_impl!(),
         IBase(_) => not_impl!(),
         IFinal(_) => not_impl!(),
-        ITry(_) => not_impl!(),
+        ITry(t) => w.write(match t {
+            InstructTry::TryCatchBegin => ".try {",
+            InstructTry::TryCatchMiddle => "} .catch {",
+            InstructTry::TryCatchEnd => "}",
+        }),
         IComment(s) => concat_str_by(w, " ", ["#", s.as_str()]),
         ISrcLoc(_) => not_impl!(),
         IAsync(_) => not_impl!(),
@@ -1185,7 +1351,8 @@ fn print_lit_const<W: Write>(w: &mut W, lit: &InstructLitConst) -> Result<(), W:
             w.write("ColFromArray ")?;
             print_collection_type(w, ct)
         }
-        _ => not_impl!(),
+        LC::NullUninit => w.write("NullUninit"),
+        LC::TypedValue(tv) => not_impl!(),
     }
 }
 

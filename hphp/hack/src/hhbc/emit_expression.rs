@@ -10,11 +10,12 @@ use ast_scope_rust::Scope;
 use emit_fatal_rust as emit_fatal;
 use emit_symbol_refs_rust as emit_symbol_refs;
 use emit_type_constant_rust as emit_type_constant;
-use env::{emitter::Emitter, local, Env};
+use env::{emitter::Emitter, local, Env, Flags as EnvFlags};
 use hhbc_ast_rust::*;
 use hhbc_id_rust::{class, function, method, Id};
 use hhbc_string_utils_rust as string_utils;
 use instruction_sequence_rust::{unrecoverable, Error::Unrecoverable, InstrSeq, Result};
+use itertools::Itertools;
 use label_rust::Label;
 use naming_special_names_rust::{
     emitter_special_functions, fb, pseudo_consts, pseudo_functions, special_functions,
@@ -351,7 +352,7 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
             let Lid(pos, _) = &**e;
             Ok(InstrSeq::gather(vec![
                 emit_pos(emitter, pos)?,
-                emit_local(env, BareThisOp::Notice, &**e)?,
+                emit_local(emitter, env, BareThisOp::Notice, &**e)?,
             ]))
         }
         Expr_::ClassConst(e) => emit_class_const(env, pos, &**e),
@@ -862,10 +863,10 @@ fn emit_call_lhs_and_fcall(
         E_::Id(id) => {
             let FcallArgs(flags, num_args, _, _, _) = fcall_args;
             let fq_id = match string_utils::strip_global_ns(&id.1) {
-                "min" if num_args == 2 && flags.contains(FcallFlags::HAS_UNPACK) => {
+                "min" if num_args == 2 && !flags.contains(FcallFlags::HAS_UNPACK) => {
                     function::Type::from_ast_name("__SystemLib\\min2")
                 }
-                "max" if num_args == 2 && flags.contains(FcallFlags::HAS_UNPACK) => {
+                "max" if num_args == 2 && !flags.contains(FcallFlags::HAS_UNPACK) => {
                     function::Type::from_ast_name("__SystemLib\\max2")
                 }
                 _ => {
@@ -980,13 +981,14 @@ fn has_inout_arg(es: &[tast::Expr]) -> bool {
 fn emit_special_function(
     e: &mut Emitter,
     env: &Env,
-    outer_pos: &Pos,
     pos: &Pos,
+    annot: &Pos,
     id: &str,
     args: &[tast::Expr],
     uarg: Option<&tast::Expr>,
     default: &InstrSeq,
 ) -> Result<Option<InstrSeq>> {
+    use tast::{Expr as E, Expr_ as E_};
     let nargs = args.len() + uarg.map_or(0, |_| 1);
     let fq = function::Type::from_ast_name(id);
     let lower_fq_name = fq.to_raw_string();
@@ -1008,7 +1010,200 @@ fn emit_special_function(
                 })
                 .collect::<Result<_>>()?,
         ))),
-        _ => unimplemented!(),
+        ("HH\\invariant", args) if args.len() >= 2 => {
+            let l = e.label_gen_mut().next_regular();
+            let expr_id = tast::Expr(
+                pos.clone(),
+                tast::Expr_::mk_id(ast_defs::Id(
+                    pos.clone(),
+                    "\\hh\\invariant_violation".into(),
+                )),
+            );
+            let call = tast::Expr(
+                annot.clone(),
+                tast::Expr_::mk_call(
+                    tast::CallType::Cnormal,
+                    expr_id,
+                    vec![],
+                    args[1..].to_owned(),
+                    uarg.cloned(),
+                ),
+            );
+            Ok(Some(InstrSeq::gather(vec![
+                emit_expr(e, env, &args[0])?,
+                InstrSeq::make_jmpnz(l.clone()),
+                emit_ignored_expr(e, env, &Pos::make_none(), &call)?,
+                emit_fatal::emit_fatal_runtime(e, pos, "invariant_violation"),
+                InstrSeq::make_label(l),
+                InstrSeq::make_null(),
+            ])))
+        }
+        ("assert", _) => {
+            let l0 = e.label_gen_mut().next_regular();
+            let l1 = e.label_gen_mut().next_regular();
+            Ok(Some(InstrSeq::gather(vec![
+                InstrSeq::make_string("zend.assertions"),
+                InstrSeq::make_fcallbuiltin(1, 1, 0, "ini_get"),
+                InstrSeq::make_int(0),
+                InstrSeq::make_gt(),
+                InstrSeq::make_jmpz(l0.clone()),
+                default.clone(),
+                InstrSeq::make_jmp(l1.clone()),
+                InstrSeq::make_label(l0),
+                InstrSeq::make_true(),
+                InstrSeq::make_label(l1),
+            ])))
+        }
+        ("HH\\sequence", &[]) => Ok(Some(InstrSeq::make_null())),
+        ("HH\\sequence", args) => Ok(Some(InstrSeq::gather(
+            args.iter()
+                .map(|arg| emit_expr(e, env, arg))
+                .collect::<Result<Vec<_>>>()?
+                .into_iter()
+                .intersperse(InstrSeq::make_popc())
+                .collect::<Vec<_>>(),
+        ))),
+        ("class_exists", _) if nargs == 1 || nargs == 2 => unimplemented!(),
+        ("trait_exists", _) if nargs == 1 || nargs == 2 => unimplemented!(),
+        ("interface_exists", _) if nargs == 1 || nargs == 2 => unimplemented!(),
+        ("exit", _) | ("die", _) if nargs == 0 || nargs == 1 => {
+            Ok(Some(emit_exit(e, env, args.first())?))
+        }
+        ("HH\\fun", _) => unimplemented!(),
+        ("__systemlib\\fun", _) => unimplemented!(),
+        ("HH\\inst_meth", _) => unimplemented!(),
+        ("HH\\class_meth", _) => unimplemented!(),
+        ("HH\\global_set", _) => unimplemented!(),
+        ("HH\\global_unset", _) => unimplemented!(),
+        ("__hhvm_internal_whresult", &[E(_, E_::Lvar(ref _p))]) => unimplemented!(),
+        ("__hhvm_internal_newlikearrayl", &[E(_, E_::Lvar(ref _p)), E(_, E_::Int(ref _n))]) => {
+            unimplemented!()
+        }
+        _ => Ok(
+            match (
+                args,
+                istype_op(e.options(), lower_fq_name),
+                is_isexp_op(lower_fq_name),
+            ) {
+                (&[ref arg_expr], _, Some(ref h)) => Some(InstrSeq::gather(vec![
+                    emit_expr(e, env, &arg_expr)?,
+                    emit_is(e, env, pos, &h)?,
+                ])),
+                (&[E(_, E_::Lvar(ref arg_id))], Some(i), _)
+                    if superglobals::is_any_global(arg_id.name()) =>
+                {
+                    Some(InstrSeq::gather(vec![
+                        emit_local(e, env, BareThisOp::NoNotice, &arg_id)?,
+                        emit_pos(e, pos)?,
+                        InstrSeq::make_istypec(i),
+                    ]))
+                }
+                (&[E(_, E_::Lvar(ref arg_id))], Some(i), _) if !is_local_this(env, &arg_id.1) => {
+                    Some(InstrSeq::make_istypel(
+                        get_local(e, env, &arg_id.0, &(arg_id.1).1)?,
+                        i,
+                    ))
+                }
+                (&[ref arg_expr], Some(i), _) => Some(InstrSeq::gather(vec![
+                    emit_expr(e, env, &arg_expr)?,
+                    emit_pos(e, pos)?,
+                    InstrSeq::make_istypec(i),
+                ])),
+                _ => match get_call_builtin_func_info(e.options(), lower_fq_name) {
+                    Some((nargs, i)) if nargs == args.len() => Some(InstrSeq::gather(vec![
+                        emit_exprs(e, env, args)?,
+                        emit_pos(e, pos)?,
+                        InstrSeq::make_instr(i),
+                    ])),
+                    _ => None,
+                },
+            },
+        ),
+    }
+}
+
+fn get_call_builtin_func_info(opts: &Options, id: impl AsRef<str>) -> Option<(usize, Instruct)> {
+    use {Instruct::*, InstructGet::*, InstructIsset::*, InstructMisc::*, InstructOperator::*};
+    let hack_arr_dv_arrs = hack_arr_dv_arrs(opts);
+    match id.as_ref() {
+        "array_key_exists" => Some((2, IMisc(AKExists))),
+        "hphp_array_idx" => Some((3, IMisc(ArrayIdx))),
+        "intval" => Some((1, IOp(CastInt))),
+        "boolval" => Some((1, IOp(CastBool))),
+        "strval" => Some((1, IOp(CastString))),
+        "floatval" | "doubleval" => Some((1, IOp(CastDouble))),
+        "HH\\vec" => Some((1, IOp(CastVec))),
+        "HH\\keyset" => Some((1, IOp(CastKeyset))),
+        "HH\\dict" => Some((1, IOp(CastDict))),
+        "HH\\varray" => Some((
+            1,
+            IOp(if hack_arr_dv_arrs {
+                CastVec
+            } else {
+                CastVArray
+            }),
+        )),
+        "HH\\darray" => Some((
+            1,
+            IOp(if hack_arr_dv_arrs {
+                CastDict
+            } else {
+                CastDArray
+            }),
+        )),
+        "HH\\global_get" => Some((1, IGet(CGetG))),
+        "HH\\global_isset" => Some((1, IIsset(IssetG))),
+        _ => None,
+    }
+}
+
+fn emit_is(e: &mut Emitter, env: &Env, pos: &Pos, h: &tast::Hint) -> Result {
+    unimplemented!()
+}
+
+fn istype_op(opts: &Options, id: impl AsRef<str>) -> Option<IstypeOp> {
+    let widen_is_array = opts.hhvm.flags.contains(HhvmFlags::WIDEN_IS_ARRAY);
+    let hack_arr_dv_arrs = hack_arr_dv_arrs(opts);
+    use IstypeOp::*;
+    match id.as_ref() {
+        "is_int" | "is_integer" | "is_long" => Some(OpInt),
+        "is_bool" => Some(OpBool),
+        "is_float" | "is_real" | "is_double" => Some(OpDbl),
+        "is_string" => Some(OpStr),
+        "is_array" => Some(if widen_is_array { OpArrLike } else { OpArr }),
+        "is_object" => Some(OpObj),
+        "is_null" => Some(OpNull),
+        "is_scalar" => Some(OpScalar),
+        "HH\\is_keyset" => Some(OpKeyset),
+        "HH\\is_dict" => Some(OpDict),
+        "HH\\is_vec" => Some(OpVec),
+        "HH\\is_varray" => Some(if hack_arr_dv_arrs { OpVec } else { OpVArray }),
+        "HH\\is_darray" => Some(if hack_arr_dv_arrs { OpDict } else { OpDArray }),
+        "HH\\is_any_array" => Some(OpArrLike),
+        "HH\\is_class_meth" => Some(OpClsMeth),
+        "HH\\is_fun" => Some(OpFunc),
+        "HH\\is_php_array" => Some(OpPHPArr),
+        _ => None,
+    }
+}
+
+fn is_isexp_op(lower_fq_id: impl AsRef<str>) -> Option<tast::Hint> {
+    let h = |s: &str| {
+        Some(tast::Hint::new(
+            Pos::make_none(),
+            tast::Hint_::mk_happly(tast::Id(Pos::make_none(), s.into()), vec![]),
+        ))
+    };
+    match lower_fq_id.as_ref() {
+        "is_int" | "is_integer" | "is_long" => h("\\HH\\int"),
+        "is_bool" => h("\\HH\\bool"),
+        "is_float" | "is_real" | "is_double" => h("\\HH\\float"),
+        "is_string" => h("\\HH\\string"),
+        "is_null" => h("\\HH\\void"),
+        "HH\\is_keyset" => h("\\HH\\keyset"),
+        "HH\\is_dict" => h("\\HH\\dict"),
+        "HH\\is_vec" => h("\\HH\\vec"),
+        _ => None,
     }
 }
 
@@ -1141,8 +1336,28 @@ fn emit_conditional_expr(
     unimplemented!("TODO(hrust)")
 }
 
-fn emit_local(env: &Env, notice: BareThisOp, lid: &aast_defs::Lid) -> Result {
-    unimplemented!("TODO(hrust)")
+fn emit_local(e: &mut Emitter, env: &Env, notice: BareThisOp, lid: &aast_defs::Lid) -> Result {
+    let tast::Lid(pos, id) = lid;
+    let id_name = local_id::get_name(id);
+    if superglobals::GLOBALS == id_name {
+        Err(emit_fatal::raise_fatal_parse(
+            pos,
+            "Access $GLOBALS via wrappers",
+        ))
+    } else if superglobals::is_superglobal(id_name) {
+        Ok(InstrSeq::gather(vec![
+            InstrSeq::make_string(string_utils::locals::strip_dollar(id_name)),
+            emit_pos(e, pos)?,
+            InstrSeq::make_cgetg(),
+        ]))
+    } else {
+        let local = get_local(e, env, pos, id_name)?;
+        if is_local_this(env, id) && !env.flags.contains(EnvFlags::NEEDS_LOCAL_THIS) {
+            emit_pos_then(e, pos, InstrSeq::make_barethis(notice))
+        } else {
+            Ok(InstrSeq::make_cgetl(local))
+        }
+    }
 }
 
 fn emit_class_const(env: &Env, pos: &Pos, (ci, id): &(tast::ClassId, ast_defs::Pstring)) -> Result {
@@ -1236,9 +1451,9 @@ fn from_unop(opts: &Options, op: &ast_defs::Uop) -> Result {
         }
         U::Uminus => {
             if check_int_overflow {
-                InstrSeq::make_addo()
+                InstrSeq::make_subo()
             } else {
-                InstrSeq::make_add()
+                InstrSeq::make_sub()
             }
         }
         _ => {
@@ -1469,8 +1684,7 @@ pub fn emit_set_range_expr(
     pos: &Pos,
     name: &str,
     kind: Setrange,
-    args: &[tast::Expr],
-    last_arg: Option<&tast::Expr>,
+    args: &[&tast::Expr],
 ) -> Result {
     let raise_fatal = |msg: &str| {
         Err(emit_fatal::raise_fatal_parse(
@@ -1479,26 +1693,19 @@ pub fn emit_set_range_expr(
         ))
     };
 
-    // NOTE(hrust) last_arg is separated because the caller
-    // would otherwise need to clone both Vec<&Expr> and Expr,
-    // or it would need to pass chained FixedSizeIterators
-    let n = args.len();
-    let (base, offset, src, n) = match last_arg {
-        Some(a) if n >= 2 => (a, &args[n - 1], &args[n - 2], n - 2),
-        None if n >= 3 => (&args[n - 1], &args[n - 2], &args[n - 3], n - 3),
-        _ => return raise_fatal("expects at least 3 arguments"),
+    let (base, offset, src, args) = if args.len() >= 3 {
+        (&args[0], &args[1], &args[2], &args[3..])
+    } else {
+        return raise_fatal("expects at least 3 arguments");
     };
-    let count_instrs = match args.get(n - 1) {
-        Some(c) if kind.vec => emit_expr(e, env, c)?,
-        None => InstrSeq::make_int(-1),
-        _ => {
-            return if !kind.vec {
-                raise_fatal("expects no more than 3 arguments")
-            } else {
-                raise_fatal("expects no more than 4 arguments")
-            }
-        }
+
+    let count_instrs = match (args, kind.vec) {
+        ([c], true) => emit_expr(e, env, c)?,
+        ([], _) => InstrSeq::make_int(-1),
+        (_, false) => return raise_fatal("expects no more than 3 arguments"),
+        (_, true) => return raise_fatal("expects no more than 4 arguments"),
     };
+
     let (base_expr, cls_expr, base_setup, base_stack, cls_stack) = emit_base(
         e,
         env,
@@ -1805,7 +2012,7 @@ pub fn emit_lval_op_nonlist_steps(
                 emit_final_global_op(e, outer_pos, op)?,
             ),
             E_::Lvar(v) if is_local_this(env, &v.1) && op.is_incdec() => (
-                emit_local(env, BareThisOp::Notice, v)?,
+                emit_local(e, env, BareThisOp::Notice, v)?,
                 rhs_instrs,
                 InstrSeq::Empty,
             ),
@@ -1898,7 +2105,7 @@ pub fn emit_jmpnz(
     Ok(
         match ast_constant_folder::expr_to_typed_value(e, &env.namespace, expr) {
             Ok(tv) => {
-                if tv.cast_to_bool().is_some() {
+                if Into::<bool>::into(tv) {
                     EmitJmpResult {
                         instrs: emit_pos_then(e, pos, InstrSeq::make_jmp(label.clone()))?,
                         is_fallthrough: false,

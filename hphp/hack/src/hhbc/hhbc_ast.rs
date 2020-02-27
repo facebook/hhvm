@@ -176,7 +176,6 @@ pub enum InstructBasic {
     PopU,
     Dup,
 }
-
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TypestructResolveOp {
     Resolve,
@@ -348,7 +347,6 @@ pub enum InstructGet {
     PushL(local::Type),
     CGetG,
     CGetS,
-    VGetL(local::Type),
     ClassGetC,
     ClassGetTS,
 }
@@ -374,6 +372,7 @@ pub enum IstypeOp {
     OpDArray,
     OpClsMeth,
     OpFunc,
+    OpPHPArr,
 }
 
 #[derive(Clone, Debug)]
@@ -463,14 +462,14 @@ pub enum InstructCall {
     NewObjS(SpecialClsRef),
     FCall(FcallArgs),
     FCallBuiltin(NumParams, NumParams, NumParams, String),
-    FCallClsMethod(FcallArgs, ParamLocations, IsLogAsDynamicCallOp),
+    FCallClsMethod(FcallArgs, IsLogAsDynamicCallOp),
     FCallClsMethodD(FcallArgs, ClassId, MethodId),
     FCallClsMethodS(FcallArgs, SpecialClsRef),
     FCallClsMethodSD(FcallArgs, SpecialClsRef, MethodId),
     FCallCtor(FcallArgs),
     FCallFunc(FcallArgs),
     FCallFuncD(FcallArgs, FunctionId),
-    FCallObjMethod(FcallArgs, ObjNullFlavor, ParamLocations),
+    FCallObjMethod(FcallArgs, ObjNullFlavor),
     FCallObjMethodD(FcallArgs, ObjNullFlavor, MethodId),
 }
 

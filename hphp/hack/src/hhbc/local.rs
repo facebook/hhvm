@@ -102,7 +102,7 @@ impl Gen {
     }
 
     pub fn state_has_changed(&self) -> bool {
-        STORED.with(|stored| self.counter.eq(*stored.borrow().get_counter()))
+        STORED.with(|stored| !self.counter.eq(*stored.borrow().get_counter()))
     }
 
     /// Revert to the old state stored in STORED, and return the ids of newly registered

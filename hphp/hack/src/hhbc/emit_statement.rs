@@ -117,21 +117,21 @@ fn emit_def_inline<Ex, Fb, En, Hi>(e: &mut Emitter, def: &a::Def<Ex, Fb, En, Hi>
 fn set_bytes_kind(name: &str) -> Option<Setrange> {
     lazy_static! {
         static ref RE: Regex =
-            Regex::new(r#"(?i)^hh\\set_bytes(_rev)_([a-z0-9]+)(_vec)$"#).unwrap();
+            Regex::new(r#"(?i)^hh\\set_bytes(_rev)?_([a-z0-9]+)(_vec)?$"#).unwrap();
     }
     RE.captures(name).map_or(None, |groups| {
-        let op = if !groups.get(1).unwrap().as_str().is_empty() {
+        let op = if groups.get(1).is_some() {
             // == _rev
             SetrangeOp::Reverse
         } else {
             SetrangeOp::Forward
         };
         let kind = groups.get(2).unwrap().as_str();
-        let vec = !groups.get(3).unwrap().as_str().is_empty(); // == _vec
+        let vec = groups.get(3).is_some(); // == _vec
         if kind == "string" && !vec {
             Some(Setrange {
                 size: 1,
-                vec: false,
+                vec: true,
                 op,
             })
         } else {
@@ -178,14 +178,29 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
                         ))
                     } else {
                         if let Some(kind) = set_bytes_kind(fname) {
-                            let (args, arg) = match exprs.last() {
-                                Some(a::Expr(_, a::Expr_::Callconv(cc))) => {
-                                    let (ast_defs::ParamKind::Pinout, ex) = cc.as_ref();
-                                    (&exprs.as_slice()[..exprs.len() - 1], Some(ex))
+                            let exprs = exprs.iter().collect::<Vec<&tast::Expr>>();
+                            match exprs.first() {
+                                Some(a::Expr(_, a::Expr_::Callconv(cc))) if cc.0.is_pinout() => {
+                                    let mut args = vec![&cc.1];
+                                    args.extend_from_slice(&exprs[1..exprs.len()]);
+                                    emit_expr::emit_set_range_expr(
+                                        e,
+                                        env,
+                                        pos,
+                                        fname,
+                                        kind,
+                                        &args[..],
+                                    )
                                 }
-                                _ => (exprs.as_slice(), None),
-                            };
-                            emit_expr::emit_set_range_expr(e, env, pos, fname, kind, args, arg)
+                                _ => emit_expr::emit_set_range_expr(
+                                    e,
+                                    env,
+                                    pos,
+                                    fname,
+                                    kind,
+                                    &exprs[..],
+                                ),
+                            }
                         } else {
                             emit_expr::emit_ignored_expr(e, env, pos, e_)
                         }

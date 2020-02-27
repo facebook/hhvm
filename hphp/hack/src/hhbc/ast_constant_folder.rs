@@ -48,7 +48,20 @@ fn try_type_intlike(s: &str) -> Option<i64> {
     match radix(s) {
         Radix::Dec => s.parse().ok(),
         Radix::Bin => i64::from_str_radix(&s[2..], 2).ok(),
-        Radix::Oct => i64::from_str_radix(&s[1..], 8).ok(),
+        Radix::Oct => {
+            let mut i = 1;
+            let sb = s.as_bytes();
+            // Ocaml's version truncate if any digit is greater then 7.
+            while i < sb.len() {
+                if sb[i] >= b'0' && sb[i] <= b'7' {
+                    i += 1;
+                } else {
+                    break;
+                }
+            }
+            let sb = &sb[1..i];
+            i64::from_str_radix(std::str::from_utf8(sb).unwrap(), 8).ok()
+        }
         Radix::Hex => i64::from_str_radix(&s[2..], 16).ok(),
     }
 }

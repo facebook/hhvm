@@ -13,7 +13,7 @@ class MyRecursiveArrayIterator extends ArrayIterator implements RecursiveIterato
     }
 }
 <<__EntryPoint>> function main(): void {
-$array = array(1, 2 => array(21, 22 => varray[221, 222], 23 => varray[231]), 3);
+$array = darray[0 => 1, 2 => darray[0 => 21, 22 => varray[221, 222], 23 => varray[231]], 3 => 3];
 
 $dir = new RecursiveIteratorIterator(new MyRecursiveArrayIterator($array), RecursiveIteratorIterator::LEAVES_ONLY);
 

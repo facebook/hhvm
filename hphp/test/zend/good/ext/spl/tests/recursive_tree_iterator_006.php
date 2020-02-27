@@ -17,9 +17,9 @@ function main_entry(): void {
   		"a",
   		1,
   	],
-  	"a" => array(
-  		2,
-  		"b",
+  	"a" => darray[
+  		0 => 2,
+  		1 => "b",
   		3 => varray[
   			4,
   			"c",
@@ -28,7 +28,7 @@ function main_entry(): void {
   			4,
   			"c",
   		],
-  	),
+		],
   ];
 
   $it = new RecursiveArrayIteratorAggregated($ary);

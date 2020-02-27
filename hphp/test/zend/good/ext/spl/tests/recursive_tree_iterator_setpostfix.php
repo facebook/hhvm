@@ -5,9 +5,9 @@ $arr = darray[
 		"a",
 		1,
 	],
-	"a" => array(
-		2,
-		"b",
+	"a" => darray[
+		0 => 2,
+		1 => "b",
 		3 => varray[
 			4,
 			"c",
@@ -16,7 +16,7 @@ $arr = darray[
 			4,
 			"c",
 		],
-	),
+	],
 ];
 
 $it = new RecursiveArrayIterator($arr);

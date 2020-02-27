@@ -95,7 +95,7 @@ echo "\n*** Testing numeric column keys ***\n";
 $numericCols = varray[
     varray['aaa', '111'],
     varray['bbb', '222'],
-    array('ccc', '333', -1 => 'ddd')
+    darray[0 => 'ccc', 1 => '333', -1 => 'ddd']
 ];
 var_dump(array_column($numericCols, 1));
 var_dump(array_column($numericCols, 1, 0));

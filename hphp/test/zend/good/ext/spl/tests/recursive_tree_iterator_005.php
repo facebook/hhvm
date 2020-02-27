@@ -6,9 +6,9 @@ $ary = darray[
 		"abc2",
 		1,
 	],
-	(string)"binary" => array(
-		2,
-		"b",
+	(string)"binary" => darray[
+		0 => 2,
+		1 => "b",
 		3 => varray[
 			4,
 			"c",
@@ -17,7 +17,7 @@ $ary = darray[
 			4,
 			"c",
 		],
-	),
+	],
 ];
 
 $it = new RecursiveTreeIterator(new RecursiveArrayIterator($ary), 0);

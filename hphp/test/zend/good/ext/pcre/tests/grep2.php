@@ -4,7 +4,7 @@ try { var_dump(preg_grep(1,varray[],3,4)); } catch (Exception $e) { echo "\n".'W
 try { var_dump(preg_grep(1, 2)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump(preg_grep('/+/', varray[]));
 
-$array = array(5=>'a', 'x' => '1', 'xyz'=>'q6', 'h20');
+$array = darray[5 => 'a', 'x' => '1', 'xyz'=>'q6', 6 => 'h20'];
 
 var_dump(preg_grep('@^[a-z]+@', $array));
 var_dump(preg_grep('@^[a-z]+@', $array, PREG_GREP_INVERT));

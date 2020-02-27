@@ -11,9 +11,9 @@ abstract class enum {
 }
 
 final class myEnum extends enum {
-    public $_values = array(
-           0 => 'No value',
-       );
+    public $_values = darray[
+        0 => 'No value',
+    ];
 }
 <<__EntryPoint>> function main(): void {
 $x = new myEnum();

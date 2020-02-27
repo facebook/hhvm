@@ -12,8 +12,8 @@ $controls = varray[
 		darray["oid" => "1.2.752.58.1.10", "value" => "magic"],
 		"weird"
 	],
-	array(
-	),
+	varray[
+	],
 ];
 
 // Too few parameters

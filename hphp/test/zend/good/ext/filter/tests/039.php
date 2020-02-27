@@ -3,7 +3,7 @@
 echo "-- (1)\n";
 var_dump(filter_var_array(NULL));
 var_dump(filter_var_array(varray[]));
-var_dump(filter_var_array(array(1,"blah"=>"hoho")));
+var_dump(filter_var_array(darray[0 => 1,"blah" => "hoho"]));
 var_dump(filter_var_array(varray[], -1));
 var_dump(filter_var_array(varray[], 1000000));
 var_dump(filter_var_array(varray[], ""));

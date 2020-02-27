@@ -31,7 +31,7 @@ class MyCachingIterator extends CachingIterator
     }
 }
 <<__EntryPoint>> function main(): void {
-$it = new MyCachingIterator(new ArrayIterator(array(0, 'foo'=>1, 'bar'=>2)), CachingIterator::TOSTRING_USE_KEY);
+$it = new MyCachingIterator(new ArrayIterator(darray[0 => 0, 'foo' => 1, 'bar' => 2]), CachingIterator::TOSTRING_USE_KEY);
 
 $it->fill();
 $it->show();

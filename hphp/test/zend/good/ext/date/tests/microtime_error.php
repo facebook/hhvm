@@ -16,7 +16,7 @@ echo "\n-- Bad Arg types --\n";
 $bad_args = varray[null,
                   1.5,
                   "hello",
-                  array('k'=>'v', varray[0]),
+                  darray['k'=>'v', 0 => varray[0]],
                   new stdClass,
                   1];
 foreach ($bad_args as $bad_arg) {

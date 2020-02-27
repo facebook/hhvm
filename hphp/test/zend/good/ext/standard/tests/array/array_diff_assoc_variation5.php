@@ -1,7 +1,7 @@
 <?hh
 /* Prototype  : array array_diff_assoc(array $arr1, array $arr2 [, array ...])
- * Description: Returns the entries of arr1 that have values which are not present 
- * in any of the others arguments but do additional checks whether the keys are equal 
+ * Description: Returns the entries of arr1 that have values which are not present
+ * in any of the others arguments but do additional checks whether the keys are equal
  * Source code: ext/standard/array.c
  */
 
@@ -11,9 +11,9 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_diff_assoc() : usage variations ***\n";
 $arr_default_int = varray[1, 2, 3, 'a'];
-$arr_float = array(0 => 1.00, 1.00 => 2.00, 2.00 => 3.00, 'b');
+$arr_float = darray[0 => 1.00, 1.00 => 2.00, 2.00 => 3.00, 3 => 'b'];
 $arr_string = varray['1', '2', '3', 'c'];
-$arr_string_float = array('0' => '1.00', '1.00' => '2.00', '2.00' => '3.00', 'd');
+$arr_string_float = darray['0' => '1.00', '1.00' => '2.00', '2.00' => '3.00', 0 => 'd'];
 
 echo "-- Result of comparing integers and floating point numbers: --\n";
 var_dump(array_diff_assoc($arr_default_int, $arr_float));

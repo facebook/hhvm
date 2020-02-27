@@ -7,7 +7,7 @@
 */
 <<__EntryPoint>> function main(): void {
 $arrays = varray [
-  array (),
+  varray [],
   varray [0],
   varray [1],
   varray [-1],

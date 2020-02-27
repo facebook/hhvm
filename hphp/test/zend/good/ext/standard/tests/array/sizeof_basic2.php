@@ -1,22 +1,22 @@
 <?hh
 /* Prototype  : int sizeof(mixed $var)
- * Description: Counts an elements in an array. If Standard PHP library is 
+ * Description: Counts an elements in an array. If Standard PHP library is
  *              installed, it will return the properties of an object.
  *
  * Alias to functions: count()
  */
 
-/* Testing the sizeof() for non-scalar type(array) value 
+/* Testing the sizeof() for non-scalar type(array) value
  * Sizeof() has been tested for simple integer, string,
  * indexed and mixed arrays.
- */ 
+ */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing sizeof() : basic functionality ***\n";
 
 $int_array = varray[1, 2, 3, 4];
 $string_array = varray["Saffron", "White", "Green"];
 $indexed_array = darray["Aggression" => "Saffron", "Peace" => "White", "Growth" => "Green"];
-$mixed_array = array(1, 2, "Aggression" => "Saffron", 10 => "Ten", "Ten" => 10);
+$mixed_array = darray[0 => 1, 1 => 2, "Aggression" => "Saffron", 10 => "Ten", "Ten" => 10];
 
 echo "-- Testing sizeof() with integer array --\n";
 echo "default mode: ";

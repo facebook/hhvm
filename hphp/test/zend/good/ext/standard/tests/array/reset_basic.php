@@ -10,7 +10,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing reset() : basic functionality ***\n";
 
-$array = array('zero', 'one', 200 => 'two');
+$array = darray[0 => 'zero', 1 => 'one', 200 => 'two'];
 
 echo "\n-- Initial Position: --\n";
 echo key($array) . " => " . current($array) . "\n";

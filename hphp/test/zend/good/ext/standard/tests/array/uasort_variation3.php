@@ -47,9 +47,9 @@ multiline heredoc with 123
 and speci@! ch@r..\ncheck\talso
 EOT3;
 
-$array_arg = array(
+$array_arg = darray[
   // default key
-  1,  //expecting: default key 0, value will be replaced by 'FALSE'
+  0 => 1,  //expecting: default key 0, value will be replaced by 'FALSE'
 
   // numeric keys
   1 => 10, // expecting: value will be replaced by 'TRUE'
@@ -83,7 +83,7 @@ $array_arg = array(
   $empty_heredoc => 90,
   $simple_heredoc => 75,
   $multiline_heredoc => 200,
-);
+];
 
 var_dump( uasort(inout $array_arg, fun('cmp_function')) );
 echo "-- Sorted array after uasort() function call --\n";

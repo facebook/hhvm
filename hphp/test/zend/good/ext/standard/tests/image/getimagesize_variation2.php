@@ -20,7 +20,7 @@ $unset_var = 10;
 unset ($unset_var);
 
 //array of values to iterate over
-$values = array(
+$values = darray[
 
       // int data
       "0" => 0,
@@ -33,7 +33,7 @@ $values = array(
       "-10.5" => -10.5,
       "10.1234567e5" => 10.1234567e10,
       "10.7654321e-5" => 10.7654321E-5,
-      .5,
+      0 => .5,
 
       // array data
       "array()" => varray[],
@@ -64,7 +64,7 @@ $values = array(
 
       // unset data
       "unset_var" => $unset_var,
-);
+];
 
 // loop through each element of the array for info
 

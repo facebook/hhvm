@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$array = array ();
+$array = varray[];
 var_dump ($array);
 for ($i = 0; $i < (sizeof($array) + 1); $i++) {
     echo "[$i]\n";

@@ -22,7 +22,7 @@ echo key($array) . " => " . current($array) . "\n";
 var_dump(prev(inout $array));
 
 echo "\n*** Testing an array with differing values/keys ***\n";
-$array2 = array('one', 2 => "help", 3, false, 'stringkey2' => 'val2', 'stringkey1' => 'val1');
+$array2 = darray[0 => 'one', 2 => "help", 3 => 3, 4 => false, 'stringkey2' => 'val2', 'stringkey1' => 'val1'];
 end(inout $array2);
 $length = count($array2);
 for ($i = $length; $i > 0; $i--) {

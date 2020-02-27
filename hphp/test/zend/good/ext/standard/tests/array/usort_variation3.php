@@ -36,7 +36,7 @@ multiline heredoc with 123
 and speci@! ch@r..\ncheck\talso
 EOT3;
 
-$array_arg = array(
+$array_arg = darray[
   // numeric keys
   -2 => 9,
   8.9 => 8,
@@ -64,8 +64,8 @@ $array_arg = array(
   $multiline_heredoc => 200,
 
   // default key
-  1,
-);
+  53 => 1,
+];
 
 var_dump( usort(inout $array_arg, fun('cmp_function')) );
 echo "\n-- Sorted array after usort() function call --\n";

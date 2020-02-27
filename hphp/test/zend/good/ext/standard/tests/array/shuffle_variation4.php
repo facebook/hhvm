@@ -23,10 +23,10 @@ $array_arg = varray[
 /*3*/  darray["float1" => 0.23, 'float2' => 1.34, "exp1" => 0e2, 'exp2' => 200e-2, "exp3" =>  10e0],
 
        // array with negative float values
-       array(-0.23 => -0.23, -1.34 => -1.34, -200e-2 => -200e-2, -30 => -30e0, -2147473649.80),
+       darray[-0.23 => -0.23, -1.34 => -1.34, -200e-2 => -200e-2, -30 => -30e0, 1 => -2147473649.80],
 
        // array with single and double quoted strings
-/*5*/  array('1' => 'one', "str1" => "123numbers", '' => 'hello\tworld', "" => "hello world\0", "12.34floatnum"),
+/*5*/  darray['1' => 'one', "str1" => "123numbers", '' => 'hello\tworld', "" => "hello world\0", 2 => "12.34floatnum"],
 
        // array with bool values
        darray['1' => TRUE, "1" => TRUE, "0" => FALSE, '0' => FALSE],

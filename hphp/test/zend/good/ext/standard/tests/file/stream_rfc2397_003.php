@@ -1,9 +1,9 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 $streams = array(
-	'data://,A%20brief%20note',
-	'data://application/vnd-xxx-query,select_vcount,fcol_from_fieldtable/local',
-	'data://;base64,Zm9vYmFyIGZvb2Jhcg==',
+	0 => 'data://,A%20brief%20note',
+	1 => 'data://application/vnd-xxx-query,select_vcount,fcol_from_fieldtable/local',
+	2 => 'data://;base64,Zm9vYmFyIGZvb2Jhcg==',
 	'stream_rfc2397_003.gif' => 'data://image/gif;base64,R0lGODdhMAAwAPAAAAAAAP///ywAAAAAMAAw
 AAAC8IyPqcvt3wCcDkiLc7C0qwyGHhSWpjQu5yqmCYsapyuvUUlvONmOZtfzgFz
 ByTB10QgxOR0TqBQejhRNzOfkVJ+5YiUqrXF5Y5lKh/DeuNcP5yLWGsEbtLiOSp

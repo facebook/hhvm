@@ -16,7 +16,7 @@ echo "*** Testing prev() : usage variations ***\n";
 $subarray = varray[9,8,7];
 end(inout $subarray);
 
-$array_arg = array ($subarray, 'a' => 'z');
+$array_arg = darray[0 => $subarray, 'a' => 'z'];
 end(inout $array_arg);
 
 echo "\n-- Pass a two-dimensional array as \$array_arg --\n";

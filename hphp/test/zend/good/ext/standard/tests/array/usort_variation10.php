@@ -32,7 +32,7 @@ var_dump( usort(inout $array_arg, fun('cmp')) );
 var_dump($array_arg);
 
 // Array with default and assigned keys
-$array_arg = array(0 => "Banana", 1 => "Mango", "Orange", 2 => "Apple", "Pineapple");
+$array_arg = darray[0 => "Banana", 1 => "Mango", 2 => "Orange", 2 => "Apple", 3 => "Pineapple"];
 
 echo "\n-- Array with default/assigned keys --\n";
 var_dump( usort(inout $array_arg, fun('cmp')) );

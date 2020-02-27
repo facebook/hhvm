@@ -106,15 +106,34 @@ let build_ty_map (ctx : Provider_context.t) (tast : Tast.def) : global_type_map
       ty
   in
   let builder =
-    object
-      inherit [_] Tast_visitor.iter_with_state
+    object (self)
+      inherit [_] Tast_visitor.iter_with_state as super
 
-      method! on_'hi (env, ty_map) hi =
+      method private extract_type_hint (env, ty_map) type_hint =
+        let hi = fst type_hint in
         match get_global_var_pos (Tast_env.tast_env_as_typing_env env) hi with
         | None -> ()
         | Some pos ->
           let pos = Pos.to_absolute pos in
           ty_map := Pos.AbsolutePosMap.add pos hi !ty_map
+
+      method! on_fun_with_env state ({ Aast.f_ret; _ } as fun_) =
+        self#extract_type_hint state f_ret;
+        super#on_fun_with_env state fun_
+
+      method! on_method_with_env state ({ Aast.m_ret; _ } as method_) =
+        self#extract_type_hint state m_ret;
+        super#on_method_with_env state method_
+
+      (* note: method_.m_params is of type fun_param list, so this will
+       * also be called for method parameters. *)
+      method! on_fun_param state ({ Aast.param_type_hint; _ } as fun_param) =
+        self#extract_type_hint state param_type_hint;
+        super#on_fun_param state fun_param
+
+      method! on_class_var_with_env state ({ Aast.cv_type; _ } as class_var) =
+        self#extract_type_hint state cv_type;
+        super#on_class_var_with_env state class_var
     end
   in
   let state = ref Pos.AbsolutePosMap.empty in

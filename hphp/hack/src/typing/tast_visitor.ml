@@ -79,8 +79,12 @@ class virtual ['state] iter_with_state =
 
     method go_def ctx state x = self#on_def (Env.def_env ctx x, state) x
 
+    method on_fun_with_env (env, state) x = super#on_fun_ (env, state) x
+
     method! on_fun_ (env, state) x =
-      super#on_fun_ (Env.restore_fun_env env x, state) x
+      self#on_fun_with_env (Env.restore_fun_env env x, state) x
+
+    method on_method_with_env (env, state) x = super#on_method_ (env, state) x
 
     method! on_method_ (env, state) x =
       let env =
@@ -95,7 +99,10 @@ class virtual ['state] iter_with_state =
         else
           env
       in
-      super#on_method_ (Env.restore_method_env env x, state) x
+      self#on_method_with_env (Env.restore_method_env env x, state) x
+
+    method on_class_var_with_env (env, state) cv =
+      super#on_class_var (env, state) cv
 
     method! on_class_var (env, state) cv =
       let env =
@@ -104,7 +111,7 @@ class virtual ['state] iter_with_state =
         else
           env
       in
-      super#on_class_var (env, state) cv
+      self#on_class_var_with_env (env, state) cv
 
     method! on_pu_enum (env, state) x =
       super#on_pu_enum (Env.restore_pu_enum_env env x, state) x

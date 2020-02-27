@@ -21,7 +21,7 @@ $ob = new A();
 
 $fp = fopen("array_count_file", "w+");
 
-$arrays = array ("bobk" => "bobv", "val", 6 => "val6",  $fp, $ob);
+$arrays = darray["bobk" => "bobv", 0 => "val", 6 => "val6", 7 => $fp, 8 => $ob];
 
 var_dump (@array_count_values ($arrays));
 echo "\n";

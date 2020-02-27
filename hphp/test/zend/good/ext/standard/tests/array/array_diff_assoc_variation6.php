@@ -14,9 +14,9 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_diff_assoc() : usage variations ***\n";
 
-$array = array ('zero',
+$array = darray[0 => 'zero',
                 1 => 1,
-                'two' => 2.00000000000001);
+                'two' => 2.00000000000001];
 
 $inputs = varray [
 

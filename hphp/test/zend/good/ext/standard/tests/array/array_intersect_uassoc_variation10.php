@@ -20,8 +20,8 @@ class MyClass
 echo "*** Testing array_intersect_uassoc() : usage variation ***\n";
 
 //Initialize variables
-$array1 = array("a" => "green", "c" => "blue", "red");
-$array2 = array("a" => "green", "yellow", "red");
+$array1 = darray["a" => "green", "c" => "blue", 0 => "red"];
+$array2 = darray["a" => "green", 0 => "yellow", 1 => "red"];
 
 echo "\n-- Testing array_intersect_uassoc() function using class with static method as callback --\n";
 var_dump( array_intersect_uassoc($array1, $array2, varray['MyClass','static_compare_func']) );

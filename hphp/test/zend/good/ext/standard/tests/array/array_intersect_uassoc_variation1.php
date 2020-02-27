@@ -27,8 +27,8 @@ function key_compare_func($a, $b) {
 echo "*** Testing array_intersect_uassoc() : usage variation ***\n";
 
 // Initialise function arguments
-$array2 = array("a" => "green", "yellow", "red");
-$array3 = array("a"=>"green", "brown");
+$array2 = darray["a" => "green", 0 => "yellow", 1 => "red"];
+$array3 = darray["a"=>"green", 0 => "brown"];
 
 //get an unset variable
 $unset_var = 10;

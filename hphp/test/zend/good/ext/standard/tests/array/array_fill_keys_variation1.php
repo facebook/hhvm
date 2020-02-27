@@ -18,7 +18,7 @@ function main() {
   var_dump( array_fill_keys($emptyArr, $nullVal) );
 
   echo "\n-- Testing array_fill_keys() function with keyed array --\n";
-  $keyedArray = array("two" => 2, "strk1" => "strv1", 4, $simpleStr);
+  $keyedArray = darray["two" => 2, "strk1" => "strv1", 0 => 4, 1 => $simpleStr];
   var_dump( array_fill_keys($keyedArray, $simpleStr) );
 
   echo "Done";

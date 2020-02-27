@@ -31,7 +31,7 @@ $input_values = varray[
   varray[null, NULL],  // null values
   darray[1 => 'one', 'zero' => 0, -2 => "value"], //associative array
   darray["one" => 1, null => 'null', 5.2 => "float", true => 1, "" => 'empty'],  // associative array with different keys
-  array(1 => 'one', 2, "key" => 'value')  // combinition of associative and non-associative array
+  darray[1 => 'one', 2 => 2, "key" => 'value']  // combinition of associative and non-associative array
 
 ];
 

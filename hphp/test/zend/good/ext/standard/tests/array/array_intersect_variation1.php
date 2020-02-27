@@ -24,7 +24,7 @@ echo "*** Testing array_intersect() : Passing non-array values to \$arr1 argumen
 $arr2 = varray[1, 2];
 
 // array to be passed to optional argument
-$arr3 = array(1, 2, "one" => 1, "two" => 2);
+$arr3 = darray[0 => 1, 1 => 2, "one" => 1, "two" => 2];
 
 // get an unset variable
 $unset_var = 10;

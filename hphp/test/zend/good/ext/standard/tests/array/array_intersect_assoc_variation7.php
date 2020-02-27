@@ -63,10 +63,10 @@ $arrays = varray [
 ];
 
 // array to be passsed to $arr2 argument
-$arr2 = array(0 => "0", 1, "two" => 2, "float" => 2.3333, "f1" => 1.2,
-              "f4" => 33333333.333, 111 => "\tHello", 3.3 => 'pen\n', '\v\fworld',
+$arr2 = darray[0 => "0", 1 => 1, "two" => 2, "float" => 2.3333, "f1" => 1.2,
+              "f4" => 33333333.333, 111 => "\tHello", 3.3 => 'pen\n', 33333334 => '\v\fworld',
               "heredoc" => "Hello world", 11 => new classA(), "resource" => $fp,
-              "int" => 133, 222 => "fruit");
+              "int" => 133, 222 => "fruit"];
 
 // loop through each sub-array within $arrrays to check the behavior of array_intersect_assoc()
 $iterator = 1;

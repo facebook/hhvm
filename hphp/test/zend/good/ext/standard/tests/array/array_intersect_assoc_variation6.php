@@ -44,9 +44,9 @@ $arrays = varray [
              '\v\fworld' => 2.2, 'pen\n' => 33],
        darray["\tHello" => 111, "re\td" => "color",
              "\v\fworld" => 2.2, "pen\n" => 33],
-       array("hello", $heredoc => "string"), // heredoc
+       darray[0 => "hello", $heredoc => "string"], // heredoc
 
-       // array with  unset variable 
+       // array with  unset variable
 /*10*/ darray[ @$unset_var => "hello"],
 
        // array with mixed keys
@@ -56,9 +56,9 @@ $arrays = varray [
 ];
 
 // array to be passsed to $arr1 argument
-$arr1 = array(0 => 0, 2 => "float", 4 => "f3", 33333333 => "f4",
-              "\tHello" => 111, 2.2, 'color', "Hello world" => "string",
-              "pen\n" => 33, 133 => "int");
+$arr1 = darray[0 => 0, 2 => "float", 4 => "f3", 33333333 => "f4",
+              "\tHello" => 111, 33333334 => 2.2, 33333335 => 'color', "Hello world" => "string",
+              "pen\n" => 33, 133 => "int"];
 
 // loop through each sub-array within $arrrays to check the behavior of array_intersect_assoc()
 $iterator = 1;

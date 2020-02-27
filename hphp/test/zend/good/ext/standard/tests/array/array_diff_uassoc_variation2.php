@@ -28,7 +28,7 @@ function key_compare_func($a, $b)
 echo "*** Testing array_diff_uassoc() : usage variation ***\n";
 
 //Initialize variables
-$array1 = array("a" => "green", "b" => "brown", "c" => "blue", "red");
+$array1 = darray["a" => "green", "b" => "brown", "c" => "blue", 0 => "red"];
 
 //get an unset variable
 $unset_var = 10;

@@ -25,7 +25,7 @@ echo "*** Testing array_intersect_assoc() : Passing non-array values to \$arr1 a
 $arr2 = varray[1, 2];
 
 // additional array to be passed for intersection
-$arr3 = array(1, 2, "one" => 1, "two" => 2);
+$arr3 = darray[0 => 1, 1 => 2, "one" => 1, "two" => 2];
 
 // get an unset variable
 $unset_var = 10;

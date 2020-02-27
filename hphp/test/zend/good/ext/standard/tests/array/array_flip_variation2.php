@@ -23,9 +23,9 @@ multiline heredoc with 123 and
 speci@! ch@r$...checking\nand\talso
 EOT7;
 
-$input = array(
+$input = darray[
   // default key
-  'one',  //expected: default key 0, value will be replaced by 'bool_key4'
+  0 => 'one',  //expected: default key 0, value will be replaced by 'bool_key4'
 
   // numeric keys
   1 => 'int_key', // expected: value will be replaced by 'bool_key3'
@@ -59,7 +59,7 @@ $input = array(
   $empty_heredoc => 'empty_heredoc',
   $simple_heredoc => 'simple_heredoc',
   $multiline_heredoc => 'multiline_heredoc',
-);
+];
 
 var_dump( array_flip($input) );
 

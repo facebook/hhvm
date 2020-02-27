@@ -24,6 +24,8 @@
 #include "hphp/runtime/server/replay-transport.h"
 
 #include "hphp/util/boot-stats.h"
+#include "hphp/util/hash-map.h"
+#include "hphp/util/hash-set.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/timer.h"
 
@@ -101,9 +103,11 @@ void InternalWarmupWorker::doJob(WarmupJob job) {
   }
 }
 
-InternalWarmupRequestPlayer::InternalWarmupRequestPlayer(int threadCount)
+InternalWarmupRequestPlayer::InternalWarmupRequestPlayer(int threadCount,
+                                                         bool dedup)
   : JobQueueDispatcher<InternalWarmupWorker>(threadCount, threadCount,
-                                             0, false, nullptr) {
+                                             0, false, nullptr)
+  , m_noDuplicate(dedup) {
 }
 
 InternalWarmupRequestPlayer::~InternalWarmupRequestPlayer() {
@@ -119,9 +123,12 @@ runAfterDelay(const std::vector<std::string>& files,
     sleep(delaySeconds);
   }
   start();
-  std::map<std::string, unsigned> seen;
+  hphp_fast_string_map<unsigned> seen;
+  hphp_fast_string_set deduped;
   do {
+    deduped.clear();
     for (auto const& file : files) {
+      if (m_noDuplicate && !deduped.insert(file).second) continue;
       try {
         boost::filesystem::path p(file);
         if (boost::filesystem::is_regular_file(p)) {

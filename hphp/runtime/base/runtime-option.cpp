@@ -566,6 +566,7 @@ bool RuntimeOption::ServerLogReorderProps = false;
 bool RuntimeOption::ServerForkEnabled = true;
 bool RuntimeOption::ServerForkLogging = false;
 bool RuntimeOption::ServerWarmupConcurrently = false;
+bool RuntimeOption::ServerDedupeWarmupRequests = false;
 int RuntimeOption::ServerWarmupThreadCount = 1;
 int RuntimeOption::ServerExtendedWarmupThreadCount = 1;
 unsigned RuntimeOption::ServerExtendedWarmupRepeat = 1;
@@ -2090,6 +2091,8 @@ void RuntimeOption::Load(
                  "Server.LogReorderProps", false);
     Config::Bind(ServerWarmupConcurrently, ini, config,
                  "Server.WarmupConcurrently", false);
+    Config::Bind(ServerDedupeWarmupRequests, ini, config,
+                 "Server.DedupeWarmupRequests", false);
     Config::Bind(ServerWarmupThreadCount, ini, config,
                  "Server.WarmupThreadCount", ServerWarmupThreadCount);
     Config::Bind(ServerExtendedWarmupThreadCount, ini, config,

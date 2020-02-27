@@ -34,6 +34,8 @@ using hphp_hash_set = folly::F14NodeSet<T,V,W>;
 template <class T, class V=std::hash<T>, class W=std::equal_to<T>>
 using hphp_fast_set = folly::F14FastSet<T,V,W>;
 
+using hphp_fast_string_set = hphp_fast_set<std::string, string_hash>;
+
 // std::string keyed tables, stable entries do not move on rehash.
 using hphp_string_set = hphp_hash_set<std::string, string_hash>;
 

@@ -88,13 +88,18 @@ struct InternalWarmupRequestPlayer : JobQueueDispatcher<InternalWarmupWorker> {
   // Problem tested on 2019-06-11 on MacOS High Sierra and Mojave
   // Apple LLVM version 10.0.1 (clang-1001.0.46.4)
   // Target: x86_64-apple-darwin18.5.0
-  explicit InternalWarmupRequestPlayer(int threadCount);
+  explicit InternalWarmupRequestPlayer(int threadCount, bool dedup = false);
   ~InternalWarmupRequestPlayer();
 
   // Start running after an optional delay.
   void runAfterDelay(const std::vector<std::string>& files,
                      unsigned nTimes = 1,
                      unsigned delaySeconds = 0);
+private:
+  // If set, duplicated files in the list will be ignored (but it is still
+  // possible to play each file multiple times by setting nTimes in
+  // runAfterDelay).
+  bool m_noDuplicate;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

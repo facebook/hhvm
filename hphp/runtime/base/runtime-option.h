@@ -264,6 +264,7 @@ struct RuntimeOption {
   static bool ServerForkEnabled;
   static bool ServerForkLogging;
   static bool ServerWarmupConcurrently;
+  static bool ServerDedupeWarmupRequests;
   static int ServerWarmupThreadCount;
   static int ServerExtendedWarmupThreadCount;
   static unsigned ServerExtendedWarmupRepeat;

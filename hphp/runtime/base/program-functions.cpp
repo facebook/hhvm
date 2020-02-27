@@ -1174,8 +1174,9 @@ static int start_server(const std::string &username, int xhprof) {
     Logger::Info("Warming up");
     if (!RuntimeOption::EvalJitProfileWarmupRequests) profileWarmupStart();
     SCOPE_EXIT { profileWarmupEnd(); };
-    InternalWarmupRequestPlayer{RuntimeOption::ServerWarmupThreadCount}.
-      runAfterDelay(RuntimeOption::ServerWarmupRequests);
+    InternalWarmupRequestPlayer(RuntimeOption::ServerWarmupThreadCount,
+                                RuntimeOption::ServerDedupeWarmupRequests)
+      .runAfterDelay(RuntimeOption::ServerWarmupRequests);
   }
   BootStats::mark("warmup");
 

@@ -206,7 +206,13 @@ and hint_to_type_constant_list ~tparams ~targ_map (h : Aast.hint) =
     get_kind ~tparams "$$internal$$reifiedtype" @ [(TV.String "id", TV.Int id)]
   | Aast.Happly (s, l) ->
     let (classname, s_res) = resolve_classname ~tparams s in
-    let kind = get_kind ~tparams s_res in
+    let kind =
+      match String.lowercase s_res with
+      | "tuple"
+      | "shape" ->
+        get_kind ~tparams "unresolved"
+      | _ -> get_kind ~tparams s_res
+    in
     let n = String.lowercase @@ snd s in
     let generic_types =
       let module SN = Naming_special_names.Classes in

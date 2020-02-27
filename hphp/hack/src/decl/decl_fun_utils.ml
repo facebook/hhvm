@@ -128,6 +128,11 @@ let hint_to_type_opt ~is_lambda env reason hint =
             mk (r, Tapply (id, [mk_tvar reason]))
           else
             ty
+        | (r, Toption ty') ->
+          if must_reinfer_type tcopt (get_node ty') then
+            mk (r, Toption (mk_tvar reason))
+          else
+            ty
         | (_r, ty_) ->
           if must_reinfer_type tcopt ty_ then
             mk_tvar reason

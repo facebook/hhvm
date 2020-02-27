@@ -461,8 +461,7 @@ struct CompactWriter {
 
       if (isContainer(map)) {
         writeMapBegin(keyType, valueType, getContainerSize(map));
-        IterateKV(*map.asTypedValue(), [](const ArrayData* /*ad*/) { return false; },
-                  elemWriter, [](const ObjectData* /*o*/) { return false; });
+        IterateKV(*map.asTypedValue(), elemWriter);
       } else {
         auto const arr = map.toArray();
         writeMapBegin(keyType, valueType, arr.size());
@@ -497,13 +496,9 @@ struct CompactWriter {
       if (isContainer(list)) {
         writeListBegin(valueType, getContainerSize(list));
         if (listType == C_LIST_LIST) {
-          IterateV(*list.asTypedValue(),
-                   [](const ArrayData* /*ad*/) { return false; }, listWriter,
-                   [](const ObjectData* /*o*/) { return false; });
+          IterateV(*list.asTypedValue(), listWriter);
         } else {
-          IterateKV(*list.asTypedValue(),
-                    [](const ArrayData* /*ad*/) { return false; }, setWriter,
-                    [](const ObjectData* /*o*/) { return false; });
+          IterateKV(*list.asTypedValue(), setWriter);
         }
       } else {
         auto const arr = list.toArray();

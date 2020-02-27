@@ -46,7 +46,8 @@ void BaseSet::addAllKeysOf(const TypedValue container) {
                   mutate();
                 }
                 return false;
-              });
+              },
+              false);
 
   if (UNLIKELY(!ok)) {
     throw_invalid_collection_parameter();

@@ -251,7 +251,8 @@ TypedValue HHVM_FUNCTION(array_fill_keys,
       if (coll->collectionType() == CollectionType::Pair) {
         ai.emplace(2, ArrayInit::Mixed{});
       }
-    }
+    },
+    false
   );
 
   if (!ok) {
@@ -412,14 +413,9 @@ TypedValue HHVM_FUNCTION(array_keys,
   }
 
   VArrayInit ai(getClsMethCompactContainerSize(input));
-  IterateKV(
-    input,
-    [](ArrayData*) { return false; },
-    [&](TypedValue k, TypedValue) {
-      ai.append(k);
-    },
-    [](ObjectData*) {}
-  );
+  IterateKV(input, [&](TypedValue k, TypedValue) {
+    ai.append(k);
+  });
   return make_array_like_tv(ai.create());
 }
 
@@ -1246,7 +1242,8 @@ TypedValue HHVM_FUNCTION(array_values,
                        if (coll->collectionType() == CollectionType::Pair) {
                          ai.emplace(2);
                        }
-                     });
+                     },
+                     false);
 
   if (!ok) {
     raise_warning("array_values() expects parameter 1 to be an array "
@@ -1465,25 +1462,21 @@ bool HHVM_FUNCTION(in_array,
   bool ret = false;
   auto ok = strict ?
     IterateV(*haystack.asTypedValue(),
-             [](ArrayData*) { return false; },
              [&](TypedValue v) -> bool {
                if (tvSame(v, *needle.asTypedValue())) {
                  ret = true;
                  return true;
                }
                return false;
-             },
-             [](ObjectData*) { return false; }) :
+             }) :
     IterateV(*haystack.asTypedValue(),
-             [](ArrayData*) { return false; },
              [&](TypedValue v) -> bool {
                if (tvEqual(v, *needle.asTypedValue())) {
                  ret = true;
                  return true;
                }
                return false;
-             },
-             [](ObjectData*) { return false; });
+             });
 
   if (UNLIKELY(!ok)) {
     raise_warning("in_array() expects parameter 2 to be an array "
@@ -1498,25 +1491,21 @@ Variant array_search(const Variant& needle,
   Variant ret = false;
   auto ok = strict ?
     IterateKV(*haystack.asTypedValue(),
-              [](ArrayData*) { return false; },
               [&](TypedValue k, TypedValue v) -> bool {
                 if (tvSame(v, *needle.asTypedValue())) {
                   ret = VarNR(k);
                   return true;
                 }
                 return false;
-              },
-              [](ObjectData*) { return false; }) :
+              }) :
     IterateKV(*haystack.asTypedValue(),
-              [](ArrayData*) { return false; },
               [&](TypedValue k, TypedValue v) -> bool {
                 if (tvEqual(v, *needle.asTypedValue())) {
                   ret = VarNR(k);
                   return true;
                 }
                 return false;
-              },
-              [](ObjectData*) { return false; });
+              });
 
   if (UNLIKELY(!ok)) {
     raise_warning("array_search() expects parameter 2 to be an array "
@@ -1975,12 +1964,7 @@ TypedValue HHVM_FUNCTION(array_diff_key,
     auto setStr = [&](StringData* k, TypedValue v) { ret.set(k, v); };
 
     auto iterate_left_with = [&](auto test_key) {
-      IterateKV(
-        left,
-        [](ArrayData*) { return false; },
-        test_key,
-        [](ObjectData*) {}
-      );
+      IterateKV(left, test_key);
     };
 
     // rightAd will be the backing ArrayData for right, or nullptr if right
@@ -2443,12 +2427,7 @@ TypedValue HHVM_FUNCTION(array_intersect_key,
       };
 
       auto iterate_right_with = [&](auto test_key) {
-        IterateKV(
-          right,
-          [](ArrayData*) { return false; },
-          test_key,
-          [](ObjectData*) {}
-        );
+        IterateKV(right, test_key);
       };
 
       // For historical reasons, we coerce intish string keys only when they
@@ -2525,12 +2504,7 @@ TypedValue HHVM_FUNCTION(array_intersect_key,
     auto setStr = [&](StringData* k, TypedValue v) { ret.set(k, v); };
 
     auto iterate_left_with = [&](auto test_key) {
-      IterateKV(
-        left,
-        [](ArrayData*) { return false; },
-        test_key,
-        [](ObjectData*) {}
-      );
+      IterateKV(left, test_key);
     };
 
     // rightAd will be the backing ArrayData for right, or nullptr if right

@@ -952,12 +952,7 @@ void shuffleMagicArgs(String&& invName, uint32_t numArgs, bool hasUnpack) {
     if (!isContainer(args)) throwInvalidUnpackArgs();
     stack.discard();
     SCOPE_EXIT { tvDecRefGen(args); };
-    IterateV(
-      args,
-      [](ArrayData*) { return false; },
-      [&](TypedValue v) { argArray.append(v); },
-      [](ObjectData*) { return false; }
-    );
+    IterateV(args, [&](TypedValue v) { argArray.append(v); });
   }
 
   // Remove the arguments from the stack; they were moved into the

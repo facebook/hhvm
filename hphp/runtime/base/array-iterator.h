@@ -572,12 +572,9 @@ bool IterateV(const TypedValue& it,
   return true;
 }
 
-template <typename PreArrFn, typename ArrFn, typename PreCollFn>
-bool IterateV(const TypedValue& it,
-              PreArrFn preArrFn,
-              ArrFn arrFn,
-              PreCollFn preCollFn) {
-  return IterateV(it, preArrFn, arrFn, preCollFn, false);
+template <typename ArrFn>
+bool IterateV(const TypedValue& it, ArrFn arrFn) {
+  return IterateV(it, false, arrFn, false, false);
 }
 
 /*
@@ -626,7 +623,7 @@ bool IterateKV(const TypedValue& it,
     adata->incRefCount();
    do_array_no_incref:
     SCOPE_EXIT { decRefArr(adata); };
-    if (preArrFn(adata)) return true;
+    if (ArrayData::call_helper(preArrFn, adata)) return true;
     return IterateKV<ArrFn, false>(adata, arrFn);
   }
   if (isClsMethType(it.m_type)) {
@@ -665,12 +662,9 @@ bool IterateKV(const TypedValue& it,
   return true;
 }
 
-template <typename PreArrFn, typename ArrFn, typename PreCollFn>
-bool IterateKV(const TypedValue& it,
-               PreArrFn preArrFn,
-               ArrFn arrFn,
-               PreCollFn preCollFn) {
-  return IterateKV(it, preArrFn, arrFn, preCollFn, false);
+template <typename ArrFn>
+bool IterateKV(const TypedValue& it, ArrFn arrFn) {
+  return IterateKV(it, false, arrFn, false, false);
 }
 
 //////////////////////////////////////////////////////////////////////

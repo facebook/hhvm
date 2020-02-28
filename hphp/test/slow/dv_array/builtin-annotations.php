@@ -31,7 +31,7 @@ function return_values(): void {
   var_dump($x);
   echo "====================================================\n";
 
-  $x = __hhvm_intrinsics\dummy_array_builtin(array(1,2,3));
+  $x = __hhvm_intrinsics\dummy_array_builtin(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1,2,3]));
   var_dump(is_array($x));
   var_dump(is_varray($x));
   var_dump(is_darray($x));
@@ -81,26 +81,26 @@ async function dummy_await(): Awaitable<(array, darray, dict)> {
 function parameters(): void {
   __hhvm_intrinsics\dummy_varray_builtin(varray[1,2,3]);
   __hhvm_intrinsics\dummy_varray_builtin(darray['a'=>1,'b'=>2,'c'=>3]);
-  __hhvm_intrinsics\dummy_varray_builtin(array(1,2,3));
+  __hhvm_intrinsics\dummy_varray_builtin(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1,2,3]));
   __hhvm_intrinsics\dummy_varray_builtin(__hhvm_intrinsics\dummy_kindofvarray_builtin());
   echo "====================================================\n";
 
   __hhvm_intrinsics\dummy_darray_builtin(varray[1,2,3]);
   __hhvm_intrinsics\dummy_darray_builtin(darray['a'=>1,'b'=>2,'c'=>3]);
-  __hhvm_intrinsics\dummy_darray_builtin(array(1,2,3));
+  __hhvm_intrinsics\dummy_darray_builtin(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1,2,3]));
   __hhvm_intrinsics\dummy_darray_builtin(__hhvm_intrinsics\dummy_kindofdarray_builtin());
   echo "====================================================\n";
 
   __hhvm_intrinsics\dummy_varr_or_darr_builtin(varray[1,2,3]);
   __hhvm_intrinsics\dummy_varr_or_darr_builtin(darray['a'=>1,'b'=>2,'c'=>3]);
-  __hhvm_intrinsics\dummy_varr_or_darr_builtin(array(1,2,3));
+  __hhvm_intrinsics\dummy_varr_or_darr_builtin(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1,2,3]));
   __hhvm_intrinsics\dummy_varr_or_darr_builtin(__hhvm_intrinsics\dummy_kindofdarray_builtin());
   __hhvm_intrinsics\dummy_varr_or_darr_builtin(__hhvm_intrinsics\dummy_kindofvarray_builtin());
   echo "====================================================\n";
 
   __hhvm_intrinsics\dummy_array_builtin(varray[1,2,3]);
   __hhvm_intrinsics\dummy_array_builtin(darray['a'=>1,'b'=>2,'c'=>3]);
-  __hhvm_intrinsics\dummy_array_builtin(array(1,2,3));
+  __hhvm_intrinsics\dummy_array_builtin(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1,2,3]));
   __hhvm_intrinsics\dummy_array_builtin(__hhvm_intrinsics\dummy_kindofdarray_builtin());
   __hhvm_intrinsics\dummy_array_builtin(__hhvm_intrinsics\dummy_kindofvarray_builtin());
   echo "====================================================\n";
@@ -110,7 +110,7 @@ function parameters(): void {
 function cast(): void {
   echo "= cast ===================================================\n";
   var_dump(
-    __hhvm_intrinsics\dummy_cast_to_kindofarray(array(1,2,3))
+    __hhvm_intrinsics\dummy_cast_to_kindofarray(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1,2,3]))
       |> is_darray($$) || is_varray($$),
   );
   $a = __hhvm_intrinsics\dummy_cast_to_kindofarray(varray[1,2,3]);

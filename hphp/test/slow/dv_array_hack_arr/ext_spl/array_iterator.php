@@ -3,7 +3,7 @@
 <<__EntryPoint>>
 function main() {
   $inputs = vec[
-    array(),
+    __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]),
     varray[1, 2, 3],
     darray['foo' => 1, 'bar' => 3, 'baz' => 5],
   ];

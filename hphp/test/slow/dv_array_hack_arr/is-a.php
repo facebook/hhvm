@@ -72,9 +72,9 @@ function test1() {
     dict['abc' => 100, 200 => 'def'],
     keyset[],
     keyset['a', 100, 'b'],
-    array(),
-    array(1, 2, 3),
-    array('a' => 100, 'b' => 200, 'c' => 300),
+    __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]),
+    __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2, 3]),
+    __hhvm_intrinsics\dummy_cast_to_kindofarray(dict['a' => 100, 'b' => 200, 'c' => 300]),
     varray[],
     varray[1, 2, 3],
     darray[],
@@ -165,11 +165,11 @@ function test3() {
   var_dump(is_varray(123));
   var_dump(is_darray(123));
 
-  var_dump(is_varray(array()));
-  var_dump(is_darray(array()));
+  var_dump(is_varray(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[])));
+  var_dump(is_darray(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[])));
 
-  var_dump(is_varray(array(1, 2, 3)));
-  var_dump(is_darray(array(1, 2, 3)));
+  var_dump(is_varray(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2, 3])));
+  var_dump(is_darray(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2, 3])));
 
   var_dump(is_varray(vec['a', 'b', 'c']));
   var_dump(is_darray(vec['a', 'b', 'c']));

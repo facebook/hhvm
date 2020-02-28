@@ -25,13 +25,13 @@ function test($x) {
   $a = new A();
   if (count($x) > 0) $a->foobaz(...$x);
   $a->foobaz(1, 2, ...$x);
-  if (count($x) > 0) call_user_func_array(array($a, 'foobaz'), $x);
+  if (count($x) > 0) call_user_func_array(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[$a, 'foobaz']), $x);
 }
 
 <<__EntryPoint>>
 function main_variadics() {
-test(array());
-test(array(3, 4, 5));
+test(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
+test(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[3, 4, 5]));
 test(vec[]);
 test(vec[3, 4, 5]);
 test(dict['a' => 3, 'b' => 4, 'c' => 5]);

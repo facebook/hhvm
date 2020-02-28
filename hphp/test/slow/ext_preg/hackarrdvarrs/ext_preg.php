@@ -18,7 +18,7 @@ function test_preg_grep() {
   VS(count($fl_array), 1);
   VS($fl_array[2], "123.1");
 
-  VS(preg_grep("/a/", varray["c", "b"]), array());
+  VS(preg_grep("/a/", varray["c", "b"]), __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
 }
 
 function test_preg_match() {
@@ -193,7 +193,7 @@ function test_preg_replace() {
   $expFoo[0] = "FOO";
   $expFoo[1] = "FOO";
   $expFoo[2] = "FOO";
-  VS(preg_replace("/some pattern/", "", array()), dict[]);
+  VS(preg_replace("/some pattern/", "", __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[])), dict[]);
   VS(preg_replace("/foo/i", "FOO", $foos), $expFoo);
 
   $patterns = varray["/(19|20)(\\d{2})-(\\d{1,2})-(\\d{1,2})/",

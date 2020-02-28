@@ -206,7 +206,7 @@ try {
   var_dump($e->getMessage());
 }
 try {
-  HH\facts_parse(null, varray[array()], null, null);
+  HH\facts_parse(null, varray[__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[])], null, null);
 } catch (Exception $e) {
   var_dump($e->getMessage());
 }

@@ -19,9 +19,14 @@ function rx($fn) {
   if ($fn) $fn(null);
 }
 
+<<__Pure>>
+function pure($fn) {
+  if ($fn) $fn(null);
+}
+
 <<__EntryPoint>>
 function main() {
-  $functions = vec['non_rx', 'rx_local', 'rx_shallow', 'rx'];
+  $functions = vec['non_rx', 'rx_local', 'rx_shallow', 'rx', 'pure'];
   foreach ($functions as $caller) {
     foreach ($functions as $callee) {
       try {

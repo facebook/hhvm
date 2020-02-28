@@ -1,4 +1,0 @@
-rx -> rx: ok
-rx -> pure: ok
-pure -> rx: Call to reactive 'rx' from pure 'pure' violates reactivity constraints.
-pure -> pure: ok

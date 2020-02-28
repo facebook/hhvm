@@ -38,7 +38,8 @@ unsafe fn parser_options_from_ocaml_only_for_parser_errors(
     let po_disallow_func_ptrs_in_constants = bool::from_ocaml(*ocaml_opts.add(9)).unwrap();
     let po_enable_xhp_class_modifier = bool::from_ocaml(*ocaml_opts.add(10)).unwrap();
     let po_disable_xhp_element_mangling = bool::from_ocaml(*ocaml_opts.add(11)).unwrap();
-    let po_enable_first_class_function_pointers = bool::from_ocaml(*ocaml_opts.add(12)).unwrap();
+    let po_disable_xhp_children_declarations = bool::from_ocaml(*ocaml_opts.add(12)).unwrap();
+    let po_enable_first_class_function_pointers = bool::from_ocaml(*ocaml_opts.add(13)).unwrap();
 
     parser_options.po_disable_lval_as_an_expression = po_disable_lval_as_an_expression;
     parser_options.po_disable_legacy_soft_typehints = po_disable_legacy_soft_typehints;
@@ -49,6 +50,7 @@ unsafe fn parser_options_from_ocaml_only_for_parser_errors(
     parser_options.po_disallow_func_ptrs_in_constants = po_disallow_func_ptrs_in_constants;
     parser_options.po_enable_xhp_class_modifier = po_enable_xhp_class_modifier;
     parser_options.po_disable_xhp_element_mangling = po_disable_xhp_element_mangling;
+    parser_options.po_disable_xhp_children_declarations = po_disable_xhp_children_declarations;
     parser_options.po_enable_first_class_function_pointers =
         po_enable_first_class_function_pointers;
 

@@ -21,6 +21,7 @@ type t = {
   leak_rust_tree: bool;
   enable_xhp_class_modifier: bool;
   disable_xhp_element_mangling: bool;
+  disable_xhp_children_declarations: bool;
 }
 [@@deriving show]
 
@@ -39,6 +40,7 @@ let default =
     leak_rust_tree = false;
     enable_xhp_class_modifier = false;
     disable_xhp_element_mangling = false;
+    disable_xhp_children_declarations = false;
   }
 
 let make
@@ -58,6 +60,8 @@ let make
     leak_rust_tree = default.leak_rust_tree)
     ?(enable_xhp_class_modifier = default.enable_xhp_class_modifier)
     ?(disable_xhp_element_mangling = default.disable_xhp_element_mangling)
+    ?(disable_xhp_children_declarations =
+      default.disable_xhp_children_declarations)
     () =
   {
     hhvm_compat_mode;
@@ -73,6 +77,7 @@ let make
     leak_rust_tree;
     enable_xhp_class_modifier;
     disable_xhp_element_mangling;
+    disable_xhp_children_declarations;
   }
 
 let hhvm_compat_mode e = e.hhvm_compat_mode
@@ -104,3 +109,5 @@ let leak_rust_tree e = e.leak_rust_tree
 let enable_xhp_class_modifier e = e.enable_xhp_class_modifier
 
 let disable_xhp_element_mangling e = e.disable_xhp_element_mangling
+
+let disable_xhp_children_declarations e = e.disable_xhp_children_declarations

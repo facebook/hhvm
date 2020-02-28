@@ -233,6 +233,7 @@ let parse_options () =
   let error_php_lambdas = ref false in
   let disallow_discarded_nullable_awaitables = ref false in
   let disable_xhp_element_mangling = ref false in
+  let disable_xhp_children_declarations = ref false in
   let enable_xhp_class_modifier = ref false in
   let verbosity = ref 0 in
   let enable_first_class_function_pointers = ref false in
@@ -517,6 +518,9 @@ let parse_options () =
         Arg.Set disable_xhp_element_mangling,
         "Disable mangling of XHP elements :foo. That is, :foo:bar is now \\foo\\bar, not xhp_foo__bar"
       );
+      ( "--disable-xhp-children-declarations",
+        Arg.Set disable_xhp_children_declarations,
+        "Disable XHP children declarations, e.g. children (foo, bar+)" );
       ( "--enable-xhp-class-modifier",
         Arg.Set enable_xhp_class_modifier,
         "Enable the XHP class modifier, xhp class name {} will define an xhp class."
@@ -588,6 +592,7 @@ let parse_options () =
       ~glean_port:!glean_port
       ~glean_reponame:!glean_reponame
       ~po_disable_xhp_element_mangling:!disable_xhp_element_mangling
+      ~po_disable_xhp_children_declarations:!disable_xhp_children_declarations
       ~po_enable_xhp_class_modifier:!enable_xhp_class_modifier
       ~po_enable_first_class_function_pointers:
         !enable_first_class_function_pointers

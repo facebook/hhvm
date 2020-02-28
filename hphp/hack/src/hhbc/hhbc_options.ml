@@ -56,6 +56,7 @@ type t = {
   option_emit_generics_ub: bool;
   option_check_int_overflow: bool;
   option_disable_xhp_element_mangling: bool;
+  option_disable_xhp_children_declarations: bool;
   option_enable_xhp_class_modifier: bool;
   option_rust_lowerer: bool;
   option_enable_first_class_function_pointers: bool;
@@ -111,6 +112,7 @@ let default =
     option_emit_generics_ub = false;
     option_check_int_overflow = false;
     option_disable_xhp_element_mangling = false;
+    option_disable_xhp_children_declarations = false;
     option_enable_xhp_class_modifier = false;
     option_rust_lowerer = true;
     option_enable_first_class_function_pointers = false;
@@ -204,6 +206,9 @@ let disable_unset_class_const o = o.option_disable_unset_class_const
 let disallow_func_ptrs_in_constants o = o.option_disallow_func_ptrs_in_constants
 
 let disable_xhp_element_mangling o = o.option_disable_xhp_element_mangling
+
+let disable_xhp_children_declarations o =
+  o.option_disable_xhp_children_declarations
 
 let enable_xhp_class_modifier o = o.option_enable_xhp_class_modifier
 

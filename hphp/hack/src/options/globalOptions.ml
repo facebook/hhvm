@@ -90,6 +90,7 @@ type t = {
   tco_disallow_discarded_nullable_awaitables: bool;
   po_enable_xhp_class_modifier: bool;
   po_disable_xhp_element_mangling: bool;
+  po_disable_xhp_children_declarations: bool;
   po_enable_first_class_function_pointers: bool;
 }
 [@@deriving show]
@@ -251,6 +252,7 @@ let default =
     tco_disallow_discarded_nullable_awaitables = false;
     po_enable_xhp_class_modifier = false;
     po_disable_xhp_element_mangling = false;
+    po_disable_xhp_children_declarations = false;
     po_enable_first_class_function_pointers = false;
   }
 
@@ -351,6 +353,8 @@ let make
       default.tco_disallow_discarded_nullable_awaitables)
     ?(po_enable_xhp_class_modifier = default.po_enable_xhp_class_modifier)
     ?(po_disable_xhp_element_mangling = default.po_disable_xhp_element_mangling)
+    ?(po_disable_xhp_children_declarations =
+      default.po_disable_xhp_children_declarations)
     ?(po_enable_first_class_function_pointers =
       default.po_enable_first_class_function_pointers)
     () =
@@ -437,6 +441,7 @@ let make
     tco_disallow_discarded_nullable_awaitables;
     po_enable_xhp_class_modifier;
     po_disable_xhp_element_mangling;
+    po_disable_xhp_children_declarations;
     po_enable_first_class_function_pointers;
   }
 
@@ -619,6 +624,9 @@ let tco_disallow_discarded_nullable_awaitables t =
 let po_enable_xhp_class_modifier t = t.po_enable_xhp_class_modifier
 
 let po_disable_xhp_element_mangling t = t.po_disable_xhp_element_mangling
+
+let po_disable_xhp_children_declarations t =
+  t.po_disable_xhp_children_declarations
 
 let po_enable_first_class_function_pointers t =
   t.po_enable_first_class_function_pointers

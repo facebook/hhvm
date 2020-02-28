@@ -17,6 +17,7 @@ pub struct ParserEnv {
     pub allow_new_attribute_syntax: bool,
     pub enable_xhp_class_modifier: bool,
     pub disable_xhp_element_mangling: bool,
+    pub disable_xhp_children_declarations: bool,
 }
 
 impl From<FullFidelityParserEnv> for ParserEnv {
@@ -29,6 +30,7 @@ impl From<FullFidelityParserEnv> for ParserEnv {
             allow_new_attribute_syntax: env.allow_new_attribute_syntax,
             enable_xhp_class_modifier: env.enable_xhp_class_modifier,
             disable_xhp_element_mangling: env.disable_xhp_element_mangling,
+            disable_xhp_children_declarations: env.disable_xhp_children_declarations,
         }
     }
 }

@@ -199,6 +199,9 @@ impl<'a> AastParser {
             allow_new_attribute_syntax: env.parser_options.po_allow_new_attribute_syntax,
             enable_xhp_class_modifier: env.parser_options.po_enable_xhp_class_modifier,
             disable_xhp_element_mangling: env.parser_options.po_disable_xhp_element_mangling,
+            disable_xhp_children_declarations: env
+                .parser_options
+                .po_disable_xhp_children_declarations,
         };
 
         let tree = if quick_mode {

@@ -229,6 +229,8 @@ type t = {
    * 'lookup side'.
    *)
   po_disable_xhp_element_mangling: bool;
+  (* Disable `children (foo|bar+|pcdata)` declarations as they can be implemented without special syntax *)
+  po_disable_xhp_children_declarations: bool;
   (* Enables the special first class function pointer syntax foo<> *)
   po_enable_first_class_function_pointers: bool;
 }
@@ -316,6 +318,7 @@ val make :
   ?tco_disallow_discarded_nullable_awaitables:bool ->
   ?po_enable_xhp_class_modifier:bool ->
   ?po_disable_xhp_element_mangling:bool ->
+  ?po_disable_xhp_children_declarations:bool ->
   ?po_enable_first_class_function_pointers:bool ->
   unit ->
   t
@@ -513,5 +516,7 @@ val tco_disallow_discarded_nullable_awaitables : t -> bool
 val po_enable_xhp_class_modifier : t -> bool
 
 val po_disable_xhp_element_mangling : t -> bool
+
+val po_disable_xhp_children_declarations : t -> bool
 
 val po_enable_first_class_function_pointers : t -> bool

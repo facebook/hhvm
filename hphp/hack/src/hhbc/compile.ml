@@ -112,6 +112,8 @@ let parse_file ~hhbc_options env text :
         ~disable_unset_class_const:(disable_unset_class_const co)
         ~disallow_func_ptrs_in_constants:(disallow_func_ptrs_in_constants co)
         ~disable_xhp_element_mangling:(disable_xhp_element_mangling co)
+        ~disable_xhp_children_declarations:
+          (disable_xhp_children_declarations co)
         ~enable_xhp_class_modifier:(enable_xhp_class_modifier co)
         ~rust_lowerer:(rust_lowerer co)
         ~enable_first_class_function_pointers:

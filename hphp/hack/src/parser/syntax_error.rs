@@ -183,6 +183,7 @@ pub const error1060: Error = Cow::Borrowed(concat!(
 ));
 pub const error1061: Error = Cow::Borrowed("A Pocket Universes operator (':@') is expected here.");
 pub const error1063: Error = Cow::Borrowed("Expected matching separator here.");
+pub const error1064: Error = Cow::Borrowed("XHP children declarations are no longer supported.");
 pub const error2001: Error = Cow::Borrowed("A type annotation is required in strict mode.");
 pub const error2003: Error =
     Cow::Borrowed("A case statement may only appear directly inside a switch.");

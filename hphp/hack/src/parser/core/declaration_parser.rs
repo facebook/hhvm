@@ -883,6 +883,9 @@ where
         //   children empty ;
         //   children xhp-children-expression ;
         let children = self.assert_token(TokenKind::Children);
+        if self.env.disable_xhp_children_declarations {
+            self.with_error(Errors::error1064);
+        }
         let token_kind = self.peek_token_kind();
         let expr = match token_kind {
             TokenKind::Empty => {

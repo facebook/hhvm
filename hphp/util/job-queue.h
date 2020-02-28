@@ -127,9 +127,9 @@ public:
   }
 
   /**
-   * Put a job into the queue and notify a worker to pick it up.
+   * Put a job into the queue and notify a worker to pick it up if requested.
    */
-  void enqueue(TJob job, int priority=0) {
+  void enqueue(TJob job, int priority = 0, bool eagerNotify = true) {
     assertx(priority >= 0);
     assertx(priority < m_jobQueues.size());
     timespec enqueueTime;
@@ -137,7 +137,7 @@ public:
     Lock lock(this);
     m_jobQueues[priority].emplace_back(job, enqueueTime);
     ++m_jobCount;
-    notify();
+    if (eagerNotify) notify();
   }
 
   /**
@@ -586,7 +586,9 @@ struct JobQueueDispatcher : IHostHealthObserver {
    * Enqueue a new job.
    */
   void enqueue(typename TWorker::JobType job, int priority = 0) {
-    m_queue.enqueue(job, priority);
+    auto const level = getHealthLevel();
+    auto const eagerNotify = (level < HealthLevel::NoMore);
+    m_queue.enqueue(job, priority, eagerNotify);
 
     // Spin up another worker thread if appropriate.
     auto const target = getTargetNumWorkers();

@@ -157,10 +157,8 @@ enable_if_lval_t<T, void> tvDecRefStr(T tv) {
 
 template<typename T> ALWAYS_INLINE
 enable_if_lval_t<T, void> tvDecRefArr(T tv) {
-  assertx(type(tv) == KindOfArray ||
-         type(tv) == KindOfVec ||
-         type(tv) == KindOfDict ||
-         type(tv) == KindOfKeyset);
+  assertx(isArrayLikeType(type(tv)));
+  assertx(isRefcountedType(type(tv)));
   decRefArr(val(tv).parr);
 }
 

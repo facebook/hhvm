@@ -391,7 +391,8 @@ struct Variant : private TypedValue {
 
   enum class PersistentArrInit {};
   Variant(const ArrayData* ad, DataType dt, PersistentArrInit) noexcept {
-    assertx(ad->toPersistentDataType() == dt);
+    // TODO(T58820726): Switch back to trusting caller and strict equality.
+    assertx(equivDataTypes(ad->toPersistentDataType(), dt));
     assertx(!ad->isRefCounted());
     m_data.parr = const_cast<ArrayData*>(ad);
     m_type = dt;

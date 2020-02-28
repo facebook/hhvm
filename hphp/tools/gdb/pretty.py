@@ -121,6 +121,10 @@ class TypedValuePrinter(object):
 
         elif (t == V('HPHP::KindOfArray') or
               t == V('HPHP::KindOfPersistentArray') or
+              t == V('HPHP::KindOfDArray') or
+              t == V('HPHP::KindOfPersistentDArray') or
+              t == V('HPHP::KindOfVArray') or
+              t == V('HPHP::KindOfPersistentVArray') or
               t == V('HPHP::KindOfDict') or
               t == V('HPHP::KindOfPersistentDict') or
               t == V('HPHP::KindOfVec') or

@@ -35,7 +35,7 @@ bool tvIsPlausible(const TypedValue cell) {
   };
 
   [&] {
-    switch (cell.m_type) {
+    switch (type(cell)) {
       case KindOfUninit:
       case KindOfNull:
         return;
@@ -92,9 +92,21 @@ bool tvIsPlausible(const TypedValue cell) {
         assertx(cell.m_data.parr->isNotDVArray());
         return;
       case KindOfPersistentDArray:
+        assertPtr(val(cell).parr);
+        assertx(val(cell).parr->kindIsValid());
+        assertx(!val(cell).parr->isRefCounted());
+        assertx(val(cell).parr->isDArray());
+        assertx(val(cell).parr->isPHPArray());
+        assertx(val(cell).parr->dvArraySanityCheck());
+        return;
       case KindOfPersistentVArray:
-        assertx(cell.m_data.parr->dvArray());
-        /* FALLTHROUGH */
+        assertPtr(val(cell).parr);
+        assertx(val(cell).parr->kindIsValid());
+        assertx(!val(cell).parr->isRefCounted());
+        assertx(val(cell).parr->isVArray());
+        assertx(val(cell).parr->isPHPArray());
+        assertx(val(cell).parr->dvArraySanityCheck());
+        return;
       case KindOfPersistentArray:
         assertPtr(cell.m_data.parr);
         assertx(cell.m_data.parr->kindIsValid());
@@ -103,9 +115,21 @@ bool tvIsPlausible(const TypedValue cell) {
         assertx(cell.m_data.parr->dvArraySanityCheck());
         return;
       case KindOfDArray:
+        assertPtr(val(cell).parr);
+        assertx(val(cell).parr->kindIsValid());
+        assertx(val(cell).parr->checkCountZ());
+        assertx(val(cell).parr->isDArray());
+        assertx(val(cell).parr->isPHPArray());
+        assertx(val(cell).parr->dvArraySanityCheck());
+        return;
       case KindOfVArray:
-        assertx(cell.m_data.parr->dvArray());
-        /* FALLTHROUGH */
+        assertPtr(val(cell).parr);
+        assertx(val(cell).parr->kindIsValid());
+        assertx(val(cell).parr->checkCountZ());
+        assertx(val(cell).parr->isVArray());
+        assertx(val(cell).parr->isPHPArray());
+        assertx(val(cell).parr->dvArraySanityCheck());
+        return;
       case KindOfArray:
         assertPtr(cell.m_data.parr);
         assertx(cell.m_data.parr->kindIsValid());

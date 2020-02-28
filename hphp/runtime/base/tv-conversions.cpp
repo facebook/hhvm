@@ -1262,6 +1262,7 @@ enable_if_lval_t<T, void> tvCastToVArrayInPlace(T tv) {
 
   assertx(a->isPacked());
   assertx(a->isVArray());
+  assertx(a->dvArraySanityCheck());
 
   val(tv).parr = a;
   type(tv) = KindOfArray;
@@ -1388,6 +1389,7 @@ enable_if_lval_t<T, void> tvCastToDArrayInPlace(T tv) {
 
   assertx(a->isMixed());
   assertx(a->isDArray());
+  assertx(a->dvArraySanityCheck());
 
   val(tv).parr = a;
   type(tv) = KindOfArray;

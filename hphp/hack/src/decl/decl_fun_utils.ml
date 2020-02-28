@@ -72,6 +72,10 @@ let get_param_mutability user_attributes =
 
 exception Gi_reinfer_type_not_supported
 
+let cut_namespace id =
+  let ids = String.split id ~on:'\\' in
+  List.last_exn ids
+
 let rec reinfer_type_to_string_exn ty =
   match ty with
   | Tmixed -> "mixed"
@@ -92,9 +96,7 @@ let rec reinfer_type_to_string_exn ty =
     | Tnoreturn -> "noreturn"
     | Tbool -> "bool"
     | Tatom _id -> "atom")
-  | Tapply ((_p, id), _tyl) ->
-    let ids = String.split id ~on:'\\' in
-    List.last_exn ids
+  | Tapply ((_p, id), _tyl) -> cut_namespace id
   | Taccess (ty, ids) ->
     let s = reinfer_type_to_string_exn (get_node ty) in
     List.fold ids ~init:s ~f:(fun s (_p, id) -> Printf.sprintf "%s::%s" s id)
@@ -120,24 +122,28 @@ let hint_to_type_opt ~is_lambda env reason hint =
       match ty with
       | None -> mk_tvar reason
       | Some ty ->
-        (match deref ty with
-        | (r, Tapply (id, [ty']))
-          when String.equal (snd id) SN.Classes.cAwaitable ->
-          let ty_' = get_node ty' in
-          if must_reinfer_type tcopt ty_' then
-            mk (r, Tapply (id, [mk_tvar reason]))
-          else
-            ty
-        | (r, Toption ty') ->
-          if must_reinfer_type tcopt (get_node ty') then
-            mk (r, Toption (mk_tvar reason))
-          else
-            ty
-        | (_r, ty_) ->
-          if must_reinfer_type tcopt ty_ then
-            mk_tvar reason
-          else
-            ty)
+        let rec create_vars_for_reinfer_types ty =
+          match deref ty with
+          | (r, Tapply (id, [ty']))
+            when String.equal (snd id) SN.Classes.cAwaitable ->
+            let ty' = create_vars_for_reinfer_types ty' in
+            mk (r, Tapply (id, [ty']))
+          | (r, Toption ty') ->
+            let ty' = create_vars_for_reinfer_types ty' in
+            mk (r, Toption ty')
+          | (r, Tapply ((_p, id), []))
+            when String.equal (cut_namespace id) "PHPism_FIXME_Array" ->
+            if must_reinfer_type tcopt (get_node ty) then
+              mk (r, Tvarray_or_darray (Some (mk_tvar reason), mk_tvar reason))
+            else
+              ty
+          | (_r, ty_) ->
+            if must_reinfer_type tcopt ty_ then
+              mk_tvar reason
+            else
+              ty
+        in
+        create_vars_for_reinfer_types ty
     in
     Some ty
   else

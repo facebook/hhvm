@@ -1,5 +1,5 @@
 array(3) {
-  ["%s/test/slow/ext_factparse/ext_factparse.php"]=>
+  ["%s/ext_factparse.php"]=>
   array(7) {
     ["constants"]=>
     array(6) {

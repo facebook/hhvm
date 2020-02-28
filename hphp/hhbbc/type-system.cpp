@@ -120,8 +120,12 @@ bool mayHaveData(trep bits) {
   case BOptCDictE: case BOptSDictE: case BOptDictE:
     return true;
 
-  case BVArrLike: case BVecLike: case BOptVArrLike: case BOptVecLike:
-  case BPArrLike: case BOptPArrLike:
+  case BVArrLike: case BVArrLikeSA:
+  case BOptVArrLike: case BOptVArrLikeSA:
+  case BVecLike: case BVecLikeSA:
+  case BOptVecLike: case BOptVecLikeSA:
+  case BPArrLike: case BPArrLikeSA:
+  case BOptPArrLike: case BOptPArrLikeSA:
     return true;
 
   case BBottom:
@@ -147,6 +151,8 @@ bool mayHaveData(trep bits) {
   case BUnc:
   case BArrKey:
   case BUncArrKey:
+  case BFuncOrCls:
+  case BOptFuncOrCls:
   case BStrLike:
   case BUncStrLike:
   case BOptTrue:
@@ -238,10 +244,14 @@ bool canBeOptional(trep bits) {
   case BStr:
   case BUncArrKey:
   case BArrKey:
+  case BFuncOrCls:
   case BUncStrLike:
   case BStrLike:
+  case BPArrLikeSA:
   case BPArrLike:
+  case BVArrLikeSA:
   case BVArrLike:
+  case BVecLikeSA:
   case BVecLike:
   case BSArr:
   case BArrE:
@@ -315,10 +325,14 @@ bool canBeOptional(trep bits) {
   case BOptRes:
   case BOptUncArrKey:
   case BOptArrKey:
+  case BOptFuncOrCls:
   case BOptUncStrLike:
   case BOptStrLike:
+  case BOptPArrLikeSA:
   case BOptPArrLike:
+  case BOptVArrLikeSA:
   case BOptVArrLike:
+  case BOptVecLikeSA:
   case BOptVecLike:
   case BOptFunc:
   case BOptCls:
@@ -4455,7 +4469,6 @@ Type union_of(Type a, Type b) {
 
   // non-optional types
   X(Null)
-  X(Cls)
 
   // optional types
   Y(Bool)
@@ -4465,6 +4478,7 @@ Type union_of(Type a, Type b) {
   Y(SStr)
   Y(Str)
   Y(Obj)
+  Y(Cls)
   Y(Record)
 
   Y(SPArr)
@@ -4493,10 +4507,12 @@ Type union_of(Type a, Type b) {
   Y(VecE)
   Y(VecN)
   Y(Vec)
+
   Y(SDict)
   Y(DictE)
   Y(DictN)
   Y(Dict)
+
   Y(SKeyset)
   Y(KeysetE)
   Y(KeysetN)
@@ -4505,15 +4521,18 @@ Type union_of(Type a, Type b) {
   Y(UncArrKey)
   Y(ArrKey)
 
-  Y(ClsMeth)
-  Y(Func)
+  Y(FuncOrCls)
 
   Y(UncStrLike)
   Y(StrLike)
 
-  Y(VecLike)
+  Y(VArrLikeSA)
   Y(VArrLike)
 
+  Y(VecLikeSA)
+  Y(VecLike)
+
+  Y(PArrLikeSA)
   Y(PArrLike)
 
   // non-optional types that contain other types above (and hence

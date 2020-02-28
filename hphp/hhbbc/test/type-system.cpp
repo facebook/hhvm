@@ -340,7 +340,8 @@ auto const primitives = folly::lazy([] {
     TRecord,
     TRes,
     TCls,
-    TClsMeth
+    TClsMeth,
+    TFunc,
   };
 });
 
@@ -435,7 +436,15 @@ auto const non_opt_unions = folly::lazy([] {
     TUnc,
     TUncArrKey,
     TArrKey,
-    TClsMeth,
+    TPArrLike,
+    TPArrLikeSA,
+    TVArrLike,
+    TVArrLikeSA,
+    TVecLike,
+    TVecLikeSA,
+    TStrLike,
+    TUncStrLike,
+    TFuncOrCls,
     TTop
   };
 });
@@ -492,8 +501,10 @@ TEST(Type, Top) {
   for (auto& t : all_with_waithandles(index)) {
     EXPECT_TRUE(t.subtypeOf(BTop));
     EXPECT_TRUE(t.couldBe(BTop));
-    EXPECT_TRUE(union_of(t, TTop) == TTop);
-    EXPECT_TRUE(union_of(TTop, t) == TTop);
+    EXPECT_EQ(union_of(t, TTop), TTop);
+    EXPECT_EQ(union_of(TTop, t), TTop);
+    EXPECT_EQ(intersection_of(TTop, t), t);
+    EXPECT_EQ(intersection_of(t, TTop), t);
   }
 }
 
@@ -506,8 +517,10 @@ TEST(Type, Bottom) {
   for (auto& t : all_with_waithandles(index)) {
     EXPECT_TRUE(TBottom.subtypeOf(t));
     EXPECT_TRUE(!TBottom.couldBe(t));
-    EXPECT_TRUE(union_of(t, TBottom) == t);
-    EXPECT_TRUE(union_of(TBottom, t) == t);
+    EXPECT_EQ(union_of(t, TBottom), t);
+    EXPECT_EQ(union_of(TBottom, t), t);
+    EXPECT_EQ(intersection_of(TBottom, t), TBottom);
+    EXPECT_EQ(intersection_of(t, TBottom), TBottom);
   }
 }
 
@@ -569,6 +582,10 @@ TEST(Type, Relations) {
         EXPECT_FALSE(t1.subtypeOf(t2));
       }
     }
+  }
+
+  for (auto const& t : all_with_waithandles(index)) {
+    EXPECT_EQ(union_of(t, t), t);
   }
 
   // union_of is commutative
@@ -644,6 +661,9 @@ TEST(Type, Prim) {
     { TDbl,      TInitPrim },
     { dval(0.0), TInitPrim },
     { ival(0),   TInitPrim },
+    { TFunc,     TInitPrim },
+    { TCls,      TInitPrim },
+    { TFuncOrCls, TInitPrim },
   };
 
   const std::initializer_list<std::pair<Type, Type>> subtype_false{
@@ -661,7 +681,13 @@ TEST(Type, Prim) {
     { TSStr, TInitPrim },
     { TArr, TInitPrim },
     { TSArr, TPrim },
+    { TRes, TPrim },
+    { TObj, TPrim },
     { TPrim, dval(0.0) },
+    { TVArrLike, TPrim },
+    { TVecLike, TPrim },
+    { TPArrLike, TPrim },
+    { TStrLike, TPrim },
   };
 
   const std::initializer_list<std::pair<Type, Type>> couldbe_true{
@@ -674,6 +700,10 @@ TEST(Type, Prim) {
     { TPrim, TOptObj },
     { TPrim, TOptRecord },
     { TPrim, TOptFalse },
+    { TPrim, TFunc },
+    { TPrim, TCls },
+    { TPrim, TFuncOrCls },
+    { TPrim, TStrLike },
   };
 
   const std::initializer_list<std::pair<Type, Type>> couldbe_false{
@@ -684,6 +714,7 @@ TEST(Type, Prim) {
     { TInitPrim, TUninit },
     { TPrim, TObj },
     { TPrim, TRecord },
+    { TPrim, TRes },
   };
 
   for (auto kv : subtype_true) {
@@ -704,10 +735,24 @@ TEST(Type, Prim) {
   }
 
   for (auto kv : couldbe_false) {
-    EXPECT_TRUE(!kv.first.couldBe(kv.second))
+    EXPECT_FALSE(kv.first.couldBe(kv.second))
       << show(kv.first) << " !couldbe " << show(kv.second);
-    EXPECT_TRUE(!kv.second.couldBe(kv.first))
+    EXPECT_FALSE(kv.second.couldBe(kv.first))
       << show(kv.first) << " !couldbe " << show(kv.second);
+  }
+
+  if (use_lowptr) {
+    EXPECT_TRUE(TClsMeth.subtypeOf(TInitPrim));
+    EXPECT_TRUE(TPrim.couldBe(TClsMeth));
+    EXPECT_TRUE(TPrim.couldBe(TVArrLike));
+    EXPECT_TRUE(TPrim.couldBe(TVecLike));
+    EXPECT_TRUE(TPrim.couldBe(TPArrLike));
+  } else {
+    EXPECT_FALSE(TClsMeth.subtypeOf(TInitPrim));
+    EXPECT_FALSE(TPrim.couldBe(TClsMeth));
+    EXPECT_FALSE(TPrim.couldBe(TVArrLike));
+    EXPECT_FALSE(TPrim.couldBe(TVecLike));
+    EXPECT_FALSE(TPrim.couldBe(TPArrLike));
   }
 }
 
@@ -741,24 +786,59 @@ TEST(Type, Unc) {
   EXPECT_TRUE(TDbl.subtypeOf(BInitUnc));
   EXPECT_TRUE(TDbl.subtypeOf(BUnc));
   EXPECT_TRUE(dval(3.0).subtypeOf(BInitUnc));
+  EXPECT_TRUE(TFuncOrCls.subtypeOf(BInitUnc));
+  EXPECT_TRUE(TUncStrLike.subtypeOf(BInitUnc));
 
-  const std::initializer_list<std::pair<Type, Type>> pairs{
-    { TUnc, TInitUnc },
-    { TUnc, TInitCell },
-    { TUnc, TCell },
-    { TInitUnc, TInt },
-    { TInitUnc, TOptInt },
-    { TInitUnc, opt(ival(2)) },
-    { TUnc, TInt },
-    { TUnc, TOptInt },
-    { TUnc, opt(ival(2)) },
-    { TNum, TUnc },
-    { TNum, TInitUnc },
-    { TUncArrKey, TInitUnc },
+  if (use_lowptr) {
+    EXPECT_TRUE(TClsMeth.subtypeOf(BInitUnc));
+    EXPECT_TRUE(TVArrLikeSA.subtypeOf(BInitUnc));
+    EXPECT_TRUE(TVecLikeSA.subtypeOf(BInitUnc));
+    EXPECT_TRUE(TPArrLikeSA.subtypeOf(BInitUnc));
+  } else {
+    EXPECT_FALSE(TClsMeth.subtypeOf(BInitUnc));
+    EXPECT_FALSE(TVArrLikeSA.subtypeOf(BInitUnc));
+    EXPECT_FALSE(TVecLikeSA.subtypeOf(BInitUnc));
+    EXPECT_FALSE(TPArrLikeSA.subtypeOf(BInitUnc));
+  }
+
+  EXPECT_FALSE(TVArrLike.subtypeOf(BInitUnc));
+  EXPECT_FALSE(TVecLike.subtypeOf(BInitUnc));
+  EXPECT_FALSE(TPArrLike.subtypeOf(BInitUnc));
+
+  const std::initializer_list<std::tuple<Type, Type, bool>> tests{
+    { TUnc, TInitUnc, true },
+    { TUnc, TInitCell, true },
+    { TUnc, TCell, true },
+    { TInitUnc, TInt, true },
+    { TInitUnc, TOptInt, true },
+    { TInitUnc, opt(ival(2)), true },
+    { TUnc, TInt, true },
+    { TUnc, TOptInt, true },
+    { TUnc, opt(ival(2)), true },
+    { TNum, TUnc, true },
+    { TNum, TInitUnc, true },
+    { TUncArrKey, TInitUnc, true },
+    { TStrLike, TInitUnc, true },
+    { TUncStrLike, TInitUnc, true },
+    { TFuncOrCls, TInitUnc, true },
+    { TClsMeth, TInitUnc, use_lowptr },
+    { TVArrLike, TInitUnc, true },
+    { TVecLike, TInitUnc, true },
+    { TPArrLike, TInitUnc, true },
+    { TVArrLikeSA, TInitUnc, true },
+    { TVecLikeSA, TInitUnc, true },
+    { TPArrLikeSA, TInitUnc, true },
   };
-  for (auto kv : pairs) {
-    EXPECT_TRUE(kv.first.couldBe(kv.second))
-      << show(kv.first) << " couldBe " << show(kv.second);
+  for (auto const& t : tests) {
+    auto const& ty1 = std::get<0>(t);
+    auto const& ty2 = std::get<1>(t);
+    if (std::get<2>(t)) {
+      EXPECT_TRUE(ty1.couldBe(ty2))
+        << show(ty1) << " couldBe " << show(ty2);
+    } else {
+      EXPECT_FALSE(ty1.couldBe(ty2))
+        << show(ty1) << " !couldBe " << show(ty2);
+    }
   }
 }
 
@@ -902,6 +982,31 @@ TEST(Type, OptUnionOf) {
   EXPECT_EQ(TOptNum, union_of(TInitNull, TNum));
   EXPECT_EQ(TOptNum, union_of(TInitNull, union_of(dval(1), ival(0))));
 
+  EXPECT_EQ(TOptTrue, union_of(TInitNull, TTrue));
+  EXPECT_EQ(TOptFalse, union_of(TInitNull, TFalse));
+  EXPECT_EQ(TOptRes, union_of(TInitNull, TRes));
+
+  EXPECT_EQ(TOptTrue, union_of(TOptTrue, TTrue));
+  EXPECT_EQ(TOptFalse, union_of(TOptFalse, TFalse));
+  EXPECT_EQ(TOptBool, union_of(TOptTrue, TFalse));
+
+  EXPECT_EQ(TOptClsMeth, union_of(TInitNull, TClsMeth));
+
+  EXPECT_EQ(TOptFuncOrCls, union_of(TInitNull, TFuncOrCls));
+  EXPECT_EQ(TOptFuncOrCls, union_of(TFunc, TOptCls));
+
+  EXPECT_EQ(TOptStrLike, union_of(TOptFuncOrCls, TStr));
+  EXPECT_EQ(TOptUncStrLike, union_of(TOptFuncOrCls, TSStr));
+
+  EXPECT_EQ(TOptVArrLike, union_of(TOptClsMeth, TVArr));
+  EXPECT_EQ(TOptVArrLikeSA, union_of(TOptClsMeth, TSVArr));
+
+  EXPECT_EQ(TOptPArrLike, union_of(TOptClsMeth, TPArr));
+  EXPECT_EQ(TOptPArrLikeSA, union_of(TOptClsMeth, TSPArr));
+
+  EXPECT_EQ(TOptVecLike, union_of(TOptClsMeth, TVec));
+  EXPECT_EQ(TOptVecLikeSA, union_of(TOptClsMeth, TSVec));
+
   auto const program = make_test_program();
   Index index { program.get() };
   auto const rcls = index.builtin_class(s_Awaitable.get());
@@ -1043,6 +1148,15 @@ TEST(Type, SpecificExamples) {
   EXPECT_TRUE(TNull.couldBe(opt(ival(3))));
   EXPECT_TRUE(TInitNull.subtypeOf(opt(ival(3))));
   EXPECT_TRUE(!TNull.subtypeOf(opt(ival(3))));
+
+  EXPECT_EQ(intersection_of(TClsMeth, TInitUnc),
+            use_lowptr ? TClsMeth : TBottom);
+  EXPECT_EQ(intersection_of(TVecLike, TInitUnc),
+            use_lowptr ? TVecLikeSA : TSVec);
+  EXPECT_EQ(intersection_of(TVArrLike, TInitUnc),
+            use_lowptr ? TVArrLikeSA : TSVArr);
+  EXPECT_EQ(intersection_of(TPArrLike, TInitUnc),
+            use_lowptr ? TPArrLikeSA : TSArr);
 
   auto test_map_a = MapElems{};
   test_map_a[tv(s_A)] = TDbl;
@@ -2491,7 +2605,11 @@ TEST(Type, LoosenStaticness) {
                         TOptVec,
                         TOptDict,
                         TOptKeyset,
-                        TOptSStr) &&
+                        TOptSStr,
+                        TOptUncStrLike,
+                        TOptPArrLikeSA,
+                        TOptVArrLikeSA,
+                        TOptVecLikeSA) &&
          t != TInitNull)) continue;
     EXPECT_EQ(loosen_staticness(t), t);
   }
@@ -2541,6 +2659,16 @@ TEST(Type, LoosenStaticness) {
     { sarr_mapn(TSStr, TInt), arr_mapn(TStr, TInt) },
     { sarr_mapn(TInt, TSDictN), arr_mapn(TInt, TDictN) },
     { sarr_map(test_map), arr_map(test_map) },
+    { TClsMeth, TClsMeth },
+    { TFuncOrCls, TFuncOrCls },
+    { TStrLike, TStrLike },
+    { TUncStrLike, TStrLike },
+    { TVArrLike, TVArrLike },
+    { TVArrLikeSA, TVArrLike },
+    { TVecLike, TVecLike },
+    { TVecLikeSA, TVecLike },
+    { TPArrLike, TPArrLike },
+    { TPArrLikeSA, TPArrLike },
   };
   for (auto const& p : tests) {
     EXPECT_EQ(loosen_staticness(p.first), p.second);
@@ -2707,7 +2835,8 @@ TEST(Type, LoosenDVArrayness) {
   Index index{ program.get() };
 
   for (auto const& t : all_with_waithandles(index)) {
-    if (t.subtypeOfAny(TOptPArr, TOptVArr, TOptDArr) && t != TInitNull) {
+    if (t.subtypeOfAny(TOptPArr, TOptVArr, TOptDArr, TOptVArrLike) &&
+        t != TInitNull) {
       continue;
     }
     EXPECT_EQ(loosen_dvarrayness(t), t);
@@ -2989,6 +3118,14 @@ TEST(Type, RemoveCounted) {
       arr_map(test_map_a, TStr, union_of(arr_packedn(TObj), some_aempty())),
       sarr_map(test_map_a, TSStr, aempty())
     },
+    { TClsMeth, use_lowptr ? TClsMeth : TBottom },
+    { TFuncOrCls, TFuncOrCls },
+    { TVArrLike, use_lowptr ? TVArrLikeSA : TSVArr },
+    { TVArrLikeSA, use_lowptr ? TVArrLikeSA : TSVArr },
+    { TVecLike, use_lowptr ? TVecLikeSA : TSVec },
+    { TVecLikeSA, use_lowptr ? TVecLikeSA : TSVec },
+    { TPArrLike, use_lowptr ? TPArrLikeSA : TSArr },
+    { TPArrLikeSA, use_lowptr ? TPArrLikeSA : TSArr },
   };
   for (auto const& p : cases) {
     EXPECT_EQ(remove_counted(p.first), p.second);
@@ -3037,11 +3174,14 @@ TEST(Type, MustBeCounted) {
     { TUnc, false },
     { TInitUnc, false },
     { TSDictN, false },
+    { TArrKey, false },
     { TUncArrKey, false },
+    { TStrLike, false },
     { TUncStrLike, false },
     { TInitCell, false },
     { TObj, true },
     { TRes, true },
+    { TRecord, true },
     { ival(1), false },
     { dval(2.0), false },
     { sval(s_test.get()), false },
@@ -3060,6 +3200,14 @@ TEST(Type, MustBeCounted) {
     { arr_map(test_map_a, TStr, TObj), false },
     { arr_map(test_map_b, TSStr, TInt), true },
     { arr_map(test_map_a, TSStr, TInt), false },
+    { TFuncOrCls, false },
+    { TClsMeth, !use_lowptr },
+    { TVArrLike, false },
+    { TVArrLikeSA, false },
+    { TVecLike, false },
+    { TVecLikeSA, false },
+    { TPArrLike, false },
+    { TPArrLikeSA, false },
   };
   for (auto const& p : cases) {
     if (p.second) {

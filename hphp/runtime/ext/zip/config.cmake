@@ -4,5 +4,5 @@ HHVM_DEFINE_EXTENSION("zip"
   SYSTEMLIB
     ext_zip.php
   DEPENDS
-    libZip
+    libzip
 )

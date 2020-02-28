@@ -3682,29 +3682,35 @@ where
     fn get_type_params_and_emit_shadowing_errors(
         &mut self,
         l: &'a Syntax<Token, Value>,
-    ) -> HashSet<&'a str> {
+    ) -> (HashSet<&'a str>, HashSet<&'a str>) {
         let mut res: HashSet<&'a str> = HashSet::new();
+        let mut notreified: HashSet<&'a str> = HashSet::new();
         for p in Self::syntax_to_list_no_separators(l).rev() {
             match &p.syntax {
-                TypeParameter(x) if !x.type_reified.is_missing() => {
+                TypeParameter(x) => {
                     let name = self.text(&x.type_name);
-                    if res.contains(&name) {
-                        self.errors
-                            .push(Self::make_error_from_node(p, errors::shadowing_reified))
+                    if !x.type_reified.is_missing() {
+                        if res.contains(&name) {
+                            self.errors
+                                .push(Self::make_error_from_node(p, errors::shadowing_reified))
+                        } else {
+                            res.insert(name);
+                        }
                     } else {
-                        res.insert(name);
+                        notreified.insert(name);
                     }
                 }
                 _ => (),
             }
         }
-        res
+        (res, notreified)
     }
 
     fn reified_parameter_errors(&mut self, node: &'a Syntax<Token, Value>) {
         if let FunctionDeclarationHeader(x) = &node.syntax {
             if let TypeParameters(x) = &x.function_type_parameter_list.syntax {
-                self.get_type_params_and_emit_shadowing_errors(&x.type_parameters_parameters);
+                self.get_type_params_and_emit_shadowing_errors(&x.type_parameters_parameters)
+                    .0;
             }
         }
     }
@@ -3720,16 +3726,21 @@ where
     fn class_reified_param_errors(&mut self, node: &'a Syntax<Token, Value>) {
         match &node.syntax {
             ClassishDeclaration(cd) => {
-                let reified_params = match &cd.classish_type_parameters.syntax {
+                let (reified, non_reified) = match &cd.classish_type_parameters.syntax {
                     TypeParameters(x) => self
                         .get_type_params_and_emit_shadowing_errors(&x.type_parameters_parameters),
-                    _ => HashSet::new(),
+                    _ => (HashSet::new(), HashSet::new()),
                 };
+
+                let tparams: HashSet<&'a str> = reified
+                    .union(&non_reified)
+                    .cloned()
+                    .collect::<HashSet<&'a str>>();
 
                 let add_error = |self_: &mut Self, e: &'a Syntax<Token, Value>| {
                     if let TypeParameter(x) = &e.syntax {
                         if !x.type_reified.is_missing()
-                            && reified_params.contains(&self_.text(&x.type_name))
+                            && tparams.contains(&self_.text(&x.type_name))
                         {
                             self_
                                 .errors
@@ -3756,7 +3767,7 @@ where
                         .for_each(check_method)
                 }
 
-                if !reified_params.is_empty() {
+                if !reified.is_empty() {
                     if Self::is_token_kind(&cd.classish_keyword, TokenKind::Interface) {
                         self.errors.push(Self::make_error_from_node(
                             node,

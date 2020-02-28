@@ -1,6 +1,6 @@
 <?hh
 function handler($errno, $errstr, $errfile, $errline, $errcontext='',
-                 $errtrace = array()) {
+                 $errtrace = varray[]) {
 
   if ($errstr === "Hack Array Compat: Comparing PHP array with Hack array") {
     HackArrCompatCompare::$got_notice_hack_array = true;
@@ -62,7 +62,7 @@ function main() {
     __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[2, 5]), __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[3, 4])]),
     __hhvm_intrinsics\dummy_cast_to_kindofarray(dict['a' => __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]), 'c' => __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2])]),
   ]);
-  $x2_hack_arrays = array(
+  $x2_hack_arrays = vec[
     vec[],
     vec[1, 2, 3],
     dict[],
@@ -70,7 +70,7 @@ function main() {
     keyset[],
     keyset['a', 'b', 'c'],
     __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2, vec[3, 4]]),
-  );
+  ];
 
   $do_compare_hack_array_listener
     = $thunk ==> do_compare_hack_array($thunk);

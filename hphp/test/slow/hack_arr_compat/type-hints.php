@@ -65,169 +65,169 @@ function test() {
   fun1(shape('a' => true, 'b' => false));
   fun1(varray[]);
   fun1(darray[]);
-  fun1(array());
+  fun1(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
 
   fun2(tuple(true, false));
   fun2(shape('a' => true, 'b' => false));
   fun2(varray[]);
   fun2(darray[]);
-  fun2(array());
+  fun2(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
 
   fun3(tuple(true, false));
   fun3(shape('a' => true, 'b' => false));
   fun3(varray[]);
   fun3(darray[]);
-  fun3(array());
+  fun3(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
 
   fun4(tuple(true, false));
   fun4(shape('a' => true, 'b' => false));
   fun4(varray[]);
   fun4(darray[]);
-  fun4(array());
+  fun4(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
 
   opt_fun1(tuple(true, false));
   opt_fun1(shape('a' => true, 'b' => false));
   opt_fun1(varray[]);
   opt_fun1(darray[]);
-  opt_fun1(array());
+  opt_fun1(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
   opt_fun1(null);
 
   opt_fun2(tuple(true, false));
   opt_fun2(shape('a' => true, 'b' => false));
   opt_fun2(varray[]);
   opt_fun2(darray[]);
-  opt_fun2(array());
+  opt_fun2(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
   opt_fun2(null);
 
   opt_fun3(tuple(true, false));
   opt_fun3(shape('a' => true, 'b' => false));
   opt_fun3(varray[]);
   opt_fun3(darray[]);
-  opt_fun3(array());
+  opt_fun3(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
   opt_fun3(null);
 
   opt_fun4(tuple(true, false));
   opt_fun4(shape('a' => true, 'b' => false));
   opt_fun4(varray[]);
   opt_fun4(darray[]);
-  opt_fun4(array());
+  opt_fun4(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
   opt_fun4(null);
 
   tuple_fun(tuple(true, false));
   tuple_fun(shape('a' => true, 'b' => false));
   tuple_fun(varray[]);
   tuple_fun(darray[]);
-  tuple_fun(array());
+  tuple_fun(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
 
   shape_fun(shape('a' => true, 'b' => false));
   shape_fun(tuple(true, false));
   shape_fun(varray[]);
   shape_fun(darray[]);
-  shape_fun(array());
+  shape_fun(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
 
   opt_tuple_fun(tuple(true, false));
   opt_tuple_fun(shape('a' => true, 'b' => false));
   opt_tuple_fun(varray[]);
   opt_tuple_fun(darray[]);
-  opt_tuple_fun(array());
+  opt_tuple_fun(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
   opt_tuple_fun(null);
 
   opt_shape_fun(shape('a' => true, 'b' => false));
   opt_shape_fun(tuple(true, false));
   opt_shape_fun(varray[]);
   opt_shape_fun(darray[]);
-  opt_shape_fun(array());
+  opt_shape_fun(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
   opt_shape_fun(null);
 
   alias_fun1(tuple(true, false));
   alias_fun1(shape('a' => true, 'b' => false));
   alias_fun1(varray[]);
   alias_fun1(darray[]);
-  alias_fun1(array());
+  alias_fun1(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
 
   alias_fun2(tuple(true, false));
   alias_fun2(shape('a' => true, 'b' => false));
   alias_fun2(varray[]);
   alias_fun2(darray[]);
-  alias_fun2(array());
+  alias_fun2(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
 
   alias_fun3(tuple(true, false));
   alias_fun3(shape('a' => true, 'b' => false));
   alias_fun3(varray[]);
   alias_fun3(darray[]);
-  alias_fun3(array());
+  alias_fun3(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
 
   alias_fun4(tuple(true, false));
   alias_fun4(shape('a' => true, 'b' => false));
   alias_fun4(varray[]);
   alias_fun4(darray[]);
-  alias_fun4(array());
+  alias_fun4(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
 
   alias_fun5(tuple(true, false));
   alias_fun5(shape('a' => true, 'b' => false));
   alias_fun5(varray[]);
   alias_fun5(darray[]);
-  alias_fun5(array());
+  alias_fun5(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
 
   alias_fun6(tuple(true, false));
   alias_fun6(shape('a' => true, 'b' => false));
   alias_fun6(varray[]);
   alias_fun6(darray[]);
-  alias_fun6(array());
+  alias_fun6(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
 
   alias_fun7(tuple(true, false));
   alias_fun7(shape('a' => true, 'b' => false));
   alias_fun7(varray[]);
   alias_fun7(darray[]);
-  alias_fun7(array());
+  alias_fun7(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
 
   opt_alias_fun1(tuple(true, false));
   opt_alias_fun1(shape('a' => true, 'b' => false));
   opt_alias_fun1(varray[]);
   opt_alias_fun1(darray[]);
-  opt_alias_fun1(array());
+  opt_alias_fun1(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
   opt_alias_fun1(null);
 
   opt_alias_fun2(tuple(true, false));
   opt_alias_fun2(shape('a' => true, 'b' => false));
   opt_alias_fun2(varray[]);
   opt_alias_fun2(darray[]);
-  opt_alias_fun2(array());
+  opt_alias_fun2(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
   opt_alias_fun2(null);
 
   opt_alias_fun3(tuple(true, false));
   opt_alias_fun3(shape('a' => true, 'b' => false));
   opt_alias_fun3(varray[]);
   opt_alias_fun3(darray[]);
-  opt_alias_fun3(array());
+  opt_alias_fun3(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
   opt_alias_fun3(null);
 
   opt_alias_fun4(tuple(true, false));
   opt_alias_fun4(shape('a' => true, 'b' => false));
   opt_alias_fun4(varray[]);
   opt_alias_fun4(darray[]);
-  opt_alias_fun4(array());
+  opt_alias_fun4(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
   opt_alias_fun4(null);
 
   opt_alias_fun5(tuple(true, false));
   opt_alias_fun5(shape('a' => true, 'b' => false));
   opt_alias_fun5(varray[]);
   opt_alias_fun5(darray[]);
-  opt_alias_fun5(array());
+  opt_alias_fun5(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
   opt_alias_fun5(null);
 
   opt_alias_fun6(tuple(true, false));
   opt_alias_fun6(shape('a' => true, 'b' => false));
   opt_alias_fun6(varray[]);
   opt_alias_fun6(darray[]);
-  opt_alias_fun6(array());
+  opt_alias_fun6(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
   opt_alias_fun6(null);
 
   opt_alias_fun7(tuple(true, false));
   opt_alias_fun7(shape('a' => true, 'b' => false));
   opt_alias_fun7(varray[]);
   opt_alias_fun7(darray[]);
-  opt_alias_fun7(array());
+  opt_alias_fun7(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
   opt_alias_fun7(null);
 
   $x = varray[];
@@ -239,7 +239,7 @@ function test() {
   $x = varray[];
   inout_fun1(inout $x, darray[]);
   $x = varray[];
-  inout_fun1(inout $x, array());
+  inout_fun1(inout $x, __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
 
   $x = darray[];
   inout_fun2(inout $x, tuple(true, false));
@@ -250,7 +250,7 @@ function test() {
   $x = darray[];
   inout_fun2(inout $x, darray[]);
   $x = darray[];
-  inout_fun2(inout $x, array());
+  inout_fun2(inout $x, __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
 
   $x = darray[];
   inout_fun3(inout $x, tuple(true, false));
@@ -261,18 +261,18 @@ function test() {
   $x = darray[];
   inout_fun3(inout $x, darray[]);
   $x = darray[];
-  inout_fun3(inout $x, array());
+  inout_fun3(inout $x, __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
 
-  $x = array();
+  $x = __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]);
   inout_fun4(inout $x, tuple(true, false));
-  $x = array();
+  $x = __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]);
   inout_fun4(inout $x, shape('a' => true, 'b' => false));
-  $x = array();
+  $x = __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]);
   inout_fun4(inout $x, varray[]);
-  $x = array();
+  $x = __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]);
   inout_fun4(inout $x, darray[]);
-  $x = array();
-  inout_fun4(inout $x, array());
+  $x = __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]);
+  inout_fun4(inout $x, __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
 
   $x = varray[];
   opt_inout_fun1(inout $x, tuple(true, false));
@@ -283,7 +283,7 @@ function test() {
   $x = varray[];
   opt_inout_fun1(inout $x, darray[]);
   $x = varray[];
-  opt_inout_fun1(inout $x, array());
+  opt_inout_fun1(inout $x, __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
   $x = varray[];
   opt_inout_fun1(inout $x, null);
 
@@ -296,7 +296,7 @@ function test() {
   $x = darray[];
   opt_inout_fun2(inout $x, darray[]);
   $x = darray[];
-  opt_inout_fun2(inout $x, array());
+  opt_inout_fun2(inout $x, __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
   $x = darray[];
   opt_inout_fun2(inout $x, null);
 
@@ -309,34 +309,34 @@ function test() {
   $x = darray[];
   opt_inout_fun3(inout $x, darray[]);
   $x = darray[];
-  opt_inout_fun3(inout $x, array());
+  opt_inout_fun3(inout $x, __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
   $x = darray[];
   opt_inout_fun3(inout $x, null);
 
-  $x = array();
+  $x = __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]);
   opt_inout_fun4(inout $x, tuple(true, false));
-  $x = array();
+  $x = __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]);
   opt_inout_fun4(inout $x, shape('a' => true, 'b' => false));
-  $x = array();
+  $x = __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]);
   opt_inout_fun4(inout $x, varray[]);
-  $x = array();
+  $x = __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]);
   opt_inout_fun4(inout $x, darray[]);
-  $x = array();
-  opt_inout_fun4(inout $x, array());
-  $x = array();
+  $x = __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]);
+  opt_inout_fun4(inout $x, __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
+  $x = __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]);
   opt_inout_fun4(inout $x, null);
 
   vsoft(tuple(true, false));
   vsoft(shape('a' => true, 'b' => false));
   vsoft(varray[]);
   vsoft(darray[]);
-  vsoft(array());
+  vsoft(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
 
   dsoft(tuple(true, false));
   dsoft(shape('a' => true, 'b' => false));
   dsoft(varray[]);
   dsoft(darray[]);
-  dsoft(array());
+  dsoft(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
 
   set_error_handler(fun('handler'));
 

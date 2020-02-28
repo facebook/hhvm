@@ -63,7 +63,7 @@ function main_varr_to_darr() {
 
   test(varray[1, 2, 3, 4]);
   test(darray['a' => 10, 'b' => 20]);
-  test(array('a' => 10, 'b' => 20));
+  test(__hhvm_intrinsics\dummy_cast_to_kindofarray(dict['a' => 10, 'b' => 20]));
   test(dict['a' => 10, 'b' => 20]);
 
   test(varray[1, 2, 3, 4, 5, 6, 7, 8]);

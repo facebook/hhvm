@@ -16,12 +16,12 @@ function main_entry(): void {
 
   for ($i = 0; $i < 10; $i++) {
     try {
-      d(dict[a => dict[]], dict[a => array()]);
+      d(dict[a => dict[]], dict[a => __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[])]);
     } catch (Exception $e) {
       echo ".";
     }
     try {
-      v(vec[dict[]], vec[array()]);
+      v(vec[dict[]], vec[__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[])]);
     } catch (Exception $e) {
       echo ".";
     }

@@ -6,7 +6,7 @@ class D {
   private $array;
 
   function __construct() {
-    $this->array = array();
+    $this->array = darray[];
   }
 
   function __get($key) {

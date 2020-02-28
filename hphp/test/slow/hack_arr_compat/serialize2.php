@@ -50,7 +50,7 @@ function literals() {
   );
 
   HH\serialize_with_options(
-    __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, vec[2, 3, 4], array(5, 6, 7), keyset[8, 9, 10], dict['a' => 11, 'b' => 12]]),
+    __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, vec[2, 3, 4], __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[5, 6, 7]), keyset[8, 9, 10], dict['a' => 11, 'b' => 12]]),
     dict["warnOnHackArrays" => true, "warnOnPHPArrays" => true]
   );
 }

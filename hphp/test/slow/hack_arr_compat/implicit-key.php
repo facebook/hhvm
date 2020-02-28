@@ -106,7 +106,7 @@ $arr = __hhvm_intrinsics\dummy_cast_to_kindofarray(dict[
     "" => $sub
   ])
 ]);
-$keys = array(null, true, false, 1.5);
+$keys = __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[null, true, false, 1.5]);
 basic_getters($arr, $keys);
 basic_setters($arr, $keys);
 member_ops($arr, $keys);

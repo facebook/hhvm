@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d9e7de87e070482bbe85795fc8192917>>
+// @generated SignedSource<<b151f60623afb5f82375328096506013>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -20,7 +20,18 @@ pub use crate::ast_defs::shape_map;
 pub use aast::PuLoc;
 pub use aast::Sid;
 
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub enum FuncBodyAnn {
     Named,
     NamedWithUnsafeBlocks,
@@ -79,7 +90,18 @@ pub type MethodRedeclaration = aast::MethodRedeclaration<pos::Pos, FuncBodyAnn, 
 
 pub type Targ = aast::Targ<()>;
 
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub struct IgnoreAttributeEnv {
     pub ignored_attributes: Vec<String>,
 }

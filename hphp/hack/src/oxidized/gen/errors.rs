@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ec534b088f1f0db3baec7e942fa7da64>>
+// @generated SignedSource<<4b2e9e94fbb0598c1f463498139e6ac3>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -32,6 +32,7 @@ pub type Message<A> = (A, String);
     Debug,
     Deserialize,
     Eq,
+    Hash,
     OcamlRep,
     Ord,
     PartialEq,
@@ -46,19 +47,55 @@ pub enum Phase {
     Typing,
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub enum Severity {
     Warning,
     Error,
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub enum Format {
     Context,
     Raw,
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub enum NameContext {
     FunctionNamespace,
     ConstantNamespace,
@@ -75,13 +112,35 @@ pub type FileT<A> = phase_map::PhaseMap<Vec<A>>;
 /// Results of multi-file analysis.
 pub type FilesT<A> = relative_path::map::Map<FileT<A>>;
 
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, Hash, OcamlRep, PartialEq, Serialize)]
 pub struct Error_<A>(pub ErrorCode, pub Vec<Message<A>>);
 
 pub type Error = Error_<pos::Pos>;
 
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub struct AppliedFixme(pub pos::Pos, pub isize);
 
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub struct Errors(pub FilesT<Error>, pub FilesT<AppliedFixme>);

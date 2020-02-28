@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<03bb8e999346ebfc9a2cace32fcd6e9e>>
+// @generated SignedSource<<e74c00e1edf8b9fadc76c092eea49637>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -16,7 +16,18 @@ use serde::Serialize;
 use crate::*;
 
 /// The reason why something is expected to have a certain type
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub enum Reason {
     Rnone,
     Rwitness(pos::Pos),
@@ -123,14 +134,37 @@ pub enum Reason {
     RglobalFunRet(pos::Pos),
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub enum ArgPosition {
     Aonly,
     Afirst,
     Asecond,
 }
 
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub enum ExprDepTypeReason {
     ERexpr(isize),
     ERstatic,
@@ -139,7 +173,18 @@ pub enum ExprDepTypeReason {
     ERself(String),
 }
 
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub enum Ureason {
     URnone,
     URassign,

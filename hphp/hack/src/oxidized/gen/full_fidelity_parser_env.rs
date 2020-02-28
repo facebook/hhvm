@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c9870e9334826557fc215c8ce81a1360>>
+// @generated SignedSource<<a0eb948d8d28aecf2a464945eb651f5e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -15,7 +15,18 @@ use serde::Serialize;
 #[allow(unused_imports)]
 use crate::*;
 
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub struct FullFidelityParserEnv {
     pub hhvm_compat_mode: bool,
     pub php5_compat_mode: bool,

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6f547544ea5e39dec96dadbfb5c8dcf3>>
+// @generated SignedSource<<ac55efa10d092398d9c52d90e12673c4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -47,14 +47,37 @@ pub use typing_defs::*;
 /// The `sc_from_req_extends` field is set to true if the context was inherited
 /// via a require extends type. This information is relevant when folding
 /// `dc_substs` during inheritance. See Decl_inherit module.
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub struct SubstContext {
     pub subst: s_map::SMap<DeclTy>,
     pub class_context: String,
     pub from_req_extends: bool,
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub enum SourceType {
     Child,
     Parent,
@@ -65,7 +88,18 @@ pub enum SourceType {
     ReqExtends,
 }
 
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub struct MroElement {
     /// The class's name
     pub name: String,
@@ -140,14 +174,36 @@ pub type Linearization = sequence::Sequence<MroElement>;
 /// If None - method is unconditionally reactive
 pub type ConditionTypeName = Option<String>;
 
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub enum MethodReactivity {
     MethodReactive(ConditionTypeName),
     MethodShallow(ConditionTypeName),
     MethodLocal(ConditionTypeName),
 }
 
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub struct DeclClassType {
     pub need_init: bool,
     pub members_fully_known: bool,
@@ -187,7 +243,18 @@ pub struct DeclClassType {
     pub condition_types: s_set::SSet,
 }
 
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub struct Element {
     pub final_: bool,
     pub synthesized: bool,

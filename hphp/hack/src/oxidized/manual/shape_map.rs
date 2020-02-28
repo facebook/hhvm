@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::ast_defs::{Id, ShapeFieldName};
 
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
+#[derive(Clone, Debug, Deserialize, Hash, OcamlRep, Serialize)]
 pub struct ShapeField(pub ShapeFieldName);
 
 impl Ord for ShapeField {

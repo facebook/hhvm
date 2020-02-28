@@ -17,19 +17,38 @@ open State
 open Convert_longident
 open Convert_type
 
-let derived_traits =
+let default_derives =
   [
     (None, "Clone");
     (None, "Debug");
+    (None, "Eq");
+    (None, "Hash");
+    (None, "Ord");
+    (None, "PartialEq");
+    (None, "PartialOrd");
     (Some "ocamlrep_derive", "OcamlRep");
     (Some "serde", "Serialize");
     (Some "serde", "Deserialize");
   ]
 
-let additional_derived_traits ty =
-  match (State.curr_module_name (), ty) with
-  | ("errors", "Phase") -> [(None, "PartialOrd"); (None, "Ord")]
-  | _ -> []
+let derive_blacklists =
+  [
+    (* A custom implementation of Ord for Error_ matches the sorting behavior of
+       errors in OCaml. *)
+    ("errors::Error_", ["Ord"; "PartialOrd"]);
+    (* GlobalOptions contains a couple floats, which only implement PartialEq
+       and PartialOrd, and do not implement Hash. *)
+    ("global_options::GlobalOptions", ["Eq"; "Hash"; "Ord"]);
+  ]
+  |> List.fold ~init:SMap.empty ~f:(fun map (ty, bl) -> SMap.add ty bl map)
+
+let derived_traits ty =
+  let ty = sprintf "%s::%s" (curr_module_name ()) ty in
+  match SMap.find_opt ty derive_blacklists with
+  | None -> default_derives
+  | Some blacklist ->
+    List.filter default_derives ~f:(fun (_, derive) ->
+        not (List.mem blacklist derive ~equal:( = )))
 
 (* HACK: ignore phases since we are only considering decl tys *)
 let blacklisted_types =
@@ -272,9 +291,9 @@ let ctor_arg_len (ctor_args : constructor_arguments) : int =
 
 let type_declaration name td =
   let doc = doc_comment_of_attribute_list td.ptype_attributes in
-  let attrs_and_vis init_derives =
+  let attrs_and_vis additional_derives =
     let derive_attr =
-      derived_traits @ init_derives @ additional_derived_traits name
+      derived_traits name @ additional_derives
       |> List.sort ~compare:(fun (_, t1) (_, t2) -> String.compare t1 t2)
       |> List.map ~f:(fun (m, trait) ->
              Option.iter m ~f:(fun m -> add_extern_use (m ^ "::" ^ trait));
@@ -395,7 +414,7 @@ let type_declaration name td =
     in
     let derives =
       if all_nullary then
-        [(None, "Copy"); (None, "Eq"); (None, "PartialEq")]
+        [(None, "Copy")]
       else
         []
     in

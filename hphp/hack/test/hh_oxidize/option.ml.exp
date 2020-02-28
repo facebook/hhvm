@@ -5,7 +5,7 @@ use serde::Serialize;
 #[allow(unused_imports)]
 use crate::*;
 
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, Hash, OcamlRep, Ord, PartialEq, PartialOrd, Serialize)]
 pub enum Option<A> {
     None,
     Some(A),

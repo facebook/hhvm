@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5bcf7748c7bfad81640c034ad1817ddb>>
+// @generated SignedSource<<300cf8e3533db14f1bbc6a6916552cfd>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -17,34 +17,93 @@ use crate::*;
 
 pub use crate::typing_reason as reason;
 
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub enum Visibility {
     Vpublic,
     Vprivate(String),
     Vprotected(String),
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub enum Exact {
     Exact,
     Nonexact,
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub enum ValKind {
     Lval,
     LvalSubexpr,
     Other,
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub enum ParamMutability {
     ParamOwnedMutable,
     ParamBorrowedMutable,
     ParamMaybeMutable,
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub enum FunTparamsKind {
     /// If ft_tparams is empty, the containing fun_type is a concrete function type.
     /// Otherwise, it is a generic function and ft_tparams specifies its type parameters.
@@ -58,25 +117,72 @@ pub enum FunTparamsKind {
     FTKinstantiatedTargs,
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub enum ShapeKind {
     ClosedShape,
     OpenShape,
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub enum ParamMode {
     FPnormal,
     FPinout,
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub enum XhpAttrTag {
     Required,
     Lateinit,
 }
 
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub struct XhpAttr {
     pub tag: Option<XhpAttrTag>,
     pub has_default: bool,
@@ -89,27 +195,73 @@ pub struct XhpAttr {
 /// If we have a new final class that doesn't extend from <<__ConsistentConstruct>>,
 /// then we use Final. Only classes that are Inconsistent or Final can have reified
 /// generics.
-#[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub enum ConsistentKind {
     Inconsistent,
     ConsistentConstruct,
     FinalClass,
 }
 
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub enum DependentType {
     DTthis,
     DTcls(String),
     DTexpr(ident::Ident),
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub enum DestructureKind {
     ListDestructure,
     SplatUnpack,
 }
 
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub struct Tparam<Ty> {
     pub variance: ast_defs::Variance,
     pub name: ast_defs::Id,
@@ -118,10 +270,32 @@ pub struct Tparam<Ty> {
     pub user_attributes: Vec<nast::UserAttribute>,
 }
 
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub struct WhereConstraint<Ty>(pub Ty, pub ast_defs::ConstraintKind, pub Ty);
 
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub struct Ty(pub reason::Reason, pub Box<Ty_>);
 
 pub type DeclTy = Ty;
@@ -135,13 +309,35 @@ pub type DeclTy = Ty;
 ///
 /// With this definition, the field 'a' may be unprovided in a shape. In this
 /// case, the field 'a' would have sf_optional set to true.
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub struct ShapeFieldType {
     pub optional: bool,
     pub ty: Ty,
 }
 
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub enum Ty_ {
     /// The late static bound type of a class
     Tthis,
@@ -239,7 +435,18 @@ pub enum Ty_ {
     Tintersection(Vec<Ty>),
 }
 
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub struct TaccessType(pub DeclTy, pub Vec<nast::Sid>);
 
 /// represents reactivity of function
@@ -257,7 +464,18 @@ pub struct TaccessType(pub DeclTy, pub Vec<nast::Sid>);
 /// ```
 ///
 /// call to function f will be treated as reactive only if $g is reactive
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub enum Reactivity {
     Nonreactive,
     Local(Option<DeclTy>),
@@ -270,7 +488,18 @@ pub enum Reactivity {
 
 /// The type of a function AND a method.
 /// A function has a min and max arity because of optional arguments
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub struct FunType<Ty> {
     pub is_coroutine: bool,
     pub arity: FunArity<Ty>,
@@ -293,7 +522,18 @@ pub type DeclFunType = FunType<DeclTy>;
 /// Arity information for a fun_type; indicating the minimum number of
 /// args expected by the function and the maximum number of args for
 /// standard, non-variadic functions or the type of variadic argument taken
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub enum FunArity<Ty> {
     /// min ; max
     Fstandard(isize, isize),
@@ -307,13 +547,35 @@ pub enum FunArity<Ty> {
 
 pub type DeclFunArity = FunArity<DeclTy>;
 
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub enum ParamRxAnnotation {
     ParamRxVar,
     ParamRxIfImpl(DeclTy),
 }
 
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub struct PossiblyEnforcedTy<Ty> {
     /// True if consumer of this type enforces it at runtime
     pub enforced: bool,
@@ -322,7 +584,18 @@ pub struct PossiblyEnforcedTy<Ty> {
 
 pub type DeclPossiblyEnforcedTy = PossiblyEnforcedTy<DeclTy>;
 
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub struct FunParam<Ty> {
     pub pos: pos::Pos,
     pub name: Option<String>,

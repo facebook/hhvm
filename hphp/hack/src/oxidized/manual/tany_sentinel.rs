@@ -6,5 +6,17 @@
 use ocamlrep_derive::OcamlRep;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
+#[derive(
+    Copy,
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    OcamlRep,
+    Serialize
+)]
 pub struct TanySentinel;

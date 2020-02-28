@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<78512f2d87f8c2e6344405c0adb4b731>>
+// @generated SignedSource<<fb0374b960153fb123d7e228ed93a469>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -15,7 +15,18 @@ use serde::Serialize;
 #[allow(unused_imports)]
 use crate::*;
 
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub struct Env {
     pub ns_uses: s_map::SMap<String>,
     pub class_uses: s_map::SMap<String>,

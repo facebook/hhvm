@@ -5,13 +5,13 @@ use serde::Serialize;
 #[allow(unused_imports)]
 use crate::*;
 
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, Hash, OcamlRep, Ord, PartialEq, PartialOrd, Serialize)]
 pub enum IntList {
     Nil,
     Cons(isize, Box<IntList>),
 }
 
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, Hash, OcamlRep, Ord, PartialEq, PartialOrd, Serialize)]
 pub enum NAryTree<A> {
     Leaf(A),
     Children(Vec<NAryTree<A>>),

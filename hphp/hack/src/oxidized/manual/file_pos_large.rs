@@ -7,7 +7,17 @@ use serde::{Deserialize, Serialize};
 
 use ocamlrep_derive::OcamlRep;
 
-#[derive(Copy, Clone, Debug, Deserialize, Eq, PartialEq, OcamlRep, Serialize)]
+#[derive(
+    Copy,
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    PartialEq,
+    Serialize
+)]
 pub struct FilePosLarge {
     lnum: usize,
     bol: usize,

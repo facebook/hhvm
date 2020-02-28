@@ -56,14 +56,6 @@ impl<P: Ord> PartialOrd for Error_<P> {
     }
 }
 
-impl<P: Ord> PartialEq for Error_<P> {
-    fn eq(&self, other: &Self) -> bool {
-        self.cmp(other) == Ordering::Equal
-    }
-}
-
-impl<P: Ord + Eq> Eq for Error_<P> {}
-
 impl Error_<Pos> {
     /// Return a struct with a `std::fmt::Display` implementation that displays
     /// the error in the "raw" format expected by our typecheck test cases.

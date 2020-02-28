@@ -16,6 +16,7 @@ use serde::{Deserialize, Serialize};
     Debug,
     Deserialize,
     Eq,
+    Hash,
     OcamlRep,
     Ord,
     PartialEq,
@@ -86,7 +87,7 @@ impl Prefix {
     }
 }
 
-#[derive(Clone, Debug, Eq, OcamlRep, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, Hash, OcamlRep, Ord, PartialEq, PartialOrd)]
 pub struct RelativePath {
     prefix: Prefix,
     path: PathBuf,

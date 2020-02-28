@@ -13,7 +13,7 @@ use crate::file_pos_large::FilePosLarge;
 use crate::file_pos_small::FilePosSmall;
 use crate::relative_path::{Prefix, RelativePath};
 
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
+#[derive(Clone, Debug, Deserialize, Hash, OcamlRep, Serialize)]
 enum PosImpl {
     Small {
         file: RcOc<RelativePath>,
@@ -29,7 +29,7 @@ enum PosImpl {
 
 use PosImpl::*;
 
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
+#[derive(Clone, Debug, Deserialize, Hash, OcamlRep, Serialize)]
 pub struct Pos(PosImpl);
 
 impl Pos {

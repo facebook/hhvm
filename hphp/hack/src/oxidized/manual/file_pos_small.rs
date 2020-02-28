@@ -33,7 +33,7 @@ use serde::{Deserialize, Serialize};
 // behave incorrectly on a 32-bit machine. We use `usize` here to match its
 // behavior, but once parity is no longer necessary, we may want to switch to
 // `u64`.
-#[derive(Copy, Clone, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Copy, Clone, Deserialize, Hash, Eq, PartialEq, Serialize)]
 pub struct FilePosSmall(usize);
 
 const COLUMN_BITS: usize = 9;

@@ -189,10 +189,12 @@ public:
     return m_jobCount;
   }
 
-  int releaseQueuedJobs() {
+  int releaseQueuedJobs(int target = 0) {
     if (m_jobCount) {
       Lock lock(this);
-      auto const toRelease = std::min(3, m_jobCount);
+      const int active = getActiveWorker();
+      auto const toRelease =
+        std::max(1, std::min(target - active, m_jobCount));
       for (int i = 0; i < toRelease; ++i) {
         notify();
       }
@@ -701,11 +703,12 @@ struct JobQueueDispatcher : IHostHealthObserver {
   void notifyNewStatus(HealthLevel newStatus) override {
     if (m_healthStatus >= HealthLevel::NoMore &&
         newStatus < HealthLevel::NoMore) {
+      m_healthStatus = newStatus;
       // release blocked requests in queue if any
-      m_queue.releaseQueuedJobs();
+      m_queue.releaseQueuedJobs(m_currThreadCountLimit / 4);
+    } else {
+      m_healthStatus = newStatus;
     }
-
-    m_healthStatus = newStatus;
   }
 
   HealthLevel getHealthLevel() override {

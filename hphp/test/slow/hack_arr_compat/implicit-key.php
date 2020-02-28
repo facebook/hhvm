@@ -88,25 +88,25 @@ function member_ops($arr, $keys) {
 
 <<__EntryPoint>>
 function main_implicit_key() {
-$sub = darray[0 => 100, 1 => 100, "" => 100];
-$arr = darray[
-  0 => darray[
+$sub = __hhvm_intrinsics\dummy_cast_to_kindofarray(dict[0 => 100, 1 => 100, "" => 100]);
+$arr = __hhvm_intrinsics\dummy_cast_to_kindofarray(dict[
+  0 => __hhvm_intrinsics\dummy_cast_to_kindofarray(dict[
     0 => $sub,
     1 => $sub,
     "" => $sub
-  ],
-  1 => darray[
+  ]),
+  1 => __hhvm_intrinsics\dummy_cast_to_kindofarray(dict[
     0 => $sub,
     1 => $sub,
     "" => $sub
-  ],
-  "" => darray[
+  ]),
+  "" => __hhvm_intrinsics\dummy_cast_to_kindofarray(dict[
     0 => $sub,
     1 => $sub,
     "" => $sub
-  ]
-];
-$keys = varray[null, true, false, 1.5];
+  ])
+]);
+$keys = array(null, true, false, 1.5);
 basic_getters($arr, $keys);
 basic_setters($arr, $keys);
 member_ops($arr, $keys);

@@ -15,7 +15,7 @@ async function gena<Tk as arraykey, Tv>(
 async function f() { return 1; }
 
 async function test() {
-  $x = varray[f(), f(), f()];
+  $x = __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[f(), f(), f()]);
   await gena($x);
 }
 

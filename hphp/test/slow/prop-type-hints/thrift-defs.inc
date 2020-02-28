@@ -168,7 +168,7 @@ class TestStruct5 {
 }
 
 class TestStruct6 {
-  public array $p1 = varray[];
+  public array $p1 = darray[];
   public array $p2 = varray[];
   public array $p3 = varray[];
 
@@ -241,7 +241,7 @@ class TestStruct7 {
   public Vector $p5 = Vector{};
   public Set $p6 = Set{};
 
-  public array $p7 = varray[];
+  public array $p7 = darray[];
   public array $p8 = varray[];
   public array $p9 = varray[];
 

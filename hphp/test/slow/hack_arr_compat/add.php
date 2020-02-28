@@ -6,10 +6,10 @@ function do_add($a, $b) {
 }
 
 function main() {
-  do_add(varray[], varray[]);
-  do_add(varray[1, 2, 3], varray[]);
-  do_add(varray[], varray[1, 2, 3]);
-  do_add(varray[1, 2, 3], varray[4, 5, 6]);
+  do_add(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]), __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
+  do_add(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2, 3]), __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
+  do_add(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]), __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2, 3]));
+  do_add(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2, 3]), __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[4, 5, 6]));
 }
 
 <<__EntryPoint>>

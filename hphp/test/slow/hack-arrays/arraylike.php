@@ -5,7 +5,7 @@ function takes_arraylike(arraylike<arraykey, mixed> $a) {
 }
 
 function ret_array(): arraylike<arraykey, mixed> {
-  return darray[42 => 'lol'];
+  return __hhvm_intrinsics\dummy_cast_to_kindofarray(dict[42 => 'lol']);
 }
 function ret_varray(): arraylike<arraykey, mixed> {
   return varray['lol'];
@@ -86,7 +86,7 @@ function test_builtins($a, $b, $c, $d, $e, $f, $g) {
 }
 
 function main() {
-  takes_arraylike(darray[42 => 'lol']);
+  takes_arraylike(__hhvm_intrinsics\dummy_cast_to_kindofarray(dict[42 => 'lol']));
   takes_arraylike(varray['lol']);
   takes_arraylike(darray[42 => 'lol']);
   takes_arraylike(vec['lol']);

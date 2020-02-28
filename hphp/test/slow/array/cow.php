@@ -8,7 +8,7 @@ function cow(): (array<int>, array<int>, array<int>) {
   $a1[] = 6;
   $a2[] = 7;
   $a2[] = 8;
-  return varray[$a1, $a2, $a3];
+  return tuple($a1, $a2, $a3);
 }
 
 function main() {

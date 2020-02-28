@@ -41,13 +41,13 @@ function test_casting($a) {
 }
 
 function run_tests() {
-  test(varray[], '10');
-  test(varray[1, 2, 3, 4], '2');
-  test(darray[10 => 'abc'], '10');
+  test(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]), '10');
+  test(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2, 3, 4]), '2');
+  test(__hhvm_intrinsics\dummy_cast_to_kindofarray(dict[10 => 'abc']), '10');
 
-  test_const_key(varray[]);
-  test_const_key(varray[1, 2, 3, 4]);
-  test_const_key(darray[2 => 'abc']);
+  test_const_key(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
+  test_const_key(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2, 3, 4]));
+  test_const_key(__hhvm_intrinsics\dummy_cast_to_kindofarray(dict[2 => 'abc']));
 
   test_casting(dict['1' => true, '2' => false]);
   test_casting(keyset['1', '2', '3']);

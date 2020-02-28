@@ -46,7 +46,7 @@ class A {
   public string $p2 = 'abc';
   public bool $p3 = false;
   public float $p4 = 3.14;
-  public array $p5a = varray[1, 2, 3];
+  public array $p5a = array(1, 2, 3); /* TODO: remove */
   public array $p5b = varray[1, 2, 3];
   public array $p5c = darray[1 => 'a', 2 => 'b', 3 => 'c'];
   public resource $p6 = STDIN;
@@ -69,7 +69,7 @@ class A {
   public darray $p23 = varray['val1', 'val2'];
   public varray_or_darray $p24 = varray[9, 8, 7];
   public varray_or_darray $p25 = darray['a' => 100, 'b' => 200];
-  public varray_or_darray $p26 = darray['a' => 100, 'b' => 200];
+  public varray_or_darray $p26 = array('a' => 100, 'b' => 200); /* TODO: remove */
   public Vector $p27 = Vector{};
   public Map $p28 = Map{};
   public Enum1 $p29 = 'abc';
@@ -198,7 +198,7 @@ class A {
   public static string $s2 = 'abc';
   public static bool $s3 = false;
   public static float $s4 = 3.14;
-  public static array $s5a = varray[1, 2, 3];
+  public static array $s5a = array(1, 2, 3); /* TODO: remove */
   public static array $s5b = varray[1, 2, 3];
   public static array $s5c = darray[1 => 'a', 2 => 'b', 3 => 'c'];
   public static resource $s6 = STDIN;
@@ -221,7 +221,7 @@ class A {
   public static darray $s23 = varray['val1', 'val2'];
   public static varray_or_darray $s24 = varray[9, 8, 7];
   public static varray_or_darray $s25 = darray['a' => 100, 'b' => 200];
-  public static varray_or_darray $s26 = darray['a' => 100, 'b' => 200];
+  public static varray_or_darray $s26 = array('a' => 100, 'b' => 200); /* TODO: delete */
   public static Vector $s27 = Vector{};
   public static Map $s28 = Map{};
   public static Enum1 $s29 = 'abc';

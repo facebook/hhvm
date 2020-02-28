@@ -45,12 +45,12 @@ function do_compares($a, $b, $cmp) {
 function main() {
   set_error_handler(fun('handler'));
 
-  $x1 = varray[
-    varray[],
-    varray[1, 2, varray[3, 4]],
-    darray['a' => 'b', 'c' => 'd']
-  ];
-  $x2_non_hack_arrays = varray[
+  $x1 = __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[
+    __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]),
+    __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2, __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[3, 4])]),
+    __hhvm_intrinsics\dummy_cast_to_kindofarray(dict['a' => 'b', 'c' => 'd'])
+  ]);
+  $x2_non_hack_arrays = __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[
     true,
     false,
     null,
@@ -59,18 +59,18 @@ function main() {
     'abc',
     new stdclass,
     imagecreate(1, 1),
-    varray[1, varray[2, 5], varray[3, 4]],
-    darray['a' => varray[], 'c' => varray[1, 2]],
-  ];
-  $x2_hack_arrays = varray[
+    __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[2, 5]), __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[3, 4])]),
+    __hhvm_intrinsics\dummy_cast_to_kindofarray(dict['a' => __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]), 'c' => __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2])]),
+  ]);
+  $x2_hack_arrays = array(
     vec[],
     vec[1, 2, 3],
     dict[],
     dict['a' => 'b', 'c' => 'd'],
     keyset[],
     keyset['a', 'b', 'c'],
-    varray[1, 2, vec[3, 4]],
-  ];
+    __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2, vec[3, 4]]),
+  );
 
   $do_compare_hack_array_listener
     = $thunk ==> do_compare_hack_array($thunk);

@@ -35,7 +35,7 @@ function getTestcase(int $num) {
     0.0, 1.0,
     "Array",
     HH\fun("wrap"),
-    varray['A', 'func1'],
+    __hhvm_intrinsics\dummy_cast_to_kindofarray(vec['A', 'func1']),
     HH\Vector{'A', 'foo'},
     varray['A', 'func1'],
     vec['A', 'func1'],

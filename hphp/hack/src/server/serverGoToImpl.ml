@@ -22,11 +22,11 @@ let find_positions_of_classes
   let ctx = Provider_context.empty_for_worker ~tcopt in
   acc
   @ List.map child_classes ~f:(fun child_class ->
-        match Naming_heap.Types.get_pos child_class with
+        match Naming_provider.get_type_pos child_class with
         | None ->
           failwith ("Could not find definition of child class: " ^ child_class)
-        | Some (FileInfo.Full pos, _type) -> (child_class, pos)
-        | Some (FileInfo.File (FileInfo.Class, path), _type) ->
+        | Some (FileInfo.Full pos) -> (child_class, pos)
+        | Some (FileInfo.File (FileInfo.Class, path)) ->
           (match Ast_provider.find_class_in_file ctx path child_class with
           | None ->
             failwith
@@ -35,9 +35,7 @@ let find_positions_of_classes
                  child_class
                  (Relative_path.to_absolute path))
           | Some { Aast.c_span; _ } -> (child_class, c_span))
-        | Some
-            FileInfo.(File ((Fun | RecordDef | Typedef | Const), _path), _type)
-          ->
+        | Some FileInfo.(File ((Fun | RecordDef | Typedef | Const), _path)) ->
           failwith
             (Printf.sprintf
                "Information for class %s was returned as not a class"

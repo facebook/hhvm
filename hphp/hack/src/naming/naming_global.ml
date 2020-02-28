@@ -74,10 +74,8 @@ module GEnv = struct
 
   let type_pos ctx name =
     let name = Option.value (type_canon_name ctx name) ~default:name in
-    match Naming_heap.Types.get_pos name with
-    | Some (pos, Naming_types.TClass)
-    | Some (pos, Naming_types.TTypedef)
-    | Some (pos, Naming_types.TRecordDef) ->
+    match Naming_provider.get_type_pos name with
+    | Some pos ->
       let (p, _) = get_full_pos ctx (pos, name) in
       Some p
     | None -> None

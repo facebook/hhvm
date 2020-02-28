@@ -1439,8 +1439,8 @@ module Make (GetLocals : GetLocals) = struct
         let (pos, name) =
           NS.elaborate_id genv.namespace NS.ElaborateClass t.Aast.tp_name
         in
-        match Naming_heap.Types.get_pos name with
-        | Some (def_pos, _) ->
+        match Naming_provider.get_type_pos name with
+        | Some def_pos ->
           let (def_pos, _) = GEnv.get_full_pos genv.ctx (def_pos, name) in
           Errors.error_name_already_bound name name pos def_pos
         | None ->

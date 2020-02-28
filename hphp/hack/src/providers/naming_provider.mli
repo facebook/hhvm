@@ -53,3 +53,7 @@ val remove_fun_batch : SSet.t -> unit
 the given position. These types all live in the same namespace, unlike
 functions and constants. *)
 val add_type : string -> FileInfo.pos -> Naming_types.kind_of_type -> unit
+
+(** Look up the position at which the given type was declared in the reverse
+naming table. *)
+val get_type_pos : string -> FileInfo.pos option

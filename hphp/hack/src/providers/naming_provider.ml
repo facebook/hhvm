@@ -42,3 +42,8 @@ let add_type
     (name : string) (pos : FileInfo.pos) (kind : Naming_types.kind_of_type) :
     unit =
   Naming_heap.Types.add name (pos, kind)
+
+let get_type_pos (name : string) : FileInfo.pos option =
+  match Naming_heap.Types.get_pos name with
+  | Some (pos, _kind) -> Some pos
+  | None -> None

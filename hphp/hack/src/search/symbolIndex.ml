@@ -269,12 +269,7 @@ let get_position_for_symbol
     | SI_Class
     | SI_Constructor
     | SI_RecordDef ->
-      let fipos =
-        match Naming_heap.Types.get_pos name_with_ns with
-        | None -> None
-        | Some (pos, _) -> Some pos
-      in
-      fipos
+      Naming_provider.get_type_pos name_with_ns
     | SI_Function -> Naming_provider.get_fun_pos name_with_ns
     | SI_GlobalConstant -> Naming_provider.get_const_pos name_with_ns
     (* Items below this are not global symbols and cannot be 'position'ed *)

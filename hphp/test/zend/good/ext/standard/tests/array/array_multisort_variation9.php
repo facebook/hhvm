@@ -16,10 +16,10 @@ class classWithoutToString { }
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_multisort() : usage variation  - test sort order of all types***\n";
 
-$inputs = array(
+$inputs = darray[
       'int 0' => 0,
       'float -10.5' => -10.5,
-      varray[],
+      0 => varray[],
       'uppercase NULL' => NULL,
       'lowercase true' => true,
       'empty string DQ' => "",
@@ -27,7 +27,7 @@ $inputs = array(
       'instance of classWithToString' => new classWithToString(),
       'instance of classWithoutToString' => new classWithoutToString(),
       'undefined var' => @$undefined_var,
-);
+];
 
 $numeric = SORT_NUMERIC;
 var_dump(array_multisort2(inout $inputs, inout $numeric));

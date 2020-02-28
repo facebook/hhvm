@@ -11,8 +11,8 @@ $begin_array = varray[
   darray[ -2.44444 => 12],
   darray[ "a" => 1, "b" => -2.344, "b" => "string", "c" => NULL,    "d" => -2.344],
   darray[ 4 => 1, 3 => -2.344, "3" => "string", "2" => NULL,1 => -2.344],
-  array( NULL, 1.23 => "Hi", "string" => "hello",
-  darray["" => "World", "-2.34" => "a", "0" => "b"])
+  darray[ 0 => NULL, 1.23 => "Hi", "string" => "hello",
+          2 => darray["" => "World", "-2.34" => "a", "0" => "b"]]
 ];
 
 $end_array   = varray[
@@ -22,8 +22,8 @@ $end_array   = varray[
   darray[ -2.44444 => 12],
   darray[ "a" => 1, "b" => -2.344, "b" => "string", "c" => NULL, "d" => -2.344],
   darray[ 4 => 1, 3 => -2.344, "3" => "string", "2" => NULL, 1=> -2.344],
-  array( NULL, 1.23 => "Hi", "string" => "hello",
-         darray["" => "World", "-2.34" => "a", "0" => "b"])
+  darray[ 0 => NULL, 1.23 => "Hi", "string" => "hello",
+          2 => darray["" => "World", "-2.34" => "a", "0" => "b"]]
 ];
 
 /* loop through to merge two arrays */

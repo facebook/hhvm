@@ -1,6 +1,6 @@
 <?hh
 /* Prototype  : array array_intersect(array $arr1, array $arr2 [, array $...])
- * Description: Returns the entries of arr1 that have values which are present in all the other arguments 
+ * Description: Returns the entries of arr1 that have values which are present in all the other arguments
  * Source code: ext/standard/array.c
 */
 
@@ -43,7 +43,7 @@ $arrays = varray [
              '\v\fworld' => 2.2, 'pen\n' => 33],
        darray["\tHello" => 111, "re\td" => "color",
              "\v\fworld" => 2.2, "pen\n" => 33],
-       array("hello", $heredoc => "string"), // heredoc
+       darray[0 => "hello", $heredoc => "string"], // heredoc
 
        // array with unset variable
 /*10*/ darray[ @$unset_var => "hello"],

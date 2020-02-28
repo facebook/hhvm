@@ -20,7 +20,7 @@ class classA
 echo "*** Testing array_key_exists() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$search = array ('zero', 'key' => 'val', 'two');
+$search = darray [0 => 'zero', 'key' => 'val', 1 => 'two'];
 
 //get an unset variable
 $unset_var = 10;

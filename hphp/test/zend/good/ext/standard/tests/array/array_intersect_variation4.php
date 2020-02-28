@@ -43,13 +43,13 @@ $numeric_string = <<<EOT
 EOT;
 
 // array to be passsed to $arr1 argument
-$arr1 = array (
-  1, 1.1, "hello", "one", NULL, 2,
-  'world', true, false, false => 5, 'aaaa\r', "aaaa\r",
-  $numeric_string, $diff_whitespaces,
+$arr1 = darray[
+  0 => 1, 1 => 1.1, 2 => "hello", 3 => "one", 4 => NULL, 5 => 2,
+  6 => 'world', 7 => true, 8 => false, false => 5, 9 => 'aaaa\r', 10 => "aaaa\r",
+  11 => $numeric_string, 12 => $diff_whitespaces,
   "one" => "ten", 4 => "four", "two" => 2, 2 => "two",
-  '', null => "null", '' => 'emptys'
-);
+  13 => '', null => "null", '' => 'emptys'
+];
 
 // arrays to be passed to $arr2 argument
 $arrays = varray [

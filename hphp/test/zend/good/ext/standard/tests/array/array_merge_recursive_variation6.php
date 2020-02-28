@@ -5,7 +5,7 @@
 */
 
 /*
- * Testing the functionality of array_merge_recursive() by passing 
+ * Testing the functionality of array_merge_recursive() by passing
  * array having duplicate keys.
 */
 <<__EntryPoint>> function main(): void {
@@ -18,7 +18,7 @@ $arr1_numeric_key = darray[ 1 => "one", 2 => "two", 2 => varray[1, 2], 3 => "thr
 $arr1_string_key = darray["str1" => "hello", "str2" => 111, "str1" => "world", "str2" => 111.111];
 
 // initialize the second argument
-$arr2 = array("one", "str1" => "two", varray["one", "two"]);
+$arr2 = darray[0 => "one", "str1" => "two", 1 => varray["one", "two"]];
 
 echo "-- With default argument --\n";
 var_dump( array_merge_recursive($arr1_numeric_key) );

@@ -26,7 +26,7 @@ $arr1 = darray[
 ];
 
 // initialize the second argument
-$arr2 = array($value2 => "hello", $value2);
+$arr2 = darray[$value2 => "hello", 0 => $value2];
 
 echo "-- With default argument --\n";
 var_dump( array_merge_recursive($arr1) );

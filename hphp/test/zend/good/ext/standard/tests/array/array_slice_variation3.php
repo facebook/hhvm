@@ -1,6 +1,6 @@
 <?hh
 /* Prototype  : array array_slice(array $input, int $offset [, int $length [, bool $preserve_keys]])
- * Description: Returns elements specified by offset and length 
+ * Description: Returns elements specified by offset and length
  * Source code: ext/standard/array.c
  */
 
@@ -11,7 +11,7 @@
 echo "*** Testing array_slice() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$input_array = array('one' => 1, 2, 'three' => 3, 4);
+$input_array = darray['one' => 1, 0 => 2, 'three' => 3, 1 => 4];
 $offset = 2;
 
 //get an unset variable
@@ -48,7 +48,7 @@ $inputs = varray[
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',

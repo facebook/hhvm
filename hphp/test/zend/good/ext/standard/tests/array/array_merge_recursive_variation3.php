@@ -68,11 +68,11 @@ $arrays = varray [
        darray['' => 1, "" => 2, NULL => 3, null => 4, false => 5, true => 6],
 
        // array containing embedded arrays
-/*15*/ array("str1", "array" => varray["hello", 'world'], varray[1, 2])
+/*15*/ darray[0 => "str1", "array" => varray["hello", 'world'], 1 => varray[1, 2]]
 ];
 
 // initialise the second argument
-$arr2 = array( 1 => "one", 2, "string" => "hello", "array" => varray["a", "b", "c"]);
+$arr2 = darray[ 1 => "one", 2 => 2, "string" => "hello", "array" => varray["a", "b", "c"]];
 
 // loop through each sub array of $arrays and check the behavior of array_merge_recursive()
 $iterator = 1;

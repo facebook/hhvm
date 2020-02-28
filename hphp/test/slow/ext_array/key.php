@@ -23,6 +23,6 @@ while (true) {
   next(inout $array);
 }
 var_dump($output);
-$array = array();
+$array = varray[];
 var_dump(key($array));
 }

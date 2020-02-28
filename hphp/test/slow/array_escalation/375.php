@@ -4,6 +4,6 @@
 <<__EntryPoint>>
 function main_375() {
 $a = varray[10];
- $a += array();
+ $a += varray[];
                 var_dump($a);
 }

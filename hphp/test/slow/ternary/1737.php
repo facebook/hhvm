@@ -13,7 +13,7 @@ function f($a0,
   $r2 = $a2 ?: false;
   $r3 = $a3 ?: '';
 
-  $r4 = $a4 ?: array();
+  $r4 = $a4 ?: varray[];
   $r5 = $a5 ?: new X;
   return varray[
     $r0, $r1, $r2,

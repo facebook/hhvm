@@ -3,7 +3,7 @@
 // default argument values; must be constants (or intrinsic function calls like array)
 
 ///*
-function f1($p1 = 10, $p2 = 1.23, $p3 = TRUE, $p4 = NULL, $p5 = "abc", $p6 = varray[1,2,3,array()])
+function f1($p1 = 10, $p2 = 1.23, $p3 = TRUE, $p4 = NULL, $p5 = "abc", $p6 = varray[1,2,3,varray[]])
 {
     echo "f1:\n";
     echo "\$p1: $p1, \$p2: $p2, \$p3: $p3, \$p4: $p4, \$p5: $p5, \$p6: $p6\n";

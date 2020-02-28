@@ -19,7 +19,7 @@ function f($x) {
 
 <<__EntryPoint>>
 function main_1853() {
-f(array());
+f(varray[]);
 f(varray[0, 1]);
 f(varray[darray[1 => 1]]);
 }

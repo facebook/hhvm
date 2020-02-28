@@ -1,7 +1,7 @@
 <?hh
 
 function test() {
-  $a = array();
+  $a = varray[];
   for ($i = 0;
  $i < 17;
  $i++) {

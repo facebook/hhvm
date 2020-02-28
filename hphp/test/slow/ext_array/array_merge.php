@@ -18,14 +18,14 @@ function a() {
 }
 
 function b() {
-  $array1 = array();
+  $array1 = varray[];
   $array2 = darray[1 => "data"];
   $result = array_merge($array1, varray[$array2]);
   var_dump($result);
 }
 
 function c() {
-  $array1 = array();
+  $array1 = varray[];
   $array2 = darray[1 => "data"];
   $result = $array1 + $array2;
   var_dump($result);

@@ -19,7 +19,7 @@ var_dump($c);
 $d = array_reduce($a, "rmul");
 var_dump($d);
 
-$x = array();
+$x = varray[];
 $e = array_reduce($x, "rsum", 1);
 var_dump($e);
 }

@@ -71,7 +71,7 @@ function main() {
   bar(1.0);
   baz(new Bazcls());
   baz2(new Bazcls());
-  lots(array(),
+  lots(varray[],
        12,
        12,
        false,
@@ -80,7 +80,7 @@ function main() {
        1.3,
        1.4,
        1.5);
-  lots2(array(),
+  lots2(varray[],
         12,
         12,
         false,
@@ -89,7 +89,7 @@ function main() {
         1.3,
         1.4,
         1.5);
-  lots3(array(),
+  lots3(varray[],
         12,
         12,
         false,

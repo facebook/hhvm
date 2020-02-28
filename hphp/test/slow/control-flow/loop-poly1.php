@@ -17,11 +17,11 @@ function main($a, $doit) {
 
 <<__EntryPoint>>
 function main_loop_poly1() {
-var_dump(main(array(), 1));
+var_dump(main(varray[], 1));
 var_dump(main(varray["1",1], 1));
 var_dump(main(varray["1",1], 1));
 var_dump(main(varray["1",1], 0));
 var_dump(main(varray["1",1,1], 0));
 var_dump(main(varray["1",1], 0));
-var_dump(main(array(), 0));
+var_dump(main(varray[], 0));
 }

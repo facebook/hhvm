@@ -13,7 +13,7 @@ $list = darray[
   'float_negative' => -42.123312,
   'float_zero' => 0.0,
   'null' => null,
-  'array_empty' => array(),
+  'array_empty' => varray[],
   'array' => varray[1, 2, 3, "foo"],
 ];
 

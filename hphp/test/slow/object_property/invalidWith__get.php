@@ -25,7 +25,7 @@ $attribute = false;
 var_dump($object->$attribute);
 $attribute = 1.1;
 var_dump($object->$attribute);
-$attribute = array();
+$attribute = varray[];
 var_dump($object->$attribute);
 $attribute = "\0key";
 var_dump(bin2hex($object->$attribute));

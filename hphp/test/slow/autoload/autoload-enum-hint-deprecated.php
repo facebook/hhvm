@@ -10,10 +10,10 @@ fb_autoload_map(
     'class' => darray['foo' => 'autoload-enum-hint-2.inc',
                      'bar' => 'autoload-enum-hint-3.inc',
                      'baz' => 'autoload-enum-hint-4.inc'],
-    'constant' => array(),
-    'function' => array(),
+    'constant' => varray[],
+    'function' => varray[],
     'failure' => 'autoload_miss',
-    'type' => array(),
+    'type' => varray[],
   ],
   __DIR__.'/'
 );

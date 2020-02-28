@@ -1,3 +1,3 @@
 <?hh <<__EntryPoint>> function main(): void {
-password_hash(array(), 1);
+password_hash(varray[], 1);
 }

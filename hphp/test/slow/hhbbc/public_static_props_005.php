@@ -1,7 +1,7 @@
 <?hh
 
 class Foo {
-  static $heh = array();
+  static $heh = varray[];
   function go() {
     self::$heh = varray[self::$heh];
   }

@@ -1,7 +1,7 @@
 <?hh
 
 function foo() {
-  if (mt_rand() == 0) return array();
+  if (mt_rand() == 0) return varray[];
   $z = varray[true, mt_rand() ? true : false];
   return $z;
 }

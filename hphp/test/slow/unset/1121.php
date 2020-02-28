@@ -8,6 +8,6 @@ function rmv($a, $b) {
 <<__EntryPoint>>
 function main_1121() {
 $a = varray['foo'];
-$b = array();
+$b = varray[];
 var_dump(rmv($a, $b));
 }

@@ -25,7 +25,7 @@ try {
 }
 
 try {
-  $draw->affine(array());
+  $draw->affine(varray[]);
 } catch (Exception $ex) {
   echo "PASS\n";
 }

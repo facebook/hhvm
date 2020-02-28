@@ -3,7 +3,7 @@
 class C {
   public function loadAllWithIDs($ids) {
     if (!count($ids = array_filter($ids))) {
-      return array();
+      return varray[];
     }
     var_dump('muy malo', $ids);
     return -666;

@@ -5,7 +5,7 @@ class A { public function yo() { echo "hi\n"; } }
 function foo() {
   $x = varray[varray[new A]];
   for ($i = 0; $i < 10; ++$i) {
-    $x[] = array();
+    $x[] = varray[];
     $x[$i + 1][] = new A;
   }
   return $x;

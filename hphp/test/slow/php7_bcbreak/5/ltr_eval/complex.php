@@ -2,7 +2,7 @@
 
 class Foo { public static int $n = 0; }
 
-$a=array();
+$a=varray[];
 
 $foo = function($i) {
   $n = Foo::$n;

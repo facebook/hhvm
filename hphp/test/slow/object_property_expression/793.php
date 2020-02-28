@@ -13,7 +13,7 @@ class C2 {
 ";
     $this->_p[ $what ] = $value;
   }
-  private $_p = array();
+  private $_p = varray[];
 }
 class C3 {
   public function __get( $what ) {
@@ -26,7 +26,7 @@ class C3 {
 ";
     $this->_p[ $what ] = $value;
   }
-  private $_p = array();
+  private $_p = varray[];
 }
 
 <<__EntryPoint>>

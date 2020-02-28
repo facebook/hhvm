@@ -12,6 +12,6 @@ function main(array $x = null) {
 
 <<__EntryPoint>>
 function main_jmp_local_006() {
-main(array());
+main(varray[]);
 main(varray[1,2,3]);
 }

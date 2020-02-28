@@ -10,5 +10,5 @@ function bug2($a, $b) {
 
 <<__EntryPoint>>
 function main_1515() {
-bug2(0, array());
+bug2(0, varray[]);
 }

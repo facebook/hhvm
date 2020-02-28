@@ -6,7 +6,7 @@ $draw = new ImagickDraw();
 try {
   $draw->polygon(varray[
           darray['x' => 1, 'y' => 2],
-          darray['x' => 'hello', 'y' => array()]
+          darray['x' => 'hello', 'y' => varray[]]
           ]);
 
   echo "pass\n";
@@ -16,7 +16,7 @@ try {
 }
 
 try {
-  $draw->polygon(varray[array()]);
+  $draw->polygon(varray[varray[]]);
   echo "fail\n";
 } catch (ImagickDrawException $e) {
   echo "pass\n";

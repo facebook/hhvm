@@ -3,7 +3,7 @@
 function foo(inout dict<int, int> $arr) {
   foreach ($arr as $val) {
     if ($arr[$val]) {
-      $arr = array();
+      $arr = varray[];
       return true;
     }
   }

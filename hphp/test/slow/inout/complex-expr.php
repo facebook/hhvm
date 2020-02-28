@@ -15,8 +15,8 @@ function fuzz(inout $a) {
 
 <<__EntryPoint>>
 function main() {
-  $arr = darray[0 => darray[12 => varray[darray['bar' => array()]]],
-          18 => varray[darray['hello' => array()]]];
+  $arr = darray[0 => darray[12 => varray[darray['bar' => varray[]]]],
+          18 => varray[darray['hello' => varray[]]]];
   $arr[0][12][0]['bar']['x'] = 'value1';
   $arr[18][0]['hello']['y'] = 'value2';
 

@@ -110,7 +110,7 @@ $not_numerics = varray[
   new stdclass, // object
   $fp,  // resource
   $dfp,
-  array(),
+  varray[],
   varray["string"],
   "",
   "1 ",

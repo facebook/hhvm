@@ -11,12 +11,12 @@ class Small {
   }
 }
 class Big {
-  public $groupAll = array();
-  public $group1 = array();
-  public $group2 = array();
+  public $groupAll = varray[];
+  public $group1 = varray[];
+  public $group2 = varray[];
   public $wacky;
   public $nothing;
-  public $unrelated = array();
+  public $unrelated = varray[];
   function add() {
     $s = new Small();
     $this->groupAll[] = $s;

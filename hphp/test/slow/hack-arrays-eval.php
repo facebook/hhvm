@@ -26,9 +26,9 @@ function test_eval() {
   eval('var_dump(is_keyset($k));');
 }
 function wrap($arr, $v) { return $arr[] = $v; }
-function test_func($v = wrap(array(), vec[1, 2]),
-                   $d = wrap(array(), dict[100 => 'a', 200 => 'b']),
-                   $k = wrap(array(), keyset['a', 'b'])) {}
+function test_func($v = wrap(varray[], vec[1, 2]),
+                   $d = wrap(varray[], dict[100 => 'a', 200 => 'b']),
+                   $k = wrap(varray[], keyset['a', 'b'])) {}
 
 function test_default_value() {
   echo "============ test_default_value ==============================\n";

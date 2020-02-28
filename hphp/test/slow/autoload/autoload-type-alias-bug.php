@@ -7,9 +7,9 @@ function autoload_miss($str1, $str2) {
 function main_autoload_type_alias_bug() {
 HH\autoload_set_paths(
   darray[
-    'class' => array(),
-    'constant' => array(),
-    'function' => array(),
+    'class' => varray[],
+    'constant' => varray[],
+    'function' => varray[],
     'failure' => 'autoload_miss',
     'type' => darray['foo' => 'autoload-type-alias-bug-2.inc'],
   ],

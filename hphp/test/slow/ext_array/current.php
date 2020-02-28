@@ -11,12 +11,12 @@ function a() {
 }
 
 function b() {
-  $arr = array();
+  $arr = varray[];
   var_dump(current($arr));
 }
 
 function c() {
-  $arr = varray[array()];
+  $arr = varray[varray[]];
   var_dump(current($arr));
 }
 

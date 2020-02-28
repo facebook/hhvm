@@ -5,14 +5,14 @@
 function main_1798() {
 $sample_dir = __DIR__.'/../../sample_dir';
 
-$files = array();
+$files = varray[];
 foreach (new DirectoryIterator($sample_dir.'/') as $file) {
   $files[] = $file;
 }
 var_dump(count($files));
 
 $dir = new DirectoryIterator($sample_dir.'/');
-$files = array();
+$files = varray[];
  // order changes per machine
 foreach ($dir as $fileinfo) {
   if (!$fileinfo->isDot()) {

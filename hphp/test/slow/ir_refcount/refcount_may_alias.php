@@ -1,7 +1,7 @@
 <?hh
 
 class X {
-  private $someArrayMember = array();
+  private $someArrayMember = varray[];
   private $someOtherMember;
 
   function __construct(array $x) { $this->someArrayMember = $x; }
@@ -10,13 +10,13 @@ class X {
     /*
      * At the time of this test's creation, this sequence of code generated
      * redundant loads from the property for the CGetM and the SetM.  These two
-     * temps may alias, so before decrefing to overwrite it with an array(), it
+     * temps may alias, so before decrefing to overwrite it with an varray[], it
      * needs to observe the may-alias sets to ensure the incref for the return
      * value isn't pushed past that decref.  It will probably stop testing that
      * if we start running weaken_decrefs before load elimination.
      */
     $thing = $this->someArrayMember;
-    $this->someArrayMember = array();
+    $this->someArrayMember = varray[];
     $this->someOtherMember = null;
     return $thing;
   }

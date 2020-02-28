@@ -17,7 +17,7 @@ var_dump(substr_replace('ABCDEFGH:/MNRPQR/', 'bob', 0.0, '1'));
 var_dump(substr_replace('ABCDEFGH:/MNRPQR/', 'bob',                        varray[0], varray[1]));
 var_dump(substr_replace('ABCDEFGH:/MNRPQR/', varray['bob'],                        varray[0], varray[3,4]));
 var_dump(substr_replace('ABCDEFGH:/MNRPQR/', varray['bob'],                        varray[0], varray[3]));
-var_dump(substr_replace(varray['ABCDEFGH:/MNRPQR/'], array(),                        varray[0,1], varray[3, 4]));
+var_dump(substr_replace(varray['ABCDEFGH:/MNRPQR/'], varray[],                        varray[0,1], varray[3, 4]));
 var_dump(substr_replace(varray['ABCDEFGH:/MNRPQR/'], varray['bob'],                        varray[0,1], varray[3]));
 var_dump(substr_replace(varray['ABCDEFGH:/MNRPQR/'],                        varray['bob', 'cat'], 0));
 var_dump(substr_replace(varray['ABCDEFGH:/MNRPQR/'],                        varray['bob'], varray[0,1]));

@@ -41,7 +41,7 @@ function get_handles() {
   $arrays[] = varray[reschedule()];
 
   // empty
-  $arrays[] = array();
+  $arrays[] = varray[];
   $vectors[] = Vector {};
   $maps[] = Map {};
   $vecs[] = vec[];

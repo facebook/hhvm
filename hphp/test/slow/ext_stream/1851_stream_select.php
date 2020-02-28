@@ -6,7 +6,7 @@ function main_1851_stream_select() {
 $stream = fopen("php://temp", "r");
 
 $read_streams = varray[$stream];
-$write_streams = array();
+$write_streams = varray[];
 $except = null;
 
 $result = stream_select(

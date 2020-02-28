@@ -41,7 +41,7 @@ class ClassForSecondCapture { }
 // We do some consolidation here because the behavior when testing
 // is really non-deterministic. Both on order of scans and also
 // whether things are in CPP or PHP (based on mode of test)
-ObjprofHeapgraphPhp::$echobuf = array();
+ObjprofHeapgraphPhp::$echobuf = varray[];
 function echo_buffer($str) {
 
   // new root names
@@ -57,7 +57,7 @@ function echo_flush() {
   foreach ($echobuf_uniq as $str) {
     echo $str;
   }
-  ObjprofHeapgraphPhp::$echobuf = array();
+  ObjprofHeapgraphPhp::$echobuf = varray[];
 }
 
 ObjprofHeapgraphPhp::$hg_for_closure = null;
@@ -161,7 +161,7 @@ function printEdge($edge) {
   echo "\n";
 }
 
-ObjprofHeapgraphPhp::$visited = array();
+ObjprofHeapgraphPhp::$visited = varray[];
 function dfsPrintNode($hg, $node) {
 
   $id = $node['index'];
@@ -237,7 +237,7 @@ echo_flush();
 
 // DFS NODES
 echo "\nDoing DFS from root class on nodes:\n";
-heapgraph_dfs_nodes($hg, varray[ObjprofHeapgraphPhp::$id_of_rootclass], array(), 'showClassOnly');
+heapgraph_dfs_nodes($hg, varray[ObjprofHeapgraphPhp::$id_of_rootclass], varray[], 'showClassOnly');
 echo_flush();
 
 echo "\nDoing DFS from root class on nodes (skipping root):\n";

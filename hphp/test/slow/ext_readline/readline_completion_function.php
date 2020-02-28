@@ -10,7 +10,7 @@ $data = varray[
   'strtolower',
   1,
   1.1231,
-  function ($str, $start, $end) { return array(); },
+  function ($str, $start, $end) { return varray[]; },
 ];
 
 foreach ($data as $callback) {

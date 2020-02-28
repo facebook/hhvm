@@ -9,7 +9,7 @@ function foo($results) {
   yield 1;
 }
 function bar() {
-  foreach (foo(array()) as $r) {
+  foreach (foo(varray[]) as $r) {
     var_dump($r);
   }
 }

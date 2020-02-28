@@ -4,7 +4,7 @@ class Point
 {
     private $x;
     private $y;
-    private $dynamicProperties = array();
+    private $dynamicProperties = varray[];
 
     public $dummy = -100;   // for test purposes only
 

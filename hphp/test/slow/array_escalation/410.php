@@ -4,6 +4,6 @@
 <<__EntryPoint>>
 function main_410() {
 $a = darray['a' => varray[1]];
- $a += array();
+ $a += varray[];
                 var_dump($a);
 }

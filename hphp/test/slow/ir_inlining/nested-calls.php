@@ -13,7 +13,7 @@ function get_local_region() {
 class c {
   public function __construct() {
     $local1 = new stdclass;
-    $local2 = array();
+    $local2 = varray[];
     get_local_region();
   }
 

@@ -18,5 +18,5 @@ var_dump(spl_autoload_functions()); // a only
 spl_autoload_unregister('b');
 var_dump(spl_autoload_functions()); // still a
 spl_autoload_unregister('a');
-var_dump(spl_autoload_functions() === array());
+var_dump(spl_autoload_functions() === varray[]);
 }

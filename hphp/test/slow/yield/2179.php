@@ -1,7 +1,7 @@
 <?hh
 
 trait DY {
-  private $drc = array();
+  private $drc = varray[];
   public function dty($key) {
     $this->drc[$key] = true;
     yield (true);

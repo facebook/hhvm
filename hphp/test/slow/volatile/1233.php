@@ -9,8 +9,8 @@ function main_entry(): void {
 
   var_dump(HH\autoload_set_paths(
     darray[
-      'function' => array(),
-      'constant' => array(),
+      'function' => varray[],
+      'constant' => varray[],
       'failure' => 'failure'
     ],
     ''

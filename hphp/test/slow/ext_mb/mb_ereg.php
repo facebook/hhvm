@@ -108,7 +108,7 @@ $matches = null;
 var_dump(mb_eregi("z", $str, inout $matches));
 
 $str = "XYZ";
-$matches = array();
+$matches = varray[];
 var_dump(mb_eregi("z", $str, inout $matches));
 var_dump($matches);
 }

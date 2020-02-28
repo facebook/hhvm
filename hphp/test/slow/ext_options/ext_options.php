@@ -16,7 +16,7 @@ $x = get_loaded_extensions();
 var_dump(!($x ?? false));
 
 var_dump(get_included_files()[0] === __FILE__);
-var_dump(array());
+var_dump(varray[]);
 
 $sec = null;
 $nsec = null;

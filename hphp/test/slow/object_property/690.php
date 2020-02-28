@@ -2,12 +2,12 @@
 
 class X {
   public $pub_var = null;
-  public $pub_set = array();
+  public $pub_set = varray[];
   private $priv_var = 2;
   function __get($name) {
     echo 'get: ';
  var_dump($name);
- return $name == 'buz' ? 1 : array();
+ return $name == 'buz' ? 1 : varray[];
   }
   function __isset($name) {
     echo 'isset: ';

@@ -32,5 +32,5 @@ function test($x, $a, $s) {
 <<__EntryPoint>>
 function main_798() {
   $s = false;
-  test(new X, array(), $s);
+  test(new X, varray[], $s);
 }

@@ -1,7 +1,7 @@
 <?hh
 
 abstract class c {
-  public static $arr = array();
+  public static $arr = varray[];
   function g() {
     $cl = new ReflectionClass(get_class($this));
     $p = $cl->getProperty('arr');

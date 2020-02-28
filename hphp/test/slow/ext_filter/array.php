@@ -5,6 +5,6 @@
 <<__EntryPoint>>
 function main_array() {
 var_dump(
-  filter_var(varray[array()], FILTER_VALIDATE_FLOAT, FILTER_REQUIRE_ARRAY)
+  filter_var(varray[varray[]], FILTER_VALIDATE_FLOAT, FILTER_REQUIRE_ARRAY)
 );
 }

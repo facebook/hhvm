@@ -11,7 +11,7 @@ class C {
   final public function genWithAccessTokens(
     ?darray<int, mixed> $tokens_data = null,
   ): bool {
-    $tokens_data = $tokens_data ?: array();
+    $tokens_data = $tokens_data ?: varray[];
     $z = $this->accessTokens->toMap();
     return $z->containsKey(100);
   }
@@ -19,17 +19,17 @@ class C {
 
 function main() {
   $obj = new C;
-  var_dump($obj->genWithAccessTokens(array()));
+  var_dump($obj->genWithAccessTokens(varray[]));
   var_dump($obj->genWithAccessTokens());
-  var_dump($obj->genWithAccessTokens(array()));
+  var_dump($obj->genWithAccessTokens(varray[]));
   var_dump($obj->genWithAccessTokens());
-  var_dump($obj->genWithAccessTokens(array()));
+  var_dump($obj->genWithAccessTokens(varray[]));
   var_dump($obj->genWithAccessTokens());
-  var_dump($obj->genWithAccessTokens(array()));
+  var_dump($obj->genWithAccessTokens(varray[]));
   var_dump($obj->genWithAccessTokens());
-  var_dump($obj->genWithAccessTokens(array()));
+  var_dump($obj->genWithAccessTokens(varray[]));
   var_dump($obj->genWithAccessTokens());
-  var_dump($obj->genWithAccessTokens(array()));
+  var_dump($obj->genWithAccessTokens(varray[]));
   var_dump($obj->genWithAccessTokens());
 }
 

@@ -22,7 +22,7 @@ function n_dump($x) {
 
 class CounterArray
 {
-  private $container = array();
+  private $container = varray[];
   public $counter = 0;
 
   public function incrementCounter () {
@@ -35,7 +35,7 @@ class CounterArray
 
 class MagicGetSet
 {
-  private $data = array();
+  private $data = varray[];
 
   public function __set($name, $value)
   {

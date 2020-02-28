@@ -8,7 +8,7 @@ abstract class Unimpl {
   }
 
   static function doweirdthings() {
-    $k = array();
+    $k = varray[];
     return static::aa($k);
   }
 }

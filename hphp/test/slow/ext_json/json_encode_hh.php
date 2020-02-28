@@ -4,7 +4,7 @@
 <<__EntryPoint>>
 function main_json_encode_hh() {
 echo("** array string keys**\n");
-var_dump(json_encode(array()));
+var_dump(json_encode(varray[]));
 var_dump(json_encode(varray['foo']));
 var_dump(json_encode(varray['foo', 'bar']));
 var_dump(json_encode(darray['fookey' => 'fooval', 'barkey' => 'barval']));

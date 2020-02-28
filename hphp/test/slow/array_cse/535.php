@@ -14,7 +14,7 @@ function g(string $x) {
 
 <<__EntryPoint>>
 function main_535() {
-f(array(), 0);
+f(varray[], 0);
 g('bar');
 g('');
 g('b');

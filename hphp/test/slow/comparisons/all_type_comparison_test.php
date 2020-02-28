@@ -151,7 +151,7 @@ function main(): void {
   $clo1 = function () { return 0; };
   $clo2 = function () { return 0; };
 
-  $arr1 = array();
+  $arr1 = varray[];
   $arr2 = varray[99];
   $arr3 = varray['foo'];
   $arr4 = varray['foo', 'bar'];

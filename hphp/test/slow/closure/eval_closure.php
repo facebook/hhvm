@@ -2,7 +2,7 @@
 
 function reproduce( $code ) {
         $template = eval( $code );
-        return $template( array() );
+        return $template( varray[] );
 }
 
 

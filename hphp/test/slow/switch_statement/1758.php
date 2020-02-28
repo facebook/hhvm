@@ -1,14 +1,14 @@
 <?hh
 
 switch ($_POST) {
-case array(): echo 'empty array';
+case varray[]: echo 'empty array';
  break;
 case $_GET:   echo 'get';
  break;
 default: echo 'default';
 }
 switch ($_SERVER) {
-case array(): echo 'empty array';
+case varray[]: echo 'empty array';
  break;
 default: echo 'default';
 }
@@ -18,7 +18,7 @@ function ret_true($x) {
 switch ($_SERVER) {
 case ret_true($_SERVER['foo'] = 10): echo '1';
  break;
-case array();
+case varray[];
  echo '2';
  break;
 default: echo '3';

@@ -157,7 +157,7 @@ f(2);
 f(true);
 f(false);
 f(null);
-f(array());
+f(varray[]);
 f(1.0);
 f('1abc');
 f('3');

@@ -8,7 +8,7 @@ function array_extend(inout $dest, array $src): void {
 }
 
 function getImpliedChecks(array $arg): array {
-  $implied_checks = array();
+  $implied_checks = varray[];
   foreach ($arg as $key => $val) {
     array_extend(inout $implied_checks, $val);
   }

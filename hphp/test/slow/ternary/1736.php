@@ -3,7 +3,7 @@
 class X {
   public $exp_info;
   public function __construct(array $exp_info = null) {
-    $this->exp_info = $exp_info ?: array();
+    $this->exp_info = $exp_info ?: varray[];
   }
 }
 

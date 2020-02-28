@@ -5,8 +5,8 @@ function read_xml($skip_white) {
   xml_parser_set_option($parser,XML_OPTION_CASE_FOLDING,0);
   xml_parser_set_option($parser,XML_OPTION_SKIP_WHITE,$skip_white);
   xml_parser_set_option($parser,XML_OPTION_TARGET_ENCODING,"UTF-8");
-  $array=array();
-  $index=array();
+  $array=varray[];
+  $index=varray[];
   xml_parse_into_struct($parser,$xml,inout $array, inout $index);
   return $array;
 }
@@ -15,7 +15,7 @@ function find_node($array,$node) {
   foreach($array as $key=>$val) {
     if($val["tag"]==$node) return $val;
   }
-  return array();
+  return varray[];
 }
 
 

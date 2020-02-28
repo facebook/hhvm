@@ -4,7 +4,7 @@ function bar() {
   echo 'bar called';
 }
 class foo {
-  public $functions = array();
+  public $functions = varray[];
   function __construct() {
     $function = 'bar';
     print($function);

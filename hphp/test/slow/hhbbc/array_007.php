@@ -1,7 +1,7 @@
 <?hh
 
 function foo() { return varray[1,2,3]; }
-function bar() { return array(); }
+function bar() { return varray[]; }
 function test($x) {
   $y = $x ? foo() : bar();
   return $y[0];

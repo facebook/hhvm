@@ -1,6 +1,6 @@
 <?hh
 
-function asd() { return array(); }
+function asd() { return varray[]; }
 function foo() {
   $x = asd();
   foreach ($x as $v) {

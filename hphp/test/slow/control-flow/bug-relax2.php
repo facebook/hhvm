@@ -11,7 +11,7 @@ function foo($arr) {
 
 <<__EntryPoint>>
 function main_bug_relax2() {
-var_dump(foo(array()));
+var_dump(foo(varray[]));
 var_dump(foo(varray[1]));
 var_dump(foo(varray[2]));
 }

@@ -1,7 +1,7 @@
 <?hh
 
 class A {
-  private $x = array();
+  private $x = varray[];
   private $y = "string";
 
   public function heh(int $i) {

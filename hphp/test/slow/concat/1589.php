@@ -13,7 +13,7 @@ class C {
     echo "set C\n";
     $this->_p[ $what ] = $value;
   }
-  private $_p = array();
+  private $_p = varray[];
 }
 function bar() {
   print " hello " . foo() . "\n";

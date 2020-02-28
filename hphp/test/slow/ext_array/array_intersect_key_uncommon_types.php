@@ -2,8 +2,8 @@
 
 function test_empty(): void {
   echo "== empty array ==\n";
-  var_dump(array_intersect_key(dict[1 => 2, '1' => '2'], array()));
-  var_dump(array_intersect_key(array(), dict[1 => 2, '1' => '2']));
+  var_dump(array_intersect_key(dict[1 => 2, '1' => '2'], varray[]));
+  var_dump(array_intersect_key(varray[], dict[1 => 2, '1' => '2']));
 }
 
 function test_apc_local(): void {

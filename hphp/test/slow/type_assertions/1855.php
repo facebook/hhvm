@@ -16,6 +16,6 @@ function main_1855() {
 f('');
 f('foo');
 f('f');
-f(array());
+f(varray[]);
 f(varray[32]);
 }

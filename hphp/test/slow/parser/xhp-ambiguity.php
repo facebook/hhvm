@@ -78,7 +78,7 @@ function test() {
    *              whitespace before the ':')
    *
    */
-  $a = false?:array();
+  $a = false?:varray[];
   $a = false?:floor(12.98);
   $a = b()?:NULL;
 

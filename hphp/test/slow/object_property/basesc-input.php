@@ -1,7 +1,7 @@
 <?hh
 
 class MyClass {
-  protected static $stack = array();
+  protected static $stack = varray[];
 
   public function addToStack(MyClass $o)
   {

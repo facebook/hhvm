@@ -11,5 +11,5 @@ function foo($b) {
 
 <<__EntryPoint>>
 function main_fpassm_mw() {
-foo(array());
+foo(varray[]);
 }

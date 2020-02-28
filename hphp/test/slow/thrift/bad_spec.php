@@ -219,7 +219,7 @@ class EdgeObjectWithBadSpec1 extends EdgeObject {
 }
 
 class EdgeObjectWithBadSpec2 extends EdgeObject {
-  const SPEC = array();
+  const SPEC = varray[];
 }
 
 class EdgeObjectWithBadSpec3 extends EdgeObject {

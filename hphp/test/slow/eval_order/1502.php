@@ -1,7 +1,7 @@
 <?hh
 
 class MyIterator implements Iterator{
-  private $var = array();
+  private $var = varray[];
   public function __construct($array) {
     echo "constructing
 ";

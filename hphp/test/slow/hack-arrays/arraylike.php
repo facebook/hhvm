@@ -71,7 +71,7 @@ function test_builtins($a, $b, $c, $d, $e, $f, $g) {
     echo "Exception: {$e->getMessage()}\n";
   }
   try {
-    __hhvm_intrinsics\dummy_arraylike_builtin(array());
+    __hhvm_intrinsics\dummy_arraylike_builtin(varray[]);
   } catch (Exception $e) {
     echo "Exception: {$e->getMessage()}\n";
   }
@@ -107,7 +107,7 @@ function main() {
     shape('a' => true, 'b' => false),
     varray[],
     darray[],
-    array()
+    varray[]
   );
 }
 

@@ -117,8 +117,8 @@ VS(passthru($nullbyte, inout $return_var), null);
 VS(system($nullbyte, inout $return_var), "");
 $nullbyteout = null;
 VS(exec($nullbyte, inout $nullbyteout, inout $return_var), "");
-VS($nullbyteout, array());
+VS($nullbyteout, varray[]);
 VS(shell_exec($nullbyte), null);
-$process = proc_open($nullbyte, array(), inout $pipes);
+$process = proc_open($nullbyte, varray[], inout $pipes);
 VS($process, false);
 }

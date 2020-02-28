@@ -10,5 +10,5 @@ function g(string $s) {
 <<__EntryPoint>>
 function main_2189() {
 g(DATE_RFC850);
-f(count(array()));
+f(count(varray[]));
 }

@@ -75,7 +75,7 @@ function main() {
 
   test_cufa(varray['a', 'b', 'c']);
   test_cufa(varray['a']);
-  test_cufa(array());
+  test_cufa(varray[]);
 
   call_user_func_array(fun('test_stack_should_not_overflow'), range(0, 10000));
   call_user_func_array(fun('test_stack_should_not_overflow'), range(0, 30000));

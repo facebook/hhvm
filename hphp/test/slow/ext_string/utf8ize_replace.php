@@ -30,7 +30,7 @@ $tmp = $input;
 fb_utf8ize(inout $tmp);
 $sanitized = $tmp;
 
-VS(fb_htmlspecialchars($input, ENT_QUOTES, "", array()), $sanitized);
+VS(fb_htmlspecialchars($input, ENT_QUOTES, "", varray[]), $sanitized);
 
 VS(fb_htmlspecialchars($input, ENT_FB_UTF8, "", null),
    "&#xa1;A".
@@ -39,7 +39,7 @@ VS(fb_htmlspecialchars($input, ENT_FB_UTF8, "", null),
    "&#x218a3;A".
    "helloworld");
 
-VS(fb_htmlspecialchars($sanitized, ENT_QUOTES, "", array()),
+VS(fb_htmlspecialchars($sanitized, ENT_QUOTES, "", varray[]),
    $sanitized);
 
 $zfoo = "\0foo";

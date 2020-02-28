@@ -12,7 +12,7 @@ function main_is_any_array() {
 $foo = varray[
   varray[],
   darray[],
-  array(),
+  varray[],
   vec[],
   dict[],
   keyset[],

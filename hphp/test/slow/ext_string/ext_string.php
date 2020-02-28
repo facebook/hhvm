@@ -124,7 +124,7 @@ var_dump(chop(" abc "));
   var_dump(implode(",", $arr));
 }
 {
-  $arr = array();
+  $arr = varray[];
   var_dump(implode(",", $arr));
 }
 

@@ -35,7 +35,7 @@ function f5($x) {
 function main_537() {
 error_reporting(0);
 var_dump(f1(null));
-var_dump(f1(array()));
+var_dump(f1(varray[]));
 var_dump(f1(varray[0]));
 var_dump(f1(''));
 var_dump(f1('a'));

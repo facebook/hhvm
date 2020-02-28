@@ -1,7 +1,7 @@
 <?hh
 
 function get_empty_array() {
-  return extension_loaded('pdo') ? array() : varray['wut'];
+  return extension_loaded('pdo') ? varray[] : varray['wut'];
 }
 
 function main() {

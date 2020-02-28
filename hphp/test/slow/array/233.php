@@ -2,7 +2,7 @@
 
 abstract final class PushStackStatics {
   public static $index = 0;
-  public static $stack = array();
+  public static $stack = varray[];
 }
 
 function push_stack(){

@@ -4,7 +4,7 @@
 <<__EntryPoint>>
 function main_var_export_arrays() {
 echo("** array **\n");
-var_export(array());
+var_export(varray[]);
 echo("\n\n");
 var_export(varray['foo']);
 echo("\n\n");

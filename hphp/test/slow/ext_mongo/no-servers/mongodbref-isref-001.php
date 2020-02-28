@@ -7,10 +7,10 @@ var_dump(MongoDBRef::isRef((object) darray['$ref' => 'dbref', '$id' => new Mongo
 var_dump(MongoDBRef::isRef((object) darray['$ref' => 'dbref', '$id' => 123, '$db' => 'test']));
 var_dump(MongoDBRef::isRef(null));
 var_dump(MongoDBRef::isRef(1));
-var_dump(MongoDBRef::isRef(array()));
+var_dump(MongoDBRef::isRef(varray[]));
 var_dump(MongoDBRef::isRef(darray['$ref' => 'dbref']));
 var_dump(MongoDBRef::isRef(darray['$id' => 123, '$db' => 'test']));
-var_dump(MongoDBRef::isRef((object) array()));
+var_dump(MongoDBRef::isRef((object) varray[]));
 var_dump(MongoDBRef::isRef((object) darray['$ref' => 'dbref']));
 var_dump(MongoDBRef::isRef((object) darray['$id' => 123, '$db' => 'test']));
 }

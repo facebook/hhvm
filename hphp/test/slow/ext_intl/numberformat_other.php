@@ -28,7 +28,7 @@ foreach ($locales as $locale) {
     var_dump($formatter->format('not a number'));
     var_dump($formatter->format(true));
     var_dump($formatter->format(false));
-    var_dump($formatter->format(array()));
+    var_dump($formatter->format(varray[]));
     var_dump($formatter->format(varray[5]));
   }
 }

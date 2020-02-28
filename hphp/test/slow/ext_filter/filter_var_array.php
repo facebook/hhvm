@@ -3,7 +3,7 @@
 function perform_test($name, $test_filters, $add_empty) {
   $params = darray[
     'null' => NULL,
-    'empty_array' => array(),
+    'empty_array' => varray[],
     'filled_array' => varray[1, 2, 3],
     'int' => 1,
     'double' => 1.0,
@@ -25,7 +25,7 @@ function perform_test($name, $test_filters, $add_empty) {
 <<__EntryPoint>>
 function main_filter_var_array() {
 $all_filters = darray[
-  'No filters' => array(),
+  'No filters' => varray[],
   'Require Scalar' => darray['flags' => FILTER_REQUIRE_SCALAR],
   'Require Array' => darray['flags' => FILTER_REQUIRE_ARRAY],
 ];

@@ -35,7 +35,7 @@ var_dump(get_include_path());
 var_dump(restore_include_path());
 var_dump(get_include_path());
 
-var_dump(set_include_path(array()));
+var_dump(set_include_path(varray[]));
 var_dump(get_include_path());
 
 var_dump(restore_include_path());

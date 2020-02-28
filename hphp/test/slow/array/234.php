@@ -10,5 +10,5 @@ class A {
 function main_234() {
 $a = true;
  $a = new A();
-$a->f(array());
+$a->f(varray[]);
 }

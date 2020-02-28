@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_545() {
-$a1 = array();
+$a1 = varray[];
 $a2 = varray[null];
 $a3 = varray[true];
 $a4 = varray[false];
@@ -19,7 +19,7 @@ $a12 = varray["a bc"];
 $a13 = varray["\xc1 bc"];
 $a14 = varray[null, true, false, 0, 1, 1.0,             '1.0', 1.23456789e+34,             1.7976931348623157e+308, 1E666,             1E666/1E666, "a bc",             "\xc1 bc"];
 $a15 = array(null => true, false => 0, 1 => 1.0,             '1.0' => 1.23456789e+34,             1.7976931348623157e+308 => 1E666,             1E666/1E666 => "a bc",             "\xc1 bc");
-$a16 = array(null => true, false => 0, 1 => 1.0,             '1.0' => 1.23456789e+34,             1.7976931348623157e+308 => 1E666,             1E666/1E666 => "a bc",             "\xc1 bc",             array(null => true, array(),                   false => 0, 1 => 1.0,                   '1.0' => 1.23456789e+34,                   1.7976931348623157e+308 => 1E666,                   1E666/1E666 => "a bc",                   "\xc1 bc"));
+$a16 = array(null => true, false => 0, 1 => 1.0,             '1.0' => 1.23456789e+34,             1.7976931348623157e+308 => 1E666,             1E666/1E666 => "a bc",             "\xc1 bc",             array(null => true, varray[],                   false => 0, 1 => 1.0,                   '1.0' => 1.23456789e+34,                   1.7976931348623157e+308 => 1E666,                   1E666/1E666 => "a bc",                   "\xc1 bc"));
 var_dump($a1);
 var_dump($a2);
 var_dump($a3);

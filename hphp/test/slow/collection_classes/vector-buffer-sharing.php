@@ -16,14 +16,14 @@ function main() {
 
   $x = Vector {null};
   $y = $x->toImmVector();
-  $x[0] = array(); $x[0][] = 73;
+  $x[0] = varray[]; $x[0][] = 73;
   var_dump($y);
   unset($y);
   unset($x);
 
   $x = Vector {null};
   $y = $x->toImmVector();
-  $x[0] = array(); $x[0][42] = 73;
+  $x[0] = varray[]; $x[0][42] = 73;
   var_dump($y);
   unset($y);
   unset($x);

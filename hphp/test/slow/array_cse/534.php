@@ -32,11 +32,11 @@ function h($x, $y) {
 
 <<__EntryPoint>>
 function main_534() {
-f(array(), 'e');
+f(varray[], 'e');
 f(darray['e' => darray['baz' => 40]], 'e');
-var_dump(f(darray['y' => array()], 'y'));
-var_dump(f(array(), 'y'));
-var_dump(f(array(), array()));
-h(array(), 0);
-h(varray[array()], 0);
+var_dump(f(darray['y' => varray[]], 'y'));
+var_dump(f(varray[], 'y'));
+var_dump(f(varray[], array()));
+h(varray[], 0);
+h(varray[varray[]], 0);
 }

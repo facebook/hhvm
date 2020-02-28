@@ -10,7 +10,7 @@ function main() {
   $heh = foo(varray[1,2,3]);
   foreach ($heh as $v) { var_dump($v); }
   echo "--\n";
-  $heh = foo(array());
+  $heh = foo(varray[]);
   foreach ($heh as $v) { var_dump($v); }
 }
 

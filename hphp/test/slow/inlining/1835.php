@@ -10,7 +10,7 @@ class B {
  }
 class X extends B {
   function __construct() {
- parent::__construct(array());
+ parent::__construct(varray[]);
  }
   function foo() {
  echo "foo

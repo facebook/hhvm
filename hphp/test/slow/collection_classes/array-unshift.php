@@ -1,6 +1,6 @@
 <?hh
 function main() {
-  $x1 = array();
+  $x1 = varray[];
   var_dump(array_unshift(inout $x1, 1));
   var_dump(array_unshift(inout $x1, 'b', 'c'));
   var_dump($x1);

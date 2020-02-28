@@ -9,7 +9,7 @@ function main() {
     ImmMap {'a' => 11, 'b' => 22, 'c' => 33},
     ImmSet {11, 22, 33},
     Pair {11, 22},
-    array(),
+    varray[],
     Vector {},
     Map {},
     Set {},

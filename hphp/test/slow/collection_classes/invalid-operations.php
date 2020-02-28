@@ -93,9 +93,9 @@ function main() {
   echo "\n";
 
   $containers = Vector {
-    ImmVector {array(), array()},
-    ImmMap {0 => array(), 1 => array()},
-    Pair {array(), array()}
+    ImmVector {varray[], array()},
+    ImmMap {0 => varray[], 1 => array()},
+    Pair {varray[], array()}
   };
   foreach ($containers as $x) {
     try {
@@ -157,9 +157,9 @@ function main() {
   echo "\n";
 
   $containers = Vector {
-    ImmVector {array(), array()},
-    ImmMap {0 => array(), 1 => array()},
-    Pair {array(), array()}
+    ImmVector {varray[], array()},
+    ImmMap {0 => varray[], 1 => array()},
+    Pair {varray[], array()}
   };
   foreach ($containers as $x) {
     try {

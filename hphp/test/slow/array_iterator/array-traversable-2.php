@@ -23,7 +23,7 @@ function ifoo(IFoo $x) {
   var_dump($x);
 }
 function main() {
-  $arr = array();
+  $arr = varray[];
   var_dump($arr is \HH\Traversable);
   var_dump($arr is \HH\KeyedTraversable);
   var_dump($arr is \HH\Container);

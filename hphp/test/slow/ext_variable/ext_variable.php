@@ -80,7 +80,7 @@ VS(gettype(null), "NULL");
 VS(gettype(0), "integer");
 VS(gettype("test"), "string");
 VS(gettype("hi"), "string");
-VS(gettype(array()), "array");
+VS(gettype(varray[]), "array");
 VS(gettype(new stdclass), "object");
 VS(gettype($valid_res), "resource");
 VS(gettype($invalid_res), "unknown type");
@@ -107,7 +107,7 @@ VS(boolval("string"), true);
 VS(boolval("0"), false);
 VS(boolval("1"), true);
 VS(boolval(varray[1, 2]), true);
-VS(boolval(array()), false);
+VS(boolval(varray[]), false);
 VS(boolval(new stdClass), true);
 
 $obj = new stdclass;

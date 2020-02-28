@@ -18,5 +18,5 @@ function bar($ar) {
 <<__EntryPoint>>
 function main_dce_003() {
 bar(varray['a']);
-bar(array());
+bar(varray[]);
 }

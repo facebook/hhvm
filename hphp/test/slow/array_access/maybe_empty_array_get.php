@@ -23,7 +23,7 @@ class Gronk {
         return $z;
       }
     }
-    return array();
+    return varray[];
   }
 }
 

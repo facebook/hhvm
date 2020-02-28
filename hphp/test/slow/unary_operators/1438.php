@@ -3,7 +3,7 @@
 class Foo {}
 function foo($x) {
   if ($x) {
-    $a = array();
+    $a = varray[];
     $s = 'hello';
     $o = new Foo();
   }

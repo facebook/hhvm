@@ -18,11 +18,11 @@ takes_rx_traverable(dict[]);
 takes_rx_traverable(keyset[]);
 takes_rx_traverable(varray[]);
 takes_rx_traverable(darray[]);
-takes_rx_traverable(array());
+takes_rx_traverable(varray[]);
 takes_rx_keyedtraverable(vec[]);
 takes_rx_keyedtraverable(dict[]);
 takes_rx_keyedtraverable(keyset[]);
 takes_rx_keyedtraverable(varray[]);
 takes_rx_keyedtraverable(darray[]);
-takes_rx_keyedtraverable(array());
+takes_rx_keyedtraverable(varray[]);
 }

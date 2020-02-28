@@ -7,7 +7,7 @@
 <<__EntryPoint>> function main(): void {
 $old = null;
 $first_set = null;
-pcntl_sigprocmask(SIG_SETMASK, array(), inout $old);
+pcntl_sigprocmask(SIG_SETMASK, varray[], inout $old);
 
 pcntl_sigprocmask(SIG_BLOCK, varray[SIGCHLD,SIGTERM], inout $first_set);
 
@@ -20,9 +20,9 @@ var_dump(count($old) - count($first_set));
 pcntl_sigprocmask(SIG_SETMASK, varray[SIGINT], inout $old);
 var_dump(count($old) - count($first_set));
 
-pcntl_sigprocmask(SIG_SETMASK, array(), inout $old);
+pcntl_sigprocmask(SIG_SETMASK, varray[], inout $old);
 var_dump(count($old));
 
-pcntl_sigprocmask(SIG_SETMASK, array(), inout $old);
+pcntl_sigprocmask(SIG_SETMASK, varray[], inout $old);
 var_dump(count($old));
 }

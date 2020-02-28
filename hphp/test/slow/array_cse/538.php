@@ -32,7 +32,7 @@ function main_538() {
 f1(varray[varray[0, 1, 2]]);
 f1('abc');
 f2(null);
-f2(array());
+f2(varray[]);
 f2(varray[10]);
 f3(varray['first', 'second']);
 f3('AB');

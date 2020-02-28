@@ -3,7 +3,7 @@
 class X {
   private $b = false;
   private $i = 0;
-  private $a = array();
+  private $a = varray[];
   private $s = 'hello';
   function set() {
     $this->b = true;

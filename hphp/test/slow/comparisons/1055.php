@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_1055() {
-$a = array();
+$a = varray[];
 $b = new stdClass();
 $b->foo = 2;
 var_dump($a < $b);

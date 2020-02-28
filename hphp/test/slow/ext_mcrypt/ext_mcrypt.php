@@ -33,7 +33,7 @@ VERIFY(in_array("cbc", mcrypt_list_modes()));
 VS(mcrypt_module_get_algo_block_size("blowfish"), 8);
 VS(mcrypt_module_get_algo_key_size("blowfish"), 56);
 
-VS(mcrypt_module_get_supported_key_sizes("blowfish"), array());
+VS(mcrypt_module_get_supported_key_sizes("blowfish"), varray[]);
 VS(mcrypt_module_get_supported_key_sizes("twofish"),
    varray[16, 24, 32]);
 

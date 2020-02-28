@@ -5,9 +5,9 @@ function id($x) { return $x; }
 
 class thinger {
   private
-    $things = array(),
-    $otherThings = array(),
-    $updatedIDs = array();
+    $things = varray[],
+    $otherThings = varray[],
+    $updatedIDs = varray[];
 
   function thinger() {
     $this->things[3] = 'three';

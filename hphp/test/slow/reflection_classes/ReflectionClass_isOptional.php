@@ -2,13 +2,13 @@
 
 function arguments_1_defaults($a = 1, $b, $c) {}
 function arguments_2_defaults($a, $b = NULL, $c) {}
-function arguments_3_defaults($a, $b, $c = array()) {}
+function arguments_3_defaults($a, $b, $c = varray[]) {}
 
 function arguments_12_defaults($a = 1, $b = NULL, $c) {}
-function arguments_13_defaults($a = 1, $b, $c = array()) {}
-function arguments_23_defaults($a, $b = NULL, $c = array()) {}
+function arguments_13_defaults($a = 1, $b, $c = varray[]) {}
+function arguments_23_defaults($a, $b = NULL, $c = varray[]) {}
 
-function arguments_123_defaults($a = 1, $b = NULL, $c = array()) {}
+function arguments_123_defaults($a = 1, $b = NULL, $c = varray[]) {}
 
 
 <<__EntryPoint>>

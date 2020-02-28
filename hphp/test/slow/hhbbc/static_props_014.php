@@ -1,7 +1,7 @@
 <?hh
 
 class Foo {
-  private static $cache = array();
+  private static $cache = varray[];
   const DELIM = ':';
 
   public function __construct(string $type, ?string $annot) {

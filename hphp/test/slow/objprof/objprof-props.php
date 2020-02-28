@@ -5,7 +5,7 @@
 
 function get_instances(string $cls, ?array $objs) {
   if (!$objs) return 0;
-  return hphp_array_idx(hphp_array_idx($objs, $cls, array()), "instances", 0);
+  return hphp_array_idx(hphp_array_idx($objs, $cls, varray[]), "instances", 0);
 }
 function get_bytes_eq(string $cls, ?array $objs) {
   if (!$objs) return 0;
@@ -18,11 +18,11 @@ function get_bytes_eq(string $cls, ?array $objs) {
 }
 function get_bytes(string $cls, ?array $objs) {
   if (!$objs) return 0;
-  return hphp_array_idx(hphp_array_idx($objs, $cls, array()), "bytes", 0);
+  return hphp_array_idx(hphp_array_idx($objs, $cls, varray[]), "bytes", 0);
 }
 function get_bytesd(string $cls, ?array $objs) {
   if (!$objs) return 0;
-  return hphp_array_idx(hphp_array_idx($objs, $cls, array()),
+  return hphp_array_idx(hphp_array_idx($objs, $cls, varray[]),
     "bytes_normalized", 0);
 }
 function getStr(int $len): string {
@@ -47,7 +47,7 @@ class SimpleProps { // 51:48
 
 // TEST: sizes of arrays
 class SimpleArrays {
-  public array $arrEmpty = array(); // 16 (tv) + 16 (ArrayData) = 32
+  public array $arrEmpty = varray[]; // 16 (tv) + 16 (ArrayData) = 32
   public array $arrMixed = darray[ // 16 (tv) + 16 (ArrayData) + 46 + 32 = 110
     "somekey" => "someval", // 2 * (23:16) = 46:32
     321 => 3, // 2 * (16:16) = 32:32

@@ -71,7 +71,7 @@ if ($ret !== $map1) {
   echo "no12\n";
 }
 $ret = apc_fetch(varray["bar"], inout $success);
-if ($ret !== array()) {
+if ($ret !== varray[]) {
   echo "no13\n";
 }
 if ($success !== false) echo "no14\n";

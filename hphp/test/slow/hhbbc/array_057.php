@@ -5,7 +5,7 @@ function unknown($x) {
 }
 
 function foo($ids) {
-  $x = array();
+  $x = varray[];
   foreach ($ids as $id) {
     $target = unknown($id);
     if ($target !== null) {

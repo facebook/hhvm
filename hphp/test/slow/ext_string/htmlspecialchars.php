@@ -61,10 +61,10 @@ function test_htmlspecialchars() {
   fb_utf8ize(inout $tmp);
   $sanitized = $tmp;
 
-  VS(fb_htmlspecialchars($input, ENT_QUOTES, "UtF-8", array()),
+  VS(fb_htmlspecialchars($input, ENT_QUOTES, "UtF-8", varray[]),
      $sanitized);
 
-  VS(fb_htmlspecialchars($input, ENT_FB_UTF8, "utf-8", array()),
+  VS(fb_htmlspecialchars($input, ENT_FB_UTF8, "utf-8", varray[]),
      '&#xa1;&#xfffd;A'.
      '&#x561;&#xfffd;&#xfffd;'.
      '&#x3862;&#xfffd;&#xfffd;'.
@@ -74,7 +74,7 @@ function test_htmlspecialchars() {
      '&#xfffd;'.
      '&#xfffd;');
 
-  VS(fb_htmlspecialchars($sanitized, ENT_QUOTES, "", array()),
+  VS(fb_htmlspecialchars($sanitized, ENT_QUOTES, "", varray[]),
      $sanitized);
 
   VS(fb_htmlspecialchars($zfoo, ENT_COMPAT, "UTF-8"), u('\ufffd')."foo");

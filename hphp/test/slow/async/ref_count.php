@@ -5,7 +5,7 @@ function bar() {
 }
 
 abstract final class FooStatics {
-  public static $result_cache = array();
+  public static $result_cache = varray[];
 }
 
 async function foo($uid) {

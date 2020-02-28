@@ -24,7 +24,7 @@ function main() {
   $x4[] = 'a';
   var_dump($x4);
 
-  $x5 = array();
+  $x5 = varray[];
   var_dump(array_shift(inout $x5));
 
   $x6 = Vector {};

@@ -4,6 +4,6 @@
 <<__EntryPoint>>
 function main_403() {
 $a = darray['a' => 'va'];
- $a += array();
+ $a += varray[];
                 var_dump($a);
 }

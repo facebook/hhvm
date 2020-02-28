@@ -16,7 +16,7 @@ function main_yield_from_multi_tree() {
   foreach (range(0, 6) as $levels) {
     print "$levels level".($levels == 1 ? "" : "s")."\n\n";
     $all = varray[];
-    $gens = varray[array()];
+    $gens = varray[varray[]];
     $all[] = $gens[0][0] = from($levels);
     for ($level = 1; $level < $levels; $level++) {
       for ($i = 0; $i < (1 << $level); $i++) {

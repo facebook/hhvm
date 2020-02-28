@@ -1,6 +1,6 @@
 <?hh
 
-function a() { return array(); }
+function a() { return varray[]; }
 function main() {
   $x = a();
   $x[] = 2;

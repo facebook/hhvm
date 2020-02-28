@@ -2,7 +2,7 @@
 
 function foo($p) {
   if ($p) {
-    $a = array();
+    $a = varray[];
   }
   var_dump((string)$a);
 }

@@ -5,7 +5,7 @@ error_reporting(-1);
 class PropertyTest
 {
     /**  Location for overloaded data.  */
-    private $data = array();
+    private $data = varray[];
 
     /**  Overloading not used on declared properties.  */
     public $declared = 1;

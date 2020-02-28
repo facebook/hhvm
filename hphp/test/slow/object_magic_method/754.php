@@ -1,7 +1,7 @@
 <?hh
 
 class MemberTest {
-  private $data = array();
+  private $data = varray[];
   public function __set($name, $value) {
     echo "Setting '$name' to '$value'
 ";

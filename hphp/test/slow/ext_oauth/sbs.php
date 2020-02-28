@@ -3,7 +3,7 @@
 echo "-- only two parameters --\n";
 echo oauth_get_sbs('GET', 'http://127.0.0.1:12342/'),"\n";
 echo "-- using empty array --\n";
-echo oauth_get_sbs('GET', 'http://127.0.0.1:12342/', array()),"\n";
+echo oauth_get_sbs('GET', 'http://127.0.0.1:12342/', varray[]),"\n";
 echo "-- using string instead of array --\n";
 echo oauth_get_sbs('GET', 'http://127.0.0.1:12342/',''),"\n";
 echo "-- using numeric keys masked as a string --\n";

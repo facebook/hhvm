@@ -1,7 +1,7 @@
 <?hh
 
 class A {
-   public $a = array();
+   public $a = varray[];
    function __set($name, $value) {
  $this->a[$name] = $value.'set';
 }

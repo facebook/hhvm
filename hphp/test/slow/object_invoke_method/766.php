@@ -2,7 +2,7 @@
 
 // taking default args
 class C3 {
-  public function __invoke($a0, $a1 = array(), $a2 = false) {
+  public function __invoke($a0, $a1 = varray[], $a2 = false) {
     var_dump($a0, $a1, $a2);
   }
 }

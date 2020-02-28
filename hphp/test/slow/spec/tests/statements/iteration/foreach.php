@@ -8,7 +8,7 @@
 <<__EntryPoint>> function main(): void {
 error_reporting(-1);
 
-$array = array();
+$array = varray[];
 foreach ($array as $a)
 {
     echo $a."\n";

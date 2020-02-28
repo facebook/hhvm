@@ -243,7 +243,7 @@ let update_naming_table
       is. *)
       let open FileInfo in
       List.iter new_file_info.funs ~f:(fun (pos, fun_name) ->
-          Naming_heap.Funs.add fun_name pos);
+          Naming_provider.add_fun fun_name pos);
       List.iter new_file_info.classes ~f:(fun (pos, class_name) ->
           Naming_heap.Types.add class_name (pos, Naming_types.TClass));
       List.iter new_file_info.record_defs ~f:(fun (pos, record_def_name) ->

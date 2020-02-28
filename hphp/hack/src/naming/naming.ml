@@ -460,7 +460,7 @@ end = struct
   let fun_id (genv, _) x =
     canonicalize
       genv
-      Naming_heap.Funs.is_defined
+      Naming_provider.fun_exists
       GEnv.fun_pos
       GEnv.fun_canon_name
       x

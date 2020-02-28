@@ -290,7 +290,7 @@ let naming_from_saved_state
             (v.FileInfo.classes |> List.map ~f:snd |> SSet.of_list);
           Naming_heap.Types.remove_batch
             (v.FileInfo.typedefs |> List.map ~f:snd |> SSet.of_list);
-          Naming_heap.Funs.remove_batch
+          Naming_provider.remove_fun_batch
             (v.FileInfo.funs |> List.map ~f:snd |> SSet.of_list);
           Naming_provider.remove_const_batch
             (v.FileInfo.consts |> List.map ~f:snd |> SSet.of_list));

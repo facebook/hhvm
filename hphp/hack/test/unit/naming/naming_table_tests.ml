@@ -125,7 +125,7 @@ let test_get_pos () =
         "Check for class type";
       Pos_asserter.assert_option_equals
         (Some (FileInfo.File (FileInfo.Fun, Relative_path.from_root "bar.php")))
-        (Naming_heap.Funs.get_pos "\\bar")
+        (Naming_provider.get_fun_pos "\\bar")
         "Check for function";
       Types_pos_asserter.assert_option_equals
         (Some
@@ -151,7 +151,7 @@ let test_get_canon_name () =
         "Check for class canon name";
       Asserter.String_asserter.assert_option_equals
         (Some "\\bar")
-        (Naming_heap.Funs.get_canon_name ctx "\\bar")
+        (Naming_provider.get_fun_canon_name ctx "\\bar")
         "Check for function canon name";
       Asserter.String_asserter.assert_option_equals
         (Some "\\Baz")

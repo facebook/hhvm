@@ -10,7 +10,8 @@ open Core_kernel
 open Aast
 
 let error_if_not_in_naming_table p name =
-  if Naming_heap.Funs.get_pos name = None then Errors.invalid_fun_pointer p name
+  if Naming_provider.get_fun_pos name = None then
+    Errors.invalid_fun_pointer p name
 
 let handler =
   object

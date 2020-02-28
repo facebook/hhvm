@@ -403,7 +403,7 @@ let update_reverse_entries file_deltas =
             (fi.FileInfo.classes |> List.map snd |> SSet.of_list);
           Naming_heap.Types.remove_batch
             (fi.FileInfo.typedefs |> List.map snd |> SSet.of_list);
-          Naming_heap.Funs.remove_batch
+          Naming_provider.remove_fun_batch
             (fi.FileInfo.funs |> List.map snd |> SSet.of_list);
           Naming_provider.remove_const_batch
             (fi.FileInfo.consts |> List.map snd |> SSet.of_list)
@@ -420,7 +420,7 @@ let update_reverse_entries file_deltas =
             Naming_heap.Types.add name (pos, Naming_types.TTypedef))
           fi.FileInfo.typedefs;
         List.iter
-          (fun (pos, name) -> Naming_heap.Funs.add name pos)
+          (fun (pos, name) -> Naming_provider.add_fun name pos)
           fi.FileInfo.funs;
         List.iter
           (fun (pos, name) -> Naming_provider.add_const name pos)

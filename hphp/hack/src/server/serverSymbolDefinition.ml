@@ -37,7 +37,7 @@ let get_class_by_name ctx x =
   Ast_provider.find_class_in_file ctx fn x
 
 let get_function_by_name ctx x =
-  Naming_heap.Funs.get_filename x >>= fun fn ->
+  Naming_provider.get_fun_path x >>= fun fn ->
   Ide_parser_cache.with_ide_cache @@ fun () ->
   Ast_provider.find_fun_in_file ctx fn x
 

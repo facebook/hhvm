@@ -181,7 +181,7 @@ let get_deps_set classes =
     ~init:Relative_path.Set.empty
 
 let get_deps_set_function f_name =
-  match Naming_heap.Funs.get_filename f_name with
+  match Naming_provider.get_fun_path f_name with
   | Some fn ->
     let dep = Typing_deps.Dep.Fun f_name in
     let ideps = Typing_deps.get_ideps dep in

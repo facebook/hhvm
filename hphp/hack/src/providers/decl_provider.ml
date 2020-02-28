@@ -37,7 +37,7 @@ let get_fun (ctx : Provider_context.t) (fun_name : fun_key) : fun_decl option =
       decl_cache
       ~key:(Provider_backend.Decl_cache_entry.Fun_decl fun_name)
       ~default:(fun () ->
-        match Naming_heap.Funs.get_filename fun_name with
+        match Naming_provider.get_fun_path fun_name with
         | Some filename ->
           let ft =
             Errors.run_in_decl_mode filename (fun () ->

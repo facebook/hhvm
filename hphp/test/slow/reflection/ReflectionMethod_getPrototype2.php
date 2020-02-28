@@ -17,13 +17,13 @@ class SimpleXMLElementChild extends SimpleXMLElement {
 
 
 function main() {
-  $tests = array(
+  $tests = varray[
     tuple(Generator::class, "next"),
     tuple(Generator::class, "getOrigFuncName"),
     tuple(SimpleXMLElementChild::class, '__construct'),
     tuple(SimpleXMLElement::class, 'offsetSet'),
     tuple(SimpleXMLElementChild::class, 'offsetSet'),
-  );
+  ];
 
   foreach ($tests as $test) {
     outputPrototype(new ReflectionMethod(...$test));

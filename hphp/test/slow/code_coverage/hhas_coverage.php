@@ -9,5 +9,5 @@ function test($a) {
 
 <<__EntryPoint>>
 function main_hhas_coverage() {
-test(array(1,2,3));
+test(varray[1,2,3]);
 }

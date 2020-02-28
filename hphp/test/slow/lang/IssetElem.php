@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_isset_elem() {
-$a = array(0, 1, 2);
+$a = varray[0, 1, 2];
 print ":".isset($a[-1]).":\n";
 print ":".isset($a[0]).":\n";
 print ":".isset($a[1]).":\n";
@@ -11,7 +11,7 @@ print ":".isset($a[3]).":\n";
 print ":".isset($a["blah"]).":\n";
 print "\n";
 
-$a = array(null, null);
+$a = varray[null, null];
 print ":".isset($a[-1]).":\n";
 print ":".isset($a[0]).":\n";
 print ":".isset($a[1]).":\n";

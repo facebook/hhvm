@@ -1,7 +1,7 @@
 <?hh
 
 function f($a) {
- $a = array($a);
+ $a = varray[$a];
  var_dump($a);
  }
 

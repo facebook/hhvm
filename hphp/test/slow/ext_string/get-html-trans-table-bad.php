@@ -3,11 +3,11 @@
 
 <<__EntryPoint>>
 function main_get_html_trans_table_bad() {
-$encodings = array(
+$encodings = varray[
   null,
   '',
   5
-);
+];
 
 foreach ($encodings as $encoding) {
   try {

@@ -20,9 +20,9 @@ function min_max_multi(...$args) {
 
 function single_arg() {
   echo ' === Single Array ===', "\n";
-  min_max_single(array(3, 1, 6, 7));
-  min_max_single(array(2, 4, 5));
-  min_max_single(array(1 => "1236150163"));
+  min_max_single(varray[3, 1, 6, 7]);
+  min_max_single(varray[2, 4, 5]);
+  min_max_single(darray[1 => "1236150163"]);
 
   echo ' === Single Collection ===', "\n";
   min_max_single(Vector {3, 1, 6, 7});
@@ -32,11 +32,11 @@ function single_arg() {
 
 function multi_arg() {
   echo ' === Multiple Arguments ===', "\n";
-  min_max_multi(0, array("hello"));
-  min_max_multi("hello", array(0));
-  min_max_multi("hello", array(-1));
-  min_max_multi(array(2, 4, 8), array(array(2, 5, 1)));
-  min_max_multi("string", array(array(2, 5, 7), 42));
+  min_max_multi(0, varray["hello"]);
+  min_max_multi("hello", varray[0]);
+  min_max_multi("hello", varray[-1]);
+  min_max_multi(varray[2, 4, 8], varray[varray[2, 5, 1]]);
+  min_max_multi("string", varray[varray[2, 5, 7], 42]);
   min_max_multi(1, 1.0);
   min_max_multi(1.0, 1);
 }

@@ -6,7 +6,7 @@ function decieve_static_analysis() {
 
 function main() {
   $start_usage = memory_get_usage();
-  $a = array();
+  $a = varray[];
   for ($i = 0; $i < $start_usage / 1000; $i++) {
     $a[] = str_repeat(decieve_static_analysis(), 1000);
   }

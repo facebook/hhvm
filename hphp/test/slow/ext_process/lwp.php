@@ -22,7 +22,7 @@ pcntl_signal_dispatch();
 
 $ret = -1;
 $last_line = exec("echo hello; echo world;", inout $output, inout $ret);
-VS($output, array("hello", "world"));
+VS($output, varray["hello", "world"]);
 VS($last_line, "world");
 VS($ret, 0);
 
@@ -48,9 +48,9 @@ $errout = tempnam('/tmp', 'vmtesterrout');
 unlink($errout);
 
 $descriptorspec =
-  array(array("pipe", "r"),
-        array("pipe", "w"),
-        array("file", $errout, "a"));
+  varray[varray["pipe", "r"],
+        varray["pipe", "w"],
+        varray["file", $errout, "a"]];
 
 putenv("inherit_me=please");
 $pipes = null;
@@ -70,9 +70,9 @@ VERIFY(strlen(fgets($pipes[1])) > 2);
 VS(proc_close($process), 0);
 
 $descriptorspec =
-  array(array("pipe", "r"),
-        array("pipe", "w"),
-        array("file", $errout, "a"));
+  varray[varray["pipe", "r"],
+        varray["pipe", "w"],
+        varray["file", $errout, "a"]];
 $cwd = "/tmp";
 
 $process = proc_open("sh", $descriptorspec, inout $pipes, $cwd);
@@ -84,9 +84,9 @@ fpassthru($pipes[1]);
 VS(proc_close($process), 0);
 
 $descriptorspec =
-  array(array("pipe", "r"),
-        array("pipe", "w"),
-        array("file", $errout, "a"));
+  varray[varray["pipe", "r"],
+        varray["pipe", "w"],
+        varray["file", $errout, "a"]];
 $process = proc_open('cat', $descriptorspec, inout $pipes);
 VERIFY($process != false);
 VERIFY(proc_terminate($process));

@@ -9,5 +9,5 @@ $e = fribidi_log2vis(1,     FRIBIDI_AUTO, FRIBIDI_CHARSET_CAP_RTL);
 $f = fribidi_log2vis('',    FRIBIDI_AUTO, FRIBIDI_CHARSET_CAP_RTL);
 $g = fribidi_log2vis("",    FRIBIDI_AUTO, FRIBIDI_CHARSET_CAP_RTL);
 
-var_dump(array($a, $b, $c, $d, $e, $f, $g));
+var_dump(varray[$a, $b, $c, $d, $e, $f, $g]);
 }

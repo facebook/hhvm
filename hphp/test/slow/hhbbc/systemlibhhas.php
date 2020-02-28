@@ -16,7 +16,7 @@ class WhateverTest {
 <<__EntryPoint>>
 function main_systemlibhhas() {
 $t = new WhateverTest();
-$ret = $t->filter( array(  "lol", "wow", "doge" ) );
+$ret = $t->filter( varray[  "lol", "wow", "doge" ] );
 
 \var_dump( $ret );
 }

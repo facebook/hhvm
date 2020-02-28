@@ -1,7 +1,7 @@
 <?hh
 
 function main() {
-  $elts = array('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h');
+  $elts = varray['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
   $v = Vector {'a', 'b', 'c', 'd'};
 

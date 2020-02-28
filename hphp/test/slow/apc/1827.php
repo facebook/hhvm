@@ -8,7 +8,7 @@ class X implements Serializable {
   }
 }
 function test() {
-  $a = array();
+  $a = varray[];
   $a[] = $x = new X;
   $a[] = $x;
   $a[] = $x;

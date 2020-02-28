@@ -1,7 +1,7 @@
 <?hh
 
 function test($s) {
-  $a = array('abc' => 1, 'abcd' => 2);
+  $a = darray['abc' => 1, 'abcd' => 2];
   $s .= 'c';
  var_dump($a[$s]);
   $s .= 'd';

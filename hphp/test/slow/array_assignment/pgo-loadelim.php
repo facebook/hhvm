@@ -10,28 +10,28 @@ class thing {
 
   public function __construct() {
     $this->location = '0110111001101';
-    $this->paper = array(
+    $this->paper = darray[
       'a' => true,
       'b' => false,
       'c' => true,
       'd' => false,
-    );
-    $this->kittens = array(
+    ];
+    $this->kittens = darray[
       'a' => 1,
       'b' => 1,
       'c' => 1,
       'd' => 1,
-    );
-    $this->puppies = array(
+    ];
+    $this->puppies = darray[
       'a' => varray[12, 34],
       'b' => varray[56, 78],
       'c' => varray[90, 12],
       'd' => varray[34, 56],
-    );
+    ];
   }
 
   public function teleport() {
-    $arr = array();
+    $arr = darray[];
     $location = $this->location;
 
     $offset = 0;

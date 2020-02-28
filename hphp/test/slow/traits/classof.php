@@ -13,5 +13,5 @@ function test($f) {
 
 <<__EntryPoint>>
 function main_classof() {
-test(array('T', 'T::foo'));
+test(varray['T', 'T::foo']);
 }

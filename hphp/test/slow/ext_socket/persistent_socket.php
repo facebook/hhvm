@@ -87,13 +87,13 @@ function do_request($scheme, $port, $context) {
 function main_persistent_socket() {
 $pemfile = tempnam('/tmp', 'sslservertest');
 
-$certdata = array('countryName' => 'US',
+$certdata = darray['countryName' => 'US',
                   'stateOrProvinceName' => 'California',
                   'localityName' => 'Menlo Park',
                   'organizationName' => 'Test Corp',
                   'organizationalUnitName' => 'Test Team',
                   'commonName' => 'Foo Bar',
-                  'emailAddress' => 'foo@bar.com');
+                  'emailAddress' => 'foo@bar.com'];
 
 // Generate the certificate
 $pkey = openssl_pkey_new();
@@ -118,10 +118,10 @@ stream_context_set_option($context, 'ssl', 'passphrase', $pem_passphrase);
 stream_context_set_option($context, 'ssl', 'allow_self_signed', true);
 stream_context_set_option($context, 'ssl', 'verify_peer', false);
 
-$schemes = array("tcp", "tls", "ssl");
-$contexts = array(null, $context, $context);
-$servers = array();
-$ports = array();
+$schemes = varray["tcp", "tls", "ssl"];
+$contexts = varray[null, $context, $context];
+$servers = varray[];
+$ports = varray[];
 foreach ($schemes as $i => $scheme) {
   $server = null;
   $port = 0;

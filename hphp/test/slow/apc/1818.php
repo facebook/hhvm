@@ -6,7 +6,7 @@ class A {
 
 <<__EntryPoint>>
 function main() {
-  $a = array(new A);
+  $a = varray[new A];
   apc_store('key1', $a);
   $b = __hhvm_intrinsics\apc_fetch_no_check('key1');
   $c = $b[0];

@@ -1,7 +1,7 @@
 <?hh
 
 function h1() {
-  $x = array(1,2,3,4);
+  $x = varray[1,2,3,4];
   next(inout $x);
   $y = $x;
   unset($y[2]);

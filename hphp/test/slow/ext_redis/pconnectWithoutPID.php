@@ -1,9 +1,9 @@
 <?hh
 
 function NewRedisTestInstance() {
-  $expecting = array(
+  $expecting = darray[
     'timeout' => 0
-  );
+  ];
   $r = new Redis();
   $redis_host = getenv('REDIS_TEST_HOST');
   $redis_port = getenv('REDIS_TEST_PORT')

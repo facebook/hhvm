@@ -4,7 +4,7 @@ class D {
 }
 
 function foo(inout int $x) {
-  foreach (array(new D) as $bar) {
+  foreach (varray[new D] as $bar) {
     try {
       return $x;
     } finally {

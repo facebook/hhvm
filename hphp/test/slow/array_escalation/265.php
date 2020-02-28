@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_265() {
-$a = array();
- $a[] = array(0);
+$a = varray[];
+ $a[] = varray[0];
        var_dump($a);
 }

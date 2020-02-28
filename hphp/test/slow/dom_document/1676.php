@@ -68,7 +68,7 @@ $ents = $dtd->entities;
 $length = $ents->length;
 echo "Length: ".$length."\n";
 
-$a = array();
+$a = darray[];
 foreach ($ents as $key=>$node) {
   $a[$key] = $node;
 }

@@ -3,7 +3,7 @@
 function bar(bool $k) {
   $x = null;
   for (;;) {
-    $x = array('x' => $x);
+    $x = darray['x' => $x];
     if ($k) return $x;
   }
 }

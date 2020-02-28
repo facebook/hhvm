@@ -1,10 +1,10 @@
 <?hh
 
 function provide_constant_vec_like_array() {
-  return array(
+  return varray[
     'first value',
     'second value',
-  );
+  ];
 }
 
 // Provides the same as the above, but using __hhas_adata with a nowdoc.

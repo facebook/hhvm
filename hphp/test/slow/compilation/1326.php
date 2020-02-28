@@ -11,7 +11,7 @@ class C {
 }
 
 function main() {
-  $testA = array(4 => false, 5 => false);
+  $testA = darray[4 => false, 5 => false];
   $c = new C();
   var_dump($c->loadAllWithIDs($testA));
 }

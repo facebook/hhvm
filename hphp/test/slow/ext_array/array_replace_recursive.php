@@ -4,13 +4,13 @@
 <<__EntryPoint>>
 function main_array_replace_recursive() {
 $ar1 = array(
-  "color" => array("favoritte" => "red"),
+  "color" => darray["favoritte" => "red"],
   5
 );
-$ar2 = array(
+$ar2 = varray[
   10,
-  array("color" => array("favorite" => "green", "blue"))
-);
-$r = array_replace_recursive($ar1, array($ar2));
+  darray["color" => array("favorite" => "green", "blue")]
+];
+$r = array_replace_recursive($ar1, varray[$ar2]);
 var_dump($r);
 }

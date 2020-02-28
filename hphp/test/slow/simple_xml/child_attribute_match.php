@@ -7,7 +7,7 @@ $p = new SimpleXMLElement('<parent/>');
 $c = $p->addChild('child', '123');
 $c->addAttribute('attr', 'hi');
 
-$cattrs = array();
+$cattrs = darray[];
 foreach ($c->attributes() as $k => $v) {
   $cattrs[$k] = $v;
 }

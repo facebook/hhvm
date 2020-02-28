@@ -76,9 +76,9 @@ var_dump(call_user_func_array(rf2(true), array()));
 var_dump(call_user_func_array(rf4(true), array()));
 var_dump(call_user_func_array(rf5(true), array()));
 var_dump(call_user_func_array(rf6(true), array()));
-var_dump(call_user_func_array(rf1(true), array(null)));
-var_dump(call_user_func_array(rf2(true), array(null)));
-var_dump(call_user_func_array(rf4(true), array(null)));
-var_dump(call_user_func_array(rf5(true), array(null)));
-var_dump(call_user_func_array(rf6(true), array(null)));
+var_dump(call_user_func_array(rf1(true), varray[null]));
+var_dump(call_user_func_array(rf2(true), varray[null]));
+var_dump(call_user_func_array(rf4(true), varray[null]));
+var_dump(call_user_func_array(rf5(true), varray[null]));
+var_dump(call_user_func_array(rf6(true), varray[null]));
 }

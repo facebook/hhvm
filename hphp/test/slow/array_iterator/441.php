@@ -26,5 +26,5 @@ function array_iterator_441() {
 }
 
 abstract final class ArrayIterator441 {
-  public static $arr = array('bar', 'bar', 'bar', 'bar', 'bar', 'bar', 'foo');
+  public static $arr = varray['bar', 'bar', 'bar', 'bar', 'bar', 'bar', 'foo'];
 }

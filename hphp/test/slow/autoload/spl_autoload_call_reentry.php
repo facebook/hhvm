@@ -11,8 +11,8 @@ class Autoloaders
   {
     echo "autoload2\n";
 
-    spl_autoload_unregister(array($this, 'autoload2'));
-    spl_autoload_register(array($this, 'autoload2'));
+    spl_autoload_unregister(varray[$this, 'autoload2']);
+    spl_autoload_register(varray[$this, 'autoload2']);
 
     spl_autoload_call($class);
   }
@@ -28,8 +28,8 @@ class Autoloaders
 <<__EntryPoint>>
 function main_spl_autoload_call_reentry() {
 $autoloaders = new Autoloaders();
-spl_autoload_register(array($autoloaders, 'autoload1'));
-spl_autoload_register(array($autoloaders, 'autoload2'));
-spl_autoload_register(array($autoloaders, 'autoload3'));
+spl_autoload_register(varray[$autoloaders, 'autoload1']);
+spl_autoload_register(varray[$autoloaders, 'autoload2']);
+spl_autoload_register(varray[$autoloaders, 'autoload3']);
 $foo = new NotRealAutoloadedClass();
 }

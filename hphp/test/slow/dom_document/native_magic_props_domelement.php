@@ -5,7 +5,7 @@
 // -----------------------------------------------------------
 
 class MyElement extends DOMElement {
-  private $props = array('userMagic' => 'userMagic');
+  private $props = darray['userMagic' => 'userMagic'];
   public function __get($name) {
     echo "__get {$name}: ";
     if (array_key_exists($name, $this->props)) {

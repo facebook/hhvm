@@ -61,7 +61,7 @@ echo ">$a|$b|$c|$d|$e|$f<\n";
 $s = sprintf("%d|%G|%s|%s|%s|%s", $a, $b, $c, $d, $e, $f);
 echo ">$s<\n";
 
-$fpvalues = array(24.543567891234565, -2345e25, 6E-200, NAN, INF);
+$fpvalues = varray[24.543567891234565, -2345e25, 6E-200, NAN, INF];
 foreach ($fpvalues as $fpval)
 {
     echo ">$fpval<--- o/p from string substition\n";
@@ -99,7 +99,7 @@ echo ">$1|$&<\n";
 ///*
 // use arrays and array elements
 
-$colors = array("red", "white", "blue");
+$colors = varray["red", "white", "blue"];
 echo "\colors contains >$colors<\n";
 try { echo "\colors[1] contains >$colors[1]<\n"; } catch (Exception $e) { echo $e->getMessage()."\n"; }
 echo "\colors[1] contains >$colors [1]<\n";     // whitespace permitted, but semantics change
@@ -112,14 +112,14 @@ try { var_dump("$colors[0X1]"); } catch (Exception $e) { echo $e->getMessage()."
 
 $index = 2;
 echo "\$colors[$index] contains >$colors[$index]<\n";
-$indices = array(2, 1, 0);
+$indices = varray[2, 1, 0];
 // echo "\colors[$indices[0]] contains >$colors[$indices[0]]<\n"; // the subscript cannot itself be
 // other than a simple variable
 //*/
 
 ///*
-$a1 = array(10,20);
-$a2 = array(FALSE,10.3,NULL);
+$a1 = varray[10,20];
+$a2 = varray[FALSE,10.3,NULL];
 echo ">$a1|$a2<\n";
 
 // use class properties

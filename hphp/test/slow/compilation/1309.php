@@ -1,7 +1,7 @@
 <?hh
 
 function foo() {
- return array(1,2,3);
+ return varray[1,2,3];
  }
 function bar($a, $b) {
  $a = 4;

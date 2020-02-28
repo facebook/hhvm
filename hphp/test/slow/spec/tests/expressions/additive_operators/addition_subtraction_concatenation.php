@@ -8,8 +8,8 @@
 <<__EntryPoint>> function main(): void {
 error_reporting(-1);
 
-$oper = array(0, -10, 100, -3.4e10, INF, -INF, NAN, TRUE, FALSE, NULL,
-    "123", "2e+5", "", "abc", PHP_INT_MAX );
+$oper = varray[0, -10, 100, -3.4e10, INF, -INF, NAN, TRUE, FALSE, NULL,
+    "123", "2e+5", "", "abc", PHP_INT_MAX ];
 /*
 foreach ($oper as $e1)
 {

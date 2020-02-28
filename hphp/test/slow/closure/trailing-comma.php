@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_trailing_comma() {
-$f = ($a,) ==> array($a);
+$f = ($a,) ==> varray[$a];
 
 var_dump($f("Hello World"));
 }

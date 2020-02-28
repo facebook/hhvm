@@ -6,10 +6,10 @@ class CatWrapper {
   private array $pipes;
 
   public function __construct() {
-    $descriptorspec = array(
-      0 => array("pipe", "r"),
-      1 => array("pipe", "w"),
-    );
+    $descriptorspec = darray[
+      0 => varray["pipe", "r"],
+      1 => varray["pipe", "w"],
+    ];
     $__pipes = $this->pipes;
     $this->proc = proc_open("cat", $descriptorspec, inout $__pipes);
     $this->pipes = $__pipes;

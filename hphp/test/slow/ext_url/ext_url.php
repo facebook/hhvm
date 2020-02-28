@@ -33,8 +33,8 @@ function test_get_meta_tags() {
 }
 
 function test_http_build_query() {
-  $data = array("foo" => "bar", "baz" => "boom", "cow" => "milk",
-                           "php" => "hypertext processor");
+  $data = darray["foo" => "bar", "baz" => "boom", "cow" => "milk",
+                           "php" => "hypertext processor"];
   VS(http_build_query($data),
      "foo=bar&baz=boom&cow=milk&php=hypertext+processor");
   VS(http_build_query($data, "", "&amp;"),
@@ -55,15 +55,15 @@ function test_http_build_query() {
      "php=hypertext+processor");
 
   $data = array(
-    'user' => array('name' => 'Bob Smith',
+    'user' => darray['name' => 'Bob Smith',
                     'age' => 47,
                     'sex' => 'M',
-                    'dob' => '5/12/1956'),
-    'pastimes' => array('golf', 'opera', 'poker', 'rap'),
-    'children' => array('bobby' => array('age' => 12,
-                                         'sex' => 'M'),
-                        'sally' => array('age' => 8,
-                                         'sex' => 'F')),
+                    'dob' => '5/12/1956'],
+    'pastimes' => varray['golf', 'opera', 'poker', 'rap'],
+    'children' => darray['bobby' => darray['age' => 12,
+                                         'sex' => 'M'],
+                        'sally' => darray['age' => 8,
+                                         'sex' => 'F']],
     'CEO'
   );
   VS(http_build_query($data, "flags_"),

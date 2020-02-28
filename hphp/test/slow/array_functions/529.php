@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_529() {
-$input = array(4, "4", "3", 4, 3, "3");
+$input = varray[4, "4", "3", 4, 3, "3"];
 $result = array_unique($input);
 var_dump($result);
 }

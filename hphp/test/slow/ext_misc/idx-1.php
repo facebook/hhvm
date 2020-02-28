@@ -7,11 +7,11 @@ function main() {
   $s = 'hello';
 
   // Arrays
-  var_dump(idx(array(2 => 'h', 3 => 'i', 4 => 'j'), 4, null));
-  var_dump(idx(array('hello' => 42), 'hello', 31337));
-  var_dump(idx(array(2 => false), 2, true));
-  var_dump(idx(array('world' => 1), 'hello', $o));
-  var_dump(idx(array(2 => null), 2, 'not_reached'));
+  var_dump(idx(darray[2 => 'h', 3 => 'i', 4 => 'j'], 4, null));
+  var_dump(idx(darray['hello' => 42], 'hello', 31337));
+  var_dump(idx(darray[2 => false], 2, true));
+  var_dump(idx(darray['world' => 1], 'hello', $o));
+  var_dump(idx(darray[2 => null], 2, 'not_reached'));
   var_dump(idx(array(), 2, 'not_reached'));
   var_dump(idx(array(), 'absent'));
   var_dump(idx(array(), null, 5));

@@ -1,7 +1,7 @@
 <?hh
 
 class C {}
-function foo() { return mt_rand() ? array(new C) : array(new C, new C); }
+function foo() { return mt_rand() ? varray[new C] : varray[new C, new C]; }
 function val() {
   $x = '0';
   apc_store('asd', $x);

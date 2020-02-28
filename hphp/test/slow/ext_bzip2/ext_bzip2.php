@@ -51,8 +51,8 @@ function test_bzerror() {
   $ret = bzerror($f);
   bzclose($f);
   unlink(ExtBzip2ExtBzip2Php::$tmpfile);
-  VS($ret, array("errno" => -5,
-                 "errstr" => "DATA_ERROR_MAGIC"));
+  VS($ret, darray["errno" => -5,
+                 "errstr" => "DATA_ERROR_MAGIC"]);
 }
 
 test_bzwrite();

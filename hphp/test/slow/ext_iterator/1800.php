@@ -6,7 +6,7 @@ function main_1800() {
 $ite=new RecursiveDirectoryIterator(__DIR__.'/../../sample_dir/');
 $bytestotal=0;
 $nbfiles=0;
-$files = array();
+$files = varray[];
  // order changes per machine
 foreach ($ite as $filename=>$cur) {
   if (substr($filename,-1)=='.') continue;

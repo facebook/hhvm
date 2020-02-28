@@ -26,11 +26,11 @@ function foo($x, $k) {
 
 <<__EntryPoint>>
 function main_invariant_load() {
-foo(array(1,2,3), 123);
-foo(array(1,2,3), 123);
-foo(array(1,2,3), 123);
-foo(array(1,2,3), 123);
-foo(array(1,2,3), 123);
-foo(array(1,2,3), 123);
-foo(array(1,2,3), 'asd');
+foo(varray[1,2,3], 123);
+foo(varray[1,2,3], 123);
+foo(varray[1,2,3], 123);
+foo(varray[1,2,3], 123);
+foo(varray[1,2,3], 123);
+foo(varray[1,2,3], 123);
+foo(varray[1,2,3], 'asd');
 }

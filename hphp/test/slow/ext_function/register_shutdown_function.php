@@ -17,7 +17,7 @@ function onShutdownRegisterShutdown() {
 
 function onShutdown() {
   echo "in register\n";
-  register_shutdown_function(array(new Fooz, 'baz'));
+  register_shutdown_function(varray[new Fooz, 'baz']);
 }
 
 function onShutdown2() {

@@ -18,7 +18,7 @@ $obj = new A();
  var_dump(is_subclass_of($obj, 'b'));
 var_dump(method_exists($obj, 'f'));
 var_dump(method_exists('A', 'f'));
-var_dump(is_callable(array($obj, 'f')));
-var_dump(is_callable(array('A', 'f')));
+var_dump(is_callable(varray[$obj, 'f']));
+var_dump(is_callable(varray['A', 'f']));
 var_dump(get_object_vars($obj));
 }

@@ -1,11 +1,11 @@
 <?hh
 
 function test1() {
- $a = array(__FUNCTION__, __LINE__);
+ $a = varray[__FUNCTION__, __LINE__];
  return $a;
  }
 function test2() {
- $a = array(__FUNCTION__, __LINE__);
+ $a = varray[__FUNCTION__, __LINE__];
  return $a;
  }
 

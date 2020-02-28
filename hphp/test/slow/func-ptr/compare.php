@@ -13,7 +13,7 @@ function bar() {}
 function LV($x)  { return __hhvm_intrinsics\launder_value($x); }
 function CLS($c) { return __hhvm_intrinsics\create_class_pointer($c); }
 
-function WRAPA($x) { return LV(array($x)); }
+function WRAPA($x) { return LV(varray[$x]); }
 function WRAPO($x) { return LV(new Wrapper($x)); }
 function WRAPD($x) { $r = new stdclass; $r->x = $x; return LV($r); }
 
@@ -39,7 +39,7 @@ function WRAPD($x) { $r = new stdclass; $r->x = $x; return LV($r); }
   $oa = new StrObj('foobar');
   $fa = CLS('foobar');
 
-  $xx = array($cm); $vx = array($va); $ox = array($oa); $fx = array($fa);
+  $xx = varray[$cm]; $vx = varray[$va]; $ox = varray[$oa]; $fx = varray[$fa];
 
   $xy = new Wrapper($cm); $vy = new Wrapper($va); $oy = new Wrapper($oa);
   $fy = new Wrapper($fa);

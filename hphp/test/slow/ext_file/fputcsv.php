@@ -5,7 +5,7 @@
 function main_fputcsv() {
 $tempfile = tempnam('/tmp', 'vmextfiletest');
 
-$fields = array('apple', "\"banana\"");
+$fields = varray['apple', "\"banana\""];
 $f = fopen($tempfile, 'w');
 // #2511892: have to specify all fields due to a bug
 fputcsv($f, $fields, ',', '"');

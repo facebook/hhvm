@@ -4,7 +4,7 @@ function __autoload($c) {
 }
 function test() {
   try {
-    array_filter(array(1), array('Foo', 'Bar'));
+    array_filter(varray[1], varray['Foo', 'Bar']);
   } catch (Exception $e) {
     var_dump($e->getMessage());
   }

@@ -10,7 +10,7 @@ class A {
 }
 
 function main() {
-  foreach (array('A', 'B') as $class) {
+  foreach (varray['A', 'B'] as $class) {
     $rc = new ReflectionClass($class);
     foreach ($rc->getMethods() as $method) {
       var_dump($method->isConstructor());

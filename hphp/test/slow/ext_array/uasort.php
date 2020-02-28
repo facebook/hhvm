@@ -7,21 +7,21 @@ function reverse_strcasecmp($s1,$s2) {
 
 <<__EntryPoint>>
 function main_uasort() {
-$fruits = array(
+$fruits = darray[
   "d" => "lemon",
   "a" => "orange",
   "b" => "banana",
   "c" => "apple"
-);
+];
 uasort(inout $fruits, fun('reverse_strcasecmp'));
 var_dump($fruits);
 
-$fruits = array(
+$fruits = darray[
   "d" => "lemon",
   "a" => "orange",
   "b" => "banana",
   "c" => "apple"
-);
+];
 uksort(inout $fruits, fun('reverse_strcasecmp'));
 var_dump($fruits);
 

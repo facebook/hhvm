@@ -151,7 +151,7 @@ $fix249639=0;
 $g = new G(5);
 // test simple function case
 echo "600 == ",
-     call_user_func_array('f2',array(call_user_func_array('f4',array(0)))), "\n";
+     call_user_func_array('f2',varray[call_user_func_array('f4',varray[0])]), "\n";
 
 // test C::o_invoke, C::o_invoke_few_args, lookup in call_user_func
 // static method call (in G::f4).
@@ -182,16 +182,16 @@ $f1='f1';
 echo "1 1 == ",$g->{$f} (1)," ", $g->{$f1} (1),"\n";
 echo "1 1 == ",$g->{'F'} (1)," ", $g->{$f1} (1),"\n";
 
-$res = call_user_func_array("H::f",array(2));
+$res = call_user_func_array("H::f",varray[2]);
  // ok
 
 // tests methodIndexLookup and this variety of dynamic calls
 // trying to exhause f_call_user_func_array cases
-$res = call_user_func_array(array($g,'f'),array(20));
+$res = call_user_func_array(varray[$g,'f'],varray[20]);
  // ok
 echo "dynamic call \$g->'f' ".ObjectMethod736::$trace.", 20 == $res\n";
 
-$res= call_user_func_array(array($g,'G::f'),array(21));
+$res= call_user_func_array(varray[$g,'G::f'],varray[21]);
  // G::G::f a bit weird
 echo "dynamic call \$g->'G::f' ".ObjectMethod736::$trace.", 21 == $res\n";
 //echo "dynamic call \$g->'H::f' $trace, FAIL = ",
@@ -224,13 +224,13 @@ $f = 'missing';
 
 
 // test methodIndexLookupReverse
-echo "dynamic call \$g->'missing' ".ObjectMethod736::$trace.", Calling G object method 'missing' 2 = ", call_user_func_array(array($g,'missing'),array(2)),"\n";
-echo "dynamic call 'missing(2)' ".ObjectMethod736::$trace.", FAIL =", call_user_func_array('missing',array(2)),"\n";
+echo "dynamic call \$g->'missing' ".ObjectMethod736::$trace.", Calling G object method 'missing' 2 = ", call_user_func_array(varray[$g,'missing'],varray[2]),"\n";
+echo "dynamic call 'missing(2)' ".ObjectMethod736::$trace.", FAIL =", call_user_func_array('missing',varray[2]),"\n";
 
 // more __call testing
 $j = new J();
 echo "Calling object method 'missing' 3 = ";
-call_user_func_array(array($j,'missing'),array(3));
+call_user_func_array(varray[$j,'missing'],varray[3]);
 
 
 // test mapping for system function names

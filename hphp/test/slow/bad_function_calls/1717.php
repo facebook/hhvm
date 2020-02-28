@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_1717() {
-$vals = array(null, 0, false, array(), 'test');
+$vals = varray[null, 0, false, array(), 'test'];
 foreach ($vals as $val) {
   try {
     $val->foo();

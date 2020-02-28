@@ -10,15 +10,15 @@ function dump(Foo $f) : void {
 
 <<__EntryPoint>> function main(): void {
 HH\autoload_set_paths(
-  array(
-    'function' => array(
+  darray[
+    'function' => darray[
       'funn' => 'autoload_record_foo.inc',
-    ),
+    ],
 
-    'class' => array(
+    'class' => darray[
       'foo' => 'autoload_record_foo.inc',
-    ),
-  ),
+    ],
+  ],
   __DIR__.'/',
 );
 

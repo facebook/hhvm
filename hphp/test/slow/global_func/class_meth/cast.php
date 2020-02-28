@@ -3,7 +3,7 @@
 class A { public static function meth() {} }
 
 function getArr() {
-  return __hhvm_intrinsics\launder_value(array(A::class, 'meth'));
+  return __hhvm_intrinsics\launder_value(varray[A::class, 'meth']);
 }
 
 function getClsMeth() {

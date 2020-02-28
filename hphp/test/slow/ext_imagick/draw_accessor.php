@@ -33,7 +33,7 @@ var_dump($draw->getStrokeAntialias());
 $draw->setStrokeColor(new ImagickPixel('#F02B88'));
 var_dump($draw->getStrokeColor()->getColor());
 
-$draw->setStrokeDashArray(array(1, 2, 3));
+$draw->setStrokeDashArray(varray[1, 2, 3]);
 var_dump($draw->getStrokeDashArray());
 
 $draw->setStrokeDashOffset(-1.0);

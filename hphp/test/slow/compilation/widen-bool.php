@@ -1,7 +1,7 @@
 <?hh
 
 function test($m1, $m2) {
-  return array($m1 == $m2);
+  return varray[$m1 == $m2];
 }
 
 function foo($m1, $m2) {

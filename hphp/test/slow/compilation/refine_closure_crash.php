@@ -3,7 +3,7 @@
 class R {
   public $dimensions;
   function __construct() {
-    $this->dimensions = array('thing' => 'x');
+    $this->dimensions = darray['thing' => 'x'];
   }
 }
 final class Table {
@@ -18,11 +18,11 @@ final class Tree {
   static function go($t) {
     $things = new Table();
     $samples = function($row) use($things) {
-      return array(
+      return darray[
         'thing1_id' => $things->insert($row->dimensions['thing'], null),
         'thing2_id' => $things->insert(
           null, () ==> { return $row; })
-      );
+      ];
     };
 
     return $samples($t);

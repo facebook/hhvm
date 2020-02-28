@@ -108,19 +108,19 @@ var_dump(chop(" abc "));
 }
 
 {
-  $arr = array("lastname", "email", "phone");
+  $arr = varray["lastname", "email", "phone"];
   var_dump(implode(",", $arr));
 }
 {
-  $arr = array("lastname", "", "phone");
+  $arr = varray["lastname", "", "phone"];
   var_dump(implode(",", $arr));
 }
 {
-  $arr = array("", "email", "phone");
+  $arr = varray["", "email", "phone"];
   var_dump(implode(",", $arr));
 }
 {
-  $arr = array("", "", "");
+  $arr = varray["", "", ""];
   var_dump(implode(",", $arr));
 }
 {
@@ -128,7 +128,7 @@ var_dump(chop(" abc "));
   var_dump(implode(",", $arr));
 }
 
-$arr = array("lastname", "email", "phone");
+$arr = varray["lastname", "email", "phone"];
 var_dump(join(",", $arr));
 
 $str = "Hello Friend";
@@ -146,7 +146,7 @@ $ret = chunk_split("ABCD", 2);
 var_dump($ret, "AB\r\nCD\r\n");
 
 $s = "This is\tan ";
-$tok = strtok($s, " \n\t"); $tokens = array();
+$tok = strtok($s, " \n\t"); $tokens = varray[];
 while ($tok) {
   $tokens[] = $tok;
   $tok = strtok(" \n\t");
@@ -157,7 +157,7 @@ var_dump($tokens);
   var_dump(str_replace("%body%", "black", "<body text='%body%'>"));
 }
 {
-  $vowels = array(); $vowels[] = "a";
+  $vowels = varray[]; $vowels[] = "a";
   $vowels[] = "e";
   $vowels[] = "i";
   $vowels[] = "o";
@@ -171,8 +171,8 @@ var_dump($tokens);
 }
 {
   $phrase  = "You should eat fruits, vegetables, and fiber every day.";
-  $healthy = array("fruits", "vegetables", "fiber");
-  $yummy   = array("pizza", "beer", "ice cream");
+  $healthy = varray["fruits", "vegetables", "fiber"];
+  $yummy   = varray["pizza", "beer", "ice cream"];
   var_dump(str_replace($healthy, $yummy, $phrase));
 }
 {
@@ -181,8 +181,8 @@ var_dump($tokens);
   var_dump($count);
 }
 {
-  $letters = array("a", "p");
-  $fruit = array("apple", "pear");
+  $letters = varray["a", "p"];
+  $fruit = varray["apple", "pear"];
   $text = "a p";
   var_dump(str_replace($letters, $fruit, $text));
 }
@@ -271,7 +271,7 @@ var_dump(md5("apple"));
 
 var_dump(sha1("apple"));
 
-$trans = array("hello" => "hi", "hi" => "hello");
+$trans = darray["hello" => "hi", "hi" => "hello"];
 var_dump(strtr("hi all, I said hello", $trans));
 
 var_dump(convert_cyr_string("abc", "a", "d")); // sanity
@@ -289,7 +289,7 @@ var_dump(sprintf("%02d", "09"));
 var_dump(sprintf("(%s-%s)", "foo\0bar", "bar\0foo"));
 var_dump(sprintf("[%s]", "a\0b"));
 
-var_dump(vsprintf("A%sB%dC", array("test", 10)));
+var_dump(vsprintf("A%sB%dC", varray["test", 10]));
 
 var_dump(sscanf("SN/2350001", "SN/%d"));
 

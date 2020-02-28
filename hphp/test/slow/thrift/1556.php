@@ -46,64 +46,64 @@ class DummyTransport {
 }
 
 class TestStruct {
-  const SPEC = array(
-    -1 => array(
+  const SPEC = darray[
+    -1 => darray[
       'var' => 'aBool',
       'type' => TType::BOOL,
-    ),
-    1 => array(
+    ],
+    1 => darray[
       'var' => 'anInt',
       'type' => TType::I32,
-    ),
-    2 => array(
+    ],
+    2 => darray[
       'var' => 'aString',
       'type' => TType::STRING,
-    ),
-    3 => array(
+    ],
+    3 => darray[
       'var' => 'aDouble',
       'type' => TType::DOUBLE,
-    ),
-    4 => array(
+    ],
+    4 => darray[
       'var' => 'anInt64',
       'type' => TType::I64,
-    ),
-    5 => array(
+    ],
+    5 => darray[
       'var' => 'aList',
       'type' => TType::LST,
       'etype' => TType::DOUBLE,
-      'elem' => array(
+      'elem' => darray[
         'type' => TType::DOUBLE,
-      ),
-    ),
-    6 => array(
+      ],
+    ],
+    6 => darray[
       'var' => 'aMap',
       'type' => TType::MAP,
       'ktype' => TType::I32,
       'vtype' => TType::DOUBLE,
-      'key' => array(
+      'key' => darray[
         'type' => TType::I32,
-      ),
-      'val' => array(
+      ],
+      'val' => darray[
         'type' => TType::DOUBLE,
-      ),
-    ),
-    7 => array(
+      ],
+    ],
+    7 => darray[
       'var' => 'aSet',
       'type' => TType::SET,
       'etype' => TType::I32,
-      'elem' => array(
+      'elem' => darray[
         'type' => TType::I32,
-      ),
-    ),
-    8 => array(
+      ],
+    ],
+    8 => darray[
       'var' => 'anByte',
       'type' => TType::BYTE,
-    ),
-    9 => array(
+    ],
+    9 => darray[
       'var' => 'anI16',
       'type' => TType::I16,
-    ),
-  );
+    ],
+  ];
   public $aBool = null;
   public $anInt = null;
   public $aString = null;
@@ -125,9 +125,9 @@ function test() {
   $v1->aString = 'abcdef';
   $v1->aDouble = 1.2345;
   $v1->anInt64 = 8589934592;
-  $v1->aList = array(13.3, 23.4, 3576.2);
-  $v1->aMap = array(10=>1.2, 43=>5.33);
-  $v1->aSet = array(10=>true, 11=>true);
+  $v1->aList = varray[13.3, 23.4, 3576.2];
+  $v1->aMap = darray[10=>1.2, 43=>5.33];
+  $v1->aSet = darray[10=>true, 11=>true];
   $v1->anByte = 123;
   $v1->anI16 = 1234;
   var_dump($v1);

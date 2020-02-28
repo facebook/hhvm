@@ -37,14 +37,14 @@ class Test {
   }
 }
 <<__EntryPoint>> function main(): void {
-$closures = array(
+$closures = varray[
   testOne(),
   testTwo(),
   testNested(),
   testTwoNested(),
   Test::testStatic(),
   (new Test())->testMethod(),
-);
+];
 
 foreach ($closures as $t) {
   var_dump(array_map($x ==> $x['function'],

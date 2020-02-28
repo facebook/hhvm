@@ -3,5 +3,5 @@
 
 <<__EntryPoint>>
 function main_1297() {
-var_dump(array(1,2,3)+array(4,5,6));
+var_dump(varray[1,2,3]+varray[4,5,6]);
 }

@@ -8,7 +8,7 @@ class A {
 }
    public function __sleep() {
  $this->foo = 3;
- return array('foo');
+ return varray['foo'];
 }
  }
 

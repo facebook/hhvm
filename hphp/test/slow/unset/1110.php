@@ -1,22 +1,22 @@
 <?hh
 
 function f1() {
-  $x = array(1,2,3);
+  $x = varray[1,2,3];
   unset($x[0]);
   var_dump($x);
 }
 function f2() {
-  $x = array(1,2,3);
+  $x = varray[1,2,3];
   unset($x[0][0]);
   var_dump($x);
 }
 function f3() {
-  $x = array(array(4,5,6),2,3);
+  $x = varray[varray[4,5,6],2,3];
   unset($x[0][0]);
   var_dump($x);
 }
 function f4() {
-  $x = array(array(4,5,6),2,3);
+  $x = varray[varray[4,5,6],2,3];
   unset($x[0][0][0]);
   var_dump($x);
 }

@@ -2,7 +2,7 @@
 
 
 function subdomains($domain) {
-  $domains = array();
+  $domains = varray[];
   $components = explode('.', strtolower($domain));
   while (count($components) > 0) {
     $domains[] = implode('.', $components);

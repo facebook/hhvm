@@ -3,8 +3,8 @@
 
 <<__EntryPoint>>
 function main_222() {
-$a = array(1,2);
- $b = array(2);
+$a = varray[1,2];
+ $b = varray[2];
  $c = $a + $b;
  var_dump($c);
 }

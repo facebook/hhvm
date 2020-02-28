@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_array_product() {
-$a = array(2, 4, 6, 8);
+$a = varray[2, 4, 6, 8];
 var_dump(array_product($a));
 var_dump(array_product(array()));
 $b = Vector { 3, 6, 9, 12 };

@@ -3,6 +3,6 @@
 
 <<__EntryPoint>>
 function main_195() {
-$a = array(1);
+$a = varray[1];
  foreach ($a as $item) print '['.$item.']';
 }

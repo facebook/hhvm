@@ -16,9 +16,9 @@ final class X {
 
   private static function getArr($val) {
     self::check($val);
-    return array(
+    return varray[
       (int)$val
-    );
+    ];
   }
 }
 <<__EntryPoint>>

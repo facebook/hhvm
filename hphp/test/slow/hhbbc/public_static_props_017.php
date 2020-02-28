@@ -1,7 +1,7 @@
 <?hh
 
 class X {
-  static $y = array(1,2,3);
+  static $y = varray[1,2,3];
 
   static function go() {
     unset(self::$y[0]);

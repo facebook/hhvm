@@ -11,7 +11,7 @@ class B extends A {
     $this->$b = 'test';
     var_dump($this->$b);
     var_dump($this->a);
-    $this->$b = array(1);
+    $this->$b = varray[1];
     var_dump($this->a);
   }
 }

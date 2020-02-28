@@ -11,9 +11,9 @@
 echo "*** Testing stripslashes() : basic functionality ***\n";
 
 // Initialize all required variables
-$str_array = array( "\\",
+$str_array = varray[ "\\",
                     "ends with slash\\",
-                  );
+                  ];
 
 // Calling striplashes() with all arguments
 foreach( $str_array as $str ) {

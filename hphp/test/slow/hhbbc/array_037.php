@@ -1,7 +1,7 @@
 <?hh
 
 function aa() { return 'a'; }
-function heh() { return array('a' => aa()); }
+function heh() { return darray['a' => aa()]; }
 function x() {
   $x = heh();
   $r = $x[null] = 2;

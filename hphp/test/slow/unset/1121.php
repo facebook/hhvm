@@ -7,7 +7,7 @@ function rmv($a, $b) {
 
 <<__EntryPoint>>
 function main_1121() {
-$a = array('foo');
+$a = varray['foo'];
 $b = array();
 var_dump(rmv($a, $b));
 }

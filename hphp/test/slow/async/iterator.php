@@ -7,8 +7,8 @@ function block() {
   );
 }
 async function test() {
-  $arr3 = array(1,2,3);
-  $arr5 = array(1,2,3,4,5);
+  $arr3 = varray[1,2,3];
+  $arr5 = varray[1,2,3,4,5];
   foreach ($arr3 as $x) {
     foreach ($arr5 as $y) {
       if ($x>=2 && $y==3) {
@@ -21,8 +21,8 @@ async function test() {
 
 async function test2() {
   await block();
-  $arr3 = array(1,2,3);
-  $arr5 = array(1,2,3,4,5);
+  $arr3 = varray[1,2,3];
+  $arr5 = varray[1,2,3,4,5];
   foreach ($arr3 as $x) {
     foreach ($arr5 as $y) {
       echo $y;

@@ -13,11 +13,11 @@ class MyConverter extends UConverter {
 
 function main() {
   using ($c = new MyConverter('ascii', 'utf-8')) {
-    $words = array(
+    $words = varray[
       "regular",
       "irregul\xC1\xA1r",
       "\xC2\xA1unsupported!",
-    );
+    ];
     foreach($words as $word) {
       $c->convert($word);
     }

@@ -13,12 +13,12 @@ function test_preg_rep($a,$b,$c) {
 }
 
 function test_preg_grep() {
-  $array = array("foo 123.1", "fg 24bar", "123.1", "24");
+  $array = varray["foo 123.1", "fg 24bar", "123.1", "24"];
   $fl_array = preg_grep("/^(\\d+)?\\.\\d+$/", $array);
   VS(count($fl_array), 1);
   VS($fl_array[2], "123.1");
 
-  VS(preg_grep("/a/", array("c", "b")), array());
+  VS(preg_grep("/a/", varray["c", "b"]), array());
 }
 
 function test_preg_match() {
@@ -169,8 +169,8 @@ function test_preg_replace() {
   VS(preg_replace($pattern, $replacement, $str), "April1,2003");
 
   $str = "The quick brown fox jumped over the lazy dog.";
-  $patterns = array();
-  $replacements = array();
+  $patterns = darray[];
+  $replacements = darray[];
   $patterns[0] = "/quick/";
   $patterns[1] = "/brown/";
   $patterns[2] = "/fox/";
@@ -185,20 +185,20 @@ function test_preg_replace() {
   VS(preg_replace($patterns, $replacements, $str),
      "The slow black bear jumped over the lazy dog.");
 
-  $foos = array();
+  $foos = darray[];
   $foos[0] = "foo";
   $foos[1] = "Foo";
   $foos[2] = "FOO";
-  $expFoo = array();
+  $expFoo = darray[];
   $expFoo[0] = "FOO";
   $expFoo[1] = "FOO";
   $expFoo[2] = "FOO";
   VS(preg_replace("/some pattern/", "", array()), array());
   VS(preg_replace("/foo/i", "FOO", $foos), $expFoo);
 
-  $patterns = array("/(19|20)(\\d{2})-(\\d{1,2})-(\\d{1,2})/",
-                                  "/^\\s*{(\\w+)}\\s*=/");
-  $replace = array("\\3/\\4/\\1\\2", "$\\1 =");
+  $patterns = varray["/(19|20)(\\d{2})-(\\d{1,2})-(\\d{1,2})/",
+                                  "/^\\s*{(\\w+)}\\s*=/"];
+  $replace = varray["\\3/\\4/\\1\\2", "$\\1 ="];
   VS(preg_replace($patterns, $replace, "{startDate} = 1999-5-27"),
      "\$startDate = 5/27/1999");
 
@@ -207,22 +207,22 @@ function test_preg_replace() {
   VS($str, "foo o");
 
   $count = 0;
-  preg_replace_with_count(array("/\\d/", "/\\s/"), "*", "xp 4 to", -1, inout $count);
+  preg_replace_with_count(varray["/\\d/", "/\\s/"], "*", "xp 4 to", -1, inout $count);
   VS($count, 3);
 
   VS(preg_replace("/xxx", "w", "xxxx"), NULL);
   VS(preg_replace("/xxx/", "w", "xxxx"), "wx");
   VS(preg_replace("/xxy/", "w", "xxxx"), "xxxx");
 
-  VS(preg_replace("/xxx", "w", array("xxxx")), array());
-  VS(preg_replace("/xxx/", "w", array("xxxx")), array("wx"));
-  VS(preg_replace("/xxx/", "w", array("xxxx", "yyyy")), array("wx", "yyyy"));
-  VS(preg_replace(array("/xxx/", "/xxx"), "w", array("xxxx")), array());
-  VS(preg_replace(array("/xxx/", "/xxx/"), "w", array("xxxx")), array("wx"));
+  VS(preg_replace("/xxx", "w", varray["xxxx"]), array());
+  VS(preg_replace("/xxx/", "w", varray["xxxx"]), varray["wx"]);
+  VS(preg_replace("/xxx/", "w", varray["xxxx", "yyyy"]), varray["wx", "yyyy"]);
+  VS(preg_replace(varray["/xxx/", "/xxx"], "w", varray["xxxx"]), array());
+  VS(preg_replace(varray["/xxx/", "/xxx/"], "w", varray["xxxx"]), varray["wx"]);
 
-  VS(preg_replace("/xxx", array("w"), array("xxxx")), false);
-  VS(preg_replace(array("/xxx"), array("w"), array("xxxx")), array());
-  VS(preg_replace(array("/xxx/"), array("w"), array("xxxx")), array("wx"));
+  VS(preg_replace("/xxx", varray["w"], varray["xxxx"]), false);
+  VS(preg_replace(varray["/xxx"], varray["w"], varray["xxxx"]), array());
+  VS(preg_replace(varray["/xxx/"], varray["w"], varray["xxxx"]), varray["wx"]);
 }
 
 function next_year($m) {

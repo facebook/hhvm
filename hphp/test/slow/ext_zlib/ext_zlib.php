@@ -14,7 +14,7 @@ function VERIFY($x) { VS($x != false, true); }
 function main_ext_zlib() {
 var_dump(readgzfile(__DIR__."/test_ext_zlib.gz"));
 
-VS(gzfile(__DIR__."/test_ext_zlib.gz"), array("Testing Ext Zlib\n"));
+VS(gzfile(__DIR__."/test_ext_zlib.gz"), varray["Testing Ext Zlib\n"]);
 
 VS(gzuncompress(gzcompress("testing gzcompress")), "testing gzcompress");
 

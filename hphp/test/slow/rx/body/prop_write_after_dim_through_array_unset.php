@@ -4,7 +4,7 @@
 function bad() {
   $io = new stdClass();
   $io->x = 1;
-  $a = array('o' => $io);
+  $a = darray['o' => $io];
 
   unset($a['o']->x);
 }

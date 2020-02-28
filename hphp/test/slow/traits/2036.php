@@ -2,7 +2,7 @@
 
 trait TestTrait {
   public static function test() {
-    $fun = array('A', 'test');
+    $fun = varray['A', 'test'];
     return 'Forwarded '.$fun();
   }
 }

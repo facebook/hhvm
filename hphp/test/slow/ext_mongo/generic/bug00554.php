@@ -1,16 +1,16 @@
 <?hh
 require_once __DIR__."/../utils/server.inc";
 <<__EntryPoint>> function main(): void {
-$valid = array(
+$valid = varray[
     str_repeat("abcdef123456", 2),
     new MongoId,
-);
+];
 
-$invalid = array(
+$invalid = varray[
     str_repeat("klsdjf", 4),
     str_repeat("abcdef123456", 2). " ",
     new stdclass,
-);
+];
 
 echo "VALID IDs\n";
 foreach($valid as $id) {

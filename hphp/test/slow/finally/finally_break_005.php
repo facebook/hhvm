@@ -1,8 +1,8 @@
 <?hh
 
 function blah() {
-  $xs = array(11, 22, 33, 44, 55);
-  $ys = array('a', 'b', 'c', 'd', 'e', 'f');
+  $xs = varray[11, 22, 33, 44, 55];
+  $ys = varray['a', 'b', 'c', 'd', 'e', 'f'];
 
   foreach ($ys as $y) {
     echo "begin outer loop $y\n";

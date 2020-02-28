@@ -8,7 +8,7 @@ function foo() {
   $bar = new bar;
   echo "----\n";
   $lol = new stdclass;
-  $bar->x = array();
+  $bar->x = darray[];
   try {
     $bar->x[$lol] = 2;
   } catch (Exception $y) {

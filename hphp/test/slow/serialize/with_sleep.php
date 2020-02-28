@@ -12,7 +12,7 @@ class A {
   protected $c;
   private $d;
   public function __sleep() {
-    return array('b', 'c', 'd');
+    return varray['b', 'c', 'd'];
   }
 }
 

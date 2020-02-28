@@ -8,10 +8,10 @@ class someclass {
 }
 
 function asd() { return mt_rand() ? 'a' : 2; }
-function array_of_one() { return array('ZZZZ'); }
+function array_of_one() { return varray['ZZZZ']; }
 function main() {
   $time = asd();
-  $items = array();
+  $items = darray[];
   if (someclass::yo()) {
     $items = array_of_one();
   }

@@ -4,7 +4,7 @@ function foo($a, $b, $c) {
 }
 function bar($a) {
   foo($a, $a++, $a);
-  $arr = array($a, $a++, $a);
+  $arr = varray[$a, $a++, $a];
   var_dump($arr);
 }
 

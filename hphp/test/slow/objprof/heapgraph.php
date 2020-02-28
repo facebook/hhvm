@@ -1,7 +1,7 @@
 <?hh
 
 class RootClass {
-  public array<string, mixed> $children = array();
+  public darray<string, mixed> $children = darray[];
   <<__Memoize>>
   public static function getInstance() {
     return new RootClass();
@@ -22,7 +22,7 @@ class ParentWithClosureTarget {
   public $child;
 
   public function __construct() {
-    $this->somestring = json_encode(array(1,2,3));
+    $this->somestring = json_encode(varray[1,2,3]);
     $this->child = new ChildWithClosureMember();
     $this->child->closure = $this->createClosure();
   }
@@ -68,12 +68,12 @@ function showTestClasses($node) {
 
   $classname = idx($node, 'class', 'no class...');
   $kind = $node['kind'];
-  $testclasses = array(
+  $testclasses = darray[
     ChildWithClosureMember::class => 1,
     ParentWithClosureTarget::class => 1,
     RootClass::class => 1,
     ClassForSecondCapture::class => 1,
-  );
+  ];
   if ($kind === "Object" && idx($testclasses, $classname)) {
     echo_buffer("$classname\n");
     $same_node = heapgraph_node(ObjprofHeapgraphPhp::$hg_for_closure, $node['index']);
@@ -109,13 +109,13 @@ function edgeName($hg, $edge) {
 
 function showTestEdge($edge) {
 
-  $testedges = array(
+  $testedges = darray[
     'ArrayKey:MemoizedSingleton' => 1,
     'Property:somestring' => 1,
     'Property:child' => 1,
     'Property:closure' => 1,
     'Property:children' => 1,
-  );
+  ];
   $name = edgeName(ObjprofHeapgraphPhp::$hg_for_closure, $edge);
   if (idx($testedges, $name)) {
     echo_buffer("$name\n");
@@ -237,12 +237,12 @@ echo_flush();
 
 // DFS NODES
 echo "\nDoing DFS from root class on nodes:\n";
-heapgraph_dfs_nodes($hg, array(ObjprofHeapgraphPhp::$id_of_rootclass), array(), 'showClassOnly');
+heapgraph_dfs_nodes($hg, varray[ObjprofHeapgraphPhp::$id_of_rootclass], array(), 'showClassOnly');
 echo_flush();
 
 echo "\nDoing DFS from root class on nodes (skipping root):\n";
 heapgraph_dfs_nodes(
-  $hg, array(ObjprofHeapgraphPhp::$id_of_rootclass), array(ObjprofHeapgraphPhp::$id_of_rootclass), 'showClass'
+  $hg, varray[ObjprofHeapgraphPhp::$id_of_rootclass], varray[ObjprofHeapgraphPhp::$id_of_rootclass], 'showClass'
 );
 echo_flush();
 

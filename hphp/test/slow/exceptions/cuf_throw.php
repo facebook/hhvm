@@ -4,7 +4,7 @@ class X {
 }
 
 function test($x) {
-  call_user_func(array($x, "FOO"));
+  call_user_func(varray[$x, "FOO"]);
 }
 
 function main() {

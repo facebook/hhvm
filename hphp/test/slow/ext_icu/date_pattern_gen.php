@@ -302,7 +302,7 @@ function test_get_error() {
 
 <<__EntryPoint>>
 function main_date_pattern_gen() {
-$tests = array(
+$tests = varray[
   'test_create_instance_with_no_locale_fails',
   'test_create_instance_with_null_locale_fails',
   'test_create_instances_with_different_locales',
@@ -320,7 +320,7 @@ $tests = array(
   'test_get_base_skeletons',
   'test_decimal',
   'test_get_error'
-);
+];
 
 foreach ($tests as $test) {
   echo "Running $test\n";

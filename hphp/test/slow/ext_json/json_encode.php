@@ -3,7 +3,7 @@
 class SerializableObject implements JsonSerializable {
 
   public function jsonSerialize() {
-    return array('foo' => 'bar');
+    return darray['foo' => 'bar'];
   }
 
 }
@@ -12,7 +12,7 @@ class MultipleNonCircularReference implements JsonSerializable {
 
   public function jsonSerialize() {
     $obj = new SerializableObject();
-    return array('a' => $obj, 'b' => $obj, 'c' => array('d' => $obj));
+    return darray['a' => $obj, 'b' => $obj, 'c' => darray['d' => $obj]];
   }
 
 }
@@ -20,7 +20,7 @@ class MultipleNonCircularReference implements JsonSerializable {
 class SimpleRecursion implements JsonSerializable {
 
   public function jsonSerialize() {
-    return array('foo' => $this);
+    return darray['foo' => $this];
   }
 
 }
@@ -28,13 +28,13 @@ class SimpleRecursion implements JsonSerializable {
 class MultilevelRecursion implements JsonSerializable {
 
   public function jsonSerialize() {
-    return array(
-      'Recursion' => array(
-        'across' => array(
-          'multiple' => array('levels' => $this)
-        )
-      )
-    );
+    return darray[
+      'Recursion' => darray[
+        'across' => darray[
+          'multiple' => darray['levels' => $this]
+        ]
+      ]
+    ];
   }
 
 }
@@ -62,25 +62,25 @@ class Dependency implements JsonSerializable {
 
 <<__EntryPoint>>
 function main_json_encode() {
-var_dump(json_encode(array("a" => 1, "b" => 2.3, 3 => "test")));
-var_dump(json_encode(array("a", 1, true, false, null)));
+var_dump(json_encode(darray["a" => 1, "b" => 2.3, 3 => "test"]));
+var_dump(json_encode(varray["a", 1, true, false, null]));
 
 var_dump(json_encode("a\xE0"));
 var_dump(json_encode("a\xE0", JSON_FB_LOOSE));
 
-var_dump(json_encode(array("0" => "apple", "1" => "banana")));
+var_dump(json_encode(darray["0" => "apple", "1" => "banana"]));
 
-var_dump(json_encode(array(array("a" => "apple"))));
+var_dump(json_encode(varray[darray["a" => "apple"]]));
 
-var_dump(json_encode(array(array("a" => "apple")), JSON_PRETTY_PRINT));
+var_dump(json_encode(varray[darray["a" => "apple"]], JSON_PRETTY_PRINT));
 
-var_dump(json_encode(array(1, 2, 3, array(1, 2, 3)), JSON_PRETTY_PRINT));
+var_dump(json_encode(varray[1, 2, 3, varray[1, 2, 3]], JSON_PRETTY_PRINT));
 
-$arr = array(
+$arr = darray[
   "a" => 1,
-  "b" => array(1, 2),
-  "c" => array("d" => 42)
-);
+  "b" => varray[1, 2],
+  "c" => darray["d" => 42]
+];
 var_dump(json_encode($arr, JSON_PRETTY_PRINT));
 var_dump(json_encode(new SerializableObject()));
 var_dump(json_encode(new MultipleNonCircularReference()));

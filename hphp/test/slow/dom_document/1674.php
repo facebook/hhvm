@@ -1,8 +1,8 @@
 <?hh
 
 function adjustDoctype($xml) {
-    return str_replace(array(">
-<","DOCTYPE HTML",'<p>','</p>'),array("><","DOCTYPE html",'',''),$xml);
+    return str_replace(varray[">
+<","DOCTYPE HTML",'<p>','</p>'],varray["><","DOCTYPE html",'',''],$xml);
 }
 
 

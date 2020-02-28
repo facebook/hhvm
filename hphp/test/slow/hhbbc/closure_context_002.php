@@ -1,7 +1,7 @@
 <?hh
 
 class MyClass {
-  private static $x = array(1,2,3);
+  private static $x = varray[1,2,3];
 
   public function closure_fun() {
     $z = () ==> {

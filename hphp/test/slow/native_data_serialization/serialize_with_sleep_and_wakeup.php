@@ -19,7 +19,7 @@ class Bar extends ReflectionClass {
     var_dump("__sleep invoked");
     var_dump($this->name);
     var_dump($this->getName());
-    return array('prop', 'meh');
+    return varray['prop', 'meh'];
   }
 
   public function __wakeup() {

@@ -1,5 +1,5 @@
 <?hh
-ArrayForEachVariableVariableForeach::$rows=array(1,2,3);
+ArrayForEachVariableVariableForeach::$rows=varray[1,2,3];
 
 
 function fn1() {

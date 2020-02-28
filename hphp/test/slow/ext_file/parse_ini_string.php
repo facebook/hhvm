@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_parse_ini_string() {
-$inis = array(
+$inis = darray[
   'general_ini_with_sections' =>
     ';;; Created on Tuesday, October 27, 2009 at 12:01 PM GMT'."\n".
     '[GJK_Browscap_Version]'."\n".
@@ -47,7 +47,7 @@ $inis = array(
     'key1 = "start\\\\"'."\n".
     'key2 = "\\\\end"'."\n".
     'key3 = "start\\\\end"',
-);
+];
 
 foreach ($inis as $key => $ini) {
   var_dump($key);

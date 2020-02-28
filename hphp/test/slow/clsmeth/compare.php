@@ -12,7 +12,7 @@ function bar() {}
 function LV($x)  { return __hhvm_intrinsics\launder_value($x); }
 function CLS($c) { return __hhvm_intrinsics\create_class_pointer($c); }
 
-function WRAPA($x) { return LV(array($x)); }
+function WRAPA($x) { return LV(varray[$x]); }
 function WRAPO($x) { return LV(new Wrapper($x)); }
 function WRAPD($x) { $r = new stdclass; $r->x = $x; return LV($r); }
 
@@ -43,8 +43,8 @@ function WRAPD($x) { $r = new stdclass; $r->x = $x; return LV($r); }
   $ca = varray[CLS('Foo'), 'bar'];
   $pa = varray[CLS('Foo'), fun('bar')];
 
-  $xx = array($cm); $vx = array($va); $ox = array($oa); $fx = array($fa);
-  $cx = array($ca); $px = array($pa);
+  $xx = varray[$cm]; $vx = varray[$va]; $ox = varray[$oa]; $fx = varray[$fa];
+  $cx = varray[$ca]; $px = varray[$pa];
 
   $xy = new Wrapper($cm); $vy = new Wrapper($va); $oy = new Wrapper($oa);
   $fy = new Wrapper($fa); $cy = new Wrapper($ca); $py = new Wrapper($pa);

@@ -9,5 +9,5 @@ function f($a) {
 }
 <<__EntryPoint>>
 function main_540() {
-f(array(0));
+f(varray[0]);
 }

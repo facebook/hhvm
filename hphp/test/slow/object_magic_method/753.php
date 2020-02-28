@@ -3,7 +3,7 @@
 class foo{
   public $public = 'public';
   public function __sleep()  {
- return array('public');
+ return varray['public'];
  }
 }
 

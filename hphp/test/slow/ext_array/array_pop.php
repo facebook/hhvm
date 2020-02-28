@@ -1,13 +1,13 @@
 <?hh
 
 function a() {
-  $input = array("orange", "banana", "apple", "raspberryu");
+  $input = varray["orange", "banana", "apple", "raspberryu"];
   $fruit = array_pop(inout $input);
   var_dump($input);
 }
 
 function b() {
-  $input = array("orange");
+  $input = varray["orange"];
   $fruit = array_pop(inout $input);
   array_push(inout $input, "banana");
   var_dump($input);

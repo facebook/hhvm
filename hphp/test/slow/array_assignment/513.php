@@ -6,7 +6,7 @@ class c {
  function f(inout $a, $b, $c) { $a[$b] = $c; }
 }
 function setNullVariantHelper($f, $value) {
-  $a = array();
+  $a = darray[];
   $obj = new c;
   $a[$obj] = 1;
   $obj->$f(inout $a, $obj, $value);

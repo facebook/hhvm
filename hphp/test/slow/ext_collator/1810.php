@@ -94,51 +94,51 @@ function ut_main1()
     ExtCollator1810::$test_num = 1;
     $res_str = '';
     // Sort an array in SORT_REGULAR mode using en_US locale.
-    $test_params = array(
-        array( 'abc', 'abd', 'aaa' ),
-        array( 'm'  , '1'  , '_'   ),
-        array( 'a'  , 'aaa', 'aa'  ),
-        array( 'ba' , 'b'  , 'ab'  ),
-        array( 'e'  , 'c'  , 'a'   ),
-        array( '100', '25' , '36'  ), // test 6
-        array( 5    , '30' , 2     ),
-        array( 'd'  , ''   , ' a'  ),
-        array( 'd ' , 'f ' , ' a'  ),
-        array( 'a'  , null , '3'   ),
-        array( 'y'  , 'k'  , 'i' )
-    );
+    $test_params = varray[
+        varray[ 'abc', 'abd', 'aaa' ],
+        varray[ 'm'  , '1'  , '_'   ],
+        varray[ 'a'  , 'aaa', 'aa'  ],
+        varray[ 'ba' , 'b'  , 'ab'  ],
+        varray[ 'e'  , 'c'  , 'a'   ],
+        varray[ '100', '25' , '36'  ], // test 6
+        varray[ 5    , '30' , 2     ],
+        varray[ 'd'  , ''   , ' a'  ],
+        varray[ 'd ' , 'f ' , ' a'  ],
+        varray[ 'a'  , null , '3'   ],
+        varray[ 'y'  , 'k'  , 'i' ]
+    ];
     $res_str .= sort_arrays( 'en_US', $test_params );
-    $test_params = array(
-        array( '100', '25' , '36'  ),
-        array( 5    , '30' , 2     ), // test 13
-        array( 'd'  , ''   , ' a'  ),
-        array( 'y'  , 'k'  , 'i' )
-    );
+    $test_params = varray[
+        varray[ '100', '25' , '36'  ],
+        varray[ 5    , '30' , 2     ], // test 13
+        varray[ 'd'  , ''   , ' a'  ],
+        varray[ 'y'  , 'k'  , 'i' ]
+    ];
     // Sort in en_US locale with SORT_STRING flag
     $res_str .= sort_arrays( 'en_US', $test_params, Collator::SORT_STRING );
     // Sort a non-ASCII array using ru_RU locale.
-    $test_params = array(
-        array( 'абг',                'абв',                'ааа',                'абв' ),
-        array( 'аа', 'ааа',               'а' )
-    );
+    $test_params = varray[
+        varray[ 'абг',                'абв',                'ааа',                'абв' ],
+        varray[ 'аа', 'ааа',               'а' ]
+    ];
     $res_str .= sort_arrays( 'ru_RU', $test_params );
     // Sort an array using Lithuanian locale.
-    $test_params = array(
-        array( 'y'  , 'k'  , 'i' )
-    );
+    $test_params = varray[
+        varray[ 'y'  , 'k'  , 'i' ]
+    ];
     $res_str .= sort_arrays( 'lt_LT', $test_params );
     return $res_str;
 }
 function ut_main2() {
   $obj = ut_coll_create('en_US');
-  $arr0 = array( 100, 25, 36, '30.2', '30.12' );
+  $arr0 = varray[ 100, 25, 36, '30.2', '30.12' ];
  // test 6
-  $arr1 = array( '100', '25', '36'  );
+  $arr1 = varray[ '100', '25', '36'  ];
  // test 6
-  $arr2 = array( 11, 5, '2', 64, 17, '30', 10, 2, '54' );
+  $arr2 = varray[ 11, 5, '2', 64, 17, '30', 10, 2, '54' ];
   // strcmp 17 and 30, ret = 1
   // Comparing values 17 and 30, ret = 1
-  $arr3 = array( 11, 5, 2, 64, 17, 30, 10, 2, 54 );
+  $arr3 = varray[ 11, 5, 2, 64, 17, 30, 10, 2, 54 ];
   $arrA = $arr0;
   $arrB = $arr0;
   $arrC = $arr0;
@@ -171,13 +171,13 @@ function ut_main2() {
 function ut_main3()
 {
     $res_str = '';
-    $locales = array(
+    $locales = varray[
         'EN-US-ODESSA',
         'UK_UA_ODESSA',
         '',
         'root',
         'uk@currency=EURO'
-    );
+    ];
     foreach( $locales as $locale )
     {
         // Create Collator with the current locale.
@@ -216,8 +216,8 @@ function test_COW( $locale, $test_array )
 function ut_main4()
 {
     $res_str = '';
-    $a1 = array( 'b', 'a', 'c' );
-    $a2 = array( 'б', 'а', 'в' );
+    $a1 = varray[ 'b', 'a', 'c' ];
+    $a2 = varray[ 'б', 'а', 'в' ];
     $res_str .= test_COW( 'en_US', $a1 );
     $res_str .= test_COW( 'ru_RU', $a2 );
     return $res_str;
@@ -246,11 +246,11 @@ function check_alternate_handling( inout $coll )
     $res = '';
     ut_coll_set_strength( $coll, Collator::TERTIARY );
     ut_coll_set_attribute( $coll, Collator::ALTERNATE_HANDLING, Collator::NON_IGNORABLE );
-    $res .= cmp_array( inout $coll, array( 'di Silva', 'Di Silva', 'diSilva', 'U.S.A.', 'USA' ) );
+    $res .= cmp_array( inout $coll, varray[ 'di Silva', 'Di Silva', 'diSilva', 'U.S.A.', 'USA' ] );
     ut_coll_set_attribute( $coll, Collator::ALTERNATE_HANDLING, Collator::SHIFTED );
-    $res .= cmp_array( inout $coll, array( 'di Silva', 'diSilva', 'Di Silva', 'U.S.A.', 'USA' ) );
+    $res .= cmp_array( inout $coll, varray[ 'di Silva', 'diSilva', 'Di Silva', 'U.S.A.', 'USA' ] );
     ut_coll_set_strength( $coll, Collator::QUATERNARY );
-    $res .= cmp_array( inout $coll, array( 'di Silva', 'diSilva', 'Di Silva', 'U.S.A.', 'USA' ) );
+    $res .= cmp_array( inout $coll, varray[ 'di Silva', 'diSilva', 'Di Silva', 'U.S.A.', 'USA' ] );
     $res .= "\n";
     return $res;
 }
@@ -290,28 +290,28 @@ function ut_main6()
     ExtCollator1810::$test_num = 1;
     $res_str = '';
     // Sort an array in SORT_REGULAR mode using en_US locale.
-    $test_params = array(
-        array( 'abc', 'abd', 'aaa' ),
-        array( 'm'  , '1'  , '_'   ),
-        array( 'a'  , 'aaa', 'aa'  ),
-        array( 'ba' , 'b'  , 'ab'  ),
-        array( 'e'  , 'c'  , 'a'   ),
-        array( 'd'  , ''   , ' a'  ),
-        array( 'd ' , 'f ' , ' a'  ),
-        array( 'a'  , null , '3'   ),
-        array( 'y'  , 'i'  , 'k'   )
-    );
+    $test_params = varray[
+        varray[ 'abc', 'abd', 'aaa' ],
+        varray[ 'm'  , '1'  , '_'   ],
+        varray[ 'a'  , 'aaa', 'aa'  ],
+        varray[ 'ba' , 'b'  , 'ab'  ],
+        varray[ 'e'  , 'c'  , 'a'   ],
+        varray[ 'd'  , ''   , ' a'  ],
+        varray[ 'd ' , 'f ' , ' a'  ],
+        varray[ 'a'  , null , '3'   ],
+        varray[ 'y'  , 'i'  , 'k'   ]
+    ];
     $res_str .= sort_arrays_with_sort_keys( 'en_US', $test_params );
     // Sort a non-ASCII array using ru_RU locale.
-    $test_params = array(
-        array( 'абг',                'абв',                'ааа',                'абв' ),
-        array( 'аа', 'ааа',               'а' )
-    );
+    $test_params = varray[
+        varray[ 'абг',                'абв',                'ааа',                'абв' ],
+        varray[ 'аа', 'ааа',               'а' ]
+    ];
     $res_str .= sort_arrays_with_sort_keys( 'ru_RU', $test_params );
     // Array with data for sorting.
-    $test_params = array(
-        array( 'y'  , 'i'  , 'k'   )
-    );
+    $test_params = varray[
+        varray[ 'y'  , 'i'  , 'k'   ]
+    ];
     // Sort an array using Lithuanian locale.
     $res_str .= sort_arrays_with_sort_keys( 'lt_LT', $test_params );
     return $res_str . "\n";

@@ -10,22 +10,22 @@ class C {
 
   <<__Rx>>
   public function ok_base() {
-    $a = array(1 => true);
+    $a = darray[1 => true];
     $x1 = $a[1]; // BaseL
-    $x2 = (array(1 => true))[1]; // BaseC
+    $x2 = (darray[1 => true])[1]; // BaseC
     $x3 = $this->p; // BaseH
   }
 
   <<__Rx>>
   public function ok_dim() {
-    $a = array(1 => array(2 => true), 'two' => array(2 => true));
+    $a = darray[1 => darray[2 => true], 'two' => darray[2 => true]];
     $p = new stdClass();
     $p->q = true;
     $o = new stdClass();
     $o->p = $p;
     $mo = new stdClass();
-    $mo->p = array(2 => true);
-    $this->p = array(2 => true);
+    $mo->p = darray[2 => true];
+    $this->p = darray[2 => true];
     $l1 = 1;
     $lp = 'p';
 
@@ -93,13 +93,13 @@ class C {
   public function ok_final() {
     $io1 = new stdClass();
     $io1->i = 1;
-    $a = array('a' => array('i' => 1), 'o' => $io1);
+    $a = darray['a' => darray['i' => 1], 'o' => $io1];
     $o = new stdClass();
-    $o->a = array('i' => 1);
+    $o->a = darray['i' => 1];
     $io2 = new stdClass();
     $io2->i = 1;
     $o->o = $io2;
-    $this->p = array('a' => array('i' => 1));
+    $this->p = darray['a' => darray['i' => 1]];
 
     // QueryM is always OK, before or after Dim, reading prop or elem
     $r1 = $a['a'];

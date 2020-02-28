@@ -2,7 +2,7 @@
 
 class X {
   public function foo($y) {
-    call_user_func(array($y, 'foo'));
+    call_user_func(varray[$y, 'foo']);
     $y::foo();
   }
 }

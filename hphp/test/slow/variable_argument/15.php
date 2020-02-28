@@ -1,7 +1,7 @@
 <?hh
 
 function test($a, $b, ...$more_args) {
-  $args = array_merge(array($a, $b), $more_args);
+  $args = array_merge(varray[$a, $b], $more_args);
   $n = count($args);
   var_dump($n);
   var_dump($args);

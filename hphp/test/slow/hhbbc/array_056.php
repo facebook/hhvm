@@ -2,7 +2,7 @@
 
 class C { public function heh() { echo "hey\n"; } }
 function foo() {
-  $x = array();
+  $x = varray[];
   for ($i = 0; $i < 10; ++$i) {
     $x[] = new C;
   }

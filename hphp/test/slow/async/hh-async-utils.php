@@ -29,7 +29,7 @@ function main() {
   var_dump(HH\Asio\join(HH\Asio\va(
     asyncval(123),
     asyncval('foo'),
-    asyncval(array(1)),
+    asyncval(varray[1]),
   )));
 }
 

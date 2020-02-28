@@ -33,8 +33,8 @@ W/noSOyMhVl694yFbwIDAQAB
 PK;
 
 $_passPhrase = 'test';
-$publicKey = openssl_pkey_get_public(array($_publicKeyString, $_passPhrase));
-$privateKey = openssl_pkey_get_private(array($_privateKeyString, $_passPhrase));
+$publicKey = openssl_pkey_get_public(varray[$_publicKeyString, $_passPhrase]);
+$privateKey = openssl_pkey_get_private(varray[$_privateKeyString, $_passPhrase]);
 $crypted = null;
 $decrypted = null;
 var_dump(openssl_public_encrypt($_passPhrase, inout $crypted, $publicKey));

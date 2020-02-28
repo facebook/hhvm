@@ -6,7 +6,7 @@ class C {
   <<__Rx>>
   public function bad() {
     $io = new stdClass();
-    $this->p = array(2 => $io);
+    $this->p = darray[2 => $io];
 
     unset($this->p[2]->q);
   }

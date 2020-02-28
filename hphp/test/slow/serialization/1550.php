@@ -6,7 +6,7 @@ class X {
   private $obj;
   function foo() {
     $this->str = 'hello';
-    $this->arr = array(1,2,3);
+    $this->arr = varray[1,2,3];
     $this->obj = $this;
   }
 }

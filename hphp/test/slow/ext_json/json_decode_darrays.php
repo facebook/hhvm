@@ -194,60 +194,60 @@ function is_equal($result1, $result2) {
 
     // LooseModeCollections from HHJsonDecodeTest.phpi
     // Single-quoted strings
-    array(
+    darray[
       'input' => '[\'value\']',
       'options' => JSON_FB_LOOSE | JSON_FB_DARRAYS,
       'expected' => dict[
         IsAssoc::TRUE => darray[0 => 'value'],
         IsAssoc::FALSE => darray[0 => 'value'],
       ],
-    ),
+    ],
     // Unquoted keys
-    array(
+    darray[
       'input' => '{key: "value"}',
       'options' => JSON_FB_LOOSE | JSON_FB_DARRAYS,
       'expected' => dict[
         IsAssoc::TRUE => darray['key' => 'value'],
         IsAssoc::FALSE => make_object(darray['key' => 'value']),
       ],
-    ),
+    ],
     // Boolean keys
-    array(
+    darray[
       'input' => '{true: "value"}',
       'options' => JSON_FB_LOOSE | JSON_FB_DARRAYS,
       'expected' => dict[
         IsAssoc::TRUE => darray['true' => 'value'],
         IsAssoc::FALSE => make_object(darray['true' => 'value']),
       ],
-    ),
+    ],
     // Null keys
-    array(
+    darray[
       'input' => '{null: "value"}',
       'options' => JSON_FB_LOOSE | JSON_FB_DARRAYS,
       'expected' => dict[
         IsAssoc::TRUE => darray['null' => 'value'],
         IsAssoc::FALSE => make_object(darray['null' => 'value']),
       ],
-    ),
+    ],
 
     // Nested hack-arrays
-    array(
+    darray[
       'input' =>  '[2,"4",{0:[]}]',
       'options' => JSON_FB_LOOSE | JSON_FB_DARRAYS,
       'expected' => dict[
         IsAssoc::TRUE => darray[0 => 2, 1 => '4', 2 => darray[0 => darray[]]],
         IsAssoc::FALSE => darray[0 => 2, 1 => '4', 2 => make_object(darray[0 => darray[]])],
       ],
-    ),
-    array(
+    ],
+    darray[
       'input' => '{"vec": [], "map": {}}',
       'options' => JSON_FB_DARRAYS,
       'expected' => dict[
         IsAssoc::TRUE => darray['vec' => darray[], 'map' => darray[]],
         IsAssoc::FALSE => make_object(darray['vec' => darray[], 'map' => make_object(darray[])]),
       ],
-    ),
-    array(
+    ],
+    darray[
       'input' => '{"vec" : [{"z" : []}], "map" : {"a" : {"]" : "["}}}',
       'options' => JSON_FB_DARRAYS,
       'expected' => dict[
@@ -262,11 +262,11 @@ function is_equal($result1, $result2) {
             'map' => make_object(darray['a' => make_object(darray[']' => '['])])
           ]),
       ],
-    ),
+    ],
   ];
 
   foreach ($tests as $idx => $test) {
-    foreach (array(IsAssoc::TRUE, IsAssoc::FALSE) as $is_assoc) {
+    foreach (varray[IsAssoc::TRUE, IsAssoc::FALSE] as $is_assoc) {
       $output =
         json_decode($test['input'], (bool) $is_assoc, 512, $test['options']);
 

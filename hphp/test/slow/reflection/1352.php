@@ -41,11 +41,11 @@ $rf->invoke();
 
 echo "\ninvoking g\n";
 $rg->invoke('hello');
-$rg->invokeArgs(array('goodbye'));
+$rg->invokeArgs(varray['goodbye']);
 
 echo "\ninvoking add\n";
 $radd->invoke(1, 2);
-$radd->invokeArgs(array(5000000000, 5000000000));
+$radd->invokeArgs(varray[5000000000, 5000000000]);
 
 echo "\nshowing f\n";
 show($rf);

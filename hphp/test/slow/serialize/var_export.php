@@ -4,7 +4,7 @@ class A {
   protected $b = 'b';
   private $c = 'c';
   public $d = 'd';
-  public $e = array(array('e'));
+  public $e = varray[varray['e']];
 }
 
 <<__EntryPoint>>

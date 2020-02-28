@@ -33,12 +33,12 @@ class DummyTransport {
 class TestStruct {
   public $anI32 = null;
 
-  const SPEC = array(
-    1 => array(
+  const SPEC = darray[
+    1 => darray[
       'var' => 'anI32',
       'type' => TType::I32,
-    ),
-  );
+    ],
+  ];
 }
 
 <<__EntryPoint>>

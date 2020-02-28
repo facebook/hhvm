@@ -45,7 +45,7 @@ class C {
 }
   public function o(<<Hi('bye')>> $param) {
 }
-  public function p(<<A('b', array('c', 'd')), E('fg')>> $param) {
+  public function p(<<A('b', varray['c', 'd']), E('fg')>> $param) {
 }
   public function q(<<RS>> $tuv) {
 }

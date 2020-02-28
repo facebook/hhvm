@@ -1,7 +1,7 @@
 <?hh
 
 function foo($v) {
-  $a = array('key' => $v);
+  $a = darray['key' => $v];
   return $a;
 }
 function goo($v) {

@@ -9,5 +9,5 @@ function test($a, $b) {
 
 <<__EntryPoint>>
 function main_1937() {
-test(array(array(1), array(2)), 5);
+test(varray[varray[1], varray[2]], 5);
 }

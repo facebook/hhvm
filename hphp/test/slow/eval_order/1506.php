@@ -60,7 +60,7 @@ echo "nest
 x(p(1), x(p(2), p(3), p(4), p(5)), p(6), x(p(7), p(8), p(9), p(10)));
 echo "arr
 ";
-$z = array(p(1), p(2), x(p(3), p(4), p(5), p(6)), p(7));
+$z = varray[p(1), p(2), x(p(3), p(4), p(5), p(6)), p(7)];
 $q = 1;
-$z = array(1, 2, $q);
+$z = varray[1, 2, $q];
 }

@@ -1,6 +1,6 @@
 <?hh
 
-  function wat(array<int> $arr, bool $sort): vec<int> {
+  function wat(varray<int> $arr, bool $sort): vec<int> {
     if ($sort) {
       usort(inout $arr, function($a, $b) {
           return $a < $b ? -1 : ($a > $b ? 1 : 0);
@@ -14,7 +14,7 @@
   }
 
 function main() {
-  var_dump(wat(array(6, 3, 7, 1, 8), true));
+  var_dump(wat(varray[6, 3, 7, 1, 8], true));
 }
 
 

@@ -90,7 +90,7 @@ function call_wrapper($fn, $arg) {
 
 function main() {
   for ($i = 1; $i <= 21; $i++) {
-    foreach (array('', '_soft') as $suffix) {
+    foreach (varray['', '_soft'] as $suffix) {
       if ($suffix !== '' && $i === 1) {
         // f1_soft() does not exist
         continue;
@@ -110,7 +110,7 @@ function main() {
       call_wrapper($f, new Fractal());
       call_wrapper($f, <div/>);
       call_wrapper($f, 'testfunc');
-      call_wrapper($f, array('C', 'testfunc'));
+      call_wrapper($f, varray['C', 'testfunc']);
     }
   }
 
@@ -128,12 +128,12 @@ function main() {
   }
 
   $callbacks = Map {
-    'f22' => array($c, 'f22'),
-    'f22_soft' => array($c, 'f22_soft'),
-    'f23' => array('C', 'f23'),
-    'f23_soft' => array('C', 'f23_soft'),
-    'f24' => array('C', 'f24'),
-    'f24_soft' => array('C', 'f24_soft')
+    'f22' => varray[$c, 'f22'],
+    'f22_soft' => varray[$c, 'f22_soft'],
+    'f23' => varray['C', 'f23'],
+    'f23_soft' => varray['C', 'f23_soft'],
+    'f24' => varray['C', 'f24'],
+    'f24_soft' => varray['C', 'f24_soft']
   };
   foreach ($callbacks as $name => $f) {
     echo "\ncalling $name\n";

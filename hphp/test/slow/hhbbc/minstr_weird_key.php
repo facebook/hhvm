@@ -6,7 +6,7 @@ class C {}
 function elem() {
   $k = new C();
 
-  $b = array(4, 3);
+  $b = varray[4, 3];
   @var_dump($b[$k] = 4);
 }
 

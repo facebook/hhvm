@@ -8,7 +8,7 @@ function myfunc() {
 error_reporting(-1);
 
 $foo = new stdclass();
-$foo->someprop = array('baz' => 'myfunc');
+$foo->someprop = darray['baz' => 'myfunc'];
 
 $bar = 'someprop';
 

@@ -35,7 +35,7 @@ ini_set("soap.wsdl_cache_enabled", 0);
 
 $client = new LocalSoapClient(
     dirname(__FILE__) . "/classmap_extension_crash.wsdl",
-    array('classmap' => array('A' => 'A', 'B' => 'B'))
+    darray['classmap' => darray['A' => 'A', 'B' => 'B']]
 );
 $b = new B();
 $b->x = 1;

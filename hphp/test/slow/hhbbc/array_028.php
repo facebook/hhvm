@@ -2,7 +2,7 @@
 
 function junk() { return 2; }
 function bar() {
-  $x = array('x' => array('y' => junk()));
+  $x = darray['x' => darray['y' => junk()]];
   $x['x']['y']++;
   $val = $x['x'];
   $val2 = $x['x']['y'];

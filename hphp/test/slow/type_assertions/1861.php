@@ -6,6 +6,6 @@ function f($x) {
 
 <<__EntryPoint>>
 function main_1861() {
-f(array(0));
+f(varray[0]);
 f('foo');
 }

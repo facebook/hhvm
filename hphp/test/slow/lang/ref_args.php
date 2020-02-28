@@ -4,8 +4,8 @@ function blarg2(inout $a1, inout $a2) {}
 
 // array_multisort is weird.  Some arguments are literals.
 function main4() {
-  $x = array(1, 54, 3, 23, 5, 2);
-  $y = array("a", "b", "c", "d", "e", "f");
+  $x = varray[1, 54, 3, 23, 5, 2];
+  $y = varray["a", "b", "c", "d", "e", "f"];
   var_dump($x, $y);
   array_multisort2(inout $x, inout $y);
   var_dump($x, $y);
@@ -15,7 +15,7 @@ function main4() {
 }
 
 function main5() {
-  $params = array(array(3,2,1),array(4,6,5),array(7,9,8));
+  $params = varray[varray[3,2,1],varray[4,6,5],varray[7,9,8]];
   array_multisort3(...$params);
   var_dump($params);
 }

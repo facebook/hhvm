@@ -1,7 +1,7 @@
 <?hh
 
 function k2() {
-  $arr = array(0,1,2,3,4);
+  $arr = varray[0,1,2,3,4];
   reset(inout $arr);
   $arr2 = $arr;
   foreach ($arr as $v) {

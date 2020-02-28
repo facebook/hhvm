@@ -5,7 +5,7 @@ trait bar {
   public function call() {
     var_dump(self::class);
     var_dump(__CLASS__);
-    var_dump(array(__CLASS__ => __CLASS__));
+    var_dump(darray[__CLASS__ => __CLASS__]);
   }
 }
 function a() {

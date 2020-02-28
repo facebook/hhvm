@@ -14,7 +14,7 @@ function main_1207() {
   $i = 'itest';
   $s = 'stest';
   $o = new A();
-  $ar = array(0,1);
+  $ar = varray[0,1];
   $st = 'abc';
   $o->$i($ar[0], $st[0]);
   A::$s($ar[1], $st[1]);

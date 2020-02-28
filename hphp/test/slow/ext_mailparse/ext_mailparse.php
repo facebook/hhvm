@@ -14,7 +14,7 @@ function VERIFY($x) { VS($x != false, true); }
 function main_ext_mailparse() {
 VS(ezmlm_hash("foo"), 40);
 
-$files = array("mime", "phpcvs1", "qp", "uue");
+$files = varray["mime", "phpcvs1", "qp", "uue"];
 
 foreach ($files as $file) {
   $testname = __DIR__."/test_ext_mailparse." . $file . ".txt";
@@ -168,11 +168,11 @@ foreach ($arr as $first => $second) {
   $section = mailparse_msg_get_part($mail, $second);
   $info = mailparse_msg_get_part_data($section);
   $received =
-    array("from mail pickup service by hotmail.com with Microsoft",
-                   "from 66.178.40.49 by BAY116-DAV8.phx.gbl with DAV;");
+    varray["from mail pickup service by hotmail.com with Microsoft",
+                   "from 66.178.40.49 by BAY116-DAV8.phx.gbl with DAV;"];
   VS($info,
-    array(
-           "headers" => array("received" => $received),
+    darray[
+           "headers" => darray["received" => $received],
            "starting-pos" => 0,
            "starting-pos-body" => 200,
            "ending-pos" => 200,
@@ -183,17 +183,17 @@ foreach ($arr as $first => $second) {
            "transfer-encoding" => "8bit",
            "content-type" => "text/plain",
            "content-base" => "/"
-    )
+    ]
   );
 }
 
 //////////////////////////////////////////////////////////////////////
 
 $addresses =
-  array("\":sysmail\"@ Some-Group. Some-Org, Muhammed.".
+  varray["\":sysmail\"@ Some-Group. Some-Org, Muhammed.".
                  "(I am the greatest) Ali @(the)Vegas.WBA",
                  "\"strange\":\":sysmail\"@ Some-Group. Some-Org, Muhammed.".
-                 "(I am the greatest) Ali @(the)Vegas.WBA;");
+                 "(I am the greatest) Ali @(the)Vegas.WBA;"];
 
 ob_start();
 

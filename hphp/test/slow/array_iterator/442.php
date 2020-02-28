@@ -11,11 +11,11 @@ function test($a) {
 
 <<__EntryPoint>>
 function main_442() {
-  test(array(
+  test(darray[
     'a' => 'x',
     false => 'y',
     '1' => false,
     null => 'z',
     'c' => 'w'
-  ));
+  ]);
 }

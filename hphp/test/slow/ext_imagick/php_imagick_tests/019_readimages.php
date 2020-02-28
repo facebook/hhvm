@@ -1,34 +1,34 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 try {
-  $imagick = new Imagick(array (
+  $imagick = new Imagick(varray [
               'magick:rose',
               'magick:rose',
               'fail_this_does_not_exist.jpg',
               'magick:rose',
-  ));
+  ]);
   echo 'Fail'. PHP_EOL;
 } catch (ImagickException $e) {
   echo 'OK' . PHP_EOL;
 }
 
 try {
-  $imagick = new Imagick(array (
+  $imagick = new Imagick(varray [
               'magick:rose',
               'magick:rose',
               'magick:rose',
-  ));
+  ]);
   echo 'OK' . PHP_EOL;
-  $imagick->readImages (array (
+  $imagick->readImages (varray [
               'magick:rose',
               'magick:rose',
               'magick:rose',
-  ));
+  ]);
   echo 'OK' . PHP_EOL;
-  $imagick->readImages (array (
+  $imagick->readImages (varray [
               'magick:rose',
               'fail_this_does_not_exist.jpg',
-  ));
+  ]);
   echo 'Fail' . PHP_EOL;
 } catch (ImagickException $e) {
   echo 'Third OK'. PHP_EOL;

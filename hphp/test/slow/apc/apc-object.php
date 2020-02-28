@@ -1,13 +1,13 @@
 <?hh
 
 class ParentClass {
-  private $arr = array('hello');
+  private $arr = varray['hello'];
   private $str = 'blep';
   protected $prot = 'bloop';
 }
 
 class WithStuff extends ParentClass {
-  private $arr = array(1);
+  private $arr = varray[1];
   private $vec = Vector {'str', 12.3, 123};
   public $pub = 'lollerskates';
   protected $prot = 'blorp';

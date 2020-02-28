@@ -88,11 +88,11 @@ function VSOAP($request, $expected) {
 for ($n = 1; $n <= 2; $n++) {
   switch ($n) {
     case 1:
-      ExtSoapExtSoapPhp::$server = new SoapServer(null, array("uri" => "http://testuri.org"));
+      ExtSoapExtSoapPhp::$server = new SoapServer(null, darray["uri" => "http://testuri.org"]);
       break;
     case 2:
-      ExtSoapExtSoapPhp::$server = new SoapServer(null, array("uri" => "http://testuri.org",
-                    "ssl_method" => SOAP_SSL_METHOD_TLS));
+      ExtSoapExtSoapPhp::$server = new SoapServer(null, darray["uri" => "http://testuri.org",
+                    "ssl_method" => SOAP_SSL_METHOD_TLS]);
       break;
   }
 
@@ -110,7 +110,7 @@ for ($n = 1; $n <= 2; $n++) {
 	"<ns1:strlenResponse><return xsi:type=\"xsd:int\">11".
 	"</return></ns1:strlenResponse>");
 
-  $funcs = array("Sub", "Add");
+  $funcs = varray["Sub", "Add"];
   ExtSoapExtSoapPhp::$server->addfunction($funcs);
 
   VSOAP("<ns1:Add xmlns:ns1=\"http://testuri.org\">".
@@ -135,7 +135,7 @@ for ($n = 1; $n <= 2; $n++) {
 	"</return></ns1:sumResponse>");
 
   ExtSoapExtSoapPhp::$server = new SoapServer(__DIR__."/1809.wsdl",
-			  array("uri" => "http://testuri.org"));
+			  darray["uri" => "http://testuri.org"]);
 
   ExtSoapExtSoapPhp::$server->addfunction("Fault");
 

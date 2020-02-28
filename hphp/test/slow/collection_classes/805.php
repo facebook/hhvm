@@ -3,11 +3,11 @@
 
 <<__EntryPoint>>
 function main_805() {
-$collections = array(
+$collections = darray[
   'Vector' => new Vector(),
   'Map' => new Map(),
   'Set' => new Set(),
-);
+];
 try {
   foreach ($collections as $cls => $obj) {
     try {

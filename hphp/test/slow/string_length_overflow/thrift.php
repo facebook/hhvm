@@ -47,12 +47,12 @@ class DummyTransport {
 }
 
 class TestStruct {
-  const SPEC = array(
-    1 => array(
+  const SPEC = darray[
+    1 => darray[
       'var' => 'aString',
       'type' => TType::STRING,
-    ),
-  );
+    ],
+  ];
   public $aString = null;
   public function __construct($vals=null) {}
 }

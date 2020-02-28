@@ -5,7 +5,7 @@ function handler($err, $errstr) {
   var_dump($err, $errstr);
 }
 class y {
-  public $foo = array(1,2,3);
+  public $foo = varray[1,2,3];
 }
 class x {
   function __construct(@y $y) {

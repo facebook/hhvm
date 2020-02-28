@@ -8,7 +8,7 @@ $iterator = new FilesystemIterator(
   FilesystemIterator::KEY_AS_PATHNAME
 );
 echo "Key as Pathname:\n";
-$ret = array();
+$ret = varray[];
 foreach ($iterator as $key => $fileinfo) {
   $ret[] = $key;
 }
@@ -17,7 +17,7 @@ var_dump(array_values($ret));
 
 $iterator->setFlags(FilesystemIterator::KEY_AS_FILENAME);
 echo "\nKey as Filename:\n";
-$ret = array();
+$ret = varray[];
 foreach ($iterator as $key => $fileinfo) {
   $ret[] = $key;
 }

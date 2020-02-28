@@ -33,7 +33,7 @@ class MyAggregate implements IteratorAggregate {
 
 <<__EntryPoint>>
 function main_recursive_iterator_iterator_begin_end_iteration() {
-$ar = array(1, 2, array(31));
+$ar = varray[1, 2, varray[31]];
 
 $it = new rii(new MyAggregate($ar));
 

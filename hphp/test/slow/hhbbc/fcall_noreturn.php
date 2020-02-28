@@ -5,12 +5,12 @@ function no_return() {
 }
 
 function main1() {
-  $foo = array(1,2,3);
+  $foo = varray[1,2,3];
   no_return(...$foo);
 }
 
 function main2() {
-  $foo = array(1,2,3);
+  $foo = varray[1,2,3];
   call_user_func_array(fun('no_return'), $foo);
 }
 

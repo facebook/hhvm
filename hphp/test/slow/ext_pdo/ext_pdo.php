@@ -60,9 +60,9 @@ try {
   VERIFY($stmt->execute());
 
   $rs = $stmt->fetch(PDO::FETCH_ASSOC);
-  VS($rs, array("bar" => "ABC"));
+  VS($rs, darray["bar" => "ABC"]);
   $rs = $stmt->fetch(PDO::FETCH_ASSOC);
-  VS($rs, array("bar" => "DEF"));
+  VS($rs, darray["bar" => "DEF"]);
 
 } catch (Exception $e) {
   VS($e, null);
@@ -109,7 +109,7 @@ try {
   unset($vstmt);
 
   //Test setAttribute with ATTR_STATEMENT_CLASS. Set it to our own class
-  var_dump($dbh->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('MyStatement')));
+  var_dump($dbh->setAttribute(PDO::ATTR_STATEMENT_CLASS, varray['MyStatement']));
   $vstmt = $dbh->query("select * from foo", PDO::FETCH_COLUMN, 0);
   var_dump(get_class($vstmt));
   unset($vstmt);
@@ -117,7 +117,7 @@ try {
   //Then reset to PDOStatement. Zend allows the class name to be explicitly set
   //to PDOStatement.
   var_dump($dbh->setAttribute(PDO::ATTR_STATEMENT_CLASS,
-                              array('PDOStatement')));
+                              varray['PDOStatement']));
   $vstmt = $dbh->query("select * from foo", PDO::FETCH_COLUMN, 0);
   var_dump(get_class($vstmt));
 

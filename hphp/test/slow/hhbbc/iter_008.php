@@ -11,12 +11,12 @@ class C {
     return $string;
   }
 
-  private static $static_arr = array(
+  private static $static_arr = darray[
     'a' => 'b',
     'c' => 'd',
     'e' => 'f',
     'g' => 'h',
-  );
+  ];
 }
 
 function main() {

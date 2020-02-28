@@ -15,7 +15,7 @@ var_dump(setlocale(LC_NUMERIC, "fr-CH"));
 var_dump(setlocale(LC_NUMERIC, "fr-FR"));
 // var_dump(setlocale(LC_NUMERIC, "XXX"));  // returns False as there is no such locale on system
 
-$s = array(
+$s = varray[
     "",
     "0", "00", "0377", "0xEEFFAA00", "0X1234EF",
     " 0", "  00", "   0377", "    0xEEFFAA00", "     0X1234EF",
@@ -29,7 +29,7 @@ $s = array(
     "+INF", "+INf", "+InF", "+Inf", "+iNF", "+iNf", "+inF", "+inf",
     "-INF", "-INf", "-InF", "-Inf", "-iNF", "-iNf", "-inF", "-inf",
     "NAN", "NAn", "NaN", "Nan", "nAN", "nAn", "naN", "nan"
-);
+];
 
 foreach ($s as $e) {
     echo ">$e< is ".(is_numeric($e) ? "numeric\n" : "not numeric\t\t***\n");

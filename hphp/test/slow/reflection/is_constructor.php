@@ -20,15 +20,15 @@ trait TestTrait {
 }
 
 function main() {
-  $classes = array(
+  $classes = varray[
     'TestClassImplementingInterface', // false
     'TestInterface', // false
     'TestConcreteClass', // true
     'TestAbstractClass', // true
     'TestTrait' // true
-  );
+  ];
 
-  $out = array();
+  $out = darray[];
   foreach ($classes as $class) {
     $rc = (new ReflectionClass($class));
     $out[$class] = $rc->getMethod('__construct')->isConstructor();

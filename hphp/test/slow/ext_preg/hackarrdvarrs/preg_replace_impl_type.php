@@ -1,11 +1,11 @@
 <?hh // strict
 
 function f(): dict {
-  $str = array();
+  $str = darray[];
   $str[0] = "The quick brown fox jumped over the lazy dog.";
   $str[1] = "The quick brown fox jumped over the quick brown fox.";
-  $patterns = array();
-  $replacements = array();
+  $patterns = darray[];
+  $replacements = darray[];
   $patterns[0] = "/quick/";
   $patterns[1] = "/brown/";
   $patterns[2] = "/fox/";

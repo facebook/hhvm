@@ -103,7 +103,7 @@ function print_ex(
   $postDec($min);
   $postDec("$min");
 
-  $values = array($min, $max, -4, 0, 5, "12", 5.2, "1.5", "abc", "", null);
+  $values = varray[$min, $max, -4, 0, 5, "12", 5.2, "1.5", "abc", "", null];
 
   print "array post inc\n";
   $array = $values;

@@ -5,7 +5,7 @@
 function main_error_depth() {
 $array = array();
 for ($i=0; $i<550; $i++) {
-    $array = array($array);
+    $array = varray[$array];
 }
 
 var_dump(json_encode($array, 0, 551));

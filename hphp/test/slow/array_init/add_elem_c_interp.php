@@ -3,9 +3,9 @@ class X {
   public $foo;
 
   function test() {
-    $a = array(
+    $a = darray[
       null => $this->foo,
-    );
+    ];
     return $a;
   }
 }

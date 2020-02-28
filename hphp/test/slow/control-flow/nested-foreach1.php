@@ -13,8 +13,8 @@ function main($arr1, $arr2) {
 
 <<__EntryPoint>>
 function main_nested_foreach1() {
-$a = array(1,2,3);
-$b = array(10,20,30);
+$a = varray[1,2,3];
+$b = varray[10,20,30];
 
 for ($i = 0; $i < 10; $i++) {
   var_dump(main($a, $b));

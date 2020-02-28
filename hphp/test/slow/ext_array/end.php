@@ -3,6 +3,6 @@
 
 <<__EntryPoint>>
 function main_end() {
-$fruits = array("apple", "banana", "cranberry");
+$fruits = varray["apple", "banana", "cranberry"];
 var_dump(end(inout $fruits));
 }

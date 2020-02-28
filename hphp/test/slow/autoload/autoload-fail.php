@@ -15,12 +15,12 @@ function fail($t, $n, $e) {
 }
 
 \HH\autoload_set_paths(
-  array('class' => array(
+  darray['class' => darray[
           'c' => 'autoload-fail-c.inc', // syntax error
           'd' => 'autoload-fail-d.inc', // throws exception in pseudomain
-        ),
+        ],
         'failure' => 'fail',
-       ),
+       ],
   __DIR__ . '/'
 );
 

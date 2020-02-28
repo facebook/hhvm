@@ -8,7 +8,7 @@ function test_empty(): void {
 
 function test_apc_local(): void {
   echo "== APC local array ==\n";
-  var_dump(apc_store(__FILE__, array(1 => 2, '1' => '2')));
+  var_dump(apc_store(__FILE__, darray[1 => 2, '1' => '2']));
   $a = __hhvm_intrinsics\apc_fetch_no_check(__FILE__);
   var_dump(array_intersect_key(dict[1 => 2, '1' => '2'], $a));
   var_dump(array_intersect_key($a, dict[1 => 2, '1' => '2']));

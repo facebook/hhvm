@@ -23,10 +23,10 @@ function unwrap($y) {
 
 function main($bar) {
   $foo = "Hello!";
-  $out = array(1, 2, 3)
+  $out = varray[1, 2, 3]
     |> array_map($x ==> $x + beep(1), $$)
     |> array_merge(
-      array(50, 60, 70)
+      varray[50, 60, 70]
         |> array_map($x ==> $x * beep(2), $$)
         |> array_filter($$, $x ==> $x != beep(100)),
       $$)

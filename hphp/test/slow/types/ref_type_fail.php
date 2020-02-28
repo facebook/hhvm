@@ -19,7 +19,7 @@ function main_ref_type_fail() {
 set_error_handler(fun('handler'));
 
 test("hello");
-test(array(1,2,3));
+test(varray[1,2,3]);
 test(array());
 test("hello");
 }

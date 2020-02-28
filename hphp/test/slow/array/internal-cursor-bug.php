@@ -1,7 +1,7 @@
 <?hh
 function f() {
-  $arr2 = array(0 => 'a');
-  $arr1 = array(0 => 'a', 1 => 'b');
+  $arr2 = darray[0 => 'a'];
+  $arr1 = darray[0 => 'a', 1 => 'b'];
   unset($arr1[0]);
   reset(inout $arr1);
   reset(inout $arr2);

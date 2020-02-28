@@ -15,5 +15,5 @@ class MySoap extends SoapClient {
 
  <<__EntryPoint>>
 function main_1809() {
-var_dump(test(array('foo' => 'bar'))->pub);
+var_dump(test(darray['foo' => 'bar'])->pub);
 }

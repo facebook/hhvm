@@ -2,7 +2,7 @@
 
 function foo() {
   yield 1.0 => "hello";
-  yield array(1,2,3) => "world";
+  yield varray[1,2,3] => "world";
   yield new stdClass => "foobar";
 }
 

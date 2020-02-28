@@ -1,7 +1,7 @@
 <?hh
 
 class Foo implements Iterator {
-  private $data = array(1, 2, 3);
+  private $data = varray[1, 2, 3];
 
   public function current() { $arr = $this->data; $x = current($arr); $this->data = $arr; return $x; }
   public function key() { $arr = $this->data; $key = key($arr); $this->data = $arr; return $key; }

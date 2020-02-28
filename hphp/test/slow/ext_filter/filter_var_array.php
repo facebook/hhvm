@@ -1,14 +1,14 @@
 <?hh
 
 function perform_test($name, $test_filters, $add_empty) {
-  $params = array(
+  $params = darray[
     'null' => NULL,
     'empty_array' => array(),
-    'filled_array' => array(1, 2, 3),
+    'filled_array' => varray[1, 2, 3],
     'int' => 1,
     'double' => 1.0,
     'string' => 'string',
-  );
+  ];
 
   if ($add_empty) {
     $name .= ', Add empty';
@@ -24,11 +24,11 @@ function perform_test($name, $test_filters, $add_empty) {
 
 <<__EntryPoint>>
 function main_filter_var_array() {
-$all_filters = array(
+$all_filters = darray[
   'No filters' => array(),
-  'Require Scalar' => array('flags' => FILTER_REQUIRE_SCALAR),
-  'Require Array' => array('flags' => FILTER_REQUIRE_ARRAY),
-);
+  'Require Scalar' => darray['flags' => FILTER_REQUIRE_SCALAR],
+  'Require Array' => darray['flags' => FILTER_REQUIRE_ARRAY],
+];
 
 foreach ($all_filters as $test_name => $filter) {
   perform_test($test_name, $filter, true);

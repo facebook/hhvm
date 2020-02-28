@@ -2,8 +2,8 @@
 
 class TestClass {
 
-  public static function test(): array<shape(?'foo' => int, 'bar' => int)> {
-    return array();
+  public static function test(): varray<shape(?'foo' => int, 'bar' => int)> {
+    return varray[];
   }
 }
 

@@ -12,5 +12,5 @@ function test($q, $a, $b, $c) {
 
 <<__EntryPoint>>
 function main_242() {
-test(5, array(0,1), 0, 'foo');
+test(5, varray[0,1], 0, 'foo');
 }

@@ -1,12 +1,12 @@
 <?hh
 
 function get() {
-  return array(
+  return darray[
     'foo' => 'bar',
     'baz' => 24,
     13 => 42,
     'heh' => 1.0
-  );
+  ];
 }
 
 function a() { return get()['foo']; }

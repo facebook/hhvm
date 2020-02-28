@@ -11,6 +11,6 @@ class Ref { public $a; }
 <<__EntryPoint>>
 function main() {
   $aa = new Ref();
-  $a = array($aa);
+  $a = varray[$aa];
   foo($aa, $a);
 }

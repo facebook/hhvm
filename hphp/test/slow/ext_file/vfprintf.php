@@ -6,7 +6,7 @@ function main_vfprintf() {
 $tempfile = tempnam('/tmp', 'vmextfiletest');
 
 $f = fopen($tempfile, 'w');
-vfprintf($f, "%s %s", array("testing", "vfprintf"));
+vfprintf($f, "%s %s", varray["testing", "vfprintf"]);
 fclose($f);
 
 $f = fopen($tempfile, "r");

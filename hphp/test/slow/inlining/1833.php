@@ -1,7 +1,7 @@
 <?hh
 
 function g($a) {
- return $a ? array(1,2,3) : 'foo';
+ return $a ? varray[1,2,3] : 'foo';
  }
 function f($a) {
  return g($a);

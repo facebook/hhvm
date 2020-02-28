@@ -53,18 +53,18 @@ enum ComplexUnionEnum: int {
   stringValue = 2;
 }
 class ComplexUnion {
-  const array SPEC = array(
-    1 => array(
+  const array SPEC = darray[
+    1 => darray[
       'var' => 'intValue',
       'union' => true,
       'type' => TType::I64,
-      ),
-    2 => array(
+      ],
+    2 => darray[
       'var' => 'stringValue',
       'union' => true,
       'type' => TType::STRING,
-      ),
-    );
+      ],
+    ];
   public static Map<string, int> $_TFIELDMAP = Map {
     'intValue' => 1,
     'stringValue' => 2,

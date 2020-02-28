@@ -36,7 +36,7 @@ function test6() {
 
 <<__EntryPoint>>
 function main_166() {
-var_dump(test1(array(1)));
+var_dump(test1(varray[1]));
 var_dump(test2());
 var_dump(test3());
 var_dump(test4());

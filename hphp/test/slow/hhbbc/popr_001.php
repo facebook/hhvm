@@ -7,7 +7,7 @@ function bar(inout $a) {
 }
 
 function main() {
-  $a = array(new A);
+  $a = varray[new A];
   bar(inout $a);
 }
 

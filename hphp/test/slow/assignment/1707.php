@@ -1,15 +1,15 @@
 <?hh
 
 function g($key, $old, $new, $s = false) {
-  $diff = array();
+  $diff = darray[];
   if ($old !== $new) {
     if ($s) {
       $old = f($old, true);
       $new = f($new, true);
     }
-    $diff['old'] = array();
+    $diff['old'] = darray[];
     $diff['old'][$key] = $old;
-    $diff['new'] = array();
+    $diff['new'] = darray[];
     $diff['new'][$key] = $new;
   }
   return $diff;

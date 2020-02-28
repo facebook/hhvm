@@ -7,7 +7,7 @@ class MyDB extends MongoDB {
 $db = new MyDB;
 
 try {
-    MongoDBRef::get($db, array('$ref' => "", '$id' => 1));
+    MongoDBRef::get($db, darray['$ref' => "", '$id' => 1]);
 } catch (MongoException $e) {
     var_dump($e->getCode());
     var_dump($e->getMessage());

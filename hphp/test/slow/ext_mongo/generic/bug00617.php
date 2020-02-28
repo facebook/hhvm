@@ -1,13 +1,13 @@
 <?hh <<__EntryPoint>> function main(): void {
 echo "ARRAY:\n";
 try {
-    $m = new MongoClient("localhost", array("connect" => false, "timeou" => 4));
+    $m = new MongoClient("localhost", darray["connect" => false, "timeou" => 4]);
 } catch(Exception $e) {
     var_dump($e->getCode(), $e->getMessage());
 }
 
 try {
-    $m = new MongoClient("localhost", array("connect" => false, "readPreference" => "nearest", "slaveOkay" => true));
+    $m = new MongoClient("localhost", darray["connect" => false, "readPreference" => "nearest", "slaveOkay" => true]);
 } catch(Exception $e) {
     var_dump($e->getCode(), $e->getMessage());
 }
@@ -46,7 +46,7 @@ try {
 echo "OTHERS:\n";
 MongoCursor::$slaveOkay = true;
 try {
-    $m = new MongoClient("localhost", array("connect" => false, "readPreference" => "nearest"));
+    $m = new MongoClient("localhost", darray["connect" => false, "readPreference" => "nearest"]);
 } catch(Exception $e) {
     var_dump($e->getCode(), $e->getMessage());
 }

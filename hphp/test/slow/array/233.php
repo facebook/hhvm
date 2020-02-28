@@ -28,6 +28,6 @@ pop_stack();
 push_stack();
 pop_stack();
 push_stack();
-$info = array(count(PushStackStatics::$stack), PushStackStatics::$stack[count(PushStackStatics::$stack)-1], PushStackStatics::$stack);
+$info = varray[count(PushStackStatics::$stack), PushStackStatics::$stack[count(PushStackStatics::$stack)-1], PushStackStatics::$stack];
 var_dump($info);
 }

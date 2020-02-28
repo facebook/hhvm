@@ -43,12 +43,12 @@ $e(0, 1);
 call_user_func($c, 0, 1);
 call_user_func($d, 0, 1);
 call_user_func($e, 0, 1);
-call_user_func_array($c, array(0, 1));
-call_user_func_array($d, array(0, 1));
-call_user_func_array($e, array(0, 1));
+call_user_func_array($c, varray[0, 1]);
+call_user_func_array($d, varray[0, 1]);
+call_user_func_array($e, varray[0, 1]);
 $c::__invoke(0, 1);
 $d::__invoke(0, 1);
 $e::__invoke(0, 1);
 (new E1)->test();
-var_dump(array_filter(array(0, 1, 11, 13), new F1));
+var_dump(array_filter(varray[0, 1, 11, 13], new F1));
 }

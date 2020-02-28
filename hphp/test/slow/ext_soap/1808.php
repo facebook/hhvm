@@ -6,7 +6,7 @@ function add($a, $b) {
 
 <<__EntryPoint>>
 function main_1808() {
-$server = new SoapServer(NULL, array('uri' => 'http://test-uri'));
+$server = new SoapServer(NULL, darray['uri' => 'http://test-uri']);
 $str = '<?xml version="1.0" '
 .       'encoding="ISO-8859-1"?>'
 .       '<SOAP-ENV:Envelope SOAP-ENV:encodingStyle='

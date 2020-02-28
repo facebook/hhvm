@@ -44,40 +44,40 @@ class DummyTransport {
   }
 }
 class TestStruct {
-  const SPEC = array(
-    -1 => array(
+  const SPEC = darray[
+    -1 => darray[
       'var' => 'aBool',
       'type' => TType::BOOL,
-    ),
-    1 => array(
+    ],
+    1 => darray[
       'var' => 'anInt',
       'type' => TType::I32,
-    ),
-    2 => array(
+    ],
+    2 => darray[
       'var' => 'aDouble',
       'type' => TType::DOUBLE,
-    ),
-    3 => array(
+    ],
+    3 => darray[
       'var' => 'anInt64',
       'type' => TType::I64,
-    ),
-    4 => array(
+    ],
+    4 => darray[
       'var' => 'anByte',
       'type' => TType::BYTE,
-    ),
-    5 => array(
+    ],
+    5 => darray[
       'var' => 'anI16',
       'type' => TType::I16,
-    ),
-    6 => array(
+    ],
+    6 => darray[
       'var' => 'aFloat',
       'type' => TType::FLOAT,
-    ),
-    7 => array(
+    ],
+    7 => darray[
       'var' => 'bFloat',
       'type' => TType::FLOAT,
-    ),
-  );
+    ],
+  ];
   public $aBool = null;
   public $anInt = null;
   public $aDouble = null;

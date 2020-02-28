@@ -7,7 +7,7 @@ async function foo($x, $suspend = false, $throw = false) {
 }
 
 async function bar($x) {
-  return array($x + 1, array($x + 2, $x + 3));
+  return varray[$x + 1, varray[$x + 2, $x + 3]];
 }
 
 async function herp() {

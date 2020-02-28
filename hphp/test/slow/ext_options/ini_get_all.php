@@ -16,10 +16,10 @@ var_dump(ini_get_all('pcre'));
 var_dump(ini_get_all('pcre', false));
 
 $core = ini_get_all('core');
-var_dump(array(
+var_dump(darray[
   'core: allow_url_fopen' => isset($core['allow_url_fopen']),
   'core: pcre.backtrack_limit' => isset($core['pcre.backtrack_limit']),
-));
+]);
 
 ini_get_all("THIS_EXTENSION_SHOULD_NOT_EXIST");
 }

@@ -10,7 +10,7 @@ class someclass {
 function asd() { return mt_rand() ? 'a' : 2; }
 function main() {
   $time = asd();
-  $items = array();
+  $items = varray[];
   if (someclass::yo()) {
     $items[] = 'ZZZZ';
   }

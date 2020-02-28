@@ -1,7 +1,7 @@
 <?hh
 
 function a() {
-  $transport = array("foot", "bike", "car", "plane");
+  $transport = varray["foot", "bike", "car", "plane"];
   var_dump(current($transport));
   var_dump(next(inout $transport));
   var_dump(current($transport));
@@ -16,7 +16,7 @@ function b() {
 }
 
 function c() {
-  $arr = array(array());
+  $arr = varray[array()];
   var_dump(current($arr));
 }
 

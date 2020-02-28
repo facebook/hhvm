@@ -20,12 +20,12 @@ class C {
 
 <<__EntryPoint>>
 function main_get_doc_comment_builtins() {
-$meths = array(
-  array('ArrayAccess', 'offsetExists'),
-  array('ReflectionMethod', 'getDocComment'),
-  array('I', 'meth'),
-  array('C', 'okay')
-);
+$meths = varray[
+  varray['ArrayAccess', 'offsetExists'],
+  varray['ReflectionMethod', 'getDocComment'],
+  varray['I', 'meth'],
+  varray['C', 'okay']
+];
 
 foreach ($meths as list($class, $meth)) {
   $refl = new ReflectionMethod($class, $meth);
@@ -35,7 +35,7 @@ foreach ($meths as list($class, $meth)) {
   var_dump($s);
 }
 
-foreach (array('p1', 'p2') as $prop) {
+foreach (varray['p1', 'p2'] as $prop) {
   $refl = new ReflectionProperty('C', $prop);
   $s = $refl->getDocComment();
   var_dump($s);

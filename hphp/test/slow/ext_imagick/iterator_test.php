@@ -16,10 +16,10 @@ function row_dump($row, $pixels) {
 <<__EntryPoint>> function main(): void {
 $magick = new Imagick(__DIR__.'/facebook.png');
 
-$iterators = array(
+$iterators = varray[
   ImagickPixelIterator::getPixelIterator($magick),
   ImagickPixelIterator::getPixelRegionIterator($magick, 40, 30, 20, 10),
-);
+];
 
 foreach ($iterators as $iterator) {
   for ($i = 0; $i < 5; ++$i) {

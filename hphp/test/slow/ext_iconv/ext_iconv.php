@@ -10,10 +10,10 @@ function VERIFY($x) { VS($x, true); }
 //////////////////////////////////////////////////////////////////////
 
 function test_iconv_mime_encode() {
-  $preferences = array("input-charset" => "ISO-8859-1",
+  $preferences = darray["input-charset" => "ISO-8859-1",
                                   "output-charset" => "UTF-8",
                                   "line-length" => 76,
-                                  "line-break-chars" => "\n");
+                                  "line-break-chars" => "\n"];
   $preferences['scheme'] = "Q";
   VS(iconv_mime_encode("Subject", "Pr\xDC"."fung Pr\xDC"."fung", $preferences),
      "Subject: =?UTF-8?Q?Pr=C3=9Cfung=20Pr=C3=9Cfung?=");
@@ -44,24 +44,24 @@ function test_iconv_mime_decode_headers() {
      ("Subject: =?UTF-8?B?UHLDnGZ1bmcgUHLDnGZ1bmc=?=\n".
       "Subject: =?UTF-8?B?UHLDnGZ1bmcgUHLDnGZ1bmc=?=\n",
       0, "ISO-8859-1"),
-     array("Subject" => array("Pr\xDC"."fung Pr\xDC"."fung",
-                                           "Pr\xDC"."fung Pr\xDC"."fung")));
+     darray["Subject" => varray["Pr\xDC"."fung Pr\xDC"."fung",
+                                           "Pr\xDC"."fung Pr\xDC"."fung"]]);
 }
 
 function test_iconv_get_encoding() {
   VS(iconv_get_encoding(),
-     array("input_encoding" => "ISO-8859-1",
+     darray["input_encoding" => "ISO-8859-1",
                  "output_encoding" => "ISO-8859-1",
-                 "internal_encoding" => "ISO-8859-1"));
+                 "internal_encoding" => "ISO-8859-1"]);
 }
 
 function test_iconv_set_encoding() {
   VS(iconv_set_encoding("output_encoding", "UTF-8"), true);
 
   VS(iconv_get_encoding(),
-     array("input_encoding" => "ISO-8859-1",
+     darray["input_encoding" => "ISO-8859-1",
                  "output_encoding" => "UTF-8",
-                 "internal_encoding" => "ISO-8859-1"));
+                 "internal_encoding" => "ISO-8859-1"]);
 }
 
 function test_iconv() {

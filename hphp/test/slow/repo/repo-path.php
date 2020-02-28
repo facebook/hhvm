@@ -16,19 +16,19 @@ function main() {
 
   $repo_pattern = $repo_prefix.'%{user}.hhbc';
 
-  $cmd = implode(' ', array(
+  $cmd = implode(' ', varray[
     PHP_BINARY,
     '-vRepo.Local.Mode=--',
     '-vRepo.Central.Path='.$repo_pattern,
     __FILE__,
     'dummy'
-  ));
+  ]);
 
-  $descriptorspec = array(
-     array('pipe', 'r'),
-     array('pipe', 'w'),
-     array('pipe', 'w')
-  );
+  $descriptorspec = varray[
+     varray['pipe', 'r'],
+     varray['pipe', 'w'],
+     varray['pipe', 'w']
+  ];
 
   $pipes = null;
   $proc = proc_open($cmd, $descriptorspec, inout $pipes);

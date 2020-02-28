@@ -8,7 +8,7 @@ class X {
   function set() {
     $this->b = true;
     $this->i = 5;
-    $this->a = array(1,2,3);
+    $this->a = varray[1,2,3];
     $this->s = 'goodbye';
   }
   function foo() {

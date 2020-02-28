@@ -1,7 +1,7 @@
 <?hh
 
 function test_InitPackedArrayLoop($x) {
-  $arr = array($x, $x, $x, $x, $x, $x, $x, $x, $x);
+  $arr = varray[$x, $x, $x, $x, $x, $x, $x, $x, $x];
   return $arr;
 }
 

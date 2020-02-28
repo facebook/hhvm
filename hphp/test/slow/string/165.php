@@ -34,7 +34,7 @@ function test3($a, $b) {
 
 <<__EntryPoint>>
 function main_165() {
-test(array('a', 'b', 'c'), array('u', 'v'));
-test2(array('a', 'b', 'c'), array('u', 'v'));
-test3(array('a', 'b', 'c'), array('u', 'v'));
+test(varray['a', 'b', 'c'], varray['u', 'v']);
+test2(varray['a', 'b', 'c'], varray['u', 'v']);
+test3(varray['a', 'b', 'c'], varray['u', 'v']);
 }

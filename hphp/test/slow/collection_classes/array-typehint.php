@@ -43,7 +43,7 @@ function f8(inout @?array $x) { helper_ref(inout $x); }
 
 function main() {
   $containers = Map {
-    'array' => array(1, 2, 3),
+    'array' => varray[1, 2, 3],
     'Vector' => Vector {1, 2, 3},
     'Map' => Map {'a' => 1, 'b' => 2, 'c' => 3},
     'Set' => Set {1, 2, 3},

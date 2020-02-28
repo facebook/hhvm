@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_405() {
-$a = array('a' => 'va');
- $a += array('b');
+$a = darray['a' => 'va'];
+ $a += varray['b'];
              var_dump($a);
 }

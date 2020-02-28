@@ -38,7 +38,7 @@ function test_core(WatchmanInstance $wminst): void {
   $version = json_decode(HH\asio\join($version_h), true);
   if (
     !isset('capabilities', $version) ||
-    $version['capabilities'] !== array('relative_root' => true)
+    $version['capabilities'] !== darray['relative_root' => true]
   ) {
     throw new Exception("FAIL ('.var_export($version).')\n");
   } else {
@@ -139,8 +139,8 @@ function test_core(WatchmanInstance $wminst): void {
   $touch_c = 0;
   $last_subscribe = null;
   $last_unsubscribe = null;
-  $exception_count = array(0, 0, 0);
-  $op_count = array(0, 0, 0);
+  $exception_count = varray[0, 0, 0];
+  $op_count = varray[0, 0, 0];
   srand(1);
   for ($i = 0; $i < 30000; $i++) {
     if ($i % 1000 === 0) {
@@ -153,8 +153,8 @@ function test_core(WatchmanInstance $wminst): void {
         ),
         "All recent subscribe/unsubscribe operations failed",
       );
-      $exception_count = array(0, 0, 0);
-      $op_count = array(0, 0, 0);
+      $exception_count = varray[0, 0, 0];
+      $op_count = varray[0, 0, 0];
     }
     $op = rand() % 3;
     $op_count[$op]++;

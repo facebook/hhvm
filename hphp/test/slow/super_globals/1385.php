@@ -1,7 +1,7 @@
 <?hh
 
 function test() {
-  $_POST = array('HELLO' => 1);
+  $_POST = darray['HELLO' => 1];
 }
 
 <<__EntryPoint>>

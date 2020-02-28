@@ -31,12 +31,12 @@ function chwrap($x) {
 }
 
 function choose($a) {
-  $arr = array('banana', $a, 'apple');
-  $dict = array(
+  $arr = varray['banana', $a, 'apple'];
+  $dict = darray[
     'banana' => 'banana',
     $a => $a,
     'apple' => 'apple',
-  );
+  ];
 
   $out = array_map(
     function ($val) { return strrev($val); },
@@ -51,13 +51,13 @@ function choose($a) {
 }
 
 function quux($b, $a) {
-  $arr = array($b, 'banana', $a, 'apple');
-  $dict = array(
+  $arr = varray[$b, 'banana', $a, 'apple'];
+  $dict = darray[
     $b => $b,
     'banana' => 'banana',
     $a => $a,
     'apple' => 'apple',
-  );
+  ];
 
   $out = array_map(
     function ($val) {

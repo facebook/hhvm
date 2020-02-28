@@ -12,5 +12,5 @@ class C extends B {
 
 <<__EntryPoint>>
 function main_1874() {
-call_user_func(array('C', 'f'));
+call_user_func(varray['C', 'f']);
 }

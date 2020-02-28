@@ -4,6 +4,6 @@ function main_entry(): void {
   MongoLog::setModule(MongoLog::ALL);
   MongoLog::setLevel(MongoLog::ALL);
   set_error_handler(fun('foo'));
-  $m = new Mongo("mongodb://whisky:13000", array( "connect" => false, "replicaSet" => true ));
-  $m = new Mongo("mongodb://whisky:13000", array( "connect" => false, "replicaSet" => 'seta' ));
+  $m = new Mongo("mongodb://whisky:13000", darray[ "connect" => false, "replicaSet" => true ]);
+  $m = new Mongo("mongodb://whisky:13000", darray[ "connect" => false, "replicaSet" => 'seta' ]);
 }

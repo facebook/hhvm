@@ -30,13 +30,13 @@ class BodyType {}
 function main_data_type_check() {
 $client = new MySoapClient(
   __DIR__ . '/data-type-check.wdsl',
-  array(
-    'classmap' => array(
+  darray[
+    'classmap' => darray[
       'BodyType' => 'BodyType',
-    ),
+    ],
     'cache_wsdl' => WSDL_CACHE_NONE,
     'soap_version' => SOAP_1_1,
-  )
+  ]
 );
 
 $recipientType = new BodyType();

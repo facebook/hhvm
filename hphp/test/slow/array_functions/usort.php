@@ -12,5 +12,5 @@ function main($a) {
 
 <<__EntryPoint>>
 function main_usort() {
-main(array(1,2));
+main(varray[1,2]);
 }

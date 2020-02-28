@@ -5,7 +5,7 @@ function f() {
 }
 class B {
   public $a = 1;
-  static $b = array(1, 2, 3);
+  static $b = varray[1, 2, 3];
 }
 
 <<__EntryPoint>>

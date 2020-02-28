@@ -15,6 +15,6 @@ function g($x) {
 
 <<__EntryPoint>>
 function main_1858() {
-f(array(10));
-g(array(10));
+f(varray[10]);
+g(varray[10]);
 }

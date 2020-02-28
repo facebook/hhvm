@@ -31,7 +31,7 @@ function main() {
   fooInt(12);
   fooBool(false);
   fooDouble(1.2);
-  fooArray(array(1,2,3));
+  fooArray(varray[1,2,3]);
   fooString("asdasd");
 }
 

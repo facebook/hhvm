@@ -35,7 +35,7 @@ VS(mcrypt_module_get_algo_key_size("blowfish"), 56);
 
 VS(mcrypt_module_get_supported_key_sizes("blowfish"), array());
 VS(mcrypt_module_get_supported_key_sizes("twofish"),
-   array(16, 24, 32));
+   varray[16, 24, 32]);
 
 VS(mcrypt_module_is_block_algorithm_mode("cbc"), true);
 VS(mcrypt_module_is_block_algorithm("blowfish"), true);
@@ -132,7 +132,7 @@ VS(mcrypt_enc_get_modes_name($td), "CFB");
 
 $td = mcrypt_module_open("rijndael-256", "", "ecb", "");
 VS(mcrypt_enc_get_supported_key_sizes($td),
-   array(16, 24, 32));
+   varray[16, 24, 32]);
 
 $td = mcrypt_module_open("tripledes", "", "ecb", "");
 VS(mcrypt_enc_is_block_algorithm_mode($td), true);

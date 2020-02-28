@@ -2,7 +2,7 @@
 
 function f(array $a = null, $e) {
   if (is_int($e) || is_string($e)) {
-    $a[$e] ??= array();
+    $a[$e] ??= darray[];
     $a[$e]['foo'] = 30;
     try { $x = $a[$e]['baz']; } catch (Exception $e) { echo $e->getMessage()."\n"; $x = null; }
   } else {
@@ -33,10 +33,10 @@ function h($x, $y) {
 <<__EntryPoint>>
 function main_534() {
 f(array(), 'e');
-f(array('e' => array('baz' => 40)), 'e');
-var_dump(f(array('y' => array()), 'y'));
+f(darray['e' => darray['baz' => 40]], 'e');
+var_dump(f(darray['y' => array()], 'y'));
 var_dump(f(array(), 'y'));
 var_dump(f(array(), array()));
 h(array(), 0);
-h(array(array()), 0);
+h(varray[array()], 0);
 }

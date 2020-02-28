@@ -6,7 +6,7 @@ class MyPriorityQueue extends \SplPriorityQueue {
   }
 
   public function sort() {
-    $sortedList = array();
+    $sortedList = varray[];
 
     while ($this->valid()) {
       $sortedList[] = $this->extract();
@@ -19,11 +19,11 @@ class MyPriorityQueue extends \SplPriorityQueue {
 
 <<__EntryPoint>>
 function main_pqueue_constructor() {
-$data  = array(
-  array('test1', 1),
-  array('test3', 3),
-  array('test2', 2),
-);
+$data  = varray[
+  varray['test1', 1],
+  varray['test3', 3],
+  varray['test2', 2],
+];
 $queue = new MyPriorityQueue();
 
 foreach ($data as $entry) {

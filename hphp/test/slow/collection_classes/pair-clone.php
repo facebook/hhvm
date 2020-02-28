@@ -1,7 +1,7 @@
 <?hh
 
 function main($n) {
-  $p = Pair{array($n), "foobar"};
+  $p = Pair{varray[$n], "foobar"};
   while (--$n > 0) $p2 = clone $p;
 }
 

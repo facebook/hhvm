@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$regexes = array('', '/', '345', 'b');
+$regexes = varray['', '/', '345', 'b'];
 
 foreach ($regexes as $regex) {
     try {

@@ -3,10 +3,10 @@
 
 <<__EntryPoint>>
 function main_add_error() {
-$entries = array();
+$entries = darray[];
 $entries['key1'] = 'value1';
 $entries['key2'] = 'value2';
-$entries['key3'] = array('value3a','value3b');
+$entries['key3'] = varray['value3a','value3b'];
 $entries['key4'] = 4;
 
 apc_store($entries);

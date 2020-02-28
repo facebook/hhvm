@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_377() {
-$a = array(10);
- $a += array('b');
+$a = varray[10];
+ $a += varray['b'];
              var_dump($a);
 }

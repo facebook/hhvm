@@ -2,7 +2,7 @@
 
 function foo() {
   if (mt_rand() == 0) return array();
-  $z = array(true, mt_rand() ? true : false);
+  $z = varray[true, mt_rand() ? true : false];
   return $z;
 }
 

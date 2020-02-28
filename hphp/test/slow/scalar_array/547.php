@@ -7,5 +7,5 @@ function func($params) {
 const VALUE = 1;
 <<__EntryPoint>>
 function main_547() {
-func(array('key' => @VALUE));
+func(darray['key' => @VALUE]);
 }

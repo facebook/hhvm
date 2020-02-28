@@ -43,21 +43,21 @@ function main() {
   unset($y);
   unset($x);
 
-  $x = Vector {array(1)};
+  $x = Vector {varray[1]};
   $y = $x->toImmVector();
   unset($x[0][0]);
   var_dump($y);
   unset($y);
   unset($x);
 
-  $x = Vector {array(1)};
+  $x = Vector {varray[1]};
   $y = $x->toImmVector();
   $x[0][] = 2;
   var_dump($y);
   unset($y);
   unset($x);
 
-  $x = Vector {array(1)};
+  $x = Vector {varray[1]};
   $y = $x->toImmVector();
   $x[0][1] = 2;
   var_dump($y);

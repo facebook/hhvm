@@ -6,7 +6,7 @@ class Blah {
 
 function main(Blah $x = null) {
   if (!$x) {
-    $k = array(1,2,3,4);
+    $k = varray[1,2,3,4];
   } else {
     $k = null;
   }

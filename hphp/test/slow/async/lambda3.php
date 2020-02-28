@@ -16,7 +16,7 @@ async function foo() {
       async $id ==> {
         return await bar($id);
       },
-      array(1,2,3,4),
+      varray[1,2,3,4],
     )
   );
 }

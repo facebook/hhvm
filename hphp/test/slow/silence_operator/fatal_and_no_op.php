@@ -6,7 +6,7 @@ set_error_handler(function () {
 
 function foo() {
   $x = 42;
-  return array(@$x);
+  return varray[@$x];
 }
 
 var_dump(foo());

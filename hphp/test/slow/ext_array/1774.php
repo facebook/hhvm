@@ -4,7 +4,7 @@ function cmp($a, $b) {
   throw new Exception('Surprise!');
 }
 function test() {
-  $a = array(1,2,3);
+  $a = varray[1,2,3];
   try {
     usort(inout $a, fun('cmp'));
     var_dump('unreached');

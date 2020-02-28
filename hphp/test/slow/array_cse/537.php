@@ -36,14 +36,14 @@ function main_537() {
 error_reporting(0);
 var_dump(f1(null));
 var_dump(f1(array()));
-var_dump(f1(array(0)));
+var_dump(f1(varray[0]));
 var_dump(f1(''));
 var_dump(f1('a'));
 f2(array(0 => array()));
 f2(array());
 f2('');
 f2(null);
-f3(array('foo' => array(0,1,2,3)));
-f4(array(array(1 => new stdClass())));
+f3(darray['foo' => varray[0,1,2,3]]);
+f4(varray[darray[1 => new stdClass()]]);
 f5('foobar');
 }

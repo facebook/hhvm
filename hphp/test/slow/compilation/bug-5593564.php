@@ -13,8 +13,8 @@ function main($arr) {
 
 <<__EntryPoint>>
 function main_bug_5593564() {
-$packed = array(1,2,3);
-$mixed = array((1 << 33) => array("value"));
+$packed = varray[1,2,3];
+$mixed = darray[(1 << 33) => varray["value"]];
 
 main($packed);
 main($mixed);

@@ -22,7 +22,7 @@ function main_2227() {
     include '2227-2.inc';
   }
 
-  $f = new Foo(array(0));
+  $f = new Foo(varray[0]);
   \var_dump(Foo::$baz);
   \var_dump(B::FOO);
   \var_dump(B::$baz);

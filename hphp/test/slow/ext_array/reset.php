@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_reset() {
-$array = array("step one", "step two", "step three", "step four");
+$array = varray["step one", "step two", "step three", "step four"];
 
 // by default, the pointer is on the first element
 var_dump(current($array));

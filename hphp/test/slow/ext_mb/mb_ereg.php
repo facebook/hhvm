@@ -28,7 +28,7 @@ mb_regex_encoding("UTF-8");
 mb_ereg_search_init($str, $reg);
 $r = mb_ereg_search();
 $r = mb_ereg_search_getregs(); // get first result
-var_dump($r === array("Pr\xC3\x9C\xC3\x9D"."fung"));
+var_dump($r === varray["Pr\xC3\x9C\xC3\x9D"."fung"]);
 var_dump(mb_ereg_search_getpos());
 
 $str = "Pr\xC3\x9C\xC3\x9D"."fung abc p\xC3\x9C";
@@ -37,7 +37,7 @@ mb_regex_encoding("UTF-8");
 mb_ereg_search_init($str, $reg);
 $r = mb_ereg_search();
 $r = mb_ereg_search_getregs(); // get first result
-var_dump($r == array("Pr\xC3\x9C\xC3\x9D"."fung"));
+var_dump($r == varray["Pr\xC3\x9C\xC3\x9D"."fung"]);
 
 $str = "Pr\xC3\x9C\xC3\x9D"."fung abc p\xC3\x9C";
 $reg = "\\w+";
@@ -45,7 +45,7 @@ mb_regex_encoding("UTF-8");
 mb_ereg_search_init($str, $reg);
 $r = mb_ereg_search();
 $r = mb_ereg_search_getregs(); // get first result
-var_dump($r == array("Pr\xC3\x9C\xC3\x9D"."fung"));
+var_dump($r == varray["Pr\xC3\x9C\xC3\x9D"."fung"]);
 var_dump(mb_ereg_search_pos());
 
 $str = "Pr\xC3\x9C\xC3\x9D"."fung abc p\xC3\x9C";
@@ -54,7 +54,7 @@ mb_regex_encoding("UTF-8");
 mb_ereg_search_init($str, $reg);
 $r = mb_ereg_search();
 $r = mb_ereg_search_getregs(); // get first result
-var_dump($r === array("Pr\xC3\x9C\xC3\x9D"."fung"));
+var_dump($r === varray["Pr\xC3\x9C\xC3\x9D"."fung"]);
 $r = mb_ereg_search_regs();    // get next result
 var_dump($r);
 
@@ -64,10 +64,10 @@ mb_regex_encoding("UTF-8");
 mb_ereg_search_init($str, $reg);
 $r = mb_ereg_search();
 $r = mb_ereg_search_getregs(); // get first result
-var_dump($r === array("Pr\xC3\x9C\xC3\x9D"."fung"));
+var_dump($r === varray["Pr\xC3\x9C\xC3\x9D"."fung"]);
 var_dump(mb_ereg_search_setpos(15));
 $r = mb_ereg_search_regs();    // get next result
-var_dump($r == array("p\xC3\x9C"));
+var_dump($r == varray["p\xC3\x9C"]);
 
 $str = "Pr\xC3\x9C\xC3\x9D"."fung abc p\xC3\x9C";
 mb_regex_encoding("UTF-8");
@@ -81,7 +81,7 @@ mb_regex_encoding("UTF-8");
 mb_ereg_search_init($str, $reg);
 $r = mb_ereg_search();
 $r = mb_ereg_search_getregs(); // get first result
-var_dump($r === array("Pr\xC3\x9C\xC3\x9D"."fung"));
+var_dump($r === varray["Pr\xC3\x9C\xC3\x9D"."fung"]);
 
 $date = "1973-04-30";
 $regs = null;

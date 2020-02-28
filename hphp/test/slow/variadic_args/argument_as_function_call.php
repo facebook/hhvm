@@ -7,8 +7,8 @@ function f(int ...$x) {
   }
 }
 
-function g() : array<int> {
-  return array(1,2,3,4);
+function g() : varray<int> {
+  return varray[1,2,3,4];
 }
 
 

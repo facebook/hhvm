@@ -1,7 +1,7 @@
 <?hh
 
 function foo($a) {
-  $v = array();
+  $v = varray[];
   for ($i = 0; $i < 1024; $i++) {
     $v[] = $a;
   }

@@ -2,8 +2,8 @@
 
 function blah() {
 
-  $xs = array(1, 2, 3, 4);
-  $ys = array(1, 2, 3, 4);
+  $xs = varray[1, 2, 3, 4];
+  $ys = varray[1, 2, 3, 4];
 
   before:
   echo "before label\n";

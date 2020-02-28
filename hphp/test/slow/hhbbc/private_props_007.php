@@ -1,7 +1,7 @@
 <?hh
 
 class Foo {
-  private $blah = array(1,2,3);
+  private $blah = varray[1,2,3];
 
   public function closure_private_prop_access() {
     $cl = $x ==> $this->blah = $x;
@@ -11,10 +11,10 @@ class Foo {
 }
 
 class Bar {
-  private $heh = array(1,2,3);
+  private $heh = varray[1,2,3];
 
   public function closure_private_prop_access2() {
-    $cl = () ==> $this->heh = array(1,2,3);
+    $cl = () ==> $this->heh = varray[1,2,3];
     $cl();
     var_dump(is_array($this->heh));
   }

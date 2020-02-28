@@ -41,7 +41,7 @@ function test_openssl_csr_get_subject() {
 }
 
 function test_openssl_csr_sign() {
-  $dn = array(
+  $dn = varray[
            "countryName",
            "stateOrProvinceName",
            "localityName",
@@ -49,7 +49,7 @@ function test_openssl_csr_sign() {
            "organizationalUnitName",
            "commonName",
            "emailAddress"
-  );
+  ];
 
   $privkeypass = "1234";
   $numberofdays = 365;
@@ -134,7 +134,7 @@ function test_openssl_pkcs7_sign() {
 
   VERIFY(openssl_pkcs7_sign
          ($infile, $outfile, $scert, $privkey,
-          array("To" => "t@facebook.com", "From" => "hzhao@facebook.com")));
+          darray["To" => "t@facebook.com", "From" => "hzhao@facebook.com"]));
 
   $tmp = tempnam('/tmp', 'x509vmtestopenssl');
   unlink($tmp);
@@ -237,7 +237,7 @@ function test_openssl_seal() {
   $sealed = null;
   $ekeys = null;
   $iv = null;
-  VERIFY(openssl_seal($data, inout $sealed, inout $ekeys, array($pubkey),
+  VERIFY(openssl_seal($data, inout $sealed, inout $ekeys, varray[$pubkey],
                       '', inout $iv));
   VERIFY(strlen($sealed) > 0);
   VS(count($ekeys), 1);
@@ -250,7 +250,7 @@ function test_openssl_seal() {
   VERIFY(openssl_open($sealed, inout $open_data, $ekeys[0], $privkey, 'RC4'));
   VS($open_data, $data);
 
-  VERIFY(openssl_seal($data, inout $sealed, inout $ekeys, array($pubkey),
+  VERIFY(openssl_seal($data, inout $sealed, inout $ekeys, varray[$pubkey],
                       'AES-256-ECB', inout $iv));
   VERIFY(strlen($sealed) > 0);
   VS(count($ekeys), 1);

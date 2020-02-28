@@ -1,12 +1,12 @@
 <?hh
 function foo() {
-  foreach (array(1,2,3) as $x) {
+  foreach (varray[1,2,3] as $x) {
     try {
       echo "A\n";
       throw new Exception("c");
     } finally {
       echo "B\n";
-      foreach (array(1,2,3) as $y) { var_dump($y); }
+      foreach (varray[1,2,3] as $y) { var_dump($y); }
     }
   }
 }

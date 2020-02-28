@@ -3,8 +3,8 @@
 
 <<__EntryPoint>>
 function main_1765() {
-var_dump(str_replace(array(65), array('a'), 'axAX'));
-var_dump(str_ireplace(array(65), array('a'), 'axAX'));
+var_dump(str_replace(varray[65], varray['a'], 'axAX'));
+var_dump(str_ireplace(varray[65], varray['a'], 'axAX'));
 echo "**************************\n";
 var_dump(strpos('aA', 65));
 var_dump(strpos('aA', 'A'));

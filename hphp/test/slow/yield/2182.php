@@ -1,7 +1,7 @@
 <?hh
 
 class X {
-  private $a = array(1,2,3);
+  private $a = varray[1,2,3];
   function foo() {
     yield $this->a;
   }

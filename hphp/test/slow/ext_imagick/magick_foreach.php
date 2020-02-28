@@ -10,12 +10,12 @@ function test($magick) {
 
 <<__EntryPoint>>
 function main_magick_foreach() {
-$img = array(
+$img = varray[
   'magick:logo',
   __DIR__.'/facebook.png',
   __DIR__.'/draw_example.png',
   __DIR__.'/php_imagick_tests/php.gif',
-);
+];
 
 $magick = new Imagick($img);
 foreach ($img as $i) {

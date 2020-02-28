@@ -14,9 +14,9 @@ async function baz(int $num) {
 
 async function bar() {
   $exp = 0;
-  foreach (array(0, 1) as $block_dep1) {
-    foreach (array(0, 1) as $block_dep2) {
-      foreach (array(0, 1) as $block_outer) {
+  foreach (varray[0, 1] as $block_dep1) {
+    foreach (varray[0, 1] as $block_dep2) {
+      foreach (varray[0, 1] as $block_outer) {
         if ($block_outer) {
           await block();
         }

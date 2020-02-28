@@ -15,8 +15,8 @@ class W {
 function main() {
     $w = new W();
     ObjectMethod::$trace = "a";
-    call_user_func_array(array($w, 'f'), array("b"));
+    call_user_func_array(varray[$w, 'f'], varray["b"]);
     echo ObjectMethod::$trace . "\n";
-    call_user_func_array(array($w, 'f'), array("c"));
+    call_user_func_array(varray[$w, 'f'], varray["c"]);
     echo ObjectMethod::$trace . "\n";
 }

@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_276() {
-$a = array();
+$a = darray[];
  $a['test'] = 'test';
    var_dump($a);
 }

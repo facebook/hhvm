@@ -15,7 +15,7 @@ abstract class aa extends c {
   }
 }
 class a extends aa {
-  public static $arr = array('v');
+  public static $arr = varray['v'];
 }
 
 <<__EntryPoint>>

@@ -30,7 +30,7 @@ __CLASS__}
 ();
     $obj->__FUNcTION__();
     $obj->__CLAsS__();
-    $arr = array();
+    $arr = darray[];
     foreach ($obj as $k => $v) {
       $arr[$k] = $v;
     }

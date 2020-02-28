@@ -11,7 +11,7 @@ function check_seek($lim, $seek) {
 
 <<__EntryPoint>>
 function main_limit_seek() {
-$arr = new ArrayIterator(array('a','b','c'));
+$arr = new ArrayIterator(varray['a','b','c']);
 
 $lim1 = new LimitIterator($arr, 0, 2);
 check_seek($lim1, 0);

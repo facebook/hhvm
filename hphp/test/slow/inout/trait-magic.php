@@ -58,7 +58,7 @@ class HerpDerp {
 
 function main() {
   $o = new HerpDerp;
-  list($x, $y) = array(60, 40);
+  list($x, $y) = varray[60, 40];
   $r = $o->foo(inout $x, inout $y);
   var_dump($r, $x, $y);
   $r = $o->bar(inout $x);

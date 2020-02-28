@@ -8,12 +8,12 @@ class C {
 }
 
 class D {
-  private $container = array("a" => "D::a",
+  private $container = darray["a" => "D::a",
                              "b" => 42,
                              "l" => 0,
                              "m" => 0,
                              "n" => 0,
-                             "o" => 0);
+                             "o" => 0];
   public $preInc = 0;
   public $preDec = 0;
   public $postInc = 0;
@@ -25,12 +25,12 @@ class D {
 }
 
 class E {
-  private $container = array("a" => "E::a",
+  private $container = darray["a" => "E::a",
                              "b" => 42,
                              "l" => 0,
                              "m" => 0,
                              "n" => 0,
-                             "o" => 0);
+                             "o" => 0];
   public $preInc = 0;
   public $preDec = 0;
   public $postInc = 0;

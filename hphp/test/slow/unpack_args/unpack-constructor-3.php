@@ -19,7 +19,7 @@ function foo($x) {
 <<__EntryPoint>>
 function main() {
   try {
-    foo(array(1,2));
+    foo(varray[1,2]);
   } catch (Exception $e) {
     var_dump($e->getMessage());
   }

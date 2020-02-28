@@ -4,7 +4,7 @@ class Gronk {
   private $gronks;
 
   function __construct() {
-    $this->gronks = array(new stdclass, new stdclass, new stdclass);
+    $this->gronks = varray[new stdclass, new stdclass, new stdclass];
   }
 
   public function gronkify(): void {
@@ -18,7 +18,7 @@ class Gronk {
   private function getStuffAndGronk(?int $count): array {
     foreach ($this->gronks as $gronk) {
       if ($GLOBALS['break']) {
-        $z = array(array(null, null), $gronk);
+        $z = varray[varray[null, null], $gronk];
         $z[] = new stdclass;
         return $z;
       }

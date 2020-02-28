@@ -1,7 +1,7 @@
 <?hh
 
 class A {
- public $a = array('t' => 't');
+ public $a = darray['t' => 't'];
 }
  class B {
  public $a;

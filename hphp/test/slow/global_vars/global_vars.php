@@ -8,13 +8,13 @@ if ($argc > 1) {
   exit;
 }
 
-$args = array('', 'G', 'P', 'E', 'S', 'ES', 'ESCGP', 'CG');
+$args = varray['', 'G', 'P', 'E', 'S', 'ES', 'ESCGP', 'CG'];
 
 foreach($args as $arg) {
-  $descriptorspec = array(
-     0 => array('pipe', 'r'),
-     1 => array('pipe', 'w'),
-     2 => array('pipe', 'w'));
+  $descriptorspec = darray[
+     0 => varray['pipe', 'r'],
+     1 => varray['pipe', 'w'],
+     2 => varray['pipe', 'w']];
 
   // -dvariables_order=  didn't consist with PHP
   // it should be fixed in ini level. so compatible with it for now

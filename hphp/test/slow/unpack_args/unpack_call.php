@@ -112,7 +112,7 @@ function test_param_mix($args) {
 }
 
 function main() {
-  $a = array('a', 'b', 'c');
+  $a = varray['a', 'b', 'c'];
   $v = Vector {'a', 'b', 'c'};
   // TODO(t4599379): arbitrary traversables
   // $t = new ArrayIterator(['a', 'b', 'c']);

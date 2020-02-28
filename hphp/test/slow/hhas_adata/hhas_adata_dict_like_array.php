@@ -1,10 +1,10 @@
 <?hh
 
 function provide_constant_dict_like_array() {
-  return array(
+  return darray[
     'first key' => 'first value',
     'second key' => 'second value',
-  );
+  ];
 }
 
 // Provides the same as the above, but using __hhas_adata with a nowdoc.

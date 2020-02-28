@@ -1,7 +1,7 @@
 <?hh
 
 function gen() {
-  $a = array('a' => 'apple', 'b' => 'banana', 'c' => 'citrus');
+  $a = darray['a' => 'apple', 'b' => 'banana', 'c' => 'citrus'];
   foreach ($a as $k1 => $v1) {
     foreach ($a as $k2 => $v2) {
       if ($k2 == 'a') {

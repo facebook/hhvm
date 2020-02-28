@@ -48,7 +48,7 @@ class MyIterator implements Iterator{
   }
 }
 function getIter() {
-  $values = array(1,2,3);
+  $values = varray[1,2,3];
   $it = new MyIterator($values);
   return $it;
 }
@@ -60,7 +60,7 @@ class MyIteratorAggregate implements IteratorAggregate {
 
 <<__EntryPoint>>
 function main_439() {
-$values = array(1,2,3);
+$values = varray[1,2,3];
 $it = new MyIterator($values);
 foreach ($it as $a => $b) {
   print "$a: $b

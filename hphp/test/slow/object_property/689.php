@@ -1,7 +1,7 @@
 <?hh
 
 class A {
-  private $a = array('apple');
+  private $a = varray['apple'];
   private $b = 'banana';
   static function foo() {
     $b = new A();

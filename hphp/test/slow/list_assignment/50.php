@@ -1,7 +1,7 @@
 <?hh
 
 class X {
-  static public $val = array(1,2,3);
+  static public $val = varray[1,2,3];
   function foo() {
     list($a, $b) = self::$val;
     var_dump($a, $b);

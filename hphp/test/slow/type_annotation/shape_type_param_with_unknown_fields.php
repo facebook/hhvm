@@ -2,8 +2,8 @@
 
 class TestClass {
 
-  public static function test(): array<shape(...)> {
-    return array();
+  public static function test(): varray<shape(...)> {
+    return varray[];
   }
 }
 

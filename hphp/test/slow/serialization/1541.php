@@ -21,15 +21,15 @@ class Big {
     $s = new Small();
     $this->groupAll[] = $s;
     if ($s->num % 2 == 0) {
-      $this->group1[]=array($s->name, $s);
+      $this->group1[]=varray[$s->name, $s];
     }
  else {
-      $this->group2[]=array($s->name, $s);
+      $this->group2[]=varray[$s->name, $s];
     }
   }
   function finish() {
     $x = 10;
-    $this->wacky = array($x, $x);
+    $this->wacky = varray[$x, $x];
     $s = new Small();
     $this->unrelated[] = $s;
     $this->unrelated[] = $s;

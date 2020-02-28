@@ -7,7 +7,7 @@
  * as a SStr or SArr.
  */
 class SerDe {
-  private $arr = array(1,2,3);
+  private $arr = varray[1,2,3];
   private $str = "one two three";
 
   public function foo() {

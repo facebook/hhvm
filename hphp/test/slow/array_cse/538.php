@@ -29,12 +29,12 @@ function f4($x) {
 
 <<__EntryPoint>>
 function main_538() {
-f1(array(array(0, 1, 2)));
+f1(varray[varray[0, 1, 2]]);
 f1('abc');
 f2(null);
 f2(array());
-f2(array(10));
-f3(array('first', 'second'));
+f2(varray[10]);
+f3(varray['first', 'second']);
 f3('AB');
-f4(array('e1', 'e2'));
+f4(varray['e1', 'e2']);
 }

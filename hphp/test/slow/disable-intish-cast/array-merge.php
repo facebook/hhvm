@@ -2,14 +2,14 @@
 
 <<__EntryPoint>>
 function main() {
-  $a = array(
+  $a = darray[
     "10" => "string_A",
     10   => "int_A",
-  );
-  $b = array(
+  ];
+  $b = darray[
     10   => "int_B",
     "10" => "string_B",
-    );
+    ];
   $a_dict = dict($a);
   $b_dict = dict($b);
   var_dump($a_dict);

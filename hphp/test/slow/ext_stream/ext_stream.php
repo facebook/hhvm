@@ -43,7 +43,7 @@ function retry_bind_server($udp = false) {
       // assing $server into a static property to make sure, it stays alive
       // until next retry_bind_server call.
       Statics::$server = $server;
-      return array($port, $address, $server);
+      return varray[$port, $address, $server];
     }
   }
   throw new Exception("Couldn't bind server");
@@ -67,7 +67,7 @@ function retry_bind_server6($udp = false) {
       // assing $server into a static property to make sure, it stays alive
       // until next retry_bind_server call.
       Statics::$server = $server;
-      return array($port, $address, $server);
+      return varray[$port, $address, $server];
     }
   }
   throw new Exception("Couldn't bind server");
@@ -146,7 +146,7 @@ function test_stream_misc() {
 
 function test_stream_select() {
   $f = fopen(__DIR__."/../ext_file/test_ext_file.txt", "r");
-  $reads = array($f);
+  $reads = varray[$f];
   $ignore = null;
   VERIFY(stream_select(
            inout $reads,

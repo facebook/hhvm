@@ -1,8 +1,8 @@
 <?hh
 
 function four() { return 4; }
-function heh() { return array('foo' => four()); }
-function bar() { return array('other' => heh()); }
+function heh() { return darray['foo' => four()]; }
+function bar() { return darray['other' => heh()]; }
 function foo() {
   $x = bar();
   $x['other']['foo'] = 2;

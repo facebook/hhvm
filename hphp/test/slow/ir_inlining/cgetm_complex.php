@@ -11,7 +11,7 @@ class CGetM {
   private $x;
 
   public function __construct() {
-    $this->x = array(new Obj);
+    $this->x = varray[new Obj];
   }
 
   public function getVal() {

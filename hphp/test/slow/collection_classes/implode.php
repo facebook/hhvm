@@ -1,7 +1,7 @@
 <?hh
 
 function main() {
-  $arr = array('a', 'b', 'c');
+  $arr = varray['a', 'b', 'c'];
 
   $v = Vector {'a', 'b', 'c'};
   $m = Map {0 => 'a', 1 => 'b', 2 => 'c'};

@@ -15,7 +15,7 @@ class Thing {
     if (self::$thingsArray !== null) {
       return;
     }
-    self::$thingsArray = array();
+    self::$thingsArray = darray[];
     self::$thingsArray[3] = 4;
   }
 }

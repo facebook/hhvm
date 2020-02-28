@@ -137,7 +137,7 @@ function main() {
   print "C::\$h: ".C::$h--."\n";
   print "C::\$h: ".--C::$h."\n";
 
-  C::$h = array(0, 1, 2);
+  C::$h = varray[0, 1, 2];
   $y = C::$h[1];
   print "\$y: $y\n";
   C::$h[2] = 42;
@@ -179,7 +179,7 @@ class D {
     print "C::\$h: ".C::$h--."\n";
     print "C::\$h: ".--C::$h."\n";
 
-    C::$h = array(0, 1, 2);
+    C::$h = varray[0, 1, 2];
     $y = C::$h[1];
     print "\$y: $y\n";
     C::$h[2] = 42;

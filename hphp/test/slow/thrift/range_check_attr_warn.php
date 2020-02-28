@@ -40,28 +40,28 @@ class TestStruct {
   <<ThriftDeprecatedSkipSerializerChecks>>
   public $map = null;
 
-  const SPEC = array(
-    1 => array(
+  const SPEC = darray[
+    1 => darray[
       'var' => 'anI32',
       'type' => TType::I32,
-    ),
-    2 => array(
+    ],
+    2 => darray[
       'var' => 'anI16',
       'type' => TType::I16,
-    ),
-    3 => array(
+    ],
+    3 => darray[
       'var' => 'map',
       'type' => TType::MAP,
       'ktype' => TType::I16,
       'vtype' => TType::I16,
-      'key' => array(
+      'key' => darray[
         'type' => TType::I16,
-      ),
-      'val' => array(
+      ],
+      'val' => darray[
         'type' => TType::I16,
-      ),
-    ),
-  );
+      ],
+    ],
+  ];
 }
 
 <<__EntryPoint>>
@@ -70,6 +70,6 @@ function test() {
   $v1 = new TestStruct();
   $v1->anI32 = 1 << 31;
   $v1->anI16 = 1 << 15;
-  $v1->map = array((1 << 15) => 0);
+  $v1->map = darray[(1 << 15) => 0];
   thrift_protocol_write_compact($p, 'foomethod', 1, $v1, 20, true);
 }

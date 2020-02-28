@@ -1,7 +1,7 @@
 <?hh
 
 function foo($arr) {
-  $children = array();
+  $children = varray[];
   foreach ($arr as $child) {
     $children[] = $child;
   }
@@ -12,6 +12,6 @@ function foo($arr) {
 <<__EntryPoint>>
 function main_bug_relax2() {
 var_dump(foo(array()));
-var_dump(foo(array(1)));
-var_dump(foo(array(2)));
+var_dump(foo(varray[1]));
+var_dump(foo(varray[2]));
 }

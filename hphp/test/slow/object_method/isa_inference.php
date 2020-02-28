@@ -6,13 +6,13 @@ class X {
 
 function test(string $s) {
   if (is_a($s, 'X', true)) {
-    call_user_func(array($s, 'foo'));
+    call_user_func(varray[$s, 'foo']);
   }
   if (is_a($s, 'X', false)) {
-    call_user_func(array($s, 'foo'));
+    call_user_func(varray[$s, 'foo']);
   }
   if (is_a($s, 'X')) {
-    call_user_func(array($s, 'foo'));
+    call_user_func(varray[$s, 'foo']);
   }
 }
 

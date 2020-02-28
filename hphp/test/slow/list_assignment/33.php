@@ -3,5 +3,5 @@
 
 <<__EntryPoint>>
 function main_33() {
-list() = array(1,2,3);
+list() = varray[1,2,3];
 }

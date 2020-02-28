@@ -35,15 +35,15 @@ function test_htmlspecialchars() {
   VS(fb_htmlspecialchars($zfoo, ENT_COMPAT), $zfoo);
 
   VS(fb_htmlspecialchars("abcdef'\"{}@gz", ENT_QUOTES,
-                           "", array("z")),
+                           "", varray["z"]),
      "abcdef&#039;&quot;&#123;&#125;&#064;g&#122;");
 
   VS(fb_htmlspecialchars("abcdef'\"".u('\u00a1\uabcd'), ENT_FB_UTF8,
-                           "", array("d")),
+                           "", varray["d"]),
      "abc&#100;ef&#039;&quot;&#xa1;&#xabcd;");
 
   VS(fb_htmlspecialchars("abcdef'\"".u('\u00a1\uabcd'), ENT_FB_UTF8_ONLY,
-                           "", array("d")),
+                           "", varray["d"]),
      "abcdef'\"&#xa1;&#xabcd;");
 
   // The rest here expects RuntimeOption::Utf8izeReplace = true;

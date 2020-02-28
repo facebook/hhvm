@@ -1,7 +1,7 @@
 <?hh
 
 function foo($a) {
-  $result = array();
+  $result = darray[];
 
 
   try {
@@ -16,7 +16,7 @@ function foo($a) {
   }
 
   if ($a & 4) {
-    return array('success' => true);//$result;
+    return darray['success' => true];//$result;
   }
 
   $result['success'] = false;

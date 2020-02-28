@@ -3,13 +3,13 @@
 
 <<__EntryPoint>>
 function main_key() {
-$array = array(
+$array = darray[
   "fruit1" => "apple",
   "fruit2" => "orange",
   "fruit3" => "grape",
   "fruit4" => "apple",
   "fruit5" => "apple"
-);
+];
 
 // this cycle echoes all associative array
 // key where value equals "apple"

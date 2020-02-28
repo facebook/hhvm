@@ -3,7 +3,7 @@
 <<__Rx, __MutableReturn>>
 function returns_object() {
   $o = new stdClass();
-  $o->p = array(5 => true);
+  $o->p = darray[5 => true];
   return $o;
 }
 

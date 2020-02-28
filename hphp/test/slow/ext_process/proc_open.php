@@ -11,21 +11,21 @@ function test_me($desc) {
 
 <<__EntryPoint>>
 function main_proc_open() {
-$desc = array(array("file", "php://stdin", "r"));
+$desc = varray[varray["file", "php://stdin", "r"]];
 test_me($desc);
 
-$desc = array(array("file", __DIR__ . "/test_proc_open.txt", "r"));
+$desc = varray[varray["file", __DIR__ . "/test_proc_open.txt", "r"]];
 test_me($desc);
 
-$desc = array(array("file", __DIR__, "r"));
+$desc = varray[varray["file", __DIR__, "r"]];
 test_me($desc);
 
-$desc = array(array("file", "php://fd/0", "r"));
+$desc = varray[varray["file", "php://fd/0", "r"]];
 test_me($desc);
 
-$desc = array(array("file", "php://temp", "r"));
+$desc = varray[varray["file", "php://temp", "r"]];
 test_me($desc);
 
-$desc = array(array("file", "php://memory", "r"));
+$desc = varray[varray["file", "php://memory", "r"]];
 test_me($desc);
 }

@@ -19,5 +19,5 @@ function test($tr_data) {
 
 <<__EntryPoint>>
 function main_1845() {
-var_dump(test(array('a' => 1, 'b' => 45)));
+var_dump(test(darray['a' => 1, 'b' => 45]));
 }

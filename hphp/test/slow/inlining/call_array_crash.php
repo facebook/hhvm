@@ -3,7 +3,7 @@
 class FooCls {
   <<__NEVER_INLINE>>
   function __construct($a, $b, $c, $d) {
-    $this->what = array($a, $b, $c, $d);
+    $this->what = varray[$a, $b, $c, $d];
   }
   <<__NEVER_INLINE>>
   function why() { return $this->what; }
@@ -29,10 +29,10 @@ function main(bool $b, array $x) {
 
 <<__EntryPoint>>
 function main_call_array_crash() {
-$small = array('array_fill', 0, 10, 'foo');
-$large = array('array_fill', 0, 10000000000, 'foo');
-$easy = array($small, $small, $small, $small);
-$hard = array($small, $small, $small, $small, $large);
+$small = varray['array_fill', 0, 10, 'foo'];
+$large = varray['array_fill', 0, 10000000000, 'foo'];
+$easy = varray[$small, $small, $small, $small];
+$hard = varray[$small, $small, $small, $small, $large];
 
 main(false, $small);
 main(false, $small);

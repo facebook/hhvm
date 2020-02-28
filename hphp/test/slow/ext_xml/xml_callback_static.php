@@ -15,13 +15,13 @@ class foo {
 
 <<__EntryPoint>>
 function main_xml_callback_static() {
-var_dump( is_callable( array( 'foo', 'elementOpen' ) ) );
+var_dump( is_callable( varray[ 'foo', 'elementOpen' ] ) );
 var_dump( is_callable( 'foo::elementClose' ) );
 
 $parser = xml_parser_create();
 xml_set_element_handler(
     $parser,
-    array( 'foo', 'elementOpen' ),
+    varray[ 'foo', 'elementOpen' ],
     'foo::elementClose'
 );
 

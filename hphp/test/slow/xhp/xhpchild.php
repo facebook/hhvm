@@ -16,8 +16,8 @@ function f2(XHPChild $x): void {
 
 function main() {
   // check array
-  f1(array(1,2,3,4));
-  f2(array(1,2,3,4));
+  f1(varray[1,2,3,4]);
+  f2(varray[1,2,3,4]);
 
   // check a static string
   f1("a boring string");

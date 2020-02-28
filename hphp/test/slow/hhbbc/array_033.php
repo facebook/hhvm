@@ -4,7 +4,7 @@ function junk() { return 2; }
 <<__EntryPoint>>
 function bar() {
   $y = null;
-  $x = array('z' => junk());
+  $x = darray['z' => junk()];
   unset($x['z']);
   try {
     $val = $x['z'];

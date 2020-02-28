@@ -6,7 +6,7 @@ class MyClass {
   }
 
   public function makeArray() {
-    $data = array();
+    $data = darray[];
     $p = $this->getKeyPrefix();
 
     $data[$p.'a'] = 2;

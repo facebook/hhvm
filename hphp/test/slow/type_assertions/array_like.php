@@ -20,5 +20,5 @@ function test($a) {
 
 <<__EntryPoint>>
 function main_array_like() {
-test(array(1));
+test(varray[1]);
 }

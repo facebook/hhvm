@@ -6,14 +6,14 @@
 
 <<__EntryPoint>>
 function main_1436_htmlspecialchars() {
-$inputs = array(
+$inputs = varray[
   'foo<>bar',
   '',
   null,
-  array('str' => 'aaa'),
+  darray['str' => 'aaa'],
   42,
   1.234
-);
+];
 
 foreach ($inputs as $input) {
   var_dump($input);

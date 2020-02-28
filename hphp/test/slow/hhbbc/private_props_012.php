@@ -1,7 +1,7 @@
 <?hh
 
 class X {
-  private $x    = array(null);
+  private $x    = varray[null];
   private $prop = "string";
 
   public function foo() {

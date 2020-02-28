@@ -1,7 +1,7 @@
 <?hh
 
 function foo(inout $perms, inout $t) {
-  $perms = array('x' => 1);
+  $perms = darray['x' => 1];
   $t = $t['x'];
   unset($t);
   return $perms;

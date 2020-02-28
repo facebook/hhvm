@@ -27,5 +27,5 @@ B::foo();
 $class = 'B';
 $c = 'call_user_fun';
 $c .= 'c';
-$c(array($class, 'foo'));
+$c(varray[$class, 'foo']);
 }

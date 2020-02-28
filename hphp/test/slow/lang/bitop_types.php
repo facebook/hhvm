@@ -29,13 +29,13 @@ $format = '
   }
   %s(%s, %s);';
 
-$ops = array(
+$ops = varray[
   '&',
   '^',
   '|',
-);
+];
 
-$values = array(
+$values = varray[
   'true',
   '42',
   '24.1987',
@@ -43,7 +43,7 @@ $values = array(
   'array(1, 2, 3)',
   'new c()',
   'null',
-);
+];
 
 for ($o = 0; $o < count($ops); ++$o) {
   for ($i = 0; $i < count($values); ++$i) {

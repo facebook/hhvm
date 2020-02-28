@@ -20,8 +20,8 @@ function launder($x) {
   return $x;
 }
 function get_arr() {
-  $x = array('alpha' => vec[dict['beta' => new Herp], null, new Herp, null]);
-  $x['alpha'][0]['beta'] = array('one' => '*BLANK*', 'two' => '*BLANK*');
+  $x = darray['alpha' => vec[dict['beta' => new Herp], null, new Herp, null]];
+  $x['alpha'][0]['beta'] = darray['one' => '*BLANK*', 'two' => '*BLANK*'];
   return $x;
 }
 
@@ -86,9 +86,9 @@ function main() {
   );
   var_dump($a, $b, $c);
 
-  $a = array('yep');
-  $b = array('nope');
-  $c = array('yep');
+  $a = varray['yep'];
+  $b = varray['nope'];
+  $c = varray['yep'];
   foo(
     $a,
     inout $a[0],

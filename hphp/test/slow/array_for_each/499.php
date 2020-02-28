@@ -15,7 +15,7 @@ function buz($x,$y) {
 
 <<__EntryPoint>>
 function main_499() {
-$a = array(1,2,3,4,5);
+$a = varray[1,2,3,4,5];
 $s = buz('hello',1);
 foreach ($a as $s[3]) {
   var_dump($s);

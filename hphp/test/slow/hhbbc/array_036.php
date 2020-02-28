@@ -1,7 +1,7 @@
 <?hh
 
 function x() { return 2; }
-function foo() { return array(x()); }
+function foo() { return varray[x()]; }
 function bar() {
   $z = foo();
   $z[1] = 12;

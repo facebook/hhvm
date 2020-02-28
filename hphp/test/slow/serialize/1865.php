@@ -4,7 +4,7 @@ class X {
   private $o, $a, $o2;
   function foo() {
     $this->o = $this;
-    $this->a = array(1,2,3);
+    $this->a = varray[1,2,3];
     $this->o2 = $this;
   }
 }

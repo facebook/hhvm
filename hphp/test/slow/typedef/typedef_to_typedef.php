@@ -10,5 +10,5 @@ function main(Bar $x) {
 
 <<__EntryPoint>>
 function main_typedef_to_typedef() {
-main(array(12));
+main(varray[12]);
 }

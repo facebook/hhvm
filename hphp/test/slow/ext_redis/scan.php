@@ -7,8 +7,8 @@ ExtRedisScan::$prefix = GetTestKeyName(__FILE__) . ':';
 $r->setOption(Redis::OPT_PREFIX, ExtRedisScan::$prefix);
 $r->setOption(Redis::OPT_SCAN, Redis::SCAN_RETRY);
 $ret = $r->delete('scan');
-$ret = $r->mset(array('key:one' => 'one', 'key:two' => 'two',
-               'key:three' => 'three','key:four' => 'four'));
+$ret = $r->mset(darray['key:one' => 'one', 'key:two' => 'two',
+               'key:three' => 'three','key:four' => 'four']);
 
 /*
  * The PHP5 extension we're patterning after doesn't try to turn
@@ -17,7 +17,7 @@ $ret = $r->mset(array('key:one' => 'one', 'key:two' => 'two',
  */
 function performScan($fn){
 	$cursor = null;
-	$returns = array();
+	$returns = varray[];
 	while (($retval = $fn(inout $cursor))){
 		foreach ($retval as $key){
 

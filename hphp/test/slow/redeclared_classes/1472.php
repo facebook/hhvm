@@ -15,5 +15,5 @@ function main_1472() {
     include '1472.inc';
   }
   $a = new A;
-  call_user_func_array(array($a, 'foo'), array());
+  call_user_func_array(varray[$a, 'foo'], array());
 }

@@ -10,15 +10,15 @@ function getQueueWithLittleData() {
 }
 
 function testExtractFlags() {
-  $flags = array(
-    array('SplPriorityQueue::EXTR_DATA', SplPriorityQueue::EXTR_DATA),
-    array('SplPriorityQueue::EXTR_PRIORITY', SplPriorityQueue::EXTR_PRIORITY),
-    array('SplPriorityQueue::EXTR_BOTH', SplPriorityQueue::EXTR_BOTH),
-  );
-  $sources = array(
+  $flags = varray[
+    varray['SplPriorityQueue::EXTR_DATA', SplPriorityQueue::EXTR_DATA],
+    varray['SplPriorityQueue::EXTR_PRIORITY', SplPriorityQueue::EXTR_PRIORITY],
+    varray['SplPriorityQueue::EXTR_BOTH', SplPriorityQueue::EXTR_BOTH],
+  ];
+  $sources = varray[
     getQueueWithLittleData(),
     clone getQueueWithLittleData(),
-  );
+  ];
   foreach ($sources as $queue) {
     foreach ($flags as $flagInfo) {
       list($name, $value) = $flagInfo;

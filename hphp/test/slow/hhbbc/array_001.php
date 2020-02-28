@@ -1,7 +1,7 @@
 <?hh
 
-function a() { return array(1,2,3); }
-function b() { return array(1,4,5); }
+function a() { return varray[1,2,3]; }
+function b() { return varray[1,4,5]; }
 function c($x) {
   $val = $x ? a() : b();
   return $val[0];

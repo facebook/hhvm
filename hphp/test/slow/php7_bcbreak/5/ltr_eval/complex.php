@@ -23,13 +23,13 @@ list(
     $a[Foo::$n++ + $foo(20)],
   ),
   $a[Foo::$n++ + $foo(2)]
-) = array(
+) = varray[
   "S0: n = " . (Foo::$n++ + $bar(0)),
-  array(
+  varray[
     "T0: n = " . (Foo::$n++ + $bar(10)),
     "T1: n = " . (Foo::$n++ + $bar(20)),
-  ),
+  ],
   "S2: n = " . (Foo::$n++ + $bar(2))
-);
+];
 
 var_dump($a);

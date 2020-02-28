@@ -5,11 +5,11 @@
 function main_ssl_socket_null_byte() {
 $file = '/etc/passwd'.chr(0).'asdf';
 
-$opt_choices = array(
-  array('ssl' => array('cafile' => $file)),
-  array('ssl' => array('capath' => $file)),
-  array('ssl' => array('local_cert' => $file)),
-);
+$opt_choices = varray[
+  darray['ssl' => darray['cafile' => $file]],
+  darray['ssl' => darray['capath' => $file]],
+  darray['ssl' => darray['local_cert' => $file]],
+];
 
 $errno = null;
 $errstr = null;

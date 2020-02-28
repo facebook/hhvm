@@ -11,7 +11,7 @@ function bar($x) {
 }
 
 function main() {
-  $a = array(1, 2, 3, foo());
+  $a = varray[1, 2, 3, foo()];
   bar($a);
 }
 

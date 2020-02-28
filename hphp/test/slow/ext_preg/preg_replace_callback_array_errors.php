@@ -22,7 +22,7 @@ var_dump(preg_replace_callback_array(array(), 3, -1, inout $count));
 $a = 5;
 var_dump(preg_replace_callback_array(1, 2, 3, inout $a));
 $a = "";
-try { var_dump(preg_replace_callback_array(array("" => ""), "", "", inout $a)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(preg_replace_callback_array(darray["" => ""], "", "", inout $a)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 $a = array();
 $b = "";
 try { var_dump(preg_replace_callback_array($a, $a, $a, inout $a, $b)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
@@ -33,14 +33,14 @@ $b = -1;
 // Testing multiple invalid. We only catch the first invalid one
 // even if there are more - that matches PHP 7
 var_dump(preg_replace_callback_array(
-  array("xx" => "notValid1", "yy" => "notValid2"), $a, -1, inout $b)
+  darray["xx" => "notValid1", "yy" => "notValid2"], $a, -1, inout $b)
 );
 var_dump($b);
-var_dump(preg_replace_callback_array(array('/\w' => 'f'), 'z', -1, inout $count));
+var_dump(preg_replace_callback_array(darray['/\w' => 'f'], 'z', -1, inout $count));
 try {
   var_dump(
     preg_replace_callback_array(
-      array('/\w/' => 'f', '/.*/' => 'f'),
+      darray['/\w/' => 'f', '/.*/' => 'f'],
       'z',
       -1,
       inout $count

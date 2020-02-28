@@ -7,5 +7,5 @@ function test($a) {
 
 <<__EntryPoint>>
 function main_44() {
-test(array('abc', 'cde', 'fgh'));
+test(varray['abc', 'cde', 'fgh']);
 }

@@ -14,7 +14,7 @@ $a = new A();
 mb_convert_variables('utf-8', 'windows-1251', inout $a);
 var_dump($a);
 
-$a = array('test' => array());
+$a = darray['test' => array()];
 mb_convert_variables('utf-8', 'windows-1251', inout $a);
 var_dump($a);
 }

@@ -1,7 +1,7 @@
 <?hh
 function main() {
   $containers = Vector {
-    array(11, 22, 33),
+    varray[11, 22, 33],
     Vector {11, 22, 33},
     Map {'a' => 11, 'b' => 22, 'c' => 33},
     Set {11, 22, 33},

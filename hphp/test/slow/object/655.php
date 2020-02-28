@@ -9,7 +9,7 @@ class g {
 }
 function foo() {
   $z = 1;
-  $qd = array('x' => $z);
+  $qd = darray['x' => $z];
   $a = G()->set($qd);
   var_dump($a);
   $qd['e'] = true;

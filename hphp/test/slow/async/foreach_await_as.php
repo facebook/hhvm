@@ -33,7 +33,7 @@ async function bar($from, $to) {
     if ($num > 47) {
       break;
     }
-    yield $num => array($num * $num, $num * $num * $num);
+    yield $num => varray[$num * $num, $num * $num * $num];
   }
   echo "end bar\n";
 }

@@ -13,7 +13,7 @@ class B {
 function main_430() {
 ;
 ;
-$attr=array();
+$attr=darray[];
 $attr[a::i1]='abc';
 $attr[a::i2]='def';
 $attr[-3]='ghi';

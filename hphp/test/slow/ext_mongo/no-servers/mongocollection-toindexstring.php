@@ -10,7 +10,7 @@ class MyCollection extends MongoCollection
 var_dump(MyCollection::toIndexString('x'));
 var_dump(MyCollection::toIndexString('x.y.z'));
 var_dump(MyCollection::toIndexString('x_y.z'));
-var_dump(MyCollection::toIndexString(array('x' => 1)));
-var_dump(MyCollection::toIndexString(array('x' => -1)));
-var_dump(MyCollection::toIndexString(array('x' => 1, 'y' => -1)));
+var_dump(MyCollection::toIndexString(darray['x' => 1]));
+var_dump(MyCollection::toIndexString(darray['x' => -1]));
+var_dump(MyCollection::toIndexString(darray['x' => 1, 'y' => -1]));
 }

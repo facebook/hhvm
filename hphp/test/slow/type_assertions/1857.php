@@ -21,7 +21,7 @@ function h($x) {
 
 <<__EntryPoint>>
 function main_1857() {
-f(array(array(array(array('hello')))));
-g(array(array(array(array('hello')))));
-h(array(array(array(array('hello')))));
+f(varray[varray[varray[varray['hello']]]]);
+g(varray[varray[varray[varray['hello']]]]);
+h(varray[varray[varray[varray['hello']]]]);
 }

@@ -48,15 +48,15 @@ class SimpleProps { // 51:48
 // TEST: sizes of arrays
 class SimpleArrays {
   public array $arrEmpty = array(); // 16 (tv) + 16 (ArrayData) = 32
-  public array $arrMixed = array( // 16 (tv) + 16 (ArrayData) + 46 + 32 = 110
+  public array $arrMixed = darray[ // 16 (tv) + 16 (ArrayData) + 46 + 32 = 110
     "somekey" => "someval", // 2 * (23:16) = 46:32
     321 => 3, // 2 * (16:16) = 32:32
-  );
-  public array<int> $arrNums = array(
+  ];
+  public varray<int> $arrNums = varray[
     2012, // 16:16
     2013, // 16:16
     2014 // 16:16
-  ); // 16 (tv) + 16 (ArrayData) + (16 * 3) = 80
+  ]; // 16 (tv) + 16 (ArrayData) + (16 * 3) = 80
 }
 
 

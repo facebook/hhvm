@@ -7,7 +7,7 @@ class a {
 <<__EntryPoint>>
 function main_1817() {
 $x = new a;
-apc_store('x', array($x));
+apc_store('x', varray[$x]);
 $x = __hhvm_intrinsics\apc_fetch_no_check('x');
 var_dump($x[0]);
 }

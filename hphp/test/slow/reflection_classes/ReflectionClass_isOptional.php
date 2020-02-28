@@ -13,7 +13,7 @@ function arguments_123_defaults($a = 1, $b = NULL, $c = array()) {}
 
 <<__EntryPoint>>
 function main_reflection_class_is_optional() {
-$functions = array(
+$functions = varray[
   'arguments_1_defaults',
   'arguments_2_defaults',
   'arguments_3_defaults',
@@ -21,13 +21,13 @@ $functions = array(
   'arguments_13_defaults',
   'arguments_23_defaults',
   'arguments_123_defaults',
-);
+];
 
-$results = array();
+$results = darray[];
 foreach ($functions as $function) {
   $reflection = new ReflectionFunction($function);
 
-  $params_info = array();
+  $params_info = varray[];
   foreach ($reflection->getParameters() as $param) {
     $params_info[] = $param->isOptional();
   }

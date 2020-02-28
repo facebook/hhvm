@@ -9,7 +9,7 @@ function foo($ids) {
   foreach ($ids as $id) {
     $target = unknown($id);
     if ($target !== null) {
-      if (!array_key_exists($target, $x)) $x[$target] = array();
+      if (!array_key_exists($target, $x)) $x[$target] = varray[];
       $x[$target][] = $id;
     }
   }
@@ -18,7 +18,7 @@ function foo($ids) {
 
 $asd = '2'.mt_rand();
 function main() {
-  $x = foo(array(1,2,3));
+  $x = foo(varray[1,2,3]);
   foreach ($x as $k => $v) {
     var_dump($v);
   }

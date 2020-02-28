@@ -3,7 +3,7 @@
 class Foo {
   static $heh = array();
   function go() {
-    self::$heh = array(self::$heh);
+    self::$heh = varray[self::$heh];
   }
 }
 

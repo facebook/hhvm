@@ -4,7 +4,7 @@ function main() {
   var_dump(array_unshift(inout $x1, 1));
   var_dump(array_unshift(inout $x1, 'b', 'c'));
   var_dump($x1);
-  $x2 = array('d');
+  $x2 = varray['d'];
   var_dump(array_unshift(inout $x2, 'e', 'f', 2, 'f'));
   var_dump($x2);
   $x3 = Vector {};

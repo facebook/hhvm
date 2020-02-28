@@ -16,9 +16,9 @@ function foo($a, $b) {
 function f() { return FIZ; }
 
 function test() {
-  foo(f(), array(X::FOO, X::BAZ,
+  foo(f(), varray[X::FOO, X::BAZ,
                  X::BAR, X::BAZ,
-                 X::BOO, X::BIZ));
+                 X::BOO, X::BIZ]);
 }
 
 

@@ -3,7 +3,7 @@
 class A implements Serializable {
   public $__foo = true;
   public function serialize() {
-    return serialize(array('a' => 'apple', 'b' => 'banana'));
+    return serialize(darray['a' => 'apple', 'b' => 'banana']);
   }
   public function unserialize($serialized) {
     $props = unserialize($serialized);

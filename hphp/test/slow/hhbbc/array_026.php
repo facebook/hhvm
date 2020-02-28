@@ -2,7 +2,7 @@
 
 function junk() { return 2; }
 function bar() {
-  $x = array('x' => junk());
+  $x = darray['x' => junk()];
   $x['x'] += 1;
   $val = $x['x'];
   var_dump(is_null($val));

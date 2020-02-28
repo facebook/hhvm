@@ -2,11 +2,11 @@
 
 function x() { return 3600; }
 function a() {
-  return array('time_mode' => array('duration' => x()),
-               'pipe' => '5m');
+  return darray['time_mode' => darray['duration' => x()],
+               'pipe' => '5m'];
 }
 function b() {
-  return array('duration' => x());
+  return darray['duration' => x()];
 }
 
 function g5m() { return '5m'; }
@@ -21,13 +21,13 @@ class MyThing {
   }
 
   function getModeQueryData() {
-    return array('time_mode' => 'history',
-                 'pipe' => g5m());
+    return darray['time_mode' => 'history',
+                 'pipe' => g5m()];
   }
 
   function doThings() {
     for ($i = 0; $i < 10; ++$i) mt_rand();
-    $params = array('duration' => $this->duration);
+    $params = darray['duration' => $this->duration];
     return $this->getModeQueryData() + $params;
   }
 

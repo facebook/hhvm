@@ -2,11 +2,11 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 HH\autoload_set_paths(
-  array(
-    'function' => array(
+  darray[
+    'function' => darray[
       'foo' => 'autoload_no_root.inc',
-    ),
-  ),
+    ],
+  ],
   '',
 );
 

@@ -1,10 +1,10 @@
 <?hh
 
 function main() {
-  $inputs = array(
+  $inputs = varray[
     'php://temp',
     'php://memory',
-  );
+  ];
 
   foreach ($inputs as $input) {
     printf("---%s---\n", $input);

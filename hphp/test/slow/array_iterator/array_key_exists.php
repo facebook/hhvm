@@ -12,11 +12,11 @@ function test($x) {
 
 <<__EntryPoint>>
 function main() {
-  $x = new ArrayIterator(array('a' => 'b'));
+  $x = new ArrayIterator(darray['a' => 'b']);
   $x->p = 'q';
   test($x);
   echo "----\n";
-  $x = new ArrayIterator(array('a' => 'b'),  ArrayIterator::STD_PROP_LIST);
+  $x = new ArrayIterator(darray['a' => 'b'],  ArrayIterator::STD_PROP_LIST);
   $x->p = 'q';
   test($x);
 }

@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_1072() {
-$a = array(1, 2);
+$a = varray[1, 2];
  foreach ($a as $b) {
  $b++;
 }

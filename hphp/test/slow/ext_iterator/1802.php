@@ -4,7 +4,7 @@
 <<__EntryPoint>>
 function main_1802() {
 $path = __DIR__."/../../sample_dir/";
-$files = array();
+$files = varray[];
  // order changes per machine
 foreach (new RecursiveIteratorIterator(
     new RecursiveDirectoryIterator($path,

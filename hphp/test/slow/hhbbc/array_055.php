@@ -1,7 +1,7 @@
 <?hh
 
 function foo() {
-  $x = array();
+  $x = darray[];
   $x[new stdclass] = 2;
   var_dump($x);
 }

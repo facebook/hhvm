@@ -11,12 +11,12 @@ function fail($t, $n, $e) {
 }
 
 \HH\autoload_set_paths(
-  array('class' => array(//
+  darray['class' => darray[//
           'i1' => 'autoload-fail-e.inc',
           'i2' => 'autoload-fail-e.inc',
-        ),
+        ],
         'failure' => 'fail',
-       ),
+       ],
   __DIR__ . '/'
 );
 

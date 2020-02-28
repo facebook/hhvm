@@ -6,7 +6,7 @@ class C {
   <<__Rx>>
   public function bad() {
     $p1 = new stdClass();
-    $p1->q = array(3 => true);
+    $p1->q = darray[3 => true];
     $this->p = $p1;
 
     $this->p->q[3] = false;

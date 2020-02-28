@@ -16,9 +16,9 @@ class B extends A {
 
 <<__EntryPoint>>
 function main_1885() {
-$array = array('foo');
+$array = varray['foo'];
 array_map('B::foo', $array);
 call_user_func('B::foo');
-call_user_func(array('B', 'foo'));
+call_user_func(varray['B', 'foo']);
 A::bar();
 }

@@ -3,6 +3,6 @@
 
 <<__EntryPoint>>
 function main_206() {
-$a = array(1, 'test');
+$a = varray[1, 'test'];
  var_dump($a);
 }

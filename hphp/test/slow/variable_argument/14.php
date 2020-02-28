@@ -8,5 +8,5 @@ function test($a, ...$more_args) {
 
  <<__EntryPoint>>
 function main_14() {
-test(2, 'ok', array(1));
+test(2, 'ok', varray[1]);
 }

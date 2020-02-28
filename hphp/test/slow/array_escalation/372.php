@@ -4,6 +4,6 @@
 <<__EntryPoint>>
 function main_372() {
 $a = array();
- $a += array('c' => 20);
+ $a += darray['c' => 20];
        var_dump($a);
 }

@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_428() {
-$a = array();
+$a = darray[];
 $a[null] = 10;
 var_dump($a[null]);
 var_dump($a[""]);

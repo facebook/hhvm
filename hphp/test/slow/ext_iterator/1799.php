@@ -4,7 +4,7 @@
 <<__EntryPoint>>
 function main_1799() {
 $dir = new DirectoryIterator(__DIR__.'/../../sample_dir');
-$files = array();
+$files = varray[];
  // order changes per machine
 while($dir->valid()) {
   if(!$dir->isDot()) {

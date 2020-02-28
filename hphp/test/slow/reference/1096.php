@@ -1,10 +1,10 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$a = array();
-$a[0] = array($a);
+$a = darray[];
+$a[0] = varray[$a];
 var_dump($a);
-$b = array(array($b));
+$b = varray[varray[$b]];
 var_dump($b);
-$c = array($c);
+$c = varray[$c];
 var_dump($c);
 }

@@ -8,11 +8,11 @@ function failure($kind, $name) {
 function main_entry(): void {
 
   var_dump(HH\autoload_set_paths(
-    array(
+    darray[
       'function' => array(),
       'constant' => array(),
       'failure' => 'failure'
-    ),
+    ],
     ''
   ));
   var_dump(function_exists('foo'));

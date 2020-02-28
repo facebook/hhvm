@@ -1,34 +1,34 @@
 <?hh
 
 async function foo() {
-  return await gena(array(
+  return await gena(varray[
                       async { return 1; },
                       async { return 2; },
                       async { return 3; }
-                    ));
+                    ]);
 }
 
 async function fooReschedule() {
-  return await gena(array(
+  return await gena(varray[
                       async { return 1; },
                       async { return 2; },
                       RescheduleWaitHandle::create(0,0)
-                    ));
+                    ]);
 }
 
 async function fooError() {
-  return await gena(array(
+  return await gena(varray[
                       async { return 1; },
                       async { return 2; },
                       async { throw new Exception("oops"); }
-                    ));
+                    ]);
 }
 
 async function bogusGena() {
   return await gena(
-    array(async { return 1; }),
-    array(async { return 2; }),
-    array(async { return 3; })
+    varray[async { return 1; }],
+    varray[async { return 2; }],
+    varray[async { return 3; }]
   );
 }
 

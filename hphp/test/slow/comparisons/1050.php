@@ -10,5 +10,5 @@ $x = new c;
 $x->x = 1;
 $y = new c;
 var_dump($x > $y);
-var_dump(array($x) == array($y));
+var_dump(varray[$x] == varray[$y]);
 }

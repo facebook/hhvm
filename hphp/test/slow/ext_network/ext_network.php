@@ -14,7 +14,7 @@ function tryopen($u, $p = -1) {
 }
 
 function get_addresses($host) {
-  $r = array();
+  $r = varray[];
   $authns = null;
   $addtl = null;
   if (($records = dns_get_record($host, DNS_ANY, inout $authns, inout $addtl))) {

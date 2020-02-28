@@ -8,7 +8,7 @@ function printFunc($rf) {
 }
 function printClass($rc) {
   $rms = $rc->getMethods();
-  $meths = array();
+  $meths = darray[];
   foreach($rms as $rm) {
     $meths[$rm->getName()] = $rm;
   }
@@ -17,7 +17,7 @@ function printClass($rc) {
     printFunc($meth);
   }
   $rps = $rc->getProperties();
-  $props = array();
+  $props = darray[];
   foreach($rps as $rp) {
     $props[$rp->getName()] = $rp;
   }

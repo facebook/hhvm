@@ -2,7 +2,7 @@
 
 function foo() {
   $x = new stdClass;
-  $x->v = array(1, 2);
+  $x->v = varray[1, 2];
   return $x;
 }
 

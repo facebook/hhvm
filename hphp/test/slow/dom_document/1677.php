@@ -22,7 +22,7 @@ function rerender($html, $frag = false) {
         $body .= helper($child);
       }
       if ($element is DOMElement) {
-        $attrs = array();
+        $attrs = varray[];
         foreach ($element->attributes as $attr) {
           $attrs[] = htmlspecialchars($attr->name) . '="' .             htmlspecialchars($attr->value) . '"';
         }

@@ -5,7 +5,7 @@ $it = new APCIterator('user', NULL, APC_ITER_ALL, 10);
 for($i = 0; $i < 41; $i++) {
   apc_store("key$i", "value$i");
 }
-$vals = array();
+$vals = darray[];
 foreach($it as $key=>$value) {
   $vals[$key] = $value['key'];
 }

@@ -9,7 +9,7 @@ class X {
 
 <<__EntryPoint>>
 function main_1736() {
-$x = new X(array(0, 1, 2));
+$x = new X(varray[0, 1, 2]);
 var_dump($x->exp_info);
 $x1 = new X(null);
 var_dump($x->exp_info);

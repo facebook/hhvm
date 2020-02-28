@@ -1,7 +1,7 @@
 <?hh
 
 function main() {
-  $arr = array('a', 'b', 'c');
+  $arr = varray['a', 'b', 'c'];
 
   $v = vec['a', 'b', 'c'];
   $d = dict[0 => 'a', 1 => 'b', 2 => 'c'];

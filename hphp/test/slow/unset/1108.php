@@ -10,7 +10,7 @@ abstract final class Unset1108 {
 }
 
 <<__EntryPoint>> function main(): void {
-Unset1108::$a = array(10);
+Unset1108::$a = varray[10];
 var_dump(Unset1108::$a);
 test();
 var_dump(Unset1108::$a);

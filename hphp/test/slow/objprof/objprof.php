@@ -49,15 +49,15 @@ class SimpleProps { // 19+16+16 = 51
 // TEST: sizes of arrays
 class SimpleArrays {
   public array $arrEmpty = array(); // 16 (tv) + 16 (ArrayData) = 32
-  public array $arrMixed = array( // 32 (ArrayData) + 46 + 32 = 110
+  public array $arrMixed = darray[ // 32 (ArrayData) + 46 + 32 = 110
     "somekey" => "someval", // 2 * (7 chars + 16 bytes object) = 46
     321 => 3, // 16 * 2 = 32
-  );
-  public array<int> $arrNums = array(
+  ];
+  public varray<int> $arrNums = varray[
     2012,
     2013,
     2014
-  ); // 32 + (16 * 3) = 80
+  ]; // 32 + (16 * 3) = 80
 }
 
 // TEST: sizes of dynamic props
@@ -221,10 +221,10 @@ echo get_bytes('SharedStringClass', $objs) == 2 * ($ObjSize + 9 + 16)  && // 114
 $objs = null;
 
 // TEST: multiple ref counted arrays
-$my_arr = array( // 32 + 88 = 120
+$my_arr = darray[ // 32 + 88 = 120
   getStr(4) => getStr(8), // 4 + 8 + 16 + 16 = 44
   getStr(5) => getStr(7), // 5 + 7 + 16 + 16 = 44
-);
+];
 $myClass = new SharedArrayClass($my_arr);
 $myClass2 = new SharedArrayClass($my_arr);
 $my_arr = null;
@@ -240,9 +240,9 @@ $myClass = null;
 $myClass2 = null;
 
 // TEST: multiple ref counted nested arrays
-$my_arr = array( // 32 + 76 = 108
-  array(getStr(4) => getStr(8)), // 4 + 8 + 16 + 16 = 44 + 32 = 76
-);
+$my_arr = varray[ // 32 + 76 = 108
+  darray[getStr(4) => getStr(8)], // 4 + 8 + 16 + 16 = 44 + 32 = 76
+];
 $myClass = new NestedArrayClass($my_arr);
 $my_arr = null;
 $objs = objprof_get_data();

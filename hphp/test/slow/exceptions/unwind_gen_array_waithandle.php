@@ -28,7 +28,7 @@ async function fuz() {
 }
 
 function baz() {
-  return AwaitAllWaitHandle::fromArray(array(fuz(), fuz()));
+  return AwaitAllWaitHandle::fromArray(varray[fuz(), fuz()]);
 }
 
 async function bar() {

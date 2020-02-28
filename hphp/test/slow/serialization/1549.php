@@ -6,7 +6,7 @@ class X {
 <<__EntryPoint>>
 function main_1549() {
 $a = new X;
-$q = array(1,2,3);
+$q = varray[1,2,3];
 $a->foo = $q;
 for ($i = 0;
  $i < 10;

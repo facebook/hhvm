@@ -1,7 +1,7 @@
 <?hh
 
 function tokenize($str, $token) {
-    $tokenizedStrArr = array();
+    $tokenizedStrArr = varray[];
     $tokStr = strtok($str, $token);
 
     while($tokStr !== false) {

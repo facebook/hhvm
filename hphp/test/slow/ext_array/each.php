@@ -1,19 +1,19 @@
 <?hh
 
 function a() {
-  $foo = array("bob", "fred", "jussi", "jouni", "egon", "marliese");
+  $foo = varray["bob", "fred", "jussi", "jouni", "egon", "marliese"];
   $bar = each(inout $foo);
   var_dump($bar);
 }
 
 function b() {
-  $foo = array("Robert" => "Bob", "Seppo" => "Sepi");
+  $foo = darray["Robert" => "Bob", "Seppo" => "Sepi"];
   $bar = each(inout $foo);
   var_dump($bar);
 }
 
 function c() {
-  $fruit = array("a" => "apple", "b" => "banana", "c" => "cranberry");
+  $fruit = darray["a" => "apple", "b" => "banana", "c" => "cranberry"];
   reset(inout $fruit);
   $output = '';
   while (true) {

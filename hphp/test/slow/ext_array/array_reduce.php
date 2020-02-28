@@ -11,7 +11,7 @@ function rmul($s1,$s2) {
 
 <<__EntryPoint>>
 function main_array_reduce() {
-$a = array(1, 2, 3, 4, 5);
+$a = varray[1, 2, 3, 4, 5];
 $b = array_reduce($a, "rsum");
 var_dump($b);
 $c = array_reduce($a, "rmul", 10);

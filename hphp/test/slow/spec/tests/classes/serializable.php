@@ -26,7 +26,7 @@ class Point implements Serializable
     {
         echo "\nInside " . __METHOD__ . ", $this\n\n";
 
-        return serialize(array('y' => $this->y, 'x' => $this->x));
+        return serialize(darray['y' => $this->y, 'x' => $this->x]);
     }
 
     public function unserialize($data)
@@ -64,10 +64,10 @@ class ColoredPoint extends Point implements Serializable
     {
         echo "\nInside " . __METHOD__ . ", $this\n\n";
 
-        return serialize(array(
+        return serialize(darray[
             'color' => $this->color,
             'baseData' => parent::serialize()
-        ));
+        ]);
     }
 
     public function unserialize($data)

@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$list = array(
+$list = darray[
   'boolean_true' => true,
   'boolean_false' => false,
   'string' => "just a string",
@@ -14,8 +14,8 @@ $list = array(
   'float_zero' => 0.0,
   'null' => null,
   'array_empty' => array(),
-  'array' => array(1, 2, 3, "foo"),
-);
+  'array' => varray[1, 2, 3, "foo"],
+];
 
 $memc = new Memcached();
 $memc->addServer('localhost', '11211');

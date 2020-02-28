@@ -19,8 +19,8 @@ class RecursiveArrayIteratorIterator extends RecursiveIteratorIterator
 
 }
 <<__EntryPoint>> function main(): void {
-$arr = array("a",
-      array("ca"));
+$arr = varray["a",
+      varray["ca"]];
 $obj = new RecursiveArrayIterator($arr);
 $rit = new RecursiveArrayIteratorIterator($obj);
 echo "Rewind: \n";

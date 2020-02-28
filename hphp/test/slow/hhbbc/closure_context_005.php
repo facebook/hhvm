@@ -1,7 +1,7 @@
 <?hh
 
 class Foo {
-  private $prop = array(1,2,3);
+  private $prop = varray[1,2,3];
 
   public function f() {
     return async function() {

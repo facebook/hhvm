@@ -33,7 +33,7 @@ function main(): void {
   $r = array();
   test("shallow array", $r);
 
-  $r = array(array());
+  $r = varray[array()];
   test("deep array", $r);
 
   echo "---- the end ----\n";

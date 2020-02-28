@@ -71,10 +71,10 @@ function test() {
   var_dump($s);
 
   echo "==== array_diff ====\n";
-  var_dump(array_diff(array("int", "string"), array($c)));
-  var_dump(array_diff(array("int", $c), array("string")));
+  var_dump(array_diff(varray["int", "string"], varray[$c]));
+  var_dump(array_diff(varray["int", $c], varray["string"]));
 
   echo "==== array_intersect ====\n";
-  var_dump(array_intersect(array("int", "string"), array($c)));
-  var_dump(array_intersect(array("int", $c), array("string")));
+  var_dump(array_intersect(varray["int", "string"], varray[$c]));
+  var_dump(array_intersect(varray["int", $c], varray["string"]));
 }

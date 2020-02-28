@@ -6,7 +6,7 @@ function foo(inout $arr) {
 }
 
 function main() {
-  $arr = array();
+  $arr = darray[];
   $arr[0] = -1;
   while (true) {
     if (foo(inout $arr)) break;

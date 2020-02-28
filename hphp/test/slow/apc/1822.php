@@ -20,7 +20,7 @@ class E {
 <<__EntryPoint>>
 function main_1822() {
 $f = new stdclass();
-$arr = array(new E($f), new D($f));
+$arr = varray[new E($f), new D($f)];
 apc_store('ggg', $arr);
 $arr2 = __hhvm_intrinsics\apc_fetch_no_check('ggg');
 var_dump($arr[0]->getMap());

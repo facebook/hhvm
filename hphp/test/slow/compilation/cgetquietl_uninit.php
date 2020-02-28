@@ -19,20 +19,20 @@ function test($a) {
 <<__EntryPoint>>
 function main_cgetquietl_uninit() {
 for ($i = 0; $i < 50; $i++) {
-  test(array(
-         array(1,2,3),
+  test(varray[
+         varray[1,2,3],
          array(),
          array(),
-         array(4,5,6),
+         varray[4,5,6],
          array(),
-       ));
+       ]);
 }
 
-var_dump(test(array(
-                array(1,2,3),
+var_dump(test(varray[
+                varray[1,2,3],
                 array(),
                 array(),
-                array(4,5,6),
+                varray[4,5,6],
                 array(),
-              )));
+              ]));
 }

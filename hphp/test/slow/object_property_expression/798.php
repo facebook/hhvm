@@ -5,7 +5,7 @@ class Y {
 class X {
   public $a;
   function __construct() {
-    $this->a = array('x' => new Y);
+    $this->a = darray['x' => new Y];
   }
   function bar() {
     var_dump('bar');

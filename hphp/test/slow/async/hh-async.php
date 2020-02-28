@@ -5,12 +5,12 @@ async function waitForme(): Awaitable<string> {
   return 'Thank you for waiting';
 }
 
-function makeWaitHandles(): array<string,Awaitable<mixed>> {
-  return array(
+function makeWaitHandles(): darray<string,Awaitable<mixed>> {
+  return darray[
     'later' => HH\Asio\later(),
     'sleep' => HH\Asio\usleep(1),
     'user'  => waitForMe(),
-  );
+  ];
 }
 
 

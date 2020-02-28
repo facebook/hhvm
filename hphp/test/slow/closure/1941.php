@@ -2,7 +2,7 @@
 
 class A {
   public function foo() {
-    $values = array(1, 2, 3);
+    $values = varray[1, 2, 3];
     $values = array_map(function($p) {
       return $this->goo($p);
     }

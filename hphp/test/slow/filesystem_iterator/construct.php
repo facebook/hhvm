@@ -4,7 +4,7 @@
 function main_construct() {
 $sample_dir = __DIR__.'/../../sample_dir';
 $it = new FilesystemIterator($sample_dir);
-$ret = array();
+$ret = varray[];
 foreach ($it as $fileinfo) {
   $ret[] = $fileinfo->getFilename();
 }

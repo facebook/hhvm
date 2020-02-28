@@ -3,11 +3,11 @@
 
 <<__EntryPoint>>
 function main_stream_set_write_buffer() {
-$descriptorspec = array(
-  0 => array("pipe", "r+"),
-  1 => array("pipe", "w"),
-  2 => array("pipe", "a"),
-);
+$descriptorspec = darray[
+  0 => varray["pipe", "r+"],
+  1 => varray["pipe", "w"],
+  2 => varray["pipe", "a"],
+];
 
 $io = null;
 $process = proc_open('echo', $descriptorspec, inout $io);

@@ -1,11 +1,11 @@
 <?hh
 
 function a() { return 4; }
-function junk() { return array('z' => a()); }
+function junk() { return darray['z' => a()]; }
 <<__EntryPoint>>
 function bar() {
   $y = null;
-  $x = array('z' => junk());
+  $x = darray['z' => junk()];
   unset($x['z']['z']);
   $val = $x['z'];
   try { $val1 = $x['z']['z']; }

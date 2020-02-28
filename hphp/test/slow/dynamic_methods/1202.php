@@ -14,5 +14,5 @@ class A {
  <<__EntryPoint>>
 function main_1202() {
 $obj = new B();
- call_user_func_array(array($obj, 'A::test'), array());
+ call_user_func_array(varray[$obj, 'A::test'], array());
 }

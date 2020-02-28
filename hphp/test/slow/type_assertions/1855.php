@@ -17,5 +17,5 @@ f('');
 f('foo');
 f('f');
 f(array());
-f(array(32));
+f(varray[32]);
 }

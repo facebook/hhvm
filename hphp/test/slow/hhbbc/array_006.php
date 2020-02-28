@@ -7,10 +7,10 @@ function randint() {
 }
 
 function pt2d() {
-  return array('x' => randint(), 'y' => randint());
+  return darray['x' => randint(), 'y' => randint()];
 }
 function pt3d() {
-  return array('x' => randint(), 'y' => randint(), 'z' => randint());
+  return darray['x' => randint(), 'y' => randint(), 'z' => randint()];
 }
 
 function test(bool $x) {

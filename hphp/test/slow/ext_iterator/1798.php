@@ -23,7 +23,7 @@ asort(inout $files);
 var_dump(array_values($files));
 
 $iterator = new DirectoryIterator($sample_dir);
-$files = array();
+$files = darray[];
  // order changes per machine
 foreach ($iterator as $fileinfo) {
   if ($fileinfo->isFile()) {
@@ -56,7 +56,7 @@ foreach ($files as $str) {
 }
 
 $iterator = new RecursiveDirectoryIterator($sample_dir);
-$files = array();
+$files = darray[];
  // order changes per machine
 foreach ($iterator as $fileinfo) {
   if ($fileinfo->isFile()) {

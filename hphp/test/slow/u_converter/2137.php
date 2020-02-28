@@ -4,7 +4,7 @@
 <<__EntryPoint>>
 function main_2137() {
 $c = new UConverter('ascii', 'utf-8');
-foreach(array('?','','<unknown>') as $subst) {
+foreach(varray['?','','<unknown>'] as $subst) {
   if (!$c->setSubstChars($subst)) {
     echo "**Disallowed\n";
     continue;

@@ -12,10 +12,10 @@ function f(inout $a, inout $b) {
 
 <<__EntryPoint>>
 function test() {
-  $a = array();
+  $a = darray[];
   f(inout $a, inout $a);
   var_dump($a);
-  $a = array();
+  $a = darray[];
   $a[100] = f(inout $a, inout $a);
   var_dump($a);
 

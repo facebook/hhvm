@@ -43,21 +43,21 @@ function main() {
   unset($y);
   unset($x);
 
-  $x = Map {0 => array(1)};
+  $x = Map {0 => varray[1]};
   $y = $x->toImmMap();
   unset($x[0][0]);
   var_dump($y);
   unset($y);
   unset($x);
 
-  $x = Map {0 => array(1)};
+  $x = Map {0 => varray[1]};
   $y = $x->toImmMap();
   $x[0][] = 2;
   var_dump($y);
   unset($y);
   unset($x);
 
-  $x = Map {0 => array(1)};
+  $x = Map {0 => varray[1]};
   $y = $x->toImmMap();
   $x[0][1] = 2;
   var_dump($y);

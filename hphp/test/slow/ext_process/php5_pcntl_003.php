@@ -9,15 +9,15 @@ $old = null;
 $first_set = null;
 pcntl_sigprocmask(SIG_SETMASK, array(), inout $old);
 
-pcntl_sigprocmask(SIG_BLOCK, array(SIGCHLD,SIGTERM), inout $first_set);
+pcntl_sigprocmask(SIG_BLOCK, varray[SIGCHLD,SIGTERM], inout $first_set);
 
-pcntl_sigprocmask(SIG_BLOCK, array(SIGINT), inout $old);
+pcntl_sigprocmask(SIG_BLOCK, varray[SIGINT], inout $old);
 var_dump(count($old) - count($first_set));
 
-pcntl_sigprocmask(SIG_UNBLOCK, array(SIGINT), inout $old);
+pcntl_sigprocmask(SIG_UNBLOCK, varray[SIGINT], inout $old);
 var_dump(count($old) - count($first_set));
 
-pcntl_sigprocmask(SIG_SETMASK, array(SIGINT), inout $old);
+pcntl_sigprocmask(SIG_SETMASK, varray[SIGINT], inout $old);
 var_dump(count($old) - count($first_set));
 
 pcntl_sigprocmask(SIG_SETMASK, array(), inout $old);

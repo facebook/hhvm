@@ -3,7 +3,7 @@
 <<__EntryPoint, __Rx>>
 function bad() {
   $io = new stdClass();
-  $a = array('o' => $io);
+  $a = darray['o' => $io];
 
   $a['o']->x = 2;
 }

@@ -1,14 +1,14 @@
 <?hh
 
 function four() { return 4; }
-function heh2() { return array('heh' => four()); }
-function heh() { return array('foo' => heh2()); }
-function bar() { return array('other' => heh()); }
+function heh2() { return darray['heh' => four()]; }
+function heh() { return darray['foo' => heh2()]; }
+function bar() { return darray['other' => heh()]; }
 function foo() {
   $x = bar();
   $x['other']['foo']['heh'] = 2;
   $x['other']['whatever'] = 2;
-  $x['yoyo'] = array('stuff' => $x);
+  $x['yoyo'] = darray['stuff' => $x];
   return $x;
 }
 function main() {

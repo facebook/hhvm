@@ -3,7 +3,7 @@
 class Dummy {
 }
 class foo {
-  public static $v = array(Dummy::c => 'foo');
+  public static $v = darray[Dummy::c => 'foo'];
 }
 interface A {
   const CONSTANT = 'CONSTANT';

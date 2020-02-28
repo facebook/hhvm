@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_get_resource_type() {
-$types = array(
+$types = varray[
   'php://stdin',
   'php://stdout',
   'php://stderr',
@@ -12,7 +12,7 @@ $types = array(
   'php://memory',
   'php://input',
   'php://output',
-);
+];
 
 foreach ($types as $type) {
   var_dump(get_resource_type(fopen($type, 'r')));

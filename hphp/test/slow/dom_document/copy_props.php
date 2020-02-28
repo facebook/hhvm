@@ -10,10 +10,10 @@ XML;
 
 $writer = new SimpleXMLElement( $template );
 
-$messages = array(
+$messages = darray[
   'key' => 'value',
   'anotherkey' => 'anothervalue',
-);
+];
 
 foreach ( $messages as $key => $value ) {
   $element = $writer->addChild( 'string', $value );

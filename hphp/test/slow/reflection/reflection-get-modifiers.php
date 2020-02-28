@@ -17,7 +17,7 @@ $explicit_abstract = 32;
 $class_final = 64;
 $implicit_public = 4096;
 
-$args = array(
+$args = varray[
   $public | $static | $final,
   $public | $implicit_abstract,
   $private | $abstract,
@@ -27,7 +27,7 @@ $args = array(
   $private | $implicit_public, // okay then php
   $explicit_abstract | $class_final,
   $final | $class_final
-);
+];
 
 foreach ($args as $arg) {
   var_dump(Reflection::getModifierNames($arg));

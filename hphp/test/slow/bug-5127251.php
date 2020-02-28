@@ -6,7 +6,7 @@ function g($x) {
 }
 
 function h() {
-  return array(1,2);
+  return varray[1,2];
 }
 
 class C {

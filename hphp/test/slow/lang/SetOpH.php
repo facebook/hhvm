@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$lefts = array(
+$lefts = varray[
   0,
   123,
   true,
@@ -8,7 +8,7 @@ $lefts = array(
   "non-numeric",
   "789",
   null,
-);
+];
 $rights = $lefts;
 
 foreach ($lefts as $left) {

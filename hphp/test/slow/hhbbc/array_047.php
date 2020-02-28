@@ -3,7 +3,7 @@
 class A { public function yo() { echo "hi\n"; } }
 
 function foo() {
-  $x = array(new A);
+  $x = varray[new A];
   for ($i = 0; $i < 10; ++$i) {
     $x[] = new A;
   }

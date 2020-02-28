@@ -52,15 +52,15 @@ class SimpleProps { // 51:48
 // TEST: sizes of arrays
 class SimpleArrays {
   public array $arrEmpty = array(); // 16 (tv) + 16 (ArrayData) = 32
-  public array $arrMixed = array( // 16 (tv) + 16 (ArrayData) + 46 + 32 = 110
+  public array $arrMixed = darray[ // 16 (tv) + 16 (ArrayData) + 46 + 32 = 110
     "somekey" => "someval", // 2 * (23:16) = 46:32
     321 => 3, // 2 * (16:16) = 32:32
-  );
-  public array<int> $arrNums = array(
+  ];
+  public varray<int> $arrNums = varray[
     2012, // 16:16
     2013, // 16:16
     2014 // 16:16
-  ); // 16 (tv) + 16 (ArrayData) + (16 * 3) = 80
+  ]; // 16 (tv) + 16 (ArrayData) + (16 * 3) = 80
 }
 
 
@@ -296,10 +296,10 @@ $myClass2 = null;
 
 
 // TEST: multiple ref counted arrays
-$my_arr = array(
+$my_arr = darray[
   getStr(4) => getStr(8), // 20:20 + 24:24 = 44:44
   getStr(5) => getStr(7), // 21:21 + 23:23 = 44:44
-);
+];
 $myClass = new SharedArrayClass($my_arr);
 $myClass2 = new SharedArrayClass($my_arr);
 $my_arr = null;
@@ -317,9 +317,9 @@ $myClass = null;
 $myClass2 = null;
 
 // TEST: multiple ref counted nested arrays
-$my_arr = array( // 16 /*(tv)*/ + 16 /*(ArrayData)*/ + 76 = 108
-  array(getStr(4) => getStr(8)), // 20 + 24 + 16 /*(tv)*/ + 16 /*(ArrayData)*/
-);
+$my_arr = varray[ // 16 /*(tv)*/ + 16 /*(ArrayData)*/ + 76 = 108
+  darray[getStr(4) => getStr(8)], // 20 + 24 + 16 /*(tv)*/ + 16 /*(ArrayData)*/
+];
 $myClass = new NestedArrayClass($my_arr);
 $my_arr = null;
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
@@ -392,7 +392,7 @@ $parent_class_bytes_before = get_bytes('SimpleClassForExclude', $objs);
 $parent_class_bytesd_before =get_bytesd('SimpleClassForExclude', $objs);
 
 $my_obj = new SimpleClassForExclude();
-$objs = objprof_get_data(OBJPROF_FLAGS_DEFAULT, array('ExlcudeClass'));
+$objs = objprof_get_data(OBJPROF_FLAGS_DEFAULT, varray['ExlcudeClass']);
 __hhvm_intrinsics\launder_value($my_obj);
 $exclude_class_instances_after = get_instances('ExlcudeClass', $objs);
 $parent_class_bytes_after = get_bytes('SimpleClassForExclude', $objs);
@@ -420,7 +420,7 @@ $parent_class_bytes_before = get_bytes('SimpleClassForExclude', $objs);
 $parent_class_bytesd_before = get_bytesd('SimpleClassForExclude', $objs);
 
 $my_obj = new SimpleClassForExclude();
-$objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY, array('ExlcudeClass'));
+$objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY, varray['ExlcudeClass']);
 __hhvm_intrinsics\launder_value($my_obj);
 $exclude_class_instances_after = get_instances('ExlcudeClass', $objs);
 $parent_class_bytes_after = get_bytes('SimpleClassForExclude', $objs);

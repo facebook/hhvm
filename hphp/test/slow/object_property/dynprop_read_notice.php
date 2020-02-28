@@ -18,7 +18,7 @@ function test($thing) {
   $thing->dynprop++;
 
   echo "== dim for read ==\n";
-  $thing->dynprop = array('a' => 'b');
+  $thing->dynprop = darray['a' => 'b'];
   $discard = $thing->dynprop['a'];
 
   echo "== dim for read (quiet) ==\n";
@@ -72,7 +72,7 @@ function test($thing) {
   echo "==== " . get_class($thing) . " never notice ====\n";
 
   echo "== dim for write ==\n";
-  $thing->dynprop = array('a' => 'b');
+  $thing->dynprop = darray['a' => 'b'];
   $thing->dynprop['c'] = 'd';
   $thing->dynprop = 3; // set prop back to an int
 

@@ -7,6 +7,6 @@ function test($a, $b) {
  <<__EntryPoint>>
 function main_1186() {
 $a = 'Test';
- $y = array('k','q','q');
+ $y = varray['k','q','q'];
  $a('o',$y[0]);
 }

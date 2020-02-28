@@ -19,7 +19,7 @@ class z {
     var_dump($args);
   }
   function varArgsTest2($a1, $a2, ...$more_args) {
-    $args = array($a1, $a2);
+    $args = varray[$a1, $a2];
     $args = array_merge($args, $more_args);
     var_dump($args);
   }

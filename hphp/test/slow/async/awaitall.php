@@ -34,11 +34,11 @@ function get_handles() {
   // single element
   $vectors[] = Vector {reschedule()};
   $maps[] = Map {0 => reschedule()};
-  $arrays[] = array(0 => reschedule());
+  $arrays[] = darray[0 => reschedule()];
   $vecs[] = vec[reschedule()];
   $dicts[] = dict[0 => reschedule()];
 
-  $arrays[] = array(reschedule());
+  $arrays[] = varray[reschedule()];
 
   // empty
   $arrays[] = array();
@@ -52,19 +52,19 @@ function get_handles() {
   // multiple elements
   $vectors[] = Vector {reschedule(), answer()};
   $maps[] = Map {0 => reschedule(), 1 => answer() };
-  $arrays[] = array(0 => reschedule(), 1 => answer() );
-  $arrays[] = array(0 => reschedule(), 2 => answer() );
-  $arrays[] = array(0 => reschedule(), 'zero' => answer() );
-  $arrays[] = array(reschedule(), answer());
-  $arrays[] = array(0 => reschedule(), 1 => answer());
-  $arrays[] = array('zero' => reschedule(), 'one' => answer());
+  $arrays[] = darray[0 => reschedule(), 1 => answer() ];
+  $arrays[] = darray[0 => reschedule(), 2 => answer() ];
+  $arrays[] = darray[0 => reschedule(), 'zero' => answer() ];
+  $arrays[] = varray[reschedule(), answer()];
+  $arrays[] = darray[0 => reschedule(), 1 => answer()];
+  $arrays[] = darray['zero' => reschedule(), 'one' => answer()];
   $vecs[] = vec[reschedule(), answer()];
   $dicts[] = dict[0 => reschedule(), 1 => answer()];
   $dicts[] = dict[0 => reschedule(), 2 => answer()];
   $dicts[] = dict[0 => reschedule(), 'zero' => answer()];
   $dicts[] = dict['zero' => reschedule(), 'one' => answer()];
 
-  $a = array(0 => reschedule());
+  $a = darray[0 => reschedule()];
   $a[2] = answer();
   $arrays[] = $a;
 
@@ -146,13 +146,13 @@ t($wh, $dicts);
 
 list($vectors, $maps, $arrays, $vecs, $dicts) = $handles = get_wrapped_handles();
 echo "grandchildren\n";
-$top = array(
+$top = varray[
   AwaitAllWaitHandle::fromVector($vectors),
   AwaitAllWaitHandle::fromVector($maps),
   AwaitAllWaitHandle::fromVector($arrays),
   AwaitAllWaitHandle::fromVector($vecs),
   AwaitAllWaitHandle::fromVector($dicts)
-);
+];
 $wh = AwaitAllWaitHandle::fromArray($top);
 $finished = () ==> {
   foreach ($handles as $hs) {

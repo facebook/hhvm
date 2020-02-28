@@ -5,14 +5,14 @@
 function main_json_encode_hh() {
 echo("** array string keys**\n");
 var_dump(json_encode(array()));
-var_dump(json_encode(array('foo')));
-var_dump(json_encode(array('foo', 'bar')));
-var_dump(json_encode(array('fookey' => 'fooval', 'barkey' => 'barval')));
-var_dump(json_encode(array('fookey' => 'fooval')));
+var_dump(json_encode(varray['foo']));
+var_dump(json_encode(varray['foo', 'bar']));
+var_dump(json_encode(darray['fookey' => 'fooval', 'barkey' => 'barval']));
+var_dump(json_encode(darray['fookey' => 'fooval']));
 
 echo("\n** array int keys**\n");
-var_dump(json_encode(array(0 => 'foo', 1 => 'bar')));
-var_dump(json_encode(array(10 => 'foo', 11 => 'bar')));
+var_dump(json_encode(darray[0 => 'foo', 1 => 'bar']));
+var_dump(json_encode(darray[10 => 'foo', 11 => 'bar']));
 
 echo("\n** vec **\n");
 var_dump(json_encode(vec[]));

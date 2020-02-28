@@ -11,7 +11,7 @@ function test($g) {
 
 <<__EntryPoint>>
 function main_self_recursive() {
-  $a = array('g' => $GLOBALS['GLOBALS']);
+  $a = darray['g' => $GLOBALS['GLOBALS']];
 
   test($a);
   test($GLOBALS['GLOBALS']);

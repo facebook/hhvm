@@ -3,7 +3,7 @@
 error_reporting(-1);
 
 class Foo {
-  static $bar = array('baz' => 'myfunc');
+  static $bar = darray['baz' => 'myfunc'];
 }
 
 function myfunc() {

@@ -14,7 +14,7 @@ function f($x) {
 
 <<__EntryPoint>>
 function main_1854() {
-f(array(32));
+f(varray[32]);
 f('foobar');
 f(32);
 }

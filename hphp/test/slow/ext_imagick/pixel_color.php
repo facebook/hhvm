@@ -35,7 +35,7 @@ dump($pixel->getHSL());
 dump($pixel->getColor(true));
 
 $pixel = new ImagickPixel('#F02B88');
-$colors = array(
+$colors = varray[
   Imagick::COLOR_BLACK,
   Imagick::COLOR_BLUE,
   Imagick::COLOR_CYAN,
@@ -45,7 +45,7 @@ $colors = array(
   Imagick::COLOR_MAGENTA,
   Imagick::COLOR_ALPHA,
   Imagick::COLOR_FUZZ,
-);
+];
 foreach ($colors as $color) {
   dump($pixel->getColorValue($color));
 }

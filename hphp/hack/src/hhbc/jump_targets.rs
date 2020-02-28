@@ -159,6 +159,7 @@ impl JumpTargets {
                             label = Some(label_continue);
                             iters.extend_from_slice(&std::mem::replace(&mut acc, vec![]));
                         };
+                        break;
                     } else {
                         add_iterator(iterator.clone(), &mut acc);
                         level -= 1;

@@ -62,3 +62,8 @@ val get_type_pos : string -> FileInfo.pos option
 the reverse naming table. *)
 val get_type_pos_and_kind :
   string -> (FileInfo.pos * Naming_types.kind_of_type) option
+
+(** Look up the path and kind with which the given type was declared in the
+reverse naming table. *)
+val get_type_path_and_kind :
+  string -> (Relative_path.t * Naming_types.kind_of_type) option

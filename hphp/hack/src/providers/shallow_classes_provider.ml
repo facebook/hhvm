@@ -33,7 +33,7 @@ let decl (ctx : Provider_context.t) ~(use_cache : bool) (class_ : Nast.class_) :
     failwith "shallow class decl not implemented for Decl_service"
 
 let get_class_filename x =
-  match Naming_heap.Types.get_filename_and_kind x with
+  match Naming_provider.get_type_path_and_kind x with
   | Some (fn, Naming_types.TClass) -> Some fn
   | _ -> None
 

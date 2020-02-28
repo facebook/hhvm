@@ -90,7 +90,7 @@ let get_local_var_def ast name p =
 
 (* summarize a class, typedef or record *)
 let summarize_class_typedef ctx x =
-  Naming_heap.Types.get_filename_and_kind x >>= fun (fn, ct) ->
+  Naming_provider.get_type_path_and_kind x >>= fun (fn, ct) ->
   match ct with
   | Naming_types.TClass ->
     Ast_provider.find_class_in_file ctx fn x >>= fun c ->

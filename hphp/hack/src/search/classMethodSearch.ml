@@ -10,7 +10,7 @@
 open Core_kernel
 
 let get_class_definition_file class_name =
-  match Naming_heap.Types.get_filename_and_kind class_name with
+  match Naming_provider.get_type_path_and_kind class_name with
   | Some (file, Naming_types.TClass) -> Some file
   | _ -> None
 

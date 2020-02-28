@@ -28,7 +28,7 @@ let check_cache_consistency x expected_kind expected_result =
 
 let get_type_id_filename x expected_kind =
   Counters.count_decl_accessor @@ fun () ->
-  match Naming_heap.Types.get_filename_and_kind x with
+  match Naming_provider.get_type_path_and_kind x with
   | Some (fn, kind) when Naming_types.equal_kind_of_type kind expected_kind ->
     check_cache_consistency x expected_kind fn;
     Some fn

@@ -190,7 +190,7 @@ let get_deps_set_function f_name =
   | None -> Relative_path.Set.empty
 
 let get_deps_set_gconst cst_name =
-  match Naming_heap.Consts.get_filename cst_name with
+  match Naming_provider.get_const_path cst_name with
   | Some fn ->
     let dep = Typing_deps.Dep.GConst cst_name in
     let ideps = Typing_deps.get_ideps dep in

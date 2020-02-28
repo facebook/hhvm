@@ -136,7 +136,7 @@ let test_get_pos () =
       Pos_asserter.assert_option_equals
         (Some
            (FileInfo.File (FileInfo.Const, Relative_path.from_root "qux.php")))
-        (Naming_heap.Consts.get_pos "\\Qux")
+        (Naming_provider.get_const_pos "\\Qux")
         "Check for const")
 
 let test_get_canon_name () =
@@ -233,7 +233,7 @@ let test_local_changes () =
         (a_file_info = a_file_info')
         "Expected file info to be found in the naming table";
 
-      let a_pos' = Option.value_exn (Naming_heap.Consts.get_pos a_name) in
+      let a_pos' = Option.value_exn (Naming_provider.get_const_pos a_name) in
       Asserter.Bool_asserter.assert_equals
         true
         (a_pos = a_pos')

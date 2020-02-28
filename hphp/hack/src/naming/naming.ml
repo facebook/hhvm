@@ -411,7 +411,7 @@ end = struct
     match Provider_backend.get () with
     | Provider_backend.Shared_memory
     | Provider_backend.Local_memory _ ->
-      if_unbound_then_dep_edge_and_report genv Naming_heap.Consts.is_defined x;
+      if_unbound_then_dep_edge_and_report genv Naming_provider.const_exists x;
       x
     | Provider_backend.Decl_service _ ->
       (* TODO: we need to refactor this so naming phase doesn't report *)

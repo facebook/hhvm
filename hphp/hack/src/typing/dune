@@ -35,6 +35,7 @@
     decl_ancestors
     decl_inheritance
     naming_heap
+    naming_provider
     shallow_decl_defs
     typing_defs)
   (preprocess (pps ppx_deriving.std))) ; See T41851208

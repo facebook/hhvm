@@ -97,6 +97,15 @@
   (preprocess (pps ppx_deriving.std)))
 
 (library
+  (name naming_provider)
+  (modules naming_provider)
+  (libraries
+    file_info
+    naming_heap
+    relative_path)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
   (name partial_provider)
   (modules partial_provider)
   (libraries

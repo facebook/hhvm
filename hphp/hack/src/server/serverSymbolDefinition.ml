@@ -42,7 +42,7 @@ let get_function_by_name ctx x =
   Ast_provider.find_fun_in_file ctx fn x
 
 let get_gconst_by_name ctx x =
-  Naming_heap.Consts.get_filename x >>= fun fn ->
+  Naming_provider.get_const_path x >>= fun fn ->
   Ide_parser_cache.with_ide_cache @@ fun () ->
   Ast_provider.find_gconst_in_file ctx fn x
 

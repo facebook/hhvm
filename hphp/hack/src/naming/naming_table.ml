@@ -405,7 +405,7 @@ let update_reverse_entries file_deltas =
             (fi.FileInfo.typedefs |> List.map snd |> SSet.of_list);
           Naming_heap.Funs.remove_batch
             (fi.FileInfo.funs |> List.map snd |> SSet.of_list);
-          Naming_heap.Consts.remove_batch
+          Naming_provider.remove_const_batch
             (fi.FileInfo.consts |> List.map snd |> SSet.of_list)
         | None -> ()
       end;
@@ -423,7 +423,7 @@ let update_reverse_entries file_deltas =
           (fun (pos, name) -> Naming_heap.Funs.add name pos)
           fi.FileInfo.funs;
         List.iter
-          (fun (pos, name) -> Naming_heap.Consts.add name pos)
+          (fun (pos, name) -> Naming_provider.add_const name pos)
           fi.FileInfo.consts
       | Naming_sqlite.Deleted -> ())
 

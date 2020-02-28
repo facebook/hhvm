@@ -124,7 +124,7 @@ module GEnv = struct
       None
 
   let gconst_pos ctx name =
-    match Naming_heap.Consts.get_pos name with
+    match Naming_provider.get_const_pos name with
     | Some pos ->
       let (p, _) = get_full_pos ctx (pos, name) in
       Some p
@@ -186,7 +186,7 @@ module Env = struct
     new_cid_fast ctx fn name Naming_types.TTypedef
 
   let new_global_const_fast fn name =
-    Naming_heap.Consts.add name (FileInfo.File (FileInfo.Const, fn))
+    Naming_provider.add_const name (FileInfo.File (FileInfo.Const, fn))
 
   let new_fun ctx (p, name) =
     let name_key = canon_key name in
@@ -256,13 +256,13 @@ module Env = struct
   let new_typedef ctx = new_cid ctx Naming_types.TTypedef
 
   let new_global_const ctx (p, x) =
-    match Naming_heap.Consts.get_pos x with
+    match Naming_provider.get_const_pos x with
     | Some p' ->
       if not @@ GEnv.compare_pos ctx p' p x then
         let (p, x) = GEnv.get_full_pos ctx (p, x) in
         let (p', x) = GEnv.get_full_pos ctx (p', x) in
         Errors.error_name_already_bound x x p p'
-    | None -> Naming_heap.Consts.add x p
+    | None -> Naming_provider.add_const x p
 end
 
 (*****************************************************************************)
@@ -273,7 +273,7 @@ let remove_decls ~funs ~classes ~record_defs ~typedefs ~consts =
   let types = SSet.union types record_defs in
   Naming_heap.Types.remove_batch types;
   Naming_heap.Funs.remove_batch funs;
-  Naming_heap.Consts.remove_batch consts
+  Naming_provider.remove_const_batch consts
 
 (*****************************************************************************)
 (* The entry point to build the naming environment *)

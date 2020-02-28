@@ -251,7 +251,7 @@ let update_naming_table
       List.iter new_file_info.typedefs ~f:(fun (pos, typedef_name) ->
           Naming_heap.Types.add typedef_name (pos, Naming_types.TTypedef));
       List.iter new_file_info.consts ~f:(fun (pos, const_name) ->
-          Naming_heap.Consts.add const_name pos);
+          Naming_provider.add_const const_name pos);
 
       (* Update and return the forward naming table *)
       Naming_table.update naming_table path new_file_info

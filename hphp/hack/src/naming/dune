@@ -82,6 +82,7 @@
     file_info
     fileutils
     naming_heap
+    naming_provider
     naming_sqlite
     relative_path)
   (preprocess (pps ppx_deriving.std))) ; See T41851208
@@ -104,6 +105,7 @@
   (libraries
     file_info
     naming_heap
+    naming_provider
     naming_table)
   (preprocess (pps ppx_deriving.std)))
 
@@ -131,6 +133,7 @@
     naming_elaborate_namespaces_endo
     naming_table
     naming_global
+    naming_provider
     nast
     partial_provider
     provider_backend

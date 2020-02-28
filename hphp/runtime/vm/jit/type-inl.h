@@ -64,6 +64,19 @@ IRT_SPECIAL
 IRT_RUNTIME
 #undef IRT
 
+// We'll update these types soon when can express a vanilla ArraySpec.
+// "vanilla" array-likes have any kind other than the "bespoke" kind;
+// "bespoke" array-likes have some hidden-class type.
+constexpr Type TVanillaArr     = TArr;
+constexpr Type TVanillaVec     = TVec;
+constexpr Type TVanillaDict    = TDict;
+constexpr Type TVanillaKeyset  = TKeyset;
+constexpr Type TVanillaArrLike = TArrLike;
+constexpr Type TLvalToVanillaArr    = TLvalToArr;
+constexpr Type TLvalToVanillaVec    = TLvalToVec;
+constexpr Type TLvalToVanillaDict   = TLvalToDict;
+constexpr Type TLvalToVanillaKeyset = TLvalToKeyset;
+
 /*
  * Abbreviated namespace for predefined types.
  *
@@ -81,6 +94,16 @@ namespace TypeNames {
 #undef IRTL
 #undef IRTM
 #undef IRTX
+
+UNUSED constexpr Type VanillaArr     = TVanillaArr;
+UNUSED constexpr Type VanillaVec     = TVanillaVec;
+UNUSED constexpr Type VanillaDict    = TVanillaDict;
+UNUSED constexpr Type VanillaKeyset  = TVanillaKeyset;
+UNUSED constexpr Type VanillaArrLike = TVanillaArrLike;
+UNUSED constexpr Type LvalToVanillaArr    = TLvalToVanillaArr;
+UNUSED constexpr Type LvalToVanillaVec    = TLvalToVanillaVec;
+UNUSED constexpr Type LvalToVanillaDict   = TLvalToVanillaDict;
+UNUSED constexpr Type LvalToVanillaKeyset = TLvalToVanillaKeyset;
 };
 
 namespace type_detail {

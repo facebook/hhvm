@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bc1de51854744bc67eef6f9539e1826f>>
+// @generated SignedSource<<cb99a37ff4943ea8aae0ee4ca0656db3>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -12,44 +12,10 @@ use ocamlrep_derive::OcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::aast_defs;
-use crate::ast_defs;
-use crate::doc_comment::DocComment;
-use crate::file_info;
-use crate::namespace_env;
-use crate::s_map;
+#[allow(unused_imports)]
+use crate::*;
 
-pub use aast_defs::CallType;
-pub use aast_defs::Enum_;
-pub use aast_defs::FuncReactive;
-pub use aast_defs::Hint;
-pub use aast_defs::HintFun;
-pub use aast_defs::Hint_;
-pub use aast_defs::ImportFlavor;
-pub use aast_defs::IsCoroutine;
-pub use aast_defs::IsReified;
-pub use aast_defs::KvcKind;
-pub use aast_defs::Lid;
-pub use aast_defs::LocalId;
-pub use aast_defs::MutableReturn;
-pub use aast_defs::NastShapeInfo;
-pub use aast_defs::OgNullFlavor;
-pub use aast_defs::ParamMutability;
-pub use aast_defs::Pos;
-pub use aast_defs::Pstring;
-pub use aast_defs::PuLoc;
-pub use aast_defs::ShapeFieldInfo;
-pub use aast_defs::ShapeMap;
-pub use aast_defs::Sid;
-pub use aast_defs::Tprim;
-pub use aast_defs::TypedefVisibility;
-pub use aast_defs::UseAsVisibility;
-pub use aast_defs::VariadicHint;
-pub use aast_defs::VcKind;
-pub use aast_defs::Visibility;
-pub use aast_defs::WhereConstraint;
-pub use aast_defs::XhpChild;
-pub use aast_defs::XhpChildOp;
+pub use aast_defs::*;
 
 /// Aast.program represents the top-level definitions in a Hack program.
 /// ex: Expression annotation type (when typechecking, the inferred dtype)
@@ -345,7 +311,7 @@ pub struct Fun_<Ex, Fb, En, Hi> {
     /// external function declaration (e.g. from an HHI file)
     pub external: bool,
     pub namespace: Nsenv,
-    pub doc_comment: Option<DocComment>,
+    pub doc_comment: Option<doc_comment::DocComment>,
     pub static_: bool,
 }
 
@@ -454,7 +420,7 @@ pub struct Class_<Ex, Fb, En, Hi> {
     pub file_attributes: Vec<FileAttribute<Ex, Fb, En, Hi>>,
     pub enum_: Option<Enum_>,
     pub pu_enums: Vec<PuEnum<Ex, Fb, En, Hi>>,
-    pub doc_comment: Option<DocComment>,
+    pub doc_comment: Option<doc_comment::DocComment>,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]
@@ -497,7 +463,7 @@ pub struct ClassConst<Ex, Fb, En, Hi> {
     pub id: Sid,
     /// expr = None indicates an abstract const
     pub expr: Option<Expr<Ex, Fb, En, Hi>>,
-    pub doc_comment: Option<DocComment>,
+    pub doc_comment: Option<doc_comment::DocComment>,
 }
 
 #[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
@@ -520,7 +486,7 @@ pub struct ClassTypeconst<Ex, Fb, En, Hi> {
     pub type_: Option<Hint>,
     pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
     pub span: Pos,
-    pub doc_comment: Option<DocComment>,
+    pub doc_comment: Option<doc_comment::DocComment>,
 }
 
 #[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
@@ -538,7 +504,7 @@ pub struct ClassVar<Ex, Fb, En, Hi> {
     pub id: Sid,
     pub expr: Option<Expr<Ex, Fb, En, Hi>>,
     pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
-    pub doc_comment: Option<DocComment>,
+    pub doc_comment: Option<doc_comment::DocComment>,
     pub is_promoted_variadic: bool,
     pub is_static: bool,
     pub span: Pos,
@@ -564,7 +530,7 @@ pub struct Method_<Ex, Fb, En, Hi> {
     /// true if this declaration has no body because it is an external method
     /// declaration (e.g. from an HHI file)
     pub external: bool,
-    pub doc_comment: Option<DocComment>,
+    pub doc_comment: Option<doc_comment::DocComment>,
 }
 
 #[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
@@ -621,7 +587,7 @@ pub struct RecordDef<Ex, Fb, En, Hi> {
     pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
     pub namespace: Nsenv,
     pub span: Pos,
-    pub doc_comment: Option<DocComment>,
+    pub doc_comment: Option<doc_comment::DocComment>,
 }
 
 /// Pocket Universe Enumeration, e.g.

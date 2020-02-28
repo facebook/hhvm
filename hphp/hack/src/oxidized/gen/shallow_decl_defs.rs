@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0bc0b078811951aea4879c32c2e63681>>
+// @generated SignedSource<<87266b9dd47e81a096232df12bf397f5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -12,16 +12,10 @@ use ocamlrep_derive::OcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::aast;
-use crate::ast_defs;
-use crate::decl_defs;
-use crate::errors;
-use crate::file_info;
-use crate::i_set;
-use crate::nast;
-use crate::pos;
+#[allow(unused_imports)]
+use crate::*;
 
-use crate::typing_defs::*;
+pub use typing_defs::*;
 
 #[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
 pub struct ShallowClassConst {

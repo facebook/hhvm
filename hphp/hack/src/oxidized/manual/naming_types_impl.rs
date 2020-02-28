@@ -5,17 +5,17 @@
 
 use std::convert::TryFrom;
 
-use crate::gen::naming_table::TypeOfType;
+use crate::gen::naming_types::KindOfType;
 
-impl TryFrom<i64> for TypeOfType {
+impl TryFrom<i64> for KindOfType {
     type Error = String;
 
     fn try_from(kind: i64) -> Result<Self, String> {
         match kind {
-            0 => Ok(TypeOfType::TClass),
-            1 => Ok(TypeOfType::TTypedef),
-            2 => Ok(TypeOfType::TRecordDef),
-            _ => Err(format!("Out of range for TypeOfType: {}", kind)),
+            0 => Ok(KindOfType::TClass),
+            1 => Ok(KindOfType::TTypedef),
+            2 => Ok(KindOfType::TRecordDef),
+            _ => Err(format!("Out of range for KindOfType: {}", kind)),
         }
     }
 }

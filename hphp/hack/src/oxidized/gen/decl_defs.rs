@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1ebfebac81ac1d8d2f7d5e7279c07bc0>>
+// @generated SignedSource<<6f547544ea5e39dec96dadbfb5c8dcf3>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -12,15 +12,10 @@ use ocamlrep_derive::OcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::ast_defs;
-use crate::errors;
-use crate::i_set;
-use crate::pos;
-use crate::s_map;
-use crate::s_set;
-use crate::sequence;
+#[allow(unused_imports)]
+use crate::*;
 
-use crate::typing_defs::*;
+pub use typing_defs::*;
 
 /// A substitution context contains all the information necessary for
 /// changing the type of an inherited class element to the class that is

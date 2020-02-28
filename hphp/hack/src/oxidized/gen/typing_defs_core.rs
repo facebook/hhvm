@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b6f99b17d62977268ded970ad5d06ced>>
+// @generated SignedSource<<5bcf7748c7bfad81640c034ad1817ddb>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -12,12 +12,8 @@ use ocamlrep_derive::OcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::aast;
-use crate::ast_defs;
-use crate::ident;
-use crate::nast;
-use crate::pos;
-use crate::tany_sentinel;
+#[allow(unused_imports)]
+use crate::*;
 
 pub use crate::typing_reason as reason;
 
@@ -267,6 +263,7 @@ pub enum Reactivity {
     Local(Option<DeclTy>),
     Shallow(Option<DeclTy>),
     Reactive(Option<DeclTy>),
+    Pure(Option<DeclTy>),
     MaybeReactive(Box<Reactivity>),
     RxVar(Option<Box<Reactivity>>),
 }

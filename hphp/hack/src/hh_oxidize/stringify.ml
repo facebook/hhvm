@@ -10,74 +10,62 @@ open Core_kernel
 open Reordered_argument_collections
 open Oxidized_module
 
-(** Recursively fetch all exported types in all included modules for re-export,
-    since there historically was no glob-export mechanism in Rust (I think).
-    Glob-export does seem to exist now, so we may choose to use it instead (or
-    keep what we have, which is more explicit?). *)
-let get_includes modules includes =
-  let get_all_exported_types directly_included_mod acc =
-    let rec aux mod_name acc =
-      let included_module =
-        try SMap.find modules mod_name
-        with Caml.Not_found ->
-          failwith
-            ( "Could not find module "
-            ^ mod_name
-            ^ ". Perhaps it needs to be added to the list of files run through hh_oxidize?"
-            )
-      in
-      let acc = SSet.fold included_module.includes ~init:acc ~f:aux in
-      let ty_uses = List.map included_module.ty_uses snd in
-      let decls = List.map included_module.decls fst in
-      let acc = List.fold_right ty_uses ~init:acc ~f:List.cons in
-      let acc = List.fold_right decls ~init:acc ~f:List.cons in
-      acc
-    in
-    aux directly_included_mod []
-    |> List.dedup_and_sort ~compare
-    |> List.fold ~init:acc ~f:(fun acc ty -> (directly_included_mod, ty) :: acc)
-  in
-  SSet.fold includes ~init:[] ~f:get_all_exported_types
-
-let postprocess modules uses aliases includes =
-  let includes = get_includes modules includes in
-  let uses = List.fold includes ~init:uses ~f:(fun u (m, _) -> SSet.add u m) in
-  let uses =
-    uses
-    |> SSet.elements
-    |> List.filter ~f:(fun m -> not (List.exists aliases (fun (_, a) -> m = a)))
-  in
-  (uses, includes)
-
-let stringify modules m =
-  let { uses; extern_uses; glob_uses; aliases; includes; ty_uses; decls } = m in
-  let (use_list, includes) = postprocess modules uses aliases includes in
+let stringify m =
+  let { extern_uses; glob_uses; aliases; includes; ty_reexports; decls } = m in
   let extern_uses =
     extern_uses
     |> SSet.elements
     |> List.map ~f:(sprintf "use %s;")
     |> String.concat ~sep:"\n"
   in
-  let uses =
-    use_list
-    |> List.map ~f:(sprintf "use crate::%s;")
-    |> String.concat ~sep:"\n"
-  in
+  let uses = "#[allow(unused_imports)]\nuse crate::*;" in
   let glob_uses =
     glob_uses
     |> SSet.elements
-    |> List.map ~f:(sprintf "use crate::%s::*;")
+    |> List.map ~f:(sprintf "pub use %s::*;")
     |> String.concat ~sep:"\n"
+  in
+  let bound_aliases =
+    aliases
+    |> List.map ~f:snd
+    |> List.fold ~init:SSet.empty ~f:(fun bound alias -> SSet.add bound alias)
   in
   let aliases =
     aliases
     |> List.map ~f:(fun (m, a) ->
-           (* If the aliased module happens to have been included in a use
-              statement already, there's no need to prefix it with "crate::". *)
-           if
-             List.mem use_list m ~equal:(fun used m ->
-                 String.is_prefix (used ^ "::") m)
-           then
+           (* Annoyingly, we can't seem to write an alias or re-export for a
+              module imported via the glob-import in `uses`. If the crate
+              exports a module `map`, we and write in foo.rs:
+
+                  use crate::*;
+                  pub use map;
+
+              Then other modules will be unable to `use foo::map;`. It is as if
+              `use crate::*;` introduces an implicit private submodule named
+              `map` (which is an alias to `crate::map`), and while publicly
+              exporting it (via `pub use map;`) is apparently allowed, it is not
+              actually visible to other modules. We must write instead:
+
+                  use crate::*;
+                  pub use crate::map;
+
+              We cannot prefix every alias with `crate::`, however, since we
+              would like to allow referencing aliases in other aliases within
+              the same file. For instance, if we have this OCaml:
+
+                  mod F = Foo
+                  mod M = F.Map
+
+              We ought to generate this Rust:
+
+                  use crate::*;
+                  pub use crate::foo as f;
+                  pub use f::map as m;
+
+              So we do not add the `crate::` prefix when referring to an alias
+              bound in the same file. *)
+           let root_module = String.split m ~on:':' |> List.hd_exn in
+           if SSet.mem bound_aliases root_module || root_module = "crate" then
              sprintf "pub use %s as %s;" m a
            else
              sprintf "pub use crate::%s as %s;" m a)
@@ -85,12 +73,12 @@ let stringify modules m =
   in
   let includes =
     includes
-    |> List.map ~f:(fun (m, t) -> sprintf "pub use %s::%s;" m t)
+    |> SSet.elements
+    |> List.map ~f:(fun m -> sprintf "pub use %s::*;" m)
     |> String.concat ~sep:"\n"
   in
-  let ty_uses =
-    ty_uses
-    |> List.map ~f:fst
+  let ty_reexports =
+    ty_reexports
     |> List.map ~f:(sprintf "pub use %s;")
     |> List.dedup_and_sort ~compare
     |> String.concat ~sep:"\n"
@@ -103,5 +91,5 @@ let stringify modules m =
     glob_uses
     aliases
     includes
-    ty_uses
+    ty_reexports
     decls

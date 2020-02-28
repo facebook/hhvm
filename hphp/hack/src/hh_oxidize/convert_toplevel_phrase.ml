@@ -135,7 +135,7 @@ let structure_item si =
       "Not converting submodule %s: importing crate::%s instead"
       mod_name
       rust_mod_name;
-    add_alias rust_mod_name rust_mod_name
+    add_alias ("crate::" ^ rust_mod_name) rust_mod_name
   | Pstr_module
       {
         pmb_name = { txt = mod_name; _ };

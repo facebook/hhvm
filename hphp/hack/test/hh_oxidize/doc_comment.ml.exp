@@ -2,6 +2,9 @@ use ocamlrep_derive::OcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
+#[allow(unused_imports)]
+use crate::*;
+
 /// Type A
 pub type A = isize;
 

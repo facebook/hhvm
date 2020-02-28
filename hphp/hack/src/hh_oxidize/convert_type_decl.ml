@@ -81,13 +81,19 @@ let should_add_rcoc ty =
 let override_field_type =
   SMap.of_list
     [
-      ("Fun_", SMap.of_list [("doc_comment", "Option<DocComment>")]);
-      ("Method_", SMap.of_list [("doc_comment", "Option<DocComment>")]);
-      ("Class_", SMap.of_list [("doc_comment", "Option<DocComment>")]);
-      ("ClassConst", SMap.of_list [("doc_comment", "Option<DocComment>")]);
-      ("ClassTypeconst", SMap.of_list [("doc_comment", "Option<DocComment>")]);
-      ("ClassVar", SMap.of_list [("doc_comment", "Option<DocComment>")]);
-      ("RecordDef", SMap.of_list [("doc_comment", "Option<DocComment>")]);
+      ("Fun_", SMap.of_list [("doc_comment", "Option<doc_comment::DocComment>")]);
+      ( "Method_",
+        SMap.of_list [("doc_comment", "Option<doc_comment::DocComment>")] );
+      ( "Class_",
+        SMap.of_list [("doc_comment", "Option<doc_comment::DocComment>")] );
+      ( "ClassConst",
+        SMap.of_list [("doc_comment", "Option<doc_comment::DocComment>")] );
+      ( "ClassTypeconst",
+        SMap.of_list [("doc_comment", "Option<doc_comment::DocComment>")] );
+      ( "ClassVar",
+        SMap.of_list [("doc_comment", "Option<doc_comment::DocComment>")] );
+      ( "RecordDef",
+        SMap.of_list [("doc_comment", "Option<doc_comment::DocComment>")] );
     ]
 
 let get_overrides name =
@@ -314,18 +320,25 @@ let type_declaration name td =
     (* Polymorphic variants. *)
     | Ptyp_variant _ ->
       raise (Skip_type_decl "polymorphic variants not supported")
-    (* In the case of `type t = prefix * string ;; type relative_path = t`, we
+    | Ptyp_constr ({ txt = Lident "t"; _ }, []) ->
+      (* In the case of `type t = prefix * string ;; type relative_path = t`, we
        have already defined a RelativePath type because we renamed t in the
        first declaration to the name of the module. We can just skip the second
        declaration introducing the alias. *)
-    | Ptyp_constr ({ txt = Lident "t"; _ }, []) ->
-      raise (Skip_type_decl "it is an alias to type t, which was renamed")
+      let mod_name_as_type = convert_type_name (curr_module_name ()) in
+      if name = mod_name_as_type then
+        raise
+          (Skip_type_decl
+             ( "it is an alias to type t, which was already renamed to "
+             ^ mod_name_as_type ))
+      else
+        sprintf "%spub type %s%s = %s;" doc name tparams mod_name_as_type
     | Ptyp_constr ({ txt = id; _ }, targs) ->
       let id = longident_to_string id in
       let ty_name = id |> String.split ~on:':' |> List.last_exn in
       if List.length td.ptype_params = List.length targs && self () = ty_name
       then (
-        add_ty_use id ty_name;
+        add_ty_reexport id;
         raise (Skip_type_decl ("it is a re-export of " ^ id))
       ) else
         let ty = core_type ty in

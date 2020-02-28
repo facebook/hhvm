@@ -23,9 +23,6 @@ let with_output_context ~module_name f =
 let add_extern_use ty =
   output := { !output with extern_uses = SSet.add !output.extern_uses ty }
 
-let add_mod_use mod_name =
-  output := { !output with uses = SSet.add !output.uses mod_name }
-
 let add_glob_use mod_name =
   output := { !output with glob_uses = SSet.add !output.glob_uses mod_name }
 
@@ -35,8 +32,8 @@ let add_alias mod_name alias =
 let add_include mod_name =
   output := { !output with includes = SSet.add !output.includes mod_name }
 
-let add_ty_use qualified_ty ty =
-  output := { !output with ty_uses = (qualified_ty, ty) :: !output.ty_uses }
+let add_ty_reexport ty =
+  output := { !output with ty_reexports = ty :: !output.ty_reexports }
 
 let add_decl name decl =
   output := { !output with decls = (name, decl) :: !output.decls }

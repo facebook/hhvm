@@ -11,14 +11,12 @@ val with_output_context :
 
 val add_extern_use : string -> unit
 
-val add_mod_use : string -> unit
-
 val add_glob_use : string -> unit
 
 val add_alias : string -> string -> unit
 
 val add_include : string -> unit
 
-val add_ty_use : string -> string -> unit
+val add_ty_reexport : string -> unit
 
 val add_decl : string -> string -> unit

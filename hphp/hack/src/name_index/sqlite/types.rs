@@ -6,14 +6,14 @@
 use crate::datatypes::*;
 use crate::Result;
 
-use oxidized::naming_table::TypeOfType;
+use oxidized::naming_types::KindOfType;
 use oxidized::relative_path::RelativePath;
 use rusqlite::{params, Connection, OptionalExtension};
 
 #[derive(Clone, Debug)]
 pub(crate) struct TypeItem {
     name: String,
-    kind: TypeOfType,
+    kind: KindOfType,
     file_info_id: i64,
 }
 
@@ -51,7 +51,7 @@ fn insert(connection: &Connection, items: &[TypeItem]) -> Result<()> {
     Ok(())
 }
 
-pub fn get_path(connection: &Connection, name: &str) -> Result<Option<(RelativePath, TypeOfType)>> {
+pub fn get_path(connection: &Connection, name: &str) -> Result<Option<(RelativePath, KindOfType)>> {
     let select_statement = "
         SELECT
             NAMING_FILE_INFO.PATH_PREFIX_TYPE,
@@ -73,7 +73,7 @@ pub fn get_path(connection: &Connection, name: &str) -> Result<Option<(RelativeP
         .query_row(params![hash], |row| {
             let prefix: SqlitePrefix = row.get(0)?;
             let suffix: SqlitePathBuf = row.get(1)?;
-            let kind: SqliteTypeOfType = row.get(2)?;
+            let kind: SqliteKindOfType = row.get(2)?;
             Ok((RelativePath::make(prefix.value, suffix.value), kind.value))
         })
         .optional()
@@ -89,7 +89,7 @@ mod tests {
         create_table(&conn).unwrap();
         let types = [TypeItem {
             name: "Foo".to_string(),
-            kind: TypeOfType::TClass,
+            kind: KindOfType::TClass,
             file_info_id: 123,
         }];
         insert(&conn, &types).unwrap();

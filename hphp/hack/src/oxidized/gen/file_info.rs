@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f19c8902272144444868dc7efab364c9>>
+// @generated SignedSource<<c8fc1e9f6cd71d8a9c44390995eddd0d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -12,12 +12,10 @@ use ocamlrep_derive::OcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::opaque_digest;
-use crate::pos;
-use crate::relative_path;
-use crate::s_set;
+#[allow(unused_imports)]
+use crate::*;
 
-use crate::prim_defs::*;
+pub use prim_defs::*;
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]
 pub enum Mode {

@@ -9,7 +9,6 @@
 open Core_kernel
 open Longident
 open Utils
-open Output
 
 type flattened_longident =
   | FLident of string list
@@ -46,7 +45,6 @@ let to_string for_open id =
         | _ -> convert_type_name ty
       in
       let modules = List.map modules convert_module_name in
-      if not for_open then List.last modules |> Option.iter ~f:add_mod_use;
       ty :: modules |> List.rev |> String.concat ~sep:"::"
     | FLdot (id, assoc_tys) ->
       let id = to_string id in

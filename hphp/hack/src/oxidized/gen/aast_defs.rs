@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5c78d4bd7fa392340d374ce0727ad04b>>
+// @generated SignedSource<<b31c17556dca5fcb0e3e5a5bb8718e88>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -12,10 +12,10 @@ use ocamlrep_derive::OcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::ast_defs;
-use crate::local_id;
+#[allow(unused_imports)]
+use crate::*;
 
-pub use ast_defs::shape_map;
+pub use crate::ast_defs::shape_map;
 
 pub use ast_defs::OgNullFlavor;
 pub use ast_defs::Pos;

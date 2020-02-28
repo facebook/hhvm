@@ -1,1 +1,6 @@
+#[allow(unused_imports)]
+use crate::*;
+
 pub type TypeT = isize;
+
+pub type Alias = TypeT;

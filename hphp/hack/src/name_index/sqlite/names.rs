@@ -7,7 +7,7 @@ use rusqlite::{Connection, OpenFlags};
 use std::path::Path;
 
 use oxidized::file_info::NameType;
-use oxidized::naming_table::TypeOfType;
+use oxidized::naming_types::KindOfType;
 use oxidized::relative_path::RelativePath;
 
 use crate::{consts, file_infos, funs, types, Result};
@@ -46,9 +46,9 @@ impl Names {
         use NameType::*;
         match kind {
             Fun => self.get_fun_path(name),
-            Class => get_type_path_if_kind_matches(TypeOfType::TClass),
-            RecordDef => get_type_path_if_kind_matches(TypeOfType::TRecordDef),
-            Typedef => get_type_path_if_kind_matches(TypeOfType::TTypedef),
+            Class => get_type_path_if_kind_matches(KindOfType::TClass),
+            RecordDef => get_type_path_if_kind_matches(KindOfType::TRecordDef),
+            Typedef => get_type_path_if_kind_matches(KindOfType::TTypedef),
             Const => self.get_const_path(name),
         }
     }
@@ -57,7 +57,7 @@ impl Names {
         funs::get_path(&self.connection, name)
     }
 
-    pub fn get_type_path(&self, name: &str) -> Result<Option<(RelativePath, TypeOfType)>> {
+    pub fn get_type_path(&self, name: &str) -> Result<Option<(RelativePath, KindOfType)>> {
         types::get_path(&self.connection, name)
     }
 

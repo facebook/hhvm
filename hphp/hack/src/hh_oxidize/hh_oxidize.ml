@@ -34,15 +34,6 @@ let parse filename =
   In_channel.close ic;
   phrases
 
-let mod_customization =
-  SMap.of_list
-    [("aast", (fun () -> Output.add_mod_use "doc_comment::DocComment"))]
-
-let get_mod_customizer name =
-  match SMap.find_opt mod_customization name with
-  | None -> (fun () -> ())
-  | Some x -> x
-
 let oxidize filename =
   let phrases = parse filename in
   let in_basename = Filename.basename filename in
@@ -52,7 +43,6 @@ let oxidize filename =
   let oxidized_module =
     Utils.with_log_indent (fun () ->
         Output.with_output_context ~module_name (fun () ->
-            get_mod_customizer module_name ();
             List.iter phrases Convert_toplevel_phrase.toplevel_phrase))
   in
   (module_name, oxidized_module)
@@ -89,7 +79,7 @@ let convert_files env out_dir files regen_command =
   let modules = files |> List.map ~f:oxidize |> SMap.of_list in
   let () =
     modules
-    |> SMap.map ~f:(Stringify.stringify modules)
+    |> SMap.map ~f:Stringify.stringify
     |> SMap.iter ~f:(fun name src ->
            let src = sprintf "%s\n\n%s" header src in
            let out_filename = Filename.concat out_dir (name ^ ".rs") in
@@ -105,9 +95,8 @@ let convert_files env out_dir files regen_command =
 
 let convert_single_file env filename =
   with_tempfile @@ fun out_filename ->
-  let (module_name, oxidized_module) = oxidize filename in
-  let modules = SMap.of_list [(module_name, oxidized_module)] in
-  let src = Stringify.stringify modules oxidized_module in
+  let (_, oxidized_module) = oxidize filename in
+  let src = Stringify.stringify oxidized_module in
   write_format_and_sign env out_filename src;
   printf "%s" (read out_filename)
 

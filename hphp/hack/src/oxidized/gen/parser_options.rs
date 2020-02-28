@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f9d21a102443a8d57814a014a4fcd2da>>
+// @generated SignedSource<<fff5fcb953cc82365570076017d0f3ed>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -12,7 +12,8 @@ use ocamlrep_derive::OcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::global_options;
+#[allow(unused_imports)]
+use crate::*;
 
 pub type ParserOptions = global_options::GlobalOptions;
 

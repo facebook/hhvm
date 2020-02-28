@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8b88a787366f347a9fd2283e8c1731df>>
+// @generated SignedSource<<3049cda5c93aa0748313a536c9919dc1>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -12,47 +12,10 @@ use ocamlrep_derive::OcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::aast;
-use crate::ast_defs;
-use crate::errors;
-use crate::lazy;
-use crate::nast;
-use crate::pos;
-use crate::s_map;
-use crate::s_set;
-use crate::typing_defs_core;
+#[allow(unused_imports)]
+use crate::*;
 
-pub use typing_defs_core::ConsistentKind;
-pub use typing_defs_core::DeclFunArity;
-pub use typing_defs_core::DeclFunParam;
-pub use typing_defs_core::DeclFunParams;
-pub use typing_defs_core::DeclFunType;
-pub use typing_defs_core::DeclPossiblyEnforcedTy;
-pub use typing_defs_core::DeclTy;
-pub use typing_defs_core::DependentType;
-pub use typing_defs_core::DestructureKind;
-pub use typing_defs_core::Exact;
-pub use typing_defs_core::FunArity;
-pub use typing_defs_core::FunParam;
-pub use typing_defs_core::FunParams;
-pub use typing_defs_core::FunTparamsKind;
-pub use typing_defs_core::FunType;
-pub use typing_defs_core::ParamMode;
-pub use typing_defs_core::ParamMutability;
-pub use typing_defs_core::ParamRxAnnotation;
-pub use typing_defs_core::PossiblyEnforcedTy;
-pub use typing_defs_core::Reactivity;
-pub use typing_defs_core::ShapeFieldType;
-pub use typing_defs_core::ShapeKind;
-pub use typing_defs_core::TaccessType;
-pub use typing_defs_core::Tparam;
-pub use typing_defs_core::Ty;
-pub use typing_defs_core::Ty_;
-pub use typing_defs_core::ValKind;
-pub use typing_defs_core::Visibility;
-pub use typing_defs_core::WhereConstraint;
-pub use typing_defs_core::XhpAttr;
-pub use typing_defs_core::XhpAttrTag;
+pub use typing_defs_core::*;
 
 #[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
 pub struct ClassElt {

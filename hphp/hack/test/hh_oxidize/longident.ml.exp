@@ -1,5 +1,5 @@
-use crate::x;
-use crate::y;
+#[allow(unused_imports)]
+use crate::*;
 
 pub type A = x::Foo;
 

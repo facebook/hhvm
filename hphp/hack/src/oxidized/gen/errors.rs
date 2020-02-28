@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b9b27a298f8d8a9cd714fafc5c3ba054>>
+// @generated SignedSource<<ec534b088f1f0db3baec7e942fa7da64>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -12,15 +12,13 @@ use ocamlrep_derive::OcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::error_codes;
-use crate::phase_map;
-use crate::pos;
-use crate::relative_path;
+#[allow(unused_imports)]
+use crate::*;
 
-pub use error_codes::Naming;
-pub use error_codes::NastCheck;
-pub use error_codes::Parsing;
-pub use error_codes::Typing;
+pub use crate::error_codes::Naming;
+pub use crate::error_codes::NastCheck;
+pub use crate::error_codes::Parsing;
+pub use crate::error_codes::Typing;
 
 pub type ErrorCode = isize;
 

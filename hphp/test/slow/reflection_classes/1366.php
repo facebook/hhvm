@@ -8,7 +8,7 @@ function printFunc($rf) {
 }
 function printClass($rc) {
   $rms = $rc->getMethods();
-  $meths = array();
+  $meths = darray[];
   foreach($rms as $rm) {
     $meths[$rm->getName()] = $rm;
   }
@@ -17,7 +17,7 @@ function printClass($rc) {
     printFunc($meth);
   }
   $rps = $rc->getProperties();
-  $props = array();
+  $props = darray[];
   foreach($rps as $rp) {
     $props[$rp->getName()] = $rp;
   }
@@ -49,13 +49,13 @@ function f201((function (@int, Map<string, Map<int, Vector<string>>>):Vector<C>)
 }
 function f202(:xhp:html-element $html): Map<string, Vector<:xhp:html-element>> {
 }
-function f203((int, Vector<string>) $tupple): array<ClassA> {
+function f203((int, Vector<string>) $tupple): varray<ClassA> {
 }
-function f204((function (int): Vector<string>) $f): array<string, ClassA> {
+function f204((function (int): Vector<string>) $f): darray<string, ClassA> {
 }
 function f300<X, Y>(Y $y, ?float $d): X {
 }
-function f301<X, Y>((function (): Vector<Y>) $f): array<string, X> {
+function f301<X, Y>((function (): Vector<Y>) $f): darray<string, X> {
 }
 function f302<X, Y>((Y, X, float, string) $f): ?Y {
 }
@@ -70,9 +70,9 @@ class C {
 }
   public function m2(@float $d) : void {
 }
-  static public function m3(Vector<Map<int, Vector<?string>>> $v, :xhp:html $x) : @array<int, ?Vector<string>> {
+  static public function m3(Vector<Map<int, Vector<?string>>> $v, :xhp:html $x) : @darray<int, ?Vector<string>> {
 }
-  public function m4((function(@int, (string, string)): void) $v) : array<Map<string, :xhp:html>> {
+  public function m4((function(@int, (string, string)): void) $v) : varray<Map<string, :xhp:html>> {
 }
 }
 class CT<X, Y> {
@@ -86,9 +86,9 @@ class CT<X, Y> {
 }
   public function m2(@Y $d) : void {
 }
-  static public function m3(Vector<Map<int, Vector<?X>>> $v, :xhp:html $x) : @array<Y, ?Vector<string>> {
+  static public function m3(Vector<Map<int, Vector<?X>>> $v, :xhp:html $x) : @darray<Y, ?Vector<string>> {
 }
-  public function m4((function(@int, (X, string)): void) $v) : array<Map<Y, :xhp:html>> {
+  public function m4((function(@int, (X, string)): void) $v) : varray<Map<Y, :xhp:html>> {
 }
 }
 trait T {
@@ -96,9 +96,9 @@ trait T {
 }
   public function m2(@int $d) : void {
 }
-  static public function m3(Vector<Map<int, Vector<?C>>> $v, :xhp:html $x) : @array<C, ?Vector<string>> {
+  static public function m3(Vector<Map<int, Vector<?C>>> $v, :xhp:html $x) : @darray<C, ?Vector<string>> {
 }
-  public function m4((function(@int, (float, string)): void) $v) : array<Map<CT<int, string>, :xhp:html>> {
+  public function m4((function(@int, (float, string)): void) $v) : varray<Map<CT<int, string>, :xhp:html>> {
 }
 }
 class TC {

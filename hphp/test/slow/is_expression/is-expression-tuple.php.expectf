@@ -2,7 +2,7 @@ not tuple
 not tuple
 not tuple
 
-Notice: Hack Array Compat: is/as operator used with darray and tuple in %s on line %d
+Notice: Hack Array Compat: is/as operator used with darray and tuple in %s/is-expression-tuple.php on line 4
 tuple
 not tuple
 not tuple
@@ -11,6 +11,4 @@ not tuple
 tuple
 tuple
 not tuple
-
-Notice: Hack Array Compat: is/as operator used with array and tuple in %s on line %d
 tuple

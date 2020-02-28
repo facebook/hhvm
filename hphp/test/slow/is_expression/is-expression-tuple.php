@@ -30,5 +30,5 @@ function main() {
   is_tuple(tuple(1, null, 'string'));
   is_tuple(varray[1, null, 'string']);
   is_tuple(vec[1, null, 'string']);
-  is_tuple(array(1, null, 'string'));
+  is_tuple(varray[1, null, 'string']);
 }

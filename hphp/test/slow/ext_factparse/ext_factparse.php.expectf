@@ -1,5 +1,5 @@
 array(3) {
-  ["%s"]=>
+  ["%s/test/slow/ext_factparse/ext_factparse.php"]=>
   array(7) {
     ["constants"]=>
     array(6) {
@@ -26,11 +26,11 @@ array(3) {
       string(2) "f6"
     }
     ["md5sum0"]=>
-    int(8523258480369755085)
+    int(4469317340332472708)
     ["md5sum1"]=>
-    int(8861313298414969065)
+    int(-103151586769569587)
     ["sha1sum"]=>
-    string(40) "a3c68301964a73d9b97c16ea0b2972ebb700d66d"
+    string(40) "41bf194ee549ed63f4fe5f412e4ed2751d955f9a"
     ["typeAliases"]=>
     array(3) {
       [0]=>
@@ -284,11 +284,11 @@ array(3) {
       string(5) "NS\f6"
     }
     ["md5sum0"]=>
-    int(8338225809124797478)
+    int(-5403595895670081442)
     ["md5sum1"]=>
-    int(8251336372971510891)
+    int(-6703890473882983499)
     ["sha1sum"]=>
-    string(40) "e15118c634a9347ed302e02784612b8aeec70b68"
+    string(40) "9f3a70e7752e72d511d780677f5dc5841b8a1714"
     ["typeAliases"]=>
     array(3) {
       [0]=>
@@ -542,11 +542,11 @@ array(3) {
       string(8) "NS\NS\f6"
     }
     ["md5sum0"]=>
-    int(968617526429768497)
+    int(-7308998232140763300)
     ["md5sum1"]=>
-    int(7198650992565850965)
+    int(-2597437857408696973)
     ["sha1sum"]=>
-    string(40) "aaf49eaafcc05da8f6c1d3998bee1b59128e0a94"
+    string(40) "ce800827049089bcf42e01e355fd49719a8cd0b6"
     ["typeAliases"]=>
     array(3) {
       [0]=>

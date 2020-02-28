@@ -99,7 +99,7 @@ file_put_contents($namespace_file2, $source);
 try {
   $res = HH\facts_parse(
     null,
-    array(__FILE__, $namespace_file1, $namespace_file2),
+    varray[__FILE__, $namespace_file1, $namespace_file2],
     true, // allowHipHopSyntax
     false, // useThreads
   );
@@ -125,7 +125,7 @@ file_put_contents($garbage_file, "<?hh }");
 try {
   $res = HH\facts_parse(
     null,
-    array($garbage_file, 'garbage_filename', '/tmp'),
+    varray[$garbage_file, 'garbage_filename', '/tmp'],
     true,
     false,
   );
@@ -152,7 +152,7 @@ file_put_contents($simplefile, "<?hh function f(){}");
 try {
   $res = HH\facts_parse(
     sys_get_temp_dir(),
-    array(basename($simplefile), $simplefile, 'garbagename'),
+    varray[basename($simplefile), $simplefile, 'garbagename'],
     false,
     false,
   );
@@ -217,12 +217,12 @@ try {
   var_dump($e->getMessage());
 }
 try {
-  HH\facts_parse(null, array(null), null, null);
+  HH\facts_parse(null, varray[null], null, null);
 } catch (Exception $e) {
   var_dump($e->getMessage());
 }
 try {
-  HH\facts_parse(null, array(array()), null, null);
+  HH\facts_parse(null, varray[array()], null, null);
 } catch (Exception $e) {
   var_dump($e->getMessage());
 }

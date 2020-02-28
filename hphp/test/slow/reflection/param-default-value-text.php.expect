@@ -4,11 +4,11 @@ array(4) {
   [1]=>
   string(0) ""
   [2]=>
-  string(39) "array (
-  0 => 1,
-  1 => 2,
-  2 => 3,
-)"
+  string(25) "varray [
+  1,
+  2,
+  3,
+]"
   [3]=>
   string(7) "vec [
 ]"
@@ -19,11 +19,11 @@ array(4) {
   [1]=>
   string(0) ""
   [2]=>
-  string(39) "array (
-  0 => 1,
-  1 => 2,
-  2 => 3,
-)"
+  string(25) "varray [
+  1,
+  2,
+  3,
+]"
   [3]=>
   string(7) "vec [
 ]"

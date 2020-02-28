@@ -1,11 +1,11 @@
 <?hh
 
-function x($x, $y, $a = array(1,2,3), $b = vec[]) {
+function x($x, $y, $a = varray[1,2,3], $b = vec[]) {
   return $x + $y;
 }
 
 class F {
-  function x($x, $y, $a = array(1,2,3), $b = vec[]) {
+  function x($x, $y, $a = varray[1,2,3], $b = vec[]) {
     return $x + $y;
   }
 }

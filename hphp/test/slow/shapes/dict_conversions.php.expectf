@@ -1,5 +1,4 @@
-array(1) {
-  [0]=>
+vec(1) {
   dict(2) {
     ["a"]=>
     int(2)
@@ -37,14 +36,14 @@ int(1)
 float(1)
 bool(true)
 
-Notice: Dict to string conversion in %s on line %d
+Notice: Dict to string conversion in %s/dict_conversions.php on line 16
 string(4) "Dict"
 bool(false)
 bool(true)
 bool(false)
 bool(true)
 bool(false)
-bool(true)
+bool(false)
 bool(true)
 bool(true)
 bool(true)

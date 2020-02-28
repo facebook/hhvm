@@ -8,13 +8,13 @@ array(1) {
   [0]=>
   string(11) "5.6.99-hhvm"
 }
-string(19) "array(\PHP_VERSION)"
+string(20) "varray[\PHP_VERSION]"
 NULL
 array(1) {
   [0]=>
   string(1) "c"
 }
-string(11) "array(\A\B)"
+string(12) "varray[\A\B]"
 NULL
 string(11) "5.6.99-hhvm"
 string(12) "\PHP_VERSION"
@@ -26,11 +26,11 @@ array(1) {
   [0]=>
   string(11) "5.6.99-hhvm"
 }
-string(19) "array(\PHP_VERSION)"
+string(20) "varray[\PHP_VERSION]"
 NULL
 array(1) {
   [0]=>
   string(1) "c"
 }
-string(11) "array(\A\B)"
+string(12) "varray[\A\B]"
 NULL

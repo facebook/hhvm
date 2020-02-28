@@ -12,7 +12,7 @@ class State { static $staticX = 4; }
 /**
  * This is f's doc comment.
  */
-function f($a, inout $b, $c=null, $d=array(1, 2, SOME_CONSTANT)) {
+function f($a, inout $b, $c=null, $d=varray[1, 2, SOME_CONSTANT]) {
   print "In f()\n";
   State::$staticX++;
   $x = State::$staticX;
@@ -85,7 +85,7 @@ print "\n";
 /**
  * This is g's doc comment.
  */
-function g($a=null, $b=array(1, 2, 3), $c=SOME_CONSTANT) {
+function g($a=null, $b=varray[1, 2, 3], $c=SOME_CONSTANT) {
   print "In g($a, $b, $c)\n";
 }
 
@@ -331,7 +331,7 @@ print "ANOTHER_CONSTANT: ".$a["ANOTHER_CONSTANT"]."\n";
 
 print "--- get_declared_classes() ---\n";
 $a = array_flip(get_declared_classes());
-$classes = array("A", "B", "C");
+$classes = varray["A", "B", "C"];
 foreach ($classes as $c) {
   if (isset($a[$c])) {
     print "Found class $c\n";
@@ -342,7 +342,7 @@ foreach ($classes as $c) {
 
 print "--- get_declared_interfaces() ---\n";
 $a = array_flip(get_declared_interfaces());
-$interfaces = array("H", "I", "J", "K", "L");
+$interfaces = varray["H", "I", "J", "K", "L"];
 foreach ($interfaces as $i) {
   if (isset($a[$i])) {
     print "Found interface $i\n";

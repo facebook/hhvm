@@ -48,6 +48,7 @@ let rec core_type ?(seen_indirection = false) ct =
       | Lident "bool" -> "bool"
       | Lident "float" -> "f64"
       | Lident "list" -> "Vec"
+      | Lident "ref" -> "std::cell::RefCell"
       | Ldot (Lident "Path", "t") -> "std::path::PathBuf"
       | id -> Convert_longident.longident_to_string id
     in

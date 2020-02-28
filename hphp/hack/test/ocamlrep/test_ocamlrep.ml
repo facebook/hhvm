@@ -18,6 +18,11 @@ external get_some_none : unit -> int option option = "get_some_none"
 
 external get_some_some_five : unit -> int option option = "get_some_some_five"
 
+(* ref tests *)
+external get_int_ref : unit -> int ref = "get_int_ref"
+
+external get_int_option_ref : unit -> int option ref = "get_int_option_ref"
+
 (* list tests *)
 external get_empty_list : unit -> int list = "get_empty_list"
 
@@ -145,6 +150,16 @@ let test_some_some_five () =
     (match x with
     | None -> assert false
     | Some y -> assert (y = 5))
+
+let test_int_ref () =
+  let int_ref = get_int_ref () in
+  assert (!int_ref = 5)
+
+let test_int_option_ref () =
+  let int_opt_ref = get_int_option_ref () in
+  match !int_opt_ref with
+  | Some 5 -> ()
+  | _ -> assert false
 
 let test_empty_list () =
   let lst = get_empty_list () in
@@ -309,6 +324,16 @@ let test_convert_some_some_five () =
     | None -> assert false
     | Some y -> assert (y = 5))
 
+let test_convert_int_ref () =
+  let int_ref = convert_to_ocamlrep (ref 5) in
+  assert (!int_ref = 5)
+
+let test_convert_int_option_ref () =
+  let int_opt_ref = convert_to_ocamlrep (ref (Some 5)) in
+  match !int_opt_ref with
+  | Some 5 -> ()
+  | _ -> assert false
+
 let test_convert_empty_list () =
   let lst = convert_to_ocamlrep [] in
   assert (List.length lst = 0);
@@ -456,6 +481,8 @@ let test_cases =
     test_some;
     test_some_none;
     test_some_some_five;
+    test_int_ref;
+    test_int_option_ref;
     test_empty_list;
     test_five_list;
     test_one_two_three_list;
@@ -488,6 +515,8 @@ let test_cases =
     test_convert_some;
     test_convert_some_none;
     test_convert_some_some_five;
+    test_convert_int_ref;
+    test_convert_int_option_ref;
     test_convert_empty_list;
     test_convert_five_list;
     test_convert_one_two_three_list;

@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::cell::RefCell;
 use std::collections::{BTreeMap, BTreeSet};
 
 use ocamlrep::OcamlRep;
@@ -67,6 +68,18 @@ pub extern "C" fn get_some_none(_unit: usize) -> usize {
 #[no_mangle]
 pub extern "C" fn get_some_some_five(_unit: usize) -> usize {
     val(Some(Some(5)))
+}
+
+// Ref tests
+
+#[no_mangle]
+pub extern "C" fn get_int_ref(_unit: usize) -> usize {
+    val(RefCell::new(5))
+}
+
+#[no_mangle]
+pub extern "C" fn get_int_option_ref(_unit: usize) -> usize {
+    val(RefCell::new(Some(5)))
 }
 
 // List Tests

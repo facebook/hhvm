@@ -23,6 +23,7 @@ let module_blacklist =
     "aast_defs_visitors_ancestors";
     "ast_defs_visitors_ancestors";
     "core_kernel";
+    "common";
     "hh_core";
     "hh_prelude";
     "naming_special_names";

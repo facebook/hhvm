@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::borrow::{Borrow, Cow};
+use std::cell::RefCell;
 use std::collections::{btree_map, btree_set, BTreeMap, BTreeSet};
 use std::convert::TryInto;
 use std::ffi::OsString;
@@ -164,6 +165,20 @@ impl<T: OcamlRep> OcamlRep for Rc<T> {
     fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError> {
         // NB: We don't get any sharing this way.
         Ok(Rc::new(T::from_ocamlrep(value)?))
+    }
+}
+
+impl<T: OcamlRep> OcamlRep for RefCell<T> {
+    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &A) -> Value<'a> {
+        let mut block = alloc.block_with_size(1);
+        A::set_field(&mut block, 0, alloc.add(&*self.borrow()));
+        block.build()
+    }
+
+    fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError> {
+        let block = from::expect_tuple(value, 1)?;
+        let value: T = from::field(block, 0)?;
+        Ok(RefCell::new(value))
     }
 }
 

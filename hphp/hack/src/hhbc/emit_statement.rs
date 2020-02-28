@@ -300,13 +300,20 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
         a::Stmt_::Goto(l) => tfr::emit_goto(false, l.1.clone(), env, e.local_gen_mut()),
         a::Stmt_::Block(b) => emit_stmts(e, env, &b),
         a::Stmt_::If(f) => emit_if(e, env, pos, &f.0, &f.1, &f.2),
-        a::Stmt_::While(_) => unimplemented!("TODO(hrust)"),
+        a::Stmt_::While(x) => emit_while(
+            e,
+            env,
+            &x.0,
+            //TODO: avoid cloning Block
+            &tast::Stmt(pos.clone(), tast::Stmt_::mk_block(x.1.clone())),
+        ),
         a::Stmt_::Using(_) => unimplemented!("TODO(hrust)"),
         a::Stmt_::Break => Ok(emit_break(e, env, pos)),
         a::Stmt_::Continue => Ok(emit_continue(e, env, pos)),
         a::Stmt_::Do(x) => emit_do(
             e,
             env,
+            //TODO: avoid cloning Block
             &tast::Stmt(pos.clone(), tast::Stmt_::mk_block(x.0.clone())),
             &x.1,
         ),
@@ -355,6 +362,26 @@ fn emit_do(e: &mut Emitter, env: &mut Env, body: &tast::Stmt, cond: &tast::Expr)
         )?,
         InstrSeq::make_label(cont_label),
         emit_expr::emit_jmpnz(e, env, cond, &start_label)?.instrs,
+        InstrSeq::make_label(break_label),
+    ]))
+}
+
+fn emit_while(e: &mut Emitter, env: &mut Env, cond: &tast::Expr, body: &tast::Stmt) -> Result {
+    let break_label = e.label_gen_mut().next_regular();
+    let cont_label = e.label_gen_mut().next_regular();
+    let start_label = e.label_gen_mut().next_regular();
+    Ok(InstrSeq::gather(vec![
+        emit_expr::emit_jmpz(e, env, cond, &break_label)?.instrs,
+        InstrSeq::make_label(start_label.clone()),
+        env.do_in_loop_body(
+            e,
+            break_label.clone(),
+            cont_label.clone(),
+            None,
+            body,
+            emit_stmt_wrapper,
+        )?,
+        InstrSeq::make_label(cont_label),
         InstrSeq::make_label(break_label),
     ]))
 }

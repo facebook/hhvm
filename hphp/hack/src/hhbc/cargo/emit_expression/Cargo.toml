@@ -32,4 +32,5 @@ options = { path = "../options" }
 oxidized = { path = "../../../oxidized" }
 runtime = { path = "../runtime" }
 scope_rust = { path = "../scope" }
+itertools = "0.8"
 # @end of Signature

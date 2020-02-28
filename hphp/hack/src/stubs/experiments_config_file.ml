@@ -11,4 +11,4 @@ let update ~(file : string) ~(source : string option) ~(ttl : float) :
   ignore (file, source, ttl);
   Ok "Experiments config update: nothing to do"
 
-let get_primary_owner () : string option = Some "user"
+let get_primary_owner ~(logged_in_user : string) : string = logged_in_user

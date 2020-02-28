@@ -364,50 +364,45 @@ let apply_overrides ~silent ~current_version ~config ~overrides =
     bool_if_min_version "enabled" ~prefix ~default:false ~current_version config
   in
   if enabled then (
-    match Experiments_config_file.get_primary_owner () with
-    | None -> ("No primary owner", config)
-    | Some owner ->
-      Disk.mkdir_p GlobalConfig.tmp_dir;
-      let dir = string_ "path" ~prefix ~default:GlobalConfig.tmp_dir config in
-      let file =
-        Filename.concat dir (Printf.sprintf "hh.%s.experiments" owner)
-      in
-      let update =
-        bool_if_min_version
-          "update"
-          ~prefix
-          ~default:false
-          ~current_version
-          config
-      in
-      let ttl =
-        float_of_int (int_ "ttl_seconds" ~prefix ~default:86400 config)
-      in
-      let source = string_opt "source" ~prefix config in
-      let meta =
-        if update then
-          match Experiments_config_file.update ~file ~source ~ttl with
-          | Ok meta -> meta
-          | Error message -> message
-        else
-          "Updating experimental config not enabled"
-      in
-      if Disk.file_exists file then
-        (* Apply the experiments overrides *)
-        let experiment_overrides =
-          Config_file.parse_local_config ~silent file
-        in
-        let config =
-          Config_file.apply_overrides
-            ~silent
-            ~config
-            ~overrides:experiment_overrides
-        in
-        (* Finally, reapply the CLI overrides, since they should take
-          precedence over the experiments overrides *)
-        (meta, Config_file.apply_overrides ~silent ~config ~overrides)
+    Disk.mkdir_p GlobalConfig.tmp_dir;
+    let dir = string_ "path" ~prefix ~default:GlobalConfig.tmp_dir config in
+    let owner =
+      Experiments_config_file.get_primary_owner
+        ~logged_in_user:(Sys_utils.logname ())
+    in
+    let file = Filename.concat dir (Printf.sprintf "hh.%s.experiments" owner) in
+    let update =
+      bool_if_min_version
+        "update"
+        ~prefix
+        ~default:false
+        ~current_version
+        config
+    in
+    let ttl = float_of_int (int_ "ttl_seconds" ~prefix ~default:86400 config) in
+    let source = string_opt "source" ~prefix config in
+    let meta =
+      if update then
+        match Experiments_config_file.update ~file ~source ~ttl with
+        | Ok meta -> meta
+        | Error message -> message
       else
-        ("Experimental config not found on disk", config)
+        "Updating experimental config not enabled"
+    in
+    if Disk.file_exists file then
+      (* Apply the experiments overrides *)
+      let experiment_overrides = Config_file.parse_local_config ~silent file in
+      let config =
+        Config_file.apply_overrides
+          ~silent
+          ~config
+          ~overrides:experiment_overrides
+      in
+      (* Finally, reapply the CLI overrides, since they should take
+          precedence over the experiments overrides *)
+      (meta, Config_file.apply_overrides ~silent ~config ~overrides)
+    else
+      ("Experimental config not found on disk", config)
   ) else
     ("Experimental config not enabled", config)
 

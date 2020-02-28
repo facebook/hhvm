@@ -85,16 +85,13 @@ module GEnv = struct
     type_pos ctx name
 
   let type_info ctx name =
-    match Naming_heap.Types.get_pos name with
-    | Some (pos, Naming_types.TClass) ->
+    match Naming_provider.get_type_pos_and_kind name with
+    | Some
+        ( pos,
+          ( ( Naming_types.TClass | Naming_types.TTypedef
+            | Naming_types.TRecordDef ) as kind ) ) ->
       let (p, _) = get_full_pos ctx (pos, name) in
-      Some (p, Naming_types.TClass)
-    | Some (pos, Naming_types.TTypedef) ->
-      let (p, _) = get_full_pos ctx (pos, name) in
-      Some (p, Naming_types.TTypedef)
-    | Some (pos, Naming_types.TRecordDef) ->
-      let (p, _) = get_full_pos ctx (pos, name) in
-      Some (p, Naming_types.TRecordDef)
+      Some (p, kind)
     | None -> None
 
   let fun_canon_name ctx name =
@@ -112,7 +109,7 @@ module GEnv = struct
     fun_pos ctx name
 
   let typedef_pos ctx name =
-    match Naming_heap.Types.get_pos name with
+    match Naming_provider.get_type_pos_and_kind name with
     | Some (pos, Naming_types.TTypedef) ->
       let (p, _) = get_full_pos ctx (pos, name) in
       Some p
@@ -204,8 +201,8 @@ module Env = struct
 
   let new_cid ctx cid_kind (p, name) =
     let validate canonical error =
-      let (p', _) =
-        match Naming_heap.Types.get_pos canonical with
+      let p' =
+        match Naming_provider.get_type_pos canonical with
         | Some x -> x
         | None ->
           failwith

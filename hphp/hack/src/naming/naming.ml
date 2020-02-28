@@ -437,7 +437,7 @@ end = struct
       end;
       x
     | None ->
-      (match Naming_heap.Types.get_pos name with
+      (match Naming_provider.get_type_pos_and_kind name with
       | Some (_def_pos, Naming_types.TClass) ->
         (* Don't let people use strictly internal classes
          * (except when they are being declared in .hhi files) *)

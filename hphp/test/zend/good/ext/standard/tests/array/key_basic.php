@@ -10,7 +10,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing key() : basic functionality ***\n";
 
-$array = array ('zero', 99 => 'one', 'two', 'three' => 3);
+$array = darray[0 => 'zero', 99 => 'one', 100 => 'two', 'three' => 3];
 echo "\n-- Initial Position: --\n";
 var_dump(key($array));
 

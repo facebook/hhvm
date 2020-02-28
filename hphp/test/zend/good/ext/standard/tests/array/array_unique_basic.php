@@ -1,6 +1,6 @@
 <?hh
 /* Prototype  : array array_unique(array $input)
- * Description: Removes duplicate values from array 
+ * Description: Removes duplicate values from array
  * Source code: ext/standard/array.c
 */
 <<__EntryPoint>> function main(): void {
@@ -15,7 +15,7 @@ $input = darray["1" => "one", 1 => "one", 2 => "two", '2' => "two"];
 var_dump( array_unique($input) );
 
 // mixed array
-$input = array("1" => "one", "two", "one", 2 => "two", "three");
+$input = darray["1" => "one", 0 => "two", 1 => "one", 2 => "two", 3 => "three"];
 var_dump( array_unique($input) );
 
 echo "Done";

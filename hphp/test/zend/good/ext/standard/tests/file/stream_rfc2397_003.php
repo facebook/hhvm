@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$streams = array(
+$streams = darray[
 	0 => 'data://,A%20brief%20note',
 	1 => 'data://application/vnd-xxx-query,select_vcount,fcol_from_fieldtable/local',
 	2 => 'data://;base64,Zm9vYmFyIGZvb2Jhcg==',
@@ -11,7 +11,7 @@ a/TPg7JpJHxyendzWTBfX0cxOnKPjgBzi4diinWGdkF8kjdfnycQZXZeYGejmJl
 ZeGl9i2icVqaNVailT6F5iJ90m6mvuTS4OK05M0vDk0Q4XUtwvKOzrcd3iq9uis
 F81M1OIcR7lEewwcLp7tuNNkM3uNna3F2JQFo97Vriy/Xl4/f1cf5VWzXyym7PH
 hhx4dbgYKAAA7',
-	);
+];
 
 foreach($streams as $original => $stream)
 {

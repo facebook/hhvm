@@ -12,40 +12,40 @@ var_dump(key_exists(0, $a));
 
 echo "integer\n";
 // 1 has index = 0
-$b = array(1, 'foo' => 'baz');
+$b = darray[0 => 1, 'foo' => 'baz'];
 var_dump(key_exists(0, $b));
 
 // 42 has index = 0, netherless its position is the latest
-$c = array('foo' => 'baz', 42);
+$c = darray['foo' => 'baz', 0 => 42];
 var_dump(key_exists(0, $c));
 
 echo "string\n";
 // 'bar' has index = 0, netherless it is a string
-$d = array('bar', 'foo' => 'baz');
+$d = darray[0 => 'bar', 'foo' => 'baz'];
 var_dump(key_exists(0, $d));
 
 // 'baz' has index = 0, netherless its position is the latest
-$e = array('foo' => 'baz', 'baz');
+$e = darray['foo' => 'baz', 0 => 'baz'];
 var_dump(key_exists(0, $e));
 
 echo "obj\n";
 $obj = new ObjectA();
 
 // object has index = 0, netherless its position is the latest
-$f = array('foo' => 'baz', $obj);
+$f = darray['foo' => 'baz', 0 => $obj];
 var_dump(key_exists(0, $f));
 
 // object has index = 0, netherless its position is the first
-$g = array($obj, 'foo' => 'baz');
+$g = darray[0 => $obj, 'foo' => 'baz'];
 var_dump(key_exists(0, $g));
 
 echo "stream resource\n";
 // stream resource has index = 0, netherless its position is the first
 $st = fopen('php://memory', '+r');
-$h = array($st, 'foo' => 'baz');
+$h = darray[0 => $st, 'foo' => 'baz'];
 var_dump(key_exists(0, $h));
 
 // stream resource has index = 0, netherless its position is the latest
-$i = array('foo' => 'baz', $st);
+$i = darray['foo' => 'baz', 0 => $st];
 var_dump(key_exists(0, $i));
 }

@@ -10,7 +10,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing current() : basic functionality ***\n";
 
-$array = array ('zero', 'one', 'two', 'three' => 3);
+$array = darray[0 => 'zero', 1 => 'one', 2 => 'two', 'three' => 3];
 var_dump(current($array));
 next(inout $array);
 var_dump(current($array));

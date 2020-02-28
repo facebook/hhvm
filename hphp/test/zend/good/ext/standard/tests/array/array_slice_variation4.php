@@ -19,7 +19,7 @@ class classA
 echo "*** Testing array_slice() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$input_array = array('one' => 1, 2, 99 => 3, 4);
+$input_array = darray['one' => 1, 0 => 2, 99 => 3, 100 => 4];
 $offset = 0;
 $length = 3;
 

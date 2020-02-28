@@ -9,9 +9,9 @@
 echo "*** Testing array_search() with different needle values ***\n";
 $arrays = varray [
   varray[0],
-  array("a" => "A", 2 => "B", "C" => 3, 4 => 4, "one" => 1, "" => NULL, "b", "ab", "abcd"),
-  array(4, array(1, 2 => 3), "one" => 1, "5" => 5 ),
-  array(-1, -2, -3, -4, -2.989888, "-0.005" => "neg0.005", 2.0 => "float2", "-.9" => -.9),
+  darray["a" => "A", 2 => "B", "C" => 3, 4 => 4, "one" => 1, "" => NULL, 5 => "b", 6 => "ab", 7 => "abcd"],
+  darray[0 => 4, 1 => darray[0 => 1, 2 => 3], "one" => 1, "5" => 5],
+  darray[0 => -1, 1 => -2, 2 => -3, 3 => -4, 4 => -2.989888, "-0.005" => "neg0.005", 2.0 => "float2", "-.9" => -.9],
   varray[TRUE, FALSE],
   varray["", varray[]],
   varray["abcd\x00abcd\x00abcd"],

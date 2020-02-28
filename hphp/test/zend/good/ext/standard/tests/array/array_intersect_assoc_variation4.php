@@ -44,13 +44,13 @@ $numeric_string = <<<EOT
 EOT;
 
 // array to be passsed to $arr1 argument
-$arr1 = array (
-  1, 1.1, 1.3, 1 => true, "hello", "one", NULL, 2,
-  'world', true, false, 3 => "b\tbbb", "aaaa\r",
-  $numeric_string, "h3" => $diff_whitespaces, "true" => true,
+$arr1 = darray [
+  0 => 1, 1 => 1.1, 2 => 1.3, 1 => true, 3 => "hello", 4 => "one", 5 => NULL, 6 => 2,
+  7 => 'world', 8 => true, 9 => false, 3 => "b\tbbb", 10 => "aaaa\r",
+  11 => $numeric_string, "h3" => $diff_whitespaces, "true" => true,
   "one" => "ten", 4 => "four", "two" => 2, 6 => "six",
-  '', null => "null", '' => 'emptys'
-);
+  12 => '', null => "null", '' => 'emptys'
+];
 
 // arrays to be passed to $arr2 argument
 $arrays = varray [
@@ -61,7 +61,7 @@ $arrays = varray [
 /*5*/  varray[NULL], // array with NULL
        varray["a\v\f","aaaa\r","b","b\tbbb","c","\[\]\!\@\#\$\%\^\&\*\(\)\{\}"],  // array with double quoted strings
        varray['a\v\f','aaaa\r','b','b\tbbb','c','\[\]\!\@\#\$\%\^\&\*\(\)\{\}'],  // array with single quoted strings
-       array($blank_line, "h2" => $multiline_string, "h3" => $diff_whitespaces, $numeric_string),  // array with heredocs
+       darray[0 => $blank_line, "h2" => $multiline_string, "h3" => $diff_whitespaces, 1 => $numeric_string],  // array with heredocs
 
        // associative arrays
 /*9*/  darray[1 => "one", 2 => "two", 6 => "six"],  // explicit numeric keys, string values

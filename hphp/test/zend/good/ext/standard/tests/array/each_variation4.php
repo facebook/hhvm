@@ -16,7 +16,7 @@ echo "*** Testing each() : usage variations ***\n";
 $val1 = 'foo';
 $val2 = 'bar';
 
-$arr1 = array('one' => $val1, $val2);
+$arr1 = darray['one' => $val1, 0 => $val2];
 
 echo "-- Call each until at the end of the array: --\n";
 var_dump( each(inout $arr1) );

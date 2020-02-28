@@ -44,9 +44,9 @@ var_dump( in_array("this", varray[0], TRUE) );
 
 //checking for type FALSE in multidimensional array with loose checking, result:false in loose type check
 var_dump( in_array(FALSE,
-                   array("a"=> TRUE, "b"=> TRUE,
-                         darray["c"=> TRUE, "d"=>TRUE]
-                        )
+                   darray["a"=> TRUE, "b"=> TRUE,
+                          0 => darray["c"=> TRUE, "d"=>TRUE]
+                         ]
                   )
         );
 

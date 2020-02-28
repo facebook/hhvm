@@ -71,8 +71,8 @@ $inputs = darray[
        '',
        ],
 
-/*6*/ 'empty array' => array(
-       ),
+/*6*/ 'empty array' => varray[
+       ],
 
        // string data
 /*7*/ 'string' => varray[

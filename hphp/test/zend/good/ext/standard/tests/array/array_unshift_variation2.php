@@ -19,7 +19,7 @@ class classA
 echo "*** Testing array_unshift() : all possible values for \$var argument ***\n";
 
 // array to be passed to $array argument
-$array = array('f' => "first", "s" => 'second', 1, 2.222);
+$array = darray['f' => "first", "s" => 'second', 0 => 1, 1 => 2.222];
 
 // get a resource variable
 $fp = fopen(__FILE__, "r");

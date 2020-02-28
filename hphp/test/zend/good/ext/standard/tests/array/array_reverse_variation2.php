@@ -19,7 +19,7 @@ class classA
 echo "*** Testing array_reverse() : usage variations ***\n";
 
 // Initialise the array
-$array = array("a" => "green", "red", "blue", "red", "orange", "pink");
+$array = darray["a" => "green", 0 => "red", 1 => "blue", 2 => "red", 3 => "orange", 4 => "pink"];
 
 //get an unset variable
 $unset_var = 10;

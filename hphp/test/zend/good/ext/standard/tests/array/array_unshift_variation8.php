@@ -13,7 +13,7 @@
 echo "*** Testing array_unshift() : single quoted strings for \$var argument ***\n";
 
 // array to be passed to $array argument
-$array = array('f' => "first", "s" => 'second', 1, 2.222);
+$array = darray['f' => "first", "s" => 'second', 0 => 1, 1 => 2.222];
 
 // different variations of single quoted strings to be passed to $var argument
 $vars = varray [

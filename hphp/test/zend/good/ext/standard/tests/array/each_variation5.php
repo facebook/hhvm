@@ -12,11 +12,11 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing each() : usage variations ***\n";
 
-$arr = array ('zero',
-              varray[1, 2, 3],
+$arr = darray[0 => 'zero',
+              1 => varray[1, 2, 3],
               'one' => 'un',
-              varray['a', 'b', 'c']
-              );
+              2 => varray['a', 'b', 'c']
+              ];
 
 echo "\n-- Pass each() a two-dimensional array --\n";
 for ($i = 1; $i < count($arr); $i++) {

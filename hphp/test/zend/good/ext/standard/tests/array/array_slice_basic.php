@@ -1,6 +1,6 @@
 <?hh
 /* Prototype  : array array_slice(array $input, int $offset [, int $length [, bool $preserve_keys]])
- * Description: Returns elements specified by offset and length 
+ * Description: Returns elements specified by offset and length
  * Source code: ext/standard/array.c
  */
 
@@ -11,7 +11,7 @@
 echo "*** Testing array_slice() : basic functionality ***\n";
 
 
-$input = array('one' => 1, 'two' => 2, 3, 23 => 4);
+$input = darray['one' => 1, 'two' => 2, 0 => 3, 23 => 4];
 $offset = 2;
 $length = 2;
 $preserve_keys = true;

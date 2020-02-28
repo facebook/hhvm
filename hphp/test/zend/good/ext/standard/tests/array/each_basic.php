@@ -11,7 +11,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing each() : basic functionality ***\n";
 
-$arr = array ('one' => 1, 'zero', 'two' => 'deux', 20 => 'twenty');
+$arr = darray ['one' => 1, 0 => 'zero', 'two' => 'deux', 20 => 'twenty'];
 echo "\n-- Passed array: --\n";
 var_dump($arr);
 

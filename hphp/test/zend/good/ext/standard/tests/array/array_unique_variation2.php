@@ -50,7 +50,7 @@ $inputs = varray [
 /*5*/  varray[NULL, null], // with NULL
        varray["a\v\f", "aaaa\r", "b", "aaaa\r", "\[\]\!\@\#\$\%\^\&\*\(\)\{\}"],  // with double quoted strings
        varray['a\v\f', 'aaaa\r', 'b', 'aaaa\r', '\[\]\!\@\#\$\%\^\&\*\(\)\{\}'],  // with single quoted strings
-       array("h1" => $blank_line, "h2" => $multiline_string, "h3" => $diff_whitespaces, $blank_line),  // with heredocs
+       darray["h1" => $blank_line, "h2" => $multiline_string, "h3" => $diff_whitespaces, 0 => $blank_line],  // with heredocs
 
        // associative arrays
 /*9*/  darray[1 => "one", 2 => "two", 2 => "two"],  // explicit numeric keys, string values

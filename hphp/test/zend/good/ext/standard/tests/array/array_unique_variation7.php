@@ -1,6 +1,6 @@
 <?hh
 /* Prototype  : array array_unique(array $input)
- * Description: Removes duplicate values from array 
+ * Description: Removes duplicate values from array
  * Source code: ext/standard/array.c
 */
 
@@ -11,7 +11,7 @@
 echo "*** Testing array_unique() : array with binary data for \$input argument ***\n";
 
 // array with binary values
-$input = array( b"1", b"hello", "world", "str1" => "hello", "str2" => "world");
+$input = darray[0 => b"1", 1 => b"hello", 2 => "world", "str1" => "hello", "str2" => "world"];
 
 var_dump( array_unique($input) );
 

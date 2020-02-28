@@ -44,10 +44,10 @@ $inputs = varray [
        // arrays with string values
 /*5*/  darray[111 => "\tHello", "red" => "col\tor", 2 => "\v\fworld", 3.3 =>  "\tHello"],
        darray[111 => '\tHello', "red" => 'col\tor', 2 => '\v\fworld', 3.3 =>  '\tHello'],
-       array(1 => "hello", "heredoc" => $heredoc, $heredoc),
+       darray[1 => "hello", "heredoc" => $heredoc, 2 => $heredoc],
 
        // array with object, unset variable and resource variable
-/*8*/ array(11 => new classA(), "unset" => @$unset_var, "resource" => $fp, new classA(), $fp),
+/*8*/ darray[11 => new classA(), "unset" => @$unset_var, "resource" => $fp, 12 => new classA(), 13 => $fp],
 ];
 
 // loop through each sub-array of $inputs to check the behavior of array_unique()

@@ -109,7 +109,9 @@ let run_test f =
         8
         Naming_sqlite.(save_results.files_added + save_results.symbols_added)
         "Expected to add eight rows (four files and four symbols)";
-      let _backed_naming_table = Naming_table.load_from_sqlite in
+      let (_backed_naming_table : Naming_table.t) =
+        Naming_table.load_from_sqlite db_name
+      in
       f ();
       true)
 

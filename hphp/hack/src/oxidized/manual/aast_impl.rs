@@ -93,3 +93,12 @@ impl<Hi> TypeHint<Hi> {
 pub fn new_nsenv(env: crate::namespace_env::Env) -> Nsenv {
     ocamlrep::rc::RcOc::new(env)
 }
+
+impl<Ex, Fb, En, Hi> Afield<Ex, Fb, En, Hi> {
+    pub fn value(&self) -> &Expr<Ex, Fb, En, Hi> {
+        match self {
+            Self::AFvalue(e) => e,
+            Self::AFkvalue(_, e) => e,
+        }
+    }
+}

@@ -242,11 +242,10 @@ pub fn expr_to_typed_value_(
     emitter: &Emitter,
     ns: &Namespace,
     expr: &tast::Expr,
-    _allow_maps: bool,
+    allow_maps: bool,
 ) -> Result<TypedValue, Error> {
     use aast::Expr_::*;
     // TODO: ML equivalent has this as an implicit parameter that defaults to false.
-    let allow_maps = false;
     let pos = &expr.0;
     match &expr.1 {
         Int(s) => Ok(TypedValue::Int(

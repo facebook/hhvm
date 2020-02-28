@@ -273,6 +273,10 @@ impl InstrSeq {
         Self::make_instr(Instruct::IOp(InstructOperator::CastDict))
     }
 
+    pub fn make_cast_string() -> Self {
+        Self::make_instr(Instruct::IOp(InstructOperator::CastString))
+    }
+
     pub fn make_retc() -> Self {
         Self::make_instr(Instruct::IContFlow(InstructControlFlow::RetC))
     }

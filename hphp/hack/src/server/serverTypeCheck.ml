@@ -1010,56 +1010,6 @@ functor
         total_rechecked_count;
       }
 
-    let start_typing_delegate genv env : env =
-      let num_workers =
-        ServerLocalConfig.(genv.local_config.remote_type_check.num_workers)
-      in
-      let version_specifier =
-        ServerLocalConfig.(genv.local_config.remote_version_specifier)
-      in
-      let max_batch_size =
-        ServerLocalConfig.(genv.local_config.remote_type_check.max_batch_size)
-      in
-      let min_batch_size =
-        ServerLocalConfig.(genv.local_config.remote_type_check.min_batch_size)
-      in
-      let worker_min_log_level =
-        ServerLocalConfig.(
-          genv.local_config.remote_type_check.worker_min_log_level)
-      in
-      let root = Relative_path.path_of_prefix Relative_path.Root in
-      {
-        env with
-        typing_service =
-          {
-            env.typing_service with
-            delegate_state =
-              Typing_service_delegate.start
-                Typing_service_types.
-                  {
-                    init_id = env.init_env.init_id;
-                    mergebase = env.init_env.mergebase;
-                    num_workers;
-                    root;
-                    server =
-                      ServerApi.make_local_server_api
-                        env.naming_table
-                        ~root
-                        ~ignore_hh_version:
-                          (ServerArgs.ignore_hh_version genv.options);
-                    version_specifier;
-                    worker_min_log_level;
-                  }
-                (* TODO: use env.typing_service.delegate_state when cancellation
-                  implementation is finished *)
-                (Typing_service_delegate.create
-                   ~max_batch_size
-                   ~min_batch_size
-                   ())
-                ~recheck_id:env.init_env.recheck_id;
-          };
-      }
-
     let type_check_core genv env =
       let env =
         if CheckKind.is_full then

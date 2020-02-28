@@ -36,6 +36,42 @@ let should_do_remote
          do_remote)
       t )
 
+let start_typing_delegate genv env : env =
+  let open ServerLocalConfig in
+  let version_specifier = genv.local_config.remote_version_specifier in
+  let { num_workers; max_batch_size; min_batch_size; worker_min_log_level; _ } =
+    genv.local_config.remote_type_check
+  in
+  let root = Relative_path.path_of_prefix Relative_path.Root in
+  {
+    env with
+    typing_service =
+      {
+        env.typing_service with
+        delegate_state =
+          Typing_service_delegate.start
+            Typing_service_types.
+              {
+                init_id = env.init_env.init_id;
+                mergebase = env.init_env.mergebase;
+                num_workers;
+                root;
+                server =
+                  ServerApi.make_local_server_api
+                    env.naming_table
+                    ~root
+                    ~ignore_hh_version:
+                      (ServerArgs.ignore_hh_version genv.options);
+                version_specifier;
+                worker_min_log_level;
+              }
+            (* TODO: use env.typing_service.delegate_state when cancellation
+                    implementation is finished *)
+            (Typing_service_delegate.create ~max_batch_size ~min_batch_size ())
+            ~recheck_id:env.init_env.recheck_id;
+      };
+  }
+
 let get_naming_table_fallback_path genv (naming_table_fn : string option) :
     string option =
   Hh_logger.log "Figuring out naming table SQLite path...";

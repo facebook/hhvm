@@ -587,7 +587,10 @@ struct JobQueueDispatcher : IHostHealthObserver {
    */
   void enqueue(typename TWorker::JobType job, int priority = 0) {
     auto const level = getHealthLevel();
-    auto const eagerNotify = (level < HealthLevel::NoMore);
+    auto const eagerNotify =
+      (level < HealthLevel::Cautious) ||
+      ((level == HealthLevel::Cautious) &&
+       (m_queue.getActiveWorker() * 2 <= m_currThreadCountLimit));
     m_queue.enqueue(job, priority, eagerNotify);
 
     // Spin up another worker thread if appropriate.

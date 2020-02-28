@@ -175,7 +175,7 @@ module Env = struct
     | None ->
       (* We store redundant info in this case, but if the position is a *)
       (* Full position, we don't store the kind, so this is necessary *)
-      Naming_heap.Types.add name (FileInfo.File (mode, fn), cid_kind)
+      Naming_provider.add_type name (FileInfo.File (mode, fn)) cid_kind
 
   let new_class_fast ctx fn name = new_cid_fast ctx fn name Naming_types.TClass
 
@@ -247,7 +247,7 @@ module Env = struct
             validate alt_canonical Errors.error_class_attribute_already_bound
           | None -> ()
         end;
-        Naming_heap.Types.add name (p, cid_kind)
+        Naming_provider.add_type name p cid_kind
 
   let new_class ctx = new_cid ctx Naming_types.TClass
 

@@ -37,3 +37,8 @@ let add_fun (name : string) (pos : FileInfo.pos) : unit =
 
 let remove_fun_batch (names : SSet.t) : unit =
   Naming_heap.Funs.remove_batch names
+
+let add_type
+    (name : string) (pos : FileInfo.pos) (kind : Naming_types.kind_of_type) :
+    unit =
+  Naming_heap.Types.add name (pos, kind)

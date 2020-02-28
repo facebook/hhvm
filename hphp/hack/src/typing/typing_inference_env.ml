@@ -1232,7 +1232,16 @@ let construct_undirected_tyvar_graph genvs :
         Some (ISet.add to_ neighbors))
       graph
   in
+  let add_vertex (vertex : Ident.t) (graph : ISet.t IMap.t) =
+    IMap.update
+      vertex
+      (function
+        | Some s -> Some s
+        | None -> Some ISet.empty)
+      graph
+  in
   let walk tyvar ty graph =
+    let graph = add_vertex tyvar graph in
     match ty with
     | ConstraintType _ -> graph
     | LoclType ty ->

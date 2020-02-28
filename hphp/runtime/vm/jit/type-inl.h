@@ -64,18 +64,15 @@ IRT_SPECIAL
 IRT_RUNTIME
 #undef IRT
 
-// We'll update these types soon when can express a vanilla ArraySpec.
-// "vanilla" array-likes have any kind other than the "bespoke" kind;
-// "bespoke" array-likes have some hidden-class type.
-constexpr Type TVanillaArr     = TArr;
-constexpr Type TVanillaVec     = TVec;
-constexpr Type TVanillaDict    = TDict;
-constexpr Type TVanillaKeyset  = TKeyset;
-constexpr Type TVanillaArrLike = TArrLike;
-constexpr Type TLvalToVanillaArr    = TLvalToArr;
-constexpr Type TLvalToVanillaVec    = TLvalToVec;
-constexpr Type TLvalToVanillaDict   = TLvalToDict;
-constexpr Type TLvalToVanillaKeyset = TLvalToKeyset;
+static auto const TVanillaArr     = TArr.narrowToVanilla();
+static auto const TVanillaVec     = TVec.narrowToVanilla();
+static auto const TVanillaDict    = TDict.narrowToVanilla();
+static auto const TVanillaKeyset  = TKeyset.narrowToVanilla();
+static auto const TVanillaArrLike = TArrLike.narrowToVanilla();
+static auto const TLvalToVanillaArr    = TLvalToArr.narrowToVanilla();
+static auto const TLvalToVanillaVec    = TLvalToVec.narrowToVanilla();
+static auto const TLvalToVanillaDict   = TLvalToDict.narrowToVanilla();
+static auto const TLvalToVanillaKeyset = TLvalToKeyset.narrowToVanilla();
 
 /*
  * Abbreviated namespace for predefined types.
@@ -95,15 +92,15 @@ namespace TypeNames {
 #undef IRTM
 #undef IRTX
 
-UNUSED constexpr Type VanillaArr     = TVanillaArr;
-UNUSED constexpr Type VanillaVec     = TVanillaVec;
-UNUSED constexpr Type VanillaDict    = TVanillaDict;
-UNUSED constexpr Type VanillaKeyset  = TVanillaKeyset;
-UNUSED constexpr Type VanillaArrLike = TVanillaArrLike;
-UNUSED constexpr Type LvalToVanillaArr    = TLvalToVanillaArr;
-UNUSED constexpr Type LvalToVanillaVec    = TLvalToVanillaVec;
-UNUSED constexpr Type LvalToVanillaDict   = TLvalToVanillaDict;
-UNUSED constexpr Type LvalToVanillaKeyset = TLvalToVanillaKeyset;
+UNUSED static auto const VanillaArr     = TVanillaArr;
+UNUSED static auto const VanillaVec     = TVanillaVec;
+UNUSED static auto const VanillaDict    = TVanillaDict;
+UNUSED static auto const VanillaKeyset  = TVanillaKeyset;
+UNUSED static auto const VanillaArrLike = TVanillaArrLike;
+UNUSED static auto const LvalToVanillaArr    = TLvalToVanillaArr;
+UNUSED static auto const LvalToVanillaVec    = TLvalToVanillaVec;
+UNUSED static auto const LvalToVanillaDict   = TLvalToVanillaDict;
+UNUSED static auto const LvalToVanillaKeyset = TLvalToVanillaKeyset;
 };
 
 namespace type_detail {
@@ -370,13 +367,13 @@ inline Type Type::dropConstVal() const {
   // A constant pointer iterator type will still have a target that's a union
   // of possible values for the array it points into.
   assertx(ptrKind() == Ptr::Elem || !isUnion());
+  auto const result = Type(m_bits, ptrKind(), memKind());
 
-  if (*this <= TStaticArr)    return Type::StaticArray(arrVal()->kind());
-  if (*this <= TStaticVec)    return TStaticVec;
-  if (*this <= TStaticDict)   return TStaticDict;
-  if (*this <= TStaticKeyset) return TStaticKeyset;
-
-  return Type(m_bits, ptrKind(), memKind());
+  if (*this <= TArrLike && arrLikeVal()->isVanilla()) {
+    return *this <= TArr ? Type::StaticArray(arrVal()->kind())
+                         : result.narrowToVanilla();
+  }
+  return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -550,10 +547,15 @@ inline ArraySpec Type::arrSpec() const {
   // along all of them.
   if (supports(SpecKind::Class)) return ArraySpec::Top();
 
+  // For constant pointers, we don't have an array-like val, so return Top.
+  // For constant non-vanilla array-likes, return Top until we have the ability
+  // to represent "bespoke" ArraySpecs. (We're punning array-like vals here.)
   if (m_hasConstVal) {
     if (m_ptr != Ptr::NotPtr) return ArraySpec::Top();
-    if ((m_bits & kArr) == kBottom) return ArraySpec::Top();
-    return ArraySpec(m_arrVal->kind());
+    if (!m_arrVal->isVanilla()) return ArraySpec::Top();
+    auto const array = (m_bits & kArr) != kBottom;
+    return array ? ArraySpec(m_arrVal->kind())
+                 : ArraySpec(ArraySpec::LayoutTag::Vanilla);
   }
 
   assertx(m_arrSpec != ArraySpec::Bottom());

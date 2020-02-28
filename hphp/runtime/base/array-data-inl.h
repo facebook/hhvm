@@ -139,6 +139,7 @@ inline bool ArrayData::empty() const {
 }
 
 inline bool ArrayData::kindIsValid() const {
+  assertx(isVanilla());
   return isArrayKind(m_kind);
 }
 
@@ -176,6 +177,10 @@ inline bool ArrayData::isPHPArray() const {
 
 inline bool ArrayData::isHackArray() const {
   return kind() >= kDictKind;
+}
+
+inline bool ArrayData::isVanilla() const {
+  return !(m_aux16 & kIsBespoke);
 }
 
 inline ArrayData::DVArray ArrayData::dvArray() const {

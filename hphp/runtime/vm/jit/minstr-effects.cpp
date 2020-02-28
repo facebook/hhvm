@@ -71,6 +71,9 @@ void getBaseType(Opcode rawOp, bool predict,
 
   if ((op == SetElem || op == SetRange || op == UnsetElem) &&
       baseType.maybe(TArrLike | TStr | TRecord | TClsMeth)) {
+    /* If we already have a vanilla array, it'll remain vanilla. */
+    auto const vanilla = baseType <= TArrLike && baseType.arrSpec().vanilla();
+
     /* Modifying an array or string element, even when COW doesn't kick in,
      * produces a new SSATmp for the base. StaticArr/StaticStr may be promoted
      * to CountedArr/CountedStr. */
@@ -92,6 +95,7 @@ void getBaseType(Opcode rawOp, bool predict,
     if (baseType.maybe(TClsMeth)) {
       baseType |= RO::EvalHackArrDVArrs ? TCountedVec : TCountedArr;
     }
+    if (vanilla) baseType = baseType.narrowToVanilla();
   }
 }
 

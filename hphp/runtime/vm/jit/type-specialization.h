@@ -35,21 +35,34 @@ namespace jit {
 /*
  * Array type specialization.
  *
- * May contain an ArrayKind and/or a pointer to a RAT.
+ * This type lattice is logically the following cross product:
+ *  (Maybe ArrayKind) x (Maybe RepoAuthoritativeType) x LayoutTag
+ *
+ * HHBBC doesn't know about vanilla or bespoke layouts, so when HHBBC provides
+ * us an ArrayKind or an RAT, we include those values in this specialization
+ * bit but we have an "unknown" layout tag. This tag makes the kind / type info
+ * unusable until we check that the array is vanilla.
+ *
+ * In the JIT, if we create an array with a known kind (e.g. with AllocVArray)
+ * or we test the kind (e.g. with CheckType), we'll also get the vanilla bit.
  */
 struct ArraySpec {
+  enum class LayoutTag { Unknown, Vanilla };
+
   /*
    * Constructors.
    */
-  explicit constexpr ArraySpec();
-  explicit ArraySpec(ArrayData::ArrayKind kind);
+  constexpr explicit ArraySpec(LayoutTag = LayoutTag::Unknown);
+  explicit ArraySpec(ArrayData::ArrayKind kind, LayoutTag = LayoutTag::Vanilla);
   explicit ArraySpec(const RepoAuthType::Array* arrTy);
   ArraySpec(ArrayData::ArrayKind kind, const RepoAuthType::Array* arrTy);
 
   /*
-   * Post-deserialization fixup.
+   * Post-deserialization fixup. We expose getRawType() so that we can adjust
+   * the underlying type for non-vanilla ArraySpecs where type() hides it.
    */
-  void adjust(const RepoAuthType::Array* adjusted);
+  const RepoAuthType::Array* getRawType() const;
+  void setRawType(const RepoAuthType::Array* adjusted);
 
   /*
    * Human-readable debug string.
@@ -59,14 +72,18 @@ struct ArraySpec {
   /*
    * Accessors.
    *
-   * These return falsey values (folly::none or nullptr) if the respective bit
-   * in `m_sort' is not set.
+   * These return falsey values (folly::none or nullptr) if we can't guarantee
+   * that a value of this type has a known ArrayKind or RepoAuthoritativeType.
+   *
+   * Note that we can return falsey values for, say, kind even w/ HasKind set.
+   * We need to know that the array is vanilla before returning a kind or type.
    *
    * bits() returns the raw bits.
    */
   uintptr_t bits() const;
   folly::Optional<ArrayData::ArrayKind> kind() const;
   const RepoAuthType::Array* type() const;
+  bool vanilla() const;
 
   /*
    * Casts.
@@ -119,6 +136,7 @@ private:
     IsBottom  = 1 << 0,
     HasKind   = 1 << 1,
     HasType   = 1 << 2,
+    IsVanilla = 1 << 3,
   };
   friend SortOf operator|(SortOf, SortOf);
   friend SortOf operator&(SortOf, SortOf);

@@ -492,27 +492,32 @@ TEST(Type, SpecializedArrays) {
   EXPECT_FALSE(TArr.isSpecialized());
   EXPECT_FALSE(TArr.arrSpec());
   EXPECT_FALSE(TArr.arrSpec().kind());
+  EXPECT_FALSE(TArr.arrSpec().vanilla());
 
   auto const packed_array = Type::Array(ArrayData::kPackedKind);
   EXPECT_TRUE(packed_array.isSpecialized());
   EXPECT_TRUE(packed_array.arrSpec());
   EXPECT_TRUE(packed_array.arrSpec().kind());
+  EXPECT_TRUE(packed_array.arrSpec().vanilla());
   EXPECT_EQ(packed_array.arrSpec().kind(), ArrayData::kPackedKind);
 
   auto const const_array = Type::cns(staticEmptyVArray());
   EXPECT_TRUE(const_array.isSpecialized());
   EXPECT_TRUE(const_array.arrSpec());
   EXPECT_TRUE(const_array.arrSpec().kind());
+  EXPECT_TRUE(const_array.arrSpec().vanilla());
   EXPECT_EQ(*const_array.arrSpec().kind(), ArrayData::kPackedKind);
 
   EXPECT_FALSE(TDict.isSpecialized());
   EXPECT_FALSE(TDict.arrSpec());
   EXPECT_FALSE(TDict.arrSpec().kind());
+  EXPECT_FALSE(TDict.arrSpec().vanilla());
 
   auto const const_dict = Type::cns(staticEmptyDictArray());
-  EXPECT_FALSE(const_dict.isSpecialized());
-  EXPECT_FALSE(const_dict.arrSpec());
+  EXPECT_TRUE(const_dict.isSpecialized());
+  EXPECT_TRUE(const_dict.arrSpec());
   EXPECT_FALSE(const_dict.arrSpec().kind());
+  EXPECT_TRUE(const_dict.arrSpec().vanilla());
 }
 
 TEST(Type, SpecializedObjects) {
@@ -675,6 +680,8 @@ TEST(Type, Const) {
   EXPECT_NE(ratArray1, ratArray2);
 
   auto packedRat = packedArray & ratArray1;
+  EXPECT_EQ("Arr={N([Str])|Bespoke}", ratArray1.toString());
+  EXPECT_EQ("Arr=PackedKind", packedArray.toString());
   EXPECT_EQ("Arr=PackedKind:N([Str])", packedRat.toString());
   EXPECT_TRUE(packedRat <= packedArray);
   EXPECT_TRUE(packedRat < packedArray);
@@ -697,6 +704,87 @@ TEST(Type, Const) {
   auto keysetData = ArrayData::GetScalarArray(std::move(keyset));
   auto constKeyset = Type::cns(keysetData);
   EXPECT_TRUE(constKeyset < TKeyset);
+}
+
+TEST(Type, NarrowToVanilla) {
+  auto const TPackedArr = Type::Array(ArrayData::kPackedKind);
+  EXPECT_EQ("Arr=Vanilla", TArr.narrowToVanilla().toString());
+  EXPECT_EQ("{Vec=Vanilla|Int}", (TVec|TInt).narrowToVanilla().toString());
+  EXPECT_EQ("{Vec|Obj}", (TVec|TObj).narrowToVanilla().toString());
+  EXPECT_EQ("Arr=PackedKind", TPackedArr.narrowToVanilla().toString());
+}
+
+TEST(Type, WidenToBespoke) {
+  auto const TPackedArr = Type::Array(ArrayData::kPackedKind);
+  EXPECT_EQ("Arr", TVanillaArr.widenToBespoke().toString());
+  EXPECT_EQ("{Vec|Int}", (TVanillaVec|TInt).widenToBespoke().toString());
+  EXPECT_EQ("Arr={PackedKind|Bespoke}", TPackedArr.widenToBespoke().toString());
+}
+
+TEST(Type, VanillaArray) {
+  EXPECT_EQ("Arr=Vanilla", TVanillaArr.toString());
+  EXPECT_EQ("ArrLike=Vanilla", TVanillaArrLike.toString());
+  EXPECT_TRUE(TVanillaArr <= TArr);
+  EXPECT_TRUE(TVanillaArr < TArr);
+  EXPECT_FALSE(TVanillaArr.arrSpec().kind());
+  EXPECT_FALSE(TVanillaArr.arrSpec().type());
+  EXPECT_TRUE(TVanillaArr.arrSpec().vanilla());
+
+  auto const packedArr = Type::Array(ArrayData::kPackedKind);
+  EXPECT_EQ("Arr=PackedKind", packedArr.toString());
+  EXPECT_TRUE(packedArr.arrSpec().kind());
+  EXPECT_FALSE(packedArr.arrSpec().type());
+  EXPECT_TRUE(packedArr.arrSpec().vanilla());
+
+  ArrayTypeTable::Builder ratBuilder;
+  auto const rat = ratBuilder.packedn(RepoAuthType::Array::Empty::No,
+                                      RepoAuthType(RepoAuthType::Tag::Str));
+  auto const packedRat = Type::Array(ArrayData::kPackedKind, rat);
+  EXPECT_EQ("Arr={PackedKind:N([Str])|Bespoke}", packedRat.toString());
+  EXPECT_FALSE(packedRat.arrSpec().kind());
+  EXPECT_FALSE(packedRat.arrSpec().type());
+  EXPECT_FALSE(packedRat.arrSpec().vanilla());
+
+  auto const vanillaRat1 = packedArr & packedRat;
+  EXPECT_EQ("Arr=PackedKind:N([Str])", vanillaRat1.toString());
+  EXPECT_TRUE(vanillaRat1.arrSpec().kind());
+  EXPECT_TRUE(vanillaRat1.arrSpec().type());
+  EXPECT_TRUE(vanillaRat1.arrSpec().vanilla());
+
+  auto const vanillaRat2 = packedRat.narrowToVanilla();
+  EXPECT_EQ("Arr=PackedKind:N([Str])", vanillaRat2.toString());
+  EXPECT_TRUE(vanillaRat2.arrSpec().kind());
+  EXPECT_TRUE(vanillaRat2.arrSpec().type());
+  EXPECT_TRUE(vanillaRat2.arrSpec().vanilla());
+
+  EXPECT_FALSE(packedArr <= packedRat);
+  EXPECT_FALSE(packedRat <= packedArr);
+  EXPECT_FALSE(packedArr < packedRat);
+  EXPECT_FALSE(packedRat < packedArr);
+  EXPECT_TRUE(packedArr <= TVanillaArr);
+  EXPECT_FALSE(packedRat <= TVanillaArr);
+  EXPECT_TRUE(packedArr < TVanillaArr);
+  EXPECT_FALSE(packedRat < TVanillaArr);
+
+  EXPECT_TRUE(vanillaRat1 <= packedArr);
+  EXPECT_TRUE(vanillaRat1 <= packedRat);
+  EXPECT_TRUE(vanillaRat1 < packedArr);
+  EXPECT_TRUE(vanillaRat1 < packedRat);
+  EXPECT_TRUE(vanillaRat1 <= TVanillaArr);
+  EXPECT_TRUE(vanillaRat1 < TVanillaArr);
+
+  EXPECT_TRUE(vanillaRat2 <= packedArr);
+  EXPECT_TRUE(vanillaRat2 <= packedRat);
+  EXPECT_TRUE(vanillaRat2 < packedArr);
+  EXPECT_TRUE(vanillaRat2 < packedRat);
+  EXPECT_TRUE(vanillaRat2 <= TVanillaArr);
+  EXPECT_TRUE(vanillaRat2 < TVanillaArr);
+
+  EXPECT_TRUE(vanillaRat1 == vanillaRat2);
+  EXPECT_TRUE(vanillaRat1 <= vanillaRat2);
+  EXPECT_TRUE(vanillaRat2 <= vanillaRat1);
+  EXPECT_FALSE(vanillaRat1 < vanillaRat2);
+  EXPECT_FALSE(vanillaRat2 < vanillaRat1);
 }
 
 TEST(Type, PtrKinds) {

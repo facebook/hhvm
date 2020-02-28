@@ -133,8 +133,8 @@ inline TypeSpec TypeSpec::operator-(const TypeSpec& rhs) const {
 ///////////////////////////////////////////////////////////////////////////////
 // ArraySpec.
 
-constexpr inline ArraySpec::ArraySpec()
-  : m_sort(IsTop)
+constexpr inline ArraySpec::ArraySpec(LayoutTag tag)
+  : m_sort(tag == LayoutTag::Vanilla ? IsVanilla : IsTop)
   , m_kind(ArrayData::ArrayKind{})
   , m_ptr(0)
 {}
@@ -145,8 +145,8 @@ constexpr inline ArraySpec::ArraySpec(ArraySpec::BottomTag)
   , m_ptr(0)
 {}
 
-inline ArraySpec::ArraySpec(ArrayData::ArrayKind kind)
-  : m_sort(HasKind)
+inline ArraySpec::ArraySpec(ArrayData::ArrayKind kind, LayoutTag tag)
+  : m_sort(HasKind | (tag == LayoutTag::Vanilla ? IsVanilla : IsTop))
   , m_kind(kind)
   , m_ptr(0)
 {
@@ -170,20 +170,31 @@ inline ArraySpec::ArraySpec(ArrayData::ArrayKind kind,
   assertx(checkInvariants());
 }
 
-inline void ArraySpec::adjust(const RepoAuthType::Array* adjusted) {
-  assertx(type() && adjusted);
+inline const RepoAuthType::Array* ArraySpec::getRawType() const {
+  if (!(m_sort & HasType)) return nullptr;
+  return reinterpret_cast<const RepoAuthType::Array*>(m_ptr);
+}
+
+inline void ArraySpec::setRawType(const RepoAuthType::Array* adjusted) {
+  assertx(getRawType() && adjusted);
   m_ptr = reinterpret_cast<uintptr_t>(adjusted);
 }
 
 inline folly::Optional<ArrayData::ArrayKind> ArraySpec::kind() const {
   auto kind = static_cast<ArrayData::ArrayKind>(m_kind);
-  return (m_sort & HasKind) ? folly::make_optional(kind) : folly::none;
+  auto const test = (HasKind | IsVanilla);
+  return ((m_sort & test) == test) ? folly::make_optional(kind) : folly::none;
 }
 
 inline const RepoAuthType::Array* ArraySpec::type() const {
-  return (m_sort & HasType)
+  auto const test = (HasType | IsVanilla);
+  return ((m_sort & test) == test)
     ? reinterpret_cast<const RepoAuthType::Array*>(m_ptr)
     : nullptr;
+}
+
+inline bool ArraySpec::vanilla() const {
+  return m_sort & IsVanilla;
 }
 
 IMPLEMENT_SPEC_OPERS(ArraySpec)

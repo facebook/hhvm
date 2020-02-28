@@ -451,13 +451,19 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
     check(match || src->isA(TBottom), type, expected);
   };
 
+  // TODO(kshaunak): When we can check these types, don't assume them here.
+  auto const maybeNarrowToVanilla = [&] (Type type) {
+    return RO::EvalAllowBespokeArrayLikes ? type : type.narrowToVanilla();
+  };
+
 using namespace TypeNames;
 using TypeNames::TCA;
 
 #define NA            return checkNoArgs();
-#define S(T...)       {                                                   \
-                        check(src()->type().subtypeOfAny(T), Type(), #T); \
-                        ++curSrc;                                         \
+#define S(T...)       {                                                     \
+                        auto const t = maybeNarrowToVanilla(src()->type()); \
+                        check(t.subtypeOfAny(T), Type(), #T);               \
+                        ++curSrc;                                           \
                       }
 #define AK(kind)      Type::Array(ArrayData::k##kind##Kind)
 #define C(T)          checkConstant(src(), T, "constant " #T); ++curSrc;

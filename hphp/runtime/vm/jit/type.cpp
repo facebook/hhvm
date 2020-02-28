@@ -68,6 +68,30 @@ constexpr Type::bits_t Type::kArrSpecBits;
 constexpr Type::bits_t Type::kClsSpecBits;
 
 ///////////////////////////////////////////////////////////////////////////////
+// Vanilla array-spec manipulation.
+
+Type Type::narrowToVanilla() const {
+  if (arrSpec().vanilla()) return *this;
+  if (!supports(SpecKind::Array) || supports(SpecKind::Class)) return *this;
+  return Type(*this, arrSpec() & ArraySpec(ArraySpec::LayoutTag::Vanilla));
+}
+
+Type Type::widenToBespoke() const {
+  auto const oldSpec = arrSpec();
+  if (!oldSpec.vanilla()) return *this;
+  auto const newSpec = [&]{
+    auto const kind = oldSpec.kind();
+    auto const type = oldSpec.type();
+    if (kind && type) return ArraySpec(*kind, type);
+    if (kind) return ArraySpec(*kind, ArraySpec::LayoutTag::Unknown);
+    if (type) return ArraySpec(type);
+    return ArraySpec();
+  }();
+  assertx(!newSpec.vanilla());
+  return Type(*this, newSpec);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 const ArrayData* Type::arrLikeVal() const {
   assertx(hasConstVal(TArrLike));
@@ -104,26 +128,21 @@ std::string Type::constValString() const {
   }
   if (*this <= TStaticArr) {
     if (m_arrVal->empty()) {
-      return "array()";
+      return m_arrVal->isVArray() ? "varray[]" :
+             m_arrVal->isDArray() ? "darray[]" : "array()";
     }
     return folly::format("Array({})", m_arrVal).str();
   }
   if (*this <= TStaticVec) {
-    if (m_vecVal->empty()) {
-      return "vec()";
-    }
+    if (m_vecVal->empty()) return "vec[]";
     return folly::format("Vec({})", m_vecVal).str();
   }
   if (*this <= TStaticDict) {
-    if (m_dictVal->empty()) {
-      return "dict()";
-    }
+    if (m_dictVal->empty()) return "dict[]";
     return folly::format("Dict({})", m_dictVal).str();
   }
   if (*this <= TStaticKeyset) {
-    if (m_keysetVal->empty()) {
-      return "keyset()";
-    }
+    if (m_keysetVal->empty()) return "keyset[]";
     return folly::format("Keyset({})", m_keysetVal).str();
   }
   if (*this <= TFunc) {
@@ -432,8 +451,8 @@ Type Type::deserialize(ProfDataDeserializer& ser) {
     } else {
       assertx(key == TypeKey::ArrSpec);
       read_raw(ser, t.m_extra);
-      if (auto const arr = t.m_arrSpec.type()) {
-        t.m_arrSpec.adjust(ser.remap(arr));
+      if (auto const arr = t.m_arrSpec.getRawType()) {
+        t.m_arrSpec.setRawType(ser.remap(arr));
       }
     }
     return t;
@@ -568,15 +587,17 @@ Type Type::modified() const {
   if (t.maybe(TVec))    t |= TVec;
   if (t.maybe(TKeyset)) t |= TKeyset;
   if (t.maybe(TStr))    t |= TStr;
-  return t;
+  auto const spec = ArraySpec(ArraySpec::LayoutTag::Vanilla);
+  return arrSpec().vanilla() ? Type(t, spec) : t;
 }
 
 /*
  * Return true if the array satisfies requirement on the ArraySpec.
  * If the kind and RepoAuthType are both set, the array must match both.
  */
-static bool arrayFitsSpec(const ArrayData* arr, const ArraySpec spec) {
+static bool arrayFitsSpec(const ArrayData* arr, ArraySpec spec) {
   if (spec == ArraySpec::Top()) return true;
+  if (arr->isVanilla()) spec = spec & ArraySpec(ArraySpec::LayoutTag::Vanilla);
 
   if (spec.kind() && arr->kind() != *spec.kind()) return false;
   if (!spec.type()) return true;
@@ -845,7 +866,9 @@ Type typeFromTV(tv_rval tv, const Class* ctx) {
   else if (outer == KindOfPersistentDict) outer = KindOfDict;
   else if (outer == KindOfPersistentKeyset) outer = KindOfKeyset;
 
-  return Type(outer);
+  auto const result = Type(outer);
+  auto const vanilla = isArrayLikeType(type(tv)) && val(tv).parr->isVanilla();
+  return vanilla ? result.narrowToVanilla() : result;
 }
 
 namespace {
@@ -873,9 +896,7 @@ bool ratArrIsCounted(const RepoAuthType::Array* arr, const Class* ctx) {
   return false;
 }
 
-}
-
-Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
+Type typeFromRATImpl(RepoAuthType ty, const Class* ctx) {
   using T = RepoAuthType::Tag;
   switch (ty.tag()) {
     case T::OptBool:        return TBool       | TInitNull;
@@ -1046,6 +1067,13 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
       return TRecord | TInitNull;
   }
   not_reached();
+}
+
+}
+
+Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
+  auto const result = typeFromRATImpl(ty, ctx);
+  return RO::EvalAllowBespokeArrayLikes ? result.widenToBespoke() : result;
 }
 
 //////////////////////////////////////////////////////////////////////

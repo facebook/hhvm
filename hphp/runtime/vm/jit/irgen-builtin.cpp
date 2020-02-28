@@ -2177,8 +2177,10 @@ Type builtinReturnType(const Func* builtin) {
     return TInitCell;
   }();
 
-  // "Reference" types (not boxed, types represented by a pointer) can always be
-  // null.
+  // We're not sure what kind of array-likes builtins will produce.
+  if (RO::EvalAllowBespokeArrayLikes) type = type.widenToBespoke();
+
+  // "Reference" types (types represented by a pointer) can always be null.
   if (type.isReferenceType()) {
     type |= TInitNull;
   } else {

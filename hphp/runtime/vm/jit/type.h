@@ -694,6 +694,7 @@ public:
 
   /*
    * Return a specialized TArr/TVec/TDict/TKeyset.
+   * All RepoAuthType constructors admit the possibility of a bespoke type.
    */
   static Type Array(ArrayData::ArrayKind kind);
   static Type Array(const RepoAuthType::Array* rat);
@@ -704,6 +705,7 @@ public:
 
   /*
    * Return a specialized TStaticArr/TStaticVec/TStaticDict/TStaticKeyset.
+   * All RepoAuthType constructors admit the possibility of a bespoke type.
    */
   static Type StaticArray(ArrayData::ArrayKind kind);
   static Type StaticArray(const RepoAuthType::Array* rat);
@@ -714,6 +716,7 @@ public:
 
   /*
    * Return a specialized TCountedArr/TCountedVec/TCountedDict.
+   * All RepoAuthType constructors admit the possibility of a bespoke type.
    */
   static Type CountedArray(ArrayData::ArrayKind, const RepoAuthType::Array*);
   static Type CountedArray(const RepoAuthType::Array*);
@@ -728,6 +731,23 @@ public:
 
   static Type ExactCls(const Class* cls);
   static Type SubCls(const Class* cls);
+
+  /*
+   * Return a copy of this type with a vanilla ArraySpec. Examples:
+   *   TArr.narrowToVanilla()        == TVanillaArr
+   *   (TVec|TInt).narrowToVanilla() == TVanillaVec|TInt
+   *   (TVec|TObj).narrowToVanilla() == TVec|TObj
+   *   TPackedArr.narrowToVanilla()  == TPackedArr
+   */
+  Type narrowToVanilla() const;
+
+  /*
+   * Return a copy of this type without a vanilla ArraySpec. Examples:
+   *   TVanillaArr.widenToBespoke()        == TArr
+   *   (TVanillaVec|TInt).widenToBespoke() == TVec|TInt
+   *   TPackedArr.widenToBespoke()         == TArr={PackedKind|Bespoke}
+   */
+  Type widenToBespoke() const;
 
   /*
    * Return a copy of this Type with the specialization dropped.

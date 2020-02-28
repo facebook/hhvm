@@ -126,6 +126,12 @@ struct ArrayData : MaybeCountable {
    */
   static auto constexpr kHasProvenanceData = 16;
 
+  /*
+   * Indicates that this array has some hidden-class type. Array-likes with
+   * their standard "vanilla" layouts never have this bit set.
+   */
+  static auto constexpr kIsBespoke = 32;
+
   /////////////////////////////////////////////////////////////////////////////
   // Creation and destruction.
 
@@ -259,6 +265,12 @@ public:
    */
   bool isPHPArray() const;
   bool isHackArray() const;
+
+  /*
+   * Whether the array-like has the standard layout. This check excludes
+   * array-likes with a "bespoke" hidden-class layout.
+   */
+  bool isVanilla() const;
 
   /*
    * The DVArray kind for the array.

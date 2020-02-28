@@ -33,9 +33,19 @@ bool ArraySpec::operator<=(const ArraySpec& rhs) const {
   if (lhs == Top() || rhs == Bottom()) return false;
 
   // It's possible to subtype RAT::Array types, but it's potentially O(n), so
-  // we just don't do it.
-  return (!rhs.kind() || lhs.kind() == rhs.kind()) &&
-         (!rhs.type() || lhs.type() == rhs.type());
+  // we just don't do it. It's okay for <= to return false negative results.
+  if ((rhs.m_sort & HasKind) &&
+      !((lhs.m_sort & HasKind) && lhs.m_kind == rhs.m_kind)) {
+    return false;
+  }
+  if ((rhs.m_sort & HasType) &&
+      !((lhs.m_sort & HasType) && lhs.m_ptr == rhs.m_ptr)) {
+    return false;
+  }
+  if (rhs.vanilla() && !lhs.vanilla()) {
+    return false;
+  }
+  return true;
 }
 
 ArraySpec ArraySpec::operator|(const ArraySpec& rhs) const {
@@ -46,17 +56,23 @@ ArraySpec ArraySpec::operator|(const ArraySpec& rhs) const {
   if (lhs <= rhs) return rhs;
   if (rhs <= lhs) return lhs;
 
-  // Take the union componentwise.  Components union trivially (i.e., to
-  // "unspecialized") unless they are equal.
-  auto new_kind = lhs.kind() == rhs.kind() ? lhs.kind() : folly::none;
-  auto new_type = lhs.type() == rhs.type() ? lhs.type() : nullptr;
-
-  // Nontrivial kind /and/ type unions would imply equal kinds and types.
-  assertx(!new_kind || !new_type);
-
-  if (new_kind) return ArraySpec(*new_kind);
-  if (new_type) return ArraySpec(new_type);
-  return Top();
+  // Operate on the raw fields; kind() masks the kind based on the vanilla bit,
+  // but we still want to propagate the value in case we later get that bit.
+  //
+  // Note that each bit in m_sort represents some fact we know about the type.
+  // To union the types, we must intersect (and thus lose) some of these facts.
+  auto result = lhs;
+  result.m_sort &= rhs.m_sort;
+  if (lhs.m_kind != rhs.m_kind) {
+    result.m_sort &= ~HasKind;
+    result.m_kind = ArrayData::ArrayKind{};
+  }
+  if (lhs.m_ptr != rhs.m_ptr) {
+    result.m_sort &= ~HasType;
+    result.m_ptr = 0;
+  }
+  assertx(result.checkInvariants());
+  return result;
 }
 
 ArraySpec ArraySpec::operator&(const ArraySpec& rhs) const {
@@ -67,51 +83,53 @@ ArraySpec ArraySpec::operator&(const ArraySpec& rhs) const {
   if (lhs <= rhs) return lhs;
   if (rhs <= lhs) return rhs;
 
-  // Take the intersection componentwise.  If one component is unspecialized,
-  // it behaves like Top, and the intersection is the other component (the
-  // Bottom case is handled by the subtype checks above).  Otherwise, they
-  // intersect to either component if they are equal, else to Bottom.
-#define NEW_COMPONENT(name, defval)                   \
-  (lhs.name() && !rhs.name() ? lhs.name() :           \
-   rhs.name() && !lhs.name() ? rhs.name() :           \
-   lhs.name() == rhs.name()  ? lhs.name() : (defval))
+  // Operate on the raw fields; kind() masks the kind based on the vanilla bit,
+  // but we still want to propagate the value in case we later get that bit.
+  //
+  // Note that each bit in m_sort represents some fact we know about the type.
+  // To intersect the types, we may union (and thus gain) some of these facts.
+  auto result = lhs;
+  result.m_sort |= rhs.m_sort;
 
-  // If the default value is returned, it might mean either Bottom or Top, so
-  // we need more checks.
-  auto new_kind = NEW_COMPONENT(kind, folly::none);
-  auto new_type = NEW_COMPONENT(type, nullptr);
-
-#undef NEW_COMPONENT
-
-  if (!new_kind && lhs.kind()) {
-    // If there's no new_x, but lhs.x() is nontrivial, then rhs.x() is not
-    // equal to it and also nontrivial.  The intersection is thus Bottom.
-    //
-    // Note that we ignore this check for type(), because we don't subtype RAT
-    // types precisely.
-    return Bottom();
+  // If both types have a kind and they differ, the intersection must be empty.
+  if (rhs.m_sort & HasKind) {
+    if ((lhs.m_sort & HasKind) && lhs.m_kind != rhs.m_kind) {
+      return Bottom();
+    }
+    result.m_kind = rhs.m_kind;
   }
 
-  if (new_kind && new_type) {
-    return ArraySpec(*new_kind, new_type);
-  } else if (new_kind) {
-    return ArraySpec(*new_kind);
-  } else if (new_type) {
-    return ArraySpec(new_type);
+  // If both types have an RAT and they differ, then we must drop this field
+  // from the specialization (because it's expensive to intersect RATs).
+  if (rhs.m_sort & HasType) {
+    if ((lhs.m_sort & HasType) && lhs.m_ptr != rhs.m_ptr) {
+      result.m_sort &= ~HasType;
+      result.m_ptr = 0;
+    } else {
+      result.m_ptr = rhs.m_ptr;
+    }
   }
 
-  return Top();
+  result.checkInvariants();
+  return result;
 }
 
 std::string ArraySpec::toString() const {
   std::string result;
+  auto const init = (m_sort & IsVanilla) ? "=" : "={";
   if (m_sort & HasKind) {
     auto const kind = ArrayData::ArrayKind(m_kind);
-    result += folly::to<std::string>('=', ArrayData::kindToString(kind));
+    result += folly::to<std::string>(init, ArrayData::kindToString(kind));
   }
   if (m_sort & HasType) {
     auto const type = reinterpret_cast<const RepoAuthType::Array*>(m_ptr);
-    result += folly::to<std::string>(':', show(*type));
+    auto const sign = result.empty() ? init : ":";
+    result += folly::to<std::string>(sign, show(*type));
+  }
+  if ((m_sort & IsVanilla) && result.empty()) {
+    result += "=Vanilla";
+  } else if (!(m_sort & IsVanilla) && !result.empty()) {
+    result += "|Bespoke}";
   }
   return result;
 }

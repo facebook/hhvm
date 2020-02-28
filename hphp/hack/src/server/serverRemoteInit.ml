@@ -16,18 +16,10 @@ let init
   let (server
         : (module RemoteWorker.RemoteServerApi
              with type naming_table = Naming_table.t option)) =
-    ServerApi.make_remote_server_api workers ctx.Provider_context.tcopt
+    ServerApi.make_remote_server_api workers
   in
   let (worker_env : Naming_table.t option RemoteWorker.work_env) =
-    RemoteWorker.
-      {
-        bin_root;
-        key = worker_key;
-        check_id;
-        naming_table_base = None;
-        root;
-        timeout = 600;
-        server;
-      }
+    RemoteWorker.make_env ctx ~bin_root ~check_id ~key:worker_key ~root server
   in
-  RemoteWorker.go ctx worker_env
+
+  RemoteWorker.go worker_env

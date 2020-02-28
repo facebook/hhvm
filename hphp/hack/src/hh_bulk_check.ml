@@ -12,7 +12,7 @@ type command =
       root: Path.t;
       timeout: int;
     }
-  | CWork of unit RemoteWorker.work_env
+  | CWork of unit option RemoteWorker.work_env
 
 type command_keyword =
   | CKSchedule
@@ -64,22 +64,24 @@ let parse_schedule_args () : command =
   CSchedule { bin_root; root; timeout = !timeout }
 
 let make_remote_server_api () :
-    (module RemoteWorker.RemoteServerApi with type naming_table = unit) =
+    (module RemoteWorker.RemoteServerApi with type naming_table = unit option) =
   ( module struct
-    type naming_table = unit
+    type naming_table = unit option
 
-    let type_check files_to_check ~state_filename =
-      ignore (files_to_check, state_filename);
+    let type_check ctx files_to_check ~state_filename =
+      ignore (ctx, files_to_check, state_filename);
       Errors.empty
 
     let load_naming_table_base ~naming_table_base =
-      Ok (ignore naming_table_base)
+      ignore naming_table_base;
+      Ok (Some ())
 
     let load_naming_table_changes_since_baseline
         ctx ~naming_table ~naming_table_diff =
-      Ok (ignore (ctx, naming_table, naming_table_diff))
+      ignore (ctx, naming_table, naming_table_diff);
+      Ok (Some ())
   end : RemoteWorker.RemoteServerApi
-    with type naming_table = unit )
+    with type naming_table = unit option )
 
 let parse_work_args () : command =
   let key = ref "" in
@@ -95,17 +97,21 @@ let parse_work_args () : command =
   let root = parse_root args in
   let bin_root = Path.make (Filename.dirname Sys.argv.(0)) in
   let check_id = Random_id.short_string () in
+  let (ctx : Provider_context.t) =
+    Provider_context.empty_for_tool
+      ~tcopt:TypecheckerOptions.default
+      ~backend:Provider_backend.Shared_memory
+  in
+  let server = make_remote_server_api () in
   CWork
-    RemoteWorker.
-      {
-        bin_root;
-        check_id;
-        key = !key;
-        root;
-        naming_table_base = ();
-        timeout = !timeout;
-        server = make_remote_server_api ();
-      }
+    (RemoteWorker.make_env
+       ctx
+       ~bin_root
+       ~check_id
+       ~key:!key
+       ~root
+       ~timeout:!timeout
+       server)
 
 let parse_args () =
   match parse_command () with

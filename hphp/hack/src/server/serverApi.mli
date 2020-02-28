@@ -17,5 +17,4 @@ val make_local_server_api :
 
 val make_remote_server_api :
   MultiWorker.worker list option ->
-  TypecheckerOptions.t ->
   (module RemoteServerApi with type naming_table = Naming_table.t option)

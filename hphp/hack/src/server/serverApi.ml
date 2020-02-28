@@ -83,8 +83,7 @@ let make_local_server_api
       Pervasives.close_out chan
   end : LocalServerApi )
 
-let make_remote_server_api
-    (workers : MultiWorker.worker list option) (tcopt : TypecheckerOptions.t) :
+let make_remote_server_api (workers : MultiWorker.worker list option) :
     (module RemoteServerApi with type naming_table = Naming_table.t option) =
   ( module struct
     type naming_table = Naming_table.t option
@@ -175,7 +174,7 @@ let make_remote_server_api
              with e -> Error (Exn.to_string e))
         end
 
-    let type_check files_to_check ~state_filename =
+    let type_check ctx files_to_check ~state_filename =
       let t = Unix.gettimeofday () in
       Hh_logger.log "Type checking a batch...";
       Typing_check_service.(
@@ -194,7 +193,7 @@ let make_remote_server_api
             workers
             (Typing_check_service.Delegate.create ())
             (Telemetry.create ())
-            tcopt
+            ctx.Provider_context.tcopt
             Relative_path.Set.empty
             files_to_check
             ~memory_cap:None

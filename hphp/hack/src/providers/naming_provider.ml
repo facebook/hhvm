@@ -56,6 +56,9 @@ let get_type_path_and_kind (name : string) :
     (Relative_path.t * Naming_types.kind_of_type) option =
   Naming_heap.Types.get_filename_and_kind name
 
+let get_type_kind (name : string) : Naming_types.kind_of_type option =
+  Naming_heap.Types.get_kind name
+
 let get_type_canon_name (ctx : Provider_context.t) (name : string) :
     string option =
   Naming_heap.Types.get_canon_name ctx name

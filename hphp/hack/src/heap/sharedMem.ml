@@ -67,6 +67,41 @@ let () =
     (C_assertion_failure "dummy string")
 
 (*****************************************************************************)
+(* Each cache can write telemetry about its current occupancy.
+ * - Immediate caches - only records its existence
+ * - WithLocalChanges caches - they do Obj.reachable_words to count up the stack
+ * - Local caches - they do Obj.reachable_words
+ * In the case of compound caches, e.g. WithCache which includes all three,
+ * it doesn't have to report telemetry since each of its constituents already
+ * reports telemetry on its own.
+ * Anyway, each cache registers in the global "get_telemetry_list" so that
+ * callers can do SharedMem.get_telemetry and pick up from all caches.
+ *
+ * Caveats:
+ * Note that Obj.reachable_words may double-count stuff if it's in both
+ * Local and WithLocalChanges cache. It may also take time, up to ~300ms.
+ * And it will be meaningless if the items in the Local cache have references
+ * into other parts of the system. It's up to the reader to make sense of it.
+ *
+ * The "WithLocalChanges" doesn't have a straightforward count of elements.
+ * Instead it counts how many "actions" there are across all change-stacks:
+ * how many adds, removes, replaces.
+ *)
+(*****************************************************************************)
+
+let get_telemetry_list = ref []
+
+let get_telemetry ~(costly : bool) : Telemetry.t =
+  let start_time = Unix.gettimeofday () in
+  let telemetry =
+    List.fold
+      !get_telemetry_list
+      ~init:(Telemetry.create ())
+      ~f:(fun acc get_telemetry -> get_telemetry ~costly acc)
+  in
+  telemetry |> Telemetry.duration ~start_time
+
+(*****************************************************************************)
 (* Initializes the shared memory. Must be called before forking. *)
 (*****************************************************************************)
 external hh_shared_init :
@@ -510,6 +545,15 @@ end = struct
   let remove key = hh_remove key
 
   let move from_key to_key = hh_move from_key to_key
+
+  let get_telemetry ~(costly : bool) (telemetry : Telemetry.t) : Telemetry.t =
+    ignore costly;
+    (* we don't have anything to say about this heap yet *)
+    telemetry
+
+  let () =
+    get_telemetry_list := get_telemetry :: !get_telemetry_list;
+    ()
 end
 
 module ProfiledImmediate : functor (Key : Key) (Value : Value.Type) -> sig
@@ -781,6 +825,44 @@ functor
         | None -> ()
         | Some changeset ->
           Hashtbl.iter (commit_action changeset.prev) changeset.current
+
+      let get_telemetry ~(costly : bool) (telemetry : Telemetry.t) : Telemetry.t
+          =
+        let rec rec_actions_and_depth acc_count acc_depth changeset_opt =
+          match changeset_opt with
+          | Some changeset ->
+            rec_actions_and_depth
+              (acc_count + Hashtbl.length changeset.current)
+              (acc_depth + 1)
+              changeset.prev
+          | None -> (acc_count, acc_depth)
+        in
+        let (actions, depth) = rec_actions_and_depth 0 0 !stack in
+        (* We count reachable words of the entire stack, to avoid double-
+        counting in cases where a value appears in multiple stack frames.
+        If instead we added up reachable words from each frame separately,
+        then an item reachable from two frames would be double-counted. *)
+        let bytes =
+          if costly then
+            Some (Obj.reachable_words (Obj.repr !stack) * (Sys.word_size / 8))
+          else
+            None
+        in
+        if actions = 0 then
+          telemetry
+        else
+          telemetry
+          |> Telemetry.object_
+               ~key:(Value.description ^ ".stack")
+               ~value:
+                 ( Telemetry.create ()
+                 |> Telemetry.int_ ~key:"actions" ~value:actions
+                 |> Telemetry.int_opt ~key:"bytes" ~value:bytes
+                 |> Telemetry.int_ ~key:"depth" ~value:depth )
+
+      let () =
+        get_telemetry_list := get_telemetry :: !get_telemetry_list;
+        ()
     end
 
     let add key value = LocalChanges.(add !stack key value)
@@ -1144,6 +1226,8 @@ module type CacheType = sig
   val string_of_key : key -> string
 
   val get_size : unit -> int
+
+  val get_telemetry_items_and_keys : unit -> Obj.t * key Seq.t
 end
 
 (*****************************************************************************)
@@ -1166,6 +1250,9 @@ end)
   let size = ref 0
 
   let get_size () = !size
+
+  let get_telemetry_items_and_keys () =
+    (Obj.repr cache, Hashtbl.to_seq_keys cache)
 
   let clear () =
     Hashtbl.clear cache;
@@ -1249,6 +1336,9 @@ end)
 
   let get_size () = !size
 
+  let get_telemetry_items_and_keys () =
+    (Obj.repr cache, Hashtbl.to_seq_keys cache)
+
   let clear () =
     Hashtbl.clear cache;
     size := 0;
@@ -1307,6 +1397,7 @@ module LocalCache (UserKeyType : UserKeyType) (Value : Value.Type) = struct
 
   (* Frequent values cache *)
   module L2 = FreqCache (UserKeyType) (ConfValue)
+  module KeySet = Set.Make (UserKeyType)
 
   let string_of_key _key =
     failwith "LocalCache does not support 'string_of_key'"
@@ -1335,7 +1426,38 @@ module LocalCache (UserKeyType : UserKeyType) (Value : Value.Type) = struct
     L1.clear ();
     L2.clear ()
 
+  let get_telemetry ~(costly : bool) (telemetry : Telemetry.t) : Telemetry.t =
+    (* Many items are stored in both L1 (ordered) and L2 (freq) caches.
+    We don't want to double-count them.
+    So: we'll figure out the reachable words of the (L1,L2) tuple,
+    and we'll figure out the set union of keys in both of them. *)
+    let (obj1, keys1) = L1.get_telemetry_items_and_keys () in
+    let (obj2, keys2) = L2.get_telemetry_items_and_keys () in
+    let count =
+      KeySet.empty
+      |> KeySet.add_seq keys1
+      |> KeySet.add_seq keys2
+      |> KeySet.cardinal
+    in
+    if count = 0 then
+      telemetry
+    else
+      let bytes =
+        if costly then
+          Some (Obj.reachable_words (Obj.repr (obj1, obj2)) * Sys.word_size / 8)
+        else
+          None
+      in
+      telemetry
+      |> Telemetry.object_
+           ~key:(Value.description ^ ".local")
+           ~value:
+             ( Telemetry.create ()
+             |> Telemetry.int_ ~key:"count" ~value:count
+             |> Telemetry.int_opt ~key:"bytes" ~value:bytes )
+
   let () =
+    get_telemetry_list := get_telemetry :: !get_telemetry_list;
     invalidate_callback_list :=
       begin
         fun () ->

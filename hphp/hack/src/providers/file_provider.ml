@@ -31,7 +31,7 @@ module FileHeap =
 
       let prefix = Prefix.make ()
 
-      let description = "Disk"
+      let description = "File"
     end)
 
 let read_file_contents_from_disk (fn : Relative_path.t) : string option =

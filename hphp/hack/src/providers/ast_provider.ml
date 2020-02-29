@@ -27,7 +27,7 @@ module ParserHeap =
 
       let prefix = Prefix.make ()
 
-      let description = "Parser"
+      let description = "Ast_Parser"
     end)
 
 module LocalParserCache =
@@ -38,7 +38,7 @@ module LocalParserCache =
 
       let prefix = Prefix.make ()
 
-      let description = "ParserLocal"
+      let description = "Ast_ParserLocal"
     end)
 
 let parse

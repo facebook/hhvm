@@ -100,7 +100,7 @@ module Types = struct
 
         let prefix = Prefix.make ()
 
-        let description = "TypeCanon"
+        let description = "Naming_TypeCanon"
       end)
 
   module TypePosHeap =
@@ -110,7 +110,7 @@ module Types = struct
 
         let prefix = Prefix.make ()
 
-        let description = "TypePos"
+        let description = "Naming_TypePos"
       end)
 
   module BlockedEntries =
@@ -120,7 +120,7 @@ module Types = struct
 
         let prefix = Prefix.make ()
 
-        let description = "TypeBlocked"
+        let description = "Naming_TypeBlocked"
       end)
 
   let add id type_info =
@@ -249,7 +249,7 @@ module Funs = struct
 
         let prefix = Prefix.make ()
 
-        let description = "FunCanon"
+        let description = "Naming_FunCanon"
       end)
 
   module FunPosHeap =
@@ -259,7 +259,7 @@ module Funs = struct
 
         let prefix = Prefix.make ()
 
-        let description = "FunPos"
+        let description = "Naming_FunPos"
       end)
 
   module BlockedEntries =
@@ -269,7 +269,7 @@ module Funs = struct
 
         let prefix = Prefix.make ()
 
-        let description = "FunBlocked"
+        let description = "Naming_FunBlocked"
       end)
 
   let add id pos =
@@ -340,7 +340,7 @@ module Consts = struct
 
         let prefix = Prefix.make ()
 
-        let description = "ConstPos"
+        let description = "Naming_ConstPos"
       end)
 
   module BlockedEntries =
@@ -350,7 +350,7 @@ module Consts = struct
 
         let prefix = Prefix.make ()
 
-        let description = "ConstBlocked"
+        let description = "Naming_ConstBlocked"
       end)
 
   let add id pos =

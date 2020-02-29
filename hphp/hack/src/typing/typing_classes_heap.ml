@@ -61,7 +61,7 @@ module Classes = struct
 
         let prefix = Prefix.make ()
 
-        let description = "ClassType"
+        let description = "Decl_Typing_ClassType"
       end)
 
   type key = StringKey.t

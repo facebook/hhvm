@@ -10,7 +10,7 @@ module IntVal = struct
 
   let prefix = Prefix.make ()
 
-  let description = "IntVal"
+  let description = "Test_IntVal"
 end
 
 module TestHeap = SharedMem.NoCache (SharedMem.Immediate) (StringKey) (IntVal)

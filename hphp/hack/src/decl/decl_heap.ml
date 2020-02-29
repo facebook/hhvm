@@ -24,7 +24,7 @@ module Class = struct
 
   let prefix = Prefix.make ()
 
-  let description = "Class"
+  let description = "Decl_Class"
 end
 
 (* a function type *)
@@ -33,7 +33,7 @@ module Fun = struct
 
   let prefix = Prefix.make ()
 
-  let description = "Fun"
+  let description = "Decl_Fun"
 end
 
 module RecordDef = struct
@@ -41,7 +41,7 @@ module RecordDef = struct
 
   let prefix = Prefix.make ()
 
-  let description = "RecordDef"
+  let description = "Decl_RecordDef"
 end
 
 module Typedef = struct
@@ -49,7 +49,7 @@ module Typedef = struct
 
   let prefix = Prefix.make ()
 
-  let description = "Typedef"
+  let description = "Decl_Typedef"
 end
 
 module GConst = struct
@@ -57,7 +57,7 @@ module GConst = struct
 
   let prefix = Prefix.make ()
 
-  let description = "GConst"
+  let description = "Decl_GConst"
 end
 
 module Funs =
@@ -76,7 +76,7 @@ module Property = struct
 
   let prefix = Prefix.make ()
 
-  let description = "Property"
+  let description = "Decl_Property"
 end
 
 module StaticProperty = struct
@@ -84,7 +84,7 @@ module StaticProperty = struct
 
   let prefix = Prefix.make ()
 
-  let description = "StaticProperty"
+  let description = "Decl_StaticProperty"
 end
 
 module Method = struct
@@ -92,7 +92,7 @@ module Method = struct
 
   let prefix = Prefix.make ()
 
-  let description = "Method"
+  let description = "Decl_Method"
 end
 
 module StaticMethod = struct
@@ -100,7 +100,7 @@ module StaticMethod = struct
 
   let prefix = Prefix.make ()
 
-  let description = "StaticMethod"
+  let description = "Decl_StaticMethod"
 end
 
 module Constructor = struct
@@ -108,7 +108,7 @@ module Constructor = struct
 
   let prefix = Prefix.make ()
 
-  let description = "Constructor"
+  let description = "Decl_Constructor"
 end
 
 module ClassEltKey = struct

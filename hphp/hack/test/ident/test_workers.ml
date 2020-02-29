@@ -17,7 +17,7 @@ module Ids =
 
       let prefix = Prefix.make ()
 
-      let description = ""
+      let description = "Test_Ids"
     end)
 
 let entry =

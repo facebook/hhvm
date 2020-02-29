@@ -77,7 +77,7 @@ module Cache =
 
       let prefix = Prefix.make ()
 
-      let description = "Linearization"
+      let description = "Decl_Linearization"
     end)
 
 let push_local_changes = Cache.LocalChanges.push_stack
@@ -101,7 +101,7 @@ module LocalCache =
 
       let prefix = Prefix.make ()
 
-      let description = "LazyLinearization"
+      let description = "Decl_LazyLinearization"
     end)
 
 let ancestor_from_ty (source : source_type) (ty : decl_ty) :

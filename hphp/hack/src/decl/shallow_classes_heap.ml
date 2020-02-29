@@ -17,7 +17,7 @@ module Classes =
 
       let prefix = Prefix.make ()
 
-      let description = "ShallowClass"
+      let description = "Decl_ShallowClass"
     end)
 
 let push_local_changes = Classes.LocalChanges.push_stack

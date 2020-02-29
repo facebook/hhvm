@@ -22,7 +22,7 @@ module UnitVal = struct
 
   let prefix = Prefix.make ()
 
-  let description = "UnitVal"
+  let description = "Test_UnitVal"
 end
 
 module TestHeap = SharedMem.NoCache (SharedMem.Immediate) (StringKey) (UnitVal)

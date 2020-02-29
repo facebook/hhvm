@@ -1353,6 +1353,12 @@ end
 (*****************************************************************************)
 module WithCache (Raw : Raw) (UserKeyType : UserKeyType) (Value : Value.Type) =
 struct
+  module ValueForCache = struct
+    include Value
+
+    let description = Value.description ^ ":cache"
+  end
+
   module Direct = NoCache (Raw) (UserKeyType) (Value)
 
   type key = Direct.key
@@ -1361,7 +1367,7 @@ struct
 
   module KeySet = Direct.KeySet
   module KeyMap = Direct.KeyMap
-  module Cache = LocalCache (UserKeyType) (Value)
+  module Cache = LocalCache (UserKeyType) (ValueForCache)
 
   let string_of_key key = Direct.string_of_key key
 

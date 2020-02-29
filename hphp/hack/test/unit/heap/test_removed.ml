@@ -15,7 +15,7 @@ module IntVal = struct
 
   let prefix = Prefix.make ()
 
-  let description = "IntVal"
+  let description = "Test_IntVal"
 end
 
 let test_add_remove

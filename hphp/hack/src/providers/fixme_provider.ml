@@ -30,7 +30,7 @@ module HH_FIXMES =
 
       let prefix = Prefix.make ()
 
-      let description = "HH_FIXMES"
+      let description = "Fixme_HH_FIXMES"
     end)
 
 module DECL_HH_FIXMES =
@@ -40,7 +40,7 @@ module DECL_HH_FIXMES =
 
       let prefix = Prefix.make ()
 
-      let description = "DECL_HH_FIXMES"
+      let description = "Fixme_DECL_HH_FIXMES"
     end)
 
 module DISALLOWED_FIXMES =
@@ -50,7 +50,7 @@ module DISALLOWED_FIXMES =
 
       let prefix = Prefix.make ()
 
-      let description = "DISALLOWED_FIXMES"
+      let description = "Fixme_DISALLOWED_FIXMES"
     end)
 
 let get_fixmes filename =

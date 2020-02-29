@@ -116,11 +116,11 @@ let hint_to_type_opt ~is_lambda env reason hint =
   let ty = Option.map hint ~f:(Decl_hint.hint env) in
   let tcopt = env.Decl_env.ctx.Provider_context.tcopt in
   let tco_global_inference = GlobalOptions.tco_global_inference tcopt in
-  let mk_tvar r = mk (r, Tvar (Ident.tmp ())) in
+  let tvar = mk (reason, Tvar 0) in
   if tco_global_inference && not is_lambda then
     let ty =
       match ty with
-      | None -> mk_tvar reason
+      | None -> tvar
       | Some ty ->
         let rec create_vars_for_reinfer_types ty =
           match deref ty with
@@ -134,12 +134,13 @@ let hint_to_type_opt ~is_lambda env reason hint =
           | (r, Tapply ((_p, id), []))
             when String.equal (cut_namespace id) "PHPism_FIXME_Array" ->
             if must_reinfer_type tcopt (get_node ty) then
-              mk (r, Tvarray_or_darray (Some (mk_tvar reason), mk_tvar reason))
+              let tvar = mk (r, Tvar 0) in
+              mk (r, Tvarray_or_darray (Some tvar, tvar))
             else
               ty
           | (_r, ty_) ->
             if must_reinfer_type tcopt ty_ then
-              mk_tvar reason
+              tvar
             else
               ty
         in

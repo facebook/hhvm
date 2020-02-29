@@ -114,7 +114,7 @@ let rec localize ~ety_env env (dty : decl_ty) =
   match deref dty with
   | (r, Terr) -> (env, TUtils.terr env r)
   | (r, Tany _) -> (env, mk (r, TUtils.tany env))
-  | (r, Tvar var) -> Env.new_global_tyvar env var r
+  | (r, Tvar _var) -> Env.new_global_tyvar env r
   | (r, ((Tnonnull | Tprim _ | Tdynamic) as x)) -> (env, mk (r, x))
   | (r, Tmixed) -> (env, MakeType.mixed r)
   | (r, Tthis) ->
@@ -162,11 +162,20 @@ let rec localize ~ety_env env (dty : decl_ty) =
   | (r, Tvarray_or_darray (tk, tv)) ->
     let (env, tk) =
       match tk with
-      | Some tk -> localize ~ety_env env tk
+      | Some tk ->
+        if GlobalOptions.tco_global_inference env.genv.tcopt && is_tyvar tk then
+          Env.new_global_tyvar env ~i:1 r
+        else
+          localize ~ety_env env tk
       | None ->
         (env, MakeType.arraykey Reason.(Rvarray_or_darray_key (to_pos r)))
     in
-    let (env, tv) = localize ~ety_env env tv in
+    let (env, tv) =
+      if GlobalOptions.tco_global_inference env.genv.tcopt && is_tyvar tv then
+        Env.new_global_tyvar env ~i:2 r
+      else
+        localize ~ety_env env tv
+    in
     (env, MakeType.varray_or_darray r tk tv)
   | (r, Tgeneric x) ->
     begin
@@ -678,8 +687,7 @@ and localize_missing_tparams_class env r sid class_ =
         let (env, ty) =
           Env.new_global_tyvar
             env
-            (Ident.from_string_hash
-               (Printf.sprintf "%s#%d" (Pos.print_verbose_relative use_pos) i))
+            ~i
             (Reason.Rtype_variable_generics
                (use_pos, snd tparam.tp_name, use_name))
         in

@@ -443,7 +443,19 @@ let fresh_type ?variance env p =
 
 let fresh_invariant_type_var = fresh_type ~variance:Ast_defs.Invariant
 
-let new_global_tyvar env v r =
+let new_global_tyvar env ?i r =
+  let v =
+    let extension =
+      match i with
+      | Some i -> Printf.sprintf "#%d" i
+      | None -> ""
+    in
+    Ident.from_string_hash
+      (Printf.sprintf
+         "%s%s"
+         (Pos.print_verbose_relative (Reason.to_pos r))
+         extension)
+  in
   let env =
     let p = Reason.to_pos r in
     match get_tyvar_info_opt env v with

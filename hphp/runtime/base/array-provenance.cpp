@@ -31,6 +31,7 @@
 #include <folly/AtomicHashMap.h>
 #include <folly/container/F14Map.h>
 #include <folly/Format.h>
+#include <folly/SharedMutex.h>
 
 #include <type_traits>
 
@@ -63,7 +64,7 @@ namespace {
 RDS_LOCAL_NO_CHECK(Tag, rl_tag_override);
 RDS_LOCAL(ArrayProvenanceTable, rl_array_provenance);
 folly::F14FastMap<const void*, Tag> s_static_array_provenance;
-std::mutex s_static_provenance_lock;
+folly::SharedMutex s_static_provenance_lock;
 
 /*
  * Flush the table after each request since none of the ArrayData*s will be
@@ -160,7 +161,7 @@ Tag getTagImpl(const A* a) {
   if (wants_local_prov(a)) {
     return get(a, rl_array_provenance->tags);
   } else {
-    std::lock_guard<std::mutex> g{s_static_provenance_lock};
+    folly::SharedMutex::ReadHolder g(s_static_provenance_lock);
     return get(a, s_static_array_provenance);
   }
 }
@@ -174,7 +175,7 @@ bool setTagImpl(A* a, Tag tag) {
   if (wants_local_prov(a)) {
     rl_array_provenance->tags[a] = tag;
   } else {
-    std::lock_guard<std::mutex> g{s_static_provenance_lock};
+    folly::SharedMutex::WriteHolder g(s_static_provenance_lock);
     s_static_array_provenance[a] = tag;
   }
   return true;
@@ -187,7 +188,7 @@ void clearTagImpl(const A* a) {
   if (wants_local_prov(a)) {
     rl_array_provenance->tags.erase(a);
   } else {
-    std::lock_guard<std::mutex> g{s_static_provenance_lock};
+    folly::SharedMutex::WriteHolder g(s_static_provenance_lock);
     s_static_array_provenance.erase(a);
   }
 }

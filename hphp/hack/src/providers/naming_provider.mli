@@ -67,3 +67,6 @@ val get_type_pos_and_kind :
 reverse naming table. *)
 val get_type_path_and_kind :
   string -> (Relative_path.t * Naming_types.kind_of_type) option
+
+(** Look up the canonical name for the given type. *)
+val get_type_canon_name : Provider_context.t -> string -> string option

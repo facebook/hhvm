@@ -70,7 +70,7 @@ module GEnv = struct
       raise File_provider.File_provider_stale
 
   let type_canon_name ctx name =
-    Naming_heap.Types.get_canon_name ctx (canon_key name)
+    Naming_provider.get_type_canon_name ctx (canon_key name)
 
   let type_pos ctx name =
     let name = Option.value (type_canon_name ctx name) ~default:name in
@@ -165,7 +165,7 @@ module Env = struct
       | Naming_types.TTypedef -> FileInfo.Typedef
       | Naming_types.TRecordDef -> FileInfo.RecordDef
     in
-    match Naming_heap.Types.get_canon_name ctx name_key with
+    match Naming_provider.get_type_canon_name ctx name_key with
     | Some _ -> ()
     | None ->
       (* We store redundant info in this case, but if the position is a *)
@@ -220,7 +220,7 @@ module Env = struct
       ()
     else
       let name_key = canon_key name in
-      match Naming_heap.Types.get_canon_name ctx name_key with
+      match Naming_provider.get_type_canon_name ctx name_key with
       | Some canonical -> validate canonical Errors.error_name_already_bound
       | None ->
         (* Check to prevent collision with attribute classes
@@ -237,7 +237,7 @@ module Env = struct
             attr_prefix ^ String.sub name_key 1 (name_len - 1)
         in
         begin
-          match Naming_heap.Types.get_canon_name ctx alt_name_key with
+          match Naming_provider.get_type_canon_name ctx alt_name_key with
           | Some alt_canonical ->
             validate alt_canonical Errors.error_class_attribute_already_bound
           | None -> ()

@@ -33,6 +33,10 @@ struct IRGS;
 
 //////////////////////////////////////////////////////////////////////
 
+// Returns the index of a parameter that should be a vanilla-array like,
+// or -1 if our optimized irgen for that builtin has no such requirement.
+int getBuiltinVanillaParam(const char* name);
+
 SSATmp* optimizedCallIsObject(IRGS&, SSATmp*);
 
 // The builtin's inferred return type (without taking into account coercion

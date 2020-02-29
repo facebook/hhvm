@@ -720,6 +720,10 @@ fn print_const_id<W: Write>(w: &mut W, id: &ConstId) -> Result<(), W::Error> {
     wrap_by_quotes(w, |w| w.write(escape(id.to_raw_string())))
 }
 
+fn print_prop_id<W: Write>(w: &mut W, id: &PropId) -> Result<(), W::Error> {
+    wrap_by_quotes(w, |w| w.write(escape(id.to_raw_string())))
+}
+
 fn print_adata_id<W: Write>(w: &mut W, id: &AdataId) -> Result<(), W::Error> {
     concat_str(w, ["@", id.as_str()])
 }
@@ -1129,27 +1133,90 @@ fn print_instr<W: Write>(w: &mut W, instr: &Instruct) -> Result<(), W::Error> {
         IContFlow(cf) => print_control_flow(w, cf),
         ICall(c) => print_call(w, c),
         IMisc(misc) => print_misc(w, misc),
-        IGet(iget) => print_get(w, iget),
+        IGet(get) => print_get(w, get),
         IMutator(mutator) => print_mutator(w, mutator),
         ILabel(l) => {
             print_label(w, l)?;
             w.write(":")
         }
-        IIsset(_) => not_impl!(),
+        IIsset(i) => print_isset(w, i),
         IBase(_) => not_impl!(),
         IFinal(_) => not_impl!(),
-        ITry(t) => w.write(match t {
-            InstructTry::TryCatchBegin => ".try {",
-            InstructTry::TryCatchMiddle => "} .catch {",
-            InstructTry::TryCatchEnd => "}",
-        }),
+        ITry(itry) => print_try(w, itry),
         IComment(s) => concat_str_by(w, " ", ["#", s.as_str()]),
         ISrcLoc(_) => not_impl!(),
-        IAsync(_) => not_impl!(),
+        IAsync(a) => print_async(w, a),
         IGenerator(gen) => print_gen_creation_execution(w, gen),
         IIncludeEvalDefine(ed) => print_include_eval_define(w, ed),
         IGenDelegation(_) => not_impl!(),
         _ => Err(Error::fail("invalid instruction")),
+    }
+}
+
+fn print_async<W: Write>(w: &mut W, a: &AsyncFunctions) -> Result<(), W::Error> {
+    use AsyncFunctions as A;
+    match a {
+        A::WHResult => w.write("WHResult"),
+        A::Await => w.write("Await"),
+        A::AwaitAll(Some((Local::Unnamed(id), count))) => w.write(format!("L:{}+{}", id, count)),
+        A::AwaitAll(None) => w.write("L:0+0"),
+        _ => Err(Error::fail("AwaitAll needs an unnamed local")),
+    }
+}
+
+fn print_isset<W: Write>(w: &mut W, isset: &InstructIsset) -> Result<(), W::Error> {
+    use InstructIsset as I;
+    match isset {
+        I::IssetC => w.write("IssetC"),
+        I::IssetL(local) => {
+            w.write("IssetL ")?;
+            print_local(w, local)
+        }
+        I::IssetG => w.write("IssetG"),
+        I::IssetS => w.write("IssetS"),
+        I::IsTypeC(op) => {
+            w.write("IsTypeC ")?;
+            print_istype_op(w, op)
+        }
+        I::IsTypeL(local, op) => {
+            w.write("IsTypeL ")?;
+            print_local(w, local)?;
+            w.write(" ")?;
+            print_istype_op(w, op)
+        }
+    }
+}
+
+fn print_istype_op<W: Write>(w: &mut W, op: &IstypeOp) -> Result<(), W::Error> {
+    use IstypeOp as Op;
+    match op {
+        Op::OpNull => w.write("Null"),
+        Op::OpBool => w.write("Bool"),
+        Op::OpInt => w.write("Int"),
+        Op::OpDbl => w.write("Dbl"),
+        Op::OpStr => w.write("Str"),
+        Op::OpArr => w.write("Arr"),
+        Op::OpObj => w.write("Obj"),
+        Op::OpRes => w.write("Res"),
+        Op::OpScalar => w.write("Scalar"),
+        Op::OpKeyset => w.write("Keyset"),
+        Op::OpDict => w.write("Dict"),
+        Op::OpVec => w.write("Vec"),
+        Op::OpArrLike => w.write("ArrLike"),
+        Op::OpVArray => w.write("VArray"),
+        Op::OpDArray => w.write("DArray"),
+        Op::OpClsMeth => w.write("ClsMeth"),
+        Op::OpFunc => w.write("Func"),
+        Op::OpPHPArr => w.write("PHPArr"),
+    }
+}
+
+fn print_try<W: Write>(w: &mut W, itry: &InstructTry) -> Result<(), W::Error> {
+    use InstructTry as T;
+    match itry {
+        T::TryCatchBegin => w.write(".try {"),
+        T::TryCatchMiddle => w.write("} .catch {"),
+        T::TryCatchEnd => w.write("}"),
     }
 }
 
@@ -1160,8 +1227,93 @@ fn print_mutator<W: Write>(w: &mut W, mutator: &InstructMutator) -> Result<(), W
             w.write("SetL ")?;
             print_local(w, local)
         }
-        _ => not_impl!(),
+        M::PopL(id) => {
+            w.write("PopL ")?;
+            print_local(w, id)
+        }
+        M::SetG => w.write("SetG"),
+        M::SetS => w.write("SetS"),
+        M::SetOpL(id, op) => {
+            w.write("SetOpL ")?;
+            print_local(w, id)?;
+            w.write(" ")?;
+            print_eq_op(w, op)
+        }
+        M::SetOpG(op) => {
+            w.write("SetOpG ")?;
+            print_eq_op(w, op)
+        }
+        M::SetOpS(op) => {
+            w.write("SetOpS ")?;
+            print_eq_op(w, op)
+        }
+        M::IncDecL(id, op) => {
+            w.write("IncDecL ")?;
+            print_local(w, id)?;
+            w.write(" ")?;
+            print_incdec_op(w, op)
+        }
+        M::IncDecG(op) => {
+            w.write("IncDecG ")?;
+            w.write(" ")?;
+            print_incdec_op(w, op)
+        }
+        M::IncDecS(op) => {
+            w.write("IncDecS ")?;
+            print_incdec_op(w, op)
+        }
+        M::UnsetL(id) => {
+            w.write("UnsetL ")?;
+            print_local(w, id)
+        }
+        M::UnsetG => w.write("UnsetG "),
+        M::CheckProp(id) => {
+            w.write("CheckProp ")?;
+            print_prop_id(w, id)
+        }
+        M::InitProp(id, op) => {
+            w.write("InitProp ")?;
+            print_prop_id(w, id)?;
+            w.write(" ")?;
+            match op {
+                InitpropOp::Static => w.write("Static"),
+                InitpropOp::NonStatic => w.write("NonStatic"),
+            }
+        }
     }
+}
+
+fn print_eq_op<W: Write>(w: &mut W, op: &EqOp) -> Result<(), W::Error> {
+    w.write(match op {
+        EqOp::PlusEqual => "PlusEqual",
+        EqOp::MinusEqual => "MinusEqual",
+        EqOp::MulEqual => "MulEqual",
+        EqOp::ConcatEqual => "ConcatEqual",
+        EqOp::DivEqual => "DivEqual",
+        EqOp::PowEqual => "PowEqual",
+        EqOp::ModEqual => "ModEqual",
+        EqOp::AndEqual => "AndEqual",
+        EqOp::OrEqual => "OrEqual",
+        EqOp::XorEqual => "XorEqual",
+        EqOp::SlEqual => "SlEqual",
+        EqOp::SrEqual => "SrEqual",
+        EqOp::PlusEqualO => "PlusEqualO",
+        EqOp::MinusEqualO => "MinusEqualO",
+        EqOp::MulEqualO => "MulEqualO",
+    })
+}
+
+fn print_incdec_op<W: Write>(w: &mut W, op: &IncdecOp) -> Result<(), W::Error> {
+    w.write(match op {
+        IncdecOp::PreInc => "PreInc",
+        IncdecOp::PostInc => "PostInc",
+        IncdecOp::PreDec => "PreDec",
+        IncdecOp::PostDec => "PostDec",
+        IncdecOp::PreIncO => "PreIncO",
+        IncdecOp::PostIncO => "PostIncO",
+        IncdecOp::PreDecO => "PreDecO",
+        IncdecOp::PostDecO => "PostDecO",
+    })
 }
 
 fn print_gen_creation_execution<W: Write>(
@@ -1207,6 +1359,19 @@ fn print_misc<W: Write>(w: &mut W, misc: &InstructMisc) -> Result<(), W::Error> 
         M::CGetCUNop => w.write("CGetCUNop"),
         M::UGetCUNop => w.write("UGetCUNop"),
         M::LockObj => w.write("LockObj"),
+        M::VerifyParamType(id) => {
+            w.write("VerifyParamType ")?;
+            print_param_id(w, id)
+        }
+        M::Silence(local, op) => {
+            w.write("Silence ")?;
+            print_local(w, local)?;
+            w.write(" ")?;
+            match op {
+                OpSilence::Start => w.write("Start"),
+                OpSilence::End => w.write("End"),
+            }
+        }
         _ => not_impl!(),
     }
 }
@@ -1252,7 +1417,7 @@ fn print_control_flow<W: Write>(w: &mut W, cf: &InstructControlFlow) -> Result<(
         }
         CF::RetC => w.write("RetC"),
         CF::RetCSuspended => w.write("RetCSuspended"),
-        CF::RetM(p) => not_impl!(),
+        CF::RetM(p) => concat_str(w, ["RetM", p.to_string().as_str()]),
         CF::Throw => w.write("Throw"),
         CF::Switch(_, _, _) => not_impl!(),
         CF::SSwitch(_) => not_impl!(),
@@ -1504,6 +1669,13 @@ fn print_param<W: Write>(
     option(w, &param.default_value, |w, i| {
         print_param_default_value(w, body_env, i)
     })
+}
+
+fn print_param_id<W: Write>(w: &mut W, param_id: &ParamId) -> Result<(), W::Error> {
+    match param_id {
+        ParamId::ParamUnnamed(i) => w.write(i.to_string()),
+        ParamId::ParamNamed(s) => w.write(s),
+    }
 }
 
 fn print_param_default_value<W: Write>(

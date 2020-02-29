@@ -382,6 +382,7 @@ fn emit_while(e: &mut Emitter, env: &mut Env, cond: &tast::Expr, body: &tast::St
             emit_stmt_wrapper,
         )?,
         InstrSeq::make_label(cont_label),
+        emit_expr::emit_jmpnz(e, env, cond, &start_label)?.instrs,
         InstrSeq::make_label(break_label),
     ]))
 }

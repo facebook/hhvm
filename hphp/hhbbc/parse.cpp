@@ -669,8 +669,8 @@ void add_frame_variables(php::Func& func, const FuncEmitter& fe) {
         param.phpCode,
         param.userAttributes,
         param.builtinType,
-        param.inout,
-        param.variadic
+        param.isInOut(),
+        param.isVariadic()
       }
     );
   }
@@ -724,7 +724,7 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   ret->noContextSensitiveAnalysis = fe.userAttributes.find(
     s___NoContextSensitiveAnalysis.get()) != fe.userAttributes.end();
   ret->hasInOutArgs        = [&] {
-    for (auto& a : fe.params) if (a.inout) return true;
+    for (auto& a : fe.params) if (a.isInOut()) return true;
     return false;
   }();
 

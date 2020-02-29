@@ -558,7 +558,7 @@ std::string func_param_list(const FuncInfo& finfo) {
         Attr(), &func->params()[i].userAttributes,
         /*isTop*/true, /*needPrefix*/false);
 
-    if (func->params()[i].variadic) {
+    if (func->params()[i].isVariadic()) {
       ret += "...";
     }
     if (func->isInOut(i)) {

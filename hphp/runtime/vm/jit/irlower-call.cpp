@@ -298,10 +298,10 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
     // holding the value, so we expect PtrToT types for these.  Pointers to
     // req::ptr types (String, Array, Object) need adjusting to point to
     // &ptr->m_data.
-    if (TVOFF(m_data) && !pi.nativeArg && isReqPtrRef(pi.builtinType)) {
+    if (TVOFF(m_data) && !pi.isNativeArg() && isReqPtrRef(pi.builtinType)) {
       assertx(inst->src(srcNum)->type() <= TPtrToCell);
       args.addr(srcLoc(env, inst, srcNum).reg(), TVOFF(m_data));
-    } else if (pi.nativeArg && !pi.builtinType) {
+    } else if (pi.isNativeArg() && !pi.builtinType) {
       // This condition indicates a MixedTV (i.e., TypedValue-by-value) arg.
       args.typedValue(srcNum);
     } else {

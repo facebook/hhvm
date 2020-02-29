@@ -2360,7 +2360,6 @@ void parse_parameter_list(AsmState& as,
 
   for (;;) {
     FuncEmitter::ParamInfo param;
-    param.inout = false;
 
     as.in.skipWhitespace();
     int ch = as.in.peek();
@@ -2380,7 +2379,7 @@ void parse_parameter_list(AsmState& as,
       }
 
       seenVariadic = true;
-      param.variadic = true;
+      param.setFlag(Func::ParamInfo::Flags::Variadic);
       as.fe->attrs |= AttrVariadicParam;
     }
 
@@ -2391,7 +2390,7 @@ void parse_parameter_list(AsmState& as,
       if (seenRef) {
         as.error("functions cannot contain both inout and ref parameters");
       }
-      param.inout = true;
+      param.setFlag(Func::ParamInfo::Flags::InOut);
     }
 
     std::tie(param.userType, param.typeConstraint) = parse_type_info(as);

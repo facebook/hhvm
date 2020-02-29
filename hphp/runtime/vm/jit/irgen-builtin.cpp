@@ -1294,8 +1294,8 @@ prepare_params(IRGS& /*env*/, const Func* callee, SSATmp* ctx,
     cur.isInOut = callee->isInOut(offset);
     // We do actually mean exact type equality here.  We're only capable of
     // passing the following primitives through registers; everything else goes
-    // by address unless its flagged "nativeArg".
-    if (ty == TBool || ty == TInt || ty == TDbl || pi.nativeArg) {
+    // by address unless its flagged "NativeArg".
+    if (ty == TBool || ty == TInt || ty == TDbl || pi.isNativeArg()) {
       continue;
     }
     if (cur.isInOut) continue;
@@ -1650,7 +1650,7 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
             assertx(targetTy == TBool ||
                     targetTy == TInt ||
                     targetTy == TDbl ||
-                    callee->params()[paramIdx].nativeArg ||
+                    callee->params()[paramIdx].isNativeArg() ||
                     callee->isInOut(paramIdx));
             return gen(env, LdMem,
                        targetTy == TBottom ? TCell : targetTy,

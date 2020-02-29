@@ -212,7 +212,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
       pi.builtinType = RuntimeOption::EvalHackArrDVArrs
         ? KindOfVec : KindOfArray;
     }
-    f->appendParam(params[i].inout, pi, fParams);
+    f->appendParam(params[i].isInOut(), pi, fParams);
     auto const& fromUBs = params[i].upperBounds;
     if (!fromUBs.empty()) {
       auto& ub = f->extShared()->m_paramUBs[i];
@@ -293,7 +293,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
           case Native::NativeSig::Type::ArrayArg:
           case Native::NativeSig::Type::ResourceArg:
           case Native::NativeSig::Type::MixedTV:
-            fParams[i].nativeArg = true;
+            fParams[i].setFlag(Func::ParamInfo::Flags::NativeArg);
             break;
           default:
             break;

@@ -58,7 +58,7 @@ inline void Func::ParamInfo::serde(SerDe& sd) {
     (defaultValue)
     (phpCode)
     (typeConstraint)
-    (variadic)
+    (flags)
     (userAttributes)
     (userType)
     ;
@@ -72,8 +72,20 @@ inline bool Func::ParamInfo::hasScalarDefaultValue() const {
   return hasDefaultValue() && defaultValue.m_type != KindOfUninit;
 }
 
+inline bool Func::ParamInfo::isInOut() const {
+  return flags & (1 << static_cast<int32_t>(Flags::InOut));
+}
+
 inline bool Func::ParamInfo::isVariadic() const {
-  return variadic;
+  return flags & (1 << static_cast<int32_t>(Flags::Variadic));
+}
+
+inline bool Func::ParamInfo::isNativeArg() const {
+  return flags & (1 << static_cast<int32_t>(Flags::NativeArg));
+}
+
+inline void Func::ParamInfo::setFlag(Func::ParamInfo::Flags flag) {
+  flags |= 1 << static_cast<int32_t>(flag);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -337,7 +349,7 @@ inline uint32_t Func::numRequiredParams() const {
 inline bool Func::hasVariadicCaptureParam() const {
 #ifndef NDEBUG
   assertx(bool(m_attrs & AttrVariadicParam) ==
-         (numParams() && params()[numParams() - 1].variadic));
+         (numParams() && params()[numParams() - 1].isVariadic()));
 #endif
   return m_attrs & AttrVariadicParam;
 }

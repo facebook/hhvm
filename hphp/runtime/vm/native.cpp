@@ -161,7 +161,7 @@ void populateArgs(Registers& regs, const Func* const func,
       pushInt(regs, (int64_t)io++);
     } else if (type == KindOfDouble) {
       pushDouble(regs, val(arg));
-    } else if (pi.nativeArg) {
+    } else if (pi.isNativeArg()) {
       pushNativeArg(regs, func, i, type, arg);
     } else if (!type) {
       pushInt(regs, (int64_t)&arg);
@@ -711,12 +711,12 @@ const char* checkTypeFunc(const NativeSig& sig,
 
     auto const argTy = *argIt++;
 
-    if (pInfo.variadic) {
+    if (pInfo.isVariadic()) {
       if (argTy != T::Array) return kInvalidArgTypeMessage;
       continue;
     }
 
-    if (pInfo.inout) {
+    if (pInfo.isInOut()) {
       if (!tcCheckNativeIO(pInfo, argTy)) {
         return kInvalidArgTypeMessage;
       }

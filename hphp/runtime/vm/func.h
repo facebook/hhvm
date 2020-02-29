@@ -128,20 +128,27 @@ struct Func final {
    * Parameter default value info.
    */
   struct ParamInfo {
+    enum class Flags {
+      InOut,      // Is this an `inout' parameter?
+      Variadic,   // Is this a `...' parameter?
+      NativeArg,  // Does this use a NativeArg?
+    };
+
     ParamInfo();
 
     bool hasDefaultValue() const;
     bool hasScalarDefaultValue() const;
+    bool isInOut() const;
     bool isVariadic() const;
+    bool isNativeArg() const;
+    void setFlag(Flags flag);
 
     template<class SerDe> void serde(SerDe& sd);
 
     // Typehint for builtins.
     MaybeDataType builtinType{folly::none};
-    // True if this is a `...' parameter.
-    bool variadic{false};
-    // Does this use a NativeArg?
-    bool nativeArg{false};
+    // Flags as defined by the Flags enum.
+    uint8_t flags{0};
     // DV initializer funclet offset.
     Offset funcletOff{kInvalidOffset};
     // Set to Uninit if there is no DV, or if there's a nonscalar DV.

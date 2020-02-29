@@ -57,21 +57,15 @@ struct FuncEmitter {
 
   using UpperBoundVec = CompactVector<TypeConstraint>;
   struct ParamInfo : public Func::ParamInfo {
-    ParamInfo()
-      : inout(false)
-    {}
+    ParamInfo() {}
 
     template<class SerDe>
     void serde(SerDe& sd) {
       Func::ParamInfo* parent = this;
       parent->serde(sd);
-      sd(inout);
       sd(upperBounds);
     }
 
-    // Whether the parameter is passed as an inout.  This field is absent from
-    // Func::ParamInfo because we store it in a bitfield on Func.
-    bool inout;
     UpperBoundVec upperBounds;
   };
 

@@ -825,8 +825,8 @@ void emit_locals_and_params(FuncEmitter& fe,
       pinfo.phpCode = param.phpCode;
       pinfo.userAttributes = param.userAttributes;
       pinfo.builtinType = param.builtinType;
-      pinfo.inout = param.inout;
-      pinfo.variadic = param.isVariadic;
+      if (param.inout) pinfo.setFlag(Func::ParamInfo::Flags::InOut);
+      if (param.isVariadic) pinfo.setFlag(Func::ParamInfo::Flags::Variadic);
       fe.appendParam(func.locals[id].name, pinfo);
       auto const dv = param.dvEntryPoint;
       if (dv != NoBlockId) {

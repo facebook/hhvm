@@ -222,7 +222,7 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
           stack.pushObjectNoRc(eagerResult);
         }
       } else {
-        jit::g_unwind_rds->fswh = nullptr;
+        if (jit) jit::g_unwind_rds->fswh = nullptr;
       }
     } else if (gen->isEagerlyExecuted() || gen->getWaitHandle()->isRunning()) {
       // Fail the async generator and let the C++ exception propagate.

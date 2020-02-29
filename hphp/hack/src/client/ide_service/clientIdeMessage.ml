@@ -13,6 +13,8 @@ module Initialize_from_saved_state = struct
     naming_table_saved_state_path: Path.t option;
     use_ranked_autocomplete: bool;
   }
+
+  type result = { num_changed_files_to_process: int }
 end
 
 type document_location = {
@@ -114,7 +116,9 @@ end
 (* GADT for request/response types. See [ServerCommandTypes] for a discussion on
    using GADTs in this way. *)
 type _ t =
-  | Initialize_from_saved_state : Initialize_from_saved_state.t -> unit t
+  | Initialize_from_saved_state :
+      Initialize_from_saved_state.t
+      -> Initialize_from_saved_state.result t
   | Shutdown : unit -> unit t
   | File_changed : Path.t -> unit t
   | File_opened : File_opened.request -> unit t

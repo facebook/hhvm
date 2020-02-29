@@ -58,7 +58,7 @@ val initialize_from_saved_state :
   naming_table_saved_state_path:Path.t option ->
   wait_for_initialization:bool ->
   use_ranked_autocomplete:bool ->
-  (unit, ClientIdeMessage.error_data) Lwt_result.t
+  (int, ClientIdeMessage.error_data) Lwt_result.t
 
 (** Pump the message loop for the IDE service. Exits once the IDE service has
 been [destroy]ed. *)

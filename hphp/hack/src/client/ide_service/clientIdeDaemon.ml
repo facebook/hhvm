@@ -377,7 +377,20 @@ let handle_message :
     let%lwt result = initialize param in
     begin
       match result with
-      | Ok state -> Lwt.return (state, Handle_message_result.Response ())
+      | Ok state ->
+        let num_changed_files_to_process =
+          match state with
+          | Initialized { changed_files_to_process; _ } ->
+            Path.Set.cardinal changed_files_to_process
+          | _ -> 0
+        in
+        let results =
+          {
+            ClientIdeMessage.Initialize_from_saved_state
+            .num_changed_files_to_process;
+          }
+        in
+        Lwt.return (state, Handle_message_result.Response results)
       | Error error_data ->
         Lwt.return
           ( Failed_to_initialize error_data,

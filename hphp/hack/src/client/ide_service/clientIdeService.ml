@@ -203,7 +203,7 @@ let initialize_from_saved_state
     ~(naming_table_saved_state_path : Path.t option)
     ~(wait_for_initialization : bool)
     ~(use_ranked_autocomplete : bool) :
-    (unit, ClientIdeMessage.error_data) Lwt_result.t =
+    (int, ClientIdeMessage.error_data) Lwt_result.t =
   set_state t (Uninitialized { wait_for_initialization });
 
   let param =
@@ -231,13 +231,29 @@ let initialize_from_saved_state
     "<- %s [initialize_from_saved_state]"
     (ClientIdeMessage.message_from_daemon_to_string response);
   match response with
-  | ClientIdeMessage.Response { ClientIdeMessage.response = Ok _; _ }
-  (* expected to be `Ok ()`, but not statically-checkable *) ->
+  | ClientIdeMessage.Response { ClientIdeMessage.response = Ok r; _ } ->
+    (* See comment on other use of Obj.magic in this file for why it's valid *)
+    let (r : ClientIdeMessage.Initialize_from_saved_state.result) =
+      Obj.magic r
+    in
+    let total =
+      r
+        .ClientIdeMessage.Initialize_from_saved_state
+         .num_changed_files_to_process
+    in
     log
-      "Initialized IDE service process (log file at %s)"
-      (ServerFiles.client_ide_log root);
-    set_state t (Initialized { status = Status.Ready });
-    Lwt.return_ok ()
+      "Initialized IDE service process (log file at %s) (%d changed files)"
+      (ServerFiles.client_ide_log root)
+      total;
+    let status =
+      if total = 0 then
+        Status.Ready
+      else
+        Status.Processing_files
+          { ClientIdeMessage.Processing_files.processed = 0; total }
+    in
+    set_state t (Initialized { status });
+    Lwt.return_ok total
   | ClientIdeMessage.Notification _ ->
     let user_message =
       "Failed to initialize IDE service process "

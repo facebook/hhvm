@@ -3292,7 +3292,12 @@ let run_ide_service (env : env) (ide_service : ClientIdeService.t) : unit Lwt.t
         ~use_ranked_autocomplete:env.use_ranked_autocomplete
     in
     match result with
-    | Ok () ->
+    | Ok num_changed_files_to_process ->
+      Lsp_helpers.telemetry_log
+        to_stdout
+        (Printf.sprintf
+           "[client-ide] Initialized; %d file changes to process"
+           num_changed_files_to_process);
       let%lwt () = ClientIdeService.serve ide_service in
       Lwt.return_unit
     | Error { ClientIdeMessage.user_message; log_string; is_actionable; _ } ->

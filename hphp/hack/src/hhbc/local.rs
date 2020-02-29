@@ -113,7 +113,7 @@ impl Gen {
             let old_counter = *stored.get_counter();
             let old_temp_map = stored.get_temp_map().clone();
             let (Counter(new_id), Counter(old_id)) = (self.counter, old_counter);
-            let local_ids_to_unset = vec![old_id; new_id];
+            let local_ids_to_unset = (old_id..new_id).collect::<Vec<_>>();
             self.counter = old_counter;
             self.dedicated.temp_map = old_temp_map;
             local_ids_to_unset

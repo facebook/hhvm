@@ -651,6 +651,7 @@ let write_symbol_info_init (genv : ServerEnv.genv) (env : ServerEnv.env) :
 (* If we fail to load a saved state, fall back to typechecking everything *)
 let full_init (genv : ServerEnv.genv) (env : ServerEnv.env) :
     ServerEnv.env * float =
+  let is_check_mode = ServerArgs.check_mode genv.options in
   let (env, t) =
     if
       genv.ServerEnv.local_config.SLC.remote_type_check
@@ -661,7 +662,16 @@ let full_init (genv : ServerEnv.genv) (env : ServerEnv.env) :
     else
       load_naming_table genv env
   in
-  if not (ServerArgs.check_mode genv.options) then
+  let env =
+    let remote_enabled =
+      genv.ServerEnv.local_config.SLC.remote_type_check.SLC.enabled
+    in
+    if remote_enabled && is_check_mode then
+      start_typing_delegate genv env
+    else
+      env
+  in
+  if not is_check_mode then
     SearchServiceRunner.update_fileinfo_map env.naming_table SearchUtils.Init;
   let fast = Naming_table.to_fast env.naming_table in
   let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing in

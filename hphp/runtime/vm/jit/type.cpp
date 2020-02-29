@@ -1073,7 +1073,8 @@ Type typeFromRATImpl(RepoAuthType ty, const Class* ctx) {
 
 Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
   auto const result = typeFromRATImpl(ty, ctx);
-  return RO::EvalAllowBespokeArrayLikes ? result.widenToBespoke() : result;
+  return RO::EvalAllowBespokeArrayLikes ? result.widenToBespoke()
+                                        : result.narrowToVanilla();
 }
 
 //////////////////////////////////////////////////////////////////////

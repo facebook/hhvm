@@ -215,7 +215,9 @@ val compress_g : t_global -> t_global
 
 (** Split multiple global environments into (weakly) connected components. *)
 val connected_components_g :
-  t_global_with_pos list -> (ISet.t * t_global_with_pos list) list
+  t_global_with_pos list ->
+  additional_edges:ISet.t list ->
+  (ISet.t * t_global_with_pos list) list
 
 (** Remove solved variable from environment by replacing it by its binding. *)
 val remove_var :

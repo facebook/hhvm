@@ -1218,18 +1218,18 @@ let compress env =
 let compress_g genv =
   IMap.filter (fun _ -> global_tyvar_info_carries_information) genv
 
-let construct_undirected_tyvar_graph genvs :
+let construct_undirected_tyvar_graph genvs (additional_edges : ISet.t list) :
     (Pos.t * global_tyvar_info) list IMap.t * ISet.t IMap.t =
   (* gather all constraints per type variable *)
-  let all : (Pos.t * global_tyvar_info) list IMap.t =
-    List.fold genvs ~init:IMap.empty ~f:(fun all (pos, genv) ->
+  let all_constraints : (Pos.t * global_tyvar_info) list IMap.t =
+    List.fold genvs ~init:IMap.empty ~f:(fun all_constraints (pos, genv) ->
         IMap.fold
           (fun tyvar tyvar_info ->
             IMap.update tyvar @@ function
             | None -> Some [(pos, tyvar_info)]
             | Some tl -> Some ((pos, tyvar_info) :: tl))
           genv
-          all)
+          all_constraints)
   in
   (* create an undirected graph of type variables where an edge
    * u <~> v means u <: v or v <: u.
@@ -1242,6 +1242,14 @@ let construct_undirected_tyvar_graph genvs :
       (fun neighbors ->
         let neighbors = Option.value neighbors ~default:ISet.empty in
         Some (ISet.add to_ neighbors))
+      graph
+  in
+  let add_edges ~(from : Ident.t) ~(to_ : ISet.t) (graph : ISet.t IMap.t) =
+    IMap.update
+      from
+      (fun neighbors ->
+        let neighbors = Option.value neighbors ~default:ISet.empty in
+        Some (ISet.union to_ neighbors))
       graph
   in
   let add_vertex (vertex : Ident.t) (graph : ISet.t IMap.t) =
@@ -1281,10 +1289,22 @@ let construct_undirected_tyvar_graph genvs :
             | TVIConstraints cstrs ->
               ITySet.fold (walk tyvar) cstrs.lower_bounds edges
               |> ITySet.fold (walk tyvar) cstrs.upper_bounds))
-      all
+      all_constraints
       IMap.empty
   in
-  (all, graph)
+  let graph =
+    List.fold
+      additional_edges
+      ~init:graph
+      ~f:(fun graph vars_which_must_be_in_same_cc ->
+        ISet.fold
+          (fun v graph ->
+            let new_edges = ISet.remove v vars_which_must_be_in_same_cc in
+            add_edges ~from:v ~to_:new_edges graph)
+          vars_which_must_be_in_same_cc
+          graph)
+  in
+  (all_constraints, graph)
 
 let split_undirected_tyvar_graph (graph : ISet.t IMap.t) : ISet.t list =
   (* compute connected components by doing DFS *)
@@ -1341,8 +1361,10 @@ let split_undirected_tyvar_graph (graph : ISet.t IMap.t) : ISet.t list =
   in
   components
 
-let connected_components_g genvs =
-  let (nodes, graph) = construct_undirected_tyvar_graph genvs in
+let connected_components_g genvs ~additional_edges =
+  let (nodes, graph) =
+    construct_undirected_tyvar_graph genvs additional_edges
+  in
   let component_tyvars = split_undirected_tyvar_graph graph in
   (* collect tyvar information *)
   let components : (Pos.t * global_tyvar_info) list IMap.t list =

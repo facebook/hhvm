@@ -519,9 +519,7 @@ Flags handle_general_effects(Local& env,
   }
 
   case CheckPackedArrayDataBounds: {
-    if (!(inst.src(0)->type() <= (TVec|Type::Array(ArrayData::kPackedKind)))) {
-      break;
-    }
+    assertx(inst.src(0)->type().subtypeOfAny(TVec, TPackedArr));
     if (!inst.src(1)->hasConstVal(TInt)) break;
 
     auto const idx = inst.src(1)->intVal();

@@ -2587,7 +2587,8 @@ SSATmp* simplifyCheckType(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyCheckVArray(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
-  if (!src->type().maybe(Type::Array(ArrayData::kPackedKind))) {
+  // TODO(kshaunak): This logic needs to account for bespoke array-likes.
+  if (!src->type().maybe(TPackedArr)) {
     gen(env, Jmp, inst->taken());
     return cns(env, TBottom);
   }
@@ -2601,7 +2602,8 @@ SSATmp* simplifyCheckVArray(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyCheckDArray(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
-  if (!src->type().maybe(Type::Array(ArrayData::kMixedKind))) {
+  // TODO(kshaunak): This logic needs to account for bespoke array-likes.
+  if (!src->type().maybe(TMixedArr)) {
     gen(env, Jmp, inst->taken());
     return cns(env, TBottom);
   }

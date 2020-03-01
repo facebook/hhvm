@@ -64,6 +64,13 @@ IRT_SPECIAL
 IRT_RUNTIME
 #undef IRT
 
+// Specialized array types that appear in irgen.
+static auto const TEmptyArr  = Type::Array(ArrayData::kEmptyKind);
+static auto const TMixedArr  = Type::Array(ArrayData::kMixedKind);
+static auto const TPackedArr = Type::Array(ArrayData::kPackedKind);
+static auto const TRecordArr = Type::Array(ArrayData::kRecordKind);
+
+// Vanilla types that we use in ir.specification and in irgen logic.
 static auto const TVanillaArr     = TArr.narrowToVanilla();
 static auto const TVanillaVec     = TVec.narrowToVanilla();
 static auto const TVanillaDict    = TDict.narrowToVanilla();

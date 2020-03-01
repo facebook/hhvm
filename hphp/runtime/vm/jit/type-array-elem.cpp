@@ -109,7 +109,7 @@ std::pair<Type, bool> arrElemType(Type arr, Type idx, const Class* ctx) {
     return {type, false};
   }
 
-  if (arr <= Type::Array(ArrayData::kPackedKind)) {
+  if (arr <= TPackedArr) {
     if (!dissected.maybe(TInt)) return {TBottom, false};
     if (dissected.hasConstVal(TInt)) {
       auto const intIdx = dissected.intVal();
@@ -321,7 +321,7 @@ std::pair<Type, bool> keysetElemType(Type arr, Type idx) {
 std::pair<Type, bool> vecFirstLastType(Type arr,
                                        bool isFirst,
                                        const Class* ctx) {
-  assertx(arr <= (TVec | Type::Array(ArrayData::kPackedKind)));
+  assertx(arr.subtypeOfAny(TVec, TPackedArr));
 
   if (arr.hasConstVal()) {
     auto const val = arr.arrLikeVal();
@@ -363,7 +363,7 @@ std::pair<Type, bool> vecFirstLastType(Type arr,
 }
 
 std::pair<Type, bool> dictFirstLastType(Type arr, bool isFirst, bool isKey) {
-  assertx(arr <= (TDict | Type::Array(ArrayData::kMixedKind)));
+  assertx(arr.subtypeOfAny(TDict, TMixedArr));
 
   if (arr.hasConstVal()) {
     auto const val = arr.arrLikeVal();

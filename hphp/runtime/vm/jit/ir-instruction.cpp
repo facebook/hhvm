@@ -324,7 +324,7 @@ Type arrElemReturn(const IRInstruction* inst) {
 */
 Type vecFirstLastReturn(const IRInstruction* inst, bool first) {
   assertx(inst->is(VecFirst, VecLast));
-  assertx(inst->src(0)->isA(TVec | Type::Array(ArrayData::kPackedKind)));
+  assertx(inst->src(0)->type().subtypeOfAny(TVec, TPackedArr));
 
   auto elem = vecFirstLastType(inst->src(0)->type(), first, inst->ctx());
   if (!elem.second) {
@@ -338,7 +338,7 @@ Type vecFirstLastReturn(const IRInstruction* inst, bool first) {
 
 Type dictFirstLastReturn(const IRInstruction* inst, bool first, bool isKey) {
   assertx(inst->is(DictFirst, DictLast, DictFirstKey, DictLastKey));
-  assertx(inst->src(0)->isA(TDict | Type::Array(ArrayData::kMixedKind)));
+  assertx(inst->src(0)->type().subtypeOfAny(TDict, TMixedArr));
 
   auto elem = dictFirstLastType(inst->src(0)->type(), isKey, first);
   if (!elem.second) {
@@ -543,9 +543,6 @@ inline Type unionReturn(const IRInstruction* inst, IdxSeq<Idx, Rest...>) {
 Type outputType(const IRInstruction* inst, int /*dstId*/) {
   using namespace TypeNames;
   using TypeNames::TCA;
-  static auto const TPackedArr = Type::Array(ArrayData::kPackedKind);
-  static auto const TMixedArr  = Type::Array(ArrayData::kMixedKind);
-  static auto const TRecordArr = Type::Array(ArrayData::kRecordKind);
 #define ND              assertx(0 && "outputType requires HasDest or NaryDest");
 #define D(type)         return type;
 #define DofS(n)         return inst->src(n)->type();

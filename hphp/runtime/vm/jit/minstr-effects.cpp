@@ -80,9 +80,8 @@ void getBaseType(Opcode rawOp, bool predict,
     baseValChanged = true;
     if (baseType.maybe(TArr)) {
       if (rawOp == SetNewElemArray &&
-          (baseType <= Type::Array(ArrayData::kPackedKind) ||
-           baseType <= Type::Array(ArrayData::kEmptyKind))) {
-        baseType = Type::Array(ArrayData::kPackedKind);
+          baseType.subtypeOfAny(TPackedArr, TEmptyArr)) {
+        baseType = TPackedArr;
       } else {
         baseType |= TCountedArr;
       }

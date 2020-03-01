@@ -790,15 +790,14 @@ SSATmp* emitProfiledPackedArrayGet(IRGS& env, SSATmp* base, SSATmp* key,
 
   if (prof.optimizing()) {
     auto const data = prof.data();
-    auto const typePackedArr = Type::Array(ArrayData::kPackedKind);
-    if (base->type().maybe(typePackedArr) &&
+    if (base->type().maybe(TPackedArr) &&
         (data.fraction(ArrayData::kPackedKind) == 1.0 ||
          RuntimeOption::EvalJitPGOArrayGetStress)) {
       // It's safe to side-exit still because we only do these profiled array
       // gets on the first element, with simple bases and single-element dims.
       // See computeSimpleCollectionOp.
       auto const exit = makeExit(env);
-      base = gen(env, CheckType, typePackedArr, exit, base);
+      base = gen(env, CheckType, TPackedArr, exit, base);
       env.irb->constrainValue(
         base,
         GuardConstraint(DataTypeSpecialized).setWantArrayKind()
@@ -1766,7 +1765,7 @@ void setNewElemPackedArrayDataImpl(IRGS& env, uint32_t nDiscard,
       gen(env, StMem, elemPtr, value);
     },
     [&] {
-      if (baseType <= Type::Array(ArrayData::kPackedKind)) {
+      if (baseType <= TPackedArr) {
         gen(env, SetNewElemArray, makeCatchSet(env, nDiscard), basePtr, value);
       } else if (baseType <= TVec) {
         gen(env, SetNewElemVec, makeCatchSet(env, nDiscard), basePtr, value);
@@ -1789,7 +1788,7 @@ SSATmp* setNewElemImpl(IRGS& env, uint32_t nDiscard) {
   auto const gc = GuardConstraint(DataTypeSpecialized).setWantArrayKind();
   env.irb->constrainLocation(Location::MBase{}, gc);
 
-  if (baseType <= Type::Array(ArrayData::kPackedKind) || baseType <= TVec) {
+  if (baseType.subtypeOfAny(TVec, TPackedArr)) {
     setNewElemPackedArrayDataImpl(env, nDiscard, basePtr, baseType, value);
   } else if (baseType <= TArr) {
     constrainBase(env);

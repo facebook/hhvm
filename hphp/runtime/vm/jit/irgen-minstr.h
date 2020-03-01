@@ -118,7 +118,6 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key,
             arr,
             GuardConstraint(DataTypeSpecialized).setWantArrayKind()
           );
-          auto const TMixedArr = Type::Array(ArrayData::kMixedKind);
           return gen(env, CheckType, TMixedArr, taken, arr);
         }();
 

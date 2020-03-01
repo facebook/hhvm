@@ -920,9 +920,8 @@ void cgLdPackedArrayDataElemAddr(IRLS& env, const IRInstruction* inst) {
 
   if (UNLIKELY(RuntimeOption::EvalProfPackedArraySampleFreq > 0)) {
     auto const arrTy = inst->src(0)->type();
-    auto const packedTy = Type::Array(ArrayData::kPackedKind);
 
-    if (arrTy.maybe(packedTy)) {
+    if (arrTy.maybe(TPackedArr)) {
       s_counter.bind(rds::Mode::Local);
 
       auto const profile = [&] (Vout& v) {
@@ -937,7 +936,7 @@ void cgLdPackedArrayDataElemAddr(IRLS& env, const IRInstruction* inst) {
         });
       };
 
-      if (arrTy <= packedTy) {
+      if (arrTy <= TPackedArr) {
         profile(v);
       } else {
         auto const sf = v.makeReg();

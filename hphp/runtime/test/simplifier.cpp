@@ -98,9 +98,9 @@ TEST(Simplifier, Count) {
 
   // Count($null) --> 0
   {
-    auto null = unit.gen(Conjure, dummy, TNull);
-    auto count = unit.gen(Count, dummy, null->dst());
-    auto result = simplify(unit, count);
+    auto const null = unit.gen(Conjure, dummy, TNull);
+    auto const count = unit.gen(Count, dummy, null->dst());
+    auto const result = simplify(unit, count);
 
     EXPECT_NE(nullptr, result.dst);
     EXPECT_EQ(0, result.instrs.size());
@@ -109,10 +109,10 @@ TEST(Simplifier, Count) {
 
   // Count($bool_int_dbl_str) --> 1
   {
-    auto ty = TBool | TInt | TDbl | TStr | TRes;
-    auto val = unit.gen(Conjure, dummy, ty);
-    auto count = unit.gen(Count, dummy, val->dst());
-    auto result = simplify(unit, count);
+    auto const ty = TBool | TInt | TDbl | TStr | TRes;
+    auto const val = unit.gen(Conjure, dummy, ty);
+    auto const count = unit.gen(Count, dummy, val->dst());
+    auto const result = simplify(unit, count);
 
     EXPECT_NE(nullptr, result.dst);
     EXPECT_EQ(0, result.instrs.size());
@@ -121,17 +121,17 @@ TEST(Simplifier, Count) {
 
   // Count($array_no_kind) --> <unchanged>
   {
-    auto arr = unit.gen(Conjure, dummy, TArr);
-    auto count = unit.gen(Count, dummy, arr->dst());
-    auto result = simplify(unit, count);
-    EXPECT_EQ(nullptr, result.dst);
+    auto const arr = unit.gen(Conjure, dummy, TArr);
+    auto const count = unit.gen(Count, dummy, arr->dst());
+    auto const result = simplify(unit, count);
+    EXPECT_NO_CHANGE(result);
   }
 
   // Count($vanilla_array) --> CountArray($vanilla_array)
   {
-    auto arr = unit.gen(Conjure, dummy, TVanillaArr);
-    auto count = unit.gen(Count, dummy, arr->dst());
-    auto result = simplify(unit, count);
+    auto const arr = unit.gen(Conjure, dummy, TVanillaArr);
+    auto const count = unit.gen(Count, dummy, arr->dst());
+    auto const result = simplify(unit, count);
 
     EXPECT_NE(nullptr, result.dst);
     EXPECT_EQ(1, result.instrs.size());
@@ -140,10 +140,9 @@ TEST(Simplifier, Count) {
 
   // Count($array_packed) --> CountArrayFast($array_packed)
   {
-    auto ty = Type::Array(ArrayData::kPackedKind);
-    auto arr = unit.gen(Conjure, dummy, ty);
-    auto count = unit.gen(Count, dummy, arr->dst());
-    auto result = simplify(unit, count);
+    auto const arr = unit.gen(Conjure, dummy, TPackedArr);
+    auto const count = unit.gen(Count, dummy, arr->dst());
+    auto const result = simplify(unit, count);
 
     EXPECT_NE(nullptr, result.dst);
     EXPECT_EQ(1, result.instrs.size());
@@ -152,9 +151,9 @@ TEST(Simplifier, Count) {
 
   // Count($some_obj) --> Count($some_obj)
   {
-    auto obj = unit.gen(Conjure, dummy, TObj);
-    auto count = unit.gen(Count, dummy, obj->dst());
-    auto result = simplify(unit, count);
+    auto const obj = unit.gen(Conjure, dummy, TObj);
+    auto const count = unit.gen(Count, dummy, obj->dst());
+    auto const result = simplify(unit, count);
     EXPECT_NO_CHANGE(result);
   }
 

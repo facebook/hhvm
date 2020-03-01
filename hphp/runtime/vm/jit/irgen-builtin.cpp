@@ -582,10 +582,7 @@ SSATmp* opt_is_list_like(IRGS& env, const ParamPrep& params) {
     return cns(env, true);
   }
   if (!type.maybe(TArrLike)) return cns(env, false);
-  if (type <= TVec || type <= Type::Array(ArrayData::kPackedKind)) {
-    return cns(env, true);
-  }
-
+  if (type.subtypeOfAny(TVec, TPackedArr)) return cns(env, true);
   return nullptr;
 }
 
@@ -730,17 +727,15 @@ SSATmp* opt_container_first(IRGS& env, const ParamPrep& params) {
   }
   auto const value = params[0].value;
   auto const type = value->type();
-  if (type <= TVec || type <= Type::Array(ArrayData::kPackedKind)) {
+  if (type.subtypeOfAny(TVec, TPackedArr)) {
     auto const r = gen(env, VecFirst, value);
     gen(env, IncRef, r);
     return r;
-  }
-  if (type <= TDict || type <= Type::Array(ArrayData::kMixedKind)) {
+  } else if (type.subtypeOfAny(TDict, TMixedArr)) {
     auto const r = gen(env, DictFirst, value);
     gen(env, IncRef, r);
     return r;
-  }
-  if (type <= TKeyset) {
+  } else if (type <= TKeyset) {
     auto const r = gen(env, KeysetFirst, value);
     gen(env, IncRef, r);
     return r;
@@ -754,17 +749,15 @@ SSATmp* opt_container_last(IRGS& env, const ParamPrep& params) {
   }
   auto const value = params[0].value;
   auto const type = value->type();
-  if (type <= TVec || type <= Type::Array(ArrayData::kPackedKind)) {
+  if (type.subtypeOfAny(TVec, TPackedArr)) {
     auto const r = gen(env, VecLast, value);
     gen(env, IncRef, r);
     return r;
-  }
-  if (type <= TDict || type <= Type::Array(ArrayData::kMixedKind)) {
+  } else if (type.subtypeOfAny(TDict, TMixedArr)) {
     auto const r = gen(env, DictLast, value);
     gen(env, IncRef, r);
     return r;
-  }
-  if (type <= TKeyset) {
+  } else if (type <= TKeyset) {
     auto const r = gen(env, KeysetLast, value);
     gen(env, IncRef, r);
     return r;
@@ -779,7 +772,7 @@ SSATmp* opt_container_first_key(IRGS& env, const ParamPrep& params) {
   auto const value = params[0].value;
   auto const type = value->type();
 
-  if (type <= TVec || type <= Type::Array(ArrayData::kPackedKind)) {
+  if (type.subtypeOfAny(TVec, TPackedArr)) {
     return cond(
       env,
       [&](Block* taken) {
@@ -787,20 +780,14 @@ SSATmp* opt_container_first_key(IRGS& env, const ParamPrep& params) {
           gen(env, CountVec, value) : gen(env, CountArray, value);
         gen(env, JmpZero, taken, length);
       },
-      [&] {
-        return cns(env, 0);
-       },
-      [&] {
-        return cns(env, TInitNull);
-       }
+      [&] { return cns(env, 0); },
+      [&] { return cns(env, TInitNull); }
     );
-  }
-  if (type <= TDict || type <= Type::Array(ArrayData::kMixedKind)) {
+  } else if (type.subtypeOfAny(TDict, TMixedArr)) {
     auto const r = gen(env, DictFirstKey, value);
     gen(env, IncRef, r);
     return r;
-  }
-  if (type <= TKeyset) {
+  } else if (type <= TKeyset) {
     auto const r = gen(env, KeysetFirst, value);
     gen(env, IncRef, r);
     return r;
@@ -815,7 +802,7 @@ SSATmp* opt_container_last_key(IRGS& env, const ParamPrep& params) {
   auto const value = params[0].value;
   auto const type = value->type();
 
-  if (type <= TVec || type <= Type::Array(ArrayData::kPackedKind)) {
+  if (type.subtypeOfAny(TVec, TPackedArr)) {
     return cond(
       env,
       [&](Block* taken) {
@@ -824,20 +811,14 @@ SSATmp* opt_container_last_key(IRGS& env, const ParamPrep& params) {
         gen(env, JmpZero, taken, length);
         return length;
       },
-      [&] (SSATmp* next) {
-        return gen(env, SubInt, next, cns(env, 1));
-       },
-      [&] {
-        return cns(env, TInitNull);
-       }
+      [&] (SSATmp* next) { return gen(env, SubInt, next, cns(env, 1)); },
+      [&] { return cns(env, TInitNull); }
     );
-  }
-  if (type <= TDict || type <= Type::Array(ArrayData::kMixedKind)) {
+  } else if (type.subtypeOfAny(TDict, TMixedArr)) {
     auto const r = gen(env, DictLastKey, value);
     gen(env, IncRef, r);
     return r;
-  }
-  if (type <= TKeyset) {
+  } else if (type <= TKeyset) {
     auto const r = gen(env, KeysetLast, value);
     gen(env, IncRef, r);
     return r;
@@ -2152,8 +2133,8 @@ Type builtinReturnType(const Func* builtin) {
     if (auto const hniType = builtin->hniReturnType()) {
       if (isArrayType(*hniType)) {
         auto const& constraint = builtin->returnTypeConstraint();
-        if (constraint.isVArray()) return Type::Array(ArrayData::kPackedKind);
-        if (constraint.isDArray()) return Type::Array(ArrayData::kMixedKind);
+        if (constraint.isVArray()) return TPackedArr;
+        if (constraint.isDArray()) return TMixedArr;
       }
       return Type{*hniType};
     }

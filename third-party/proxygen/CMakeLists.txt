@@ -51,6 +51,6 @@ add_library(hphp_proxygen STATIC ${CXX_SOURCES})
 add_dependencies(hphp_proxygen libsodiumMaybeBuild)
 target_include_directories(hphp_proxygen PUBLIC "${LIBSODIUM_INCLUDE_DIRS}")
 
-target_link_libraries(hphp_proxygen wangle zstd boost
+target_link_libraries(hphp_proxygen wangle zstd boost brotli_dec brotli_enc
   fizz libsodium
   ${LIBGLOG_LIBRARY} ${LIBPTHREAD_LIBRARIES})

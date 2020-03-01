@@ -19,26 +19,17 @@
 
 #include "hphp/util/string-holder.h"
 
-#include <memory>
 #include <cstddef>
 
-#include <brotli/encode.h>
+#include <enc/encode.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-struct BrotliCompressor {
-  BrotliCompressor(BrotliEncoderMode mode, uint32_t quality, uint32_t lgWin);
-  StringHolder compress(const void* data,
-                        size_t& len,
-                        bool last);
- private:
-  struct EncStateDeleter {
-    void operator()(BrotliEncoderState* e) const {
-      BrotliEncoderDestroyInstance(e);
-    }
-  };
-  std::unique_ptr<BrotliEncoderState, EncStateDeleter> m_encState;
-};
+
+StringHolder compressBrotli(brotli::BrotliCompressor* compressor,
+                            const void* data,
+                            size_t& len,
+                            bool last);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

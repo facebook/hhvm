@@ -60,7 +60,7 @@ list(APPEND THIRD_PARTY_MODULES wangle)
 list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/wangle/src")
 
 list(APPEND THIRD_PARTY_MODULES brotli)
-list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/brotli/src/c/include")
+list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/brotli/src")
 
 list(APPEND THIRD_PARTY_MODULES proxygen)
 list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/proxygen/src")

@@ -265,7 +265,7 @@ void BrotliResponseCompressor::disable() {
   m_chunkedEnabled = false;
 }
 
-BrotliCompressor* BrotliResponseCompressor::getCompressor(
+brotli::BrotliCompressor* BrotliResponseCompressor::getCompressor(
     int size, bool last) {
   if (!m_compressor) {
     if (last) {
@@ -278,27 +278,27 @@ BrotliCompressor* BrotliResponseCompressor::getCompressor(
     if (!isEnabled()) {
       return nullptr;
     }
-    BrotliEncoderMode mode =
-        (BrotliEncoderMode)RuntimeOption::BrotliCompressionMode;
+    brotli::BrotliParams params;
+    params.mode =
+        (brotli::BrotliParams::Mode)RuntimeOption::BrotliCompressionMode;
 
-    Variant qualityVar;
-    IniSetting::Get("brotli.compression_quality", qualityVar);
-    uint32_t quality = static_cast<uint32_t>(qualityVar.asInt64Val());
+    Variant quality;
+    IniSetting::Get("brotli.compression_quality", quality);
+    params.quality = quality.asInt64Val();
 
-
-    Variant windowSizeVar;
-    IniSetting::Get("brotli.compression_lgwin", windowSizeVar);
-    uint32_t windowSize = static_cast<uint32_t>(windowSizeVar.asInt64Val());
+    Variant lgWindowSize;
+    IniSetting::Get("brotli.compression_lgwin", lgWindowSize);
+    params.lgwin = lgWindowSize.asInt64Val();
     if (size && !m_chunkedEnabled) {
       // If there is only one block (i.e. non-chunked content) set a maximum
       // brotli window of ceil(log2(size)). This way the reader doesn't have
       // to waste memory constructing a larger window which will never be used.
-      windowSize = std::min(
-          windowSize,
-          folly::findLastSet(static_cast<uint32_t>(size) - 1));
+      params.lgwin = std::min(
+          static_cast<unsigned int>(params.lgwin),
+          folly::findLastSet(static_cast<unsigned int>(size) - 1));
     }
 
-    m_compressor = std::make_unique<BrotliCompressor>(mode, quality, windowSize);
+    m_compressor = std::make_unique<brotli::BrotliCompressor>(params);
   }
 
   return m_compressor.get();
@@ -314,7 +314,7 @@ StringHolder BrotliResponseCompressor::compressResponse(
     return StringHolder{};
   }
   size_t size = len;
-  auto compressedData = compressor->compress(data, size, last);
+  auto compressedData = HPHP::compressBrotli(compressor, data, size, last);
   if (!compressedData) {
     m_compressor.reset();
     Logger::Error("Unable to compress response to brotli: len=%d", len);

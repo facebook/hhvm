@@ -23,7 +23,9 @@
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/runtime/vm/srckey.h"
 
+#include "hphp/util/stack-trace.h"
 #include "hphp/util/rds-local.h"
 #include "hphp/util/type-scan.h"
 #include "hphp/util/type-traits.h"
@@ -53,6 +55,12 @@ std::string Tag::toString() const {
     return folly::sformat("{}:{} (trait xinit merge)", filename()->slice(), -1);
   case Kind::KnownLargeEnum:
     return folly::sformat("{}:{} (large enum)", filename()->slice(), -1);
+  case Kind::RuntimeLocation:
+    return folly::sformat("{}:{} (c++ runtime location)",
+                          filename()->slice(), line());
+  case Kind::RuntimeLocationPoison:
+    return folly::sformat("unknown location (poisoned c++ runtime location was {}:{})",
+                          filename()->slice(), line());
   }
   always_assert(false);
 }
@@ -61,18 +69,21 @@ std::string Tag::toString() const {
 
 namespace {
 
-RDS_LOCAL_NO_CHECK(Tag, rl_tag_override);
+RDS_LOCAL(Tag, rl_tag_override);
 RDS_LOCAL(ArrayProvenanceTable, rl_array_provenance);
 folly::F14FastMap<const void*, Tag> s_static_array_provenance;
 folly::SharedMutex s_static_provenance_lock;
 
 /*
  * Flush the table after each request since none of the ArrayData*s will be
- * valid anymore
+ * valid anymore 
  */
 InitFiniNode flushTable([]{
   if (!RO::EvalArrayProvenance) return;
   rl_array_provenance->tags.clear();
+  assert_flog(!rl_tag_override->valid(),
+              "contents: {}",
+              rl_tag_override->toString());
 }, InitFiniNode::When::RequestFini);
 
 } // anonymous namespace
@@ -273,29 +284,40 @@ ArrayData* tagStaticArr(ArrayData* ad, Tag tag /* = {} */) {
 ///////////////////////////////////////////////////////////////////////////////
 
 TagOverride::TagOverride(Tag tag)
-  : m_saved_tag(rl_tag_override.getInited()
-                ? folly::make_optional<Tag>(*rl_tag_override)
-                : folly::none)
+  : m_saved_tag(*rl_tag_override)
 {
-  rl_tag_override.emplace(tag);
+  *rl_tag_override = tag;
 }
 
 TagOverride::~TagOverride() {
-  if (m_saved_tag) {
-    *rl_tag_override = *m_saved_tag;
-  } else {
-    rl_tag_override.nullOut();
-  }
+  *rl_tag_override = m_saved_tag;
 }
 
 Tag tagFromPC() {
-  if (rl_tag_override.getInited()) return *rl_tag_override;
+  auto log_violation = [&](const char* why) {
+    auto const rate = RO::EvalLogArrayProvenanceDiagnosticsSampleRate;
+    if (StructuredLog::coinflip(rate)) {
+      StructuredLogEntry sle;
+      sle.setStr("reason", why);
+      sle.setStackTrace("stack", StackTrace{StackTrace::Force{}});
+      FTRACE_MOD(Trace::runtime, 2, "arrprov {} {}\n", why, show(sle));
+      StructuredLog::log("hphp_arrprov_diagnostics", sle);
+    }
+  };
+
+  if (rl_tag_override->valid()) {
+    if (rl_tag_override->kind() == Tag::Kind::RuntimeLocationPoison) {
+      log_violation("poison");
+    }
+    return *rl_tag_override;
+  }
 
   VMRegAnchor _(VMRegAnchor::Soft);
 
   if (tl_regState != VMRegState::CLEAN ||
-      rds::header() == nullptr ||
+
       vmfp() == nullptr) {
+    log_violation("no_fixup");
     return {};
   }
 
@@ -320,6 +342,15 @@ Tag tagFromPC() {
   auto const tag = fromLeaf(make_tag, skip_frame);
   assertx(!tag.valid() || tag.concrete());
   return tag;
+}
+
+Tag tagFromSK(SrcKey sk) {
+  assert(sk.valid());
+  auto const unit = sk.unit();
+  auto const func = sk.func();
+  auto const filename = func->filename();
+  auto const line = unit->getLineNumber(sk.offset());
+  return Tag { filename, line };
 }
 
 ///////////////////////////////////////////////////////////////////////////////

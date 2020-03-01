@@ -1694,6 +1694,7 @@ void Unit::initialMerge() {
 }
 
 void Unit::merge() {
+  ARRPROV_USE_RUNTIME_LOCATION();
   if (UNLIKELY(!(m_mergeState.load(std::memory_order_relaxed) &
                  MergeState::Merged))) {
     SimpleLock lock(unitInitLock);

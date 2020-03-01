@@ -986,6 +986,14 @@ Array make_vec_array(Vals&&... vals) {
   return init.toArray();
 }
 
+template<class... Vals>
+Array make_vec_array_tagged(arrprov::Tag tag, Vals&&... vals) {
+  ARRPROV_USE_RUNTIME_LOCATION();
+  auto ret = make_vec_array(std::forward<Vals>(vals)...);
+  arrprov::setTag<arrprov::Mode::Emplace>(ret.get(), tag);
+  return ret;
+}
+
 /*
  * Helper for creating map-like arrays (kMixedKind).  Takes pairs of
  * arguments for the keys and values.

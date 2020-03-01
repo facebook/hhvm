@@ -1194,7 +1194,7 @@ void emitThrowAsTypeStructException(IRGS& env) {
       bool partial = true, invalidType = true;
       maybe_resolved =
         staticallyResolveTypeStructure(env, ts, partial, invalidType);
-      if (maybe_resolved != ts) {
+      if (!ts->equal(maybe_resolved, true)) {
         auto const inputTS = cns(env, maybe_resolved);
         return {inputTS, create_catch_block(env, [&]{ decRef(env, inputTS); })};
       }
@@ -1274,7 +1274,7 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
               env,
               RaiseHackArrParamNotice,
               RaiseHackArrParamNoticeData { tc, id, true },
-              cns(env, empty_varray().get()),
+              cns(env, staticEmptyVArray()),
               cns(env, func)
             );
           }
@@ -1391,7 +1391,7 @@ void verifyParamTypeImpl(IRGS& env, int32_t id) {
               env,
               RaiseHackArrParamNotice,
               RaiseHackArrParamNoticeData { tc, id, false },
-              cns(env, empty_varray().get()),
+              cns(env, staticEmptyVArray()),
               cns(env, func)
             );
           }
@@ -1521,6 +1521,7 @@ void verifyPropType(IRGS& env,
       }
       if (RuntimeOption::EvalHackArrCompatTypeHintNotices) {
         if (getAnnotMetaType(tc->type()) == AnnotMetaType::DArray) {
+          ARRPROV_USE_RUNTIME_LOCATION();
           gen(
             env,
             RaiseHackArrPropNotice,

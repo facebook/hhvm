@@ -1652,6 +1652,7 @@ using DualDispatchIntersection = Commute<DualDispatchIntersectionImpl>;
 template<typename AInit, bool force_static>
 folly::Optional<TypedValue> fromTypeVec(const std::vector<Type> &elems,
                                   ProvTag tag) {
+  ARRPROV_USE_RUNTIME_LOCATION();
   AInit ai(elems.size());
   for (auto const& t : elems) {
     auto const v = tv(t);
@@ -1661,7 +1662,7 @@ folly::Optional<TypedValue> fromTypeVec(const std::vector<Type> &elems,
   auto var = ai.toVariant();
   if (tag.valid()) {
     assertx(RuntimeOption::EvalArrayProvenance);
-    arrprov::setTag(var.asArrRef().get(), tag.get());
+    arrprov::setTag<arrprov::Mode::Emplace>(var.asArrRef().get(), tag.get());
   }
   if (force_static) var.setEvalScalar();
   return tvReturn(std::move(var));
@@ -1692,6 +1693,7 @@ void add(KeysetInit& ai, const Variant& key, const Variant& value) {
 template<typename AInit, bool force_static, typename Key>
 folly::Optional<TypedValue> fromTypeMap(const ArrayLikeMap<Key> &elems,
                                   ProvTag tag) {
+  ARRPROV_USE_RUNTIME_LOCATION();
   auto val = eval_cell_value([&] () -> TypedValue {
     AInit ai(elems.size());
     for (auto const& elm : elems) {
@@ -1703,7 +1705,7 @@ folly::Optional<TypedValue> fromTypeMap(const ArrayLikeMap<Key> &elems,
     if (tag.valid()) {
       assertx(RuntimeOption::EvalArrayProvenance);
       assertx(arrprov::arrayWantsTag(var.asCArrRef().get()));
-      arrprov::setTag(var.asArrRef().get(), tag.get());
+      arrprov::setTag<arrprov::Mode::Emplace>(var.asArrRef().get(), tag.get());
     }
     if (force_static) var.setEvalScalar();
     return tvReturn(std::move(var));

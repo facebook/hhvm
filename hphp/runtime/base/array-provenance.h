@@ -18,6 +18,7 @@
 #define incl_HPHP_ARRAY_PROVENANCE_H
 
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/types.h"
 
@@ -34,6 +35,7 @@ struct ArrayData;
 struct StringData;
 struct c_WaitableWaitHandle;
 struct AsioExternalThreadEvent;
+struct SrcKey;
 
 namespace arrprov {
 
@@ -59,14 +61,20 @@ struct Tag {
     KnownTraitMerge,
     /* Dummy tag for all large enums, which we cache as static arrays */
     KnownLargeEnum,
+    /* no vmregs are available, filename and line are runtime locations */
+    RuntimeLocation,
+    /* some piece of the runtime prevented a backtrace from being collected--
+     * e.g. the JIT will use this to prevent a tag being assigned to an array
+     * inside of the JIT corresponding to the PHP location that entered the JIT
+     */
+    RuntimeLocationPoison,
   };
 
 private:
   static auto constexpr kKindMask = 0x7;
 
   template <typename T>
-  static const char* ptrAndKind(Kind k,
-                                          const T* filename) {
+  static const char* ptrAndKind(Kind k, const T* filename) {
     auto const ptr = reinterpret_cast<uintptr_t>(filename);
     assertx(!(ptr & kKindMask));
     return reinterpret_cast<const char*>(
@@ -121,6 +129,40 @@ public:
     return tag;
   }
 
+  static Tag RuntimeLocation(
+    const StringData* filename,
+    int line
+  ) {
+    Tag tag;
+    tag.m_filename = ptrAndKind(Kind::RuntimeLocation, filename);
+    tag.m_line = line;
+    return tag;
+  }
+
+  static Tag RuntimeLocation(
+    const char* file,
+    int line
+  ) {
+    return RuntimeLocation(makeStaticString(file), line);
+  }
+
+  static Tag RuntimeLocationPoison(
+    const StringData* filename,
+    int line
+  ) {
+    Tag tag;
+    tag.m_filename = ptrAndKind(Kind::RuntimeLocationPoison, filename);
+    tag.m_line = line;
+    return tag;
+  }
+
+  static Tag RuntimeLocationPoison(
+    const char* file,
+    int line
+  ) {
+    return RuntimeLocationPoison(makeStaticString(file), line);
+  }
+
   Kind kind() const { return extractKind(m_filename.get()); }
   const StringData* filename() const {
     return removeKind<StringData>(m_filename.get());
@@ -144,6 +186,8 @@ public:
     case Kind::UnknownRepo: return false;
     case Kind::KnownTraitMerge: return true;
     case Kind::KnownLargeEnum: return true;
+    case Kind::RuntimeLocation: return true;
+    case Kind::RuntimeLocationPoison: return false;
     }
     always_assert(false);
   }
@@ -162,6 +206,8 @@ public:
     case Kind::KnownLargeEnum:
       return m_filename == other.m_filename;
     case Kind::Known:
+    case Kind::RuntimeLocation:
+    case Kind::RuntimeLocationPoison:
       return m_filename == other.m_filename &&
         m_line == other.m_line;
     }
@@ -203,6 +249,11 @@ struct ArrayProvenanceTable {
 Tag tagFromPC();
 
 /*
+ * Create a tag based on the given SrcKey
+ */
+Tag tagFromSK(SrcKey sk);
+
+/*
  * RAII struct for modifying the behavior of tagFromPC().
  *
  * When this is in effect we use the tag provided instead of computing a
@@ -219,8 +270,29 @@ struct TagOverride {
   TagOverride& operator=(TagOverride&&) = delete;
 
 private:
-  folly::Optional<Tag> m_saved_tag;
+  Tag m_saved_tag;
 };
+
+#define ARRPROV_HERE() (                        \
+    ::HPHP::arrprov::Tag::RuntimeLocation(      \
+      __FILE__,                                 \
+      __LINE__                                  \
+    )                                           \
+  )
+
+#define ARRPROV_USE_RUNTIME_LOCATION() \
+  ::HPHP::arrprov::TagOverride ap_override(ARRPROV_HERE())
+
+#define ARRPROV_USE_POISONED_LOCATION()           \
+  ::HPHP::arrprov::TagOverride ap_override(       \
+    ::HPHP::arrprov::Tag::RuntimeLocationPoison(  \
+      __FILE__,                                   \
+      __LINE__                                    \
+    )                                             \
+)
+
+#define ARRPROV_USE_VMPC() \
+  ::HPHP::arrprov::TagOverride ap_override({})
 
 /*
  * Whether `a` admits a provenance tag.

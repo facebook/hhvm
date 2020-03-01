@@ -1705,6 +1705,9 @@ void VariableSerializer::serializeArrayImpl(const ArrayData* arr) {
         write_filename(tag.filename());
         break;
       }
+      case arrprov::Tag::Kind::RuntimeLocation:
+      case arrprov::Tag::Kind::RuntimeLocationPoison:
+        break;
       }
     }
   }

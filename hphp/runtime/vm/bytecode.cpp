@@ -321,6 +321,7 @@ VarEnv::VarEnv()
   , m_global(true)
 {
   TRACE(3, "Creating VarEnv %p [global scope]\n", this);
+  ARRPROV_USE_RUNTIME_LOCATION();
   auto globals_var = Variant::attach(
     new (tl_heap->objMalloc(sizeof(GlobalsArray))) GlobalsArray(&m_nvTable)
   );
@@ -984,6 +985,7 @@ uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
   auto const numUnpackArgs = getContainerSize(unpackArgs);
   auto const numParams = func->numNonVariadicParams();
   if (LIKELY(numArgs == numParams)) {
+    ARRPROV_USE_RUNTIME_LOCATION();
     // Nothing to unpack.
     if (numUnpackArgs == 0) return numParams;
     // Convert unpack args to the proper type.
@@ -1089,6 +1091,7 @@ static void prepareFuncEntry(ActRec *ar, Array&& generics) {
       }
     }
     if (UNLIKELY(func->hasVariadicCaptureParam())) {
+      ARRPROV_USE_RUNTIME_LOCATION();
       if (RuntimeOption::EvalHackArrDVArrs) {
         stack.pushVecNoRc(ArrayData::CreateVec());
       } else {
@@ -1107,6 +1110,7 @@ static void prepareFuncEntry(ActRec *ar, Array&& generics) {
   }
 
   if (ar->m_func->hasReifiedGenerics()) {
+    ARRPROV_USE_RUNTIME_LOCATION();
     // Currently does not work with closures
     assertx(!func->isClosureBody());
     // push for first local
@@ -1162,6 +1166,7 @@ void enterVMAtPseudoMain(ActRec* enterFnAr, VarEnv* varEnv) {
   assertx(enterFnAr);
   assertx(enterFnAr->func()->isPseudoMain());
   assertx(!isResumed(enterFnAr));
+  ARRPROV_USE_VMPC();
   Stats::inc(Stats::VMEnter);
 
   enterFnAr->setVarEnv(varEnv);
@@ -1195,6 +1200,7 @@ void enterVMAtFunc(ActRec* enterFnAr, Array&& generics, bool hasInOut,
                    bool dynamicCall, bool allowDynCallNoPointer) {
   assertx(enterFnAr);
   assertx(!isResumed(enterFnAr));
+  ARRPROV_USE_VMPC();
   Stats::inc(Stats::VMEnter);
 
   auto const hasGenerics = !generics.isNull();
@@ -1222,6 +1228,7 @@ void enterVMAtCurPC() {
   assertx(vmfp());
   assertx(vmpc());
   assertx(vmfp()->func()->contains(vmpc()));
+  ARRPROV_USE_VMPC();
   Stats::inc(Stats::VMEnter);
   if (RID().getJit()) {
     jit::enterTC(jit::tc::ustubs().resumeHelper);

@@ -728,6 +728,7 @@ void apc_load_impl_compressed
      int *object_lens, const char *objects,
      int *thrift_lens, const char *thrifts,
      int *other_lens, const char *others) {
+  ARRPROV_USE_RUNTIME_LOCATION();
   bool readOnly = apcExtension::EnableConstLoad && info && info->use_const;
   if (readOnly && info->a_name) Logger::FInfo("const archive {}", info->a_name);
   auto& s = apc_store();

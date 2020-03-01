@@ -1932,6 +1932,7 @@ namespace {
 
 template <typename C>
 SSATmp* arrayLikeConvImpl(State& env, const IRInstruction* inst, C convert) {
+  arrprov::TagOverride ap_override{arrprov::tagFromSK(inst->marker().sk())};
   auto const src = inst->src(0);
   if (!src->hasConstVal()) return nullptr;
   auto const before = src->arrLikeVal();

@@ -387,6 +387,7 @@ void allocStructImpl(
   MixedArray* (*f)(uint32_t, const int32_t*),
   SyncOptions sync = SyncOptions::None
 ) {
+  arrprov::TagOverride ap_override{arrprov::tagFromSK(inst->marker().sk())};
   auto const extra = inst->extra<NewStructData>();
   auto init = ArrayInit{extra->numKeys};
   for (auto i = 0; i < extra->numKeys; ++i) {

@@ -593,6 +593,7 @@ SSATmp* opt_foldable(IRGS& env,
                      const Func* func,
                      const ParamPrep& params,
                      uint32_t numNonDefaultArgs) {
+  ARRPROV_USE_RUNTIME_LOCATION();
   if (!func->isFoldable()) return nullptr;
 
   const Class* cls = nullptr;

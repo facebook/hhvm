@@ -130,6 +130,7 @@ static void setKey(folly::StringPiece key, KeyValuePair& item) {
 }
 
 void SnapshotLoader::load(ConcurrentTableSharedStore& s) {
+  ARRPROV_USE_RUNTIME_LOCATION();
   // This could share code with apc_load_impl_compressed, but that function
   // should go away together with the shared object format.
   std::vector<KeyValuePair> all;

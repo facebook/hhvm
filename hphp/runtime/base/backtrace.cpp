@@ -304,6 +304,7 @@ using namespace backtrace_detail;
 ///////////////////////////////////////////////////////////////////////////////
 
 Array createBacktrace(const BacktraceArgs& btArgs) {
+  ARRPROV_USE_RUNTIME_LOCATION();
   if (btArgs.isCompact()) {
     return createCompactBacktrace(btArgs.m_skipTop)->extract();
   }

@@ -317,6 +317,7 @@ void Repo::saveGlobalData(GlobalData newData) {
 std::unique_ptr<Unit> Repo::loadUnit(const folly::StringPiece name,
                                      const SHA1& sha1,
                                      const Native::FuncTable& nativeFuncs) {
+  ARRPROV_USE_RUNTIME_LOCATION();
   if (m_dbc == nullptr) return nullptr;
   return m_urp.load(name, sha1, nativeFuncs);
 }

@@ -77,6 +77,7 @@ void init_params(IRGS& env, const Func* func, uint32_t argc,
         gen(env, JmpNZero, taken, hasGenerics);
       },
       [&] {
+        arrprov::TagOverride ap_override{arrprov::tagFromSK(env.bcState)};
         // Generics not given. We will either fail later or raise a warning.
         // Write empty array so that the local is properly initialized.
         auto const emptyArr =
@@ -124,6 +125,7 @@ void init_params(IRGS& env, const Func* func, uint32_t argc,
   }
 
   if (argc <= nparams && func->hasVariadicCaptureParam()) {
+    ARRPROV_USE_RUNTIME_LOCATION();
     // Need to initialize `...$args'.
     gen(env, StLoc, LocalId{nparams}, fp(env),
         cns(env, ArrayData::CreateVArray()));

@@ -255,6 +255,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
                                            ReturnEncodeType returnEncodeType) {
   std::string rpcFunc = transport->getCommand();
   {
+    ARRPROV_USE_RUNTIME_LOCATION();
     ServerStatsHelper ssh("input");
     RequestURI reqURI(rpcFunc);
     HttpProtocol::PrepareSystemVariables(transport, reqURI, sourceRootInfo);
@@ -271,6 +272,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
   Transport::Method requestMethod = m_serverInfo->getMethod();
   std::string sparams = transport->getParam("params", requestMethod);
   if (!sparams.empty()) {
+    ARRPROV_USE_RUNTIME_LOCATION();
     auto jparams = Variant::attach(
       HHVM_FN(json_decode)(String(sparams), true)
     );
@@ -280,6 +282,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
       error = true;
     }
   } else {
+    ARRPROV_USE_RUNTIME_LOCATION();
     std::vector<std::string> sparams;
     transport->getArrayParam("p", sparams, requestMethod);
     if (!sparams.empty()) {

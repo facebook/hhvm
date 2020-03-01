@@ -276,15 +276,22 @@ TCA emitFuncPrologueRedispatch(CodeBlock& cb, DataBlock& data) {
     v << subl{numNonVariadicParams, numArgs, numToPack, v.makeReg()};
 
     // Pack the extra args into a vec/varray.
-    auto const helper = RuntimeOption::EvalHackArrDVArrs
-      ? PackedArray::MakeVec
-      : PackedArray::MakeVArray;
+    auto const helper = [](uint32_t count,
+                           TypedValue* values) -> ArrayData* {
+      // TODO(jgriego) surely we have a better way of instrumenting this ...
+      ARRPROV_USE_RUNTIME_LOCATION();
+      if (RO::EvalHackArrDVArrs) {
+        return PackedArray::MakeVec(count, values);
+      } else {
+        return PackedArray::MakeVArray(count, values);
+      }
+    };
     auto const packedArr = v.makeReg();
     {
       auto const save = r_php_call_flags()|r_php_call_func()|r_php_call_ctx();
       PhysRegSaver prs{v, save};
       v << vcall{
-        CallSpec::direct(helper),
+        CallSpec::direct(static_cast<ArrayData* (*)(uint32_t, TypedValue*)>(helper)),
         v.makeVcallArgs({{numToPack, stackTopPtr}}),
         v.makeTuple({packedArr}),
         Fixup{},

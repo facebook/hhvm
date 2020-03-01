@@ -78,6 +78,10 @@ struct CompactTaggedPtr {
     return ptr();
   }
 
+  void swap(CompactTaggedPtr& o) noexcept {
+    std::swap(m_data, o.m_data);
+  }
+
 private:
   uintptr_t m_data;
 
@@ -104,9 +108,26 @@ struct CompactSizedPtr {
   const T* ptr()  const { return m_data.ptr(); }
         T* ptr()        { return m_data.ptr(); }
 
+  void swap(CompactSizedPtr& o) noexcept {
+    m_data.swap(o.m_data);
+  }
+
 private:
   CompactTaggedPtr<T> m_data;
 };
+
+//////////////////////////////////////////////////////////////////////
+
+template<typename T, typename TagType>
+void swap(CompactTaggedPtr<T, TagType>& p1,
+          CompactTaggedPtr<T, TagType>& p2) noexcept {
+  p1.swap(p1);
+}
+
+template<typename T>
+void swap(CompactSizedPtr<T>& p1, CompactSizedPtr<T>& p2) noexcept {
+  p1.swap(p2);
+}
 
 //////////////////////////////////////////////////////////////////////
 

@@ -1272,18 +1272,23 @@ void ExecutionContext::pushVMState(TypedValue* savedSP) {
   }
 
   TRACE(3, "savedVM: %p %p %p %p\n", vmpc(), vmfp(), vmFirstAR(), savedSP);
-  auto& savedVM = m_nestedVMs.alloc_back();
-  savedVM.pc = vmpc();
-  savedVM.fp = vmfp();
-  savedVM.firstAR = vmFirstAR();
-  savedVM.sp = savedSP;
-  savedVM.mInstrState = vmMInstrState();
-  savedVM.jitCalledFrame = vmJitCalledFrame();
-  savedVM.jitReturnAddr = vmJitReturnAddr();
-  savedVM.exn = jit::g_unwind_rds->exn;
-  savedVM.unwinderSideEnter = jit::g_unwind_rds->sideEnter;
+
+  auto& savedVM = m_nestedVMs.emplace_back(
+    VMState {
+      vmpc(),
+      vmfp(),
+      vmFirstAR(),
+      savedSP,
+      vmMInstrState(),
+      vmJitCalledFrame(),
+      vmJitReturnAddr(),
+      jit::g_unwind_rds->exn,
+      jit::g_unwind_rds->sideEnter
+    }
+  );
   jit::g_unwind_rds->exn = nullptr;
   jit::g_unwind_rds->sideEnter = false;
+
   m_nesting++;
 
   if (debug && savedVM.fp &&

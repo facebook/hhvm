@@ -22,14 +22,26 @@
 #include <type_traits>
 
 #include <boost/iterator/iterator_facade.hpp>
+#include <folly/lang/Launder.h>
 #include <folly/portability/Malloc.h>
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/compact-tagged-ptrs.h"
 
-
 namespace HPHP {
+
+// Replace with std::is_nothrow_swappable in c++17
+namespace tiny_vector_detail {
+using std::swap;
+
+template <typename U>
+struct is_nothrow_swappable {
+  static constexpr bool value =
+    noexcept(swap(std::declval<U&>(), std::declval<U&>()));
+};
+
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -47,8 +59,7 @@ namespace HPHP {
  *    - There is no non-const iterator support, and we have forward
  *      iterators only.
  *
- *    - The elements must be trivially copyable/assignable and have
- *      trivial destructors.
+ *    - The elements must be nothrow move constructible and nothrow swappable.
  *
  * Currently, does not invalidate pointers or references to elements
  * at indexes less than InternalSize, but we don't want to depend on
@@ -70,24 +81,25 @@ struct TinyVectorMallocAllocator {
     using other = TinyVectorMallocAllocator<U>;
   };
 
-  void* allocate(std::size_t size) const { return malloc(size); }
-  void deallocate(void* ptr, size_t) const { free(ptr); }
-  std::size_t usable_size(void* ptr, std::size_t /*size*/) const {
+  T* allocate(std::size_t size) const {
+    return reinterpret_cast<T*>(malloc(size));
+  }
+  void deallocate(T* ptr, size_t) const { free(ptr); }
+  std::size_t usable_size(T* ptr, std::size_t) const {
     return malloc_usable_size(ptr);
   }
 };
 
-template<class T,
+template<typename T,
          size_t InternalSize = 1,
          size_t MinHeapCapacity = 0,
-         typename OrigAllocator = std::allocator<char>>
+         typename OrigAllocator = TinyVectorMallocAllocator<T>>
 struct TinyVector {
-  static_assert(std::is_trivially_destructible<T>::value,
-                "TinyVector only supports elements with trivial destructors");
-  static_assert(std::is_trivially_copy_constructible<T>::value &&
-                std::is_trivially_copy_assignable<T>::value,
-                "TinyVector only supports elements with trivial copy "
-                "constructors and trivial assignment operators");
+  static_assert(std::is_nothrow_move_constructible<T>::value,
+                "TinyVector only supports elements with "
+                "non-throwing move constructors");
+  static_assert(tiny_vector_detail::is_nothrow_swappable<T>::value,
+                "TinyVector only supports elements with non-throwing swaps");
   static_assert(InternalSize >= 1,
                 "TinyVector assumes that the internal size is at least 1");
 
@@ -130,14 +142,75 @@ struct TinyVector {
 
   struct const_iterator;
 
-  TinyVector() {}
+  TinyVector() = default;
   ~TinyVector() { clear(); }
 
-  TinyVector(const TinyVector&) = delete;
-  TinyVector& operator=(const TinyVector&) = delete;
+  TinyVector(const TinyVector& o) {
+    reserve(o.size());
+    for (auto const& elem : o) push_back(elem);
+  }
+  TinyVector(TinyVector&& o) noexcept { swap(o); }
+
+  TinyVector& operator=(const TinyVector& o) {
+    if (this != &o) {
+      auto temp = o;
+      swap(temp);
+    }
+    return *this;
+  }
+  TinyVector& operator=(TinyVector&& o) noexcept {
+    if (this != &o) swap(o);
+    return *this;
+  }
+
+  template <typename U>
+  TinyVector(std::initializer_list<U> il) {
+    reserve(il.size());
+    for (auto const& elem : il) push_back(elem);
+  }
 
   size_t size() const { return m_impl.m_data.size(); }
   bool empty() const { return !size(); }
+
+  void swap(TinyVector& o) noexcept {
+    auto const size1 = m_impl.m_data.size();
+    auto const size2 = o.m_impl.m_data.size();
+    auto const internal1 = std::min<size_t>(size1, InternalSize);
+    auto const internal2 = std::min<size_t>(size2, InternalSize);
+
+    // Swap the prefix of the inline storage which both have initialized.
+    auto const both = std::min(internal1, internal2);
+    for (size_t i = 0; i < both; ++i) {
+      using std::swap;
+      swap(*location(i), *o.location(i));
+    }
+
+    // Move data out of the vector with more initialized inline data into the
+    // one with less. Then destroy the moved from data.
+    if (internal1 > internal2) {
+      uninitialized_move_n(
+        location(internal2),
+        internal1 - internal2,
+        o.location(internal2)
+      );
+      if (!std::is_trivially_destructible<T>::value) {
+        for (size_t i = internal2; i < internal1; ++i) location(i)->~T();
+      }
+    } else {
+      uninitialized_move_n(
+        o.location(internal1),
+        internal2 - internal1,
+        location(internal1)
+      );
+      if (!std::is_trivially_destructible<T>::value) {
+        for (size_t i = internal1; i < internal2; ++i) o.location(i)->~T();
+      }
+    }
+
+    // Move the non-inline data. This is just a simple pointer swap.
+    using std::swap;
+    swap(m_impl.m_data, o.m_impl.m_data);
+  }
 
   const_iterator begin() const { return const_iterator(this, 0); }
   const_iterator end()   const { return const_iterator(this); }
@@ -152,6 +225,11 @@ struct TinyVector {
   }
 
   void clear() {
+    if (!std::is_trivially_destructible<T>::value) {
+      auto const current = size();
+      for (size_t i = 0; i < current; ++i) location(i)->~T();
+    }
+
     if (HeapData* p = m_impl.m_data.ptr()) {
       alloc_traits<Impl>::deallocate(m_impl, reinterpret_cast<AllocPtr>(p),
                                      allocSize(p->capacity));
@@ -159,23 +237,44 @@ struct TinyVector {
     m_impl.m_data.set(0, 0);
   }
 
-  void push_back(const T& t) {
-    alloc_back() = t;
+  template <typename U>
+  T& push_back(const U& u) {
+    auto const current = size();
+    reserve(current + 1);
+    auto ptr = location(current);
+    ::new (ptr) T(u);
+    m_impl.m_data.set(current + 1, m_impl.m_data.ptr());
+    return *ptr;
   }
 
-  /*
-   * Increase the size of this TinyVector by 1 and return a reference to the
-   * new object, which will be uninitialized.
-   */
-  T& alloc_back() {
-    size_t current = size();
+  template <typename U>
+  T& push_back(U&& u) {
+    auto const current = size();
     reserve(current + 1);
+    auto ptr = location(current);
+    ::new (ptr) T(std::move(u));
     m_impl.m_data.set(current + 1, m_impl.m_data.ptr());
-    return back();
+    return *ptr;
+  }
+
+  template <typename... Args>
+  T& emplace_back(Args&&... args) {
+    auto const current = size();
+    reserve(current + 1);
+    auto ptr = location(current);
+    ::new (ptr) T(std::forward<Args>(args)...);
+    m_impl.m_data.set(current + 1, m_impl.m_data.ptr());
+    return *ptr;
+  }
+
+  template <typename I>
+  void insert(I begin, I end) {
+    while (begin != end) emplace_back(*begin++);
   }
 
   void pop_back() {
     assert(!empty());
+    location(size() - 1)->~T();
     m_impl.m_data.set(size() - 1, m_impl.m_data.ptr());
   }
 
@@ -191,12 +290,12 @@ struct TinyVector {
 
   T& front() {
     assert(!empty());
-    return m_impl.m_vals[0];
+    return (*this)[0];
   }
 
   const T& front() const {
     assert(!empty());
-    return m_impl.m_vals[0];
+    return (*this)[0];
   }
 
   void reserve(size_t sz) {
@@ -218,12 +317,21 @@ struct TinyVector {
     const size_t usableSize = AT::usable_size(m_impl, newHeap, requested);
     newHeap->capacity = (usableSize - offsetof(HeapData, vals)) / sizeof(T);
 
-    if (HeapData* p = m_impl.m_data.ptr()) {
-      std::copy(&m_impl.m_data.ptr()->vals[0],
-                &m_impl.m_data.ptr()->vals[size() - InternalSize],
-                &newHeap->vals[0]);
-      AT::deallocate(m_impl, reinterpret_cast<AllocPtr>(p),
-                     allocSize(p->capacity));
+    if (auto p = m_impl.m_data.ptr()) {
+      auto const current = size();
+      uninitialized_move_n(
+        &m_impl.m_data.ptr()->vals[0],
+        current - InternalSize,
+        &newHeap->vals[0]
+      );
+      if (!std::is_trivially_destructible<T>::value) {
+        for (size_t i = InternalSize; i < current; ++i) location(i)->~T();
+      }
+      AT::deallocate(
+        m_impl,
+        reinterpret_cast<AllocPtr>(p),
+        allocSize(p->capacity)
+      );
     }
     m_impl.m_data.set(size(), newHeap);
   }
@@ -231,11 +339,28 @@ struct TinyVector {
   template<size_t isize, size_t minheap, typename origalloc>
   bool operator==(const TinyVector<T, isize, minheap, origalloc>& tv) const {
     if (size() != tv.size()) return false;
+    return std::equal(begin(), end(), tv.begin());
+  }
+  template<size_t isize, size_t minheap, typename origalloc>
+  bool operator!=(const TinyVector<T, isize, minheap, origalloc>& tv) const {
+    return !(*this == tv);
+  }
 
-    for (size_t i = 0; i < size(); ++i) {
-      if ((*this)[i] != tv[i]) return false;
-    }
-    return true;
+  template<size_t isize, size_t minheap, typename origalloc>
+  bool operator<(const TinyVector<T, isize, minheap, origalloc>& tv) const {
+    return std::lexicographical_compare(begin(), end(), tv.begin(), tv.end());
+  }
+  template<size_t isize, size_t minheap, typename origalloc>
+  bool operator<=(const TinyVector<T, isize, minheap, origalloc>& tv) const {
+    return (*this < tv) || (*this == tv);
+  }
+  template<size_t isize, size_t minheap, typename origalloc>
+  bool operator>(const TinyVector<T, isize, minheap, origalloc>& tv) const {
+    return !(*this <= tv);
+  }
+  template<size_t isize, size_t minheap, typename origalloc>
+  bool operator>=(const TinyVector<T, isize, minheap, origalloc>& tv) const {
+    return !(*this < tv);
   }
 
 private:
@@ -249,22 +374,44 @@ private:
   }
 
   T* location(size_t index) {
-    return index < InternalSize
-                   ? &m_impl.m_vals[index]
-                   : &m_impl.m_data.ptr()->vals[index - InternalSize];
+    return (index < InternalSize)
+      ? folly::launder(reinterpret_cast<T*>(&m_impl.m_vals[index]))
+      : &m_impl.m_data.ptr()->vals[index - InternalSize];
   }
 
-private:
+  // Replace with std::uninitialized_move_n in c++17
+  template<typename InputIt, typename ForwardIt>
+  static void uninitialized_move_n(InputIt first,
+                                   size_t count,
+                                   ForwardIt d_first) {
+    using Value = typename std::iterator_traits<ForwardIt>::value_type;
+    auto current = d_first;
+    try {
+      for (; count > 0; ++first, ++current, --count) {
+        ::new (static_cast<void*>(std::addressof(*current)))
+          Value(std::move(*first));
+      }
+    } catch (...) {
+      for (; d_first != current; ++d_first) {
+        d_first->~Value();
+      }
+      throw;
+    }
+  }
+
+  using RawBuffer = typename std::aligned_storage<sizeof(T), alignof(T)>::type;
+  using InternalStorage = RawBuffer[InternalSize];
+
   struct Impl : Allocator {
     CompactSizedPtr<HeapData> m_data;
-    T m_vals[InternalSize];
+    InternalStorage m_vals;
   };
   Impl m_impl;
 };
 
 //////////////////////////////////////////////////////////////////////
 
-template<class T,
+template<typename T,
          size_t InternalSize,
          size_t MinHeapCapacity,
          typename Allocator>
@@ -303,6 +450,18 @@ private:
   const TinyVector* m_p;
   uint32_t m_idx;
 };
+
+//////////////////////////////////////////////////////////////////////
+
+template<typename T,
+         size_t InternalSize,
+         size_t MinHeapCapacity,
+         typename Allocator>
+void swap(TinyVector<T, InternalSize, MinHeapCapacity, Allocator>& v1,
+          TinyVector<T, InternalSize, MinHeapCapacity, Allocator>& v2)
+  noexcept {
+  v1.swap(v2);
+}
 
 //////////////////////////////////////////////////////////////////////
 

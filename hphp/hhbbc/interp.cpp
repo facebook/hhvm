@@ -1813,7 +1813,13 @@ void castImpl(ISS& env, Type target, void(*fn)(TypedValue*)) {
   auto const t = topC(env);
   if (t.subtypeOf(target)) return reduce(env);
   popC(env);
-  if (fn) {
+
+  auto const needsRuntimeProvenance =
+    RO::EvalArrayProvenance &&
+    env.ctx.func->attrs & AttrProvenanceSkipFrame &&
+    target.subtypeOf(kProvBits);
+
+  if (fn && !needsRuntimeProvenance) {
     if (auto val = tv(t)) {
       if (auto result = eval_cell([&] { fn(&*val); return *val; })) {
         constprop(env);
@@ -1837,10 +1843,12 @@ void in(ISS& env, const bc::CastArray&)  {
 }
 
 void in(ISS& env, const bc::CastDict&)   {
+  arrprov::TagOverride tag_override{provTagHere(env).get()};
   castImpl(env, TDict, tvCastToDictInPlace);
 }
 
 void in(ISS& env, const bc::CastVec&)    {
+  arrprov::TagOverride tag_override{provTagHere(env).get()};
   castImpl(env, TVec, tvCastToVecInPlace);
 }
 
@@ -1850,11 +1858,13 @@ void in(ISS& env, const bc::CastKeyset&) {
 
 void in(ISS& env, const bc::CastVArray&)  {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
+  arrprov::TagOverride tag_override{provTagHere(env).get()};
   castImpl(env, TVArr, tvCastToVArrayInPlace);
 }
 
 void in(ISS& env, const bc::CastDArray&)  {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
+  arrprov::TagOverride tag_override{provTagHere(env).get()};
   castImpl(env, TDArr, tvCastToDArrayInPlace);
 }
 

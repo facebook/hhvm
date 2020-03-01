@@ -225,10 +225,6 @@ void MemoryManager::setMemThresholdCallback(size_t threshold) {
  * The stats parameter allows the updates to be applied to either
  * m_stats as in refreshStats() or to a separate MemoryUsageStats
  * struct as in getStatsCopy().
- *
- * The template variable live controls whether or not MemoryManager
- * member variables are updated and whether or not to call helper
- * methods in response to memory anomalies.
  */
 void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
   // Incrementally incorporate the difference between the previous and current

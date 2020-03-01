@@ -14,7 +14,6 @@ import struct
 
 from gdbutils import *
 import idx as idxs
-from nameof import nameof
 import repo
 
 

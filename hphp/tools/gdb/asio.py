@@ -13,7 +13,6 @@ import re
 from gdbutils import *
 import frame
 import idx
-from nameof import nameof
 from sizeof import sizeof
 
 

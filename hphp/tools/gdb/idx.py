@@ -259,11 +259,11 @@ def tv_layout_at(layout_type, props_base, idx):
             ty = (chunk + rem).cast(T("HPHP::DataType").pointer()).dereference()
             valaddr = chunk + T("HPHP::Value").sizeof * (1 + rem)
             val = valaddr.cast(T("HPHP::Value").pointer()).dereference()
-            return hallucinate_tv(ty, val)
+            return pretty_tv(ty, val)
     except:
         pass
 
-    print("No such tv layout: {}" % layout_type.name)
+    print("\nNo such tv layout: %s\n" % layout_type.name)
 
 
 def object_data_at(obj, cls, prop_name_or_slot, hasher=None):

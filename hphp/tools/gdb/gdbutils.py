@@ -335,14 +335,107 @@ def deref(val):
 
 
 #------------------------------------------------------------------------------
+# Name accessor.
+
+def nameof(val):
+    val = deref(val)
+    try:
+        t = val.type.name
+    except:
+        return None
+
+    sd = None
+
+    if t == 'HPHP::Func':
+        sd = val['m_fullName']
+    elif t == 'HPHP::Class':
+        sd = deref(val['m_preClass'])['m_name']
+    elif t == 'HPHP::ObjectData':
+        cls = deref(val['m_cls'])
+        sd = deref(cls['m_preClass'])['m_name']
+
+    if sd is None:
+        return None
+
+    return string_data_val(deref(sd))
+
+
+#------------------------------------------------------------------------------
 # TV helpers.
 
-def hallucinate_tv(ty, val):
-    ty = int(ty.cast(T("uint8_t")))
-    val = int(val.cast(T("uintptr_t")))
-    return gdb.parse_and_eval(
-        "*(HPHP::TypedValue*)(uint64_t[2]){0x%08x, 0x%02x}" % (val, ty)
-    )
+tv_recurse = False
+
+
+def DT(kind):
+    return V(kind, 'DataType')
+
+
+def pretty_tv(t, data):
+    t = t.cast(T("HPHP::DataType"))
+
+    global tv_recurse
+
+    val = None
+    name = None
+
+    if t == DT('HPHP::KindOfUninit') or t == DT('HPHP::KindOfNull'):
+        pass
+
+    elif t == DT('HPHP::KindOfBoolean'):
+        if data['num'] == 0:
+            val = False
+        elif data['num'] == 1:
+            val = True
+        else:
+            val = data['num']
+
+    elif t == DT('HPHP::KindOfInt64'):
+        val = data['num']
+
+    elif t == DT('HPHP::KindOfDouble'):
+        val = data['dbl']
+
+    elif (t == DT('HPHP::KindOfString') or
+          t == DT('HPHP::KindOfPersistentString')):
+        val = data['pstr'].dereference()
+
+    elif (t == V('HPHP::KindOfArray') or
+          t == V('HPHP::KindOfPersistentArray') or
+          t == V('HPHP::KindOfDArray') or
+          t == V('HPHP::KindOfPersistentDArray') or
+          t == V('HPHP::KindOfVArray') or
+          t == V('HPHP::KindOfPersistentVArray') or
+          t == V('HPHP::KindOfDict') or
+          t == V('HPHP::KindOfPersistentDict') or
+          t == V('HPHP::KindOfVec') or
+          t == V('HPHP::KindOfPersistentVec') or
+          t == V('HPHP::KindOfKeyset') or
+          t == V('HPHP::KindOfPersistentKeyset')):
+        val = data['parr']
+        if tv_recurse:
+            val = val.dereference()
+
+    elif t == DT('HPHP::KindOfObject'):
+        val = data['pobj']
+        if tv_recurse:
+            val = val.dereference()
+        name = nameof(val)
+
+    elif t == DT('HPHP::KindOfResource'):
+        val = data['pres']
+
+    else:
+        t = 'Invalid(%d)' % t.cast(T('int8_t'))
+        val = "0x%x" % int(data['num'])
+
+    if val is None:
+        out = '{ %s }' % t
+    elif name is None:
+        out = '{ %s, %s }' % (t, str(val))
+    else:
+        out = '{ %s, %s ("%s") }' % (t, str(val), name)
+
+    return out
 
 
 #------------------------------------------------------------------------------

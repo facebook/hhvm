@@ -11,32 +11,6 @@ from gdbutils import *
 
 
 #------------------------------------------------------------------------------
-# Name accessor.
-
-def nameof(val):
-    val = deref(val)
-    try:
-        t = val.type.name
-    except:
-        return None
-
-    sd = None
-
-    if t == 'HPHP::Func':
-        sd = val['m_fullName']
-    elif t == 'HPHP::Class':
-        sd = deref(val['m_preClass'])['m_name']
-    elif t == 'HPHP::ObjectData':
-        cls = deref(val['m_cls'])
-        sd = deref(cls['m_preClass'])['m_name']
-
-    if sd is None:
-        return None
-
-    return string_data_val(deref(sd))
-
-
-#------------------------------------------------------------------------------
 # `nameof' command.
 
 class NameOfCommand(gdb.Command):

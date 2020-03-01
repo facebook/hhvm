@@ -51,6 +51,7 @@
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/irgen-basic.h"
+#include "hphp/runtime/vm/jit/irgen-bespoke.h"
 #include "hphp/runtime/vm/jit/irgen-control.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
@@ -1212,6 +1213,7 @@ void translateInstr(irgen::IRGS& irgs, const NormalizedInstruction& ni,
   }
 
   if (isAlwaysNop(ni)) return;
+  handleBespokeInputs(irgs, ni);
   if (ni.interp || RuntimeOption::EvalJitAlwaysInterpOne) {
     irgen::interpOne(irgs);
     return;

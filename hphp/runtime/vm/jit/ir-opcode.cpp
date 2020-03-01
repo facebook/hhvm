@@ -63,6 +63,7 @@ TRACE_SET_MOD(hhir);
 #define DDictLastKey      HasDest
 #define DKeysetFirstElem  HasDest
 #define DKeysetLastElem   HasDest
+#define DCheckDV(...)  HasDest
 #define DArrPacked     HasDest
 #define DArrMixed      HasDest
 #define DArrRecord     HasDest

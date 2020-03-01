@@ -61,12 +61,23 @@ inline bool GuardConstraint::isSpecialized() const {
 inline GuardConstraint& GuardConstraint::setWantArrayKind() {
   assertx(!wantClass());
   assertx(isSpecialized());
-  m_specialized |= kWantArrayKind;
+  m_specialized |= kWantArrayKind | kWantVanillaArray;
+  return *this;
+}
+
+inline GuardConstraint& GuardConstraint::setWantVanillaArray() {
+  assertx(!wantClass());
+  assertx(isSpecialized());
+  m_specialized |= kWantVanillaArray;
   return *this;
 }
 
 inline bool GuardConstraint::wantArrayKind() const {
   return m_specialized & kWantArrayKind;
+}
+
+inline bool GuardConstraint::wantVanillaArray() const {
+  return m_specialized & kWantVanillaArray;
 }
 
 inline GuardConstraint& GuardConstraint::setDesiredClass(const Class* cls) {
@@ -79,7 +90,7 @@ inline GuardConstraint& GuardConstraint::setDesiredClass(const Class* cls) {
 }
 
 inline bool GuardConstraint::wantClass() const {
-  return m_specialized && !wantArrayKind();
+  return m_specialized && !wantVanillaArray();
 }
 
 inline const Class* GuardConstraint::desiredClass() const {

@@ -61,9 +61,10 @@ struct SSATmp;
  *     DArrMixed    single dst has a mixed array type
  *     DVArr        single dst is either a packed array type or vec, depending
                       on configuration
- *     DVArrOrNull  either as described above as DVarr or the type is nullptr
  *     DDArr        single dst is either a mixed array type or dict, depending
                       on configuration
+ *     DCheckDV(kind) single dst either has the given array kind or is bespoke;
+                      if the src is vanilla, the dst is vanilla as well
  *     DArrElem     single dst has type based on reading an array element,
  *                    intersected with an optional type parameter
  *     DVecElem    single dst has type based on reading a vec element,

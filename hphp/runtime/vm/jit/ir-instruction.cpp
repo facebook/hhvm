@@ -543,6 +543,9 @@ inline Type unionReturn(const IRInstruction* inst, IdxSeq<Idx, Rest...>) {
 Type outputType(const IRInstruction* inst, int /*dstId*/) {
   using namespace TypeNames;
   using TypeNames::TCA;
+  static auto const TPackedArr = Type::Array(ArrayData::kPackedKind);
+  static auto const TMixedArr  = Type::Array(ArrayData::kMixedKind);
+  static auto const TRecordArr = Type::Array(ArrayData::kRecordKind);
 #define ND              assertx(0 && "outputType requires HasDest or NaryDest");
 #define D(type)         return type;
 #define DofS(n)         return inst->src(n)->type();
@@ -571,19 +574,18 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DDictLastKey      return dictFirstLastReturn(inst, false, true);
 #define DKeysetFirstElem  return keysetFirstLastReturn(inst, true);
 #define DKeysetLastElem   return keysetFirstLastReturn(inst, false);
-#define DArrPacked      return Type::Array(ArrayData::kPackedKind);
-#define DArrMixed       return Type::Array(ArrayData::kMixedKind);
-#define DArrRecord      return Type::Array(ArrayData::kRecordKind);
-#define DVArr           return (RuntimeOption::EvalHackArrDVArrs \
-                                ? TVec : Type::Array(ArrayData::kPackedKind));
-#define DVArrOrNull     return ((RuntimeOption::EvalHackArrDVArrs             \
-                                ? TVec : Type::Array(ArrayData::kPackedKind)) \
-                               | TNullptr);
-#define DDArr           return (RuntimeOption::EvalHackArrDVArrs \
-                                ? TDict : Type::Array(ArrayData::kMixedKind));
+#define DArrPacked      return TPackedArr;
+#define DArrMixed       return TMixedArr;
+#define DArrRecord      return TRecordArr;
+#define DVArr           return RO::EvalHackArrDVArrs ? TVec : TPackedArr;
+#define DDArr           return RO::EvalHackArrDVArrs ? TDict : TMixedArr;
 #define DStaticDArr     return (RuntimeOption::EvalHackArrDVArrs \
                                 ? TStaticDict \
                                 : Type::StaticArray(ArrayData::kMixedKind));
+// If the inputs to CheckVArray and CheckDArray are vanilla, then the output
+// will have a known type, but if the inputs are generic arrays, we won't.
+#define DCheckDV(kind)  return inst->getPassthroughValue()->type() & \
+                               T##kind##Arr.widenToBespoke();
 #define DCol            return newColReturn(inst);
 #define DMulti          return TBottom;
 #define DSetElem        return setElemReturn(inst);

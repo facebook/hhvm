@@ -3331,10 +3331,10 @@ SSATmp* simplifyCount(State& env, const IRInstruction* inst) {
   auto const oneTy = TBool | TInt | TDbl | TStr | TRes;
   if (ty <= oneTy) return cns(env, 1);
 
-  if (ty <= TArr) return gen(env, CountArray, val);
-  if (ty <= TVec) return gen(env, CountVec, val);
-  if (ty <= TDict) return gen(env, CountDict, val);
-  if (ty <= TKeyset) return gen(env, CountKeyset, val);
+  if (ty <= TVanillaArr) return gen(env, CountArray, val);
+  if (ty <= TVanillaVec) return gen(env, CountVec, val);
+  if (ty <= TVanillaDict) return gen(env, CountDict, val);
+  if (ty <= TVanillaKeyset) return gen(env, CountKeyset, val);
 
   if (ty < TObj) {
     auto const cls = ty.clsSpec().cls();

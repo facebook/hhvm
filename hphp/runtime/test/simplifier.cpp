@@ -119,9 +119,17 @@ TEST(Simplifier, Count) {
     EXPECT_EQ(1, result.dst->intVal());
   }
 
-  // Count($array_no_kind) --> CountArray($array_no_kind)
+  // Count($array_no_kind) --> <unchanged>
   {
     auto arr = unit.gen(Conjure, dummy, TArr);
+    auto count = unit.gen(Count, dummy, arr->dst());
+    auto result = simplify(unit, count);
+    EXPECT_EQ(nullptr, result.dst);
+  }
+
+  // Count($vanilla_array) --> CountArray($vanilla_array)
+  {
+    auto arr = unit.gen(Conjure, dummy, TVanillaArr);
     auto count = unit.gen(Count, dummy, arr->dst());
     auto result = simplify(unit, count);
 

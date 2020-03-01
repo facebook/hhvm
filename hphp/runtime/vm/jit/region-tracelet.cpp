@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/region-selection.h"
 
 #include "hphp/runtime/vm/jit/inlining-decider.h"
+#include "hphp/runtime/vm/jit/irgen-bespoke.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/location.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
@@ -183,6 +184,7 @@ bool prepareInstruction(Env& env) {
       return false;
     }
   }
+  if (!checkBespokeInputs(env.irgs, env.inst)) return false;
 
   addInstruction(env);
 

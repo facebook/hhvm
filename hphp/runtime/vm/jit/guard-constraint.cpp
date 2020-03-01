@@ -30,8 +30,11 @@ std::string GuardConstraint::toString() const {
   std::string ret = "<" + typeCategoryName(category);
 
   if (category == DataTypeSpecialized) {
-    if (wantArrayKind()) ret += ",ArrayKind";
-    if (wantClass()) {
+    if (wantArrayKind()) {
+      ret += ",ArrayKind";
+    } else if (wantVanillaArray()) {
+      ret += ",VanillaArray";
+    } else if (wantClass()) {
       folly::toAppend("Cls:", desiredClass()->name()->data(), &ret);
     }
   }
@@ -63,13 +66,14 @@ bool typeFitsConstraint(Type t, GuardConstraint gc) {
     case DataTypeSpecialized:
       // Type::isSpecialized() returns true for types like {Arr<Packed>|Int},
       // so we need to check both for specialization and isKnownDataType.
-      assertx(gc.wantClass() ^ gc.wantArrayKind());
+      assertx(gc.wantClass() ^ gc.wantVanillaArray());
       if (!t.isKnownDataType()) return false;
       if (gc.wantClass()) {
         auto const clsSpec = t.clsSpec();
         return clsSpec && clsSpec.cls()->classof(gc.desiredClass());
       } else {
-        return static_cast<bool>(t.arrSpec().kind());
+        if (gc.wantArrayKind()) return !!t.arrSpec().kind();
+        if (gc.wantVanillaArray()) return t.arrSpec().vanilla();
       }
       return false;
   }
@@ -95,21 +99,27 @@ GuardConstraint relaxConstraint(GuardConstraint origGc,
   // Preserve origGc's weak property.
   GuardConstraint newGc{DataTypeGeneric};
   newGc.weak = origGc.weak;
+  Type newDstType{};
 
   while (true) {
     if (newGc.isSpecialized()) {
-      // We need to ask for the right kind of specialization, so grab it from
-      // origGc.
+      // Check if a vanilla constraint is sufficient before proceeding to kind.
+      if (origGc.wantVanillaArray()) {
+        newGc.setWantVanillaArray();
+        newDstType = knownType & relaxToConstraint(toRelax, newGc);
+        if (typeFitsConstraint(newDstType, origGc)) break;
+        ITRACE(5, "newDstType = {}, newGc = {}; vanilla is insufficient\n",
+               newDstType, newGc);
+      }
+      // Include the remainder of the specialization from origGc.
       if (origGc.wantArrayKind()) newGc.setWantArrayKind();
       if (origGc.wantClass()) newGc.setDesiredClass(origGc.desiredClass());
     }
 
-    auto const relaxed = relaxToConstraint(toRelax, newGc);
-    auto const newDstType = relaxed & knownType;
+    newDstType = knownType & relaxToConstraint(toRelax, newGc);
     if (typeFitsConstraint(newDstType, origGc)) break;
-
     ITRACE(5, "newDstType = {}, newGc = {}; incrementing constraint\n",
-      newDstType, newGc);
+           newDstType, newGc);
     incCategory(newGc.category);
   }
   // DataTypeCountness can be relaxed to DataTypeGeneric in
@@ -132,6 +142,7 @@ GuardConstraint applyConstraint(GuardConstraint gc,
   gc.category = std::max(newGc.category, gc.category);
 
   if (newGc.wantArrayKind()) gc.setWantArrayKind();
+  if (newGc.wantVanillaArray()) gc.setWantVanillaArray();
 
   if (newGc.wantClass()) {
     if (gc.wantClass()) {

@@ -73,6 +73,7 @@ struct GuardConstraint {
   // Specialization.
 
   static constexpr uint8_t kWantArrayKind = 0x1;
+  static constexpr uint8_t kWantVanillaArray = 0x2;
 
   /*
    * Is this GuardConstraint for a specialized type?
@@ -80,12 +81,15 @@ struct GuardConstraint {
   bool isSpecialized() const;
 
   /*
-   * Set or check the kWantArrayKind bit in `m_specialized'.
+   * Constrain this type to a specialized array-like subtype. Guarding to kind
+   * is strictly stronger than guarding to vanilla; it sets both flag bits.
    *
    * @requires: isSpecialized()
    */
   GuardConstraint& setWantArrayKind();
+  GuardConstraint& setWantVanillaArray();
   bool wantArrayKind() const;
+  bool wantVanillaArray() const;
 
   /*
    * Set, check, or return the specialized Class.

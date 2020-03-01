@@ -188,12 +188,12 @@ Instruction set
 
   If the value pointed to by S0 is not type T, branch to the block B.
 
-| CheckVArray, DArrPacked, S(Arr), B|P
+| CheckVArray, DCheckDV(Packed), S(Arr), B|P
 
   Check that S0 is a varray, and if so copy it to D, and fallthrough. If S0 is
   not a varray, branch to block B.
 
-| CheckDArray, DArrMixed, S(Arr), B|P
+| CheckDArray, DCheckDV(Mixed), S(Arr), B|P
 
   Check that S0 is a darray, and if so copy it to D, and fallthrough. If S0 is
   not a darray, branch to block B.

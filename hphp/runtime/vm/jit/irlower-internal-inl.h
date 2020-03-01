@@ -154,14 +154,18 @@ void emitSpecializedTypeTest(Vout& v, IRLS& /*env*/, Type type, Loc dataSrc,
     }
     doJcc(CC_E, sf);
   } else {
-    assertx(type < TArr && type.arrSpec() && type.arrSpec().kind());
-    assertx(type.arrSpec().type() == nullptr);
-
     auto const arrSpec = type.arrSpec();
-    auto const data = materialize(v, dataSrc);
+    assertx(arrSpec);
+    assertx(!arrSpec.type());
+    assertx(arrSpec.kind() || arrSpec.vanilla());
 
-    static_assert(sizeof(HeaderKind) == 1, "");
-    v << cmpbim{*arrSpec.kind(), data[HeaderKindOffset], sf};
+    auto const r = materialize(v, dataSrc);
+    if (arrSpec.kind()) {
+      assertx(type < TArr);
+      v << cmpbim{*arrSpec.kind(), r[HeaderKindOffset], sf};
+    } else if (arrSpec.vanilla()) {
+      v << testbim{ArrayData::kIsBespoke, r[ArrayData::offsetofDVArray()], sf};
+    }
     doJcc(CC_E, sf);
   }
 }

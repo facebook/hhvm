@@ -1039,6 +1039,37 @@ constexpr bool isJmp(Op opcode) {
     opcode == Op::JmpNZ;
 }
 
+constexpr bool isBinaryOp(Op opcode) {
+  return
+#define SETOP_OP(setOpOp, bcOp) opcode == bcOp ||
+  SETOP_OPS
+#undef SETOP_OP
+    opcode == Op::Cmp ||
+    opcode == Op::Eq ||
+    opcode == Op::Neq ||
+    opcode == Op::Gt ||
+    opcode == Op::Gte ||
+    opcode == Op::Lt ||
+    opcode == Op::Lte ||
+    opcode == Op::Same ||
+    opcode == Op::NSame ||
+    opcode == Op::Xor;
+}
+
+constexpr bool isCast(Op opcode) {
+  return
+    opcode == Op::CastBool ||
+    opcode == Op::CastInt ||
+    opcode == Op::CastDouble ||
+    opcode == Op::CastString ||
+    opcode == Op::CastArray ||
+    opcode == Op::CastDict ||
+    opcode == Op::CastKeyset ||
+    opcode == Op::CastVec ||
+    opcode == Op::CastVArray ||
+    opcode == Op::CastDArray;
+}
+
 constexpr bool isFCallClsMethod(Op opcode) {
   return
     opcode == OpFCallClsMethod ||

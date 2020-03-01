@@ -1214,18 +1214,18 @@ Type relaxType(Type t, DataTypeCategory cat) {
   not_reached();
 }
 
-// This method currently behaves just like relaxType, but as we support finer
-// guard constraints for specialized types, that will change, such as:
-//
-//  1. When we introduce "vanilla" and "bespoke" array-likes, the "vanilla"
-//     guard-constraint on a TArr is weaker than the "kind" constraint, so we
-//     can relax TArr=PackedKind to TArr=Vanilla here.
-//
-//  2. Right now, we only guard object types on class equality. We may want to
-//     relax those guards to subclass guards, so Obj=Derived becomes Obj<=Base.
-//
 Type relaxToConstraint(Type t, const GuardConstraint& gc) {
-  return relaxType(t, gc.category);
+  assertx(t <= TCell);
+  if (!gc.isSpecialized()) return relaxType(t, gc.category);
+
+  assertx(t.isSpecialized());
+  assertx(gc.wantClass() ^ gc.wantVanillaArray());
+
+  // NOTE: This second check here causes us to guard to specific classes where
+  // we could guard to superclasses and unify multiple regions. Rethink it.
+  if (gc.wantArrayKind() || gc.wantClass()) return t;
+  assertx(gc.wantVanillaArray());
+  return t.arrSpec().vanilla() ? t.unspecialize().narrowToVanilla() : t;
 }
 
 Type relaxToGuardable(Type ty) {

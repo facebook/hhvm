@@ -497,27 +497,27 @@ bool shouldInline(const irgen::IRGS& irgs,
     return refuse("inlining stack depth limit exceeded");
   }
 
-  // Even if the func contains NativeImpl we may have broken the trace before
-  // we hit it.
-  auto containsNativeImpl = [&] {
-    for (auto block : region.blocks()) {
-      if (!block->empty() && block->last().op() == OpNativeImpl) return true;
-    }
-    return false;
-  };
-
   auto isAwaitish = [&] (Op opcode) {
     return opcode == OpAwait || opcode == OpAwaitAll;
   };
 
-  // Try to inline CPP builtin functions.
-  // The NativeImpl opcode may appear later in the function because of Asserts
-  // generated in hhbbc
-  if (callee->isCPPBuiltin() && containsNativeImpl()) {
-    if (isInlinableCPPBuiltin(callee)) {
-      return accept("inlinable CPP builtin");
+  // Try to inline CPP builtin functions. Inline regions for these functions
+  // must end with a unique NativeImpl, which may not be true:
+  //  - If we only include the initial Asserts in the region, we may have zero
+  //  - If the NativeImpl guards its inputs, we may have multiple
+  if (callee->isCPPBuiltin()) {
+    if (!isInlinableCPPBuiltin(callee)) {
+      return refuse("non-inlinable CPP builtin");
     }
-    return refuse("non-inlinable CPP builtin");
+    auto const count = std::count_if(
+      std::begin(region.blocks()), std::end(region.blocks()),
+      [](auto const b) { return !b->empty() && b->last().op() == OpNativeImpl; }
+    );
+    switch (count) {
+      case 0:  return refuse("inlinable CPP builtin without a NativeImpl");
+      case 1:  return accept("inlinable CPP builtin with a unique NativeImpl");
+      default: return refuse("inlinable CPP builtin with multiple NativeImpls");
+    }
   }
 
   bool hasRet = false;

@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/jit/irgen-state.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
+#include "hphp/util/tiny-vector.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP { namespace jit { namespace irgen {
@@ -29,7 +30,9 @@ namespace HPHP { namespace jit { namespace irgen {
 
 namespace {
 
-std::vector<Location> getVanillaLocationsForBuiltin(
+using Locations = TinyVector<Location, 2>;
+
+Locations getVanillaLocationsForBuiltin(
     const IRGS& env, const NormalizedInstruction& ni) {
   auto const op = ni.op();
   auto const soff = env.irb->fs().bcSPOff();
@@ -51,7 +54,7 @@ std::vector<Location> getVanillaLocationsForBuiltin(
   }
 }
 
-std::vector<Location> getVanillaLocationsForCall(
+Locations getVanillaLocationsForCall(
     const IRGS& env, const NormalizedInstruction& ni) {
   auto const soff = env.irb->fs().bcSPOff();
   auto const& fca = ni.imm[0].u_FCA;
@@ -62,7 +65,7 @@ std::vector<Location> getVanillaLocationsForCall(
   return {Location::Stack{soff - (fca.hasGenerics() ? 1 : 0) - extra}};
 }
 
-std::vector<Location> getVanillaLocations(
+Locations getVanillaLocations(
     const IRGS& env, const NormalizedInstruction& ni) {
   auto const op = ni.op();
   auto const soff = env.irb->fs().bcSPOff();
@@ -102,8 +105,8 @@ std::vector<Location> getVanillaLocations(
 
     case Op::SetOpL: {
       auto const local = ni.imm[localImmIdx(op)].u_LA;
-      return {Location::Local{safe_cast<uint32_t>(local)},
-              Location::Stack{soff}};
+      return {Location{Location::Local{safe_cast<uint32_t>(local)}},
+              Location{Location::Stack{soff}}};
     }
 
     // Miscellaneous ops that constrain one stack value.
@@ -143,7 +146,7 @@ void guardToVanilla(IRGS& env, const NormalizedInstruction& ni, Location loc) {
 }
 
 bool skipVanillaGuards(IRGS& env, const NormalizedInstruction& ni,
-                       const std::vector<Location>& locs) {
+                       const Locations& locs) {
   auto const is_arrlike = [&](Location loc) {
     auto const& type = env.irb->fs().typeOf(loc);
     if (!type.isKnownDataType()) return false;

@@ -209,7 +209,6 @@ void ArrayData::GetScalarArray(ArrayData** parr, arrprov::Tag tag) {
     return replace(staticEmptyArray());
   }
 
-  checkNativeStack();
   arr->onSetEvalScalar();
 
   s_cachedHash.first = arr;

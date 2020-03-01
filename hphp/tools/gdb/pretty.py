@@ -51,7 +51,7 @@ class StringDataPrinter(object):
 
 
 class SetTVRecurseCommand(gdb.Command):
-    """Whether to recurse into TypedValue data ptrs when pretty-printing."""
+    """How many levels to recurse into TypedValue data ptrs when pretty-printing."""
 
     def __init__(self):
         super(SetTVRecurseCommand, self).__init__('set tv-recurse',
@@ -61,16 +61,23 @@ class SetTVRecurseCommand(gdb.Command):
     def invoke(self, args, from_tty):
         argv = gdb.string_to_argv(args)
 
-        if len(argv) != 1:
-            print('Requires an argument. Valid arguments are true, false.')
-            return
+        if len(argv) == 1:
+            if argv[0] == 'true':
+                gdbutils.tv_recurse = 1
+                return
 
-        if argv[0] == 'true':
-            gdbutils.tv_recurse = True
-        elif argv[0] == 'false':
-            gdbutils.tv_recurse = False
-        else:
-            print('Undefined item: "{}"'.format(argv[0]))
+            if argv[0] == 'false':
+                gdbutils.tv_recurse = 0
+                return
+
+            try:
+                gdbutils.tv_recurse = int(argv[0])
+                return
+            except:
+                pass
+
+        print('Requires an argument. '
+              'Valid arguments are true, false or an integer depth')
 
 
 SetTVRecurseCommand()

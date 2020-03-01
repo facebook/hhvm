@@ -363,8 +363,8 @@ def nameof(val):
 #------------------------------------------------------------------------------
 # TV helpers.
 
-tv_recurse = False
-
+tv_recurse = 0
+_tv_recurse_depth = 0
 
 def DT(kind):
     return V(kind, 'DataType')
@@ -374,6 +374,9 @@ def pretty_tv(t, data):
     t = t.cast(T("HPHP::DataType"))
 
     global tv_recurse
+    global _tv_recurse_depth
+
+    recurse = False
 
     val = None
     name = None
@@ -412,13 +415,15 @@ def pretty_tv(t, data):
           t == V('HPHP::KindOfKeyset') or
           t == V('HPHP::KindOfPersistentKeyset')):
         val = data['parr']
-        if tv_recurse:
+        if _tv_recurse_depth < tv_recurse:
             val = val.dereference()
+            recurse = True
 
     elif t == DT('HPHP::KindOfObject'):
         val = data['pobj']
-        if tv_recurse:
+        if _tv_recurse_depth < tv_recurse:
             val = val.dereference()
+            recurse = True
         name = nameof(val)
 
     elif t == DT('HPHP::KindOfResource'):
@@ -427,6 +432,15 @@ def pretty_tv(t, data):
     else:
         t = 'Invalid(%d)' % t.cast(T('int8_t'))
         val = "0x%x" % int(data['num'])
+
+    if recurse:
+        _tv_recurse_depth += 1
+        try:
+            val = str(val)
+            indent = 2 * _tv_recurse_depth
+            val = re.sub(r"^", ' ' * indent, val, flags=re.M)[indent:]
+        finally:
+            _tv_recurse_depth -= 1
 
     if val is None:
         out = '{ %s }' % t

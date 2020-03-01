@@ -289,8 +289,7 @@ void MemoryManager::refreshStats() {
   auto usage = m_stats.usage();
   if (usage > m_usageLimit && m_couldOOM) {
     refreshStatsHelperExceeded();
-  }
-  if (usage > m_memThresholdCallbackPeakUsage) {
+  } else if (usage > m_memThresholdCallbackPeakUsage) {
     m_memThresholdCallbackPeakUsage = SIZE_MAX;
     setSurpriseFlag(MemThresholdFlag);
   }

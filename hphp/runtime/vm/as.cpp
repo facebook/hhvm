@@ -2315,16 +2315,33 @@ UpperBoundMap parse_ubs(AsmState& as) {
   return ret;
 }
 
-UpperBoundVec getUpperBounds(const StringData* typeName,
+namespace {
+void findUpperBounds(const StringData* name, const UpperBoundMap& ubs,
+                     TypeConstraint::Flags flags,
+                     UpperBoundVec& out) {
+  auto it = ubs.find(name);
+  if (it != ubs.end()) {
+    for (auto& ub : it->second) {
+      out.push_back(TypeConstraint(ub.typeName(),
+                                   static_cast<TypeConstraint::Flags>(
+                                     ub.flags() | flags)));
+    }
+  }
+}
+}
+UpperBoundVec getUpperBounds(const TypeConstraint& tc,
                              const UpperBoundMap& ubs,
                              const UpperBoundMap& class_ubs) {
-  if (!typeName) return {};
-  assertx(typeName->isStatic());
-  auto it = ubs.find(typeName);
-  if (it != ubs.end()) return it->second;
-  it = class_ubs.find(typeName);
-  if (it != class_ubs.end()) return it->second;
-  return {};
+  UpperBoundVec ret;
+  if (!tc.isTypeVar()) return ret;
+  auto const typeName = tc.typeName();
+  auto tcFlags = static_cast<TypeConstraint::Flags>(
+      tc.flags() & ~TypeConstraint::Flags::TypeVar);
+  findUpperBounds(typeName, ubs, tcFlags, ret);
+  if (ret.empty()) {
+    findUpperBounds(typeName, class_ubs, tcFlags, ret);
+  }
+  return ret;
 }
 
 /*
@@ -2394,7 +2411,7 @@ void parse_parameter_list(AsmState& as,
     }
 
     std::tie(param.userType, param.typeConstraint) = parse_type_info(as);
-    auto const& ub = getUpperBounds(param.userType, ubs, class_ubs);
+    auto const& ub = getUpperBounds(param.typeConstraint, ubs, class_ubs);
     if (ub.size() == 1 && !hasReifiedGenerics) {
       param.typeConstraint = ub[0];
     } else if (!ub.empty()) {
@@ -2661,7 +2678,8 @@ void parse_function(AsmState& as) {
   as.fe = as.ue->newFuncEmitter(makeStaticString(name));
   as.fe->init(line0, line1, as.ue->bcPos(), attrs, isTop, 0);
 
-  auto const& ub = getUpperBounds(retTypeInfo.first, ubs, {});
+  auto const& ub = getUpperBounds(retTypeInfo.second,
+                                  ubs, {});
   auto const hasReifiedGenerics =
     userAttrs.find(s___Reified.get()) != userAttrs.end();
   if (ub.size() == 1 && !hasReifiedGenerics) {
@@ -2725,7 +2743,7 @@ void parse_method(AsmState& as, const UpperBoundMap& class_ubs) {
     userAttrs.find(s___Reified.get()) != userAttrs.end() ||
     as.pce->userAttributes().find(s___Reified.get()) !=
     as.pce->userAttributes().end();
-  auto const& ub = getUpperBounds(retTypeInfo.first, ubs, class_ubs);
+  auto const& ub = getUpperBounds(retTypeInfo.second, ubs, class_ubs);
   if (ub.size() == 1 && !hasReifiedGenerics) {
     retTypeInfo.second = ub[0];
   } else if (!ub.empty()) {

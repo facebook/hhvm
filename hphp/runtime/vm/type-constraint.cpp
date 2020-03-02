@@ -1354,15 +1354,19 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* c,
     // errors, to ease migration.
     raise_warning_unsampled(
       folly::format(
-        "Argument {} to {}() must be of type {}, {} given",
-        id + 1, func->fullName(), name, givenType
+        "Argument {} to {}() must be {} {}, {} given",
+        id + 1, func->fullName(),
+        isUpperBound() ? "upper-bounded by" : "of type",
+        name, givenType
       ).str()
     );
   } else if (isExtended() && isNullable()) {
     raise_typehint_error(
       folly::format(
-        "Argument {} to {}() must be of type {}, {} given",
-        id + 1, func->fullName(), name, givenType
+        "Argument {} to {}() must be {} {}, {} given",
+        id + 1, func->fullName(),
+        isUpperBound() ? "upper-bounded by" : "of type",
+        name, givenType
       ).str()
     );
   } else {

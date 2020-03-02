@@ -13,7 +13,7 @@
 }
 
 .class C {
-  .method [public static] <"HH\\void" N > derive(<"TE" "" extended_hint type_var> $field, <"HH\\mixed" N > $data) {
+  .method [public static] <"HH\\void" N > derive(<"TE" "TE" extended_hint type_var> $field, <"HH\\mixed" N > $data) {
     .declvars $_;
     VerifyParamType $field
     CGetL $data

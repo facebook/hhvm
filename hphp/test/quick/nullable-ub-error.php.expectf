@@ -1,0 +1,3 @@
+NULL
+
+Catchable fatal error: Argument 1 to foo() must be upper-bounded by ?int, string given in %s/nullable-ub-error.php on line 10

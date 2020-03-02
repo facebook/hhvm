@@ -168,9 +168,14 @@ let can_be_nullable (_, h) =
 let rec hint_to_type_constraint ~kind ~tparams ~skipawaitable (p, h) =
   let happly_helper (pos, name) =
     if List.mem ~equal:( = ) tparams name then
-      let tc_name = Some "" in
+      let tc_name =
+        if kind = Param || kind = Return then
+          name
+        else
+          ""
+      in
       let tc_flags = [TC.ExtendedHint; TC.TypeVar] in
-      TC.make tc_name tc_flags
+      TC.make (Some tc_name) tc_flags
     else if kind = TypeDef && (is_self name || is_parent name) then
       Emit_fatal.raise_fatal_runtime
         pos

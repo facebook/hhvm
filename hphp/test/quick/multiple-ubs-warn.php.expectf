@@ -2,9 +2,9 @@ Warning: Value returned from function foo() must be upper-bounded by Fooable, Me
 
 Warning: Value returned from function foo() must be upper-bounded by Barable, Meh given in %s/multiple-ubs-warn.php on line 45
 
-Warning: Argument 1 passed to example() must be upper-bounded by interface Fooable, Meh given in %s/multiple-ubs-warn.php on line 42
+Warning: Argument 1 to example() must be upper-bounded by Fooable, Meh given in %s/multiple-ubs-warn.php on line 42
 
-Warning: Argument 1 passed to example() must be upper-bounded by interface Barable, Meh given in %s/multiple-ubs-warn.php on line 42
+Warning: Argument 1 to example() must be upper-bounded by Barable, Meh given in %s/multiple-ubs-warn.php on line 42
 string(3) "foo"
 string(3) "bar"
 
@@ -14,9 +14,9 @@ Warning: Value returned from function example() must be upper-bounded by Barable
 string(3) "foo"
 string(3) "bar"
 
-Warning: Argument 1 passed to baz() must be upper-bounded by interface Fooable, Meh given in %s/multiple-ubs-warn.php on line 52
+Warning: Argument 1 to baz() must be upper-bounded by Fooable, Meh given in %s/multiple-ubs-warn.php on line 52
 
-Warning: Argument 1 passed to baz() must be upper-bounded by interface Barable, Meh given in %s/multiple-ubs-warn.php on line 52
+Warning: Argument 1 to baz() must be upper-bounded by Barable, Meh given in %s/multiple-ubs-warn.php on line 52
 string(3) "baz"
 string(3) "baz"
 
@@ -24,16 +24,16 @@ Warning: Argument 1 returned from baz() as an inout parameter must be upper-boun
 
 Warning: Argument 1 returned from baz() as an inout parameter must be upper-bounded by Barable, Meh given in %s/multiple-ubs-warn.php on line 52
 
-Warning: Argument 1 passed to baz() must be upper-bounded by interface Fooable, Meh given in %s/multiple-ubs-warn.php on line 52
+Warning: Argument 1 to baz() must be upper-bounded by Fooable, Meh given in %s/multiple-ubs-warn.php on line 52
 
-Warning: Argument 1 passed to baz() must be upper-bounded by interface Barable, Meh given in %s/multiple-ubs-warn.php on line 52
+Warning: Argument 1 to baz() must be upper-bounded by Barable, Meh given in %s/multiple-ubs-warn.php on line 52
 string(3) "baz"
 
 Warning: Argument 1 returned from baz() as an inout parameter must be upper-bounded by Fooable, Meh given in %s/multiple-ubs-warn.php on line 52
 
 Warning: Argument 1 returned from baz() as an inout parameter must be upper-bounded by Barable, Meh given in %s/multiple-ubs-warn.php on line 52
 
-Warning: Argument 1 passed to example() must be upper-bounded by interface Barable, JustFoo given in %s/multiple-ubs-warn.php on line 42
+Warning: Argument 1 to example() must be upper-bounded by Barable, JustFoo given in %s/multiple-ubs-warn.php on line 42
 string(8) "just foo"
 string(8) "just bar"
 

@@ -829,8 +829,25 @@ struct LibXMLExtension final : Extension {
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
+
+// Only check memory stats when allocating more than 64k.
+constexpr ssize_t kOOMCheckThreshold = 65536;
+
+// Return whether it OOMed, also safe to call in non-VM threads.
+inline bool checkOOM(size_t size) {
+  if (!RuntimeOption::EvalMoreAccurateMemStats) return false;
+  if (tl_heap) return tl_heap->preAllocOOM(size);
+  return false;
+}
+
 void* checked_local_malloc(size_t size) {
   if (!size) return nullptr;
+  if (size > kOOMCheckThreshold) {
+    // We are not ready to return nullptr here yet. libxml seems to check
+    // for allocation failures in most places, but the extension itself doesn't
+    // interface with libxml correctly in the presence of allocation failures.
+    checkOOM(size);
+  }
   return local_malloc(size);
 }
 
@@ -843,11 +860,20 @@ void* checked_local_realloc(void* ptr, size_t size) {
     checked_local_free(ptr);
     return nullptr;
   }
+#ifdef USE_JEMALLOC
+  if (size > kOOMCheckThreshold) {
+    size_t origSize = 0;
+    if (ptr) origSize = sallocx(ptr, local_arena_flags);
+    auto const increase = static_cast<ssize_t>(size - origSize);
+    if (increase > kOOMCheckThreshold) checkOOM(increase);
+  }
+#endif
   return local_realloc(ptr, size);
 }
 
 char* local_strdup(const char* str) {
   auto const size = strlen(str) + 1;
+  if (size > kOOMCheckThreshold) checkOOM(size);
   auto ret = local_malloc(size);
   return (char*)memcpy(ret, str, size);
 }

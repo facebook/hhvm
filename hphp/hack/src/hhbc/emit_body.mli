@@ -14,6 +14,7 @@ val make_body :
   bool ->
   bool ->
   (string * Hhas_type_info.t list) list ->
+  string list ->
   Hhas_param.t list ->
   Hhas_type_info.t option ->
   string option ->

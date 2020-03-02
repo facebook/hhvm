@@ -199,7 +199,8 @@ let make_wrapper_body env return_type params instrs is_reified =
     (* decl_vars *) )
     true (* is_memoize_wrapper *)
     false (* is_memoize_wrapper_lsb *)
-    []
+    [] (* upper_bounds *)
+    [] (* shadowed_tparams *)
     params
     (Some return_type)
     None (* doc *)

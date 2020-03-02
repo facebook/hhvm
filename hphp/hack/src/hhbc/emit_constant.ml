@@ -52,6 +52,7 @@ let emit_constant_cinit env (ast_constant : Tast.gconst) (c : Hhas_constant.t) :
         false (* is_memoize_wrapper *)
         false (* is_memoize_wrapper_lsb *)
         [] (* upper_bounds *)
+        [] (* shadowed_tparams *)
         [] (* params *)
         return_type_info
         None (* doc_comment *)

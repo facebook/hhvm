@@ -12,6 +12,7 @@ open Instruction_sequence
 module A = Aast
 module SU = Hhbc_string_utils
 module RGH = Reified_generics_helpers
+module SS = Set.Make (String)
 
 let has_type_constraint env ti ast_param =
   match (ti, A.hint_of_type_hint ast_param.A.param_type_hint) with
@@ -19,6 +20,11 @@ let has_type_constraint env ti ast_param =
     let h = RGH.remove_erased_generics env h in
     (RGH.has_reified_type_constraint env h, Some h)
   | _ -> (RGH.NoConstraint, None)
+
+let emit_shadowed_tparams immediate_tparam_names class_tparam_names =
+  let s1 = SS.of_list immediate_tparam_names in
+  let s2 = SS.of_list class_tparam_names in
+  SS.elements (SS.inter s1 s2)
 
 let emit_generics_upper_bounds tparams class_tparam_names ~skipawaitable =
   List.filter_map tparams ~f:(fun t ->
@@ -144,6 +150,7 @@ let make_body
     is_memoize_wrapper
     is_memoize_wrapper_lsb
     upper_bounds
+    shadowed_tparams
     params
     return_type_info
     doc_comment
@@ -169,6 +176,7 @@ let make_body
     is_memoize_wrapper
     is_memoize_wrapper_lsb
     upper_bounds
+    shadowed_tparams
     params
     return_type_info
     doc_comment
@@ -574,12 +582,22 @@ let emit_body
     else
       []
   in
+  let shadowed_tparams =
+    if Hhbc_options.emit_generics_ub !Hhbc_options.compiler_options then
+      let immediate_tparam_names =
+        List.map immediate_tparams (fun t -> snd t.A.tp_name)
+      in
+      emit_shadowed_tparams immediate_tparam_names class_tparam_names
+    else
+      []
+  in
   ( make_body
       body_instrs
       decl_vars
       false (*is_memoize_wrapper*)
       false (*is_memoize_wrapper_lsb*)
       upper_bounds
+      shadowed_tparams
       params
       (Some return_type_info)
       doc_comment

@@ -594,6 +594,13 @@ std::string func_flag_list(const FuncInfo& finfo) {
   return " ";
 }
 
+// We do not need to emit shadowed type parameters in disassembly
+// because we do not emit any type parameters for classes.
+// We need to emit the empty list so that assembler can parse it.
+std::string opt_shadowed_tparams() {
+  return "{}";
+}
+
 std::string opt_ubs(const FuncInfo& finfo) {
   std::string ret = {};
   if (finfo.ubs.empty()) return ret;
@@ -680,7 +687,8 @@ void print_property(Output& out, const PreClass::Prop* prop) {
 
 void print_method(Output& out, const Func* func) {
   auto const finfo = find_func_info(func);
-  out.fmtln(".method{}{}{} {}{}({}){}{{",
+  out.fmtln(".method{}{}{}{} {}{}({}){}{{",
+    opt_shadowed_tparams(),
     opt_ubs(finfo),
     opt_attrs(AttrContext::Func, func->attrs(), &func->userAttributes()),
     format_line_pair(func),

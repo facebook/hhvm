@@ -406,7 +406,7 @@ let set_option options name value =
   | "hhvm.hack.lang.enable_xhp_class_modifier" ->
     { options with option_enable_xhp_class_modifier = as_bool value }
   | "hhvm.emit_generics_ub" ->
-    { options with option_emit_generics_ub = int_of_string value > 0 }
+    { options with option_emit_generics_ub = as_bool value }
   | "hhvm.hack.lang.disable_xhp_element_mangling" ->
     { options with option_disable_xhp_element_mangling = as_bool value }
   | "hhvm.hack.lang.check_int_overflow" ->

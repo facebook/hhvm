@@ -1,0 +1,14 @@
+int(1)
+int(1)
+
+Warning: Argument 2 to Foo::foo1() must be upper-bounded by int, string given in %s/ub-shadow.php on line 7
+int(1)
+string(1) "a"
+int(1)
+int(1)
+int(1)
+int(1)
+
+Warning: Argument 1 to Foo::foo3() must be upper-bounded by int, string given in %s/ub-shadow.php on line 15
+string(1) "a"
+int(1)

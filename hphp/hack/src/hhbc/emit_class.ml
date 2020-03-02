@@ -54,6 +54,7 @@ let make_86method ~name ~params ~is_static ~visibility ~is_abstract ~span instrs
       method_is_memoize_wrapper
       method_is_memoize_wrapper_lsb
       []
+      []
       params
       method_return_type
       method_doc_comment

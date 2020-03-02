@@ -2265,6 +2265,24 @@ TypeConstraint parse_type_constraint(AsmState& as) {
   return parse_type_info(as, true).second;
 }
 
+using TParamNameVec = CompactVector<const StringData*>;
+
+TParamNameVec parse_shadowed_tparams(AsmState& as) {
+  TParamNameVec ret;
+  as.in.skipWhitespace();
+  if (as.in.peek() != '{') return ret;
+  as.in.getc();
+  std::string name;
+  for (;;) {
+    as.in.skipWhitespace();
+    if (as.in.readword(name)) ret.push_back(makeStaticString(name));
+    if (as.in.peek() == '}') break;
+    as.in.expectWs(',');
+  }
+  as.in.expectWs('}');
+  return ret;
+}
+
 using UpperBoundVec = CompactVector<TypeConstraint>;
 using UpperBoundMap = std::unordered_map<const StringData*, UpperBoundVec>;
 
@@ -2321,6 +2339,7 @@ void findUpperBounds(const StringData* name, const UpperBoundMap& ubs,
                      UpperBoundVec& out) {
   auto it = ubs.find(name);
   if (it != ubs.end()) {
+    assertx(out.empty());
     for (auto& ub : it->second) {
       out.push_back(TypeConstraint(ub.typeName(),
                                    static_cast<TypeConstraint::Flags>(
@@ -2331,14 +2350,16 @@ void findUpperBounds(const StringData* name, const UpperBoundMap& ubs,
 }
 UpperBoundVec getUpperBounds(const TypeConstraint& tc,
                              const UpperBoundMap& ubs,
-                             const UpperBoundMap& class_ubs) {
+                             const UpperBoundMap& class_ubs,
+                             const TParamNameVec& shadowed_tparams) {
   UpperBoundVec ret;
   if (!tc.isTypeVar()) return ret;
   auto const typeName = tc.typeName();
   auto tcFlags = static_cast<TypeConstraint::Flags>(
       tc.flags() & ~TypeConstraint::Flags::TypeVar);
   findUpperBounds(typeName, ubs, tcFlags, ret);
-  if (ret.empty()) {
+  if (std::find(shadowed_tparams.begin(), shadowed_tparams.end(), typeName) ==
+                shadowed_tparams.end()) {
     findUpperBounds(typeName, class_ubs, tcFlags, ret);
   }
   return ret;
@@ -2367,6 +2388,7 @@ UpperBoundVec getUpperBounds(const TypeConstraint& tc,
 void parse_parameter_list(AsmState& as,
                           const UpperBoundMap& ubs,
                           const UpperBoundMap& class_ubs,
+                          const TParamNameVec& shadowed_tparams,
                           bool hasReifiedGenerics) {
   as.in.skipWhitespace();
   if (as.in.peek() != '(') return;
@@ -2411,7 +2433,8 @@ void parse_parameter_list(AsmState& as,
     }
 
     std::tie(param.userType, param.typeConstraint) = parse_type_info(as);
-    auto const& ub = getUpperBounds(param.typeConstraint, ubs, class_ubs);
+    auto const& ub = getUpperBounds(param.typeConstraint, ubs,
+                                    class_ubs, shadowed_tparams);
     if (ub.size() == 1 && !hasReifiedGenerics) {
       param.typeConstraint = ub[0];
     } else if (!ub.empty()) {
@@ -2644,7 +2667,7 @@ void parse_function(AsmState& as) {
 
   as.in.skipWhitespace();
 
-  auto ubs = parse_ubs(as);
+  auto const ubs = parse_ubs(as);
 
   bool isTop = true;
 
@@ -2679,7 +2702,7 @@ void parse_function(AsmState& as) {
   as.fe->init(line0, line1, as.ue->bcPos(), attrs, isTop, 0);
 
   auto const& ub = getUpperBounds(retTypeInfo.second,
-                                  ubs, {});
+                                  ubs, {}, {});
   auto const hasReifiedGenerics =
     userAttrs.find(s___Reified.get()) != userAttrs.end();
   if (ub.size() == 1 && !hasReifiedGenerics) {
@@ -2692,7 +2715,7 @@ void parse_function(AsmState& as) {
   std::tie(as.fe->retUserType, as.fe->retTypeConstraint) = retTypeInfo;
   as.fe->userAttributes = userAttrs;
 
-  parse_parameter_list(as, ubs, {}, hasReifiedGenerics);
+  parse_parameter_list(as, ubs, {}, {}, hasReifiedGenerics);
   // parse_function_flabs relies on as.fe already having valid attrs
   parse_function_flags(as);
 
@@ -2705,14 +2728,16 @@ void parse_function(AsmState& as) {
 }
 
 /*
- * directive-method : attribute-list ?line-range type-info identifier
+ * directive-method : shadowed-tparam-list upper-bound-list attribute-list
+ *                      ?line-range type-info identifier
  *                      parameter-list function-flags '{' function-body
  *                  ;
  */
 void parse_method(AsmState& as, const UpperBoundMap& class_ubs) {
   as.in.skipWhitespace();
 
-  auto ubs = parse_ubs(as);
+  auto const shadowed_tparams = parse_shadowed_tparams(as);
+  auto const ubs = parse_ubs(as);
 
   UserAttributeMap userAttrs;
   Attr attrs = parse_attribute_list(as, AttrContext::Func, &userAttrs);
@@ -2743,7 +2768,8 @@ void parse_method(AsmState& as, const UpperBoundMap& class_ubs) {
     userAttrs.find(s___Reified.get()) != userAttrs.end() ||
     as.pce->userAttributes().find(s___Reified.get()) !=
     as.pce->userAttributes().end();
-  auto const& ub = getUpperBounds(retTypeInfo.second, ubs, class_ubs);
+  auto const& ub = getUpperBounds(retTypeInfo.second, ubs,
+                                  class_ubs, shadowed_tparams);
   if (ub.size() == 1 && !hasReifiedGenerics) {
     retTypeInfo.second = ub[0];
   } else if (!ub.empty()) {
@@ -2754,7 +2780,8 @@ void parse_method(AsmState& as, const UpperBoundMap& class_ubs) {
   std::tie(as.fe->retUserType, as.fe->retTypeConstraint) = retTypeInfo;
   as.fe->userAttributes = userAttrs;
 
-  parse_parameter_list(as, ubs, class_ubs, hasReifiedGenerics);
+  parse_parameter_list(as, ubs, class_ubs,
+                       shadowed_tparams, hasReifiedGenerics);
   // parse_function_flabs relies on as.fe already having valid attrs
   parse_function_flags(as);
 

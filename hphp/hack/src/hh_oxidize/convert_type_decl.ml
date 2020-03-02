@@ -50,26 +50,18 @@ let derived_traits ty =
     List.filter default_derives ~f:(fun (_, derive) ->
         not (List.mem blacklist derive ~equal:( = )))
 
-(* HACK: ignore phases since we are only considering decl tys *)
 let blacklisted_types =
-  [
-    ("typing_defs_core", "ArrayKind");
-    ("typing_defs_core", "ConstraintType_");
-    ("typing_defs_core", "ConstraintType");
-    ("typing_defs_core", "DeclPhase");
-    ("typing_defs_core", "Destructure");
-    ("typing_defs_core", "HasMember");
-    ("typing_defs_core", "InternalType_");
-    ("typing_defs_core", "InternalType");
-    ("typing_defs_core", "LoclPhase");
-    ("typing_defs", "ExpandEnv");
-    ("typing_defs", "PhaseTy");
-  ]
+  [("typing_defs", "ExpandEnv"); ("typing_defs", "PhaseTy")]
 
-(* HACK: ignore anything beginning with the "locl" prefix, since we are only
-   considering decl tys *)
+(* HACK: ignore anything beginning with the "decl" or "locl" prefix, since the
+   oxidized version of Ty does not have a phase. *)
 let blacklisted_type_prefixes =
-  [("typing_defs", "Locl"); ("typing_defs_core", "Locl")]
+  [
+    ("typing_defs", "Decl");
+    ("typing_defs_core", "Decl");
+    ("typing_defs", "Locl");
+    ("typing_defs_core", "Locl");
+  ]
 
 (* HACK: Typing_reason is usually aliased to Reason, so we have lots of
    instances of Reason.t. Since we usually convert an identifier like Reason.t
@@ -307,7 +299,10 @@ let type_declaration name td =
     match (td.ptype_params, td.ptype_name.txt) with
     (* HACK: eliminate tparam from `type _ ty_` and phase-parameterized types *)
     | ([({ ptyp_desc = Ptyp_any; _ }, _)], "ty_")
-    | ([({ ptyp_desc = Ptyp_var "phase"; _ }, _)], _) ->
+    | ([({ ptyp_desc = Ptyp_var "phase"; _ }, _)], _)
+    | ([({ ptyp_desc = Ptyp_var "ty"; _ }, _)], _)
+      when curr_module_name () = "typing_defs_core"
+           || curr_module_name () = "typing_defs" ->
       ""
     | (tparams, _) -> type_params tparams
   in
@@ -382,33 +377,6 @@ let type_declaration name td =
         sprintf "%s struct %s%s %s;" (attrs_and_vis []) name tparams ty)
   (* Variant types, including GADTs. *)
   | (Ptype_variant ctors, None) ->
-    let ctors =
-      (* HACK: consider only decl tys for now by eliminating locl ty variants *)
-      if name <> "Ty_" then
-        ctors
-      else
-        List.filter ctors (fun cd ->
-            match cd.pcd_res with
-            | Some
-                {
-                  ptyp_desc =
-                    Ptyp_constr
-                      ( { txt = Lident "ty_"; _ },
-                        [
-                          {
-                            ptyp_desc =
-                              Ptyp_constr ({ txt = Lident "locl_phase"; _ }, _);
-                            _;
-                          };
-                        ] );
-                  _;
-                } ->
-              log
-                "Not generating an equivalent to the locl_phase ty_ constructor %s"
-                cd.pcd_name.txt;
-              false
-            | _ -> true)
-    in
     let all_nullary =
       List.for_all ctors (fun c -> 0 = ctor_arg_len c.pcd_args)
     in

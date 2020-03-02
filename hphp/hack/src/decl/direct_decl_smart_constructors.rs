@@ -25,7 +25,7 @@ use oxidized::{
     tany_sentinel::TanySentinel,
     typing_defs,
     typing_defs::{
-        DeclTy, FunArity, FunElt, FunParam, FunParams, FunTparamsKind, FunType, ParamMode,
+        FunArity, FunElt, FunParam, FunParams, FunTparamsKind, FunType, ParamMode,
         PossiblyEnforcedTy, Reactivity, ShapeFieldType, ShapeKind, Tparam, Ty, Ty_, TypedefType,
     },
     typing_reason::Reason,
@@ -46,7 +46,7 @@ pub struct InProgressDecls {
     pub classes: HashMap<String, Rc<shallow_decl_defs::ShallowClass>>,
     pub funs: HashMap<String, Rc<typing_defs::FunElt>>,
     pub typedefs: HashMap<String, Rc<typing_defs::TypedefType>>,
-    pub consts: HashMap<String, Rc<typing_defs::DeclTy>>,
+    pub consts: HashMap<String, Rc<typing_defs::Ty>>,
 }
 
 pub fn empty_decls() -> InProgressDecls {
@@ -805,10 +805,7 @@ impl DirectDeclSmartConstructors<'_> {
     /// Converts any node that can represent a list of Node_::TypeParameter
     /// into the type parameter list and a list of all type variables. Used for
     /// classes, methods, and functions.
-    fn into_type_params(
-        &self,
-        node: Node_,
-    ) -> Result<(Vec<Tparam<Ty>>, HashSet<Rc<String>>), String> {
+    fn into_type_params(&self, node: Node_) -> Result<(Vec<Tparam>, HashSet<Rc<String>>), String> {
         let mut type_variables = HashSet::new();
         let type_params = node
             .into_iter()
@@ -930,7 +927,7 @@ impl DirectDeclSmartConstructors<'_> {
         &self,
         list: Node_,
         type_variables: &HashSet<Rc<String>>,
-    ) -> Result<FunParams<DeclTy>, String> {
+    ) -> Result<FunParams, String> {
         match list {
             Node_::List(nodes) => {
                 nodes

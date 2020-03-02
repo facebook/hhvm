@@ -10,6 +10,19 @@ open Core_kernel
 open Longident
 open Utils
 
+let strip_decl_prefix =
+  SSet.of_list
+    [
+      "DeclFunArity";
+      "DeclFunParam";
+      "DeclFunParams";
+      "DeclFunType";
+      "DeclPossiblyEnforcedTy";
+      "DeclTparam";
+      "DeclTy";
+      "DeclWhereConstraint";
+    ]
+
 type flattened_longident =
   | FLident of string list
   | FLdot of flattened_longident * string list
@@ -43,6 +56,15 @@ let to_string for_open id =
         | _ when for_open -> convert_module_name ty
         | ("t", m :: _) -> convert_type_name m
         | _ -> convert_type_name ty
+      in
+      (* HACK: The oxidized version of `ty` has no phase. *)
+      let ty =
+        if ty = "LoclTy" then
+          "Ty"
+        else if SSet.mem ty strip_decl_prefix then
+          String.chop_prefix_exn ty "Decl"
+        else
+          ty
       in
       let modules = List.map modules convert_module_name in
       ty :: modules |> List.rev |> String.concat ~sep:"::"

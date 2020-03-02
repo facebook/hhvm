@@ -20,7 +20,11 @@ open State
    (for instances of mutual recursion where we would otherwise define types of
    infinite size). *)
 let add_box_between =
-  [("typing_defs_core", "Ty", "Ty_"); ("aast_defs", "Hint", "Hint_")]
+  [
+    ("typing_defs_core", "ConstraintType", "ConstraintType_");
+    ("typing_defs_core", "Ty", "Ty_");
+    ("aast_defs", "Hint", "Hint_");
+  ]
 
 let should_add_box ty =
   List.mem add_box_between (curr_module_name (), self (), ty) ~equal:( = )
@@ -60,15 +64,15 @@ let rec core_type ?(seen_indirection = false) ct =
     in
     let seen_indirection = seen_indirection || SSet.mem indirection_types id in
     let args =
-      (* HACK: consider only decl tys for now by eliminating the phase tparam *)
+      (* HACK: eliminate phase type arguments *)
       match args with
-      | [{ ptyp_desc = Ptyp_var "phase"; _ }] -> []
+      | [{ ptyp_desc = Ptyp_var "phase"; _ }]
+      | [{ ptyp_desc = Ptyp_var "ty"; _ }]
       | [{ ptyp_desc = Ptyp_constr ({ txt = Lident "decl_phase"; _ }, _); _ }]
-        ->
-        []
       | [{ ptyp_desc = Ptyp_constr ({ txt = Lident "locl_phase"; _ }, _); _ }]
         ->
         []
+      | _ when id = "FunType" -> []
       | _ -> args
     in
     let args = type_args ~seen_indirection args in

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ac55efa10d092398d9c52d90e12673c4>>
+// @generated SignedSource<<7abc8df2ddfab85ff0b233e8ac44a80c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -60,7 +60,7 @@ pub use typing_defs::*;
     Serialize
 )]
 pub struct SubstContext {
-    pub subst: s_map::SMap<DeclTy>,
+    pub subst: s_map::SMap<Ty>,
     pub class_context: String,
     pub from_req_extends: bool,
 }
@@ -112,7 +112,7 @@ pub struct MroElement {
     /// The type arguments with which this ancestor class was instantiated. The
     /// first class in the linearization (the one which was linearized) will have
     /// an empty list here, even when it takes type parameters.
-    pub type_args: Vec<DeclTy>,
+    pub type_args: Vec<Ty>,
     /// True if this element referred to a class whose definition could not be
     /// found. This is always indicative of an "Unbound name" error (emitted by
     /// Naming), so one could imagine omitting elements with this flag set from the
@@ -218,8 +218,8 @@ pub struct DeclClassType {
     pub has_xhp_keyword: bool,
     pub name: String,
     pub pos: pos::Pos,
-    pub tparams: Vec<DeclTparam>,
-    pub where_constraints: Vec<DeclWhereConstraint>,
+    pub tparams: Vec<Tparam>,
+    pub where_constraints: Vec<WhereConstraint>,
     /// class name to the subst_context that must be applied to that class
     pub substs: s_map::SMap<SubstContext>,
     pub consts: s_map::SMap<ClassConst>,
@@ -230,7 +230,7 @@ pub struct DeclClassType {
     pub methods: s_map::SMap<Element>,
     pub smethods: s_map::SMap<Element>,
     pub construct: (Option<Element>, ConsistentKind),
-    pub ancestors: s_map::SMap<DeclTy>,
+    pub ancestors: s_map::SMap<Ty>,
     pub req_ancestors: Vec<Requirement>,
     pub req_ancestors_extends: s_set::SSet,
     pub extends: s_set::SSet,

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<300cf8e3533db14f1bbc6a6916552cfd>>
+// @generated SignedSource<<27d56b5d02964caed12ff9e0c651e20b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -262,7 +262,7 @@ pub enum DestructureKind {
     PartialOrd,
     Serialize
 )]
-pub struct Tparam<Ty> {
+pub struct Tparam {
     pub variance: ast_defs::Variance,
     pub name: ast_defs::Id,
     pub constraints: Vec<(ast_defs::ConstraintKind, Ty)>,
@@ -282,7 +282,7 @@ pub struct Tparam<Ty> {
     PartialOrd,
     Serialize
 )]
-pub struct WhereConstraint<Ty>(pub Ty, pub ast_defs::ConstraintKind, pub Ty);
+pub struct WhereConstraint(pub Ty, pub ast_defs::ConstraintKind, pub Ty);
 
 #[derive(
     Clone,
@@ -297,8 +297,6 @@ pub struct WhereConstraint<Ty>(pub Ty, pub ast_defs::ConstraintKind, pub Ty);
     Serialize
 )]
 pub struct Ty(pub reason::Reason, pub Box<Ty_>);
-
-pub type DeclTy = Ty;
 
 /// A shape may specify whether or not fields are required. For example, consider
 /// this typedef:
@@ -342,7 +340,7 @@ pub enum Ty_ {
     /// The late static bound type of a class
     Tthis,
     /// Either an object type or a type alias, ty list are the arguments
-    Tapply(nast::Sid, Vec<DeclTy>),
+    Tapply(nast::Sid, Vec<Ty>),
     /// Name of class, name of type const, remaining names of type consts
     Taccess(TaccessType),
     /// The type of the various forms of "array":
@@ -353,13 +351,13 @@ pub enum Ty_ {
     /// Tarray (Some ty1, Some ty2) => "array<ty1, ty2>"
     /// Tarray (None, Some ty)      => [invalid]
     /// ```
-    Tarray(Option<DeclTy>, Option<DeclTy>),
+    Tarray(Option<Ty>, Option<Ty>),
     /// Tdarray (ty1, ty2) => "darray<ty1, ty2>"
-    Tdarray(DeclTy, DeclTy),
+    Tdarray(Ty, Ty),
     /// Tvarray (ty) => "varray<ty>"
-    Tvarray(DeclTy),
+    Tvarray(Ty),
     /// Tvarray_or_darray (ty1, ty2) => "varray_or_darray<ty1, ty2>"
-    TvarrayOrDarray(Option<DeclTy>, DeclTy),
+    TvarrayOrDarray(Option<Ty>, Ty),
     /// "Any" is the type of a variable with a missing annotation, and "mixed" is
     /// the type of a variable annotated as "mixed". THESE TWO ARE VERY DIFFERENT!
     /// Any unifies with anything, i.e., it is both a supertype and subtype of any
@@ -387,12 +385,12 @@ pub enum Ty_ {
     /// mixed exists only in the decl_phase phase because it is desugared into ?nonnull
     /// during the localization phase.
     Tmixed,
-    Tlike(DeclTy),
+    Tlike(Ty),
     /// Access to a Pocket Universe Expression or Atom, denoted by
     /// Foo:@Bar or Foo:@Bar:@X.
     /// It might be unresolved at first (e.g. if Foo is a generic variable).
     /// Will be refined to Tpu once typechecking is successful
-    TpuAccess(DeclTy, nast::Sid, nast::PuLoc),
+    TpuAccess(Ty, nast::Sid, nast::PuLoc),
     Tany(tany_sentinel::TanySentinel),
     Terr,
     Tnonnull,
@@ -412,7 +410,7 @@ pub enum Ty_ {
     Tprim(aast::Tprim),
     /// A wrapper around fun_type, which contains the full type information for a
     /// function, method, lambda, etc.
-    Tfun(FunType<Ty>),
+    Tfun(FunType),
     /// Tuple, with ordered list of the types of the elements of the tuple.
     Ttuple(Vec<Ty>),
     /// Whether all fields of this shape are known, types of each of the
@@ -433,6 +431,47 @@ pub enum Ty_ {
     ///   Tunion [null;t] is the same as Toption t
     Tunion(Vec<Ty>),
     Tintersection(Vec<Ty>),
+    /// The type of an opaque type (e.g. a "newtype" outside of the file where it
+    /// was defined) or enum. They are "opaque", which means that they only unify with
+    /// themselves. However, it is possible to have a constraint that allows us to
+    /// relax this. For example:
+    ///
+    ///   newtype my_type as int = ...
+    ///
+    /// Outside of the file where the type was defined, this translates to:
+    ///
+    ///   Tnewtype ((pos, "my_type"), [], Tprim Tint)
+    ///
+    /// Which means that my_type is abstract, but is subtype of int as well.
+    Tnewtype(String, Vec<Ty>, Ty),
+    /// see dependent_type
+    Tdependent(DependentType, Ty),
+    /// Tobject is an object type compatible with all objects. This type is also
+    /// compatible with some string operations (since a class might implement
+    /// __toString), but not with string type hints.
+    ///
+    /// Tobject is currently used to type code like:
+    ///   ../test/typecheck/return_unknown_class.php
+    Tobject,
+    /// An instance of a class or interface, ty list are the arguments
+    /// If exact=Exact, then this represents instances of *exactly* this class
+    /// If exact=Nonexact, this also includes subclasses
+    Tclass(nast::Sid, Exact, Vec<Ty>),
+    /// Localized version of Tarray
+    Tarraykind(ArrayKind),
+    /// Typing of Pocket Universe Expressions
+    /// - first parameter is the enclosing class
+    /// - second parameter is the name of the Pocket Universe Enumeration
+    /// - third parameter is  either Pu_plain (the enumeration as the set of
+    ///   all its atoms) or Pu_atom (a specific atom in the enumeration)
+    Tpu(Ty, nast::Sid),
+    /// Typing of Pocket Universes type projections
+    /// - first parameter is the enclosing class
+    /// - second parameter is the name of the Pocket Universe Enumeration
+    /// - third parameter is the generic (tvar/tabstract) in place of the
+    ///   member name
+    /// - the fourth parameter is the name of the type to project
+    TpuTypeAccess(Ty, nast::Sid, Ty, nast::Sid),
 }
 
 #[derive(
@@ -447,7 +486,136 @@ pub enum Ty_ {
     PartialOrd,
     Serialize
 )]
-pub struct TaccessType(pub DeclTy, pub Vec<nast::Sid>);
+pub enum ConstraintType_ {
+    ThasMember(HasMember),
+    /// The type of container destructuring via list() or splat `...`
+    Tdestructure(Destructure),
+    TCunion(Ty, ConstraintType),
+    TCintersection(Ty, ConstraintType),
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
+pub struct HasMember {
+    pub name: nast::Sid,
+    pub type_: Ty,
+    /// This is required to check ambiguous object access, where sometimes
+    /// HHVM would access the private member of a parent class instead of the
+    /// one from the current class.
+    pub class_id: nast::ClassId_,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
+pub struct Destructure {
+    /// This represents the standard parameters of a function or the fields in a list
+    /// destructuring assignment. Example:
+    ///
+    /// function take(bool $b, float $f = 3.14, arraykey ...$aks): void {}
+    /// function f((bool, float, int, string) $tup): void {
+    ///   take(...$tup);
+    /// }
+    ///
+    /// corresponds to the subtyping assertion
+    ///
+    /// (bool, float, int, string) <: splat([#1], [opt#2], ...#3)
+    pub required: Vec<Ty>,
+    /// Represents the optional parameters in a function, only used for splats
+    pub optional: Vec<Ty>,
+    /// Represents a function's variadic parameter, also only used for splats
+    pub variadic: Option<Ty>,
+    /// list() destructuring allows for partial matches on lists, even when the operation
+    /// might throw i.e. list($a) = vec[];
+    pub kind: DestructureKind,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
+pub struct ConstraintType(pub reason::Reason, pub Box<ConstraintType_>);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
+pub enum InternalType {
+    LoclType(Ty),
+    ConstraintType(ConstraintType),
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
+pub enum ArrayKind {
+    /// An array declared as a varray.
+    AKvarray(Ty),
+    /// An array declared as a darray.
+    AKdarray(Ty, Ty),
+    /// An array annotated as a varray_or_darray.
+    AKvarrayOrDarray(Ty, Ty),
+    /// This is a type created when we see array() literal
+    AKempty,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
+pub struct TaccessType(pub Ty, pub Vec<nast::Sid>);
 
 /// represents reactivity of function
 /// - None corresponds to non-reactive function
@@ -478,10 +646,10 @@ pub struct TaccessType(pub DeclTy, pub Vec<nast::Sid>);
 )]
 pub enum Reactivity {
     Nonreactive,
-    Local(Option<DeclTy>),
-    Shallow(Option<DeclTy>),
-    Reactive(Option<DeclTy>),
-    Pure(Option<DeclTy>),
+    Local(Option<Ty>),
+    Shallow(Option<Ty>),
+    Reactive(Option<Ty>),
+    Pure(Option<Ty>),
     MaybeReactive(Box<Reactivity>),
     RxVar(Option<Box<Reactivity>>),
 }
@@ -500,13 +668,13 @@ pub enum Reactivity {
     PartialOrd,
     Serialize
 )]
-pub struct FunType<Ty> {
+pub struct FunType {
     pub is_coroutine: bool,
-    pub arity: FunArity<Ty>,
-    pub tparams: (Vec<Tparam<Ty>>, FunTparamsKind),
-    pub where_constraints: Vec<WhereConstraint<Ty>>,
-    pub params: FunParams<Ty>,
-    pub ret: PossiblyEnforcedTy<Ty>,
+    pub arity: FunArity,
+    pub tparams: (Vec<Tparam>, FunTparamsKind),
+    pub where_constraints: Vec<WhereConstraint>,
+    pub params: FunParams,
+    pub ret: PossiblyEnforcedTy,
     /// Carries through the sync/async information from the aast
     pub fun_kind: ast_defs::FunKind,
     pub reactive: Reactivity,
@@ -516,8 +684,6 @@ pub struct FunType<Ty> {
     pub returns_mutable: bool,
     pub returns_void_to_rx: bool,
 }
-
-pub type DeclFunType = FunType<DeclTy>;
 
 /// Arity information for a fun_type; indicating the minimum number of
 /// args expected by the function and the maximum number of args for
@@ -534,18 +700,16 @@ pub type DeclFunType = FunType<DeclTy>;
     PartialOrd,
     Serialize
 )]
-pub enum FunArity<Ty> {
+pub enum FunArity {
     /// min ; max
     Fstandard(isize, isize),
     /// PHP5.6-style ...$args finishes the func declaration.
     /// min ; variadic param type
-    Fvariadic(isize, FunParam<Ty>),
+    Fvariadic(isize, FunParam),
     /// HH-style ... anonymous variadic arg; body presumably uses func_get_args.
     /// min ; position of ...
     Fellipsis(isize, pos::Pos),
 }
-
-pub type DeclFunArity = FunArity<DeclTy>;
 
 #[derive(
     Clone,
@@ -561,7 +725,7 @@ pub type DeclFunArity = FunArity<DeclTy>;
 )]
 pub enum ParamRxAnnotation {
     ParamRxVar,
-    ParamRxIfImpl(DeclTy),
+    ParamRxIfImpl(Ty),
 }
 
 #[derive(
@@ -576,14 +740,12 @@ pub enum ParamRxAnnotation {
     PartialOrd,
     Serialize
 )]
-pub struct PossiblyEnforcedTy<Ty> {
+pub struct PossiblyEnforcedTy {
     /// True if consumer of this type enforces it at runtime
     pub enforced: bool,
     pub type_: Ty,
 }
 
-pub type DeclPossiblyEnforcedTy = PossiblyEnforcedTy<DeclTy>;
-
 #[derive(
     Clone,
     Debug,
@@ -596,18 +758,14 @@ pub type DeclPossiblyEnforcedTy = PossiblyEnforcedTy<DeclTy>;
     PartialOrd,
     Serialize
 )]
-pub struct FunParam<Ty> {
+pub struct FunParam {
     pub pos: pos::Pos,
     pub name: Option<String>,
-    pub type_: PossiblyEnforcedTy<Ty>,
+    pub type_: PossiblyEnforcedTy,
     pub kind: ParamMode,
     pub accept_disposable: bool,
     pub mutability: Option<ParamMutability>,
     pub rx_annotation: Option<ParamRxAnnotation>,
 }
 
-pub type DeclFunParam = FunParam<DeclTy>;
-
-pub type FunParams<Ty> = Vec<FunParam<Ty>>;
-
-pub type DeclFunParams = FunParams<DeclTy>;
+pub type FunParams = Vec<FunParam>;

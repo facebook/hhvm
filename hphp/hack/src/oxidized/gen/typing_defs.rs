@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3ad8a715a90394a1709443e05c6cb43e>>
+// @generated SignedSource<<d656c5807b23625a58ddf7cf2bca3152>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -52,7 +52,7 @@ pub struct ClassElt {
     pub visibility: Visibility,
     pub const_: bool,
     pub lateinit: bool,
-    pub type_: lazy::Lazy<DeclTy>,
+    pub type_: lazy::Lazy<Ty>,
     /// identifies the class from which this elt originates
     pub origin: String,
     pub deprecated: Option<String>,
@@ -73,7 +73,7 @@ pub struct ClassElt {
 )]
 pub struct FunElt {
     pub deprecated: Option<String>,
-    pub type_: DeclTy,
+    pub type_: Ty,
     pub decl_errors: Option<errors::Errors>,
     pub pos: pos::Pos,
 }
@@ -94,7 +94,7 @@ pub struct ClassConst {
     pub synthesized: bool,
     pub abstract_: bool,
     pub pos: pos::Pos,
-    pub type_: DeclTy,
+    pub type_: Ty,
     pub expr: Option<nast::Expr>,
     /// identifies the class from which this const originates
     pub origin: String,
@@ -125,7 +125,7 @@ pub struct ClassConst {
     PartialOrd,
     Serialize
 )]
-pub struct Requirement(pub pos::Pos, pub DeclTy);
+pub struct Requirement(pub pos::Pos, pub Ty);
 
 #[derive(
     Clone,
@@ -158,8 +158,8 @@ pub struct ClassType {
     pub is_disposable: bool,
     pub name: String,
     pub pos: pos::Pos,
-    pub tparams: Vec<DeclTparam>,
-    pub where_constraints: Vec<DeclWhereConstraint>,
+    pub tparams: Vec<Tparam>,
+    pub where_constraints: Vec<WhereConstraint>,
     pub consts: s_map::SMap<ClassConst>,
     pub typeconsts: s_map::SMap<TypeconstType>,
     pub pu_enums: s_map::SMap<PuEnumType>,
@@ -171,7 +171,7 @@ pub struct ClassType {
     pub construct: (Option<ClassElt>, ConsistentKind),
     /// This includes all the classes, interfaces and traits this class is
     /// using.
-    pub ancestors: s_map::SMap<DeclTy>,
+    pub ancestors: s_map::SMap<Ty>,
     pub req_ancestors: Vec<Requirement>,
     /// the extends of req_ancestors
     pub req_ancestors_extends: s_set::SSet,
@@ -194,7 +194,7 @@ pub struct ClassType {
     Serialize
 )]
 pub enum TypeconstAbstractKind {
-    TCAbstract(Option<DeclTy>),
+    TCAbstract(Option<Ty>),
     TCPartiallyAbstract,
     TCConcrete,
 }
@@ -214,8 +214,8 @@ pub enum TypeconstAbstractKind {
 pub struct TypeconstType {
     pub abstract_: TypeconstAbstractKind,
     pub name: nast::Sid,
-    pub constraint: Option<DeclTy>,
-    pub type_: Option<DeclTy>,
+    pub constraint: Option<Ty>,
+    pub type_: Option<Ty>,
     pub origin: String,
     pub enforceable: (pos::Pos, bool),
     pub reifiable: Option<pos::Pos>,
@@ -237,7 +237,7 @@ pub struct PuEnumType {
     pub name: nast::Sid,
     pub is_final: bool,
     pub case_types: s_map::SMap<(nast::Sid, aast::ReifyKind)>,
-    pub case_values: s_map::SMap<(nast::Sid, DeclTy)>,
+    pub case_values: s_map::SMap<(nast::Sid, Ty)>,
     pub members: s_map::SMap<PuMemberType>,
 }
 
@@ -255,7 +255,7 @@ pub struct PuEnumType {
 )]
 pub struct PuMemberType {
     pub atom: nast::Sid,
-    pub types: s_map::SMap<(nast::Sid, DeclTy)>,
+    pub types: s_map::SMap<(nast::Sid, Ty)>,
     pub exprs: s_map::SMap<nast::Sid>,
 }
 
@@ -272,8 +272,8 @@ pub struct PuMemberType {
     Serialize
 )]
 pub struct EnumType {
-    pub base: DeclTy,
-    pub constraint: Option<DeclTy>,
+    pub base: Ty,
+    pub constraint: Option<Ty>,
 }
 
 #[derive(
@@ -330,15 +330,11 @@ pub struct RecordDefType {
 pub struct TypedefType {
     pub pos: pos::Pos,
     pub vis: aast::TypedefVisibility,
-    pub tparams: Vec<DeclTparam>,
-    pub constraint: Option<DeclTy>,
-    pub type_: DeclTy,
+    pub tparams: Vec<Tparam>,
+    pub constraint: Option<Ty>,
+    pub type_: Ty,
     pub decl_errors: Option<errors::Errors>,
 }
-
-pub type DeclTparam = Tparam<DeclTy>;
-
-pub type DeclWhereConstraint = WhereConstraint<DeclTy>;
 
 #[derive(
     Clone,

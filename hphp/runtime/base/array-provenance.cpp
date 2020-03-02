@@ -284,13 +284,18 @@ ArrayData* tagStaticArr(ArrayData* ad, Tag tag /* = {} */) {
 ///////////////////////////////////////////////////////////////////////////////
 
 TagOverride::TagOverride(Tag tag)
-  : m_saved_tag(*rl_tag_override)
+  : m_valid(RO::EvalArrayProvenance)
 {
-  *rl_tag_override = tag;
+  if (m_valid) {
+    m_saved_tag = *rl_tag_override;
+    *rl_tag_override = tag;
+  }
 }
 
 TagOverride::~TagOverride() {
-  *rl_tag_override = m_saved_tag;
+  if (m_valid) {
+    *rl_tag_override = m_saved_tag;
+  }
 }
 
 Tag tagFromPC() {

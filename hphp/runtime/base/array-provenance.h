@@ -270,6 +270,7 @@ struct TagOverride {
   TagOverride& operator=(TagOverride&&) = delete;
 
 private:
+  bool m_valid;
   Tag m_saved_tag;
 };
 

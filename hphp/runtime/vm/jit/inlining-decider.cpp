@@ -619,11 +619,16 @@ RegionDescPtr selectCalleeTracelet(const Func* callee,
     ctx.liveTypes.push_back({Location::Local{i}, type});
   }
 
-  auto const numParams = callee->numParams();
+  auto const numParams = callee->numNonVariadicParams();
   for (uint32_t i = argTypes.size(); i < numParams; ++i) {
-    // These locals will be populated by DV init funclets but they'll start out
-    // as Uninit.
+    // These params are populated by DV init funclets, so set them to Uninit.
     ctx.liveTypes.push_back({Location::Local{i}, TUninit});
+  }
+  if (argTypes.size() <= numParams && callee->hasVariadicCaptureParam()) {
+    // There's no DV init funclet for the case where all non-variadic params
+    // have already been passed, so the caller must handle it instead.
+    auto const vargs = Type::cns(ArrayData::CreateVArray());
+    ctx.liveTypes.push_back({Location::Local{numParams}, vargs});
   }
 
   // Produce a tracelet for the callee.

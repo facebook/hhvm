@@ -4023,7 +4023,7 @@ where
                     && !Self::list_contains_predicate(|x| x.is_abstract(), &cd.classish_modifiers)
                 {
                     self.errors.push(Self::make_error_from_node(
-                        node,
+                        &cd.classish_name,
                         errors::class_with_abstract_method(name),
                     ))
                 }

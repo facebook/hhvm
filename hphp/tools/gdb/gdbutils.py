@@ -364,10 +364,23 @@ def nameof(val):
 # TV helpers.
 
 tv_recurse = 0
+tv_recurse_key = ""
 _tv_recurse_depth = 0
+current_key = None
 
 def DT(kind):
     return V(kind, 'DataType')
+
+
+def should_recurse():
+    global _tv_recurse_depth
+    global tv_recurse_key
+
+    if _tv_recurse_depth >= tv_recurse:
+        return False
+    if tv_recurse_key == "" or current_key is None:
+        return True
+    return re.match(tv_recurse_key, current_key) is not None
 
 
 def pretty_tv(t, data):
@@ -415,13 +428,13 @@ def pretty_tv(t, data):
           t == V('HPHP::KindOfKeyset') or
           t == V('HPHP::KindOfPersistentKeyset')):
         val = data['parr']
-        if _tv_recurse_depth < tv_recurse:
+        if should_recurse():
             val = val.dereference()
             recurse = True
 
     elif t == DT('HPHP::KindOfObject'):
         val = data['pobj']
-        if _tv_recurse_depth < tv_recurse:
+        if should_recurse():
             val = val.dereference()
             recurse = True
         name = nameof(val)

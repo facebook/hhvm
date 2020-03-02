@@ -51,7 +51,9 @@ class StringDataPrinter(object):
 
 
 class SetTVRecurseCommand(gdb.Command):
-    """How many levels to recurse into TypedValue data ptrs when pretty-printing."""
+    """How many levels to recurse into TypedValue data ptrs when pretty-printing.
+    and an optional filter on keys to recurse on.
+    """
 
     def __init__(self):
         super(SetTVRecurseCommand, self).__init__('set tv-recurse',
@@ -61,23 +63,38 @@ class SetTVRecurseCommand(gdb.Command):
     def invoke(self, args, from_tty):
         argv = gdb.string_to_argv(args)
 
-        if len(argv) == 1:
-            if argv[0] == 'true':
+        argn = len(argv)
+        depth = None
+        regex = ""
+        if argn == 1:
+            depth = argv[0]
+        if argn == 2:
+            depth, regex = argv
+
+        if depth is not None:
+            gdbutils.tv_recurse_key = regex
+
+            if depth == 'true':
                 gdbutils.tv_recurse = 1
                 return
 
-            if argv[0] == 'false':
+            if depth == 'false':
                 gdbutils.tv_recurse = 0
                 return
 
             try:
                 gdbutils.tv_recurse = int(argv[0])
-                return
+                if gdbutils.tv_recurse >= 0:
+                    return
             except:
                 pass
 
-        print('Requires an argument. '
-              'Valid arguments are true, false or an integer depth')
+        print(
+            'tv-recurse <depth> [<regex>]\n'
+            '  Valid values for <depth> are true, false or an integer depth (>=0)\n'
+            '  The optional <regex> determines which array keys or object properties '
+            'to recurse on\n'
+        )
 
 
 SetTVRecurseCommand()
@@ -232,18 +249,23 @@ class ArrayDataPrinter(object):
 
             try:
                 if elt['data']['m_type'] == -128:
-                    key = '<deleted>'
+                    rawkey = key = '<deleted>'
                 elif elt['data']['m_aux']['u_hash'] < 0:
-                    key = '%d' % elt['ikey']
+                    rawkey = key = '%d' % elt['ikey']
                 else:
-                    key = '"%s"' % string_data_val(elt['skey'].dereference())
+                    rawkey = string_data_val(elt['skey'].dereference())
+                    key = '"%s"' % rawkey
+
             except gdb.MemoryError:
                 key = '<invalid>'
 
+            gdbutils.current_key = rawkey
             try:
                 data = elt['data'].cast(T('HPHP::TypedValue'))
             except gdb.MemoryError:
                 data = '<invalid>'
+            finally:
+                gdbutils.current_key = None
 
             self.cur = self.cur + 1
             return (key, data)
@@ -339,10 +361,13 @@ class ObjectDataPrinter(object):
             except gdb.MemoryError:
                 name = '<invalid>'
 
+            gdbutils.current_key = strinfo(name)['data']
             try:
                 val = idx.object_data_at(self.obj, self.cls, self.cur)
             except gdb.MemoryError:
                 val = '<unknown>'
+            finally:
+                gdbutils.current_key = None
 
             self.cur = self.cur + 1
 

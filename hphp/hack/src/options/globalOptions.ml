@@ -92,6 +92,7 @@ type t = {
   po_disable_xhp_element_mangling: bool;
   po_disable_xhp_children_declarations: bool;
   po_enable_first_class_function_pointers: bool;
+  po_disable_partial: bool;
 }
 [@@deriving show]
 
@@ -254,6 +255,7 @@ let default =
     po_disable_xhp_element_mangling = false;
     po_disable_xhp_children_declarations = false;
     po_enable_first_class_function_pointers = false;
+    po_disable_partial = false;
   }
 
 let make
@@ -357,6 +359,7 @@ let make
       default.po_disable_xhp_children_declarations)
     ?(po_enable_first_class_function_pointers =
       default.po_enable_first_class_function_pointers)
+    ?(po_disable_partial = default.po_disable_partial)
     () =
   {
     tco_experimental_features;
@@ -443,6 +446,7 @@ let make
     po_disable_xhp_element_mangling;
     po_disable_xhp_children_declarations;
     po_enable_first_class_function_pointers;
+    po_disable_partial;
   }
 
 let tco_experimental_feature_enabled t s =
@@ -630,3 +634,5 @@ let po_disable_xhp_children_declarations t =
 
 let po_enable_first_class_function_pointers t =
   t.po_enable_first_class_function_pointers
+
+let po_disable_partial t = t.po_disable_partial

@@ -112,6 +112,8 @@ let enable_first_class_function_pointers =
 let with_enable_first_class_function_pointers po b =
   { po with GlobalOptions.po_enable_first_class_function_pointers = b }
 
+let disable_partial = GlobalOptions.po_disable_partial
+
 let make
     ~auto_namespace_map
     ~codegen
@@ -133,7 +135,8 @@ let make
     ~disable_xhp_element_mangling
     ~disable_xhp_children_declarations
     ~rust_lowerer
-    ~enable_first_class_function_pointers =
+    ~enable_first_class_function_pointers
+    ~disable_partial =
   GlobalOptions.
     {
       default with
@@ -159,11 +162,13 @@ let make
       po_rust_lowerer = rust_lowerer;
       po_enable_first_class_function_pointers =
         enable_first_class_function_pointers;
+      po_disable_partial = disable_partial;
     }
 
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)
 type ffi_t =
   bool
+  * bool
   * bool
   * bool
   * bool
@@ -192,4 +197,5 @@ let to_rust_ffi_t po ~hhvm_compat_mode ~hhi_mode ~codegen =
     enable_xhp_class_modifier po,
     disable_xhp_element_mangling po,
     disable_xhp_children_declarations po,
-    enable_first_class_function_pointers po )
+    enable_first_class_function_pointers po,
+    disable_partial po )

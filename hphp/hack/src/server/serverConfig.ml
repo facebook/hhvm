@@ -395,6 +395,7 @@ let load config_filename options =
         (bool_opt "disable_xhp_children_declarations" config)
       ?po_enable_xhp_class_modifier:
         (bool_opt "enable_xhp_class_modifier" config)
+      ?po_disable_partial:(bool_opt "disable_partial" config)
       ()
   in
   Errors.ignored_fixme_codes := GlobalOptions.ignored_fixme_codes global_opts;

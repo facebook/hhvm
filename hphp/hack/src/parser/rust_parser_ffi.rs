@@ -8,6 +8,7 @@ use mode_parser::parse_mode;
 use ocamlrep::{ptr::UnsafeOcamlPtr, Allocator, OcamlRep};
 use ocamlrep_ocamlpool::{ocaml_ffi, Pool};
 use operator::{Assoc, Operator};
+use oxidized::file_info::Mode;
 use oxidized::{file_info, full_fidelity_parser_env::FullFidelityParserEnv};
 use smart_constructors::{NodeType, SmartConstructors};
 
@@ -68,6 +69,7 @@ where
                 // send it between threads, but it has internal mutablility and
                 // is not Send.
                 let source_text = unsafe { SourceText::from_ocaml(ocaml_source_text).unwrap() };
+                let disable_partial = env.disable_partial;
                 let (root, errors, state) =
                     ParseFun::parse_script(&source_text, env, Some(stack_limit_ref));
                 // traversing the parsed syntax tree uses about 1/3 of the stack
@@ -76,7 +78,10 @@ where
                 let ocaml_errors = pool.add(&errors);
                 let ocaml_state = unsafe { state.to_ocaml(&context) };
                 let tree = if leak_rust_tree {
-                    let mode = parse_mode(&source_text);
+                    let mut mode = parse_mode(&source_text);
+                    if mode == Some(Mode::Mpartial) && disable_partial {
+                        mode = Some(Mode::Mstrict);
+                    }
                     let tree = Box::new(SyntaxTree::build(
                         &source_text,
                         root,

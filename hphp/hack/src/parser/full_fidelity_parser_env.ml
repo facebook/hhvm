@@ -22,6 +22,7 @@ type t = {
   enable_xhp_class_modifier: bool;
   disable_xhp_element_mangling: bool;
   disable_xhp_children_declarations: bool;
+  disable_partial: bool;
 }
 [@@deriving show]
 
@@ -41,6 +42,7 @@ let default =
     enable_xhp_class_modifier = false;
     disable_xhp_element_mangling = false;
     disable_xhp_children_declarations = false;
+    disable_partial = false;
   }
 
 let make
@@ -62,6 +64,7 @@ let make
     ?(disable_xhp_element_mangling = default.disable_xhp_element_mangling)
     ?(disable_xhp_children_declarations =
       default.disable_xhp_children_declarations)
+    ?(disable_partial = default.disable_partial)
     () =
   {
     hhvm_compat_mode;
@@ -78,6 +81,7 @@ let make
     enable_xhp_class_modifier;
     disable_xhp_element_mangling;
     disable_xhp_children_declarations;
+    disable_partial;
   }
 
 let hhvm_compat_mode e = e.hhvm_compat_mode
@@ -111,3 +115,5 @@ let enable_xhp_class_modifier e = e.enable_xhp_class_modifier
 let disable_xhp_element_mangling e = e.disable_xhp_element_mangling
 
 let disable_xhp_children_declarations e = e.disable_xhp_children_declarations
+
+let disable_partial e = e.disable_partial

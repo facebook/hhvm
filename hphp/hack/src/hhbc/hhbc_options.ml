@@ -61,6 +61,7 @@ type t = {
   option_rust_lowerer: bool;
   option_enable_first_class_function_pointers: bool;
   option_widen_is_array: bool;
+  option_disable_partial: bool;
 }
 
 let default =
@@ -117,6 +118,7 @@ let default =
     option_rust_lowerer = true;
     option_enable_first_class_function_pointers = false;
     option_widen_is_array = false;
+    option_disable_partial = false;
   }
 
 let constant_folding o = o.option_constant_folding
@@ -220,6 +222,8 @@ let rust_lowerer o = o.option_rust_lowerer
 
 let enable_first_class_function_pointers o =
   o.option_enable_first_class_function_pointers
+
+let disable_partial o = o.option_disable_partial
 
 (**
  * Widen the default behavior of `is_array` from "is exactly a PHP array to"

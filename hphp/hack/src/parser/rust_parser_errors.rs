@@ -5535,7 +5535,7 @@ where
     }
 
     fn parse_errors_impl(mut self) -> Vec<SyntaxError> {
-        if self.env.is_typechecker() {
+        if self.env.is_typechecker() && !self.env.parser_options.po_disable_partial {
             self.is_invalid_hack_mode();
         }
         self.fold_child_nodes(self.env.syntax_tree.root());

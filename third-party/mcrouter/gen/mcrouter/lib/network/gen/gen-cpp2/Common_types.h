@@ -200,6 +200,22 @@ class McVersionRequest final : private apache::thrift::detail::st::ComparisonOpe
   bool operator==(const McVersionRequest& rhs) const;
   bool operator<(const McVersionRequest& rhs) const;
 
+  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::thrift::IOBufKey&> key_ref() const& {
+    return {key, __isset.key};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::thrift::IOBufKey&&> key_ref() const&& {
+    return {std::move(key), __isset.key};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::thrift::IOBufKey&> key_ref() & {
+    return {key, __isset.key};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::thrift::IOBufKey&&> key_ref() && {
+    return {std::move(key), __isset.key};
+  }
+
   const  ::carbon::thrift::IOBufKey& get_key() const& {
     return key;
   }
@@ -278,6 +294,70 @@ class McVersionReply final : private apache::thrift::detail::st::ComparisonOpera
   } __isset = {};
   bool operator==(const McVersionReply& rhs) const;
   bool operator<(const McVersionReply& rhs) const;
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::Result&> result_ref() const& {
+    return {result, __isset.result};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::Result&&> result_ref() const&& {
+    return {std::move(result), __isset.result};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::Result&> result_ref() & {
+    return {result, __isset.result};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::Result&&> result_ref() && {
+    return {std::move(result), __isset.result};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const folly::IOBuf&> value_ref() const& {
+    return {value, __isset.value};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const folly::IOBuf&&> value_ref() const&& {
+    return {std::move(value), __isset.value};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<folly::IOBuf&> value_ref() & {
+    return {value, __isset.value};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<folly::IOBuf&&> value_ref() && {
+    return {std::move(value), __isset.value};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&> message_ref() const& {
+    return {message, __isset.message};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&&> message_ref() const&& {
+    return {std::move(message), __isset.message};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&> message_ref() & {
+    return {message, __isset.message};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&&> message_ref() && {
+    return {std::move(message), __isset.message};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const int16_t&> appSpecificErrorCode_ref() const& {
+    return {appSpecificErrorCode, __isset.appSpecificErrorCode};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const int16_t&&> appSpecificErrorCode_ref() const&& {
+    return {std::move(appSpecificErrorCode), __isset.appSpecificErrorCode};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<int16_t&> appSpecificErrorCode_ref() & {
+    return {appSpecificErrorCode, __isset.appSpecificErrorCode};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<int16_t&&> appSpecificErrorCode_ref() && {
+    return {std::move(appSpecificErrorCode), __isset.appSpecificErrorCode};
+  }
 
    ::carbon::Result get_result() const {
     return result;
@@ -382,6 +462,22 @@ class McStatsRequest final : private apache::thrift::detail::st::ComparisonOpera
   bool operator==(const McStatsRequest& rhs) const;
   bool operator<(const McStatsRequest& rhs) const;
 
+  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::thrift::IOBufKey&> key_ref() const& {
+    return {key, __isset.key};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::thrift::IOBufKey&&> key_ref() const&& {
+    return {std::move(key), __isset.key};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::thrift::IOBufKey&> key_ref() & {
+    return {key, __isset.key};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::thrift::IOBufKey&&> key_ref() && {
+    return {std::move(key), __isset.key};
+  }
+
   const  ::carbon::thrift::IOBufKey& get_key() const& {
     return key;
   }
@@ -460,6 +556,70 @@ class McStatsReply final : private apache::thrift::detail::st::ComparisonOperato
   } __isset = {};
   bool operator==(const McStatsReply& rhs) const;
   bool operator<(const McStatsReply& rhs) const;
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::Result&> result_ref() const& {
+    return {result, __isset.result};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::Result&&> result_ref() const&& {
+    return {std::move(result), __isset.result};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::Result&> result_ref() & {
+    return {result, __isset.result};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::Result&&> result_ref() && {
+    return {std::move(result), __isset.result};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&> message_ref() const& {
+    return {message, __isset.message};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&&> message_ref() const&& {
+    return {std::move(message), __isset.message};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&> message_ref() & {
+    return {message, __isset.message};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&&> message_ref() && {
+    return {std::move(message), __isset.message};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::vector<::std::string>&> stats_ref() const& {
+    return {stats, __isset.stats};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::vector<::std::string>&&> stats_ref() const&& {
+    return {std::move(stats), __isset.stats};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::vector<::std::string>&> stats_ref() & {
+    return {stats, __isset.stats};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::vector<::std::string>&&> stats_ref() && {
+    return {std::move(stats), __isset.stats};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const int16_t&> appSpecificErrorCode_ref() const& {
+    return {appSpecificErrorCode, __isset.appSpecificErrorCode};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const int16_t&&> appSpecificErrorCode_ref() const&& {
+    return {std::move(appSpecificErrorCode), __isset.appSpecificErrorCode};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<int16_t&> appSpecificErrorCode_ref() & {
+    return {appSpecificErrorCode, __isset.appSpecificErrorCode};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<int16_t&&> appSpecificErrorCode_ref() && {
+    return {std::move(appSpecificErrorCode), __isset.appSpecificErrorCode};
+  }
 
    ::carbon::Result get_result() const {
     return result;
@@ -558,6 +718,22 @@ class McShutdownRequest final : private apache::thrift::detail::st::ComparisonOp
   bool operator==(const McShutdownRequest& rhs) const;
   bool operator<(const McShutdownRequest& rhs) const;
 
+  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::thrift::IOBufKey&> key_ref() const& {
+    return {key, __isset.key};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::thrift::IOBufKey&&> key_ref() const&& {
+    return {std::move(key), __isset.key};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::thrift::IOBufKey&> key_ref() & {
+    return {key, __isset.key};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::thrift::IOBufKey&&> key_ref() && {
+    return {std::move(key), __isset.key};
+  }
+
   const  ::carbon::thrift::IOBufKey& get_key() const& {
     return key;
   }
@@ -633,6 +809,54 @@ class McShutdownReply final : private apache::thrift::detail::st::ComparisonOper
   } __isset = {};
   bool operator==(const McShutdownReply& rhs) const;
   bool operator<(const McShutdownReply& rhs) const;
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::Result&> result_ref() const& {
+    return {result, __isset.result};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::Result&&> result_ref() const&& {
+    return {std::move(result), __isset.result};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::Result&> result_ref() & {
+    return {result, __isset.result};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::Result&&> result_ref() && {
+    return {std::move(result), __isset.result};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&> message_ref() const& {
+    return {message, __isset.message};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&&> message_ref() const&& {
+    return {std::move(message), __isset.message};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&> message_ref() & {
+    return {message, __isset.message};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&&> message_ref() && {
+    return {std::move(message), __isset.message};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const int16_t&> appSpecificErrorCode_ref() const& {
+    return {appSpecificErrorCode, __isset.appSpecificErrorCode};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const int16_t&&> appSpecificErrorCode_ref() const&& {
+    return {std::move(appSpecificErrorCode), __isset.appSpecificErrorCode};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<int16_t&> appSpecificErrorCode_ref() & {
+    return {appSpecificErrorCode, __isset.appSpecificErrorCode};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<int16_t&&> appSpecificErrorCode_ref() && {
+    return {std::move(appSpecificErrorCode), __isset.appSpecificErrorCode};
+  }
 
    ::carbon::Result get_result() const {
     return result;
@@ -722,6 +946,22 @@ class McQuitRequest final : private apache::thrift::detail::st::ComparisonOperat
   bool operator==(const McQuitRequest& rhs) const;
   bool operator<(const McQuitRequest& rhs) const;
 
+  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::thrift::IOBufKey&> key_ref() const& {
+    return {key, __isset.key};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::thrift::IOBufKey&&> key_ref() const&& {
+    return {std::move(key), __isset.key};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::thrift::IOBufKey&> key_ref() & {
+    return {key, __isset.key};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::thrift::IOBufKey&&> key_ref() && {
+    return {std::move(key), __isset.key};
+  }
+
   const  ::carbon::thrift::IOBufKey& get_key() const& {
     return key;
   }
@@ -797,6 +1037,54 @@ class McQuitReply final : private apache::thrift::detail::st::ComparisonOperator
   } __isset = {};
   bool operator==(const McQuitReply& rhs) const;
   bool operator<(const McQuitReply& rhs) const;
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::Result&> result_ref() const& {
+    return {result, __isset.result};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::Result&&> result_ref() const&& {
+    return {std::move(result), __isset.result};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::Result&> result_ref() & {
+    return {result, __isset.result};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::Result&&> result_ref() && {
+    return {std::move(result), __isset.result};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&> message_ref() const& {
+    return {message, __isset.message};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&&> message_ref() const&& {
+    return {std::move(message), __isset.message};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&> message_ref() & {
+    return {message, __isset.message};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&&> message_ref() && {
+    return {std::move(message), __isset.message};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const int16_t&> appSpecificErrorCode_ref() const& {
+    return {appSpecificErrorCode, __isset.appSpecificErrorCode};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const int16_t&&> appSpecificErrorCode_ref() const&& {
+    return {std::move(appSpecificErrorCode), __isset.appSpecificErrorCode};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<int16_t&> appSpecificErrorCode_ref() & {
+    return {appSpecificErrorCode, __isset.appSpecificErrorCode};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<int16_t&&> appSpecificErrorCode_ref() && {
+    return {std::move(appSpecificErrorCode), __isset.appSpecificErrorCode};
+  }
 
    ::carbon::Result get_result() const {
     return result;
@@ -886,6 +1174,22 @@ class McExecRequest final : private apache::thrift::detail::st::ComparisonOperat
   bool operator==(const McExecRequest& rhs) const;
   bool operator<(const McExecRequest& rhs) const;
 
+  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::thrift::IOBufKey&> key_ref() const& {
+    return {key, __isset.key};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::thrift::IOBufKey&&> key_ref() const&& {
+    return {std::move(key), __isset.key};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::thrift::IOBufKey&> key_ref() & {
+    return {key, __isset.key};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::thrift::IOBufKey&&> key_ref() && {
+    return {std::move(key), __isset.key};
+  }
+
   const  ::carbon::thrift::IOBufKey& get_key() const& {
     return key;
   }
@@ -964,6 +1268,70 @@ class McExecReply final : private apache::thrift::detail::st::ComparisonOperator
   } __isset = {};
   bool operator==(const McExecReply& rhs) const;
   bool operator<(const McExecReply& rhs) const;
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::Result&> result_ref() const& {
+    return {result, __isset.result};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::Result&&> result_ref() const&& {
+    return {std::move(result), __isset.result};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::Result&> result_ref() & {
+    return {result, __isset.result};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::Result&&> result_ref() && {
+    return {std::move(result), __isset.result};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&> response_ref() const& {
+    return {response, __isset.response};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&&> response_ref() const&& {
+    return {std::move(response), __isset.response};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&> response_ref() & {
+    return {response, __isset.response};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&&> response_ref() && {
+    return {std::move(response), __isset.response};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&> message_ref() const& {
+    return {message, __isset.message};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&&> message_ref() const&& {
+    return {std::move(message), __isset.message};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&> message_ref() & {
+    return {message, __isset.message};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&&> message_ref() && {
+    return {std::move(message), __isset.message};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const int16_t&> appSpecificErrorCode_ref() const& {
+    return {appSpecificErrorCode, __isset.appSpecificErrorCode};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const int16_t&&> appSpecificErrorCode_ref() const&& {
+    return {std::move(appSpecificErrorCode), __isset.appSpecificErrorCode};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<int16_t&> appSpecificErrorCode_ref() & {
+    return {appSpecificErrorCode, __isset.appSpecificErrorCode};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<int16_t&&> appSpecificErrorCode_ref() && {
+    return {std::move(appSpecificErrorCode), __isset.appSpecificErrorCode};
+  }
 
    ::carbon::Result get_result() const {
     return result;
@@ -1117,6 +1485,38 @@ class GoAwayRequest final : private apache::thrift::detail::st::ComparisonOperat
   } __isset = {};
   bool operator==(const GoAwayRequest& rhs) const;
   bool operator<(const GoAwayRequest& rhs) const;
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::Result&> result_ref() const& {
+    return {result, __isset.result};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::Result&&> result_ref() const&& {
+    return {std::move(result), __isset.result};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::Result&> result_ref() & {
+    return {result, __isset.result};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::Result&&> result_ref() && {
+    return {std::move(result), __isset.result};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&> reason_ref() const& {
+    return {reason, __isset.reason};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&&> reason_ref() const&& {
+    return {std::move(reason), __isset.reason};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&> reason_ref() & {
+    return {reason, __isset.reason};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&&> reason_ref() && {
+    return {std::move(reason), __isset.reason};
+  }
 
    ::carbon::Result get_result() const {
     return result;

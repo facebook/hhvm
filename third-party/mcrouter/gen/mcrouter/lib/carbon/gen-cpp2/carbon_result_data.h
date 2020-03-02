@@ -14,8 +14,8 @@ namespace carbon {
 
 struct _ResultEnumDataStorage {
   using type = Result;
-  static constexpr const std::size_t size = 33;
-  static constexpr const std::array<Result, 33> values = {{
+  static constexpr const std::size_t size = 34;
+  static constexpr const std::array<Result, 34> values = {{
     Result::UNKNOWN,
     Result::DELETED,
     Result::TOUCHED,
@@ -48,9 +48,10 @@ struct _ResultEnumDataStorage {
     Result::LOCAL_ERROR,
     Result::REMOTE_ERROR,
     Result::WAITING,
+    Result::DEADLINE_EXCEEDED,
     Result::NUM_RESULTS,
   }};
-  static constexpr const std::array<folly::StringPiece, 33> names = {{
+  static constexpr const std::array<folly::StringPiece, 34> names = {{
     "UNKNOWN",
     "DELETED",
     "TOUCHED",
@@ -83,6 +84,7 @@ struct _ResultEnumDataStorage {
     "LOCAL_ERROR",
     "REMOTE_ERROR",
     "WAITING",
+    "DEADLINE_EXCEEDED",
     "NUM_RESULTS",
   }};
 };

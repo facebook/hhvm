@@ -46,7 +46,8 @@ enum class Result {
   LOCAL_ERROR = 29,
   REMOTE_ERROR = 30,
   WAITING = 31,
-  NUM_RESULTS = 32
+  DEADLINE_EXCEEDED = 32,
+  NUM_RESULTS = 33
 };
 
 
@@ -70,7 +71,7 @@ template <> struct TEnumDataStorage<::carbon::Result>;
 template <> struct TEnumTraits<::carbon::Result> {
   using type = ::carbon::Result;
 
-  static constexpr std::size_t const size = 33;
+  static constexpr std::size_t const size = 34;
   static folly::Range<type const*> const values;
   static folly::Range<folly::StringPiece const*> const names;
 

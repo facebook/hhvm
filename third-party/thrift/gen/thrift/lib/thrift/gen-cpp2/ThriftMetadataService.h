@@ -27,9 +27,9 @@ namespace apache { namespace thrift { namespace metadata {
 class ThriftMetadataServiceSvAsyncIf {
  public:
   virtual ~ThriftMetadataServiceSvAsyncIf() {}
-  virtual void async_tm_getRpcMetadata(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr< ::apache::thrift::metadata::ThriftMetadata>>> callback) = 0;
-  virtual folly::Future<std::unique_ptr< ::apache::thrift::metadata::ThriftMetadata>> future_getRpcMetadata() = 0;
-  virtual folly::SemiFuture<std::unique_ptr< ::apache::thrift::metadata::ThriftMetadata>> semifuture_getRpcMetadata() = 0;
+  virtual void async_tm_getThriftServiceMetadata(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr< ::apache::thrift::metadata::ThriftServiceMetadataResponse>>> callback) = 0;
+  virtual folly::Future<std::unique_ptr< ::apache::thrift::metadata::ThriftServiceMetadataResponse>> future_getThriftServiceMetadata() = 0;
+  virtual folly::SemiFuture<std::unique_ptr< ::apache::thrift::metadata::ThriftServiceMetadataResponse>> semifuture_getThriftServiceMetadata() = 0;
 };
 
 class ThriftMetadataServiceAsyncProcessor;
@@ -38,25 +38,26 @@ class ThriftMetadataServiceSvIf : public ThriftMetadataServiceSvAsyncIf, public 
  public:
   typedef ThriftMetadataServiceAsyncProcessor ProcessorType;
   std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override;
-  virtual void getRpcMetadata( ::apache::thrift::metadata::ThriftMetadata& /*_return*/);
-  folly::Future<std::unique_ptr< ::apache::thrift::metadata::ThriftMetadata>> future_getRpcMetadata() override;
-  folly::SemiFuture<std::unique_ptr< ::apache::thrift::metadata::ThriftMetadata>> semifuture_getRpcMetadata() override;
-  void async_tm_getRpcMetadata(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr< ::apache::thrift::metadata::ThriftMetadata>>> callback) override;
+  virtual void getThriftServiceMetadata( ::apache::thrift::metadata::ThriftServiceMetadataResponse& /*_return*/);
+  folly::Future<std::unique_ptr< ::apache::thrift::metadata::ThriftServiceMetadataResponse>> future_getThriftServiceMetadata() override;
+  folly::SemiFuture<std::unique_ptr< ::apache::thrift::metadata::ThriftServiceMetadataResponse>> semifuture_getThriftServiceMetadata() override;
+  void async_tm_getThriftServiceMetadata(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr< ::apache::thrift::metadata::ThriftServiceMetadataResponse>>> callback) override;
 };
 
 class ThriftMetadataServiceSvNull : public ThriftMetadataServiceSvIf {
  public:
-  void getRpcMetadata( ::apache::thrift::metadata::ThriftMetadata& /*_return*/) override;
+  void getThriftServiceMetadata( ::apache::thrift::metadata::ThriftServiceMetadataResponse& /*_return*/) override;
 };
 
 class ThriftMetadataServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessor {
  public:
   const char* getServiceName() override;
+  void getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) override;
   using BaseAsyncProcessor = void;
  protected:
   ThriftMetadataServiceSvIf* iface_;
  public:
-  void process(std::unique_ptr<apache::thrift::ResponseChannelRequest> req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) override;
+  void process(apache::thrift::ResponseChannelRequest::UniquePtr req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) override;
  protected:
   bool isOnewayMethod(const folly::IOBuf* buf, const apache::thrift::transport::THeader* header) override;
   std::shared_ptr<folly::RequestContext> getBaseContextForRequest() override;
@@ -72,13 +73,13 @@ class ThriftMetadataServiceAsyncProcessor : public ::apache::thrift::GeneratedAs
    static const ThriftMetadataServiceAsyncProcessor::ProcessMap compactProcessMap_;
  private:
   template <typename ProtocolIn_, typename ProtocolOut_>
-  void _processInThread_getRpcMetadata(std::unique_ptr<apache::thrift::ResponseChannelRequest> req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
+  void _processInThread_getThriftServiceMetadata(apache::thrift::ResponseChannelRequest::UniquePtr req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
   template <typename ProtocolIn_, typename ProtocolOut_>
-  void process_getRpcMetadata(std::unique_ptr<apache::thrift::ResponseChannelRequest> req, std::unique_ptr<folly::IOBuf> buf,apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
+  void process_getThriftServiceMetadata(apache::thrift::ResponseChannelRequest::UniquePtr req, std::unique_ptr<folly::IOBuf> buf,apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
   template <class ProtocolIn_, class ProtocolOut_>
-  static folly::IOBufQueue return_getRpcMetadata(int32_t protoSeqId, apache::thrift::ContextStack* ctx,  ::apache::thrift::metadata::ThriftMetadata const& _return);
+  static folly::IOBufQueue return_getThriftServiceMetadata(int32_t protoSeqId, apache::thrift::ContextStack* ctx,  ::apache::thrift::metadata::ThriftServiceMetadataResponse const& _return);
   template <class ProtocolIn_, class ProtocolOut_>
-  static void throw_wrapped_getRpcMetadata(std::unique_ptr<apache::thrift::ResponseChannelRequest> req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
+  static void throw_wrapped_getThriftServiceMetadata(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
  public:
   ThriftMetadataServiceAsyncProcessor(ThriftMetadataServiceSvIf* iface) :
       iface_(iface) {}

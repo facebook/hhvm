@@ -22,6 +22,11 @@ struct name;
 struct name;
 struct name;
 struct underlyingType;
+struct elemType;
+struct initialResponseType;
+struct elemType;
+struct finalResponseType;
+struct initialResponseType;
 struct t_primitive;
 struct t_list;
 struct t_set;
@@ -30,6 +35,8 @@ struct t_enum;
 struct t_struct;
 struct t_union;
 struct t_typedef;
+struct t_stream;
+struct t_sink;
 struct name;
 struct elements;
 struct id;
@@ -48,11 +55,15 @@ struct exceptions;
 struct name;
 struct functions;
 struct parent;
-struct file_name;
+struct name;
+struct service_info;
+struct module;
 struct enums;
 struct structs;
 struct exceptions;
 struct services;
+struct context;
+struct metadata;
 } // namespace tag
 namespace detail {
 #ifndef APACHE_THRIFT_ACCESSOR_valueType
@@ -91,6 +102,26 @@ APACHE_THRIFT_DEFINE_ACCESSOR(name);
 #define APACHE_THRIFT_ACCESSOR_underlyingType
 APACHE_THRIFT_DEFINE_ACCESSOR(underlyingType);
 #endif
+#ifndef APACHE_THRIFT_ACCESSOR_elemType
+#define APACHE_THRIFT_ACCESSOR_elemType
+APACHE_THRIFT_DEFINE_ACCESSOR(elemType);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_initialResponseType
+#define APACHE_THRIFT_ACCESSOR_initialResponseType
+APACHE_THRIFT_DEFINE_ACCESSOR(initialResponseType);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_elemType
+#define APACHE_THRIFT_ACCESSOR_elemType
+APACHE_THRIFT_DEFINE_ACCESSOR(elemType);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_finalResponseType
+#define APACHE_THRIFT_ACCESSOR_finalResponseType
+APACHE_THRIFT_DEFINE_ACCESSOR(finalResponseType);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_initialResponseType
+#define APACHE_THRIFT_ACCESSOR_initialResponseType
+APACHE_THRIFT_DEFINE_ACCESSOR(initialResponseType);
+#endif
 #ifndef APACHE_THRIFT_ACCESSOR_t_primitive
 #define APACHE_THRIFT_ACCESSOR_t_primitive
 APACHE_THRIFT_DEFINE_ACCESSOR(t_primitive);
@@ -122,6 +153,14 @@ APACHE_THRIFT_DEFINE_ACCESSOR(t_union);
 #ifndef APACHE_THRIFT_ACCESSOR_t_typedef
 #define APACHE_THRIFT_ACCESSOR_t_typedef
 APACHE_THRIFT_DEFINE_ACCESSOR(t_typedef);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_t_stream
+#define APACHE_THRIFT_ACCESSOR_t_stream
+APACHE_THRIFT_DEFINE_ACCESSOR(t_stream);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_t_sink
+#define APACHE_THRIFT_ACCESSOR_t_sink
+APACHE_THRIFT_DEFINE_ACCESSOR(t_sink);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_name
 #define APACHE_THRIFT_ACCESSOR_name
@@ -195,9 +234,17 @@ APACHE_THRIFT_DEFINE_ACCESSOR(functions);
 #define APACHE_THRIFT_ACCESSOR_parent
 APACHE_THRIFT_DEFINE_ACCESSOR(parent);
 #endif
-#ifndef APACHE_THRIFT_ACCESSOR_file_name
-#define APACHE_THRIFT_ACCESSOR_file_name
-APACHE_THRIFT_DEFINE_ACCESSOR(file_name);
+#ifndef APACHE_THRIFT_ACCESSOR_name
+#define APACHE_THRIFT_ACCESSOR_name
+APACHE_THRIFT_DEFINE_ACCESSOR(name);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_service_info
+#define APACHE_THRIFT_ACCESSOR_service_info
+APACHE_THRIFT_DEFINE_ACCESSOR(service_info);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_module
+#define APACHE_THRIFT_ACCESSOR_module
+APACHE_THRIFT_DEFINE_ACCESSOR(module);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_enums
 #define APACHE_THRIFT_ACCESSOR_enums
@@ -215,6 +262,14 @@ APACHE_THRIFT_DEFINE_ACCESSOR(exceptions);
 #define APACHE_THRIFT_ACCESSOR_services
 APACHE_THRIFT_DEFINE_ACCESSOR(services);
 #endif
+#ifndef APACHE_THRIFT_ACCESSOR_context
+#define APACHE_THRIFT_ACCESSOR_context
+APACHE_THRIFT_DEFINE_ACCESSOR(context);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_metadata
+#define APACHE_THRIFT_ACCESSOR_metadata
+APACHE_THRIFT_DEFINE_ACCESSOR(metadata);
+#endif
 } // namespace detail
 } // namespace thrift
 } // namespace apache
@@ -223,16 +278,16 @@ APACHE_THRIFT_DEFINE_ACCESSOR(services);
 namespace apache { namespace thrift { namespace metadata {
 
 enum class ThriftPrimitiveType {
-  BOOL = 1,
-  BYTE = 2,
-  I16 = 3,
-  I32 = 4,
-  I64 = 5,
-  FLOAT = 6,
-  DOUBLE = 7,
-  BINARY = 8,
-  STRING = 9,
-  VOID = 10
+  THRIFT_BOOL_TYPE = 1,
+  THRIFT_BYTE_TYPE = 2,
+  THRIFT_I16_TYPE = 3,
+  THRIFT_I32_TYPE = 4,
+  THRIFT_I64_TYPE = 5,
+  THRIFT_FLOAT_TYPE = 6,
+  THRIFT_DOUBLE_TYPE = 7,
+  THRIFT_BINARY_TYPE = 8,
+  THRIFT_STRING_TYPE = 9,
+  THRIFT_VOID_TYPE = 10
 };
 
 
@@ -263,8 +318,8 @@ template <> struct TEnumTraits<::apache::thrift::metadata::ThriftPrimitiveType> 
   static char const* findName(type value);
   static bool findValue(char const* name, type* out);
 
-  static constexpr type min() { return type::BOOL; }
-  static constexpr type max() { return type::VOID; }
+  static constexpr type min() { return type::THRIFT_BOOL_TYPE; }
+  static constexpr type max() { return type::THRIFT_VOID_TYPE; }
 };
 
 
@@ -291,6 +346,8 @@ class ThriftEnumType;
 class ThriftStructType;
 class ThriftUnionType;
 class ThriftTypedefType;
+class ThriftStreamType;
+class ThriftSinkType;
 class ThriftType;
 class ThriftEnum;
 class ThriftField;
@@ -298,7 +355,10 @@ class ThriftStruct;
 class ThriftException;
 class ThriftFunction;
 class ThriftService;
+class ThriftModuleContext;
+class ThriftServiceContext;
 class ThriftMetadata;
+class ThriftServiceMetadataResponse;
 }}} // apache::thrift::metadata
 // END forward_declare
 // BEGIN typedefs
@@ -479,6 +539,22 @@ class ThriftEnumType final : private apache::thrift::detail::st::ComparisonOpera
   bool operator==(const ThriftEnumType& rhs) const;
   bool operator<(const ThriftEnumType& rhs) const;
 
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&> name_ref() const& {
+    return {name, __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&&> name_ref() const&& {
+    return {std::move(name), __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&> name_ref() & {
+    return {name, __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&&> name_ref() && {
+    return {std::move(name), __isset.name};
+  }
+
   const ::std::string& get_name() const& {
     return name;
   }
@@ -546,6 +622,22 @@ class ThriftStructType final : private apache::thrift::detail::st::ComparisonOpe
   } __isset = {};
   bool operator==(const ThriftStructType& rhs) const;
   bool operator<(const ThriftStructType& rhs) const;
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&> name_ref() const& {
+    return {name, __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&&> name_ref() const&& {
+    return {std::move(name), __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&> name_ref() & {
+    return {name, __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&&> name_ref() && {
+    return {std::move(name), __isset.name};
+  }
 
   const ::std::string& get_name() const& {
     return name;
@@ -615,6 +707,22 @@ class ThriftUnionType final : private apache::thrift::detail::st::ComparisonOper
   bool operator==(const ThriftUnionType& rhs) const;
   bool operator<(const ThriftUnionType& rhs) const;
 
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&> name_ref() const& {
+    return {name, __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&&> name_ref() const&& {
+    return {std::move(name), __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&> name_ref() & {
+    return {name, __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&&> name_ref() && {
+    return {std::move(name), __isset.name};
+  }
+
   const ::std::string& get_name() const& {
     return name;
   }
@@ -683,6 +791,22 @@ class ThriftTypedefType final : private apache::thrift::detail::st::ComparisonOp
   bool operator==(const ThriftTypedefType& rhs) const;
   bool operator<(const ThriftTypedefType& rhs) const;
 
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&> name_ref() const& {
+    return {name, __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&&> name_ref() const&& {
+    return {std::move(name), __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&> name_ref() & {
+    return {name, __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&&> name_ref() && {
+    return {std::move(name), __isset.name};
+  }
+
   const ::std::string& get_name() const& {
     return name;
   }
@@ -725,9 +849,111 @@ uint32_t ThriftTypedefType::read(Protocol_* iprot) {
 
 }}} // apache::thrift::metadata
 namespace apache { namespace thrift { namespace metadata {
+class ThriftStreamType final : private apache::thrift::detail::st::ComparisonOperators<ThriftStreamType> {
+ public:
+
+  ThriftStreamType() {}
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  ThriftStreamType(apache::thrift::FragileConstructor, std::unique_ptr< ::apache::thrift::metadata::ThriftType> elemType__arg, std::unique_ptr< ::apache::thrift::metadata::ThriftType> initialResponseType__arg);
+
+  ThriftStreamType(ThriftStreamType&&) = default;
+  ThriftStreamType(const ThriftStreamType& src);
+
+  ThriftStreamType& operator=(ThriftStreamType&&) = default;
+  ThriftStreamType& operator=(const ThriftStreamType& src);
+  void __clear();
+ public:
+  std::unique_ptr< ::apache::thrift::metadata::ThriftType> elemType;
+ public:
+  std::unique_ptr< ::apache::thrift::metadata::ThriftType> initialResponseType;
+
+ public:
+  bool operator==(const ThriftStreamType& rhs) const;
+  bool operator<(const ThriftStreamType& rhs) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops< ThriftStreamType >;
+};
+
+void swap(ThriftStreamType& a, ThriftStreamType& b);
+
+template <class Protocol_>
+uint32_t ThriftStreamType::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+}}} // apache::thrift::metadata
+namespace apache { namespace thrift { namespace metadata {
+class ThriftSinkType final : private apache::thrift::detail::st::ComparisonOperators<ThriftSinkType> {
+ public:
+
+  ThriftSinkType() {}
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  ThriftSinkType(apache::thrift::FragileConstructor, std::unique_ptr< ::apache::thrift::metadata::ThriftType> elemType__arg, std::unique_ptr< ::apache::thrift::metadata::ThriftType> finalResponseType__arg, std::unique_ptr< ::apache::thrift::metadata::ThriftType> initialResponseType__arg);
+
+  ThriftSinkType(ThriftSinkType&&) = default;
+  ThriftSinkType(const ThriftSinkType& src);
+
+  ThriftSinkType& operator=(ThriftSinkType&&) = default;
+  ThriftSinkType& operator=(const ThriftSinkType& src);
+  void __clear();
+ public:
+  std::unique_ptr< ::apache::thrift::metadata::ThriftType> elemType;
+ public:
+  std::unique_ptr< ::apache::thrift::metadata::ThriftType> finalResponseType;
+ public:
+  std::unique_ptr< ::apache::thrift::metadata::ThriftType> initialResponseType;
+
+ public:
+  bool operator==(const ThriftSinkType& rhs) const;
+  bool operator<(const ThriftSinkType& rhs) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops< ThriftSinkType >;
+};
+
+void swap(ThriftSinkType& a, ThriftSinkType& b);
+
+template <class Protocol_>
+uint32_t ThriftSinkType::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+}}} // apache::thrift::metadata
+namespace apache { namespace thrift { namespace metadata {
 class ThriftType final : private apache::thrift::detail::st::ComparisonOperators<ThriftType> {
  public:
-  enum Type {
+  enum Type : int {
     __EMPTY__ = 0,
     t_primitive = 1,
     t_list = 2,
@@ -737,6 +963,8 @@ class ThriftType final : private apache::thrift::detail::st::ComparisonOperators
     t_struct = 6,
     t_union = 7,
     t_typedef = 8,
+    t_stream = 9,
+    t_sink = 10,
   } ;
 
   ThriftType()
@@ -785,6 +1013,16 @@ class ThriftType final : private apache::thrift::detail::st::ComparisonOperators
       case Type::t_typedef:
       {
         set_t_typedef(std::move(rhs.value_.t_typedef));
+        break;
+      }
+      case Type::t_stream:
+      {
+        set_t_stream(std::move(rhs.value_.t_stream));
+        break;
+      }
+      case Type::t_sink:
+      {
+        set_t_sink(std::move(rhs.value_.t_sink));
         break;
       }
       default:
@@ -841,6 +1079,16 @@ class ThriftType final : private apache::thrift::detail::st::ComparisonOperators
         set_t_typedef(rhs.value_.t_typedef);
         break;
       }
+      case Type::t_stream:
+      {
+        set_t_stream(rhs.value_.t_stream);
+        break;
+      }
+      case Type::t_sink:
+      {
+        set_t_sink(rhs.value_.t_sink);
+        break;
+      }
       default:
       {
         assert(false);
@@ -892,6 +1140,16 @@ class ThriftType final : private apache::thrift::detail::st::ComparisonOperators
       case Type::t_typedef:
       {
         set_t_typedef(std::move(rhs.value_.t_typedef));
+        break;
+      }
+      case Type::t_stream:
+      {
+        set_t_stream(std::move(rhs.value_.t_stream));
+        break;
+      }
+      case Type::t_sink:
+      {
+        set_t_sink(std::move(rhs.value_.t_sink));
         break;
       }
       default:
@@ -949,6 +1207,16 @@ class ThriftType final : private apache::thrift::detail::st::ComparisonOperators
         set_t_typedef(rhs.value_.t_typedef);
         break;
       }
+      case Type::t_stream:
+      {
+        set_t_stream(rhs.value_.t_stream);
+        break;
+      }
+      case Type::t_sink:
+      {
+        set_t_sink(rhs.value_.t_sink);
+        break;
+      }
       default:
       {
         assert(false);
@@ -971,6 +1239,8 @@ class ThriftType final : private apache::thrift::detail::st::ComparisonOperators
      ::apache::thrift::metadata::ThriftStructType t_struct;
      ::apache::thrift::metadata::ThriftUnionType t_union;
      ::apache::thrift::metadata::ThriftTypedefType t_typedef;
+     ::apache::thrift::metadata::ThriftStreamType t_stream;
+     ::apache::thrift::metadata::ThriftSinkType t_sink;
 
     storage_type() {}
     ~storage_type() {}
@@ -1132,6 +1402,48 @@ class ThriftType final : private apache::thrift::detail::st::ComparisonOperators
     return value_.t_typedef;
   }
 
+   ::apache::thrift::metadata::ThriftStreamType& set_t_stream( ::apache::thrift::metadata::ThriftStreamType const &t) {
+    __clear();
+    type_ = Type::t_stream;
+    ::new (std::addressof(value_.t_stream))  ::apache::thrift::metadata::ThriftStreamType(t);
+    return value_.t_stream;
+  }
+
+   ::apache::thrift::metadata::ThriftStreamType& set_t_stream( ::apache::thrift::metadata::ThriftStreamType&& t) {
+    __clear();
+    type_ = Type::t_stream;
+    ::new (std::addressof(value_.t_stream))  ::apache::thrift::metadata::ThriftStreamType(std::move(t));
+    return value_.t_stream;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t< ::apache::thrift::metadata::ThriftStreamType, T...>>  ::apache::thrift::metadata::ThriftStreamType& set_t_stream(T&&... t) {
+    __clear();
+    type_ = Type::t_stream;
+    ::new (std::addressof(value_.t_stream))  ::apache::thrift::metadata::ThriftStreamType(std::forward<T>(t)...);
+    return value_.t_stream;
+  }
+
+   ::apache::thrift::metadata::ThriftSinkType& set_t_sink( ::apache::thrift::metadata::ThriftSinkType const &t) {
+    __clear();
+    type_ = Type::t_sink;
+    ::new (std::addressof(value_.t_sink))  ::apache::thrift::metadata::ThriftSinkType(t);
+    return value_.t_sink;
+  }
+
+   ::apache::thrift::metadata::ThriftSinkType& set_t_sink( ::apache::thrift::metadata::ThriftSinkType&& t) {
+    __clear();
+    type_ = Type::t_sink;
+    ::new (std::addressof(value_.t_sink))  ::apache::thrift::metadata::ThriftSinkType(std::move(t));
+    return value_.t_sink;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t< ::apache::thrift::metadata::ThriftSinkType, T...>>  ::apache::thrift::metadata::ThriftSinkType& set_t_sink(T&&... t) {
+    __clear();
+    type_ = Type::t_sink;
+    ::new (std::addressof(value_.t_sink))  ::apache::thrift::metadata::ThriftSinkType(std::forward<T>(t)...);
+    return value_.t_sink;
+  }
+
    ::apache::thrift::metadata::ThriftPrimitiveType const & get_t_primitive() const {
     assert(type_ == Type::t_primitive);
     return value_.t_primitive;
@@ -1170,6 +1482,16 @@ class ThriftType final : private apache::thrift::detail::st::ComparisonOperators
    ::apache::thrift::metadata::ThriftTypedefType const & get_t_typedef() const {
     assert(type_ == Type::t_typedef);
     return value_.t_typedef;
+  }
+
+   ::apache::thrift::metadata::ThriftStreamType const & get_t_stream() const {
+    assert(type_ == Type::t_stream);
+    return value_.t_stream;
+  }
+
+   ::apache::thrift::metadata::ThriftSinkType const & get_t_sink() const {
+    assert(type_ == Type::t_sink);
+    return value_.t_sink;
   }
 
    ::apache::thrift::metadata::ThriftPrimitiveType & mutable_t_primitive() {
@@ -1212,6 +1534,16 @@ class ThriftType final : private apache::thrift::detail::st::ComparisonOperators
     return value_.t_typedef;
   }
 
+   ::apache::thrift::metadata::ThriftStreamType & mutable_t_stream() {
+    assert(type_ == Type::t_stream);
+    return value_.t_stream;
+  }
+
+   ::apache::thrift::metadata::ThriftSinkType & mutable_t_sink() {
+    assert(type_ == Type::t_sink);
+    return value_.t_sink;
+  }
+
    ::apache::thrift::metadata::ThriftPrimitiveType move_t_primitive() {
     assert(type_ == Type::t_primitive);
     return std::move(value_.t_primitive);
@@ -1250,6 +1582,16 @@ class ThriftType final : private apache::thrift::detail::st::ComparisonOperators
    ::apache::thrift::metadata::ThriftTypedefType move_t_typedef() {
     assert(type_ == Type::t_typedef);
     return std::move(value_.t_typedef);
+  }
+
+   ::apache::thrift::metadata::ThriftStreamType move_t_stream() {
+    assert(type_ == Type::t_stream);
+    return std::move(value_.t_stream);
+  }
+
+   ::apache::thrift::metadata::ThriftSinkType move_t_sink() {
+    assert(type_ == Type::t_sink);
+    return std::move(value_.t_sink);
   }
 
   Type getType() const { return type_; }
@@ -1317,6 +1659,38 @@ class ThriftEnum final : private apache::thrift::detail::st::ComparisonOperators
   } __isset = {};
   bool operator==(const ThriftEnum& rhs) const;
   bool operator<(const ThriftEnum& rhs) const;
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&> name_ref() const& {
+    return {name, __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&&> name_ref() const&& {
+    return {std::move(name), __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&> name_ref() & {
+    return {name, __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&&> name_ref() && {
+    return {std::move(name), __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::map<int32_t, ::std::string>&> elements_ref() const& {
+    return {elements, __isset.elements};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::map<int32_t, ::std::string>&&> elements_ref() const&& {
+    return {std::move(elements), __isset.elements};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::map<int32_t, ::std::string>&> elements_ref() & {
+    return {elements, __isset.elements};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::map<int32_t, ::std::string>&&> elements_ref() && {
+    return {std::move(elements), __isset.elements};
+  }
 
   const ::std::string& get_name() const& {
     return name;
@@ -1405,6 +1779,70 @@ class ThriftField final : private apache::thrift::detail::st::ComparisonOperator
   } __isset = {};
   bool operator==(const ThriftField& rhs) const;
   bool operator<(const ThriftField& rhs) const;
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const int32_t&> id_ref() const& {
+    return {id, __isset.id};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const int32_t&&> id_ref() const&& {
+    return {std::move(id), __isset.id};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<int32_t&> id_ref() & {
+    return {id, __isset.id};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<int32_t&&> id_ref() && {
+    return {std::move(id), __isset.id};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const  ::apache::thrift::metadata::ThriftType&> type_ref() const& {
+    return {type, __isset.type};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const  ::apache::thrift::metadata::ThriftType&&> type_ref() const&& {
+    return {std::move(type), __isset.type};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref< ::apache::thrift::metadata::ThriftType&> type_ref() & {
+    return {type, __isset.type};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref< ::apache::thrift::metadata::ThriftType&&> type_ref() && {
+    return {std::move(type), __isset.type};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&> name_ref() const& {
+    return {name, __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&&> name_ref() const&& {
+    return {std::move(name), __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&> name_ref() & {
+    return {name, __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&&> name_ref() && {
+    return {std::move(name), __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const bool&> is_optional_ref() const& {
+    return {is_optional, __isset.is_optional};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const bool&&> is_optional_ref() const&& {
+    return {std::move(is_optional), __isset.is_optional};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<bool&> is_optional_ref() & {
+    return {is_optional, __isset.is_optional};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<bool&&> is_optional_ref() && {
+    return {std::move(is_optional), __isset.is_optional};
+  }
 
   int32_t get_id() const {
     return id;
@@ -1510,6 +1948,54 @@ class ThriftStruct final : private apache::thrift::detail::st::ComparisonOperato
   bool operator==(const ThriftStruct& rhs) const;
   bool operator<(const ThriftStruct& rhs) const;
 
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&> name_ref() const& {
+    return {name, __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&&> name_ref() const&& {
+    return {std::move(name), __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&> name_ref() & {
+    return {name, __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&&> name_ref() && {
+    return {std::move(name), __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::vector< ::apache::thrift::metadata::ThriftField>&> fields_ref() const& {
+    return {fields, __isset.fields};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::vector< ::apache::thrift::metadata::ThriftField>&&> fields_ref() const&& {
+    return {std::move(fields), __isset.fields};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::vector< ::apache::thrift::metadata::ThriftField>&> fields_ref() & {
+    return {fields, __isset.fields};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::vector< ::apache::thrift::metadata::ThriftField>&&> fields_ref() && {
+    return {std::move(fields), __isset.fields};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const bool&> is_union_ref() const& {
+    return {is_union, __isset.is_union};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const bool&&> is_union_ref() const&& {
+    return {std::move(is_union), __isset.is_union};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<bool&> is_union_ref() & {
+    return {is_union, __isset.is_union};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<bool&&> is_union_ref() && {
+    return {std::move(is_union), __isset.is_union};
+  }
+
   const ::std::string& get_name() const& {
     return name;
   }
@@ -1600,6 +2086,38 @@ class ThriftException final : private apache::thrift::detail::st::ComparisonOper
   bool operator==(const ThriftException& rhs) const;
   bool operator<(const ThriftException& rhs) const;
 
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&> name_ref() const& {
+    return {name, __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&&> name_ref() const&& {
+    return {std::move(name), __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&> name_ref() & {
+    return {name, __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&&> name_ref() && {
+    return {std::move(name), __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::vector< ::apache::thrift::metadata::ThriftField>&> fields_ref() const& {
+    return {fields, __isset.fields};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::vector< ::apache::thrift::metadata::ThriftField>&&> fields_ref() const&& {
+    return {std::move(fields), __isset.fields};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::vector< ::apache::thrift::metadata::ThriftField>&> fields_ref() & {
+    return {fields, __isset.fields};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::vector< ::apache::thrift::metadata::ThriftField>&&> fields_ref() && {
+    return {std::move(fields), __isset.fields};
+  }
+
   const ::std::string& get_name() const& {
     return name;
   }
@@ -1685,6 +2203,70 @@ class ThriftFunction final : private apache::thrift::detail::st::ComparisonOpera
   } __isset = {};
   bool operator==(const ThriftFunction& rhs) const;
   bool operator<(const ThriftFunction& rhs) const;
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&> name_ref() const& {
+    return {name, __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&&> name_ref() const&& {
+    return {std::move(name), __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&> name_ref() & {
+    return {name, __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&&> name_ref() && {
+    return {std::move(name), __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const  ::apache::thrift::metadata::ThriftType&> returnType_ref() const& {
+    return {returnType, __isset.returnType};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const  ::apache::thrift::metadata::ThriftType&&> returnType_ref() const&& {
+    return {std::move(returnType), __isset.returnType};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref< ::apache::thrift::metadata::ThriftType&> returnType_ref() & {
+    return {returnType, __isset.returnType};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref< ::apache::thrift::metadata::ThriftType&&> returnType_ref() && {
+    return {std::move(returnType), __isset.returnType};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::vector< ::apache::thrift::metadata::ThriftField>&> arguments_ref() const& {
+    return {arguments, __isset.arguments};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::vector< ::apache::thrift::metadata::ThriftField>&&> arguments_ref() const&& {
+    return {std::move(arguments), __isset.arguments};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::vector< ::apache::thrift::metadata::ThriftField>&> arguments_ref() & {
+    return {arguments, __isset.arguments};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::vector< ::apache::thrift::metadata::ThriftField>&&> arguments_ref() && {
+    return {std::move(arguments), __isset.arguments};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::vector< ::apache::thrift::metadata::ThriftField>&> exceptions_ref() const& {
+    return {exceptions, __isset.exceptions};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::vector< ::apache::thrift::metadata::ThriftField>&&> exceptions_ref() const&& {
+    return {std::move(exceptions), __isset.exceptions};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::vector< ::apache::thrift::metadata::ThriftField>&> exceptions_ref() & {
+    return {exceptions, __isset.exceptions};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::vector< ::apache::thrift::metadata::ThriftField>&&> exceptions_ref() && {
+    return {std::move(exceptions), __isset.exceptions};
+  }
 
   const ::std::string& get_name() const& {
     return name;
@@ -1787,6 +2369,38 @@ class ThriftService final : private apache::thrift::detail::st::ComparisonOperat
   bool operator==(const ThriftService& rhs) const;
   bool operator<(const ThriftService& rhs) const;
 
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&> name_ref() const& {
+    return {name, __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&&> name_ref() const&& {
+    return {std::move(name), __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&> name_ref() & {
+    return {name, __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&&> name_ref() && {
+    return {std::move(name), __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::vector< ::apache::thrift::metadata::ThriftFunction>&> functions_ref() const& {
+    return {functions, __isset.functions};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::vector< ::apache::thrift::metadata::ThriftFunction>&&> functions_ref() const&& {
+    return {std::move(functions), __isset.functions};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::vector< ::apache::thrift::metadata::ThriftFunction>&> functions_ref() & {
+    return {functions, __isset.functions};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::vector< ::apache::thrift::metadata::ThriftFunction>&&> functions_ref() && {
+    return {std::move(functions), __isset.functions};
+  }
+
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const ::std::string&> parent_ref() const& {
     return {parent, __isset.parent};
   }
@@ -1870,14 +2484,203 @@ uint32_t ThriftService::read(Protocol_* iprot) {
 
 }}} // apache::thrift::metadata
 namespace apache { namespace thrift { namespace metadata {
+class ThriftModuleContext final : private apache::thrift::detail::st::ComparisonOperators<ThriftModuleContext> {
+ public:
+
+  ThriftModuleContext() {}
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  ThriftModuleContext(apache::thrift::FragileConstructor, ::std::string name__arg);
+
+  ThriftModuleContext(ThriftModuleContext&&) = default;
+
+  ThriftModuleContext(const ThriftModuleContext&) = default;
+
+  ThriftModuleContext& operator=(ThriftModuleContext&&) = default;
+
+  ThriftModuleContext& operator=(const ThriftModuleContext&) = default;
+  void __clear();
+ public:
+  ::std::string name;
+
+ public:
+  struct __isset {
+    bool name;
+  } __isset = {};
+  bool operator==(const ThriftModuleContext& rhs) const;
+  bool operator<(const ThriftModuleContext& rhs) const;
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&> name_ref() const& {
+    return {name, __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&&> name_ref() const&& {
+    return {std::move(name), __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&> name_ref() & {
+    return {name, __isset.name};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&&> name_ref() && {
+    return {std::move(name), __isset.name};
+  }
+
+  const ::std::string& get_name() const& {
+    return name;
+  }
+
+  ::std::string get_name() && {
+    return std::move(name);
+  }
+
+  template <typename T_ThriftModuleContext_name_struct_setter = ::std::string>
+  ::std::string& set_name(T_ThriftModuleContext_name_struct_setter&& name_) {
+    name = std::forward<T_ThriftModuleContext_name_struct_setter>(name_);
+    __isset.name = true;
+    return name;
+  }
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops< ThriftModuleContext >;
+};
+
+void swap(ThriftModuleContext& a, ThriftModuleContext& b);
+
+template <class Protocol_>
+uint32_t ThriftModuleContext::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+}}} // apache::thrift::metadata
+namespace apache { namespace thrift { namespace metadata {
+class ThriftServiceContext final : private apache::thrift::detail::st::ComparisonOperators<ThriftServiceContext> {
+ public:
+
+  ThriftServiceContext() {}
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  ThriftServiceContext(apache::thrift::FragileConstructor,  ::apache::thrift::metadata::ThriftService service_info__arg,  ::apache::thrift::metadata::ThriftModuleContext module__arg);
+
+  ThriftServiceContext(ThriftServiceContext&&) = default;
+
+  ThriftServiceContext(const ThriftServiceContext&) = default;
+
+  ThriftServiceContext& operator=(ThriftServiceContext&&) = default;
+
+  ThriftServiceContext& operator=(const ThriftServiceContext&) = default;
+  void __clear();
+ public:
+   ::apache::thrift::metadata::ThriftService service_info;
+ public:
+   ::apache::thrift::metadata::ThriftModuleContext module;
+
+ public:
+  struct __isset {
+    bool service_info;
+    bool module;
+  } __isset = {};
+  bool operator==(const ThriftServiceContext& rhs) const;
+  bool operator<(const ThriftServiceContext& rhs) const;
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const  ::apache::thrift::metadata::ThriftService&> service_info_ref() const& {
+    return {service_info, __isset.service_info};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const  ::apache::thrift::metadata::ThriftService&&> service_info_ref() const&& {
+    return {std::move(service_info), __isset.service_info};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref< ::apache::thrift::metadata::ThriftService&> service_info_ref() & {
+    return {service_info, __isset.service_info};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref< ::apache::thrift::metadata::ThriftService&&> service_info_ref() && {
+    return {std::move(service_info), __isset.service_info};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const  ::apache::thrift::metadata::ThriftModuleContext&> module_ref() const& {
+    return {module, __isset.module};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const  ::apache::thrift::metadata::ThriftModuleContext&&> module_ref() const&& {
+    return {std::move(module), __isset.module};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref< ::apache::thrift::metadata::ThriftModuleContext&> module_ref() & {
+    return {module, __isset.module};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref< ::apache::thrift::metadata::ThriftModuleContext&&> module_ref() && {
+    return {std::move(module), __isset.module};
+  }
+  const  ::apache::thrift::metadata::ThriftService& get_service_info() const&;
+   ::apache::thrift::metadata::ThriftService get_service_info() &&;
+
+  template <typename T_ThriftServiceContext_service_info_struct_setter =  ::apache::thrift::metadata::ThriftService>
+   ::apache::thrift::metadata::ThriftService& set_service_info(T_ThriftServiceContext_service_info_struct_setter&& service_info_) {
+    service_info = std::forward<T_ThriftServiceContext_service_info_struct_setter>(service_info_);
+    __isset.service_info = true;
+    return service_info;
+  }
+  const  ::apache::thrift::metadata::ThriftModuleContext& get_module() const&;
+   ::apache::thrift::metadata::ThriftModuleContext get_module() &&;
+
+  template <typename T_ThriftServiceContext_module_struct_setter =  ::apache::thrift::metadata::ThriftModuleContext>
+   ::apache::thrift::metadata::ThriftModuleContext& set_module(T_ThriftServiceContext_module_struct_setter&& module_) {
+    module = std::forward<T_ThriftServiceContext_module_struct_setter>(module_);
+    __isset.module = true;
+    return module;
+  }
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops< ThriftServiceContext >;
+};
+
+void swap(ThriftServiceContext& a, ThriftServiceContext& b);
+
+template <class Protocol_>
+uint32_t ThriftServiceContext::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+}}} // apache::thrift::metadata
+namespace apache { namespace thrift { namespace metadata {
 class ThriftMetadata final : private apache::thrift::detail::st::ComparisonOperators<ThriftMetadata> {
  public:
 
-  ThriftMetadata();
-
+  ThriftMetadata() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  ThriftMetadata(apache::thrift::FragileConstructor, ::std::string file_name__arg, ::std::map<::std::string,  ::apache::thrift::metadata::ThriftEnum> enums__arg, ::std::map<::std::string,  ::apache::thrift::metadata::ThriftStruct> structs__arg, ::std::map<::std::string,  ::apache::thrift::metadata::ThriftException> exceptions__arg, ::std::map<::std::string,  ::apache::thrift::metadata::ThriftService> services__arg);
+  ThriftMetadata(apache::thrift::FragileConstructor, ::std::map<::std::string,  ::apache::thrift::metadata::ThriftEnum> enums__arg, ::std::map<::std::string,  ::apache::thrift::metadata::ThriftStruct> structs__arg, ::std::map<::std::string,  ::apache::thrift::metadata::ThriftException> exceptions__arg, ::std::map<::std::string,  ::apache::thrift::metadata::ThriftService> services__arg);
 
   ThriftMetadata(ThriftMetadata&&) = default;
 
@@ -1887,11 +2690,6 @@ class ThriftMetadata final : private apache::thrift::detail::st::ComparisonOpera
 
   ThriftMetadata& operator=(const ThriftMetadata&) = default;
   void __clear();
-
-  ~ThriftMetadata();
-
- public:
-  ::std::string file_name;
  public:
   ::std::map<::std::string,  ::apache::thrift::metadata::ThriftEnum> enums;
  public:
@@ -1903,7 +2701,6 @@ class ThriftMetadata final : private apache::thrift::detail::st::ComparisonOpera
 
  public:
   struct __isset {
-    bool file_name;
     bool enums;
     bool structs;
     bool exceptions;
@@ -1912,19 +2709,68 @@ class ThriftMetadata final : private apache::thrift::detail::st::ComparisonOpera
   bool operator==(const ThriftMetadata& rhs) const;
   bool operator<(const ThriftMetadata& rhs) const;
 
-  const ::std::string& get_file_name() const& {
-    return file_name;
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::map<::std::string,  ::apache::thrift::metadata::ThriftEnum>&> enums_ref() const& {
+    return {enums, __isset.enums};
   }
 
-  ::std::string get_file_name() && {
-    return std::move(file_name);
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::map<::std::string,  ::apache::thrift::metadata::ThriftEnum>&&> enums_ref() const&& {
+    return {std::move(enums), __isset.enums};
   }
 
-  template <typename T_ThriftMetadata_file_name_struct_setter = ::std::string>
-  ::std::string& set_file_name(T_ThriftMetadata_file_name_struct_setter&& file_name_) {
-    file_name = std::forward<T_ThriftMetadata_file_name_struct_setter>(file_name_);
-    __isset.file_name = true;
-    return file_name;
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::map<::std::string,  ::apache::thrift::metadata::ThriftEnum>&> enums_ref() & {
+    return {enums, __isset.enums};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::map<::std::string,  ::apache::thrift::metadata::ThriftEnum>&&> enums_ref() && {
+    return {std::move(enums), __isset.enums};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::map<::std::string,  ::apache::thrift::metadata::ThriftStruct>&> structs_ref() const& {
+    return {structs, __isset.structs};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::map<::std::string,  ::apache::thrift::metadata::ThriftStruct>&&> structs_ref() const&& {
+    return {std::move(structs), __isset.structs};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::map<::std::string,  ::apache::thrift::metadata::ThriftStruct>&> structs_ref() & {
+    return {structs, __isset.structs};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::map<::std::string,  ::apache::thrift::metadata::ThriftStruct>&&> structs_ref() && {
+    return {std::move(structs), __isset.structs};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::map<::std::string,  ::apache::thrift::metadata::ThriftException>&> exceptions_ref() const& {
+    return {exceptions, __isset.exceptions};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::map<::std::string,  ::apache::thrift::metadata::ThriftException>&&> exceptions_ref() const&& {
+    return {std::move(exceptions), __isset.exceptions};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::map<::std::string,  ::apache::thrift::metadata::ThriftException>&> exceptions_ref() & {
+    return {exceptions, __isset.exceptions};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::map<::std::string,  ::apache::thrift::metadata::ThriftException>&&> exceptions_ref() && {
+    return {std::move(exceptions), __isset.exceptions};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::map<::std::string,  ::apache::thrift::metadata::ThriftService>&> services_ref() const& {
+    return {services, __isset.services};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::map<::std::string,  ::apache::thrift::metadata::ThriftService>&&> services_ref() const&& {
+    return {std::move(services), __isset.services};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::map<::std::string,  ::apache::thrift::metadata::ThriftService>&> services_ref() & {
+    return {services, __isset.services};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<::std::map<::std::string,  ::apache::thrift::metadata::ThriftService>&&> services_ref() && {
+    return {std::move(services), __isset.services};
   }
   const ::std::map<::std::string,  ::apache::thrift::metadata::ThriftEnum>& get_enums() const&;
   ::std::map<::std::string,  ::apache::thrift::metadata::ThriftEnum> get_enums() &&;
@@ -1983,6 +2829,112 @@ void swap(ThriftMetadata& a, ThriftMetadata& b);
 
 template <class Protocol_>
 uint32_t ThriftMetadata::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+}}} // apache::thrift::metadata
+namespace apache { namespace thrift { namespace metadata {
+class ThriftServiceMetadataResponse final : private apache::thrift::detail::st::ComparisonOperators<ThriftServiceMetadataResponse> {
+ public:
+
+  ThriftServiceMetadataResponse() {}
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  ThriftServiceMetadataResponse(apache::thrift::FragileConstructor,  ::apache::thrift::metadata::ThriftServiceContext context__arg,  ::apache::thrift::metadata::ThriftMetadata metadata__arg);
+
+  ThriftServiceMetadataResponse(ThriftServiceMetadataResponse&&) = default;
+
+  ThriftServiceMetadataResponse(const ThriftServiceMetadataResponse&) = default;
+
+  ThriftServiceMetadataResponse& operator=(ThriftServiceMetadataResponse&&) = default;
+
+  ThriftServiceMetadataResponse& operator=(const ThriftServiceMetadataResponse&) = default;
+  void __clear();
+ public:
+   ::apache::thrift::metadata::ThriftServiceContext context;
+ public:
+   ::apache::thrift::metadata::ThriftMetadata metadata;
+
+ public:
+  struct __isset {
+    bool context;
+    bool metadata;
+  } __isset = {};
+  bool operator==(const ThriftServiceMetadataResponse& rhs) const;
+  bool operator<(const ThriftServiceMetadataResponse& rhs) const;
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const  ::apache::thrift::metadata::ThriftServiceContext&> context_ref() const& {
+    return {context, __isset.context};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const  ::apache::thrift::metadata::ThriftServiceContext&&> context_ref() const&& {
+    return {std::move(context), __isset.context};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref< ::apache::thrift::metadata::ThriftServiceContext&> context_ref() & {
+    return {context, __isset.context};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref< ::apache::thrift::metadata::ThriftServiceContext&&> context_ref() && {
+    return {std::move(context), __isset.context};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const  ::apache::thrift::metadata::ThriftMetadata&> metadata_ref() const& {
+    return {metadata, __isset.metadata};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref<const  ::apache::thrift::metadata::ThriftMetadata&&> metadata_ref() const&& {
+    return {std::move(metadata), __isset.metadata};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref< ::apache::thrift::metadata::ThriftMetadata&> metadata_ref() & {
+    return {metadata, __isset.metadata};
+  }
+
+  FOLLY_ERASE ::apache::thrift::field_ref< ::apache::thrift::metadata::ThriftMetadata&&> metadata_ref() && {
+    return {std::move(metadata), __isset.metadata};
+  }
+  const  ::apache::thrift::metadata::ThriftServiceContext& get_context() const&;
+   ::apache::thrift::metadata::ThriftServiceContext get_context() &&;
+
+  template <typename T_ThriftServiceMetadataResponse_context_struct_setter =  ::apache::thrift::metadata::ThriftServiceContext>
+   ::apache::thrift::metadata::ThriftServiceContext& set_context(T_ThriftServiceMetadataResponse_context_struct_setter&& context_) {
+    context = std::forward<T_ThriftServiceMetadataResponse_context_struct_setter>(context_);
+    __isset.context = true;
+    return context;
+  }
+  const  ::apache::thrift::metadata::ThriftMetadata& get_metadata() const&;
+   ::apache::thrift::metadata::ThriftMetadata get_metadata() &&;
+
+  template <typename T_ThriftServiceMetadataResponse_metadata_struct_setter =  ::apache::thrift::metadata::ThriftMetadata>
+   ::apache::thrift::metadata::ThriftMetadata& set_metadata(T_ThriftServiceMetadataResponse_metadata_struct_setter&& metadata_) {
+    metadata = std::forward<T_ThriftServiceMetadataResponse_metadata_struct_setter>(metadata_);
+    __isset.metadata = true;
+    return metadata;
+  }
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops< ThriftServiceMetadataResponse >;
+};
+
+void swap(ThriftServiceMetadataResponse& a, ThriftServiceMetadataResponse& b);
+
+template <class Protocol_>
+uint32_t ThriftServiceMetadataResponse::read(Protocol_* iprot) {
   auto _xferStart = iprot->getCursorPosition();
   readNoXfer(iprot);
   return iprot->getCursorPosition() - _xferStart;

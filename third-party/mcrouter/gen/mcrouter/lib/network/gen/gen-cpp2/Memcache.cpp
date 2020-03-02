@@ -6,13 +6,14 @@
  */
 #include "mcrouter/lib/network/gen/gen-cpp2/Memcache.h"
 #include "mcrouter/lib/network/gen/gen-cpp2/Memcache.tcc"
-
+#include "mcrouter/lib/network/gen/gen-cpp2/MemcacheService_metadata.h"
 #include <thrift/lib/cpp2/gen/service_cpp.h>
 
 namespace facebook { namespace memcache { namespace thrift {
 std::unique_ptr<apache::thrift::AsyncProcessor> MemcacheSvIf::getProcessor() {
   return std::make_unique<MemcacheAsyncProcessor>(this);
 }
+
 
 void MemcacheSvIf::mcGet(facebook::memcache::McGetReply& /*_return*/, const facebook::memcache::McGetRequest& /*request*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("mcGet");
@@ -378,7 +379,11 @@ const char* MemcacheAsyncProcessor::getServiceName() {
   return "Memcache";
 }
 
-void MemcacheAsyncProcessor::process(std::unique_ptr<apache::thrift::ResponseChannelRequest> req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+void MemcacheAsyncProcessor::getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
+  ::apache::thrift::detail::md::ServiceMetadata<MemcacheSvIf>::gen(response.metadata, response.context);
+}
+
+void MemcacheAsyncProcessor::process(apache::thrift::ResponseChannelRequest::UniquePtr req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
   apache::thrift::detail::ap::process(this, std::move(req), std::move(buf), protType, context, eb, tm);
 }
 

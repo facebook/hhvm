@@ -52,7 +52,7 @@ typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache:
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, apache::thrift::protocol::T_STRUCT, facebook::memcache::McVersionRequest*>> Memcache_mcVersion_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache::thrift::protocol::T_STRUCT, facebook::memcache::McVersionReply*>> Memcache_mcVersion_presult;
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MemcacheAsyncProcessor::process_mcGet(std::unique_ptr<apache::thrift::ResponseChannelRequest> req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+void MemcacheAsyncProcessor::process_mcGet(apache::thrift::ResponseChannelRequest::UniquePtr req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
   // make sure getConnectionContext is null
   // so async calls don't accidentally use it
   iface_->setConnectionContext(nullptr);
@@ -88,7 +88,7 @@ folly::IOBufQueue MemcacheAsyncProcessor::return_mcGet(int32_t protoSeqId, apach
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-void MemcacheAsyncProcessor::throw_wrapped_mcGet(std::unique_ptr<apache::thrift::ResponseChannelRequest> req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+void MemcacheAsyncProcessor::throw_wrapped_mcGet(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
   if (!ew) {
     return;
   }
@@ -101,7 +101,7 @@ void MemcacheAsyncProcessor::throw_wrapped_mcGet(std::unique_ptr<apache::thrift:
 }
 
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MemcacheAsyncProcessor::process_mcSet(std::unique_ptr<apache::thrift::ResponseChannelRequest> req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+void MemcacheAsyncProcessor::process_mcSet(apache::thrift::ResponseChannelRequest::UniquePtr req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
   // make sure getConnectionContext is null
   // so async calls don't accidentally use it
   iface_->setConnectionContext(nullptr);
@@ -137,7 +137,7 @@ folly::IOBufQueue MemcacheAsyncProcessor::return_mcSet(int32_t protoSeqId, apach
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-void MemcacheAsyncProcessor::throw_wrapped_mcSet(std::unique_ptr<apache::thrift::ResponseChannelRequest> req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+void MemcacheAsyncProcessor::throw_wrapped_mcSet(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
   if (!ew) {
     return;
   }
@@ -150,7 +150,7 @@ void MemcacheAsyncProcessor::throw_wrapped_mcSet(std::unique_ptr<apache::thrift:
 }
 
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MemcacheAsyncProcessor::process_mcDelete(std::unique_ptr<apache::thrift::ResponseChannelRequest> req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+void MemcacheAsyncProcessor::process_mcDelete(apache::thrift::ResponseChannelRequest::UniquePtr req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
   // make sure getConnectionContext is null
   // so async calls don't accidentally use it
   iface_->setConnectionContext(nullptr);
@@ -186,7 +186,7 @@ folly::IOBufQueue MemcacheAsyncProcessor::return_mcDelete(int32_t protoSeqId, ap
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-void MemcacheAsyncProcessor::throw_wrapped_mcDelete(std::unique_ptr<apache::thrift::ResponseChannelRequest> req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+void MemcacheAsyncProcessor::throw_wrapped_mcDelete(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
   if (!ew) {
     return;
   }
@@ -199,7 +199,7 @@ void MemcacheAsyncProcessor::throw_wrapped_mcDelete(std::unique_ptr<apache::thri
 }
 
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MemcacheAsyncProcessor::process_mcLeaseGet(std::unique_ptr<apache::thrift::ResponseChannelRequest> req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+void MemcacheAsyncProcessor::process_mcLeaseGet(apache::thrift::ResponseChannelRequest::UniquePtr req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
   // make sure getConnectionContext is null
   // so async calls don't accidentally use it
   iface_->setConnectionContext(nullptr);
@@ -235,7 +235,7 @@ folly::IOBufQueue MemcacheAsyncProcessor::return_mcLeaseGet(int32_t protoSeqId, 
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-void MemcacheAsyncProcessor::throw_wrapped_mcLeaseGet(std::unique_ptr<apache::thrift::ResponseChannelRequest> req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+void MemcacheAsyncProcessor::throw_wrapped_mcLeaseGet(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
   if (!ew) {
     return;
   }
@@ -248,7 +248,7 @@ void MemcacheAsyncProcessor::throw_wrapped_mcLeaseGet(std::unique_ptr<apache::th
 }
 
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MemcacheAsyncProcessor::process_mcLeaseSet(std::unique_ptr<apache::thrift::ResponseChannelRequest> req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+void MemcacheAsyncProcessor::process_mcLeaseSet(apache::thrift::ResponseChannelRequest::UniquePtr req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
   // make sure getConnectionContext is null
   // so async calls don't accidentally use it
   iface_->setConnectionContext(nullptr);
@@ -284,7 +284,7 @@ folly::IOBufQueue MemcacheAsyncProcessor::return_mcLeaseSet(int32_t protoSeqId, 
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-void MemcacheAsyncProcessor::throw_wrapped_mcLeaseSet(std::unique_ptr<apache::thrift::ResponseChannelRequest> req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+void MemcacheAsyncProcessor::throw_wrapped_mcLeaseSet(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
   if (!ew) {
     return;
   }
@@ -297,7 +297,7 @@ void MemcacheAsyncProcessor::throw_wrapped_mcLeaseSet(std::unique_ptr<apache::th
 }
 
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MemcacheAsyncProcessor::process_mcAdd(std::unique_ptr<apache::thrift::ResponseChannelRequest> req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+void MemcacheAsyncProcessor::process_mcAdd(apache::thrift::ResponseChannelRequest::UniquePtr req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
   // make sure getConnectionContext is null
   // so async calls don't accidentally use it
   iface_->setConnectionContext(nullptr);
@@ -333,7 +333,7 @@ folly::IOBufQueue MemcacheAsyncProcessor::return_mcAdd(int32_t protoSeqId, apach
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-void MemcacheAsyncProcessor::throw_wrapped_mcAdd(std::unique_ptr<apache::thrift::ResponseChannelRequest> req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+void MemcacheAsyncProcessor::throw_wrapped_mcAdd(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
   if (!ew) {
     return;
   }
@@ -346,7 +346,7 @@ void MemcacheAsyncProcessor::throw_wrapped_mcAdd(std::unique_ptr<apache::thrift:
 }
 
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MemcacheAsyncProcessor::process_mcReplace(std::unique_ptr<apache::thrift::ResponseChannelRequest> req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+void MemcacheAsyncProcessor::process_mcReplace(apache::thrift::ResponseChannelRequest::UniquePtr req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
   // make sure getConnectionContext is null
   // so async calls don't accidentally use it
   iface_->setConnectionContext(nullptr);
@@ -382,7 +382,7 @@ folly::IOBufQueue MemcacheAsyncProcessor::return_mcReplace(int32_t protoSeqId, a
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-void MemcacheAsyncProcessor::throw_wrapped_mcReplace(std::unique_ptr<apache::thrift::ResponseChannelRequest> req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+void MemcacheAsyncProcessor::throw_wrapped_mcReplace(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
   if (!ew) {
     return;
   }
@@ -395,7 +395,7 @@ void MemcacheAsyncProcessor::throw_wrapped_mcReplace(std::unique_ptr<apache::thr
 }
 
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MemcacheAsyncProcessor::process_mcGets(std::unique_ptr<apache::thrift::ResponseChannelRequest> req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+void MemcacheAsyncProcessor::process_mcGets(apache::thrift::ResponseChannelRequest::UniquePtr req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
   // make sure getConnectionContext is null
   // so async calls don't accidentally use it
   iface_->setConnectionContext(nullptr);
@@ -431,7 +431,7 @@ folly::IOBufQueue MemcacheAsyncProcessor::return_mcGets(int32_t protoSeqId, apac
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-void MemcacheAsyncProcessor::throw_wrapped_mcGets(std::unique_ptr<apache::thrift::ResponseChannelRequest> req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+void MemcacheAsyncProcessor::throw_wrapped_mcGets(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
   if (!ew) {
     return;
   }
@@ -444,7 +444,7 @@ void MemcacheAsyncProcessor::throw_wrapped_mcGets(std::unique_ptr<apache::thrift
 }
 
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MemcacheAsyncProcessor::process_mcCas(std::unique_ptr<apache::thrift::ResponseChannelRequest> req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+void MemcacheAsyncProcessor::process_mcCas(apache::thrift::ResponseChannelRequest::UniquePtr req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
   // make sure getConnectionContext is null
   // so async calls don't accidentally use it
   iface_->setConnectionContext(nullptr);
@@ -480,7 +480,7 @@ folly::IOBufQueue MemcacheAsyncProcessor::return_mcCas(int32_t protoSeqId, apach
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-void MemcacheAsyncProcessor::throw_wrapped_mcCas(std::unique_ptr<apache::thrift::ResponseChannelRequest> req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+void MemcacheAsyncProcessor::throw_wrapped_mcCas(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
   if (!ew) {
     return;
   }
@@ -493,7 +493,7 @@ void MemcacheAsyncProcessor::throw_wrapped_mcCas(std::unique_ptr<apache::thrift:
 }
 
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MemcacheAsyncProcessor::process_mcIncr(std::unique_ptr<apache::thrift::ResponseChannelRequest> req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+void MemcacheAsyncProcessor::process_mcIncr(apache::thrift::ResponseChannelRequest::UniquePtr req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
   // make sure getConnectionContext is null
   // so async calls don't accidentally use it
   iface_->setConnectionContext(nullptr);
@@ -529,7 +529,7 @@ folly::IOBufQueue MemcacheAsyncProcessor::return_mcIncr(int32_t protoSeqId, apac
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-void MemcacheAsyncProcessor::throw_wrapped_mcIncr(std::unique_ptr<apache::thrift::ResponseChannelRequest> req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+void MemcacheAsyncProcessor::throw_wrapped_mcIncr(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
   if (!ew) {
     return;
   }
@@ -542,7 +542,7 @@ void MemcacheAsyncProcessor::throw_wrapped_mcIncr(std::unique_ptr<apache::thrift
 }
 
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MemcacheAsyncProcessor::process_mcDecr(std::unique_ptr<apache::thrift::ResponseChannelRequest> req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+void MemcacheAsyncProcessor::process_mcDecr(apache::thrift::ResponseChannelRequest::UniquePtr req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
   // make sure getConnectionContext is null
   // so async calls don't accidentally use it
   iface_->setConnectionContext(nullptr);
@@ -578,7 +578,7 @@ folly::IOBufQueue MemcacheAsyncProcessor::return_mcDecr(int32_t protoSeqId, apac
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-void MemcacheAsyncProcessor::throw_wrapped_mcDecr(std::unique_ptr<apache::thrift::ResponseChannelRequest> req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+void MemcacheAsyncProcessor::throw_wrapped_mcDecr(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
   if (!ew) {
     return;
   }
@@ -591,7 +591,7 @@ void MemcacheAsyncProcessor::throw_wrapped_mcDecr(std::unique_ptr<apache::thrift
 }
 
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MemcacheAsyncProcessor::process_mcMetaget(std::unique_ptr<apache::thrift::ResponseChannelRequest> req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+void MemcacheAsyncProcessor::process_mcMetaget(apache::thrift::ResponseChannelRequest::UniquePtr req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
   // make sure getConnectionContext is null
   // so async calls don't accidentally use it
   iface_->setConnectionContext(nullptr);
@@ -627,7 +627,7 @@ folly::IOBufQueue MemcacheAsyncProcessor::return_mcMetaget(int32_t protoSeqId, a
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-void MemcacheAsyncProcessor::throw_wrapped_mcMetaget(std::unique_ptr<apache::thrift::ResponseChannelRequest> req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+void MemcacheAsyncProcessor::throw_wrapped_mcMetaget(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
   if (!ew) {
     return;
   }
@@ -640,7 +640,7 @@ void MemcacheAsyncProcessor::throw_wrapped_mcMetaget(std::unique_ptr<apache::thr
 }
 
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MemcacheAsyncProcessor::process_mcAppend(std::unique_ptr<apache::thrift::ResponseChannelRequest> req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+void MemcacheAsyncProcessor::process_mcAppend(apache::thrift::ResponseChannelRequest::UniquePtr req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
   // make sure getConnectionContext is null
   // so async calls don't accidentally use it
   iface_->setConnectionContext(nullptr);
@@ -676,7 +676,7 @@ folly::IOBufQueue MemcacheAsyncProcessor::return_mcAppend(int32_t protoSeqId, ap
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-void MemcacheAsyncProcessor::throw_wrapped_mcAppend(std::unique_ptr<apache::thrift::ResponseChannelRequest> req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+void MemcacheAsyncProcessor::throw_wrapped_mcAppend(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
   if (!ew) {
     return;
   }
@@ -689,7 +689,7 @@ void MemcacheAsyncProcessor::throw_wrapped_mcAppend(std::unique_ptr<apache::thri
 }
 
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MemcacheAsyncProcessor::process_mcPrepend(std::unique_ptr<apache::thrift::ResponseChannelRequest> req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+void MemcacheAsyncProcessor::process_mcPrepend(apache::thrift::ResponseChannelRequest::UniquePtr req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
   // make sure getConnectionContext is null
   // so async calls don't accidentally use it
   iface_->setConnectionContext(nullptr);
@@ -725,7 +725,7 @@ folly::IOBufQueue MemcacheAsyncProcessor::return_mcPrepend(int32_t protoSeqId, a
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-void MemcacheAsyncProcessor::throw_wrapped_mcPrepend(std::unique_ptr<apache::thrift::ResponseChannelRequest> req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+void MemcacheAsyncProcessor::throw_wrapped_mcPrepend(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
   if (!ew) {
     return;
   }
@@ -738,7 +738,7 @@ void MemcacheAsyncProcessor::throw_wrapped_mcPrepend(std::unique_ptr<apache::thr
 }
 
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MemcacheAsyncProcessor::process_mcTouch(std::unique_ptr<apache::thrift::ResponseChannelRequest> req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+void MemcacheAsyncProcessor::process_mcTouch(apache::thrift::ResponseChannelRequest::UniquePtr req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
   // make sure getConnectionContext is null
   // so async calls don't accidentally use it
   iface_->setConnectionContext(nullptr);
@@ -774,7 +774,7 @@ folly::IOBufQueue MemcacheAsyncProcessor::return_mcTouch(int32_t protoSeqId, apa
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-void MemcacheAsyncProcessor::throw_wrapped_mcTouch(std::unique_ptr<apache::thrift::ResponseChannelRequest> req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+void MemcacheAsyncProcessor::throw_wrapped_mcTouch(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
   if (!ew) {
     return;
   }
@@ -787,7 +787,7 @@ void MemcacheAsyncProcessor::throw_wrapped_mcTouch(std::unique_ptr<apache::thrif
 }
 
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MemcacheAsyncProcessor::process_mcFlushRe(std::unique_ptr<apache::thrift::ResponseChannelRequest> req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+void MemcacheAsyncProcessor::process_mcFlushRe(apache::thrift::ResponseChannelRequest::UniquePtr req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
   // make sure getConnectionContext is null
   // so async calls don't accidentally use it
   iface_->setConnectionContext(nullptr);
@@ -823,7 +823,7 @@ folly::IOBufQueue MemcacheAsyncProcessor::return_mcFlushRe(int32_t protoSeqId, a
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-void MemcacheAsyncProcessor::throw_wrapped_mcFlushRe(std::unique_ptr<apache::thrift::ResponseChannelRequest> req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+void MemcacheAsyncProcessor::throw_wrapped_mcFlushRe(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
   if (!ew) {
     return;
   }
@@ -836,7 +836,7 @@ void MemcacheAsyncProcessor::throw_wrapped_mcFlushRe(std::unique_ptr<apache::thr
 }
 
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MemcacheAsyncProcessor::process_mcFlushAll(std::unique_ptr<apache::thrift::ResponseChannelRequest> req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+void MemcacheAsyncProcessor::process_mcFlushAll(apache::thrift::ResponseChannelRequest::UniquePtr req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
   // make sure getConnectionContext is null
   // so async calls don't accidentally use it
   iface_->setConnectionContext(nullptr);
@@ -872,7 +872,7 @@ folly::IOBufQueue MemcacheAsyncProcessor::return_mcFlushAll(int32_t protoSeqId, 
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-void MemcacheAsyncProcessor::throw_wrapped_mcFlushAll(std::unique_ptr<apache::thrift::ResponseChannelRequest> req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+void MemcacheAsyncProcessor::throw_wrapped_mcFlushAll(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
   if (!ew) {
     return;
   }
@@ -885,7 +885,7 @@ void MemcacheAsyncProcessor::throw_wrapped_mcFlushAll(std::unique_ptr<apache::th
 }
 
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MemcacheAsyncProcessor::process_mcGat(std::unique_ptr<apache::thrift::ResponseChannelRequest> req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+void MemcacheAsyncProcessor::process_mcGat(apache::thrift::ResponseChannelRequest::UniquePtr req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
   // make sure getConnectionContext is null
   // so async calls don't accidentally use it
   iface_->setConnectionContext(nullptr);
@@ -921,7 +921,7 @@ folly::IOBufQueue MemcacheAsyncProcessor::return_mcGat(int32_t protoSeqId, apach
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-void MemcacheAsyncProcessor::throw_wrapped_mcGat(std::unique_ptr<apache::thrift::ResponseChannelRequest> req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+void MemcacheAsyncProcessor::throw_wrapped_mcGat(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
   if (!ew) {
     return;
   }
@@ -934,7 +934,7 @@ void MemcacheAsyncProcessor::throw_wrapped_mcGat(std::unique_ptr<apache::thrift:
 }
 
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MemcacheAsyncProcessor::process_mcGats(std::unique_ptr<apache::thrift::ResponseChannelRequest> req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+void MemcacheAsyncProcessor::process_mcGats(apache::thrift::ResponseChannelRequest::UniquePtr req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
   // make sure getConnectionContext is null
   // so async calls don't accidentally use it
   iface_->setConnectionContext(nullptr);
@@ -970,7 +970,7 @@ folly::IOBufQueue MemcacheAsyncProcessor::return_mcGats(int32_t protoSeqId, apac
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-void MemcacheAsyncProcessor::throw_wrapped_mcGats(std::unique_ptr<apache::thrift::ResponseChannelRequest> req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+void MemcacheAsyncProcessor::throw_wrapped_mcGats(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
   if (!ew) {
     return;
   }
@@ -983,7 +983,7 @@ void MemcacheAsyncProcessor::throw_wrapped_mcGats(std::unique_ptr<apache::thrift
 }
 
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MemcacheAsyncProcessor::process_mcVersion(std::unique_ptr<apache::thrift::ResponseChannelRequest> req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+void MemcacheAsyncProcessor::process_mcVersion(apache::thrift::ResponseChannelRequest::UniquePtr req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
   // make sure getConnectionContext is null
   // so async calls don't accidentally use it
   iface_->setConnectionContext(nullptr);
@@ -1019,7 +1019,7 @@ folly::IOBufQueue MemcacheAsyncProcessor::return_mcVersion(int32_t protoSeqId, a
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-void MemcacheAsyncProcessor::throw_wrapped_mcVersion(std::unique_ptr<apache::thrift::ResponseChannelRequest> req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+void MemcacheAsyncProcessor::throw_wrapped_mcVersion(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
   if (!ew) {
     return;
   }

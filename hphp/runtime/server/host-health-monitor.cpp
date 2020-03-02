@@ -31,6 +31,7 @@ namespace HPHP {
 namespace {
 bool Enabled;
 int32_t UpdateFreq;
+auto DampenTime = std::chrono::milliseconds{0};
 
 struct HostHealthMonitorExtension final : public Extension {
   HostHealthMonitorExtension() : Extension("hosthealthmonitor", "1.0") {}
@@ -40,6 +41,9 @@ struct HostHealthMonitorExtension final : public Extension {
                  "HealthMonitor.EnableHealthMonitor", true);
     Config::Bind(UpdateFreq, ini, globalConfig,
                  "HealthMonitor.UpdateFreq", 1000 /* miliseconds */);
+    auto const dampenMs =
+      Config::GetInt32(ini, globalConfig, "HealthMonitor.DampenTimeMs", 0);
+    if (dampenMs > 0) DampenTime = std::chrono::milliseconds(dampenMs);
   }
 } s_host_health_monitor_extension;
 
@@ -105,8 +109,23 @@ void HostHealthMonitor::monitor() {
   auto next = std::chrono::steady_clock::now();
   while (!m_stopped.load(std::memory_order_acquire)) {
     HealthLevel newStatus = evaluate();
-    notifyObservers(newStatus);
-    m_healthLevelCounter->addValue(healthLevelToInt(newStatus));
+    bool notify = false;
+    if (newStatus > m_status) {
+      // Server has become less healthy. Respond immediately.
+      notify = true;
+    } else if (newStatus < m_status) {
+      // Server is healthier than before. Don't jump in health levels; instead
+      // try to stay at each intermediate level for DampenTime as a slow start,
+      // unless current status is BackOff, which we do want to get out of
+      // immediately.
+      if (m_status == HealthLevel::BackOff ||
+          std::chrono::steady_clock::now() >= m_statusTime + DampenTime) {
+        newStatus = static_cast<HealthLevel>(static_cast<int>(m_status) - 1);
+        notify = true;
+      }
+    }
+    if (notify) notifyObservers(newStatus);
+    m_healthLevelCounter->addValue(healthLevelToInt(m_status));
     next += dura;
     auto const now = std::chrono::steady_clock::now();
     if (next <= now) {                  // already late, update immediately
@@ -142,6 +161,7 @@ void HostHealthMonitor::notifyObservers(HealthLevel newStatus) {
       observer->notifyNewStatus(newStatus);
     }
     m_status = newStatus;
+    m_statusTime = std::chrono::steady_clock::now();
   }
 }
 

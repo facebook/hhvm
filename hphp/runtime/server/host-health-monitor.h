@@ -18,6 +18,7 @@
 #define incl_HPHP_SERVER_MEMORY_PROTECTOR_H_
 
 #include <atomic>
+#include <chrono>
 #include <condition_variable>
 #include <memory>
 #include <mutex>
@@ -62,6 +63,7 @@ struct HostHealthMonitor {
   boost::container::flat_set<IHostHealthObserver*> m_observers;
   std::mutex m_lock;                    // protects metrics/observers
   HealthLevel m_status{HealthLevel::Bold};
+  std::chrono::steady_clock::time_point m_statusTime;
   ServiceData::ExportedTimeSeries* m_healthLevelCounter{nullptr};
   std::mutex m_condvar_lock;
   std::condition_variable m_condition;

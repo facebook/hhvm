@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7abc8df2ddfab85ff0b233e8ac44a80c>>
+// @generated SignedSource<<add9f55f2ca8a1a052879a729100462d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -167,8 +167,6 @@ pub struct MroElement {
     /// type constant instead.
     pub passthrough_abstract_typeconst: bool,
 }
-
-pub type Linearization = sequence::Sequence<MroElement>;
 
 /// name of condition type for conditional reactivity of methods.
 /// If None - method is unconditionally reactive

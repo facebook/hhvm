@@ -51,7 +51,11 @@ let derived_traits ty =
         not (List.mem blacklist derive ~equal:( = )))
 
 let blacklisted_types =
-  [("typing_defs", "ExpandEnv"); ("typing_defs", "PhaseTy")]
+  [
+    ("decl_defs", "Linearization");
+    ("typing_defs", "ExpandEnv");
+    ("typing_defs", "PhaseTy");
+  ]
 
 (* HACK: ignore anything beginning with the "decl" or "locl" prefix, since the
    oxidized version of Ty does not have a phase. *)

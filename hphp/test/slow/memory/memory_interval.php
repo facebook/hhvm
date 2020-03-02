@@ -9,7 +9,7 @@ class testobj {
 }
 
 function alloc_lots($x) {
-  $v = array();
+  $v = __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]);
   for ($i = 0; $i < $x * 10000; ++$i) {
     $m = new testobj($x * $i);
     $v[] = $m;

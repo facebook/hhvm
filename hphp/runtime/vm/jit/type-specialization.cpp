@@ -21,6 +21,22 @@
 #include "hphp/runtime/vm/class.h"
 
 namespace HPHP { namespace jit {
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace {
+// Ideally, we would intersect RATs here, but doing so is expensive and rarely
+// ends up being useful. Instead, we use a heuristic which tends to select the
+// more constrained type, and fall back to id to ensure commutativity.
+const RepoAuthType::Array* chooseRATArray(const RepoAuthType::Array* lhs,
+                                          const RepoAuthType::Array* rhs) {
+  auto const lhs_size_known = lhs->tag() == RepoAuthType::Array::Tag::Packed;
+  auto const rhs_size_known = rhs->tag() == RepoAuthType::Array::Tag::Packed;
+  if (lhs_size_known != rhs_size_known) return lhs_size_known ? lhs : rhs;
+  return lhs->id() < rhs->id() ? lhs : rhs;
+}
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // ArraySpec.
 
@@ -99,12 +115,11 @@ ArraySpec ArraySpec::operator&(const ArraySpec& rhs) const {
     result.m_kind = rhs.m_kind;
   }
 
-  // If both types have an RAT and they differ, then we must drop this field
-  // from the specialization (because it's expensive to intersect RATs).
+  // If both types have an RAT and they differ, keep the "better" one.
   if (rhs.m_sort & HasType) {
     if ((lhs.m_sort & HasType) && lhs.m_ptr != rhs.m_ptr) {
-      result.m_sort &= ~HasType;
-      result.m_ptr = 0;
+      auto const rat = chooseRATArray(lhs.getRawType(), rhs.getRawType());
+      result.m_ptr = reinterpret_cast<uintptr_t>(rat);
     } else {
       result.m_ptr = rhs.m_ptr;
     }

@@ -667,20 +667,21 @@ TEST(Type, Const) {
   EXPECT_EQ(constArray, constArray & TPackedArr);
 
   ArrayTypeTable::Builder ratBuilder;
-  auto rat1 = ratBuilder.packedn(RepoAuthType::Array::Empty::No,
-                                 RepoAuthType(RepoAuthType::Tag::Str));
-  auto ratArray1 = Type::Array(rat1);
-  auto rat2 = ratBuilder.packedn(RepoAuthType::Array::Empty::No,
-                                 RepoAuthType(RepoAuthType::Tag::Int));
-  auto ratArray2 = Type::Array(rat2);
-  EXPECT_EQ(TArr, ratArray1 & ratArray2);
+  auto const rat1 = ratBuilder.packedn(RepoAuthType::Array::Empty::No,
+                                       RepoAuthType(RepoAuthType::Tag::Str));
+  auto const ratArray1 = Type::Array(rat1);
+  auto const rat2 = ratBuilder.packedn(RepoAuthType::Array::Empty::No,
+                                       RepoAuthType(RepoAuthType::Tag::Int));
+  auto const ratArray2 = Type::Array(rat2);
+  EXPECT_EQ(ratArray1, ratArray1 & ratArray2);
+  EXPECT_EQ(ratArray1, ratArray2 & ratArray1);
   EXPECT_TRUE(ratArray1 < TArr);
   EXPECT_TRUE(ratArray1 <= ratArray1);
   EXPECT_TRUE(ratArray1 < (TArr|TObj));
   EXPECT_FALSE(ratArray1 < ratArray2);
   EXPECT_NE(ratArray1, ratArray2);
 
-  auto packedRat = TPackedArr & ratArray1;
+  auto const packedRat = TPackedArr & ratArray1;
   EXPECT_EQ("Arr={N([Str])|Bespoke}", ratArray1.toString());
   EXPECT_EQ("Arr=PackedKind", TPackedArr.toString());
   EXPECT_EQ("Arr=PackedKind:N([Str])", packedRat.toString());

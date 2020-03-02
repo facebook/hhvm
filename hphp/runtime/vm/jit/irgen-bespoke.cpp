@@ -125,7 +125,9 @@ Locations getVanillaLocations(
 }
 
 void guardToVanilla(IRGS& env, const NormalizedInstruction& ni, Location loc) {
-  auto const& type = env.irb->typeOf(loc, DataTypeSpecific);
+  auto const& type = RO::EvalAllowBespokeArrayLikes
+    ? env.irb->typeOf(loc, DataTypeSpecific)
+    : env.irb->fs().typeOf(loc);
   if (!(type.isKnownDataType() && type <= TArrLike)) return;
 
   auto const target_type = type.unspecialize().narrowToVanilla();

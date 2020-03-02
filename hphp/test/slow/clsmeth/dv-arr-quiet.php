@@ -52,8 +52,8 @@ function static_compare_darr(): void {
   $dother = darray['x' => 'y'];
   $meth = class_meth(Foo::class, 'bar');
 
-  $wdempty = array($dempty); $wdsame = array($dsame); $wdother = array($dother);
-  $wmeth = array($meth);
+  $wdempty = varray[$dempty]; $wdsame = varray[$dsame]; $wdother = varray[$dother];
+  $wmeth = varray[$meth];
 
   print_header('[static] VAR ?? $meth');
   begin_row('dempty');
@@ -112,8 +112,8 @@ function dynamic_compare_darr(): void {
   $dother = LV(darray['x' => LV('y')]);
   $meth = class_meth(Foo::class, 'bar');
 
-  $wdempty = LV(array($dempty)); $wdsame = LV(array($dsame));
-  $wdother = LV(array($dother)); $wmeth = LV(array($meth));
+  $wdempty = LV(varray[$dempty]); $wdsame = LV(varray[$dsame]);
+  $wdother = LV(varray[$dother]); $wmeth = LV(varray[$meth]);
 
   print_header('[dynamic] VAR ?? $meth');
   begin_row('dempty');
@@ -172,8 +172,8 @@ function static_compare_varr(): void {
   $vother = varray['y'];
   $meth = class_meth(Foo::class, 'bar');
 
-  $wvempty = array($vempty); $wvsame = array($vsame); $wvother = array($vother);
-  $wmeth = array($meth);
+  $wvempty = varray[$vempty]; $wvsame = varray[$vsame]; $wvother = varray[$vother];
+  $wmeth = varray[$meth];
 
   print_header('[static] VAR ?? $meth');
   begin_row('vempty');
@@ -232,8 +232,8 @@ function dynamic_compare_varr(): void {
   $vother = LV(varray[LV('y')]);
   $meth = class_meth(Foo::class, 'bar');
 
-  $wvempty = LV(array($vempty)); $wvsame = LV(array($vsame));
-  $wvother = LV(array($vother)); $wmeth = LV(array($meth));
+  $wvempty = LV(varray[$vempty]); $wvsame = LV(varray[$vsame]);
+  $wvother = LV(varray[$vother]); $wmeth = LV(varray[$meth]);
 
   print_header('[dynamic] VAR ?? $meth');
   begin_row('vempty');

@@ -15,12 +15,12 @@ pub mod scope {
     where
         F: FnOnce(&mut Emitter) -> Result<(InstrSeq, InstrSeq, InstrSeq)>,
     {
-        let next_local = emitter.local_gen_mut();
-        next_local.store_current_state();
+        emitter.local_gen_mut().store_current_state();
 
         let (before, inner, after) = emit(emitter)?;
 
         if !emitter.local_gen().state_has_changed() {
+            emitter.local_gen_mut().revert_state();
             Ok(InstrSeq::gather(vec![before, inner, after]))
         } else {
             let local_ids_to_unset = emitter.local_gen_mut().revert_state();

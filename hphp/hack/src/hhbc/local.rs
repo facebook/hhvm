@@ -102,15 +102,18 @@ impl Gen {
     }
 
     pub fn state_has_changed(&self) -> bool {
-        STORED.with(|stored| !self.counter.eq(*stored.borrow().get_counter()))
+        STORED.with(|stored| match stored.borrow().get_counter() {
+            None => false,
+            Some(counter) => !self.counter.eq(*counter),
+        })
     }
 
     /// Revert to the old state stored in STORED, and return the ids of newly registered
     /// unnamed locals to be unset
     pub fn revert_state(&mut self) -> Vec<Id> {
         STORED.with(|stored| {
-            let stored: &Stored = &*stored.borrow();
-            let old_counter = *stored.get_counter();
+            let stored: &mut Stored = &mut *stored.borrow_mut();
+            let old_counter = stored.counters.pop().unwrap();
             let old_temp_map = stored.get_temp_map().clone();
             let (Counter(new_id), Counter(old_id)) = (self.counter, old_counter);
             let local_ids_to_unset = (old_id..new_id).collect::<Vec<_>>();
@@ -133,18 +136,18 @@ thread_local! {
 
 #[derive(Default)]
 struct Stored {
-    counter: Counter,
+    counters: Vec<Counter>,
     temp_map: HashMap<String, Type>,
 }
 
 impl Stored {
     fn store(&mut self, counter: Counter, temp_map: HashMap<String, Type>) {
-        self.counter = counter;
+        self.counters.push(counter);
         self.temp_map = temp_map;
     }
 
-    fn get_counter(&self) -> &Counter {
-        &self.counter
+    fn get_counter(&self) -> Option<&Counter> {
+        self.counters.last()
     }
 
     fn get_temp_map(&self) -> &HashMap<String, Type> {

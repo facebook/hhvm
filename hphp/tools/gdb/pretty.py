@@ -75,7 +75,7 @@ class SetTVRecurseCommand(gdb.Command):
             gdbutils.tv_recurse_key = regex
 
             if depth == 'true':
-                gdbutils.tv_recurse = 1
+                gdbutils.tv_recurse = True
                 return
 
             if depth == 'false':

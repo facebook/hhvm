@@ -365,8 +365,10 @@ def nameof(val):
 
 tv_recurse = 0
 tv_recurse_key = ""
-_tv_recurse_depth = 0
 current_key = None
+
+_tv_recurse_depth = 0
+_tv_recurse_seen = set()
 
 def DT(kind):
     return V(kind, 'DataType')
@@ -376,7 +378,7 @@ def should_recurse():
     global _tv_recurse_depth
     global tv_recurse_key
 
-    if _tv_recurse_depth >= tv_recurse:
+    if tv_recurse is not True and _tv_recurse_depth >= tv_recurse:
         return False
     if tv_recurse_key == "" or current_key is None:
         return True
@@ -429,13 +431,11 @@ def pretty_tv(t, data):
           t == V('HPHP::KindOfPersistentKeyset')):
         val = data['parr']
         if should_recurse():
-            val = val.dereference()
             recurse = True
 
     elif t == DT('HPHP::KindOfObject'):
         val = data['pobj']
         if should_recurse():
-            val = val.dereference()
             recurse = True
         name = nameof(val)
 
@@ -447,13 +447,19 @@ def pretty_tv(t, data):
         val = "0x%x" % int(data['num'])
 
     if recurse:
-        _tv_recurse_depth += 1
-        try:
-            val = str(val)
-            indent = 2 * _tv_recurse_depth
-            val = re.sub(r"^", ' ' * indent, val, flags=re.M)[indent:]
-        finally:
-            _tv_recurse_depth -= 1
+        num = int(data['num'])
+        if num not in _tv_recurse_seen:
+            _tv_recurse_seen.add(num)
+            _tv_recurse_depth += 1
+            try:
+                val = str(val.dereference())
+                indent = 2 * _tv_recurse_depth
+                val = re.sub(r"^", ' ' * indent, val, flags=re.M)[indent:]
+            finally:
+                _tv_recurse_seen.remove(num)
+                _tv_recurse_depth -= 1
+        else:
+            val = "RECURSION: " + str(val)
 
     if val is None:
         out = '{ %s }' % t

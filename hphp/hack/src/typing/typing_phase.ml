@@ -111,6 +111,15 @@ let env_with_self ?pos ?(quiet = false) env =
 (*****************************************************************************)
 
 let rec localize ~ety_env env (dty : decl_ty) =
+  let tvar_or_localize ~ety_env env r ty ~i =
+    if
+      GlobalOptions.tco_global_inference env.genv.tcopt
+      && (is_any ty || is_tyvar ty)
+    then
+      Env.new_global_tyvar env ~i r
+    else
+      localize ~ety_env env ty
+  in
   match deref dty with
   | (r, Terr) -> (env, TUtils.terr env r)
   | (r, Tany _) -> (env, mk (r, TUtils.tany env))
@@ -138,44 +147,40 @@ let rec localize ~ety_env env (dty : decl_ty) =
       match (ty1, ty2) with
       | (None, None) ->
         let tk = MakeType.arraykey Reason.(Rvarray_or_darray_key (to_pos r)) in
-        let tany = mk (r, TUtils.tany env) in
-        (env, Tarraykind (AKvarray_or_darray (tk, tany)))
+        let (env, tv) =
+          if GlobalOptions.tco_global_inference env.genv.tcopt then
+            Env.new_global_tyvar env r
+          else
+            (env, mk (r, TUtils.tany env))
+        in
+        (env, Tarraykind (AKvarray_or_darray (tk, tv)))
       | (Some tv, None) ->
-        let (env, tv) = localize ~ety_env env tv in
+        let (env, tv) = tvar_or_localize ~ety_env env r tv ~i:1 in
         (env, Tarraykind (AKvarray tv))
       | (Some tk, Some tv) ->
-        let (env, tk) = localize ~ety_env env tk in
-        let (env, tv) = localize ~ety_env env tv in
+        let (env, tk) = tvar_or_localize ~ety_env env r tk ~i:0 in
+        let (env, tv) = tvar_or_localize ~ety_env env r tv ~i:1 in
         (env, Tarraykind (AKdarray (tk, tv)))
       | (None, Some _) -> failwith "Invalid array declaration type"
     in
     (env, mk (r, ty))
   | (r, Tdarray (tk, tv)) ->
-    let (env, tk) = localize ~ety_env env tk in
-    let (env, tv) = localize ~ety_env env tv in
+    let (env, tk) = tvar_or_localize ~ety_env env r tk ~i:0 in
+    let (env, tv) = tvar_or_localize ~ety_env env r tv ~i:1 in
     let ty = Tarraykind (AKdarray (tk, tv)) in
     (env, mk (r, ty))
   | (r, Tvarray tv) ->
-    let (env, tv) = localize ~ety_env env tv in
+    let (env, tv) = tvar_or_localize ~ety_env env r tv ~i:0 in
     let ty = Tarraykind (AKvarray tv) in
     (env, mk (r, ty))
   | (r, Tvarray_or_darray (tk, tv)) ->
     let (env, tk) =
       match tk with
-      | Some tk ->
-        if GlobalOptions.tco_global_inference env.genv.tcopt && is_tyvar tk then
-          Env.new_global_tyvar env ~i:1 r
-        else
-          localize ~ety_env env tk
+      | Some tk -> tvar_or_localize ~ety_env env r tk ~i:0
       | None ->
         (env, MakeType.arraykey Reason.(Rvarray_or_darray_key (to_pos r)))
     in
-    let (env, tv) =
-      if GlobalOptions.tco_global_inference env.genv.tcopt && is_tyvar tv then
-        Env.new_global_tyvar env ~i:2 r
-      else
-        localize ~ety_env env tv
-    in
+    let (env, tv) = tvar_or_localize ~ety_env env r tv ~i:1 in
     (env, MakeType.varray_or_darray r tk tv)
   | (r, Tgeneric x) ->
     begin

@@ -10,10 +10,10 @@
  */
 
 function get_arr(): array<string, bool> {
-  return array(
+  return darray[
     'foo' => true,
     'bar' => false,
-  );
+  ];
 }
 
 function use_arr(array<mixed, int> $arr): void {

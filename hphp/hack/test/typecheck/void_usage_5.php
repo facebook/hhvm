@@ -7,7 +7,7 @@ function test(bool $b): void {
         return $x;
       }
     },
-    array('test'),
+    varray['test'],
   );
   foreach ($arr as $x) {
     if ($x) {

@@ -5,7 +5,7 @@
  */
 
 function test(): void {
-  $a = array(true);
+  $a = varray[true];
   take_int_indexed_array($a);
 }
 

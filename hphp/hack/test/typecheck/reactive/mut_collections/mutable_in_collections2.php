@@ -3,7 +3,7 @@
 class A {
   <<__Rx, __Mutable>>
   public function f(): void {
-    $b = array($this);
+    $b = varray[$this];
     $b1 = varray[$this];
     $c = Vector {$this};
     $d = Map {"x" => $this};
@@ -18,7 +18,7 @@ class A {
 
   <<__Rx, __MaybeMutable>>
   public function g(): void {
-    $b = array($this);
+    $b = varray[$this];
     $b1 = varray[$this];
     $c = Vector {$this};
     $d = Map {"x" => $this};

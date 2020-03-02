@@ -1,7 +1,7 @@
 <?hh //strict
 
 function test(bool $b): array<string> {
-  $a = array();
+  $a = darray[];
   if ($b) {
     $a[4] = 'aaa';
   }

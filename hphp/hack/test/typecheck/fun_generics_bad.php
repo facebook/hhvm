@@ -12,8 +12,9 @@ function special_array_map<T1, T2>(
 ): array<int, T2> {
 }
 
+<<__EntryPoint>>
 function demo(): bool {
-  $array = array();
+  $array = darray[];
 
   for ($k = 0; $k < 10; $k++) {
     $array[$k] = null;
@@ -26,5 +27,3 @@ function demo(): bool {
   return (bool)$val1;
 }
 
-/* HH_FIXME[1002] Just a demo */
-demo();

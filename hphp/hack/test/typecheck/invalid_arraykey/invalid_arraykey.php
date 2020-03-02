@@ -1,7 +1,7 @@
 <?hh // partial
 
 function main($untyped, $arr) {
-  $x = array();
+  $x = darray[];
   $x['foo'] = 0;
   $x[null] = 0;
   $x[4.2] = 0;

@@ -10,7 +10,7 @@
  */
 
 function get_keys<T1, T2>(array<T1, T2> $x): array<T1> {
-  $result = array();
+  $result = varray[];
   foreach ($x as $k => $v) {
     $result[] = $k;
   }

@@ -26,14 +26,14 @@ function expectsMyClosureRunnerMyClass(
 }
 function getThing1(): MyClosureRunner<MyClass> {
   $var = expectsMyClosureRunnerMyClass(
-    array(
+    darray[
       'a' => new MyClosureRunner(
         function($arg) {
           $arg->missing_method();
           return "ok";
         },
       ),
-    ),
+    ],
   );
   return $var;
 }

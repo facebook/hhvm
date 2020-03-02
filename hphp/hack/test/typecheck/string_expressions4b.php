@@ -28,7 +28,7 @@ class Meh {
   }
 
   public function foo() {
-    $b = array("blah" => new Other());
+    $b = darray["blah" => new Other()];
     print "$b[blah]$this";
   }
 }

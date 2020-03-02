@@ -10,10 +10,10 @@
  */
 
 function f() {
-  $arr = array();
-  foreach (array() as $x) {
+  $arr = darray[];
+  foreach (varray[] as $x) {
     if (true) {
-      foreach (array() as $y) {
+      foreach (varray[] as $y) {
       }
 
       continue;

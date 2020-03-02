@@ -5,7 +5,7 @@ class A {}
 <<__Rx>>
 function f(): void {
   $a = \HH\Rx\mutable(new A());
-  $b = array($a);
+  $b = varray[$a];
   $b1 = varray[$a];
   $c = Vector {$a};
   $d = Map {"x" => $a};
@@ -17,7 +17,7 @@ function f(): void {
 
 <<__Rx>>
 function g(<<__MaybeMutable>> A $a): void {
-  $b = array($a);
+  $b = varray[$a];
   $b1 = varray[$a];
   $c = Vector {$a};
   $d = Map {"x" => $a};
@@ -29,7 +29,7 @@ function g(<<__MaybeMutable>> A $a): void {
 
 <<__Rx>>
 function h(<<__OwnedMutable>> A $a): void {
-  $b = array($a);
+  $b = varray[$a];
   $b1 = varray[$a];
   $c = Vector {$a};
   $d = Map {"x" => $a};

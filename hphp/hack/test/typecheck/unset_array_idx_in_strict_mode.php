@@ -2,15 +2,15 @@
 
 function f(): void {
   // Unsetting array indexes should be fine
-  $a = array('hi');
+  $a = varray['hi'];
   unset($a[0]);
 }
 
 function g(bool $cond): void {
   if ($cond) {
-    $arr = array('foo');
+    $arr = varray['foo'];
   } else {
-    $arr = array(0);
+    $arr = varray[0];
   }
   unset($arr[0]);
 }

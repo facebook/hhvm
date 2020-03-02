@@ -12,6 +12,6 @@
 class A {}
 
 function test(string $field1): void {
-  $v = array($field1 => 1, 'field2' => new A());
+  $v = darray[$field1 => 1, 'field2' => new A()];
   $v[$field1]->unknownFunction();
 }

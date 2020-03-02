@@ -13,7 +13,7 @@ function any() {
 }
 
 function arr<T>(array<T> $x): array<array<T>> {
-  return array($x);
+  return varray[$x];
 }
 
 function f(): void {

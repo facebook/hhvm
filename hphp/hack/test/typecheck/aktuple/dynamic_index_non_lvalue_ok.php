@@ -6,7 +6,7 @@
  */
 
 function test(int $key): void {
-  $a = array(4, 'aaa');
+  $a = varray[4, 'aaa'];
   $_ = $a[$key];
 
   take_int($a[0]);

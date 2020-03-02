@@ -26,16 +26,16 @@ function test1(
   darray<int, string> $darray3,
 ): void {
   if ($b) {
-    $x = array(); // AKempty
+    $x = varray[]; // AKvarray
   } else {
-    $x = array(); // AKempty
+    $x = varray[]; // AKvarray
   }
   hh_show($x);
   hh_show($x[0]);
   expect_array($x);
 
   if ($b) {
-    $x = array(); // AKempty
+    $x = varray[]; // AKvarray
   } else {
     $x = varray[1]; // AKvarray
   }

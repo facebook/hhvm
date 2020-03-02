@@ -10,6 +10,6 @@
  */
 
 function main() {
-  $arr = array();
+  $arr = darray[];
   $arr[$arr->getLength()] = 1;
 }

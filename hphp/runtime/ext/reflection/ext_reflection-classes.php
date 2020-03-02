@@ -27,7 +27,7 @@ interface Reflector {
 }
 
 trait ReflectionLegacyAttribute {
-  <<__Rx, __MaybeMutable>>
+  <<__Rx, __MaybeMutable, __ProvenanceSkipFrame>>
   final public function getAttributes(): darray<arraykey, varray<mixed>> {
     $denamespaced = darray[];
     foreach ($this->getAttributesNamespaced() as $name => $args) {

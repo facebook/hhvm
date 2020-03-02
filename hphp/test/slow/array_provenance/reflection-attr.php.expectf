@@ -1,0 +1,22 @@
+array(1) {
+  [0]=>
+  string(4) "Quux"
+}
+string(%d) "%s/reflection-attr.php:23"
+---------
+array(1) {
+  [0]=>
+  string(4) "Quux"
+}
+string(%d) "%s/reflection-attr.php:25"
+---------
+array(0) {
+}
+string(%d) "%s/reflection-attr.php:33"
+---------
+array(1) {
+  [0]=>
+  int(42)
+}
+string(%d) "%s/reflection-attr.php:33"
+---------

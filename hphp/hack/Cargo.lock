@@ -185,6 +185,7 @@ dependencies = [
  "bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "elaborate_namespaces_visitor 0.0.0",
  "emit_program_rust 0.0.0",
+ "emit_pu_rust 0.0.0",
  "env 0.0.0",
  "hhas_program_rust 0.0.0",
  "hhbc_ast_rust 0.0.0",
@@ -793,6 +794,13 @@ dependencies = [
  "naming_special_names_rust 0.0.0",
  "oxidized 0.0.0",
  "runtime 0.0.0",
+]
+
+[[package]]
+name = "emit_pu_rust"
+version = "0.0.0"
+dependencies = [
+ "oxidized 0.0.0",
 ]
 
 [[package]]

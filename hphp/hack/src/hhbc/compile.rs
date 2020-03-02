@@ -11,6 +11,7 @@ use aast_parser::{
 use anyhow::{anyhow, *};
 use bitflags::bitflags;
 use emit_program_rust::{emit_fatal_program, emit_program, FromAstFlags};
+use emit_pu_rust;
 use hhas_program_rust::HhasProgram;
 use hhbc_ast_rust::FatalOp;
 use hhbc_hhas_rust::{context::Context, print_program, Write};
@@ -129,6 +130,13 @@ fn emit<'p>(
     is_hh: bool,
     ast: &'p mut Tast::Program,
 ) -> (Result<HhasProgram<'p>, Error>, f64) {
+    if opts
+        .hhvm
+        .hack_lang_flags
+        .contains(options::LangFlags::ENABLE_POCKET_UNIVERSES)
+    {
+        emit_pu_rust::translate(ast);
+    }
     let mut flags = FromAstFlags::empty();
     if is_hh {
         flags |= FromAstFlags::IS_HH_FILE;

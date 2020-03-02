@@ -58,17 +58,27 @@ SourceRootInfo::SourceRootInfo(Transport* transport)
                                 RuntimeOption::SandboxPattern.size(),
                                 CopyString), host, &matches);
   if (!same(r, static_cast<int64_t>(1))) {
+    auto const user = RO::GetDefaultUser();
+    if (!user.empty()) {
+      m_user = user;
+      m_sandbox = s_default;
+      createFromUserConfig();
+      if (sandboxOn()) *s_path.getCheck() = m_path.c_str();
+      return;
+    }
     m_sandboxCond = SandboxCondition::Off;
     return;
   }
-  if (RuntimeOption::SandboxFromCommonRoot) {
-    auto sandboxName = tvCastToString(matches.toArray().rval(1).tv());
-    createFromCommonRoot(sandboxName);
+
+  auto const alias = RO::SandboxHostAlias;
+  auto const name = tvCastToString(matches.toArray().rval(1).tv());
+  if (!alias.empty() && !strcmp(name.data(), alias.data())) {
+    m_sandboxCond = SandboxCondition::Off;
+    return;
+  } else if (RuntimeOption::SandboxFromCommonRoot) {
+    createFromCommonRoot(name);
   } else {
-    Array pair = StringUtil::Explode(
-      tvCastToString(matches.toArray().rval(1).tv()),
-      "-", 2
-    ).toArray();
+    Array pair = StringUtil::Explode(name, "-", 2).toArray();
     m_user = tvCastToString(pair.rval(0).tv());
     bool defaultSb = pair.size() == 1;
     if (defaultSb) {

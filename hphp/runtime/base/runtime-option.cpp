@@ -1040,6 +1040,18 @@ folly::Optional<folly::fs::path> RuntimeOption::GetHomePath(
   return {};
 }
 
+std::string RuntimeOption::GetDefaultUser() {
+  if (SandboxDefaultUserFile.empty()) return {};
+
+  folly::fs::path file{SandboxDefaultUserFile};
+  if (!folly::fs::is_regular_file(file)) return {};
+
+  std::string user;
+  if (!folly::readFile(file.c_str(), user) || user.empty()) return {};
+
+  return user;
+}
+
 bool RuntimeOption::ReadPerUserSettings(const folly::fs::path& confFileName,
                                         IniSettingMap& ini, Hdf& config) {
   try {
@@ -1119,6 +1131,8 @@ std::map<std::string, std::string> RuntimeOption::SandboxServerVariables;
 bool RuntimeOption::SandboxFromCommonRoot = false;
 std::string RuntimeOption::SandboxDirectoriesRoot;
 std::string RuntimeOption::SandboxLogsRoot;
+std::string RuntimeOption::SandboxDefaultUserFile;
+std::string RuntimeOption::SandboxHostAlias;
 
 bool RuntimeOption::EnableHphpdDebugger = false;
 bool RuntimeOption::EnableVSDebugger = false;
@@ -2596,6 +2610,9 @@ void RuntimeOption::Load(
     Config::Bind(SandboxLogsRoot, ini, config, "Sandbox.LogsRoot");
     Config::Bind(SandboxServerVariables, ini, config,
                  "Sandbox.ServerVariables");
+    Config::Bind(SandboxDefaultUserFile, ini, config,
+                 "Sandbox.DefaultUserFile");
+    Config::Bind(SandboxHostAlias, ini, config, "Sandbox.HostAlias");
   }
   {
     // Mail

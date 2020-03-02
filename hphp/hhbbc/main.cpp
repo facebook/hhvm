@@ -319,6 +319,7 @@ std::vector<SString> load_input(F&& fun) {
     RO::EvalArrProvDVArrays =
       gd.ArrayProvenance;
   RO::StrictArrayFillKeys = gd.StrictArrayFillKeys;
+  if (gd.HardGenericsUB) RO::EvalEnforceGenericsUB = 2;
 
   auto const units = Repo::get().enumerateUnits(RepoIdCentral, true);
   auto const size = units.size();
@@ -372,7 +373,7 @@ void write_global_data(
 
   auto gd                        = Repo::GlobalData{};
   gd.Signature                   = nanos.count();
-  gd.EnforceGenericsUB           = RuntimeOption::EvalEnforceGenericsUB;
+  gd.HardGenericsUB              = RuntimeOption::EvalEnforceGenericsUB >= 2;
   gd.HardReturnTypeHints         = RuntimeOption::EvalCheckReturnTypeHints >= 3;
   gd.CheckPropTypeHints          = RuntimeOption::EvalCheckPropTypeHints;
   gd.HardPrivatePropInference    = options.HardPrivatePropInference;
@@ -541,8 +542,6 @@ int main(int argc, char** argv) try {
   if (!hack_compiler_extract_path.empty()) {
     RuntimeOption::EvalHackCompilerExtractPath = hack_compiler_extract_path;
   }
-
-  RuntimeOption::EvalEnforceGenericsUB = gd.EnforceGenericsUB;
 
   register_process_init();
 

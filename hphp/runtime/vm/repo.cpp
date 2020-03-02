@@ -232,7 +232,6 @@ void Repo::loadGlobalData(bool readArrayTable /* = true */) {
     RuntimeOption::PHP7_NoHexNumerics       = s_globalData.PHP7_NoHexNumerics;
     RuntimeOption::PHP7_Substr              = s_globalData.PHP7_Substr;
     RuntimeOption::EvalCheckPropTypeHints   = s_globalData.CheckPropTypeHints;
-    RuntimeOption::EvalEnforceGenericsUB    = s_globalData.EnforceGenericsUB;
     RuntimeOption::EvalHackArrDVArrs        = s_globalData.HackArrDVArrs;
     /*
      * We only should enable array provenance at runtime if it was enabled in
@@ -250,6 +249,9 @@ void Repo::loadGlobalData(bool readArrayTable /* = true */) {
     RuntimeOption::StrictArrayFillKeys      = s_globalData.StrictArrayFillKeys;
     if (s_globalData.HardReturnTypeHints) {
       RuntimeOption::EvalCheckReturnTypeHints = 3;
+    }
+    if (s_globalData.HardGenericsUB) {
+      RuntimeOption::EvalEnforceGenericsUB = 2;
     }
 
     RuntimeOption::EvalIsCompatibleClsMethType =

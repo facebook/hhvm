@@ -63,7 +63,7 @@ struct Repo::GlobalData {
    * This changes program behavior because this type hints that are checked
    * at runtime will enable additional HHBBC optimizations.
    */
-  int32_t EnforceGenericsUB = 0;
+  bool HardGenericsUB = false;
 
   /*
    * Indicates whether a repo was compiled with HardPrivatePropInference.
@@ -188,7 +188,7 @@ struct Repo::GlobalData {
   template<class SerDe> void serde(SerDe& sd) {
     sd(InitialNamedEntityTableSize)
       (InitialStaticStringTableSize)
-      (EnforceGenericsUB)
+      (HardGenericsUB)
       (HardReturnTypeHints)
       (CheckPropTypeHints)
       (HardPrivatePropInference)

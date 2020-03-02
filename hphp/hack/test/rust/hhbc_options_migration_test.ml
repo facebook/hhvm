@@ -230,7 +230,7 @@ let caml_from_configs ~jsons ~args =
 
 let test_json_configs_stackable _ =
   (* See hhbc/options.rs test_options_de_multiple_jsons for comments *)
-  let json_configs =
+  let jsons =
     List.rev
       [
         "
@@ -247,11 +247,8 @@ let test_json_configs_stackable _ =
       ";
       ]
   in
-  let caml_configs =
-    List.map ~f:(fun s -> Some (Hh_json.json_of_string s)) json_configs
-  in
   (* Sanity checks *)
-  let caml_opts = caml_from_configs ~jsons:caml_configs ~args:[] in
+  let caml_opts = caml_from_configs ~jsons ~args:[] in
   (* set to 0 in the first JSON, so it must stay 0 *)
   assert_equal false Hhbc_options.(enable_coroutines caml_opts);
 
@@ -262,7 +259,7 @@ let test_json_configs_stackable _ =
   assert_equal true Hhbc_options.(rx_is_enabled caml_opts);
 
   (* Verify Rust implementation behind FFI gives the same results *)
-  let rust_opts = Options_ffi.from_configs json_configs [] in
+  let rust_opts = Options_ffi.from_configs ~jsons ~args:[] in
   assert_equal
     Hhbc_options.(enable_coroutines caml_opts)
     Hhbc_options.(enable_coroutines rust_opts);
@@ -419,10 +416,9 @@ let test_all_overrides_json_only _ =
 }
 "
   in
-  let caml_opts =
-    caml_from_configs ~jsons:[Some (Hh_json.json_of_string json)] ~args:[]
-  in
-  let rust_opts = Options_ffi.from_configs ~jsons:[json] ~args:[] in
+  let jsons = [json] in
+  let caml_opts = caml_from_configs ~jsons ~args:[] in
+  let rust_opts = Options_ffi.from_configs ~jsons ~args:[] in
   assert_opts_equal caml_opts rust_opts
 
 module CliArgOverrides = struct

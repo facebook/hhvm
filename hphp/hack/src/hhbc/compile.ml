@@ -28,7 +28,7 @@ type env = {
   is_evaled: bool;
   for_debugger_eval: bool;
   dump_symbol_refs: bool;
-  config_jsons: Hh_json.json option list;
+  config_jsons: string list;
   config_list: string list;
   disable_toplevel_elaboration: bool;
 }

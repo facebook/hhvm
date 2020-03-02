@@ -411,10 +411,10 @@ let decl_and_run_mode compiler_options =
       let old_hhbc_options = ref Hhbc_options.default in
       let config_jsons = ref [] in
       (* list of pending config JSONs *)
-      let add_config config_json =
+      let add_config (config_json : string option) =
         let options =
           Hhbc_options.get_options_from_config
-            config_json
+            (Option.map ~f:Hh_json.json_of_string config_json)
             ~init:!pending_config
             ~config_list:compiler_options.config_list
         in
@@ -429,14 +429,27 @@ let decl_and_run_mode compiler_options =
           | _ :: old_config_jsons -> old_config_jsons
           | _ -> !config_jsons
       in
-      let ini_config_json =
-        Option.map ~f:json_of_file compiler_options.config_file
+      let get_config_jsons () = List.filter_map ~f:(fun x -> x) !config_jsons in
+      let ini_config_json : string option =
+        Option.map
+          ~f:(fun path -> (try Sys_utils.cat path with _ -> ""))
+          compiler_options.config_file
       in
       add_config ini_config_json;
       Ident.track_names := true;
 
       match compiler_options.mode with
       | DAEMON ->
+        let add_config_overrides header =
+          let config_overrides =
+            get_field
+              (get_obj "config_overrides")
+              (fun _af -> JSON_Object [])
+              header
+            |> Hh_json.json_to_string
+          in
+          add_config (Some config_overrides)
+        in
         let handle_output filename output debug_time =
           let abs_path = Relative_path.to_absolute filename in
           let bytes =
@@ -483,7 +496,7 @@ let decl_and_run_mode compiler_options =
                   if body = "" then
                     None
                   else
-                    Some (json_of_string body)
+                    Some body
                 in
                 add_config config_json);
             error =
@@ -531,20 +544,14 @@ let decl_and_run_mode compiler_options =
                       fail_daemon None ("for_debugger_eval flag missing: " ^ af))
                     header
                 in
-                let config_overrides =
-                  get_field
-                    (get_obj "config_overrides")
-                    (fun _af -> JSON_Object [])
-                    header
-                in
-                add_config (Some config_overrides);
+                add_config_overrides header;
                 let compiler_options =
                   { compiler_options with for_debugger_eval }
                 in
                 let result =
                   process_single_source_unit
                     ~is_systemlib
-                    ~config_jsons:!config_jsons
+                    ~config_jsons:(get_config_jsons ())
                     compiler_options
                     handle_output
                     handle_exception
@@ -572,19 +579,13 @@ let decl_and_run_mode compiler_options =
                      body
                  in
                  let path = Relative_path.create Relative_path.Dummy filename in
-                 let config_overrides =
-                   get_field
-                     (get_obj "config_overrides")
-                     (fun _af -> JSON_Object [])
-                     header
-                 in
-                 add_config (Some config_overrides);
+                 add_config_overrides header;
                  let result =
                    handle_output
                      path
                      (extract_facts
                         ~compiler_options
-                        ~config_jsons:!config_jsons
+                        ~config_jsons:(get_config_jsons ())
                         ~filename:path
                         body)
                  in
@@ -608,18 +609,12 @@ let decl_and_run_mode compiler_options =
                    else
                      body
                  in
-                 let config_overrides =
-                   get_field
-                     (get_obj "config_overrides")
-                     (fun _af -> JSON_Object [])
-                     header
-                 in
-                 add_config (Some config_overrides);
+                 add_config_overrides header;
                  let result =
                    handle_output
                      (Relative_path.create Relative_path.Dummy filename)
                      (parse_hh_file
-                        ~config_jsons:!config_jsons
+                        ~config_jsons:(get_config_jsons ())
                         ~compiler_options
                         filename
                         body)
@@ -650,7 +645,7 @@ let decl_and_run_mode compiler_options =
           List.iter files ~f:(fun (filename, content) ->
               process_single_source_unit
                 ~is_systemlib:false
-                ~config_jsons:!config_jsons
+                ~config_jsons:(get_config_jsons ())
                 compiler_options
                 handle_output
                 handle_exception

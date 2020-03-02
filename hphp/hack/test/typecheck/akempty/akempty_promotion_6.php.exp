@@ -1,1 +1,6 @@
-No errors
+File "akempty_promotion_6.php", line 11, characters 5-6:
+Invalid argument (Typing[4110])
+File "akempty_promotion_6.php", line 15, characters 12-21:
+Expected varray<int>
+File "akempty_promotion_6.php", line 7, characters 8-15:
+But got darray<nothing, nothing>

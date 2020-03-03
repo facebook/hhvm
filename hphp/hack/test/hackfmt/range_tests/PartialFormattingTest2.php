@@ -13,9 +13,9 @@ abstract final class PartialFormattingTest {
     bool $validate = false,
   ): Awaitable<?int> {
 
-    $nonsensical_maplike_array = array(
+    $nonsensical_maplike_array = darray[
       "A Very Long Key Value For This Map" => "Here's a value of an appropriate length"
-    );
+    ];
 
     if (false) {
       /**
@@ -24,7 +24,7 @@ abstract final class PartialFormattingTest {
        *
        * MultilineComment1-2
        */
-      $errors = array();
+      $errors = varray[];
       $create_exception = null;
     }
 

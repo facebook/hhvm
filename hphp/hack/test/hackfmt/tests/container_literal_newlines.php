@@ -1,17 +1,17 @@
 <?hh // strict
-$foo = array('should_stay_on_same_line');
-$foo = array(
+$foo = varray['should_stay_on_same_line'];
+$foo = varray[
   'should_remain_on_new_line',
-);
+];
 $foo = varray['should_stay_on_same_line'];
 $foo = varray[
   'should_remain_on_new_line',
 ];
 
-$foo = array('should_stay' => 'on_same_line');
-$foo = array(
+$foo = darray['should_stay' => 'on_same_line'];
+$foo = darray[
   'should_remain' => 'on_new_line',
-);
+];
 $foo = darray['should_stay' => 'on_same_line'];
 $foo = darray[
   'should_remain' => 'on_new_line',

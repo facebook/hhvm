@@ -457,8 +457,9 @@ let construct class_name lin =
          ~f:(fold_constructors class_name) )
 
 let make ctx class_name get_ancestor =
+  let key = (class_name, Decl_defs.Member_resolution) in
   let lin =
-    Decl_linearize.get_linearization ctx class_name
+    Decl_linearize.get_linearization ctx key
     |> get_shallow_classes_and_substs ctx
     |> Sequence.memoize
   in

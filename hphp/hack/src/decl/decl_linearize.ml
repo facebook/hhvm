@@ -75,11 +75,13 @@ module Cache =
       let description = "Decl_Linearization"
     end)
 
-let push_local_changes = Cache.LocalChanges.push_stack
+let push_local_changes (_ctx : Provider_context.t) : unit =
+  Cache.LocalChanges.push_stack ()
 
-let pop_local_changes = Cache.LocalChanges.pop_stack
+let pop_local_changes (_ctx : Provider_context.t) : unit =
+  Cache.LocalChanges.pop_stack ()
 
-let remove_batch classes =
+let remove_batch (_ctx : Provider_context.t) (classes : SSet.t) : unit =
   let keys =
     SSet.fold classes ~init:CacheKeySet.empty ~f:(fun class_name acc ->
         let acc = CacheKeySet.add acc (class_name, Member_resolution) in
@@ -511,7 +513,10 @@ and get_linearization (env : env) (class_name : string) : linearization =
               mro_class_not_found = true (* This class is not known to exist! *);
             }))
 
-let get_linearization ?(kind = Member_resolution) ctx class_name =
+let get_linearization
+    (ctx : Provider_context.t) (key : string * Decl_defs.linearization_kind) :
+    Decl_defs.linearization =
+  let (class_name, kind) = key in
   let decl_env =
     {
       Decl_env.mode = FileInfo.Mstrict;

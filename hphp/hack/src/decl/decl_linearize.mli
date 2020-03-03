@@ -8,13 +8,12 @@
  *)
 
 val get_linearization :
-  ?kind:Decl_defs.linearization_kind ->
   Provider_context.t ->
-  string ->
+  string * Decl_defs.linearization_kind ->
   Decl_defs.linearization
 
-val push_local_changes : unit -> unit
+val push_local_changes : Provider_context.t -> unit
 
-val pop_local_changes : unit -> unit
+val pop_local_changes : Provider_context.t -> unit
 
-val remove_batch : SSet.t -> unit
+val remove_batch : Provider_context.t -> SSet.t -> unit

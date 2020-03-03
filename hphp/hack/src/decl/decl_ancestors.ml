@@ -38,14 +38,16 @@ let members_fully_known lin =
   lazy (Sequence.for_all lin ~f:(fun mro -> not mro.mro_class_not_found))
 
 let req_ancestor_names ctx class_name =
-  Decl_linearize.get_linearization ctx class_name
+  let key = (class_name, Decl_defs.Member_resolution) in
+  Decl_linearize.get_linearization ctx key
   |> Sequence.filter ~f:(fun mro ->
          mro.mro_via_req_extends || mro.mro_via_req_impl)
   |> Sequence.map ~f:(fun mro -> (mro.mro_name, ()))
 
 let all_requirements ctx class_name =
+  let key = (class_name, Decl_defs.Member_resolution) in
   lazy
-    ( Decl_linearize.get_linearization ctx class_name
+    ( Decl_linearize.get_linearization ctx key
     |> Sequence.filter ~f:(fun mro -> not mro.mro_xhp_attrs_only)
     |> Sequence.filter_map ~f:(fun mro ->
            Option.map mro.mro_required_at (fun pos ->
@@ -58,8 +60,9 @@ let is_canonical _ = true
 let merge ~earlier ~later:_ = earlier
 
 let make ctx class_name =
+  let key = (class_name, Decl_defs.Ancestor_types) in
   let lin =
-    Decl_linearize.(get_linearization ctx ~kind:Ancestor_types) class_name
+    Decl_linearize.get_linearization ctx key
     (* Drop the requested class; we only want its ancestors. *)
     |> fun lin -> Sequence.drop_eagerly lin 1
   in

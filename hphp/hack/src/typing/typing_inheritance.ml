@@ -86,8 +86,9 @@ let check_trait_override_annotations env cls ~static =
           ))
 
 let check_if_cyclic ctx cls =
+  let key = (Cls.name cls, Decl_defs.Member_resolution) in
   let cyclic_classes =
-    Decl_linearize.get_linearization ctx (Cls.name cls)
+    Decl_linearize.get_linearization ctx key
     |> Sequence.find_map ~f:(fun mro -> mro.mro_cyclic)
   in
   match cyclic_classes with
@@ -126,7 +127,8 @@ let no_trait_reuse_enabled env =
 
 let check_trait_reuse ctx shallow_class =
   let class_name = snd shallow_class.sc_name in
-  Decl_linearize.(get_linearization ctx ~kind:Ancestor_types) class_name
+  let key = (class_name, Decl_defs.Ancestor_types) in
+  Decl_linearize.get_linearization ctx key
   |> Sequence.iter ~f:(fun mro ->
          match mro.mro_trait_reuse with
          | None -> ()

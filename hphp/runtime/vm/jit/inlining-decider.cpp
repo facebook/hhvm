@@ -627,6 +627,7 @@ RegionDescPtr selectCalleeTracelet(const Func* callee,
   if (argTypes.size() <= numParams && callee->hasVariadicCaptureParam()) {
     // There's no DV init funclet for the case where all non-variadic params
     // have already been passed, so the caller must handle it instead.
+    ARRPROV_USE_RUNTIME_LOCATION();
     auto const vargs = Type::cns(ArrayData::CreateVArray());
     ctx.liveTypes.push_back({Location::Local{numParams}, vargs});
   }

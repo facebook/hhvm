@@ -16,7 +16,26 @@
 
 #include "hphp/util/jemalloc-util.h"
 
+#include <folly/Optional.h>
+
 namespace HPHP {
+
+namespace {
+#ifdef USE_JEMALLOC
+folly::Optional<unsigned> allArenas() {
+  assert(mallctlnametomib && mallctlbymib);
+  unsigned allArenas = 0;
+#ifndef MALLCTL_ARENAS_ALL
+  if (mallctlRead<unsigned, true>("arenas.narenas", &allArenas)) {
+    return folly::none;
+  }
+#else
+  allArenas = MALLCTL_ARENAS_ALL;
+#endif
+  return allArenas;
+}
+#endif // USE_JEMALLOC
+}
 
 int jemalloc_pprof_enable() {
   return mallctlWrite<bool, true>("prof.active", true);
@@ -46,43 +65,6 @@ int jemalloc_pprof_dump(const std::string& prefix, bool force) {
   }
 }
 
-bool purge_all(std::string* errStr) {
-#ifdef USE_JEMALLOC
-  assert(mallctlnametomib && mallctlbymib);
-  unsigned allArenas = 0;
-#ifndef MALLCTL_ARENAS_ALL
-  if (mallctlRead<unsigned, true>("arenas.narenas", &allArenas)) {
-    if (errStr) {
-      *errStr = "arenas.narena";
-    }
-    return false;
-  }
-#else
-  allArenas = MALLCTL_ARENAS_ALL;
-#endif
-
-  size_t mib[3];
-  size_t miblen = 3;
-  if (mallctlnametomib("arena.0.purge", mib, &miblen)) {
-    if (errStr) {
-      *errStr = "mallctlnametomib(arena.0.purge)";
-    }
-    return false;
-  }
-
-  mib[1] = allArenas;
-  if (mallctlbymib(mib, miblen, nullptr, nullptr, nullptr, 0)) {
-    if (errStr) {
-      *errStr = "mallctlbymib(arena.all.purge)";
-    }
-    return false;
-  }
-  return true;
-#else
-  return false;
-#endif
-}
-
 #ifdef USE_JEMALLOC
 
 // Frequently used mallctl mibs.
@@ -92,20 +74,43 @@ namespace {
 // report values, and increment the epoch. Return the current epoch. This is
 // useful for detecting whether another thread caused a refresh.
 size_t g_epoch_mib[1];                  // "epoch"
+size_t g_purge_mib[3];                  // "arena.<i>.purge"
 size_t g_pactive_mib[4];                // "stats.arenas.<i>.pactive"
-
+size_t g_pdirty_mib[4];                 // "stats.arenas.<i>.pdirty"
 }
 
 void init_mallctl_mibs() {
   size_t miblen = 1;
   mallctlnametomib("epoch", g_epoch_mib, &miblen);
+  miblen = 3;
+  mallctlnametomib("arena.0.purge", g_purge_mib, &miblen);
   miblen = 4;
   mallctlnametomib("stats.arenas.0.pactive", g_pactive_mib, &miblen);
+  mallctlnametomib("stats.arenas.0.pdirty", g_pdirty_mib, &miblen);
 }
 
 void mallctl_epoch() {
   uint64_t epoch = 1;
   mallctlbymib(g_epoch_mib, 1, nullptr, nullptr, &epoch, sizeof(epoch));
+}
+
+bool purge_all(std::string* errStr) {
+  auto const all = allArenas();
+  if (!all) {
+    if (errStr) {
+      *errStr = "arenas.narenas";
+    }
+    return false;
+  }
+
+  size_t mib[3] = {g_purge_mib[0], *all, g_purge_mib[2]};
+  if (mallctlbymib(mib, 3, nullptr, nullptr, nullptr, 0)) {
+    if (errStr) {
+      *errStr = "mallctlbymib(arena.all.purge)";
+    }
+    return false;
+  }
+  return true;
 }
 
 size_t mallctl_pactive(unsigned arenaId) {
@@ -117,5 +122,21 @@ size_t mallctl_pactive(unsigned arenaId) {
   return pactive;
 }
 
-#endif
+size_t mallctl_pdirty(unsigned arenaId) {
+  size_t mib[4] = {g_pdirty_mib[0], g_pdirty_mib[1], arenaId, g_pdirty_mib[3]};
+  size_t pdirty = 0;
+  size_t sz = sizeof(pdirty);
+  if (mallctlbymib(mib, 4, &pdirty, &sz, nullptr, 0)) return 0;
+  return pdirty;
+}
+
+size_t mallctl_all_pdirty() {
+  if (auto const all = allArenas()) return mallctl_pdirty(*all);
+  return 0;
+}
+#else
+bool purge_all(std::string* errStr) {
+  return false;
+}
+#endif // USE_JEMALLOC
 }

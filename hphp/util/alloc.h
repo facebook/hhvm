@@ -189,6 +189,22 @@ inline void* safe_aligned_alloc(size_t align, size_t size) {
 void flush_thread_caches();
 
 /**
+ * Get the number of bytes that could be purged via `purge_all()`.
+ * JEMalloc holds pages in three states:
+ *   - active: In use by the application
+ *   - dirty: Held by JEMalloc for future allocations
+ *   - muzzy: madvise(FREE) but not madvised(DONTNEED), so mapping may still
+ *            exist, but kernel could reclaim if necessary
+ * By default pages spend 10s in dirty state after being freed up, and then
+ * move to muzzy state for an additional 10s prior to being
+ * `madvise(DONTNEED)`.  This function reports the number of bytes that are in
+ * the dirty state.  These are bytes unusable by the kernel, but also unused by
+ * the application.  A force purge will make JEMalloc `madvise(DONTNEED)` these
+ * pages immediately.
+ */
+ssize_t purgeable_bytes();
+
+/**
  * Instruct the kernel to free parts of the unused stack back to the system.
  * Like flush_thread_caches, this is called when the thread has been idle
  * and predicted to continue to be idle for a while.

@@ -135,6 +135,14 @@ void flush_thread_stack() {
   }
 }
 
+ssize_t purgeable_bytes() {
+#ifdef USE_JEMALLOC
+  return s_pageSize * mallctl_all_pdirty();
+#else
+  return 0;
+#endif
+}
+
 #if !defined USE_JEMALLOC || !defined HAVE_NUMA
 void set_numa_binding(int node) {}
 void* mallocx_on_node(size_t size, int node, size_t align) {

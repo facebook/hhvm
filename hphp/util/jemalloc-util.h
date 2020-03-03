@@ -164,6 +164,8 @@ void init_mallctl_mibs();
 
 void mallctl_epoch();
 size_t mallctl_pactive(unsigned arenaId);
+size_t mallctl_pdirty(unsigned arenaId);
+size_t mallctl_all_pdirty();
 
 #endif
 

@@ -286,10 +286,12 @@ let naming_from_saved_state
            * it could be a new file that was added. *)
           ()
         | Some v ->
-          Naming_heap.Types.remove_batch
+          Naming_provider.remove_type_batch
             (v.FileInfo.classes |> List.map ~f:snd |> SSet.of_list);
-          Naming_heap.Types.remove_batch
+          Naming_provider.remove_type_batch
             (v.FileInfo.typedefs |> List.map ~f:snd |> SSet.of_list);
+          Naming_provider.remove_type_batch
+            (v.FileInfo.record_defs |> List.map ~f:snd |> SSet.of_list);
           Naming_provider.remove_fun_batch
             (v.FileInfo.funs |> List.map ~f:snd |> SSet.of_list);
           Naming_provider.remove_const_batch

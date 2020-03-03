@@ -409,9 +409,9 @@ let update_reverse_entries file_deltas =
       begin
         match Naming_sqlite.get_file_info path with
         | Some fi ->
-          Naming_heap.Types.remove_batch
+          Naming_provider.remove_type_batch
             (fi.FileInfo.classes |> List.map snd |> SSet.of_list);
-          Naming_heap.Types.remove_batch
+          Naming_provider.remove_type_batch
             (fi.FileInfo.typedefs |> List.map snd |> SSet.of_list);
           Naming_provider.remove_fun_batch
             (fi.FileInfo.funs |> List.map snd |> SSet.of_list);

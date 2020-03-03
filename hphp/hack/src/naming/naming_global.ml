@@ -266,7 +266,7 @@ end
 let remove_decls ~funs ~classes ~record_defs ~typedefs ~consts =
   let types = SSet.union classes typedefs in
   let types = SSet.union types record_defs in
-  Naming_heap.Types.remove_batch types;
+  Naming_provider.remove_type_batch types;
   Naming_provider.remove_fun_batch funs;
   Naming_provider.remove_const_batch consts
 

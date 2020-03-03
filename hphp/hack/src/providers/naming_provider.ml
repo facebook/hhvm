@@ -43,6 +43,9 @@ let add_type
     unit =
   Naming_heap.Types.add name (pos, kind)
 
+let remove_type_batch (names : SSet.t) : unit =
+  Naming_heap.Types.remove_batch names
+
 let get_type_pos (name : string) : FileInfo.pos option =
   match Naming_heap.Types.get_pos name with
   | Some (pos, _kind) -> Some pos

@@ -496,14 +496,17 @@ end = struct
   let hh_get_and_deserialize x =
     WorkerCancel.with_worker_exit (fun () -> hh_get_and_deserialize x)
 
+  let measure_add = Value.description ^ " (bytes serialized into shared heap)"
+
+  let measure_remove =
+    Value.description ^ " (compressed bytes removed from shared heap)"
+
   let log_serialize compressed original =
     let compressed = float compressed in
     let original = float original in
     let saved = original -. compressed in
     let ratio = compressed /. original in
-    Measure.sample
-      (Value.description ^ " (bytes serialized into shared heap)")
-      compressed;
+    Measure.sample measure_add compressed;
     Measure.sample "ALL bytes serialized into shared heap" compressed;
     Measure.sample
       (Value.description ^ " (bytes saved in shared heap due to compression)")
@@ -530,6 +533,12 @@ end = struct
       Measure.sample "ALL bytes allocated for deserialized value" localheap
     )
 
+  let log_remove compressed =
+    let compressed = float compressed in
+    Measure.sample measure_remove compressed;
+    Measure.sample "ALL compressed bytes removed from shared heap" compressed;
+    ()
+
   let add key value =
     let (compressed_size, original_size) = hh_add key value in
     (* compressed_size is a negative number if nothing new was added *)
@@ -544,16 +553,40 @@ end = struct
     v
 
   let remove key =
-    let (_compressed_size : int) = hh_remove key in
+    let compressed_size = hh_remove key in
     (* hh_remove assumes the key is present *)
+    if hh_log_level () > 0 then log_remove compressed_size;
     ()
 
   let move from_key to_key = hh_move from_key to_key
 
   let get_telemetry ~(costly : bool) (telemetry : Telemetry.t) : Telemetry.t =
     ignore costly;
-    (* we don't have anything to say about this heap yet *)
-    telemetry
+    let count =
+      Option.merge
+        (Measure.get_count measure_add)
+        ~f:( -. )
+        (Measure.get_count measure_remove)
+    in
+    let bytes =
+      Option.merge
+        (Measure.get_sum measure_add)
+        ~f:( -. )
+        (Measure.get_sum measure_remove)
+    in
+    match (count, bytes) with
+    | (None, _)
+    | (_, None)
+    | (Some 0., _) ->
+      telemetry
+    | (Some count, Some bytes) ->
+      telemetry
+      |> Telemetry.object_
+           ~key:(Value.description ^ ".shared")
+           ~value:
+             ( Telemetry.create ()
+             |> Telemetry.int_ ~key:"count" ~value:(int_of_float count)
+             |> Telemetry.int_ ~key:"bytes" ~value:(int_of_float bytes) )
 
   let () =
     get_telemetry_list := get_telemetry :: !get_telemetry_list;

@@ -16,6 +16,7 @@ open Hh_json_helpers
 
 type env = {
   from: string;
+  config: (string * string) list;
   use_ffp_autocomplete: bool;
   use_ranked_autocomplete: bool;
   use_serverless_ide: bool;
@@ -2684,7 +2685,7 @@ let rec connect_client ~(env : env) (root : Path.t) ~(autostart : bool) :
         and doesn't provide benefits in serverless-ide. *)
         use_priority_pipe = not env.use_serverless_ide;
         prechecked = None;
-        config = [];
+        config = env.config;
         allow_non_opt_build = false;
       }
     in
@@ -2701,8 +2702,9 @@ let rec connect_client ~(env : env) (root : Path.t) ~(autostart : bool) :
       can_autostart_after_mismatch := false;
       connect_client ~env root ~autostart:true)
 
-let do_initialize (root : Path.t) : Initialize.result =
+let do_initialize ~(env : env) (root : Path.t) : Initialize.result =
   let server_args = ServerArgs.default_options ~root:(Path.to_string root) in
+  let server_args = ServerArgs.set_config server_args env.config in
   let server_local_config =
     snd @@ ServerConfig.load ServerConfig.filename server_args
   in
@@ -2785,7 +2787,7 @@ let set_up_hh_logger_for_client_lsp (root : Path.t) : unit =
     (Out_channel.create client_lsp_log_fn ~append:true);
   log "Starting clientLsp at %s" client_lsp_log_fn
 
-let start_server (root : Path.t) : unit =
+let start_server ~(env : env) (root : Path.t) : unit =
   (* This basically does "hh_client start": a single attempt to open the     *)
   (* socket, send+read version and compare for mismatch, send handoff and    *)
   (* read response. It will print information to stderr. If the server is in *)
@@ -2809,7 +2811,7 @@ let start_server (root : Path.t) : unit =
       saved_state_ignore_hhconfig = false;
       dynamic_view = !cached_toggle_state;
       prechecked = None;
-      config = [];
+      config = env.config;
       allow_non_opt_build = false;
     }
   in
@@ -3290,6 +3292,7 @@ let run_ide_service (env : env) (ide_service : ClientIdeService.t) : unit Lwt.t
         ~naming_table_saved_state_path
         ~wait_for_initialization:(Option.is_some naming_table_saved_state_path)
         ~use_ranked_autocomplete:env.use_ranked_autocomplete
+        ~config:env.config
     in
     match result with
     | Ok num_changed_files_to_process ->
@@ -3333,7 +3336,7 @@ let tick_showStatus
             ClientStop.kill_server root !ref_from;
 
           (* After that it's safe to try to reconnect! *)
-          start_server root;
+          start_server ~env root;
           let%lwt state =
             reconnect_from_lost_if_necessary ~env state `Force_regain
           in
@@ -3463,7 +3466,7 @@ let handle_client_message
       let%lwt new_state = connect ~env !state in
       state := new_state;
       Relative_path.set_path_prefix Relative_path.Root root;
-      let result = do_initialize root in
+      let result = do_initialize ~env root in
       respond_jsonrpc ~powered_by:Language_server id (InitializeResult result);
 
       if env.use_serverless_ide then (
@@ -3894,7 +3897,7 @@ let handle_client_message
       let root_folder =
         Path.make (Relative_path.path_of_prefix Relative_path.Root)
       in
-      start_server root_folder;
+      start_server ~env root_folder;
       respond_jsonrpc ~powered_by:Serverless_ide id HackTestStartServerResultFB;
       Lwt.return_none
     (* catch-all for client reqs/notifications we haven't yet implemented *)

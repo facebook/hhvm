@@ -10,6 +10,8 @@
 type env = {
   (* The source where the client was spawned from, i.e. nuclide, vim, emacs, etc. *)
   from: string;
+  (* --config overrides at the command-line *)
+  config: (string * string) list;
   (* Flag to turn on the (experimental) FFP based autocomplete *)
   use_ffp_autocomplete: bool;
   (* Flag to turn on ranked autocompletion results *)

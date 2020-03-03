@@ -17,7 +17,8 @@ module Common_argspecs = struct
     ( "--config",
       Arg.String
         (fun s -> value_ref := String_utils.split2_exn '=' s :: !value_ref),
-      " override arbitrary value from hh.conf (format: <key>=<value>)" )
+      " override arbitrary value from hh.conf and .hhconfig (format: <key>=<value>)"
+    )
 
   let force_dormant_start value_ref =
     ( "--force-dormant-start",
@@ -841,6 +842,7 @@ let parse_lsp_args () =
       Sys.argv.(0)
   in
   let from = ref "" in
+  let config = ref [] in
   let use_ffp_autocomplete = ref false in
   let use_ranked_autocomplete = ref false in
   let use_serverless_ide = ref false in
@@ -853,6 +855,7 @@ let parse_lsp_args () =
         Arg.Set use_ffp_autocomplete,
         " [experimental] use the full-fidelity parser based autocomplete " );
       Common_argspecs.from from;
+      Common_argspecs.config config;
       ( "--ranked-autocomplete",
         Arg.Set use_ranked_autocomplete,
         " [experimental] display ranked autocompletion results" );
@@ -872,6 +875,7 @@ let parse_lsp_args () =
     CLsp
       {
         ClientLsp.from = !from;
+        config = !config;
         use_ffp_autocomplete = !use_ffp_autocomplete;
         use_ranked_autocomplete = !use_ranked_autocomplete;
         use_serverless_ide = !use_serverless_ide;

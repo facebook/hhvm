@@ -149,6 +149,7 @@ let initialize
        ClientIdeMessage.Initialize_from_saved_state.root;
        naming_table_saved_state_path;
        use_ranked_autocomplete;
+       config;
      } :
       ClientIdeMessage.Initialize_from_saved_state.t) :
     (state, ClientIdeMessage.error_data) Lwt_result.t =
@@ -163,6 +164,7 @@ let initialize
   Relative_path.set_path_prefix Relative_path.Tmp (Path.make "/tmp");
 
   let server_args = ServerArgs.default_options ~root:(Path.to_string root) in
+  let server_args = ServerArgs.set_config server_args config in
   let (server_config, server_local_config) =
     ServerConfig.load ServerConfig.filename server_args
   in

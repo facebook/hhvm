@@ -169,7 +169,7 @@ let get_deps_set classes =
     ~f:
       begin
         fun class_name acc ->
-        match Naming_heap.Types.get_filename class_name with
+        match Naming_provider.get_type_path class_name with
         | None -> acc
         | Some fn ->
           let dep = Typing_deps.Dep.Class class_name in

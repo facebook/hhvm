@@ -48,6 +48,9 @@ let get_type_pos (name : string) : FileInfo.pos option =
   | Some (pos, _kind) -> Some pos
   | None -> None
 
+let get_type_path (name : string) : Relative_path.t option =
+  Naming_heap.Types.get_filename name
+
 let get_type_pos_and_kind (name : string) :
     (FileInfo.pos * Naming_types.kind_of_type) option =
   Naming_heap.Types.get_pos name

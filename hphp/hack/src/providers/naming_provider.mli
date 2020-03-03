@@ -58,6 +58,10 @@ val add_type : string -> FileInfo.pos -> Naming_types.kind_of_type -> unit
 naming table. *)
 val get_type_pos : string -> FileInfo.pos option
 
+(** Look up the file path declaring the given type in the reverse naming
+table. *)
+val get_type_path : string -> Relative_path.t option
+
 (** Look up the kind with which the given type was declared in the reverse
 naming table. *)
 val get_type_kind : string -> Naming_types.kind_of_type option

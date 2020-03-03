@@ -179,7 +179,7 @@ let verify_call_targs env expr_pos decl_pos tparams targs =
     List.iter2 tparams targs ~f:(verify_targ_valid env Resolved) |> ignore
 
 let get_class_by_name ctx classname =
-  match Naming_heap.Types.get_filename classname with
+  match Naming_provider.get_type_path classname with
   | Some filename ->
     Ide_parser_cache.with_ide_cache @@ fun () ->
     Ast_provider.find_class_in_file ctx filename classname

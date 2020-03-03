@@ -32,7 +32,7 @@ and class_element_ =
   | Typeconst
 
 let get_class_by_name ctx x =
-  Naming_heap.Types.get_filename x >>= fun fn ->
+  Naming_provider.get_type_path x >>= fun fn ->
   Ide_parser_cache.with_ide_cache @@ fun () ->
   Ast_provider.find_class_in_file ctx fn x
 

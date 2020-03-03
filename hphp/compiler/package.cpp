@@ -28,6 +28,7 @@
 #include <folly/String.h>
 #include <folly/portability/Dirent.h>
 #include <folly/portability/Unistd.h>
+#include <folly/synchronization/Baton.h>
 
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/json.h"
@@ -286,6 +287,9 @@ bool Package::parse(bool check, std::thread& unit_emitter_thread) {
       RuntimeOption::RepoLocalPath.size() &&
       RuntimeOption::RepoLocalMode == "rw") {
     m_ueq.emplace();
+    // Since we'll modify the repo RuntimeOptions after creating this
+    // thread, we need to block until the thread initialize its repo.
+    folly::Baton<> repoBaton;
     // note useHHBBC is needed because when program is set, m_ar might
     // be cleared before the thread finishes running, so we would
     // segfault trying to check it. Note that when program is *not*
@@ -308,6 +312,10 @@ bool Package::parse(bool check, std::thread& unit_emitter_thread) {
           batched_ues.clear();
         };
 
+        // Initialize the repo and then notify the creating the thread
+        // that it's been created.
+        Repo::get();
+        repoBaton.post();
         while (auto ue = m_ueq->pop()) {
           if (!timer) timer.emplace(Timer::WallTime, "Caching parsed units...");
           batched_ues.push_back(std::move(ue));
@@ -318,6 +326,10 @@ bool Package::parse(bool check, std::thread& unit_emitter_thread) {
         if (batched_ues.size()) commitSome();
       }
     };
+
+    // Wait for unit_emitter_thread to initialize its copy of the
+    // repo. Once this happens, its safe to modify RuntimeOptions.
+    repoBaton.wait();
   }
 
   if (RuntimeOption::RepoLocalPath.size() &&

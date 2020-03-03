@@ -40,21 +40,21 @@ function test_http_build_query() {
   VS(http_build_query($data, "", "&amp;"),
      "foo=bar&amp;baz=boom&amp;cow=milk&amp;php=hypertext+processor");
 
-  $data = array(
-    'foo',
-    'bar',
-    'baz',
-    'boom',
+  $data = darray[
+    0 => 'foo',
+    1 => 'bar',
+    2 => 'baz',
+    3 => 'boom',
     'cow' => 'milk',
     'php' => 'hypertext processor'
-  );
+  ];
   VS(http_build_query($data),
      "0=foo&1=bar&2=baz&3=boom&cow=milk&php=hypertext+processor");
   VS(http_build_query($data, "myvar_"),
      "myvar_0=foo&myvar_1=bar&myvar_2=baz&myvar_3=boom&cow=milk&".
      "php=hypertext+processor");
 
-  $data = array(
+  $data = darray[
     'user' => darray['name' => 'Bob Smith',
                     'age' => 47,
                     'sex' => 'M',
@@ -64,8 +64,8 @@ function test_http_build_query() {
                                          'sex' => 'M'],
                         'sally' => darray['age' => 8,
                                          'sex' => 'F']],
-    'CEO'
-  );
+    0 => 'CEO'
+  ];
   VS(http_build_query($data, "flags_"),
      "user%5Bname%5D=Bob+Smith&user%5Bage%5D=47&user%5Bsex%5D=M&".
      "user%5Bdob%5D=5%2F12%2F1956&pastimes%5B0%5D=golf&".

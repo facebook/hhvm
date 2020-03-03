@@ -13,7 +13,7 @@ try {
 }
 
 try {
-    $m = new MongoClient("localhost", array("connect" => false, "bogus"));
+  $m = new MongoClient("localhost", darray["connect" => false, 0 => "bogus"]);
 } catch(Exception $e) {
     var_dump($e->getCode(), $e->getMessage());
 }

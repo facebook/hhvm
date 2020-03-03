@@ -1,4 +1,4 @@
-Notice: Hack Array Compat: Property 'A::p10' declared as type array, darray assigned in %s/deserialization.php on line 23
+Notice: Hack Array Compat: Property 'A::p10' declared as type ?array, darray assigned in %s/deserialization.php on line 23
 
 Warning: Property 'B::p1' declared as type int, string assigned in %s/deserialization.php on line 26
 
@@ -14,4 +14,5 @@ Warning: Property 'A::p7' declared as type HH\Traversable, null assigned in %s/d
 
 Notice: Hack Array Compat: Property 'A::p8' declared as type HH\varray, darray assigned in %s/deserialization.php on line 26
 
-Notice: Hack Array Compat: Property 'A::p10' declared as type array, varray assigned in %s/deserialization.php on line 26
+Notice: Hack Array Compat: Property 'A::p10' declared as type ?array, varray assigned in %s/deserialization.php on line 26
+

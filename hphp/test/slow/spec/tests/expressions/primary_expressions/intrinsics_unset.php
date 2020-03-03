@@ -182,7 +182,7 @@ $d->f();
 
 echo "---------- unsetting array elements ------------\n";
 
-$a = array(10, 20, "xx" => 30);
+$a = darray[0 => 10, 1 => 20, "xx" => 30];
 print_r($a);
 unset($a[1]);
 print_r($a);

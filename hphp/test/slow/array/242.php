@@ -1,7 +1,7 @@
 <?hh
 
 function test($q, $a, $b, $c) {
-  $x = array($a, 'foo'=> $a);
+  $x = darray[0 => $a, 'foo'=> $a];
   if ($x) {
     var_dump(isset($x[0][1]), isset($x['foo'][1]));
     var_dump(isset($x[$b][1]), isset($x[$c][1]));

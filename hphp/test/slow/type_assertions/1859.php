@@ -32,10 +32,10 @@ function i($x) {
 
 <<__EntryPoint>>
 function main_1859() {
-f(array(0, 1, 2));
-g(array(0, 1, 2));
-h(array(0, 1, 2));
+f(varray[0, 1, 2]);
+g(varray[0, 1, 2]);
+h(varray[0, 1, 2]);
 h('foobar');
 h(new stdClass());
-var_dump(i(array(0, 1, 2)));
+var_dump(i(varray[0, 1, 2]));
 }

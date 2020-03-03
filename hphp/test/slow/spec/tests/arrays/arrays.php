@@ -59,7 +59,7 @@ $v = darray[0 => NULL, 1 => FALSE, 2 => 123, 3 => 34e12, 4 => "Hello"];
 var_dump($v);
 $v = darray[0 => NULL, 1 => FALSE, 2 => 123, 3 => 34e12, 4 => "Hello"];
 var_dump($v);
-$v = array(NULL, 1 => FALSE, 123, 3 => 34e12, "Hello"); // some keys default, others not
+$v = darray[0 => NULL, 1 => FALSE, 2 => 123, 3 => 34e12, 4 => "Hello"]; // some keys default, others not
 var_dump($v);
 $v = darray[0 => NULL, 1 => FALSE, 2 => 123, 3 => 34e12, 4 => "Hello"];
 var_dump($v);
@@ -189,7 +189,7 @@ echo "\n";
 
 echo "================= remove some elements from an array =================\n";
 
-$v = array("red" => TRUE, 123, 9 => 34e12, "Hello");
+$v = darray["red" => TRUE, 0 => 123, 9 => 34e12, 10 => "Hello"];
 var_dump($v);
 unset($v[0], $v["red"]);
 var_dump($v);

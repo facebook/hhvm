@@ -3,17 +3,17 @@
 
 <<__EntryPoint>>
 function main_array_diff() {
-$array1 = array(
+$array1 = darray[
   "a" => "green",
-  "red",
-  "blue",
-  "red"
-);
-$array2 = array(
+  0 => "red",
+  1 => "blue",
+  2 => "red"
+];
+$array2 = darray[
   "b" => "green",
-  "yellow",
-  "red"
-);
+  0 => "yellow",
+  1 => "red"
+];
 
 $result = array_diff($array1, $array2);
 var_dump($result);

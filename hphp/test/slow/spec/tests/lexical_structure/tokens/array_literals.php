@@ -3,8 +3,8 @@
 class X
 {
     private $prop10 = varray[];
-    private $prop11 = array(10, "a" => "red", TRUE);
-    private $prop12 = array(10, "red", "xx" => array(2.3, NULL, "zz" => varray[12, FALSE, "zzz"]));
+    private $prop11 = darray[0 => 10, "a" => "red", 1 => TRUE];
+    private $prop12 = darray[0 => 10, 1 => "red", "xx" => darray[0 => 2.3, 1 => NULL, "zz" => varray[12, FALSE, "zzz"]]];
 
     private $prop20 = darray[];
     private $prop21 = darray[0 => 10, "a" => "red", 1 => TRUE];

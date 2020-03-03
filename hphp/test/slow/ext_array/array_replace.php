@@ -1,18 +1,18 @@
 <?hh
 
 function a() {
-  $array1 = array(
+  $array1 = darray[
     "color" => "red",
-    2,
-    4
-  );
-  $array2 = array(
-    "a",
-    "b",
+    0 => 2,
+    1 => 4
+  ];
+  $array2 = darray[
+    0 => "a",
+    1 => "b",
     "color" => "green",
     "shape" => "trapezoid",
-    4
-  );
+    2 => 4
+  ];
   $result = array_replace($array1, varray[$array2]);
   var_dump($result);
 }

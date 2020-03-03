@@ -3,7 +3,7 @@
 <<__EntryPoint>>
 function main() {
   $arrs = vec[
-    array('x' => 1),
+    __hhvm_intrinsics\dummy_cast_to_kindofarray(dict['x' => 1]),
     shape('x' => 1),
     darray['x' => 1],
     varray[true, false],

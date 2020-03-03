@@ -16,13 +16,13 @@ function LV(mixed $m): mixed { return __hhvm_intrinsics\launder_value($m); }
 
 function set_static1(): void {
   $cm = class_meth(Foo::class, 'bar');
-  $am = array($cm);
+  $am = varray[$cm];
   $dm = darray[0 => $cm];
   $om = new P($cm);
 
   $cm[0] = 'Apple';
   $cm[1] = 'list';
-  $am[0][1] = array(1, 2, 3);
+  $am[0][1] = varray[1, 2, 3];
   $am[0][0] = null;
   $dm[0][0] = 12;
   $dm[0][1] = 1.2;
@@ -34,12 +34,12 @@ function set_static1(): void {
 
 function set_static2(): void {
   $cm = class_meth(Foo::class, 'bar');
-  $am = array($cm);
+  $am = varray[$cm];
   $dm = darray[0 => $cm];
   $om = new P($cm);
 
   $cm[] = 'XYZ';
-  $am[0][] = array();
+  $am[0][] = varray[];
   $dm[0][] = 99;
   $om->m[] = false;
 
@@ -48,7 +48,7 @@ function set_static2(): void {
 
 function set_static3(): void {
   $cm = class_meth(Foo::class, 'bar');
-  $am = array($cm);
+  $am = varray[$cm];
   $dm = darray[0 => $cm];
   $om = new P($cm);
 
@@ -66,7 +66,7 @@ function set_static3(): void {
 
 function set_static4(): void {
   $cm = class_meth(Foo::class, 'bar');
-  $am = array($cm);
+  $am = varray[$cm];
   $dm = darray[0 => $cm];
   $om = new P($cm);
 
@@ -84,13 +84,13 @@ function set_static4(): void {
 
 function set_dynamic1(): void {
   $cm = LV(class_meth(Foo::class, 'bar'));
-  $am = LV(array($cm));
+  $am = LV(varray[$cm]);
   $dm = LV(darray[0 => $cm]);
   $om = LV(new P($cm));
 
   $cm[0] = 'Apple';
   $cm[1] = 'list';
-  $am[0][1] = array(1, 2, 3);
+  $am[0][1] = varray[1, 2, 3];
   $am[0][0] = null;
   $dm[0][0] = 12;
   $dm[0][1] = 1.2;
@@ -102,12 +102,12 @@ function set_dynamic1(): void {
 
 function set_dynamic2(): void {
   $cm = LV(class_meth(Foo::class, 'bar'));
-  $am = LV(array($cm));
+  $am = LV(varray[$cm]);
   $dm = LV(darray[0 => $cm]);
   $om = LV(new P($cm));
 
   $cm[] = 'XYZ';
-  $am[0][] = array();
+  $am[0][] = varray[];
   $dm[0][] = 99;
   $om->m[] = false;
 
@@ -116,7 +116,7 @@ function set_dynamic2(): void {
 
 function set_dynamic3(): void {
   $cm = LV(class_meth(Foo::class, 'bar'));
-  $am = LV(array($cm));
+  $am = LV(varray[$cm]);
   $dm = LV(darray[0 => $cm]);
   $om = LV(new P($cm));
 
@@ -134,7 +134,7 @@ function set_dynamic3(): void {
 
 function set_dynamic4(): void {
   $cm = LV(class_meth(Foo::class, 'bar'));
-  $am = LV(array($cm));
+  $am = LV(varray[$cm]);
   $dm = LV(darray[0 => $cm]);
   $om = LV(new P($cm));
 

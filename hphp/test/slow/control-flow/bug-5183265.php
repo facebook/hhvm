@@ -26,9 +26,9 @@ var_dump(compare(varray["a", "b", "c"], varray["a", "a", "b"],
 var_dump(compare(varray["a", "b", "c"], varray["b", "a", "b"],
                  varray["b", "c"]), 1);
 
-var_dump(compare(varray[], array(), array()), 0);
-var_dump(compare(varray[], array(), array()), 1);
+var_dump(compare(varray[], varray[], varray[]), 0);
+var_dump(compare(varray[], varray[], varray[]), 1);
 
-var_dump(compare(varray[], array(), array()), 0);
-var_dump(compare(varray[], array(), array()), 1);
+var_dump(compare(varray[], varray[], varray[]), 0);
+var_dump(compare(varray[], varray[], varray[]), 1);
 }

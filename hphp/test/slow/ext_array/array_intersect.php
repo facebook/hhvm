@@ -3,15 +3,15 @@
 
 <<__EntryPoint>>
 function main_array_intersect() {
-$array1 = array(
+$array1 = darray[
   "a" => "green",
-  "red",
-  "blue"
-);
-$array2 = array(
+  0 => "red",
+  1 => "blue"
+];
+$array2 = darray[
   "b" => "green",
-  "yellow",
-  "red"
-);
+  0 => "yellow",
+  1 => "red"
+];
 var_dump(array_intersect($array1, $array2));
 }

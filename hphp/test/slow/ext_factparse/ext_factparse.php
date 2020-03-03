@@ -172,7 +172,7 @@ try {
 # Execute multi-threaded test
 #
 
-$many_files = array();
+$many_files = varray[];
 for ($i = 0; $i < 10000; $i++) {
   $many_files[] = tempnam(sys_get_temp_dir(), "factparsetest");
   file_put_contents($many_files[$i], $source);
@@ -222,7 +222,7 @@ try {
   var_dump($e->getMessage());
 }
 try {
-  HH\facts_parse(null, varray[array()], null, null);
+  HH\facts_parse(null, varray[varray[]], null, null);
 } catch (Exception $e) {
   var_dump($e->getMessage());
 }

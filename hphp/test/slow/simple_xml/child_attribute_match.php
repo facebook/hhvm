@@ -13,7 +13,7 @@ foreach ($c->attributes() as $k => $v) {
 }
 
 // $p->children()[0] should be the same node as $c
-$pcattrs = array();
+$pcattrs = varray[];
 foreach ($p->children()->offsetGet(0)->attributes() as $k => $v) {
   $pcattrs[$k] = $v;
 }

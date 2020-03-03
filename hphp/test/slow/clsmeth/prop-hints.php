@@ -23,10 +23,10 @@ function C(mixed $m): void { echo gettype($m)."\n"; }
 class Props {
   public  static Foo          $pub_sprop_foo_static;
   public  static Foo          $pub_sprop_foo_dynamic;
-  public  static Traversable  $pub_sprop_trav_static         = array();
-  public  static Traversable  $pub_sprop_trav_dynamic        = array();
-  public  static array        $pub_sprop_array_static        = array();
-  public  static array        $pub_sprop_array_dynamic       = array();
+  public  static Traversable  $pub_sprop_trav_static         = varray[];
+  public  static Traversable  $pub_sprop_trav_dynamic        = varray[];
+  public  static array        $pub_sprop_array_static        = varray[];
+  public  static array        $pub_sprop_array_dynamic       = varray[];
   public  static varray       $pub_sprop_varray_static       = varray[];
   public  static varray       $pub_sprop_varray_dynamic      = varray[];
   public  static darray       $pub_sprop_darray_static       = darray[];
@@ -44,10 +44,10 @@ class Props {
 
   private static Foo          $priv_sprop_foo_static;
   private static Foo          $priv_sprop_foo_dynamic;
-  private static Traversable  $priv_sprop_trav_static        = array();
-  private static Traversable  $priv_sprop_trav_dynamic       = array();
-  private static array        $priv_sprop_array_static       = array();
-  private static array        $priv_sprop_array_dynamic      = array();
+  private static Traversable  $priv_sprop_trav_static        = varray[];
+  private static Traversable  $priv_sprop_trav_dynamic       = varray[];
+  private static array        $priv_sprop_array_static       = varray[];
+  private static array        $priv_sprop_array_dynamic      = varray[];
   private static varray       $priv_sprop_varray_static      = varray[];
   private static varray       $priv_sprop_varray_dynamic     = varray[];
   private static darray       $priv_sprop_darray_static      = darray[];
@@ -65,10 +65,10 @@ class Props {
 
   public         Foo          $pub_prop_foo_static;
   public         Foo          $pub_prop_foo_dynamic;
-  public         Traversable  $pub_prop_trav_static          = array();
-  public         Traversable  $pub_prop_trav_dynamic         = array();
-  public         array        $pub_prop_array_static         = array();
-  public         array        $pub_prop_array_dynamic        = array();
+  public         Traversable  $pub_prop_trav_static          = varray[];
+  public         Traversable  $pub_prop_trav_dynamic         = varray[];
+  public         array        $pub_prop_array_static         = varray[];
+  public         array        $pub_prop_array_dynamic        = varray[];
   public         varray       $pub_prop_varray_static        = varray[];
   public         varray       $pub_prop_varray_dynamic       = varray[];
   public         darray       $pub_prop_darray_static        = darray[];
@@ -86,10 +86,10 @@ class Props {
 
   private        Foo          $priv_prop_foo_static;
   private        Foo          $priv_prop_foo_dynamic;
-  private        Traversable  $priv_prop_trav_static         = array();
-  private        Traversable  $priv_prop_trav_dynamic        = array();
-  private        array        $priv_prop_array_static        = array();
-  private        array        $priv_prop_array_dynamic       = array();
+  private        Traversable  $priv_prop_trav_static         = varray[];
+  private        Traversable  $priv_prop_trav_dynamic        = varray[];
+  private        array        $priv_prop_array_static        = varray[];
+  private        array        $priv_prop_array_dynamic       = varray[];
   private        varray       $priv_prop_varray_static       = varray[];
   private        varray       $priv_prop_varray_dynamic      = varray[];
   private        darray       $priv_prop_darray_static       = darray[];

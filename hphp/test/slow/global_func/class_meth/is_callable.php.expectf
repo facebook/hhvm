@@ -1,14 +1,10 @@
-array(2) {
-  [0]=>
+vec(2) {
   string(1) "D"
-  [1]=>
   string(5) "func1"
 }
 int(1)
-array(2) {
-  [0]=>
+vec(2) {
   string(1) "D"
-  [1]=>
   string(5) "func1"
 }
 bool(true)

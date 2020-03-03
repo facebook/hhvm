@@ -38,13 +38,13 @@ function print_cover_maps(dict<string, vec<int>> $map) {
 <<__EntryPoint>>
 function main() {
   hh\autoload_set_paths(
-    array(
-      'class' => array(),
-      'function' => array('a_foo' => __DIR__.'/multi-file-a.inc'),
-      'constant' => array(),
-      'type' => array(),
+    darray[
+      'class' => varray[],
+      'function' => darray['a_foo' => __DIR__.'/multi-file-a.inc'],
+      'constant' => varray[],
+      'type' => varray[],
       'failure' => 'handle_autoload',
-    ),
+    ],
     __DIR__
   );
 

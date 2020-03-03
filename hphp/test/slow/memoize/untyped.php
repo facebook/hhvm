@@ -144,7 +144,7 @@ echo passthrough(0) === 0 ? '1 ' : '-1 ';
 echo passthrough(false) === false ? '2 ' : '-2 ';
 echo passthrough(null) === null ? '3 ' : '-3 ';
 echo passthrough('') === '' ? '4 ' : '-4 ';
-echo passthrough(varray[]) === array() ? '5 ' : '-5 ';
+echo passthrough(varray[]) === varray[] ? '5 ' : '-5 ';
 echo passthrough(1) === 1 ? '6 ' : '-6 ';
 echo passthrough(true) === true ? '7 ' : '-7 ';
 echo passthrough('foo') === 'foo' ? '8 ' : '-8 ';

@@ -12,10 +12,10 @@ $ar1 = darray[
   "color" => darray["favorite" => "red"],
   1 => 5
 ];
-$ar2 = array(
+$ar2 = darray[
   "color" => darray["favorite" => "green"],
-  "blue"
-);
+  0 => "blue"
+];
 
 $result = array_merge_recursive($ar1, varray[$ar2]);
 var_dump($result);

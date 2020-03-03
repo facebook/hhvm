@@ -68,7 +68,7 @@ var_dump($avg);
 
 echo "--------- test with sufficient array elements but not consecutive keys -------------\n";
 
-try { list($min, $max, $avg) = $v = array(0, 2 => 100, 4 => 67);
+try { list($min, $max, $avg) = $v = darray[0 => 0, 2 => 100, 4 => 67];
 } catch (Exception $e) { echo $e->getMessage()."\n"; }
 echo "\$min: $min, \$max: $max, \$avg: $avg\n";
 print_r($v);

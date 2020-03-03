@@ -193,7 +193,7 @@ function test_preg_replace() {
   $expFoo[0] = "FOO";
   $expFoo[1] = "FOO";
   $expFoo[2] = "FOO";
-  VS(preg_replace("/some pattern/", "", varray[]), array());
+  VS(preg_replace("/some pattern/", "", varray[]), varray[]);
   VS(preg_replace("/foo/i", "FOO", $foos), $expFoo);
 
   $patterns = varray["/(19|20)(\\d{2})-(\\d{1,2})-(\\d{1,2})/",

@@ -5,9 +5,9 @@
 function main_mb_convert_variables_nested_arrays() {
 $a = darray[
   'test' => darray[
-    'sub_test' => array(
+    'sub_test' => varray[
 
-    ),
+    ],
   ],
 ];
 

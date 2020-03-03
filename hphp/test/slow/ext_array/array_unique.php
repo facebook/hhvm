@@ -1,13 +1,13 @@
 <?hh
 
 function a() {
-  $input = array(
+  $input = darray[
     "a" => "green",
-    "red",
+    0 => "red",
     "b" => "green",
-    "blue",
-    "red"
-  );
+    1 => "blue",
+    2 => "red"
+  ];
   $result = array_unique($input);
   var_dump($result);
 }

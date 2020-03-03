@@ -1,7 +1,7 @@
 <?hh
 
 class SetTest {
-  private $_vals = array('one' => 1, 'two' => 2, 'three' => 3);
+  private $_vals = darray['one' => 1, 'two' => 2, 'three' => 3];
   public function __set($name, $value) {
     $this->_vals[$name] = $value;
   }
@@ -9,7 +9,7 @@ class SetTest {
 
 <<__EntryPoint>>
 function main_43() {
-  $q = array('eins', 'zwei', array('drei'));
+  $q = varray['eins', 'zwei', varray['drei']];
   var_dump($q);
   $x = new SetTest;
   $qq = list($x->one, $x->two, list($x->three)) = 1;

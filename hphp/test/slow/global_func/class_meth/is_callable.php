@@ -28,8 +28,8 @@ function check($m) {
 
 <<__EntryPoint>>
 function main() {
-  typehint(array(D::class, 'func1'));
-  check(array(D::class, 'func1'));
+  typehint(vec[D::class, 'func1']);
+  check(vec[D::class, 'func1']);
   typehint(HH\class_meth(D::class, 'func1'));
   check(HH\class_meth(D::class, 'func1'));
 }

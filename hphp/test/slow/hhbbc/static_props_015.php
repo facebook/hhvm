@@ -1,7 +1,7 @@
 <?hh
 
 class Foo {
-  private static $a = array('foo' => varray['bar'], 2, 3);
+  private static $a = darray['foo' => varray['bar'], 0 => 2, 1 => 3];
 
   public static function main() {
     unset(self::$a['foo']['bar']);

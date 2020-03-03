@@ -185,8 +185,8 @@ with_keyset(keyset[]);
 // Recursive functions will convert the keysets they process in a "lazy"
 // fashion...
 ///
-$ar1 = array("colors" => keyset["green", "red"], 5);
-$ar2 = array(10, "colors" => keyset["green", "blue"]);
+$ar1 = darray["colors" => keyset["green", "red"], 0 => 5];
+$ar2 = darray[0 => 10, "colors" => keyset["green", "blue"]];
 echo "array_merge_recursive: ";
 var_dump(array_merge_recursive($ar1, $ar2));
 echo "array_replace_recursive 1: "; // The keyset remains in the return value

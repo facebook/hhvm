@@ -3,17 +3,17 @@
 
 <<__EntryPoint>>
 function main_array_uintersect_assoc() {
-$array1 = array(
+$array1 = darray[
   "a" => "green",
   "b" => "brown",
   "c" => "blue",
-  "red"
-);
-$array2 = array(
+  0 => "red"
+];
+$array2 = darray[
   "a" => "GREEN",
   "B" => "brown",
-  "yellow",
-  "red"
-);
+  0 => "yellow",
+  1 => "red"
+];
 var_dump(array_uintersect_assoc($array1, $array2, 'strcasecmp'));
 }

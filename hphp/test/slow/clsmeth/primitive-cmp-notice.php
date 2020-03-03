@@ -26,7 +26,7 @@ function bar() {}
 function LV($x)  { return __hhvm_intrinsics\launder_value($x); }
 function CLS($c) { return __hhvm_intrinsics\create_class_pointer($c); }
 
-function WRAPA($x) { return LV(array($x)); }
+function WRAPA($x) { return LV(varray[$x]); }
 function WRAPO($x) { return LV(new Wrapper($x)); }
 function WRAPD($x) { $r = new stdclass; $r->x = $x; return LV($r); }
 
@@ -68,10 +68,10 @@ function WRAPD($x) { $r = new stdclass; $r->x = $x; return LV($r); }
   $lp = class_meth(Foo::class, 'baz');
   $qp = CLS('Foo');
 
-  $xx = array($cm); $nx = array($nv); $tx = array($tv); $bx = array($bv);
-  $ix = array($iv); $fx = array($fv); $sx = array($sv); $rx = array($rv);
-  $ox = array($ov); $vx = array($va); $dx = array($da); $cx = array($cp);
-  $ex = array($ep); $lx = array($lp); $qx = array($qp);
+  $xx = varray[$cm]; $nx = varray[$nv]; $tx = varray[$tv]; $bx = varray[$bv];
+  $ix = varray[$iv]; $fx = varray[$fv]; $sx = varray[$sv]; $rx = varray[$rv];
+  $ox = varray[$ov]; $vx = varray[$va]; $dx = varray[$da]; $cx = varray[$cp];
+  $ex = varray[$ep]; $lx = varray[$lp]; $qx = varray[$qp];
 
   $xy = new Wrapper($cm); $ny = new Wrapper($nv); $ty = new Wrapper($tv);
   $by = new Wrapper($bv); $iy = new Wrapper($iv); $fy = new Wrapper($fv);

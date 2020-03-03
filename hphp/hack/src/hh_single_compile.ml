@@ -450,6 +450,25 @@ let decl_and_run_mode compiler_options =
           in
           add_config (Some config_overrides)
         in
+        let get_filename_and_path (header : json) =
+          let filename =
+            get_field
+              (get_string "file")
+              (fun af ->
+                fail_daemon
+                  None
+                  ("Cannot determine file name of source unit: " ^ af))
+              header
+          in
+          (filename, Relative_path.create Relative_path.Dummy filename)
+        in
+        let body_or_file_contents (body : string) (filename : string) =
+          (* if body is empty - read file from disk *)
+          if String.length body = 0 then
+            Sys_utils.cat filename
+          else
+            body
+        in
         let handle_output filename output debug_time =
           let abs_path = Relative_path.to_absolute filename in
           let bytes =
@@ -501,15 +520,7 @@ let decl_and_run_mode compiler_options =
                 add_config config_json);
             error =
               (fun header _body ->
-                let filename =
-                  get_field
-                    (get_string "file")
-                    (fun af ->
-                      fail_daemon
-                        None
-                        ("Cannot determine file name of source unit: " ^ af))
-                    header
-                in
+                let (filename, _) = get_filename_and_path header in
                 let error =
                   get_field
                     (get_string "error")
@@ -524,15 +535,7 @@ let decl_and_run_mode compiler_options =
                   ("Error processing " ^ filename ^ ": " ^ error));
             compile =
               (fun header body ->
-                let filename =
-                  get_field
-                    (get_string "file")
-                    (fun af ->
-                      fail_daemon
-                        None
-                        ("Cannot determine file name of source unit: " ^ af))
-                    header
-                in
+                let (_, path) = get_filename_and_path header in
                 let is_systemlib =
                   get_field_opt (get_bool "is_systemlib") header
                   |> Option.value ~default:false
@@ -555,30 +558,15 @@ let decl_and_run_mode compiler_options =
                     compiler_options
                     handle_output
                     handle_exception
-                    (Relative_path.create Relative_path.Dummy filename)
+                    path
                     body
                 in
                 pop_config ();
                 result);
             facts =
               (fun header body ->
-                (* if body is empty - read file from disk *)
-                (let filename =
-                   get_field
-                     (get_string "file")
-                     (fun af ->
-                       fail_daemon
-                         None
-                         ("Cannot determine file name of source unit: " ^ af))
-                     header
-                 in
-                 let body =
-                   if String.length body = 0 then
-                     Sys_utils.cat filename
-                   else
-                     body
-                 in
-                 let path = Relative_path.create Relative_path.Dummy filename in
+                (let (filename, path) = get_filename_and_path header in
+                 let body = body_or_file_contents body filename in
                  add_config_overrides header;
                  let result =
                    handle_output
@@ -594,25 +582,12 @@ let decl_and_run_mode compiler_options =
                   (new_debug_time ()));
             parse =
               (fun header body ->
-                (let filename =
-                   get_field
-                     (get_string "file")
-                     (fun af ->
-                       fail_daemon
-                         None
-                         ("Cannot determine file name of source unit: " ^ af))
-                     header
-                 in
-                 let body =
-                   if String.length body = 0 then
-                     Sys_utils.cat filename
-                   else
-                     body
-                 in
+                (let (filename, path) = get_filename_and_path header in
+                 let body = body_or_file_contents body filename in
                  add_config_overrides header;
                  let result =
                    handle_output
-                     (Relative_path.create Relative_path.Dummy filename)
+                     path
                      (parse_hh_file
                         ~config_jsons:(get_config_jsons ())
                         ~compiler_options
@@ -626,8 +601,12 @@ let decl_and_run_mode compiler_options =
         in
         dispatch_loop handlers
       | CLI ->
-        (* Note: makes sense only if Hhbc_options stay frozen after first call *)
         let dumped_options = lazy (Hhbc_options.to_string !pending_config) in
+        let handle_output _filename output _debug_time =
+          if compiler_options.dump_config then
+            Printf.printf "===CONFIG===\n%s\n\n%!" (Lazy.force dumped_options);
+          if not compiler_options.quiet_mode then print_and_flush_strings output
+        in
         let handle_exception filename exc =
           if not compiler_options.quiet_mode then (
             let stack = Caml.Printexc.get_backtrace () in
@@ -664,14 +643,6 @@ let decl_and_run_mode compiler_options =
                 | exception End_of_file -> lines
               in
               go []
-            in
-            let handle_output _filename output _debug_time =
-              if compiler_options.dump_config then
-                Printf.printf
-                  "===CONFIG===\n%s\n\n%!"
-                  (Lazy.force dumped_options);
-              if not compiler_options.quiet_mode then
-                print_and_flush_strings output
             in
             (get_lines_in_file input_file_list, handle_output)
           | None ->
@@ -712,17 +683,12 @@ let decl_and_run_mode compiler_options =
               (files_in_dir, handle_output)
             (* Compile a single file *)
             else
-              let handle_output _filename output _debug_time =
+              let handle_output =
                 match compiler_options.output_file with
                 | Some output_file ->
-                  Sys_utils.write_strings_to_file ~file:output_file output
-                | None ->
-                  if compiler_options.dump_config then
-                    Printf.printf
-                      "===CONFIG===\n%s\n\n%!"
-                      (Lazy.force dumped_options);
-                  if not compiler_options.quiet_mode then
-                    print_and_flush_strings output
+                  fun _filename output _debug_time ->
+                    Sys_utils.write_strings_to_file ~file:output_file output
+                | None -> handle_output
               in
               ([compiler_options.filename], handle_output)
           (* Actually execute the compilation(s) *)

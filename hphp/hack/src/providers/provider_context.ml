@@ -70,12 +70,19 @@ let unset_global_context_internal () : unit =
   | Some _ -> global_context := None
   | None -> failwith "unset_global_context_internal: no global context is set"
 
-let get_telemetry (t : t) (telemetry : Telemetry.t) : Telemetry.t =
+let get_telemetry (t : t) ~(costly : bool) (telemetry : Telemetry.t) :
+    Telemetry.t =
   let telemetry =
     telemetry
     |> Telemetry.string_
          ~key:"backend"
          ~value:(t.backend |> Provider_backend.t_to_string)
+    |> Telemetry.object_
+         ~key:"SharedMem"
+         ~value:(SharedMem.get_telemetry ~costly)
+    (* We get SharedMem telemetry for all providers, not just the SharedMem
+  provider, just in case there are code paths which use SharedMem despite
+  it not being the intended provider. *)
   in
   match t.backend with
   | Provider_backend.Local_memory { decl_cache; shallow_decl_cache; _ } ->

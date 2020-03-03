@@ -254,6 +254,9 @@ let compute_tast_and_errors_unquarantined_internal
     (* prepare logging *)
     Deferred_decl.reset ~enable:false ~threshold_opt:None;
     Provider_context.reset_telemetry ctx;
+    let prev_telemetry =
+      Telemetry.create () |> Provider_context.get_telemetry ctx ~costly:false
+    in
     let prev_tally_state = Counters.reset ~enable:true in
     let t = Unix.gettimeofday () in
 
@@ -285,10 +288,11 @@ let compute_tast_and_errors_unquarantined_internal
     Counters.restore_state prev_tally_state;
     let telemetry =
       telemetry
-      |> Provider_context.get_telemetry ctx
+      |> Provider_context.get_telemetry ctx ~costly:false
       |> Telemetry.float_
            ~key:"duration_decl_and_typecheck"
            ~value:(Unix.gettimeofday () -. t)
+      |> Telemetry.object_ ~key:"prev" ~value:prev_telemetry
     in
     (* File size. *)
     let telemetry =

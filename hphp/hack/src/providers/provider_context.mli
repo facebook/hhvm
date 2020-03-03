@@ -105,7 +105,7 @@ val unset_global_context_internal : unit -> unit
 
 (** Telemetry for a provider_context includes the current cache state of its backend,
 plus 'counters' like how many times cache has been read or evicted. *)
-val get_telemetry : t -> Telemetry.t -> Telemetry.t
+val get_telemetry : t -> costly:bool -> Telemetry.t -> Telemetry.t
 
 (** This function resets the 'counters' associated with telemetry. *)
 val reset_telemetry : t -> unit

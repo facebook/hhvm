@@ -9,6 +9,8 @@
 
 open Hh_core
 
+let ref_has_done_init = ref false
+
 (* Don't change the ordering of this record without updating hh_shared_init in
  * hh_shared.c, which indexes into config objects *)
 type config = {
@@ -91,15 +93,21 @@ let () =
 
 let get_telemetry_list = ref []
 
-let get_telemetry ~(costly : bool) : Telemetry.t =
-  let start_time = Unix.gettimeofday () in
-  let telemetry =
-    List.fold
-      !get_telemetry_list
-      ~init:(Telemetry.create ())
-      ~f:(fun acc get_telemetry -> get_telemetry ~costly acc)
-  in
-  telemetry |> Telemetry.duration ~start_time
+let get_telemetry () : Telemetry.t =
+  (* This function gets called by compute_tast, even in places which
+  deliberately don't initialize shared memory. In these places, no-op,
+  since otherwise reading from hh_log_level would segfault. *)
+  if !ref_has_done_init = false then
+    Telemetry.create ()
+  else
+    let start_time = Unix.gettimeofday () in
+    let telemetry =
+      List.fold
+        !get_telemetry_list
+        ~init:(Telemetry.create ())
+        ~f:(fun acc get_telemetry -> get_telemetry acc)
+    in
+    telemetry |> Telemetry.duration ~start_time
 
 (*****************************************************************************)
 (* Initializes the shared memory. Must be called before forking. *)
@@ -162,6 +170,7 @@ let rec shm_dir_init config ~num_workers = function
     end
 
 let init config ~num_workers =
+  ref_has_done_init := true;
   try anonymous_init config ~num_workers
   with Failed_anonymous_memfd_init ->
     EventLogger.(
@@ -560,8 +569,7 @@ end = struct
 
   let move from_key to_key = hh_move from_key to_key
 
-  let get_telemetry ~(costly : bool) (telemetry : Telemetry.t) : Telemetry.t =
-    ignore costly;
+  let get_telemetry (telemetry : Telemetry.t) : Telemetry.t =
     let count =
       Option.merge
         (Measure.get_count measure_add)
@@ -863,8 +871,7 @@ functor
         | Some changeset ->
           Hashtbl.iter (commit_action changeset.prev) changeset.current
 
-      let get_telemetry ~(costly : bool) (telemetry : Telemetry.t) : Telemetry.t
-          =
+      let get_telemetry (telemetry : Telemetry.t) : Telemetry.t =
         let rec rec_actions_and_depth acc_count acc_depth changeset_opt =
           match changeset_opt with
           | Some changeset ->
@@ -880,7 +887,7 @@ functor
         If instead we added up reachable words from each frame separately,
         then an item reachable from two frames would be double-counted. *)
         let bytes =
-          if costly then
+          if hh_log_level () > 0 then
             Some (Obj.reachable_words (Obj.repr !stack) * (Sys.word_size / 8))
           else
             None
@@ -1463,7 +1470,7 @@ module LocalCache (UserKeyType : UserKeyType) (Value : Value.Type) = struct
     L1.clear ();
     L2.clear ()
 
-  let get_telemetry ~(costly : bool) (telemetry : Telemetry.t) : Telemetry.t =
+  let get_telemetry (telemetry : Telemetry.t) : Telemetry.t =
     (* Many items are stored in both L1 (ordered) and L2 (freq) caches.
     We don't want to double-count them.
     So: we'll figure out the reachable words of the (L1,L2) tuple,
@@ -1480,7 +1487,7 @@ module LocalCache (UserKeyType : UserKeyType) (Value : Value.Type) = struct
       telemetry
     else
       let bytes =
-        if costly then
+        if hh_log_level () > 0 then
           Some (Obj.reachable_words (Obj.repr (obj1, obj2)) * Sys.word_size / 8)
         else
           None

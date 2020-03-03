@@ -539,6 +539,7 @@ public:
    */
   bool classof(const Class*) const;
   bool classofNonIFace(const Class*) const;
+  bool subtypeOf(const Class*) const;
 
   /*
    * Whether this class implements an interface called `name'.

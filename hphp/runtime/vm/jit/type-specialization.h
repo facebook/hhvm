@@ -18,6 +18,7 @@
 #define incl_HPHP_JIT_TYPE_SPECIALIZATION_H_
 
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 
 #include <folly/Optional.h>
@@ -28,6 +29,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Class;
+struct RecordDesc;
 
 namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
@@ -160,9 +162,10 @@ ArraySpec::SortOf operator&(ArraySpec::SortOf l, ArraySpec::SortOf r);
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Class type specialization.
+ * Class and RecordDesc type specialization.
  */
-struct ClassSpec {
+template<typename T> // T is either Class or RecordDesc
+struct ClsRecSpec {
   /*
    * Constructor tags.
    */
@@ -172,9 +175,9 @@ struct ClassSpec {
   /*
    * Constructors.
    */
-  constexpr ClassSpec();
-  ClassSpec(const Class* cls, SubTag);
-  ClassSpec(const Class* cls, ExactTag);
+  constexpr ClsRecSpec();
+  ClsRecSpec(const T*, SubTag);
+  ClsRecSpec(const T*, ExactTag);
 
   /*
    * Human-readable debug string.
@@ -186,8 +189,21 @@ struct ClassSpec {
    */
   uintptr_t bits() const;
   bool exact() const;
-  const Class* cls() const;
-  const Class* exactCls() const;
+
+  // Methods for accessing Class* and RecordDesc* of Class and RecordDesc
+  // specializations respectively.
+  template<typename D = void,
+           typename = std::enable_if_t<std::is_same<T, Class>::value, D>>
+  const Class* cls() const { return typeCns(); }
+  template<typename D = void,
+           typename = std::enable_if_t<std::is_same<T, Class>::value, D>>
+  const Class* exactCls() const { return exactTypeCns(); }
+  template<typename D = void,
+           typename = std::enable_if_t<std::is_same<T, RecordDesc>::value, D>>
+  const RecordDesc* rec() const { return typeCns(); }
+  template<typename D = void,
+           typename = std::enable_if_t<std::is_same<T, RecordDesc>::value, D>>
+  const RecordDesc* exactRec() const { return exactTypeCns(); }
 
   /*
    * Casts.
@@ -199,32 +215,36 @@ struct ClassSpec {
   /*
    * Comparisons.
    */
-  bool operator==(const ClassSpec& rhs) const;
-  bool operator!=(const ClassSpec& rhs) const;
-  bool operator<=(const ClassSpec& rhs) const;
-  bool operator>=(const ClassSpec& rhs) const;
-  bool operator<(const ClassSpec& rhs) const;
-  bool operator>(const ClassSpec& rhs) const;
+  bool operator==(const ClsRecSpec<T>& rhs) const;
+  bool operator!=(const ClsRecSpec<T>& rhs) const;
+  bool operator<=(const ClsRecSpec<T>& rhs) const;
+  bool operator>=(const ClsRecSpec<T>& rhs) const;
+  bool operator<(const ClsRecSpec<T>& rhs) const;
+  bool operator>(const ClsRecSpec<T>& rhs) const;
 
   /*
    * Combinators.
    */
-  ClassSpec operator|(const ClassSpec& rhs) const;
-  ClassSpec operator&(const ClassSpec& rhs) const;
-  ClassSpec operator-(const ClassSpec& rhs) const;
+  ClsRecSpec<T> operator|(const ClsRecSpec<T>& rhs) const;
+  ClsRecSpec<T> operator&(const ClsRecSpec<T>& rhs) const;
+  ClsRecSpec<T> operator-(const ClsRecSpec<T>& rhs) const;
 
   /*
    * Top and bottom types.
    */
-  static constexpr ClassSpec Top();
-  static constexpr ClassSpec Bottom();
+  static constexpr ClsRecSpec<T> Top();
+  static constexpr ClsRecSpec<T> Bottom();
 
 private:
   /*
    * Bottom constructor.
    */
   enum class BottomTag {};
-  explicit constexpr ClassSpec(BottomTag);
+  explicit constexpr ClsRecSpec(BottomTag);
+
+  const T* typeCns() const;
+  const T* exactTypeCns() const;
+
 
   /*
    * Sort tag.
@@ -248,6 +268,14 @@ private:
   };
 };
 
+using ClassSpec = ClsRecSpec<Class>;
+using RecordSpec = ClsRecSpec<RecordDesc>;
+template<>
+ClassSpec ClassSpec::operator&(const ClassSpec&) const;
+
+template<>
+RecordSpec RecordSpec::operator&(const RecordSpec&) const;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -257,6 +285,7 @@ enum class SpecKind : uint8_t {
   None = 0,
   Array = 1 << 0,
   Class = 1 << 1,
+  Record = 1 << 2,
 };
 
 SpecKind operator|(SpecKind l, SpecKind r);
@@ -273,7 +302,7 @@ struct TypeSpec {
    * Constructors.
    */
   TypeSpec();
-  TypeSpec(ArraySpec, ClassSpec);
+  TypeSpec(ArraySpec, ClassSpec, RecordSpec);
 
   /*
    * Accessors.
@@ -281,6 +310,7 @@ struct TypeSpec {
   SpecKind kind() const;
   ArraySpec arrSpec() const;
   ClassSpec clsSpec() const;
+  RecordSpec recSpec() const;
 
   /*
    * Comparisons.
@@ -304,6 +334,7 @@ private:
   SpecKind m_kind;
   ArraySpec m_arrSpec;
   ClassSpec m_clsSpec;
+  RecordSpec m_recSpec;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

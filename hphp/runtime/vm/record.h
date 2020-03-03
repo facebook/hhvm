@@ -187,6 +187,10 @@ struct RecordDesc : AtomicCountable {
 
   const RecordDesc* parent() const { return m_parent.get(); }
   bool recordDescOf(const RecordDesc* rec) const;
+  bool subtypeOf(const RecordDesc* rec) const { return recordDescOf(rec); }
+
+  // Returns null if there is no common ancestor
+  const RecordDesc* commonAncestor(const RecordDesc*) const;
 
   // Fields declared in current record as well as in its parent(s)
   size_t numFields() const { return m_fields.size(); }
@@ -240,6 +244,19 @@ struct RecordDesc : AtomicCountable {
   Avail availWithParent(RecordDesc*& parent, bool tryAutoload = false) const;
   bool isZombie() const { return !m_cachedRecordDesc.bound(); }
 
+  /*
+   * Return true, and set the m_serialized flag, iff this RecordDesc hasn't
+   * been serialized yet (see prof-data-serialize.cpp).
+   *
+   * Not thread safe - caller is responsible for any necessary locking.
+   */
+  bool serialize() const;
+
+  /*
+   * Return true if this RecordDesc was already serialized.
+   */
+  bool wasSerialized() const;
+
 private:
   void setParent();
   void setFields();
@@ -249,6 +266,8 @@ private:
   FieldMap m_fields;
 
   mutable rds::Link<LowPtr<RecordDesc>, rds::Mode::NonLocal> m_cachedRecordDesc;
+
+  mutable bool m_serialized : 1;
 };
 
 inline bool recordHasPersistentRDS(const RecordDesc* rec) {

@@ -418,6 +418,7 @@ public:
 
   static constexpr bits_t kArrSpecBits  = kArrLike;
   static constexpr bits_t kClsSpecBits  = kObj | kCls;
+  static constexpr bits_t kRecSpecBits  = kRecord | kRecDesc;
 
   /////////////////////////////////////////////////////////////////////////////
   // Basic methods.
@@ -729,6 +730,12 @@ public:
   static Type SubObj(const Class* cls);
   static Type ExactObj(const Class* cls);
 
+  /*
+   * Return a specialized TRecord.
+   */
+  static Type SubRecord(const RecordDesc*);
+  static Type ExactRecord(const RecordDesc*);
+
   static Type ExactCls(const Class* cls);
   static Type SubCls(const Class* cls);
 
@@ -796,6 +803,7 @@ public:
    */
   ArraySpec arrSpec() const;
   ClassSpec clsSpec() const;
+  RecordSpec recSpec() const;
 
   /*
    * Return a discriminated TypeSpec for this Type's specialization.
@@ -837,6 +845,7 @@ private:
   Type(bits_t bits, Ptr ptr, Mem mem, bool hasConstVal, uintptr_t extra);
   Type(Type t, ArraySpec arraySpec);
   Type(Type t, ClassSpec classSpec);
+  Type(Type t, RecordSpec recSpec);
 
   /*
    * Bit-pack a DataType
@@ -892,9 +901,10 @@ private:
     rds::Handle m_rdsHandleVal;
     TypedValue* m_ptrVal;
 
-    // Specializations for object classes and arrays.
+    // Specializations for object classes, records and arrays.
     ClassSpec m_clsSpec;
     ArraySpec m_arrSpec;
+    RecordSpec m_recSpec;
   };
 };
 

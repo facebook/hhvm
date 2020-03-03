@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/record.h"
 
 namespace HPHP { namespace jit {
 
@@ -170,49 +171,19 @@ bool ArraySpec::checkInvariants() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// ClassSpec.
+// ClsRecSpec.
 
-bool ClassSpec::operator<=(const ClassSpec& rhs) const {
-  auto const& lhs = *this;
-
-  if (lhs == rhs) return true;
-  if (lhs == Bottom() || rhs == Top()) return true;
-  if (lhs == Top() || rhs == Bottom()) return false;
-
-  return !rhs.exact() && lhs.cls()->classof(rhs.cls());
-}
-
-ClassSpec ClassSpec::operator|(const ClassSpec& rhs) const {
-  auto const& lhs = *this;
-
-  if (lhs <= rhs) return rhs;
-  if (rhs <= lhs) return lhs;
-
-  assertx(lhs.cls() && rhs.cls());
-
-  // We're unwilling to unify with interfaces, so just return Top.
-  if (!isNormalClass(lhs.cls()) || !isNormalClass(rhs.cls())) {
-    return Top();
-  }
-
-  // Unify to a common ancestor if possible.
-  if (auto cls = lhs.cls()->commonAncestor(rhs.cls())) {
-    return ClassSpec(cls, ClassSpec::SubTag{});
-  }
-
-  return Top();
-}
-
+template<>
 ClassSpec ClassSpec::operator&(const ClassSpec& rhs) const {
   auto const& lhs = *this;
 
   if (lhs <= rhs) return lhs;
   if (rhs <= lhs) return rhs;
 
-  assertx(lhs.cls() && rhs.cls());
+  assertx(lhs.typeCns() && rhs.typeCns());
 
   // If neither class is an interface, their intersection is trivial.
-  if (isNormalClass(lhs.cls()) && isNormalClass(rhs.cls())) {
+  if (isNormalClass(lhs.typeCns()) && isNormalClass(rhs.typeCns())) {
     return Bottom();
   }
 
@@ -222,21 +193,26 @@ ClassSpec ClassSpec::operator&(const ClassSpec& rhs) const {
   // class better than an interface, because it might influence important
   // things like method dispatch or property accesses better than an interface
   // type could.
-  if (isNormalClass(lhs.cls())) return lhs;
-  if (isNormalClass(rhs.cls())) return rhs;
+  if (isNormalClass(lhs.typeCns())) return lhs;
+  if (isNormalClass(rhs.typeCns())) return rhs;
 
   // If they are both interfaces, we have to pick one arbitrarily, but we must
   // do so in a way that is stable regardless of which one was passed as lhs or
   // rhs (to guarantee that operator& is commutative).  We use the class name
   // in this case to ensure that the ordering is dependent only on the source
   // program (Class* or something like that seems less desirable).
-  return lhs.cls()->name()->compare(rhs.cls()->name()) < 0 ? lhs : rhs;
+  return lhs.typeCns()->name()->compare(rhs.typeCns()->name()) < 0 ? lhs : rhs;
 }
 
-std::string ClassSpec::toString() const {
-  auto const type = exact() ? "=" : "<=";
-  auto const name = cls()->name()->data();
-  return folly::to<std::string>(type, name);
+template<>
+RecordSpec RecordSpec::operator&(const RecordSpec& rhs) const {
+  auto const& lhs = *this;
+
+  if (lhs <= rhs) return lhs;
+  if (rhs <= lhs) return rhs;
+
+  assertx(lhs.typeCns() && rhs.typeCns());
+  return Bottom();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

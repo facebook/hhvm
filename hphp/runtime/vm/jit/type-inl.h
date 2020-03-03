@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
+#include "hphp/runtime/vm/record.h"
 
 #include "hphp/util/hash.h"
 
@@ -511,6 +512,15 @@ inline Type Type::ExactObj(const Class* cls) {
   return Type(TObj, ClassSpec(cls, ClassSpec::ExactTag{}));
 }
 
+inline Type Type::SubRecord(const RecordDesc* rec) {
+  if (rec->attrs() & AttrFinal) return ExactRecord(rec);
+  return Type(TRecord, RecordSpec(rec, RecordSpec::SubTag{}));
+}
+
+inline Type Type::ExactRecord(const RecordDesc* rec) {
+  return Type(TRecord, RecordSpec(rec, RecordSpec::ExactTag{}));
+}
+
 inline Type Type::SubCls(const Class* cls) {
   if (cls->attrs() & AttrNoOverride) return ExactCls(cls);
   return Type(TCls, ClassSpec(cls, ClassSpec::SubTag{}));
@@ -528,7 +538,7 @@ inline Type Type::unspecialize() const {
 // Specialization introspection.
 
 inline bool Type::isSpecialized() const {
-  return clsSpec() || arrSpec();
+  return clsSpec() || arrSpec() || recSpec();
 }
 
 inline bool Type::supports(bits_t bits, SpecKind kind) {
@@ -539,6 +549,8 @@ inline bool Type::supports(bits_t bits, SpecKind kind) {
       return (bits & kArrSpecBits) != kBottom;
     case SpecKind::Class:
       return (bits & kClsSpecBits) != kBottom;
+    case SpecKind::Record:
+      return (bits & kRecSpecBits) != kBottom;
   }
   not_reached();
 }
@@ -552,7 +564,9 @@ inline ArraySpec Type::arrSpec() const {
 
   // Currently, a Type which supports multiple specializations is trivial
   // along all of them.
-  if (supports(SpecKind::Class)) return ArraySpec::Top();
+  if (supports(SpecKind::Class) || supports(SpecKind::Record)) {
+    return ArraySpec::Top();
+  }
 
   // For constant pointers, we don't have an array-like val, so return Top.
   // For constant non-vanilla array-likes, return Top until we have the ability
@@ -574,7 +588,9 @@ inline ClassSpec Type::clsSpec() const {
 
   // Currently, a Type which supports multiple specializations is trivial
   // along all of them.
-  if (supports(SpecKind::Array)) return ClassSpec::Top();
+  if (supports(SpecKind::Array) || supports(SpecKind::Record)) {
+    return ClassSpec::Top();
+  }
 
   if (m_hasConstVal) {
     if (m_ptr != Ptr::NotPtr) return ClassSpec::Top();
@@ -585,8 +601,26 @@ inline ClassSpec Type::clsSpec() const {
   return m_clsSpec;
 }
 
+inline RecordSpec Type::recSpec() const {
+  if (!supports(SpecKind::Record)) return RecordSpec::Bottom();
+
+  // Currently, a Type which supports multiple specializations is trivial
+  // along all of them.
+  if (supports(SpecKind::Array) || supports(SpecKind::Class)) {
+    return RecordSpec::Top();
+  }
+
+  if (m_hasConstVal) {
+    if (m_ptr != Ptr::NotPtr) return RecordSpec::Top();
+    return RecordSpec(recVal(), RecordSpec::ExactTag{});
+  }
+
+  assertx(m_recSpec != RecordSpec::Bottom());
+  return m_recSpec;
+}
+
 inline TypeSpec Type::spec() const {
-  return TypeSpec(arrSpec(), clsSpec());
+  return TypeSpec(arrSpec(), clsSpec(), recSpec());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -663,6 +697,17 @@ inline Type::Type(Type t, ClassSpec classSpec)
 {
   assertx(checkValid());
   assertx(m_clsSpec != ClassSpec::Bottom());
+}
+
+inline Type::Type(Type t, RecordSpec recSpec)
+  : m_bits(t.m_bits)
+  , m_ptr(t.m_ptr)
+  , m_mem(t.m_mem)
+  , m_hasConstVal(false)
+  , m_recSpec(recSpec)
+{
+  assertx(checkValid());
+  assertx(m_recSpec != RecordSpec::Bottom());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

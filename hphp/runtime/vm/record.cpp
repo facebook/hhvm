@@ -192,7 +192,8 @@ void RecordDesc::setFields() {
 
 RecordDesc::RecordDesc(PreRecordDesc* preRec, RecordDesc* parent)
   : m_parent(parent)
-  , m_preRec(PreRecordDescPtr(preRec)) {
+  , m_preRec(PreRecordDescPtr(preRec))
+  , m_serialized(false) {
   setParent();
   setFields();
 }
@@ -206,5 +207,29 @@ bool RecordDesc::recordDescOf(const RecordDesc* rec) const {
     curr = curr->m_parent.get();
   }
   return false;
+}
+
+const RecordDesc* RecordDesc::commonAncestor(const RecordDesc* rec) const {
+  // TODO: Optimize this. See T45403957.
+  assertx(rec);
+  std::vector<const RecordDesc*> thisVec;
+  std::vector<const RecordDesc*> recVec;
+  for (auto r = this; r != nullptr; r = r->m_parent.get()) thisVec.push_back(r);
+  for (auto r = rec; r != nullptr; r = r->m_parent.get()) recVec.push_back(r);
+  auto idx = std::min(thisVec.size(), recVec.size()) - 1;
+  do {
+    if (thisVec[idx] == recVec[idx]) return thisVec[idx];
+  } while(idx--);
+  return nullptr;
+}
+
+bool RecordDesc::serialize() const {
+  if (m_serialized) return false;
+  m_serialized = true;
+  return true;
+}
+
+bool RecordDesc::wasSerialized() const {
+  return m_serialized;
 }
 }

@@ -232,6 +232,8 @@ inline bool Class::classof(const Class* cls) const {
   return classofNonIFace(cls);
 }
 
+inline bool Class::subtypeOf(const Class* cls) const { return classof(cls); }
+
 inline bool Class::ifaceofDirect(const StringData* name) const {
   return m_interfaces.contains(name);
 }

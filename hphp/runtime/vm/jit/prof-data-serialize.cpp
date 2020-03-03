@@ -84,17 +84,21 @@ constexpr uint32_t k86pinitSlot = 0x80000000u;
 constexpr uint32_t k86sinitSlot = 0x80000001u;
 constexpr uint32_t k86linitSlot = 0x80000002u;
 
+constexpr int kSerializedPtrBit = 0x1;
+constexpr int kSerializedTypeAliasBit = 0x2;
+constexpr int kSerializedRecordBit = 0x4;
+
 template<typename F>
 auto deserialize(ProfDataDeserializer&ser, F&& f) -> decltype(f()) {
   using T = decltype(f());
   auto const ptr = read_raw<uintptr_t>(ser);
   if (!ptr) return T{};
-  if (ptr & 1) {
-    auto& ent = ser.getEnt(reinterpret_cast<T>(ptr - 1));
+  if (ptr & kSerializedPtrBit) {
+    auto& ent = ser.getEnt(reinterpret_cast<T>(ptr - kSerializedPtrBit));
     assertx(!ent);
     ent = f();
     ITRACE(3, "0x{:08x} => 0x{:08x}\n",
-           ptr - 1, reinterpret_cast<uintptr_t>(ent));
+           ptr - kSerializedPtrBit, reinterpret_cast<uintptr_t>(ent));
     assertx(ent);
     return ent;
   }
@@ -105,13 +109,13 @@ auto deserialize(ProfDataDeserializer&ser, F&& f) -> decltype(f()) {
 
 void write_serialized_ptr(ProfDataSerializer& ser, const void* p) {
   auto const ptr_as_int = reinterpret_cast<uintptr_t>(p);
-  assertx(!(ptr_as_int & 1));
-  write_raw(ser, ptr_as_int | 1);
+  assertx(!(ptr_as_int & kSerializedPtrBit));
+  write_raw(ser, ptr_as_int | kSerializedPtrBit);
 }
 
 void write_raw_ptr(ProfDataSerializer& ser, const void* p) {
   auto const ptr_as_int = reinterpret_cast<uintptr_t>(p);
-  assertx(!(ptr_as_int & 1));
+  assertx(!(ptr_as_int & kSerializedPtrBit));
   write_raw(ser, ptr_as_int);
 }
 
@@ -451,13 +455,19 @@ std::unique_ptr<ProfTransRec> read_prof_trans_rec(ProfDataDeserializer& ser) {
 
 bool write_type_alias(ProfDataSerializer&, const TypeAliasReq*);
 
-bool write_type_alias_or_class(ProfDataSerializer& ser, const NamedEntity* ne) {
+bool write_named_type(ProfDataSerializer& ser, const NamedEntity* ne) {
   if (!ne) return false;
   if (auto const cls = ne->clsList()) {
     if (!(cls->attrs() & AttrUnique)) return false;
     auto const filepath = cls->preClass()->unit()->filepath();
     if (!filepath || filepath->empty()) return false;
     if (!cls->wasSerialized()) write_class(ser, cls);
+    return true;
+  } else if (auto const rec = ne->recordList()) {
+    if (!(rec->attrs() & AttrUnique)) return false;
+    auto const filepath = rec->preRecordDesc()->unit()->filepath();
+    if (!filepath || filepath->empty()) return false;
+    if (!rec->wasSerialized()) write_record(ser, rec);
     return true;
   }
   if (!ne->isPersistentTypeAlias()) return false;
@@ -474,7 +484,7 @@ bool write_type_alias(ProfDataSerializer& ser, const TypeAliasReq* td) {
   // in. We also need to keep track of both whether we already tried
   // serialize this one, and whether it was successful. Use td2 for
   // that too.
-  auto const td2 = reinterpret_cast<const char*>(td) + 2;
+  auto const td2 = reinterpret_cast<const char*>(td) + kSerializedTypeAliasBit;
   if (!ser.serialize(td)) {
     return ser.wasSerialized(td2);
   }
@@ -491,8 +501,8 @@ bool write_type_alias(ProfDataSerializer& ser, const TypeAliasReq* td) {
         case TypeStructure::Kind::T_xhp:
         {
           auto const clsname = get_ts_classname(ta.typeStructure.get());
-          if (!write_type_alias_or_class(ser,
-                                         NamedEntity::get(clsname, false))) {
+          if (!write_named_type(ser, NamedEntity::get(clsname,
+                                                      /*allowCreate*/false))) {
             return false;
           }
           break;
@@ -602,6 +612,35 @@ Class* read_class_internal(ProfDataDeserializer& ser) {
   return cls;
 }
 
+RecordDesc* read_record_internal(ProfDataDeserializer& ser) {
+  auto const id = read_raw<decltype(std::declval<PreRecordDesc*>()->id())>(ser);
+  auto const unit = read_unit(ser);
+
+  read_container(ser,
+                 [&] {
+                   auto const dep = read_record(ser);
+                   auto const ne = dep->preRecordDesc()->namedEntity();
+                   // if it's not persistent, make sure that dep
+                   // is the active record for this NamedEntity
+                   assertx(ne->m_cachedRecordDesc.bound());
+                   if (ne->m_cachedRecordDesc.isNormal()) {
+                     ne->setCachedRecordDesc(dep);
+                   }
+                 });
+
+  auto const preRec = unit->lookupPreRecordId(id);
+  auto const ne = preRec->namedEntity();
+  // If it's not persistent, make sure its NamedEntity is
+  // unbound, ready for DefClass
+  if (ne->m_cachedRecordDesc.bound() &&
+      ne->m_cachedRecordDesc.isNormal()) {
+    ne->m_cachedRecordDesc.markUninit();
+  }
+
+  auto const rec = Unit::defRecordDesc(preRec, true);
+  return rec;
+}
+
 /*
  * This reads in TypeAliases and Classes that are used for code gen,
  * but otherwise aren't needed for profiling. We just need them to be
@@ -609,20 +648,32 @@ Class* read_class_internal(ProfDataDeserializer& ser) {
  * whether or not to continue (the end of the list is marked by a
  * null pointer).
  */
-bool read_type_alias_or_class(ProfDataDeserializer& ser) {
+bool read_named_type(ProfDataDeserializer& ser) {
   auto const ptr = read_raw<uintptr_t>(ser);
   if (!ptr) return false;
-  assertx(ptr & 1);
+  assertx(ptr & kSerializedPtrBit);
 
-  if (!(ptr & 2)) {
-    ITRACE(2, "Class>\n");
-    Trace::Indent _;
-    auto& ent = ser.getEnt(reinterpret_cast<Class*>(ptr - 1));
-    assertx(!ent);
-    ent = read_class_internal(ser);
-    assertx(ent);
-    ITRACE(2, "Class: {}\n", ent->name());
-    return true;
+  if (!(ptr & kSerializedTypeAliasBit)) {
+    if (ptr & kSerializedRecordBit) {
+      ITRACE(2, "Record>\n");
+      Trace::Indent _;
+      auto& ent =
+        ser.getEnt(reinterpret_cast<RecordDesc*>(ptr - kSerializedPtrBit));
+      assertx(!ent);
+      ent = read_record_internal(ser);
+      assertx(ent);
+      ITRACE(2, "RecordDesc: {}\n", ent->name());
+      return true;
+    } else {
+      ITRACE(2, "Class>\n");
+      Trace::Indent _;
+      auto& ent = ser.getEnt(reinterpret_cast<Class*>(ptr - kSerializedPtrBit));
+      assertx(!ent);
+      ent = read_class_internal(ser);
+      assertx(ent);
+      ITRACE(2, "Class: {}\n", ent->name());
+      return true;
+    }
   }
 
   auto const unit = read_unit(ser);
@@ -656,7 +707,7 @@ void read_profiled_funcs(ProfDataDeserializer& ser, ProfData* pd) {
   }
 }
 
-void write_classes_and_type_aliases(ProfDataSerializer& ser, ProfData* pd) {
+void write_named_types(ProfDataSerializer& ser, ProfData* pd) {
   auto const maxFuncId = pd->maxProfilingFuncId();
 
   // in an attempt to get a sensible order for these, start with the
@@ -665,23 +716,23 @@ void write_classes_and_type_aliases(ProfDataSerializer& ser, ProfData* pd) {
     if (!Func::isFuncIdValid(fid) || !pd->profiling(fid)) continue;
     auto const func = Func::fromFuncId(fid);
     for (auto const& p : func->params()) {
-      write_type_alias_or_class(ser, p.typeConstraint.namedEntity());
+      write_named_type(ser, p.typeConstraint.namedEntity());
     }
   }
 
   // Now just iterate and write anything that remains
   NamedEntity::foreach_name(
     [&] (NamedEntity& ne) {
-      write_type_alias_or_class(ser, &ne);
+      write_named_type(ser, &ne);
     }
   );
   write_raw(ser, uintptr_t{});
 }
 
-void read_classes_and_type_aliases(ProfDataDeserializer& ser) {
-  BootStats::Block timer("DES_read_classes_and_type_aliases",
+void read_named_types(ProfDataDeserializer& ser) {
+  BootStats::Block timer("DES_read_classes_and_type_aliases_and_records",
                          RuntimeOption::ServerExecutionMode());
-  while (read_type_alias_or_class(ser)) {
+  while (read_named_type(ser)) {
     // nothing to do. this was just to make sure everything is loaded
     // into the NamedEntity table
   }
@@ -1083,6 +1134,10 @@ Class*& ProfDataDeserializer::getEnt(const Class* p) {
   return classMap[uintptr_t(p)];
 }
 
+RecordDesc*& ProfDataDeserializer::getEnt(const RecordDesc* p) {
+  return recordMap[uintptr_t(p)];
+}
+
 const RepoAuthType::Array*&
 ProfDataDeserializer::getEnt(const RepoAuthType::Array* p) {
   return ratMap[uintptr_t(p)];
@@ -1098,6 +1153,10 @@ bool ProfDataSerializer::serialize(const Func* func) {
 
 bool ProfDataSerializer::serialize(const Class* cls) {
   return cls->serialize();
+}
+
+bool ProfDataSerializer::serialize(const RecordDesc* rec) {
+  return rec->serialize();
 }
 
 void write_raw_string(ProfDataSerializer& ser, const StringData* str) {
@@ -1248,6 +1307,45 @@ Class* read_class(ProfDataDeserializer& ser) {
   );
 
   ITRACE(2, "Class: {}\n", ret ? ret->name() : staticEmptyString());
+  return ret;
+}
+
+void write_record(ProfDataSerializer& ser, const RecordDesc* rec) {
+  SCOPE_EXIT {
+    ITRACE(2, "RecordDesc: {}\n", rec ? rec->name() : staticEmptyString());
+  };
+  ITRACE(2, "RecordDesc>\n");
+  Trace::Indent _;
+
+  auto const rec4 = reinterpret_cast<const char*>(rec) + kSerializedRecordBit;
+  if (!rec || !ser.serialize(rec)) return write_raw(ser, rec4);
+
+  write_serialized_ptr(ser, rec4);
+  write_raw(ser, rec->preRecordDesc()->id());
+  write_unit(ser, rec->preRecordDesc()->unit());
+
+  jit::vector<const RecordDesc*> dependents;
+  auto record_dep = [&] (const RecordDesc* dep) {
+    if (!dep) return;
+    if (!dep->wasSerialized() || !recordHasPersistentRDS(dep)) {
+      dependents.emplace_back(dep);
+    }
+  };
+  record_dep(rec->parent());
+  write_container(ser, dependents, write_record);
+}
+
+RecordDesc* read_record(ProfDataDeserializer& ser) {
+  ITRACE(2, "RecordDesc>\n");
+  auto const ret = deserialize(
+    ser,
+    [&] () -> RecordDesc* {
+      Trace::Indent _;
+      return read_record_internal(ser);
+    }
+  );
+
+  ITRACE(2, "RecordDesc: {}\n", ret ? ret->name() : staticEmptyString());
   return ret;
 }
 
@@ -1452,7 +1550,7 @@ std::string serializeProfData(const std::string& filename) {
     // data, but jitted code might still use Classes and TypeAliasReqs
     // that haven't been otherwise mentioned (eg VerifyParamType,
     // InstanceOfD etc).
-    write_classes_and_type_aliases(ser, pd);
+    write_named_types(ser, pd);
 
     ser.finalize();
 
@@ -1531,7 +1629,7 @@ std::string deserializeProfData(const std::string& filename, int numWorkers) {
 
     read_target_profiles(ser);
 
-    read_classes_and_type_aliases(ser);
+    read_named_types(ser);
 
     if (!ser.done()) {
       // We have profile data for the optimized code, so deserialize it too.

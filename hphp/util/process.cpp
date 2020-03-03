@@ -141,7 +141,9 @@ bool Process::GetMemoryInfo(MemInfo& info) {
     char line[128];
     while (fgets(line, sizeof(line), f)) {
       auto const kb = readSize(line, true);
-      if (!strncmp(line, "MemFree:", 8)) {
+      if (!strncmp(line, "MemTotal:", 9)) {
+        if (kb >= 0) info.totalMb = kb / 1024;
+      } else if (!strncmp(line, "MemFree:", 8)) {
         if (kb >= 0) info.freeMb = kb / 1024;
       } else if (!strncmp(line, "Buffers:", 8)) {
         if (kb >= 0) info.buffersMb = kb / 1024;

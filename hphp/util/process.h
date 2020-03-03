@@ -37,12 +37,13 @@ namespace HPHP {
  * System-wide memory infomation from /proc/meminfo
  */
 struct MemInfo {
+  int64_t totalMb{-1};
   int64_t freeMb{-1};
   int64_t cachedMb{-1};
   int64_t buffersMb{-1};
   int64_t availableMb{-1};
   bool valid() const {
-    return (freeMb | cachedMb | buffersMb | availableMb) >= 0;
+    return (totalMb | freeMb | cachedMb | buffersMb | availableMb) >= 0;
   }
 };
 

@@ -58,6 +58,7 @@ Some operations may make changes to global state (e.g. write to shared memory
 heaps). To ensure that no changes escape the scope of your operation, use
 [Provider_utils.respect_but_quarantine_unsaved_changes]. *)
 type t = {
+  popt: ParserOptions.t;
   tcopt: TypecheckerOptions.t;
   backend: Provider_backend.t;
   entries: entry Relative_path.Map.t;
@@ -69,21 +70,25 @@ have a [ServerEnv.env].
 If you have a [ServerEnv.env], you probably want to use
 [Provider_utils.ctx_from_server_env] instead. *)
 val empty_for_tool :
-  tcopt:TypecheckerOptions.t -> backend:Provider_backend.t -> t
+  popt:ParserOptions.t ->
+  tcopt:TypecheckerOptions.t ->
+  backend:Provider_backend.t ->
+  t
 
 (** The empty context, for use with Multiworker workers. This assumes that the
 backend is shared memory. We don't want to serialize and send the entire
 [ServerEnv.env] to these workers because a [ServerEnv.env] contains large data
 objects (such as the forward naming table). *)
-val empty_for_worker : tcopt:TypecheckerOptions.t -> t
+val empty_for_worker : popt:ParserOptions.t -> tcopt:TypecheckerOptions.t -> t
 
 (** The empty context, for use in tests, where there may not be a
 [ServerEnv.env] available. *)
-val empty_for_test : tcopt:TypecheckerOptions.t -> t
+val empty_for_test : popt:ParserOptions.t -> tcopt:TypecheckerOptions.t -> t
 
 (** The empty context, for use in debugging aides in production code, where
 there may not be a [ServerEnv.env] available. *)
-val empty_for_debugging : tcopt:TypecheckerOptions.t -> t
+val empty_for_debugging :
+  popt:ParserOptions.t -> tcopt:TypecheckerOptions.t -> t
 
 (** Update the [TypecheckerOptions.t] contained within the [t]. *)
 val map_tcopt : t -> f:(TypecheckerOptions.t -> TypecheckerOptions.t) -> t

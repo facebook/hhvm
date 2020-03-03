@@ -77,14 +77,6 @@ module Delegate = Typing_service_delegate
 
 type progress = job_progress
 
-(*****************************************************************************)
-(* The place where we store the shared data in cache *)
-(*****************************************************************************)
-
-module TypeCheckStore = GlobalStorage.Make (struct
-  type t = TypecheckerOptions.t
-end)
-
 let neutral = Errors.empty
 
 (*****************************************************************************)
@@ -407,18 +399,17 @@ let process_files
   result
 
 let load_and_process_files
+    (ctx : Provider_context.t)
     (dynamic_view_files : Relative_path.Set.t)
     (errors : Errors.t)
     (progress : computation_progress)
     ~(memory_cap : int option)
     ~(check_info : check_info) : Errors.t * computation_progress =
-  let opts = TypeCheckStore.load () in
   (* When the type-checking worker receives SIGUSR1, display a position which
      corresponds approximately with the function/expression being checked. *)
   Sys_utils.set_signal
     Sys.sigusr1
     (Sys.Signal_handle Typing.debug_print_last_pos);
-  let ctx = Provider_context.empty_for_worker ~tcopt:opts in
   process_files dynamic_view_files ctx errors progress ~memory_cap ~check_info
 
 (*****************************************************************************)
@@ -592,17 +583,16 @@ let on_cancelled
   `job` runs in each worker and does not have access to this mutable state.
  *)
 let process_in_parallel
+    (ctx : Provider_context.t)
     (dynamic_view_files : Relative_path.Set.t)
     (workers : MultiWorker.worker list option)
     (delegate_state : Delegate.state)
     (telemetry : Telemetry.t)
-    (opts : TypecheckerOptions.t)
     (fnl : file_computation list)
     ~(interrupt : 'a MultiWorker.interrupt_config)
     ~(memory_cap : int option)
     ~(check_info : check_info) :
     Errors.t * Delegate.state * Telemetry.t * 'a * Relative_path.t list =
-  TypeCheckStore.store opts;
   let delegate_state = ref delegate_state in
   let files_to_process = ref fnl in
   let files_in_progress = Hash_set.Poly.create () in
@@ -615,9 +605,12 @@ let process_in_parallel
     ~unit:"files";
   let next = next workers delegate_state files_to_process files_in_progress in
   let should_prefetch_deferred_files =
-    Vfs.is_vfs () && TypecheckerOptions.prefetch_deferred_files opts
+    Vfs.is_vfs ()
+    && TypecheckerOptions.prefetch_deferred_files ctx.Provider_context.tcopt
   in
-  let job = load_and_process_files dynamic_view_files ~memory_cap ~check_info in
+  let job =
+    load_and_process_files ctx dynamic_view_files ~memory_cap ~check_info
+  in
   let job (errors : Errors.t) (progress : progress) =
     let (errors, computation_progress) =
       match progress.kind with
@@ -646,7 +639,6 @@ let process_in_parallel
   let telemetry =
     Typing_service_delegate.add_telemetry !delegate_state telemetry
   in
-  TypeCheckStore.clear ();
   let paths_of (cancelled_results : progress list) : Relative_path.t list =
     let paths_of (cancelled_progress : progress) =
       let cancelled_computations = cancelled_progress.progress.remaining in
@@ -720,10 +712,10 @@ let should_process_sequentially
   | _ -> false
 
 let go_with_interrupt
+    (ctx : Provider_context.t)
     (workers : MultiWorker.worker list option)
     (delegate_state : Delegate.state)
     (telemetry : Telemetry.t)
-    (opts : TypecheckerOptions.t)
     (dynamic_view_files : Relative_path.Set.t)
     (fnl : Relative_path.t list)
     ~(interrupt : 'a MultiWorker.interrupt_config)
@@ -732,9 +724,8 @@ let go_with_interrupt
     (Errors.t, Delegate.state, Telemetry.t, 'a) job_result =
   let fnl = List.map fnl ~f:(fun path -> Check { path; deferred_count = 0 }) in
   Mocking.with_test_mocking fnl @@ fun fnl ->
-  let ctx = Provider_context.empty_for_worker ~tcopt:opts in
   let result =
-    if should_process_sequentially opts fnl then (
+    if should_process_sequentially ctx.Provider_context.tcopt fnl then (
       Hh_logger.log "Type checking service will process files sequentially";
       let progress = { completed = []; remaining = fnl; deferred = [] } in
       let (errors, _) =
@@ -750,11 +741,11 @@ let go_with_interrupt
     ) else (
       Hh_logger.log "Type checking service will process files in parallel";
       process_in_parallel
+        ctx
         dynamic_view_files
         workers
         delegate_state
         telemetry
-        ctx.Provider_context.tcopt
         fnl
         ~interrupt
         ~memory_cap
@@ -771,10 +762,10 @@ let go_with_interrupt
   result
 
 let go
+    (ctx : Provider_context.t)
     (workers : MultiWorker.worker list option)
     (delegate_state : Delegate.state)
     (telemetry : Telemetry.t)
-    (opts : TypecheckerOptions.t)
     (dynamic_view_files : Relative_path.Set.t)
     (fnl : Relative_path.t list)
     ~(memory_cap : int option)
@@ -782,10 +773,10 @@ let go
   let interrupt = MultiThreadedCall.no_interrupt () in
   let (res, delegate_state, telemetry, (), cancelled) =
     go_with_interrupt
+      ctx
       workers
       delegate_state
       telemetry
-      opts
       dynamic_view_files
       fnl
       ~interrupt

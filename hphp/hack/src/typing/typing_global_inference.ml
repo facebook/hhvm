@@ -254,8 +254,8 @@ module StateConstraintGraph = struct
         merge_var (env, errors) (pos, subgraph) v)
 
   let merge_subgraphs
-      ?(tcopt = GlobalOptions.default)
-      (subgraphs : StateSubConstraintGraphs.t list) : t =
+      (ctx : Provider_context.t) (subgraphs : StateSubConstraintGraphs.t list) :
+      t =
     let (type_maps, subgraphs) = List.unzip subgraphs in
     let type_map =
       List.fold
@@ -264,12 +264,7 @@ module StateConstraintGraph = struct
         ~init:Pos.AbsolutePosMap.empty
     in
     let subgraphs = List.concat subgraphs in
-    let env =
-      Typing_env.empty
-        (Provider_context.empty_for_worker ~tcopt)
-        Relative_path.default
-        ~droot:None
-    in
+    let env = Typing_env.empty ctx Relative_path.default ~droot:None in
     let errors = StateErrors.mk_empty () in
     if is_ordered_solving env then
       let env = Typing_ordered_solver.merge_graphs env subgraphs in

@@ -19,7 +19,11 @@ let find_positions_of_classes
     (tcopt : TypecheckerOptions.t)
     (acc : (string * Pos.t) list)
     (child_classes : string list) : (string * Pos.t) list =
-  let ctx = Provider_context.empty_for_worker ~tcopt in
+  let ctx =
+    Provider_context.empty_for_worker
+      ~popt:(Parser_options_provider.get ())
+      ~tcopt
+  in
   acc
   @ List.map child_classes ~f:(fun child_class ->
         match Naming_provider.get_type_pos child_class with

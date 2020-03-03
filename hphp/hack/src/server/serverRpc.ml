@@ -529,6 +529,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     in
     (env, ())
   | GLOBAL_INFERENCE (submode, files) ->
+    let ctx = Provider_utils.ctx_from_server_env env in
     (* We are getting files in the reverse order*)
     let files = List.rev files in
-    (env, ServerGlobalInference.execute submode files)
+    (env, ServerGlobalInference.execute ctx submode files)

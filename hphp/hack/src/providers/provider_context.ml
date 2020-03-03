@@ -23,30 +23,34 @@ type entry = {
 }
 
 type t = {
+  popt: ParserOptions.t;
   tcopt: TypecheckerOptions.t;
   backend: Provider_backend.t;
   entries: entry Relative_path.Map.t;
 }
 
-let empty_for_tool ~tcopt ~backend =
-  { tcopt; backend; entries = Relative_path.Map.empty }
+let empty_for_tool ~popt ~tcopt ~backend =
+  { popt; tcopt; backend; entries = Relative_path.Map.empty }
 
-let empty_for_worker ~tcopt =
+let empty_for_worker ~popt ~tcopt =
   {
+    popt;
     tcopt;
     backend = Provider_backend.Shared_memory;
     entries = Relative_path.Map.empty;
   }
 
-let empty_for_test ~tcopt =
+let empty_for_test ~popt ~tcopt =
   {
+    popt;
     tcopt;
     backend = Provider_backend.Shared_memory;
     entries = Relative_path.Map.empty;
   }
 
-let empty_for_debugging ~tcopt =
+let empty_for_debugging ~popt ~tcopt =
   {
+    popt;
     tcopt;
     backend = Provider_backend.Shared_memory;
     entries = Relative_path.Map.empty;

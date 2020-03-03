@@ -38,7 +38,9 @@ end = struct
 
   let dummy_env =
     let ctx =
-      Provider_context.empty_for_test ~tcopt:TypecheckerOptions.default
+      Provider_context.empty_for_test
+        ~popt:ParserOptions.default
+        ~tcopt:TypecheckerOptions.default
     in
     let env = Env.empty ctx Relative_path.default ~droot:None in
     let env = Env.set_log_level env "show" 2 in

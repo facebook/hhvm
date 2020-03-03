@@ -115,7 +115,7 @@ let expect_1_file_read ~error_message (files : string list) =
     Ok input
 
 module Mode_merge = struct
-  let execute files =
+  let execute ctx files =
     expect_2_files_read_write
       ~error_message:
         "was expecting two files: [directory containing subgraphs] [graph output]"
@@ -127,7 +127,7 @@ module Mode_merge = struct
       List.map (Array.to_list subgraphs) ~f:(Filename.concat input)
     in
     let subgraphs = List.map subgraphs ~f:StateSubConstraintGraphs.load in
-    let merged_graph = StateConstraintGraph.merge_subgraphs subgraphs in
+    let merged_graph = StateConstraintGraph.merge_subgraphs ctx subgraphs in
     Hh_logger.log "GI: Saving to %s" output;
     StateConstraintGraph.save output merged_graph;
     Ok ()
@@ -606,9 +606,9 @@ module Mode_rewrite = struct
 end
 
 (* Entry Point *)
-let execute mode files =
+let execute ctx mode files =
   match mode with
-  | MMerge -> Mode_merge.execute files >>| fun x -> RMerge x
+  | MMerge -> Mode_merge.execute ctx files >>| fun x -> RMerge x
   | MSolve -> Mode_solve.execute files >>| fun x -> RSolve x
   | MExport -> Mode_export_json.execute files >>| fun x -> RExport x
   | MRewrite -> Mode_rewrite.execute files >>| fun x -> RRewrite x

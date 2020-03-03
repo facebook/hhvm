@@ -190,10 +190,10 @@ let make_remote_server_api (workers : MultiWorker.worker list option) :
         (* TODO: use the telemetry *)
         let (errors, _, _telemetry) =
           go
+            ctx
             workers
             (Typing_check_service.Delegate.create ())
             (Telemetry.create ())
-            ctx.Provider_context.tcopt
             Relative_path.Set.empty
             files_to_check
             ~memory_cap:None

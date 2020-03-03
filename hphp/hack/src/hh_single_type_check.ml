@@ -701,9 +701,7 @@ let merge_global_inference_envs_opt ctx gienvs :
   if TypecheckerOptions.global_inference ctx.Provider_context.tcopt then
     let open Typing_global_inference in
     let (type_map, env, state_errors) =
-      StateConstraintGraph.merge_subgraphs
-        ~tcopt:ctx.Provider_context.tcopt
-        [gienvs]
+      StateConstraintGraph.merge_subgraphs ctx [gienvs]
     in
     (* we are not going to print type variables without any bounds *)
     let env = { env with inference_env = Inf.compress env.inference_env } in
@@ -768,7 +766,7 @@ let solve_global_inference_env
   Typing_global_inference.StateSolvedGraph.from_constraint_graph gienv
 
 let global_inference_merge_and_solve
-    ctx ~verbosity ?(error_format = Errors.Raw) ?max_errors gienvs =
+    ~verbosity ?(error_format = Errors.Raw) ?max_errors ctx gienvs =
   print_global_inference_envs ctx ~verbosity gienvs;
   let gienv = merge_global_inference_envs_opt ctx gienvs in
   print_merged_global_inference_env ~verbosity gienv error_format max_errors;
@@ -1214,7 +1212,6 @@ let handle_mode
     mode
     filenames
     ctx
-    popt
     builtins
     files_contents
     files_info
@@ -1258,7 +1255,7 @@ let handle_mode
             Typing_check_utils.type_file ctx path file_info)
           files_info
           ai_options
-          ctx.Provider_context.tcopt
+          ctx
   | Autocomplete
   | Autocomplete_manually_invoked ->
     let path = expect_single_file () in
@@ -1472,13 +1469,15 @@ let handle_mode
   | Find_local (line, column) ->
     let filename = expect_single_file () in
     let file = cat (Relative_path.to_absolute filename) in
-    let result = ServerFindLocals.go popt filename file line column in
+    let result =
+      ServerFindLocals.go ctx.Provider_context.popt filename file line column
+    in
     let print pos = Printf.printf "%s\n" (Pos.string_no_file pos) in
     List.iter result print
   | Outline ->
     iter_over_files (fun filename ->
         let file = cat (Relative_path.to_absolute filename) in
-        let results = FileOutline.outline popt file in
+        let results = FileOutline.outline ctx.Provider_context.popt file in
         FileOutline.print ~short_pos:true results)
   | Dump_nast ->
     iter_over_files (fun filename ->
@@ -1885,13 +1884,12 @@ let decl_and_run_mode
       HashSet.add dbg_glean_deps (dep_left, dep_right)
     in
     Typing_deps.add_dependency_callback "get_debug_trace" get_debug_trace );
-  let ctx = Provider_context.empty_for_test ~tcopt in
+  let ctx = Provider_context.empty_for_test ~popt ~tcopt in
   let (errors, files_info) = parse_name_and_decl ctx to_decl in
   handle_mode
     mode
     files
     ctx
-    popt
     builtins
     files_contents
     files_info

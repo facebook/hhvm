@@ -24,7 +24,8 @@ end
 
 let ctx_from_server_env (env : ServerEnv.env) : Provider_context.t =
   {
-    Provider_context.tcopt = env.ServerEnv.tcopt;
+    Provider_context.popt = env.ServerEnv.popt;
+    tcopt = env.ServerEnv.tcopt;
     (* TODO: backend should be stored in [env]. *)
     backend = Provider_backend.get ();
     entries = Relative_path.Map.empty;

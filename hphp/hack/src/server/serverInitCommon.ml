@@ -182,11 +182,12 @@ let type_check
       let memory_cap =
         genv.local_config.ServerLocalConfig.max_typechecker_worker_memory_mb
       in
+      let ctx = Provider_utils.ctx_from_server_env env in
       Typing_check_service.go
+        ctx
         genv.workers
         env.typing_service.delegate_state
         (Telemetry.create ())
-        env.tcopt
         Relative_path.Set.empty
         files_to_check
         ~memory_cap

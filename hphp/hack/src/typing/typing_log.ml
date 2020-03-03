@@ -72,7 +72,9 @@ let indentEnv ?(color = Normal Yellow) message f =
 let lastenv =
   ref
     (Env.empty
-       (Provider_context.empty_for_debugging ~tcopt:TypecheckerOptions.default)
+       (Provider_context.empty_for_debugging
+          ~popt:ParserOptions.default
+          ~tcopt:TypecheckerOptions.default)
        Relative_path.default
        None)
 

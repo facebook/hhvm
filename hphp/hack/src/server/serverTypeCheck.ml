@@ -932,11 +932,12 @@ functor
       in
       let fnl = Relative_path.Set.elements files_to_check in
       let (errorl', delegate_state, telemetry, env', cancelled) =
+        let ctx = Provider_utils.ctx_from_server_env env in
         Typing_check_service.go_with_interrupt
+          ctx
           genv.workers
           env.typing_service.delegate_state
           telemetry
-          env.tcopt
           dynamic_view_files
           fnl
           ~interrupt

@@ -109,7 +109,9 @@ let run_naming_table_test f =
         "Expected to add eight rows (four files and four symbols)";
       let backed_naming_table = Naming_table.load_from_sqlite db_name in
       let ctx =
-        Provider_context.empty_for_test ~tcopt:TypecheckerOptions.default
+        Provider_context.empty_for_test
+          ~popt:ParserOptions.default
+          ~tcopt:TypecheckerOptions.default
       in
       f ~ctx ~unbacked_naming_table ~backed_naming_table ~db_name;
       true)

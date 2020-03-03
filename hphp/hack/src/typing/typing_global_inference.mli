@@ -60,7 +60,7 @@ module StateConstraintGraph : sig
   val save : string -> t -> unit
 
   val merge_subgraphs :
-    ?tcopt:TypecheckerOptions.t -> StateSubConstraintGraphs.t list -> t
+    Provider_context.t -> StateSubConstraintGraphs.t list -> t
 end
 
 module StateSolvedGraph : sig

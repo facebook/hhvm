@@ -99,6 +99,7 @@ let parse_work_args () : command =
   let check_id = Random_id.short_string () in
   let (ctx : Provider_context.t) =
     Provider_context.empty_for_tool
+      ~popt:ParserOptions.default
       ~tcopt:TypecheckerOptions.default
       ~backend:Provider_backend.Shared_memory
   in

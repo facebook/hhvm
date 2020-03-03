@@ -133,15 +133,18 @@ let test_dep_graph_blob () =
             profile_type_check_twice = false;
           }
       in
+      let ctx =
+        Provider_context.empty_for_test ~popt:ParserOptions.default ~tcopt:opts
+      in
 
       (* Check reentrancy *)
       for i = 0 to 2 do
         let (errors, _delegate_state, _telemetry) =
           Typing_check_service.go
+            ctx
             workers
             delegate_state
             (Telemetry.create ())
-            opts
             dynamic_view_files
             [Relative_path.from_root "baz.php"]
             memory_cap

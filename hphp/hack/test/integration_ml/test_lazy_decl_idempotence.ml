@@ -39,11 +39,10 @@ let test () =
       env
       [(foo_file_name, foo_contents); (bar_file_name, bar_contents)]
   in
-  let ctx = Provider_context.empty_for_test ~tcopt:env.ServerEnv.tcopt in
+  let ctx = Provider_utils.ctx_from_server_env env in
   let classes = [foo_name; bar_name] in
   let foo_path = Relative_path.from_root foo_file_name in
   let bar_path = Relative_path.from_root bar_file_name in
-  let tcopt = TypecheckerOptions.default in
   (* Remove things from shared memory (that were put there by Test.setup_disk)
    * to simulate lazy saved state init. *)
   let defs =
@@ -69,10 +68,10 @@ let test () =
   let delegate_state = Typing_service_delegate.create () in
   let (errors, delegate_state, telemetry) =
     Typing_check_service.go
+      ctx
       None
       delegate_state
       (Telemetry.create ())
-      tcopt
       empty
       [bar_path]
       ~memory_cap
@@ -81,10 +80,10 @@ let test () =
   Test.assert_errors errors "";
   let (errors, delegate_state, telemetry) =
     Typing_check_service.go
+      ctx
       None
       delegate_state
       telemetry
-      tcopt
       empty
       [bar_path]
       ~memory_cap
@@ -94,10 +93,10 @@ let test () =
 
   let (errors, delegate_state, telemetry) =
     Typing_check_service.go
+      ctx
       None
       delegate_state
       telemetry
-      tcopt
       empty
       [foo_path]
       ~memory_cap
@@ -106,10 +105,10 @@ let test () =
   Test.assert_errors errors expected_errors;
   let (errors, _delegate_state, _telemetry) =
     Typing_check_service.go
+      ctx
       None
       delegate_state
       telemetry
-      tcopt
       empty
       [foo_path]
       ~memory_cap

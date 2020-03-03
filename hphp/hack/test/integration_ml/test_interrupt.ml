@@ -42,8 +42,8 @@ let test () =
       ]
   in
   (* Prepare rechecking of all files *)
+  let ctx = Provider_utils.ctx_from_server_env env in
   let workers = None in
-  let options = TypecheckerOptions.default in
   let fast = Naming_table.to_fast env.ServerEnv.naming_table in
   (* Pretend that this rechecking will be cancelled before we get to bar1 *)
   let bar1_path =
@@ -65,10 +65,10 @@ let test () =
   in
   let (errors, _delegate_state, _telemetry, (), cancelled) =
     Typing_check_service.go_with_interrupt
+      ctx
       workers
       (Typing_service_delegate.create ())
       (Telemetry.create ())
-      options
       Relative_path.Set.empty
       fnl
       ~interrupt

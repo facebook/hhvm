@@ -114,8 +114,7 @@ let init
         failwith "Remote init is only supported in check (run once) mode";
       let bin_root = Path.make (Filename.dirname Sys.argv.(0)) in
       let t = Unix.gettimeofday () in
-      let backend = Provider_backend.get () in
-      let ctx = Provider_context.empty_for_tool env.tcopt backend in
+      let ctx = Provider_utils.ctx_from_server_env env in
       ServerRemoteInit.init
         genv.workers
         ctx

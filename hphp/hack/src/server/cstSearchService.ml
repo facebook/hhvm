@@ -611,15 +611,13 @@ let go
         progress_fn ~total:0 ~start:0 ~length:(List.length files);
         Hh_bucket.of_list files
   in
-  (* Extract the `tcopt` so that we don't close over the entire `env`. *)
-  let tcopt = env.ServerEnv.tcopt in
+  let ctx = Provider_utils.ctx_from_server_env env in
   let job
       (acc : (Relative_path.t * result) list)
       (inputs : (Relative_path.t * pattern) list) :
       (Relative_path.t * result) list =
     List.fold inputs ~init:acc ~f:(fun acc (path, pattern) ->
         try
-          let ctx = Provider_context.empty_for_worker ~tcopt in
           let (ctx, entry) = Provider_utils.add_entry ~ctx ~path in
           match search ctx entry pattern with
           | Some result -> (path, result) :: acc

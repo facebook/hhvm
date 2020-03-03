@@ -145,12 +145,13 @@ let server_setup_for_deferral_tests () =
   in
   (* Parsing produces the file infos that the naming table module can use
     to construct the forward naming table (files-to-symbols) *)
+  let popt = ParserOptions.default in
   let (file_infos, _errors, _failed_parsing) =
     Parsing_service.go
       None
       Relative_path.Set.empty
       ~get_next:(MultiWorker.next None [foo_path; bar_path])
-      ParserOptions.default
+      popt
       ~trace:true
   in
   let naming_table = Naming_table.create file_infos in
@@ -160,7 +161,7 @@ let server_setup_for_deferral_tests () =
     GlobalOptions.
       { default with tco_defer_class_declaration_threshold = Some 1 }
   in
-  let ctx = Provider_context.empty_for_test ~tcopt in
+  let ctx = Provider_context.empty_for_test ~popt ~tcopt in
   Relative_path.Map.iter fast ~f:(fun name info ->
       let {
         FileInfo.n_classes = classes;
@@ -289,6 +290,7 @@ let test_compute_tast_counting () =
       Parser_options_provider.set ParserOptions.default;
       let ctx =
         Provider_context.empty_for_tool
+          ~popt:ParserOptions.default
           ~tcopt:TypecheckerOptions.default
           ~backend:(Provider_backend.get ())
       in

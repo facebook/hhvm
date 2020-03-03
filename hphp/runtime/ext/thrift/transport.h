@@ -191,7 +191,7 @@ struct PHPInputTransport {
       Logger::Error(e.getMessage());
     } catch (Object &e) {
       try {
-        Logger::Error(e.toString().toCppString());
+        Logger::Error(throwable_to_string(e.get()).toCppString());
       } catch (...) {
         Logger::Error("(e.toString() failed)");
       }

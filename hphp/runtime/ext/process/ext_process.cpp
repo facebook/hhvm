@@ -408,7 +408,7 @@ bool HHVM_FUNCTION(pcntl_signal_dispatch) {
       } catch (const Object& e) {
         std::string what;
         try {
-          what = e.toString().c_str();
+          what = throwable_to_string(e.get()).c_str();
         } catch (...) {
           what = "(unable to call toString())";
         }

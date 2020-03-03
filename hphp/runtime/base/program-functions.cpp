@@ -552,8 +552,7 @@ static void handle_exception_helper(bool& ret,
       errorMsg = "Exception handler threw an object exception: ";
     }
     try {
-      auto str = throwable_to_string(e.get());
-      errorMsg += !str.empty() ? str.data() : s_toStringErr.data();
+      errorMsg += throwable_to_string(e.get()).data();
     } catch (...) {
       errorMsg += s_toStringErr.data();
     }
@@ -626,7 +625,7 @@ void handle_destructor_exception(const char* situation) {
     errorMsg = situation;
     errorMsg += " threw an object exception: ";
     try {
-      errorMsg += e.toString().data();
+      errorMsg += throwable_to_string(e.get()).data();
     } catch (...) {
       handle_resource_exceeded_exception();
       errorMsg += "(unable to call toString())";

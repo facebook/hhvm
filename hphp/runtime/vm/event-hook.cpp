@@ -121,7 +121,7 @@ void EventHook::DoMemoryThresholdCallback() {
       vm_call_user_func(g_context->m_memThresholdCallback, empty_vec_array());
     } catch (Object& ex) {
       raise_error("Uncaught exception escaping mem Threshold callback: %s",
-                  ex.toString().data());
+                  throwable_to_string(ex.get()).data());
     }
   }
 }

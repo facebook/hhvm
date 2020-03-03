@@ -627,7 +627,7 @@ void RequestInjectionData::invokeUserTimeoutCallback(c_WaitableWaitHandle* wh) {
       vm_call_user_func(g_context->m_timeThresholdCallback, args);
     } catch (Object& ex) {
       raise_error("Uncaught exception escaping pre timeout callback: %s",
-                  ex.toString().data());
+                  throwable_to_string(ex.get()).data());
     }
   }
 }

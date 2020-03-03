@@ -1,1 +1,1 @@
-Exception handler threw an object exception: (unable to call toString())
+Fatal error: Uncaught (throwable_to_string failed)

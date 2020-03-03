@@ -371,7 +371,7 @@ struct ActiveSubscription {
     } catch(Object& e) {
       if (m_error.empty()) {
         try {
-          m_error = e->invokeToString().data();
+          m_error = throwable_to_string(e.get()).data();
         } catch(...) {
           m_error = "PHP exception which cannot be turned into a string";
         }

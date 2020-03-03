@@ -751,7 +751,7 @@ void LogException(const char* msg) {
     Logger::Error("%s: %s", msg, e.what());
   } catch (Object& e) {
     try {
-      Logger::Error("%s: %s", msg, e.toString().c_str());
+      Logger::Error("%s: %s", msg, throwable_to_string(e.get()).c_str());
     } catch (...) {
       Logger::Error("%s: (e.toString() failed)", msg);
     }

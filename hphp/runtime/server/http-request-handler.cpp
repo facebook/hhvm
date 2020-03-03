@@ -380,7 +380,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
       response = e.what();
     } catch (Object &e) {
       try {
-        emsg = e.toString().data();
+        emsg = throwable_to_string(e.get()).data();
       } catch (...) {
         emsg = "Unknown";
       }

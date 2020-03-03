@@ -101,7 +101,7 @@ void IntervalTimer::RunCallbacks(
       vm_call_user_func(timer->m_callback, args);
     } catch (Object& ex) {
       raise_error("Uncaught exception escaping IntervalTimer: %s",
-                  ex.toString().data());
+                  throwable_to_string(ex.get()).data());
     }
   }
 }

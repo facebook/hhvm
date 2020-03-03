@@ -1049,7 +1049,7 @@ TypedValue ExecutionContext::lookupClsCns(const NamedEntity* ne,
     // different behavior inside a property initializer (86pinit/86sinit).
     auto ar = getStackFrame();
     if (ar && ar->func() && Func::isSpecial(ar->func()->name())) {
-      raise_warning("Uncaught %s", ex.toString().data());
+      raise_warning("Uncaught %s", throwable_to_string(ex.get()).data());
       raise_error("Couldn't find constant %s::%s", cls->data(), cns->data());
     }
     throw;
@@ -2172,7 +2172,7 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
     errorString << s_phpException.data();
     errorString << " : ";
     try {
-      errorString << e->invokeToString().data();
+      errorString << throwable_to_string(e.get()).data();
     } catch (...) {
       errorString << e->getVMClass()->name()->data();
     }

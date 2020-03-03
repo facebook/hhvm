@@ -32,6 +32,7 @@ const StaticString s_line("line");
 const StaticString s_trace("trace");
 const StaticString s_traceOpts("traceOpts");
 const StaticString s___toString("__toString");
+const StaticString s_throwableToStringFailed("(throwable_to_string failed)");
 const Slot s_fileSlot{3};
 const Slot s_lineSlot{4};
 const Slot s_traceSlot{5};
@@ -382,10 +383,17 @@ void throwable_recompute_backtrace_from_wh(ObjectData* throwable,
 }
 
 String throwable_to_string(ObjectData* throwable) {
-  auto result = ObjectData::InvokeSimple(throwable, s___toString);
-  return result.isString()
-    ? result.toString()
-    : empty_string();
+  if (throwable->instanceof(SystemLib::s_ThrowableClass)) {
+    try {
+      auto result = ObjectData::InvokeSimple(throwable, s___toString);
+      if (result.isString()) {
+        return result.asCStrRef();
+      }
+    } catch (const Object&) {
+      // Ignore PHP exceptions from Throwable::__toString
+    }
+  }
+  return s_throwableToStringFailed;
 }
 ///////////////////////////////////////////////////////////////////////////////
 }

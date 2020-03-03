@@ -132,6 +132,11 @@ type mro_element = {
 
 type linearization = mro_element Sequence.t
 
+type linearization_kind =
+  | Member_resolution
+  | Ancestor_types
+[@@deriving show, ord]
+
 (** name of condition type for conditional reactivity of methods.
     If None - method is unconditionally reactive *)
 type condition_type_name = string option [@@deriving eq, show]

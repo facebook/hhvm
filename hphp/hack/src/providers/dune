@@ -83,6 +83,7 @@
     decl_service_client
     provider_backend
     shallow_classes_provider
+    linearization_provider
     typing_heap)
   (preprocess (pps ppx_deriving.std)))
 
@@ -150,4 +151,12 @@
     provider_backend
     provider_context
     shallow_classes_heap)
+  (preprocess (pps ppx_deriving.std)))
+	
+(library
+  (name linearization_provider)
+  (modules linearization_provider)
+  (libraries
+    provider_backend
+    provider_context)
   (preprocess (pps ppx_deriving.std)))

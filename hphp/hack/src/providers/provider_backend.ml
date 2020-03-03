@@ -62,6 +62,26 @@ end
 
 module Shallow_decl_cache = Lru_cache.Cache (Shallow_decl_cache_entry)
 
+module Linearization_cache_entry = struct
+  type _ t =
+    | Member_resolution_linearization : string -> Decl_defs.linearization t
+    | Ancestor_types_linearization : string -> Decl_defs.linearization t
+
+  type 'a key = 'a t
+
+  type 'a value = 'a
+
+  let get_size ~key:_ ~value:_ = 1
+
+  let key_to_log_string : type a. a key -> string =
+   fun key ->
+    match key with
+    | Member_resolution_linearization c -> "MemberResolution" ^ c
+    | Ancestor_types_linearization c -> "AncestorTypes" ^ c
+end
+
+module Linearization_cache = Lru_cache.Cache (Linearization_cache_entry)
+
 type fixme_map = Pos.t IMap.t IMap.t
 
 module Fixme_store = struct
@@ -102,6 +122,7 @@ type t =
   | Local_memory of {
       decl_cache: Decl_cache.t;
       shallow_decl_cache: Shallow_decl_cache.t;
+      linearization_cache: Linearization_cache.t;
       fixmes: Fixmes.t;
     }
   | Decl_service of {
@@ -120,23 +141,32 @@ let backend_ref = ref Shared_memory
 let set_shared_memory_backend () : unit = backend_ref := Shared_memory
 
 let set_local_memory_backend
-    ~(max_num_decls : int) ~(max_bytes_shallow_decls : int) : unit =
+    ~(max_num_decls : int)
+    ~(max_bytes_shallow_decls : int)
+    ~(max_num_linearizations : int) : unit =
   backend_ref :=
     Local_memory
       {
         decl_cache = Decl_cache.make ~max_size:max_num_decls;
         shallow_decl_cache =
           Shallow_decl_cache.make ~max_size:max_bytes_shallow_decls;
+        linearization_cache =
+          Linearization_cache.make ~max_size:max_num_linearizations;
         fixmes = empty_fixmes;
       }
 
 let set_local_memory_backend_with_defaults () : unit =
-  (* TODO(ljw): Figure out a good size. Some files read ~5k shallow
-  decls to typecheck, at about 16k / shallow decl, fitting into 73Mb.
-  I figure that 140Mb feels right. *)
+  (* Shallow decls: some files read ~5k shallow decls, at about 16k / shallow dec,
+  fitting into 73Mb. Hence we guess at 140Mb. *)
   let max_bytes_shallow_decls = 140 * 1024 * 1024 in
+  (* Linearizations: such files will pick up ~6k linearizations. *)
+  let max_num_linearizations = 10000 in
+  (* TODO: justify max_num_decls *)
   let max_num_decls = 5000 in
-  set_local_memory_backend ~max_num_decls ~max_bytes_shallow_decls
+  set_local_memory_backend
+    ~max_num_decls
+    ~max_bytes_shallow_decls
+    ~max_num_linearizations
 
 let set_decl_service_backend (decl : Decl_service_client.t) : unit =
   backend_ref := Decl_service { decl; fixmes = empty_fixmes }

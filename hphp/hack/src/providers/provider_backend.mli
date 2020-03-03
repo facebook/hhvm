@@ -45,6 +45,24 @@ module Shallow_decl_cache : sig
   include module type of Lru_cache.Cache (Shallow_decl_cache_entry)
 end
 
+module Linearization_cache_entry : sig
+  type _ t =
+    | Member_resolution_linearization : string -> Decl_defs.linearization t
+    | Ancestor_types_linearization : string -> Decl_defs.linearization t
+
+  type 'a key = 'a t
+
+  type 'a value = 'a
+
+  val get_size : key:'a key -> value:'a value -> int
+
+  val key_to_log_string : 'a key -> string
+end
+
+module Linearization_cache : sig
+  include module type of Lru_cache.Cache (Linearization_cache_entry)
+end
+
 (** A `fixme_map` associates:
     line number guarded by HH_FIXME =>
     error_node_number =>
@@ -88,6 +106,7 @@ type t =
   | Local_memory of {
       decl_cache: Decl_cache.t;
       shallow_decl_cache: Shallow_decl_cache.t;
+      linearization_cache: Linearization_cache.t;
       fixmes: Fixmes.t;
     }
   | Decl_service of {

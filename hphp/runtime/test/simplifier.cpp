@@ -119,14 +119,6 @@ TEST(Simplifier, Count) {
     EXPECT_EQ(1, result.dst->intVal());
   }
 
-  // Count($array_no_kind) --> <unchanged>
-  {
-    auto const arr = unit.gen(Conjure, dummy, TArr);
-    auto const count = unit.gen(Count, dummy, arr->dst());
-    auto const result = simplify(unit, count);
-    EXPECT_NO_CHANGE(result);
-  }
-
   // Count($vanilla_array) --> CountArray($vanilla_array)
   {
     auto const arr = unit.gen(Conjure, dummy, TVanillaArr);

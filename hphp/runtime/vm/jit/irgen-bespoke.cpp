@@ -125,18 +125,8 @@ Locations getVanillaLocations(
 }
 
 void guardToVanilla(IRGS& env, const NormalizedInstruction& ni, Location loc) {
-  auto const& type = RO::EvalAllowBespokeArrayLikes
-    ? env.irb->typeOf(loc, DataTypeSpecific)
-    : env.irb->fs().typeOf(loc);
+  auto const& type = env.irb->typeOf(loc, DataTypeSpecific);
   if (!(type.isKnownDataType() && type <= TArrLike)) return;
-
-  auto const target_type = type.unspecialize().narrowToVanilla();
-  if (!RO::EvalAllowBespokeArrayLikes) {
-    if (type.arrSpec().vanilla()) return;
-    FTRACE_MOD(Trace::hhir, 2, "At {}: {}: assert input {} is vanilla: {}\n",
-               ni.offset(), opcodeToName(ni.op()), show(loc), type);
-    return assertTypeLocation(env, loc, target_type);
-  }
 
   FTRACE_MOD(Trace::hhir, 2, "At {}: {}: guard input {} to vanilla: {}\n",
              ni.offset(), opcodeToName(ni.op()), show(loc), type);
@@ -144,6 +134,7 @@ void guardToVanilla(IRGS& env, const NormalizedInstruction& ni, Location loc) {
   env.irb->constrainLocation(loc, gc);
   if (type.arrSpec().vanilla()) return;
   if (!env.irb->guardFailBlock()) env.irb->setGuardFailBlock(makeExit(env));
+  auto const target_type = type.unspecialize().narrowToVanilla();
   checkType(env, loc, target_type, -1, false);
 }
 
@@ -183,6 +174,7 @@ bool checkBespokeInputs(IRGS& env, const NormalizedInstruction& ni) {
 }
 
 void handleBespokeInputs(IRGS& env, const NormalizedInstruction& ni) {
+  if (!RO::EvalAllowBespokeArrayLikes) return;
   auto const locs = getVanillaLocations(env, ni);
   if (skipVanillaGuards(env, ni, locs)) return;
 

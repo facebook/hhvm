@@ -338,7 +338,9 @@ struct PackedAccessor : public Accessor {
   explicit PackedAccessor(IterSpecialization specialization) {
     is_ptr_iter = specialization.base_const && !specialization.output_key;
     is_hack_arr = specialization.base_type == IterSpecialization::Vec;
-    arr_type = is_hack_arr ? TVanillaVec : TPackedArr;
+    arr_type = is_hack_arr
+      ? (RO::EvalAllowBespokeArrayLikes ? TVanillaVec : TVec)
+      : TPackedArr;
     pos_type = is_ptr_iter ? TPtrToElemCell : TInt;
     iter_type = specialization;
   }
@@ -385,7 +387,9 @@ struct MixedAccessor : public Accessor {
   explicit MixedAccessor(IterSpecialization specialization) {
     is_ptr_iter = specialization.base_const;
     is_hack_arr = specialization.base_type == IterSpecialization::Dict;
-    arr_type = is_hack_arr ? TVanillaDict : TMixedArr;
+    arr_type = is_hack_arr
+      ? (RO::EvalAllowBespokeArrayLikes ? TVanillaDict : TDict)
+      : TMixedArr;
     pos_type = is_ptr_iter ? TPtrToElemCell : TInt;
     key_type = getKeyType(specialization);
     iter_type = specialization;

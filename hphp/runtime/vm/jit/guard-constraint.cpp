@@ -104,7 +104,7 @@ GuardConstraint relaxConstraint(GuardConstraint origGc,
   while (true) {
     if (newGc.isSpecialized()) {
       // Check if a vanilla constraint is sufficient before proceeding to kind.
-      if (origGc.wantVanillaArray()) {
+      if (RO::EvalAllowBespokeArrayLikes && origGc.wantVanillaArray()) {
         newGc.setWantVanillaArray();
         newDstType = knownType & relaxToConstraint(toRelax, newGc);
         if (typeFitsConstraint(newDstType, origGc)) break;

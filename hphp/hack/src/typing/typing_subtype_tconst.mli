@@ -17,14 +17,3 @@ If that type constant is not present, make a fresh invariant
 type variable and add it as the type of the type constant in the environment.
 *)
 val get_tyvar_type_const : env -> Ident.t -> Aast.sid -> env * locl_ty
-
-module Pu : sig
-  val get_tyvar_pu_access :
-    env ->
-    Typing_reason.t ->
-    locl_ty ->
-    Aast.sid ->
-    Ident.t ->
-    Aast.sid ->
-    env * locl_ty
-end

@@ -58,7 +58,6 @@ let expand_ty ?var_hook ?pos env ty =
       | (p, Tpu (base, enum)) -> mk (p, Tpu (exp_ty base, enum))
       | (p, Tpu_type_access (base, enum, member, tyname)) ->
         let base = exp_ty base in
-        let member = exp_ty member in
         mk (p, Tpu_type_access (base, enum, member, tyname))
     in
     ety

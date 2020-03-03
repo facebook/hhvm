@@ -305,9 +305,7 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
       | Tclass (cls, exact, tyl) -> this#on_tclass acc r cls exact tyl
       | Tarraykind akind -> this#on_tarraykind acc r akind
       | Tpu (base, _) -> this#on_type acc base
-      | Tpu_type_access (base, _, member, _) ->
-        let acc = this#on_type acc base in
-        this#on_type acc member
+      | Tpu_type_access (base, _, _, _) -> this#on_type acc base
   end
 
 class type ['a] internal_type_visitor_type =

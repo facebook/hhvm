@@ -22,6 +22,11 @@ and sid = Ast_defs.id
 
 and is_reified = bool
 
+(* Helps keeping track if a pocket universe member is a generic type
+ * parameter or an atom. Since there is currently no way to make sure
+ * that a string is a bound type parameter during typing, we thread this
+ * information from parsing/naming to typing using this type.
+ *)
 and pu_loc =
   | Unknown
   | TypeParameter

@@ -219,12 +219,12 @@ and pp_ty_ : type a. Format.formatter -> a ty_ -> unit =
   | Tpu_type_access (base, enum, member, tyname) ->
     Format.fprintf
       fmt
-      "(@[<2>Tpu_type (%a@,,%a@,,%a@,,%a)@])"
+      "(@[<2>Tpu_type_access (%a@,,%a@,,%a@,,%a)@])"
       pp_ty
       base
       Aast.pp_sid
       enum
-      pp_ty
+      Aast.pp_sid
       member
       Aast.pp_sid
       tyname;

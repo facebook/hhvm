@@ -5280,6 +5280,27 @@ and dispatch_call
       ty
   | PU_identifier ((cpos, cid), ((epos, enum) as enum'), ((_, case) as case'))
     ->
+    (* We are type checking a PU expression like MyClass:@MyEnum::MyField($x).
+     * So we are crafting the right signature for such a 'function' call,
+     * based on the PU definition.
+     *
+     * Example:
+     *   class MyClass {
+     *     enum MyEnum {
+     *       case string name;
+     *       case type T;
+     *       case T data;
+     *     }
+     *   }
+     *
+     *   in such a context, MyClass:@MyEnum::name 's signature is
+     *      MyClass:@MyEnum -> string
+     *   and MyClass:@MyEnum::data 's signature is
+     *      forall TE <: MyClass:@MyEnum, TE -> TE:@T
+     *
+     *  To simplify the code in here, we always generate the second form, even
+     *  for simple types.
+     *)
     let (env, tal, te1, ty1) =
       static_class_id ~check_constraints:false cpos env [] cid
     in
@@ -5344,11 +5365,18 @@ and dispatch_call
                   Errors.pu_typing cpos "identifier" case;
                   MakeType.err (Reason.Rwitness cpos)
               in
-              (* Type variable to type the parameter of the Pu expression call.
-                     We use a variable in case there is some dependency *)
-              (* let (env, fresh_ty) = Env.fresh_invariant_type_var env cpos in *)
+              (* Type variable to type the parameter of the Pu expression
+               * call, e.g. the type of the atom $x in call
+               * MyClass:@MyEnum::myField($x).
+               *
+               * We use a variable in case there is some dependency *)
               let (env, fresh_ty) = Env.fresh_type env cpos in
-              (* It's original upper bound is the PU enum itself *)
+              let fresh_var =
+                match get_var fresh_ty with
+                | Some v -> v
+                | None -> assert false
+              in
+              (* Its original upper bound is the PU enum itself *)
               let env =
                 SubType.sub_type
                   env
@@ -5356,11 +5384,17 @@ and dispatch_call
                   (mk (reason, Tpu (ty1, enum')))
                   Errors.pocket_universes_typing
               in
-              let substs =
-                let f (id, _reified) =
-                  mk (reason, Tpu_type_access (ty1, enum', fresh_ty, id))
+              let (env, substs) =
+                let f env _key (pu_case_type_name, _reified) =
+                  Typing_subtype_pocket_universes.get_tyvar_pu_access
+                    env
+                    reason
+                    ty1
+                    enum'
+                    fresh_var
+                    pu_case_type_name
                 in
-                SMap.map f et.tpu_case_types
+                SMap.map_env f env et.tpu_case_types
               in
               let ety_env =
                 let combine _ va vb =

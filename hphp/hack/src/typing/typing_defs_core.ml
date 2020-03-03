@@ -214,10 +214,11 @@ and _ ty_ =
        *)
   | Tlike : decl_ty -> decl_phase ty_
   | Tpu_access : decl_ty * Nast.sid * Nast.pu_loc -> decl_phase ty_
-      (** Access to a Pocket Universe Expression or Atom, denoted by
-       * Foo:@Bar or Foo:@Bar:@X.
-       * It might be unresolved at first (e.g. if Foo is a generic variable).
-       * Will be refined to Tpu once typechecking is successful
+      (** Access to a Pocket Universe or Pocket Universes dependent type,
+       * denoted by Foo:@Bar, or Foo:@Bar:@Bli:@T.
+       * It might be unresolved at first (e.g. if Bli is a generic variable).
+       * Will be refined to Tpu, or to the actual type associated with an
+       * atom, once typechecking is successful.
        *)
   (*========== Following Types Exist in Both Phases ==========*)
   | Tany : TanySentinel.t -> 'phase ty_
@@ -300,14 +301,12 @@ and _ ty_ =
       (** Typing of Pocket Universe Expressions
        * - first parameter is the enclosing class
        * - second parameter is the name of the Pocket Universe Enumeration
-       * - third parameter is  either Pu_plain (the enumeration as the set of
-       *   all its atoms) or Pu_atom (a specific atom in the enumeration)
        *)
-  | Tpu_type_access : locl_ty * Nast.sid * locl_ty * Nast.sid -> locl_phase ty_
+  | Tpu_type_access : locl_ty * Nast.sid * Nast.sid * Nast.sid -> locl_phase ty_
       (** Typing of Pocket Universes type projections
        * - first parameter is the enclosing class
        * - second parameter is the name of the Pocket Universe Enumeration
-       * - third parameter is the generic (tvar/tabstract) in place of the
+       * - third parameter is the Tgeneric in place of the
        *   member name
        * - the fourth parameter is the name of the type to project
        *)

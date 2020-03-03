@@ -94,7 +94,7 @@ let rec print_ty_exn ?(allow_nothing = false) ty =
       "(%s:@%s:@%s:@%s)"
       (print_ty_exn ty)
       (snd id)
-      (print_ty_exn member)
+      (snd member)
       (snd tyname)
 
 and print_tyl_exn tyl = String.concat ~sep:", " (List.map tyl ~f:print_ty_exn)

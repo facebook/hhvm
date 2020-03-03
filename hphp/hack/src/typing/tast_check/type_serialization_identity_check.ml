@@ -85,7 +85,7 @@ let rec strip_ty ty =
       Tshape (shape_kind, shape_fields)
     | Tpu (base, enum) -> Tpu (strip_ty base, enum)
     | Tpu_type_access (base, enum, member, tyname) ->
-      Tpu_type_access (strip_ty base, enum, strip_ty member, tyname)
+      Tpu_type_access (strip_ty base, enum, member, tyname)
   in
   mk (reason, ty)
 

@@ -564,8 +564,11 @@ module Full = struct
     | Tobject -> text "object"
     | Tshape (shape_kind, fdm) -> tshape k to_doc shape_kind fdm
     | Tpu (base, (_, enum)) -> pu_concat k base enum
-    | Tpu_type_access (base, (_, enum), member, (_, tyname)) ->
-      pu_concat k base enum ^^ text ":@" ^^ pu_concat k member tyname
+    | Tpu_type_access (base, (_, enum), (_, member), (_, tyname)) ->
+      k base
+      ^^ text (":@" ^ enum)
+      ^^ text (":@" ^ member)
+      ^^ text (":@" ^ tyname)
 
   let rec constraint_type_ to_doc st env x =
     let k lty = locl_ty to_doc st env lty in
@@ -1003,7 +1006,8 @@ module Json = struct
     | (p, Tpu_type_access (base, enum, member, typ)) ->
       obj
       @@ kind p "pocket_universe_type_access"
-      @ args [base; member]
+      @ args [base]
+      @ name (snd member)
       @ name (snd enum)
       @ name (snd typ)
 

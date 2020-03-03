@@ -1,0 +1,6 @@
+File "dep2.bad.php", line 19, characters 13-16:
+Invalid argument (Typing[4110])
+File "dep2.bad.php", line 7, characters 18-20:
+Expected int
+File "dep2.bad.php", line 19, characters 13-16:
+But got string

@@ -343,6 +343,9 @@ val get_tyvar_type_const : env -> int -> Aast.sid -> (Aast.sid * locl_ty) option
 val get_tyvar_pu_access :
   env -> int -> Aast.sid -> (locl_ty * Aast.sid * locl_ty * Aast.sid) option
 
+val get_tyvar_pu_accesses :
+  env -> int -> (locl_ty * Aast.sid * locl_ty * Aast.sid) SMap.t
+
 val set_tyvar_type_const : env -> int -> Aast.sid -> locl_ty -> env
 
 val set_tyvar_pu_access :

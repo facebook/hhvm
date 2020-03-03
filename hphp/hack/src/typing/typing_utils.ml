@@ -104,6 +104,21 @@ let (expand_typeconst_ref : expand_typeconst ref) =
 
 let expand_typeconst x = !expand_typeconst_ref x
 
+type expand_pocket_universes =
+  env ->
+  ety_env:expand_env ->
+  Reason.t ->
+  locl_ty ->
+  Pos.t * string ->
+  (Pos.t * string) * Aast_defs.pu_loc ->
+  Pos.t * string ->
+  env * locl_ty
+
+let (expand_pocket_universes_ref : expand_pocket_universes ref) =
+  ref (not_implemented "expand_pocket_universes")
+
+let expand_pocket_universes x = !expand_pocket_universes_ref x
+
 type union = env -> locl_ty -> locl_ty -> env * locl_ty
 
 let (union_ref : union ref) = ref (not_implemented "union")

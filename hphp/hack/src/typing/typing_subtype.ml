@@ -29,55 +29,6 @@ module ShapeMap = Nast.ShapeMap
 module ShapeSet = Ast_defs.ShapeSet
 module Nast = Aast
 
-let class_get_pu_member_type ?from_class env ty enum member name =
-  let (env, dty) =
-    TUtils.class_get_pu_member_type ?from_class env ty enum member name
-  in
-  match dty with
-  | None -> (env, None)
-  | Some (ety_env, (_, dty)) ->
-    let (env, lty) = Typing_phase.localize ~ety_env env dty in
-    (env, Some lty)
-
-type error_f = unit -> unit
-
-type pu_reduced_access =
-  | PTA_Reduced of env * locl_ty
-  | PTA_Rigid of env * locl_ty
-  | PTA_Unsupported of env * error_f
-
-let reduce_pu_type_access env reason base enum member name =
-  let (env, base) = Env.expand_type env base in
-  let (env, member) = Env.expand_type env member in
-  match get_node member with
-  | Tprim (Aast_defs.Tatom atom_name) ->
-    (match
-       class_get_pu_member_type env base (snd enum) atom_name (snd name)
-     with
-    | (_env, None) -> assert false (* already caught in localization *)
-    | (env, Some lty) ->
-      (* Not sure if this expand is necessary, ask Catg *)
-      let (env, lty) = Env.expand_type env lty in
-      PTA_Reduced (env, lty))
-  | Tvar var ->
-    let (env, lty) =
-      Typing_subtype_tconst.Pu.get_tyvar_pu_access env reason base enum var name
-    in
-    PTA_Reduced (env, lty)
-  (* During naming, we checked whether if was a type parameter or something
-     else. If it wasn't, we checked during localization whether it was an atom
-     or not, so if we end up here, it means it is a bound type parameter *)
-  | Tgeneric _ -> PTA_Rigid (env, member)
-  (* TODO(T36532263) deal with unions of Tatoms ! *)
-  | _ ->
-    let err () =
-      if Typing_utils.is_any env base then
-        ()
-      else
-        Errors.pu_typing_not_supported (Reason.to_pos reason)
-    in
-    PTA_Unsupported (env, err)
-
 type subtype_env = {
   seen_generic_params: SSet.t option;
   no_top_bottom: bool;
@@ -602,15 +553,6 @@ and simplify_subtype_i
           | (_, Tdependent (_, ty)) ->
             let this_ty = Option.first_some this_ty (Some ty_sub) in
             simplify_subtype ~subtype_env ~this_ty ty ty_super env
-          | (r_sub, Tpu_type_access (base, enum, member, name)) ->
-            (* If the lhs can be resolved, continue. Otherwise abort (because the
-       only possible rigid case has been handled by the previous case) *)
-            (match reduce_pu_type_access env r_sub base enum member name with
-            | PTA_Reduced (env, ety_sub) ->
-              simplify_subtype ~subtype_env ~this_ty ety_sub ty_super env
-            | PTA_Rigid (env, _ety_sub) -> invalid_env env
-            (* Missing atom, unknown generic or internal failure. *)
-            | PTA_Unsupported (env, err) -> invalid_env_with env err)
           | (r_sub, Tany _) ->
             if subtype_env.no_top_bottom then
               default ()
@@ -1354,67 +1296,30 @@ and simplify_subtype_i
       (match ety_sub with
       | ConstraintType _ -> default_subtype env
       | LoclType ty_sub ->
-        (match deref ty_sub with
-        | (_, Tpu_type_access (bsub, esub, msub, nsub)) ->
-          (* Is the lhs known and can be reduced ? *)
-          let rsub =
-            reduce_pu_type_access env (get_reason ty_sub) bsub esub msub nsub
-          in
-          (match rsub with
-          | PTA_Reduced (env, ety_sub) ->
-            (* Yes, let's continue the problem with its definition *)
-            simplify_subtype ~subtype_env ~this_ty ety_sub ty_super env
-          (* No, and it's a rigid definition, so it can only unify with
-         itself *)
-          | PTA_Rigid (env, msub) ->
-            (* So let's look at the rhs *)
-            let rsuper =
-              reduce_pu_type_access
-                env
-                (get_reason ty_super)
-                bsuper
-                esuper
-                msuper
-                nsuper
-            in
-            (match rsuper with
-            (* It reduces, so let's continue with its definition *)
-            | PTA_Reduced (env, ty_super) ->
-              simplify_subtype ~subtype_env ~this_ty ty_sub ty_super env
-            (* It is rigid too, so let's test for reflexivity *)
-            | PTA_Rigid (env, msuper) ->
-              if
-                String.equal (snd esub) (snd esuper)
-                && String.equal (snd nsub) (snd nsuper)
-              then
-                env
-                |> simplify_subtype ~subtype_env ~this_ty bsuper bsub
-                &&& simplify_subtype ~subtype_env ~this_ty msub msuper
-                &&& simplify_subtype ~subtype_env ~this_ty msuper msub
-              else
-                default_subtype env
-            (* Missing atom, unknown generic or internal failure. *)
-            | PTA_Unsupported (env, err) -> invalid_env_with env err)
-          (* Missing atom, unknown generic or internal failure. *)
-          | PTA_Unsupported (env, err) -> invalid_env_with env err)
-        | (_, (Tunion _ | Tvar _ | Tintersection _)) -> default_subtype env
+        (match get_node ty_sub with
+        | Tpu_type_access (bsub, esub, msub, nsub) ->
+          if
+            String.equal (snd esub) (snd esuper)
+            && String.equal (snd nsub) (snd nsuper)
+            && String.equal (snd msub) (snd msuper)
+          then
+            simplify_subtype ~subtype_env ~this_ty bsuper bsub env
+          else
+            default_subtype env
+        | Tunion _
+        | Tvar _
+        | Tintersection _ ->
+          default_subtype env
         | _ ->
-          (* If the rhs can be resolved, continue. Otherwise abort (because the
-     only possible rigid case has been handled by the previous case) *)
-          (match
-             reduce_pu_type_access
-               env
-               (get_reason ty_super)
-               bsuper
-               esuper
-               msuper
-               nsuper
-           with
-          | PTA_Reduced (env, ty_super) ->
-            simplify_subtype ~subtype_env ~this_ty ty_sub ty_super env
-          | PTA_Rigid (_env, _ty_super) -> default_subtype env
-          (* Missing atom, unknown generic or internal failure. *)
-          | PTA_Unsupported (env, err) -> invalid_env_with env err)))
+          (* TODO: check if err is still needed *)
+          let err () =
+            let reason = get_reason ty_sub in
+            if Typing_utils.is_any env ty_sub then
+              ()
+            else
+              Errors.pu_typing_not_supported (Reason.to_pos reason)
+          in
+          invalid_env_with env err))
     | (r_super, Tfun ft_super) ->
       (match ety_sub with
       | ConstraintType _ -> default_subtype env
@@ -2744,6 +2649,32 @@ and add_tyvar_upper_bound_and_close
       added_upper_bounds
       (env, prop)
   in
+  let (env, prop) =
+    ITySet.fold
+      (fun upper_bound (env, prop) ->
+        let env =
+          Typing_subtype_pocket_universes.make_all_pu_equal
+            env
+            var
+            upper_bound
+            ~on_error
+        in
+        ITySet.fold
+          (fun lower_bound (env, prop1) ->
+            let (env, prop2) =
+              simplify_subtype_i
+                ~subtype_env:
+                  (make_subtype_env ~treat_dynamic_as_bottom on_error)
+                lower_bound
+                upper_bound
+                env
+            in
+            (env, TL.conj prop1 prop2))
+          lower_bounds
+          (env, prop))
+      added_upper_bounds
+      (env, prop)
+  in
   (env, prop)
 
 (* Add a new lower bound ty on var.  Apply transitivity of subtyping
@@ -2773,6 +2704,32 @@ and add_tyvar_lower_bound_and_close
             lower_bound
             ~on_error
             ~as_tyvar_with_cnstr:false
+        in
+        ITySet.fold
+          (fun upper_bound (env, prop1) ->
+            let (env, prop2) =
+              simplify_subtype_i
+                ~subtype_env:
+                  (make_subtype_env ~treat_dynamic_as_bottom on_error)
+                lower_bound
+                upper_bound
+                env
+            in
+            (env, TL.conj prop1 prop2))
+          upper_bounds
+          (env, prop))
+      added_lower_bounds
+      (env, prop)
+  in
+  let (env, prop) =
+    ITySet.fold
+      (fun lower_bound (env, prop) ->
+        let env =
+          Typing_subtype_pocket_universes.make_all_pu_equal
+            env
+            var
+            lower_bound
+            ~on_error
         in
         ITySet.fold
           (fun upper_bound (env, prop1) ->

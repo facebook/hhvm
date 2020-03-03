@@ -161,7 +161,6 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
         (env, mk (r, Tpu (base, enum)))
       | Tpu_type_access (base, enum, member, tyname) ->
         let (env, base) = this#on_type env base in
-        let (env, member) = this#on_type env member in
         (env, mk (r, Tpu_type_access (base, enum, member, tyname)))
 
     method on_locl_ty_list env tyl = List.map_env env tyl ~f:this#on_type

@@ -263,3 +263,14 @@ let set_allow_wildcards env =
 let get_allow_wildcards env = env.Typing_env_types.allow_wildcards
 
 let condition_type_matches = Typing_reactivity.condition_type_matches
+
+(* ocaml being ocaml...
+ * We need at least one explicit reference to the Typing_pocket_univereses
+ * module otherwise the compiler will not include it in the resulting binary.
+ * Because of cyclic module dependencies, this is never done directly (we
+ * rely on references in Typing_utils), so I need this dummy occurence just
+ * to make sure the code is present.
+ *)
+let _ =
+  let _ = Typing_pocket_universes.expand_dep_ty in
+  ()

@@ -139,6 +139,15 @@ void arenas_thread_exit();
 
 #endif // USE_JEMALLOC
 
+/**
+ * Get the number of bytes held by the slab managers, but are free for request
+ * use.
+ *
+ * The value is calculated using relaxed atomic adds and subs, and may become
+ * negative at moments due to the unpredictable memory ordering.
+ */
+ssize_t get_free_slab_bytes();
+
 void low_2m_pages(uint32_t pages);
 void high_2m_pages(uint32_t pages);
 

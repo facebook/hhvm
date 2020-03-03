@@ -69,10 +69,20 @@ struct TaggedSlabList {
     return m_head.load(std::memory_order_relaxed);
   }
   /*
+   * Return the number of bytes held in the tagged slab list.
+   *
+   * The value is calculated using atomic adds and subs, and may become
+   * negative as the operations are executed with a relaxed ordering.
+   */
+  ssize_t bytes() const {
+    return m_bytes.load(std::memory_order_relaxed);
+  }
+  /*
    * Add a slab to the list.  If `local`, assume the list is only accessed in a
    * single thread.
    */
   template<bool local = false> void push_front(void* p, uint16_t tag) {
+    m_bytes.fetch_add(kSlabSize, std::memory_order_relaxed);
     ++tag;
     TaggedSlabPtr tagged{p, tag};
     auto ptr = reinterpret_cast<AtomicTaggedSlabPtr*>(p);
@@ -105,6 +115,7 @@ struct TaggedSlabList {
 
  protected:
   AtomicTaggedSlabPtr m_head;
+  std::atomic<ssize_t> m_bytes{0};
 };
 
 struct SlabManager : TaggedSlabList {
@@ -115,22 +126,24 @@ struct SlabManager : TaggedSlabList {
       auto next = ptr->load(std::memory_order_acquire);
       if (m_head.compare_exchange_weak(currHead, next,
                                        std::memory_order_release)) {
+        m_bytes.fetch_sub(kSlabSize, std::memory_order_relaxed);
         return currHead;
       } // otherwise currHead is updated with latest value of m_head.
     }
     return nullptr;
   }
 
-  // Push everything in a local TaggedSlabList starting with `newHead` and
-  // ending with `localTail` to this global list.  The linking on the local list
-  // should be performed before this call. This is intended for returning
-  // multiple local slabs to the global list in one batch at the end of each
-  // request.
-  void merge(TaggedSlabPtr newHead, void* localTail) {
+  // Push everything in a local TaggedSlabList `other` that ends with with
+  // `otherTail` to this global list.  The linking on the local list should be
+  // performed before this call. This is intended for returning multiple local
+  // slabs to the global list in one batch at the end of each request.
+  void merge(TaggedSlabList&& other, void* otherTail) {
+    auto const newHead = other.head();
     assertx(newHead);
+    m_bytes.fetch_add(other.bytes(), std::memory_order_relaxed);
     // No need to bump the tag here, as it is already bumped when forming the
     // local list.
-    auto last = reinterpret_cast<AtomicTaggedSlabPtr*>(localTail);
+    auto last = reinterpret_cast<AtomicTaggedSlabPtr*>(otherTail);
     auto currHead = m_head.load(std::memory_order_acquire);
     while (true) {
       last->store(currHead, std::memory_order_release);

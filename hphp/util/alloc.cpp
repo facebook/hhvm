@@ -614,6 +614,18 @@ SlabManager* get_local_slab_manager(uint32_t node) {
 
 #endif // USE_JEMALLOC
 
+ssize_t get_free_slab_bytes() {
+  ssize_t bytes = 0;
+#ifdef USE_JEMALLOC
+  for (auto const slabManager : s_slab_managers) {
+    if (slabManager) {
+      bytes += slabManager->bytes();
+    }
+  }
+#endif // USE_JEMALLOC
+  return bytes;
+}
+
 struct JEMallocInitializer {
   JEMallocInitializer() {
     // The following comes from malloc_extension.cc in google-perftools

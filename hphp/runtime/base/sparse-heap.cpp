@@ -65,7 +65,7 @@ void SparseHeap::reset() {
     m_bigs.erase(slab.ptr);
   }
   if (pooledSlabTail) {
-    m_slabManager->merge(pooledSlabs.head(), pooledSlabTail);
+    m_slabManager->merge(std::move(pooledSlabs), pooledSlabTail);
   }
   m_pooled_slabs.clear();
   m_hugeBytes = 0;

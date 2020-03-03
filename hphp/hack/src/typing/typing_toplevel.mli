@@ -7,6 +7,11 @@
  *
  *)
 
+val fun_def :
+  Provider_context.t ->
+  Nast.fun_ ->
+  (Tast.fun_ * Typing_inference_env.t_global_with_pos) option
+
 val gconst_def : Provider_context.t -> Nast.gconst -> Tast.gconst
 
 val record_def_def : Provider_context.t -> Nast.record_def -> Tast.record_def

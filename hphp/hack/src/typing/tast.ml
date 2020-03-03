@@ -104,6 +104,9 @@ type user_attribute =
 
 type fun_ = (Pos.t * ty, func_body_ann, saved_env, ty) Aast.fun_
 
+type file_attribute =
+  (Pos.t * ty, func_body_ann, saved_env, ty) Aast.file_attribute
+
 type fun_def = (Pos.t * ty, func_body_ann, saved_env, ty) Aast.fun_def
 
 type fun_param = (Pos.t * ty, func_body_ann, saved_env, ty) Aast.fun_param

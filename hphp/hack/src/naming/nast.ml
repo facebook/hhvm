@@ -48,6 +48,8 @@ type class_ = (Pos.t, func_body_ann, unit, unit) Aast.class_
 
 type method_ = (Pos.t, func_body_ann, unit, unit) Aast.method_
 
+type file_attribute = (Pos.t, func_body_ann, unit, unit) Aast.file_attribute
+
 type fun_ = (Pos.t, func_body_ann, unit, unit) Aast.fun_
 
 type fun_def = (Pos.t, func_body_ann, unit, unit) Aast.fun_def

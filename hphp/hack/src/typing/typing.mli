@@ -12,11 +12,6 @@ val with_expr_hook :
 
 val debug_print_last_pos : 'a -> unit
 
-val fun_def :
-  Provider_context.t ->
-  Nast.fun_ ->
-  (Tast.fun_ * Typing_inference_env.t_global_with_pos) option
-
 val class_def :
   Provider_context.t ->
   Nast.class_ ->
@@ -36,3 +31,32 @@ val user_attribute :
   Typing_env_types.env * Tast.user_attribute
 
 val stmt : Typing_env_types.env -> Nast.stmt -> Typing_env_types.env * Tast.stmt
+
+val bind_param :
+  Typing_env_types.env ->
+  Typing_defs.locl_ty * Nast.fun_param ->
+  Typing_env_types.env * Tast.fun_param
+
+val fun_ :
+  ?abstract:bool ->
+  ?disable:bool ->
+  Typing_env_types.env ->
+  Typing_env_return_info.t ->
+  Pos.t ->
+  Nast.func_body ->
+  Ast_defs.fun_kind ->
+  Typing_env_types.env * Tast.stmt list
+
+val attributes_check_def :
+  Typing_env_types.env ->
+  string ->
+  Nast.user_attribute list ->
+  Typing_env_types.env
+
+val file_attributes :
+  Typing_env_types.env ->
+  Nast.file_attribute list ->
+  Typing_env_types.env * Tast.file_attribute list
+
+val type_param :
+  Typing_env_types.env -> Nast.tparam -> Typing_env_types.env * Tast.tparam

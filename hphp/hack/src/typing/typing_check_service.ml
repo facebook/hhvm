@@ -106,7 +106,7 @@ let type_fun (ctx : Provider_context.t) (fn : Relative_path.t) (x : string) :
         let fun_ = Naming.fun_ ctx f in
         Nast_check.def ctx (Aast.Fun fun_);
         let def_opt =
-          Typing.fun_def ctx fun_
+          Typing_toplevel.fun_def ctx fun_
           |> Option.map ~f:(fun (f, global_tvenv) -> (Aast.Fun f, global_tvenv))
         in
         Option.iter def_opt (fun (f, _) -> Tast_check.def ctx f);

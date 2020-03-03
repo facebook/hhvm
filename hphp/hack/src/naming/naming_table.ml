@@ -425,8 +425,7 @@ let update_reverse_entries file_deltas =
           (fun (pos, name) -> Naming_provider.add_class name pos)
           fi.FileInfo.classes;
         List.iter
-          (fun (pos, name) ->
-            Naming_heap.Types.add name (pos, Naming_types.TTypedef))
+          (fun (pos, name) -> Naming_provider.add_typedef name pos)
           fi.FileInfo.typedefs;
         List.iter
           (fun (pos, name) -> Naming_provider.add_fun name pos)

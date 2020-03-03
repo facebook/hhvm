@@ -249,7 +249,7 @@ let update_naming_table
       List.iter new_file_info.record_defs ~f:(fun (pos, record_def_name) ->
           Naming_heap.Types.add record_def_name (pos, Naming_types.TRecordDef));
       List.iter new_file_info.typedefs ~f:(fun (pos, typedef_name) ->
-          Naming_heap.Types.add typedef_name (pos, Naming_types.TTypedef));
+          Naming_provider.add_typedef typedef_name pos);
       List.iter new_file_info.consts ~f:(fun (pos, const_name) ->
           Naming_provider.add_const const_name pos);
 

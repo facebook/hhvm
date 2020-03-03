@@ -91,3 +91,13 @@ val get_class_path : string -> Relative_path.t option
 position. Same as calling [add_type] with [Naming_types.TClass].
 *)
 val add_class : string -> FileInfo.pos -> unit
+
+(** Look up the file path declaring the given class in the reverse naming
+table. Same as calling [get_type_pos] and extracting the path if the result
+is a [Naming_types.TTypedef]. *)
+val get_typedef_path : string -> Relative_path.t option
+
+(** Record that a class with the given name was declared at the given
+position. Same as calling [add_type] with [Naming_types.TTypedef].
+*)
+val add_typedef : string -> FileInfo.pos -> unit

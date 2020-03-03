@@ -62,6 +62,7 @@ std::atomic<MemoryManager::ReqProfContext*>
   MemoryManager::s_trigger{nullptr};
 
 bool MemoryManager::s_statsEnabled = false;
+std::atomic<ssize_t> MemoryManager::s_req_heap_usage;
 
 static std::atomic<size_t> s_heap_id; // global counter of heap instances
 
@@ -176,6 +177,12 @@ void MemoryManager::resetAllStats() {
   m_stats.peakIntervalUsage = 0;
   m_stats.peakIntervalCap = 0;
   m_enableStatsSync = false;
+
+  // Reset this memory managers portion of the bytes used across all memory
+  // managers.
+  s_req_heap_usage.fetch_sub(m_lastUsage, std::memory_order_relaxed);
+  m_lastUsage = 0;
+
   if (Trace::enabled) tl_heap_id = ++s_heap_id;
   if (s_statsEnabled) {
     m_resetDeallocated = *m_deallocated;
@@ -287,6 +294,8 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
 void MemoryManager::refreshStats() {
   refreshStatsImpl(m_stats);
   auto usage = m_stats.usage();
+  s_req_heap_usage.fetch_add(usage - m_lastUsage, std::memory_order_relaxed);
+  m_lastUsage = usage;
   if (usage > m_usageLimit && m_couldOOM) {
     refreshStatsHelperExceeded();
   } else if (usage > m_memThresholdCallbackPeakUsage) {

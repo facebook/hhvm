@@ -752,6 +752,17 @@ struct MemoryManager {
   // Stats.
 
   /*
+   * Get the total amount of memory used across all memory managers.  This
+   * number of bytes is tracked at the slab size granularity.
+   *
+   * This number make occasionally be negative since the atomic operations used
+   * to track it are performed with relaxed ordering constraints.
+   */
+  static ssize_t getAllMMUsage() {
+    return s_req_heap_usage.load(std::memory_order_relaxed);
+  }
+
+  /*
    * Update the request-memory limit.
    */
   void setMemoryLimit(size_t limit);
@@ -1023,6 +1034,8 @@ private:
   int64_t m_nextGC{kNoNextGC}; // request gc when heap usage reaches this size
   int64_t m_nextSample{kNoNextSample};
   int64_t m_usageLimit; // OOM when m_stats.usage() > m_usageLimit
+  ssize_t m_lastUsage{0};
+  static std::atomic<ssize_t> s_req_heap_usage;
   MemoryUsageStats m_stats;
   HeapImpl m_heap;
   std::vector<NativeNode*> m_natives;

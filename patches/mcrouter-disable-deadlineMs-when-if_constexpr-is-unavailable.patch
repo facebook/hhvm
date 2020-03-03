@@ -1,0 +1,87 @@
+From a6ad725247cc87d1e7fe7ac1cb60ec67ada72a37 Mon Sep 17 00:00:00 2001
+From: jjergus <jjergus@fb.com>
+Date: Tue, 3 Mar 2020 14:13:46 -0800
+Subject: [PATCH] disable deadlineMs when if_constexpr is unavailable
+
+---
+ mcrouter/McReqUtil.h | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/third-party/mcrouter/src/mcrouter/McReqUtil.h b/third-party/mcrouter/src/mcrouter/McReqUtil.h
+index 2acfac5c..60dd6f6d 100644
+--- a/third-party/mcrouter/src/mcrouter/McReqUtil.h
++++ b/third-party/mcrouter/src/mcrouter/McReqUtil.h
+@@ -7,6 +7,7 @@
+ 
+ #pragma once
+ 
++#if __cpp_if_constexpr
+ #include "mcrouter/config.h"
+ 
+ // Request deadline related helper functions
+@@ -24,6 +25,7 @@ constexpr auto hasNonConstDeadlineMs<
+     T,
+     std::void_t<decltype(std::declval<std::decay_t<T>&>().deadlineMs())>> =
+     true;
++#endif
+ 
+ /**
+  * setRequestDeadline - sets request deadline time to current time + deadlineMs
+@@ -34,10 +36,12 @@ constexpr auto hasNonConstDeadlineMs<
+  */
+ template <class Request>
+ void setRequestDeadline(Request& req, uint64_t deadlineMs) {
++#if __cpp_if_constexpr
+   if constexpr (hasNonConstDeadlineMs<Request>) {
+     req.deadlineMs() =
+         facebook::memcache::mcrouter::getCurrentTimeInMs() + deadlineMs;
+   }
++#endif
+ }
+ 
+ /**
+@@ -52,12 +56,14 @@ void setRequestDeadline(Request& req, uint64_t deadlineMs) {
+  */
+ template <class Request>
+ bool isRequestDeadlineExceeded(const Request& req) {
++#if __cpp_if_constexpr
+   if constexpr (hasConstDeadlineMs<Request>) {
+     if (req.deadlineMs() > 0) {
+       return facebook::memcache::mcrouter::getCurrentTimeInMs() >
+           req.deadlineMs();
+     }
+   }
++#endif
+   return false;
+ }
+ 
+@@ -69,9 +75,11 @@ bool isRequestDeadlineExceeded(const Request& req) {
+  */
+ template <class Request>
+ std::pair<bool, uint64_t> getDeadline(const Request& req) {
++#if __cpp_if_constexpr
+   if constexpr (hasConstDeadlineMs<Request>) {
+     return {true, req.deadlineMs()};
+   }
++#endif
+   return {false, 0};
+ }
+ 
+@@ -82,6 +90,7 @@ std::pair<bool, uint64_t> getDeadline(const Request& req) {
+  */
+ template <class Request>
+ std::pair<bool, uint64_t> getRemainingTime(const Request& req) {
++#if __cpp_if_constexpr
+   if constexpr (hasConstDeadlineMs<Request>) {
+     auto deadlineMs = req.deadlineMs();
+     auto currentTime = facebook::memcache::mcrouter::getCurrentTimeInMs();
+@@ -90,5 +99,6 @@ std::pair<bool, uint64_t> getRemainingTime(const Request& req) {
+     }
+     return {true, 0};
+   }
++#endif
+   return {false, 0};
+ }
+-- 
+2.17.1
+

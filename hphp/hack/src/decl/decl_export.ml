@@ -47,14 +47,6 @@ let empty_decls =
 let keys_to_sset smap =
   SMap.fold smap ~init:SSet.empty ~f:(fun k _ s -> SSet.add s k)
 
-let get_class_filename cid =
-  match Naming_heap.Types.get_filename_and_kind cid with
-  | None
-  | Some (_, Naming_types.TRecordDef)
-  | Some (_, Naming_types.TTypedef) ->
-    None
-  | Some (fn, Naming_types.TClass) -> Some fn
-
 let rec collect_class
     ?(fail_if_missing = false)
     (ctx : Provider_context.t)
@@ -76,7 +68,7 @@ let rec collect_class
         failwith @@ "Missing " ^ kind ^ " class " ^ cid ^ " after declaration"
       else (
         try
-          match get_class_filename cid with
+          match Naming_provider.get_class_path cid with
           | None -> raise Exit
           | Some filename ->
             Hh_logger.log "Declaring %s class %s" kind cid;
@@ -146,7 +138,7 @@ let rec collect_class
                  | Some x -> { decls with cstrs = SMap.add decls.cstrs cid x })
       in
       let filename =
-        match get_class_filename cid with
+        match Naming_provider.get_class_path cid with
         | None ->
           failwith @@ "Could not look up filename for " ^ kind ^ " class " ^ cid
         | Some f -> f

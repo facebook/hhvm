@@ -149,7 +149,7 @@ let test_get_canon_name () =
        saved state. *)
       Asserter.String_asserter.assert_option_equals
         (Some "\\Foo")
-        (Naming_heap.Types.get_canon_name ctx "\\foo")
+        (Naming_provider.get_type_canon_name ctx "\\foo")
         "Check for class canon name";
       Asserter.String_asserter.assert_option_equals
         (Some "\\bar")
@@ -157,7 +157,7 @@ let test_get_canon_name () =
         "Check for function canon name";
       Asserter.String_asserter.assert_option_equals
         (Some "\\Baz")
-        (Naming_heap.Types.get_canon_name ctx "\\baz")
+        (Naming_provider.get_type_canon_name ctx "\\baz")
         "Check for typedef canon name")
 
 let test_remove () =

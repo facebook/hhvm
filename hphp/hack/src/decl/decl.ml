@@ -441,8 +441,8 @@ and class_type_decl class_env hint =
   match get_node hint with
   | Tapply ((_, cid), _) ->
     begin
-      match Naming_heap.Types.get_filename_and_kind cid with
-      | Some (fn, Naming_types.TClass) when not (Decl_heap.Classes.mem cid) ->
+      match Naming_provider.get_class_path cid with
+      | Some fn when not (Decl_heap.Classes.mem cid) ->
         (* We are supposed to redeclare the class *)
         let class_opt = Ast_provider.find_class_in_file class_env.ctx fn cid in
         Errors.run_in_context fn Errors.Decl (fun () ->

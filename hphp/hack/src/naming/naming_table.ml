@@ -422,8 +422,7 @@ let update_reverse_entries file_deltas =
       match delta with
       | Naming_sqlite.Modified fi ->
         List.iter
-          (fun (pos, name) ->
-            Naming_heap.Types.add name (pos, Naming_types.TClass))
+          (fun (pos, name) -> Naming_provider.add_class name pos)
           fi.FileInfo.classes;
         List.iter
           (fun (pos, name) ->

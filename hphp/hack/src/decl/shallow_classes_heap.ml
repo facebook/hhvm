@@ -63,16 +63,11 @@ let declare_class_in_file ctx file name =
   | Some cls -> class_decl_if_missing ctx cls
   | None -> err_not_found file name
 
-let get_class_filename x =
-  match Naming_heap.Types.get_filename_and_kind x with
-  | Some (fn, Naming_types.TClass) -> Some fn
-  | _ -> None
-
 let get ctx cid =
   match get_from_store ctx cid with
   | Some _ as c -> c
   | None ->
-    (match get_class_filename cid with
+    (match Naming_provider.get_class_path cid with
     | None -> None
     | Some filename -> Some (declare_class_in_file ctx filename cid))
 

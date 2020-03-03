@@ -245,7 +245,7 @@ let update_naming_table
       List.iter new_file_info.funs ~f:(fun (pos, fun_name) ->
           Naming_provider.add_fun fun_name pos);
       List.iter new_file_info.classes ~f:(fun (pos, class_name) ->
-          Naming_heap.Types.add class_name (pos, Naming_types.TClass));
+          Naming_provider.add_class class_name pos);
       List.iter new_file_info.record_defs ~f:(fun (pos, record_def_name) ->
           Naming_heap.Types.add record_def_name (pos, Naming_types.TRecordDef));
       List.iter new_file_info.typedefs ~f:(fun (pos, typedef_name) ->

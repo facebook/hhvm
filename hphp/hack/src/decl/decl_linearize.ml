@@ -57,15 +57,6 @@ type state =
       type parameter substitutions) unless it was already emitted earlier in the
       current linearization sequence. *)
 
-let push_local_changes (ctx : Provider_context.t) : unit =
-  Linearization_provider.push_local_changes ctx
-
-let pop_local_changes (ctx : Provider_context.t) : unit =
-  Linearization_provider.pop_local_changes ctx
-
-let remove_batch (ctx : Provider_context.t) (classes : SSet.t) : unit =
-  Linearization_provider.remove_batch ctx classes
-
 let ancestor_from_ty (source : source_type) (ty : decl_ty) :
     Pos.t * (Pos.t * string) * decl_ty list * source_type =
   let (r, class_name, type_args) = Decl_utils.unwrap_class_type ty in

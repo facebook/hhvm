@@ -298,7 +298,7 @@ let remove_defs
   Decl_class_elements.remove_all elems;
   Decl_heap.Classes.remove_batch n_classes;
   Shallow_classes_provider.remove_batch ctx n_classes;
-  Decl_linearize.remove_batch ctx n_classes;
+  Linearization_provider.remove_batch ctx n_classes;
   Decl_heap.RecordDefs.remove_batch n_record_defs;
   Decl_heap.Typedefs.remove_batch n_types;
   Decl_heap.GConsts.remove_batch n_consts;
@@ -454,7 +454,7 @@ let redo_type_decl
         |> Relative_path.Set.fold ~init:SSet.empty ~f:(fun path acc ->
                SSet.union acc (get_classes path))
       in
-      Decl_linearize.remove_batch ctx mro_invalidated;
+      Linearization_provider.remove_batch ctx mro_invalidated;
       (changed, to_recheck)
     ) else
       (changed, to_recheck)

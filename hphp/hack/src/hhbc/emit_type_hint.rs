@@ -311,8 +311,12 @@ fn make_tc_with_flags_if_non_empty_flags(
 fn happly_helper(tparams: &[&str], kind: &Kind, pos: &Pos, name: &str) -> Result<constraint::Type> {
     use constraint::{Flags, Type};
     if tparams.contains(&name) {
+        let tc_name = match kind {
+            Kind::Param | Kind::Return => name,
+            _ => "",
+        };
         Ok(Type::make(
-            Some("".into()),
+            Some(tc_name.into()),
             Flags::EXTENDED_HINT | Flags::TYPE_VAR,
         ))
     } else if string_utils::is_self(&name) || string_utils::is_parent(name) {

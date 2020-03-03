@@ -264,7 +264,11 @@ let with_check_kind _ f = f ()
 
 let state_loader_dirty_files _ = ()
 
+let save_decls_end _ = ()
+
 let save_decls_failure _ _ = ()
+
+let load_decls_end _ = ()
 
 let load_decls_failure _ _ = ()
 

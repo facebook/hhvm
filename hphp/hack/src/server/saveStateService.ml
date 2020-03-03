@@ -55,6 +55,7 @@ let load_class_decls (input_filename : string) : unit =
     let classes = Decl_export.import_class_decls decls in
     let num_classes = SSet.cardinal classes in
     let msg = Printf.sprintf "Loaded %d class declarations" num_classes in
+    HackEventLogger.load_decls_end start_t;
     ignore @@ Hh_logger.log_duration msg start_t
   with exn ->
     let stack = Printexc.get_backtrace () in
@@ -134,6 +135,7 @@ let dump_class_decls ctx filename =
     let decls = Decl_export.export_class_decls ctx classes in
     Hh_logger.log "Marshalling class declarations...";
     dump_contents filename decls;
+    HackEventLogger.save_decls_end start_t;
     ignore @@ Hh_logger.log_duration "Saved class declarations" start_t
   with exn ->
     let stack = Printexc.get_backtrace () in

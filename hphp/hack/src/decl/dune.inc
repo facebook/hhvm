@@ -208,6 +208,7 @@
     decl_utils
     shallow_decl_defs
     shallow_classes_provider
+    linearization_provider
     typing_defs)
   (preprocess (pps ppx_deriving.std)))
 

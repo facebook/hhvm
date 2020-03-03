@@ -57,49 +57,14 @@ type state =
       type parameter substitutions) unless it was already emitted earlier in the
       current linearization sequence. *)
 
-module CacheKey = struct
-  type t = string * linearization_kind [@@deriving show, ord]
+let push_local_changes (ctx : Provider_context.t) : unit =
+  Linearization_provider.push_local_changes ctx
 
-  let to_string = show
-end
+let pop_local_changes (ctx : Provider_context.t) : unit =
+  Linearization_provider.pop_local_changes ctx
 
-module CacheKeySet = Reordered_argument_set (Caml.Set.Make (CacheKey))
-
-module Cache =
-  SharedMem.WithCache (SharedMem.ProfiledImmediate) (CacheKey)
-    (struct
-      type t = mro_element list
-
-      let prefix = Prefix.make ()
-
-      let description = "Decl_Linearization"
-    end)
-
-let push_local_changes (_ctx : Provider_context.t) : unit =
-  Cache.LocalChanges.push_stack ()
-
-let pop_local_changes (_ctx : Provider_context.t) : unit =
-  Cache.LocalChanges.pop_stack ()
-
-let remove_batch (_ctx : Provider_context.t) (classes : SSet.t) : unit =
-  let keys =
-    SSet.fold classes ~init:CacheKeySet.empty ~f:(fun class_name acc ->
-        let acc = CacheKeySet.add acc (class_name, Member_resolution) in
-        let acc = CacheKeySet.add acc (class_name, Ancestor_types) in
-        acc)
-  in
-  Cache.remove_batch keys
-
-module LocalCache =
-  SharedMem.LocalCache
-    (CacheKey)
-    (struct
-      type t = linearization
-
-      let prefix = Prefix.make ()
-
-      let description = "Decl_LazyLinearization"
-    end)
+let remove_batch (ctx : Provider_context.t) (classes : SSet.t) : unit =
+  Linearization_provider.remove_batch ctx classes
 
 let ancestor_from_ty (source : source_type) (ty : decl_ty) :
     Pos.t * (Pos.t * string) * decl_ty list * source_type =
@@ -467,8 +432,7 @@ and next_state
       Yield (next, (Synthesized_elts synths, ancestors, next :: acc, synths))
     | (Synthesized_elts [], _) ->
       let key = (class_name, env.linearization_kind) in
-      Cache.add key (List.rev acc);
-      LocalCache.remove key;
+      Linearization_provider.complete (get_ctx env) key (List.rev acc);
       Done)
 
 and get_linearization (env : env) (class_name : string) : linearization =
@@ -484,34 +448,31 @@ and get_linearization (env : env) (class_name : string) : linearization =
     let class_stack = SSet.add class_stack class_name in
     let env = { env with class_stack } in
     let key = (class_name, linearization_kind) in
-    match Cache.get key with
-    | Some lin -> Sequence.of_list lin
+    match Linearization_provider.get (get_ctx env) key with
+    | Some lin -> lin
     | None ->
-      (match LocalCache.get key with
-      | Some lin -> lin
+      (match Shallow_classes_provider.get (get_ctx env) class_name with
+      | Some c ->
+        let lin = linearize env c in
+        Linearization_provider.add (get_ctx env) key lin;
+        lin
       | None ->
-        (match Shallow_classes_provider.get (get_ctx env) class_name with
-        | Some c ->
-          let lin = linearize env c in
-          LocalCache.add key lin;
-          lin
-        | None ->
-          (* There is no known definition for the class with the given name. This
-           is always an "Unbound name" error, and we will emit one wherever this
-           class was specified as an ancestor. In order to suppress downstream
-           errors (and, historically, to support the now-removed assume_php
-           feature), we include this fake mro_element with the
-           mro_class_not_found flag set. This logic is largely here to ensure
-           that the behavior of shallow_class_decl is equivalent to legacy decl,
-           and we should look into removing it (along with
-           Typing_classes_heap.members_fully_known) after we have removed legacy
-           decl. *)
-          Sequence.singleton
-            {
-              empty_mro_element with
-              mro_name = class_name;
-              mro_class_not_found = true (* This class is not known to exist! *);
-            }))
+        (* There is no known definition for the class with the given name. This
+          is always an "Unbound name" error, and we will emit one wherever this
+          class was specified as an ancestor. In order to suppress downstream
+          errors (and, historically, to support the now-removed assume_php
+          feature), we include this fake mro_element with the
+          mro_class_not_found flag set. This logic is largely here to ensure
+          that the behavior of shallow_class_decl is equivalent to legacy decl,
+          and we should look into removing it (along with
+          Typing_classes_heap.members_fully_known) after we have removed legacy
+          decl. *)
+        Sequence.singleton
+          {
+            empty_mro_element with
+            mro_name = class_name;
+            mro_class_not_found = true (* This class is not known to exist! *);
+          })
 
 let get_linearization
     (ctx : Provider_context.t) (key : string * Decl_defs.linearization_kind) :

@@ -181,8 +181,6 @@ let get_outstanding_request_exn (id : lsp_id) : lsp_request =
 (* head is newest *)
 let hh_server_state : (float * hh_server_state) list ref = ref []
 
-let ref_from : string ref = ref ""
-
 let showStatus_outstanding : string ref = ref ""
 
 let log s = Hh_logger.log ("[client-lsp] " ^^ s)
@@ -2659,7 +2657,7 @@ let rec connect_client ~(env : env) (root : Path.t) ~(autostart : bool) :
     let env_connect =
       {
         ClientConnect.root;
-        from = !ref_from;
+        from = env.from;
         autostart;
         force_dormant_start = false;
         watchman_debug_logging = false;
@@ -2798,7 +2796,7 @@ let start_server ~(env : env) (root : Path.t) : unit =
   let env_start =
     {
       ClientStart.root;
-      from = !ref_from;
+      from = env.from;
       no_load = false;
       watchman_debug_logging = false;
       log_inference_constraints = false;
@@ -3333,7 +3331,7 @@ let tick_showStatus
           (* Belt-and-braces kill the server. This is in case the server was *)
           (* stuck in some weird state. It's also what 'hh restart' does. *)
           if MonitorConnection.server_exists (Path.to_string root) then
-            ClientStop.kill_server root !ref_from;
+            ClientStop.kill_server root env.from;
 
           (* After that it's safe to try to reconnect! *)
           start_server ~env root;
@@ -4098,7 +4096,6 @@ let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
   Hh_logger.Level.set_min_level_file Hh_logger.Level.Info;
   Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Error;
   if env.verbose then Hh_logger.Level.set_min_level Hh_logger.Level.Debug;
-  ref_from := env.from;
   HackEventLogger.set_from env.from;
 
   let client = Jsonrpc.make_queue () in

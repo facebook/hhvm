@@ -22,23 +22,17 @@ val class_def :
   Nast.class_ ->
   (Tast.class_ * Typing_inference_env.t_global_with_pos list) option
 
-val record_def_def : Provider_context.t -> Nast.record_def -> Tast.record_def
-
 val typedef_def : Provider_context.t -> Nast.typedef -> Tast.typedef
 
-val gconst_def : Provider_context.t -> Nast.gconst -> Tast.gconst
+val expr :
+  ?expected:Typing_helpers.ExpectedTy.t ->
+  Typing_env_types.env ->
+  Nast.expr ->
+  Typing_env_types.env * Tast.expr * Typing_defs.locl_ty
 
-val nast_to_tast_gienv :
-  do_tast_checks:bool ->
-  Provider_context.t ->
-  Nast.program ->
-  Tast.program * Typing_inference_env.t_global_with_pos list
+val user_attribute :
+  Typing_env_types.env ->
+  Nast.user_attribute ->
+  Typing_env_types.env * Tast.user_attribute
 
-(** Run typing on the given named AST (NAST) to produced a typed AST (TAST).
-
-Set [do_tast_checks] to [false] to skip running TAST checks on the resulting
-TAST. This means that the associated list of errors may be incomplete. This is
-useful for performance in cases where we want the TAST, but don't need a correct
-list of errors. *)
-val nast_to_tast :
-  do_tast_checks:bool -> Provider_context.t -> Nast.program -> Tast.program
+val stmt : Typing_env_types.env -> Nast.stmt -> Typing_env_types.env * Tast.stmt

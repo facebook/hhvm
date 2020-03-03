@@ -1065,7 +1065,7 @@ let compute_tasts ctx files_info interesting_files :
       let tasts_envs =
         Relative_path.Map.map
           nasts
-          ~f:(Typing.nast_to_tast_gienv ~do_tast_checks:true ctx)
+          ~f:(Typing_toplevel.nast_to_tast_gienv ~do_tast_checks:true ctx)
       in
       let tasts = Relative_path.Map.map tasts_envs ~f:fst in
       let genvs =

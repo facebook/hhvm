@@ -138,7 +138,7 @@ let type_record_def
         let rd = Naming.record_def ctx rd in
         Nast_check.def ctx (Aast.RecordDef rd);
 
-        let def = Aast.RecordDef (Typing.record_def_def ctx rd) in
+        let def = Aast.RecordDef (Typing_toplevel.record_def_def ctx rd) in
         Tast_check.def ctx def;
         Some def)
   | None -> None
@@ -165,7 +165,7 @@ let check_const (ctx : Provider_context.t) (fn : Relative_path.t) (x : string) :
     handle_exn_as_error cst.Aast.cst_span (fun () ->
         let cst = Naming.global_const ctx cst in
         Nast_check.def ctx (Aast.Constant cst);
-        let def = Aast.Constant (Typing.gconst_def ctx cst) in
+        let def = Aast.Constant (Typing_toplevel.gconst_def ctx cst) in
         Tast_check.def ctx def;
         Some def)
 

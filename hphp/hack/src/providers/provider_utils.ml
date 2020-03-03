@@ -280,7 +280,7 @@ let compute_tast_and_errors_unquarantined_internal
       Errors.do_with_context
         entry.Provider_context.path
         Errors.Typing
-        (fun () -> Typing.nast_to_tast ~do_tast_checks ctx nast)
+        (fun () -> Typing_toplevel.nast_to_tast ~do_tast_checks ctx nast)
     in
     let tast_errors = Errors.merge nast_errors tast_errors in
 

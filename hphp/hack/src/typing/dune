@@ -161,6 +161,7 @@
     typing_disposable
     typing_extends
     typing_exts
+    typing_helpers
     typing_inheritance
     typing_lenv
     typing_memoize
@@ -170,6 +171,7 @@
     typing_sequencing
     typing_shapes
     typing_structure
+    typing_toplevel
     typing_try)
   (libraries
     logging

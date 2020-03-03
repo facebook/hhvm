@@ -75,7 +75,10 @@ let get_patches ctx file =
   let tast =
     (* We don't need an accurate list of typing errors, so we can skip TAST
     checks. *)
-    Typing.nast_to_tast ~do_tast_checks:false ctx (Naming.program ctx nast)
+    Typing_toplevel.nast_to_tast
+      ~do_tast_checks:false
+      ctx
+      (Naming.program ctx nast)
   in
   let type_map = Tast_type_collector.collect_types ctx tast in
   let source_text = Full_fidelity_source_text.from_file file in

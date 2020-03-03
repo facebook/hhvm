@@ -122,7 +122,10 @@ let get_patches ctx file =
   let tast =
     (* [Infer_params] is not implemented with a TAST check, so we can skip TAST
     checks safely. *)
-    Typing.nast_to_tast ~do_tast_checks:false ctx (Naming.program ctx nast)
+    Typing_toplevel.nast_to_tast
+      ~do_tast_checks:false
+      ctx
+      (Naming.program ctx nast)
   in
   let type_map = collect_types ctx tast in
   let source_text = Full_fidelity_source_text.from_file file in

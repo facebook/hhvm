@@ -1726,7 +1726,7 @@ let not_initialized (pos, cname) prop_names =
          "when the method __construct is called.";
          "\nAlternatively, you can define the ";
          members;
-         " as optional (?...)\n";
+         " as nullable (?...)\n";
        ])
 
 let call_before_init pos cv =

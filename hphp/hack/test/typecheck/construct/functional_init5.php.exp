@@ -4,5 +4,5 @@ The initialization is not over because $this->x can still potentially be null (N
 File "functional_init5.php", line 17, characters 19-29:
 Class A does not initialize all of its members; x is not always initialized.
 Make sure you systematically set $this->x when the method __construct is called.
-Alternatively, you can define the member as optional (?...)
+Alternatively, you can define the member as nullable (?...)
  (NastCheck[3015])

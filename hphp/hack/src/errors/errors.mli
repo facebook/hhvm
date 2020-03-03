@@ -663,8 +663,6 @@ val requires_final_class : Pos.t -> string -> unit
 
 val abstract_body : Pos.t -> unit
 
-val not_public_or_protected_interface : Pos.t -> unit
-
 val interface_with_member_variable : Pos.t -> unit
 
 val interface_with_static_member_variable : Pos.t -> unit

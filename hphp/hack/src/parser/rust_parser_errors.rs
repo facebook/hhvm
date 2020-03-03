@@ -4031,7 +4031,7 @@ where
                     && Self::is_token_kind(&cd.classish_keyword, TokenKind::Interface)
                 {
                     self.errors.push(Self::make_error_from_node(
-                        node,
+                        &cd.classish_name,
                         errors::interface_has_private_method,
                     ))
                 }

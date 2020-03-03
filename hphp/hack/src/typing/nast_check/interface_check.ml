@@ -12,9 +12,7 @@ open Aast
 
 let enforce_no_body m =
   match m.m_body.fb_ast with
-  | [] ->
-    if Aast.equal_visibility m.m_visibility Private then
-      Errors.not_public_or_protected_interface (fst m.m_name)
+  | [] -> ()
   | _ -> Errors.abstract_body (fst m.m_name)
 
 let check_interface c =

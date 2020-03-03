@@ -1928,12 +1928,6 @@ let abstract_body pos =
     pos
     "This method shouldn't have a body"
 
-let not_public_or_protected_interface pos =
-  add
-    (NastCheck.err_code NastCheck.NotPublicInterface)
-    pos
-    "Access type for interface method must be public or protected."
-
 let interface_with_member_variable pos =
   add
     (NastCheck.err_code NastCheck.InterfaceWithMemberVariable)

@@ -1,0 +1,22 @@
+# @generated
+# @autocargo from //hphp/hack/src/typing:typing_check_service_rust
+# Signature
+[package]
+name = "typing_check_service_rust"
+edition = "2018"
+version = "0.0.0"
+include = ["../../typing_check_service_rust.rs", "../../typing_check_utils.rs", "../../typing_env.rs", "../../typing_make_type.rs"]
+
+[lib]
+path = "../../typing_check_service_rust.rs"
+
+[dependencies]
+aast_parser = { path = "../../../parser/cargo/aast_parser" }
+ocamlrep = { path = "../../../ocamlrep" }
+oxidized = { path = "../../../oxidized" }
+parser_core_types = { path = "../../../parser/cargo/core_types" }
+stack_limit = { path = "../../../utils/stack_limit" }
+anyhow = "1.0"
+bitflags = "1.2"
+itertools = "0.8"
+# @end of Signature

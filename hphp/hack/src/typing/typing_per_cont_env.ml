@@ -8,8 +8,7 @@
  *)
 open Common
 module C = Typing_continuations
-module CMap = Typing_continuations.Map
-module LMap = Local_id.Map
+module CMap = C.Map
 
 type per_cont_entry = {
   (* Local types per continuation. For example, the local types of the
@@ -52,7 +51,7 @@ let empty_entry =
     tpenv = Type_parameter_env.empty;
   }
 
-let initial_locals entry = CMap.add C.Next entry CMap.empty
+let initial_locals entry = CMap.add Typing_continuations.Next entry CMap.empty
 
 let get_cont_option = CMap.find_opt
 
@@ -69,7 +68,7 @@ let add_to_cont name key value m =
   | None -> m
   | Some cont ->
     let cont =
-      { cont with local_types = LMap.add key value cont.local_types }
+      { cont with local_types = Local_id.Map.add key value cont.local_types }
     in
     CMap.add name cont m
 
@@ -77,7 +76,10 @@ let remove_from_cont name key m =
   match CMap.find_opt name m with
   | None -> m
   | Some c ->
-    CMap.add name { c with local_types = LMap.remove key c.local_types } m
+    CMap.add
+      name
+      { c with local_types = Local_id.Map.remove key c.local_types }
+      m
 
 let drop_cont = CMap.remove
 

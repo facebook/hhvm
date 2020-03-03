@@ -48,7 +48,7 @@ let to_string (_, mut) = to_string_ mut
   - for locals - arguments to move\freeze calls we still keep value in map
     as MutableUnset to keep mutability flavor information
 *)
-type mutability_env = mutability LMap.t
+type mutability_env = mutability Local_id.Map.t
 
 (* Given two mutability maps, intersect them. *)
 let intersect_mutability

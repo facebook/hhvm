@@ -39,6 +39,10 @@ let derive_blacklists =
     (* GlobalOptions contains a couple floats, which only implement PartialEq
        and PartialOrd, and do not implement Hash. *)
     ("global_options::GlobalOptions", ["Eq"; "Hash"; "Ord"]);
+    (* And GlobalOptions is used in Genv which is used in Env. We
+     * don't care about comparison or hashing on environments *)
+    ("typing_env_types::Env", ["Eq"; "Hash"; "Ord"]);
+    ("typing_env_types::Genv", ["Eq"; "Hash"; "Ord"]);
   ]
   |> List.fold ~init:SMap.empty ~f:(fun map (ty, bl) -> SMap.add ty bl map)
 

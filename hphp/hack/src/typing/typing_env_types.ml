@@ -10,7 +10,6 @@
 (* cf: typing_env_types_sig.mli - These files should be the same *)
 open Hh_prelude
 open Typing_defs
-module TPEnv = Type_parameter_env
 module ITySet = Internal_type_set
 
 type locl_ty = Typing_defs.locl_ty
@@ -64,7 +63,7 @@ type env = {
   inside_constructor: bool;
   inside_ppl_class: bool;
   (* A set of constraints that are global to a given method *)
-  global_tpenv: TPEnv.t;
+  global_tpenv: Type_parameter_env.t;
   log_levels: int SMap.t;
   inference_env: Typing_inference_env.t;
   allow_wildcards: bool;

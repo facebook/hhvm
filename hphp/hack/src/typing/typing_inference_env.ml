@@ -67,7 +67,7 @@ type tvenv = tyvar_info IMap.t
 type t = {
   tvenv: tvenv;
   tyvars_stack: (Pos.t * Ident.t list) list;
-  subtype_prop: Typing_logic.subtype_prop;
+  subtype_prop: TL.subtype_prop;
   tyvar_occurrences: Typing_tyvar_occurrences.t;
   allow_solve_globals: bool;
 }

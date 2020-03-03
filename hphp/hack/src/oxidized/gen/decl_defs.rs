@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<add9f55f2ca8a1a052879a729100462d>>
+// @generated SignedSource<<473231a8b0eeb807b76cdb7a14266468>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -166,6 +166,24 @@ pub struct MroElement {
     /// from an ancestor with this flag not set, should be inherited as a concrete
     /// type constant instead.
     pub passthrough_abstract_typeconst: bool,
+}
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
+pub enum LinearizationKind {
+    MemberResolution,
+    AncestorTypes,
 }
 
 /// name of condition type for conditional reactivity of methods.

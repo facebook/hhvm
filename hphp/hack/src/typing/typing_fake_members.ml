@@ -7,8 +7,6 @@
  *
  *)
 
-open Typing_log_value
-
 (* Validation blame: call or lambda *)
 type blame =
   | Blame_call of Pos.t
@@ -111,23 +109,26 @@ let add fake lid =
 
 let blame_as_log_value blame =
   match blame with
-  | Blame_call p -> make_map [("Blame_call", pos_as_value p)]
-  | Blame_lambda p -> make_map [("Blame_lambda", pos_as_value p)]
+  | Blame_call p -> Typing_log_value.(make_map [("Blame_call", pos_as_value p)])
+  | Blame_lambda p ->
+    Typing_log_value.(make_map [("Blame_lambda", pos_as_value p)])
 
 let as_log_value fake =
   match fake with
-  | Valid valid -> make_map [("Valid", local_id_set_as_value valid)]
+  | Valid valid ->
+    Typing_log_value.(make_map [("Valid", local_id_set_as_value valid)])
   | Invalidated { valid; invalid; blame } ->
-    make_map
-      [
-        ( "Invalidated",
-          make_map
-            [
-              ("valid", local_id_set_as_value valid);
-              ("invalid", local_id_set_as_value invalid);
-              ("blame", blame_as_log_value blame);
-            ] );
-      ]
+    Typing_log_value.(
+      make_map
+        [
+          ( "Invalidated",
+            make_map
+              [
+                ("valid", local_id_set_as_value valid);
+                ("invalid", local_id_set_as_value invalid);
+                ("blame", blame_as_log_value blame);
+              ] );
+        ])
 
 let make_id obj_name member_name =
   let obj_name =

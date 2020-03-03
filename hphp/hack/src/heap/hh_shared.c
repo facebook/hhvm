@@ -2071,12 +2071,14 @@ void hh_move(value key1, value key2) {
  * Only the master can perform this operation.
  */
 /*****************************************************************************/
-void hh_remove(value key) {
+CAMLprim value hh_remove(value key) {
+  CAMLparam1(key);
   unsigned int slot = find_slot(key);
 
   assert_master();
   assert_allow_removes();
   assert(hashtbl[slot].hash == get_hash(key));
+  size_t entry_size = Entry_size(hashtbl[slot].addr->header);
   // see hh_alloc for the source of this size
   size_t slot_size =
     CACHE_ALIGN(Heap_entry_total_size(hashtbl[slot].addr->header));
@@ -2084,6 +2086,7 @@ void hh_remove(value key) {
   hashtbl[slot].addr = NULL;
   removed_count += 1;
   __sync_fetch_and_sub(hcounter_filled, 1);
+  CAMLreturn(Val_long(entry_size));
 }
 
 size_t deptbl_entry_count_for_slot(size_t slot) {

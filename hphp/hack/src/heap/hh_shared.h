@@ -95,7 +95,7 @@ CAMLprim value hh_mem_status(value key);
  */
 void hh_move(value key1, value key2);
 /* Removes a key from the hash table. */
-void hh_remove(value key);
+CAMLprim value hh_remove(value key);
 
 /*****************************************************************************/
 /* Saved State with SQLite */

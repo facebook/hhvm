@@ -480,7 +480,7 @@ end = struct
   external hh_get_and_deserialize : Key.md5 -> Value.t
     = "hh_get_and_deserialize"
 
-  external hh_remove : Key.md5 -> unit = "hh_remove"
+  external hh_remove : Key.md5 -> int = "hh_remove"
 
   external hh_move : Key.md5 -> Key.md5 -> unit = "hh_move"
 
@@ -532,6 +532,7 @@ end = struct
 
   let add key value =
     let (compressed_size, original_size) = hh_add key value in
+    (* compressed_size is a negative number if nothing new was added *)
     if hh_log_level () > 0 && compressed_size > 0 then
       log_serialize compressed_size original_size
 
@@ -542,7 +543,10 @@ end = struct
     if hh_log_level () > 0 then log_deserialize (hh_get_size key) (Obj.repr v);
     v
 
-  let remove key = hh_remove key
+  let remove key =
+    let (_compressed_size : int) = hh_remove key in
+    (* hh_remove assumes the key is present *)
+    ()
 
   let move from_key to_key = hh_move from_key to_key
 

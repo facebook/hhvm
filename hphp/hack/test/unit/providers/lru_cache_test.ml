@@ -75,10 +75,16 @@ let test_remove _test_ctxt =
   Cache.remove cache ~key:(Int_key 1);
   Cache.remove cache ~key:(Int_key 1);
   Cache.remove cache ~key:(String_key "foo");
+  let telemetry = Cache.get_telemetry cache in
   Int_asserter.assert_equals
     0
     (Cache.length cache)
-    "empty cache should have length 0"
+    "empty cache should have length 0";
+  Int_asserter.assert_equals
+    0
+    (Telemetry_test_utils.int_exn telemetry "total_size")
+    "removed total size should be zero";
+  ()
 
 let test_eviction_oversized _test_ctxt =
   let cache = Cache.make ~max_size:2 in

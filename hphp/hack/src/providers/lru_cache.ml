@@ -170,7 +170,11 @@ module Cache (Entry : Entry) = struct
 
   let remove (t : t) ~(key : 'a Entry.key) : unit =
     let start_time = Unix.gettimeofday () in
-    Hashtbl.remove t.entries (Key key);
+    begin
+      match Hashtbl.find_and_remove t.entries (Key key) with
+      | None -> ()
+      | Some value -> t.total_size <- t.total_size - value.size
+    end;
     time_internal t start_time;
     ()
 

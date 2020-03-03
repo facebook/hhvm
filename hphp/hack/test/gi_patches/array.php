@@ -10,15 +10,15 @@ function g(array $v) {
 }
 
 function h1(): array {
-  return array(0 => 'billie');
+  return darray[0 => 'billie'];
 }
 
 function h2(): array {
-  return array('billie');
+  return varray['billie'];
 }
 
 function i(): array {
-  $x = array();
+  $x = darray[];
   $x[3] = 'bob';
   return $x;
 }

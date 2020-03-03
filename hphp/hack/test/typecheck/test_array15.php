@@ -10,7 +10,7 @@
  */
 
 class X {
-  public array<int> $v = array();
+  public array<int> $v = darray[];
 
   public function set(int $x): void {
     $this->v[0] = $x;

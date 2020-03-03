@@ -10,9 +10,9 @@
  */
 
 function with_arg() {
-  foreach (array(1, 2, 3) as $a) {
-    foreach (array(1, 2, 3, 4) as $b) {
-      foreach (array(1, 2, 3, 4) as $c) {
+  foreach (varray[1, 2, 3] as $a) {
+    foreach (varray[1, 2, 3, 4] as $b) {
+      foreach (varray[1, 2, 3, 4] as $c) {
         continue 2;
       }
     }

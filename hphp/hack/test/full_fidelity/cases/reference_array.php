@@ -1,7 +1,7 @@
 <?hh
 
 function test() : void {
-  bar(&array());
+  bar(&darray[]);
 }
 
 function bar(&$x) : void {

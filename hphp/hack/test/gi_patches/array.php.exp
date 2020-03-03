@@ -10,15 +10,15 @@ function g(<<__Soft>> varray_or_darray<arraykey, string> $v) : <<__Soft>> void {
 }
 
 function h1(): <<__Soft>> varray_or_darray<arraykey, string> {
-  return array(0 => 'billie');
+  return darray[0 => 'billie'];
 }
 
 function h2(): <<__Soft>> varray_or_darray<arraykey, string> {
-  return array('billie');
+  return varray['billie'];
 }
 
 function i(): <<__Soft>> varray_or_darray<arraykey, string> {
-  $x = array();
+  $x = darray[];
   $x[3] = 'bob';
   return $x;
 }

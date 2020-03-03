@@ -10,6 +10,6 @@
  */
 
 function f(): void {
-  foreach (array(1) as $k => 42) {
+  foreach (varray[1] as $k => 42) {
   }
 }

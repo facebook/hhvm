@@ -2,7 +2,7 @@
 
 class C {
   public function __call($name, inout $arguments) {
-    $arguments = array();
+    $arguments = varray[];
     return null;
   }
 }

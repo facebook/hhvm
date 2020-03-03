@@ -12,14 +12,14 @@
 function meh(): void {
   if ($v === null) {
     $outputRow[$key] = new sps_DBResultField(
-      array(
+      darray[
         'isNull' => true,
-      ));
+      ]);
   } else if ($v is int) {
     $outputRow[$key] = new sps_DBResultField(
-      array(
+      darray[
         'isNull' => false,
-        'intValue' = 'foo',
-      ));
+        0 => 'intValue' = 'foo',
+      ]);
   }
 }

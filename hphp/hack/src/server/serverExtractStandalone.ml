@@ -619,7 +619,7 @@ let rec get_init_from_hint ctx tparams_stack hint =
   | Hprim prim -> get_init_for_prim prim
   | Hoption _ -> "null"
   | Hlike hint -> get_init_from_hint ctx tparams_stack hint
-  | Harray _ -> "array()"
+  | Harray _ -> "darray[]"
   | Hdarray _ -> "darray[]"
   | Hvarray_or_darray _
   | Hvarray _ ->

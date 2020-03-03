@@ -13,7 +13,7 @@ class Test {
   public function f() {
     return <<<END
       public function testFunctionWithReturnTypeHavingAngleBrackets(): array<int> {
-        return array();
+        return varray[];
       }
 END;
   }

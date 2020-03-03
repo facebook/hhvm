@@ -5,14 +5,14 @@ const array<shape(
   'baaaaaar' => string,
   'baaaaaaz' => string,
   'quuuuuux' => string,
-)> A = array();
+)> A = varray[];
 
 const array<string, shape(
   'fooooooo' => string,
   'baaaaaar' => string,
   'baaaaaaz' => string,
   'quuuuuux' => string,
-)> B = array();
+)> B = darray[];
 
 const vec<shape(
   'fooooooo' => string,

@@ -10,5 +10,5 @@
  */
 
 function foo(int $var) {
-  $a = array(&$var);
+  $a = varray[&$var];
 }

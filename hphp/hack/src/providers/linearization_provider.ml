@@ -11,6 +11,16 @@ open Reordered_argument_collections
 
 type key = string * Decl_defs.linearization_kind
 
+let key_to_local_key (key : key) :
+    Decl_defs.linearization Provider_backend.Linearization_cache_entry.t =
+  let (name, kind) = key in
+  match kind with
+  | Decl_defs.Member_resolution ->
+    Provider_backend.Linearization_cache_entry.Member_resolution_linearization
+      name
+  | Decl_defs.Ancestor_types ->
+    Provider_backend.Linearization_cache_entry.Ancestor_types_linearization name
+
 module CacheKey = struct
   type t = string * Decl_defs.linearization_kind [@@deriving show, ord]
 
@@ -57,20 +67,41 @@ module LocalCache =
       let description = "LazyLinearization"
     end)
 
-let add
-    (_ctx : Provider_context.t) (key : key) (value : Decl_defs.linearization) :
-    unit =
-  LocalCache.add key value
+let add (ctx : Provider_context.t) (key : key) (value : Decl_defs.linearization)
+    : unit =
+  match ctx.Provider_context.backend with
+  | Provider_backend.Shared_memory -> LocalCache.add key value
+  | Provider_backend.Local_memory { linearization_cache; _ } ->
+    let key = key_to_local_key key in
+    Provider_backend.Linearization_cache.add linearization_cache ~key ~value
+  | Provider_backend.Decl_service _ ->
+    failwith "Linearization_provider.add not implemented for Decl_service"
 
 let complete
-    (_ctx : Provider_context.t) (key : key) (value : Decl_defs.mro_element list)
+    (ctx : Provider_context.t) (key : key) (value : Decl_defs.mro_element list)
     : unit =
-  Cache.add key value;
-  LocalCache.remove key;
-  ()
+  match ctx.Provider_context.backend with
+  | Provider_backend.Shared_memory ->
+    Cache.add key value;
+    LocalCache.remove key
+  | Provider_backend.Local_memory _ -> ()
+  | Provider_backend.Decl_service _ ->
+    failwith "Linearization_provider.complete not implemented for Decl_service"
 
-let get (_ctx : Provider_context.t) (key : key) : Decl_defs.linearization option
+let get (ctx : Provider_context.t) (key : key) : Decl_defs.linearization option
     =
-  match Cache.get key with
-  | Some lin -> Some (Sequence.of_list lin)
-  | None -> LocalCache.get key
+  match ctx.Provider_context.backend with
+  | Provider_backend.Shared_memory ->
+    begin
+      match Cache.get key with
+      | Some lin -> Some (Sequence.of_list lin)
+      | None -> LocalCache.get key
+    end
+  | Provider_backend.Local_memory { linearization_cache; _ } ->
+    let key = key_to_local_key key in
+    Provider_backend.Linearization_cache.find_or_add
+      linearization_cache
+      ~key
+      ~default:(fun () -> None)
+  | Provider_backend.Decl_service _ ->
+    failwith "Linearization_provider.get not implemented for Decl_service"

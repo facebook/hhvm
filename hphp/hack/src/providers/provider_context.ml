@@ -82,7 +82,8 @@ let get_telemetry (t : t) (telemetry : Telemetry.t) : Telemetry.t =
   it not being the intended provider. *)
   in
   match t.backend with
-  | Provider_backend.Local_memory { decl_cache; shallow_decl_cache; _ } ->
+  | Provider_backend.Local_memory
+      { decl_cache; shallow_decl_cache; linearization_cache; _ } ->
     telemetry
     |> Telemetry.object_
          ~key:"decl_cache"
@@ -92,6 +93,11 @@ let get_telemetry (t : t) (telemetry : Telemetry.t) : Telemetry.t =
          ~value:
            (Provider_backend.Shallow_decl_cache.get_telemetry
               shallow_decl_cache)
+    |> Telemetry.object_
+         ~key:"linearization_cache"
+         ~value:
+           (Provider_backend.Linearization_cache.get_telemetry
+              linearization_cache)
   | _ -> telemetry
 
 let reset_telemetry (t : t) : unit =

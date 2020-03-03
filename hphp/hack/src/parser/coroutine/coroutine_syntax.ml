@@ -35,9 +35,15 @@ let single_space = " "
 let newline = "\n"
 
 let make_token_syntax ?text token_kind =
+  let trailing_trivia =
+    if token_kind = TokenKind.Semicolon then
+      newline
+    else
+      single_space
+  in
   let text = Option.value text ~default:(TokenKind.to_string token_kind) in
   make_syntax
-  @@ Token (Token.synthesize_new token_kind text single_space single_space)
+  @@ Token (Token.synthesize_new token_kind text single_space trailing_trivia)
 
 let backslash_syntax = make_token_syntax TokenKind.Backslash
 

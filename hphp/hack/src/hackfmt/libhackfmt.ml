@@ -106,16 +106,6 @@ let env_from_tree config tree =
   else
     env
 
-(** Format an entire file. *)
-let format_tree ?config tree =
-  let source_text = SourceText.text (SyntaxTree.text tree) in
-  let env = env_from_tree config tree in
-  tree
-  |> SyntaxTransforms.editable_from_positioned
-  |> Hack_format.transform env
-  |> Chunk_builder.build
-  |> Line_splitter.solve env ~source_text
-
 (** Format a single node.
  *
  * A trailing newline will be included (and leading indentation, if
@@ -135,6 +125,91 @@ let format_node ?config ?(indent = 0) node =
   |> Chunk_builder.build
   |> Line_splitter.solve env ~source_text
 
+(** Return the start and end offsets of every fixme comment, sorted by order of
+    appearance in the file. *)
+let get_fixme_offsets tree : Interval.t list =
+  let module Syntax = Full_fidelity_positioned_syntax in
+  let module Trivia = Full_fidelity_positioned_trivia in
+  let module Token = Full_fidelity_positioned_token in
+  let trivium_range trivium =
+    (Trivia.start_offset trivium, Trivia.end_offset trivium)
+  in
+  let add_fixme_range acc trivium =
+    match Trivia.kind trivium with
+    | Full_fidelity_trivia_kind.(FixMe | IgnoreError) ->
+      trivium_range trivium :: acc
+    | _ -> acc
+  in
+  let add_fixme_ranges acc trivia =
+    List.fold (List.rev trivia) ~init:acc ~f:add_fixme_range
+  in
+  let rec aux acc node =
+    match Syntax.get_token node with
+    | None -> List.fold (List.rev (Syntax.children node)) ~init:acc ~f:aux
+    | Some t ->
+      let acc = add_fixme_ranges acc (Token.trailing t) in
+      let acc = add_fixme_ranges acc (Token.leading t) in
+      acc
+  in
+  aux [] (SyntaxTree.root tree)
+
+let get_suppressed_formatting_ranges line_boundaries tree =
+  let source_text = SyntaxTree.text tree in
+  (* Expand each range to contain the entire line the fixme is on, then add one
+     to the range end and expand again to include the next line, since the fixme
+     suppresses errors on both the line in which it appears and the line
+     following it. *)
+  get_fixme_offsets tree
+  |> List.map ~f:(expand_to_line_boundaries ~ranges:line_boundaries source_text)
+  |> List.map ~f:(fun (st, ed) -> (st, ed + 1))
+  |> List.map ~f:(expand_to_line_boundaries ~ranges:line_boundaries source_text)
+  |> Interval.union_consecutive_overlapping
+
+let text_with_formatted_ranges
+    ?(range : Interval.t option)
+    (text : string)
+    (formatted_ranges : (Interval.t * string) list) : Buffer.t =
+  let (start_offset, length) =
+    match range with
+    | Some (start_offset, end_offset) ->
+      (start_offset, end_offset - start_offset)
+    | None -> (0, String.length text)
+  in
+  let buf = Buffer.create (length + 256) in
+  let bytes_seen = ref start_offset in
+  List.iter formatted_ranges (fun ((st, ed), formatted) ->
+      for i = !bytes_seen to st - 1 do
+        Buffer.add_char buf text.[i]
+      done;
+      Buffer.add_string buf formatted;
+      bytes_seen := ed);
+  for i = !bytes_seen to length - 1 do
+    Buffer.add_char buf text.[i]
+  done;
+  buf
+
+(** Format an entire file. *)
+let format_tree ?config tree =
+  let source_text = SyntaxTree.text tree in
+  let text = SourceText.text source_text in
+  let env = env_from_tree config tree in
+  let chunk_groups =
+    tree
+    |> SyntaxTransforms.editable_from_positioned
+    |> Hack_format.transform env
+    |> Chunk_builder.build
+  in
+  let line_boundaries = get_line_boundaries text in
+  let noformat_ranges = get_suppressed_formatting_ranges line_boundaries tree in
+  let whole_file = [(0, String.length text)] in
+  let ranges = Interval.diff_sorted_lists whole_file noformat_ranges in
+  let formatted_ranges =
+    List.map ranges (fun range ->
+        (range, Line_splitter.solve env ~range ~source_text:text chunk_groups))
+  in
+  let buf = text_with_formatted_ranges text formatted_ranges in
+  Buffer.contents buf
+
 (** Format a given range in a file.
  *
  * The range is a half-open interval of byte offsets into the file.
@@ -151,13 +226,24 @@ let format_node ?config ?(indent = 0) node =
  * Non-indentation space characters are not included at the beginning or end of
  * the formatted output (unless they are in a comment or string literal). *)
 let format_range ?config range tree =
-  let source_text = SourceText.text (SyntaxTree.text tree) in
+  let source_text = SyntaxTree.text tree in
+  let text = SourceText.text source_text in
   let env = env_from_tree config tree in
-  tree
-  |> SyntaxTransforms.editable_from_positioned
-  |> Hack_format.transform env
-  |> Chunk_builder.build
-  |> Line_splitter.solve env ~range ~source_text
+  let chunk_groups =
+    tree
+    |> SyntaxTransforms.editable_from_positioned
+    |> Hack_format.transform env
+    |> Chunk_builder.build
+  in
+  let line_boundaries = get_line_boundaries text in
+  let noformat_ranges = get_suppressed_formatting_ranges line_boundaries tree in
+  let ranges = Interval.diff_sorted_lists [range] noformat_ranges in
+  let formatted_ranges =
+    List.map ranges (fun range ->
+        (range, Line_splitter.solve env ~range ~source_text:text chunk_groups))
+  in
+  let buf = text_with_formatted_ranges ~range text formatted_ranges in
+  Buffer.contents buf
 
 (** Return the source of the entire file with the given intervals formatted.
  *
@@ -185,16 +271,18 @@ let format_intervals ?config intervals tree =
        outside of the range. *)
     |> List.map ~f:(fun (st, ed) -> (st - 1, ed + 1))
     |> List.map ~f:(expand_to_atom_boundaries atom_boundaries)
-    |> Interval.union_list
-    |> List.sort ~compare:Interval.comparator
+    |> List.sort ~compare:Interval.compare
+    |> Interval.union_consecutive_overlapping
   in
+  let noformat_ranges = get_suppressed_formatting_ranges line_boundaries tree in
+  let ranges = Interval.diff_sorted_lists ranges noformat_ranges in
   let solve_states =
     Line_splitter.find_solve_states
       env
       ~source_text:(SourceText.text source_text)
       chunk_groups
   in
-  let formatted_intervals =
+  let formatted_ranges =
     List.map ranges (fun range ->
         ( range,
           Line_splitter.print
@@ -203,19 +291,7 @@ let format_intervals ?config intervals tree =
             ~include_surrounding_whitespace:false
             solve_states ))
   in
-  let length = SourceText.length source_text in
-  let buf = Buffer.create (length + 256) in
-  let bytes_seen = ref 0 in
-  List.iter formatted_intervals (fun ((st, ed), formatted) ->
-      for i = !bytes_seen to st - 1 do
-        Buffer.add_char buf text.[i]
-      done;
-      Buffer.add_string buf formatted;
-      bytes_seen := ed);
-  for i = !bytes_seen to length - 1 do
-    Buffer.add_char buf text.[i]
-  done;
-
+  let buf = text_with_formatted_ranges text formatted_ranges in
   (* Dirty hack: Since we don't print the whitespace surrounding formatted
      ranges, we don't print the trailing newline at the end of the file if the
      last line in the file was modified. Add it here manually. *)

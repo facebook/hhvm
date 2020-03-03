@@ -49,7 +49,7 @@ let check_enum_exhaustiveness pos tc caselist coming_from_unresolved =
   match (all_cases_handled, has_default, coming_from_unresolved) with
   | (false, false, _) ->
     Errors.enum_switch_nonexhaustive pos unhandled (Cls.pos tc)
-  (* | (true, true, false) -> Errors.enum_switch_redundant_default pos (Cls.pos tc) *)
+  | (true, true, false) -> Errors.enum_switch_redundant_default pos (Cls.pos tc)
   | _ -> ()
 
 let rec check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =

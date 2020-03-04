@@ -18,6 +18,10 @@ module IntVal = struct
   let description = "Test_IntVal"
 end
 
+module Capacity = struct
+  let capacity = 1000
+end
+
 let expect ~msg bool =
   if bool then
     ()
@@ -207,7 +211,7 @@ let test_cache_behavior
 module TestNoCache =
   SharedMem.NoCache (SharedMem.Immediate) (StringKey) (IntVal)
 module TestWithCache =
-  SharedMem.WithCache (SharedMem.Immediate) (StringKey) (IntVal)
+  SharedMem.WithCache (SharedMem.Immediate) (StringKey) (IntVal) (Capacity)
 
 let tests () =
   let list =

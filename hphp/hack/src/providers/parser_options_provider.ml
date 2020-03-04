@@ -23,6 +23,9 @@ module Store =
 
       let description = "Parser_options_provider"
     end)
+    (struct
+      let capacity = 1
+    end)
 
 let local_memory_popt : ParserOptions.t option ref = ref None
 

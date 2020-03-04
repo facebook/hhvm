@@ -112,6 +112,9 @@ module Types = struct
 
         let description = "Naming_TypePos"
       end)
+      (struct
+        let capacity = 1000
+      end)
 
   module BlockedEntries =
     SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey)
@@ -121,6 +124,9 @@ module Types = struct
         let prefix = Prefix.make ()
 
         let description = "Naming_TypeBlocked"
+      end)
+      (struct
+        let capacity = 1000
       end)
 
   let add id type_info =

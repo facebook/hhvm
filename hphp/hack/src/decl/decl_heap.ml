@@ -10,6 +10,12 @@
 open Typing_defs
 open Decl_defs
 
+(* All the following heaps will have a local cache of size 1000 *)
+
+module Capacity = struct
+  let capacity = 1000
+end
+
 (* The following classes are used to make sure we make no typing
  * mistake when interacting with the database. The database knows
  * how to associate a string to a string. We need to deserialize
@@ -61,15 +67,19 @@ module GConst = struct
 end
 
 module Funs =
-  SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Fun)
+  SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Fun) (Capacity)
 module Classes =
   SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Class)
+    (Capacity)
 module RecordDefs =
   SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (RecordDef)
+    (Capacity)
 module Typedefs =
   SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Typedef)
+    (Capacity)
 module GConsts =
   SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (GConst)
+    (Capacity)
 
 module Property = struct
   type t = decl_ty
@@ -126,12 +136,17 @@ end
 
 module Props =
   SharedMem.WithCache (SharedMem.ProfiledImmediate) (ClassEltKey) (Property)
+    (Capacity)
 module StaticProps =
   SharedMem.WithCache (SharedMem.ProfiledImmediate) (ClassEltKey)
     (StaticProperty)
+    (Capacity)
 module Methods =
   SharedMem.WithCache (SharedMem.ProfiledImmediate) (ClassEltKey) (Method)
+    (Capacity)
 module StaticMethods =
   SharedMem.WithCache (SharedMem.ProfiledImmediate) (ClassEltKey) (StaticMethod)
+    (Capacity)
 module Constructors =
   SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Constructor)
+    (Capacity)

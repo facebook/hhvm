@@ -10,6 +10,10 @@
 open Typing_defs
 open Decl_defs
 
+module Capacity : sig
+  val capacity : int
+end
+
 module Class : sig
   type t = decl_class_type
 
@@ -95,42 +99,52 @@ module ClassEltKey : SharedMem.UserKeyType with type t = string * string
 module Funs :
     module type of
       SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Fun)
+        (Capacity)
 
 module Classes :
     module type of
       SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Class)
+        (Capacity)
 
 module RecordDefs :
     module type of
       SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (RecordDef)
+        (Capacity)
 
 module Typedefs :
     module type of
       SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Typedef)
+        (Capacity)
 
 module GConsts :
     module type of
       SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (GConst)
+        (Capacity)
 
 module Props :
     module type of
       SharedMem.WithCache (SharedMem.ProfiledImmediate) (ClassEltKey) (Property)
+        (Capacity)
 
 module StaticProps :
     module type of
       SharedMem.WithCache (SharedMem.ProfiledImmediate) (ClassEltKey)
         (StaticProperty)
+        (Capacity)
 
 module Methods :
     module type of
       SharedMem.WithCache (SharedMem.ProfiledImmediate) (ClassEltKey) (Method)
+        (Capacity)
 
 module StaticMethods :
     module type of
       SharedMem.WithCache (SharedMem.ProfiledImmediate) (ClassEltKey)
         (StaticMethod)
+        (Capacity)
 
 module Constructors :
     module type of
       SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey)
         (Constructor)
+        (Capacity)

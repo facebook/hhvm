@@ -63,6 +63,9 @@ module Classes = struct
 
         let description = "Decl_Typing_ClassType"
       end)
+      (struct
+        let capacity = 1000
+      end)
 
   type key = StringKey.t
 

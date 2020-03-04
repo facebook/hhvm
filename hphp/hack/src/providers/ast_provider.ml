@@ -29,6 +29,9 @@ module ParserHeap =
 
       let description = "Ast_Parser"
     end)
+    (struct
+      let capacity = 1000
+    end)
 
 module LocalParserCache =
   SharedMem.LocalCache
@@ -39,6 +42,9 @@ module LocalParserCache =
       let prefix = Prefix.make ()
 
       let description = "Ast_ParserLocal"
+    end)
+    (struct
+      let capacity = 1000
     end)
 
 let parse

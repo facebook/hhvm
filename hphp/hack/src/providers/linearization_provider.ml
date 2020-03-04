@@ -38,6 +38,9 @@ module Cache =
 
       let description = "Linearization"
     end)
+    (struct
+      let capacity = 1000
+    end)
 
 let push_local_changes (_ctx : Provider_context.t) : unit =
   Cache.LocalChanges.push_stack ()
@@ -65,6 +68,9 @@ module LocalCache =
       let prefix = Prefix.make ()
 
       let description = "LazyLinearization"
+    end)
+    (struct
+      let capacity = 1000
     end)
 
 let add (ctx : Provider_context.t) (key : key) (value : Decl_defs.linearization)

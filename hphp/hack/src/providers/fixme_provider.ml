@@ -32,6 +32,9 @@ module HH_FIXMES =
 
       let description = "Fixme_HH_FIXMES"
     end)
+    (struct
+      let capacity = 1000
+    end)
 
 module DECL_HH_FIXMES =
   SharedMem.WithCache (SharedMem.ProfiledImmediate) (Relative_path.S)
@@ -42,6 +45,9 @@ module DECL_HH_FIXMES =
 
       let description = "Fixme_DECL_HH_FIXMES"
     end)
+    (struct
+      let capacity = 1000
+    end)
 
 module DISALLOWED_FIXMES =
   SharedMem.WithCache (SharedMem.Immediate) (Relative_path.S)
@@ -51,6 +57,9 @@ module DISALLOWED_FIXMES =
       let prefix = Prefix.make ()
 
       let description = "Fixme_DISALLOWED_FIXMES"
+    end)
+    (struct
+      let capacity = 1000
     end)
 
 let get_fixmes filename =

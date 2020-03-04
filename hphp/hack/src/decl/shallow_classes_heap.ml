@@ -19,6 +19,9 @@ module Classes =
 
       let description = "Decl_ShallowClass"
     end)
+    (struct
+      let capacity = 1000
+    end)
 
 let push_local_changes = Classes.LocalChanges.push_stack
 

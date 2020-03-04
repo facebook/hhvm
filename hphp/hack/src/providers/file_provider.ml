@@ -33,6 +33,9 @@ module FileHeap =
 
       let description = "File"
     end)
+    (struct
+      let capacity = 1000
+    end)
 
 let read_file_contents_from_disk (fn : Relative_path.t) : string option =
   (try Some (Sys_utils.cat (Relative_path.to_absolute fn)) with _ -> None)

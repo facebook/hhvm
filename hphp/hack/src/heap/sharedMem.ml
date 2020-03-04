@@ -461,6 +461,15 @@ module type Raw = functor (Key : Key) (Value : Value.Type) -> sig
 end
 
 (*****************************************************************************)
+(* Some heaps are parameterized by how many local (ocaml heap) items they    *)
+(* can fit.                                                                  *)
+(*****************************************************************************)
+
+module type LocalCapacityType = sig
+  val capacity : int
+end
+
+(*****************************************************************************)
 (* Immediate access to shared memory (cf hh_shared.c for the underlying
  * representation).
  *)
@@ -1433,7 +1442,11 @@ let invalidate_callback_list = ref []
 let invalidate_caches () =
   List.iter !invalidate_callback_list (fun callback -> callback ())
 
-module LocalCache (UserKeyType : UserKeyType) (Value : Value.Type) = struct
+module LocalCache
+    (UserKeyType : UserKeyType)
+    (Value : Value.Type)
+    (Capacity : LocalCapacityType) =
+struct
   type key = UserKeyType.t
 
   type value = Value.t
@@ -1441,7 +1454,7 @@ module LocalCache (UserKeyType : UserKeyType) (Value : Value.Type) = struct
   module LocalHashtblConfig = struct
     type value = Value.t
 
-    let capacity = 1000
+    let capacity = Capacity.capacity
   end
 
   (* Young values cache *)
@@ -1525,7 +1538,11 @@ end
  * much time. The caches keep a deserialized version of the types.
  *)
 (*****************************************************************************)
-module WithCache (Raw : Raw) (UserKeyType : UserKeyType) (Value : Value.Type) =
+module WithCache
+    (Raw : Raw)
+    (UserKeyType : UserKeyType)
+    (Value : Value.Type)
+    (Capacity : LocalCapacityType) =
 struct
   module ValueForCache = struct
     include Value
@@ -1541,7 +1558,7 @@ struct
 
   module KeySet = Direct.KeySet
   module KeyMap = Direct.KeyMap
-  module Cache = LocalCache (UserKeyType) (ValueForCache)
+  module Cache = LocalCache (UserKeyType) (ValueForCache) (Capacity)
 
   let string_of_key key = Direct.string_of_key key
 

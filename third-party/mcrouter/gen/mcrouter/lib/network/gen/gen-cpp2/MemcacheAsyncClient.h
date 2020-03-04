@@ -48,6 +48,10 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   folly::coro::Task<facebook::memcache::McGetReply> co_mcGet(const facebook::memcache::McGetRequest& request) {
     co_return co_await semifuture_mcGet(request);
   }
+  template <int = 0>
+  folly::coro::Task<facebook::memcache::McGetReply> co_mcGet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGetRequest& request) {
+    co_return co_await semifuture_mcGet(rpcOptions, request);
+  }
 #endif // FOLLY_HAS_COROUTINES
   virtual void mcGet(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McGetRequest& request);
   static folly::exception_wrapper recv_wrapped_mcGet(facebook::memcache::McGetReply& _return, ::apache::thrift::ClientReceiveState& state);
@@ -77,6 +81,10 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   template <int = 0>
   folly::coro::Task<facebook::memcache::McSetReply> co_mcSet(const facebook::memcache::McSetRequest& request) {
     co_return co_await semifuture_mcSet(request);
+  }
+  template <int = 0>
+  folly::coro::Task<facebook::memcache::McSetReply> co_mcSet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McSetRequest& request) {
+    co_return co_await semifuture_mcSet(rpcOptions, request);
   }
 #endif // FOLLY_HAS_COROUTINES
   virtual void mcSet(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McSetRequest& request);
@@ -108,6 +116,10 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   folly::coro::Task<facebook::memcache::McDeleteReply> co_mcDelete(const facebook::memcache::McDeleteRequest& request) {
     co_return co_await semifuture_mcDelete(request);
   }
+  template <int = 0>
+  folly::coro::Task<facebook::memcache::McDeleteReply> co_mcDelete(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McDeleteRequest& request) {
+    co_return co_await semifuture_mcDelete(rpcOptions, request);
+  }
 #endif // FOLLY_HAS_COROUTINES
   virtual void mcDelete(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McDeleteRequest& request);
   static folly::exception_wrapper recv_wrapped_mcDelete(facebook::memcache::McDeleteReply& _return, ::apache::thrift::ClientReceiveState& state);
@@ -137,6 +149,10 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   template <int = 0>
   folly::coro::Task<facebook::memcache::McLeaseGetReply> co_mcLeaseGet(const facebook::memcache::McLeaseGetRequest& request) {
     co_return co_await semifuture_mcLeaseGet(request);
+  }
+  template <int = 0>
+  folly::coro::Task<facebook::memcache::McLeaseGetReply> co_mcLeaseGet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McLeaseGetRequest& request) {
+    co_return co_await semifuture_mcLeaseGet(rpcOptions, request);
   }
 #endif // FOLLY_HAS_COROUTINES
   virtual void mcLeaseGet(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McLeaseGetRequest& request);
@@ -168,6 +184,10 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   folly::coro::Task<facebook::memcache::McLeaseSetReply> co_mcLeaseSet(const facebook::memcache::McLeaseSetRequest& request) {
     co_return co_await semifuture_mcLeaseSet(request);
   }
+  template <int = 0>
+  folly::coro::Task<facebook::memcache::McLeaseSetReply> co_mcLeaseSet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McLeaseSetRequest& request) {
+    co_return co_await semifuture_mcLeaseSet(rpcOptions, request);
+  }
 #endif // FOLLY_HAS_COROUTINES
   virtual void mcLeaseSet(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McLeaseSetRequest& request);
   static folly::exception_wrapper recv_wrapped_mcLeaseSet(facebook::memcache::McLeaseSetReply& _return, ::apache::thrift::ClientReceiveState& state);
@@ -197,6 +217,10 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   template <int = 0>
   folly::coro::Task<facebook::memcache::McAddReply> co_mcAdd(const facebook::memcache::McAddRequest& request) {
     co_return co_await semifuture_mcAdd(request);
+  }
+  template <int = 0>
+  folly::coro::Task<facebook::memcache::McAddReply> co_mcAdd(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McAddRequest& request) {
+    co_return co_await semifuture_mcAdd(rpcOptions, request);
   }
 #endif // FOLLY_HAS_COROUTINES
   virtual void mcAdd(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McAddRequest& request);
@@ -228,6 +252,10 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   folly::coro::Task<facebook::memcache::McReplaceReply> co_mcReplace(const facebook::memcache::McReplaceRequest& request) {
     co_return co_await semifuture_mcReplace(request);
   }
+  template <int = 0>
+  folly::coro::Task<facebook::memcache::McReplaceReply> co_mcReplace(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McReplaceRequest& request) {
+    co_return co_await semifuture_mcReplace(rpcOptions, request);
+  }
 #endif // FOLLY_HAS_COROUTINES
   virtual void mcReplace(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McReplaceRequest& request);
   static folly::exception_wrapper recv_wrapped_mcReplace(facebook::memcache::McReplaceReply& _return, ::apache::thrift::ClientReceiveState& state);
@@ -257,6 +285,10 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   template <int = 0>
   folly::coro::Task<facebook::memcache::McGetsReply> co_mcGets(const facebook::memcache::McGetsRequest& request) {
     co_return co_await semifuture_mcGets(request);
+  }
+  template <int = 0>
+  folly::coro::Task<facebook::memcache::McGetsReply> co_mcGets(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGetsRequest& request) {
+    co_return co_await semifuture_mcGets(rpcOptions, request);
   }
 #endif // FOLLY_HAS_COROUTINES
   virtual void mcGets(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McGetsRequest& request);
@@ -288,6 +320,10 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   folly::coro::Task<facebook::memcache::McCasReply> co_mcCas(const facebook::memcache::McCasRequest& request) {
     co_return co_await semifuture_mcCas(request);
   }
+  template <int = 0>
+  folly::coro::Task<facebook::memcache::McCasReply> co_mcCas(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McCasRequest& request) {
+    co_return co_await semifuture_mcCas(rpcOptions, request);
+  }
 #endif // FOLLY_HAS_COROUTINES
   virtual void mcCas(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McCasRequest& request);
   static folly::exception_wrapper recv_wrapped_mcCas(facebook::memcache::McCasReply& _return, ::apache::thrift::ClientReceiveState& state);
@@ -317,6 +353,10 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   template <int = 0>
   folly::coro::Task<facebook::memcache::McIncrReply> co_mcIncr(const facebook::memcache::McIncrRequest& request) {
     co_return co_await semifuture_mcIncr(request);
+  }
+  template <int = 0>
+  folly::coro::Task<facebook::memcache::McIncrReply> co_mcIncr(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McIncrRequest& request) {
+    co_return co_await semifuture_mcIncr(rpcOptions, request);
   }
 #endif // FOLLY_HAS_COROUTINES
   virtual void mcIncr(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McIncrRequest& request);
@@ -348,6 +388,10 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   folly::coro::Task<facebook::memcache::McDecrReply> co_mcDecr(const facebook::memcache::McDecrRequest& request) {
     co_return co_await semifuture_mcDecr(request);
   }
+  template <int = 0>
+  folly::coro::Task<facebook::memcache::McDecrReply> co_mcDecr(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McDecrRequest& request) {
+    co_return co_await semifuture_mcDecr(rpcOptions, request);
+  }
 #endif // FOLLY_HAS_COROUTINES
   virtual void mcDecr(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McDecrRequest& request);
   static folly::exception_wrapper recv_wrapped_mcDecr(facebook::memcache::McDecrReply& _return, ::apache::thrift::ClientReceiveState& state);
@@ -377,6 +421,10 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   template <int = 0>
   folly::coro::Task<facebook::memcache::McMetagetReply> co_mcMetaget(const facebook::memcache::McMetagetRequest& request) {
     co_return co_await semifuture_mcMetaget(request);
+  }
+  template <int = 0>
+  folly::coro::Task<facebook::memcache::McMetagetReply> co_mcMetaget(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McMetagetRequest& request) {
+    co_return co_await semifuture_mcMetaget(rpcOptions, request);
   }
 #endif // FOLLY_HAS_COROUTINES
   virtual void mcMetaget(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McMetagetRequest& request);
@@ -408,6 +456,10 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   folly::coro::Task<facebook::memcache::McAppendReply> co_mcAppend(const facebook::memcache::McAppendRequest& request) {
     co_return co_await semifuture_mcAppend(request);
   }
+  template <int = 0>
+  folly::coro::Task<facebook::memcache::McAppendReply> co_mcAppend(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McAppendRequest& request) {
+    co_return co_await semifuture_mcAppend(rpcOptions, request);
+  }
 #endif // FOLLY_HAS_COROUTINES
   virtual void mcAppend(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McAppendRequest& request);
   static folly::exception_wrapper recv_wrapped_mcAppend(facebook::memcache::McAppendReply& _return, ::apache::thrift::ClientReceiveState& state);
@@ -437,6 +489,10 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   template <int = 0>
   folly::coro::Task<facebook::memcache::McPrependReply> co_mcPrepend(const facebook::memcache::McPrependRequest& request) {
     co_return co_await semifuture_mcPrepend(request);
+  }
+  template <int = 0>
+  folly::coro::Task<facebook::memcache::McPrependReply> co_mcPrepend(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McPrependRequest& request) {
+    co_return co_await semifuture_mcPrepend(rpcOptions, request);
   }
 #endif // FOLLY_HAS_COROUTINES
   virtual void mcPrepend(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McPrependRequest& request);
@@ -468,6 +524,10 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   folly::coro::Task<facebook::memcache::McTouchReply> co_mcTouch(const facebook::memcache::McTouchRequest& request) {
     co_return co_await semifuture_mcTouch(request);
   }
+  template <int = 0>
+  folly::coro::Task<facebook::memcache::McTouchReply> co_mcTouch(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McTouchRequest& request) {
+    co_return co_await semifuture_mcTouch(rpcOptions, request);
+  }
 #endif // FOLLY_HAS_COROUTINES
   virtual void mcTouch(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McTouchRequest& request);
   static folly::exception_wrapper recv_wrapped_mcTouch(facebook::memcache::McTouchReply& _return, ::apache::thrift::ClientReceiveState& state);
@@ -497,6 +557,10 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   template <int = 0>
   folly::coro::Task<facebook::memcache::McFlushReReply> co_mcFlushRe(const facebook::memcache::McFlushReRequest& request) {
     co_return co_await semifuture_mcFlushRe(request);
+  }
+  template <int = 0>
+  folly::coro::Task<facebook::memcache::McFlushReReply> co_mcFlushRe(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McFlushReRequest& request) {
+    co_return co_await semifuture_mcFlushRe(rpcOptions, request);
   }
 #endif // FOLLY_HAS_COROUTINES
   virtual void mcFlushRe(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McFlushReRequest& request);
@@ -528,6 +592,10 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   folly::coro::Task<facebook::memcache::McFlushAllReply> co_mcFlushAll(const facebook::memcache::McFlushAllRequest& request) {
     co_return co_await semifuture_mcFlushAll(request);
   }
+  template <int = 0>
+  folly::coro::Task<facebook::memcache::McFlushAllReply> co_mcFlushAll(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McFlushAllRequest& request) {
+    co_return co_await semifuture_mcFlushAll(rpcOptions, request);
+  }
 #endif // FOLLY_HAS_COROUTINES
   virtual void mcFlushAll(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McFlushAllRequest& request);
   static folly::exception_wrapper recv_wrapped_mcFlushAll(facebook::memcache::McFlushAllReply& _return, ::apache::thrift::ClientReceiveState& state);
@@ -557,6 +625,10 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   template <int = 0>
   folly::coro::Task<facebook::memcache::McGatReply> co_mcGat(const facebook::memcache::McGatRequest& request) {
     co_return co_await semifuture_mcGat(request);
+  }
+  template <int = 0>
+  folly::coro::Task<facebook::memcache::McGatReply> co_mcGat(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGatRequest& request) {
+    co_return co_await semifuture_mcGat(rpcOptions, request);
   }
 #endif // FOLLY_HAS_COROUTINES
   virtual void mcGat(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McGatRequest& request);
@@ -588,6 +660,10 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   folly::coro::Task<facebook::memcache::McGatsReply> co_mcGats(const facebook::memcache::McGatsRequest& request) {
     co_return co_await semifuture_mcGats(request);
   }
+  template <int = 0>
+  folly::coro::Task<facebook::memcache::McGatsReply> co_mcGats(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGatsRequest& request) {
+    co_return co_await semifuture_mcGats(rpcOptions, request);
+  }
 #endif // FOLLY_HAS_COROUTINES
   virtual void mcGats(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McGatsRequest& request);
   static folly::exception_wrapper recv_wrapped_mcGats(facebook::memcache::McGatsReply& _return, ::apache::thrift::ClientReceiveState& state);
@@ -617,6 +693,10 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   template <int = 0>
   folly::coro::Task<facebook::memcache::McVersionReply> co_mcVersion(const facebook::memcache::McVersionRequest& request) {
     co_return co_await semifuture_mcVersion(request);
+  }
+  template <int = 0>
+  folly::coro::Task<facebook::memcache::McVersionReply> co_mcVersion(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McVersionRequest& request) {
+    co_return co_await semifuture_mcVersion(rpcOptions, request);
   }
 #endif // FOLLY_HAS_COROUTINES
   virtual void mcVersion(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McVersionRequest& request);

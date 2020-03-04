@@ -2,6 +2,38 @@ set(PROXYGEN_LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/proxygen/lib")
 set(PROXYGEN_HTTPSERVER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/proxygen/httpserver")
 set(PROXYGEN_EXTERNAL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/proxygen/external")
 
+# ported over from src/CMakeLists.txt
+set(PROXYGEN_FBCODE_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/src)
+set(PROXYGEN_GENERATED_ROOT ${CMAKE_CURRENT_BINARY_DIR}/generated)
+file(MAKE_DIRECTORY ${PROXYGEN_GENERATED_ROOT})
+
+find_program(PROXYGEN_PYTHON python3 python)
+if(NOT PROXYGEN_PYTHON)
+  message(FATAL_ERROR "python is required for the proxygen build")
+endif()
+
+# ported over from src/proxygen/lib/CMakeLists.txt
+file(MAKE_DIRECTORY ${PROXYGEN_GENERATED_ROOT}/proxygen/lib/utils)
+add_custom_command(
+  OUTPUT
+    ${PROXYGEN_GENERATED_ROOT}/proxygen/lib/utils/TraceEventType.h
+    ${PROXYGEN_GENERATED_ROOT}/proxygen/lib/utils/TraceEventType.cpp
+    ${PROXYGEN_GENERATED_ROOT}/proxygen/lib/utils/TraceFieldType.h
+    ${PROXYGEN_GENERATED_ROOT}/proxygen/lib/utils/TraceFieldType.cpp
+  COMMAND
+    ${PROXYGEN_PYTHON}
+    ${PROXYGEN_LIB_DIR}/utils/gen_trace_event_constants.py
+    --output_type=cpp
+    --input_files=samples/TraceEventType.txt,samples/TraceFieldType.txt
+    --output_scope=proxygen
+    --header_path=proxygen/lib/utils
+    --install_dir=${PROXYGEN_GENERATED_ROOT}/proxygen/lib/utils
+    --fbcode_dir=${PROXYGEN_FBCODE_ROOT}
+  WORKING_DIRECTORY
+    ${PROXYGEN_LIB_DIR}/utils/
+  COMMENT "Generating TraceEventType and TraceFieldType"
+)
+
 set(CXX_SOURCES)
 auto_sources(files "*.cpp" "RECURSE" "${PROXYGEN_LIB_DIR}")
 auto_sources(serverfiles "*.cpp" "RECURSE" "${PROXYGEN_HTTPSERVER_DIR}")
@@ -12,7 +44,6 @@ HHVM_REMOVE_MATCHES_FROM_LISTS(
   "/samples/"
   "/test/"
   "/tests/"
-  "/lib/utils/(Null)?TraceEvent"
   "/http/codec/compress/experimental/simulator/"
   # Quic
   "/HQ"
@@ -24,6 +55,9 @@ list(APPEND CXX_SOURCES ${files})
 list(APPEND CXX_SOURCES "${PROXYGEN_EXTERNAL_DIR}/http_parser/http_parser_cpp.cpp")
 list(APPEND CXX_SOURCES "${PROXYGEN_LIB_DIR}/http/HTTPCommonHeaders.cpp")
 list(APPEND CXX_SOURCES "${PROXYGEN_LIB_DIR}/http/HTTPCommonHeaders.h")
+list(APPEND CXX_SOURCES
+  ${PROXYGEN_GENERATED_ROOT}/proxygen/lib/utils/TraceEventType.cpp
+  ${PROXYGEN_GENERATED_ROOT}/proxygen/lib/utils/TraceFieldType.cpp)
 
 FIND_PROGRAM(GPERF_EXECUTABLE NAMES gperf)
 IF(NOT GPERF_EXECUTABLE)
@@ -47,6 +81,7 @@ if (NOT MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable")
 endif()
 add_library(hphp_proxygen STATIC ${CXX_SOURCES})
+target_include_directories(hphp_proxygen PUBLIC ${PROXYGEN_GENERATED_ROOT})
 
 add_dependencies(hphp_proxygen libsodiumMaybeBuild)
 target_include_directories(hphp_proxygen PUBLIC "${LIBSODIUM_INCLUDE_DIRS}")

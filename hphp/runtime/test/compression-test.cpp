@@ -18,7 +18,7 @@
 #include <string>
 #include <vector>
 
-#include <dec/decode.h>
+#include <brotli/decode.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <zstd.h>
@@ -280,12 +280,12 @@ void decompressBrotli(std::string compressed, const std::string& expected) {
   std::string decompressed;
   size_t decompressed_size = expected.size();
   decompressed.resize(decompressed_size);
-  auto result = BrotliDecompressBuffer(
+  auto result = BrotliDecoderDecompress(
       compressed.size(),
-      (const unsigned char*)compressed.data(),
+      reinterpret_cast<const uint8_t *>(compressed.data()),
       &decompressed_size,
-      (unsigned char*)&(decompressed[0]));
-  EXPECT_EQ(result, BrotliResult::BROTLI_RESULT_SUCCESS);
+      reinterpret_cast<uint8_t*>(&(decompressed[0])));
+  EXPECT_EQ(result, BROTLI_DECODER_RESULT_SUCCESS);
   EXPECT_EQ(decompressed_size, expected.size());
   decompressed.resize(decompressed_size);
   EXPECT_EQ(decompressed, expected);

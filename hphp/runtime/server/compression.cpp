@@ -265,7 +265,7 @@ void BrotliResponseCompressor::disable() {
   m_chunkedEnabled = false;
 }
 
-brotli::BrotliCompressor* BrotliResponseCompressor::getCompressor(
+BrotliCompressor* BrotliResponseCompressor::getCompressor(
     int size, bool last) {
   if (!m_compressor) {
     if (last) {
@@ -278,27 +278,33 @@ brotli::BrotliCompressor* BrotliResponseCompressor::getCompressor(
     if (!isEnabled()) {
       return nullptr;
     }
-    brotli::BrotliParams params;
-    params.mode =
-        (brotli::BrotliParams::Mode)RuntimeOption::BrotliCompressionMode;
+    BrotliEncoderMode mode =
+        (BrotliEncoderMode)RuntimeOption::BrotliCompressionMode;
 
-    Variant quality;
-    IniSetting::Get("brotli.compression_quality", quality);
-    params.quality = quality.asInt64Val();
+    Variant qualityVar;
+    IniSetting::Get("brotli.compression_quality", qualityVar);
+    uint32_t quality = static_cast<uint32_t>(qualityVar.asInt64Val());
 
-    Variant lgWindowSize;
-    IniSetting::Get("brotli.compression_lgwin", lgWindowSize);
-    params.lgwin = lgWindowSize.asInt64Val();
+
+    Variant windowSizeVar;
+    IniSetting::Get("brotli.compression_lgwin", windowSizeVar);
+    uint32_t windowSize = static_cast<uint32_t>(windowSizeVar.asInt64Val());
     if (size && !m_chunkedEnabled) {
       // If there is only one block (i.e. non-chunked content) set a maximum
       // brotli window of ceil(log2(size)). This way the reader doesn't have
       // to waste memory constructing a larger window which will never be used.
-      params.lgwin = std::min(
-          static_cast<unsigned int>(params.lgwin),
-          folly::findLastSet(static_cast<unsigned int>(size) - 1));
+
+      // First, calculate the window size. It must be at least
+      // BROTLI_MIN_WINDOW_BITS large.
+      auto calculatedSize = std::max(
+        folly::findLastSet(static_cast<uint32_t>(size) - 1),
+        static_cast<uint32_t>(BROTLI_MIN_WINDOW_BITS));
+
+      // Then, use whichever is smaller: configured value or calculated one.
+      windowSize = std::min(windowSize, calculatedSize);
     }
 
-    m_compressor = std::make_unique<brotli::BrotliCompressor>(params);
+    m_compressor = std::make_unique<BrotliCompressor>(mode, quality, windowSize);
   }
 
   return m_compressor.get();
@@ -314,7 +320,7 @@ StringHolder BrotliResponseCompressor::compressResponse(
     return StringHolder{};
   }
   size_t size = len;
-  auto compressedData = HPHP::compressBrotli(compressor, data, size, last);
+  auto compressedData = compressor->compress(data, size, last);
   if (!compressedData) {
     m_compressor.reset();
     Logger::Error("Unable to compress response to brotli: len=%d", len);

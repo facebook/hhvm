@@ -157,11 +157,11 @@ struct BrotliResponseCompressor : ResponseCompressor {
   StringHolder compressResponse(const char *data, int len, bool last) override;
 
  private:
-  brotli::BrotliCompressor* getCompressor(int size, bool last);
+  BrotliCompressor* getCompressor(int size, bool last);
 
   int8_t m_enabled;
   int8_t m_chunkedEnabled;
-  std::unique_ptr<brotli::BrotliCompressor> m_compressor;
+  std::unique_ptr<BrotliCompressor> m_compressor;
 };
 
 struct ZstdResponseCompressor : ResponseCompressor {

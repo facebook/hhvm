@@ -142,21 +142,14 @@ impl Ord for TypedValue {
             (TypedValue::Float(f1), TypedValue::Float(f2)) => {
                 f1.partial_cmp(f2).unwrap_or(std::cmp::Ordering::Equal)
             }
-            (TypedValue::Int(i1), TypedValue::Int(i2)) => i1.cmp(i2),
-            _ => self.cmp(other),
+            _ => self.partial_cmp(other).unwrap(),
         }
     }
 }
 
 impl PartialEq for TypedValue {
     fn eq(&self, other: &TypedValue) -> bool {
-        match (self, other) {
-            (TypedValue::Float(f1), TypedValue::Float(f2)) => {
-                f1.to_be_bytes().eq(&f2.to_be_bytes())
-            }
-            (TypedValue::Int(i1), TypedValue::Int(i2)) => i1.eq(i2),
-            _ => self.eq(other),
-        }
+        self.cmp(other) == std::cmp::Ordering::Equal
     }
 }
 
@@ -403,6 +396,20 @@ mod typed_value_tests {
     fn big_shift_left() {
         let res = TypedValue::Int(1).shift_left(&TypedValue::Int(70)).unwrap();
         assert_eq!(res, TypedValue::Int(64));
+    }
+
+    #[test]
+    fn eq() {
+        assert_eq!(TypedValue::Bool(true), TypedValue::Bool(true));
+        assert_ne!(TypedValue::Int(2), TypedValue::Int(3));
+        assert_eq!(
+            TypedValue::String("foo".to_string()),
+            TypedValue::String("foo".to_string())
+        );
+        assert_eq!(
+            TypedValue::Float(std::f64::NAN),
+            TypedValue::Float(std::f64::NAN)
+        );
     }
 
     #[test]

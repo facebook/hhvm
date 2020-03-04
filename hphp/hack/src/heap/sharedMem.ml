@@ -1238,18 +1238,6 @@ struct
 end
 
 (*****************************************************************************)
-(* All the cache are configured by a module of type ConfigType *)
-(*****************************************************************************)
-
-module type ConfigType = sig
-  (* The type of object we want to keep in cache *)
-  type value
-
-  (* The capacity of the cache *)
-  val capacity : int
-end
-
-(*****************************************************************************)
 (* All the caches are functors returning a module of the following signature
  *)
 (*****************************************************************************)
@@ -1275,21 +1263,43 @@ module type CacheType = sig
 end
 
 (*****************************************************************************)
-(* Cache keeping the objects the most frequently used. *)
+(* FreqCache and OrderedCache are both local Hashtbl.t-based caches of       *)
+(* bounded size in the ocaml heap, design to be used together.               *)
+(*                                                                           *)
+(* - FreqCache is an LFU cache - "Least Frequently Used" - which keeps count *)
+(* of how many times each item in the cache has been added/replaced/fetched  *)
+(* and, when it reaches 2*capacity, then it flushes 1*capacity items and     *)
+(* they lose their counts. This might result in a lucky few early items      *)
+(* getting to stay in the cache while newcomers get evicted...               *)
+(*                                                                           *)
+(* - OrderedCache is a LRA cache - "Least Recently Added" - which, whenever  *)
+(* you add an item beyond capacity, will evict the oldest one to be added.   *)
+(*                                                                           *)
+(* If you keep both kinds of caches simultaneously, and add items to both    *)
+(* of them, then hopefully each one will paper over the other's weaknesses.  *)
 (*****************************************************************************)
+
+module type LocalHashtblConfigType = sig
+  (* The type of object we want to keep in cache *)
+  type value
+
+  (* The capacity of the cache *)
+  val capacity : int
+end
 
 module FreqCache (Key : sig
   type t
 end)
-(Config : ConfigType) :
-  CacheType with type key := Key.t and type value := Config.value = struct
-  type value = Config.value
+(LocalHashtblConfig : LocalHashtblConfigType) :
+  CacheType with type key := Key.t and type value := LocalHashtblConfig.value =
+struct
+  type value = LocalHashtblConfig.value
 
   let string_of_key _key = failwith "FreqCache does not support 'string_of_key'"
 
   (* The cache itself *)
   let (cache : (Key.t, int ref * value) Hashtbl.t) =
-    Hashtbl.create (2 * Config.capacity)
+    Hashtbl.create (2 * LocalHashtblConfig.capacity)
 
   let size = ref 0
 
@@ -1309,7 +1319,7 @@ end)
    * After collection: size = capacity (with the most frequently used objects)
    *)
   let collect () =
-    if !size < 2 * Config.capacity then
+    if !size < 2 * LocalHashtblConfig.capacity then
       ()
     else
       let l = ref [] in
@@ -1322,15 +1332,15 @@ end)
       Hashtbl.clear cache;
       l := List.sort (fun (_, x, _) (_, y, _) -> y - x) !l;
       let i = ref 0 in
-      while !i < Config.capacity do
+      while !i < LocalHashtblConfig.capacity do
         match !l with
-        | [] -> i := Config.capacity
+        | [] -> i := LocalHashtblConfig.capacity
         | (k, _freq, v) :: rl ->
           Hashtbl.replace cache k (ref 0, v);
           l := rl;
           incr i
       done;
-      size := Config.capacity;
+      size := LocalHashtblConfig.capacity;
       ()
 
   let add x y =
@@ -1360,19 +1370,17 @@ end)
     Hashtbl.remove cache x
 end
 
-(*****************************************************************************)
-(* An ordered cache keeps the most recently used objects *)
-(*****************************************************************************)
-
 module OrderedCache (Key : sig
   type t
 end)
-(Config : ConfigType) :
-  CacheType with type key := Key.t and type value := Config.value = struct
+(LocalHashtblConfig : LocalHashtblConfigType) :
+  CacheType with type key := Key.t and type value := LocalHashtblConfig.value =
+struct
   let string_of_key _key =
     failwith "OrderedCache does not support 'string_of_key'"
 
-  let (cache : (Key.t, Config.value) Hashtbl.t) = Hashtbl.create Config.capacity
+  let (cache : (Key.t, LocalHashtblConfig.value) Hashtbl.t) =
+    Hashtbl.create LocalHashtblConfig.capacity
 
   let queue = Queue.create ()
 
@@ -1390,7 +1398,7 @@ end)
     ()
 
   let add x y =
-    ( if !size >= Config.capacity then
+    ( if !size >= LocalHashtblConfig.capacity then
       (* Remove oldest element - if it's still around. *)
       let elt = Queue.pop queue in
       if Hashtbl.mem cache elt then (
@@ -1430,17 +1438,17 @@ module LocalCache (UserKeyType : UserKeyType) (Value : Value.Type) = struct
 
   type value = Value.t
 
-  module ConfValue = struct
+  module LocalHashtblConfig = struct
     type value = Value.t
 
     let capacity = 1000
   end
 
   (* Young values cache *)
-  module L1 = OrderedCache (UserKeyType) (ConfValue)
+  module L1 = OrderedCache (UserKeyType) (LocalHashtblConfig)
 
   (* Frequent values cache *)
-  module L2 = FreqCache (UserKeyType) (ConfValue)
+  module L2 = FreqCache (UserKeyType) (LocalHashtblConfig)
   module KeySet = Set.Make (UserKeyType)
 
   let string_of_key _key =

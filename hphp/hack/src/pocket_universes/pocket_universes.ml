@@ -7,10 +7,9 @@
  *
  *)
 
-open Base
+open Core_kernel
 open Aast
-open Tast
-open Ast_defs
+module T = Tast
 
 let annotation pos =
   (pos, Typing_defs.mk (Typing_reason.Rnone, Typing_defs.make_tany ()))
@@ -76,8 +75,8 @@ let gen_pu_accessor
     (pos : pos)
     (final : bool)
     (extends : bool)
-    (info : (string * expr) list)
-    (error : string) : method_ =
+    (info : (string * T.expr) list)
+    (error : string) : T.method_ =
   let var_name = "$atom" in
   let var_atom =
     (annotation pos, Lvar (pos, Local_id.make_unscoped var_name))
@@ -100,6 +99,7 @@ let gen_pu_accessor
       in
       Default (pos, [(pos, Return (Some (annotation pos, call)))])
     else
+      let open Ast_defs in
       let msg = Binop (Dot, str pos error, var_atom) in
       let class_id = (annotation pos, CIexpr (id pos "\\Exception")) in
       Default
@@ -117,7 +117,7 @@ let gen_pu_accessor
   let body =
     {
       fb_ast = [(pos, Switch (var_atom, cases))];
-      fb_annotation = NoUnsafeBlocks;
+      fb_annotation = T.NoUnsafeBlocks;
     }
   in
   {
@@ -142,7 +142,7 @@ let gen_pu_accessor
     m_user_attributes = [];
     (* TODO: Memoize ? *)
     m_ret = create_mixed_type_hint pos;
-    m_fun_kind = FSync;
+    m_fun_kind = Ast_defs.FSync;
     m_span = pos;
     m_doc_comment = None;
     m_external = false;
@@ -151,7 +151,7 @@ let gen_pu_accessor
     m_final = final;
     m_variadic = FVnonVariadic;
     m_where_constraints = [];
-    m_annotation = dummy_saved_env;
+    m_annotation = T.dummy_saved_env;
     m_abstract = false;
   }
 
@@ -159,7 +159,7 @@ let gen_pu_accessor
    vector of all the atoms declared in a ClassEnum. Will be removed / boxed in
    the future
 *)
-let gen_Members field pos (fields : pu_enum) =
+let gen_Members field pos (fields : T.pu_enum) =
   let { pu_members; _ } = fields in
   let annot = annotation pos in
   let mems =
@@ -173,13 +173,13 @@ let gen_Members field pos (fields : pu_enum) =
             Expr
               ( annot,
                 Binop
-                  ( Eq None,
+                  ( Ast_defs.Eq None,
                     (annot, Lvar (pos, Local_id.make_unscoped "$mems")),
                     (annot, Collection ((pos, "vec"), None, mems)) ) ) );
           ( pos,
             Return (Some (annot, Lvar (pos, Local_id.make_unscoped "$mems"))) );
         ];
-      fb_annotation = NoUnsafeBlocks;
+      fb_annotation = T.NoUnsafeBlocks;
     }
   in
   {
@@ -193,18 +193,18 @@ let gen_Members field pos (fields : pu_enum) =
     m_user_attributes = [];
     (* TODO: Memoize ? *)
     m_ret = create_mixed_type_hint pos;
-    m_fun_kind = FSync;
+    m_fun_kind = Ast_defs.FSync;
     m_span = pos;
     m_doc_comment = None;
     m_external = false;
     m_where_constraints = [];
     m_variadic = FVnonVariadic;
-    m_annotation = dummy_saved_env;
+    m_annotation = T.dummy_saved_env;
     m_abstract = false;
   }
 
-let gen_pu_accessors (class_name : string) (extends : bool) (field : pu_enum) :
-    method_ list =
+let gen_pu_accessors (class_name : string) (extends : bool) (field : T.pu_enum)
+    : T.method_ list =
   let (pos, field_name) = field.pu_name in
   let fun_members = gen_Members field_name pos field in
   let info = process_class_enum field in
@@ -257,7 +257,7 @@ let erase_stmt stmt = visitor#on_stmt () stmt
 
 let erase_fun f = visitor#on_fun_ () f
 
-let process_pufields class_name extends (pu_enums : pu_enum list) =
+let process_pufields class_name extends (pu_enums : T.pu_enum list) =
   List.concat_map ~f:(gen_pu_accessors class_name extends) pu_enums
 
 let update_class c =
@@ -284,4 +284,4 @@ let update_def d =
   | SetNamespaceEnv _ ->
     d
 
-let translate (program : program) = List.map ~f:update_def program
+let translate (program : T.program) = List.map ~f:update_def program

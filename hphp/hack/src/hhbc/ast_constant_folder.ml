@@ -6,8 +6,6 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-
-open Ast_class_expr
 open Core_kernel
 module A = Aast
 module TV = Typed_value
@@ -202,6 +200,7 @@ and update_duplicates_in_map kvs =
 
 and class_const_to_typed_value cid id =
   if snd id = SN.Members.mClass then
+    let open Ast_class_expr in
     let cexpr = class_id_to_class_expr ~resolve_self:true [] cid in
     match cexpr with
     | Class_id (_, cname) ->

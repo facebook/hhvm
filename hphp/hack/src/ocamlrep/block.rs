@@ -39,7 +39,7 @@ impl<'a> BlockBuilder<'a> {
 
     /// Return a pointer to the first field in the block.
     #[inline(always)]
-    pub unsafe fn as_mut_ptr(&mut self) -> *mut Value<'a> {
+    pub fn as_mut_ptr(&mut self) -> *mut Value<'a> {
         self.0.as_mut_ptr()
     }
 }

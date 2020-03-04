@@ -12,11 +12,6 @@ val with_expr_hook :
 
 val debug_print_last_pos : 'a -> unit
 
-val class_def :
-  Provider_context.t ->
-  Nast.class_ ->
-  (Tast.class_ * Typing_inference_env.t_global_with_pos list) option
-
 val typedef_def : Provider_context.t -> Nast.typedef -> Tast.typedef
 
 val expr :
@@ -60,3 +55,9 @@ val file_attributes :
 
 val type_param :
   Typing_env_types.env -> Nast.tparam -> Typing_env_types.env * Tast.tparam
+
+val check_shape_keys_validity :
+  Typing_env_types.env ->
+  Pos.t ->
+  Ast_defs.shape_field_name list ->
+  Typing_env_types.env

@@ -174,3 +174,8 @@ let set_tyvars_variance_in_callable env return_ty param_tys variadic_param_ty =
       env
   in
   env
+
+let reify_kind = function
+  | Erased -> Aast.Erased
+  | SoftReified -> Aast.SoftReified
+  | Reified -> Aast.Reified

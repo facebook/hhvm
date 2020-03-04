@@ -121,7 +121,7 @@ let type_class (ctx : Provider_context.t) (fn : Relative_path.t) (x : string) :
         let class_ = Naming.class_ ctx cls in
         Nast_check.def ctx (Aast.Class class_);
         let def_opt =
-          Typing.class_def ctx class_
+          Typing_toplevel.class_def ctx class_
           |> Option.map ~f:(fun (c, global_tvenv) ->
                  (Aast.Class c, global_tvenv))
         in

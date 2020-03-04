@@ -915,6 +915,7 @@ fn emit_call(
                 ),
                 lhs,
                 args,
+                uargs,
                 emit_pos(e, pos)?,
                 fcall,
                 inout_setters,

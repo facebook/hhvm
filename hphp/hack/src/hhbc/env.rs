@@ -158,6 +158,7 @@ impl<'a> Env<'a> {
     {
         let res = f(self, e, x);
         self.jump_targets_gen.release_ids();
+        self.jump_targets_gen.revert();
         res
     }
 }

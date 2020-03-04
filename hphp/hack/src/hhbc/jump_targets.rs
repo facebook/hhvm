@@ -302,6 +302,10 @@ impl Gen {
             .0
             .push(Region::Using(finally_label, labels));
     }
+
+    pub fn revert(&mut self) {
+        self.jump_targets.0.pop();
+    }
 }
 
 pub struct ResolvedTryFinally {

@@ -1417,7 +1417,7 @@ fn print_control_flow<W: Write>(w: &mut W, cf: &InstructControlFlow) -> Result<(
         }
         CF::RetC => w.write("RetC"),
         CF::RetCSuspended => w.write("RetCSuspended"),
-        CF::RetM(p) => concat_str(w, ["RetM", p.to_string().as_str()]),
+        CF::RetM(p) => concat_str_by(w, " ", ["RetM", p.to_string().as_str()]),
         CF::Throw => w.write("Throw"),
         CF::Switch(_, _, _) => not_impl!(),
         CF::SSwitch(_) => not_impl!(),

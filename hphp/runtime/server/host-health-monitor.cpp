@@ -30,7 +30,7 @@ namespace HPHP {
 
 namespace {
 bool Enabled;
-int32_t UpdateFreq;
+int32_t MaxUpdatePeriod;
 auto DampenTime = std::chrono::milliseconds{0};
 
 struct HostHealthMonitorExtension final : public Extension {
@@ -39,8 +39,8 @@ struct HostHealthMonitorExtension final : public Extension {
   void moduleLoad(const IniSetting::Map& ini, Hdf globalConfig) override {
     Config::Bind(Enabled, ini, globalConfig,
                  "HealthMonitor.EnableHealthMonitor", true);
-    Config::Bind(UpdateFreq, ini, globalConfig,
-                 "HealthMonitor.UpdateFreq", 1000 /* miliseconds */);
+    Config::Bind(MaxUpdatePeriod, ini, globalConfig,
+                 "HealthMonitor.MaxUpdatePeriod", 100 /* miliseconds */);
     auto const dampenMs =
       Config::GetInt32(ini, globalConfig, "HealthMonitor.DampenTimeMs", 0);
     if (dampenMs > 0) DampenTime = std::chrono::milliseconds(dampenMs);
@@ -63,8 +63,8 @@ void IHealthMonitorMetric::registerSelf() {
 
 void HostHealthMonitor::start() {
   if (!Enabled || !m_stopped.load(std::memory_order_acquire)) return;
-  if (UpdateFreq < 10) UpdateFreq = 10;
-  if (UpdateFreq > 10000) UpdateFreq = 10000;
+  if (MaxUpdatePeriod < 10) MaxUpdatePeriod = 10;
+  if (MaxUpdatePeriod > 10000) MaxUpdatePeriod = 10000;
 
   m_monitor_thread = std::make_unique<std::thread>([] {
     folly::setThreadName("HostHealthMonitor");
@@ -105,7 +105,7 @@ void HostHealthMonitor::monitor() {
                                    std::chrono::seconds(60)});
   m_stopped.store(false, std::memory_order_relaxed);
   std::unique_lock<std::mutex> guard(m_condvar_lock);
-  std::chrono::milliseconds dura(UpdateFreq);
+  std::chrono::milliseconds dura(MaxUpdatePeriod);
   auto next = std::chrono::steady_clock::now();
   while (!m_stopped.load(std::memory_order_acquire)) {
     HealthLevel newStatus = evaluate();

@@ -466,8 +466,8 @@ endfunction()
 # This should be called for object libraries, rather than calling
 # hphp_link directly.
 function(object_library_hphp_link target)
-  # Gold doesn't need this, and MSVC can't have it. (see below)
-  if (NOT ENABLE_LD_GOLD AND NOT MSVC)
+  # MSVC can't have it. (see below)
+  if (NOT MSVC)
     hphp_link(${target})
   endif()
 endfunction()

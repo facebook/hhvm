@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::ffi::{CStr, CString};
-use std::marker::PhantomData;
 use std::panic::UnwindSafe;
 
 use ocamlpool_rust::utils::{caml_set_field, reserve_block};
@@ -18,11 +17,9 @@ extern "C" {
     static mut ocamlpool_generation: usize;
 }
 
-pub struct Pool<'a> {
-    _phantom: PhantomData<Value<'a>>,
-}
+pub struct Pool(());
 
-impl<'a> Pool<'a> {
+impl Pool {
     /// Prepare the ocamlpool library to allocate values directly on the OCaml
     /// runtime's garbage-collected heap.
     ///
@@ -35,41 +32,39 @@ impl<'a> Pool<'a> {
     #[inline(always)]
     pub unsafe fn new() -> Self {
         ocamlpool_enter();
-        Self {
-            _phantom: PhantomData,
-        }
+        Self(())
     }
 
     #[inline(always)]
-    pub fn add<T: OcamlRep>(&mut self, value: &T) -> Value<'a> {
+    pub fn add<T: OcamlRep>(&mut self, value: &T) -> Value<'_> {
         value.to_ocamlrep(self)
     }
 }
 
-impl Drop for Pool<'_> {
+impl Drop for Pool {
     #[inline(always)]
     fn drop(&mut self) {
         unsafe { ocamlpool_leave() };
     }
 }
 
-impl<'a> Allocator<'a> for Pool<'a> {
+impl Allocator for Pool {
     #[inline(always)]
     fn generation(&self) -> usize {
         unsafe { ocamlpool_generation }
     }
 
     #[inline(always)]
-    fn block_with_size_and_tag<'b>(&'b self, size: usize, tag: u8) -> BlockBuilder<'a, 'b> {
+    fn block_with_size_and_tag(&self, size: usize, tag: u8) -> BlockBuilder<'_> {
         let block = unsafe {
-            let ptr = reserve_block(tag, size) as *mut Value<'a>;
+            let ptr = reserve_block(tag, size) as *mut Value<'_>;
             std::slice::from_raw_parts_mut(ptr, size)
         };
         BlockBuilder::new(block)
     }
 
     #[inline(always)]
-    fn set_field(block: &mut BlockBuilder<'a, '_>, index: usize, value: Value<'a>) {
+    fn set_field<'a>(block: &mut BlockBuilder<'a>, index: usize, value: Value<'a>) {
         assert!(index < block.size());
         unsafe { caml_set_field(block.as_mut_ptr() as usize, index, value.to_bits()) };
     }
@@ -135,9 +130,7 @@ pub fn catch_unwind(f: impl FnOnce() -> usize + UnwindSafe) -> usize {
 /// result.
 #[inline(always)]
 pub unsafe fn add_to_ambient_pool<T: OcamlRep>(value: &T) -> usize {
-    let mut fake_pool = Pool {
-        _phantom: PhantomData,
-    };
+    let mut fake_pool = Pool(());
     let result = value.to_ocamlrep(&mut fake_pool).to_bits();
     std::mem::forget(fake_pool);
     result

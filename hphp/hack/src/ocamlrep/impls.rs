@@ -28,7 +28,7 @@ fn expect_block_with_size_and_tag<'a>(
 }
 
 impl OcamlRep for () {
-    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, _alloc: &A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> Value<'a> {
         Value::int(0)
     }
 
@@ -41,7 +41,7 @@ impl OcamlRep for () {
 }
 
 impl OcamlRep for isize {
-    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, _alloc: &A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> Value<'a> {
         Value::int(*self)
     }
 
@@ -51,7 +51,7 @@ impl OcamlRep for isize {
 }
 
 impl OcamlRep for usize {
-    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, _alloc: &A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> Value<'a> {
         Value::int((*self).try_into().unwrap())
     }
 
@@ -61,7 +61,7 @@ impl OcamlRep for usize {
 }
 
 impl OcamlRep for i64 {
-    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, _alloc: &A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> Value<'a> {
         Value::int((*self).try_into().unwrap())
     }
 
@@ -71,7 +71,7 @@ impl OcamlRep for i64 {
 }
 
 impl OcamlRep for u64 {
-    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, _alloc: &A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> Value<'a> {
         Value::int((*self).try_into().unwrap())
     }
 
@@ -81,7 +81,7 @@ impl OcamlRep for u64 {
 }
 
 impl OcamlRep for i32 {
-    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, _alloc: &A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> Value<'a> {
         Value::int((*self).try_into().unwrap())
     }
 
@@ -91,7 +91,7 @@ impl OcamlRep for i32 {
 }
 
 impl OcamlRep for u32 {
-    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, _alloc: &A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> Value<'a> {
         Value::int((*self).try_into().unwrap())
     }
 
@@ -101,7 +101,7 @@ impl OcamlRep for u32 {
 }
 
 impl OcamlRep for bool {
-    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, _alloc: &A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> Value<'a> {
         Value::int((*self).into())
     }
 
@@ -115,7 +115,7 @@ impl OcamlRep for bool {
 }
 
 impl OcamlRep for char {
-    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, _alloc: &A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> Value<'a> {
         if *self as u32 > 255 {
             panic!("char out of range: {}", self.to_string())
         }
@@ -133,7 +133,7 @@ impl OcamlRep for char {
 }
 
 impl OcamlRep for f64 {
-    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
         let mut block = alloc.block_with_size_and_tag(1, block::DOUBLE_TAG);
         A::set_field(&mut block, 0, unsafe {
             Value::from_bits(self.to_bits() as usize)
@@ -148,7 +148,7 @@ impl OcamlRep for f64 {
 }
 
 impl<T: OcamlRep> OcamlRep for Box<T> {
-    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
         alloc.add(&**self)
     }
 
@@ -158,7 +158,7 @@ impl<T: OcamlRep> OcamlRep for Box<T> {
 }
 
 impl<T: OcamlRep> OcamlRep for Rc<T> {
-    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
         alloc.add(self.as_ref())
     }
 
@@ -169,7 +169,7 @@ impl<T: OcamlRep> OcamlRep for Rc<T> {
 }
 
 impl<T: OcamlRep> OcamlRep for RefCell<T> {
-    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
         let mut block = alloc.block_with_size(1);
         A::set_field(&mut block, 0, alloc.add(&*self.borrow()));
         block.build()
@@ -183,7 +183,7 @@ impl<T: OcamlRep> OcamlRep for RefCell<T> {
 }
 
 impl<T: OcamlRep> OcamlRep for Option<T> {
-    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
         match self {
             None => Value::int(0),
             Some(val) => {
@@ -206,7 +206,7 @@ impl<T: OcamlRep> OcamlRep for Option<T> {
 }
 
 impl<T: OcamlRep, E: OcamlRep> OcamlRep for Result<T, E> {
-    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
         match self {
             Ok(val) => {
                 let mut block = alloc.block_with_size(1);
@@ -232,7 +232,7 @@ impl<T: OcamlRep, E: OcamlRep> OcamlRep for Result<T, E> {
 }
 
 impl<T: OcamlRep> OcamlRep for Vec<T> {
-    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
         let mut hd = alloc.add(&());
         for val in self.iter().rev() {
             let mut block = alloc.block_with_size(2);
@@ -260,7 +260,7 @@ impl<T: OcamlRep> OcamlRep for Vec<T> {
 }
 
 impl<K: OcamlRep + Ord, V: OcamlRep> OcamlRep for BTreeMap<K, V> {
-    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
         if self.is_empty() {
             return Value::int(0);
         }
@@ -277,9 +277,9 @@ impl<K: OcamlRep + Ord, V: OcamlRep> OcamlRep for BTreeMap<K, V> {
     }
 }
 
-fn btree_map_to_ocamlrep<'a, A: Allocator<'a>, K: OcamlRep, V: OcamlRep>(
+fn btree_map_to_ocamlrep<'a, A: Allocator, K: OcamlRep, V: OcamlRep>(
     iter: &mut btree_map::Iter<K, V>,
-    alloc: &A,
+    alloc: &'a A,
     size: usize,
 ) -> (Value<'a>, usize) {
     if size == 0 {
@@ -316,7 +316,7 @@ fn btree_map_from_ocamlrep<K: OcamlRep + Ord, V: OcamlRep>(
 }
 
 impl<T: OcamlRep + Ord> OcamlRep for BTreeSet<T> {
-    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
         if self.is_empty() {
             return Value::int(0);
         }
@@ -333,9 +333,9 @@ impl<T: OcamlRep + Ord> OcamlRep for BTreeSet<T> {
     }
 }
 
-fn btree_set_to_ocamlrep<'a, A: Allocator<'a>, T: OcamlRep>(
+fn btree_set_to_ocamlrep<'a, A: Allocator, T: OcamlRep>(
     iter: &mut btree_set::Iter<T>,
-    alloc: &A,
+    alloc: &'a A,
     size: usize,
 ) -> (Value<'a>, usize) {
     if size == 0 {
@@ -370,7 +370,7 @@ fn btree_set_from_ocamlrep<T: OcamlRep + Ord>(
 
 impl OcamlRep for OsString {
     #[cfg(unix)]
-    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
         use std::os::unix::ffi::OsStrExt;
         bytes_to_ocamlrep(self.as_bytes(), alloc)
     }
@@ -389,7 +389,7 @@ impl OcamlRep for OsString {
 
 impl OcamlRep for PathBuf {
     #[cfg(unix)]
-    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
         use std::os::unix::ffi::OsStrExt;
         bytes_to_ocamlrep(self.as_os_str().as_bytes(), alloc)
     }
@@ -400,7 +400,7 @@ impl OcamlRep for PathBuf {
 }
 
 impl OcamlRep for String {
-    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
         str_to_ocamlrep(self.as_str(), alloc)
     }
 
@@ -410,7 +410,7 @@ impl OcamlRep for String {
 }
 
 impl OcamlRep for Cow<'_, str> {
-    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
         str_to_ocamlrep(self.borrow(), alloc)
     }
 
@@ -421,7 +421,7 @@ impl OcamlRep for Cow<'_, str> {
 
 /// Allocate an OCaml string using the given allocator and copy the given string
 /// slice into it.
-pub fn str_to_ocamlrep<'a, A: Allocator<'a>>(s: &str, alloc: &A) -> Value<'a> {
+pub fn str_to_ocamlrep<'a, A: Allocator>(s: &str, alloc: &'a A) -> Value<'a> {
     bytes_to_ocamlrep(s.as_bytes(), alloc)
 }
 
@@ -432,7 +432,7 @@ pub fn str_from_ocamlrep<'a>(value: Value<'a>) -> Result<&'a str, FromError> {
 }
 
 impl OcamlRep for Vec<u8> {
-    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
         bytes_to_ocamlrep(self, alloc)
     }
 
@@ -443,7 +443,7 @@ impl OcamlRep for Vec<u8> {
 
 /// Allocate an OCaml string using the given allocator and copy the given byte
 /// slice into it.
-pub fn bytes_to_ocamlrep<'a, A: Allocator<'a>>(s: &[u8], alloc: &A) -> Value<'a> {
+pub fn bytes_to_ocamlrep<'a, A: Allocator>(s: &[u8], alloc: &'a A) -> Value<'a> {
     let words = (s.len() + 1 /*null-ending*/ + (WORD_SIZE - 1)/*rounding*/) / WORD_SIZE;
     let length = words * WORD_SIZE;
     let mut block = alloc.block_with_size_and_tag(words, block::STRING_TAG);
@@ -477,7 +477,7 @@ where
     T0: OcamlRep,
     T1: OcamlRep,
 {
-    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
         let mut block = alloc.block_with_size(2);
         A::set_field(&mut block, 0, alloc.add(&self.0));
         A::set_field(&mut block, 1, alloc.add(&self.1));
@@ -498,7 +498,7 @@ where
     T1: OcamlRep,
     T2: OcamlRep,
 {
-    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
         let mut block = alloc.block_with_size(3);
         A::set_field(&mut block, 0, alloc.add(&self.0));
         A::set_field(&mut block, 1, alloc.add(&self.1));
@@ -522,7 +522,7 @@ where
     T2: OcamlRep,
     T3: OcamlRep,
 {
-    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
         let mut block = alloc.block_with_size(4);
         A::set_field(&mut block, 0, alloc.add(&self.0));
         A::set_field(&mut block, 1, alloc.add(&self.1));
@@ -549,7 +549,7 @@ where
     T3: OcamlRep,
     T4: OcamlRep,
 {
-    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
         let mut block = alloc.block_with_size(5);
         A::set_field(&mut block, 0, alloc.add(&self.0));
         A::set_field(&mut block, 1, alloc.add(&self.1));
@@ -579,7 +579,7 @@ where
     T4: OcamlRep,
     T5: OcamlRep,
 {
-    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
         let mut block = alloc.block_with_size(6);
         A::set_field(&mut block, 0, alloc.add(&self.0));
         A::set_field(&mut block, 1, alloc.add(&self.1));
@@ -612,7 +612,7 @@ where
     T5: OcamlRep,
     T6: OcamlRep,
 {
-    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
         let mut block = alloc.block_with_size(7);
         A::set_field(&mut block, 0, alloc.add(&self.0));
         A::set_field(&mut block, 1, alloc.add(&self.1));
@@ -648,7 +648,7 @@ where
     T6: OcamlRep,
     T7: OcamlRep,
 {
-    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
         let mut block = alloc.block_with_size(8);
         A::set_field(&mut block, 0, alloc.add(&self.0));
         A::set_field(&mut block, 1, alloc.add(&self.1));

@@ -338,7 +338,7 @@ pub use value::{OpaqueValue, Value};
 /// reconstructed from an OCaml value of the same (OCaml) type.
 pub trait OcamlRep: Sized {
     /// Allocate an OCaml representation of `self` using the given Allocator.
-    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &A) -> Value<'a>;
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a>;
 
     /// Convert the given ocamlrep Value to a value of type `Self`, if possible.
     fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError>;
@@ -357,7 +357,7 @@ pub trait OcamlRep: Sized {
 }
 
 /// An interface for allocating OCaml values in some allocator-defined memory region.
-pub trait Allocator<'a>: Sized {
+pub trait Allocator: Sized {
     /// Return a token which uniquely identifies this Allocator. The token must
     /// be unique (among all instances of all implementors of the Allocator
     /// trait), and an instance of an implementor of Allocator must return the
@@ -366,7 +366,7 @@ pub trait Allocator<'a>: Sized {
 
     /// Allocate a block with enough space for `size` fields, write its header,
     /// and return it.
-    fn block_with_size_and_tag<'b>(&'b self, size: usize, tag: u8) -> BlockBuilder<'a, 'b>;
+    fn block_with_size_and_tag(&self, size: usize, tag: u8) -> BlockBuilder<'_>;
 
     /// Write the given value to the `index`th field of `block`.
     ///
@@ -374,15 +374,15 @@ pub trait Allocator<'a>: Sized {
     ///
     /// Panics if `index` is out of bounds for `block` (i.e., greater than or
     /// equal to the block's size).
-    fn set_field(block: &mut BlockBuilder<'a, '_>, index: usize, value: Value<'a>);
+    fn set_field<'a>(block: &mut BlockBuilder<'a>, index: usize, value: Value<'a>);
 
     #[inline(always)]
-    fn block_with_size<'b>(&'b self, size: usize) -> BlockBuilder<'a, 'b> {
+    fn block_with_size(&self, size: usize) -> BlockBuilder<'_> {
         self.block_with_size_and_tag(size, 0u8)
     }
 
     #[inline(always)]
-    fn add<T: OcamlRep>(&self, value: &T) -> Value<'a> {
+    fn add<T: OcamlRep>(&self, value: &T) -> Value<'_> {
         value.to_ocamlrep(self)
     }
 }

@@ -242,7 +242,7 @@ impl<T> fmt::Pointer for RcOc<T> {
 }
 
 impl<T: OcamlRep> OcamlRep for RcOc<T> {
-    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
         let generation = alloc.generation();
         match self.get_cached_value_in_generation(generation) {
             Some(value) => unsafe { Value::from_bits(value) },

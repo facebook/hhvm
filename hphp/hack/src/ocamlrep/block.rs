@@ -15,11 +15,11 @@ pub const DOUBLE_TAG: u8 = 253;
 
 /// A recently-allocated, not-yet-finalized Block.
 #[repr(transparent)]
-pub struct BlockBuilder<'arena: 'builder, 'builder>(pub(crate) &'builder mut [Value<'arena>]);
+pub struct BlockBuilder<'a>(pub(crate) &'a mut [Value<'a>]);
 
-impl<'a, 'b> BlockBuilder<'a, 'b> {
+impl<'a> BlockBuilder<'a> {
     #[inline(always)]
-    pub fn new(block: &'b mut [Value<'a>]) -> Self {
+    pub fn new(block: &'a mut [Value<'a>]) -> Self {
         if block.len() == 0 {
             panic!()
         }

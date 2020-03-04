@@ -28,7 +28,7 @@ fn derive_ocamlrep(mut s: synstructure::Structure) -> TokenStream {
     s.gen_impl(quote! {
         use ::ocamlrep::{Allocator, OcamlRep};
         gen impl ::ocamlrep::OcamlRep for @Self {
-            fn to_ocamlrep<'a, Alloc: ::ocamlrep::Allocator<'a>>(&self, arena: &Alloc) -> ::ocamlrep::Value<'a> {
+            fn to_ocamlrep<'a, Alloc: ::ocamlrep::Allocator>(&self, arena: &'a Alloc) -> ::ocamlrep::Value<'a> {
                 match self { #to_body }
             }
 

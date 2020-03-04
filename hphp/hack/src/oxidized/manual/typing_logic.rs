@@ -26,7 +26,7 @@ pub enum SubtypeProp {
 }
 
 impl OcamlRep for SubtypeProp {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator<'a>>(&self, _alloc: &A) -> ocamlrep::Value<'a> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, _alloc: &'a A) -> ocamlrep::Value<'a> {
         unimplemented!()
     }
 

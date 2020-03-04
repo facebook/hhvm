@@ -9,15 +9,15 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 
 use crate::{block::Header, Allocator, BlockBuilder, OcamlRep, Value};
 
-struct Chunk<'a> {
-    data: Box<[Value<'a>]>,
+struct Chunk {
+    data: Box<[Value<'static>]>,
     index: usize,
 
     /// Pointer to the prev arena segment.
-    prev: Option<Box<Chunk<'a>>>,
+    prev: Option<Box<Chunk>>,
 }
 
-impl<'a> Chunk<'a> {
+impl Chunk {
     fn with_capacity(capacity: usize) -> Self {
         Self {
             index: 0,
@@ -35,10 +35,10 @@ impl<'a> Chunk<'a> {
     }
 
     #[inline]
-    pub fn alloc(&mut self, requested_size: usize) -> *mut Value<'a> {
+    pub fn alloc(&mut self, requested_size: usize) -> &mut [Value<'static>] {
         let previous_index = self.index;
         self.index += requested_size;
-        unsafe { self.data.as_mut_ptr().add(previous_index) }
+        &mut self.data[previous_index..self.index]
     }
 }
 
@@ -57,12 +57,12 @@ static NEXT_GENERATION: AtomicUsize = AtomicUsize::new(usize::max_value() / 2);
 
 /// An [`Allocator`](trait.Allocator.html) which builds values in Rust-managed
 /// memory. The memory is freed when the Arena is dropped.
-pub struct Arena<'a> {
+pub struct Arena {
     generation: Cell<usize>,
-    current_chunk: RefCell<Chunk<'a>>,
+    current_chunk: RefCell<Chunk>,
 }
 
-impl<'a> Arena<'a> {
+impl Arena {
     /// Create a new Arena with 4KB of capacity preallocated.
     pub fn new() -> Self {
         Self::with_capacity(1024 * 4)
@@ -79,7 +79,7 @@ impl<'a> Arena<'a> {
     }
 
     #[inline]
-    fn alloc(&self, requested_size: usize) -> &mut [Value<'a>] {
+    fn alloc<'a>(&'a self, requested_size: usize) -> &'a mut [Value<'a>] {
         if !self.current_chunk.borrow().can_fit(requested_size) {
             let prev_chunk_capacity = self.current_chunk.borrow().capacity();
             let prev_chunk = self.current_chunk.replace(Chunk::with_capacity(max(
@@ -88,27 +88,35 @@ impl<'a> Arena<'a> {
             )));
             self.current_chunk.borrow_mut().prev = Some(Box::new(prev_chunk));
         }
-        let ptr = self.current_chunk.borrow_mut().alloc(requested_size);
-        // Transmute away the lifetime. We want to simultaneously hand out
-        // several mutable references to distinct allocated blocks within our
-        // chunks. Blocks are non-overlapping, so this won't allow aliasing. We
-        // need to ensure that the slices don't outlive the Arena, though.
-        unsafe { std::slice::from_raw_parts_mut(ptr, requested_size) }
+        let mut chunk = self.current_chunk.borrow_mut();
+        let slice = chunk.alloc(requested_size);
+        // Transmute the 'static lifetime to 'a, to allow Values which point to
+        // blocks allocated using this Arena to be stored in other such blocks.
+        // The lifetime ensures that callers cannot allow such Values to outlive
+        // the arena (and therefore outlive the block they point to). This
+        // transmute violates the 'static lifetime in Chunk, so it is critical
+        // for safety that we never expose a view of those Values to code
+        // outside this module (using the type `Value<'static>`).
+        // Also transmute the unnamed lifetime referring to the mutable borrow
+        // of `chunk` to 'a. This allows callers to hold multiple mutable blocks
+        // at once. This is safe because the blocks handed out by Chunk::alloc
+        // are non-overlapping, so there is no aliasing.
+        unsafe { std::mem::transmute::<&'_ mut [Value<'static>], &'a mut [Value<'a>]>(slice) }
     }
 
     #[inline(always)]
-    pub fn add<T: OcamlRep>(&self, value: &T) -> Value<'a> {
+    pub fn add<T: OcamlRep>(&self, value: &T) -> Value<'_> {
         value.to_ocamlrep(self)
     }
 }
 
-impl<'a> Allocator<'a> for Arena<'a> {
+impl Allocator for Arena {
     #[inline(always)]
     fn generation(&self) -> usize {
         self.generation.get()
     }
 
-    fn block_with_size_and_tag<'b>(&'b self, size: usize, tag: u8) -> BlockBuilder<'a, 'b> {
+    fn block_with_size_and_tag(&self, size: usize, tag: u8) -> BlockBuilder<'_> {
         let block = self.alloc(size + 1);
         let header = Header::new(size, tag);
         // Safety: We need to make sure that the Header written to index 0 of
@@ -119,7 +127,7 @@ impl<'a> Allocator<'a> for Arena<'a> {
     }
 
     #[inline(always)]
-    fn set_field<'b>(block: &mut BlockBuilder<'a, 'b>, index: usize, value: Value<'a>) {
+    fn set_field<'a>(block: &mut BlockBuilder<'a>, index: usize, value: Value<'a>) {
         block.0[index] = value;
     }
 }

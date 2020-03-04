@@ -36,7 +36,7 @@ module Cache =
 
       let prefix = Prefix.make ()
 
-      let description = "Linearization"
+      let description = "Decl_Linearization"
     end)
     (struct
       let capacity = 1000
@@ -67,7 +67,7 @@ module LocalCache =
 
       let prefix = Prefix.make ()
 
-      let description = "LazyLinearization"
+      let description = "Decl_LazyLinearization"
     end)
     (struct
       let capacity = 1000

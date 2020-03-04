@@ -1,0 +1,32 @@
+--- binary ---
+object(TestStruct) (1) {
+  ["var"]=>
+  string(4) "asdf"
+}
+object(TestStruct) (1) {
+  ["var"]=>
+  string(3) "123"
+}
+object(TestStruct) (1) {
+  ["var"]=>
+  string(4) "1.23"
+}
+
+Warning: runtime/ext_thrift: Output buffer has 18 unflushed bytes in %s/string_field_serialization.php on line 56
+<TProtocolException: Attempt to send object type as a T_STRING>
+--- compact ---
+object(TestStruct) (1) {
+  ["var"]=>
+  string(4) "asdf"
+}
+object(TestStruct) (1) {
+  ["var"]=>
+  string(3) "123"
+}
+object(TestStruct) (1) {
+  ["var"]=>
+  string(4) "1.23"
+}
+
+Warning: runtime/ext_thrift: Output buffer has 8 unflushed bytes in %s/string_field_serialization.php on line 63
+<TProtocolException: Attempt to send object type as a T_STRING>

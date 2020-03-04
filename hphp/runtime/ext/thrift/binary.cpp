@@ -568,6 +568,10 @@ void binary_serialize(int8_t thrift_typeID, PHPOutputTransport& transport,
     case T_UTF8:
     case T_UTF16:
     case T_STRING: {
+        if (value.is(KindOfObject)) {
+          throw_tprotocolexception("Attempt to send object "
+                                   "type as a T_STRING", INVALID_DATA);
+        }
         String sv = value.toString();
         transport.writeString(sv.data(), sv.size());
     } return;

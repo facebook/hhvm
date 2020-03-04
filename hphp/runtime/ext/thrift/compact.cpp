@@ -412,6 +412,10 @@ struct CompactWriter {
         case T_UTF8:
         case T_UTF16:
         case T_STRING: {
+            if (value.is(KindOfObject)) {
+              thrift_error("Attempt to send object type as a T_STRING",
+                ERR_INVALID_DATA);
+            }
             auto s = value.toString();
             auto slice = s.slice();
             writeVarint(slice.size());

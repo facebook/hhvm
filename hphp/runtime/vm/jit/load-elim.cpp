@@ -406,8 +406,10 @@ bool handle_minstr(Local& env, const IRInstruction& inst, GeneralEffects m) {
   auto const meta = env.global.ainfo.find(acls);
   if (!meta || !env.state.avail[meta->index]) return false;
 
+  // We may not have any type info for old_val, but since base is an LvalToCell
+  // that points to this location, we can at least narrow it to a Cell.
   auto const old_val = env.state.tracked[meta->index];
-  auto const effects = MInstrEffects(inst.op(), old_val.knownType);
+  auto const effects = MInstrEffects(inst.op(), old_val.knownType & TCell);
   store(env, m.stores, nullptr);
 
   SCOPE_ASSERT_DETAIL("handle_minstr") { return inst.toString(); };

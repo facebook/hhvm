@@ -298,25 +298,13 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
         },
         a::Stmt_::GotoLabel(l) => Ok(InstrSeq::make_label(Label::Named(l.1.clone()))),
         a::Stmt_::Goto(l) => tfr::emit_goto(false, l.1.clone(), env, e.local_gen_mut()),
-        a::Stmt_::Block(b) => emit_stmts(e, env, &b),
+        a::Stmt_::Block(b) => emit_block(env, e, &b),
         a::Stmt_::If(f) => emit_if(e, env, pos, &f.0, &f.1, &f.2),
-        a::Stmt_::While(x) => emit_while(
-            e,
-            env,
-            &x.0,
-            //TODO: avoid cloning Block
-            &tast::Stmt(pos.clone(), tast::Stmt_::mk_block(x.1.clone())),
-        ),
+        a::Stmt_::While(x) => emit_while(e, env, &x.0, &x.1),
         a::Stmt_::Using(_) => unimplemented!("TODO(hrust)"),
         a::Stmt_::Break => Ok(emit_break(e, env, pos)),
         a::Stmt_::Continue => Ok(emit_continue(e, env, pos)),
-        a::Stmt_::Do(x) => emit_do(
-            e,
-            env,
-            //TODO: avoid cloning Block
-            &tast::Stmt(pos.clone(), tast::Stmt_::mk_block(x.0.clone())),
-            &x.1,
-        ),
+        a::Stmt_::Do(x) => emit_do(e, env, &x.0, &x.1),
         a::Stmt_::For(x) => emit_for(e, env, pos, &x.0, &x.1, &x.2, &x.3),
         a::Stmt_::Throw(_) => unimplemented!("TODO(hrust)"),
         a::Stmt_::Try(_) => unimplemented!("TODO(hrust)"),
@@ -342,23 +330,23 @@ fn emit_stmts(e: &mut Emitter, env: &Env, stl: &[tast::Stmt]) -> Result {
     ))
 }
 
-fn emit_stmt_wrapper(env: &mut Env, emitter: &mut Emitter, stmt: &tast::Stmt) -> Result {
-    emit_stmt(emitter, env, stmt)
+fn emit_block(env: &mut Env, emitter: &mut Emitter, block: &tast::Block) -> Result {
+    emit_stmts(emitter, env, block.as_slice())
 }
 
-fn emit_do(e: &mut Emitter, env: &mut Env, body: &tast::Stmt, cond: &tast::Expr) -> Result {
+fn emit_do(e: &mut Emitter, env: &mut Env, body: &tast::Block, cond: &tast::Expr) -> Result {
     let break_label = e.label_gen_mut().next_regular();
     let cont_label = e.label_gen_mut().next_regular();
     let start_label = e.label_gen_mut().next_regular();
     Ok(InstrSeq::gather(vec![
         InstrSeq::make_label(start_label.clone()),
-        env.do_in_loop_body(
+        env.do_in_loop_block(
             e,
             break_label.clone(),
             cont_label.clone(),
             None,
             body,
-            emit_stmt_wrapper,
+            emit_block,
         )?,
         InstrSeq::make_label(cont_label),
         emit_expr::emit_jmpnz(e, env, cond, &start_label)?.instrs,
@@ -366,20 +354,20 @@ fn emit_do(e: &mut Emitter, env: &mut Env, body: &tast::Stmt, cond: &tast::Expr)
     ]))
 }
 
-fn emit_while(e: &mut Emitter, env: &mut Env, cond: &tast::Expr, body: &tast::Stmt) -> Result {
+fn emit_while(e: &mut Emitter, env: &mut Env, cond: &tast::Expr, body: &tast::Block) -> Result {
     let break_label = e.label_gen_mut().next_regular();
     let cont_label = e.label_gen_mut().next_regular();
     let start_label = e.label_gen_mut().next_regular();
     Ok(InstrSeq::gather(vec![
         emit_expr::emit_jmpz(e, env, cond, &break_label)?.instrs,
         InstrSeq::make_label(start_label.clone()),
-        env.do_in_loop_body(
+        env.do_in_loop_block(
             e,
             break_label.clone(),
             cont_label.clone(),
             None,
             body,
-            emit_stmt_wrapper,
+            emit_block,
         )?,
         InstrSeq::make_label(cont_label),
         emit_expr::emit_jmpnz(e, env, cond, &start_label)?.instrs,
@@ -483,13 +471,13 @@ fn emit_for(
         emit_expr::emit_ignored_expr(e, env, pos, e1)?,
         emit_cond(e, env, pos, true, &break_label, e2)?,
         InstrSeq::make_label(start_label.clone()),
-        env.do_in_loop_body(
+        env.do_in_loop_block(
             e,
             break_label.clone(),
             cont_label.clone(),
             None,
-            &tast::Stmt(pos.clone(), tast::Stmt_::mk_block(body.clone())),
-            emit_stmt_wrapper,
+            body,
+            emit_block,
         )?,
         InstrSeq::make_label(cont_label),
         emit_expr::emit_ignored_expr(e, env, pos, e3)?,

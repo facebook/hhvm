@@ -94,6 +94,23 @@ impl<'a> Env<'a> {
         self.run_and_release_ids(e, s, f)
     }
 
+    pub fn do_in_loop_block<R, F>(
+        &mut self,
+        e: &mut Emitter,
+        label_break: Label,
+        label_continue: Label,
+        iterator: Option<Iter>,
+        b: &tast::Block,
+        f: F,
+    ) -> R
+    where
+        F: FnOnce(&mut Self, &mut Emitter, &tast::Block) -> R,
+    {
+        self.jump_targets_gen
+            .with_loop_block(label_break, label_continue, iterator, b);
+        self.run_and_release_ids(e, b, f)
+    }
+
     pub fn do_in_switch_body<R, F>(
         &mut self,
         e: &mut Emitter,

@@ -263,6 +263,24 @@ impl Gen {
         ))
     }
 
+    pub fn with_loop_block<Ex, Fb, En, Hi>(
+        &mut self,
+        label_break: Label,
+        label_continue: Label,
+        iterator: Option<Iter>,
+        block: &Block<Ex, Fb, En, Hi>,
+    ) {
+        let labels = self.collect_valid_target_labels_for_block(block);
+        self.jump_targets.0.push(Region::Loop(
+            LoopLabels {
+                label_break,
+                label_continue,
+                iterator,
+            },
+            labels,
+        ))
+    }
+
     pub fn with_switch<Ex, Fb, En, Hi>(
         &mut self,
         end_label: Label,
@@ -431,6 +449,13 @@ impl Gen {
         stmt: &Stmt<Ex, Fb, En, Hi>,
     ) -> LabelSet {
         self.collect_valid_target_labels(stmt, Self::collect_valid_target_labels_for_stmt_aux)
+    }
+
+    fn collect_valid_target_labels_for_block<Ex, Fb, En, Hi>(
+        &self,
+        block: &Block<Ex, Fb, En, Hi>,
+    ) -> LabelSet {
+        self.collect_valid_target_labels(block, Self::collect_valid_target_labels_for_block_aux)
     }
 
     fn collect_valid_target_labels_for_defs<Ex, Fb, En, Hi>(

@@ -153,9 +153,9 @@ TEST(Type, ToString) {
   EXPECT_EQ("Record<=A", subRec.toString());
   EXPECT_EQ("Record=A", exactRec.toString());
 
-  EXPECT_EQ("PtrTo{Prop|MIS|MMisc|Other}Cell",
+  EXPECT_EQ("PtrTo{Prop|MIS|MMisc|Other|Field}Cell",
             (TPtrToMembCell - TPtrToElemCell).toString());
-  EXPECT_EQ("LvalTo{Prop|MIS|MMisc|Other}Cell",
+  EXPECT_EQ("LvalTo{Prop|MIS|MMisc|Other|Field}Cell",
             (TLvalToMembCell - TLvalToElemCell).toString());
   EXPECT_EQ("PtrToMembCell", TPtrToMembCell.toString());
   EXPECT_EQ("LvalToMembCell", TLvalToMembCell.toString());
@@ -906,6 +906,8 @@ TEST(Type, PtrKinds) {
   EXPECT_EQ("PtrToStkRecord", stackRec.toString());
   EXPECT_EQ("Nullptr|PtrToPropCell",
     (TPtrToPropCell|TNullptr).toString());
+  EXPECT_EQ("Nullptr|PtrToFieldCell",
+    (TPtrToFieldCell|TNullptr).toString());
 
   EXPECT_EQ(Ptr::Frame, (frameUninit|frameBool).ptrKind());
 
@@ -930,6 +932,10 @@ TEST(Type, PtrKinds) {
             (TPtrToPropCell|TNullptr).ptrKind());
   EXPECT_EQ(TPtrToPropCell,
             (TPtrToPropCell|TNullptr) - TNullptr);
+  EXPECT_EQ(Ptr::Field,
+            (TPtrToFieldCell|TNullptr).ptrKind());
+  EXPECT_EQ(TPtrToFieldCell,
+            (TPtrToFieldCell|TNullptr) - TNullptr);
 
   auto const frameCellOrCell = frameCell | TCell;
   auto const stackOrArrOrInt = TArr.ptr(Ptr::Stk) | TInt;

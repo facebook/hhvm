@@ -82,9 +82,9 @@ struct ProfDataDeserializer;
  *         |                        +--------+----- ... etc
  *         |                        |        |
  *         |                      Frame     Stk
- *      +--+-+------+
- *      |    |      |
- *     MIS  Prop   Elem
+ *      +--+-+------+----+
+ *      |    |      |    |
+ *     MIS  Prop   Elem Field
  *
  * Note: if you add a new pointer type, you very likely need to update
  * pointee() in memory-effects.cpp for it to remain correct.
@@ -103,11 +103,12 @@ struct ProfDataDeserializer;
   f(MIS,   1U << 8, __VA_ARGS__)                         \
   f(MMisc, 1U << 9, __VA_ARGS__)                         \
   f(Other, 1U << 10, __VA_ARGS__)                        \
-  /* NotPtr,  1U << 11, declared below */
+  f(Field, 1U << 11, __VA_ARGS__)                        \
+  /* NotPtr,  1U << 12, declared below */
 
 #define PTR_TYPES(f, ...)                                \
   PTR_PRIMITIVE(f, __VA_ARGS__)                          \
-  f(Memb, Prop | Elem | MIS | MMisc | Other, __VA_ARGS__)
+  f(Memb, Prop | Elem | MIS | MMisc | Other | Field, __VA_ARGS__)
 
 enum class Ptr : uint16_t {
   /*
@@ -116,9 +117,9 @@ enum class Ptr : uint16_t {
    * with less ridiculous names: TCell and TPtrToCell, respectively.
    */
   Bottom = 0,
-  Top    = 0xfffU, // Keep this in sync with the number of bits used in
-                   // PTR_PRIMITIVE, to keep pretty-printing cleaner.
-  NotPtr = 1U << 11,
+  Top    = 0x1fffU, // Keep this in sync with the number of bits used in
+                    // PTR_PRIMITIVE, to keep pretty-printing cleaner.
+  NotPtr = 1U << 12,
   Ptr    = Top & ~NotPtr,
 
 #define PTRT(name, bits, ...) name = (bits),

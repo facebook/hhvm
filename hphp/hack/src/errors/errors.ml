@@ -2217,7 +2217,8 @@ let enum_switch_redundant_default pos enum_pos =
     [
       ( pos,
         "All cases already covered; a redundant default case prevents "
-        ^ "detecting future errors" );
+        ^ "detecting future errors. If your goal is to guard against "
+        ^ "invalid values for this type, do an `is` check before the switch." );
       (enum_pos, "Enum declared here");
     ]
 

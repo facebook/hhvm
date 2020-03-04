@@ -81,10 +81,10 @@ let init_progress =
   in
   { resultJson = default_json; factIds = JMap.empty }
 
-let hint ctx h =
+let get_type_from_hint ctx h =
   let mode = FileInfo.Mdecl in
   let decl_env = { mode; droot = None; ctx } in
-  Decl_hint.hint decl_env h
+  Typing_print.full_decl ctx (Decl_hint.hint decl_env h)
 
 let get_next_elem_id () =
   let x = ref 500_000 in
@@ -95,8 +95,6 @@ let get_next_elem_id () =
     r
 
 let json_element_id = get_next_elem_id ()
-
-let type_ = Typing_print.full_decl
 
 let update_json_data predicate json progress =
   let json =
@@ -154,7 +152,7 @@ let update_json_data predicate json progress =
   in
   { resultJson = json; factIds = progress.factIds }
 
-(* Add a fact of the given predicte type to the running result, if an identical
+(* Add a fact of the given predicate type to the running result, if an identical
  fact has not yet been added. Return the fact's id (which can be referenced in
  other facts), and the updated result. *)
 let add_fact predicate json_key progress =
@@ -197,13 +195,28 @@ let get_container_kind clss =
   | _ -> ClassContainer
 
 (* JSON builder functions. These all return JSON objects, which
-may be used to build up larger objects. *)
-
-let build_name_json name =
+may be used to build up larger objects. The functions with prefix
+_nested include the key field because they are used for writing
+nested facts. *)
+let build_name_json_nested name =
   (* Remove leading slash, if present, so names such as
   Exception and \Exception are captured by the same fact *)
   let basename = String_utils.lstrip name "\\" in
-  JSON_Object [("name", JSON_Object [("key", JSON_String basename)])]
+  JSON_Object [("key", JSON_String basename)]
+
+let build_type_json_nested type_name =
+  JSON_Object [("key", JSON_String type_name)]
+
+let build_enumerator_json_nested const_name decl_ref =
+  JSON_Object
+    [
+      ( "key",
+        JSON_Object
+          [
+            ("name", build_name_json_nested const_name);
+            ("enumeration", decl_ref);
+          ] );
+    ]
 
 let build_id_json fact_id =
   JSON_Object [("id", JSON_Number (string_of_int fact_id))]
@@ -288,14 +301,37 @@ let add_container_defn_fact clss decl_id progress =
     add_fact ClassDefinition json_fact progress
 
 let add_container_decl_fact decl_pred name _elem progress =
-  add_fact decl_pred (build_name_json name) progress
+  let json_fact = JSON_Object [("name", build_name_json_nested name)] in
+  add_fact decl_pred json_fact progress
 
 let add_enum_decl_fact name _elem progress =
-  add_fact EnumDeclaration (build_name_json name) progress
+  let json_fact = JSON_Object [("name", build_name_json_nested name)] in
+  add_fact EnumDeclaration json_fact progress
 
-let add_enum_defn_fact _elem decl_id progress =
-  let json_fact = JSON_Object [("declaration", build_id_json decl_id)] in
-  add_fact EnumDefinition json_fact progress
+let add_enum_defn_fact ctx elem decl_id progress =
+  let decl_ref = build_id_json decl_id in
+  let enumerators =
+    List.map elem.c_consts (fun const ->
+        build_enumerator_json_nested (snd const.cc_id) decl_ref)
+  in
+  let json_fields =
+    let json_fields =
+      [("declaration", decl_ref); ("enumerators", JSON_Array enumerators)]
+    in
+    match elem.c_enum with
+    | None -> json_fields
+    | Some en ->
+      let json_fields =
+        ("enumBase", build_type_json_nested (get_type_from_hint ctx en.e_base))
+        :: json_fields
+      in
+      (match en.e_constraint with
+      | None -> json_fields
+      | Some c ->
+        ("enumConstraint", build_type_json_nested (get_type_from_hint ctx c))
+        :: json_fields)
+  in
+  add_fact EnumDefinition (JSON_Object json_fields) progress
 
 let add_decl_loc_fact pos decl_json progress =
   let filepath = Relative_path.to_absolute (Pos.filename pos) in
@@ -383,11 +419,11 @@ let process_container_decl elem progress =
     elem
     progress
 
-let process_enum_decl elem progress =
+let process_enum_decl ctx elem progress =
   let (pos, id) = elem.c_name in
   process_decl_loc
     add_enum_decl_fact
-    add_enum_defn_fact
+    (add_enum_defn_fact ctx)
     build_enum_decl_json_ref
     pos
     id
@@ -400,7 +436,8 @@ let build_json ctx symbols =
   let progress =
     List.fold symbols.decls ~init:init_progress ~f:(fun acc symbol ->
         match symbol with
-        | Class en when phys_equal en.c_kind Cenum -> process_enum_decl en acc
+        | Class en when phys_equal en.c_kind Cenum ->
+          process_enum_decl ctx en acc
         | Class cd -> process_container_decl cd acc
         | _ -> acc)
   in

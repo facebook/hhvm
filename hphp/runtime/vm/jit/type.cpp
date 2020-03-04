@@ -1277,7 +1277,7 @@ Type relaxToConstraint(Type t, const GuardConstraint& gc) {
   if (!gc.isSpecialized()) return relaxType(t, gc.category);
 
   assertx(t.isSpecialized());
-  assertx(gc.wantClass() ^ gc.wantVanillaArray());
+  assertx(gc.wantClass() + gc.wantVanillaArray() + gc.wantRecord() == 1);
 
   // NOTE: This second check here causes us to guard to specific classes where
   // we could guard to superclasses and unify multiple regions. Rethink it.

@@ -37,6 +37,9 @@ std::string GuardConstraint::toString() const {
     } else if (wantClass()) {
       folly::toAppend("Cls:", desiredClass()->name()->data(), &ret);
     }
+    if (wantRecord()) {
+      folly::toAppend("Rec:", desiredRecord()->name()->data(), &ret);
+    }
   }
 
   if (weak) ret += ",weak";
@@ -66,11 +69,14 @@ bool typeFitsConstraint(Type t, GuardConstraint gc) {
     case DataTypeSpecialized:
       // Type::isSpecialized() returns true for types like {Arr<Packed>|Int},
       // so we need to check both for specialization and isKnownDataType.
-      assertx(gc.wantClass() ^ gc.wantVanillaArray());
+      assertx(gc.wantClass() + gc.wantVanillaArray() + gc.wantRecord() == 1);
       if (!t.isKnownDataType()) return false;
       if (gc.wantClass()) {
         auto const clsSpec = t.clsSpec();
         return clsSpec && clsSpec.cls()->classof(gc.desiredClass());
+      } else if (gc.wantRecord()) {
+        auto const recSpec = t.recSpec();
+        return recSpec && recSpec.rec()->recordDescOf(gc.desiredRecord());
       } else {
         if (gc.wantArrayKind()) return !!t.arrSpec().kind();
         if (gc.wantVanillaArray()) return t.arrSpec().vanilla();
@@ -114,6 +120,7 @@ GuardConstraint relaxConstraint(GuardConstraint origGc,
       // Include the remainder of the specialization from origGc.
       if (origGc.wantArrayKind()) newGc.setWantArrayKind();
       if (origGc.wantClass()) newGc.setDesiredClass(origGc.desiredClass());
+      if (origGc.wantRecord()) newGc.setDesiredRecord(origGc.desiredRecord());
     }
 
     newDstType = knownType & relaxToConstraint(toRelax, newGc);
@@ -153,6 +160,18 @@ GuardConstraint applyConstraint(GuardConstraint gc,
       gc.setDesiredClass(cls1->classof(cls2) ? cls1 : cls2);
     } else {
       gc.setDesiredClass(newGc.desiredClass());
+    }
+  }
+
+  if (newGc.wantRecord()) {
+    if (gc.wantRecord()) {
+      // It only makes sense to constrain gc with a record that's related to its
+      // existing record, and we want to preserve the more derived of the two.
+      auto rec1 = gc.desiredRecord();
+      auto rec2 = newGc.desiredRecord();
+      gc.setDesiredRecord(rec1->recordDescOf(rec2) ? rec1 : rec2);
+    } else {
+      gc.setDesiredRecord(newGc.desiredRecord());
     }
   }
 

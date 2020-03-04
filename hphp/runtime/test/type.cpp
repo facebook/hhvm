@@ -393,6 +393,14 @@ TEST(Type, RelaxType) {
   auto subIter = Type::SubObj(SystemLib::s_HH_IteratorClass);
   EXPECT_EQ("Obj<=HH\\Iterator", subIter.toString());
   EXPECT_EQ(subIter, relaxType(subIter, gc.category));
+
+  auto const rec = testRecordDesc("A");
+  gc = GuardConstraint{DataTypeSpecialized};
+  gc.setDesiredRecord(rec.get());
+  gc.category = DataTypeSpecialized;
+  auto subRec = Type::SubRecord(rec.get());
+  EXPECT_EQ("Record<=A", subRec.toString());
+  EXPECT_EQ(subRec, relaxType(subRec, gc.category));
 }
 
 TEST(Type, RelaxConstraint) {

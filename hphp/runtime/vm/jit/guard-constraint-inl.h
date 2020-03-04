@@ -32,6 +32,12 @@ inline GuardConstraint::GuardConstraint(const Class* cls)
   setDesiredClass(cls);
 }
 
+inline GuardConstraint::GuardConstraint(const RecordDesc* rec)
+  : GuardConstraint(DataTypeSpecialized)
+{
+  setDesiredRecord(rec);
+}
+
 inline GuardConstraint& GuardConstraint::setWeak(bool w /* = true */) {
   weak = w;
   return *this;
@@ -60,6 +66,7 @@ inline bool GuardConstraint::isSpecialized() const {
 
 inline GuardConstraint& GuardConstraint::setWantArrayKind() {
   assertx(!wantClass());
+  assertx(!wantRecord());
   assertx(isSpecialized());
   m_specialized |= kWantArrayKind | kWantVanillaArray;
   return *this;
@@ -90,12 +97,32 @@ inline GuardConstraint& GuardConstraint::setDesiredClass(const Class* cls) {
 }
 
 inline bool GuardConstraint::wantClass() const {
-  return m_specialized && !wantVanillaArray();
+  return m_specialized && !wantVanillaArray() && !wantRecord();
 }
 
 inline const Class* GuardConstraint::desiredClass() const {
   assertx(wantClass());
   return reinterpret_cast<const Class*>(m_specialized);
+}
+
+inline GuardConstraint&
+GuardConstraint::setDesiredRecord(const RecordDesc* rec) {
+  assertx(m_specialized == 0 ||
+          desiredRecord()->recordDescOf(rec) ||
+          rec->recordDescOf(desiredRecord()));
+  assertx(isSpecialized());
+  m_specialized = reinterpret_cast<uintptr_t>(rec) | kWantRecord;
+  assertx(wantRecord());
+  return *this;
+}
+
+inline bool GuardConstraint::wantRecord() const {
+  return m_specialized & kWantRecord;
+}
+
+inline const RecordDesc* GuardConstraint::desiredRecord() const {
+  assertx(wantRecord());
+  return reinterpret_cast<const RecordDesc*>(m_specialized | ~kWantRecord);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

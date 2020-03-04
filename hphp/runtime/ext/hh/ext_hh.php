@@ -50,8 +50,7 @@ function autoload_is_native(): bool;
  *  takes a kind ('class', 'function' or 'constant') and the
  *  name of the entity we're trying to autoload.
  *
- * If $root is non empty, it is prepended to every filename
- * (so will typically need to end with '/').
+ * If $root is non empty, it is prepended to every filename.
  *
  * @param map The autoload map.
  * @param root Root to be prepended to all paths in the map.

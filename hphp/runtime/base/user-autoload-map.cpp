@@ -64,6 +64,12 @@ UserAutoloadMap UserAutoloadMap::fromFullMap(const Array& fullMap,
   auto typeAliasFile = getSubMapFromMap(fullMap, s_type);
   auto failFunc = fullMap[s_failure];
 
+  // We construct absolute paths with simple concatenation, so make
+  // sure the root passed to us has a trailing slash.
+  if (!root.empty() && root[root.size() - 1] != '/') {
+    root += "/";
+  }
+
   return {std::move(root),
       std::move(typeFile),
       std::move(functionFile),

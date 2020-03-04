@@ -13,8 +13,8 @@ diff --git a/third-party/folly/src/folly/memory/ReentrantAllocator.h b/third-par
 +
 +  using pointer = value_type*;
 +  using const_pointer = value_type const*;
-+  using reference = value_type&;
-+  using const_reference = value_type const&;
++  using reference = typename std::add_lvalue_reference<value_type>::type;
++  using const_reference = typename std::add_lvalue_reference<value_type const>::type;
 +  using difference_type = std::ptrdiff_t;
 +  using size_type = std::size_t;
 +

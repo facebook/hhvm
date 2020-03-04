@@ -121,6 +121,10 @@ bool tvInstanceOfImpl(const TypedValue* tv, F lookupClass) {
       if (cls && (RuntimeOption::EvalHackArrDVArrs ?
         interface_supports_vec(cls->name()) :
         interface_supports_array(cls->name()))) {
+        if (RO::EvalIsVecNotices) {
+          raise_notice("Implicit clsmeth to %s conversion",
+                       cls->name()->data());
+        }
         return true;
       }
       return false;

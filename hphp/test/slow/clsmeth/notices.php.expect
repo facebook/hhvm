@@ -5,13 +5,13 @@ is_varray($m): (error: is_varray() called on clsmeth) True
 $m is arraylike: (error: is_any_array() called on clsmeth) True
 $m is shape(...): (error: is_shape() called on clsmeth) True
 $m is shape(str,str): (error: is_shape() called on clsmeth) True
-$m is HH\Traversable: True
-$m is Traversable: True
-$m is KeyedTraversable: True
-$m is HH\Rx\Traversable: True
-$m is HH\Rx\KeyedTraversable: True
-$m is Container: True
-$m is KeyedContainer: True
+$m is HH\Traversable: (error: Implicit clsmeth to HH\Traversable conversion) True
+$m is Traversable: (error: Implicit clsmeth to HH\Traversable conversion) True
+$m is KeyedTraversable: (error: Implicit clsmeth to HH\KeyedTraversable conversion) True
+$m is HH\Rx\Traversable: (error: Implicit clsmeth to HH\Rx\Traversable conversion) True
+$m is HH\Rx\KeyedTraversable: (error: Implicit clsmeth to HH\Rx\KeyedTraversable conversion) True
+$m is Container: (error: Implicit clsmeth to HH\Container conversion) True
+$m is KeyedContainer: (error: Implicit clsmeth to HH\KeyedContainer conversion) True
 is_a($m, HH\Traversable): False
 is_a($m, Traversable): False
 is_a($m, KeyedTraversable): False
@@ -26,13 +26,13 @@ is_varray($m): (error: is_varray() called on clsmeth) True
 $m is arraylike: (error: is_any_array() called on clsmeth) True
 $m is shape(...): (error: is_shape() called on clsmeth) True
 $m is shape(str,str): (error: is_shape() called on clsmeth) True
-$m is HH\Traversable: True
-$m is Traversable: True
-$m is KeyedTraversable: True
-$m is HH\Rx\Traversable: True
-$m is HH\Rx\KeyedTraversable: True
-$m is Container: True
-$m is KeyedContainer: True
+$m is HH\Traversable: (error: Implicit clsmeth to HH\Traversable conversion) True
+$m is Traversable: (error: Implicit clsmeth to HH\Traversable conversion) True
+$m is KeyedTraversable: (error: Implicit clsmeth to HH\KeyedTraversable conversion) True
+$m is HH\Rx\Traversable: (error: Implicit clsmeth to HH\Rx\Traversable conversion) True
+$m is HH\Rx\KeyedTraversable: (error: Implicit clsmeth to HH\Rx\KeyedTraversable conversion) True
+$m is Container: (error: Implicit clsmeth to HH\Container conversion) True
+$m is KeyedContainer: (error: Implicit clsmeth to HH\KeyedContainer conversion) True
 is_a($m, HH\Traversable): False
 is_a($m, Traversable): False
 is_a($m, KeyedTraversable): False

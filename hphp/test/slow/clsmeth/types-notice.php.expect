@@ -4,7 +4,9 @@ handle_error(): [8]: is_shape() called on clsmeth
 $m is shape(str,str): True
 handle_error(): [8]: is_shape() called on clsmeth
 $m is shape(...): True
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
 $m is Traversable: True
+handle_error(): [8]: Implicit clsmeth to HH\Container conversion
 $m is Container: True
 handle_error(): [8]: is_tuple() called on clsmeth
 $m is (string,string): True
@@ -15,6 +17,8 @@ $m[1] is string: True
 handle_error(): [8]: is_any_array() called on clsmeth
 handle_error(): [8]: is_shape() called on clsmeth
 handle_error(): [8]: is_shape() called on clsmeth
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
+handle_error(): [8]: Implicit clsmeth to HH\Container conversion
 handle_error(): [8]: is_tuple() called on clsmeth
 handle_error(): [8]: Implicit clsmeth to varray conversion
 handle_error(): [8]: Implicit clsmeth to varray conversion
@@ -31,7 +35,9 @@ handle_error(): [8]: is_shape() called on clsmeth
 $m is shape(str,str): True
 handle_error(): [8]: is_shape() called on clsmeth
 $m is shape(...): True
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
 $m is Traversable: True
+handle_error(): [8]: Implicit clsmeth to HH\Container conversion
 $m is Container: True
 handle_error(): [8]: is_tuple() called on clsmeth
 $m is (string,string): True
@@ -42,6 +48,8 @@ $m[1] is string: True
 handle_error(): [8]: is_any_array() called on clsmeth
 handle_error(): [8]: is_shape() called on clsmeth
 handle_error(): [8]: is_shape() called on clsmeth
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
+handle_error(): [8]: Implicit clsmeth to HH\Container conversion
 handle_error(): [8]: is_tuple() called on clsmeth
 handle_error(): [8]: Implicit clsmeth to varray conversion
 handle_error(): [8]: Implicit clsmeth to varray conversion
@@ -58,7 +66,9 @@ handle_error(): [8]: is_shape() called on clsmeth
 $m is shape(str,str): True
 handle_error(): [8]: is_shape() called on clsmeth
 $m is shape(...): True
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
 $m is Traversable: True
+handle_error(): [8]: Implicit clsmeth to HH\Container conversion
 $m is Container: True
 handle_error(): [8]: is_tuple() called on clsmeth
 $m is (string,string): True
@@ -69,6 +79,8 @@ $m[1] is string: True
 handle_error(): [8]: is_any_array() called on clsmeth
 handle_error(): [8]: is_shape() called on clsmeth
 handle_error(): [8]: is_shape() called on clsmeth
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
+handle_error(): [8]: Implicit clsmeth to HH\Container conversion
 handle_error(): [8]: is_tuple() called on clsmeth
 handle_error(): [8]: Implicit clsmeth to varray conversion
 handle_error(): [8]: Implicit clsmeth to varray conversion
@@ -85,7 +97,9 @@ handle_error(): [8]: is_shape() called on clsmeth
 $m is shape(str,str): True
 handle_error(): [8]: is_shape() called on clsmeth
 $m is shape(...): True
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
 $m is Traversable: True
+handle_error(): [8]: Implicit clsmeth to HH\Container conversion
 $m is Container: True
 handle_error(): [8]: is_tuple() called on clsmeth
 $m is (string,string): True
@@ -96,6 +110,8 @@ $m[1] is string: True
 handle_error(): [8]: is_any_array() called on clsmeth
 handle_error(): [8]: is_shape() called on clsmeth
 handle_error(): [8]: is_shape() called on clsmeth
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
+handle_error(): [8]: Implicit clsmeth to HH\Container conversion
 handle_error(): [8]: is_tuple() called on clsmeth
 handle_error(): [8]: Implicit clsmeth to varray conversion
 handle_error(): [8]: Implicit clsmeth to varray conversion
@@ -112,7 +128,9 @@ handle_error(): [8]: is_shape() called on clsmeth
 $m is shape(str,str): True
 handle_error(): [8]: is_shape() called on clsmeth
 $m is shape(...): True
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
 $m is Traversable: True
+handle_error(): [8]: Implicit clsmeth to HH\Container conversion
 $m is Container: True
 handle_error(): [8]: is_tuple() called on clsmeth
 $m is (string,string): True
@@ -123,6 +141,8 @@ $m[1] is string: True
 handle_error(): [8]: is_any_array() called on clsmeth
 handle_error(): [8]: is_shape() called on clsmeth
 handle_error(): [8]: is_shape() called on clsmeth
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
+handle_error(): [8]: Implicit clsmeth to HH\Container conversion
 handle_error(): [8]: is_tuple() called on clsmeth
 handle_error(): [8]: Implicit clsmeth to varray conversion
 handle_error(): [8]: Implicit clsmeth to varray conversion
@@ -139,7 +159,9 @@ handle_error(): [8]: is_shape() called on clsmeth
 $m is shape(str,str): True
 handle_error(): [8]: is_shape() called on clsmeth
 $m is shape(...): True
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
 $m is Traversable: True
+handle_error(): [8]: Implicit clsmeth to HH\Container conversion
 $m is Container: True
 handle_error(): [8]: is_tuple() called on clsmeth
 $m is (string,string): True
@@ -150,6 +172,8 @@ $m[1] is string: True
 handle_error(): [8]: is_any_array() called on clsmeth
 handle_error(): [8]: is_shape() called on clsmeth
 handle_error(): [8]: is_shape() called on clsmeth
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
+handle_error(): [8]: Implicit clsmeth to HH\Container conversion
 handle_error(): [8]: is_tuple() called on clsmeth
 handle_error(): [8]: Implicit clsmeth to varray conversion
 handle_error(): [8]: Implicit clsmeth to varray conversion
@@ -163,27 +187,36 @@ array(2) {
 handle_error(): [8]: is_array() called on clsmeth
 handle_error(): [8]: is_shape() called on clsmeth
 $m === ($m as shape(...)): True
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
 $m === ($m as Traversable): True
 handle_error(): [8]: is_array() called on clsmeth
 handle_error(): [8]: is_shape() called on clsmeth
 $m === ($m as shape(...)): True
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
 $m === ($m as Traversable): True
 handle_error(): [8]: is_array() called on clsmeth
 handle_error(): [8]: is_shape() called on clsmeth
 $m === ($m as shape(...)): True
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
 $m === ($m as Traversable): True
 handle_error(): [8]: is_array() called on clsmeth
 handle_error(): [8]: is_shape() called on clsmeth
 $m === ($m as shape(...)): True
 handle_error(): [8]: is_any_array() called on clsmeth
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
 $m === ($m as arraylike): True
 handle_error(): [8]: is_array() called on clsmeth
 handle_error(): [8]: is_shape() called on clsmeth
 $m === ($m as shape(...)): True
 handle_error(): [8]: is_any_array() called on clsmeth
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
 $m === ($m as arraylike): True
 handle_error(): [8]: is_array() called on clsmeth
 handle_error(): [8]: is_shape() called on clsmeth
 $m === ($m as shape(...)): True
 handle_error(): [8]: is_any_array() called on clsmeth
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
 $m === ($m as arraylike): True

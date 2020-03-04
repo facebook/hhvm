@@ -699,16 +699,36 @@ SSATmp* implInstanceOfD(IRGS& env, SSATmp* src, const StringData* className) {
       return cns(env, true);
     }
 
+    if (src->isA(TClsMeth)) {
+      if (RuntimeOption::EvalHackArrDVArrs
+          ? !interface_supports_vec(className)
+          : !interface_supports_array(className)) {
+        return cns(env, false);
+      }
+
+      if (RO::EvalIsVecNotices) {
+        gen(
+          env,
+          RaiseNotice,
+          cns(
+            env,
+            makeStaticString(folly::sformat(
+              "Implicit clsmeth to {} conversion", className->data()
+            ))
+          )
+        );
+      }
+
+      return cns(env, true);
+    }
+
     bool res = ((src->isA(TArr) && interface_supports_array(className))) ||
       (src->isA(TVec) && interface_supports_vec(className)) ||
       (src->isA(TDict) && interface_supports_dict(className)) ||
       (src->isA(TKeyset) && interface_supports_keyset(className)) ||
       (src->isA(TStr) && interface_supports_string(className)) ||
       (src->isA(TInt) && interface_supports_int(className)) ||
-      (src->isA(TDbl) && interface_supports_double(className)) ||
-      (src->isA(TClsMeth) && (RuntimeOption::EvalHackArrDVArrs ?
-        interface_supports_vec(className) :
-        interface_supports_array(className)));
+      (src->isA(TDbl) && interface_supports_double(className));
     return cns(env, res);
   }
 

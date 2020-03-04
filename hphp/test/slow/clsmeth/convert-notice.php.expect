@@ -106,6 +106,7 @@ array(2) {
   [1]=>
   string(3) "bar"
 }
+** CAST: clsmeth -> HH\KeyedTraversable
 ** CAST: clsmeth -> varray
 string(3) "Foo"
 string(3) "bar"
@@ -223,6 +224,7 @@ array(2) {
   [1]=>
   string(3) "bar"
 }
+** CAST: clsmeth -> HH\KeyedTraversable
 ** CAST: clsmeth -> varray
 string(3) "Foo"
 string(3) "bar"
@@ -340,6 +342,7 @@ array(2) {
   [1]=>
   string(3) "bar"
 }
+** CAST: clsmeth -> HH\KeyedTraversable
 ** CAST: clsmeth -> varray
 string(3) "Foo"
 string(3) "bar"
@@ -457,6 +460,7 @@ array(2) {
   [1]=>
   string(3) "bar"
 }
+** CAST: clsmeth -> HH\KeyedTraversable
 ** CAST: clsmeth -> varray
 string(3) "Foo"
 string(3) "bar"
@@ -574,6 +578,7 @@ array(2) {
   [1]=>
   string(3) "bar"
 }
+** CAST: clsmeth -> HH\KeyedTraversable
 ** CAST: clsmeth -> varray
 string(3) "Foo"
 string(3) "bar"
@@ -691,6 +696,7 @@ array(2) {
   [1]=>
   string(3) "bar"
 }
+** CAST: clsmeth -> HH\KeyedTraversable
 ** CAST: clsmeth -> varray
 string(3) "Foo"
 string(3) "bar"

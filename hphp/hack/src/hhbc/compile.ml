@@ -20,6 +20,7 @@ type result = {
   parsing_t: float;
   codegen_t: float;
   printing_t: float;
+  hhbc_options: Hhbc_options.t;
 }
 
 type env = {
@@ -50,7 +51,7 @@ let with_global_state env f =
   global state carry over across multiple emit requests  *)
   ret
 
-let with_compilation_times env f =
+let with_compilation_times ~hhbc_options env f =
   let t = Unix.gettimeofday () in
   let hhas_prog = f () in
   let (t, codegen_t) = add_to_time t in
@@ -61,7 +62,13 @@ let with_compilation_times env f =
       hhas_prog
   in
   let (_, printing_t) = add_to_time t in
-  { bytecode_segments; codegen_t; printing_t; parsing_t = Float.nan }
+  {
+    bytecode_segments;
+    codegen_t;
+    printing_t;
+    hhbc_options;
+    parsing_t = Float.nan;
+  }
 
 let elaborate_namespaces popt aast =
   let elaborator = new Naming_elaborate_namespaces_endo.generic_elaborator in
@@ -182,7 +189,7 @@ let parse_file ~hhbc_options env text :
   (result, popt)
 
 let emit ~env ~is_hh_file ~empty_namespace ~hhbc_options tast =
-  with_compilation_times env (fun _ ->
+  with_compilation_times ~hhbc_options env (fun _ ->
       let tast =
         if Hhbc_options.enable_pocket_universes hhbc_options then
           Pocket_universes.translate tast
@@ -196,8 +203,8 @@ let emit ~env ~is_hh_file ~empty_namespace ~hhbc_options tast =
         ~is_hh_file
         tast)
 
-let emit_fatal ~env ~is_runtime_error pos message =
-  with_compilation_times env (fun _ ->
+let emit_fatal ~env ~is_runtime_error ~hhbc_options pos message =
+  with_compilation_times ~hhbc_options env (fun _ ->
       let error_t =
         if is_runtime_error then
           Hhbc_ast.FatalOp.Runtime
@@ -223,6 +230,6 @@ let from_text (source_text : string) (env : env) : result =
           let tast = elaborate_namespaces popt tast in
           emit ~env ~is_hh_file ~empty_namespace ~hhbc_options tast
         | Either.Second (pos, msg, is_runtime_error) ->
-          emit_fatal ~env ~is_runtime_error pos (Some msg)
+          emit_fatal ~env ~is_runtime_error ~hhbc_options pos (Some msg)
       in
       { ret with parsing_t })

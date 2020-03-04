@@ -311,7 +311,7 @@ let do_compile
   if compiler_options.debug_time then print_debug_time_info filename debug_time;
   if compiler_options.log_stats then
     log_success compiler_options filename debug_time;
-  Compile.(ret.bytecode_segments)
+  Compile.(ret.bytecode_segments, Some ret.hhbc_options)
 
 let extract_facts ~compiler_options ~config_jsons ~filename text =
   let co =
@@ -319,22 +319,23 @@ let extract_facts ~compiler_options ~config_jsons ~filename text =
       compiler_options.config_list
       config_jsons
   in
-  [
-    Hhbc_options.(
-      Facts_parser.extract_as_json_string
-        ~php5_compat_mode:true
-        ~hhvm_compat_mode:true
-        ~disable_nontoplevel_declarations:
-          (phpism_disable_nontoplevel_declarations co)
-        ~disable_legacy_soft_typehints:(disable_legacy_soft_typehints co)
-        ~allow_new_attribute_syntax:(allow_new_attribute_syntax co)
-        ~disable_legacy_attribute_syntax:(disable_legacy_attribute_syntax co)
-        ~enable_xhp_class_modifier:(enable_xhp_class_modifier co)
-        ~disable_xhp_element_mangling:(disable_xhp_element_mangling co)
-        ~filename
-        ~text
-      |> Option.value ~default:"");
-  ]
+  ( [
+      Hhbc_options.(
+        Facts_parser.extract_as_json_string
+          ~php5_compat_mode:true
+          ~hhvm_compat_mode:true
+          ~disable_nontoplevel_declarations:
+            (phpism_disable_nontoplevel_declarations co)
+          ~disable_legacy_soft_typehints:(disable_legacy_soft_typehints co)
+          ~allow_new_attribute_syntax:(allow_new_attribute_syntax co)
+          ~disable_legacy_attribute_syntax:(disable_legacy_attribute_syntax co)
+          ~enable_xhp_class_modifier:(enable_xhp_class_modifier co)
+          ~disable_xhp_element_mangling:(disable_xhp_element_mangling co)
+          ~filename
+          ~text
+        |> Option.value ~default:"");
+    ],
+    Some co )
 
 let parse_hh_file ~config_jsons ~compiler_options filename body =
   let co =
@@ -363,7 +364,7 @@ let parse_hh_file ~config_jsons ~compiler_options filename body =
     in
     let syntax_tree = SyntaxTree.make ~env source_text in
     let json = SyntaxTree.to_json syntax_tree in
-    [Hh_json.json_to_string json])
+    ([Hh_json.json_to_string json], Some co))
 
 (*****************************************************************************)
 (* Main entry point *)
@@ -379,7 +380,7 @@ let process_single_source_unit
     source_text =
   try
     let debug_time = new_debug_time () in
-    let output =
+    let (output, hhbc_options) =
       if compiler_options.extract_facts then
         extract_facts ~compiler_options ~config_jsons ~filename source_text
       else
@@ -391,7 +392,7 @@ let process_single_source_unit
           source_text
           debug_time
     in
-    handle_output filename output debug_time
+    handle_output filename output hhbc_options debug_time
   with exc ->
     let stack = Caml.Printexc.get_backtrace () in
     if compiler_options.log_stats then
@@ -405,25 +406,12 @@ let decl_and_run_mode compiler_options =
         List.iter ~f:(P.printf "%s") strings;
         P.printf "%!"
       in
-      (* NOTE: these two are only needed to check log_extern_compiler_perf
-       * from OCaml; the rest of get/sets will be from Rust only *)
-      let pending_config = ref Hhbc_options.default in
-      let old_hhbc_options = ref Hhbc_options.default in
-      let config_jsons = ref [] in
       (* list of pending config JSONs *)
+      let config_jsons = ref [] in
       let add_config (config_json : string option) =
-        let options =
-          Hhbc_options.get_options_from_config
-            (Option.map ~f:Hh_json.json_of_string config_json)
-            ~init:!pending_config
-            ~config_list:compiler_options.config_list
-        in
-        old_hhbc_options := !pending_config;
-        pending_config := options;
         config_jsons := config_json :: !config_jsons
       in
       let pop_config () =
-        pending_config := !old_hhbc_options;
         config_jsons :=
           match !config_jsons with
           | _ :: old_config_jsons -> old_config_jsons
@@ -469,7 +457,7 @@ let decl_and_run_mode compiler_options =
           else
             body
         in
-        let handle_output filename output debug_time =
+        let handle_output filename output hhbc_options debug_time =
           let abs_path = Relative_path.to_absolute filename in
           let bytes =
             List.fold ~f:(fun len s -> len + String.length s) ~init:0 output
@@ -481,8 +469,17 @@ let decl_and_run_mode compiler_options =
               ("bytes", int_ bytes);
             ]
           in
+          let log_extern_compiler_perf =
+            (match hhbc_options with
+            | Some opts -> opts
+            | None ->
+              Hhbc_options.apply_config_overrides_statelessly
+                compiler_options.config_list
+                (get_config_jsons ()))
+            |> Hhbc_options.log_extern_compiler_perf
+          in
           let msg =
-            if Hhbc_options.log_extern_compiler_perf !pending_config then
+            if log_extern_compiler_perf then
               let json_microsec t = int_ @@ int_of_float @@ (t *. 1000000.0) in
               ("parsing_time", json_microsec !(debug_time.parsing_t))
               :: ("codegen_time", json_microsec !(debug_time.codegen_t))
@@ -568,15 +565,14 @@ let decl_and_run_mode compiler_options =
                 (let (filename, path) = get_filename_and_path header in
                  let body = body_or_file_contents body filename in
                  add_config_overrides header;
-                 let result =
-                   handle_output
-                     path
-                     (extract_facts
-                        ~compiler_options
-                        ~config_jsons:(get_config_jsons ())
-                        ~filename:path
-                        body)
+                 let (output, hhbc_options) =
+                   extract_facts
+                     ~compiler_options
+                     ~config_jsons:(get_config_jsons ())
+                     ~filename:path
+                     body
                  in
+                 let result = handle_output path output hhbc_options in
                  pop_config ();
                  result)
                   (new_debug_time ()));
@@ -585,15 +581,14 @@ let decl_and_run_mode compiler_options =
                 (let (filename, path) = get_filename_and_path header in
                  let body = body_or_file_contents body filename in
                  add_config_overrides header;
-                 let result =
-                   handle_output
-                     path
-                     (parse_hh_file
-                        ~config_jsons:(get_config_jsons ())
-                        ~compiler_options
-                        filename
-                        body)
+                 let (output, hhbc_options) =
+                   parse_hh_file
+                     ~config_jsons:(get_config_jsons ())
+                     ~compiler_options
+                     filename
+                     body
                  in
+                 let result = handle_output path output hhbc_options in
                  pop_config ();
                  result)
                   (new_debug_time ()));
@@ -601,8 +596,14 @@ let decl_and_run_mode compiler_options =
         in
         dispatch_loop handlers
       | CLI ->
-        let dumped_options = lazy (Hhbc_options.to_string !pending_config) in
-        let handle_output _filename output _debug_time =
+        let dumped_options =
+          lazy
+            ( Hhbc_options.apply_config_overrides_statelessly
+                compiler_options.config_list
+                (get_config_jsons ())
+            |> Hhbc_options.to_string )
+        in
+        let handle_output _filename output _hhbc_options _debug_time =
           if compiler_options.dump_config then
             Printf.printf "===CONFIG===\n%s\n\n%!" (Lazy.force dumped_options);
           if not compiler_options.quiet_mode then print_and_flush_strings output
@@ -665,7 +666,7 @@ let decl_and_run_mode compiler_options =
                 in
                 go [compiler_options.filename]
               in
-              let handle_output filename output _debug_time =
+              let handle_output filename output _hhbc_options _debug_time =
                 let abs_path = Relative_path.to_absolute filename in
                 if Filename.check_suffix abs_path ".php" then
                   let output_file =
@@ -686,9 +687,9 @@ let decl_and_run_mode compiler_options =
               let handle_output =
                 match compiler_options.output_file with
                 | Some output_file ->
-                  fun _filename output _debug_time ->
+                  fun _filename output _hhbc_options _debug_time ->
                     Sys_utils.write_strings_to_file ~file:output_file output
-                | None -> handle_output
+                | _ -> handle_output
               in
               ([compiler_options.filename], handle_output)
           (* Actually execute the compilation(s) *)

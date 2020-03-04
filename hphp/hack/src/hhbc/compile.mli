@@ -11,6 +11,7 @@ type result = {
   parsing_t: float;
   codegen_t: float;
   printing_t: float;
+  hhbc_options: Hhbc_options.t;
 }
 
 type env = {

@@ -661,10 +661,6 @@ let override_from_cli config_list init =
 (* Construct an instance of Hhbc_options.t from the options passed in as well as
  * as specified in `-v str` on the command line.
  *)
-let get_options_from_config ?(init = default) ?(config_list = []) config_json =
-  extract_config_options_from_json ~init config_json
-  |> override_from_cli config_list
-
 let apply_config_overrides_statelessly config_list config_jsons =
   List.fold_right
     ~init:default

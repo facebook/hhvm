@@ -154,7 +154,8 @@ let json_override_2bools =
 (* Sanity-check test data: if this fails other tests are meaningless *)
 let test_override_2bools_sanity_check _ =
   let opts =
-    Hhbc_options.get_options_from_config
+    Hhbc_options.extract_config_options_from_json
+      ~init:Hhbc_options.default
       (Some (Hh_json.json_of_string json_override_2bools))
   in
   assert_equal false Hhbc_options.(enable_coroutines opts);

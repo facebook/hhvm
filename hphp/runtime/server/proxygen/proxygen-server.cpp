@@ -172,7 +172,8 @@ ProxygenServer::ProxygenServer(
                    options.m_hugeThreads,
                    options.m_initThreads,
                    options.m_hugeStackKb,
-                   options.m_extraKb) {
+                   options.m_extraKb,
+                   options.m_legacyBehavior) {
   if (options.m_loop_sample_rate > 0) {
     m_worker.getEventBase()->setObserver(
       std::make_shared<ProxygenEventBaseObserver>(options.m_loop_sample_rate));

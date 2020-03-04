@@ -124,7 +124,7 @@ HttpServer::HttpServer() {
     ? RuntimeOption::ServerIP : RuntimeOption::ServerFileSocket;
   ServerOptions options(address, RuntimeOption::ServerPort,
     RuntimeOption::ServerThreadCount, startingThreadCount,
-    RuntimeOption::ServerQueueCount);
+    RuntimeOption::ServerQueueCount, RuntimeOption::ServerLegacyBehavior);
   options.m_useFileSocket = !RuntimeOption::ServerFileSocket.empty();
   options.m_serverFD = RuntimeOption::ServerPortFd;
   options.m_sslFD = RuntimeOption::SSLPortFd;

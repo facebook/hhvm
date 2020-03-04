@@ -114,14 +114,14 @@ public:
   JobQueue(int maxQueueCount, int dropCacheTimeout,
            bool dropStack, int lifoSwitchThreshold = INT_MAX,
            int maxJobQueuingMs = -1, int numPriorities = 1,
-           IHostHealthObserver* healthStatus = nullptr)
+           bool legacyBehavior = true)
       : SynchronizableMulti(maxQueueCount + 1) // reaper added
       , m_dropCacheTimeout(dropCacheTimeout)
       , m_dropStack(dropStack)
       , m_lifoSwitchThreshold(lifoSwitchThreshold)
       , m_maxJobQueuingMs(maxJobQueuingMs)
       , m_jobReaperId(maxQueueCount)
-      , m_healthStatus(healthStatus) {
+      , m_legacyBehavior(legacyBehavior) {
     assertx(maxQueueCount > 0);
     m_jobQueues.resize(numPriorities);
   }
@@ -130,14 +130,23 @@ public:
    * Put a job into the queue and notify a worker to pick it up if requested.
    */
   void enqueue(TJob job, int priority = 0, bool eagerNotify = true) {
+    uint32_t kNumPriority = m_jobQueues.size();
     assertx(priority >= 0);
-    assertx(priority < m_jobQueues.size());
+    assertx(priority < kNumPriority);
     timespec enqueueTime;
     Timer::GetMonotonicTime(enqueueTime);
     Lock lock(this);
     m_jobQueues[priority].emplace_back(job, enqueueTime);
     ++m_jobCount;
-    if (eagerNotify) notify();
+    if (m_legacyBehavior) {
+      if (eagerNotify) notify();
+    } else {
+      if (priority == kNumPriority - 1 ||
+          getActiveWorker() <
+          m_maxActiveWorkers.load(std::memory_order_acquire)) {
+        notify();
+      }
+    }
   }
 
   /**
@@ -189,7 +198,20 @@ public:
     return m_jobCount;
   }
 
+  void updateMaxActiveWorkers(int num) {
+    int old = m_maxActiveWorkers.exchange(num, std::memory_order_acq_rel);
+    if (!m_legacyBehavior && num > old) {
+      Lock lock(this);
+      int workerCountChange = num - getActiveWorker();
+      int toRelease = std::min(m_jobCount, workerCountChange);
+      for (; toRelease > 0; --toRelease) {
+        notify();
+      }
+    }
+  }
+
   int releaseQueuedJobs(int target = 0) {
+    assertx(m_legacyBehavior);
     if (m_jobCount) {
       Lock lock(this);
       const int active = getActiveWorker();
@@ -212,9 +234,10 @@ public:
     Lock lock(this);
     bool flushed = false;
 
+    bool ableToDequeue;
     while (m_jobCount == 0 ||
-           (m_healthStatus &&
-            m_healthStatus->getHealthLevel() >= HealthLevel::NoMore)) {
+           !(ableToDequeue = getActiveWorker() <
+             m_maxActiveWorkers.load(std::memory_order_acquire))) {
       uint32_t kNumPriority = m_jobQueues.size();
       if (m_jobQueues[kNumPriority - 1].size() > 0) {
         break;
@@ -232,10 +255,13 @@ public:
         // without huge stack.
         wait(id, q, highPri ? Priority::High : Priority::Low);
       } else if (m_dropCacheTimeout > 0) {
-        if (!wait(id, q, (highPri ? Priority::Highest : Priority::Normal),
+        // When we can't dequeue due to the max active worker limit, we flush
+        // the thread immediately to reduce resource pressure.
+        if (!ableToDequeue ||
+            !wait(id, q, (highPri ? Priority::Highest : Priority::Normal),
                   m_dropCacheTimeout)) {
           // since we timed out, maybe we can turn idle without holding memory
-          if (m_jobCount == 0) {
+          if (m_jobCount == 0 || !ableToDequeue) {
             ScopedUnlock unlock(this);
             flush_thread_caches();
             if (m_dropStack && s_stackLimit) {
@@ -339,12 +365,13 @@ public:
   folly::small_vector<std::deque<std::pair<TJob, timespec>>, 2> m_jobQueues;
   bool m_stopped{false};
   std::atomic<int> m_workerCount{0};
+  std::atomic<int> m_maxActiveWorkers{INT_MAX};
   const int m_dropCacheTimeout;
   const bool m_dropStack;
   const int m_lifoSwitchThreshold;
   const int m_maxJobQueuingMs;
   const int m_jobReaperId;              // equals max worker thread count
-  IHostHealthObserver* m_healthStatus;
+  const bool m_legacyBehavior;
 };
 
 template<class TJob, class Policy>
@@ -352,14 +379,14 @@ struct JobQueue<TJob,true,Policy> : JobQueue<TJob,false,Policy> {
   JobQueue(int threadCount, int dropCacheTimeout,
            bool dropStack, int lifoSwitchThreshold=INT_MAX,
            int maxJobQueuingMs = -1, int numPriorities = 1,
-           IHostHealthObserver* healthStatus = nullptr) :
+           bool legacyBehavior = true) :
     JobQueue<TJob,false,Policy>(threadCount,
                                 dropCacheTimeout,
                                 dropStack,
                                 lifoSwitchThreshold,
                                 maxJobQueuingMs,
                                 numPriorities,
-                                healthStatus) {
+                                legacyBehavior) {
     pthread_cond_init(&m_cond, nullptr);
   }
   ~JobQueue() override {
@@ -501,7 +528,8 @@ struct JobQueueDispatcher : IHostHealthObserver {
                      int hugeCount = 0,
                      int initThreadCount = -1,
                      unsigned hugeStackKb = 0,
-                     unsigned extraKb = 0)
+                     unsigned extraKb = 0,
+                     bool legacyBehavior = true)
       : m_startReaperThread(maxJobQueuingMs > 0)
       , m_context(context)
       , m_maxThreadCount(maxThreadCount)
@@ -510,9 +538,10 @@ struct JobQueueDispatcher : IHostHealthObserver {
       , m_hugeThreadCount(hugeCount)
       , m_hugeStackKb(hugeStackKb)
       , m_tlExtraKb(extraKb)
+      , m_legacyBehavior(legacyBehavior)
       , m_queue(m_maxQueueCount, dropCacheTimeout, dropStack,
                 lifoSwitchThreshold, maxJobQueuingMs, numPriorities,
-                this) {
+                legacyBehavior) {
     assertx(maxThreadCount >= 1);
     assertx(m_maxQueueCount >= maxThreadCount);
     if (maxQueueCountConfig < maxThreadCount) {
@@ -589,11 +618,15 @@ struct JobQueueDispatcher : IHostHealthObserver {
    */
   void enqueue(typename TWorker::JobType job, int priority = 0) {
     auto const level = getHealthLevel();
-    auto const eagerNotify =
-      (level < HealthLevel::Cautious) ||
-      ((level == HealthLevel::Cautious) &&
-       (m_queue.getActiveWorker() * 2 <= m_currThreadCountLimit));
-    m_queue.enqueue(job, priority, eagerNotify);
+    if (m_legacyBehavior) {
+      auto const eagerNotify =
+        (level < HealthLevel::Cautious) ||
+        ((level == HealthLevel::Cautious) &&
+         (m_queue.getActiveWorker() * 2 <= m_currThreadCountLimit));
+      m_queue.enqueue(job, priority, eagerNotify);
+    } else {
+      m_queue.enqueue(job, priority);
+    }
 
     // Spin up another worker thread if appropriate.
     auto const target = getTargetNumWorkers();
@@ -701,13 +734,31 @@ struct JobQueueDispatcher : IHostHealthObserver {
   }
 
   void notifyNewStatus(HealthLevel newStatus) override {
-    if (m_healthStatus >= HealthLevel::NoMore &&
-        newStatus < HealthLevel::NoMore) {
-      m_healthStatus = newStatus;
-      // release blocked requests in queue if any
-      m_queue.releaseQueuedJobs(m_currThreadCountLimit / 4);
+    if (m_legacyBehavior) {
+      if (m_healthStatus >= HealthLevel::NoMore &&
+          newStatus < HealthLevel::NoMore) {
+        m_healthStatus = newStatus;
+        // release blocked requests in queue if any
+        m_queue.updateMaxActiveWorkers(INT_MAX);
+        m_queue.releaseQueuedJobs(m_currThreadCountLimit / 4);
+      } else if (newStatus >= HealthLevel::NoMore &&
+                 m_healthStatus < HealthLevel::NoMore) {
+        m_healthStatus = newStatus;
+        m_queue.updateMaxActiveWorkers(0);
+      } else {
+        m_healthStatus = newStatus;
+      }
     } else {
-      m_healthStatus = newStatus;
+      if (m_healthStatus != newStatus) {
+        // TODO: Use an estimated safe number of workers.
+        if (newStatus >= HealthLevel::NoMore) {
+          m_queue.updateMaxActiveWorkers(0);
+        } else {
+          m_queue.updateMaxActiveWorkers(INT_MAX);
+        }
+
+        m_healthStatus = newStatus;
+      }
     }
   }
 
@@ -776,6 +827,7 @@ private:
   int m_hugeThreadCount{0};
   unsigned m_hugeStackKb;
   unsigned m_tlExtraKb;
+  const bool m_legacyBehavior;
   JobQueue<typename TWorker::JobType,
            TWorker::Waitable,
            typename TWorker::DropCachePolicy> m_queue;

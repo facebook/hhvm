@@ -547,6 +547,7 @@ int RuntimeOption::ServerBacklog = 128;
 int RuntimeOption::ServerConnectionLimit = 0;
 int RuntimeOption::ServerThreadCount = 50;
 int RuntimeOption::ServerQueueCount = 50;
+bool RuntimeOption::ServerLegacyBehavior = true;
 int RuntimeOption::ServerHugeThreadCount = 0;
 int RuntimeOption::ServerHugeStackKb = 384;
 uint32_t RuntimeOption::ServerLoopSampleRate = 0;
@@ -2073,6 +2074,8 @@ void RuntimeOption::Load(
                  Process::GetCPUCount() * 2);
     Config::Bind(ServerQueueCount, ini, config, "Server.QueueCount",
                  ServerThreadCount);
+    Config::Bind(ServerLegacyBehavior, ini, config, "Server.LegacyBehavior",
+                 ServerLegacyBehavior);
     Config::Bind(ServerHugeThreadCount, ini, config,
                  "Server.HugeThreadCount", 0);
     Config::Bind(ServerHugeStackKb, ini, config, "Server.HugeStackSizeKb", 384);

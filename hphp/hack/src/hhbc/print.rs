@@ -1860,7 +1860,31 @@ fn print_expr<W: Write>(
                 ))),
             }
         }
-        E_::Shape(_) | E_::Binop(_) | E_::Call(_) | E_::New(_) => not_impl!(),
+        E_::Shape(_) => not_impl!(),
+        E_::Binop(_) => not_impl!(),
+        E_::Call(c) => {
+            let (_, e, _, es, unpacked_element) = &**c;
+            match e.as_id() {
+                Some(ast_defs::Id(_, call_id)) => {
+                    w.write(lstrip(adjust_id(env, &call_id).as_ref(), "\\\\"))?
+                }
+                None => {
+                    let mut buf = String::new();
+                    print_expr(&mut buf, env, e).map_err(|e| Error::Fail(format!("{}", e)) )?;
+                    w.write(lstrip("\\\\", &buf))?
+                }
+            };
+            wrap_by_paren(w, |w| {
+                concat_by(w, ", ", &es, |w, e| print_expr(w, env, e))?;
+                match unpacked_element {
+                    None => Ok(()),
+                    Some(e) => {
+                        w.write(", ")?;
+                        print_expr(w, env, e)
+                    }
+            }})
+        }
+        E_::New(_) => not_impl!(),
         E_::Record(r) => {
             w.write(lstrip(adjust_id(env, &(r.0).1).as_ref(), "\\\\"))?;
             print_key_values(w, env, &r.2)

@@ -16,10 +16,14 @@ module Trivia = Full_fidelity_positioned_trivia
 open Core_kernel
 open Boundaries
 
+let generated_tag = "@" ^ "generated"
+
 let begin_manual_section_regexp =
   Str.regexp "/\\* BEGIN MANUAL SECTION [^*]*\\*/"
 
 let end_manual_section_tag = "/* END MANUAL SECTION */"
+
+let is_generated_file text = String.is_substring text ~substring:generated_tag
 
 let is_begin_manual_section_tag text =
   try
@@ -91,8 +95,8 @@ let get_fixme_ranges_and_manual_sections tree :
 
 (** Return the start and end offsets of every range in which formatting is
     suppressed, sorted by order of appearance in the file. Formatting is
-    suppressed around HH_FIXME/HH_IGNORE_ERROR comments and in generated
-    sections of partially-generated files. *)
+    suppressed around HH_FIXME/HH_IGNORE_ERROR comments, in generated
+    sections of partially-generated files, and in generated files. *)
 let get_suppressed_formatting_ranges line_boundaries tree =
   let source_text = SyntaxTree.text tree in
   let (fixme_ranges, manual_sections) =
@@ -112,10 +116,13 @@ let get_suppressed_formatting_ranges line_boundaries tree =
     |> List.map ~f:expand_to_line_boundaries
   in
   let generated_sections =
-    if List.is_empty manual_sections then
+    let text = SourceText.text source_text in
+    let whole_file = [(0, String.length text)] in
+    if is_generated_file text then
+      whole_file
+    else if List.is_empty manual_sections then
       []
     else
-      let whole_file = [(0, String.length (SourceText.text source_text))] in
       Interval.diff_sorted_lists whole_file manual_sections
       |> List.map ~f:expand_to_line_boundaries
   in

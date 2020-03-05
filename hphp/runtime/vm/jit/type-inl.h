@@ -71,16 +71,12 @@ static auto const TMixedArr  = Type::Array(ArrayData::kMixedKind);
 static auto const TPackedArr = Type::Array(ArrayData::kPackedKind);
 static auto const TRecordArr = Type::Array(ArrayData::kRecordKind);
 
-// Vanilla types that we use in ir.specification and in irgen logic.
+// Vanilla types that appear in irgen.
 static auto const TVanillaArr     = TArr.narrowToVanilla();
 static auto const TVanillaVec     = TVec.narrowToVanilla();
 static auto const TVanillaDict    = TDict.narrowToVanilla();
 static auto const TVanillaKeyset  = TKeyset.narrowToVanilla();
 static auto const TVanillaArrLike = TArrLike.narrowToVanilla();
-static auto const TLvalToVanillaArr    = TLvalToArr.narrowToVanilla();
-static auto const TLvalToVanillaVec    = TLvalToVec.narrowToVanilla();
-static auto const TLvalToVanillaDict   = TLvalToDict.narrowToVanilla();
-static auto const TLvalToVanillaKeyset = TLvalToKeyset.narrowToVanilla();
 
 /*
  * Abbreviated namespace for predefined types.
@@ -99,16 +95,6 @@ namespace TypeNames {
 #undef IRTL
 #undef IRTM
 #undef IRTX
-
-UNUSED static auto const VanillaArr     = TVanillaArr;
-UNUSED static auto const VanillaVec     = TVanillaVec;
-UNUSED static auto const VanillaDict    = TVanillaDict;
-UNUSED static auto const VanillaKeyset  = TVanillaKeyset;
-UNUSED static auto const VanillaArrLike = TVanillaArrLike;
-UNUSED static auto const LvalToVanillaArr    = TLvalToVanillaArr;
-UNUSED static auto const LvalToVanillaVec    = TLvalToVanillaVec;
-UNUSED static auto const LvalToVanillaDict   = TLvalToVanillaDict;
-UNUSED static auto const LvalToVanillaKeyset = TLvalToVanillaKeyset;
 };
 
 namespace type_detail {

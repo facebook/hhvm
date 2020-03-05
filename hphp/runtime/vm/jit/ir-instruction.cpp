@@ -541,10 +541,16 @@ inline Type unionReturn(const IRInstruction* inst, IdxSeq<Idx, Rest...>) {
 } // namespace
 
 Type outputType(const IRInstruction* inst, int /*dstId*/) {
+  // Don't produce vanilla types if the bespoke runtime checks flag is off,
+  // because we never use these types. Otherwise, apply layout-dependence.
+  auto const checkLayoutFlags = [&](Type t) {
+    if (!RO::EvalAllowBespokeArrayLikes) return t;
+    return inst->isLayoutAgnostic() ? t.widenToBespoke() : t.narrowToVanilla();
+  };
   using namespace TypeNames;
   using TypeNames::TCA;
 #define ND              assertx(0 && "outputType requires HasDest or NaryDest");
-#define D(type)         return type;
+#define D(type)         return checkLayoutFlags(type);
 #define DofS(n)         return inst->src(n)->type();
 #define DRefineS(n)     return inst->src(n)->type() & inst->typeParam();
 #define DParamMayRelax(t) return inst->typeParam();
@@ -582,7 +588,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 // If the inputs to CheckVArray and CheckDArray are vanilla, then the output
 // will have a known type, but if the inputs are generic arrays, we won't.
 #define DCheckDV(kind)  return inst->getPassthroughValue()->type() & \
-                               T##kind##Arr.widenToBespoke();
+                               checkLayoutFlags(T##kind##Arr);
 #define DCol            return newColReturn(inst);
 #define DMulti          return TBottom;
 #define DSetElem        return setElemReturn(inst);

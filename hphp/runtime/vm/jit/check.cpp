@@ -451,9 +451,25 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
     check(match || src->isA(TBottom), type, expected);
   };
 
-  // Assume that inputs are vanilla if the bespoke runtime checks flag is off.
-  auto const maybeNarrowToVanilla = [&] (Type type) {
-    return RO::EvalAllowBespokeArrayLikes ? type : type.narrowToVanilla();
+  // If the bespoke runtime check flag is off, leave the IR types unchanged.
+  // Otherwise, assume that non-layout-agnostic ops taking an S(Arr) actually
+  // take an S(VanillaArr), and likewise for other array-likes.
+  auto const checkLayoutFlags = [&] (std::vector<Type> types) {
+    if (RO::EvalAllowBespokeArrayLikes && !inst->isLayoutAgnostic()) {
+      for (auto& type : types) type = type.narrowToVanilla();
+    }
+    return types;
+  };
+  auto const getTypeNames = [&] (const std::vector<Type>& types) {
+    auto parts = std::vector<std::string>{};
+    for (auto const& type : types) parts.push_back(type.toString());
+    return folly::join(" or ", parts);
+  };
+  auto const checkMultiple = [&] (SSATmp* src, const std::vector<Type>& types,
+                                  const std::string& message) {
+    auto okay = false;
+    for (auto const& type : types) if ((okay = src->isA(type))) break;
+    check(okay, Type(), message.c_str());
   };
 
 using namespace TypeNames;
@@ -461,16 +477,19 @@ using TypeNames::TCA;
 
 #define NA            return checkNoArgs();
 #define S(T...)       {                                                     \
-                        auto const t = maybeNarrowToVanilla(src()->type()); \
-                        check(t.subtypeOfAny(T), Type(), #T);               \
+                        static auto const types = checkLayoutFlags({T});    \
+                        static auto const names = getTypeNames(types);      \
+                        checkMultiple(src(), types, names);                 \
                         ++curSrc;                                           \
                       }
 #define AK(kind)      Type::Array(ArrayData::k##kind##Kind)
 #define C(T)          checkConstant(src(), T, "constant " #T); ++curSrc;
 #define CStr          C(StaticStr)
 #define SVar(T...)    {                                                     \
+                        static auto const types = checkLayoutFlags({T});    \
+                        static auto const names = getTypeNames(types);      \
                         for (; curSrc < inst->numSrcs(); ++curSrc) {        \
-                          check(src()->type().subtypeOfAny(T), Type(), #T); \
+                          checkMultiple(src(), types, names);               \
                         }                                                   \
                       }
 #define SVArr         checkArr(false /* is_kv */, false /* is_const */);

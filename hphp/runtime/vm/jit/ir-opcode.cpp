@@ -41,6 +41,7 @@ TRACE_SET_MOD(hhir);
 #define P      Passthrough
 #define MProp  MInstrProp
 #define MElem  MInstrElem
+#define LA     LayoutAgnostic
 
 #define ND             0
 #define D(n)           HasDest
@@ -63,7 +64,6 @@ TRACE_SET_MOD(hhir);
 #define DDictLastKey      HasDest
 #define DKeysetFirstElem  HasDest
 #define DKeysetLastElem   HasDest
-#define DCheckDV(...)  HasDest
 #define DArrPacked     HasDest
 #define DArrMixed      HasDest
 #define DArrRecord     HasDest
@@ -71,6 +71,7 @@ TRACE_SET_MOD(hhir);
 #define DVArrOrNull    HasDest
 #define DDArr          HasDest
 #define DStaticDArr    HasDest
+#define DCheckDV(...)  HasDest
 #define DCol           HasDest
 #define DMulti         NaryDest
 #define DSetElem       HasDest
@@ -145,9 +146,9 @@ OpInfo g_opInfo[] = {
 #undef DArrMixed
 #undef DArrRecord
 #undef DVArr
-#undef DVArrOrNull
 #undef DDArr
 #undef DStaticDArr
+#undef DCheckDV
 #undef DCol
 #undef DAllocObj
 #undef DMulti

@@ -73,6 +73,10 @@ inline bool IRInstruction::isPassthrough() const {
   return opcodeHasFlags(op(), Passthrough);
 }
 
+inline bool IRInstruction::isLayoutAgnostic() const {
+  return opcodeHasFlags(op(), LayoutAgnostic);
+}
+
 inline bool IRInstruction::producesReference() const {
   return opcodeHasFlags(op(), ProducesRC);
 }

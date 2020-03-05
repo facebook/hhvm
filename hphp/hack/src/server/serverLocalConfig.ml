@@ -207,7 +207,7 @@ let default =
     prefetch_deferred_files = false;
     remote_type_check =
       {
-        enabled = true;
+        enabled = false;
         load_naming_table_on_full_init = false;
         max_batch_size = 8_000;
         min_batch_size = 5_000;

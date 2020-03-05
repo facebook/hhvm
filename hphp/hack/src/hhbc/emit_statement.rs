@@ -10,13 +10,13 @@ use crate::try_finally_rewriter as tfr;
 use emit_expression_rust::{self as emit_expr, emit_await, emit_expr, LValOp, Setrange};
 use emit_fatal_rust as emit_fatal;
 use emit_pos_rust::{emit_pos, emit_pos_then};
-use env::{emitter::Emitter, Env};
+use env::{emitter::Emitter, local, Env};
 use hhbc_ast_rust::*;
 use hhbc_id_rust::{self as hhbc_id, Id};
 use instruction_sequence_rust::{Error::Unrecoverable, InstrSeq, Result};
 use label_rust::Label;
-use naming_special_names_rust::special_functions;
-use oxidized::{aast as a, ast as tast, ast_defs, pos::Pos};
+use naming_special_names_rust::{special_functions, special_idents, superglobals};
+use oxidized::{aast as a, ast as tast, ast_defs, local_id, pos::Pos};
 use scope_rust::scope;
 
 use lazy_static::lazy_static;
@@ -309,12 +309,405 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
         a::Stmt_::Throw(_) => unimplemented!("TODO(hrust)"),
         a::Stmt_::Try(_) => unimplemented!("TODO(hrust)"),
         a::Stmt_::Switch(_) => unimplemented!("TODO(hrust)"),
-        a::Stmt_::Foreach(_) => unimplemented!("TODO(hrust)"),
+        a::Stmt_::Foreach(x) => emit_foreach(e, env, pos, &x.0, &x.1, &x.2),
         a::Stmt_::DefInline(def) => emit_def_inline(e, &**def),
         a::Stmt_::Awaitall(_) => unimplemented!("TODO(hrust)"),
         a::Stmt_::Markup(x) => emit_markup(e, env, (&x.0, &x.1), false),
         a::Stmt_::Fallthrough | a::Stmt_::Noop => Ok(InstrSeq::Empty),
     }
+}
+
+fn emit_foreach(
+    e: &mut Emitter,
+    env: &mut Env,
+    pos: &Pos,
+    collection: &tast::Expr,
+    iterator: &tast::AsExpr,
+    block: &tast::Block,
+) -> Result {
+    use tast::AsExpr as A;
+    e.local_gen_mut().store_current_state();
+    let res = match iterator {
+        A::AsV(_) | A::AsKv(_, _) => emit_foreach_(e, env, pos, collection, iterator, block),
+        A::AwaitAsV(pos, _) | A::AwaitAsKv(pos, _, _) => {
+            emit_foreach_await(e, env, pos, collection, iterator, block)
+        }
+    };
+    e.local_gen_mut().revert_state();
+    res
+}
+
+fn emit_foreach_(
+    e: &mut Emitter,
+    env: &mut Env,
+    pos: &Pos,
+    collection: &tast::Expr,
+    iterator: &tast::AsExpr,
+    block: &tast::Block,
+) -> Result {
+    scope::with_unnamed_locals_and_iterators(e, |e| {
+        let iter_id = e.iterator_mut().get();
+        let loop_break_label = e.label_gen_mut().next_regular();
+        let loop_continue_label = e.label_gen_mut().next_regular();
+        let loop_head_label = e.label_gen_mut().next_regular();
+        let (key_id, val_id, preamble) = emit_iterator_key_value_storage(e, env, iterator)?;
+        let iter_args = IterArgs {
+            iter_id: iter_id.clone(),
+            key_id,
+            val_id,
+        };
+        let body = env.do_in_loop_block(
+            e,
+            loop_break_label.clone(),
+            loop_continue_label.clone(),
+            //TODO(hrust): change this to Some(iter_id) once Iter is corrected to IterId in jump_targets
+            None,
+            block,
+            emit_block,
+        )?;
+        let iter_init = InstrSeq::gather(vec![
+            emit_expr::emit_expr(e, env, collection)?,
+            emit_pos(e, &collection.0),
+            InstrSeq::make_iterinit(iter_args.clone(), loop_break_label.clone()),
+        ]);
+        let iterate = InstrSeq::gather(vec![
+            InstrSeq::make_label(loop_head_label.clone()),
+            preamble,
+            body,
+            InstrSeq::make_label(loop_continue_label),
+            emit_pos(e, pos),
+            InstrSeq::make_iternext(iter_args.clone(), loop_head_label),
+        ]);
+        let iter_done = InstrSeq::make_label(loop_break_label);
+        Ok((iter_init, iterate, iter_done))
+    })
+}
+
+fn emit_foreach_await(
+    e: &mut Emitter,
+    env: &mut Env,
+    pos: &Pos,
+    collection: &tast::Expr,
+    iterator: &tast::AsExpr,
+    block: &tast::Block,
+) -> Result {
+    scope::with_unnamed_local(e, |e, iter_temp_local| {
+        let input_is_async_iterator_label = e.label_gen_mut().next_regular();
+        let next_label = e.label_gen_mut().next_regular();
+        let exit_label = e.label_gen_mut().next_regular();
+        let pop_and_exit_label = e.label_gen_mut().next_regular();
+        let async_eager_label = e.label_gen_mut().next_regular();
+        let next_meth = hhbc_id::method::from_raw_string("next");
+        let iter_init = InstrSeq::gather(vec![
+            emit_expr::emit_expr(e, env, collection)?,
+            InstrSeq::make_dup(),
+            InstrSeq::make_instanceofd(hhbc_id::class::from_raw_string("HH\\AsyncIterator")),
+            InstrSeq::make_jmpnz(input_is_async_iterator_label.clone()),
+            emit_fatal::emit_fatal_runtime(
+                e,
+                pos,
+                "Unable to iterate non-AsyncIterator asynchronously",
+            ),
+            InstrSeq::make_label(input_is_async_iterator_label),
+            InstrSeq::make_popl(iter_temp_local.clone()),
+        ]);
+        let iterate = InstrSeq::gather(vec![
+            InstrSeq::make_label(next_label.clone()),
+            InstrSeq::make_cgetl(iter_temp_local.clone()),
+            InstrSeq::make_nulluninit(),
+            InstrSeq::make_nulluninit(),
+            InstrSeq::make_fcallobjmethodd(
+                FcallArgs::new(
+                    FcallFlags::empty(),
+                    1,
+                    vec![],
+                    Some(async_eager_label.clone()),
+                    0,
+                ),
+                next_meth,
+                ObjNullFlavor::NullThrows,
+            ),
+            InstrSeq::make_await(),
+            InstrSeq::make_label(async_eager_label),
+            InstrSeq::make_dup(),
+            InstrSeq::make_istypec(IstypeOp::OpNull),
+            InstrSeq::make_jmpnz(pop_and_exit_label.clone()),
+            emit_foreach_await_key_value_storage(e, env, iterator)?,
+            env.do_in_loop_block(
+                e,
+                exit_label.clone(),
+                next_label.clone(),
+                None,
+                block,
+                emit_block,
+            )?,
+            emit_pos(e, pos),
+            InstrSeq::make_jmp(next_label),
+            InstrSeq::make_label(pop_and_exit_label),
+            InstrSeq::make_popc(),
+            InstrSeq::make_label(exit_label),
+        ]);
+        let iter_done = InstrSeq::make_unsetl(iter_temp_local);
+        Ok((iter_init, iterate, iter_done))
+    })
+}
+
+// Assigns a location to store values for foreach-key and foreach-value and
+// creates a code to populate them.
+// NOT suitable for foreach (... await ...) which uses different code-gen
+// Returns: key_local_opt * value_local * key_preamble * value_preamble
+// where:
+// - key_local_opt - local variable to store a foreach-key value if it is
+//     declared
+// - value_local - local variable to store a foreach-value
+// - key_preamble - list of instructions to populate foreach-key
+// - value_preamble - list of instructions to populate foreach-value
+fn emit_iterator_key_value_storage(
+    e: &mut Emitter,
+    env: &mut Env,
+    iterator: &tast::AsExpr,
+) -> Result<(Option<local::Type>, local::Type, InstrSeq)> {
+    use tast::AsExpr as A;
+    fn get_id_of_simple_lvar_opt(lvar: &tast::Expr_) -> Result<Option<String>> {
+        if let Some(tast::Lid(pos, id)) = lvar.as_lvar() {
+            let name = local_id::get_name(&id);
+            if name == special_idents::THIS {
+                return Err(emit_fatal::raise_fatal_parse(
+                    &pos,
+                    "Cannot re-assign $this",
+                ));
+            } else if superglobals::is_superglobal(&name) || name == superglobals::GLOBALS {
+                return Ok(Some(name.into()));
+            }
+        };
+        Ok(None)
+    };
+    match iterator {
+        A::AsKv(k, v) => Ok(
+            match (
+                get_id_of_simple_lvar_opt(&k.1)?,
+                get_id_of_simple_lvar_opt(&v.1)?,
+            ) {
+                (Some(key_id), Some(val_id)) => (
+                    Some(local::Type::Named(key_id)),
+                    local::Type::Named(val_id),
+                    InstrSeq::Empty,
+                ),
+                _ => {
+                    let key_local = e.local_gen_mut().get_unnamed();
+                    let val_local = e.local_gen_mut().get_unnamed();
+                    let (mut key_preamble, key_load) =
+                        emit_iterator_lvalue_storage(e, env, k, key_local.clone())?;
+                    let (mut val_preamble, val_load) =
+                        emit_iterator_lvalue_storage(e, env, v, val_local.clone())?;
+                    // HHVM prepends code to initialize non-plain, non-list foreach-key
+                    // to the value preamble - do the same to minimize diffs
+                    if !(k.1).is_list() {
+                        key_preamble.extend(val_preamble);
+                        val_preamble = key_preamble;
+                        key_preamble = vec![];
+                    };
+                    (
+                        Some(key_local),
+                        val_local,
+                        InstrSeq::gather(vec![
+                            InstrSeq::gather(val_preamble),
+                            InstrSeq::gather(val_load),
+                            InstrSeq::gather(key_preamble),
+                            InstrSeq::gather(key_load),
+                        ]),
+                    )
+                }
+            },
+        ),
+        A::AsV(v) => Ok(match get_id_of_simple_lvar_opt(&v.1)? {
+            Some(val_id) => (None, local::Type::Named(val_id), InstrSeq::Empty),
+            None => {
+                let val_local = e.local_gen_mut().get_unnamed();
+                let (val_preamble, val_load) =
+                    emit_iterator_lvalue_storage(e, env, v, val_local.clone())?;
+                (
+                    None,
+                    val_local,
+                    InstrSeq::gather(vec![
+                        InstrSeq::gather(val_preamble),
+                        InstrSeq::gather(val_load),
+                    ]),
+                )
+            }
+        }),
+        _ => Err(Unrecoverable(
+            "emit_iterator_key_value_storage with iterator using await".into(),
+        )),
+    }
+}
+
+fn emit_iterator_lvalue_storage(
+    e: &mut Emitter,
+    env: &mut Env,
+    lvalue: &tast::Expr,
+    local: local::Type,
+) -> Result<(Vec<InstrSeq>, Vec<InstrSeq>)> {
+    match &lvalue.1 {
+        tast::Expr_::Call(_) => Err(emit_fatal::raise_fatal_parse(
+            &lvalue.0,
+            "Can't use return value in write context",
+        )),
+        tast::Expr_::List(es) => {
+            let (preamble, load_values) = emit_load_list_elements(
+                e,
+                env,
+                &mut vec![InstrSeq::make_basel(local.clone(), MemberOpMode::Warn)],
+                es,
+            )?;
+            let load_values = vec![
+                InstrSeq::gather(load_values.into_iter().rev().collect()),
+                InstrSeq::make_unsetl(local),
+            ];
+            Ok((preamble, load_values))
+        }
+        _ => {
+            let (lhs, rhs, set_op) = emit_expr::emit_lval_op_nonlist_steps(
+                e,
+                env,
+                &lvalue.0,
+                LValOp::Set,
+                lvalue,
+                InstrSeq::make_cgetl(local.clone()),
+                1,
+                false,
+            )?;
+            Ok((
+                vec![lhs],
+                vec![
+                    rhs,
+                    set_op,
+                    InstrSeq::make_popc(),
+                    InstrSeq::make_unsetl(local),
+                ],
+            ))
+        }
+    }
+}
+
+fn emit_load_list_elements(
+    e: &mut Emitter,
+    env: &mut Env,
+    path: &mut Vec<InstrSeq>,
+    es: &[tast::Expr],
+) -> Result<(Vec<InstrSeq>, Vec<InstrSeq>)> {
+    let (preamble, load_value): (Vec<Vec<InstrSeq>>, Vec<Vec<InstrSeq>>) = es
+        .iter()
+        .enumerate()
+        .map(|(i, x)| emit_load_list_element(e, env, path, i, x))
+        .collect::<Result<Vec<_>>>()?
+        .into_iter()
+        .unzip();
+    Ok((
+        preamble.into_iter().flatten().collect(),
+        load_value.into_iter().flatten().collect(),
+    ))
+}
+
+fn emit_load_list_element(
+    e: &mut Emitter,
+    env: &mut Env,
+    path: &mut Vec<InstrSeq>,
+    i: usize,
+    elem: &tast::Expr,
+) -> Result<(Vec<InstrSeq>, Vec<InstrSeq>)> {
+    if let tast::Expr_::List(es) = &elem.1 {
+        let instr_dim = InstrSeq::make_dim(MemberOpMode::Warn, MemberKey::EI(i as i64));
+        path.push(instr_dim);
+        return emit_load_list_elements(e, env, path, es);
+    };
+
+    assert_eq!(elem.1.is_list(), false);
+
+    let query_value = InstrSeq::gather(vec![
+        InstrSeq::gather(path.to_vec()),
+        InstrSeq::make_querym(0, QueryOp::CGet, MemberKey::EI(i as i64)),
+    ]);
+    Ok(match &elem.1 {
+        tast::Expr_::Lvar(lid) => {
+            let load_value = InstrSeq::gather(vec![
+                query_value,
+                InstrSeq::make_setl(local::Type::Named(local_id::get_name(&lid.1).into())),
+                InstrSeq::make_popc(),
+            ]);
+            (vec![], vec![load_value])
+        }
+        _ => {
+            let set_instrs = emit_expr::emit_lval_op_nonlist(
+                e,
+                env,
+                &elem.0,
+                LValOp::Set,
+                elem,
+                query_value,
+                1,
+                false,
+            )?;
+            let load_value = InstrSeq::gather(vec![set_instrs, InstrSeq::make_popc()]);
+            (vec![], vec![load_value])
+        }
+    })
+}
+
+//Emit code for the value and possibly key l-value operation in a foreach
+// await statement. The result of invocation of the `next` method has been
+// stored on top of the stack. For example:
+//   foreach (foo() await as $a->f => list($b[0], $c->g)) { ... }
+// Here, we need to construct l-value operations that access the [0] (for $a->f)
+// and [1;0] (for $b[0]) and [1;1] (for $c->g) indices of the array returned
+// from the `next` method.
+fn emit_foreach_await_key_value_storage(
+    e: &mut Emitter,
+    env: &mut Env,
+    iterator: &tast::AsExpr,
+) -> Result {
+    use tast::AsExpr as A;
+    match iterator {
+        A::AwaitAsKv(_, k, v) | A::AsKv(k, v) => Ok(InstrSeq::gather(vec![
+            emit_foreach_await_lvalue_storage(e, env, k, &[0], true)?,
+            emit_foreach_await_lvalue_storage(e, env, k, &[1], false)?,
+        ])),
+        A::AwaitAsV(_, v) | A::AsV(v) => emit_foreach_await_lvalue_storage(e, env, v, &[1], false),
+    }
+}
+
+// Emit code for either the key or value l-value operation in foreach await.
+// `indices` is the initial prefix of the array indices ([0] for key or [1] for
+// value) that is prepended onto the indices needed for list destructuring
+//
+// TODO: we don't need unnamed local if the target is a local
+fn emit_foreach_await_lvalue_storage(
+    e: &mut Emitter,
+    env: &mut Env,
+    lvalue: &tast::Expr,
+    indices: &[isize],
+    keep_on_stack: bool,
+) -> Result {
+    scope::with_unnamed_local(e, |e, local| {
+        Ok((
+            InstrSeq::make_popl(local.clone()),
+            emit_expr::emit_lval_op_list(
+                e,
+                env,
+                &lvalue.0,
+                Some(local.clone()),
+                indices,
+                lvalue,
+                false,
+            )?
+            .into(),
+            if keep_on_stack {
+                InstrSeq::make_pushl(local)
+            } else {
+                InstrSeq::make_unsetl(local)
+            },
+        ))
+    })
 }
 
 fn emit_stmts(e: &mut Emitter, env: &Env, stl: &[tast::Stmt]) -> Result {

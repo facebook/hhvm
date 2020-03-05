@@ -37,31 +37,31 @@ pub mod scope {
     /// instruction blocks -- before, inner, after. If emit () registered any unnamed
     /// locals or iterators, the inner block will be wrapped in a try/catch that will
     /// unset these unnamed locals and free these iterators upon exception.
-    pub fn with_unnamed_locals_and_iterators<F>(emitter: &mut Emitter, emit: F) -> InstrSeq
+    pub fn with_unnamed_locals_and_iterators<F>(emitter: &mut Emitter, emit: F) -> Result
     where
-        F: FnOnce(&mut Emitter) -> (InstrSeq, InstrSeq, InstrSeq),
+        F: FnOnce(&mut Emitter) -> Result<(InstrSeq, InstrSeq, InstrSeq)>,
     {
         let stateref = emitter.refined_state_mut();
         let (next_local, next_iterator) = (stateref.local_gen, stateref.iterator);
         next_local.store_current_state();
         next_iterator.store_current_state();
 
-        let (before, inner, after) = emit(emitter);
+        let (before, inner, after) = emit(emitter)?;
 
         let stateref = emitter.refined_state_mut();
         let (next_local, next_iterator) = (stateref.local_gen, stateref.iterator);
         if !next_local.state_has_changed() && !next_iterator.state_has_changed() {
-            InstrSeq::gather(vec![before, inner, after])
+            Ok(InstrSeq::gather(vec![before, inner, after]))
         } else {
             let local_ids_to_unset = next_local.revert_state();
             let iters_to_free = next_iterator.revert_state();
             let unset_locals = unset_unnamed_locals(local_ids_to_unset);
             let free_iters = free_iterators(iters_to_free);
-            wrap_inner_in_try_catch(
+            Ok(wrap_inner_in_try_catch(
                 stateref.label_gen,
                 (before, inner, after),
                 InstrSeq::gather(vec![unset_locals, free_iters]),
-            )
+            ))
         }
     }
 

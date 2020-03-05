@@ -673,7 +673,7 @@ fn inline_gena_call(emitter: &mut Emitter, env: &Env, arg: &tast::Expr) -> Resul
                         InstrSeq::make_popc(),
                     ])
                 },
-            ),
+            )?,
         ]);
 
         let after = InstrSeq::make_pushl(arr_local);
@@ -686,7 +686,7 @@ fn emit_iter<F: FnOnce(local::Type, local::Type) -> InstrSeq>(
     e: &mut Emitter,
     collection: InstrSeq,
     f: F,
-) -> InstrSeq {
+) -> Result {
     scope::with_unnamed_locals_and_iterators(e, |e| {
         let iter_id = e.iterator_mut().get();
         let val_id = e.local_gen_mut().get_unnamed();
@@ -712,7 +712,7 @@ fn emit_iter<F: FnOnce(local::Type, local::Type) -> InstrSeq>(
             InstrSeq::make_unsetl(key_id),
             InstrSeq::make_label(loop_end),
         ]);
-        (iter_init, iterate, iter_done)
+        Ok((iter_init, iterate, iter_done))
     })
 }
 

@@ -319,9 +319,11 @@ let process_files
       let telemetry =
         counters
         |> Telemetry.float_
-             ~key:"time_decl_and_typecheck"
+             ~key:"duration_decl_and_typecheck"
              ~value:time_decl_and_typecheck
-        |> Telemetry.float_opt ~key:"time_typecheck" ~value:time_typecheck_opt
+        |> Telemetry.float_opt
+             ~key:"duration_typecheck"
+             ~value:time_typecheck_opt
         |> Telemetry.int_opt ~key:"filesize" ~value:filesize_opt
         |> Telemetry.object_ ~key:"deferment" ~value:deferment_telemetry
       in

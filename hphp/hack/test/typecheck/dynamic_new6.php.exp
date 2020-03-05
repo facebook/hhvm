@@ -1,2 +1,2 @@
 File "dynamic_new6.php", line 18, characters 13-17:
-Cannot use dynamic new in strict mode (Naming[2060])
+Cannot use dynamic new. (Naming[2060])

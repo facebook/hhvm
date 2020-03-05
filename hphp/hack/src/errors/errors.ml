@@ -1223,7 +1223,7 @@ let dynamic_new_in_strict_mode pos =
   add
     (Naming.err_code Naming.DynamicNewInStrictMode)
     pos
-    "Cannot use dynamic new in strict mode"
+    "Cannot use dynamic new."
 
 let invalid_type_access_root (pos, id) =
   add

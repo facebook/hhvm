@@ -16,28 +16,28 @@ struct _ThriftPrimitiveTypeEnumDataStorage {
   using type = ThriftPrimitiveType;
   static constexpr const std::size_t size = 10;
   static constexpr const std::array<ThriftPrimitiveType, 10> values = {{
-    ThriftPrimitiveType::THRIFT_BOOL_TYPE,
-    ThriftPrimitiveType::THRIFT_BYTE_TYPE,
-    ThriftPrimitiveType::THRIFT_I16_TYPE,
-    ThriftPrimitiveType::THRIFT_I32_TYPE,
-    ThriftPrimitiveType::THRIFT_I64_TYPE,
-    ThriftPrimitiveType::THRIFT_FLOAT_TYPE,
-    ThriftPrimitiveType::THRIFT_DOUBLE_TYPE,
-    ThriftPrimitiveType::THRIFT_BINARY_TYPE,
-    ThriftPrimitiveType::THRIFT_STRING_TYPE,
-    ThriftPrimitiveType::THRIFT_VOID_TYPE,
+    ThriftPrimitiveType::BOOL,
+    ThriftPrimitiveType::BYTE,
+    ThriftPrimitiveType::I16,
+    ThriftPrimitiveType::I32,
+    ThriftPrimitiveType::I64,
+    ThriftPrimitiveType::FLOAT,
+    ThriftPrimitiveType::DOUBLE,
+    ThriftPrimitiveType::BINARY,
+    ThriftPrimitiveType::STRING,
+    ThriftPrimitiveType::VOID,
   }};
   static constexpr const std::array<folly::StringPiece, 10> names = {{
-    "THRIFT_BOOL_TYPE",
-    "THRIFT_BYTE_TYPE",
-    "THRIFT_I16_TYPE",
-    "THRIFT_I32_TYPE",
-    "THRIFT_I64_TYPE",
-    "THRIFT_FLOAT_TYPE",
-    "THRIFT_DOUBLE_TYPE",
-    "THRIFT_BINARY_TYPE",
-    "THRIFT_STRING_TYPE",
-    "THRIFT_VOID_TYPE",
+    "BOOL",
+    "BYTE",
+    "I16",
+    "I32",
+    "I64",
+    "FLOAT",
+    "DOUBLE",
+    "BINARY",
+    "STRING",
+    "VOID",
   }};
 };
 

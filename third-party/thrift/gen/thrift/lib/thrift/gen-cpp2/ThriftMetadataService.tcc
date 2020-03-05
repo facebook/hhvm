@@ -11,20 +11,20 @@
 #include <thrift/lib/cpp2/gen/service_tcc.h>
 
 namespace apache { namespace thrift { namespace metadata {
-typedef apache::thrift::ThriftPresult<false> ThriftMetadataService_getThriftServiceMetadata_pargs;
-typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache::thrift::protocol::T_STRUCT,  ::apache::thrift::metadata::ThriftServiceMetadataResponse*>> ThriftMetadataService_getThriftServiceMetadata_presult;
+typedef apache::thrift::ThriftPresult<false> ThriftMetadataService_getRpcMetadata_pargs;
+typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache::thrift::protocol::T_STRUCT,  ::apache::thrift::metadata::ThriftMetadata*>> ThriftMetadataService_getRpcMetadata_presult;
 template <typename ProtocolIn_, typename ProtocolOut_>
-void ThriftMetadataServiceAsyncProcessor::_processInThread_getThriftServiceMetadata(apache::thrift::ResponseChannelRequest::UniquePtr req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+void ThriftMetadataServiceAsyncProcessor::_processInThread_getRpcMetadata(std::unique_ptr<apache::thrift::ResponseChannelRequest> req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
   auto pri = iface_->getRequestPriority(ctx, apache::thrift::concurrency::NORMAL);
-  processInThread<ProtocolIn_, ProtocolOut_>(std::move(req), std::move(buf), ctx, eb, tm, pri, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, &ThriftMetadataServiceAsyncProcessor::process_getThriftServiceMetadata<ProtocolIn_, ProtocolOut_>, this);
+  processInThread<ProtocolIn_, ProtocolOut_>(std::move(req), std::move(buf), ctx, eb, tm, pri, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, &ThriftMetadataServiceAsyncProcessor::process_getRpcMetadata<ProtocolIn_, ProtocolOut_>, this);
 }
 template <typename ProtocolIn_, typename ProtocolOut_>
-void ThriftMetadataServiceAsyncProcessor::process_getThriftServiceMetadata(apache::thrift::ResponseChannelRequest::UniquePtr req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+void ThriftMetadataServiceAsyncProcessor::process_getRpcMetadata(std::unique_ptr<apache::thrift::ResponseChannelRequest> req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
   // make sure getConnectionContext is null
   // so async calls don't accidentally use it
   iface_->setConnectionContext(nullptr);
-  ThriftMetadataService_getThriftServiceMetadata_pargs args;
-  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "ThriftMetadataService.getThriftServiceMetadata", ctx));
+  ThriftMetadataService_getRpcMetadata_pargs args;
+  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "ThriftMetadataService.getRpcMetadata", ctx));
   try {
     folly::io::Cursor cursor(buf.get());
     cursor.skip(ctx->getMessageBeginSize());
@@ -34,37 +34,37 @@ void ThriftMetadataServiceAsyncProcessor::process_getThriftServiceMetadata(apach
   }
   catch (const std::exception& ex) {
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
-        ex, std::move(req), ctx, eb, "getThriftServiceMetadata");
+        ex, std::move(req), ctx, eb, "getRpcMetadata");
     return;
   }
   req->setStartedProcessing();
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<std::unique_ptr< ::apache::thrift::metadata::ThriftServiceMetadataResponse>>>(std::move(req), std::move(ctxStack), return_getThriftServiceMetadata<ProtocolIn_,ProtocolOut_>, throw_wrapped_getThriftServiceMetadata<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<std::unique_ptr< ::apache::thrift::metadata::ThriftMetadata>>>(std::move(req), std::move(ctxStack), return_getRpcMetadata<ProtocolIn_,ProtocolOut_>, throw_wrapped_getRpcMetadata<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
   if (!callback->isRequestActive()) {
     callback.release()->deleteInThread();
     return;
   }
   ctx->setStartedProcessing();
-  iface_->async_tm_getThriftServiceMetadata(std::move(callback));
+  iface_->async_tm_getRpcMetadata(std::move(callback));
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-folly::IOBufQueue ThriftMetadataServiceAsyncProcessor::return_getThriftServiceMetadata(int32_t protoSeqId, apache::thrift::ContextStack* ctx,  ::apache::thrift::metadata::ThriftServiceMetadataResponse const& _return) {
+folly::IOBufQueue ThriftMetadataServiceAsyncProcessor::return_getRpcMetadata(int32_t protoSeqId, apache::thrift::ContextStack* ctx,  ::apache::thrift::metadata::ThriftMetadata const& _return) {
   ProtocolOut_ prot;
-  ThriftMetadataService_getThriftServiceMetadata_presult result;
-  result.get<0>().value = const_cast< ::apache::thrift::metadata::ThriftServiceMetadataResponse*>(&_return);
+  ThriftMetadataService_getRpcMetadata_presult result;
+  result.get<0>().value = const_cast< ::apache::thrift::metadata::ThriftMetadata*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse("getThriftServiceMetadata", &prot, protoSeqId, ctx, result);
+  return serializeResponse("getRpcMetadata", &prot, protoSeqId, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-void ThriftMetadataServiceAsyncProcessor::throw_wrapped_getThriftServiceMetadata(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+void ThriftMetadataServiceAsyncProcessor::throw_wrapped_getRpcMetadata(std::unique_ptr<apache::thrift::ResponseChannelRequest> req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
   if (!ew) {
     return;
   }
   {
     (void)protoSeqId;
     apache::thrift::detail::ap::process_throw_wrapped_handler_error<ProtocolOut_>(
-        ew, std::move(req), reqCtx, ctx, "getThriftServiceMetadata");
+        ew, std::move(req), reqCtx, ctx, "getRpcMetadata");
     return;
   }
 }

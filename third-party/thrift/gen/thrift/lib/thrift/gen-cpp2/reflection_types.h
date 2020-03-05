@@ -204,54 +204,6 @@ class StructField final : private apache::thrift::detail::st::ComparisonOperator
   bool operator==(const StructField& rhs) const;
   bool operator<(const StructField& rhs) const;
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const bool&> isRequired_ref() const& {
-    return {isRequired, __isset.isRequired};
-  }
-
-  FOLLY_ERASE ::apache::thrift::field_ref<const bool&&> isRequired_ref() const&& {
-    return {std::move(isRequired), __isset.isRequired};
-  }
-
-  FOLLY_ERASE ::apache::thrift::field_ref<bool&> isRequired_ref() & {
-    return {isRequired, __isset.isRequired};
-  }
-
-  FOLLY_ERASE ::apache::thrift::field_ref<bool&&> isRequired_ref() && {
-    return {std::move(isRequired), __isset.isRequired};
-  }
-
-  FOLLY_ERASE ::apache::thrift::field_ref<const int64_t&> type_ref() const& {
-    return {type, __isset.type};
-  }
-
-  FOLLY_ERASE ::apache::thrift::field_ref<const int64_t&&> type_ref() const&& {
-    return {std::move(type), __isset.type};
-  }
-
-  FOLLY_ERASE ::apache::thrift::field_ref<int64_t&> type_ref() & {
-    return {type, __isset.type};
-  }
-
-  FOLLY_ERASE ::apache::thrift::field_ref<int64_t&&> type_ref() && {
-    return {std::move(type), __isset.type};
-  }
-
-  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&> name_ref() const& {
-    return {name, __isset.name};
-  }
-
-  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&&> name_ref() const&& {
-    return {std::move(name), __isset.name};
-  }
-
-  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&> name_ref() & {
-    return {name, __isset.name};
-  }
-
-  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&&> name_ref() && {
-    return {std::move(name), __isset.name};
-  }
-
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const std::unordered_map<::std::string, ::std::string>&> annotations_ref() const& {
     return {annotations, __isset.annotations};
   }
@@ -266,22 +218,6 @@ class StructField final : private apache::thrift::detail::st::ComparisonOperator
 
   FOLLY_ERASE ::apache::thrift::optional_field_ref<std::unordered_map<::std::string, ::std::string>&&> annotations_ref() && {
     return {std::move(annotations), __isset.annotations};
-  }
-
-  FOLLY_ERASE ::apache::thrift::field_ref<const int16_t&> order_ref() const& {
-    return {order, __isset.order};
-  }
-
-  FOLLY_ERASE ::apache::thrift::field_ref<const int16_t&&> order_ref() const&& {
-    return {std::move(order), __isset.order};
-  }
-
-  FOLLY_ERASE ::apache::thrift::field_ref<int16_t&> order_ref() & {
-    return {order, __isset.order};
-  }
-
-  FOLLY_ERASE ::apache::thrift::field_ref<int16_t&&> order_ref() && {
-    return {std::move(order), __isset.order};
   }
 
   bool get_isRequired() const {
@@ -407,22 +343,6 @@ class DataType final : private apache::thrift::detail::st::ComparisonOperators<D
   } __isset = {};
   bool operator==(const DataType& rhs) const;
   bool operator<(const DataType& rhs) const;
-
-  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&> name_ref() const& {
-    return {name, __isset.name};
-  }
-
-  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&&> name_ref() const&& {
-    return {std::move(name), __isset.name};
-  }
-
-  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&> name_ref() & {
-    return {name, __isset.name};
-  }
-
-  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&&> name_ref() && {
-    return {std::move(name), __isset.name};
-  }
 
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const std::unordered_map<int16_t,  ::apache::thrift::reflection::StructField>&> fields_ref() const& {
     return {fields, __isset.fields};
@@ -608,38 +528,6 @@ class Schema final : private apache::thrift::detail::st::ComparisonOperators<Sch
   } __isset = {};
   bool operator==(const Schema& rhs) const;
   bool operator<(const Schema& rhs) const;
-
-  FOLLY_ERASE ::apache::thrift::field_ref<const std::unordered_map<int64_t,  ::apache::thrift::reflection::DataType>&> dataTypes_ref() const& {
-    return {dataTypes, __isset.dataTypes};
-  }
-
-  FOLLY_ERASE ::apache::thrift::field_ref<const std::unordered_map<int64_t,  ::apache::thrift::reflection::DataType>&&> dataTypes_ref() const&& {
-    return {std::move(dataTypes), __isset.dataTypes};
-  }
-
-  FOLLY_ERASE ::apache::thrift::field_ref<std::unordered_map<int64_t,  ::apache::thrift::reflection::DataType>&> dataTypes_ref() & {
-    return {dataTypes, __isset.dataTypes};
-  }
-
-  FOLLY_ERASE ::apache::thrift::field_ref<std::unordered_map<int64_t,  ::apache::thrift::reflection::DataType>&&> dataTypes_ref() && {
-    return {std::move(dataTypes), __isset.dataTypes};
-  }
-
-  FOLLY_ERASE ::apache::thrift::field_ref<const std::unordered_map<::std::string, int64_t>&> names_ref() const& {
-    return {names, __isset.names};
-  }
-
-  FOLLY_ERASE ::apache::thrift::field_ref<const std::unordered_map<::std::string, int64_t>&&> names_ref() const&& {
-    return {std::move(names), __isset.names};
-  }
-
-  FOLLY_ERASE ::apache::thrift::field_ref<std::unordered_map<::std::string, int64_t>&> names_ref() & {
-    return {names, __isset.names};
-  }
-
-  FOLLY_ERASE ::apache::thrift::field_ref<std::unordered_map<::std::string, int64_t>&&> names_ref() && {
-    return {std::move(names), __isset.names};
-  }
   const std::unordered_map<int64_t,  ::apache::thrift::reflection::DataType>& get_dataTypes() const&;
   std::unordered_map<int64_t,  ::apache::thrift::reflection::DataType> get_dataTypes() &&;
 

@@ -26,39 +26,35 @@ class ThriftMetadataServiceAsyncClient : public apache::thrift::GeneratedAsyncCl
     return "ThriftMetadataService";
   }
 
-  virtual void getThriftServiceMetadata(std::unique_ptr<apache::thrift::RequestCallback> callback);
-  virtual void getThriftServiceMetadata(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
+  virtual void getRpcMetadata(std::unique_ptr<apache::thrift::RequestCallback> callback);
+  virtual void getRpcMetadata(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  private:
-  void getThriftServiceMetadataImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback);
+  void getRpcMetadataImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback);
  public:
-  virtual void sync_getThriftServiceMetadata( ::apache::thrift::metadata::ThriftServiceMetadataResponse& _return);
-  virtual void sync_getThriftServiceMetadata(apache::thrift::RpcOptions& rpcOptions,  ::apache::thrift::metadata::ThriftServiceMetadataResponse& _return);
-  virtual folly::Future< ::apache::thrift::metadata::ThriftServiceMetadataResponse> future_getThriftServiceMetadata();
-  virtual folly::SemiFuture< ::apache::thrift::metadata::ThriftServiceMetadataResponse> semifuture_getThriftServiceMetadata();
-  virtual folly::Future< ::apache::thrift::metadata::ThriftServiceMetadataResponse> future_getThriftServiceMetadata(apache::thrift::RpcOptions& rpcOptions);
-  virtual folly::SemiFuture< ::apache::thrift::metadata::ThriftServiceMetadataResponse> semifuture_getThriftServiceMetadata(apache::thrift::RpcOptions& rpcOptions);
-  virtual folly::Future<std::pair< ::apache::thrift::metadata::ThriftServiceMetadataResponse, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_getThriftServiceMetadata(apache::thrift::RpcOptions& rpcOptions);
-  virtual folly::SemiFuture<std::pair< ::apache::thrift::metadata::ThriftServiceMetadataResponse, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_getThriftServiceMetadata(apache::thrift::RpcOptions& rpcOptions);
+  virtual void sync_getRpcMetadata( ::apache::thrift::metadata::ThriftMetadata& _return);
+  virtual void sync_getRpcMetadata(apache::thrift::RpcOptions& rpcOptions,  ::apache::thrift::metadata::ThriftMetadata& _return);
+  virtual folly::Future< ::apache::thrift::metadata::ThriftMetadata> future_getRpcMetadata();
+  virtual folly::SemiFuture< ::apache::thrift::metadata::ThriftMetadata> semifuture_getRpcMetadata();
+  virtual folly::Future< ::apache::thrift::metadata::ThriftMetadata> future_getRpcMetadata(apache::thrift::RpcOptions& rpcOptions);
+  virtual folly::SemiFuture< ::apache::thrift::metadata::ThriftMetadata> semifuture_getRpcMetadata(apache::thrift::RpcOptions& rpcOptions);
+  virtual folly::Future<std::pair< ::apache::thrift::metadata::ThriftMetadata, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_getRpcMetadata(apache::thrift::RpcOptions& rpcOptions);
+  virtual folly::SemiFuture<std::pair< ::apache::thrift::metadata::ThriftMetadata, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_getRpcMetadata(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
-  folly::coro::Task< ::apache::thrift::metadata::ThriftServiceMetadataResponse> co_getThriftServiceMetadata() {
-    co_return co_await semifuture_getThriftServiceMetadata();
-  }
-  template <int = 0>
-  folly::coro::Task< ::apache::thrift::metadata::ThriftServiceMetadataResponse> co_getThriftServiceMetadata(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await semifuture_getThriftServiceMetadata(rpcOptions);
+  folly::coro::Task< ::apache::thrift::metadata::ThriftMetadata> co_getRpcMetadata() {
+    co_return co_await semifuture_getRpcMetadata();
   }
 #endif // FOLLY_HAS_COROUTINES
-  virtual void getThriftServiceMetadata(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback);
-  static folly::exception_wrapper recv_wrapped_getThriftServiceMetadata( ::apache::thrift::metadata::ThriftServiceMetadataResponse& _return, ::apache::thrift::ClientReceiveState& state);
-  static void recv_getThriftServiceMetadata( ::apache::thrift::metadata::ThriftServiceMetadataResponse& _return, ::apache::thrift::ClientReceiveState& state);
+  virtual void getRpcMetadata(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback);
+  static folly::exception_wrapper recv_wrapped_getRpcMetadata( ::apache::thrift::metadata::ThriftMetadata& _return, ::apache::thrift::ClientReceiveState& state);
+  static void recv_getRpcMetadata( ::apache::thrift::metadata::ThriftMetadata& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
-  virtual void recv_instance_getThriftServiceMetadata( ::apache::thrift::metadata::ThriftServiceMetadataResponse& _return, ::apache::thrift::ClientReceiveState& state);
-  virtual folly::exception_wrapper recv_instance_wrapped_getThriftServiceMetadata( ::apache::thrift::metadata::ThriftServiceMetadataResponse& _return, ::apache::thrift::ClientReceiveState& state);
+  virtual void recv_instance_getRpcMetadata( ::apache::thrift::metadata::ThriftMetadata& _return, ::apache::thrift::ClientReceiveState& state);
+  virtual folly::exception_wrapper recv_instance_wrapped_getRpcMetadata( ::apache::thrift::metadata::ThriftMetadata& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_>
-  void getThriftServiceMetadataT(Protocol_* prot, apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback);
+  void getRpcMetadataT(Protocol_* prot, apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback);
  public:
 };
 

@@ -82,7 +82,6 @@ list(REMOVE_ITEM files
   # io/Compression requires snappy library
   # Don't add dep until we need it
   ${FOLLY_DIR}/io/Compression.cpp
-  ${FOLLY_DIR}/logging/BridgeFromGoogleLogging.cpp
   ${FOLLY_DIR}/python/GILAwareManualExecutor.cpp
 )
 list(REMOVE_ITEM hfiles
@@ -109,7 +108,6 @@ list(REMOVE_ITEM hfiles
   # io/Compression requires snappy library
   # Don't add dep until we need it
   ${FOLLY_DIR}/io/Compression.h
-  ${FOLLY_DIR}/logging/BridgeFromGoogleLogging.h
   ${FOLLY_DIR}/python/AsyncioExecutor.h
   ${FOLLY_DIR}/python/GILAwareManualExecutor.h
 )

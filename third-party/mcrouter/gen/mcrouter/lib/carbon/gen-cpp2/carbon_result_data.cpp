@@ -12,8 +12,8 @@
 namespace carbon {
 
 constexpr const std::size_t _ResultEnumDataStorage::size;
-constexpr const std::array<Result, 34> _ResultEnumDataStorage::values;
-constexpr const std::array<folly::StringPiece, 34> _ResultEnumDataStorage::names;
+constexpr const std::array<Result, 33> _ResultEnumDataStorage::values;
+constexpr const std::array<folly::StringPiece, 33> _ResultEnumDataStorage::names;
 
 } // carbon
 

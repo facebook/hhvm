@@ -14,6 +14,7 @@ open Type_mapper
 module Env = Typing_env
 module TUtils = Typing_utils
 module Reason = Typing_reason
+module MakeType = Typing_make_type
 
 (* Mapper used by update_array* functions. It traverses Tunion and
  * modifies the type "inside" the Tvars - so it has side effects on the input
@@ -51,7 +52,7 @@ class virtual downcast_tabstract_to_array_type_mapper =
           this#on_type env x)
 
     method on_tgeneric env r x =
-      let ty = mk (r, Tgeneric x) in
+      let ty = MakeType.generic r x in
       this#try_super_types env ty
 
     method on_tdependent env r x ty =

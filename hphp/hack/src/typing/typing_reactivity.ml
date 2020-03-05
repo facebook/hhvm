@@ -405,7 +405,9 @@ let try_substitute_type_with_condition env cond_ty ty =
   generate_fresh_name_for_target_of_condition_type env ty cond_ty
   |> Option.map ~f:(fun fresh_type_argument_name ->
          let param_ty =
-           mk (Reason.Rwitness (get_pos ty), Tgeneric fresh_type_argument_name)
+           MakeType.generic
+             (Reason.Rwitness (get_pos ty))
+             fresh_type_argument_name
          in
          (* if generic type is already registered this means we already saw
        parameter with the same pair (declared type * condition type) so there

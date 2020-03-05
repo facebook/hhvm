@@ -702,7 +702,7 @@ let tconst_subsumption env class_name parent_typeconst child_typeconst on_error
     in
 
     let default =
-      mk (Reason.Rtconst_no_cstr child_typeconst.ttc_name, Tgeneric name)
+      MakeType.generic (Reason.Rtconst_no_cstr child_typeconst.ttc_name) name
     in
     let child_cstr =
       if child_is_abstract then

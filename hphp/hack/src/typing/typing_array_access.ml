@@ -93,7 +93,7 @@ let widen_for_array_get ~lhs_of_null_coalesce ~expr_pos index_expr env ty =
           List.map_env env tyl (fun env _ty ->
               Env.fresh_invariant_type_var env expr_pos)
         in
-        (env, Some (mk (r, Ttuple params)))
+        (env, Some (MakeType.tuple r params))
       | _ -> (env, None)
     end
   (* Whatever the lower bound, construct an open, singleton shape type. *)
@@ -341,10 +341,10 @@ let rec array_get
         (env, v)
       | Terr -> (env, err_witness env expr_pos)
       | Tdynamic -> (env, ty1)
-      | Tany _ -> (env, mk (Reason.Rnone, TUtils.tany env))
+      | Tany _ -> (env, TUtils.mk_tany env expr_pos)
       | Tarraykind AKempty ->
         let env = check_arraykey_index env expr_pos ty1 ty2 in
-        (env, mk (Reason.Rnone, TUtils.tany env))
+        (env, TUtils.mk_tany env expr_pos)
       | Tprim Tstring ->
         let ty = MakeType.string (Reason.Rwitness expr_pos) in
         let ty1 = MakeType.int (Reason.Ridx (fst e2, r)) in
@@ -445,7 +445,7 @@ let rec array_get
         if Partial.should_check_error (Env.get_mode env) 4005 then
           error_array env expr_pos ty1
         else
-          (env, mk (Reason.Rwitness expr_pos, TUtils.tany env))
+          (env, TUtils.mk_tany env expr_pos)
       | Tnewtype (ts, [ty], bound) ->
         begin
           match deref bound with
@@ -795,7 +795,7 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
                let idx = int_of_string n in
                match List.split_n tyl idx with
                | (tyl', _ :: tyl'') ->
-                 (env, mk (r, Ttuple (tyl' @ (ty2 :: tyl''))))
+                 (env, MakeType.tuple r (tyl' @ (ty2 :: tyl'')))
                | _ -> fail Reason.index_tuple
              with _ -> fail Reason.index_tuple)
           | _ -> fail Reason.URtuple_access

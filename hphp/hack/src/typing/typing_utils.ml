@@ -636,6 +636,8 @@ let fun_mutable user_attributes =
 
 let tany = Env.tany
 
+let mk_tany env p = mk (Reason.Rwitness p, tany env)
+
 let decl_tany = Env.decl_tany
 
 let terr env r =

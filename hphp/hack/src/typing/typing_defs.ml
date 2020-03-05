@@ -228,6 +228,11 @@ let is_var_v t v =
   | Tvar v' when Ident.equal v v' -> true
   | _ -> false
 
+let is_generic t =
+  match get_node t with
+  | Tgeneric _ -> true
+  | _ -> false
+
 let is_dynamic t =
   match get_node t with
   | Tdynamic -> true

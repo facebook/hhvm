@@ -104,8 +104,8 @@ let expr_error env (r : Reason.t) (e : Nast.expr) =
   let ty = TUtils.terr env r in
   (env, with_type ty Tast.dummy_saved_env e, ty)
 
-let expr_any env r e =
-  let ty = mk (r, Typing_utils.tany env) in
+let expr_any env p e =
+  let ty = Typing_utils.mk_tany env p in
   (env, with_type ty Tast.dummy_saved_env e, ty)
 
 let compare_field_kinds x y =
@@ -131,7 +131,7 @@ let unbound_name env (pos, name) e =
   | FileInfo.Mdecl
   | FileInfo.Mpartial
   | FileInfo.Mphp ->
-    expr_any env (Reason.Rwitness pos) e
+    expr_any env pos e
 
 (* Is this type Traversable<vty> or Container<vty> for some vty? *)
 let get_value_collection_inst ty =
@@ -472,8 +472,9 @@ and check_using_clause env has_await ((pos, content) as using_clause) =
       List.map_env env using_clauses (check_using_expr has_await)
     in
     let (typed_using_clauses, vars_list) = List.unzip pairs in
-    let ty_ = Ttuple (List.map typed_using_clauses Tast.get_type) in
-    let ty = mk (Reason.Rnone, ty_) in
+    let ty =
+      MakeType.tuple Reason.Rnone (List.map typed_using_clauses Tast.get_type)
+    in
     ( env,
       Tast.make_typed_expr pos ty (Aast.Expr_list typed_using_clauses),
       List.concat vars_list )
@@ -1345,7 +1346,7 @@ and expr_
       then
         (* If one of the values comes from PHP land, we have to be conservative
          * and consider that we don't know what the type of the values are. *)
-        (env, mk (Reason.Rwitness use_pos, Typing_utils.tany env))
+        (env, Typing_utils.mk_tany env p)
       else
         (env, supertype)
   in
@@ -1419,8 +1420,7 @@ and expr_
   | BracedExpr _ ->
     failwith "AST should not contain these nodes"
   | Omitted ->
-    let r = Reason.Rwitness p in
-    let ty = mk (r, Typing_utils.tany env) in
+    let ty = Typing_utils.mk_tany env p in
     make_result env p Aast.Omitted ty
   | ParenthesizedExpr e ->
     let (env, te, ty) = expr env e in
@@ -1757,12 +1757,7 @@ and expr_
       Errors.unbound_global cst_pos;
       let ty = err_witness env cst_pos in
       make_result env cst_pos (Aast.Id id) ty
-    | None ->
-      make_result
-        env
-        p
-        (Aast.Id id)
-        (mk (Reason.Rwitness cst_pos, Typing_utils.tany env))
+    | None -> make_result env p (Aast.Id id) (Typing_utils.mk_tany env cst_pos)
     | Some (ty, _) ->
       let (env, ty) = Phase.localize_with_self ~pos:p env ty in
       make_result env p (Aast.Id id) ty)
@@ -1865,9 +1860,9 @@ and expr_
       in
       let params =
         List.map (Cls.tparams class_) (fun { tp_name = (p, n); _ } ->
-            mk (Reason.Rwitness p, Tgeneric n))
+            MakeType.generic (Reason.Rwitness p) n)
       in
-      let obj_type = mk (Reason.Rwitness p, Tapply (pos_cname, params)) in
+      let obj_type = MakeType.apply (Reason.Rwitness p) pos_cname params in
       let ety_env =
         {
           (Phase.env_with_self env) with
@@ -1941,7 +1936,7 @@ and expr_
           env
           p
           (Aast.Method_caller (pos_cname, meth_name))
-          (mk (Reason.Rwitness pos, Typing_utils.tany env))))
+          (Typing_utils.mk_tany env pos)))
   | FunctionPointer ((pos_cc, Class_const ((cpos, cid), meth)), targs) ->
     let (env, _, ce, cty) =
       static_class_id ~check_constraints:true cpos env [] cid
@@ -2093,7 +2088,7 @@ and expr_
           exprs_expected (pos, ur, expected_tyl) env el
         | _ -> exprs env el)
     in
-    let ty = mk (Reason.Rwitness p, Ttuple tyl) in
+    let ty = MakeType.tuple (Reason.Rwitness p) tyl in
     make_result env p (Aast.List tel) ty
   | Pair (e1, e2) ->
     (* Use expected type to determine expected element types *)
@@ -2113,7 +2108,7 @@ and expr_
   | Expr_list el ->
     (* TODO: use expected type to determine tuple component types *)
     let (env, tel, tyl) = exprs env el in
-    let ty = mk (Reason.Rwitness p, Ttuple tyl) in
+    let ty = MakeType.tuple (Reason.Rwitness p) tyl in
     make_result env p (Aast.Expr_list tel) ty
   | Array_get (e, None) ->
     let (env, te, _) = update_array_type p env e None valkind in
@@ -2170,10 +2165,7 @@ and expr_
       p
       (Aast.Call
          ( Cnormal,
-           Tast.make_typed_expr
-             pos_id
-             (mk (Reason.Rnone, TUtils.tany env))
-             (Aast.Id id),
+           Tast.make_typed_expr pos_id (TUtils.mk_tany env pos_id) (Aast.Id id),
            [],
            tel,
            None ))
@@ -2348,7 +2340,7 @@ and expr_
             ~f:
               begin
                 fun { tp_name = (p, x); _ } ->
-                mk (Reason.Rwitness p, Tgeneric x)
+                MakeType.generic (Reason.Rwitness p) x
               end
             tparaml
         in
@@ -2468,18 +2460,14 @@ and expr_
       if TUtils.is_dynamic env ty1 then
         MakeType.dynamic (Reason.Rwitness p)
       else
-        mk (Reason.Rwitness p, Typing_utils.tany env)
+        Typing_utils.mk_tany env p
     in
     let ((pos, _), te2) = te2 in
     let env = might_throw env in
     let te2 = Tast.make_typed_expr pos ty te2 in
     make_result env p (Aast.Obj_get (te1, te2, nullflavor)) ty
   | Yield_break ->
-    make_result
-      env
-      p
-      Aast.Yield_break
-      (mk (Reason.Rwitness p, Typing_utils.tany env))
+    make_result env p Aast.Yield_break (Typing_utils.mk_tany env p)
   | Yield af ->
     let (env, (taf, opt_key, value)) = array_field env af in
     let (env, send) = Env.fresh_type env p in
@@ -2492,7 +2480,7 @@ and expr_
           | Ast_defs.FSync
           | Ast_defs.FAsync ->
             Errors.internal_error p "yield found in non-generator";
-            (env, mk (Reason.Rwitness p, Typing_utils.tany env))
+            (env, Typing_utils.mk_tany env p)
           | Ast_defs.FGenerator -> (env, MakeType.int (Reason.Rwitness p))
           | Ast_defs.FAsyncGenerator ->
             let (env, ty) = Env.fresh_type env p in
@@ -3299,7 +3287,7 @@ and anon_bind_variadic env vparam variadic_ty =
 and anon_bind_opt_param env param : env =
   match param.param_expr with
   | None ->
-    let ty = mk (Reason.Rwitness param.param_pos, Typing_utils.tany env) in
+    let ty = Typing_utils.mk_tany env param.param_pos in
     let (env, _) = bind_param env (ty, param) in
     env
   | Some default ->
@@ -3629,13 +3617,12 @@ and new_object
     let (env, new_ty) =
       let ((_, cid_ty), _) = tcid in
       let (env, cid_ty) = Env.expand_type env cid_ty in
-      match get_node cid_ty with
-      | Tgeneric _ -> (env, cid_ty)
-      | _ ->
-        if check_parent then
-          (env, ty)
-        else
-          ExprDepTy.make env cid ty
+      if is_generic cid_ty then
+        (env, cid_ty)
+      else if check_parent then
+        (env, ty)
+      else
+        ExprDepTy.make env cid ty
     in
     (env, tcid, tal, tel, typed_unpack_element, new_ty, ctor_fty)
   in
@@ -3730,13 +3717,12 @@ and new_object
       let (env, new_ty) =
         let ((_, cid_ty), _) = tcid in
         let (env, cid_ty) = Env.expand_type env cid_ty in
-        match get_node cid_ty with
-        | Tgeneric _ -> (env, cid_ty)
-        | _ ->
-          if check_parent then
-            (env, c_ty)
-          else
-            ExprDepTy.make env cid c_ty
+        if is_generic cid_ty then
+          (env, cid_ty)
+        else if check_parent then
+          (env, c_ty)
+        else
+          ExprDepTy.make env cid c_ty
       in
       (* Set variance according to type of `new` expression now. Lambda arguments
        * to the constructor might depend on it, and `call_construct` only uses
@@ -4233,7 +4219,7 @@ and call_parent_construct pos env el unpacked_element =
   | Some parent -> check_parent_construct pos env el unpacked_element parent
   | None ->
     (* continue here *)
-    let ty = mk (Reason.Rwitness pos, Typing_utils.tany env) in
+    let ty = Typing_utils.mk_tany env pos in
     let default = (env, [], None, ty, ty, ty) in
     (match get_node (Env.get_self env) with
     | Tclass ((_, self), _, _) ->
@@ -4301,10 +4287,7 @@ and dispatch_call
   let make_call_special env id tel ty =
     make_call
       env
-      (Tast.make_typed_expr
-         fpos
-         (mk (Reason.Rnone, TUtils.tany env))
-         (Aast.Id id))
+      (Tast.make_typed_expr fpos (TUtils.mk_tany env fpos) (Aast.Id id))
       []
       tel
       None
@@ -4654,10 +4637,7 @@ and dispatch_call
                   Errors.try_
                     (fun () -> try_container env)
                     (fun _ ->
-                      ( env,
-                        fun env _ ->
-                          (env, mk (Reason.Rwitness p, Typing_utils.tany env))
-                      ))))
+                      (env, (fun env _ -> (env, Typing_utils.mk_tany env p))))))
         in
         (env, tr)
     in
@@ -5451,7 +5431,7 @@ and class_get_
   | (_, Tclass ((_, c), _, paraml)) ->
     let class_ = Env.get_class env c in
     (match class_ with
-    | None -> (env, (mk (Reason.Rwitness p, Typing_utils.tany env), []))
+    | None -> (env, (Typing_utils.mk_tany env p, []))
     | Some class_ ->
       (* We need to instantiate generic parameters in the method signature *)
       let ety_env =
@@ -5637,7 +5617,7 @@ and class_get_
       ( Tvar _ | Tnonnull | Tarraykind _ | Toption _ | Tprim _ | Tfun _
       | Ttuple _ | Tobject | Tshape _ | Tpu _ | Tpu_type_access _ ) ) ->
     (* should never happen; static_class_id takes care of these *)
-    (env, (mk (Reason.Rnone, Typing_utils.tany env), []))
+    (env, (Typing_utils.mk_tany env p, []))
 
 and class_id_for_new ~exact p env cid explicit_targs =
   let (env, tal, te, cid_ty) =
@@ -5857,17 +5837,12 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
           (List.map ~f:snd tal)
       in
       let r = Reason.Rhint p in
-      let tgeneric = mk (r, Tgeneric id) in
+      let tgeneric = MakeType.generic r id in
       make_result env tal (Aast.CI c) tgeneric
     else
       let class_ = Env.get_class env (snd c) in
       (match class_ with
-      | None ->
-        make_result
-          env
-          []
-          (Aast.CI c)
-          (mk (Reason.Rwitness p, Typing_utils.tany env))
+      | None -> make_result env [] (Aast.CI c) (Typing_utils.mk_tany env p)
       | Some class_ ->
         let (env, ty, tal) =
           List.map ~f:snd tal
@@ -5909,7 +5884,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
         Inter.intersect_list env r tyl
       | (_, Tdynamic) -> (env, base_ty)
       | (_, (Tany _ | Tprim Tstring | Tobject)) when not (Env.is_strict env) ->
-        (env, mk (Reason.Rwitness p, Typing_utils.tany env))
+        (env, Typing_utils.mk_tany env p)
       | (_, Terr) -> (env, err_witness env p)
       | (r, Tvar _) ->
         Errors.unknown_type "an object" p (Reason.to_string "It is unknown" r);
@@ -5959,7 +5934,7 @@ and call_construct p env class_ params el unpacked_element cid =
       (Cls.where_constraints class_)
   in
   if Cls.is_xhp class_ then
-    (env, tcid, [], None, mk (Reason.Rnone, TUtils.tany env))
+    (env, tcid, [], None, TUtils.mk_tany env p)
   else
     let cstr = Env.get_construct env class_ in
     let mode = Env.get_mode env in
@@ -6106,7 +6081,7 @@ and call
                     ExpectedTy.make
                       pos
                       Reason.URparam
-                      (mk (Reason.Rnone, Typing_utils.tany env))
+                      (Typing_utils.mk_tany env pos)
                   in
                   let (env, te, _) = expr ~expected env elt in
                   (env, te))
@@ -6129,7 +6104,7 @@ and call
                       ExpectedTy.make
                         pos
                         Reason.URparam
-                        (mk (Reason.Rnone, Typing_utils.tany env))
+                        (Typing_utils.mk_tany env pos)
                     in
                     expr ~expected env elt
                   in
@@ -6168,7 +6143,7 @@ and call
               if is_dynamic efty then
                 MakeType.dynamic (Reason.Rdynamic_call pos)
               else
-                mk (Reason.Rnone, Typing_utils.tany env)
+                Typing_utils.mk_tany env pos
             in
             (env, (tel, None, ty))
           | (_, Tunion [ty]) ->
@@ -6250,7 +6225,7 @@ and call
                   ExpectedTy.make
                     pos
                     Reason.URparam
-                    (mk (Reason.Rnone, Typing_utils.tany env))
+                    (Typing_utils.mk_tany env pos)
                 in
                 let (env, te, ty) = expr ~expected env e in
                 (env, Some (te, ty))
@@ -6732,7 +6707,7 @@ and class_for_refinement env p reason ivar_pos ivar_ty hint_ty =
       List.map2_env env ivar_tyl hint_tyl (fun env ivar_ty hint_ty ->
           class_for_refinement env p reason ivar_pos ivar_ty hint_ty)
     in
-    (env, mk (reason, Ttuple tyl))
+    (env, MakeType.tuple reason tyl)
   | ( _,
       ( Tany _ | Tprim _ | Toption _ | Ttuple _ | Tnonnull | Tshape _ | Tvar _
       | Tgeneric _ | Tnewtype _ | Tdependent _ | Tarraykind _ | Tunion _
@@ -6771,7 +6746,7 @@ and generate_fresh_tparams env class_info reason hint_tyl =
       begin
         match get_node ty with
         | Tgeneric name when Env.is_fresh_generic_parameter name ->
-          (env, (Some (tp, name), mk (reason, Tgeneric name)))
+          (env, (Some (tp, name), MakeType.generic reason name))
         | _ -> (env, (None, ty))
       end
     | None ->
@@ -6783,7 +6758,7 @@ and generate_fresh_tparams env class_info reason hint_tyl =
           ~enforceable
           ~newable
       in
-      (env, (Some (tp, new_name), mk (reason, Tgeneric new_name)))
+      (env, (Some (tp, new_name), MakeType.generic reason new_name))
   in
   let (env, tparams_and_tyl) =
     List.map2_env env hint_tyl (Cls.tparams class_info) ~f:replace_wildcard
@@ -6909,7 +6884,7 @@ and is_array env ty p pred_name arg_expr =
           ~enforceable:false
           ~newable:false
       in
-      let tarrkey = mk (r, Tgeneric tarrkey_name) in
+      let tarrkey = MakeType.generic r tarrkey_name in
       let env =
         SubType.add_constraint
           p
@@ -6926,7 +6901,7 @@ and is_array env ty p pred_name arg_expr =
           ~enforceable:false
           ~newable:false
       in
-      let tfresh = mk (r, Tgeneric tfresh_name) in
+      let tfresh = MakeType.generic r tfresh_name in
       (* This is the refined type of e inside the branch *)
       let refined_ty =
         match ty with

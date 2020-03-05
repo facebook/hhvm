@@ -412,8 +412,7 @@ and fun_arity tcopt root variance static env arity =
 and fun_param
     tcopt root variance static env { fp_type = { et_type = ty; _ }; fp_kind; _ }
     =
-  let reason = get_reason ty in
-  let pos = Reason.to_pos reason in
+  let pos = get_pos ty in
   match fp_kind with
   | FPnormal ->
     let reason = (pos, Rfun_parameter static, Pcontravariant) in

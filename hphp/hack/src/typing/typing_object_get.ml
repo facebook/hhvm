@@ -156,9 +156,7 @@ and obj_get_concrete_ty
     (id_pos, id_str)
     k_lhs
     on_error =
-  let default () =
-    (env, (mk (Reason.Rwitness id_pos, Typing_utils.tany env), []))
-  in
+  let default () = (env, (Typing_utils.mk_tany env id_pos, [])) in
   let mk_ety_env r class_info x e paraml =
     let this_ty = k_lhs (mk (r, Tclass (x, e, paraml))) in
     {
@@ -212,7 +210,7 @@ and obj_get_concrete_ty
         let paraml =
           if List.is_empty paraml then
             List.map (Cls.tparams class_info) (fun _ ->
-                mk (Reason.Rwitness id_pos, Typing_utils.tany env))
+                Typing_utils.mk_tany env id_pos)
           else
             paraml
         in

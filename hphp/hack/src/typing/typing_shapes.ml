@@ -197,7 +197,7 @@ let idx env ~expr_pos ~fun_pos ~shape_pos shape_ty field default =
   let (env, res) = Env.fresh_type env expr_pos in
   let (env, res) =
     match TUtils.shape_field_name env field with
-    | None -> (env, mk (Reason.Rwitness (fst field), TUtils.tany env))
+    | None -> (env, TUtils.mk_tany env (fst field))
     | Some field_name ->
       let fake_super_shape_ty =
         make_idx_fake_super_shape
@@ -259,7 +259,7 @@ let at env ~expr_pos ~shape_pos shape_ty field =
   let (env, res) = Env.fresh_type env expr_pos in
   let (env, res) =
     match TUtils.shape_field_name env field with
-    | None -> (env, mk (Reason.Rwitness (fst field), TUtils.tany env))
+    | None -> (env, TUtils.mk_tany env (fst field))
     | Some field_name ->
       let fake_super_shape_ty =
         make_idx_fake_super_shape
@@ -283,7 +283,7 @@ let at env ~expr_pos ~shape_pos shape_ty field =
 
 let remove_key p env shape_ty field =
   match TUtils.shape_field_name env field with
-  | None -> (env, mk (Reason.Rwitness (fst field), TUtils.tany env))
+  | None -> (env, TUtils.mk_tany env (fst field))
   | Some field_name -> shrink_shape p field_name env shape_ty
 
 let to_collection env shape_ty res return_type =
@@ -314,9 +314,9 @@ let to_collection env shape_ty res return_type =
                         match Env.get_const env class_ mid with
                         | Some const ->
                           Typing_phase.localize_with_self env const.cc_type
-                        | None -> (env, mk (Reason.Rwitness p, TUtils.tany env))
+                        | None -> (env, TUtils.mk_tany env p)
                       end
-                    | None -> (env, mk (Reason.Rwitness p, TUtils.tany env))
+                    | None -> (env, TUtils.mk_tany env p)
                   end)
           in
           let (env, key) = Typing_union.union_list env r keys in

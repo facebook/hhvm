@@ -113,6 +113,10 @@ let nullable_locl r ty =
 
 let nothing r = mk (r, Tunion [])
 
+let apply r id tyl = mk (r, Tapply (id, tyl))
+
+let tuple r tyl = mk (r, Ttuple tyl)
+
 let union r tyl =
   match tyl with
   | [ty] -> ty

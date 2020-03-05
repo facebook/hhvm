@@ -96,10 +96,10 @@ module ConditionTypes = struct
         | Some (((p, _) as sid), cls) ->
           let params =
             List.map (Cls.tparams cls) ~f:(fun { tp_name = (p, x); _ } ->
-                mk (Reason.Rwitness p, Tgeneric x))
+                MakeType.generic (Reason.Rwitness p) x)
           in
           let subst = Decl_instantiate.make_subst (Cls.tparams cls) [] in
-          let ty = mk (Reason.Rwitness p, Tapply (sid, params)) in
+          let ty = MakeType.apply (Reason.Rwitness p) sid params in
           Decl_instantiate.instantiate subst ty
       in
       let ety_env = Phase.env_with_self env in
@@ -1170,13 +1170,15 @@ and simplify_subtype_i
       | ConstraintType _ -> default_subtype env
       (* If subtype and supertype are the same generic parameter, we're done *)
       | LoclType ty_sub ->
-        (match deref ty_sub with
-        | (_, Tgeneric name_sub) when String.equal name_sub name_super ->
-          valid ()
+        (match get_node ty_sub with
+        | Tgeneric name_sub when String.equal name_sub name_super -> valid ()
         (* When decomposing subtypes for the purpose of adding bounds on generic
          * parameters to the context, (so seen_generic_params = None), leave
          * subtype so that the bounds get added *)
-        | (_, (Tvar _ | Tunion _ | Terr)) -> default_subtype env
+        | Tvar _
+        | Tunion _
+        | Terr ->
+          default_subtype env
         | _ ->
           (match subtype_env.seen_generic_params with
           | None -> default ()

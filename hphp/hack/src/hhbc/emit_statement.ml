@@ -238,7 +238,7 @@ and emit_stmt env (pos, stmt) =
   | A.Block b -> emit_stmts env b
   | A.If (condition, consequence, alternative) ->
     emit_if env pos condition consequence alternative
-  | A.While (e, b) -> emit_while env e (pos, A.Block b)
+  | A.While (e, b) -> emit_while env e b
   | A.Using
       A.
         {
@@ -250,8 +250,8 @@ and emit_stmt env (pos, stmt) =
     emit_using env pos is_block_scoped has_await e (block_pos b, A.Block b)
   | A.Break -> emit_break env pos
   | A.Continue -> emit_continue env pos
-  | A.Do (b, e) -> emit_do env (pos, A.Block b) e
-  | A.For (e1, e2, e3, b) -> emit_for env pos e1 e2 e3 (pos, A.Block b)
+  | A.Do (b, e) -> emit_do env b e
+  | A.For (e1, e2, e3, b) -> emit_for env pos e1 e2 e3 b
   | A.Throw ((_, _) as expr) ->
     gather [emit_expr env expr; Emit_pos.emit_pos pos; instr (IContFlow Throw)]
   | A.Try (try_block, catch_list, finally_block) ->
@@ -275,7 +275,7 @@ and emit_stmt env (pos, stmt) =
         (pos, A.Block finally_block)
   | A.Switch (e, cl) -> emit_switch env pos e cl
   | A.Foreach (collection, iterator, block) ->
-    emit_foreach env pos collection iterator (pos, A.Block block)
+    emit_foreach env pos collection iterator block
   | A.Def_inline def -> emit_def_inline def
   | A.Awaitall (el, b) -> emit_awaitall env pos el b
   | A.Markup ((_, s), echo_expr_opt) ->
@@ -439,7 +439,7 @@ and emit_while env e b =
     [
       get_instrs @@ emit_jmpz env e break_label;
       instr_label start_label;
-      Emit_env.do_in_loop_body break_label cont_label env b emit_stmt;
+      Emit_env.do_in_loop_body break_label cont_label env b emit_stmts;
       instr_label cont_label;
       get_instrs @@ emit_jmpnz env (fst e) (snd e) start_label;
       instr_label break_label;
@@ -560,7 +560,7 @@ and emit_do env b e =
   gather
     [
       instr_label start_label;
-      Emit_env.do_in_loop_body break_label cont_label env b emit_stmt;
+      Emit_env.do_in_loop_body break_label cont_label env b emit_stmts;
       instr_label cont_label;
       get_instrs @@ emit_jmpnz env (fst e) (snd e) start_label;
       instr_label break_label;
@@ -616,7 +616,7 @@ and emit_for (env : Emit_env.t) p (e1 : Tast.expr) e2 e3 b =
       emit_ignored_expr env e1;
       emit_cond ~jmpz:true break_label;
       instr_label start_label;
-      Emit_env.do_in_loop_body break_label cont_label env b emit_stmt;
+      Emit_env.do_in_loop_body break_label cont_label env b emit_stmts;
       instr_label cont_label;
       emit_ignored_expr env e3;
       emit_cond ~jmpz:false start_label;
@@ -1120,7 +1120,7 @@ and emit_foreach_await env pos collection iterator block =
         instr_istypec OpNull;
         instr_jmpnz pop_and_exit_label;
         emit_foreach_await_key_value_storage env iterator;
-        Emit_env.do_in_loop_body exit_label next_label env block emit_stmt;
+        Emit_env.do_in_loop_body exit_label next_label env block emit_stmts;
         emit_pos pos;
         instr_jmp next_label;
         instr_label pop_and_exit_label;
@@ -1150,7 +1150,7 @@ and emit_foreach_ env pos collection iterator block =
       env
       ~iter:iter_id
       block
-      emit_stmt
+      emit_stmts
   in
   ( gather [instr_collection; emit_pos (Tast_annotate.get_pos collection); init],
     gather

@@ -181,9 +181,9 @@ let with_try env = { env with env_in_try = true }
 
 let with_rx_body rx_body env = { env with env_in_rx_body = rx_body }
 
-let do_in_loop_body break_label continue_label ?iter env s f =
-  Jump_targets.with_loop break_label continue_label iter env.env_jump_targets s
-  @@ fun env_jump_targets s -> f { env with env_jump_targets } s
+let do_in_loop_body break_label continue_label ?iter env b f =
+  Jump_targets.with_loop break_label continue_label iter env.env_jump_targets b
+  @@ fun env_jump_targets b -> f { env with env_jump_targets } b
 
 let do_in_switch_body end_label env s f =
   Jump_targets.with_switch end_label env.env_jump_targets s

@@ -83,6 +83,12 @@ let collect_valid_target_labels_for_stmt s =
   else
     collect_valid_target_labels_aux SSet.empty s
 
+let collect_valid_target_labels_for_block b =
+  if not !function_has_goto_ then
+    SSet.empty
+  else
+    collect_valid_target_labels_for_block_aux SSet.empty b
+
 let collect_valid_target_labels_for_defs defs =
   if not !function_has_goto_ then
     SSet.empty
@@ -227,10 +233,10 @@ let run_and_release_ids _labels f s t =
   (* SSet.iter (fun l -> release_id (Label.Named l)) labels; *)
   r
 
-let with_loop label_break label_continue iterator t s f =
-  let labels = collect_valid_target_labels_for_stmt s in
+let with_loop label_break label_continue iterator t b f =
+  let labels = collect_valid_target_labels_for_block b in
   Loop ({ label_break; label_continue; iterator }, labels) :: t
-  |> run_and_release_ids labels f s
+  |> run_and_release_ids labels f b 
 
 let with_switch end_label t cl f =
   let labels = collect_valid_target_labels_for_switch_cases cl in

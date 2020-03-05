@@ -499,21 +499,25 @@ fn deserialize_flags<'de, D: Deserializer<'de>, P: PrefixedFlags>(
                 num => num.parse::<i32>().map(|v| v > 0).map_err(de::Error::custom),
             };
             while let Some((ref k, ref v)) = map.next_entry::<String, Arg<GlobalValue>>()? {
-                let truish = match v.get() {
-                    GlobalValue::String(s) => from_str(s)?,
-                    GlobalValue::Bool(b) => *b,
-                    GlobalValue::Int(n) => *n != 0,
-                    _ => continue, // types such as VecStr aren't parsable as flags
-                };
-                // println!("k={:?} v={:?}~{} flag={:?}", k, v, truish, by_name.get(k));
                 let mut found = None;
                 let k: &str = &k;
                 let k: &str = options_cli::CANON_BY_ALIAS.get(k).unwrap_or(&k);
                 if k.starts_with(P::PREFIX) {
                     found = by_name.get(&k[prefix_len..]).map(|p| *p);
                 }
-
                 if let Some(flag) = found {
+                    let truish = match v.get() {
+                        GlobalValue::String(s) => {
+                            if s.is_empty() {
+                                false
+                            } else {
+                                from_str(s)?
+                            }
+                        }
+                        GlobalValue::Bool(b) => *b,
+                        GlobalValue::Int(n) => *n != 0,
+                        _ => continue, // types such as VecStr aren't parsable as flags
+                    };
                     if truish {
                         flags |= flag
                     } else {
@@ -752,6 +756,15 @@ mod tests {
     }
 
     #[test]
+    fn test_empty_flag_treated_as_false_json_de() {
+        // verify a true-by-default flag was parsed as false if ""
+        let hhvm: Hhvm =
+            serde_json::from_str(r#"{ "hhvm.emit_func_pointers": { "global_value": "" } }"#)
+                .unwrap();
+        assert!(!hhvm.flags.contains(HhvmFlags::EMIT_FUNC_POINTERS));
+    }
+
+    #[test]
     fn test_options_flat_arg_alias_json_de() {
         let act: Options = serde_json::value::from_value(json!({
             "eval.jitenablerenamefunction": {
@@ -937,6 +950,17 @@ mod tests {
         const CLI_ARG: &str = "hhvm.include_roots=foo:bar,bar:baz";
         let act = Options::from_configs(&EMPTY_STRS, &[CLI_ARG]).unwrap();
         assert_eq!(act.hhvm.include_roots.global_value, exp_include_roots,);
+    }
+
+    #[test]
+    fn test_options_de_regression_boolish_parse_on_unrelated_opt() {
+        // Note: this fails if bool-looking options are too eagerly parsed
+        // (i.e., before they're are looked by JSON key/name and match a flag)
+        let _: Options = serde_json::value::from_value(json!({
+            "hhvm.only.opt1": { "global_value": "12345678901234567890" },
+             "hhvm.only.opt2": { "global_value": "" },
+        }))
+        .expect("boolish-parsing logic wrongly triggered");
     }
 
     #[test]

@@ -13,7 +13,6 @@ open String_utils
 open Sys_utils
 open Typing_env_types
 module Inf = Typing_inference_env
-module TNBody = Typing_naming_body
 
 module StringAnnotation = struct
   type t = string

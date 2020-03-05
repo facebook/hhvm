@@ -31,7 +31,6 @@ module Union = Typing_union
 module Inter = Typing_intersection
 module SN = Naming_special_names
 module TVis = Typing_visibility
-module TNBody = Typing_naming_body
 module Phase = Typing_phase
 module TOG = Typing_object_get
 module Subst = Decl_subst

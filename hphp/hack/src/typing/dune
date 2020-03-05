@@ -133,22 +133,6 @@
   (preprocess (pps ppx_deriving.std)))
 
 (library
-  (name typing_naming_body)
-  (wrapped false)
-  (modules
-    typing_func_terminality
-    typing_get_locals
-    typing_naming_body)
-  (libraries
-    ast
-    core_kernel
-    full_fidelity
-    nast
-    tast
-    typing_defs)
-  (preprocess (pps ppx_deriving.std))) ; See T41851208
-
-(library
   (name typing)
   (wrapped false)
   (modules
@@ -163,6 +147,7 @@
     typing_disposable
     typing_extends
     typing_exts
+    typing_func_terminality
     typing_helpers
     typing_inheritance
     typing_lenv
@@ -181,8 +166,7 @@
     procs_procs
     tast
     tast_check
-    nast_check
-    typing_naming_body)
+    nast_check)
   (preprocess (pps ppx_deriving.std))) ; See T41851208
 
 (library

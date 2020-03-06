@@ -5,6 +5,7 @@
 
 #![allow(unused_variables, dead_code)]
 
+use ast_class_expr_rust::ClassExpr;
 use ast_constant_folder_rust as ast_constant_folder;
 use ast_scope_rust::Scope;
 use emit_fatal_rust as emit_fatal;
@@ -12,7 +13,7 @@ use emit_symbol_refs_rust as emit_symbol_refs;
 use emit_type_constant_rust as emit_type_constant;
 use env::{emitter::Emitter, local, Env, Flags as EnvFlags};
 use hhbc_ast_rust::*;
-use hhbc_id_rust::{class, function, method, Id};
+use hhbc_id_rust::{class, function, method, prop, Id};
 use hhbc_string_utils_rust as string_utils;
 use instruction_sequence_rust::{unrecoverable, Error::Unrecoverable, InstrSeq, Result};
 use itertools::Itertools;
@@ -389,7 +390,7 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
         }
         Expr_::ObjGet(e) => emit_obj_get(env, pos, QueryOp::CGet, e),
         Expr_::Call(c) => emit_call_expr(emitter, env, pos, None, c),
-        Expr_::New(e) => emit_new(env, pos, e),
+        Expr_::New(e) => emit_new(emitter, env, pos, e),
         Expr_::Record(e) => emit_record(env, pos, e),
         Expr_::Array(es) => {
             let c = emit_collection(emitter, env, expression, es, None)?;
@@ -786,7 +787,33 @@ fn emit_static_collection(
     pos: &Pos,
     tv: TypedValue,
 ) -> Result {
-    unimplemented!()
+    let arrprov_enabled = e.options().hhvm.flags.contains(HhvmFlags::ARRAY_PROVENANCE);
+    let transform_instr = match transform_to_collection {
+        Some(collection_type) => InstrSeq::make_colfromarray(collection_type),
+        _ => InstrSeq::Empty,
+    };
+    Ok(
+        if arrprov_enabled && env.scope.has_function_attribute("__ProvenanceSkipFrame") {
+            InstrSeq::gather(vec![
+                emit_pos(e, pos)?,
+                InstrSeq::make_nulluninit(),
+                InstrSeq::make_nulluninit(),
+                InstrSeq::make_nulluninit(),
+                InstrSeq::make_typedvalue(tv),
+                InstrSeq::make_fcallfuncd(
+                    FcallArgs::new(FcallFlags::default(), 0, vec![], None, 1),
+                    function::from_raw_string("HH\\tag_provenance_here"),
+                ),
+                transform_instr,
+            ])
+        } else {
+            InstrSeq::gather(vec![
+                emit_pos(e, pos)?,
+                InstrSeq::make_typedvalue(tv),
+                transform_instr,
+            ])
+        },
+    )
 }
 
 fn emit_dynamic_collection(
@@ -1417,7 +1444,97 @@ fn emit_call_expr(
     }
 }
 
+fn emit_reified_generic_instrs(e: &mut Emitter, pos: &Pos, is_fun: bool, index: usize) -> Result {
+    let base = if is_fun {
+        InstrSeq::make_basel(
+            local::Type::Named(string_utils::reified::GENERICS_LOCAL_NAME.into()),
+            MemberOpMode::Warn,
+        )
+    } else {
+        InstrSeq::gather(vec![
+            InstrSeq::make_checkthis(),
+            InstrSeq::make_baseh(),
+            InstrSeq::make_dim_warn_pt(prop::from_raw_string(string_utils::reified::PROP_NAME)),
+        ])
+    };
+    emit_pos_then(
+        e,
+        pos,
+        InstrSeq::gather(vec![
+            base,
+            InstrSeq::make_querym(0, QueryOp::CGet, MemberKey::EI(index.try_into().unwrap())),
+        ]),
+    )
+}
+
+fn emit_reified_type_opt(
+    e: &mut Emitter,
+    env: &Env,
+    pos: &Pos,
+    name: &str,
+) -> Result<Option<InstrSeq>> {
+    let is_in_lambda = env.scope.is_in_lambda();
+    let cget_instr = |is_fun, i| {
+        InstrSeq::make_cgetl(local::Type::Named(
+            string_utils::reified::reified_generic_captured_name(is_fun, i),
+        ))
+    };
+    let check = |is_soft| -> Result<()> {
+        if is_soft {
+            Err(emit_fatal::raise_fatal_parse(pos, format!(
+                "{} is annotated to be a soft reified generic, it cannot be used until the __Soft annotation is removed",
+                name
+            )))
+        } else {
+            Ok(())
+        }
+    };
+    let mut emit = |(i, is_soft), is_fun| {
+        check(is_soft)?;
+        Ok(Some(if is_in_lambda {
+            cget_instr(is_fun, i)
+        } else {
+            emit_reified_generic_instrs(e, pos, is_fun, i)?
+        }))
+    };
+    match is_reified_tparam(env, true, name) {
+        Some((i, is_soft)) => emit((i, is_soft), true),
+        None => match is_reified_tparam(env, false, name) {
+            Some((i, is_soft)) => emit((i, is_soft), false),
+            None => Ok(None),
+        },
+    }
+}
+
+fn emit_known_class_id(e: &mut Emitter, id: &ast_defs::Id) -> InstrSeq {
+    let cid = class::Type::from_ast_name(&id.1);
+    emit_symbol_refs::State::add_class(e, cid.clone());
+    InstrSeq::gather(vec![
+        InstrSeq::make_string(cid.to_raw_string()),
+        InstrSeq::make_classgetc(),
+    ])
+}
+
+fn emit_load_class_ref(e: &mut Emitter, env: &Env, pos: &Pos, cexpr: ClassExpr) -> Result {
+    let instrs = match cexpr {
+        ClassExpr::Special(SpecialClsRef::Self_) => InstrSeq::make_self(),
+        ClassExpr::Special(SpecialClsRef::Static) => InstrSeq::make_lateboundcls(),
+        ClassExpr::Special(SpecialClsRef::Parent) => InstrSeq::make_parent(),
+        ClassExpr::Id(id) => emit_known_class_id(e, &id),
+        ClassExpr::Expr(expr) => InstrSeq::gather(vec![
+            emit_pos(e, pos)?,
+            emit_expr(e, env, &expr)?,
+            InstrSeq::make_classgetc(),
+        ]),
+        ClassExpr::Reified(instrs) => {
+            InstrSeq::gather(vec![emit_pos(e, pos)?, instrs, InstrSeq::make_classgetc()])
+        }
+    };
+    emit_pos_then(e, pos, instrs)
+}
+
 fn emit_new(
+    e: &mut Emitter,
     env: &Env,
     pos: &Pos,
     (cid, targs, args, uarg, _): &(
@@ -1428,7 +1545,92 @@ fn emit_new(
         Pos,
     ),
 ) -> Result {
-    unimplemented!("TODO(hrust)")
+    if has_inout_arg(args) {
+        return Err(unrecoverable("Unexpected inout arg in new expr"));
+    }
+    let resolve_self = true;
+    use HasGenericsOp as H;
+    let cexpr = ClassExpr::class_id_to_class_expr(e, false, resolve_self, &env.scope, cid);
+    let (cexpr, has_generics) = match &cexpr {
+        ClassExpr::Id(ast_defs::Id(_, name)) => match emit_reified_type_opt(e, env, pos, name)? {
+            Some(instrs) => {
+                if targs.is_empty() {
+                    (ClassExpr::Reified(instrs), H::MaybeGenerics)
+                } else {
+                    return Err(emit_fatal::raise_fatal_parse(
+                        pos,
+                        "Cannot have higher kinded reified generics",
+                    ));
+                }
+            }
+            None if !has_non_tparam_generics_targs(env, targs) => (cexpr, H::NoGenerics),
+            None => (cexpr, H::HasGenerics),
+        },
+        _ => (cexpr, H::NoGenerics),
+    };
+    let newobj_instrs = match cexpr {
+        ClassExpr::Id(ast_defs::Id(_, cname)) => {
+            // TODO(hrust) enabel `let id = class::Type::from_ast_name(&cname);`,
+            // `from_ast_name` should be able to accpet Cow<str>
+            let id: class::Type = string_utils::strip_global_ns(&cname).to_string().into();
+            emit_symbol_refs::State::add_class(e, id.clone());
+            match has_generics {
+                H::NoGenerics => {
+                    InstrSeq::gather(vec![emit_pos(e, pos)?, InstrSeq::make_newobjd(id)])
+                }
+                H::HasGenerics => InstrSeq::gather(vec![
+                    emit_pos(e, pos)?,
+                    emit_reified_targs(
+                        e,
+                        env,
+                        pos,
+                        &targs.iter().map(|t| &t.1).collect::<Vec<_>>(),
+                    )?,
+                    InstrSeq::make_newobjrd(id),
+                ]),
+                H::MaybeGenerics => {
+                    return Err(unrecoverable(
+                        "Internal error: This case should have been transformed",
+                    ))
+                }
+            }
+        }
+        ClassExpr::Special(cls_ref) => {
+            InstrSeq::gather(vec![emit_pos(e, pos)?, InstrSeq::make_newobjs(cls_ref)])
+        }
+        ClassExpr::Reified(instrs) if has_generics == H::MaybeGenerics => InstrSeq::gather(vec![
+            instrs,
+            InstrSeq::make_classgetts(),
+            InstrSeq::make_newobjr(),
+        ]),
+        _ => InstrSeq::gather(vec![
+            emit_load_class_ref(e, env, pos, cexpr)?,
+            InstrSeq::make_newobj(),
+        ]),
+    };
+    scope::with_unnamed_locals(e, |e| {
+        let (instr_args, _) = emit_args_inout_setters(e, env, args)?;
+        let instr_uargs = match uarg {
+            None => InstrSeq::Empty,
+            Some(uarg) => emit_expr(e, env, uarg)?,
+        };
+        Ok((
+            InstrSeq::Empty,
+            InstrSeq::gather(vec![
+                newobj_instrs,
+                InstrSeq::make_dup(),
+                InstrSeq::make_nulluninit(),
+                InstrSeq::make_nulluninit(),
+                instr_args,
+                instr_uargs,
+                emit_pos(e, pos)?,
+                InstrSeq::make_fcallctor(get_fcall_args(args, uarg.as_ref(), None, true)),
+                InstrSeq::make_popc(),
+                InstrSeq::make_lockobj(),
+            ]),
+            InstrSeq::Empty,
+        ))
+    })
 }
 
 fn emit_obj_get(

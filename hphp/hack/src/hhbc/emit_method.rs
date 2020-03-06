@@ -198,7 +198,7 @@ pub fn from_ast<'a>(
                 T::Stmt_::mk_block(ast_body_block.to_vec()),
             )))],
             InstrSeq::make_null(),
-            &emit_body::Args {
+            emit_body::Args {
                 immediate_tparams: &method.tparams,
                 ast_params: &method.params,
                 ret: method.ret.1.as_ref(),

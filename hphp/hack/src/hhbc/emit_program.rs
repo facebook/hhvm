@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use closure_convert_rust as closure_convert;
+use emit_adata_rust as emit_adata;
 use emit_body_rust::{emit_body_with_default_args, make_body};
 use emit_class_rust::emit_classes_from_program;
 use emit_constant_rust::emit_constants_from_program;
@@ -100,6 +101,7 @@ fn emit_program_<'p>(
     let classes = emit_classes_from_program(&mut emitter, &hoist_kinds, prog)?;
     let mut functions = emit_functions_from_program(&mut emitter, &hoist_kinds, prog)?;
     functions.append(&mut const_inits);
+    let adata = emit_adata::take(&mut emitter).adata;
 
     Ok(HhasProgram {
         main,
@@ -108,6 +110,7 @@ fn emit_program_<'p>(
         functions,
         typedefs,
         constants,
+        adata,
         is_hh: flags.contains(FromAstFlags::IS_HH_FILE),
         file_attributes,
         ..HhasProgram::default()

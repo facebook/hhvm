@@ -109,30 +109,20 @@ let rec expr_to_typed_value ?(allow_maps = false) ns ((_, expr_) as expr) =
   | A.Null -> TV.null
   | A.String s -> TV.String s
   | A.Float s -> TV.Float (float_of_string s)
-  | A.Id (_, id) when id = "NAN" -> TV.Float Float.nan
-  | A.Id (_, id) when id = "INF" -> TV.Float Float.infinity
   | A.Call (_, (_, A.Id (_, id)), _, [(_, A.String data)], None)
     when id = SN.SpecialFunctions.hhas_adata ->
     TV.HhasAdata data
   | A.Array fields -> array_to_typed_value ns fields
   | A.Varray (_, fields) -> varray_to_typed_value ns fields pos
   | A.Darray (_, fields) -> darray_to_typed_value ns fields pos
+  (* A.Id *)
+  | A.Id (_, id) when id = "NAN" -> TV.Float Float.nan
+  | A.Id (_, id) when id = "INF" -> TV.Float Float.infinity
+  | A.Id _ -> raise UserDefinedConstant
+  (* A.Coolection *)
   | A.Collection ((_, "vec"), _, fields) ->
     TV.Vec (List.map fields (value_afield_to_typed_value ns), Some pos)
-  | A.ValCollection (A.Vec, _, el)
-  | A.ValCollection (A.Vector, _, el) ->
-    let fields = List.map el ~f:(fun e -> Aast.AFvalue e) in
-    TV.Vec (List.map fields (value_afield_to_typed_value ns), Some pos)
   | A.Collection ((_, "keyset"), _, fields) ->
-    let l =
-      List.fold_left
-        fields
-        ~f:(fun l x -> TVL.add l (keyset_value_afield_to_typed_value ns x))
-        ~init:TVL.empty
-    in
-    TV.Keyset (TVL.items l)
-  | A.ValCollection (A.Keyset, _, el) ->
-    let fields = List.map el ~f:(fun e -> Aast.AFvalue e) in
     let l =
       List.fold_left
         fields
@@ -149,13 +139,6 @@ let rec expr_to_typed_value ?(allow_maps = false) ns ((_, expr_) as expr) =
     let values = List.map fields ~f:(afield_to_typed_value_pair ns) in
     let d = update_duplicates_in_map values in
     TV.Dict (d, Some pos)
-  | A.KeyValCollection (A.Dict, _, fields)
-  | A.KeyValCollection (A.Map, _, fields)
-  | A.KeyValCollection (A.ImmMap, _, fields) ->
-    let fields = List.map fields ~f:(fun (e1, e2) -> Aast.AFkvalue (e1, e2)) in
-    let values = List.map fields ~f:(afield_to_typed_value_pair ns) in
-    let d = update_duplicates_in_map values in
-    TV.Dict (d, Some pos)
   | A.Collection ((_, kind), _, fields)
     when allow_maps
          && ( SU.cmp ~case_sensitive:false ~ignore_ns:true kind "Set"
@@ -163,18 +146,37 @@ let rec expr_to_typed_value ?(allow_maps = false) ns ((_, expr_) as expr) =
     let values = List.map fields ~f:(set_afield_to_typed_value_pair ns) in
     let d = update_duplicates_in_map values in
     TV.Dict (d, Some pos)
+  (* A.ValCoolection *)
+  | A.ValCollection (A.Vec, _, el)
+  | A.ValCollection (A.Vector, _, el) ->
+    TV.Vec (List.map el (expr_to_typed_value ns), Some pos)
+  | A.ValCollection (A.Keyset, _, el) ->
+    let fields = List.map el ~f:(fun e -> Aast.AFvalue e) in
+    let l =
+      List.fold_left
+        fields
+        ~f:(fun l x -> TVL.add l (keyset_value_afield_to_typed_value ns x))
+        ~init:TVL.empty
+    in
+    TV.Keyset (TVL.items l)
   | A.ValCollection (A.Set, _, el)
   | A.ValCollection (A.ImmSet, _, el) ->
     let fields = List.map el ~f:(fun e -> Aast.AFvalue e) in
     let values = List.map fields ~f:(set_afield_to_typed_value_pair ns) in
     let d = update_duplicates_in_map values in
     TV.Dict (d, Some pos)
+  (* A.KeyValCoolection *)
+  | A.KeyValCollection (A.Dict, _, fields)
+  | A.KeyValCollection (A.Map, _, fields)
+  | A.KeyValCollection (A.ImmMap, _, fields) ->
+    let values = List.map fields ~f:(kv_to_typed_value_pair ns) in
+    let d = update_duplicates_in_map values in
+    TV.Dict (d, Some pos)
+  (* Others *)
   | A.Shape fields -> shape_to_typed_value ns fields pos
   | A.Class_const (cid, id) -> class_const_to_typed_value cid id
   | A.BracedExpr e -> expr_to_typed_value ~allow_maps ns e
-  | A.Id _
-  | A.Class_get _ ->
-    raise UserDefinedConstant
+  | A.Class_get _ -> raise UserDefinedConstant
   | A.As (e, (_, A.Hlike _), _nullable) -> expr_to_typed_value ~allow_maps ns e
   | _ -> raise NotLiteral
 
@@ -284,8 +286,10 @@ and key_expr_to_typed_value ns expr =
 and afield_to_typed_value_pair ns afield =
   match afield with
   | A.AFvalue _value -> failwith "afield_to_typed_value_pair: unexpected value"
-  | A.AFkvalue (key, value) ->
-    (key_expr_to_typed_value ns key, expr_to_typed_value ns value)
+  | A.AFkvalue (k, v) -> kv_to_typed_value_pair ns (k, v)
+
+and kv_to_typed_value_pair ns (key, value) =
+  (key_expr_to_typed_value ns key, expr_to_typed_value ns value)
 
 and value_afield_to_typed_value ns afield =
   match afield with

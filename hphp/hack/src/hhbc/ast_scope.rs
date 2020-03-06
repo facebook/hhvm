@@ -248,7 +248,7 @@ impl<'a> Scope<'a> {
         rx::Level::NonRx
     }
 
-    pub fn has_function_attribute(&self, attr_name: String) -> bool {
+    pub fn has_function_attribute(&self, attr_name: impl AsRef<str>) -> bool {
         for scope_item in self.items.iter().rev() {
             match scope_item {
                 ScopeItem::Method(Cow::Borrowed(ast::Method_ {
@@ -263,7 +263,9 @@ impl<'a> Scope<'a> {
                 | ScopeItem::Function(Cow::Owned(ast::Fun_ {
                     user_attributes, ..
                 })) => {
-                    return user_attributes.iter().any(|attr| attr.name.1 == attr_name);
+                    return user_attributes
+                        .iter()
+                        .any(|attr| attr.name.1 == attr_name.as_ref());
                 }
                 _ => (),
             }

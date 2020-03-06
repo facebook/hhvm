@@ -261,7 +261,7 @@ fn make_memoize_method_with_params_code(
     let add_refied = usize::from(args.flags.contains(Flags::IS_REFIED));
     let first_local = local::Type::Unnamed(param_count + add_refied);
     let deprecation_body =
-        emit_body::emit_deprecation_info(args.scope, &args.deprecation_info, emitter.systemlib())?;
+        emit_body::emit_deprecation_info(args.scope, args.deprecation_info, emitter.systemlib())?;
     let (begin_label, default_value_setters) =
         // Default value setters belong in the wrapper method not in the original method
         emit_param::emit_param_default_value_setter(emitter, env, false, pos, hhas_params)?;
@@ -358,7 +358,7 @@ fn make_memoize_method_no_params_code(emitter: &mut Emitter, args: &Args) -> Res
     let suspended_get = emitter.label_gen_mut().next_regular();
     let eager_set = emitter.label_gen_mut().next_regular();
     let deprecation_body =
-        emit_body::emit_deprecation_info(args.scope, &args.deprecation_info, emitter.systemlib())?;
+        emit_body::emit_deprecation_info(args.scope, args.deprecation_info, emitter.systemlib())?;
 
     let fcall_args = FcallArgs::new(
         FcallFlags::default(),
@@ -438,7 +438,7 @@ fn make_wrapper<'a>(
     let env_copy = emit_body::make_env(
         &NamespaceEnv::empty(vec![], false, false),
         env.flags.contains(env::Flags::NEEDS_LOCAL_THIS),
-        &env.scope,
+        env.scope.clone(),
         env.flags.contains(env::Flags::IN_RX_BODY),
     );
     emit_body::make_body(

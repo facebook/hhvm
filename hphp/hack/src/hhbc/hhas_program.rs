@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use hhas_adata_rust::HhasAdata;
 use hhas_attribute_rust::HhasAttribute;
 use hhas_body_rust::HhasBody;
 use hhas_class_rust::HhasClass;
@@ -15,7 +16,7 @@ use hhas_typedef_rust::Typedef;
 #[derive(Default, Debug)]
 pub struct HhasProgram<'a> {
     pub is_hh: bool,
-    /* TODO(hrust): add `pub adata: Hhas_adata.t list` */
+    pub adata: Vec<HhasAdata>,
     pub functions: Vec<HhasFunction<'a>>,
     pub classes: Vec<HhasClass<'a>>,
     pub record_defs: Vec<HhasRecord<'a>>,

@@ -247,7 +247,8 @@ pub mod float {
         }
     }
 
-    pub fn to_string(f: f64) -> String {
+    pub fn to_string(f: impl Into<f64>) -> String {
+        let f = f.into();
         // or_else should not happen, but just in case it does fall back
         // to Rust native formatting
         let res = sprintf(f).unwrap_or_else(|| f.to_string());

@@ -84,7 +84,7 @@ pub fn emit_body_with_default_args<'a, 'b>(
         default_dropthrough: None,
         flags: Flags::empty(),
     };
-    emit_body(emitter, namespace, body, return_value, &args).map(|r| r.0)
+    emit_body(emitter, namespace, body, return_value, args).map(|r| r.0)
 }
 
 pub fn emit_body<'a, 'b>(
@@ -92,7 +92,7 @@ pub fn emit_body<'a, 'b>(
     namespace: &namespace_env::Env,
     body: &'b tast::Program,
     return_value: InstrSeq,
-    args: &Args<'a, '_>,
+    args: Args<'a, '_>,
 ) -> Result<(HhasBody<'a>, bool, bool)> {
     if args.flags.contains(Flags::ASYNC)
         && args.flags.contains(Flags::SKIP_AWAITABLE)
@@ -124,18 +124,33 @@ pub fn emit_body<'a, 'b>(
         &tp_names,
     )?;
 
-    let params = make_params(emitter, namespace, &mut tp_names, args)?;
+    let params = make_params(
+        emitter,
+        namespace,
+        &mut tp_names,
+        args.ast_params,
+        args.scope,
+        args.flags,
+    )?;
 
     let upper_bounds = make_upper_bounds(
         emitter,
         args.immediate_tparams,
         args.flags.contains(Flags::SKIP_AWAITABLE),
     );
-    let (need_local_this, decl_vars) = make_decl_vars(emitter, args, &params, &body);
+    let (need_local_this, decl_vars) = make_decl_vars(
+        emitter,
+        args.scope,
+        args.immediate_tparams,
+        &params,
+        &body,
+        args.flags,
+    );
     let mut env = make_env(
         namespace,
         need_local_this,
-        args.scope,
+        // TODO(hrust): avoid clone here.
+        args.scope.clone(),
         args.flags.contains(Flags::RX_BODY),
     );
 
@@ -144,28 +159,33 @@ pub fn emit_body<'a, 'b>(
         return_value,
         &params,
         &return_type_info,
-        args,
+        args.ret,
+        args.pos,
+        args.default_dropthrough,
+        args.flags,
         is_generator,
     );
     env.jump_targets_gen.reset();
 
-    let should_reserve_locals = set_function_jmp_targets(emitter, &mut env, args.scope);
+    let should_reserve_locals = set_function_jmp_targets(emitter, &mut env);
     let local_gen = emitter.local_gen_mut();
     local_gen.reset(params.len() + decl_vars.len());
     if should_reserve_locals {
         local_gen.reserve_retval_and_label_id_locals();
     };
-
     let body_instrs = make_body_instrs(
         emitter,
         &mut env,
-        &args,
         &params,
         &tparams,
         &decl_vars,
         &body,
         need_local_this,
         is_generator,
+        args.deprecation_info.clone(),
+        &args.pos,
+        &args.ast_params,
+        args.flags,
     )?;
     Ok((
         make_body(
@@ -188,15 +208,18 @@ pub fn emit_body<'a, 'b>(
 fn make_body_instrs(
     emitter: &mut Emitter,
     env: &mut Env,
-    args: &Args,
     params: &[HhasParam],
     tparams: &[tast::Tparam],
     decl_vars: &[String],
     body: &tast::Program,
     need_local_this: bool,
     is_generator: bool,
+    deprecation_info: Option<&[TypedValue]>,
+    pos: &Pos,
+    ast_params: &[tast::FunParam],
+    flags: Flags,
 ) -> Result {
-    let stmt_instrs = if args.flags.contains(Flags::NATIVE) {
+    let stmt_instrs = if flags.contains(Flags::NATIVE) {
         InstrSeq::make_nativeimpl()
     } else {
         env.do_function(emitter, body, emit_defs)?
@@ -205,20 +228,23 @@ fn make_body_instrs(
     let (begin_label, default_value_setters) = emit_param::emit_param_default_value_setter(
         emitter,
         env,
-        args.flags.contains(Flags::NATIVE),
-        args.pos,
+        flags.contains(Flags::NATIVE),
+        pos,
         params,
     )?;
 
     let header_content = make_header_content(
         emitter,
         env,
-        args,
         params,
         tparams,
         decl_vars,
         need_local_this,
         is_generator,
+        deprecation_info,
+        pos,
+        ast_params,
+        flags,
     )?;
     let first_instr_is_label = match InstrSeq::first(&stmt_instrs) {
         Some(Instruct::ILabel(_)) => true,
@@ -231,7 +257,7 @@ fn make_body_instrs(
     };
 
     let mut body_instrs = InstrSeq::gather(vec![header, stmt_instrs, default_value_setters]);
-    if args.flags.contains(Flags::DEBUGGER_MODIFY_PROGRAM) {
+    if flags.contains(Flags::DEBUGGER_MODIFY_PROGRAM) {
         modify_prog_for_debugger_eval(&mut body_instrs);
     };
     Ok(body_instrs)
@@ -240,32 +266,35 @@ fn make_body_instrs(
 fn make_header_content(
     emitter: &mut Emitter,
     env: &mut Env,
-    args: &Args,
     params: &[HhasParam],
     tparams: &[tast::Tparam],
     decl_vars: &[String],
     need_local_this: bool,
     is_generator: bool,
+    deprecation_info: Option<&[TypedValue]>,
+    pos: &Pos,
+    ast_params: &[tast::FunParam],
+    flags: Flags,
 ) -> Result {
-    let method_prolog = if args.flags.contains(Flags::NATIVE) {
+    let method_prolog = if flags.contains(Flags::NATIVE) {
         InstrSeq::Empty
     } else {
-        let should_emit_init_this = !args.scope.is_in_static_method()
+        let should_emit_init_this = !env.scope.is_in_static_method()
             && (need_local_this
-                || (args.scope.is_toplevel() && decl_vars.contains(&THIS.to_string())));
+                || (env.scope.is_toplevel() && decl_vars.contains(&THIS.to_string())));
         emit_method_prolog(
             emitter,
             env,
-            args.pos,
+            pos,
             params,
-            args.ast_params,
+            ast_params,
             tparams,
             should_emit_init_this,
         )?
     };
 
     let deprecation_warning =
-        emit_deprecation_info(args.scope, args.deprecation_info, emitter.systemlib())?;
+        emit_deprecation_info(&env.scope, deprecation_info, emitter.systemlib())?;
 
     let generator_info = if is_generator {
         InstrSeq::gather(vec![InstrSeq::make_createcont(), InstrSeq::make_popc()])
@@ -282,20 +311,22 @@ fn make_header_content(
 
 fn make_decl_vars(
     emitter: &mut Emitter,
-    args: &Args,
+    scope: &Scope,
+    immediate_tparams: &[tast::Tparam],
     params: &[HhasParam],
     body: &tast::Program,
+    arg_flags: Flags,
 ) -> (bool, Vec<String>) {
     let mut flags = decl_vars::Flags::empty();
-    flags.set(decl_vars::Flags::HAS_THIS, args.scope.has_this());
-    flags.set(decl_vars::Flags::IS_TOPLEVEL, args.scope.is_toplevel());
+    flags.set(decl_vars::Flags::HAS_THIS, scope.has_this());
+    flags.set(decl_vars::Flags::IS_TOPLEVEL, scope.is_toplevel());
     flags.set(
         decl_vars::Flags::IS_IN_STATIC_METHOD,
-        args.scope.is_in_static_method(),
+        scope.is_in_static_method(),
     );
     flags.set(
         decl_vars::Flags::IS_CLOSURE_BODY,
-        args.flags.contains(Flags::CLOSURE_BODY),
+        arg_flags.contains(Flags::CLOSURE_BODY),
     );
 
     let explicit_use_set = &emitter.emit_state().explicit_use_set;
@@ -303,12 +334,12 @@ fn make_decl_vars(
     let (need_local_this, mut decl_vars) =
         decl_vars::from_ast(params, body, flags, explicit_use_set);
 
-    if args.flags.contains(Flags::CLOSURE_BODY) {
-        let mut captured_vars = args.scope.get_captured_vars();
+    if arg_flags.contains(Flags::CLOSURE_BODY) {
+        let mut captured_vars = scope.get_captured_vars();
         move_this(&mut decl_vars);
         decl_vars.retain(|v| !captured_vars.contains(v));
         captured_vars.extend_from_slice(&decl_vars.as_slice());
-    } else if has_reified(args.immediate_tparams) {
+    } else if has_reified(immediate_tparams) {
         decl_vars.push(String::from(string_utils::reified::GENERICS_LOCAL_NAME));
     }
 
@@ -354,13 +385,13 @@ fn make_return_type_info(
 pub fn make_env<'a>(
     _namespace: &namespace_env::Env,
     need_local_this: bool,
-    _scope: &Scope<'a>,
+    scope: Scope<'a>,
     is_rx_body: bool,
 ) -> Env<'a> {
     let mut env = Env::default();
     env.with_need_local_this(need_local_this);
     env.with_rx_body(is_rx_body);
-    //TODO(hrust) add scope
+    env.scope = scope;
     //TODO(hrust) add namespace
     env
 }
@@ -385,16 +416,18 @@ fn make_params(
     emitter: &mut Emitter,
     namespace: &namespace_env::Env,
     tp_names: &mut Vec<&str>,
-    args: &Args,
+    ast_params: &[tast::FunParam],
+    scope: &Scope,
+    flags: Flags,
 ) -> Result<Vec<HhasParam>> {
-    let generate_defaults = !args.flags.contains(Flags::MEMOIZE);
+    let generate_defaults = !flags.contains(Flags::MEMOIZE);
     emit_param::from_asts(
         emitter,
         tp_names,
         namespace,
         generate_defaults,
-        args.scope,
-        args.ast_params,
+        scope,
+        ast_params,
     )
 }
 
@@ -585,7 +618,7 @@ pub fn emit_method_prolog(
 
 pub fn emit_deprecation_info(
     scope: &Scope,
-    deprecation_info: &Option<&[TypedValue]>,
+    deprecation_info: Option<&[TypedValue]>,
     is_systemlib: bool,
 ) -> Result<InstrSeq> {
     Ok(match deprecation_info {
@@ -669,26 +702,30 @@ fn set_emit_statement_state(
     default_return_value: InstrSeq,
     params: &[HhasParam],
     return_type_info: &HhasTypeInfo,
-    args: &Args,
+    return_type: Option<&tast::Hint>,
+    pos: &Pos,
+    default_dropthrough: Option<InstrSeq>,
+    flags: Flags,
     is_generator: bool,
 ) {
     let verify_return = match &return_type_info.user_type {
         Some(s) if s == "" => None,
-        _ if return_type_info.has_type_constraint() && !is_generator => args.ret.map(|h| h.clone()),
+        _ if return_type_info.has_type_constraint() && !is_generator => {
+            return_type.map(|h| h.clone())
+        }
         _ => None,
     };
-    let default_dropthrough = if args.default_dropthrough.is_none()
-        && args.flags.contains(Flags::ASYNC)
-        && verify_return.is_some()
-    {
-        Some(InstrSeq::gather(vec![
-            InstrSeq::make_null(),
-            InstrSeq::make_verify_ret_type_c(),
-            InstrSeq::make_retc(),
-        ]))
-    } else {
-        args.default_dropthrough.clone()
-    };
+    let default_dropthrough =
+        if default_dropthrough.is_none() && flags.contains(Flags::ASYNC) && verify_return.is_some()
+        {
+            Some(InstrSeq::gather(vec![
+                InstrSeq::make_null(),
+                InstrSeq::make_verify_ret_type_c(),
+                InstrSeq::make_retc(),
+            ]))
+        } else {
+            default_dropthrough.clone()
+        };
     let (num_out, verify_out) = emit_verify_out(params);
 
     emit_statement::set_state(
@@ -698,7 +735,7 @@ fn set_emit_statement_state(
             default_return_value,
             default_dropthrough,
             verify_out,
-            function_pos: args.pos.clone(),
+            function_pos: pos.clone(),
             num_out,
         },
     )
@@ -797,9 +834,9 @@ fn modify_prog_for_debugger_eval(_body_instrs: &mut InstrSeq) {
     //TODO(hrust) implement
 }
 
-fn set_function_jmp_targets(emitter: &mut Emitter, env: &mut Env, scope: &Scope) -> bool {
+fn set_function_jmp_targets(emitter: &mut Emitter, env: &mut Env) -> bool {
     use ScopeItem::*;
-    let function_state_key = match scope.items.as_slice() {
+    let function_state_key = match env.scope.items.as_slice() {
         [] => env::get_unique_id_for_main(),
         [.., Class(cls), Method(md)] | [.., Class(cls), Method(md), Lambda(_)] => {
             env::get_unique_id_for_method(cls, md)

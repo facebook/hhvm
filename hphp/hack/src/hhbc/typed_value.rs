@@ -4,18 +4,48 @@
 // LICENSE file in the "hack" directory of this source tree.
 extern crate lazy_static;
 
+use float::*;
 use oxidized::ast_defs;
 use std::{
     convert::{Into, TryFrom, TryInto},
     num::{FpCategory, Wrapping},
 };
 
+mod float {
+    use std::num::FpCategory;
+
+    #[derive(Clone, Copy, Debug, Hash, PartialOrd, Ord, PartialEq, Eq)]
+    pub struct F64([u8; 8]);
+
+    impl F64 {
+        pub fn to_f64(&self) -> f64 {
+            (*self).into()
+        }
+
+        pub fn classify(&self) -> FpCategory {
+            self.to_f64().classify()
+        }
+    }
+
+    impl From<f64> for F64 {
+        fn from(f: f64) -> Self {
+            F64(f.to_be_bytes())
+        }
+    }
+
+    impl Into<f64> for F64 {
+        fn into(self) -> f64 {
+            f64::from_be_bytes(self.0)
+        }
+    }
+}
+
 /// We introduce a type for Hack/PHP values, mimicking what happens at runtime.
 /// Currently this is used for constant folding. By defining a special type, we
 /// ensure independence from usage: for example, it can be used for optimization
 /// on ASTs, or on bytecode, or (in future) on a compiler intermediate language.
 /// HHVM takes a similar approach: see runtime/base/typed-value.h
-#[derive(Clone, Debug, PartialOrd)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, PartialOrd, Ord)]
 pub enum TypedValue {
     /// Used for fields that are initialized in the 86pinit method
     Uninit,
@@ -23,7 +53,7 @@ pub enum TypedValue {
     Int(i64),
     Bool(bool),
     /// Both Hack/PHP and Caml floats are IEEE754 64-bit
-    Float(f64),
+    Float(float::F64),
     String(String),
     Null,
     // Classic PHP arrays with explicit (key,value) entries
@@ -62,7 +92,7 @@ impl From<TypedValue> for bool {
             TypedValue::Null => false,
             TypedValue::String(s) => s != "" && s != "0",
             TypedValue::Int(i) => i != 0,
-            TypedValue::Float(f) => f != 0.0,
+            TypedValue::Float(f) => f.to_f64() != 0.0,
             // Empty collections cast to false if empty, otherwise true
             TypedValue::Array(v) => !v.is_empty(),
             TypedValue::VArray((v, _)) => !v.is_empty(),
@@ -91,7 +121,7 @@ impl TryFrom<TypedValue> for i64 {
             TypedValue::Int(i) => Ok(i),
             TypedValue::Float(f) => match f.classify() {
                 FpCategory::Nan | FpCategory::Infinite => {
-                    if f == std::f64::INFINITY {
+                    if f.to_f64() == std::f64::INFINITY {
                         Ok(0)
                     } else {
                         Ok(std::i64::MIN)
@@ -113,7 +143,7 @@ impl TryFrom<TypedValue> for f64 {
             TypedValue::Uninit => Err(()),    // Should not happen
             TypedValue::String(_) => Err(()), // not worth it
             TypedValue::Int(i) => Ok(i as f64),
-            TypedValue::Float(f) => Ok(f),
+            TypedValue::Float(f) => Ok(f.into()),
             _ => Ok(if v.into() { 1.0 } else { 0.0 }),
         }
     }
@@ -136,25 +166,6 @@ impl TryFrom<TypedValue> for String {
     }
 }
 
-impl Ord for TypedValue {
-    fn cmp(&self, other: &TypedValue) -> std::cmp::Ordering {
-        match (self, other) {
-            (TypedValue::Float(f1), TypedValue::Float(f2)) => {
-                f1.partial_cmp(f2).unwrap_or(std::cmp::Ordering::Equal)
-            }
-            _ => self.partial_cmp(other).unwrap(),
-        }
-    }
-}
-
-impl PartialEq for TypedValue {
-    fn eq(&self, other: &TypedValue) -> bool {
-        self.cmp(other) == std::cmp::Ordering::Equal
-    }
-}
-
-impl Eq for TypedValue {}
-
 impl TypedValue {
     // Integer operations. For now, we don't attempt to implement the
     // overflow-to-float semantics
@@ -165,7 +176,7 @@ impl TypedValue {
     pub fn neg(&self) -> Option<TypedValue> {
         match self {
             Self::Int(i) => Some(Self::Int((-Wrapping(*i)).0)),
-            Self::Float(i) => Some(Self::Float(0.0 - i)),
+            Self::Float(i) => Some(Self::float(0.0 - i.to_f64())),
 
             _ => None,
         }
@@ -179,7 +190,7 @@ impl TypedValue {
     pub fn sub(&self, v2: &TypedValue) -> Option<TypedValue> {
         match (self, v2) {
             (Self::Int(i1), Self::Int(i2)) => Self::sub_int(*i1, *i2),
-            (Self::Float(f1), Self::Float(f2)) => Some(Self::Float(f1 - f2)),
+            (Self::Float(f1), Self::Float(f2)) => Some(Self::float(f1.to_f64() - f2.to_f64())),
             _ => None,
         }
     }
@@ -192,9 +203,9 @@ impl TypedValue {
     pub fn mul(&self, other: &TypedValue) -> Option<TypedValue> {
         match (self, other) {
             (Self::Int(i1), Self::Int(i2)) => Self::mul_int(*i1, *i2),
-            (Self::Float(i1), Self::Float(i2)) => Some(Self::Float(i1 * i2)),
-            (Self::Int(i1), Self::Float(i2)) => Some(Self::Float(*i1 as f64 * i2)),
-            (Self::Float(i1), Self::Int(i2)) => Some(Self::Float(i1 * *i2 as f64)),
+            (Self::Float(i1), Self::Float(i2)) => Some(Self::float(i1.to_f64() * i2.to_f64())),
+            (Self::Int(i1), Self::Float(i2)) => Some(Self::float(*i1 as f64 * i2.to_f64())),
+            (Self::Float(i1), Self::Int(i2)) => Some(Self::float(i1.to_f64() * *i2 as f64)),
             _ => None,
         }
     }
@@ -206,12 +217,18 @@ impl TypedValue {
                 if i1 % i2 == 0 {
                     Some(Self::Int(i1 / i2))
                 } else {
-                    Some(Self::Float(*i1 as f64 / *i2 as f64))
+                    Some(Self::float(*i1 as f64 / *i2 as f64))
                 }
             }
-            (Self::Float(f1), Self::Float(f2)) if *f2 != 0.0 => Some(Self::Float(f1 / f2)),
-            (Self::Int(i1), Self::Float(f2)) if *f2 != 0.0 => Some(Self::Float(*i1 as f64 / f2)),
-            (Self::Float(f1), Self::Int(i2)) if *i2 != 0 => Some(Self::Float(f1 / *i2 as f64)),
+            (Self::Float(f1), Self::Float(f2)) if f2.to_f64() != 0.0 => {
+                Some(Self::float(f1.to_f64() / f2.to_f64()))
+            }
+            (Self::Int(i1), Self::Float(f2)) if f2.to_f64() != 0.0 => {
+                Some(Self::float(*i1 as f64 / f2.to_f64()))
+            }
+            (Self::Float(f1), Self::Int(i2)) if *i2 != 0 => {
+                Some(Self::float(f1.to_f64() / *i2 as f64))
+            }
             _ => None,
         }
     }
@@ -219,10 +236,10 @@ impl TypedValue {
     // Arithmetic. For now, only on pure integer or float operands
     pub fn add(&self, other: &TypedValue) -> Option<TypedValue> {
         match (self, other) {
-            (Self::Float(i1), Self::Float(i2)) => Some(Self::Float(i1 + i2)),
+            (Self::Float(i1), Self::Float(i2)) => Some(Self::float(i1.to_f64() + i2.to_f64())),
             (Self::Int(i1), Self::Int(i2)) => Self::add_int(*i1, *i2),
-            (Self::Int(i1), Self::Float(i2)) => Some(Self::Float(*i1 as f64 + i2)),
-            (Self::Float(i1), Self::Int(i2)) => Some(Self::Float(i1 + *i2 as f64)),
+            (Self::Int(i1), Self::Float(i2)) => Some(Self::float(*i1 as f64 + i2.to_f64())),
+            (Self::Float(i1), Self::Int(i2)) => Some(Self::float(i1.to_f64() + *i2 as f64)),
             _ => None,
         }
     }
@@ -286,7 +303,7 @@ impl TypedValue {
     }
 
     pub fn cast_to_float(self) -> Option<TypedValue> {
-        self.try_into().ok().map(|x| Self::Float(x))
+        self.try_into().ok().map(|x| Self::float(x))
     }
 
     pub fn cast_to_arraykey(self) -> Option<TypedValue> {
@@ -307,6 +324,10 @@ impl TypedValue {
     pub fn string(s: impl Into<String>) -> TypedValue {
         Self::String(s.into())
     }
+
+    pub fn float(f: f64) -> Self {
+        Self::Float(f.into())
+    }
 }
 
 #[cfg(test)]
@@ -322,19 +343,19 @@ mod typed_value_tests {
 
     #[test]
     fn nan_to_int() {
-        let res: i64 = TypedValue::Float(std::f64::NAN).try_into().unwrap();
+        let res: i64 = TypedValue::float(std::f64::NAN).try_into().unwrap();
         assert_eq!(res, std::i64::MIN);
     }
 
     #[test]
     fn inf_to_int() {
-        let res: i64 = TypedValue::Float(std::f64::INFINITY).try_into().unwrap();
+        let res: i64 = TypedValue::float(std::f64::INFINITY).try_into().unwrap();
         assert_eq!(res, 0);
     }
 
     #[test]
     fn neg_inf_to_int() {
-        let res: i64 = TypedValue::Float(std::f64::NEG_INFINITY)
+        let res: i64 = TypedValue::float(std::f64::NEG_INFINITY)
             .try_into()
             .unwrap();
         assert_eq!(res, std::i64::MIN);
@@ -407,8 +428,8 @@ mod typed_value_tests {
             TypedValue::String("foo".to_string())
         );
         assert_eq!(
-            TypedValue::Float(std::f64::NAN),
-            TypedValue::Float(std::f64::NAN)
+            TypedValue::float(std::f64::NAN),
+            TypedValue::float(std::f64::NAN)
         );
     }
 
@@ -417,4 +438,9 @@ mod typed_value_tests {
         let res = TypedValue::Int(1).shift_left(&TypedValue::Int(0xffffffffffff));
         assert_eq!(res, None);
     }
+
+    /*     #[test]
+    fn eq() {
+        assert_eq!(TypedValue::Bool(true), TypedValue::Bool(true));
+    } */
 }

@@ -115,12 +115,12 @@ impl ClassExpr {
         check_traits: bool,
         resolve_self: bool,
         scope: &Scope,
-        cid: ast::ClassId,
+        cid: &ast::ClassId,
     ) -> Self {
         let ClassId(annot, cid_) = cid;
         let expr = match cid_ {
-            ClassId_::CIexpr(e) => e,
-            ClassId_::CI(sid) => Expr(annot, Expr_::Id(Box::new(sid))),
+            ClassId_::CIexpr(e) => e.clone(),
+            ClassId_::CI(sid) => Expr(annot.clone(), Expr_::mk_id(sid.clone())),
             ClassId_::CIparent => return Self::Special(SpecialClsRef::Parent),
             ClassId_::CIstatic => return Self::Special(SpecialClsRef::Static),
             ClassId_::CIself => return Self::Special(SpecialClsRef::Self_),

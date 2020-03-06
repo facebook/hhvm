@@ -15,6 +15,7 @@ use runtime::TypedValue as TV;
 
 use std::collections::BTreeMap;
 
+#[derive(Default)]
 pub struct State {
     pub array_identifier_counter: usize,
     pub array_identifier_map: BTreeMap<TV, String>,
@@ -85,7 +86,13 @@ fn get_array_identifier(e: &mut Emitter, tv: &TV) -> String {
         next_adata_id(e, tv)
     } else {
         match e.emit_state_mut().array_identifier_map.get(tv) {
-            None => next_adata_id(e, tv),
+            None => {
+                let id = next_adata_id(e, tv);
+                e.emit_state_mut()
+                    .array_identifier_map
+                    .insert(tv.clone(), id.clone());
+                id
+            }
             Some(id) => id.clone(),
         }
     }
@@ -100,6 +107,11 @@ fn next_adata_id(e: &mut Emitter, value: &TV) -> String {
         value: value.clone(),
     });
     id
+}
+
+pub fn take(e: &mut Emitter) -> State {
+    let state = e.emit_state_mut();
+    std::mem::take(state)
 }
 
 #[cfg(test)]

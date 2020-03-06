@@ -15,6 +15,7 @@ use context::Context;
 use core_utils_rust::add_ns;
 use env::{iterator::Id as IterId, local::Type as Local, Env as BodyEnv};
 use escaper::{escape, escape_by, is_lit_printable};
+use hhas_adata_rust::HhasAdata;
 use hhas_adata_rust::{
     ARRAY_PREFIX, DARRAY_PREFIX, DICT_PREFIX, KEYSET_PREFIX, VARRAY_PREFIX, VEC_PREFIX,
 };
@@ -201,9 +202,10 @@ fn print_program_<W: Write>(
     let is_hh = if prog.is_hh { "1" } else { "0" };
     newline(w)?;
     write_list(w, &[".hh_file ", is_hh, ";"])?;
-    newline(w)?;
 
     print_data_region(w, vec![])?;
+    concat(w, &prog.adata, |w, a| print_adata_region(ctx, w, a))?;
+    newline(w)?;
     print_main(ctx, w, &prog.main)?;
     concat(w, &prog.functions, |w, f| print_fun_def(ctx, w, f))?;
     concat(w, &prog.classes, |w, cd| print_class_def(ctx, w, cd))?;
@@ -216,6 +218,17 @@ fn print_program_<W: Write>(
         return not_impl!();
     }
     Ok(())
+}
+
+fn print_adata_region<W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    adata: &HhasAdata,
+) -> Result<(), W::Error> {
+    concat_str_by(w, " ", [".adata", adata.id.as_str(), "= "])?;
+    wrap_by_triple_quotes(w, |w| print_adata(ctx, w, &adata.value))?;
+    w.write(";")?;
+    ctx.newline(w)
 }
 
 fn print_typedef<W: Write>(ctx: &mut Context, w: &mut W, td: &HhasTypedef) -> Result<(), W::Error> {
@@ -997,11 +1010,11 @@ fn print_instr<W: Write>(w: &mut W, instr: &Instruct) -> Result<(), W::Error> {
             I::NewObj => w.write("NewObj"),
             I::NewObjR => w.write("NewObjR"),
             I::NewObjD(cid) => {
-                w.write("NewObjD")?;
+                w.write("NewObjD ")?;
                 print_class_id(w, cid)
             }
             I::NewObjRD(cid) => {
-                w.write("NewObjRD")?;
+                w.write("NewObjRD ")?;
                 print_class_id(w, cid)
             }
             I::NewObjS(r) => {
@@ -1150,26 +1163,6 @@ fn print_instr<W: Write>(w: &mut W, instr: &Instruct) -> Result<(), W::Error> {
         IIncludeEvalDefine(ed) => print_include_eval_define(w, ed),
         IGenDelegation(g) => print_gen_delegation(w, g),
         _ => Err(Error::fail("invalid instruction")),
-    }
-}
-
-fn print_final<W: Write>(w: &mut W, i: &InstructFinal) -> Result<(), W::Error> {
-    use InstructFinal as I;
-    match i {
-        I::QueryM(n, op, mk) => {
-            w.write("QueryM ")?;
-            w.write(n.to_string())?;
-            w.write(" ")?;
-            w.write(match op {
-                QueryOp::CGet => "CGet",
-                QueryOp::CGetQuiet => "CGetQuiet",
-                QueryOp::Isset => "Isset",
-                QueryOp::InOut => "InOut",
-            })?;
-            w.write(" ")?;
-            print_member_key(w, mk)
-        }
-        _ => unimplemented!(),
     }
 }
 
@@ -1342,6 +1335,30 @@ fn print_async<W: Write>(w: &mut W, a: &AsyncFunctions) -> Result<(), W::Error> 
         A::AwaitAll(Some((Local::Unnamed(id), count))) => w.write(format!("L:{}+{}", id, count)),
         A::AwaitAll(None) => w.write("L:0+0"),
         _ => Err(Error::fail("AwaitAll needs an unnamed local")),
+    }
+}
+
+fn print_query_op<W: Write>(w: &mut W, q: QueryOp) -> Result<(), W::Error> {
+    w.write(match q {
+        QueryOp::CGet => "CGet",
+        QueryOp::CGetQuiet => "CGetQuiet",
+        QueryOp::Isset => "Isset",
+        QueryOp::InOut => "InOut",
+    })
+}
+
+fn print_final<W: Write>(w: &mut W, f: &InstructFinal) -> Result<(), W::Error> {
+    use InstructFinal as F;
+    match f {
+        F::QueryM(n, op, mk) => {
+            w.write("QueryM ")?;
+            print_int(w, n)?;
+            w.write(" ")?;
+            print_query_op(w, *op)?;
+            w.write(" ")?;
+            print_member_key(w, mk)
+        }
+        _ => not_impl!(),
     }
 }
 

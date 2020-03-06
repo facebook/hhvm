@@ -199,7 +199,6 @@ let initialize
         };
     }
   in
-  Parser_options_provider.set server_env.ServerEnv.popt;
 
   (* Use server_config to modify server_env with the correct symbol index *)
   let start_time = log_startup_time "basic_startup" start_time in

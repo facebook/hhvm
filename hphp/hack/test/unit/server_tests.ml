@@ -261,7 +261,6 @@ let test_process_file_deferring () =
    ProviderUtils.compute_tast_and_errors_unquarantined. *)
 let test_compute_tast_counting () =
   let (ctx, path, contents) = server_setup_for_deferral_tests () in
-  Parser_options_provider.set ParserOptions.default;
   EventLogger.init_fake ();
 
   let (ctx, entry) =
@@ -287,7 +286,6 @@ let test_compute_tast_counting () =
       (* restore it back to shared_mem for the rest of the tests *)
       Provider_backend.set_shared_memory_backend ())
     ~do_:(fun () ->
-      Parser_options_provider.set ParserOptions.default;
       let ctx =
         Provider_context.empty_for_tool
           ~popt:ParserOptions.default

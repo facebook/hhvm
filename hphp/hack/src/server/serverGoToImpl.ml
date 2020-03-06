@@ -16,14 +16,9 @@ open Typing_defs
 let parallel_limit = 10
 
 let find_positions_of_classes
-    (tcopt : TypecheckerOptions.t)
+    (ctx : Provider_context.t)
     (acc : (string * Pos.t) list)
     (child_classes : string list) : (string * Pos.t) list =
-  let ctx =
-    Provider_context.empty_for_worker
-      ~popt:(Parser_options_provider.get ())
-      ~tcopt
-  in
   acc
   @ List.map child_classes ~f:(fun child_class ->
         match Naming_provider.get_type_pos child_class with
@@ -46,12 +41,12 @@ let find_positions_of_classes
                child_class))
 
 let parallel_find_positions_of_classes
-    (tcopt : TypecheckerOptions.t)
+    (ctx : Provider_context.t)
     (child_classes : string list)
     (workers : MultiWorker.worker list option) : (string * Pos.t) list =
   MultiWorker.call
     workers
-    ~job:(find_positions_of_classes tcopt)
+    ~job:(find_positions_of_classes ctx)
     ~neutral:[]
     ~merge:List.append
     ~next:(MultiWorker.next workers child_classes)
@@ -129,10 +124,11 @@ let search_class
     Typing_deps.Dep.(make (Class class_name))
   @@ fun () ->
   let child_classes = find_child_classes class_name genv env in
+  let ctx = Provider_utils.ctx_from_server_env env in
   if List.length child_classes < parallel_limit then
-    find_positions_of_classes env.tcopt [] child_classes
+    find_positions_of_classes ctx [] child_classes
   else
-    parallel_find_positions_of_classes env.tcopt child_classes genv.workers
+    parallel_find_positions_of_classes ctx child_classes genv.workers
 
 let search_member
     (ctx : Provider_context.t)

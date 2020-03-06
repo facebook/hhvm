@@ -48,10 +48,11 @@ module LocalParserCache =
     end)
 
 let parse
+    (ctx : Provider_context.t)
     ~(full : bool)
     ~(keep_errors : bool)
     ~(source_text : Full_fidelity_source_text.t) : Parser_return.t =
-  let popt = Parser_options_provider.get () in
+  let popt = ctx.Provider_context.popt in
   let path = source_text.Full_fidelity_source_text.file_path in
   let parser_env =
     Full_fidelity_ast.make_env
@@ -75,12 +76,12 @@ let parse
   in
   { result with Parser_return.ast }
 
-let get_from_local_cache ~full file_name =
+let get_from_local_cache ~full ctx file_name =
   let fn = Relative_path.to_absolute file_name in
   match LocalParserCache.get file_name with
   | Some ast -> ast
   | None ->
-    let popt = Parser_options_provider.get () in
+    let popt = ctx.Provider_context.popt in
     let f contents =
       let contents =
         if FindUtils.file_filter fn then
@@ -257,10 +258,10 @@ let get_ast ?(full = false) ctx path =
       | (Some (_, Decl), true) ->
         (* If we need full, and parser-heap can't provide it, then we *)
         (* don't want to write a full decl into the parser heap. *)
-        get_from_local_cache ~full path
+        get_from_local_cache ~full ctx path
       | (None, false) ->
         (* This is the case where we will write into the parser heap. *)
-        let ast = get_from_local_cache ~full path in
+        let ast = get_from_local_cache ~full ctx path in
         ParserHeap.add path (ast, Decl);
         ast
       | (Some (ast, _), _) ->
@@ -273,7 +274,7 @@ let get_ast ?(full = false) ctx path =
     let contents = Sys_utils.cat (Relative_path.to_absolute path) in
     let source_text = Full_fidelity_source_text.make path contents in
     let { Parser_return.ast; _ } =
-      parse ~full ~keep_errors:false ~source_text
+      parse ctx ~full ~keep_errors:false ~source_text
     in
     ast
   | (_, Provider_backend.Decl_service _) ->

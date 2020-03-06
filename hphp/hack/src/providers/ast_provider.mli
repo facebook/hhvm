@@ -50,6 +50,7 @@ val get_ast :
   ?full:bool -> Provider_context.t -> Relative_path.t -> Nast.program
 
 val parse :
+  Provider_context.t ->
   full:bool ->
   keep_errors:bool ->
   source_text:Full_fidelity_source_text.t ->

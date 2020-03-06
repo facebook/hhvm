@@ -94,11 +94,8 @@ let init
     ~(init_approach : init_approach)
     (genv : ServerEnv.genv)
     (env : ServerEnv.env) : ServerEnv.env * init_result =
-  let lazy_lev = get_lazy_level genv in
-  (* Save the global settings for parsing.
-     These settings cannot be changed during the lifetime of the server. *)
-  Parser_options_provider.set env.popt;
   Provider_backend.set_shared_memory_backend ();
+  let lazy_lev = get_lazy_level genv in
   let root = ServerArgs.root genv.options in
   let (lazy_lev, init_approach) =
     if GlobalOptions.tco_global_inference env.tcopt then (
@@ -116,8 +113,8 @@ let init
       let t = Unix.gettimeofday () in
       let ctx = Provider_utils.ctx_from_server_env env in
       ServerRemoteInit.init
-        genv.workers
         ctx
+        genv.workers
         ~worker_key
         ~check_id
         ~bin_root

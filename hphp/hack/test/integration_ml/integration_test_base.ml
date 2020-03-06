@@ -92,7 +92,6 @@ let setup_server ?custom_config ?(hhi_files = []) () =
         Relative_path.create Relative_path.Hhi (Filename.concat hhi fn))
   in
   let hhi_set = Relative_path.Set.of_list hhi_file_list in
-  Parser_options_provider.set result.ServerEnv.popt;
 
   (* Initialize symbol index *)
   let sienv =

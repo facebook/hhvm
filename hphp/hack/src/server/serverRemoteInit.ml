@@ -7,8 +7,8 @@
  *)
 
 let init
-    (workers : MultiWorker.worker list option)
     (ctx : Provider_context.t)
+    (workers : MultiWorker.worker list option)
     ~(worker_key : string)
     ~(check_id : string)
     ~(bin_root : Path.t)

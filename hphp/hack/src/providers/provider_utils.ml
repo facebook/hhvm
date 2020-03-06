@@ -117,7 +117,8 @@ let compute_parser_return_and_ast_errors
       Errors.do_with_context
         entry.Provider_context.path
         Errors.Parsing
-        (fun () -> Ast_provider.parse ~full:true ~keep_errors:true ~source_text)
+        (fun () ->
+          Ast_provider.parse ctx ~full:true ~keep_errors:true ~source_text)
     in
     entry.Provider_context.ast_errors <- Some ast_errors;
     entry.Provider_context.parser_return <- Some parser_return;

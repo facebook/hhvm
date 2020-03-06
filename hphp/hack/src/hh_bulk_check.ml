@@ -320,7 +320,6 @@ let schedule_type_checking schedule_env =
       .ServerLocalConfig.max_typechecker_worker_memory_mb
   in
   let files_to_check = read_input_file schedule_env.input_file in
-  Parser_options_provider.set env.ServerEnv.popt;
   let check_info =
     Typing_check_service.
       {

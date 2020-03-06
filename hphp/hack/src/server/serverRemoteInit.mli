@@ -8,8 +8,8 @@
  *)
 
 val init :
-  MultiWorker.worker list option ->
   Provider_context.t ->
+  MultiWorker.worker list option ->
   worker_key:string ->
   check_id:string ->
   bin_root:Path.t ->

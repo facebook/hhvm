@@ -67,7 +67,6 @@
     heap_shared_mem
     nast
     parser
-    parser_options_provider
     provider_context
     relative_path
     server_command_types
@@ -112,16 +111,6 @@
   (libraries
     errors
     file_info)
-  (preprocess (pps ppx_deriving.std)))
-
-(library
-  (name parser_options_provider)
-  (modules parser_options_provider)
-  (libraries
-    heap_shared_mem
-    parser_options
-    provider_backend
-    utils_core)
   (preprocess (pps ppx_deriving.std)))
 
 (library

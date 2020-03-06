@@ -19,7 +19,6 @@ let init root : Provider_context.t =
   let (_handle : SharedMem.handle) =
     SharedMem.init ~num_workers:0 GlobalConfig.default_sharedmem_config
   in
-  Parser_options_provider.set ParserOptions.default;
   let tcopt =
     {
       TypecheckerOptions.default with

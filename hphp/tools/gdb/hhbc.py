@@ -19,6 +19,7 @@ def as_idx(op):
     """Cast an HPHP::Op to a uint16_t."""
     return op.cast(T('uint16_t'))
 
+
 @memoized
 def op_table(name):
     """Get the symbol `name' as an int8_t[]."""
@@ -34,14 +35,17 @@ def op_table(name):
 #------------------------------------------------------------------------------
 # Bytecode immediates.
 
+
 @memoized
 def iva_imm_types():
     return [V('HPHP::' + t) for t in ['IVA', 'LA', 'ILA', 'IA']]
+
 
 @memoized
 def vec_imm_types():
     # keep this in sync with vec_elm_sizes()
     return [V('HPHP::' + t) for t in ['BLA', 'VSA', 'SLA']]
+
 
 @memoized
 def vec_elm_sizes():
@@ -51,17 +55,21 @@ def vec_elm_sizes():
         'HPHP::StrVecItem',  # SLA
     ]]
 
+
 @memoized
 def tv_iva_mcodes():
     return [V('HPHP::' + t) for t in ['MEC', 'MPC']]
+
 
 @memoized
 def tv_loc_mcodes():
     return [V('HPHP::' + t) for t in ['MEL', 'MPL']]
 
+
 @memoized
 def str_imm_mcodes():
     return [V('HPHP::' + t) for t in ['MET', 'MPT', 'MQT']]
+
 
 @memoized
 def rata_arrs():
@@ -70,6 +78,7 @@ def rata_arrs():
             for s in ['', 'S']
             for t in ['Arr', 'VArr', 'DArr', 'Vec', 'Dict', 'Keyset']]
 
+
 @memoized
 def rata_objs():
     return [V('HPHP::RepoAuthType::Tag::' + o + s + t)
@@ -77,12 +86,14 @@ def rata_objs():
             for s in ['Exact', 'Sub']
             for t in ['Obj', 'Cls']]
 
+
 @memoized
 def uints_by_size():
     return {1: 'uint8_t',
             2: 'uint16_t',
             4: 'uint32_t',
             8: 'uint64_t'}
+
 
 class HHBC(object):
     """
@@ -118,7 +129,7 @@ class HHBC(object):
 
         if small & 0x80:
             large = pc.cast(T('uint32_t').pointer()).dereference()
-            info['value'] = ((large & 0xffffff00) >> 1) | (large & 0x7f);
+            info['value'] = ((large & 0xffffff00) >> 1) | (large & 0x7f)
             info['size'] = 4
         else:
             info['value'] = small
@@ -409,6 +420,7 @@ class HHBC(object):
 #------------------------------------------------------------------------------
 # `hhx' command.
 
+
 class HHXCommand(gdb.Command):
     """Print an HHBC stream.
 
@@ -486,5 +498,6 @@ remains where it left off after the previous call.
 
             self.bcpos += instr['len']
             self.bcoff += instr['len']
+
 
 HHXCommand()

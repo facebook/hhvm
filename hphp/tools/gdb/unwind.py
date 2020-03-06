@@ -16,9 +16,12 @@ import frame
 # HHVM unwinder.
 
 class FrameId(object):
+    __slots__ = ['sp', 'pc']
+
     def __init__(self, sp, ip):
         self.sp = sp
         self.pc = ip
+
 
 class HHVMUnwinder(Unwinder):
     """Custom unwinder for jitted frames.
@@ -74,6 +77,7 @@ falls back to the default GDB unwinder(s) otherwise.
 
 _did_init = False
 
+
 def try_unwinder_init():
     """Try to register the custom unwinder if it hasn't been already, and
     return whether the unwinder has been successfully registered."""
@@ -103,7 +107,9 @@ class UnwinderCommand(gdb.Command):
         super(UnwinderCommand, self).__init__('unwinder', gdb.COMMAND_STACK,
                                               gdb.COMPLETE_NONE, True)
 
+
 UnwinderCommand()
+
 
 class UnwinderInitCommand(gdb.Command):
     """Initialize the custom unwinder."""
@@ -119,5 +125,6 @@ class UnwinderInitCommand(gdb.Command):
         else:
             print('HHVM unwinder could not be initialized.')
             print('Has gdb startup run to completion?')
+
 
 UnwinderInitCommand()

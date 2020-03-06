@@ -8,15 +8,18 @@ I don't understand Python's version incompatibilities and also Python sucks.
 # Most likely people who think this should be hospitalized, but who am I to
 # argue.  I'm just scared for my life.
 
-try: xrange
+try:
+    xrange
 except NameError:
     xrange = range
 
-try: unicode
+try:
+    unicode
 except NameError:
     unicode = str
 
-try: reduce
+try:
+    reduce
 except NameError:
     from functools import reduce
 

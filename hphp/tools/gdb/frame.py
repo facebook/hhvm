@@ -117,6 +117,7 @@ def php_line_number(func, pc):
 #------------------------------------------------------------------------------
 # Frame builders.
 
+
 def create_native(idx, fp, rip, native_frame=None, name=None):
     # Try to get the function name.
     if native_frame is None:

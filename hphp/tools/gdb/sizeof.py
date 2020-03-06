@@ -54,4 +54,5 @@ class SizeOfCommand(gdb.Command):
         else:
             print('sizeof: Unrecognized container.')
 
+
 SizeOfCommand()

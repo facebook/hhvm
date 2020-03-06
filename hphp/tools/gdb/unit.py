@@ -14,6 +14,7 @@ from gdbutils import *
 
 curunit = None
 
+
 class UnitCommand(gdb.Command):
     """Set the current translation unit.
 
@@ -48,5 +49,6 @@ Use `unit none` to unset.  Just `unit` displays the current Unit.
             curunit = gdb.parse_and_eval(argv[0]).cast(unit_type)
 
         gdbprint(curunit)
+
 
 UnitCommand()

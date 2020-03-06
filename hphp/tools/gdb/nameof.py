@@ -32,4 +32,5 @@ class NameOfCommand(gdb.Command):
         if name is not None:
             print('"' + name + '"')
 
+
 NameOfCommand()

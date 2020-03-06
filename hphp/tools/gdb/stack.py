@@ -22,7 +22,7 @@ def _function_for(rip):
     try:
         out = gdb.execute('x/i %s' % str(rip), False, True)
         # [=>] 0xabc3210 <HPHP::foo<T>((*) Foo*(int))+789>: jmp 0xf0 <...>
-        return re.split('\+\d+>:', out.split('<', 1)[1], 1)[0]
+        return re.split(r'\+\d+>:', out.split('<', 1)[1], 1)[0]
     except:
         return None
 

@@ -177,9 +177,11 @@ def fixed_string_map_at(fsm, sd, hasher=None):
 def _ism_index(ism, s):
     return fixed_string_map_at(ism['m_map'], s)
 
+
 def _ism_access_list(ism):
     t = rawtype(rawtype(ism.type).template_argument(0))
     return ism['m_map']['m_table'].cast(t.pointer())
+
 
 def indexed_string_map_at(ism, idx, hasher=None):
     # If `idx' is a string, it must be converted to an index via the underlying
@@ -223,8 +225,8 @@ def compact_vector_at(vec, idx, hasher=None):
         return None
 
     inner = vec.type.template_argument(0)
-    elems = (vec['m_data'].cast(T('char').pointer()) +
-             vec['elems_offset']).cast(inner.pointer())
+    elems = (vec['m_data'].cast(T('char').pointer())
+             + vec['elems_offset']).cast(inner.pointer())
     return elems[idx]
 
 
@@ -296,10 +298,10 @@ def idx_accessors():
         'std::unordered_map':       unordered_map_at,
         'HPHP::jit::hash_map':      unordered_map_at,
         'HPHP::hphp_hash_map':      unordered_map_at,
-        'boost::container::flat_map':
-                                    boost_flat_map_at,
-        'tbb::interface5::concurrent_hash_map':
-                                    tbb_chm_at,
+        'boost::container::'
+        'flat_map':                 boost_flat_map_at,
+        'tbb::interface5::'
+        'concurrent_hash_map':      tbb_chm_at,
         'HPHP::AtomicVector':       atomic_vector_at,
         'HPHP::FixedVector':        fixed_vector_at,
         'HPHP::FixedStringMap':     fixed_string_map_at,
@@ -378,7 +380,7 @@ hash, if valid, will be used instead of the default hash for the key type.
         ty = str(value.type.pointer())
         ty_parts = [
             x for x in
-            re.split('(\s*(?:const\s*)?[*&](?!\s*[>,]))', ty, 1) if x
+            re.split(r'(\s*(?:const\s*)?[*&](?!\s*[>,]))', ty, 1) if x
         ]
         ty_parts[0] = "'%s'" % ty_parts[0]
 

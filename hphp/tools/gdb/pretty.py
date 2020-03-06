@@ -132,7 +132,7 @@ class PtrPrinter(object):
         except gdb.MemoryError:
             s = None
 
-        out = '(%s) %s'  % (str(self._ptype()), str(self._pointer()))
+        out = '(%s) %s' % (str(self._ptype()), str(self._pointer()))
         return '%s "%s"' % (out, s) if s is not None else out
 
 
@@ -148,11 +148,13 @@ class ReqPtrPrinter(PtrPrinter):
     def _pointer(self):
         return self.val['m_px']
 
+
 class StringPrinter(ReqPtrPrinter):
     RECOGNIZE = '^HPHP::(Static)?String$'
 
     def __init__(self, val):
         super(StringPrinter, self).__init__(val['m_str'])
+
 
 class ArrayPrinter(ReqPtrPrinter):
     RECOGNIZE = '^HPHP::Array$'
@@ -160,11 +162,13 @@ class ArrayPrinter(ReqPtrPrinter):
     def __init__(self, val):
         super(ArrayPrinter, self).__init__(val['m_arr'])
 
+
 class ObjectPrinter(ReqPtrPrinter):
     RECOGNIZE = '^HPHP::Object$'
 
     def __init__(self, val):
         super(ObjectPrinter, self).__init__(val['m_obj'])
+
 
 class ResourcePrinter(ReqPtrPrinter):
     RECOGNIZE = '^HPHP::Resource$'
@@ -210,6 +214,7 @@ class OptionalPrinter(object):
 
 #------------------------------------------------------------------------------
 # ArrayData.
+
 
 class ArrayDataPrinter(object):
     RECOGNIZE = '^HPHP::(ArrayData|MixedArray)$'
@@ -292,7 +297,6 @@ class ArrayDataPrinter(object):
             self.cur = self.cur + 1
             return (key, key)
 
-
     def __init__(self, val):
         kind_ty = T('HPHP::ArrayData::ArrayKind')
         self.kind = val['m_kind'].cast(kind_ty)
@@ -319,8 +323,8 @@ class ArrayDataPrinter(object):
         )
 
     def children(self):
-        data = self.val.address.cast(T('char').pointer()) + \
-               self.val.type.sizeof
+        data = (self.val.address.cast(T('char').pointer())
+                + self.val.type.sizeof)
 
         if self.kind == self._kind('Packed') or self.kind == self._kind('Vec'):
             pelm = data.cast(T('HPHP::TypedValue').pointer())
@@ -388,6 +392,7 @@ class ObjectDataPrinter(object):
 #------------------------------------------------------------------------------
 # HHBBC::Bytecode
 
+
 class HhbbcBytecodePrinter(object):
     RECOGNIZE = '^HPHP::HHBBC::Bytecode$'
 
@@ -400,6 +405,8 @@ class HhbbcBytecodePrinter(object):
 
 #------------------------------------------------------------------------------
 # Lookup function.
+
+
 class CompactVectorPrinter(object):
     RECOGNIZE = '^HPHP::CompactVector(<.*>)$'
 
@@ -425,7 +432,6 @@ class CompactVectorPrinter(object):
             self.count = self.count + 1
             return (key, data)
 
-
     def __init__(self, val):
         inner = val.type.template_argument(0)
         self.inner = inner
@@ -435,8 +441,8 @@ class CompactVectorPrinter(object):
         else:
             self.len = val['m_data']['m_len']
             self.cap = val['m_data']['m_capacity']
-            self.elems = (val['m_data'].cast(T('char').pointer()) +
-                          val['elems_offset']).cast(inner.pointer())
+            self.elems = (val['m_data'].cast(T('char').pointer())
+                          + val['elems_offset']).cast(inner.pointer())
 
     def to_string(self):
         return "CompactVector<%s>: %d element(s) capacity=%d" % (
@@ -486,6 +492,7 @@ class SrcKeyPrinter(object):
 #------------------------------------------------------------------------------
 # Lookup function.
 
+
 printer_classes = [
     TypedValuePrinter,
     ReqPtrPrinter,
@@ -505,6 +512,7 @@ printer_classes = [
 type_printers = {(re.compile(cls.RECOGNIZE), cls)
                   for cls in printer_classes}
 
+
 def lookup_function(val):
     t = val.type
     if t.code == gdb.TYPE_CODE_REF:
@@ -514,7 +522,7 @@ def lookup_function(val):
 
     # Get the type name.
     typename = t.tag
-    if typename == None:
+    if typename is None:
         return None
 
     # Iterate over local dict of types to determine if a printer is registered
@@ -525,5 +533,6 @@ def lookup_function(val):
 
     # Cannot find a pretty printer.  Return None.
     return None
+
 
 gdb.pretty_printers.append(lookup_function)

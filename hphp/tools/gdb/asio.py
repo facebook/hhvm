@@ -134,7 +134,7 @@ class WaitHandle(object):
         # The remaining bits point to the next blockable in the chain.
         kind = (bits & 0x7).cast(T(kind_str))
 
-        m = re.match(kind_str + '::(\w+)WaitHandle\w*', str(kind))
+        m = re.match(kind_str + r'::(\w+)WaitHandle\w*', str(kind))
         if m is None:
             return None
 
@@ -160,7 +160,6 @@ class WaitHandle(object):
         except:
             if blockable != wh['m_children'][0]['m_blockable'].address:
                 return None
-
 
         return WaitHandle(wh)
 
@@ -243,6 +242,7 @@ The format used is the same as that used by `walkstk'.
         for s in frame.stringify_stacktrace(stacktrace):
             print(s)
 
+
 AsyncStkCommand()
 
 
@@ -283,10 +283,10 @@ class InfoAsioCommand(gdb.Command):
 
         # Find the most recent join().
         for _i, fp in izip(count(), frame.gen_php(vmfp)):
-            if nameof(fp['m_func']) == 'HH\WaitHandle::join':
+            if nameof(fp['m_func']) == r'HH\WaitHandle::join':
                 break
 
-        if nameof(fp['m_func']) != 'HH\WaitHandle::join':
+        if nameof(fp['m_func']) != r'HH\WaitHandle::join':
             print("...but couldn't find join().  Something is wrong.\n")
             return
 
@@ -339,5 +339,6 @@ class InfoAsioCommand(gdb.Command):
                     for s in stacktrace:
                         print('    %s' % s)
         print('')
+
 
 InfoAsioCommand()

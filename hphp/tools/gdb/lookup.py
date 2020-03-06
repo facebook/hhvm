@@ -22,6 +22,7 @@ class LookupCommand(gdb.Command):
         super(LookupCommand, self).__init__('lookup', gdb.COMMAND_DATA,
                                             gdb.COMPLETE_NONE, True)
 
+
 LookupCommand()
 
 
@@ -113,5 +114,6 @@ If no Unit is given, the current unit (set by `unit') is used.
 
         litstr = lookup_litstr(litstr_id, u)
         gdbprint(litstr)
+
 
 LookupLitstrCommand()

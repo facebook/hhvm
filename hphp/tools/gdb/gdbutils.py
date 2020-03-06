@@ -21,6 +21,7 @@ import types
 
 _all_caches = []
 
+
 def memoized(func):
     """Simple memoization decorator that ignores **kwargs."""
     global _all_caches
@@ -135,6 +136,7 @@ def string_data_val(val, keep_case=True):
 def _unpack(s):
     return 0xdfdfdfdfdfdfdfdf & struct.unpack('<Q', s)[0]
 
+
 def hash_string(s):
     """Hash a string as in hphp/util/hash-crc.S."""
 
@@ -145,7 +147,7 @@ def hash_string(s):
     crc = 0xffffffff
 
     for i in xrange(0, size, 8):
-        crc = crc32q(crc, _unpack(s[i:i+8]))
+        crc = crc32q(crc, _unpack(s[i : i + 8]))
 
     if tail_sz == 0:
         return crc >> 1
@@ -166,8 +168,8 @@ def strinfo(s, keep_case=True):
 
     t = rawtype(s.type)
 
-    if (t == T('char').pointer() or
-            re.match(r"char \[\d*\]$", str(t)) is not None):
+    if (t == T('char').pointer()
+          or re.match(r"char \[\d*\]$", str(t)) is not None):
         data = s.string()
     else:
         sd = deref(s)
@@ -229,6 +231,7 @@ def alt_form_enum(str, enum_name):
 def T(name):
     return gdb.lookup_type(name)
 
+
 @memoized
 def K(name, enumName=''):
     try:
@@ -246,6 +249,7 @@ def V(name, enumName=''):
         result = TL(alt_form_enum(name, enumName))
     return result
 
+
 @memoized
 def nullptr():
     return gdb.Value(0).cast(T('void').pointer())
@@ -262,7 +266,7 @@ def TL(name):
 # Type manipulations.
 
 def destruct(t):
-    return re.sub('^(struct|class|union)\s+', '', t)
+    return re.sub(r'^(struct|class|union)\s+', '', t)
 
 
 def rawtype(t):
@@ -370,6 +374,7 @@ current_key = None
 _tv_recurse_depth = 0
 _tv_recurse_seen = set()
 
+
 def DT(kind):
     return V(kind, 'DataType')
 
@@ -413,22 +418,22 @@ def pretty_tv(t, data):
     elif t == DT('HPHP::KindOfDouble'):
         val = data['dbl']
 
-    elif (t == DT('HPHP::KindOfString') or
-          t == DT('HPHP::KindOfPersistentString')):
+    elif (t == DT('HPHP::KindOfString')
+          or t == DT('HPHP::KindOfPersistentString')):
         val = data['pstr'].dereference()
 
-    elif (t == V('HPHP::KindOfArray') or
-          t == V('HPHP::KindOfPersistentArray') or
-          t == V('HPHP::KindOfDArray') or
-          t == V('HPHP::KindOfPersistentDArray') or
-          t == V('HPHP::KindOfVArray') or
-          t == V('HPHP::KindOfPersistentVArray') or
-          t == V('HPHP::KindOfDict') or
-          t == V('HPHP::KindOfPersistentDict') or
-          t == V('HPHP::KindOfVec') or
-          t == V('HPHP::KindOfPersistentVec') or
-          t == V('HPHP::KindOfKeyset') or
-          t == V('HPHP::KindOfPersistentKeyset')):
+    elif (t == V('HPHP::KindOfArray')
+          or t == V('HPHP::KindOfPersistentArray')
+          or t == V('HPHP::KindOfDArray')
+          or t == V('HPHP::KindOfPersistentDArray')
+          or t == V('HPHP::KindOfVArray')
+          or t == V('HPHP::KindOfPersistentVArray')
+          or t == V('HPHP::KindOfDict')
+          or t == V('HPHP::KindOfPersistentDict')
+          or t == V('HPHP::KindOfVec')
+          or t == V('HPHP::KindOfPersistentVec')
+          or t == V('HPHP::KindOfKeyset')
+          or t == V('HPHP::KindOfPersistentKeyset')):
         val = data['parr']
         if should_recurse():
             recurse = True
@@ -480,6 +485,7 @@ def arch():
         return gdb.newest_frame().architecture().name()
     except:
         return None
+
 
 @memoized
 def arch_regs():

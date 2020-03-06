@@ -284,7 +284,11 @@ and obj_get_concrete_ty
                               use_name = strip_ns id_str;
                               explicit_targs = [];
                             }
-                          ~ety_env
+                          ~ety_env:
+                            {
+                              ety_env with
+                              on_error = Errors.unify_error_at id_pos;
+                            }
                           ~def_pos:mem_pos
                           env
                           ft)
@@ -387,7 +391,8 @@ and obj_get_concrete_ty
                           use_pos = id_pos;
                           explicit_targs;
                         }
-                      ~ety_env
+                      ~ety_env:
+                        { ety_env with on_error = Errors.unify_error_at id_pos }
                       ~def_pos:mem_pos
                       env
                       ft)

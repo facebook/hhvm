@@ -179,7 +179,7 @@ bool PDOSqliteConnection::preparer(const String& sql, sp_PDOStatement *stmt,
 
   const char *tail;
   sqlite3_stmt *rawstmt = NULL;
-  if (sqlite3_prepare(m_db, sql.data(), sql.size(), &rawstmt, &tail)
+  if (sqlite3_prepare_v2(m_db, sql.data(), sql.size(), &rawstmt, &tail)
       == SQLITE_OK) {
 
     *stmt = req::make<PDOSqliteStatement>(m_db, rawstmt);

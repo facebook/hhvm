@@ -250,24 +250,6 @@ impl Gen {
         label_break: Label,
         label_continue: Label,
         iterator: Option<Iter>,
-        stmt: &Stmt<Ex, Fb, En, Hi>,
-    ) {
-        let labels = self.collect_valid_target_labels_for_stmt(stmt);
-        self.jump_targets.0.push(Region::Loop(
-            LoopLabels {
-                label_break,
-                label_continue,
-                iterator,
-            },
-            labels,
-        ))
-    }
-
-    pub fn with_loop_block<Ex, Fb, En, Hi>(
-        &mut self,
-        label_break: Label,
-        label_continue: Label,
-        iterator: Option<Iter>,
         block: &Block<Ex, Fb, En, Hi>,
     ) {
         let labels = self.collect_valid_target_labels_for_block(block);
@@ -300,8 +282,8 @@ impl Gen {
             .push(Region::TryFinally(finally_label, labels));
     }
 
-    pub fn with_finally<Ex, Fb, En, Hi>(&mut self, stmt: &Stmt<Ex, Fb, En, Hi>) {
-        let labels = self.collect_valid_target_labels_for_stmt(stmt);
+    pub fn with_finally<Ex, Fb, En, Hi>(&mut self, block: &Block<Ex, Fb, En, Hi>) {
+        let labels = self.collect_valid_target_labels_for_block(block);
         self.jump_targets.0.push(Region::Finally(labels));
     }
 

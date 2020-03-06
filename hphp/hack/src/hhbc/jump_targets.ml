@@ -236,7 +236,7 @@ let run_and_release_ids _labels f s t =
 let with_loop label_break label_continue iterator t b f =
   let labels = collect_valid_target_labels_for_block b in
   Loop ({ label_break; label_continue; iterator }, labels) :: t
-  |> run_and_release_ids labels f b 
+  |> run_and_release_ids labels f b
 
 let with_switch end_label t cl f =
   let labels = collect_valid_target_labels_for_switch_cases cl in
@@ -245,21 +245,21 @@ let with_switch end_label t cl f =
   let _ = get_id_for_label end_label in
   Switch (end_label, labels) :: t |> run_and_release_ids labels f ()
 
-let with_try finally_label t s f =
-  let labels = collect_valid_target_labels_for_stmt s in
-  TryFinally (finally_label, labels) :: t |> run_and_release_ids labels f s
+let with_try finally_label t b f =
+  let labels = collect_valid_target_labels_for_block b in
+  TryFinally (finally_label, labels) :: t |> run_and_release_ids labels f b
 
-let with_finally t s f =
-  let labels = collect_valid_target_labels_for_stmt s in
-  Finally labels :: t |> run_and_release_ids labels f s
+let with_finally t b f =
+  let labels = collect_valid_target_labels_for_block b in
+  Finally labels :: t |> run_and_release_ids labels f b
 
 let with_function t s f =
   let labels = collect_valid_target_labels_for_defs s in
   Function labels :: t |> run_and_release_ids labels f s
 
-let with_using finally_label t s f =
-  let labels = collect_valid_target_labels_for_stmt s in
-  Using (finally_label, labels) :: t |> run_and_release_ids labels f s
+let with_using finally_label t b f =
+  let labels = collect_valid_target_labels_for_block b in
+  Using (finally_label, labels) :: t |> run_and_release_ids labels f b
 
 type resolved_try_finally = {
   target_label: Label.t;

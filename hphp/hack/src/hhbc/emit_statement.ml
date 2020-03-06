@@ -247,7 +247,7 @@ and emit_stmt env (pos, stmt) =
           us_block = b;
           us_is_block_scoped = is_block_scoped;
         } ->
-    emit_using env pos is_block_scoped has_await e (block_pos b, A.Block b)
+    emit_using env pos is_block_scoped has_await e (block_pos b) b
   | A.Break -> emit_break env pos
   | A.Continue -> emit_continue env pos
   | A.Do (b, e) -> emit_do env b e
@@ -266,13 +266,9 @@ and emit_stmt env (pos, stmt) =
           A.Try ([(pos, A.Try (try_block, catch_list, []))], [], finally_block)
         )
     else if catch_list <> [] then
-      emit_try_catch env (pos, A.Block try_block) catch_list
+      emit_try_catch env pos try_block catch_list
     else
-      emit_try_finally
-        env
-        pos
-        (pos, A.Block try_block)
-        (pos, A.Block finally_block)
+      emit_try_finally env pos try_block finally_block
   | A.Switch (e, cl) -> emit_switch env pos e cl
   | A.Foreach (collection, iterator, block) ->
     emit_foreach env pos collection iterator block
@@ -446,22 +442,30 @@ and emit_while env e b =
     ]
 
 and emit_using
-    (env : Emit_env.t) pos is_block_scoped has_await (e : Tast.expr) b =
+    (env : Emit_env.t)
+    pos
+    is_block_scoped
+    has_await
+    (e : Tast.expr)
+    block_pos
+    (b : Tast.block) =
   match snd e with
   | A.Expr_list es ->
-    emit_stmt env
+    emit_stmts env
     @@ List.fold_right
          es
          ~f:(fun e acc ->
            let ((p, _), _) = e in
-           ( p,
-             A.Using
-               {
-                 A.us_has_await = has_await;
-                 A.us_is_block_scoped = is_block_scoped;
-                 A.us_expr = e;
-                 A.us_block = [acc];
-               } ))
+           [
+             ( p,
+               A.Using
+                 {
+                   A.us_has_await = has_await;
+                   A.us_is_block_scoped = is_block_scoped;
+                   A.us_expr = e;
+                   A.us_block = acc;
+                 } );
+           ])
          ~init:b
   | _ ->
     Local.scope @@ fun () ->
@@ -470,14 +474,14 @@ and emit_using
       | A.Binop (Ast_defs.Eq None, (_, A.Lvar (_, id)), _)
       | A.Lvar (_, id) ->
         ( Local.Named (Local_id.get_name id),
-          gather [emit_expr env e; Emit_pos.emit_pos (fst b); instr_popc] )
+          gather [emit_expr env e; Emit_pos.emit_pos block_pos; instr_popc] )
       | _ ->
         let l = Local.get_unnamed_local () in
         (l, gather [emit_expr env e; instr_setl l; instr_popc])
     in
     let finally_start = Label.next_regular () in
     let finally_end = Label.next_regular () in
-    let body = Emit_env.do_in_using_body finally_start env b emit_stmt in
+    let body = Emit_env.do_in_using_body finally_start env b emit_stmts in
     let jump_instructions = TFR.collect_jump_instructions body env in
     let body =
       if IMap.is_empty jump_instructions then
@@ -538,7 +542,7 @@ and emit_using
           body
           (gather
              [
-               emit_pos (fst b);
+               emit_pos block_pos;
                make_finally_catch exn_local (emit_finally ());
                emit_pos pos;
              ])
@@ -748,25 +752,25 @@ and emit_catch
 and emit_catches (env : Emit_env.t) pos catch_list end_label =
   gather (List.map catch_list ~f:(emit_catch env pos end_label))
 
-and is_empty_block (_, b) =
-  match b with
-  | A.Block l -> List.for_all ~f:is_empty_block l
-  | A.Noop -> true
-  | _ -> false
+and is_empty_block b =
+  List.for_all
+    ~f:(function
+      | (_, A.Noop) -> true
+      | _ -> false)
+    b
 
-and emit_try_catch (env : Emit_env.t) try_block catch_list =
-  Local.scope @@ fun () -> emit_try_catch_ env try_block catch_list
+and emit_try_catch (env : Emit_env.t) pos try_block catch_list =
+  Local.scope @@ fun () -> emit_try_catch_ env pos try_block catch_list
 
-and emit_try_catch_ (env : Emit_env.t) try_block catch_list =
+and emit_try_catch_ (env : Emit_env.t) pos try_block catch_list =
   if is_empty_block try_block then
     empty
   else
     let end_label = Label.next_regular () in
-    let (pos, _) = try_block in
     let try_env = Emit_env.with_try env in
     create_try_catch
       ~opt_done_label:end_label
-      (gather [emit_stmt try_env try_block; Emit_pos.emit_pos pos])
+      (gather [emit_stmts try_env try_block; Emit_pos.emit_pos pos])
       (emit_catches env pos catch_list end_label)
 
 and emit_try_finally env pos try_block finally_block =
@@ -774,7 +778,7 @@ and emit_try_finally env pos try_block finally_block =
 
 and emit_try_finally_ env pos try_block finally_block =
   let make_finally_body () =
-    Emit_env.do_in_finally_body env finally_block emit_stmt
+    Emit_env.do_in_finally_body env finally_block emit_stmts
   in
   if is_empty_block try_block then
     make_finally_body ()
@@ -805,7 +809,7 @@ and emit_try_finally_ env pos try_block finally_block =
     let enclosing_span = Ast_scope.Scope.get_span env.Emit_env.env_scope in
     let try_env = Emit_env.with_try env in
     let try_body =
-      Emit_env.do_in_try_body finally_start try_env try_block emit_stmt
+      Emit_env.do_in_try_body finally_start try_env try_block emit_stmts
     in
     let jump_instructions = TFR.collect_jump_instructions try_body env in
     let try_body =
@@ -877,7 +881,7 @@ and emit_try_finally_ env pos try_block finally_block =
       [
         middle;
         instr_label finally_start;
-        Emit_pos.emit_pos (fst finally_block);
+        Emit_pos.emit_pos pos;
         finally_body;
         finally_epilogue;
         instr_label finally_end;

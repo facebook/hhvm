@@ -83,23 +83,6 @@ impl<'a> Env<'a> {
         label_break: Label,
         label_continue: Label,
         iterator: Option<Iter>,
-        s: &tast::Stmt,
-        f: F,
-    ) -> R
-    where
-        F: FnOnce(&mut Self, &mut Emitter, &tast::Stmt) -> R,
-    {
-        self.jump_targets_gen
-            .with_loop(label_break, label_continue, iterator, s);
-        self.run_and_release_ids(e, s, f)
-    }
-
-    pub fn do_in_loop_block<R, F>(
-        &mut self,
-        e: &mut Emitter,
-        label_break: Label,
-        label_continue: Label,
-        iterator: Option<Iter>,
         b: &tast::Block,
         f: F,
     ) -> R
@@ -107,7 +90,7 @@ impl<'a> Env<'a> {
         F: FnOnce(&mut Self, &mut Emitter, &tast::Block) -> R,
     {
         self.jump_targets_gen
-            .with_loop_block(label_break, label_continue, iterator, b);
+            .with_loop(label_break, label_continue, iterator, b);
         self.run_and_release_ids(e, b, f)
     }
 
@@ -139,12 +122,12 @@ impl<'a> Env<'a> {
         self.run_and_release_ids(e, stmt, f)
     }
 
-    pub fn do_in_finally_body<R, F>(&mut self, e: &mut Emitter, stmt: &tast::Stmt, f: F) -> R
+    pub fn do_in_finally_body<R, F>(&mut self, e: &mut Emitter, block: &tast::Block, f: F) -> R
     where
-        F: FnOnce(&mut Self, &mut Emitter, &tast::Stmt) -> R,
+        F: FnOnce(&mut Self, &mut Emitter, &tast::Block) -> R,
     {
-        self.jump_targets_gen.with_finally(stmt);
-        self.run_and_release_ids(e, stmt, f)
+        self.jump_targets_gen.with_finally(block);
+        self.run_and_release_ids(e, block, f)
     }
 
     pub fn do_in_using_body<R, F>(

@@ -353,7 +353,7 @@ fn emit_foreach_(
             key_id,
             val_id,
         };
-        let body = env.do_in_loop_block(
+        let body = env.do_in_loop_body(
             e,
             loop_break_label.clone(),
             loop_continue_label.clone(),
@@ -430,7 +430,7 @@ fn emit_foreach_await(
             InstrSeq::make_istypec(IstypeOp::OpNull),
             InstrSeq::make_jmpnz(pop_and_exit_label.clone()),
             emit_foreach_await_key_value_storage(e, env, iterator)?,
-            env.do_in_loop_block(
+            env.do_in_loop_body(
                 e,
                 exit_label.clone(),
                 next_label.clone(),
@@ -730,7 +730,7 @@ fn emit_do(e: &mut Emitter, env: &mut Env, body: &tast::Block, cond: &tast::Expr
     let start_label = e.label_gen_mut().next_regular();
     Ok(InstrSeq::gather(vec![
         InstrSeq::make_label(start_label.clone()),
-        env.do_in_loop_block(
+        env.do_in_loop_body(
             e,
             break_label.clone(),
             cont_label.clone(),
@@ -751,7 +751,7 @@ fn emit_while(e: &mut Emitter, env: &mut Env, cond: &tast::Expr, body: &tast::Bl
     Ok(InstrSeq::gather(vec![
         emit_expr::emit_jmpz(e, env, cond, &break_label)?.instrs,
         InstrSeq::make_label(start_label.clone()),
-        env.do_in_loop_block(
+        env.do_in_loop_body(
             e,
             break_label.clone(),
             cont_label.clone(),
@@ -861,7 +861,7 @@ fn emit_for(
         emit_expr::emit_ignored_expr(e, env, pos, e1)?,
         emit_cond(e, env, pos, true, &break_label, e2)?,
         InstrSeq::make_label(start_label.clone()),
-        env.do_in_loop_block(
+        env.do_in_loop_body(
             e,
             break_label.clone(),
             cont_label.clone(),

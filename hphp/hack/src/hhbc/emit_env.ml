@@ -189,17 +189,17 @@ let do_in_switch_body end_label env s f =
   Jump_targets.with_switch end_label env.env_jump_targets s
   @@ fun env_jump_targets s -> f { env with env_jump_targets } s
 
-let do_in_try_body finally_label env s f =
-  Jump_targets.with_try finally_label env.env_jump_targets s
-  @@ fun env_jump_targets s -> f { env with env_jump_targets } s
+let do_in_try_body finally_label env b f =
+  Jump_targets.with_try finally_label env.env_jump_targets b
+  @@ fun env_jump_targets b -> f { env with env_jump_targets } b
 
-let do_in_finally_body env s f =
-  Jump_targets.with_finally env.env_jump_targets s @@ fun env_jump_targets s ->
-  f { env with env_jump_targets } s
+let do_in_finally_body env b f =
+  Jump_targets.with_finally env.env_jump_targets b @@ fun env_jump_targets b ->
+  f { env with env_jump_targets } b
 
-let do_in_using_body finally_label env s f =
-  Jump_targets.with_using finally_label env.env_jump_targets s
-  @@ fun env_jump_targets s -> f { env with env_jump_targets } s
+let do_in_using_body finally_label env b f =
+  Jump_targets.with_using finally_label env.env_jump_targets b
+  @@ fun env_jump_targets b -> f { env with env_jump_targets } b
 
 let do_function (env : t) (s : Tast.program) f =
   Jump_targets.with_function env.env_jump_targets s @@ fun env_jump_targets s ->

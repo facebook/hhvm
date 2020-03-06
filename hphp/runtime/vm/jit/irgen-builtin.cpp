@@ -1004,7 +1004,6 @@ SSATmp* opt_shapes_idx(IRGS& env, const ParamPrep& params) {
 
 const EnumValues* getEnumValues(IRGS& env, const ParamPrep& params) {
   if (RO::EvalLogArrayProvenance) return nullptr;
-  if (params.size() != 0) return nullptr;
   if (!(params.ctx && params.ctx->hasConstVal(TCls))) return nullptr;
   auto const cls = params.ctx->clsVal();
   if (!(isEnum(cls) && classHasPersistentRDS(cls))) return nullptr;
@@ -1012,13 +1011,52 @@ const EnumValues* getEnumValues(IRGS& env, const ParamPrep& params) {
 }
 
 SSATmp* opt_enum_names(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 0) return nullptr;
   auto const enum_values = getEnumValues(env, params);
   return enum_values ? cns(env, enum_values->names.get()) : nullptr;
 }
 
 SSATmp* opt_enum_values(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 0) return nullptr;
   auto const enum_values = getEnumValues(env, params);
   return enum_values ? cns(env, enum_values->values.get()) : nullptr;
+}
+
+SSATmp* opt_enum_is_valid(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
+  auto const value = params[0].value;
+  if (!value->type().isKnownDataType()) return nullptr;
+  auto const enum_values = getEnumValues(env, params);
+  if (!enum_values) return nullptr;
+  auto const ad = MixedArray::asMixed(enum_values->names.get());
+  auto const op = ad->isDict() ? AKExistsDict : AKExistsArr;
+  if (value->isA(TInt)) {
+    if (ad->keyTypes().mustBeStrs()) return cns(env, false);
+    return gen(env, op, cns(env, ad->asArrayData()), value);
+  } else if (value->isA(TStr)) {
+    // We're not doing intish-casts here, so we bail if ad has any int keys.
+    if (!ad->keyTypes().mustBeStrs()) return nullptr;
+    return gen(env, op, cns(env, ad->asArrayData()), value);
+  }
+  return cns(env, false);
+}
+
+SSATmp* opt_enum_coerce(IRGS& env, const ParamPrep& params) {
+  auto const valid = opt_enum_is_valid(env, params);
+  if (!valid) return nullptr;
+  return cond(env,
+    [&](Block* taken) { gen(env, JmpZero, taken, valid); },
+    [&]{
+      // We never need to coerce strs to ints here, but we may need to coerce
+      // ints to strs if the enum is a string type with intish values.
+      auto const value = params[0].value;
+      auto const isstr = isStringType(params.ctx->clsVal()->enumBaseTy());
+      if (value->isA(TInt) && isstr) return gen(env, ConvIntToStr, value);
+      gen(env, IncRef, value);
+      return value;
+    },
+    [&]{ return cns(env, TInitNull); }
+  );
 }
 
 SSATmp* opt_tag_provenance_here(IRGS& env, const ParamPrep& params) {
@@ -1125,6 +1163,8 @@ const hphp_fast_string_imap<OptEmitFn> s_opt_emit_fns{
   {"HH\\Shapes::idx", opt_shapes_idx},
   {"HH\\BuiltinEnum::getNames", opt_enum_names},
   {"HH\\BuiltinEnum::getValues", opt_enum_values},
+  {"HH\\BuiltinEnum::coerce", opt_enum_coerce},
+  {"HH\\BuiltinEnum::isValid", opt_enum_is_valid},
   {"HH\\is_meth_caller", opt_is_meth_caller},
   {"HH\\tag_provenance_here", opt_tag_provenance_here},
   {"HH\\array_mark_legacy", opt_array_mark_legacy},

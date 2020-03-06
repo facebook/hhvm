@@ -99,7 +99,7 @@ This special Stream::Wrapper implements all file:// IO for requests handled by
 CLIServer. It proxies all syscalls to the client process over the unix socket
 connection. The client responds with the results of these calls, and in the
 case of open() and opendir(), with the actual file-descriptors it opened (via
-SCM_RIGHTS).
+SCM_RIGHTS)
 
 ================================ [ The Client ] ================================
 
@@ -127,6 +127,7 @@ way to determine how much progress the server made.
 */
 
 #include "hphp/runtime/server/cli-server.h"
+#include "hphp/runtime/server/cli-server-ext.h"
 
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/execution-context.h"
@@ -159,13 +160,14 @@ way to determine how much progress the server made.
 #include <folly/io/async/EventBaseManager.h>
 #include <folly/portability/Sockets.h>
 
-#include <afdt.h>
 #include <errno.h>
 #include <grp.h>
 #include <pwd.h>
 #include <utime.h>
 
 TRACE_SET_MOD(clisrv);
+
+#include "hphp/runtime/server/cli-server-impl.h"
 
 namespace HPHP {
 
@@ -180,7 +182,7 @@ namespace HPHP {
  *
  * ===== WARNING ===== WARNING ===== WARNING ===== WARNING ===== WARNING =====
  */
-const uint64_t CLI_SERVER_API_VERSION = 2;
+const uint64_t CLI_SERVER_API_VERSION = 3;
 
 const StaticString s_hphp_cli_server_api_version("hphp.cli_server_api_version");
 
@@ -246,29 +248,6 @@ struct CLIClientGuardedFile : PlainFile {
 static_assert(sizeof(CLIClientGuardedFile) == sizeof(PlainFile),
               "CLIClientGuardedFile inherits PlainFile::heapSize()");
 
-namespace {
-
-template<class... Args>
-void cli_write(int afdt_fd, Args&&... args) {
-  FTRACE(4, "cli_write({}, nargs={})\n", afdt_fd, sizeof...(args) + 1);
-  try {
-    afdt::sendx(afdt_fd, std::forward<Args>(args)...);
-  } catch (const std::runtime_error& ex) {
-    throw Exception("Failed in afdt::sendRaw: %s [%s]",
-                    ex.what(), folly::errnoStr(errno).c_str());
-  }
-}
-
-template<class... Args>
-void cli_read(int afdt_fd, Args&&... args) {
-  FTRACE(4, "cli_read({}, nargs={})\n", afdt_fd, sizeof...(args) + 1);
-  try {
-    afdt::recvx(afdt_fd, std::forward<Args>(args)...);
-  } catch (const std::runtime_error& ex) {
-    throw Exception("Failed in afdt::recvRaw: %s [%s]",
-                    ex.what(), folly::errnoStr(errno).c_str());
-  }
-}
 
 int cli_read_fd(int afdt_fd) {
   int fd = afdt::recv_fd(afdt_fd);
@@ -287,6 +266,8 @@ void cli_write_fd(int afdt_fd, int fd) {
                     folly::errnoStr(errno).c_str());
   }
 }
+
+namespace {
 
 #ifdef SCM_CREDENTIALS
 
@@ -511,6 +492,7 @@ private:
 };
 
 CLIServer* s_cliServer{nullptr};
+std::map<std::string, void(*)(detail::CLIServerInterface&)> s_extensionHandlers;
 __thread ucred* tl_ucred{nullptr};
 __thread int tl_cliSock{-1};
 __thread Array* tl_env;
@@ -1562,6 +1544,21 @@ folly::Optional<int> cli_process_command_loop(int fd) {
       cli_write(fd, true, out);
       continue;
     }
+
+    if (cmd == "ext") {
+      std::string name;
+      cli_read(fd, name);
+      FTRACE(2, "cli_process_command_loop({}): {}\n", fd, name);
+      auto handler = s_extensionHandlers.find(name);
+      if (handler == s_extensionHandlers.end()) {
+        cli_write(fd, /* handler_recognized = */ false);
+        continue;
+      }
+      cli_write(fd, /* handler recognized = */ true);
+      detail::CLIServerInterface server(fd);
+      handler->second(server);
+      continue;
+    }
   }
 }
 
@@ -1761,4 +1758,20 @@ void run_command_on_cli_server(const char* sock_path,
   exit(ret);
 }
 
+namespace detail {
+
+void cli_register_handler(
+  const std::string& id,
+  void(*impl)(CLIServerInterface&)
+) {
+  s_extensionHandlers.emplace(id, impl);
 }
+// This is defined here so that tl_cliSock does not need to be exposed
+CLIClientInterface::CLIClientInterface(const std::string& id)
+: CLIServerExtensionInterface(tl_cliSock), id(id) {
+  assertx(tl_cliSock >= 0);
+}
+
+} // namespace HPHP::detail
+
+} // namespace HPHP

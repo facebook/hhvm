@@ -19,6 +19,7 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/native-data.h"
+#include "hphp/runtime/server/cli-server-ext.h"
 #include "hphp/system/systemlib.h"
 
 #include <fcntl.h>
@@ -110,10 +111,30 @@ Array HHVM_METHOD(HSLFileDescriptor, __debugInfo) {
 
 namespace {
 
+template<class T>
+T hsl_cli_unwrap(CLISrvResult<T, int> res) {
+  if (res.succeeded()) {
+    return res.result();
+  }
+  throw_errno_exception(res.error());
+}
+
+CLISrvResult<FdData, int> CLI_CLIENT_HANDLER(HSL_os_open, std::string path, int64_t flags, int64_t mode) {
+  auto fd = ::open(path.c_str(), flags, mode);
+  if (fd == -1) {
+    return { CLIError {}, errno };
+  }
+  return { CLISuccess {}, FdData { fd } };
+}
+
 Object HHVM_FUNCTION(HSL_os_open, const String& path, int64_t flags, int64_t mode) {
-  int fd;
-  fd = ::open(path.c_str(), flags, mode);
-  throw_errno_if_minus_one(fd);
+  int fd = hsl_cli_unwrap(INVOKE_ON_CLI_CLIENT(
+    HSL_os_open,
+    path.toCppString(),
+    flags,
+    mode
+  )).fd;
+  assertx(fd >= 0);
   return HSLFileDescriptor::newInstance(fd);
 }
 
@@ -157,6 +178,7 @@ struct OSExtension final : Extension {
 
     HHVM_NAMED_ME(HH\\Lib\\OS\\FileDescriptor, __debugInfo, HHVM_MN(HSLFileDescriptor, __debugInfo));
 
+    CLI_REGISTER_HANDLER(HSL_os_open);
     Native::registerNativeDataInfo<HSLFileDescriptor>(s_HSLFileDescriptor.get());
     loadSystemlib();
     s_FileDescriptorClass = Unit::lookupClass(s_FQHSLFileDescriptor.get());

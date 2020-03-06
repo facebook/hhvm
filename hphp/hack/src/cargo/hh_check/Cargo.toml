@@ -16,9 +16,12 @@ multifile_rust = { path = "../../utils/multifile" }
 options = { path = "../../hhbc/cargo/options" }
 oxidized = { path = "../../oxidized" }
 stack_limit = { path = "../../utils/stack_limit" }
-typing_check_service_rust = { path = "../../typing/cargo/compile" }
+typing_check_service_rust = { path = "../../typing/cargo/compile/typing_check_service_rust" }
+typing_defs_rust = { path = "../../typing/cargo/compile/typing_defs_rust" }
+typing_env_rust = { path = "../../typing/cargo/compile/typing_env_rust" }
 anyhow = "1.0"
 atty = "0.2"
+bumpalo = { version = "3.1.2", features = ["collections"] }
 itertools = "0.8"
 structopt = "0.3.7"
 # @end of Signature

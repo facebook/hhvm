@@ -5,11 +5,12 @@
 
 use ::anyhow::{self, anyhow, Context};
 
+use bumpalo::Bump;
 use structopt::StructOpt;
-use typing_check_service_rust::{
-    typing_check_utils::from_text, typing_check_utils::*, typing_env::empty_global_env,
-    typing_make_type,
-};
+use typing_check_service_rust::{typing_check_utils::from_text, typing_check_utils::*};
+
+use typing_defs_rust::typing_make_type;
+use typing_env_rust::empty_global_env;
 
 use oxidized::relative_path::{self, RelativePath};
 use stack_limit::{StackLimit, KI, MI};
@@ -53,7 +54,8 @@ fn process_single_file_impl(
         eprintln!("processing file: {}", filepath.display());
     }
     let rel_path = RelativePath::make(relative_path::Prefix::Dummy, filepath.to_owned());
-    let builder = typing_make_type::TypeBuilder::new();
+    let arena = Bump::new();
+    let builder = typing_make_type::TypeBuilder::new(&arena);
     let env = empty_global_env(&builder, rel_path);
     let profile = from_text(env, stack_limit, content)?;
     Ok(profile)

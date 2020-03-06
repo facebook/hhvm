@@ -3,12 +3,17 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use bumpalo::collections::Vec;
+use bumpalo::{vec, Bump};
+
 use naming_special_names_rust::{classes, collections};
-use oxidized::{aast_defs::*, ast_defs::*, ident, typing_defs::*, typing_reason::*};
+use oxidized::{aast_defs::*, ast_defs::*, ident, typing_reason::*};
+
+use crate::typing_defs_core::{Ty, *};
 
 // Struct off which we call type builder methods
 // This gives us the option to keep some state here e.g. for hash consing
-pub struct TypeBuilder {
+pub struct TypeBuilder<'a> {
     // Well-known identifiers
     // We could initialize the positions to their actual definition site in hhi
     // This makes more sense than inheriting the position from the use
@@ -33,6 +38,8 @@ pub struct TypeBuilder {
     id_const_vector: Id,
     id_const_collection: Id,
     id_collection: Id,
+
+    alloc: &'a Bump,
 }
 
 // Copying of string is bad
@@ -43,9 +50,11 @@ fn mk_special_id(name: &str) -> Id {
     Id(Pos::make_none(), name.to_string())
 }
 
-impl TypeBuilder {
-    pub fn new() -> Self {
+impl<'a> TypeBuilder<'a> {
+    pub fn new(alloc: &'a Bump) -> Self {
         TypeBuilder {
+            alloc,
+
             id_traversable: mk_special_id(collections::TRAVERSABLE),
             id_keyed_traversable: mk_special_id(collections::KEYED_TRAVERSABLE),
             id_keyed_container: mk_special_id(collections::KEYED_CONTAINER),
@@ -68,145 +77,172 @@ impl TypeBuilder {
         }
     }
     // All type construction should go through here
-    pub fn mk(&self, reason: Reason, ty_: Ty_) -> Ty {
-        Ty(reason, Box::new(ty_))
+    pub fn mk(&'a self, reason: &'a Reason, ty_: Ty_<'a>) -> Ty<'a> {
+        Ty(reason, self.alloc.alloc(ty_))
     }
-    pub fn prim(&self, reason: Reason, kind: Tprim) -> Ty {
+
+    /// Make an Rnone reason. This does not belong here, but:
+    ///
+    /// The reason story is not worked out yet, we have (at least)
+    /// two options:
+    ///
+    ///   1. If we only seldomly create reasons: allocate them in
+    ///      the rust heap. Free them on freeing the arena.
+    ///
+    ///   2. If we create them often: provide our own version of
+    ///      the oxidized Reason type (just as we do with types)
+    ///      that is fully allocated in the arena. Convert
+    ///      between oxidized and non-oxidized when necessary.
+    pub fn mk_rnone(&self) -> &'a Reason {
+        self.alloc.alloc(Reason::Rnone)
+    }
+
+    pub fn prim(&'a self, reason: &'a Reason, kind: PrimKind<'a>) -> Ty<'a> {
         self.mk(reason, Ty_::Tprim(kind))
     }
-    pub fn class(&self, reason: Reason, name: Sid, tys: Vec<Ty>) -> Ty {
+    pub fn class(&'a self, reason: &'a Reason, name: &'a Sid, tys: Vec<'a, Ty<'a>>) -> Ty<'a> {
         self.mk(reason, Ty_::Tclass(name, Exact::Nonexact, tys))
     }
-    pub fn traversable(&self, reason: Reason, ty: Ty) -> Ty {
-        self.class(reason.clone(), self.id_traversable.clone(), vec![ty])
+    pub fn traversable(&'a self, reason: &'a Reason, ty: Ty<'a>) -> Ty<'a> {
+        self.class(reason, &self.id_traversable, vec![in &self.alloc; ty])
     }
-    pub fn keyed_traversable(&self, reason: Reason, kty: Ty, vty: Ty) -> Ty {
+    pub fn keyed_traversable(&'a self, reason: &'a Reason, kty: Ty<'a>, vty: Ty<'a>) -> Ty<'a> {
         self.class(
-            reason.clone(),
-            self.id_keyed_traversable.clone(),
-            vec![kty, vty],
+            reason,
+            &self.id_keyed_traversable,
+            vec![in &self.alloc; kty, vty],
         )
     }
-    pub fn keyed_container(&self, reason: Reason, kty: Ty, vty: Ty) -> Ty {
+    pub fn keyed_container(&'a self, reason: &'a Reason, kty: Ty<'a>, vty: Ty<'a>) -> Ty<'a> {
         self.class(
-            reason.clone(),
-            self.id_keyed_container.clone(),
-            vec![kty, vty],
+            reason,
+            &self.id_keyed_container,
+            vec![in &self.alloc; kty, vty],
         )
     }
-    pub fn awaitable(&self, reason: Reason, ty: Ty) -> Ty {
-        self.class(reason.clone(), self.id_awaitable.clone(), vec![ty])
+    pub fn awaitable(&'a self, reason: &'a Reason, ty: Ty<'a>) -> Ty<'a> {
+        self.class(reason, &self.id_awaitable, vec![in &self.alloc; ty])
     }
-    pub fn generator(&self, reason: Reason, key: Ty, value: Ty, send: Ty) -> Ty {
+    pub fn generator(
+        &'a self,
+        reason: &'a Reason,
+        key: Ty<'a>,
+        value: Ty<'a>,
+        send: Ty<'a>,
+    ) -> Ty<'a> {
         self.class(
-            reason.clone(),
-            self.id_generator.clone(),
-            vec![key, value, send],
+            reason,
+            &self.id_generator,
+            vec![in &self.alloc; key, value, send],
         )
     }
-    pub fn async_generator(&self, reason: Reason, key: Ty, value: Ty, send: Ty) -> Ty {
+    pub fn async_generator(
+        &'a self,
+        reason: &'a Reason,
+        key: Ty<'a>,
+        value: Ty<'a>,
+        send: Ty<'a>,
+    ) -> Ty<'a> {
         self.class(
-            reason.clone(),
-            self.id_async_generator.clone(),
-            vec![key, value, send],
+            reason,
+            &self.id_async_generator,
+            vec![in &self.alloc; key, value, send],
         )
     }
-    pub fn async_iterator(&self, reason: Reason, ty: Ty) -> Ty {
-        self.class(reason.clone(), self.id_async_iterator.clone(), vec![ty])
+    pub fn async_iterator(&'a self, reason: &'a Reason, ty: Ty<'a>) -> Ty<'a> {
+        self.class(reason, &self.id_async_iterator, vec![in &self.alloc; ty])
     }
-    pub fn async_keyed_iterator(&self, reason: Reason, kty: Ty, vty: Ty) -> Ty {
+    pub fn async_keyed_iterator(&'a self, reason: &'a Reason, kty: Ty<'a>, vty: Ty<'a>) -> Ty<'a> {
         self.class(
-            reason.clone(),
-            self.id_async_keyed_iterator.clone(),
-            vec![kty, vty],
+            reason,
+            &self.id_async_keyed_iterator,
+            vec![in &self.alloc; kty, vty],
         )
     }
-    pub fn pair(&self, reason: Reason, ty1: Ty, ty2: Ty) -> Ty {
-        self.class(reason.clone(), self.id_pair.clone(), vec![ty1, ty2])
+    pub fn pair(&'a self, reason: &'a Reason, ty1: Ty<'a>, ty2: Ty<'a>) -> Ty<'a> {
+        self.class(reason, &self.id_pair, vec![in &self.alloc; ty1, ty2])
     }
-    pub fn dict(&self, reason: Reason, kty: Ty, vty: Ty) -> Ty {
-        self.class(reason.clone(), self.id_dict.clone(), vec![kty, vty])
+    pub fn dict(&'a self, reason: &'a Reason, kty: Ty<'a>, vty: Ty<'a>) -> Ty<'a> {
+        self.class(reason, &self.id_dict, vec![in &self.alloc; kty, vty])
     }
-    pub fn keyset(&self, reason: Reason, ty: Ty) -> Ty {
-        self.class(reason.clone(), self.id_keyset.clone(), vec![ty])
+    pub fn keyset(&'a self, reason: &'a Reason, ty: Ty<'a>) -> Ty<'a> {
+        self.class(reason, &self.id_keyset, vec![in &self.alloc; ty])
     }
-    pub fn vec(&self, reason: Reason, ty: Ty) -> Ty {
-        self.class(reason.clone(), self.id_vec.clone(), vec![ty])
+    pub fn vec(&'a self, reason: &'a Reason, ty: Ty<'a>) -> Ty<'a> {
+        self.class(reason, &self.id_vec, vec![in &self.alloc; ty])
     }
-    pub fn container(&self, reason: Reason, ty: Ty) -> Ty {
-        self.class(reason.clone(), self.id_container.clone(), vec![ty])
+    pub fn container(&'a self, reason: &'a Reason, ty: Ty<'a>) -> Ty<'a> {
+        self.class(reason, &self.id_container, vec![in &self.alloc; ty])
     }
-    pub fn const_vector(&self, reason: Reason, ty: Ty) -> Ty {
-        self.class(reason.clone(), self.id_const_vector.clone(), vec![ty])
+    pub fn const_vector(&'a self, reason: &'a Reason, ty: Ty<'a>) -> Ty<'a> {
+        self.class(reason, &self.id_const_vector, vec![in &self.alloc; ty])
     }
-    pub fn const_collection(&self, reason: Reason, ty: Ty) -> Ty {
-        self.class(reason.clone(), self.id_const_collection.clone(), vec![ty])
+    pub fn const_collection(&'a self, reason: &'a Reason, ty: Ty<'a>) -> Ty<'a> {
+        self.class(reason, &self.id_const_collection, vec![in &self.alloc; ty])
     }
-    pub fn collection(&self, reason: Reason, ty: Ty) -> Ty {
-        self.class(reason.clone(), self.id_collection.clone(), vec![ty])
+    pub fn collection(&'a self, reason: &'a Reason, ty: Ty<'a>) -> Ty<'a> {
+        self.class(reason, &self.id_collection, vec![in &self.alloc; ty])
     }
-    pub fn throwable(&self, reason: Reason) -> Ty {
-        self.class(reason.clone(), self.id_throwable.clone(), vec![])
+    pub fn throwable(&'a self, reason: &'a Reason) -> Ty<'a> {
+        self.class(reason, &self.id_throwable, vec![in &self.alloc; ])
     }
-    pub fn datetime(&self, reason: Reason) -> Ty {
-        self.class(reason.clone(), self.id_datetime.clone(), vec![])
+    pub fn datetime(&'a self, reason: &'a Reason) -> Ty<'a> {
+        self.class(reason, &self.id_datetime, vec![in &self.alloc])
     }
-    pub fn datetime_immutable(&self, reason: Reason) -> Ty {
-        self.class(reason.clone(), self.id_datetime_immutable.clone(), vec![])
+    pub fn datetime_immutable(&'a self, reason: &'a Reason) -> Ty<'a> {
+        self.class(reason, &self.id_datetime_immutable, vec![in &self.alloc])
     }
-    pub fn int(&self, reason: Reason) -> Ty {
-        self.prim(reason, Tprim::Tint)
+    pub fn int(&'a self, reason: &'a Reason) -> Ty<'a> {
+        self.prim(reason, PrimKind::Tint)
     }
-    pub fn bool(&self, reason: Reason) -> Ty {
-        self.prim(reason, Tprim::Tbool)
+    pub fn bool(&'a self, reason: &'a Reason) -> Ty<'a> {
+        self.prim(reason, PrimKind::Tbool)
     }
-    pub fn string(&self, reason: Reason) -> Ty {
-        self.prim(reason, Tprim::Tstring)
+    pub fn string(&'a self, reason: &'a Reason) -> Ty<'a> {
+        self.prim(reason, PrimKind::Tstring)
     }
-    pub fn float(&self, reason: Reason) -> Ty {
-        self.prim(reason, Tprim::Tfloat)
+    pub fn float(&'a self, reason: &'a Reason) -> Ty<'a> {
+        self.prim(reason, PrimKind::Tfloat)
     }
-    pub fn arraykey(&self, reason: Reason) -> Ty {
-        self.prim(reason, Tprim::Tarraykey)
+    pub fn arraykey(&'a self, reason: &'a Reason) -> Ty<'a> {
+        self.prim(reason, PrimKind::Tarraykey)
     }
-    pub fn void(&self, reason: Reason) -> Ty {
-        self.prim(reason, Tprim::Tvoid)
+    pub fn void(&'a self, reason: &'a Reason) -> Ty<'a> {
+        self.prim(reason, PrimKind::Tvoid)
     }
-    pub fn null(&self, reason: Reason) -> Ty {
-        self.prim(reason, Tprim::Tnull)
+    pub fn null(&'a self, reason: &'a Reason) -> Ty<'a> {
+        self.prim(reason, PrimKind::Tnull)
     }
-    pub fn nonnull(&self, reason: Reason) -> Ty {
+    pub fn nonnull(&'a self, reason: &'a Reason) -> Ty<'a> {
         self.mk(reason, Ty_::Tnonnull)
     }
-    pub fn dynamic(&self, reason: Reason) -> Ty {
+    pub fn dynamic(&'a self, reason: &'a Reason) -> Ty<'a> {
         self.mk(reason, Ty_::Tdynamic)
     }
     /*
-    pub fn object(&self, reason: Reason) -> Ty {
+    pub fn object(&'a self, reason: &'a Reason) -> Ty<'a> {
         self.mk(reason, Ty_::Tobject)
     }
     */
-    pub fn tyvar(&self, reason: Reason, v: ident::Ident) -> Ty {
+    pub fn tyvar(&'a self, reason: &'a Reason, v: ident::Ident) -> Ty<'a> {
         self.mk(reason, Ty_::Tvar(v))
     }
-    pub fn union(&self, reason: Reason, tys: Vec<Ty>) -> Ty {
+    pub fn union(&'a self, reason: &'a Reason, tys: Vec<'a, Ty<'a>>) -> Ty<'a> {
         self.mk(reason, Ty_::Tunion(tys))
     }
-    pub fn intersection(&self, reason: Reason, tys: Vec<Ty>) -> Ty {
+    pub fn intersection(&'a self, reason: &'a Reason, tys: Vec<'a, Ty<'a>>) -> Ty<'a> {
         self.mk(reason, Ty_::Tintersection(tys))
     }
-    pub fn nothing(&self, reason: Reason) -> Ty {
-        self.union(reason, Vec::new())
+    pub fn nothing(&'a self, reason: &'a Reason) -> Ty<'a> {
+        self.union(reason, Vec::new_in(self.alloc))
     }
-    pub fn nullable(&self, reason: Reason, ty: Ty) -> Ty {
+    pub fn nullable(&'a self, reason: &'a Reason, ty: Ty<'a>) -> Ty<'a> {
         self.mk(reason, Ty_::Toption(ty))
     }
-    pub fn mixed(&self, reason: Reason) -> Ty {
-        // TODO: cloning is annoying. We should see if we can change rep of reasons
-        let reason2 = reason.clone();
-        self.nullable(reason, self.nonnull(reason2))
+    pub fn mixed(&'a self, reason: &'a Reason) -> Ty<'a> {
+        self.nullable(reason, self.nonnull(reason))
     }
-    pub fn generic(&self, reason: Reason, name: String) -> Ty {
+    pub fn generic(&'a self, reason: &'a Reason, name: &'a str) -> Ty<'a> {
         self.mk(reason, Ty_::Tgeneric(name))
     }
 }

@@ -9,12 +9,10 @@ use aast_parser::{
 use anyhow;
 use itertools::{Either, Either::*};
 use ocamlrep::rc::RcOc;
-use oxidized::{
-    ast as Tast, parser_options::ParserOptions, pos::Pos, relative_path::RelativePath,
-    typing_env_types::Genv,
-};
+use oxidized::{ast as Tast, parser_options::ParserOptions, pos::Pos, relative_path::RelativePath};
 use parser_core_types::{indexed_source_text::IndexedSourceText, source_text::SourceText};
 use stack_limit::StackLimit;
+use typing_env_rust::Genv;
 
 /// Compilation profile. All times are in seconds
 #[derive(Debug)]

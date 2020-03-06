@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/collections.h"
+#include "hphp/runtime/base/enum-cache.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-variant.h"
@@ -1001,6 +1002,25 @@ SSATmp* opt_shapes_idx(IRGS& env, const ParamPrep& params) {
   }));
 }
 
+const EnumValues* getEnumValues(IRGS& env, const ParamPrep& params) {
+  if (RO::EvalLogArrayProvenance) return nullptr;
+  if (params.size() != 0) return nullptr;
+  if (!(params.ctx && params.ctx->hasConstVal(TCls))) return nullptr;
+  auto const cls = params.ctx->clsVal();
+  if (!(isEnum(cls) && classHasPersistentRDS(cls))) return nullptr;
+  return EnumCache::getValuesStatic(cls);
+}
+
+SSATmp* opt_enum_names(IRGS& env, const ParamPrep& params) {
+  auto const enum_values = getEnumValues(env, params);
+  return enum_values ? cns(env, enum_values->names.get()) : nullptr;
+}
+
+SSATmp* opt_enum_values(IRGS& env, const ParamPrep& params) {
+  auto const enum_values = getEnumValues(env, params);
+  return enum_values ? cns(env, enum_values->values.get()) : nullptr;
+}
+
 SSATmp* opt_tag_provenance_here(IRGS& env, const ParamPrep& params) {
   if (params.size() != 1) return nullptr;
   if (RO::EvalLogArrayProvenance) return nullptr;
@@ -1103,6 +1123,8 @@ const hphp_fast_string_imap<OptEmitFn> s_opt_emit_fns{
   {"HH\\class_meth_get_class", opt_class_meth_get_class},
   {"HH\\class_meth_get_method", opt_class_meth_get_method},
   {"HH\\Shapes::idx", opt_shapes_idx},
+  {"HH\\BuiltinEnum::getNames", opt_enum_names},
+  {"HH\\BuiltinEnum::getValues", opt_enum_values},
   {"HH\\is_meth_caller", opt_is_meth_caller},
   {"HH\\tag_provenance_here", opt_tag_provenance_here},
   {"HH\\array_mark_legacy", opt_array_mark_legacy},

@@ -38,19 +38,29 @@ const EnumValues* EnumCache::getValues(const Class* klass,
     EnumCache::failLookup(msg);
   }
   if (LIKELY(!recurse)) {
-    if (auto values = klass->getEnumValues()) {
-      return values;
-    }
+    if (auto const values = klass->getEnumValues()) return values;
   }
   return s_cache.getEnumValues(klass, recurse);
 }
 
 const EnumValues* EnumCache::getValuesBuiltin(const Class* klass) {
   assertx(isEnum(klass));
-  if (auto values = klass->getEnumValues()) {
-    return values;
-  }
+  if (auto const values = klass->getEnumValues()) return values;
   return s_cache.getEnumValues(klass, false);
+}
+
+const EnumValues* EnumCache::getValuesStatic(const Class* klass) {
+  assertx(isEnum(klass));
+  auto const result = [&]() -> const EnumValues* {
+    if (auto const values = klass->getEnumValues()) return values;
+    return s_cache.getEnumValues(klass, false, true);
+  }();
+  if (!result) return nullptr;
+  assertx(result->names->isStatic());
+  assertx(result->values->isStatic());
+  // Sizes may mismatch if there are duplicate names or values.
+  if (result->names->size() != result->values->size()) return nullptr;
+  return result;
 }
 
 void EnumCache::deleteValues(const Class* klass) {
@@ -121,8 +131,8 @@ const EnumValues* EnumCache::cacheRequestEnumValues(
   return enums;
 }
 
-const EnumValues* EnumCache::loadEnumValues(const Class* klass,
-                                            bool recurse) {
+const EnumValues* EnumCache::loadEnumValues(
+    const Class* klass, bool recurse, bool require_static) {
   auto const numConstants = klass->numConstants();
   auto values = Array::CreateDArray();
   auto names = Array::CreateDArray();
@@ -136,14 +146,16 @@ const EnumValues* EnumCache::loadEnumValues(const Class* klass,
       continue;
     }
     TypedValue value = consts[i].val;
-    // Handle dynamically set constants
+    // Handle dynamically set constants. We can't get a static value here.
     if (value.m_type == KindOfUninit) {
+      if (require_static) return nullptr;
       persist = false;
       value = klass->clsCnsGet(consts[i].name);
     }
     assertx(value.m_type != KindOfUninit);
     if (UNLIKELY(!(isIntType(value.m_type) || tvIsString(&value)))) {
-      // only int and string values allowed for enums.
+      // Enum values must be ints or strings. We can't get a static value here.
+      if (require_static) return nullptr;
       std::string msg;
       msg += klass->name()->data();
       msg += " enum can only contain string and int values";
@@ -207,14 +219,11 @@ const EnumValues* EnumCache::getEnumValuesIfDefined(
   return nullptr;
 }
 
-const EnumValues* EnumCache::getEnumValues(const Class* klass,
-                                           bool recurse) {
-  const EnumValues* values =
-      getEnumValuesIfDefined(getKey(klass, recurse));
-  if (values == nullptr) {
-    values = loadEnumValues(klass, recurse);
-  }
-  return values;
+const EnumValues* EnumCache::getEnumValues(
+    const Class* klass, bool recurse, bool require_static) {
+  auto const values = getEnumValuesIfDefined(getKey(klass, recurse));
+  if (values && require_static && !values->names->isStatic()) return nullptr;
+  return values ? values : loadEnumValues(klass, recurse, require_static);
 }
 
 void EnumCache::deleteEnumValues(intptr_t key) {

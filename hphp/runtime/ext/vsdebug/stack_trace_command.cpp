@@ -41,6 +41,10 @@ bool StackTraceCommand::executeImpl(
   DebuggerSession* session,
   folly::dynamic* responseMsg
 ) {
+  // The request thread should not re-enter the debugger while
+  // processing this command.
+  DebuggerNoBreakContext noBreak(m_debugger);
+
   const request_id_t requestId = m_debugger->getCurrentThreadId();
   const folly::dynamic& message = getMessage();
   const folly::dynamic& args = tryGetObject(message, "arguments", s_emptyArgs);

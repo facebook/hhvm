@@ -262,6 +262,10 @@ bool CompletionsCommand::executeImpl(
 ) {
   VMRegAnchor regAnchor;
 
+  // The request thread should not re-enter the debugger while
+  // processing this command.
+  DebuggerNoBreakContext noBreak(m_debugger);
+
   folly::dynamic& message = getMessage();
   const folly::dynamic& args = tryGetObject(message, "arguments", s_emptyArgs);
   int column = tryGetInt(args, "column", -1);

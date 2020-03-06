@@ -58,6 +58,9 @@ bool ScopesCommand::executeImpl(
   DebuggerSession* session,
   folly::dynamic* responseMsg
 ) {
+  // The request thread should not re-enter the debugger while
+  // processing this command.
+  DebuggerNoBreakContext noBreak(m_debugger);
 
   folly::dynamic body = folly::dynamic::object;
   folly::dynamic scopes = folly::dynamic::array;

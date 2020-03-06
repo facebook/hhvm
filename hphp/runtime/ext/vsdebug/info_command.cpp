@@ -67,6 +67,10 @@ bool InfoCommand::executeImpl(
 ) {
   VMRegAnchor regAnchor;
 
+  // The request thread should not re-enter the debugger while
+  // processing this command.
+  DebuggerNoBreakContext noBreak(m_debugger);
+
   const folly::dynamic& message = getMessage();
   const folly::dynamic& args = tryGetObject(message, "arguments", s_emptyArgs);
   std::string requestedObject = tryGetString(args, "object", "");

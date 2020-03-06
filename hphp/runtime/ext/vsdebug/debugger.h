@@ -752,6 +752,25 @@ private:
   PCFilter m_savedBpFilter;
 };
 
+struct DebuggerNoBreakContext {
+  bool m_prevDoNotBreak;
+  bool m_prevDbgNoBreak;
+  DebuggerRequestInfo* m_requestInfo;
+
+  DebuggerNoBreakContext(Debugger* debugger) {
+    m_requestInfo = debugger->getRequestInfo();
+    m_prevDoNotBreak = m_requestInfo->m_flags.doNotBreak;
+    m_requestInfo->m_flags.doNotBreak = true;
+    m_prevDbgNoBreak = g_context->m_dbgNoBreak;
+    g_context->m_dbgNoBreak = true;
+  }
+
+  ~DebuggerNoBreakContext() {
+    m_requestInfo->m_flags.doNotBreak = m_prevDoNotBreak;
+    g_context->m_dbgNoBreak = m_prevDbgNoBreak;
+  }
+};
+
 }
 }
 

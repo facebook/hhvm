@@ -66,6 +66,10 @@ bool SetVariableCommand::executeImpl(
   DebuggerSession* session,
   folly::dynamic* responseMsg
 ) {
+  // The request thread should not re-enter the debugger while
+  // processing this command.
+  DebuggerNoBreakContext noBreak(m_debugger);
+
   folly::dynamic body = folly::dynamic::object;
   folly::dynamic variables = folly::dynamic::array;
   auto& args = tryGetObject(getMessage(), "arguments", s_emptyArgs);
@@ -227,7 +231,6 @@ bool SetVariableCommand::setConstant(
       return true;
     }
   }
-
   return false;
 }
 

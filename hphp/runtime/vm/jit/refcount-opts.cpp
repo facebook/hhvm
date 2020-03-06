@@ -2489,6 +2489,7 @@ bool can_sink_inc_through(const IRInstruction& inst) {
     case InlineReturn:
     case InlineSuspend:
     case InlineReturnNoFrame:
+    case FinishMemberOp:
     case Nop:        return true;
 
     default:         return false;

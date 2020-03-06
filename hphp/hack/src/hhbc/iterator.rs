@@ -10,7 +10,7 @@ pub struct Id(usize);
 
 impl fmt::Display for Id {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Id({})", self.0)
+        write!(f, "{}", self.0)
     }
 }
 
@@ -52,8 +52,8 @@ impl Iter {
 
     pub fn state_has_changed(&self) -> bool {
         STORED.with(|stored| {
-            let (Id(x), Id(y)) = (self.next, (&*stored.borrow()).get_iterator().next);
-            x == y
+            let (Id(x), Id(y)) = (self.next, (&*stored.borrow()).get_iterator_id());
+            x != y
         })
     }
 
@@ -61,8 +61,8 @@ impl Iter {
     /// iterators to be freed
     pub fn revert_state(&mut self) -> Vec<Iter> {
         STORED.with(|stored| {
-            let old_iterator = (&*stored.borrow()).get_iterator().to_owned();
-            let (Id(new_id), Id(old_id)) = (self.next, old_iterator.next);
+            let Id(old_id) = (&*stored.borrow()).get_iterator_id();
+            let Id(new_id) = self.next;
             let mut iters_to_free = Vec::new();
             for i in old_id..new_id {
                 iters_to_free.push(Iter {
@@ -70,7 +70,7 @@ impl Iter {
                     count: i + 1,
                 });
             }
-            *self = old_iterator;
+            self.next = Id(old_id);
             iters_to_free
         })
     }
@@ -100,7 +100,7 @@ impl Stored {
         self.iterator = iterator;
     }
 
-    fn get_iterator(&self) -> &Iter {
-        &self.iterator
+    fn get_iterator_id(&self) -> Id {
+        self.iterator.next
     }
 }

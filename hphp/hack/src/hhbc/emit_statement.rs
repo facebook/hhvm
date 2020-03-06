@@ -326,15 +326,12 @@ fn emit_foreach(
     block: &tast::Block,
 ) -> Result {
     use tast::AsExpr as A;
-    e.local_gen_mut().store_current_state();
-    let res = match iterator {
+    e.local_scope(|e| match iterator {
         A::AsV(_) | A::AsKv(_, _) => emit_foreach_(e, env, pos, collection, iterator, block),
         A::AwaitAsV(pos, _) | A::AwaitAsKv(pos, _, _) => {
             emit_foreach_await(e, env, pos, collection, iterator, block)
         }
-    };
-    e.local_gen_mut().revert_state();
-    res
+    })
 }
 
 fn emit_foreach_(
@@ -476,7 +473,7 @@ fn emit_iterator_key_value_storage(
                     &pos,
                     "Cannot re-assign $this",
                 ));
-            } else if superglobals::is_superglobal(&name) || name == superglobals::GLOBALS {
+            } else if !(superglobals::is_superglobal(&name) || name == superglobals::GLOBALS) {
                 return Ok(Some(name.into()));
             }
         };

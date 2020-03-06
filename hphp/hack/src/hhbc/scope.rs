@@ -51,6 +51,7 @@ pub mod scope {
         let stateref = emitter.refined_state_mut();
         let (next_local, next_iterator) = (stateref.local_gen, stateref.iterator);
         if !next_local.state_has_changed() && !next_iterator.state_has_changed() {
+            next_local.revert_state();
             Ok(InstrSeq::gather(vec![before, inner, after]))
         } else {
             let local_ids_to_unset = next_local.revert_state();

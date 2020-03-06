@@ -13,7 +13,7 @@ pub use write::{Error, IoWrite, Result, Write};
 
 use context::Context;
 use core_utils_rust::add_ns;
-use env::{local::Type as Local, Env as BodyEnv};
+use env::{iterator::Id as IterId, local::Type as Local, Env as BodyEnv};
 use escaper::{escape, escape_by, is_lit_printable};
 use hhas_adata_rust::{
     ARRAY_PREFIX, DARRAY_PREFIX, DICT_PREFIX, KEYSET_PREFIX, VARRAY_PREFIX, VEC_PREFIX,
@@ -881,7 +881,7 @@ fn print_body<W: Write>(ctx: &mut Context, w: &mut W, body: &HhasBody) -> Result
     }
     if body.num_iters > 0 {
         ctx.newline(w)?;
-        w.write(format!(".number {};", body.num_iters))?;
+        w.write(format!(".numiters {};", body.num_iters))?;
     }
     if !body.decl_vars.is_empty() {
         ctx.newline(w)?;
@@ -1120,7 +1120,7 @@ fn print_instr<W: Write>(w: &mut W, instr: &Instruct) -> Result<(), W::Error> {
     use Instruct::*;
     use InstructBasic as IB;
     match instr {
-        IIterator(_) => not_impl!(),
+        IIterator(i) => print_iterator(w, i),
         IBasic(b) => w.write(match b {
             IB::Nop => "Nop",
             IB::EntryNop => "EntryNop",
@@ -1140,17 +1140,198 @@ fn print_instr<W: Write>(w: &mut W, instr: &Instruct) -> Result<(), W::Error> {
             w.write(":")
         }
         IIsset(i) => print_isset(w, i),
-        IBase(_) => not_impl!(),
-        IFinal(_) => not_impl!(),
+        IBase(i) => print_base(w, i),
+        IFinal(i) => print_final(w, i),
         ITry(itry) => print_try(w, itry),
         IComment(s) => concat_str_by(w, " ", ["#", s.as_str()]),
         ISrcLoc(_) => not_impl!(),
         IAsync(a) => print_async(w, a),
         IGenerator(gen) => print_gen_creation_execution(w, gen),
         IIncludeEvalDefine(ed) => print_include_eval_define(w, ed),
-        IGenDelegation(_) => not_impl!(),
+        IGenDelegation(g) => print_gen_delegation(w, g),
         _ => Err(Error::fail("invalid instruction")),
     }
+}
+
+fn print_final<W: Write>(w: &mut W, i: &InstructFinal) -> Result<(), W::Error> {
+    use InstructFinal as I;
+    match i {
+        I::QueryM(n, op, mk) => {
+            w.write("QueryM ")?;
+            w.write(n.to_string())?;
+            w.write(" ")?;
+            w.write(match op {
+                QueryOp::CGet => "CGet",
+                QueryOp::CGetQuiet => "CGetQuiet",
+                QueryOp::Isset => "Isset",
+                QueryOp::InOut => "InOut",
+            })?;
+            w.write(" ")?;
+            print_member_key(w, mk)
+        }
+        _ => unimplemented!(),
+    }
+}
+
+fn print_gen_delegation<W: Write>(w: &mut W, g: &GenDelegation) -> Result<(), W::Error> {
+    use GenDelegation as G;
+    match g {
+        G::ContAssignDelegate(i) => {
+            w.write("ContAssignDelegate ")?;
+            print_iterator_id(w, i)
+        }
+        G::ContEnterDelegate => w.write("ContEnterDelegate"),
+        G::YieldFromDelegate(i, l) => {
+            w.write("YieldFromDelegate ")?;
+            print_iterator_id(w, i)?;
+            w.write(" ")?;
+            print_label(w, l)
+        }
+        G::ContUnsetDelegate(free, i) => {
+            w.write("ContUnsetDelegate ")?;
+            w.write(match free {
+                FreeIterator::IgnoreIter => "IgnoreIter ",
+                FreeIterator::FreeIter => "FreeIter ",
+            })?;
+            print_iterator_id(w, i)
+        }
+    }
+}
+
+fn print_base<W: Write>(w: &mut W, i: &InstructBase) -> Result<(), W::Error> {
+    use InstructBase as I;
+    match i {
+        I::BaseGC(si, m) => {
+            w.write("BaseGC ")?;
+            print_stack_index(w, si)?;
+            w.write(" ")?;
+            print_member_opmode(w, m)
+        }
+        I::BaseGL(id, m) => {
+            w.write("BaseGL ")?;
+            print_local(w, id)?;
+            w.write(" ")?;
+            print_member_opmode(w, m)
+        }
+        I::BaseSC(si1, si2, m) => {
+            w.write("BaseGC ")?;
+            print_stack_index(w, si1)?;
+            w.write(" ")?;
+            print_stack_index(w, si2)?;
+            w.write(" ")?;
+            print_member_opmode(w, m)
+        }
+        I::BaseL(id, m) => {
+            w.write("BaseL ")?;
+            print_local(w, id)?;
+            w.write(" ")?;
+            print_member_opmode(w, m)
+        }
+        I::BaseC(si, m) => {
+            w.write("BaseC ")?;
+            print_stack_index(w, si)?;
+            w.write(" ")?;
+            print_member_opmode(w, m)
+        }
+        I::BaseH => w.write("BaseH"),
+        I::Dim(m, mk) => {
+            w.write("Dim ")?;
+            print_member_opmode(w, m)?;
+            w.write(" ")?;
+            print_member_key(w, mk)
+        }
+    }
+}
+
+fn print_stack_index<W: Write>(w: &mut W, si: &StackIndex) -> Result<(), W::Error> {
+    w.write(si.to_string())
+}
+
+fn print_member_opmode<W: Write>(w: &mut W, m: &MemberOpMode) -> Result<(), W::Error> {
+    use MemberOpMode as M;
+    w.write(match m {
+        M::ModeNone => "None",
+        M::Warn => "Warn",
+        M::Define => "Define",
+        M::Unset => "Unset",
+        M::InOut => "InOut",
+    })
+}
+
+fn print_member_key<W: Write>(w: &mut W, mk: &MemberKey) -> Result<(), W::Error> {
+    use MemberKey as M;
+    match mk {
+        M::EC(si) => {
+            w.write("EC:")?;
+            print_stack_index(w, si)
+        }
+        M::EL(local) => {
+            w.write("EL:")?;
+            print_local(w, local)
+        }
+        M::ET(s) => {
+            w.write("ET:")?;
+            wrap_by_quotes(w, |w| w.write(escape(s)))
+        }
+        M::EI(i) => concat_str(w, ["EI:", i.to_string().as_ref()]),
+        M::PC(si) => {
+            w.write("PC:")?;
+            print_stack_index(w, si)
+        }
+        M::PL(local) => {
+            w.write("PL:")?;
+            print_local(w, local)
+        }
+        M::PT(id) => {
+            w.write("PT:")?;
+            print_prop_id(w, id)
+        }
+        M::QT(id) => {
+            w.write("QT:")?;
+            print_prop_id(w, id)
+        }
+    }
+}
+
+fn print_iterator<W: Write>(w: &mut W, i: &InstructIterator) -> Result<(), W::Error> {
+    use InstructIterator as I;
+    match i {
+        I::IterInit(iter_args, label) => {
+            w.write("IterInit ")?;
+            print_iter_args(w, iter_args)?;
+            w.write(" ")?;
+            print_label(w, label)
+        }
+        I::IterNext(iter_args, label) => {
+            w.write("IterNext ")?;
+            print_iter_args(w, iter_args)?;
+            w.write(" ")?;
+            print_label(w, label)
+        }
+        I::IterFree(id) => {
+            w.write("IterFree ")?;
+            print_iterator_id(w, id)
+        }
+    }
+}
+
+fn print_iter_args<W: Write>(w: &mut W, iter_args: &IterArgs) -> Result<(), W::Error> {
+    print_iterator_id(w, &iter_args.iter_id)?;
+    w.write(" ")?;
+    match &iter_args.key_id {
+        None => w.write("NK")?,
+        Some(k) => {
+            w.write("K:")?;
+            print_local(w, &k)?;
+        }
+    };
+    w.write(" ")?;
+    w.write("V:")?;
+    print_local(w, &iter_args.val_id)
+}
+
+fn print_iterator_id<W: Write>(w: &mut W, i: &IterId) -> Result<(), W::Error> {
+    w.write(format!("{}", i))
 }
 
 fn print_async<W: Write>(w: &mut W, a: &AsyncFunctions) -> Result<(), W::Error> {

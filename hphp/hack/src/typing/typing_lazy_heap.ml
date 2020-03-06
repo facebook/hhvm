@@ -9,28 +9,10 @@
 
 open Hh_prelude
 
-let check_cache_consistency x expected_kind expected_result =
-  if
-    Relative_path.equal expected_result Relative_path.default
-    && (not @@ Naming_heap.has_local_changes ())
-  then (
-    Hh_logger.log "WARNING: found dummy path in shared heap for %s" x;
-    match Naming_heap.Types.get_pos ~bypass_cache:true x with
-    | Some (pos, kind)
-      when Naming_types.equal_kind_of_type kind expected_kind
-           && Relative_path.equal
-                (FileInfo.get_pos_filename pos)
-                expected_result ->
-      ()
-    | _ ->
-      Hh_logger.log "WARNING: get and get_no_cache returned different results"
-  )
-
 let get_type_id_filename x expected_kind =
   Counters.count_decl_accessor @@ fun () ->
   match Naming_provider.get_type_path_and_kind x with
   | Some (fn, kind) when Naming_types.equal_kind_of_type kind expected_kind ->
-    check_cache_consistency x expected_kind fn;
     Some fn
   | _ -> None
 

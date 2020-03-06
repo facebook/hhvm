@@ -111,3 +111,7 @@ val get_typedef_path : string -> Relative_path.t option
 position. Same as calling [add_type] with [Naming_types.TTypedef].
 *)
 val add_typedef : string -> FileInfo.pos -> unit
+
+val push_local_changes : unit -> unit
+
+val pop_local_changes : unit -> unit

@@ -98,3 +98,7 @@ let get_typedef_path (name : string) : Relative_path.t option =
 
 let add_typedef (name : string) (pos : FileInfo.pos) : unit =
   add_type name pos Naming_types.TTypedef
+
+let push_local_changes () : unit = Naming_heap.push_local_changes ()
+
+let pop_local_changes () : unit = Naming_heap.pop_local_changes ()

@@ -179,7 +179,7 @@ let respect_but_quarantine_unsaved_changes
 
         Ide_parser_cache.activate ();
 
-        Naming_heap.push_local_changes ())
+        Naming_provider.push_local_changes ())
       ~exit:(fun () ->
         Errors.set_allow_errors_in_default_path false;
         SharedMem.allow_hashtable_writes_by_current_process true;
@@ -191,7 +191,7 @@ let respect_but_quarantine_unsaved_changes
 
         Ide_parser_cache.deactivate ();
 
-        Naming_heap.pop_local_changes ();
+        Naming_provider.pop_local_changes ();
 
         SharedMem.invalidate_caches ();
 

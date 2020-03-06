@@ -45,14 +45,19 @@ inline void mapSetAndConvertStaticKeys(Array& map,
   }
 }
 
-enum VariantControllerHackArraysMode {
+enum class VariantControllerHackArraysMode {
   // Do not serialize Hack arrays and unserialize as PHP arrays
   OFF,
-  // Do serialize Hack arrays and unserialize as Hack arrays
+  // Do serialize Hack arrays and unserialize as Hack arrays.
+  // Does not support serializing keysets.
   ON,
   // (Un)serialize varrays / darrays: this will accept / emit Hack arrays if
   // HackArrDVArrs is set.
   MIGRATORY,
+  // Do serialize Hack arrays and unserialize as Hack arrays.
+  // Supports serializing keysets.
+  ON_AND_KEYSET,
+
 };
 
 /**
@@ -63,6 +68,7 @@ struct VariantControllerImpl {
   typedef Variant VariantType;
   typedef Array MapType;
   typedef Array VectorType;
+  typedef Array SetType;
   typedef String StringType;
 
   // variant accessors
@@ -92,7 +98,8 @@ struct VariantControllerImpl {
         return HPHP::serialize::Type::MAP;
       case KindOfPersistentDict:
       case KindOfDict: {
-        if (HackArraysMode == VariantControllerHackArraysMode::ON) {
+        if (HackArraysMode == VariantControllerHackArraysMode::ON ||
+            HackArraysMode == VariantControllerHackArraysMode::ON_AND_KEYSET) {
           return HPHP::serialize::Type::MAP;
         }
         if (RuntimeOption::EvalHackArrCompatFBSerializeHackArraysNotices) {
@@ -104,7 +111,8 @@ struct VariantControllerImpl {
       }
       case KindOfPersistentVec:
       case KindOfVec: {
-        if (HackArraysMode == VariantControllerHackArraysMode::ON) {
+        if (HackArraysMode == VariantControllerHackArraysMode::ON ||
+            HackArraysMode == VariantControllerHackArraysMode::ON_AND_KEYSET) {
           return HPHP::serialize::Type::LIST;
         }
         if (RuntimeOption::EvalHackArrCompatFBSerializeHackArraysNotices) {
@@ -116,6 +124,10 @@ struct VariantControllerImpl {
       }
       case KindOfPersistentKeyset:
       case KindOfKeyset:
+        if (HackArraysMode == VariantControllerHackArraysMode::ON_AND_KEYSET) {
+          return HPHP::serialize::Type::SET;
+        }
+
         throw HPHP::serialize::KeysetSerializeError{};
 
       case KindOfClsMeth:
@@ -138,6 +150,7 @@ struct VariantControllerImpl {
   static String asString(const_variant_ref obj) { return obj.toString(); }
   static Array asMap(const_variant_ref obj) { return obj.toArray(); }
   static Array asVector(const_variant_ref obj) { return obj.toArray(); }
+  static Array asSet(const_variant_ref obj) { return obj.toArray(); }
 
   // variant creators
   static VariantType createNull() { return init_null(); }
@@ -147,11 +160,13 @@ struct VariantControllerImpl {
   static VariantType fromString(const StringType& str) { return str; }
   static VariantType fromMap(const MapType& map) { return map; }
   static VariantType fromVector(const VectorType& vec) { return vec; }
+  static VariantType fromSet(const SetType& set) { return set; }
 
   // map methods
   static MapType createMap() {
     switch (HackArraysMode) {
       case VariantControllerHackArraysMode::ON:
+      case VariantControllerHackArraysMode::ON_AND_KEYSET:
         return empty_dict_array();
       case VariantControllerHackArraysMode::OFF:
         return empty_darray();
@@ -165,6 +180,7 @@ struct VariantControllerImpl {
     auto arrayData = map.toArray().detach();
     switch (HackArraysMode) {
       case VariantControllerHackArraysMode::ON:
+      case VariantControllerHackArraysMode::ON_AND_KEYSET:
         return Array::attach(arrayData->toDict(false));
       case VariantControllerHackArraysMode::OFF:
         return Array::attach(arrayData->toDArray(false));
@@ -181,6 +197,7 @@ struct VariantControllerImpl {
     ArrayData* empty;
     switch (HackArraysMode) {
       case VariantControllerHackArraysMode::ON:
+      case VariantControllerHackArraysMode::ON_AND_KEYSET:
         empty = ArrayData::CreateDict();
         break;
       case VariantControllerHackArraysMode::OFF:
@@ -229,6 +246,7 @@ struct VariantControllerImpl {
   static VectorType createVector() {
     switch (HackArraysMode) {
       case VariantControllerHackArraysMode::ON:
+      case VariantControllerHackArraysMode::ON_AND_KEYSET:
         return empty_vec_array();
       case VariantControllerHackArraysMode::OFF:
         return empty_darray();
@@ -252,6 +270,34 @@ struct VariantControllerImpl {
   }
   static void vectorNext(ArrayIter& it) { ++it; }
   static const_variant_ref vectorValue(ArrayIter& it) {
+    return it.secondRef();
+  }
+
+  // set methods
+  static SetType createSet() {
+    return empty_keyset();
+  }
+  static int64_t setSize(const SetType& set) {
+    return set.size();
+  }
+  static void setAppend(SetType& set, const VariantType& v) {
+    auto value_type = type(v);
+    if (value_type != HPHP::serialize::Type::INT64 &&
+        value_type != HPHP::serialize::Type::STRING) {
+      throw HPHP::serialize::UnserializeError(
+          "Unsupported keyset element of type " +
+          folly::to<std::string>(value_type));
+    }
+    set.append(v);
+  }
+  static ArrayIter setIterator(const VectorType& set) {
+    return ArrayIter(set);
+  }
+  static bool setNotEnd(const SetType& /*set*/, ArrayIter& it) {
+    return !it.end();
+  }
+  static void setNext(ArrayIter& it) { ++it; }
+  static const_variant_ref setValue(ArrayIter& it) {
     return it.secondRef();
   }
 
@@ -290,7 +336,10 @@ struct VariantControllerImpl {
   ALWAYS_INLINE
   static void traceSerialization(const_variant_ref thing) {
     if (LIKELY(!RuntimeOption::EvalLogArrayProvenance)) return;
-    if (HackArraysMode != VariantControllerHackArraysMode::ON) return;
+    if (HackArraysMode != VariantControllerHackArraysMode::ON &&
+        HackArraysMode != VariantControllerHackArraysMode::ON_AND_KEYSET) {
+      return;
+    }
     if (!thing.isArray()) return;
     auto const ad = thing.getArrayData();
 
@@ -306,6 +355,8 @@ using VariantController =
   VariantControllerImpl<VariantControllerHackArraysMode::OFF>;
 using VariantControllerUsingHackArrays =
   VariantControllerImpl<VariantControllerHackArraysMode::ON>;
+using VariantControllerUsingHackArraysAndKeyset =
+  VariantControllerImpl<VariantControllerHackArraysMode::ON_AND_KEYSET>;
 using VariantControllerUsingVarrayDarray =
   VariantControllerImpl<VariantControllerHackArraysMode::MIGRATORY>;
 }

@@ -62,6 +62,11 @@ namespace HPHP { namespace serialize {
  *                   FB_SERIALIZE_STRUCT (instead of FB_SERIALIZE_VECTOR)
  *                   for reasons beyond me. The length of the list is first
  *                   written followed by each element in the list.
+ *
+ *  20 (SET): followed set size and then each element of the set. On-the-wire
+ *            format is basically the same as LIST, except it uses
+ *            FB_SERIALIZE_SET tag. Set elements must be strings or integers.
+ *            Represents Hack keyset.
  */
 
 enum class Type {
@@ -74,6 +79,7 @@ enum class Type {
   STRING,
   OBJECT,
   LIST,
+  SET,
 };
 
 struct FBSerializeBase {
@@ -91,6 +97,7 @@ struct FBSerializeBase {
     FB_SERIALIZE_BOOLEAN = 17,
     FB_SERIALIZE_VECTOR  = 18,
     FB_SERIALIZE_LIST    = 19,
+    FB_SERIALIZE_SET     = 20,
   };
 
   static const size_t CODE_SIZE = 1;
@@ -127,6 +134,8 @@ struct FBSerializer : private FBSerializeBase {
   void serializeVector(const Vector& vec, size_t depth);
   template <typename Vector>
   void serializeList(const Vector& vec, size_t depth);
+  template <typename Set>
+  void serializeSet(const Set& set, size_t depth);
   template <typename Variant>
   void serializeThing(const Variant& thing, size_t depth);
 
@@ -139,6 +148,8 @@ struct FBSerializer : private FBSerializeBase {
   static size_t serializedSizeVector(const Vector& v, size_t depth);
   template <typename Vector>
   static size_t serializedSizeList(const Vector& v, size_t depth);
+  template <typename Set>
+  static size_t serializedSizeSet(const Set& v, size_t depth);
   template <typename Variant>
   static size_t serializedSizeThing(const Variant& v, size_t depth);
 };
@@ -157,6 +168,7 @@ struct FBUnserializer : private FBSerializeBase {
   typename V::MapType unserializeMap();
   typename V::VectorType unserializeVector();
   typename V::VectorType unserializeList();
+  typename V::SetType unserializeSet();
   // read the next map but don't unserialze it (for lazy or delay
   // unserialization)
   folly::StringPiece getSerializedMap();

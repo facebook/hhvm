@@ -43,4 +43,10 @@ function main(): void {
     fb_serialize(keyset[], FB_SERIALIZE_HACK_ARRAYS);
     echo "fail\n";
   } catch (Exception $e) {}
+
+  fb_serialize(varray[], FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS);
+  fb_serialize(darray[], FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS);
+  fb_serialize(vec[], FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS);
+  fb_serialize(dict[], FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS);
+  fb_serialize(keyset[], FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS);
 }

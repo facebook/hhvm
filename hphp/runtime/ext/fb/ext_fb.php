@@ -4,9 +4,17 @@
 namespace {
 /** Serialize data into a compact format that can be unserialized by
  * fb_unserialize().
+ *
+ * WARNING: FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS mode has been added in March
+ * 2020, and support for underlying serialization format may not yet be
+ * available in all non-Hack implementations yet. Caution is adviced when using
+ * FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS for serializing data, which may be
+ * deserialized outside of Hack.
+ *
  * @param mixed $thing - What to serialize. Note that objects are not
  * supported.
- * @param options bitmask of options: FB_SERIALIZE_HACK_ARRAYS.
+ * @param options bitmask of options: FB_SERIALIZE_HACK_ARRAYS,
+ * FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS.
  * @return mixed - Serialized data.
  */
 <<__HipHopSpecific, __Native, __Rx>>
@@ -15,7 +23,8 @@ function fb_serialize(mixed $thing, int $options = 0): mixed;
 /** Unserialize previously fb_serialize()-ed data.
  * @param mixed $thing - What to unserialize.
  * @param mixed $success - Whether it was successful or not.
- * @param options bitmask of options: FB_SERIALIZE_HACK_ARRAYS.
+ * @param options bitmask of options: FB_SERIALIZE_HACK_ARRAYS,
+ * FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS.
  * @return mixed - Unserialized data.
  */
 <<__HipHopSpecific, __Native>>

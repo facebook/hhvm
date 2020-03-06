@@ -56,6 +56,7 @@ namespace HPHP {
 // fb_serialize options
 const int64_t k_FB_SERIALIZE_HACK_ARRAYS = 1<<1;
 const int64_t k_FB_SERIALIZE_VARRAY_DARRAY = 1<<2;
+const int64_t k_FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS = 1<<3;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -115,6 +116,16 @@ Variant HHVM_FUNCTION(fb_serialize, const Variant& thing, int64_t options) {
         ::serialize(thing, s.mutableData());
       s.setSize(len);
       return s;
+    } else if (options & k_FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS) {
+      size_t len = HPHP::serialize
+        ::FBSerializer<VariantControllerUsingHackArraysAndKeyset>
+        ::serializedSize(thing);
+      String s(len, ReserveString);
+      HPHP::serialize
+        ::FBSerializer<VariantControllerUsingHackArraysAndKeyset>
+        ::serialize(thing, s.mutableData());
+      s.setSize(len);
+      return s;
     } else if (options & k_FB_SERIALIZE_VARRAY_DARRAY) {
       size_t len = HPHP::serialize
         ::FBSerializer<VariantControllerUsingVarrayDarray>
@@ -136,7 +147,8 @@ Variant HHVM_FUNCTION(fb_serialize, const Variant& thing, int64_t options) {
     }
   } catch (const HPHP::serialize::KeysetSerializeError&) {
     SystemLib::throwInvalidArgumentExceptionObject(
-      "Keysets cannot be serialized with fb_serialize"
+      "Serializing Keysets requires the FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS "
+      "option to be provided"
     );
   } catch (const HPHP::serialize::HackArraySerializeError&) {
     SystemLib::throwInvalidArgumentExceptionObject(
@@ -176,6 +188,12 @@ Variant fb_unserialize(const char* str,
     if (options & k_FB_SERIALIZE_HACK_ARRAYS) {
       auto res = HPHP::serialize
         ::FBUnserializer<VariantControllerUsingHackArrays>
+        ::unserialize(folly::StringPiece(str, len));
+      success = true;
+      return res;
+    } else if (options & k_FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS) {
+      auto res = HPHP::serialize
+        ::FBUnserializer<VariantControllerUsingHackArraysAndKeyset>
         ::unserialize(folly::StringPiece(str, len));
       success = true;
       return res;
@@ -1293,6 +1311,8 @@ struct FBExtension : Extension {
 
     HHVM_RC_INT(FB_SERIALIZE_HACK_ARRAYS, k_FB_SERIALIZE_HACK_ARRAYS);
     HHVM_RC_INT(FB_SERIALIZE_VARRAY_DARRAY, k_FB_SERIALIZE_VARRAY_DARRAY);
+    HHVM_RC_INT(FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS,
+                k_FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS);
 
     HHVM_FE(fb_serialize);
     HHVM_FE(fb_unserialize);

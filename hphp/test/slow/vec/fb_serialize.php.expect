@@ -86,7 +86,7 @@ vec(1) {
   }
 }
 string(83) "Serializing Hack arrays requires the FB_SERIALIZE_HACK_ARRAYS option to be provided"
-string(46) "Keysets cannot be serialized with fb_serialize"
+string(91) "Serializing Keysets requires the FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS option to be provided"
 string(83) "Serializing Hack arrays requires the FB_SERIALIZE_HACK_ARRAYS option to be provided"
 bool(true)
 dict(5) {

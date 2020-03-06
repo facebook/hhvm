@@ -635,6 +635,10 @@ ALWAYS_INLINE Array empty_dict_array() {
   return Array::attach(ArrayData::CreateDict());
 }
 
+ALWAYS_INLINE Array empty_keyset() {
+  return Array::attach(ArrayData::CreateKeyset());
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*

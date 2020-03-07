@@ -672,6 +672,7 @@ where
     fn check_valid_reified_hint(env: &mut Env, node: &Syntax<T, V>, hint: &ast::Hint) {
         struct Checker<F: FnMut(&String)>(F);
         impl<F: FnMut(&String)> Visitor for Checker<F> {
+            type Error = ();
             type Context = ();
             type Ex = Pos;
             type Fb = ();
@@ -680,12 +681,22 @@ where
 
             fn object(
                 &mut self,
-            ) -> &mut dyn Visitor<Context = Self::Context, Ex = Pos, Fb = (), En = (), Hi = ()>
-            {
+            ) -> &mut dyn Visitor<
+                Context = Self::Context,
+                Error = (),
+                Ex = Pos,
+                Fb = (),
+                En = (),
+                Hi = (),
+            > {
                 self
             }
 
-            fn visit_hint(&mut self, c: &mut (), h: &ast::Hint) {
+            fn visit_hint(
+                &mut self,
+                c: &mut (),
+                h: &ast::Hint,
+            ) -> std::result::Result<(), Self::Error> {
                 match h.1.as_ref() {
                     ast::Hint_::Happly(id, _) => {
                         self.0(&id.1);
@@ -695,7 +706,7 @@ where
                     }
                     _ => {}
                 }
-                h.recurse(c, self);
+                h.recurse(c, self)
             }
         }
 
@@ -704,7 +715,7 @@ where
                 Self::fail_if_invalid_reified_generic(node, env, id);
             };
             let mut visitor = Checker(f);
-            visitor.visit_hint(&mut (), hint);
+            visitor.visit_hint(&mut (), hint).unwrap();
         }
     }
 

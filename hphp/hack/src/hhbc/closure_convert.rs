@@ -19,6 +19,7 @@ use global_state::{ClosureEnclosingClassInfo, GlobalState, LazyState};
 use hhbc_id::class;
 use hhbc_id_rust as hhbc_id;
 use hhbc_string_utils_rust as string_utils;
+use instruction_sequence_rust::{unrecoverable, Error, Result};
 use naming_special_names_rust::{fb, pseudo_consts, special_idents, superglobals};
 use options::{CompilerFlags, HhvmFlags, Options};
 use oxidized::{
@@ -83,11 +84,11 @@ impl<'a> Env<'a> {
         function_count: usize,
         defs: &Program,
         options: &'a Options,
-    ) -> Self {
+    ) -> Result<Self> {
         let scope = ast_scope::Scope::toplevel();
-        let all_vars = get_vars(&scope, false, &vec![], Either::Left(&defs));
+        let all_vars = get_vars(&scope, false, &vec![], Either::Left(&defs))?;
 
-        Self {
+        Ok(Self {
             scope,
             variable_scopes: vec![Variables {
                 all_vars,
@@ -98,7 +99,7 @@ impl<'a> Env<'a> {
             defined_function_count: function_count,
             in_using: false,
             options,
-        }
+        })
     }
 
     fn with_function_like_(
@@ -107,13 +108,13 @@ impl<'a> Env<'a> {
         is_closure_body: bool,
         params: &[FunParam],
         body: &Block,
-    ) {
+    ) -> Result<()> {
         self.scope.push_item(e);
-        let all_vars = get_vars(&self.scope, is_closure_body, params, Either::Right(body));
-        self.variable_scopes.push(Variables {
+        let all_vars = get_vars(&self.scope, is_closure_body, params, Either::Right(body))?;
+        Ok(self.variable_scopes.push(Variables {
             parameter_names: get_parameter_names(params),
             all_vars,
-        })
+        }))
     }
 
     fn with_function_like(
@@ -121,11 +122,11 @@ impl<'a> Env<'a> {
         e: ast_scope::ScopeItem<'a>,
         is_closure_body: bool,
         fd: &Fun_,
-    ) {
+    ) -> Result<()> {
         self.with_function_like_(e, is_closure_body, &fd.params, &fd.body.ast)
     }
 
-    fn with_function(&mut self, fd: &Fun_) {
+    fn with_function(&mut self, fd: &Fun_) -> Result<()> {
         self.with_function_like(
             ast_scope::ScopeItem::Function(Cow::Owned(fd.clone())),
             false,
@@ -133,7 +134,7 @@ impl<'a> Env<'a> {
         )
     }
 
-    fn with_method(&mut self, md: &Method_) {
+    fn with_method(&mut self, md: &Method_) -> Result<()> {
         self.with_function_like_(
             ast_scope::ScopeItem::Method(Cow::Owned(md.clone())),
             false,
@@ -142,7 +143,7 @@ impl<'a> Env<'a> {
         )
     }
 
-    fn with_lambda(&mut self, fd: &Fun_) {
+    fn with_lambda(&mut self, fd: &Fun_) -> Result<()> {
         let is_async = fd.fun_kind.is_async();
         let rx_level = rx::Level::from_ast(&fd.user_attributes);
 
@@ -150,7 +151,7 @@ impl<'a> Env<'a> {
         self.with_function_like(ast_scope::ScopeItem::Lambda(Cow::Owned(lambda)), true, fd)
     }
 
-    fn with_longlambda(&mut self, is_static: bool, fd: &Fun_) {
+    fn with_longlambda(&mut self, is_static: bool, fd: &Fun_) -> Result<()> {
         let is_async = fd.fun_kind.is_async();
         let rx_level = rx::Level::from_ast(&fd.user_attributes);
 
@@ -172,14 +173,15 @@ impl<'a> Env<'a> {
             .push_item(ast_scope::ScopeItem::Class(Cow::Owned(cd.clone())));
     }
 
-    fn with_in_using<F>(&mut self, in_using: bool, mut f: F)
+    fn with_in_using<F, R>(&mut self, in_using: bool, mut f: F) -> R
     where
-        F: FnMut(&mut Self),
+        F: FnMut(&mut Self) -> R,
     {
         let old_in_using = self.in_using;
         self.in_using = in_using;
-        f(self);
+        let r = f(self);
         self.in_using = old_in_using;
+        r
     }
 }
 
@@ -341,14 +343,14 @@ fn get_vars(
     is_closure_body: bool,
     params: &[FunParam],
     body: decl_vars::ProgramOrStmt,
-) -> HashSet<String> {
+) -> Result<HashSet<String>> {
     use decl_vars::{vars_from_ast, Flags};
     let mut flags = Flags::empty();
     flags.set(Flags::HAS_THIS, scope.has_this());
     flags.set(Flags::IS_TOPLEVEL, scope.is_toplevel());
     flags.set(Flags::IS_IN_STATIC_METHOD, scope.is_in_static_method());
     flags.set(Flags::IS_CLOSURE_BODY, is_closure_body);
-    vars_from_ast(params, body, flags)
+    vars_from_ast(params, body, flags).map_err(unrecoverable)
 }
 
 fn get_parameter_names(params: &[FunParam]) -> HashSet<String> {
@@ -576,10 +578,14 @@ fn convert_id(env: &Env, Id(p, s): Id) -> Expr_ {
     }
 }
 
-fn visit_class_id<'a>(env: &mut Env<'a>, self_: &mut ClosureConvertVisitor<'a>, cid: &mut ClassId) {
-    if let ClassId(_, ClassId_::CIexpr(e)) = cid {
-        self_.visit_expr(env, e);
-    }
+fn visit_class_id<'a>(
+    env: &mut Env<'a>,
+    self_: &mut ClosureConvertVisitor<'a>,
+    cid: &mut ClassId,
+) -> Result<()> {
+    Ok(if let ClassId(_, ClassId_::CIexpr(e)) = cid {
+        self_.visit_expr(env, e)?;
+    })
 }
 
 fn make_info(c: &Class_) -> ClosureEnclosingClassInfo {
@@ -599,7 +605,7 @@ fn convert_lambda<'a>(
     self_: &mut ClosureConvertVisitor<'a>,
     mut fd: Fun_,
     use_vars_opt: Option<Vec<aast_defs::Lid>>,
-) -> Expr_ {
+) -> Result<Expr_> {
     let is_long_lambda = use_vars_opt.is_some();
     let st = &mut self_.state;
 
@@ -613,15 +619,15 @@ fn convert_lambda<'a>(
     let lambda_env = &mut env.clone();
 
     if use_vars_opt.is_some() {
-        lambda_env.with_longlambda(false, &fd)
+        lambda_env.with_longlambda(false, &fd)?
     } else {
-        lambda_env.with_lambda(&fd)
+        lambda_env.with_lambda(&fd)?
     };
-    let function_state = convert_function_like_body(self_, lambda_env, &mut fd.body);
+    let function_state = convert_function_like_body(self_, lambda_env, &mut fd.body)?;
     for param in &mut fd.params {
-        self_.visit_fun_param(lambda_env, param)
+        self_.visit_fun_param(lambda_env, param)?;
     }
-    self_.visit_type_hint(lambda_env, &mut fd.ret);
+    self_.visit_type_hint(lambda_env, &mut fd.ret)?;
 
     let st = &mut self_.state;
     st.closure_cnt_per_fun += 1;
@@ -751,7 +757,7 @@ fn convert_lambda<'a>(
     }
 
     st.hoisted_classes.push(cd);
-    Expr_::mk_efun(inline_fundef, use_vars)
+    Ok(Expr_::mk_efun(inline_fundef, use_vars))
 }
 
 fn convert_meth_caller_to_func_ptr<'a>(
@@ -889,16 +895,16 @@ fn convert_function_like_body<'a>(
     self_: &mut ClosureConvertVisitor<'a>,
     env: &mut Env<'a>,
     body: &mut FuncBody,
-) -> PerFunctionState {
+) -> Result<PerFunctionState> {
     // reset has_finally/goto_state values on the state
     let old_state = std::mem::replace(
         &mut self_.state.current_function_state,
         PerFunctionState::default(),
     );
-    body.recurse(env, self_.object());
+    body.recurse(env, self_.object())?;
     // restore old has_finally/goto_state values
     let function_state = std::mem::replace(&mut self_.state.current_function_state, old_state);
-    function_state
+    Ok(function_state)
 }
 
 fn add_reified_property(tparams: &ClassTparams, vars: &mut Vec<ClassVar>) {
@@ -955,6 +961,7 @@ struct ClosureConvertVisitor<'a> {
 
 impl<'a> VisitorMut for ClosureConvertVisitor<'a> {
     type Context = Env<'a>;
+    type Error = Error;
     type Ex = Pos;
     type Fb = ();
     type En = ();
@@ -964,6 +971,7 @@ impl<'a> VisitorMut for ClosureConvertVisitor<'a> {
         &mut self,
     ) -> &mut dyn VisitorMut<
         Context = Self::Context,
+        Error = Self::Error,
         Ex = Self::Ex,
         Fb = Self::Fb,
         En = Self::En,
@@ -972,129 +980,130 @@ impl<'a> VisitorMut for ClosureConvertVisitor<'a> {
         self
     }
 
-    fn visit_method_(&mut self, env: &mut Env<'a>, md: &mut Method_) {
-        let cls = env
-            .scope
-            .get_class()
-            .expect("unexpected scope shape - method is not inside the class");
+    fn visit_method_(&mut self, env: &mut Env<'a>, md: &mut Method_) -> Result<()> {
+        let cls = env.scope.get_class().ok_or(unrecoverable(
+            "unexpected scope shape - method is not inside the class",
+        ))?;
         // TODO(hrust): not great to have to clone env constantly
         let mut env = env.clone();
-        env.with_method(md);
+        env.with_method(md)?;
         self.state.reset_function_counts();
-        let function_state = convert_function_like_body(self, &mut env, &mut md.body);
+        let function_state = convert_function_like_body(self, &mut env, &mut md.body)?;
         self.state.record_function_state(
             env::get_unique_id_for_method(cls, &md),
             function_state,
             rx::Level::NonRx,
         );
         for mut param in &mut md.params {
-            self.visit_fun_param(&mut env, &mut param);
+            self.visit_fun_param(&mut env, &mut param)?;
         }
+        Ok(())
     }
 
-    fn visit_class_<'b>(&mut self, env: &mut Env<'a>, cd: &'b mut Class_) {
+    fn visit_class_<'b>(&mut self, env: &mut Env<'a>, cd: &'b mut Class_) -> Result<()> {
         let mut env = env.clone();
         env.with_class(cd);
         self.state.reset_function_counts();
-        cd.recurse(&mut env, self.object());
-        add_reified_property(&cd.tparams, &mut cd.vars);
+        cd.recurse(&mut env, self.object())?;
+        Ok(add_reified_property(&cd.tparams, &mut cd.vars))
     }
 
-    fn visit_def(&mut self, env: &mut Env<'a>, def: &mut Def) {
+    fn visit_def(&mut self, env: &mut Env<'a>, def: &mut Def) -> Result<()> {
         match def {
             // need to handle it ourselvses, because visit_fun_ is
             // called both for toplevel functions and lambdas
             Def::Fun(x) => {
                 let mut env = env.clone();
-                env.with_function(&x);
+                env.with_function(&x)?;
                 self.state.reset_function_counts();
-                let function_state = convert_function_like_body(self, &mut env, &mut x.body);
+                let function_state = convert_function_like_body(self, &mut env, &mut x.body)?;
                 self.state.record_function_state(
                     env::get_unique_id_for_function(&x),
                     function_state,
                     rx::Level::NonRx,
                 );
                 for mut param in &mut x.params {
-                    self.visit_fun_param(&mut env, &mut param)
+                    self.visit_fun_param(&mut env, &mut param)?
                 }
                 for mut ua in &mut x.user_attributes {
-                    self.visit_user_attribute(&mut env, &mut ua)
+                    self.visit_user_attribute(&mut env, &mut ua)?
                 }
+                Ok(())
             }
             _ => def.recurse(env, self.object()),
         }
     }
 
-    fn visit_hint_(&mut self, env: &mut Env<'a>, hint: &mut Hint_) {
+    fn visit_hint_(&mut self, env: &mut Env<'a>, hint: &mut Hint_) -> Result<()> {
         if let Hint_::Happly(id, _) = hint {
             add_generic(env, &mut self.state, id.name())
         };
-        hint.recurse(env, self.object());
+        hint.recurse(env, self.object())
     }
 
-    fn visit_stmt_(&mut self, env: &mut Env<'a>, stmt: &mut Stmt_) {
+    fn visit_stmt_(&mut self, env: &mut Env<'a>, stmt: &mut Stmt_) -> Result<()> {
         match stmt {
             Stmt_::Do(x) => {
                 let (b, e) = (&mut x.0, &mut x.1);
                 env.with_in_using(false, |env| {
-                    for stmt in b.iter_mut() {
-                        self.visit_stmt(env, stmt);
-                    }
-                });
-                self.visit_expr(env, e);
+                    Ok(for stmt in b.iter_mut() {
+                        self.visit_stmt(env, stmt)?;
+                    })
+                })?;
+                self.visit_expr(env, e)
             }
             Stmt_::While(x) => {
                 let (e, b) = (&mut x.0, &mut x.1);
-                self.visit_expr(env, e);
+                self.visit_expr(env, e)?;
                 env.with_in_using(false, |env| {
-                    for stmt in b.iter_mut() {
-                        self.visit_stmt(env, stmt);
-                    }
-                });
+                    Ok(for stmt in b.iter_mut() {
+                        self.visit_stmt(env, stmt)?;
+                    })
+                })
             }
             Stmt_::For(x) => {
                 let (e1, e2, e3, b) = (&mut x.0, &mut x.1, &mut x.2, &mut x.3);
-                self.visit_expr(env, e1);
-                self.visit_expr(env, e2);
+                self.visit_expr(env, e1)?;
+                self.visit_expr(env, e2)?;
                 env.with_in_using(false, |env| {
-                    for stmt in b.iter_mut() {
-                        self.visit_stmt(env, stmt);
-                    }
-                });
-                self.visit_expr(env, e3);
+                    Ok(for stmt in b.iter_mut() {
+                        self.visit_stmt(env, stmt)?;
+                    })
+                })?;
+                self.visit_expr(env, e3)
             }
             Stmt_::Switch(x) => {
                 let (e, cl) = (&mut x.0, &mut x.1);
-                self.visit_expr(env, e);
+                self.visit_expr(env, e)?;
                 env.with_in_using(false, |env| {
-                    for c in cl.iter_mut() {
-                        self.visit_case(env, c);
-                    }
+                    Ok(for c in cl.iter_mut() {
+                        self.visit_case(env, c)?;
+                    })
                 })
             }
             Stmt_::Try(x) => {
                 let (b1, cl, b2) = (&mut x.0, &mut x.1, &mut x.2);
                 for stmt in b1.iter_mut() {
-                    self.visit_stmt(env, stmt);
+                    self.visit_stmt(env, stmt)?;
                 }
                 for c in cl.iter_mut() {
-                    self.visit_catch(env, c);
+                    self.visit_catch(env, c)?;
                 }
                 env.with_in_using(false, |env| {
-                    for stmt in b2.iter_mut() {
-                        self.visit_stmt(env, stmt);
-                    }
-                });
-                self.state.current_function_state.has_finally |= !x.2.is_empty()
+                    Ok(for stmt in b2.iter_mut() {
+                        self.visit_stmt(env, stmt)?;
+                    })
+                })?;
+                Ok(self.state.current_function_state.has_finally |= !x.2.is_empty())
             }
             Stmt_::Using(x) => {
-                self.visit_expr(env, &mut x.expr);
+                self.visit_expr(env, &mut x.expr)?;
                 env.with_in_using(true, |env| {
-                    for stmt in x.block.iter_mut() {
-                        self.visit_stmt(env, stmt);
-                    }
-                });
-                self.state.current_function_state.has_finally = true
+                    Ok(for stmt in x.block.iter_mut() {
+                        self.visit_stmt(env, stmt)?;
+                    })
+                })?;
+                Ok(self.state.current_function_state.has_finally = true)
             }
             Stmt_::GotoLabel(x) => {
                 let label = &x.1;
@@ -1103,18 +1112,19 @@ impl<'a> VisitorMut for ClosureConvertVisitor<'a> {
                     .current_function_state
                     .labels
                     .insert(label.clone(), env.in_using);
+                Ok(())
             }
             _ => stmt.recurse(env, self.object()),
         }
     }
 
     //TODO(hrust): do we need special handling for Awaitall?
-    fn visit_expr(&mut self, env: &mut Env<'a>, Expr(pos, e): &mut Expr) {
+    fn visit_expr(&mut self, env: &mut Env<'a>, Expr(pos, e): &mut Expr) -> Result<()> {
         let null = Expr_::mk_null();
         let e_owned = std::mem::replace(e, null);
         *e = match e_owned {
-            Expr_::Efun(x) => convert_lambda(env, self, x.0, Some(x.1)),
-            Expr_::Lfun(x) => convert_lambda(env, self, x.0, None),
+            Expr_::Efun(x) => convert_lambda(env, self, x.0, Some(x.1))?,
+            Expr_::Lfun(x) => convert_lambda(env, self, x.0, None)?,
             Expr_::Lvar(id) => {
                 add_var(env, &mut self.state, local_id::get_name(&id.1));
                 Expr_::Lvar(id)
@@ -1149,17 +1159,13 @@ impl<'a> VisitorMut for ClosureConvertVisitor<'a> {
                     if let [Expr(pc, cls), Expr(pf, fname)] = &mut *x.3 {
                         (pc, cls, pf, fname)
                     } else {
-                        // TODO: Remove panic! when error-handling is added to function.
-                        panic!(
-                            "Err={:?}",
-                            emit_fatal::raise_fatal_parse(
-                                pos,
-                                format!(
-                                    "meth_caller must have exactly two arguments. Received {}",
-                                    x.3.len()
-                                )
-                            )
-                        )
+                        return Err(emit_fatal::raise_fatal_parse(
+                            pos,
+                            format!(
+                                "meth_caller must have exactly two arguments. Received {}",
+                                x.3.len()
+                            ),
+                        ));
                     }
                 };
                 match (cls, func.as_string()) {
@@ -1176,7 +1182,7 @@ impl<'a> VisitorMut for ClosureConvertVisitor<'a> {
                             Some((ref mut cid, (_, cs))) => (cid, cs),
                         };
                         use hhbc_id::Id;
-                        visit_class_id(env, self, cid);
+                        visit_class_id(env, self, cid)?;
                         match &cid.1 {
                             cid if cid
                                 .as_ciexpr()
@@ -1202,19 +1208,11 @@ impl<'a> VisitorMut for ClosureConvertVisitor<'a> {
                                     fname,
                                 )
                             }
-                            e => {
-                                // TODO: Print and soft "accept" are WRONG. Change when error-handling is ready.
-                                eprintln!(
-                                    "{:?}",
-                                    emit_fatal::raise_fatal_parse(
-                                        pos,
-                                        format!(
-                                            "Class must be a Class or string type. Got '{:?}'",
-                                            e
-                                        ),
-                                    )
-                                );
-                                Expr_::Call(x)
+                            _ => {
+                                return Err(emit_fatal::raise_fatal_parse(
+                                    pos,
+                                    "Class must be a Class or string type",
+                                ));
                             }
                         }
                     }
@@ -1241,7 +1239,7 @@ impl<'a> VisitorMut for ClosureConvertVisitor<'a> {
             {
                 add_var(env, &mut self.state, "$this");
                 let mut res = Expr_::Call(x);
-                res.recurse(env, self.object());
+                res.recurse(env, self.object())?;
                 res
             }
             Expr_::Call(mut x)
@@ -1253,11 +1251,11 @@ impl<'a> VisitorMut for ClosureConvertVisitor<'a> {
                 // replace tuple with varray
                 let call_args = mem::replace(&mut x.3, vec![]);
                 let mut res = Expr_::mk_varray(None, call_args);
-                res.recurse(env, self.object());
+                res.recurse(env, self.object())?;
                 res
             }
             Expr_::BracedExpr(mut x) => {
-                x.recurse(env, self.object());
+                x.recurse(env, self.object())?;
                 match x.1 {
                     Expr_::Lvar(_) => x.1,
                     Expr_::String(_) => x.1,
@@ -1266,7 +1264,7 @@ impl<'a> VisitorMut for ClosureConvertVisitor<'a> {
             }
             Expr_::As(x) if (x.1).is_hlike() => {
                 let mut res = x.0;
-                res.recurse(env, self.object());
+                res.recurse(env, self.object())?;
                 *pos = res.0;
                 res.1
             }
@@ -1280,7 +1278,7 @@ impl<'a> VisitorMut for ClosureConvertVisitor<'a> {
                     .unwrap_or_default() =>
             {
                 let mut res = x.0;
-                res.recurse(env, self.object());
+                res.recurse(env, self.object())?;
                 *pos = res.0;
                 res.1
             }
@@ -1291,14 +1289,15 @@ impl<'a> VisitorMut for ClosureConvertVisitor<'a> {
                     // to remove it.
                     add_var(env, &mut self.state, &id.1);
                 };
-                x.recurse(env, self.object());
+                x.recurse(env, self.object())?;
                 Expr_::ClassGet(x)
             }
             mut x => {
-                x.recurse(env, self.object());
+                x.recurse(env, self.object())?;
                 x
             }
         };
+        Ok(())
     }
 }
 
@@ -1321,7 +1320,7 @@ fn flatten_ns(defs: &mut Program) -> Program {
         .collect()
 }
 
-pub fn convert_toplevel_prog(e: &mut Emitter, defs: &mut Program) -> Vec<HoistKind> {
+pub fn convert_toplevel_prog(e: &mut Emitter, defs: &mut Program) -> Result<Vec<HoistKind>> {
     let empty_namespace = namespace_env::Env::empty(vec![], false, false);
     if e.options()
         .hack_compiler_flags
@@ -1336,7 +1335,7 @@ pub fn convert_toplevel_prog(e: &mut Emitter, defs: &mut Program) -> Vec<HoistKi
         1,
         defs,
         e.options(),
-    );
+    )?;
     *defs = flatten_ns(defs);
 
     let mut visitor = ClosureConvertVisitor {
@@ -1351,7 +1350,7 @@ pub fn convert_toplevel_prog(e: &mut Emitter, defs: &mut Program) -> Vec<HoistKi
     let mut const_count = 0;
 
     for mut def in defs.drain(..) {
-        visitor.visit_def(&mut env, &mut def);
+        visitor.visit_def(&mut env, &mut def)?;
         match def {
             Def::Class(x) => {
                 let stub_class = make_defcls(*x.clone(), class_count);
@@ -1416,5 +1415,5 @@ pub fn convert_toplevel_prog(e: &mut Emitter, defs: &mut Program) -> Vec<HoistKi
         hoist_kinds.push(HoistKind::Hoisted);
     }
     *e.emit_state_mut() = visitor.state.global_state;
-    hoist_kinds
+    Ok(hoist_kinds)
 }

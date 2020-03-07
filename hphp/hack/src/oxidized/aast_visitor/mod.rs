@@ -31,30 +31,41 @@ mod tests {
     fn simple() {
         impl Visitor for usize {
             type Context = ();
+            type Error = ();
             type Ex = ();
             type Fb = ();
             type En = ();
             type Hi = ();
             fn object(
                 &mut self,
-            ) -> &mut dyn Visitor<Context = Self::Context, Ex = (), Fb = (), En = (), Hi = ()>
-            {
+            ) -> &mut dyn Visitor<
+                Context = Self::Context,
+                Ex = (),
+                Error = (),
+                Fb = (),
+                En = (),
+                Hi = (),
+            > {
                 self
             }
 
-            fn visit_expr(&mut self, c: &mut Self::Context, p: &Expr<(), (), (), ()>) {
+            fn visit_expr(
+                &mut self,
+                c: &mut Self::Context,
+                p: &Expr<(), (), (), ()>,
+            ) -> Result<(), ()> {
                 *self += 1;
-                p.recurse(c, self);
+                p.recurse(c, self)
             }
         }
 
         let expr = Expr((), Expr_::Any);
         let mut v: usize = 0;
-        v.visit_expr(&mut (), &expr);
+        v.visit_expr(&mut (), &expr).unwrap();
         assert_eq!(v, 1);
 
         let mut v: usize = 0;
-        visitor::visit(&mut v, &mut (), &expr);
+        visitor::visit(&mut v, &mut (), &expr).unwrap();
         assert_eq!(v, 1);
     }
 
@@ -62,26 +73,37 @@ mod tests {
     fn simple_mut() {
         impl VisitorMut for () {
             type Context = ();
+            type Error = ();
             type Ex = ();
             type Fb = ();
             type En = ();
             type Hi = ();
             fn object(
                 &mut self,
-            ) -> &mut dyn VisitorMut<Context = Self::Context, Ex = (), Fb = (), En = (), Hi = ()>
-            {
+            ) -> &mut dyn VisitorMut<
+                Context = Self::Context,
+                Error = (),
+                Ex = (),
+                Fb = (),
+                En = (),
+                Hi = (),
+            > {
                 self
             }
 
-            fn visit_expr_(&mut self, c: &mut Self::Context, p: &mut Expr_<(), (), (), ()>) {
+            fn visit_expr_(
+                &mut self,
+                c: &mut Self::Context,
+                p: &mut Expr_<(), (), (), ()>,
+            ) -> Result<(), ()> {
                 std::mem::replace(p, Expr_::Null);
-                p.recurse(c, self);
+                p.recurse(c, self)
             }
         }
 
         let mut expr = Expr((), Expr_::Any);
         let mut v = ();
-        v.visit_expr(&mut (), &mut expr);
+        v.visit_expr(&mut (), &mut expr).unwrap();
         match expr.1 {
             Expr_::Null => {}
             e => assert!(false, "Expect Expr_::Null, but got {:?}", e),
@@ -89,7 +111,7 @@ mod tests {
 
         let mut expr = Expr((), Expr_::Any);
         let mut v = ();
-        visitor_mut::visit(&mut v, &mut (), &mut expr);
+        visitor_mut::visit(&mut v, &mut (), &mut expr).unwrap();
         match expr.1 {
             Expr_::Null => {}
             e => assert!(false, "Expect Expr_::Null, but got {:?}", e),

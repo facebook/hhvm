@@ -8,7 +8,6 @@ use crate::common::Result;
 use quote::format_ident;
 use std::{
     collections::{HashMap, HashSet, VecDeque},
-    iter::once,
     path::Path,
 };
 use syn::*;
@@ -28,6 +27,8 @@ pub struct Context<'a> {
     pub root_ty_params: Vec<String>,
     /// the name of `Context` type in `Visitor`
     pub context: String,
+    /// the type param name for `Error`, which is used in `Result<(), Error>`
+    pub error_ty_param: String,
 }
 impl<'a> Context<'a> {
     pub fn new(files: &'a [(syn::File, &'a Path)], root: &'a str) -> Result<Self> {
@@ -57,11 +58,16 @@ impl<'a> Context<'a> {
             root_ty_params,
             types,
             context: "Context".into(),
+            error_ty_param: "Error".into(),
         })
     }
 
-    pub fn visitor_context(&self) -> Ident {
+    pub fn context_ident(&self) -> Ident {
         format_ident!("{}", self.context)
+    }
+
+    pub fn error_ident(&self) -> Ident {
+        format_ident!("{}", self.error_ty_param)
     }
 
     pub fn is_root_ty_param(&self, ty_param: &str) -> bool {
@@ -77,7 +83,9 @@ impl<'a> Context<'a> {
     }
 
     pub fn root_ty_params_with_context_raw(&'a self) -> impl Iterator<Item = &'a String> {
-        once(&self.context).chain(self.root_ty_params.iter())
+        vec![&self.context, &self.error_ty_param]
+            .into_iter()
+            .chain(self.root_ty_params.iter())
     }
 
     pub fn root_ty_params_with_context(&'a self) -> impl Iterator<Item = Ident> + 'a {

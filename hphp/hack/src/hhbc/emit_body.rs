@@ -27,7 +27,7 @@ use hhas_param_rust::HhasParam;
 use hhas_type::Info as HhasTypeInfo;
 use hhbc_ast_rust::{Instruct, IstypeOp, ParamId};
 use hhbc_string_utils_rust as string_utils;
-use instruction_sequence_rust::{Error, InstrSeq, Result};
+use instruction_sequence_rust::{unrecoverable, Error, InstrSeq, Result};
 use label_rewriter_rust as label_rewriter;
 use naming_special_names_rust::classes;
 use options::CompilerFlags;
@@ -145,7 +145,7 @@ pub fn emit_body<'a, 'b>(
         &params,
         &body,
         args.flags,
-    );
+    )?;
     let mut env = make_env(
         namespace,
         need_local_this,
@@ -316,7 +316,7 @@ fn make_decl_vars(
     params: &[HhasParam],
     body: &tast::Program,
     arg_flags: Flags,
-) -> (bool, Vec<String>) {
+) -> Result<(bool, Vec<String>)> {
     let mut flags = decl_vars::Flags::empty();
     flags.set(decl_vars::Flags::HAS_THIS, scope.has_this());
     flags.set(decl_vars::Flags::IS_TOPLEVEL, scope.is_toplevel());
@@ -332,7 +332,7 @@ fn make_decl_vars(
     let explicit_use_set = &emitter.emit_state().explicit_use_set;
 
     let (need_local_this, mut decl_vars) =
-        decl_vars::from_ast(params, body, flags, explicit_use_set);
+        decl_vars::from_ast(params, body, flags, explicit_use_set).map_err(unrecoverable)?;
 
     if arg_flags.contains(Flags::CLOSURE_BODY) {
         let mut captured_vars = scope.get_captured_vars();
@@ -343,7 +343,7 @@ fn make_decl_vars(
         decl_vars.push(String::from(string_utils::reified::GENERICS_LOCAL_NAME));
     }
 
-    (need_local_this, decl_vars)
+    Ok((need_local_this, decl_vars))
 }
 
 pub fn emit_return_type_info(

@@ -97,14 +97,19 @@ impl<'a> DeclvarVisitor<'a> {
         }
     }
 
-    fn on_class_get(&mut self, cid: &ClassId, cge: &ClassGetExpr, is_call_target: bool) {
+    fn on_class_get(
+        &mut self,
+        cid: &ClassId,
+        cge: &ClassGetExpr,
+        is_call_target: bool,
+    ) -> Result<(), String> {
         use aast::ClassId_::*;
         match &cid.1 {
             CIparent | CIself | CIstatic | CI(_) => {
-                panic!("Expects CIexpr as class_id on aast where expr was on ast")
+                Err("Expects CIexpr as class_id on aast where expr was on ast".into())
             }
             CIexpr(e) => {
-                self.visit_expr(&mut (), e);
+                self.visit_expr(&mut (), e)?;
                 use aast::ClassGetExpr::*;
                 match cge {
                     CGstring(pstr) => {
@@ -113,6 +118,7 @@ impl<'a> DeclvarVisitor<'a> {
                         if is_call_target {
                             self.add_local(BareThis, &pstr.1)
                         }
+                        Ok(())
                     }
                     CGexpr(e2) => self.visit_expr(&mut (), e2),
                 }
@@ -123,6 +129,7 @@ impl<'a> DeclvarVisitor<'a> {
 
 impl<'a> Visitor for DeclvarVisitor<'a> {
     type Context = ();
+    type Error = String;
     type Ex = Pos;
     type Fb = ();
     type En = ();
@@ -132,6 +139,7 @@ impl<'a> Visitor for DeclvarVisitor<'a> {
         &mut self,
     ) -> &mut dyn Visitor<
         Context = Self::Context,
+        Error = Self::Error,
         Ex = Self::Ex,
         Fb = Self::Fb,
         En = Self::En,
@@ -140,22 +148,22 @@ impl<'a> Visitor for DeclvarVisitor<'a> {
         self
     }
 
-    fn visit_stmt_(&mut self, env: &mut Self::Context, s: &Stmt_) {
+    fn visit_stmt_(&mut self, env: &mut Self::Context, s: &Stmt_) -> Result<(), Self::Error> {
         match s {
             Stmt_::Try(x) => {
                 let (body, catch_list, finally) = (&x.0, &x.1, &x.2);
-                visit(self, env, body);
+                visit(self, env, body)?;
                 for Catch(_, id, catch_body) in catch_list {
                     self.add_local(BareThisAsRef, id.name());
-                    visit(self, env, catch_body);
+                    visit(self, env, catch_body)?;
                 }
-                visit(self, env, finally);
+                visit(self, env, finally)
             }
             _ => s.recurse(env, self),
         }
     }
 
-    fn visit_expr_(&mut self, env: &mut Self::Context, e: &Expr_) {
+    fn visit_expr_(&mut self, env: &mut Self::Context, e: &Expr_) -> Result<(), Self::Error> {
         use aast::Expr_::*;
         match e {
             ObjGet(x) => {
@@ -167,12 +175,13 @@ impl<'a> Visitor for DeclvarVisitor<'a> {
                             self.locals.add(id.name().into())
                         }
                     }
-                    _ => receiver_e.recurse(env, self.object()),
+                    _ => receiver_e.recurse(env, self.object())?,
                 }
                 match &prop_e.1 {
                     Lvar(id) => self.add_local(BareThis, id.name()),
-                    _ => prop_e.recurse(env, self.object()),
+                    _ => prop_e.recurse(env, self.object())?,
                 }
+                Ok(())
             }
 
             Binop(x) => {
@@ -183,17 +192,17 @@ impl<'a> Visitor for DeclvarVisitor<'a> {
                     | (Bop::Eq(_), YieldFrom(_)) => {
                         // Visit e2 before e1. The ordering of declvars in async
                         // expressions matters to HHVM. See D5674623.
-                        self.visit_expr(env, e2);
-                        self.visit_expr(env, e1);
+                        self.visit_expr(env, e2)?;
+                        self.visit_expr(env, e1)
                     }
                     _ => e.recurse(env, self.object()),
                 }
             }
 
-            Lvar(x) => self.add_local(BareThis, x.name()),
+            Lvar(x) => Ok(self.add_local(BareThis, x.name())),
             ClassGet(x) => self.on_class_get(&x.0, &x.1, false),
             // For an Lfun, we don't want to recurse, because it's a separate scope.
-            Lfun(_) => (),
+            Lfun(_) => Ok(()),
             Efun(x) => {
                 // at this point AST is already rewritten so use lists on EFun nodes
                 // contain list of captured variables. However if use list was initially absent
@@ -221,6 +230,7 @@ impl<'a> Visitor for DeclvarVisitor<'a> {
                         self.add_local(BareThis, id.name())
                     }
                 }
+                Ok(())
             }
             Call(x) => {
                 let (func_e, pos_args, unpacked_arg) = (&x.1, &x.3, &x.4);
@@ -241,44 +251,50 @@ impl<'a> Visitor for DeclvarVisitor<'a> {
                 };
                 let on_arg = |self_: &mut Self, env: &mut Self::Context, x: &Expr| match &x.1 {
                     // Only add $this to locals if it's bare
-                    Lvar(id) if &(id.1).1 == "$this" => self_.with_this(barethis),
+                    Lvar(id) if &(id.1).1 == "$this" => Ok(self_.with_this(barethis)),
                     _ => self_.visit_expr(env, x),
                 };
                 match &func_e.1 {
                     ClassGet(x) => {
                         let (id, prop) = (&x.0, &x.1);
-                        self.on_class_get(id, prop, true)
+                        self.on_class_get(id, prop, true)?
                     }
-                    _ => self.visit_expr(env, func_e),
+                    _ => self.visit_expr(env, func_e)?,
                 }
                 for arg in pos_args {
-                    on_arg(self, env, arg)
+                    on_arg(self, env, arg)?
                 }
                 if let Some(arg) = unpacked_arg {
-                    on_arg(self, env, arg)
+                    on_arg(self, env, arg)?
                 }
+                Ok(())
             }
             New(x) => {
                 let (exprs1, expr2) = (&x.2, &x.3);
 
                 let add_bare_expr =
                     |self_: &mut Self, env: &mut Self::Context, expr: &Expr| match &expr.1 {
-                        Lvar(x) if &(x.1).1 == "$this" => self_.with_this(BareThisAsRef),
+                        Lvar(x) if &(x.1).1 == "$this" => Ok(self_.with_this(BareThisAsRef)),
                         _ => self_.visit_expr(env, expr),
                     };
                 for expr in exprs1 {
-                    add_bare_expr(self, env, expr);
+                    add_bare_expr(self, env, expr)?;
                 }
                 if let Some(expr) = expr2 {
-                    add_bare_expr(self, env, expr)
+                    add_bare_expr(self, env, expr)?
                 }
+                Ok(())
             }
             e => e.recurse(env, self.object()),
         }
     }
 
-    fn visit_class_(&mut self, _: &mut Self::Context, _: &Class_) {}
-    fn visit_fun_(&mut self, _: &mut Self::Context, _: &Fun_) {}
+    fn visit_class_(&mut self, _: &mut Self::Context, _: &Class_) -> Result<(), Self::Error> {
+        Ok(())
+    }
+    fn visit_fun_(&mut self, _: &mut Self::Context, _: &Fun_) -> Result<(), Self::Error> {
+        Ok(())
+    }
 }
 
 pub fn uls_from_ast<P, F1, F2>(
@@ -288,7 +304,7 @@ pub fn uls_from_ast<P, F1, F2>(
     explicit_use_set_opt: Option<&env::SSet>,
     b: ProgramOrStmt,
     flags: Flags,
-) -> (bool, UniqueList<String>)
+) -> Result<(bool, UniqueList<String>), String>
 where
     F1: Fn(&P) -> &str,
     F2: Fn(&P) -> Option<&Expr>,
@@ -297,12 +313,12 @@ where
 
     for p in params {
         if let Some(e) = get_param_default_value(p) {
-            visitor.visit_expr(&mut (), e)
+            visitor.visit_expr(&mut (), e)?
         }
     }
     match b {
-        Either::Left(b) => visit(&mut visitor, &mut (), b),
-        Either::Right(b) => visit(&mut visitor, &mut (), b),
+        Either::Left(b) => visit(&mut visitor, &mut (), b)?,
+        Either::Right(b) => visit(&mut visitor, &mut (), b)?,
     };
     let needs_local_this =
         visitor.bare_this == Some(BareThisAsRef) || flags.contains(Flags::IS_IN_STATIC_METHOD);
@@ -316,10 +332,10 @@ where
     {
         visitor.locals.remove("$this")
     }
-    (
+    Ok((
         needs_local_this && flags.contains(Flags::HAS_THIS),
         visitor.locals,
-    )
+    ))
 }
 
 pub fn from_ast(
@@ -327,7 +343,7 @@ pub fn from_ast(
     body: &Program,
     flags: Flags,
     explicit_use_set: &env::SSet,
-) -> (bool, Vec<String>) {
+) -> Result<(bool, Vec<String>), String> {
     let (needs_local_this, decl_vars) = uls_from_ast(
         params,
         |p| &p.name,
@@ -335,11 +351,15 @@ pub fn from_ast(
         Some(explicit_use_set),
         Either::Left(body),
         flags,
-    );
-    (needs_local_this, decl_vars.into_iter().collect())
+    )?;
+    Ok((needs_local_this, decl_vars.into_iter().collect()))
 }
 
-pub fn vars_from_ast(params: &[FunParam], b: ProgramOrStmt, flags: Flags) -> HashSet<String> {
+pub fn vars_from_ast(
+    params: &[FunParam],
+    b: ProgramOrStmt,
+    flags: Flags,
+) -> Result<HashSet<String>, String> {
     let (_, decl_vars) = uls_from_ast(
         params,
         |p| &p.name,         // get_param_name
@@ -347,6 +367,6 @@ pub fn vars_from_ast(params: &[FunParam], b: ProgramOrStmt, flags: Flags) -> Has
         None,                // explicit_use_set_opt
         b,
         flags,
-    );
-    decl_vars.into_iter().collect()
+    )?;
+    Ok(decl_vars.into_iter().collect())
 }

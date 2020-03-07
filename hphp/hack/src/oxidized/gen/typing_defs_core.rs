@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<27d56b5d02964caed12ff9e0c651e20b>>
+// @generated SignedSource<<45071f96ebfc7b8de2feb676d240e1f6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -386,10 +386,11 @@ pub enum Ty_ {
     /// during the localization phase.
     Tmixed,
     Tlike(Ty),
-    /// Access to a Pocket Universe Expression or Atom, denoted by
-    /// Foo:@Bar or Foo:@Bar:@X.
-    /// It might be unresolved at first (e.g. if Foo is a generic variable).
-    /// Will be refined to Tpu once typechecking is successful
+    /// Access to a Pocket Universe or Pocket Universes dependent type,
+    /// denoted by Foo:@Bar, or Foo:@Bar:@Bli:@T.
+    /// It might be unresolved at first (e.g. if Bli is a generic variable).
+    /// Will be refined to Tpu, or to the actual type associated with an
+    /// atom, once typechecking is successful.
     TpuAccess(Ty, nast::Sid, nast::PuLoc),
     Tany(tany_sentinel::TanySentinel),
     Terr,
@@ -462,16 +463,14 @@ pub enum Ty_ {
     /// Typing of Pocket Universe Expressions
     /// - first parameter is the enclosing class
     /// - second parameter is the name of the Pocket Universe Enumeration
-    /// - third parameter is  either Pu_plain (the enumeration as the set of
-    ///   all its atoms) or Pu_atom (a specific atom in the enumeration)
     Tpu(Ty, nast::Sid),
     /// Typing of Pocket Universes type projections
     /// - first parameter is the enclosing class
     /// - second parameter is the name of the Pocket Universe Enumeration
-    /// - third parameter is the generic (tvar/tabstract) in place of the
+    /// - third parameter is the Tgeneric in place of the
     ///   member name
     /// - the fourth parameter is the name of the type to project
-    TpuTypeAccess(Ty, nast::Sid, Ty, nast::Sid),
+    TpuTypeAccess(Ty, nast::Sid, nast::Sid, nast::Sid),
 }
 
 #[derive(

@@ -139,7 +139,8 @@ fn from_ast(
         &mut ResolverVisitor(PhantomData),
         &mut Ctx { emitter, scope },
         &param.expr,
-    );
+    )
+    .unwrap();
     let default_value = if generate_defaults {
         param
             .expr
@@ -219,6 +220,7 @@ struct Ctx<'a> {
 
 impl<'a> aast_visitor::Visitor for ResolverVisitor<'a> {
     type Context = Ctx<'a>;
+    type Error = ();
     type Ex = ast_defs::Pos;
     type Fb = ();
     type En = ();
@@ -228,6 +230,7 @@ impl<'a> aast_visitor::Visitor for ResolverVisitor<'a> {
         &mut self,
     ) -> &mut dyn aast_visitor::Visitor<
         Context = Self::Context,
+        Error = Self::Error,
         Ex = Self::Ex,
         Fb = Self::Fb,
         En = Self::En,
@@ -236,8 +239,8 @@ impl<'a> aast_visitor::Visitor for ResolverVisitor<'a> {
         self
     }
 
-    fn visit_expr(&mut self, c: &mut Self::Context, p: &a::Expr) {
-        p.recurse(c, self.object());
+    fn visit_expr(&mut self, c: &mut Self::Context, p: &a::Expr) -> std::result::Result<(), ()> {
+        p.recurse(c, self.object())
         // TODO(implement on_CIexpr)
     }
 }

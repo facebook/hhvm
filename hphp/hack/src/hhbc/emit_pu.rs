@@ -258,6 +258,7 @@ struct Ctx {}
 
 impl VisitorMut for EraseBodyVisitor {
     type Context = Ctx;
+    type Error = ();
     type Ex = ast_defs::Pos;
     type Fb = ();
     type En = ();
@@ -267,6 +268,7 @@ impl VisitorMut for EraseBodyVisitor {
         &mut self,
     ) -> &mut dyn VisitorMut<
         Context = Self::Context,
+        Error = Self::Error,
         Ex = Self::Ex,
         Fb = Self::Fb,
         En = Self::En,
@@ -275,39 +277,39 @@ impl VisitorMut for EraseBodyVisitor {
         self
     }
 
-    fn visit_expr_(&mut self, c: &mut Self::Context, e: &mut Tast::Expr_) {
+    fn visit_expr_(&mut self, c: &mut Self::Context, e: &mut Tast::Expr_) -> Result<(), ()> {
         match e {
-            Tast::Expr_::PUAtom(atom) => *e = Tast::Expr_::String(atom.to_string()),
+            Tast::Expr_::PUAtom(atom) => Ok(*e = Tast::Expr_::String(atom.to_string())),
             Tast::Expr_::PUIdentifier(pui) => {
                 let class_id = pui.0.clone();
                 let pfield = &pui.1;
                 let name = &(pui.2).1;
                 let (pos, field) = pfield;
                 let fun_name = (pos.clone(), gen_fun_name(field, name));
-                *e = Tast::Expr_::ClassConst(Box::new((class_id, fun_name)))
+                Ok(*e = Tast::Expr_::ClassConst(Box::new((class_id, fun_name))))
             }
             _ => e.recurse(c, self.object()),
-        };
+        }
     }
 
-    fn visit_hint_(&mut self, c: &mut Self::Context, h: &mut Tast::Hint_) {
+    fn visit_hint_(&mut self, c: &mut Self::Context, h: &mut Tast::Hint_) -> Result<(), ()> {
         match h {
-            Tast::Hint_::HpuAccess(_, _, _) => *h = Tast::Hint_::Hmixed,
-            Tast::Hint_::Hprim(prim) => match prim {
+            Tast::Hint_::HpuAccess(_, _, _) => Ok(*h = Tast::Hint_::Hmixed),
+            Tast::Hint_::Hprim(prim) => Ok(match prim {
                 aast_defs::Tprim::Tatom(_) => *h = Tast::Hint_::Hprim(aast_defs::Tprim::Tstring),
                 _ => (),
-            },
+            }),
             _ => h.recurse(c, self.object()),
         }
     }
 }
 
 fn erase_stmt(stmt: &mut Tast::Stmt) {
-    visit_mut(&mut EraseBodyVisitor {}, &mut Ctx {}, stmt);
+    visit_mut(&mut EraseBodyVisitor {}, &mut Ctx {}, stmt).unwrap();
 }
 
 fn erase_fun(f: &mut Tast::Fun_) {
-    visit_mut(&mut EraseBodyVisitor {}, &mut Ctx {}, f);
+    visit_mut(&mut EraseBodyVisitor {}, &mut Ctx {}, f).unwrap();
 }
 
 fn process_pufields(
@@ -326,7 +328,7 @@ fn update_class(c: &mut Tast::Class_) {
     let extends = c.extends.is_empty();
     let pu_enums = std::mem::replace(&mut c.pu_enums, vec![]);
     let mut pu_methods = process_pufields(class_name, extends, pu_enums);
-    visit_mut(&mut EraseBodyVisitor {}, &mut Ctx {}, c);
+    visit_mut(&mut EraseBodyVisitor {}, &mut Ctx {}, c).unwrap();
     c.methods.append(&mut pu_methods);
 }
 

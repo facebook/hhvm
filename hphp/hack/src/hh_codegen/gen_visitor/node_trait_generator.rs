@@ -23,7 +23,8 @@ trait NodeTrait {
         let receiver = Self::receiver();
         let visitor = Self::visitor();
         let use_visitor = Self::use_visitor();
-        let context = format_ident!("{}", ctx.context);
+        let context = ctx.context_ident();
+        let error = ctx.error_ident();
         Ok(quote! {
             #![allow(unused_variables)]
             #use_visitor
@@ -33,7 +34,7 @@ trait NodeTrait {
                     #receiver,
                     ctx: &mut #context,
                     v: &mut dyn #visitor#ty_param_bindings,
-                ) {
+                ) -> Result<(), #error> {
                     self.recurse(ctx, v)
                 }
 
@@ -41,7 +42,9 @@ trait NodeTrait {
                     #receiver,
                     ctx: &mut #context,
                     v: &mut dyn #visitor#ty_param_bindings,
-                ) { }
+                ) -> Result<(), #error> {
+                    Ok(())
+                }
             }
         })
     }

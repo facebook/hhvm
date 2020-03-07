@@ -133,6 +133,7 @@ struct ElaborateNamespacesVisitor {}
 
 impl VisitorMut for ElaborateNamespacesVisitor {
     type Context = Env;
+    type Error = ();
     type Ex = Pos;
     type Fb = ();
     type En = ();
@@ -142,6 +143,7 @@ impl VisitorMut for ElaborateNamespacesVisitor {
         &mut self,
     ) -> &mut dyn VisitorMut<
         Context = Self::Context,
+        Error = Self::Error,
         Ex = Self::Ex,
         Fb = Self::Fb,
         En = Self::En,
@@ -152,7 +154,7 @@ impl VisitorMut for ElaborateNamespacesVisitor {
 
     // Namespaces were already precomputed by ElaborateDefs
     // The following functions just set the namespace env correctly
-    fn visit_class_(&mut self, env: &mut Env, cd: &mut Class_) {
+    fn visit_class_(&mut self, env: &mut Env, cd: &mut Class_) -> Result<(), Self::Error> {
         let mut env = env.clone();
         env.in_ppl = naming_attributes::mem(
             sn::user_attributes::PROBABILISTIC_MODEL,
@@ -160,17 +162,17 @@ impl VisitorMut for ElaborateNamespacesVisitor {
         );
         env.namespace = cd.namespace.clone();
         env.extend_tparams(&cd.tparams.list);
-        cd.recurse(&mut env, self.object());
+        cd.recurse(&mut env, self.object())
     }
 
-    fn visit_typedef(&mut self, env: &mut Env, td: &mut Typedef) {
+    fn visit_typedef(&mut self, env: &mut Env, td: &mut Typedef) -> Result<(), Self::Error> {
         let mut env = env.clone();
         env.namespace = td.namespace.clone();
         env.extend_tparams(&td.tparams);
-        td.recurse(&mut env, self.object());
+        td.recurse(&mut env, self.object())
     }
 
-    fn visit_def(&mut self, env: &mut Env, def: &mut Def) {
+    fn visit_def(&mut self, env: &mut Env, def: &mut Def) -> Result<(), Self::Error> {
         match &def {
             // need to handle it ourselves, because in visit_fun_ is
             // called both for toplevel functions and lambdas
@@ -178,54 +180,57 @@ impl VisitorMut for ElaborateNamespacesVisitor {
                 let mut env = env.clone();
                 env.namespace = f.namespace.clone();
                 env.extend_tparams(&f.tparams);
-                def.recurse(&mut env, self.object());
+                def.recurse(&mut env, self.object())
             }
-            Def::SetNamespaceEnv(nsenv) => {
-                env.namespace = (**nsenv).clone();
-            }
+            Def::SetNamespaceEnv(nsenv) => Ok(env.namespace = (**nsenv).clone()),
             _ => def.recurse(env, self.object()),
         }
     }
 
-    fn visit_method_(&mut self, env: &mut Env, m: &mut Method_) {
+    fn visit_method_(&mut self, env: &mut Env, m: &mut Method_) -> Result<(), Self::Error> {
         let mut env = env.clone();
         env.extend_tparams(&m.tparams);
-        m.recurse(&mut env, self.object());
+        m.recurse(&mut env, self.object())
     }
 
     // Codegen does not elaborate traits in the trait redeclaration node.
     // TODO: This should be changed if this feature is to be shipped.
     // Also change: class_method_trait_resolution in emit_class
     // T56629465
-    fn visit_method_redeclaration(&mut self, env: &mut Env, mt: &mut MethodRedeclaration) {
+    fn visit_method_redeclaration(
+        &mut self,
+        env: &mut Env,
+        mt: &mut MethodRedeclaration,
+    ) -> Result<(), ()> {
         if env.in_codegen() {
             let old_trait = mt.trait_.clone();
-            mt.recurse(env, self.object());
+            mt.recurse(env, self.object())?;
             mt.trait_ = old_trait;
+            Ok(())
         } else {
-            mt.recurse(env, self.object());
+            mt.recurse(env, self.object())
         }
     }
 
-    fn visit_pu_enum(&mut self, env: &mut Env, pue: &mut PuEnum) {
+    fn visit_pu_enum(&mut self, env: &mut Env, pue: &mut PuEnum) -> Result<(), ()> {
         let mut env = env.clone();
         env.extend_tparams_puenum(&pue.case_types);
-        pue.recurse(&mut env, self.object());
+        pue.recurse(&mut env, self.object())
     }
 
-    fn visit_gconst(&mut self, env: &mut Env, gc: &mut Gconst) {
+    fn visit_gconst(&mut self, env: &mut Env, gc: &mut Gconst) -> Result<(), ()> {
         let mut env = env.clone();
         env.namespace = gc.namespace.clone();
-        gc.recurse(&mut env, self.object());
+        gc.recurse(&mut env, self.object())
     }
 
-    fn visit_file_attribute(&mut self, env: &mut Env, fa: &mut FileAttribute) {
+    fn visit_file_attribute(&mut self, env: &mut Env, fa: &mut FileAttribute) -> Result<(), ()> {
         let mut env = env.clone();
         env.namespace = fa.namespace.clone();
-        fa.recurse(&mut env, self.object());
+        fa.recurse(&mut env, self.object())
     }
 
-    fn visit_record_def(&mut self, env: &mut Env, rd: &mut RecordDef) {
+    fn visit_record_def(&mut self, env: &mut Env, rd: &mut RecordDef) -> Result<(), ()> {
         rd.name =
             namespaces::elaborate_id(&env.namespace, namespaces::ElaborateKind::Record, &rd.name);
         match &mut rd.extends {
@@ -245,15 +250,15 @@ impl VisitorMut for ElaborateNamespacesVisitor {
             }
             _ => (),
         }
-        rd.recurse(env, self.object());
+        rd.recurse(env, self.object())
     }
 
     // I don't think we need to visit blocks because we got rid of let bindings :)
 
-    fn visit_catch(&mut self, env: &mut Env, catch: &mut Catch) {
+    fn visit_catch(&mut self, env: &mut Env, catch: &mut Catch) -> Result<(), ()> {
         let exception_sid = &mut catch.0;
         env.elaborate_type_name(exception_sid);
-        catch.recurse(env, self.object());
+        catch.recurse(env, self.object())
     }
 
     // I don't think we need to visit stmts because we got rid of let bindings :)
@@ -261,7 +266,7 @@ impl VisitorMut for ElaborateNamespacesVisitor {
     // Lfun and Efun as Expr_:: nodes so update the env in visit_expr_
 
     // Actually rewrites the names
-    fn visit_expr_(&mut self, env: &mut Env, e: &mut Expr_) {
+    fn visit_expr_(&mut self, env: &mut Env, e: &mut Expr_) -> Result<(), ()> {
         // Sets env for lambdas
         let orig_in_ppl_flag = env.in_ppl;
         match e {
@@ -277,10 +282,10 @@ impl VisitorMut for ElaborateNamespacesVisitor {
                     (&mut c.0, &mut c.1, &mut c.2, &mut c.3, &mut c.4);
 
                 // Recurse first due to borrow order
-                call_type.accept(env, self.object());
-                targs.accept(env, self.object());
-                args.accept(env, self.object());
-                uargs.accept(env, self.object());
+                call_type.accept(env, self.object())?;
+                targs.accept(env, self.object())?;
+                args.accept(env, self.object())?;
+                uargs.accept(env, self.object())?;
 
                 if let Some(sid) = func.1.as_id_mut() {
                     if !(sn::special_functions::is_special_function(&sid.1)
@@ -295,7 +300,7 @@ impl VisitorMut for ElaborateNamespacesVisitor {
                         env.handle_special_calls(e);
                     }
                 } else {
-                    func.accept(env, self.object());
+                    func.accept(env, self.object())?;
                 }
             }
             Expr_::FunctionPointer(fp) => {
@@ -308,19 +313,19 @@ impl VisitorMut for ElaborateNamespacesVisitor {
                     )
                     .1;
                 } else {
-                    name.accept(env, self.object());
+                    name.accept(env, self.object())?;
                 }
-                targs.accept(env, self.object());
+                targs.accept(env, self.object())?;
             }
             Expr_::ObjGet(og) => {
                 let (obj, expr, nullsafe) = (&mut og.0, &mut og.1, &mut og.2);
                 if let Expr_::Id(..) = expr.1 {
                 } else {
-                    expr.accept(env, self.object());
+                    expr.accept(env, self.object())?;
                 }
 
-                obj.accept(env, self.object());
-                nullsafe.accept(env, self.object());
+                obj.accept(env, self.object())?;
+                nullsafe.accept(env, self.object())?;
             }
             Expr_::Id(sid) if !((sid.1 == "NAN" || sid.1 == "INF") && env.in_codegen()) => {
                 sid.1 =
@@ -333,10 +338,10 @@ impl VisitorMut for ElaborateNamespacesVisitor {
                     if let Some(sid) = e.1.as_id_mut() {
                         env.elaborate_type_name(sid);
                     } else {
-                        e.accept(env, self.object());
+                        e.accept(env, self.object())?;
                     }
                 } else {
-                    class_id.accept(env, self.object());
+                    class_id.accept(env, self.object())?;
                 }
             }
             Expr_::New(n) => {
@@ -345,19 +350,19 @@ impl VisitorMut for ElaborateNamespacesVisitor {
                     if let Some(sid) = e.1.as_id_mut() {
                         env.elaborate_type_name(sid);
                     } else {
-                        e.accept(env, self.object());
+                        e.accept(env, self.object())?;
                     }
                 } else {
-                    class_id.accept(env, self.object());
+                    class_id.accept(env, self.object())?;
                 }
-                targs.accept(env, self.object());
-                args.accept(env, self.object());
-                unpacked_el.accept(env, self.object());
+                targs.accept(env, self.object())?;
+                args.accept(env, self.object())?;
+                unpacked_el.accept(env, self.object())?;
             }
             Expr_::Record(r) => {
                 let (record_name, l) = (&mut r.0, &mut r.2);
                 env.elaborate_type_name(record_name);
-                l.accept(env, self.object());
+                l.accept(env, self.object())?;
             }
             Expr_::ClassConst(cc) => {
                 let type_ = &mut cc.0;
@@ -365,10 +370,10 @@ impl VisitorMut for ElaborateNamespacesVisitor {
                     if let Some(sid) = e.1.as_id_mut() {
                         env.elaborate_type_name(sid);
                     } else {
-                        e.accept(env, self.object());
+                        e.accept(env, self.object())?;
                     }
                 } else {
-                    type_.accept(env, self.object());
+                    type_.accept(env, self.object())?;
                 }
             }
             Expr_::ClassGet(cg) => {
@@ -377,25 +382,26 @@ impl VisitorMut for ElaborateNamespacesVisitor {
                     if let Some(sid) = e.1.as_id_mut() {
                         env.elaborate_type_name(sid);
                     } else {
-                        e.accept(env, self.object());
+                        e.accept(env, self.object())?;
                     }
                 } else {
-                    class_id.accept(env, self.object());
+                    class_id.accept(env, self.object())?;
                 }
-                class_get_expr.accept(env, self.object());
+                class_get_expr.accept(env, self.object())?;
             }
             Expr_::Xml(x) if !env.in_codegen() => {
                 let (xml_id, attributes, el) = (&mut x.0, &mut x.1, &mut x.2);
                 env.elaborate_type_name(xml_id);
-                attributes.recurse(env, self.object());
-                el.recurse(env, self.object());
+                attributes.recurse(env, self.object())?;
+                el.recurse(env, self.object())?;
             }
-            _ => e.recurse(env, self.object()),
+            _ => e.recurse(env, self.object())?,
         }
         env.in_ppl = orig_in_ppl_flag;
+        Ok(())
     }
 
-    fn visit_hint_(&mut self, env: &mut Env, hint: &mut Hint_) {
+    fn visit_hint_(&mut self, env: &mut Env, hint: &mut Hint_) -> Result<(), ()> {
         fn is_rx(x: &str) -> bool {
             x == sn::rx::RX || x == sn::rx::RX_LOCAL || x == sn::rx::RX_SHALLOW
         }
@@ -419,46 +425,54 @@ impl VisitorMut for ElaborateNamespacesVisitor {
             }
             _ => (),
         }
-        hint.recurse(env, self.object());
+        hint.recurse(env, self.object())
     }
 
-    fn visit_shape_field_name(&mut self, env: &mut Env, sfn: &mut ShapeFieldName) {
+    fn visit_shape_field_name(
+        &mut self,
+        env: &mut Env,
+        sfn: &mut ShapeFieldName,
+    ) -> Result<(), ()> {
         match sfn {
             ShapeFieldName::SFclassConst(id, _) => {
                 env.elaborate_type_name(id);
             }
             _ => (),
         }
-        sfn.recurse(env, self.object());
+        sfn.recurse(env, self.object())
     }
 
-    fn visit_user_attribute(&mut self, env: &mut Env, ua: &mut UserAttribute) {
+    fn visit_user_attribute(&mut self, env: &mut Env, ua: &mut UserAttribute) -> Result<(), ()> {
         if !sn::user_attributes::is_reserved(&ua.name.1) {
             env.elaborate_type_name(&mut ua.name);
         }
-        ua.recurse(env, self.object());
+        ua.recurse(env, self.object())
     }
 
-    fn visit_insteadof_alias(&mut self, env: &mut Env, alias: &mut InsteadofAlias) {
+    fn visit_insteadof_alias(
+        &mut self,
+        env: &mut Env,
+        alias: &mut InsteadofAlias,
+    ) -> Result<(), ()> {
         let (replacement_sid, orig_sids) = (&mut alias.0, &mut alias.2);
         env.elaborate_type_name(replacement_sid);
         for sid in orig_sids.iter_mut() {
             env.elaborate_type_name(sid);
         }
-        alias.recurse(env, self.object());
+        alias.recurse(env, self.object())
     }
 
-    fn visit_use_as_alias(&mut self, env: &mut Env, alias: &mut UseAsAlias) {
+    fn visit_use_as_alias(&mut self, env: &mut Env, alias: &mut UseAsAlias) -> Result<(), ()> {
         let sid_option = &mut alias.0;
-        match sid_option {
+        Ok(match sid_option {
             Some(sid) => {
                 env.elaborate_type_name(sid);
             }
             _ => (),
-        }
+        })
     }
 
-    fn visit_xhp_child(&mut self, env: &mut Env, child: &mut XhpChild) {
+    fn visit_xhp_child(&mut self, env: &mut Env, child: &mut XhpChild) -> Result<(), ()> {
         match child {
             XhpChild::ChildName(sid)
                 if !env.in_codegen()
@@ -469,7 +483,7 @@ impl VisitorMut for ElaborateNamespacesVisitor {
             }
             _ => (),
         }
-        child.recurse(env, self.object());
+        child.recurse(env, self.object())
     }
 }
 
@@ -477,6 +491,6 @@ pub fn elaborate_program(e: ocamlrep::rc::RcOc<namespace_env::Env>, defs: &mut P
     let mut env = Env::make(e);
     let mut visitor = ElaborateNamespacesVisitor {};
     for mut def in defs.into_iter() {
-        visitor.visit_def(&mut env, &mut def);
+        visitor.visit_def(&mut env, &mut def).unwrap();
     }
 }

@@ -177,7 +177,8 @@ mod inout_locals {
                     },
                     &mut Ctx { state: acc, env, i },
                     arg,
-                );
+                )
+                .unwrap();
             }
         }
     }
@@ -194,6 +195,7 @@ mod inout_locals {
 
     impl<'a> aast_visitor::Visitor for Visitor<'a> {
         type Context = Ctx<'a>;
+        type Error = ();
         type Ex = ast_defs::Pos;
         type Fb = ();
         type En = ();
@@ -203,6 +205,7 @@ mod inout_locals {
             &mut self,
         ) -> &mut dyn aast_visitor::Visitor<
             Context = Self::Context,
+            Error = Self::Error,
             Ex = Self::Ex,
             Fb = Self::Fb,
             En = Self::En,
@@ -211,9 +214,13 @@ mod inout_locals {
             self
         }
 
-        fn visit_expr_(&mut self, c: &mut Self::Context, p: &tast::Expr_) {
-            p.recurse(c, self.object());
-            match p {
+        fn visit_expr_(
+            &mut self,
+            c: &mut Self::Context,
+            p: &tast::Expr_,
+        ) -> std::result::Result<(), ()> {
+            p.recurse(c, self.object())?;
+            Ok(match p {
                 tast::Expr_::Binop(expr) => {
                     let (bop, left, _) = &**expr;
                     if let ast_defs::Bop::Eq(_) = bop {
@@ -239,7 +246,7 @@ mod inout_locals {
                         .map(|arg| handle_arg(&c.env, false, c.i, arg, &mut c.state));
                 }
                 _ => (),
-            }
+            })
         }
     }
 

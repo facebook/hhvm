@@ -458,6 +458,7 @@ impl<'a> FolderVisitor<'a> {
 
 impl VisitorMut for FolderVisitor<'_> {
     type Context = ();
+    type Error = ();
     type Ex = ast_defs::Pos;
     type Fb = ();
     type En = ();
@@ -467,6 +468,7 @@ impl VisitorMut for FolderVisitor<'_> {
         &mut self,
     ) -> &mut dyn VisitorMut<
         Context = Self::Context,
+        Error = Self::Error,
         Ex = Self::Ex,
         Fb = Self::Fb,
         En = Self::En,
@@ -475,8 +477,8 @@ impl VisitorMut for FolderVisitor<'_> {
         self
     }
 
-    fn visit_expr_(&mut self, c: &mut Self::Context, p: &mut tast::Expr_) {
-        p.recurse(c, self.object());
+    fn visit_expr_(&mut self, c: &mut Self::Context, p: &mut tast::Expr_) -> Result<(), ()> {
+        p.recurse(c, self.object())?;
         let new_p = match p {
             tast::Expr_::Cast(e) => expr_to_typed_value(self.emitter, self.empty_namespace, &e.1)
                 .and_then(|v| cast_value(&(e.0).1, v))
@@ -497,15 +499,16 @@ impl VisitorMut for FolderVisitor<'_> {
         if let Some(new_p) = new_p {
             *p = new_p
         }
+        Ok(())
     }
 }
 
 pub fn fold_expr(expr: &mut tast::Expr, e: &mut Emitter, empty_namespace: &Namespace) {
-    visit_mut(&mut FolderVisitor::new(e, empty_namespace), &mut (), expr);
+    visit_mut(&mut FolderVisitor::new(e, empty_namespace), &mut (), expr).unwrap();
 }
 
 pub fn fold_program(p: &mut tast::Program, e: &mut Emitter, empty_namespace: &Namespace) {
-    visit_mut(&mut FolderVisitor::new(e, empty_namespace), &mut (), p);
+    visit_mut(&mut FolderVisitor::new(e, empty_namespace), &mut (), p).unwrap();
 }
 
 pub fn literals_from_exprs(

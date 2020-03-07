@@ -83,7 +83,7 @@ fn emit_program_<'p>(
     prog: &'p mut Tast::Program,
 ) -> Result<HhasProgram<'p>> {
     let mut emitter = Emitter::new(options);
-    let hoist_kinds = closure_convert::convert_toplevel_prog(&mut emitter, prog);
+    let hoist_kinds = closure_convert::convert_toplevel_prog(&mut emitter, prog)?;
     emitter
         .context_mut()
         .set_systemlib(flags.contains(FromAstFlags::IS_SYSTEMLIB));

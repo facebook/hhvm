@@ -147,6 +147,10 @@ pub enum CollectionType {
     ImmVector,
     ImmMap,
     ImmSet,
+    Dict,
+    Array,
+    Keyset,
+    Vec,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

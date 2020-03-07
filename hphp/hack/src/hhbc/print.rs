@@ -1729,6 +1729,10 @@ fn print_collection_type<W: Write>(w: &mut W, ct: &CollectionType) -> Result<(),
         CT::ImmVector => w.write("ImmVector"),
         CT::ImmMap => w.write("ImmMap"),
         CT::ImmSet => w.write("ImmSet"),
+        CT::Dict => w.write("dict"),
+        CT::Array => w.write("array"),
+        CT::Keyset => w.write("keyset"),
+        CT::Vec => w.write("vec"),
     }
 }
 

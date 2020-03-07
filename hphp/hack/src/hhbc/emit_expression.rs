@@ -22,12 +22,13 @@ use naming_special_names_rust::{
     emitter_special_functions, fb, pseudo_consts, pseudo_functions, special_functions,
     special_idents, superglobals, user_attributes,
 };
+use ocaml_helper::int_of_str_opt;
 use options::{CompilerFlags, HhvmFlags, LangFlags, Options};
 use oxidized::{aast, aast_defs, ast as tast, ast_defs, local_id, pos::Pos};
 use runtime::TypedValue;
 use scope_rust::scope;
 
-use std::{collections::BTreeMap, convert::TryInto, iter};
+use std::{collections::BTreeMap, convert::TryInto, iter, str::FromStr};
 
 #[derive(Debug)]
 pub struct EmitJmpResult {
@@ -404,7 +405,7 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
             let instrs = emit_collection(emitter, env, expression, &mk_afvalues(&e.1), None)?;
             emit_pos_then(emitter, pos, instrs)
         }
-        Expr_::Collection(e) => emit_named_collection_str(env, expression, e),
+        Expr_::Collection(e) => emit_named_collection_str(emitter, env, expression, e),
         Expr_::ValCollection(e) => {
             let (kind, _, es) = &**e;
             let fields = mk_afvalues(es);
@@ -415,12 +416,12 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
                 aast_defs::VcKind::ImmSet => CollectionType::ImmSet,
                 _ => return emit_collection(emitter, env, expression, &fields, None),
             };
-            emit_named_collection(env, pos, expression, &fields, collection_typ)
+            emit_named_collection(emitter, env, pos, expression, &fields, collection_typ)
         }
         Expr_::Pair(e) => {
             let (e1, e2) = (**e).to_owned();
             let fields = mk_afvalues(&vec![e1, e2]);
-            emit_named_collection(env, pos, expression, &fields, CollectionType::Pair)
+            emit_named_collection(emitter, env, pos, expression, &fields, CollectionType::Pair)
         }
         Expr_::KeyValCollection(e) => {
             let (kind, _, fields) = &**e;
@@ -436,7 +437,7 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
                 aast_defs::KvcKind::ImmMap => CollectionType::ImmMap,
                 _ => return emit_collection(emitter, env, expression, &fields, None),
             };
-            emit_named_collection(env, pos, expression, &fields, collection_typ)
+            emit_named_collection(emitter, env, pos, expression, &fields, collection_typ)
         }
         Expr_::Clone(e) => {
             let clone = emit_clone(emitter, env, e)?;
@@ -725,17 +726,69 @@ fn emit_shape(
     unimplemented!("TODO(hrust)")
 }
 
+fn emit_vec_collection(
+    e: &mut Emitter,
+    env: &Env,
+    pos: &Pos,
+    fields: &Vec<tast::Afield>,
+) -> Result {
+    match ast_constant_folder::vec_to_typed_value(e, &env.namespace, pos, fields) {
+        Ok(tv) => emit_static_collection(e, env, None, pos, tv),
+        Err(_) => emit_value_only_collection(e, env, pos, fields, InstructLitConst::NewVecArray),
+    }
+}
+
 fn emit_named_collection(
+    e: &mut Emitter,
     env: &Env,
     pos: &Pos,
     expr: &tast::Expr,
     fields: &Vec<tast::Afield>,
-    collection_typ: CollectionType,
+    collection_type: CollectionType,
 ) -> Result {
-    unimplemented!("TODO(hrust)")
+    let emit_vector_like = |e: &mut Emitter, collection_type| {
+        if fields.is_empty() {
+            emit_pos_then(e, pos, InstrSeq::make_newcol(collection_type))
+        } else {
+            Ok(InstrSeq::gather(vec![
+                emit_vec_collection(e, env, pos, fields)?,
+                InstrSeq::make_colfromarray(collection_type),
+            ]))
+        }
+    };
+    let emit_map_or_set = |e: &mut Emitter, collection_type| {
+        if fields.is_empty() {
+            emit_pos_then(e, pos, InstrSeq::make_newcol(collection_type))
+        } else {
+            emit_collection(e, env, expr, fields, Some(collection_type))
+        }
+    };
+    use CollectionType as C;
+    match collection_type {
+        C::Dict | C::Vec | C::Keyset => {
+            let instr = emit_collection(e, env, expr, fields, None)?;
+            emit_pos_then(e, pos, instr)
+        }
+        C::Vector | C::ImmVector => emit_vector_like(e, collection_type),
+        C::Map | C::ImmMap | C::Set | C::ImmSet => emit_map_or_set(e, collection_type),
+        C::Pair => Ok(InstrSeq::gather(vec![
+            InstrSeq::gather(
+                fields
+                    .iter()
+                    .map(|f| match f {
+                        tast::Afield::AFvalue(v) => emit_expr(e, env, v),
+                        _ => Err(unrecoverable("impossible Pair argument")),
+                    })
+                    .collect::<Result<_>>()?,
+            ),
+            InstrSeq::make_new_pair(),
+        ])),
+        _ => Err(unrecoverable("Unexpected named collection type")),
+    }
 }
 
 fn emit_named_collection_str(
+    e: &mut Emitter,
     env: &Env,
     expr: &tast::Expr,
     (ast_defs::Id(pos, name), _, fields): &(
@@ -744,7 +797,28 @@ fn emit_named_collection_str(
         Vec<tast::Afield>,
     ),
 ) -> Result {
-    unimplemented!("TODO(hrust)")
+    let name = string_utils::strip_ns(name);
+    let name = string_utils::types::fix_casing(name.as_ref());
+    use CollectionType::*;
+    let ctype = match name {
+        "dict" => Dict,
+        "vec" => Vec,
+        "keyset" => Keyset,
+        "Vector" => Vector,
+        "ImmVector" => ImmVector,
+        "Map" => Map,
+        "ImmMap" => ImmMap,
+        "Set" => Set,
+        "ImmSet" => ImmSet,
+        "Pair" => Pair,
+        _ => {
+            return Err(unrecoverable(format!(
+                "collection: {} does not exist",
+                name
+            )))
+        }
+    };
+    emit_named_collection(e, env, pos, expr, fields, ctype)
 }
 
 fn mk_afkvalues(es: &Vec<(tast::Expr, tast::Expr)>) -> Vec<tast::Afield> {
@@ -816,6 +890,135 @@ fn emit_static_collection(
     )
 }
 
+fn expr_and_new(
+    e: &mut Emitter,
+    env: &Env,
+    pos: &Pos,
+    instr_to_add_new: InstrSeq,
+    instr_to_add: InstrSeq,
+    field: &tast::Afield,
+) -> Result {
+    match field {
+        tast::Afield::AFvalue(v) => Ok(InstrSeq::gather(vec![
+            emit_expr(e, env, v)?,
+            emit_pos(e, pos)?,
+            instr_to_add_new,
+        ])),
+        tast::Afield::AFkvalue(k, v) => Ok(InstrSeq::gather(vec![
+            emit_two_exprs(e, env, &k.0, k, v)?,
+            instr_to_add,
+        ])),
+    }
+}
+
+fn emit_keyvalue_collection(
+    e: &mut Emitter,
+    env: &Env,
+    pos: &Pos,
+    fields: &[tast::Afield],
+    ctype: CollectionType,
+    constructor: InstructLitConst,
+) -> Result {
+    let (transform_instr, add_elem_instr) = match ctype {
+        CollectionType::Dict | CollectionType::Array => {
+            (InstrSeq::Empty, InstrSeq::make_add_new_elemc())
+        }
+        _ => (
+            InstrSeq::make_colfromarray(ctype),
+            InstrSeq::gather(vec![InstrSeq::make_dup(), InstrSeq::make_add_elemc()]),
+        ),
+    };
+    let emitted_pos = emit_pos(e, pos)?;
+    Ok(InstrSeq::gather(vec![
+        emitted_pos.clone(),
+        InstrSeq::make_lit_const(constructor),
+        InstrSeq::gather(
+            fields
+                .iter()
+                .map(|f| {
+                    expr_and_new(
+                        e,
+                        env,
+                        pos,
+                        add_elem_instr.clone(),
+                        InstrSeq::make_add_elemc(),
+                        f,
+                    )
+                })
+                .collect::<Result<_>>()?,
+        ),
+        emitted_pos,
+        transform_instr,
+    ]))
+}
+
+fn is_struct_init(
+    e: &mut Emitter,
+    env: &Env,
+    fields: &[tast::Afield],
+    allow_numerics: bool,
+) -> bool {
+    let mut are_all_keys_non_numeric_strings = true;
+    let mut has_duplicate_keys = false;
+    let mut uniq_keys = std::collections::HashSet::<String>::new();
+    for f in fields.iter() {
+        if let tast::Afield::AFkvalue(key, _) = f {
+            // TODO(hrust): if key is String, don't clone and call fold_expr
+            let mut key = key.clone();
+            ast_constant_folder::fold_expr(&mut key, e, &env.namespace);
+            if let tast::Expr(_, tast::Expr_::String(s)) = key {
+                are_all_keys_non_numeric_strings = are_all_keys_non_numeric_strings
+                    && !i64::from_str(&s).is_ok()
+                    && !f64::from_str(&s).is_ok();
+                has_duplicate_keys = has_duplicate_keys || !uniq_keys.insert(s);
+            }
+            if !are_all_keys_non_numeric_strings && has_duplicate_keys {
+                break;
+            }
+        }
+    }
+    let num_keys = fields.len();
+    let limit = *(e.options().max_array_elem_size_on_the_stack.get()) as usize;
+    (allow_numerics || are_all_keys_non_numeric_strings)
+        && !has_duplicate_keys
+        && num_keys <= limit
+        && num_keys != 0
+}
+
+fn emit_struct_array<C: FnOnce(&mut Emitter, Vec<String>) -> Result<InstrSeq>>(
+    e: &mut Emitter,
+    env: &Env,
+    pos: &Pos,
+    fields: &[tast::Afield],
+    ctor: C,
+) -> Result {
+    use tast::{Expr as E, Expr_ as E_};
+    let (keys, value_instrs) = fields
+        .iter()
+        .map(|f| match f {
+            tast::Afield::AFkvalue(k, v) => match k {
+                E(_, E_::String(s)) => Ok((s.clone(), emit_expr(e, env, v)?)),
+                _ => {
+                    let mut k = k.clone();
+                    ast_constant_folder::fold_expr(&mut k, e, &env.namespace);
+                    match k {
+                        E(_, E_::String(s)) => Ok((s.clone(), emit_expr(e, env, v)?)),
+                        _ => Err(unrecoverable("Key must be a string")),
+                    }
+                }
+            },
+            _ => Err(unrecoverable("impossible")),
+        })
+        .collect::<Result<Vec<(String, InstrSeq)>>>()?
+        .into_iter()
+        .unzip();
+    Ok(InstrSeq::gather(vec![
+        InstrSeq::gather(value_instrs),
+        emit_pos(e, pos)?,
+        ctor(e, keys)?,
+    ]))
+}
+
 fn emit_dynamic_collection(
     e: &mut Emitter,
     env: &Env,
@@ -824,6 +1027,30 @@ fn emit_dynamic_collection(
 ) -> Result {
     let pos = &expr.0;
     let count = fields.len();
+    let emit_dict = |e: &mut Emitter| {
+        if is_struct_init(e, env, fields, true) {
+            emit_struct_array(e, env, pos, fields, |_, x| {
+                Ok(InstrSeq::make_newstructdict(x))
+            })
+        } else {
+            let ctor = InstructLitConst::NewDictArray(count as isize);
+            emit_keyvalue_collection(e, env, pos, fields, CollectionType::Dict, ctor)
+        }
+    };
+    let emit_collection_helper = |e: &mut Emitter, ctype| {
+        if is_struct_init(e, env, fields, true) {
+            Ok(InstrSeq::gather(vec![
+                emit_struct_array(e, env, pos, fields, |_, x| {
+                    Ok(InstrSeq::make_newstructdict(x))
+                })?,
+                emit_pos(e, pos)?,
+                InstrSeq::make_colfromarray(ctype),
+            ]))
+        } else {
+            let ctor = InstructLitConst::NewDictArray(count as isize);
+            emit_keyvalue_collection(e, env, pos, fields, ctype, ctor)
+        }
+    };
     use tast::Expr_ as E_;
     match &expr.1 {
         E_::ValCollection(v) if v.0 == tast::VcKind::Vec => {
@@ -838,8 +1065,109 @@ fn emit_dynamic_collection(
         E_::Collection(v) if (v.0).1 == "keyset" => {
             emit_value_only_collection(e, env, pos, fields, InstructLitConst::NewKeysetArray)
         }
-        _ => unimplemented!(),
+        E_::Collection(v) if (v.0).1 == "dict" => emit_dict(e),
+        E_::KeyValCollection(v) if v.0 == tast::KvcKind::Dict => emit_dict(e),
+        E_::Collection(v) if string_utils::strip_ns(&(v.0).1) == "Set" => {
+            emit_collection_helper(e, CollectionType::Set)
+        }
+        E_::ValCollection(v) if v.0 == tast::VcKind::Set => {
+            emit_collection_helper(e, CollectionType::Set)
+        }
+        E_::Collection(v) if string_utils::strip_ns(&(v.0).1) == "ImmSet" => {
+            emit_collection_helper(e, CollectionType::ImmSet)
+        }
+        E_::ValCollection(v) if v.0 == tast::VcKind::ImmSet => {
+            emit_collection_helper(e, CollectionType::ImmSet)
+        }
+        E_::Collection(v) if string_utils::strip_ns(&(v.0).1) == "Map" => {
+            emit_collection_helper(e, CollectionType::Map)
+        }
+        E_::KeyValCollection(v) if v.0 == tast::KvcKind::Map => {
+            emit_collection_helper(e, CollectionType::Map)
+        }
+        E_::Collection(v) if string_utils::strip_ns(&(v.0).1) == "ImmMap" => {
+            emit_collection_helper(e, CollectionType::ImmMap)
+        }
+        E_::KeyValCollection(v) if v.0 == tast::KvcKind::ImmMap => {
+            emit_collection_helper(e, CollectionType::ImmMap)
+        }
+        E_::Varray(_) => {
+            let hack_arr_dv_arrs = hack_arr_dv_arrs(e.options());
+            emit_value_only_collection(e, env, pos, fields, |n| {
+                if hack_arr_dv_arrs {
+                    InstructLitConst::NewVecArray(n)
+                } else {
+                    InstructLitConst::NewVArray(n)
+                }
+            })
+        }
+        E_::Darray(_) => {
+            if is_struct_init(e, env, fields, false /* allow_numerics */) {
+                let hack_arr_dv_arrs = hack_arr_dv_arrs(e.options());
+                emit_struct_array(e, env, pos, fields, |e, arg| {
+                    let instr = if hack_arr_dv_arrs {
+                        InstrSeq::make_newstructdict(arg)
+                    } else {
+                        InstrSeq::make_newstructdarray(arg)
+                    };
+                    emit_pos_then(e, pos, instr)
+                })
+            } else {
+                let constr = if hack_arr_dv_arrs(e.options()) {
+                    InstructLitConst::NewDictArray(count as isize)
+                } else {
+                    InstructLitConst::NewDArray(count as isize)
+                };
+                emit_keyvalue_collection(e, env, pos, fields, CollectionType::Array, constr)
+            }
+        }
+        _ => {
+            if is_packed_init(e.options(), fields, true /* hack_arr_compat */) {
+                emit_value_only_collection(e, env, pos, fields, InstructLitConst::NewPackedArray)
+            } else if is_struct_init(e, env, fields, false /* allow_numerics */) {
+                emit_struct_array(e, env, pos, fields, |_, x| {
+                    Ok(InstrSeq::make_newstructarray(x))
+                })
+            } else if is_packed_init(e.options(), fields, false /* hack_arr_compat*/) {
+                let constr = InstructLitConst::NewArray(count as isize);
+                emit_keyvalue_collection(e, env, pos, fields, CollectionType::Array, constr)
+            } else {
+                let constr = InstructLitConst::NewMixedArray(count as isize);
+                emit_keyvalue_collection(e, env, pos, fields, CollectionType::Array, constr)
+            }
+        }
     }
+}
+
+/// is_packed_init() returns true if this expression list looks like an
+/// array with no keys and no ref values
+fn is_packed_init(opts: &Options, es: &[tast::Afield], hack_arr_compat: bool) -> bool {
+    let is_only_values = es.iter().all(|f| !f.is_afkvalue());
+    let has_bool_keys = es.iter().any(|f| {
+        f.as_afkvalue()
+            .map(|(tast::Expr(_, k), _)| k.is_true() || k.is_false())
+            .is_some()
+    });
+    let keys_are_zero_indexed_properly_formed = es.iter().enumerate().all(|(i, f)| {
+        use tast::{Afield as A, Expr as E, Expr_ as E_};
+        match f {
+            A::AFkvalue(E(_, E_::Int(k)), _) => int_of_str_opt(k).unwrap() == i as i64, // already checked in lowerer
+            // arrays with int-like string keys are still considered packed
+            // and should be emitted via NewArray
+            A::AFkvalue(E(_, E_::String(s)), _) => {
+                int_of_str_opt(s).map_or(false, |s| s == i as i64)
+            }
+            A::AFkvalue(E(_, E_::True), _) => i == 1,
+            A::AFkvalue(E(_, E_::False), _) => i == 0,
+            A::AFvalue(_) => true,
+            _ => false,
+        }
+    });
+    (is_only_values || keys_are_zero_indexed_properly_formed)
+        && (!(has_bool_keys
+            && hack_arr_compat
+            && opts.hhvm.flags.contains(HhvmFlags::HACK_ARR_COMPAT_NOTICES)))
+        && !es.is_empty()
 }
 
 fn emit_value_only_collection<F: FnOnce(isize) -> InstructLitConst>(

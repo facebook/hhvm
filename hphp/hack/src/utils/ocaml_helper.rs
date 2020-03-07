@@ -67,6 +67,10 @@ pub fn int_of_string_opt(p: &[u8]) -> Option<i64> {
     Some(r)
 }
 
+pub fn int_of_str_opt(s: impl AsRef<str>) -> Option<i64> {
+    int_of_string_opt(s.as_ref().as_bytes())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

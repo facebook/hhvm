@@ -120,8 +120,7 @@ let rec expr_to_typed_value ?(allow_maps = false) ns ((_, expr_) as expr) =
   | A.Id (_, id) when id = "INF" -> TV.Float Float.infinity
   | A.Id _ -> raise UserDefinedConstant
   (* A.Coolection *)
-  | A.Collection ((_, "vec"), _, fields) ->
-    TV.Vec (List.map fields (value_afield_to_typed_value ns), Some pos)
+  | A.Collection ((_, "vec"), _, fields) -> vec_to_typed_value ns pos fields
   | A.Collection ((_, "keyset"), _, fields) ->
     let l =
       List.fold_left
@@ -179,6 +178,9 @@ let rec expr_to_typed_value ?(allow_maps = false) ns ((_, expr_) as expr) =
   | A.Class_get _ -> raise UserDefinedConstant
   | A.As (e, (_, A.Hlike _), _nullable) -> expr_to_typed_value ~allow_maps ns e
   | _ -> raise NotLiteral
+
+and vec_to_typed_value ns pos fields =
+  TV.Vec (List.map fields (value_afield_to_typed_value ns), Some pos)
 
 and update_duplicates_in_map kvs =
   (* map key -> (the latest value for the given key) *)

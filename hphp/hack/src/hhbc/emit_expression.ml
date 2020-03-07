@@ -1973,16 +1973,8 @@ and emit_named_collection env (expr : Tast.expr) pos ctype fields =
     if fields = [] then
       emit_pos_then pos @@ instr_newcol collection_type
     else
-      let ((_, ty), _) = expr in
-      let annot = (pos, ty) in
       gather
-        [
-          emit_collection
-            env
-            (annot, A.Collection ((pos, "vec"), None, fields))
-            fields;
-          instr_colfromarray collection_type;
-        ]
+        [emit_vec_collection env pos fields; instr_colfromarray collection_type]
   in
   let emit_map_or_set collection_type =
     if fields = [] then
@@ -2030,6 +2022,14 @@ and emit_collection ?transform_to_collection env (expr : Tast.expr) es =
   with
   | Some tv -> emit_static_collection env ~transform_to_collection pos tv
   | None -> emit_dynamic_collection env expr es
+
+and emit_vec_collection env pos es =
+  match
+    Ast_constant_folder.vec_to_typed_value (Emit_env.get_namespace env) pos es
+  with
+  | tv -> emit_static_collection env pos tv ~transform_to_collection:None
+  | exception Ast_constant_folder.(NotLiteral | UserDefinedConstant) ->
+    emit_value_only_collection env pos es (fun t -> NewVecArray t)
 
 and emit_pipe env (e1 : Tast.expr) (e2 : Tast.expr) =
   let lhs_instrs = emit_expr env e1 in

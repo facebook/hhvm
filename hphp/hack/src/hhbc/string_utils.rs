@@ -115,6 +115,7 @@ pub fn strip_global_ns(s: &str) -> &str {
     s.trim_start_matches("\\")
 }
 
+// TODO(hrust): improve perf: don't use regex and reutrn &str
 pub fn strip_ns(s: &str) -> Cow<str> {
     NS_RE.replace(&s, "")
 }

@@ -593,6 +593,10 @@ impl InstrSeq {
         Self::make_instr(Instruct::ILitConst(InstructLitConst::NewVecArray(i)))
     }
 
+    pub fn make_new_pair() -> Self {
+        Self::make_instr(Instruct::ILitConst(InstructLitConst::NewPair))
+    }
+
     pub fn make_add_elemc() -> Self {
         Self::make_instr(Instruct::ILitConst(InstructLitConst::AddElemC))
     }

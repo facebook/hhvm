@@ -16,6 +16,7 @@ use oxidized::{
     aast_visitor::{visit_mut, NodeMut, VisitorMut},
     ast as tast, ast_defs,
     namespace_env::Env as Namespace,
+    pos::Pos,
 };
 use runtime::TypedValue;
 
@@ -252,6 +253,21 @@ fn shape_to_typed_value(
     Ok(TypedValue::DArray((a, Some(pos.clone()))))
 }
 
+pub fn vec_to_typed_value(
+    e: &Emitter,
+    ns: &Namespace,
+    pos: &Pos,
+    fields: &[tast::Afield],
+) -> Result<TypedValue, Error> {
+    Ok(TypedValue::Vec((
+        fields
+            .iter()
+            .map(|f| value_afield_to_typed_value(e, ns, f))
+            .collect::<Result<_, _>>()?,
+        Some(pos.clone()),
+    )))
+}
+
 pub fn expr_to_typed_value(
     e: &Emitter,
     ns: &Namespace,
@@ -300,12 +316,7 @@ pub fn expr_to_typed_value_(
         Id(id) if id.1 == math::INF => Ok(TypedValue::float(std::f64::INFINITY)),
         Id(_) => Err(Error::UserDefinedConstant),
 
-        Collection(x) if x.0.name().eq("vec") => Ok(TypedValue::Vec((
-            x.2.iter()
-                .map(|x| value_afield_to_typed_value(emitter, ns, x))
-                .collect::<Result<_, _>>()?,
-            Some(pos.clone()),
-        ))),
+        Collection(x) if x.0.name().eq("vec") => vec_to_typed_value(emitter, ns, pos, &x.2),
         Collection(x) if x.0.name().eq("keyset") => {
             // TODO(hrust): dedup
             Ok(TypedValue::Keyset(

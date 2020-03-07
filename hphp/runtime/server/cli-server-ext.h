@@ -21,14 +21,6 @@
 
 #include <memory>
 #include <string>
-#include <tuple>
-
-#if defined(__GNUC__) && __GNUC__ == 5
-#include <experimental/tuple>
-using std::experimental::apply;
-#else
-using std::apply;
-#endif
 
 namespace HPHP {
 

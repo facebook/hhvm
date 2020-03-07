@@ -20,6 +20,9 @@
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/server/cli-server.h"
 
+#include <folly/functional/ApplyTuple.h>
+#include <tuple>
+
 namespace HPHP {
 namespace detail {
 
@@ -156,8 +159,8 @@ std::string cli_get_extension_function_id(const char* name, TRet(*impl)(Args...)
 template<class TSuccess, class TError, class... Args>
 void cli_server_invoke_wrapped(CLIServerInterface& server, CLISrvResult<TSuccess, TError>(*func)(Args...)) {
   std::tuple<Args...> args;
-  apply([&] (Args&... tupleArgs) { server.readArguments(tupleArgs...); }, args);
-  server.sendResult(apply(func, args));
+  folly::apply([&] (Args&... tupleArgs) { server.readArguments(tupleArgs...); }, args);
+  server.sendResult(folly::apply(func, args));
 }
 
 template<class TSuccess, class TError, class... Args>

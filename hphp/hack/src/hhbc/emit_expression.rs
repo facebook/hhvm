@@ -536,7 +536,19 @@ fn emit_xhp(
 }
 
 fn emit_yield(e: &mut Emitter, env: &Env, pos: &Pos, af: &tast::Afield) -> Result {
-    unimplemented!("TODO(hrust)")
+    Ok(match af {
+        tast::Afield::AFvalue(v) => InstrSeq::gather(vec![
+            emit_expr(e, env, v)?,
+            emit_pos(e, pos)?,
+            InstrSeq::make_yield(),
+        ]),
+        tast::Afield::AFkvalue(k, v) => InstrSeq::gather(vec![
+            emit_expr(e, env, k)?,
+            emit_expr(e, env, v)?,
+            emit_pos(e, pos)?,
+            InstrSeq::make_yieldk(),
+        ]),
+    })
 }
 
 fn emit_import(env: &Env, pos: &Pos, (flavor, expr): &(tast::ImportFlavor, tast::Expr)) -> Result {

@@ -172,8 +172,8 @@ constexpr inline ArraySpec::ArraySpec(ArraySpec::BottomTag)
   , m_ptr(0)
 {}
 
-inline ArraySpec::ArraySpec(ArrayData::ArrayKind kind, LayoutTag tag)
-  : m_sort(HasKind | (tag == LayoutTag::Vanilla ? IsVanilla : IsTop))
+inline ArraySpec::ArraySpec(ArrayData::ArrayKind kind)
+  : m_sort(HasKind | IsVanilla)
   , m_kind(kind)
   , m_ptr(0)
 {
@@ -181,7 +181,7 @@ inline ArraySpec::ArraySpec(ArrayData::ArrayKind kind, LayoutTag tag)
 }
 
 inline ArraySpec::ArraySpec(const RepoAuthType::Array* arrTy)
-  : m_sort(HasType)
+  : m_sort(HasType | IsVanilla)
   , m_kind(ArrayData::ArrayKind{})
   , m_ptr(reinterpret_cast<uintptr_t>(arrTy))
 {
@@ -190,11 +190,24 @@ inline ArraySpec::ArraySpec(const RepoAuthType::Array* arrTy)
 
 inline ArraySpec::ArraySpec(ArrayData::ArrayKind kind,
                             const RepoAuthType::Array* arrTy)
-  : m_sort(HasKind | HasType)
+  : m_sort(HasKind | HasType | IsVanilla)
   , m_kind(kind)
   , m_ptr(reinterpret_cast<uintptr_t>(arrTy))
 {
   assertx(checkInvariants());
+}
+
+inline ArraySpec ArraySpec::narrowToVanilla() const {
+  return *this & ArraySpec(LayoutTag::Vanilla);
+}
+
+inline ArraySpec ArraySpec::widenToBespoke() const {
+  if (!(m_sort & IsVanilla)) return *this;
+  auto result = *this;
+  result.m_sort &= ~IsVanilla;
+  if (!result.m_sort) return Top();
+  assertx(result.checkInvariants());
+  return result;
 }
 
 inline const RepoAuthType::Array* ArraySpec::getRawType() const {

@@ -696,7 +696,7 @@ public:
 
   /*
    * Return a specialized TArr/TVec/TDict/TKeyset.
-   * All RepoAuthType constructors admit the possibility of a bespoke type.
+   * These types are always subtypes of TVanillaArrLike.
    */
   static Type Array(ArrayData::ArrayKind kind);
   static Type Array(const RepoAuthType::Array* rat);
@@ -707,7 +707,7 @@ public:
 
   /*
    * Return a specialized TStaticArr/TStaticVec/TStaticDict/TStaticKeyset.
-   * All RepoAuthType constructors admit the possibility of a bespoke type.
+   * These types are always subtypes of TVanillaArrLike.
    */
   static Type StaticArray(ArrayData::ArrayKind kind);
   static Type StaticArray(const RepoAuthType::Array* rat);
@@ -718,7 +718,7 @@ public:
 
   /*
    * Return a specialized TCountedArr/TCountedVec/TCountedDict.
-   * All RepoAuthType constructors admit the possibility of a bespoke type.
+   * These types are always subtypes of TVanillaArrLike.
    */
   static Type CountedArray(ArrayData::ArrayKind, const RepoAuthType::Array*);
   static Type CountedArray(const RepoAuthType::Array*);

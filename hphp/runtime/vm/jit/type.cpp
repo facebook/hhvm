@@ -71,24 +71,17 @@ constexpr Type::bits_t Type::kClsSpecBits;
 // Vanilla array-spec manipulation.
 
 Type Type::narrowToVanilla() const {
-  if (arrSpec().vanilla()) return *this;
-  if (!supports(SpecKind::Array) || supports(SpecKind::Class)) return *this;
-  return Type(*this, arrSpec() & ArraySpec(ArraySpec::LayoutTag::Vanilla));
+  if (!supports(SpecKind::Array)) return *this;
+  if (supports(SpecKind::Class) || supports(SpecKind::Record)) return *this;
+  auto const oldSpec = arrSpec();
+  return oldSpec.vanilla() ? *this : Type(*this, oldSpec.narrowToVanilla());
 }
 
 Type Type::widenToBespoke() const {
+  if (!supports(SpecKind::Array)) return *this;
+  if (supports(SpecKind::Class) || supports(SpecKind::Record)) return *this;
   auto const oldSpec = arrSpec();
-  if (!oldSpec.vanilla()) return *this;
-  auto const newSpec = [&]{
-    auto const kind = oldSpec.kind();
-    auto const type = oldSpec.type();
-    if (kind && type) return ArraySpec(*kind, type);
-    if (kind) return ArraySpec(*kind, ArraySpec::LayoutTag::Unknown);
-    if (type) return ArraySpec(type);
-    return ArraySpec();
-  }();
-  assertx(!newSpec.vanilla());
-  return Type(*this, newSpec);
+  return oldSpec.vanilla() ? Type(*this, oldSpec.widenToBespoke()) : *this;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -622,7 +615,7 @@ Type Type::modified() const {
  */
 static bool arrayFitsSpec(const ArrayData* arr, ArraySpec spec) {
   if (spec == ArraySpec::Top()) return true;
-  if (arr->isVanilla()) spec = spec & ArraySpec(ArraySpec::LayoutTag::Vanilla);
+  if (arr->isVanilla()) spec = spec.narrowToVanilla();
 
   if (spec.kind() && arr->kind() != *spec.kind()) return false;
   if (!spec.type()) return true;
@@ -1131,8 +1124,7 @@ Type typeFromRATImpl(RepoAuthType ty, const Class* ctx) {
 
 Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
   auto const result = typeFromRATImpl(ty, ctx);
-  return RO::EvalAllowBespokeArrayLikes ? result.widenToBespoke()
-                                        : result.narrowToVanilla();
+  return RO::EvalAllowBespokeArrayLikes ? result.widenToBespoke() : result;
 }
 
 //////////////////////////////////////////////////////////////////////

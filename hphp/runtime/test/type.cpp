@@ -784,16 +784,25 @@ TEST(Type, Const) {
   EXPECT_FALSE(ratArray1 < ratArray2);
   EXPECT_NE(ratArray1, ratArray2);
 
-  auto const packedRat = TPackedArr & ratArray1;
-  EXPECT_EQ("Arr={N([Str])|Bespoke}", ratArray1.toString());
+  auto const packedRat = ratArray1 & TPackedArr;
   EXPECT_EQ("Arr=PackedKind", TPackedArr.toString());
   EXPECT_EQ("Arr=PackedKind:N([Str])", packedRat.toString());
   EXPECT_TRUE(packedRat <= TPackedArr);
   EXPECT_TRUE(packedRat < TPackedArr);
   EXPECT_TRUE(packedRat <= ratArray1);
   EXPECT_TRUE(packedRat < ratArray1);
-  EXPECT_EQ(packedRat, packedRat & TPackedArr);
-  EXPECT_EQ(packedRat, packedRat & ratArray1);
+  EXPECT_TRUE(packedRat.arrSpec().vanilla());
+
+  auto const widenedRat = ratArray1.widenToBespoke();
+  EXPECT_EQ("Arr=N([Str])", ratArray1.toString());
+  EXPECT_EQ("Arr={N([Str])|Bespoke}", widenedRat.toString());
+  EXPECT_TRUE(ratArray1 < widenedRat);
+  EXPECT_TRUE(ratArray1 <= widenedRat);
+  EXPECT_FALSE(widenedRat < ratArray1);
+  EXPECT_FALSE(widenedRat <= ratArray1);
+  EXPECT_EQ(ratArray1, widenedRat & TVanillaArr);
+  EXPECT_EQ(ratArray1, widenedRat.narrowToVanilla());
+  EXPECT_FALSE(widenedRat.arrSpec().vanilla());
 
   auto vec = make_vec_array(1, 2, 3, 4);
   auto vecData = ArrayData::GetScalarArray(std::move(vec));
@@ -842,51 +851,35 @@ TEST(Type, VanillaArray) {
   auto const rat = ratBuilder.packedn(RepoAuthType::Array::Empty::No,
                                       RepoAuthType(RepoAuthType::Tag::Str));
   auto const packedRat = Type::Array(ArrayData::kPackedKind, rat);
-  EXPECT_EQ("Arr={PackedKind:N([Str])|Bespoke}", packedRat.toString());
-  EXPECT_FALSE(packedRat.arrSpec().kind());
-  EXPECT_FALSE(packedRat.arrSpec().type());
-  EXPECT_FALSE(packedRat.arrSpec().vanilla());
+  EXPECT_EQ("Arr=PackedKind:N([Str])", packedRat.toString());
+  EXPECT_TRUE(packedRat.arrSpec().kind());
+  EXPECT_TRUE(packedRat.arrSpec().type());
+  EXPECT_TRUE(packedRat.arrSpec().vanilla());
 
-  auto const vanillaRat1 = TPackedArr & packedRat;
-  EXPECT_EQ("Arr=PackedKind:N([Str])", vanillaRat1.toString());
-  EXPECT_TRUE(vanillaRat1.arrSpec().kind());
-  EXPECT_TRUE(vanillaRat1.arrSpec().type());
-  EXPECT_TRUE(vanillaRat1.arrSpec().vanilla());
+  auto const widenedRat = packedRat.widenToBespoke();
+  EXPECT_EQ("Arr={PackedKind:N([Str])|Bespoke}", widenedRat.toString());
+  EXPECT_FALSE(widenedRat.arrSpec().kind());
+  EXPECT_FALSE(widenedRat.arrSpec().type());
+  EXPECT_FALSE(widenedRat.arrSpec().vanilla());
+  EXPECT_EQ(packedRat, widenedRat & TVanillaArr);
+  EXPECT_EQ(packedRat, widenedRat & TPackedArr);
+  EXPECT_EQ(packedRat, widenedRat.narrowToVanilla());
 
-  auto const vanillaRat2 = packedRat.narrowToVanilla();
-  EXPECT_EQ("Arr=PackedKind:N([Str])", vanillaRat2.toString());
-  EXPECT_TRUE(vanillaRat2.arrSpec().kind());
-  EXPECT_TRUE(vanillaRat2.arrSpec().type());
-  EXPECT_TRUE(vanillaRat2.arrSpec().vanilla());
+  EXPECT_TRUE(packedRat <= TPackedArr);
+  EXPECT_TRUE(packedRat < TPackedArr);
+  EXPECT_TRUE(packedRat <= packedRat);
+  EXPECT_FALSE(packedRat < packedRat);
+  EXPECT_TRUE(packedRat <= TVanillaArr);
+  EXPECT_TRUE(packedRat < TVanillaArr);
 
-  EXPECT_FALSE(TPackedArr <= packedRat);
-  EXPECT_FALSE(packedRat <= TPackedArr);
-  EXPECT_FALSE(TPackedArr < packedRat);
-  EXPECT_FALSE(packedRat < TPackedArr);
+  EXPECT_FALSE(TPackedArr <= widenedRat);
+  EXPECT_FALSE(widenedRat <= TPackedArr);
+  EXPECT_FALSE(TPackedArr < widenedRat);
+  EXPECT_FALSE(widenedRat < TPackedArr);
   EXPECT_TRUE(TPackedArr <= TVanillaArr);
-  EXPECT_FALSE(packedRat <= TVanillaArr);
+  EXPECT_FALSE(widenedRat <= TVanillaArr);
   EXPECT_TRUE(TPackedArr < TVanillaArr);
-  EXPECT_FALSE(packedRat < TVanillaArr);
-
-  EXPECT_TRUE(vanillaRat1 <= TPackedArr);
-  EXPECT_TRUE(vanillaRat1 <= packedRat);
-  EXPECT_TRUE(vanillaRat1 < TPackedArr);
-  EXPECT_TRUE(vanillaRat1 < packedRat);
-  EXPECT_TRUE(vanillaRat1 <= TVanillaArr);
-  EXPECT_TRUE(vanillaRat1 < TVanillaArr);
-
-  EXPECT_TRUE(vanillaRat2 <= TPackedArr);
-  EXPECT_TRUE(vanillaRat2 <= packedRat);
-  EXPECT_TRUE(vanillaRat2 < TPackedArr);
-  EXPECT_TRUE(vanillaRat2 < packedRat);
-  EXPECT_TRUE(vanillaRat2 <= TVanillaArr);
-  EXPECT_TRUE(vanillaRat2 < TVanillaArr);
-
-  EXPECT_TRUE(vanillaRat1 == vanillaRat2);
-  EXPECT_TRUE(vanillaRat1 <= vanillaRat2);
-  EXPECT_TRUE(vanillaRat2 <= vanillaRat1);
-  EXPECT_FALSE(vanillaRat1 < vanillaRat2);
-  EXPECT_FALSE(vanillaRat2 < vanillaRat1);
+  EXPECT_FALSE(widenedRat < TVanillaArr);
 }
 
 TEST(Type, PtrKinds) {

@@ -14,26 +14,26 @@ class Point implements \Serializable {
     $this->y = $y;
     $this->id = self::$nextId++;
 
-    echo "\nInside " . __METHOD__ . ", $this\n\n";
+    echo "\nInside ".__METHOD__.", $this\n\n";
   }
 
   public function __toString(): string {
-    return 'ID:' . $this->id . '(' . $this->x . ',' . $this->y . ')';
-  }	
+    return 'ID:'.$this->id.'('.$this->x.','.$this->y.')';
+  }
 
   public function serialize(): string {
-    echo "\nInside " . __METHOD__ . ", $this\n\n";
-		
+    echo "\nInside ".__METHOD__.", $this\n\n";
+
     return serialize(array('y' => $this->y, 'x' => $this->x));
   }
-    
+
   public function unserialize(string $data): void {
     $data = unserialize($data);
     $this->x = $data['x'];
     $this->y = $data['y'];
     $this->id = self::$nextId++;
 
-    echo "\nInside " . __METHOD__ . ", $this\n\n";
+    echo "\nInside ".__METHOD__.", $this\n\n";
   }
 }
 
@@ -43,37 +43,42 @@ class ColoredPoint extends Point implements \Serializable {
 
   private int $color;
 
-  public function __construct(float $x = 0.0, float $y = 0.0, int $color = ColoredPoint::RED) {
+  public function __construct(
+    float $x = 0.0,
+    float $y = 0.0,
+    int $color = ColoredPoint::RED,
+  ) {
     parent::__construct($x, $y);
     $this->color = $color;
 
-    echo "\nInside " . __METHOD__ . ", $this\n\n";
+    echo "\nInside ".__METHOD__.", $this\n\n";
   }
 
   public function __toString(): string {
-    return parent::__toString() . $this->color;
-  }	
+    return parent::__toString().$this->color;
+  }
 
   public function serialize(): string {
-    echo "\nInside " . __METHOD__ . ", $this\n\n";
-		
+    echo "\nInside ".__METHOD__.", $this\n\n";
+
     return serialize(array(
       'color' => $this->color,
-      'baseData' => parent::serialize()
+      'baseData' => parent::serialize(),
     ));
   }
-    
+
   public function unserialize(string $data): void {
     $data = unserialize($data);
     $this->color = $data['color'];
     parent::unserialize($data['baseData']);
 
-    echo "\nInside " . __METHOD__ . ", $this\n\n";
+    echo "\nInside ".__METHOD__.", $this\n\n";
   }
 }
 
 function main(): void {
-  echo "---------------- create, serialize, and unserialize a Point -------------------\n";
+  echo
+    "---------------- create, serialize, and unserialize a Point -------------------\n";
 
   $p = new Point(2.0, 5.0);
   echo "Point \$p = $p\n";

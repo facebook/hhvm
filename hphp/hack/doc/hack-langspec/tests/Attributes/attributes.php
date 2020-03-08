@@ -14,7 +14,9 @@ class Widget {
 // --------------------------------------------------------
 
 <<Attr1, Attr2(3, true, 3.4, 'top-level function')>>
-function f1(): void { echo "Inside " . __FUNCTION__ . "\n"; }
+function f1(): void {
+  echo "Inside ".__FUNCTION__."\n";
+}
 
 // --------------------------------------------------------
 
@@ -23,10 +25,10 @@ function f1(): void { echo "Inside " . __FUNCTION__ . "\n"; }
 <<Attr1b, Attr2b(3, true, 3.4, 'trait')>>
 trait T {
   <<Attr1, Attr2(3, true, 3.4, 'trait instance method')>>
-  public function compute(): void { }
+  public function compute(): void {}
 
   <<Attr1, Attr2(3, true, 3.4, 'trait static method')>>
-  public static function getData(): void { }
+  public static function getData(): void {}
 }
 
 // --------------------------------------------------------
@@ -46,42 +48,43 @@ interface I {
 // Check that token and whitespace handling is regular. It is
 // Also note that an empty value list is equivalent to no value list
 
-<<  Attr1()   , Attr2  (  3  , true  , 3.4  ,
-	 'class C1'  )  >>
+<<Attr1(), Attr2(3, true, 3.4, 'class C1')>>
 
 class C1 implements I {
   use T;
 
-// hh_client - Expected modifier (Parsing[1002]); The class member _ is not always properly initialized
-//
-//  <<Attr1, Attr2(3, true, 3.4, 'const')>>
+  // hh_client - Expected modifier (Parsing[1002]); The class member _ is not always properly initialized
+  //
+  //  <<Attr1, Attr2(3, true, 3.4, 'const')>>
   const int CON = 100;
 
-// hhvm - Fatal error: syntax error, unexpected T_STRING, expecting T_FUNCTION 
-//
-//  <<Attr1, Attr2(3, true, 3.4, 'static int property')>>
+  // hhvm - Fatal error: syntax error, unexpected T_STRING, expecting T_FUNCTION 
+  //
+  //  <<Attr1, Attr2(3, true, 3.4, 'static int property')>>
   private static int $pr1 = 0;
 
-// hhvm - Fatal error: syntax error, unexpected T_STRING, expecting T_FUNCTION
-//
-//  <<Attr1, Attr2(3, true, 3.4, 'int property')>>
+  // hhvm - Fatal error: syntax error, unexpected T_STRING, expecting T_FUNCTION
+  //
+  //  <<Attr1, Attr2(3, true, 3.4, 'int property')>>
   private int $pr2 = 0;
 
   <<Attr1, Attr2(3, true, 3.4, 'constructor')>>
-  public function __construct() { }
+  public function __construct() {}
 
   <<Attr1, Attr2(3, true, 3.4, 'destructor')>>
-  public function __destruct() { }
+  public function __destruct() {}
 
   <<Attr1, Attr2(3, true, 3.4, 'instance method')>>
-  public function f(): void { }
+  public function f(): void {}
 
-// attributes on parameter accepted, but don't seem to serve a purpose
+  // attributes on parameter accepted, but don't seem to serve a purpose
 
-  public function f2(<<X>> int $p1): void { echo "Inside " . __FUNCTION__ . "\n"; }
+  public function f2(<<X>> int $p1): void {
+    echo "Inside ".__FUNCTION__."\n";
+  }
 
   <<Attr1, Attr2(3, true, 3.4, 'static method')>>
-  public static function sf(): void { }
+  public static function sf(): void {}
 }
 
 // --------------------------------------------------------
@@ -120,28 +123,42 @@ class X {
   const int MAX = 100;
 }
 
-<<Attr6(true, 123, 3.4, 'class C4', null
-//	, X::MAX			// disallowed
-//	, STDERR			// disallowed
-	, array(10, 20, 30)
-	, array('x' => 3, 'y' => 5)
-//	, ControlStatus::Stopping	// disallowed
-	, tuple (12, 5.9)
-	, shape('x' => -3, 'y' => 6)
-//	, Vector {22, 33}		// disallowed
-)>> 
+<<Attr6(
+  true,
+  123,
+  3.4,
+  'class C4',
+  null
+  //	, X::MAX			// disallowed
+  //	, STDERR			// disallowed
+  ,
+  array(10, 20, 30),
+  array('x' => 3, 'y' => 5)
+  //	, ControlStatus::Stopping	// disallowed
+  ,
+  tuple(12, 5.9),
+  shape('x' => -3, 'y' => 6),
+  //	, Vector {22, 33}		// disallowed
+)>>
 class C4 {
-  <<Attr6(true, 123, 3.4, 'method C4->f', null
-//		, X::MAX			// disallowed
-//		, STDERR			// disallowed
-		, array(10, 20, 30)
-		, array('x' => 3, 'y' => 5)
-//		, ControlStatus::Stopping	// disallowed
-		, tuple (12, 5.9)
-		, shape('x' => -3, 'y' => 6)
-//		, Vector {22, 33}		// disallowed
-  )>> 
-  public function f(): void { }
+  <<Attr6(
+    true,
+    123,
+    3.4,
+    'method C4->f',
+    null
+    //		, X::MAX			// disallowed
+    //		, STDERR			// disallowed
+    ,
+    array(10, 20, 30),
+    array('x' => 3, 'y' => 5)
+    //		, ControlStatus::Stopping	// disallowed
+    ,
+    tuple(12, 5.9),
+    shape('x' => -3, 'y' => 6),
+    //		, Vector {22, 33}		// disallowed
+  )>>
+  public function f(): void {}
 }
 
 // --------------------------------------------------------
@@ -169,12 +186,12 @@ function main(): void {
   $attr2 = $rf->getAttribute('Attr2');
   var_dump($attr2);
 
-// The method getAttributes is undefined in an object of type ReflectionFunction
+  // The method getAttributes is undefined in an object of type ReflectionFunction
 
-//  $attrs = $rf->getAttributes();
-//  var_dump($attrs);
+  //  $attrs = $rf->getAttributes();
+  //  var_dump($attrs);
 
-// --------------------------------------------------------
+  // --------------------------------------------------------
 
   $rc = new \ReflectionClass('\NS_attrib1\Widget');
 
@@ -182,7 +199,7 @@ function main(): void {
 
   $attrHelp = $rc->getAttribute('Help');
   var_dump($attrHelp);
-//  $attrHelp = $rc->getAttributes();	// method not defined
+  //  $attrHelp = $rc->getAttributes();	// method not defined
 
   echo "\n============== class C1->f2 =====================\n\n";
 

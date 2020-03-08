@@ -13,7 +13,7 @@ class Item {
 
   private static function getNameFromStorage(int $productCode): string {
     $names = array('??', 'door', 'window', 'cabinet');
-    echo "Inside " . __FUNCTION__ . "\n";
+    echo "Inside ".__FUNCTION__."\n";
     return $names[$productCode];
   }
 }
@@ -29,7 +29,7 @@ trait T {
 
   private function getNameFromStorage(int $productCode): string {
     $names = array('??', 'door', 'window', 'cabinet');
-    echo "Inside " . __FUNCTION__ . "\n";
+    echo "Inside ".__FUNCTION__."\n";
     return $names[$productCode];
   }
 }
@@ -43,7 +43,7 @@ class C1 {
 // hhvm - <<__Memoize>> cannot be used in interfaces
 
 interface I {
-//  <<__Memoize>>
+  //  <<__Memoize>>
   public function getNameFromProductCode(int $productCode): string;
 }
 
@@ -55,7 +55,7 @@ class C2 implements I {
 
   private function getNameFromStorage(int $productCode): string {
     $names = array('??', 'door', 'window', 'cabinet');
-    echo "Inside " . __FUNCTION__ . "\n";
+    echo "Inside ".__FUNCTION__."\n";
     return $names[$productCode];
   }
 }
@@ -70,15 +70,17 @@ function getNameFromProductCode(int $productCode): string {
 
 function getNameFromStorage(int $productCode): string {
   $names = array('??', 'door', 'window', 'cabinet');
-  echo "Inside " . __FUNCTION__ . "\n";
+  echo "Inside ".__FUNCTION__."\n";
   return $names[$productCode];
 }
 
 // --------------------------------------------------------
 
 //<<__Memoize, Attr2(3, true)>>	// hmmm! accepted even though function has a void return type
-<<__Memoize(3), Attr2(3, true)>>	// hmmm! accepted with a value
-function f1(): void { echo "Inside " . __FUNCTION__ . "\n"; }
+<<__Memoize(3), Attr2(3, true)>> // hmmm! accepted with a value
+function f1(): void {
+  echo "Inside ".__FUNCTION__."\n";
+}
 
 // --------------------------------------------------------
 
@@ -103,20 +105,25 @@ class C4 {} // does NOT implement IMemoizeParam
 
 <<__Memoize>>
 function getNameFromProductCode2(
-	bool $p1
-	, int $productCode
-	, float $p3
-	, string $p4
-	, ?int $p5
-//	, resource $p6		// invalid type
-	, array<int> $p7
-	, array<string, int> $p8
-	, ControlStatus $p9	// permitted, but no in docs list
-	, (int, float) $p10	// permitted, but no in docs list
-	, Point $p11		// permitted, but no in docs list
-	, Vector<int> $p12	// permitted, presumably this type implements IMemoizeParam
-	, C3 $p13
-//	, C4 $p14		// invalid type
+  bool $p1,
+  int $productCode,
+  float $p3,
+  string $p4,
+  ?int $p5
+  //	, resource $p6		// invalid type
+  ,
+  array<int> $p7,
+  array<string, int> $p8,
+  ControlStatus $p9 // permitted, but no in docs list
+  ,
+  (int, float) $p10 // permitted, but no in docs list
+  ,
+  Point $p11 // permitted, but no in docs list
+  ,
+  Vector<int> $p12 // permitted, presumably this type implements IMemoizeParam
+  ,
+  C3 $p13,
+  //	, C4 $p14		// invalid type
 ): string {
   /* ... */
   return getNameFromStorage2($productCode);
@@ -124,7 +131,7 @@ function getNameFromProductCode2(
 
 function getNameFromStorage2(int $productCode): string {
   $names = array('??', 'door', 'window', 'cabinet');
-  echo "Inside " . __FUNCTION__ . "\n";
+  echo "Inside ".__FUNCTION__."\n";
   return $names[$productCode];
 }
 
@@ -140,7 +147,7 @@ function getNameFromProductCode3(int $productCode, ...): string {
 
 function getNameFromStorage3(int $productCode): string {
   $names = array('??', 'door', 'window', 'cabinet');
-  echo "Inside " . __FUNCTION__ . "\n";
+  echo "Inside ".__FUNCTION__."\n";
   return $names[$productCode];
 }
 
@@ -176,7 +183,8 @@ function main(): void {
   var_dump($c2->getNameFromProductCode(2));
   var_dump($c2->getNameFromProductCode(3));
 
-  echo "\n============== top-level function getNameFromProductCode =====================\n\n";
+  echo
+    "\n============== top-level function getNameFromProductCode =====================\n\n";
 
   var_dump(getNameFromProductCode(3));
   var_dump(getNameFromProductCode(1));
@@ -185,32 +193,54 @@ function main(): void {
   var_dump(getNameFromProductCode(2));
   var_dump(getNameFromProductCode(3));
 
-  echo "\n============== top-level function getNameFromProductCode2 =====================\n\n";
+  echo
+    "\n============== top-level function getNameFromProductCode2 =====================\n\n";
 
-  var_dump(getNameFromProductCode2(true, 3, 1.2, "z", null
-//		, STDERR			// invalid type
-		, array(10,20)
-		, array('q' => 10, 'a' => 12)
-		, ControlStatus::Stopped	// permitted, but no in docs list
-		, tuple(10, 1.2)		// permitted, but no in docs list
-		, shape('x' => 1, 'y' => 3)	// permitted, but no in docs list
-		, Vector {10,20,30}		// permitted, but no in docs list
-		, new C3()			// permitted, presumably this type implements IMemoizeParam
-//		, new C4()			// invalid type
+  var_dump(getNameFromProductCode2(
+    true,
+    3,
+    1.2,
+    "z",
+    null
+    //		, STDERR			// invalid type
+    ,
+    array(10, 20),
+    array('q' => 10, 'a' => 12),
+    ControlStatus::Stopped // permitted, but no in docs list
+    ,
+    tuple(10, 1.2) // permitted, but no in docs list
+    ,
+    shape('x' => 1, 'y' => 3) // permitted, but no in docs list
+    ,
+    Vector {10, 20, 30} // permitted, but no in docs list
+    ,
+    new C3(), // permitted, presumably this type implements IMemoizeParam
+    //		, new C4()			// invalid type
   ));
-  var_dump(getNameFromProductCode2(true, 3, 1.2, "z", null
-//		, STDERR			// invalid type
-		, array(10,20)
-		, array('q' => 10, 'a' => 12)
-		, ControlStatus::Stopped	// permitted, but no in docs list
-		, tuple(10, 1.2)		// permitted, but no in docs list
-		, shape('x' => 1, 'y' => 3)	// permitted, but no in docs list
-		, Vector {10,20,30}		// permitted, but no in docs list
-		, new C3()			// permitted, presumably this type implements IMemoizeParam
-//		, new C4()			// invalid type
+  var_dump(getNameFromProductCode2(
+    true,
+    3,
+    1.2,
+    "z",
+    null
+    //		, STDERR			// invalid type
+    ,
+    array(10, 20),
+    array('q' => 10, 'a' => 12),
+    ControlStatus::Stopped // permitted, but no in docs list
+    ,
+    tuple(10, 1.2) // permitted, but no in docs list
+    ,
+    shape('x' => 1, 'y' => 3) // permitted, but no in docs list
+    ,
+    Vector {10, 20, 30} // permitted, but no in docs list
+    ,
+    new C3(), // permitted, presumably this type implements IMemoizeParam
+    //		, new C4()			// invalid type
   ));
 
-  echo "\n============== top-level function getNameFromProductCode3 =====================\n\n";
+  echo
+    "\n============== top-level function getNameFromProductCode3 =====================\n\n";
 
   var_dump(getNameFromProductCode3(3));
   var_dump(getNameFromProductCode3(1));
@@ -223,7 +253,7 @@ function main(): void {
 
   f1();
   $rf = new \ReflectionFunction('\NS_Memoize\f1');
-  $attr1 = $rf->getAttribute('__Memoize');	// hmmm!
+  $attr1 = $rf->getAttribute('__Memoize'); // hmmm!
   var_dump($attr1);
   $attr2 = $rf->getAttribute('Attr2');
   var_dump($attr2);

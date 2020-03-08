@@ -5,23 +5,23 @@ namespace NS_heredoc_string_literals;
 function main(): void {
   $v = 123;
 
-// test using unescaped ", embedded (actual) tab, variable substitution, multiple lines
+  // test using unescaped ", embedded (actual) tab, variable substitution, multiple lines
 
- $s = <<<	  ID
+  $s = <<<	  ID
 S'o'me "\"t e\txt; \$v = $v"
 Some more text
 ID;
- echo ">$s<\n\n";
+  echo ">$s<\n\n";
 
- var_dump(<<<X
+  var_dump(<<<X
 X
-);
+  );
 
   var_dump(<<<X
 xxx
 yyy
 X
-);
+  );
 
 }
 

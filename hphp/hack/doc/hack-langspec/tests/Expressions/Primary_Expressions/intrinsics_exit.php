@@ -5,11 +5,11 @@ namespace NS_intrinsics_exit;
 require_once('Point2.php');
 
 function cleanup1(): void {
-  echo "Inside " . __METHOD__ . "\n";
+  echo "Inside ".__METHOD__."\n";
 }
 
 function cleanup2(): void {
-  echo "Inside " . __METHOD__ . "\n";
+  echo "Inside ".__METHOD__."\n";
 }
 
 function main(): void {
@@ -22,10 +22,10 @@ function main(): void {
   $p2 = new Point2();
   $p3 = new Point2();
 
-  exit("goodbye\n");	// writes "goodbye", then destructors are called.
-//  exit(99);		// writes nothing
-//  exit();			// writes nothing
-//  exit;			// writes nothing
+  exit("goodbye\n"); // writes "goodbye", then destructors are called.
+  //  exit(99);		// writes nothing
+  //  exit();			// writes nothing
+  //  exit;			// writes nothing
 
   echo "end of script\n";
 }

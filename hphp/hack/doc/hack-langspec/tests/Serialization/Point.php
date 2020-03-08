@@ -2,9 +2,9 @@
 
 namespace Graphics;
 
-class Point implements \Serializable {	// note the interface
+class Point implements \Serializable { // note the interface
   private static int $nextId = 1;
-  private int $id;	// transient property; not serialized
+  private int $id; // transient property; not serialized
 
   private float $x;
   private float $y;
@@ -16,7 +16,7 @@ class Point implements \Serializable {	// note the interface
   }
 
   public function __toString(): string {
-    return 'ID:' . $this->id . '(' . $this->x . ',' . $this->y . ')';
+    return 'ID:'.$this->id.'('.$this->x.','.$this->y.')';
   }
 
   public function serialize(): string {

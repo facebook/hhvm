@@ -11,56 +11,56 @@ class C {
 
 function displayVector<T>(Vector<T> $v): void {
   var_dump($v);
-/*
-  foreach ($v as $item) {
-//    var_dump($item);
-      echo (string)$item . "\n";
-  }
-*/
+  /*
+    foreach ($v as $item) {
+  //    var_dump($item);
+        echo (string)$item . "\n";
+    }
+  */
 }
 
 function main(): void {
-  $v1 = new Vector(null);		// vector of zero items
+  $v1 = new Vector(null); // vector of zero items
   displayVector($v1);
-  echo "\$v1 = " . ($v1->isEmpty() ? "is" : "is not") . " empty\n";
+  echo "\$v1 = ".($v1->isEmpty() ? "is" : "is not")." empty\n";
 
-  $v1 = new Vector(array());	// vector of zero items
-  displayVector($v1);
-
-  $v1 = Vector {};		// vector of zero items
-  echo "\$v1's element count = " . $v1->count() . "\n";
+  $v1 = new Vector(array()); // vector of zero items
   displayVector($v1);
 
-  $v1->add(12);			// add item 0
-  $v1[] = 99;			// add item 1
-//  $v1[2] = 2001;			// add item 2 ==> OutOfBoundsException
-  $v1[] = 199;			// add item 2
+  $v1 = Vector {}; // vector of zero items
+  echo "\$v1's element count = ".$v1->count()."\n";
   displayVector($v1);
-  echo "\$v1's element count = " . $v1->count() . "\n";
-  echo "\$v1 = " . ($v1->isEmpty() ? "is" : "is not") . " empty\n";
+
+  $v1->add(12); // add item 0
+  $v1[] = 99; // add item 1
+  //  $v1[2] = 2001;			// add item 2 ==> OutOfBoundsException
+  $v1[] = 199; // add item 2
+  displayVector($v1);
+  echo "\$v1's element count = ".$v1->count()."\n";
+  echo "\$v1 = ".($v1->isEmpty() ? "is" : "is not")." empty\n";
 
   if ($v1->containsKey(1)) {
-    echo "\$v1[1] = " . $v1->at(1) . "\n";
+    echo "\$v1[1] = ".$v1->at(1)."\n";
   }
-//  echo "\$v1[-1] = " . $v1->at(-1) . "\n";	// OutOfBoundsException
-//  echo "\$v1[100] = " . $v1->at(100) . "\n";	// OutOfBoundsException
+  //  echo "\$v1[-1] = " . $v1->at(-1) . "\n";	// OutOfBoundsException
+  //  echo "\$v1[100] = " . $v1->at(100) . "\n";	// OutOfBoundsException
 
   $v2 = Vector::fromItems(array(2, 8));
   displayVector($v2);
 
-  $v2 = $v1->filter(function (int $value): bool {
+  $v2 = $v1->filter(function(int $value): bool {
     return $value > 50;
   });
   displayVector($v2);
 
   $v1->clear();
 
-  $v1->addAll(null);			// add no new items
+  $v1->addAll(null); // add no new items
 
   $c1 = new C();
   var_dump($c1);
 
-  $v1->addAll($c1->pr1);		// add 3 new items
+  $v1->addAll($c1->pr1); // add 3 new items
   displayVector($v1);
 
   $c1->pr1[-5] = 17;

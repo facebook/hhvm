@@ -6,17 +6,17 @@ class D {}
 
 class C {
   public function f1(int $m, int $n): D {
-    echo "Inside " . __METHOD__ . "\n";
+    echo "Inside ".__METHOD__."\n";
     return new D();
   }
 
   public function f2(int $m, int $n): ?D {
-    echo "Inside " . __METHOD__ . "\n";
+    echo "Inside ".__METHOD__."\n";
     return null;
   }
 
   public function f3(int $m, int $n): void {
-    echo "Inside " . __METHOD__ . "\n";
+    echo "Inside ".__METHOD__."\n";
   }
 }
 
@@ -33,7 +33,7 @@ Invalid return type in return statement
 */
 
 function hello(int $j): int {
-  echo "Inside " . __METHOD__ . "; \$j = $j\n";
+  echo "Inside ".__METHOD__."; \$j = $j\n";
   return $j;
 }
 
@@ -52,7 +52,10 @@ function test(?C $x): void {
 
   echo "------------ \$x?->f3(++\$i, hello(\$i))\n";
 
-  $res3 = $x?->f3(++$i, hello($i));	// allows >-> to call a void function thus producing a ?void result
+  $res3 = $x?->f3(
+    ++$i,
+    hello($i),
+  ); // allows >-> to call a void function thus producing a ?void result
   var_dump($res3);
 }
 
@@ -63,7 +66,9 @@ function main(): void {
 
   echo "------------ test(null)\n";
 
-  test(null);	// the expressions in the method argument list DO GET CALLED ANYWAY
+  test(
+    null,
+  ); // the expressions in the method argument list DO GET CALLED ANYWAY
 }
 
 /* HH_FIXME[1002] call to main in strict*/

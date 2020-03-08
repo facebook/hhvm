@@ -9,12 +9,18 @@ function main(): void {
       break;
   }
 
-  for ($i = 10; $i <= 40; $i +=10) {
+  for ($i = 10; $i <= 40; $i += 10) {
     echo "\n\$i = $i: ";
-    switch($i) {
-    case 10: echo "ten"; break;
-    case 20: echo "twenty"; break;
-    case 30: echo "thirty"; break;
+    switch ($i) {
+      case 10:
+        echo "ten";
+        break;
+      case 20:
+        echo "twenty";
+        break;
+      case 30:
+        echo "thirty";
+        break;
     }
     echo "\nJust beyond the switch";
   }

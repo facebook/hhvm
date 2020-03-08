@@ -10,12 +10,12 @@ class Point {
     $this->x = $x;
     $this->y = $y;
 
-    echo "\nInside " . __METHOD__ . ", $this\n\n";
+    echo "\nInside ".__METHOD__.", $this\n\n";
   }
 
   public function __toString(): string {
-    return '(' . $this->x . ',' . $this->y . ')';
-  }	
+    return '('.$this->x.','.$this->y.')';
+  }
 }
 
 function main(): void {
@@ -26,7 +26,7 @@ function main(): void {
 
   echo "\n--- serialize that Point ---\n\n";
 
-  $s = serialize($p);		// all instance properties get serialized
+  $s = serialize($p); // all instance properties get serialized
   var_dump($s);
 
   echo "\n--- unserialize that Point ---\n\n";
@@ -36,7 +36,7 @@ function main(): void {
 
   echo "\n--- fake string value ---\n\n";
 
-  $s[32] = 'J';		// change class name, so an unserialize failure occurs
+  $s[32] = 'J'; // change class name, so an unserialize failure occurs
   var_dump($s);
 
   echo "\n--- unserialize that Point to non-existant class type ---\n\n";

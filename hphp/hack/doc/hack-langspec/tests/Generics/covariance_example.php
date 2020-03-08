@@ -10,16 +10,20 @@ class C<+T> {
 class Animal {}
 class Cat extends Animal {}
 
-function f(C<Animal> $p1): void { var_dump($p1); }
+function f(C<Animal> $p1): void {
+  var_dump($p1);
+}
 
-function g(array<Animal> $p1): void { var_dump($p1); }
+function g(array<Animal> $p1): void {
+  var_dump($p1);
+}
 
 function main(): void {
   f(new C(new Animal()));
-  f(new C(new Cat()));	// accepted
+  f(new C(new Cat())); // accepted
 
   g(array(new Animal(), new Animal()));
-  g(array(new Cat(), new Cat(), new Animal()));	// arrays are covariant
+  g(array(new Cat(), new Cat(), new Animal())); // arrays are covariant
 }
 
 /* HH_FIXME[1002] call to main in strict*/

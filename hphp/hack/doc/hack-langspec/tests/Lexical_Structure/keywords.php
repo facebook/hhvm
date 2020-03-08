@@ -10,15 +10,15 @@ function main(): void {
   }
   echo "\n";
 
-/* keywords must be lower-case
+  /* keywords must be lower-case
 
-// try various case combinations of keywords
+  // try various case combinations of keywords
 
-  fOREacH ($colors As $a) {
-    eChO $a.' ';
-  }
-  ECHO "\n";
-*/
+    fOREacH ($colors As $a) {
+      eChO $a.' ';
+    }
+    ECHO "\n";
+  */
 }
 
 /* HH_FIXME[1002] call to main in strict*/

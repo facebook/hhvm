@@ -15,10 +15,10 @@ type TTA1c = OTA1b;
 
 type TTA_bool1 = bool;
 newtype OTA_bool1 = bool;
-type TTA_bool2 = bool;		// duplicate aliases
-newtype OTA_bool2 = bool;	// duplicate aliases
-type TTA_bool3 = TTA_bool1;	// aliasing an alias
-newtype OTA_bool3 = OTA_bool1;	// aliasing an alias
+type TTA_bool2 = bool; // duplicate aliases
+newtype OTA_bool2 = bool; // duplicate aliases
+type TTA_bool3 = TTA_bool1; // aliasing an alias
+newtype OTA_bool3 = OTA_bool1; // aliasing an alias
 
 // ------------------------------------------------------
 
@@ -37,18 +37,23 @@ type TTA_string = string;
 type TTA_arraykey = arraykey;
 type TTA_resource = resource;
 
-type TTA_n_bool = ?TTA_bool1;		// using a ? modifier + an alias
-newtype OTA_n_bool = ?OTA_bool1;	// using a ? modifier + an alias
+type TTA_n_bool = ?TTA_bool1; // using a ? modifier + an alias
+newtype OTA_n_bool = ?OTA_bool1; // using a ? modifier + an alias
 
 type TTA_n_int = ?int;
-type TTA_n_n_int = ?TTA_n_int;		// I don't think this should be allowed
+type TTA_n_n_int = ?TTA_n_int; // I don't think this should be allowed
 
 type TTA_mixed = mixed;
-type TTA_n_mixed = ?TTA_mixed;		// I don't think this should be allowed
+type TTA_n_mixed = ?TTA_mixed; // I don't think this should be allowed
 
 // ------------------------------------------------------
 
-enum Modes: int { Stopped = 0; Stopping = 1; Starting = 2; Started = 3; }
+enum Modes: int {
+  Stopped = 0;
+  Stopping = 1;
+  Starting = 2;
+  Started = 3;
+}
 type TTA_enum_Modes = Modes;
 newtype OTA_enum_Modes = Modes;
 
@@ -75,14 +80,20 @@ interface MyCollection<T> {
   public function get(): T;
 }
 type TTA_interface_MyCollection1 = MyCollection;
-type TTA_interface_MyCollection2<T> = MyCollection<T>;	// Okay? Really?
+type TTA_interface_MyCollection2<T> = MyCollection<T>; // Okay? Really?
 type TTA_interface_MyCollection3 = MyCollection<int>;
 
 // ------------------------------------------------------
 
-trait TR1 { public function compute(): void {} }
-trait TR2 { public function compute(): void {} }
-trait TR3 { public function sort(): void {} }
+trait TR1 {
+  public function compute(): void {}
+}
+trait TR2 {
+  public function compute(): void {}
+}
+trait TR3 {
+  public function sort(): void {}
+}
 trait TR4a {
   use TR3;
   use TR1, TR2;
@@ -104,8 +115,8 @@ newtype OTA_tuple = (int, string, int);
 
 // ------------------------------------------------------
 
-type TTA_closure = (function (int): void);
-newtype OTA_closure = (function (int): void);
+type TTA_closure = (function(int): void);
+newtype OTA_closure = (function(int): void);
 
 // ------------------------------------------------------
 

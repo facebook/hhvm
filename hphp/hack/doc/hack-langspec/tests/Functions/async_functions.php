@@ -5,11 +5,13 @@ namespace NS_as1;
 // async and abstract methods ---------------------------------
 
 interface I1 {
-  public function f1(): Awaitable<string>;	// async not allowed here
+  public function f1(): Awaitable<string>; // async not allowed here
 }
 
 class C1 implements I1 {
-  public async function f1(): Awaitable<string> { return "abc"; }
+  public async function f1(): Awaitable<string> {
+    return "abc";
+  }
 }
 
 // test basic async functions ---------------------------------
@@ -22,7 +24,7 @@ async function calc(): Awaitable<int> {
 async function control(): Awaitable<void> {
   $awaitable = calc();
   $result = await $awaitable;
-//  $result = await calc();	// short version of the 2 assignments above
+  //  $result = await calc();	// short version of the 2 assignments above
 
   await calc();
 
@@ -77,41 +79,62 @@ async function use_countdown2(): Awaitable<void> {
 
 async function doit(): Awaitable<void> {
 
-  await async {		// block result has type awaitable<void>
-  };			// implicit return nothing
-  var_dump(async {});
+  await async { // block result has type awaitable<void>
+  }; // implicit return nothing
+  var_dump(async {
+  });
   echo "-----------------\n";
 
-  await async {		// block result has type awaitable<void>
-    return;		// explicit return nothing
+  await async { // block result has type awaitable<void>
+    return; // explicit return nothing
   };
-  var_dump(async { return; });
+  var_dump(async {
+    return;
+  });
   echo "-----------------\n";
 
-  await async {		// block result has type awaitable<int>
+  await async { // block result has type awaitable<int>
     return 123;
   };
 
-  $v = await async {		// block result has type awaitable<int>
+  $v = await async { // block result has type awaitable<int>
     return 123;
   };
-  var_dump($v, async { return 123; });
+  var_dump($v, async {
+    return 123;
+  });
   echo "-----------------\n";
 
-  $v = await async {		// block result has type awaitable<float>
+  $v = await async { // block result has type awaitable<float>
     return 1.23;
   };
-  var_dump($v, async { return 1.23; });
+  var_dump($v, async {
+    return 1.23;
+  });
   echo "-----------------\n";
 
-  $v = await \HH\Asio\v(array(async { return 10; }, async { return 1.2; }));
-// first block result has type awaitable<int>, the second, awaitable<float>
+  $v = await \HH\Asio\v(array(
+    async {
+      return 10;
+    },
+    async {
+      return 1.2;
+    },
+  ));
+  // first block result has type awaitable<int>, the second, awaitable<float>
 
   var_dump($v);
   echo "-----------------\n";
 
-  $v = await \HH\Asio\v(array(async { return 1.2; }, async { return 10; }));
-// first block result has type awaitable<float>, the second, awaitable<int>
+  $v = await \HH\Asio\v(array(
+    async {
+      return 1.2;
+    },
+    async {
+      return 10;
+    },
+  ));
+  // first block result has type awaitable<float>, the second, awaitable<int>
   var_dump($v);
 }
 
@@ -126,20 +149,20 @@ async function threeWay(int $p): Awaitable<?arraykey> {
 // In what constexts can we use await directly? -----------------------
 
 async function fDirect(): Awaitable<int> {
-//**  takesAnInt(await calc());	// runtime Fatal error: syntax error, unexpected T_AWAIT, expecting ')'
-//  $a = array(await calc());	// runtime Fatal error: syntax error, unexpected T_AWAIT, expecting ')'
-//  $vect = Vector {await calc()};	// runtime Fatal error: syntax error, unexpected T_AWAIT
-//  $t2 = tuple(await calc());	// runtime Fatal error: syntax error, unexpected T_AWAIT, expecting ')'
-//  $s = shape('x' => await calc());	// runtime Fatal error: syntax error, unexpected T_AWAIT
-//  $cl = clone await calc();	// runtime Fatal error: syntax error, unexpected T_AWAIT
-//  $v = (await calc()) instanceof C1;	// runtime Fatal error: syntax error, unexpected T_AWAIT
-//  $v = async { return 10; } == await calc();	// runtime Fatal error: syntax error, unexpected T_AWAIT
-//  $v = true ? (await calc()) : (async { return 5; });	// runtime Fatal error: syntax error, unexpected T_AWAIT
+  //**  takesAnInt(await calc());	// runtime Fatal error: syntax error, unexpected T_AWAIT, expecting ')'
+  //  $a = array(await calc());	// runtime Fatal error: syntax error, unexpected T_AWAIT, expecting ')'
+  //  $vect = Vector {await calc()};	// runtime Fatal error: syntax error, unexpected T_AWAIT
+  //  $t2 = tuple(await calc());	// runtime Fatal error: syntax error, unexpected T_AWAIT, expecting ')'
+  //  $s = shape('x' => await calc());	// runtime Fatal error: syntax error, unexpected T_AWAIT
+  //  $cl = clone await calc();	// runtime Fatal error: syntax error, unexpected T_AWAIT
+  //  $v = (await calc()) instanceof C1;	// runtime Fatal error: syntax error, unexpected T_AWAIT
+  //  $v = async { return 10; } == await calc();	// runtime Fatal error: syntax error, unexpected T_AWAIT
+  //  $v = true ? (await calc()) : (async { return 5; });	// runtime Fatal error: syntax error, unexpected T_AWAIT
 
-  await calc();			// in an expression statement
-  $v = await calc();		// RHS of a simple assignment
-//  return (await calc());	// runtime Fatal error: syntax error, unexpected T_AWAIT
-  return await calc();		// OK as the full expression in a return
+  await calc(); // in an expression statement
+  $v = await calc(); // RHS of a simple assignment
+  //  return (await calc());	// runtime Fatal error: syntax error, unexpected T_AWAIT
+  return await calc(); // OK as the full expression in a return
 }
 
 function takesAnInt(int $p): void {
@@ -150,7 +173,7 @@ function takesAnInt(int $p): void {
 async function main(): Awaitable<void> {
   echo "\nTest some basics ======================\n\n";
 
-///*
+  ///*
   await control();
 
   echo "\nWait on multiple async operations ======================\n\n";
@@ -158,13 +181,15 @@ async function main(): Awaitable<void> {
   $awaitables = array(dbq1(), dbq2());
   $groupAwaitables = \HH\Asio\v($awaitables);
   await $groupAwaitables;
-  await \HH\Asio\v(array(dbq1(), dbq2()));	// short version of the 3 statements above
+  await \HH\Asio\v(
+    array(dbq1(), dbq2()),
+  ); // short version of the 3 statements above
 
   echo "\nUse async iterators ======================\n\n";
 
   await use_countdown1();
   await use_countdown2();
-//*/
+  //*/
   echo "\nTest async blocks ======================\n\n";
 
   await doit();

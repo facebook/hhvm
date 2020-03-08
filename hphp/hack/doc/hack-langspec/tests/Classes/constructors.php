@@ -47,7 +47,7 @@ class D4 extends D3 {
 
 // ---------------------------------------------------------
 
-function f3(int $iValue, (function (int): int) $process): int {
+function f3(int $iValue, (function(int): int) $process): int {
   return $process($iValue);
 }
 
@@ -55,7 +55,7 @@ function f3(int $iValue, (function (int): int) $process): int {
 // However, hhvm gags with Fatal error: syntax error, unexpected T_PRIVATE
 
 function f4(): void {
-//  $result = f3(5, function (private int $p) { return $p * 2; });	// doubles 5
+  //  $result = f3(5, function (private int $p) { return $p * 2; });	// doubles 5
 }
 
 // ---------------------------------------------------------
@@ -64,7 +64,7 @@ function f4(): void {
 // However, hhvm gags with Fatal error: Parameters modifiers not allowed on methods
 
 interface I1 {
-//  public function f(private int $p1): void;
+  //  public function f(private int $p1): void;
 }
 
 // ---------------------------------------------------------
@@ -73,7 +73,7 @@ interface I1 {
 // However, hhvm gags with Fatal error: Parameters modifiers not allowed on methods
 
 trait T1 {
-//  public function f(private int $p1): void {}
+  //  public function f(private int $p1): void {}
 }
 
 // ---------------------------------------------------------
@@ -82,7 +82,7 @@ trait T1 {
 // However, hhvm gags with Fatal error: Parameters modifiers not allowed on methods
 
 class C1 {
-//  public function f(private int $p1): void {}
+  //  public function f(private int $p1): void {}
 }
 
 // ---------------------------------------------------------
@@ -94,8 +94,14 @@ class C2 {
   protected int $pr3;
   public int $pr5;
 
-  public function __construct(int $p1, private int $p2, int $p3, protected float $p4, int $p5,
-    public string $p6 = "xxx") {
+  public function __construct(
+    int $p1,
+    private int $p2,
+    int $p3,
+    protected float $p4,
+    int $p5,
+    public string $p6 = "xxx",
+  ) {
     $this->pr1 = $p1;
     $this->pr3 = $p3;
     $this->pr5 = $p5;
@@ -106,28 +112,32 @@ class C2 {
 
 // If have explicit property name same as implicit one, get "Name already bound: px"; good
 class C3 {
-//  private ?int $p1;
-//  private ?int $p2;
-//  private ?int $p3;
+  //  private ?int $p1;
+  //  private ?int $p2;
+  //  private ?int $p3;
 
-  public function __construct(private int $p1, protected float $p2, public string $p3) {
+  public function __construct(
+    private int $p1,
+    protected float $p2,
+    public string $p3,
+  ) {
   }
 }
 
 function main(): void {
-//  $d1 = new D1(10);
-//  $d2 = new D2(10, 20);
-//  $d3 = new D3(10, 20, 30);
+  //  $d1 = new D1(10);
+  //  $d2 = new D2(10, 20);
+  //  $d3 = new D3(10, 20, 30);
   $d4 = new D4();
 
   $c2 = new C2(10, 20, 30, 40.0, 50);
   var_dump($c2);
-//  echo $c2->pr1 . "\n";	// can't access private member; good
-//  echo $c2->p2 . "\n";	// can't access private member; good
-//  echo $c2->pr3 . "\n";	// can't access protected member; good
-//  echo $c2->p4 . "\n";	// can't access protected member; good
-  echo $c2->pr5 . "\n";	// can access public member; good
-  echo $c2->p6 . "\n";	// can access public member; good
+  //  echo $c2->pr1 . "\n";	// can't access private member; good
+  //  echo $c2->p2 . "\n";	// can't access private member; good
+  //  echo $c2->pr3 . "\n";	// can't access protected member; good
+  //  echo $c2->p4 . "\n";	// can't access protected member; good
+  echo $c2->pr5."\n"; // can access public member; good
+  echo $c2->p6."\n"; // can access public member; good
 }
 
 /* HH_FIXME[1002] call to main in strict*/

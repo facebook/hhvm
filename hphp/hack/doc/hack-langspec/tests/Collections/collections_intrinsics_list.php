@@ -9,11 +9,11 @@ function main(): void {
   echo "\$min: $min, \$max: $max, \$avg: $avg\n";
   print_r($v);
 
-//  list($min, , $avg) = array(0, 100, 67);		// missing arguments not allowed
-//  list($min, , $avg) = Vector {0, 100, 67};	// missing arguments not allowed
-//  echo "\$min: $min, , \$avg: $avg\n";
+  //  list($min, , $avg) = array(0, 100, 67);		// missing arguments not allowed
+  //  list($min, , $avg) = Vector {0, 100, 67};	// missing arguments not allowed
+  //  echo "\$min: $min, , \$avg: $avg\n";
 
-  list($min, $max, ) = Vector {0, 100, 67};
+  list($min, $max) = Vector {0, 100, 67};
   echo "\$min: $min, \$max: $max,\n";
 
   list($min, $max) = Vector {0, 100, 67};
@@ -26,7 +26,7 @@ function main(): void {
   echo "\$first: $first, \$second: $second\n";
   print_r($v);
 
-//  $v = list($first) = Pair {-15, 17};		// must extract both elements
+  //  $v = list($first) = Pair {-15, 17};		// must extract both elements
 
   echo "--------- test with more elements than variables -------------\n";
 
@@ -34,11 +34,11 @@ function main(): void {
   echo "\$min: $min, \$max: $max, \$avg: $avg\n";
   print_r($v);
 
-//  $v = list($first, $second, $third) = Pair {-5, 7}; // must extract both elements only
+  //  $v = list($first, $second, $third) = Pair {-5, 7}; // must extract both elements only
 
-//  echo "--------- test with fewer elements than variables -------------\n";
-//
-//  $v = list($min, $max, $avg) = Vector {100, 500};	// Undefined offset: 2
+  //  echo "--------- test with fewer elements than variables -------------\n";
+  //
+  //  $v = list($min, $max, $avg) = Vector {100, 500};	// Undefined offset: 2
 
   echo "--------- test with element being an array -------------\n";
 
@@ -52,7 +52,7 @@ function main(): void {
 
   echo "--------- test with target vars being array elements -------------\n";
 
-  $a = array();		// Hack needs $a to exist, whereas PHP doesn't
+  $a = array(); // Hack needs $a to exist, whereas PHP doesn't
   $v = list($a[0], $a[2], $a[4]) = Vector {0, 100, 67};
   print_r($a);
   print_r($v);

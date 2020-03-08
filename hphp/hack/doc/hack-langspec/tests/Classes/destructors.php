@@ -11,7 +11,7 @@ class D1 {
 class D2 extends D1 {
   public function __destruct() {
     echo "In D2 destructor\n";
-//  parent::__destruct();		// can't access private destructor
+    //  parent::__destruct();		// can't access private destructor
   }
 }
 
@@ -30,9 +30,9 @@ class D4 extends D3 {
 }
 
 function main(): void {
-//  $d1 = new D1();
-//  $d2 = new D2();
-//  $d3 = new D3();
+  //  $d1 = new D1();
+  //  $d2 = new D2();
+  //  $d3 = new D3();
   $d4 = new D4();
 }
 

@@ -4,45 +4,45 @@ namespace NS_this;
 
 trait TR {
 
-// constants
+  // constants
 
   abstract const ?this TRM1a;
   const ?this TRM1c = null;
 
-// methods
+  // methods
 
   abstract public function TRf(this $val): this;
 }
 
 interface I {
 
-// constants
+  // constants
 
   abstract const ?this IM1a;
   const ?this IM1c = null;
 
-// methods
+  // methods
 
   public function inf(this $val): this;
 
-// type constants
+  // type constants
 
   abstract const type IT1 as this;
 }
 
 abstract class C implements I {
 
-// constants
+  // constants
 
   abstract const ?this M1a;
   const ?this M1c = null;
 
   const ?this IM1a = null;
 
-// properties
+  // properties
 
-//  static private this $p1s;	// The type "this" cannot be used as the type of a static member variable
-//  static private ?this $p2s;	// The type "this" cannot be used as the type of a static member variable
+  //  static private this $p1s;	// The type "this" cannot be used as the type of a static member variable
+  //  static private ?this $p2s;	// The type "this" cannot be used as the type of a static member variable
 
   private string $name;
 
@@ -50,44 +50,56 @@ abstract class C implements I {
   protected ?this $p2c;
   public ?this $p3c;
 
-// constructor
+  // constructor
 
   public function __construct(string $name) {
-    echo "Inside " . __METHOD__ . "\n";
+    echo "Inside ".__METHOD__."\n";
     $this->name = $name;
-    var_dump($this); 
+    var_dump($this);
     $this->setProp($this);
     $this->p2c = $this->getProp();
-    var_dump($this->p2c); 
+    var_dump($this->p2c);
   }
 
-// methods
+  // methods
 
   public function setProp(this $val): void {
-    echo "Inside " . __METHOD__ . "\n";
-    var_dump($val); 
+    echo "Inside ".__METHOD__."\n";
+    var_dump($val);
     $this->p1c = $val;
   }
 
   public function getProp(): ?this {
-    echo "Inside " . __METHOD__ . "\n";
-    var_dump($this->p1c); 
+    echo "Inside ".__METHOD__."\n";
+    var_dump($this->p1c);
     return $this->p1c;
   }
 
-  private function privf(this $val): this { return $val; }
-  private static function privsf(this $val): this { return $val; }
-  protected function protf(this $val): this { return $val; }
-  protected static function protsf(this $val): this { return $val; }
-  public function pubf(this $val): this { return $val; }
-  public static function pubsf(this $val): this {
-    echo "Inside " . __METHOD__ . "\n";
-    var_dump($val); 
+  private function privf(this $val): this {
     return $val;
   }
-  public function inf(this $val): this { return $val; }
+  private static function privsf(this $val): this {
+    return $val;
+  }
+  protected function protf(this $val): this {
+    return $val;
+  }
+  protected static function protsf(this $val): this {
+    return $val;
+  }
+  public function pubf(this $val): this {
+    return $val;
+  }
+  public static function pubsf(this $val): this {
+    echo "Inside ".__METHOD__."\n";
+    var_dump($val);
+    return $val;
+  }
+  public function inf(this $val): this {
+    return $val;
+  }
 
-// type constants
+  // type constants
 
   abstract const type T1 as this;
 }

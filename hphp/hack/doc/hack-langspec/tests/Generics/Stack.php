@@ -12,7 +12,7 @@ class Stack<T> {
     $this->stackPtr = 0;
     $this->stack = array();
 
-    echo "Inside " . __METHOD__ . ": stackPtr = " . $this->stackPtr . "\n";
+    echo "Inside ".__METHOD__.": stackPtr = ".$this->stackPtr."\n";
   }
 
   public function __destruct() {
@@ -20,13 +20,13 @@ class Stack<T> {
   }
 
   public function push(T $value): void {
-    echo "Inside " . __METHOD__ . ": stackPtr = " . $this->stackPtr . "\n";
+    echo "Inside ".__METHOD__.": stackPtr = ".$this->stackPtr."\n";
 
     $this->stack[$this->stackPtr++] = $value;
   }
 
   public function pop(): T {
-    echo "Inside " . __METHOD__ . ": stackPtr = " . $this->stackPtr . "\n";
+    echo "Inside ".__METHOD__.": stackPtr = ".$this->stackPtr."\n";
 
     if ($this->stackPtr > 0) {
       return $this->stack[--$this->stackPtr];

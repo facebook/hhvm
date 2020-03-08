@@ -21,11 +21,11 @@ function f5(bool $p): noreturn {
 }					// implicit return nothing on true is disallowed
 */
 
-function f6(int $p): noreturn { 
+function f6(int $p): noreturn {
   if ($p < 0) throw new ExceptionA();
   else if ($p > 0) throw new ExceptionB();
   else exit(10);
-}					// Okay; no path returns
+} // Okay; no path returns
 
 //function caller1(): void { $p = f6(123); }	// disallowed, as function does not return at all let along a value
 
@@ -47,65 +47,65 @@ function f7a(int $p): noreturn {
 }
 */
 
-function f7b(int $p): noreturn { 
-  return f6($p);				// Currently allowed; bug??
+function f7b(int $p): noreturn {
+  return f6($p); // Currently allowed; bug??
 }
 
-function f7c(int $p): noreturn { 
+function f7c(int $p): noreturn {
   f6($p);
-}						// implicit return nothing is allowed
+} // implicit return nothing is allowed
 
-function f7d(int $p): noreturn { 
+function f7d(int $p): noreturn {
   f6($p);
-//  return;					// explicit return nothing is disallowed
+  //  return;					// explicit return nothing is disallowed
 }
 
 // ============================== test instance methods ==============================
 
 class C1 {
-/*
-  public function f1(): noreturn { }		// implicit return nothing is disallowed
-  public function f2(): noreturn { return; }	// explicit return nothing is disallowed
-  public function f3(): noreturn { return 10; }	// explicit return anything is disallowed
+  /*
+    public function f1(): noreturn { }		// implicit return nothing is disallowed
+    public function f2(): noreturn { return; }	// explicit return nothing is disallowed
+    public function f3(): noreturn { return 10; }	// explicit return anything is disallowed
 
-  public function f4(bool $p): noreturn { 
-    if ($p) exit(10);
-  }						// implicit return nothing on false is disallowed
+    public function f4(bool $p): noreturn { 
+      if ($p) exit(10);
+    }						// implicit return nothing on false is disallowed
 
-  public function f5(bool $p): noreturn { 
-    if ($p) ; else exit(10);
-  }						// implicit return nothing on true is disallowed
-*/
+    public function f5(bool $p): noreturn { 
+      if ($p) ; else exit(10);
+    }						// implicit return nothing on true is disallowed
+  */
 
-  public function f6(int $p): noreturn { 
+  public function f6(int $p): noreturn {
     if ($p < 0) throw new ExceptionA();
     else if ($p > 0) throw new ExceptionB();
     else exit(10);
-  }						// Okay; no path returns but surpising. Not supposed to work here 
+  } // Okay; no path returns but surpising. Not supposed to work here 
 }
 
 // ============================== test instance methods ==============================
 
 class C2 {
-/*
-  public static function f1(): noreturn { }		// implicit return nothing is disallowed
-  public static function f2(): noreturn { return; }	// explicit return nothing is disallowed
-  public static function f3(): noreturn { return 10; }	// explicit return anything is disallowed
+  /*
+    public static function f1(): noreturn { }		// implicit return nothing is disallowed
+    public static function f2(): noreturn { return; }	// explicit return nothing is disallowed
+    public static function f3(): noreturn { return 10; }	// explicit return anything is disallowed
 
-  public static function f4(bool $p): noreturn { 
-    if ($p) exit(10);
-  }							// implicit return nothing on false is disallowed
+    public static function f4(bool $p): noreturn { 
+      if ($p) exit(10);
+    }							// implicit return nothing on false is disallowed
 
-  public static function f5(bool $p): noreturn { 
-    if ($p) ; else exit(10);
-  }							// implicit return nothing on true is disallowed
-*/
+    public static function f5(bool $p): noreturn { 
+      if ($p) ; else exit(10);
+    }							// implicit return nothing on true is disallowed
+  */
 
-  public static function f6(int $p): noreturn { 
+  public static function f6(int $p): noreturn {
     if ($p < 0) throw new ExceptionA();
     else if ($p > 0) throw new ExceptionB();
     else exit(10);
-  }							// Okay; no path returns
+  } // Okay; no path returns
 }
 
 // ============================== end of script ==============================

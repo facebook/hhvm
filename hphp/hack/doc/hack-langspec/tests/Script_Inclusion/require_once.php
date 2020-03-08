@@ -11,12 +11,12 @@ function main(): void {
   var_dump(\NS_Positions\LEFT);
   var_dump(\NS_Positions\TOP);
 
-  $p1 = new \NS_Point\Point(10.0,20.0);
+  $p1 = new \NS_Point\Point(10.0, 20.0);
   $p2 = new \NS_Point\Point(5.0, 6.0);
   var_dump($p1, $p2);
 
   $c1 = new \NS_Circle\Circle(9.0, 7.0, 2.4);
- var_dump($c1);
+  var_dump($c1);
 
   print_r(get_required_files());
 }

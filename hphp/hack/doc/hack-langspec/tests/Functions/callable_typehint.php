@@ -7,8 +7,8 @@ function hello(): void {
 }
 
 //function f5(callable $p1): void {	// callable type hint not permitted
-function f5((function (): void) $p1): void {
-  echo "Inside " . __FUNCTION__ . "\n";
+function f5((function(): void) $p1): void {
+  echo "Inside ".__FUNCTION__."\n";
 
   var_dump($p1);
   $p1();

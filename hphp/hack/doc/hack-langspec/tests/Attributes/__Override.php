@@ -28,7 +28,7 @@ trait T1 {
 }
 
 class C1 {
-//  use T1; // error! foo is not an override
+  //  use T1; // error! foo is not an override
 }
 
 class C2 {
@@ -61,15 +61,17 @@ class C implements I2 {
 // --------------------------------------------------------
 
 //<<__Override, Attr2(3, true)>>	// hmmm! accepted
-<<__Override(3), Attr2(3, true)>>	// hmmm! accepted
-function f1(): void { echo "Inside " . __FUNCTION__ . "\n"; }
+<<__Override(3), Attr2(3, true)>> // hmmm! accepted
+function f1(): void {
+  echo "Inside ".__FUNCTION__."\n";
+}
 
 function main(): void {
   echo "\n============== top-level function =====================\n\n";
 
   f1();
   $rf = new \ReflectionFunction('\NS_Override\f1');
-  $attr1 = $rf->getAttribute('__Override');	// hmmm!
+  $attr1 = $rf->getAttribute('__Override'); // hmmm!
   var_dump($attr1);
   $attr2 = $rf->getAttribute('Attr2');
   var_dump($attr2);

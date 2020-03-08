@@ -5,7 +5,7 @@ namespace NS_while;
 function main(): void {
   $i = 1;
   while ($i <= 10) {
-    echo "$i\t".($i * $i)."\n";	// output a table of squares
+    echo "$i\t".($i * $i)."\n"; // output a table of squares
     ++$i;
   }
 
@@ -17,7 +17,7 @@ function main(): void {
     echo $count."\n";
     // ...
     if ($done)
-      break;	// break out of the while loop
+      break; // break out of the while loop
     // ...
   }
 }

@@ -3,7 +3,7 @@
 namespace NS_trait_requirements;
 
 class C1 {
-  public function cf1(): void { }
+  public function cf1(): void {}
 }
 
 interface I1 {
@@ -21,7 +21,7 @@ trait T1 {
 
 class C2 extends C1 implements I1 {
   use T1;
-  public function if1(): void { }
+  public function if1(): void {}
 }
 
 trait T2 {
@@ -35,7 +35,7 @@ trait T2 {
 
 class C3 extends C1 implements I1 {
   use T2;
-  public function if1(): void { }
+  public function if1(): void {}
 }
 
 /*
@@ -50,17 +50,17 @@ interface I2 {
 
 trait T3 {
   require implements I1;
-  require extends C1;		// redundant, as C3 already extends C1, but permitted
+  require extends C1; // redundant, as C3 already extends C1, but permitted
   require implements I2;
-  require implements I2;	// redundant, but permitted
+  require implements I2; // redundant, but permitted
   require extends C3;
-  require extends C3;		// redundant, but permitted
+  require extends C3; // redundant, but permitted
 }
 
 class C4 extends C3 implements I1, I2 {
   use T3;
-  public function if1(): void { }
-  public function if2(): void { }
+  public function if1(): void {}
+  public function if2(): void {}
 }
 
 /*
@@ -72,4 +72,3 @@ trait Tx {
   require implements Ix;	// cyclic definition; not permitted
 }
 */
-

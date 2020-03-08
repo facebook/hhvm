@@ -15,6 +15,6 @@ class MyQueue<T> implements MyCollection<T> {
     // ...
     return $this->list[0];
   }
-	
+
   // ...
 }

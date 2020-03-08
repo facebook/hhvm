@@ -2,25 +2,25 @@
 
 namespace NS10 {
   function f10(): void {
-    echo "Inside namespace " . __NAMESPACE__ . "\n";
-    echo "Inside function " . __FUNCTION__ . "\n";
-    echo "Inside method " . __METHOD__ . "\n";
+    echo "Inside namespace ".__NAMESPACE__."\n";
+    echo "Inside function ".__FUNCTION__."\n";
+    echo "Inside method ".__METHOD__."\n";
   }
 }
 
 namespace {
   function f20(): void {
-    echo "Inside namespace " . __NAMESPACE__ . "\n";
-    echo "Inside function " . __FUNCTION__ . "\n";
-    echo "Inside method " . __METHOD__ . "\n";
+    echo "Inside namespace ".__NAMESPACE__."\n";
+    echo "Inside function ".__FUNCTION__."\n";
+    echo "Inside method ".__METHOD__."\n";
   }
 }
 
 namespace NS20 {
   function f30(): void {
-    echo "Inside namespace " . __NAMESPACE__ . "\n";
-    echo "Inside function " . __FUNCTION__ . "\n";
-    echo "Inside method " . __METHOD__ . "\n";
+    echo "Inside namespace ".__NAMESPACE__."\n";
+    echo "Inside function ".__FUNCTION__."\n";
+    echo "Inside method ".__METHOD__."\n";
   }
 }
 

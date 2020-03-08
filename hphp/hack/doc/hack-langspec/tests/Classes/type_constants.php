@@ -58,14 +58,16 @@ main();
 
 abstract class Ctc1 {
   abstract const type T;
-//  abstract public const type T;
-//  private abstract const type T;
-//  protected abstract const type T;
+  //  abstract public const type T;
+  //  private abstract const type T;
+  //  protected abstract const type T;
 }
 
 // use public name Ctc1::T
 
-function ftc1(Ctc1::T $p): Ctc1::T { return $p; }
+function ftc1(Ctc1::T $p): Ctc1::T {
+  return $p;
+}
 
 // ---------------------------------------------------------------------
 
@@ -87,19 +89,19 @@ abstract class Ctc2 {
 // Check the permitted orderings of the keywords
 
 abstract class Ctc3a {
-  abstract const type T1;	// OK
-//  abstract type const T2;	// ill-formed
-//  const abstract type T3;	// ill-formed
-//  type abstract const T4;	// ill-formed
-//  const type abstract T5;	// ill-formed
-//  type const abstract T6;	// ill-formed
+  abstract const type T1; // OK
+  //  abstract type const T2;	// ill-formed
+  //  const abstract type T3;	// ill-formed
+  //  type abstract const T4;	// ill-formed
+  //  const type abstract T5;	// ill-formed
+  //  type const abstract T6;	// ill-formed
 }
 
 class Ctc3b {
-  const type T1 = int;			// OK
-  const type T2 as arraykey = int;	// OK
-//  type const T3 = int;		// ill-formed
-//  type const T4 as arraykey = int;	// ill-formed
+  const type T1 = int; // OK
+  const type T2 as arraykey = int; // OK
+  //  type const T3 = int;		// ill-formed
+  //  type const T4 as arraykey = int;	// ill-formed
 }
 
 // ---------------------------------------------------------------------
@@ -107,17 +109,18 @@ class Ctc3b {
 // an abstract class
 
 abstract class Ctc4 {
-  abstract const type T1;			// constraint omitted; OK
-  abstract const type T2 as arraykey;		// constraint present; OK
-//  abstract const type T3 = int;		// Declared as abstract, so cannot have a concrete type
-//  abstract const type T4 as arraykey = int;	// Declared as abstract, so cannot have a concrete type
+  abstract const type T1; // constraint omitted; OK
+  abstract const type T2 as arraykey; // constraint present; OK
+  //  abstract const type T3 = int;		// Declared as abstract, so cannot have a concrete type
+  //  abstract const type T4 as arraykey = int;	// Declared as abstract, so cannot have a concrete type
 
-//  const type T5;				// Not declared as abstract, so must have a concrete type
-//  const type T6 as arraykey;			// Not declared as abstract, so must have a concrete type
-  const type T7 = int;				// Not declared as abstract, has a concrete type; OK
-  const type T8 as arraykey = int;		// Not declared as abstract, has a concrete type; OK
+  //  const type T5;				// Not declared as abstract, so must have a concrete type
+  //  const type T6 as arraykey;			// Not declared as abstract, so must have a concrete type
+  const type T7 = int; // Not declared as abstract, has a concrete type; OK
+  const type T8 as arraykey =
+    int; // Not declared as abstract, has a concrete type; OK
 
-//  abstract const type T9, T10 as arraykey;	// A list is not permitted
+  //  abstract const type T9, T10 as arraykey;	// A list is not permitted
 }
 
 // ---------------------------------------------------------------------
@@ -125,15 +128,16 @@ abstract class Ctc4 {
 // a concrete class
 
 class Ctc5 {
-//  abstract const type T1;			// Can't have abstract type constant in a concrete class
-//  abstract const type T2 as arraykey;		// Can't have abstract type constant in a concrete class
-//  abstract const type T3 = int;		// Can't have abstract type constant in a concrete class
-//  abstract const type T4 as arraykey = int;	// Can't have abstract type constant in a concrete class
+  //  abstract const type T1;			// Can't have abstract type constant in a concrete class
+  //  abstract const type T2 as arraykey;		// Can't have abstract type constant in a concrete class
+  //  abstract const type T3 = int;		// Can't have abstract type constant in a concrete class
+  //  abstract const type T4 as arraykey = int;	// Can't have abstract type constant in a concrete class
 
-//  const type T5;				// Not declared as abstract, so must have a concrete type
-//  const type T6 as arraykey;			// Not declared as abstract, so must have a concrete type
-  const type T7 = int;				// Not declared as abstract, has a concrete type; OK
-  const type T8 as arraykey = int;		// Not declared as abstract, has a concrete type; OK
+  //  const type T5;				// Not declared as abstract, so must have a concrete type
+  //  const type T6 as arraykey;			// Not declared as abstract, so must have a concrete type
+  const type T7 = int; // Not declared as abstract, has a concrete type; OK
+  const type T8 as arraykey =
+    int; // Not declared as abstract, has a concrete type; OK
 }
 
 // ---------------------------------------------------------------------
@@ -147,7 +151,7 @@ interface Itc1a {
   abstract const type T1 as arraykey;
   public function getID1(): this::T1;
   const type T4a = int;
-//  const type T4b as arraykey = int; // Disallowed: An interface cannot contain a partially abstract type constant
+  //  const type T4b as arraykey = int; // Disallowed: An interface cannot contain a partially abstract type constant
 }
 
 interface Itc1b {
@@ -185,8 +189,8 @@ class Ctc6 implements Itc1a, Itc1b {
 // traits; type constants are not permitted!
 
 trait Ttc1 {
-//  abstract const type T1;			// Cannot declare a constant in a trait
-//  const type T2 = int;			// Cannot declare a constant in a trait
+  //  abstract const type T1;			// Cannot declare a constant in a trait
+  //  const type T2 = int;			// Cannot declare a constant in a trait
 }
 
 // ---------------------------------------------------------------------
@@ -195,44 +199,44 @@ trait Ttc1 {
 
 abstract class Ctc7a {
   abstract const type T1;
-//  abstract const type T1;			// cannot redeclare in same class
+  //  abstract const type T1;			// cannot redeclare in same class
   const type T7 = int;
-//  const type T7 = int;			// cannot redeclare in same class
+  //  const type T7 = int;			// cannot redeclare in same class
 }
 
 abstract class Ctc7b extends Ctc7a {
-  abstract const type T1;			// redeclared exactly as was; OK
-  const type T7 = int;				// redeclared exactly as was; OK
+  abstract const type T1; // redeclared exactly as was; OK
+  const type T7 = int; // redeclared exactly as was; OK
   const type T8 = num;
 }
 
 class Ctc7c extends Ctc7b {
-  const type T1 = float;			// finally gets a concrete type; OK
-//  const type T7 = num;			// num is inconsistent with int; error
-//  const type T8 = int;			// int is inconsistent with num; error
+  const type T1 = float; // finally gets a concrete type; OK
+  //  const type T7 = num;			// num is inconsistent with int; error
+  //  const type T8 = int;			// int is inconsistent with num; error
 }
 
 interface Itc2a {
   abstract const type T1;
-//  abstract const type T1;			// cannot redeclare in same interface
-//***  const type T7 = int;
-//  const type T7 = int;			// cannot redeclare in same interface
+  //  abstract const type T1;			// cannot redeclare in same interface
+  //***  const type T7 = int;
+  //  const type T7 = int;			// cannot redeclare in same interface
 }
 
 interface Itc2b extends Itc2a {
-  abstract const type T1;			// redeclared exactly as was; OK
-//****  const type T7 = int;				// redeclared exactly as was; OK
+  abstract const type T1; // redeclared exactly as was; OK
+  //****  const type T7 = int;				// redeclared exactly as was; OK
   const type T8 = num;
 }
 
 interface Itc2c extends Itc2b {
-  const type T1 = float;			// finally gets a concrete type; OK
-//  const type T7 = num;			// num is inconsistent with int; error
-//  const type T8 = int;			// int is inconsistent with num; error
+  const type T1 = float; // finally gets a concrete type; OK
+  //  const type T7 = num;			// num is inconsistent with int; error
+  //  const type T8 = int;			// int is inconsistent with num; error
 }
 
 class Ctc7d extends Ctc7c implements Itc2a {
-  const type T7 = int;				// redeclared exactly as was; OK
+  const type T7 = int; // redeclared exactly as was; OK
 }
 
 // ---------------------------------------------------------------------
@@ -251,9 +255,15 @@ function ftc8b(Ctc8a::T $p): void {}
 function ftc8c(Ctc8b::T $p): void {}
 
 function ftcx(Itc8::T $p1, Ctc8a::T $p2, Ctc8b::T $p3): void {
-  ftc8a($p1); ftc8a($p2); ftc8a($p3);
-  ftc8b($p1); ftc8b($p2); ftc8b($p3);
-  ftc8c($p1); ftc8c($p2); ftc8c($p3);
+  ftc8a($p1);
+  ftc8a($p2);
+  ftc8a($p3);
+  ftc8b($p1);
+  ftc8b($p2);
+  ftc8b($p3);
+  ftc8c($p1);
+  ftc8c($p2);
+  ftc8c($p3);
 }
 
 //ftcx(5, 10, 15);
@@ -267,7 +277,7 @@ interface Ix {
 }
 
 interface Iy extends Ix {
-//  const type T7 = int;	// HHVM error: Cannot override previously defined type constant Ix::T7
+  //  const type T7 = int;	// HHVM error: Cannot override previously defined type constant Ix::T7
 }
 
 class Cw {
@@ -316,9 +326,7 @@ interface Itc9b extends Itc9a {
 
 abstract class Ctc9 implements Itc9b {
   const type T2 = int;
-  abstract public function ftc9(
-	Itc9b::T1 $p1,
-	this::T2 $p2): void;
+  abstract public function ftc9(Itc9b::T1 $p1, this::T2 $p2): void;
   public static Ctc9::T2 $count = 0;
 }
 
@@ -330,11 +338,11 @@ function f9b(array<Ctc9::T1> $p1, array<Itc9b::T0> $p2): void {}
 // can chain (with multiple ::) and use "keywords" in identifier contexts
 
 interface I10 {
-  const type this = int;	// this is an identifier, NOT a keyword
+  const type this = int; // this is an identifier, NOT a keyword
 }
 
 class C10 {
-  const type self = I10;	// self is an identifier, NOT a keyword
+  const type self = I10; // self is an identifier, NOT a keyword
 }
 
 function test10(C10::self::this $x): void {}
@@ -352,14 +360,14 @@ abstract class CBase {
 class Cstring extends CBase {
   const type T = string;
   public function getString(): string {
-    return $this->value;	// gets the string
+    return $this->value; // gets the string
   }
 }
 
 class Cint extends CBase {
   const type T = int;
   public function getInt(): int {
-    return $this->value;	// gets the int
+    return $this->value; // gets the int
   }
 }
 

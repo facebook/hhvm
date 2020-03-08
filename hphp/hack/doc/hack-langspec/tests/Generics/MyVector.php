@@ -36,9 +36,9 @@ class MyVector<T> {
   public function __toString(): string {
     $s = '[';
     for ($i = 0; $i < $this->length - 1; ++$i) {
-      $s .= (string)$this->vector[$i] . ':';
+      $s .= (string)$this->vector[$i].':';
     }
-    $s .= (string)$this->vector[$i] . ']';
+    $s .= (string)$this->vector[$i].']';
     return $s;
   }
 }

@@ -3,31 +3,37 @@
 namespace NS_closure;
 
 class C {
-//  const (function (): void) T = // *** no way to write a closure constant expression
+  //  const (function (): void) T = // *** no way to write a closure constant expression
 
-  private (function (): void) $prop;
+  private (function(): void) $prop;
 
-  public function setProp((function (): void) $val): void {
+  public function setProp((function(): void) $val): void {
     $this->prop = $val;
   }
 
-  public function getProp(): (function (): void) {
+  public function getProp(): (function(): void) {
     return $this->prop;
   }
 
   public function __construct() {
-    $this->prop = function (): void { echo "Hi there!\n"; };
+    $this->prop = function(): void {
+      echo "Hi there!\n";
+    };
   }
 }
 
-function doit(int $iValue, (function (int): int) $process): int {
+function doit(int $iValue, (function(int): int) $process): int {
   return $process($iValue);
 }
 
 function main(): void {
-  $result = doit(5, function ($p) { return $p * 2; });	// doubles 5
+  $result = doit(5, function($p) {
+    return $p * 2;
+  }); // doubles 5
   var_dump($result);
-  $result = doit(5, function ($p) { return $p * $p; });	// squares 5
+  $result = doit(5, function($p) {
+    return $p * $p;
+  }); // squares 5
   var_dump($result);
 }
 

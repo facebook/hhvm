@@ -2,7 +2,7 @@
 
 namespace NS_MyVector_test;
 
-require_once ('MyVector.php');
+require_once('MyVector.php');
 
 function main(): void {
   $iv1 = new \NS_MyVector\MyVector(7, 2);
@@ -17,7 +17,7 @@ function main(): void {
   echo "\$sv1: >>$sv1<<\n";
 
   $sv1->setElement(1, 'AB');
-  $sv1->setElement(3, $sv1->getElement(4) . 'ZZ');
+  $sv1->setElement(3, $sv1->getElement(4).'ZZ');
   echo "\$sv1: >>$sv1<<\n";
 
   $viv = new \NS_MyVector\MyVector(3, new \NS_MyVector\MyVector(2, -1));
@@ -32,9 +32,11 @@ function main(): void {
   echo "\$viv: >>$viv<<\n";
 }
 
-function f(\NS_MyVector\MyVector<int> $p1, \NS_MyVector\MyVector<string> $p2,
-  \NS_MyVector\MyVector<\NS_MyVector\MyVector<int>> $p3)
-  : \NS_MyVector\MyVector<\NS_MyVector\MyVector<int>> {
+function f(
+  \NS_MyVector\MyVector<int> $p1,
+  \NS_MyVector\MyVector<string> $p2,
+  \NS_MyVector\MyVector<\NS_MyVector\MyVector<int>> $p3,
+): \NS_MyVector\MyVector<\NS_MyVector\MyVector<int>> {
   $p3->setElement(1, $p1);
   return $p3;
 }

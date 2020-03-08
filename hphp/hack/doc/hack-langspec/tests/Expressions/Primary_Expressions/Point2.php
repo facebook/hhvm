@@ -5,8 +5,8 @@ namespace NS_intrinsics_exit;
 class Point2 {
   private static int $pointCount = 0;
 
-  public float $x;		// Cartesian x-coordinate
-  public float $y;		// Cartesian y-coordinate
+  public float $x; // Cartesian x-coordinate
+  public float $y; // Cartesian y-coordinate
 
   public static function getPointCount(): int {
     return self::$pointCount;
@@ -23,6 +23,6 @@ class Point2 {
   }
 
   public function __toString(): string {
-    return '(' . $this->x . ',' . $this->y . ')';
-  }	
+    return '('.$this->x.','.$this->y.')';
+  }
 }

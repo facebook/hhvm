@@ -16,7 +16,7 @@ function incdec(int $x): void {
   ++$x;
   var_dump($x);
 
-// equivalent code using -=/+= instead of --/++.
+  // equivalent code using -=/+= instead of --/++.
 
   var_dump($y);
   $y -= 1;
@@ -44,7 +44,7 @@ function incdecrev(int $x): void {
   --$x;
   var_dump($x);
 
-// equivalent code using -=/+= instead of --/++.
+  // equivalent code using -=/+= instead of --/++.
 
   var_dump($y);
   $y += 1;
@@ -59,7 +59,7 @@ function incdecrev(int $x): void {
 }
 
 function main(): void {
-  $i32 = 1 << 31;	// if this is negative, we have a 32-bit int
+  $i32 = 1 << 31; // if this is negative, we have a 32-bit int
   $i64 = 1 << 63; // same as $i32 for 32-bit int; otherwise, is 64-bit
   $IntMin = ($i32 < 0) ? $i32 : $i64;
   $IntMax = ~$IntMin;

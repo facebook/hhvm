@@ -17,14 +17,14 @@ class C {
 
 function main(): void {
   var_dump(-PHP_INT_MAX - 1);
-  var_dump(-PHP_INT_MAX - 1 - 1);		// wraps to max positive
+  var_dump(-PHP_INT_MAX - 1 - 1); // wraps to max positive
 
   var_dump(PHP_INT_MAX);
-  var_dump(PHP_INT_MAX + 1);			// wraps to min negative
+  var_dump(PHP_INT_MAX + 1); // wraps to min negative
 
-  var_dump(PHP_INT_MAX/2 + PHP_INT_MAX);	// converts to float
+  var_dump(PHP_INT_MAX / 2 + PHP_INT_MAX); // converts to float
 
-  var_dump(PHP_INT_MIN);			// added in PHP7
+  var_dump(PHP_INT_MIN); // added in PHP7
 }
 
 /* HH_FIXME[1002] call to main in strict*/

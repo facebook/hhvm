@@ -49,31 +49,31 @@ function swap<T>(Box<T> $a, Box<T> $b): void {
 function main(): void {
   echo "=============== maxVal ==================\n\n";
 
-  echo "maxVal(10, 20) = " . maxVal(10, 20) . "\n";
-  echo "maxVal(20, 10) = " . maxVal(20, 10) . "\n";
-  echo "maxVal(10, 10) = " . maxVal(10, 10) . "\n";
+  echo "maxVal(10, 20) = ".maxVal(10, 20)."\n";
+  echo "maxVal(20, 10) = ".maxVal(20, 10)."\n";
+  echo "maxVal(10, 10) = ".maxVal(10, 10)."\n";
 
-  echo "maxVal(15.6, -20.78) = " . maxVal(15.6, -20.78) . "\n";
+  echo "maxVal(15.6, -20.78) = ".maxVal(15.6, -20.78)."\n";
 
-  echo "maxVal('red', 'green') = " . maxVal('red', 'green') . "\n";
+  echo "maxVal('red', 'green') = ".maxVal('red', 'green')."\n";
 
-// all are accepted; hmm!
+  // all are accepted; hmm!
 
   $res = maxVal(10, 20.5);
-  echo "maxVal(10, 20.5) = " . $res . "\n";
+  echo "maxVal(10, 20.5) = ".$res."\n";
   var_dump($res);
 
   $res = maxVal(20.5, 10);
-  echo "maxVal(20.5, 10) = " . $res . "\n";
+  echo "maxVal(20.5, 10) = ".$res."\n";
   var_dump($res);
 
   $res = maxVal(0, true);
-  echo "maxVal(0, true) = " . $res . "\n";
-  var_dump($res);		// type is bool
+  echo "maxVal(0, true) = ".$res."\n";
+  var_dump($res); // type is bool
 
   $res = maxVal(1, false);
-  echo "maxVal(1, false) = " . $res . "\n";
-  var_dump($res);		// type is int
+  echo "maxVal(1, false) = ".$res."\n";
+  var_dump($res); // type is int
 
   echo "\n=============== arrayCopy ==================\n\n";
 

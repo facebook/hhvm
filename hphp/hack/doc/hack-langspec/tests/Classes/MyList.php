@@ -13,7 +13,6 @@ class MyList implements \NS_MyCollections\MyCollection {
     // ...
     return 100;
   }
-	
+
   // ...
 }
-

@@ -50,8 +50,7 @@ class E extends C implements J, K {
   use T;
 }
 
-function main (): void
-{
+function main(): void {
 }
 
 /* HH_FIXME[1002] call to main in strict*/

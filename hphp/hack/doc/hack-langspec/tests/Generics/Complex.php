@@ -36,12 +36,12 @@ class Complex<T as num> {
   }
 
   public function __toString(): string {
-    if ($this->imag < 0.0) {                                                       
-      return "(" . $this->real . " - " . (-$this->imag) . "i)";
-    } else if (1.0/$this->imag == -INF) {
-      return "(" . $this->real . " + " . 0.0 . "i)";
+    if ($this->imag < 0.0) {
+      return "(".$this->real." - ".(-$this->imag)."i)";
+    } else if (1.0 / $this->imag == -INF) {
+      return "(".$this->real." + ". 0.0 ."i)";
     } else {
-      return "(" . $this->real . " + " . (+$this->imag) . "i)";
+      return "(".$this->real." + ".(+$this->imag)."i)";
     }
   }
 }

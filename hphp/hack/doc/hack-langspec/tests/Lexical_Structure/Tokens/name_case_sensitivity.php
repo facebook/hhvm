@@ -6,8 +6,8 @@ function F(): void {}
 //function f(): void {}	// name spelling differs only in capitalization
 
 class C {
-	public function F(): void {}
-	public function f(): void {}
+  public function F(): void {}
+  public function f(): void {}
 }
 //class c {}		// not permitted
 

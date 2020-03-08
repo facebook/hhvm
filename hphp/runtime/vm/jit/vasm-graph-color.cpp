@@ -2088,6 +2088,19 @@ void infer_register_classes(State& state) {
     );
   };
 
+  // Check that a phi or a copyargs instruction has distinct dst registers.
+  // We allow rvmfp() as a special case because we sometimes phi FramePtrs but
+  // we always assign them to the PhysReg rvmfp().
+  DEBUG_ONLY auto const checkDistinctDsts = [] (const VregList& dsts) -> bool {
+    VregSet defs;
+    for (auto i = 0; i < dsts.size(); ++i) {
+      if (dsts[i] == rvmfp()) continue;
+      always_assert(!defs[dsts[i]]);
+      defs.add(dsts[i]);
+    }
+    return true;
+  };
+
   // Insert copies as necessary to ensure that a copyargs instruction
   // does not copy between a non-ignored register and an ignored
   // one. Also ensure that a copyargs only has all physical registers
@@ -2105,18 +2118,7 @@ void infer_register_classes(State& state) {
     auto& srcs = unit.tuples[inst.copyargs_.s];
     auto& dsts = unit.tuples[inst.copyargs_.d];
     assertx(srcs.size() == dsts.size());
-
-    if (debug) {
-      // Sanity check that the copyargs doesn't have any duplicate
-      // defs (even physical registers, whose semantics would be
-      // unclear).
-      VregSet defs;
-      for (size_t i = 0; i < dsts.size(); ++i) {
-        auto const d = dsts[i];
-        always_assert(!defs[d]);
-        defs.add(d);
-      }
-    }
+    assertx(checkDistinctDsts(dsts));
 
     for (size_t i = 0; i < srcs.size(); ++i) {
       auto const s = srcs[i];
@@ -2324,18 +2326,7 @@ void infer_register_classes(State& state) {
     auto& firstInst = unit.blocks[b].code.front();
     if (firstInst.op == Vinstr::phidef) {
       auto& d = unit.tuples[firstInst.phidef_.defs];
-
-      if (debug) {
-        // Sanity check that the phi doesn't have duplicate defs. We
-        // allow rvmfp() as a special case because sometimes we phi
-        // FramePtrs and those are always assigned rvmfp().
-        VregSet defs;
-        for (size_t i = 0; i < d.size(); ++i) {
-          if (d[i] == rvmfp()) continue;
-          always_assert(!defs[d[i]]);
-          defs.add(d[i]);
-        }
-      }
+      assertx(checkDistinctDsts(d));
 
       // Check for any physical registers as dests. If any, set a new
       // virtual register as the dest, and emit a copy from it to the

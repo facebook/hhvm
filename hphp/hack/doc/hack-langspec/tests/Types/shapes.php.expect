@@ -1,0 +1,11 @@
+----------- Play ------------
+
+----------- Create some shape values ------------
+
+$point1 is -3
+shape(...)['y'] is 6
+$point1 is (-3,6)
+Origin is (0,0)
+----------- Create some shape values ------------
+
+A shape is an array

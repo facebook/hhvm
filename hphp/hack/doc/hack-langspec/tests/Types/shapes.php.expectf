@@ -1,0 +1,8 @@
+----------- Play ------------
+
+----------- Create some shape values ------------
+
+$point1 is -3
+shape(...)['y'] is 6
+
+Fatal error: Call to undefined function NS_shapes_rf\Point_toString() in %s/tests/Types/shapes.php on line 62

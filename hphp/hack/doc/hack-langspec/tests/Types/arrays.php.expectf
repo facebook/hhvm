@@ -1,0 +1,439 @@
+================= Class C1 ===================
+
+Inside NS_arrays2\C1::__construct
+object(NS_arrays2\C1)#1 (29) {
+  ["a_defint_string":"NS_arrays2\C1":private]=>
+  array(2) {
+    [0]=>
+    string(1) "a"
+    [1]=>
+    string(1) "b"
+  }
+  ["a_int_string":"NS_arrays2\C1":private]=>
+  array(2) {
+    [0]=>
+    string(1) "a"
+    [1]=>
+    string(1) "b"
+  }
+  ["a_string_bool":"NS_arrays2\C1":private]=>
+  array(2) {
+    ["X1"]=>
+    bool(true)
+    ["X2"]=>
+    bool(false)
+  }
+  ["a_float_int":"NS_arrays2\C1":private]=>
+  array(1) {
+    [5]=>
+    int(20)
+  }
+  ["a_bool_int":"NS_arrays2\C1":private]=>
+  array(2) {
+    [1]=>
+    int(10)
+    [0]=>
+    int(20)
+  }
+  ["a_num_int":"NS_arrays2\C1":private]=>
+  array(1) {
+    [5]=>
+    int(30)
+  }
+  ["a_mixed_int":"NS_arrays2\C1":private]=>
+  array(3) {
+    [5]=>
+    int(10)
+    [0]=>
+    int(20)
+    [""]=>
+    int(30)
+  }
+  ["a_bool":"NS_arrays2\C1":private]=>
+  array(2) {
+    [0]=>
+    bool(true)
+    [1]=>
+    bool(false)
+  }
+  ["a_int":"NS_arrays2\C1":private]=>
+  array(2) {
+    [0]=>
+    int(10)
+    [1]=>
+    int(20)
+  }
+  ["a_float":"NS_arrays2\C1":private]=>
+  array(2) {
+    [0]=>
+    float(3.1)
+    [1]=>
+    float(-2.4)
+  }
+  ["a_num":"NS_arrays2\C1":private]=>
+  array(2) {
+    [0]=>
+    float(5.4)
+    [1]=>
+    int(234)
+  }
+  ["a_string":"NS_arrays2\C1":private]=>
+  array(2) {
+    [0]=>
+    string(1) "a"
+    [1]=>
+    string(1) "b"
+  }
+  ["a_mixed":"NS_arrays2\C1":private]=>
+  array(6) {
+    [0]=>
+    int(10)
+    [1]=>
+    string(1) "b"
+    [2]=>
+    bool(false)
+    [3]=>
+    object(NS_arrays2\C2b)#23 (0) {
+    }
+    [4]=>
+    object(NS_arrays2\C2c)#24 (0) {
+    }
+    [5]=>
+    object(NS_arrays2\C3)#25 (0) {
+    }
+  }
+  ["a_a_int":"NS_arrays2\C1":private]=>
+  array(2) {
+    [0]=>
+    array(2) {
+      [0]=>
+      int(10)
+      [1]=>
+      int(20)
+    }
+    [1]=>
+    array(2) {
+      [0]=>
+      int(2)
+      [1]=>
+      int(3)
+    }
+  }
+  ["a_resource":"NS_arrays2\C1":private]=>
+  array(2) {
+    [0]=>
+    resource(1) of type (stream)
+    [1]=>
+    resource(2) of type (stream)
+  }
+  ["a_nbool":"NS_arrays2\C1":private]=>
+  array(2) {
+    [0]=>
+    bool(true)
+    [1]=>
+    NULL
+  }
+  ["a_nint":"NS_arrays2\C1":private]=>
+  array(2) {
+    [0]=>
+    int(10)
+    [1]=>
+    NULL
+  }
+  ["a_nfloat":"NS_arrays2\C1":private]=>
+  array(2) {
+    [0]=>
+    float(3.1)
+    [1]=>
+    NULL
+  }
+  ["a_nnum":"NS_arrays2\C1":private]=>
+  array(2) {
+    [0]=>
+    float(5.4)
+    [1]=>
+    NULL
+  }
+  ["a_nstring":"NS_arrays2\C1":private]=>
+  array(2) {
+    [0]=>
+    string(1) "a"
+    [1]=>
+    NULL
+  }
+  ["a_nmixed":"NS_arrays2\C1":private]=>
+  array(3) {
+    [0]=>
+    int(10)
+    [1]=>
+    string(1) "b"
+    [2]=>
+    NULL
+  }
+  ["a_C2a":"NS_arrays2\C1":private]=>
+  array(3) {
+    [0]=>
+    object(NS_arrays2\C2c)#11 (0) {
+    }
+    [1]=>
+    object(NS_arrays2\C2c)#12 (0) {
+    }
+    [2]=>
+    object(NS_arrays2\C2c)#13 (0) {
+    }
+  }
+  ["a_C2b":"NS_arrays2\C1":private]=>
+  array(3) {
+    [0]=>
+    object(NS_arrays2\C2b)#20 (0) {
+    }
+    [1]=>
+    object(NS_arrays2\C2b)#21 (0) {
+    }
+    [2]=>
+    object(NS_arrays2\C2c)#22 (0) {
+    }
+  }
+  ["a_C2c":"NS_arrays2\C1":private]=>
+  array(3) {
+    [0]=>
+    object(NS_arrays2\C2c)#17 (0) {
+    }
+    [1]=>
+    object(NS_arrays2\C2c)#18 (0) {
+    }
+    [2]=>
+    object(NS_arrays2\C2c)#19 (0) {
+    }
+  }
+  ["a_iI":"NS_arrays2\C1":private]=>
+  array(2) {
+    [0]=>
+    object(NS_arrays2\C4a)#26 (0) {
+    }
+    [1]=>
+    object(NS_arrays2\C4b)#27 (0) {
+    }
+  }
+  ["a_int1":"NS_arrays2\C1":private]=>
+  array(2) {
+    [0]=>
+    int(10)
+    [1]=>
+    int(20)
+  }
+  ["a_int2":"NS_arrays2\C1":private]=>
+  array(2) {
+    [0]=>
+    int(10)
+    [1]=>
+    int(20)
+  }
+  ["a_int3":"NS_arrays2\C1":private]=>
+  array(2) {
+    [1]=>
+    int(20)
+    [0]=>
+    int(10)
+  }
+  ["a_int4":"NS_arrays2\C1":private]=>
+  array(2) {
+    [5]=>
+    int(20)
+    [-1]=>
+    int(10)
+  }
+}
+================= Class C1::test_conversions ===================
+
+Inside NS_arrays2\C1::test_conversions
+result of (bool) = 
+result of (bool) = 1
+result of (int) = 0
+result of (int) = 1
+
+Notice: Array to string conversion in %s/tests/Types/arrays.php on line 181
+result of (string) = string(5) "Array"
+
+Notice: Array to string conversion in %s/tests/Types/arrays.php on line 183
+result of (string) = string(5) "Array"
+
+Notice: Array to string conversion in %s/tests/Types/arrays.php on line 185
+result of (string) = string(5) "Array"
+================= Class C1::test_intrinsics ===================
+
+Inside NS_arrays2\C1::test_intrinsics
+array(3) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(100)
+  [2]=>
+  int(67)
+}
+$min = 0, $max = 100, $avg = 67
+================= Class C1::array_proc ===================
+
+Inside NS_arrays2\C1::array_proc
+result of p1+p2 = array(2) {
+  [0]=>
+  int(66)
+  [1]=>
+  int(200)
+}
+result of p1<p2 = bool(true)
+result of p1<=p2 = bool(true)
+result of p1>p2 = bool(false)
+result of p1>=p2 = bool(false)
+result of p1!=p2 = bool(true)
+result of p1==p2 = 
+result of p1!=p2 = 1
+result of p1===p2 = 
+result of p1!==p2 = 1
+result of p1==p3 = 
+result of p1!=p3 = 1
+result of p1===p3 = 
+result of p1!==p3 = 1
+$v[0] = 66
+array(1) {
+  [0]=>
+  int(66)
+}
+array(2) {
+  [0]=>
+  int(66)
+  [1]=>
+  int(123)
+}
+array(3) {
+  [0]=>
+  int(66)
+  [1]=>
+  int(123)
+  [2]=>
+  int(456)
+}
+array(3) {
+  [0]=>
+  int(66)
+  [1]=>
+  int(333)
+  [2]=>
+  int(456)
+}
+array(4) {
+  [0]=>
+  int(66)
+  [1]=>
+  int(333)
+  [2]=>
+  int(456)
+  [-5]=>
+  int(-23)
+}
+array(5) {
+  [0]=>
+  int(66)
+  [1]=>
+  int(333)
+  [2]=>
+  int(456)
+  [-5]=>
+  int(-23)
+  [100]=>
+  int(4444)
+}
+================= Class C5 ===================
+
+object(NS_arrays2\C5)#28 (10) {
+  ["colorsV":"NS_arrays2\C5":private]=>
+  array(3) {
+    [0]=>
+    string(3) "red"
+    [1]=>
+    string(5) "white"
+    [2]=>
+    string(4) "blue"
+  }
+  ["colorsM":"NS_arrays2\C5":private]=>
+  array(3) {
+    [0]=>
+    string(3) "red"
+    [1]=>
+    string(5) "white"
+    [2]=>
+    string(4) "blue"
+  }
+  ["colorsM2":"NS_arrays2\C5":private]=>
+  array(3) {
+    [0]=>
+    string(3) "red"
+    [1]=>
+    string(5) "white"
+    [2]=>
+    string(4) "blue"
+  }
+  ["colorsM3":"NS_arrays2\C5":private]=>
+  array(3) {
+    [2]=>
+    string(4) "blue"
+    [0]=>
+    string(3) "red"
+    [1]=>
+    string(5) "white"
+  }
+  ["flags":"NS_arrays2\C5":private]=>
+  array(4) {
+    ["F1"]=>
+    bool(true)
+    ["F2"]=>
+    bool(false)
+    ["F3"]=>
+    bool(false)
+    ["F4"]=>
+    bool(true)
+  }
+  ["measurements":"NS_arrays2\C5":private]=>
+  array(2) {
+    [0]=>
+    int(10)
+    [1]=>
+    float(25.55)
+  }
+  ["items":"NS_arrays2\C5":private]=>
+  array(4) {
+    [0]=>
+    bool(true)
+    [1]=>
+    int(123)
+    [2]=>
+    string(3) "red"
+    [3]=>
+    NULL
+  }
+  ["things":"NS_arrays2\C5":private]=>
+  array(2) {
+    ["X"]=>
+    int(10)
+    [2]=>
+    bool(true)
+  }
+  ["buttons":"NS_arrays2\C5":private]=>
+  array(2) {
+    [0]=>
+    object(NS_arrays2\Button)#29 (0) {
+    }
+    [1]=>
+    object(NS_arrays2\CustomButton)#30 (0) {
+    }
+  }
+  ["collections":"NS_arrays2\C5":private]=>
+  array(2) {
+    [0]=>
+    object(NS_arrays2\MyList)#31 (0) {
+    }
+    [1]=>
+    object(NS_arrays2\MyQueue)#32 (0) {
+    }
+  }
+}

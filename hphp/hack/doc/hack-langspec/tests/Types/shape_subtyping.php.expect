@@ -1,0 +1,29 @@
+array(3) {
+  ["trtype"]=>
+  int(1)
+  ["toaccnum"]=>
+  int(23456)
+  ["amount"]=>
+  float(100)
+}
+Deposit: 100 to Account 23456
+array(3) {
+  ["trtype"]=>
+  int(2)
+  ["fromaccnum"]=>
+  int(3157)
+  ["amount"]=>
+  float(100)
+}
+Withdrawal: 100 from Account 3157
+array(4) {
+  ["trtype"]=>
+  int(3)
+  ["fromaccnum"]=>
+  int(23456)
+  ["toaccnum"]=>
+  int(3157)
+  ["amount"]=>
+  float(100)
+}
+Transfer: 100 from Account 23456 to Account 3157

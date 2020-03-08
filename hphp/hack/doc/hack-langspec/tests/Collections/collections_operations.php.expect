@@ -1,0 +1,223 @@
+========================== Vector =======================
+$v1[1] = 10
+object(HH\Vector)#1 (4) {
+  [0]=>
+  int(-5)
+  [1]=>
+  int(10)
+  [2]=>
+  int(15)
+  [3]=>
+  int(20)
+}
+int(4)
+Vector $v1 = >Vector<
+$min: 0, $max: 100, $avg: 67
+HH\Vector Object
+(
+    [0] => 0
+    [1] => 100
+    [2] => 67
+)
+object(HH\Vector)#5 (2) {
+  [0]=>
+  object(HH\Vector)#3 (2) {
+    [0]=>
+    bool(true)
+    [1]=>
+    bool(false)
+  }
+  [1]=>
+  object(HH\Pair)#4 (2) {
+    [0]=>
+    int(10)
+    [1]=>
+    int(20)
+  }
+}
+object(HH\Vector)#6 (2) {
+  [0]=>
+  object(HH\Vector)#3 (2) {
+    [0]=>
+    bool(true)
+    [1]=>
+    bool(false)
+  }
+  [1]=>
+  object(HH\Pair)#4 (2) {
+    [0]=>
+    int(10)
+    [1]=>
+    int(20)
+  }
+}
+Vector ==  #1: T
+Vector ==  #2: T
+Vector ==  #3: F
+Vector ==  #4: F
+Vector === #1: T
+Vector === #2: F
+Vector === #3: F
+Vector === #4: F
+========================== Conversions from Vector =======================
+bool(false)
+bool(true)
+string(6) "Vector"
+string(6) "Vector"
+========================== ImmVector =======================
+$iv1[1] = 10
+object(HH\ImmVector)#13 (3) {
+  [0]=>
+  int(5)
+  [1]=>
+  int(10)
+  [2]=>
+  int(15)
+}
+$min: 0, $max: 100, $avg: 67
+object(HH\ImmVector)#14 (3) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(100)
+  [2]=>
+  int(67)
+}
+ImmVector ==  #1: T
+ImmVector ==  #2: T
+ImmVector ==  #3: F
+ImmVector ==  #4: F
+ImmVector == Vector: T
+ImmVector === #1: T
+ImmVector === #2: F
+ImmVector === #3: F
+ImmVector === #4: F
+========================== Conversions from ImmVector =======================
+bool(false)
+bool(true)
+string(9) "ImmVector"
+string(9) "ImmVector"
+========================== Map =======================
+object(HH\Map)#22 (2) {
+  ["red"]=>
+  int(5)
+  ["green"]=>
+  int(12)
+}
+$m1['red'] = 123
+object(HH\Map)#22 (4) {
+  ["red"]=>
+  int(123)
+  ["green"]=>
+  int(12)
+  ["blue"]=>
+  int(35)
+  ["black"]=>
+  int(43)
+}
+Map $m1 = >Map<
+Map ==  #1: T
+Map ==  #2: T
+Map ==  #3: T
+Map ==  #4: F
+Map === #1: T
+Map === #2: F
+Map === #3: F
+Map === #4: F
+========================== Conversions from Map =======================
+bool(false)
+bool(true)
+string(3) "Map"
+string(3) "Map"
+========================== ImmMap =======================
+$im1['red'] = 5
+object(HH\ImmMap)#29 (2) {
+  ["red"]=>
+  int(5)
+  ["green"]=>
+  int(12)
+}
+ImmMap ==  #1: T
+ImmMap ==  #2: T
+ImmMap ==  #3: T
+ImmMap ==  #4: F
+ImmMap == Map: T
+ImmMap === #1: T
+ImmMap === #2: F
+ImmMap === #3: F
+ImmMap === #4: F
+========================== Conversions from ImmMap =======================
+bool(false)
+bool(true)
+string(6) "ImmMap"
+string(6) "ImmMap"
+========================== Set =======================
+object(HH\Set)#37 (6) {
+  int(1)
+  int(5)
+  int(10)
+  int(15)
+  string(3) "red"
+  int(20)
+}
+Set $s1 = >Set<
+Set ==  #1: T
+Set ==  #2: T
+Set ==  #3: T
+Set ==  #4: F
+Set === #1: T
+Set === #2: F
+Set === #3: F
+Set === #4: F
+========================== Conversions from Set =======================
+bool(false)
+bool(true)
+string(3) "Set"
+string(3) "Set"
+========================== ImmSet =======================
+object(HH\ImmSet)#43 (4) {
+  int(1)
+  int(5)
+  int(10)
+  string(3) "red"
+}
+ImmSet ==  #1: T
+ImmSet ==  #2: T
+ImmSet ==  #3: T
+ImmSet ==  #4: F
+ImmSet == Set: T
+ImmSet === #1: T
+ImmSet === #2: F
+ImmSet === #3: F
+ImmSet === #4: F
+========================== Conversions from ImmSet =======================
+bool(false)
+bool(true)
+string(6) "ImmSet"
+string(6) "ImmSet"
+========================== Pair =======================
+$p1[0] = 55
+object(HH\Pair)#50 (2) {
+  [0]=>
+  int(55)
+  [1]=>
+  object(NS_collections_operations\C)#51 (0) {
+  }
+}
+Pair $p1 = >Pair<
+$min: 15, $max: 75
+object(HH\Pair)#52 (2) {
+  [0]=>
+  int(15)
+  [1]=>
+  int(75)
+}
+Pair ==  #1: T
+Pair ==  #2: T
+Pair ==  #3: F
+Pair === #1: T
+Pair === #2: F
+Pair === #3: F
+========================== Conversions from Pair =======================
+bool(true)
+string(4) "Pair"

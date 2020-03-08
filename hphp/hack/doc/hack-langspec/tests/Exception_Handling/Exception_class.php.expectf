@@ -1,0 +1,291 @@
+L0: In try-block
+L0: In catch-block
+$e = >exception 'Exception' with message 'L0 Message' in %s/tests/Exception_Handling/Exception_class.php:103
+Stack trace:
+#0 %s/tests/Exception_Handling/Exception_class.php(121): NS_Exception_class\main()
+#1 {main}<
+getMessage:       >L0 Message<
+getCode:          >-1<
+getPrevious:      ><
+getFile:          >%s/tests/Exception_Handling/Exception_class.php<
+getLine:          >103<
+getTraceAsString: >#0 %s/tests/Exception_Handling/Exception_class.php(121): NS_Exception_class\main()
+#1 {main}<
+array(1) {
+  [0]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s/tests/Exception_Handling/Exception_class.php"
+    ["line"]=>
+    int(121)
+    ["function"]=>
+    string(23) "NS_Exception_class\main"
+    ["args"]=>
+    array(0) {
+    }
+  }
+}
+Trace Info:
+Key[0]:
+  Key[file] => >%s/tests/Exception_Handling/Exception_class.php<
+  Key[line] => >121<
+  Key[function] => >NS_Exception_class\main<
+  Key[args]:
+L0: In finally-block
+L0: Beyond try/catch/finally blocks
+==========
+L0: Calling fL1
+fL1: In try-block
+fL1: In catch-block
+$e = >exception 'Exception' with message 'fL1 Message' in %s/tests/Exception_Handling/Exception_class.php:38
+Stack trace:
+#0 %s/tests/Exception_Handling/Exception_class.php(116): NS_Exception_class\fL1()
+#1 %s/tests/Exception_Handling/Exception_class.php(121): NS_Exception_class\main()
+#2 {main}<
+getMessage:       >fL1 Message<
+getCode:          >123<
+getPrevious:      ><
+getFile:          >%s/tests/Exception_Handling/Exception_class.php<
+getLine:          >38<
+getTraceAsString: >#0 %s/tests/Exception_Handling/Exception_class.php(116): NS_Exception_class\fL1()
+#1 %s/tests/Exception_Handling/Exception_class.php(121): NS_Exception_class\main()
+#2 {main}<
+array(2) {
+  [0]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s/tests/Exception_Handling/Exception_class.php"
+    ["line"]=>
+    int(116)
+    ["function"]=>
+    string(22) "NS_Exception_class\fL1"
+    ["args"]=>
+    array(1) {
+      [0]=>
+      int(10)
+    }
+  }
+  [1]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s/tests/Exception_Handling/Exception_class.php"
+    ["line"]=>
+    int(121)
+    ["function"]=>
+    string(23) "NS_Exception_class\main"
+    ["args"]=>
+    array(0) {
+    }
+  }
+}
+Trace Info:
+Key[0]:
+  Key[file] => >%s/tests/Exception_Handling/Exception_class.php<
+  Key[line] => >116<
+  Key[function] => >NS_Exception_class\fL1<
+  Key[args]:
+    Key[0] => >10<
+Key[1]:
+  Key[file] => >%s/tests/Exception_Handling/Exception_class.php<
+  Key[line] => >121<
+  Key[function] => >NS_Exception_class\main<
+  Key[args]:
+fL1: In finally-block
+fL1: Beyond try/catch/finally blocks
+==========
+fL1: Calling fL2
+fL2: In try-block
+fL2: In catch-block
+$e = >exception 'Exception' with message 'fL2 Message' in %s/tests/Exception_Handling/Exception_class.php:61
+Stack trace:
+#0 %s/tests/Exception_Handling/Exception_class.php(52): NS_Exception_class\fL2()
+#1 %s/tests/Exception_Handling/Exception_class.php(116): NS_Exception_class\fL1()
+#2 %s/tests/Exception_Handling/Exception_class.php(121): NS_Exception_class\main()
+#3 {main}<
+getMessage:       >fL2 Message<
+getCode:          >234<
+getPrevious:      ><
+getFile:          >%s/tests/Exception_Handling/Exception_class.php<
+getLine:          >61<
+getTraceAsString: >#0 %s/tests/Exception_Handling/Exception_class.php(52): NS_Exception_class\fL2()
+#1 %s/tests/Exception_Handling/Exception_class.php(116): NS_Exception_class\fL1()
+#2 %s/tests/Exception_Handling/Exception_class.php(121): NS_Exception_class\main()
+#3 {main}<
+array(3) {
+  [0]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s/tests/Exception_Handling/Exception_class.php"
+    ["line"]=>
+    int(52)
+    ["function"]=>
+    string(22) "NS_Exception_class\fL2"
+    ["args"]=>
+    array(2) {
+      [0]=>
+      float(2.3)
+      [1]=>
+      float(-4.5)
+    }
+  }
+  [1]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s/tests/Exception_Handling/Exception_class.php"
+    ["line"]=>
+    int(116)
+    ["function"]=>
+    string(22) "NS_Exception_class\fL1"
+    ["args"]=>
+    array(1) {
+      [0]=>
+      int(10)
+    }
+  }
+  [2]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s/tests/Exception_Handling/Exception_class.php"
+    ["line"]=>
+    int(121)
+    ["function"]=>
+    string(23) "NS_Exception_class\main"
+    ["args"]=>
+    array(0) {
+    }
+  }
+}
+Trace Info:
+Key[0]:
+  Key[file] => >%s/tests/Exception_Handling/Exception_class.php<
+  Key[line] => >52<
+  Key[function] => >NS_Exception_class\fL2<
+  Key[args]:
+    Key[0] => >2.3<
+    Key[1] => >-4.5<
+Key[1]:
+  Key[file] => >%s/tests/Exception_Handling/Exception_class.php<
+  Key[line] => >116<
+  Key[function] => >NS_Exception_class\fL1<
+  Key[args]:
+    Key[0] => >10<
+Key[2]:
+  Key[file] => >%s/tests/Exception_Handling/Exception_class.php<
+  Key[line] => >121<
+  Key[function] => >NS_Exception_class\main<
+  Key[args]:
+fL2: In finally-block
+fL2: Beyond try/catch/finally blocks
+==========
+fL2: Calling fL3
+fL3: In try-block
+fL3: In catch-block
+$e = >exception 'Exception' with message 'fL3 Message' in %s/tests/Exception_Handling/Exception_class.php:84
+Stack trace:
+#0 %s/tests/Exception_Handling/Exception_class.php(75): NS_Exception_class\fL3()
+#1 %s/tests/Exception_Handling/Exception_class.php(52): NS_Exception_class\fL2()
+#2 %s/tests/Exception_Handling/Exception_class.php(116): NS_Exception_class\fL1()
+#3 %s/tests/Exception_Handling/Exception_class.php(121): NS_Exception_class\main()
+#4 {main}<
+getMessage:       >fL3 Message<
+getCode:          >345<
+getPrevious:      ><
+getFile:          >%s/tests/Exception_Handling/Exception_class.php<
+getLine:          >84<
+getTraceAsString: >#0 %s/tests/Exception_Handling/Exception_class.php(75): NS_Exception_class\fL3()
+#1 %s/tests/Exception_Handling/Exception_class.php(52): NS_Exception_class\fL2()
+#2 %s/tests/Exception_Handling/Exception_class.php(116): NS_Exception_class\fL1()
+#3 %s/tests/Exception_Handling/Exception_class.php(121): NS_Exception_class\main()
+#4 {main}<
+array(4) {
+  [0]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s/tests/Exception_Handling/Exception_class.php"
+    ["line"]=>
+    int(75)
+    ["function"]=>
+    string(22) "NS_Exception_class\fL3"
+    ["args"]=>
+    array(3) {
+      [0]=>
+      string(3) "xyz"
+      [1]=>
+      NULL
+      [2]=>
+      bool(true)
+    }
+  }
+  [1]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s/tests/Exception_Handling/Exception_class.php"
+    ["line"]=>
+    int(52)
+    ["function"]=>
+    string(22) "NS_Exception_class\fL2"
+    ["args"]=>
+    array(2) {
+      [0]=>
+      float(2.3)
+      [1]=>
+      float(-4.5)
+    }
+  }
+  [2]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s/tests/Exception_Handling/Exception_class.php"
+    ["line"]=>
+    int(116)
+    ["function"]=>
+    string(22) "NS_Exception_class\fL1"
+    ["args"]=>
+    array(1) {
+      [0]=>
+      int(10)
+    }
+  }
+  [3]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s/tests/Exception_Handling/Exception_class.php"
+    ["line"]=>
+    int(121)
+    ["function"]=>
+    string(23) "NS_Exception_class\main"
+    ["args"]=>
+    array(0) {
+    }
+  }
+}
+Trace Info:
+Key[0]:
+  Key[file] => >%s/tests/Exception_Handling/Exception_class.php<
+  Key[line] => >75<
+  Key[function] => >NS_Exception_class\fL3<
+  Key[args]:
+    Key[0] => >xyz<
+    Key[1] => ><
+    Key[2] => >1<
+Key[1]:
+  Key[file] => >%s/tests/Exception_Handling/Exception_class.php<
+  Key[line] => >52<
+  Key[function] => >NS_Exception_class\fL2<
+  Key[args]:
+    Key[0] => >2.3<
+    Key[1] => >-4.5<
+Key[2]:
+  Key[file] => >%s/tests/Exception_Handling/Exception_class.php<
+  Key[line] => >116<
+  Key[function] => >NS_Exception_class\fL1<
+  Key[args]:
+    Key[0] => >10<
+Key[3]:
+  Key[file] => >%s/tests/Exception_Handling/Exception_class.php<
+  Key[line] => >121<
+  Key[function] => >NS_Exception_class\main<
+  Key[args]:
+fL3: In finally-block
+fL3: Beyond try/catch/finally blocks
+==========

@@ -1,0 +1,5 @@
+.DS_Store
+www.pid
+.commit-template
+*.php.diff
+*.php.out

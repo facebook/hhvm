@@ -1,0 +1,2 @@
+
+Fatal error: syntax error, unexpected T_CLASS, expecting T_VARIABLE or T_PIPE_VAR or '$' in %s/tests/Types/Issue_109.php on line 9

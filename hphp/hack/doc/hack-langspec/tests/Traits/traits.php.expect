@@ -1,0 +1,32 @@
+=== display some __***__ values ===
+
+Inside >NS_traits\main<
+Inside >NS_traits\main<
+
+=== Play with C5a and C5b ===
+
+123
+43.56
+
+=== Play with C6a ===
+
+Inside NS_traits\T6::f
+$v = 0
+Inside NS_traits\T6::f
+$v = 1
+
+=== Play with C6b ===
+
+Inside NS_traits\T6::f
+$v = 0
+Inside NS_traits\T6::f
+$v = 1
+Inside NS_traits\T6::f
+$v = 2
+
+=== Play with T7 ===
+
+-------
+Inside NS_traits\T7
+Inside NS_traits\T7
+Inside NS_traits\T7::g

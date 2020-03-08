@@ -1,0 +1,50 @@
+object(NS_array_literals\X)#1 (6) {
+  ["prop10":"NS_array_literals\X":private]=>
+  array(0) {
+  }
+  ["prop11":"NS_array_literals\X":private]=>
+  array(3) {
+    [0]=>
+    int(10)
+    [1]=>
+    string(3) "red"
+    [2]=>
+    bool(true)
+  }
+  ["prop12":"NS_array_literals\X":private]=>
+  array(2) {
+    ["a"]=>
+    int(10)
+    ["r"]=>
+    array(2) {
+      [0]=>
+      int(20)
+      [1]=>
+      int(30)
+    }
+  }
+  ["prop20":"NS_array_literals\X":private]=>
+  array(0) {
+  }
+  ["prop21":"NS_array_literals\X":private]=>
+  array(3) {
+    [0]=>
+    int(10)
+    [1]=>
+    string(3) "red"
+    [2]=>
+    bool(true)
+  }
+  ["prop22":"NS_array_literals\X":private]=>
+  array(2) {
+    ["a"]=>
+    int(10)
+    ["r"]=>
+    array(2) {
+      [0]=>
+      int(20)
+      [1]=>
+      int(30)
+    }
+  }
+}

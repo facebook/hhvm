@@ -1,0 +1,3 @@
+
+Fatal error: HH mode: content before <?hh (Line: 1, Char: 39)
+syntax error, unexpected T_HH_ERROR, expecting $end in %s/tests/Expressions/Yield_Operator/yield.php on line 1

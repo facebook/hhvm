@@ -1,0 +1,44 @@
+=========== $doubler1 ===============
+
+int(3)
+int(6)
+float(4.2)
+float(8.4)
+int(10)
+int(20)
+
+=========== $doubler2 ===============
+
+int(3)
+float(6)
+float(4.2)
+float(8.4)
+int(10)
+float(20)
+
+=========== $doubler3 ===============
+
+int(3)
+int(6)
+=========== $doubler1 ===============
+
+int(3)
+int(6)
+float(4.2)
+float(8.4)
+float(1.3)
+float(2.6)
+
+=========== $doubler2 ===============
+
+int(3)
+float(6)
+float(4.2)
+float(8.4)
+float(1.3)
+float(2.6)
+
+=========== $doubler3 ===============
+
+int(3)
+int(6)

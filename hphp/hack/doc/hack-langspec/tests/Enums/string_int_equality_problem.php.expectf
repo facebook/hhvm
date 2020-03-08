@@ -1,0 +1,2 @@
+
+Fatal error: Call to undefined function NS_string_int_equality_problem\main() in %s/tests/Enums/string_int_equality_problem.php on line 39

@@ -1,0 +1,23 @@
+
+====== various operations on int and string enums  ======
+
+
+______ <
+bool(true)
+______ >=
+bool(false)
+
+______ <
+bool(false)
+______ >=
+bool(true)
+
+______ ==
+bool(false)
+______ !==
+bool(true)
+
+______ ==
+bool(false)
+______ !==
+bool(true)

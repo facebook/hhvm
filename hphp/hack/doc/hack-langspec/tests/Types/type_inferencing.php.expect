@@ -1,0 +1,14 @@
+int(-1)
+float(23.56)
+string(3) "acb"
+bool(true)
+array(3) {
+  ["red"]=>
+  int(10)
+  ["green"]=>
+  int(15)
+  ["white"]=>
+  int(20)
+}
+object(NS_type_inferencing\C)#1 (0) {
+}

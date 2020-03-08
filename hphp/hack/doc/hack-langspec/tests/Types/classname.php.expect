@@ -1,0 +1,75 @@
+---------- sf0() --------------
+
+string(9) "Exception"
+string(15) "NS_classname\C0"
+string(15) "NS_classname\C0"
+---------- sf1() --------------
+
+sf1: TRUE
+---------- sf2() --------------
+
+sf2: TRUE
+---------- var_dump --------------
+
+object(NS_classname\C4)#1 (2) {
+  ["vals1"]=>
+  array(3) {
+    [0]=>
+    string(15) "NS_classname\C1"
+    [1]=>
+    string(15) "NS_classname\C2"
+    [2]=>
+    string(15) "NS_classname\C3"
+  }
+  ["vals2"]=>
+  array(3) {
+    [0]=>
+    string(15) "NS_classname\I5"
+    [1]=>
+    string(16) "NS_classname\C5a"
+    [2]=>
+    string(16) "NS_classname\C5b"
+  }
+}
+
+---------- test2(C2::class) --------------
+
+string(15) "NS_classname\C2"
+$classname is >NS_classname\C2<
+$classname is >NS_classname\C2<
+bool(true)
+bool(true)
+Inside method NS_classname\C2::hello
+
+---------- test3(C3::class) --------------
+
+string(15) "NS_classname\C3"
+
+---------- test2(C3::class) --------------
+
+string(15) "NS_classname\C3"
+$classname is >NS_classname\C3<
+$classname is >NS_classname\C3<
+bool(false)
+bool(true)
+Inside method NS_classname\C3::hello
+
+---------- test5(C5a::class) --------------
+
+string(16) "NS_classname\C5a"
+$classname is >NS_classname\C5a<
+$classname is >NS_classname\C5a<
+bool(true)
+bool(false)
+Inside method NS_classname\C5a::hello
+
+---------- test5(C5b::class) --------------
+
+string(16) "NS_classname\C5b"
+$classname is >NS_classname\C5b<
+$classname is >NS_classname\C5b<
+bool(false)
+bool(true)
+Inside method NS_classname\C5b::hello
+
+---------- end of script --------------

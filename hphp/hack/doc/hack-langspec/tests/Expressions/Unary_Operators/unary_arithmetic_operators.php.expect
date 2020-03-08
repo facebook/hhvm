@@ -1,0 +1,153 @@
+--- start DoItInt -------------------------
+
+     original: int(0)
+after unary ~: int(-1)
+ before Hex: 00000000
+ after  Hex: FFFFFFFFFFFFFFFF
+ before (int): 0; before (int) Hex: 00000000
+
+--- end DoItInt -------------------------
+
+--- start DoItInt -------------------------
+
+     original: int(5)
+after unary ~: int(-6)
+ before Hex: 00000005
+ after  Hex: FFFFFFFFFFFFFFFA
+ before (int): 5; before (int) Hex: 00000005
+
+--- end DoItInt -------------------------
+
+--- start DoItInt -------------------------
+
+     original: int(-10)
+after unary ~: int(9)
+ before Hex: FFFFFFFFFFFFFFF6
+ after  Hex: 00000009
+ before (int): -10; before (int) Hex: FFFFFFFFFFFFFFF6
+
+--- end DoItInt -------------------------
+
+--- start DoItFloat -------------------------
+
+     original: float(0)
+
+--- end DoItFloat -------------------------
+
+--- start DoItFloat -------------------------
+
+     original: float(1.0E-107)
+
+--- end DoItFloat -------------------------
+
+--- start DoItFloat -------------------------
+
+     original: float(12.7345)
+
+--- end DoItFloat -------------------------
+
+--- start DoItFloat -------------------------
+
+     original: float(-9.34E+26)
+
+--- end DoItFloat -------------------------
+
+--- start DoItFloat -------------------------
+
+     original: float(1.234567E+56)
+
+--- end DoItFloat -------------------------
+
+--- start DoItFloat -------------------------
+
+     original: float(1.234567E+106)
+
+--- end DoItFloat -------------------------
+
+--- start DoItFloat -------------------------
+
+     original: float(INF)
+
+--- end DoItFloat -------------------------
+
+--- start DoItFloat -------------------------
+
+     original: float(-INF)
+
+--- end DoItFloat -------------------------
+
+--- start DoItFloat -------------------------
+
+     original: float(NAN)
+
+--- end DoItFloat -------------------------
+
+--- start DoItFloat -------------------------
+
+     original: float(NAN)
+
+--- end DoItFloat -------------------------
+
+bool(true)
+--- start DoItBool -------------------------
+
+     original: bool(true)
+bool(false)
+
+--- end DoItBool -------------------------
+
+--- start DoItBool -------------------------
+
+     original: bool(false)
+bool(true)
+
+--- end DoItBool -------------------------
+
+--- start DoItString -------------------------
+
+     original: string(1) "0"
+bool(true)
+
+--- end DoItString -------------------------
+
+--- start DoItString -------------------------
+
+     original: string(3) "-43"
+bool(false)
+
+--- end DoItString -------------------------
+
+--- start DoItString -------------------------
+
+     original: string(3) "123"
+bool(false)
+
+--- end DoItString -------------------------
+
+--- start DoItString -------------------------
+
+     original: string(3) "0.0"
+bool(false)
+
+--- end DoItString -------------------------
+
+--- start DoItString -------------------------
+
+     original: string(9) "-25.5e-10"
+bool(false)
+
+--- end DoItString -------------------------
+
+--- start DoItString -------------------------
+
+     original: string(0) ""
+bool(true)
+
+--- end DoItString -------------------------
+
+--- start DoItString -------------------------
+
+     original: string(3) "ABC"
+bool(false)
+
+--- end DoItString -------------------------

@@ -1,0 +1,71 @@
+"" is not numeric	***
+"0" is numeric; value is 0
+"00" is numeric; value is 0
+"0377" is numeric; value is 377
+"0xEEFFAA00" is numeric; value is 0
+"0X1234EF" is numeric; value is 0
+" 0" is numeric; value is 0
+"  00" is numeric; value is 0
+"   0377" is numeric; value is 377
+"    0xEEFFAA00" is numeric; value is 0
+"     0X1234EF" is numeric; value is 0
+"0 " is not numeric	***
+"00  " is not numeric	***
+"0377   " is not numeric	***
+"0xEEFFAA00    " is not numeric	***
+"0X1234EF     " is not numeric	***
+"0b1010" is not numeric	***
+"0B111111111111111" is not numeric	***
+"+0" is numeric; value is 0
+"+01234567890" is numeric; value is 1234567890
+"-187654321" is numeric; value is -187654321
+"123.456" is numeric; value is 123.456
+"-7654." is numeric; value is -7654
+".7654321" is numeric; value is 0.7654321
+"1e12" is numeric; value is 1000000000000
+"+2E21" is numeric; value is 2.0E+21
+"-4e+2" is numeric; value is -400
+"9E-21" is numeric; value is 9.0E-21
+"-123.762e21" is numeric; value is -1.23762E+23
+"+876.432E37" is numeric; value is 8.76432E+39
+"INF" is not numeric	***
+"INf" is not numeric	***
+"InF" is not numeric	***
+"Inf" is not numeric	***
+"iNF" is not numeric	***
+"iNf" is not numeric	***
+"inF" is not numeric	***
+"inf" is not numeric	***
+"+INF" is not numeric	***
+"+INf" is not numeric	***
+"+InF" is not numeric	***
+"+Inf" is not numeric	***
+"+iNF" is not numeric	***
+"+iNf" is not numeric	***
+"+inF" is not numeric	***
+"+inf" is not numeric	***
+"-INF" is not numeric	***
+"-INf" is not numeric	***
+"-InF" is not numeric	***
+"-Inf" is not numeric	***
+"-iNF" is not numeric	***
+"-iNf" is not numeric	***
+"-inF" is not numeric	***
+"-inf" is not numeric	***
+"NAN" is not numeric	***
+"NAn" is not numeric	***
+"NaN" is not numeric	***
+"Nan" is not numeric	***
+"nAN" is not numeric	***
+"nAn" is not numeric	***
+"naN" is not numeric	***
+"nan" is not numeric	***
+string(7) "1010,10"
+string(3) "INF"
+string(4) "-INF"
+string(3) "NAN"
+int(-9223372036854775808)
+int(9223372036854775807)
+int(9223372036854775807)
+int(-9223372036854775808)
+float(1.3835058055282E+19)

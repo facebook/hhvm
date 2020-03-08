@@ -1,0 +1,31 @@
+======= check for even/odd integer values by inspecting the low-order bit ========
+-5 is odd
+-4 is even
+-3 is odd
+-2 is even
+-1 is odd
+0 is even
+1 is odd
+2 is even
+3 is odd
+4 is even
+5 is odd
+Lowercase equivalent of 'A' is 'a'
+Uppercase equivalent of 's' is 'S'
+======= swap two integers ========
+$v1 = 1234, $v2 = -987
+$v1 = -987, $v2 = 1234
+======= misc stuff ========
+0b101101 & 0b111 = 0b101
+0b101101 | 0b111 = 0b101111
+0b101101 ^ 0b111 = 0b101010
+======= Test all kinds of scalar values to see which are ints or can be implicitly converted ========
+-3 & 123 = int(121)
+-3 | 123 = int(-1)
+-3 ^ 123 = int(-122)
+0 & 123 = int(0)
+0 | 123 = int(123)
+0 ^ 123 = int(123)
+1000 & 123 = int(104)
+1000 | 123 = int(1019)
+1000 ^ 123 = int(915)

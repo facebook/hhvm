@@ -1,0 +1,199 @@
+
+================ setting pr_bool ===================
+
+(bool)false: pr_bool = >false<
+(bool)true: pr_bool = >true<
+(bool)0: pr_bool = >false<
+(bool)100: pr_bool = >true<
+(bool)0.0: pr_bool = >false<
+(bool)123.45: pr_bool = >true<
+(bool)"": pr_bool = >false<
+(bool)"0": pr_bool = >false<
+(bool)"123ABC": pr_bool = >true<
+(bool)"456.78ABC": pr_bool = >true<
+(bool)null: pr_bool = >false<
+(bool)array(): pr_bool = >false<
+(bool)array(10,20,30): pr_bool = >true<
+(bool)new Button(): pr_bool = >true<
+(bool)resource: pr_bool = >true<
+(bool)arraykey: pr_arraykey = >false<
+(bool)arraykey: pr_arraykey = >true<
+(bool)arraykey: pr_arraykey = >false<
+(bool)arraykey: pr_arraykey = >true<
+
+================ setting pr_int ===================
+
+(int)false: pr_int = >0<
+(int)true: pr_int = >1<
+(int)0: pr_int = >0<
+(int)100: pr_int = >100<
+(int)0.0: pr_int = >0<
+(int)123.45: pr_int = >123<
+(int)"": pr_int = >0<
+(int)"0": pr_int = >0<
+(int)"123ABC": pr_int = >123<
+(int)"456.78ABC": pr_int = >456<
+(int)null: pr_int = >0<
+(int)array(): pr_int = >0<
+(int)array(10,20,30): pr_int = >1<
+(int)new Button(): pr_int = >1<
+(int)resource: pr_int = >2<
+
+================ setting pr_float ===================
+
+(float)false: pr_float = >0<
+(float)true: pr_float = >1<
+(float)0: pr_float = >0<
+(float)100: pr_float = >100<
+(float)0.0: pr_float = >0<
+(float)123.45: pr_float = >123.45<
+(float)INF: pr_float = >INF<
+(float)NAN: pr_float = >NAN<
+(float)"": pr_float = >0<
+(float)"0": pr_float = >0<
+(float)"123ABC": pr_float = >123<
+(float)"456.78ABC": pr_float = >456.78<
+(float)null: pr_float = >0<
+(float)array(): pr_float = >0<
+(float)array(10,20,30): pr_float = >1<
+(float)new Button(): pr_float = >1<
+(float)resource: pr_float = >2<
+
+================ setting pr_num ===================
+
+0: pr_num = >0<
+100: pr_num = >100<
+0.0: pr_num = >0<
+123.45: pr_num = >123.45<
+
+================ setting pr_string ===================
+
+(string)false: pr_string = ><
+(string)true: pr_string = >1<
+(string)0: pr_string = >0<
+(string)100: pr_string = >100<
+(string)0.0: pr_string = >0<
+(string)123.45: pr_string = >123.45<
+(string)"": pr_string = ><
+(string)"0": pr_string = >0<
+(string)"123ABC": pr_string = >123ABC<
+(string)"456.78ABC": pr_string = >456.78ABC<
+(string)null: pr_string = ><
+(string)resource: pr_string = >Resource id #2<
+
+================ setting pr_arraykey ===================
+
+(arraykey)int: pr_arraykey = >0<
+(arraykey)int: pr_arraykey = >100<
+(arraykey)string: pr_arraykey = ><
+(arraykey)string: pr_arraykey = >0<
+(arraykey)string: pr_arraykey = >123ABC<
+(arraykey)string: pr_arraykey = >456.78ABC<
+
+================ setting pr_resource ===================
+
+resource: pr_resource = >Resource id #2<
+
+================ setting pr_Button ===================
+
+new Button("STOP"): pr_Button = >[[Button: STOP]]<
+new CustomButton("RAISE"): pr_Button = >[[Button: RAISE]][[CustomButton]]<
+resource: pr_Button = >[[Button: RAISE]][[CustomButton]]<
+
+================ setting pr_CustomButton===================
+
+new CustomButton("LOWER"): pr_CustomButton= >[[Button: LOWER]][[CustomButton]]<
+resource: pr_CustomButton = >[[Button: LOWER]][[CustomButton]]<
+
+================ setting pr_MyCollection ===================
+
+new MyList(): pr_MyCollection = >[[MyList]]<
+new MyQueue(): pr_MyCollection = >[[MyQueue]]<
+
+================ converting non-nullable to corresponding nullable ===================
+
+bool: pr_nbool = ><
+bool: pr_nbool = >1<
+bool: pr_nbool = ><
+bool: pr_nbool = >1<
+int: pr_nint = ><
+int: pr_nint = >100<
+int: pr_nint = >2<
+float: pr_nfloat = ><
+float: pr_nfloat = >123.45<
+float: pr_nfloat = >2<
+num: pr_nnum = ><
+num: pr_nnum = >100<
+num: pr_nnum = >123.45<
+num: pr_nnum = >123.45<
+string: pr_nstring = ><
+string: pr_nstring = >123ABC<
+string: pr_nstring = >Resource id #2<
+resource: pr_nresource = ><
+resource: pr_nresource = >Resource id #2<
+resource: pr_nresource = >Resource id #2<
+Button: pr_nButton = ><
+Button: pr_nButton = >[[Button: HOT]]<
+CustomButton: pr_nButton = >[[Button: COLD]][[CustomButton]]<
+Button: pr_nButton = >[[Button: RAISE]][[CustomButton]]<
+CustomButton: pr_nCustomButton = ><
+CustomButton: pr_nCustomButton = >[[Button: ALARM]][[CustomButton]]<
+CustomButton: pr_nCustomButton = >[[Button: LOWER]][[CustomButton]]<
+MyCollection: pr_nMyCollection = >[[MyList]]<
+MyCollection: pr_nMyCollection = >[[MyQueue]]<
+
+================ converting one nullable to a different nullable (excluding mixed) ===================
+
+nint: pr_nnum = >2<
+nfloat: pr_nnum = >2<
+nCustomButton: pr_nnum = >2<
+
+================ converting nullable to corresponding non-nullable ===================
+
+pr->bool = ><
+pr->bool = >1<
+pr->int = >0<
+pr->int = >100<
+pr->float = >0<
+pr->float = >123.45<
+pr->string = ><
+pr->string = >123ABC<
+
+================ setting pr_mixed ===================
+
+false: pr_mixed = ><
+pr_bool: pr_mixed = >1<
+pr_nbool: pr_mixed = >1<
+true: pr_mixed = >1<
+0: pr_mixed = >0<
+pr_int: pr_mixed = >100<
+pr_nint: pr_mixed = >100<
+100: pr_mixed = >100<
+0.0: pr_mixed = >0<
+pr_float: pr_mixed = >123.45<
+pr_nfloat: pr_mixed = >123.45<
+123.45: pr_mixed = >123.45<
+"": pr_mixed = ><
+pr_string: pr_mixed = >123ABC<
+pr_nstring: pr_mixed = >123ABC<
+"0": pr_mixed = >0<
+"123ABC": pr_mixed = >123ABC<
+"456.78ABC": pr_mixed = >456.78ABC<
+null: pr_mixed = ><
+
+Notice: Array to string conversion in %s/tests/Expressions/conversions.php on line 653
+array(): pr_mixed = >Array<
+
+Notice: Array to string conversion in %s/tests/Expressions/conversions.php on line 656
+array(10,20,30): pr_mixed = >Array<
+new Button(): pr_mixed = >[[Button: ??]]<
+pr_Button: pr_mixed = >[[Button: RAISE]][[CustomButton]]<
+pr_nButton: pr_mixed = >[[Button: LOWER]][[CustomButton]]<
+new CustomButton(): pr_mixed = >[[Button: ??]][[CustomButton]]<
+pr_CustomButton: pr_mixed = >[[Button: LOWER]][[CustomButton]]<
+pr_nCustomButton: pr_mixed = >[[Button: LOWER]][[CustomButton]]<
+new MyList(): pr_mixed = >[[MyList]]<
+new MyQueue(): pr_mixed = >[[MyQueue]]<
+resource: pr_mixed = >Resource id #2<
+pr_resource: pr_mixed = >Resource id #2<
+pr_nresource: pr_mixed = >Resource id #2<

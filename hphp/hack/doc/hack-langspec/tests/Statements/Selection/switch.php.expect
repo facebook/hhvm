@@ -1,0 +1,17 @@
+================= empty body ====================
+================= default case only ====================
+default case: $v is 10
+================= general switch ====================
+case 10
+case 30
+case 20
+================= duplicate case values ====================
+case 30-2
+================= multiple case candidates ====================
+case 30.0
+================= strings for label values ====================
+default case: $v is white
+================= Booleans for label values ====================
+case true
+================= expressions for label values ====================
+case 10 + 12

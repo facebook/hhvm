@@ -1,0 +1,75 @@
+
+
+========================= Simple Use =========================
+
+int(20)
+int(20)
+float(1.23)
+string(3) "abc"
+Inside NS_pipe\fvoid; returning nothing
+
+
+========================= Check Associativity =========================
+
+Inside NS_pipe\fint; returning 7
+Inside NS_pipe\gint; returning 14
+Inside NS_pipe\hint; returning -14
+Result is: -14
+Inside NS_pipe\fint; returning -2
+Inside NS_pipe\gint; returning -4
+Inside NS_pipe\hint; returning 4
+Result is: 4
+
+
+========================= Check Precedence against << =========================
+
+Inside NS_pipe\fint; returning 4
+Inside NS_pipe\gint; returning 64
+
+
+========================= Check Precedence against &, |, and ^ =========================
+
+Inside NS_pipe\fint; returning 4
+Inside NS_pipe\gint; returning 8
+Inside NS_pipe\fint; returning 4
+Inside NS_pipe\gint; returning 14
+Inside NS_pipe\fint; returning 4
+Inside NS_pipe\gint; returning 6
+
+
+========================= Check Precedence against ?: =========================
+
+Inside NS_pipe\fint; returning 5
+Inside NS_pipe\gint; returning 10
+Inside NS_pipe\fint; returning 4
+Inside NS_pipe\gint; returning 8
+Inside NS_pipe\gint; returning 16
+Inside NS_pipe\fint; returning 4
+Inside NS_pipe\gint; returning 8
+
+
+========================= Check Precedence against ?? =========================
+
+Inside NS_pipe\fint; returning 4
+Inside NS_pipe\gint; returning 8
+Inside NS_pipe\gint; returning 16
+Inside NS_pipe\fint; returning 4
+Inside NS_pipe\gint; returning 8
+
+
+========================= Check Precedence against a lambda =========================
+
+Inside NS_pipe\fint; returning 5
+Inside NS_pipe\gint; returning 10
+int(10)
+Inside NS_pipe\fint; returning 5
+Inside NS_pipe\gint; returning 10
+int(10)
+
+
+========================= Check Precedence against = =========================
+
+Inside NS_pipe\fint; returning 5
+Inside NS_pipe\gint; returning 10
+Inside NS_pipe\fint; returning 5
+Inside NS_pipe\gint; returning 10

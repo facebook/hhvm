@@ -1,0 +1,177 @@
+=========== iterate over empty array =============
+=========== iterate over array of strings =============
+red
+white
+blue
+Index: 0; Color: red
+int(0)
+Index: 1; Color: white
+int(1)
+Index: 2; Color: blue
+int(2)
+=========== iterate over some vectors of string =============
+Key: 0 ; Value: red
+Key: 1 ; Value: white
+Key: 2 ; Value: blue
+Key: 0 ; Value: red
+Key: 1 ; Value: white
+Key: 2 ; Value: blue
+=========== iterate over some maps of float =============
+Key: a ; Value: 1.234
+Key: xx ; Value: 234.45
+Key: qqq ; Value: -34.54
+Key: a ; Value: 1.234
+Key: xx ; Value: 234.45
+Key: qqq ; Value: -34.54
+=========== iterate over a pair of strings =============
+int(0)
+string(3) "red"
+int(1)
+string(5) "green"
+=========== Modify the local copy of an element's value =============
+red<-->black
+white<-->black
+blue<-->black
+array(3) {
+  [0]=>
+  string(3) "red"
+  [1]=>
+  string(5) "white"
+  [2]=>
+  string(4) "blue"
+}
+=========== Modify the the actual element itself =============
+red<-->black
+white<-->black
+blue<-->black
+array(3) {
+  [0]=>
+  string(5) "black"
+  [1]=>
+  string(5) "black"
+  [2]=>
+  &string(5) "black"
+}
+=========== nested iterators =============
+  abc  ij
+  mnop  xyz
+------
+int(0)
+array(2) {
+  [0]=>
+  int(10)
+  [1]=>
+  int(20)
+}
+------
+int(1)
+array(2) {
+  [0]=>
+  float(1.2)
+  [1]=>
+  float(4.5)
+}
+------
+int(2)
+array(2) {
+  [0]=>
+  bool(true)
+  [1]=>
+  string(3) "abc"
+}
+Key: 0
+	Key: 0; Value: 10
+
+Key: 1
+	Key: 0; Value: 1.2
+	Key: 1; Value: 4.5
+	Key: 2; Value: 9.2
+
+Key: 2
+	Key: 0; Value: 1
+	Key: 1; Value: abc
+
+=========== test use of list =============
+------
+int(0)
+int(10)
+int(20)
+------
+int(1)
+float(1.2)
+float(4.5)
+------
+int(2)
+bool(true)
+string(3) "abc"
+=========== test use of a vector as recipient =============
+------
+int(0)
+object(HH\Vector)#21 (1) {
+  [0]=>
+  int(10)
+}
+------
+int(1)
+object(HH\Vector)#22 (3) {
+  [0]=>
+  float(1.2)
+  [1]=>
+  float(4.5)
+  [2]=>
+  float(9.2)
+}
+------
+int(2)
+object(HH\Vector)#23 (2) {
+  [0]=>
+  bool(true)
+  [1]=>
+  string(3) "abc"
+}
+=========== test use of a map as recipient =============
+------
+int(0)
+object(HH\Map)#24 (3) {
+  ["x"]=>
+  float(1.2)
+  ["z"]=>
+  float(4.5)
+  ["q"]=>
+  float(9.2)
+}
+------
+int(1)
+object(HH\Map)#25 (2) {
+  ["zz"]=>
+  float(22.1)
+  ["cc"]=>
+  float(-2.1)
+}
+=========== test use of set as recipient =============
+------
+int(0)
+object(HH\Set)#26 (3) {
+  string(3) "red"
+  string(5) "white"
+  string(4) "blue"
+}
+------
+int(1)
+object(HH\Set)#27 (2) {
+  string(2) "aa"
+  string(2) "bb"
+}
+=========== test use of Pair as recipient =============
+------
+int(0)
+int(2)
+string(3) "red"
+------
+int(1)
+int(9)
+string(5) "white"
+------
+int(2)
+int(1)
+string(4) "blue"

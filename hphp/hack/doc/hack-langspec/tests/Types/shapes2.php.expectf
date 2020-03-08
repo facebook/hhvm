@@ -1,0 +1,90 @@
+
+Inside function NS_shapes2\f1
+10, 20
+== is True
+!= is False
+=== is True
+!== is False
+
+
+Inside function NS_shapes2\f2
+10, 20
+== is True
+!= is False
+=== is True
+!== is False
+
+
+Inside function NS_shapes2\main
+== is True
+!= is False
+=== is False
+!== is True
+
+== is True
+!= is False
+=== is True
+!== is False
+
+== is True
+!= is False
+=== is True
+!== is False
+
+
+=== null fields ===
+
+array(2) {
+  ["a"]=>
+  int(10)
+  ["n"]=>
+  NULL
+}
+array(1) {
+  ["a"]=>
+  int(10)
+}
+object(NS_shapes2\C)#1 (2) {
+  ["p6a"]=>
+  array(2) {
+    ["a"]=>
+    int(10)
+    ["n"]=>
+    NULL
+  }
+  ["p6b"]=>
+  array(1) {
+    ["a"]=>
+    int(10)
+  }
+}
+
+
+=== null field access ===
+
+$p5a['a']: 10
+$p5a['n']: 
+$p5b['a']: 10
+
+Notice: Undefined index: n in %s/tests/Types/shapes2.php on line 61
+$p5b['n']: 
+$p6a['a']: 10
+$p6a['n']: 
+$p6b['a']: 10
+
+Notice: Undefined index: n in %s/tests/Types/shapes2.php on line 65
+$p6b['n']: 
+
+Inside function NS_shapes2\f3
+$p['a']: 10
+$p['n']: xyz
+
+Inside function NS_shapes2\f3
+$p['a']: 10
+$p['n']: 
+
+Inside function NS_shapes2\f3
+$p['a']: 10
+
+Notice: Undefined index: n in %s/tests/Types/shapes2.php on line 114
+$p['n']: 

@@ -1,0 +1,24 @@
+---------------- Local "constants" -------------------
+Inside NS_variable_kinds\localConst
+COEFFICIENT_1 = 2.345
+COEFFICIENT_1 = 2.345
+FAILURE = 1
+COEFFICIENT_1 = 2.345
+FAILURE = 1
+---------------- Local variables -------------------
+---------------- Function statics -------------------
+NULL
+$lv = 1, $fs1 = 1
+$fs3 = 99
+NULL
+$lv = 1, $fs1 = 2
+$fs3 = 100
+NULL
+$lv = 1, $fs1 = 3
+$fs3 = 101
+---------------- recursive function example -------------------
+$result = 3628800
+------ instance/static properties & constants --------
+Point::MAX_COUNT: 1000
+$p1: (0,0)
+$p2: (5.3,6.8)

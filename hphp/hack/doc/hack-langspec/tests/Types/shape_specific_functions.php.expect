@@ -1,0 +1,117 @@
+======== Shapes::idx ========
+$v = 10
+$v = 20
+$v = null
+$v = -99
+----------------------------
+$v = 10
+$v = 20
+$v = null
+$v = -99
+
+======== Shapes::keyExists ========
+
+keyExists($s, 'x') = 1
+keyExists($s, 'name') = 
+
+======== Shapes::removeKey ========
+
+array(0) {
+}
+# elements in array = 0
+array(0) {
+}
+array(0) {
+}
+----------------------------
+array(2) {
+  ["x"]=>
+  int(10)
+  ["y"]=>
+  int(20)
+}
+# elements in array = 1
+array(1) {
+  ["y"]=>
+  int(20)
+}
+array(1) {
+  ["y"]=>
+  int(20)
+}
+----------------------------
+array(3) {
+  ["id"]=>
+  string(5) "23456"
+  ["url"]=>
+  string(15) "www.example.com"
+  ["count"]=>
+  int(23)
+}
+# elements in array = 2
+array(2) {
+  ["id"]=>
+  string(5) "23456"
+  ["count"]=>
+  int(23)
+}
+array(2) {
+  ["id"]=>
+  string(5) "23456"
+  ["count"]=>
+  int(23)
+}
+
+======== Shapes::toArray ========
+
+# elements in array = 0
+array(0) {
+}
+array(0) {
+}
+----------------------------
+# elements in array = 2
+array(2) {
+  ["x"]=>
+  int(10)
+  ["y"]=>
+  int(20)
+}
+array(2) {
+  ["x"]=>
+  int(10)
+  ["y"]=>
+  int(20)
+}
+----------------------------
+# elements in array = 2
+array(2) {
+  ["y"]=>
+  int(20)
+  ["x"]=>
+  int(10)
+}
+array(2) {
+  ["y"]=>
+  int(20)
+  ["x"]=>
+  int(10)
+}
+----------------------------
+# elements in array = 3
+array(3) {
+  ["id"]=>
+  string(5) "23456"
+  ["url"]=>
+  string(15) "www.example.com"
+  ["count"]=>
+  int(23)
+}
+array(3) {
+  ["id"]=>
+  string(5) "23456"
+  ["url"]=>
+  string(15) "www.example.com"
+  ["count"]=>
+  int(23)
+}

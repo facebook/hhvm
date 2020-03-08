@@ -1,0 +1,2 @@
+
+Fatal error: syntax error, unexpected T_LNUMBER, expecting T_VARIABLE or T_PIPE_VAR or '$' in %s/tests/Classes/test_for_new_types.php on line 18

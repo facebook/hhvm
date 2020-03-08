@@ -1,0 +1,22 @@
+=============== maxVal ==================
+
+maxVal(10, 20) = 20
+maxVal(20, 10) = 20
+maxVal(10, 10) = 10
+maxVal(15.6, -20.78) = 15.6
+maxVal('red', 'green') = red
+maxVal(10, 20.5) = 20.5
+float(20.5)
+maxVal(20.5, 10) = 20.5
+float(20.5)
+maxVal(0, true) = 1
+bool(true)
+maxVal(1, false) = 1
+int(1)
+
+=============== arrayCopy ==================
+
+array(1) {
+  [0]=>
+  int(0)
+}

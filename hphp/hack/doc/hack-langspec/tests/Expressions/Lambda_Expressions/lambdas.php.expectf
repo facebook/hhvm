@@ -1,0 +1,94 @@
+-------------- anonymous function concatStr ----------------
+
+XX:blue
+XX:green
+
+-------------- lam1 ----------------
+
+int(52)
+
+-------------- misc ----------------
+
+int(80)
+
+-------------- empty compound statement ----------------
+
+
+-------------- single parameter, type inferred ----------------
+
+int(20)
+float(11.2)
+
+-------------- single parameter in parens, type inferred ----------------
+
+int(20)
+float(11.2)
+
+-------------- single parameter in parens, but with ...; type inferred ----------------
+
+int(20)
+float(11.2)
+int(6)
+
+-------------- single parameter in parens, type set by default value ----------------
+
+int(20)
+int(-180)
+
+-------------- single parameter in parens, explicit type ----------------
+
+int(20)
+
+-------------- no parameters, but parens necessary ----------------
+
+int(100)
+
+-------------- multiple parameters, types inferred ----------------
+
+int(24)
+float(24)
+
+-------------- multiple parameters, types partially/fully specified ----------------
+
+int(24)
+int(24)
+int(24)
+int(24)
+
+-------------- lambdas can be async ----------------
+
+object(HH\StaticWaitHandle)#17 (0) {
+}
+object(HH\StaticWaitHandle)#17 (0) {
+}
+
+-------------- specifying a return type ----------------
+
+int(20)
+float(20)
+float(11.2)
+
+-------------- chaining lambdas ----------------
+
+Result is 17
+
+-------------- comparing brief lambdas with equivalent anonymous functions ----------------
+
+object(Closure$NS_lambdas\NS_lambdas\main#%d;%d)#%d (1) {
+  ["parameter"]=>
+  array(1) {
+    ["$p"]=>
+    string(10) "<required>"
+  }
+}
+int(20)
+float(11.2)
+object(Closure$NS_lambdas\NS_lambdas\main#%d;%d)#%d (1) {
+  ["parameter"]=>
+  array(1) {
+    ["$p"]=>
+    string(10) "<required>"
+  }
+}
+int(20)
+float(11.2)

@@ -1,0 +1,126 @@
+object(HH\Vector)#1 (0) {
+}
+$v1 = is empty
+object(HH\Vector)#2 (0) {
+}
+$v1's element count = 0
+object(HH\Vector)#3 (0) {
+}
+object(HH\Vector)#3 (3) {
+  [0]=>
+  int(12)
+  [1]=>
+  int(99)
+  [2]=>
+  int(199)
+}
+$v1's element count = 3
+$v1 = is not empty
+$v1[1] = 99
+object(HH\Vector)#4 (2) {
+  [0]=>
+  int(2)
+  [1]=>
+  int(8)
+}
+object(HH\Vector)#6 (2) {
+  [0]=>
+  int(99)
+  [1]=>
+  int(199)
+}
+object(NS_vector\C)#7 (1) {
+  ["pr1"]=>
+  array(3) {
+    [0]=>
+    int(22)
+    [1]=>
+    int(33)
+    [2]=>
+    int(44)
+  }
+}
+object(HH\Vector)#3 (3) {
+  [0]=>
+  int(22)
+  [1]=>
+  int(33)
+  [2]=>
+  int(44)
+}
+array(5) {
+  [0]=>
+  int(22)
+  [1]=>
+  int(33)
+  [2]=>
+  int(44)
+  [-5]=>
+  int(17)
+  [200]=>
+  int(18)
+}
+object(HH\Vector)#8 (5) {
+  [0]=>
+  int(22)
+  [1]=>
+  int(33)
+  [2]=>
+  int(44)
+  [3]=>
+  int(17)
+  [4]=>
+  int(18)
+}
+object(HH\Vector)#8 (10) {
+  [0]=>
+  int(22)
+  [1]=>
+  int(33)
+  [2]=>
+  int(44)
+  [3]=>
+  int(17)
+  [4]=>
+  int(18)
+  [5]=>
+  int(22)
+  [6]=>
+  int(33)
+  [7]=>
+  int(44)
+  [8]=>
+  int(17)
+  [9]=>
+  int(18)
+}
+$v1 contains >Vector<
+object(HH\Vector)#9 (5) {
+  [0]=>
+  int(22)
+  [1]=>
+  int(33)
+  [2]=>
+  int(44)
+  [3]=>
+  int(17)
+  [4]=>
+  int(18)
+}
+object(HH\Vector)#10 (3) {
+  [0]=>
+  int(-100)
+  [1]=>
+  int(0)
+  [2]=>
+  int(50)
+}
+object(HH\Vector)#10 (3) {
+  [0]=>
+  int(50)
+  [1]=>
+  int(0)
+  [2]=>
+  int(-100)
+}
+$str contains >V:9:"HH\Vector":3:{i:50;i:0;i:-100;}<

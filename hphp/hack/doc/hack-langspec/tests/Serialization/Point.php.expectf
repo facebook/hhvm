@@ -1,0 +1,2 @@
+
+Fatal error: Declaration of Graphics\Point::unserialize() must be compatible with that of Serializable::unserialize() in %s/tests/Serialization/Point.php on line 5

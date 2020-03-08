@@ -1,0 +1,24 @@
+------------ test(new C())
+------------ $x?->f1(++$i, hello($i))
+Inside NS_null_safe_calls\hello; $j = 6
+Inside NS_null_safe_calls\C::f1
+object(NS_null_safe_calls\D)#2 (0) {
+}
+------------ $x?->f2(++$i, hello($i))
+Inside NS_null_safe_calls\hello; $j = 7
+Inside NS_null_safe_calls\C::f2
+NULL
+------------ $x?->f3(++$i, hello($i))
+Inside NS_null_safe_calls\hello; $j = 8
+Inside NS_null_safe_calls\C::f3
+NULL
+------------ test(null)
+------------ $x?->f1(++$i, hello($i))
+Inside NS_null_safe_calls\hello; $j = 6
+NULL
+------------ $x?->f2(++$i, hello($i))
+Inside NS_null_safe_calls\hello; $j = 7
+NULL
+------------ $x?->f3(++$i, hello($i))
+Inside NS_null_safe_calls\hello; $j = 8
+NULL

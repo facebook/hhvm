@@ -1,0 +1,10 @@
+$month 6 is in-bounds
+$month 14 is out-of-bounds
+$month 6 is in-bounds
+$month 14 is out-of-bounds
+inside f(int 5)
+inside g(int 6)
+bool(false)
+inside g(int 0)
+inside f(int 1)
+bool(true)

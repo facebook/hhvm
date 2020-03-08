@@ -1,0 +1,8 @@
+__FUNCTION__ = NS_anonymous_function_name\main
+__METHOD__ = NS_anonymous_function_name\main
+__FUNCTION__ = {closure}
+__METHOD__ = {closure}
+__FUNCTION__ = f
+__METHOD__ = NS_anonymous_function_name\C::f
+__FUNCTION__ = {closure}
+__METHOD__ = NS_anonymous_function_name\C::{closure}

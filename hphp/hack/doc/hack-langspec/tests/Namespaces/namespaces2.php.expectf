@@ -1,0 +1,2 @@
+
+Fatal error: No code may exist outside of namespace {}: (Line: 36, Char: 19) in %s/tests/Namespaces/namespaces2.php on line 36

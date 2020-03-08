@@ -1,0 +1,182 @@
+----------------- main_closure_example from Hack doc site ----------------------
+10
+13
+8
+Calling f2 =>hihihihihi<
+----------------- closure with no parameters ----------------------
+--
+string(6) "object"
+--
+object(Closure$NS_anonymous_functions\I::NS_anonymous_functions\main;%d)#%d (0) {
+}
+--
+bool(true)
+--
+Inside function >>{closure}<<
+Inside method >>{closure}<<
+----------------- closure with 5 parameters ----------------------
+--
+string(6) "object"
+--
+object(Closure$NS_anonymous_functions\I::NS_anonymous_functions\main#%d;%d)#%d (1) {
+  ["parameter"]=>
+  array(5) {
+    ["$p1"]=>
+    string(10) "<required>"
+    ["$p2"]=>
+    string(10) "<required>"
+    ["$p3"]=>
+    string(10) "<required>"
+    ["$p4"]=>
+    string(10) "<required>"
+    ["$p5"]=>
+    string(10) "<required>"
+  }
+}
+--
+bool(true)
+--
+Inside function >>{closure}<<
+Inside method >>{closure}<<
+----------------- passing a callable to a function ----------------------
+string(30) "\NS_anonymous_functions\double"
+Result of calling doit using function double = 20
+-------
+string(30) "\NS_anonymous_functions\square"
+Result of calling doit using function square = 100
+-------
+object(Closure$NS_anonymous_functions\I::NS_anonymous_functions\main#%d;%d)#%d (1) {
+  ["parameter"]=>
+  array(1) {
+    ["$p"]=>
+    string(10) "<required>"
+  }
+}
+Result of calling doit using double closure = 10
+-------
+object(Closure$NS_anonymous_functions\I::NS_anonymous_functions\main#%d;%d)#%d (1) {
+  ["parameter"]=>
+  array(1) {
+    ["$p"]=>
+    string(10) "<required>"
+  }
+}
+Result of calling doit using square closure = 25
+-------
+$functionList[0] returns 24
+$functionList[1] returns 225
+array(2) {
+  [0]=>
+  object(Closure$NS_anonymous_functions\I::NS_anonymous_functions\main#%d;%d)#%d (1) {
+    ["parameter"]=>
+    array(1) {
+      ["$p"]=>
+      string(10) "<required>"
+    }
+  }
+  [1]=>
+  object(Closure$NS_anonymous_functions\I::NS_anonymous_functions\main#%d;%d)#%d (1) {
+    ["parameter"]=>
+    array(1) {
+      ["$p"]=>
+      string(10) "<required>"
+    }
+  }
+}
+----------------- using a use clause, #1 ----------------------
+Inside method >>{closure}<<
+$count = 0
+Inside method >>{closure}<<
+$count = 0
+----------------- using a use clause, #2 (instance method) ----------------------
+--
+string(6) "object"
+--
+object(Closure$NS_anonymous_functions\D::compute;%d)#%d (3) {
+  ["static"]=>
+  array(2) {
+    ["count"]=>
+    int(0)
+    ["values"]=>
+    array(2) {
+      ["red"]=>
+      int(3)
+      ["green"]=>
+      int(10)
+    }
+  }
+  ["parameter"]=>
+  array(2) {
+    ["$p1"]=>
+    string(10) "<required>"
+    ["$p2"]=>
+    string(10) "<required>"
+  }
+  ["this"]=>
+  object(NS_anonymous_functions\D)#10 (0) {
+  }
+}
+--
+bool(true)
+--
+Inside method >>NS_anonymous_functions\D::{closure}<<
+Inside method >>NS_anonymous_functions\D::f<<
+$count = 0
+Inside method >>NS_anonymous_functions\D::{closure}<<
+Inside method >>NS_anonymous_functions\D::f<<
+$count = 0
+--
+string(6) "object"
+--
+object(Closure$NS_anonymous_functions\D::compute#%d;%d)#%d (1) {
+  ["this"]=>
+  object(NS_anonymous_functions\D)#10 (0) {
+  }
+}
+--
+bool(true)
+--
+Inside method >>NS_anonymous_functions\D::{closure}<<
+----------------- using a use clause, #3 (static method) ----------------------
+--
+string(6) "object"
+--
+object(Closure$NS_anonymous_functions\D::stcompute;%d)#%d (2) {
+  ["static"]=>
+  array(2) {
+    ["count"]=>
+    int(0)
+    ["values"]=>
+    array(2) {
+      ["red"]=>
+      int(3)
+      ["green"]=>
+      int(10)
+    }
+  }
+  ["parameter"]=>
+  array(2) {
+    ["$p1"]=>
+    string(10) "<required>"
+    ["$p2"]=>
+    string(10) "<required>"
+  }
+}
+--
+bool(true)
+--
+Inside method >>NS_anonymous_functions\D::{closure}<<
+$count = 0
+Inside method >>NS_anonymous_functions\D::{closure}<<
+$count = 0
+----------------- Misc. Stuff ----------------------
+Hi
+$p = 6
+$p = -5
+$p = 123
+$p = -5
+$p = 123
+$p = -5
+$p = 10.5
+$p = -5
+$p = 10.5

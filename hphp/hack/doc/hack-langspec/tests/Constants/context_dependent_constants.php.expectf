@@ -1,0 +1,43 @@
+__LINE__: int(70)
+__FILE__: string(%d) "%s/tests/Constants/context_dependent_constants.php"
+__DIR__: string(%d) "%s/tests/Constants"
+string(%d) "%s/tests/Constants"
+__LINE__: int(77)
+__NAMESPACE__: string(30) "NS_context_dependent_constants"
+-----------------------------------------
+Outside all classes
+-----------------------------------------
+Outside all classes
+-----------------------------------------
+Inside ComputeResult
+__FUNCTION__: string(44) "NS_context_dependent_constants\ComputeResult"
+__METHOD__: string(44) "NS_context_dependent_constants\ComputeResult"
+__NAMESPACE__: string(30) "NS_context_dependent_constants"
+-----------------------------------------
+Inside NS_context_dependent_constants\Date::__construct
+__CLASS__: string(35) "NS_context_dependent_constants\Date"
+__FUNCTION__: string(11) "__construct"
+__NAMESPACE__: string(30) "NS_context_dependent_constants"
+$name1: string(0) ""
+$name2: string(35) "NS_context_dependent_constants\Date"
+Inside NS_context_dependent_constants\Date::setDay
+__FUNCTION__: string(6) "setDay"
+__LINE__: int(41)
+Inside NS_context_dependent_constants\Date::priv1
+__FUNCTION__: string(5) "priv1"
+Inside NS_context_dependent_constants\Date::spf1
+__FUNCTION__: string(4) "spf1"
+-----------------------------------------
+Inside NS_context_dependent_constants\Date::__construct
+__CLASS__: string(35) "NS_context_dependent_constants\Date"
+__FUNCTION__: string(11) "__construct"
+__NAMESPACE__: string(30) "NS_context_dependent_constants"
+$name1: string(0) ""
+$name2: string(35) "NS_context_dependent_constants\Date"
+__CLASS__: string(39) "NS_context_dependent_constants\DatePlus"
+Inside NS_context_dependent_constants\DatePlus::xx
+__FUNCTION__: string(2) "xx"
+Inside NS_context_dependent_constants\Date::__destruct
+__FUNCTION__: string(10) "__destruct"
+Inside NS_context_dependent_constants\Date::__destruct
+__FUNCTION__: string(10) "__destruct"

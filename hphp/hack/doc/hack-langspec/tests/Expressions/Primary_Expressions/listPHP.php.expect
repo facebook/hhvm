@@ -1,0 +1,41 @@
+--------- test with full and omitted LHS vars -------------
+$min: 0, $max: 100, $avg: 67
+Array
+(
+    [0] => 0
+    [1] => 100
+    [2] => 67
+)
+$min: 10, $max: 1100,
+$min: 20, $max: 2100
+$min: 30
+--------- test with more array elements than variables -------------
+$min: 40, $max: 4100, $avg: 467
+Array
+(
+    [0] => 40
+    [1] => 4100
+    [2] => 467
+    [3] => 22
+    [4] => 33
+)
+--------- test with target vars being array elements -------------
+Array
+(
+    [4] => 567
+    [2] => 5100
+    [0] => 50
+)
+Array
+(
+    [0] => 50
+    [1] => 5100
+    [2] => 567
+)
+--------- test with no variables -------------
+Array
+(
+    [0] => 0
+    [1] => 100
+    [2] => 67
+)

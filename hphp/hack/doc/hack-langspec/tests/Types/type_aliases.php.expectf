@@ -1,0 +1,2 @@
+
+Fatal error: Namespace declaration statement has to be the very first statement in the script: (Line: 5, Char: 26) in %s/tests/Types/type_aliases.php on line 5

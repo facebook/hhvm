@@ -1,0 +1,11 @@
+qq============= map-like arrays ================
+result of p1 == p7 = bool(false)
+result of p8 == p9 = bool(false)
+result of p7 == p10 = bool(false)
+result of p11 == p12 = bool(false)
+============= concating to an empty/untyped array ================
+result of p1 == array() = bool(false)
+result of array() == p1 = bool(false)
+result of p10 == array() = bool(false)
+result of p11 == array() = bool(false)
+result of array() == array() = bool(true)

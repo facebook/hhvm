@@ -1,0 +1,3 @@
+
+Fatal error: HH mode: content before <?hh (Line: 1, Char: 38)
+syntax error, unexpected T_HH_ERROR, expecting $end in %s/tests/Expressions/Postfix_Operators/new_anonymous_classes.php on line 1

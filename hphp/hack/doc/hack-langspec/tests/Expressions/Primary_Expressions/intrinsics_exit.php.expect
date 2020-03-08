@@ -1,0 +1,6 @@
+--------- test with/without string -------------
+goodbye
+
+Warning: Invalid argument: function: method 'cleanup2' not found
+
+Warning: Invalid argument: function: method 'cleanup1' not found

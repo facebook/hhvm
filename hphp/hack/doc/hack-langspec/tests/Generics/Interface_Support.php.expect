@@ -1,0 +1,42 @@
+------- Container -------
+
+V is a Container
+IV is a Container
+M is a Container
+IM is a Container
+S is a Container
+IS is a Container
+P is a Container
+A is a Container
+
+------- KeyedContainer -------
+
+V is a KeyedContainer
+IV is a KeyedContainer
+M is a KeyedContainer
+IM is a KeyedContainer
+S is **NOT** a KeyedContainer
+IS is **NOT** a KeyedContainer
+P is a KeyedContainer
+A is a KeyedContainer
+------- Traversable -------
+
+V is a Traversable
+IV is a Traversable
+M is a Traversable
+IM is a Traversable
+S is a Traversable
+IS is a Traversable
+P is a Traversable
+A is a Traversable
+
+------- KeyedTraversable -------
+
+V is a KeyedTraversable
+IV is a KeyedTraversable
+M is a KeyedTraversable
+IM is a KeyedTraversable
+S is a KeyedTraversable
+IS is a KeyedTraversable
+P is a KeyedTraversable
+A is a KeyedTraversable

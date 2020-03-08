@@ -1,0 +1,32 @@
+=== int 5 ===
+int(6)
+int(5)
+
+=== int 0x7fffffffffffffff ===
+int(-9223372036854775808)
+int(9223372036854775807)
+
+=== int 0x80000000 ===
+int(-9223372036854775808)
+int(9223372036854775807)
+
+=== float 12.345 ===
+float(13.345)
+float(12.345)
+
+=== float INF ===
+float(INF)
+float(INF)
+
+=== float -INF ===
+float(-INF)
+float(-INF)
+
+=== float NAN ===
+float(NAN)
+float(NAN)
+=== ?int ===
+---> ++/--/--
+int(6)
+int(5)
+int(4)

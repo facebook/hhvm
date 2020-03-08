@@ -1,0 +1,57 @@
+object(NS_cloning\C)#1 (1) {
+  ["m":"NS_cloning\C":private]=>
+  int(10)
+}
+Inside NS_cloning\C::__clone
+object(NS_cloning\C)#2 (1) {
+  ["m":"NS_cloning\C":private]=>
+  int(10)
+}
+================= Use cloning in Point class =================
+Point count = 0
+object(NS_Point2\Point2)#3 (2) {
+  ["x"]=>
+  float(-3.5)
+  ["y"]=>
+  float(1.4)
+}
+Point count = 1
+Inside NS_Point2\Point2::__clone, point count = 2
+object(NS_Point2\Point2)#4 (2) {
+  ["x"]=>
+  float(-3.5)
+  ["y"]=>
+  float(1.4)
+}
+Point count = 2
+Inside NS_Point2\Point2::__clone, point count = 3
+object(NS_Point2\Point2)#5 (2) {
+  ["x"]=>
+  float(-3.5)
+  ["y"]=>
+  float(1.4)
+}
+Point count = 3
+Inside NS_Point2\Point2::__clone, point count = 4
+object(NS_Point2\Point2)#6 (2) {
+  ["x"]=>
+  float(-3.5)
+  ["y"]=>
+  float(1.4)
+}
+Point count = 4
+================= use chained cloning in a class heirarchy =================
+object(NS_cloning\Manager)#7 (2) {
+  ["level":"NS_cloning\Manager":private]=>
+  int(23)
+  ["name":"NS_cloning\Employee":private]=>
+  string(5) "Smith"
+}
+Inside NS_cloning\Manager::__clone
+Inside NS_cloning\Employee::__clone
+object(NS_cloning\Manager)#8 (2) {
+  ["level":"NS_cloning\Manager":private]=>
+  int(23)
+  ["name":"NS_cloning\Employee":private]=>
+  string(5) "Smith"
+}

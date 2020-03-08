@@ -1,0 +1,21 @@
+resource(1) of type (stream)
+bool(true)
+string(6) "stream"
+resource(2) of type (stream)
+bool(true)
+string(6) "stream"
+resource(3) of type (stream)
+bool(true)
+string(6) "stream"
+
+Warning: No such file or directory in %s/tests/Types/resources.php on line 35
+bool(false)
+
+
+
+Warning: No such file or directory in %s/tests/Types/resources.php on line 41
+bool(false)
+object(NS_resources\C)#1 (1) {
+  ["prop":"NS_resources\C":private]=>
+  resource(2) of type (stream)
+}

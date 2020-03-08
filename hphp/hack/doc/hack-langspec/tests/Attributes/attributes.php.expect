@@ -1,0 +1,219 @@
+
+============== top-level function =====================
+
+Inside NS_attrib1\f1
+array(0) {
+}
+array(4) {
+  [0]=>
+  int(3)
+  [1]=>
+  bool(true)
+  [2]=>
+  float(3.4)
+  [3]=>
+  string(18) "top-level function"
+}
+
+============== class Widget =====================
+
+array(1) {
+  [0]=>
+  string(39) "http://www.MyOnlineDocs.com/Widget.html"
+}
+
+============== class C1->f2 =====================
+
+Inside f2
+
+============== class =====================
+
+array(0) {
+}
+array(4) {
+  [0]=>
+  int(3)
+  [1]=>
+  bool(true)
+  [2]=>
+  float(3.4)
+  [3]=>
+  string(8) "class C1"
+}
+
+============== constructor =====================
+
+array(0) {
+}
+array(4) {
+  [0]=>
+  int(3)
+  [1]=>
+  bool(true)
+  [2]=>
+  float(3.4)
+  [3]=>
+  string(11) "constructor"
+}
+
+============== destructor =====================
+
+array(0) {
+}
+array(4) {
+  [0]=>
+  int(3)
+  [1]=>
+  bool(true)
+  [2]=>
+  float(3.4)
+  [3]=>
+  string(10) "destructor"
+}
+
+============== instance method =====================
+
+array(0) {
+}
+array(4) {
+  [0]=>
+  int(3)
+  [1]=>
+  bool(true)
+  [2]=>
+  float(3.4)
+  [3]=>
+  string(15) "instance method"
+}
+
+============== static method =====================
+
+array(0) {
+}
+array(4) {
+  [0]=>
+  int(3)
+  [1]=>
+  bool(true)
+  [2]=>
+  float(3.4)
+  [3]=>
+  string(13) "static method"
+}
+
+============== trait instance method =====================
+
+array(0) {
+}
+array(4) {
+  [0]=>
+  int(3)
+  [1]=>
+  bool(true)
+  [2]=>
+  float(3.4)
+  [3]=>
+  string(21) "trait instance method"
+}
+
+============== trait static method =====================
+
+array(0) {
+}
+array(4) {
+  [0]=>
+  int(3)
+  [1]=>
+  bool(true)
+  [2]=>
+  float(3.4)
+  [3]=>
+  string(19) "trait static method"
+}
+
+============== class C4 =====================
+
+array(9) {
+  [0]=>
+  bool(true)
+  [1]=>
+  int(123)
+  [2]=>
+  float(3.4)
+  [3]=>
+  string(8) "class C4"
+  [4]=>
+  NULL
+  [5]=>
+  array(3) {
+    [0]=>
+    int(10)
+    [1]=>
+    int(20)
+    [2]=>
+    int(30)
+  }
+  [6]=>
+  array(2) {
+    ["x"]=>
+    int(3)
+    ["y"]=>
+    int(5)
+  }
+  [7]=>
+  array(2) {
+    [0]=>
+    int(12)
+    [1]=>
+    float(5.9)
+  }
+  [8]=>
+  array(2) {
+    ["x"]=>
+    int(-3)
+    ["y"]=>
+    int(6)
+  }
+}
+array(9) {
+  [0]=>
+  bool(true)
+  [1]=>
+  int(123)
+  [2]=>
+  float(3.4)
+  [3]=>
+  string(12) "method C4->f"
+  [4]=>
+  NULL
+  [5]=>
+  array(3) {
+    [0]=>
+    int(10)
+    [1]=>
+    int(20)
+    [2]=>
+    int(30)
+  }
+  [6]=>
+  array(2) {
+    ["x"]=>
+    int(3)
+    ["y"]=>
+    int(5)
+  }
+  [7]=>
+  array(2) {
+    [0]=>
+    int(12)
+    [1]=>
+    float(5.9)
+  }
+  [8]=>
+  array(2) {
+    ["x"]=>
+    int(-3)
+    ["y"]=>
+    int(6)
+  }
+}

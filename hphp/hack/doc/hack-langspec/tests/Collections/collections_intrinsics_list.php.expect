@@ -1,0 +1,91 @@
+--------- test with full and omitted LHS vars -------------
+$min: 0, $max: 100, $avg: 67
+HH\Vector Object
+(
+    [0] => 0
+    [1] => 100
+    [2] => 67
+)
+$min: 0, $max: 100,
+$min: 0, $max: 100
+$min: 0
+$first: -5, $second: 7
+HH\Pair Object
+(
+    [0] => -5
+    [1] => 7
+)
+--------- test with more elements than variables -------------
+$min: 0, $max: 100, $avg: 67
+HH\Vector Object
+(
+    [0] => 0
+    [1] => 100
+    [2] => 67
+    [3] => 22
+    [4] => 33
+)
+--------- test with element being an array -------------
+$min: 0, $max: Vector, $avg: Vector
+HH\Vector Object
+(
+    [0] => 0
+    [1] => HH\Vector Object
+        (
+            [0] => 1
+            [1] => 7
+        )
+
+    [2] => HH\Vector Object
+        (
+            [0] => 3
+            [1] => 6
+        )
+
+)
+$first: Vector, $second: Vector
+HH\Pair Object
+(
+    [0] => HH\Vector Object
+        (
+            [0] => 1
+            [1] => 7
+        )
+
+    [1] => HH\Vector Object
+        (
+            [0] => 3
+            [1] => 6
+        )
+
+)
+--------- test with target vars being array elements -------------
+Array
+(
+    [4] => 67
+    [2] => 100
+    [0] => 0
+)
+HH\Vector Object
+(
+    [0] => 0
+    [1] => 100
+    [2] => 67
+)
+Array
+(
+    [2] => 24
+    [0] => 12
+)
+HH\Pair Object
+(
+    [0] => 12
+    [1] => 24
+)
+--------- test with no variables -------------
+HH\Vector Object
+(
+    [0] => 0
+    [1] => 100
+    [2] => 67
+)

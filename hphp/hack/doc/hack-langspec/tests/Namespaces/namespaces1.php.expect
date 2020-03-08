@@ -1,0 +1,6 @@
+Inside function NS1\f1, namespace NS1
+Inside function NS1\Sub1\f2, namespace NS1\Sub1
+Inside function NS2\f3, namespace NS2
+Inside function NS3\Sub1\f4, namespace NS3\Sub1
+Inside function NS3\Sub1\f5, namespace NS3\Sub1
+Inside function NS3\Sub1\C1::f, namespace NS3\Sub1

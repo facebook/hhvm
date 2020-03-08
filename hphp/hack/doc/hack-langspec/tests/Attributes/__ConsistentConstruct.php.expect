@@ -1,0 +1,35 @@
+
+============== on constructor =====================
+
+making a new object
+In NS_ConsistentConstruct\Base::__construct
+object(NS_ConsistentConstruct\Base)#1 (0) {
+}
+making a new object
+In NS_ConsistentConstruct\Derived::__construct
+In NS_ConsistentConstruct\Base::__construct
+object(NS_ConsistentConstruct\Derived)#2 (0) {
+}
+making a new object
+In NS_ConsistentConstruct\C1::__construct
+object(NS_ConsistentConstruct\C1)#3 (0) {
+}
+making a new object
+In NS_ConsistentConstruct\C2::__construct
+In NS_ConsistentConstruct\C1::__construct
+object(NS_ConsistentConstruct\C2)#4 (0) {
+}
+
+============== top-level function f1 =====================
+
+Inside NS_ConsistentConstruct\f1
+array(1) {
+  [0]=>
+  int(3)
+}
+array(2) {
+  [0]=>
+  int(3)
+  [1]=>
+  bool(true)
+}

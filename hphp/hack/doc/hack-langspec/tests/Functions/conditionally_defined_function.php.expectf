@@ -1,0 +1,2 @@
+
+Fatal error: syntax error, unexpected '-', expecting T_NS_SEPARATOR or ';' or '{' in %s/tests/Functions/conditionally_defined_function.php on line 3

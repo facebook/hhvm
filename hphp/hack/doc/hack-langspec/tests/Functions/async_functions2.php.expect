@@ -1,0 +1,6 @@
+Inside NS_async_functions2\f
+Enter await
+Inside NS_async_functions2\g
+Exit await; $r1 = int(10)
+$v = object(HH\StaticWaitHandle)#1 (0) {
+}

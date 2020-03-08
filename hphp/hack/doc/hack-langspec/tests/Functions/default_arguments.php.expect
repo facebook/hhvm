@@ -1,0 +1,128 @@
+f1: # arguments passed is 0
+int(10)
+float(1.23)
+bool(true)
+NULL
+string(3) "abc"
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  array(0) {
+  }
+}
+f1: # arguments passed is 1
+	arg[0] = >12<
+int(12)
+float(1.23)
+bool(true)
+NULL
+string(3) "abc"
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  array(0) {
+  }
+}
+f1: # arguments passed is 2
+	arg[0] = >12<
+	arg[1] = >10.5<
+int(12)
+float(10.5)
+bool(true)
+NULL
+string(3) "abc"
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  array(0) {
+  }
+}
+f1: # arguments passed is 3
+	arg[0] = >12<
+	arg[1] = >10.5<
+	arg[2] = ><
+int(12)
+float(10.5)
+bool(false)
+NULL
+string(3) "abc"
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  array(0) {
+  }
+}
+f1: # arguments passed is 4
+	arg[0] = >12<
+	arg[1] = >10.5<
+	arg[2] = ><
+	arg[3] = >100<
+int(12)
+float(10.5)
+bool(false)
+int(100)
+string(3) "abc"
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  array(0) {
+  }
+}
+f1: # arguments passed is 5
+	arg[0] = >12<
+	arg[1] = >10.5<
+	arg[2] = ><
+	arg[3] = >aaa<
+	arg[4] = >xxx<
+int(12)
+float(10.5)
+bool(false)
+string(3) "aaa"
+string(3) "xxx"
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  array(0) {
+  }
+}
+f1: # arguments passed is 6
+	arg[0] = >12<
+	arg[1] = >10.5<
+	arg[2] = ><
+	arg[3] = >aaa<
+	arg[4] = >xxx<
+	arg[5] = ><
+int(12)
+float(10.5)
+bool(false)
+string(3) "aaa"
+string(3) "xxx"
+NULL
+f4: # arguments passed is 1
+	arg[0] = >10<
+int(10)
+int(-100)
+int(-200)
+f4: # arguments passed is 2
+	arg[0] = >10<
+	arg[1] = >20<
+int(10)
+int(20)
+int(-200)
+f4: # arguments passed is 3
+	arg[0] = >10<
+	arg[1] = >20<
+	arg[2] = >30<
+int(10)
+int(20)
+int(30)
+$p1 is -1, $p2 is 99.99, $p3 is ??
+$p1 is 123, $p2 is 99.99, $p3 is ??
+$p1 is 123, $p2 is 3.14, $p3 is ??
+$p1 is 123, $p2 is 3.14, $p3 is Hello

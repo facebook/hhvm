@@ -1,0 +1,55 @@
+$_ is >33<
+
+
+========================= Using $_ as an exception catch parameter name =========================
+
+
+
+========================= Is $_ defined by default? =========================
+
+
+
+========================= Can the value of $_ be changed? =========================
+
+$_ is >Hello<
+$_ is >10<
+
+
+========================= Odd behavior with var_dump and $_ =========================
+
+string(1) "a"
+int(10)
+int(10)
+string(1) "f"
+int(30)
+int(10)
+
+
+========================= An intended use of $_ with foreach, but ... =========================
+
+string(1) "a"
+int(10)
+string(1) "f"
+int(30)
+$_ is >xx<
+
+
+========================= An odd use of $_ =========================
+
+$_ is >10<
+$_ is >30<
+$_ is >30<
+
+
+========================= Using $_ for both key and value =========================
+
+$_ is >a<
+$_ is >f<
+$_ is >f<
+
+
+========================= An intended use of $_ with list =========================
+
+int(1)
+int(3)
+int(2)

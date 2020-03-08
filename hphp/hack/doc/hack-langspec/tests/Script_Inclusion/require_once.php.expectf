@@ -1,0 +1,4 @@
+int(3)
+int(1)
+
+Fatal error: Class undefined: NS_Point\Point in %s/tests/Script_Inclusion/require_once.php on line 14

@@ -1,0 +1,9 @@
+int(100)
+Hi from T
+10
+Hi from doit
+Hi from g
+In NS_generics\C2a::__construct
+In NS_generics\C2b::__construct
+In NS_generics\C2b::__destruct
+In NS_generics\C2a::__destruct

@@ -1,0 +1,2 @@
+
+Fatal error: strict_types can only be used when hhvm.php7.scalar_types = true in %s/tests/Expressions/Postfix_Operators/function_call_with_strict_checking.php on line 9

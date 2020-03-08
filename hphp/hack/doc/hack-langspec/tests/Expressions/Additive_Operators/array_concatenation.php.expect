@@ -1,0 +1,53 @@
+============= vector-like arrays ================
+result of p1 + p2 = array(2) {
+  [0]=>
+  int(66)
+  [1]=>
+  int(200)
+}
+result of p2 + p1 = array(2) {
+  [0]=>
+  int(100)
+  [1]=>
+  int(200)
+}
+============= map-like arrays ================
+result of p8 + p9 = array(4) {
+  [2]=>
+  string(2) "aa"
+  [12]=>
+  string(2) "bb"
+  [-4]=>
+  string(2) "cc"
+  [6]=>
+  string(2) "dd"
+}
+result of p11 + p12 = array(3) {
+  ["red"]=>
+  int(12)
+  ["green"]=>
+  int(7)
+  ["blue"]=>
+  int(3)
+}
+============= concating to an empty/untyped array ================
+result of p1 + array() = array(1) {
+  [0]=>
+  int(66)
+}
+result of array() + p1 = array(1) {
+  [0]=>
+  int(66)
+}
+result of p10 + array() = array(1) {
+  [-3]=>
+  bool(true)
+}
+result of p11 + array() = array(2) {
+  ["red"]=>
+  int(12)
+  ["green"]=>
+  int(7)
+}
+result of array() + array() = array(0) {
+}

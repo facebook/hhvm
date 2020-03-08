@@ -1,0 +1,44 @@
+================== Complex<float> ===================
+
+$c1 = (10.5 + 5.67i)
+$c2 = (-10.98 - 123.45i)
+$c1 + $c2 = (-0.48 - 117.78i)
+$c1 - $c2 = (21.48 + 129.12i)
+
+================== Complex<int> ===================
+
+$c3 = (5 + 6i)
+$c4 = (-10 - 12i)
+$c3 + $c4 = (-5 - 6i)
+$c3 - $c4 = (15 + 18i)
+
+================== Complex<num> ===================
+
+$c5 = (9 + 5.4i)
+$c6 = (12.2 - 20i)
+$c5 + $c6 = (21.2 - 14.6i)
+$c5 - $c6 = (-3.2 + 25.4i)
+object(NS_Complex\Complex)#5 (2) {
+  ["real":"NS_Complex\Complex":private]=>
+  int(9)
+  ["imag":"NS_Complex\Complex":private]=>
+  float(5.4)
+}
+object(NS_Complex\Complex)#6 (2) {
+  ["real":"NS_Complex\Complex":private]=>
+  float(12.2)
+  ["imag":"NS_Complex\Complex":private]=>
+  int(-20)
+}
+object(NS_Complex\Complex)#7 (2) {
+  ["real":"NS_Complex\Complex":private]=>
+  float(21.2)
+  ["imag":"NS_Complex\Complex":private]=>
+  float(-14.6)
+}
+object(NS_Complex\Complex)#8 (2) {
+  ["real":"NS_Complex\Complex":private]=>
+  float(-3.2)
+  ["imag":"NS_Complex\Complex":private]=>
+  float(25.4)
+}

@@ -1,0 +1,181 @@
+array(2) {
+  ["red"]=>
+  int(0)
+  ["green"]=>
+  int(0)
+}
+array(2) {
+  ["red"]=>
+  int(0)
+  ["green"]=>
+  int(0)
+}
+{$p1} >  {$p2}  result: bool(false)
+{$p2} <= {$p1}  result: bool(true)
+---
+{$p1} >= {$p2}  result: bool(true)
+{$p2} <  {$p1}  result: bool(false)
+---
+{$p1} <  {$p2}  result: bool(false)
+{$p2} >= {$p1}  result: bool(true)
+---
+{$p1} <= {$p2}  result: bool(true)
+{$p2} >  {$p1}  result: bool(false)
+---
+{$p1} == {$p2}  result: bool(true)
+{$p1} != {$p2}  result: bool(false)
+=======
+array(2) {
+  ["red"]=>
+  int(0)
+  ["green"]=>
+  int(0)
+}
+array(2) {
+  ["green"]=>
+  int(0)
+  ["red"]=>
+  int(0)
+}
+{$p1} >  {$p2}  result: bool(false)
+{$p2} <= {$p1}  result: bool(true)
+---
+{$p1} >= {$p2}  result: bool(true)
+{$p2} <  {$p1}  result: bool(false)
+---
+{$p1} <  {$p2}  result: bool(false)
+{$p2} >= {$p1}  result: bool(true)
+---
+{$p1} <= {$p2}  result: bool(true)
+{$p2} >  {$p1}  result: bool(false)
+---
+{$p1} == {$p2}  result: bool(true)
+{$p1} != {$p2}  result: bool(false)
+=======
+array(2) {
+  ["red"]=>
+  int(0)
+  ["green"]=>
+  int(0)
+}
+array(2) {
+  ["green"]=>
+  int(0)
+  ["red"]=>
+  int(5)
+}
+{$p1} >  {$p2}  result: bool(false)
+{$p2} <= {$p1}  result: bool(false)
+---
+{$p1} >= {$p2}  result: bool(false)
+{$p2} <  {$p1}  result: bool(false)
+---
+{$p1} <  {$p2}  result: bool(true)
+{$p2} >= {$p1}  result: bool(true)
+---
+{$p1} <= {$p2}  result: bool(true)
+{$p2} >  {$p1}  result: bool(true)
+---
+{$p1} == {$p2}  result: bool(false)
+{$p1} != {$p2}  result: bool(true)
+=======
+array(2) {
+  ["red"]=>
+  int(0)
+  ["green"]=>
+  int(0)
+}
+array(2) {
+  ["green"]=>
+  int(-5)
+  ["red"]=>
+  int(5)
+}
+{$p1} >  {$p2}  result: bool(true)
+{$p2} <= {$p1}  result: bool(true)
+---
+{$p1} >= {$p2}  result: bool(true)
+{$p2} <  {$p1}  result: bool(true)
+---
+{$p1} <  {$p2}  result: bool(true)
+{$p2} >= {$p1}  result: bool(true)
+---
+{$p1} <= {$p2}  result: bool(true)
+{$p2} >  {$p1}  result: bool(true)
+---
+{$p1} == {$p2}  result: bool(false)
+{$p1} != {$p2}  result: bool(true)
+=======
+array(2) {
+  ["red"]=>
+  int(0)
+  ["green"]=>
+  int(0)
+}
+array(2) {
+  ["green"]=>
+  int(-5)
+  ["red"]=>
+  int(0)
+}
+{$p1} >  {$p2}  result: bool(true)
+{$p2} <= {$p1}  result: bool(true)
+---
+{$p1} >= {$p2}  result: bool(true)
+{$p2} <  {$p1}  result: bool(true)
+---
+{$p1} <  {$p2}  result: bool(false)
+{$p2} >= {$p1}  result: bool(false)
+---
+{$p1} <= {$p2}  result: bool(false)
+{$p2} >  {$p1}  result: bool(false)
+---
+{$p1} == {$p2}  result: bool(false)
+{$p1} != {$p2}  result: bool(true)
+=======
+array(1) {
+  ["red"]=>
+  int(0)
+}
+array(1) {
+  ["green"]=>
+  int(0)
+}
+{$p1} >  {$p2}  result: bool(false)
+{$p2} <= {$p1}  result: bool(false)
+---
+{$p1} >= {$p2}  result: bool(false)
+{$p2} <  {$p1}  result: bool(false)
+---
+{$p1} <  {$p2}  result: bool(false)
+{$p2} >= {$p1}  result: bool(false)
+---
+{$p1} <= {$p2}  result: bool(false)
+{$p2} >  {$p1}  result: bool(false)
+---
+{$p1} == {$p2}  result: bool(false)
+{$p1} != {$p2}  result: bool(true)
+=======
+array(1) {
+  ["green"]=>
+  int(0)
+}
+array(1) {
+  ["red"]=>
+  int(0)
+}
+{$p1} >  {$p2}  result: bool(false)
+{$p2} <= {$p1}  result: bool(false)
+---
+{$p1} >= {$p2}  result: bool(false)
+{$p2} <  {$p1}  result: bool(false)
+---
+{$p1} <  {$p2}  result: bool(false)
+{$p2} >= {$p1}  result: bool(false)
+---
+{$p1} <= {$p2}  result: bool(false)
+{$p2} >  {$p1}  result: bool(false)
+---
+{$p1} == {$p2}  result: bool(false)
+{$p1} != {$p2}  result: bool(true)
+=======

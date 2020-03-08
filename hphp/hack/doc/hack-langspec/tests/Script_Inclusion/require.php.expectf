@@ -1,0 +1,9 @@
+MY_MIN is not defined
+Array
+(
+    [0] => %s/tests/Script_Inclusion/require.php
+    [1] => %s/tests/Script_Inclusion/limits.php
+    [2] => %s/tests/Script_Inclusion/mycolors.php
+    [3] => %s/tests/Script_Inclusion/return_none.php
+    [4] => %s/tests/Script_Inclusion/return_with_value.php
+)

@@ -1,0 +1,21 @@
+int(123)
+string(5) "green"
+------------------------------------
+object(NS_MyCollectionClasses\MyList)#1 (1) {
+  ["list":"NS_MyCollectionClasses\MyList":private]=>
+  array(0) {
+  }
+}
+object(NS_MyCollectionClasses\MyQueue)#2 (1) {
+  ["list":"NS_MyCollectionClasses\MyQueue":private]=>
+  array(0) {
+  }
+}
+object(NS_MyCollectionClasses\MyQueue)#3 (1) {
+  ["list":"NS_MyCollectionClasses\MyQueue":private]=>
+  array(0) {
+  }
+}
+int(1000)
+int(1000)
+int(1000)

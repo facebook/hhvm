@@ -1,0 +1,83 @@
+
+============== in class =====================
+
+Inside getNameFromStorage
+string(7) "cabinet"
+Inside getNameFromStorage
+string(4) "door"
+Inside getNameFromStorage
+string(6) "window"
+string(4) "door"
+string(6) "window"
+string(7) "cabinet"
+
+============== in trait =====================
+
+Inside getNameFromStorage
+string(7) "cabinet"
+Inside getNameFromStorage
+string(4) "door"
+Inside getNameFromStorage
+string(6) "window"
+string(4) "door"
+string(6) "window"
+string(7) "cabinet"
+
+============== in interface =====================
+
+Inside getNameFromStorage
+string(7) "cabinet"
+Inside getNameFromStorage
+string(4) "door"
+Inside getNameFromStorage
+string(6) "window"
+Inside getNameFromStorage
+string(4) "door"
+Inside getNameFromStorage
+string(6) "window"
+Inside getNameFromStorage
+string(7) "cabinet"
+
+============== top-level function getNameFromProductCode =====================
+
+Inside NS_Memoize\getNameFromStorage
+string(7) "cabinet"
+Inside NS_Memoize\getNameFromStorage
+string(4) "door"
+Inside NS_Memoize\getNameFromStorage
+string(6) "window"
+string(4) "door"
+string(6) "window"
+string(7) "cabinet"
+
+============== top-level function getNameFromProductCode2 =====================
+
+Inside NS_Memoize\getNameFromStorage2
+string(7) "cabinet"
+string(7) "cabinet"
+
+============== top-level function getNameFromProductCode3 =====================
+
+Inside NS_Memoize\getNameFromStorage3
+string(7) "cabinet"
+Inside NS_Memoize\getNameFromStorage3
+string(4) "door"
+Inside NS_Memoize\getNameFromStorage3
+string(6) "window"
+string(4) "door"
+string(6) "window"
+string(7) "cabinet"
+
+============== top-level function f1 =====================
+
+Inside NS_Memoize\f1
+array(1) {
+  [0]=>
+  int(3)
+}
+array(2) {
+  [0]=>
+  int(3)
+  [1]=>
+  bool(true)
+}

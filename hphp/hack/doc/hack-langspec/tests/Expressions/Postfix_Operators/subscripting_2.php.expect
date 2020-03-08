@@ -1,0 +1,77 @@
+====== vector-like array without index; simple assignment =========
+int(991)
+array(3) {
+  [0]=>
+  int(33)
+  [1]=>
+  int(-11)
+  [2]=>
+  int(991)
+}
+------
+====== array without index; compound assignment =========
+int(991)
+array(3) {
+  [0]=>
+  int(33)
+  [1]=>
+  int(-11)
+  [2]=>
+  int(991)
+}
+------
+int(-991)
+array(3) {
+  [0]=>
+  int(33)
+  [1]=>
+  int(-11)
+  [2]=>
+  int(-991)
+}
+------
+int(0)
+array(3) {
+  [0]=>
+  int(33)
+  [1]=>
+  int(-11)
+  [2]=>
+  int(0)
+}
+====== array without index; ++/-- =========
+NULL
+array(3) {
+  [0]=>
+  int(33)
+  [1]=>
+  int(-11)
+  [2]=>
+  int(1)
+}
+------
+int(1)
+array(4) {
+  [0]=>
+  int(33)
+  [1]=>
+  int(-11)
+  [2]=>
+  int(1)
+  [3]=>
+  int(1)
+}
+------
+NULL
+array(5) {
+  [0]=>
+  int(33)
+  [1]=>
+  int(-11)
+  [2]=>
+  int(1)
+  [3]=>
+  int(1)
+  [4]=>
+  NULL
+}

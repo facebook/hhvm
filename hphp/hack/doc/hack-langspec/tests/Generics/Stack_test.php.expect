@@ -1,0 +1,32 @@
+Inside NS_Stack\Stack::__construct: stackPtr = 0
+Inside NS_Stack\Stack::push: stackPtr = 0
+Inside NS_Stack\Stack::pop: stackPtr = 1
+pop => 100
+stack depth = 0
+Inside NS_Stack\Stack::push: stackPtr = 0
+object(NS_Stack\Stack)#1 (2) {
+  ["stack":"NS_Stack\Stack":private]=>
+  array(1) {
+    [0]=>
+    float(10.5)
+  }
+  ["stackPtr":"NS_Stack\Stack":private]=>
+  int(1)
+}
+Inside NS_Stack\Stack::pop: stackPtr = 1
+pop => 10.5
+Inside NS_Stack\Stack::push: stackPtr = 0
+object(NS_Stack\Stack)#1 (2) {
+  ["stack":"NS_Stack\Stack":private]=>
+  array(1) {
+    [0]=>
+    string(3) "abc"
+  }
+  ["stackPtr":"NS_Stack\Stack":private]=>
+  int(1)
+}
+Inside NS_Stack\Stack::pop: stackPtr = 1
+pop => abc
+Inside NS_Stack\Stack::__construct: stackPtr = 0
+Inside NS_Stack\Stack::push: stackPtr = 0
+Inside NS_Stack\Stack::push: stackPtr = 1

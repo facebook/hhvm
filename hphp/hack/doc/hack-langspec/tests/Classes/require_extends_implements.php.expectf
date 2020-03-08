@@ -1,0 +1,2 @@
+
+Fatal error: Traits cannot have constants in %s/tests/Classes/require_extends_implements.php on line 35

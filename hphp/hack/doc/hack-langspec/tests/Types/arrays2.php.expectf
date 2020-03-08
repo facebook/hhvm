@@ -1,0 +1,203 @@
+
+Warning: Illegal offset type in %s/tests/Types/arrays2.php on line 123
+
+Warning: Illegal offset type in %s/tests/Types/arrays2.php on line 127
+====== bool keys (implicitly converted to int) ======
+
+pr_bool_bool: array(2) {
+  [1]=>
+  bool(false)
+  [0]=>
+  bool(false)
+}
+pr_bool_int: array(2) {
+  [1]=>
+  int(200)
+  [0]=>
+  int(-100)
+}
+pr_bool_float: array(2) {
+  [0]=>
+  float(12.34)
+  [1]=>
+  float(-2.0E+23)
+}
+pr_bool_num: array(2) {
+  [0]=>
+  float(12.34)
+  [1]=>
+  int(111)
+}
+pr_bool_string: array(2) {
+  [1]=>
+  string(3) "abc"
+  [0]=>
+  string(3) "def"
+}
+
+====== int keys ======
+
+pr_int_bool: array(2) {
+  [5]=>
+  bool(true)
+  [-2]=>
+  bool(false)
+}
+pr_int_int: array(2) {
+  [123]=>
+  int(12)
+  [-1]=>
+  int(1111)
+}
+pr_int_float: array(2) {
+  [8]=>
+  float(1.2)
+  [2]=>
+  float(3.4)
+}
+pr_int_num: array(2) {
+  [5]=>
+  float(12.34)
+  [-6]=>
+  int(111)
+}
+pr_int_string: array(2) {
+  [19]=>
+  string(3) "abc"
+  [-5]=>
+  string(3) "def"
+}
+
+====== float keys (implicitly converted to int) ======
+
+pr_float_bool: array(1) {
+  [1]=>
+  bool(true)
+}
+pr_float_int: array(2) {
+  [12]=>
+  int(10)
+  [8]=>
+  int(-5)
+}
+pr_float_float: array(3) {
+  [11]=>
+  float(1.2)
+  [-54]=>
+  float(3.4)
+  [23]=>
+  float(1.111)
+}
+pr_float_num: array(2) {
+  [1]=>
+  float(12.34)
+  [19]=>
+  int(111)
+}
+pr_float_string: array(2) {
+  [4]=>
+  string(3) "abc"
+  [9]=>
+  string(3) "def"
+}
+
+====== num keys (implicitly converted to int) ======
+
+pr_num_bool: array(2) {
+  [1]=>
+  bool(true)
+  [2]=>
+  bool(false)
+}
+pr_num_int: array(2) {
+  [12]=>
+  int(10)
+  [8]=>
+  int(-5)
+}
+pr_num_float: array(2) {
+  [11]=>
+  float(1.2)
+  [-54]=>
+  float(3.4)
+}
+pr_num_num: array(4) {
+  [1]=>
+  float(12.34)
+  [19]=>
+  int(111)
+  [7]=>
+  int(10)
+  [-3]=>
+  float(6.7)
+}
+pr_num_string: array(2) {
+  [4]=>
+  string(3) "abc"
+  [9]=>
+  string(3) "def"
+}
+
+====== string keys ======
+
+pr_string_bool: array(3) {
+  ["B"]=>
+  bool(true)
+  ["Z"]=>
+  bool(false)
+  ["ff"]=>
+  bool(true)
+}
+pr_string_int: array(2) {
+  ["X"]=>
+  int(10)
+  ["Y"]=>
+  int(20)
+}
+pr_string_float: array(2) {
+  ["v"]=>
+  float(1.2)
+  ["w"]=>
+  float(9.7)
+}
+pr_string_num: array(2) {
+  ["zz"]=>
+  float(12.34)
+  ["vv"]=>
+  int(111)
+}
+pr_string_string: array(2) {
+  ["red"]=>
+  string(3) "yes"
+  ["green"]=>
+  string(2) "no"
+}
+
+====== void keys ======
+
+
+====== array<bool> keys ======
+
+pr_arraybool_bool: array(0) {
+}
+pr_arraybool_int: array(0) {
+}
+pr_arraybool_float: array(0) {
+}
+pr_arraybool_num: array(0) {
+}
+pr_arraybool_string: array(0) {
+}
+
+====== C1 keys ======
+
+pr_C1_bool: array(0) {
+}
+pr_C1_int: array(0) {
+}
+pr_C1_float: array(0) {
+}
+pr_C1_num: array(0) {
+}
+pr_C1_string: array(0) {
+}

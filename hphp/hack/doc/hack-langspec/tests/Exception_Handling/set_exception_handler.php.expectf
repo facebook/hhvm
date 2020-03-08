@@ -1,0 +1,63 @@
+NULL
+NULL
+About to call f
+In f's try-block
+In f's finally-block
+In MyDefExHandler
+$e = >exception 'Exception' with message 'Watson, come here!' in %s/tests/Exception_Handling/set_exception_handler.php:42
+Stack trace:
+#0 %s/tests/Exception_Handling/set_exception_handler.php(68): NS_set_exception_handler\f()
+#1 %s/tests/Exception_Handling/set_exception_handler.php(73): NS_set_exception_handler\main()
+#2 {main}<
+getMessage:       >Watson, come here!<
+getCode:          >1234<
+getPrevious:      ><
+getFile:          >%s/tests/Exception_Handling/set_exception_handler.php<
+getLine:          >42<
+getTraceAsString: >#0 %s/tests/Exception_Handling/set_exception_handler.php(68): NS_set_exception_handler\f()
+#1 %s/tests/Exception_Handling/set_exception_handler.php(73): NS_set_exception_handler\main()
+#2 {main}<
+array(2) {
+  [0]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s/tests/Exception_Handling/set_exception_handler.php"
+    ["line"]=>
+    int(68)
+    ["function"]=>
+    string(26) "NS_set_exception_handler\f"
+    ["args"]=>
+    array(2) {
+      [0]=>
+      int(10)
+      [1]=>
+      bool(true)
+    }
+  }
+  [1]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s/tests/Exception_Handling/set_exception_handler.php"
+    ["line"]=>
+    int(73)
+    ["function"]=>
+    string(29) "NS_set_exception_handler\main"
+    ["args"]=>
+    array(0) {
+    }
+  }
+}
+Trace Info:
+Key[0]:
+  Key[file] => >%s/tests/Exception_Handling/set_exception_handler.php<
+  Key[line] => >68<
+  Key[function] => >NS_set_exception_handler\f<
+  Key[args]:
+    Key[0] => >10<
+    Key[1] => >1<
+Key[1]:
+  Key[file] => >%s/tests/Exception_Handling/set_exception_handler.php<
+  Key[line] => >73<
+  Key[function] => >NS_set_exception_handler\main<
+  Key[args]:
+Leaving MyDefExHandler

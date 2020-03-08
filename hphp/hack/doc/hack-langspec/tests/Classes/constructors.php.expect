@@ -1,0 +1,20 @@
+In D1 constructor, 1
+In D2 constructor, 1, 2
+In D3 constructor, 1, 2, 3
+In D4 constructor
+object(NS_constructors\C2)#2 (6) {
+  ["pr1":"NS_constructors\C2":private]=>
+  int(10)
+  ["pr3":protected]=>
+  int(30)
+  ["pr5"]=>
+  int(50)
+  ["p2":"NS_constructors\C2":private]=>
+  int(20)
+  ["p4":protected]=>
+  float(40)
+  ["p6"]=>
+  string(3) "xxx"
+}
+50
+xxx

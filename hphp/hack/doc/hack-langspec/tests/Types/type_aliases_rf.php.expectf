@@ -1,0 +1,2 @@
+
+Fatal error: Method 'compute' declared in multiple traits in %s/tests/Types/type_aliases_rf.php on line 86

@@ -1,0 +1,2 @@
+
+Fatal error: Redeclared method NS_name_case_sensitivity\C::F in %s/tests/Lexical_Structure/Tokens/name_case_sensitivity.php on line 9

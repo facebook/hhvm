@@ -1,0 +1,3 @@
+
+Fatal error: HH mode: content before <?hh (Line: 1, Char: 25)
+syntax error, unexpected T_HH_ERROR, expecting $end in %s/tests/Classes/Generator_getReturn.php on line 1

@@ -1,0 +1,24 @@
+object(NS_this_play\Base)#1 (2) {
+  ["pr1":"NS_this_play\Base":private]=>
+  NULL
+  ["x":"NS_this_play\Base":private]=>
+  int(10)
+}
+object(NS_this_play\Base)#1 (2) {
+  ["pr1":"NS_this_play\Base":private]=>
+  NULL
+  ["x":"NS_this_play\Base":private]=>
+  int(10)
+}
+object(NS_this_play\Derived)#2 (2) {
+  ["pr1":"NS_this_play\Base":private]=>
+  NULL
+  ["x":"NS_this_play\Base":private]=>
+  int(20)
+}
+object(NS_this_play\Derived)#2 (2) {
+  ["pr1":"NS_this_play\Base":private]=>
+  NULL
+  ["x":"NS_this_play\Base":private]=>
+  int(20)
+}

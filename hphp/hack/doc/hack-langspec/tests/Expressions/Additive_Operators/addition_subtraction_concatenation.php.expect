@@ -1,0 +1,96 @@
+>100< + >100<, result: int(200)
+>100< + >-3.4<, result: float(96.6)
+>100< + >11<, result: int(111)
+-------------------------------------
+>-3.4< + >100<, result: float(96.6)
+>-3.4< + >-3.4<, result: float(-6.8)
+>-3.4< + >11<, result: float(7.6)
+-------------------------------------
+>11< + >100<, result: int(111)
+>11< + >-3.4<, result: float(7.6)
+>11< + >11<, result: int(22)
+-------------------------------------
+>100< - >100<, result: int(0)
+>100< - >-3.4<, result: float(103.4)
+>100< - >11<, result: int(89)
+-------------------------------------
+>-3.4< - >100<, result: float(-103.4)
+>-3.4< - >-3.4<, result: float(0)
+>-3.4< - >11<, result: float(-14.4)
+-------------------------------------
+>11< - >100<, result: int(-89)
+>11< - >-3.4<, result: float(14.4)
+>11< - >11<, result: int(0)
+-------------------------------------
+>100< . >100<, result: string(6) "100100"
+>100< . >-3.4<, result: string(7) "100-3.4"
+>100< . >1<, result: string(4) "1001"
+>100< . ><, result: string(3) "100"
+>100< . >123<, result: string(6) "100123"
+>100< . >2e+5<, result: string(7) "1002e+5"
+>100< . ><, result: string(3) "100"
+>100< . >abc<, result: string(6) "100abc"
+-------------------------------------
+>-3.4< . >100<, result: string(7) "-3.4100"
+>-3.4< . >-3.4<, result: string(8) "-3.4-3.4"
+>-3.4< . >1<, result: string(5) "-3.41"
+>-3.4< . ><, result: string(4) "-3.4"
+>-3.4< . >123<, result: string(7) "-3.4123"
+>-3.4< . >2e+5<, result: string(8) "-3.42e+5"
+>-3.4< . ><, result: string(4) "-3.4"
+>-3.4< . >abc<, result: string(7) "-3.4abc"
+-------------------------------------
+>1< . >100<, result: string(4) "1100"
+>1< . >-3.4<, result: string(5) "1-3.4"
+>1< . >1<, result: string(2) "11"
+>1< . ><, result: string(1) "1"
+>1< . >123<, result: string(4) "1123"
+>1< . >2e+5<, result: string(5) "12e+5"
+>1< . ><, result: string(1) "1"
+>1< . >abc<, result: string(4) "1abc"
+-------------------------------------
+>< . >100<, result: string(3) "100"
+>< . >-3.4<, result: string(4) "-3.4"
+>< . >1<, result: string(1) "1"
+>< . ><, result: string(0) ""
+>< . >123<, result: string(3) "123"
+>< . >2e+5<, result: string(4) "2e+5"
+>< . ><, result: string(0) ""
+>< . >abc<, result: string(3) "abc"
+-------------------------------------
+>123< . >100<, result: string(6) "123100"
+>123< . >-3.4<, result: string(7) "123-3.4"
+>123< . >1<, result: string(4) "1231"
+>123< . ><, result: string(3) "123"
+>123< . >123<, result: string(6) "123123"
+>123< . >2e+5<, result: string(7) "1232e+5"
+>123< . ><, result: string(3) "123"
+>123< . >abc<, result: string(6) "123abc"
+-------------------------------------
+>2e+5< . >100<, result: string(7) "2e+5100"
+>2e+5< . >-3.4<, result: string(8) "2e+5-3.4"
+>2e+5< . >1<, result: string(5) "2e+51"
+>2e+5< . ><, result: string(4) "2e+5"
+>2e+5< . >123<, result: string(7) "2e+5123"
+>2e+5< . >2e+5<, result: string(8) "2e+52e+5"
+>2e+5< . ><, result: string(4) "2e+5"
+>2e+5< . >abc<, result: string(7) "2e+5abc"
+-------------------------------------
+>< . >100<, result: string(3) "100"
+>< . >-3.4<, result: string(4) "-3.4"
+>< . >1<, result: string(1) "1"
+>< . ><, result: string(0) ""
+>< . >123<, result: string(3) "123"
+>< . >2e+5<, result: string(4) "2e+5"
+>< . ><, result: string(0) ""
+>< . >abc<, result: string(3) "abc"
+-------------------------------------
+>abc< . >100<, result: string(6) "abc100"
+>abc< . >-3.4<, result: string(7) "abc-3.4"
+>abc< . >1<, result: string(4) "abc1"
+>abc< . ><, result: string(3) "abc"
+>abc< . >123<, result: string(6) "abc123"
+>abc< . >2e+5<, result: string(7) "abc2e+5"
+>abc< . ><, result: string(3) "abc"
+>abc< . >abc<, result: string(6) "abcabc"
+-------------------------------------

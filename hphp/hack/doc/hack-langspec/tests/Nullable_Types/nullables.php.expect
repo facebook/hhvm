@@ -1,0 +1,102 @@
+Inside NS_nullables\C1::__construct
+object(NS_nullables\C1)#1 (19) {
+  ["pr_nbool":"NS_nullables\C1":private]=>
+  bool(true)
+  ["pr_nint":"NS_nullables\C1":private]=>
+  int(10)
+  ["pr_nfloat":"NS_nullables\C1":private]=>
+  float(3.1)
+  ["pr_nnum":"NS_nullables\C1":private]=>
+  float(5.4)
+  ["pr_nstring":"NS_nullables\C1":private]=>
+  string(1) "a"
+  ["pr_mixed":"NS_nullables\C1":private]=>
+  string(1) "b"
+  ["pr_nresource":"NS_nullables\C1":private]=>
+  NULL
+  ["pr_nButton":"NS_nullables\C1":private]=>
+  object(NS_nullables\CustomButton)#4 (0) {
+  }
+  ["pr_nCustomButton":"NS_nullables\C1":private]=>
+  object(NS_nullables\CustomButton)#4 (0) {
+  }
+  ["pr_nMyCollection":"NS_nullables\C1":private]=>
+  object(NS_nullables\MyQueue)#6 (0) {
+  }
+  ["a_nbool":"NS_nullables\C1":private]=>
+  array(2) {
+    [0]=>
+    bool(true)
+    [1]=>
+    NULL
+  }
+  ["a_nint":"NS_nullables\C1":private]=>
+  array(2) {
+    [0]=>
+    int(10)
+    [1]=>
+    NULL
+  }
+  ["a_nfloat":"NS_nullables\C1":private]=>
+  array(2) {
+    [0]=>
+    float(3.1)
+    [1]=>
+    NULL
+  }
+  ["a_nnum":"NS_nullables\C1":private]=>
+  array(3) {
+    [0]=>
+    int(-4)
+    [1]=>
+    float(5.4)
+    [2]=>
+    NULL
+  }
+  ["a_nstring":"NS_nullables\C1":private]=>
+  array(2) {
+    [0]=>
+    string(1) "a"
+    [1]=>
+    NULL
+  }
+  ["a_mixed":"NS_nullables\C1":private]=>
+  array(3) {
+    [0]=>
+    int(10)
+    [1]=>
+    string(1) "b"
+    [2]=>
+    NULL
+  }
+  ["a_nButton":"NS_nullables\C1":private]=>
+  array(3) {
+    [0]=>
+    object(NS_nullables\Button)#7 (0) {
+    }
+    [1]=>
+    NULL
+    [2]=>
+    object(NS_nullables\CustomButton)#8 (0) {
+    }
+  }
+  ["a_nCustomButton":"NS_nullables\C1":private]=>
+  array(2) {
+    [0]=>
+    object(NS_nullables\CustomButton)#9 (0) {
+    }
+    [1]=>
+    NULL
+  }
+  ["a_nMyCollection":"NS_nullables\C1":private]=>
+  array(3) {
+    [0]=>
+    NULL
+    [1]=>
+    object(NS_nullables\MyList)#10 (0) {
+    }
+    [2]=>
+    object(NS_nullables\MyQueue)#11 (0) {
+    }
+  }
+}

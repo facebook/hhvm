@@ -1,0 +1,54 @@
+
+Test some basics ======================
+
+$result = 100
+
+Wait on multiple async operations ======================
+
+
+Use async iterators ======================
+
+int(3)
+int(2)
+int(1)
+int(0)
+int(3)
+string(1) "3"
+int(2)
+string(1) "2"
+int(1)
+string(1) "1"
+int(0)
+string(1) "0"
+
+Test async blocks ======================
+
+object(HH\StaticWaitHandle)#%d (0) {
+}
+-----------------
+object(HH\StaticWaitHandle)#%d (0) {
+}
+-----------------
+int(123)
+object(HH\StaticWaitHandle)#%d (0) {
+}
+-----------------
+float(1.23)
+object(HH\StaticWaitHandle)#%d (0) {
+}
+-----------------
+object(HH\Vector)#%d (2) {
+  [0]=>
+  int(10)
+  [1]=>
+  float(1.2)
+}
+-----------------
+object(HH\Vector)#%d (2) {
+  [0]=>
+  float(1.2)
+  [1]=>
+  int(10)
+}
+
+Check usage contexts for await ======================

@@ -1,0 +1,26 @@
+Calling instance method >iMethod<
+array(3) {
+  [0]=>
+  int(10)
+  [1]=>
+  bool(true)
+  [2]=>
+  string(3) "abc"
+}
+Calling static method >sMethod<
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  float(1.234)
+}
+Calling static method >sMethod<
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  float(1.234)
+}
+Calling static method >[]{}<
+array(0) {
+}

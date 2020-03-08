@@ -1,0 +1,2 @@
+
+Fatal error: Declaration of NS_Serializable\Point::unserialize() must be compatible with that of Serializable::unserialize() in %s/tests/Classes/Serializable.php on line 5

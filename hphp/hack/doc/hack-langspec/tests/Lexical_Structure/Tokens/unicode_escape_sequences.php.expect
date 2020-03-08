@@ -1,0 +1,23 @@
+================= Basic checks =================
+
+string(3) ">A<"
+string(8) ">\U{41}<"
+string(3) ">A<"
+string(3) ">A<"
+string(3) ">A<"
+string(3) ">A<"
+string(4) ">©<"
+string(4) ">©<"
+string(4) ">©<"
+string(4) ">æ<"
+string(5) ">†<"
+string(6) ">𠀀<"
+string(6) ">𠀀<"
+string(6) ">􏿿<"
+
+================= Is variable substitution allowed? =================
+
+string(4) ">41<"
+string(5) ">041<"
+string(5) ">041<"
+string(6) ">\u41<"

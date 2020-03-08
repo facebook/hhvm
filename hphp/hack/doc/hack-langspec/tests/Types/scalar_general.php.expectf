@@ -1,0 +1,38 @@
+
+Warning: No such file or directory in %s/tests/Types/scalar_general.php on line 8
+========== is_numeric tests ==========
+
+is_numeric(true): False
+is_numeric(false): False
+is_numeric(10): True
+is_numeric(12.34): True
+is_numeric(""): False
+is_numeric("123"): True
+is_numeric("123abc"): False
+is_numeric("abc"): False
+is_numeric(null): False
+is_numeric(array(10,20)): False
+is_numeric(new C()): False
+is_numeric(resource): False
+
+========== is_numeric tests ==========
+
+is_scalar(true): True
+is_scalar(10): True
+is_scalar(12.34): True
+is_scalar("123"): True
+is_scalar(null): False
+is_scalar(array(10,20)): False
+is_scalar(new C()): False
+is_scalar(resource): True
+
+ ========== is_numeric tests ==========
+
+is_null(true): False
+is_null(10): False
+is_null(12.34): False
+is_null("123"): False
+is_null(null): True
+is_null(array(10,20)): False
+is_null(new C()): False
+is_null(resource): False

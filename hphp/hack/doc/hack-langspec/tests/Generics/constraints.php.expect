@@ -1,0 +1,14 @@
+object(NS_generics_constraints\C1a)#1 (1) {
+  ["p1":"NS_generics_constraints\C1a":private]=>
+  bool(true)
+}
+object(NS_generics_constraints\C1a)#2 (1) {
+  ["p1":"NS_generics_constraints\C1a":private]=>
+  bool(false)
+}
+Inside NS_generics_constraints\C2::__construct
+Inside NS_generics_constraints\C2::__construct
+=============== maxVal ==================
+
+maxVal(10, 20) = 20
+maxVal(15.6, -20.78) = 15.6

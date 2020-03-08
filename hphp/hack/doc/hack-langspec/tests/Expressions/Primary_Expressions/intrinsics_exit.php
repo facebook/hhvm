@@ -23,9 +23,9 @@ function main(): void {
   $p3 = new Point2();
 
   exit("goodbye\n"); // writes "goodbye", then destructors are called.
-  //  exit(99);		// writes nothing
-  //  exit();			// writes nothing
-  //  exit;			// writes nothing
+  //  exit(99);         // writes nothing
+  //  exit();                   // writes nothing
+  //  exit;                     // writes nothing
 
   echo "end of script\n";
 }

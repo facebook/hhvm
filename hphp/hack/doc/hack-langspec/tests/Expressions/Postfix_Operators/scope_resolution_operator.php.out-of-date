@@ -32,7 +32,7 @@ class M {
 }
 
 class N extends M {
-  public function b2(): void	// overrides base::b2() {
+  public function b2(): void    // overrides base::b2() {
     echo "Inside " . __METHOD__ . "\n";
   }
 }
@@ -49,21 +49,21 @@ class P extends N {
 
     echo "Inside instance " . __METHOD__ . "\n";
     parent::__construct();
-    M::__construct();		// allowed
-    N::__construct();		// allowed
+    M::__construct();           // allowed
+    N::__construct();           // allowed
     $clName = "M";
-    $clName::__construct();	// allowed
-//    "M"::__construct();		// not allowed
+    $clName::__construct();     // allowed
+//    "M"::__construct();               // not allowed
 
 // can call instance and static methods using both -> and ::
 
-    $this->gi();	// $this explicitly used (and passed)
-    P::gi();		// $this implicitly used (and passed)
-    self::gi();		// $this implicitly used (and passed)
+    $this->gi();        // $this explicitly used (and passed)
+    P::gi();            // $this implicitly used (and passed)
+    self::gi();         // $this implicitly used (and passed)
 
-    $this->gs();	// call to static method, so no $this passed
-    P::gs();		// call to static method, so no $this passed
-    self::gs();		// call to static method, so no $this passed
+    $this->gs();        // call to static method, so no $this passed
+    P::gs();            // call to static method, so no $this passed
+    self::gs();         // call to static method, so no $this passed
   }
 
   public function gi(): void {
@@ -89,7 +89,7 @@ class P extends N {
     echo "MYPI   = " . parent::MYPI . "\n";
   }
 
-  public function b2(): void	// overrides base::b2() {
+  public function b2(): void    // overrides base::b2() {
     echo "Inside " . __METHOD__ . "\n";
   }
 
@@ -128,7 +128,7 @@ interface I1 {
 }
 
 interface I2 extends I1 {
-  const int CON4 = parent::CON1;	// Cannot access parent:: when current class scope has no parent
+  const int CON4 = parent::CON1;        // Cannot access parent:: when current class scope has no parent
 }
 
 class X implements I2 { public function f(): void {} }
@@ -149,32 +149,32 @@ class W2 extends W1 {
 }
 
 function main(): void {
-  \\var_dump(M::psf());		// okay to access static method via class
+  \\var_dump(M::psf());         // okay to access static method via class
   $memName = 'psf';
   \\var_dump(M::$memName());// string form allowed
-//  \var_dump(M::'psf'());	// but not string literal
+//  \var_dump(M::'psf'());      // but not string literal
 
-  \\var_dump(M::$psProp);	// okay to access static property via class, but leading $ needed!!
+  \\var_dump(M::$psProp);       // okay to access static property via class, but leading $ needed!!
   $memName = '$psProp';
 //  \var_dump(M::$memName);// Access to undeclared static property: M::$memName
 //  \var_dump(M::memName);// Undefined class constant 'memName'
 
-  \\var_dump(M::MYPI);		// okay to access const via class
+  \\var_dump(M::MYPI);          // okay to access const via class
   $memName = 'MYPI';
-//  \var_dump(M::$memName);	// Access to undeclared static property: M::$memName
+//  \var_dump(M::$memName);     // Access to undeclared static property: M::$memName
 
   $clName = "M";
-  \\var_dump($clName::MYPI);	// okay to use a string containing class name
-//  \var_dump("M"::MYPI);		// but not the literal form
+  \\var_dump($clName::MYPI);    // okay to use a string containing class name
+//  \var_dump("M"::MYPI);               // but not the literal form
 
   echo "-----------------------------\n";
 
-  \\var_dump(P::psf());		// okay to access static method via class
-  \\var_dump(P::$psProp);	// okay to access static property via class, but leading $ needed!!
-  \\var_dump(P::MYPI);		// okay to access const via class
+  \\var_dump(P::psf());         // okay to access static method via class
+  \\var_dump(P::$psProp);       // okay to access static property via class, but leading $ needed!!
+  \\var_dump(P::MYPI);          // okay to access const via class
 
   $clName = "P";
-  \\var_dump($clName::MYPI);	// okay to use a string containing class name
+  \\var_dump($clName::MYPI);    // okay to use a string containing class name
 
   echo "-----------------------------\n";
 

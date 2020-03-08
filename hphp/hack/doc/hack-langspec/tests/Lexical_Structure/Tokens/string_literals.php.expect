@@ -11,7 +11,7 @@ string(0) ""
 > <
 > a B c <
 >\'.".\.$.XXX..
-..	..A.A.A.\F.\Q.\S<
+..      ..A.A.A.\F.\Q.\S<
 >$x.123<
 >xxx    // this comment-like thingy really is part of the string literal
 yyy

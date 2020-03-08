@@ -8,7 +8,7 @@ function main(): void {
 // Can I have an empty body?
 
   $v = 10;
-  switch ($v) {		// yes
+  switch ($v) {         // yes
   }
 /*
   echo "================= body containing only empty statements ====================\n";
@@ -17,7 +17,7 @@ function main(): void {
 
   $v = 10;
   switch ($v) {
-    ;		// unlike PHP, not even 1 is permitted
+    ;           // unlike PHP, not even 1 is permitted
     //;
     //;
   }
@@ -38,19 +38,19 @@ function main(): void {
   default:
     // FALLTHROUGH
     echo "default case: \$v is $v\n";
-    break;		// break ends "group" of default statements
+    break;              // break ends "group" of default statements
   case 10:
     // FALLTHROUGH
     // FALLTHROUGH
-    echo "case 10\n";	// no break, so control drops into next label's "group"
+    echo "case 10\n";   // no break, so control drops into next label's "group"
     // FALLTHROUGH
   case 30:
     // FALLTHROUGH
-    echo "case 30\n";	// no break, but then none is really needed either
-    //		return;
+    echo "case 30\n";   // no break, but then none is really needed either
+    //          return;
   case 20:
     echo "case 20\n";
-    break; 		// break ends "group" of case 20 statements
+    break;              // break ends "group" of case 20 statements
     // FALLTHROUGH
   }
 
@@ -77,13 +77,13 @@ function main(): void {
 
   $v = 30;
   switch ($v) {
-  case 30.0:	// <===== this case matches with 30
+  case 30.0:    // <===== this case matches with 30
     echo "case 30.0\n";
     break;
   default:
     echo "default case: \$v is $v\n";
     break;
-  case 30:		// <===== rather than this case matching with 30
+  case 30:              // <===== rather than this case matching with 30
     echo "case 30\n";
     break;
   }
@@ -96,13 +96,13 @@ function main(): void {
 
   $v = 10;
   switch ($v) {
-  case 10;		// <================ ;
+  case 10;              // <================ ;
     echo "case 10\n";
     break;
-  case 20:		// <================ :
+  case 20:              // <================ :
     echo "case 20\n";
     break;
-  default;		// <================ ;
+  default;              // <================ ;
     echo "default case: \$v is $v\n";
     break;
   }
@@ -112,7 +112,7 @@ function main(): void {
 
 // use  strings for label values 
 
-  $v = "white";	// note the lower-case spelling
+  $v = "white"; // note the lower-case spelling
   switch ($v) {
   case "White":
     echo "case White\n";
@@ -153,8 +153,8 @@ function main(): void {
   case 10 + $b:
     echo "case 10 + $b\n";
     break;
-  case (int)($v < $a):		// cast needed; otherwise, label expression type incompatible
- 				// with switch expression type
+  case (int)($v < $a):          // cast needed; otherwise, label expression type incompatible
+                                // with switch expression type
     echo "case $v < $a\n";
     break;
   default:

@@ -218,7 +218,7 @@ A class may contain the following members:
 * [Methods](16-classes.md#methods) – the computations and actions that can be performed by the class (see also [§§](16-classes.md#methods-with-special-semantics)).
 * [Constructor](16-classes.md#constructors) – the actions required to initialize an instance of the class.
 * [Destructor](16-classes.md#destructors) – the actions to be performed when an instance of the class is no longer needed.
-*	[Type constant](16-classes.md#type-constants) – a way of parameterizing class types without using generics.
+*       [Type constant](16-classes.md#type-constants) – a way of parameterizing class types without using generics.
 
 A number of names are reserved for methods with special semantics, which
 user-defined versions must follow. These are described in ([§§](16-classes.md#methods-with-special-semantics)).
@@ -732,14 +732,14 @@ abstract class CBase {
 class Cstring extends CBase {
   const type T = string;
   public function getString(): string {
-    return $this->value;	// gets the string
+    return $this->value;        // gets the string
   }
 }
 
 class Cint extends CBase {
   const type T = int;
   public function getInt(): int {
-    return $this->value;	// gets the int
+    return $this->value;        // gets the int
   }
 }
 
@@ -757,7 +757,7 @@ If a class contains a definition for a method having one of the
 following names, that method must have the prescribed visibility,
 signature, and semantics:
 
-Method Name	| Description
+Method Name     | Description
 ------------|-------------
 [`__call`](16-classes.md#method-__call) | Calls a dynamic method in the context of an instance-method call
 [`__callStatic`](16-classes.md#method-__callstatic) | Calls a dynamic method in the context of a static-method call

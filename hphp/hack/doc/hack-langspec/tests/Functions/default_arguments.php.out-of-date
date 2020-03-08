@@ -41,22 +41,22 @@ function f3(int $p1 = -1, float $p2 = 99.99, string $p3 = '??'): void {
 function main(): void {
   f1();
   f1(12);
-//  f1(10.5);	// mismatch; rejected
+//  f1(10.5);   // mismatch; rejected
   f1(12, 10.5);
   f1(12, 10.5, false);
   f1(12, 10.5, false, 100);
   f1(12, 10.5, false, 'aaa', 'xxx');
   f1(12, 10.5, false, 'aaa', 'xxx', null);
 
-//  f4();		// too few arguments
+//  f4();               // too few arguments
   f4(10);
   f4(10, 20);
   f4(10, 20, 30);
 
-  f3();				// $p1 is -1, $p2 is 99.99, $p3 is ??
-  f3(123);			// $p1 is 123, $p2 is 99.99, $p3 is ??
-  f3(123, 3.14);		// $p1 is 123, $p2 is 3.14, $p3 is ??
-  f3(123, 3.14, 'Hello');	// $p1 is 123, $p2 is 3.14, $p3 is Hello
+  f3();                         // $p1 is -1, $p2 is 99.99, $p3 is ??
+  f3(123);                      // $p1 is 123, $p2 is 99.99, $p3 is ??
+  f3(123, 3.14);                // $p1 is 123, $p2 is 3.14, $p3 is ??
+  f3(123, 3.14, 'Hello');       // $p1 is 123, $p2 is 3.14, $p3 is Hello
 }
 
 /* HH_FIXME[1002] call to main in strict*/

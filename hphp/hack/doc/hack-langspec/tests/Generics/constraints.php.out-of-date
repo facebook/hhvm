@@ -47,7 +47,7 @@ function main(): void {
   \var_dump($c1a);
   $c1a = new C1a(false); // OK
   \var_dump($c1a);
-  //  $c1a = new C1a(123);		// rejected; violates the constraint
+  //  $c1a = new C1a(123);              // rejected; violates the constraint
 
   $c2 = new C2(new D1(), new CX());
   $c2 = new C2(new D2(), new C());

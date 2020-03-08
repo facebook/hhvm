@@ -10,7 +10,7 @@ function f1(): void {
 
 function main(): void {
   f1();
-  //  namespace\f1();		// PHP allows this; Hack does not
+  //  namespace\f1();           // PHP allows this; Hack does not
 
   $v = fun('\NS_variable_functions\f1');
   $v();

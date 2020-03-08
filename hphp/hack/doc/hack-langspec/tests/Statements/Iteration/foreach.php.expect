@@ -80,16 +80,16 @@ array(2) {
   string(3) "abc"
 }
 Key: 0
-	Key: 0; Value: 10
+        Key: 0; Value: 10
 
 Key: 1
-	Key: 0; Value: 1.2
-	Key: 1; Value: 4.5
-	Key: 2; Value: 9.2
+        Key: 0; Value: 1.2
+        Key: 1; Value: 4.5
+        Key: 2; Value: 9.2
 
 Key: 2
-	Key: 0; Value: 1
-	Key: 1; Value: abc
+        Key: 0; Value: 1
+        Key: 1; Value: abc
 
 =========== test use of list =============
 ------

@@ -19,7 +19,7 @@ function main(): void {
     ('>>').($v1).('|').($v2).("<<\n")
   ); // outer parens are part of optional syntax
   // inner ones are redundant grouping parens
-  //  echo ('>>' , $v1 , '|' , $v2 , "<<\n");	// parens no allowed with commas
+  //  echo ('>>' , $v1 , '|' , $v2 , "<<\n");   // parens no allowed with commas
 
   echo '>>'.$v3.'|'.$v4.'|'.$v5.'|'.$v6."<<\n";
   echo '>>', $v3, '|', $v4, '|', $v5, '|', $v6, "<<\n";

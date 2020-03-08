@@ -51,8 +51,8 @@ function CYf4(): Point {
 
 // Can a shape literal initialize fewer fields than exist? NO
 
-//function CYf5(): Point { return shape('x' => 10); }	// The field 'y' is missing
-//function CYf6(): Point { return shape('y' => 12); }	// The field 'x' is missing
+//function CYf5(): Point { return shape('x' => 10); }   // The field 'y' is missing
+//function CYf6(): Point { return shape('y' => 12); }   // The field 'x' is missing
 
 //type PointNT = shape('x' => int, 'y' => int);
 newtype PointNT = shape('x' => int, 'y' => int);
@@ -73,10 +73,10 @@ type st1 = shape(); // can have no fields
 // ----------- Shapes with literal string keys ------------
 
 type st2a = shape('x' => int); // can have 1 field with '-quoted string key
-//type st2b = shape('x'.'x' => int);	// gags: key must be a literal NOT an expression
+//type st2b = shape('x'.'x' => int);    // gags: key must be a literal NOT an expression
 
-//type st2c = shape("x" => int);	// gags on "-quoted string: Expected string literal or class constant
-//type st2d = shape("x\tx\$" => int);	// gags too
+//type st2c = shape("x" => int);        // gags on "-quoted string: Expected string literal or class constant
+//type st2d = shape("x\tx\$" => int);   // gags too
 
 /*
 // can't use a heredoc literal 
@@ -109,36 +109,36 @@ function st3a_test(): st3a {
 
 // Can I mix the 2 forms? Apparently not
 
-//type st3b = shape(C::KEY1 => int, 'y' => int);	// Shape uses class constant as field name; But expected a literal string
-//type st3c = shape('y' => int, C::KEY1 => int);	// Shape uses literal string as field name; But expected a class constant
+//type st3b = shape(C::KEY1 => int, 'y' => int);        // Shape uses class constant as field name; But expected a literal string
+//type st3c = shape('y' => int, C::KEY1 => int);        // Shape uses literal string as field name; But expected a class constant
 
 
 // ----------- Shapes with int keys ------------
 
 // There seems to be confusion about whether a key can have type int
 
-//type st4a = shape(3 => int);		// gags: Expected string literal or class constant
+//type st4a = shape(3 => int);          // gags: Expected string literal or class constant
 type st4b =
   shape(C::KEY2 => int); // but can have an int key via class constant!!!
-//function st4b_test1(): st4b { return shape(3 => 99); }	// gags: Expected string literal or class constant
+//function st4b_test1(): st4b { return shape(3 => 99); }        // gags: Expected string literal or class constant
 function st4b_test2(): st4b {
   return shape(C::KEY2 => 99);
 } // but can do it through a class constant
 
-//type st4c = shape('x' => int, 3 => int);	// gags: Expected string literal or class constant
-//type st4d = shape('x' => int, C::KEY2 => int);	// gags: Shape uses class constant as field name;
+//type st4c = shape('x' => int, 3 => int);      // gags: Expected string literal or class constant
+//type st4d = shape('x' => int, C::KEY2 => int);        // gags: Shape uses class constant as field name;
 //       But expected a literal string
 
-//type st5a = shape(true => int);	// gags: Expected string literal or class constant
-//type st5b = shape(C::KEY3 => int);	// gags: A shape field name must be an int or string; Not a bool
+//type st5a = shape(true => int);       // gags: Expected string literal or class constant
+//type st5b = shape(C::KEY3 => int);    // gags: A shape field name must be an int or string; Not a bool
 
-//type st6a = shape(2.5 => int);	// gags: Expected string literal or class constant
-//type st6b = shape(C::KEY4 => int);	// gags: A shape field name must be an int or string; Not a num
+//type st6a = shape(2.5 => int);        // gags: Expected string literal or class constant
+//type st6b = shape(C::KEY4 => int);    // gags: A shape field name must be an int or string; Not a num
 
 // ----------- Shapes with duplicate keys ------------
 
-//type st7a = shape('abc' => int,'abc' => int);		// can't have duplicate keys
-//type st7b = shape('cde' => int,'cde' => float);	// ditto
+//type st7a = shape('abc' => int,'abc' => int);         // can't have duplicate keys
+//type st7b = shape('cde' => int,'cde' => float);       // ditto
 
 // ----------- Shapes containing exotic types (why not?) ------------
 

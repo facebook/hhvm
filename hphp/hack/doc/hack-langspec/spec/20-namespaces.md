@@ -110,24 +110,24 @@ form the namespace extends from the opening brace to the closing brace.
 Script1.php:
 ```Hack
 namespace NS1;
-...				// __NAMESPACE__ is "NS1"
+...                             // __NAMESPACE__ is "NS1"
 namespace NS3\Sub1;
-...				// __NAMESPACE__ is "NS3\Sub1"
+...                             // __NAMESPACE__ is "NS3\Sub1"
 ```
 
 Script2.php:
 ```Hack
 namespace NS1
 {
-...				// __NAMESPACE__ is "NS1"
+...                             // __NAMESPACE__ is "NS1"
 }
 namespace
 {
-...				// __NAMESPACE__ is ""
+...                             // __NAMESPACE__ is ""
 }
 namespace NS3\Sub1;
 {
-...				// __NAMESPACE__ is "NS3\Sub1"
+...                             // __NAMESPACE__ is "NS3\Sub1"
 }
 ```
 

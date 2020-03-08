@@ -46,7 +46,7 @@ function compute(array<int> $values): void {
 
 //  $callback = function () use (&$count)
   $callback = function () use ($count) {
-    echo "Inside method >>" . __METHOD__ . "<<\n";	// called {closure}
+    echo "Inside method >>" . __METHOD__ . "<<\n";      // called {closure}
     ++$count;
   };
 
@@ -66,10 +66,10 @@ class D {
 
 //  $callback = function (int $p1, int $p2): void use (&$count, $values)
     $callback = function (int $p1, int $p2): void use ($count, $values) {
-      echo "Inside method >>" . __METHOD__ . "<<\n";	// called D::{closure}
+      echo "Inside method >>" . __METHOD__ . "<<\n";    // called D::{closure}
       ++$count;
 
-      $this->f();	// $this is available automatically; can't put it in use clause anyway
+      $this->f();       // $this is available automatically; can't put it in use clause anyway
     };
 
     echo "--\n";
@@ -86,7 +86,7 @@ class D {
     echo "\$count = $count\n";
 
     $callback2 = function(): void {
-      echo "Inside method >>" . __METHOD__ . "<<\n";	// ALSO called D::{closure}
+      echo "Inside method >>" . __METHOD__ . "<<\n";    // ALSO called D::{closure}
     };
 
     echo "--\n";
@@ -105,7 +105,7 @@ class D {
 
 //    $callback = function ($p1, $p2) use (&$count, $values)
     $callback = function (int $p1, int $p2): void use ($count, $values) {
-      echo "Inside method >>" . __METHOD__ . "<<\n";	// called D::{closure}
+      echo "Inside method >>" . __METHOD__ . "<<\n";    // called D::{closure}
       ++$count;
     };
 
@@ -177,7 +177,7 @@ function main(): void {
     echo "Inside function >>" . __FUNCTION__ . "<<\n";
     echo "Inside method >>" . __METHOD__ . "<<\n";
     // ...
-//  return 123;	// test
+//  return 123; // test
   };
 
   echo "--\n";
@@ -189,8 +189,8 @@ function main(): void {
   echo "--\n";
 
   $cl1();
-//  $x = $cl1();		// test
-//  echo "\$x = $x\n";	// test
+//  $x = $cl1();                // test
+//  echo "\$x = $x\n";  // test
 
   // Closure object is empty
 
@@ -250,7 +250,7 @@ function main(): void {
 
   echo "----------------- Misc. Stuff ----------------------\n";
 
-//  (function (): void { echo "Hi\n"; })();		// can't use an anon function directly with ()
+//  (function (): void { echo "Hi\n"; })();             // can't use an anon function directly with ()
   $v = (function (): void { echo "Hi\n"; });
   $v();
 
@@ -260,14 +260,14 @@ function main(): void {
   $v(6, 7, 8);
   $v(-5);
   $v();
-//  $v(10.5);	// float is incompatible with int
+//  $v(10.5);   // float is incompatible with int
 
 // parameter type can be omitted and implied from default value
 
   $v = (function ($p = 123): void { echo "\$p = $p\n"; });
   $v(-5);
   $v();
-//  $v(10.5);	// float is incompatible with int
+//  $v(10.5);   // float is incompatible with int
 
 // parameter type can be omitted
 

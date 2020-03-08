@@ -20,14 +20,14 @@ function ft2(): (int, int) {
 }
 
 function main(?int $p1 = 123): void {
-  //  $t1 = tuple();	// must have at least 1 element
+  //  $t1 = tuple();    // must have at least 1 element
   $t1 = tuple(
     10,
   ); // while can't declare a tuple type with only 1 element, can create a 1-element tuple
 
-  //  $t1 = tuple('a' => 5, 6 => 7);	// only (implied) int keys are allowed
+  //  $t1 = tuple('a' => 5, 6 => 7);    // only (implied) int keys are allowed
 
-  //  $t1 = tuple(2 => 5, 6 => 7);	// can't specify index numbers
+  //  $t1 = tuple(2 => 5, 6 => 7);      // can't specify index numbers
 
   $t2 = tuple(
     10,
@@ -43,10 +43,10 @@ function main(?int $p1 = 123): void {
   );
   \var_dump($t2);
 
-  //  foreach ($t2 => $key as $value) { }	//	can't iterate over a tuple
+  //  foreach ($t2 => $key as $value) { }       //      can't iterate over a tuple
 
   //  $i = 0;
-  //  echo "\$t2[0] = " . $t2[$i] . "\n";	// tuple index must be an integer literal
+  //  echo "\$t2[0] = " . $t2[$i] . "\n";       // tuple index must be an integer literal
 
   echo "\$t2[0] = >".$t2[0]."<\n";
   echo "\$t2[4] = >".$t2[4]."<\n";

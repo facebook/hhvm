@@ -38,7 +38,7 @@ function main(num $p1): void {
     }
   );
   \var_dump($doubler3(3));
-  //  \var_dump($doubler3(4.2));	// rejected; int/float not compatible
+  //  \var_dump($doubler3(4.2));        // rejected; int/float not compatible
   //  \var_dump($doubler3($p1));
 }
 

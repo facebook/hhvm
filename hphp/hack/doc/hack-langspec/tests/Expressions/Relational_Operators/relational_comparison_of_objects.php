@@ -18,18 +18,18 @@ function main(): void {
   $c2 = new C2(); // \var_dump($c2);
 
   /*
-    \var_dump($c1a >= 10);	// different types; incompatible
-    \var_dump($c1a < 10.5);	// different types; incompatible
-    \var_dump($c1a > '12');	// different types; incompatible
-    \var_dump($c1a <= true);	// different types; incompatible
+    \var_dump($c1a >= 10);      // different types; incompatible
+    \var_dump($c1a < 10.5);     // different types; incompatible
+    \var_dump($c1a > '12');     // different types; incompatible
+    \var_dump($c1a <= true);    // different types; incompatible
   */
 
   //  echo "\n===== compare instances of different object types =====\n\n";
 
-  //  \var_dump($c1a >= $c2);	// different types; incompatible
+  //  \var_dump($c1a >= $c2);   // different types; incompatible
 
-  //  \var_dump($c1a <= $c2);	// different types; incompatible
-  //  \var_dump($c1a <  $c2);	// different types; incompatible
+  //  \var_dump($c1a <= $c2);   // different types; incompatible
+  //  \var_dump($c1a <  $c2);   // different types; incompatible
 
   echo "\n===== compare instances of the same (empty) object type =====\n\n";
 

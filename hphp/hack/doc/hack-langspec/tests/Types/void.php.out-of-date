@@ -10,10 +10,10 @@ class C {
   // interesting behavior below
   /*
 
-    private void $prop;	// surprise!
+    private void $prop; // surprise!
 
     public function __construct() {
-      $this->prop = v();	// the default (null) value "returned" from a void function is used
+      $this->prop = v();        // the default (null) value "returned" from a void function is used
     }
   */
   //  public function setProp(void $val): void {

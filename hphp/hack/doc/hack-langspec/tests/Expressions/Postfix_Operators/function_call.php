@@ -18,21 +18,21 @@ function fz(int $p1, int $p2, int $p3, int $p4, int $p5): void {}
 
 function main(): void {
   //  $x = '\NS_function_call\f';
-  // $x();	// unlike PHP, Hack does not allow a function to be called using its raw string name
+  // $x();      // unlike PHP, Hack does not allow a function to be called using its raw string name
   $x = fun('\NS_function_call\f'); // must "wrap" using fun instead
   $x();
 
-  //  f2();			// too few argumemts
+  //  f2();                     // too few argumemts
   f2(24);
-  //  f2(2.3);		// incompatible types
+  //  f2(2.3);          // incompatible types
   f2(5, 10);
-  //  f2(9, true);		// incompatible types
-  //  f2(12, 123, 222);	// too many arguments
+  //  f2(9, true);              // incompatible types
+  //  f2(12, 123, 222); // too many arguments
 
 
   f3(); // default value used
   f3(24);
-  //  f3(2.3);		// incompatible types
+  //  f3(2.3);          // incompatible types
   f3(5, 10); // excess of any number and type okay
   f3(9, true); // excess of any number and type okay
   f3(12, 123, 222); // excess of any number and type okay

@@ -54,7 +54,7 @@ function fL1(int $p1 = -10): void {
   echo "fL1: Calling fL2\n";
   $a = -4.5;
   fL2(2.3, $a); // pass 2nd arg as a non-literal to see how traceback handles it
-  //  fL2(2.3);	// see what happens when a default argument value is used
+  //  fL2(2.3); // see what happens when a default argument value is used
 }
 
 function fL2(float $p1, float $p2 = -100.0): void {
@@ -81,7 +81,7 @@ function fL2(float $p1, float $p2 = -100.0): void {
     $b,
     $c,
   ); // pass args as non-literals to see how traceback handles them
-  //  fL3($a, $b);	// see what happens when a default argument value is used
+  //  fL3($a, $b);      // see what happens when a default argument value is used
 }
 
 function fL3(string $p1, ?int $p2, bool $p3 = false): void {
@@ -118,7 +118,7 @@ function main(): void {
   echo "L0: Beyond try/catch/finally blocks\n==========\n";
   echo "L0: Calling fL1\n";
   fL1(10);
-  //  fL1();	// see what happens when a default argument value is used
+  //  fL1();    // see what happens when a default argument value is used
 }
 
 /* HH_FIXME[1002] call to main in strict*/

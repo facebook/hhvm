@@ -126,10 +126,10 @@ A *type-constant-type-name* beginning with `self` or `this` must be used in the 
 
 A *type-constant-type-name* specifies a type, as follows:
 
-*	For *name* `::` *name*, the type is that designated by the type-constant having the right-hand *name*, in the class or interface having the left-hand *name*.
-*	For `self` `::` *name*, used within a class, the type is that designated by the type-constant named *name*, in the enclosing class, ignoring any overrides.
-*	For `this` `::` *name*, used within a class, the type is that designated by the type-constant named *name*, in the enclosing class’s hierarchy resolved in a late-bound context. For a non-static member, this designates the class of the `$this` object; for a static member, this designates the current class. `this` is recommended when accessing abstract type constant names.
-*	In cases of *type-constant-type-name* having the form `x::y::z`, the type is resolved left-to-right.
+*       For *name* `::` *name*, the type is that designated by the type-constant having the right-hand *name*, in the class or interface having the left-hand *name*.
+*       For `self` `::` *name*, used within a class, the type is that designated by the type-constant named *name*, in the enclosing class, ignoring any overrides.
+*       For `this` `::` *name*, used within a class, the type is that designated by the type-constant named *name*, in the enclosing class’s hierarchy resolved in a late-bound context. For a non-static member, this designates the class of the `$this` object; for a static member, this designates the current class. `this` is recommended when accessing abstract type constant names.
+*       In cases of *type-constant-type-name* having the form `x::y::z`, the type is resolved left-to-right.
 
 A given type constant can be referenced via multiple names; for example:
 

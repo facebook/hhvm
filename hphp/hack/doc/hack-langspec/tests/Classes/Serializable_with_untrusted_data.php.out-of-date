@@ -90,8 +90,8 @@ function main(): void {
 
   echo "------\n";
 
-//  $v = \unserialize($s, ["allowed_classes" => true]);	// OK
-  $v = \unserialize($s, ["allowed_classes" => false]);		// converts Point to __PHP_Incomplete_Class
+//  $v = \unserialize($s, ["allowed_classes" => true]); // OK
+  $v = \unserialize($s, ["allowed_classes" => false]);          // converts Point to __PHP_Incomplete_Class
   \var_dump($v);
 
   echo "---------------- Serialize ColoredPoint -------------------\n";
@@ -102,8 +102,8 @@ function main(): void {
   $s = \serialize($cp);
   \var_dump($s);
 
-//  $v = \unserialize($s, ["allowed_classes" => true]);	// OK
-  $v = \unserialize($s, ["allowed_classes" => false]);		// converts ColoredPoint to __PHP_Incomplete_Class
+//  $v = \unserialize($s, ["allowed_classes" => true]); // OK
+  $v = \unserialize($s, ["allowed_classes" => false]);          // converts ColoredPoint to __PHP_Incomplete_Class
   \var_dump($v);
 
   echo "---------------- end -------------------\n";

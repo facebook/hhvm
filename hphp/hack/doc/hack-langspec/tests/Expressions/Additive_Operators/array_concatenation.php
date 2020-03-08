@@ -29,21 +29,21 @@ function array_proc(
   echo "result of p2 + p1 = ";
   \var_dump($v);
 
-  //  $v = $p1 + $p3;		// array<int> + array<float> disallowed
-  //  $v = $p4 + $p1;		// array<num> + array<int> disallowed
-  //  $v = $p4 + $p3;		// array<num> + array<float> disallowed
-  //  $v = $p5 + $p6;		// array<Button> + array<CustomButton> disallowed
+  //  $v = $p1 + $p3;           // array<int> + array<float> disallowed
+  //  $v = $p4 + $p1;           // array<num> + array<int> disallowed
+  //  $v = $p4 + $p3;           // array<num> + array<float> disallowed
+  //  $v = $p5 + $p6;           // array<Button> + array<CustomButton> disallowed
 
   echo "============= map-like arrays ================\n";
 
-  //  $v = $p1 + $p7;		// array<int> + array<int, int> disallowed;
+  //  $v = $p1 + $p7;           // array<int> + array<int, int> disallowed;
   // can't mix vector-like and map-like arrays even with same key/value types
 
   $v = $p8 + $p9; // array<int, string> + array<int, string> okay
   echo "result of p8 + p9 = ";
   \var_dump($v);
 
-  //  $v = $p7 + $p10;	// array<int, int> + array<int, bool> disallowed;
+  //  $v = $p7 + $p10;  // array<int, int> + array<int, bool> disallowed;
 
   $v = $p11 + $p12; // array<string, int> + array<string, int> okay
   echo "result of p11 + p12 = ";

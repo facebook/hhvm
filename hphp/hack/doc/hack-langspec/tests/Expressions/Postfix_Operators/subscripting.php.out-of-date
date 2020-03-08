@@ -16,8 +16,8 @@ function main(): void {
   $v1 = array(10, 20, 30);
   \var_dump($v1);
   echo $v1[0] . "\n";
-//  echo $v1[1.2] . "\n";		// index must have type int
-//  echo $v1["1"] . "\n";		// index must have type int
+//  echo $v1[1.2] . "\n";               // index must have type int
+//  echo $v1["1"] . "\n";               // index must have type int
 
   foreach ($v1 as $k => $e) {
     echo "key: " . $k . ", value: " . $e . "\n";
@@ -28,8 +28,8 @@ function main(): void {
   $v2 = array('x' => 40, 1 => 50, 'y' => 60);
   \var_dump($v2);
   echo $v2[0] . "\n";
-  echo $v2[1.2] . "\n";		// like PHP index need not have type int
-  echo $v2["x"] . "\n";		// like PHP index need not have type int
+  echo $v2[1.2] . "\n";         // like PHP index need not have type int
+  echo $v2["x"] . "\n";         // like PHP index need not have type int
 
   foreach ($v2 as $k => $e) {
     echo "key: " . $k . ", value: " . $e . "\n";
@@ -42,9 +42,9 @@ function main(): void {
   echo "[7] contains >".($v[7] == null ? "null" : "??")
     ."<, [12] contains >".($v[12] == null ? "null" : "??")."<\n";
 
-  $v[1] = 1.234;		// change the value (and type) of an existing element
-  $v[-10] = 19;		// insert a new element with int key -10
-  $v[5] = 54;			// insert a new element with int key 5
+  $v[1] = 1.234;                // change the value (and type) of an existing element
+  $v[-10] = 19;         // insert a new element with int key -10
+  $v[5] = 54;                   // insert a new element with int key 5
   \var_dump($v);
 
   foreach ($v as $k => $e) {
@@ -53,8 +53,8 @@ function main(): void {
 */
 /*
   $v = array('x' => 10, 1 => 20, 'y' => 30);
-  $v["red"] = true;	// insert a new element with string key "red"
-  $v[null] = 232;		// insert a new element with string key ""
+  $v["red"] = true;     // insert a new element with string key "red"
+  $v[null] = 232;               // insert a new element with string key ""
   \var_dump($v);
 
   foreach ($v as $k => $e) {
@@ -87,14 +87,14 @@ function main(): void {
   $z = [array(2,4,6,8), array(5,10), array(100,200,300)][0][2];
   \var_dump($z);
 
-  $z = [[2,4,6,8], [5,10], [100,200,300]][0][2];	// acceses element with value 6
+  $z = [[2,4,6,8], [5,10], [100,200,300]][0][2];        // acceses element with value 6
   \var_dump($z);
 
-  \var_dump(["black", "white", "yellow"][1]);		// white
-  \var_dump(["black", "white", "yellow"][1][2]);	// 1st [] is for array, 2nd for string
+  \var_dump(["black", "white", "yellow"][1]);           // white
+  \var_dump(["black", "white", "yellow"][1][2]);        // 1st [] is for array, 2nd for string
 */
 /*
-  \var_dump(f()[2]);	// acceses element with value 3000
+  \var_dump(f()[2]);    // acceses element with value 3000
 */
 
 /*
@@ -102,13 +102,13 @@ function main(): void {
 
   $z = [[2,4,6,8], [5,10], [100,200,300]];
   $i = 0;
-  \var_dump($z[$i++][$i]);		// accesses [0][1] L->R int(4)
+  \var_dump($z[$i++][$i]);              // accesses [0][1] L->R int(4)
   $i = 0;
-  \var_dump($z[$i][$i++]);		// accesses [1][0] R->L int(5)
+  \var_dump($z[$i][$i++]);              // accesses [1][0] R->L int(5)
   $i = 0;
-  \var_dump($z[++$i][$i]);		// accesses [1][1] L->R int(10)
+  \var_dump($z[++$i][$i]);              // accesses [1][1] L->R int(10)
   $i = 0;
-  \var_dump($z[$i][++$i]);		// accesses [1][1] R->L int(10)
+  \var_dump($z[$i][++$i]);              // accesses [1][1] R->L int(10)
 */
 
 /*
@@ -116,54 +116,54 @@ function main(): void {
 //
 //  $z = 10;
 //  \var_dump($z);
-//  $v = $z[12];		// results in null
+//  $v = $z[12];                // results in null
 //  \var_dump($v);
-//  $v = $z["red"];		// results in null
+//  $v = $z["red"];             // results in null
 //  \var_dump($v);
 
   $z = [[2,4,6,8], [5,10], [100,200,300]];
-  \var_dump($z[0][2]);	// results in 6
-//  \var_dump($z[0][2][3]);	// results in null
+  \var_dump($z[0][2]);  // results in 6
+//  \var_dump($z[0][2][3]);     // results in null
 
-  \var_dump(f()[2]);	// results in 3000
-//  \var_dump(f()[2][1]);	// results in null
+  \var_dump(f()[2]);    // results in 3000
+//  \var_dump(f()[2][1]);       // results in null
 
   $v = 10;
-//  \var_dump($v[1]);	// OK, results in null
+//  \var_dump($v[1]);   // OK, results in null
 
   $v = 1.23;
-//  \var_dump($v[1]);	// OK, results in null
+//  \var_dump($v[1]);   // OK, results in null
 
   $v = true;
-//  \var_dump($v[1]);	// OK, results in null
+//  \var_dump($v[1]);   // OK, results in null
 
   $v = null;
-//  \var_dump($v[1]);	// OK, results in null
+//  \var_dump($v[1]);   // OK, results in null
 */
 /*
 // subscript some strings
 
-  \var_dump("red"[1]);	// OK, results in "e"
-  \var_dump("red"[-1]);	// OK, results in ""
-  \var_dump("red"[10]);	// OK, results in ""
+  \var_dump("red"[1]);  // OK, results in "e"
+  \var_dump("red"[-1]); // OK, results in ""
+  \var_dump("red"[10]); // OK, results in ""
 
 // as string[xxx] results in a string, can keep applying more [], indefinitely
 
-  \var_dump("red"[0]);		// OK, results in "r"
-  \var_dump("red"[0][0]);		// OK, results in "r"
-  \var_dump("red"[0][0][0]);	// OK, results in "r"
-  \var_dump("red"[0][0][0][0]);	// OK, results in "r"
+  \var_dump("red"[0]);          // OK, results in "r"
+  \var_dump("red"[0][0]);               // OK, results in "r"
+  \var_dump("red"[0][0][0]);    // OK, results in "r"
+  \var_dump("red"[0][0][0][0]); // OK, results in "r"
 */
 /*
 // change a string
 
   $s = "red";
   \var_dump($s);
-  $s[1] = "X";		// OK; "e" -> "X"
+  $s[1] = "X";          // OK; "e" -> "X"
   \var_dump($s);
-  $s[-5] = "Y";		// warning; string unchanged
+  $s[-5] = "Y";         // warning; string unchanged
   \var_dump($s);
-  $s[5] = "Z";		// extends string, padding with spaces
+  $s[5] = "Z";          // extends string, padding with spaces
   \var_dump($s);
 
   echo ">".$s[2]."<\n";
@@ -175,18 +175,18 @@ function main(): void {
   echo ">".$s[5]."<\n";
   echo ($s[5] == " ") ? "[5] is a space\n" : "[5] is not a space\n";
 
-  $s[0] = "DEF";		// "r" -> "D"; only 1 char changed
+  $s[0] = "DEF";                // "r" -> "D"; only 1 char changed
   \var_dump($s);
-  $s[0] = "MN";		// "D" -> "M"; only 1 char changed
+  $s[0] = "MN";         // "D" -> "M"; only 1 char changed
   \var_dump($s);
-  $s[0] = "";			// "M" -> "\0"
+  $s[0] = "";                   // "M" -> "\0"
   \var_dump($s);
 */
 /*
   echo "--------------------\n";
 
   $v = array();
-  $v[] = 10;				// inserts using a key of the next available int value
+  $v[] = 10;                            // inserts using a key of the next available int value
   $v["XX"] = 3;
   $v[5] = 99;
   $v[] = -2.3;

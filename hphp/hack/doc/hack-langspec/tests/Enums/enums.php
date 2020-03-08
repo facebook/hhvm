@@ -60,7 +60,7 @@ enum E2f: num {
 // an enum constant must be initialized explicitly; no default values are assigned
 
 enum E3: int {
-	X;	// need an = and initial value
+        X;      // need an = and initial value
 }
 */
 
@@ -84,9 +84,9 @@ enum E5: mixed {
   Stopped = 10;
   Started = 20;
 
-//  Status = false;	// Enum constants must be an int or string
-//  Value = 1.234;	// Enum constants must be an int or string
-//  X = null;	// Enum constants must be an int or string
+//  Status = false;     // Enum constants must be an int or string
+//  Value = 1.234;      // Enum constants must be an int or string
+//  X = null;   // Enum constants must be an int or string
 }
 */
 
@@ -97,9 +97,9 @@ enum E6a: int {
   val2 = 20;
   val3 = -5; // negative value okay
   val4 = 20; // duplicate okay
-  //  val5 = val1;		// unbound name val1
-  //  val6 = E6a::val1;	// Constant of type int conflicts with type E6a
-  //  val7 = self::val1;	// Constant of type int conflicts with type E6a
+  //  val5 = val1;              // unbound name val1
+  //  val6 = E6a::val1; // Constant of type int conflicts with type E6a
+  //  val7 = self::val1;        // Constant of type int conflicts with type E6a
 }
 
 enum E6c: int as int {
@@ -119,22 +119,22 @@ enum E6b: string {
 /*
 // a string enum with as int clause
 
-enum E7a: string as int {	// Invalid constraint on enum
+enum E7a: string as int {       // Invalid constraint on enum
 }
 
 // an int enum with as string clause
 
-enum E7b: int as string {	// Invalid constraint on enum
+enum E7b: int as string {       // Invalid constraint on enum
 }
 
 // a mixed enum with as string clause
 
-enum E7c: mixed as string {	// Invalid constraint on enum
+enum E7c: mixed as string {     // Invalid constraint on enum
 }
 
 // a mixed enum with as int clause
 
-enum E7d: mixed as int {	// Invalid constraint on enum
+enum E7d: mixed as int {        // Invalid constraint on enum
 }
 */
 
@@ -142,7 +142,7 @@ enum E7d: mixed as int {	// Invalid constraint on enum
 
 /* mixed enums no longer allowed
 
-enum E7e: mixed as mixed {	// Allowed, but not obvious what the value of that might be
+enum E7e: mixed as mixed {      // Allowed, but not obvious what the value of that might be
   con1 = 123;
 }
 */
@@ -216,13 +216,13 @@ function main(ControlStatus $p1, ControlStatus2 $p2, E4a $p3, E6a $p5): void {
   // tests True in PHP and so in hhvm. That is, switch/case matching appears to use == rather than ===.
 
     echo "++++++\n";
-    \var_dump($p4);	// 'R'
-    echo $p4 . " == " . E5::Set . " is " . (($p4 == E5::Set) ? "True\n" : "False\n");		// False
-    echo $p4 . " == " . E5::Started . " is " . (($p4 == E5::Started) ? "True\n" : "False\n");	// True **
-    echo $p4 . " === " . E5::Started . " is " . (($p4 === E5::Started) ? "True\n" : "False\n");	// False
-    echo $p4 . " == " . E5::Stopped . " is " . (($p4 == E5::Stopped) ? "True\n" : "False\n");	// False
-    echo $p4 . " == " . E5::Ready . " is " . (($p4 == E5::Ready) ? "True\n" : "False\n");		// True
-    echo $p4 . " === " . E5::Ready . " is " . (($p4 === E5::Ready) ? "True\n" : "False\n");	// True
+    \var_dump($p4);     // 'R'
+    echo $p4 . " == " . E5::Set . " is " . (($p4 == E5::Set) ? "True\n" : "False\n");           // False
+    echo $p4 . " == " . E5::Started . " is " . (($p4 == E5::Started) ? "True\n" : "False\n");   // True **
+    echo $p4 . " === " . E5::Started . " is " . (($p4 === E5::Started) ? "True\n" : "False\n"); // False
+    echo $p4 . " == " . E5::Stopped . " is " . (($p4 == E5::Stopped) ? "True\n" : "False\n");   // False
+    echo $p4 . " == " . E5::Ready . " is " . (($p4 == E5::Ready) ? "True\n" : "False\n");               // True
+    echo $p4 . " === " . E5::Ready . " is " . (($p4 === E5::Ready) ? "True\n" : "False\n");     // True
     echo "++++++\n";
 
     switch ($p4) {
@@ -245,14 +245,14 @@ function main(ControlStatus $p1, ControlStatus2 $p2, E4a $p3, E6a $p5): void {
 
   if (ControlStatus::Started == 3) ;
 
-  //  if (ControlStatus::Started < 3) ;	// This is an object of type NS_enum\ControlStatus
+  //  if (ControlStatus::Started < 3) ; // This is an object of type NS_enum\ControlStatus
   // It is incompatible with an int
 
-  //  $r = ControlStatus::Stopping << 3;	// This is an int because this is used in a bitwise
+  //  $r = ControlStatus::Stopping << 3;        // This is an int because this is used in a bitwise
   // operation. It is incompatible with an object of type
   // NS_enum\ControlStatus
 
-  //  $r = ControlStatus::Stopping * 10;	// This is a num (int/float) because this is used in
+  //  $r = ControlStatus::Stopping * 10;        // This is a num (int/float) because this is used in
   // an arithmetic operation. It is incompatible with
   // an object of type NS_enum\ControlStatus
 
@@ -312,7 +312,7 @@ function main(ControlStatus $p1, ControlStatus2 $p2, E4a $p3, E6a $p5): void {
 
   echo "\n====== use Enum static methods ======\n\n";
 
-  //  $e = new \Enum();	// Unbound name: Enum; hmm. I was expecting to get something like
+  //  $e = new \Enum(); // Unbound name: Enum; hmm. I was expecting to get something like
   // "Can't instantiate an abstract class"
 
   $names = ControlStatus::getNames();
@@ -370,28 +370,28 @@ function main(ControlStatus $p1, ControlStatus2 $p2, E4a $p3, E6a $p5): void {
 
   \var_dump('READY'[1]); // outputs string(1) "E"
 
-  //  \var_dump(E4a::Ready[1]);		// rejected, as expected
+  //  \var_dump(E4a::Ready[1]);         // rejected, as expected
   echo "E4a:Ready is ".
     E4a::Ready.
     "\n"; // concat works for enum (special case, apparently)
-  //  takes_string(E4a::Ready);		// rejected, as expected
+  //  takes_string(E4a::Ready);         // rejected, as expected
 
-  //  \var_dump(E4b::Ready[1]);		// rejected, hmm; I expected this to work (Issue #60)
+  //  \var_dump(E4b::Ready[1]);         // rejected, hmm; I expected this to work (Issue #60)
   echo "E4b:Ready is ".E4b::Ready."\n"; // concat works for enum
   takes_string(E4b::Ready); // acepted; enum behaves as string
 
   echo "\n====== int operations on an int enum constant  ======\n\n";
 
-  //  takes_int(ControlStatus::Starting);	// rejected, as expected
+  //  takes_int(ControlStatus::Starting);       // rejected, as expected
   takes_int(ControlStatus2::Starting);
 
   /*
     echo "\n====== mixed operations on an mixed enum constant  ======\n\n";
 
-    takes_mixed(E5::Stopped);		// acepted; but then mixed accepts any kind of argument
-  					// including one of enum type, so the mixed enum is NOT
-  					// being treated like a mixed
-    takes_mixed(E7e::con1);		// acepted; enum behaves as string
+    takes_mixed(E5::Stopped);           // acepted; but then mixed accepts any kind of argument
+                                        // including one of enum type, so the mixed enum is NOT
+                                        // being treated like a mixed
+    takes_mixed(E7e::con1);             // acepted; enum behaves as string
   */
 }
 

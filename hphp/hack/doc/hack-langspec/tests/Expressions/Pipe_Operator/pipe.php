@@ -38,13 +38,13 @@ function main(): void {
 
   // check where $$ is allowed (only in the RHS operand of |>)
 
-  //  $$ |> $$;	// Undefined variable: $$ (on LHS)
+  //  $$ |> $$; // Undefined variable: $$ (on LHS)
 
   20 |> $$; // OK; on RHS of |>
 
-  //  $x = $$;	// Undefined variable: $$
+  //  $x = $$;  // Undefined variable: $$
 
-  //  $$ = 10;	// Undefined variable: $$; Invalid lvalue
+  //  $$ = 10;  // Undefined variable: $$; Invalid lvalue
 
   echo "\n\n========================= Simple Use =========================\n\n";
 
@@ -55,17 +55,17 @@ function main(): void {
   1.23 |> \var_dump($$);
   "abc" |> \var_dump($$);
 
-  //  20 |> $x = $$;	// Error: Feature not implemented: Assignment within pipe expressions
-  //  20 |> ($x = $$);	// Error: Feature not implemented: Assignment within pipe expressions
+  //  20 |> $x = $$;    // Error: Feature not implemented: Assignment within pipe expressions
+  //  20 |> ($x = $$);  // Error: Feature not implemented: Assignment within pipe expressions
 
   // The RH operand must use the result of the LH operand
 
-  //  echo "Result is: " . (fint(4) |> gint(9)) . "\n";	// Error: This expression does not contain a usage of the
+  //  echo "Result is: " . (fint(4) |> gint(9)) . "\n"; // Error: This expression does not contain a usage of the
   // special pipe variable. Did you forget to use the ($$)
   // variable? (Naming[2069]
 
-  //  fvoid() |> gint($$);	// You are using the return value of a void function
-  //  fvoid() |> 10 + $$;		// This is a num ... It is incompatible with void
+  //  fvoid() |> gint($$);      // You are using the return value of a void function
+  //  fvoid() |> 10 + $$;               // This is a num ... It is incompatible with void
   fvoid()
     |> $$
     |> $$; // Permitted because the result (which has type void) is not used
@@ -88,8 +88,8 @@ function main(): void {
   2 << fint(1) |> gint($$); // lower than <<, as g is passed (2 << fint(1))
 
   /*
-    2 <  fint(1) |> gint($$);	// lower than <, as g is passed a bool
-    2 == fint(1) |> gint($$);	// lower than ==, as g is passed a bool
+    2 <  fint(1) |> gint($$);   // lower than <, as g is passed a bool
+    2 == fint(1) |> gint($$);   // lower than ==, as g is passed a bool
   */
 
   echo
@@ -100,8 +100,8 @@ function main(): void {
   7 ^ fint(1) |> gint($$); // lower than ^, as g is passed (7 ^ fint(1))
 
   /*
-    1 && fint(1) |> gint($$);	// lower than &, as g is passed a bool
-    0 && fint(1) |> gint($$);	// lower than &, as g is passed a bool
+    1 && fint(1) |> gint($$);   // lower than &, as g is passed a bool
+    0 && fint(1) |> gint($$);   // lower than &, as g is passed a bool
   */
 
   echo

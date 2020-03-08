@@ -16,7 +16,7 @@ class C2 {
   public array<bool, num> $pr_bool_num = array(false => 12.34, true => 111);
   public array<bool, string> $pr_bool_string =
     array(true => "abc", false => "def");
-  //  public array<bool, void> $pr_bool_void = array();	// previously allowed; not now
+  //  public array<bool, void> $pr_bool_void = array(); // previously allowed; not now
 
   // no errors from checker, but get hhvm error
   //  public array<bool, void> $pr_bool_void = array(true => v());
@@ -28,7 +28,7 @@ class C2 {
   public array<int, float> $pr_int_float = array(8 => 1.2, 2 => 3.4);
   public array<int, num> $pr_int_num = array(5 => 12.34, -6 => 111);
   public array<int, string> $pr_int_string = array(19 => "abc", -5 => "def");
-  //  public array<int, void> $pr_int_void = array();	// previously allowed; not now
+  //  public array<int, void> $pr_int_void = array();   // previously allowed; not now
 
   // the float key initialiers are implicitly converted to int
 
@@ -39,7 +39,7 @@ class C2 {
   public array<float, num> $pr_float_num = array(1.4 => 12.34, 19.4 => 111);
   public array<float, string> $pr_float_string =
     array(4.5 => "abc", 9.88 => "def");
-  //  public array<float, void> $pr_float_void = array();	// previously allowed; not now
+  //  public array<float, void> $pr_float_void = array();       // previously allowed; not now
 
   // the num key initialiers are implicitly converted to int
 
@@ -48,7 +48,7 @@ class C2 {
   public array<num, float> $pr_num_float = array(11.2 => 1.2, -54 => 3.4);
   public array<num, num> $pr_num_num = array(1.4 => 12.34, 19 => 111);
   public array<num, string> $pr_num_string = array(4.5 => "abc", 9 => "def");
-  //  public array<num, void> $pr_num_void = array();	// previously allowed; not now
+  //  public array<num, void> $pr_num_void = array();   // previously allowed; not now
 
   // the string key initialiers are used as is
 
@@ -58,16 +58,16 @@ class C2 {
   public array<string, num> $pr_string_num = array('zz' => 12.34, 'vv' => 111);
   public array<string, string> $pr_string_string =
     array('red' => 'yes', 'green' => 'no');
-  //  public array<string, void> $pr_string_void = array();	// previously allowed; not now
+  //  public array<string, void> $pr_string_void = array();     // previously allowed; not now
 
   // there is no synax for writing a void expression for any key, so can use only an empty array
 
-  //  public array<void, bool> $pr_void_bool = array();	// previously allowed; not now
-  //  public array<void, int> $pr_void_int = array();	// previously allowed; not now
-  //  public array<void, float> $pr_void_float = array();	// previously allowed; not now
-  //  public array<void, num> $pr_void_num = array();	// previously allowed; not now
-  //  public array<void, string> $pr_void_string = array();	// previously allowed; not now
-  //  public array<void, void> $pr_void_void = array();	// previously allowed; not now
+  //  public array<void, bool> $pr_void_bool = array(); // previously allowed; not now
+  //  public array<void, int> $pr_void_int = array();   // previously allowed; not now
+  //  public array<void, float> $pr_void_float = array();       // previously allowed; not now
+  //  public array<void, num> $pr_void_num = array();   // previously allowed; not now
+  //  public array<void, string> $pr_void_string = array();     // previously allowed; not now
+  //  public array<void, void> $pr_void_void = array(); // previously allowed; not now
 
   // Although the checker finds no errors, HHVM reports "Warning: Invalid operand type was used: Invalid
   // type used as key" and then ignores the initializer(s), resulting in an empty array
@@ -83,7 +83,7 @@ class C2 {
   public array<array<bool>, float> $pr_arraybool_float = array();
   public array<array<bool>, num> $pr_arraybool_num = array();
   public array<array<bool>, string> $pr_arraybool_string = array();
-  //  public array<array<bool>, void> $pr_arraybool_void = array();	// previously allowed; not now
+  //  public array<array<bool>, void> $pr_arraybool_void = array();     // previously allowed; not now
 
   // Although the checker finds no errors, HHVM reports "syntax error, unexpected T_NEW, expecting ')'"
 
@@ -98,7 +98,7 @@ class C2 {
   public array<C1, float> $pr_C1_float = array();
   public array<C1, num> $pr_C1_num = array();
   public array<C1, string> $pr_C1_string = array();
-  //  public array<C1, void> $pr_C1_void = array();	// previously allowed; not now
+  //  public array<C1, void> $pr_C1_void = array();     // previously allowed; not now
 
   public function __construct() {
 
@@ -123,7 +123,7 @@ class C2 {
     // new element, whose value is 123. Interesting, but defies the idea that a void expression (like the
     // call to v()) has no value.
 
-    //    $this->pr_void_int[v()] = 123;	// previously allowed; not now
+    //    $this->pr_void_int[v()] = 123;        // previously allowed; not now
 
     // The following appears to do nothing
 

@@ -7,7 +7,7 @@ namespace NS_functions_basics;
 function f(): void {
   echo "f\n";
 }
-//function F(): void { echo "F\n"; }	// F is equivalent to f
+//function F(): void { echo "F\n"; }    // F is equivalent to f
 
 // function having no declared parameters
 
@@ -45,9 +45,9 @@ function addVector(Vector<int> $v1, Vector<int> $v2): Vector<int> {
 }
 
 function main(): void {
-  //  \var_dump(f1());	// call f1, default return value is null
-  //  $f = f1;	// PHP: assign this string to a variable; Hack disallows
-  //  $f();		// PHP: call f1 indirectly via $f; Hack disallows
+  //  \var_dump(f1());  // call f1, default return value is null
+  //  $f = f1;  // PHP: assign this string to a variable; Hack disallows
+  //  $f();             // PHP: call f1 indirectly via $f; Hack disallows
 
   f1();
   f1(10);

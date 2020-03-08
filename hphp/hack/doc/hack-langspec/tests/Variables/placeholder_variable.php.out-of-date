@@ -39,11 +39,11 @@ function main(): void {
   echo
     "\n\n========================= Is \$_ defined by default? =========================\n\n";
 
-  //  \var_dump($_);	// You are using the return value of a void function (Typing[4119])
+  //  \var_dump($_);    // You are using the return value of a void function (Typing[4119])
   // A void function doesn't return a value ($_ is a placeholder variable not meant to be used)
-  //  echo "\$_ is >" . $_ . "<\n";	// runtime Notice: Undefined variable: _
+  //  echo "\$_ is >" . $_ . "<\n";     // runtime Notice: Undefined variable: _
 
-  //  f($_);	// You are using the return value of a void function (Typing[4119])
+  //  f($_);    // You are using the return value of a void function (Typing[4119])
   // A void function doesn't return a value ($_ is a placeholder variable not meant to be used)
 
   // The messages are confusing: one talks about a void function (at check time), the other about a non-existent
@@ -53,20 +53,20 @@ function main(): void {
     "\n\n========================= Can the value of \$_ be changed? =========================\n\n";
 
   $_ = "Hello"; // allows me to change $_
-  //  \var_dump($_);	// You are using the return value of a void function (Typing[4119])
+  //  \var_dump($_);    // You are using the return value of a void function (Typing[4119])
   // A void function doesn't return a value ($_ is a placeholder variable not meant to be used)
   echo "\$_ is >".$_."<\n"; // checks and outputs "$_ is >Hello<"
 
-  //  f($_);	// You are using the return value of a void function (Typing[4119])
+  //  f($_);    // You are using the return value of a void function (Typing[4119])
   // A void function doesn't return a value ($_ is a placeholder variable not meant to be used)
 
   $_ = 10; // allows me to change $_
   echo "\$_ is >".$_."<\n"; // checks and outputs "$_ is >Hello<"
-  //  ++$_;		// This is a num (int/float) because this is used in an arithmetic operation
+  //  ++$_;             // This is a num (int/float) because this is used in an arithmetic operation
   // It is incompatible with void ($_ is a placeholder variable not meant to be used)
-  //  $_ += 5;	// This is a num (int/float) because this is used in an arithmetic operation
+  //  $_ += 5;  // This is a num (int/float) because this is used in an arithmetic operation
   // It is incompatible with void ($_ is a placeholder variable not meant to be used)
-  //  $v = $_ + 5;	// checker rejects ... void function and num/float
+  //  $v = $_ + 5;      // checker rejects ... void function and num/float
 
   // echo usage is allowed by can't pass to a function or use on some other contexts
 
@@ -80,7 +80,7 @@ function main(): void {
       $value,
       $_,
     ); // checks and works, as expected; 'a', 10, "hello", and 'f', 30, "hello"
-    //    \var_dump($_);	// You are using the return value of a void function (Typing[4119])
+    //    \var_dump($_);        // You are using the return value of a void function (Typing[4119])
     // A void function doesn't return a value ($_ is a placeholder variable not meant to be used)
   }
 
@@ -94,7 +94,7 @@ function main(): void {
     $_ = 'xx'; // allows me to change $_
   }
 
-  //  \var_dump($_);	// You are using the return value of a void function (Typing[4119])
+  //  \var_dump($_);    // You are using the return value of a void function (Typing[4119])
   // A void function doesn't return a value ($_ is a placeholder variable not meant to be used)
   echo "\$_ is >".$_."<\n"; // checks and works, as expected; $_ is >xx<
 
@@ -102,14 +102,14 @@ function main(): void {
     "\n\n========================= An odd use of \$_ =========================\n\n";
 
   foreach ($a as $_) {
-    //    \var_dump($_);	// You are using the return value of a void function (Typing[4119])
+    //    \var_dump($_);        // You are using the return value of a void function (Typing[4119])
     echo "\$_ is >".
       $_.
       "<\n"; // checks and works, as expected; $_ is >10<; $_ is >30<
 
   }
 
-  //  \var_dump($_);	// You are using the return value of a void function (Typing[4119])
+  //  \var_dump($_);    // You are using the return value of a void function (Typing[4119])
   // A void function doesn't return a value ($_ is a placeholder variable not meant to be used)
   echo "\$_ is >".$_."<\n"; // checks and works, as expected; $_ is >30<
 
@@ -117,14 +117,14 @@ function main(): void {
     "\n\n========================= Using \$_ for both key and value =========================\n\n";
 
   foreach ($a as $_ => $_) {
-    //    \var_dump($_);	// You are using the return value of a void function (Typing[4119])
+    //    \var_dump($_);        // You are using the return value of a void function (Typing[4119])
     echo
       "\$_ is >".$_."<\n"; // checks and works, outputting $_ is >a<; $_ is >f<
   }
 
   // shows that key wins over value, but should this be guaranteed?
 
-  //  \var_dump($_);	// You are using the return value of a void function (Typing[4119])
+  //  \var_dump($_);    // You are using the return value of a void function (Typing[4119])
   // A void function doesn't return a value ($_ is a placeholder variable not meant to be used)
   echo "\$_ is >".$_."<\n"; // checks and works, as expected; $_ is >f<
 

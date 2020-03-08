@@ -18,22 +18,22 @@ function getValue(): int {
 class C {}
 
 class MyClass {
-  //  define("DEFINE_INSIDE_CLASS", 10);		// not permitted inside a class; OK
+  //  define("DEFINE_INSIDE_CLASS", 10);                // not permitted inside a class; OK
 
-  //  const int CON30;		// not permitted; OK
+  //  const int CON30;          // not permitted; OK
   const float CON31 = 5 + 10.1 * 3;
-  //  const int CON34 = array(10, 20)[0];	// failed; Arrays are not allowed in class constants
+  //  const int CON34 = array(10, 20)[0];       // failed; Arrays are not allowed in class constants
   //  const float CON37 = (float)10;// failed; unexpected '(float)'
-  //  const C CON40 = new C();	// failed; unexpected 'new'
+  //  const C CON40 = new C();  // failed; unexpected 'new'
   const int CON38 = 99; // succeeded
   const int CON39 = MyClass::CON38; // succeeded
 }
 
 class C3 {
   const CON1 = 123; // implicitly static, and can't say so explicitly
-  //  public const CON2 = 123;	// all class constants are implicitly public; can't say explicitly
-  //  protected const CON3 = 123;	// all class constants are implicitly public
-  //  private const CON4 = 123;	// all class constants are implicitly public
+  //  public const CON2 = 123;  // all class constants are implicitly public; can't say explicitly
+  //  protected const CON3 = 123;       // all class constants are implicitly public
+  //  private const CON4 = 123; // all class constants are implicitly public
 }
 
 function main(): void {
@@ -42,7 +42,7 @@ function main(): void {
 
     trace("STATUS1", true);
     trace("MIN", 10);
-    trace("MAX", 20, true);		// HHVM Warning: Case insensitive constant names are not supported in HipHop
+    trace("MAX", 20, true);             // HHVM Warning: Case insensitive constant names are not supported in HipHop
     trace("MY_PI", 3.1415926);
     trace("MY_COLOR", "red");
     trace("C1", null);
@@ -76,7 +76,7 @@ function main(): void {
   trace("CON22", 2 * constant("CON2") + constant("CON1")); // succeeded;
 
   //  define('X1', 10, false);
-  //  define('X2', 5 * X1, false);		// Unbound name: NS_constants\X1
+  //  define('X2', 5 * X1, false);              // Unbound name: NS_constants\X1
   //  define('X2', 5 * constant('X1'), false);
   //  \var_dump(constant('X1'), constant('X2'));
 
@@ -85,33 +85,33 @@ function main(): void {
   /*
   // try to define some constants with names not permitted as tokens
 
-    trace("36ABC", 100) . "\n";		// ill-formed name, but no error. Seems to work
-    trace("#%&", 200) . "\n";		// ill-formed name, but no error. Seems to work
+    trace("36ABC", 100) . "\n";         // ill-formed name, but no error. Seems to work
+    trace("#%&", 200) . "\n";           // ill-formed name, but no error. Seems to work
   */
 
   /*
   // try to redefine a user-defined constant
 
-    trace("MY_COLOR", "green");		// Warning, and doesn't change the value
+    trace("MY_COLOR", "green");         // Warning, and doesn't change the value
 
   // try to redefine a pre-defined constant
 
-    trace("true", 999) . "\n";		// HHVM:  Constant true already defined ...
-    echo "    true's value:" . true . "\n";	// however, this shows the old value, 1
+    trace("true", 999) . "\n";          // HHVM:  Constant true already defined ...
+    echo "    true's value:" . true . "\n";     // however, this shows the old value, 1
   */
 
   /*
   // try to define some constants with non-scalar initial values
 
-    trace("COLORS", [10, 20]);	// Constants may only evaluate to scalar values
+    trace("COLORS", [10, 20]);  // Constants may only evaluate to scalar values
 
-    trace("MY_OBJECT", new C());	// Constants may only evaluate to scalar values
+    trace("MY_OBJECT", new C());        // Constants may only evaluate to scalar values
 
     $infile = fopen("Testfile.txt", 'r');
     if ($infile == false) {
       echo "Can't open file\n";
     }
-    trace("MY_RESOURCE", $infile);	// HHVM: Constants may only evaluate to scalar values
+    trace("MY_RESOURCE", $infile);      // HHVM: Constants may only evaluate to scalar values
   */
 
   //  \print_r(get_defined_constants());

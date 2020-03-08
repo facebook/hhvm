@@ -60,7 +60,7 @@ class C implements I2 {
 
 // --------------------------------------------------------
 
-//<<__Override, Attr2(3, true)>>	// hmmm! accepted
+//<<__Override, Attr2(3, true)>>        // hmmm! accepted
 <<__Override(3), Attr2(3, true)>> // hmmm! accepted
 function f1(): void {
   echo "Inside ".__FUNCTION__."\n";

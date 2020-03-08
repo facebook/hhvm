@@ -54,7 +54,7 @@ class D extends B {
   public function f1(): int {
     return 100;
   }
-  //  public function f2(): float { return 100.2; }	// float return type incompatible with int
+  //  public function f2(): float { return 100.2; }     // float return type incompatible with int
   public function f3(): int {
     return 0;
   } // OK; int is compatible with num

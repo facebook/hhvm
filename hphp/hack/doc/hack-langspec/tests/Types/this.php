@@ -41,8 +41,8 @@ abstract class C implements I {
 
   // properties
 
-  //  static private this $p1s;	// The type "this" cannot be used as the type of a static member variable
-  //  static private ?this $p2s;	// The type "this" cannot be used as the type of a static member variable
+  //  static private this $p1s; // The type "this" cannot be used as the type of a static member variable
+  //  static private ?this $p2s;        // The type "this" cannot be used as the type of a static member variable
 
   private string $name;
 
@@ -112,8 +112,8 @@ class D extends C {
 
 class E extends D {}
 
-//class G<T as this> {}		// The type "this" cannot be used as a constraint on a generic class
-//class G<T as ?this> {}	// The type "this" cannot be used as a constraint on a generic class
+//class G<T as this> {}         // The type "this" cannot be used as a constraint on a generic class
+//class G<T as ?this> {}        // The type "this" cannot be used as a constraint on a generic class
 
 function main(): void {
   $d = new D("AA");

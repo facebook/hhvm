@@ -21,7 +21,7 @@ class Point {
 
   public function __construct(float $x = 0.0, float $y = 0.0) {
     //  $name = 'x';
-    //  $this->$name = $x;	// Unlike PHP, Hack does not permit this
+    //  $this->$name = $x;      // Unlike PHP, Hack does not permit this
     $this->x = $x;
     $this->y = $y;
   }
@@ -69,11 +69,11 @@ function main(): void {
   echo "\$p1 is >$p1<\n";
 
   //  $n = "move";
-  //  $p1->$n(-2.0, 4.0);	// Unlike PHP, Hack does not permit this
+  //  $p1->$n(-2.0, 4.0);       // Unlike PHP, Hack does not permit this
   //  echo "\$p1 is >$p1<\n";
 
   \var_dump($p1->piProp); // okay to access instance property via instance
-  //  \var_dump($p1->psf());	// Unlike PHP, Hack doesn't allow access to a static method via instance
+  //  \var_dump($p1->psf());    // Unlike PHP, Hack doesn't allow access to a static method via instance
 
   \var_dump(Point::psf()); // okay to access static method via class
   \var_dump(

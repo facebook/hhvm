@@ -10,8 +10,8 @@ namespace NS_new_anonymous_classes;
 
 class C1 {}
 interface I1 {
-	public function f(): void;
-	public function g(): void;
+        public function f(): void;
+        public function g(): void;
 }
 interface I2 {}
 

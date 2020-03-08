@@ -18,23 +18,23 @@ interface iX {
 
   public function f0(): void;
   //  public function f1(int $p1): void;
-  //  private function f1(int $p1): void;	// private not permitted
-  //  protected function f1(int $p1): void;	// protected not permitted
+  //  private function f1(int $p1): void;       // private not permitted
+  //  protected function f1(int $p1): void;     // protected not permitted
   public static function f3(): void;
 }
 
 interface iY {
-  //  const int C1 = 123;		// can't inherit duplicate constants even if defined identically
+  //  const int C1 = 123;               // can't inherit duplicate constants even if defined identically
   const string C2 = "green";
 
-  //  public function f0(int $p1): void;	// Declaration of iX::f0() must be compatible with iY::f0($p1)
+  //  public function f0(int $p1): void;        // Declaration of iX::f0() must be compatible with iY::f0($p1)
   public function f1(int $p1): void;
   public function f2(int $p1, int $p2): void;
 }
 
 interface iZ extends iX, iY {
-  //  const int C1 = 123;		// can't override inherited constants
-  //  const string C2 = "green";	// can't override inherited constants
+  //  const int C1 = 123;               // can't override inherited constants
+  //  const string C2 = "green";        // can't override inherited constants
 
   public function f2(int $p1, int $p2): void;
 }

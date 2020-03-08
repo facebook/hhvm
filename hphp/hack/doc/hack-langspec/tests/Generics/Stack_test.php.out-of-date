@@ -12,12 +12,12 @@ function main2(
   $stInt->push(20);
   $stInt->push(30);
   echo 'pop => '.$stInt->pop()."\n";
-  //  $stInt->push(10.5);	// type argument float is incompatible with type parameter int
+  //  $stInt->push(10.5);       // type argument float is incompatible with type parameter int
 
   $stFloat->push(10.12);
   $stFloat->push(-4320.6);
   echo 'pop => '.$stFloat->pop()."\n";
-  //  $stFloat->push(100);	// type argument int is incompatible with type parameter float
+  //  $stFloat->push(100);      // type argument int is incompatible with type parameter float
   echo 'pop => '.$stFloat->pop()."\n";
 
   echo 'pop => '.$stInt->pop()."\n";
@@ -35,7 +35,7 @@ function main(): \NS_Stack\Stack<num> {
   echo 'pop => '.$stInt->pop()."\n";
 
   echo 'stack depth = '.$stInt->getStackDepth()."\n";
-  //  process($stInt);			// fixes the type as Stack<int>
+  //  process($stInt);                  // fixes the type as Stack<int>
 
   // With the line above commented out
   // Pushing a float or string on an intended int stack is allowed; need to discuss this under "type inferencing"
@@ -46,13 +46,13 @@ function main(): \NS_Stack\Stack<num> {
   \var_dump($stInt);
   echo 'pop => '.$stInt->pop()."\n";
 
-  //  process($stInt);			// locks in the type as Stack<num>
+  //  process($stInt);                  // locks in the type as Stack<num>
 
   $stInt->push('abc'); // rejected once stack type is fixed
   \var_dump($stInt);
   echo 'pop => '.$stInt->pop()."\n";
 
-  //  process($stInt);			// fixes the type as Stack<mixed>
+  //  process($stInt);                  // fixes the type as Stack<mixed>
 
 
   $stInt = new \NS_Stack\Stack();

@@ -1789,9 +1789,9 @@ This operator must be used within an[ asynchronous function](15-functions.md#asy
 The return type of the function containing a use of this operator must be a type that implements `Awaitable<T>`.
 
 *await-expression* can only be used in the following contexts:
-*	As an [*expression-statement*](11-statements.md#expression-statements)
-*	As the *assignment-expression* in a [*simple-assignment-expression*](10-expressions.md#simple-assignment)
-*	As *expression* in a [*return-statement*](11-statements.md#the-return-statement)
+*       As an [*expression-statement*](11-statements.md#expression-statements)
+*       As the *assignment-expression* in a [*simple-assignment-expression*](10-expressions.md#simple-assignment)
+*       As *expression* in a [*return-statement*](11-statements.md#the-return-statement)
 
 **Semantics**
 
@@ -1802,8 +1802,8 @@ The resulting value is the value of type `T` that was wrapped in the object of t
 ```Hack
 async function f(): Awaitable<int> {…}
 
-$x = await f();		// $x is an int
-$x = f();			// $x is an Awaitable<int>
+$x = await f();         // $x is an int
+$x = f();                       // $x is an Awaitable<int>
 ```
 
 **Examples**

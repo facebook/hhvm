@@ -73,7 +73,7 @@ class Derived2 extends Base2 {
 */
 // --------------------------------------------------------
 
-//<<__ConsistentConstruct, Attr2(3, true)>>	// hmmm! accepted
+//<<__ConsistentConstruct, Attr2(3, true)>>     // hmmm! accepted
 <<__ConsistentConstruct(3), Attr2(3, true)>> // hmmm! accepted with a value
 function f1(): void {
   echo "Inside ".__FUNCTION__."\n";

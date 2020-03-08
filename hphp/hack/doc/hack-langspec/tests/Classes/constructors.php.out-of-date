@@ -55,7 +55,7 @@ function f3(int $iValue, (function(int): int) $process): int {
 // However, hhvm gags with Fatal error: syntax error, unexpected T_PRIVATE
 
 function f4(): void {
-  //  $result = f3(5, function (private int $p) { return $p * 2; });	// doubles 5
+  //  $result = f3(5, function (private int $p) { return $p * 2; });    // doubles 5
 }
 
 // ---------------------------------------------------------
@@ -132,10 +132,10 @@ function main(): void {
 
   $c2 = new C2(10, 20, 30, 40.0, 50);
   \var_dump($c2);
-  //  echo $c2->pr1 . "\n";	// can't access private member; good
-  //  echo $c2->p2 . "\n";	// can't access private member; good
-  //  echo $c2->pr3 . "\n";	// can't access protected member; good
-  //  echo $c2->p4 . "\n";	// can't access protected member; good
+  //  echo $c2->pr1 . "\n";     // can't access private member; good
+  //  echo $c2->p2 . "\n";      // can't access private member; good
+  //  echo $c2->pr3 . "\n";     // can't access protected member; good
+  //  echo $c2->p4 . "\n";      // can't access protected member; good
   echo $c2->pr5."\n"; // can access public member; good
   echo $c2->p6."\n"; // can access public member; good
 }

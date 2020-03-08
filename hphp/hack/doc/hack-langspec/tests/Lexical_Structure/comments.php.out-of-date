@@ -34,7 +34,7 @@ function main(): void {
   $k = $i + ++$j; # $i + + +$j; several unary +'s
   \var_dump($k);
 
-  //  $i = 2; $j = 3; $k = $i++++$j;	// correctly diagnosed; sees $i++ ++ +$j, which is invalid
+  //  $i = 2; $j = 3; $k = $i++++$j;    // correctly diagnosed; sees $i++ ++ +$j, which is invalid
 
   $i = 2;
   $j = 3;

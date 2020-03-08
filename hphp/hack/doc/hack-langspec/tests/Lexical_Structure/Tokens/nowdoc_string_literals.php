@@ -7,7 +7,7 @@ function main(): void {
 
   // test using unescaped ", embedded (actual) tab, variable substitution, multiple lines
 
-  $s = <<<	  'ID'
+  $s = <<<        'ID'
 S'o'me "\"t e\txt; \$v = $v"
 Some more text
 ID;

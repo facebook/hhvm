@@ -31,7 +31,7 @@ function main(): void {
   echo "----------- Play ------------\n\n";
 
   //  $key = 'x';
-  //  f1(shape($key => 10));	// gags: The field '' is missing
+  //  f1(shape($key => 10));    // gags: The field '' is missing
   // like the shape definition, key must be a string literal
 
   //  \var_dump(\NS_shapes_rf\st4b_test2());
@@ -41,17 +41,17 @@ function main(): void {
   $point1 = shape('x' => -3, 'y' => 6);
   echo "\$point1 is ".$point1['x']."\n";
   //  echo "\$point1 instanceof Point is " .
-  //    (($point1 instanceof \NS_shapes_rf\Point) ? "True" : "False") . "\n";	// False
+  //    (($point1 instanceof \NS_shapes_rf\Point) ? "True" : "False") . "\n";   // False
 
   /*
   // a key must be a string literal; apparently can't be a class constant
 
-  // ???	echo "\$point1 is " . $point1[\NS_shapes_rf\C::KEY1] . "\n";
-  	// The field  is undefined *** WHY IS THIS?
+  // ???        echo "\$point1 is " . $point1[\NS_shapes_rf\C::KEY1] . "\n";
+        // The field  is undefined *** WHY IS THIS?
     $key = 'x';
-    echo "\$point1 is " . $point1[$key] . "\n";	// The field  is undefined
+    echo "\$point1 is " . $point1[$key] . "\n"; // The field  is undefined
 
-    echo "\$point1 is " . $point1['z'] . "\n";	// The field z is undefined
+    echo "\$point1 is " . $point1['z'] . "\n";  // The field z is undefined
   */
 
   // Fatal error: syntax error, unexpected '[', expecting ',' or ';'
@@ -64,7 +64,7 @@ function main(): void {
   $str = \NS_shapes_rf\Point_toString($point1);
   echo "\$point1 is $str\n";
   //  echo "\$point1 instanceof Point is " .
-  //    (($point1 instanceof \NS_shapes_rf\Point) ? "True" : "False") . "\n";	// False
+  //    (($point1 instanceof \NS_shapes_rf\Point) ? "True" : "False") . "\n";   // False
 
   // The following function-call argument is incompatible with PointNT while alias is created using 'newtype'.
   // However, it's okay when 'type' used

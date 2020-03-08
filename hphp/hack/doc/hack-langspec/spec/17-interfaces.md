@@ -118,7 +118,7 @@ An interface may contain the following members:
 * *require-extends-clauses* each of which requires the class implementing this interface to directly or indirectly extend the class type designated by *qualified-name*.
 * [Constants](17-interfaces.md#constants) – the constant values associated with the interface.
 * [Methods](17-interfaces.md#methods) – placeholders for the computations and actions that can be performed by implementers of the interface.
-*	[Type constants](16-classes.md#type-constants) – a way of parameterizing class types without using generics.
+*       [Type constants](16-classes.md#type-constants) – a way of parameterizing class types without using generics.
 
 An *interface-member-declarations* may contain multiple *require-extends-clause*s that designate the same class, in which case, the duplicates are redundant. 
 
@@ -180,12 +180,12 @@ interface ArrayAccess<string, T> {
 
 The interface members are defined below:
 
-Name	|   Purpose
+Name    |   Purpose
 ----    |   -------
-`offsetExists`  |	This instance method returns `true` if the instance contains an element with key `$offset`, otherwise, `false`.
-`offsetGet`	|  This instance method gets the value having key `$offset`. This method is called when an instance of a class that implements this interface is [subscripted](10-expressions.md#subscript-operator) in a non-lvalue context.
-`offsetSet`	| This instance method sets the value having key `$offset` to $value. This method is called when an instance of a class that implements this interface is [subscripted](10-expressions.md#subscript-operator) in a modifiable-lvalue context.
-`offsetUnset`	| This instance method removes the value having key `$offset`.
+`offsetExists`  |       This instance method returns `true` if the instance contains an element with key `$offset`, otherwise, `false`.
+`offsetGet`     |  This instance method gets the value having key `$offset`. This method is called when an instance of a class that implements this interface is [subscripted](10-expressions.md#subscript-operator) in a non-lvalue context.
+`offsetSet`     | This instance method sets the value having key `$offset` to $value. This method is called when an instance of a class that implements this interface is [subscripted](10-expressions.md#subscript-operator) in a modifiable-lvalue context.
+`offsetUnset`   | This instance method removes the value having key `$offset`.
 
 ### Interface `AsyncIterator`
 
@@ -336,7 +336,7 @@ interface Serializable {
 
 The interface members are defined below:
 
-Name |	Purpose
+Name |  Purpose
 -----|  -------
 `serialize` | This instance method returns a string representation of the current instance. On failure, it returns `null`.
 `unserialize` | This instance method constructs an object from its string form designated by `$serialized`.

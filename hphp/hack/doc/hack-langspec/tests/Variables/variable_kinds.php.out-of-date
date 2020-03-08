@@ -2,14 +2,14 @@
 
 namespace NS_variable_kinds;
 
-// global $min;			// disallowed
-// global int $min;		// disallowed
-// global int $min = -100;	// disallowed
+// global $min;                 // disallowed
+// global int $min;             // disallowed
+// global int $min = -100;      // disallowed
 
-// const int $gc = 10;		// disallowed
+// const int $gc = 10;          // disallowed
 
 function localConst(bool $p): void {
-//  const int $lc = 10;	// disallowed; declarations are not supported outside global scope
+//  const int $lc = 10; // disallowed; declarations are not supported outside global scope
 
 // define()'d names are not really constants in the linguistic sense, esp. as Hack can't see them directly
 
@@ -26,7 +26,7 @@ function localConst(bool $p): void {
   }
 }
 
-function doit(bool $p1): void {	// assigned the value true when called
+function doit(bool $p1): void { // assigned the value true when called
   $count = 10;
 
   if ($p1) {
@@ -38,7 +38,7 @@ function f(): void {
   $lv = 1;
 
   static $fs1 = 1;
-//  static int $fs1 = 1;	// disallowed
+//  static int $fs1 = 1;        // disallowed
 
 //  \var_dump($fs1);
 //  $fs1 = true;
@@ -47,7 +47,7 @@ function f(): void {
 //  \var_dump($fs1);
 
   static $fs2;
-  \var_dump($fs2);		// show default value is null
+  \var_dump($fs2);              // show default value is null
 
   echo "\$lv = $lv, \$fs1 = $fs1\n";
   ++$lv;
@@ -76,7 +76,7 @@ function compute(bool $p): void {
 
   if ($p) {
     global $result;
-    $result = 3.456;	// initializes a global, creating it if necessary
+    $result = 3.456;    // initializes a global, creating it if necessary
     \var_dump($result);
   }
 }
@@ -105,7 +105,7 @@ function main(): void {
 
   localConst(true);
   echo "COEFFICIENT_1 = " . constant('COEFFICIENT_1') . "\n";
-  echo "FAILURE = " . constant('FAILURE') . "\n";	// as it's visible here, it's not really a local!
+  echo "FAILURE = " . constant('FAILURE') . "\n";       // as it's visible here, it's not really a local!
 
   echo "---------------- Local variables -------------------\n";
 
@@ -156,13 +156,13 @@ $GLOBALS['min'] = 10;
 $GLOBALS['max'] = 100;
 $GLOBALS['average'] = null;
 
-global $min, $max;		// allowed, but serve no purpose
+global $min, $max;              // allowed, but serve no purpose
 
 function compute2($p) {
   $GLOBALS['average'] = ($GLOBALS['max'] + $GLOBALS['min'])/2;
 
   if ($p) {
-    $GLOBALS['result'] = 3.456;		// initializes a global, creating it if necessary
+    $GLOBALS['result'] = 3.456;         // initializes a global, creating it if necessary
   }
 }
 

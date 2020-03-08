@@ -8,12 +8,12 @@ Can use as an identifier
 
 */
 
-//function classname(): void {}			// can be used as a function name
+//function classname(): void {}                 // can be used as a function name
 
 class C0 {
-//  public function classname(): void {}	// can be used as a method name
-//  const type classname = int;			// can be used as a type constant name
-  const type classname = classname<C0>;		// first is an identifier, second is a keyword
+//  public function classname(): void {}        // can be used as a method name
+//  const type classname = int;                 // can be used as a type constant name
+  const type classname = classname<C0>;         // first is an identifier, second is a keyword
 }
 
 function f0a(C0::classname $p): C0::classname { return $p; }
@@ -35,7 +35,7 @@ class C0B {
 
   const classname<C0> P0 = C0::class;
   public static string $str = 'NS_classname\C0';
-/***/  public static function sf1(): void { echo "sf1: " . ((C0B::$str === C0B::$p1) ? 'TRUE' : 'FALSE') . "\n"; }	// surprise! accepted
+/***/  public static function sf1(): void { echo "sf1: " . ((C0B::$str === C0B::$p1) ? 'TRUE' : 'FALSE') . "\n"; }      // surprise! accepted
   public static function sf2(): void { echo "sf2: " . ((C0B::$str == C0B::$p1) ? 'TRUE' : 'FALSE') . "\n"; }
 
   public static function f(classname<C0> $p) : classname<C0> { return C0::class; }
@@ -81,8 +81,8 @@ function test2(classname<C2> $clsname): void {
 // use classname<T> with new
 
   $w = new $clsname();
-//  $w = new '\NS_classname\C2'();	// Cannot use dynamic new in strict mode
-//  $w = new $v();			// this works!
+//  $w = new '\NS_classname\C2'();      // Cannot use dynamic new in strict mode
+//  $w = new $v();                      // this works!
 
 // use classname<T> with instanceof
 
@@ -95,9 +95,9 @@ function test2(classname<C2> $clsname): void {
 
 // However, can't use classname<T> with ::class
 
-//  \var_dump($clsname::class);	// invalid combo
+//  \var_dump($clsname::class); // invalid combo
 
-///******/  \var_dump(new C2() instanceof C1::class);	// checker allows, but HHVM doesn't
+///******/  \var_dump(new C2() instanceof C1::class);   // checker allows, but HHVM doesn't
 }
 
 function test3(classname<C3> $clsname): void {
@@ -208,9 +208,9 @@ function main(): void {
 
   echo "\n---------- test2(C3::class) --------------\n\n";
 
-  test2(C3::class);	// treats as a C3 rather than a C2; good
+  test2(C3::class);     // treats as a C3 rather than a C2; good
 
-//  test3(C2::class);	// incompatible type
+//  test3(C2::class);   // incompatible type
 
   echo "\n---------- test5(C5a::class) --------------\n\n";
 
@@ -223,7 +223,7 @@ function main(): void {
 /*
   echo "\n---------- test5(I5::class) --------------\n\n";
 
-  test5(I5::class);	// runtime error; can't use new with an interface name
+  test5(I5::class);     // runtime error; can't use new with an interface name
 */
   echo "\n---------- end of script --------------\n\n";
 }

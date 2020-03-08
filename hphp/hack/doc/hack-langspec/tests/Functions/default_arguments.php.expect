@@ -12,7 +12,7 @@ array(2) {
   }
 }
 f1: # arguments passed is 1
-	arg[0] = >12<
+        arg[0] = >12<
 int(12)
 float(1.23)
 bool(true)
@@ -26,8 +26,8 @@ array(2) {
   }
 }
 f1: # arguments passed is 2
-	arg[0] = >12<
-	arg[1] = >10.5<
+        arg[0] = >12<
+        arg[1] = >10.5<
 int(12)
 float(10.5)
 bool(true)
@@ -41,9 +41,9 @@ array(2) {
   }
 }
 f1: # arguments passed is 3
-	arg[0] = >12<
-	arg[1] = >10.5<
-	arg[2] = ><
+        arg[0] = >12<
+        arg[1] = >10.5<
+        arg[2] = ><
 int(12)
 float(10.5)
 bool(false)
@@ -57,10 +57,10 @@ array(2) {
   }
 }
 f1: # arguments passed is 4
-	arg[0] = >12<
-	arg[1] = >10.5<
-	arg[2] = ><
-	arg[3] = >100<
+        arg[0] = >12<
+        arg[1] = >10.5<
+        arg[2] = ><
+        arg[3] = >100<
 int(12)
 float(10.5)
 bool(false)
@@ -74,11 +74,11 @@ array(2) {
   }
 }
 f1: # arguments passed is 5
-	arg[0] = >12<
-	arg[1] = >10.5<
-	arg[2] = ><
-	arg[3] = >aaa<
-	arg[4] = >xxx<
+        arg[0] = >12<
+        arg[1] = >10.5<
+        arg[2] = ><
+        arg[3] = >aaa<
+        arg[4] = >xxx<
 int(12)
 float(10.5)
 bool(false)
@@ -92,12 +92,12 @@ array(2) {
   }
 }
 f1: # arguments passed is 6
-	arg[0] = >12<
-	arg[1] = >10.5<
-	arg[2] = ><
-	arg[3] = >aaa<
-	arg[4] = >xxx<
-	arg[5] = ><
+        arg[0] = >12<
+        arg[1] = >10.5<
+        arg[2] = ><
+        arg[3] = >aaa<
+        arg[4] = >xxx<
+        arg[5] = ><
 int(12)
 float(10.5)
 bool(false)
@@ -105,20 +105,20 @@ string(3) "aaa"
 string(3) "xxx"
 NULL
 f4: # arguments passed is 1
-	arg[0] = >10<
+        arg[0] = >10<
 int(10)
 int(-100)
 int(-200)
 f4: # arguments passed is 2
-	arg[0] = >10<
-	arg[1] = >20<
+        arg[0] = >10<
+        arg[1] = >20<
 int(10)
 int(20)
 int(-200)
 f4: # arguments passed is 3
-	arg[0] = >10<
-	arg[1] = >20<
-	arg[2] = >30<
+        arg[0] = >10<
+        arg[1] = >20<
+        arg[2] = >30<
 int(10)
 int(20)
 int(30)

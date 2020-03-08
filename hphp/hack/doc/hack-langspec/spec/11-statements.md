@@ -54,17 +54,17 @@ often referred to as a *block*.
 
 ```Hack
 if (condition)
-{	// braces are needed as the true path has more than one statement
-	// statement-1
-	// statement-2
+{       // braces are needed as the true path has more than one statement
+        // statement-1
+        // statement-2
 }
 else
-{	// braces are optional as the false path has only one statement
-	// statement-3
+{       // braces are optional as the false path has only one statement
+        // statement-3
 }
 // -----------------------------------------
 while (condition)
-{	// the empty block is equivalent to a null statement
+{       // the empty block is equivalent to a null statement
 }
 ```
 

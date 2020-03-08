@@ -100,9 +100,9 @@ trait TR4a {
 }
 
 /*
-type TTA_trait1 = TR1;	// TR1 is uninstantiable
-type TTA_trait2 = TR2;	// TR2 is uninstantiable
-type TTA_trait3 = TR3;	// TR3 is uninstantiable
+type TTA_trait1 = TR1;  // TR1 is uninstantiable
+type TTA_trait2 = TR2;  // TR2 is uninstantiable
+type TTA_trait3 = TR3;  // TR3 is uninstantiable
 trait TR4b {
   use TTA_trait3;
   use TTA_trait1, TTA_trait2;
@@ -129,8 +129,8 @@ newtype OTA_shape_complex = shape('real' => float, 'imag' => float);
 // ------------------------------------------------------
 
 newtype Counter as int = int;
-//newtype Counter as float = int;	// float not compatible with int
+//newtype Counter as float = int;       // float not compatible with int
 //newtype Counter as num = int;
-//newtype OTA_x1 as int = Fullname;	// int not compatible with Fullname
+//newtype OTA_x1 as int = Fullname;     // int not compatible with Fullname
 
 // ------------------------------------------------------

@@ -69,6 +69,6 @@ interface Ix {
 }
 
 trait Tx {
-  require implements Ix;	// cyclic definition; not permitted
+  require implements Ix;        // cyclic definition; not permitted
 }
 */

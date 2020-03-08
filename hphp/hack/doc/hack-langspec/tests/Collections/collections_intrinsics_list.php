@@ -9,8 +9,8 @@ function main(): void {
   echo "\$min: $min, \$max: $max, \$avg: $avg\n";
   \print_r($v);
 
-  //  list($min, , $avg) = array(0, 100, 67);		// missing arguments not allowed
-  //  list($min, , $avg) = Vector {0, 100, 67};	// missing arguments not allowed
+  //  list($min, , $avg) = array(0, 100, 67);           // missing arguments not allowed
+  //  list($min, , $avg) = Vector {0, 100, 67}; // missing arguments not allowed
   //  echo "\$min: $min, , \$avg: $avg\n";
 
   list($min, $max) = Vector {0, 100, 67};
@@ -26,7 +26,7 @@ function main(): void {
   echo "\$first: $first, \$second: $second\n";
   \print_r($v);
 
-  //  $v = list($first) = Pair {-15, 17};		// must extract both elements
+  //  $v = list($first) = Pair {-15, 17};               // must extract both elements
 
   echo "--------- test with more elements than variables -------------\n";
 
@@ -38,7 +38,7 @@ function main(): void {
 
   //  echo "--------- test with fewer elements than variables -------------\n";
   //
-  //  $v = list($min, $max, $avg) = Vector {100, 500};	// Undefined offset: 2
+  //  $v = list($min, $max, $avg) = Vector {100, 500};  // Undefined offset: 2
 
   echo "--------- test with element being an array -------------\n";
 

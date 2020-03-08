@@ -12,17 +12,17 @@ function main(): void {
   try {
     echo "L0: In try-block\n";
 
-    //    throw 10;		// Diagnosed; good
-    //    throw new X();		// Diagnosed; good
+    //    throw 10;             // Diagnosed; good
+    //    throw new X();                // Diagnosed; good
     throw new \Exception();
   }
   /*
-    catch (int $e) {		// diagnosed; good (Unbound name: int)
+    catch (int $e) {            // diagnosed; good (Unbound name: int)
       echo "L0: In catch-block int\n";
     }
   */
   /*
-    catch (X $e) {		// diagnosed; good
+    catch (X $e) {              // diagnosed; good
       echo "L0: In catch-block int\n";
     }
   */
@@ -32,7 +32,7 @@ function main(): void {
 
     //    throw $e;
     //    throw new \Exception();
-    //    throw;			// can't re-throw current exception ala C#, C++
+    //    throw;                        // can't re-throw current exception ala C#, C++
   }
   //*/
   ///*

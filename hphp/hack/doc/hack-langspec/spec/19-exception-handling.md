@@ -65,25 +65,25 @@ about nested exceptions, see [§§](19-exception-handling.md#tracing-exceptions)
 
 The class members are defined below:
 
-Name	| Purpose
+Name    | Purpose
 ----    | -------
-`$code`	| The exception code (as provided by the constructor)
-`$file`	| The name of the script where the exception was generated
-`$line`	| The source line number in the script where the exception was generated
-`$message`	| The exception message (as provided by the constructor)
-`$previous`	| The previous exception in the chain, if this is a nested exception; otherwise, `null`
-`$string`	| Work area for `__toString`
-`$trace`	| Work area for function-call tracing
-`__construct`	| Takes three (optional) arguments – `string`: the exception message (defaults to ""), `int`: the exception code (defaults to 0), and `\Exception`: the previous exception in the chain (defaults to `null`)
-`__clone`	| Present to inhibit the cloning of exception objects
-`__toString`	| Retrieves a string representation of the exception in some unspecified format
-`getCode`	| Retrieves the exception code (as set by the constructor).
-`getFile`	| Retrieves the name of the script where the exception was generated
-`getLine`	| Retrieves the source line number in the script where the exception was generated
-`getMessage`	| Retrieves the exception message
-`getPrevious`	| Retrieves the previous exception (as set by the constructor), if one exists; otherwise, `null`
-`getTrace`	| Retrieves the function stack trace information (see [§§](19-exception-handling.md#tracing-exceptions))
-`getTraceAsString`	| Retrieves the function stack trace information formatted as a single string in some unspecified format
+`$code` | The exception code (as provided by the constructor)
+`$file` | The name of the script where the exception was generated
+`$line` | The source line number in the script where the exception was generated
+`$message`      | The exception message (as provided by the constructor)
+`$previous`     | The previous exception in the chain, if this is a nested exception; otherwise, `null`
+`$string`       | Work area for `__toString`
+`$trace`        | Work area for function-call tracing
+`__construct`   | Takes three (optional) arguments – `string`: the exception message (defaults to ""), `int`: the exception code (defaults to 0), and `\Exception`: the previous exception in the chain (defaults to `null`)
+`__clone`       | Present to inhibit the cloning of exception objects
+`__toString`    | Retrieves a string representation of the exception in some unspecified format
+`getCode`       | Retrieves the exception code (as set by the constructor).
+`getFile`       | Retrieves the name of the script where the exception was generated
+`getLine`       | Retrieves the source line number in the script where the exception was generated
+`getMessage`    | Retrieves the exception message
+`getPrevious`   | Retrieves the previous exception (as set by the constructor), if one exists; otherwise, `null`
+`getTrace`      | Retrieves the function stack trace information (see [§§](19-exception-handling.md#tracing-exceptions))
+`getTraceAsString`      | Retrieves the function stack trace information formatted as a single string in some unspecified format
 
 ## Tracing Exceptions
 
@@ -116,15 +116,15 @@ trace-array[2] is for the call to function `f1`.
 Each element in trace-array is itself an array that contains elements
 with the following key/value pairs:
 
-Key	| Value Type	| Value
+Key     | Value Type    | Value
 --- | ----------    | -----
-"args"	| `array`	| The set of arguments passed to the function
-"class"	| `string` |	The name of the function's parent class
-"file"	| `string` |	The name of the script where the function was called
-"function"	| `string` |	The name of the function or class method
-"line"	| `int` |	The line number in the source where the function was called
-"object" |	`object` | The current object
-"type"	| `string` |	Type of call; `->` for an instance method call, `::` for a static method call, ordinary function call, "" is returned.
+"args"  | `array`       | The set of arguments passed to the function
+"class" | `string` |    The name of the function's parent class
+"file"  | `string` |    The name of the script where the function was called
+"function"      | `string` |    The name of the function or class method
+"line"  | `int` |       The line number in the source where the function was called
+"object" |      `object` | The current object
+"type"  | `string` |    Type of call; `->` for an instance method call, `::` for a static method call, ordinary function call, "" is returned.
 
 As to whether extra elements with other keys are provided is
 unspecified.

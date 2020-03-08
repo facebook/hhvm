@@ -102,7 +102,7 @@ class C2 {}
 // Can a target have multiple attribute specifications? No
 
 <<Attr4>>
-//<<Attr5>>	// hh_client: rejected; Expected expression
+//<<Attr5>>     // hh_client: rejected; Expected expression
 class C3 {}
 
 // --------------------------------------------------------
@@ -129,16 +129,16 @@ class X {
   3.4,
   'class C4',
   null
-  //	, X::MAX			// disallowed
-  //	, STDERR			// disallowed
+  //    , X::MAX                        // disallowed
+  //    , STDERR                        // disallowed
   ,
   array(10, 20, 30),
   array('x' => 3, 'y' => 5)
-  //	, ControlStatus::Stopping	// disallowed
+  //    , ControlStatus::Stopping       // disallowed
   ,
   tuple(12, 5.9),
   shape('x' => -3, 'y' => 6),
-  //	, Vector {22, 33}		// disallowed
+  //    , Vector {22, 33}               // disallowed
 )>>
 class C4 {
   <<Attr6(
@@ -147,16 +147,16 @@ class C4 {
     3.4,
     'method C4->f',
     null
-    //		, X::MAX			// disallowed
-    //		, STDERR			// disallowed
+    //          , X::MAX                        // disallowed
+    //          , STDERR                        // disallowed
     ,
     array(10, 20, 30),
     array('x' => 3, 'y' => 5)
-    //		, ControlStatus::Stopping	// disallowed
+    //          , ControlStatus::Stopping       // disallowed
     ,
     tuple(12, 5.9),
     shape('x' => -3, 'y' => 6),
-    //		, Vector {22, 33}		// disallowed
+    //          , Vector {22, 33}               // disallowed
   )>>
   public function f(): void {}
 }
@@ -167,9 +167,9 @@ class C4 {
 
 /*
 class C5 {
-  private (<<XX>> function (): void) $prop;	// rejected by hh_client
+  private (<<XX>> function (): void) $prop;     // rejected by hh_client
   public function __construct() {
-    $this->prop = <<XX>> function (): void { echo "Hi there!\n"; };	// rejected by hh_client
+    $this->prop = <<XX>> function (): void { echo "Hi there!\n"; };     // rejected by hh_client
   }
 }
 */
@@ -199,7 +199,7 @@ function main(): void {
 
   $attrHelp = $rc->getAttribute('Help');
   \var_dump($attrHelp);
-  //  $attrHelp = $rc->getAttributes();	// method not defined
+  //  $attrHelp = $rc->getAttributes(); // method not defined
 
   echo "\n============== class C1->f2 =====================\n\n";
 

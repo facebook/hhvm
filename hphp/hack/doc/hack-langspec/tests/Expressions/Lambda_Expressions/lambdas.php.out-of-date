@@ -45,12 +45,12 @@ function main(): void {
 
   $fn = $a ==> $a << 3;
   \var_dump($fn(10));
-  //  \var_dump($fn(5.6));	// float is incompatible with <<
+  //  \var_dump($fn(5.6));      // float is incompatible with <<
 
   echo "\n-------------- empty compound statement ----------------\n\n";
 
   $fn = $a ==> {};
-  //  \var_dump($fn(123));		// can't use the resturn value form a void function
+  //  \var_dump($fn(123));              // can't use the resturn value form a void function
 
   echo "\n-------------- single parameter, type inferred ----------------\n\n";
 
@@ -68,7 +68,7 @@ function main(): void {
   /*
     echo "\n-------------- single parameter in parens with attribute, type inferred ----------------\n\n";
 
-    $fn = (<<XX>> $a) ==> $a * 2;	// hhvm gags on attribute; reports "unexpected T_SL"
+    $fn = (<<XX>> $a) ==> $a * 2;       // hhvm gags on attribute; reports "unexpected T_SL"
     \var_dump($fn(10));
     \var_dump($fn(5.6));
   */
@@ -85,7 +85,7 @@ function main(): void {
 
   $fn = ($a = -90) ==> $a * 2;
   \var_dump($fn(10));
-  //  \var_dump($fn(5.6));	// float is incompatible with int
+  //  \var_dump($fn(5.6));      // float is incompatible with int
   \var_dump($fn());
 
   echo
@@ -95,7 +95,7 @@ function main(): void {
 
   $fn = (int $a) ==> $a * 2;
   \var_dump($fn(10));
-  //  \var_dump($fn(5.6));	// float is incompatible with int
+  //  \var_dump($fn(5.6));      // float is incompatible with int
 
   echo
     "\n-------------- no parameters, but parens necessary ----------------\n\n";
@@ -115,7 +115,7 @@ function main(): void {
 
   $fn = (int $a, $b, $c) ==> $a + $b + $c;
   \var_dump($fn(10, 5, 9));
-  //  \var_dump($fn(10.0, 5.0, 9.0));	// float is incompatible with int
+  //  \var_dump($fn(10.0, 5.0, 9.0));   // float is incompatible with int
 
   $fn = (int $a, int $b, $c) ==> $a + $b + $c;
   \var_dump($fn(10, 5, 9));
@@ -136,7 +136,7 @@ function main(): void {
 
   $fn = ($a): int ==> $a * 2;
   \var_dump($fn(10));
-  //  \var_dump($fn(5.6));	// float is incompatible with int (type of $a * 2)
+  //  \var_dump($fn(5.6));      // float is incompatible with int (type of $a * 2)
 
   $fn = ($a): float ==> $a * 2.0;
   \var_dump($fn(10));

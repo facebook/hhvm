@@ -6,7 +6,7 @@ require_once('Point.php');
 require_once('Circle.php');
 
 use \Graphics\D2\Point;
-//use \Graphics\D2\Point as Point;		// "as Point" is redundant
+//use \Graphics\D2\Point as Point;              // "as Point" is redundant
 
 use \Graphics\D2\Circle as Circle; // "as Circle" is redundant
 

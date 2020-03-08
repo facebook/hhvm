@@ -8,25 +8,25 @@ class C {
 
 function f(?int $p1, C $p2): void {
   /*
-    $p1++;		// flagged
-    $p1--;		// flagged
-    ++$p1;		// flagged
-    --$p1;		// flagged
+    $p1++;              // flagged
+    $p1--;              // flagged
+    ++$p1;              // flagged
+    --$p1;              // flagged
   */
   /*
-    $p2->nint++;	// not flagged
-    $p2->nint--;	// not flagged
-    ++$p2->nint;	// flagged
-    --$p2->nint;	// flagged
+    $p2->nint++;        // not flagged
+    $p2->nint--;        // not flagged
+    ++$p2->nint;        // flagged
+    --$p2->nint;        // flagged
   */
 }
 
 function main(): void {
   $v = null;
-  //  $v++;			// flagged
-  //  $q = $v + 3;		// flagged
-  //  $q = $v * 1.2;		// flagged
-  //  $q = $v >> 3;		// flagged
+  //  $v++;                     // flagged
+  //  $q = $v + 3;              // flagged
+  //  $q = $v * 1.2;            // flagged
+  //  $q = $v >> 3;             // flagged
 
   /*
   // Typing error: This is a num (int/float) because this is used in an arithmetic operation
@@ -51,23 +51,23 @@ function main(): void {
   /*
   /*
     $v = $c->nint;
-    if (!\is_null($v)) {	// all OK!
+    if (!\is_null($v)) {        // all OK!
       $v++;
       $v--;
       ++$v;
       --$v;
     } else {
-  //  $v++;		// flagged, as outside true path
+  //  $v++;             // flagged, as outside true path
     }
 
-    if (is_int($v)) {	// all OK!
+    if (is_int($v)) {   // all OK!
       $v++;
       $v--;
       ++$v;
       --$v;
     }
 
-    if (is_float($v)) {	// all OK, but tests false for an ?int
+    if (is_float($v)) { // all OK, but tests false for an ?int
       $v++;
       $v--;
       ++$v;

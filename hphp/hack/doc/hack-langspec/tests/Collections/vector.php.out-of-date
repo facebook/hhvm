@@ -33,7 +33,7 @@ function main(): void {
 
   $v1->add(12); // add item 0
   $v1[] = 99; // add item 1
-  //  $v1[2] = 2001;			// add item 2 ==> OutOfBoundsException
+  //  $v1[2] = 2001;                    // add item 2 ==> OutOfBoundsException
   $v1[] = 199; // add item 2
   displayVector($v1);
   echo "\$v1's element count = ".$v1->count()."\n";
@@ -42,8 +42,8 @@ function main(): void {
   if ($v1->containsKey(1)) {
     echo "\$v1[1] = ".$v1->at(1)."\n";
   }
-  //  echo "\$v1[-1] = " . $v1->at(-1) . "\n";	// OutOfBoundsException
-  //  echo "\$v1[100] = " . $v1->at(100) . "\n";	// OutOfBoundsException
+  //  echo "\$v1[-1] = " . $v1->at(-1) . "\n";  // OutOfBoundsException
+  //  echo "\$v1[100] = " . $v1->at(100) . "\n";        // OutOfBoundsException
 
   $v2 = Vector::fromItems(array(2, 8));
   displayVector($v2);

@@ -16,7 +16,7 @@ function doit(num $p1_num): void {
   /*
     foreach ($oper as $e1) {
       foreach ($oper as $e2) {
-        if (($e2) == 0) continue;	// skip divide-by-zeros
+        if (($e2) == 0) continue;       // skip divide-by-zeros
 
         echo ">$e1< / >$e2<, result: "; \var_dump($e1 / $e2);
       }
@@ -36,10 +36,10 @@ function doit(num $p1_num): void {
     echo "-------------------------------------\n";
   }
 
-  //  \var_dump(10 % 3.0);		// % requires int operands
-  //  \var_dump(10.0 % 3);		// % requires int operands
-  //  \var_dump(10 % $p1_num);		// % requires int operands
-  //  \var_dump($p1_num % 3);		// % requires int operands
+  //  \var_dump(10 % 3.0);              // % requires int operands
+  //  \var_dump(10.0 % 3);              // % requires int operands
+  //  \var_dump(10 % $p1_num);          // % requires int operands
+  //  \var_dump($p1_num % 3);           // % requires int operands
 
   if (is_int($p1_num)) {
     echo ">$p1_num< % >3<, result: ";

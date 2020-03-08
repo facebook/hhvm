@@ -25,7 +25,7 @@ function main(): void {
   foreach ($colors as $color) {
     echo $color . "\n";
   }
-//  echo $color . "\n";	// unlike PHP, this variable is no longer in scope
+//  echo $color . "\n"; // unlike PHP, this variable is no longer in scope
 
 // access each element's value and its element number
 
@@ -34,7 +34,7 @@ function main(): void {
     echo "Index: $index; Color: $color\n";
     \var_dump($index);
   }
-//  echo "Index: $index; Color: $color\n";	// unlike PHP, these variables are no longer in scope
+//  echo "Index: $index; Color: $color\n";      // unlike PHP, these variables are no longer in scope
 
   echo "=========== iterate over some vectors of string =============\n";
 

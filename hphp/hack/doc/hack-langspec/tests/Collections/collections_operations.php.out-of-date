@@ -6,40 +6,40 @@ class C {}
 
 function main(int $idx): void {
   //  $str = "Hello";
-  //  eval("echo \$str . \"\\n\";");			// intrinsic eval not recognized
+  //  eval("echo \$str . \"\\n\";");                    // intrinsic eval not recognized
 
   //  exit ("bye bye!\n");
-  //  die ("bye bye!\n");				// intrinsic die not recognized
+  //  die ("bye bye!\n");                               // intrinsic die not recognized
 
   echo "========================== Vector =======================\n";
 
   //  $v1 = Vector {5, $idx, $idx * 3};
-  //  $v1 = Vector {0 = 5, 1 = $idx, 2 = $idx * 3};	// no explicit keys allowed
+  //  $v1 = Vector {0 = 5, 1 = $idx, 2 = $idx * 3};     // no explicit keys allowed
   $v1 = (Vector {})->addAll(array(5, 10, 15)); // grouping parens needed
   $v1[] = 20;
   $v1[0] = -5;
 
-  //  $v1[] += 17;	// throws InvalidOperationException;
+  //  $v1[] += 17;      // throws InvalidOperationException;
   // Cannot use [] with collections for reading in an lvalue context
-  //  $v1[]++;	// ditto
-  //  ++$v1[];	// ditto
-  //  $v1[]--;	// ditto
-  //  --$v1[];	// ditto
+  //  $v1[]++;  // ditto
+  //  ++$v1[];  // ditto
+  //  $v1[]--;  // ditto
+  //  --$v1[];  // ditto
 
   echo "\$v1[1] = ".$v1[1]."\n";
-  //  echo "\$v1[100] = " . $v1[100] . "\n";		// throws OutOfBoundsException
+  //  echo "\$v1[100] = " . $v1[100] . "\n";            // throws OutOfBoundsException
   \var_dump($v1);
 
-  //  \var_dump(Vector {2, 4, 6}[1]);			// unexpected '[', expecting ')'
+  //  \var_dump(Vector {2, 4, 6}[1]);                   // unexpected '[', expecting ')'
   \var_dump((Vector {2, 4, 6})[1]); // grouping parens needed
 
   echo "Vector \$v1 = >$v1<\n";
-  //  $res = print "Vector \$v1 = >$v1<\n";		// intrinsic print not recognized
+  //  $res = print "Vector \$v1 = >$v1<\n";             // intrinsic print not recognized
 
-  //  echo "empty(Vector {}) = >" . empty(Vector {}) . "<\n";	// intrinsic empty not recognized
+  //  echo "empty(Vector {}) = >" . empty(Vector {}) . "<\n";   // intrinsic empty not recognized
 
   //  echo "isset(\$v1) is " . (isset($v1) ? "True" : "False") . "\n"; // told not to use isset
-  //  unset($v1);					// intrinsic unset not recognized
+  //  unset($v1);                                       // intrinsic unset not recognized
 
   $v = list($min, $max, $avg) = Vector {0, 100, 67};
   echo "\$min: $min, \$max: $max, \$avg: $avg\n";
@@ -75,35 +75,35 @@ function main(int $idx): void {
   $b2 = (bool)$v2;
   \var_dump($b1, $b2);
 
-  //  $i1 = (int)$v1;		// conversion not permitted
-  //  $i2 = (int)$v2;		// conversion not permitted
+  //  $i1 = (int)$v1;           // conversion not permitted
+  //  $i2 = (int)$v2;           // conversion not permitted
   //  \var_dump($i1, $i2);
 
-  //  $f1 = (float)$v1;	// conversion not permitted
-  //  $f2 = (float)$v2;	// conversion not permitted
+  //  $f1 = (float)$v1; // conversion not permitted
+  //  $f2 = (float)$v2; // conversion not permitted
   //  \var_dump($f1, $f2);
 
   $s1 = (string)$v1; // uses __tostring
   $s2 = (string)$v2; // uses __tostring
   \var_dump($s1, $s2);
 
-  //  $a1 = (array)$v1;	// (array) cast forbidden in strict mode; arrays with
-  //				// unspecified key and value types are not allowed
+  //  $a1 = (array)$v1; // (array) cast forbidden in strict mode; arrays with
+  //                            // unspecified key and value types are not allowed
   //  $a2 = (array)$v2;
-  //  $a1 = (array<float>)$v1;	// can't cast to typed arrays either
+  //  $a1 = (array<float>)$v1;  // can't cast to typed arrays either
   //  $a2 = (array<float>)$v2;
 
-  //  $o1 = (object)$v1;		// object not supported
+  //  $o1 = (object)$v1;                // object not supported
   //  $o2 = (object)$v2;
   //  \var_dump($o1, $o2);
 
   echo "========================== ImmVector =======================\n";
 
   $iv1 = ImmVector {5, 10, 15};
-  //  $iv1[] = 20;					// mutation not allowed
-  //  $iv1[0] = -5;					// mutation not allowed
+  //  $iv1[] = 20;                                      // mutation not allowed
+  //  $iv1[0] = -5;                                     // mutation not allowed
   echo "\$iv1[1] = ".$iv1[1]."\n";
-  //  echo "\$iv1[100] = " . $iv1[100] . "\n";	// throws OutOfBoundsException
+  //  echo "\$iv1[100] = " . $iv1[100] . "\n";  // throws OutOfBoundsException
   \var_dump($iv1);
 
   $v = list($min, $max, $avg) = ImmVector {0, 100, 67};
@@ -148,18 +148,18 @@ function main(int $idx): void {
   \var_dump($m1);
   $m1['blue'] = 35; // add an element with a new key
   $m1['red'] = 6; // change the value of an existing element
-  //  $m1[] = 20;					// can only append a value of type Pair
+  //  $m1[] = 20;                                       // can only append a value of type Pair
   $m1[] = Pair {'black', 43}; // append value 43 with key 'black'
   $m1[] = Pair {'red', 123}; // replaces existing element's value with 123
-  //  $m1[true] = 99;					// throws InvalidArgumentException
+  //  $m1[true] = 99;                                   // throws InvalidArgumentException
   echo "\$m1['red'] = ".$m1['red']."\n";
-  //  echo "\$m1['white'] = " . $m1['white'] . "\n";	// throws OutOfBoundsException
+  //  echo "\$m1['white'] = " . $m1['white'] . "\n";    // throws OutOfBoundsException
   \var_dump($m1);
 
   echo "Map \$m1 = >$m1<\n";
 
   //  $m1 = Map {0 => 0, 1 => 100, 2 => 67};
-  //  	$v = list($min, $max, $avg) = $m1;		// can't use a Map here
+  //    $v = list($min, $max, $avg) = $m1;              // can't use a Map here
 
   $m1 = Map {2 => 5.2, 'a' => 10.1};
   $m2 = Map {2 => 5.2, 'a' => 10.1};
@@ -193,9 +193,9 @@ function main(int $idx): void {
   echo "========================== ImmMap =======================\n";
 
   $im1 = ImmMap {'red' => 5, 'green' => 12};
-  //  $im1['blue'] = 35;				// mutation not allowed
-  //  $im1['red'] = 6;				// mutation not allowed
-  //  $im1[] = Pair {'black', 43};			// mutation not allowed
+  //  $im1['blue'] = 35;                                // mutation not allowed
+  //  $im1['red'] = 6;                          // mutation not allowed
+  //  $im1[] = Pair {'black', 43};                      // mutation not allowed
   echo "\$im1['red'] = ".$im1['red']."\n";
   //  echo "\$im1['white'] = " . $im1['white'] . "\n";// throws OutOfBoundsException
   \var_dump($im1);
@@ -248,14 +248,14 @@ function main(int $idx): void {
   $s1[] = 20;
   $s1[] = 5; // attempt to add a duplicate is ignored
   $s1->add(10); // attempt to add a duplicate is ignored
-  //  $s1[] = true;					// throws InvalidArgumentException
-  //  $s1[0] = -5;					// [index] not permitted
-  //  echo "\$s1[1] = " . $s1[1] . "\n";		// [index] not permitted
+  //  $s1[] = true;                                     // throws InvalidArgumentException
+  //  $s1[0] = -5;                                      // [index] not permitted
+  //  echo "\$s1[1] = " . $s1[1] . "\n";                // [index] not permitted
   \var_dump($s1);
 
   echo "Set \$s1 = >$s1<\n";
 
-  //  $v = list($min, $max, $avg) = $s1;		// can't use a Map here
+  //  $v = list($min, $max, $avg) = $s1;                // can't use a Map here
 
   $s1 = Set {10, 'red'};
   $s2 = Set {10, 'red'};
@@ -298,8 +298,8 @@ function main(int $idx): void {
     'red',
     1,
   }; // duplicates are allowed, but are ignored
-  // $is1[] = 'red';					// [index] not permitted
-  //  echo "\$is1[1] = " . $is1[1] . "\n";		// [index] not permitted
+  // $is1[] = 'red';                                    // [index] not permitted
+  //  echo "\$is1[1] = " . $is1[1] . "\n";              // [index] not permitted
   \var_dump($is1);
 
   $is1 = ImmSet {10, 'red'};
@@ -335,20 +335,20 @@ function main(int $idx): void {
 
   echo "========================== Pair =======================\n";
 
-  //  $p1 = new Pair();				// throws InvalidOperationException
-  //  $p1 = Pair {0 = 55, 1 = 'abc'};			// no explicit keys allowed
+  //  $p1 = new Pair();                         // throws InvalidOperationException
+  //  $p1 = Pair {0 = 55, 1 = 'abc'};                   // no explicit keys allowed
   $p1 = Pair {55, new C()};
 
-  //  $p1[0] = 14;					// throws InvalidOperationException
-  //  $p1[0]++;					// ditto
-  //  --$p1[0];					// ditto
-  //  $p1[0] *= 3;					// ditto
+  //  $p1[0] = 14;                                      // throws InvalidOperationException
+  //  $p1[0]++;                                 // ditto
+  //  --$p1[0];                                 // ditto
+  //  $p1[0] *= 3;                                      // ditto
 
-  //  $p1[] = 20;					// mutation not allowed
+  //  $p1[] = 20;                                       // mutation not allowed
   echo "\$p1[0] = ".$p1[0]."\n";
-  //  echo "\$p1[true] = " . $p1[true] . "\n";	// Pair elements can only be accessed with an integer literal
-  //  echo "\$p1[100] = " . $p1[100] . "\n";		// Invalid index for this pair
-  //  echo "\$p1[$idx] = " . $p1[$idx] . "\n";	// Pair elements can only be accessed with an integer literal
+  //  echo "\$p1[true] = " . $p1[true] . "\n";  // Pair elements can only be accessed with an integer literal
+  //  echo "\$p1[100] = " . $p1[100] . "\n";            // Invalid index for this pair
+  //  echo "\$p1[$idx] = " . $p1[$idx] . "\n";  // Pair elements can only be accessed with an integer literal
   \var_dump($p1);
 
   echo "Pair \$p1 = >$p1<\n";

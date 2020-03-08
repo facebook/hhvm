@@ -15,17 +15,17 @@ function f(): int {
     ///*
     catch (\Exception $e) {
       echo "In handler for Exception\n";
-      //	break;			// allowed
-      //	continue;		// allowed
-      //	return msg();		// expression is evaluated, but value actually returned
+      //        break;                  // allowed
+      //        continue;               // allowed
+      //        return msg();           // expression is evaluated, but value actually returned
       // when both returns exist is 20, from finally block,
     }
     //*/
     finally {
       echo "In finally block\n";
-      //	break;			// not allowed
-      //	continue;		// not allowed
-      //	return 20;		// not allowed
+      //        break;                  // not allowed
+      //        continue;               // not allowed
+      //        return 20;              // not allowed
     }
   }
   return 1;

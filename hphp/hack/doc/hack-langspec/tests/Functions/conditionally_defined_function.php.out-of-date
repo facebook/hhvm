@@ -21,13 +21,13 @@ function ucf2(): void {
 */
 
 function main(): void {
-  ucf1();		// can call ucf1 before its definition is seen
+  ucf1();               // can call ucf1 before its definition is seen
 
-  ucf1();		// can call ucf1 after its definition is seen
+  ucf1();               // can call ucf1 after its definition is seen
 
   $flag = true;
 /*
-  cf1();	// Error; call to undefined function
+  cf1();        // Error; call to undefined function
 
   if ($flag) {
 // nested/conditional function definitions are not supported
@@ -37,14 +37,14 @@ function main(): void {
   }
 
   if ($flag) {
-    cf1();	// can call cf1 now, as it's been defined
+    cf1();      // can call cf1 now, as it's been defined
   } else {
-    cf1();	// Error; call to undefined function
+    cf1();      // Error; call to undefined function
   }
 */
-//  cf2();		// Error; call to undefined function
-//  ucf2();		// cf2 now exists
-//  cf2();		// Ok
+//  cf2();              // Error; call to undefined function
+//  ucf2();             // cf2 now exists
+//  cf2();              // Ok
 }
 
 /* HH_FIXME[1002] call to main in strict*/

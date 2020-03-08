@@ -19,7 +19,7 @@ function series(int $start, int $end): Continuation<int> {
 
 function series2(int $start, int $end, string $keyPrefix = ""): Generator<string, int, void> {
   for ($i = $start; $i <= $end; ++$i) {
-    yield $keyPrefix . $i => $i;	// specify a key/value pair
+    yield $keyPrefix . $i => $i;        // specify a key/value pair
   }
 }
 
@@ -35,7 +35,7 @@ function getTextFileLines(string $filename): Continuation<string> {
   try {
     while ($textLine = fgets($infile)) { // while not EOF
 //    echo "len before rtrim: " . + strlen($textLine) . "\n";
-      $textLine = rtrim($textLine, "\r\n");	// strip off line terminator
+      $textLine = rtrim($textLine, "\r\n");     // strip off line terminator
 //    echo "len after rtrim:  " . + strlen($textLine) . "\n";
       yield $textLine;
     }

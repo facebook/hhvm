@@ -24,7 +24,7 @@ function foo1(): ?int {
   $b = get_Bar1();
   // Use the null-safe operator to access a method of class.
 
-  //  return $b?->sbaz1();	// error: method can't be static
+  //  return $b?->sbaz1();      // error: method can't be static
 
   return $b?->baz1();
 }
@@ -47,9 +47,9 @@ function foo2(): ?string {
   $b = get_Bar2();
   // Use the null-safe operator to access a proprety of a class.
 
-  //  $b?->str = 'abc';	// error: ?-> syntax is not supported for lvalues
+  //  $b?->str = 'abc'; // error: ?-> syntax is not supported for lvalues
 
-  //  return $b?->sstr;	// error: property can't be static
+  //  return $b?->sstr; // error: property can't be static
 
   return $b?->str;
 }

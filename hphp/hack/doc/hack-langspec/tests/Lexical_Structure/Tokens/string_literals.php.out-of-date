@@ -105,13 +105,13 @@ zzz".
   $colors = array("red", "white", "blue");
   //  echo "\colors contains >$colors<\n";
   echo "\colors[1] contains >$colors[1]<\n";
-  //  echo "\colors[1] contains >$colors [1]<\n";		// whitespace permitted, but semantics change
-  //  echo "\colors[1] contains >$colors[ 1]<\n";	// whitespace not permitted
-  //  echo "\colors[1] contains >$colors[1 ]<\n";	// whitespace not permitted
+  //  echo "\colors[1] contains >$colors [1]<\n";               // whitespace permitted, but semantics change
+  //  echo "\colors[1] contains >$colors[ 1]<\n";       // whitespace not permitted
+  //  echo "\colors[1] contains >$colors[1 ]<\n";       // whitespace not permitted
   \var_dump("$colors[1]");
-  //  \var_dump("$colors[01]");		// invalid index
-  //  \var_dump("$colors[0x1]");		// invalid index
-  //  \var_dump("$colors[0X1]");		// invalid index
+  //  \var_dump("$colors[01]");         // invalid index
+  //  \var_dump("$colors[0x1]");                // invalid index
+  //  \var_dump("$colors[0X1]");                // invalid index
 
   $index = 2;
   echo "\$colors[$index] contains >$colors[$index]<\n";
@@ -128,10 +128,10 @@ zzz".
   // use class properties
   $myC = new C();
 
-  //  echo "\$myC = >$myC<\n";	// can't use an object instance
+  //  echo "\$myC = >$myC<\n";  // can't use an object instance
   echo "\$myC->p1 = >$myC->p1<\n";
-  //  echo "\$myC ->p1 = >$myC ->p1<\n";	// whitespace not permitted
-  //  echo "\$myC-> p1 = >$myC-> p1<\n";	// whitespace not permitted
+  //  echo "\$myC ->p1 = >$myC ->p1<\n";        // whitespace not permitted
+  //  echo "\$myC-> p1 = >$myC-> p1<\n";        // whitespace not permitted
 
   //  echo "\colors[$indices[$myC->p1]] contains >$colors[$indices[$myC->p1]]<\n"; // not permitted
   //*/
@@ -154,7 +154,7 @@ zzz".
   echo ">{}|{q}|}|{<\n";
 
   $a = 10;
-  // checker balks at this	echo ">{$a  }<\n";		// trailing white space is ignored
+  // checker balks at this      echo ">{$a  }<\n";              // trailing white space is ignored
   ///*/
 }
 

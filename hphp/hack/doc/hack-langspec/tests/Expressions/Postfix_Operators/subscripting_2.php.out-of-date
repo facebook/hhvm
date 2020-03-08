@@ -45,7 +45,7 @@ function main(): void {
   //  echo "====== map-like array without index; simple assignment =========\n";
   //
   //  $a = array(3 => 33, -1 => -11);
-  //  \var_dump($a[] = 991);		// creates $a[4]
+  //  \var_dump($a[] = 991);            // creates $a[4]
   //  \var_dump($a);
   //  echo "------\n";
 

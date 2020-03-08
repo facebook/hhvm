@@ -63,7 +63,7 @@ function main(): void {
   /*
     echo "--------- test with fewer array elements than variables -------------\n";
 
-    $v = list($min, $max, $avg) = array(-100, -500);	// Undefined offset: 2
+    $v = list($min, $max, $avg) = array(-100, -500);    // Undefined offset: 2
     echo "\$min: $min, \$max: $max, \$avg: $avg\n";
     \print_r($v);
   */

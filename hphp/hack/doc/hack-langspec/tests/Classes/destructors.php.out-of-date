@@ -11,7 +11,7 @@ class D1 {
 class D2 extends D1 {
   public function __destruct() {
     echo "In D2 destructor\n";
-    //  parent::__destruct();		// can't access private destructor
+    //  parent::__destruct();           // can't access private destructor
   }
 }
 

@@ -13,8 +13,8 @@ function main(): void {
     //             10987654321098765432109876543210
     //              3         2         1         0
   } else {
-    //    \var_dump(9223372036854775808);	// number too big
-    //    \var_dump(-9223372036854775808);	// number too big
+    //    \var_dump(9223372036854775808);       // number too big
+    //    \var_dump(-9223372036854775808);      // number too big
     \var_dump(-9223372036854775807 - 1);
     \var_dump(0x8000000000000000);
     \var_dump(01000000000000000000000);
@@ -26,10 +26,10 @@ function main(): void {
 
     // HHVM-specific test
 
-    //    \var_dump(9223372036854775808);	// number too big
-    //    \var_dump(9223372036854775809);	// number too big
-    //    \var_dump(9223372036854775810);	// number too big
-    //    \var_dump(9223372036854775808888);	// number too big
+    //    \var_dump(9223372036854775808);       // number too big
+    //    \var_dump(9223372036854775809);       // number too big
+    //    \var_dump(9223372036854775810);       // number too big
+    //    \var_dump(9223372036854775808888);    // number too big
   }
 }
 

@@ -76,7 +76,7 @@ function getNameFromStorage(int $productCode): string {
 
 // --------------------------------------------------------
 
-//<<__Memoize, Attr2(3, true)>>	// hmmm! accepted even though function has a void return type
+//<<__Memoize, Attr2(3, true)>> // hmmm! accepted even though function has a void return type
 <<__Memoize(3), Attr2(3, true)>> // hmmm! accepted with a value
 function f1(): void {
   echo "Inside ".__FUNCTION__."\n";
@@ -110,7 +110,7 @@ function getNameFromProductCode2(
   float $p3,
   string $p4,
   ?int $p5
-  //	, resource $p6		// invalid type
+  //    , resource $p6          // invalid type
   ,
   array<int> $p7,
   array<string, int> $p8,
@@ -123,7 +123,7 @@ function getNameFromProductCode2(
   Vector<int> $p12 // permitted, presumably this type implements IMemoizeParam
   ,
   C3 $p13,
-  //	, C4 $p14		// invalid type
+  //    , C4 $p14               // invalid type
 ): string {
   /* ... */
   return getNameFromStorage2($productCode);
@@ -202,7 +202,7 @@ function main(): void {
     1.2,
     "z",
     null
-    //		, STDERR			// invalid type
+    //          , STDERR                        // invalid type
     ,
     array(10, 20),
     array('q' => 10, 'a' => 12),
@@ -215,7 +215,7 @@ function main(): void {
     Vector {10, 20, 30} // permitted, but no in docs list
     ,
     new C3(), // permitted, presumably this type implements IMemoizeParam
-    //		, new C4()			// invalid type
+    //          , new C4()                      // invalid type
   ));
   \var_dump(getNameFromProductCode2(
     true,
@@ -223,7 +223,7 @@ function main(): void {
     1.2,
     "z",
     null
-    //		, STDERR			// invalid type
+    //          , STDERR                        // invalid type
     ,
     array(10, 20),
     array('q' => 10, 'a' => 12),
@@ -236,7 +236,7 @@ function main(): void {
     Vector {10, 20, 30} // permitted, but no in docs list
     ,
     new C3(), // permitted, presumably this type implements IMemoizeParam
-    //		, new C4()			// invalid type
+    //          , new C4()                      // invalid type
   ));
 
   echo

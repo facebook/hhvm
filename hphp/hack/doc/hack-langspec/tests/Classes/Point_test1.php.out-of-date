@@ -27,7 +27,7 @@ function main(): void {
   //  echo "\n==================== new 'Point'(-1, 1) ===================\n\n";
   //
   //  $cName = 'Point';
-  //  $p1 = new $cName(-1, 1);	// use string form
+  //  $p1 = new $cName(-1, 1);  // use string form
   //  \var_dump($p1);
   //  unset($p1);
 
@@ -116,7 +116,7 @@ function main(): void {
 
   //
   //  $p1 = new Point(2.3, 4.5);
-  //  $r = $p1(123);		// becomes $r = $p1->__invoke(123);
+  //  $r = $p1(123);            // becomes $r = $p1->__invoke(123);
   //  echo "\$r = $r\n";
   //  unset($p1);
 

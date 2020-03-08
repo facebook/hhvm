@@ -1,3 +1,15 @@
+<style type = "text/css">
+  header {
+    border-color: red;
+    border-width: .25em;
+    border-style: solid;
+    padding: .25em;
+  }
+</style>
+<header>
+NOTICE: This spec is currently very out of date and does not reflect the current version of Hack.
+</header>
+
 # Introduction
 This specification is intended to provide a complete and concise
 definition of the syntax and semantics of the Hack language, suitable for

@@ -1,3 +1,15 @@
+<style type = "text/css">
+  header {
+    border-color: red;
+    border-width: .25em;
+    border-style: solid;
+    padding: .25em;
+  }
+</style>
+<header>
+NOTICE: This spec is currently very out of date and does not reflect the current version of Hack.
+</header>
+
 # Basic Concepts
 ## Program Structure
 A Hack *program* consists of one or more source files, known formally as

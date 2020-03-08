@@ -1,3 +1,15 @@
+<style type = "text/css">
+  header {
+    border-color: red;
+    border-width: .25em;
+    border-style: solid;
+    padding: .25em;
+  }
+</style>
+<header>
+NOTICE: This spec is currently very out of date and does not reflect the current version of Hack.
+</header>
+
 # Terms and Definitions
 For the purposes of this document, the following terms and definitions
 apply:

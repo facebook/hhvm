@@ -31,7 +31,7 @@ function pipe_operator_example(array<Widget> $arr): int {
   return $arr
     |> array_map($x ==> $x->getNumber(), $$)
     |> array_filter($$, $x ==> $x % 2 == 0)
-    |> count($$);
+    |> \count($$);
 }
 
 function main(): void {
@@ -44,16 +44,16 @@ function main(): void {
 
   //  $x = $$;	// Undefined variable: $$
 
-  //  $$ = 10;	// Undefined variable: $$; Invalid lvalue 
+  //  $$ = 10;	// Undefined variable: $$; Invalid lvalue
 
   echo "\n\n========================= Simple Use =========================\n\n";
 
   $v = (20 |> $$ |> $$);
-  var_dump($v);
+  \var_dump($v);
 
-  20 |> var_dump($$);
-  1.23 |> var_dump($$);
-  "abc" |> var_dump($$);
+  20 |> \var_dump($$);
+  1.23 |> \var_dump($$);
+  "abc" |> \var_dump($$);
 
   //  20 |> $x = $$;	// Error: Feature not implemented: Assignment within pipe expressions
   //  20 |> ($x = $$);	// Error: Feature not implemented: Assignment within pipe expressions
@@ -122,9 +122,9 @@ function main(): void {
     "\n\n========================= Check Precedence against a lambda =========================\n\n";
 
   $doit1 = ($p) ==> fint($p) |> gint($$); // higher than ==>
-  var_dump($doit1(2));
+  \var_dump($doit1(2));
   $doit2 = ($p) ==> (fint($p) |> gint($$)); // parens are redundant
-  var_dump($doit2(2));
+  \var_dump($doit2(2));
 
   echo
     "\n\n========================= Check Precedence against = =========================\n\n";

@@ -7,10 +7,10 @@ class C {
   public static string $str = 'Issue_110\C';
 
   public static function sf1(): void {
-    var_dump(C::$str == C::$p1); // value-equality
+    \var_dump(C::$str == C::$p1); // value-equality
   }
   public static function sf2(): void {
-    var_dump(C::$str === C::$p1); // same-type-and-value-equality
+    \var_dump(C::$str === C::$p1); // same-type-and-value-equality
   }
 }
 

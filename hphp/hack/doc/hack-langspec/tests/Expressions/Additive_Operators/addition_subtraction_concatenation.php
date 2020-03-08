@@ -8,7 +8,7 @@ function doit(num $p1_num): void {
   foreach ($oper as $e1) {
     foreach ($oper as $e2) {
       echo ">$e1< + >$e2<, result: ";
-      var_dump($e1 + $e2);
+      \var_dump($e1 + $e2);
     }
     echo "-------------------------------------\n";
   }
@@ -17,7 +17,7 @@ function doit(num $p1_num): void {
   foreach ($oper as $e1) {
     foreach ($oper as $e2) {
       echo ">$e1< - >$e2<, result: ";
-      var_dump($e1 - $e2);
+      \var_dump($e1 - $e2);
     }
     echo "-------------------------------------\n";
   }
@@ -27,7 +27,7 @@ function doit(num $p1_num): void {
   foreach ($oper as $e1) {
     foreach ($oper as $e2) {
       echo ">$e1< . >$e2<, result: ";
-      var_dump($e1.$e2);
+      \var_dump($e1.$e2);
     }
     echo "-------------------------------------\n";
   }

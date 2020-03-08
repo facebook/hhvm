@@ -25,7 +25,7 @@ function main(): void {
   echo '>>', $v3, '|', $v4, '|', $v5, '|', $v6, "<<\n";
 
   $v3 = "qqq{$v2}zzz";
-  var_dump($v3);
+  \var_dump($v3);
   echo "$v3\n";
 }
 

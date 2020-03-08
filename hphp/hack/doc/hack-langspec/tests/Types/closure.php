@@ -30,11 +30,11 @@ function main(): void {
   $result = doit(5, function($p) {
     return $p * 2;
   }); // doubles 5
-  var_dump($result);
+  \var_dump($result);
   $result = doit(5, function($p) {
     return $p * $p;
   }); // squares 5
-  var_dump($result);
+  \var_dump($result);
 }
 
 /* HH_FIXME[1002] call to main in strict*/

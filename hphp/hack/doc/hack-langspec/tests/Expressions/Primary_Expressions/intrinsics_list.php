@@ -12,7 +12,7 @@ function main(): void {
 
   $v = list($min, $max, $avg) = array(0, 100, 67);
   echo "\$min: $min, \$max: $max, \$avg: $avg\n";
-  print_r($v);
+  \print_r($v);
   //*/
 
   /*
@@ -20,7 +20,7 @@ function main(): void {
 
     $v = list($min, $max, $avg) = array(2 => 67, 1 => 100, 0 => 0);
     echo "\$min: $min, \$max: $max, \$avg: $avg\n";
-    print_r($v);
+    \print_r($v);
   */
 
   /*
@@ -57,7 +57,7 @@ function main(): void {
 
   $v = list($min, $max, $avg) = array(40, 4100, 467, 22, 33);
   echo "\$min: $min, \$max: $max, \$avg: $avg\n";
-  print_r($v);
+  \print_r($v);
   //*/
 
   /*
@@ -65,7 +65,7 @@ function main(): void {
 
     $v = list($min, $max, $avg) = array(-100, -500);	// Undefined offset: 2
     echo "\$min: $min, \$max: $max, \$avg: $avg\n";
-    print_r($v);
+    \print_r($v);
   */
 
   /*
@@ -75,7 +75,7 @@ function main(): void {
 
     $v = list($min, list($max, $avg)) = [0, [67, 99, 100], 33];
   //  echo "\$min: $min, \$max: $max, \$avg: $avg\n";
-    print_r($v);
+    \print_r($v);
   */
 
   ///*
@@ -83,15 +83,15 @@ function main(): void {
 
   $a = array();
   $v = list($a[0], $a[2], $a[4]) = array(50, 5100, 567);
-  print_r($a);
-  print_r($v);
+  \print_r($a);
+  \print_r($v);
   //*/
 
   ///*
   echo "--------- test with no variables -------------\n";
 
   $v = list() = array(0, 100, 67);
-  print_r($v);
+  \print_r($v);
   //*/
 }
 

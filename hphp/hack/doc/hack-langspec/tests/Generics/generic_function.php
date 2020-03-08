@@ -61,26 +61,26 @@ function main(): void {
 
   $res = maxVal(10, 20.5);
   echo "maxVal(10, 20.5) = ".$res."\n";
-  var_dump($res);
+  \var_dump($res);
 
   $res = maxVal(20.5, 10);
   echo "maxVal(20.5, 10) = ".$res."\n";
-  var_dump($res);
+  \var_dump($res);
 
   $res = maxVal(0, true);
   echo "maxVal(0, true) = ".$res."\n";
-  var_dump($res); // type is bool
+  \var_dump($res); // type is bool
 
   $res = maxVal(1, false);
   echo "maxVal(1, false) = ".$res."\n";
-  var_dump($res); // type is int
+  \var_dump($res); // type is int
 
   echo "\n=============== arrayCopy ==================\n\n";
 
   $dest = array(0);
   $source = array(10, 20, 30, 40);
   arrayCopy($dest, $source, 2);
-  var_dump($dest);
+  \var_dump($dest);
 }
 
 /* HH_FIXME[1002] call to main in strict*/

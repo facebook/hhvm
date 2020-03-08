@@ -10,8 +10,8 @@ class C {
 
 function main(): void {
   $c = new C();
-  var_dump(
-    is_callable($c),
+  \var_dump(
+    \is_callable($c),
   ); // returns true if __invoke exists; otherwise, false
   //  $c();
 }

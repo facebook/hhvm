@@ -23,11 +23,11 @@ function array_proc(
 
   $v = $p1 + $p2; // array<int> + array<int> okay
   echo "result of p1 + p2 = ";
-  var_dump($v);
+  \var_dump($v);
 
   $v = $p2 + $p1; // okay, but of course, is not commutative
   echo "result of p2 + p1 = ";
-  var_dump($v);
+  \var_dump($v);
 
   //  $v = $p1 + $p3;		// array<int> + array<float> disallowed
   //  $v = $p4 + $p1;		// array<num> + array<int> disallowed
@@ -41,34 +41,34 @@ function array_proc(
 
   $v = $p8 + $p9; // array<int, string> + array<int, string> okay
   echo "result of p8 + p9 = ";
-  var_dump($v);
+  \var_dump($v);
 
   //  $v = $p7 + $p10;	// array<int, int> + array<int, bool> disallowed;
 
   $v = $p11 + $p12; // array<string, int> + array<string, int> okay
   echo "result of p11 + p12 = ";
-  var_dump($v);
+  \var_dump($v);
 
   echo "============= concating to an empty/untyped array ================\n";
 
   $p2 = $p1 + array(); // array<int> + array() allowed;
   echo "result of p1 + array() = ";
-  var_dump($p2);
+  \var_dump($p2);
   $p2 = array() + $p2; // array<int> + array() allowed;
   echo "result of array() + p1 = ";
-  var_dump($p2);
+  \var_dump($p2);
 
   $v = $p10 + array(); // array<int, bool> + array() allowed;
   echo "result of p10 + array() = ";
-  var_dump($v);
+  \var_dump($v);
 
   $v = $p11 + array(); // array<string, int> + array() allowed
   echo "result of p11 + array() = ";
-  var_dump($v);
+  \var_dump($v);
 
   $p2 = array() + array(); // array() + array() allowed;
   echo "result of array() + array() = ";
-  var_dump($p2);
+  \var_dump($p2);
 }
 
 function main(): void {

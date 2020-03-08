@@ -13,8 +13,8 @@ function cleanup2(): void {
 }
 
 function main(): void {
-  register_shutdown_function('cleanup2');
-  register_shutdown_function('cleanup1');
+  \register_shutdown_function('cleanup2');
+  \register_shutdown_function('cleanup1');
 
   echo "--------- test with/without string -------------\n";
 

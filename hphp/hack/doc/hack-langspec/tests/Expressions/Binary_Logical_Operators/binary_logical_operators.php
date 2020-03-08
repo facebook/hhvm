@@ -40,10 +40,10 @@ function main(): void {
 
   $i = 5;
   $v = (f($i++) && g($i));
-  var_dump($v);
+  \var_dump($v);
   $i = 0;
   $v = (g($i++) || f($i));
-  var_dump($v);
+  \var_dump($v);
 }
 
 /* HH_FIXME[1002] call to main in strict*/

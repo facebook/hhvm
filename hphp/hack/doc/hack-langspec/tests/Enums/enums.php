@@ -179,7 +179,7 @@ enum Months: int as int {
 
 //function main(ControlStatus $p1, ControlStatus2 $p2, E4a $p3, E5 $p4, E6a $p5): void {
 function main(ControlStatus $p1, ControlStatus2 $p2, E4a $p3, E6a $p5): void {
-  var_dump(ControlStatus::Started); // int
+  \var_dump(ControlStatus::Started); // int
 
   echo "====== use an enum value to control a switch ======\n\n";
 
@@ -212,11 +212,11 @@ function main(ControlStatus $p1, ControlStatus2 $p2, E4a $p3, E6a $p5): void {
 
   /*
   // The following debug code was used to figure what was going wrong when E5::Ready was initialized
-  // with the value 0. Doing that caused $p4 (= 'R') to match the case label E5::Started, as 'R' == 0 
+  // with the value 0. Doing that caused $p4 (= 'R') to match the case label E5::Started, as 'R' == 0
   // tests True in PHP and so in hhvm. That is, switch/case matching appears to use == rather than ===.
 
     echo "++++++\n";
-    var_dump($p4);	// 'R'
+    \var_dump($p4);	// 'R'
     echo $p4 . " == " . E5::Set . " is " . (($p4 == E5::Set) ? "True\n" : "False\n");		// False
     echo $p4 . " == " . E5::Started . " is " . (($p4 == E5::Started) ? "True\n" : "False\n");	// True **
     echo $p4 . " === " . E5::Started . " is " . (($p4 === E5::Started) ? "True\n" : "False\n");	// False
@@ -264,7 +264,7 @@ function main(ControlStatus $p1, ControlStatus2 $p2, E4a $p3, E6a $p5): void {
   $r = ControlStatus2::Stopping << 3;
   $r = $p2 * 10;
 
-  // Clearly, I can use the enum constant as an int, so why does the checker gag on the two 
+  // Clearly, I can use the enum constant as an int, so why does the checker gag on the two
   // subscript attempts?
 
   Months::March < 6;
@@ -285,7 +285,7 @@ function main(ControlStatus $p1, ControlStatus2 $p2, E4a $p3, E6a $p5): void {
     200,
     300,
   );
-  //  echo "Total for March is " . $monthTotals[Months::March] . "\n"; 
+  //  echo "Total for March is " . $monthTotals[Months::March] . "\n";
 
   $monthTotals = Vector {
     100,
@@ -301,7 +301,7 @@ function main(ControlStatus $p1, ControlStatus2 $p2, E4a $p3, E6a $p5): void {
     200,
     300,
   };
-  //  echo "Total for March is " . $monthTotals[Months::March] . "\n"; 
+  //  echo "Total for March is " . $monthTotals[Months::March] . "\n";
 
   echo "\n====== use enum having duplicate enum constant values ======\n\n";
 
@@ -368,15 +368,15 @@ function main(ControlStatus $p1, ControlStatus2 $p2, E4a $p3, E6a $p5): void {
 
   echo "\n====== string operations on a string enum constant  ======\n\n";
 
-  var_dump('READY'[1]); // outputs string(1) "E"
+  \var_dump('READY'[1]); // outputs string(1) "E"
 
-  //  var_dump(E4a::Ready[1]);		// rejected, as expected
+  //  \var_dump(E4a::Ready[1]);		// rejected, as expected
   echo "E4a:Ready is ".
     E4a::Ready.
     "\n"; // concat works for enum (special case, apparently)
   //  takes_string(E4a::Ready);		// rejected, as expected
 
-  //  var_dump(E4b::Ready[1]);		// rejected, hmm; I expected this to work (Issue #60)
+  //  \var_dump(E4b::Ready[1]);		// rejected, hmm; I expected this to work (Issue #60)
   echo "E4b:Ready is ".E4b::Ready."\n"; // concat works for enum
   takes_string(E4b::Ready); // acepted; enum behaves as string
 
@@ -396,13 +396,13 @@ function main(ControlStatus $p1, ControlStatus2 $p2, E4a $p3, E6a $p5): void {
 }
 
 function takes_int(int $x): void {
-  var_dump($x);
+  \var_dump($x);
 }
 function takes_string(string $x): void {
-  var_dump($x);
+  \var_dump($x);
 }
 function takes_mixed(mixed $x): void {
-  var_dump($x);
+  \var_dump($x);
 }
 
 //main(ControlStatus::Started, ControlStatus2::Started, E4a::Ready, E6a::val2);

@@ -17,17 +17,17 @@ class C {
   public function __construct() {
     echo "arraykey ".
       $this->prop.
-      (is_int($this->prop) ? " is int\n" : " is string\n");
+      (\is_int($this->prop) ? " is int\n" : " is string\n");
 
     $this->prop = 20;
     echo "arraykey ".
       $this->prop.
-      (is_int($this->prop) ? " is int\n" : " is string\n");
+      (\is_int($this->prop) ? " is int\n" : " is string\n");
 
     $this->prop = 'red';
     echo "arraykey ".
       $this->prop.
-      (is_int($this->prop) ? " is int\n" : " is string\n");
+      (\is_int($this->prop) ? " is int\n" : " is string\n");
   }
 }
 
@@ -37,7 +37,7 @@ function main(): void {
 
   //  $q = $val + 10;	// checker can't be sure teh arraykey is currently an int
 
-  if (is_int($val)) {
+  if (\is_int($val)) {
     $q = $val + 10;
   } else {
     // Checker reports: This is not a container, this is an array key (int/string)
@@ -45,7 +45,7 @@ function main(): void {
     //  echo "First character of string is " . $val[0] . "\n";
   }
 
-  if (is_string($val)) {
+  if (\is_string($val)) {
     echo "First character of string is ".$val[0]."\n";
   }
 }

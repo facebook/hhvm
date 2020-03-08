@@ -7,7 +7,7 @@ class C {
 }
 
 function f1((int, string) $p): void {
-  var_dump($p);
+  \var_dump($p);
 }
 
 function f2(): (bool, array<int>, float) {
@@ -41,7 +41,7 @@ function main(?int $p1 = 123): void {
     Vector {},
     new C(),
   );
-  var_dump($t2);
+  \var_dump($t2);
 
   //  foreach ($t2 => $key as $value) { }	//	can't iterate over a tuple
 

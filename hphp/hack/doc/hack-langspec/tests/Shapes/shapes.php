@@ -7,7 +7,7 @@ require_once 'shapes_rf.php';
 function f1(\NS_shapes_rf\st2a $p1): void {
   echo "----- dumping 'x' => int -----\n\n";
 
-  var_dump($p1);
+  \var_dump($p1);
 }
 
 function main(): void {
@@ -20,12 +20,12 @@ function main(): void {
   <<<ID
   XXX
   ID
-   => 40, 
+   => 40,
   <<<'ID'
   YYY
   ID
    => 50);
-    var_dump($a);
+    \var_dump($a);
   */
 
   echo "----------- Play ------------\n\n";
@@ -34,13 +34,13 @@ function main(): void {
   //  f1(shape($key => 10));	// gags: The field '' is missing
   // like the shape definition, key must be a string literal
 
-  //  var_dump(\NS_shapes_rf\st4b_test2());
+  //  \var_dump(\NS_shapes_rf\st4b_test2());
 
   echo "----------- Create some shape values ------------\n\n";
 
   $point1 = shape('x' => -3, 'y' => 6);
   echo "\$point1 is ".$point1['x']."\n";
-  //  echo "\$point1 instanceof Point is " . 
+  //  echo "\$point1 instanceof Point is " .
   //    (($point1 instanceof \NS_shapes_rf\Point) ? "True" : "False") . "\n";	// False
 
   /*
@@ -63,7 +63,7 @@ function main(): void {
 
   $str = \NS_shapes_rf\Point_toString($point1);
   echo "\$point1 is $str\n";
-  //  echo "\$point1 instanceof Point is " . 
+  //  echo "\$point1 instanceof Point is " .
   //    (($point1 instanceof \NS_shapes_rf\Point) ? "True" : "False") . "\n";	// False
 
   // The following function-call argument is incompatible with PointNT while alias is created using 'newtype'.

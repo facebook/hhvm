@@ -38,7 +38,7 @@ function main(): void {
 }
 
 function processTransaction(Transaction $t): void {
-  var_dump($t);
+  \var_dump($t);
 
   $ary = Shapes::toArray($t);
 

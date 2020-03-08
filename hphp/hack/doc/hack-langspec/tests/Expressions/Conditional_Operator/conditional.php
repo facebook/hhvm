@@ -20,18 +20,18 @@ function main(): void {
     echo "======= some simple examples =======\n";
 
     $a = 10 ? 100 : "Hello";
-    var_dump($a);
+    \var_dump($a);
     $a = 0 ? 100 : "Hello";
-    var_dump($a);
+    \var_dump($a);
 
   */
   /*
     echo "======= omit 2nd operand =======\n";
 
     $a = 10 ? : "Hello";
-    var_dump($a);
+    \var_dump($a);
     $a = 0 ? : "Hello";
-    var_dump($a);
+    \var_dump($a);
 
   */
   /*
@@ -39,10 +39,10 @@ function main(): void {
 
     $i = 5;
     $a = $i++ ? : "red";
-    var_dump($a);
+    \var_dump($a);
     $i = 5;
     $a = ++$i ? : "red";
-    var_dump($a);
+    \var_dump($a);
 
   */
   /*
@@ -59,7 +59,7 @@ function main(): void {
 
     $a = true ? -1 : 1 ? 10 : 20;
     $a = (true ? -1 : 1) ? 10 : 20;
-    var_dump($a);
+    \var_dump($a);
     $a = true ? -1 : (1 ? 10 : 20);
   */
   /*
@@ -69,7 +69,7 @@ function main(): void {
     foreach ($scalarValueList as $v) {
       echo "\$v = $v, ";
       $a = $v ? 100 : "Hello";
-      var_dump($a);
+      \var_dump($a);
     }
 
   */

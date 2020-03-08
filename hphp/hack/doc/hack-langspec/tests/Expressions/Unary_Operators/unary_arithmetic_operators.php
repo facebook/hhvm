@@ -5,19 +5,19 @@ namespace NS_unary_arithmetic_operators;
 function DoItInt(int $a): void {
   echo "--- start DoItInt -------------------------\n\n";
   echo "     original: ";
-  var_dump($a);
+  \var_dump($a);
   $b = +$a;
   $c = -$a;
   $d = !$a;
 
   $f = ~$a;
   echo "after unary ~: ";
-  var_dump($f);
-  printf(" before Hex: %08X\n", $a);
-  printf(" after  Hex: %08X\n", $f);
+  \var_dump($f);
+  \printf(" before Hex: %08X\n", $a);
+  \printf(" after  Hex: %08X\n", $f);
 
   echo " before (int): ".(int)$a;
-  printf("; before (int) Hex: %08X\n", $a);
+  \printf("; before (int) Hex: %08X\n", $a);
 
   echo "\n--- end DoItInt -------------------------\n\n";
 }
@@ -25,7 +25,7 @@ function DoItInt(int $a): void {
 function DoItFloat(float $a): void {
   echo "--- start DoItFloat -------------------------\n\n";
   echo "     original: ";
-  var_dump($a);
+  \var_dump($a);
   $b = +$a;
   $c = -$a;
   $d = !$a;
@@ -36,11 +36,11 @@ function DoItFloat(float $a): void {
 function DoItBool(bool $a): void {
   echo "--- start DoItBool -------------------------\n\n";
   echo "     original: ";
-  var_dump($a);
+  \var_dump($a);
   //  $b = +$a;		// a bool is not numeric, so can't be used here
   //  $c = -$a;		// a bool is not numeric, so can't be used here
   $d = !$a;
-  var_dump($d);
+  \var_dump($d);
   //  $f = ~$a;		// a bool is not numeric, so can't be used here
 
   echo "\n--- end DoItBool -------------------------\n\n";
@@ -49,11 +49,11 @@ function DoItBool(bool $a): void {
 function DoItString(string $a): void {
   echo "--- start DoItString -------------------------\n\n";
   echo "     original: ";
-  var_dump($a);
+  \var_dump($a);
   //  $b = +$a;		// a string is not numeric, so can't be used here
   //  $c = -$a;		// a string is not numeric, so can't be used here
   $d = !$a;
-  var_dump($d);
+  \var_dump($d);
   //  $f = ~$a;		// a string is not numeric, so can't be used here
 
   echo "\n--- end DoItString -------------------------\n\n";
@@ -88,7 +88,7 @@ function main(): void {
   //  $b = +null;		// null is not numeric, so can't be used here
   //  $c = -null;		// null is not numeric, so can't be used here
   $d = !null;
-  var_dump($d);
+  \var_dump($d);
   //  $f = ~null;		// null is not numeric, so can't be used here
   //*/
 

@@ -34,7 +34,7 @@ namespace NS18 {
 
   function f(): void {
     $d = new D();
-    var_dump($d);
+    \var_dump($d);
 
     echo "CON1 = ".\NS17\CON1."\n";
 
@@ -42,6 +42,6 @@ namespace NS18 {
 
     //  use \NS17\C as C2;
     //  $c2 = new C2();
-    //  var_dump($c2);
+    //  \var_dump($c2);
   }
 }

@@ -7,7 +7,7 @@ require_once 'shapes_rf.php';
 function f1(\NS_shapes_rf_in_types_dir\st2a $p1): void {
   echo "----- dumping 'x' => int -----\n\n";
 
-  var_dump($p1);
+  \var_dump($p1);
 }
 
 function main(): void {
@@ -25,7 +25,7 @@ function main(): void {
   YYY
   ID
    => 50);
-  	var_dump($a);
+  	\var_dump($a);
   */
 
   echo "----------- Play ------------\n\n";
@@ -34,7 +34,7 @@ function main(): void {
   //  f1(shape($key => 10));	// gags: The field '' is missing
   // like the shape definition, key must be a string literal
 
-  //  var_dump(\NS_shapes_rf_in_types_dir\st4b_test2());
+  //  \var_dump(\NS_shapes_rf_in_types_dir\st4b_test2());
 
   echo "----------- Create some shape values ------------\n\n";
 
@@ -79,7 +79,7 @@ function main(): void {
 
   echo "----------- Create some shape values ------------\n\n";
 
-  $v = is_array(shape('x' => -3, 'y' => 6));
+  $v = \is_array(shape('x' => -3, 'y' => 6));
   echo "A shape ".($v ? "is" : "is not")." an array\n";
 }
 

@@ -7,33 +7,33 @@ function doit1(num $p1_num, ?int $p2_nint): void {
     echo "====== checkout the type and value of the result ======\n\n";
 
     $a = 10 < 20;
-    var_dump($a);	// bool(true)
+    \var_dump($a);	// bool(true)
     $a = 10 >= 20;
-    var_dump($a);	// bool(false)	
+    \var_dump($a);	// bool(false)
     $a = "zz" > "xx";
-    var_dump($a);	// bool(true)
+    \var_dump($a);	// bool(true)
   */
 
   /*
   // all incompatible pairs of types
 
-    var_dump(null > true);
-    var_dump(true >= 100);
-    var_dump(null < 1.23);
-    var_dump(false <= "123");
+    \var_dump(null > true);
+    \var_dump(true >= 100);
+    \var_dump(null < 1.23);
+    \var_dump(false <= "123");
 
-    var_dump($p1_num > $p2_nint);
-    var_dump($p1_num >= $p2_nint);
-    var_dump($p1_num < $p2_nint);
-    var_dump($p1_num <= $p2_nint);
+    \var_dump($p1_num > $p2_nint);
+    \var_dump($p1_num >= $p2_nint);
+    \var_dump($p1_num < $p2_nint);
+    \var_dump($p1_num <= $p2_nint);
   */
 
   /*
     echo "\n====== compare arithmetic ops ======\n\n";
 
-    var_dump(100 > 12.3);		// true
-    var_dump(100 >= $p1_num);	// true
-    var_dump($p1_num < 5.6);	// false when $p1_num == 11
+    \var_dump(100 > 12.3);		// true
+    \var_dump(100 >= $p1_num);	// true
+    \var_dump($p1_num < 5.6);	// false when $p1_num == 11
   */
 
   /*
@@ -41,9 +41,9 @@ function doit1(num $p1_num, ?int $p2_nint): void {
 
   // surprise; Boolean comparisons are ordered!
 
-    var_dump(true > false);		// true
-    var_dump(true < false);		// false
-    var_dump(false <= true);	// true
+    \var_dump(true > false);		// true
+    \var_dump(true < false);		// false
+    \var_dump(false <= true);	// true
   */
 
   /*
@@ -51,8 +51,8 @@ function doit1(num $p1_num, ?int $p2_nint): void {
 
   // surprise; this compiles!
 
-    var_dump(null < null);		// false
-    var_dump(null > null);		// false
+    \var_dump(null < null);		// false
+    \var_dump(null > null);		// false
   */
 
   /*
@@ -61,11 +61,11 @@ function doit1(num $p1_num, ?int $p2_nint): void {
   // hmmm
   // when $p2_nint == null
 
-    var_dump($p2_nint);		// null
-    var_dump(null > $p2_nint);	// false
-    var_dump(null >= $p2_nint);	// true
-    var_dump(null < $p2_nint);	// false
-    var_dump(null <= $p2_nint);	// true
+    \var_dump($p2_nint);		// null
+    \var_dump(null > $p2_nint);	// false
+    \var_dump(null >= $p2_nint);	// true
+    \var_dump(null < $p2_nint);	// false
+    \var_dump(null <= $p2_nint);	// true
 
   // when $p2_nint != null and non-zero, get false, false, true, true, so is doing numeric comparison
 
@@ -75,11 +75,11 @@ function doit1(num $p1_num, ?int $p2_nint): void {
   /*
     echo "\n====== compare numeric-string ops ======\n\n";
 
-    var_dump('123' <= '4');		// false; is doing a numeric comparison
-    var_dump('X123' <= 'X4');	// true; is doing a string comparison
-    var_dump(123 <= 4);		// false; numeric comparison
-  // var_dump('123' <= 4);		// incompatible types
-  //  var_dump(123 <= '4');		// incompatible types
+    \var_dump('123' <= '4');		// false; is doing a numeric comparison
+    \var_dump('X123' <= 'X4');	// true; is doing a string comparison
+    \var_dump(123 <= 4);		// false; numeric comparison
+  // \var_dump('123' <= 4);		// incompatible types
+  //  \var_dump(123 <= '4');		// incompatible types
   */
 
   /*
@@ -90,17 +90,17 @@ function doit1(num $p1_num, ?int $p2_nint): void {
 
     foreach ($oper1 as $e1) {
       foreach ($oper2 as $e2) {
-        echo "{$e1} >  {$e2}  result: "; var_dump($e1 > $e2);
-        echo "{$e2} <= {$e1}  result: "; var_dump($e2 <= $e1);
+        echo "{$e1} >  {$e2}  result: "; \var_dump($e1 > $e2);
+        echo "{$e2} <= {$e1}  result: "; \var_dump($e2 <= $e1);
         echo "---\n";
-        echo "{$e1} >= {$e2}  result: "; var_dump($e1 >= $e2);
-        echo "{$e2} <  {$e1}  result: "; var_dump($e2 < $e1);
+        echo "{$e1} >= {$e2}  result: "; \var_dump($e1 >= $e2);
+        echo "{$e2} <  {$e1}  result: "; \var_dump($e2 < $e1);
         echo "---\n";
-        echo "{$e1} <  {$e2}  result: "; var_dump($e1 < $e2);
-        echo "{$e2} >= {$e1}  result: "; var_dump($e2 >= $e1);
+        echo "{$e1} <  {$e2}  result: "; \var_dump($e1 < $e2);
+        echo "{$e2} >= {$e1}  result: "; \var_dump($e2 >= $e1);
         echo "---\n";
-        echo "{$e1} <= {$e2}  result: "; var_dump($e1 <= $e2);
-        echo "{$e2} >  {$e1}  result: "; var_dump($e2 > $e1);
+        echo "{$e1} <= {$e2}  result: "; \var_dump($e1 <= $e2);
+        echo "{$e2} >  {$e1}  result: "; \var_dump($e2 > $e1);
         echo "=======\n";
       }
       echo "-------------------------------------\n";
@@ -112,72 +112,72 @@ function doit1(num $p1_num, ?int $p2_nint): void {
 
     $infile1 = fopen("Testfile1.txt", 'r');
     $infile2 = fopen("Testfile2.txt", 'r');
-    var_dump($infile1, $infile2);
+    \var_dump($infile1, $infile2);
 
   // surprise; this compiles!
 
-    var_dump($infile1 > $infile2);	// false (4 > 5)
-    var_dump($infile1 < $infile2);	// true (4 < 5)
+    \var_dump($infile1 > $infile2);	// false (4 > 5)
+    \var_dump($infile1 < $infile2);	// true (4 < 5)
   */
 }
 
 function doit2(array<int> $p1, array<int> $p2, array<float> $p3): void {
-  var_dump($p1, $p2);
+  \var_dump($p1, $p2);
   echo "{\$p1} >  {\$p2}  result: ";
-  var_dump($p1 > $p2);
+  \var_dump($p1 > $p2);
   echo "{\$p2} <= {\$p1}  result: ";
-  var_dump($p2 <= $p1);
+  \var_dump($p2 <= $p1);
   echo "---\n";
   echo "{\$p1} >= {\$p2}  result: ";
-  var_dump($p1 >= $p2);
+  \var_dump($p1 >= $p2);
   echo "{\$p2} <  {\$p1}  result: ";
-  var_dump($p2 < $p1);
+  \var_dump($p2 < $p1);
   echo "---\n";
   echo "{\$p1} <  {\$p2}  result: ";
-  var_dump($p1 < $p2);
+  \var_dump($p1 < $p2);
   echo "{\$p2} >= {\$p1}  result: ";
-  var_dump($p2 >= $p1);
+  \var_dump($p2 >= $p1);
   echo "---\n";
   echo "{\$p1} <= {\$p2}  result: ";
-  var_dump($p1 <= $p2);
+  \var_dump($p1 <= $p2);
   echo "{\$p2} >  {\$p1}  result: ";
-  var_dump($p2 > $p1);
+  \var_dump($p2 > $p1);
   echo "---\n";
   echo "{\$p1} == {\$p2}  result: ";
-  var_dump($p1 == $p2);
+  \var_dump($p1 == $p2);
   echo "{\$p1} != {\$p2}  result: ";
-  var_dump($p1 != $p2);
+  \var_dump($p1 != $p2);
   echo "=======\n";
-  //  var_dump($p3);
-  //  echo "{\$p3} >  {\$p2}  result: "; var_dump($p3 > $p2);	// correctly rejected
+  //  \var_dump($p3);
+  //  echo "{\$p3} >  {\$p2}  result: "; \var_dump($p3 > $p2);	// correctly rejected
 }
 
 function doit3(array<string, int> $p1, array<string, int> $p2): void {
-  var_dump($p1, $p2);
+  \var_dump($p1, $p2);
   echo "{\$p1} >  {\$p2}  result: ";
-  var_dump($p1 > $p2);
+  \var_dump($p1 > $p2);
   echo "{\$p2} <= {\$p1}  result: ";
-  var_dump($p2 <= $p1);
+  \var_dump($p2 <= $p1);
   echo "---\n";
   echo "{\$p1} >= {\$p2}  result: ";
-  var_dump($p1 >= $p2);
+  \var_dump($p1 >= $p2);
   echo "{\$p2} <  {\$p1}  result: ";
-  var_dump($p2 < $p1);
+  \var_dump($p2 < $p1);
   echo "---\n";
   echo "{\$p1} <  {\$p2}  result: ";
-  var_dump($p1 < $p2);
+  \var_dump($p1 < $p2);
   echo "{\$p2} >= {\$p1}  result: ";
-  var_dump($p2 >= $p1);
+  \var_dump($p2 >= $p1);
   echo "---\n";
   echo "{\$p1} <= {\$p2}  result: ";
-  var_dump($p1 <= $p2);
+  \var_dump($p1 <= $p2);
   echo "{\$p2} >  {\$p1}  result: ";
-  var_dump($p2 > $p1);
+  \var_dump($p2 > $p1);
   echo "---\n";
   echo "{\$p1} == {\$p2}  result: ";
-  var_dump($p1 == $p2);
+  \var_dump($p1 == $p2);
   echo "{\$p1} != {\$p2}  result: ";
-  var_dump($p1 != $p2);
+  \var_dump($p1 != $p2);
   echo "=======\n";
 }
 

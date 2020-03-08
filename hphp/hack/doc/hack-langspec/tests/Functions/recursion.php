@@ -4,7 +4,7 @@ namespace NS_functions_recursion;
 
 function main(): void {
   for ($i = 0; $i <= 10; ++$i) {
-    printf("%2d! = %d\n", $i, factorial($i));
+    \printf("%2d! = %d\n", $i, factorial($i));
   }
 }
 

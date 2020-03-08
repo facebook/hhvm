@@ -51,7 +51,7 @@ function main(): void {
   /*
   /*
     $v = $c->nint;
-    if (!is_null($v)) {	// all OK!
+    if (!\is_null($v)) {	// all OK!
       $v++;
       $v--;
       ++$v;
@@ -89,9 +89,9 @@ function main(): void {
   $c->nint--; // not flagged
   ++$c->nint; // flagged if assignment is omitted
   --$c->nint; // flagged if assignment is omitted
-  //  var_dump($c);
+  //  \var_dump($c);
 
-  if (!is_null($c->nint)) { // all OK!
+  if (!\is_null($c->nint)) { // all OK!
     $c->nint++;
     $c->nint--;
     ++$c->nint;

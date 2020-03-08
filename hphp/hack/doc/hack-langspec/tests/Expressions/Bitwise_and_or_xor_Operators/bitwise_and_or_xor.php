@@ -13,7 +13,7 @@ function main(): void {
 
   $upCaseLetter = 0x41; // letter 'A'
   $lowCaseLetter = $upCaseLetter | 0x20; // set the 6th bit
-  printf(
+  \printf(
     "Lowercase equivalent of '%c' is '%c'\n",
     $upCaseLetter,
     $lowCaseLetter,
@@ -21,7 +21,7 @@ function main(): void {
 
   $lowCaseLetter = 0x73; // letter 's'
   $upCaseLetter = $lowCaseLetter & ~0x20; // clear the 6th bit
-  printf(
+  \printf(
     "Uppercase equivalent of '%c' is '%c'\n",
     $lowCaseLetter,
     $upCaseLetter,
@@ -32,17 +32,17 @@ function main(): void {
 
   $v1 = 1234;
   $v2 = -987;
-  printf("\$v1 = %d, \$v2 = %d\n", $v1, $v2);
+  \printf("\$v1 = %d, \$v2 = %d\n", $v1, $v2);
   $v1 = $v1 ^ $v2;
   $v2 = $v1 ^ $v2;
   $v1 = $v1 ^ $v2;
-  printf("\$v1 = %d, \$v2 = %d\n", $v1, $v2);
+  \printf("\$v1 = %d, \$v2 = %d\n", $v1, $v2);
 
   echo "======= misc stuff ========\n";
 
-  printf("0b101101 & 0b111 = 0b%b\n", 0b101111 & 0b101);
-  printf("0b101101 | 0b111 = 0b%b\n", 0b101111 | 0b101);
-  printf("0b101101 ^ 0b111 = 0b%b\n", 0b101111 ^ 0b101);
+  \printf("0b101101 & 0b111 = 0b%b\n", 0b101111 & 0b101);
+  \printf("0b101101 | 0b111 = 0b%b\n", 0b101111 | 0b101);
+  \printf("0b101101 ^ 0b111 = 0b%b\n", 0b101111 ^ 0b101);
   //*/
   ///*
   echo
@@ -57,11 +57,11 @@ function main(): void {
   );
   foreach ($scalarValueList as $v) {
     echo "$v & 123 = ";
-    var_dump($v & 123);
+    \var_dump($v & 123);
     echo "$v | 123 = ";
-    var_dump($v | 123);
+    \var_dump($v | 123);
     echo "$v ^ 123 = ";
-    var_dump($v ^ 123);
+    \var_dump($v ^ 123);
   }
   //*/
 }

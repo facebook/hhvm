@@ -72,14 +72,14 @@ function main(): void {
   //  $p1->$n(-2.0, 4.0);	// Unlike PHP, Hack does not permit this
   //  echo "\$p1 is >$p1<\n";
 
-  var_dump($p1->piProp); // okay to access instance property via instance
-  //  var_dump($p1->psf());	// Unlike PHP, Hack doesn't allow access to a static method via instance
+  \var_dump($p1->piProp); // okay to access instance property via instance
+  //  \var_dump($p1->psf());	// Unlike PHP, Hack doesn't allow access to a static method via instance
 
-  var_dump(Point::psf()); // okay to access static method via class
-  var_dump(
+  \var_dump(Point::psf()); // okay to access static method via class
+  \var_dump(
     Point::$psProp,
   ); // okay to access static property via class, but leading $ needed!!
-  var_dump(Point::MYPI); // okay to access const via class
+  \var_dump(Point::MYPI); // okay to access const via class
 
   // use multiple ->s
 

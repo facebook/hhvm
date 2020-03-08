@@ -18,7 +18,7 @@ function f(): int {
       //	break;			// allowed
       //	continue;		// allowed
       //	return msg();		// expression is evaluated, but value actually returned
-      // when both returns exist is 20, from finally block, 
+      // when both returns exist is 20, from finally block,
     }
     //*/
     finally {
@@ -33,7 +33,7 @@ function f(): int {
 
 function main(): void {
   $r = f();
-  var_dump($r);
+  \var_dump($r);
 }
 
 /* HH_FIXME[1002] call to main in strict*/

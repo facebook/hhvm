@@ -6,27 +6,27 @@ function incdec(int $x): void {
   echo "--- start incdec ---\n";
   $y = $x;
 
-  var_dump($x);
+  \var_dump($x);
   --$x;
-  var_dump($x);
+  \var_dump($x);
   --$x;
-  var_dump($x);
+  \var_dump($x);
   ++$x;
-  var_dump($x);
+  \var_dump($x);
   ++$x;
-  var_dump($x);
+  \var_dump($x);
 
   // equivalent code using -=/+= instead of --/++.
 
-  var_dump($y);
+  \var_dump($y);
   $y -= 1;
-  var_dump($y);
+  \var_dump($y);
   $y -= 1;
-  var_dump($y);
+  \var_dump($y);
   $y += 1;
-  var_dump($y);
+  \var_dump($y);
   $y += 1;
-  var_dump($y);
+  \var_dump($y);
   echo "--- end incdec ---\n";
 }
 
@@ -34,27 +34,27 @@ function incdecrev(int $x): void {
   echo "--- start incdecrev ---\n";
   $y = $x;
 
-  var_dump($x);
+  \var_dump($x);
   ++$x;
-  var_dump($x);
+  \var_dump($x);
   ++$x;
-  var_dump($x);
+  \var_dump($x);
   --$x;
-  var_dump($x);
+  \var_dump($x);
   --$x;
-  var_dump($x);
+  \var_dump($x);
 
   // equivalent code using -=/+= instead of --/++.
 
-  var_dump($y);
+  \var_dump($y);
   $y += 1;
-  var_dump($y);
+  \var_dump($y);
   $y += 1;
-  var_dump($y);
+  \var_dump($y);
   $y -= 1;
-  var_dump($y);
+  \var_dump($y);
   $y -= 1;
-  var_dump($y);
+  \var_dump($y);
   echo "--- end incdecrev ---\n";
 }
 

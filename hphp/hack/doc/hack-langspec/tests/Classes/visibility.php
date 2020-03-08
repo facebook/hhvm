@@ -19,7 +19,7 @@ class C {
   private int $prop4 = 0;
 
   //  public var $vprop1a;		// var not supported, with or without an explicit type
-  //  var $vprop1b = 123;		// 
+  //  var $vprop1b = 123;		//
   //  public var $vprop2;		// can't combine var with visibility modifiers
   //  var public  $vprop2;
   //  protected var $vprop3;
@@ -114,7 +114,7 @@ function main(): void {
     "CON1: ".C::CON1."\n"; // use :: notation, as a const is implicitly static
 
   $c = new C(); // calls public constructor
-  var_dump($c->prop2); // accesses public instance method
+  \var_dump($c->prop2); // accesses public instance method
 }
 
 /* HH_FIXME[1002] call to main in strict*/

@@ -12,11 +12,11 @@ function f1(): noreturn { }		// implicit return nothing is disallowed
 function f2(): noreturn { return; }	// explicit return nothing is disallowed
 function f3(): noreturn { return 10; }	// explicit return anything is disallowed
 
-function f4(bool $p): noreturn { 
+function f4(bool $p): noreturn {
   if ($p) exit(10);
 }					// implicit return nothing on false is disallowed
 
-function f5(bool $p): noreturn { 
+function f5(bool $p): noreturn {
   if ($p) ; else exit(10);
 }					// implicit return nothing on true is disallowed
 */
@@ -42,8 +42,8 @@ This is disallowed on 2 fronts:
 */
 
 /*
-function f7a(int $p): noreturn { 
-  var_dump(f6($p));			// disallowed; can't use non-existent value as arg to var_dump
+function f7a(int $p): noreturn {
+  \var_dump(f6($p));			// disallowed; can't use non-existent value as arg to \var_dump
 }
 */
 
@@ -68,11 +68,11 @@ class C1 {
     public function f2(): noreturn { return; }	// explicit return nothing is disallowed
     public function f3(): noreturn { return 10; }	// explicit return anything is disallowed
 
-    public function f4(bool $p): noreturn { 
+    public function f4(bool $p): noreturn {
       if ($p) exit(10);
     }						// implicit return nothing on false is disallowed
 
-    public function f5(bool $p): noreturn { 
+    public function f5(bool $p): noreturn {
       if ($p) ; else exit(10);
     }						// implicit return nothing on true is disallowed
   */
@@ -81,7 +81,7 @@ class C1 {
     if ($p < 0) throw new ExceptionA();
     else if ($p > 0) throw new ExceptionB();
     else exit(10);
-  } // Okay; no path returns but surpising. Not supposed to work here 
+  } // Okay; no path returns but surpising. Not supposed to work here
 }
 
 // ============================== test instance methods ==============================
@@ -92,11 +92,11 @@ class C2 {
     public static function f2(): noreturn { return; }	// explicit return nothing is disallowed
     public static function f3(): noreturn { return 10; }	// explicit return anything is disallowed
 
-    public static function f4(bool $p): noreturn { 
+    public static function f4(bool $p): noreturn {
       if ($p) exit(10);
     }							// implicit return nothing on false is disallowed
 
-    public static function f5(bool $p): noreturn { 
+    public static function f5(bool $p): noreturn {
       if ($p) ; else exit(10);
     }							// implicit return nothing on true is disallowed
   */

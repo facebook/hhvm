@@ -13,11 +13,11 @@ Some more text
 ID;
   echo ">$s<\n\n";
 
-  var_dump(<<<'X'
+  \var_dump(<<<'X'
 X
   );
 
-  var_dump(<<<'X'
+  \var_dump(<<<'X'
 xxx
 yyy
 X

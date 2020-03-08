@@ -55,23 +55,23 @@ abstract class C implements I {
   public function __construct(string $name) {
     echo "Inside ".__METHOD__."\n";
     $this->name = $name;
-    var_dump($this);
+    \var_dump($this);
     $this->setProp($this);
     $this->p2c = $this->getProp();
-    var_dump($this->p2c);
+    \var_dump($this->p2c);
   }
 
   // methods
 
   public function setProp(this $val): void {
     echo "Inside ".__METHOD__."\n";
-    var_dump($val);
+    \var_dump($val);
     $this->p1c = $val;
   }
 
   public function getProp(): ?this {
     echo "Inside ".__METHOD__."\n";
-    var_dump($this->p1c);
+    \var_dump($this->p1c);
     return $this->p1c;
   }
 
@@ -92,7 +92,7 @@ abstract class C implements I {
   }
   public static function pubsf(this $val): this {
     echo "Inside ".__METHOD__."\n";
-    var_dump($val);
+    \var_dump($val);
     return $val;
   }
   public function inf(this $val): this {
@@ -112,12 +112,12 @@ class D extends C {
 
 class E extends D {}
 
-//class G<T as this> {}		// The type "this" cannot be used as a constraint on a generic class 
-//class G<T as ?this> {}	// The type "this" cannot be used as a constraint on a generic class 
+//class G<T as this> {}		// The type "this" cannot be used as a constraint on a generic class
+//class G<T as ?this> {}	// The type "this" cannot be used as a constraint on a generic class
 
 function main(): void {
   $d = new D("AA");
-  var_dump($d);
+  \var_dump($d);
   D::pubsf(new D("BB"));
   E::pubsf(new E("CC"));
 }

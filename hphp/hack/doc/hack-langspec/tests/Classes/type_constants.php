@@ -40,13 +40,13 @@ class OtherUser extends User implements IUser {
 /*
 function main(): void {
   $au = new AppUser(-1);
-  var_dump($au->getID());
+  \var_dump($au->getID());
   $wu = new WebUser('-1');
-  var_dump($wu->getID());
+  \var_dump($wu->getID());
   $ou1 = new OtherUser(-1);
-  var_dump($ou1->getID());
+  \var_dump($ou1->getID());
   $ou2 = new OtherUser('-1');
-  var_dump($ou2->getID());
+  \var_dump($ou2->getID());
 }
 
 main();
@@ -372,8 +372,8 @@ class Cint extends CBase {
 }
 
 function main(): void {
-  var_dump((new Cstring('abc'))->getString());
-  var_dump((new Cint(123))->getInt());
+  \var_dump((new Cstring('abc'))->getString());
+  \var_dump((new Cint(123))->getInt());
 }
 
 /* HH_FIXME[1002] call to main in strict*/

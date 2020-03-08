@@ -35,7 +35,7 @@ function main(): void {
   $c = new C();
   $val = $c->getProp();
 
-  //  $q = $val + 10;   // checker can't be sure teh arraykey is currently an int
+  //  $q = $val + 10;   // checker can't be sure the arraykey is currently an int
 
   if (\is_int($val)) {
     $q = $val + 10;

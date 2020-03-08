@@ -25,7 +25,7 @@ function main(): void {
     }
   */
 
-  // In PHP, 'continue;' inside a switch statement is equivalent to 'break;'. Hack does not 
+  // In PHP, 'continue;' inside a switch statement is equivalent to 'break;'. Hack does not
   // support this; use 'break' if that is what you meant.
 
   for ($i = 10; $i <= 40; $i += 10) {

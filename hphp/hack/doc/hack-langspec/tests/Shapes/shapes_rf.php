@@ -79,7 +79,7 @@ type st2a = shape('x' => int); // can have 1 field with '-quoted string key
 //type st2d = shape("x\tx\$" => int);   // gags too
 
 /*
-// can't use a heredoc literal 
+// can't use a heredoc literal
 // hhvm says at <<< line: Fatal error: syntax error, unexpected T_START_HEREDOC, expecting ')'
 
 type st2e = shape(
@@ -90,7 +90,7 @@ ID
 */
 
 /*
-// can't use a nowdoc literal 
+// can't use a nowdoc literal
 // hhvm says at <<< line: Fatal error: syntax error, unexpected T_START_HEREDOC, expecting ')'
 
 type st2f = shape(

@@ -24,20 +24,20 @@ function main(): void {
   //  \var_dump(">\u{00000041}<");              // results in ">A<", length 3
   //  \var_dump(">\u{000000000000000000000041}<");              // results in ">A<", length 3
 
-  \var_dump(">\u{A9}<"); // results in ">©<", length 4
-  \var_dump(">\u{a9}<"); // results in ">©<", length 4
-  \var_dump(">\u{0000A9}<"); // results in ">©<", length 4
-  //  \var_dump(">\u{00000000A9}<");            // results in ">©<", length 4
+  \var_dump(">\u{A9}<"); // results in (unicode), length 4
+  \var_dump(">\u{a9}<"); // results in (unicode), length 4
+  \var_dump(">\u{0000A9}<"); // results in (unicode), length 4
+  //  \var_dump(">\u{00000000A9}<");            // results in (unicode), length 4
 
-  \var_dump(">\u{e6}<"); // results in ">æ<", length 4
+  \var_dump(">\u{e6}<"); // results in (unicode), length 4
 
-  \var_dump(">\u{2020}<"); // results in ">†<", length 5
+  \var_dump(">\u{2020}<"); // results in (unicode), length 5
 
-  \var_dump(">\u{20000}<"); // results in ">𠀀<", length 6
-  \var_dump(">\u{020000}<"); // results in ">𠀀<", length 6
-  //  \var_dump(">\u{0020000}<");               // results in ">𠀀<", length 6
+  \var_dump(">\u{20000}<"); // results in (unicode), length 6
+  \var_dump(">\u{020000}<"); // results in (unicode), length 6
+  //  \var_dump(">\u{0020000}<");               // results in (unicode), length 6
 
-  \var_dump(">\u{10FFFF}<"); // results in ">𠀀<", length 6
+  \var_dump(">\u{10FFFF}<"); // results in (unicode), length 6
 
   //  \var_dump(">\u{110000}<");                // Invalid UTF-8 codepoint escape sequence: Codepoint too large (> 0x10FFFF)
 

@@ -52,4 +52,3 @@ foreach ($files as $file) {
 }
 
 file_put_contents($tocFile, "$prefix\n$output");
-

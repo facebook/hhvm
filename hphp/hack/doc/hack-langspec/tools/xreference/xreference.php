@@ -18,15 +18,15 @@ function insert_cross_references(string $md_file,
   $contents = file($md_file);
   $update = "";
   // matches
-  //   §16.2
-  //   [§§]
-  //   §A.1.2
-  $pattern = "/([\[])?§([A-Z0-9\.]+)([\]])?/";
+  //   \u{00a7}16.2
+  //   [\u{00a7}\u{00a7}]
+  //   \u{00a7}A.1.2
+  $pattern = "/([\[])?\u00a7([A-Z0-9\.]+)([\]])?/";
   $matches = array();
   foreach ($contents as $line) {
     // Get all the matches on this line of text
     if (preg_match_all($pattern, $line, $matches) > 0) {
-      $ref_texts = $matches[2]; // The matches for the characters after §
+      $ref_texts = $matches[2]; // The matches for the characters after \u{00a7}
       foreach ($ref_texts as $ref_text) {
         // Get rid of any trailing . in case the cross reference is the
         // end of a sentence and the match occurred.
@@ -45,7 +45,7 @@ function insert_cross_references(string $md_file,
         if (!$update_only){
           $replace .= $section_map[$ref_text];
         }
-        $line = str_replace("§".$ref_text, $replace, $line);
+        $line = str_replace("\u00a7".$ref_text, $replace, $line);
       }
     }
     $update .= $line;

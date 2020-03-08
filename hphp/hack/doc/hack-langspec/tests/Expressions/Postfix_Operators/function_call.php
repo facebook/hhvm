@@ -41,7 +41,7 @@ function main(): void {
     fun('\NS_function_call\fx'),
     fun('\NS_function_call\fy'),
     fun('\NS_function_call\fz'),
-  ); // list of 3 function designators 
+  ); // list of 3 function designators
   $i = 1;
   $funcTable[$i++]($i, ++$i, $i, $i = 12, --$i); // calls fy(2,3,3,12,11)
 }

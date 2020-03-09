@@ -299,7 +299,6 @@ let rec fun_def ctx f :
       Reason.expr_display_id_map := IMap.empty;
       let pos = fst f.f_name in
       let decl_header = get_decl_function_header env (snd f.f_name) in
-      let nb = Naming.func_body ctx f in
       Typing_helpers.add_decl_errors
         (Option.map
            (Env.get_fun env (snd f.f_name))
@@ -386,7 +385,9 @@ let rec fun_def ctx f :
           SN.UserAttributes.uaDisableTypecheckerInternal
           f.f_user_attributes
       in
-      let (env, tb) = Typing.fun_ ~disable env return pos nb f.f_fun_kind in
+      let (env, tb) =
+        Typing.fun_ ~disable env return pos f.f_body f.f_fun_kind
+      in
       (* restore original reactivity *)
       let env = Env.set_env_reactive env reactive in
       begin
@@ -423,7 +424,7 @@ let rec fun_def ctx f :
           Aast.f_body =
             {
               Aast.fb_ast = tb;
-              fb_annotation = map_funcbody_annotation nb.fb_annotation;
+              fb_annotation = map_funcbody_annotation f.f_body.fb_annotation;
             };
           Aast.f_external = f.f_external;
           Aast.f_namespace = f.f_namespace;
@@ -736,7 +737,6 @@ let rec class_def ctx c =
   let env = Env.set_env_pessimize env in
   Typing_helpers.add_decl_errors
     Option.(map tc (fun tc -> value_exn (Cls.decl_errors tc)));
-  let c = Naming.class_meth_bodies ctx c in
   NastCheck.class_ env c;
   NastInitCheck.class_ env c;
   match tc with

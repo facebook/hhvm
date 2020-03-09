@@ -67,15 +67,6 @@ module Env : sig
 
   val empty_local : unbound_handler option -> lenv
 
-  val make_class_genv :
-    Provider_context.t ->
-    type_constraint SMap.t ->
-    FileInfo.mode ->
-    Ast_defs.id * Ast_defs.class_kind ->
-    Namespace_env.env ->
-    bool ->
-    genv
-
   val make_class_env :
     Provider_context.t -> type_constraint SMap.t -> Nast.class_ -> genv * lenv
 
@@ -83,14 +74,6 @@ module Env : sig
     Provider_context.t -> type_constraint SMap.t -> Nast.typedef -> genv * lenv
 
   val make_top_level_env : Provider_context.t -> genv * lenv
-
-  val make_fun_genv :
-    Provider_context.t ->
-    type_constraint SMap.t ->
-    FileInfo.mode ->
-    string ->
-    Namespace_env.env ->
-    genv
 
   val make_fun_decl_genv :
     Provider_context.t -> type_constraint SMap.t -> Nast.fun_ -> genv
@@ -1633,12 +1616,20 @@ and method_ genv m =
     | FileInfo.Mstrict
     | FileInfo.Mpartial
     | FileInfo.Mexperimental ->
-      if Nast.is_body_named m.Aast.m_body then
-        {
-          N.fb_ast = m.Aast.m_body.Aast.fb_ast;
-          fb_annotation = Nast.Unnamed genv.namespace;
-        }
-      else
+      if Nast.is_body_named m.Aast.m_body then (
+        let env = List.fold_left ~f:Env.add_param m.N.m_params ~init:env in
+        let env =
+          match m.N.m_variadic with
+          | N.FVellipsis _
+          | N.FVnonVariadic ->
+            env
+          | N.FVvariadicArg param -> Env.add_param env param
+        in
+        let fub_ast = block env m.N.m_body.N.fb_ast in
+        let annotation = Nast.Named in
+        Env.check_goto_references env;
+        { N.fb_ast = fub_ast; fb_annotation = annotation }
+      ) else
         failwith "ast_to_nast error unnamedbody in method_"
   in
   let attrs = user_attributes env m.Aast.m_user_attributes in
@@ -1792,10 +1783,18 @@ and fun_ ctx f =
     | FileInfo.Mpartial
     | FileInfo.Mexperimental ->
       if Nast.is_body_named f.Aast.f_body then
-        {
-          N.fb_ast = f.Aast.f_body.Aast.fb_ast;
-          fb_annotation = Nast.Unnamed genv.namespace;
-        }
+        let env = List.fold_left ~f:Env.add_param paraml ~init:env in
+        let env =
+          match variadicity with
+          | N.FVellipsis _
+          | N.FVnonVariadic ->
+            env
+          | N.FVvariadicArg param -> Env.add_param env param
+        in
+        let fb_ast = block env f.Aast.f_body.Aast.fb_ast in
+        let annotation = Nast.Named in
+        let _ = Env.check_goto_references env in
+        { N.fb_ast; fb_annotation = annotation }
       else
         failwith "ast_to_nast error unnamedbody in fun_"
   in
@@ -2255,7 +2254,6 @@ and expr_ env p (e : Nast.expr_) =
       | [] ->
         Errors.naming_too_few_arguments p;
         N.Any
-      | [(_, Aast.String s)] when String.contains s ':' -> N.Any
       | [(_, Aast.String s)] when genv.in_ppl && SN.PPLFunctions.is_reserved s
         ->
         Errors.ppl_meth_pointer p ("fun(" ^ s ^ ")");
@@ -2859,78 +2857,6 @@ and class_pu_enum env pu_enum =
     pu_case_values;
     pu_members;
   }
-
-(**************************************************************************)
-(* Function/Method Body Naming: *)
-(* Ensure that, given a function / class, any UnnamedBody within is
- * transformed into a a named body *)
-(**************************************************************************)
-
-let func_body ctx f =
-  match f.N.f_body.N.fb_annotation with
-  | Nast.Named
-  | Nast.NamedWithUnsafeBlocks ->
-    f.N.f_body
-  | Nast.Unnamed nsenv ->
-    let genv =
-      Env.make_fun_genv ctx SMap.empty f.N.f_mode (snd f.N.f_name) nsenv
-    in
-    let genv = extend_params genv f.N.f_tparams in
-    let lenv = Env.empty_local None in
-    let env = (genv, lenv) in
-    let env = List.fold_left ~f:Env.add_param f.N.f_params ~init:env in
-    let env =
-      match f.N.f_variadic with
-      | N.FVellipsis _
-      | N.FVnonVariadic ->
-        env
-      | N.FVvariadicArg param -> Env.add_param env param
-    in
-    let fub_ast = block env f.N.f_body.N.fb_ast in
-    let annotation = Nast.Named in
-    Env.check_goto_references env;
-    { N.fb_ast = fub_ast; fb_annotation = annotation }
-
-let meth_body genv m =
-  let named_body =
-    match m.N.m_body.N.fb_annotation with
-    | Nast.Named
-    | Nast.NamedWithUnsafeBlocks ->
-      m.N.m_body
-    | Nast.Unnamed nsenv ->
-      let genv = { genv with namespace = nsenv } in
-      let genv = extend_params genv m.N.m_tparams in
-      let env = (genv, Env.empty_local None) in
-      let env = List.fold_left ~f:Env.add_param m.N.m_params ~init:env in
-      let env =
-        match m.N.m_variadic with
-        | N.FVellipsis _
-        | N.FVnonVariadic ->
-          env
-        | N.FVvariadicArg param -> Env.add_param env param
-      in
-      let fub_ast = block env m.N.m_body.N.fb_ast in
-      let annotation = Nast.Named in
-      Env.check_goto_references env;
-      { N.fb_ast = fub_ast; fb_annotation = annotation }
-  in
-  { m with N.m_body = named_body }
-
-let class_meth_bodies ctx nc =
-  let { N.c_tparam_constraints = cstrs; _ } = nc.N.c_tparams in
-  let genv =
-    Env.make_class_genv
-      ctx
-      cstrs
-      nc.N.c_mode
-      (nc.N.c_name, nc.N.c_kind)
-      Namespace_env.empty_with_default
-      (Naming_attributes.mem
-         SN.UserAttributes.uaProbabilisticModel
-         nc.N.c_user_attributes)
-  in
-  let methods = List.map nc.N.c_methods (meth_body genv) in
-  { nc with N.c_methods = methods }
 
 let record_field env rf =
   let (id, h, e) = rf in

@@ -26,9 +26,3 @@ val typedef : Provider_context.t -> Nast.typedef -> Nast.typedef
 
 (* Solves the local names in a global constant definition *)
 val global_const : Provider_context.t -> Nast.gconst -> Nast.gconst
-
-(* Solves the local names in a function body *)
-val func_body : Provider_context.t -> Nast.fun_ -> Nast.func_body
-
-(* Solves the local names in class method bodies *)
-val class_meth_bodies : Provider_context.t -> Nast.class_ -> Nast.class_

@@ -116,39 +116,36 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
          implicit_cast<void*>(prevFp),
          jit);
 
-  auto const decRefLocals = [&] {
-    /*
-     * It is possible that locals have already been decref'd.
-     *
-     * Here's why:
-     *
-     *   - If a destructor for any of these things throws a php
-     *     exception, it's swallowed at the dtor boundary and we keep
-     *     running php.
-     *
-     *   - If the destructor for any of these things throws a fatal,
-     *     it's swallowed, and we set surprise flags to throw a fatal
-     *     from now on.
-     *
-     *   - If the second case happened and we have to run another
-     *     destructor, its enter hook will throw, but it will be
-     *     swallowed again.
-     *
-     *   - Finally, the exit hook for the returning function can
-     *     throw, but this happens last so everything is destructed.
-     *
-     *   - When that happens, exit hook sets localsDecRefd flag.
-     */
-    if (!fp->localsDecRefd()) {
-      fp->setLocalsDecRefd();
-      try {
-        frame_free_locals_unwind(fp, func->numLocals(), phpException);
-      } catch (...) {}
-    }
-  };
+  /*
+   * It is possible that locals have already been decref'd.
+   *
+   * Here's why:
+   *
+   *   - If a destructor for any of these things throws a php
+   *     exception, it's swallowed at the dtor boundary and we keep
+   *     running php.
+   *
+   *   - If the destructor for any of these things throws a fatal,
+   *     it's swallowed, and we set surprise flags to throw a fatal
+   *     from now on.
+   *
+   *   - If the second case happened and we have to run another
+   *     destructor, its enter hook will throw, but it will be
+   *     swallowed again.
+   *
+   *   - Finally, the exit hook for the returning function can
+   *     throw, but this happens last so everything is destructed.
+   *
+   *   - When that happens, exit hook sets localsDecRefd flag.
+   */
+  if (!fp->localsDecRefd()) {
+    fp->setLocalsDecRefd();
+    try {
+      frame_free_locals_unwind(fp, func->numLocals(), phpException);
+    } catch (...) {}
+  }
 
   if (LIKELY(!isResumed(fp))) {
-    decRefLocals();
     if (UNLIKELY(func->isAsyncFunction()) &&
         phpException &&
         (!fp->isAsyncEagerReturn() || func->isMemoizeImpl())) {
@@ -191,17 +188,16 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
     auto const waitHandle = frame_afwh(fp);
     if (phpException) {
       // Handle exception thrown by async function.
-      decRefLocals();
       waitHandle->fail(phpException);
       decRefObj(waitHandle);
       phpException = nullptr;
       if (jit) jit::g_unwind_rds->fswh = nullptr;
-    } else if (waitHandle->isRunning()) {
+    } else {
+      assertx(waitHandle->isRunning());
       // Let the C++ exception propagate. If the current frame represents async
       // function that is running, mark it as abruptly interrupted. Some opcodes
       // like Await may change state of the async function just before exit hook
       // decides to throw C++ exception.
-      decRefLocals();
       waitHandle->failCpp();
       decRefObj(waitHandle);
     }
@@ -209,7 +205,6 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
     auto const gen = frame_async_generator(fp);
     if (phpException) {
       // Handle exception thrown by async generator.
-      decRefLocals();
       auto eagerResult = gen->fail(phpException);
       phpException = nullptr;
       if (eagerResult) {
@@ -224,14 +219,13 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
       } else {
         if (jit) jit::g_unwind_rds->fswh = nullptr;
       }
-    } else if (gen->isEagerlyExecuted() || gen->getWaitHandle()->isRunning()) {
+    } else {
+      assertx(gen->isEagerlyExecuted() || gen->getWaitHandle()->isRunning());
       // Fail the async generator and let the C++ exception propagate.
-      decRefLocals();
       gen->failCpp();
     }
   } else if (func->isNonAsyncGenerator()) {
     // Mark the generator as finished.
-    decRefLocals();
     frame_generator(fp)->fail();
   } else {
     not_reached();

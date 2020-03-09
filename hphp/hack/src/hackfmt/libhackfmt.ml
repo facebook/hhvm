@@ -158,20 +158,20 @@ let format_intervals ?config intervals tree =
   in
   let noformat_ranges = get_suppressed_formatting_ranges line_boundaries tree in
   let ranges = Interval.diff_sorted_lists ranges noformat_ranges in
-  let solve_states =
-    Line_splitter.find_solve_states
-      env
-      ~source_text:(SourceText.text source_text)
-      chunk_groups
-  in
   let formatted_ranges =
     List.map ranges (fun range ->
         ( range,
-          Line_splitter.print
+          Line_splitter.solve
             env
             ~range
-            ~include_surrounding_whitespace:false
-            solve_states ))
+            ~include_leading_whitespace:
+              (not
+                 (List.exists atom_boundaries ~f:(fun (st, _) -> fst range = st)))
+            ~include_trailing_whitespace:
+              (not
+                 (List.exists atom_boundaries ~f:(fun (_, ed) -> snd range = ed)))
+            ~source_text:text
+            chunk_groups ))
   in
   let buf = text_with_formatted_ranges text formatted_ranges in
   (* Dirty hack: Since we don't print the whitespace surrounding formatted
@@ -239,7 +239,8 @@ let format_at_offset ?config (tree : SyntaxTree.t) offset =
     Line_splitter.solve
       env
       ~range
-      ~include_surrounding_whitespace:false
+      ~include_leading_whitespace:false
+      ~include_trailing_whitespace:false
       ~source_text:(SourceText.text source_text)
       chunk_groups
   in

@@ -44,7 +44,8 @@ let string_of_subchunks (env : Env.t) (subchunks : t list) : string =
   Buffer.contents buf
 
 let subchunks_in_range
-    ?(include_surrounding_whitespace = true)
+    ~(include_leading_whitespace : bool)
+    ~(include_trailing_whitespace : bool)
     (subchunks : t list)
     (range : Interval.t) : t list =
   let (range_start, range_end) = range in
@@ -73,7 +74,7 @@ let subchunks_in_range
   in
   (* When omitting trailing whitespace, drop trailing newlines *)
   let subchunks =
-    if include_surrounding_whitespace then
+    if include_trailing_whitespace then
       subchunks
     else
       List.drop_while subchunks ~f:(function
@@ -98,7 +99,7 @@ let subchunks_in_range
   in
   (* When omitting leading whitespace, drop leading indentation *)
   let subchunks =
-    if include_surrounding_whitespace then
+    if include_leading_whitespace then
       subchunks
     else
       List.drop_while subchunks ~f:(function

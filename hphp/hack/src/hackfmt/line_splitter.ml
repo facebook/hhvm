@@ -143,14 +143,16 @@ let find_solve_states
 let print
     (env : Env.t)
     ?(range : Interval.t option)
-    ?(include_surrounding_whitespace = true)
+    ?(include_leading_whitespace = true)
+    ?(include_trailing_whitespace = true)
     (solve_states : Solve_state.t list) : string =
   let filter_to_range subchunks =
     match range with
     | None -> subchunks
     | Some range ->
       Subchunk.subchunks_in_range
-        ~include_surrounding_whitespace
+        ~include_leading_whitespace
+        ~include_trailing_whitespace
         subchunks
         range
   in
@@ -162,12 +164,13 @@ let print
 let solve
     (env : Env.t)
     ?(range : Interval.t option)
-    ?(include_surrounding_whitespace = true)
+    ?(include_leading_whitespace : bool option)
+    ?(include_trailing_whitespace : bool option)
     ?(source_text : string option)
     (chunk_groups : Chunk_group.t list) : string =
   chunk_groups
   |> find_solve_states env ?range ?source_text
-  |> print env ?range ~include_surrounding_whitespace
+  |> print env ?range ?include_leading_whitespace ?include_trailing_whitespace
 
 let unbroken_solve_state env chunk_group =
   let rbm = Chunk_group.get_initial_rule_bindings chunk_group in

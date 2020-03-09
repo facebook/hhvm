@@ -553,7 +553,7 @@ fn emit_iterator_lvalue_storage(
             let (preamble, load_values) = emit_load_list_elements(
                 e,
                 env,
-                &mut vec![InstrSeq::make_basel(local.clone(), MemberOpMode::Warn)],
+                vec![InstrSeq::make_basel(local.clone(), MemberOpMode::Warn)],
                 es,
             )?;
             let load_values = vec![
@@ -589,13 +589,13 @@ fn emit_iterator_lvalue_storage(
 fn emit_load_list_elements(
     e: &mut Emitter,
     env: &mut Env,
-    path: &mut Vec<InstrSeq>,
+    path: Vec<InstrSeq>,
     es: &[tast::Expr],
 ) -> Result<(Vec<InstrSeq>, Vec<InstrSeq>)> {
     let (preamble, load_value): (Vec<Vec<InstrSeq>>, Vec<Vec<InstrSeq>>) = es
         .iter()
         .enumerate()
-        .map(|(i, x)| emit_load_list_element(e, env, path, i, x))
+        .map(|(i, x)| emit_load_list_element(e, env, path.clone(), i, x))
         .collect::<Result<Vec<_>>>()?
         .into_iter()
         .unzip();
@@ -608,30 +608,29 @@ fn emit_load_list_elements(
 fn emit_load_list_element(
     e: &mut Emitter,
     env: &mut Env,
-    path: &mut Vec<InstrSeq>,
+    mut path: Vec<InstrSeq>,
     i: usize,
     elem: &tast::Expr,
 ) -> Result<(Vec<InstrSeq>, Vec<InstrSeq>)> {
-    if let tast::Expr_::List(es) = &elem.1 {
-        let instr_dim = InstrSeq::make_dim(MemberOpMode::Warn, MemberKey::EI(i as i64));
-        path.push(instr_dim);
-        return emit_load_list_elements(e, env, path, es);
+    let query_value = |path| {
+        InstrSeq::gather(vec![
+            InstrSeq::gather(path),
+            InstrSeq::make_querym(0, QueryOp::CGet, MemberKey::EI(i as i64)),
+        ])
     };
-
-    assert_eq!(elem.1.is_list(), false);
-
-    let query_value = InstrSeq::gather(vec![
-        InstrSeq::gather(path.to_vec()),
-        InstrSeq::make_querym(0, QueryOp::CGet, MemberKey::EI(i as i64)),
-    ]);
     Ok(match &elem.1 {
         tast::Expr_::Lvar(lid) => {
             let load_value = InstrSeq::gather(vec![
-                query_value,
+                query_value(path),
                 InstrSeq::make_setl(local::Type::Named(local_id::get_name(&lid.1).into())),
                 InstrSeq::make_popc(),
             ]);
             (vec![], vec![load_value])
+        }
+        tast::Expr_::List(es) => {
+            let instr_dim = InstrSeq::make_dim(MemberOpMode::Warn, MemberKey::EI(i as i64));
+            path.push(instr_dim);
+            emit_load_list_elements(e, env, path, es)?
         }
         _ => {
             let set_instrs = emit_expr::emit_lval_op_nonlist(
@@ -640,7 +639,7 @@ fn emit_load_list_element(
                 &elem.0,
                 LValOp::Set,
                 elem,
-                query_value,
+                query_value(path),
                 1,
                 false,
             )?;

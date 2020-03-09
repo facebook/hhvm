@@ -937,21 +937,11 @@ fn add_reified_property(tparams: &ClassTparams, vars: &mut Vec<ClassVar>) {
 }
 
 fn count_classes(defs: &Program) -> usize {
-    defs.iter()
-        .filter(|x| match x {
-            Def::Class(_) => true,
-            _ => false,
-        })
-        .count()
+    defs.iter().filter(|x| x.is_class()).count()
 }
 
 fn count_records(defs: &Program) -> usize {
-    defs.iter()
-        .filter(|x| match x {
-            Def::RecordDef(_) => true,
-            _ => false,
-        })
-        .count()
+    defs.iter().filter(|x| x.is_record_def()).count()
 }
 
 struct ClosureConvertVisitor<'a> {
@@ -1168,14 +1158,8 @@ impl<'a> VisitorMut for ClosureConvertVisitor<'a> {
                         ));
                     }
                 };
-                match (cls, func.as_string()) {
-                    (cls, Some(fname))
-                        if cls
-                            .as_class_const()
-                            .and_then(|(_, (_, cs))| Some(cs.as_str()))
-                            .map(string_utils::is_class)
-                            .unwrap_or(false) =>
-                    {
+                match (&cls, func.as_string()) {
+                    (Expr_::ClassConst(cc), Some(fname)) if string_utils::is_class(&(cc.1).1) => {
                         let mut cls_const = cls.as_class_const_mut();
                         let (cid, _) = match cls_const {
                             None => unreachable!(),
@@ -1209,16 +1193,20 @@ impl<'a> VisitorMut for ClosureConvertVisitor<'a> {
                                 )
                             }
                             _ => {
-                                return Err(emit_fatal::raise_fatal_parse(
-                                    pos,
-                                    "Class must be a Class or string type",
-                                ));
+                                return Err(emit_fatal::raise_fatal_parse(pos, "Invalid class"));
                             }
                         }
+                    }
+                    (Expr_::ClassConst(_), Some(_)) => {
+                        return Err(emit_fatal::raise_fatal_parse(
+                            pos,
+                            "Class must be a Class or string type",
+                        ));
                     }
                     (Expr_::String(cls_name), Some(fname)) => {
                         convert_meth_caller_to_func_ptr(env, self, &*pos, pc, &cls_name, pf, fname)
                     }
+
                     // For other cases, fallback to create __SystemLib\MethCallerHelper
                     _ => Expr_::Call(x),
                 }

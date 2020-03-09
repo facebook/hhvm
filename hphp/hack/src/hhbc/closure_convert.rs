@@ -24,7 +24,7 @@ use naming_special_names_rust::{fb, pseudo_consts, special_idents, superglobals}
 use options::{CompilerFlags, HhvmFlags, Options};
 use oxidized::{
     aast_defs,
-    aast_visitor::{NodeMut, VisitorMut},
+    aast_visitor::{AstParams, NodeMut, VisitorMut},
     ast::*,
     ast_defs::*,
     file_info::Mode,
@@ -950,23 +950,9 @@ struct ClosureConvertVisitor<'a> {
 }
 
 impl<'a> VisitorMut for ClosureConvertVisitor<'a> {
-    type Context = Env<'a>;
-    type Error = Error;
-    type Ex = Pos;
-    type Fb = ();
-    type En = ();
-    type Hi = ();
+    type P = AstParams<Env<'a>, Error>;
 
-    fn object(
-        &mut self,
-    ) -> &mut dyn VisitorMut<
-        Context = Self::Context,
-        Error = Self::Error,
-        Ex = Self::Ex,
-        Fb = Self::Fb,
-        En = Self::En,
-        Hi = Self::Hi,
-    > {
+    fn object(&mut self) -> &mut dyn VisitorMut<P = Self::P> {
         self
     }
 
@@ -1291,10 +1277,7 @@ impl<'a> VisitorMut for ClosureConvertVisitor<'a> {
 
 fn hoist_toplevel_functions(defs: &mut Program) {
     // Reorder the functions so that they appear first.
-    let (funs, nonfuns): (Vec<Def>, Vec<Def>) = defs.drain(..).partition(|x| match x {
-        Def::Fun(_) => true,
-        _ => false,
-    });
+    let (funs, nonfuns): (Vec<Def>, Vec<Def>) = defs.drain(..).partition(|x| x.is_fun());
     defs.extend(funs);
     defs.extend(nonfuns);
 }

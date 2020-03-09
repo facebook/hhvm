@@ -15,7 +15,7 @@ use naming_special_names_rust::{
 use ocamlrep::rc::RcOc;
 use oxidized::{
     aast,
-    aast_visitor::{Node, Visitor},
+    aast_visitor::{AstParams, Node, Visitor},
     ast,
     ast::Expr_ as E_,
     doc_comment::DocComment,
@@ -672,31 +672,13 @@ where
     fn check_valid_reified_hint(env: &mut Env, node: &Syntax<T, V>, hint: &ast::Hint) {
         struct Checker<F: FnMut(&String)>(F);
         impl<F: FnMut(&String)> Visitor for Checker<F> {
-            type Error = ();
-            type Context = ();
-            type Ex = Pos;
-            type Fb = ();
-            type En = ();
-            type Hi = ();
+            type P = AstParams<(), ()>;
 
-            fn object(
-                &mut self,
-            ) -> &mut dyn Visitor<
-                Context = Self::Context,
-                Error = (),
-                Ex = Pos,
-                Fb = (),
-                En = (),
-                Hi = (),
-            > {
+            fn object(&mut self) -> &mut dyn Visitor<P = Self::P> {
                 self
             }
 
-            fn visit_hint(
-                &mut self,
-                c: &mut (),
-                h: &ast::Hint,
-            ) -> std::result::Result<(), Self::Error> {
+            fn visit_hint(&mut self, c: &mut (), h: &ast::Hint) -> std::result::Result<(), ()> {
                 match h.1.as_ref() {
                     ast::Hint_::Happly(id, _) => {
                         self.0(&id.1);

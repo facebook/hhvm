@@ -18,9 +18,8 @@ use hhbc_string_utils_rust::locals::strip_dollar;
 use instruction_sequence_rust::{InstrSeq, Result};
 use oxidized::{
     aast_defs::{Hint, Hint_},
-    aast_visitor,
-    aast_visitor::Node,
-    ast as a, ast_defs,
+    aast_visitor::{self, AstParams, Node},
+    ast as a,
     ast_defs::{Id, ParamKind},
     namespace_env::Env as Namespace,
     pos::Pos,
@@ -219,27 +218,13 @@ struct Ctx<'a> {
 }
 
 impl<'a> aast_visitor::Visitor for ResolverVisitor<'a> {
-    type Context = Ctx<'a>;
-    type Error = ();
-    type Ex = ast_defs::Pos;
-    type Fb = ();
-    type En = ();
-    type Hi = ();
+    type P = AstParams<Ctx<'a>, ()>;
 
-    fn object(
-        &mut self,
-    ) -> &mut dyn aast_visitor::Visitor<
-        Context = Self::Context,
-        Error = Self::Error,
-        Ex = Self::Ex,
-        Fb = Self::Fb,
-        En = Self::En,
-        Hi = Self::Hi,
-    > {
+    fn object(&mut self) -> &mut dyn aast_visitor::Visitor<P = Self::P> {
         self
     }
 
-    fn visit_expr(&mut self, c: &mut Self::Context, p: &a::Expr) -> std::result::Result<(), ()> {
+    fn visit_expr(&mut self, c: &mut Ctx<'a>, p: &a::Expr) -> std::result::Result<(), ()> {
         p.recurse(c, self.object())
         // TODO(implement on_CIexpr)
     }

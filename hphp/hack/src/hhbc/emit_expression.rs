@@ -194,31 +194,13 @@ mod inout_locals {
     }
 
     impl<'a> aast_visitor::Visitor for Visitor<'a> {
-        type Context = Ctx<'a>;
-        type Error = ();
-        type Ex = ast_defs::Pos;
-        type Fb = ();
-        type En = ();
-        type Hi = ();
+        type P = aast_visitor::AstParams<Ctx<'a>, ()>;
 
-        fn object(
-            &mut self,
-        ) -> &mut dyn aast_visitor::Visitor<
-            Context = Self::Context,
-            Error = Self::Error,
-            Ex = Self::Ex,
-            Fb = Self::Fb,
-            En = Self::En,
-            Hi = Self::Hi,
-        > {
+        fn object(&mut self) -> &mut dyn aast_visitor::Visitor<P = Self::P> {
             self
         }
 
-        fn visit_expr_(
-            &mut self,
-            c: &mut Self::Context,
-            p: &tast::Expr_,
-        ) -> std::result::Result<(), ()> {
+        fn visit_expr_(&mut self, c: &mut Ctx<'a>, p: &tast::Expr_) -> std::result::Result<(), ()> {
             p.recurse(c, self.object())?;
             Ok(match p {
                 tast::Expr_::Binop(expr) => {

@@ -3,32 +3,17 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use oxidized::{
-    aast_visitor::{visit, Node, Visitor},
+    aast_visitor::{visit, AstParams, Node, Visitor},
     ast as tast,
-    pos::Pos,
 };
 
 pub fn is_function_generator(body: &tast::Program) -> (bool, bool) {
     struct S((bool, bool));
 
     impl Visitor for S {
-        type Context = ();
-        type Error = ();
-        type Ex = Pos;
-        type Fb = ();
-        type En = ();
-        type Hi = ();
+        type P = AstParams<(), ()>;
 
-        fn object(
-            &mut self,
-        ) -> &mut dyn Visitor<
-            Context = Self::Context,
-            Error = (),
-            Ex = Pos,
-            Fb = (),
-            En = (),
-            Hi = (),
-        > {
+        fn object(&mut self) -> &mut dyn Visitor<P = Self::P> {
             self
         }
 

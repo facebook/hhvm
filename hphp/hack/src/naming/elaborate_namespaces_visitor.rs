@@ -10,9 +10,8 @@ use naming_special_names_rust as sn;
 use std::collections::HashSet;
 
 use oxidized::{
-    aast_visitor::{NodeMut, VisitorMut},
+    aast_visitor::{AstParams, NodeMut, VisitorMut},
     ast::*,
-    ast_defs::*,
     namespace_env,
 };
 
@@ -132,29 +131,15 @@ fn is_reserved_type_hint(name: &str) -> bool {
 struct ElaborateNamespacesVisitor {}
 
 impl VisitorMut for ElaborateNamespacesVisitor {
-    type Context = Env;
-    type Error = ();
-    type Ex = Pos;
-    type Fb = ();
-    type En = ();
-    type Hi = ();
+    type P = AstParams<Env, ()>;
 
-    fn object(
-        &mut self,
-    ) -> &mut dyn VisitorMut<
-        Context = Self::Context,
-        Error = Self::Error,
-        Ex = Self::Ex,
-        Fb = Self::Fb,
-        En = Self::En,
-        Hi = Self::Hi,
-    > {
+    fn object(&mut self) -> &mut dyn VisitorMut<P = Self::P> {
         self
     }
 
     // Namespaces were already precomputed by ElaborateDefs
     // The following functions just set the namespace env correctly
-    fn visit_class_(&mut self, env: &mut Env, cd: &mut Class_) -> Result<(), Self::Error> {
+    fn visit_class_(&mut self, env: &mut Env, cd: &mut Class_) -> Result<(), ()> {
         let mut env = env.clone();
         env.in_ppl = naming_attributes::mem(
             sn::user_attributes::PROBABILISTIC_MODEL,
@@ -165,14 +150,14 @@ impl VisitorMut for ElaborateNamespacesVisitor {
         cd.recurse(&mut env, self.object())
     }
 
-    fn visit_typedef(&mut self, env: &mut Env, td: &mut Typedef) -> Result<(), Self::Error> {
+    fn visit_typedef(&mut self, env: &mut Env, td: &mut Typedef) -> Result<(), ()> {
         let mut env = env.clone();
         env.namespace = td.namespace.clone();
         env.extend_tparams(&td.tparams);
         td.recurse(&mut env, self.object())
     }
 
-    fn visit_def(&mut self, env: &mut Env, def: &mut Def) -> Result<(), Self::Error> {
+    fn visit_def(&mut self, env: &mut Env, def: &mut Def) -> Result<(), ()> {
         match &def {
             // need to handle it ourselves, because in visit_fun_ is
             // called both for toplevel functions and lambdas
@@ -187,7 +172,7 @@ impl VisitorMut for ElaborateNamespacesVisitor {
         }
     }
 
-    fn visit_method_(&mut self, env: &mut Env, m: &mut Method_) -> Result<(), Self::Error> {
+    fn visit_method_(&mut self, env: &mut Env, m: &mut Method_) -> Result<(), ()> {
         let mut env = env.clone();
         env.extend_tparams(&m.tparams);
         m.recurse(&mut env, self.object())

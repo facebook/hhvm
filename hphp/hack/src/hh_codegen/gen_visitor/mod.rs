@@ -10,6 +10,7 @@ mod node_impl_generator;
 mod node_trait_generator;
 mod run;
 mod syn_helper;
+mod type_params_generator;
 mod visitor_trait_generator;
 
 #[macro_use]

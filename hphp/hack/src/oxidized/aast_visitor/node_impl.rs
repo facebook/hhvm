@@ -3,14 +3,16 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use super::{node::Node, node_mut::NodeMut, visitor::Visitor, visitor_mut::VisitorMut};
+use super::{
+    node::Node, node_mut::NodeMut, type_params::Params, visitor::Visitor, visitor_mut::VisitorMut,
+};
 use ocamlrep::rc::RcOc;
 use std::collections::BTreeMap;
 
 macro_rules! leaf_node {
     ($ty:ty) => {
-        impl<Context, Error, Ex, Fb, En, Hi> Node<Context, Error, Ex, Fb, En, Hi> for $ty {}
-        impl<Context, Error, Ex, Fb, En, Hi> NodeMut<Context, Error, Ex, Fb, En, Hi> for $ty {}
+        impl<P: Params> Node<P> for $ty {}
+        impl<P: Params> NodeMut<P> for $ty {}
     };
 }
 
@@ -21,52 +23,37 @@ leaf_node!(crate::pos::Pos);
 leaf_node!(crate::file_info::Mode);
 leaf_node!(crate::namespace_env::Env);
 
-impl<Context, Error, Ex, Fb, En, Hi, T> Node<Context, Error, Ex, Fb, En, Hi> for Vec<T>
+impl<P: Params, T> Node<P> for Vec<T>
 where
-    T: Node<Context, Error, Ex, Fb, En, Hi>,
+    T: Node<P>,
 {
-    fn recurse(
-        &self,
-        c: &mut Context,
-        v: &mut dyn Visitor<Context = Context, Error = Error, Ex = Ex, Fb = Fb, En = En, Hi = Hi>,
-    ) -> Result<(), Error> {
+    fn recurse(&self, c: &mut P::Context, v: &mut dyn Visitor<P = P>) -> Result<(), P::Error> {
         Ok(for i in self {
             i.accept(c, v)?;
         })
     }
 }
 
-impl<Context, Error, Ex, Fb, En, Hi, T> NodeMut<Context, Error, Ex, Fb, En, Hi> for Vec<T>
+impl<P: Params, T> NodeMut<P> for Vec<T>
 where
-    T: NodeMut<Context, Error, Ex, Fb, En, Hi>,
+    T: NodeMut<P>,
 {
     fn recurse(
         &mut self,
-        c: &mut Context,
-        v: &mut dyn VisitorMut<
-            Context = Context,
-            Error = Error,
-            Ex = Ex,
-            Fb = Fb,
-            En = En,
-            Hi = Hi,
-        >,
-    ) -> Result<(), Error> {
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<P = P>,
+    ) -> Result<(), P::Error> {
         Ok(for i in self {
             i.accept(c, v)?;
         })
     }
 }
 
-impl<Context, Error, Ex, Fb, En, Hi, T> Node<Context, Error, Ex, Fb, En, Hi> for Option<T>
+impl<P: Params, T> Node<P> for Option<T>
 where
-    T: Node<Context, Error, Ex, Fb, En, Hi>,
+    T: Node<P>,
 {
-    fn recurse(
-        &self,
-        c: &mut Context,
-        v: &mut dyn Visitor<Context = Context, Error = Error, Ex = Ex, Fb = Fb, En = En, Hi = Hi>,
-    ) -> Result<(), Error> {
+    fn recurse(&self, c: &mut P::Context, v: &mut dyn Visitor<P = P>) -> Result<(), P::Error> {
         Ok(match self {
             Some(t) => t.accept(c, v)?,
             _ => (),
@@ -74,22 +61,15 @@ where
     }
 }
 
-impl<Context, Error, Ex, Fb, En, Hi, T> NodeMut<Context, Error, Ex, Fb, En, Hi> for Option<T>
+impl<P: Params, T> NodeMut<P> for Option<T>
 where
-    T: NodeMut<Context, Error, Ex, Fb, En, Hi>,
+    T: NodeMut<P>,
 {
     fn recurse(
         &mut self,
-        c: &mut Context,
-        v: &mut dyn VisitorMut<
-            Context = Context,
-            Error = Error,
-            Ex = Ex,
-            Fb = Fb,
-            En = En,
-            Hi = Hi,
-        >,
-    ) -> Result<(), Error> {
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<P = P>,
+    ) -> Result<(), P::Error> {
         Ok(match self {
             Some(t) => t.accept(c, v)?,
             _ => (),
@@ -97,193 +77,134 @@ where
     }
 }
 
-impl<Context, Error, Ex, Fb, En, Hi, K, V> Node<Context, Error, Ex, Fb, En, Hi> for BTreeMap<K, V>
+impl<P: Params, K, V> Node<P> for BTreeMap<K, V>
 where
-    V: Node<Context, Error, Ex, Fb, En, Hi>,
+    V: Node<P>,
 {
-    fn recurse(
-        &self,
-        c: &mut Context,
-        v: &mut dyn Visitor<Context = Context, Error = Error, Ex = Ex, Fb = Fb, En = En, Hi = Hi>,
-    ) -> Result<(), Error> {
+    fn recurse(&self, c: &mut P::Context, v: &mut dyn Visitor<P = P>) -> Result<(), P::Error> {
         Ok(for value in self.values() {
             value.accept(c, v)?;
         })
     }
 }
 
-impl<Context, Error, Ex, Fb, En, Hi, K, V> NodeMut<Context, Error, Ex, Fb, En, Hi>
-    for BTreeMap<K, V>
+impl<P: Params, K, V> NodeMut<P> for BTreeMap<K, V>
 where
-    V: NodeMut<Context, Error, Ex, Fb, En, Hi>,
+    V: NodeMut<P>,
 {
     fn recurse(
         &mut self,
-        c: &mut Context,
-        v: &mut dyn VisitorMut<
-            Context = Context,
-            Error = Error,
-            Ex = Ex,
-            Fb = Fb,
-            En = En,
-            Hi = Hi,
-        >,
-    ) -> Result<(), Error> {
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<P = P>,
+    ) -> Result<(), P::Error> {
         Ok(for value in self.values_mut() {
             value.accept(c, v)?;
         })
     }
 }
 
-impl<Context, Error, Ex, Fb, En, Hi, T> Node<Context, Error, Ex, Fb, En, Hi> for RcOc<T>
+impl<P: Params, T> Node<P> for RcOc<T>
 where
-    T: Node<Context, Error, Ex, Fb, En, Hi>,
+    T: Node<P>,
 {
-    fn recurse(
-        &self,
-        c: &mut Context,
-        v: &mut dyn Visitor<Context = Context, Error = Error, Ex = Ex, Fb = Fb, En = En, Hi = Hi>,
-    ) -> Result<(), Error> {
+    fn recurse(&self, c: &mut P::Context, v: &mut dyn Visitor<P = P>) -> Result<(), P::Error> {
         self.as_ref().accept(c, v)
     }
 }
 
-impl<Context, Error, Ex, Fb, En, Hi, T> NodeMut<Context, Error, Ex, Fb, En, Hi> for RcOc<T>
+impl<P: Params, T> NodeMut<P> for RcOc<T>
 where
-    T: NodeMut<Context, Error, Ex, Fb, En, Hi>,
+    T: NodeMut<P>,
 {
     fn recurse(
         &mut self,
-        c: &mut Context,
-        v: &mut dyn VisitorMut<
-            Context = Context,
-            Error = Error,
-            Ex = Ex,
-            Fb = Fb,
-            En = En,
-            Hi = Hi,
-        >,
-    ) -> Result<(), Error> {
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<P = P>,
+    ) -> Result<(), P::Error> {
         Ok(if let Some(x) = RcOc::get_mut(self) {
             x.accept(c, v)?;
         })
     }
 }
 
-impl<Context, Error, Ex, Fb, En, Hi, T> Node<Context, Error, Ex, Fb, En, Hi> for std::rc::Rc<T>
+impl<P: Params, T> Node<P> for std::rc::Rc<T>
 where
-    T: Node<Context, Error, Ex, Fb, En, Hi>,
+    T: Node<P>,
 {
-    fn recurse(
-        &self,
-        c: &mut Context,
-        v: &mut dyn Visitor<Context = Context, Error = Error, Ex = Ex, Fb = Fb, En = En, Hi = Hi>,
-    ) -> Result<(), Error> {
+    fn recurse(&self, c: &mut P::Context, v: &mut dyn Visitor<P = P>) -> Result<(), P::Error> {
         self.as_ref().accept(c, v)
     }
 }
 
-impl<Context, Error, Ex, Fb, En, Hi, T> NodeMut<Context, Error, Ex, Fb, En, Hi> for std::rc::Rc<T>
+impl<P: Params, T> NodeMut<P> for std::rc::Rc<T>
 where
-    T: NodeMut<Context, Error, Ex, Fb, En, Hi>,
+    T: NodeMut<P>,
 {
     fn recurse(
         &mut self,
-        c: &mut Context,
-        v: &mut dyn VisitorMut<
-            Context = Context,
-            Error = Error,
-            Ex = Ex,
-            Fb = Fb,
-            En = En,
-            Hi = Hi,
-        >,
-    ) -> Result<(), Error> {
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<P = P>,
+    ) -> Result<(), P::Error> {
         Ok(if let Some(x) = std::rc::Rc::get_mut(self) {
             x.accept(c, v)?;
         })
     }
 }
 
-impl<Context, Error, Ex, Fb, En, Hi, T> Node<Context, Error, Ex, Fb, En, Hi> for Box<T>
+impl<P: Params, T> Node<P> for Box<T>
 where
-    T: Node<Context, Error, Ex, Fb, En, Hi>,
+    T: Node<P>,
 {
-    fn recurse(
-        &self,
-        c: &mut Context,
-        v: &mut dyn Visitor<Context = Context, Error = Error, Ex = Ex, Fb = Fb, En = En, Hi = Hi>,
-    ) -> Result<(), Error> {
+    fn recurse(&self, c: &mut P::Context, v: &mut dyn Visitor<P = P>) -> Result<(), P::Error> {
         self.as_ref().accept(c, v)
     }
 }
 
-impl<Context, Error, Ex, Fb, En, Hi, T> NodeMut<Context, Error, Ex, Fb, En, Hi> for Box<T>
+impl<P: Params, T> NodeMut<P> for Box<T>
 where
-    T: NodeMut<Context, Error, Ex, Fb, En, Hi>,
+    T: NodeMut<P>,
 {
     fn recurse(
         &mut self,
-        c: &mut Context,
-        v: &mut dyn VisitorMut<
-            Context = Context,
-            Error = Error,
-            Ex = Ex,
-            Fb = Fb,
-            En = En,
-            Hi = Hi,
-        >,
-    ) -> Result<(), Error> {
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<P = P>,
+    ) -> Result<(), P::Error> {
         self.as_mut().accept(c, v)
     }
 }
 
-impl<Context, Error, Ex, Fb, En, Hi, T1, T2> Node<Context, Error, Ex, Fb, En, Hi> for (T1, T2)
+impl<P: Params, T1, T2> Node<P> for (T1, T2)
 where
-    T1: Node<Context, Error, Ex, Fb, En, Hi>,
-    T2: Node<Context, Error, Ex, Fb, En, Hi>,
+    T1: Node<P>,
+    T2: Node<P>,
 {
-    fn recurse(
-        &self,
-        c: &mut Context,
-        v: &mut dyn Visitor<Context = Context, Error = Error, Ex = Ex, Fb = Fb, En = En, Hi = Hi>,
-    ) -> Result<(), Error> {
+    fn recurse(&self, c: &mut P::Context, v: &mut dyn Visitor<P = P>) -> Result<(), P::Error> {
         self.0.accept(c, v)?;
         self.1.accept(c, v)
     }
 }
 
-impl<Context, Error, Ex, Fb, En, Hi, T1, T2, T3> Node<Context, Error, Ex, Fb, En, Hi>
-    for (T1, T2, T3)
+impl<P: Params, T1, T2, T3> Node<P> for (T1, T2, T3)
 where
-    T1: Node<Context, Error, Ex, Fb, En, Hi>,
-    T2: Node<Context, Error, Ex, Fb, En, Hi>,
-    T3: Node<Context, Error, Ex, Fb, En, Hi>,
+    T1: Node<P>,
+    T2: Node<P>,
+    T3: Node<P>,
 {
-    fn recurse(
-        &self,
-        c: &mut Context,
-        v: &mut dyn Visitor<Context = Context, Error = Error, Ex = Ex, Fb = Fb, En = En, Hi = Hi>,
-    ) -> Result<(), Error> {
+    fn recurse(&self, c: &mut P::Context, v: &mut dyn Visitor<P = P>) -> Result<(), P::Error> {
         self.0.accept(c, v)?;
         self.1.accept(c, v)?;
         self.2.accept(c, v)
     }
 }
 
-impl<Context, Error, Ex, Fb, En, Hi, T1, T2, T3, T4> Node<Context, Error, Ex, Fb, En, Hi>
-    for (T1, T2, T3, T4)
+impl<P: Params, T1, T2, T3, T4> Node<P> for (T1, T2, T3, T4)
 where
-    T1: Node<Context, Error, Ex, Fb, En, Hi>,
-    T2: Node<Context, Error, Ex, Fb, En, Hi>,
-    T3: Node<Context, Error, Ex, Fb, En, Hi>,
-    T4: Node<Context, Error, Ex, Fb, En, Hi>,
+    T1: Node<P>,
+    T2: Node<P>,
+    T3: Node<P>,
+    T4: Node<P>,
 {
-    fn recurse(
-        &self,
-        c: &mut Context,
-        v: &mut dyn Visitor<Context = Context, Error = Error, Ex = Ex, Fb = Fb, En = En, Hi = Hi>,
-    ) -> Result<(), Error> {
+    fn recurse(&self, c: &mut P::Context, v: &mut dyn Visitor<P = P>) -> Result<(), P::Error> {
         self.0.accept(c, v)?;
         self.1.accept(c, v)?;
         self.2.accept(c, v)?;
@@ -291,73 +212,50 @@ where
     }
 }
 
-impl<Context, Error, Ex, Fb, En, Hi, T1, T2> NodeMut<Context, Error, Ex, Fb, En, Hi> for (T1, T2)
+impl<P: Params, T1, T2> NodeMut<P> for (T1, T2)
 where
-    T1: NodeMut<Context, Error, Ex, Fb, En, Hi>,
-    T2: NodeMut<Context, Error, Ex, Fb, En, Hi>,
+    T1: NodeMut<P>,
+    T2: NodeMut<P>,
 {
     fn recurse(
         &mut self,
-        c: &mut Context,
-        v: &mut dyn VisitorMut<
-            Context = Context,
-            Error = Error,
-            Ex = Ex,
-            Fb = Fb,
-            En = En,
-            Hi = Hi,
-        >,
-    ) -> Result<(), Error> {
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<P = P>,
+    ) -> Result<(), P::Error> {
         self.0.accept(c, v)?;
         self.1.accept(c, v)
     }
 }
 
-impl<Context, Error, Ex, Fb, En, Hi, T1, T2, T3> NodeMut<Context, Error, Ex, Fb, En, Hi>
-    for (T1, T2, T3)
+impl<P: Params, T1, T2, T3> NodeMut<P> for (T1, T2, T3)
 where
-    T1: NodeMut<Context, Error, Ex, Fb, En, Hi>,
-    T2: NodeMut<Context, Error, Ex, Fb, En, Hi>,
-    T3: NodeMut<Context, Error, Ex, Fb, En, Hi>,
+    T1: NodeMut<P>,
+    T2: NodeMut<P>,
+    T3: NodeMut<P>,
 {
     fn recurse(
         &mut self,
-        c: &mut Context,
-        v: &mut dyn VisitorMut<
-            Context = Context,
-            Error = Error,
-            Ex = Ex,
-            Fb = Fb,
-            En = En,
-            Hi = Hi,
-        >,
-    ) -> Result<(), Error> {
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<P = P>,
+    ) -> Result<(), P::Error> {
         self.0.accept(c, v)?;
         self.1.accept(c, v)?;
         self.2.accept(c, v)
     }
 }
 
-impl<Context, Error, Ex, Fb, En, Hi, T1, T2, T3, T4> NodeMut<Context, Error, Ex, Fb, En, Hi>
-    for (T1, T2, T3, T4)
+impl<P: Params, T1, T2, T3, T4> NodeMut<P> for (T1, T2, T3, T4)
 where
-    T1: NodeMut<Context, Error, Ex, Fb, En, Hi>,
-    T2: NodeMut<Context, Error, Ex, Fb, En, Hi>,
-    T3: NodeMut<Context, Error, Ex, Fb, En, Hi>,
-    T4: NodeMut<Context, Error, Ex, Fb, En, Hi>,
+    T1: NodeMut<P>,
+    T2: NodeMut<P>,
+    T3: NodeMut<P>,
+    T4: NodeMut<P>,
 {
     fn recurse(
         &mut self,
-        c: &mut Context,
-        v: &mut dyn VisitorMut<
-            Context = Context,
-            Error = Error,
-            Ex = Ex,
-            Fb = Fb,
-            En = En,
-            Hi = Hi,
-        >,
-    ) -> Result<(), Error> {
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<P = P>,
+    ) -> Result<(), P::Error> {
         self.0.accept(c, v)?;
         self.1.accept(c, v)?;
         self.2.accept(c, v)?;

@@ -7,7 +7,7 @@
 use naming_special_names_rust::special_idents;
 use oxidized::{
     aast,
-    aast_visitor::{visit, Node, Visitor},
+    aast_visitor::{visit, AstParams, Node, Visitor},
     pos::Pos,
 };
 use parser_core_types::{
@@ -44,24 +44,16 @@ impl Checker {
 }
 
 impl Visitor for Checker {
-    type Context = Context;
-    type Error = ();
-    type Ex = Pos;
-    type Fb = ();
-    type En = ();
-    type Hi = ();
+    type P = AstParams<Context, ()>;
 
-    fn object(
-        &mut self,
-    ) -> &mut dyn Visitor<Context = Self::Context, Error = (), Ex = Pos, Fb = (), En = (), Hi = ()>
-    {
+    fn object(&mut self) -> &mut dyn Visitor<P = Self::P> {
         self
     }
 
     fn visit_class_(
         &mut self,
-        c: &mut Self::Context,
-        p: &aast::Class_<Self::Ex, Self::Fb, Self::En, Self::Hi>,
+        c: &mut Context,
+        p: &aast::Class_<Pos, (), (), ()>,
     ) -> Result<(), ()> {
         p.recurse(
             &mut Context {
@@ -74,8 +66,8 @@ impl Visitor for Checker {
 
     fn visit_method_(
         &mut self,
-        c: &mut Self::Context,
-        p: &aast::Method_<Self::Ex, Self::Fb, Self::En, Self::Hi>,
+        c: &mut Context,
+        p: &aast::Method_<Pos, (), (), ()>,
     ) -> Result<(), ()> {
         p.recurse(
             &mut Context {
@@ -87,11 +79,7 @@ impl Visitor for Checker {
         )
     }
 
-    fn visit_fun_(
-        &mut self,
-        c: &mut Self::Context,
-        p: &aast::Fun_<Self::Ex, Self::Fb, Self::En, Self::Hi>,
-    ) -> Result<(), ()> {
+    fn visit_fun_(&mut self, c: &mut Context, p: &aast::Fun_<Pos, (), (), ()>) -> Result<(), ()> {
         p.recurse(
             &mut Context {
                 in_methodish: true,
@@ -102,11 +90,7 @@ impl Visitor for Checker {
         )
     }
 
-    fn visit_expr(
-        &mut self,
-        c: &mut Self::Context,
-        p: &aast::Expr<Self::Ex, Self::Fb, Self::En, Self::Hi>,
-    ) -> Result<(), ()> {
+    fn visit_expr(&mut self, c: &mut Context, p: &aast::Expr<Pos, (), (), ()>) -> Result<(), ()> {
         use aast::{ClassId, ClassId_::*, Expr, Expr_::*, Lid};
 
         if let Await(_) = p.1 {

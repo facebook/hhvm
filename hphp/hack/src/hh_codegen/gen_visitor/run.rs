@@ -5,7 +5,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 use super::{
     context::Context, generator::Generator, node_impl_generator::*, node_trait_generator::*,
-    visitor_trait_generator::*,
+    type_params_generator::*, visitor_trait_generator::*,
 };
 use crate::common::*;
 use clap::ArgMatches;
@@ -32,6 +32,7 @@ pub fn run(m: &ArgMatches) -> Result<Vec<(PathBuf, String)>> {
     let ctx = Context::new(files.as_slice(), root)?;
 
     let generators: Vec<Box<dyn Generator>> = vec![
+        Box::new(TypeParamGenerator),
         Box::new(RefNodeTrait),
         Box::new(MutNodeTrait),
         Box::new(RefNodeImpl),

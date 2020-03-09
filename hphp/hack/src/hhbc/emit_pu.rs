@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use oxidized::aast_visitor::{visit_mut, NodeMut, VisitorMut};
+use oxidized::aast_visitor::{visit_mut, AstParams, NodeMut, VisitorMut};
 use oxidized::{aast, aast_defs, ast_defs, local_id};
 use oxidized::{ast as Tast, pos::Pos};
 use std::collections::HashMap;
@@ -257,27 +257,13 @@ struct EraseBodyVisitor {}
 struct Ctx {}
 
 impl VisitorMut for EraseBodyVisitor {
-    type Context = Ctx;
-    type Error = ();
-    type Ex = ast_defs::Pos;
-    type Fb = ();
-    type En = ();
-    type Hi = ();
+    type P = AstParams<Ctx, ()>;
 
-    fn object(
-        &mut self,
-    ) -> &mut dyn VisitorMut<
-        Context = Self::Context,
-        Error = Self::Error,
-        Ex = Self::Ex,
-        Fb = Self::Fb,
-        En = Self::En,
-        Hi = Self::Hi,
-    > {
+    fn object(&mut self) -> &mut dyn VisitorMut<P = Self::P> {
         self
     }
 
-    fn visit_expr_(&mut self, c: &mut Self::Context, e: &mut Tast::Expr_) -> Result<(), ()> {
+    fn visit_expr_(&mut self, c: &mut Ctx, e: &mut Tast::Expr_) -> Result<(), ()> {
         match e {
             Tast::Expr_::PUAtom(atom) => Ok(*e = Tast::Expr_::String(atom.to_string())),
             Tast::Expr_::PUIdentifier(pui) => {
@@ -292,7 +278,7 @@ impl VisitorMut for EraseBodyVisitor {
         }
     }
 
-    fn visit_hint_(&mut self, c: &mut Self::Context, h: &mut Tast::Hint_) -> Result<(), ()> {
+    fn visit_hint_(&mut self, c: &mut Ctx, h: &mut Tast::Hint_) -> Result<(), ()> {
         match h {
             Tast::Hint_::HpuAccess(_, _, _) => Ok(*h = Tast::Hint_::Hmixed),
             Tast::Hint_::Hprim(prim) => Ok(match prim {

@@ -13,7 +13,7 @@ use hhbc_string_utils_rust as string_utils;
 use naming_special_names_rust::{math, members, special_functions, typehints};
 use oxidized::{
     aast,
-    aast_visitor::{visit_mut, NodeMut, VisitorMut},
+    aast_visitor::{visit_mut, AstParams, NodeMut, VisitorMut},
     ast as tast, ast_defs,
     namespace_env::Env as Namespace,
     pos::Pos,
@@ -457,27 +457,13 @@ impl<'a> FolderVisitor<'a> {
 }
 
 impl VisitorMut for FolderVisitor<'_> {
-    type Context = ();
-    type Error = ();
-    type Ex = ast_defs::Pos;
-    type Fb = ();
-    type En = ();
-    type Hi = ();
+    type P = AstParams<(), ()>;
 
-    fn object(
-        &mut self,
-    ) -> &mut dyn VisitorMut<
-        Context = Self::Context,
-        Error = Self::Error,
-        Ex = Self::Ex,
-        Fb = Self::Fb,
-        En = Self::En,
-        Hi = Self::Hi,
-    > {
+    fn object(&mut self) -> &mut dyn VisitorMut<P = Self::P> {
         self
     }
 
-    fn visit_expr_(&mut self, c: &mut Self::Context, p: &mut tast::Expr_) -> Result<(), ()> {
+    fn visit_expr_(&mut self, c: &mut (), p: &mut tast::Expr_) -> Result<(), ()> {
         p.recurse(c, self.object())?;
         let new_p = match p {
             tast::Expr_::Cast(e) => expr_to_typed_value(self.emitter, self.empty_namespace, &e.1)

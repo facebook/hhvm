@@ -28,21 +28,22 @@ trait NodeTrait {
         Ok(quote! {
             #![allow(unused_variables)]
             #use_visitor
+            use super::type_params::Params;
 
-            pub trait #trait_name#ty_params {
+            pub trait #trait_name<P: Params> {
                 fn accept(
                     #receiver,
-                    ctx: &mut #context,
-                    v: &mut dyn #visitor#ty_param_bindings,
-                ) -> Result<(), #error> {
+                    ctx: &mut P::#context,
+                    v: &mut dyn #visitor<P = P>,
+                ) -> Result<(), P::#error> {
                     self.recurse(ctx, v)
                 }
 
                 fn recurse(
                     #receiver,
-                    ctx: &mut #context,
-                    v: &mut dyn #visitor#ty_param_bindings,
-                ) -> Result<(), #error> {
+                    ctx: &mut P::#context,
+                    v: &mut dyn #visitor<P = P>,
+                ) -> Result<(), P::#error> {
                     Ok(())
                 }
             }

@@ -3,40 +3,27 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1ba997789a7557c7e8b4a52b47a343fb>>
+// @generated SignedSource<<387c9adc078058e14d79e9f1e71c7788>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
 #![allow(unused_variables)]
+use super::type_params::Params;
 use super::visitor_mut::VisitorMut;
-pub trait NodeMut<Context, Error, Ex, Fb, En, Hi> {
+pub trait NodeMut<P: Params> {
     fn accept(
         &mut self,
-        ctx: &mut Context,
-        v: &mut dyn VisitorMut<
-            Context = Context,
-            Error = Error,
-            Ex = Ex,
-            Fb = Fb,
-            En = En,
-            Hi = Hi,
-        >,
-    ) -> Result<(), Error> {
+        ctx: &mut P::Context,
+        v: &mut dyn VisitorMut<P = P>,
+    ) -> Result<(), P::Error> {
         self.recurse(ctx, v)
     }
     fn recurse(
         &mut self,
-        ctx: &mut Context,
-        v: &mut dyn VisitorMut<
-            Context = Context,
-            Error = Error,
-            Ex = Ex,
-            Fb = Fb,
-            En = En,
-            Hi = Hi,
-        >,
-    ) -> Result<(), Error> {
+        ctx: &mut P::Context,
+        v: &mut dyn VisitorMut<P = P>,
+    ) -> Result<(), P::Error> {
         Ok(())
     }
 }

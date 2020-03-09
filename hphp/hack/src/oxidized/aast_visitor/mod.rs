@@ -9,13 +9,33 @@ mod node_impl;
 mod node_impl_gen;
 mod node_mut;
 mod node_mut_impl_gen;
+mod type_params;
 mod visitor;
 mod visitor_mut;
 
 pub use node::Node;
 pub use node_mut::NodeMut;
+pub use type_params::Params;
+pub use type_params_defaults::AstParams;
 pub use visitor::{visit, Visitor};
 pub use visitor_mut::{visit as visit_mut, VisitorMut};
+
+mod type_params_defaults {
+
+    pub struct P<Context, Error, Ex, Fb, En, Hi>(
+        std::marker::PhantomData<(Context, Error, Ex, Fb, En, Hi)>,
+    );
+    impl<C, E, Ex, Fb, En, Hi> super::type_params::Params for P<C, E, Ex, Fb, En, Hi> {
+        type Context = C;
+        type Error = E;
+        type Ex = Ex;
+        type Fb = Fb;
+        type En = En;
+        type Hi = Hi;
+    }
+
+    pub type AstParams<Context, Error> = P<Context, Error, crate::pos::Pos, (), (), ()>;
+}
 
 #[cfg(test)]
 mod tests {
@@ -30,30 +50,12 @@ mod tests {
     #[test]
     fn simple() {
         impl Visitor for usize {
-            type Context = ();
-            type Error = ();
-            type Ex = ();
-            type Fb = ();
-            type En = ();
-            type Hi = ();
-            fn object(
-                &mut self,
-            ) -> &mut dyn Visitor<
-                Context = Self::Context,
-                Ex = (),
-                Error = (),
-                Fb = (),
-                En = (),
-                Hi = (),
-            > {
+            type P = type_params_defaults::P<(), (), (), (), (), ()>;
+            fn object(&mut self) -> &mut dyn Visitor<P = Self::P> {
                 self
             }
 
-            fn visit_expr(
-                &mut self,
-                c: &mut Self::Context,
-                p: &Expr<(), (), (), ()>,
-            ) -> Result<(), ()> {
+            fn visit_expr(&mut self, c: &mut (), p: &Expr<(), (), (), ()>) -> Result<(), ()> {
                 *self += 1;
                 p.recurse(c, self)
             }
@@ -72,30 +74,12 @@ mod tests {
     #[test]
     fn simple_mut() {
         impl VisitorMut for () {
-            type Context = ();
-            type Error = ();
-            type Ex = ();
-            type Fb = ();
-            type En = ();
-            type Hi = ();
-            fn object(
-                &mut self,
-            ) -> &mut dyn VisitorMut<
-                Context = Self::Context,
-                Error = (),
-                Ex = (),
-                Fb = (),
-                En = (),
-                Hi = (),
-            > {
+            type P = type_params_defaults::P<(), (), (), (), (), ()>;
+            fn object(&mut self) -> &mut dyn VisitorMut<P = Self::P> {
                 self
             }
 
-            fn visit_expr_(
-                &mut self,
-                c: &mut Self::Context,
-                p: &mut Expr_<(), (), (), ()>,
-            ) -> Result<(), ()> {
+            fn visit_expr_(&mut self, c: &mut (), p: &mut Expr_<(), (), (), ()>) -> Result<(), ()> {
                 std::mem::replace(p, Expr_::Null);
                 p.recurse(c, self)
             }

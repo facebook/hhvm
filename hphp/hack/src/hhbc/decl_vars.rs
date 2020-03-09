@@ -14,8 +14,8 @@ use naming_special_names_rust::{
     emitter_special_functions, pseudo_functions, special_idents, superglobals,
 };
 use oxidized::{
-    aast::{self, Pos},
-    aast_visitor::{visit, Node, Visitor},
+    aast,
+    aast_visitor::{visit, AstParams, Node, Visitor},
     ast::*,
 };
 use unique_list_rust::UniqueList;
@@ -128,27 +128,13 @@ impl<'a> DeclvarVisitor<'a> {
 }
 
 impl<'a> Visitor for DeclvarVisitor<'a> {
-    type Context = ();
-    type Error = String;
-    type Ex = Pos;
-    type Fb = ();
-    type En = ();
-    type Hi = ();
+    type P = AstParams<(), String>;
 
-    fn object(
-        &mut self,
-    ) -> &mut dyn Visitor<
-        Context = Self::Context,
-        Error = Self::Error,
-        Ex = Self::Ex,
-        Fb = Self::Fb,
-        En = Self::En,
-        Hi = Self::Hi,
-    > {
+    fn object(&mut self) -> &mut dyn Visitor<P = Self::P> {
         self
     }
 
-    fn visit_stmt_(&mut self, env: &mut Self::Context, s: &Stmt_) -> Result<(), Self::Error> {
+    fn visit_stmt_(&mut self, env: &mut (), s: &Stmt_) -> Result<(), String> {
         match s {
             Stmt_::Try(x) => {
                 let (body, catch_list, finally) = (&x.0, &x.1, &x.2);
@@ -163,7 +149,7 @@ impl<'a> Visitor for DeclvarVisitor<'a> {
         }
     }
 
-    fn visit_expr_(&mut self, env: &mut Self::Context, e: &Expr_) -> Result<(), Self::Error> {
+    fn visit_expr_(&mut self, env: &mut (), e: &Expr_) -> Result<(), String> {
         use aast::Expr_::*;
         match e {
             ObjGet(x) => {
@@ -249,7 +235,7 @@ impl<'a> Visitor for DeclvarVisitor<'a> {
                     }
                     _ => BareThisAsRef,
                 };
-                let on_arg = |self_: &mut Self, env: &mut Self::Context, x: &Expr| match &x.1 {
+                let on_arg = |self_: &mut Self, env: &mut (), x: &Expr| match &x.1 {
                     // Only add $this to locals if it's bare
                     Lvar(id) if &(id.1).1 == "$this" => Ok(self_.with_this(barethis)),
                     _ => self_.visit_expr(env, x),
@@ -272,11 +258,10 @@ impl<'a> Visitor for DeclvarVisitor<'a> {
             New(x) => {
                 let (exprs1, expr2) = (&x.2, &x.3);
 
-                let add_bare_expr =
-                    |self_: &mut Self, env: &mut Self::Context, expr: &Expr| match &expr.1 {
-                        Lvar(x) if &(x.1).1 == "$this" => Ok(self_.with_this(BareThisAsRef)),
-                        _ => self_.visit_expr(env, expr),
-                    };
+                let add_bare_expr = |self_: &mut Self, env: &mut (), expr: &Expr| match &expr.1 {
+                    Lvar(x) if &(x.1).1 == "$this" => Ok(self_.with_this(BareThisAsRef)),
+                    _ => self_.visit_expr(env, expr),
+                };
                 for expr in exprs1 {
                     add_bare_expr(self, env, expr)?;
                 }
@@ -289,10 +274,10 @@ impl<'a> Visitor for DeclvarVisitor<'a> {
         }
     }
 
-    fn visit_class_(&mut self, _: &mut Self::Context, _: &Class_) -> Result<(), Self::Error> {
+    fn visit_class_(&mut self, _: &mut (), _: &Class_) -> Result<(), String> {
         Ok(())
     }
-    fn visit_fun_(&mut self, _: &mut Self::Context, _: &Fun_) -> Result<(), Self::Error> {
+    fn visit_fun_(&mut self, _: &mut (), _: &Fun_) -> Result<(), String> {
         Ok(())
     }
 }

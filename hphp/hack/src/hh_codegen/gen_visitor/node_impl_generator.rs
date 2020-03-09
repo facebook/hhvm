@@ -40,6 +40,7 @@ pub trait NodeImpl {
             #use_node
             #use_visitor
             #uses
+            use super::type_params::Params;
 
             #(#impls)*
         })
@@ -58,20 +59,20 @@ pub trait NodeImpl {
         let context = ctx.context_ident();
         let error = ctx.error_ident();
         Ok(quote! {
-            impl#root_ty_params #node_trait_name#root_ty_params for #ty_name#ty_params {
+            impl<P: Params> #node_trait_name<P> for #ty_name#ty_params {
                 fn accept(
                     #self_ref_kind self,
-                    c: &mut #context,
-                    v: &mut dyn #visitor_trait_name#visitor_ty_param_bindings
-                ) -> Result<(), #error> {
+                    c: &mut P::#context,
+                    v: &mut dyn #visitor_trait_name<P = P>
+                ) -> Result<(), P::#error> {
                     v.#visit_fn(c, self)
                 }
 
                 fn recurse(
                     #self_ref_kind self,
-                    c: &mut #context,
-                    v: &mut dyn #visitor_trait_name#visitor_ty_param_bindings
-                ) -> Result<(), #error> {
+                    c: &mut P::#context,
+                    v: &mut dyn #visitor_trait_name<P = P>
+                ) -> Result<(), P::#error> {
                     #recurse_body
                 }
             }

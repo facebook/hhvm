@@ -17,7 +17,7 @@ pub fn gen_ty_param_bindings(tys: impl Iterator<Item = syn::Ident>) -> TokenStre
 }
 
 pub fn gen_ty_params(tys: impl Iterator<Item = syn::Ident>) -> TokenStream {
-    let ty_idents = tys.map(|ty| quote! { #ty, }).collect::<Vec<_>>();
+    let ty_idents = tys.map(|ty| quote! { P::#ty, }).collect::<Vec<_>>();
     if ty_idents.is_empty() {
         quote! {}
     } else {
@@ -26,7 +26,9 @@ pub fn gen_ty_params(tys: impl Iterator<Item = syn::Ident>) -> TokenStream {
 }
 
 pub fn gen_ty_params_with_self(tys: impl Iterator<Item = syn::Ident>) -> TokenStream {
-    let ty_idents = tys.map(|ty| quote! { Self::#ty, }).collect::<Vec<_>>();
+    let ty_idents = tys
+        .map(|ty| quote! { <Self::P as Params>::#ty, })
+        .collect::<Vec<_>>();
     if ty_idents.is_empty() {
         quote! {}
     } else {

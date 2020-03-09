@@ -33,12 +33,6 @@ pub struct Emitter {
     pub global_state: DynState,
 }
 
-pub struct StateRef<'a> {
-    pub label_gen: &'a mut label::Gen,
-    pub local_gen: &'a mut local::Gen,
-    pub iterator: &'a mut Iter,
-}
-
 impl Emitter {
     pub fn new(opts: Options) -> Emitter {
         Emitter {
@@ -83,20 +77,12 @@ impl Emitter {
         &self.local_gen
     }
 
-    pub fn refined_state_mut(&mut self) -> StateRef {
-        StateRef {
-            label_gen: &mut self.label_gen,
-            local_gen: &mut self.local_gen,
-            iterator: &mut self.iterator,
-        }
-    }
-
     pub fn local_scope<R, F: FnOnce(&mut Self) -> R>(&mut self, f: F) -> R {
         let counter = self.local_gen.counter;
-        let temp_map = self.local_gen.dedicated.temp_map.clone();
+        self.local_gen.dedicated.temp_map.push();
         let r = f(self);
         self.local_gen.counter = counter;
-        self.local_gen.dedicated.temp_map = temp_map;
+        self.local_gen.dedicated.temp_map.pop();
         r
     }
 }

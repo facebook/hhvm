@@ -44,20 +44,18 @@ let get_unnamed_local () = Unnamed (get_unnamed_local_id ())
 
 let get_unnamed_local_for_tempname s =
   SN.SpecialIdents.assert_tmp_var s;
-  let temp_local_map_ = !temp_local_map in
-  match SMap.find_opt s temp_local_map_ with
+  match SMap.find_opt s !temp_local_map with
   | Some x -> x
   | None -> failwith "Unnamed local never init'ed"
 
 let init_unnamed_local_for_tempname s =
   SN.SpecialIdents.assert_tmp_var s;
-  let temp_local_map_ = !temp_local_map in
-  match SMap.find_opt s temp_local_map_ with
+  match SMap.find_opt s !temp_local_map with
   | Some _ -> failwith "Attempted to double init"
   | None ->
     let new_local_id = get_unnamed_local_id () in
     let new_local = Unnamed new_local_id in
-    temp_local_map := SMap.add s new_local temp_local_map_;
+    temp_local_map := SMap.add s new_local !temp_local_map;
     new_local
 
 let get_or_allocate_unnamed r =

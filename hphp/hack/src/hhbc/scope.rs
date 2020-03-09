@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 pub mod scope {
-    use env::{emitter::Emitter, iterator::Iter, local};
+    use env::{emitter::Emitter, iterator, local};
     use instruction_sequence_rust::{InstrSeq, Result};
     use label_rust as label;
 
@@ -11,22 +11,23 @@ pub mod scope {
     /// blocks -- before, inner, after. If emit () registered any unnamed locals, the
     /// inner block will be wrapped in a try/catch that will unset these unnamed
     /// locals upon exception.
-    pub fn with_unnamed_locals<F>(emitter: &mut Emitter, emit: F) -> Result
+    pub fn with_unnamed_locals<F>(e: &mut Emitter, emit: F) -> Result
     where
         F: FnOnce(&mut Emitter) -> Result<(InstrSeq, InstrSeq, InstrSeq)>,
     {
-        emitter.local_gen_mut().store_current_state();
+        let local_counter = e.local_gen().counter;
+        e.local_gen_mut().dedicated.temp_map.push();
 
-        let (before, inner, after) = emit(emitter)?;
+        let (before, inner, after) = emit(e)?;
 
-        if !emitter.local_gen().state_has_changed() {
-            emitter.local_gen_mut().revert_state();
+        e.local_gen_mut().dedicated.temp_map.pop();
+        if local_counter == e.local_gen().counter {
             Ok(InstrSeq::gather(vec![before, inner, after]))
         } else {
-            let local_ids_to_unset = emitter.local_gen_mut().revert_state();
-            let unset_locals = unset_unnamed_locals(local_ids_to_unset);
+            let unset_locals = unset_unnamed_locals(local_counter.0, e.local_gen().counter.0);
+            e.local_gen_mut().counter = local_counter;
             Ok(wrap_inner_in_try_catch(
-                emitter.label_gen_mut(),
+                e.label_gen_mut(),
                 (before, inner, after),
                 unset_locals,
             ))
@@ -37,29 +38,27 @@ pub mod scope {
     /// instruction blocks -- before, inner, after. If emit () registered any unnamed
     /// locals or iterators, the inner block will be wrapped in a try/catch that will
     /// unset these unnamed locals and free these iterators upon exception.
-    pub fn with_unnamed_locals_and_iterators<F>(emitter: &mut Emitter, emit: F) -> Result
+    pub fn with_unnamed_locals_and_iterators<F>(e: &mut Emitter, emit: F) -> Result
     where
         F: FnOnce(&mut Emitter) -> Result<(InstrSeq, InstrSeq, InstrSeq)>,
     {
-        let stateref = emitter.refined_state_mut();
-        let (next_local, next_iterator) = (stateref.local_gen, stateref.iterator);
-        next_local.store_current_state();
-        next_iterator.store_current_state();
+        let local_counter = e.local_gen().counter;
+        e.local_gen_mut().dedicated.temp_map.push();
+        let next_iterator = e.iterator().next;
 
-        let (before, inner, after) = emit(emitter)?;
+        let (before, inner, after) = emit(e)?;
 
-        let stateref = emitter.refined_state_mut();
-        let (next_local, next_iterator) = (stateref.local_gen, stateref.iterator);
-        if !next_local.state_has_changed() && !next_iterator.state_has_changed() {
-            next_local.revert_state();
+        e.local_gen_mut().dedicated.temp_map.pop();
+
+        if local_counter == e.local_gen().counter && next_iterator == e.iterator().next {
             Ok(InstrSeq::gather(vec![before, inner, after]))
         } else {
-            let local_ids_to_unset = next_local.revert_state();
-            let iters_to_free = next_iterator.revert_state();
-            let unset_locals = unset_unnamed_locals(local_ids_to_unset);
-            let free_iters = free_iterators(iters_to_free);
+            let unset_locals = unset_unnamed_locals(local_counter.0, e.local_gen().counter.0);
+            e.local_gen_mut().counter = local_counter;
+            let free_iters = free_iterators(next_iterator, e.iterator().next);
+            e.iterator_mut().next = next_iterator;
             Ok(wrap_inner_in_try_catch(
-                stateref.label_gen,
+                e.label_gen_mut(),
                 (before, inner, after),
                 InstrSeq::gather(vec![unset_locals, free_iters]),
             ))
@@ -68,71 +67,44 @@ pub mod scope {
 
     /// An equivalent of with_unnamed_locals that allocates a single local and
     /// passes it to emit
-    pub fn with_unnamed_local<F>(emitter: &mut Emitter, emit: F) -> Result
+    pub fn with_unnamed_local<F>(e: &mut Emitter, emit: F) -> Result
     where
         F: FnOnce(&mut Emitter, local::Type) -> Result<(InstrSeq, InstrSeq, InstrSeq)>,
     {
-        let next_local = emitter.local_gen_mut();
-        next_local.store_current_state();
-        let local = next_local.get_unnamed();
-
-        let (before, inner, after) = emit(emitter, local)?;
-
-        if !emitter.local_gen().state_has_changed() {
-            Ok(InstrSeq::gather(vec![before, inner, after]))
-        } else {
-            let local_ids_to_unset = emitter.local_gen_mut().revert_state();
-            let unset_locals = unset_unnamed_locals(local_ids_to_unset);
-            Ok(wrap_inner_in_try_catch(
-                emitter.label_gen_mut(),
-                (before, inner, after),
-                unset_locals,
-            ))
-        }
+        with_unnamed_locals(e, |e| {
+            let tmp = e.local_gen_mut().get_unnamed();
+            emit(e, tmp)
+        })
     }
 
-    pub fn stash_top_in_unnamed_local<F>(emitter: &mut Emitter, emit: F) -> InstrSeq
+    pub fn stash_top_in_unnamed_local<F>(e: &mut Emitter, emit: F) -> Result
     where
-        F: FnOnce() -> InstrSeq,
+        F: FnOnce(&mut Emitter) -> Result,
     {
-        let next_local = emitter.local_gen_mut();
-        next_local.store_current_state();
-
-        // Pop the top of the stack into an unnamed local, run emit (), then push the
-        // stashed value to the top of the stack
-        let tmp = next_local.get_unnamed();
-        let (before, inner, after) = (
-            InstrSeq::make_popl(tmp.clone()),
-            emit(),
-            InstrSeq::make_pushl(tmp.clone()),
-        );
-
-        if !next_local.state_has_changed() {
-            InstrSeq::gather(vec![before, inner, after])
-        } else {
-            let local_ids_to_unset = next_local.revert_state();
-            let unset_locals = unset_unnamed_locals(local_ids_to_unset);
-            wrap_inner_in_try_catch(
-                emitter.label_gen_mut(),
-                (before, inner, after),
-                unset_locals,
-            )
-        }
+        with_unnamed_locals(e, |e| {
+            let tmp = e.local_gen_mut().get_unnamed();
+            Ok((
+                InstrSeq::make_popl(tmp.clone()),
+                emit(e)?,
+                InstrSeq::make_pushl(tmp),
+            ))
+        })
     }
 
-    fn unset_unnamed_locals(ids: Vec<local::Id>) -> InstrSeq {
+    fn unset_unnamed_locals(start: local::Id, end: local::Id) -> InstrSeq {
         InstrSeq::gather(
-            ids.into_iter()
+            (start..end)
+                .into_iter()
                 .map(|id| InstrSeq::make_unsetl(local::Type::Unnamed(id)))
                 .collect(),
         )
     }
 
-    fn free_iterators(iters: Vec<Iter>) -> InstrSeq {
+    fn free_iterators(start: iterator::Id, end: iterator::Id) -> InstrSeq {
         InstrSeq::gather(
-            iters
+            (start.0..end.0)
                 .into_iter()
-                .map(|i| InstrSeq::make_iterfree(i.next))
+                .map(|i| InstrSeq::make_iterfree(iterator::Id(i)))
                 .collect(),
         )
     }

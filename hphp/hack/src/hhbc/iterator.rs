@@ -5,8 +5,8 @@
 
 use std::fmt;
 
-#[derive(Debug, Clone, Copy)]
-pub struct Id(usize);
+#[derive(Default, Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Id(pub usize);
 
 impl fmt::Display for Id {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -14,7 +14,7 @@ impl fmt::Display for Id {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Default, Debug, Clone)]
 pub struct Iter {
     pub next: Id,
     count: usize,
@@ -27,11 +27,7 @@ impl Iter {
     pub fn get(&mut self) -> Id {
         let curr = self.next.0;
         self.next.0 = curr + 1;
-        self.count = if self.count > self.next.0 {
-            self.count
-        } else {
-            self.next.0
-        };
+        self.count = usize::max(self.count, self.next.0);
         Id(curr)
     }
 
@@ -41,66 +37,5 @@ impl Iter {
 
     pub fn reset(&mut self) {
         *self = Self::default();
-    }
-
-    pub fn store_current_state(&mut self) {
-        STORED.with(|x| {
-            let stored_mut: &mut Stored = &mut *x.borrow_mut();
-            stored_mut.store(self.clone());
-        });
-    }
-
-    pub fn state_has_changed(&self) -> bool {
-        STORED.with(|stored| {
-            let (Id(x), Id(y)) = (self.next, (&*stored.borrow()).get_iterator_id());
-            x != y
-        })
-    }
-
-    /// Revert to the old state stored in STORED, and return newly registered
-    /// iterators to be freed
-    pub fn revert_state(&mut self) -> Vec<Iter> {
-        STORED.with(|stored| {
-            let Id(old_id) = (&*stored.borrow()).get_iterator_id();
-            let Id(new_id) = self.next;
-            let mut iters_to_free = Vec::new();
-            for i in old_id..new_id {
-                iters_to_free.push(Iter {
-                    next: Id(i),
-                    count: i + 1,
-                });
-            }
-            self.next = Id(old_id);
-            iters_to_free
-        })
-    }
-}
-
-impl Default for Iter {
-    fn default() -> Self {
-        Iter {
-            next: Id(0),
-            count: 0,
-        }
-    }
-}
-
-use ::std::cell::RefCell;
-thread_local! {
-    static STORED: RefCell<Stored> = RefCell::new( Stored::default() );
-}
-
-#[derive(Default)]
-struct Stored {
-    iterator: Iter,
-}
-
-impl Stored {
-    fn store(&mut self, iterator: Iter) {
-        self.iterator = iterator;
-    }
-
-    fn get_iterator_id(&self) -> Id {
-        self.iterator.next
     }
 }

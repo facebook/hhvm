@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 use naming_special_names_rust::special_idents;
 
-use std::collections::HashMap;
+use indexmap::IndexMap;
 
 /// Type of locals as they appear in instructions.
 /// Named variables are those appearing in the .declvars declaration. These
@@ -21,8 +21,8 @@ pub type Id = usize;
 
 #[derive(Default, Debug)]
 pub struct Gen {
-    pub(crate) counter: Counter,
-    pub(crate) dedicated: Dedicated,
+    pub counter: Counter,
+    pub dedicated: Dedicated,
 }
 
 impl Gen {
@@ -41,12 +41,7 @@ impl Gen {
     pub fn init_unnamed_for_tempname(&mut self, s: &str) -> &Type {
         special_idents::assert_tmp_var(s);
         let new_local = self.get_unnamed();
-        if self
-            .dedicated
-            .temp_map
-            .insert(s.to_owned(), new_local)
-            .is_some()
-        {
+        if self.dedicated.temp_map.insert(s, new_local).is_some() {
             panic!("Attempted to double init");
         }
         self.dedicated.temp_map.get(s).unwrap()
@@ -56,7 +51,7 @@ impl Gen {
         let mut counter = self.counter;
         let mut new_counter = self.counter;
         let new_id = new_counter.get_unnamed_id(&self.dedicated);
-        let ret = self.dedicated.retval.get_or_insert_with(|| {
+        let ret = self.dedicated.label.get_or_insert_with(|| {
             counter = new_counter;
             Type::Unnamed(new_id)
         });
@@ -84,88 +79,52 @@ impl Gen {
         self.get_retval();
     }
 
-    pub fn scope<R, F: FnOnce(&mut Self) -> R>(&mut self, f: F) -> R {
-        // TODO(hrust) copying HashMap may be a performance bottleneck
-        // but we cannot do better without immutable collections
-        let (counter, temp_map) = (self.counter, self.dedicated.temp_map.clone());
-        let result = f(self);
-        self.counter = counter;
-        self.dedicated.temp_map = temp_map;
-        result
-    }
-
-    pub fn store_current_state(&mut self) {
-        STORED.with(|x| {
-            let stored_mut: &mut Stored = &mut *x.borrow_mut();
-            stored_mut.store(self.counter, self.dedicated.temp_map.clone());
-        });
-    }
-
-    pub fn state_has_changed(&self) -> bool {
-        STORED.with(|stored| match stored.borrow().get_counter() {
-            None => false,
-            Some(counter) => !self.counter.eq(*counter),
-        })
-    }
-
-    /// Revert to the old state stored in STORED, and return the ids of newly registered
-    /// unnamed locals to be unset
-    pub fn revert_state(&mut self) -> Vec<Id> {
-        STORED.with(|stored| {
-            let stored: &mut Stored = &mut *stored.borrow_mut();
-            let old_counter = stored.counters.pop().unwrap();
-            let old_temp_map = stored.get_temp_map().clone();
-            let (Counter(new_id), Counter(old_id)) = (self.counter, old_counter);
-            let local_ids_to_unset = (old_id..new_id).collect::<Vec<_>>();
-            self.counter = old_counter;
-            self.dedicated.temp_map = old_temp_map;
-            local_ids_to_unset
-        })
-    }
-
     pub fn reset(&mut self, base: Id) {
         self.counter = Counter(base);
         self.dedicated = Dedicated::default();
     }
 }
 
-use ::std::cell::RefCell;
-thread_local! {
-    static STORED: RefCell<Stored> = RefCell::new( Stored::default() );
+#[derive(Debug, Default)]
+pub struct TempMap {
+    stack: Vec<usize>,
+    map: IndexMap<String, Type>,
 }
 
-#[derive(Default)]
-struct Stored {
-    counters: Vec<Counter>,
-    temp_map: HashMap<String, Type>,
-}
-
-impl Stored {
-    fn store(&mut self, counter: Counter, temp_map: HashMap<String, Type>) {
-        self.counters.push(counter);
-        self.temp_map = temp_map;
+impl TempMap {
+    pub fn get(&self, temp: impl AsRef<str>) -> Option<&Type> {
+        self.map.get(temp.as_ref())
     }
 
-    fn get_counter(&self) -> Option<&Counter> {
-        self.counters.last()
+    pub fn insert(&mut self, temp: impl Into<String>, local: Type) -> Option<Type> {
+        self.map.insert(temp.into(), local)
     }
 
-    fn get_temp_map(&self) -> &HashMap<String, Type> {
-        &self.temp_map
+    pub fn push(&mut self) {
+        self.stack.push(self.map.len())
+    }
+
+    pub fn pop(&mut self) {
+        if let Some(_) = self.stack.pop() {
+            let j = *self.stack.last().unwrap_or(&0);
+            while self.map.len() > j {
+                self.pop();
+            }
+        }
     }
 }
 
 // implementation details
 
 #[derive(Default, Debug)]
-pub(crate) struct Dedicated {
+pub struct Dedicated {
     label: Option<Type>,
     retval: Option<Type>,
-    pub(crate) temp_map: HashMap<String, Type>,
+    pub temp_map: TempMap,
 }
 
-#[derive(Default, Clone, Copy, Debug)]
-pub(crate) struct Counter(Id);
+#[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Counter(pub Id);
 
 impl Counter {
     fn get_unnamed_id(&mut self, dedicated: &Dedicated) -> Id {
@@ -180,10 +139,5 @@ impl Counter {
                 _ => curr,
             },
         }
-    }
-
-    fn eq(self, other: Self) -> bool {
-        let (Counter(id1), Counter(id2)) = (self, other);
-        id1 == id2
     }
 }

@@ -256,7 +256,9 @@ pub struct Destructure<'a> {
     pub kind: DestructureKind,
 }
 
-pub enum InternalType<'a> {
+pub enum InternalType_<'a> {
     LoclType(Ty<'a>),
     ConstraintType(ConstraintType<'a>),
 }
+
+pub type InternalType<'a> = &'a InternalType_<'a>;

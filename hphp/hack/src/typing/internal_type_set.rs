@@ -5,4 +5,6 @@
 
 use crate::InternalType;
 
-pub type ITySet<'a> = std::collections::BTreeSet<InternalType<'a>>;
+use im_rc::OrdSet;
+
+pub type ITySet<'a> = OrdSet<InternalType<'a>>;

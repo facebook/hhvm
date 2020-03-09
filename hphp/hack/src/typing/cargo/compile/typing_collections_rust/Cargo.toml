@@ -1,0 +1,17 @@
+# @generated
+# @autocargo from //hphp/hack/src/typing:typing_collections_rust
+# Signature
+[package]
+name = "typing_collections_rust"
+edition = "2018"
+version = "0.0.0"
+include = ["../../../typing_collections_rust.rs"]
+
+[lib]
+path = "../../../typing_collections_rust.rs"
+
+[dependencies]
+oxidized = { path = "../../../../oxidized" }
+bumpalo = { version = "3.1.2", features = ["collections"] }
+im-rc = { version = "14.2", features = ["serde"] }
+# @end of Signature

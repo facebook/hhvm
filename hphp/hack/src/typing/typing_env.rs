@@ -13,8 +13,8 @@ pub fn empty_global_env<'a>(builder: &'a TypeBuilder<'a>, file: RelativePath) ->
     Genv {
         file,
         tcopt: oxidized::global_options::GlobalOptions::default(),
-        params: oxidized::local_id::map::Map::new(),
-        return_: typing_env_return_info::TypingEnvReturnInfo {
+        params: LocalIdMap::new(),
+        return_info: typing_env_return_info::TypingEnvReturnInfo {
             explicit: false,
             mutable: false,
             void_to_rx: false,

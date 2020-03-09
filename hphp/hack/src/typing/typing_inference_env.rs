@@ -5,8 +5,12 @@
 use bumpalo::collections::Vec;
 
 use oxidized::pos::Pos;
-use oxidized::{aast, i_map, ident, s_map, typing_tyvar_occurrences};
+use oxidized::{aast, ident};
+
+use typing_collections_rust::{IMap, SMap};
 use typing_defs_rust::{ITySet, PReason, Ty};
+
+use crate::typing_tyvar_occurrences;
 
 pub struct TyvarConstraints<'a> {
     /// Does this type variable appear covariantly in the type of the expression?
@@ -21,13 +25,13 @@ pub struct TyvarConstraints<'a> {
     /// Whenever we localize "T1::T" in a constraint, we add a fresh type variable
     /// indexed by "T" in the type_constants of the type variable representing T1.
     /// This allows to properly check constraints on "T1::T".
-    pub type_constants: s_map::SMap<(&'a aast::Sid, Ty<'a>)>,
+    pub type_constants: SMap<'a, (&'a aast::Sid, Ty<'a>)>,
     /// Map associating PU information to each instance of
     /// C:@E:@#v:@T
     /// when the type variable #v is not resolved yet. We introduce a new type
     /// variable to 'postpone' the checking of this expression until the end,
     /// when #v will be known.
-    pub pu_accesses: s_map::SMap<(Ty<'a>, &'a aast::Sid, Ty<'a>, &'a aast::Sid)>,
+    pub pu_accesses: SMap<'a, (Ty<'a>, &'a aast::Sid, Ty<'a>, &'a aast::Sid)>,
 }
 
 pub enum SolvingInfo<'a> {
@@ -46,7 +50,7 @@ pub struct TyvarInfo<'a> {
     pub solving_info: SolvingInfo<'a>,
 }
 
-pub type Tvenv<'a> = i_map::IMap<TyvarInfo<'a>>;
+pub type Tvenv<'a> = IMap<TyvarInfo<'a>>;
 
 pub struct TypingInferenceEnv<'a> {
     pub tvenv: Tvenv<'a>,

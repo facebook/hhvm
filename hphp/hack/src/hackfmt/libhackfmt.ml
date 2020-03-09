@@ -52,13 +52,12 @@ let text_with_formatted_ranges
     ?(range : Interval.t option)
     (text : string)
     (formatted_ranges : (Interval.t * string) list) : Buffer.t =
-  let (start_offset, length) =
+  let (start_offset, end_offset) =
     match range with
-    | Some (start_offset, end_offset) ->
-      (start_offset, end_offset - start_offset)
+    | Some (start_offset, end_offset) -> (start_offset, end_offset)
     | None -> (0, String.length text)
   in
-  let buf = Buffer.create (length + 256) in
+  let buf = Buffer.create (end_offset - start_offset + 256) in
   let bytes_seen = ref start_offset in
   List.iter formatted_ranges (fun ((st, ed), formatted) ->
       for i = !bytes_seen to st - 1 do
@@ -66,7 +65,7 @@ let text_with_formatted_ranges
       done;
       Buffer.add_string buf formatted;
       bytes_seen := ed);
-  for i = !bytes_seen to length - 1 do
+  for i = !bytes_seen to end_offset - 1 do
     Buffer.add_char buf text.[i]
   done;
   buf

@@ -5,5 +5,7 @@
 pub mod typing_defs;
 pub mod typing_defs_core;
 pub mod typing_make_type;
+pub mod typing_reason;
 
 pub use typing_defs::*;
+pub use typing_reason::*;

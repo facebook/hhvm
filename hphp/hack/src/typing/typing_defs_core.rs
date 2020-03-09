@@ -5,8 +5,9 @@
 
 use bumpalo::collections::Vec;
 pub use oxidized::typing_defs_core::*;
-use oxidized::typing_reason as reason;
 use oxidized::{ident, nast, tany_sentinel};
+
+use crate::typing_reason::*;
 
 /// A type as used during type inference.
 ///
@@ -162,7 +163,7 @@ pub enum Ty_<'a> {
 /// is to have a pointer to a pointer to a
 /// (reason ptr, inlined type). Which reduces the size of
 /// Ty_ and decreases stack usage.
-pub struct Ty<'a>(pub &'a reason::Reason, pub &'a Ty_<'a>);
+pub struct Ty<'a>(pub PReason<'a>, pub &'a Ty_<'a>);
 
 /// This is a direct translation of oxidized::gen::typing_defs_core::TaccessType.
 ///

@@ -214,3 +214,49 @@ pub struct PossiblyEnforcedTy<'a> {
     pub enforced: bool,
     pub type_: Ty<'a>,
 }
+
+pub enum ConstraintType_<'a> {
+    ThasMember(HasMember<'a>),
+    /// The type of container destructuring via list() or splat `...`
+    Tdestructure, // TODO: Tdestructure(Destructure),
+    TCunion(Ty<'a>, ConstraintType<'a>),
+    TCintersection(Ty<'a>, ConstraintType<'a>),
+}
+
+pub struct ConstraintType<'a>(pub PReason<'a>, pub &'a ConstraintType_<'a>);
+
+pub struct HasMember<'a> {
+    pub name: &'a nast::Sid,
+    pub member_type: Ty<'a>,
+    /// This is required to check ambiguous object access, where sometimes
+    /// HHVM would access the private member of a parent class instead of the
+    /// one from the current class.
+    pub class_id: &'a nast::ClassId_,
+}
+
+pub struct Destructure<'a> {
+    /// This represents the standard parameters of a function or the fields in a list
+    /// destructuring assignment. Example:
+    ///
+    /// function take(bool $b, float $f = 3.14, arraykey ...$aks): void {}
+    /// function f((bool, float, int, string) $tup): void {
+    ///   take(...$tup);
+    /// }
+    ///
+    /// corresponds to the subtyping assertion
+    ///
+    /// (bool, float, int, string) <: splat([#1], [opt#2], ...#3)
+    pub required: Vec<'a, Ty<'a>>,
+    /// Represents the optional parameters in a function, only used for splats
+    pub optional: Vec<'a, Ty<'a>>,
+    /// Represents a function's variadic parameter, also only used for splats
+    pub variadic: Option<Ty<'a>>,
+    /// list() destructuring allows for partial matches on lists, even when the operation
+    /// might throw i.e. list($a) = vec[];
+    pub kind: DestructureKind,
+}
+
+pub enum InternalType<'a> {
+    LoclType(Ty<'a>),
+    ConstraintType(ConstraintType<'a>),
+}

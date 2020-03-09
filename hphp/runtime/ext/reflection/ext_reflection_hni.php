@@ -1793,15 +1793,15 @@ class ReflectionClass implements Reflector {
   // This calculations requires walking the preclasses in the hierarchy and
   // should not be getting performed repeatedly.
   <<__Native, __Rx>>
-  // returns array:
-  //   'properties'               => array<string, prop_info_array>
-  //   'private_properties'       => array<string, prop_info_array>
-  //   'properties_index'         => array<string, int>
-  //   'private_properties_index' => array<string, int>
-  private static function getClassPropertyInfo(string $clsname): array;
+  // returns dict:
+  //   'properties'               => darray<string, prop_info_array>
+  //   'private_properties'       => darray<string, prop_info_array>
+  //   'properties_index'         => darray<string, int>
+  //   'private_properties_index' => darray<string, int>
+  private static function getClassPropertyInfo(string $clsname): dict;
 
   <<__Native, __Rx, __MaybeMutable>>
-  private function getDynamicPropertyInfos(object $obj): array<string, mixed>;
+  private function getDynamicPropertyInfos(object $obj): dict<string, mixed>;
 
   <<__Rx, __MaybeMutable>>
   private function getOrderedPropertyInfos(): ConstMap<string, mixed> {

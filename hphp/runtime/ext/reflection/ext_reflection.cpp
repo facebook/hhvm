@@ -1543,7 +1543,7 @@ static Array HHVM_STATIC_METHOD(
     ? *cls->getPropData()
     : cls->declPropInit();
 
-  auto ret = Array::Create();
+  auto ret = Array::CreateDict();
   for (auto const& declProp : properties) {
     auto slot = declProp.serializationIdx;
     auto index = cls->propSlotToIndex(slot);
@@ -1553,7 +1553,7 @@ static Array HHVM_STATIC_METHOD(
       continue;
     }
 
-    auto info = Array::Create();
+    auto info = Array::CreateDArray();
     set_instance_prop_info(info, &prop, default_val);
     ret.set(StrNR(prop.name), VarNR(info).tv());
   }
@@ -1567,7 +1567,7 @@ static Array HHVM_STATIC_METHOD(
       continue;
     }
 
-    auto info = Array::Create();
+    auto info = Array::CreateDArray();
     set_static_prop_info(info, &prop);
     ret.set(StrNR(prop.name), VarNR(info).tv());
   }
@@ -1580,17 +1580,17 @@ static Array HHVM_METHOD(ReflectionClass, getDynamicPropertyInfos,
   auto obj_data = obj.get();
   assertx(obj_data->getVMClass() == cls);
   if (!obj_data->hasDynProps()) {
-    return empty_array();
+    return empty_dict_array();
   }
 
   auto const dynPropArray = obj_data->dynPropArray();
-  ArrayInit ret(dynPropArray->size(), ArrayInit::Mixed{});
+  DictInit ret{dynPropArray->size()};
   IterateKV(dynPropArray.get(), [&](TypedValue k, TypedValue) {
     if (RuntimeOption::EvalNoticeOnReadDynamicProp) {
       auto const key = tvCastToString(k);
       obj_data->raiseReadDynamicProp(key.get());
     }
-    Array info = Array::Create();
+    Array info = Array::CreateDArray();
     set_dyn_prop_info(info, k, cls->name());
     ret.setValidKey(k, VarNR(info).tv());
   });

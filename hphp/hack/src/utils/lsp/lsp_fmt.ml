@@ -252,6 +252,22 @@ let print_cancelRequest (p : CancelRequest.params) : json =
   CancelRequest.(JSON_Object [("id", print_id p.id)])
 
 (************************************************************************)
+
+let parse_setTraceNotification (params : json option) :
+    SetTraceNotification.params =
+  match Jget.string_opt params "value" with
+  | Some "verbose" -> SetTraceNotification.Verbose
+  | _ -> SetTraceNotification.Off
+
+let print_setTraceNotification (p : SetTraceNotification.params) : json =
+  let s =
+    match p with
+    | SetTraceNotification.Verbose -> "verbose"
+    | SetTraceNotification.Off -> "off"
+  in
+  JSON_Object [("value", JSON_String s)]
+
+(************************************************************************)
 let print_rage (r : RageFB.result) : json =
   RageFB.(
     let print_item (item : rageItem) : json =
@@ -1237,7 +1253,7 @@ let notification_name_to_string (notification : lsp_notification) : string =
   | ShowMessageNotification _ -> "window/showMessage"
   | ConnectionStatusNotificationFB _ -> "telemetry/connectionStatus"
   | InitializedNotification -> "initialized"
-  | SetTraceNotification -> "$/setTraceNotification"
+  | SetTraceNotification _ -> "$/setTraceNotification"
   | LogTraceNotification -> "$/logTraceNotification"
   | ToggleTypeCoverageNotificationFB _ -> "workspace/toggleTypeCoverage"
   | UnknownNotification (method_, _params) -> method_
@@ -1309,7 +1325,8 @@ let parse_lsp_notification (method_ : string) (params : json option) :
     lsp_notification =
   match method_ with
   | "$/cancelRequest" -> CancelRequestNotification (parse_cancelRequest params)
-  | "$/setTraceNotification" -> SetTraceNotification
+  | "$/setTraceNotification" ->
+    SetTraceNotification (parse_setTraceNotification params)
   | "$/logTraceNotification" -> LogTraceNotification
   | "initialized" -> InitializedNotification
   | "exit" -> ExitNotification
@@ -1492,6 +1509,7 @@ let print_lsp_notification (notification : lsp_notification) : json =
   let params =
     match notification with
     | CancelRequestNotification r -> print_cancelRequest r
+    | SetTraceNotification r -> print_setTraceNotification r
     | PublishDiagnosticsNotification r -> print_diagnostics r
     | TelemetryNotification r ->
       print_logMessage r.LogMessage.type_ r.LogMessage.message
@@ -1502,7 +1520,6 @@ let print_lsp_notification (notification : lsp_notification) : json =
     | ConnectionStatusNotificationFB r -> print_connectionStatus r
     | ExitNotification
     | InitializedNotification
-    | SetTraceNotification
     | LogTraceNotification
     | DidOpenNotification _
     | DidCloseNotification _

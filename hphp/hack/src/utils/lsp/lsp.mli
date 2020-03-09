@@ -174,6 +174,12 @@ module CancelRequest : sig
   and cancelParams = { id: lsp_id }
 end
 
+module SetTraceNotification : sig
+  type params =
+    | Verbose
+    | Off
+end
+
 module CodeActionKind : sig
   type t = string * string list
 
@@ -928,7 +934,7 @@ type lsp_notification =
   | ShowMessageNotification of ShowMessage.params
   | ConnectionStatusNotificationFB of ConnectionStatusFB.params
   | InitializedNotification
-  | SetTraceNotification (* $/setTraceNotification *)
+  | SetTraceNotification of SetTraceNotification.params
   | LogTraceNotification (* $/logTraceNotification *)
   | ToggleTypeCoverageNotificationFB of ToggleTypeCoverageFB.params
   | UnknownNotification of string * Hh_json.json option

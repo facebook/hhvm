@@ -357,7 +357,7 @@ let get_uri_opt (m : lsp_message) : Lsp.documentUri option =
   | NotificationMessage (ShowMessageNotification _)
   | NotificationMessage (ConnectionStatusNotificationFB _)
   | NotificationMessage InitializedNotification
-  | NotificationMessage SetTraceNotification
+  | NotificationMessage (SetTraceNotification _)
   | NotificationMessage LogTraceNotification
   | NotificationMessage (ToggleTypeCoverageNotificationFB _)
   | NotificationMessage (UnknownNotification _)

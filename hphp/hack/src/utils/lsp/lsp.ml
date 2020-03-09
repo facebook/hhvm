@@ -318,6 +318,13 @@ module CancelRequest = struct
   and cancelParams = { id: lsp_id (* the request id to cancel *) }
 end
 
+(* SetTraceNotification, method="$/setTraceNotification" *)
+module SetTraceNotification = struct
+  type params =
+    | Verbose
+    | Off
+end
+
 (* Initialize request, method="initialize" *)
 module Initialize = struct
   type textDocumentSyncKind =
@@ -1214,7 +1221,7 @@ type lsp_notification =
   | ShowMessageNotification of ShowMessage.params
   | ConnectionStatusNotificationFB of ConnectionStatusFB.params
   | InitializedNotification
-  | SetTraceNotification (* $/setTraceNotification *)
+  | SetTraceNotification of SetTraceNotification.params
   | LogTraceNotification (* $/logTraceNotification *)
   | ToggleTypeCoverageNotificationFB of ToggleTypeCoverageFB.params
   | UnknownNotification of string * Hh_json.json option

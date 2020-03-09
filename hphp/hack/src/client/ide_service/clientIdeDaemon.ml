@@ -336,6 +336,12 @@ let handle_message :
   | (state, Shutdown ()) ->
     let%lwt () = shutdown state in
     Lwt.return (state, Handle_message_result.Response ())
+  | (_, Verbose verbose) ->
+    if verbose then
+      Hh_logger.Level.set_min_level Hh_logger.Level.Debug
+    else
+      Hh_logger.Level.set_min_level Hh_logger.Level.Info;
+    Lwt.return (state, Handle_message_result.Notification)
   | ((Failed_to_initialize _ | Initializing), File_changed _) ->
     (* Should not happen. *)
     let error_data =

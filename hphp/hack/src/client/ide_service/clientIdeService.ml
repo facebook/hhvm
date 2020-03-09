@@ -471,6 +471,10 @@ let notify_file_changed (t : t) ~(tracking_id : string) (path : Path.t) : unit =
   let message = ClientIdeMessage.File_changed path in
   push_message t (Message_wrapper { ClientIdeMessage.tracking_id; message })
 
+let notify_verbose (t : t) ~(tracking_id : string) (verbose : bool) : unit =
+  let message = ClientIdeMessage.Verbose verbose in
+  push_message t (Message_wrapper { ClientIdeMessage.tracking_id; message })
+
 (* Simplified function for handling initialization cases *)
 let rpc
     (t : t)

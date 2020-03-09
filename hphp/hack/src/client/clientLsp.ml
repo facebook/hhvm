@@ -168,6 +168,10 @@ let ( (initialize_params_promise : Lsp.Initialize.params Lwt.t),
 
 let hhconfig_version : string ref = ref "[NotYetInitialized]"
 
+(* verbosity is controlled by --verbose flag, and also $/setTraceNotification,
+and is also passed to ClientIdeService upon initialization and change. *)
+let verbose : bool ref = ref false
+
 let can_autostart_after_mismatch : bool ref = ref true
 
 let requests_outstanding : (lsp_request * result_handler) IdMap.t ref =
@@ -3346,7 +3350,7 @@ let tick_showStatus
           sure to assign the new IDE service to the [ref] before attempting
           to do an asynchronous operation with the old one. *)
           let old_ide_service = !ide_service in
-          let ide_args = { ClientIdeMessage.init_id; verbose = env.verbose } in
+          let ide_args = { ClientIdeMessage.init_id; verbose = !verbose } in
           let new_ide_service = ClientIdeService.make ide_args in
           ide_service := new_ide_service;
           Lwt.async (fun () -> run_ide_service env new_ide_service);
@@ -3451,6 +3455,16 @@ let handle_client_message
         exit_ok ()
       else
         exit_fail ()
+    (* setTrace notification *)
+    | (_, NotificationMessage (SetTraceNotification params)) ->
+      verbose := params = SetTraceNotification.Verbose;
+      if !verbose then
+        Hh_logger.Level.set_min_level Hh_logger.Level.Debug
+      else
+        Hh_logger.Level.set_min_level Hh_logger.Level.Info;
+      if env.use_serverless_ide then
+        ClientIdeService.notify_verbose ide_service ~tracking_id !verbose;
+      Lwt.return_none
     (* initialize request *)
     | (Pre_init, RequestMessage (id, InitializeRequest initialize_params)) ->
       Lwt.wakeup_later initialize_params_resolver initialize_params;
@@ -4093,13 +4107,14 @@ let handle_tick
 
 let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
   Printexc.record_backtrace true;
+  verbose := env.verbose;
   Hh_logger.Level.set_min_level_file Hh_logger.Level.Info;
   Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Error;
-  if env.verbose then Hh_logger.Level.set_min_level Hh_logger.Level.Debug;
+  if !verbose then Hh_logger.Level.set_min_level Hh_logger.Level.Debug;
   HackEventLogger.set_from env.from;
 
   let client = Jsonrpc.make_queue () in
-  let ide_args = { ClientIdeMessage.init_id; verbose = env.verbose } in
+  let ide_args = { ClientIdeMessage.init_id; verbose = !verbose } in
   let ide_service = ref (ClientIdeService.make ide_args) in
   let deferred_action : (unit -> unit Lwt.t) option ref = ref None in
   let state = ref Pre_init in

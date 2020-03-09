@@ -75,6 +75,9 @@ whenever a Hack file changes on disk, so that it can update its indexes
 appropriately. *)
 val notify_file_changed : t -> tracking_id:string -> Path.t -> unit
 
+(** The caller uses this to switch on or off verbose logging. *)
+val notify_verbose : t -> tracking_id:string -> bool -> unit
+
 (** Make an RPC call to the IDE service. *)
 val rpc :
   t ->

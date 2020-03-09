@@ -63,6 +63,7 @@ type saved_env = {
   local_mutability: mutability_env;
   fun_mutable: type_param_mutability option;
   condition_types: decl_ty SMap.t;
+  pessimize: bool;
 }
 [@@deriving show]
 
@@ -144,6 +145,7 @@ let empty_saved_env tcopt : saved_env =
     local_mutability = Local_id.Map.empty;
     fun_mutable = None;
     condition_types = SMap.empty;
+    pessimize = false;
   }
 
 (* Used when an env is needed in codegen.

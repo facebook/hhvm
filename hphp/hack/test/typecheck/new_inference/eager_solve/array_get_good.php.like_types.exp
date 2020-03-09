@@ -1,6 +1,0 @@
-File "array_get_good.php", line 5, characters 10-15:
-Invalid index type for this KeyedContainer (Typing[4324])
-File "array_get_good.php", line 4, characters 48-49:
-This is a value of generic type Tk
-File "array_get_good.php", line 4, characters 59-60:
-It is incompatible with a dynamic value or a value of generic type Tk because it is an unenforceable type

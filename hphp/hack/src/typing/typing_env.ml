@@ -1241,6 +1241,7 @@ let save local_tpenv env =
     Tast.local_mutability = get_env_mutability env;
     Tast.fun_mutable = function_is_mutable env;
     Tast.condition_types = env.genv.condition_types;
+    Tast.pessimize = env.pessimize;
   }
 
 (* Compute the type variables appearing covariantly (positively)

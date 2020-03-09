@@ -1,8 +1,0 @@
-File "constraints_stack_overflow.php", line 18, characters 5-19:
-Invalid index type for this dict (Typing[4324])
-File "constraints_stack_overflow.php", line 4, characters 15-16:
-This is a value of generic type Tk
-File "constraints_stack_overflow.php", line 7, characters 16-17:
-  via this generic Tk
-File "constraints_stack_overflow.php", line 13, characters 5-6:
-It is incompatible with a dynamic value or a value of generic type Tk because it is an unenforceable type

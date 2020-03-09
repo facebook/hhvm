@@ -46,7 +46,7 @@ struct Directory : SweepableResourceData {
   const String& o_getClassNameHook() const override { return classnameof(); }
 
   String getLastError() {
-    return String(folly::errnoStr(errno).toStdString());
+    return String(folly::toStdString(folly::errnoStr(errno)));
   }
 };
 

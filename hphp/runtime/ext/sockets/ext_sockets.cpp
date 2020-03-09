@@ -1419,7 +1419,7 @@ String HHVM_FUNCTION(socket_strerror,
     return folly::format("Host lookup error {}", errnum).str();
   }
 
-  return String(folly::errnoStr(errnum).toStdString());
+  return String(folly::toStdString(folly::errnoStr(errnum)));
 }
 
 int64_t HHVM_FUNCTION(socket_last_error,

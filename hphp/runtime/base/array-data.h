@@ -244,34 +244,42 @@ public:
   /*
    * Whether the array has a particular kind.
    */
-  bool isPacked() const;
-  bool isMixed() const;
-  bool isApcArray() const;
-  bool isGlobalsArray() const;
-  bool isEmptyArray() const;
-  bool isDict() const;
-  bool isVecArray() const;
-  bool isKeyset() const;
-  bool isRecordArray() const;
+  bool isPackedKind() const;
+  bool isMixedKind() const;
+  bool isApcArrayKind() const;
+  bool isGlobalsArrayKind() const;
+  bool isEmptyArrayKind() const;
+  bool isDictKind() const;
+  bool isVecArrayKind() const;
+  bool isKeysetKind() const;
+  bool isRecordArrayKind() const;
+
+  /*
+   * Whether the array has a particular Hack type
+   */
+  bool isPHPArrayType() const;
+  bool isHackArrayType() const;
+  bool isDictType() const;
+  bool isVecArrayType() const;
+  bool isKeysetType() const;
 
   /*
    * Whether the ArrayData is backed by PackedArray or MixedArray.
    */
-  bool hasPackedLayout() const;
-  bool hasMixedLayout() const;
+  bool hasVanillaPackedLayout() const;
+  bool hasVanillaMixedLayout() const;
 
   /*
    * Whether the array is a PHP (non-Hack) or Hack array.
    */
-  bool isPHPArray() const;
-  bool isHackArray() const;
+  bool isPHPArrayKind() const;
+  bool isHackArrayKind() const;
 
   /*
    * Whether the array-like has the standard layout. This check excludes
    * array-likes with a "bespoke" hidden-class layout.
    */
   bool isVanilla() const;
-
   /*
    * The DVArray kind for the array.
    */

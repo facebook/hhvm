@@ -333,20 +333,20 @@ Array& Array::mergeImpl(ArrayData *data) {
 
 String Array::toString() const {
   if (m_arr == nullptr) return empty_string();
-  if (m_arr->isPHPArray()) {
+  if (m_arr->isPHPArrayType()) {
     raise_notice("Array to string conversion");
     return array_string;
   }
-  assertx(m_arr->isHackArray());
-  if (m_arr->isVecArray()) {
+  assertx(m_arr->isHackArrayType());
+  if (m_arr->isVecArrayType()) {
     raise_notice("Vec to string conversion");
     return vec_string;
   }
-  if (m_arr->isDict()) {
+  if (m_arr->isDictType()) {
     raise_notice("Dict to string conversion");
     return dict_string;
   }
-  assertx(m_arr->isKeyset());
+  assertx(m_arr->isKeysetType());
   raise_notice("Keyset to string conversion");
   return keyset_string;
 }
@@ -356,7 +356,7 @@ String Array::toString() const {
 
 bool Array::same(const Array& v2) const {
   if (!m_arr) return !v2.get();
-  if (m_arr->isPHPArray()) {
+  if (isPHPArray()) {
     if (UNLIKELY(!v2.isPHPArray())) {
       if (UNLIKELY(checkHACCompare() && v2.isHackArray())) {
         raiseHackArrCompatArrHackArrCmp();
@@ -372,25 +372,28 @@ bool Array::same(const Array& v2) const {
     }
   };
 
-  if (m_arr->isVecArray()) {
+  if (m_arr->isVecArrayType()) {
     if (UNLIKELY(!v2.isVecArray())) {
       nonHackArr();
       return false;
     }
+    assertx(m_arr->isVecArrayKind() && v2->isVecArrayKind());
     return PackedArray::VecSame(m_arr.get(), v2.get());
   }
-  if (m_arr->isDict()) {
+  if (m_arr->isDictType()) {
     if (UNLIKELY(!v2.isDict())) {
       nonHackArr();
       return false;
     }
+    assertx(m_arr->isDictKind() && v2->isDictKind());
     return MixedArray::DictSame(m_arr.get(), v2.get());
   }
-  if (m_arr->isKeyset()) {
+  if (m_arr->isKeysetType()) {
     if (UNLIKELY(!v2.isKeyset())) {
       nonHackArr();
       return false;
     }
+    assertx(m_arr->isKeysetKind() && v2->isKeysetKind());
     return SetArray::Same(m_arr.get(), v2.get());
   }
   not_reached();
@@ -416,21 +419,23 @@ bool Array::equal(const Array& v2) const {
     }
   };
 
-  if (m_arr->isVecArray()) {
+  if (m_arr->isVecArrayType()) {
     if (UNLIKELY(!v2.isVecArray())) {
       nonHackArr();
       return false;
     }
+    assertx(m_arr->isVecArrayKind() && v2->isVecArrayKind());
     return PackedArray::VecEqual(m_arr.get(), v2.get());
   }
-  if (m_arr->isDict()) {
+  if (m_arr->isDictType()) {
     if (UNLIKELY(!v2.isDict())) {
       nonHackArr();
       return false;
     }
+    assertx(m_arr->isDictKind() && v2->isDictKind());
     return MixedArray::DictEqual(m_arr.get(), v2.get());
   }
-  if (m_arr->isKeyset()) {
+  if (m_arr->isKeysetType()) {
     if (UNLIKELY(!v2.isKeyset())) {
       nonHackArr();
       return false;
@@ -458,13 +463,14 @@ bool Array::less(const Array& v2, bool flip /* = false */) const {
       ? ArrayData::Gt(v2.get(), m_arr.get())
       : ArrayData::Lt(m_arr.get(), v2.get());
   }
-  if (m_arr->isVecArray()) {
+  if (m_arr->isVecArrayType()) {
     if (UNLIKELY(!v2.isVecArray())) {
       if (UNLIKELY(checkHACCompare() && v2.isPHPArray() && !v2.isNull())) {
         raiseHackArrCompatArrHackArrCmp();
       }
       throw_vec_compare_exception();
     }
+    assertx(v2->isVecArrayKind() && m_arr->isVecArrayKind());
     return flip
       ? PackedArray::VecGt(v2.get(), m_arr.get())
       : PackedArray::VecLt(m_arr.get(), v2.get());
@@ -472,8 +478,8 @@ bool Array::less(const Array& v2, bool flip /* = false */) const {
   if (UNLIKELY(checkHACCompare() && v2.isPHPArray() && !v2.isNull())) {
     raiseHackArrCompatArrHackArrCmp();
   }
-  if (m_arr->isDict()) throw_dict_compare_exception();
-  if (m_arr->isKeyset()) throw_keyset_compare_exception();
+  if (m_arr->isDictType()) throw_dict_compare_exception();
+  if (m_arr->isKeysetType()) throw_keyset_compare_exception();
   not_reached();
 }
 
@@ -510,13 +516,14 @@ bool Array::more(const Array& v2, bool flip /* = true */) const {
       ? ArrayData::Lt(v2.get(), m_arr.get())
       : ArrayData::Gt(m_arr.get(), v2.get());
   }
-  if (m_arr->isVecArray()) {
+  if (m_arr->isVecArrayType()) {
     if (UNLIKELY(!v2.isVecArray())) {
       if (UNLIKELY(checkHACCompare() && v2.isPHPArray() && !v2.isNull())) {
         raiseHackArrCompatArrHackArrCmp();
       }
       throw_vec_compare_exception();
     }
+    assertx(m_arr->isVecArrayKind() && v2->isVecArrayKind());
     return flip
       ? PackedArray::VecGt(v2.get(), m_arr.get())
       : PackedArray::VecLt(m_arr.get(), v2.get());
@@ -524,8 +531,8 @@ bool Array::more(const Array& v2, bool flip /* = true */) const {
   if (UNLIKELY(checkHACCompare() && v2.isPHPArray() && !v2.isNull())) {
     raiseHackArrCompatArrHackArrCmp();
   }
-  if (m_arr->isDict()) throw_dict_compare_exception();
-  if (m_arr->isKeyset()) throw_keyset_compare_exception();
+  if (m_arr->isDictType()) throw_dict_compare_exception();
+  if (m_arr->isKeysetType()) throw_keyset_compare_exception();
   not_reached();
 }
 
@@ -562,13 +569,14 @@ int Array::compare(const Array& v2, bool flip /* = false */) const {
       ? -ArrayData::Compare(v2.get(), m_arr.get())
       : ArrayData::Compare(m_arr.get(), v2.get());
   }
-  if (m_arr->isVecArray()) {
+  if (m_arr->isVecArrayType()) {
     if (UNLIKELY(!v2.isVecArray())) {
       if (UNLIKELY(checkHACCompare() && v2.isPHPArray() && !v2.isNull())) {
         raiseHackArrCompatArrHackArrCmp();
       }
       throw_vec_compare_exception();
     }
+    assertx(v2->isVecArrayKind() && m_arr->isVecArrayKind());
     return flip
       ? -PackedArray::VecCmp(v2.get(), m_arr.get())
       : PackedArray::VecCmp(m_arr.get(), v2.get());
@@ -576,8 +584,8 @@ int Array::compare(const Array& v2, bool flip /* = false */) const {
   if (UNLIKELY(checkHACCompare() && v2.isPHPArray() && !v2.isNull())) {
     raiseHackArrCompatArrHackArrCmp();
   }
-  if (m_arr->isDict()) throw_dict_compare_exception();
-  if (m_arr->isKeyset()) throw_keyset_compare_exception();
+  if (m_arr->isDictType()) throw_dict_compare_exception();
+  if (m_arr->isKeysetType()) throw_keyset_compare_exception();
   not_reached();
 }
 

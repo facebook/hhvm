@@ -138,10 +138,10 @@ inline Type for_const(const StringData* sd) {
 }
 inline Type for_const(const ArrayData* ad) {
   assertx(ad->isStatic());
-  if (ad->isPHPArray()) return Type::StaticArray(ad->kind());
-  if (ad->isVecArray()) return TStaticVec;
-  if (ad->isDict()) return TStaticDict;
-  if (ad->isKeyset()) return TStaticKeyset;
+  if (ad->isPHPArrayType()) return Type::StaticArray(ad->kind());
+  if (ad->isVecArrayType()) return TStaticVec;
+  if (ad->isDictType()) return TStaticDict;
+  if (ad->isKeysetType()) return TStaticKeyset;
   not_reached();
 }
 inline Type for_const(double)        { return TDbl; }
@@ -317,17 +317,17 @@ inline Type Type::cns(const TypedValue& tv) {
 
       case KindOfPersistentVec:
       case KindOfVec:
-        assertx(tv.m_data.parr->isVecArray());
+        assertx(tv.m_data.parr->isVecArrayType());
         return type_detail::for_const(tv.m_data.parr);
 
       case KindOfPersistentDict:
       case KindOfDict:
-        assertx(tv.m_data.parr->isDict());
+        assertx(tv.m_data.parr->isDictType());
         return type_detail::for_const(tv.m_data.parr);
 
       case KindOfPersistentKeyset:
       case KindOfKeyset:
-        assertx(tv.m_data.parr->isKeyset());
+        assertx(tv.m_data.parr->isKeysetType());
         return type_detail::for_const(tv.m_data.parr);
 
       case KindOfPersistentDArray:
@@ -336,7 +336,7 @@ inline Type Type::cns(const TypedValue& tv) {
       case KindOfVArray:
       case KindOfPersistentArray:
       case KindOfArray:
-        assertx(tv.m_data.parr->isPHPArray());
+        assertx(tv.m_data.parr->isPHPArrayType());
         return type_detail::for_const(tv.m_data.parr);
 
       case KindOfObject:

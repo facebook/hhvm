@@ -672,7 +672,7 @@ CGETELEM_HELPER_TABLE(X)
 template<bool copyProv>
 auto vecSetImpl(ArrayData* a, int64_t key, TypedValue value) {
   assertx(tvIsPlausible(value));
-  assertx(a->isVecArray());
+  assertx(a->isVecArrayKind());
   return PackedArray::SetIntMoveVec(a, key, value);
 }
 
@@ -700,7 +700,7 @@ inline ArrayData* dictSetImplPre(ArrayData* a, StringData* s, TypedValue val) {
 template<KeyType keyType, bool copyProv>
 auto dictSetImpl(ArrayData* a, key_type<keyType> key, TypedValue value) {
   assertx(tvIsPlausible(value));
-  assertx(a->isDict());
+  assertx(a->isDictKind());
   return dictSetImplPre(a, key, value);
 }
 

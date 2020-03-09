@@ -344,7 +344,7 @@ bool HHVM_FUNCTION(array_key_exists,
   switch (cell->m_type) {
     case KindOfUninit:
     case KindOfNull:
-      if (ad->isHackArray()) {
+      if (ad->isHackArrayType()) {
         throwInvalidArrayKeyException(cell, ad);
       } else if (checkHACArrayKeyCast() && ad->useWeakKeys()) {
         raiseHackArrCompatImplicitArrayKey(cell);
@@ -1146,7 +1146,7 @@ TypedValue HHVM_FUNCTION(array_unshift,
     } else {
       {
         Array newArray;
-        if (cell_array->m_data.parr->isHackArray()) {
+        if (cell_array->m_data.parr->isHackArrayType()) {
           newArray = Array::attach(
             MixedArray::MakeReserveSame(cell_array->m_data.parr, 0));
         } else {
@@ -1161,7 +1161,7 @@ TypedValue HHVM_FUNCTION(array_unshift,
             newArray.append(args->atPos(pos));
           }
         }
-        if (cell_array->m_data.parr->isKeyset()) {
+        if (cell_array->m_data.parr->isKeysetType()) {
           for (ArrayIter iter(array.toArray()); iter; ++iter) {
             Variant key(iter.first());
             newArray.append(key);

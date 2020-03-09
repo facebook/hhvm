@@ -721,7 +721,7 @@ bool checkTypeStructureMatchesTVImpl(
       if (!kind_supports_tuple && !wants_prov_logging) {
         // `ad` is a Hack array and we have no logging to do; it can never be a
         // tuple, so return false.
-        assertx(ad->isHackArray());
+        assertx(ad->isHackArrayType());
         return false;
       }
 
@@ -779,7 +779,7 @@ bool checkTypeStructureMatchesTVImpl(
       if (UNLIKELY(
         RuntimeOption::EvalHackArrCompatTypeHintNotices &&
         is_tuple_like &&
-        ad->isPHPArray()
+        ad->isPHPArrayType()
       )) {
         if (ad->isDArray()) {
           raise_hackarr_compat_is_operator("darray", "tuple");
@@ -866,7 +866,7 @@ bool checkTypeStructureMatchesTVImpl(
       if (!kind_supports_struct && !wants_prov_logging) {
         // `ad` is a Hack array and we have no logging to do; it can never be a
         // struct, so return false.
-        assertx(ad->isHackArray());
+        assertx(ad->isHackArrayType());
         return false;
       }
 
@@ -950,7 +950,7 @@ bool checkTypeStructureMatchesTVImpl(
       if (UNLIKELY(
         RuntimeOption::EvalHackArrCompatTypeHintNotices &&
         !warn &&
-        ad->isPHPArray()
+        ad->isPHPArrayType()
       )) {
         if (ad->isVArray()) {
           raise_hackarr_compat_is_operator("varray", "shape");

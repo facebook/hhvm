@@ -216,7 +216,7 @@ inline tv_rval ElemArrayPre(ArrayData* base, int64_t key) {
 template<MOpMode mode>
 inline tv_rval ElemArrayPre(ArrayData* base, StringData* key) {
   auto constexpr warn = mode == MOpMode::Warn;
-  assertx(base->isPHPArray());
+  assertx(base->isPHPArrayType());
   return warn ? base->rvalStrict(key) : base->rval(key);
 }
 
@@ -251,7 +251,7 @@ inline tv_rval ElemArrayPre(ArrayData* base, TypedValue key) {
  */
 template<MOpMode mode, KeyType keyType>
 inline tv_rval ElemArray(ArrayData* base, key_type<keyType> key) {
-  assertx(base->isPHPArray());
+  assertx(base->isPHPArrayType());
 
   auto result = ElemArrayPre<mode>(base, key);
 
@@ -298,7 +298,7 @@ inline tv_rval ElemVecPre(ArrayData* base, TypedValue key) {
 
 template<MOpMode mode, KeyType keyType>
 inline tv_rval ElemVec(ArrayData* base, key_type<keyType> key) {
-  assertx(base->isVecArray());
+  assertx(base->isVecArrayKind());
   auto result = ElemVecPre<mode>(base, key);
   if (mode != MOpMode::Warn && mode != MOpMode::InOut) {
     if (UNLIKELY(!result)) return ElemEmptyish();
@@ -334,7 +334,7 @@ inline tv_rval ElemDictPre(ArrayData* base, TypedValue key) {
 
 template<MOpMode mode, KeyType keyType>
 inline tv_rval ElemDict(ArrayData* base, key_type<keyType> key) {
-  assertx(base->isDict());
+  assertx(base->isDictKind());
   auto result = ElemDictPre<mode>(base, key);
   if (mode != MOpMode::Warn && mode != MOpMode::InOut) {
     if (UNLIKELY(!result)) return ElemEmptyish();
@@ -370,7 +370,7 @@ inline tv_rval ElemKeysetPre(ArrayData* base, TypedValue key) {
 
 template<MOpMode mode, KeyType keyType>
 inline tv_rval ElemKeyset(ArrayData* base, key_type<keyType> key) {
-  assertx(base->isKeyset());
+  assertx(base->isKeysetKind());
   auto result = ElemKeysetPre<mode>(base, key);
   if (mode != MOpMode::Warn && mode != MOpMode::InOut) {
     if (UNLIKELY(!result)) return ElemEmptyish();
@@ -609,7 +609,7 @@ inline tv_lval ElemDArrayPre(tv_lval base, int64_t key, bool& defined) {
   auto const lval = oldArr->lval(key, oldArr->cowCheck());
 
   if (lval.arr != oldArr) {
-    assertx(lval.arr->isPHPArray());
+    assertx(lval.arr->isPHPArrayType());
     type(base) = lval.arr->toDataType();
     val(base).parr = lval.arr;
     assertx(tvIsPlausible(*base));
@@ -631,7 +631,7 @@ inline tv_lval ElemDArrayPre(tv_lval base, StringData* key,
   }();
 
   if (lval.arr != oldArr) {
-    assertx(lval.arr->isPHPArray());
+    assertx(lval.arr->isPHPArrayType());
     type(base) = lval.arr->toDataType();
     val(base).parr = lval.arr;
     assertx(tvIsPlausible(*base));
@@ -978,7 +978,7 @@ inline tv_lval ElemUArrayImpl(tv_lval base, int64_t key) {
   if (!oldArr->exists(key)) return ElemUEmptyish();
   auto const lval = oldArr->lval(key, oldArr->cowCheck());
   if (lval.arr != oldArr) {
-    assertx(lval.arr->isPHPArray());
+    assertx(lval.arr->isPHPArrayType());
     type(base) = lval.arr->toDataType();
     val(base).parr = lval.arr;
     assertx(tvIsPlausible(*base));
@@ -993,7 +993,7 @@ inline tv_lval ElemUArrayImpl(tv_lval base, StringData* key) {
 
   auto const lval = arr->lval(key, arr->cowCheck());
   if (lval.arr != arr) {
-    assertx(lval.arr->isPHPArray());
+    assertx(lval.arr->isPHPArrayType());
     type(base) = lval.arr->toDataType();
     val(base).parr = lval.arr;
     assertx(tvIsPlausible(*base));
@@ -1545,7 +1545,7 @@ inline ArrayData* SetElemArrayPre(ArrayData* a, int64_t key, TypedValue* value) 
  */
 template<bool setResult>
 inline ArrayData* SetElemArrayPre(ArrayData* a, StringData* key, TypedValue* value) {
-  assertx(a->isPHPArray());
+  assertx(a->isPHPArrayType());
   return a->set(key, *value);
 }
 
@@ -1606,7 +1606,7 @@ inline void SetElemArray(tv_lval base, key_type<keyType> key, TypedValue* value)
   // NB: If 'a' was sitting inside a reference, it may have been released during
   // the set (and 'newData' will equal 'a'). We can only safely dereference
   // 'newData' if its not equal to 'a'.
-  assertx(a == newData || newData->isPHPArray());
+  assertx(a == newData || newData->isPHPArrayType());
 
   if (UNLIKELY(RuntimeOption::EvalEmitDVArray)) {
     if (newData->toDataType() == KindOfDArray) {
@@ -1657,7 +1657,7 @@ inline void SetElemVec(tv_lval base, key_type<keyType> key, TypedValue* value) {
 
   ArrayData* a = val(base).parr;
   auto* newData = SetElemVecPre<setResult>(a, key, value);
-  assertx(newData->isVecArray());
+  assertx(newData->isVecArrayType());
 
   arraySetUpdateBase<KindOfVec>(a, newData, base);
 }
@@ -1701,7 +1701,7 @@ inline void SetElemDict(tv_lval base, key_type<keyType> key,
 
   ArrayData* a = val(base).parr;
   auto newData = SetElemDictPre<setResult>(a, key, value);
-  assertx(newData->isDict());
+  assertx(newData->isDictKind());
 
   arraySetUpdateBase<KindOfDict>(a, newData, base);
 }
@@ -1864,7 +1864,7 @@ inline void SetNewElemArray(tv_lval base, TypedValue* value) {
   auto a = val(base).parr;
   auto a2 = a->append(*value);
   if (a2 != a) {
-    assertx(a2->isPHPArray());
+    assertx(a2->isPHPArrayType());
     type(base) = a2->toDataType();
     val(base).parr = a2;
     a->decRefAndRelease();
@@ -2453,7 +2453,7 @@ inline ArrayData* UnsetElemArrayPre(ArrayData* a, int64_t key) {
  * UnsetElemArray when key is a String
  */
 inline ArrayData* UnsetElemArrayPre(ArrayData* a, StringData* key) {
-  assertx(a->isPHPArray());
+  assertx(a->isPHPArrayType());
   return a->remove(key);
 }
 
@@ -2490,7 +2490,7 @@ inline void UnsetElemArray(tv_lval base, key_type<keyType> key) {
   ArrayData* a2 = UnsetElemArrayPre(a, key);
 
   if (a2 != a) {
-    assertx(a2->isPHPArray());
+    assertx(a2->isPHPArrayType());
     type(base) = a2->toDataType();
     val(base).parr = a2;
     assertx(tvIsPlausible(*base));
@@ -2525,7 +2525,7 @@ inline void UnsetElemVec(tv_lval base, key_type<keyType> key) {
   assertx(tvIsPlausible(*base));
   ArrayData* a = val(base).parr;
   ArrayData* a2 = UnsetElemVecPre(a, key);
-  assertx(a2->isVecArray() || a2->isDict());
+  assertx(a2->isVecArrayType() || a2->isDictType());
 
   if (a2 != a) {
     type(base) = a2->toDataType();
@@ -2754,7 +2754,7 @@ bool IssetElemString(const StringData* sd, key_type<keyType> key) {
  */
 template<KeyType keyType>
 bool IssetElemArray(ArrayData* a, key_type<keyType> key) {
-  assertx(a->isPHPArray());
+  assertx(a->isPHPArrayType());
   auto const result = ElemArray<MOpMode::None, keyType>(a, key);
   return !tvIsNull(result.tv());
 }
@@ -2764,7 +2764,7 @@ bool IssetElemArray(ArrayData* a, key_type<keyType> key) {
  */
 template<KeyType keyType>
 bool IssetElemVec(ArrayData* a, key_type<keyType> key) {
-  assertx(a->isVecArray());
+  assertx(a->isVecArrayKind());
   auto const result = ElemVec<MOpMode::None, keyType>(a, key);
   return !tvIsNull(tvAssertPlausible(result.tv()));
 }
@@ -2774,7 +2774,7 @@ bool IssetElemVec(ArrayData* a, key_type<keyType> key) {
  */
 template<KeyType keyType>
 bool IssetElemDict(ArrayData* a, key_type<keyType> key) {
-  assertx(a->isDict());
+  assertx(a->isDictKind());
   auto const result = ElemDict<MOpMode::None, keyType>(a, key);
   return !tvIsNull(tvAssertPlausible(result.tv()));
 }
@@ -2784,7 +2784,7 @@ bool IssetElemDict(ArrayData* a, key_type<keyType> key) {
  */
 template<KeyType keyType>
 bool IssetElemKeyset(ArrayData* a, key_type<keyType> key) {
-  assertx(a->isKeyset());
+  assertx(a->isKeysetKind());
   auto const result = ElemKeyset<MOpMode::None, keyType>(a, key);
   return !tvIsNull(tvAssertPlausible(result.tv()));
 }

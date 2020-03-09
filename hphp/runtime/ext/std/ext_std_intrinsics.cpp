@@ -85,7 +85,7 @@ TypedValue HHVM_FUNCTION(dummy_cast_to_kindofarray, const Variant& var) {
     SystemLib::throwInvalidOperationExceptionObject("must pass arraylike");
   }
   auto const& arr = var.asCArrRef();
-  if (arr->isPHPArray() && arr->isNotDVArray()) {
+  if (arr->isPHPArrayType() && arr->isNotDVArray()) {
     return tvReturn(arr.get());
   }
   TypedValue tv;

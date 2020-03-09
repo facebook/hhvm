@@ -57,14 +57,14 @@ SetArray::Initializer SetArray::s_initializer;
 //////////////////////////////////////////////////////////////////////
 
 SetArray* SetArray::asSet(ArrayData* ad) {
-  assertx(ad->isKeyset());
+  assertx(ad->isKeysetKind());
   auto a = static_cast<SetArray*>(ad);
   assertx(a->checkInvariants());
   return a;
 }
 
 const SetArray* SetArray::asSet(const ArrayData* ad) {
-  assertx(ad->isKeyset());
+  assertx(ad->isKeysetKind());
   auto a = static_cast<const SetArray*>(ad);
   assertx(a->checkInvariants());
   return a;

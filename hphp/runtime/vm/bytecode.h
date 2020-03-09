@@ -426,7 +426,7 @@ public:
   // already adjusted the refcount appropriately
   ALWAYS_INLINE
   void pushArrayNoRc(ArrayData* a) {
-    assertx(a->isPHPArray());
+    assertx(a->isPHPArrayType());
     assertx(m_top != m_elms);
     m_top--;
     *m_top = make_array_like_tv(a);
@@ -434,7 +434,7 @@ public:
 
   ALWAYS_INLINE
   void pushVecNoRc(ArrayData* a) {
-    assertx(a->isVecArray());
+    assertx(a->isVecArrayType());
     assertx(m_top != m_elms);
     m_top--;
     *m_top = make_tv<KindOfVec>(a);
@@ -442,7 +442,7 @@ public:
 
   ALWAYS_INLINE
   void pushDictNoRc(ArrayData* a) {
-    assertx(a->isDict());
+    assertx(a->isDictType());
     assertx(m_top != m_elms);
     m_top--;
     *m_top = make_tv<KindOfDict>(a);
@@ -450,7 +450,7 @@ public:
 
   ALWAYS_INLINE
   void pushKeysetNoRc(ArrayData* a) {
-    assertx(a->isKeyset());
+    assertx(a->isKeysetType());
     assertx(m_top != m_elms);
     m_top--;
     *m_top = make_tv<KindOfKeyset>(a);
@@ -487,7 +487,7 @@ public:
   ALWAYS_INLINE
   void pushStaticArray(const ArrayData* a) {
     assertx(a->isStatic()); // No need to call a->incRefCount().
-    assertx(a->isPHPArray());
+    assertx(a->isPHPArrayType());
     assertx(m_top != m_elms);
     m_top--;
     *m_top = make_persistent_array_like_tv(const_cast<ArrayData*>(a));
@@ -496,7 +496,7 @@ public:
   ALWAYS_INLINE
   void pushStaticVec(const ArrayData* a) {
     assertx(a->isStatic()); // No need to call a->incRefCount().
-    assertx(a->isVecArray());
+    assertx(a->isVecArrayType());
     assertx(m_top != m_elms);
     m_top--;
     *m_top = make_tv<KindOfPersistentVec>(a);
@@ -505,7 +505,7 @@ public:
   ALWAYS_INLINE
   void pushStaticDict(const ArrayData* a) {
     assertx(a->isStatic()); // No need to call a->incRefCount().
-    assertx(a->isDict());
+    assertx(a->isDictType());
     assertx(m_top != m_elms);
     m_top--;
     *m_top = make_tv<KindOfPersistentDict>(a);
@@ -514,7 +514,7 @@ public:
   ALWAYS_INLINE
   void pushStaticKeyset(const ArrayData* a) {
     assertx(a->isStatic()); // No need to call a->incRefCount().
-    assertx(a->isKeyset());
+    assertx(a->isKeysetType());
     assertx(m_top != m_elms);
     m_top--;
     *m_top = make_tv<KindOfPersistentKeyset>(a);

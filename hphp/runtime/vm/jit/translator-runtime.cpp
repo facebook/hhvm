@@ -79,7 +79,7 @@ namespace jit {
 //////////////////////////////////////////////////////////////////////
 
 ArrayData* addNewElemHelper(ArrayData* a, TypedValue value) {
-  assertx(a->isPHPArray());
+  assertx(a->isPHPArrayType());
 
   auto r = a->append(*tvAssertPlausible(&value));
   if (UNLIKELY(r != a)) {
@@ -89,8 +89,8 @@ ArrayData* addNewElemHelper(ArrayData* a, TypedValue value) {
 }
 
 ArrayData* arrayAdd(ArrayData* a1, ArrayData* a2) {
-  assertx(a1->isPHPArray());
-  assertx(a2->isPHPArray());
+  assertx(a1->isPHPArrayType());
+  assertx(a2->isPHPArrayType());
 
   if (checkHACArrayPlus()) raiseHackArrCompatAdd();
 
@@ -128,7 +128,7 @@ ArrayData* convTVToArrHelper(TypedValue tv) {
 }
 
 ArrayData* convArrToNonDVArrHelper(ArrayData* adIn) {
-  assertx(adIn->isPHPArray());
+  assertx(adIn->isPHPArrayType());
   if (adIn->isNotDVArray()) return adIn;
   auto a = adIn->toPHPArray(adIn->cowCheck());
   if (a != adIn) decRefArr(adIn);
@@ -137,41 +137,41 @@ ArrayData* convArrToNonDVArrHelper(ArrayData* adIn) {
 }
 
 ArrayData* convVecToArrHelper(ArrayData* adIn) {
-  assertx(adIn->isVecArray());
+  assertx(adIn->isVecArrayKind());
   auto a = PackedArray::ToPHPArrayVec(adIn, adIn->cowCheck());
   if (a != adIn) decRefArr(adIn);
-  assertx(a->isPHPArray());
+  assertx(a->isPHPArrayType());
   assertx(a->isNotDVArray());
   return a;
 }
 
 ArrayData* convDictToArrHelper(ArrayData* adIn) {
-  assertx(adIn->isDict());
+  assertx(adIn->isDictKind());
   auto a = MixedArray::ToPHPArrayDict(adIn, adIn->cowCheck());
   if (a != adIn) decRefArr(adIn);
-  assertx(a->isPHPArray());
+  assertx(a->isPHPArrayType());
   assertx(a->isNotDVArray());
   return a;
 }
 
 ArrayData* convKeysetToArrHelper(ArrayData* adIn) {
-  assertx(adIn->isKeyset());
+  assertx(adIn->isKeysetKind());
   auto a = SetArray::ToPHPArray(adIn, adIn->cowCheck());
   if (a != adIn) decRefArr(adIn);
-  assertx(a->isPHPArray());
+  assertx(a->isPHPArrayType());
   assertx(a->isNotDVArray());
   return a;
 }
 
 ArrayData* convArrToVecHelper(ArrayData* adIn) {
-  assertx(adIn->isPHPArray());
+  assertx(adIn->isPHPArrayType());
   auto a = adIn->toVec(adIn->cowCheck());
   if (a != adIn) decRefArr(adIn);
   return a;
 }
 
 ArrayData* convDictToVecHelper(ArrayData* adIn) {
-  assertx(adIn->isDict());
+  assertx(adIn->isDictKind());
   auto a = MixedArray::ToVecDict(adIn, adIn->cowCheck());
   assertx(a != adIn);
   decRefArr(adIn);
@@ -179,7 +179,7 @@ ArrayData* convDictToVecHelper(ArrayData* adIn) {
 }
 
 ArrayData* convKeysetToVecHelper(ArrayData* adIn) {
-  assertx(adIn->isKeyset());
+  assertx(adIn->isKeysetKind());
   auto a = SetArray::ToVec(adIn, adIn->cowCheck());
   assertx(a != adIn);
   decRefArr(adIn);
@@ -188,20 +188,20 @@ ArrayData* convKeysetToVecHelper(ArrayData* adIn) {
 
 ArrayData* convObjToVecHelper(ObjectData* obj) {
   auto a = castObjToVec(obj);
-  assertx(a->isVecArray());
+  assertx(a->isVecArrayType());
   decRefObj(obj);
   return a;
 }
 
 ArrayData* convArrToDictHelper(ArrayData* adIn) {
-  assertx(adIn->isPHPArray());
+  assertx(adIn->isPHPArrayType());
   auto a = adIn->toDict(adIn->cowCheck());
   if (a != adIn) decRefArr(adIn);
   return a;
 }
 
 ArrayData* convVecToDictHelper(ArrayData* adIn) {
-  assertx(adIn->isVecArray());
+  assertx(adIn->isVecArrayKind());
   auto a = PackedArray::ToDictVec(adIn, adIn->cowCheck());
   assertx(a != adIn);
   decRefArr(adIn);
@@ -209,7 +209,7 @@ ArrayData* convVecToDictHelper(ArrayData* adIn) {
 }
 
 ArrayData* convKeysetToDictHelper(ArrayData* adIn) {
-  assertx(adIn->isKeyset());
+  assertx(adIn->isKeysetKind());
   auto a = SetArray::ToDict(adIn, adIn->cowCheck());
   if (a != adIn) decRefArr(adIn);
   return a;
@@ -217,20 +217,20 @@ ArrayData* convKeysetToDictHelper(ArrayData* adIn) {
 
 ArrayData* convObjToDictHelper(ObjectData* obj) {
   auto a = castObjToDict(obj);
-  assertx(a->isDict());
+  assertx(a->isDictType());
   decRefObj(obj);
   return a;
 }
 
 ArrayData* convArrToKeysetHelper(ArrayData* adIn) {
-  assertx(adIn->isPHPArray());
+  assertx(adIn->isPHPArrayType());
   auto a = adIn->toKeyset(adIn->cowCheck());
   if (a != adIn) decRefArr(adIn);
   return a;
 }
 
 ArrayData* convVecToKeysetHelper(ArrayData* adIn) {
-  assertx(adIn->isVecArray());
+  assertx(adIn->isVecArrayKind());
   auto a = PackedArray::ToKeysetVec(adIn, adIn->cowCheck());
   assertx(a != adIn);
   decRefArr(adIn);
@@ -238,7 +238,7 @@ ArrayData* convVecToKeysetHelper(ArrayData* adIn) {
 }
 
 ArrayData* convDictToKeysetHelper(ArrayData* adIn) {
-  assertx(adIn->isDict());
+  assertx(adIn->isDictKind());
   auto a = MixedArray::ToKeysetDict(adIn, adIn->cowCheck());
   if (a != adIn) decRefArr(adIn);
   return a;
@@ -246,7 +246,7 @@ ArrayData* convDictToKeysetHelper(ArrayData* adIn) {
 
 ArrayData* convObjToKeysetHelper(ObjectData* obj) {
   auto a = castObjToKeyset(obj);
-  assertx(a->isKeyset());
+  assertx(a->isKeysetType());
   decRefObj(obj);
   return a;
 }
@@ -528,7 +528,7 @@ TypedValue getDefaultIfNullTV(tv_rval rval, const TypedValue& def) {
 
 NEVER_INLINE
 TypedValue arrayIdxSSlow(ArrayData* a, StringData* key, TypedValue def) {
-  assertx(a->isPHPArray());
+  assertx(a->isPHPArrayType());
   return getDefaultIfNullTV(a->rval(key), def);
 }
 
@@ -548,36 +548,36 @@ TypedValue doScan(const MixedArray* arr, StringData* key, TypedValue def) {
 }
 
 TypedValue arrayIdxI(ArrayData* a, int64_t key, TypedValue def) {
-  assertx(a->isPHPArray());
+  assertx(a->isPHPArrayType());
   return getDefaultIfNullTV(a->rval(key), def);
 }
 
 TypedValue arrayIdxS(ArrayData* a, StringData* key, TypedValue def) {
-  assertx(a->isPHPArray());
-  if (UNLIKELY(!a->isMixed())) return arrayIdxSSlow(a, key, def);
+  assertx(a->isPHPArrayType());
+  if (UNLIKELY(!a->isMixedKind())) return arrayIdxSSlow(a, key, def);
   return getDefaultIfNullTV(MixedArray::RvalStr(a, key), def);
 }
 
 TypedValue arrayIdxScan(ArrayData* a, StringData* key, TypedValue def) {
-  assertx(a->isPHPArray());
+  assertx(a->isPHPArrayType());
   return LIKELY(MixedArrayKeys::isMixedWithStaticStrKeys(a))
     ? doScan(MixedArray::asMixed(a), key, def)
     : arrayIdxSSlow(a, key, def);
 }
 
 TypedValue dictIdxI(ArrayData* a, int64_t key, TypedValue def) {
-  assertx(a->isDict());
+  assertx(a->isDictKind());
   return getDefaultIfNullTV(MixedArray::RvalIntDict(a, key), def);
 }
 
 NEVER_INLINE
 TypedValue dictIdxS(ArrayData* a, StringData* key, TypedValue def) {
-  assertx(a->isDict());
+  assertx(a->isDictKind());
   return getDefaultIfNullTV(MixedArray::RvalStrDict(a, key), def);
 }
 
 TypedValue dictIdxScan(ArrayData* a, StringData* key, TypedValue def) {
-  assertx(a->isDict());
+  assertx(a->isDictKind());
   auto ad = MixedArray::asMixed(a);
   return LIKELY(ad->keyTypes().mustBeStaticStrs())
     ? doScan(ad, key, def)
@@ -585,18 +585,18 @@ TypedValue dictIdxScan(ArrayData* a, StringData* key, TypedValue def) {
 }
 
 TypedValue keysetIdxI(ArrayData* a, int64_t key, TypedValue def) {
-  assertx(a->isKeyset());
+  assertx(a->isKeysetKind());
   return getDefaultIfNullTV(SetArray::RvalInt(a, key), def);
 }
 
 TypedValue keysetIdxS(ArrayData* a, StringData* key, TypedValue def) {
-  assertx(a->isKeyset());
+  assertx(a->isKeysetKind());
   return getDefaultIfNullTV(SetArray::RvalStr(a, key), def);
 }
 
 template <bool isFirst>
 TypedValue vecFirstLast(ArrayData* a) {
-  assertx(a->isVecArray() || a->isPacked());
+  assertx(a->isVecArrayKind() || a->isPackedKind());
   int64_t idx = isFirst ? 0 : a->size() - 1;
   auto rval = a->rval(idx);
   return UNLIKELY(!rval) ? make_tv<KindOfNull>() : rval.tv();

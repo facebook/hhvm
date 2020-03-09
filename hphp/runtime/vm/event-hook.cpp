@@ -238,7 +238,8 @@ static Array get_frame_args(const ActRec* ar) {
   );
   if (variadic && numArgs > numNonVariadic) {
     auto arr = local - numNonVariadic;
-    if (isArrayType(arr->m_type) && arr->m_data.parr->hasPackedLayout()) {
+    if (isArrayType(arr->m_type) &&
+        arr->m_data.parr->hasVanillaPackedLayout()) {
       numArgs = numNonVariadic + arr->m_data.parr->size();
     } else {
       numArgs = numNonVariadic;

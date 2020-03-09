@@ -598,23 +598,23 @@ void emitFuncCred(IRGS& env) {
 //////////////////////////////////////////////////////////////////////
 
 void emitArray(IRGS& env, const ArrayData* x) {
-  assertx(x->isPHPArray());
+  assertx(x->isPHPArrayType());
   assertx(!RuntimeOption::EvalHackArrDVArrs || x->isNotDVArray());
   push(env, cns(env, x));
 }
 
 void emitVec(IRGS& env, const ArrayData* x) {
-  assertx(x->isVecArray());
+  assertx(x->isVecArrayType());
   push(env, cns(env, x));
 }
 
 void emitDict(IRGS& env, const ArrayData* x) {
-  assertx(x->isDict());
+  assertx(x->isDictType());
   push(env, cns(env, x));
 }
 
 void emitKeyset(IRGS& env, const ArrayData* x) {
-  assertx(x->isKeyset());
+  assertx(x->isKeysetType());
   push(env, cns(env, x));
 }
 

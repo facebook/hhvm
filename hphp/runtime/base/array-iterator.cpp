@@ -151,11 +151,11 @@ bool ArrayIter::checkInvariants(const ArrayData* ad /* = nullptr */) const {
   // Check that array's vtable index is compatible with the array's layout.
   if (m_nextHelperIdx == IterNextIndex::ArrayPacked ||
       m_nextHelperIdx == IterNextIndex::ArrayPackedPointer) {
-    assertx(arr->hasPackedLayout());
+    assertx(arr->hasVanillaPackedLayout());
   } else if (m_nextHelperIdx == IterNextIndex::ArrayMixed) {
-    assertx(arr->hasMixedLayout());
+    assertx(arr->hasVanillaMixedLayout());
   } else if (m_nextHelperIdx == IterNextIndex::ArrayMixedPointer) {
-    assertx(arr->hasMixedLayout());
+    assertx(arr->hasVanillaMixedLayout());
     assertx(arr->getSize() == MixedArray::asMixed(arr)->iterLimit());
   } else {
     // We'd like to assert the converse, too: a packed or mixed array should
@@ -165,8 +165,8 @@ bool ArrayIter::checkInvariants(const ArrayData* ad /* = nullptr */) const {
     // We check it for non-local iters.
     assertx(m_nextHelperIdx == IterNextIndex::Array);
     if (m_data != nullptr) {
-      assertx(!m_data->hasPackedLayout());
-      assertx(!m_data->hasMixedLayout());
+      assertx(!m_data->hasVanillaPackedLayout());
+      assertx(!m_data->hasVanillaMixedLayout());
     }
   }
 
@@ -181,7 +181,7 @@ bool ArrayIter::checkInvariants(const ArrayData* ad /* = nullptr */) const {
     assertx(m_pos < m_end);
     // RecordArray::IterEnd logs a notice, so avoid it in assertions.
     DEBUG_ONLY auto const end =
-      arr->isRecordArray() ? arr->getSize() : arr->iter_end();
+      arr->isRecordArrayKind() ? arr->getSize() : arr->iter_end();
     assertx(m_end == end);
   }
   return true;
@@ -498,14 +498,14 @@ inline void liter_key_cell_local_impl(Iter* iter,
 
 NEVER_INLINE int64_t iter_next_free_packed(Iter* iter, ArrayData* arr) {
   assertx(arr->decWillRelease());
-  assertx(arr->hasPackedLayout());
+  assertx(arr->hasVanillaPackedLayout());
   PackedArray::Release(arr);
   iter->kill();
   return 0;
 }
 
 NEVER_INLINE int64_t iter_next_free_mixed(Iter* iter, ArrayData* arr) {
-  assertx(arr->hasMixedLayout());
+  assertx(arr->hasVanillaMixedLayout());
   assertx(arr->decWillRelease());
   MixedArray::Release(arr);
   iter->kill();
@@ -565,8 +565,8 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
   if (UNLIKELY(size == 0)) {
     if (!Local) {
       if (UNLIKELY(ad->decWillRelease())) {
-        if (ad->hasPackedLayout()) return iter_next_free_packed(dest, ad);
-        if (ad->hasMixedLayout()) return iter_next_free_mixed(dest, ad);
+        if (ad->hasVanillaPackedLayout()) return iter_next_free_packed(dest, ad);
+        if (ad->hasVanillaMixedLayout()) return iter_next_free_mixed(dest, ad);
       }
       ad->decRefCount();
     }
@@ -582,7 +582,7 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
   auto& aiter = *unwrap(dest);
   aiter.m_data = Local ? nullptr : ad;
 
-  if (LIKELY(ad->hasPackedLayout())) {
+  if (LIKELY(ad->hasVanillaPackedLayout())) {
     if (BaseConst) {
       aiter.m_packed_elm = packedData(ad);
       aiter.m_packed_end = aiter.m_packed_elm + size;
@@ -596,7 +596,7 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
     return 1;
   }
 
-  if (LIKELY(ad->hasMixedLayout())) {
+  if (LIKELY(ad->hasVanillaMixedLayout())) {
     auto const mixed = MixedArray::asMixed(ad);
     if (BaseConst && LIKELY(mixed->iterLimit() == size)) {
       aiter.m_mixed_elm = mixed->data();
@@ -640,8 +640,8 @@ int64_t new_iter_array_key(Iter*       dest,
   if (UNLIKELY(size == 0)) {
     if (!Local) {
       if (UNLIKELY(ad->decWillRelease())) {
-        if (ad->hasPackedLayout()) return iter_next_free_packed(dest, ad);
-        if (ad->hasMixedLayout()) return iter_next_free_mixed(dest, ad);
+        if (ad->hasVanillaPackedLayout()) return iter_next_free_packed(dest, ad);
+        if (ad->hasVanillaMixedLayout()) return iter_next_free_mixed(dest, ad);
       }
       ad->decRefCount();
     }
@@ -664,7 +664,7 @@ int64_t new_iter_array_key(Iter*       dest,
   auto& aiter = *unwrap(dest);
   aiter.m_data = Local ? nullptr : ad;
 
-  if (ad->hasPackedLayout()) {
+  if (ad->hasVanillaPackedLayout()) {
     aiter.m_pos = 0;
     aiter.m_end = size;
     aiter.setArrayNext(IterNextIndex::ArrayPacked);
@@ -674,7 +674,7 @@ int64_t new_iter_array_key(Iter*       dest,
     return 1;
   }
 
-  if (ad->hasMixedLayout()) {
+  if (ad->hasVanillaMixedLayout()) {
     auto const mixed = MixedArray::asMixed(ad);
     if (BaseConst && LIKELY(mixed->iterLimit() == size)) {
       aiter.m_mixed_elm = mixed->data();
@@ -1248,7 +1248,7 @@ int64_t literNextKArrayMixed(Iter* it,
 int64_t iterNextArray(Iter* it, TypedValue* valOut) {
   TRACE(2, "iterNextArray: I %p\n", it);
   auto const ad = const_cast<ArrayData*>(unwrap(it)->getArrayData());
-  if (ad->isApcArray()) {
+  if (ad->isApcArrayKind()) {
     return iter_next_apc_array<false>(it, valOut, nullptr, ad);
   }
   return iter_next_cold(it, valOut, nullptr);
@@ -1256,7 +1256,7 @@ int64_t iterNextArray(Iter* it, TypedValue* valOut) {
 
 int64_t literNextArray(Iter* it, TypedValue* valOut, ArrayData* ad) {
   TRACE(2, "literNextArray: I %p\n", it);
-  if (ad->isApcArray()) {
+  if (ad->isApcArrayKind()) {
     return iter_next_apc_array<true>(it, valOut, nullptr, ad);
   }
   return liter_next_cold(it, ad, valOut, nullptr);
@@ -1265,7 +1265,7 @@ int64_t literNextArray(Iter* it, TypedValue* valOut, ArrayData* ad) {
 int64_t iterNextKArray(Iter* it, TypedValue* valOut, TypedValue* keyOut) {
   TRACE(2, "iterNextKArray: I %p\n", it);
   auto const ad = const_cast<ArrayData*>(unwrap(it)->getArrayData());
-  if (ad->isApcArray()) {
+  if (ad->isApcArrayKind()) {
     return iter_next_apc_array<false>(it, valOut, keyOut, ad);
   }
   return iter_next_cold(it, valOut, keyOut);
@@ -1273,7 +1273,7 @@ int64_t iterNextKArray(Iter* it, TypedValue* valOut, TypedValue* keyOut) {
 
 int64_t literNextKArray(Iter* it, TypedValue* valOut, TypedValue* keyOut, ArrayData* ad) {
   TRACE(2, "literNextKArray: I %p\n", it);
-  if (ad->isApcArray()) {
+  if (ad->isApcArrayKind()) {
     return iter_next_apc_array<true>(it, valOut, keyOut, ad);
   }
   return liter_next_cold(it, ad, valOut, keyOut);

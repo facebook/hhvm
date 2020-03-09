@@ -515,7 +515,7 @@ static int fb_compact_serialize_variant(
     case KindOfPersistentVec:
     case KindOfVec: {
       Array arr = var.toArray();
-      assertx(arr->isVecArray());
+      assertx(arr->isVecArrayType());
       if (UNLIKELY(RuntimeOption::EvalLogArrayProvenance)) {
         raise_array_serialization_notice(SerializationSite::FBCompactSerialize,
                                          arr.get());
@@ -527,7 +527,7 @@ static int fb_compact_serialize_variant(
     case KindOfPersistentDict:
     case KindOfDict: {
       Array arr = var.toArray();
-      assertx(arr->isDict());
+      assertx(arr->isDictType());
       if (UNLIKELY(RuntimeOption::EvalLogArrayProvenance)) {
         raise_array_serialization_notice(SerializationSite::FBCompactSerialize,
                                          arr.get());
@@ -539,7 +539,7 @@ static int fb_compact_serialize_variant(
     case KindOfPersistentKeyset:
     case KindOfKeyset: {
       Array arr = var.toArray();
-      assertx(arr->isKeyset());
+      assertx(arr->isKeysetType());
       fb_compact_serialize_keyset(sb, std::move(arr));
       return 0;
     }
@@ -551,7 +551,7 @@ static int fb_compact_serialize_variant(
     case KindOfPersistentArray:
     case KindOfArray: {
       Array arr = var.toArray();
-      assertx(arr->isPHPArray());
+      assertx(arr->isPHPArrayType());
       int64_t index_limit;
       if (UNLIKELY(RuntimeOption::EvalLogArrayProvenance) &&
           arrprov::arrayWantsTag(arr.get())) {
@@ -572,10 +572,10 @@ static int fb_compact_serialize_variant(
     case KindOfClsMeth: {
       Array arr = var.toArray();
       if (RuntimeOption::EvalHackArrDVArrs) {
-        assertx(arr->isVecArray());
+        assertx(arr->isVecArrayType());
         fb_compact_serialize_vec(sb, std::move(arr), depth);
       } else {
-        assertx(arr->isPHPArray());
+        assertx(arr->isPHPArrayType());
         int64_t index_limit;
         fb_compact_serialize_is_list(arr, index_limit);
         fb_compact_serialize_array_as_list_map(

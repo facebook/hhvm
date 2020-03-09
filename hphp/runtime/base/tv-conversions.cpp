@@ -607,7 +607,7 @@ ArrayData* tvCastToArrayLikeData(TypedValue tv) {
 
     case KindOfObject: {
       auto ad = tv.m_data.pobj->toArray<IC>();
-      assertx(ad->isPHPArray());
+      assertx(ad->isPHPArrayType());
       return ad.detach();
     }
 
@@ -664,7 +664,7 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
 
       case KindOfPersistentVec: {
         auto* adIn = val(tv).parr;
-        assertx(adIn->isVecArray());
+        assertx(adIn->isVecArrayKind());
         a = PackedArray::ToPHPArrayVec(adIn, true);
         assertx(a != adIn);
         continue;
@@ -672,7 +672,7 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
 
       case KindOfVec: {
         auto* adIn = val(tv).parr;
-        assertx(adIn->isVecArray());
+        assertx(adIn->isVecArrayKind());
         a = PackedArray::ToPHPArrayVec(adIn, adIn->cowCheck());
         if (a != adIn) tvDecRefArr(tv);
         continue;
@@ -680,7 +680,7 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
 
       case KindOfPersistentDict: {
         auto* adIn = val(tv).parr;
-        assertx(adIn->isDict());
+        assertx(adIn->isDictKind());
 
         if (IC == IntishCast::Cast) {
           a = MixedArray::ToPHPArrayIntishCastDict(adIn, true);
@@ -695,7 +695,7 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
 
       case KindOfDict: {
         auto* adIn = val(tv).parr;
-        assertx(adIn->isDict());
+        assertx(adIn->isDictKind());
 
         if (IC == IntishCast::Cast) {
           a = MixedArray::ToPHPArrayIntishCastDict(adIn, adIn->cowCheck());
@@ -710,7 +710,7 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
 
       case KindOfPersistentKeyset: {
         auto* adIn = val(tv).parr;
-        assertx(adIn->isKeyset());
+        assertx(adIn->isKeysetKind());
 
         if (IC == IntishCast::Cast) {
           a = SetArray::ToPHPArrayIntishCast(adIn, true);
@@ -725,7 +725,7 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
 
       case KindOfKeyset: {
         auto* adIn = val(tv).parr;
-        assertx(adIn->isKeyset());
+        assertx(adIn->isKeysetKind());
 
         if (IC == IntishCast::Cast) {
           a = SetArray::ToPHPArrayIntishCast(adIn, adIn->cowCheck());
@@ -742,7 +742,7 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
       case KindOfPersistentVArray:
       case KindOfPersistentArray: {
         auto* adIn = val(tv).parr;
-        assertx(adIn->isPHPArray());
+        assertx(adIn->isPHPArrayType());
         if (IC == IntishCast::Cast) {
           a = adIn->toPHPArrayIntishCast(true);
         } else {
@@ -756,7 +756,7 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
       case KindOfVArray:
       case KindOfArray: {
         auto* adIn = val(tv).parr;
-        assertx(adIn->isPHPArray());
+        assertx(adIn->isPHPArrayType());
         if (IC == IntishCast::Cast) {
           a = adIn->toPHPArrayIntishCast(adIn->cowCheck());
         } else {
@@ -797,7 +797,7 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
     not_reached();
   } while (0);
 
-  assertx(a->isPHPArray());
+  assertx(a->isPHPArrayType());
   assertx(a->isNotDVArray());
 
   val(tv).parr = a;
@@ -847,7 +847,7 @@ enable_if_lval_t<T, void> tvCastToVecInPlace(T tv) {
       case KindOfPersistentDict:
       case KindOfDict: {
         auto* adIn = val(tv).parr;
-        assertx(adIn->isDict());
+        assertx(adIn->isDictKind());
         a = MixedArray::ToVecDict(adIn, adIn->cowCheck());
         assertx(a != adIn);
         decRefArr(adIn);
@@ -857,7 +857,7 @@ enable_if_lval_t<T, void> tvCastToVecInPlace(T tv) {
       case KindOfPersistentKeyset:
       case KindOfKeyset: {
         auto* adIn = val(tv).parr;
-        assertx(adIn->isKeyset());
+        assertx(adIn->isKeysetKind());
         a = SetArray::ToVec(adIn, adIn->cowCheck());
         assertx(a != adIn);
         decRefArr(adIn);
@@ -871,7 +871,7 @@ enable_if_lval_t<T, void> tvCastToVecInPlace(T tv) {
       case KindOfPersistentArray:
       case KindOfArray: {
         auto* adIn = val(tv).parr;
-        assertx(adIn->isPHPArray());
+        assertx(adIn->isPHPArrayType());
         a = adIn->toVec(adIn->cowCheck());
         if (a != adIn) decRefArr(adIn);
         continue;
@@ -879,7 +879,7 @@ enable_if_lval_t<T, void> tvCastToVecInPlace(T tv) {
 
       case KindOfPersistentVec:
       case KindOfVec:
-        assertx(val(tv).parr->isVecArray());
+        assertx(val(tv).parr->isVecArrayType());
         return;
 
       case KindOfObject:
@@ -960,7 +960,7 @@ enable_if_lval_t<T, void> tvCastToDictInPlace(T tv) {
       case KindOfPersistentVec:
       case KindOfVec: {
         auto* adIn = val(tv).parr;
-        assertx(adIn->isVecArray());
+        assertx(adIn->isVecArrayKind());
         a = PackedArray::ToDictVec(adIn, adIn->cowCheck());
         assertx(a != adIn);
         decRefArr(adIn);
@@ -970,7 +970,7 @@ enable_if_lval_t<T, void> tvCastToDictInPlace(T tv) {
       case KindOfPersistentKeyset:
       case KindOfKeyset: {
         auto* adIn = val(tv).parr;
-        assertx(adIn->isKeyset());
+        assertx(adIn->isKeysetKind());
         a = SetArray::ToDict(adIn, adIn->cowCheck());
         if (a != adIn) decRefArr(adIn);
         continue;
@@ -983,7 +983,7 @@ enable_if_lval_t<T, void> tvCastToDictInPlace(T tv) {
       case KindOfPersistentArray:
       case KindOfArray: {
         auto* adIn = val(tv).parr;
-        assertx(adIn->isPHPArray());
+        assertx(adIn->isPHPArrayType());
         a = adIn->toDict(adIn->cowCheck());
         if (a != adIn) decRefArr(adIn);
         continue;
@@ -991,7 +991,7 @@ enable_if_lval_t<T, void> tvCastToDictInPlace(T tv) {
 
       case KindOfPersistentDict:
       case KindOfDict:
-        assertx(val(tv).parr->isDict());
+        assertx(val(tv).parr->isDictType());
         return;
 
       case KindOfObject:
@@ -1072,7 +1072,7 @@ enable_if_lval_t<T, void> tvCastToKeysetInPlace(T tv) {
       case KindOfPersistentVec:
       case KindOfVec: {
         auto* adIn = val(tv).parr;
-        assertx(adIn->isVecArray());
+        assertx(adIn->isVecArrayKind());
         a = PackedArray::ToKeysetVec(adIn, adIn->cowCheck());
         assertx(a != adIn);
         decRefArr(adIn);
@@ -1082,7 +1082,7 @@ enable_if_lval_t<T, void> tvCastToKeysetInPlace(T tv) {
       case KindOfPersistentDict:
       case KindOfDict: {
         auto* adIn = val(tv).parr;
-        assertx(adIn->isDict());
+        assertx(adIn->isDictKind());
         a = MixedArray::ToKeysetDict(adIn, adIn->cowCheck());
         if (a != adIn) decRefArr(adIn);
         continue;
@@ -1095,7 +1095,7 @@ enable_if_lval_t<T, void> tvCastToKeysetInPlace(T tv) {
       case KindOfPersistentArray:
       case KindOfArray: {
         auto* adIn = val(tv).parr;
-        assertx(adIn->isPHPArray());
+        assertx(adIn->isPHPArrayType());
         a = adIn->toKeyset(adIn->cowCheck());
         if (a != adIn) decRefArr(adIn);
         continue;
@@ -1103,7 +1103,7 @@ enable_if_lval_t<T, void> tvCastToKeysetInPlace(T tv) {
 
       case KindOfPersistentKeyset:
       case KindOfKeyset:
-        assertx(val(tv).parr->isKeyset());
+        assertx(val(tv).parr->isKeysetType());
         return;
 
       case KindOfObject:
@@ -1186,7 +1186,7 @@ enable_if_lval_t<T, void> tvCastToVArrayInPlace(T tv) {
       case KindOfPersistentVec:
       case KindOfVec: {
         auto* adIn = val(tv).parr;
-        assertx(adIn->isVecArray());
+        assertx(adIn->isVecArrayKind());
         a = PackedArray::ToVArrayVec(adIn, adIn->cowCheck());
         if (a != adIn) decRefArr(adIn);
         continue;
@@ -1195,7 +1195,7 @@ enable_if_lval_t<T, void> tvCastToVArrayInPlace(T tv) {
       case KindOfPersistentDict:
       case KindOfDict: {
         auto* adIn = val(tv).parr;
-        assertx(adIn->isDict());
+        assertx(adIn->isDictKind());
         a = MixedArray::ToVArrayDict(adIn, adIn->cowCheck());
         assertx(a != adIn);
         decRefArr(adIn);
@@ -1205,7 +1205,7 @@ enable_if_lval_t<T, void> tvCastToVArrayInPlace(T tv) {
       case KindOfPersistentKeyset:
       case KindOfKeyset: {
         auto* adIn = val(tv).parr;
-        assertx(adIn->isKeyset());
+        assertx(adIn->isKeysetKind());
         a = SetArray::ToVArray(adIn, adIn->cowCheck());
         assertx(a != adIn);
         decRefArr(adIn);
@@ -1219,10 +1219,10 @@ enable_if_lval_t<T, void> tvCastToVArrayInPlace(T tv) {
       case KindOfPersistentArray:
       case KindOfArray: {
         auto* adIn = val(tv).parr;
-        assertx(adIn->isPHPArray());
+        assertx(adIn->isPHPArrayType());
         if (adIn->isVArray()) return;
         a = adIn->toVArray(adIn->cowCheck());
-        assertx(a->isPacked());
+        assertx(a->isPackedKind());
         assertx(a->isVArray());
         if (a == adIn) return;
         decRefArr(adIn);
@@ -1260,7 +1260,7 @@ enable_if_lval_t<T, void> tvCastToVArrayInPlace(T tv) {
     not_reached();
   } while (0);
 
-  assertx(a->isPacked());
+  assertx(a->isPackedKind());
   assertx(a->isVArray());
   assertx(a->dvArraySanityCheck());
 
@@ -1312,7 +1312,7 @@ enable_if_lval_t<T, void> tvCastToDArrayInPlace(T tv) {
       case KindOfPersistentVec:
       case KindOfVec: {
         auto* adIn = val(tv).parr;
-        assertx(adIn->isVecArray());
+        assertx(adIn->isVecArrayKind());
         a = PackedArray::ToDArrayVec(adIn, adIn->cowCheck());
         assertx(a != adIn);
         decRefArr(adIn);
@@ -1322,7 +1322,7 @@ enable_if_lval_t<T, void> tvCastToDArrayInPlace(T tv) {
       case KindOfPersistentDict:
       case KindOfDict: {
         auto* adIn = val(tv).parr;
-        assertx(adIn->isDict());
+        assertx(adIn->isDictKind());
         a = MixedArray::ToDArrayDict(adIn, adIn->cowCheck());
         if (a != adIn) decRefArr(adIn);
         continue;
@@ -1331,7 +1331,7 @@ enable_if_lval_t<T, void> tvCastToDArrayInPlace(T tv) {
       case KindOfPersistentKeyset:
       case KindOfKeyset: {
         auto* adIn = val(tv).parr;
-        assertx(adIn->isKeyset());
+        assertx(adIn->isKeysetKind());
         a = SetArray::ToDArray(adIn, adIn->cowCheck());
         assertx(a != adIn);
         decRefArr(adIn);
@@ -1345,10 +1345,10 @@ enable_if_lval_t<T, void> tvCastToDArrayInPlace(T tv) {
       case KindOfPersistentArray:
       case KindOfArray: {
         auto* adIn = val(tv).parr;
-        assertx(adIn->isPHPArray());
+        assertx(adIn->isPHPArrayType());
         if (adIn->isDArray()) return;
         a = adIn->toDArray(adIn->cowCheck());
-        assertx(a->isMixed());
+        assertx(a->isMixedKind());
         assertx(a->isDArray());
         if (a == adIn) return;
         decRefArr(adIn);
@@ -1387,7 +1387,7 @@ enable_if_lval_t<T, void> tvCastToDArrayInPlace(T tv) {
     not_reached();
   } while (0);
 
-  assertx(a->isMixed());
+  assertx(a->isMixedKind());
   assertx(a->isDArray());
   assertx(a->dvArraySanityCheck());
 

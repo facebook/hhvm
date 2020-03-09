@@ -730,14 +730,14 @@ IMPL_OPCODE_CALL(SetNewElemArray);
 IMPL_OPCODE_CALL(AddNewElem);
 
 static ArrayData* addNewElemKeysetImpl(ArrayData* keyset, TypedValue v) {
-  assertx(keyset->isKeyset());
+  assertx(keyset->isKeysetKind());
   auto out = SetArray::Append(keyset, v);
   if (keyset != out) decRefArr(keyset);
   return out;
 }
 
 static ArrayData* addNewElemVecImpl(ArrayData* vec, TypedValue v) {
-  assertx(vec->isVecArray());
+  assertx(vec->isVecArrayKind());
   auto out = PackedArray::AppendVec(vec, v);
   if (vec != out) decRefArr(vec);
   return out;

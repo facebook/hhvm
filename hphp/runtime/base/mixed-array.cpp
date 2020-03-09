@@ -126,7 +126,7 @@ ArrayData* MixedArray::MakeReserveImpl(uint32_t size,
 
 ArrayData* MixedArray::MakeReserveMixed(uint32_t size) {
   auto ad = MakeReserveImpl(size, HeaderKind::Mixed, ArrayData::kNotDVArray);
-  assertx(ad->isMixed());
+  assertx(ad->isMixedKind());
   assertx(ad->isNotDVArray());
   return ad;
 }
@@ -134,14 +134,14 @@ ArrayData* MixedArray::MakeReserveMixed(uint32_t size) {
 ArrayData* MixedArray::MakeReserveDArray(uint32_t size) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
   auto ad = MakeReserveImpl(size, HeaderKind::Mixed, ArrayData::kDArray);
-  assertx(ad->isMixed());
+  assertx(ad->isMixedKind());
   assertx(ad->isDArray());
   return tagArrProv(ad);
 }
 
 ArrayData* MixedArray::MakeReserveDict(uint32_t size) {
   auto ad = MakeReserveImpl(size, HeaderKind::Dict, ArrayData::kNotDVArray);
-  assertx(ad->isDict());
+  assertx(ad->isDictKind());
   return tagArrProv(ad);
 }
 
@@ -149,19 +149,19 @@ ArrayData* MixedArray::MakeReserveSame(const ArrayData* other,
                                        uint32_t capacity) {
   capacity = (capacity ? capacity : other->size());
 
-  if (other->isPacked()) {
+  if (other->isPackedKind()) {
     return PackedArray::MakeReserve(capacity);
   }
 
-  if (other->isVecArray()) {
+  if (other->isVecArrayType()) {
     return PackedArray::MakeReserveVec(capacity);
   }
 
-  if (other->isDict()) {
+  if (other->isDictType()) {
     return MixedArray::MakeReserveDict(capacity);
   }
 
-  if (other->isKeyset()) {
+  if (other->isKeysetType()) {
     return SetArray::MakeReserveSet(capacity);
   }
 
@@ -172,7 +172,7 @@ ArrayData* MixedArray::MakeReserveLike(const ArrayData* other,
                                        uint32_t capacity) {
   capacity = (capacity ? capacity : other->size());
 
-  if (other->hasPackedLayout()) {
+  if (other->hasVanillaPackedLayout()) {
     return PackedArray::MakeReserve(capacity);
   } else {
     return MixedArray::MakeReserveMixed(capacity);
@@ -790,9 +790,9 @@ bool MixedArray::checkInvariants() const {
   );
 
   // All arrays:
-  assertx(hasMixedLayout());
-  assertx(!isMixed() || !isVArray());
-  assertx(!isDict() || isNotDVArray());
+  assertx(hasVanillaMixedLayout());
+  assertx(!isMixedKind() || !isVArray());
+  assertx(!isDictKind() || isNotDVArray());
   assertx(!RuntimeOption::EvalHackArrDVArrs || isNotDVArray());
   assertx(checkCount());
   assertx(m_scale >= 1 && (m_scale & (m_scale - 1)) == 0);
@@ -1404,9 +1404,9 @@ ArrayData* MixedArray::ArrayPlusEqGeneric(ArrayData* ad,
                                           MixedArray* ret,
                                           const ArrayData* elems,
                                           size_t neededSize) {
-  assertx(ad->isPHPArray());
-  assertx(elems->isPHPArray());
-  assertx(ret->isMixed());
+  assertx(ad->isPHPArrayType());
+  assertx(elems->isPHPArrayType());
+  assertx(ret->isMixedKind());
 
   for (ArrayIter it(elems); !it.end(); it.next()) {
     Variant key = it.first();
@@ -1434,8 +1434,8 @@ ArrayData* MixedArray::ArrayPlusEqGeneric(ArrayData* ad,
 ArrayData* MixedArray::PlusEq(ArrayData* ad, const ArrayData* elems) {
   assertx(asMixed(ad)->checkInvariants());
 
-  if (!ad->isPHPArray()) throwInvalidAdditionException(ad);
-  if (!elems->isPHPArray()) throwInvalidAdditionException(elems);
+  if (!ad->isPHPArrayType()) throwInvalidAdditionException(ad);
+  if (!elems->isPHPArrayType()) throwInvalidAdditionException(elems);
 
   auto const neededSize = ad->size() + elems->size();
 
@@ -1443,7 +1443,7 @@ ArrayData* MixedArray::PlusEq(ArrayData* ad, const ArrayData* elems) {
     ad->cowCheck() ? CopyReserve(asMixed(ad), neededSize) :
     asMixed(ad);
 
-  if (UNLIKELY(!elems->hasMixedLayout())) {
+  if (UNLIKELY(!elems->hasVanillaMixedLayout())) {
     return ArrayPlusEqGeneric(ad, ret, elems, neededSize);
   }
 
@@ -1483,7 +1483,7 @@ ArrayData* MixedArray::PlusEq(ArrayData* ad, const ArrayData* elems) {
 NEVER_INLINE
 ArrayData* MixedArray::ArrayMergeGeneric(MixedArray* ret,
                                          const ArrayData* elems) {
-  assertx(ret->isMixed());
+  assertx(ret->isMixedKind());
   assertx(ret->isNotDVArray());
 
   for (ArrayIter it(elems); !it.end(); it.next()) {
@@ -1509,7 +1509,7 @@ ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
   auto const aux = asMixed(ad)->keyTypes().packForAux();
   ret->initHeader_16(HeaderKind::Mixed, OneReference, aux);
 
-  if (elems->hasMixedLayout()) {
+  if (elems->hasVanillaMixedLayout()) {
     auto const rhs = asMixed(elems);
     auto srcElem = rhs->data();
     auto const srcStop = rhs->data() + rhs->m_used;
@@ -1528,7 +1528,7 @@ ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
     return ret;
   }
 
-  if (UNLIKELY(!elems->hasPackedLayout())) {
+  if (UNLIKELY(!elems->hasVanillaPackedLayout())) {
     return ArrayMergeGeneric(ret, elems);
   }
 
@@ -1616,7 +1616,7 @@ ArrayData* MixedArray::Prepend(ArrayData* adInput, TypedValue v) {
 
 ArrayData* MixedArray::ToPHPArray(ArrayData* in, bool copy) {
   auto adIn = asMixed(in);
-  assertx(adIn->isPHPArray());
+  assertx(adIn->isPHPArrayKind());
   if (adIn->isNotDVArray()) return adIn;
   assertx(adIn->isDArray());
   if (adIn->getSize() == 0) return ArrayData::Create();
@@ -1668,7 +1668,7 @@ ArrayData* MixedArray::copyWithIntishCast(MixedArray* adIn,
     }
   }
 
-  assertx(out->isMixed());
+  assertx(out->isMixedKind());
   assertx(out->checkInvariants());
   assertx(out->hasExactlyOneRef());
   return out;
@@ -1678,7 +1678,7 @@ ArrayData* MixedArray::ToPHPArrayIntishCast(ArrayData* in, bool copy) {
   // the input array should already be a PHP-array so we just need to
   // clear DV array bits and cast any intish strings that may appear
   auto adIn = asMixed(in);
-  assertx(adIn->isPHPArray());
+  assertx(adIn->isPHPArrayKind());
   if (adIn->size() == 0) return ArrayData::Create();
 
   if (copy || adIn->hasIntishKeys()) {
@@ -1696,7 +1696,7 @@ ALWAYS_INLINE
 ArrayData* MixedArray::FromDictImpl(ArrayData* adIn,
                                     bool copy,
                                     bool toDArray) {
-  assertx(adIn->isDict());
+  assertx(adIn->isDictKind());
   auto a = asMixed(adIn);
 
   auto const size = a->size();
@@ -1738,7 +1738,7 @@ ArrayData* MixedArray::ToPHPArrayIntishCastDict(ArrayData* adIn, bool copy) {
 
 ArrayData* MixedArray::ToDArray(ArrayData* in, bool copy) {
   auto a = asMixed(in);
-  assertx(a->isMixed());
+  assertx(a->isMixedKind());
   if (RuntimeOption::EvalHackArrDVArrs) return ToDict(in, copy);
   if (a->isDArray()) return a;
   if (a->getSize() == 0) return ArrayData::CreateDArray();
@@ -1760,7 +1760,7 @@ ArrayData* MixedArray::ToDArrayDict(ArrayData* in, bool copy) {
 
 MixedArray* MixedArray::ToDictInPlace(ArrayData* ad) {
   auto a = asMixed(ad);
-  assertx(a->isMixed());
+  assertx(a->isMixedKind());
   assertx(!a->cowCheck());
   a->m_kind = HeaderKind::Dict;
   a->setDVArray(ArrayData::kNotDVArray);
@@ -1770,7 +1770,7 @@ MixedArray* MixedArray::ToDictInPlace(ArrayData* ad) {
 
 ArrayData* MixedArray::ToDict(ArrayData* ad, bool copy) {
   auto a = asMixed(ad);
-  assertx(a->isMixed());
+  assertx(a->isMixedKind());
 
   if (a->empty() && a->m_nextKI == 0) return ArrayData::CreateDict();
 
@@ -1787,7 +1787,7 @@ ArrayData* MixedArray::ToDict(ArrayData* ad, bool copy) {
 
 ArrayData* MixedArray::ToDictDict(ArrayData* ad, bool) {
   assertx(asMixed(ad)->checkInvariants());
-  assertx(ad->isDict());
+  assertx(ad->isDictKind());
   return ad;
 }
 
@@ -1817,7 +1817,7 @@ void MixedArray::OnSetEvalScalar(ArrayData* ad) {
 
 tv_rval MixedArray::NvTryGetIntDict(const ArrayData* ad, int64_t k) {
   assertx(asMixed(ad)->checkInvariants());
-  assertx(ad->isDict());
+  assertx(ad->isDictKind());
   auto const ptr = MixedArray::NvGetInt(ad, k);
   if (UNLIKELY(!ptr)) throwOOBArrayKeyException(k, ad);
   return ptr;
@@ -1826,7 +1826,7 @@ tv_rval MixedArray::NvTryGetIntDict(const ArrayData* ad, int64_t k) {
 tv_rval MixedArray::NvTryGetStrDict(const ArrayData* ad,
                                                const StringData* k) {
   assertx(asMixed(ad)->checkInvariants());
-  assertx(ad->isDict());
+  assertx(ad->isDictKind());
   auto const ptr = MixedArray::NvGetStr(ad, k);
   if (UNLIKELY(!ptr)) throwOOBArrayKeyException(k, ad);
   return ptr;
@@ -1839,8 +1839,8 @@ bool MixedArray::DictEqualHelper(const ArrayData* ad1, const ArrayData* ad2,
                                  bool strict) {
   assertx(asMixed(ad1)->checkInvariants());
   assertx(asMixed(ad2)->checkInvariants());
-  assertx(ad1->isDict());
-  assertx(ad2->isDict());
+  assertx(ad1->isDictKind());
+  assertx(ad2->isDictKind());
 
   if (ad1 == ad2) return true;
   if (ad1->size() != ad2->size()) return false;

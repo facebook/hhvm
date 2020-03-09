@@ -168,16 +168,16 @@ bool start_add_elem(ISS& env, Type& ty, Op op) {
   auto const arr = value->m_data.parr;
   env.replacedBcs.push_back(
     [&] () -> Bytecode {
-      if (arr->isKeyset()) {
+      if (arr->isKeysetType()) {
         return bc::Keyset { arr };
       }
-      if (arr->isVecArray()) {
+      if (arr->isVecArrayType()) {
         return bc::Vec { arr };
       }
-      if (arr->isDict()) {
+      if (arr->isDictType()) {
         return bc::Dict { arr };
       }
-      if (arr->isPHPArray()) {
+      if (arr->isPHPArrayType()) {
         return bc::Array { arr };
       }
 
@@ -906,26 +906,26 @@ void in(ISS& env, const bc::String& op) {
 }
 
 void in(ISS& env, const bc::Array& op) {
-  assert(op.arr1->isPHPArray());
+  assert(op.arr1->isPHPArrayType());
   assertx(!RuntimeOption::EvalHackArrDVArrs || op.arr1->isNotDVArray());
   effect_free(env);
   push(env, aval(op.arr1));
 }
 
 void in(ISS& env, const bc::Vec& op) {
-  assert(op.arr1->isVecArray());
+  assert(op.arr1->isVecArrayType());
   effect_free(env);
   push(env, vec_val(op.arr1));
 }
 
 void in(ISS& env, const bc::Dict& op) {
-  assert(op.arr1->isDict());
+  assert(op.arr1->isDictType());
   effect_free(env);
   push(env, dict_val(op.arr1));
 }
 
 void in(ISS& env, const bc::Keyset& op) {
-  assert(op.arr1->isKeyset());
+  assert(op.arr1->isKeysetType());
   effect_free(env);
   push(env, keyset_val(op.arr1));
 }

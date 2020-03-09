@@ -344,11 +344,11 @@ public:
   static constexpr auto NvTryGetInt = &NvGetInt;
   static constexpr auto NvTryGetStr = &NvGetStr;
   static tv_rval RvalIntStrict(const ArrayData* ad, int64_t k) {
-    assertx(ad->isMixed());
+    assertx(ad->isMixedKind());
     return NvTryGetInt(ad, k);
   }
   static tv_rval RvalStrStrict(const ArrayData* ad, const StringData* k) {
-    assertx(ad->isMixed());
+    assertx(ad->isMixedKind());
     return NvTryGetStr(ad, k);
   }
   static bool ExistsInt(const ArrayData*, int64_t k);
@@ -410,20 +410,20 @@ public:
   static constexpr auto NvGetIntPosDict = &NvGetIntPos;
   static constexpr auto NvGetStrPosDict = &NvGetStrPos;
   static tv_rval RvalIntDict(const ArrayData* ad, int64_t k) {
-    assertx(ad->isDict());
+    assertx(ad->isDictKind());
     return NvGetIntDict(ad, k);
   }
   static tv_rval RvalIntStrictDict(const ArrayData* ad, int64_t k) {
-    assertx(ad->isDict());
+    assertx(ad->isDictKind());
     return NvTryGetIntDict(ad, k);
   }
   static tv_rval RvalStrDict(const ArrayData* ad, const StringData* k) {
-    assertx(ad->isDict());
+    assertx(ad->isDictKind());
     return NvGetStrDict(ad, k);
   }
   static tv_rval RvalStrStrictDict(const ArrayData* ad,
                                        const StringData* k) {
-    assertx(ad->isDict());
+    assertx(ad->isDictKind());
     return NvTryGetStrDict(ad, k);
   }
   static constexpr auto ReleaseDict = &Release;
@@ -546,13 +546,13 @@ private:
 public:
   // Safe downcast helpers
   static MixedArray* asMixed(ArrayData* ad) {
-    assertx(ad->hasMixedLayout());
+    assertx(ad->hasVanillaMixedLayout());
     auto a = static_cast<MixedArray*>(ad);
     assertx(a->checkInvariants());
     return a;
   }
   static const MixedArray* asMixed(const ArrayData* ad) {
-    assertx(ad->hasMixedLayout());
+    assertx(ad->hasVanillaMixedLayout());
     auto a = static_cast<const MixedArray*>(ad);
     assertx(a->checkInvariants());
     return a;
@@ -561,7 +561,7 @@ public:
   // Fast iteration
   template <class F, bool inc = true>
   static void IterateV(const MixedArray* arr, F fn) {
-    assertx(arr->hasMixedLayout());
+    assertx(arr->hasVanillaMixedLayout());
     auto elm = arr->data();
     if (inc) arr->incRefCount();
     SCOPE_EXIT { if (inc) decRefArr(const_cast<MixedArray*>(arr)); };
@@ -573,7 +573,7 @@ public:
   }
   template <class F, bool inc = true>
   static void IterateKV(const MixedArray* arr, F fn) {
-    assertx(arr->hasMixedLayout());
+    assertx(arr->hasVanillaMixedLayout());
     auto elm = arr->data();
     if (inc) arr->incRefCount();
     SCOPE_EXIT { if (inc) decRefArr(const_cast<MixedArray*>(arr)); };

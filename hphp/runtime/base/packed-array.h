@@ -75,11 +75,11 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static ssize_t NvGetStrPos(const ArrayData*, const StringData* k);
   static constexpr auto NvGetStrPosVec = &NvGetStrPos;
   static tv_rval RvalInt(const ArrayData* ad, int64_t k) {
-    assertx(ad->isPacked());
+    assertx(ad->isPackedKind());
     return NvGetInt(ad, k);
   }
   static tv_rval RvalIntStrict(const ArrayData* ad, int64_t k) {
-    assertx(ad->isPacked());
+    assertx(ad->isPackedKind());
     return NvTryGetInt(ad, k);
   }
   static TypedValue NvGetKey(const ArrayData*, ssize_t pos);
@@ -196,11 +196,11 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static constexpr auto ToDArrayVec = &ToDArray;
 
   static tv_rval RvalIntVec(const ArrayData* ad, int64_t k) {
-    assertx(ad->isVecArray());
+    assertx(ad->isVecArrayKind());
     return NvGetIntVec(ad, k);
   }
   static tv_rval RvalIntStrictVec(const ArrayData* ad, int64_t k) {
-    assertx(ad->isVecArray());
+    assertx(ad->isVecArrayKind());
     return NvTryGetIntVec(ad, k);
   }
 

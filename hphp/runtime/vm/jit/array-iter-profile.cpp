@@ -38,7 +38,7 @@ IterSpecialization getIterSpecialization(const ArrayData* arr) {
     case ArrayData::kPackedKind:
     case ArrayData::kVecKind: {
       result.specialized = true;
-      result.base_type = arr->isPHPArray() ? S::Packed : S::Vec;
+      result.base_type = arr->isPHPArrayType() ? S::Packed : S::Vec;
       result.key_types = S::Int;
       return result;
     }
@@ -48,7 +48,7 @@ IterSpecialization getIterSpecialization(const ArrayData* arr) {
       auto const keys = MixedArray::asMixed(arr)->keyTypes();
       if (keys.mayIncludeTombstone()) return result;
       result.specialized = true;
-      result.base_type = arr->isPHPArray() ? S::Mixed : S::Dict;
+      result.base_type = arr->isPHPArrayType() ? S::Mixed : S::Dict;
       result.key_types = [&]{
         if (keys.mustBeStaticStrs()) return S::StaticStr;
         if (keys.mustBeInts()) return S::Int;
@@ -58,7 +58,7 @@ IterSpecialization getIterSpecialization(const ArrayData* arr) {
       return result;
     }
 
-    default: return result;
+  default: return result;
   }
 }
 

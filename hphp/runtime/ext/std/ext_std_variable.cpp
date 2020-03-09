@@ -472,7 +472,7 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
     case KindOfPersistentVec:
     case KindOfVec: {
       ArrayData* arr = value.getArrayData();
-      assertx(arr->isVecArray());
+      assertx(arr->isVecArrayType());
       if (arr->empty()) {
         return UNLIKELY(RuntimeOption::EvalHackArrDVArrs &&
                         !arr->isLegacyArray())
@@ -485,7 +485,7 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
     case KindOfPersistentDict:
     case KindOfDict: {
       ArrayData* arr = value.getArrayData();
-      assertx(arr->isDict());
+      assertx(arr->isDictType());
       if (arr->empty()) {
         return UNLIKELY(RuntimeOption::EvalHackArrDVArrs &&
                         !arr->isLegacyArray())
@@ -498,7 +498,7 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
     case KindOfPersistentKeyset:
     case KindOfKeyset: {
       ArrayData* arr = value.getArrayData();
-      assertx(arr->isKeyset());
+      assertx(arr->isKeysetType());
       if (arr->empty()) return empty_hack(arr, s_EmptyKeysetArray);
       break;
     }
@@ -510,7 +510,7 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
     case KindOfPersistentArray:
     case KindOfArray: {
       ArrayData *arr = value.getArrayData();
-      assertx(arr->isPHPArray());
+      assertx(arr->isPHPArrayType());
       assertx(!RuntimeOption::EvalHackArrDVArrs || arr->isNotDVArray());
       if (arr->empty()) {
         if (UNLIKELY(RuntimeOption::EvalHackArrCompatSerializeNotices &&

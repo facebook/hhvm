@@ -228,7 +228,7 @@ void ConvertTvToUncounted(
       // Fall-through.
     case KindOfPersistentVec: {
       auto& ad = data.parr;
-      assertx(ad->isVecArray());
+      assertx(ad->isVecArrayKind());
       if (handlePersistent(ad)) break;
       if (ad->empty()) ad = ArrayData::CreateVec();
       else ad = PackedArray::MakeUncounted(ad, false, seen);
@@ -240,7 +240,7 @@ void ConvertTvToUncounted(
       // Fall-through.
     case KindOfPersistentDict: {
       auto& ad = data.parr;
-      assertx(ad->isDict());
+      assertx(ad->isDictKind());
       if (handlePersistent(ad)) break;
       if (ad->empty()) ad = ArrayData::CreateDict();
       else ad = MixedArray::MakeUncounted(ad, false, seen);
@@ -252,7 +252,7 @@ void ConvertTvToUncounted(
       // Fall-through.
     case KindOfPersistentKeyset: {
       auto& ad = data.parr;
-      assertx(ad->isKeyset());
+      assertx(ad->isKeysetKind());
       if (handlePersistent(ad)) break;
       if (ad->empty()) ad = ArrayData::CreateKeyset();
       else ad = SetArray::MakeUncounted(ad, false, seen);
@@ -268,16 +268,17 @@ void ConvertTvToUncounted(
     case KindOfPersistentVArray:
     case KindOfPersistentArray: {
       auto& ad = data.parr;
-      assertx(ad->isPHPArray());
+      assertx(ad->isPHPArrayKind());
       assertx(!RuntimeOption::EvalHackArrDVArrs || ad->isNotDVArray());
       if (handlePersistent(ad)) break;
       if (ad->empty()) {
         if (ad->isVArray()) ad = ArrayData::CreateVArray();
         else if (ad->isDArray()) ad = ArrayData::CreateDArray();
         else ad = ArrayData::Create();
-      } else if (ad->hasPackedLayout()) {
+      } else if (ad->hasVanillaPackedLayout()) {
         ad = PackedArray::MakeUncounted(ad, false, seen);
       } else {
+        assertx(ad->hasVanillaMixedLayout());
         ad = MixedArray::MakeUncounted(ad, false, seen);
       }
       break;
@@ -293,6 +294,7 @@ void ConvertTvToUncounted(
         auto& ad = data.parr;
         if (handlePersistent(ad)) break;
         assertx(!ad->empty());
+        assertx(ad->hasVanillaPackedLayout());
         ad = PackedArray::MakeUncounted(ad, false, seen);
         break;
       } else {
@@ -301,6 +303,7 @@ void ConvertTvToUncounted(
         auto& ad = data.parr;
         if (handlePersistent(ad)) break;
         assertx(!ad->empty());
+        assertx(ad->hasVanillaPackedLayout());
         ad = PackedArray::MakeUncounted(ad, false, seen);
         break;
       }
@@ -333,9 +336,12 @@ void ReleaseUncountedTv(tv_lval lval) {
     auto const arr = val(lval).parr;
     assertx(!arr->isRefCounted());
     if (!arr->isStatic()) {
-      if (arr->hasPackedLayout()) PackedArray::ReleaseUncounted(arr);
-      else if (arr->isKeyset()) SetArray::ReleaseUncounted(arr);
-      else MixedArray::ReleaseUncounted(arr);
+      if (arr->hasVanillaPackedLayout()) PackedArray::ReleaseUncounted(arr);
+      else if (arr->isKeysetKind()) SetArray::ReleaseUncounted(arr);
+      else {
+        assertx(arr->hasVanillaMixedLayout());
+        MixedArray::ReleaseUncounted(arr);
+      }
     }
     return;
   }

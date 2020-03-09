@@ -69,7 +69,7 @@ struct APCTypedValue {
   enum class StaticArr {};
   APCTypedValue(StaticArr, ArrayData* data)
     : m_handle(APCKind::StaticArray, KindOfPersistentArray) {
-    assertx(data->isPHPArray());
+    assertx(data->isPHPArrayKind());
     assertx(data->isStatic());
     m_data.arr = data;
     assertx(checkInvariants());
@@ -78,7 +78,7 @@ struct APCTypedValue {
   enum class UncountedArr {};
   APCTypedValue(UncountedArr, ArrayData* data)
     : m_handle(APCKind::UncountedArray, KindOfPersistentArray) {
-    assertx(data->isPHPArray());
+    assertx(data->isPHPArrayKind());
     assertx(data->isUncounted());
     m_data.arr = data;
     assertx(checkInvariants());
@@ -87,7 +87,7 @@ struct APCTypedValue {
   enum class StaticVec {};
   APCTypedValue(StaticVec, ArrayData* data)
     : m_handle(APCKind::StaticVec, KindOfPersistentVec) {
-    assertx(data->isVecArray());
+    assertx(data->isVecArrayKind());
     assertx(data->isStatic());
     m_data.vec = data;
     assertx(checkInvariants());
@@ -96,7 +96,7 @@ struct APCTypedValue {
   enum class UncountedVec {};
   APCTypedValue(UncountedVec, ArrayData* data)
     : m_handle(APCKind::UncountedVec, KindOfPersistentVec) {
-    assertx(data->isVecArray());
+    assertx(data->isVecArrayKind());
     assertx(data->isUncounted());
     m_data.vec = data;
     assertx(checkInvariants());
@@ -105,7 +105,7 @@ struct APCTypedValue {
   enum class StaticDict {};
   APCTypedValue(StaticDict, ArrayData* data)
     : m_handle(APCKind::StaticDict, KindOfPersistentDict) {
-    assertx(data->isDict());
+    assertx(data->isDictKind());
     assertx(data->isStatic());
     m_data.dict = data;
     assertx(checkInvariants());
@@ -114,7 +114,7 @@ struct APCTypedValue {
   enum class UncountedDict {};
   APCTypedValue(UncountedDict, ArrayData* data)
     : m_handle(APCKind::UncountedDict, KindOfPersistentDict) {
-    assertx(data->isDict());
+    assertx(data->isDictKind());
     assertx(data->isUncounted());
     m_data.dict = data;
     assertx(checkInvariants());
@@ -123,7 +123,7 @@ struct APCTypedValue {
   enum class StaticKeyset {};
   APCTypedValue(StaticKeyset, ArrayData* data)
     : m_handle(APCKind::StaticKeyset, KindOfPersistentKeyset) {
-    assertx(data->isKeyset());
+    assertx(data->isKeysetKind());
     assertx(data->isStatic());
     m_data.keyset = data;
     assertx(checkInvariants());
@@ -132,7 +132,7 @@ struct APCTypedValue {
   enum class UncountedKeyset {};
   APCTypedValue(UncountedKeyset, ArrayData* data)
     : m_handle(APCKind::UncountedKeyset, KindOfPersistentKeyset) {
-    assertx(data->isKeyset());
+    assertx(data->isKeysetKind());
     assertx(data->isUncounted());
     m_data.keyset = data;
     assertx(checkInvariants());

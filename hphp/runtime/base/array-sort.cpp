@@ -186,11 +186,11 @@ ArrayData* PackedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
     }
     return ad;
   }
-  if (ad->m_size <= 1 && !(ad->isVecArray() || ad->isVArray())) {
+  if (ad->m_size <= 1 && !(ad->isVecArrayKind() || ad->isVArray())) {
     return ad;
   }
   assertx(checkInvariants(ad));
-  auto ret = ad->isVecArray()
+  auto ret = ad->isVecArrayKind()
     // TODO(T39123862)
     ? PackedArray::ToDictVec(ad, ad->cowCheck())
     : ToMixedCopy(ad);

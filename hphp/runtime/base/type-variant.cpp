@@ -343,7 +343,7 @@ static bool isAllowedAsConstantValueImpl(TypedValue tv) {
     case KindOfVec:
     case KindOfDict:
     case KindOfArray: {
-      if (tv.m_data.parr->isGlobalsArray()) return false;
+      if (tv.m_data.parr->isGlobalsArrayKind()) return false;
 
       bool allowed = true;
       IterateV(

@@ -58,37 +58,37 @@ bool tvIsPlausible(const TypedValue cell) {
       case KindOfPersistentVec:
         assertPtr(cell.m_data.parr);
         assertx(!cell.m_data.parr->isRefCounted());
-        assertx(cell.m_data.parr->isVecArray());
+        assertx(cell.m_data.parr->isVecArrayType());
         assertx(cell.m_data.parr->isNotDVArray());
         return;
       case KindOfVec:
         assertPtr(cell.m_data.parr);
         assertx(cell.m_data.parr->checkCountZ());
-        assertx(cell.m_data.parr->isVecArray());
+        assertx(cell.m_data.parr->isVecArrayType());
         assertx(cell.m_data.parr->isNotDVArray());
         return;
       case KindOfPersistentDict:
         assertPtr(cell.m_data.parr);
         assertx(!cell.m_data.parr->isRefCounted());
-        assertx(cell.m_data.parr->isDict());
+        assertx(cell.m_data.parr->isDictType());
         assertx(cell.m_data.parr->isNotDVArray());
         return;
       case KindOfDict:
         assertPtr(cell.m_data.parr);
         assertx(cell.m_data.parr->checkCountZ());
-        assertx(cell.m_data.parr->isDict());
+        assertx(cell.m_data.parr->isDictType());
         assertx(cell.m_data.parr->isNotDVArray());
         return;
       case KindOfPersistentKeyset:
         assertPtr(cell.m_data.parr);
         assertx(!cell.m_data.parr->isRefCounted());
-        assertx(cell.m_data.parr->isKeyset());
+        assertx(cell.m_data.parr->isKeysetType());
         assertx(cell.m_data.parr->isNotDVArray());
         return;
       case KindOfKeyset:
         assertPtr(cell.m_data.parr);
         assertx(cell.m_data.parr->checkCountZ());
-        assertx(cell.m_data.parr->isKeyset());
+        assertx(cell.m_data.parr->isKeysetType());
         assertx(cell.m_data.parr->isNotDVArray());
         return;
       case KindOfPersistentDArray:
@@ -96,7 +96,7 @@ bool tvIsPlausible(const TypedValue cell) {
         assertx(val(cell).parr->kindIsValid());
         assertx(!val(cell).parr->isRefCounted());
         assertx(val(cell).parr->isDArray());
-        assertx(val(cell).parr->isPHPArray());
+        assertx(val(cell).parr->isPHPArrayType());
         assertx(val(cell).parr->dvArraySanityCheck());
         return;
       case KindOfPersistentVArray:
@@ -104,14 +104,14 @@ bool tvIsPlausible(const TypedValue cell) {
         assertx(val(cell).parr->kindIsValid());
         assertx(!val(cell).parr->isRefCounted());
         assertx(val(cell).parr->isVArray());
-        assertx(val(cell).parr->isPHPArray());
+        assertx(val(cell).parr->isPHPArrayType());
         assertx(val(cell).parr->dvArraySanityCheck());
         return;
       case KindOfPersistentArray:
         assertPtr(cell.m_data.parr);
         assertx(cell.m_data.parr->kindIsValid());
         assertx(!cell.m_data.parr->isRefCounted());
-        assertx(cell.m_data.parr->isPHPArray());
+        assertx(cell.m_data.parr->isPHPArrayType());
         assertx(cell.m_data.parr->dvArraySanityCheck());
         return;
       case KindOfDArray:
@@ -119,7 +119,7 @@ bool tvIsPlausible(const TypedValue cell) {
         assertx(val(cell).parr->kindIsValid());
         assertx(val(cell).parr->checkCountZ());
         assertx(val(cell).parr->isDArray());
-        assertx(val(cell).parr->isPHPArray());
+        assertx(val(cell).parr->isPHPArrayType());
         assertx(val(cell).parr->dvArraySanityCheck());
         return;
       case KindOfVArray:
@@ -127,14 +127,14 @@ bool tvIsPlausible(const TypedValue cell) {
         assertx(val(cell).parr->kindIsValid());
         assertx(val(cell).parr->checkCountZ());
         assertx(val(cell).parr->isVArray());
-        assertx(val(cell).parr->isPHPArray());
+        assertx(val(cell).parr->isPHPArrayType());
         assertx(val(cell).parr->dvArraySanityCheck());
         return;
       case KindOfArray:
         assertPtr(cell.m_data.parr);
         assertx(cell.m_data.parr->kindIsValid());
         assertx(cell.m_data.parr->checkCountZ());
-        assertx(cell.m_data.parr->isPHPArray());
+        assertx(cell.m_data.parr->isPHPArrayType());
         assertx(cell.m_data.parr->dvArraySanityCheck());
         return;
       case KindOfObject:

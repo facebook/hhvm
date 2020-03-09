@@ -632,7 +632,7 @@ struct HashCollection : ObjectData {
     ~SortTmp() {
       if (m_h->m_arr != m_ad) {
         Array tmp = Array::attach(m_h->m_arr);
-        assertx(m_ad->isDict());
+        assertx(m_ad->isDictKind());
         m_h->m_arr = static_cast<MixedArray*>(m_ad);
       }
     }

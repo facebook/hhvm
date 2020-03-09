@@ -218,7 +218,7 @@ std::pair<int, double> sizeOfArray(
 
   int size = 0;
   double sized = 0;
-  if (ad->hasPackedLayout()) {
+  if (ad->hasVanillaPackedLayout()) {
     FTRACE(2, "Iterating packed array\n");
     if (stack) stack->push_back("ArrayIndex");
 
@@ -366,7 +366,7 @@ void stringsOfArray(
 
   path->push_back(std::string("array()"));
 
-  if (ad->hasPackedLayout()) {
+  if (ad->hasVanillaPackedLayout()) {
     path->push_back(std::string("[]"));
     IterateV(ad, [&] (TypedValue v) {
       tvGetStrings(v, metrics, path, pointers, val_stack);

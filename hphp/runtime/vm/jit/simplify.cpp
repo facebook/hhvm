@@ -2936,7 +2936,7 @@ SSATmp* arrIntKeyImpl(State& env, const IRInstruction* inst) {
   auto const idx = inst->src(1);
   assertx(arr->hasConstVal(TArr));
   assertx(idx->hasConstVal(TInt));
-  assertx(arr->arrVal()->isPHPArray());
+  assertx(arr->arrVal()->isPHPArrayType());
   auto const rval = arr->arrVal()->rval(idx->intVal());
   return rval ? cns(env, rval.tv()) : nullptr;
 }
@@ -2946,7 +2946,7 @@ SSATmp* arrStrKeyImpl(State& env, const IRInstruction* inst, bool& skip) {
   auto const idx = inst->src(1);
   assertx(arr->hasConstVal(TArr));
   assertx(idx->hasConstVal(TStr));
-  assertx(arr->arrVal()->isPHPArray());
+  assertx(arr->arrVal()->isPHPArrayType());
 
   skip = false;
   auto const rval = arr->arrVal()->rval(idx->strVal());
@@ -3441,7 +3441,7 @@ SSATmp* packedLayoutLoadImpl(State& env,
   if (src0->hasConstVal() && src1->hasConstVal(TInt)) {
     auto const arr = src0->arrLikeVal();
     auto const idx = src1->intVal();
-    assertx(arr->hasPackedLayout());
+    assertx(arr->hasVanillaPackedLayout());
     if (idx >= 0) {
       auto const rval = isVec
         ? PackedArray::RvalIntVec(arr, idx)

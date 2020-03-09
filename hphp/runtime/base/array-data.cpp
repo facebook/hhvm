@@ -71,7 +71,7 @@ struct ScalarHash {
   }
   size_t raw_hash(const ArrayData* arr, arrprov::Tag tag = {}) const {
     auto ret = uint64_t{
-      arr->isHackArray()
+      arr->isHackArrayType()
       ? arr->kind()
       : ArrayData::ArrayKind::kMixedKind
     };
@@ -135,10 +135,10 @@ struct ScalarHash {
     if (ad1 == ad2) return true;
     if (ad1->size() != ad2->size()) return false;
     if (!ArrayData::dvArrayEqual(ad1, ad2)) return false;
-    if (ad1->isHackArray()) {
-      if (!ad2->isHackArray()) return false;
+    if (ad1->isHackArrayType()) {
+      if (!ad2->isHackArrayType()) return false;
       if (ad1->kind() != ad2->kind()) return false;
-    } else if (ad2->isHackArray()) {
+    } else if (ad2->isHackArrayType()) {
       return false;
     }
 
@@ -201,11 +201,11 @@ void ArrayData::GetScalarArray(ArrayData** parr, arrprov::Tag tag) {
   };
 
   if (arr->empty() && LIKELY(!requested_tag)) {
-    if (arr->isKeyset())   return replace(staticEmptyKeysetArray());
-    if (arr->isVArray())   return replace(staticEmptyVArray());
-    if (arr->isDArray())   return replace(staticEmptyDArray());
-    if (arr->isVecArray()) return replace(staticEmptyVecArray());
-    if (arr->isDict())     return replace(staticEmptyDictArray());
+    if (arr->isKeysetType())   return replace(staticEmptyKeysetArray());
+    if (arr->isVArray())       return replace(staticEmptyVArray());
+    if (arr->isDArray())       return replace(staticEmptyDArray());
+    if (arr->isVecArrayType()) return replace(staticEmptyVecArray());
+    if (arr->isDictType())     return replace(staticEmptyDictArray());
     return replace(staticEmptyArray());
   }
 
@@ -229,12 +229,15 @@ void ArrayData::GetScalarArray(ArrayData** parr, arrprov::Tag tag) {
   if (it != s_arrayDataMap.end()) return replace(*it);
 
   ArrayData* ad;
-  if (((arr->isMixed() && !arr->isDArray()) || arr->isApcArray() ||
-        arr->isGlobalsArray()) && arr->isVectorData()) {
+  if (((arr->isMixedKind() && !arr->isDArray()) ||
+       arr->isApcArrayKind() ||
+       arr->isGlobalsArrayKind()) &&
+      arr->isVectorData()) {
     ad = PackedArray::ConvertStatic(arr);
   } else {
     ad = arr->copyStatic();
   }
+
   assertx(ad->isStatic());
   s_cachedHash.first = ad;
   assertx(ScalarHash{}.raw_hash(ad) == s_cachedHash.second);
@@ -797,8 +800,8 @@ ArrayData* ArrayData::Create(TypedValue name, TypedValue value) {
 ALWAYS_INLINE
 bool ArrayData::EqualHelper(const ArrayData* ad1, const ArrayData* ad2,
                             bool strict) {
-  assertx(ad1->isPHPArray());
-  assertx(ad2->isPHPArray());
+  assertx(ad1->isPHPArrayType());
+  assertx(ad2->isPHPArrayType());
 
   if (ad1 == ad2) return true;
 
@@ -839,8 +842,8 @@ bool ArrayData::EqualHelper(const ArrayData* ad1, const ArrayData* ad2,
 
 ALWAYS_INLINE
 int64_t ArrayData::CompareHelper(const ArrayData* ad1, const ArrayData* ad2) {
-  assertx(ad1->isPHPArray());
-  assertx(ad2->isPHPArray());
+  assertx(ad1->isPHPArrayType());
+  assertx(ad2->isPHPArrayType());
 
   if (UNLIKELY(RuntimeOption::EvalHackArrCompatDVCmpNotices)) {
     if (!ArrayData::dvArrayEqual(ad1, ad2)) {
@@ -917,35 +920,36 @@ int64_t ArrayData::Compare(const ArrayData* ad1, const ArrayData* ad2) {
 int ArrayData::compare(const ArrayData* v2) const {
   assertx(v2);
 
-  if (isPHPArray()) {
-    if (UNLIKELY(!v2->isPHPArray())) {
+  if (isPHPArrayType()) {
+    if (UNLIKELY(!v2->isPHPArrayType())) {
       if (UNLIKELY(checkHACCompare())) {
         raiseHackArrCompatArrHackArrCmp();
       }
-      if (v2->isVecArray()) throw_vec_compare_exception();
-      if (v2->isDict()) throw_dict_compare_exception();
-      if (v2->isKeyset()) throw_keyset_compare_exception();
+      if (v2->isVecArrayType()) throw_vec_compare_exception();
+      if (v2->isDictType()) throw_dict_compare_exception();
+      if (v2->isKeysetType()) throw_keyset_compare_exception();
       not_reached();
     }
     return Compare(this, v2);
   }
 
-  if (isVecArray()) {
-    if (UNLIKELY(!v2->isVecArray())) {
-      if (UNLIKELY(checkHACCompare() && v2->isPHPArray())) {
+  if (isVecArrayType()) {
+    if (UNLIKELY(!v2->isVecArrayType())) {
+      if (UNLIKELY(checkHACCompare() && v2->isPHPArrayType())) {
         raiseHackArrCompatArrHackArrCmp();
       }
       throw_vec_compare_exception();
     }
+    assertx(isVecArrayKind() && v2->isVecArrayKind());
     return PackedArray::VecCmp(this, v2);
   }
 
-  if (UNLIKELY(checkHACCompare() && v2->isPHPArray())) {
+  if (UNLIKELY(checkHACCompare() && v2->isPHPArrayType())) {
     raiseHackArrCompatArrHackArrCmp();
   }
 
-  if (isDict()) throw_dict_compare_exception();
-  if (isKeyset()) throw_keyset_compare_exception();
+  if (isDictType()) throw_dict_compare_exception();
+  if (isKeysetType()) throw_keyset_compare_exception();
 
   not_reached();
 }
@@ -954,31 +958,31 @@ bool ArrayData::equal(const ArrayData* v2, bool strict) const {
   assertx(v2);
 
   auto const mixed = [&]{
-    if (UNLIKELY(checkHACCompare() && v2->isHackArray())) {
+    if (UNLIKELY(checkHACCompare() && v2->isHackArrayType())) {
       raiseHackArrCompatArrHackArrCmp();
     }
     return false;
   };
 
-  if (isPHPArray()) {
-    if (UNLIKELY(!v2->isPHPArray())) return mixed();
+  if (isPHPArrayType()) {
+    if (UNLIKELY(!v2->isPHPArrayType())) return mixed();
     return strict ? Same(this, v2) : Equal(this, v2);
   }
 
-  if (isVecArray()) {
-    if (UNLIKELY(!v2->isVecArray())) return mixed();
+  if (isVecArrayKind()) {
+    if (UNLIKELY(!v2->isVecArrayKind())) return mixed();
     return strict
       ? PackedArray::VecSame(this, v2) : PackedArray::VecEqual(this, v2);
   }
 
-  if (isDict()) {
-    if (UNLIKELY(!v2->isDict())) return mixed();
+  if (isDictKind()) {
+    if (UNLIKELY(!v2->isDictKind())) return mixed();
     return strict
       ? MixedArray::DictSame(this, v2) : MixedArray::DictEqual(this, v2);
   }
 
-  if (isKeyset()) {
-    if (UNLIKELY(!v2->isKeyset())) return mixed();
+  if (isKeysetKind()) {
+    if (UNLIKELY(!v2->isKeysetKind())) return mixed();
     return strict ? SetArray::Same(this, v2) : SetArray::Equal(this, v2);
   }
 
@@ -1165,10 +1169,10 @@ std::string describeKeyValue(TypedValue tv) {
 
 void throwInvalidArrayKeyException(const TypedValue* key, const ArrayData* ad) {
   std::pair<const char*, const char*> kind_type = [&]{
-    if (ad->isVecArray()) return std::make_pair("vec", "int");
-    if (ad->isDict()) return std::make_pair("dict", "int or string");
-    if (ad->isKeyset()) return std::make_pair("keyset", "int or string");
-    assertx(ad->isPHPArray());
+    if (ad->isVecArrayType()) return std::make_pair("vec", "int");
+    if (ad->isDictType()) return std::make_pair("dict", "int or string");
+    if (ad->isKeysetType()) return std::make_pair("keyset", "int or string");
+    assertx(ad->isPHPArrayType());
     return std::make_pair("array", "int or string");
   }();
   SystemLib::throwInvalidArgumentExceptionObject(
@@ -1198,10 +1202,10 @@ void throwMissingElementException(const char* op) {
 
 void throwOOBArrayKeyException(TypedValue key, const ArrayData* ad) {
   const char* type = [&]{
-    if (ad->isVecArray()) return "vec";
-    if (ad->isDict()) return "dict";
-    if (ad->isKeyset()) return "keyset";
-    assertx(ad->isPHPArray());
+    if (ad->isVecArrayType()) return "vec";
+    if (ad->isDictType()) return "dict";
+    if (ad->isKeysetType()) return "keyset";
+    assertx(ad->isPHPArrayType());
     return "array";
   }();
   SystemLib::throwOutOfBoundsExceptionObject(
@@ -1228,11 +1232,11 @@ void throwInvalidKeysetOperation() {
 }
 
 void throwInvalidAdditionException(const ArrayData* ad) {
-  assertx(ad->isHackArray());
+  assertx(ad->isHackArrayType());
   const char* type = [&]{
-    if (ad->isVecArray()) return "Vecs";
-    if (ad->isDict()) return "Dicts";
-    if (ad->isKeyset()) return "Keysets";
+    if (ad->isVecArrayType()) return "Vecs";
+    if (ad->isDictType()) return "Dicts";
+    if (ad->isKeysetType()) return "Keysets";
     not_reached();
   }();
   SystemLib::throwInvalidOperationExceptionObject(

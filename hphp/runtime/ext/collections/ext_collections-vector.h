@@ -40,7 +40,7 @@ protected:
     , m_unusedAndSize(arr->m_size)
     , m_arr(arr)
   {
-    assertx(arr->isVecArray());
+    assertx(arr->isVecArrayKind());
   }
   explicit BaseVector(Class* cls, HeaderKind kind, uint32_t cap)
     : ObjectData(cls, NoInit{}, ObjectData::NoAttrs, kind)
@@ -83,11 +83,11 @@ public:
   php_concat(const Variant& iterable);
 
   ArrayData* arrayData() {
-    assertx(m_arr->isVecArray());
+    assertx(m_arr->isVecArrayKind());
     return m_arr;
   }
   const ArrayData* arrayData() const {
-    assertx(m_arr->isVecArray());
+    assertx(m_arr->isVecArrayKind());
     return m_arr;
   }
   void setSize(uint32_t sz) {

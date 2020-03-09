@@ -396,9 +396,9 @@ private:
     m_data = Local ? nullptr : ad;
     setArrayNext(IterNextIndex::Array);
     if (ad != nullptr) {
-      if (ad->hasPackedLayout()) {
+      if (ad->hasVanillaPackedLayout()) {
         setArrayNext(IterNextIndex::ArrayPacked);
-      } else if (ad->hasMixedLayout()) {
+      } else if (ad->hasVanillaMixedLayout()) {
         setArrayNext(IterNextIndex::ArrayMixed);
       }
       m_pos = ad->iter_begin();
@@ -503,11 +503,11 @@ private:
 template <typename ArrFn, bool IncRef = true>
 bool IterateV(const ArrayData* adata, ArrFn arrFn) {
   if (adata->empty()) return true;
-  if (adata->hasPackedLayout()) {
+  if (adata->hasVanillaPackedLayout()) {
     PackedArray::IterateV<ArrFn, IncRef>(adata, arrFn);
-  } else if (adata->hasMixedLayout()) {
+  } else if (adata->hasVanillaMixedLayout()) {
     MixedArray::IterateV<ArrFn, IncRef>(MixedArray::asMixed(adata), arrFn);
-  } else if (adata->isKeyset()) {
+  } else if (adata->isKeysetKind()) {
     SetArray::Iterate<ArrFn, IncRef>(SetArray::asSet(adata), arrFn);
   } else {
     for (ArrayIter iter(adata); iter; ++iter) {
@@ -588,11 +588,11 @@ bool IterateV(const TypedValue& it, ArrFn arrFn) {
 template <typename ArrFn, bool IncRef = true>
 bool IterateKV(const ArrayData* adata, ArrFn arrFn) {
   if (adata->empty()) return true;
-  if (adata->hasMixedLayout()) {
+  if (adata->hasVanillaMixedLayout()) {
     MixedArray::IterateKV<ArrFn, IncRef>(MixedArray::asMixed(adata), arrFn);
-  } else if (adata->hasPackedLayout()) {
+  } else if (adata->hasVanillaPackedLayout()) {
     PackedArray::IterateKV<ArrFn, IncRef>(adata, arrFn);
-  } else if (adata->isKeyset()) {
+  } else if (adata->isKeysetKind()) {
     auto fun = [&](TypedValue v) { return arrFn(v, v); };
     SetArray::Iterate<decltype(fun), IncRef>(SetArray::asSet(adata), fun);
   } else {

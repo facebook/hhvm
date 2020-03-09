@@ -203,7 +203,7 @@ void RegisterUncountedTvAllocations(TypedValue& tv, APCHandle* rootAPCHandle) {
     auto arr = tv.m_data.parr;
     assertx(!arr->isRefCounted());
     if (!arr->isStatic()) {
-      if (arr->hasPackedLayout()) {
+      if (arr->hasVanillaPackedLayout()) {
         PackedArray::RegisterUncountedAllocations(arr, rootAPCHandle);
       } else {
         MixedArray::RegisterUncountedAllocations(arr, rootAPCHandle);
@@ -234,8 +234,8 @@ void APCTypedValue::registerUncountedAllocations() {
    if (kind == APCKind::UncountedString) {
      m_data.str->registerUncountedAllocation(&m_handle);
    } else if (kind == APCKind::UncountedArray) {
-     assertx(m_data.arr->isPHPArray());
-     if (m_data.arr->hasPackedLayout()) {
+     assertx(m_data.arr->isPHPArrayKind());
+     if (m_data.arr->hasVanillaPackedLayout()) {
        auto arr = m_data.arr;
        PackedArray::RegisterUncountedAllocations(arr, &m_handle);
        return;
@@ -246,17 +246,17 @@ void APCTypedValue::registerUncountedAllocations() {
      }
    } else if (kind == APCKind::UncountedVec) {
      auto vec = m_data.vec;
-     assertx(vec->isVecArray());
+     assertx(vec->isVecArrayKind());
      PackedArray::RegisterUncountedAllocations(vec, &m_handle);
      return;
    } else if (kind == APCKind::UncountedDict) {
      auto dict = m_data.dict;
-     assertx(dict->isDict());
+     assertx(dict->isDictKind());
      MixedArray::RegisterUncountedAllocations(dict, &m_handle);
      return;
    } else if (kind == APCKind::UncountedKeyset) {
      auto keyset = m_data.keyset;
-     assertx(keyset->isKeyset());
+     assertx(keyset->isKeysetKind());
      SetArray::RegisterUncountedAllocations(keyset, &m_handle);
      return;
    }

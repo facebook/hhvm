@@ -141,7 +141,7 @@ ArrayData* asArray(ObjectData* obj) {
 namespace {
 
 ArrayData* deepCopyArray(ArrayData* arr) {
-  assertx(arr->isPHPArray());
+  assertx(arr->isPHPArrayType());
   Array ar(arr);
   IterateKV(
     arr,
@@ -159,7 +159,7 @@ ArrayData* deepCopyArray(ArrayData* arr) {
 }
 
 ArrayData* deepCopyVecArray(ArrayData* arr) {
-  assertx(arr->isVecArray());
+  assertx(arr->isVecArrayKind());
   Array ar(arr);
   PackedArray::IterateKV(
     arr,
@@ -178,7 +178,7 @@ ArrayData* deepCopyVecArray(ArrayData* arr) {
 }
 
 ArrayData* deepCopyDict(ArrayData* arr) {
-  assertx(arr->isDict());
+  assertx(arr->isDictKind());
   Array ar(arr);
   MixedArray::IterateKV(
     MixedArray::asMixed(arr),

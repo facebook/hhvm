@@ -305,9 +305,9 @@ IMPL_OPCODE_CALL(ConvTVToDbl);
 
 static ArrayData* convArrToVArrImpl(ArrayData* adIn) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
-  assertx(adIn->isPHPArray());
+  assertx(adIn->isPHPArrayType());
   auto a = adIn->toVArray(adIn->cowCheck());
-  assertx(a->isPacked());
+  assertx(a->isPackedKind());
   assertx(a->isVArray());
   if (a != adIn) decRefArr(adIn);
   return a;
@@ -315,9 +315,9 @@ static ArrayData* convArrToVArrImpl(ArrayData* adIn) {
 
 static ArrayData* convVecToVArrImpl(ArrayData* adIn) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
-  assertx(adIn->isVecArray());
+  assertx(adIn->isVecArrayKind());
   auto a = PackedArray::ToVArrayVec(adIn, adIn->cowCheck());
-  assertx(a->isPacked());
+  assertx(a->isPackedKind());
   assertx(a->isVArray());
   if (a != adIn) decRefArr(adIn);
   return a;
@@ -325,10 +325,10 @@ static ArrayData* convVecToVArrImpl(ArrayData* adIn) {
 
 static ArrayData* convDictToVArrImpl(ArrayData* adIn) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
-  assertx(adIn->isDict());
+  assertx(adIn->isDictKind());
   auto a = MixedArray::ToVArrayDict(adIn, adIn->cowCheck());
   assertx(a != adIn);
-  assertx(a->isPacked());
+  assertx(a->isPackedKind());
   assertx(a->isVArray());
   decRefArr(adIn);
   return a;
@@ -336,10 +336,10 @@ static ArrayData* convDictToVArrImpl(ArrayData* adIn) {
 
 static ArrayData* convKeysetToVArrImpl(ArrayData* adIn) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
-  assertx(adIn->isKeyset());
+  assertx(adIn->isKeysetKind());
   auto a = SetArray::ToVArray(adIn, adIn->cowCheck());
   assertx(a != adIn);
-  assertx(a->isPacked());
+  assertx(a->isPackedKind());
   assertx(a->isVArray());
   decRefArr(adIn);
   return a;
@@ -348,7 +348,7 @@ static ArrayData* convKeysetToVArrImpl(ArrayData* adIn) {
 static ArrayData* convObjToVArrImpl(ObjectData* obj) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
   auto a = castObjToVArray(obj);
-  assertx(a->isPacked());
+  assertx(a->isPackedKind());
   assertx(a->isVArray());
   decRefObj(obj);
   return a;
@@ -396,9 +396,9 @@ void cgConvObjToVArr(IRLS& env, const IRInstruction* inst) {
 
 static ArrayData* convArrToDArrImpl(ArrayData* adIn) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
-  assertx(adIn->isPHPArray());
+  assertx(adIn->isPHPArrayType());
   auto a = adIn->toDArray(adIn->cowCheck());
-  assertx(a->isMixed());
+  assertx(a->isMixedKind());
   assertx(a->isDArray());
   if (a != adIn) decRefArr(adIn);
   return a;
@@ -406,10 +406,10 @@ static ArrayData* convArrToDArrImpl(ArrayData* adIn) {
 
 static ArrayData* convVecToDArrImpl(ArrayData* adIn) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
-  assertx(adIn->isVecArray());
+  assertx(adIn->isVecArrayKind());
   auto a = PackedArray::ToDArrayVec(adIn, adIn->cowCheck());
   assertx(a != adIn);
-  assertx(a->isMixed());
+  assertx(a->isMixedKind());
   assertx(a->isDArray());
   decRefArr(adIn);
   return a;
@@ -417,9 +417,9 @@ static ArrayData* convVecToDArrImpl(ArrayData* adIn) {
 
 static ArrayData* convDictToDArrImpl(ArrayData* adIn) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
-  assertx(adIn->isDict());
+  assertx(adIn->isDictKind());
   auto a = MixedArray::ToDArrayDict(adIn, adIn->cowCheck());
-  assertx(a->isMixed());
+  assertx(a->isMixedKind());
   assertx(a->isDArray());
   if (a != adIn) decRefArr(adIn);
   return a;
@@ -427,10 +427,10 @@ static ArrayData* convDictToDArrImpl(ArrayData* adIn) {
 
 static ArrayData* convKeysetToDArrImpl(ArrayData* adIn) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
-  assertx(adIn->isKeyset());
+  assertx(adIn->isKeysetKind());
   auto a = SetArray::ToDArray(adIn, adIn->cowCheck());
   assertx(a != adIn);
-  assertx(a->isMixed());
+  assertx(a->isMixedKind());
   assertx(a->isDArray());
   decRefArr(adIn);
   return a;
@@ -439,7 +439,7 @@ static ArrayData* convKeysetToDArrImpl(ArrayData* adIn) {
 static ArrayData* convObjToDArrImpl(ObjectData* obj) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
   auto a = castObjToDArray(obj);
-  assertx(a->isMixed());
+  assertx(a->isMixedKind());
   assertx(a->isDArray());
   decRefObj(obj);
   return a;

@@ -1029,7 +1029,7 @@ SSATmp* opt_enum_is_valid(IRGS& env, const ParamPrep& params) {
   auto const enum_values = getEnumValues(env, params);
   if (!enum_values) return nullptr;
   auto const ad = MixedArray::asMixed(enum_values->names.get());
-  auto const op = ad->isDict() ? AKExistsDict : AKExistsArr;
+  auto const op = ad->isDictType() ? AKExistsDict : AKExistsArr;
   if (value->isA(TInt)) {
     if (ad->keyTypes().mustBeStrs()) return cns(env, false);
     return gen(env, op, cns(env, ad->asArrayData()), value);
@@ -1209,7 +1209,7 @@ SSATmp* optimizedFCallBuiltin(IRGS& env,
       // contents to their proper place on the stack.
       auto const ad = retVal->arrLikeVal();
       assertx(ad->isStatic());
-      assertx(ad->hasPackedLayout());
+      assertx(ad->hasVanillaPackedLayout());
       assertx(ad->size() == numInOut + 1);
 
       size_t inOutIndex = 0;

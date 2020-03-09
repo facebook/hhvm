@@ -110,21 +110,21 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
     case KindOfPersistentVec:
     case KindOfVec: {
       auto const ad = val(cell).parr;
-      assertx(ad->isVecArray());
+      assertx(ad->isVecArrayType());
       return APCArray::MakeSharedVec(ad, level, unserializeObj);
     }
 
     case KindOfPersistentDict:
     case KindOfDict: {
       auto const ad = val(cell).parr;
-      assertx(ad->isDict());
+      assertx(ad->isDictType());
       return APCArray::MakeSharedDict(ad, level, unserializeObj);
     }
 
     case KindOfPersistentKeyset:
     case KindOfKeyset: {
       auto const ad = val(cell).parr;
-      assertx(ad->isKeyset());
+      assertx(ad->isKeysetType());
       return APCArray::MakeSharedKeyset(ad, level, unserializeObj);
     }
 
@@ -135,7 +135,7 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
     case KindOfPersistentArray:
     case KindOfArray: {
       auto const ad = val(cell).parr;
-      assertx(ad->isPHPArray());
+      assertx(ad->isPHPArrayType());
       return APCArray::MakeSharedArray(ad, level, unserializeObj);
     }
 
@@ -157,10 +157,10 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
       raiseClsMethToVecWarningHelper();
       auto arr = clsMethToVecHelper(val(cell).pclsmeth);
       if (RuntimeOption::EvalHackArrDVArrs) {
-        assertx(arr->isVecArray());
+        assertx(arr->isVecArrayType());
         return APCArray::MakeSharedVec(arr.detach(), level, unserializeObj);
       } else {
-        assertx(arr->isPHPArray());
+        assertx(arr->isPHPArrayType());
         return APCArray::MakeSharedArray(arr.detach(), level, unserializeObj);
       }
     }

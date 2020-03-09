@@ -659,7 +659,7 @@ static std::string toStringElm(const TypedValue* tv) {
       continue;
     case KindOfPersistentVec:
     case KindOfVec:
-      assertx(tv->m_data.parr->isVecArray());
+      assertx(tv->m_data.parr->isVecArrayType());
       assertx(tv->m_data.parr->checkCount());
       os << tv->m_data.parr;
       print_count();
@@ -667,7 +667,7 @@ static std::string toStringElm(const TypedValue* tv) {
       continue;
     case KindOfPersistentDict:
     case KindOfDict:
-      assertx(tv->m_data.parr->isDict());
+      assertx(tv->m_data.parr->isDictType());
       assertx(tv->m_data.parr->checkCount());
       os << tv->m_data.parr;
       print_count();
@@ -675,7 +675,7 @@ static std::string toStringElm(const TypedValue* tv) {
       continue;
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-      assertx(tv->m_data.parr->isKeyset());
+      assertx(tv->m_data.parr->isKeysetType());
       assertx(tv->m_data.parr->checkCount());
       os << tv->m_data.parr;
       print_count();
@@ -687,7 +687,7 @@ static std::string toStringElm(const TypedValue* tv) {
     case KindOfVArray:
     case KindOfPersistentArray:
     case KindOfArray:
-      assertx(tv->m_data.parr->isPHPArray());
+      assertx(tv->m_data.parr->isPHPArrayType());
       assertx(tv->m_data.parr->checkCount());
       os << tv->m_data.parr;
       print_count();
@@ -1474,23 +1474,23 @@ OPTBLD_INLINE void iopString(const StringData* s) {
 }
 
 OPTBLD_INLINE void iopArray(const ArrayData* a) {
-  assertx(a->isPHPArray());
+  assertx(a->isPHPArrayType());
   assertx(!RuntimeOption::EvalHackArrDVArrs || a->isNotDVArray());
   vmStack().pushStaticArray(a);
 }
 
 OPTBLD_INLINE void iopVec(const ArrayData* a) {
-  assertx(a->isVecArray());
+  assertx(a->isVecArrayType());
   vmStack().pushStaticVec(a);
 }
 
 OPTBLD_INLINE void iopDict(const ArrayData* a) {
-  assertx(a->isDict());
+  assertx(a->isDictType());
   vmStack().pushStaticDict(a);
 }
 
 OPTBLD_INLINE void iopKeyset(const ArrayData* a) {
-  assertx(a->isKeyset());
+  assertx(a->isKeysetType());
   vmStack().pushStaticKeyset(a);
 }
 

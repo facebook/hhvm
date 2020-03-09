@@ -948,17 +948,17 @@ Bytecode gen_constant(const TypedValue& cell) {
     case KindOfVec:
       assert(cell.m_data.parr->isStatic());
     case KindOfPersistentVec:
-      assert(cell.m_data.parr->isVecArray());
+      assert(cell.m_data.parr->isVecArrayType());
       return bc::Vec { cell.m_data.parr };
     case KindOfDict:
       assert(cell.m_data.parr->isStatic());
     case KindOfPersistentDict:
-      assert(cell.m_data.parr->isDict());
+      assert(cell.m_data.parr->isDictType());
       return bc::Dict { cell.m_data.parr };
     case KindOfKeyset:
       assert(cell.m_data.parr->isStatic());
     case KindOfPersistentKeyset:
-      assert(cell.m_data.parr->isKeyset());
+      assert(cell.m_data.parr->isKeysetType());
       return bc::Keyset { cell.m_data.parr };
     case KindOfVArray:
     case KindOfDArray:
@@ -967,7 +967,7 @@ Bytecode gen_constant(const TypedValue& cell) {
     case KindOfPersistentVArray:
     case KindOfPersistentDArray:
     case KindOfPersistentArray:
-      assert(cell.m_data.parr->isPHPArray());
+      assert(cell.m_data.parr->isPHPArrayType());
       return bc::Array { cell.m_data.parr };
 
     case KindOfResource:

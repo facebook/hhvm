@@ -69,7 +69,7 @@ void BaseMap::addAllImpl(const Variant& iterable) {
         reserve(m_size + sz);
         mutate();
         return false;
-      } else if (adata->isDict()) {
+      } else if (adata->isDictKind()) {
         replaceArray(adata);
         return true;
       } else {

@@ -120,18 +120,18 @@ VariableSerializer::getKind(const ArrayData* arr) const {
       !arr->isLegacyArray()) {
     return VariableSerializer::ArrayKind::PHP;
   }
-  if (arr->isDict()) {
+  if (arr->isDictType()) {
     return getType() == Type::Internal && arr->isLegacyArray()
       ? VariableSerializer::ArrayKind::LegacyDict
       : VariableSerializer::ArrayKind::Dict;
   }
-  if (arr->isVecArray()) {
+  if (arr->isVecArrayType()) {
     return getType() == Type::Internal && arr->isLegacyArray()
       ? VariableSerializer::ArrayKind::LegacyVec
       : VariableSerializer::ArrayKind::Vec;
   }
-  if (arr->isKeyset())   return VariableSerializer::ArrayKind::Keyset;
-  assertx(arr->isPHPArray());
+  if (arr->isKeysetType())   return VariableSerializer::ArrayKind::Keyset;
+  assertx(arr->isPHPArrayType());
   if (m_keepDVArrays) {
     if (arr->isVArray()) return VariableSerializer::ArrayKind::VArray;
     if (arr->isDArray()) return VariableSerializer::ArrayKind::DArray;
@@ -1572,21 +1572,21 @@ void VariableSerializer::serializeVariant(tv_rval tv,
     case KindOfPersistentVec:
     case KindOfVec:
       assertx(!isArrayKey);
-      assertx(val(tv).parr->isVecArray());
+      assertx(val(tv).parr->isVecArrayType());
       serializeArray(val(tv).parr, skipNestCheck);
       return;
 
     case KindOfPersistentDict:
     case KindOfDict:
       assertx(!isArrayKey);
-      assertx(val(tv).parr->isDict());
+      assertx(val(tv).parr->isDictType());
       serializeArray(val(tv).parr, skipNestCheck);
       return;
 
     case KindOfPersistentKeyset:
     case KindOfKeyset:
       assertx(!isArrayKey);
-      assertx(val(tv).parr->isKeyset());
+      assertx(val(tv).parr->isKeysetType());
       serializeArray(val(tv).parr, skipNestCheck);
       return;
 
@@ -1597,7 +1597,7 @@ void VariableSerializer::serializeVariant(tv_rval tv,
     case KindOfPersistentArray:
     case KindOfArray:
       assertx(!isArrayKey);
-      assertx(val(tv).parr->isPHPArray());
+      assertx(val(tv).parr->isPHPArrayType());
       serializeArray(val(tv).parr, skipNestCheck);
       return;
 
@@ -1726,19 +1726,19 @@ void VariableSerializer::serializeArrayImpl(const ArrayData* arr) {
 void VariableSerializer::serializeArray(const ArrayData* arr,
                                         bool skipNestCheck /* = false */) {
   if (UNLIKELY(RuntimeOption::EvalHackArrCompatSerializeNotices)) {
-    if (UNLIKELY(m_hackWarn && !m_hasHackWarned && arr->isHackArray())) {
+    if (UNLIKELY(m_hackWarn && !m_hasHackWarned && arr->isHackArrayType())) {
       raise_hack_arr_compat_serialize_notice(arr);
       m_hasHackWarned = true;
     }
-    if (UNLIKELY(m_dictWarn && !m_hasDictWarned && arr->isDict())) {
+    if (UNLIKELY(m_dictWarn && !m_hasDictWarned && arr->isDictType())) {
       raise_hack_arr_compat_serialize_notice(arr);
       m_hasDictWarned = true;
     }
-    if (UNLIKELY(m_keysetWarn && !m_hasKeysetWarned && arr->isKeyset())) {
+    if (UNLIKELY(m_keysetWarn && !m_hasKeysetWarned && arr->isKeysetType())) {
       raise_hack_arr_compat_serialize_notice(arr);
       m_hasKeysetWarned = true;
     }
-    if (UNLIKELY(m_phpWarn && !m_hasPHPWarned && arr->isPHPArray())) {
+    if (UNLIKELY(m_phpWarn && !m_hasPHPWarned && arr->isPHPArrayType())) {
       raise_hack_arr_compat_serialize_notice(arr);
       m_hasPHPWarned = true;
     }
@@ -1750,7 +1750,7 @@ void VariableSerializer::serializeArray(const ArrayData* arr,
     auto const source = [&]() -> folly::Optional<SerializationSite> {
       switch (getType()) {
       case VariableSerializer::Type::JSON:
-        return arr->isVecArray()
+        return arr->isVecArrayType()
           ? folly::none
           : folly::make_optional(SerializationSite::JsonEncode);
       case VariableSerializer::Type::Serialize:

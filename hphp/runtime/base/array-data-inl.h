@@ -153,29 +153,46 @@ inline bool ArrayData::noCopyOnWrite() const {
   return kind() == kGlobalsKind;
 }
 
-inline bool ArrayData::isPacked() const { return kind() == kPackedKind; }
-inline bool ArrayData::isMixed() const { return kind() == kMixedKind; }
-inline bool ArrayData::isApcArray() const { return kind() == kApcKind; }
-inline bool ArrayData::isGlobalsArray() const { return kind() == kGlobalsKind; }
-inline bool ArrayData::isEmptyArray() const { return kind() == kEmptyKind; }
-inline bool ArrayData::isDict() const { return kind() == kDictKind; }
+inline bool ArrayData::isPackedKind() const { return kind() == kPackedKind; }
+inline bool ArrayData::isMixedKind() const { return kind() == kMixedKind; }
+inline bool ArrayData::isApcArrayKind() const { return kind() == kApcKind; }
+inline bool ArrayData::isGlobalsArrayKind() const { return kind() == kGlobalsKind; }
+inline bool ArrayData::isEmptyArrayKind() const { return kind() == kEmptyKind; }
+inline bool ArrayData::isDictKind() const { return kind() == kDictKind; }
 
-inline bool ArrayData::isVecArray() const { return kind() == kVecKind; }
-inline bool ArrayData::isKeyset() const { return kind() == kKeysetKind; }
-inline bool ArrayData::isRecordArray() const { return kind() == kRecordKind; }
+inline bool ArrayData::isVecArrayKind() const { return kind() == kVecKind; }
+inline bool ArrayData::isKeysetKind() const { return kind() == kKeysetKind; }
+inline bool ArrayData::isRecordArrayKind() const { return kind() == kRecordKind; }
 
-inline bool ArrayData::hasPackedLayout() const {
-  return isPacked() || isVecArray();
+inline bool ArrayData::isPHPArrayType() const {
+  return ::HPHP::isArrayType(toDataType());
 }
-inline bool ArrayData::hasMixedLayout() const {
-  return isMixed() || isDict();
+inline bool ArrayData::isHackArrayType() const {
+  return ::HPHP::isHackArrayType(toDataType());
 }
 
-inline bool ArrayData::isPHPArray() const {
+inline bool ArrayData::isDictType() const {
+  return ::HPHP::isDictType(toDataType());
+}
+inline bool ArrayData::isVecArrayType() const {
+  return ::HPHP::isVecType(toDataType());
+}
+inline bool ArrayData::isKeysetType() const {
+  return ::HPHP::isKeysetType(toDataType());
+}
+
+inline bool ArrayData::hasVanillaPackedLayout() const {
+  return isPackedKind() || isVecArrayKind();
+}
+inline bool ArrayData::hasVanillaMixedLayout() const {
+  return isMixedKind() || isDictKind();
+}
+
+inline bool ArrayData::isPHPArrayKind() const {
   return kind() <= kRecordKind;
 }
 
-inline bool ArrayData::isHackArray() const {
+inline bool ArrayData::isHackArrayKind() const {
   return kind() >= kDictKind;
 }
 
@@ -201,10 +218,10 @@ inline bool ArrayData::isDArray() const { return dvArray() & kDArray; }
 inline bool ArrayData::isDVArray() const { return dvArray(); }
 inline bool ArrayData::isNotDVArray() const { return dvArray() == kNotDVArray; }
 inline bool ArrayData::isVecOrVArray() const {
-  return RuntimeOption::EvalHackArrDVArrs ? isVecArray() : isVArray();
+  return RuntimeOption::EvalHackArrDVArrs ? isVecArrayType() : isVArray();
 }
 inline bool ArrayData::isDictOrDArray() const {
-  return RuntimeOption::EvalHackArrDVArrs ? isDict() : isDArray();
+  return RuntimeOption::EvalHackArrDVArrs ? isDictType() : isDArray();
 }
 
 // gcc doesn't optimize (a & 3) == (b & 3) very well; help it a little.
@@ -215,8 +232,8 @@ inline bool ArrayData::dvArrayEqual(const ArrayData* a, const ArrayData* b) {
 inline bool ArrayData::dvArraySanityCheck() const {
   auto const dv = dvArray();
   if (!RuntimeOption::EvalHackArrDVArrs) {
-    if (isPacked()) return !(dv & kDArray);
-    if (isMixed())  return !(dv & kVArray);
+    if (isPackedKind()) return !(dv & kDArray);
+    if (isMixedKind())  return !(dv & kVArray);
   }
   return dv == kNotDVArray;
 }
@@ -228,8 +245,8 @@ inline bool ArrayData::isLegacyArray() const { return m_aux16 & kLegacyArray; }
 inline void ArrayData::setLegacyArray(bool legacy) {
   assertx(hasExactlyOneRef());
   assertx(!legacy
-          || kind() == kDictKind
-          || kind() == kVecKind
+          || isDictType()
+          || isVecArrayType()
           || (!RO::EvalHackArrDVArrs && isDVArray()));
   /* TODO(jgriego) we should be asserting that the
    * mark-ee should have provenance here but it's not
@@ -245,7 +262,9 @@ inline uint8_t ArrayData::auxBits() const {
   return dvArray() | (isLegacyArray() ? kLegacyArray : 0);
 }
 
-inline bool ArrayData::useWeakKeys() const { return isPHPArray(); }
+inline bool ArrayData::useWeakKeys() const {
+  return isPHPArrayType();
+}
 
 inline DataType ArrayData::toDataType() const {
   switch (kind()) {

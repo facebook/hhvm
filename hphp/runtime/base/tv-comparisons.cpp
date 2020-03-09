@@ -321,7 +321,7 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const StringData* val) {
 template<class Op>
 typename Op::RetType tvRelOp(Op op, TypedValue cell, const ArrayData* ad) {
   assertx(tvIsPlausible(cell));
-  assertx(ad->isPHPArray());
+  assertx(ad->isPHPArrayType());
 
   auto const nonArr = [&]{
     if (UNLIKELY(op.noticeOnArrNonArr())) {
@@ -587,7 +587,7 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const ResourceHdr* r) {
 template<class Op>
 typename Op::RetType tvRelOpVec(Op op, TypedValue cell, const ArrayData* a) {
   assertx(tvIsPlausible(cell));
-  assertx(a->isVecArray());
+  assertx(a->isVecArrayType());
 
   if (isClsMethType(cell.m_type)) {
     if (RuntimeOption::EvalHackArrDVArrs) {
@@ -619,7 +619,7 @@ typename Op::RetType tvRelOpVec(Op op, TypedValue cell, const ArrayData* a) {
 template<class Op>
 typename Op::RetType tvRelOpDict(Op op, TypedValue cell, const ArrayData* a) {
   assertx(tvIsPlausible(cell));
-  assertx(a->isDict());
+  assertx(a->isDictType());
 
   if (UNLIKELY(!isDictType(cell.m_type))) {
     if (cell.m_type == KindOfBoolean) return op(!!cell.m_data.num, a);
@@ -638,7 +638,7 @@ typename Op::RetType tvRelOpDict(Op op, TypedValue cell, const ArrayData* a) {
 template<class Op>
 typename Op::RetType tvRelOpKeyset(Op op, TypedValue cell, const ArrayData* a) {
   assertx(tvIsPlausible(cell));
-  assertx(a->isKeyset());
+  assertx(a->isKeysetType());
 
   if (UNLIKELY(!isKeysetType(cell.m_type))) {
     if (cell.m_type == KindOfBoolean) return op(!!cell.m_data.num, a);
@@ -1011,17 +1011,17 @@ struct Eq {
   }
 
   bool operator()(const ArrayData* ad1, const ArrayData* ad2) const {
-    assertx(ad1->isPHPArray());
-    assertx(ad2->isPHPArray());
+    assertx(ad1->isPHPArrayType());
+    assertx(ad2->isPHPArrayType());
     return ArrayData::Equal(ad1, ad2);
   }
   bool operator()(const ArrayData* ad, bool val) const {
-    assertx(!ad->isPHPArray());
+    assertx(!ad->isPHPArrayType());
     raiseHackArrCompatHackArrBoolCmp();
     return false;
   }
   bool operator()(bool val, const ArrayData* ad) const {
-    assertx(!ad->isPHPArray());
+    assertx(!ad->isPHPArrayType());
     raiseHackArrCompatHackArrBoolCmp();
     return false;
   }
@@ -1043,18 +1043,18 @@ struct Eq {
   }
 
   bool vec(const ArrayData* ad1, const ArrayData* ad2) const {
-    assertx(ad1->isVecArray());
-    assertx(ad2->isVecArray());
+    assertx(ad1->isVecArrayKind());
+    assertx(ad2->isVecArrayKind());
     return PackedArray::VecEqual(ad1, ad2);
   }
   bool dict(const ArrayData* ad1, const ArrayData* ad2) const {
-    assertx(ad1->isDict());
-    assertx(ad2->isDict());
+    assertx(ad1->isDictKind());
+    assertx(ad2->isDictKind());
     return MixedArray::DictEqual(ad1, ad2);
   }
   bool keyset(const ArrayData* ad1, const ArrayData* ad2) const {
-    assertx(ad1->isKeyset());
-    assertx(ad2->isKeyset());
+    assertx(ad1->isKeysetKind());
+    assertx(ad2->isKeysetKind());
     return SetArray::Equal(ad1, ad2);
   }
 
@@ -1095,17 +1095,17 @@ struct CompareBase {
   }
 
   RetType operator()(const ArrayData* ad, bool val) const {
-    assertx(!ad->isPHPArray());
-    if (ad->isVecArray()) throw_vec_compare_exception();
-    if (ad->isDict()) throw_dict_compare_exception();
-    assertx(ad->isKeyset());
+    assertx(!ad->isPHPArrayType());
+    if (ad->isVecArrayType()) throw_vec_compare_exception();
+    if (ad->isDictType()) throw_dict_compare_exception();
+    assertx(ad->isKeysetType());
     throw_keyset_compare_exception();
   }
   RetType operator()(bool val, const ArrayData* ad) const {
-    assertx(!ad->isPHPArray());
-    if (ad->isVecArray()) throw_vec_compare_exception();
-    if (ad->isDict()) throw_dict_compare_exception();
-    assertx(ad->isKeyset());
+    assertx(!ad->isPHPArrayType());
+    if (ad->isVecArrayType()) throw_vec_compare_exception();
+    if (ad->isDictType()) throw_dict_compare_exception();
+    assertx(ad->isKeysetType());
     throw_keyset_compare_exception();
   }
 
@@ -1120,13 +1120,13 @@ struct CompareBase {
   }
 
   RetType dict(const ArrayData* ad1, const ArrayData* ad2) const {
-    assertx(ad1->isDict());
-    assertx(ad2->isDict());
+    assertx(ad1->isDictType());
+    assertx(ad2->isDictType());
     throw_dict_compare_exception();
   }
   RetType keyset(const ArrayData* ad1, const ArrayData* ad2) const {
-    assertx(ad1->isKeyset());
-    assertx(ad2->isKeyset());
+    assertx(ad1->isKeysetType());
+    assertx(ad2->isKeysetType());
     throw_keyset_compare_exception();
   }
 
@@ -1190,8 +1190,8 @@ struct Lt : CompareBase<bool, std::less<>> {
   using CompareBase::operator();
 
   bool operator()(const ArrayData* ad1, const ArrayData* ad2) const {
-    assertx(ad1->isPHPArray());
-    assertx(ad2->isPHPArray());
+    assertx(ad1->isPHPArrayType());
+    assertx(ad2->isPHPArrayType());
     return ArrayData::Lt(ad1, ad2);
   }
 
@@ -1202,8 +1202,8 @@ struct Lt : CompareBase<bool, std::less<>> {
   }
 
   bool vec(const ArrayData* ad1, const ArrayData* ad2) const {
-    assertx(ad1->isVecArray());
-    assertx(ad2->isVecArray());
+    assertx(ad1->isVecArrayKind());
+    assertx(ad2->isVecArrayKind());
     return PackedArray::VecLt(ad1, ad2);
   }
 };
@@ -1214,8 +1214,8 @@ struct Lte : CompareBase<bool, std::less_equal<>> {
   using CompareBase::operator();
 
   bool operator()(const ArrayData* ad1, const ArrayData* ad2) const {
-    assertx(ad1->isPHPArray());
-    assertx(ad2->isPHPArray());
+    assertx(ad1->isPHPArrayType());
+    assertx(ad2->isPHPArrayType());
     return ArrayData::Lte(ad1, ad2);
   }
 
@@ -1226,8 +1226,8 @@ struct Lte : CompareBase<bool, std::less_equal<>> {
   }
 
   bool vec(const ArrayData* ad1, const ArrayData* ad2) const {
-    assertx(ad1->isVecArray());
-    assertx(ad2->isVecArray());
+    assertx(ad1->isVecArrayKind());
+    assertx(ad2->isVecArrayKind());
     return PackedArray::VecLte(ad1, ad2);
   }
 };
@@ -1238,8 +1238,8 @@ struct Gt : CompareBase<bool, std::greater<>> {
   using CompareBase::operator();
 
   bool operator()(const ArrayData* ad1, const ArrayData* ad2) const {
-    assertx(ad1->isPHPArray());
-    assertx(ad2->isPHPArray());
+    assertx(ad1->isPHPArrayType());
+    assertx(ad2->isPHPArrayType());
     return ArrayData::Gt(ad1, ad2);
   }
 
@@ -1250,8 +1250,8 @@ struct Gt : CompareBase<bool, std::greater<>> {
   }
 
   bool vec(const ArrayData* ad1, const ArrayData* ad2) const {
-    assertx(ad1->isVecArray());
-    assertx(ad2->isVecArray());
+    assertx(ad1->isVecArrayKind());
+    assertx(ad2->isVecArrayKind());
     return PackedArray::VecGt(ad1, ad2);
   }
 };
@@ -1262,8 +1262,8 @@ struct Gte : CompareBase<bool, std::greater_equal<>> {
   using CompareBase::operator();
 
   bool operator()(const ArrayData* ad1, const ArrayData* ad2) const {
-    assertx(ad1->isPHPArray());
-    assertx(ad2->isPHPArray());
+    assertx(ad1->isPHPArrayType());
+    assertx(ad2->isPHPArrayType());
     return ArrayData::Gte(ad1, ad2);
   }
 
@@ -1274,8 +1274,8 @@ struct Gte : CompareBase<bool, std::greater_equal<>> {
   }
 
   bool vec(const ArrayData* ad1, const ArrayData* ad2) const {
-    assertx(ad1->isVecArray());
-    assertx(ad2->isVecArray());
+    assertx(ad1->isVecArrayKind());
+    assertx(ad2->isVecArrayKind());
     return PackedArray::VecGte(ad1, ad2);
   }
 };
@@ -1295,8 +1295,8 @@ struct Cmp : CompareBase<int64_t, struct PHPPrimitiveCmp> {
   using CompareBase::operator();
 
   int64_t operator()(const ArrayData* ad1, const ArrayData* ad2) const {
-    assertx(ad1->isPHPArray());
-    assertx(ad2->isPHPArray());
+    assertx(ad1->isPHPArrayType());
+    assertx(ad2->isPHPArrayType());
     return ArrayData::Compare(ad1, ad2);
   }
 
@@ -1305,8 +1305,8 @@ struct Cmp : CompareBase<int64_t, struct PHPPrimitiveCmp> {
   }
 
   int64_t vec(const ArrayData* ad1, const ArrayData* ad2) const {
-    assertx(ad1->isVecArray());
-    assertx(ad2->isVecArray());
+    assertx(ad1->isVecArrayKind());
+    assertx(ad2->isVecArrayKind());
     return PackedArray::VecCmp(ad1, ad2);
   }
 };
@@ -1494,10 +1494,10 @@ bool tvEqual(TypedValue cell, const StringData* val) {
 }
 
 bool tvEqual(TypedValue cell, const ArrayData* val) {
-  if (val->isPHPArray()) return tvRelOp(Eq(), cell, val);
-  if (val->isVecArray()) return tvRelOpVec(Eq(), cell, val);
-  if (val->isDict()) return tvRelOpDict(Eq(), cell, val);
-  if (val->isKeyset()) return tvRelOpKeyset(Eq(), cell, val);
+  if (val->isPHPArrayType()) return tvRelOp(Eq(), cell, val);
+  if (val->isVecArrayType()) return tvRelOpVec(Eq(), cell, val);
+  if (val->isDictType()) return tvRelOpDict(Eq(), cell, val);
+  if (val->isKeysetType()) return tvRelOpKeyset(Eq(), cell, val);
   not_reached();
 }
 
@@ -1537,10 +1537,10 @@ bool tvLess(TypedValue cell, const StringData* val) {
 }
 
 bool tvLess(TypedValue cell, const ArrayData* val) {
-  if (val->isPHPArray()) return tvRelOp(Lt(), cell, val);
-  if (val->isVecArray()) return tvRelOpVec(Lt(), cell, val);
-  if (val->isDict()) return tvRelOpDict(Lt(), cell, val);
-  if (val->isKeyset()) return tvRelOpKeyset(Lt(), cell, val);
+  if (val->isPHPArrayType()) return tvRelOp(Lt(), cell, val);
+  if (val->isVecArrayType()) return tvRelOpVec(Lt(), cell, val);
+  if (val->isDictType()) return tvRelOpDict(Lt(), cell, val);
+  if (val->isKeysetType()) return tvRelOpKeyset(Lt(), cell, val);
   not_reached();
 }
 
@@ -1580,10 +1580,10 @@ bool tvGreater(TypedValue cell, const StringData* val) {
 }
 
 bool tvGreater(TypedValue cell, const ArrayData* val) {
-  if (val->isPHPArray()) return tvRelOp(Gt(), cell, val);
-  if (val->isVecArray()) return tvRelOpVec(Gt(), cell, val);
-  if (val->isDict()) return tvRelOpDict(Gt(), cell, val);
-  if (val->isKeyset()) return tvRelOpKeyset(Gt(), cell, val);
+  if (val->isPHPArrayType()) return tvRelOp(Gt(), cell, val);
+  if (val->isVecArrayType()) return tvRelOpVec(Gt(), cell, val);
+  if (val->isDictType()) return tvRelOpDict(Gt(), cell, val);
+  if (val->isKeysetType()) return tvRelOpKeyset(Gt(), cell, val);
   not_reached();
 }
 
@@ -1625,10 +1625,10 @@ int64_t tvCompare(TypedValue cell, const StringData* val) {
 }
 
 int64_t tvCompare(TypedValue cell, const ArrayData* val) {
-  if (val->isPHPArray()) return tvRelOp(Cmp(), cell, val);
-  if (val->isVecArray()) return tvRelOpVec(Cmp(), cell, val);
-  if (val->isDict()) return tvRelOpDict(Cmp(), cell, val);
-  if (val->isKeyset()) return tvRelOpKeyset(Cmp(), cell, val);
+  if (val->isPHPArrayType()) return tvRelOp(Cmp(), cell, val);
+  if (val->isVecArrayType()) return tvRelOpVec(Cmp(), cell, val);
+  if (val->isDictType()) return tvRelOpDict(Cmp(), cell, val);
+  if (val->isKeysetType()) return tvRelOpKeyset(Cmp(), cell, val);
   not_reached();
 }
 

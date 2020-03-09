@@ -42,10 +42,10 @@ namespace {
 [[noreturn]] NEVER_INLINE
 void throw_bad_array_operand(const ArrayData* ad) {
   const char* type = [&]{
-    if (ad->isVecArray()) return "vecs";
-    if (ad->isDict()) return "dicts";
-    if (ad->isKeyset()) return "keysets";
-    assertx(ad->isPHPArray());
+    if (ad->isVecArrayType()) return "vecs";
+    if (ad->isDictType()) return "dicts";
+    if (ad->isKeysetType()) return "keysets";
+    assertx(ad->isPHPArrayType());
     return "arrays";
   }();
   throw ExtendedException(
@@ -209,8 +209,8 @@ struct Add {
   }
 
   ArrayData* operator()(ArrayData* a1, ArrayData* a2) const {
-    if (UNLIKELY(a1->isHackArray())) throwInvalidAdditionException(a1);
-    if (UNLIKELY(a2->isHackArray())) throwInvalidAdditionException(a2);
+    if (UNLIKELY(a1->isHackArrayType())) throwInvalidAdditionException(a1);
+    if (UNLIKELY(a2->isHackArrayType())) throwInvalidAdditionException(a2);
     if (checkHACArrayPlus()) raiseHackArrCompatAdd();
     a1->incRefCount(); // force COW
     SCOPE_EXIT { a1->decRefCount(); };
@@ -343,8 +343,8 @@ struct AddEq {
   double  operator()(double  a, double  b) const { return a + b; }
 
   ArrayData* operator()(ArrayData* ad1, ArrayData* ad2) const {
-    if (UNLIKELY(ad1->isHackArray())) throwInvalidAdditionException(ad1);
-    if (UNLIKELY(ad2->isHackArray())) throwInvalidAdditionException(ad2);
+    if (UNLIKELY(ad1->isHackArrayType())) throwInvalidAdditionException(ad1);
+    if (UNLIKELY(ad2->isHackArrayType())) throwInvalidAdditionException(ad2);
     if (checkHACArrayPlus()) raiseHackArrCompatAdd();
     if (ad2->empty() || ad1 == ad2) return ad1;
     if (ad1->empty()) {

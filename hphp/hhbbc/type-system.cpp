@@ -1379,8 +1379,8 @@ struct DualDispatchUnionImpl {
 
       auto r = [&] {
         auto const tag = unionProvTag(aTag, bTag);
-        if (a->isVecArray()) return vec_empty(tag);
-        if (a->isDict()) return dict_empty(tag);
+        if (a->isVecArrayType()) return vec_empty(tag);
+        if (a->isDictType()) return dict_empty(tag);
         if (a->isVArray()) return aempty_varray(tag);
         if (a->isDArray()) return aempty_darray(tag);
         always_assert(false);
@@ -2671,13 +2671,13 @@ bool Type::checkInvariants() const {
     }
     // If we have a static array, we'd better be sure of the type.
     assert(!isPHPArray || isVArray || isDArray || isNotDVArray);
-    assert(!isPHPArray || m_data.aval->isPHPArray());
+    assert(!isPHPArray || m_data.aval->isPHPArrayType());
     assert(!isVArray || m_data.aval->isVArray());
     assert(!isDArray || m_data.aval->isDArray());
     assert(!isNotDVArray || m_data.aval->isNotDVArray());
-    assert(!isVector || m_data.aval->isVecArray());
-    assert(!isKeyset || m_data.aval->isKeyset());
-    assert(!isDict || m_data.aval->isDict());
+    assert(!isVector || m_data.aval->isVecArrayType());
+    assert(!isKeyset || m_data.aval->isKeysetType());
+    assert(!isDict || m_data.aval->isDictType());
     assertx(!RuntimeOption::EvalHackArrDVArrs || m_data.aval->isNotDVArray());
     assertx(!m_data.aval->hasProvenanceData() || RO::EvalArrayProvenance);
     assertx(!m_data.aval->hasProvenanceData() || m_bits & kProvBits);
@@ -2836,7 +2836,7 @@ Type dval(double val) {
 
 Type aval(SArray val) {
   assert(val->isStatic());
-  assert(val->isPHPArray());
+  assert(val->isPHPArrayType());
   assertx(!RuntimeOption::EvalHackArrDVArrs || val->isNotDVArray());
 
   if (val->empty() && val->isNotDVArray()) return aempty();
@@ -2894,7 +2894,7 @@ Type some_aempty_darray(ProvTag tag) {
 
 Type vec_val(SArray val) {
   assert(val->isStatic());
-  assert(val->isVecArray());
+  assert(val->isVecArrayType());
   auto const bits = val->empty() ? BSVecE : BSVecN;
   auto r = Type { bits };
   r.m_data.aval = val;
@@ -2954,7 +2954,7 @@ Type svec(std::vector<Type> elems, ProvTag tag) {
 
 Type dict_val(SArray val) {
   assert(val->isStatic());
-  assert(val->isDict());
+  assert(val->isDictType());
   auto const bits = val->empty() ? BSDictE : BSDictN;
   auto r = Type { bits };
   r.m_data.aval = val;
@@ -3000,7 +3000,7 @@ Type sdict_n(Type k, Type v, ProvTag tag) {
 
 Type keyset_val(SArray val) {
   assert(val->isStatic());
-  assert(val->isKeyset());
+  assert(val->isKeysetType());
   if (val->empty()) return keyset_empty();
   auto r        = Type { BSKeysetN };
   r.m_data.aval = val;
@@ -4057,19 +4057,19 @@ Type from_cell(TypedValue cell) {
   case KindOfPersistentVec:
   case KindOfVec:
     always_assert(cell.m_data.parr->isStatic());
-    always_assert(cell.m_data.parr->isVecArray());
+    always_assert(cell.m_data.parr->isVecArrayType());
     return vec_val(cell.m_data.parr);
 
   case KindOfPersistentDict:
   case KindOfDict:
     always_assert(cell.m_data.parr->isStatic());
-    always_assert(cell.m_data.parr->isDict());
+    always_assert(cell.m_data.parr->isDictType());
     return dict_val(cell.m_data.parr);
 
   case KindOfPersistentKeyset:
   case KindOfKeyset:
     always_assert(cell.m_data.parr->isStatic());
-    always_assert(cell.m_data.parr->isKeyset());
+    always_assert(cell.m_data.parr->isKeysetType());
     return keyset_val(cell.m_data.parr);
 
   case KindOfPersistentDArray:
@@ -4079,7 +4079,7 @@ Type from_cell(TypedValue cell) {
   case KindOfPersistentArray:
   case KindOfArray:
     always_assert(cell.m_data.parr->isStatic());
-    always_assert(cell.m_data.parr->isPHPArray());
+    always_assert(cell.m_data.parr->isPHPArrayType());
     return aval(cell.m_data.parr);
 
   case KindOfObject:

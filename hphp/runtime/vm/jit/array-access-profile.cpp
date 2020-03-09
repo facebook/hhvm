@@ -46,7 +46,7 @@ int32_t findStringKey(const Arr* ad, const StringData* sd) {
 }
 
 bool isSmallStaticArray(const ArrayData* ad) {
-  if (!ad->hasMixedLayout()) return false;
+  if (!ad->hasVanillaMixedLayout()) return false;
   auto const arr = MixedArray::asMixed(ad);
   return arr->iterLimit() <= MixedArray::SmallSize &&
          arr->keyTypes().mustBeStaticStrs();
@@ -139,8 +139,8 @@ void ArrayAccessProfile::update(const ArrayData* ad, int64_t i, bool cowCheck) {
   auto const h = hash_int64(i);
   auto const pos =
     cowCheck && ad->cowCheck() ? -1 :
-    ad->hasMixedLayout() ? MixedArray::asMixed(ad)->find(i, h) :
-    ad->isKeyset() ? SetArray::asSet(ad)->find(i, h) :
+    ad->hasVanillaMixedLayout() ? MixedArray::asMixed(ad)->find(i, h) :
+    ad->isKeysetKind() ? SetArray::asSet(ad)->find(i, h) :
     -1;
   update(pos, 1);
   if (isSmallStaticArray(ad)) m_small++;
@@ -153,8 +153,8 @@ void ArrayAccessProfile::update(const ArrayData* ad, const StringData* sd,
   // pointers (checked within findStringKey).
   auto const pos =
     cowCheck && ad->cowCheck() ? -1 :
-    ad->hasMixedLayout() ? findStringKey(MixedArray::asMixed(ad), sd) :
-    ad->isKeyset() ? findStringKey(SetArray::asSet(ad), sd) :
+    ad->hasVanillaMixedLayout() ? findStringKey(MixedArray::asMixed(ad), sd) :
+    ad->isKeysetKind() ? findStringKey(SetArray::asSet(ad), sd) :
     -1;
   update(pos, 1);
   if (isSmallStaticArray(ad)) m_small++;

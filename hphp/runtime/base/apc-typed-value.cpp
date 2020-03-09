@@ -54,35 +54,35 @@ bool APCTypedValue::checkInvariants() const {
     case APCKind::StaticString: assertx(m_data.str->isStatic()); break;
     case APCKind::UncountedString: assertx(m_data.str->isUncounted()); break;
     case APCKind::StaticArray:
-      assertx(m_data.arr->isPHPArray());
+      assertx(m_data.arr->isPHPArrayKind());
       assertx(m_data.arr->isStatic());
       break;
     case APCKind::StaticVec:
-      assertx(m_data.vec->isVecArray());
+      assertx(m_data.vec->isVecArrayKind());
       assertx(m_data.vec->isStatic());
       break;
     case APCKind::StaticDict:
-      assertx(m_data.dict->isDict());
+      assertx(m_data.dict->isDictKind());
       assertx(m_data.dict->isStatic());
       break;
     case APCKind::StaticKeyset:
-      assertx(m_data.keyset->isKeyset());
+      assertx(m_data.keyset->isKeysetKind());
       assertx(m_data.keyset->isStatic());
       break;
     case APCKind::UncountedArray:
-      assertx(m_data.arr->isPHPArray());
+      assertx(m_data.arr->isPHPArrayKind());
       assertx(m_data.arr->isUncounted());
       break;
     case APCKind::UncountedVec:
-      assertx(m_data.vec->isVecArray());
+      assertx(m_data.vec->isVecArrayKind());
       assertx(m_data.vec->isUncounted());
       break;
     case APCKind::UncountedDict:
-      assertx(m_data.dict->isDict());
+      assertx(m_data.dict->isDictKind());
       assertx(m_data.dict->isUncounted());
       break;
     case APCKind::UncountedKeyset:
-      assertx(m_data.keyset->isKeyset());
+      assertx(m_data.keyset->isKeysetKind());
       assertx(m_data.keyset->isUncounted());
       break;
     case APCKind::FuncEntity:
@@ -129,29 +129,30 @@ void APCTypedValue::deleteUncounted() {
     auto const arr = [&] {
       if (kind == APCKind::UncountedArray) {
         auto const parr = m_data.arr;
-        assertx(parr->isPHPArray());
-        if (parr->hasPackedLayout()) {
+        assertx(parr->isPHPArrayKind());
+        if (parr->hasVanillaPackedLayout()) {
           PackedArray::ReleaseUncounted(parr);
         } else {
+          assertx(parr->hasVanillaMixedLayout());
           MixedArray::ReleaseUncounted(parr);
         }
         return parr;
       }
       if (kind == APCKind::UncountedVec) {
         auto const vec = m_data.vec;
-        assertx(vec->isVecArray());
+        assertx(vec->isVecArrayKind());
         PackedArray::ReleaseUncounted(vec);
         return vec;
       }
       if (kind == APCKind::UncountedDict) {
         auto const dict = m_data.dict;
-        assertx(dict->isDict());
+        assertx(dict->isDictKind());
         MixedArray::ReleaseUncounted(dict);
         return dict;
       }
       assertx(kind == APCKind::UncountedKeyset);
       auto const keyset = m_data.keyset;
-      assertx(keyset->isKeyset());
+      assertx(keyset->isKeysetKind());
       SetArray::ReleaseUncounted(keyset);
       return keyset;
     }();

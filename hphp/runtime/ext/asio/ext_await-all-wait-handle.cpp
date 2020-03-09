@@ -173,7 +173,7 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromArray,
                           const Array& dependencies) {
   auto ad = dependencies.get();
   assertx(ad);
-  assertx(ad->isPHPArray());
+  assertx(ad->isPHPArrayType());
   if (!ad->size()) return Object{returnEmpty()};
 
   switch (ad->kind()) {
@@ -218,7 +218,7 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromVec,
                           const Array& dependencies) {
   auto ad = dependencies.get();
   assertx(ad);
-  assertx(ad->isVecArray());
+  assertx(ad->isVecArrayKind());
   if (!ad->size()) return Object{returnEmpty()};
   return c_AwaitAllWaitHandle::Create([=](auto fn) {
     PackedArray::IterateV(ad, fn);
@@ -229,7 +229,7 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromDict,
                           const Array& dependencies) {
   auto ad = dependencies.get();
   assertx(ad);
-  assertx(ad->isDict());
+  assertx(ad->isDictKind());
   if (!ad->size()) return Object{returnEmpty()};
   return c_AwaitAllWaitHandle::Create([=](auto fn) {
     MixedArray::IterateV(MixedArray::asMixed(ad), fn);

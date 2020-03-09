@@ -222,11 +222,11 @@ public:
   /*
    * Array kind.
    */
-  bool isVecArray() const { return m_arr && m_arr->isVecArray(); }
-  bool isDict() const { return m_arr && m_arr->isDict(); }
-  bool isKeyset() const { return m_arr && m_arr->isKeyset(); }
-  bool isHackArray() const { return m_arr && m_arr->isHackArray(); }
-  bool isPHPArray() const { return !m_arr || m_arr->isPHPArray(); }
+  bool isVecArray() const { return m_arr && m_arr->isVecArrayType(); }
+  bool isDict() const { return m_arr && m_arr->isDictType(); }
+  bool isKeyset() const { return m_arr && m_arr->isKeysetType(); }
+  bool isHackArray() const { return m_arr && m_arr->isHackArrayType(); }
+  bool isPHPArray() const { return !m_arr || m_arr->isPHPArrayType(); }
   bool isVArray() const { return m_arr && m_arr->isVArray(); }
   bool isDArray() const { return m_arr && m_arr->isDArray(); }
   bool isVecOrVArray() const { return m_arr && m_arr->isVecOrVArray(); }

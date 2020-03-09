@@ -59,7 +59,7 @@ struct EscalateHelper {
 //////////////////////////////////////////////////////////////////////
 
 bool APCLocalArray::checkInvariants(const ArrayData* ad) {
-  assertx(ad->isApcArray());
+  assertx(ad->isApcArrayKind());
   assertx(ad->isNotDVArray());
   assertx(ad->checkCount());
   DEBUG_ONLY auto const local = static_cast<const APCLocalArray*>(ad);
@@ -232,7 +232,7 @@ ArrayData* APCLocalArray::Append(ArrayData* ad, TypedValue v) {
 }
 
 ArrayData* APCLocalArray::PlusEq(ArrayData* ad, const ArrayData *elems) {
-  if (!elems->isPHPArray()) throwInvalidAdditionException(elems);
+  if (!elems->isPHPArrayType()) throwInvalidAdditionException(elems);
   auto escalated = Array::attach(Escalate(ad));
   return (escalated += const_cast<ArrayData*>(elems)).detach();
 }

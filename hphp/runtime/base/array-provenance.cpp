@@ -107,7 +107,7 @@ constexpr bool wants_local_prov(const APCArray* a) { return false; }
 
 bool arrayWantsTag(const ArrayData* ad) {
   return !ad->isLegacyArray() && (
-    (RO::EvalArrProvHackArrays && (ad->isVecArray() || ad->isDict())) ||
+    (RO::EvalArrProvHackArrays && (ad->isVecArrayType() || ad->isDictType())) ||
     (RO::EvalArrProvDVArrays && (ad->isVArray() || ad->isDArray()))
   );
 }
@@ -464,10 +464,10 @@ TypedValue markTvImpl(TypedValue in, bool recursive) {
   // post-HAM, tag vecs and dicts and notice on any other array-like inputs.
   auto const mark_tv = [&](ArrayData* ad, bool cow) -> ArrayData* {
     if (!RO::EvalHackArrDVArrs) {
-      if (ad->isVecArray()) {
+      if (ad->isVecArrayType()) {
         warn_once(raised_hack_array_notice, Strings::ARRAY_MARK_LEGACY_VEC);
         return nullptr;
-      } else if (ad->isDict()) {
+      } else if (ad->isDictType()) {
         warn_once(raised_hack_array_notice, Strings::ARRAY_MARK_LEGACY_DICT);
         return nullptr;
       } else if (ad->isNotDVArray()) {
@@ -475,14 +475,14 @@ TypedValue markTvImpl(TypedValue in, bool recursive) {
                   "array_mark_legacy expects a varray or darray");
         return nullptr;
       }
-    } else if (!ad->isVecArray() && !ad->isDict()) {
+    } else if (!ad->isVecArrayType() && !ad->isDictType()) {
       warn_once(raised_non_hack_array_notice,
                 "array_mark_legacy expects a dict or vec");
       return nullptr;
     }
 
     if (!RO::EvalHackArrDVArrs) assertx(ad->isDVArray());
-    if (RO::EvalHackArrDVArrs) assertx(ad->isVecArray() || ad->isDict());
+    if (RO::EvalHackArrDVArrs) assertx(ad->isVecArrayType() || ad->isDictType());
     if (ad->isLegacyArray()) return ad;
 
     auto result = copy_if_needed(ad, cow);

@@ -59,7 +59,7 @@ namespace {
 void copySlice(ArrayData* from, ArrayData* to,
                int64_t from_pos, int64_t to_pos, int64_t size) {
   assertx(0 < size && from_pos + size <= from->size());
-  assertx(from->hasPackedLayout() && to->hasPackedLayout());
+  assertx(from->hasVanillaPackedLayout() && to->hasVanillaPackedLayout());
   int64_t offset = from_pos - to_pos;
   int64_t to_end = to_pos + size;
   do {
@@ -186,7 +186,7 @@ void BaseVector::addAllImpl(const Variant& t) {
     *t.asTypedValue(),
     [&, this](ArrayData* adata) {
       if (adata->empty()) return true;
-      if (!m_size && adata->isVecArray()) {
+      if (!m_size && adata->isVecArrayKind()) {
         dropImmCopy();
         auto oldAd = arrayData();
         m_arr = adata;
@@ -303,7 +303,7 @@ void BaseVector::reserveImpl(uint32_t newCap) {
   m_arr = PackedArray::MakeReserveVec(newCap);
   arrayData()->m_size = m_size;
   if (LIKELY(!oldAd->cowCheck())) {
-    assertx(oldAd->isVecArray());
+    assertx(oldAd->isVecArrayKind());
     if (m_size > 0) {
       static_assert(PackedArray::stores_typed_values, "");
       size_t bytes = m_size * sizeof(TypedValue);

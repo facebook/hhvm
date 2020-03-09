@@ -42,7 +42,7 @@ PackedBounds packedArrayBoundsStaticCheck(Type arrayType,
 
   if (arrayType.hasConstVal()) {
     auto const val = arrayType.arrLikeVal();
-    assertx(val->hasPackedLayout());
+    assertx(val->hasVanillaPackedLayout());
     if (val->empty()) return PackedBounds::Out;
     if (!idx) return PackedBounds::Unknown;
     return *idx < val->size() ? PackedBounds::In : PackedBounds::Out;

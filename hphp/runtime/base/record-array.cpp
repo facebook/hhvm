@@ -80,7 +80,7 @@ RecordArray::ExtraFieldMapPtr& RecordArray::extraFieldMap() const {
 }
 
 bool RecordArray::checkInvariants() const {
-  assertx(isRecordArray());
+  assertx(isRecordArrayKind());
   assertx(checkCount());
   assertx(m_pos == 0);
   DEBUG_ONLY auto const extra = extraFieldMap();
@@ -90,7 +90,7 @@ bool RecordArray::checkInvariants() const {
 }
 
 RecordArray* RecordArray::asRecordArray(ArrayData* in) {
-  assertx(in->isRecordArray());
+  assertx(in->isRecordArrayKind());
   auto ad = static_cast<RecordArray*>(in);
   assertx(ad->checkInvariants());
   return ad;

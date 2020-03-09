@@ -357,8 +357,7 @@ fn emit_foreach_(
             e,
             loop_break_label.clone(),
             loop_continue_label.clone(),
-            //TODO(hrust): change this to Some(iter_id) once Iter is corrected to IterId in jump_targets
-            None,
+            Some(iter_id),
             block,
             emit_block,
         )?;

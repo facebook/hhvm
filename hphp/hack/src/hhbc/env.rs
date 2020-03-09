@@ -10,7 +10,6 @@ pub mod local;
 
 use ast_scope_rust::{Scope, ScopeItem};
 use emitter::Emitter;
-use iterator::Iter;
 use label_rust::Label;
 use oxidized::{ast as tast, ast_defs::Id, namespace_env::Env as NamespaceEnv};
 
@@ -82,7 +81,7 @@ impl<'a> Env<'a> {
         e: &mut Emitter,
         label_break: Label,
         label_continue: Label,
-        iterator: Option<Iter>,
+        iterator: Option<iterator::Id>,
         b: &tast::Block,
         f: F,
     ) -> R

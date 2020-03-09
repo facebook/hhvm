@@ -2,7 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::iterator::Iter;
+use crate::iterator;
 use label_rust::Label;
 use oxidized::aast::*;
 use std::collections::{BTreeMap, HashSet};
@@ -14,7 +14,7 @@ type LabelSet = HashSet<String>;
 pub struct LoopLabels {
     label_break: Label,
     label_continue: Label,
-    iterator: Option<Iter>,
+    iterator: Option<iterator::Id>,
 }
 
 #[derive(Clone, Debug)]
@@ -34,7 +34,7 @@ impl JumpTargets {
         self.0.as_slice()
     }
 
-    pub fn get_closest_enclosing_finally_label(&self) -> Option<(Label, Vec<Iter>)> {
+    pub fn get_closest_enclosing_finally_label(&self) -> Option<(Label, Vec<iterator::Id>)> {
         let mut iters = vec![];
         for r in self.0.iter().rev() {
             match r {
@@ -51,7 +51,7 @@ impl JumpTargets {
     }
 
     // NOTE(hrust) this corresponds to collect_iterators in OCaml but doesn't allocate/clone
-    pub fn iterators(&self) -> impl Iterator<Item = &Iter> {
+    pub fn iterators(&self) -> impl Iterator<Item = &iterator::Id> {
         self.0.iter().rev().filter_map(|r| {
             if let Region::Loop(LoopLabels { iterator, .. }, _) = r {
                 iterator.as_ref()
@@ -249,7 +249,7 @@ impl Gen {
         &mut self,
         label_break: Label,
         label_continue: Label,
-        iterator: Option<Iter>,
+        iterator: Option<iterator::Id>,
         block: &Block<Ex, Fb, En, Hi>,
     ) {
         let labels = self.collect_valid_target_labels_for_block(block);
@@ -312,22 +312,22 @@ pub struct ResolvedTryFinally {
     pub target_label: Label,
     pub finally_label: Label,
     pub adjusted_level: usize,
-    pub iterators_to_release: Vec<Iter>,
+    pub iterators_to_release: Vec<iterator::Id>,
 }
 
 pub enum ResolvedJumpTarget {
     NotFound,
     ResolvedTryFinally(ResolvedTryFinally),
-    ResolvedRegular(Label, Vec<Iter>),
+    ResolvedRegular(Label, Vec<iterator::Id>),
 }
 
 pub struct ResolvedGotoFinally {
     pub rgf_finally_start_label: Label,
-    pub rgf_iterators_to_release: Vec<Iter>,
+    pub rgf_iterators_to_release: Vec<iterator::Id>,
 }
 
 pub enum ResolvedGotoTarget {
-    Label(Vec<Iter>),
+    Label(Vec<iterator::Id>),
     Finally(ResolvedGotoFinally),
     GotoFromFinally,
     GotoInvalidLabel,
@@ -494,7 +494,7 @@ impl Gen {
     }
 }
 
-fn add_iterator(it_opt: Option<Iter>, iters: &mut Vec<Iter>) {
+fn add_iterator(it_opt: Option<iterator::Id>, iters: &mut Vec<iterator::Id>) {
     if let Some(it) = it_opt {
         iters.push(it);
     }

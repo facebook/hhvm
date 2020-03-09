@@ -12,7 +12,7 @@ use ast_scope_rust as ast_scope;
 use emit_expression_rust as emit_expression;
 use emit_fatal_rust as emit_fatal;
 use emit_pos_rust::emit_pos;
-use env::{emitter::Emitter, iterator::Iter, jump_targets as jt, local, Env};
+use env::{emitter::Emitter, iterator, jump_targets as jt, local, Env};
 use hhbc_ast_rust::{self as hhbc_ast, Instruct};
 use instruction_sequence_rust::{InstrSeq, Result};
 use label::Label;
@@ -83,11 +83,11 @@ pub(super) fn cleanup_try_body(is: &InstrSeq) -> InstrSeq {
     })
 }
 
-pub(super) fn emit_jump_to_label(l: Label, iters: Vec<Iter>) -> InstrSeq {
+pub(super) fn emit_jump_to_label(l: Label, iters: Vec<iterator::Id>) -> InstrSeq {
     if iters.is_empty() {
         InstrSeq::make_jmp(l)
     } else {
-        InstrSeq::make_iter_break(l, iters.iter().map(|i| i.next).collect())
+        InstrSeq::make_iter_break(l, iters)
     }
 }
 
@@ -195,7 +195,7 @@ pub(super) fn emit_return(e: &mut Emitter, in_finally_epilogue: bool, env: &mut 
                 jt_gen
                     .jump_targets()
                     .iterators()
-                    .map(|i| InstrSeq::make_iterfree(i.next))
+                    .map(|i| InstrSeq::make_iterfree(*i))
                     .collect(),
             );
             let mut instrs = Vec::with_capacity(5);

@@ -23,7 +23,7 @@ let get_fun ctx x =
   match Typing_heap.Funs.get x with
   | Some c -> Some c
   | None ->
-    (match Naming_provider.get_fun_path x with
+    (match Naming_provider.get_fun_path ctx x with
     | Some filename ->
       let ft =
         Errors.run_in_decl_mode filename (fun () ->

@@ -13,11 +13,12 @@ let handler =
   object
     inherit Nast_visitor.handler_base
 
-    method! at_expr _ expr =
+    method! at_expr env expr =
       match snd expr with
       | Fun_id (p, name) when String.contains name ':' ->
         Errors.illegal_meth_fun p
-      | Fun_id (p, name) when Naming_provider.get_fun_pos name = None ->
+      | Fun_id (p, name)
+        when Naming_provider.get_fun_pos env.Nast_check_env.ctx name = None ->
         Errors.invalid_fun_pointer p name
       | _ -> ()
   end

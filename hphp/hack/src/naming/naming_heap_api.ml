@@ -16,7 +16,7 @@ let get_class ctx id =
     | Some class_ -> Some (Errors.ignore_ (fun () -> Naming.class_ ctx class_)))
 
 let get_fun ctx id =
-  match Naming_provider.get_fun_path id with
+  match Naming_provider.get_fun_path ctx id with
   | None -> None
   | Some fn ->
     (match Ast_provider.find_fun_in_file ctx fn id with

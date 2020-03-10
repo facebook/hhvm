@@ -297,6 +297,7 @@ let naming_from_saved_state
           Naming_provider.remove_type_batch
             (v.FileInfo.record_defs |> List.map ~f:snd |> SSet.of_list);
           Naming_provider.remove_fun_batch
+            ctx
             (v.FileInfo.funs |> List.map ~f:snd |> SSet.of_list);
           Naming_provider.remove_const_batch
             ctx

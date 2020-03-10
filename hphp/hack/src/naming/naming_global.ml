@@ -98,7 +98,7 @@ module GEnv = struct
     Naming_provider.get_fun_canon_name ctx (canon_key name)
 
   let fun_pos ctx name =
-    match Naming_provider.get_fun_pos name with
+    match Naming_provider.get_fun_pos ctx name with
     | Some pos ->
       let (p, _) = get_full_pos ctx (pos, name) in
       Some p
@@ -155,7 +155,8 @@ module Env = struct
     let name_key = canon_key name in
     match Naming_provider.get_fun_canon_name ctx name_key with
     | Some _ -> ()
-    | None -> Naming_provider.add_fun name (FileInfo.File (FileInfo.Fun, fn))
+    | None ->
+      Naming_provider.add_fun ctx name (FileInfo.File (FileInfo.Fun, fn))
 
   let new_cid_fast ctx fn name cid_kind =
     let name_key = canon_key name in
@@ -187,12 +188,12 @@ module Env = struct
     let name_key = canon_key name in
     match Naming_provider.get_fun_canon_name ctx name_key with
     | Some canonical ->
-      let p' = Option.value_exn (Naming_provider.get_fun_pos canonical) in
+      let p' = Option.value_exn (Naming_provider.get_fun_pos ctx canonical) in
       if not @@ GEnv.compare_pos ctx p' p canonical then
         let (p, name) = GEnv.get_full_pos ctx (p, name) in
         let (p', canonical) = GEnv.get_full_pos ctx (p', canonical) in
         Errors.error_name_already_bound name canonical p p'
-    | None -> Naming_provider.add_fun name p
+    | None -> Naming_provider.add_fun ctx name p
 
   let (attr_prefix, attr_prefix_len) =
     let a = "\\__attribute__" in
@@ -267,7 +268,7 @@ let remove_decls ~ctx ~funs ~classes ~record_defs ~typedefs ~consts =
   let types = SSet.union classes typedefs in
   let types = SSet.union types record_defs in
   Naming_provider.remove_type_batch types;
-  Naming_provider.remove_fun_batch funs;
+  Naming_provider.remove_fun_batch ctx funs;
   Naming_provider.remove_const_batch ctx consts
 
 (*****************************************************************************)

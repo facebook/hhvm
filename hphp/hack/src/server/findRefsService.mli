@@ -50,7 +50,10 @@ val get_origin_class_name :
 val get_child_classes_files : string -> Relative_path.Set.t
 
 val get_dependent_files_function :
-  MultiWorker.worker list option -> string -> Relative_path.Set.t
+  Provider_context.t ->
+  MultiWorker.worker list option ->
+  string ->
+  Relative_path.Set.t
 
 val get_dependent_files_gconst :
   Provider_context.t ->

@@ -24,22 +24,26 @@ let add_const (_ctx : Provider_context.t) (name : string) (pos : FileInfo.pos) :
 let remove_const_batch (_ctx : Provider_context.t) (names : SSet.t) : unit =
   Naming_heap.Consts.remove_batch names
 
-let fun_exists (name : string) : bool = Naming_heap.Funs.is_defined name
+let fun_exists (_ctx : Provider_context.t) (name : string) : bool =
+  Naming_heap.Funs.is_defined name
 
-let get_fun_path (name : string) : Relative_path.t option =
+let get_fun_path (_ctx : Provider_context.t) (name : string) :
+    Relative_path.t option =
   Naming_heap.Funs.get_filename name
 
-let get_fun_pos (name : string) : FileInfo.pos option =
+let get_fun_pos (_ctx : Provider_context.t) (name : string) :
+    FileInfo.pos option =
   Naming_heap.Funs.get_pos name
 
 let get_fun_canon_name (ctx : Provider_context.t) (name : string) :
     string option =
   Naming_heap.Funs.get_canon_name ctx name
 
-let add_fun (name : string) (pos : FileInfo.pos) : unit =
+let add_fun (_ctx : Provider_context.t) (name : string) (pos : FileInfo.pos) :
+    unit =
   Naming_heap.Funs.add name pos
 
-let remove_fun_batch (names : SSet.t) : unit =
+let remove_fun_batch (_ctx : Provider_context.t) (names : SSet.t) : unit =
   Naming_heap.Funs.remove_batch names
 
 let add_type

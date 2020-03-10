@@ -180,8 +180,8 @@ let get_deps_set classes =
       end
     ~init:Relative_path.Set.empty
 
-let get_deps_set_function f_name =
-  match Naming_provider.get_fun_path f_name with
+let get_deps_set_function ctx f_name =
+  match Naming_provider.get_fun_path ctx f_name with
   | Some fn ->
     let dep = Typing_deps.Dep.Fun f_name in
     let ideps = Typing_deps.get_ideps dep in
@@ -372,9 +372,9 @@ let find_references ctx workers target include_defs files =
   else
     results
 
-let get_dependent_files_function _workers f_name =
+let get_dependent_files_function ctx _workers f_name =
   (* This is performant enough to not need to go parallel for now *)
-  get_deps_set_function f_name
+  get_deps_set_function ctx f_name
 
 let get_dependent_files_gconst ctx _workers cst_name =
   (* This is performant enough to not need to go parallel for now *)

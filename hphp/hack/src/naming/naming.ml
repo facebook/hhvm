@@ -443,7 +443,7 @@ end = struct
   let fun_id (genv, _) x =
     canonicalize
       genv
-      Naming_provider.fun_exists
+      (Naming_provider.fun_exists genv.ctx)
       GEnv.fun_pos
       GEnv.fun_canon_name
       x

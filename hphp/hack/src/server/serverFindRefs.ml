@@ -68,13 +68,14 @@ let handle_prechecked_files genv env dep f =
     let () = Hh_logger.debug "ServerFindRefs.handle_prechecked_files: Retry" in
     (env, Retry)
 
-let search_function function_name include_defs genv env =
+let search_function ctx function_name include_defs genv env =
   let function_name = add_ns function_name in
   Hh_logger.debug "ServerFindRefs.search_function: %s" function_name;
   handle_prechecked_files genv env Typing_deps.Dep.(make (Fun function_name))
   @@ fun () ->
   let files =
     FindRefsService.get_dependent_files_function
+      ctx
       genv.ServerEnv.workers
       function_name
     |> Relative_path.Set.elements
@@ -157,7 +158,7 @@ let go ctx action include_defs genv env =
   | Member (class_name, member) ->
     search_member ctx class_name member include_defs genv env
   | Function function_name ->
-    search_function function_name include_defs genv env
+    search_function ctx function_name include_defs genv env
   | Class class_name -> search_class class_name include_defs genv env
   | Record record_name -> search_record record_name include_defs genv env
   | GConst cst_name -> search_gconst ctx cst_name include_defs genv env

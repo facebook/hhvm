@@ -414,6 +414,7 @@ let update_reverse_entries ctx file_deltas =
           Naming_provider.remove_type_batch
             (fi.FileInfo.typedefs |> List.map snd |> SSet.of_list);
           Naming_provider.remove_fun_batch
+            ctx
             (fi.FileInfo.funs |> List.map snd |> SSet.of_list);
           Naming_provider.remove_const_batch
             ctx
@@ -432,7 +433,7 @@ let update_reverse_entries ctx file_deltas =
           (fun (pos, name) -> Naming_provider.add_typedef name pos)
           fi.FileInfo.typedefs;
         List.iter
-          (fun (pos, name) -> Naming_provider.add_fun name pos)
+          (fun (pos, name) -> Naming_provider.add_fun ctx name pos)
           fi.FileInfo.funs;
         List.iter
           (fun (pos, name) -> Naming_provider.add_const ctx name pos)

@@ -194,39 +194,9 @@ class Redis {
   public function restore($key, $ttl, $value) {}
   public function migrate($host, $port, $key, $db, $timeout) {}
   public function time() {}
+  public function call__($fname, $args) {}
 }
 
 <<__PHPStdLib>>
 class RedisException extends RuntimeException {
-}
-
-<<__PHPStdLib>>
-class RedisArray {
-  public function __call($function_name, $arguments) {}
-  public function __construct($name = '', array $hosts = varray[], array $opts = darray[]) {}
-  public function _distributor() {}
-  public function _function() {}
-  public function _hosts() {}
-  public function _instance() {}
-  public function _rehash() {}
-  public function _target() {}
-  public function bgsave() {}
-  public function del() {}
-  public function delete() {}
-  public function discard() {}
-  public function exec() {}
-  public function flushall() {}
-  public function flushdb() {}
-  public function getMultiple() {}
-  public function getOption() {}
-  public function info() {}
-  public function keys() {}
-  public function mget() {}
-  public function mset() {}
-  public function multi() {}
-  public function ping() {}
-  public function save() {}
-  public function select() {}
-  public function setOption() {}
-  public function unwatch() {}
 }

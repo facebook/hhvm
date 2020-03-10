@@ -166,6 +166,13 @@ class SoapClient {
   ): mixed;
 
   public function __call(mixed $name, mixed $args): mixed {
+    if (ini_get('hhvm.no_use_magic_methods')) {
+      trigger_error("Invoking SoapClient::$name via magic __call", E_WARNING);
+    }
+    return $this->call__($name, $args);
+  }
+
+  public function call__(mixed $name, mixed $args): mixed {
     return $this->__soapcall($name, $args);
   }
 

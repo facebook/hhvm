@@ -46,6 +46,6 @@ class RecursiveIteratorIterator<Tv> implements OuterIterator<Tv> {
   public function getSubIterator($level = null);
   public function nextElement();
   public function setMaxDepth($max_depth = -1);
-  public function __call($func, $params);
+  public function call__($func, $params);
 
 }

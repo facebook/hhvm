@@ -1,0 +1,9 @@
+Warning: Invoking A::test via magic __call in %s/hphp/test/slow/object_magic_method/trigger_logs.php on line 21
+
+Warning: Checking if property A::test is set via magic __isset in %s/hphp/test/slow/object_magic_method/trigger_logs.php on line 31
+
+Warning: Unsetting property A::test via magic __unset in %s/hphp/test/slow/object_magic_method/trigger_logs.php on line 32
+
+Warning: Accessing property A::test via magic __get in %s/hphp/test/slow/object_magic_method/trigger_logs.php on line 33
+
+Warning: Setting property A::test via magic __set in %s/hphp/test/slow/object_magic_method/trigger_logs.php on line 34

@@ -1316,6 +1316,9 @@ struct MagicInvoker {
 }
 
 bool ObjectData::invokeSet(const StringData* key, TypedValue val) {
+  if (RuntimeOption::EvalNoUseMagicMethods) {
+    raise_warning("Setting property %s::%s via magic __set", this->getClassName().data(), key->data());
+  }
   auto const info = PropAccessInfo { this, key, Class::UseSet };
   auto r = magic_prop_impl(key, info, [&] {
     auto const meth = m_cls->lookupMethod(s___set.get());
@@ -1330,6 +1333,9 @@ bool ObjectData::invokeSet(const StringData* key, TypedValue val) {
 }
 
 InvokeResult ObjectData::invokeGet(const StringData* key) {
+  if (RuntimeOption::EvalNoUseMagicMethods) {
+    raise_warning("Accessing property %s::%s via magic __get", this->getClassName().data(), key->data());
+  }
   auto const info = PropAccessInfo { this, key, Class::UseGet };
   return magic_prop_impl(
     key,
@@ -1339,6 +1345,9 @@ InvokeResult ObjectData::invokeGet(const StringData* key) {
 }
 
 InvokeResult ObjectData::invokeIsset(const StringData* key) {
+  if (RuntimeOption::EvalNoUseMagicMethods) {
+    raise_warning("Checking if property %s::%s is set via magic __isset", this->getClassName().data(), key->data());
+  }
   auto const info = PropAccessInfo { this, key, Class::UseIsset };
   return magic_prop_impl(
     key,
@@ -1348,6 +1357,9 @@ InvokeResult ObjectData::invokeIsset(const StringData* key) {
 }
 
 bool ObjectData::invokeUnset(const StringData* key) {
+  if (RuntimeOption::EvalNoUseMagicMethods) {
+    raise_warning("Unsetting property %s::%s via magic __unset", this->getClassName().data(), key->data());
+  }
   auto const info = PropAccessInfo { this, key, Class::UseUnset };
   auto r = magic_prop_impl(key, info,
                            MagicInvoker{s___unset.get(), info});

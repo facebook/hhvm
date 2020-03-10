@@ -815,6 +815,7 @@ class IntlCalendar {
   public function setTime($date);
   public function setTimeZone($timeZone);
   public function toDateTime();
+  public function call__($fname, $args): mixed;
 }
 
 class IntlGregorianCalendar extends IntlCalendar {

@@ -390,12 +390,22 @@ class IntlCalendar {
    * Can't define a method named isSet()
    */
   public function __call($fname, $args): mixed {
+    if (ini_get('hhvm.no_use_magic_methods')) {
+      trigger_error(
+        "Invoking IntlCalendar::$fname via magic __call",
+        E_USER_WARNING
+      );
+    }
+    return $this->call__($fname, $args);
+  }
+
+  public function call__($fname, $args): mixed {
     $cls = get_class($this);
     $count = count($args);
     if (!strcasecmp($fname, 'isSet')) {
       if ($count < 1) {
         trigger_error("$cls::$fname must be called with at least 1 argument, ".
-                      "$count provided.", E_WARNING);
+                      "$count provided.", E_USER_WARNING);
         return null;
       }
       return $this->_isSet((int)$args[0]);

@@ -5,32 +5,34 @@ object(SoapClient) (0) {
 Warning: Attempted to serialize unserializable builtin class SoapClient in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-array(13) {
+array(14) {
   [0]=>
   string(11) "__construct"
   [1]=>
   string(6) "__call"
   [2]=>
-  string(10) "__soapcall"
+  string(6) "call__"
   [3]=>
-  string(16) "__getlastrequest"
+  string(10) "__soapcall"
   [4]=>
-  string(17) "__getlastresponse"
+  string(16) "__getlastrequest"
   [5]=>
-  string(23) "__getlastrequestheaders"
+  string(17) "__getlastresponse"
   [6]=>
-  string(24) "__getlastresponseheaders"
+  string(23) "__getlastrequestheaders"
   [7]=>
-  string(14) "__getfunctions"
+  string(24) "__getlastresponseheaders"
   [8]=>
-  string(10) "__gettypes"
+  string(14) "__getfunctions"
   [9]=>
-  string(11) "__dorequest"
+  string(10) "__gettypes"
   [10]=>
-  string(11) "__setcookie"
+  string(11) "__dorequest"
   [11]=>
-  string(13) "__setlocation"
+  string(11) "__setcookie"
   [12]=>
+  string(13) "__setlocation"
+  [13]=>
   string(16) "__setsoapheaders"
 }
 ================
@@ -43,31 +45,33 @@ object(A_SoapClient) (1) {
 Warning: Attempted to serialize unserializable builtin class A_SoapClient in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-array(13) {
+array(14) {
   [0]=>
   string(11) "__construct"
   [1]=>
   string(6) "__call"
   [2]=>
-  string(10) "__soapcall"
+  string(6) "call__"
   [3]=>
-  string(16) "__getlastrequest"
+  string(10) "__soapcall"
   [4]=>
-  string(17) "__getlastresponse"
+  string(16) "__getlastrequest"
   [5]=>
-  string(23) "__getlastrequestheaders"
+  string(17) "__getlastresponse"
   [6]=>
-  string(24) "__getlastresponseheaders"
+  string(23) "__getlastrequestheaders"
   [7]=>
-  string(14) "__getfunctions"
+  string(24) "__getlastresponseheaders"
   [8]=>
-  string(10) "__gettypes"
+  string(14) "__getfunctions"
   [9]=>
-  string(11) "__dorequest"
+  string(10) "__gettypes"
   [10]=>
-  string(11) "__setcookie"
+  string(11) "__dorequest"
   [11]=>
-  string(13) "__setlocation"
+  string(11) "__setcookie"
   [12]=>
+  string(13) "__setlocation"
+  [13]=>
   string(16) "__setsoapheaders"
 }

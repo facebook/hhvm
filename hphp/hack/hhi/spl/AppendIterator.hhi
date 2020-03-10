@@ -16,5 +16,5 @@ class AppendIterator<Tv> extends IteratorIterator<Tv> {
   public function getArrayIterator(): ArrayIterator<Iterator<Tv>>;
   public function getIteratorIndex(): int;
   public function getInnerIterator(): Iterator<Tv>;
-  public function __call($func, $params);
+  public function call__($func, $params);
 }

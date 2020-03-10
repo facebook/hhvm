@@ -1594,6 +1594,13 @@ class Redis {
    * All other commands are handled by explicit implementations
    */
   public function __call($fname, $args) {
+    if (ini_get('hhvm.no_use_magic_methods')) {
+      trigger_error("Invoking Redis::$fname via magic __call", E_WARNING);
+    }
+    return $this->call__($fname, $args);
+  }
+
+  public function call__($fname, $args) {
     $fname = strtolower($fname);
     if (!isset(self::$map[$fname])) {
       trigger_error("Call to undefined function Redis::$fname()", E_ERROR);

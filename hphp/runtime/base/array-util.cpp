@@ -121,9 +121,13 @@ Variant ArrayUtil::PadLeft(const Array& input, const Variant& pad_value,
     return input;
   }
 
-  auto ret = Array::attach(
-    MixedArray::MakeReserveLike(input.get(), pad_size)
-  );
+  ArrayData* data;
+  if (input.get()->hasVanillaPackedLayout()) {
+    data = PackedArray::MakeReserveVArray(pad_size);
+  } else {
+    data = MixedArray::MakeReserveDArray(pad_size);
+  }
+  auto ret = Array::attach(data);
   for (int i = input_size; i < pad_size; i++) {
     ret.append(pad_value);
   }

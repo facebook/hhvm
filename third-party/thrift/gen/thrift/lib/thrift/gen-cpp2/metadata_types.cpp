@@ -125,6 +125,38 @@ void TccStructTraits<::apache::thrift::metadata::ThriftTypedefType>::translateFi
     _ftype = apache::thrift::protocol::T_STRUCT;
   }
 }
+void TccStructTraits<::apache::thrift::metadata::ThriftStreamType>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
+  if (false) {}
+  else if (_fname == "elemType") {
+    fid = 1;
+    _ftype = apache::thrift::protocol::T_STRUCT;
+  }
+  else if (_fname == "initialResponseType") {
+    fid = 2;
+    _ftype = apache::thrift::protocol::T_STRUCT;
+  }
+}
+void TccStructTraits<::apache::thrift::metadata::ThriftSinkType>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
+  if (false) {}
+  else if (_fname == "elemType") {
+    fid = 1;
+    _ftype = apache::thrift::protocol::T_STRUCT;
+  }
+  else if (_fname == "finalResponseType") {
+    fid = 2;
+    _ftype = apache::thrift::protocol::T_STRUCT;
+  }
+  else if (_fname == "initialResponseType") {
+    fid = 3;
+    _ftype = apache::thrift::protocol::T_STRUCT;
+  }
+}
 void TccStructTraits<::apache::thrift::metadata::ThriftType>::translateFieldName(
     FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
     FOLLY_MAYBE_UNUSED int16_t& fid,
@@ -160,6 +192,14 @@ void TccStructTraits<::apache::thrift::metadata::ThriftType>::translateFieldName
   }
   else if (_fname == "t_typedef") {
     fid = 8;
+    _ftype = apache::thrift::protocol::T_STRUCT;
+  }
+  else if (_fname == "t_stream") {
+    fid = 9;
+    _ftype = apache::thrift::protocol::T_STRUCT;
+  }
+  else if (_fname == "t_sink") {
+    fid = 10;
     _ftype = apache::thrift::protocol::T_STRUCT;
   }
 }
@@ -271,15 +311,35 @@ void TccStructTraits<::apache::thrift::metadata::ThriftService>::translateFieldN
     _ftype = apache::thrift::protocol::T_STRING;
   }
 }
+void TccStructTraits<::apache::thrift::metadata::ThriftModuleContext>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
+  if (false) {}
+  else if (_fname == "name") {
+    fid = 1;
+    _ftype = apache::thrift::protocol::T_STRING;
+  }
+}
+void TccStructTraits<::apache::thrift::metadata::ThriftServiceContext>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
+  if (false) {}
+  else if (_fname == "service_info") {
+    fid = 1;
+    _ftype = apache::thrift::protocol::T_STRUCT;
+  }
+  else if (_fname == "module") {
+    fid = 2;
+    _ftype = apache::thrift::protocol::T_STRUCT;
+  }
+}
 void TccStructTraits<::apache::thrift::metadata::ThriftMetadata>::translateFieldName(
     FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
     FOLLY_MAYBE_UNUSED int16_t& fid,
     FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
   if (false) {}
-  else if (_fname == "file_name") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_STRING;
-  }
   else if (_fname == "enums") {
     fid = 2;
     _ftype = apache::thrift::protocol::T_MAP;
@@ -295,6 +355,20 @@ void TccStructTraits<::apache::thrift::metadata::ThriftMetadata>::translateField
   else if (_fname == "services") {
     fid = 6;
     _ftype = apache::thrift::protocol::T_MAP;
+  }
+}
+void TccStructTraits<::apache::thrift::metadata::ThriftServiceMetadataResponse>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
+  if (false) {}
+  else if (_fname == "context") {
+    fid = 1;
+    _ftype = apache::thrift::protocol::T_STRUCT;
+  }
+  else if (_fname == "metadata") {
+    fid = 2;
+    _ftype = apache::thrift::protocol::T_STRUCT;
   }
 }
 
@@ -753,6 +827,198 @@ template uint32_t ThriftTypedefType::serializedSizeZC<>(apache::thrift::CompactP
 }}} // apache::thrift::metadata
 namespace apache { namespace thrift { namespace metadata {
 
+ThriftStreamType::ThriftStreamType(const ThriftStreamType& srcObj) {
+  if (srcObj.elemType) elemType.reset(new  ::apache::thrift::metadata::ThriftType(*srcObj.elemType));
+  if (srcObj.initialResponseType) initialResponseType.reset(new  ::apache::thrift::metadata::ThriftType(*srcObj.initialResponseType));
+}
+
+ThriftStreamType& ThriftStreamType::operator=(const ThriftStreamType& src) {
+  ThriftStreamType tmp(src);
+  swap(*this, tmp);
+  return *this;
+}
+
+ThriftStreamType::ThriftStreamType(apache::thrift::FragileConstructor, std::unique_ptr< ::apache::thrift::metadata::ThriftType> elemType__arg, std::unique_ptr< ::apache::thrift::metadata::ThriftType> initialResponseType__arg) :
+    elemType(std::move(elemType__arg)),
+    initialResponseType(std::move(initialResponseType__arg)) {}
+
+void ThriftStreamType::__clear() {
+  // clear all fields
+  elemType.reset();
+  initialResponseType.reset();
+}
+
+bool ThriftStreamType::operator==(const ThriftStreamType& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!!lhs.elemType != !!rhs.elemType) {
+    return false;
+  }
+  if (!!lhs.elemType) {
+    if (lhs.elemType != rhs.elemType && !(*lhs.elemType == *rhs.elemType)) {
+      return false;
+    }
+  }
+  if (!!lhs.initialResponseType != !!rhs.initialResponseType) {
+    return false;
+  }
+  if (!!lhs.initialResponseType) {
+    if (lhs.initialResponseType != rhs.initialResponseType && !(*lhs.initialResponseType == *rhs.initialResponseType)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool ThriftStreamType::operator<(const ThriftStreamType& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!!lhs.elemType != !!rhs.elemType) {
+    return !!lhs.elemType < !!rhs.elemType;
+  }
+  if (!!lhs.elemType) {
+    if (lhs.elemType != rhs.elemType && !(*lhs.elemType == *rhs.elemType)) {
+      return *lhs.elemType < *rhs.elemType;
+    }
+  }
+  if (!!lhs.initialResponseType != !!rhs.initialResponseType) {
+    return !!lhs.initialResponseType < !!rhs.initialResponseType;
+  }
+  if (!!lhs.initialResponseType) {
+    if (lhs.initialResponseType != rhs.initialResponseType && !(*lhs.initialResponseType == *rhs.initialResponseType)) {
+      return *lhs.initialResponseType < *rhs.initialResponseType;
+    }
+  }
+  return false;
+}
+
+
+void swap(ThriftStreamType& a, ThriftStreamType& b) {
+  using ::std::swap;
+  swap(a.elemType, b.elemType);
+  swap(a.initialResponseType, b.initialResponseType);
+}
+
+template void ThriftStreamType::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t ThriftStreamType::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t ThriftStreamType::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t ThriftStreamType::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void ThriftStreamType::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t ThriftStreamType::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t ThriftStreamType::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t ThriftStreamType::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}}} // apache::thrift::metadata
+namespace apache { namespace thrift { namespace metadata {
+
+ThriftSinkType::ThriftSinkType(const ThriftSinkType& srcObj) {
+  if (srcObj.elemType) elemType.reset(new  ::apache::thrift::metadata::ThriftType(*srcObj.elemType));
+  if (srcObj.finalResponseType) finalResponseType.reset(new  ::apache::thrift::metadata::ThriftType(*srcObj.finalResponseType));
+  if (srcObj.initialResponseType) initialResponseType.reset(new  ::apache::thrift::metadata::ThriftType(*srcObj.initialResponseType));
+}
+
+ThriftSinkType& ThriftSinkType::operator=(const ThriftSinkType& src) {
+  ThriftSinkType tmp(src);
+  swap(*this, tmp);
+  return *this;
+}
+
+ThriftSinkType::ThriftSinkType(apache::thrift::FragileConstructor, std::unique_ptr< ::apache::thrift::metadata::ThriftType> elemType__arg, std::unique_ptr< ::apache::thrift::metadata::ThriftType> finalResponseType__arg, std::unique_ptr< ::apache::thrift::metadata::ThriftType> initialResponseType__arg) :
+    elemType(std::move(elemType__arg)),
+    finalResponseType(std::move(finalResponseType__arg)),
+    initialResponseType(std::move(initialResponseType__arg)) {}
+
+void ThriftSinkType::__clear() {
+  // clear all fields
+  elemType.reset();
+  finalResponseType.reset();
+  initialResponseType.reset();
+}
+
+bool ThriftSinkType::operator==(const ThriftSinkType& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!!lhs.elemType != !!rhs.elemType) {
+    return false;
+  }
+  if (!!lhs.elemType) {
+    if (lhs.elemType != rhs.elemType && !(*lhs.elemType == *rhs.elemType)) {
+      return false;
+    }
+  }
+  if (!!lhs.finalResponseType != !!rhs.finalResponseType) {
+    return false;
+  }
+  if (!!lhs.finalResponseType) {
+    if (lhs.finalResponseType != rhs.finalResponseType && !(*lhs.finalResponseType == *rhs.finalResponseType)) {
+      return false;
+    }
+  }
+  if (!!lhs.initialResponseType != !!rhs.initialResponseType) {
+    return false;
+  }
+  if (!!lhs.initialResponseType) {
+    if (lhs.initialResponseType != rhs.initialResponseType && !(*lhs.initialResponseType == *rhs.initialResponseType)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool ThriftSinkType::operator<(const ThriftSinkType& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!!lhs.elemType != !!rhs.elemType) {
+    return !!lhs.elemType < !!rhs.elemType;
+  }
+  if (!!lhs.elemType) {
+    if (lhs.elemType != rhs.elemType && !(*lhs.elemType == *rhs.elemType)) {
+      return *lhs.elemType < *rhs.elemType;
+    }
+  }
+  if (!!lhs.finalResponseType != !!rhs.finalResponseType) {
+    return !!lhs.finalResponseType < !!rhs.finalResponseType;
+  }
+  if (!!lhs.finalResponseType) {
+    if (lhs.finalResponseType != rhs.finalResponseType && !(*lhs.finalResponseType == *rhs.finalResponseType)) {
+      return *lhs.finalResponseType < *rhs.finalResponseType;
+    }
+  }
+  if (!!lhs.initialResponseType != !!rhs.initialResponseType) {
+    return !!lhs.initialResponseType < !!rhs.initialResponseType;
+  }
+  if (!!lhs.initialResponseType) {
+    if (lhs.initialResponseType != rhs.initialResponseType && !(*lhs.initialResponseType == *rhs.initialResponseType)) {
+      return *lhs.initialResponseType < *rhs.initialResponseType;
+    }
+  }
+  return false;
+}
+
+
+void swap(ThriftSinkType& a, ThriftSinkType& b) {
+  using ::std::swap;
+  swap(a.elemType, b.elemType);
+  swap(a.finalResponseType, b.finalResponseType);
+  swap(a.initialResponseType, b.initialResponseType);
+}
+
+template void ThriftSinkType::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t ThriftSinkType::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t ThriftSinkType::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t ThriftSinkType::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void ThriftSinkType::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t ThriftSinkType::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t ThriftSinkType::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t ThriftSinkType::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}}} // apache::thrift::metadata
+namespace apache { namespace thrift { namespace metadata {
+
 void ThriftType::__clear() {
   // clear all fields
   if (type_ == Type::__EMPTY__) { return; }
@@ -795,6 +1061,16 @@ void ThriftType::__clear() {
     case Type::t_typedef:
     {
       destruct(value_.t_typedef);
+      break;
+    }
+    case Type::t_stream:
+    {
+      destruct(value_.t_stream);
+      break;
+    }
+    case Type::t_sink:
+    {
+      destruct(value_.t_sink);
       break;
     }
     default:
@@ -841,6 +1117,14 @@ bool ThriftType::operator==(const ThriftType& rhs) const {
     {
       return value_.t_typedef == rhs.value_.t_typedef;
     }
+    case Type::t_stream:
+    {
+      return value_.t_stream == rhs.value_.t_stream;
+    }
+    case Type::t_sink:
+    {
+      return value_.t_sink == rhs.value_.t_sink;
+    }
     default:
     {
       return true;
@@ -872,6 +1156,10 @@ bool ThriftType::operator<(const ThriftType& rhs) const {
       return lhs.value_.t_union < rhs.value_.t_union;
     case Type::t_typedef:
       return lhs.value_.t_typedef < rhs.value_.t_typedef;
+    case Type::t_stream:
+      return lhs.value_.t_stream < rhs.value_.t_stream;
+    case Type::t_sink:
+      return lhs.value_.t_sink < rhs.value_.t_sink;
     default:
       return false;
   }
@@ -1389,18 +1677,137 @@ template uint32_t ThriftService::serializedSizeZC<>(apache::thrift::CompactProto
 }}} // apache::thrift::metadata
 namespace apache { namespace thrift { namespace metadata {
 
-ThriftMetadata::ThriftMetadata() {}
+ThriftModuleContext::ThriftModuleContext(apache::thrift::FragileConstructor, ::std::string name__arg) :
+    name(std::move(name__arg)) {
+  __isset.name = true;
+}
+
+void ThriftModuleContext::__clear() {
+  // clear all fields
+  name = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
+  __isset = {};
+}
+
+bool ThriftModuleContext::operator==(const ThriftModuleContext& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!(lhs.name == rhs.name)) {
+    return false;
+  }
+  return true;
+}
+
+bool ThriftModuleContext::operator<(const ThriftModuleContext& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!(lhs.name == rhs.name)) {
+    return lhs.name < rhs.name;
+  }
+  return false;
+}
 
 
-ThriftMetadata::~ThriftMetadata() {}
+void swap(ThriftModuleContext& a, ThriftModuleContext& b) {
+  using ::std::swap;
+  swap(a.name, b.name);
+  swap(a.__isset, b.__isset);
+}
 
-ThriftMetadata::ThriftMetadata(apache::thrift::FragileConstructor, ::std::string file_name__arg, ::std::map<::std::string,  ::apache::thrift::metadata::ThriftEnum> enums__arg, ::std::map<::std::string,  ::apache::thrift::metadata::ThriftStruct> structs__arg, ::std::map<::std::string,  ::apache::thrift::metadata::ThriftException> exceptions__arg, ::std::map<::std::string,  ::apache::thrift::metadata::ThriftService> services__arg) :
-    file_name(std::move(file_name__arg)),
+template void ThriftModuleContext::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t ThriftModuleContext::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t ThriftModuleContext::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t ThriftModuleContext::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void ThriftModuleContext::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t ThriftModuleContext::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t ThriftModuleContext::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t ThriftModuleContext::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}}} // apache::thrift::metadata
+namespace apache { namespace thrift { namespace metadata {
+
+ThriftServiceContext::ThriftServiceContext(apache::thrift::FragileConstructor,  ::apache::thrift::metadata::ThriftService service_info__arg,  ::apache::thrift::metadata::ThriftModuleContext module__arg) :
+    service_info(std::move(service_info__arg)),
+    module(std::move(module__arg)) {
+  __isset.service_info = true;
+  __isset.module = true;
+}
+
+void ThriftServiceContext::__clear() {
+  // clear all fields
+  ::apache::thrift::Cpp2Ops<  ::apache::thrift::metadata::ThriftService>::clear(&service_info);
+  ::apache::thrift::Cpp2Ops<  ::apache::thrift::metadata::ThriftModuleContext>::clear(&module);
+  __isset = {};
+}
+
+bool ThriftServiceContext::operator==(const ThriftServiceContext& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!(lhs.service_info == rhs.service_info)) {
+    return false;
+  }
+  if (!(lhs.module == rhs.module)) {
+    return false;
+  }
+  return true;
+}
+
+bool ThriftServiceContext::operator<(const ThriftServiceContext& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!(lhs.service_info == rhs.service_info)) {
+    return lhs.service_info < rhs.service_info;
+  }
+  if (!(lhs.module == rhs.module)) {
+    return lhs.module < rhs.module;
+  }
+  return false;
+}
+
+const  ::apache::thrift::metadata::ThriftService& ThriftServiceContext::get_service_info() const& {
+  return service_info;
+}
+
+ ::apache::thrift::metadata::ThriftService ThriftServiceContext::get_service_info() && {
+  return std::move(service_info);
+}
+
+const  ::apache::thrift::metadata::ThriftModuleContext& ThriftServiceContext::get_module() const& {
+  return module;
+}
+
+ ::apache::thrift::metadata::ThriftModuleContext ThriftServiceContext::get_module() && {
+  return std::move(module);
+}
+
+
+void swap(ThriftServiceContext& a, ThriftServiceContext& b) {
+  using ::std::swap;
+  swap(a.service_info, b.service_info);
+  swap(a.module, b.module);
+  swap(a.__isset, b.__isset);
+}
+
+template void ThriftServiceContext::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t ThriftServiceContext::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t ThriftServiceContext::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t ThriftServiceContext::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void ThriftServiceContext::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t ThriftServiceContext::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t ThriftServiceContext::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t ThriftServiceContext::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}}} // apache::thrift::metadata
+namespace apache { namespace thrift { namespace metadata {
+
+ThriftMetadata::ThriftMetadata(apache::thrift::FragileConstructor, ::std::map<::std::string,  ::apache::thrift::metadata::ThriftEnum> enums__arg, ::std::map<::std::string,  ::apache::thrift::metadata::ThriftStruct> structs__arg, ::std::map<::std::string,  ::apache::thrift::metadata::ThriftException> exceptions__arg, ::std::map<::std::string,  ::apache::thrift::metadata::ThriftService> services__arg) :
     enums(std::move(enums__arg)),
     structs(std::move(structs__arg)),
     exceptions(std::move(exceptions__arg)),
     services(std::move(services__arg)) {
-  __isset.file_name = true;
   __isset.enums = true;
   __isset.structs = true;
   __isset.exceptions = true;
@@ -1409,7 +1816,6 @@ ThriftMetadata::ThriftMetadata(apache::thrift::FragileConstructor, ::std::string
 
 void ThriftMetadata::__clear() {
   // clear all fields
-  file_name = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
   enums.clear();
   structs.clear();
   exceptions.clear();
@@ -1421,9 +1827,6 @@ bool ThriftMetadata::operator==(const ThriftMetadata& rhs) const {
   (void)rhs;
   auto& lhs = *this;
   (void)lhs;
-  if (!(lhs.file_name == rhs.file_name)) {
-    return false;
-  }
   if (!(lhs.enums == rhs.enums)) {
     return false;
   }
@@ -1443,9 +1846,6 @@ bool ThriftMetadata::operator<(const ThriftMetadata& rhs) const {
   (void)rhs;
   auto& lhs = *this;
   (void)lhs;
-  if (!(lhs.file_name == rhs.file_name)) {
-    return lhs.file_name < rhs.file_name;
-  }
   if (!(lhs.enums == rhs.enums)) {
     return lhs.enums < rhs.enums;
   }
@@ -1496,7 +1896,6 @@ const ::std::map<::std::string,  ::apache::thrift::metadata::ThriftService>& Thr
 
 void swap(ThriftMetadata& a, ThriftMetadata& b) {
   using ::std::swap;
-  swap(a.file_name, b.file_name);
   swap(a.enums, b.enums);
   swap(a.structs, b.structs);
   swap(a.exceptions, b.exceptions);
@@ -1512,5 +1911,81 @@ template void ThriftMetadata::readNoXfer<>(apache::thrift::CompactProtocolReader
 template uint32_t ThriftMetadata::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t ThriftMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t ThriftMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}}} // apache::thrift::metadata
+namespace apache { namespace thrift { namespace metadata {
+
+ThriftServiceMetadataResponse::ThriftServiceMetadataResponse(apache::thrift::FragileConstructor,  ::apache::thrift::metadata::ThriftServiceContext context__arg,  ::apache::thrift::metadata::ThriftMetadata metadata__arg) :
+    context(std::move(context__arg)),
+    metadata(std::move(metadata__arg)) {
+  __isset.context = true;
+  __isset.metadata = true;
+}
+
+void ThriftServiceMetadataResponse::__clear() {
+  // clear all fields
+  ::apache::thrift::Cpp2Ops<  ::apache::thrift::metadata::ThriftServiceContext>::clear(&context);
+  ::apache::thrift::Cpp2Ops<  ::apache::thrift::metadata::ThriftMetadata>::clear(&metadata);
+  __isset = {};
+}
+
+bool ThriftServiceMetadataResponse::operator==(const ThriftServiceMetadataResponse& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!(lhs.context == rhs.context)) {
+    return false;
+  }
+  if (!(lhs.metadata == rhs.metadata)) {
+    return false;
+  }
+  return true;
+}
+
+bool ThriftServiceMetadataResponse::operator<(const ThriftServiceMetadataResponse& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!(lhs.context == rhs.context)) {
+    return lhs.context < rhs.context;
+  }
+  if (!(lhs.metadata == rhs.metadata)) {
+    return lhs.metadata < rhs.metadata;
+  }
+  return false;
+}
+
+const  ::apache::thrift::metadata::ThriftServiceContext& ThriftServiceMetadataResponse::get_context() const& {
+  return context;
+}
+
+ ::apache::thrift::metadata::ThriftServiceContext ThriftServiceMetadataResponse::get_context() && {
+  return std::move(context);
+}
+
+const  ::apache::thrift::metadata::ThriftMetadata& ThriftServiceMetadataResponse::get_metadata() const& {
+  return metadata;
+}
+
+ ::apache::thrift::metadata::ThriftMetadata ThriftServiceMetadataResponse::get_metadata() && {
+  return std::move(metadata);
+}
+
+
+void swap(ThriftServiceMetadataResponse& a, ThriftServiceMetadataResponse& b) {
+  using ::std::swap;
+  swap(a.context, b.context);
+  swap(a.metadata, b.metadata);
+  swap(a.__isset, b.__isset);
+}
+
+template void ThriftServiceMetadataResponse::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t ThriftServiceMetadataResponse::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t ThriftServiceMetadataResponse::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t ThriftServiceMetadataResponse::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void ThriftServiceMetadataResponse::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t ThriftServiceMetadataResponse::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t ThriftServiceMetadataResponse::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t ThriftServiceMetadataResponse::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 }}} // apache::thrift::metadata

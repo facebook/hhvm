@@ -59,20 +59,19 @@ let empty_for_debugging ~popt ~tcopt =
 let map_tcopt (t : t) ~(f : TypecheckerOptions.t -> TypecheckerOptions.t) : t =
   { t with tcopt = f t.tcopt }
 
-let global_context : t option ref = ref None
+let ref_is_quarantined : bool ref = ref false
 
-let get_global_context () : t option = !global_context
+let is_quarantined () : bool = !ref_is_quarantined
 
-let set_global_context_internal (t : t) : unit =
-  match !global_context with
-  | Some _ ->
-    failwith "set_global_context_internal: a global context is already set"
-  | None -> global_context := Some t
+let set_is_quarantined_internal () : unit =
+  match !ref_is_quarantined with
+  | true -> failwith "set_is_quarantined: was already quarantined"
+  | false -> ref_is_quarantined := true
 
-let unset_global_context_internal () : unit =
-  match !global_context with
-  | Some _ -> global_context := None
-  | None -> failwith "unset_global_context_internal: no global context is set"
+let unset_is_quarantined_internal () : unit =
+  match !ref_is_quarantined with
+  | true -> ref_is_quarantined := false
+  | false -> failwith "unset_is_quarantined: wasn't already quarantined"
 
 let get_telemetry (t : t) (telemetry : Telemetry.t) : Telemetry.t =
   let telemetry =

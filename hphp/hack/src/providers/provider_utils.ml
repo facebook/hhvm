@@ -168,7 +168,7 @@ let respect_but_quarantine_unsaved_changes
   let make_then_revert_local_changes f () =
     Utils.with_context
       ~enter:(fun () ->
-        Provider_context.set_global_context_internal ctx;
+        Provider_context.set_is_quarantined_internal ();
 
         Errors.set_allow_errors_in_default_path true;
         SharedMem.allow_hashtable_writes_by_current_process false;
@@ -196,7 +196,7 @@ let respect_but_quarantine_unsaved_changes
 
         SharedMem.invalidate_caches ();
 
-        Provider_context.unset_global_context_internal ())
+        Provider_context.unset_is_quarantined_internal ())
       ~do_:f
   in
   let (_errors, result) =
@@ -352,10 +352,9 @@ let compute_tast_and_errors_quarantined
   (* Okay, we don't have memoized results, let's ensure we are quarantined before computing *)
   | _ ->
     let f () = compute_tast_and_errors_unquarantined ~ctx ~entry in
-    (* If global context is not set, set it and proceed *)
-    (match Provider_context.get_global_context () with
-    | None -> respect_but_quarantine_unsaved_changes ~ctx ~f
-    | Some _ -> f ())
+    (match Provider_context.is_quarantined () with
+    | false -> respect_but_quarantine_unsaved_changes ~ctx ~f
+    | true -> f ())
 
 let compute_tast_quarantined
     ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
@@ -371,7 +370,6 @@ let compute_tast_quarantined
         ~entry
         ~mode:Compute_tast_only
     in
-    (* If global context is not set, set it and proceed *)
-    (match Provider_context.get_global_context () with
-    | None -> respect_but_quarantine_unsaved_changes ~ctx ~f
-    | Some _ -> f ())
+    (match Provider_context.is_quarantined () with
+    | false -> respect_but_quarantine_unsaved_changes ~ctx ~f
+    | true -> f ())

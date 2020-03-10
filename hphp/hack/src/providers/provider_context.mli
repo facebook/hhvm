@@ -93,20 +93,18 @@ val empty_for_debugging :
 (** Update the [TypecheckerOptions.t] contained within the [t]. *)
 val map_tcopt : t -> f:(TypecheckerOptions.t -> TypecheckerOptions.t) -> t
 
-(** Get the current global context (which is set with
-[Provider_utils.respect_but_quarantine_unsaved_changes]), if any. Only one
-global context can be set at a time. *)
-val get_global_context : unit -> t option
+(** Are we within [Provider_utils.respect_but_quarantine_unsaved_changes] ? *)
+val is_quarantined : unit -> bool
 
 (** Internal functions **)
 
-(** Set the current global context. Should not be used directly; use
-[Provider_utils.respect_but_quarantine_unsaved_changes] instead. *)
-val set_global_context_internal : t -> unit
+(** Called by [Provider_utils.respect_but_quarantine_unsaved_changes] upon entry.
+Don't call it directly yourself. *)
+val set_is_quarantined_internal : unit -> unit
 
-(** Unset the current global context. Should not be used directly; use
-[Provider_utils.respect_but_quarantine_unsaved_changes] instead. *)
-val unset_global_context_internal : unit -> unit
+(** Called by [Provider_utils.respect_but_quarantine_unsaved_changes] upon exit.
+Don't call it directly yourself. *)
+val unset_is_quarantined_internal : unit -> unit
 
 (** Telemetry for a provider_context includes the current cache state of its backend,
 plus 'counters' like how many times cache has been read or evicted. *)

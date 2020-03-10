@@ -25,6 +25,8 @@
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/act-rec.h"
 
+#include <folly/container/Array.h>
+
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/array-iter-profile.h"
@@ -217,16 +219,8 @@ constexpr DataType baseKindToDataType(size_t index) {
   return kInvalidDataType;
 }
 
-template<typename Fn, typename T, T... Values>
-constexpr std::array<std::result_of_t<Fn(T)>, sizeof...(Values)>
-make_array(Fn&& fn, std::integer_sequence<T, Values...>) {
-   return std::array<std::result_of_t<Fn(T)>, sizeof...(Values)>{fn(Values)...};
-}
-
-alignas(64) constexpr std::array<DataType, NumHeaderKinds>
-kBaseKindToDataType = make_array(
-  baseKindToDataType,
-  std::make_index_sequence<NumHeaderKinds>());
+alignas(64) constexpr auto kBaseKindToDataType =
+  folly::make_array_with<NumHeaderKinds>(baseKindToDataType);
 
 template<typename T>
 Vptr iteratorPtr(IRLS& env, const IRInstruction* inst, const T* extra) {

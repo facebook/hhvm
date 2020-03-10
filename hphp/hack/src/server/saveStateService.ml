@@ -66,6 +66,7 @@ let load_class_decls (input_filename : string) : unit =
 let load_saved_state
     ~(load_decls : bool)
     ~(naming_table_fallback_path : string option)
+    (ctx : Provider_context.t)
     (saved_state_filename : string) : Naming_table.t * saved_state_errors =
   let old_naming_table =
     match naming_table_fallback_path with
@@ -79,7 +80,7 @@ let load_saved_state
           (Printf.sprintf
              "Naming table file does not exist on disk: '%s'"
              nt_path);
-      Naming_table.load_from_sqlite nt_path
+      Naming_table.load_from_sqlite ctx nt_path
     | None ->
       let chan = In_channel.create ~binary:true saved_state_filename in
       let (old_saved : Naming_table.saved_state_info) =

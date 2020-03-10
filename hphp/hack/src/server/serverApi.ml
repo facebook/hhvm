@@ -83,7 +83,8 @@ let make_local_server_api
       Pervasives.close_out chan
   end : LocalServerApi )
 
-let make_remote_server_api (workers : MultiWorker.worker list option) :
+let make_remote_server_api
+    (ctx : Provider_context.t) (workers : MultiWorker.worker list option) :
     (module RemoteServerApi with type naming_table = Naming_table.t option) =
   ( module struct
     type naming_table = Naming_table.t option
@@ -99,7 +100,9 @@ let make_remote_server_api (workers : MultiWorker.worker list option) :
       | Some naming_table_base ->
         Ok
           (Some
-             (Naming_table.load_from_sqlite (Path.to_string naming_table_base)))
+             (Naming_table.load_from_sqlite
+                ctx
+                (Path.to_string naming_table_base)))
 
     (**
       There is a variety of state that the server accumulates after type
@@ -163,6 +166,7 @@ let make_remote_server_api (workers : MultiWorker.worker list option) :
                in
                let (naming_table : Naming_table.t) =
                  Naming_table.load_from_sqlite_with_changes_since_baseline
+                   ctx
                    naming_table_diff
                    naming_table_base
                in

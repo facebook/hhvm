@@ -119,7 +119,7 @@ module GEnv = struct
       None
 
   let gconst_pos ctx name =
-    match Naming_provider.get_const_pos name with
+    match Naming_provider.get_const_pos ctx name with
     | Some pos ->
       let (p, _) = get_full_pos ctx (pos, name) in
       Some p
@@ -180,8 +180,8 @@ module Env = struct
   let new_typedef_fast ctx fn name =
     new_cid_fast ctx fn name Naming_types.TTypedef
 
-  let new_global_const_fast fn name =
-    Naming_provider.add_const name (FileInfo.File (FileInfo.Const, fn))
+  let new_global_const_fast ctx fn name =
+    Naming_provider.add_const ctx name (FileInfo.File (FileInfo.Const, fn))
 
   let new_fun ctx (p, name) =
     let name_key = canon_key name in
@@ -251,24 +251,24 @@ module Env = struct
   let new_typedef ctx = new_cid ctx Naming_types.TTypedef
 
   let new_global_const ctx (p, x) =
-    match Naming_provider.get_const_pos x with
+    match Naming_provider.get_const_pos ctx x with
     | Some p' ->
       if not @@ GEnv.compare_pos ctx p' p x then
         let (p, x) = GEnv.get_full_pos ctx (p, x) in
         let (p', x) = GEnv.get_full_pos ctx (p', x) in
         Errors.error_name_already_bound x x p p'
-    | None -> Naming_provider.add_const x p
+    | None -> Naming_provider.add_const ctx x p
 end
 
 (*****************************************************************************)
 (* Updating the environment *)
 (*****************************************************************************)
-let remove_decls ~funs ~classes ~record_defs ~typedefs ~consts =
+let remove_decls ~ctx ~funs ~classes ~record_defs ~typedefs ~consts =
   let types = SSet.union classes typedefs in
   let types = SSet.union types record_defs in
   Naming_provider.remove_type_batch types;
   Naming_provider.remove_fun_batch funs;
-  Naming_provider.remove_const_batch consts
+  Naming_provider.remove_const_batch ctx consts
 
 (*****************************************************************************)
 (* The entry point to build the naming environment *)
@@ -286,7 +286,7 @@ let make_env_from_fast ctx fn ~funs ~classes ~record_defs ~typedefs ~consts =
   SSet.iter (Env.new_class_fast ctx fn) classes;
   SSet.iter (Env.new_record_decl_fast ctx fn) record_defs;
   SSet.iter (Env.new_typedef_fast ctx fn) typedefs;
-  SSet.iter (Env.new_global_const_fast fn) consts
+  SSet.iter (Env.new_global_const_fast ctx fn) consts
 
 (*****************************************************************************)
 (* Declaring the names in a list of files *)

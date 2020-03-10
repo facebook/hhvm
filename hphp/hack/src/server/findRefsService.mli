@@ -49,11 +49,17 @@ val get_origin_class_name :
 
 val get_child_classes_files : string -> Relative_path.Set.t
 
-val get_dependent_files_function : 'a -> string -> Relative_path.Set.t
+val get_dependent_files_function :
+  MultiWorker.worker list option -> string -> Relative_path.Set.t
 
-val get_dependent_files_gconst : 'a -> string -> Relative_path.Set.t
+val get_dependent_files_gconst :
+  Provider_context.t ->
+  MultiWorker.worker list option ->
+  string ->
+  Relative_path.Set.t
 
-val get_dependent_files : 'a -> SSet.t -> Relative_path.Set.t
+val get_dependent_files :
+  MultiWorker.worker list option -> SSet.t -> Relative_path.Set.t
 
 val result_to_ide_message :
   ('a * string Pos.pos list) option ->

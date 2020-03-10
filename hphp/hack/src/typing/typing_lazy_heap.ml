@@ -37,7 +37,7 @@ let get_gconst ctx cst_name =
   match Typing_heap.GConsts.get cst_name with
   | Some c -> Some c
   | None ->
-    (match Naming_provider.get_const_path cst_name with
+    (match Naming_provider.get_const_path ctx cst_name with
     | Some filename ->
       let gconst =
         Errors.run_in_decl_mode filename (fun () ->

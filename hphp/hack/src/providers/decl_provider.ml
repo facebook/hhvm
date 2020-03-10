@@ -165,7 +165,7 @@ let get_gconst (ctx : Provider_context.t) (gconst_name : string) :
       decl_cache
       ~key:(Provider_backend.Decl_cache_entry.Gconst_decl gconst_name)
       ~default:(fun () ->
-        match Naming_provider.get_const_path gconst_name with
+        match Naming_provider.get_const_path ctx gconst_name with
         | Some filename ->
           let gconst =
             Errors.run_in_decl_mode filename (fun () ->

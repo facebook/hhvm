@@ -68,6 +68,7 @@ let download_and_load_state_exn
     ~(use_canary : bool)
     ~(target : ServerMonitorUtils.target_saved_state option)
     ~(genv : ServerEnv.genv)
+    ~(ctx : Provider_context.t)
     ~(root : Path.t) : (loaded_info, load_state_error) result =
   ServerMonitorUtils.(
     let saved_state_handle =
@@ -162,6 +163,7 @@ let download_and_load_state_exn
       in
       let (old_naming_table, old_errors) =
         SaveStateService.load_saved_state
+          ctx
           result.State_loader.saved_state_fn
           ~naming_table_fallback_path
           ~load_decls
@@ -194,8 +196,9 @@ let download_and_load_state_exn
           }))
 
 let use_precomputed_state_exn
-    (genv : ServerEnv.genv) (info : ServerArgs.saved_state_target_info) :
-    loaded_info =
+    (genv : ServerEnv.genv)
+    (ctx : Provider_context.t)
+    (info : ServerArgs.saved_state_target_info) : loaded_info =
   let {
     ServerArgs.saved_state_fn;
     corresponding_base_revision;
@@ -216,6 +219,7 @@ let use_precomputed_state_exn
   let naming_table_fallback_path = get_naming_table_fallback_path genv None in
   let (old_naming_table, old_errors) =
     SaveStateService.load_saved_state
+      ctx
       saved_state_fn
       ~naming_table_fallback_path
       ~load_decls
@@ -295,6 +299,7 @@ let naming_from_saved_state
           Naming_provider.remove_fun_batch
             (v.FileInfo.funs |> List.map ~f:snd |> SSet.of_list);
           Naming_provider.remove_const_batch
+            ctx
             (v.FileInfo.consts |> List.map ~f:snd |> SSet.of_list));
     Unix.gettimeofday ()
   | None ->
@@ -574,8 +579,9 @@ let load_naming_table (genv : ServerEnv.genv) (env : ServerEnv.env) :
     let { Saved_state_loader.Naming_table_saved_state_info.naming_table_path } =
       info
     in
+    let ctx = Provider_utils.ctx_from_server_env env in
     let naming_table_path = Path.to_string naming_table_path in
-    let naming_table = Naming_table.load_from_sqlite naming_table_path in
+    let naming_table = Naming_table.load_from_sqlite ctx naming_table_path in
     let fnl =
       List.map fnl ~f:(fun path ->
           Relative_path.from_root (Path.to_string path))
@@ -588,7 +594,6 @@ let load_naming_table (genv : ServerEnv.genv) (env : ServerEnv.env) :
         genv
         env
     in
-    let ctx = Provider_utils.ctx_from_server_env env in
     let t =
       naming_from_saved_state
         ctx
@@ -882,20 +887,22 @@ let saved_state_init
     result =
   ServerProgress.send_progress_to_monitor "loading saved state";
 
+  let ctx = Provider_utils.ctx_from_server_env env in
   (* A historical quirk: we allowed the timeout once while downloading+loading *)
   (* saved-state, and then once again while waiting to get dirty files from hg *)
   let timeout = 2 * genv.local_config.SLC.load_state_script_timeout in
   (* following function will be run under the timeout *)
   let do_ (_id : Timeout.t) : (loaded_info, load_state_error) result =
     match load_state_approach with
-    | Precomputed info -> Ok (use_precomputed_state_exn genv info)
+    | Precomputed info -> Ok (use_precomputed_state_exn genv ctx info)
     | Load_state_natively use_canary ->
-      download_and_load_state_exn ~use_canary ~target:None ~genv ~root
+      download_and_load_state_exn ~use_canary ~target:None ~genv ~ctx ~root
     | Load_state_natively_with_target target ->
       download_and_load_state_exn
         ~use_canary:false
         ~target:(Some target)
         ~genv
+        ~ctx
         ~root
   in
   let state_result =

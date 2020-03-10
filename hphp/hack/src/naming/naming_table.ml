@@ -404,7 +404,7 @@ let saved_to_fast saved = Relative_path.Map.map saved FileInfo.saved_to_names
 
 let create a = Unbacked a
 
-let update_reverse_entries file_deltas =
+let update_reverse_entries ctx file_deltas =
   Relative_path.Map.iter file_deltas ~f:(fun path delta ->
       begin
         match Naming_sqlite.get_file_info path with
@@ -416,6 +416,7 @@ let update_reverse_entries file_deltas =
           Naming_provider.remove_fun_batch
             (fi.FileInfo.funs |> List.map snd |> SSet.of_list);
           Naming_provider.remove_const_batch
+            ctx
             (fi.FileInfo.consts |> List.map snd |> SSet.of_list)
         | None -> ()
       end;
@@ -434,7 +435,7 @@ let update_reverse_entries file_deltas =
           (fun (pos, name) -> Naming_provider.add_fun name pos)
           fi.FileInfo.funs;
         List.iter
-          (fun (pos, name) -> Naming_provider.add_const name pos)
+          (fun (pos, name) -> Naming_provider.add_const ctx name pos)
           fi.FileInfo.consts
       | Naming_sqlite.Deleted -> ())
 
@@ -472,6 +473,7 @@ let choose_local_changes ~local_changes ~custom_local_changes =
 let load_from_sqlite_for_type_checking
     ~(should_update_reverse_entries : bool)
     ~(custom_local_changes : Naming_sqlite.local_changes option)
+    (ctx : Provider_context.t)
     (db_path : string) : t =
   Hh_logger.log "Loading naming table from SQLite...";
   let t = Unix.gettimeofday () in
@@ -483,30 +485,35 @@ let load_from_sqlite_for_type_checking
   in
   let t = Hh_logger.log_duration "Loaded local naming table changes" t in
   if should_update_reverse_entries then begin
-    update_reverse_entries local_changes.Naming_sqlite.file_deltas;
+    update_reverse_entries ctx local_changes.Naming_sqlite.file_deltas;
     let _t = Hh_logger.log_duration "Updated reverse naming table entries" t in
     ()
   end;
   Backed local_changes
 
 let load_from_sqlite_with_changes_since_baseline
+    (ctx : Provider_context.t)
     (changes_since_baseline : Naming_sqlite.local_changes option)
     (db_path : string) : t =
   load_from_sqlite_for_type_checking
     ~should_update_reverse_entries:true
     ~custom_local_changes:changes_since_baseline
+    ctx
     db_path
 
-let load_from_sqlite_for_batch_update (db_path : string) : t =
+let load_from_sqlite_for_batch_update
+    (ctx : Provider_context.t) (db_path : string) : t =
   load_from_sqlite_for_type_checking
     ~should_update_reverse_entries:false
     ~custom_local_changes:None
+    ctx
     db_path
 
-let load_from_sqlite (db_path : string) : t =
+let load_from_sqlite (ctx : Provider_context.t) (db_path : string) : t =
   load_from_sqlite_for_type_checking
     ~should_update_reverse_entries:true
     ~custom_local_changes:None
+    ctx
     db_path
 
 let get_reverse_naming_fallback_path () : string option =

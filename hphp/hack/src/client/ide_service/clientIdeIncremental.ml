@@ -207,6 +207,7 @@ let compute_fileinfo_for_path (env : ServerEnv.env) (path : Relative_path.t) :
 
 let update_naming_table
     ~(env : ServerEnv.env)
+    ~(ctx : Provider_context.t)
     ~(path : Relative_path.t)
     ~(old_file_info : FileInfo.t option)
     ~(new_file_info : FileInfo.t option) : ServerEnv.env =
@@ -219,6 +220,7 @@ let update_naming_table
       (* Update reverse naming table *)
       FileInfo.(
         Naming_global.remove_decls
+          ~ctx
           ~funs:(strip_positions old_file_info.funs)
           ~classes:(strip_positions old_file_info.classes)
           ~record_defs:(strip_positions old_file_info.record_defs)
@@ -251,7 +253,7 @@ let update_naming_table
       List.iter new_file_info.typedefs ~f:(fun (pos, typedef_name) ->
           Naming_provider.add_typedef typedef_name pos);
       List.iter new_file_info.consts ~f:(fun (pos, const_name) ->
-          Naming_provider.add_const const_name pos);
+          Naming_provider.add_const ctx const_name pos);
 
       (* Update and return the forward naming table *)
       Naming_table.update naming_table path new_file_info
@@ -320,6 +322,8 @@ let process_changed_file
         compute_fileinfo_for_path env path
       in
       invalidate_decls ~ctx ~old_file_info;
-      let env = update_naming_table ~env ~path ~old_file_info ~new_file_info in
+      let env =
+        update_naming_table ~env ~ctx ~path ~old_file_info ~new_file_info
+      in
       let env = update_symbol_index ~env ~path ~facts in
       Lwt.return env

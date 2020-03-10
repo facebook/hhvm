@@ -16,5 +16,6 @@ val make_local_server_api :
   (module LocalServerApi)
 
 val make_remote_server_api :
+  Provider_context.t ->
   MultiWorker.worker list option ->
   (module RemoteServerApi with type naming_table = Naming_table.t option)

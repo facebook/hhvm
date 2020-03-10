@@ -49,19 +49,21 @@ let set_up_hh_logger_for_client_ide_service ~(root : Path.t) : unit =
 
 let load_naming_table_from_saved_state_info
     (server_env : ServerEnv.env)
+    (ctx : Provider_context.t)
     (saved_state_info : Saved_state_loader.Naming_table_saved_state_info.t) :
     ServerEnv.env Lwt.t =
   let path =
     Saved_state_loader.Naming_table_saved_state_info.(
       Path.to_string saved_state_info.naming_table_path)
   in
-  let naming_table = Naming_table.load_from_sqlite path in
+  let naming_table = Naming_table.load_from_sqlite ctx path in
   log "Loaded naming table from SQLite database at %s" path;
   let server_env = { server_env with ServerEnv.naming_table } in
   Lwt.return server_env
 
 let load_saved_state
     (env : ServerEnv.env)
+    (ctx : Provider_context.t)
     ~(root : Path.t)
     ~(hhi_root : Path.t)
     ~(naming_table_saved_state_path : Path.t option) :
@@ -99,7 +101,7 @@ let load_saved_state
             Path.to_string saved_state_info.naming_table_path);
 
         let%lwt server_env =
-          load_naming_table_from_saved_state_info env saved_state_info
+          load_naming_table_from_saved_state_info env ctx saved_state_info
         in
         (* Track how many files we have to change locally *)
         HackEventLogger.serverless_ide_local_files
@@ -112,7 +114,7 @@ let load_saved_state
                hhi_root;
                server_env;
                changed_files_to_process = Path.Set.of_list changed_files;
-               ctx = Provider_utils.ctx_from_server_env server_env;
+               ctx;
                peak_changed_files_queue_size = List.length changed_files;
              })
       | Error load_error ->
@@ -226,10 +228,16 @@ let initialize
     }
   in
   let server_env = { server_env with ServerEnv.local_symbol_table = sienv } in
+  let ctx = Provider_utils.ctx_from_server_env server_env in
   let start_time = log_startup_time "symbol_index" start_time in
   if use_ranked_autocomplete then AutocompleteRankService.initialize ();
   let%lwt load_state_result =
-    load_saved_state server_env ~root ~hhi_root ~naming_table_saved_state_path
+    load_saved_state
+      server_env
+      ctx
+      ~root
+      ~hhi_root
+      ~naming_table_saved_state_path
   in
   let _ = log_startup_time "saved_state" start_time in
   match load_state_result with

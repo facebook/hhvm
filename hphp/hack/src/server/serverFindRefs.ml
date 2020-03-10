@@ -104,12 +104,15 @@ let search_member ctx class_name member include_defs genv env =
   in
   search target include_defs files genv env
 
-let search_gconst cst_name include_defs genv env =
+let search_gconst ctx cst_name include_defs genv env =
   let cst_name = add_ns cst_name in
   handle_prechecked_files genv env Typing_deps.Dep.(make (GConst cst_name))
   @@ fun () ->
   let files =
-    FindRefsService.get_dependent_files_gconst genv.ServerEnv.workers cst_name
+    FindRefsService.get_dependent_files_gconst
+      ctx
+      genv.ServerEnv.workers
+      cst_name
     |> Relative_path.Set.elements
   in
   search (FindRefsService.IGConst cst_name) include_defs files genv env
@@ -157,7 +160,7 @@ let go ctx action include_defs genv env =
     search_function function_name include_defs genv env
   | Class class_name -> search_class class_name include_defs genv env
   | Record record_name -> search_record record_name include_defs genv env
-  | GConst cst_name -> search_gconst cst_name include_defs genv env
+  | GConst cst_name -> search_gconst ctx cst_name include_defs genv env
   | LocalVar { filename; file_content; line; char } ->
     (env, Done (search_localvar filename file_content line char env))
 

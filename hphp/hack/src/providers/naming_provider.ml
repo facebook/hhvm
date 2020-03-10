@@ -6,18 +6,22 @@
  *
  *)
 
-let const_exists (name : string) : bool = Naming_heap.Consts.is_defined name
+let const_exists (_ctx : Provider_context.t) (name : string) : bool =
+  Naming_heap.Consts.is_defined name
 
-let get_const_path (name : string) : Relative_path.t option =
+let get_const_path (_ctx : Provider_context.t) (name : string) :
+    Relative_path.t option =
   Naming_heap.Consts.get_filename name
 
-let get_const_pos (name : string) : FileInfo.pos option =
+let get_const_pos (_ctx : Provider_context.t) (name : string) :
+    FileInfo.pos option =
   Naming_heap.Consts.get_pos name
 
-let add_const (name : string) (pos : FileInfo.pos) : unit =
+let add_const (_ctx : Provider_context.t) (name : string) (pos : FileInfo.pos) :
+    unit =
   Naming_heap.Consts.add name pos
 
-let remove_const_batch (names : SSet.t) : unit =
+let remove_const_batch (_ctx : Provider_context.t) (names : SSet.t) : unit =
   Naming_heap.Consts.remove_batch names
 
 let fun_exists (name : string) : bool = Naming_heap.Funs.is_defined name

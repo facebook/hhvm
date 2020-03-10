@@ -198,10 +198,12 @@ let init_env_and_create_local_workers root naming_table num_local_workers =
   in
   let sharedmem_config = ServerConfig.sharedmem_config server_config in
   let handle = SharedMem.init sharedmem_config ~num_workers:num_local_workers in
+  let server_env = ServerEnvBuild.make_env server_config in
+  let ctx = Provider_utils.ctx_from_server_env server_env in
   let server_env =
     {
-      (ServerEnvBuild.make_env server_config) with
-      ServerEnv.naming_table = Naming_table.load_from_sqlite naming_table;
+      server_env with
+      ServerEnv.naming_table = Naming_table.load_from_sqlite ctx naming_table;
     }
   in
   let t = Unix.gettimeofday () in

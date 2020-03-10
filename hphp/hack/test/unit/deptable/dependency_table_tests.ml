@@ -100,6 +100,11 @@ let run_test f =
           }
       in
       let (_ : SharedMem.handle) = SharedMem.init config ~num_workers:0 in
+      let ctx =
+        Provider_context.empty_for_test
+          ~popt:ParserOptions.default
+          ~tcopt:TypecheckerOptions.default
+      in
 
       (* let (_ : Naming_table.t) = write_and_parse_test_files () in *)
       let unbacked_naming_table = write_and_parse_test_files () in
@@ -110,7 +115,7 @@ let run_test f =
         Naming_sqlite.(save_results.files_added + save_results.symbols_added)
         "Expected to add eight rows (four files and four symbols)";
       let (_backed_naming_table : Naming_table.t) =
-        Naming_table.load_from_sqlite db_name
+        Naming_table.load_from_sqlite ctx db_name
       in
       f ();
       true)

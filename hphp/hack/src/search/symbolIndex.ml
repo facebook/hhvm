@@ -271,7 +271,7 @@ let get_position_for_symbol
     | SI_RecordDef ->
       Naming_provider.get_type_pos name_with_ns
     | SI_Function -> Naming_provider.get_fun_pos name_with_ns
-    | SI_GlobalConstant -> Naming_provider.get_const_pos name_with_ns
+    | SI_GlobalConstant -> Naming_provider.get_const_pos ctx name_with_ns
     (* Items below this are not global symbols and cannot be 'position'ed *)
     | SI_Unknown
     | SI_Namespace

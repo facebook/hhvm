@@ -210,11 +210,12 @@ let respect_but_quarantine_unsaved_changes
                  Nast.get_defs ast
                in
                (* Update the positions of the symbols present in the AST by redeclaring
-        them. Note that this doesn't handle *removing* any entries from the
-        naming table if they've disappeared since the last time we updated the
-        naming table. *)
+               them. Note that this doesn't handle *removing* any entries from the
+               naming table if they've disappeared since the last time we updated the
+               naming table. *)
                let get_names ids = List.map ~f:snd ids |> SSet.of_list in
                Naming_global.remove_decls
+                 ~ctx
                  ~funs:(get_names funs)
                  ~classes:(get_names classes)
                  ~record_defs:(get_names record_defs)

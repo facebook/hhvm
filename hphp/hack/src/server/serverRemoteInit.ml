@@ -16,7 +16,7 @@ let init
   let (server
         : (module RemoteWorker.RemoteServerApi
              with type naming_table = Naming_table.t option)) =
-    ServerApi.make_remote_server_api workers
+    ServerApi.make_remote_server_api ctx workers
   in
   let (worker_env : Naming_table.t option RemoteWorker.work_env) =
     RemoteWorker.make_env ctx ~bin_root ~check_id ~key:worker_key ~root server

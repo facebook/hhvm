@@ -100,6 +100,11 @@ let run_naming_table_test f =
           }
       in
       let (_ : SharedMem.handle) = SharedMem.init config ~num_workers:0 in
+      let ctx =
+        Provider_context.empty_for_test
+          ~popt:ParserOptions.default
+          ~tcopt:TypecheckerOptions.default
+      in
       let unbacked_naming_table = write_and_parse_test_files () in
       let db_name = Path.to_string (Path.concat path "naming_table.sqlite") in
       let save_results = Naming_table.save unbacked_naming_table db_name in
@@ -107,18 +112,13 @@ let run_naming_table_test f =
         8
         Naming_sqlite.(save_results.files_added + save_results.symbols_added)
         "Expected to add eight rows (four files and four symbols)";
-      let backed_naming_table = Naming_table.load_from_sqlite db_name in
-      let ctx =
-        Provider_context.empty_for_test
-          ~popt:ParserOptions.default
-          ~tcopt:TypecheckerOptions.default
-      in
+      let backed_naming_table = Naming_table.load_from_sqlite ctx db_name in
       f ~ctx ~unbacked_naming_table ~backed_naming_table ~db_name;
       true)
 
 let test_get_pos () =
   run_naming_table_test
-    (fun ~ctx:_ ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_ ->
+    (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_ ->
       Types_pos_asserter.assert_option_equals
         (Some
            ( FileInfo.File (FileInfo.Class, Relative_path.from_root "foo.php"),
@@ -138,7 +138,7 @@ let test_get_pos () =
       Pos_asserter.assert_option_equals
         (Some
            (FileInfo.File (FileInfo.Const, Relative_path.from_root "qux.php")))
-        (Naming_provider.get_const_pos "\\Qux")
+        (Naming_provider.get_const_pos ctx "\\Qux")
         "Check for const")
 
 let test_get_canon_name () =
@@ -199,7 +199,7 @@ let test_get_sqlite_paths () =
 
 let test_local_changes () =
   run_naming_table_test
-    (fun ~ctx:_ ~unbacked_naming_table:_ ~backed_naming_table ~db_name ->
+    (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table ~db_name ->
       let a_name = "CONST_IN_A" in
 
       let a_file = Relative_path.from_root "a.php" in
@@ -214,7 +214,7 @@ let test_local_changes () =
       Naming_table.save_changes_since_baseline
         backed_naming_table
         changes_since_baseline_path;
-      let changes_since_baseline =
+      let (changes_since_baseline : Naming_table.changes_since_baseline) =
         Marshal.from_string (Disk.cat changes_since_baseline_path) 0
       in
       Asserter.Relative_path_asserter.assert_list_equals
@@ -223,6 +223,7 @@ let test_local_changes () =
         "Expected files changed since baseline to be correct";
       let backed_naming_table' =
         Naming_table.load_from_sqlite_with_changes_since_baseline
+          ctx
           changes_since_baseline
           db_name
       in
@@ -235,7 +236,9 @@ let test_local_changes () =
         (a_file_info = a_file_info')
         "Expected file info to be found in the naming table";
 
-      let a_pos' = Option.value_exn (Naming_provider.get_const_pos a_name) in
+      let a_pos' =
+        Option.value_exn (Naming_provider.get_const_pos ctx a_name)
+      in
       Asserter.Bool_asserter.assert_equals
         true
         (a_pos = a_pos')

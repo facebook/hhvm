@@ -298,8 +298,8 @@ end = struct
     (genv, lenv)
 
   let if_unbound_then_dep_edge_and_report
-      genv (is_defined : string -> bool) (p, x) =
-    if not (is_defined x) then
+      genv (is_defined : Provider_context.t -> string -> bool) (p, x) =
+    if not (is_defined genv.ctx x) then
       match genv.in_mode with
       | FileInfo.Mstrict
       | FileInfo.Mexperimental

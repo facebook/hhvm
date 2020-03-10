@@ -62,12 +62,12 @@ val save : t -> string -> Naming_sqlite.save_result
 val create : FileInfo.t Relative_path.Map.t -> t
 
 (* The common path for loading a save state from a SQLite database *)
-val load_from_sqlite : string -> t
+val load_from_sqlite : Provider_context.t -> string -> t
 
 (* This function is intended for incremental naming table saved state
     creation. It does not update the reverse naming table, so it should not
     be used when loading the naming table in type checking scenarios. *)
-val load_from_sqlite_for_batch_update : string -> t
+val load_from_sqlite_for_batch_update : Provider_context.t -> string -> t
 
 (* This function is intended for applying naming changes relative
   to the source code version on which the naming table was first created.
@@ -96,7 +96,7 @@ val load_from_sqlite_for_batch_update : string -> t
   of sending the naming table is not negligible.
   *)
 val load_from_sqlite_with_changes_since_baseline :
-  changes_since_baseline -> string -> t
+  Provider_context.t -> changes_since_baseline -> string -> t
 
 (* The path to the table's SQLite database mapping filenames to symbol names, if any *)
 val get_forward_naming_fallback_path : t -> string option

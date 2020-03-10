@@ -8,23 +8,23 @@
 
 (** Determine whether a global constant with the given name is declared in
 the reverse naming table. *)
-val const_exists : string -> bool
+val const_exists : Provider_context.t -> string -> bool
 
 (** Look up the file path at which the given global constant was declared in
 the reverse naming table. *)
-val get_const_path : string -> Relative_path.t option
+val get_const_path : Provider_context.t -> string -> Relative_path.t option
 
 (** Look up the position at which the given global constant was declared in
 the reverse naming table. *)
-val get_const_pos : string -> FileInfo.pos option
+val get_const_pos : Provider_context.t -> string -> FileInfo.pos option
 
 (** Record that a global constant with the given name was declared at the
 given position. *)
-val add_const : string -> FileInfo.pos -> unit
+val add_const : Provider_context.t -> string -> FileInfo.pos -> unit
 
 (** Remove all global constants with the given names from the reverse naming
 table. *)
-val remove_const_batch : SSet.t -> unit
+val remove_const_batch : Provider_context.t -> SSet.t -> unit
 
 (** Determine whether a global function with the given name is declared in
 the reverse naming table. *)

@@ -189,8 +189,8 @@ let get_deps_set_function f_name =
     Relative_path.Set.add files fn
   | None -> Relative_path.Set.empty
 
-let get_deps_set_gconst cst_name =
-  match Naming_provider.get_const_path cst_name with
+let get_deps_set_gconst ctx cst_name =
+  match Naming_provider.get_const_path ctx cst_name with
   | Some fn ->
     let dep = Typing_deps.Dep.GConst cst_name in
     let ideps = Typing_deps.get_ideps dep in
@@ -376,9 +376,9 @@ let get_dependent_files_function _workers f_name =
   (* This is performant enough to not need to go parallel for now *)
   get_deps_set_function f_name
 
-let get_dependent_files_gconst _workers cst_name =
+let get_dependent_files_gconst ctx _workers cst_name =
   (* This is performant enough to not need to go parallel for now *)
-  get_deps_set_gconst cst_name
+  get_deps_set_gconst ctx cst_name
 
 let get_dependent_files _workers input_set =
   (* This is performant enough to not need to go parallel for now *)

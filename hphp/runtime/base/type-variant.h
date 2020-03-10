@@ -1365,9 +1365,10 @@ struct VarNR : private TypedValueAux {
     m_data.pstr = v.get();
   }
 
-  explicit VarNR(const String& v);
-  explicit VarNR(const Array& v);
-  explicit VarNR(const Object& v);
+  explicit VarNR(const String& v) : VarNR(v.get()) {}
+  explicit VarNR(const Array& v) : VarNR(v.get()) {}
+  explicit VarNR(const Object& v) : VarNR(v.get()) {}
+
   explicit VarNR(StringData *v);
   explicit VarNR(const StringData *v) {
     assertx(v && !v->isRefCounted());

@@ -674,36 +674,6 @@ void Variant::setEvalScalar() {
   not_reached();
 }
 
-VarNR::VarNR(const String& v) {
-  init(KindOfString);
-  StringData *s = v.get();
-  if (s) {
-    m_data.pstr = s;
-  } else {
-    m_type = KindOfNull;
-  }
-}
-
-VarNR::VarNR(const Array& v) {
-  ArrayData *a = v.get();
-  if (a) {
-    init(a->toDataType());
-    m_data.parr = a;
-  } else {
-    init(KindOfNull);
-  }
-}
-
-VarNR::VarNR(const Object& v) {
-  init(KindOfObject);
-  ObjectData *o = v.get();
-  if (o) {
-    m_data.pobj = o;
-  } else {
-    m_type = KindOfNull;
-  }
-}
-
 VarNR::VarNR(StringData *v) {
   init(KindOfString);
   if (v) {

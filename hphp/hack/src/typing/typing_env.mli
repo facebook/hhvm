@@ -63,7 +63,7 @@ val empty :
   droot:Typing_deps.Dep.dependent Typing_deps.Dep.variant option ->
   env
 
-val is_typedef : typedef_key -> bool
+val is_typedef : env -> typedef_key -> bool
 
 val get_enum : env -> class_key -> class_decl option
 

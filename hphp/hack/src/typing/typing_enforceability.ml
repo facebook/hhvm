@@ -22,7 +22,7 @@ let rec is_enforceable (env : env) (ty : decl_ty) =
   match get_node ty with
   | Tthis -> false
   | Tapply ((_, name), _) when Env.is_enum env name -> false
-  | Tapply ((_, name), _) when Env.is_typedef name ->
+  | Tapply ((_, name), _) when Env.is_typedef env name ->
     begin
       match Env.get_typedef env name with
       | Some { td_vis = Aast.Transparent; td_tparams; td_type; _ } ->

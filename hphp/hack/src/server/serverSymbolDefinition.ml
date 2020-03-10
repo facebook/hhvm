@@ -32,7 +32,7 @@ and class_element_ =
   | Typeconst
 
 let get_class_by_name ctx x =
-  Naming_provider.get_type_path x >>= fun fn ->
+  Naming_provider.get_type_path ctx x >>= fun fn ->
   Ide_parser_cache.with_ide_cache @@ fun () ->
   Ast_provider.find_class_in_file ctx fn x
 
@@ -90,7 +90,7 @@ let get_local_var_def ast name p =
 
 (* summarize a class, typedef or record *)
 let summarize_class_typedef ctx x =
-  Naming_provider.get_type_path_and_kind x >>= fun (fn, ct) ->
+  Naming_provider.get_type_path_and_kind ctx x >>= fun (fn, ct) ->
   match ct with
   | Naming_types.TClass ->
     Ast_provider.find_class_in_file ctx fn x >>= fun c ->

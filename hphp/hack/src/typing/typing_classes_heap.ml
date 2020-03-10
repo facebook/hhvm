@@ -87,7 +87,7 @@ module Classes = struct
         match cached with
         | Some dc -> dc
         | None ->
-          (match Naming_provider.get_type_path_and_kind class_name with
+          (match Naming_provider.get_type_path_and_kind ctx class_name with
           | Some (_, Naming_types.TTypedef)
           | Some (_, Naming_types.TRecordDef)
           | None ->

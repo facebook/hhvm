@@ -210,10 +210,10 @@ let rec localize ~ety_env env (dty : decl_ty) =
     in
     (env, mk (r, Tfun ft))
   | (r, Tapply ((_, x), [arg]))
-    when Env.is_typedef x
+    when Env.is_typedef env x
          && String.equal x Naming_special_names.FB.cIncorrectType ->
     localize ~ety_env env (mk (r, Tlike arg))
-  | (r, Tapply ((_, x), argl)) when Env.is_typedef x ->
+  | (r, Tapply ((_, x), argl)) when Env.is_typedef env x ->
     let (env, argl) = List.map_env env argl (localize ~ety_env) in
     TUtils.expand_typedef ety_env env r x argl
   | (r, Tapply ((p, x), _argl)) when Env.is_enum env x ->

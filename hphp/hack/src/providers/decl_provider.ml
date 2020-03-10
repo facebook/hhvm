@@ -107,8 +107,8 @@ let get_static_method
     let smeth = Class.get_smethod cls method_name in
     convert_class_elt_to_fun_decl smeth
 
-let get_type_id_filename x expected_kind =
-  match Naming_provider.get_type_path_and_kind x with
+let get_type_id_filename ctx x expected_kind =
+  match Naming_provider.get_type_path_and_kind ctx x with
   | Some (pos, kind) when kind = expected_kind -> Some pos
   | _ -> None
 
@@ -122,7 +122,7 @@ let get_typedef (ctx : Provider_context.t) (typedef_name : string) :
       decl_cache
       ~key:(Provider_backend.Decl_cache_entry.Typedef_decl typedef_name)
       ~default:(fun () ->
-        match get_type_id_filename typedef_name Naming_types.TTypedef with
+        match get_type_id_filename ctx typedef_name Naming_types.TTypedef with
         | Some filename ->
           let tdecl =
             Errors.run_in_decl_mode filename (fun () ->

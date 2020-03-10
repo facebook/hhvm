@@ -18,7 +18,7 @@ module Partial = Partial_provider
 
 let rec check_hint env (pos, hint) =
   match hint with
-  | Aast.Happly ((_, x), hl) when Typing_env.is_typedef x ->
+  | Aast.Happly ((_, x), hl) when Env.is_typedef env x ->
     begin
       match Decl_provider.get_typedef (Env.get_ctx env) x with
       | Some { td_tparams; td_pos; _ } as _ty ->

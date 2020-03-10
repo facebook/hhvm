@@ -150,8 +150,8 @@ let get_origin_class_name ctx class_name member =
   in
   Option.value origin ~default:class_name
 
-let get_child_classes_files class_name =
-  match Naming_provider.get_type_kind class_name with
+let get_child_classes_files ctx class_name =
+  match Naming_provider.get_type_kind ctx class_name with
   | Some Naming_types.TClass ->
     (* Find the files that contain classes that extend class_ *)
     let cid_hash = Typing_deps.Dep.make (Typing_deps.Dep.Class class_name) in
@@ -163,13 +163,13 @@ let get_child_classes_files class_name =
     Typing_deps.get_files extend_deps
   | _ -> Relative_path.Set.empty
 
-let get_deps_set classes =
+let get_deps_set ctx classes =
   SSet.fold
     classes
     ~f:
       begin
         fun class_name acc ->
-        match Naming_provider.get_type_path class_name with
+        match Naming_provider.get_type_path ctx class_name with
         | None -> acc
         | Some fn ->
           let dep = Typing_deps.Dep.Class class_name in
@@ -324,7 +324,7 @@ let get_definitions ctx = function
   | IClass class_name ->
     Option.value
       ~default:[]
-      (Naming_provider.get_type_kind class_name >>= function
+      (Naming_provider.get_type_kind ctx class_name >>= function
        | Naming_types.TClass ->
          Decl_provider.get_class ctx class_name >>= fun class_ ->
          Some [(class_name, Cls.pos class_)]
@@ -380,9 +380,9 @@ let get_dependent_files_gconst ctx _workers cst_name =
   (* This is performant enough to not need to go parallel for now *)
   get_deps_set_gconst ctx cst_name
 
-let get_dependent_files _workers input_set =
+let get_dependent_files ctx _workers input_set =
   (* This is performant enough to not need to go parallel for now *)
-  get_deps_set input_set
+  get_deps_set ctx input_set
 
 let result_to_ide_message x =
   Option.map x ~f:(fun (symbol_name, references) ->

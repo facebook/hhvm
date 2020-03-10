@@ -410,8 +410,10 @@ let update_reverse_entries ctx file_deltas =
         match Naming_sqlite.get_file_info path with
         | Some fi ->
           Naming_provider.remove_type_batch
+            ctx
             (fi.FileInfo.classes |> List.map snd |> SSet.of_list);
           Naming_provider.remove_type_batch
+            ctx
             (fi.FileInfo.typedefs |> List.map snd |> SSet.of_list);
           Naming_provider.remove_fun_batch
             ctx

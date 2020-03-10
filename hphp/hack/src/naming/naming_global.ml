@@ -74,7 +74,7 @@ module GEnv = struct
 
   let type_pos ctx name =
     let name = Option.value (type_canon_name ctx name) ~default:name in
-    match Naming_provider.get_type_pos name with
+    match Naming_provider.get_type_pos ctx name with
     | Some pos ->
       let (p, _) = get_full_pos ctx (pos, name) in
       Some p
@@ -85,7 +85,7 @@ module GEnv = struct
     type_pos ctx name
 
   let type_info ctx name =
-    match Naming_provider.get_type_pos_and_kind name with
+    match Naming_provider.get_type_pos_and_kind ctx name with
     | Some
         ( pos,
           ( ( Naming_types.TClass | Naming_types.TTypedef
@@ -109,7 +109,7 @@ module GEnv = struct
     fun_pos ctx name
 
   let typedef_pos ctx name =
-    match Naming_provider.get_type_pos_and_kind name with
+    match Naming_provider.get_type_pos_and_kind ctx name with
     | Some (pos, Naming_types.TTypedef) ->
       let (p, _) = get_full_pos ctx (pos, name) in
       Some p
@@ -171,7 +171,7 @@ module Env = struct
     | None ->
       (* We store redundant info in this case, but if the position is a *)
       (* Full position, we don't store the kind, so this is necessary *)
-      Naming_provider.add_type name (FileInfo.File (mode, fn)) cid_kind
+      Naming_provider.add_type ctx name (FileInfo.File (mode, fn)) cid_kind
 
   let new_class_fast ctx fn name = new_cid_fast ctx fn name Naming_types.TClass
 
@@ -203,7 +203,7 @@ module Env = struct
   let new_cid ctx cid_kind (p, name) =
     let validate canonical error =
       let p' =
-        match Naming_provider.get_type_pos canonical with
+        match Naming_provider.get_type_pos ctx canonical with
         | Some x -> x
         | None ->
           failwith
@@ -243,7 +243,7 @@ module Env = struct
             validate alt_canonical Errors.error_class_attribute_already_bound
           | None -> ()
         end;
-        Naming_provider.add_type name p cid_kind
+        Naming_provider.add_type ctx name p cid_kind
 
   let new_class ctx = new_cid ctx Naming_types.TClass
 
@@ -267,7 +267,7 @@ end
 let remove_decls ~ctx ~funs ~classes ~record_defs ~typedefs ~consts =
   let types = SSet.union classes typedefs in
   let types = SSet.union types record_defs in
-  Naming_provider.remove_type_batch types;
+  Naming_provider.remove_type_batch ctx types;
   Naming_provider.remove_fun_batch ctx funs;
   Naming_provider.remove_const_batch ctx consts
 

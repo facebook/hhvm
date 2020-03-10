@@ -21,7 +21,7 @@ let find_positions_of_classes
     (child_classes : string list) : (string * Pos.t) list =
   acc
   @ List.map child_classes ~f:(fun child_class ->
-        match Naming_provider.get_type_pos child_class with
+        match Naming_provider.get_type_pos ctx child_class with
         | None ->
           failwith ("Could not find definition of child class: " ^ child_class)
         | Some (FileInfo.Full pos) -> (child_class, pos)
@@ -103,10 +103,13 @@ let parallel_find_positions_of_methods
     ~next:(MultiWorker.next workers child_classes)
 
 let find_child_classes
-    (class_name : string) (genv : ServerEnv.genv) (env : ServerEnv.env) :
-    string list =
+    (ctx : Provider_context.t)
+    (class_name : string)
+    (genv : ServerEnv.genv)
+    (env : ServerEnv.env) : string list =
   let files =
     FindRefsService.get_dependent_files
+      ctx
       genv.ServerEnv.workers
       (SSet.singleton class_name)
   in
@@ -115,16 +118,17 @@ let find_child_classes
   |> SSet.elements
 
 let search_class
-    (class_name : string) (genv : ServerEnv.genv) (env : ServerEnv.env) :
-    ServerEnv.env * server_result_or_retry =
+    (ctx : Provider_context.t)
+    (class_name : string)
+    (genv : ServerEnv.genv)
+    (env : ServerEnv.env) : ServerEnv.env * server_result_or_retry =
   let class_name = ServerFindRefs.add_ns class_name in
   ServerFindRefs.handle_prechecked_files
     genv
     env
     Typing_deps.Dep.(make (Class class_name))
   @@ fun () ->
-  let child_classes = find_child_classes class_name genv env in
-  let ctx = Provider_utils.ctx_from_server_env env in
+  let child_classes = find_child_classes ctx class_name genv env in
   if List.length child_classes < parallel_limit then
     find_positions_of_classes ctx [] child_classes
   else
@@ -148,7 +152,7 @@ let search_member
       Typing_deps.Dep.(make (Class class_name))
     @@ fun () ->
     (* Find all the classes that extend this one *)
-    let child_classes = find_child_classes class_name genv env in
+    let child_classes = find_child_classes ctx class_name genv env in
     let results =
       if List.length child_classes < parallel_limit then
         find_positions_of_methods ctx method_name [] child_classes
@@ -170,7 +174,7 @@ let go ~(action : action) ~(genv : ServerEnv.genv) ~(env : ServerEnv.env) :
     ServerEnv.env * server_result_or_retry =
   let ctx = Provider_utils.ctx_from_server_env env in
   match action with
-  | Class class_name -> search_class class_name genv env
+  | Class class_name -> search_class ctx class_name genv env
   | Member (class_name, member) -> search_member ctx class_name member genv env
   | Function _
   | Record _

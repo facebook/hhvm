@@ -32,11 +32,6 @@ let decl (ctx : Provider_context.t) ~(use_cache : bool) (class_ : Nast.class_) :
   | Provider_backend.Decl_service _ ->
     failwith "shallow class decl not implemented for Decl_service"
 
-let get_class_filename x =
-  match Naming_provider.get_type_path_and_kind x with
-  | Some (fn, Naming_types.TClass) -> Some fn
-  | _ -> None
-
 let get (ctx : Provider_context.t) (name : string) : shallow_class option =
   if not (TypecheckerOptions.shallow_class_decl ctx.Provider_context.tcopt) then
     failwith "shallow_class_decl not enabled"
@@ -49,7 +44,7 @@ let get (ctx : Provider_context.t) (name : string) : shallow_class option =
         ~key:(Provider_backend.Shallow_decl_cache_entry.Shallow_class_decl name)
         ~default:(fun () ->
           let open Option.Monad_infix in
-          get_class_filename name >>= fun path ->
+          Naming_provider.get_class_path ctx name >>= fun path ->
           Ast_provider.find_class_in_file ctx path name >>| fun class_ ->
           Shallow_classes_heap.class_naming_and_decl ctx class_)
     | Provider_backend.Decl_service _ ->

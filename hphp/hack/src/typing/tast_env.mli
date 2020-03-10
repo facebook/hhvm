@@ -254,6 +254,8 @@ val is_xhp_child : env -> Pos.t -> Tast.ty -> bool
 
 val get_enum : env -> string -> Decl_provider.class_decl option
 
+val is_typedef : env -> string -> bool
+
 val get_typedef : env -> string -> Decl_provider.typedef_decl option
 
 val is_enum : env -> string -> bool

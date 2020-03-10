@@ -136,7 +136,7 @@ let find_extended_classes_in_files_parallel
 let get_child_classes_and_methods ctx cls ~filter naming_table workers =
   if filter <> No_filter then
     failwith "Method jump filters not implemented for finding children";
-  let files = FindRefsService.get_child_classes_files (Cls.name cls) in
+  let files = FindRefsService.get_child_classes_files ctx (Cls.name cls) in
   find_extended_classes_in_files_parallel
     ctx
     workers

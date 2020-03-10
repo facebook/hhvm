@@ -291,10 +291,13 @@ let naming_from_saved_state
           ()
         | Some v ->
           Naming_provider.remove_type_batch
+            ctx
             (v.FileInfo.classes |> List.map ~f:snd |> SSet.of_list);
           Naming_provider.remove_type_batch
+            ctx
             (v.FileInfo.typedefs |> List.map ~f:snd |> SSet.of_list);
           Naming_provider.remove_type_batch
+            ctx
             (v.FileInfo.record_defs |> List.map ~f:snd |> SSet.of_list);
           Naming_provider.remove_fun_batch
             ctx

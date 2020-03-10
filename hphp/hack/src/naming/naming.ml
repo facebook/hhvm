@@ -420,7 +420,7 @@ end = struct
       end;
       x
     | None ->
-      (match Naming_provider.get_type_pos_and_kind name with
+      (match Naming_provider.get_type_pos_and_kind genv.ctx name with
       | Some (_def_pos, Naming_types.TClass) ->
         (* Don't let people use strictly internal classes
          * (except when they are being declared in .hhi files) *)
@@ -1376,7 +1376,7 @@ and type_param ~forbid_this ((genv, _) as env) t =
       let (pos, name) =
         NS.elaborate_id genv.namespace NS.ElaborateClass t.Aast.tp_name
       in
-      match Naming_provider.get_type_pos name with
+      match Naming_provider.get_type_pos genv.ctx name with
       | Some def_pos ->
         let (def_pos, _) = GEnv.get_full_pos genv.ctx (def_pos, name) in
         Errors.error_name_already_bound name name pos def_pos
@@ -2190,7 +2190,7 @@ and expr_ env p (e : Nast.expr_) =
     let (genv, _) = env in
     let (_, name) = NS.elaborate_id genv.namespace NS.ElaborateClass x1 in
     begin
-      match Naming_provider.get_type_kind name with
+      match Naming_provider.get_type_kind genv.ctx name with
       | Some Naming_types.TTypedef when snd x2 = "class" ->
         N.Typename
           (Env.type_name
@@ -2206,7 +2206,7 @@ and expr_ env p (e : Nast.expr_) =
     let (genv, _) = env in
     let (_, name) = NS.elaborate_id genv.namespace NS.ElaborateClass x1 in
     begin
-      match Naming_provider.get_type_kind name with
+      match Naming_provider.get_type_kind genv.ctx name with
       | Some Naming_types.TTypedef when snd x2 = "class" ->
         N.Typename
           (Env.type_name

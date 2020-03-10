@@ -242,6 +242,8 @@ let is_xhp_child = Typing_xhp.is_xhp_child
 
 let get_enum = Typing_env.get_enum
 
+let is_typedef = Typing_env.is_typedef
+
 let get_typedef = Typing_env.get_typedef
 
 let is_enum = Typing_env.is_enum

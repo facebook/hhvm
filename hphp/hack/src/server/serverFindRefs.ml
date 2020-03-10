@@ -90,14 +90,14 @@ let search_member ctx class_name member include_defs genv env =
   handle_prechecked_files genv env Typing_deps.Dep.(make (Class class_name))
   @@ fun () ->
   (* Find all the classes that extend this one *)
-  let files = FindRefsService.get_child_classes_files class_name in
+  let files = FindRefsService.get_child_classes_files ctx class_name in
   let all_classes =
     FindRefsService.find_child_classes ctx class_name env.naming_table files
   in
   let all_classes = SSet.add all_classes class_name in
   (* Get all the files that reference those classes *)
   let files =
-    FindRefsService.get_dependent_files genv.ServerEnv.workers all_classes
+    FindRefsService.get_dependent_files ctx genv.ServerEnv.workers all_classes
     |> Relative_path.Set.elements
   in
   let target =
@@ -118,19 +118,20 @@ let search_gconst ctx cst_name include_defs genv env =
   in
   search (FindRefsService.IGConst cst_name) include_defs files genv env
 
-let search_class class_name include_defs genv env =
+let search_class ctx class_name include_defs genv env =
   let class_name = add_ns class_name in
   handle_prechecked_files genv env Typing_deps.Dep.(make (Class class_name))
   @@ fun () ->
   let files =
     FindRefsService.get_dependent_files
+      ctx
       genv.ServerEnv.workers
       (SSet.singleton class_name)
     |> Relative_path.Set.elements
   in
   search (FindRefsService.IClass class_name) include_defs files genv env
 
-let search_record record_name include_defs genv env =
+let search_record ctx record_name include_defs genv env =
   let record_name = add_ns record_name in
   handle_prechecked_files
     genv
@@ -139,6 +140,7 @@ let search_record record_name include_defs genv env =
   @@ fun () ->
   let files =
     FindRefsService.get_dependent_files
+      ctx
       genv.ServerEnv.workers
       (SSet.singleton record_name)
     |> Relative_path.Set.elements
@@ -159,8 +161,8 @@ let go ctx action include_defs genv env =
     search_member ctx class_name member include_defs genv env
   | Function function_name ->
     search_function ctx function_name include_defs genv env
-  | Class class_name -> search_class class_name include_defs genv env
-  | Record record_name -> search_record record_name include_defs genv env
+  | Class class_name -> search_class ctx class_name include_defs genv env
+  | Record record_name -> search_record ctx record_name include_defs genv env
   | GConst cst_name -> search_gconst ctx cst_name include_defs genv env
   | LocalVar { filename; file_content; line; char } ->
     (env, Done (search_localvar filename file_content line char env))

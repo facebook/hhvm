@@ -9,11 +9,6 @@
 
 open Core_kernel
 
-let get_class_definition_file class_name =
-  match Naming_provider.get_type_path_and_kind class_name with
-  | Some (file, Naming_types.TClass) -> Some file
-  | _ -> None
-
 let query_class_methods
     (ctx : Provider_context.t) (class_name : string) (method_query : string) :
     SearchUtils.result =
@@ -26,7 +21,7 @@ let query_class_methods
       else
         true
     in
-    get_class_definition_file class_name
+    Naming_provider.get_class_path ctx class_name
     >>= (fun file -> Ast_provider.find_class_in_file ctx file class_name)
     >>| (fun class_ -> class_.Aast.c_methods)
     >>| List.filter_map ~f:(fun m ->

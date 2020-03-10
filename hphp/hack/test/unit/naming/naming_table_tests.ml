@@ -123,7 +123,7 @@ let test_get_pos () =
         (Some
            ( FileInfo.File (FileInfo.Class, Relative_path.from_root "foo.php"),
              Naming_types.TClass ))
-        (Naming_provider.get_type_pos_and_kind "\\Foo")
+        (Naming_provider.get_type_pos_and_kind ctx "\\Foo")
         "Check for class type";
       Pos_asserter.assert_option_equals
         (Some (FileInfo.File (FileInfo.Fun, Relative_path.from_root "bar.php")))
@@ -133,7 +133,7 @@ let test_get_pos () =
         (Some
            ( FileInfo.File (FileInfo.Typedef, Relative_path.from_root "baz.php"),
              Naming_types.TTypedef ))
-        (Naming_provider.get_type_pos_and_kind "\\Baz")
+        (Naming_provider.get_type_pos_and_kind ctx "\\Baz")
         "Check for typedef type";
       Pos_asserter.assert_option_equals
         (Some

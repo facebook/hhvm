@@ -265,14 +265,12 @@ let get_class_variance ctx root (pos, class_name) =
     let dep = Typing_deps.Dep.Class class_name in
     Typing_deps.add_idep (fst root) dep;
     let tparams =
-      if Env.is_typedef class_name then
-        match Decl_provider.get_typedef ctx class_name with
-        | Some { td_tparams; _ } -> td_tparams
+      match Decl_provider.get_typedef ctx class_name with
+      | Some { td_tparams; _ } -> td_tparams
+      | None ->
+        (match Decl_provider.get_class ctx class_name with
         | None -> []
-      else
-        match Decl_provider.get_class ctx class_name with
-        | None -> []
-        | Some cls -> Cls.tparams cls
+        | Some cls -> Cls.tparams cls)
     in
     List.map tparams make_tparam_variance
 

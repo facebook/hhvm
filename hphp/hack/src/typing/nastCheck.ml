@@ -116,7 +116,7 @@ and hint_ env p = function
     List.iter hl (hint env);
     hint env h;
     Option.iter variadic_hint (hint env)
-  | Happly ((_, x), hl) as h when Env.is_typedef x ->
+  | Happly ((_, x), hl) as h when Env.is_typedef env.tenv x ->
     begin
       match Decl_provider.get_typedef (get_ctx env) x with
       | Some _ ->

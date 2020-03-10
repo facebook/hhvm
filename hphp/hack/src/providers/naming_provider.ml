@@ -47,30 +47,35 @@ let remove_fun_batch (_ctx : Provider_context.t) (names : SSet.t) : unit =
   Naming_heap.Funs.remove_batch names
 
 let add_type
-    (name : string) (pos : FileInfo.pos) (kind : Naming_types.kind_of_type) :
-    unit =
+    (_ctx : Provider_context.t)
+    (name : string)
+    (pos : FileInfo.pos)
+    (kind : Naming_types.kind_of_type) : unit =
   Naming_heap.Types.add name (pos, kind)
 
-let remove_type_batch (names : SSet.t) : unit =
+let remove_type_batch (_ctx : Provider_context.t) (names : SSet.t) : unit =
   Naming_heap.Types.remove_batch names
 
-let get_type_pos (name : string) : FileInfo.pos option =
+let get_type_pos (_ctx : Provider_context.t) (name : string) :
+    FileInfo.pos option =
   match Naming_heap.Types.get_pos name with
   | Some (pos, _kind) -> Some pos
   | None -> None
 
-let get_type_path (name : string) : Relative_path.t option =
+let get_type_path (_ctx : Provider_context.t) (name : string) :
+    Relative_path.t option =
   Naming_heap.Types.get_filename name
 
-let get_type_pos_and_kind (name : string) :
+let get_type_pos_and_kind (_ctx : Provider_context.t) (name : string) :
     (FileInfo.pos * Naming_types.kind_of_type) option =
   Naming_heap.Types.get_pos name
 
-let get_type_path_and_kind (name : string) :
+let get_type_path_and_kind (_ctx : Provider_context.t) (name : string) :
     (Relative_path.t * Naming_types.kind_of_type) option =
   Naming_heap.Types.get_filename_and_kind name
 
-let get_type_kind (name : string) : Naming_types.kind_of_type option =
+let get_type_kind (_ctx : Provider_context.t) (name : string) :
+    Naming_types.kind_of_type option =
   Naming_heap.Types.get_kind name
 
 let get_type_canon_name (ctx : Provider_context.t) (name : string) :
@@ -85,9 +90,9 @@ let get_class_path (_ctx : Provider_context.t) (name : string) :
   | None ->
     None
 
-let add_class (_ctx : Provider_context.t) (name : string) (pos : FileInfo.pos) :
+let add_class (ctx : Provider_context.t) (name : string) (pos : FileInfo.pos) :
     unit =
-  add_type name pos Naming_types.TClass
+  add_type ctx name pos Naming_types.TClass
 
 let get_record_def_path (_ctx : Provider_context.t) (name : string) :
     Relative_path.t option =
@@ -98,8 +103,8 @@ let get_record_def_path (_ctx : Provider_context.t) (name : string) :
     None
 
 let add_record_def
-    (_ctx : Provider_context.t) (name : string) (pos : FileInfo.pos) : unit =
-  add_type name pos Naming_types.TRecordDef
+    (ctx : Provider_context.t) (name : string) (pos : FileInfo.pos) : unit =
+  add_type ctx name pos Naming_types.TRecordDef
 
 let get_typedef_path (_ctx : Provider_context.t) (name : string) :
     Relative_path.t option =
@@ -109,9 +114,9 @@ let get_typedef_path (_ctx : Provider_context.t) (name : string) :
   | None ->
     None
 
-let add_typedef (_ctx : Provider_context.t) (name : string) (pos : FileInfo.pos)
+let add_typedef (ctx : Provider_context.t) (name : string) (pos : FileInfo.pos)
     : unit =
-  add_type name pos Naming_types.TTypedef
+  add_type ctx name pos Naming_types.TTypedef
 
 let push_local_changes (_ctx : Provider_context.t) : unit =
   Naming_heap.push_local_changes ()

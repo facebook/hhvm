@@ -671,17 +671,7 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
       let%lwt server_env =
         try%lwt
           let%lwt server_env =
-            Lwt_utils.with_context
-              ~enter:(fun () -> Lwt.return_unit)
-              ~exit:(fun () -> Lwt.return_unit)
-              ~do_:(fun () ->
-                let%lwt server_env =
-                  ClientIdeIncremental.process_changed_file
-                    server_env
-                    ctx
-                    next_file
-                in
-                Lwt.return server_env)
+            ClientIdeIncremental.process_changed_file server_env ctx next_file
           in
           Lwt.return server_env
         with exn ->

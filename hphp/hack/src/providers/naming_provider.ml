@@ -113,6 +113,8 @@ let add_typedef (_ctx : Provider_context.t) (name : string) (pos : FileInfo.pos)
     : unit =
   add_type name pos Naming_types.TTypedef
 
-let push_local_changes () : unit = Naming_heap.push_local_changes ()
+let push_local_changes (_ctx : Provider_context.t) : unit =
+  Naming_heap.push_local_changes ()
 
-let pop_local_changes () : unit = Naming_heap.pop_local_changes ()
+let pop_local_changes (_ctx : Provider_context.t) : unit =
+  Naming_heap.pop_local_changes ()

@@ -439,3 +439,13 @@ val remove_var :
   env
 
 val unsolve : env -> Ident.t -> env
+
+module Log : sig
+  (** Convert a type variable from an environment into json *)
+  val tyvar_to_json :
+    (locl_ty -> string) ->
+    (internal_type -> string) ->
+    env ->
+    Ident.t ->
+    Hh_json.json
+end

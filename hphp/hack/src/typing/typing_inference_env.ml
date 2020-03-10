@@ -180,25 +180,25 @@ module Log = struct
 
   let global_inference_env_as_value genv = global_tvenv_as_value genv
 
-  let tyvar_to_json_g
+  let reason_to_json r =
+    let open Hh_json in
+    let p = Reason.to_pos r in
+    let to_n x = JSON_Number (string_of_int x) in
+    JSON_Object
+      [
+        ("reason", JSON_String (Reason.to_constructor_string r));
+        ("filename", JSON_String (Relative_path.suffix (Pos.filename p)));
+        ("start_line", to_n @@ fst (Pos.line_column p));
+        ("start_column", to_n @@ snd (Pos.line_column p));
+        ("end_line", to_n @@ fst (Pos.end_line_column p));
+        ("end_column", to_n @@ snd (Pos.end_line_column p));
+      ]
+
+  let solving_info_to_json
       (p_locl_ty : locl_ty -> string)
       (p_internal_type : internal_type -> string)
-      (genv : t_global)
-      (v : Ident.t) =
+      solving_info =
     let open Hh_json in
-    let reason_to_json r =
-      let p = Reason.to_pos r in
-      let to_n x = JSON_Number (string_of_int x) in
-      JSON_Object
-        [
-          ("reason", JSON_String (Reason.to_constructor_string r));
-          ("filename", JSON_String (Relative_path.suffix (Pos.filename p)));
-          ("start_line", to_n @@ fst (Pos.line_column p));
-          ("start_column", to_n @@ snd (Pos.line_column p));
-          ("end_line", to_n @@ fst (Pos.end_line_column p));
-          ("end_column", to_n @@ snd (Pos.end_line_column p));
-        ]
-    in
     let constraints_to_json
         {
           appears_covariantly;
@@ -221,18 +221,48 @@ module Log = struct
         ]
     in
     let locl_ty_to_json x = JSON_String (p_locl_ty x) in
-    let solving_info_to_json = function
-      | TVIType locl_ty -> JSON_Object [("type", locl_ty_to_json locl_ty)]
-      | TVIConstraints cstr ->
-        JSON_Object [("constraints", constraints_to_json cstr)]
-    in
+    match solving_info with
+    | TVIType locl_ty -> JSON_Object [("type", locl_ty_to_json locl_ty)]
+    | TVIConstraints cstr ->
+      JSON_Object [("constraints", constraints_to_json cstr)]
+
+  let tyvar_to_json_g
+      (p_locl_ty : locl_ty -> string)
+      (p_internal_type : internal_type -> string)
+      (genv : t_global)
+      (v : Ident.t) =
+    let open Hh_json in
     match IMap.find_opt v genv with
     | None -> JSON_Null
     | Some { tyvar_reason; solving_info_g } ->
       JSON_Object
         [
           ("tyvar_reason", reason_to_json tyvar_reason);
-          ("solving_info", solving_info_to_json solving_info_g);
+          ( "solving_info",
+            solving_info_to_json p_locl_ty p_internal_type solving_info_g );
+        ]
+
+  let tyvar_to_json
+      (p_locl_ty : locl_ty -> string)
+      (p_internal_type : internal_type -> string)
+      (env : t)
+      (v : Ident.t) =
+    let open Hh_json in
+    match IMap.find_opt v env.tvenv with
+    | None -> JSON_Null
+    | Some { tyvar_pos; global_reason; eager_solve_failed; solving_info } ->
+      let global_reason =
+        match global_reason with
+        | None -> JSON_Null
+        | Some global_reason -> reason_to_json global_reason
+      in
+      JSON_Object
+        [
+          ("tyvar_pos", string_ @@ Pos.string (Pos.to_absolute tyvar_pos));
+          ("global_reason", global_reason);
+          ("eager_solve_failed", JSON_Bool eager_solve_failed);
+          ( "solving_info",
+            solving_info_to_json p_locl_ty p_internal_type solving_info );
         ]
 end
 

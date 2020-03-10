@@ -33,6 +33,14 @@ module Log : sig
     t_global ->
     Ident.t ->
     Hh_json.json
+
+  (** Convert a type variable from an environment into json *)
+  val tyvar_to_json :
+    (locl_ty -> string) ->
+    (internal_type -> string) ->
+    t ->
+    Ident.t ->
+    Hh_json.json
 end
 
 val pp : Format.formatter -> t -> unit

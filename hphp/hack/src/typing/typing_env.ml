@@ -1629,3 +1629,14 @@ let remove_var env var ~search_in_upper_bounds_of ~search_in_lower_bounds_of =
 
 let unsolve env v =
   wrap_inference_env_call_env env (fun env -> Inf.unsolve env v)
+
+module Log = struct
+  (** Convert a type variable from an environment into json *)
+  let tyvar_to_json
+      (p_locl_ty : locl_ty -> string)
+      (p_internal_type : internal_type -> string)
+      (env : env)
+      (v : Ident.t) =
+    wrap_inference_env_call_res env (fun env ->
+        Inf.Log.tyvar_to_json p_locl_ty p_internal_type env v)
+end

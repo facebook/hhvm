@@ -424,7 +424,7 @@ let update_reverse_entries ctx file_deltas =
       match delta with
       | Naming_sqlite.Modified fi ->
         List.iter
-          (fun (pos, name) -> Naming_provider.add_class name pos)
+          (fun (pos, name) -> Naming_provider.add_class ctx name pos)
           fi.FileInfo.classes;
         List.iter
           (fun (pos, name) -> Naming_provider.add_record_def name pos)

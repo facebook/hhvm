@@ -85,12 +85,12 @@ val get_type_canon_name : Provider_context.t -> string -> string option
 (** Look up the file path declaring the given class in the reverse naming
 table. Same as calling [get_type_pos] and extracting the path if the result
 is a [Naming_types.TClass]. *)
-val get_class_path : string -> Relative_path.t option
+val get_class_path : Provider_context.t -> string -> Relative_path.t option
 
 (** Record that a class with the given name was declared at the given
 position. Same as calling [add_type] with [Naming_types.TClass].
 *)
-val add_class : string -> FileInfo.pos -> unit
+val add_class : Provider_context.t -> string -> FileInfo.pos -> unit
 
 (** Look up the file path declaring the given class in the reverse naming
 table. Same as calling [get_type_pos] and extracting the path if the result

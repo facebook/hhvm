@@ -8,7 +8,7 @@
  *)
 
 let get_class ctx id =
-  match Naming_provider.get_class_path id with
+  match Naming_provider.get_class_path ctx id with
   | None -> None
   | Some fn ->
     (match Ast_provider.find_class_in_file ctx fn id with

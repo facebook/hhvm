@@ -70,7 +70,7 @@ let get ctx cid =
   match get_from_store ctx cid with
   | Some _ as c -> c
   | None ->
-    (match Naming_provider.get_class_path cid with
+    (match Naming_provider.get_class_path ctx cid with
     | None -> None
     | Some filename -> Some (declare_class_in_file ctx filename cid))
 

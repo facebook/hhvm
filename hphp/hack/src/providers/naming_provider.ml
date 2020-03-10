@@ -77,14 +77,16 @@ let get_type_canon_name (ctx : Provider_context.t) (name : string) :
     string option =
   Naming_heap.Types.get_canon_name ctx name
 
-let get_class_path (name : string) : Relative_path.t option =
+let get_class_path (_ctx : Provider_context.t) (name : string) :
+    Relative_path.t option =
   match Naming_heap.Types.get_filename_and_kind name with
   | Some (fn, Naming_types.TClass) -> Some fn
   | Some (_, (Naming_types.TRecordDef | Naming_types.TTypedef))
   | None ->
     None
 
-let add_class (name : string) (pos : FileInfo.pos) : unit =
+let add_class (_ctx : Provider_context.t) (name : string) (pos : FileInfo.pos) :
+    unit =
   add_type name pos Naming_types.TClass
 
 let get_record_def_path (name : string) : Relative_path.t option =

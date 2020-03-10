@@ -68,7 +68,7 @@ let rec collect_class
         failwith @@ "Missing " ^ kind ^ " class " ^ cid ^ " after declaration"
       else (
         try
-          match Naming_provider.get_class_path cid with
+          match Naming_provider.get_class_path ctx cid with
           | None -> raise Exit
           | Some filename ->
             Hh_logger.log "Declaring %s class %s" kind cid;
@@ -138,7 +138,7 @@ let rec collect_class
                  | Some x -> { decls with cstrs = SMap.add decls.cstrs cid x })
       in
       let filename =
-        match Naming_provider.get_class_path cid with
+        match Naming_provider.get_class_path ctx cid with
         | None ->
           failwith @@ "Could not look up filename for " ^ kind ^ " class " ^ cid
         | Some f -> f

@@ -11,6 +11,7 @@ use oxidized::pos::Pos;
 use oxidized::{aast_defs::*, ast_defs::*, ident};
 
 use crate::typing_defs_core::{Ty, *};
+use crate::typing_logic::SubtypeProp;
 use crate::typing_reason::*;
 
 // Struct off which we call type builder methods
@@ -234,6 +235,21 @@ impl<'a> TypeBuilder<'a> {
     }
     pub fn generic(&'a self, reason: PReason<'a>, name: &'a str) -> Ty<'a> {
         self.mk(reason, Ty_::Tgeneric(name))
+    }
+    pub fn conj(&'a self, v: Vec<'a, SubtypeProp<'a>>) -> SubtypeProp<'a> {
+        SubtypeProp::Conj(v)
+    }
+    pub fn disj(&'a self, v: Vec<'a, SubtypeProp<'a>>) -> SubtypeProp<'a> {
+        SubtypeProp::Disj(v)
+    }
+    pub fn is_subtype(&'a self, ty1: InternalType<'a>, ty2: InternalType<'a>) -> SubtypeProp<'a> {
+        SubtypeProp::IsSubtype(ty1, ty2)
+    }
+    pub fn valid(&'a self) -> SubtypeProp<'a> {
+        SubtypeProp::Conj(Vec::new_in(self.alloc))
+    }
+    pub fn invalid(&'a self) -> SubtypeProp<'a> {
+        SubtypeProp::Disj(Vec::new_in(self.alloc))
     }
 }
 

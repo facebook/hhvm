@@ -165,6 +165,67 @@ pub enum Ty_<'a> {
 /// Ty_ and decreases stack usage.
 pub struct Ty<'a>(pub PReason<'a>, pub &'a Ty_<'a>);
 
+impl<'a> Ty<'a> {
+    pub fn get_node(&self) -> &Ty_<'a> {
+        let Ty(_r, t) = self;
+        t
+    }
+    pub fn get_reason(&self) -> &PReason<'a> {
+        let Ty(r, _t) = self;
+        r
+    }
+    pub fn get_pos(&self) -> Option<&oxidized::pos::Pos> {
+        self.get_reason().pos
+    }
+    pub fn is_tyvar(&self) -> bool {
+        match self.get_node() {
+            Ty_::Tvar(_) => true,
+            _ => false,
+        }
+    }
+    pub fn is_generic(&self) -> bool {
+        match self.get_node() {
+            Ty_::Tgeneric(_) => true,
+            _ => false,
+        }
+    }
+    pub fn is_dynamic(&self) -> bool {
+        match self.get_node() {
+            Ty_::Tdynamic => true,
+            _ => false,
+        }
+    }
+    pub fn is_nonnull(&self) -> bool {
+        match self.get_node() {
+            Ty_::Tnonnull => true,
+            _ => false,
+        }
+    }
+    pub fn is_any(&self) -> bool {
+        match self.get_node() {
+            Ty_::Tany(_) => true,
+            _ => false,
+        }
+    }
+    pub fn is_prim(&self, kind: PrimKind) -> bool {
+        match self.get_node() {
+            Ty_::Tprim(k) => kind == *k,
+            _ => false,
+        }
+    }
+    pub fn is_union(&self) -> bool {
+        match self.get_node() {
+            Ty_::Tunion(_) => true,
+            _ => false,
+        }
+    }
+    pub fn is_intersection(&self) -> bool {
+        match self.get_node() {
+            Ty_::Tintersection(_) => true,
+            _ => false,
+        }
+    }
+}
 /// This is a direct translation of oxidized::gen::typing_defs_core::TaccessType.
 ///
 /// We need this because it wraps Tys
@@ -193,6 +254,7 @@ pub enum ArrayKind<'a> {
 ///      type checking.
 ///   2. Additionally, I (hverr) think the aast::Tprim -> Tprim conversion
 ///      is cheaper than dereferencing a pointer to aast::Tprim.
+#[derive(Eq, PartialEq)]
 pub enum PrimKind<'a> {
     Tnull,
     Tvoid,

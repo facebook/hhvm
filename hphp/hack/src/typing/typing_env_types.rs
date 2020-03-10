@@ -5,6 +5,7 @@
 use oxidized::{pos, relative_path, typechecker_options};
 
 pub use typing_collections_rust::*;
+pub use typing_defs_rust::typing_logic::{SubtypeProp, *};
 pub use typing_defs_rust::{Ty, *};
 
 use crate::typing_env_return_info;

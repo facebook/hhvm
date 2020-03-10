@@ -6,7 +6,6 @@ pub mod typing_env;
 pub mod typing_env_return_info;
 pub mod typing_env_types;
 pub mod typing_inference_env;
-pub mod typing_logic;
 pub mod typing_tyvar_occurrences;
 
 pub use typing_env::*;

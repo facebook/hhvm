@@ -59,19 +59,30 @@ let empty_for_debugging ~popt ~tcopt =
 let map_tcopt (t : t) ~(f : TypecheckerOptions.t -> TypecheckerOptions.t) : t =
   { t with tcopt = f t.tcopt }
 
-let ref_is_quarantined : bool ref = ref false
+(** ref_is_quarantined stores the stack at which it was last changed,
+so we can give better failwith error messages where appropriate. *)
+let ref_is_quarantined : (bool * Utils.callstack) ref =
+  ref (false, Utils.Callstack "init")
 
-let is_quarantined () : bool = !ref_is_quarantined
+let is_quarantined () : bool = !ref_is_quarantined |> fst
 
 let set_is_quarantined_internal () : unit =
   match !ref_is_quarantined with
-  | true -> failwith "set_is_quarantined: was already quarantined"
-  | false -> ref_is_quarantined := true
+  | (true, Utils.Callstack stack) ->
+    failwith ("set_is_quarantined: was already quarantined at\n" ^ stack)
+  | (false, _) ->
+    ref_is_quarantined :=
+      (true, Utils.Callstack (Exception.get_current_callstack_string 99))
 
 let unset_is_quarantined_internal () : unit =
   match !ref_is_quarantined with
-  | true -> ref_is_quarantined := false
-  | false -> failwith "unset_is_quarantined: wasn't already quarantined"
+  | (true, _) ->
+    ref_is_quarantined :=
+      (false, Utils.Callstack (Exception.get_current_callstack_string 99))
+  | (false, Utils.Callstack stack) ->
+    failwith
+      ( "unset_is_quarantined: but quarantine had already been released at\n"
+      ^ stack )
 
 let get_telemetry (t : t) (telemetry : Telemetry.t) : Telemetry.t =
   let telemetry =

@@ -1198,7 +1198,6 @@ struct RuntimeOption {
    * __DynamicallyCallable attribute is present at declaration.         \
    */                                                                   \
   F(bool, ForbidDynamicCallsWithAttr, false)                            \
-  F(bool, WarnOnNonLiteralClsMeth, false)                               \
   /* Toggles logging for expressions of type $var::name() */            \
   F(bool, LogKnownMethodsAsDynamicCalls, true)                          \
   /*                                                                    \

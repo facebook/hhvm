@@ -869,8 +869,20 @@ impl InstrSeq {
         Self::make_instr(Instruct::IOp(InstructOperator::ResolveObjMethod))
     }
 
-    pub fn make_resolve_cls_method(mode: ClsMethResolveOp) -> Self {
-        Self::make_instr(Instruct::IOp(InstructOperator::ResolveClsMethod(mode)))
+    pub fn make_resolveclsmethod(method_id: MethodId) -> Self {
+        Self::make_instr(Instruct::IOp(InstructOperator::ResolveClsMethod(method_id)))
+    }
+
+    pub fn make_resolveclsmethodd(class_id: ClassId, method_id: MethodId) -> Self {
+        Self::make_instr(Instruct::IOp(InstructOperator::ResolveClsMethodD(
+            class_id, method_id,
+        )))
+    }
+
+    pub fn make_resolveclsmethods(scref: SpecialClsRef, method_id: MethodId) -> Self {
+        Self::make_instr(Instruct::IOp(InstructOperator::ResolveClsMethodS(
+            scref, method_id,
+        )))
     }
 
     pub fn make_fatal(op: FatalOp) -> Self {

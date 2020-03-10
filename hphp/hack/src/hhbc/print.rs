@@ -1816,17 +1816,20 @@ fn print_op<W: Write>(w: &mut W, op: &InstructOperator) -> Result<(), W::Error> 
             print_function_id(w, id)
         }
         I::ResolveObjMethod => w.write("ResolveObjMethod"),
-        I::ResolveClsMethod(op) => concat_str_by(
-            w,
-            " ",
-            [
-                "ResolveClsMethod",
-                match op {
-                    ClsMethResolveOp::Warn => "Warn",
-                    ClsMethResolveOp::NoWarn => "NoWarn",
-                },
-            ],
-        ),
+        I::ResolveClsMethod(mid) => {
+            w.write("ResolveClsMethod")?;
+            print_method_id(w, mid)
+        }
+        I::ResolveClsMethodD(cid, mid) => {
+            w.write("ResolveClsMethodD")?;
+            print_class_id(w, cid)?;
+            print_method_id(w, mid)
+        }
+        I::ResolveClsMethodS(r, mid) => {
+            w.write("ResolveClsMethodS")?;
+            print_special_cls_ref(w, r)?;
+            print_method_id(w, mid)
+        }
         I::Fatal(fatal_op) => print_fatal_op(w, fatal_op),
     }
 }

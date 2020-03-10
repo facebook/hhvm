@@ -141,10 +141,6 @@ let string_of_typestruct_resolve_op = function
   | Resolve -> "Resolve"
   | DontResolve -> "DontResolve"
 
-let string_of_cls_meth_resolve_op = function
-  | Warn -> "Warn"
-  | NoWarn -> "NoWarn"
-
 let string_of_is_log_as_dynamic_call_op = function
   | LogAsDynamicCall -> "LogAsDynamicCall"
   | DontLogAsDynamicCall -> "DontLogAsDynamicCall"
@@ -206,8 +202,12 @@ let string_of_operator instruction =
   | H.Exit -> "Exit"
   | ResolveFunc id -> sep ["ResolveFunc"; string_of_function_id id]
   | ResolveObjMethod -> sep ["ResolveObjMethod"]
-  | ResolveClsMethod op ->
-    sep ["ResolveClsMethod"; string_of_cls_meth_resolve_op op]
+  | ResolveClsMethod mid -> sep ["ResolveClsMethod"; string_of_method_id mid]
+  | ResolveClsMethodD (cid, mid) ->
+    sep ["ResolveClsMethodD"; string_of_class_id cid; string_of_method_id mid]
+  | ResolveClsMethodS (r, mid) ->
+    sep
+      ["ResolveClsMethodS"; SpecialClsRef.to_string r; string_of_method_id mid]
   | Fatal op -> sep ["Fatal"; FatalOp.to_string op]
 
 let string_of_get x =

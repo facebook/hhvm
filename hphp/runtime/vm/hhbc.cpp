@@ -1012,12 +1012,6 @@ static const char* SpecialClsRef_names[] = {
 #undef REF
 };
 
-static const char* ClsMethResolveOp_names[] = {
-#define OP(x) #x,
-  CLS_METH_RESOLVE_OPS
-#undef OP
-};
-
 template<class T, size_t Sz>
 const char* subopToNameImpl(const char* (&arr)[Sz], T opcode, int off) {
   static_assert(
@@ -1089,8 +1083,6 @@ X(MOpMode,        static_cast<int>(MOpMode::None))
 X(ContCheckOp,    static_cast<int>(ContCheckOp::IgnoreStarted))
 X(CudOp,          static_cast<int>(CudOp::IgnoreIter))
 X(SpecialClsRef,  static_cast<int>(SpecialClsRef::Self))
-X(ClsMethResolveOp,
-                  static_cast<int>(ClsMethResolveOp::NoWarn))
 X(IsLogAsDynamicCallOp,
                   static_cast<int>(IsLogAsDynamicCallOp::LogAsDynamicCall))
 #undef X

@@ -187,12 +187,6 @@ pub enum TypestructResolveOp {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum ClsMethResolveOp {
-    Warn,
-    NoWarn,
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum HasGenericsOp {
     NoGenerics,
     MaybeGenerics,
@@ -310,7 +304,9 @@ pub enum InstructOperator {
     Fatal(FatalOp),
     ResolveFunc(FunctionId),
     ResolveObjMethod,
-    ResolveClsMethod(ClsMethResolveOp),
+    ResolveClsMethod(MethodId),
+    ResolveClsMethodD(ClassId, MethodId),
+    ResolveClsMethodS(SpecialClsRef, MethodId),
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

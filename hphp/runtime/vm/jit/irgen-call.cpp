@@ -1435,58 +1435,6 @@ void emitResolveObjMethod(IRGS& env) {
   push(env, methPair);
 }
 
-
-const StaticString s_resolveClsMagicCall(
-  "Unable to resolve magic call for class_meth()");
-
-void emitResolveClsMethod(IRGS& env, ClsMethResolveOp op) {
-  auto const classNameTmp = topC(env, BCSPRelOffset { 1 });
-  auto const methodNameTmp = topC(env, BCSPRelOffset { 0 });
-  if (!classNameTmp->hasConstVal(TStr) || !methodNameTmp->hasConstVal(TStr)) {
-    return interpOne(env);
-  } else if (op == ClsMethResolveOp::Warn &&
-      RuntimeOption::EvalWarnOnNonLiteralClsMeth) {
-    gen(
-      env,
-      RaiseWarning,
-      cns(env, makeStaticString(Strings::WARN_CLS_METH_WRONG_ARGS))
-    );
-  }
-  auto className = classNameTmp->strVal();
-  auto methodName = methodNameTmp->strVal();
-
-  auto const clsMeth = [&] {
-    auto const cls = Unit::lookupUniqueClassInContext(className, curClass(env));
-    if (cls) {
-      auto const func = lookupImmutableClsMethod(cls, methodName, curFunc(env),
-                                                 true);
-      if (func) {
-        if (!classIsPersistentOrCtxParent(env, cls)) {
-          gen(env, LdClsCached, classNameTmp);
-        }
-        ldCtxForClsMethod(env, func, cns(env, cls), cls, true);
-
-        // For clsmeth, we want to return the class user gave,
-        // not the class where func is associated with.
-        return gen(env, NewClsMeth, cns(env, cls), cns(env, func));
-      }
-    }
-
-    auto const slowExit = makeExitSlow(env);
-    auto const ne = NamedEntity::get(className);
-    auto const data = ClsMethodData { className, methodName, ne };
-    auto const funcTmp = loadClsMethodUnknown(env, data, slowExit);
-    auto const clsTmp = gen(env, LdClsCached, classNameTmp);
-    return gen(env, NewClsMeth, clsTmp, funcTmp);
-  }();
-
-  decRef(env, methodNameTmp);
-  decRef(env, classNameTmp);
-  popC(env);
-  popC(env);
-  push(env, clsMeth);
-}
-
 namespace {
 
 SSATmp* forwardCtx(IRGS& env, const Func* parentFunc, SSATmp* funcTmp) {
@@ -1528,6 +1476,75 @@ SSATmp* lookupClsMethodKnown(IRGS& env,
     : ldCtxForClsMethod(env, func, callerCtx, baseClass, exact);
   return funcTmp;
 }
+
+void resolveClsMethodCommon(IRGS& env, SSATmp* clsVal,
+                            const StringData* methodName,
+                            uint32_t numExtraInputs) {
+  assertx(clsVal->isA(TCls));
+  auto const cs = clsVal->type().clsSpec();
+  if (!cs) return interpOne(env);
+  auto const exactClass = cs.exact() || cs.cls()->attrs() & AttrNoOverride;
+  SSATmp* ctx;
+  auto const funcTmp = lookupClsMethodKnown(env, methodName, clsVal, cs.cls(),
+                                            exactClass, false, ctx);
+  if (!funcTmp) return interpOne(env);
+  assertx(funcTmp->isA(TFunc));
+  if (!funcTmp->hasConstVal()) return interpOne(env);
+  if (!funcTmp->funcVal()->isStaticInPrologue()) {
+    gen(env, ThrowMissingThis, funcTmp);
+  }
+  discard(env, numExtraInputs);
+  push(env, gen(env, NewClsMeth, clsVal, funcTmp));
+}
+
+} // namespace
+
+void emitResolveClsMethod(IRGS& env, const StringData* methodName) {
+  auto const cls = topC(env);
+  if (!cls->isA(TCls)) return interpOne(env);
+  resolveClsMethodCommon(env, cls, methodName, 1);
+}
+
+void emitResolveClsMethodD(IRGS& env, const StringData* className,
+                           const StringData* methodName) {
+  auto const cls = Unit::lookupUniqueClassInContext(className, curClass(env));
+  if (cls) {
+    auto const func = lookupImmutableClsMethod(cls, methodName, curFunc(env),
+                                               true);
+    if (func) {
+      if (!func->isStaticInPrologue()) {
+        gen(env, ThrowMissingThis, cns(env, func));
+      }
+      if (!classIsPersistentOrCtxParent(env, cls)) {
+        gen(env, LdClsCached, cns(env, className));
+      }
+      ldCtxForClsMethod(env, func, cns(env, cls), cls, true);
+
+      // For clsmeth, we want to return the class user gave,
+      // not the class where func is associated with.
+      push(env, gen(env, NewClsMeth, cns(env, cls), cns(env, func)));
+    } else {
+      resolveClsMethodCommon(env, cns(env, cls), methodName, 0);
+    }
+    return;
+  }
+
+  auto const slowExit = makeExitSlow(env);
+  auto const ne = NamedEntity::get(className);
+  auto const data = ClsMethodData { className, methodName, ne };
+  auto const funcTmp = loadClsMethodUnknown(env, data, slowExit);
+  auto const clsTmp = gen(env, LdClsCached, cns(env, className));
+  push(env, gen(env, NewClsMeth, clsTmp, funcTmp));
+}
+
+void emitResolveClsMethodS(IRGS& env, SpecialClsRef ref,
+                           const StringData* methodName) {
+  auto const cls = specialClsRefToCls(env, ref);
+  if (!cls) return interpOne(env);
+  resolveClsMethodCommon(env, cls, methodName, 0);
+}
+
+namespace {
 
 void fcallClsMethodCommon(IRGS& env,
                           const FCallArgs& fca,
@@ -1613,7 +1630,7 @@ void fcallClsMethodCommon(IRGS& env,
                              numExtraInputs, emitFCall);
 }
 
-}
+} // namespace
 
 void emitFCallClsMethod(IRGS& env, FCallArgs fca, const StringData* clsHint,
                         IsLogAsDynamicCallOp op) {

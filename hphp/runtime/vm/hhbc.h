@@ -510,16 +510,6 @@ enum class SpecialClsRef : uint8_t {
 #undef REF
 };
 
-#define CLS_METH_RESOLVE_OPS \
-  OP(NoWarn)                 \
-  OP(Warn)
-
-enum class ClsMethResolveOp : uint8_t {
-#define OP(name) name,
-  CLS_METH_RESOLVE_OPS
-#undef OP
-};
-
 #define IS_LOG_AS_DYNAMIC_CALL_OPS                  \
   IS_LOG_AS_DYNAMIC_CALL_OP(LogAsDynamicCall)       \
   IS_LOG_AS_DYNAMIC_CALL_OP(DontLogAsDynamicCall)
@@ -684,8 +674,12 @@ constexpr uint32_t kMaxConcatN = 4;
                                                                         \
   O(ResolveFunc,     ONE(SA),          NOV,             ONE(CV),    NF) \
   O(ResolveObjMethod,NA,               TWO(CV,CV),      ONE(CV),    NF) \
-  O(ResolveClsMethod,ONE(OA(ClsMethResolveOp)),                         \
-                                       TWO(CV,CV),      ONE(CV),    NF) \
+  O(ResolveClsMethod,ONE(SA),          ONE(CV),         ONE(CV),    NF) \
+  O(ResolveClsMethodD,                                                  \
+                     TWO(SA,SA),       NOV,             ONE(CV),    NF) \
+  O(ResolveClsMethodS,                                                  \
+                     TWO(OA(SpecialClsRef),SA),                         \
+                                       NOV,             ONE(CV),    NF) \
   O(NewObj,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(NewObjR,         NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(NewObjD,         ONE(SA),          NOV,             ONE(CV),    NF) \
@@ -956,7 +950,6 @@ const char* subopToName(TypeStructResolveOp);
 const char* subopToName(ContCheckOp);
 const char* subopToName(CudOp);
 const char* subopToName(SpecialClsRef);
-const char* subopToName(ClsMethResolveOp);
 const char* subopToName(IsLogAsDynamicCallOp);
 
 /*

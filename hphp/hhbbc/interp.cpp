@@ -4046,12 +4046,10 @@ void in(ISS& env, const bc::FCallFunc& op) {
 }
 
 void in(ISS& env, const bc::ResolveFunc& op) {
-  // TODO (T29639296)
   push(env, TFunc);
 }
 
 void in(ISS& env, const bc::ResolveObjMethod& op) {
-  // TODO (T29639296)
   popC(env);
   popC(env);
   if (RuntimeOption::EvalHackArrDVArrs) {
@@ -4061,9 +4059,45 @@ void in(ISS& env, const bc::ResolveObjMethod& op) {
   }
 }
 
+namespace {
+
+Type ctxCls(ISS& env) {
+  auto const s = selfCls(env);
+  return setctx(s ? *s : TCls);
+}
+
+Type specialClsRefToCls(ISS& env, SpecialClsRef ref) {
+  if (!env.ctx.cls) return TCls;
+  auto const op = [&]()-> folly::Optional<Type> {
+    switch (ref) {
+      case SpecialClsRef::Static: return ctxCls(env);
+      case SpecialClsRef::Self:   return selfClsExact(env);
+      case SpecialClsRef::Parent: return parentClsExact(env);
+    }
+    always_assert(false);
+  }();
+  return op ? *op : TCls;
+}
+
+} // namespace
+
 void in(ISS& env, const bc::ResolveClsMethod& op) {
   popC(env);
-  popC(env);
+  push(env, TClsMeth);
+}
+
+void in(ISS& env, const bc::ResolveClsMethodD& op) {
+  push(env, TClsMeth);
+}
+
+void in(ISS& env, const bc::ResolveClsMethodS& op) {
+  auto const clsTy = specialClsRefToCls(env, op.subop1);
+  auto const rfunc = env.index.resolve_method(env.ctx, clsTy, op.str2);
+  if (is_specialized_cls(clsTy) && dcls_of(clsTy).type == DCls::Exact &&
+      !rfunc.couldHaveReifiedGenerics()) {
+    auto const clsName = dcls_of(clsTy).cls.name();
+    return reduce(env, bc::ResolveClsMethodD { clsName, op.str2 });
+  }
   push(env, TClsMeth);
 }
 
@@ -4302,24 +4336,6 @@ void in(ISS& env, const bc::FCallClsMethod& op) {
 }
 
 namespace {
-
-Type ctxCls(ISS& env) {
-  auto const s = selfCls(env);
-  return setctx(s ? *s : TCls);
-}
-
-Type specialClsRefToCls(ISS& env, SpecialClsRef ref) {
-  if (!env.ctx.cls) return TCls;
-  auto const op = [&]()-> folly::Optional<Type> {
-    switch (ref) {
-      case SpecialClsRef::Static: return ctxCls(env);
-      case SpecialClsRef::Self:   return selfClsExact(env);
-      case SpecialClsRef::Parent: return parentClsExact(env);
-    }
-    always_assert(false);
-  }();
-  return op ? *op : TCls;
-}
 
 template <typename Op, class UpdateBC>
 void fcallClsMethodSImpl(ISS& env, const Op& op, SString methName, bool dynamic,

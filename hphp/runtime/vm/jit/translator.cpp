@@ -360,9 +360,13 @@ static const struct {
   { OpGetMemoKeyL, {Local,            Stack1,       OutUnknown      }},
   { OpResolveFunc, {None,             Stack1,       OutFunc         }},
   { OpResolveObjMethod,
-                   {StackTop2,        Stack1,       OutVArray        }},
+                   {StackTop2,        Stack1,       OutVArray       }},
   { OpResolveClsMethod,
-                   {StackTop2,        Stack1,       OutClsMeth       }},
+                   {Stack1,           Stack1,       OutClsMeth      }},
+  { OpResolveClsMethodD,
+                   {None,             Stack1,       OutClsMeth      }},
+  { OpResolveClsMethodS,
+                   {None,             Stack1,       OutClsMeth      }},
 
   /*** 14. Generator instructions ***/
 
@@ -941,6 +945,8 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::FCallObjMethodD:
   case Op::ResolveFunc:
   case Op::ResolveClsMethod:
+  case Op::ResolveClsMethodD:
+  case Op::ResolveClsMethodS:
   case Op::ResolveObjMethod:
   case Op::False:
   case Op::File:

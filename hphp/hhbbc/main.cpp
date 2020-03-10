@@ -292,8 +292,6 @@ std::vector<SString> load_input(F&& fun) {
   RO::EvalForbidDynamicConstructs = gd.ForbidDynamicConstructs;
   RO::EvalForbidDynamicCallsWithAttr =
     gd.ForbidDynamicCallsWithAttr;
-  RO::EvalWarnOnNonLiteralClsMeth =
-    gd.WarnOnNonLiteralClsMeth;
   RO::EvalLogKnownMethodsAsDynamicCalls =
     gd.LogKnownMethodsAsDynamicCalls;
   RO::EvalNoticeOnBuiltinDynamicCalls =
@@ -393,8 +391,6 @@ void write_global_data(
   gd.ForbidDynamicConstructs     = RuntimeOption::EvalForbidDynamicConstructs;
   gd.ForbidDynamicCallsWithAttr =
     RuntimeOption::EvalForbidDynamicCallsWithAttr;
-  gd.WarnOnNonLiteralClsMeth =
-    RuntimeOption::EvalWarnOnNonLiteralClsMeth;
   gd.LogKnownMethodsAsDynamicCalls =
     RuntimeOption::EvalLogKnownMethodsAsDynamicCalls;
   gd.AbortBuildOnVerifyError     = RuntimeOption::EvalAbortBuildOnVerifyError;

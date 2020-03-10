@@ -3317,14 +3317,30 @@ ResolveObjMethod [C C] -> [C]
   always $2. Fatal if the function resolves to a magic __call method. When
   resolution fails, raise an error.
 
-ResolveClsMethod <cls meth resolve op> [C C] -> [C]
+ResolveClsMethod  <litstr id>               [C:Class] -> [C]
+ResolveClsMethodD <litstr id> <litstr id>   []        -> [C]
+ResolveClsMethodS <mode>      <litstr id>   []        -> [C]
 
-  Resolve $1 as a class method of $2 to a method array, then push the array onto
-  the top of stack. Fatal if there is an invoke name for PHP magic call. When
-  resolution fails, raise an error.
+  Push a class method pointer value. First, these instructions load values
+  into x and y as given by the following table:
 
-  If the cls meth resolve op is Warn, then raises warning about parameters used
-  in method not being string literals.
+    instruction             x    y
+    ---------------------+----+-----
+      ResolveClsMethod   | $1 | %1
+      ResolveClsMethodD  | %1 | %2
+      ResolveClsMethodS  | %1 | %2
+
+  When loading litstr id %1 into x, ResolveClsMethodD will perform the work
+  done by the ClassGetC instruction to convert the name given by %1 into a
+  class.
+
+  When loading mode %1 into x, ResolveClsMethodS will perform the same work
+  as LateBoundCls/Self/Parent depending on the specified mode.
+
+  This instruction checks if class x has an accessible static method named y.
+  If not, it raises a fatal error. Otherwise, it creates a value that can be
+  used to call that method and pushes the resulting class method pointer onto
+  the stack.
 
 ThrowNonExhaustiveSwitch [] -> []
 

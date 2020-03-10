@@ -65,6 +65,9 @@ function dummy_dict_await(): Awaitable;
 <<__Native, __HipHopSpecific>>
 function create_class_pointer(string $name): mixed;
 
+<<__Native, __HipHopSpecific>>
+function create_clsmeth_pointer(string $cls, string $meth): mixed;
+
 function apc_fetch_no_check(mixed $key) {
   $ignored = false;
   return \apc_fetch($key, inout $ignored);

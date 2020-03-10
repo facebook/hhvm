@@ -343,7 +343,13 @@ let instr_resolve_func func_id = instr (IOp (ResolveFunc func_id))
 
 let instr_resolve_obj_method = instr (IOp ResolveObjMethod)
 
-let instr_resolve_cls_method mode = instr (IOp (ResolveClsMethod mode))
+let instr_resolveclsmethod method_id = instr (IOp (ResolveClsMethod method_id))
+
+let instr_resolveclsmethodd cls_id method_id =
+  instr (IOp (ResolveClsMethodD (cls_id, method_id)))
+
+let instr_resolveclsmethods scref method_id =
+  instr (IOp (ResolveClsMethodS (scref, method_id)))
 
 let instr_await = instr (IAsync Await)
 

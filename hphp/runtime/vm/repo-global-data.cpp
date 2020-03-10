@@ -50,7 +50,6 @@ std::string show(const Repo::GlobalData& gd) {
   SHOW(ForbidDynamicCallsToInstMeth);
   SHOW(ForbidDynamicConstructs);
   SHOW(ForbidDynamicCallsWithAttr);
-  SHOW(WarnOnNonLiteralClsMeth);
   SHOW(LogKnownMethodsAsDynamicCalls);
   SHOW(NoticeOnBuiltinDynamicCalls);
   SHOW(AbortBuildOnVerifyError);

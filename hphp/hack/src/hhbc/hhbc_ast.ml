@@ -192,10 +192,6 @@ type typestruct_resolve_op =
   | Resolve
   | DontResolve
 
-type cls_meth_resolve_op =
-  | Warn
-  | NoWarn
-
 type has_generics_op =
   | NoGenerics
   | MaybeGenerics
@@ -302,7 +298,9 @@ type instruct_operator =
   | Fatal of FatalOp.t
   | ResolveFunc of function_id
   | ResolveObjMethod
-  | ResolveClsMethod of cls_meth_resolve_op
+  | ResolveClsMethod of method_id
+  | ResolveClsMethodD of class_id * method_id
+  | ResolveClsMethodS of SpecialClsRef.t * method_id
 
 type switchkind =
   | Bounded
@@ -354,9 +352,9 @@ type istype_op =
   | OpArrLike (* Arr or Vec or Dict or Keyset *)
   | OpVArray
   | OpDArray
+  | OpPHPArr (* Arr *)
   | OpClsMeth
   | OpFunc
-  | OpPHPArr (* Arr *)
 
 type instruct_isset =
   | IssetC

@@ -609,13 +609,6 @@ void HHVM_FUNCTION(parse_str,
 
 /////////////////////////////////////////////////////////////////////////////
 
-Variant HHVM_FUNCTION(hhvm_intrinsics_create_class_pointer, StringArg name) {
-  auto const cls = Unit::loadClass(name.get());
-  return cls ? Variant{cls} : init_null();
-}
-
-/////////////////////////////////////////////////////////////////////////////
-
 bool HHVM_FUNCTION(HH_is_late_init_prop_init,
                    const Object& obj,
                    const String& name) {
@@ -722,8 +715,6 @@ void StandardExtension::initVariable() {
   if (RuntimeOption::EnableIntrinsicsExtension) {
     HHVM_FALIAS(__hhvm_intrinsics\\serialize_keep_dvarrays,
                 hhvm_intrinsics_serialize_keep_dvarrays);
-    HHVM_FALIAS(__hhvm_intrinsics\\create_class_pointer,
-                hhvm_intrinsics_create_class_pointer);
   }
 
   loadSystemlib("std_variable");

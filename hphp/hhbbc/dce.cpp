@@ -1614,6 +1614,8 @@ void dce(Env& env, const bc::Req& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ReqDoc& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ReqOnce& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ResolveClsMethod& op) { no_dce(env, op); }
+void dce(Env& env, const bc::ResolveClsMethodD& op) { no_dce(env, op); }
+void dce(Env& env, const bc::ResolveClsMethodS& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ResolveFunc& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ResolveObjMethod& op) { no_dce(env, op); }
 void dce(Env& env, const bc::RetM& op) { no_dce(env, op); }

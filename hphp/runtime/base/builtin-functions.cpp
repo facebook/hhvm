@@ -377,36 +377,6 @@ const Func* vm_decode_func_from_name(
 }
 }
 
-std::pair<Class*, Func*> decode_for_clsmeth(
-  const String& clsName,
-  const String& funcName,
-  ActRec* ar,
-  StringData*& invName,
-  DecodeFlags flags /* = DecodeFlags::Warn */) {
-  int pos = funcName.find("::");
-  bool nameContainsClass =
-    (pos != 0 && pos != String::npos && pos + 2 < funcName.size());
-  bool forwarding = false;
-  HPHP::Class* ctx = nullptr;
-  if (ar) ctx = arGetContextClass(ar);
-  auto cls = vm_decode_class_from_name(
-    clsName, funcName, nameContainsClass, ar, forwarding, ctx, flags);
-  if (!cls) {
-    if (flags == DecodeFlags::Warn) {
-      raise_invalid_argument_warning("function: class not found");
-    }
-    return std::make_pair(nullptr, nullptr);
-  }
-
-  // For clsmeth, we want to return the class user gave,
-  // not the class where func is associated with
-  auto c = cls;
-  ObjectData* thiz = nullptr;
-  auto const func = vm_decode_func_from_name(
-    funcName, ar, forwarding, thiz, c, ctx, c, invName, flags);
-  return std::make_pair(cls, const_cast<Func*>(func));
-}
-
 const HPHP::Func*
 vm_decode_function(const_variant_ref function,
                    ActRec* ar,

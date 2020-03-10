@@ -1063,9 +1063,8 @@ and emit_load_class_ref env pos cexpr =
   | Class_special SpecialClsRef.Static -> instr_lateboundcls
   | Class_special SpecialClsRef.Parent -> instr_parent
   | Class_id id -> emit_known_class_id id
-  | Class_expr expr ->
-    gather [emit_pos pos; emit_expr env expr; instr_classgetc]
-  | Class_reified instrs -> gather [emit_pos pos; instrs; instr_classgetc]
+  | Class_expr expr -> gather [emit_expr env expr; instr_classgetc]
+  | Class_reified instrs -> gather [instrs; instr_classgetc]
 
 and emit_load_class_const env pos (cexpr : Ast_class_expr.class_expr) id =
   let load_const =
@@ -3775,22 +3774,30 @@ and emit_special_function
           ^ string_of_int nargs
           ^ " given" )
     end
-  | ("HH\\class_meth", _) ->
+  | ("HH\\class_meth", cls :: meth :: _) when nargs = 2 ->
     begin
-      match args with
-      (* Hunch: This is wrong - Should instead be only Class_const::class *)
-      | [((_, A.Class_const _) as class_name); ((_, A.String _) as method_name)]
-      | [((_, A.String _) as class_name); ((_, A.String _) as method_name)] ->
-        Some (emit_class_meth env class_name method_name NoWarn)
-      | [class_name; method_name] ->
-        Some (emit_class_meth env class_name method_name Warn)
+      match (cls, meth) with
+      | ((_, A.Class_const (_, (_, id))), (_, A.String _)) when SU.is_class id
+        ->
+        Some (emit_class_meth env cls meth)
+      | ((_, A.Id (_, s)), (_, A.String _)) when s = SN.PseudoConsts.g__CLASS__
+        ->
+        Some (emit_class_meth env cls meth)
+      | ((_, A.String _), (_, A.String _)) ->
+        Some (emit_class_meth env cls meth)
       | _ ->
         Emit_fatal.raise_fatal_runtime
           pos
-          ( "class_meth() expects exactly 2 parameters, "
-          ^ string_of_int nargs
-          ^ " given" )
+          ( "class_meth() expects a literal class name or ::class constant, "
+          ^ "followed by a constant string that refers to a static method "
+          ^ "on that class" )
     end
+  | ("HH\\class_meth", _) ->
+    Emit_fatal.raise_fatal_runtime
+      pos
+      ( "class_meth() expects exactly 2 parameters, "
+      ^ string_of_int nargs
+      ^ " given" )
   | ("HH\\global_set", _) ->
     begin
       match args with
@@ -3884,22 +3891,54 @@ and emit_hh_fun func_name =
   else
     instr_string func_name
 
-and emit_class_meth env class_name method_name warn_type =
-  gather
-    [
-      emit_expr env class_name;
-      emit_expr env method_name;
-      ( if Hhbc_options.emit_cls_meth_pointers !Hhbc_options.compiler_options
-      then
-        instr_resolve_cls_method warn_type
-      else
+and emit_class_meth env cls meth =
+  if Hhbc_options.emit_cls_meth_pointers !Hhbc_options.compiler_options then
+    let method_id =
+      match meth with
+      | (_, A.String method_name) -> Hhbc_id.Method.from_raw_string method_name
+      | _ -> failwith "emit_class_meth: unhandled method"
+    in
+    match cls with
+    | ((pos, _), A.Class_const (cid, (_, id))) when SU.is_class id ->
+      emit_class_meth_native env pos cid method_id
+    | (_, A.Id (_, s)) when s = SN.PseudoConsts.g__CLASS__ ->
+      instr_resolveclsmethods SpecialClsRef.Self method_id
+    | (_, A.String class_name) ->
+      instr_resolveclsmethodd
+        (Hhbc_id.Class.from_raw_string @@ SU.strip_global_ns class_name)
+        method_id
+    | _ -> failwith "emit_class_meth: unhandled class"
+  else
+    gather
+      [
+        emit_expr env cls;
+        emit_expr env meth;
         instr
           (ILitConst
              ( if hack_arr_dv_arrs () then
                NewVecArray 2
              else
-               NewVArray 2 )) );
-    ]
+               NewVArray 2 ));
+      ]
+
+and emit_class_meth_native env pos cid method_id =
+  let cexpr =
+    class_id_to_class_expr ~resolve_self:true (Emit_env.get_scope env) cid
+  in
+  let cexpr =
+    match cexpr with
+    | Class_id (_, name) ->
+      Option.value ~default:cexpr (get_reified_var_cexpr env pos name)
+    | _ -> cexpr
+  in
+  match cexpr with
+  | Class_id (_, cname) ->
+    instr_resolveclsmethodd (Hhbc_id.Class.from_ast_name cname) method_id
+  | Class_special clsref -> instr_resolveclsmethods clsref method_id
+  | Class_expr _ ->
+    failwith "emit_class_meth_native: Class_expr should be impossible"
+  | Class_reified instrs ->
+    gather [instrs; instr_classgetc; instr_resolveclsmethod method_id]
 
 and emit_inst_meth env obj_expr method_name =
   gather
@@ -3979,12 +4018,9 @@ and emit_function_pointer env (annot, e) _targs =
   (* This is a function name. Equivalent to HH\fun('str') *)
   | A.Id (_, str) -> emit_hh_fun str
   (* class_meth *)
-  | A.Class_const (cid, method_name) ->
-    let substitute_class_const =
-      (annot, A.Class_const (cid, (Pos.none, SN.Members.mClass)))
-    in
-    let substitute_method_name = (annot, A.String (snd method_name)) in
-    emit_class_meth env substitute_class_const substitute_method_name NoWarn
+  | A.Class_const (cid, (_, method_name)) ->
+    let method_id = Hhbc_id.Method.from_ast_name method_name in
+    emit_class_meth_native env (fst annot) cid method_id
   (* inst_meth *)
   | A.Obj_get
       (obj_expr, (((pos, _) as annot), A.Id (_, method_name)), null_flavor) ->

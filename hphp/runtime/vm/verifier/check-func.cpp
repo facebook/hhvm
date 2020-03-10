@@ -1673,6 +1673,8 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::ResolveFunc:
     case Op::ResolveObjMethod:
     case Op::ResolveClsMethod:
+    case Op::ResolveClsMethodD:
+    case Op::ResolveClsMethodS:
       return true;
 
     // closures and generators

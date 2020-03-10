@@ -52,8 +52,6 @@ constexpr char FUNCTION_NAME_MUST_BE_STRING[] =
   "Function name must be a string";
 constexpr char METHOD_NAME_MUST_BE_STRING[] =
   "Method name must be a string";
-constexpr char CLASS_NAME_MUST_BE_STRING[] =
-  "Class name must be a string";
 constexpr char CANT_UNSET_STRING[] =
   "Cannot unset string offsets";
 constexpr char OP_NOT_SUPPORTED_STRING[] =
@@ -120,10 +118,6 @@ constexpr char RECORD_NOT_SUPPORTED[] =
 constexpr char CALL_ILLFORMED_FUNC[] =
   "calling an ill-formed function pointer without resolved "
   "class/object pointer";
-constexpr char WARN_CLS_METH_WRONG_ARGS[] =
-  "Arguments to class_meth() must be a literal class name "
-  "followed by a literal string "
-  "that refers to a static method on that class";
 
 constexpr char CLSMETH_COMPAT_IS_ARR[] = "is_array() called on clsmeth";
 constexpr char CLSMETH_COMPAT_IS_VEC[] = "is_vec() called on clsmeth";

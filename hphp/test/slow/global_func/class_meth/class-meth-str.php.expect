@@ -1,15 +1,9 @@
-classMeth{
-    class(Foo)
-    function(f)
-}
 string(6) "Foo::f"
-classMeth{
-    class(Bar)
-    function(g)
-}
+string(6) "Foo::f"
+string(6) "Foo::f"
+string(6) "Bar::f"
 string(6) "Bar::g"
-classMeth{
-    class(Foo)
-    function(f)
-}
-string(6) "Foo::f"
+string(6) "Bar::f"
+int(42)
+string(6) "Bar::g"
+Done

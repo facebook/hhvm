@@ -1,3 +1,0 @@
--vRuntime.Eval.EmitFuncPointers=1
--vRuntime.Eval.EmitClsMethPointers=1
--vRuntime.Eval.WarnOnNonLiteralClsMeth=1

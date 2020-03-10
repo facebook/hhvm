@@ -193,7 +193,6 @@ inline const char* prettytype(CudOp) { return "CudOp"; }
 inline const char* prettytype(ContCheckOp) { return "ContCheckOp"; }
 inline const char* prettytype(SpecialClsRef) { return "SpecialClsRef"; }
 inline const char* prettytype(CollectionType) { return "CollectionType"; }
-inline const char* prettytype(ClsMethResolveOp) { return "ClsMethResolveOp"; }
 inline const char* prettytype(IsLogAsDynamicCallOp) {
   return "IsLogAsDynamicCallOp";
 }
@@ -4348,6 +4347,7 @@ iopFCallObjMethodD(PC origpc, PC& pc, FCallArgs fca, const StringData*,
 }
 
 namespace {
+
 void resolveMethodImpl(TypedValue* c1, TypedValue* c2) {
   auto name = c1->m_data.pstr;
   ObjectData* thiz = nullptr;
@@ -4388,46 +4388,8 @@ void resolveMethodImpl(TypedValue* c1, TypedValue* c2) {
     vmStack().pushArrayNoRc(arr.detach());
   }
 }
-}
 
-OPTBLD_INLINE void iopResolveClsMethod(ClsMethResolveOp op) {
-  TypedValue* func = vmStack().topC();
-  TypedValue* cls = vmStack().indC(1);
-  if (op == ClsMethResolveOp::Warn &&
-      RuntimeOption::EvalWarnOnNonLiteralClsMeth) {
-    raise_warning(Strings::WARN_CLS_METH_WRONG_ARGS);
-  }
-
-  if (!isStringType(func->m_type) || !isStringType(cls->m_type)) {
-    raise_error(!isStringType(func->m_type) ?
-      Strings::METHOD_NAME_MUST_BE_STRING : Strings::CLASS_NAME_MUST_BE_STRING);
-  }
-
-  StringData* invName = nullptr;
-  auto const decoded_func = decode_for_clsmeth(
-    StrNR{val(cls).pstr}, StrNR{val(func).pstr}, vmfp(), invName,
-    DecodeFlags::NoWarn);
-  if (!decoded_func.first || !decoded_func.second) {
-    if (!decoded_func.first) {
-      raise_error("Failure to resolve class name \'%s\'",
-        val(cls).pstr->data());
-    } else {
-      raise_error(
-        "Failure to resolve method name \'%s::%s\'",
-        decoded_func.first->name()->data(), val(func).pstr->data());
-    }
-  }
-  if (invName) {
-    SystemLib::throwInvalidOperationExceptionObject(
-      "Unable to resolve magic call for class_meth()");
-  }
-
-  ClsMethDataRef clsMeth =
-    ClsMethDataRef::create(decoded_func.first, decoded_func.second);
-  vmStack().popC();
-  vmStack().popC();
-  vmStack().pushClsMethNoRc(clsMeth);
-}
+} // namespace
 
 OPTBLD_INLINE void iopResolveObjMethod() {
   TypedValue* c1 = vmStack().topC();
@@ -4441,6 +4403,68 @@ OPTBLD_INLINE void iopResolveObjMethod() {
                              getDataTypeString(c2->m_type).get()->data());
   }
   resolveMethodImpl(c1, c2);
+}
+
+namespace {
+
+Class* specialClsRefToCls(SpecialClsRef ref) {
+  switch (ref) {
+    case SpecialClsRef::Static:
+      if (auto const cls = frameStaticClass(vmfp())) return cls;
+      raise_error(HPHP::Strings::CANT_ACCESS_STATIC);
+    case SpecialClsRef::Self:
+      if (auto const cls = arGetContextClass(vmfp())) return cls;
+      raise_error(HPHP::Strings::CANT_ACCESS_SELF);
+    case SpecialClsRef::Parent:
+      if (auto const cls = arGetContextClass(vmfp())) {
+        if (auto const parent = cls->parent()) return parent;
+        raise_error(HPHP::Strings::CANT_ACCESS_PARENT_WHEN_NO_PARENT);
+      }
+      raise_error(HPHP::Strings::CANT_ACCESS_PARENT_WHEN_NO_CLASS);
+  }
+  always_assert(false);
+}
+
+template<bool extraStk = false>
+void resolveClsMethodImpl(Class* cls, const StringData* methName) {
+  const Func* func;
+  auto const res = lookupClsMethod(func, cls, methName, nullptr,
+                                   arGetContextClass(vmfp()), false);
+  if (res == LookupResult::MethodNotFound) {
+    raise_error("Failure to resolve method name \'%s::%s\'",
+                cls->name()->data(), methName->data());
+  }
+  assertx(res == LookupResult::MethodFoundNoThis);
+  assertx(func);
+  if (!func->isStaticInPrologue()) throw_missing_this(func);
+  auto clsmeth = ClsMethDataRef::create(cls, const_cast<Func*>(func));
+  if (extraStk) vmStack().popC();
+  vmStack().pushClsMethNoRc(clsmeth);
+}
+
+} // namespace
+
+OPTBLD_INLINE void iopResolveClsMethod(const StringData* methName) {
+  auto const c = vmStack().topC();
+  if (!isClassType(c->m_type)) {
+    raise_error("Attempting ResolveClsMethod with non-class");
+  }
+  resolveClsMethodImpl<true>(c->m_data.pclass, methName);
+}
+
+OPTBLD_INLINE void iopResolveClsMethodD(Id classId,
+                                        const StringData* methName) {
+  auto const nep = vmfp()->m_func->unit()->lookupNamedEntityPairId(classId);
+  auto cls = Unit::loadClass(nep.second, nep.first);
+  if (UNLIKELY(cls == nullptr)) {
+    raise_error("Failure to resolve class name \'%s\'", nep.first->data());
+  }
+  resolveClsMethodImpl(cls, methName);
+}
+
+OPTBLD_INLINE void iopResolveClsMethodS(SpecialClsRef ref,
+                                        const StringData* methName) {
+  resolveClsMethodImpl(specialClsRefToCls(ref), methName);
 }
 
 namespace {
@@ -4492,25 +4516,7 @@ void fcallClsMethodImpl(PC origpc, PC& pc, const FCallArgs& fca, Class* cls,
   }
 }
 
-Class* specialClsRefToCls(SpecialClsRef ref) {
-  switch (ref) {
-    case SpecialClsRef::Static:
-      if (auto const cls = frameStaticClass(vmfp())) return cls;
-      raise_error(HPHP::Strings::CANT_ACCESS_STATIC);
-    case SpecialClsRef::Self:
-      if (auto const cls = arGetContextClass(vmfp())) return cls;
-      raise_error(HPHP::Strings::CANT_ACCESS_SELF);
-    case SpecialClsRef::Parent:
-      if (auto const cls = arGetContextClass(vmfp())) {
-        if (auto const parent = cls->parent()) return parent;
-        raise_error(HPHP::Strings::CANT_ACCESS_PARENT_WHEN_NO_PARENT);
-      }
-      raise_error(HPHP::Strings::CANT_ACCESS_PARENT_WHEN_NO_CLASS);
-  }
-  always_assert(false);
-}
-
-}
+} // namespace
 
 OPTBLD_INLINE void
 iopFCallClsMethod(PC origpc, PC& pc, FCallArgs fca, const StringData*,

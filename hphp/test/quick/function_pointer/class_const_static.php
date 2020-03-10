@@ -2,7 +2,7 @@
 
 class Foo {
   public static function bar(string $x): void {
-    echo "Incorrect";
+    echo "Incorrect\n";
   }
 
   public static function baz(): void {

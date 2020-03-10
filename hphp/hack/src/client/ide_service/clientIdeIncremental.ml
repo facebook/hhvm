@@ -100,8 +100,8 @@ let compute_fileinfo_for_path (env : ServerEnv.env) (path : Relative_path.t) :
     match contents with
     | None -> (None, None)
     (* The file couldn't be read from disk. Assume it's been deleted or is
-      otherwise inaccessible. We've already deleted the entries from the naming
-      table and reverse naming table, so there's nothing left to do here. *)
+      otherwise inaccessible. Our caller will delete the entries from the
+      naming and reverse naming table; there's nothing for us to do here. *)
     | Some contents ->
       (* We don't want our symbols to be mangled for export.  Mangling would
        * convert :xhp:myclass to __xhp_myclass, which would fail name lookup *)

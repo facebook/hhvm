@@ -249,7 +249,7 @@ let update_naming_table
       List.iter new_file_info.classes ~f:(fun (pos, class_name) ->
           Naming_provider.add_class ctx class_name pos);
       List.iter new_file_info.record_defs ~f:(fun (pos, record_def_name) ->
-          Naming_provider.add_record_def record_def_name pos);
+          Naming_provider.add_record_def ctx record_def_name pos);
       List.iter new_file_info.typedefs ~f:(fun (pos, typedef_name) ->
           Naming_provider.add_typedef typedef_name pos);
       List.iter new_file_info.consts ~f:(fun (pos, const_name) ->

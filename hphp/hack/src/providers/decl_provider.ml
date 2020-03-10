@@ -143,7 +143,7 @@ let get_record_def (ctx : Provider_context.t) (record_name : string) :
       decl_cache
       ~key:(Provider_backend.Decl_cache_entry.Record_decl record_name)
       ~default:(fun () ->
-        match Naming_provider.get_record_def_path record_name with
+        match Naming_provider.get_record_def_path ctx record_name with
         | Some filename ->
           let rdecl =
             Errors.run_in_decl_mode filename (fun () ->

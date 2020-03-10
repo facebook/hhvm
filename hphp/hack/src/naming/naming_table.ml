@@ -427,7 +427,7 @@ let update_reverse_entries ctx file_deltas =
           (fun (pos, name) -> Naming_provider.add_class ctx name pos)
           fi.FileInfo.classes;
         List.iter
-          (fun (pos, name) -> Naming_provider.add_record_def name pos)
+          (fun (pos, name) -> Naming_provider.add_record_def ctx name pos)
           fi.FileInfo.record_defs;
         List.iter
           (fun (pos, name) -> Naming_provider.add_typedef name pos)

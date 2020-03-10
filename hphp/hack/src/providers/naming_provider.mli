@@ -95,12 +95,12 @@ val add_class : Provider_context.t -> string -> FileInfo.pos -> unit
 (** Look up the file path declaring the given class in the reverse naming
 table. Same as calling [get_type_pos] and extracting the path if the result
 is a [Naming_types.TRecordDef]. *)
-val get_record_def_path : string -> Relative_path.t option
+val get_record_def_path : Provider_context.t -> string -> Relative_path.t option
 
 (** Record that a class with the given name was declared at the given
 position. Same as calling [add_type] with [Naming_types.TRecordDef].
 *)
-val add_record_def : string -> FileInfo.pos -> unit
+val add_record_def : Provider_context.t -> string -> FileInfo.pos -> unit
 
 (** Look up the file path declaring the given class in the reverse naming
 table. Same as calling [get_type_pos] and extracting the path if the result

@@ -6,7 +6,7 @@
  */
 #include "thrift/lib/thrift/gen-cpp2/ThriftMetadataService.h"
 #include "thrift/lib/thrift/gen-cpp2/ThriftMetadataService.tcc"
-
+#include "thrift/lib/thrift/gen-cpp2/metadata_metadata.h"
 #include <thrift/lib/cpp2/gen/service_cpp.h>
 
 namespace apache { namespace thrift { namespace metadata {
@@ -14,31 +14,36 @@ std::unique_ptr<apache::thrift::AsyncProcessor> ThriftMetadataServiceSvIf::getPr
   return std::make_unique<ThriftMetadataServiceAsyncProcessor>(this);
 }
 
-void ThriftMetadataServiceSvIf::getRpcMetadata( ::apache::thrift::metadata::ThriftMetadata& /*_return*/) {
-  apache::thrift::detail::si::throw_app_exn_unimplemented("getRpcMetadata");
+
+void ThriftMetadataServiceSvIf::getThriftServiceMetadata( ::apache::thrift::metadata::ThriftServiceMetadataResponse& /*_return*/) {
+  apache::thrift::detail::si::throw_app_exn_unimplemented("getThriftServiceMetadata");
 }
 
-folly::SemiFuture<std::unique_ptr< ::apache::thrift::metadata::ThriftMetadata>> ThriftMetadataServiceSvIf::semifuture_getRpcMetadata() {
-  return apache::thrift::detail::si::semifuture_returning_uptr([&]( ::apache::thrift::metadata::ThriftMetadata& _return) { getRpcMetadata(_return); });
+folly::SemiFuture<std::unique_ptr< ::apache::thrift::metadata::ThriftServiceMetadataResponse>> ThriftMetadataServiceSvIf::semifuture_getThriftServiceMetadata() {
+  return apache::thrift::detail::si::semifuture_returning_uptr([&]( ::apache::thrift::metadata::ThriftServiceMetadataResponse& _return) { getThriftServiceMetadata(_return); });
 }
 
-folly::Future<std::unique_ptr< ::apache::thrift::metadata::ThriftMetadata>> ThriftMetadataServiceSvIf::future_getRpcMetadata() {
-  return apache::thrift::detail::si::future(semifuture_getRpcMetadata(), getThreadManager());
-}
-
-
-void ThriftMetadataServiceSvIf::async_tm_getRpcMetadata(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr< ::apache::thrift::metadata::ThriftMetadata>>> callback) {
-  apache::thrift::detail::si::async_tm(this, std::move(callback), [&] { return future_getRpcMetadata(); });
+folly::Future<std::unique_ptr< ::apache::thrift::metadata::ThriftServiceMetadataResponse>> ThriftMetadataServiceSvIf::future_getThriftServiceMetadata() {
+  return apache::thrift::detail::si::future(semifuture_getThriftServiceMetadata(), getThreadManager());
 }
 
 
-void ThriftMetadataServiceSvNull::getRpcMetadata( ::apache::thrift::metadata::ThriftMetadata& /*_return*/) {}
+void ThriftMetadataServiceSvIf::async_tm_getThriftServiceMetadata(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr< ::apache::thrift::metadata::ThriftServiceMetadataResponse>>> callback) {
+  apache::thrift::detail::si::async_tm(this, std::move(callback), [&] { return future_getThriftServiceMetadata(); });
+}
+
+
+void ThriftMetadataServiceSvNull::getThriftServiceMetadata( ::apache::thrift::metadata::ThriftServiceMetadataResponse& /*_return*/) {}
 
 const char* ThriftMetadataServiceAsyncProcessor::getServiceName() {
   return "ThriftMetadataService";
 }
 
-void ThriftMetadataServiceAsyncProcessor::process(std::unique_ptr<apache::thrift::ResponseChannelRequest> req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+void ThriftMetadataServiceAsyncProcessor::getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
+  ::apache::thrift::detail::md::ServiceMetadata<ThriftMetadataServiceSvIf>::gen(response.metadata, response.context);
+}
+
+void ThriftMetadataServiceAsyncProcessor::process(apache::thrift::ResponseChannelRequest::UniquePtr req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
   apache::thrift::detail::ap::process(this, std::move(req), std::move(buf), protType, context, eb, tm);
 }
 
@@ -56,7 +61,7 @@ const ThriftMetadataServiceAsyncProcessor::ProcessMap& ThriftMetadataServiceAsyn
 }
 
 const ThriftMetadataServiceAsyncProcessor::ProcessMap ThriftMetadataServiceAsyncProcessor::binaryProcessMap_ {
-  {"getRpcMetadata", &ThriftMetadataServiceAsyncProcessor::_processInThread_getRpcMetadata<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>},
+  {"getThriftServiceMetadata", &ThriftMetadataServiceAsyncProcessor::_processInThread_getThriftServiceMetadata<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>},
 };
 
 const ThriftMetadataServiceAsyncProcessor::ProcessMap& ThriftMetadataServiceAsyncProcessor::getCompactProtocolProcessMap() {
@@ -64,7 +69,7 @@ const ThriftMetadataServiceAsyncProcessor::ProcessMap& ThriftMetadataServiceAsyn
 }
 
 const ThriftMetadataServiceAsyncProcessor::ProcessMap ThriftMetadataServiceAsyncProcessor::compactProcessMap_ {
-  {"getRpcMetadata", &ThriftMetadataServiceAsyncProcessor::_processInThread_getRpcMetadata<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>},
+  {"getThriftServiceMetadata", &ThriftMetadataServiceAsyncProcessor::_processInThread_getThriftServiceMetadata<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>},
 };
 
 }}} // apache::thrift::metadata

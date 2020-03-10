@@ -1,0 +1,29 @@
+diff --git a/third-party/folly/src/folly/memory/ReentrantAllocator.h b/third-party/folly/src/folly/memory/ReentrantAllocator.h
+--- a/third-party/folly/src/folly/memory/ReentrantAllocator.h
++++ b/third-party/folly/src/folly/memory/ReentrantAllocator.h
+@@ -158,6 +158,23 @@
+
+   using base::base;
+
++#if defined(_GLIBCXX_USE_CXX11_ABI) && _GLIBCXX_USE_CXX11_ABI == 0
++  template <class Type>
++  struct rebind {
++    typedef reentrant_allocator<Type> other;
++  };
++
++  using pointer = value_type*;
++  using const_pointer = value_type const*;
++  using reference = typename std::add_lvalue_reference<value_type>::type;
++  using const_reference = typename std::add_lvalue_reference<value_type const>::type;
++  using difference_type = std::ptrdiff_t;
++  using size_type = std::size_t;
++
++  explicit reentrant_allocator() noexcept
++      : reentrant_allocator(reentrant_allocator_options()){};
++#endif
++
+   template <typename U, std::enable_if_t<!std::is_same<U, T>::value, int> = 0>
+   /* implicit */ reentrant_allocator(
+       reentrant_allocator<U> const& that) noexcept
+--
+1.7.9.5

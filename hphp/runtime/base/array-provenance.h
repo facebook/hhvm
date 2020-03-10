@@ -103,10 +103,7 @@ private:
 
 public:
   constexpr Tag() = default;
-  Tag(const StringData* filename, int32_t line)
-    : m_filename(ptrAndKind(Kind::Known, filename))
-    , m_line(line)
-  {}
+  Tag(const StringData* filename, int32_t line);
 
   static Tag RepoUnion() {
     Tag tag;

@@ -37,7 +37,11 @@ let pos_to_prov_tag loc =
     match loc with
     | Some loc' ->
       let (line, _, _) = Pos.info_pos loc' in
-      let filename = Relative_path.to_absolute @@ Pos.filename loc' in
+      let filename =
+        match Relative_path.to_absolute @@ Pos.filename loc' with
+        | "" -> "(unknown hackc filename)"
+        | x -> x
+      in
       Printf.sprintf
         "p:i:%d;s:%d:%s;"
         line

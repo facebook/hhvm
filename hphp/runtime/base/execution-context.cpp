@@ -1938,9 +1938,14 @@ Variant ExecutionContext::getEvaledArg(const StringData* val,
     code = (funcUnit->isHHFile() ? s_hh_return : s_php_return) +
       key + s_semicolon;
   }
-  Unit* unit = compileEvalString(code.get());
-  unit->setInterpretOnly();
+
+  // This unit needs to have a name, so that we have provenance for its arrays.
+  auto const name = folly::to<std::string>(
+    funcUnit->filepath()->data(), " @ getEvaledArg @ ", namespacedName.data());
+  Unit* unit = compileEvalString(code.get(), name.data());
   assertx(unit != nullptr);
+  unit->setInterpretOnly();
+
   // Default arg values are not currently allowed to depend on class context.
   auto v = Variant::attach(
     g_context->invokePseudoMain(unit->getMain(nullptr, false))

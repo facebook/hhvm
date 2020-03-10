@@ -101,14 +101,16 @@ let add_record_def
     (_ctx : Provider_context.t) (name : string) (pos : FileInfo.pos) : unit =
   add_type name pos Naming_types.TRecordDef
 
-let get_typedef_path (name : string) : Relative_path.t option =
+let get_typedef_path (_ctx : Provider_context.t) (name : string) :
+    Relative_path.t option =
   match Naming_heap.Types.get_filename_and_kind name with
   | Some (fn, Naming_types.TTypedef) -> Some fn
   | Some (_, (Naming_types.TClass | Naming_types.TRecordDef))
   | None ->
     None
 
-let add_typedef (name : string) (pos : FileInfo.pos) : unit =
+let add_typedef (_ctx : Provider_context.t) (name : string) (pos : FileInfo.pos)
+    : unit =
   add_type name pos Naming_types.TTypedef
 
 let push_local_changes () : unit = Naming_heap.push_local_changes ()

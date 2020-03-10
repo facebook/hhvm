@@ -136,7 +136,6 @@
   (name shallow_classes_provider)
   (modules shallow_classes_provider)
   (libraries
-    naming_heap
     provider_backend
     provider_context
     shallow_classes_heap)

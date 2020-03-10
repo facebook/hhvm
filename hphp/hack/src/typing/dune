@@ -34,7 +34,6 @@
     counters
     decl_ancestors
     decl_inheritance
-    naming_heap
     naming_provider
     shallow_decl_defs
     typing_defs)

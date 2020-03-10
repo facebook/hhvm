@@ -81,7 +81,6 @@
     ast_provider
     file_info
     fileutils
-    naming_heap
     naming_provider
     naming_sqlite
     relative_path)
@@ -94,7 +93,6 @@
   (libraries
     ast_provider
     naming
-    naming_heap
     naming_table)
   (preprocess (pps ppx_deriving.std))) ; See T41851208
 
@@ -104,7 +102,6 @@
     naming_global)
   (libraries
     file_info
-    naming_heap
     naming_provider
     naming_table)
   (preprocess (pps ppx_deriving.std)))

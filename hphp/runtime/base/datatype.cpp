@@ -20,6 +20,8 @@
 
 namespace HPHP {
 
+namespace {
+
 ///////////////////////////////////////////////////////////////////////////////
 // Static asserts.
 
@@ -191,6 +193,79 @@ static_assert(!isNullType(KindOfString),           "");
 static_assert(!isNullType(KindOfObject),           "");
 static_assert(!isNullType(KindOfResource),         "");
 
+static_assert(isRealType(KindOfUninit), "");
+static_assert(isRealType(KindOfNull), "");
+static_assert(isRealType(KindOfArray), "");
+static_assert(isRealType(KindOfPersistentArray), "");
+static_assert(isRealType(KindOfVArray), "");
+static_assert(isRealType(KindOfPersistentVArray), "");
+static_assert(isRealType(KindOfDArray), "");
+static_assert(isRealType(KindOfPersistentDArray), "");
+static_assert(isRealType(KindOfVec), "");
+static_assert(isRealType(KindOfPersistentVec), "");
+static_assert(isRealType(KindOfDict), "");
+static_assert(isRealType(KindOfPersistentDict), "");
+static_assert(isRealType(KindOfKeyset), "");
+static_assert(isRealType(KindOfPersistentKeyset), "");
+static_assert(isRealType(KindOfBoolean), "");
+static_assert(isRealType(KindOfInt64), "");
+static_assert(isRealType(KindOfDouble), "");
+static_assert(isRealType(KindOfPersistentString), "");
+static_assert(isRealType(KindOfString), "");
+static_assert(isRealType(KindOfObject), "");
+static_assert(isRealType(KindOfResource), "");
+
+static_assert(dt_with_rc(KindOfArray) == KindOfArray, "");
+static_assert(dt_with_rc(KindOfPersistentArray) == KindOfArray, "");
+static_assert(dt_with_rc(KindOfVArray) == KindOfVArray, "");
+static_assert(dt_with_rc(KindOfPersistentVArray) == KindOfVArray, "");
+static_assert(dt_with_rc(KindOfDArray) == KindOfDArray, "");
+static_assert(dt_with_rc(KindOfPersistentDArray) == KindOfDArray, "");
+static_assert(dt_with_rc(KindOfString) == KindOfString, "");
+static_assert(dt_with_rc(KindOfPersistentString) == KindOfString, "");
+static_assert(dt_with_rc(KindOfVec) == KindOfVec, "");
+static_assert(dt_with_rc(KindOfPersistentVec) == KindOfVec, "");
+static_assert(dt_with_rc(KindOfDict) == KindOfDict, "");
+static_assert(dt_with_rc(KindOfPersistentDict) == KindOfDict, "");
+static_assert(dt_with_rc(KindOfKeyset) == KindOfKeyset, "");
+static_assert(dt_with_rc(KindOfPersistentKeyset) == KindOfKeyset, "");
+
+static_assert(dt_modulo_persistence(KindOfPersistentArray) == KindOfArray, "");
+static_assert(dt_modulo_persistence(KindOfArray) == KindOfArray, "");
+static_assert(dt_modulo_persistence(KindOfPersistentVArray) == KindOfVArray, "");
+static_assert(dt_modulo_persistence(KindOfVArray) == KindOfVArray, "");
+static_assert(dt_modulo_persistence(KindOfPersistentDArray) == KindOfDArray, "");
+static_assert(dt_modulo_persistence(KindOfDArray) == KindOfDArray, "");
+static_assert(dt_modulo_persistence(KindOfPersistentString) == KindOfString, "");
+static_assert(dt_modulo_persistence(KindOfString) == KindOfString, "");
+static_assert(dt_modulo_persistence(KindOfPersistentVec) == KindOfVec, "");
+static_assert(dt_modulo_persistence(KindOfVec) == KindOfVec, "");
+static_assert(dt_modulo_persistence(KindOfPersistentDict) == KindOfDict, "");
+static_assert(dt_modulo_persistence(KindOfDict) == KindOfDict, "");
+static_assert(dt_modulo_persistence(KindOfPersistentKeyset) == KindOfKeyset, "");
+static_assert(dt_modulo_persistence(KindOfKeyset) == KindOfKeyset, "");
+
+static_assert(dt_with_persistence(KindOfArray) == KindOfPersistentArray, "");
+static_assert(dt_with_persistence(KindOfPersistentArray) ==
+              KindOfPersistentArray, "");
+static_assert(dt_with_persistence(KindOfVArray) == KindOfPersistentVArray, "");
+static_assert(dt_with_persistence(KindOfPersistentVArray) ==
+              KindOfPersistentVArray, "");
+static_assert(dt_with_persistence(KindOfDArray) == KindOfPersistentDArray, "");
+static_assert(dt_with_persistence(KindOfPersistentDArray) ==
+              KindOfPersistentDArray, "");
+static_assert(dt_with_persistence(KindOfString) == KindOfPersistentString, "");
+static_assert(dt_with_persistence(KindOfPersistentString) ==
+              KindOfPersistentString, "");
+static_assert(dt_with_persistence(KindOfVec) == KindOfPersistentVec, "");
+static_assert(dt_with_persistence(KindOfPersistentVec) == KindOfPersistentVec, "");
+static_assert(dt_with_persistence(KindOfDict) == KindOfPersistentDict, "");
+static_assert(dt_with_persistence(KindOfPersistentDict) ==
+              KindOfPersistentDict, "");
+static_assert(dt_with_persistence(KindOfKeyset) == KindOfPersistentKeyset, "");
+static_assert(dt_with_persistence(KindOfPersistentKeyset) ==
+              KindOfPersistentKeyset, "");
+
 static_assert(isRefcountedType(KindOfString),            "");
 static_assert(isRefcountedType(KindOfObject),            "");
 static_assert(isRefcountedType(KindOfResource),          "");
@@ -263,6 +338,9 @@ static_assert(equivDataTypes(KindOfPersistentDArray, KindOfArray),  "");
 
 static_assert(KindOfUninit == static_cast<DataType>(0),
               "Several things assume this tag is 0, especially RDS");
+
+
+} // namespace
 
 ///////////////////////////////////////////////////////////////////////////////
 

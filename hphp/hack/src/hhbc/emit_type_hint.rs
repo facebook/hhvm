@@ -219,7 +219,7 @@ fn hint_to_type_constraint(
             ))
         }
         Hoption(t) => {
-            if let Happly(Id(_, s), hs) = &**hint {
+            if let Happly(Id(_, s), hs) = &*(t.1) {
                 if skipawaitable && is_awaitable(&s) {
                     match &hs[..] {
                         [] => return Ok(Type::default()),
@@ -227,7 +227,7 @@ fn hint_to_type_constraint(
                         _ => (),
                     }
                 }
-            } else if let Hsoft(Hint(_, h)) = &**hint {
+            } else if let Hsoft(Hint(_, h)) = &*(t.1) {
                 if let Happly(Id(_, s), hs) = &**h {
                     if skipawaitable && is_awaitable(&s) {
                         if let [h] = &hs[..] {
@@ -252,27 +252,21 @@ fn hint_to_type_constraint(
         }
         Happly(Id(_, s), hs) => {
             match &hs[..] {
-                [] => {
-                    if s == "\\HH\\dynamic"
-                        || s == "\\HH\\mixed"
-                        || (skipawaitable && is_awaitable(s))
-                        || (s.eq_ignore_ascii_case("\\hh\\void") && !is_typedef(&kind))
-                    {
-                        return Ok(Type::default());
-                    }
+                [] if s == "\\HH\\dynamic"
+                    || s == "\\HH\\mixed"
+                    || (skipawaitable && is_awaitable(s))
+                    || (s.eq_ignore_ascii_case("\\hh\\void") && !is_typedef(&kind)) =>
+                {
+                    return Ok(Type::default());
                 }
-                [Hint(_, h)] => {
-                    if skipawaitable && is_awaitable(s) {
-                        match &**h {
-                            Hprim(Tprim::Tvoid) => return Ok(Type::default()),
-                            Happly(Id(_, s), hs) => {
-                                if s == "\\HH\\void" && hs.is_empty() {
-                                    return Ok(Type::default());
-                                }
-                            }
-                            _ => (),
+                [Hint(_, h)] if skipawaitable && is_awaitable(s) => {
+                    return match &**h {
+                        Hprim(Tprim::Tvoid) => Ok(Type::default()),
+                        Happly(Id(_, id), hs) if id == "\\HH\\void" && hs.is_empty() => {
+                            Ok(Type::default())
                         }
-                    }
+                        _ => hint_to_type_constraint(kind, tparams, false, &hs[0]),
+                    };
                 }
                 _ => (),
             };

@@ -275,8 +275,12 @@ impl Gen {
         self.jump_targets.0.push(Region::Switch(end_label, labels));
     }
 
-    pub fn with_try<Ex, Fb, En, Hi>(&mut self, finally_label: Label, stmt: &Stmt<Ex, Fb, En, Hi>) {
-        let labels = self.collect_valid_target_labels_for_stmt(stmt);
+    pub fn with_try<Ex, Fb, En, Hi>(
+        &mut self,
+        finally_label: Label,
+        block: &Block<Ex, Fb, En, Hi>,
+    ) {
+        let labels = self.collect_valid_target_labels_for_block(block);
         self.jump_targets
             .0
             .push(Region::TryFinally(finally_label, labels));

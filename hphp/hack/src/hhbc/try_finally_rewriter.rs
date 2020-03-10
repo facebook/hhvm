@@ -27,6 +27,10 @@ type LabelMap<'a> = BTreeMap<label::Id, &'a Instruct>;
 
 pub(super) struct JumpInstructions<'a>(LabelMap<'a>);
 impl JumpInstructions<'_> {
+    pub(super) fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+
     /// Collects list of Ret* and non rewritten Break/Continue instructions inside try body.
     pub(super) fn collect<'a>(is: &'a InstrSeq, jt_gen: &mut jt::Gen) -> JumpInstructions<'a> {
         fn get_label_id(jt_gen: &mut jt::Gen, is_break: bool, level: Level) -> label::Id {
@@ -163,7 +167,7 @@ pub fn emit_goto(
                         InstrSeq::make_goto(label),
                     ]))
                 }
-                jt::ResolvedGotoTarget::GotoFromFinally => Err(emit_fatal::raise_fatal_parse(
+                jt::ResolvedGotoTarget::GotoFromFinally => Err(emit_fatal::raise_fatal_runtime(
                     &get_pos_for_error(env),
                     "Goto to a label outside a finally block is not supported",
                 )),
@@ -338,7 +342,7 @@ pub(super) fn emit_break_or_continue(
     }
 }
 
-fn emit_finally_epilogue(
+pub(super) fn emit_finally_epilogue(
     e: &mut Emitter,
     env: &mut Env,
     pos: &Pos,

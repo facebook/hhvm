@@ -1693,7 +1693,7 @@ struct SodiumExtension final : Extension {
   SodiumExtension() : Extension("sodium", "7.2-hhvm1") {}
 
   void moduleInit() override {
-    if (sodium_init() != 0) {
+    if (sodium_init() == -1) {
       raise_error("sodium_init()");
     }
 

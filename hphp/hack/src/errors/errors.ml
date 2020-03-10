@@ -4225,11 +4225,10 @@ let should_be_override pos class_id id =
   add
     (Typing.err_code Typing.ShouldBeOverride)
     pos
-    ( strip_ns class_id
-    ^ "::"
-    ^ id
-    ^ "() is marked as override; no non-private parent definition found or overridden parent is defined in non-<?hh code"
-    )
+    (Printf.sprintf
+       "%s has no parent class with a method `%s` to override"
+       (strip_ns class_id)
+       id)
 
 let override_per_trait class_name id m_pos =
   let (c_pos, c_name) = class_name in

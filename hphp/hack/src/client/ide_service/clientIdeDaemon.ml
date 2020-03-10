@@ -672,12 +672,8 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
         try%lwt
           let%lwt server_env =
             Lwt_utils.with_context
-              ~enter:(fun () ->
-                Provider_context.set_global_context_internal ctx;
-                Lwt.return_unit)
-              ~exit:(fun () ->
-                Provider_context.unset_global_context_internal ();
-                Lwt.return_unit)
+              ~enter:(fun () -> Lwt.return_unit)
+              ~exit:(fun () -> Lwt.return_unit)
               ~do_:(fun () ->
                 let%lwt server_env =
                   ClientIdeIncremental.process_changed_file

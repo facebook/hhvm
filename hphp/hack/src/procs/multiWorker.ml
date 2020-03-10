@@ -91,11 +91,10 @@ let call workers ~job ~merge ~neutral ~next =
 let call_with_interrupt
     ?on_cancelled workers ~job ~merge ~neutral ~next ~interrupt =
   match workers with
-  | None ->
-    ( single_threaded_call job merge neutral next,
-      interrupt.MultiThreadedCall.env,
-      [] )
-  | Some workers ->
+  | Some workers when List.length workers <> 0 ->
+    Hh_logger.log
+      "MultiThreadedCall.call_with_interrupt called with %d workers"
+      (List.length workers);
     MultiThreadedCall.call_with_interrupt
       ?on_cancelled
       workers
@@ -104,6 +103,11 @@ let call_with_interrupt
       neutral
       next
       interrupt
+  | _ ->
+    Hh_logger.log "single_threaded_call called with zero workers";
+    ( single_threaded_call job merge neutral next,
+      interrupt.MultiThreadedCall.env,
+      [] )
 
 let next ?progress_fn ?max_size workers =
   Hh_bucket.make

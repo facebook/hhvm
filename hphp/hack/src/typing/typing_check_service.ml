@@ -549,16 +549,22 @@ let next
               List.rev_append stolen_jobs jobs
             end
           in
-          let bucket_size =
-            Bucket.calculate_bucket_size
-              ~num_jobs:(List.length !files_to_process)
-              ~num_workers
-              ~max_size
-          in
-          let (current_bucket, remaining_jobs) =
-            List.split_n jobs bucket_size
-          in
-          return_bucket_job Progress current_bucket remaining_jobs
+          begin
+            match num_workers with
+            (* When num_workers is zero, the execution mode is delegate-only, so we give an empty bucket to MultiWorker for execution. *)
+            | 0 -> return_bucket_job Progress [] jobs
+            | _ ->
+              let bucket_size =
+                Bucket.calculate_bucket_size
+                  ~num_jobs:(List.length !files_to_process)
+                  ~num_workers
+                  ~max_size
+              in
+              let (current_bucket, remaining_jobs) =
+                List.split_n jobs bucket_size
+              in
+              return_bucket_job Progress current_bucket remaining_jobs
+          end
       end
 
 let on_cancelled

@@ -749,16 +749,7 @@ struct JobQueueDispatcher : IHostHealthObserver {
         m_healthStatus = newStatus;
       }
     } else {
-      if (m_healthStatus != newStatus) {
-        // TODO: Use an estimated safe number of workers.
-        if (newStatus >= HealthLevel::NoMore) {
-          m_queue.updateMaxActiveWorkers(0);
-        } else {
-          m_queue.updateMaxActiveWorkers(INT_MAX);
-        }
-
-        m_healthStatus = newStatus;
-      }
+      m_healthStatus = newStatus;
     }
   }
 
@@ -769,6 +760,10 @@ struct JobQueueDispatcher : IHostHealthObserver {
   void setHugePageConfig(int count, unsigned stackKb, unsigned rangeKb = 0) {
     m_hugeThreadCount = count;
     m_hugeStackKb = stackKb;
+  }
+
+  void updateMaxActiveWorkers(int num) {
+    m_queue.updateMaxActiveWorkers(num);
   }
 
   /*

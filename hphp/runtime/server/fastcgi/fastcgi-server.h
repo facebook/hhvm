@@ -119,6 +119,9 @@ struct FastCGIServer : public Server,
   }
   int getActiveWorker() override { return m_dispatcher.getActiveWorker(); }
   int getQueuedJobs()   override { return m_dispatcher.getQueuedJobs();   }
+  void updateMaxActiveWorkers(int num) override {
+    return m_dispatcher.updateMaxActiveWorkers(num);
+  }
 
   // Query the event manager
   folly::EventBaseManager *getEventBaseManager() { return &m_eventBaseManager; }

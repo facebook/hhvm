@@ -267,6 +267,12 @@ public:
   virtual int getActiveWorker() = 0;
 
   /**
+   * Update the maximum number of threads allowed to handle requests at a
+   * time.
+   */
+  virtual void updateMaxActiveWorkers(int) = 0;
+
+  /**
    * How many jobs are queued waiting to be handled.
    */
   virtual int getQueuedJobs() = 0;

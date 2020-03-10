@@ -118,6 +118,9 @@ struct ProxygenServer : Server,
   int getActiveWorker() override {
     return m_dispatcher.getActiveWorker();
   }
+  void updateMaxActiveWorkers(int num) override {
+    return m_dispatcher.updateMaxActiveWorkers(num);
+  }
   int getQueuedJobs() override {
     return m_dispatcher.getQueuedJobs();
   }

@@ -178,7 +178,7 @@ impl<'a> AastParser {
     ) -> Result<(Option<Mode>, PositionedSyntaxTreeWithCoroutineState<'a>)> {
         let source_text = indexed_source_text.source_text();
         let mut mode = parse_mode(indexed_source_text.source_text());
-        if mode == Some(Mode::Mpartial) && env.parser_options.po_disable_partial {
+        if mode == Some(Mode::Mpartial) && env.parser_options.po_disable_modes {
             mode = Some(Mode::Mstrict);
         }
         if mode == Some(Mode::Mexperimental) && env.codegen && !env.hacksperimental {
@@ -205,7 +205,7 @@ impl<'a> AastParser {
             disable_xhp_children_declarations: env
                 .parser_options
                 .po_disable_xhp_children_declarations,
-            disable_partial: env.parser_options.po_disable_partial,
+            disable_modes: env.parser_options.po_disable_modes,
         };
 
         let tree = if quick_mode {

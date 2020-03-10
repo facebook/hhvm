@@ -69,7 +69,7 @@ where
                 // send it between threads, but it has internal mutablility and
                 // is not Send.
                 let source_text = unsafe { SourceText::from_ocaml(ocaml_source_text).unwrap() };
-                let disable_partial = env.disable_partial;
+                let disable_modes = env.disable_modes;
                 let (root, errors, state) =
                     ParseFun::parse_script(&source_text, env, Some(stack_limit_ref));
                 // traversing the parsed syntax tree uses about 1/3 of the stack
@@ -79,7 +79,7 @@ where
                 let ocaml_state = unsafe { state.to_ocaml(&context) };
                 let tree = if leak_rust_tree {
                     let mut mode = parse_mode(&source_text);
-                    if mode == Some(Mode::Mpartial) && disable_partial {
+                    if mode == Some(Mode::Mpartial) && disable_modes {
                         mode = Some(Mode::Mstrict);
                     }
                     let tree = Box::new(SyntaxTree::build(

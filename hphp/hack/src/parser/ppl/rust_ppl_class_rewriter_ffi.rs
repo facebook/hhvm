@@ -30,7 +30,7 @@ pub extern "C" fn parse_and_rewrite_ppl_classes(ocaml_source_text: usize) -> usi
         enable_xhp_class_modifier: false,
         disable_xhp_element_mangling: false,
         disable_xhp_children_declarations: false,
-        disable_partial: false,
+        disable_modes: false,
     };
 
     let (root, _, _) = positioned_parser::parse_script(&source_text, env, None);

@@ -236,7 +236,7 @@ let parse_options () =
   let enable_xhp_class_modifier = ref false in
   let verbosity = ref 0 in
   let enable_first_class_function_pointers = ref false in
-  let disable_partial = ref false in
+  let disable_modes = ref false in
   let options =
     [
       ("--ai", Arg.String set_ai, " Run the abstract interpreter (Zoncolan)");
@@ -531,7 +531,7 @@ let parse_options () =
       ( "--enable-first-class-function-pointers",
         Arg.Set enable_first_class_function_pointers,
         "Enable first class funciton pointers using <> syntax" );
-      ("--disable-partial", Arg.Set disable_partial, "Treat partial as strict");
+      ("--disable-modes", Arg.Set disable_modes, "Treat partial as strict");
     ]
   in
   let options = Arg.align ~limit:25 options in
@@ -597,7 +597,7 @@ let parse_options () =
       ~po_enable_xhp_class_modifier:!enable_xhp_class_modifier
       ~po_enable_first_class_function_pointers:
         !enable_first_class_function_pointers
-      ~po_disable_partial:!disable_partial
+      ~po_disable_modes:!disable_modes
       ()
   in
   let tcopt =

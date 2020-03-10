@@ -18,7 +18,7 @@ pub struct ParserEnv {
     pub enable_xhp_class_modifier: bool,
     pub disable_xhp_element_mangling: bool,
     pub disable_xhp_children_declarations: bool,
-    pub disable_partial: bool,
+    pub disable_modes: bool,
 }
 
 impl From<FullFidelityParserEnv> for ParserEnv {
@@ -32,7 +32,7 @@ impl From<FullFidelityParserEnv> for ParserEnv {
             enable_xhp_class_modifier: env.enable_xhp_class_modifier,
             disable_xhp_element_mangling: env.disable_xhp_element_mangling,
             disable_xhp_children_declarations: env.disable_xhp_children_declarations,
-            disable_partial: env.disable_partial,
+            disable_modes: env.disable_modes,
         }
     }
 }

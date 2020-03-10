@@ -234,7 +234,7 @@ type t = {
   (* Enables the special first class function pointer syntax foo<> *)
   po_enable_first_class_function_pointers: bool;
   (* Treats partial files as strict *)
-  po_disable_partial: bool;
+  po_disable_modes: bool;
 }
 [@@deriving show]
 
@@ -322,7 +322,7 @@ val make :
   ?po_disable_xhp_element_mangling:bool ->
   ?po_disable_xhp_children_declarations:bool ->
   ?po_enable_first_class_function_pointers:bool ->
-  ?po_disable_partial:bool ->
+  ?po_disable_modes:bool ->
   unit ->
   t
 
@@ -524,4 +524,4 @@ val po_disable_xhp_children_declarations : t -> bool
 
 val po_enable_first_class_function_pointers : t -> bool
 
-val po_disable_partial : t -> bool
+val po_disable_modes : t -> bool

@@ -125,7 +125,7 @@ let parse_file ~hhbc_options env text :
         ~rust_lowerer:(rust_lowerer co)
         ~enable_first_class_function_pointers:
           (enable_first_class_function_pointers co)
-        ~disable_partial:(disable_partial co))
+        ~disable_modes:(disable_modes co))
   in
   let env =
     Full_fidelity_ast.make_env

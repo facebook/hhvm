@@ -223,7 +223,7 @@ let rust_lowerer o = o.option_rust_lowerer
 let enable_first_class_function_pointers o =
   o.option_enable_first_class_function_pointers
 
-let disable_partial o = o.option_disable_partial
+let disable_modes o = o.option_disable_partial
 
 (**
  * Widen the default behavior of `is_array` from "is exactly a PHP array to"

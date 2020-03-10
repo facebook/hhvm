@@ -146,6 +146,7 @@ way to determine how much progress the server made.
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/vm/treadmill.h"
+#include "hphp/runtime/ext/hash/hash_murmur.h"
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/server/job-queue-vm-stack.h"
 #include "hphp/util/afdt-util.h"
@@ -171,20 +172,27 @@ TRACE_SET_MOD(clisrv);
 
 namespace HPHP {
 
+namespace {
 /*
  *               READ BEFORE MODIFYING THE CLI SERVER PROTOCOL
  * ===== WARNING ===== WARNING ===== WARNING ===== WARNING ===== WARNING =====
  *
- * The CLI client and server use CLI_SERVER_API_VERSION to negotiate a
+ * The CLI client and server use cli_server_api_version() to negotiate a
  * conncection, any changes to their API must include a bump of this version.
  * Version is not tied to HHVM compiler-id because changes rarely affect
  * communication between the server and client.
  *
+ * Adding, removing, or changing the signatures of functions using the
+ * CLI_REGISTER_HANDLER macro does not require a change here.
+ *
  * ===== WARNING ===== WARNING ===== WARNING ===== WARNING ===== WARNING =====
  */
-const uint64_t CLI_SERVER_API_VERSION = 3;
+const uint32_t CLI_SERVER_API_BASE_VERSION = 3;
+std::atomic<uint64_t> s_cliServerComputedVersion(0);
 
 const StaticString s_hphp_cli_server_api_version("hphp.cli_server_api_version");
+
+}
 
 struct CLIClientGuardedFile : PlainFile {
   explicit CLIClientGuardedFile(int fd, const char* mode) :
@@ -989,12 +997,12 @@ void CLIWorker::doJob(int client) {
         return val.isString() ? val.toString().toInt64() : 0;
       }();
 
-      if (api_version != CLI_SERVER_API_VERSION) {
+      if (api_version != cli_server_api_version()) {
         cli_write(client, "version_bad");
         throw Exception(
-          "CLI_SERVER_API_VERSION (%" PRIu64") "
+          "cli_server_api_version() (%" PRIu64") "
           "does not match client (%" PRIu64 ")",
-          CLI_SERVER_API_VERSION, api_version
+          cli_server_api_version(), api_version
         );
       } else {
         // Even if the client is too old to understand this command, unknown
@@ -1314,7 +1322,7 @@ folly::Optional<int> cli_process_command_loop(int fd) {
   if (cmd != "version_ok") {
     // Server is too old / didn't send a version. Only version 0 is compatible
     // with an unversioned server.
-    if (CLI_SERVER_API_VERSION != 0) return folly::none;
+    return folly::none;
   } else {
     cli_read(fd, cmd);
   }
@@ -1741,6 +1749,22 @@ Array cli_env() {
 }
 
 bool is_cli_mode() { return tl_cliSock != -1; }
+
+uint64_t cli_server_api_version() {
+  if (s_cliServerComputedVersion != 0) {
+    return s_cliServerComputedVersion;
+  }
+  std::string key;
+  for (const auto it : s_extensionHandlers) {
+    key += it.first.c_str();
+  }
+  s_cliServerComputedVersion = murmur_hash_64A(
+    key.c_str(),
+    key.length(),
+    CLI_SERVER_API_BASE_VERSION
+  );
+  return s_cliServerComputedVersion;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 

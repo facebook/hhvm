@@ -85,7 +85,7 @@ struct ucred {
 /*
  * The API version of the CLI-Server protocol
  */
-extern const uint64_t CLI_SERVER_API_VERSION;
+uint64_t cli_server_api_version();
 
 /*
  * Returns true if the current request is executing in CLI mode

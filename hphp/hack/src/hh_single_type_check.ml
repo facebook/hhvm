@@ -1249,12 +1249,7 @@ let handle_mode
       if errors <> [] then
         List.iter ~f:(print_error error_format) errors
       else
-        Ai.do_
-          (fun _tcopt path file_info ->
-            Typing_check_utils.type_file ctx path file_info)
-          files_info
-          ai_options
-          ctx
+        Ai.do_ files_info ai_options ctx
   | Autocomplete
   | Autocomplete_manually_invoked ->
     let path = expect_single_file () in

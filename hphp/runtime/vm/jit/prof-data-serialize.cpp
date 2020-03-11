@@ -1208,6 +1208,7 @@ ArrayData* read_array(ProfDataDeserializer& ser) {
   return deserialize(
     ser,
     [&] () -> ArrayData* {
+      ARRPROV_USE_RUNTIME_LOCATION();
       auto const sz = read_raw<uint32_t>(ser);
       String s{sz, ReserveStringMode{}};
       auto const range = s.bufferSlice();

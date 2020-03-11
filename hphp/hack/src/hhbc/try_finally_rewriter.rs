@@ -14,10 +14,14 @@ use emit_fatal_rust as emit_fatal;
 use emit_pos_rust::emit_pos;
 use env::{emitter::Emitter, iterator, jump_targets as jt, local, Env};
 use hhbc_ast_rust::{self as hhbc_ast, Instruct};
-use instruction_sequence_rust::{InstrSeq, Result};
+use instruction_sequence_rust::{Error, InstrSeq, Result};
 use label::Label;
 use label_rust as label;
-use oxidized::pos::Pos;
+use oxidized::{
+    aast_visitor::{visit, AstParams, Node, Visitor},
+    ast as tast,
+    pos::Pos,
+};
 
 use bitflags::bitflags;
 
@@ -182,6 +186,57 @@ pub fn emit_goto(
             }
         }
     }
+}
+
+pub fn fail_if_goto_from_try_to_finally(
+    try_block: &tast::Block,
+    finally_block: &tast::Block,
+) -> Result<()> {
+    fn find_gotos_in(block: &tast::Block) -> Vec<tast::Pstring> {
+        struct State(Vec<tast::Pstring>);
+        impl Visitor for State {
+            type P = AstParams<(), ()>;
+
+            fn object(&mut self) -> &mut dyn Visitor<P = Self::P> {
+                self
+            }
+
+            fn visit_stmt_(&mut self, c: &mut (), s: &tast::Stmt_) -> std::result::Result<(), ()> {
+                match s {
+                    tast::Stmt_::Goto(l) => Ok(self.0.push((&**l).clone())),
+                    _ => s.recurse(c, self),
+                }
+            }
+        }
+        let mut state = State(vec![]);
+        visit(&mut state, &mut (), block).unwrap();
+        state.0
+    };
+
+    struct GotoVisitor {};
+    impl Visitor for GotoVisitor {
+        type P = AstParams<Vec<tast::Pstring>, Error>;
+
+        fn object(&mut self) -> &mut dyn Visitor<P = Self::P> {
+            self
+        }
+
+        fn visit_stmt_(&mut self, c: &mut Vec<tast::Pstring>, s: &tast::Stmt_) -> Result<()> {
+            match s {
+                tast::Stmt_::GotoLabel(l) => match c.iter().rev().find(|label| label.1 == l.1) {
+                    Some((pos, _)) => Err(emit_fatal::raise_fatal_parse(
+                        pos,
+                        "'goto' into finally statement is disallowed",
+                    )),
+                    _ => Ok(()),
+                },
+                _ => s.recurse(c, self.object()),
+            }
+        }
+    }
+    let mut visitor = GotoVisitor {};
+    let mut goto_labels = find_gotos_in(try_block);
+    visit(&mut visitor, &mut goto_labels, finally_block)
 }
 
 pub(super) fn emit_return(e: &mut Emitter, in_finally_epilogue: bool, env: &mut Env) -> Result {

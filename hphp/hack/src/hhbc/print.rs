@@ -811,7 +811,7 @@ fn print_adata<W: Write>(ctx: &mut Context, w: &mut W, tv: &TypedValue) -> Resul
         TypedValue::VArray((values, loc)) => {
             print_adata_collection_argument(ctx, w, VARRAY_PREFIX, loc, values)
         }
-        TypedValue::HhasAdata(_) => not_impl!(),
+        TypedValue::HhasAdata(s) => not_impl!(),
     }
 }
 
@@ -2003,7 +2003,13 @@ fn print_expr<W: Write>(
     match expr {
         E_::Id(id) => w.write(adjust_id(env, &id.1)),
         E_::Lvar(lid) => w.write(escaper::escape(&(lid.1).1)),
-        E_::Float(f) => not_impl!(),
+        E_::Float(f) => {
+            w.write(if f.contains('E') || f.contains('e') {
+                format!("{:.1}E", f.parse::<f64>().map_err(|_| Error::fail(format!("ParseFloatError: {}", f)))?)
+            } else {
+                f.into()
+            })
+        }
         E_::Int(i) => {
             w.write(integer::to_decimal(i.as_str()).map_err(|_| Error::fail("ParseIntError"))?)
         }

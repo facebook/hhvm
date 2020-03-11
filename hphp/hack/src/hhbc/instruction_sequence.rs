@@ -214,7 +214,6 @@ impl InstrSeq {
     pub fn make_iter_break(label: Label, itrs: Vec<IterId>) -> Self {
         let mut instrs = itrs
             .into_iter()
-            .rev()
             .map(|id| Instruct::IIterator(InstructIterator::IterFree(id)))
             .collect::<Vec<_>>();
         instrs.push(Instruct::IContFlow(InstructControlFlow::Jmp(label)));

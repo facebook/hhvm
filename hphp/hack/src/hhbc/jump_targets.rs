@@ -129,10 +129,13 @@ impl JumpTargets {
         //  }
         for r in self.0.iter().rev() {
             match r {
+                Region::Function(_) | Region::Finally(_) => return ResolvedJumpTarget::NotFound,
                 Region::Using(finally_label, _) | Region::TryFinally(finally_label, _) => {
                     // we need to jump out of try body in try/finally - in order to do this
                     // we should go through the finally block first
-                    skip_try_finally = Some(finally_label);
+                    if skip_try_finally.is_none() {
+                        skip_try_finally = Some((finally_label, level, iters.clone()));
+                    }
                 }
                 Region::Switch(end_label, _) => {
                     if level == 1 {
@@ -165,10 +168,9 @@ impl JumpTargets {
                         level -= 1;
                     }
                 }
-                _ => (),
             }
         }
-        if let Some(finally_label) = skip_try_finally {
+        if let Some((finally_label, level, iters)) = skip_try_finally {
             if let Some(target_label) = label {
                 return ResolvedJumpTarget::ResolvedTryFinally(ResolvedTryFinally {
                     target_label: target_label.clone(),

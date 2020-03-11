@@ -314,17 +314,16 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
             InstrSeq::make_throw(),
         ])),
         a::Stmt_::Try(x) => {
-            //TODO(hrust): Implement fail_if_goto_from_try_to_finally in tfr when visitor is updated
-            // if env.jump_targets_gen().get_function_has_goto() {
-            //     tfr::fail_if_goto_from_try_to_finally(&x.0, &x.2)
-            // }
+            if env.jump_targets_gen.get_function_has_goto() {
+                tfr::fail_if_goto_from_try_to_finally(&x.0, &x.2)?;
+            }
             let (try_block, catch_list, finally_block) = &**x;
             if catch_list.is_empty() {
                 emit_try_finally(e, env, pos, &try_block, &finally_block)
             } else if finally_block.is_empty() {
                 emit_try_catch(e, env, pos, &try_block, &catch_list[..])
             } else {
-                //TODO: avoid cloning block
+                //TODO(hrust): avoid cloning block
                 let try_catch_finally = tast::Stmt(
                     pos.clone(),
                     tast::Stmt_::mk_try(
@@ -498,7 +497,7 @@ fn emit_try_catch_(
     try_block: &tast::Block,
     catch_list: &[tast::Catch],
 ) -> Result {
-    if try_block.is_empty() {
+    if is_empty_block(&try_block) {
         return Ok(InstrSeq::Empty);
     };
     let end_label = e.label_gen_mut().next_regular();

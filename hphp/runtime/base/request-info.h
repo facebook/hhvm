@@ -72,9 +72,10 @@ struct RequestInfo {
 
   /*
    * Actively kill inflight requests when memory is tight.  Some or all ongoing
-   * request will terminate with fatal error.
+   * request will terminate with fatal error.  No more than maxToKill requests
+   * will be killed.
    */
-  static void InvokeOOMKiller();
+  static void InvokeOOMKiller(int maxToKill);
 
   /*
    * This is the amount of "slack" in stack usage checks - if the stack pointer

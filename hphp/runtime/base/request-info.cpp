@@ -49,6 +49,8 @@ namespace {
 std::set<RequestInfo*> s_request_infos;
 Mutex s_request_info_mutex;
 
+std::atomic<int> s_pendingOOMs{0};
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 
@@ -108,7 +110,12 @@ int RequestInfo::SetPendingGCForAllOnRequest() {
   return cnt;
 }
 
-void RequestInfo::InvokeOOMKiller() {
+void RequestInfo::InvokeOOMKiller(int maxToKill) {
+  auto pendingOOMs = s_pendingOOMs.load(std::memory_order_relaxed);
+  while (!s_pendingOOMs.compare_exchange_weak(pendingOOMs,
+                                              std::max(pendingOOMs, maxToKill),
+                                              std::memory_order_relaxed,
+                                              std::memory_order_relaxed));
   ExecutePerRequest(
     [] (RequestInfo* t) {
       t->m_reqInjectionData.setHostOOMFlag();
@@ -304,7 +311,9 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
       // the lifetime of the request.
       // TODO(#T25950158): add flags to indicate whether a request is safe to
       // retry, etc. to help the OOM killer to make better decisions.
-      if (currUsage > RuntimeOption::RequestMemoryOOMKillBytes) {
+      if (currUsage > RuntimeOption::RequestMemoryOOMKillBytes &&
+          !p.shouldOOMAbort() &&
+          s_pendingOOMs.fetch_sub(1, std::memory_order_relaxed) > 0) {
         p.setRequestOOMAbort();
       }
       if (p.shouldOOMAbort()) {

@@ -519,7 +519,8 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     if (cmd == "oom-kill") {
       Logger::Info("Invoking OOM killer upon admin port request from %s",
                    transport->getRemoteHost());
-      RequestInfo::InvokeOOMKiller();
+      auto const server = HttpServer::Server->getPageServer();
+      RequestInfo::InvokeOOMKiller(server->getActiveWorker());
       transport->sendString("OOM killer invoked");
       break;
     }

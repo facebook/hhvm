@@ -2370,10 +2370,11 @@ SSATmp* simplifyConvTVToStr(State& env, const IRInstruction* inst) {
   if (srcType <= TObj)    return gen(env, ConvObjToStr, catchTrace, src);
   if (srcType <= TRes)    return gen(env, ConvResToStr, catchTrace, src);
   if (srcType <= TFunc) {
+    auto const ret = gen(env, LdFuncName, src);
     if (RuntimeOption::EvalRaiseFuncConversionWarning) {
       gen(env, RaiseWarning, catchTrace, cns(env, s_msgFuncToStr.get()));
     }
-    return gen(env, LdFuncName, src);
+    return ret;
   }
   if (srcType <= TClsMeth) {
     if (RuntimeOption::EvalRaiseClsMethConversionWarning) {

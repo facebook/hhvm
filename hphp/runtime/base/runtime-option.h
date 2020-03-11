@@ -684,7 +684,6 @@ struct RuntimeOption {
   F(int, JitPrintOptimizedIR,          0)                               \
   F(bool, RecordSubprocessTimes,       false)                           \
   F(bool, AllowHhas,                   false)                           \
-  F(bool, DisassemblerSourceMapping,   true)                            \
   F(bool, GenerateDocComments,         true)                            \
   F(bool, DisassemblerDocComments,     true)                            \
   F(bool, DisassemblerPropDocComments, true)                            \

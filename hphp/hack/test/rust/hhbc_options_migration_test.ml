@@ -16,9 +16,6 @@ let assert_opts_equal caml rust =
   assert_equal
     Hhbc_options.(aliased_namespaces caml)
     Hhbc_options.(aliased_namespaces rust);
-  assert_equal
-    Hhbc_options.(source_mapping caml)
-    Hhbc_options.(source_mapping rust);
   assert_equal Hhbc_options.(relabel caml) Hhbc_options.(relabel rust);
   assert_equal
     Hhbc_options.(enable_uniform_variable_syntax caml)
@@ -282,9 +279,6 @@ let test_all_overrides_json_only _ =
   let json =
     "{
   \"doc_root\": { \"global_value\": \"some/path\" },
-  \"eval.disassembler_source_mapping\": {
-    \"global_value\": 1
-  },
   \"hack.compiler.constant_folding\": {
     \"global_value\": 0
   },
@@ -427,12 +421,6 @@ module CliArgOverrides = struct
 
   (* let doc_root = "UNSUPPORTED BY CLI" *)
 
-  let eval'disassembler_source_mapping'alias1 =
-    "-veval.dissasemblersourcemapping=1"
-
-  let eval'disassembler_source_mapping'alias2 =
-    "-vhack.compiler.sourcemapping=1"
-
   (* Note: only supported by CLI (not as JSON) *)
   let hack'compiler'relabel = "-vhack.compiler.relabel=false"
 
@@ -549,8 +537,6 @@ let test_all_overrides_cli_only _ =
   let open CliArgOverrides in
   let args =
     [
-      eval'disassembler_source_mapping'alias1;
-      eval'disassembler_source_mapping'alias2;
       hack'compiler'relabel;
       (* Note: generated from the above by:
        grep -o '^  \\"\([^"]*\)\\"' THIS_FILE | sed -e 's:[\\" ]::g' \

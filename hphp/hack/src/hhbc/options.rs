@@ -137,15 +137,6 @@ impl<T> Arg<T> {
 
 // group options by JSON config prefix to avoid error-prone repetition & boilerplate in SerDe
 
-// TODO move this "lonely wolf" to group "hack.compiler." (as hinted in D7057454);
-// however, this is a breaking change for stuff that passes this option as JSON key
-prefixed_flags!(EvalFlags, "eval.", DISASSEMBLER_SOURCE_MAPPING,);
-impl Default for EvalFlags {
-    fn default() -> EvalFlags {
-        EvalFlags::empty()
-    }
-}
-
 prefixed_flags!(
     CompilerFlags,
     "hack.compiler.",
@@ -294,13 +285,6 @@ pub struct Options {
         serialize_with = "serialize_flags",
         deserialize_with = "deserialize_flags"
     )]
-    pub eval_flags: EvalFlags,
-
-    #[serde(
-        flatten,
-        serialize_with = "serialize_flags",
-        deserialize_with = "deserialize_flags"
-    )]
     pub hack_compiler_flags: CompilerFlags,
 
     #[serde(flatten, default)]
@@ -347,7 +331,6 @@ impl Default for Options {
         Options {
             max_array_elem_size_on_the_stack: defaults::max_array_elem_size_on_the_stack(),
             hack_compiler_flags: CompilerFlags::default(),
-            eval_flags: EvalFlags::default(),
             hhvm: Hhvm::default(),
             phpism_flags: PhpismFlags::default(),
             php7_flags: Php7Flags::default(),
@@ -439,11 +422,6 @@ impl Options {
         Self::merge(&mut merged, &overrides);
         let opts: serde_json::Result<Self> = serde_json::value::from_value(merged);
         opts.map_err(|e| e.to_string())
-    }
-
-    pub fn source_map(&self) -> bool {
-        self.eval_flags
-            .contains(EvalFlags::DISASSEMBLER_SOURCE_MAPPING)
     }
 
     pub fn array_provenance(&self) -> bool {
@@ -962,46 +940,6 @@ mod tests {
         }))
         .expect("boolish-parsing logic wrongly triggered");
     }
-
-    #[test]
-    fn test_major_outlier_source_mapping_serde() {
-        use serde::ser::Serialize;
-        fn mk_source_mapping<T: Serialize>(v: T) -> Json {
-            json!({
-                "eval.disassembler_source_mapping": {
-                    "global_value": v
-                }
-            })
-        }
-        fn serialize_source_mapping(opts: Options) -> Json {
-            let mut j = serde_json::to_value(opts).unwrap();
-            // remove everything from Options JSON except this key
-            const KEY: &str = "eval.disassembler_source_mapping";
-            let m = j.as_object_mut().unwrap();
-            let sm = m.remove(KEY);
-            m.clear();
-            sm.map(|val| m.insert(KEY.to_owned(), val));
-            j
-        }
-        fn test<T: Serialize + std::fmt::Debug>(exp_val: bool, val: T) {
-            let j = mk_source_mapping(dbg!(val));
-            let opts: Options = serde_json::value::from_value(j).unwrap();
-            assert_eq!(
-                exp_val,
-                opts.eval_flags
-                    .contains(EvalFlags::DISASSEMBLER_SOURCE_MAPPING)
-            );
-            let j_act = serialize_source_mapping(opts);
-            let j_exp = mk_source_mapping(exp_val);
-            assert_eq!(j_exp, j_act);
-        }
-        test(true, true);
-        test(true, 1);
-        test(true, "true");
-        test(false, 0);
-        test(false, false);
-        test(false, "false");
-    }
 }
 
 // boilerplate code that could eventually be avoided via procedural macros
@@ -1010,7 +948,6 @@ bitflags! {
     struct Flags: u64 {
         const CONSTANT_FOLDING = 1 << 0;
         const OPTIMIZE_NULL_CHECKS = 1 << 1;
-        const DISASSEMBLER_SOURCE_MAPPING = 1 << 2;
         const UVS = 1 << 3;
         const LTR_ASSIGN = 1 << 4;
         /// If true, then renumber labels after generating code for a method

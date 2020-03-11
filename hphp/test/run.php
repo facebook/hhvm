@@ -309,7 +309,6 @@ function hhvm_path() {
 
 function hh_codegen_cmd($options) {
   $cmd = hh_codegen_path();
-  $cmd .= ' -v Hack.Compiler.SourceMapping=1 ';
   if (isset($options['hackc'])) {
     $cmd .= ' --daemon';
   }
@@ -1128,7 +1127,7 @@ function hphp_cmd($options, $test, $program) {
     $compiler_args = implode(" ", varray[
       '-vRuntime.Eval.HackCompilerUseEmbedded=false',
       "-vRuntime.Eval.HackCompilerInheritConfig=true",
-      "-vRuntime.Eval.HackCompilerCommand=\"{$hh_single_compile} -v Hack.Compiler.SourceMapping=1 --daemon --dump-symbol-refs\""
+      "-vRuntime.Eval.HackCompilerCommand=\"{$hh_single_compile} --daemon --dump-symbol-refs\""
     ]);
   }
 

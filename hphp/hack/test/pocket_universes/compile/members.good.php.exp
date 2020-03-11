@@ -6,31 +6,44 @@
 .adata A_0 = """Y:2:{s:4:\"kind\";i:20;s:13:\"generic_types\";y:1:{Y:0:{}}}""";
 .adata A_1 = """v:4:{s:2:\"A0\";s:2:\"A1\";s:2:\"A2\";s:2:\"A3\";}""";
 
-.main {
+.main (1,1) {
+  .srcloc 3:7,3:7;
   DefCls 0
   Int 1
   RetC
 }
 
-.function <"HH\\void" N > foo(<"HH\\vec<(C:@E)>" "HH\\vec" > $v) {
+.function (13,18) <"HH\\void" N > foo(<"HH\\vec<(C:@E)>" "HH\\vec" > $v) {
   .numiters 1;
   .declvars $x;
+  .srcloc 13:1,18:103;
   Array @A_0
   VerifyParamTypeTS $v
+  .srcloc 14:12,14:13;
   CGetL $v
+  .srcloc 14:12,14:13;
   IterInit 0 NK V:$x L0
   .try {
   L1:
+    .srcloc 15:10,15:22;
     NullUninit
     NullUninit
     NullUninit
+    .srcloc 15:20,15:21;
     CGetL $x
+    .srcloc 15:10,15:22;
     FCallClsMethodD <> 1 1 "0" - "" "C" "E##val"
+    .srcloc 15:5,15:23;
     Print
+    .srcloc 15:5,15:23;
     PopC
+    .srcloc 16:10,16:13;
     String "\n"
+    .srcloc 16:5,16:14;
     Print
+    .srcloc 16:5,16:14;
     PopC
+    .srcloc 14:3,17:65;
     IterNext 0 NK V:$x L1
     Jmp L0
   } .catch {
@@ -38,80 +51,118 @@
     Throw
   }
 L0:
+  .srcloc 18:2,18:2;
   Null
   RetC
 }
 
-.function ["__EntryPoint"("""y:0:{}""")] <"HH\\void" N > main() {
+.function ["__EntryPoint"("""y:0:{}""")] (21,24) <"HH\\void" N > main() {
   .declvars $v;
+  .srcloc 22:8,22:22;
   NullUninit
   NullUninit
   NullUninit
+  .srcloc 22:8,22:22;
   FCallClsMethodD <> 0 1 "" - "" "C" "E##Members"
+  .srcloc 22:3,22:22;
   SetL $v
+  .srcloc 22:3,22:23;
   PopC
+  .srcloc 23:3,23:9;
   NullUninit
   NullUninit
   NullUninit
+  .srcloc 23:7,23:8;
   CGetL $v
+  .srcloc 23:3,23:9;
   FCallFuncD <> 1 1 "0" - "foo"
+  .srcloc 23:3,23:9;
   PopC
+  .srcloc 24:2,24:2;
   Null
   RetC
 }
 
-.class C {
-  .method [public static] <"HH\\mixed" N > E##Members() {
+.class C (3,11) {
+  .method [public static] (4,4) <"HH\\mixed" N > E##Members() {
     .declvars $mems;
+    .srcloc 4:8,4:8;
     Vec @A_1
+    .srcloc 4:8,4:8;
     SetL $mems
+    .srcloc 4:8,4:8;
     PopC
+    .srcloc 4:8,4:8;
     CGetL $mems
+    .srcloc 4:8,4:8;
     RetC
   }
-  .method [public static] <"HH\\mixed" N > E##val(<"HH\\string" "HH\\string" > $atom) {
+  .method [public static] (4,4) <"HH\\mixed" N > E##val(<"HH\\string" "HH\\string" > $atom) {
+    .srcloc 4:8,4:8;
     VerifyParamType $atom
+    .srcloc 4:8,4:8;
     String "A0"
+    .srcloc 4:8,4:8;
     CGetL2 $atom
     Eq
     JmpNZ L0
+    .srcloc 4:8,4:8;
     String "A1"
+    .srcloc 4:8,4:8;
     CGetL2 $atom
     Eq
     JmpNZ L1
+    .srcloc 4:8,4:8;
     String "A2"
+    .srcloc 4:8,4:8;
     CGetL2 $atom
     Eq
     JmpNZ L2
+    .srcloc 4:8,4:8;
     String "A3"
+    .srcloc 4:8,4:8;
     CGetL2 $atom
     Eq
     JmpNZ L3
     Jmp L4
   L0:
+    .srcloc 6:16,6:17;
     Int 42
+    .srcloc 4:8,4:8;
     RetC
   L1:
+    .srcloc 7:16,7:17;
     Int 43
+    .srcloc 4:8,4:8;
     RetC
   L2:
+    .srcloc 8:16,8:17;
     Int 44
+    .srcloc 4:8,4:8;
     RetC
   L3:
+    .srcloc 9:16,9:17;
     Int 45
+    .srcloc 4:8,4:8;
     RetC
   L4:
+    .srcloc 4:8,4:8;
     NewObjD "Exception"
     Dup
     NullUninit
     NullUninit
+    .srcloc 4:8,4:8;
     String "\\C::E::val unknown atom access: "
+    .srcloc 4:8,4:8;
     CGetL $atom
     Concat
+    .srcloc 4:8,4:8;
     FCallCtor <LockWhileUnwinding> 1 1 "0" - ""
     PopC
     LockObj
+    .srcloc 4:8,4:8;
     Throw
+    .srcloc 4:9,4:9;
     Null
     RetC
   }

@@ -16,7 +16,6 @@ type t = {
   option_optimize_null_checks: bool;
   option_max_array_elem_size_on_the_stack: int;
   option_aliased_namespaces: (string * string) list;
-  option_source_mapping: bool;
   option_relabel: bool;
   option_php7_uvs: bool;
   option_php7_ltr_assign: bool;
@@ -70,7 +69,6 @@ let default =
     option_optimize_null_checks = false;
     option_max_array_elem_size_on_the_stack = 64;
     option_aliased_namespaces = [];
-    option_source_mapping = false;
     option_php7_uvs = false;
     option_php7_ltr_assign = false;
     (* If true, then renumber labels after generating code for a method
@@ -129,8 +127,6 @@ let max_array_elem_size_on_the_stack o =
   o.option_max_array_elem_size_on_the_stack
 
 let aliased_namespaces o = o.option_aliased_namespaces
-
-let source_mapping o = o.option_source_mapping
 
 let relabel o = o.option_relabel
 
@@ -254,7 +250,6 @@ let to_string o =
       Printf.sprintf "max_array_elem_size_on_the_stack: %d"
       @@ max_array_elem_size_on_the_stack o;
       Printf.sprintf "aliased_namespaces: %s" aliased_namespaces_str;
-      Printf.sprintf "source_mapping: %B" @@ source_mapping o;
       Printf.sprintf "relabel: %B" @@ relabel o;
       Printf.sprintf "enable_uniform_variable_syntax: %B"
       @@ enable_uniform_variable_syntax o;
@@ -335,10 +330,6 @@ let set_option options name value =
     { options with option_constant_folding = as_bool value }
   | "hack.compiler.optimizenullcheck" ->
     { options with option_optimize_null_checks = as_bool value }
-  (* Keep both for backwards compatibility until next release *)
-  | "hack.compiler.sourcemapping"
-  | "eval.disassemblersourcemapping" ->
-    { options with option_source_mapping = as_bool value }
   | "hhvm.php7.ltr_assign" ->
     { options with option_php7_ltr_assign = as_bool value }
   | "hhvm.php7.uvs" -> { options with option_php7_uvs = as_bool value }
@@ -502,8 +493,6 @@ let value_setters =
     @@ fun opts v -> { opts with option_constant_folding = v = 1 } );
     ( set_value "hack.compiler.optimize_null_checks" get_value_from_config_int
     @@ fun opts v -> { opts with option_optimize_null_checks = v = 1 } );
-    ( set_value "eval.disassembler_source_mapping" get_value_from_config_int
-    @@ fun opts v -> { opts with option_source_mapping = v = 1 } );
     ( set_value "hhvm.php7.uvs" get_value_from_config_int @@ fun opts v ->
       { opts with option_php7_uvs = v = 1 } );
     ( set_value "hhvm.php7.ltr_assign" get_value_from_config_int @@ fun opts v ->

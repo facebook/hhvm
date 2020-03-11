@@ -5,17 +5,11 @@
 
 use env::emitter::Emitter;
 use instruction_sequence_rust::InstrSeq;
-use options::EvalFlags;
 use oxidized::pos::Pos;
 use std::convert::TryInto;
 
 pub fn emit_pos(emitter: &Emitter, pos: &Pos) -> InstrSeq {
-    if emitter
-        .options()
-        .eval_flags
-        .contains(EvalFlags::DISASSEMBLER_SOURCE_MAPPING)
-        && !pos.is_none()
-    {
+    if !pos.is_none() {
         let (line_begin, line_end, col_begin, col_end) = pos.info_pos_extended();
         InstrSeq::make_srcloc(
             line_begin.try_into().unwrap(),

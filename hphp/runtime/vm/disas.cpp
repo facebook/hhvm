@@ -93,7 +93,6 @@ void indented(Output& out, Func f) {
 
 template<class T>
 std::string format_line_pair(T* ptr) {
-  if (!RuntimeOption::EvalDisassemblerSourceMapping) return {};
   return folly::sformat(" ({},{})", ptr->line1(), ptr->line2());
 }
 
@@ -426,7 +425,6 @@ void print_func_directives(Output& out, const FuncInfo& finfo) {
 }
 
 void print_srcloc(Output& out, SourceLoc loc) {
-  if (!RuntimeOption::EvalDisassemblerSourceMapping) return;
   if (!loc.valid()) {
     out.fmtln(".srcloc -1:-1,-1:-1;");
   } else {

@@ -26,13 +26,10 @@ lazy_static! {
     /// the exceptions are overridden here for config list (-v KEY=VAL).
     pub static ref CANON_BY_ALIAS: HashMap<&'static str, &'static str> =
         impl_CANON_BY_ALIAS!(
-            // group 1: multiple names, neither consistent with JSON field name
-            "hack.compiler.sourcemapping" =>    "eval.disassembler_source_mapping",
-            "eval.disassemblersourcemapping" => "eval.disassembler_source_mapping",
-            // group 2: obtained by removing underscores from JSON field names
+            // group 1: obtained by removing underscores from JSON field names
             "hack.compiler.constantfolding" => "hack.compiler.constant_folding",
             "hack.compiler.optimizenullcheck" => "hack.compiler.optimize_null_checks",
-            // group 3: also different prefix without any obvious rule
+            // group 2: also different prefix without any obvious rule
             "eval.hackarrcompatnotices" => "hhvm.hack_arr_compat_notices",
             "eval.hackarrdvarrs" => "hhvm.hack_arr_dv_arrs",
             "eval.emitfuncpointers" => "hhvm.emit_func_pointers",
@@ -40,22 +37,22 @@ lazy_static! {
             "eval.logexterncompilerperf" => "hhvm.log_extern_compiler_perf",
             "eval.enableintrinsicsextension" => "hhvm.enable_intrinsics_extension",
             "eval.emitgenericsub" => "hhvm.emit_generics_ub",
-            // group 4: we could ignore hhvm. part of prefix in deser.
+            // group 3: we could ignore hhvm. part of prefix in deser.
             "hack.lang.disable_lval_as_an_expression" => "hhvm.hack.lang.disable_lval_as_an_expression",
-            // group 5: combination of group 4 & 2
+            // group 4: combination of group 3 & 1
             "hack.lang.phpism.disallowexecutionoperator" => "hhvm.hack.lang.phpism.disallow_execution_operator",
             "hack.lang.phpism.disablenontopleveldeclarations" => "hhvm.hack.lang.phpism.disable_nontoplevel_declarations",
             "hack.lang.phpism.disablestaticclosures" => "hhvm.hack.lang.phpism.disable_static_closures",
             "hack.lang.phpism.disablehaltcompiler" => "hhvm.hack.lang.phpism.disable_halt_compiler",
             "hack.lang.enablecoroutines" => "hhvm.hack.lang.enable_coroutines",
             "hack.lang.enablepocketuniverses" => "hhvm.hack.lang.enable_pocket_universes",
-            // group 6: we could assume "hack." between "hhvm." and "lang."
+            // group 5: we could assume "hack." between "hhvm." and "lang."
             "hhvm.lang.enable_class_level_where_clauses" => "hhvm.hack.lang.enable_class_level_where_clauses",
             "hhvm.lang.disable_legacy_soft_typehints" => "hhvm.hack.lang.disable_legacy_soft_typehints",
             "hhvm.lang.allow_new_attribute_syntax" => "hhvm.hack.lang.allow_new_attribute_syntax",
             "hhvm.lang.disable_legacy_attribute_syntax" => "hhvm.hack.lang.disable_legacy_attribute_syntax",
             "hhvm.lang.disallow_func_ptrs_in_constants" => "hhvm.hack.lang.disallow_func_ptrs_in_constants",
-            // group 7: combination of group 6 & 2
+            // group 6: combination of group 5 & 1
             "hhvm.lang.constdefaultfuncargs" => "hhvm.hack.lang.const_default_func_args",
             "hhvm.lang.abstractstaticprops" => "hhvm.hack.lang.abstract_static_props",
             "hhvm.lang.disableunsetclassconst" => "hhvm.hack.lang.disable_unset_class_const",

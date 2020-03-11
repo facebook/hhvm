@@ -292,10 +292,8 @@ fn print_fun_def<W: Write>(
         print_upper_bounds(w, &body.upper_bounds)?;
     }
     print_fun_attrs(ctx, w, fun_def)?;
-    if ctx.opts.source_map() {
-        w.write(string_of_span(&fun_def.span))?;
-        w.write(" ")?;
-    }
+    w.write(string_of_span(&fun_def.span))?;
+    w.write(" ")?;
     option(w, &body.return_type_info, print_type_info)?;
     w.write(" ")?;
     w.write(fun_def.name.to_raw_string())?;
@@ -678,9 +676,7 @@ fn print_class_def<W: Write>(
     }
     print_class_special_attributes(ctx, w, class_def)?;
     w.write(class_def.name.to_raw_string())?;
-    if ctx.opts.source_map() {
-        w.write(format!(" {}", string_of_span(&class_def.span)))?;
-    }
+    w.write(format!(" {}", string_of_span(&class_def.span)))?;
     print_extends(w, class_def.base.as_ref().map(|x| x.to_raw_string()))?;
     print_implements(w, &class_def.implements)?;
     w.write(" {")?;
@@ -865,9 +861,7 @@ fn print_file_attributes<W: Write>(
 
 fn print_main<W: Write>(ctx: &mut Context, w: &mut W, body: &HhasBody) -> Result<(), W::Error> {
     w.write(".main ")?;
-    if ctx.opts.source_map() {
-        w.write("(1,1) ")?;
-    }
+    w.write("(1,1) ")?;
     wrap_by_braces(w, |w| {
         ctx.block(w, |c, w| print_body(c, w, body))?;
         newline(w)

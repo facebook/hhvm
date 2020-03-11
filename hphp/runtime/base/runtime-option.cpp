@@ -888,8 +888,8 @@ static inline bool eagerGcDefault() {
 
 static inline std::string hackCompilerArgsDefault() {
   return RuntimeOption::RepoAuthoritative
-    ? "-v Hack.Compiler.SourceMapping=1 --daemon --dump-symbol-refs"
-    : "-v Hack.Compiler.SourceMapping=1 --daemon";
+    ? "--daemon --dump-symbol-refs"
+    : "--daemon";
 }
 
 static inline std::string hackCompilerCommandDefault() {

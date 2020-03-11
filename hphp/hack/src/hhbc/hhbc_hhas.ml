@@ -1594,8 +1594,7 @@ let add_fun_def buf fun_def =
   if Hhbc_options.emit_generics_ub !Hhbc_options.compiler_options then
     Acc.add buf (string_of_upper_bounds function_upper_bounds);
   Acc.add buf (function_attributes fun_def);
-  if Hhbc_options.source_mapping !Hhbc_options.compiler_options then
-    Acc.add buf (string_of_span function_span ^ " ");
+  Acc.add buf (string_of_span function_span ^ " ");
   Acc.add buf (string_of_type_info_option function_return_type);
   Acc.add buf (Hhbc_id.Function.to_raw_string function_name);
   Acc.add buf (string_of_params env function_params);
@@ -1734,8 +1733,7 @@ let add_method_def buf method_def =
     Acc.add buf (string_of_upper_bounds method_upper_bounds)
   );
   Acc.add buf (method_attributes method_def);
-  if Hhbc_options.source_mapping !Hhbc_options.compiler_options then
-    Acc.add buf (string_of_span method_span ^ " ");
+  Acc.add buf (string_of_span method_span ^ " ");
   Acc.add buf (string_of_type_info_option method_return_type);
   Acc.add buf (Hhbc_id.Method.to_raw_string method_name);
   Acc.add buf (string_of_params env method_params);
@@ -2102,8 +2100,7 @@ let add_class_def buf class_def =
     Acc.add buf (string_of_upper_bounds (Hhas_class.upper_bounds class_def));
   Acc.add buf (class_special_attributes class_def);
   Acc.add buf (Hhbc_id.Class.to_raw_string class_name);
-  if Hhbc_options.source_mapping !Hhbc_options.compiler_options then
-    Acc.add buf (" " ^ string_of_span (Hhas_class.span class_def));
+  Acc.add buf (" " ^ string_of_span (Hhas_class.span class_def));
   add_extends
     buf
     (Option.map ~f:Hhbc_id.Class.to_raw_string (Hhas_class.base class_def));
@@ -2168,8 +2165,7 @@ let add_data_region buf adata =
 
 let add_main buf body =
   Acc.add buf ".main ";
-  if Hhbc_options.source_mapping !Hhbc_options.compiler_options then
-    Acc.add buf "(1,1) ";
+  Acc.add buf "(1,1) ";
   Acc.add buf "{";
   add_body buf 2 body;
   Acc.add buf "}\n"

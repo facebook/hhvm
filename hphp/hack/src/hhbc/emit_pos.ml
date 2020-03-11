@@ -11,10 +11,7 @@ open Instruction_sequence
 open Hhbc_ast
 
 let emit_pos pos =
-  if
-    Hhbc_options.source_mapping !Hhbc_options.compiler_options
-    && pos <> Pos.none
-  then
+  if pos <> Pos.none then
     let (line_begin, line_end, col_begin, col_end) =
       Pos.info_pos_extended pos
     in

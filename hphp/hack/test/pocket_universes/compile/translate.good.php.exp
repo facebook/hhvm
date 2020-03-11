@@ -5,133 +5,193 @@
 .hh_file 1;
 .adata A_0 = """v:2:{s:1:\"A\";s:1:\"B\";}""";
 
-.main {
+.main (1,1) {
+  .srcloc 3:7,3:7;
   DefCls 0
   Int 1
   RetC
 }
 
-.class C {
+.class C (3,35) {
   .property [private sys_initial_val] <"HH\\int" "HH\\int" extended_hint> x =
     """N;""";
-  .method [public] <"" N > __construct(<"HH\\int" "HH\\int" > $x) {
+  .method [public] (6,8) <"" N > __construct(<"HH\\int" "HH\\int" > $x) {
+    .srcloc 6:10,8:63;
     VerifyParamType $x
+    .srcloc 7:5,7:9;
     CheckThis
+    .srcloc 7:17,7:18;
     CGetL $x
     BaseH
+    .srcloc 7:5,7:13;
     SetM 0 PL:$x
+    .srcloc 7:5,7:19;
     PopC
+    .srcloc 8:4,8:4;
     Null
     RetC
   }
-  .method [public] <"HH\\int" "HH\\int" extended_hint> get() {
+  .method [public] (10,12) <"HH\\int" "HH\\int" extended_hint> get() {
+    .srcloc 11:12,11:16;
     CheckThis
+    .srcloc 11:12,11:19;
     BaseH
     QueryM 0 CGet PT:"x"
+    .srcloc 11:5,11:20;
     VerifyRetTypeC
     RetC
   }
-  .method [public static] <"HH\\mixed" N > Field##Members() {
+  .method [public static] (14,14) <"HH\\mixed" N > Field##Members() {
     .declvars $mems;
+    .srcloc 14:8,14:12;
     Vec @A_0
+    .srcloc 14:8,14:12;
     SetL $mems
+    .srcloc 14:8,14:12;
     PopC
+    .srcloc 14:8,14:12;
     CGetL $mems
+    .srcloc 14:8,14:12;
     RetC
   }
-  .method [public static] <"HH\\mixed" N > Field##stuff(<"HH\\string" "HH\\string" > $atom) {
+  .method [public static] (14,14) <"HH\\mixed" N > Field##stuff(<"HH\\string" "HH\\string" > $atom) {
+    .srcloc 14:8,14:12;
     VerifyParamType $atom
+    .srcloc 14:8,14:12;
     String "A"
+    .srcloc 14:8,14:12;
     CGetL2 $atom
     Eq
     JmpNZ L0
+    .srcloc 14:8,14:12;
     String "B"
+    .srcloc 14:8,14:12;
     CGetL2 $atom
     Eq
     JmpNZ L1
     Jmp L2
   L0:
+    .srcloc 26:15,26:21;
     String "stuff"
+    .srcloc 14:8,14:12;
     RetC
   L1:
+    .srcloc 33:15,33:18;
     Int 1664
+    .srcloc 14:8,14:12;
     RetC
   L2:
+    .srcloc 14:8,14:12;
     NewObjD "Exception"
     Dup
     NullUninit
     NullUninit
+    .srcloc 14:8,14:12;
     String "\\C::Field::stuff unknown atom access: "
+    .srcloc 14:8,14:12;
     CGetL $atom
     Concat
+    .srcloc 14:8,14:12;
     FCallCtor <LockWhileUnwinding> 1 1 "0" - ""
     PopC
     LockObj
+    .srcloc 14:8,14:12;
     Throw
+    .srcloc 14:13,14:13;
     Null
     RetC
   }
-  .method [public static] <"HH\\mixed" N > Field##name(<"HH\\string" "HH\\string" > $atom) {
+  .method [public static] (14,14) <"HH\\mixed" N > Field##name(<"HH\\string" "HH\\string" > $atom) {
+    .srcloc 14:8,14:12;
     VerifyParamType $atom
+    .srcloc 14:8,14:12;
     String "A"
+    .srcloc 14:8,14:12;
     CGetL2 $atom
     Eq
     JmpNZ L0
+    .srcloc 14:8,14:12;
     String "B"
+    .srcloc 14:8,14:12;
     CGetL2 $atom
     Eq
     JmpNZ L1
     Jmp L2
   L0:
+    .srcloc 24:14,24:16;
     String "A"
+    .srcloc 14:8,14:12;
     RetC
   L1:
+    .srcloc 31:14,31:16;
     String "B"
+    .srcloc 14:8,14:12;
     RetC
   L2:
+    .srcloc 14:8,14:12;
     NewObjD "Exception"
     Dup
     NullUninit
     NullUninit
+    .srcloc 14:8,14:12;
     String "\\C::Field::name unknown atom access: "
+    .srcloc 14:8,14:12;
     CGetL $atom
     Concat
+    .srcloc 14:8,14:12;
     FCallCtor <LockWhileUnwinding> 1 1 "0" - ""
     PopC
     LockObj
+    .srcloc 14:8,14:12;
     Throw
+    .srcloc 14:13,14:13;
     Null
     RetC
   }
-  .method [public static] <"HH\\mixed" N > Field##default_value(<"HH\\string" "HH\\string" > $atom) {
+  .method [public static] (14,14) <"HH\\mixed" N > Field##default_value(<"HH\\string" "HH\\string" > $atom) {
+    .srcloc 14:8,14:12;
     VerifyParamType $atom
+    .srcloc 14:8,14:12;
     String "A"
+    .srcloc 14:8,14:12;
     CGetL2 $atom
     Eq
     JmpNZ L0
+    .srcloc 14:8,14:12;
     String "B"
+    .srcloc 14:8,14:12;
     CGetL2 $atom
     Eq
     JmpNZ L1
     Jmp L2
   L0:
+    .srcloc 25:23,25:24;
     Int 42
+    .srcloc 14:8,14:12;
     RetC
   L1:
+    .srcloc 32:23,32:37;
     String "default_value"
+    .srcloc 14:8,14:12;
     RetC
   L2:
+    .srcloc 14:8,14:12;
     NewObjD "Exception"
     Dup
     NullUninit
     NullUninit
+    .srcloc 14:8,14:12;
     String "\\C::Field::default_value unknown atom access: "
+    .srcloc 14:8,14:12;
     CGetL $atom
     Concat
+    .srcloc 14:8,14:12;
     FCallCtor <LockWhileUnwinding> 1 1 "0" - ""
     PopC
     LockObj
+    .srcloc 14:8,14:12;
     Throw
+    .srcloc 14:13,14:13;
     Null
     RetC
   }

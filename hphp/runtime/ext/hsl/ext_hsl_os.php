@@ -53,4 +53,10 @@ function pwrite(FileDescriptor $fd, string $data, int $offset);
 <<__Native>>
 function close(FileDescriptor $fd): void;
 
+<<__Native>>
+function pipe(): varray<FileDescriptor>;
+
+<<__Native>>
+function poll_async(FileDescriptor $fd, int $events, int $timeout_ns): Awaitable<int>;
+
 }

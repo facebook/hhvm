@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/file-await.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/native-data.h"
@@ -149,6 +150,51 @@ void HHVM_FUNCTION(HSL_os_close, const Object& obj) {
   HSLFileDescriptor::get(obj)->close();
 }
 
+Array HHVM_FUNCTION(HSL_os_pipe) {
+  int fds[2];
+  throw_errno_if_minus_one(::pipe(fds));
+  return make_varray(
+    HSLFileDescriptor::newInstance(fds[0]),
+    HSLFileDescriptor::newInstance(fds[1])
+  );
+}
+
+Object HHVM_FUNCTION(HSL_os_poll_async,
+                     const Object& fd_wrapper,
+                     int64_t events,
+                     int64_t timeout_ns) {
+  if (!(events & FileEventHandler::READ_WRITE)) {
+    SystemLib::throwExceptionObject("Must poll for read, write, or both");
+  }
+  if (timeout_ns< 0) {
+    SystemLib::throwExceptionObject("Poll timeout must be >= 0");
+  }
+  auto fd = HSLFileDescriptor::fd(fd_wrapper);
+
+  const auto originalFlags = ::fcntl(fd, F_GETFL);
+  // This always succeeds...
+  ::fcntl(fd, F_SETFL, originalFlags | O_ASYNC);
+  // ... but sometimes doesn't actually do anything
+  const bool isAsyncableFd = ::fcntl(fd, F_GETFL) & O_ASYNC;
+  ::fcntl(fd, F_SETFL, originalFlags);
+  if (!isAsyncableFd) {
+    throw_errno_exception(ENOTSUP);
+  }
+
+  auto ev = new FileAwait(
+    fd,
+    events,
+    std::chrono::nanoseconds(timeout_ns)
+  );
+  try {
+    return Object{ev->getWaitHandle()};
+  } catch (...) {
+    assertx(false);
+    ev->abandon();
+    throw;
+  }
+}
+
 struct OSExtension final : Extension {
 
   OSExtension() : Extension("hsl_os", "0.1") {}
@@ -173,6 +219,8 @@ struct OSExtension final : Extension {
     // Linux: ... lots ...
 
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\open, HSL_os_open);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\pipe, HSL_os_pipe);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\poll_async, HSL_os_poll_async);
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\write, HSL_os_write);
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\close, HSL_os_close);
 

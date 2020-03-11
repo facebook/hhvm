@@ -4,7 +4,9 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/asio/asio-external-thread-event.h"
 #include "hphp/runtime/ext/asio/socket-event.h"
+
 #include <atomic>
+#include <chrono>
 #include <memory>
 
 namespace HPHP {
@@ -44,7 +46,7 @@ struct FileAwait : AsioExternalThreadEvent {
     CLOSED,
   };
 
-  FileAwait(int fd, uint16_t events, double timeout);
+  FileAwait(int fd, uint16_t events, std::chrono::nanoseconds timeout);
   ~FileAwait();
   void unserialize(TypedValue& c) override;
   void setFinished(int64_t status);

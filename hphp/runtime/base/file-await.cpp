@@ -4,6 +4,8 @@
 
 #include "hphp/util/compatibility.h"
 
+#include <folly/Chrono.h>
+
 #include <fcntl.h>
 
 namespace HPHP {
@@ -19,7 +21,12 @@ void FileEventHandler::handlerReady(uint16_t events) noexcept {
 
 /////////////////////////////////////////////////////////////////////////////
 
-FileAwait::FileAwait(int fd, uint16_t events, double timeout) {
+FileAwait::FileAwait(
+  int fd,
+  uint16_t events,
+  std::chrono::nanoseconds timeout
+) {
+  assertx(timeout.count() >= 0);
   assertx(fd >= 0);
   assertx(events & FileEventHandler::READ_WRITE);
 
@@ -27,14 +34,12 @@ FileAwait::FileAwait(int fd, uint16_t events, double timeout) {
   m_file = std::make_unique<FileEventHandler>(asio_event_base.get(), fd, *this);
   m_file->registerHandler(events);
 
-  int64_t timeout_ms = timeout * 1000.0;
-  if (timeout_ms > 0) {
+  if (timeout != std::chrono::nanoseconds::zero()) {
     m_timeout = std::make_unique<FileTimeoutHandler>(asio_event_base.get(),
                                                      *this);
-    asio_event_base->runInEventBaseThreadAndWait([this,timeout_ms] {
-      if (m_timeout) {
-        m_timeout->scheduleTimeout(timeout_ms);
-      }
+    asio_event_base->runInEventBaseThreadAndWait([this,timeout] {
+      // Folly internally converts everything to milliseconds, so might as well do the same
+      m_timeout->scheduleTimeout(folly::chrono::ceil<std::chrono::milliseconds>(timeout));
     });
   }
 }
@@ -102,7 +107,16 @@ Object File::await(uint16_t events, double timeout) {
     );
   }
 
-  auto ev = new FileAwait(fd(), events, timeout);
+  // we have a double timeout in seconds, need ms
+  // keeping with ms rather than more accuracy to avoid introducing subtle behavior
+  // changes to existing callsites that expect this behavior, e.g. `stream_await`;
+  // they already need to consider <1ms to be 0 to avoid blocking forever due to
+  // past bugs, so we don't get anything new here.
+  auto ev = new FileAwait(
+    fd(),
+    events,
+    std::chrono::milliseconds(static_cast<int64_t>(timeout * 1000.0))
+  );
   try {
     return Object{ev->getWaitHandle()};
   } catch (...) {

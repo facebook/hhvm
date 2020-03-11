@@ -202,10 +202,8 @@ inline ArraySpec ArraySpec::narrowToVanilla() const {
 }
 
 inline ArraySpec ArraySpec::widenToBespoke() const {
-  if (!(m_sort & IsVanilla)) return *this;
   auto result = *this;
   result.m_sort &= ~IsVanilla;
-  if (!result.m_sort) return Top();
   assertx(result.checkInvariants());
   return result;
 }

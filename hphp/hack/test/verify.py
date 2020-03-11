@@ -448,7 +448,7 @@ def get_hh_flags(test_dir: str) -> List[str]:
             print("No HH_FLAGS file found")
         return []
     with open(path) as f:
-        return shlex.split(f.read().strip())
+        return shlex.split(f.read())
 
 
 def files_with_ext(files: List[str], ext: str) -> List[str]:

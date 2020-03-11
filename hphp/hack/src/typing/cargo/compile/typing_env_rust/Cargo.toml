@@ -5,7 +5,7 @@
 name = "typing_env_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["../../../typing_env.rs", "../../../typing_env_return_info.rs", "../../../typing_env_rust.rs", "../../../typing_env_types.rs", "../../../typing_inference_env.rs", "../../../typing_logic.rs", "../../../typing_tyvar_occurrences.rs"]
+include = ["../../../typing_env.rs", "../../../typing_env_return_info.rs", "../../../typing_env_rust.rs", "../../../typing_env_types.rs", "../../../typing_inference_env.rs", "../../../typing_tyvar_occurrences.rs"]
 
 [lib]
 path = "../../../typing_env_rust.rs"

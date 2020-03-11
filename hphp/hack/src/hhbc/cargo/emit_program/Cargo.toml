@@ -12,6 +12,7 @@ path = "../../emit_program.rs"
 
 [dependencies]
 closure_convert_rust = { path = "../closure_convert" }
+emit_adata_rust = { path = "../emit_adata" }
 emit_body_rust = { path = "../emit_body" }
 emit_class_rust = { path = "../emit_class" }
 emit_constant_rust = { path = "../emit_constant" }

@@ -18,5 +18,6 @@ options = { path = "../options" }
 oxidized = { path = "../../../oxidized" }
 rx_rust = { path = "../rx" }
 bitflags = "1.2"
+indexmap = { version = "1.3", features = ["serde-1", "rayon"] }
 lazy_static = "1.0"
 # @end of Signature

@@ -148,11 +148,11 @@ public:
    * Create a new empty ArrayData with the appropriate ArrayKind.
    */
   static ArrayData* Create();
-  static ArrayData* CreateVec();
-  static ArrayData* CreateDict();
+  static ArrayData* CreateVec(arrprov::Tag tag = {});
+  static ArrayData* CreateDict(arrprov::Tag tag = {});
   static ArrayData* CreateKeyset();
-  static ArrayData* CreateVArray();
-  static ArrayData* CreateDArray();
+  static ArrayData* CreateVArray(arrprov::Tag tag = {});
+  static ArrayData* CreateDArray(arrprov::Tag tag = {});
 
   /*
    * Create a new kPackedKind ArrayData with a single element, `value'.

@@ -38,6 +38,7 @@
 #include "hphp/runtime/vm/type-profile.h"
 
 #include "hphp/util/assertions.h"
+#include "hphp/util/build-info.h"
 #include "hphp/util/mutex.h"
 #include "hphp/util/process.h"
 #include "hphp/util/rank.h"
@@ -817,6 +818,7 @@ std::string mangleUnitSha1(const std::string& fileSha1,
                            const folly::StringPiece fileName,
                            const RepoOptions& opts) {
   std::string t = fileSha1 + '\0'
+    + repoSchemaId().toString()
     + (RuntimeOption::EnableClassLevelWhereClauses ? '1' : '0')
     + (RuntimeOption::AssertEmitted ? '1' : '0')
     + (RuntimeOption::EnablePocketUniverses ? '1' : '0')

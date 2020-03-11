@@ -248,7 +248,6 @@ void apcExtension::moduleInit() {
   HHVM_FE(apc_exists);
   HHVM_FE(apc_size);
   HHVM_FE(apc_cache_info);
-  HHVM_FE(apc_sma_info);
   loadSystemlib();
 }
 
@@ -360,10 +359,10 @@ Variant HHVM_FUNCTION(apc_add,
   if (!apcExtension::Enable) return false;
 
   if (key_or_array.isArray()) {
-    Array valuesArr = key_or_array.toArray();
+    auto valuesArr = key_or_array.asCArrRef();
 
     // errors stores all keys corresponding to entries that could not be cached
-    ArrayInit errors(valuesArr.size(), ArrayInit::Map{});
+    DArrayInit errors(valuesArr.size());
 
     for (ArrayIter iter(valuesArr); iter; ++iter) {
       Variant key = iter.first();
@@ -390,7 +389,7 @@ Variant HHVM_FUNCTION(apc_add,
     raise_invalid_argument_warning("apc key: (not a string)");
     return false;
   }
-  String strKey = key_or_array.toString();
+  auto strKey = key_or_array.asCStrRef();
   if (isKeyInvalid(strKey)) {
     raise_invalid_argument_warning("apc key: (contains invalid characters)");
     return false;
@@ -405,15 +404,15 @@ TypedValue HHVM_FUNCTION(apc_fetch, const Variant& key, bool& success) {
 
   if (key.isArray()) {
     bool tmp = false;
-    Array keys = key.toArray();
-    ArrayInit init(keys.size(), ArrayInit::Map{});
+    auto keys = key.asCArrRef();
+    DArrayInit init(keys.size());
     for (ArrayIter iter(keys); iter; ++iter) {
       Variant k = iter.second();
       if (!k.isString()) {
         raise_invalid_argument_warning("apc key: (not a string)");
         return make_tv<KindOfBoolean>(false);
       }
-      String strKey = k.toString();
+      auto strKey = k.asCStrRef();
       if (apc_store().get(strKey, v)) {
         tmp = true;
         init.set(strKey, v);
@@ -437,8 +436,8 @@ Variant HHVM_FUNCTION(apc_delete,
   if (!apcExtension::Enable) return false;
 
   if (key.isArray()) {
-    Array keys = key.toArray();
-    PackedArrayInit init(keys.size());
+    auto keys = key.asCArrRef();
+    VArrayInit init(keys.size());
     for (ArrayIter iter(keys); iter; ++iter) {
       Variant k = iter.second();
       if (!k.isString()) {
@@ -449,7 +448,7 @@ Variant HHVM_FUNCTION(apc_delete,
       }
     }
     return init.toVariant();
-  } else if(key.is(KindOfObject)) {
+  } else if (key.is(KindOfObject)) {
     if (!key.getObjectData()->getVMClass()->
          classof(SystemLib::s_APCIteratorClass)) {
       raise_error(
@@ -511,24 +510,24 @@ Variant HHVM_FUNCTION(apc_exists,
                       const Variant& key) {
   if (!apcExtension::Enable) return false;
 
-  if (key.isArray()) {
-    Array keys = key.toArray();
-    PackedArrayInit init(keys.size());
-    for (ArrayIter iter(keys); iter; ++iter) {
-      Variant k = iter.second();
-      if (!k.isString()) {
-        raise_invalid_argument_warning("apc key: (not a string)");
-        return false;
-      }
-      String strKey = k.toString();
-      if (apc_store().exists(strKey)) {
-        init.append(strKey);
-      }
+  if (!key.isArray()) return apc_store().exists(key.toString());
+  bool failed = false;
+  auto keys = key.toArray();
+  VArrayInit init(keys.size());
+  IterateV(keys.get(), [&](TypedValue k) {
+    if (!isStringType(type(k))) {
+      raise_invalid_argument_warning("apc key: (not a string)");
+      failed = true;
+      return true;
     }
-    return init.toVariant();
-  }
-
-  return apc_store().exists(key.toString());
+    auto strKey = String{val(k).pstr};
+    if (apc_store().exists(strKey)) {
+      init.append(strKey);
+    }
+    return false;
+  });
+  if  (failed) return false;
+  return init.toVariant();
 }
 
 TypedValue HHVM_FUNCTION(apc_size, const String& key) {
@@ -559,10 +558,12 @@ const uint32_t kCacheInfoSize = 40;
 // Number of elements in the entry array
 const int32_t kEntryInfoSize = 7;
 
-Variant HHVM_FUNCTION(apc_cache_info,
-                      const String& cache_type,
-                      bool limited /* = false */) {
-  ArrayInit info(kCacheInfoSize, ArrayInit::Map{});
+Array HHVM_FUNCTION(
+  apc_cache_info,
+  const String& cache_type,
+  bool limited /* = false */) {
+
+  DArrayInit info(kCacheInfoSize);
   info.add(s_start_time, start_time());
   if (cache_type.size() != 0 && !cache_type.same(s_user)) {
     return info.toArray();
@@ -572,14 +573,14 @@ Variant HHVM_FUNCTION(apc_cache_info,
 
   std::map<const StringData*, int64_t> stats;
   APCStats::getAPCStats().collectStats(stats);
-  for (auto it = stats.begin(); it != stats.end(); it++) {
-    info.add(Variant(it->first, Variant::PersistentStrInit{}), it->second);
+  for (auto const& stat : stats) {
+    info.add(StrNR{stat.first}, make_tv<KindOfInt64>(stat.second));
   }
   if (!limited) {
     auto const entries = apc_store().getEntriesInfo();
-    PackedArrayInit ents(entries.size());
+    VArrayInit ents(entries.size());
     for (auto& entry : entries) {
-      ArrayInit ent(kEntryInfoSize, ArrayInit::Map{});
+      DArrayInit ent(kEntryInfoSize);
       ent.add(s_info,
               Variant::attach(StringData::Make(entry.key.c_str())));
       ent.add(s_in_memory, entry.inMem);
@@ -593,10 +594,6 @@ Variant HHVM_FUNCTION(apc_cache_info,
     info.add(s_cache_list, ents.toArray(), false);
   }
   return info.toArray();
-}
-
-Array HHVM_FUNCTION(apc_sma_info, bool /*limited*/ /* = false */) {
-  return empty_darray();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -992,7 +989,7 @@ int apc_rfc1867_progress(apc_rfc1867_data* rfc1867ApcData, unsigned int event,
       len = strlen(data->name);
       if (len > RFC1867_NAME_MAXLEN) len = RFC1867_NAME_MAXLEN;
       rfc1867ApcData->name = std::string(data->name, len);
-      ArrayInit track(6, ArrayInit::Map{});
+      DArrayInit track(6);
       track.set(s_total, rfc1867ApcData->content_length);
       track.set(s_current, rfc1867ApcData->bytes_processed);
       track.set(s_filename, rfc1867ApcData->filename);
@@ -1014,7 +1011,7 @@ int apc_rfc1867_progress(apc_rfc1867_data* rfc1867ApcData, unsigned int event,
         Variant v;
         if (apc_store().get(rfc1867ApcData->tracking_key, v)) {
           if (v.isArray()) {
-            ArrayInit track(6, ArrayInit::Map{});
+            DArrayInit track(6);
             track.set(s_total, rfc1867ApcData->content_length);
             track.set(s_current, rfc1867ApcData->bytes_processed);
             track.set(s_filename, rfc1867ApcData->filename);
@@ -1038,7 +1035,7 @@ int apc_rfc1867_progress(apc_rfc1867_data* rfc1867ApcData, unsigned int event,
       rfc1867ApcData->bytes_processed = data->post_bytes_processed;
       rfc1867ApcData->cancel_upload = data->cancel_upload;
       rfc1867ApcData->temp_filename = data->temp_filename;
-      ArrayInit track(8, ArrayInit::Map{});
+      DArrayInit track(8);
       track.set(s_total, rfc1867ApcData->content_length);
       track.set(s_current, rfc1867ApcData->bytes_processed);
       track.set(s_filename, rfc1867ApcData->filename);
@@ -1062,7 +1059,7 @@ int apc_rfc1867_progress(apc_rfc1867_data* rfc1867ApcData, unsigned int event,
       } else {
         rfc1867ApcData->rate =
           8.0*rfc1867ApcData->bytes_processed;  /* Too quick */
-        ArrayInit track(8, ArrayInit::Map{});
+        DArrayInit track(8);
         track.set(s_total, rfc1867ApcData->content_length);
         track.set(s_current, rfc1867ApcData->bytes_processed);
         track.set(s_rate, rfc1867ApcData->rate);

@@ -102,10 +102,8 @@ TypedValue HHVM_FUNCTION(apc_size, const String& key);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant HHVM_FUNCTION(apc_cache_info,
-                      const String& cache_type /* = "" */,
-                      bool limited /* = false */);
-Array HHVM_FUNCTION(apc_sma_info,
+Array HHVM_FUNCTION(apc_cache_info,
+                    const String& cache_type /* = "" */,
                     bool limited /* = false */);
 
 ///////////////////////////////////////////////////////////////////////////////

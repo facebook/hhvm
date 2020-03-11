@@ -363,40 +363,38 @@ let try_bind_to_equal_bound ~freshen env r var on_error =
       if not freshen then
         env
       else
-        ITySet.fold
-          (fun upper_bound env ->
-            ITySet.fold
-              (fun lower_bound env ->
-                if Env.tyvar_is_solved_or_skip_global env var then
-                  let (env, ty) = Env.expand_var env r var in
-                  let ty = LoclType ty in
-                  let env =
-                    Typing_utils.sub_type_i env lower_bound ty on_error
-                  in
-                  let env =
-                    Typing_utils.sub_type_i env ty upper_bound on_error
-                  in
-                  env
-                else
+        (* Search for lower bound and upper bound pair that shallowly match.
+         * Then freshen the inner types on the matched type. We then want
+         * to make var equal to the matched type so we add the constraints
+         *  var <: matched_ty and matched_ty <: var
+         * Finally we bind var to matched_ty
+         *)
+        let shallow_match =
+          ITySet.find_first_opt
+            (fun lower_bound ->
+              ITySet.exists
+                (fun upper_bound ->
                   match (lower_bound, upper_bound) with
-                  | (LoclType lower_bound, LoclType upper_bound)
-                    when ty_equal_shallow env lower_bound upper_bound ->
-                    let (env, ty) = freshen_inside_ty env lower_bound in
-                    let env =
-                      Typing_utils.sub_type env lower_bound ty on_error
-                    in
-                    let env =
-                      Typing_utils.sub_type env ty upper_bound on_error
-                    in
-                    let (env, ty) =
-                      union_any_if_any_in_lower_bounds env ty lower_bounds
-                    in
-                    bind env var ty
-                  | _ -> env)
-              lower_bounds
-              env)
-          upper_bounds
-          env
+                  | (LoclType lower_bound, LoclType upper_bound) ->
+                    ty_equal_shallow env lower_bound upper_bound
+                  | _ -> false)
+                upper_bounds)
+            lower_bounds
+        in
+        let env =
+          match shallow_match with
+          | Some (LoclType shallow_match) ->
+            let (env, ty) = freshen_inside_ty env shallow_match in
+            let var_ty = mk (r, Tvar var) in
+            let env = Typing_utils.sub_type env ty var_ty on_error in
+            let env = Typing_utils.sub_type env var_ty ty on_error in
+            let (env, ty) =
+              union_any_if_any_in_lower_bounds env ty lower_bounds
+            in
+            bind env var ty
+          | _ -> env
+        in
+        env
 
 (* Always solve a type variable.
 We are here because we eagerly solve a type variable to see

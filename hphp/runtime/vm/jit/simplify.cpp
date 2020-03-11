@@ -2276,7 +2276,6 @@ const StaticString
     s_msgDictToStr("Dict to string conversion"),
     s_msgKeysetToStr("Keyset to string conversion"),
     s_msgFuncToStr("Func to string conversion"),
-    s_msgFuncToBool("Func to bool conversion"),
     s_msgFuncToInt("Func to int conversion"),
     s_msgFuncToDbl("Func to double conversion"),
     s_msgClsMethToStr("Implicit clsmeth to string conversion"),
@@ -2319,12 +2318,7 @@ SSATmp* simplifyConvTVToBool(State& env, const IRInstruction* inst) {
     return gen(env, ConvObjToBool, inst->taken(), src);
   }
   if (srcType <= TRes)  return cns(env, true);
-  if (srcType <= TFunc) {
-    if (RuntimeOption::EvalRaiseFuncConversionWarning) {
-      gen(env, RaiseWarning, inst->taken(), cns(env, s_msgFuncToBool.get()));
-    }
-    return cns(env, true);
-  }
+  if (srcType <= TFunc) return cns(env, true);
   if (srcType <= TClsMeth) return cns(env, true);
 
   return nullptr;

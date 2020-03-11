@@ -31,6 +31,7 @@ namespace HPHP {
 // We want to avoid potential include cycle with func.h/class.h, so putting
 // forward declarations here is more feasible and simpler.
 const StringData* funcToStringHelper(const Func* func);
+int64_t funcToInt64Helper(const Func* func);
 const StringData* classToStringHelper(const Class* cls);
 Array clsMethToVecHelper(const ClsMethDataRef clsMeth);
 void raiseClsMethConvertWarningHelper(const char* toType);
@@ -64,12 +65,7 @@ inline bool tvToBool(TypedValue cell) {
     case KindOfResource:      return cell.m_data.pres->data()->o_toBoolean();
     case KindOfRecord:        raise_convert_record_to_type("bool"); break;
     case KindOfFunc:
-      if (RuntimeOption::EvalRaiseFuncConversionWarning) {
-        raise_warning("Func to bool conversion");
-      }
-      return true;
     case KindOfClass:
-      return classToStringHelper(cell.m_data.pclass)->toBoolean();
     case KindOfClsMeth:       return true;
   }
   not_reached();
@@ -102,12 +98,9 @@ inline int64_t tvToInt(TypedValue cell) {
     case KindOfResource:      return cell.m_data.pres->data()->o_toInt64();
     case KindOfRecord:        raise_convert_record_to_type("int"); break;
     case KindOfFunc:
-      if (RuntimeOption::EvalRaiseFuncConversionWarning) {
-        raise_warning("Func to int conversion");
-      }
-      return 0;
+      return funcToInt64Helper(cell.m_data.pfunc);
     case KindOfClass:
-      return classToStringHelper(cell.m_data.pclass)->toInt64(10);
+      return classToStringHelper(cell.m_data.pclass)->toInt64();
     case KindOfClsMeth:
       raiseClsMethConvertWarningHelper("int");
       return 1;

@@ -35,6 +35,7 @@
 
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
+#include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/system/systemlib.h"
@@ -404,9 +405,7 @@ bool Variant::toBooleanHelper() const {
     case KindOfObject:        return m_data.pobj->toBoolean();
     case KindOfResource:      return m_data.pres->data()->o_toBoolean();
     case KindOfFunc:
-      return funcToStringHelper(m_data.pfunc)->toBoolean();
     case KindOfClass:
-      return classToStringHelper(m_data.pclass)->toBoolean();
     case KindOfClsMeth:       return true;
     case KindOfRecord:
       raise_convert_record_to_type("bool");
@@ -439,7 +438,7 @@ int64_t Variant::toInt64Helper(int base /* = 10 */) const {
     case KindOfObject:        return m_data.pobj->toInt64();
     case KindOfResource:      return m_data.pres->data()->o_toInt64();
     case KindOfFunc:
-      return funcToStringHelper(m_data.pfunc)->toInt64();
+      return funcToInt64Helper(m_data.pfunc);
     case KindOfClass:
       return classToStringHelper(m_data.pclass)->toInt64();
     case KindOfClsMeth:
@@ -448,43 +447,6 @@ int64_t Variant::toInt64Helper(int base /* = 10 */) const {
     case KindOfRecord:
       raise_convert_record_to_type("int");
       return 0;
-  }
-  not_reached();
-}
-
-double Variant::toDoubleHelper() const {
-  switch (m_type) {
-    case KindOfUninit:
-    case KindOfNull:          return 0.0;
-    case KindOfBoolean:
-    case KindOfInt64:         return (double)toInt64();
-    case KindOfDouble:        return m_data.dbl;
-    case KindOfPersistentString:
-    case KindOfString:        return m_data.pstr->toDouble();
-    case KindOfPersistentDArray:
-    case KindOfDArray:
-    case KindOfPersistentVArray:
-    case KindOfVArray:
-    case KindOfPersistentVec:
-    case KindOfVec:
-    case KindOfPersistentDict:
-    case KindOfDict:
-    case KindOfPersistentKeyset:
-    case KindOfKeyset:
-    case KindOfPersistentArray:
-    case KindOfArray:         return (double)toInt64();
-    case KindOfObject:        return m_data.pobj->toDouble();
-    case KindOfResource:      return m_data.pres->data()->o_toDouble();
-    case KindOfFunc:
-      return funcToStringHelper(m_data.pfunc)->toDouble();
-    case KindOfClass:
-      return classToStringHelper(m_data.pclass)->toDouble();
-    case KindOfClsMeth:
-      raiseClsMethConvertWarningHelper("double");
-      return 1.0;
-    case KindOfRecord:
-      raise_convert_record_to_type("double");
-      return 0.0;
   }
   not_reached();
 }

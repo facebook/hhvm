@@ -112,17 +112,11 @@ enable_if_lval_t<T, void> tvCastToBooleanInPlace(T tv) {
         tvDecRefRes(tv);
         continue;
 
-      case KindOfFunc:
-        b = funcToStringHelper(val(tv).pfunc)->toBoolean();
-        continue;
-
-      case KindOfClass:
-        b = classToStringHelper(val(tv).pclass)->toBoolean();
-        continue;
-
       case KindOfClsMeth:
-        b = true;
         tvDecRefClsMeth(tv);
+      case KindOfFunc:
+      case KindOfClass:
+        b = true;
         continue;
 
       case KindOfRecord:
@@ -201,7 +195,10 @@ enable_if_lval_t<T, void> tvCastToDoubleInPlace(T tv) {
         continue;
 
       case KindOfFunc:
-        d = funcToStringHelper(val(tv).pfunc)->toDouble();
+        if (RuntimeOption::EvalRaiseFuncConversionWarning) {
+          raise_warning("Func to double conversion");
+        }
+        d = val(tv).pfunc->name()->toDouble();
         continue;
 
       case KindOfClass:
@@ -286,7 +283,7 @@ enable_if_lval_t<T, void> tvCastToInt64InPlace(T tv) {
         continue;
 
       case KindOfFunc:
-        i = funcToStringHelper(val(tv).pfunc)->toInt64();
+        i = funcToInt64Helper(val(tv).pfunc);
         continue;
 
       case KindOfClass:
@@ -358,7 +355,7 @@ double tvCastToDouble(TypedValue tv) {
       if (RuntimeOption::EvalRaiseFuncConversionWarning) {
         raise_warning("Func to double conversion");
       }
-      return 0.0;
+      return tv.m_data.pfunc->name()->toDouble();
 
     case KindOfClass:
       return classToStringHelper(tv.m_data.pclass)->toDouble();

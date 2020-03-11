@@ -914,7 +914,7 @@ struct Variant : private TypedValue {
   }
   double toDouble() const {
     if (m_type == KindOfDouble) return m_data.dbl;
-    return toDoubleHelper();
+    return tvCastToDouble(*asTypedValue());
   }
 
   String toString() const& {
@@ -1290,7 +1290,6 @@ struct Variant : private TypedValue {
 private:
   bool   toBooleanHelper() const;
   int64_t  toInt64Helper(int base = 10) const;
-  double toDoubleHelper() const;
   Array  toPHPArrayHelper() const;
   Resource toResourceHelper() const;
 

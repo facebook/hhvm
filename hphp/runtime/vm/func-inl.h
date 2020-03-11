@@ -173,6 +173,13 @@ inline const StringData* funcToStringHelper(const Func* func) {
   return func->name();
 }
 
+inline int64_t funcToInt64Helper(const Func* func) {
+  if (RuntimeOption::EvalRaiseFuncConversionWarning) {
+    raise_warning("Func to int conversion");
+  }
+  return func->name()->toInt64();
+}
+
 inline NamedEntity* Func::getNamedEntity() {
   assertx(!shared()->m_preClass);
   return *reinterpret_cast<LowPtr<NamedEntity>*>(&m_namedEntity);

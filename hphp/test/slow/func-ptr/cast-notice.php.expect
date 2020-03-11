@@ -1,0 +1,72 @@
+[static] $s = 'foobar'
++-----------------+----------------------+--------------------------------+
+|                 | Result               | Error?                         |
++=================+======================+================================+
+| (bool)$s        | bool(true)           |                                |
+| (int)$s         | int(0)               |                                |
+| (float)$s       | float(0)             |                                |
+| (string)$s      | string(6) "foobar"   |                                |
+| $s == true      | bool(true)           |                                |
+| true == $s      | bool(true)           |                                |
+| $s == false     | bool(false)          |                                |
+| false == $s     | bool(false)          |                                |
+| !$s             | bool(false)          |                                |
+| !!$s            | bool(true)           |                                |
+| if ($s) ...     | ok!                  |                                |
+| switch ($s) ... | ok!                  |                                |
++-----------------+----------------------+--------------------------------+
+
+[dynamic] $s = LV('foobar')
++-----------------+----------------------+--------------------------------+
+|                 | Result               | Error?                         |
++=================+======================+================================+
+| (bool)$s        | bool(true)           |                                |
+| (int)$s         | int(0)               |                                |
+| (float)$s       | float(0)             |                                |
+| (string)$s      | string(6) "foobar"   |                                |
+| $s == true      | bool(true)           |                                |
+| true == $s      | bool(true)           |                                |
+| $s == false     | bool(false)          |                                |
+| false == $s     | bool(false)          |                                |
+| !$s             | bool(false)          |                                |
+| !!$s            | bool(true)           |                                |
+| if ($s) ...     | ok!                  |                                |
+| switch ($s) ... | ok!                  |                                |
++-----------------+----------------------+--------------------------------+
+
+[static] $f = fun('foobar')
++-----------------+----------------------+--------------------------------+
+|                 | Result               | Error?                         |
++=================+======================+================================+
+| (bool)$f        | bool(true)           |                                |
+| (int)$f         | int(0)               | Func to int conversion         |
+| (float)$f       | float(0)             | Func to double conversion      |
+| (string)$f      | string(6) "foobar"   | Func to string conversion      |
+| $f == true      | bool(true)           |                                |
+| true == $f      | bool(true)           |                                |
+| $f == false     | bool(false)          |                                |
+| false == $f     | bool(false)          |                                |
+| !$f             | bool(false)          |                                |
+| !!$f            | bool(true)           |                                |
+| if ($f) ...     | ok!                  |                                |
+| switch ($f) ... | ok!                  |                                |
++-----------------+----------------------+--------------------------------+
+
+[dynamic] $f = LV(fun('foobar'))
++-----------------+----------------------+--------------------------------+
+|                 | Result               | Error?                         |
++=================+======================+================================+
+| (bool)$f        | bool(true)           |                                |
+| (int)$f         | int(0)               | Func to int conversion         |
+| (float)$f       | float(0)             | Func to double conversion      |
+| (string)$f      | string(6) "foobar"   | Func to string conversion      |
+| $f == true      | bool(true)           |                                |
+| true == $f      | bool(true)           |                                |
+| $f == false     | bool(false)          |                                |
+| false == $f     | bool(false)          |                                |
+| !$f             | bool(false)          |                                |
+| !!$f            | bool(true)           |                                |
+| if ($f) ...     | ok!                  |                                |
+| switch ($f) ... | ok!                  |                                |
++-----------------+----------------------+--------------------------------+
+

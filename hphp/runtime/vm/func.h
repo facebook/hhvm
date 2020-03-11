@@ -1474,6 +1474,8 @@ void logFunc(const Func* func, StructuredLogEntry& ent);
  */
 const StringData* funcToStringHelper(const Func* func);
 
+int64_t funcToInt64Helper(const Func* func);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }

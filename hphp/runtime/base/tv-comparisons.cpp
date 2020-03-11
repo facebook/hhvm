@@ -774,7 +774,7 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const Func* val) {
              op(cell.m_data.num, 0);
     }
     case KindOfBoolean:
-      return op(!!cell.m_data.num, funcToStringHelper(val)->toBoolean());
+      return op(!!cell.m_data.num, true);
 
     case KindOfDouble: {
       auto const num = stringToNumeric(funcToStringHelper(val));
@@ -867,7 +867,7 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const Class* val) {
              op(cell.m_data.num, 0);
     }
     case KindOfBoolean:
-      return op(!!cell.m_data.num, classToStringHelper(val)->toBoolean());
+      return op(!!cell.m_data.num, true);
 
     case KindOfDouble: {
       auto const num = stringToNumeric(classToStringHelper(val));

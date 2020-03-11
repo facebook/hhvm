@@ -40,11 +40,11 @@ Class* s_FileDescriptorClass = nullptr;
 IMPLEMENT_REQUEST_LOCAL(std::set<int>, s_fds_to_close);
 
 [[noreturn]]
-void throw_errno_exception(int number) {
+void throw_errno_exception(int number, const String& message = String()) {
   throw_object(
     s_ErrnoException,
     make_vec_array(
-      folly::sformat("Errno {}: {}", number, ::strerror(number)),
+      message.isNull() ? folly::sformat("Errno {}: {}", number, ::strerror(number)) : message,
       number
     )
   );
@@ -139,6 +139,24 @@ Object HHVM_FUNCTION(HSL_os_open, const String& path, int64_t flags, int64_t mod
   return HSLFileDescriptor::newInstance(fd);
 }
 
+String HHVM_FUNCTION(HSL_os_read, const Object& obj, int max) {
+  if (max <= 0) {
+    throw_errno_exception(EINVAL, "Max bytes can not be negative");
+  }
+  if (max > StringData::MaxSize) {
+    max = StringData::MaxSize;
+  }
+  String buf(max, ReserveString);
+  auto fd = HSLFileDescriptor::fd(obj);
+  ssize_t read = ::read(fd, buf.mutableData(), max);
+  if (read < 0) {
+    buf.clear();
+    throw_errno_exception(errno);
+  }
+  buf.setSize(read);
+  return buf;
+}
+
 int64_t HHVM_FUNCTION(HSL_os_write, const Object& obj, const String& data) {
   auto fd = HSLFileDescriptor::fd(obj);
   ssize_t written = ::write(fd, data.data(), data.length());
@@ -221,6 +239,7 @@ struct OSExtension final : Extension {
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\open, HSL_os_open);
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\pipe, HSL_os_pipe);
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\poll_async, HSL_os_poll_async);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\read, HSL_os_read);
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\write, HSL_os_write);
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\close, HSL_os_close);
 

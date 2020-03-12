@@ -24,7 +24,7 @@ use oxidized::{
 };
 
 use bitflags::bitflags;
-
+use indexmap::IndexSet;
 use std::{borrow::Cow, collections::BTreeMap};
 
 type LabelMap<'a> = BTreeMap<label::Id, &'a Instruct>;
@@ -274,11 +274,11 @@ pub(super) fn emit_return(e: &mut Emitter, in_finally_epilogue: bool, env: &mut 
                         ReificationLevel::Not => Ok(InstrSeq::make_verify_ret_type_c()),
                         ReificationLevel::Maybe => Ok(InstrSeq::gather(vec![
                             emit_expression::get_type_structure_for_hint(
-                                e.options(),
+                                e,
                                 &[],
-                                &BTreeMap::new(),
+                                &IndexSet::new(),
                                 &h,
-                            ),
+                            )?,
                             InstrSeq::make_verify_ret_type_ts(),
                         ])),
                         ReificationLevel::Definitely => {

@@ -34,13 +34,11 @@ use options::CompilerFlags;
 use oxidized::{aast, ast as tast, ast_defs, doc_comment::DocComment, namespace_env, pos::Pos};
 use reified_generics_helpers as RGH;
 use runtime::TypedValue;
-use std::collections::BTreeMap;
-
-static THIS: &'static str = "$this";
-
-extern crate bitflags;
 
 use bitflags::bitflags;
+use indexmap::IndexSet;
+
+static THIS: &'static str = "$this";
 
 /// Optional arguments for emit_body; use Args::default() for defaults
 pub struct Args<'a, 'b> {
@@ -548,48 +546,43 @@ pub fn emit_method_prolog(
     tparams: &[tast::Tparam],
     should_emit_init_this: bool,
 ) -> Result {
-    let make_param_instr = |(param, ast_param): (&HhasParam, &tast::FunParam)| -> Option<Result> {
-        let param_name = &param.name;
-        let param_name = || ParamId::ParamNamed(param_name.into());
-        if param.is_variadic {
-            None
-        } else {
-            use RGH::ReificationLevel as L;
-            match has_type_constraint(env, param.type_info.as_ref(), ast_param) {
-                (L::Unconstrained, _) => None,
-                (L::Not, _) => Some(Ok(InstrSeq::make_verify_param_type(param_name()))),
-                (L::Maybe, Some(h)) => Some(Ok(InstrSeq::gather(vec![
-                    emit_expression::get_type_structure_for_hint(
-                        emitter.options(),
-                        tparams
-                            .iter()
-                            .map(|fp| fp.name.1.as_str())
-                            .collect::<Vec<_>>()
-                            .as_slice(),
-                        &BTreeMap::new(),
-                        &h,
-                    ),
-                    InstrSeq::make_verify_param_type(param_name()),
-                ]))),
-                (L::Definitely, Some(h)) => {
-                    let check = InstrSeq::make_istypel(
-                        local::Type::Named((&param.name).into()),
-                        IstypeOp::OpNull,
-                    );
-                    let verify_instr = InstrSeq::make_verify_param_type(param_name());
-                    Some(RGH::simplify_verify_type(
-                        emitter,
-                        env,
-                        pos,
-                        check,
-                        &h,
-                        verify_instr,
-                    ))
+    let mut make_param_instr =
+        |(param, ast_param): (&HhasParam, &tast::FunParam)| -> Result<Option<InstrSeq>> {
+            let param_name = &param.name;
+            let param_name = || ParamId::ParamNamed(param_name.into());
+            if param.is_variadic {
+                Ok(None)
+            } else {
+                use RGH::ReificationLevel as L;
+                match has_type_constraint(env, param.type_info.as_ref(), ast_param) {
+                    (L::Unconstrained, _) => Ok(None),
+                    (L::Not, _) => Ok(Some(InstrSeq::make_verify_param_type(param_name()))),
+                    (L::Maybe, Some(h)) => Ok(Some(InstrSeq::gather(vec![
+                        emit_expression::get_type_structure_for_hint(
+                            emitter,
+                            tparams
+                                .iter()
+                                .map(|fp| fp.name.1.as_str())
+                                .collect::<Vec<_>>()
+                                .as_slice(),
+                            &IndexSet::new(),
+                            &h,
+                        )?,
+                        InstrSeq::make_verify_param_type_ts(param_name()),
+                    ]))),
+                    (L::Definitely, Some(h)) => {
+                        let check = InstrSeq::make_istypel(
+                            local::Type::Named((&param.name).into()),
+                            IstypeOp::OpNull,
+                        );
+                        let verify_instr = InstrSeq::make_verify_param_type_ts(param_name());
+                        RGH::simplify_verify_type(emitter, env, pos, check, &h, verify_instr)
+                            .map(Some)
+                    }
+                    _ => Err(unrecoverable("impossible")),
                 }
-                _ => Some(Err(Error::Unrecoverable("impossible".into()))),
             }
-        }
-    };
+        };
 
     let ast_params = ast_params
         .iter()
@@ -601,7 +594,7 @@ pub fn emit_method_prolog(
     let param_instrs = params
         .iter()
         .zip(ast_params.into_iter())
-        .filter_map(make_param_instr)
+        .filter_map(|p| make_param_instr(p).transpose())
         .collect::<Result<Vec<_>>>()?;
 
     let mut instrs = vec![emit_pos(emitter, pos)];
@@ -711,17 +704,17 @@ fn set_emit_statement_state(
         }
         _ => None,
     };
-    let default_dropthrough =
-        if default_dropthrough.is_none() && flags.contains(Flags::ASYNC) && verify_return.is_some()
-        {
-            Some(InstrSeq::gather(vec![
-                InstrSeq::make_null(),
-                InstrSeq::make_verify_ret_type_c(),
-                InstrSeq::make_retc(),
-            ]))
-        } else {
-            default_dropthrough.clone()
-        };
+    let default_dropthrough = if default_dropthrough.is_some() {
+        default_dropthrough
+    } else if flags.contains(Flags::ASYNC) && verify_return.is_some() {
+        Some(InstrSeq::gather(vec![
+            InstrSeq::make_null(),
+            InstrSeq::make_verify_ret_type_c(),
+            InstrSeq::make_retc(),
+        ]))
+    } else {
+        None
+    };
     let (num_out, verify_out) = emit_verify_out(params);
 
     emit_statement::set_state(

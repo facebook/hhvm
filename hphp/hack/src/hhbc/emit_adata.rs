@@ -81,7 +81,7 @@ fn rewrite_typed_value(e: &mut Emitter, instr: &mut Instruct) -> Result<()> {
     Ok(())
 }
 
-fn get_array_identifier(e: &mut Emitter, tv: &TV) -> String {
+pub fn get_array_identifier(e: &mut Emitter, tv: &TV) -> String {
     if e.options().hhvm.flags.contains(HhvmFlags::ARRAY_PROVENANCE) {
         next_adata_id(e, tv)
     } else {

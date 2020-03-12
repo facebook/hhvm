@@ -8,6 +8,7 @@
 use ast_class_expr_rust::ClassExpr;
 use ast_constant_folder_rust as ast_constant_folder;
 use ast_scope_rust::Scope;
+use emit_adata_rust as emit_adata;
 use emit_fatal_rust as emit_fatal;
 use emit_symbol_refs_rust as emit_symbol_refs;
 use emit_type_constant_rust as emit_type_constant;
@@ -15,8 +16,12 @@ use env::{emitter::Emitter, local, Env, Flags as EnvFlags};
 use hhbc_ast_rust::*;
 use hhbc_id_rust::{class, function, method, prop, Id};
 use hhbc_string_utils_rust as string_utils;
-use instruction_sequence_rust::{unrecoverable, Error::Unrecoverable, InstrSeq, Result};
-use itertools::Itertools;
+use instruction_sequence_rust::{
+    unrecoverable,
+    Error::{self, Unrecoverable},
+    InstrSeq, Result,
+};
+use itertools::{Either, Itertools};
 use label_rust::Label;
 use naming_special_names_rust::{
     emitter_special_functions, fb, pseudo_consts, pseudo_functions, special_functions,
@@ -24,11 +29,23 @@ use naming_special_names_rust::{
 };
 use ocaml_helper::int_of_str_opt;
 use options::{CompilerFlags, HhvmFlags, LangFlags, Options};
-use oxidized::{aast, aast_defs, ast as tast, ast_defs, local_id, pos::Pos};
+use oxidized::{
+    aast, aast_defs,
+    aast_visitor::{visit, visit_mut, AstParams, Node, NodeMut, Visitor, VisitorMut},
+    ast as tast, ast_defs, local_id,
+    pos::Pos,
+};
 use runtime::TypedValue;
 use scope_rust::scope;
 
-use std::{collections::BTreeMap, convert::TryInto, iter, str::FromStr};
+use indexmap::IndexSet;
+use std::{
+    collections::{BTreeMap, HashSet},
+    convert::TryInto,
+    iter,
+    result::Result as StdResult,
+    str::FromStr,
+};
 
 #[derive(Debug)]
 pub struct EmitJmpResult {
@@ -250,14 +267,30 @@ mod inout_locals {
 }
 
 pub fn get_type_structure_for_hint(
-    opts: &Options,
+    e: &mut Emitter,
     tparams: &[&str],
-    targ_map: &BTreeMap<&str, i64>,
+    targ_map: &IndexSet<String>,
     hint: &aast::Hint,
-) -> InstrSeq {
-    let _tv =
-        emit_type_constant::hint_to_type_constant(opts, tparams, targ_map, &hint, false, false);
-    unimplemented!("TODO(hrust) after porting most of emit_adata")
+) -> Result<InstrSeq> {
+    let targ_map: BTreeMap<&str, i64> = targ_map
+        .iter()
+        .enumerate()
+        .map(|(i, n)| (n.as_str(), i as i64))
+        .collect();
+    let tv = emit_type_constant::hint_to_type_constant(
+        e.options(),
+        tparams,
+        &targ_map,
+        &hint,
+        false,
+        false,
+    )?;
+    let i = emit_adata::get_array_identifier(e, &tv);
+    Ok(if hack_arr_dv_arrs(e.options()) {
+        InstrSeq::make_lit_const(InstructLitConst::Dict(i))
+    } else {
+        InstrSeq::make_lit_const(InstructLitConst::Array(i))
+    })
 }
 
 pub struct Setrange {
@@ -587,7 +620,7 @@ fn emit_lambda(env: &Env, (fndef, ids): &(tast::Fun_, Vec<aast_defs::Lid>)) -> R
 
 pub fn emit_await(emitter: &mut Emitter, env: &Env, pos: &Pos, expr: &tast::Expr) -> Result {
     let tast::Expr(_, e) = expr;
-    let cant_inline_gen_functions = emitter
+    let cant_inline_gen_functions = !emitter
         .options()
         .hhvm
         .flags
@@ -657,7 +690,7 @@ fn inline_gena_call(emitter: &mut Emitter, env: &Env, arg: &tast::Expr) -> Resul
                 method::from_raw_string(if hack_arr_dv_arrs {
                     "fromDict"
                 } else {
-                    "fromArray"
+                    "fromDArray"
                 }),
                 class::from_raw_string("HH\\AwaitAllWaitHandle"),
             ),
@@ -667,7 +700,7 @@ fn inline_gena_call(emitter: &mut Emitter, env: &Env, arg: &tast::Expr) -> Resul
             emit_iter(
                 e,
                 InstrSeq::make_cgetl(arr_local.clone()),
-                |key_local, val_local| {
+                |val_local, key_local| {
                     InstrSeq::gather(vec![
                         InstrSeq::make_cgetl(val_local),
                         InstrSeq::make_whresult(),
@@ -1796,6 +1829,11 @@ fn emit_reified_generic_instrs(e: &mut Emitter, pos: &Pos, is_fun: bool, index: 
     )
 }
 
+fn emit_reified_type(e: &mut Emitter, env: &Env, pos: &Pos, name: &str) -> Result<InstrSeq> {
+    emit_reified_type_opt(e, env, pos, name)?
+        .ok_or_else(|| emit_fatal::raise_fatal_runtime(&Pos::make_none(), "Invalid reified param"))
+}
+
 fn emit_reified_type_opt(
     e: &mut Emitter,
     env: &Env,
@@ -2424,7 +2462,7 @@ pub fn emit_set_range_expr(
 }
 
 pub fn is_reified_tparam(env: &Env, is_fun: bool, name: &str) -> Option<(usize, bool)> {
-    let is = |tparams: &Vec<tast::Tparam>| {
+    let is = |tparams: &[tast::Tparam]| {
         let is_soft = |ual: &Vec<tast::UserAttribute>| {
             ual.iter().any(|ua| &ua.name.1 == user_attributes::SOFT)
         };
@@ -2438,9 +2476,9 @@ pub fn is_reified_tparam(env: &Env, is_fun: bool, name: &str) -> Option<(usize, 
         })
     };
     if is_fun {
-        env.scope.get_fun_tparams().and_then(is)
+        is(env.scope.get_fun_tparams())
     } else {
-        is(&env.scope.get_class_params().list)
+        is(&env.scope.get_class_tparams().list[..])
     }
 }
 
@@ -2747,14 +2785,196 @@ pub fn emit_lval_op_nonlist_steps(
     }
 }
 
+pub fn fixup_type_arg<'a>(
+    env: &Env,
+    isas: bool,
+    hint: &'a tast::Hint,
+) -> Result<impl AsRef<tast::Hint> + 'a> {
+    struct Checker<'s> {
+        erased_tparams: &'s [&'s str],
+        isas: bool,
+    };
+    impl<'s> Visitor for Checker<'s> {
+        type P = AstParams<(), Option<Error>>;
+
+        fn object(&mut self) -> &mut dyn Visitor<P = Self::P> {
+            self
+        }
+
+        fn visit_hint_fun(
+            &mut self,
+            c: &mut (),
+            hf: &tast::HintFun,
+        ) -> StdResult<(), Option<Error>> {
+            hf.param_tys.accept(c, self.object())?;
+            hf.return_ty.accept(c, self.object())
+        }
+
+        fn visit_hint(&mut self, c: &mut (), h: &tast::Hint) -> StdResult<(), Option<Error>> {
+            use tast::{Hint_ as H_, Id};
+            match h.1.as_ref() {
+                H_::Happly(Id(_, id), _)
+                    if self.erased_tparams.contains(&id.as_str()) && self.isas =>
+                {
+                    return Err(Some(emit_fatal::raise_fatal_parse(
+                        &h.0,
+                        "Erased generics are not allowd in is/as expressions",
+                    )))
+                }
+                _ => (),
+            }
+            h.recurse(c, self.object())
+        }
+
+        fn visit_hint_(&mut self, c: &mut (), h: &tast::Hint_) -> StdResult<(), Option<Error>> {
+            use tast::{Hint_ as H_, Id};
+            match h {
+                H_::Happly(Id(_, id), _) if self.erased_tparams.contains(&id.as_str()) => Err(None),
+                _ => h.recurse(c, self.object()),
+            }
+        }
+    }
+
+    struct Updater<'s> {
+        erased_tparams: &'s [&'s str],
+    }
+    impl<'s> VisitorMut for Updater<'s> {
+        type P = AstParams<(), ()>;
+
+        fn object(&mut self) -> &mut dyn VisitorMut<P = Self::P> {
+            self
+        }
+
+        fn visit_hint_fun(&mut self, c: &mut (), hf: &mut tast::HintFun) -> StdResult<(), ()> {
+            <Vec<tast::Hint> as NodeMut<Self::P>>::accept(&mut hf.param_tys, c, self.object())?;
+            <tast::Hint as NodeMut<Self::P>>::accept(&mut hf.return_ty, c, self.object())
+        }
+
+        fn visit_hint_(&mut self, c: &mut (), h: &mut tast::Hint_) -> StdResult<(), ()> {
+            use tast::{Hint_ as H_, Id};
+            match h {
+                H_::Happly(Id(_, id), _) if self.erased_tparams.contains(&id.as_str()) => {
+                    Ok(*id = "_".into())
+                }
+                _ => h.recurse(c, self.object()),
+            }
+        }
+    }
+    let erased_tparams = get_erased_tparams(env);
+    let erased_tparams = erased_tparams.as_slice();
+    let mut checker = Checker {
+        erased_tparams,
+        isas,
+    };
+    match visit(&mut checker, &mut (), hint) {
+        Ok(()) => Ok(Either::Left(hint)),
+        Err(Some(error)) => Err(error),
+        Err(None) => {
+            let mut updater = Updater { erased_tparams };
+            let mut hint = hint.clone();
+            visit_mut(&mut updater, &mut (), &mut hint).unwrap();
+            Ok(Either::Right(hint))
+        }
+    }
+}
+
 pub fn emit_reified_arg(
-    _emitter: &mut Emitter,
-    _env: &Env,
-    _pos: &Pos,
+    e: &mut Emitter,
+    env: &Env,
+    pos: &Pos,
     isas: bool,
     hint: &tast::Hint,
 ) -> Result<(InstrSeq, bool)> {
-    unimplemented!("TODO(hrust)")
+    struct Collector<'a> {
+        current_tags: &'a HashSet<&'a str>,
+        // TODO(hrust): acc should be typed to (usize, HashMap<'str, usize>)
+        // which avoids allocation. This currently isn't possible since visitor need to expose
+        // lifttime of nodes, for example,
+        // `fn visit_hint_(..., h_: &'a tast::Hint_) -> ... {}`
+        acc: IndexSet<String>,
+    }
+
+    impl<'a> Collector<'a> {
+        fn add_name(&mut self, name: &str) {
+            if self.current_tags.contains(name) && !self.acc.contains(name) {
+                self.acc.insert(name.into());
+            }
+        }
+    }
+
+    impl<'a> Visitor for Collector<'a> {
+        type P = AstParams<(), ()>;
+
+        fn object(&mut self) -> &mut dyn Visitor<P = Self::P> {
+            self
+        }
+
+        fn visit_hint_(&mut self, c: &mut (), h_: &tast::Hint_) -> StdResult<(), ()> {
+            use tast::{Hint_ as H_, Id};
+            match h_ {
+                H_::Haccess(_, sids) => Ok(sids.iter().for_each(|Id(_, name)| self.add_name(name))),
+                H_::Happly(Id(_, name), h) => {
+                    self.add_name(name);
+                    h.accept(c, self.object())
+                }
+                H_::Habstr(name) => Ok(self.add_name(name)),
+                _ => h_.recurse(c, self.object()),
+            }
+        }
+    }
+    let hint = fixup_type_arg(env, isas, hint)?;
+    let hint = hint.as_ref();
+    fn f<'a>(mut acc: HashSet<&'a str>, tparam: &'a tast::Tparam) -> HashSet<&'a str> {
+        if tparam.reified != tast::ReifyKind::Erased {
+            acc.insert(&tparam.name.1);
+        }
+        acc
+    }
+    let current_tags = env
+        .scope
+        .get_fun_tparams()
+        .iter()
+        .fold(HashSet::<&str>::new(), |acc, t| f(acc, &*t));
+    let class_tparams = env.scope.get_class_tparams();
+    let current_tags = class_tparams
+        .list
+        .iter()
+        .fold(current_tags, |acc, t| f(acc, &*t));
+
+    let mut collector = Collector {
+        current_tags: &current_tags,
+        acc: IndexSet::new(),
+    };
+    visit(&mut collector, &mut (), hint).unwrap();
+    match hint.1.as_ref() {
+        tast::Hint_::Happly(tast::Id(_, name), hs)
+            if hs.is_empty() && current_tags.contains(name.as_str()) =>
+        {
+            Ok((emit_reified_type(e, env, pos, name)?, false))
+        }
+        _ => {
+            let ts = get_type_structure_for_hint(e, &[], &collector.acc, hint)?;
+            let ts_list = if collector.acc.is_empty() {
+                ts
+            } else {
+                let values = collector
+                    .acc
+                    .iter()
+                    .map(|v| emit_reified_type(e, env, pos, v))
+                    .collect::<Result<Vec<_>>>()?;
+                InstrSeq::gather(vec![InstrSeq::gather(values), ts])
+            };
+            Ok((
+                InstrSeq::gather(vec![
+                    ts_list,
+                    InstrSeq::make_combine_and_resolve_type_struct(
+                        (collector.acc.len() + 1) as isize,
+                    ),
+                ]),
+                collector.acc.is_empty(),
+            ))
+        }
+    }
 }
 
 pub fn get_local(e: &mut Emitter, env: &Env, pos: &Pos, s: &str) -> Result<local::Type> {

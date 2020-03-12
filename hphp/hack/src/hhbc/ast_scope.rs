@@ -121,25 +121,25 @@ impl<'a> Scope<'a> {
         tparams
     }
 
-    pub fn get_fun_tparams(&self) -> Option<&Vec<ast::Tparam>> {
+    pub fn get_fun_tparams(&self) -> &[ast::Tparam] {
         for scope_item in self.items.iter().rev() {
             match scope_item {
                 ScopeItem::Class(_) => {
-                    return None;
+                    return &[];
                 }
                 ScopeItem::Function(fd) => {
-                    return Some(&fd.tparams);
+                    return &fd.tparams[..];
                 }
                 ScopeItem::Method(md) => {
-                    return Some(&md.tparams);
+                    return &md.tparams[..];
                 }
                 _ => (),
             }
         }
-        None
+        &[]
     }
 
-    pub fn get_class_params(&self) -> Cow<ast::ClassTparams> {
+    pub fn get_class_tparams(&self) -> Cow<ast::ClassTparams> {
         for scope_item in self.items.iter().rev() {
             if let ScopeItem::Class(cd) = scope_item {
                 return Cow::Borrowed(&cd.tparams);

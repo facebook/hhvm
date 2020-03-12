@@ -1363,7 +1363,45 @@ fn print_final<W: Write>(w: &mut W, f: &InstructFinal) -> Result<(), W::Error> {
             w.write(" ")?;
             print_member_key(w, mk)
         }
-        _ => not_impl!(),
+        F::UnsetM(n, mk) => {
+            w.write("UnsetM ")?;
+            print_int(w, n)?;
+            w.write(" ")?;
+            print_member_key(w, mk)
+        }
+        F::SetM(i, mk) => {
+            w.write("SetM ")?;
+            print_int(w, i)?;
+            w.write(" ")?;
+            print_member_key(w, mk)
+        }
+        F::SetOpM(i, op, mk) => {
+            w.write("SetOpM ")?;
+            print_int(w, i)?;
+            w.write(" ")?;
+            print_eq_op(w, &op)?;
+            w.write(" ")?;
+            print_member_key(w, mk)
+        }
+        F::IncDecM(i, op, mk) => {
+            w.write("IncDecM ")?;
+            print_int(w, i)?;
+            w.write(" ")?;
+            print_incdec_op(w, &op)?;
+            w.write(" ")?;
+            print_member_key(w, mk)
+        }
+        F::SetRangeM(i, op, s) => {
+            w.write("SetRangeM ")?;
+            print_int(w, i)?;
+            w.write(" ")?;
+            w.write(match op {
+                SetrangeOp::Forward => "Forward",
+                SetrangeOp::Reverse => "Reverse",
+            })?;
+            w.write(" ")?;
+            print_int(w, &(*s as usize))
+        }
     }
 }
 
@@ -1564,6 +1602,10 @@ fn print_misc<W: Write>(w: &mut W, misc: &InstructMisc) -> Result<(), W::Error> 
         M::LockObj => w.write("LockObj"),
         M::VerifyParamType(id) => {
             w.write("VerifyParamType ")?;
+            print_param_id(w, id)
+        }
+        M::VerifyParamTypeTS(id) => {
+            w.write("VerifyParamTypeTS ")?;
             print_param_id(w, id)
         }
         M::Silence(local, op) => {

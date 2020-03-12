@@ -42,7 +42,7 @@ pub enum HoistKind {
     Hoisted,
 }
 
-#[derive(Clone)] // TODO(hrust): Clone is used when bactracking now, can we somehow avoid it?
+#[derive(Debug, Clone)] // TODO(hrust): Clone is used when bactracking now, can we somehow avoid it?
 struct Variables {
     /// all variables declared/used in the scope
     all_vars: HashSet<String>,
@@ -50,12 +50,16 @@ struct Variables {
     parameter_names: HashSet<String>,
 }
 
-#[derive(Clone)] // TODO(hrust): do we need clone
+#[derive(Debug, Clone)] // TODO(hrust): do we need clone
 struct Env<'a> {
     /// What is the current context?
     // TODO(hrust) VisitorMut doesn't provide an interface
     // where a reference to visited NodeMut outlives the Context type (in this case Env<'a>),
     // so we have no choice but to clone in ach ScopeItem (i.e., can't se Borrowed for 'a)
+
+    /// Span of function/method body
+    pos: Pos, // TODO(hrust) change to &'a Pos after dependent Visitor/Node lifetime is fixed.
+    /// What is the current context?
     scope: ast_scope::Scope<'a>,
     variable_scopes: Vec<Variables>,
     /// How many existing classes are there?
@@ -89,6 +93,7 @@ impl<'a> Env<'a> {
         let all_vars = get_vars(&scope, false, &vec![], Either::Left(&defs))?;
 
         Ok(Self {
+            pos: Pos::make_none(),
             scope,
             variable_scopes: vec![Variables {
                 all_vars,
@@ -107,8 +112,10 @@ impl<'a> Env<'a> {
         e: ast_scope::ScopeItem<'a>,
         is_closure_body: bool,
         params: &[FunParam],
+        pos: Pos,
         body: &Block,
     ) -> Result<()> {
+        self.pos = pos;
         self.scope.push_item(e);
         let all_vars = get_vars(&self.scope, is_closure_body, params, Either::Right(body))?;
         Ok(self.variable_scopes.push(Variables {
@@ -123,7 +130,13 @@ impl<'a> Env<'a> {
         is_closure_body: bool,
         fd: &Fun_,
     ) -> Result<()> {
-        self.with_function_like_(e, is_closure_body, &fd.params, &fd.body.ast)
+        self.with_function_like_(
+            e,
+            is_closure_body,
+            &fd.params,
+            fd.span.clone(),
+            &fd.body.ast,
+        )
     }
 
     fn with_function(&mut self, fd: &Fun_) -> Result<()> {
@@ -139,6 +152,7 @@ impl<'a> Env<'a> {
             ast_scope::ScopeItem::Method(Cow::Owned(md.clone())),
             false,
             &md.params,
+            md.span.clone(),
             &md.body.ast,
         )
     }
@@ -182,6 +196,45 @@ impl<'a> Env<'a> {
         let r = f(self);
         self.in_using = old_in_using;
         r
+    }
+
+    fn check_if_in_async_context(&self) -> Result<()> {
+        let check_valid_fun_kind = |name, kind: FunKind| {
+            if !kind.is_async() {
+                Err(emit_fatal::raise_fatal_parse(
+                    &self.pos,
+                    format!(
+                        "Function '{}' contains 'await' but is not declared as async.",
+                        string_utils::strip_global_ns(name)
+                    ),
+                ))
+            } else {
+                Ok(())
+            }
+        };
+        let check_lambda = |is_async: bool| {
+            if !is_async {
+                Err(emit_fatal::raise_fatal_parse(
+                    &self.pos,
+                    "Await may only appear in an async function",
+                ))
+            } else {
+                Ok(())
+            }
+        };
+        let head = self.scope.iter().next();
+        use ast_scope::ScopeItem as S;
+        match head {
+            None => Err(emit_fatal::raise_fatal_parse(
+                &self.pos,
+                "'await' can only be used inside a function",
+            )),
+            Some(S::Lambda(l)) => check_lambda(l.is_async),
+            Some(S::LongLambda(l)) => check_lambda(l.is_async),
+            Some(S::Class(_)) => Ok(()), /* Syntax error, wont get here */
+            Some(S::Function(fd)) => check_valid_fun_kind(&fd.name.1, fd.fun_kind),
+            Some(S::Method(md)) => check_valid_fun_kind(&md.name.1, md.fun_kind),
+        }
     }
 }
 
@@ -317,12 +370,10 @@ fn add_generic(env: &mut Env, st: &mut State, var: &str) {
         let is_reified_var =
             |param: &Tparam| param.reified != ReifyKind::Erased && param.name.1 == var;
         if is_fun {
-            env.scope
-                .get_fun_tparams()
-                .and_then(|x| x.iter().position(is_reified_var))
+            env.scope.get_fun_tparams().iter().position(is_reified_var)
         } else {
             env.scope
-                .get_class_params()
+                .get_class_tparams()
                 .list
                 .iter()
                 .position(is_reified_var)
@@ -683,12 +734,8 @@ fn convert_lambda<'a>(
         }
     };
 
-    let fun_tparams = lambda_env
-        .scope
-        .get_fun_tparams()
-        .unwrap_or(&vec![])
-        .to_vec();
-    let class_tparams = lambda_env.scope.get_class_params();
+    let fun_tparams = lambda_env.scope.get_fun_tparams().to_vec();
+    let class_tparams = lambda_env.scope.get_class_tparams();
     let class_num = total_class_count(lambda_env, st);
 
     let is_static = if is_long_lambda {
@@ -1019,6 +1066,10 @@ impl<'a> VisitorMut for ClosureConvertVisitor<'a> {
 
     fn visit_stmt_(&mut self, env: &mut Env<'a>, stmt: &mut Stmt_) -> Result<()> {
         match stmt {
+            Stmt_::Awaitall(x) => {
+                env.check_if_in_async_context()?;
+                x.recurse(env, self.object())
+            }
             Stmt_::Do(x) => {
                 let (b, e) = (&mut x.0, &mut x.1);
                 env.with_in_using(false, |env| {
@@ -1036,6 +1087,12 @@ impl<'a> VisitorMut for ClosureConvertVisitor<'a> {
                         self.visit_stmt(env, stmt)?;
                     })
                 })
+            }
+            Stmt_::Foreach(x) => {
+                if x.1.is_await_as_v() || x.1.is_await_as_kv() {
+                    env.check_if_in_async_context()?
+                }
+                x.recurse(env, self.object())
             }
             Stmt_::For(x) => {
                 let (e1, e2, e3, b) = (&mut x.0, &mut x.1, &mut x.2, &mut x.3);
@@ -1073,6 +1130,9 @@ impl<'a> VisitorMut for ClosureConvertVisitor<'a> {
                 Ok(self.state.current_function_state.has_finally |= !x.2.is_empty())
             }
             Stmt_::Using(x) => {
+                if x.has_await {
+                    env.check_if_in_async_context()?;
+                }
                 self.visit_expr(env, &mut x.expr)?;
                 env.with_in_using(true, |env| {
                     Ok(for stmt in x.block.iter_mut() {
@@ -1118,14 +1178,14 @@ impl<'a> VisitorMut for ClosureConvertVisitor<'a> {
                 if {
                     if let Expr_::Id(ref id) = (x.1).1 {
                         let name = strip_id(id);
-                        (["hh\\meth_caller", "meth_caller"]
+                        ["hh\\meth_caller", "meth_caller"]
                             .iter()
                             .any(|n| n.eq_ignore_ascii_case(name))
                             && env
                                 .options
                                 .hhvm
                                 .flags
-                                .contains(HhvmFlags::EMIT_METH_CALLER_FUNC_POINTERS))
+                                .contains(HhvmFlags::EMIT_METH_CALLER_FUNC_POINTERS)
                     } else {
                         false
                     }
@@ -1265,6 +1325,11 @@ impl<'a> VisitorMut for ClosureConvertVisitor<'a> {
                 };
                 x.recurse(env, self.object())?;
                 Expr_::ClassGet(x)
+            }
+            Expr_::Await(mut x) => {
+                env.check_if_in_async_context()?;
+                x.recurse(env, self.object())?;
+                Expr_::Await(x)
             }
             mut x => {
                 x.recurse(env, self.object())?;

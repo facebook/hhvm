@@ -14,11 +14,7 @@ use hhbc_hhas_rust::IoWrite;
 use itertools::Either::*;
 use multifile_rust as multifile;
 use options::Options;
-use oxidized::{
-    namespace_env::Env as NamespaceEnv,
-    relative_path::{self, RelativePath},
-    s_map::SMap,
-};
+use oxidized::relative_path::{self, RelativePath};
 use stack_limit::{StackLimit, KI, MI};
 
 use std::{
@@ -89,18 +85,6 @@ fn process_single_file_impl(
     let rel_path = RelativePath::make(relative_path::Prefix::Dummy, filepath.to_owned());
     let env = Env {
         filepath: rel_path,
-        // TODO(hrust) port empty_from_popt
-        empty_namespace: ocamlrep::rc::RcOc::new(NamespaceEnv {
-            is_codegen: true,
-            ns_uses: SMap::new(),
-            class_uses: SMap::new(),
-            record_def_uses: SMap::new(),
-            fun_uses: SMap::new(),
-            const_uses: SMap::new(),
-            name: None,
-            auto_ns_map: vec![],
-            disable_xhp_element_mangling: false,
-        }),
         config_jsons: vec![],
         config_list: vec![],
         flags: EnvFlags::empty(),

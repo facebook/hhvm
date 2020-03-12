@@ -31,6 +31,12 @@ impl Hint {
     }
 }
 
+impl AsRef<Hint> for Hint {
+    fn as_ref(&self) -> &Self {
+        self
+    }
+}
+
 impl Lid {
     pub fn name(&self) -> &String {
         crate::local_id::get_name(&self.1)

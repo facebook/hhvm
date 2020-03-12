@@ -184,18 +184,20 @@ fn type_constant_access_list(opts: &Options, sl: Vec<aast::Sid>) -> TypedValue {
 fn resolve_classname(
     tparams: &[&str],
     mut s: String,
-) -> (Vec<(TypedValue, TypedValue)>, Vec<(TypedValue, TypedValue)>) {
+) -> (Option<(TypedValue, TypedValue)>, String) {
     let is_tparam = s == "_" || tparams.contains(&s.as_str());
     if !is_tparam {
         s = class::Type::from_ast_name(s.as_str()).into()
     };
-    let mut classname = vec![];
-    let kind = get_kind(tparams, &s.as_str());
-    if !is_prim(&s) && !is_resolved_classname(&s) {
-        let id = if is_tparam { "name" } else { "classname" }.to_string();
-        classname.push((TypedValue::String(id), TypedValue::String(s)));
-    };
-    (classname, kind)
+    if is_prim(&s) || is_resolved_classname(&s) {
+        (None, s)
+    } else {
+        let id = if is_tparam { "name" } else { "classname" };
+        (
+            Some((TypedValue::String(id.into()), TypedValue::String(s.clone()))),
+            s,
+        )
+    }
 }
 
 fn get_generic_types(
@@ -258,9 +260,16 @@ fn hint_to_type_constant_list(
                     return Ok(r);
                 }
             }
-            let (mut classname, kind) = resolve_classname(tparams, name.to_owned());
-            let mut r = kind;
-            r.append(&mut classname);
+            let (classname, s_res) = resolve_classname(tparams, name.to_owned());
+            let mut r =
+                if s_res.eq_ignore_ascii_case("tuple") || s_res.eq_ignore_ascii_case("shape") {
+                    get_kind(tparams, "unresolved")
+                } else {
+                    get_kind(tparams, s_res.as_str())
+                };
+            if let Some(c) = classname {
+                r.push(c);
+            }
             if !(name.eq_ignore_ascii_case(classes::CLASS_NAME)
                 || name.eq_ignore_ascii_case(classes::TYPE_NAME))
             {

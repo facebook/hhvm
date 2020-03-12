@@ -3216,24 +3216,21 @@ and fixup_type_arg (env : Emit_env.t) ~isas (hint : Aast.hint) =
 and emit_reified_arg env ~isas pos (hint : Aast.hint) =
   let hint = fixup_type_arg env ~isas hint in
   let scope = Emit_env.get_scope env in
-  let f is_fun tparam acc =
+  let f tparam acc =
     match tparam with
     | { A.tp_name = (_, id); A.tp_reified; _ } when not (tp_reified = A.Erased)
       ->
-      SMap.add id is_fun acc
+      SSet.add id acc
     | _ -> acc
   in
   let current_targs =
-    List.fold_right
-      (Ast_scope.Scope.get_fun_tparams scope)
-      ~init:SMap.empty
-      ~f:(f true)
+    List.fold_right (Ast_scope.Scope.get_fun_tparams scope) ~init:SSet.empty ~f
   in
   let current_targs =
     List.fold_right
       (Ast_scope.Scope.get_class_tparams scope).A.c_tparam_list
       ~init:current_targs
-      ~f:(f false)
+      ~f
   in
   let acc = ref (0, SMap.empty) in
   let visitor =
@@ -3243,10 +3240,8 @@ and emit_reified_arg env ~isas pos (hint : Aast.hint) =
       method! on_hint_ _ h =
         let add_name name =
           let (i, map) = !acc in
-          match SMap.find_opt name current_targs with
-          | Some _ when not (SMap.mem name map) ->
+          if SSet.mem name current_targs && not (SMap.mem name map) then
             acc := (i + 1, SMap.add name i map)
-          | _ -> ()
         in
         match h with
         | A.Haccess (_, sids) -> List.iter sids (fun sid -> add_name (snd sid))
@@ -3263,7 +3258,7 @@ and emit_reified_arg env ~isas pos (hint : Aast.hint) =
   visitor#on_hint () hint;
   let (count, targ_map) = !acc in
   match snd hint with
-  | Aast.Happly ((_, name), []) when SMap.mem name current_targs ->
+  | Aast.Happly ((_, name), []) when SSet.mem name current_targs ->
     (emit_reified_type env pos name, false)
   | _ ->
     let ts = get_type_structure_for_hint ~targ_map ~tparams:[] hint in

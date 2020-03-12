@@ -575,6 +575,13 @@ let build_json ctx symbols =
                 symbol_def
                 occ.pos
                 (xrefs, prog)
+            | Function ->
+              process_xref
+                add_func_decl_fact
+                build_func_decl_json_ref
+                symbol_def
+                occ.pos
+                (xrefs, prog)
             | _ -> (xrefs, prog)))
   in
   let progress =

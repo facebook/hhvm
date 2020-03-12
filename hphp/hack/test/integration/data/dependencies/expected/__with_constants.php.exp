@@ -1,10 +1,16 @@
 <?hh
+const array<string, int> ARR = darray[];
+const varray<string> MAP_INDEX = varray[];
+const (int, ?(string, float)) OPTION = tuple(0, null);
+const varray_or_darray<int> CVARRAY_OR_DARRAY = varray[];
 class WithConst {
-  const float CFLOAT = 0.0;
   const string CSTRING = "";
-  const CWITHOUT_HINT = "";
+  const float CFLOAT = 0.0;
   const \SomeEnum CENUM = \SomeEnum::FIRST;
+  const CWITHOUT_HINT = "";
 }
+const \TypedefForString TYPEDEF = "";
+const \HH\keyset<string> KEYSET = keyset[];
 function with_constants(): void {
   $_ = WithConst::CFLOAT;
   $_ = WithConst::CENUM;
@@ -21,25 +27,19 @@ function with_constants(): void {
   $_ = SHAPE3;
   $_ = WithConst::CWITHOUT_HINT;
 }
-const \TypedefForString TYPEDEF = "";
-const shape('a' => int, 'b' => string, ...) SHAPE3 = shape('a' => 0, 'b' => "");
 const shape(\WithConst::CSTRING => int) SHAPE2 =
   shape(\WithConst::CSTRING => 0);
-const array<string, int> ARR = darray[];
-type TypedefForString = string;
-const varray<string> MAP_INDEX = varray[];
-const shape('x' => int, 'y' => \SecondEnum) SHAPE1 =
-  shape('x' => 0, 'y' => \SecondEnum::FIRST);
-const (int, ?(string, float)) OPTION = tuple(0, null);
 const darray<string, int> AGE_RANGE = darray[];
 enum SomeEnum: int {
   FIRST = 0;
   SECOND = 0;
 }
-const varray_or_darray<int> CVARRAY_OR_DARRAY = varray[];
+const shape('a' => int, 'b' => string, ...) SHAPE3 = shape('a' => 0, 'b' => "");
+const shape('x' => int, 'y' => \SecondEnum) SHAPE1 =
+  shape('x' => 0, 'y' => \SecondEnum::FIRST);
+type TypedefForString = string;
 const \HH\classname<\WithConst> CLASSNAME = \WithConst::class;
 enum SecondEnum: string {
   FIRST = "";
   SECOND = "";
 }
-const \HH\keyset<string> KEYSET = keyset[];

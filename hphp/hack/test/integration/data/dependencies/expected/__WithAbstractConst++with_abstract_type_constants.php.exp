@@ -1,5 +1,4 @@
 <?hh
-class WithConst {}
 abstract class WithAbstractConst {
   abstract const type ABS_WO_CONSTRAINT;
   abstract const type ABS_WITH_CONSTRAINT as string;
@@ -7,3 +6,4 @@ abstract class WithAbstractConst {
     this::ABS_WO_CONSTRAINT $arg,
   ): this::ABS_WITH_CONSTRAINT;
 }
+class WithConst {}

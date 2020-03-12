@@ -7,24 +7,48 @@
  *
  *)
 
+open Core_kernel
+
 type 'a t = ('a, unit) Hashtbl.t
 
-let create size = Hashtbl.create size
+let create () = Hashtbl.Poly.create ()
 
-let clear set = Hashtbl.clear set
+let clear = Hashtbl.clear
 
-let copy set = Hashtbl.copy set
+let copy = Hashtbl.copy
 
-let add set x = Hashtbl.replace set x ()
+let add set x = Hashtbl.set set x ()
 
-let mem set x = Hashtbl.mem set x
+let mem = Hashtbl.mem
 
-let remove set x = Hashtbl.remove set x
+let remove = Hashtbl.remove
 
-let iter f set = Hashtbl.iter (fun k _ -> f k) set
+let iter = Hashtbl.iter_keys
 
-let fold f set acc = Hashtbl.fold (fun k _ acc -> f k acc) set acc
+let union set ~other = iter other ~f:(add set)
 
-let length set = Hashtbl.length set
+let fold set ~init ~f =
+  Hashtbl.fold set ~init ~f:(fun ~key ~data:_ acc -> f key acc)
 
-let is_empty set = length set = 0
+let filter set ~f =
+  let to_remove =
+    fold set ~init:[] ~f:(fun elt acc ->
+        if not (f elt) then
+          elt :: acc
+        else
+          acc)
+  in
+  List.iter to_remove ~f:(remove set)
+
+let intersect set ~other = filter ~f:(mem other) set
+
+let length = Hashtbl.length
+
+let is_empty = Hashtbl.is_empty
+
+let to_list = Hashtbl.keys
+
+let of_list list =
+  let set = Hashtbl.Poly.create ~size:(List.length list) () in
+  List.iter list ~f:(add set);
+  set

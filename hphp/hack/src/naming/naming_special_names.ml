@@ -359,10 +359,10 @@ module SpecialFunctions = struct
   let hhas_adata = "__hhas_adata"
 
   let is_special_function =
-    let all_special_functions = [tuple; echo; assert_; autoload; hhas_adata] in
-    let h = HashSet.create (List.length all_special_functions) in
-    List.iter all_special_functions (HashSet.add h);
-    (fun x -> HashSet.mem h x)
+    let all_special_functions =
+      HashSet.of_list [tuple; echo; assert_; autoload; hhas_adata]
+    in
+    (fun x -> HashSet.mem all_special_functions x)
 end
 
 (* There are a number of functions that are automatically imported into the
@@ -427,25 +427,23 @@ module PseudoFunctions = struct
   let die = "\\die"
 
   let all_pseudo_functions =
-    [
-      isset;
-      unset;
-      hh_show;
-      hh_show_env;
-      hh_log_level;
-      hh_force_solve;
-      hh_loop_forever;
-      assert_;
-      echo;
-      empty;
-      exit;
-      die;
-    ]
+    HashSet.of_list
+      [
+        isset;
+        unset;
+        hh_show;
+        hh_show_env;
+        hh_log_level;
+        hh_force_solve;
+        hh_loop_forever;
+        assert_;
+        echo;
+        empty;
+        exit;
+        die;
+      ]
 
-  let is_pseudo_function =
-    let h = HashSet.create (List.length all_pseudo_functions) in
-    List.iter all_pseudo_functions (HashSet.add h);
-    (fun x -> HashSet.mem h x)
+  let is_pseudo_function x = HashSet.mem all_pseudo_functions x
 end
 
 module StdlibFunctions = struct
@@ -515,33 +513,32 @@ module Typehints = struct
 
   let is_reserved_type_hint =
     let reserved_typehints =
-      [
-        null;
-        void;
-        resource;
-        num;
-        arraykey;
-        noreturn;
-        mixed;
-        nonnull;
-        this;
-        dynamic;
-        nothing;
-        int;
-        bool;
-        float;
-        string;
-        array;
-        darray;
-        varray;
-        varray_or_darray;
-        callable;
-        wildcard;
-      ]
+      HashSet.of_list
+        [
+          null;
+          void;
+          resource;
+          num;
+          arraykey;
+          noreturn;
+          mixed;
+          nonnull;
+          this;
+          dynamic;
+          nothing;
+          int;
+          bool;
+          float;
+          string;
+          array;
+          darray;
+          varray;
+          varray_or_darray;
+          callable;
+          wildcard;
+        ]
     in
-    let h = HashSet.create (List.length reserved_typehints) in
-    List.iter reserved_typehints (HashSet.add h);
-    (fun x -> HashSet.mem h x)
+    (fun x -> HashSet.mem reserved_typehints x)
 
   let is_reserved_global_name x =
     x = array || x = callable || x = Classes.cSelf || x = Classes.cParent
@@ -613,25 +610,23 @@ module PseudoConsts = struct
   let die = "\\die"
 
   let all_pseudo_consts =
-    [
-      g__LINE__;
-      g__CLASS__;
-      g__TRAIT__;
-      g__FILE__;
-      g__DIR__;
-      g__FUNCTION__;
-      g__METHOD__;
-      g__NAMESPACE__;
-      g__COMPILER_FRONTEND__;
-      g__FUNCTION_CREDENTIAL__;
-      exit;
-      die;
-    ]
+    HashSet.of_list
+      [
+        g__LINE__;
+        g__CLASS__;
+        g__TRAIT__;
+        g__FILE__;
+        g__DIR__;
+        g__FUNCTION__;
+        g__METHOD__;
+        g__NAMESPACE__;
+        g__COMPILER_FRONTEND__;
+        g__FUNCTION_CREDENTIAL__;
+        exit;
+        die;
+      ]
 
-  let is_pseudo_const =
-    let h = HashSet.create 23 in
-    List.iter all_pseudo_consts (HashSet.add h);
-    (fun x -> HashSet.mem h x)
+  let is_pseudo_const x = HashSet.mem all_pseudo_consts x
 end
 
 module FB = struct
@@ -708,40 +703,37 @@ module Superglobals = struct
 
   let is_superglobal =
     let superglobals =
-      [
-        "$_SERVER";
-        "$_GET";
-        "$_POST";
-        "$_FILES";
-        "$_COOKIE";
-        "$_REQUEST";
-        "$_ENV";
-      ]
+      HashSet.of_list
+        [
+          "$_SERVER";
+          "$_GET";
+          "$_POST";
+          "$_FILES";
+          "$_COOKIE";
+          "$_REQUEST";
+          "$_ENV";
+        ]
     in
-    let h = HashSet.create (List.length superglobals) in
-    List.iter superglobals (HashSet.add h);
-    (fun x -> HashSet.mem h x)
+    (fun x -> HashSet.mem superglobals x)
 end
 
 module PPLFunctions = struct
   let all_reserved =
-    [
-      "sample";
-      "\\sample";
-      "factor";
-      "\\factor";
-      "observe";
-      "\\observe";
-      "condition";
-      "\\condition";
-      "sample_model";
-      "\\sample_model";
-    ]
+    HashSet.of_list
+      [
+        "sample";
+        "\\sample";
+        "factor";
+        "\\factor";
+        "observe";
+        "\\observe";
+        "condition";
+        "\\condition";
+        "sample_model";
+        "\\sample_model";
+      ]
 
-  let is_reserved =
-    let h = HashSet.create 23 in
-    List.iter all_reserved (HashSet.add h);
-    (fun name -> HashSet.mem h name)
+  let is_reserved name = HashSet.mem all_reserved name
 end
 
 module Regex = struct

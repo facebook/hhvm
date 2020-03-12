@@ -1,4 +1,12 @@
 <?hh
+abstract class FlobBase {
+  public function f1(): void {
+    throw new \Exception();
+  }
+}
+final class Flobby extends \FlobBase {
+  use \TFlobby;
+}
 trait TFlobby {
   private function asFlobby(): \Flobby {
     throw new \Exception();
@@ -6,13 +14,5 @@ trait TFlobby {
   final public function g(): void {
     $flobby = $this->asFlobby();
     $flobby->f1();
-  }
-}
-final class Flobby extends \FlobBase {
-  use \TFlobby;
-}
-abstract class FlobBase {
-  public function f1(): void {
-    throw new \Exception();
   }
 }

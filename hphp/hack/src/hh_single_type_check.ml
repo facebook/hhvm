@@ -1172,7 +1172,8 @@ let sort_debug_deps deps =
   |> List.sort ~compare:(fun (a, _) (b, _) -> String.compare a b)
   |> List.map ~f:(fun (obj, roots) ->
          let roots =
-           HashSet.fold List.cons roots [] |> List.sort ~compare:String.compare
+           HashSet.fold roots ~init:[] ~f:List.cons
+           |> List.sort ~compare:String.compare
          in
          (obj, roots))
 
@@ -1864,12 +1865,12 @@ let decl_and_run_mode
       match Caml.Hashtbl.find_opt dbg_deps obj with
       | Some set -> HashSet.add set root
       | None ->
-        let set = HashSet.create 1 in
+        let set = HashSet.create () in
         HashSet.add set root;
         Caml.Hashtbl.replace dbg_deps obj set
     in
     Typing_deps.add_dependency_callback "get_debug_trace" get_debug_trace );
-  let dbg_glean_deps = HashSet.create 0 in
+  let dbg_glean_deps = HashSet.create () in
   ( if mode = Dump_glean_deps then
     (* In addition to actually recording the dependencies in shared memory,
      we build a non-hashed respresentation of the dependency graph

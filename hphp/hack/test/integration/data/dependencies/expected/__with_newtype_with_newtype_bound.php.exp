@@ -1,7 +1,7 @@
 //// strict_toplevel.php
 <?hh
-function with_newtype_with_newtype_bound(M $_): void {}
 newtype M as \N = nothing;
+function with_newtype_with_newtype_bound(M $_): void {}
 
 //// partial_toplevel.php
 <?hh // partial

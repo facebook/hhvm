@@ -1,9 +1,9 @@
 <?hh
-trait TDummy implements \IWithNullaryConstructor {}
 <<__ConsistentConstruct>>
 interface IWithNullaryConstructor {
   public function __construct();
 }
+trait TDummy implements \IWithNullaryConstructor {}
 class WithOptionalConstructorArguments implements \IWithNullaryConstructor {
   use \TDummy;
   public function __construct(

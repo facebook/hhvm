@@ -1,10 +1,4 @@
 <?hh
-class ImplementingBase extends \AbstractBase {
-  public function overridden(): int {
-    throw new \Exception();
-  }
-}
-abstract class AbstractBase {}
 final class Derived extends \ImplementingBase {
   private int $result;
   public function __construct(int $num) {
@@ -15,3 +9,9 @@ final class Derived extends \ImplementingBase {
     return $this->result;
   }
 }
+class ImplementingBase extends \AbstractBase {
+  public function overridden(): int {
+    throw new \Exception();
+  }
+}
+abstract class AbstractBase {}

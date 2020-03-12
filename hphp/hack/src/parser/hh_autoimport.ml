@@ -111,8 +111,7 @@ let consts = []
 let namespaces = ["Rx"]
 
 let is_hh_autoimport =
-  let h = HashSet.create (List.length types) in
-  List.iter types (HashSet.add h);
+  let h = HashSet.of_list types in
   (fun x -> HashSet.mem h x)
 
 let reverse_type id =

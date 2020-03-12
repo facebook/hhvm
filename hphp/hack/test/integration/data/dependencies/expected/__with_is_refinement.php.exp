@@ -1,4 +1,9 @@
 <?hh
+class GenericBase<Tfirst, Tsecond> {}
+enum Mode: int as int {
+  One = 0;
+  Two = 0;
+}
 class GenericDerived<Tfirst> extends \GenericBase<Tfirst, \Mode> {
   public function foo(): void {
     throw new \Exception();
@@ -10,9 +15,4 @@ function with_is_refinement<Tfirst, Tsecond>(
   if ($x is GenericDerived<_>) {
     $x->foo();
   }
-}
-class GenericBase<Tfirst, Tsecond> {}
-enum Mode: int as int {
-  One = 0;
-  Two = 0;
 }

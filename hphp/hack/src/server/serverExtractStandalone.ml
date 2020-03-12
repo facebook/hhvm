@@ -1312,8 +1312,7 @@ let get_implementation_dependencies ctx env cls_name =
         in
         acc
       else
-        HashSet.fold
-          (fun dep acc ->
+        HashSet.fold env.dependencies ~init:acc ~f:(fun dep acc ->
             match dep with
             | SMethod (class_name, method_name) when class_name = ancestor_name
               ->
@@ -1329,8 +1328,6 @@ let get_implementation_dependencies ctx env cls_name =
               else
                 acc
             | _ -> acc)
-          env.dependencies
-          acc
     in
     let result =
       List.fold ~init:[] ~f:add_impls (Class.all_ancestor_names cls)
@@ -1343,13 +1340,10 @@ let get_implementation_dependencies ctx env cls_name =
 let rec add_implementation_dependencies ctx env =
   let open Typing_deps.Dep in
   let size = HashSet.length env.dependencies in
-  HashSet.fold
-    (fun dep acc ->
+  HashSet.fold env.dependencies ~init:[] ~f:(fun dep acc ->
       match dep with
       | Class cls_name -> cls_name :: acc
       | _ -> acc)
-    env.dependencies
-    []
   |> List.concat_map ~f:(get_implementation_dependencies ctx env)
   |> List.iter ~f:(do_add_dep ctx env);
   if HashSet.length env.dependencies <> size then
@@ -1383,7 +1377,7 @@ let collect_dependencies ctx target =
   let filename = get_filename ctx target in
   let env =
     {
-      dependencies = HashSet.create 0;
+      dependencies = HashSet.create ();
       depends_on_make_default = ref false;
       depends_on_any = ref false;
     }
@@ -1482,7 +1476,7 @@ let sort_by_namespace declarations =
     | Some name ->
       ( if Caml.Hashtbl.find_opt nspace.namespaces name = None then
         let nested = Caml.Hashtbl.create 0 in
-        let declarations = HashSet.create 0 in
+        let declarations = HashSet.create () in
         Caml.Hashtbl.add
           nspace.namespaces
           name
@@ -1491,7 +1485,7 @@ let sort_by_namespace declarations =
     | None -> HashSet.add nspace.decls decl
   in
   let namespaces =
-    { namespaces = Caml.Hashtbl.create 0; decls = HashSet.create 0 }
+    { namespaces = Caml.Hashtbl.create 0; decls = HashSet.create () }
   in
   List.iter declarations ~f:(fun decl -> add_decl namespaces decl 0);
   namespaces
@@ -1516,7 +1510,7 @@ let get_code
       Option.value (SMap.find_opt name declarations) ~default:[] @ acc
     in
     let toplevel =
-      HashSet.fold code_from_namespace_decls global_namespace.decls []
+      HashSet.fold global_namespace.decls ~init:[] ~f:code_from_namespace_decls
     in
     let rec code_from_namespace nspace_name nspace_content code =
       let code = "}" :: code in
@@ -1524,7 +1518,10 @@ let get_code
         Caml.Hashtbl.fold code_from_namespace nspace_content.namespaces code
       in
       let code =
-        HashSet.fold code_from_namespace_decls nspace_content.decls code
+        HashSet.fold
+          nspace_content.decls
+          ~init:code
+          ~f:code_from_namespace_decls
       in
       Printf.sprintf "namespace %s {" nspace_name :: code
     in
@@ -1629,7 +1626,7 @@ let get_declarations ctx target class_dependencies global_dependencies =
 let go ctx target =
   try
     let env = collect_dependencies ctx target in
-    let dependencies = HashSet.fold List.cons env.dependencies [] in
+    let dependencies = HashSet.fold env.dependencies ~init:[] ~f:List.cons in
     let (class_dependencies, global_dependencies) =
       List.partition_tf dependencies ~f:(fun dep ->
           Option.is_some (get_class_name dep))

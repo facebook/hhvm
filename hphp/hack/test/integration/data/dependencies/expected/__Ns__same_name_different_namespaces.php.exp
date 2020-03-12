@@ -10,10 +10,10 @@ namespace Test1 {
     }
     class A extends \Test1\NestedTest\UltraNested\B {}
     namespace UltraNested {
+      class B {}
       function noop(): void {
         throw new \Exception();
       }
-      class B {}
     }
   }
 }

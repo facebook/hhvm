@@ -1,10 +1,4 @@
 <?hh
-trait THasFoo {
-  require implements \IHasFoo;
-  public function getFoo(): this::TFoo {
-    throw new \Exception();
-  }
-}
 interface IHasFoo {
   abstract const type TFoo;
 }
@@ -14,4 +8,10 @@ class IntFooWrapper implements \IHasFoo {
 }
 function with_type_const_from_required_interface(IntFooWrapper $w): int {
   return $w->getFoo();
+}
+trait THasFoo {
+  require implements \IHasFoo;
+  public function getFoo(): this::TFoo {
+    throw new \Exception();
+  }
 }

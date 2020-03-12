@@ -240,7 +240,7 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
       let results =
         Glean_dependency_graph.go_to_implementation ~class_name ~globalrev:""
       in
-      HashSet.iter (fun cls -> Printf.printf "%s\n" cls) results;
+      HashSet.iter results ~f:(fun cls -> Printf.printf "%s\n" cls);
       Printf.printf "%d total results\n" (HashSet.length results);
       Lwt.return Exit_status.No_error
     | MODE_GO_TO_IMPL_METHOD name ->

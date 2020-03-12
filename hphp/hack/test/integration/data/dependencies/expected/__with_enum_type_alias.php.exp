@@ -1,6 +1,6 @@
 <?hh
-type SomeEnumType = \SomeEnum;
 function with_enum_type_alias(ThirdEnum $_): void {}
+type SomeEnumType = \SomeEnum;
 enum SomeEnum: int {
   FIRST = 0;
   SECOND = 0;

@@ -1,13 +1,13 @@
 <?hh
-abstract class BBB {
-  abstract const type TA as \AAA;
-}
-abstract class CCC {
-  const type T = this::TA::T;
-  abstract const type TB as \BBB;
-  const type TA = this::TB::TA;
-  public function with_nested_type_access(this::T $_): void {}
-}
 abstract class AAA {
   abstract const type T;
+}
+abstract class CCC {
+  abstract const type TB as \BBB;
+  const type TA = this::TB::TA;
+  const type T = this::TA::T;
+  public function with_nested_type_access(this::T $_): void {}
+}
+abstract class BBB {
+  abstract const type TA as \AAA;
 }

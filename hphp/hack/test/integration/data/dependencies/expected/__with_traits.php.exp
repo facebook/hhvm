@@ -1,10 +1,11 @@
 <?hh
+function with_traits(TraitBase $arg): void {
+  $arg->routine();
+}
+trait ImplementingAbstractBase {}
 class TraitBase extends \AbstractBase {
   use \ImplementingAbstractBase;
   use \T;
-}
-function with_traits(TraitBase $arg): void {
-  $arg->routine();
 }
 abstract class AbstractBase {}
 trait T {
@@ -13,4 +14,3 @@ trait T {
     throw new \Exception();
   }
 }
-trait ImplementingAbstractBase {}

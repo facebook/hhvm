@@ -297,7 +297,7 @@ struct MySQLResult : SweepableResourceData {
   void close() {
     sweep();
     if (isLocalized()) {
-      m_rows.clear();
+      m_rows.reset();
     }
   }
 

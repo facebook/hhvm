@@ -44,7 +44,7 @@ struct TimerPool final : RequestEventHandler {
         timer->~IntervalTimer();
       }
     } while (!m_timers->empty());
-    m_timers.clear();
+    m_timers.reset();
   }
 
  private:

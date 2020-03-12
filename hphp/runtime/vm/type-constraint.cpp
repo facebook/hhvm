@@ -977,7 +977,9 @@ std::string describe_actual_type(tv_rval val) {
     case KindOfPersistentKeyset:
     case KindOfKeyset:        return "HH\\keyset";
     case KindOfPersistentDArray:
-    case KindOfDArray:        return "darray";
+    case KindOfDArray:
+      return UNLIKELY(RuntimeOption::EvalSpecializeDVArray)
+        ? "darray" : "array";
     case KindOfPersistentVArray:
     case KindOfVArray:
       return UNLIKELY(RuntimeOption::EvalSpecializeDVArray)

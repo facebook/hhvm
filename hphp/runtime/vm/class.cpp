@@ -1332,12 +1332,9 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName, ClsCnsLookup what) con
     if (cns.isType()) {
       // Type constants with the low bit set are already resolved and can be
       // returned after masking out that bit.
-      assertx(cnsVal->m_type ==
-             (RuntimeOption::EvalHackArrDVArrs
-              ? KindOfPersistentDict
-              : KindOfPersistentArray)
-            );
-      typeCns = cnsVal->m_data.parr;
+      assertx(isDictOrArrayType(type(cnsVal)));
+      assertx(!isRefcountedType(type(cnsVal)));
+      typeCns = val(cnsVal).parr;
       auto const rawData = reinterpret_cast<intptr_t>(typeCns);
       if (rawData & 0x1) {
         auto const resolved = reinterpret_cast<ArrayData*>(rawData ^ 0x1);

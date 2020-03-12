@@ -236,8 +236,7 @@ namespace {
 
     exCls->initialize();
     auto const traceOptsTV = exCls->getSPropData(s_traceOptsSlot);
-    return traceOptsTV->m_type == KindOfInt64
-      ? traceOptsTV->m_data.num : 0;
+    return type(traceOptsTV) == KindOfInt64 ? val(traceOptsTV).num : 0;
   }
 
   void throwable_init_file_and_line_from_trace(ObjectData* throwable) {
@@ -275,16 +274,12 @@ namespace {
       return;
     }
 
-    assertx(RuntimeOption::EvalHackArrDVArrs ?
-      isVecType(trace_rval.type()) :
-      isArrayType(trace_rval.type())
-    );
+    assertx(isArrayLikeType(trace_rval.type()));
     auto const trace = trace_rval.val().parr;
     for (ArrayIter iter(trace); iter; ++iter) {
-      assertx(iter.second().asTypedValue()->m_type == (
-        RuntimeOption::EvalHackArrDVArrs ? KindOfDict : KindOfArray
-      ));
-      auto const frame = iter.second().asTypedValue()->m_data.parr;
+      auto const& frame_tv = iter.secondRval();
+      assertx(isArrayLikeType(type(frame_tv)));
+      auto const frame = val(frame_tv).parr;
       auto const file = frame->rval(s_file.get());
       auto const line = frame->rval(s_line.get());
       if (file || line) {

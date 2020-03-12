@@ -1389,7 +1389,7 @@ enable_if_lval_t<T, void> tvCastToDArrayInPlace(T tv) {
   assertx(a->dvArraySanityCheck());
 
   val(tv).parr = a;
-  type(tv) = KindOfArray;
+  type(tv) = RuntimeOption::EvalEmitDVArray ? KindOfDArray : KindOfArray;
   assertx(tvIsPlausible(*tv));
 }
 

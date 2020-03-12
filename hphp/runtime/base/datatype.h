@@ -299,6 +299,20 @@ inline bool isArrayLikeType(MaybeDataType t) {
   return t && isArrayLikeType(*t);
 }
 
+/*
+ * When any PHP (d|v|)array will do.
+ */
+constexpr bool isPHPArrayType(DataType t) {
+  return t <= KindOfArray;
+}
+inline bool isPHPArrayType(MaybeDataType t) {
+  return t && isPHPArrayType(*t);
+}
+
+/*
+ * Currently matches any PHP (d|v|)array.
+ * Eventually will only match arrays without dvarray-ness.
+ */
 constexpr bool isArrayType(DataType t) {
   return t <= KindOfArray;
 }

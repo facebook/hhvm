@@ -271,6 +271,9 @@ inline DataType ArrayData::toDataType() const {
     if (isVArray()) {
       assertx(isPackedKind());
       return KindOfVArray;
+    } else if (isDArray()) {
+      assertx(isMixedKind());
+      return KindOfDArray;
     }
   }
   switch (kind()) {
@@ -295,6 +298,9 @@ inline DataType ArrayData::toPersistentDataType() const {
     if (isVArray()) {
       assertx(isPackedKind());
       return KindOfPersistentVArray;
+    } else if (isDArray()) {
+      assertx(isMixedKind());
+      return KindOfPersistentDArray;
     }
   }
   switch (kind()) {

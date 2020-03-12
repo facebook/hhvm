@@ -18,7 +18,7 @@ use hhbc_hhas_rust::{context::Context, print_program, Write};
 use instruction_sequence_rust::Error;
 use itertools::{Either, Either::*};
 use ocamlrep::rc::RcOc;
-use options::{LangFlags, Options, PhpismFlags};
+use options::{LangFlags, Options, Php7Flags, PhpismFlags};
 use oxidized::{
     ast as Tast, namespace_env::Env as NamespaceEnv, parser_options::ParserOptions, pos::Pos,
     relative_path::RelativePath,
@@ -229,10 +229,19 @@ fn parse_file(
 ) -> Either<(Pos, String, bool), (Tast::Program, bool)> {
     let mut aast_env = AastEnv::default();
     aast_env.codegen = true;
-    aast_env.keep_errors = true;
-    aast_env.show_all_errors = true;
-    aast_env.fail_open = true;
+    aast_env.fail_open = false;
+    // Ocaml's implementation
+    // let enable_uniform_variable_syntax o = o.option_php7_uvs in
+    // php5_compat_mode:
+    //   (not (Hhbc_options.enable_uniform_variable_syntax hhbc_options))
+    aast_env.php5_compat_mode = !opts.php7_flags.contains(Php7Flags::UVS);
+    aast_env.hacksperimental = opts
+        .hhvm
+        .hack_lang_flags
+        .contains(LangFlags::HACKSPERIMENTAL);
+    aast_env.keep_errors = false;
     aast_env.parser_options = create_parser_options(opts);
+
     let source_text = SourceText::make(RcOc::new(filepath.clone()), text);
     let indexed_source_text = IndexedSourceText::new(source_text);
     let ast_result = AastParser::from_text(&aast_env, &indexed_source_text, Some(stack_limit));

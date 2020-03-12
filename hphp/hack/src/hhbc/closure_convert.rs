@@ -1179,13 +1179,13 @@ impl<'a> VisitorMut for ClosureConvertVisitor<'a> {
                                 )
                             }
                             _ => {
-                                return Err(emit_fatal::raise_fatal_parse(pos, "Invalid class"));
+                                return Err(emit_fatal::raise_fatal_parse(pc, "Invalid class"));
                             }
                         }
                     }
                     (Expr_::ClassConst(_), Some(_)) => {
                         return Err(emit_fatal::raise_fatal_parse(
-                            pos,
+                            pc,
                             "Class must be a Class or string type",
                         ));
                     }

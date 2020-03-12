@@ -347,15 +347,9 @@ static_assert(KindOfUninit == static_cast<DataType>(0),
 MaybeDataType get_datatype(
   const std::string& name,
   bool can_be_collection,
-  bool is_function,
-  bool is_xhp,
-  bool is_tuple,
   bool is_nullable,
   bool is_soft
 ) {
-  if (is_function || is_xhp || is_tuple) {
-    return KindOfObject;
-  }
   if (can_be_collection) {
     if (!strcasecmp(name.c_str(), "array"))      return KindOfArray;
     if (!strcasecmp(name.c_str(), "HH\\vec"))    return KindOfVec;

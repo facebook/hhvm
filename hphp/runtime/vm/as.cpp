@@ -2588,8 +2588,10 @@ bool ensure_pseudomain(AsmState& as) {
 
 static StaticString s_native("__Native");
 
-MaybeDataType type_constraint_to_data_type(LowStringPtr user_type,
-  const TypeConstraint& tc) {
+MaybeDataType type_constraint_to_data_type(
+  LowStringPtr user_type,
+  const TypeConstraint& tc
+) {
     if (auto type = tc.typeName()) {
       // in type_annotation.cpp this code uses m_typeArgs
       // as indicator that type can represent one of collection types
@@ -2597,14 +2599,11 @@ MaybeDataType type_constraint_to_data_type(LowStringPtr user_type,
       // collection types but we don't have direct way to figure out if
       // type used to have type arguments - do it indirectly by checking
       // if name of user type contains '<'
-      auto has_type_args =
+      auto const has_type_args =
         user_type && user_type->slice().str().find('<') != std::string::npos;
       return get_datatype(
         type->toCppString(),
         has_type_args,
-        false, // no syntactic functions in type annotations
-        false, // no xhp type annotation
-        false, // no tuples in type annotation
         tc.isNullable(),
         tc.isSoft());
     }

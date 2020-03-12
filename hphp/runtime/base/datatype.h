@@ -165,9 +165,6 @@ using MaybeDataType = folly::Optional<DataType>;
 MaybeDataType get_datatype(
   const std::string& name,
   bool can_be_collection,
-  bool is_function,
-  bool is_xhp,
-  bool is_tuple,
   bool is_nullable,
   bool is_soft
 );

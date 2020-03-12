@@ -83,6 +83,10 @@ impl<'a> TypeBuilder<'a> {
 
 /// All type builders go here
 impl<'a> TypeBuilder<'a> {
+    pub fn alloc<T>(&self, x: T) -> &T {
+        self.alloc.alloc(x)
+    }
+
     // All type construction should go through here
     fn mk(&'a self, reason: PReason<'a>, ty_: Ty_<'a>) -> Ty<'a> {
         Ty(reason, self.alloc.alloc(ty_))

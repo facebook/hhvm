@@ -4,14 +4,17 @@
 // LICENSE file in the "hack" directory of this source tree.
 use bumpalo::collections::Vec;
 
+use oxidized::aast;
+use oxidized::ident::Ident;
 use oxidized::pos::Pos;
-use oxidized::{aast, ident};
 
-use typing_collections_rust::{IMap, SMap};
-use typing_defs_rust::{ITySet, PReason, Ty};
+use typing_collections_rust::{IMap, ISet, SMap};
+use typing_defs_rust::{ITySet, PReason, Ty, Ty_};
 
+use crate::typing_make_type::TypeBuilder;
 use crate::typing_tyvar_occurrences;
 
+#[derive(Clone)]
 pub struct TyvarConstraints<'a> {
     /// Does this type variable appear covariantly in the type of the expression?
     pub appears_covariantly: bool,
@@ -34,13 +37,15 @@ pub struct TyvarConstraints<'a> {
     pub pu_accesses: SMap<'a, (Ty<'a>, &'a aast::Sid, Ty<'a>, &'a aast::Sid)>,
 }
 
+#[derive(Clone)]
 pub enum SolvingInfo<'a> {
     /// when the type variable is bound to a type
-    TVIType(Ty<'a>),
+    Type(Ty<'a>),
     /// when the type variable is still unsolved
-    TVIConstraints(TyvarConstraints<'a>),
+    Constraints(&'a TyvarConstraints<'a>),
 }
 
+#[derive(Clone)]
 pub struct TyvarInfo<'a> {
     /// Where was the type variable introduced? (e.g. generic method invocation,
     /// new object construction)
@@ -50,11 +55,88 @@ pub struct TyvarInfo<'a> {
     pub solving_info: SolvingInfo<'a>,
 }
 
-pub type Tvenv<'a> = IMap<TyvarInfo<'a>>;
+pub type Tvenv<'a> = IMap<&'a TyvarInfo<'a>>;
 
 pub struct TypingInferenceEnv<'a> {
+    pub builder: &'a TypeBuilder<'a>,
     pub tvenv: Tvenv<'a>,
-    pub tyvars_stack: Vec<'a, (&'a Pos, Vec<'a, ident::Ident>)>,
+    pub tyvars_stack: Vec<'a, (&'a Pos, Vec<'a, Ident>)>,
     pub tyvar_occurrences: typing_tyvar_occurrences::TypingTyvarOccurrences,
     pub allow_solve_globals: bool,
+}
+
+impl<'a> TypingInferenceEnv<'a> {
+    pub fn expand_type(&'a mut self, ty: Ty<'a>) -> Ty<'a> {
+        let Ty(r, ty_) = ty;
+        match ty_ {
+            Ty_::Tvar(v) => match self.expand_var(r, *v) {
+                None => ty,
+                Some(ty) => ty,
+            },
+            _ => ty,
+        }
+    }
+
+    fn expand_var(&'a mut self, r: PReason<'a>, v: Ident) -> Option<Ty<'a>> {
+        let ty = self.get_type(r, v);
+        // TODO(hrust) port eager_solve_fail logic
+        ty
+    }
+
+    fn get_type(&'a mut self, r: PReason<'a>, v: Ident) -> Option<Ty<'a>> {
+        let mut aliases = ISet::new();
+        let mut v = v;
+        let mut r = r;
+        loop {
+            match self.tvenv.get(&v) {
+                None => {
+                    // TODO: This should actually be an error
+                    return None;
+                }
+                Some(tvinfo) => match &tvinfo.solving_info {
+                    SolvingInfo::Type(ty) => {
+                        let Ty(r0, ty_) = ty;
+                        r = r0;
+                        match ty_ {
+                            Ty_::Tvar(v0) => {
+                                if Option::is_some(&aliases.insert(*v0)) {
+                                    panic!("Two type variables are aliasing each other!");
+                                }
+                                v = *v0;
+                                continue;
+                            }
+                            _ => {
+                                for alias in aliases.iter() {
+                                    self.add(*alias, *ty);
+                                }
+                                return Some(*ty);
+                            }
+                        }
+                    }
+                    SolvingInfo::Constraints(_) => {
+                        let ty = self.builder.tyvar(r, v);
+                        for alias in aliases.iter() {
+                            self.add(*alias, ty);
+                        }
+                        return Some(ty);
+                    }
+                },
+            }
+        }
+    }
+
+    fn add(&mut self, v: Ident, ty: Ty<'a>) -> () {
+        self.bind(v, ty);
+        // TODO(hrust) update tyvar occurrences
+    }
+
+    fn bind(&mut self, v: Ident, ty: Ty<'a>) -> () {
+        /* TODO(hrust): the following indexing might panic,
+        as somehow sometimes we're missing variables in the environment,
+        The OCaml error, would create an empty tyvar_info in this case
+        to avoid throwing. */
+        let mut tvinfo = self.tvenv[&v].clone();
+        tvinfo.solving_info = SolvingInfo::Type(ty);
+        self.tvenv = self.tvenv.update(v, self.builder.alloc(tvinfo));
+    }
 }

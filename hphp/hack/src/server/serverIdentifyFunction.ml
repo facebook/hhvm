@@ -49,7 +49,7 @@ let go_quarantined
   let symbols = take_best_suggestions (List.sort by_nesting symbols) in
   (* TODO(ljw): shouldn't the following be quarantined also? *)
   List.map symbols ~f:(fun symbol ->
-      let ast = Provider_utils.compute_ast ~ctx ~entry in
+      let ast = Ast_provider.compute_ast ~ctx ~entry in
       let symbol_definition = ServerSymbolDefinition.go ctx (Some ast) symbol in
       (symbol, symbol_definition))
 

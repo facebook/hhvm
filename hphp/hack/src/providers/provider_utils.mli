@@ -70,31 +70,6 @@ hopefully we'll remove that dependency in future. *)
 val respect_but_quarantine_unsaved_changes :
   ctx:Provider_context.t -> f:(unit -> 'a) -> 'a
 
-(** Compute the AST for the given [entry]. *)
-val compute_ast :
-  ctx:Provider_context.t -> entry:Provider_context.entry -> Nast.program
-
-(** Compute the comments for the given [entry]. *)
-val compute_comments :
-  ctx:Provider_context.t ->
-  entry:Provider_context.entry ->
-  Parser_return.comments
-
-(** Compute the [FileInfo.t] associated with the given entry, doing a parse if
-necessary. *)
-val compute_file_info :
-  ctx:Provider_context.t -> entry:Provider_context.entry -> FileInfo.t
-
-(** Compute the [Full_fidelity_source_text.t] for this [entry]. *)
-val compute_source_text :
-  entry:Provider_context.entry -> Full_fidelity_source_text.t
-
-(** Compute the concrete syntax tree for this [entry]. *)
-val compute_cst :
-  ctx:Provider_context.t ->
-  entry:Provider_context.entry ->
-  Provider_context.PositionedSyntaxTree.t
-
 (** Computes TAST and error-list by taking the AST in a context entry,
 and typechecking it, and memoizing the result (caching the results in the
 context entry). CAUTION: this function doesn't use a quarantine, and so

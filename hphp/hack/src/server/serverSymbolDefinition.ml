@@ -185,12 +185,12 @@ let go ctx ast result =
 
 let get_definition_cst_node_from_pos ctx entry kind pos =
   try
-    let source_text = Provider_utils.compute_source_text entry in
+    let source_text = Ast_provider.compute_source_text entry in
     let tree =
       if Ide_parser_cache.is_enabled () then
         Ide_parser_cache.(with_ide_cache @@ fun () -> get_cst source_text)
       else
-        Provider_utils.compute_cst ctx entry
+        Ast_provider.compute_cst ctx entry
     in
     let (line, start, _) = Pos.info_pos pos in
     let offset = SourceText.position_to_offset source_text (line, start) in

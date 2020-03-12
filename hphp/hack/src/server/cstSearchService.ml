@@ -552,7 +552,7 @@ let search
     (ctx : Provider_context.t)
     (entry : Provider_context.entry)
     (pattern : pattern) : result option =
-  let syntax_tree = Provider_utils.compute_cst ~ctx ~entry in
+  let syntax_tree = Ast_provider.compute_cst ~ctx ~entry in
   let env = { ctx; entry; collected_types = None } in
   let (_env, result) =
     search_node ~env ~pattern ~node:(SyntaxTree.root syntax_tree)

@@ -82,87 +82,6 @@ let find_entry ~(ctx : Provider_context.t) ~(path : Relative_path.t) :
     Provider_context.entry option =
   Relative_path.Map.find_opt ctx.Provider_context.entries path
 
-let compute_source_text ~(entry : Provider_context.entry) :
-    Full_fidelity_source_text.t =
-  match entry with
-  | { Provider_context.source_text = Some source_text; _ } -> source_text
-  | _ ->
-    let source_text =
-      Full_fidelity_source_text.make
-        entry.Provider_context.path
-        entry.Provider_context.contents
-    in
-    entry.Provider_context.source_text <- Some source_text;
-    source_text
-
-(* Note that some callers may not actually need the AST errors. This could be
-improved with a method similar to the TAST-and-errors generation, where the TAST
-errors are not generated unless necessary. *)
-let compute_parser_return_and_ast_errors
-    ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
-    Parser_return.t * Errors.t =
-  match entry with
-  | {
-   Provider_context.ast_errors = Some ast_errors;
-   parser_return = Some parser_return;
-   _;
-  } ->
-    (parser_return, ast_errors)
-  | _ ->
-    (* Not used yet, but we will eventually want to extract the parser options
-  from the [Provider_context.t]. *)
-    let (_ : Provider_context.t) = ctx in
-    let source_text = compute_source_text entry in
-    let (ast_errors, parser_return) =
-      Errors.do_with_context
-        entry.Provider_context.path
-        Errors.Parsing
-        (fun () ->
-          Ast_provider.parse ctx ~full:true ~keep_errors:true ~source_text)
-    in
-    entry.Provider_context.ast_errors <- Some ast_errors;
-    entry.Provider_context.parser_return <- Some parser_return;
-    (parser_return, ast_errors)
-
-let compute_ast ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
-    Nast.program =
-  let ({ Parser_return.ast; _ }, _ast_errors) =
-    compute_parser_return_and_ast_errors ~ctx ~entry
-  in
-  ast
-
-let compute_comments
-    ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
-    Parser_return.comments =
-  let ({ Parser_return.comments; _ }, _ast_errors) =
-    compute_parser_return_and_ast_errors ~ctx ~entry
-  in
-  comments
-
-let compute_file_info
-    ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) : FileInfo.t =
-  let ast = compute_ast ~ctx ~entry in
-  let (funs, classes, record_defs, typedefs, consts) = Nast.get_defs ast in
-  {
-    FileInfo.empty_t with
-    FileInfo.funs;
-    classes;
-    record_defs;
-    typedefs;
-    consts;
-  }
-
-let compute_cst ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
-    Provider_context.PositionedSyntaxTree.t =
-  let _ = ctx in
-  match entry.Provider_context.cst with
-  | Some cst -> cst
-  | None ->
-    let source_text = compute_source_text ~entry in
-    let cst = Provider_context.PositionedSyntaxTree.make source_text in
-    entry.Provider_context.cst <- Some cst;
-    cst
-
 let respect_but_quarantine_unsaved_changes
     ~(ctx : Provider_context.t) ~(f : unit -> 'a) : 'a =
   let make_then_revert_local_changes f () =
@@ -205,7 +124,7 @@ let respect_but_quarantine_unsaved_changes
            Relative_path.Map.iter
              ctx.Provider_context.entries
              ~f:(fun _path entry ->
-               let ast = compute_ast ctx entry in
+               let ast = Ast_provider.compute_ast ctx entry in
                let (funs, classes, record_defs, typedefs, consts) =
                  Nast.get_defs ast
                in
@@ -249,7 +168,7 @@ let compute_tast_and_errors_unquarantined_internal
     { Compute_tast.tast; telemetry = Telemetry.create () }
   | (Compute_tast_and_errors, Some tast, Some tast_errors) ->
     let (_parser_return, ast_errors) =
-      compute_parser_return_and_ast_errors ~ctx ~entry
+      Ast_provider.compute_parser_return_and_ast_errors ~ctx ~entry
     in
     let errors = Errors.merge ast_errors tast_errors in
     { Compute_tast_and_errors.tast; errors; telemetry = Telemetry.create () }
@@ -265,7 +184,7 @@ let compute_tast_and_errors_unquarantined_internal
 
     (* do the work *)
     let ({ Parser_return.ast; _ }, ast_errors) =
-      compute_parser_return_and_ast_errors ~ctx ~entry
+      Ast_provider.compute_parser_return_and_ast_errors ~ctx ~entry
     in
     let (nast_errors, nast) =
       Errors.do_with_context
@@ -346,7 +265,7 @@ let compute_tast_and_errors_quarantined
   match (entry.Provider_context.tast, entry.Provider_context.tast_errors) with
   | (Some tast, Some tast_errors) ->
     let (_parser_return, ast_errors) =
-      compute_parser_return_and_ast_errors ~ctx ~entry
+      Ast_provider.compute_parser_return_and_ast_errors ~ctx ~entry
     in
     let errors = Errors.merge ast_errors tast_errors in
     { Compute_tast_and_errors.tast; errors; telemetry = Telemetry.create () }

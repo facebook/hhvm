@@ -138,9 +138,9 @@ let go_quarantined
     ~(entry : Provider_context.entry)
     ~(line : int)
     ~(column : int) : Lsp.SignatureHelp.result =
-  let source_text = Provider_utils.compute_source_text ~entry in
+  let source_text = Ast_provider.compute_source_text ~entry in
   let offset = SourceText.position_to_offset source_text (line, column) in
-  let cst = Provider_utils.compute_cst ~ctx ~entry in
+  let cst = Ast_provider.compute_cst ~ctx ~entry in
   match
     get_positional_info (Provider_context.PositionedSyntaxTree.root cst) offset
   with
@@ -164,7 +164,7 @@ let go_quarantined
     (match List.hd results with
     | None -> None
     | Some head_result ->
-      let ast = Provider_utils.compute_ast ~ctx ~entry in
+      let ast = Ast_provider.compute_ast ~ctx ~entry in
       (match get_occurrence_info env ctx ast head_result with
       | None -> None
       | Some (occurrence, fe, def_opt) ->

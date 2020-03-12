@@ -65,13 +65,13 @@ let auto_complete_all_completion_types
     ~(pos : File_content.position)
     ~(filter_by_token : bool)
     ~(sienv : SearchUtils.si_env) : result =
-  let source_text = Provider_utils.compute_source_text ~entry:new_entry in
+  let source_text = Ast_provider.compute_source_text ~entry:new_entry in
   let offset =
     SourceText.position_to_offset
       source_text
       (pos.File_content.line, pos.File_content.column)
   in
-  let syntax_tree = Provider_utils.compute_cst ~ctx:new_ctx ~entry:new_entry in
+  let syntax_tree = Ast_provider.compute_cst ~ctx:new_ctx ~entry:new_entry in
   let positioned_tree = SyntaxTree.root syntax_tree in
   let replace_pos =
     let syntax =

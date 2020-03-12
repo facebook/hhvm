@@ -203,7 +203,7 @@ let go_from_file_ctx
   >>= fun (occurrence, definition) ->
   (* Ignore symbols that lack definitions *)
   definition >>= fun definition ->
-  let source_text = Provider_utils.compute_source_text ~entry in
+  let source_text = Ast_provider.compute_source_text ~entry in
   get_action
     occurrence
     ( entry.Provider_context.path,

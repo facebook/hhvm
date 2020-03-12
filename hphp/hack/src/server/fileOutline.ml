@@ -524,8 +524,8 @@ let outline popt content =
 
 let outline_ctx ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
     string SymbolDefinition.t list =
-  let ast = Provider_utils.compute_ast ~ctx ~entry in
-  let comments = Provider_utils.compute_comments ~ctx ~entry in
+  let ast = Ast_provider.compute_ast ~ctx ~entry in
+  let comments = Ast_provider.compute_comments ~ctx ~entry in
   let result = outline_ast ast in
   add_docblocks result comments
 

@@ -11,6 +11,8 @@ from test_case import TestCase
 
 class ExtractStandaloneDriver(CommonTestDriver):
 
+    UPDATE_TESTS = False
+
     error_file_ext = ".err"
     auto_namespace_map = '{"PHP": "HH\\\\Lib\\\\PHP"}'
 
@@ -25,20 +27,20 @@ auto_namespace_map = {}
             )
 
     def expected_file_name(self, function_name: str) -> str:
-        return os.path.join(
-            self.repo_dir,
-            "expected/{}.php.exp".format(
-                function_name.replace(":", "+").replace("\\", "__")
-            ),
+        return "expected/{}.php.exp".format(
+            function_name.replace(":", "+").replace("\\", "__")
         )
 
+    def expected_file_path(self, function_name: str) -> str:
+        return os.path.join(self.repo_dir, self.expected_file_name(function_name))
+
     def expected_code(self, function_name: str) -> str:
-        with open(self.expected_file_name(function_name)) as expected_file:
+        with open(self.expected_file_path(function_name)) as expected_file:
             return expected_file.read().strip()
 
     def expected_code_type_errors(self, function_name: str) -> str:
         with open(
-            self.expected_file_name(function_name) + self.error_file_ext
+            self.expected_file_path(function_name) + self.error_file_ext
         ) as error_file:
             return error_file.read().strip()
 
@@ -51,7 +53,17 @@ auto_namespace_map = {}
             retcode,
             "hh --extract-standalone {} returned non-zero code".format(function_name),
         )
-        return extracted_code.strip()
+        result = extracted_code.strip()
+        if self.UPDATE_TESTS:
+            expected_file_path = os.path.join(
+                os.getcwd(),
+                TestExtractStandalone.get_template_repo(),
+                self.expected_file_name(function_name),
+            )
+            with open(expected_file_path, "w") as expected_file:
+                expected_file.write(result)
+                expected_file.write("\n")
+        return result
 
     def assert_expected_code_matches_extracted_code(self, function_name: str) -> None:
         self.assertMultiLineEqual(
@@ -62,7 +74,7 @@ auto_namespace_map = {}
 
     def type_check_expected_files(self, function_names: List[str]) -> None:
         files = [
-            self.expected_file_name(function_name) for function_name in function_names
+            self.expected_file_path(function_name) for function_name in function_names
         ]
         self.proc_call(
             [

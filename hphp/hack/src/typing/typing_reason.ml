@@ -405,7 +405,7 @@ let rec to_string prefix r =
     [(p, prefix ^ " because it is used as shape-like array here")]
   | Rpredicated (p, f) ->
     [(p, prefix ^ " from the argument to this " ^ f ^ " test")]
-  | Ris p -> [(p, prefix ^ " from this is expression test")]
+  | Ris p -> [(p, prefix ^ " from this `is` expression test")]
   | Ras p -> [(p, prefix ^ " from this \"as\" assertion")]
   | Rfinal_property _ ->
     [(p, prefix ^ " because properties cannot be declared final")]

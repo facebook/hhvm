@@ -3,4 +3,4 @@ Invalid return type (Typing[4110])
 File "instance_of_tparam.php", line 12, characters 40-45:
 Expected string
 File "instance_of_tparam.php", line 13, characters 13-34:
-But got mixed from this is expression test
+But got mixed from this `is` expression test

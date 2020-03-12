@@ -299,12 +299,8 @@ let rec describe_ty_super env ?(short = false) ty =
   | ConstraintType ty ->
     (match deref_constraint_type ty with
     | (_, Thas_member hm) ->
-      let { hm_name = (_, name); hm_type = ty; hm_class_id = _ } = hm in
-      let ty_descr = describe_ty_super env ~short:true (LoclType ty) in
-      Printf.sprintf
-        "something that has a member named %s of type %s"
-        name
-        ty_descr
+      let { hm_name = (_, name); hm_type = _; hm_class_id = _ } = hm in
+      Printf.sprintf "an object with member `%s`" name
     | (_, Tdestructure _) ->
       Typing_print.with_blank_tyvars (fun () ->
           Typing_print.full_strip_ns_i env (ConstraintType ty))

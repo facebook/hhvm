@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use bumpalo::collections::Vec;
-pub use oxidized::typing_defs_core::*;
+pub use oxidized::typing_defs_core::{DestructureKind, Exact, ParamMode};
 use oxidized::{ident, nast, tany_sentinel};
 
 use crate::typing_reason::*;
@@ -163,6 +163,7 @@ pub enum Ty_<'a> {
 /// is to have a pointer to a pointer to a
 /// (reason ptr, inlined type). Which reduces the size of
 /// Ty_ and decreases stack usage.
+#[derive(Clone, Copy)]
 pub struct Ty<'a>(pub PReason<'a>, pub &'a Ty_<'a>);
 
 impl<'a> Ty<'a> {

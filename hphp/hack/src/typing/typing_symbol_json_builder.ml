@@ -40,6 +40,7 @@ type predicate =
   | InterfaceDefinition
   | TraitDeclaration
   | TraitDefinition
+  | TypedefDeclaration
 
 (* Containers that can be in inheritance relationships *)
 type container_type =
@@ -60,6 +61,7 @@ type glean_json = {
   interfaceDefinition: json list;
   traitDeclaration: json list;
   traitDefinition: json list;
+  typedefDeclaration: json list;
 }
 
 type result_progress = {
@@ -83,6 +85,7 @@ let init_progress =
       interfaceDefinition = [];
       traitDeclaration = [];
       traitDefinition = [];
+      typedefDeclaration = [];
     }
   in
   { resultJson = default_json; factIds = JMap.empty }
@@ -173,6 +176,11 @@ let update_json_data predicate json progress =
       {
         progress.resultJson with
         traitDefinition = json :: progress.resultJson.traitDefinition;
+      }
+    | TypedefDeclaration ->
+      {
+        progress.resultJson with
+        typedefDeclaration = json :: progress.resultJson.typedefDeclaration;
       }
   in
   { resultJson = json; factIds = progress.factIds }
@@ -329,6 +337,9 @@ let build_enum_decl_json_ref fact_id =
 let build_func_decl_json_ref fact_id =
   JSON_Object [("function_", build_id_json fact_id)]
 
+let build_typedef_decl_json_ref fact_id =
+  JSON_Object [("typedef_", build_id_json fact_id)]
+
 (* These functions build up the JSON necessary and then add facts
 to the running result. *)
 
@@ -424,6 +435,21 @@ let add_func_defn_fact ctx elem decl_id progress =
       ]
   in
   add_fact FunctionDefinition json_fact progress
+
+let add_typedef_decl_fact name elem progress =
+  let is_transparent =
+    match elem.t_vis with
+    | Transparent -> true
+    | Opaque -> false
+  in
+  let json_fact =
+    JSON_Object
+      [
+        ("name", build_name_json_nested name);
+        ("is_transparent", JSON_Bool is_transparent);
+      ]
+  in
+  add_fact TypedefDeclaration json_fact progress
 
 let add_decl_loc_fact pos decl_json progress =
   let filepath = Relative_path.to_absolute (Pos.filename pos) in
@@ -533,6 +559,13 @@ let process_func_decl ctx elem progress =
     elem
     progress
 
+let process_typedef_decl elem progress =
+  let (pos, id) = elem.t_name in
+  let (decl_id, prog) = add_typedef_decl_fact id elem progress in
+  let ref_json = build_typedef_decl_json_ref decl_id in
+  let (_, prog) = add_decl_loc_fact pos ref_json prog in
+  prog
+
 (* This function walks over the symbols in each file and gleans
  facts along the way. *)
 let build_json ctx symbols =
@@ -543,6 +576,7 @@ let build_json ctx symbols =
           process_enum_decl ctx en acc
         | Class cd -> process_container_decl cd acc
         | Fun fd -> process_func_decl ctx fd acc
+        | Typedef td -> process_typedef_decl td acc
         | _ -> acc)
   in
   (* file_xrefs : (Hh_json.json * Relative_path.t Pos.pos list) IMap.t SMap.t *)
@@ -609,6 +643,7 @@ let build_json ctx symbols =
       ("hack.ClassDeclaration.1", progress.resultJson.classDeclaration);
       ("hack.TraitDeclaration.1", progress.resultJson.traitDeclaration);
       ("hack.InterfaceDeclaration.1", progress.resultJson.interfaceDeclaration);
+      ("hack.TypedefDeclaration.1", progress.resultJson.typedefDeclaration);
     ]
   in
   let json_array =

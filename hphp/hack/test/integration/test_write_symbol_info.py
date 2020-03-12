@@ -20,6 +20,7 @@ from glean.schema.hack.types import (
     InterfaceDefinition,
     TraitDeclaration,
     TraitDefinition,
+    TypedefDeclaration,
 )
 from hh_paths import hh_server
 from thrift.py3 import Protocol, Struct, deserialize
@@ -108,6 +109,7 @@ max_workers = 2
             "hack.InterfaceDefinition.1": InterfaceDefinition,
             "hack.TraitDeclaration.1": TraitDeclaration,
             "hack.TraitDefinition.1": TraitDefinition,
+            "hack.TypedefDeclaration.1": TypedefDeclaration,
         }
         return predicate_dict.get(predicate_name)
 

@@ -188,7 +188,7 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
                                     emit_expr::emit_set_range_expr(
                                         e,
                                         env,
-                                        pos,
+                                        &e_.0,
                                         fname,
                                         kind,
                                         &args[..],
@@ -197,14 +197,14 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
                                 _ => emit_expr::emit_set_range_expr(
                                     e,
                                     env,
-                                    pos,
+                                    &e_.0,
                                     fname,
                                     kind,
                                     &exprs[..],
                                 ),
                             }
                         } else {
-                            emit_expr::emit_ignored_expr(e, env, pos, e_)
+                            emit_expr::emit_ignored_expr(e, env, &e_.0, e_)
                         }
                     }
                 } else {
@@ -1086,7 +1086,7 @@ fn emit_for(
     //  instr_jmp start_label;
     //  instr_label break_label;
     Ok(InstrSeq::gather(vec![
-        emit_expr::emit_ignored_expr(e, env, pos, e1)?,
+        emit_expr::emit_ignored_expr(e, env, &Pos::make_none(), e1)?,
         emit_cond(e, env, pos, true, &break_label, e2)?,
         InstrSeq::make_label(start_label.clone()),
         env.do_in_loop_body(
@@ -1098,7 +1098,7 @@ fn emit_for(
             emit_block,
         )?,
         InstrSeq::make_label(cont_label),
-        emit_expr::emit_ignored_expr(e, env, pos, e3)?,
+        emit_expr::emit_ignored_expr(e, env, &Pos::make_none(), e3)?,
         emit_cond(e, env, pos, false, &start_label, e2)?,
         InstrSeq::make_label(break_label),
     ]))

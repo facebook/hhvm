@@ -303,9 +303,9 @@ fn make_header_content(
     };
 
     Ok(InstrSeq::gather(vec![
-        generator_info,
-        deprecation_warning,
         method_prolog,
+        deprecation_warning,
+        generator_info,
     ]))
 }
 
@@ -609,11 +609,7 @@ pub fn emit_method_prolog(
         instrs.push(InstrSeq::make_initthisloc(local::Type::Named(THIS.into())))
     }
     instrs.extend_from_slice(param_instrs.as_slice());
-    if instrs.len() == 1 {
-        Ok(InstrSeq::Empty)
-    } else {
-        Ok(InstrSeq::gather(instrs))
-    }
+    Ok(InstrSeq::gather(instrs))
 }
 
 pub fn emit_deprecation_info(

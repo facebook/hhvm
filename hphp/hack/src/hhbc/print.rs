@@ -912,7 +912,7 @@ fn print_instructions<W: Write>(
 ) -> Result<(), W::Error> {
     use Instruct::*;
     use InstructTry::*;
-    for instr in instr_seq.iter() {
+    for instr in instr_seq.compact_iter() {
         match instr {
             ISpecialFlow(_) => return not_impl!(),
             IComment(_) => {
@@ -1151,7 +1151,18 @@ fn print_instr<W: Write>(w: &mut W, instr: &Instruct) -> Result<(), W::Error> {
         IFinal(i) => print_final(w, i),
         ITry(itry) => print_try(w, itry),
         IComment(s) => concat_str_by(w, " ", ["#", s.as_str()]),
-        ISrcLoc(_) => not_impl!(),
+        ISrcLoc(p) => concat_str(
+            w,
+            [
+                ".srcloc ",
+                format!(
+                    "{}:{},{}:{}",
+                    p.line_begin, p.col_begin, p.line_end, p.col_end
+                )
+                .as_str(),
+                ";",
+            ],
+        ),
         IAsync(a) => print_async(w, a),
         IGenerator(gen) => print_gen_creation_execution(w, gen),
         IIncludeEvalDefine(ed) => print_include_eval_define(w, ed),

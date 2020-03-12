@@ -1505,7 +1505,7 @@ fn emit_special_function(
                 )),
             );
             let call = tast::Expr(
-                annot.clone(),
+                pos.clone(),
                 tast::Expr_::mk_call(
                     tast::CallType::Cnormal,
                     expr_id,
@@ -2492,6 +2492,7 @@ struct EmitBaseArgs {
     rhs_stack_size: StackIndex,
 }
 
+// TODO(hrust): change pos from &Pos to Option<&Pos>, since Pos::make_none() still allocate mem.
 pub fn emit_ignored_expr(emitter: &mut Emitter, env: &Env, pos: &Pos, expr: &tast::Expr) -> Result {
     if let Some(es) = expr.1.as_expr_list() {
         Ok(InstrSeq::gather(

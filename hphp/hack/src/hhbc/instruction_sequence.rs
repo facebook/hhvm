@@ -56,6 +56,52 @@ impl From<(InstrSeq, InstrSeq)> for InstrSeq {
 }
 
 #[derive(Debug)]
+pub struct CompactIter<'i, I>
+where
+    I: Iterator<Item = &'i Instruct>,
+{
+    iter: I,
+    next: Option<&'i Instruct>,
+}
+
+impl<'i, I> CompactIter<'i, I>
+where
+    I: Iterator<Item = &'i Instruct>,
+{
+    pub fn new(i: I) -> Self {
+        Self {
+            iter: i,
+            next: None,
+        }
+    }
+}
+
+impl<'i, I> Iterator for CompactIter<'i, I>
+where
+    I: Iterator<Item = &'i Instruct>,
+{
+    type Item = &'i Instruct;
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.next.is_some() {
+            std::mem::replace(&mut self.next, None)
+        } else {
+            let mut cur = self.iter.next();
+            match cur {
+                Some(i) if InstrSeq::is_srcloc(i) => {
+                    self.next = self.iter.next();
+                    while self.next.map_or(false, InstrSeq::is_srcloc) {
+                        cur = self.next;
+                        self.next = self.iter.next();
+                    }
+                    cur
+                }
+                _ => cur,
+            }
+        }
+    }
+}
+
+#[derive(Debug)]
 pub struct InstrIter<'i> {
     instr_seq: &'i InstrSeq,
     index: usize,
@@ -135,6 +181,10 @@ impl InstrSeq {
 
     pub fn iter(&self) -> InstrIter {
         InstrIter::new(self)
+    }
+
+    pub fn compact_iter(&self) -> impl Iterator<Item = &Instruct> {
+        CompactIter::new(self.iter())
     }
 
     pub fn make_empty() -> Self {

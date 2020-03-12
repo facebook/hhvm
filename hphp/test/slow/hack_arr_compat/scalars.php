@@ -1,15 +1,6 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function test_keys() {
-  var_dump(__hhvm_intrinsics\dummy_cast_to_kindofarray(darray[100 => 'a', true => 'b', 200 => 'c']));
-  var_dump(__hhvm_intrinsics\dummy_cast_to_kindofarray(darray[100 => 'a', false => 'b', 200 => 'c']));
-  var_dump(__hhvm_intrinsics\dummy_cast_to_kindofarray(darray[100 => 'a', null => 'b', 200 => 'c']));
-  var_dump(__hhvm_intrinsics\dummy_cast_to_kindofarray(darray[100 => 'a', 3.14 => 'b', 200 => 'c']));
-  var_dump(__hhvm_intrinsics\dummy_cast_to_kindofarray(darray[100 => 'a', STDIN => 'b', 200 => 'c']));
-  var_dump(__hhvm_intrinsics\dummy_cast_to_kindofarray(darray[100 => 'a', new stdclass => 'b', 200 => 'c']));
-}
-
 function test_cmp() {
   var_dump(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2, 3]) === vec[1, 2, 3]);
   var_dump(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2, 3]) !== vec[1, 2, 3]);
@@ -52,7 +43,6 @@ function test_intlike_keys() {
 
 <<__EntryPoint>>
 function main_scalars() {
-test_keys();
 test_cmp();
 test_add();
 test_intlike_keys();

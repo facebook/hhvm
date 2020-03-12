@@ -10,6 +10,3 @@ array(4) {
   ["more stuff"]=>
   string(3) "yep"
 }
-string(12) "empty string"
-string(3) "one"
-string(4) "zero"

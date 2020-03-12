@@ -4,7 +4,7 @@ function aa() { return 'a'; }
 function heh() { return darray['a' => aa()]; }
 function x() {
   $x = heh();
-  $r = $x[null] = 2;
+  $r = $x[''] = 2;
   var_dump($r);
   var_dump($x);
 }

@@ -60,8 +60,8 @@ type glean_json = {
 
 type result_progress = {
   resultJson: glean_json;
-  (* Maps fact JSON to fact id *)
-  factIds: int JMap.t;
+  (* Maps fact JSON key to a list of predicate/fact id pairs *)
+  factIds: (predicate * int) list JMap.t;
 }
 
 let init_progress =
@@ -80,6 +80,15 @@ let init_progress =
     }
   in
   { resultJson = default_json; factIds = JMap.empty }
+
+let rec find_fid fid_list pred =
+  match fid_list with
+  | [] -> None
+  | (p, fid) :: tail ->
+    if phys_equal p pred then
+      Some fid
+    else
+      find_fid tail pred
 
 let get_type_from_hint ctx h =
   let mode = FileInfo.Mdecl in
@@ -156,18 +165,28 @@ let update_json_data predicate json progress =
  fact has not yet been added. Return the fact's id (which can be referenced in
  other facts), and the updated result. *)
 let add_fact predicate json_key progress =
+  let add_id =
+    let newFactId = json_element_id () in
+    let progress =
+      {
+        resultJson = progress.resultJson;
+        factIds =
+          JMap.add
+            json_key
+            [(predicate, newFactId)]
+            progress.factIds
+            ~combine:List.append;
+      }
+    in
+    (newFactId, true, progress)
+  in
   let (id, is_new, progress) =
     match JMap.find_opt json_key progress.factIds with
-    | Some fid -> (fid, false, progress)
-    | None ->
-      let newFactId = json_element_id () in
-      let progress =
-        {
-          resultJson = progress.resultJson;
-          factIds = JMap.add json_key newFactId progress.factIds;
-        }
-      in
-      (newFactId, true, progress)
+    | None -> add_id
+    | Some fid_list ->
+      (match find_fid fid_list predicate with
+      | None -> add_id
+      | Some fid -> (fid, false, progress))
   in
   let json_fact =
     JSON_Object [("id", JSON_Number (string_of_int id)); ("key", json_key)]

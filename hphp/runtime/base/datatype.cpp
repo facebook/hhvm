@@ -362,7 +362,9 @@ MaybeDataType get_datatype(
     if (!strcasecmp(name.c_str(), "HH\\dict"))   return KindOfDict;
     if (!strcasecmp(name.c_str(), "HH\\keyset")) return KindOfKeyset;
     if (!strcasecmp(name.c_str(), "HH\\varray")) {
-      return RuntimeOption::EvalHackArrDVArrs ? KindOfVec : KindOfArray;
+      return RuntimeOption::EvalHackArrDVArrs
+        ? KindOfVec : RuntimeOption::EvalSpecializeDVArray
+        ? KindOfVArray : KindOfArray;
     }
     if (!strcasecmp(name.c_str(), "HH\\darray")) {
       return RuntimeOption::EvalHackArrDVArrs ? KindOfDict : KindOfArray;
@@ -391,7 +393,9 @@ MaybeDataType get_datatype(
   if (!strcasecmp(name.c_str(), "HH\\vec"))      return KindOfVec;
   if (!strcasecmp(name.c_str(), "HH\\keyset"))   return KindOfKeyset;
   if (!strcasecmp(name.c_str(), "HH\\varray")) {
-    return RuntimeOption::EvalHackArrDVArrs ? KindOfVec : KindOfArray;
+    return RuntimeOption::EvalHackArrDVArrs
+      ? KindOfVec : RuntimeOption::EvalSpecializeDVArray
+      ? KindOfVArray : KindOfArray;
   }
   if (!strcasecmp(name.c_str(), "HH\\darray")) {
     return RuntimeOption::EvalHackArrDVArrs ? KindOfDict : KindOfArray;

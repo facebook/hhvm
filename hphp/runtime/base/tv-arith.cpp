@@ -325,6 +325,8 @@ again:
       val(c1).parr = newArr;
       type(c1) = newArr->toDataType();
       decRefArr(ad1);
+    } else if (RuntimeOption::EvalEmitDVArray) {
+      type(c1) = ad1->toDataType();
     }
     return;
   }

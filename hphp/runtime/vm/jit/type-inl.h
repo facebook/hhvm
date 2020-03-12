@@ -317,26 +317,32 @@ inline Type Type::cns(const TypedValue& tv) {
 
       case KindOfPersistentVec:
       case KindOfVec:
-        assertx(tv.m_data.parr->isVecArrayType());
+        assertx(val(tv).parr->isVecArrayType());
         return type_detail::for_const(tv.m_data.parr);
 
       case KindOfPersistentDict:
       case KindOfDict:
-        assertx(tv.m_data.parr->isDictType());
+        assertx(val(tv).parr->isDictType());
         return type_detail::for_const(tv.m_data.parr);
 
       case KindOfPersistentKeyset:
       case KindOfKeyset:
-        assertx(tv.m_data.parr->isKeysetType());
+        assertx(val(tv).parr->isKeysetType());
         return type_detail::for_const(tv.m_data.parr);
 
       case KindOfPersistentDArray:
       case KindOfDArray:
+        assertx(val(tv).parr->isDArray());
+        return type_detail::for_const(tv.m_data.parr);
+
       case KindOfPersistentVArray:
       case KindOfVArray:
+        assertx(val(tv).parr->isVArray());
+        return type_detail::for_const(tv.m_data.parr);
+
       case KindOfPersistentArray:
       case KindOfArray:
-        assertx(tv.m_data.parr->isPHPArrayType());
+        assertx(val(tv).parr->isPHPArrayType());
         return type_detail::for_const(tv.m_data.parr);
 
       case KindOfObject:

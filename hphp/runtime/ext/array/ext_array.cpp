@@ -2775,15 +2775,15 @@ namespace {
 struct ArraySortTmp {
   ArraySortTmp(TypedValue* arr, SortFunction sf) : m_arr(arr) {
     m_ad = arr->m_data.parr->escalateForSort(sf);
-    assertx(m_ad == arr->m_data.parr ||
+    assertx(m_ad == val(arr).parr ||
             m_ad->empty() ||
             m_ad->hasExactlyOneRef());
   }
   ~ArraySortTmp() {
-    if (m_ad != m_arr->m_data.parr) {
-      Array tmp = Array::attach(m_arr->m_data.parr);
-      m_arr->m_data.parr = m_ad;
-      m_arr->m_type = m_ad->toDataType();
+    if (m_ad != val(m_arr).parr) {
+      auto tmp = Array::attach(val(m_arr).parr);
+      val(m_arr).parr = m_ad;
+      type(m_arr) = m_ad->toDataType();
     }
   }
   ArrayData* operator->() { return m_ad; }

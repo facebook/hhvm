@@ -492,6 +492,7 @@ struct PackedArrayInitBase final : ArrayInitBase<TArray, DT> {
 
 /*
  * Initializer for a PHP vector-shaped array.
+ * TODO(T58820726): Remove by migrating remaining callers.
  */
 using PackedArrayInit = PackedArrayInitBase<PackedArray, KindOfArray>;
 
@@ -943,6 +944,7 @@ namespace make_array_detail {
  *
  * If you need to deal with references, you currently have to use
  * PackedArrayInit directly.
+ * TODO(T58820726): Remove by migrating remaining callers.
  */
 template<class... Vals>
 Array make_packed_array(Vals&&... vals) {

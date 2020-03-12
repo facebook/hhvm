@@ -979,7 +979,9 @@ std::string describe_actual_type(tv_rval val) {
     case KindOfPersistentDArray:
     case KindOfDArray:        return "darray";
     case KindOfPersistentVArray:
-    case KindOfVArray:        return "varray";
+    case KindOfVArray:
+      return UNLIKELY(RuntimeOption::EvalSpecializeDVArray)
+        ? "varray" : "array";
     case KindOfPersistentArray:
     case KindOfArray:         return "array";
     case KindOfResource:

@@ -408,7 +408,9 @@ StaticString getDataTypeString(DataType t) {
     case KindOfPersistentDArray:
     case KindOfDArray:     return s_darray;
     case KindOfPersistentVArray:
-    case KindOfVArray:     return s_varray;
+    case KindOfVArray:
+      return UNLIKELY(RuntimeOption::EvalSpecializeDVArray)
+        ? s_varray : s_array;
     case KindOfPersistentArray:
     case KindOfArray:      return s_array;
     case KindOfObject:     return s_object;

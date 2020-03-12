@@ -267,6 +267,12 @@ inline bool ArrayData::useWeakKeys() const {
 }
 
 inline DataType ArrayData::toDataType() const {
+  if (UNLIKELY(RuntimeOption::EvalEmitDVArray)) {
+    if (isVArray()) {
+      assertx(isPackedKind());
+      return KindOfVArray;
+    }
+  }
   switch (kind()) {
     case kPackedKind:
     case kMixedKind:
@@ -285,6 +291,12 @@ inline DataType ArrayData::toDataType() const {
 }
 
 inline DataType ArrayData::toPersistentDataType() const {
+  if (UNLIKELY(RuntimeOption::EvalEmitDVArray)) {
+    if (isVArray()) {
+      assertx(isPackedKind());
+      return KindOfPersistentVArray;
+    }
+  }
   switch (kind()) {
     case kPackedKind:
     case kMixedKind:

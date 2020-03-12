@@ -53,7 +53,7 @@ namespace HH {
  * - `Tv`: The type of value returned by the generator
  * - `Ts`: The type that will be passed on a call to `send()`
  *
- * @guide /hack/async/generators
+ * @guide /hack/asynchronous-operations/generators
  */
 final class AsyncGenerator<Tk, +Tv, -Ts>
     implements AsyncKeyedIterator<Tk, Tv> {

@@ -34,6 +34,8 @@ type predicate =
   | EnumDeclaration
   | EnumDefinition
   | FileXRefs
+  | FunctionDeclaration
+  | FunctionDefinition
   | InterfaceDeclaration
   | InterfaceDefinition
   | TraitDeclaration
@@ -52,6 +54,8 @@ type glean_json = {
   enumDeclaration: json list;
   enumDefinition: json list;
   fileXRefs: json list;
+  functionDeclaration: json list;
+  functionDefinition: json list;
   interfaceDeclaration: json list;
   interfaceDefinition: json list;
   traitDeclaration: json list;
@@ -73,6 +77,8 @@ let init_progress =
       enumDeclaration = [];
       enumDefinition = [];
       fileXRefs = [];
+      functionDeclaration = [];
+      functionDefinition = [];
       interfaceDeclaration = [];
       interfaceDefinition = [];
       traitDeclaration = [];
@@ -137,6 +143,16 @@ let update_json_data predicate json progress =
       {
         progress.resultJson with
         fileXRefs = json :: progress.resultJson.fileXRefs;
+      }
+    | FunctionDeclaration ->
+      {
+        progress.resultJson with
+        functionDeclaration = json :: progress.resultJson.functionDeclaration;
+      }
+    | FunctionDefinition ->
+      {
+        progress.resultJson with
+        functionDefinition = json :: progress.resultJson.functionDefinition;
       }
     | InterfaceDeclaration ->
       {
@@ -237,8 +253,26 @@ let build_enumerator_json_nested const_name decl_ref =
           ] );
     ]
 
+let build_signature_json_nested parameters return_type_name =
+  let fields =
+    let params = [("parameters", JSON_Array parameters)] in
+    match return_type_name with
+    | None -> params
+    | Some ty -> ("returns", build_type_json_nested ty) :: params
+  in
+  JSON_Object [("key", JSON_Object fields)]
+
 let build_id_json fact_id =
   JSON_Object [("id", JSON_Number (string_of_int fact_id))]
+
+let build_parameter_json param_name param_type_name =
+  let fields =
+    let name_field = [("name", build_name_json_nested param_name)] in
+    match param_type_name with
+    | None -> name_field
+    | Some ty -> ("type", build_type_json_nested ty) :: name_field
+  in
+  JSON_Object fields
 
 let build_bytespan_json pos =
   let start = fst (Pos.info_raw pos) in
@@ -291,6 +325,9 @@ let build_container_decl_json_ref container_type fact_id =
 
 let build_enum_decl_json_ref fact_id =
   JSON_Object [("enum_", build_id_json fact_id)]
+
+let build_func_decl_json_ref fact_id =
+  JSON_Object [("function_", build_id_json fact_id)]
 
 (* These functions build up the JSON necessary and then add facts
 to the running result. *)
@@ -351,6 +388,42 @@ let add_enum_defn_fact ctx elem decl_id progress =
         :: json_fields)
   in
   add_fact EnumDefinition (JSON_Object json_fields) progress
+
+let add_func_decl_fact name _elem progress =
+  let json_fact = JSON_Object [("name", build_name_json_nested name)] in
+  add_fact FunctionDeclaration json_fact progress
+
+let add_func_defn_fact ctx elem decl_id progress =
+  let parameters =
+    List.map elem.f_params (fun param ->
+        let ty =
+          match hint_of_type_hint param.param_type_hint with
+          | None -> None
+          | Some h -> Some (get_type_from_hint ctx h)
+        in
+        build_parameter_json param.param_name ty)
+  in
+  let return_type_name =
+    match hint_of_type_hint elem.f_ret with
+    | None -> None
+    | Some h -> Some (get_type_from_hint ctx h)
+  in
+  let signature = build_signature_json_nested parameters return_type_name in
+  let is_async =
+    match elem.f_fun_kind with
+    | FAsync -> true
+    | FAsyncGenerator -> true
+    | _ -> false
+  in
+  let json_fact =
+    JSON_Object
+      [
+        ("declaration", build_id_json decl_id);
+        ("signature", signature);
+        ("isAsync", JSON_Bool is_async);
+      ]
+  in
+  add_fact FunctionDefinition json_fact progress
 
 let add_decl_loc_fact pos decl_json progress =
   let filepath = Relative_path.to_absolute (Pos.filename pos) in
@@ -449,6 +522,17 @@ let process_enum_decl ctx elem progress =
     elem
     progress
 
+let process_func_decl ctx elem progress =
+  let (pos, id) = elem.f_name in
+  process_decl_loc
+    add_func_decl_fact
+    (add_func_defn_fact ctx)
+    build_func_decl_json_ref
+    pos
+    id
+    elem
+    progress
+
 (* This function walks over the symbols in each file and gleans
  facts along the way. *)
 let build_json ctx symbols =
@@ -458,6 +542,7 @@ let build_json ctx symbols =
         | Class en when phys_equal en.c_kind Cenum ->
           process_enum_decl ctx en acc
         | Class cd -> process_container_decl cd acc
+        | Fun fd -> process_func_decl ctx fd acc
         | _ -> acc)
   in
   (* file_xrefs : (Hh_json.json * Relative_path.t Pos.pos list) IMap.t SMap.t *)
@@ -506,11 +591,13 @@ let build_json ctx symbols =
     by id only *)
     [
       ("hack.FileXRefs.1", progress.resultJson.fileXRefs);
+      ("hack.FunctionDefinition.1", progress.resultJson.functionDefinition);
       ("hack.EnumDefinition.1", progress.resultJson.enumDefinition);
       ("hack.ClassDefinition.1", progress.resultJson.classDefinition);
       ("hack.TraitDefinition.1", progress.resultJson.traitDefinition);
       ("hack.InterfaceDefinition.1", progress.resultJson.interfaceDefinition);
       ("hack.DeclarationLocation.1", progress.resultJson.declarationLocation);
+      ("hack.FunctionDeclaration.1", progress.resultJson.functionDeclaration);
       ("hack.EnumDeclaration.1", progress.resultJson.enumDeclaration);
       ("hack.ClassDeclaration.1", progress.resultJson.classDeclaration);
       ("hack.TraitDeclaration.1", progress.resultJson.traitDeclaration);

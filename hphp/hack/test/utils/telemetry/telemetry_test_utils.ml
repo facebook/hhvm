@@ -7,15 +7,12 @@
  *)
 
 let telemetry_to_multiline (telemetry : Telemetry.t) : string =
-  telemetry
-  |> Telemetry.to_string
-  |> Hh_json.json_of_string
-  |> Hh_json.json_to_multiline
+  telemetry |> Telemetry.to_json |> Hh_json.json_to_multiline
 
 (** e.g. drilling for "foo.bar" will return that field.
 Raises exception if foo is absent or not an object, and if bar is absent or null *)
 let value_exn (telemetry : Telemetry.t) (path : string) : Hh_json.json =
-  let json = telemetry |> Telemetry.to_string |> Hh_json.json_of_string in
+  let json = telemetry |> Telemetry.to_json in
   let accessors = Str.split (Str.regexp "\\.") path in
   let rec drill (json : Hh_json.json) (accessors : string list) : Hh_json.json =
     match accessors with

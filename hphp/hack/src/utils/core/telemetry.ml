@@ -14,8 +14,10 @@ and key_value_pair = string * Hh_json.json
 
 let create () : t = []
 
+let to_json (telemetry : t) : Hh_json.json = Hh_json.JSON_Object telemetry
+
 let to_string (telemetry : t) : string =
-  Hh_json.json_to_string (Hh_json.JSON_Object telemetry)
+  to_json telemetry |> Hh_json.json_to_string
 
 let string_ (key : string) (value : string) : string * Hh_json.json =
   (key, Hh_json.JSON_String value)

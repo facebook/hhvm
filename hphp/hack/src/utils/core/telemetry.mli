@@ -12,6 +12,8 @@ val create : unit -> t
 
 val to_string : t -> string
 
+val to_json : t -> Hh_json.json
+
 val string_ : ?truncate:int -> t -> key:string -> value:string -> t
 
 val array_ :

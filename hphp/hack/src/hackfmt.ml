@@ -98,6 +98,11 @@ let read_hhconfig path =
             "hackfmt.line_width"
             ~default:default.line_width
             config;
+        format_generated_code =
+          Config_file.Getters.bool_
+            "hackfmt.format_generated_code"
+            ~default:default.format_generated_code
+            config;
       },
     Full_fidelity_parser_env.make
       ?enable_xhp_class_modifier:
@@ -143,6 +148,7 @@ let parse_options () =
   let cli_indent_with_tabs = ref false in
   let cli_line_width = ref None in
   let cli_root = ref None in
+  let cli_format_generated_code = ref false in
   let rec options =
     ref
       [
@@ -181,6 +187,11 @@ let parse_options () =
         ( "--tabs",
           Arg.Set cli_indent_with_tabs,
           " Indent with tabs rather than spaces" );
+        ( "--format-generated-code",
+          Arg.Set cli_format_generated_code,
+          " Enable formatting of generated files and generated sections in "
+          ^ "partially-generated files. By default, generated code will be left "
+          ^ "untouched." );
         ( "--diff",
           Arg.Set diff,
           " Format the changed lines in a diff"
@@ -237,6 +248,8 @@ let parse_options () =
         indent_width = opt_default !cli_indent_width config.indent_width;
         indent_with_tabs = !cli_indent_with_tabs || config.indent_with_tabs;
         line_width = opt_default !cli_line_width config.line_width;
+        format_generated_code =
+          !cli_format_generated_code || config.format_generated_code;
       }
   in
   ( ( !files,

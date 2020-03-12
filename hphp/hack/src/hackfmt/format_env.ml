@@ -12,6 +12,7 @@ type t = {
   indent_width: int;
   indent_with_tabs: bool;
   line_width: int;
+  format_generated_code: bool;
 }
 
 let default =
@@ -20,4 +21,5 @@ let default =
     indent_width = 2;
     indent_with_tabs = false;
     line_width = 80;
+    format_generated_code = false;
   }

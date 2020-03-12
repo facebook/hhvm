@@ -1,8 +1,0 @@
-diff --git a/fixme.php b/fixme.php
---- a/fixme.php
-+++ b/fixme.php
-@@ -8,2 +8,2 @@
--    /* HH_FIXME[4110] Some comment */
--    return vec[2,
-+    /* HH_FIXME[4110] */
-+    return vec[1,

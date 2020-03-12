@@ -1,7 +1,11 @@
 <?hh
 
+// This fixme should not suppress formatting for the entire class. Ideally, it
+// would suppress formatting for the line "class HasFixme {" and nothing else,
+// but there isn't a straightforward way to implement this at the moment, so
+// instead we do not suppress formatting for this HH_FIXME at all.
 /* HH_FIXME[4110] */
-class    HasFixme          {
+class HasFixme {
   public function why() {
     // Here is a motivating example for the fixmes-suppress-formatting feature.
     // We do not want to format this node because it would move the suppression
@@ -9,47 +13,50 @@ class    HasFixme          {
 
     /* HH_FIXME[4110] */
     f($some_type_error_we_would_like_to_suppress, $xxxxxxxxxx, $yyyyyyyyyy, $zzzzzzzzzz);
+
+    // For now, we use newline count as a heuristic for judging when it is
+    // reasonable to suppress formatting. Nodes which contain 3 or more newlines
+    // (excluding leading trivia before the HH_FIXME, including leading trivia
+    // after the HH_FIXME, and excluding all trailing trivia) will still be
+    // formatted.
+
+    // Because we're just using a heuristic, we will still have some failures,
+    // like this one:
+
+    /* HH_FIXME[4110] */
+    f($some_type_error_we_would_like_to_suppress,
+      $but_we_will_move_it_away_from_the_suppression_comment,
+      $because_the_function_call,
+      $is_split_over_too_many_lines_already);
   }
 
   public function cases() {
-    // The FIXME on the class definition only suppresses formatting for the
-    // first line (containing the tokens "class" "HasFixme" "{"). Statements
-    // inside the class, like this one, are still formatted normally.
     $this_is
            + $formatted;
 
-    /* HH_FIXME[1111] */
-    func($not_formatted,
+    /* HH_FIXME[4110] */
+    this($is,
          $formatted,
-         $formatted);
+         $too);
 
-    /* HH_FIXME[2222] */
-    func($not_formatted,
-         $formatted);
+    /* HH_FIXME[4110] */
+    this($is,
+         $not);
 
-    /* HH_FIXME[3333] */ func($not_formatted,
-                              $not_formatted,
-                              $formatted,
+    /* HH_FIXME[4110] */ this($node,
+                              $is,
+                              $also,
                               $formatted);
 
-        /* HH_FIXME[1000] */// not formatted
-      /* HH_FIXME[2000] */  // not formatted
-    /* HH_FIXME[3000] */ func($not_formatted,
-                              $not_formatted,
-                              $formatted,
+    /* HH_FIXME[4110] */ this($is,
+                              $not,
                               $formatted);
 
-    /* HH_FIXME[4444] */
+    /* HH_FIXME[4110] */
     f($some_type_error_we_would_like_to_suppress, $xxxxxxxxxx, $yyyyyyyyyy, $zzzzzzzzzz)
       + $this_part_of_the_expression
-        + $is_still_formatted;
-
-    /* HH_FIXME[4297] */
-    expect(PHPism_FIXME::varrayFuzzyEqualsDarray($config['foo'], varray[
-        'apples',
-        'oranges',
-        'kiwis',
-        'pears',
-      ]))->toBeTrue();
+        + $is_still_formatted
+          + $since_formatting_is_suppressed
+            + $only_for_the_function_call_node;
   }
 }

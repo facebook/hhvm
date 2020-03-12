@@ -1,7 +1,0 @@
-<?hh
-type UNSAFE_TYPE_HH_FIXME_<  T> = T;
-function with_unsafe_type_hh_fixme(UNSAFE_TYPE_HH_FIXME $x): int { return $x; }
-
-// NB: NO TRAILING NEWLINE AT END OF FILE
-/* HH_FIXME[4101] */
-type UNSAFE_TYPE_HH_FIXME =     \UNSAFE_TYPE_HH_FIXME_;

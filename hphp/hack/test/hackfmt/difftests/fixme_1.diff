@@ -1,6 +1,0 @@
-diff --git a/fixme.php b/fixme.php
---- a/fixme.php
-+++ b/fixme.php
-@@ -7,1 +7,1 @@
--    PHP\shuffle(inout $ints);
-+    $ints = Vec\shuffle($ints);

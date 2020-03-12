@@ -19,7 +19,6 @@
   (name hackfmt)
   (wrapped false)
   (modules
-    boundaries
     chunk
     chunk_builder
     chunk_group
@@ -29,7 +28,6 @@
     line_splitter
     nesting
     nesting_allocator
-    noformat
     rule_allocator
     solve_state
     span

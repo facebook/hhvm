@@ -332,12 +332,6 @@ let leading_trivia node =
   | None -> []
   | Some t -> Token.leading t
 
-let trailing_trivia node =
-  let token = trailing_token node in
-  match token with
-  | None -> []
-  | Some t -> Token.trailing t
-
 type 'a rust_parse_type =
   Full_fidelity_source_text.t ->
   Full_fidelity_parser_env.t ->

@@ -14,7 +14,6 @@ module SyntaxError = Full_fidelity_syntax_error
 module Logger = HackfmtEventLogger
 module FEnv = Format_env
 open Printf
-open Boundaries
 open Libhackfmt
 open Hackfmt_error
 open Ocaml_overrides

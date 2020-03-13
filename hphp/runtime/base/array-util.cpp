@@ -150,7 +150,7 @@ Variant ArrayUtil::Range(unsigned char low, unsigned char high,
     return false;
   }
 
-  Array ret;
+  auto ret = Array::CreateVArray();
   if (low > high) { // Negative Steps
     for (; low >= high; low -= (unsigned int)step) {
       ret.append(String::FromChar(low));
@@ -192,7 +192,7 @@ void rangeCheckAlloc(double estNumSteps) {
 }
 
 Variant ArrayUtil::Range(double low, double high, double step /* = 1.0 */) {
-  Array ret;
+  auto ret = Array::CreateVArray();
   double element;
   int64_t i;
   if (low > high) { // Negative steps
@@ -222,7 +222,7 @@ Variant ArrayUtil::Range(double low, double high, double step /* = 1.0 */) {
 }
 
 Variant ArrayUtil::Range(int64_t low, int64_t high, int64_t step /* = 1 */) {
-  Array ret;
+  auto ret = Array::CreateVArray();
   if (low > high) { // Negative steps
     if (low - high < step || step <= 0) {
       raise_invalid_argument_warning("step exceeds the specified range");

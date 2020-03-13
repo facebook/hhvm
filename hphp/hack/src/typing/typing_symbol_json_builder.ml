@@ -36,6 +36,8 @@ type predicate =
   | FileXRefs
   | FunctionDeclaration
   | FunctionDefinition
+  | GlobalConstDeclaration
+  | GlobalConstDefinition
   | InterfaceDeclaration
   | InterfaceDefinition
   | TraitDeclaration
@@ -57,6 +59,8 @@ type glean_json = {
   fileXRefs: json list;
   functionDeclaration: json list;
   functionDefinition: json list;
+  globalConstDeclaration: json list;
+  globalConstDefinition: json list;
   interfaceDeclaration: json list;
   interfaceDefinition: json list;
   traitDeclaration: json list;
@@ -81,6 +85,8 @@ let init_progress =
       fileXRefs = [];
       functionDeclaration = [];
       functionDefinition = [];
+      globalConstDeclaration = [];
+      globalConstDefinition = [];
       interfaceDeclaration = [];
       interfaceDefinition = [];
       traitDeclaration = [];
@@ -156,6 +162,18 @@ let update_json_data predicate json progress =
       {
         progress.resultJson with
         functionDefinition = json :: progress.resultJson.functionDefinition;
+      }
+    | GlobalConstDeclaration ->
+      {
+        progress.resultJson with
+        globalConstDeclaration =
+          json :: progress.resultJson.globalConstDeclaration;
+      }
+    | GlobalConstDefinition ->
+      {
+        progress.resultJson with
+        globalConstDefinition =
+          json :: progress.resultJson.globalConstDefinition;
       }
     | InterfaceDeclaration ->
       {
@@ -340,6 +358,9 @@ let build_func_decl_json_ref fact_id =
 let build_typedef_decl_json_ref fact_id =
   JSON_Object [("typedef_", build_id_json fact_id)]
 
+let build_gconst_decl_json_ref fact_id =
+  JSON_Object [("global_const", build_id_json fact_id)]
+
 (* These functions build up the JSON necessary and then add facts
 to the running result. *)
 
@@ -451,6 +472,22 @@ let add_typedef_decl_fact name elem progress =
   in
   add_fact TypedefDeclaration json_fact progress
 
+let add_gconst_decl_fact name _elem progress =
+  let json_fact = JSON_Object [("name", build_name_json_nested name)] in
+  add_fact GlobalConstDeclaration json_fact progress
+
+let add_gconst_defn_fact ctx elem decl_id progress =
+  let req_fields = [("declaration", build_id_json decl_id)] in
+  let json_fields =
+    match elem.cst_type with
+    | None -> req_fields
+    | Some h ->
+      let ty = get_type_from_hint ctx h in
+      ("type", build_type_json_nested ty) :: req_fields
+  in
+  let json_fact = JSON_Object json_fields in
+  add_fact GlobalConstDefinition json_fact progress
+
 let add_decl_loc_fact pos decl_json progress =
   let filepath = Relative_path.to_absolute (Pos.filename pos) in
   let json_fact =
@@ -548,6 +585,17 @@ let process_enum_decl ctx elem progress =
     elem
     progress
 
+let process_gconst_decl ctx elem progress =
+  let (pos, id) = elem.cst_name in
+  process_decl_loc
+    add_gconst_decl_fact
+    (add_gconst_defn_fact ctx)
+    build_gconst_decl_json_ref
+    pos
+    id
+    elem
+    progress
+
 let process_func_decl ctx elem progress =
   let (pos, id) = elem.f_name in
   process_decl_loc
@@ -575,6 +623,7 @@ let build_json ctx symbols =
         | Class en when phys_equal en.c_kind Cenum ->
           process_enum_decl ctx en acc
         | Class cd -> process_container_decl cd acc
+        | Constant gd -> process_gconst_decl ctx gd acc
         | Fun fd -> process_func_decl ctx fd acc
         | Typedef td -> process_typedef_decl td acc
         | _ -> acc)
@@ -602,6 +651,13 @@ let build_json ctx symbols =
             | Trait ->
               let con_kind = container_decl_predicate TraitContainer in
               process_container_xref con_kind symbol_def occ.pos (xrefs, prog)
+            | Const when phys_equal occ.type_ GConst ->
+              process_xref
+                add_gconst_decl_fact
+                build_gconst_decl_json_ref
+                symbol_def
+                occ.pos
+                (xrefs, prog)
             | Enum ->
               process_xref
                 add_enum_decl_fact
@@ -637,6 +693,7 @@ let build_json ctx symbols =
       ("hack.ClassDefinition.1", progress.resultJson.classDefinition);
       ("hack.TraitDefinition.1", progress.resultJson.traitDefinition);
       ("hack.InterfaceDefinition.1", progress.resultJson.interfaceDefinition);
+      ("hack.GlobalConstDefinition.1", progress.resultJson.globalConstDefinition);
       ("hack.DeclarationLocation.1", progress.resultJson.declarationLocation);
       ("hack.FunctionDeclaration.1", progress.resultJson.functionDeclaration);
       ("hack.EnumDeclaration.1", progress.resultJson.enumDeclaration);
@@ -644,6 +701,8 @@ let build_json ctx symbols =
       ("hack.TraitDeclaration.1", progress.resultJson.traitDeclaration);
       ("hack.InterfaceDeclaration.1", progress.resultJson.interfaceDeclaration);
       ("hack.TypedefDeclaration.1", progress.resultJson.typedefDeclaration);
+      ( "hack.GlobalConstDeclaration.1",
+        progress.resultJson.globalConstDeclaration );
     ]
   in
   let json_array =

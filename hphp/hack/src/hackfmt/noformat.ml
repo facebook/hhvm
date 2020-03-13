@@ -15,6 +15,7 @@ module Token = Full_fidelity_positioned_token
 module Trivia = Full_fidelity_positioned_trivia
 open Core_kernel
 open Boundaries
+open Format_env
 
 let generated_tag = "@" ^ "generated"
 
@@ -97,7 +98,7 @@ let get_fixme_ranges_and_manual_sections tree :
     suppressed, sorted by order of appearance in the file. Formatting is
     suppressed around HH_FIXME/HH_IGNORE_ERROR comments, in generated
     sections of partially-generated files, and in generated files. *)
-let get_suppressed_formatting_ranges line_boundaries tree =
+let get_suppressed_formatting_ranges env line_boundaries tree =
   let source_text = SyntaxTree.text tree in
   let (fixme_ranges, manual_sections) =
     get_fixme_ranges_and_manual_sections tree
@@ -115,16 +116,19 @@ let get_suppressed_formatting_ranges line_boundaries tree =
     |> List.map ~f:(fun (st, ed) -> (st, ed + 1))
     |> List.map ~f:expand_to_line_boundaries
   in
-  let generated_sections =
-    let text = SourceText.text source_text in
-    let whole_file = [(0, String.length text)] in
-    if is_generated_file text then
-      whole_file
-    else if List.is_empty manual_sections then
-      []
-    else
-      Interval.diff_sorted_lists whole_file manual_sections
-      |> List.map ~f:expand_to_line_boundaries
-  in
-  List.merge fixme_ranges generated_sections ~compare:Interval.compare
-  |> Interval.union_consecutive_overlapping
+  if env.format_generated_code then
+    Interval.union_consecutive_overlapping fixme_ranges
+  else
+    let generated_sections =
+      let text = SourceText.text source_text in
+      let whole_file = [(0, String.length text)] in
+      if is_generated_file text then
+        whole_file
+      else if List.is_empty manual_sections then
+        []
+      else
+        Interval.diff_sorted_lists whole_file manual_sections
+        |> List.map ~f:expand_to_line_boundaries
+    in
+    List.merge fixme_ranges generated_sections ~compare:Interval.compare
+    |> Interval.union_consecutive_overlapping

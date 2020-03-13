@@ -82,7 +82,9 @@ let format_tree ?config tree =
     |> Chunk_builder.build
   in
   let line_boundaries = get_line_boundaries text in
-  let noformat_ranges = get_suppressed_formatting_ranges line_boundaries tree in
+  let noformat_ranges =
+    get_suppressed_formatting_ranges env line_boundaries tree
+  in
   let whole_file = [(0, String.length text)] in
   let ranges = Interval.diff_sorted_lists whole_file noformat_ranges in
   let formatted_ranges =
@@ -118,7 +120,9 @@ let format_range ?config range tree =
     |> Chunk_builder.build
   in
   let line_boundaries = get_line_boundaries text in
-  let noformat_ranges = get_suppressed_formatting_ranges line_boundaries tree in
+  let noformat_ranges =
+    get_suppressed_formatting_ranges env line_boundaries tree
+  in
   let ranges = Interval.diff_sorted_lists [range] noformat_ranges in
   let formatted_ranges =
     List.map ranges (fun range ->
@@ -156,7 +160,9 @@ let format_intervals ?config intervals tree =
     |> List.sort ~compare:Interval.compare
     |> Interval.union_consecutive_overlapping
   in
-  let noformat_ranges = get_suppressed_formatting_ranges line_boundaries tree in
+  let noformat_ranges =
+    get_suppressed_formatting_ranges env line_boundaries tree
+  in
   let ranges = Interval.diff_sorted_lists ranges noformat_ranges in
   let formatted_ranges =
     List.map ranges (fun range ->

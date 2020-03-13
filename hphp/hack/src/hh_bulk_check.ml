@@ -7,6 +7,8 @@
  *)
 
 open ServerEnv
+open ServerLocalConfig
+open ServerLocalConfig.RemoteTypeCheck
 
 type schedule_args = {
   bin_root: Path.t;
@@ -174,8 +176,8 @@ let parse_args () =
     parse_schedule_args ()
   | CKWork -> parse_work_args ()
 
-(* 
-  Initialize env/genv from naming_table and create local workers 
+(*
+  Initialize env/genv from naming_table and create local workers
   based on num_local_workers.
 *)
 let init_env_and_create_local_workers root naming_table num_local_workers =
@@ -240,17 +242,15 @@ let get_batch_size genv (batch_size : int option) =
     ( ServerLocalConfig.(genv.local_config.remote_type_check.max_batch_size),
       ServerLocalConfig.(genv.local_config.remote_type_check.min_batch_size) )
 
-(* 
+(*
   Start remote checking service with number of remote workers specified by num_remote_workers.
 *)
 let start_remote_checking_service genv env num_remote_workers batch_size =
-  let version_specifier =
-    ServerLocalConfig.(genv.local_config.remote_version_specifier)
-  in
+  let version_specifier = genv.local_config.remote_version_specifier in
 
   let (max_batch_size, min_batch_size) = get_batch_size genv batch_size in
   let worker_min_log_level =
-    ServerLocalConfig.(genv.local_config.remote_type_check.worker_min_log_level)
+    genv.local_config.remote_type_check.worker_min_log_level
   in
   let root = Relative_path.path_of_prefix Relative_path.Root in
   let delegate_state =
@@ -307,7 +307,7 @@ let print_errors errors =
   ()
 
 (*
-  Schedule type checking for input file. 
+  Schedule type checking for input file.
   The type checking mode can be controlled by --num-remote-workers/--num-remote-workers options:
     If --num-remote-workers != 0, remote type checking will be enabled.
       Otherwise, pure-local type checking is used.

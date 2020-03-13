@@ -10,6 +10,85 @@
 open Config_file.Getters
 open Hh_core
 
+module RemoteTypeCheck = struct
+  type remote_type_check = {
+    (* Enables remote type check *)
+    enabled: bool;
+    load_naming_table_on_full_init: bool;
+    max_batch_size: int;
+    min_batch_size: int;
+    (* Dictates the number of remote type checking workers *)
+    num_workers: int;
+    (* If set, distributes type checking to remote workers if the number of files to
+    type check exceeds the threshold. If not set, then always checks everything locally. *)
+    recheck_threshold: int option;
+    worker_min_log_level: Hh_logger.Level.t;
+    (* Indicates the size of the job below which a virtual file system should
+    be used by the remote worker *)
+    worker_vfs_checkout_threshold: int;
+  }
+
+  let load ~current_version ~default config =
+    let prefix = Some "remote_type_check" in
+    let num_workers =
+      int_ "num_workers" ~prefix ~default:default.num_workers config
+    in
+    let max_batch_size =
+      int_ "max_batch_size" ~prefix ~default:default.max_batch_size config
+    in
+    let min_batch_size =
+      int_ "min_batch_size" ~prefix ~default:default.min_batch_size config
+    in
+    let recheck_threshold = int_opt "recheck_threshold" ~prefix config in
+    let load_naming_table_on_full_init =
+      bool_if_min_version
+        "load_naming_table_on_full_init"
+        ~prefix
+        ~default:default.load_naming_table_on_full_init
+        ~current_version
+        config
+    in
+    let enabled =
+      bool_if_min_version
+        "enabled"
+        ~prefix
+        ~default:default.enabled
+        ~current_version
+        config
+    in
+    let worker_min_log_level =
+      match
+        Hh_logger.Level.of_enum_string
+          (String.lowercase_ascii
+             (string_
+                ~prefix
+                "worker_min_log_level"
+                ~default:
+                  (Hh_logger.Level.to_enum_string default.worker_min_log_level)
+                config))
+      with
+      | Some level -> level
+      | None -> Hh_logger.Level.Debug
+    in
+    let worker_vfs_checkout_threshold =
+      int_
+        "worker_vfs_checkout_threshold"
+        ~prefix
+        ~default:default.worker_vfs_checkout_threshold
+        config
+    in
+    {
+      enabled;
+      load_naming_table_on_full_init;
+      max_batch_size;
+      min_batch_size;
+      num_workers;
+      recheck_threshold;
+      worker_min_log_level;
+      worker_vfs_checkout_threshold;
+    }
+end
+
 type t = {
   min_log_level: Hh_logger.Level.t;
   (* the list of experiments from the experiments config *)
@@ -102,7 +181,7 @@ type t = {
   (* The whether to use the hook that prefetches files on an Eden checkout *)
   prefetch_deferred_files: bool;
   (* Remote type check settings that can be changed, e.g., by GK *)
-  remote_type_check: remote_type_check;
+  remote_type_check: RemoteTypeCheck.remote_type_check;
   (* If set, uses the key to fetch type checking jobs *)
   remote_worker_key: string option;
   (* If set, uses the check ID when logging events in the context of remove init/work *)
@@ -130,23 +209,6 @@ type t = {
   profile_desc: string;
   (* Allows the IDE to show the 'find all implementations' button *)
   go_to_implementation: bool;
-}
-
-and remote_type_check = {
-  (* Enables remote type check *)
-  enabled: bool;
-  load_naming_table_on_full_init: bool;
-  max_batch_size: int;
-  min_batch_size: int;
-  (* Dictates the number of remote type checking workers *)
-  num_workers: int;
-  (* If set, distributes type checking to remote workers if the number of files to
-    type check exceeds the threshold. If not set, then always checks everything locally. *)
-  recheck_threshold: int option;
-  worker_min_log_level: Hh_logger.Level.t;
-  (* Indicates the size of the job below which a virtual file system should
-    be used by the remote worker *)
-  worker_vfs_checkout_threshold: int;
 }
 
 let default =
@@ -206,16 +268,17 @@ let default =
     max_times_to_defer_type_checking = None;
     prefetch_deferred_files = false;
     remote_type_check =
-      {
-        enabled = false;
-        load_naming_table_on_full_init = false;
-        max_batch_size = 8_000;
-        min_batch_size = 5_000;
-        num_workers = 4;
-        recheck_threshold = None;
-        worker_min_log_level = Hh_logger.Level.Info;
-        worker_vfs_checkout_threshold = 10_000;
-      };
+      RemoteTypeCheck.
+        {
+          enabled = false;
+          load_naming_table_on_full_init = false;
+          max_batch_size = 8_000;
+          min_batch_size = 5_000;
+          num_workers = 4;
+          recheck_threshold = None;
+          worker_min_log_level = Hh_logger.Level.Info;
+          worker_vfs_checkout_threshold = 10_000;
+        };
     remote_worker_key = None;
     remote_check_id = None;
     remote_version_specifier = None;
@@ -280,79 +343,6 @@ let state_loader_timeouts_ ~default config =
       current_hg_rev_timeout;
       current_base_rev_timeout;
     })
-
-let load_remote_type_check ~current_version config =
-  let prefix = Some "remote_type_check" in
-  let num_workers =
-    int_
-      "num_workers"
-      ~prefix
-      ~default:default.remote_type_check.num_workers
-      config
-  in
-  let max_batch_size =
-    int_
-      "max_batch_size"
-      ~prefix
-      ~default:default.remote_type_check.max_batch_size
-      config
-  in
-  let min_batch_size =
-    int_
-      "min_batch_size"
-      ~prefix
-      ~default:default.remote_type_check.min_batch_size
-      config
-  in
-  let recheck_threshold = int_opt "recheck_threshold" ~prefix config in
-  let load_naming_table_on_full_init =
-    bool_if_min_version
-      "load_naming_table_on_full_init"
-      ~prefix
-      ~default:default.remote_type_check.load_naming_table_on_full_init
-      ~current_version
-      config
-  in
-  let enabled =
-    bool_if_min_version
-      "enabled"
-      ~prefix
-      ~default:default.remote_type_check.enabled
-      ~current_version
-      config
-  in
-  let worker_min_log_level =
-    match
-      Hh_logger.Level.of_enum_string
-        (String.lowercase_ascii
-           (string_
-              ~prefix
-              "worker_min_log_level"
-              ~default:
-                (Hh_logger.Level.to_enum_string
-                   default.remote_type_check.worker_min_log_level)
-              config))
-    with
-    | Some level -> level
-    | None -> Hh_logger.Level.Debug
-  in
-  let worker_vfs_checkout_threshold =
-    int_
-      "worker_vfs_checkout_threshold"
-      ~prefix
-      ~default:default.remote_type_check.worker_vfs_checkout_threshold
-      config
-  in
-  {
-    enabled;
-    load_naming_table_on_full_init;
-    max_batch_size;
-    min_batch_size;
-    num_workers;
-    recheck_threshold;
-    worker_min_log_level;
-    worker_vfs_checkout_threshold;
-  }
 
 let apply_overrides ~silent ~current_version ~config ~overrides =
   (* First of all, apply the CLI overrides so the settings below could be specified
@@ -653,7 +643,12 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
-  let remote_type_check = load_remote_type_check ~current_version config in
+  let remote_type_check =
+    RemoteTypeCheck.load
+      ~current_version
+      ~default:default.remote_type_check
+      config
+  in
   let remote_worker_key = string_opt "remote_worker_key" config in
   let remote_check_id = string_opt "remote_check_id" config in
   let remote_version_specifier = string_opt "remote_version_specifier" config in

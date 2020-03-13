@@ -9,6 +9,7 @@
 open Core_kernel
 open ServerEnv
 open ServerLocalConfig
+open ServerLocalConfig.RemoteTypeCheck
 
 let should_do_remote
     (opts : TypecheckerOptions.t) (fnl : Relative_path.Set.t) ~(t : float) :

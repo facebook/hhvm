@@ -300,18 +300,26 @@ let load config_filename options =
         local_config.max_times_to_defer_type_checking
       ?tco_prefetch_deferred_files:(Some local_config.prefetch_deferred_files)
       ?tco_remote_type_check_threshold:
-        local_config.remote_type_check.recheck_threshold
-      ?tco_remote_type_check:(Some local_config.remote_type_check.enabled)
+        ServerLocalConfig.RemoteTypeCheck.(
+          local_config.remote_type_check.recheck_threshold)
+      ?tco_remote_type_check:
+        ServerLocalConfig.RemoteTypeCheck.(
+          Some local_config.remote_type_check.enabled)
       ?tco_remote_worker_key:local_config.remote_worker_key
       ?tco_remote_check_id:local_config.remote_check_id
       ?tco_remote_max_batch_size:
-        (Some local_config.remote_type_check.max_batch_size)
+        ServerLocalConfig.RemoteTypeCheck.(
+          Some local_config.remote_type_check.max_batch_size)
       ?tco_remote_min_batch_size:
-        (Some local_config.remote_type_check.min_batch_size)
-      ?tco_num_remote_workers:(Some local_config.remote_type_check.num_workers)
+        ServerLocalConfig.RemoteTypeCheck.(
+          Some local_config.remote_type_check.min_batch_size)
+      ?tco_num_remote_workers:
+        ServerLocalConfig.RemoteTypeCheck.(
+          Some local_config.remote_type_check.num_workers)
       ?so_remote_version_specifier:local_config.remote_version_specifier
       ?so_remote_worker_vfs_checkout_threshold:
-        (Some local_config.remote_type_check.worker_vfs_checkout_threshold)
+        ServerLocalConfig.RemoteTypeCheck.(
+          Some local_config.remote_type_check.worker_vfs_checkout_threshold)
       ?so_naming_sqlite_path:local_config.naming_sqlite_path
       ?tco_language_feature_logging:(bool_opt "language_feature_logging" config)
       ?tco_unsafe_rx:(bool_opt "unsafe_rx" config)

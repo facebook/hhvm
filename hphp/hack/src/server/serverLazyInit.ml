@@ -668,7 +668,7 @@ let full_init (genv : ServerEnv.genv) (env : ServerEnv.env) :
   let (env, t) =
     if
       genv.ServerEnv.local_config.SLC.remote_type_check
-        .SLC.load_naming_table_on_full_init
+        .SLC.RemoteTypeCheck.load_naming_table_on_full_init
       = false
     then
       initialize_naming_table ~do_naming:true "full initialization" genv env
@@ -677,7 +677,8 @@ let full_init (genv : ServerEnv.genv) (env : ServerEnv.env) :
   in
   let env =
     let remote_enabled =
-      genv.ServerEnv.local_config.SLC.remote_type_check.SLC.enabled
+      genv.ServerEnv.local_config.SLC.remote_type_check
+        .SLC.RemoteTypeCheck.enabled
     in
     if remote_enabled && is_check_mode then
       start_typing_delegate genv env

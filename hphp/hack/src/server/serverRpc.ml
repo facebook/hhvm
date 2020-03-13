@@ -184,9 +184,41 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         ~autocomplete_context
     in
     (env, result.With_complete_flag.value)
-  | IDENTIFY_SYMBOL _name ->
-    (* TODO(ljw): implement it *)
-    (env, [])
+  | IDENTIFY_SYMBOL arg ->
+    let ctx = Provider_utils.ctx_from_server_env env in
+    let get_def_opt type_ name =
+      ServerSymbolDefinition.go
+        ctx
+        None
+        SymbolOccurrence.{ type_; name; is_declaration = false; pos = Pos.none }
+      |> Option.to_list
+      |> List.map ~f:SymbolDefinition.to_absolute
+    in
+    let arg = Str.split (Str.regexp "::") arg in
+    (* The following are all the different named entities I could think of in Hack. *)
+    let results =
+      match arg with
+      | [c_name; member] ->
+        let c_name = Utils.add_ns c_name in
+        List.concat
+          [
+            get_def_opt (SymbolOccurrence.Method (c_name, member)) "";
+            get_def_opt (SymbolOccurrence.Property (c_name, member)) "";
+            get_def_opt (SymbolOccurrence.ClassConst (c_name, member)) "";
+            get_def_opt (SymbolOccurrence.Typeconst (c_name, member)) "";
+          ]
+      | [name] ->
+        let name = Utils.add_ns name in
+        List.concat
+          [
+            get_def_opt SymbolOccurrence.Class name;
+            (* SymbolOccurrence.Record and Class find the same things *)
+            get_def_opt SymbolOccurrence.Function name;
+            get_def_opt SymbolOccurrence.GConst name;
+          ]
+      | _ -> []
+    in
+    (env, results)
   | IDENTIFY_FUNCTION (filename, file_input, line, column) ->
     let (ctx, entry) =
       Provider_utils.add_entry_from_file_input

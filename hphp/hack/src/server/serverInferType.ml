@@ -109,6 +109,12 @@ let type_at_pos
     (Tast_env.env * Tast.ty) option =
   (base_visitor line char)#go ctx tast >>| fun (_, env, ty) -> (env, ty)
 
+let expanded_type_at_pos
+    (ctx : Provider_context.t) (tast : Tast.program) (line : int) (char : int) :
+    (Tast_env.env * Tast.ty) option =
+  type_at_pos ctx tast line char
+  |> Option.map ~f:(fun (env, ty) -> (env, Tast_expand.expand_ty env ty))
+
 let type_at_range
     (ctx : Provider_context.t)
     (tast : Tast.program)

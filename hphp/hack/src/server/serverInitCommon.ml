@@ -147,7 +147,7 @@ let filter_filenames_by_spec
 let type_check
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
-    (fast : FileInfo.names Relative_path.Map.t)
+    (files_to_check : Relative_path.t list)
     (t : float) : ServerEnv.env * float =
   (* No type checking in AI mode *)
   if ServerArgs.ai_mode genv.options <> None then
@@ -161,11 +161,10 @@ let type_check
      * should always recheck everything necessary up-front. *)
     assert (env.prechecked_files = Prechecked_files_disabled);
 
-    let count = Relative_path.Map.cardinal fast in
+    let count = List.length files_to_check in
     let logstring = Printf.sprintf "Filter %d files" count in
     Hh_logger.log "Begin %s" logstring;
 
-    let (files_to_check : Relative_path.t list) = Relative_path.Map.keys fast in
     let (files_to_check : Relative_path.t list) =
       match ServerArgs.save_with_spec genv.options with
       | None -> files_to_check
@@ -211,10 +210,8 @@ let type_check
     (env, Hh_logger.log_duration logstring t)
   ) else
     let needs_recheck =
-      Relative_path.Map.fold
-        fast
-        ~init:Relative_path.Set.empty
-        ~f:(fun fn _ acc -> Relative_path.Set.add acc fn)
+      List.fold files_to_check ~init:Relative_path.Set.empty ~f:(fun acc fn ->
+          Relative_path.Set.add acc fn)
     in
     let env =
       {

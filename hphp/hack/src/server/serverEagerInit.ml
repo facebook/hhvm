@@ -80,4 +80,4 @@ let init (genv : ServerEnv.genv) (lazy_level : lazy_level) (env : ServerEnv.env)
   in
   (* Type-checking everything *)
   SharedMem.cleanup_sqlite ();
-  type_check genv env fast t
+  type_check genv env (Relative_path.Map.keys fast) t

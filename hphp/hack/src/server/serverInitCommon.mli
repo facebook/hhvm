@@ -26,6 +26,6 @@ val naming : ServerEnv.env -> float -> ServerEnv.env * float
 val type_check :
   ServerEnv.genv ->
   ServerEnv.env ->
-  FileInfo.names Relative_path.Map.t ->
+  Relative_path.t list ->
   float ->
   ServerEnv.env * float

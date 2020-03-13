@@ -615,6 +615,60 @@ class CommonTests(BarebonesTests):
             options=["--find-class-refs", "Foo"],
         )
 
+    def test_identify_symbol(self) -> None:
+        """
+        Test hh_client --identify
+        """
+        self.test_driver.start_hh_server()
+
+        self.test_driver.check_cmd_and_json_cmd(
+            [],
+            [
+                '[{{"full_name":"B","pos":{{"filename":"{root}class_1.php","line":3,"char_start":7,"char_end":7}},"kind":"class"}}]'
+            ],
+            options=["--identify", "B"],
+        )
+
+        self.test_driver.check_cmd_and_json_cmd(
+            [],
+            [
+                '[{{"full_name":"B::foo","pos":{{"filename":"{root}class_1.php","line":5,"char_start":26,"char_end":28}},"kind":"method"}}]'
+            ],
+            options=["--identify", "B::foo"],
+        )
+
+        self.test_driver.check_cmd_and_json_cmd(
+            [],
+            [
+                '[{{"full_name":"CONST_SOME_COOL_VALUE","pos":{{"filename":"{root}const_1.php","line":3,"char_start":11,"char_end":31}},"kind":"const"}}]'
+            ],
+            options=["--identify", "CONST_SOME_COOL_VALUE"],
+        )
+
+        self.test_driver.check_cmd_and_json_cmd(
+            [],
+            [
+                '[{{"full_name":"FbidMapField","pos":{{"filename":"{root}enum_1.php","line":3,"char_start":6,"char_end":17}},"kind":"enum"}}]'
+            ],
+            options=["--identify", "FbidMapField"],
+        )
+
+        self.test_driver.check_cmd_and_json_cmd(
+            [],
+            [
+                '[{{"full_name":"FbidMapField::FBID","pos":{{"filename":"{root}enum_1.php","line":4,"char_start":3,"char_end":6}},"kind":"const"}}]'
+            ],
+            options=["--identify", "FbidMapField::FBID"],
+        )
+
+        self.test_driver.check_cmd_and_json_cmd(
+            [],
+            [
+                '[{{"full_name":"f","pos":{{"filename":"{root}foo_1.php","line":3,"char_start":18,"char_end":18}},"kind":"function"}}]'
+            ],
+            options=["--identify", "f"],
+        )
+
     def test_ide_find_refs(self) -> None:
         self.test_driver.start_hh_server()
 

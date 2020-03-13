@@ -12,13 +12,12 @@ NOTICE: This spec is currently very out of date and does not reflect the current
 
 # Basic Concepts
 ## Program Structure
-A Hack *program* consists of one or more source files, known formally as
-*scripts*.
+A Hack *program* consists of one or more source files, known formally as *scripts*.
 
 <pre>
 <i>script:
-  </i>&lt;?hh // strict
-  <i>declaration-list<sub>opt</sub></i>
+  </i>&lt;?hh <i>declaration-list<sub>opt</sub></i> (in a .php script)
+  <i>declaration-list<sub>opt</sub></i> (in a .hack script)
 
 <i>declaration-list:</i>
   <i>declaration</i>
@@ -48,12 +47,12 @@ A Hack *program* consists of one or more source files, known formally as
 * [*namespace-use-declaration*](20-namespaces.md#namespace-use-declarations)
 * [*trait-declaration*](18-traits.md#trait-declarations)
 
-A Hack script can be processed in any one of a number of *modes*, of which
+~~A Hack script can be processed in any one of a number of *modes*, of which
 `strict` is one. This mode is specified in a [*special single-line-comment*](09-lexical-structure.md#comments), on the first source line, as shown. This comment may be separated
 from the preceding &lt;?hh by an arbitrary amount of [horizontal white space](09-lexical-structure.md#white-space), which must not include any [*delimited-comments*](09-lexical-structure.md#comments). This
 specification is written from the perspective of strict mode only. A
 conforming implementation may provide modes other than `strict`, but they are
-outside the scope of this specification.
+outside the scope of this specification.~~
 
 A script can import another script via [script inclusion](12-script-inclusion.md#script-inclusion-operators).
 
@@ -62,13 +61,14 @@ The top level of a script is simply referred to as the *top level*.
 ## Program Start-Up
 Once the start-up function begins execution, it is implementation-defined as
 to whether it has access to things like command-line arguments and environment
-variables. [PHP's global variables `$argc` and `$argv` are not available in
-`strict` mode.]
+variables. ~~[PHP's global variables `$argc` and `$argv` are not available in
+`strict` mode.]~~ Execution begins with the function with the `<<__EntryPoint>>` attribute in the primary file (not files loaded via [script inclusion](12-script-inclusion.md#script-inclusion-operators)).
 
 ## Program Termination
 A program may terminate normally in the following ways:
 
 -   A [`return` statement](11-statements.md#the-return-statement) in the start-up function is executed.
+-   The start-up function reaches the end of the function.
 -   The intrinsic [`exit`](10-expressions.md#exit) is called explicitly.
 
 The behavior of the first case is equivalent to corresponding calls
@@ -81,8 +81,8 @@ via a fatal error, or via an uncaught exception and there is no uncaught
 exception handler registered by `set_exception_handler`, that is
 equivalent to `exit(255)`. If execution reaches the end of the start-up
 script via an uncaught exception and an uncaught exception handler was
-registered by `set_exception_handler`, that is equivalent to exit(0). It
-is unspecified whether [object destructors](16-classes.md#destructors) are run. In all other cases,
+registered by `set_exception_handler`, that is equivalent to `exit(0)`. ~~It
+is unspecified whether [object destructors](16-classes.md#destructors) are run.~~ In all other cases,
 the behavior is unspecified.
 
 ## The Memory Model
@@ -122,9 +122,9 @@ A VStore can be changed to contain different scalar values and handles
 over time. Multiple VStores may simultaneously contain handles that
 point to the same HStore. When a VStore is created it initially contains
 the scalar value `null` unless specified otherwise. In addition to
-containing a value, VStores also carry a *type tag* that indicates the [type](05-types.md#types) of the VStore’s value. A VStore’s type tag can be changed over
+containing a value, VStores also carry a *type tag* that indicates the [type](05-types.md#types) of the VStore’s value. ~~A VStore’s type tag can be changed over
 time. At any given time a VStore’s type tag may be one of the following:
-`Null`, `Bool`, `Int`, `Float`, `Str`, `Arr`, `Arr-D` (see [§§](#deferred-array-copying)), `Obj`, or `Res`.
+`Null`, `Bool`, `Int`, `Float`, `Str`, `Arr`, `Arr-D` (see [§§](#deferred-array-copying)), `Obj`, or `Res`.~~
 
 An HStore represents the contents of a non-scalar value, and it may
 contain zero or more VSlots. At run time, the Engine may add new VSlots
@@ -186,9 +186,9 @@ abstract memory model is not intended to exactly match any specific
 implementation’s model, and for generality and simplicity there may be some
 superficial differences between the described model and an implementation's model.
 
-For most operations, the mapping between VSlots and VStores remains the
+~~For most operations, the mapping between VSlots and VStores remains the
 same. Only the following program constructs can change a VSlot to point
-to different VStore: the use of `&` in a [`foreach` statement](11-statements.md#the-foreach-statement).
+to different VStore: the use of `&` in a [`foreach` statement](11-statements.md#the-foreach-statement).~~
 
 ### Reclamation and Automatic Memory Management
 The Engine is required to manage the lifetimes of VStores and HStores
@@ -203,16 +203,16 @@ Later, if a VStore or HStore becomes unreachable through any existing
 variable, they become eligible for reclamation to release the memory
 they occupy. The engine may reclaim a VStore or HStore at any time
 between when it becomes eligible for reclamation and when the script
-exits. Before reclaiming an HStore that represents an [object](05-types.md#class-types),
-the Engine will invoke the object’s [destructor](16-classes.md#destructors) if one is defined.
+exits. ~~Before reclaiming an HStore that represents an [object](05-types.md#class-types),
+the Engine will invoke the object’s [destructor](16-classes.md#destructors) if one is defined.~~
 
-The Engine must reclaim each VSlot when the [storage duration](#storage-duration) of its
+~~The Engine must reclaim each VSlot when the [storage duration](#storage-duration) of its
 corresponding variable ends, when the variable is explicitly unset by the
 programmer, or when the script exits, whichever comes first. In the case where
 a VSlot is contained within an HStore (i.e. an array element or an object
 instance property), the engine must immediate reclaim the VSlot when it is
 explicitly unset by the programmer, when the containing HStore is reclaimed,
-or when the script exits, whichever comes first.
+or when the script exits, whichever comes first.~~
 
 The precise form of automatic memory management used by the Engine is
 unspecified, which means that the time and order of the reclamation of
@@ -229,22 +229,19 @@ counting-based implementation for automatic memory management.
 ### Assignment
 #### General
 This section and those immediately following it describe the abstract
-model’s implementation of *value assignment* and *byRef assignment*.
+model’s implementation of *value assignment*.
 Value assignment of non-array types to local variables is described
-first, followed by byRef assignment with local variables, followed by
+first, followed by
 value assignment of array types to local variables, and ending with
-value assignment with complex left-hand side expressions, and byRef
-assignment with complex expressions on the left- or right-hand side.
+value assignment with complex left-hand side expressions.
 
-Value assignment and byRef assignment are core to HHVM, the Engine which
-supports the  PHP and Hack languages. Many other operations in the PHP and
-Hack specification are described in terms of value assignment. On the other
-hand, byRef assignment is used only by PHP, not by Hack. However, a discussion
-of such assignment has been retained here for historical reference.
+Value assignment is core to HHVM, the Engine which
+supports the Hack language. Many other operations in the
+Hack specification are described in terms of value assignment.
 
 #### Value Assignment of Scalar Types to a Local Variable
 Value assignment is the primary means by which the programmer can create
-local variables. If a local variable appears on the left-hand side of
+local variables. If a local variable that appears on the left-hand side of
 value assignment does not exist, the engine will bring a new local
 variable into existence and create a VSlot and initial VStore for
 storing the local variable’s value.
@@ -292,15 +289,6 @@ except that the literals or expressions don’t have their own VSlots or
 VStores. The scalar value or handle produced by the literal or
 expression is written into the VStore of the left hand side, overwriting
 its previous contents.
-
-***Implementation Notes*** For simplicity, the abstract model’s
-definition of value assignment never changes the mapping from VSlots to
-VStores. This aspect of the abstract model is superficially different
-from the php.net implementation’s model, which in some cases will set
-two variable slots to point to the same zval when performing value
-assignment. Despite this superficial difference, php.net’s
-implementation produces the same observable behavior as the abstract
-model presented here.
 
 To illustrate the semantics of value assignment further, consider `++$b`:
 
@@ -353,16 +341,6 @@ example:
 [VSlot $b *]-->[VStore Str 'gh']
 </pre>
 
-***Implementation Notes*** For simplicity, the abstract model represents
-a string as a scalar value that can be entirely contained within VStore.
-This aspect of the abstract model is superficially different from the
-php.net implementation’s model, where a zval points to a separate buffer
-in memory containing a string’s characters and in the common case
-multiple slots point to the same zval that holds the string. Despite
-this superficial difference, php.net’s implementation produces the same
-observable behavior (excluding performance and resource consumption) as
-the abstract model presented here.
-
 Because a string’s content can be arbitrarily large, copying a string’s
 entire contents for value assignment can be expensive. In practice an
 application written in Hack may rely on value assignment of strings being
@@ -378,7 +356,7 @@ defer copying a string’s contents for value assignment so long as it has
 no observable effect on behavior from any testable viewpoint (excluding
 performance and resource consumption).
 
-#### Value Assignment of Object and Resource Types to a Local Variable
+#### Value Assignment of Object ~~and Resource~~ Types to a Local Variable
 
 To demonstrate value assignment of objects to local variables, consider
 the case in which we have a Point class that supports a two-dimensional
@@ -461,201 +439,14 @@ We can remove all these handles using `$a = null` and `$b = null`:
 </pre>
 
 By assigning null to `$a`, we remove the only handle to `Point(2,1)`, which
-allows that object's [destructor](14-classes.md#destructors) to run. A similar thing happens
-with `$b`, as it too is the only handle to its Point.
+allows that object to be reclaimed at some unspecified future time. A similar
+thing happens with `$b`, as it too is the only handle to its Point.
 
 Although the examples above only show with only two instance properties,
 the same mechanics apply for value assignment of all object types, even
 though they can have an arbitrarily large number of instance properties
-of arbitrary type. Likewise, the same mechanics apply to value
-assignment of all resource types.
-
-#### ByRef Assignment for Scalar Types with Local Variables
-Let's begin with the same [value assignment](10-expressions.md#simple-assignment) as in the previous
-section, `$a = 123` and `$b = false`:
-
-<pre>
-[VSlot $a *]-->[VStore Int 123]
-
-[VSlot $b *]-->[VStore Bool false]
-</pre>
-
-Now consider the [byRef assignment](10-expressions.md#byref-assignment) `$b =& $a`, which has byRef
-semantics:
-<pre>
-[VSlot $a *]-->[VStore Int 123]
-                 ^
-                 |
-[VSlot $b *]-----+     [VStore Bool false (dead)]
-</pre>
-
-In this example, byRef assignment changes `$b`’s VSlot point to the same
-VStore that `$a`’s VSlot points to. The old VStore that `$b`’s VSlot used
-to point to is now unreachable. As stated in [§§](#general), it is not possible for a VSlot to point to another VSlot, so `$b`‘s VSlot cannot point to `$a`‘s VSlot. When multiple variables’ VSlots point to the same VStore,
-the variables are said to be *aliases* of each other or they are said to
-have an *alias relationship*. In the example above, after the byRef
-assignment executes the variables `$a` and `$b` will be aliases of each
-other.
-
-Now, let's observe what happens when we change the value of `$b` using
-`++$b`:
-<pre>
-[VSlot $a *]-->[VStore Int 124 (123 was overwritten)]
-                 ^
-                 |
-[VSlot $b *]-----+
-</pre>
-
-`$b`‘s value, which is stored in the VStore that `$b`’s VSlot points, is
-changed to 124. And as that VStore is also aliased by `$a`’s VSlot, the
-value of `$a` is also 124. Indeed, any variable’s VSlot that is aliased
-to that VStore will have the value 124.
-
-Now consider the value assignment `$a = 99`:
-<pre>
-[VSlot $a *]-->[VStore Int 99 (124 was overwritten)]
-                 ^
-                 |
-[VSlot $b *]-----+
-</pre>
-
-The alias relationship between `$a` and `$b` can be broken explicitly by
-using `unset` on variable `$a` or variable `$b`. For example, consider
-`unset($a)`:
-<pre>
-[VSlot $a (dead)]      [VStore Int 99]
-                         ^
-                         |
-[VSlot $b *]-------------+
-</pre>
-
-Unsetting `$a` causes variable `$a` to be destroyed and its corresponding
-alias to the VStore to be removed, leaving `$b`’s VSlot as the only
-pointer remaining to the VStore.
-
-Other operations can also break an alias relationship between two or
-more variables. For example, `$a = 123` and `$b =& $a`, and `$c = 'hi'`:
-<pre>
-[VSlot $a *]-->[VStore Int 123]
-                 ^
-                 |
-[VSlot $b *]-----+
-
-[VSlot $c *]-->[VStore Str 'hi']
-</pre>
-
-After the byRef assignment, `$a` and `$b` now have an alias relationship.
-Next, let's observe what happens for `$b =& $c`:
-<pre>
-[VSlot $a *]-->[VStore Int 123]
-
-[VSlot $b *]-----+
-                 |
-                 V
-[VSlot $c *]-->[VStore Str 'hi']
-</pre>
-
-As we can see, the byRef assignment above breaks the alias relationship
-between `$a` and `$b`, and now `$b` and `$c` are aliases of each other. When
-byRef assignment changes a VSlot to point to a different VStore, it
-breaks any existing alias relationship the left hand side variable had
-before the assignment operation.
-
-It is also possible to use byRef assignment to make three or more VSlots
-point to the same VStore. Consider the following example:
-
-```Hack
-$b =& $a;
-$c =& $b;
-$a = 123;
-```
-<pre>
-[VSlot $a *]-->[VStore Int 123]
-                 ^   ^
-                 |   |
-[VSlot $b *]-----+   |
-                     |
-[VSlot $c *]---------+
-</pre>
-
-Like value assignment, byRef assignment provides a means for the
-programmer to created variables. If the local variables that appear on
-the left- or right-hand side of byRef assignment do not exist, the
-engine will bring new local variables into existence and create a VSlot
-and initial VStore for storing the local variable’s value.
-
-Note that literals, constants, and other expressions that don’t
-designate a modifiable lvalue cannot be used on the left- or right-hand
-side of byRef assignment.
-
-#### Byref Assignment of Non-Scalar Types with Local Variables
-byRef assignment of non-scalar types works using the same mechanism as
-byRef assignment for scalar types. Nevertheless, it is worthwhile to
-describe a few examples to clarify the semantics of byRef assignment.
-Recall the example from [§§](#value-assignment-of-object-and-resource-types-to-a-local-variable)) using the `Point` class:
-
-`$a = new Point(1, 3);`
-<pre>
-[VSlot $a *]-->[VStore Obj *]-->[HStore Point [VSlot $x *] [VSlot $y *]]
-                                                        |            |
-                                                        V            V
-                                               [VStore Int 1]  [VStore Int 3]
-</pre>
-
-Now consider the [byRef assignment](10-expressions.md#byref-assignment) `$b =& $a`, which has byRef
-semantics:
-<pre>
-[VSlot $a *]-->[VStore Obj *]-->[HStore Point [VSlot $x *][VSlot $y *]]
-                 ^                                      |           |
-                 |                                      V           V
-[VSlot $b *]-----+                               [VStore Int 1] [VStore Int 3]
-</pre>
-`$a` and `$b` now aliases of each other. Note that byRef assignment
-produces a different result than `$b = $a` where `$a` and `$b` would point
-to distinct VStores pointing to the same HStore.
-
-Let's modify the value of the `Point` aliased by `$a` using `$a->move(4,
-6)`:
-<pre>
-[VSlot $a *]-->[VStore Obj *]-->[HStore Point [VSlot $x *] VSlot $y *]]
-                 ^                                      |           |
-                 |                                      V           V
-[VSlot $b *]-----+                           [VStore Int 4] [VStore Int 6]
-                                        (1 was overwritten) (3 was overwritten)
-</pre>
-
-Now, let's change `$a` itself using the value assignment `$a = new
-Point(2, 1)`:
-<pre>
-[VSlot $a *]-->[VStore Obj *]-->[HStore Point [VSlot $x *][VSlot $y *]]
-                 ^                                      |           |
-                 |                                      V           V
-[VSlot $b *]-----+                             [VStore Int 2] [VStore Int 1]
-
-                               [HStore Point [VSlot $x *]   [VSlot $y *] (dead)]
-                                                       |              |
-                                                       V              V
-                                     [VStore Int 4 (dead)] [VStore Int 6 (dead)]
-</pre>
-
-As we can see, `$b` continues to have an alias relationship with `$a`.
-Here's what's involved in that assignment: `$a` and `$b`'s VStore’s handle
-pointing to `Point(4,6)` is removed, `Point(2,1)` is created, and `$a` and
-`$b`’s VStore is overwritten to contain a handle pointing to that new
-`Point`. As there are now no VStores pointing to `Point(4,6)`, its
-[destructor](14-classes.md#destructors) can run.
-
-We can remove these aliases using `unset($a, $b)`:
-<pre>
-[VSlot $a (dead)]       [HStore Point [VSlot $x *] [VSlot $y *] (dead)]
-                                                |            |
-                                                V            V
-[VSlot $b (dead)]             [VStore Int 2 (dead)]  [VStore Int 1 (dead)]
-</pre>
-
-Once all the aliases to the VStores are gone, the VStores can be
-destroyed, in which case, there are no more pointers to the HStore, and
-its [destructor](16-classes.md#destructors) can be run.
+of arbitrary type. ~~Likewise, the same mechanics apply to value
+assignment of all resource types.~~
 
 #### Value Assignment of Array Types to Local Variables
 The semantics of value assignment of array types is different from value
@@ -708,26 +499,8 @@ the value assignment `$b = $a`:
 The value assignment `$b = $a` made a copy of `$a`’s array. Note how
 `$b`’s VSlot points to a different VStore than `$a`’s VSlot, and `$b`’s
 VStore points to a different HStore than `$b`’s VStore. Each source array
-element is copied using *member-copy assignment* `=*`, which is defined
-as follows:
+element is copied using value assignment (`destination = $source`).
 
-```Hack
-   $destination =* $source
-```
--   If `$source`’s VStore has a refcount equal to 1, the Engine copies the
-    array element using  value assignment (`destination = $source`).
--   If `$source`’s VStore has a refcount that is greater than 1, the Engine
-    uses an implementation-defined algorithm to decide whether to copy the element
-    using value assignment (`$destination = $source`) or byRef
-    assignment (`$destination =& $source`).
-
-Note the member-copy assignment `=*` is **not** an operator or language
-construct in the Hack language, but instead it is used internally to
-describe behavior for the engine for array copying and other operations
-
-For the particular example above, member-copy assignment exhibits the
-same semantics as value assignment for all conforming implementations
-because all of the array elements’ VStores have a refcount equal to 1.
 The first element VSlots in `$a`’s array and `$b`’s array point
 to distinct VStores, each of which contain a distinct copy of the
 integer value 10. The second element VSlots in `$a`’s array and `$b`’s
@@ -737,43 +510,20 @@ same object HStore.
 Let’s consider another example:
 ```Hack
 $x = 123;
-$a = array(array(&$x, 'hi'));
+$a = array(array($x, 'hi'));
 $b = $a;
 ```
 
-Eager copying can produce two possible outcomes depending on the
-implementation. Here is the first possible outcome:
 <pre>
 [VSlot $a *]---->[VStore Arr *]---->[HStore Array [VSlot 0 *]]
                                                            |
-[VSlot $x *]-------------------------+   [VStore Arr *]&lt;---+
-                                     |               |
-[VSlot $b *]-->[VStore Arr *]        |               V
-                           |         |  [HStore Array [VSlot 0 *][VSlot 1 *]]
-                           V         |                          |          |
-         [HStore Array [VSlot 0 *]]  |                          V          |
-                                |    +---------------->[VStore Int 123]    |
-                                V                          ^               V
-                     [VStore Arr *]                        |   [VStore Str 'hi']
-                                 |          +--------------+
-                                 V          |
-                     [HStore Array [VSlot 0 *] [VSlot 1 *]]
-                                                        |
-                                                        V
-                                                     [VStore Str 'hi']
-</pre>
-
-Here is the second possible outcome:
-<pre>
-[VSlot $a *]---->[VStore Arr *]---->[HStore Array [VSlot 0 *]]
-                                                           |
-[VSlot $x *]-------------------------+  [VStore Arr *]&lt;----+
-                                     |               |
-[VSlot $b *]-->[VStore Arr *]        |               V
-                           |         |  [HStore Array [VSlot 0 *] [VSlot 1 *]]
-                           V         |                         |           |
-         [HStore Array [VSlot 0 *]]  |                         V           |
-                                |    +---------------->[VStore Int 123]    |
+[VSlot $x *]---->VStore Int 123]        [VStore Arr *]&lt;----+
+                                                     |
+[VSlot $b *]-->[VStore Arr *]                        V
+                           |            [HStore Array [VSlot 0 *] [VSlot 1 *]]
+                           V                                   |           |
+         [HStore Array [VSlot 0 *]]                            V           |
+                                |                      [VStore Int 123]    |
                                 V                                          V
                      [VStore Arr *]                            [VStore Str 'hi']
                                  |
@@ -784,21 +534,11 @@ Here is the second possible outcome:
                                   [VStore Int 123]  [VStore Str 'hi']
 </pre>
 
-In both possible outcomes, value assignment with eager copying makes a
+Value assignment with eager copying makes a
 copy of `$a`’s array, copying the array’s single element using
-member-copy assignment (which in this case will exhibit the same
-semantics of value assignment for all implementations), which in turn
+value assignment, which in turn
 makes a copy of the inner array inside `$a`’s array, copying the inner
-array’s elements using member-copy assignment. The inner array’s first
-element VSlot points to a VStore that has a refcount that is greater than 1,
-so an implementation-defined algorithm is used to decide whether to use value
-assignment or byRef assignment. The first possible outcome shown above
-demonstrates what happens if the implementation chooses to do byRef
-assignment, and the second possible outcome shown above demonstrates
-what happens if the implementation chooses to do value assignment. The
-inner array’s second element VSlot points to a VStore that has a refcount
-equal to 1, so value assignment is used to copy the inner array’s second
-element for all conforming implementations that use eager copying.
+array’s elements using value assignment.
 
 Although the examples in this section only use arrays with one
 element or two elements, the model works equally well for all
@@ -822,211 +562,9 @@ acceptable performance), and as such it is common for an implementation
 to use a deferred array copy mechanism in order to reduce the cost of
 value assignment for arrays.
 
-Unlike conforming deferred string copy mechanisms discussed in [§§](#value-assignment-of-scalar-types-to-a-local-variable)
+Like conforming deferred string copy mechanisms discussed in [§§](#value-assignment-of-scalar-types-to-a-local-variable)
 that must produce the same observable behavior as eager string copying,
-deferred array copy mechanisms are allowed in some cases to exhibit
-observably different behavior than eager array copying. Thus, for
-completeness this section describes how deferred array copies can be
-modeled in the abstract memory model and how conforming deferred array
-copy mechanisms must behave.
-
-Conforming deferred array copy mechanisms work by not making an array
-copy during value assignment, by allowing the destination VStore to
-share an array HStore with the source VStore, and by making a copy of
-the array HStore at a later time if or when it is necessary. The
-abstract model represents a deferred array copy relationship by marking
-the destination VStore with a special “Arr-D” type tag and by sharing
-the same array HStore between the source and destination VStores. Note
-that the source VStore’s type tag remains unchanged. For the purposes of
-this abstract model, the “Arr-D” type tag is considered identical to the
-“Arr” type in all respects except when specified otherwise.
-
-To illustrate this, let’s see how the previous example would be
-represented under the abstract model assuming the implementation defers
-the copying the array:
-
-```Hack
-$x = 123;
-$a = array(array(&$x, ‘hi’));
-$b = $a;
-```
-<pre>
-[VSlot $a *]--->[VStore Arr *]--->[HStore Array [VSlot 0 *]]
-                                    ^                    |
-                                    |   [VStore Arr *]&lt;--+
-[VSlot $b *]--->[VStore Arr-D *]----+               |
-                                                    V
-                                        [HStore Array [VSlot 0 *] [VSlot 1 *]]
-                                                               |           |
-                                                               V           |
-[VSlot $x *]------------------------------------------>[VStore Int 123]    |
-                                                                           V
-                                                               [VStore Str 'hi']
-</pre>
-
-As we can see, both `$a`’s VStore (the source VStore) and `$b`’s VStore
-(the destination VStore) point to the same array HStore. Note the
-asymmetric nature of how deferred array copies are represented in the
-abstract model. In the above example the source VStore’s type tag
-remains unchanged after value assignment, whereas the destination
-VStore’s type tag was changed to “Arr-D”.
-
-When the engine is about to perform an array-mutating operation on a
-VStore tagged “Arr” that participates in a deferred array copy
-relationship or on a VStore tagged “Arr-D”, the engine must first take
-certain actions that involve making a copy of the array (described in
-the next paragraph) before performing the array-mutating operation. An
-array-mutating operation is any operation can add or remove array
-elements, overwrite existing array elements, change the state of the
-array’s internal cursor, or cause the refcount of one or more of the
-array’s element VStores or subelement VStores to increase from 1 to
-a value greater than 1. This requirement to take certain actions before
-performing an array-mutation operation on a VStore participating in a
-deferred array copy relationship is commonly referred to as the
-copy-on-write requirement.
-
-When an array-mutating operation is about to be performed on a given
-VStore X with an “Arr” type tag that participates in a deferred array
-copy relationship, the engine must find all of the VStores tagged
-“Arr-D” that point to the same array HStore that VStore X points to,
-make a copy of the array (using member-copy assignment to copy the
-array’s elements as described in [§§](#value-assignment-of-array-types-to-local-variables)), and update all of these
-VStores tagged “Arr-D” to point to the newly created copy (note that
-VStore X remains unchanged). When an array-mutation operation is about
-to be performed on a given VStore X with an “Arr-D” type tag, the engine
-must make a copy of the array (as described in [§§](#value-assignment-of-array-types-to-local-variables)), update VStore
-X to point to the newly created copy, and change VStore X’s type tag to
-“Arr”. These specific actions that the engine must perform on VStore at
-certain times to satisfy the copy-on-write requirement are collectively
-referred to as “array-separation” or “array-separating the VStore”. An
-array-mutation operation is said to “trigger” an array-separation.
-
-Note that for any VStore with an “Arr” type tag that participates in a
-deferred array copy relationship, or for any VStore with an “Arr-D” type
-tag, a conforming implementation may choose to array-separate the VStore
-at any time for any reason as long as the copy-on-write requirement is
-upheld.
-
-Continuing with the previous example, consider the array-mutating
-operation `$b[1]++`. Depending on the implementation, this can produce
-one of three possible outcomes. Here is the one of the possible
-outcomes:
-<pre>
-[VSlot $a *]---->[VStore Arr *]---->[HStore Array [VSlot 0 *]]
-                                                           |
-[VSlot $b *]-->[VStore Arr *]            [VStore Arr *]&lt;---+
-                             |                       |
-      +----------------------+              +--------+
-      V                                     V
-  [HStore Array [VSlot 0 *] [VSlot 1 *]]  [HStore Array [VSlot 0 *] [VSlot 1 *]]
-                         |           |       ^                  |          |
-                         |           V       |                  V          |
-                         |   [VStore Int 1]  |            [VStore Int 123] |
-                         V                   |             ^               V
-                       [VStore Arr-D *]-----+              |   [VStore Str 'hi']
-                                                           |
- [VSlot $x *]----------------------------------------------+
-</pre>
-
-As we can see in the outcome shown above, `$b`’s VStore was
-array-separated and now `$a`’s VStore and `$b`’s VStore point to distinct
-array HStores. Performing array-separation on `$b`’s VStore was necessary
-to satisfy the copy-on-write requirement. `$a`’s array remains unchanged
-and that `$x` and `$a[0][0]` still have an alias relationship with each
-other. For this particular example, conforming implementations are
-required to preserve `$a`’s array’s contents and to preserve the alias
-relationship between `$x` and `$a[0][0]`. Finally, note that `$a[0]` and
-`$b[0]` have a deferred copy relationship with each other in the outcome
-shown above. For this particular example, a conforming implementation is
-not required to array-separate `$b[0]`’s VStore, and the outcome shown
-above demonstrates what happens when `$b[0]`’s VStore is not
-array-separated. However, an implementation can choose to array-separate
-`$b[0]`’s VStore at any time if desired. The other two possible outcomes
-shown below demonstrate what can possibly happen if the implementation
-choose to array-separate `$b[0]`’s VStore as well. Here is the second
-possible outcome:
-<pre>
-[VSlot $a *]---->[VStore Arr *]---->[HStore Array [VSlot 0 *]]
-                                                           |
-[VSlot $b *]-->[VStore Arr *]            [VStore Arr *]&lt;---+
-                          |                          |
-                          V                          V
-  [HStore Array [VSlot 0 *] [VSlot 1 *]]  [HStore Array [VSlot 0 *] [VSlot 1 *]]
-                         |           |                           |           |
-       +-----------------+           V                           |           |
-       |                     [VStore Int 1]                  +---+           |
-       V                                                     |               V
-  [VStore Arr-D *]-->[HStore Array [VSlot 0 *] [VSlot 1 *]] | [VStore Str 'hi']
-                                            |           |   |
-                                    +-------+           |   |
-                                    |                   V   |
-                                    |    [VStore Str ‘hi’]  |
-                                    V                       |
- [VSlot $x *]--------------------->[VStore Int 123]&lt;--------+
-</pre>
-
-Here is the third possible outcome:
-<pre>
-[VSlot $a *]---->[VStore Arr *-]---->[HStore Array [VSlot 0 *]]
-                                                            |
-[VSlot $b *]-->[VStore Arr *]             [VStore Arr *]&lt;---+
-                            |                          |
-                            V                          V
- [HStore Array [VSlot 0 *] [VSlot 1 *]]  [HStore Array [VSlot 0 *] [VSlot 1 *]]
-                         |           |                           |           |
-       +-----------------+           V                           |           |
-       |                     [VStore Int 1]                  +---+           |
-       V                                                     |               V
-   [VStore Arr-D *]-->[HStore Array [VSlot 0 *] [VSlot 1 *]] | [VStore Str 'hi']
-                                             |           |   |
-                     [VStore Int 123]&lt;-------+           |   |
-                                                         V   |
-                                          [VStore Str 'hi']  |
-                                                             |
- [VSlot $x *]--------------------->[VStore Int 123]&lt;--------+
-</pre>
-
-The second and third possible outcomes show what can possibly happen if
-the implementation chooses to array-separate `$b[0]`’s VStore. In the
-second outcome, `$b[0][0]` has an alias relationship with `$x` and
-`$a[0][0]`. In the third outcome, `$b[0][0]` does not have an alias
-relationship, though `$x` and `$a[0][0]` still have an alias relationship
-with each other. The differences between the second and third outcome
-are reflect that different possibilities when the engine uses
-member-copy assignment to copy `$a[0]`’s arrays’s elements into `$b[0]`’s
-array.
-
-Finally, let’s briefly consider one more example:
-```Hack
-$x = 0;
-$a = array(&$x);
-$b = $a;
-$x = 2;
-unset($x);
-$b[1]++;
-$b[0]++;
-echo $a[0], ' ', $b[0];
-```
-
-For the example above, a conforming implementation could output “2 1”,
-“2 3”, or “3 3” depending on how it implements value assignment for
-arrays.
-
-For portability, it is generally recommended that programs written in
-Hack should avoid performing value assignment with a right-hand side that
-is an array with one or more elements or sub-elements that have an alias
-relationship.
-
-***Implementation Notes*** For generality and for simplicity, the
-abstract model represents deferred array copy mechanisms in a manner
-that is more open-ended and superficially different than the php.net
-implementation’s model, which uses a symmetric deferred copy mechanism
-where a single zval contains the sole pointer to a given Hashtable and
-deferred array copies are represented as multiple slots pointing to the
-same single zval that holds the array. Despite this superficial
-difference, php.net’s implementation produces behavior that is
-compatible with the abstract model’s definition of deferred array copy
-mechanisms.
+deferred array copy mechanisms are required to produce the same observable behavior as eager array copying.
 
 #### General Value Assignment
 The sections above thus far have described the mechanics of value assignment
@@ -1050,6 +588,8 @@ will result in:
                                                   [VStore int 123] [VStore int 3]
 [VSlot $b *]-->[VStore int 123]
 </pre>
+
+<mark>TODO(aorenste): I think this following section can be deprecated - Hack no longer supports dynamically adding new VSlots to non-dynamic objects.</mark>
 
 If needed, new VSlots are created as part of the containing VStore, for example:
 
@@ -1092,40 +632,18 @@ is considered a modifiable lvalue, and the VSlot will be created by the engine a
 to the appropriate HStore automatically. Static class properties are considered modifiable lvalues too,
 though new ones would not be created automatically.
 
-#### General ByRef Assignment
-The sections above thus far have described the mechanics of byref assignment
-with local variables. This section describes how byref assignment works when
-general modifiable lvalue expressions are used on the left hand side and/or
-the right hand side.
-
-For example:
-
-```Hack
-$a = new Point(1, 3);
-$b = 123;
-$a->z =& $b;
-```
-
-will result in:
-<pre>
-[VSlot $a *]-->[VStore object *]-->[HStore Point [VSlot $x *] [VSlot $y *] [VSlot $z *]]
-                                                           |            |            |
-                                                           V            V            |
-                                                  [VStore int 1] [VStore int 3]      |
-[VSlot $b *]---------------->[VStore int 123]&lt;---------------------------------------+
-</pre>
-
 ### Argument Passing
 Argument passing is defined in terms of simple assignment[§§](#value-assignment-of-scalar-types-to-a-local-variable), [§§](#value-assignment-of-object-and-resource-types-to-a-local-variable), [§§](#value-assignment-of-array-types-to-local-variables), and [§§](10-expressions.md#simple-assignment)). 
 That is, passing an argument to a function having a corresponding
 parameter is like assigning that argument to that parameter.
+
+<mark>TODO(aorenste): inout parameters </mark>
 
 ### Value Returning
 Returning a value from a function is defined in terms of simple
 assignment ([§§](#value-assignment-of-scalar-types-to-a-local-variable), [§§](#value-assignment-of-object-and-resource-types-to-a-local-variable), [§§](#value-assignment-of-array-types-to-local-variables), and [§§](10-expressions.md#simple-assignment)).  That is, returning a value from a function to its
 caller is like assigning that value to the user of the caller's return
 value.
-
 
 ### Cloning objects
 When an instance is allocated, [operator `new`](10-expressions.md#the-new-operator) returns a handle

@@ -17,16 +17,37 @@
 #ifndef incl_HPHP_RFUNC_H_
 #define incl_HPHP_RFUNC_H_
 
+#include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/countable.h"
+#include "hphp/runtime/vm/func.h"
+#include "hphp/util/type-scan.h"
 
 namespace HPHP {
 
-struct ArrayData;
-struct Func;
-
-struct RFuncData : Countable {
+struct RFuncData : Countable, type_scan::MarkCollectable<RFuncData> {
   Func* m_func;
   ArrayData* m_arr;
+
+  RFuncData(const RFuncData&) = delete;
+  RFuncData& operator=(const RFuncData&) = delete;
+  ~RFuncData() = delete;
+
+  static RFuncData* newInstance(Func* func, ArrayData* reified_generics);
+
+  bool kindIsValid() const {
+    return m_kind == HeaderKind::RFunc && m_arr->kindIsValid();
+  }
+
+  // Decrement ref-counts of generics and free the memory.
+  void release() noexcept;
+
+  ALWAYS_INLINE void decRefAndRelease() {
+    assertx(kindIsValid());
+    if (decReleaseCheck()) release();
+  }
+
+private:
+  RFuncData(Func* m_func, ArrayData* m_arr);
 };
 
 } // namespace HPHP

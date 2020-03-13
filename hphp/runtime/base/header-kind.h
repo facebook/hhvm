@@ -50,7 +50,7 @@ enum class HeaderKind : uint8_t {
   // Hack arrays
   Dict, VecArray, Keyset,
   // Other ordinary refcounted heap objects
-  String, Resource, ClsMeth, Record,
+  String, Resource, ClsMeth, Record, RFunc,
 
   // Valid kinds for an ObjectData; all but Object and NativeObject are
   // isCppBuiltin()

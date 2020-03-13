@@ -118,6 +118,8 @@ constexpr char RECORD_NOT_SUPPORTED[] =
 constexpr char CALL_ILLFORMED_FUNC[] =
   "calling an ill-formed function pointer without resolved "
   "class/object pointer";
+constexpr char RFUNC_NOT_SUPPORTED[] =
+  "Reified functions not supported";
 
 constexpr char CLSMETH_COMPAT_IS_ARR[] = "is_array() called on clsmeth";
 constexpr char CLSMETH_COMPAT_IS_VEC[] = "is_vec() called on clsmeth";

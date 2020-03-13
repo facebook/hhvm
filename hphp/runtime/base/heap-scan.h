@@ -180,6 +180,7 @@ inline void scanHeapObject(const HeapObject* h, type_scan::Scanner& scanner) {
       return;
     case HeaderKind::Record:
       return static_cast<const RecordData*>(h)->scan(scanner);
+    case HeaderKind::RFunc: // TODO(T63348446)
     case HeaderKind::Cpp:
     case HeaderKind::SmallMalloc:
     case HeaderKind::BigMalloc: {

@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/resumable.h"
+#include "hphp/runtime/vm/rfunc-data.h"
 
 #include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
@@ -266,6 +267,7 @@ inline size_t allocSize(const HeapObject* h) {
     0, /* Resource */
     sizeClass<ClsMethData>(),
     0, /* Record */
+    sizeClass<RFuncData>(),
     0, /* Object */
     0, /* NativeObject */
     0, /* WaitHandle */
@@ -303,6 +305,7 @@ inline size_t allocSize(const HeapObject* h) {
   CHECKSIZE(ImmVector, c_ImmVector)
   CHECKSIZE(ImmMap, c_ImmMap)
   CHECKSIZE(ImmSet, c_ImmSet)
+  CHECKSIZE(RFunc, RFuncData)
   static_assert(kind_sizes[(int)HeaderKind::Slab] == sizeof(Slab), "");
 #undef CHECKSIZE
 #define CHECKSIZE(knd)\
@@ -450,6 +453,7 @@ inline size_t allocSize(const HeapObject* h) {
     case HeaderKind::ImmMap:
     case HeaderKind::ImmSet:
     case HeaderKind::ClsMeth:
+    case HeaderKind::RFunc:
       not_reached();
   }
   return MemoryManager::sizeClass(size);

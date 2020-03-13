@@ -316,6 +316,8 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
       case HeaderKind::Record:  // TODO(T41026982)
       case HeaderKind::RecordArray:
         raise_error(Strings::RECORD_NOT_SUPPORTED);
+      case HeaderKind::RFunc: // TODO(T63348446)
+        raise_error(Strings::RFUNC_NOT_SUPPORTED);
     }
   }
 

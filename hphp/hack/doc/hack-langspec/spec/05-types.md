@@ -20,6 +20,8 @@ are [Boolean](#the-boolean-type), [integer](#the-integer-type), [floating-point]
 [enumerated](05-types.md#enumerated-types). The non-scalar types are [array](05-types.md#array-types), [class](05-types.md#class-types), [interface](05-types.md#interface-types), [tuple](05-types.md#tuple-types), [shape](05-types.md#shape-types), [closure](05-types.md#closure-types), [resource](05-types.md#resource-types), and [nullable](05-types.md#nullable-types). The [void type](05-types.md#the-void-type) is neither scalar nor
 non-scalar.
 
+<mark>TODO(aorenste): Add varray, darray, keyset, remove array and resource?</mark>
+
 The integer, floating-point, and numeric types are known collectively as
 arithmetic types. (Note carefully, that the library function [is_numeric](http://www.php.net/is_numeric) indicates if a given value is an int, a float, or a [numeric string](05-types.md#the-string-type).)
 
@@ -42,9 +44,13 @@ used.
 
 A *type constraint* indicates a requirement that a type must fulfill in order to be accepted in a given context. Type constraints are used in [type aliasing](05-types.md#type-aliases), [enum declarations](13-enums.md#enum-declarations), [type parameters](14-generic-types-methods-and-functions.md#type-parameters), and [type constants](16-classes.md#type-constants).
 
+<mark>TODO(aorenste): Are function parameters and returns type constraints?</mark>
+
+<mark>TODO(aorenste): Type testing is performed by the `is` operator.</mark>
+
 The library function [`is_scalar`](http://www.php.net/is_scalar) indicates if a given value has a scalar
-type. However, that function does not consider `null` to be scalar. To test
-for `null`, use [`is_null`](http://www.php.net/is_null). Useful library functions for interrogating and using type information include [`gettype`](http://www.php.net/gettype), [`is_type`](http://www.php.net/is_type), [`settype`](http://www.php.net/settype), and [`var_dump`](http://www.php.net/var_dump).
+type. However, that function does not consider `null` to be scalar. ~~To test
+for `null`, use `is null`. Useful library functions for interrogating and using type information include [`gettype`](http://www.php.net/gettype), [`is_type`](http://www.php.net/is_type), [`settype`](http://www.php.net/settype), and [`var_dump`](http://www.php.net/var_dump).~~
 
 **Syntax**
 <pre>
@@ -54,7 +60,6 @@ for `null`, use [`is_null`](http://www.php.net/is_null). Useful library function
   float
   int
   num
-  resource
   string
   this
   void
@@ -179,8 +184,8 @@ type is capable of storing two distinct values, which correspond to the
 Boolean values `true` and `false`, respectively. The representation of
 this type and its values is unspecified.
 
-The library function [`is_bool`](http://www.php.net/is_bool) indicates if a given value has type
-`bool`.
+~~The library function [`is_bool`](http://www.php.net/is_bool) indicates if a given value has type
+`bool`.~~
 
 ## The Integer Type
 
@@ -209,16 +214,16 @@ but must be one of the following:
 The constants [`PHP_INT_SIZE`, `PHP_INT_MIN` and `PHP_INT_MAX`](06-constants.md#core-predefined-constants) define certain
 characteristics about type `int`.
 
-The library function [`is_int`](http://www.php.net/is_int) indicates if a given value has type
-int.
+~~The library function [`is_int`](http://www.php.net/is_int) indicates if a given value has type
+int.~~
 
 ## The Floating-Point Type
 
 There is one floating-point type, `float`. The `float` type must support at least the range and
 precision of IEEE 754 64-bit double-precision representation.
 
-The library function [`is_float`](http://www.php.net/is_float) indicates if a given value has type
-`float`. The library function [`is_finite`](http://www.php.net/is_finite) indicates if a given
+~~The library function [`is_float`](http://www.php.net/is_float) indicates if a given value has type
+`float`.~~ The library function [`is_finite`](http://www.php.net/is_finite) indicates if a given
 floating-point value is finite. The library function [`is_infinite`](http://www.php.net/is_infinite)
 indicates if a given floating-point value is infinite. The library
 function [`is_nan`](http://www.php.net/is_nan) indicates if a given floating-point value is a
@@ -236,6 +241,8 @@ There is one string type, `string`.
 
 A string is a set of contiguous bytes that represents a sequence of zero
 or more characters.
+
+<mark>TODO(aorenste): array -> varray below?</mark>
 
 Conceptually, a string can be considered as an [array](05-types.md#array-types) of
 bytes—the *elements*—whose keys are the `int` values starting at zero. The
@@ -292,8 +299,8 @@ leading zero, rather than as octal 377).
 Only one mutation operation may be performed on a string, offset
 assignment, which involves the [simple assignment operator `=`](10-expressions.md#simple-assignment).
 
-The library function [`is_string`](http://www.php.net/is_string) indicates if a given value has
-type `string`.
+~~The library function [`is_string`](http://www.php.net/is_string) indicates if a given value has
+type `string`.~~
 
 ## The Array Key Type
 The type `arraykey` can represent any integer or string value.
@@ -305,7 +312,7 @@ See the discussion of [type side effects](05-types.md#type-side-effects).
 The null type has only one possible value, [`null`](06-constants.md#core-predefined-constants). The representation
 of this type and its value is unspecified.
 
-The library function [`is_null`](http://www.php.net/is_null) indicates if a given value is `null`.
+~~The library function [`is_null`](http://www.php.net/is_null) indicates if a given value is `null`.~~
 
 ## Enumerated Types
 
@@ -317,6 +324,8 @@ The type `void` indicates the absence of a value. Its primary use is as the
 return type of a function.
 
 ## Array Types
+
+<mark>TODO(aorenste): This whole section needs an update - re: varray, darray, keyset</mark>
 
 **Syntax**
 <pre>
@@ -415,11 +424,13 @@ Class types are described in [§§](16-classes.md#classes).
 
 See the discussion of [type side effects](05-types.md#type-side-effects).
 
-The library function [`is_object`] (http://www.php.net/is_object) indicates if a given value is an
+<mark>TODO(aorenste): Since we don't have a top type, what is the replacement for 'is_object'?</mark>
+
+~~The library function [`is_object`] (http://www.php.net/is_object) indicates if a given value is an
 instance of any class, and the library function
 [`get_class`](http://docs.hhvm.com/manual/en/function.get-class.php)
 (§xx) indicates the name of an object's class. See also the [`instanceof`
-operator](10-expressions.md#instanceof-operator).
+operator](10-expressions.md#instanceof-operator).~~
 
 ## Interface Types
 
@@ -594,7 +605,9 @@ function processTransaction(Transaction $t): void {
 }
 ```
 
-Note carefully, that inside function `processTransaction`, even though the transaction passed in might have been a `Deposit`, a `Withdrawal`, or a `Transfer`, it always appears as a `Transaction`, so the only field you can access in `$t` is `trtype`. However, using `Shapes::toArray`, we can convert the `Transaction` to an array, and then get read-access to the field values we know that array must contain by indexing it using the field names, as shown.
+Note carefully, that inside function `processTransaction`, even though the transaction passed in might have been a `Deposit`, a `Withdrawal`, or a `Transfer`, it always appears as a `Transaction`, so the only field you can access in `$t` is `trtype`. However, using `Shapes::toArray`, we can convert the `Transaction` to an array, and then get read-access to the field values we know that array must contain by indexing it using the field names, as sho wn.
+
+<mark>TODO(aorenste): I think the structural subtyping that shapes do (mentioned above) doesn't work with the `is` operator</mark>
 
 ## Closure Types
 

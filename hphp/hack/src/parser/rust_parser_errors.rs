@@ -3838,6 +3838,24 @@ where
         }
     }
 
+    fn interface_private_method_errors<I>(&mut self, elts: I)
+    where
+        I: Iterator<Item = &'a Syntax<Token, Value>>,
+    {
+        for elt in elts {
+            if let Some(modifiers) = Self::get_modifiers_of_declaration(elt) {
+                for modifier in Self::syntax_to_list_no_separators(modifiers) {
+                    if modifier.is_private() {
+                        self.errors.push(Self::make_error_from_node(
+                            modifier,
+                            errors::interface_has_private_method,
+                        ))
+                    }
+                }
+            }
+        }
+    }
+
     fn classish_errors(&mut self, node: &'a Syntax<Token, Value>) {
         if let ClassishDeclaration(cd) = &node.syntax {
             // Given a ClassishDeclaration node, test whether or not it's a trait
@@ -4017,7 +4035,6 @@ where
                     );
                 }
                 let has_abstract_fn = class_body_methods().any(&Self::has_modifier_abstract);
-                let has_private_method = class_body_methods().any(&Self::has_modifier_private);
                 if has_abstract_fn
                     && Self::is_token_kind(&cd.classish_keyword, TokenKind::Class)
                     && !Self::list_contains_predicate(|x| x.is_abstract(), &cd.classish_modifiers)
@@ -4027,13 +4044,9 @@ where
                         errors::class_with_abstract_method(name),
                     ))
                 }
-                if has_private_method
-                    && Self::is_token_kind(&cd.classish_keyword, TokenKind::Interface)
-                {
-                    self.errors.push(Self::make_error_from_node(
-                        &cd.classish_name,
-                        errors::interface_has_private_method,
-                    ))
+
+                if Self::is_token_kind(&cd.classish_keyword, TokenKind::Interface) {
+                    self.interface_private_method_errors(class_body_elts());
                 }
 
                 self.duplicate_xhp_category_errors(class_body_elts());

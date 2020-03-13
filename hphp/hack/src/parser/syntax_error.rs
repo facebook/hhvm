@@ -819,7 +819,7 @@ pub fn class_with_abstract_method(name: &str) -> Error {
     ))
 }
 pub const interface_has_private_method: Error =
-    Cow::Borrowed("Interface methods must be public or protected and cannot be private");
+    Cow::Borrowed("Interface methods must be public or protected");
 pub fn redeclaration_of_function(name: &str, loc: &str) -> Error {
     Cow::Owned(format!(
         "Cannot redeclare {}() (previously declared in {})",

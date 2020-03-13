@@ -243,8 +243,8 @@ let find_refs
   let tasts_of_files : (Relative_path.t * Tast.program) list =
     List.map files ~f:(fun path ->
         let (_ctx, entry) = Provider_context.add_entry ~ctx ~path in
-        let { Provider_utils.Compute_tast.tast; _ } =
-          Provider_utils.compute_tast_unquarantined ~ctx ~entry
+        let { Tast_provider.Compute_tast.tast; _ } =
+          Tast_provider.compute_tast_unquarantined ~ctx ~entry
         in
         (path, tast))
   in

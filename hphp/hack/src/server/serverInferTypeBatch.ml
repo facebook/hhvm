@@ -18,8 +18,8 @@ let recheck_typing ctx (pos_list : pos list) =
   let tasts =
     List.map files_to_check ~f:(fun (path, _, _, _) ->
         let (_ctx, entry) = Provider_context.add_entry ~ctx ~path in
-        let { Provider_utils.Compute_tast.tast; _ } =
-          Provider_utils.compute_tast_unquarantined ~ctx ~entry
+        let { Tast_provider.Compute_tast.tast; _ } =
+          Tast_provider.compute_tast_unquarantined ~ctx ~entry
         in
         (path, tast))
   in

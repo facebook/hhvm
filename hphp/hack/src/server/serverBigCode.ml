@@ -180,8 +180,8 @@ let go_ctx ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
     string =
   (* Extract TAST and convert to string *)
   (* TODO(ljw): surely this doesn't need quarantine? *)
-  let { Provider_utils.Compute_tast.tast; _ } =
-    Provider_utils.compute_tast_quarantined ~ctx ~entry
+  let { Tast_provider.Compute_tast.tast; _ } =
+    Tast_provider.compute_tast_quarantined ~ctx ~entry
   in
   let serialized_tast = serialize_tast tast ctx in
   (* Visit the TAST and extract autocompleteion items for Acclass_get *)

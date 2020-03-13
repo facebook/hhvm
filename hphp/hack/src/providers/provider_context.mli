@@ -52,7 +52,7 @@ shared memory, out of process, etc.
 
 You can examine an individual file in the codebase by constructing an [entry]
 for it. For example, you can call [Provider_context.add_entry] to create a new
-[entry], and then [Provider_utils.compute_tast_and_errors_unquarantined].
+[entry], and then [Tast_provider.compute_tast_and_errors_unquarantined].
 
 Some operations may make changes to global state (e.g. write to shared memory
 heaps). To ensure that no changes escape the scope of your operation, use

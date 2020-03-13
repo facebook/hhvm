@@ -178,8 +178,8 @@ let collect_types (env : env) : env * collected_type_map =
   match env with
   | { collected_types = Some collected_types; _ } -> (env, collected_types)
   | { collected_types = None; ctx; entry } ->
-    let { Provider_utils.Compute_tast.tast; _ } =
-      Provider_utils.compute_tast_unquarantined ~ctx ~entry
+    let { Tast_provider.Compute_tast.tast; _ } =
+      Tast_provider.compute_tast_unquarantined ~ctx ~entry
     in
     let collected_types = Tast_type_collector.collect_types env.ctx tast in
     let env = { env with collected_types = Some collected_types } in

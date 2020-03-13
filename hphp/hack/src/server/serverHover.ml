@@ -389,11 +389,10 @@ let go_quarantined
   let identities =
     ServerIdentifyFunction.go_quarantined ~ctx ~entry ~line ~column
   in
-  let { Provider_utils.Compute_tast.tast; _ } =
-    Provider_utils.compute_tast_quarantined ~ctx ~entry
+  let { Tast_provider.Compute_tast.tast; _ } =
+    Tast_provider.compute_tast_quarantined ~ctx ~entry
   in
-  let env_and_ty =
-    ServerInferType.expanded_type_at_pos ctx tast line column in
+  let env_and_ty = ServerInferType.expanded_type_at_pos ctx tast line column in
   (* There are legitimate cases where we expect to have no identities returned,
      so just format the type. *)
   match identities with

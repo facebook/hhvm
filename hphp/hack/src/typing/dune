@@ -275,6 +275,7 @@
     typing_symbol_info_writer
     typing_symbol_json_builder)
   (libraries
+    tast_provider
     typing
     typing_ast
     procs_procs

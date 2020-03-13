@@ -129,8 +129,8 @@ let go_ctx
     ~(entry : Provider_context.entry)
     ~(line : int)
     ~(column : int) : (string * string) option =
-  let { Provider_utils.Compute_tast.tast; _ } =
-    Provider_utils.compute_tast_quarantined ~ctx ~entry
+  let { Tast_provider.Compute_tast.tast; _ } =
+    Tast_provider.compute_tast_quarantined ~ctx ~entry
   in
   type_at_pos ctx tast line column >>| fun (env, ty) ->
   ( Tast_env.print_ty env ty,

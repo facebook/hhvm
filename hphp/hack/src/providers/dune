@@ -148,3 +148,12 @@
     provider_backend
     provider_context)
   (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name tast_provider)
+  (modules tast_provider)
+  (libraries
+    provider_utils
+    tast
+    typing)
+  (preprocess (pps ppx_deriving.std)))

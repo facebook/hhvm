@@ -160,6 +160,7 @@
     server_env
     sys_utils
     tast_check
+    tast_provider
     tast_type_collector
     typechecker_options
     typing
@@ -242,6 +243,7 @@
     server_env
     server_services
     sys_utils
+    tast_provider
     typing
     typing_service_api
     utils_core

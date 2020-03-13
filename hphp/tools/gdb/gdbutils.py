@@ -370,10 +370,10 @@ def nameof(val):
 #------------------------------------------------------------------------------
 # TV helpers.
 
+tv_brief = False
 tv_recurse = 0
 tv_recurse_key = ""
 current_key = None
-
 _tv_recurse_depth = 0
 _tv_recurse_seen = set()
 
@@ -398,6 +398,7 @@ def pretty_tv(t, data):
 
     global tv_recurse
     global _tv_recurse_depth
+    global tv_brief
 
     recurse = False
 
@@ -416,14 +417,14 @@ def pretty_tv(t, data):
             val = data['num']
 
     elif t == DT('HPHP::KindOfInt64'):
-        val = data['num']
+        val = int(data['num'])
 
     elif t == DT('HPHP::KindOfDouble'):
-        val = data['dbl']
+        val = double(data['dbl'])
 
     elif (t == DT('HPHP::KindOfString')
           or t == DT('HPHP::KindOfPersistentString')):
-        val = data['pstr'].dereference()
+        val = '"%s"' % string_data_val(data['pstr'])
 
     elif (t == V('HPHP::KindOfArray')
           or t == V('HPHP::KindOfPersistentArray')
@@ -468,6 +469,15 @@ def pretty_tv(t, data):
                 _tv_recurse_depth -= 1
         else:
             val = "RECURSION: " + str(val)
+
+    if tv_brief:
+        if val is None:
+            return str(t)
+        elif not isinstance(val, gdb.Value):
+            if name is None:
+                return str(val)
+            else:
+                return '{ %s ("%s") }' % (str(val), name)
 
     if val is None:
         out = '{ %s }' % t

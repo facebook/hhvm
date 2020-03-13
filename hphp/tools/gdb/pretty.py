@@ -100,6 +100,38 @@ class SetTVRecurseCommand(gdb.Command):
 SetTVRecurseCommand()
 
 
+class SetTVBriefCommand(gdb.Command):
+    """
+    Select brief or verbose TV pretty printing
+    """
+
+    def __init__(self):
+        super(SetTVBriefCommand, self).__init__('set tv-brief',
+                                                  gdb.COMMAND_STATUS)
+
+    @errorwrap
+    def invoke(self, args, from_tty):
+        argv = gdb.string_to_argv(args)
+
+        argn = len(argv)
+        if argn == 1:
+            if argv[0] == 'true':
+                gdbutils.tv_brief = True
+                return
+
+            if argv[0] == 'false':
+                gdbutils.tv_brief = False
+                return
+
+        print(
+            'tv-brief <arg>\n'
+            '  Valid values for <arg> are true and false.\n'
+        )
+
+
+SetTVBriefCommand()
+
+
 class TypedValuePrinter(object):
     RECOGNIZE = '^HPHP::(TypedValue|Cell|Ref|Variant|VarNR)$'
 

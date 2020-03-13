@@ -1,0 +1,18 @@
+# @generated
+# @autocargo from //hphp/hack/src/typing:typing_defs_rust
+# Signature
+[package]
+name = "typing_defs_rust"
+edition = "2018"
+version = "0.0.0"
+include = ["../../internal_type_set.rs", "../../tast.rs", "../../typing_defs.rs", "../../typing_defs_core.rs", "../../typing_defs_rust.rs", "../../typing_logic.rs", "../../typing_make_type.rs", "../../typing_reason.rs"]
+
+[lib]
+path = "../../typing_defs_rust.rs"
+
+[dependencies]
+naming_special_names_rust = { path = "../../../naming" }
+oxidized = { path = "../../../oxidized" }
+bumpalo = { version = "3.1.2", features = ["collections"] }
+im-rc = { version = "14.2", features = ["serde"] }
+# @end of Signature

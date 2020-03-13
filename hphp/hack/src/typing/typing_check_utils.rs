@@ -13,6 +13,7 @@ use oxidized::{ast as Tast, parser_options::ParserOptions, pos::Pos, relative_pa
 use parser_core_types::{indexed_source_text::IndexedSourceText, source_text::SourceText};
 use stack_limit::StackLimit;
 use typing_env_rust::Genv;
+use typing_rust as typing;
 
 /// Compilation profile. All times are in seconds
 #[derive(Debug)]
@@ -38,7 +39,9 @@ pub fn from_text(env: Genv, stack_limit: &StackLimit, text: &[u8]) -> anyhow::Re
 
     let _program = match &mut parse_result {
         Either::Right((ast, _is_hh_file)) => {
-            println!("{:?}", ast);
+            // TODO(hrust): env shoult be Env, not Genv
+            let tast = typing::program(ast, &env);
+            println!("{:#?}", tast);
             ()
         }
         Either::Left((_pos, _msg, _is_runtime_error)) => (),

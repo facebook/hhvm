@@ -2,6 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use decl_provider_rust::DeclProvider;
 use oxidized::{pos, relative_path, typechecker_options};
 
 pub use typing_collections_rust::*;
@@ -10,6 +11,7 @@ pub use typing_defs_rust::{Ty, *};
 
 use crate::typing_env_return_info;
 use crate::typing_inference_env;
+use crate::typing_make_type::TypeBuilder;
 
 pub struct Env<'a> {
     pub function_pos: &'a pos::Pos,
@@ -25,4 +27,6 @@ pub struct Genv<'a> {
     pub return_info: typing_env_return_info::TypingEnvReturnInfo<'a>,
     pub params: LocalIdMap<'a, (Ty<'a>, ParamMode)>,
     pub file: relative_path::RelativePath,
+    pub builder: &'a TypeBuilder<'a>,
+    pub provider: &'a dyn DeclProvider,
 }

@@ -4,12 +4,17 @@
 // LICENSE file in the "hack" directory of this source tree.
 use crate::typing_env_return_info;
 pub use crate::typing_env_types::*;
+use decl_provider_rust as decl_provider;
 use typing_defs_rust as typing_defs;
 use typing_defs_rust::typing_make_type::TypeBuilder;
 
 use oxidized::relative_path::RelativePath;
 
-pub fn empty_global_env<'a>(builder: &'a TypeBuilder<'a>, file: RelativePath) -> Genv<'a> {
+pub fn empty_global_env<'a>(
+    builder: &'a TypeBuilder<'a>,
+    provider: &'a dyn decl_provider::DeclProvider,
+    file: RelativePath,
+) -> Genv<'a> {
     Genv {
         file,
         tcopt: oxidized::global_options::GlobalOptions::default(),
@@ -24,5 +29,7 @@ pub fn empty_global_env<'a>(builder: &'a TypeBuilder<'a>, file: RelativePath) ->
                 type_: builder.nothing(builder.mk_rnone()),
             },
         },
+        builder,
+        provider,
     }
 }

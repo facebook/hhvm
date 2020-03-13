@@ -485,6 +485,7 @@ dependencies = [
  "hhbc_ast_rust 0.0.0",
  "hhbc_id_rust 0.0.0",
  "hhbc_string_utils_rust 0.0.0",
+ "indexmap 1.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "instruction_sequence_rust 0.0.0",
  "label_rewriter_rust 0.0.0",
  "label_rust 0.0.0",
@@ -574,6 +575,7 @@ dependencies = [
  "hhbc_ast_rust 0.0.0",
  "hhbc_id_rust 0.0.0",
  "hhbc_string_utils_rust 0.0.0",
+ "indexmap 1.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "instruction_sequence_rust 0.0.0",
  "itertools 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "label_rust 0.0.0",
@@ -1651,6 +1653,7 @@ name = "options"
 version = "0.0.0"
 dependencies = [
  "bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "itertools 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "options_serde 0.0.0",
  "pretty_assertions 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",

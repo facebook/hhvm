@@ -5,8 +5,9 @@
 
 use bumpalo::collections::Vec;
 pub use oxidized::typing_defs_core::{DestructureKind, Exact, ParamMode};
-use oxidized::{ident, nast, tany_sentinel};
+use oxidized::{aast_defs, ident, nast, tany_sentinel, typing_defs as oxidized_defs};
 
+use crate::typing_make_type::TypeBuilder;
 use crate::typing_reason::*;
 
 /// A type as used during type inference.
@@ -19,6 +20,7 @@ use crate::typing_reason::*;
 ///
 /// There is a mapping from this representation to the oxidized representation,
 /// for consumers that require the oxidized representation.
+#[derive(Debug)]
 pub enum Ty_<'a> {
     /// The late static bound type of a class
     Tthis,
@@ -163,7 +165,7 @@ pub enum Ty_<'a> {
 /// is to have a pointer to a pointer to a
 /// (reason ptr, inlined type). Which reduces the size of
 /// Ty_ and decreases stack usage.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct Ty<'a>(pub PReason<'a>, pub &'a Ty_<'a>);
 
 impl<'a> Ty<'a> {
@@ -230,11 +232,13 @@ impl<'a> Ty<'a> {
 /// This is a direct translation of oxidized::gen::typing_defs_core::TaccessType.
 ///
 /// We need this because it wraps Tys
+#[derive(Debug)]
 pub struct TaccessType<'a>(pub Ty<'a>, pub Vec<'a, &'a nast::Sid>);
 
 /// This is a direct translation of oxidized::gen::typing_defs_core::ArrayKind.
 ///
 /// We need this, because it wraps Tys.
+#[derive(Debug)]
 pub enum ArrayKind<'a> {
     /// An array declared as a varray.
     AKvarray(Ty<'a>),
@@ -255,7 +259,7 @@ pub enum ArrayKind<'a> {
 ///      type checking.
 ///   2. Additionally, I (hverr) think the aast::Tprim -> Tprim conversion
 ///      is cheaper than dereferencing a pointer to aast::Tprim.
-#[derive(Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum PrimKind<'a> {
     Tnull,
     Tvoid,
@@ -272,12 +276,14 @@ pub enum PrimKind<'a> {
     Tatom(&'a str),
 }
 
+#[derive(Debug)]
 pub struct PossiblyEnforcedTy<'a> {
     /// True if consumer of this type enforces it at runtime
     pub enforced: bool,
     pub type_: Ty<'a>,
 }
 
+#[derive(Debug)]
 pub enum ConstraintType_<'a> {
     ThasMember(HasMember<'a>),
     /// The type of container destructuring via list() or splat `...`
@@ -286,8 +292,10 @@ pub enum ConstraintType_<'a> {
     TCintersection(Ty<'a>, ConstraintType<'a>),
 }
 
+#[derive(Debug)]
 pub struct ConstraintType<'a>(pub PReason<'a>, pub &'a ConstraintType_<'a>);
 
+#[derive(Debug)]
 pub struct HasMember<'a> {
     pub name: &'a nast::Sid,
     pub member_type: Ty<'a>,
@@ -297,6 +305,7 @@ pub struct HasMember<'a> {
     pub class_id: &'a nast::ClassId_,
 }
 
+#[derive(Debug)]
 pub struct Destructure<'a> {
     /// This represents the standard parameters of a function or the fields in a list
     /// destructuring assignment. Example:
@@ -319,9 +328,20 @@ pub struct Destructure<'a> {
     pub kind: DestructureKind,
 }
 
+#[derive(Debug)]
 pub enum InternalType_<'a> {
     LoclType(Ty<'a>),
     ConstraintType(ConstraintType<'a>),
 }
 
 pub type InternalType<'a> = &'a InternalType_<'a>;
+
+impl<'a> Ty<'a> {
+    pub fn from_oxidized(ty: &oxidized_defs::Ty, builder: &'a TypeBuilder<'a>) -> Ty<'a> {
+        use oxidized_defs::Ty_;
+        match ty.1.as_ref() {
+            Ty_::Tprim(aast_defs::Tprim::Tint) => builder.prim(builder.mk_rnone(), PrimKind::Tint),
+            _ => unimplemented!("{:#?}", ty),
+        }
+    }
+}

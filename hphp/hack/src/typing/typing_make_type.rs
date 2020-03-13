@@ -8,7 +8,7 @@ use bumpalo::{vec, Bump};
 
 use naming_special_names_rust::{classes, collections};
 use oxidized::pos::Pos;
-use oxidized::{aast_defs::*, ast_defs::*, ident};
+use oxidized::{aast_defs::Sid, ast_defs::Id, ident};
 
 use crate::typing_defs_core::{Ty, *};
 use crate::typing_logic::{SubtypeProp, SubtypePropEnum};

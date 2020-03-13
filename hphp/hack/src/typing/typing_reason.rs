@@ -8,6 +8,7 @@ use oxidized::pos::Pos;
 pub use oxidized::typing_reason::ArgPosition;
 use oxidized::{aast, ast_defs};
 
+#[derive(Debug)]
 pub struct PReason_<'a> {
     pub pos: Option<&'a Pos>,
     pub reason: Reason<'a>,
@@ -15,6 +16,7 @@ pub struct PReason_<'a> {
 
 pub type PReason<'a> = &'a PReason_<'a>;
 
+#[derive(Debug)]
 pub enum Reason<'a> {
     Rnone,
     Rwitness,
@@ -121,6 +123,7 @@ pub enum Reason<'a> {
     RglobalFunRet,
 }
 
+#[derive(Debug)]
 pub enum ExprDepTypeReason<'a> {
     ERexpr(isize),
     ERstatic,

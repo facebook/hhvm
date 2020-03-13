@@ -1,0 +1,17 @@
+# @generated
+# @autocargo from //hphp/hack/src/typing:typing_rust
+# Signature
+[package]
+name = "typing_rust"
+edition = "2018"
+version = "0.0.0"
+include = ["../../typing.rs"]
+
+[lib]
+path = "../../typing.rs"
+
+[dependencies]
+oxidized = { path = "../../../oxidized" }
+typing_defs_rust = { path = "../typing_defs_rust" }
+typing_env_rust = { path = "../typing_env_rust" }
+# @end of Signature

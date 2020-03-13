@@ -12,6 +12,7 @@ use typing_check_service_rust::{typing_check_utils::from_text, typing_check_util
 use typing_defs_rust::typing_make_type;
 use typing_env_rust::empty_global_env;
 
+use decl_provider_rust as decl_provider;
 use oxidized::relative_path::{self, RelativePath};
 use stack_limit::{StackLimit, KI, MI};
 
@@ -36,6 +37,30 @@ struct Opts {
     filename: PathBuf,
 }
 
+/// DeclProvider for tests - assumes that all the declarations come from a single file
+struct TestDeclProvider {
+    decls: oxidized::direct_decl_parser::Decls,
+}
+
+impl TestDeclProvider {
+    fn new(path: &RelativePath, text: &[u8]) -> Self {
+        let decls = match decl_rust::direct_decl_parser::parse_decls(
+            path.clone(),
+            &String::from_utf8_lossy(text),
+        ) {
+            Err(e) => panic!("{:?}", e),
+            Ok(decls) => decls,
+        };
+        Self { decls }
+    }
+}
+
+impl decl_provider::DeclProvider for TestDeclProvider {
+    fn get_fun(&self, s: &str) -> Option<&decl_provider::FunDecl> {
+        self.decls.funs.get(s)
+    }
+}
+
 fn read_file(filepath: &Path) -> anyhow::Result<Vec<u8>> {
     let mut text: Vec<u8> = Vec::new();
     File::open(filepath)
@@ -56,7 +81,8 @@ fn process_single_file_impl(
     let rel_path = RelativePath::make(relative_path::Prefix::Dummy, filepath.to_owned());
     let arena = Bump::new();
     let builder = typing_make_type::TypeBuilder::new(&arena);
-    let env = empty_global_env(&builder, rel_path);
+    let provider = TestDeclProvider::new(&rel_path, content);
+    let env = empty_global_env(&builder, &provider, rel_path);
     let profile = from_text(env, stack_limit, content)?;
     Ok(profile)
 }

@@ -12,12 +12,6 @@ include Config_file_version
 
 type t = string SMap.t
 
-let version_to_string_opt (v : version) : string option =
-  match v with
-  | Opaque_version s -> s
-  | Version_components { major; minor; build } ->
-    Some (Printf.sprintf "%d.%02d.%d" major minor build)
-
 let file_path_relative_to_repo_root =
   Config_file_common.file_path_relative_to_repo_root
 

@@ -364,8 +364,13 @@ let read_hhconfig_version () : string Lwt.t =
     let%lwt config = Config_file_lwt.parse_hhconfig file in
     (match config with
     | Ok (_hash, config) ->
-      let version = SMap.find_opt "version" config in
-      Lwt.return (Option.value version ~default:"[NoVersion]")
+      let version =
+        SMap.find_opt "version" config
+        |> Config_file_lwt.parse_version
+        |> Config_file_lwt.version_to_string_opt
+        |> Option.value ~default:"[NoVersion]"
+      in
+      Lwt.return version
     | Error message -> Lwt.return (Printf.sprintf "[NoHhconfig:%s]" message))
 
 (* get_uris_with_unsaved_changes is the set of files for which we've          *)

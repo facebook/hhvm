@@ -8,6 +8,7 @@
  *)
 
 open Core_kernel
+include Config_file_version
 
 type t = string SMap.t
 

@@ -262,11 +262,13 @@ nested facts. *)
 let build_name_json_nested name =
   (* Remove leading slash, if present, so names such as
   Exception and \Exception are captured by the same fact *)
-  let basename = String_utils.lstrip name "\\" in
+  let basename = Utils.strip_ns name in
   JSON_Object [("key", JSON_String basename)]
 
 let build_type_json_nested type_name =
-  JSON_Object [("key", JSON_String type_name)]
+  (* Remove namespace slash from type, if present *)
+  let ty = Utils.strip_ns type_name in
+  JSON_Object [("key", JSON_String ty)]
 
 let build_enumerator_json_nested const_name decl_ref =
   JSON_Object

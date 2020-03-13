@@ -157,6 +157,7 @@ type env = {
   full_recheck_on_file_changes: full_recheck_on_file_changes;
   full_check: full_check_status;
   prechecked_files: prechecked_files_status;
+  changed_files: Relative_path.Set.t;
   (* Not every caller of rechecks expects that they can be interrupted,
    * so making it opt-in by setting this flag at call site *)
   can_interrupt: bool;

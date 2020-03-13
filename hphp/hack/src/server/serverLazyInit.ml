@@ -513,6 +513,7 @@ let type_check_dirty
   let to_recheck = Relative_path.Set.union to_recheck similar_files in
   let fast = extend_fast genv dirty_fast env.naming_table to_recheck in
   let files_to_check = Relative_path.Map.keys fast in
+  let env = { env with changed_files = dirty_files } in
   let result = type_check genv env files_to_check t in
   HackEventLogger.type_check_dirty
     ~start_t

@@ -317,6 +317,7 @@ let make_env ?init_id config =
     full_recheck_on_file_changes = Not_paused;
     remote = false;
     full_check = Full_check_done;
+    changed_files = Relative_path.Set.empty;
     prechecked_files = Prechecked_files_disabled;
     can_interrupt = true;
     interrupt_handlers = (fun _ _ -> []);

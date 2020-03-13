@@ -38,6 +38,7 @@ struct ResourceHdr;
 struct StringData;
 struct MemoCacheBase;
 struct Func;
+struct RFuncData;
 struct Class;
 struct RecordData;
 
@@ -59,6 +60,7 @@ union Value {
   MaybeCountable* pcnt; // for alias-safe generic refcounting operations
   MemoCacheBase* pcache; // Not valid except when in a MemoSlot
   const Func*   pfunc;  // KindOfFunc
+  RFuncData*    prfunc; // KindOfRFunc
   Class*        pclass; // KindOfClass
   ClsMethDataRef pclsmeth; // KindOfClsMeth
   RecordData*   prec;   // KindOfRecord

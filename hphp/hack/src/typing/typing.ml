@@ -2683,7 +2683,7 @@ and expr_
               ~field_pos:pos
               ~record_name:id
               ~decl_pos:(fst rd.rdt_name))
-    | None -> ());
+    | None -> Errors.type_not_record id pos);
 
     expr_error env (Reason.Rwitness p) outer
   | Cast ((_, Harray (None, None)), _)

@@ -195,6 +195,8 @@ val missing_record_field_name :
   field_decl_pos:Pos.t ->
   unit
 
+val type_not_record : string -> Pos.t -> unit
+
 val primitive_toplevel : Pos.t -> unit
 
 val primitive_invalid_alias : Pos.t -> string -> string -> unit

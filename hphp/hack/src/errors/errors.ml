@@ -1203,6 +1203,12 @@ let missing_record_field_name ~field_name ~new_pos ~record_name ~field_decl_pos
     (Typing.err_code Typing.RecordMissingRequiredField)
     [(new_pos, msg); (field_decl_pos, "Field definition is here")]
 
+let type_not_record id pos =
+  add
+    (Typing.err_code Typing.NotARecord)
+    pos
+    (Printf.sprintf "Expected a record type, but got `%s`." (strip_ns id))
+
 let primitive_toplevel pos =
   add
     (Naming.err_code Naming.PrimitiveToplevel)

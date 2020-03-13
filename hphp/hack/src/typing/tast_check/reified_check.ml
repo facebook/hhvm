@@ -178,21 +178,6 @@ let verify_call_targs env expr_pos decl_pos tparams targs =
     (* Unequal_lengths case handled elsewhere *)
     List.iter2 tparams targs ~f:(verify_targ_valid env Resolved) |> ignore
 
-let get_class_by_name ctx classname =
-  match Naming_provider.get_type_path ctx classname with
-  | Some filename ->
-    Ide_parser_cache.with_ide_cache @@ fun () ->
-    Ast_provider.find_class_in_file ctx filename classname
-  | _ -> None
-
-let get_static_method_by_name ctx class_name method_name =
-  match get_class_by_name ctx class_name with
-  | Some cls ->
-    List.hd
-    @@ List.filter cls.Nast.c_methods (fun m ->
-           String.equal (snd m.m_name) method_name && m.m_static)
-  | _ -> None
-
 let handler =
   object
     inherit Tast_visitor.handler_base
@@ -227,25 +212,31 @@ let handler =
               (match Cls.get_smethod cls fname with
               | Some ce_m ->
                 (match
-                   get_static_method_by_name
-                     (Tast_env.get_ctx env)
-                     ce_m.ce_origin
-                     fname
+                   Env.get_class env ce_m.ce_origin
+                   |> Option.bind ~f:(fun cls -> Cls.get_smethod cls fname)
                  with
                 | Some m ->
-                  let check_type_hint = function
-                    | (_, Some (t_pos, Habstr t))
-                    | (_, Some (_, Happly ((t_pos, t), _))) ->
+                  let check_type ty =
+                    let check_names t_pos t =
                       List.iter tp_names ~f:(function (_, name) ->
                           if String.equal name t then
                             Errors.static_call_with_class_level_reified_generic
                               call_pos
                               t_pos)
+                    in
+                    match Typing_defs.deref ty with
+                    | (r, Tgeneric t) -> check_names (Reason.to_pos r) t
+                    | (_, Tapply ((t_pos, t), _)) -> check_names t_pos t
                     | _ -> ()
                   in
-                  List.iter m.m_params ~f:(fun param ->
-                      check_type_hint param.param_type_hint);
-                  check_type_hint m.m_ret
+                  (match Typing_defs.deref (Lazy.force m.ce_type) with
+                  | (_, Tfun ft) ->
+                    List.iter ft.ft_params ~f:(fun param ->
+                        check_type param.fp_type.et_type);
+                    check_type ft.ft_ret.et_type
+                  | _ ->
+                    failwith
+                      "Expected Tfun type in result of Typing_classes_heap.get_smethod")
                 | None -> ())
               | _ -> ())
             | None -> ());

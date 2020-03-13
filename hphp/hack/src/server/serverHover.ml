@@ -414,6 +414,6 @@ let go_quarantined
              |> Option.map ~f:Pos.filename
              |> Option.value ~default:entry.Provider_context.path
            in
-           let (ctx, entry) = Provider_utils.add_entry ~ctx ~path in
+           let (ctx, entry) = Provider_context.add_entry ~ctx ~path in
            make_hover_info ctx env_and_ty entry occurrence def_opt)
     |> List.remove_consecutive_duplicates ~equal:( = )

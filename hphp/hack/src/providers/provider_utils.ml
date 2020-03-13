@@ -31,53 +31,6 @@ let ctx_from_server_env (env : ServerEnv.env) : Provider_context.t =
     entries = Relative_path.Map.empty;
   }
 
-let make_entry
-    ~(ctx : Provider_context.t) ~(path : Relative_path.t) ~(contents : string) :
-    Provider_context.t * Provider_context.entry =
-  let entry =
-    {
-      Provider_context.path;
-      contents;
-      source_text = None;
-      parser_return = None;
-      ast_errors = None;
-      cst = None;
-      tast = None;
-      tast_errors = None;
-      symbols = None;
-    }
-  in
-  let ctx =
-    {
-      ctx with
-      Provider_context.entries =
-        Relative_path.Map.add ctx.Provider_context.entries path entry;
-    }
-  in
-  (ctx, entry)
-
-let add_entry_from_file_input
-    ~(ctx : Provider_context.t)
-    ~(path : Relative_path.t)
-    ~(file_input : ServerCommandTypes.file_input) :
-    Provider_context.t * Provider_context.entry =
-  let contents =
-    match file_input with
-    | ServerCommandTypes.FileName path -> Sys_utils.cat path
-    | ServerCommandTypes.FileContent contents -> contents
-  in
-  make_entry ~ctx ~path ~contents
-
-let add_entry ~(ctx : Provider_context.t) ~(path : Relative_path.t) :
-    Provider_context.t * Provider_context.entry =
-  let contents = Sys_utils.cat (Relative_path.to_absolute path) in
-  make_entry ~ctx ~path ~contents
-
-let add_entry_from_file_contents
-    ~(ctx : Provider_context.t) ~(path : Relative_path.t) ~(contents : string) :
-    Provider_context.t * Provider_context.entry =
-  make_entry ~ctx ~path ~contents
-
 let find_entry ~(ctx : Provider_context.t) ~(path : Relative_path.t) :
     Provider_context.entry option =
   Relative_path.Map.find_opt ctx.Provider_context.entries path

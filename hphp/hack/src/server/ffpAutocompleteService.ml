@@ -152,7 +152,7 @@ let auto_complete
   some require that it isn't, so make a separate entry for each scenario. *)
   let old_file_content = entry.Provider_context.contents in
   let (old_ctx, old_entry) =
-    Provider_utils.add_entry_from_file_contents
+    Provider_context.add_entry_from_file_contents
       ~ctx
       ~path:entry.Provider_context.path
       ~contents:old_file_content
@@ -160,7 +160,7 @@ let auto_complete
   (* The part of the line from the far left end to the point where the caret is. *)
   let new_file_content = handle_empty_autocomplete pos old_file_content in
   let (new_ctx, new_entry) =
-    Provider_utils.add_entry_from_file_contents
+    Provider_context.add_entry_from_file_contents
       ~ctx
       ~path:entry.Provider_context.path
       ~contents:new_file_content

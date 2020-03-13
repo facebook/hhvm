@@ -182,7 +182,7 @@ let go_quarantined
           let base_class_name = SymbolOccurrence.enclosing_class occurrence in
           def_opt >>= fun def ->
           let path = def.SymbolDefinition.pos |> Pos.filename in
-          let (ctx, entry) = Provider_utils.add_entry ~ctx ~path in
+          let (ctx, entry) = Provider_context.add_entry ~ctx ~path in
           ServerDocblockAt.go_comments_for_symbol_ctx
             ~ctx
             ~entry

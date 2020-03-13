@@ -1266,7 +1266,7 @@ let handle_mode
     let pos = File_content.offset_to_position contents offset in
     let is_manually_invoked = mode = Autocomplete_manually_invoked in
     let (ctx, entry) =
-      Provider_utils.add_entry_from_file_contents ~ctx ~path ~contents
+      Provider_context.add_entry_from_file_contents ~ctx ~path ~contents
     in
     let autocomplete_context =
       ServerAutoComplete.get_autocomplete_context
@@ -1293,7 +1293,7 @@ let handle_mode
     iter_over_files (fun path ->
         try
           let sienv = scan_files_for_symbol_index path sienv ctx in
-          let (ctx, entry) = Provider_utils.add_entry ~ctx ~path in
+          let (ctx, entry) = Provider_context.add_entry ~ctx ~path in
           (* TODO: Use a magic word/symbol to identify autocomplete location instead *)
           let args_regex = Str.regexp "AUTOCOMPLETE [1-9][0-9]* [1-9][0-9]*" in
           let position =
@@ -1344,7 +1344,7 @@ let handle_mode
           print_coverage type_acc)
   | Cst_search ->
     let path = expect_single_file () in
-    let (ctx, entry) = Provider_utils.add_entry ~ctx ~path in
+    let (ctx, entry) = Provider_context.add_entry ~ctx ~path in
     let result =
       let open Result.Monad_infix in
       Sys_utils.read_stdin_to_string ()
@@ -1446,7 +1446,7 @@ let handle_mode
         ))
   | Identify_symbol (line, column) ->
     let path = expect_single_file () in
-    let (ctx, entry) = Provider_utils.add_entry ~ctx ~path in
+    let (ctx, entry) = Provider_context.add_entry ~ctx ~path in
     (* TODO(ljw): surely this doesn't need quarantine? *)
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
@@ -1562,7 +1562,7 @@ let handle_mode
     in
     let include_defs = true in
     let (ctx, entry) =
-      Provider_utils.add_entry
+      Provider_context.add_entry
         ~ctx:(Provider_utils.ctx_from_server_env env)
         ~path
     in
@@ -1598,7 +1598,7 @@ let handle_mode
     let filename = Relative_path.to_absolute filename in
     let contents = cat filename in
     let (ctx, entry) =
-      Provider_utils.add_entry_from_file_contents
+      Provider_context.add_entry_from_file_contents
         ~ctx:(Provider_utils.ctx_from_server_env env)
         ~path:(Relative_path.create_detect_prefix filename)
         ~contents
@@ -1621,7 +1621,7 @@ let handle_mode
         ClientFindRefs.print_ide_readable results))
   | Highlight_refs (line, column) ->
     let path = expect_single_file () in
-    let (ctx, entry) = Provider_utils.add_entry ~ctx ~path in
+    let (ctx, entry) = Provider_context.add_entry ~ctx ~path in
     let results =
       ServerHighlightRefs.go_quarantined ~ctx ~entry ~line ~column
     in

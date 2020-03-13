@@ -1038,7 +1038,7 @@ let test () =
         in
         let path = Relative_path.from_root file in
         let (ctx, entry) =
-          Provider_utils.add_entry
+          Provider_context.add_entry
             ~ctx:(Provider_utils.ctx_from_server_env env)
             ~path
         in

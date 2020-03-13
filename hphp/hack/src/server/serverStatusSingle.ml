@@ -16,7 +16,7 @@ let go file_input ctx =
     | FileContent _ -> Relative_path.default
   in
   let (_ctx, entry) =
-    Provider_utils.add_entry_from_file_input ~ctx ~path ~file_input
+    Provider_context.add_entry_from_file_input ~ctx ~path ~file_input
   in
   let { Provider_utils.Compute_tast_and_errors.errors; _ } =
     Provider_utils.compute_tast_and_errors_unquarantined ~ctx ~entry

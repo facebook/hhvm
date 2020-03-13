@@ -63,7 +63,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
   | COVERAGE_LEVELS (path, file_input) ->
     let path = Relative_path.create_detect_prefix path in
     let (ctx, entry) =
-      Provider_utils.add_entry_from_file_input
+      Provider_context.add_entry_from_file_input
         ~ctx:(Provider_utils.ctx_from_server_env env)
         ~path
         ~file_input
@@ -81,7 +81,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       | FileContent _ -> Relative_path.create_detect_prefix ""
     in
     let (ctx, entry) =
-      Provider_utils.add_entry_from_file_input ~ctx ~path ~file_input
+      Provider_context.add_entry_from_file_input ~ctx ~path ~file_input
     in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
@@ -96,7 +96,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
   | IDE_HOVER (path, line, column) ->
     let path = Relative_path.create_detect_prefix path in
     let (ctx, entry) =
-      Provider_utils.add_entry
+      Provider_context.add_entry
         ~ctx:(Provider_utils.ctx_from_server_env env)
         ~path
     in
@@ -105,7 +105,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
   | DOCBLOCK_AT (filename, line, column, _, kind) ->
     let ctx = Provider_utils.ctx_from_server_env env in
     let (ctx, entry) =
-      Provider_utils.add_entry
+      Provider_context.add_entry
         ~ctx
         ~path:(Relative_path.create_detect_prefix filename)
     in
@@ -117,7 +117,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     (env, r)
   | IDE_SIGNATURE_HELP (path, line, column) ->
     let (ctx, entry) =
-      Provider_utils.add_entry
+      Provider_context.add_entry
         ~ctx:(Provider_utils.ctx_from_server_env env)
         ~path:(Relative_path.create_detect_prefix path)
     in
@@ -150,7 +150,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     in
     (* feature not implemented here; it only works for LSP *)
     let (ctx, entry) =
-      Provider_utils.add_entry_from_file_contents
+      Provider_context.add_entry_from_file_contents
         ~ctx:(Provider_utils.ctx_from_server_env env)
         ~path:(Relative_path.create_detect_prefix "")
         ~contents
@@ -221,7 +221,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     (env, results)
   | IDENTIFY_FUNCTION (filename, file_input, line, column) ->
     let (ctx, entry) =
-      Provider_utils.add_entry_from_file_input
+      Provider_context.add_entry_from_file_input
         ~ctx:(Provider_utils.ctx_from_server_env env)
         ~path:(Relative_path.create_detect_prefix filename)
         ~file_input
@@ -266,7 +266,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         ServerCommandTypesUtils.extract_labelled_file labelled_file
       in
       let (ctx, entry) =
-        Provider_utils.add_entry_from_file_input
+        Provider_context.add_entry_from_file_input
           ~ctx:(Provider_utils.ctx_from_server_env env)
           ~path
           ~file_input
@@ -284,7 +284,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         ServerCommandTypesUtils.extract_labelled_file labelled_file
       in
       let (ctx, entry) =
-        Provider_utils.add_entry_from_file_input
+        Provider_context.add_entry_from_file_input
           ~ctx:(Provider_utils.ctx_from_server_env env)
           ~path
           ~file_input
@@ -297,7 +297,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
           (ServerGoToImpl.go ~action ~genv ~env)))
   | IDE_HIGHLIGHT_REFS (path, file_input, line, column) ->
     let (ctx, entry) =
-      Provider_utils.add_entry_from_file_input
+      Provider_context.add_entry_from_file_input
         ~ctx:(Provider_utils.ctx_from_server_env env)
         ~path:(Relative_path.create_detect_prefix path)
         ~file_input
@@ -392,7 +392,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       ServerFileSync.get_file_content (ServerCommandTypes.FileName filename)
     in
     let (ctx, entry) =
-      Provider_utils.add_entry_from_file_contents
+      Provider_context.add_entry_from_file_contents
         ~ctx:(Provider_utils.ctx_from_server_env env)
         ~path:(Relative_path.create_detect_prefix filename)
         ~contents
@@ -418,7 +418,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     let char_at_pos = File_content.get_char contents offset in
     let ctx = Provider_utils.ctx_from_server_env env in
     let (ctx, entry) =
-      Provider_utils.add_entry_from_file_contents
+      Provider_context.add_entry_from_file_contents
         ~ctx
         ~path:(Relative_path.create_detect_prefix path)
         ~contents
@@ -511,7 +511,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       ServerCommandTypesUtils.extract_labelled_file labelled_file
     in
     let (ctx, entry) =
-      Provider_utils.add_entry_from_file_input
+      Provider_context.add_entry_from_file_input
         ~ctx:(Provider_utils.ctx_from_server_env env)
         ~path
         ~file_input
@@ -529,7 +529,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       ServerCommandTypesUtils.extract_labelled_file labelled_file
     in
     let (ctx, entry) =
-      Provider_utils.add_entry_from_file_input
+      Provider_context.add_entry_from_file_input
         ~ctx:(Provider_utils.ctx_from_server_env env)
         ~path
         ~file_input
@@ -538,7 +538,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         (env, ServerGoToDefinition.go_quarantined ~ctx ~entry ~line ~column))
   | BIGCODE filename ->
     let (ctx, entry) =
-      Provider_utils.add_entry
+      Provider_context.add_entry
         ~ctx:(Provider_utils.ctx_from_server_env env)
         ~path:(Relative_path.create_detect_prefix filename)
     in

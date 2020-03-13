@@ -124,7 +124,7 @@ let go_ctx
   in
   let auto332_content = File_content.edit_file_unsafe file_content edits in
   let (modified_auto332_context, modified_auto332_entry) =
-    Provider_utils.add_entry_from_file_contents
+    Provider_context.add_entry_from_file_contents
       ~ctx
       ~path:entry.Provider_context.path
       ~contents:auto332_content

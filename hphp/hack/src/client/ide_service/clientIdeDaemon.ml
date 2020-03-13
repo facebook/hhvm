@@ -286,7 +286,7 @@ let make_context_from_file_input
   match Provider_utils.find_entry ~ctx ~path with
   | None ->
     let (ctx, entry) =
-      Provider_utils.add_entry_from_file_input ~ctx ~path ~file_input
+      Provider_context.add_entry_from_file_input ~ctx ~path ~file_input
     in
     (Initialized { initialized_state with ctx }, ctx, entry)
   | Some entry ->
@@ -301,7 +301,7 @@ let make_context_from_file_input
     in
     if any_changes then
       let (ctx, entry) =
-        Provider_utils.add_entry_from_file_input ~ctx ~path ~file_input
+        Provider_context.add_entry_from_file_input ~ctx ~path ~file_input
       in
       (Initialized { initialized_state with ctx }, ctx, entry)
     else

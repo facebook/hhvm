@@ -242,7 +242,7 @@ let find_refs
   (* These are the tasts for all the 'fileinfo_l' passed in *)
   let tasts_of_files : (Relative_path.t * Tast.program) list =
     List.map files ~f:(fun path ->
-        let (_ctx, entry) = Provider_utils.add_entry ~ctx ~path in
+        let (_ctx, entry) = Provider_context.add_entry ~ctx ~path in
         let { Provider_utils.Compute_tast.tast; _ } =
           Provider_utils.compute_tast_unquarantined ~ctx ~entry
         in

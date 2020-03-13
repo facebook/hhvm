@@ -23,7 +23,7 @@ two reasons:
     same data (such as an AST). This is important for performance, particularly
     for IDE operation latency.
 
-To create a new entry for a file, use [Provider_utils.add_entry].
+To create a new entry for a file, use [Provider_context.add_entry].
 
 There should generally be no more than one or two entries inside the
 [Provider_context.t] at a given time. Be careful not to try to store every
@@ -51,7 +51,7 @@ Depending on the [backend] setting, data may be cached in local memory, in
 shared memory, out of process, etc.
 
 You can examine an individual file in the codebase by constructing an [entry]
-for it. For example, you can call [Provider_utils.add_entry] to create a new
+for it. For example, you can call [Provider_context.add_entry] to create a new
 [entry], and then [Provider_utils.compute_tast_and_errors_unquarantined].
 
 Some operations may make changes to global state (e.g. write to shared memory
@@ -89,6 +89,33 @@ val empty_for_test : popt:ParserOptions.t -> tcopt:TypecheckerOptions.t -> t
 there may not be a [ServerEnv.env] available. *)
 val empty_for_debugging :
   popt:ParserOptions.t -> tcopt:TypecheckerOptions.t -> t
+
+(** Read the contents at [path] from disk and create a new
+[Provider_context.entry] representing that file. The returned
+[Provider_context.t] contains that new entry.
+
+If an [entry] is already present for the given [path], then this function
+overwrites that entry in the returned [Provider_context.t]. If you want to see
+if an entry already exists, you can use [Provider_utils.find_entry].
+
+It's important to pass around the resulting [Provider_context.t]. That way, if a
+subsequent operation tries to access data about the same file, it will be
+returned the same [entry]. *)
+val add_entry : ctx:t -> path:Relative_path.t -> t * entry
+
+(** Same as [add_entry], but using the provided file contents. This is primarily
+useful in the IDE (which may have unsaved changes), or for testing (to pretend
+that a certain file exists on disk). *)
+val add_entry_from_file_contents :
+  ctx:t -> path:Relative_path.t -> contents:string -> t * entry
+
+(** Same as [add_entry], but using the provided [ServerCommandTypes.file_input].
+This is useful in some IDE code paths. *)
+val add_entry_from_file_input :
+  ctx:t ->
+  path:Relative_path.t ->
+  file_input:ServerCommandTypes.file_input ->
+  t * entry
 
 (** Update the [TypecheckerOptions.t] contained within the [t]. *)
 val map_tcopt : t -> f:(TypecheckerOptions.t -> TypecheckerOptions.t) -> t

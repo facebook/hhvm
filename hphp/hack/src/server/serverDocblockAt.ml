@@ -40,7 +40,7 @@ let get_docblock_for_member ctx class_info member_name =
   | Typing_defs.Tfun _ ->
     let pos = Lazy.force member.Typing_defs.ce_pos in
     let path = Pos.filename pos in
-    let (ctx, entry) = Provider_utils.add_entry ~ctx ~path in
+    let (ctx, entry) = Provider_context.add_entry ~ctx ~path in
     ServerSymbolDefinition.get_definition_cst_node_ctx
       ~ctx
       ~entry
@@ -274,7 +274,7 @@ let go_docblock_for_symbol
     | Some location ->
       DocblockService.(
         let (ctx, entry) =
-          Provider_utils.add_entry
+          Provider_context.add_entry
             ~ctx
             ~path:(Relative_path.create_detect_prefix location.dbs_filename)
         in

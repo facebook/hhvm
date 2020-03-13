@@ -266,6 +266,7 @@ type _ t =
   | IDE_SIGNATURE_HELP : (string * int * int) -> Lsp.SignatureHelp.result t
   | COVERAGE_LEVELS : string * file_input -> Coverage_level_defs.result t
   | COMMANDLINE_AUTOCOMPLETE : string -> AutocompleteTypes.result t
+  | IDENTIFY_SYMBOL : string -> string SymbolDefinition.t list t
   | IDENTIFY_FUNCTION :
       string * file_input * int * int
       -> Identify_symbol.result t

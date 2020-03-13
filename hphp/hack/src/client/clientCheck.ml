@@ -329,6 +329,26 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
       let%lwt single_file = rpc args @@ Rpc.CONCATENATE_ALL paths in
       print_endline single_file;
       Lwt.return Exit_status.No_error
+    | MODE_IDENTIFY_SYMBOL arg ->
+      if not args.output_json then begin
+        Printf.eprintf "Must use --json\n%!";
+        raise Exit_status.(Exit_with Input_error)
+      end;
+      let%lwt result = rpc args @@ Rpc.IDENTIFY_SYMBOL arg in
+      let definition_to_json (d : string SymbolDefinition.t) : Hh_json.json =
+        Hh_json.JSON_Object
+          [
+            ("full_name", d.SymbolDefinition.full_name |> Hh_json.string_);
+            ("pos", d.SymbolDefinition.pos |> Pos.json);
+            ( "kind",
+              d.SymbolDefinition.kind
+              |> SymbolDefinition.string_of_kind
+              |> Hh_json.string_ );
+          ]
+      in
+      let definitions = List.map result ~f:definition_to_json in
+      Hh_json.json_to_string (Hh_json.JSON_Array definitions) |> print_endline;
+      Lwt.return Exit_status.No_error
     | MODE_IDENTIFY_SYMBOL1 arg
     | MODE_IDENTIFY_SYMBOL2 arg
     | MODE_IDENTIFY_SYMBOL3 arg ->

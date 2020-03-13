@@ -184,6 +184,9 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         ~autocomplete_context
     in
     (env, result.With_complete_flag.value)
+  | IDENTIFY_SYMBOL _name ->
+    (* TODO(ljw): implement it *)
+    (env, [])
   | IDENTIFY_FUNCTION (filename, file_input, line, column) ->
     let (ctx, entry) =
       Provider_utils.add_entry_from_file_input

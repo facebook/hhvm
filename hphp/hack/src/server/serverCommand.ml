@@ -62,6 +62,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | COVERAGE_LEVELS _ -> false
   | COMMANDLINE_AUTOCOMPLETE _ -> false
   | IDENTIFY_FUNCTION _ -> false
+  | IDENTIFY_SYMBOL _ -> false
   | METHOD_JUMP_BATCH _ -> false
   | IDE_HIGHLIGHT_REFS _ -> false
   | DUMP_SYMBOL_INFO _ -> false

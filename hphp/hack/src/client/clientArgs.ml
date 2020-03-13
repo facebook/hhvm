@@ -379,6 +379,9 @@ let parse_check_args cmd =
         Arg.String (fun x -> set_mode (MODE_IDENTIFY_SYMBOL1 x) ()),
         " (mode) print the full function name at the position "
         ^ "[line:character] of the text on stdin" );
+      ( "--identify",
+        Arg.String (fun x -> set_mode (MODE_IDENTIFY_SYMBOL x) ()),
+        " (mode) identify the named symbol" );
       ( "--ignore-hh-version",
         Arg.Set ignore_hh_version,
         " ignore hh_version check when loading saved states (default: false)" );

@@ -540,12 +540,11 @@ void profileDecRefs(IRGS& env, const IterArgs& data, SSATmp* base,
   if (env.context.kind != TransKind::Profile) return;
   if (curFunc(env)->isPseudoMain()) return;
 
+  // We could profile the iterator's base for IterNext here, too, but loading
+  // the value out of the base is tricky and it doesn't affect perf measurably.
   if (!local) {
-    auto const type = TArrLike | TObj;
-    auto const id = IterId(data.iterId);
     always_assert(init == (base != nullptr));
-    auto const arr = init ? base : gen(env, LdIterBase, type, id, fp(env));
-    gen(env, ProfileDecRef, DecRefData(), arr);
+    if (init) gen(env, ProfileDecRef, DecRefData(), base);
   }
 
   auto const val = gen(env, LdLoc, TCell, LocalId(data.valId), fp(env));

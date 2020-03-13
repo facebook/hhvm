@@ -44,6 +44,7 @@ std::string show(const Repo::GlobalData& gd) {
   SHOW(HackArrCompatHackArrCmpNotices);
   SHOW(HackArrCompatSerializeNotices);
   SHOW(HackArrDVArrs);
+  SHOW(HackArrEmptyBasedBoolEqCmp);
   SHOW(EnableIntrinsicsExtension);
   SHOW(ForbidDynamicCallsToFunc);
   SHOW(ForbidDynamicCallsToClsMeth);

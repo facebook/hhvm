@@ -1,0 +1,9 @@
+-vHackArrCompatNotices=1
+-vHackArrCompatIsArrayNotices=1
+-vHackArrCompatTypeHintNotices=1
+-vHackArrCompatDVCmpNotices=1
+
+-vHackArrCompatHackArrCmpNotices=1
+-vHackArrEmptyBasedBoolEqCmp=1
+
+-vRuntime.Eval.HackArrCompatIsVecDictNotices=1

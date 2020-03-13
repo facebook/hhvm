@@ -974,12 +974,16 @@ struct Eq {
     return ArrayData::Equal(ad1, ad2);
   }
   bool operator()(const ArrayData* ad, bool val) const {
-    if (ad->isPHPArrayType()) return !ad->empty() == val;
+    if (ad->isPHPArrayType() || RO::EvalHackArrEmptyBasedBoolEqCmp) {
+      return !ad->empty() == val;
+    }
     raiseHackArrCompatHackArrBoolCmp();
     return false;
   }
   bool operator()(bool val, const ArrayData* ad) const {
-    if (ad->isPHPArrayType()) return val == !ad->empty();
+    if (ad->isPHPArrayType() || RO::EvalHackArrEmptyBasedBoolEqCmp) {
+      return val == !ad->empty();
+    }
     raiseHackArrCompatHackArrBoolCmp();
     return false;
   }

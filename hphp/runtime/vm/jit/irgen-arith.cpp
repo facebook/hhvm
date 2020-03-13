@@ -439,7 +439,10 @@ SSATmp* emitHackArrBoolCmp(IRGS& env, Op op, SSATmp* arr, SSATmp* right) {
       return cns(env, op == Op::Cmp ? 0 : false);
     }
     case Op::Eq:
-      if (RuntimeOption::EvalHackArrCompatHackArrCmpNotices) {
+      if (RO::EvalHackArrEmptyBasedBoolEqCmp) {
+        return gen(env, EqBool, gen(env, ConvTVToBool, arr), right);
+      }
+      if (RO::EvalHackArrCompatHackArrCmpNotices) {
         gen(
           env,
           RaiseHackArrCompatNotice,
@@ -448,7 +451,10 @@ SSATmp* emitHackArrBoolCmp(IRGS& env, Op op, SSATmp* arr, SSATmp* right) {
       }
       return cns(env, false);
     case Op::Neq:
-      if (RuntimeOption::EvalHackArrCompatHackArrCmpNotices) {
+      if (RO::EvalHackArrEmptyBasedBoolEqCmp) {
+        return gen(env, NeqBool, gen(env, ConvTVToBool, arr), right);
+      }
+      if (RO::EvalHackArrCompatHackArrCmpNotices) {
         gen(
           env,
           RaiseHackArrCompatNotice,

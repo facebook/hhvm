@@ -116,6 +116,12 @@ struct Repo::GlobalData {
   bool HackArrDVArrs = false;
 
   /*
+   * Are ==/!= comparisons between Hack arrays and bool/null based on the
+   * array's emptiness?
+   */
+  bool HackArrEmptyBasedBoolEqCmp = false;
+
+  /*
    * Should the extension containing HHVM intrinsics be enabled?
    */
   bool EnableIntrinsicsExtension = false;
@@ -200,6 +206,7 @@ struct Repo::GlobalData {
       (HackArrCompatHackArrCmpNotices)
       (HackArrCompatSerializeNotices)
       (HackArrDVArrs)
+      (HackArrEmptyBasedBoolEqCmp)
       (EnableIntrinsicsExtension)
       (ForbidDynamicCallsToFunc)
       (ForbidDynamicCallsToClsMeth)

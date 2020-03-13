@@ -31,10 +31,6 @@ let ctx_from_server_env (env : ServerEnv.env) : Provider_context.t =
     entries = Relative_path.Map.empty;
   }
 
-let find_entry ~(ctx : Provider_context.t) ~(path : Relative_path.t) :
-    Provider_context.entry option =
-  Relative_path.Map.find_opt ctx.Provider_context.entries path
-
 let respect_but_quarantine_unsaved_changes
     ~(ctx : Provider_context.t) ~(f : unit -> 'a) : 'a =
   let make_then_revert_local_changes f () =

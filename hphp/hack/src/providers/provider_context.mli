@@ -95,8 +95,7 @@ val empty_for_debugging :
 [Provider_context.t] contains that new entry.
 
 If an [entry] is already present for the given [path], then this function
-overwrites that entry in the returned [Provider_context.t]. If you want to see
-if an entry already exists, you can use [Provider_utils.find_entry].
+overwrites that entry in the returned [Provider_context.t].
 
 It's important to pass around the resulting [Provider_context.t]. That way, if a
 subsequent operation tries to access data about the same file, it will be

@@ -67,10 +67,3 @@ error list. If the errors are needed at a later time, you'll have to incur the
 full cost of recomputing the entire TAST and errors. *)
 val compute_tast_quarantined :
   ctx:Provider_context.t -> entry:Provider_context.entry -> Compute_tast.t
-
-(** Find an existing entry within the context.  Returns "None" if
-that entry has not yet been observed. *)
-val find_entry :
-  ctx:Provider_context.t ->
-  path:Relative_path.t ->
-  Provider_context.entry option

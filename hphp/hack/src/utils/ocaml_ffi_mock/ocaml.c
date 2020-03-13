@@ -29,6 +29,7 @@ void caml_copy_int64(void) {}
 void caml_copy_nativeint(void) {}
 void caml_enter_blocking_section(void) {}
 void caml_failwith_value(void) {}
+void caml_failwith(void) {}
 void caml_invalid_argument_value(void) {}
 void caml_leave_blocking_section(void) {}
 void caml_raise(void) {}

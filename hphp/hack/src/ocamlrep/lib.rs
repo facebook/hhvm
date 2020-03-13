@@ -144,15 +144,6 @@ ocaml_ffi! {
 }
 ```
 
-Note that `ocaml_ffi!` requires a RustException type to be registered on the
-OCaml side:
-
-```ocaml
-exception RustException of string
-let () =
-  Callback.register_exception "rust exception" (RustException "")
-```
-
 # Example: pass an OCaml value to Rust ########################################
 
 An `Allocator` converts Rust values which implement the `OcamlRep` trait into
@@ -204,16 +195,7 @@ ocaml_ffi! {
 }
 ```
 
-Note that `ocaml_ffi!` requires a RustException type to be registered on the
-OCaml side:
-
-```ocaml
-exception RustException of string
-let () =
-  Callback.register_exception "rust exception" (RustException "")
-```
-
-Note also that the value returned by `from_ocaml` is owned--it is effectively a
+Note that the value returned by `from_ocaml` is owned--it is effectively a
 deep clone of the OCaml value. For instance, the OCaml string "a" is copied into
 a newly allocated Rust String--the Rust side does not need to worry about the
 OCaml value being garbage collected.

@@ -12,8 +12,6 @@ module MinimalSyntax = Full_fidelity_minimal_syntax
 module Env = Full_fidelity_parser_env
 module PositionedSyntax = Full_fidelity_positioned_syntax
 
-exception RustException of string
-
 external parse_mode : SourceText.t -> FileInfo.mode option = "rust_parse_mode"
 
 type ('a, 'b) result = 'a * 'b * SyntaxError.t list * Rust_pointer.t option
@@ -58,7 +56,6 @@ let parse_positioned_with_verify_sc text env =
   parse_positioned_with_verify_sc text env
 
 let init () =
-  Callback.register_exception "rust exception" (RustException "");
   Full_fidelity_minimal_syntax.rust_parse_ref := parse_minimal;
   Full_fidelity_positioned_syntax.rust_parse_ref := parse_positioned;
   Full_fidelity_positioned_syntax.rust_parse_with_coroutine_sc_ref :=

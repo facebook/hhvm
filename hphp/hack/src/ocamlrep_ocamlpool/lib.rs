@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::ffi::{CStr, CString};
+use std::ffi::CString;
 use std::panic::UnwindSafe;
 
 use ocamlpool_rust::utils::{caml_set_field, reserve_block};
@@ -85,16 +85,8 @@ pub unsafe fn to_ocaml<T: OcamlRep>(value: &T) -> usize {
     result.to_bits()
 }
 
-/// Catches panics in `f` and raises a OCaml exception of type RustException
+/// Catches panics in `f` and raises a OCaml exception of type Failure
 /// with the panic message (if the panic was raised with a `&str` or `String`).
-///
-/// Requires a RustException type to be registered on the OCaml side:
-///
-/// ```ocaml
-/// exception RustException of string
-/// let () =
-///   Callback.register_exception "rust exception" (RustException "")
-/// ```
 pub fn catch_unwind(f: impl FnOnce() -> usize + UnwindSafe) -> usize {
     let err = match std::panic::catch_unwind(f) {
         Ok(value) => return value,
@@ -109,11 +101,8 @@ pub fn catch_unwind(f: impl FnOnce() -> usize + UnwindSafe) -> usize {
         "Panicked with non-string object"
     };
     unsafe {
-        let exn_value_name = CStr::from_bytes_with_nul_unchecked(b"rust exception\0");
-        let exn = ocaml::core::callback::caml_named_value(exn_value_name.as_ptr() as *const u8);
-        assert!(!exn.is_null());
         let msg = CString::new(msg).unwrap();
-        ocaml::core::fail::caml_raise_with_string(exn as usize, msg.as_ptr());
+        ocaml::core::fail::caml_failwith(msg.as_ptr());
     }
     unreachable!();
 }
@@ -219,15 +208,7 @@ macro_rules! ocaml_ffi_fn {
 /// heap using `ocamlpool`.
 ///
 /// Panics in the function body will be caught and converted to an OCaml
-/// exception of type RustException.
-///
-/// Requires a RustException type to be registered on the OCaml side:
-///
-/// ```ocaml
-/// exception RustException of string
-/// let () =
-///   Callback.register_exception "rust exception" (RustException "")
-/// ```
+/// exception of type Failure.
 #[macro_export]
 macro_rules! ocaml_ffi {
     ($(fn $name:ident($($param:ident: $ty:ty),*  $(,)?) $(-> $ret:ty)? $code:block)*) => {

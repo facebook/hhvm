@@ -379,10 +379,6 @@ ALWAYS_INLINE bool checkHACCompare() {
   return RuntimeOption::EvalHackArrCompatNotices &&
          RuntimeOption::EvalHackArrCompatCheckCompare;
 }
-ALWAYS_INLINE bool checkHACCompareNonAnyArray() {
-  return RuntimeOption::EvalHackArrCompatNotices &&
-         RuntimeOption::EvalHackArrCompatCheckCompareNonAnyArray;
-}
 ALWAYS_INLINE bool checkHACArrayPlus() {
   return RuntimeOption::EvalHackArrCompatNotices &&
          RuntimeOption::EvalHackArrCompatCheckArrayPlus;

@@ -96,6 +96,10 @@ const StaticString s_cmpWithClsMeth(
 const StaticString s_cmpWithNonRecord(
   "Cannot compare records with non-records"
 );
+const StaticString s_cmpWithNonArr(
+  "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "
+  "a PHP array with a non-array"
+);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -738,6 +742,10 @@ void throw_keyset_compare_exception() {
 
 void throw_clsmeth_compare_exception() {
   SystemLib::throwInvalidOperationExceptionObject(s_cmpWithClsMeth);
+}
+
+void throw_arr_non_arr_compare_exception() {
+  SystemLib::throwInvalidOperationExceptionObject(s_cmpWithNonArr);
 }
 
 void throw_param_is_not_container() {

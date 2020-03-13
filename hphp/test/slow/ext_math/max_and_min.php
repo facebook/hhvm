@@ -32,11 +32,11 @@ function single_arg() {
 
 function multi_arg() {
   echo ' === Multiple Arguments ===', "\n";
-  min_max_multi(0, varray["hello"]);
-  min_max_multi("hello", varray[0]);
-  min_max_multi("hello", varray[-1]);
-  min_max_multi(varray[2, 4, 8], varray[varray[2, 5, 1]]);
-  min_max_multi("string", varray[varray[2, 5, 7], 42]);
+  min_max_multi(0, "hello");
+  min_max_multi("hello", 0);
+  min_max_multi("hello", -1);
+  min_max_multi(varray[varray[2], 4, 8], varray[varray[2, 5, 1]]);
+  min_max_multi("string", "foo", 42);
   min_max_multi(1, 1.0);
   min_max_multi(1.0, 1);
 }

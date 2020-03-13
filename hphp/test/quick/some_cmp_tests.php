@@ -5,12 +5,21 @@ function eq($x, $y) {
 }
 
 function lt($x, $y) {
-  var_dump($x < $y);
+  try {
+    var_dump($x < $y);
+  } catch (Exception $e) {
+    echo "Caught: ".$e->getMessage()."\n";
+  }
 }
 
 function gt($x, $y) {
-  var_dump($x > $y);
+  try {
+    var_dump($x > $y);
+  } catch (Exception $e) {
+    echo "Caught: ".$e->getMessage()."\n";
+  }
 }
+
 <<__EntryPoint>> function main(): void {
 echo "======\n";
 

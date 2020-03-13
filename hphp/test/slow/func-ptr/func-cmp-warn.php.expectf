@@ -78,15 +78,9 @@ bool(true)
 
 Warning: Func to string conversion in %s/func-cmp-warn.php on line 21
 bool(true)
-bool(false)
-bool(false)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
 
-Warning: Func to string conversion in %s/func-cmp-warn.php on line 28
+Warning: Func to string conversion in %s/func-cmp-warn.php on line 24
 bool(true)
 
-Warning: Func to string conversion in %s/func-cmp-warn.php on line 31
+Warning: Func to string conversion in %s/func-cmp-warn.php on line 27
 bool(false)

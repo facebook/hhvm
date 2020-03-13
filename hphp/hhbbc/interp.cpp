@@ -1473,10 +1473,6 @@ void in(ISS& env, const bc::BitNot& /*op*/) {
 
 namespace {
 
-bool couldBeHackArr(Type t) {
-  return t.couldBe(BVec | BDict | BKeyset);
-}
-
 template<bool NSame>
 std::pair<Type,bool> resolveSame(ISS& env) {
   auto const l1 = topStkEquiv(env, 0);

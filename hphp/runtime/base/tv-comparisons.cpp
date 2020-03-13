@@ -62,10 +62,9 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, bool val) {
       }
       return op(true, val);
     }
+  } else if (UNLIKELY(isArrayType(cell.m_type))) {
+    return op(cell.m_data.parr, val);
   } else {
-    if (UNLIKELY(op.noticeOnArrNonArr() && isArrayType(cell.m_type))) {
-      raiseHackArrCompatArrNonArrCmp();
-    }
     return op(tvToBool(cell), val);
   }
 }
@@ -118,10 +117,7 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, int64_t val) {
     case KindOfVArray:
     case KindOfPersistentArray:
     case KindOfArray:
-      if (UNLIKELY(op.noticeOnArrNonArr())) {
-        raiseHackArrCompatArrNonArrCmp();
-      }
-      return op(true, false);
+      return op.phpArrVsNonArr();
 
     case KindOfObject:
       return cell.m_data.pobj->isCollection()
@@ -193,10 +189,7 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, double val) {
     case KindOfVArray:
     case KindOfPersistentArray:
     case KindOfArray:
-      if (UNLIKELY(op.noticeOnArrNonArr())) {
-        raiseHackArrCompatArrNonArrCmp();
-      }
-      return op(true, false);
+      return op.phpArrVsNonArr();
 
     case KindOfObject:
       return cell.m_data.pobj->isCollection()
@@ -276,10 +269,7 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const StringData* val) {
     case KindOfVArray:
     case KindOfPersistentArray:
     case KindOfArray:
-      if (UNLIKELY(op.noticeOnArrNonArr())) {
-        raiseHackArrCompatArrNonArrCmp();
-      }
-      return op(true, false);
+      return op.phpArrVsNonArr();
 
     case KindOfObject: {
       auto od = cell.m_data.pobj;
@@ -323,11 +313,6 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const ArrayData* ad) {
   assertx(tvIsPlausible(cell));
   assertx(ad->isPHPArrayType());
 
-  auto const nonArr = [&]{
-    if (UNLIKELY(op.noticeOnArrNonArr())) {
-      raiseHackArrCompatArrNonArrCmp();
-    }
-  };
   auto const hackArr = [&]{
     if (UNLIKELY(op.noticeOnArrHackArr())) {
       raiseHackArrCompatArrHackArrCmp();
@@ -337,27 +322,19 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const ArrayData* ad) {
   switch (cell.m_type) {
     case KindOfUninit:
     case KindOfNull:
-      nonArr();
-      return op(false, !ad->empty());
+      return op(false, ad);
 
     case KindOfBoolean:
-      nonArr();
-      return op(cell.m_data.num, !ad->empty());
+      return op(cell.m_data.num, ad);
 
     case KindOfInt64:
-      nonArr();
-      return op(false, true);
-
     case KindOfDouble:
-      nonArr();
-      return op(false, true);
-
     case KindOfPersistentString:
     case KindOfString:
     case KindOfFunc:
     case KindOfClass:
-      nonArr();
-      return op(false, true);
+    case KindOfResource:
+      return op.phpArrVsNonArr();
 
     case KindOfPersistentVec:
     case KindOfVec:
@@ -383,16 +360,9 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const ArrayData* ad) {
       return op(cell.m_data.parr, ad);
 
     case KindOfObject: {
-      nonArr();
       auto const od = cell.m_data.pobj;
-      return od->isCollection()
-        ? op.collectionVsNonObj()
-        : op(true, false);
+      return od->isCollection() ? op.collectionVsNonObj() : op.phpArrVsNonArr();
     }
-
-    case KindOfResource:
-      nonArr();
-      return op(false, true);
 
     case KindOfClsMeth:
       if (RuntimeOption::EvalHackArrDVArrs) {
@@ -460,10 +430,7 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const ObjectData* od) {
     case KindOfVArray:
     case KindOfPersistentArray:
     case KindOfArray:
-      if (UNLIKELY(op.noticeOnArrNonArr())) {
-        raiseHackArrCompatArrNonArrCmp();
-      }
-      return od->isCollection() ? op.collectionVsNonObj() : op(false, true);
+      return od->isCollection() ? op.collectionVsNonObj() : op.phpArrVsNonArr();
 
     case KindOfObject:
       return op(cell.m_data.pobj, od);
@@ -543,10 +510,7 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const ResourceData* rd) {
     case KindOfVArray:
     case KindOfPersistentArray:
     case KindOfArray:
-      if (UNLIKELY(op.noticeOnArrNonArr())) {
-        raiseHackArrCompatArrNonArrCmp();
-      }
-      return op(true, false);
+      return op.phpArrVsNonArr();
 
     case KindOfObject:
       return op(true, false);
@@ -805,11 +769,8 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const Func* val) {
     case KindOfVArray:
     case KindOfPersistentArray:
     case KindOfArray:
-      if (UNLIKELY(op.noticeOnArrNonArr())) {
-        raiseHackArrCompatArrNonArrCmp();
-      }
       funcToStringHelper(val); // warn
-      return op(true, false);
+      return op.phpArrVsNonArr();
 
     case KindOfObject: {
       auto od = cell.m_data.pobj;
@@ -898,11 +859,8 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const Class* val) {
     case KindOfVArray:
     case KindOfPersistentArray:
     case KindOfArray:
-      if (UNLIKELY(op.noticeOnArrNonArr())) {
-        raiseHackArrCompatArrNonArrCmp();
-      }
       classToStringHelper(val); // warn
-      return op(true, false);
+      return op.phpArrVsNonArr();
 
     case KindOfObject: {
       auto od = cell.m_data.pobj;
@@ -1016,12 +974,12 @@ struct Eq {
     return ArrayData::Equal(ad1, ad2);
   }
   bool operator()(const ArrayData* ad, bool val) const {
-    assertx(!ad->isPHPArrayType());
+    if (ad->isPHPArrayType()) return !ad->empty() == val;
     raiseHackArrCompatHackArrBoolCmp();
     return false;
   }
   bool operator()(bool val, const ArrayData* ad) const {
-    assertx(!ad->isPHPArrayType());
+    if (ad->isPHPArrayType()) return val == !ad->empty();
     raiseHackArrCompatHackArrBoolCmp();
     return false;
   }
@@ -1066,8 +1024,8 @@ struct Eq {
     throw_rec_non_rec_compare_exception();
   }
   bool clsmethVsNonClsMeth() const { return false; }
+  bool phpArrVsNonArr() const { return false; }
 
-  bool noticeOnArrNonArr() const { return false; }
   bool noticeOnArrHackArr() const {
     return checkHACCompare();
   }
@@ -1095,14 +1053,14 @@ struct CompareBase {
   }
 
   RetType operator()(const ArrayData* ad, bool val) const {
-    assertx(!ad->isPHPArrayType());
+    if (ad->isPHPArrayType()) throw_arr_non_arr_compare_exception();
     if (ad->isVecArrayType()) throw_vec_compare_exception();
     if (ad->isDictType()) throw_dict_compare_exception();
     assertx(ad->isKeysetType());
     throw_keyset_compare_exception();
   }
   RetType operator()(bool val, const ArrayData* ad) const {
-    assertx(!ad->isPHPArrayType());
+    if (ad->isPHPArrayType()) throw_arr_non_arr_compare_exception();
     if (ad->isVecArrayType()) throw_vec_compare_exception();
     if (ad->isDictType()) throw_dict_compare_exception();
     assertx(ad->isKeysetType());
@@ -1148,10 +1106,10 @@ struct CompareBase {
   RetType clsmethVsNonClsMeth() const {
     throw_clsmeth_compare_exception();
   }
-
-  bool noticeOnArrNonArr() const {
-    return checkHACCompareNonAnyArray();
+  RetType phpArrVsNonArr() const {
+    throw_arr_non_arr_compare_exception();
   }
+
   bool noticeOnArrHackArr() const {
     return checkHACCompare();
   }

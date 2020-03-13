@@ -486,11 +486,8 @@ bool Array::less(const Array& v2, bool flip /* = false */) const {
 bool Array::less(const Variant& v2) const {
   if (isPHPArray()) {
     if (m_arr == nullptr || v2.isNull()) {
-      if (
-        UNLIKELY(checkHACCompareNonAnyArray() &&
-        ((bool)m_arr == !v2.isPHPArray()))
-      ) {
-        raiseHackArrCompatArrNonArrCmp();
+      if (UNLIKELY(((bool)m_arr == !v2.isPHPArray()))) {
+        throw_arr_non_arr_compare_exception();
       }
       return HPHP::less(toBoolean(), v2.toBoolean());
     }
@@ -539,11 +536,8 @@ bool Array::more(const Array& v2, bool flip /* = true */) const {
 bool Array::more(const Variant& v2) const {
   if (isPHPArray()) {
     if (m_arr == nullptr || v2.isNull()) {
-      if (
-        UNLIKELY(checkHACCompareNonAnyArray() &&
-        ((bool)m_arr == !v2.isPHPArray()))
-      ) {
-        raiseHackArrCompatArrNonArrCmp();
+      if (UNLIKELY(((bool)m_arr == !v2.isPHPArray()))) {
+        throw_arr_non_arr_compare_exception();
       }
       return HPHP::more(toBoolean(), v2.toBoolean());
     }

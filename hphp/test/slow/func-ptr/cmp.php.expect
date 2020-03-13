@@ -106,32 +106,32 @@ bool(true)
 Test 7
 bool(false)
 bool(false)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
 
 bool(false)
 bool(false)
-bool(false)
-bool(false)
-bool(true)
-bool(true)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
 
 Test 8
 bool(false)
 bool(false)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
 
 bool(false)
 bool(false)
-bool(false)
-bool(false)
-bool(true)
-bool(true)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
 
 Test 9
 bool(false)
@@ -151,17 +151,17 @@ Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec 
 Test 10
 bool(false)
 bool(false)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
 
 bool(false)
 bool(false)
-bool(false)
-bool(false)
-bool(true)
-bool(true)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
 
 Test 11
 bool(false)
@@ -302,32 +302,32 @@ bool(true)
 Test 7
 bool(false)
 bool(false)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
 
 bool(false)
 bool(false)
-bool(false)
-bool(false)
-bool(true)
-bool(true)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
 
 Test 8
 bool(false)
 bool(false)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
 
 bool(false)
 bool(false)
-bool(false)
-bool(false)
-bool(true)
-bool(true)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
 
 Test 9
 bool(false)
@@ -347,17 +347,17 @@ Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec 
 Test 10
 bool(false)
 bool(false)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
 
 bool(false)
 bool(false)
-bool(false)
-bool(false)
-bool(true)
-bool(true)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
 
 Test 11
 bool(false)
@@ -388,3 +388,4 @@ Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keyset
 Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+

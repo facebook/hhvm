@@ -7,12 +7,7 @@ bool(true)
 bool(true)
 int(1)
 bool(true)
-array(2) {
-  [0]=>
-  int(2)
-  [1]=>
-  int(3)
-}
+int(1)
 int(2147483646)
 %s(2147483648)
 %s(2147483648)

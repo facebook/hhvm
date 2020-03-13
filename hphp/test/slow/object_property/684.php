@@ -4,7 +4,7 @@ function f() {
   return false;
 }
 class B {
-  public $a = 1;
+  public $a = darray[1 => 1];
   static $b = varray[1, 2, 3];
 }
 

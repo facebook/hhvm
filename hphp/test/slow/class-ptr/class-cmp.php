@@ -3,7 +3,7 @@
 class foo {}
 class bar {}
 
-function baz($a, $b, $c, $d, $e, $f) {
+function baz($a, $b, $c, $d, $e) {
   var_dump($a === $b); var_dump($a == $b);
   var_dump($a < $b);   var_dump($a <= $b);
   var_dump($a > $b);   var_dump($a >= $b);
@@ -20,10 +20,6 @@ function baz($a, $b, $c, $d, $e, $f) {
   var_dump($a < $e);   var_dump($a <= $e);
   var_dump($a > $e);   var_dump($a >= $e);
 
-  var_dump($a === $f); var_dump($a == $f);
-  var_dump($a < $f);   var_dump($a <= $f);
-  var_dump($a > $f);   var_dump($a >= $f);
-
   var_dump(
     ($e === 'bar' ? __hhvm_intrinsics\create_class_pointer('foo') : __hhvm_intrinsics\create_class_pointer('bar')) === ($d === 'foo' ? 'foo' : 'bar')
   );
@@ -34,5 +30,5 @@ function baz($a, $b, $c, $d, $e, $f) {
 
 <<__EntryPoint>>
 function main() {
-  baz(__hhvm_intrinsics\create_class_pointer('foo'), __hhvm_intrinsics\create_class_pointer('foo'), __hhvm_intrinsics\create_class_pointer('bar'), 'foo', 'bar', varray[]);
+  baz(__hhvm_intrinsics\create_class_pointer('foo'), __hhvm_intrinsics\create_class_pointer('foo'), __hhvm_intrinsics\create_class_pointer('bar'), 'foo', 'bar');
 }

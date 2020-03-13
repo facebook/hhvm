@@ -43,26 +43,68 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
 
   print_header('[static] $va ? VAR');
   begin_row('true');
-    C($va<$tr);C($va<=$tr);C($va>$tr);C($va>=$tr);C($va==$tr);C($va!=$tr);
-    C($va===$tr);C($va!==$tr);I($va<=>$tr);
+    try { C($va<  $tr); } catch (Exception $_) { E(); }
+    try { C($va<= $tr); } catch (Exception $_) { E(); }
+    try { C($va > $tr); } catch (Exception $_) { E(); }
+    try { C($va >=$tr); } catch (Exception $_) { E(); }
+    C($va ==$tr);
+    C($va !=$tr);
+    C($va===$tr);
+    C($va!==$tr);
+    try { I($va<=>$tr); } catch (Exception $_) { E(); }
   begin_row('false');
-    C($va<$fa);C($va<=$fa);C($va>$fa);C($va>=$fa);C($va==$fa);C($va!=$fa);
-    C($va===$fa);C($va!==$fa);I($va<=>$fa);
+    try { C($va<  $fa); } catch (Exception $_) { E(); }
+    try { C($va<= $fa); } catch (Exception $_) { E(); }
+    try { C($va > $fa); } catch (Exception $_) { E(); }
+    try { C($va >=$fa); } catch (Exception $_) { E(); }
+    C($va ==$fa);
+    C($va !=$fa);
+    C($va===$fa);
+    C($va!==$fa);
+    try { I($va<=>$fa); } catch (Exception $_) { E(); }
   begin_row('null');
-    C($va<$nu);C($va<=$nu);C($va>$nu);C($va>=$nu);C($va==$nu);C($va!=$nu);
-    C($va===$nu);C($va!==$nu);I($va<=>$nu);
+    try { C($va<  $nu); } catch (Exception $_) { E(); }
+    try { C($va<= $nu); } catch (Exception $_) { E(); }
+    try { C($va > $nu); } catch (Exception $_) { E(); }
+    try { C($va >=$nu); } catch (Exception $_) { E(); }
+    C($va ==$nu);
+    C($va !=$nu);
+    C($va===$nu);
+    C($va!==$nu);
+    try { I($va<=>$nu); } catch (Exception $_) { E(); }
   print_footer();
 
   print_header('[static] VAR ? $va');
   begin_row('true');
-    C($tr<$va);C($tr<=$va);C($tr>$va);C($tr>=$va);C($tr==$va);C($tr!=$va);
-    C($tr===$va);C($tr!==$va);I($tr<=>$va);
+    try { C($tr<  $va); } catch (Exception $_) { E(); }
+    try { C($tr<= $va); } catch (Exception $_) { E(); }
+    try { C($tr > $va); } catch (Exception $_) { E(); }
+    try { C($tr >=$va); } catch (Exception $_) { E(); }
+    C($tr ==$va);
+    C($tr !=$va);
+    C($tr===$va);
+    C($tr!==$va);
+    try { I($tr<=>$va); } catch (Exception $_) { E(); }
   begin_row('false');
-    C($fa<$va);C($fa<=$va);C($fa>$va);C($fa>=$va);C($fa==$va);C($fa!=$va);
-    C($fa===$va);C($fa!==$va);I($fa<=>$va);
+    try { C($fa<  $va); } catch (Exception $_) { E(); }
+    try { C($fa<= $va); } catch (Exception $_) { E(); }
+    try { C($fa > $va); } catch (Exception $_) { E(); }
+    try { C($fa >=$va); } catch (Exception $_) { E(); }
+    C($fa ==$va);
+    C($fa !=$va);
+    C($fa===$va);
+    C($fa!==$va);
+    try { I($fa<=>$va); } catch (Exception $_) { E(); }
   begin_row('null');
-    C($nu<$va);C($nu<=$va);C($nu>$va);C($nu>=$va);C($nu==$va);C($nu!=$va);
-    C($nu===$va);C($nu!==$va);I($nu<=>$va);
+    try { C($nu<  $va); } catch (Exception $_) { E(); }
+    try { C($nu<= $va); } catch (Exception $_) { E(); }
+    try { C($nu > $va); } catch (Exception $_) { E(); }
+    try { C($nu >=$va); } catch (Exception $_) { E(); }
+    C($nu ==$va);
+    C($nu !=$va);
+    C($nu===$va);
+    C($nu!==$va);
+    try { I($nu<=>$va); } catch (Exception $_) { E(); }
   print_footer();
 }
 
@@ -74,26 +116,68 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
 
   print_header('[dynamic] $va ? VAR');
   begin_row('true');
-    C($va<$tr);C($va<=$tr);C($va>$tr);C($va>=$tr);C($va==$tr);C($va!=$tr);
-    C($va===$tr);C($va!==$tr);I($va<=>$tr);
+    try { C($va<  $tr); } catch (Exception $_) { E(); }
+    try { C($va<= $tr); } catch (Exception $_) { E(); }
+    try { C($va > $tr); } catch (Exception $_) { E(); }
+    try { C($va >=$tr); } catch (Exception $_) { E(); }
+    C($va ==$tr);
+    C($va !=$tr);
+    C($va===$tr);
+    C($va!==$tr);
+    try { I($va<=>$tr); } catch (Exception $_) { E(); }
   begin_row('false');
-    C($va<$fa);C($va<=$fa);C($va>$fa);C($va>=$fa);C($va==$fa);C($va!=$fa);
-    C($va===$fa);C($va!==$fa);I($va<=>$fa);
+    try { C($va<  $fa); } catch (Exception $_) { E(); }
+    try { C($va<= $fa); } catch (Exception $_) { E(); }
+    try { C($va > $fa); } catch (Exception $_) { E(); }
+    try { C($va >=$fa); } catch (Exception $_) { E(); }
+    C($va ==$fa);
+    C($va !=$fa);
+    C($va===$fa);
+    C($va!==$fa);
+    try { I($va<=>$fa); } catch (Exception $_) { E(); }
   begin_row('null');
-    C($va<$nu);C($va<=$nu);C($va>$nu);C($va>=$nu);C($va==$nu);C($va!=$nu);
-    C($va===$nu);C($va!==$nu);I($va<=>$nu);
+    try { C($va<  $nu); } catch (Exception $_) { E(); }
+    try { C($va<= $nu); } catch (Exception $_) { E(); }
+    try { C($va > $nu); } catch (Exception $_) { E(); }
+    try { C($va >=$nu); } catch (Exception $_) { E(); }
+    C($va ==$nu);
+    C($va !=$nu);
+    C($va===$nu);
+    C($va!==$nu);
+    try { I($va<=>$nu); } catch (Exception $_) { E(); }
   print_footer();
 
   print_header('[dynamic] VAR ? $va');
   begin_row('true');
-    C($tr<$va);C($tr<=$va);C($tr>$va);C($tr>=$va);C($tr==$va);C($tr!=$va);
-    C($tr===$va);C($tr!==$va);I($tr<=>$va);
+    try { C($tr<  $va); } catch (Exception $_) { E(); }
+    try { C($tr<= $va); } catch (Exception $_) { E(); }
+    try { C($tr > $va); } catch (Exception $_) { E(); }
+    try { C($tr >=$va); } catch (Exception $_) { E(); }
+    C($tr ==$va);
+    C($tr !=$va);
+    C($tr===$va);
+    C($tr!==$va);
+    try { I($tr<=>$va); } catch (Exception $_) { E(); }
   begin_row('false');
-    C($fa<$va);C($fa<=$va);C($fa>$va);C($fa>=$va);C($fa==$va);C($fa!=$va);
-    C($fa===$va);C($fa!==$va);I($fa<=>$va);
+    try { C($fa<  $va); } catch (Exception $_) { E(); }
+    try { C($fa<= $va); } catch (Exception $_) { E(); }
+    try { C($fa > $va); } catch (Exception $_) { E(); }
+    try { C($fa >=$va); } catch (Exception $_) { E(); }
+    C($fa ==$va);
+    C($fa !=$va);
+    C($fa===$va);
+    C($fa!==$va);
+    try { I($fa<=>$va); } catch (Exception $_) { E(); }
   begin_row('null');
-    C($nu<$va);C($nu<=$va);C($nu>$va);C($nu>=$va);C($nu==$va);C($nu!=$va);
-    C($nu===$va);C($nu!==$va);I($nu<=>$va);
+    try { C($nu<  $va); } catch (Exception $_) { E(); }
+    try { C($nu<= $va); } catch (Exception $_) { E(); }
+    try { C($nu > $va); } catch (Exception $_) { E(); }
+    try { C($nu >=$va); } catch (Exception $_) { E(); }
+    C($nu ==$va);
+    C($nu !=$va);
+    C($nu===$va);
+    C($nu!==$va);
+    try { I($nu<=>$va); } catch (Exception $_) { E(); }
   print_footer();
 }
 
@@ -105,26 +189,68 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
 
   print_header('[static] $vx ? VAR');
   begin_row('true');
-    C($vx<$tr);C($vx<=$tr);C($vx>$tr);C($vx>=$tr);C($vx==$tr);C($vx!=$tr);
-    C($vx===$tr);C($vx!==$tr);I($vx<=>$tr);
+    try { C($vx<  $tr); } catch (Exception $_) { E(); }
+    try { C($vx<= $tr); } catch (Exception $_) { E(); }
+    try { C($vx > $tr); } catch (Exception $_) { E(); }
+    try { C($vx >=$tr); } catch (Exception $_) { E(); }
+    C($vx ==$tr);
+    C($vx !=$tr);
+    C($vx===$tr);
+    C($vx!==$tr);
+    try { I($vx<=>$tr); } catch (Exception $_) { E(); }
   begin_row('false');
-    C($vx<$fa);C($vx<=$fa);C($vx>$fa);C($vx>=$fa);C($vx==$fa);C($vx!=$fa);
-    C($vx===$fa);C($vx!==$fa);I($vx<=>$fa);
+    try { C($vx<  $fa); } catch (Exception $_) { E(); }
+    try { C($vx<= $fa); } catch (Exception $_) { E(); }
+    try { C($vx > $fa); } catch (Exception $_) { E(); }
+    try { C($vx >=$fa); } catch (Exception $_) { E(); }
+    C($vx ==$fa);
+    C($vx !=$fa);
+    C($vx===$fa);
+    C($vx!==$fa);
+    try { I($vx<=>$fa); } catch (Exception $_) { E(); }
   begin_row('null');
-    C($vx<$nu);C($vx<=$nu);C($vx>$nu);C($vx>=$nu);C($vx==$nu);C($vx!=$nu);
-    C($vx===$nu);C($vx!==$nu);I($vx<=>$nu);
+    try { C($vx<  $nu); } catch (Exception $_) { E(); }
+    try { C($vx<= $nu); } catch (Exception $_) { E(); }
+    try { C($vx > $nu); } catch (Exception $_) { E(); }
+    try { C($vx >=$nu); } catch (Exception $_) { E(); }
+    C($vx ==$nu);
+    C($vx !=$nu);
+    C($vx===$nu);
+    C($vx!==$nu);
+    try { I($vx<=>$nu); } catch (Exception $_) { E(); }
   print_footer();
 
   print_header('[static] VAR ? $vx');
   begin_row('true');
-    C($tr<$vx);C($tr<=$vx);C($tr>$vx);C($tr>=$vx);C($tr==$vx);C($tr!=$vx);
-    C($tr===$vx);C($tr!==$vx);I($tr<=>$vx);
+    try { C($tr<  $vx); } catch (Exception $_) { E(); }
+    try { C($tr<= $vx); } catch (Exception $_) { E(); }
+    try { C($tr > $vx); } catch (Exception $_) { E(); }
+    try { C($tr >=$vx); } catch (Exception $_) { E(); }
+    C($tr ==$vx);
+    C($tr !=$vx);
+    C($tr===$vx);
+    C($tr!==$vx);
+    try { I($tr<=>$vx); } catch (Exception $_) { E(); }
   begin_row('false');
-    C($fa<$vx);C($fa<=$vx);C($fa>$vx);C($fa>=$vx);C($fa==$vx);C($fa!=$vx);
-    C($fa===$vx);C($fa!==$vx);I($fa<=>$vx);
+    try { C($fa<  $vx); } catch (Exception $_) { E(); }
+    try { C($fa<= $vx); } catch (Exception $_) { E(); }
+    try { C($fa > $vx); } catch (Exception $_) { E(); }
+    try { C($fa >=$vx); } catch (Exception $_) { E(); }
+    C($fa ==$vx);
+    C($fa !=$vx);
+    C($fa===$vx);
+    C($fa!==$vx);
+    try { I($fa<=>$vx); } catch (Exception $_) { E(); }
   begin_row('null');
-    C($nu<$vx);C($nu<=$vx);C($nu>$vx);C($nu>=$vx);C($nu==$vx);C($nu!=$vx);
-    C($nu===$vx);C($nu!==$vx);I($nu<=>$vx);
+    try { C($nu<  $vx); } catch (Exception $_) { E(); }
+    try { C($nu<= $vx); } catch (Exception $_) { E(); }
+    try { C($nu > $vx); } catch (Exception $_) { E(); }
+    try { C($nu >=$vx); } catch (Exception $_) { E(); }
+    C($nu ==$vx);
+    C($nu !=$vx);
+    C($nu===$vx);
+    C($nu!==$vx);
+    try { I($nu<=>$vx); } catch (Exception $_) { E(); }
   print_footer();
 }
 
@@ -136,26 +262,68 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
 
   print_header('[dynamic] $vx ? VAR');
   begin_row('true');
-    C($vx<$tr);C($vx<=$tr);C($vx>$tr);C($vx>=$tr);C($vx==$tr);C($vx!=$tr);
-    C($vx===$tr);C($vx!==$tr);I($vx<=>$tr);
+    try { C($vx<  $tr); } catch (Exception $_) { E(); }
+    try { C($vx<= $tr); } catch (Exception $_) { E(); }
+    try { C($vx > $tr); } catch (Exception $_) { E(); }
+    try { C($vx >=$tr); } catch (Exception $_) { E(); }
+    C($vx ==$tr);
+    C($vx !=$tr);
+    C($vx===$tr);
+    C($vx!==$tr);
+    try { I($vx<=>$tr); } catch (Exception $_) { E(); }
   begin_row('false');
-    C($vx<$fa);C($vx<=$fa);C($vx>$fa);C($vx>=$fa);C($vx==$fa);C($vx!=$fa);
-    C($vx===$fa);C($vx!==$fa);I($vx<=>$fa);
+    try { C($vx<  $fa); } catch (Exception $_) { E(); }
+    try { C($vx<= $fa); } catch (Exception $_) { E(); }
+    try { C($vx > $fa); } catch (Exception $_) { E(); }
+    try { C($vx >=$fa); } catch (Exception $_) { E(); }
+    C($vx ==$fa);
+    C($vx !=$fa);
+    C($vx===$fa);
+    C($vx!==$fa);
+    try { I($vx<=>$fa); } catch (Exception $_) { E(); }
   begin_row('null');
-    C($vx<$nu);C($vx<=$nu);C($vx>$nu);C($vx>=$nu);C($vx==$nu);C($vx!=$nu);
-    C($vx===$nu);C($vx!==$nu);I($vx<=>$nu);
+    try { C($vx<  $nu); } catch (Exception $_) { E(); }
+    try { C($vx<= $nu); } catch (Exception $_) { E(); }
+    try { C($vx > $nu); } catch (Exception $_) { E(); }
+    try { C($vx >=$nu); } catch (Exception $_) { E(); }
+    C($vx ==$nu);
+    C($vx !=$nu);
+    C($vx===$nu);
+    C($vx!==$nu);
+    try { I($vx<=>$nu); } catch (Exception $_) { E(); }
   print_footer();
 
   print_header('[dynamic] VAR ? $vx');
   begin_row('true');
-    C($tr<$vx);C($tr<=$vx);C($tr>$vx);C($tr>=$vx);C($tr==$vx);C($tr!=$vx);
-    C($tr===$vx);C($tr!==$vx);I($tr<=>$vx);
+    try { C($tr<  $vx); } catch (Exception $_) { E(); }
+    try { C($tr<= $vx); } catch (Exception $_) { E(); }
+    try { C($tr > $vx); } catch (Exception $_) { E(); }
+    try { C($tr >=$vx); } catch (Exception $_) { E(); }
+    C($tr ==$vx);
+    C($tr !=$vx);
+    C($tr===$vx);
+    C($tr!==$vx);
+    try { I($tr<=>$vx); } catch (Exception $_) { E(); }
   begin_row('false');
-    C($fa<$vx);C($fa<=$vx);C($fa>$vx);C($fa>=$vx);C($fa==$vx);C($fa!=$vx);
-    C($fa===$vx);C($fa!==$vx);I($fa<=>$vx);
+    try { C($fa<  $vx); } catch (Exception $_) { E(); }
+    try { C($fa<= $vx); } catch (Exception $_) { E(); }
+    try { C($fa > $vx); } catch (Exception $_) { E(); }
+    try { C($fa >=$vx); } catch (Exception $_) { E(); }
+    C($fa ==$vx);
+    C($fa !=$vx);
+    C($fa===$vx);
+    C($fa!==$vx);
+    try { I($fa<=>$vx); } catch (Exception $_) { E(); }
   begin_row('null');
-    C($nu<$vx);C($nu<=$vx);C($nu>$vx);C($nu>=$vx);C($nu==$vx);C($nu!=$vx);
-    C($nu===$vx);C($nu!==$vx);I($nu<=>$vx);
+    try { C($nu<  $vx); } catch (Exception $_) { E(); }
+    try { C($nu<= $vx); } catch (Exception $_) { E(); }
+    try { C($nu > $vx); } catch (Exception $_) { E(); }
+    try { C($nu >=$vx); } catch (Exception $_) { E(); }
+    C($nu ==$vx);
+    C($nu !=$vx);
+    C($nu===$vx);
+    C($nu!==$vx);
+    try { I($nu<=>$vx); } catch (Exception $_) { E(); }
   print_footer();
 }
 
@@ -167,26 +335,68 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
 
   print_header('[static] $da ? VAR');
   begin_row('true');
-    C($da<$tr);C($da<=$tr);C($da>$tr);C($da>=$tr);C($da==$tr);C($da!=$tr);
-    C($da===$tr);C($da!==$tr);I($da<=>$tr);
+    try { C($da<  $tr); } catch (Exception $_) { E(); }
+    try { C($da<= $tr); } catch (Exception $_) { E(); }
+    try { C($da > $tr); } catch (Exception $_) { E(); }
+    try { C($da >=$tr); } catch (Exception $_) { E(); }
+    C($da ==$tr);
+    C($da !=$tr);
+    C($da===$tr);
+    C($da!==$tr);
+    try { I($da<=>$tr); } catch (Exception $_) { E(); }
   begin_row('false');
-    C($da<$fa);C($da<=$fa);C($da>$fa);C($da>=$fa);C($da==$fa);C($da!=$fa);
-    C($da===$fa);C($da!==$fa);I($da<=>$fa);
+    try { C($da<  $fa); } catch (Exception $_) { E(); }
+    try { C($da<= $fa); } catch (Exception $_) { E(); }
+    try { C($da > $fa); } catch (Exception $_) { E(); }
+    try { C($da >=$fa); } catch (Exception $_) { E(); }
+    C($da ==$fa);
+    C($da !=$fa);
+    C($da===$fa);
+    C($da!==$fa);
+    try { I($da<=>$fa); } catch (Exception $_) { E(); }
   begin_row('null');
-    C($da<$nu);C($da<=$nu);C($da>$nu);C($da>=$nu);C($da==$nu);C($da!=$nu);
-    C($da===$nu);C($da!==$nu);I($da<=>$nu);
+    try { C($da<  $nu); } catch (Exception $_) { E(); }
+    try { C($da<= $nu); } catch (Exception $_) { E(); }
+    try { C($da > $nu); } catch (Exception $_) { E(); }
+    try { C($da >=$nu); } catch (Exception $_) { E(); }
+    C($da ==$nu);
+    C($da !=$nu);
+    C($da===$nu);
+    C($da!==$nu);
+    try { I($da<=>$nu); } catch (Exception $_) { E(); }
   print_footer();
 
   print_header('[static] VAR ? $da');
   begin_row('true');
-    C($tr<$da);C($tr<=$da);C($tr>$da);C($tr>=$da);C($tr==$da);C($tr!=$da);
-    C($tr===$da);C($tr!==$da);I($tr<=>$da);
+    try { C($tr<  $da); } catch (Exception $_) { E(); }
+    try { C($tr<= $da); } catch (Exception $_) { E(); }
+    try { C($tr > $da); } catch (Exception $_) { E(); }
+    try { C($tr >=$da); } catch (Exception $_) { E(); }
+    C($tr ==$da);
+    C($tr !=$da);
+    C($tr===$da);
+    C($tr!==$da);
+    try { I($tr<=>$da); } catch (Exception $_) { E(); }
   begin_row('false');
-    C($fa<$da);C($fa<=$da);C($fa>$da);C($fa>=$da);C($fa==$da);C($fa!=$da);
-    C($fa===$da);C($fa!==$da);I($fa<=>$da);
+    try { C($fa<  $da); } catch (Exception $_) { E(); }
+    try { C($fa<= $da); } catch (Exception $_) { E(); }
+    try { C($fa > $da); } catch (Exception $_) { E(); }
+    try { C($fa >=$da); } catch (Exception $_) { E(); }
+    C($fa ==$da);
+    C($fa !=$da);
+    C($fa===$da);
+    C($fa!==$da);
+    try { I($fa<=>$da); } catch (Exception $_) { E(); }
   begin_row('null');
-    C($nu<$da);C($nu<=$da);C($nu>$da);C($nu>=$da);C($nu==$da);C($nu!=$da);
-    C($nu===$da);C($nu!==$da);I($nu<=>$da);
+    try { C($nu<  $da); } catch (Exception $_) { E(); }
+    try { C($nu<= $da); } catch (Exception $_) { E(); }
+    try { C($nu > $da); } catch (Exception $_) { E(); }
+    try { C($nu >=$da); } catch (Exception $_) { E(); }
+    C($nu ==$da);
+    C($nu !=$da);
+    C($nu===$da);
+    C($nu!==$da);
+    try { I($nu<=>$da); } catch (Exception $_) { E(); }
   print_footer();
 }
 
@@ -198,26 +408,68 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
 
   print_header('[dynamic] $da ? VAR');
   begin_row('true');
-    C($da<$tr);C($da<=$tr);C($da>$tr);C($da>=$tr);C($da==$tr);C($da!=$tr);
-    C($da===$tr);C($da!==$tr);I($da<=>$tr);
+    try { C($da<  $tr); } catch (Exception $_) { E(); }
+    try { C($da<= $tr); } catch (Exception $_) { E(); }
+    try { C($da > $tr); } catch (Exception $_) { E(); }
+    try { C($da >=$tr); } catch (Exception $_) { E(); }
+    C($da ==$tr);
+    C($da !=$tr);
+    C($da===$tr);
+    C($da!==$tr);
+    try { I($da<=>$tr); } catch (Exception $_) { E(); }
   begin_row('false');
-    C($da<$fa);C($da<=$fa);C($da>$fa);C($da>=$fa);C($da==$fa);C($da!=$fa);
-    C($da===$fa);C($da!==$fa);I($da<=>$fa);
+    try { C($da<  $fa); } catch (Exception $_) { E(); }
+    try { C($da<= $fa); } catch (Exception $_) { E(); }
+    try { C($da > $fa); } catch (Exception $_) { E(); }
+    try { C($da >=$fa); } catch (Exception $_) { E(); }
+    C($da ==$fa);
+    C($da !=$fa);
+    C($da===$fa);
+    C($da!==$fa);
+    try { I($da<=>$fa); } catch (Exception $_) { E(); }
   begin_row('null');
-    C($da<$nu);C($da<=$nu);C($da>$nu);C($da>=$nu);C($da==$nu);C($da!=$nu);
-    C($da===$nu);C($da!==$nu);I($da<=>$nu);
+    try { C($da<  $nu); } catch (Exception $_) { E(); }
+    try { C($da<= $nu); } catch (Exception $_) { E(); }
+    try { C($da > $nu); } catch (Exception $_) { E(); }
+    try { C($da >=$nu); } catch (Exception $_) { E(); }
+    C($da ==$nu);
+    C($da !=$nu);
+    C($da===$nu);
+    C($da!==$nu);
+    try { I($da<=>$nu); } catch (Exception $_) { E(); }
   print_footer();
 
   print_header('[dynamic] VAR ? $da');
   begin_row('true');
-    C($tr<$da);C($tr<=$da);C($tr>$da);C($tr>=$da);C($tr==$da);C($tr!=$da);
-    C($tr===$da);C($tr!==$da);I($tr<=>$da);
+    try { C($tr<  $da); } catch (Exception $_) { E(); }
+    try { C($tr<= $da); } catch (Exception $_) { E(); }
+    try { C($tr > $da); } catch (Exception $_) { E(); }
+    try { C($tr >=$da); } catch (Exception $_) { E(); }
+    C($tr ==$da);
+    C($tr !=$da);
+    C($tr===$da);
+    C($tr!==$da);
+    try { I($tr<=>$da); } catch (Exception $_) { E(); }
   begin_row('false');
-    C($fa<$da);C($fa<=$da);C($fa>$da);C($fa>=$da);C($fa==$da);C($fa!=$da);
-    C($fa===$da);C($fa!==$da);I($fa<=>$da);
+    try { C($fa<  $da); } catch (Exception $_) { E(); }
+    try { C($fa<= $da); } catch (Exception $_) { E(); }
+    try { C($fa > $da); } catch (Exception $_) { E(); }
+    try { C($fa >=$da); } catch (Exception $_) { E(); }
+    C($fa ==$da);
+    C($fa !=$da);
+    C($fa===$da);
+    C($fa!==$da);
+    try { I($fa<=>$da); } catch (Exception $_) { E(); }
   begin_row('null');
-    C($nu<$da);C($nu<=$da);C($nu>$da);C($nu>=$da);C($nu==$da);C($nu!=$da);
-    C($nu===$da);C($nu!==$da);I($nu<=>$da);
+    try { C($nu<  $da); } catch (Exception $_) { E(); }
+    try { C($nu<= $da); } catch (Exception $_) { E(); }
+    try { C($nu > $da); } catch (Exception $_) { E(); }
+    try { C($nu >=$da); } catch (Exception $_) { E(); }
+    C($nu ==$da);
+    C($nu !=$da);
+    C($nu===$da);
+    C($nu!==$da);
+    try { I($nu<=>$da); } catch (Exception $_) { E(); }
   print_footer();
 }
 
@@ -229,26 +481,68 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
 
   print_header('[static] $dx ? VAR');
   begin_row('true');
-    C($dx<$tr);C($dx<=$tr);C($dx>$tr);C($dx>=$tr);C($dx==$tr);C($dx!=$tr);
-    C($dx===$tr);C($dx!==$tr);I($dx<=>$tr);
+    try { C($dx<  $tr); } catch (Exception $_) { E(); }
+    try { C($dx<= $tr); } catch (Exception $_) { E(); }
+    try { C($dx > $tr); } catch (Exception $_) { E(); }
+    try { C($dx >=$tr); } catch (Exception $_) { E(); }
+    C($dx ==$tr);
+    C($dx !=$tr);
+    C($dx===$tr);
+    C($dx!==$tr);
+    try { I($dx<=>$tr); } catch (Exception $_) { E(); }
   begin_row('false');
-    C($dx<$fa);C($dx<=$fa);C($dx>$fa);C($dx>=$fa);C($dx==$fa);C($dx!=$fa);
-    C($dx===$fa);C($dx!==$fa);I($dx<=>$fa);
+    try { C($dx<  $fa); } catch (Exception $_) { E(); }
+    try { C($dx<= $fa); } catch (Exception $_) { E(); }
+    try { C($dx > $fa); } catch (Exception $_) { E(); }
+    try { C($dx >=$fa); } catch (Exception $_) { E(); }
+    C($dx ==$fa);
+    C($dx !=$fa);
+    C($dx===$fa);
+    C($dx!==$fa);
+    try { I($dx<=>$fa); } catch (Exception $_) { E(); }
   begin_row('null');
-    C($dx<$nu);C($dx<=$nu);C($dx>$nu);C($dx>=$nu);C($dx==$nu);C($dx!=$nu);
-    C($dx===$nu);C($dx!==$nu);I($dx<=>$nu);
+    try { C($dx<  $nu); } catch (Exception $_) { E(); }
+    try { C($dx<= $nu); } catch (Exception $_) { E(); }
+    try { C($dx > $nu); } catch (Exception $_) { E(); }
+    try { C($dx >=$nu); } catch (Exception $_) { E(); }
+    C($dx ==$nu);
+    C($dx !=$nu);
+    C($dx===$nu);
+    C($dx!==$nu);
+    try { I($dx<=>$nu); } catch (Exception $_) { E(); }
   print_footer();
 
   print_header('[static] VAR ? $dx');
   begin_row('true');
-    C($tr<$dx);C($tr<=$dx);C($tr>$dx);C($tr>=$dx);C($tr==$dx);C($tr!=$dx);
-    C($tr===$dx);C($tr!==$dx);I($tr<=>$dx);
+    try { C($tr<  $dx); } catch (Exception $_) { E(); }
+    try { C($tr<= $dx); } catch (Exception $_) { E(); }
+    try { C($tr > $dx); } catch (Exception $_) { E(); }
+    try { C($tr >=$dx); } catch (Exception $_) { E(); }
+    C($tr ==$dx);
+    C($tr !=$dx);
+    C($tr===$dx);
+    C($tr!==$dx);
+    try { I($tr<=>$dx); } catch (Exception $_) { E(); }
   begin_row('false');
-    C($fa<$dx);C($fa<=$dx);C($fa>$dx);C($fa>=$dx);C($fa==$dx);C($fa!=$dx);
-    C($fa===$dx);C($fa!==$dx);I($fa<=>$dx);
+    try { C($fa<  $dx); } catch (Exception $_) { E(); }
+    try { C($fa<= $dx); } catch (Exception $_) { E(); }
+    try { C($fa > $dx); } catch (Exception $_) { E(); }
+    try { C($fa >=$dx); } catch (Exception $_) { E(); }
+    C($fa ==$dx);
+    C($fa !=$dx);
+    C($fa===$dx);
+    C($fa!==$dx);
+    try { I($fa<=>$dx); } catch (Exception $_) { E(); }
   begin_row('null');
-    C($nu<$dx);C($nu<=$dx);C($nu>$dx);C($nu>=$dx);C($nu==$dx);C($nu!=$dx);
-    C($nu===$dx);C($nu!==$dx);I($nu<=>$dx);
+    try { C($nu<  $dx); } catch (Exception $_) { E(); }
+    try { C($nu<= $dx); } catch (Exception $_) { E(); }
+    try { C($nu > $dx); } catch (Exception $_) { E(); }
+    try { C($nu >=$dx); } catch (Exception $_) { E(); }
+    C($nu ==$dx);
+    C($nu !=$dx);
+    C($nu===$dx);
+    C($nu!==$dx);
+    try { I($nu<=>$dx); } catch (Exception $_) { E(); }
   print_footer();
 }
 
@@ -260,26 +554,68 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
 
   print_header('[dynamic] $dx ? VAR');
   begin_row('true');
-    C($dx<$tr);C($dx<=$tr);C($dx>$tr);C($dx>=$tr);C($dx==$tr);C($dx!=$tr);
-    C($dx===$tr);C($dx!==$tr);I($dx<=>$tr);
+    try { C($dx<  $tr); } catch (Exception $_) { E(); }
+    try { C($dx<= $tr); } catch (Exception $_) { E(); }
+    try { C($dx > $tr); } catch (Exception $_) { E(); }
+    try { C($dx >=$tr); } catch (Exception $_) { E(); }
+    C($dx ==$tr);
+    C($dx !=$tr);
+    C($dx===$tr);
+    C($dx!==$tr);
+    try { I($dx<=>$tr); } catch (Exception $_) { E(); }
   begin_row('false');
-    C($dx<$fa);C($dx<=$fa);C($dx>$fa);C($dx>=$fa);C($dx==$fa);C($dx!=$fa);
-    C($dx===$fa);C($dx!==$fa);I($dx<=>$fa);
+    try { C($dx<  $fa); } catch (Exception $_) { E(); }
+    try { C($dx<= $fa); } catch (Exception $_) { E(); }
+    try { C($dx > $fa); } catch (Exception $_) { E(); }
+    try { C($dx >=$fa); } catch (Exception $_) { E(); }
+    C($dx ==$fa);
+    C($dx !=$fa);
+    C($dx===$fa);
+    C($dx!==$fa);
+    try { I($dx<=>$fa); } catch (Exception $_) { E(); }
   begin_row('null');
-    C($dx<$nu);C($dx<=$nu);C($dx>$nu);C($dx>=$nu);C($dx==$nu);C($dx!=$nu);
-    C($dx===$nu);C($dx!==$nu);I($dx<=>$nu);
+    try { C($dx<  $nu); } catch (Exception $_) { E(); }
+    try { C($dx<= $nu); } catch (Exception $_) { E(); }
+    try { C($dx > $nu); } catch (Exception $_) { E(); }
+    try { C($dx >=$nu); } catch (Exception $_) { E(); }
+    C($dx ==$nu);
+    C($dx !=$nu);
+    C($dx===$nu);
+    C($dx!==$nu);
+    try { I($dx<=>$nu); } catch (Exception $_) { E(); }
   print_footer();
 
   print_header('[dynamic] VAR ? $dx');
   begin_row('true');
-    C($tr<$dx);C($tr<=$dx);C($tr>$dx);C($tr>=$dx);C($tr==$dx);C($tr!=$dx);
-    C($tr===$dx);C($tr!==$dx);I($tr<=>$dx);
+    try { C($tr<  $dx); } catch (Exception $_) { E(); }
+    try { C($tr<= $dx); } catch (Exception $_) { E(); }
+    try { C($tr > $dx); } catch (Exception $_) { E(); }
+    try { C($tr >=$dx); } catch (Exception $_) { E(); }
+    C($tr ==$dx);
+    C($tr !=$dx);
+    C($tr===$dx);
+    C($tr!==$dx);
+    try { I($tr<=>$dx); } catch (Exception $_) { E(); }
   begin_row('false');
-    C($fa<$dx);C($fa<=$dx);C($fa>$dx);C($fa>=$dx);C($fa==$dx);C($fa!=$dx);
-    C($fa===$dx);C($fa!==$dx);I($fa<=>$dx);
+    try { C($fa<  $dx); } catch (Exception $_) { E(); }
+    try { C($fa<= $dx); } catch (Exception $_) { E(); }
+    try { C($fa > $dx); } catch (Exception $_) { E(); }
+    try { C($fa >=$dx); } catch (Exception $_) { E(); }
+    C($fa ==$dx);
+    C($fa !=$dx);
+    C($fa===$dx);
+    C($fa!==$dx);
+    try { I($fa<=>$dx); } catch (Exception $_) { E(); }
   begin_row('null');
-    C($nu<$dx);C($nu<=$dx);C($nu>$dx);C($nu>=$dx);C($nu==$dx);C($nu!=$dx);
-    C($nu===$dx);C($nu!==$dx);I($nu<=>$dx);
+    try { C($nu<  $dx); } catch (Exception $_) { E(); }
+    try { C($nu<= $dx); } catch (Exception $_) { E(); }
+    try { C($nu > $dx); } catch (Exception $_) { E(); }
+    try { C($nu >=$dx); } catch (Exception $_) { E(); }
+    C($nu ==$dx);
+    C($nu !=$dx);
+    C($nu===$dx);
+    C($nu!==$dx);
+    try { I($nu<=>$dx); } catch (Exception $_) { E(); }
   print_footer();
 }
 

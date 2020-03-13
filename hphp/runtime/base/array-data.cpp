@@ -1260,10 +1260,6 @@ void raiseHackArrCompatArrHackArrCmp() {
   raise_hac_compare_notice(Strings::HACKARR_COMPAT_ARR_HACK_ARR_CMP);
 }
 
-void raiseHackArrCompatArrNonArrCmp() {
-  raise_hac_compare_notice(Strings::HACKARR_COMPAT_ARR_NON_ARR_CMP);
-}
-
 void raiseHackArrCompatDVArrCmp(const ArrayData* ad1,
                                 const ArrayData* ad2,
                                 bool is_relational) {

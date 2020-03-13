@@ -438,7 +438,6 @@ SSATmp* emitHackArrBoolCmp(IRGS& env, Op op, SSATmp* arr, SSATmp* right) {
       gen(env, ThrowInvalidOperation, cns(env, m.get()));
       return cns(env, op == Op::Cmp ? 0 : false);
     }
-    case Op::Same:
     case Op::Eq:
       if (RuntimeOption::EvalHackArrCompatHackArrCmpNotices) {
         gen(
@@ -448,7 +447,6 @@ SSATmp* emitHackArrBoolCmp(IRGS& env, Op op, SSATmp* arr, SSATmp* right) {
         );
       }
       return cns(env, false);
-    case Op::NSame:
     case Op::Neq:
       if (RuntimeOption::EvalHackArrCompatHackArrCmpNotices) {
         gen(
@@ -1408,45 +1406,48 @@ void implCmp(IRGS& env, Op op) {
     PUNT(cmpUnknownDataType);
   }
 
-  if (checkHACCompare() || checkHACCompareNonAnyArray()) {
-    // With EvalHackArrCompatNotices enabled, we'll raise a notice on ===, !==,
-    // ==, or != between a PHP array and a Hack array. On relational compares,
-    // we'll raise a notice between a PHP array and any other type.
-    bool const is_php_arr_hack_arr_cmp =
-      (leftTy <= TArr && rightTy <= (TVec|TDict|TKeyset)) ||
-      (leftTy <= (TVec|TDict|TKeyset) && rightTy <= TArr);
-    switch (op) {
-      case Op::Same:
-      case Op::NSame:
-      case Op::Eq:
-      case Op::Neq:
-        if (is_php_arr_hack_arr_cmp) raiseHACCompareWarningHelper(env);
-        break;
-      case Op::Lt:
-      case Op::Lte:
-      case Op::Gt:
-      case Op::Gte:
-      case Op::Cmp:
-        if ((leftTy <= TArr) != (rightTy <= TArr)) {
-          if (is_php_arr_hack_arr_cmp) {
-            raiseHACCompareWarningHelper(env);
+  // With EvalHackArrCompatNotices enabled, we'll raise a notice on ===, !==,
+  // ==, or != between a PHP array and a Hack array. On relational compares,
+  // we'll throw between a PHP array and any other type.
+  auto const is_php_arr_hack_arr_cmp =
+    (leftTy <= TArr && rightTy <= (TVec|TDict|TKeyset)) ||
+    (leftTy <= (TVec|TDict|TKeyset) && rightTy <= TArr);
+  switch (op) {
+    case Op::Same:
+    case Op::NSame:
+    case Op::Eq:
+    case Op::Neq:
+      if (is_php_arr_hack_arr_cmp) raiseHACCompareWarningHelper(env);
+      break;
+    case Op::Lt:
+    case Op::Lte:
+    case Op::Gt:
+    case Op::Gte:
+    case Op::Cmp:
+      if (is_php_arr_hack_arr_cmp) raiseHACCompareWarningHelper(env);
+      else {
+        auto const is_php_arr_non_arr_cmp =
+          ((leftTy <= TArr) != (rightTy <= (TArr|TClsMeth))) &&
+          ((leftTy <= (TArr|TClsMeth)) != (rightTy <= TArr));
+        if (is_php_arr_non_arr_cmp) {
+          auto const nonArr = [&]{
+            gen(
+              env,
+              ThrowInvalidOperation,
+              cns(env, s_cmpWithNonArr.get())
+            );
+            return cns(env, false);
+          };
+          if (leftTy <= TObj || rightTy <= TObj) {
+            emitCollectionCheck(env, op, leftTy <= TObj ? left : right, nonArr);
           } else {
-            if (checkHACCompareNonAnyArray()) {
-              gen(
-                env,
-                RaiseHackArrCompatNotice,
-                cns(
-                  env,
-                  makeStaticString(Strings::HACKARR_COMPAT_ARR_NON_ARR_CMP)
-                )
-              );
-            }
+            nonArr();
           }
         }
-        break;
-      default:
-        always_assert(false);
-    }
+      }
+      break;
+    default:
+      always_assert(false);
   }
 
   auto equiv = [&] {

@@ -10,20 +10,15 @@ bool(false)
 Notice: Hack Array Compat: Comparing PHP array with Hack array in %s/scalars.php on line 8
 bool(true)
 
-Notice: Hack Array Compat: Comparing PHP array with non any-array in %s/scalars.php on line 9
-bool(false)
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array on line 9
 
-Notice: Hack Array Compat: Comparing PHP array with non any-array in %s/scalars.php on line 10
-bool(true)
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array on line 10
 
-Notice: Hack Array Compat: Comparing PHP array with non any-array in %s/scalars.php on line 11
-bool(false)
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array on line 11
 
-Notice: Hack Array Compat: Comparing PHP array with non any-array in %s/scalars.php on line 12
-bool(true)
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array on line 12
 
-Notice: Hack Array Compat: Comparing PHP array with non any-array in %s/scalars.php on line 13
-int(0)
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array on line 13
 
 Notice: Hack Array Compat: Comparing PHP array with Hack array in %s/scalars.php on line 15
 bool(false)
@@ -37,20 +32,15 @@ bool(false)
 Notice: Hack Array Compat: Comparing PHP array with Hack array in %s/scalars.php on line 18
 bool(true)
 
-Notice: Hack Array Compat: Comparing PHP array with non any-array in %s/scalars.php on line 19
-bool(false)
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array on line 19
 
-Notice: Hack Array Compat: Comparing PHP array with non any-array in %s/scalars.php on line 20
-bool(true)
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array on line 20
 
-Notice: Hack Array Compat: Comparing PHP array with non any-array in %s/scalars.php on line 21
-bool(false)
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array on line 21
 
-Notice: Hack Array Compat: Comparing PHP array with non any-array in %s/scalars.php on line 22
-bool(true)
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array on line 22
 
-Notice: Hack Array Compat: Comparing PHP array with non any-array in %s/scalars.php on line 23
-int(0)
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array on line 23
 
 Notice: Hack Array Compat: Using + operator on arrays in %s/scalars.php on line 27
 array(5) {

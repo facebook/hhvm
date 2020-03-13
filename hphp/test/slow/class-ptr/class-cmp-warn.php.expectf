@@ -78,15 +78,9 @@ bool(true)
 
 Warning: Class to string conversion in %s/class-cmp-warn.php on line 21
 bool(true)
-bool(false)
-bool(false)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
 
-Warning: Class to string conversion in %s/class-cmp-warn.php on line 28
+Warning: Class to string conversion in %s/class-cmp-warn.php on line 24
 bool(true)
 
-Warning: Class to string conversion in %s/class-cmp-warn.php on line 31
+Warning: Class to string conversion in %s/class-cmp-warn.php on line 27
 bool(false)

@@ -756,7 +756,6 @@ bool canDCE(IRInstruction* inst) {
   case NSameDict:
     return
       !RuntimeOption::EvalHackArrCompatCheckCompare &&
-      !RuntimeOption::EvalHackArrCompatCheckCompareNonAnyArray &&
       !RuntimeOption::EvalHackArrCompatDVCmpNotices;
 
   case IsTypeStruct:

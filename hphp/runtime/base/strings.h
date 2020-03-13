@@ -93,8 +93,6 @@ constexpr char MULTIPLY_EXCLUDED[] =
 constexpr char REDECLARE_BUILTIN[] = "Cannot redeclare %s()";
 constexpr char HACKARR_COMPAT_ARR_HACK_ARR_CMP[] =
   "Comparing PHP array with Hack array";
-constexpr char HACKARR_COMPAT_ARR_NON_ARR_CMP[] =
-  "Comparing PHP array with non any-array";
 constexpr char HACKARR_COMPAT_VEC_IS_ARR[] = "is_array() called on vec";
 constexpr char HACKARR_COMPAT_DICT_IS_ARR[] = "is_array() called on dict";
 constexpr char HACKARR_COMPAT_KEYSET_IS_ARR[] = "is_array() called on keyset";

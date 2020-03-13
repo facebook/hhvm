@@ -280,7 +280,6 @@ std::vector<SString> load_input(F&& fun) {
   RO::EvalJitEnableRenameFunction = gd.EnableRenameFunction;
   RO::EvalHackArrCompatNotices =
     RO::EvalHackArrCompatCheckCompare =
-    RO::EvalHackArrCompatCheckCompareNonAnyArray =
     RO::EvalHackArrCompatCheckArrayPlus =
     RO::EvalHackArrCompatCheckArrayKeyCast =
       gd.HackArrCompatNotices;

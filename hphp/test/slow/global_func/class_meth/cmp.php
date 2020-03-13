@@ -11,7 +11,8 @@ function getClsMeth() {
 }
 
 function wrap($fun) {
-  try { $fun();
+  try {
+    $fun();
   } catch (Exception $e) {
     print $e->getMessage()."\n";
   }
@@ -36,7 +37,7 @@ function getTestcase(int $num) {
     "Array",
     HH\fun("wrap"),
     __hhvm_intrinsics\dummy_cast_to_kindofarray(vec['A', 'func1']),
-    HH\Vector{'A', 'foo'},
+    Vector {'A', 'func1'},
     varray['A', 'func1'],
     vec['A', 'func1'],
     darray[0 => 'A', 1 => 'func1'],

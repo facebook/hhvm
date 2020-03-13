@@ -983,7 +983,6 @@ extern const ArrayFunctions g_array_funcs;
 void raiseHackArrCompatAdd();
 
 void raiseHackArrCompatArrHackArrCmp();
-void raiseHackArrCompatArrNonArrCmp();
 void raiseHackArrCompatDVArrCmp(const ArrayData*, const ArrayData*, bool);
 void raiseHackArrCompatHackArrBoolCmp();
 
@@ -994,7 +993,6 @@ StringData* getHackArrCompatNullHackArrayKeyMsg();
 
 bool checkHACEmptyStringPromote();
 bool checkHACCompare();
-bool checkHACCompareNonAnyArray();
 bool checkHACArrayPlus();
 bool checkHACArrayKeyCast();
 

@@ -95,6 +95,7 @@ def try_unwinder_init():
         return False
 
     register_unwinder(None, HHVMUnwinder())
+    frame.JittedFrameFilter()
     _did_init = True
 
     return True
@@ -128,3 +129,14 @@ class UnwinderInitCommand(gdb.Command):
 
 
 UnwinderInitCommand()
+
+
+def handle_before_prompt():
+    global _did_init
+    if _did_init:
+        return
+    if try_unwinder_init():
+        gdb.events.before_prompt.disconnect(handle_before_prompt)
+
+
+gdb.events.before_prompt.connect(handle_before_prompt)

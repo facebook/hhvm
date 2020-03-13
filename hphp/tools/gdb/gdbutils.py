@@ -166,7 +166,10 @@ def strinfo(s, keep_case=True):
     data = None
     h = None
 
-    t = rawtype(s.type)
+    try:
+        t = rawtype(s.type)
+    except:
+        return None
 
     if (t == T('char').pointer()
           or re.match(r"char \[\d*\]$", str(t)) is not None):

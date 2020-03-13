@@ -6,9 +6,10 @@ Helpers for collecting and printing frame data.
 
 from compatibility import *
 
-import os
-import gdb
 import bisect
+import gdb
+import itertools
+import os
 import sqlite3
 import struct
 
@@ -256,3 +257,135 @@ def _format_rip(rip):
         rip = str(rip)
 
     return rip
+
+
+class SymValueWrapper():
+
+    def __init__(self, symbol, value):
+        self.sym = symbol
+        self.val = value
+
+    def value(self):
+        return self.val
+
+    def symbol(self):
+        return self.sym
+
+
+class JittedFrameDecorator(gdb.FrameDecorator.FrameDecorator):
+
+    def __init__(self, fobj, regs):
+        super(JittedFrameDecorator, self).__init__(fobj)
+        self.regs = regs
+        frame = self.inferior_frame()
+        self.ar = frame.read_register(self.regs['fp']).cast(T('HPHP::ActRec').pointer())
+        self.args = []
+        try:
+            func = self.ar['m_func']
+            shared = rawptr(func['m_shared'])
+            argptr = self.ar.cast(T('HPHP::TypedValue').pointer())
+            nargs = func['m_paramCounts'] >> 1
+            if nargs > 64:
+                return None
+            args = []
+            i = 0
+            while i < nargs:
+                argptr -= 1
+                try:
+                    name = idxs.indexed_string_map_at(shared['m_localNames'], i)
+                    name = strinfo(name)['data']
+                except:
+                    name = "arg_" + str(i)
+                i += 1
+                args.append(SymValueWrapper(name, argptr.dereference()))
+            self.args = args
+        except:
+            pass
+
+    def function(self):
+        try:
+            func = self.ar['m_func']
+            shared = rawptr(func['m_shared'])
+
+            if not shared['m_isClosureBody']:
+                func_name = nameof(func)
+            else:
+                func_name = nameof(func['m_baseCls'].cast(T('HPHP::Class').pointer()))
+                func_name = func_name[:func_name.find(';')]
+
+            func_name = ("[PHP] " + func_name + "("
+                         + ", ".join([arg.symbol() for arg in self.args])
+                         + ")")
+            return func_name
+
+        except:
+            return "??"
+
+    def filename(self):
+        try:
+            return php_filename(self.ar['m_func'])
+        except:
+            return None
+
+    def line(self):
+        try:
+            inner = self.inferior_frame().newer()
+            inner_ar = inner.read_register(self.regs['fp']).cast(
+                T('HPHP::ActRec').pointer())
+            shared = rawptr(self.ar['m_func']['m_shared'])
+            pc = shared['m_base'] + (inner_ar['m_callOffAndFlags'] >> 2)
+            return php_line_number(self.ar['m_func'], pc)
+        except:
+            return None
+
+    def frame_args(self):
+        return self.args
+
+    def frame_locals(self):
+        try:
+            func = self.ar['m_func']
+            argptr = self.ar.cast(T('HPHP::TypedValue').pointer())
+            nargs = func['m_paramCounts'] >> 1
+            shared = rawptr(func['m_shared'])
+            num_loc = shared['m_numLocals']
+            if num_loc < nargs or num_loc - nargs > 64:
+                return None
+            argptr -= nargs
+            locals = []
+            i = nargs
+            while i < num_loc:
+                argptr -= 1
+                try:
+                    name = idxs.indexed_string_map_at(shared['m_localNames'], i)
+                    name = strinfo(name)['data']
+                except:
+                    name = "unnamed_" + str(i)
+                i += 1
+                locals.append(SymValueWrapper(name, argptr.dereference()))
+            return locals
+        except:
+            return None
+
+
+class JittedFrameFilter():
+
+    def __init__(self):
+        self.name = "JittedFrameFilter"
+        self.priority = 100
+        self.enabled = True
+        self.regs = arch_regs()
+        gdb.frame_filters[self.name] = self
+
+    def filter(self, frame_iter):
+        self.stackBase = int(TL('HPHP::s_stackLimit'))
+        self.stackTop = self.stackBase + int(TL('HPHP::s_stackSize'))
+        return (self.map_decorator(x) for x in frame_iter)
+
+    def map_decorator(self, frame_decorator):
+        frame = frame_decorator.inferior_frame()
+        fp = frame.read_register(self.regs['fp'])
+        ip = frame.read_register(self.regs['ip'])
+        if is_jitted(fp, ip) and (fp < self.stackBase or fp >= self.stackTop):
+            return JittedFrameDecorator(frame_decorator, self.regs)
+        else:
+            return frame_decorator

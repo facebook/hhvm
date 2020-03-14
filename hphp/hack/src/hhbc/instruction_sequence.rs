@@ -740,6 +740,10 @@ impl InstrSeq {
         Self::make_instr(Instruct::IBase(InstructBase::BaseC(stack_index, mode)))
     }
 
+    pub fn make_basegc(stack_index: StackIndex, mode: MemberOpMode) -> Self {
+        Self::make_instr(Instruct::IBase(InstructBase::BaseGC(stack_index, mode)))
+    }
+
     pub fn make_basesc(y: StackIndex, z: StackIndex, mode: MemberOpMode) -> Self {
         Self::make_instr(Instruct::IBase(InstructBase::BaseSC(y, z, mode)))
     }

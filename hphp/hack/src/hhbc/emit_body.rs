@@ -2,8 +2,6 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-#![feature(slice_patterns)]
-
 mod emit_statement;
 mod reified_generics_helpers;
 mod try_finally_rewriter;

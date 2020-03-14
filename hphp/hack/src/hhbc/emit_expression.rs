@@ -85,7 +85,7 @@ mod inout_locals {
     use oxidized::{aast_defs::Lid, aast_visitor, aast_visitor::Node, ast as tast, ast_defs};
     use std::{collections::HashMap, marker::PhantomData};
 
-    struct AliasInfo {
+    pub(super) struct AliasInfo {
         first_inout: usize,
         last_write: usize,
         num_uses: usize,
@@ -102,32 +102,32 @@ mod inout_locals {
     }
 
     impl AliasInfo {
-        pub fn add_inout(&mut self, i: usize) {
+        pub(super) fn add_inout(&mut self, i: usize) {
             if i < self.first_inout {
                 self.first_inout = i;
             }
         }
 
-        pub fn add_write(&mut self, i: usize) {
+        pub(super) fn add_write(&mut self, i: usize) {
             if i > self.last_write {
                 self.last_write = i;
             }
         }
 
-        pub fn add_use(&mut self) {
+        pub(super) fn add_use(&mut self) {
             self.num_uses += 1
         }
 
-        pub fn in_range(&self, i: usize) -> bool {
+        pub(super) fn in_range(&self, i: usize) -> bool {
             i > self.first_inout || i <= self.last_write
         }
 
-        pub fn has_single_ref(&self) -> bool {
+        pub(super) fn has_single_ref(&self) -> bool {
             self.num_uses < 2
         }
     }
 
-    type AliasInfoMap = HashMap<String, AliasInfo>;
+    pub(super) type AliasInfoMap = HashMap<String, AliasInfo>;
 
     fn add_write(name: String, i: usize, map: &mut AliasInfoMap) {
         map.entry(name).or_default().add_write(i);
@@ -143,8 +143,8 @@ mod inout_locals {
 
     // determines if value of a local 'name' that appear in parameter 'i'
     // should be saved to local because it might be overwritten later
-    fn should_save_local_value(name: String, i: usize, aliases: &AliasInfoMap) -> bool {
-        aliases.get(&name).map_or(false, |alias| alias.in_range(i))
+    pub(super) fn should_save_local_value(name: &str, i: usize, aliases: &AliasInfoMap) -> bool {
+        aliases.get(name).map_or(false, |alias| alias.in_range(i))
     }
 
     fn should_move_local_value(local: &local::Type, aliases: &AliasInfoMap) -> bool {
@@ -300,6 +300,7 @@ pub struct Setrange {
 }
 
 /// kind of value stored in local
+#[derive(Debug, Clone, Copy)]
 pub enum StoredValueKind {
     Local,
     Expr,
@@ -408,7 +409,18 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
                         InstrSeq::make_cgetg(),
                     ]))
                 }
-                _ => emit_array_get(env, pos, QueryOp::CGet, e),
+                _ => Ok(emit_array_get(
+                    emitter,
+                    env,
+                    pos,
+                    None,
+                    QueryOp::CGet,
+                    base_expr,
+                    opt_elem_expr.as_ref(),
+                    false,
+                    false,
+                )?
+                .0),
             }
         }
         Expr_::ObjGet(e) => emit_obj_get(env, pos, QueryOp::CGet, e),
@@ -2070,12 +2082,58 @@ fn emit_obj_get(
 }
 
 fn emit_array_get(
+    e: &mut Emitter,
     env: &Env,
-    pos: &Pos,
+    outer_pos: &Pos,
+    mode: Option<MemberOpMode>,
     query_op: QueryOp,
-    (base_expr, opt_elem_expr): &(tast::Expr, Option<tast::Expr>),
-) -> Result {
-    unimplemented!("TODO(hrust)")
+    base: &tast::Expr,
+    elem: Option<&tast::Expr>,
+    no_final: bool,
+    null_coalesce_assignment: bool,
+) -> Result<(InstrSeq, Option<usize>)> {
+    let result = emit_array_get_(
+        e,
+        env,
+        outer_pos,
+        mode,
+        query_op,
+        base,
+        elem,
+        no_final,
+        null_coalesce_assignment,
+        None,
+    )?;
+    match result {
+        (ArrayGetInstr::Regular(i), querym_n_unpopped) => Ok((i, querym_n_unpopped)),
+        (ArrayGetInstr::Inout { load, store }, _) => Err(unrecoverable("unexpected inout")),
+    }
+}
+
+fn emit_array_get_(
+    e: &mut Emitter,
+    env: &Env,
+    outer_pos: &Pos,
+    mode: Option<MemberOpMode>,
+    query_op: QueryOp,
+    base: &tast::Expr,
+    elem: Option<&tast::Expr>,
+    no_final: bool,
+    null_coalesce_assignment: bool,
+    inout_param_info: Option<(usize, inout_locals::AliasInfoMap)>,
+) -> Result<(ArrayGetInstr, Option<usize>)> {
+    use tast::{Expr as E, Expr_ as E_};
+    match (base, elem) {
+        (E(pos, E_::Array(_)), None) => Err(emit_fatal::raise_fatal_parse(
+            pos,
+            "Can't use array() as base in write context",
+        )),
+        (E(pos, _), None) => Err(emit_fatal::raise_fatal_runtime(
+            pos,
+            "Can't use [] for reading",
+        )),
+        _ => unimplemented!(),
+    }
 }
 
 fn emit_class_get(
@@ -2495,14 +2553,12 @@ pub fn emit_set_range_expr(
     let (base_expr, cls_expr, base_setup, base_stack, cls_stack) = emit_base(
         e,
         env,
-        EmitBaseArgs {
-            is_object: false,
-            null_coalesce_assignment: None,
-            base_offset: 3,
-            rhs_stack_size: 3,
-        },
-        MemberOpMode::Define,
         base,
+        MemberOpMode::Define,
+        false, /* is_object */
+        false, /*null_coalesce_assignment*/
+        3,     /* base_offset */
+        3,     /* rhs_stack_size */
     )?;
     Ok(InstrSeq::gather(vec![
         base_expr,
@@ -2574,20 +2630,178 @@ pub fn is_reified_tparam(env: &Env, is_fun: bool, name: &str) -> Option<(usize, 
 fn emit_base(
     e: &mut Emitter,
     env: &Env,
-    args: EmitBaseArgs,
+    expr: &tast::Expr,
     mode: MemberOpMode,
-    ex: &tast::Expr,
-) -> Result<(InstrSeq, InstrSeq, InstrSeq, StackIndex, StackIndex)> {
-    let _notice = BareThisOp::Notice;
-    unimplemented!("TODO(hrust)")
-}
-
-#[derive(Debug, Default)]
-struct EmitBaseArgs {
     is_object: bool,
-    null_coalesce_assignment: Option<bool>,
+    null_coalesce_assignment: bool,
     base_offset: StackIndex,
     rhs_stack_size: StackIndex,
+) -> Result<(InstrSeq, InstrSeq, InstrSeq, StackIndex, StackIndex)> {
+    let result = emit_base_(
+        e,
+        env,
+        expr,
+        mode,
+        is_object,
+        null_coalesce_assignment,
+        base_offset,
+        rhs_stack_size,
+        None,
+    )?;
+    match result {
+        ArrayGetBase::Regular(i) => Ok((
+            i.base_instrs,
+            i.cls_instrs,
+            i.setup_instrs,
+            i.base_stack_size as isize,
+            i.cls_stack_size as isize,
+        )),
+        ArrayGetBase::Inout { load, store } => Err(unrecoverable("unexpected input")),
+    }
+}
+
+fn is_trivial(env: &Env, is_base: bool, expr: &tast::Expr) -> bool {
+    use tast::Expr_ as E_;
+    match &expr.1 {
+        E_::Int(_) | E_::String(_) => true,
+        E_::Lvar(x) => !is_local_this(env, &x.1) || env.flags.contains(EnvFlags::NEEDS_LOCAL_THIS),
+        E_::ArrayGet(_) if !is_base => false,
+        E_::ArrayGet(x) => {
+            is_trivial(env, is_base, &x.0)
+                && (x.1)
+                    .as_ref()
+                    .map_or(true, |e| is_trivial(env, is_base, &e))
+        }
+        _ => false,
+    }
+}
+
+fn get_local_temp_kind(
+    env: &Env,
+    is_base: bool,
+    inout_param_info: Option<(usize, inout_locals::AliasInfoMap)>,
+    expr: Option<&tast::Expr>,
+) -> Option<StoredValueKind> {
+    match (expr, inout_param_info) {
+        (_, None) => None,
+        (Some(tast::Expr(_, tast::Expr_::Lvar(id))), Some((i, aliases)))
+            if inout_locals::should_save_local_value(id.name(), i, &aliases) =>
+        {
+            Some(StoredValueKind::Local)
+        }
+        (Some(e), _) => {
+            if is_trivial(env, is_base, e) {
+                None
+            } else {
+                Some(StoredValueKind::Expr)
+            }
+        }
+        (None, _) => None,
+    }
+}
+
+// TODO(hrust): emit_base_ as emit_base_worker in Ocaml, remove this TODO after ported
+fn emit_base_(
+    e: &mut Emitter,
+    env: &Env,
+    expr: &tast::Expr,
+    mode: MemberOpMode,
+    is_object: bool,
+    null_coalesce_assignment: bool,
+    base_offset: StackIndex,
+    rhs_stack_size: StackIndex,
+    inout_param_info: Option<(usize, inout_locals::AliasInfoMap)>,
+) -> Result<ArrayGetBase> {
+    let pos = &expr.0;
+    let expr_ = &expr.1;
+    let base_mode = if mode == MemberOpMode::InOut {
+        MemberOpMode::Warn
+    } else {
+        mode
+    };
+    let local_temp_kind = get_local_temp_kind(env, true, inout_param_info, Some(expr));
+    let emit_default = |e: &mut Emitter,
+                        base_instrs,
+                        cls_instrs,
+                        setup_instrs,
+                        base_stack_size,
+                        cls_stack_size| {
+        match local_temp_kind {
+            Some(local_temp) => {
+                let local = e.local_gen_mut().get_unnamed();
+                ArrayGetBase::Inout {
+                    load: ArrayGetBaseData {
+                        base_instrs: vec![(base_instrs, Some((local.clone(), local_temp)))],
+                        cls_instrs,
+                        setup_instrs,
+                        base_stack_size,
+                        cls_stack_size,
+                    },
+                    store: InstrSeq::make_basel(local, MemberOpMode::Define),
+                }
+            }
+            _ => ArrayGetBase::Regular(ArrayGetBaseData {
+                base_instrs,
+                cls_instrs,
+                setup_instrs,
+                base_stack_size,
+                cls_stack_size,
+            }),
+        }
+    };
+    use tast::Expr_ as E_;
+    match expr_ {
+        E_::Lvar(x) if &(x.1).1 == superglobals::GLOBALS => Err(emit_fatal::raise_fatal_runtime(
+            pos,
+            "Cannot use [] with $GLOBALS",
+        )),
+        E_::Lvar(x) if superglobals::is_superglobal(&(x.1).1) => {
+            let base_instrs = emit_pos_then(
+                e,
+                &x.0,
+                InstrSeq::make_string(string_utils::locals::strip_dollar(&(x.1).1)),
+            )?;
+
+            Ok(emit_default(
+                e,
+                base_instrs,
+                InstrSeq::Empty,
+                InstrSeq::make_basegc(base_offset, base_mode),
+                1,
+                0,
+            ))
+        }
+        E_::Lvar(x) if is_object && &(x.1).1 == special_idents::THIS => {
+            let base_instrs = emit_pos_then(e, &x.0, InstrSeq::make_checkthis())?;
+            Ok(emit_default(
+                e,
+                base_instrs,
+                InstrSeq::Empty,
+                InstrSeq::make_baseh(),
+                0,
+                0,
+            ))
+        }
+        E_::Lvar(x)
+            if !is_local_this(env, &x.1) || env.flags.contains(EnvFlags::NEEDS_LOCAL_THIS) =>
+        {
+            let v = get_local(e, env, &x.0, &(x.1).1)?;
+            let base_instr = if local_temp_kind.is_some() {
+                InstrSeq::make_cgetquietl(v.clone())
+            } else {
+                InstrSeq::Empty
+            };
+            Ok(emit_default(
+                e,
+                base_instr,
+                InstrSeq::Empty,
+                InstrSeq::make_basel(v, base_mode),
+                0,
+                0,
+            ))
+        }
+        _ => unimplemented!(),
+    }
 }
 
 // TODO(hrust): change pos from &Pos to Option<&Pos>, since Pos::make_none() still allocate mem.

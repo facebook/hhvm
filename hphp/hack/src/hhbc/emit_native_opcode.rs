@@ -2,8 +2,6 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-#![feature(slice_patterns)]
-
 use ast_scope_rust::Scope;
 use emit_body_rust as emit_body;
 use emit_fatal_rust as emit_fatal;

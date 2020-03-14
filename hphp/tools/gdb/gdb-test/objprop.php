@@ -12,7 +12,24 @@ class A {
   public $foo8 = "foo";
 };
 
+function h() {
+  return new Exception();
+}
+
+function g($u, $v, $w, $x) {
+  // create an exception so that we've loaded line number info
+  // for all lines in the backtrace.
+  h(); var_dump($u);
+}
+
+function f($a, $b) {
+  g($a, $b, !$b, $a);
+}
+
 <<__EntryPoint>>
 function main() {
-  var_dump(new A());
+  $a = new A();
+  f($a, true);
+  f($a, true);
+  f($a, true);
 }

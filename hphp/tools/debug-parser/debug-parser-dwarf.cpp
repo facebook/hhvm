@@ -2427,56 +2427,67 @@ private:
     bool full_name = false;
     bool is_inlined = false;
     bool has_location = false;
-
-    dwarf.forEachAttribute(
-      die,
-      [&](Dwarf_Attribute attr) {
-        switch (dwarf.getAttributeType(attr)) {
-          case DW_AT_declaration:
+    bool in_specification = false;
+    auto specification = GlobalOff::fromRaw(0);
+    auto collect_attributes = [&] (Dwarf_Attribute attr) {
+      switch (dwarf.getAttributeType(attr)) {
+        case DW_AT_declaration:
+          if (!in_specification) {
             is_declaration = dwarf.getAttributeValueFlag(attr);
-            break;
-          case DW_AT_external:
-            is_external = dwarf.getAttributeValueFlag(attr);
-            break;
-          case DW_AT_linkage_name:
-            is_external = true;
-            break;
-          case DW_AT_location:
-            has_location = true;
-            break;
-          case DW_AT_name:
-            if (!full_name) {
-              name = dwarf.getAttributeValueString(attr);
-            }
-            break;
-          case DW_AT_inline: {
-            auto const val = dwarf.getAttributeValueUData(attr);
-            is_inlined =
-              (val == DW_INL_inlined) ||
-              (val == DW_INL_declared_inlined);
-            break;
           }
-          case DW_AT_language:
-            language = dwarf.getAttributeValueUData(attr);
-            break;
-          case DW_AT_specification: {
-            auto const it = spec_names.find(dwarf.getAttributeValueRef(attr));
-            if (it != spec_names.end()) {
-              name = it->second;
-              auto const pos = name.rfind("::");
-              if (pos != std::string::npos) {
-                parent_name = name.substr(0, pos);
-              }
-              full_name = true;
-            }
-            break;
+          break;
+        case DW_AT_external:
+          is_external = dwarf.getAttributeValueFlag(attr);
+          break;
+        case DW_AT_linkage_name:
+          is_external = true;
+          break;
+        case DW_AT_location:
+          has_location = true;
+          break;
+        case DW_AT_name:
+          if (!full_name) {
+            name = dwarf.getAttributeValueString(attr);
           }
-          default:
-            return true;
+          break;
+        case DW_AT_inline: {
+          auto const val = dwarf.getAttributeValueUData(attr);
+          is_inlined =
+            (val == DW_INL_inlined) ||
+            (val == DW_INL_declared_inlined);
+          break;
         }
-        return true;
+        case DW_AT_language:
+          language = dwarf.getAttributeValueUData(attr);
+          break;
+        case DW_AT_specification: {
+          specification = dwarf.getAttributeValueRef(attr);
+          auto const it = spec_names.find(specification);
+          if (it != spec_names.end()) {
+            name = it->second;
+            auto const pos = name.rfind("::");
+            if (pos != std::string::npos) {
+              parent_name = name.substr(0, pos);
+            }
+            full_name = true;
+          }
+          break;
+        }
+        default:
+          return true;
       }
-    );
+      return true;
+    };
+    dwarf.forEachAttribute(die, collect_attributes);
+    if (specification.raw()) {
+      dwarf.onDIEAtOffset(
+        specification,
+        [&] (Dwarf_Die d) {
+          in_specification = true;
+          dwarf.forEachAttribute(d, collect_attributes);
+        }
+      );
+    }
 
     struct IndexAndFlags {
       IndexAndFlags(uint32_t index, uint32_t kind, uint32_t is_static) {

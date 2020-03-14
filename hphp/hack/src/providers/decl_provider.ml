@@ -244,20 +244,22 @@ let invalidate_gconst (ctx : Provider_context.t) (gconst_name : gconst_key) :
 let invalidate_context_decls ~(ctx : Provider_context.t) =
   match ctx.Provider_context.backend with
   | Provider_backend.Local_memory _ ->
-    Relative_path.Map.iter ctx.Provider_context.entries ~f:(fun path _entry ->
-        let ast = Ast_provider.get_ast ctx path in
-        let (funs, classes, record_defs, typedefs, gconsts) =
-          Nast.get_defs ast
-        in
-        List.iter funs ~f:(fun (_, fun_name) -> invalidate_fun ctx fun_name);
-        List.iter classes ~f:(fun (_, class_name) ->
-            invalidate_class ctx class_name);
-        List.iter record_defs ~f:(fun (_, record_name) ->
-            invalidate_record_def ctx record_name);
-        List.iter typedefs ~f:(fun (_, typedef_name) ->
-            invalidate_typedef ctx typedef_name);
-        List.iter gconsts ~f:(fun (_, gconst_name) ->
-            invalidate_gconst ctx gconst_name))
+    Relative_path.Map.iter ctx.Provider_context.entries ~f:(fun _path entry ->
+        match entry.Provider_context.parser_return with
+        | None -> () (* hasn't been parsed, hence nothing to invalidate *)
+        | Some { Parser_return.ast; _ } ->
+          let (funs, classes, record_defs, typedefs, gconsts) =
+            Nast.get_defs ast
+          in
+          List.iter funs ~f:(fun (_, fun_name) -> invalidate_fun ctx fun_name);
+          List.iter classes ~f:(fun (_, class_name) ->
+              invalidate_class ctx class_name);
+          List.iter record_defs ~f:(fun (_, record_name) ->
+              invalidate_record_def ctx record_name);
+          List.iter typedefs ~f:(fun (_, typedef_name) ->
+              invalidate_typedef ctx typedef_name);
+          List.iter gconsts ~f:(fun (_, gconst_name) ->
+              invalidate_gconst ctx gconst_name))
   | Provider_backend.Shared_memory ->
     (* Don't attempt to invalidate decls with shared memory, as we may not be
     running in the master process where that's allowed. *)

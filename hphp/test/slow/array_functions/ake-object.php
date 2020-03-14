@@ -37,8 +37,6 @@ function main() {
   var_dump(array_key_exists("pub", $o));
   var_dump(array_key_exists("dynamic", $o));
   echo "==== class D, bogus ====\n";
-  var_dump(array_key_exists(null, $o));
-  var_dump(array_key_exists(__hhvm_intrinsics\launder_value(null), $o));
   var_dump(array_key_exists(1, $o));
   var_dump(array_key_exists('wat', $o));
   var_dump(array_key_exists("\0E\0priv", $o));
@@ -50,8 +48,6 @@ $o = new stdClass();
 $o->{'1'} = 'two';
 $o->{'three'} = 'fore';
 echo "==== stdClass, extant ====\n";
-var_dump(array_key_exists(null, $o));
-var_dump(array_key_exists(__hhvm_intrinsics\launder_value(null), $o));
 var_dump(array_key_exists('', $o));
 var_dump(array_key_exists(1, $o));
 var_dump(array_key_exists('three', $o));

@@ -200,7 +200,7 @@ array(3) {
   [6]=>
   int(13)
 }
-123 6 13 
+123,6,13,
 Undefined index: 1
 
 Notice: Undefined variable: v1 in %s on line 110
@@ -221,12 +221,10 @@ array(5) {
   [4]=>
   int(99)
 }
-123 6 13 1 99 
+123,6,13,1,99,
 ================= duplicate keys allowed, but lexically final one used =================
-array(2) {
+array(1) {
   [2]=>
-  int(46)
-  [1]=>
   int(6)
 }
 ================= string keys can be expressions too =================
@@ -235,39 +233,6 @@ array(2) {
   string(3) "red"
   ["shape"]=>
   string(6) "square"
-}
-================= can mix int and string keys =================
-array(5) {
-  ["red"]=>
-  int(10)
-  ["4"]=>
-  int(3)
-  [9]=>
-  int(5)
-  ["12.8"]=>
-  int(111)
-  [""]=>
-  int(1)
-}
-array(1) {
-  [0]=>
-  int(-4)
-}
-array(1) {
-  [""]=>
-  int(-3)
-}
-array(1) {
-  [%i]=>
-  int(21)
-}
-array(1) {
-  [-9223372036854775808]=>
-  int(-1)
-}
-array(1) {
-  [-9223372036854775808]=>
-  int(123)
 }
 ================= arrays some of whose elements are arrays, and so on =================
 array(4) {
@@ -363,8 +328,8 @@ array(4) {
   [-1]=>
   string(3) "red"
 }
-1 123 34.5 red 
-red 123 34.5 1 
+1,123,34.5,red,
+red,123,34.5,1,
 ================= remove some elements from an array =================
 array(4) {
   ["red"]=>

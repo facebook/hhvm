@@ -8,14 +8,14 @@ function f(): void {
 
   $arr = darray[4 =>
     darray[
-      2 => darray[], $z => darray[]
+      2 => darray[], (string)$z => darray[]
     ]];
   $arreq = $arr;
   $x = 4;
 
-  var_dump(($arr[$x][$z][Foo::bar] ??= 'Yay!') === 'Yay!'); // $z warns
+  var_dump(($arr[$x][(string)$z][Foo::bar] ??= 'Yay!') === 'Yay!'); // $z warns
   var_dump($z === NULL); // $z doesn't get set
-  $arreq[$x][$z][Foo::bar] = 'Yay!'; // Note the `=`
+  $arreq[$x][(string)$z][Foo::bar] = 'Yay!'; // Note the `=`
   var_dump($z === NULL); // $z doesn't get set
   var_dump($arr === $arreq); // $arr and $arreq get set consistently
 

@@ -27,28 +27,13 @@ var_dump($a);
 $a = varray[null, true, 42, 12.34, "hello", varray[1, varray[2, varray[3]]]];
 var_dump($a);
 
-$a = darray[null => "null"];
-var_dump($a);
-
-$a = darray[false => "false"];
-var_dump($a);
-
-$a = darray[true => "true"];
-var_dump($a);
-
 $a = darray[0 => "0"];
 var_dump($a);
 
 $a = darray[42 => "42"];
 var_dump($a);
 
-$a = darray[12.34 => "12.34"];
-var_dump($a);
-
 $a = darray["hello" => "world"];
-var_dump($a);
-
-$a = darray[0 => "0", true => "1", "hello" => "world", 12.34 => darray[]];
 var_dump($a);
 
 # Non-static arrays.
@@ -82,15 +67,5 @@ var_dump($a);
 
 $v = 0;
 $a = varray[varray[0], varray[$v]];
-var_dump($a);
-
-# Invalid key, prevents static array optimization.
-$a = darray[darray[] => 1];
-var_dump($a);
-
-$a = darray[INF => 0];
-var_dump($a);
-
-$a = darray[NAN => 0];
 var_dump($a);
 }

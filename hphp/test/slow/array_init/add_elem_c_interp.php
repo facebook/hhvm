@@ -4,7 +4,7 @@ class X {
 
   function test() {
     $a = darray[
-      null => $this->foo,
+      'null' => $this->foo,
     ];
     return $a;
   }

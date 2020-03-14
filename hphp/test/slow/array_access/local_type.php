@@ -6,7 +6,7 @@ class thing {
   function go() {
     $idx = 'five';
     $instances = darray[];
-    $instances[$this->prop] = false;
+    $instances[(string)$this->prop] = false;
     return isset($this->prop[$idx]);
   }
 }

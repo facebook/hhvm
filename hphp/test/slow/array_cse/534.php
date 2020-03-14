@@ -36,7 +36,6 @@ f(varray[], 'e');
 f(darray['e' => darray['baz' => 40]], 'e');
 var_dump(f(darray['y' => varray[]], 'y'));
 var_dump(f(varray[], 'y'));
-var_dump(f(varray[], varray[]));
 h(varray[], 0);
 h(varray[varray[]], 0);
 }

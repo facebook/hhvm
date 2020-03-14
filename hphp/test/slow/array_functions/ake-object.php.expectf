@@ -5,12 +5,6 @@ bool(true)
 bool(true)
 bool(true)
 ==== class D, bogus ====
-
-Notice: Hack Array Compat: Implicit conversion of null to array key in %s/test/slow/array_functions/ake-object.php on line %d
-bool(false)
-
-Notice: Hack Array Compat: Implicit conversion of null to array key in %s/test/slow/array_functions/ake-object.php on line %d
-bool(false)
 bool(false)
 bool(false)
 bool(false)
@@ -18,12 +12,6 @@ bool(false)
 bool(false)
 bool(false)
 ==== stdClass, extant ====
-
-Notice: Hack Array Compat: Implicit conversion of null to array key in %s/test/slow/array_functions/ake-object.php on line %d
-bool(false)
-
-Notice: Hack Array Compat: Implicit conversion of null to array key in %s/test/slow/array_functions/ake-object.php on line %d
-bool(false)
 bool(false)
 bool(false)
 bool(true)

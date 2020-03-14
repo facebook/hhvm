@@ -1345,6 +1345,20 @@ fn has_non_tparam_generics_targs(env: &Env, targs: &[tast::Targ]) -> bool {
     })
 }
 
+fn from_ast_null_flavor(nullflavor: tast::OgNullFlavor) -> ObjNullFlavor {
+    match nullflavor {
+        tast::OgNullFlavor::OGNullsafe => ObjNullFlavor::NullSafe,
+        tast::OgNullFlavor::OGNullthrows => ObjNullFlavor::NullThrows,
+    }
+}
+
+fn emit_object_expr(e: &mut Emitter, env: &Env, expr: &tast::Expr) -> Result {
+    match &expr.1 {
+        tast::Expr_::Lvar(x) if is_local_this(env, &x.1) => Ok(InstrSeq::make_this()),
+        _ => emit_expr(e, env, expr),
+    }
+}
+
 fn emit_call_lhs_and_fcall(
     e: &mut Emitter,
     env: &Env,
@@ -1353,9 +1367,9 @@ fn emit_call_lhs_and_fcall(
     targs: &[tast::Targ],
 ) -> Result<(InstrSeq, InstrSeq)> {
     let tast::Expr(pos, expr_) = expr;
-    use tast::Expr_ as E_;
+    use tast::{Expr as E, Expr_ as E_};
 
-    let emit_generics = |e, env, fcall_args: &mut FcallArgs| {
+    let emit_generics = |e: &mut Emitter, env, fcall_args: &mut FcallArgs| {
         let does_not_have_non_tparam_generics = !has_non_tparam_generics_targs(env, targs);
         if does_not_have_non_tparam_generics {
             Ok(InstrSeq::Empty)
@@ -1375,7 +1389,53 @@ fn emit_call_lhs_and_fcall(
     };
 
     match expr_ {
-        E_::ObjGet(_) => unimplemented!(),
+        E_::ObjGet(o) => {
+            let emit_id =
+                |e: &mut Emitter, obj, id, null_flavor: &tast::OgNullFlavor, mut fcall_args| {
+                    // TODO(hrust): enable let name = method::Type::from_ast_name(id);
+                    let name: method::Type = string_utils::strip_global_ns(id).to_string().into();
+                    let obj = emit_object_expr(e, env, obj)?;
+                    let generics = emit_generics(e, env, &mut fcall_args)?;
+                    let null_flavor = from_ast_null_flavor(*null_flavor);
+                    Ok((
+                        InstrSeq::gather(vec![
+                            obj,
+                            InstrSeq::make_nulluninit(),
+                            InstrSeq::make_nulluninit(),
+                        ]),
+                        InstrSeq::gather(vec![
+                            generics,
+                            InstrSeq::make_fcallobjmethodd(fcall_args, name, null_flavor),
+                        ]),
+                    ))
+                };
+            match o.as_ref() {
+                (obj, E(_, E_::String(id)), null_flavor) => {
+                    emit_id(e, obj, id, null_flavor, fcall_args)
+                }
+                (obj, E(_, E_::Id(id)), null_flavor) => {
+                    emit_id(e, obj, &id.1, null_flavor, fcall_args)
+                }
+                (obj, method_expr, null_flavor) => {
+                    let obj = emit_object_expr(e, env, obj)?;
+                    let tmp = e.local_gen_mut().get_unnamed();
+                    let null_flavor = from_ast_null_flavor(*null_flavor);
+                    Ok((
+                        InstrSeq::gather(vec![
+                            obj,
+                            InstrSeq::make_nulluninit(),
+                            InstrSeq::make_nulluninit(),
+                            emit_expr(e, env, method_expr)?,
+                            InstrSeq::make_popl(tmp.clone()),
+                        ]),
+                        InstrSeq::gather(vec![
+                            InstrSeq::make_pushl(tmp),
+                            InstrSeq::make_fcallobjmethod(fcall_args, null_flavor),
+                        ]),
+                    ))
+                }
+            }
+        }
         E_::ClassConst(_) => unimplemented!(),
         E_::ClassGet(_) => unimplemented!(),
         E_::Id(id) => {

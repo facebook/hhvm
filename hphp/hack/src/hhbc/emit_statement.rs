@@ -252,13 +252,13 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
                             let temp = e.local_gen_mut().get_unnamed();
                             let rhs_instrs = InstrSeq::make_pushl(temp.clone());
                             Ok(InstrSeq::gather(vec![
-                                emit_yield_from_delegates(e, env, pos, e_yeild)?,
+                                emit_yield_from_delegates(e, env, &e_.0, e_yeild)?,
                                 InstrSeq::make_setl(temp),
                                 InstrSeq::make_popc(),
                                 emit_expr::emit_lval_op_nonlist(
                                     e,
                                     env,
-                                    pos,
+                                    &e_.0,
                                     LValOp::Set,
                                     e_lhs,
                                     rhs_instrs,

@@ -89,6 +89,35 @@ module RemoteTypeCheck = struct
     }
 end
 
+module RecheckCapture = struct
+  type recheck_capture = {
+    (* Enables recheck environment capture *)
+    enabled: bool;
+    (* We will automatically capture the recheck environment if
+        the number of rechecked files exceeds this threshold *)
+    rechecked_files_threshold: int;
+  }
+
+  let load ~current_version ~default config =
+    let prefix = Some "recheck_capture" in
+    let enabled =
+      bool_if_min_version
+        "enabled"
+        ~prefix
+        ~default:default.enabled
+        ~current_version
+        config
+    in
+    let rechecked_files_threshold =
+      int_
+        "rechecked_files_threshold"
+        ~prefix
+        ~default:default.rechecked_files_threshold
+        config
+    in
+    { enabled; rechecked_files_threshold }
+end
+
 type t = {
   min_log_level: Hh_logger.Level.t;
   (* the list of experiments from the experiments config *)
@@ -180,6 +209,8 @@ type t = {
   max_times_to_defer_type_checking: int option;
   (* The whether to use the hook that prefetches files on an Eden checkout *)
   prefetch_deferred_files: bool;
+  (* Settings controlling how and whether we capture the recheck environment *)
+  recheck_capture: RecheckCapture.recheck_capture;
   (* Remote type check settings that can be changed, e.g., by GK *)
   remote_type_check: RemoteTypeCheck.remote_type_check;
   (* If set, uses the key to fetch type checking jobs *)
@@ -267,6 +298,8 @@ let default =
     defer_class_declaration_threshold = None;
     max_times_to_defer_type_checking = None;
     prefetch_deferred_files = false;
+    recheck_capture =
+      RecheckCapture.{ enabled = false; rechecked_files_threshold = 40_000 };
     remote_type_check =
       RemoteTypeCheck.
         {
@@ -643,6 +676,9 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
+  let recheck_capture =
+    RecheckCapture.load ~current_version ~default:default.recheck_capture config
+  in
   let remote_type_check =
     RemoteTypeCheck.load
       ~current_version
@@ -766,6 +802,7 @@ let load_ fn ~silent ~current_version overrides =
     defer_class_declaration_threshold;
     max_times_to_defer_type_checking;
     prefetch_deferred_files;
+    recheck_capture;
     remote_type_check;
     remote_worker_key;
     remote_check_id;

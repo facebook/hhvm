@@ -302,9 +302,9 @@ impl Gen {
     pub fn with_using<Ex, Fb, En, Hi>(
         &mut self,
         finally_label: Label,
-        stmt: &Stmt<Ex, Fb, En, Hi>,
+        block: &Block<Ex, Fb, En, Hi>,
     ) {
-        let labels = self.collect_valid_target_labels_for_stmt(stmt);
+        let labels = self.collect_valid_target_labels_for_block(block);
         self.jump_targets
             .0
             .push(Region::Using(finally_label, labels));

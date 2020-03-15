@@ -303,7 +303,7 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
         a::Stmt_::Block(b) => emit_block(env, e, &b),
         a::Stmt_::If(f) => emit_if(e, env, pos, &f.0, &f.1, &f.2),
         a::Stmt_::While(x) => emit_while(e, env, &x.0, &x.1),
-        a::Stmt_::Using(_) => unimplemented!("TODO(hrust)"),
+        a::Stmt_::Using(x) => emit_using(e, env, pos, &**x),
         a::Stmt_::Break => Ok(emit_break(e, env, pos)),
         a::Stmt_::Continue => Ok(emit_continue(e, env, pos)),
         a::Stmt_::Do(x) => emit_do(e, env, &x.0, &x.1),
@@ -403,6 +403,170 @@ fn emit_case(
             )
         }
     })
+}
+
+fn emit_using(e: &mut Emitter, env: &mut Env, pos: &Pos, using: &tast::UsingStmt) -> Result {
+    let block_pos = block_pos(&using.block)?;
+    match (using.expr).1.as_expr_list() {
+        // TODO(hrust): avoid cloning blocks and expressions
+        Some(es) => emit_stmts(
+            e,
+            env,
+            es.iter()
+                .rev()
+                .fold(using.block.clone(), |block, expr| {
+                    vec![tast::Stmt(
+                        expr.0.clone(),
+                        tast::Stmt_::mk_using(tast::UsingStmt {
+                            has_await: using.has_await,
+                            is_block_scoped: using.is_block_scoped,
+                            expr: expr.clone(),
+                            block,
+                        }),
+                    )]
+                })
+                .as_slice(),
+        ),
+        _ => e.local_scope(|e| {
+            let (local, preamble) = match &(using.expr).1 {
+                tast::Expr_::Binop(x) if x.0.is_eq() && (x.1).1.is_lvar() => {
+                    match (x.1).1.as_lvar() {
+                        Some(tast::Lid(_, id)) => (
+                            local::Type::Named(local_id::get_name(&id).into()),
+                            InstrSeq::gather(vec![
+                                emit_expr::emit_expr(e, env, &using.expr)?,
+                                emit_pos(e, &block_pos),
+                                InstrSeq::make_popc(),
+                            ]),
+                        ),
+                        None => {
+                            let l = e.local_gen_mut().get_unnamed();
+                            (
+                                l.clone(),
+                                InstrSeq::gather(vec![
+                                    emit_expr::emit_expr(e, env, &using.expr)?,
+                                    InstrSeq::make_setl(l),
+                                    InstrSeq::make_popc(),
+                                ]),
+                            )
+                        }
+                    }
+                }
+                tast::Expr_::Lvar(lid) => (
+                    local::Type::Named(local_id::get_name(&lid.1).into()),
+                    InstrSeq::gather(vec![
+                        emit_expr::emit_expr(e, env, &using.expr)?,
+                        emit_pos(e, &block_pos),
+                        InstrSeq::make_popc(),
+                    ]),
+                ),
+                _ => {
+                    let l = e.local_gen_mut().get_unnamed();
+                    (
+                        l.clone(),
+                        InstrSeq::gather(vec![
+                            emit_expr::emit_expr(e, env, &using.expr)?,
+                            InstrSeq::make_setl(l),
+                            InstrSeq::make_popc(),
+                        ]),
+                    )
+                }
+            };
+            let finally_start = e.label_gen_mut().next_regular();
+            let finally_end = e.label_gen_mut().next_regular();
+            let body = env.do_in_using_body(e, finally_start.clone(), &using.block, emit_block)?;
+            let jump_instrs = tfr::JumpInstructions::collect(&body, &mut env.jump_targets_gen);
+            let jump_instrs_is_empty = jump_instrs.is_empty();
+            let finally_epilogue =
+                tfr::emit_finally_epilogue(e, env, pos, jump_instrs, finally_end.clone())?;
+            let try_instrs = if jump_instrs_is_empty {
+                body
+            } else {
+                tfr::cleanup_try_body(&body)
+            };
+
+            let emit_finally = |e: &mut Emitter,
+                                local: local::Type,
+                                has_await: bool,
+                                is_block_scoped: bool|
+             -> InstrSeq {
+                let (epilogue, async_eager_label) = if has_await {
+                    let after_await = e.label_gen_mut().next_regular();
+                    (
+                        InstrSeq::gather(vec![
+                            InstrSeq::make_await(),
+                            InstrSeq::make_label(after_await.clone()),
+                            InstrSeq::make_popc(),
+                        ]),
+                        Some(after_await),
+                    )
+                } else {
+                    (InstrSeq::make_popc(), None)
+                };
+                let fn_name = hhbc_id::method::from_raw_string(if has_await {
+                    "__disposeAsync"
+                } else {
+                    "__dispose"
+                });
+                InstrSeq::gather(vec![
+                    InstrSeq::make_cgetl(local.clone()),
+                    InstrSeq::make_nulluninit(),
+                    InstrSeq::make_nulluninit(),
+                    InstrSeq::make_fcallobjmethodd(
+                        FcallArgs::new(FcallFlags::empty(), 1, vec![], async_eager_label, 0),
+                        fn_name,
+                        ObjNullFlavor::NullThrows,
+                    ),
+                    epilogue,
+                    if is_block_scoped {
+                        InstrSeq::make_unsetl(local)
+                    } else {
+                        InstrSeq::Empty
+                    },
+                ])
+            };
+            let exn_local = e.local_gen_mut().get_unnamed();
+            let middle = if is_empty_block(&using.block) {
+                InstrSeq::Empty
+            } else {
+                let finally_instrs =
+                    emit_finally(e, local.clone(), using.has_await, using.is_block_scoped);
+                let catch_instrs = InstrSeq::gather(vec![
+                    emit_pos(e, &block_pos),
+                    make_finally_catch(e, exn_local, finally_instrs),
+                    emit_pos(e, pos),
+                ]);
+                InstrSeq::create_try_catch(e.label_gen_mut(), None, true, try_instrs, catch_instrs)
+            };
+            Ok(InstrSeq::gather(vec![
+                preamble,
+                middle,
+                InstrSeq::make_label(finally_start),
+                emit_finally(e, local, using.has_await, using.is_block_scoped),
+                finally_epilogue,
+                InstrSeq::make_label(finally_end),
+            ]))
+        }),
+    }
+}
+
+fn block_pos(block: &tast::Block) -> Result<Pos> {
+    if block.iter().all(|b| b.0.is_none()) {
+        return Ok(Pos::make_none());
+    }
+    let mut first = 0;
+    let mut last = block.len() - 1;
+    loop {
+        if !block[first].0.is_none() && !block[last].0.is_none() {
+            return Pos::btw(&block[first].0, &block[last].0).map_err(|s| Unrecoverable(s));
+        }
+        if block[first].0.is_none() {
+            first += 1;
+        }
+        if block[last].0.is_none() {
+            last -= 1;
+        }
+    }
 }
 
 fn emit_switch(

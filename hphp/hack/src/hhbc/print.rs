@@ -1600,6 +1600,7 @@ fn print_misc<W: Write>(w: &mut W, misc: &InstructMisc) -> Result<(), W::Error> 
         M::CGetCUNop => w.write("CGetCUNop"),
         M::UGetCUNop => w.write("UGetCUNop"),
         M::LockObj => w.write("LockObj"),
+        M::ThrowNonExhaustiveSwitch => w.write("ThrowNonExhaustiveSwitch"),
         M::VerifyParamType(id) => {
             w.write("VerifyParamType ")?;
             print_param_id(w, id)

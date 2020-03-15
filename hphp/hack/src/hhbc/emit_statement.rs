@@ -338,13 +338,175 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
                 emit_stmt(e, env, &try_catch_finally)
             }
         }
-        a::Stmt_::Switch(_) => unimplemented!("TODO(hrust)"),
+        a::Stmt_::Switch(x) => emit_switch(e, env, pos, &x.0, &x.1),
         a::Stmt_::Foreach(x) => emit_foreach(e, env, pos, &x.0, &x.1, &x.2),
         a::Stmt_::DefInline(def) => emit_def_inline(e, &**def),
         a::Stmt_::Awaitall(_) => unimplemented!("TODO(hrust)"),
         a::Stmt_::Markup(x) => emit_markup(e, env, (&x.0, &x.1), false),
         a::Stmt_::Fallthrough | a::Stmt_::Noop => Ok(InstrSeq::Empty),
     }
+}
+
+fn emit_case(
+    e: &mut Emitter,
+    env: &mut Env,
+    pos: &Pos,
+    scrutinee_expr: &tast::Expr,
+    case: &tast::Case,
+    emit_exhaustiveness: bool,
+) -> Result<((InstrSeq, InstrSeq), Option<Label>)> {
+    Ok(match case {
+        tast::Case::Case(case_expr, b) => {
+            let case_handler_label = e.label_gen_mut().next_regular();
+
+            let instr_check_case = if scrutinee_expr.1.is_lvar() {
+                InstrSeq::gather(vec![
+                    emit_expr::emit_two_exprs(e, env, &case_expr.0, scrutinee_expr, &case_expr)?,
+                    InstrSeq::make_eq(),
+                    InstrSeq::make_jmpnz(case_handler_label.clone()),
+                ])
+            } else {
+                let next_case_label = e.label_gen_mut().next_regular();
+                InstrSeq::gather(vec![
+                    InstrSeq::make_dup(),
+                    emit_expr::emit_expr(e, env, &case_expr)?,
+                    emit_pos(e, &case_expr.0),
+                    InstrSeq::make_eq(),
+                    InstrSeq::make_jmpz(next_case_label.clone()),
+                    InstrSeq::make_popc(),
+                    InstrSeq::make_jmp(case_handler_label.clone()),
+                    InstrSeq::make_label(next_case_label),
+                ])
+            };
+            (
+                (
+                    instr_check_case,
+                    InstrSeq::gather(vec![
+                        InstrSeq::make_label(case_handler_label),
+                        emit_block(env, e, b)?,
+                    ]),
+                ),
+                None,
+            )
+        }
+        tast::Case::Default(_, b) => {
+            let l = e.label_gen_mut().next_regular();
+            (
+                (
+                    InstrSeq::Empty,
+                    InstrSeq::gather(vec![
+                        InstrSeq::make_label(l.clone()),
+                        emit_block(env, e, b)?,
+                    ]),
+                ),
+                Some(l),
+            )
+        }
+    })
+}
+
+fn emit_switch(
+    e: &mut Emitter,
+    env: &mut Env,
+    pos: &Pos,
+    scrutinee_expr: &tast::Expr,
+    cl: &Vec<tast::Case>,
+) -> Result {
+    let (instr_init, instr_free) = if scrutinee_expr.1.is_lvar() {
+        (InstrSeq::Empty, InstrSeq::Empty)
+    } else {
+        (
+            emit_expr::emit_expr(e, env, scrutinee_expr)?,
+            InstrSeq::make_popc(),
+        )
+    };
+    let break_label = e.label_gen_mut().next_regular();
+    let has_default = cl.iter().any(|c| c.is_default());
+
+    let emit_cases = |env: &mut Env,
+                      e: &mut Emitter,
+                      cases: &[tast::Case]|
+     -> Result<(InstrSeq, InstrSeq, Label)> {
+        match cases.split_last() {
+            None => {
+                return Err(Unrecoverable(
+                    "impossible - switch statements must have at least one case".into(),
+                ))
+            }
+            Some((last, rest)) => {
+                // Emit all the cases except the last one
+                let mut res = rest
+                    .iter()
+                    .map(|case| emit_case(e, env, pos, scrutinee_expr, case, !has_default))
+                    .collect::<Vec<_>>();
+
+                if has_default {
+                    // If there is a default, emit the last case as usual
+                    res.push(emit_case(e, env, pos, scrutinee_expr, last, !has_default))
+                } else {
+                    // Otherwise, emit the last case with an added break
+                    let last = &mut last.clone();
+                    match last {
+                        tast::Case::Case(expr, block) => {
+                            block.push(tast::Stmt(Pos::make_none(), tast::Stmt_::Break));
+                            res.push(emit_case(e, env, pos, scrutinee_expr, last, !has_default))
+                        }
+                        tast::Case::Default(_, _) => {
+                            return Err(Unrecoverable(
+                                "impossible - there shouldn't be a default".into(),
+                            ))
+                        }
+                    };
+                    // ...and emit warning/exception for missing default
+                    let l = e.label_gen_mut().next_regular();
+                    res.push(Ok((
+                        (
+                            InstrSeq::Empty,
+                            emit_pos_then(e, pos, InstrSeq::make_throw_non_exhaustive_switch()),
+                        ),
+                        Some(l),
+                    )))
+                };
+                let (case_instrs, default_labels): (Vec<(InstrSeq, InstrSeq)>, Vec<_>) = res
+                    .into_iter()
+                    .collect::<Result<Vec<_>>>()?
+                    .into_iter()
+                    .unzip();
+                let (case_expr_instrs, case_body_instrs) = case_instrs.into_iter().unzip();
+                let default_label = match default_labels
+                    .iter()
+                    .filter_map(|lopt| lopt.as_ref())
+                    .collect::<Vec<_>>()
+                    .as_slice()
+                {
+                    [] => break_label.clone(),
+                    [l] => l.to_owned().clone(),
+                    _ => {
+                        return Err(emit_fatal::raise_fatal_runtime(
+                            pos,
+                            "Switch statements may only contain one 'default' clause.",
+                        ))
+                    }
+                };
+                Ok((
+                    InstrSeq::gather(case_expr_instrs),
+                    InstrSeq::gather(case_body_instrs),
+                    default_label,
+                ))
+            }
+        }
+    };
+
+    let (case_expr_instrs, case_body_instrs, default_label) =
+        env.do_in_switch_body(e, break_label.clone(), cl, emit_cases)?;
+    Ok(InstrSeq::gather(vec![
+        instr_init,
+        case_expr_instrs,
+        instr_free,
+        InstrSeq::make_jmp(default_label),
+        case_body_instrs,
+        InstrSeq::make_label(break_label),
+    ]))
 }
 
 fn is_empty_block(b: &tast::Block) -> bool {

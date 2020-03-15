@@ -2397,7 +2397,7 @@ fn emit_first_expr(e: &mut Emitter, env: &Env, expr: &tast::Expr) -> Result<(Ins
     })
 }
 
-fn emit_two_exprs(
+pub fn emit_two_exprs(
     e: &mut Emitter,
     env: &Env,
     outer_pos: &Pos,

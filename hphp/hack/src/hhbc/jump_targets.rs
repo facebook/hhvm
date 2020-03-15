@@ -141,6 +141,7 @@ impl JumpTargets {
                     if level == 1 {
                         label = Some(end_label);
                         iters.extend_from_slice(&std::mem::replace(&mut acc, vec![]));
+                        break;
                     } else {
                         level -= 1;
                     }

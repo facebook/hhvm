@@ -101,10 +101,10 @@ impl<'a> Env<'a> {
         f: F,
     ) -> R
     where
-        F: FnOnce(&mut Self, &mut Emitter, &Vec<tast::Case>) -> R,
+        F: FnOnce(&mut Self, &mut Emitter, &[tast::Case]) -> R,
     {
         self.jump_targets_gen.with_switch(end_label, cases);
-        self.run_and_release_ids(e, cases, f)
+        self.run_and_release_ids(e, cases.as_slice(), f)
     }
 
     pub fn do_in_try_body<R, F>(

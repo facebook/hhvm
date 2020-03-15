@@ -378,6 +378,10 @@ impl InstrSeq {
         Self::make_instr(Instruct::IOp(InstructOperator::ThrowAsTypeStructException))
     }
 
+    pub fn make_throw_non_exhaustive_switch() -> Self {
+        Self::make_instr(Instruct::IMisc(InstructMisc::ThrowNonExhaustiveSwitch))
+    }
+
     pub fn make_combine_and_resolve_type_struct(i: isize) -> Self {
         Self::make_instr(Instruct::IOp(
             InstructOperator::CombineAndResolveTypeStruct(i),

@@ -654,6 +654,8 @@ let write_symbol_info_init (genv : ServerEnv.genv) (env : ServerEnv.env) :
   else
     Sys_utils.mkdir_p out_dir;
 
+  Hh_logger.log "Writing JSON to: %s" out_dir;
+
   let ctx = Provider_utils.ctx_from_server_env env in
   let root_path = env.swriteopt.symbol_write_root_path in
   let hhi_path = env.swriteopt.symbol_write_hhi_path in

@@ -69,7 +69,7 @@ let write_json
     let json_chunks =
       Typing_symbol_json_builder.build_json ctx symbol_occurrences
     in
-    let (_, channel) =
+    let (out_file, channel) =
       Filename.open_temp_file
         ~temp_dir:file_dir
         "glean_symbol_info_chunk_"
@@ -77,7 +77,8 @@ let write_json
     in
     let json = JSON_Array json_chunks in
     Out_channel.output_string channel (json_to_string ~pretty:true json);
-    Out_channel.close channel
+    Out_channel.close channel;
+    Hh_logger.log "Wrote symbol info to: %s" out_file
   with e ->
     Printf.eprintf "WARNING: symbol write failure: \n%s" (Exn.to_string e)
 

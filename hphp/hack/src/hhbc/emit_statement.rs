@@ -1690,7 +1690,36 @@ fn emit_await_assignment(
     lval: &tast::Expr,
     r: &tast::Expr,
 ) -> Result {
-    unimplemented!()
+    match lval.1.as_lvar() {
+        Some(tast::Lid(_, id)) if !emit_expr::is_local_this(env, &id) => {
+            Ok(InstrSeq::gather(vec![
+                emit_expr::emit_await(e, env, pos, r)?,
+                emit_pos(e, pos),
+                InstrSeq::make_popl(emit_expr::get_local(e, env, pos, local_id::get_name(&id))?),
+            ]))
+        }
+        _ => {
+            let awaited_instrs = emit_await(e, env, pos, r)?;
+            scope::with_unnamed_local(e, |e, temp| {
+                let rhs_instrs = InstrSeq::make_pushl(temp.clone());
+                let (lhs, rhs, setop) = emit_expr::emit_lval_op_nonlist_steps(
+                    e,
+                    env,
+                    pos,
+                    LValOp::Set,
+                    lval,
+                    rhs_instrs,
+                    1,
+                    false,
+                )?;
+                Ok((
+                    InstrSeq::gather(vec![awaited_instrs, InstrSeq::make_popl(temp)]),
+                    lhs,
+                    InstrSeq::gather(vec![rhs, setop, InstrSeq::make_popc()]),
+                ))
+            })
+        }
+    }
 }
 
 fn emit_if(

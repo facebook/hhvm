@@ -76,12 +76,19 @@ retry_on_eintr(TRet failureValue, TFn impl, Args... args) {
 } // namespace
 
 struct HSLFileDescriptor {
+  enum class Awaitability {
+    UNKNOWN,
+    AWAITABLE,
+    NOT_AWAITABLE
+  };
+
   static Object newInstance(int fd) {
     assertx(s_FileDescriptorClass);
     Object obj { s_FileDescriptorClass };
 
     auto* data = Native::data<HSLFileDescriptor>(obj);
     data->m_fd = fd;
+    data->m_awaitability = Awaitability::UNKNOWN;
 
     s_fds_to_close->insert(fd);
     return obj;
@@ -114,6 +121,8 @@ struct HSLFileDescriptor {
       s_fd, VarNR{make_tv<KindOfInt64>(m_fd)}
     );
   }
+
+  Awaitability m_awaitability;
 
  private:
    // intentionally not closed by destructor: that would introduce observable
@@ -203,22 +212,40 @@ Object HHVM_FUNCTION(HSL_os_poll_async,
                      int64_t events,
                      int64_t timeout_ns) {
   if (!(events & FileEventHandler::READ_WRITE)) {
-    SystemLib::throwExceptionObject("Must poll for read, write, or both");
+    throw_errno_exception(
+      EINVAL,
+      "Must poll for read, write, or both"
+    );
   }
   if (timeout_ns< 0) {
-    SystemLib::throwExceptionObject("Poll timeout must be >= 0");
+    throw_errno_exception(
+      EINVAL,
+      "Poll timeout must be >= 0"
+    );
   }
-  auto fd = HSLFileDescriptor::fd(fd_wrapper);
-
-  const auto originalFlags = ::fcntl(fd, F_GETFL);
-  // This always succeeds...
-  ::fcntl(fd, F_SETFL, originalFlags | O_ASYNC);
-  // ... but sometimes doesn't actually do anything
-  const bool isAsyncableFd = ::fcntl(fd, F_GETFL) & O_ASYNC;
-  ::fcntl(fd, F_SETFL, originalFlags);
-  if (!isAsyncableFd) {
-    throw_errno_exception(ENOTSUP);
+  auto hslfd = HSLFileDescriptor::get(fd_wrapper);
+  auto fd = hslfd->fd();
+  if (hslfd->m_awaitability == HSLFileDescriptor::Awaitability::NOT_AWAITABLE) {
+    throw_errno_exception(
+      ENOTSUP,
+      "Attempted to await a known-non-awaitable File Descriptor"
+    );
+  } else if (
+    hslfd->m_awaitability == HSLFileDescriptor::Awaitability::UNKNOWN
+  ) {
+    const auto originalFlags = ::fcntl(fd, F_GETFL);
+    // This always succeeds...
+    ::fcntl(fd, F_SETFL, originalFlags | O_ASYNC);
+    // ... but sometimes doesn't actually do anything
+    const bool isAsyncableFd = ::fcntl(fd, F_GETFL) & O_ASYNC;
+    ::fcntl(fd, F_SETFL, originalFlags);
+    if (!isAsyncableFd) {
+      hslfd->m_awaitability = HSLFileDescriptor::Awaitability::NOT_AWAITABLE;
+      throw_errno_exception(ENOTSUP, "File descriptor is not awaitable");
+    }
+    hslfd->m_awaitability = HSLFileDescriptor::Awaitability::AWAITABLE;
   }
+  // now known to be awaitable
 
   auto ev = new FileAwait(
     fd,

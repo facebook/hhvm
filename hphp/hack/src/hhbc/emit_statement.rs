@@ -945,7 +945,10 @@ fn emit_try_catch_(
             .map(|catch| emit_catch(e, env, pos, &end_label, catch))
             .collect::<Result<Vec<_>>>()?,
     );
-    let try_instrs = InstrSeq::gather(vec![emit_stmts(e, &try_env, try_block)?, emit_pos(e, pos)]);
+    let try_instrs = InstrSeq::gather(vec![
+        emit_stmts(e, &mut try_env, try_block)?,
+        emit_pos(e, pos),
+    ]);
     Ok(InstrSeq::create_try_catch(
         e.label_gen_mut(),
         Some(end_label.clone()),
@@ -1371,15 +1374,10 @@ fn emit_foreach_await_lvalue_storage(
     })
 }
 
-fn emit_stmts(e: &mut Emitter, env: &Env, stl: &[tast::Stmt]) -> Result {
-    // TODO(shiqicao):
-    //     Ocaml's env is immutable, we need to match the same behavior
-    //     during porting. Simulating immutability will change every `&Env`
-    //     to `&mut Env`. The following is a hack to build.
-    let mut new_env: Env = env.clone();
+fn emit_stmts(e: &mut Emitter, env: &mut Env, stl: &[tast::Stmt]) -> Result {
     Ok(InstrSeq::gather(
         stl.iter()
-            .map(|s| emit_stmt(e, &mut new_env, s))
+            .map(|s| emit_stmt(e, env, s))
             .collect::<Result<Vec<_>>>()?,
     ))
 }
@@ -1724,7 +1722,7 @@ fn emit_await_assignment(
 
 fn emit_if(
     e: &mut Emitter,
-    env: &Env,
+    env: &mut Env,
     pos: &Pos,
     condition: &tast::Expr,
     consequence: &[tast::Stmt],

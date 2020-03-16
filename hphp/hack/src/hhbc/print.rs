@@ -1618,6 +1618,10 @@ fn print_misc<W: Write>(w: &mut W, misc: &InstructMisc) -> Result<(), W::Error> 
                 OpSilence::End => w.write("End"),
             }
         }
+        M::VerifyOutType(id) => {
+            w.write("VerifyOutType ")?;
+            print_param_id(w, id)
+        }
         _ => not_impl!(),
     }
 }
@@ -1665,9 +1669,25 @@ fn print_control_flow<W: Write>(w: &mut W, cf: &InstructControlFlow) -> Result<(
         CF::RetCSuspended => w.write("RetCSuspended"),
         CF::RetM(p) => concat_str_by(w, " ", ["RetM", p.to_string().as_str()]),
         CF::Throw => w.write("Throw"),
-        CF::Switch(_, _, _) => not_impl!(),
+        CF::Switch(kind, base, labels) => print_switch(w, kind, base, labels),
         CF::SSwitch(_) => not_impl!(),
     }
+}
+
+fn print_switch<W: Write>(
+    w: &mut W,
+    kind: &Switchkind,
+    base: &isize,
+    labels: &[Label],
+) -> Result<(), W::Error> {
+    w.write("Switch ")?;
+    w.write(match kind {
+        Switchkind::Bounded => "Bounded ",
+        Switchkind::Unbounded => "Unbounded ",
+    })?;
+    w.write(base.to_string())?;
+    w.write(" ")?;
+    wrap_by_angle(w, |w| concat_by(w, " ", labels, print_label))
 }
 
 fn print_lit_const<W: Write>(w: &mut W, lit: &InstructLitConst) -> Result<(), W::Error> {
@@ -2120,7 +2140,14 @@ fn print_expr<W: Write>(
             }
         }
         E_::Shape(_) => not_impl!(),
-        E_::Binop(_) => not_impl!(),
+        E_::Binop(x) => {
+            let (bop, e1, e2) = &**x;
+            print_expr(w, env, e1)?;
+            w.write(" ")?;
+            print_bop(w, bop)?;
+            w.write(" ")?;
+            print_expr(w, env, e2)
+        }
         E_::Call(c) => {
             let (_, e, _, es, unpacked_element) = &**c;
             match e.as_id() {
@@ -2253,6 +2280,42 @@ fn print_expr<W: Write>(
         _ => Err(Error::fail(
             "TODO Unimplemented: We are missing a lot of cases in the case match. Delete this catchall"
         ))
+    }
+}
+
+fn print_bop<W: Write>(w: &mut W, bop: &ast_defs::Bop) -> Result<(), W::Error> {
+    use ast_defs::Bop;
+    match bop {
+        Bop::Plus => w.write("+"),
+        Bop::Minus => w.write("-"),
+        Bop::Star => w.write("*"),
+        Bop::Slash => w.write("/"),
+        Bop::Eqeq => w.write("=="),
+        Bop::Eqeqeq => w.write("==="),
+        Bop::Starstar => w.write("**"),
+        Bop::Eq(None) => w.write("="),
+        Bop::Eq(Some(bop)) => {
+            w.write("=")?;
+            print_bop(w, bop)
+        }
+        Bop::Ampamp => w.write("&&"),
+        Bop::Barbar => w.write("||"),
+        Bop::Lt => w.write("<"),
+        Bop::Lte => w.write("<="),
+        Bop::Cmp => w.write("<=>"),
+        Bop::Gt => w.write(">"),
+        Bop::Gte => w.write(">="),
+        Bop::Dot => w.write("."),
+        Bop::Amp => w.write("&"),
+        Bop::Bar => w.write("|"),
+        Bop::Ltlt => w.write("<<"),
+        Bop::Gtgt => w.write(">>"),
+        Bop::Percent => w.write("%"),
+        Bop::Xor => w.write("^"),
+        Bop::LogXor => w.write("xor"),
+        Bop::Diff => w.write("!="),
+        Bop::Diff2 => w.write("!=="),
+        Bop::QuestionQuestion => w.write("\\?\\?"),
     }
 }
 

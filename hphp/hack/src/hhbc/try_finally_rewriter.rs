@@ -499,8 +499,8 @@ pub(super) fn emit_finally_epilogue(
             InstrSeq::make_issetl(e.local_gen_mut().get_label().clone()),
             InstrSeq::make_jmpz(finally_end),
             InstrSeq::make_cgetl(e.local_gen_mut().get_label().clone()),
-            InstrSeq::make_switch(labels),
-            InstrSeq::gather(bodies),
+            InstrSeq::make_switch(labels.into_iter().rev().collect()),
+            InstrSeq::gather(bodies.into_iter().rev().collect()),
         ])
     })
 }

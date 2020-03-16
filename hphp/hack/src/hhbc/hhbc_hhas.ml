@@ -201,6 +201,7 @@ let string_of_operator instruction =
   | Clone -> "Clone"
   | H.Exit -> "Exit"
   | ResolveFunc id -> sep ["ResolveFunc"; string_of_function_id id]
+  | ResolveMethCaller id -> sep ["ResolveMethCaller"; string_of_function_id id]
   | ResolveObjMethod -> sep ["ResolveObjMethod"]
   | ResolveClsMethod mid -> sep ["ResolveClsMethod"; string_of_method_id mid]
   | ResolveClsMethodD (cid, mid) ->

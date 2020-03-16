@@ -4214,6 +4214,15 @@ OPTBLD_INLINE void iopResolveFunc(Id id) {
   vmStack().pushFunc(func);
 }
 
+OPTBLD_INLINE void iopResolveMethCaller(Id id) {
+  auto unit = vmfp()->m_func->unit();
+  auto const nep = unit->lookupNamedEntityPairId(id);
+  auto func = Unit::loadFunc(nep.second, nep.first);
+  assertx(func && func->isMethCaller());
+  checkMethCaller(func, arGetContextClass(vmfp()));
+  vmStack().pushFunc(func);
+}
+
 OPTBLD_INLINE void iopFCallFunc(PC origpc, PC& pc, FCallArgs fca) {
   auto const type = vmStack().topC()->m_type;
   if (isObjectType(type)) return fcallFuncObj(origpc, pc, fca);

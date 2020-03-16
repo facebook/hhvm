@@ -1671,6 +1671,7 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::NewObjS:
     case Op::LockObj:
     case Op::ResolveFunc:
+    case Op::ResolveMethCaller:
     case Op::ResolveObjMethod:
     case Op::ResolveClsMethod:
     case Op::ResolveClsMethodD:

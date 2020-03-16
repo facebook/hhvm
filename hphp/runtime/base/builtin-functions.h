@@ -309,6 +309,9 @@ vm_decode_function(const_variant_ref function,
                                 genericsAlreadyGiven);
 }
 
+bool checkMethCallerTarget(const Func* meth, const Class* ctx, bool error);
+void checkMethCaller(const Func* func, const Class* ctx);
+
 Variant vm_call_user_func(const_variant_ref function, const Variant& params,
                           bool checkRef = false,
                           bool allowDynCallNoPointer = false);

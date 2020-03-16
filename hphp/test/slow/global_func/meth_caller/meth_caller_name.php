@@ -1,6 +1,10 @@
 <?hh
 
 namespace {
+class A { function f() {} function B() {} }
+class B { function f() {} function B() {} }
+class C { function f() {} function B() {} }
+class D { function f() {} function B() {} }
 $x = \HH\meth_caller(A::class, "f");
 \var_dump(
   $x, \HH\is_meth_caller($x),
@@ -33,6 +37,9 @@ new Acls()->bfunc();
 }
 
 namespace Ans {
+class B { function f() {} }
+class C { function f() {} }
+class D { function f() {} }
 $x = \HH\meth_caller(A::class, "f");
 \var_dump(
   $x, \HH\is_meth_caller($x),
@@ -89,6 +96,7 @@ class A {
   function set($k, $v) {
     $this->map[$k] = $v;
   }
+  function f() {}
 }
 $o = new A();
 $func_name = testFunction(\HH\meth_caller(get_name('A', 'a'), 'B'));

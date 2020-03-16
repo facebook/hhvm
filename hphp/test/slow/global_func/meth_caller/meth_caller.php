@@ -1,7 +1,7 @@
 <?hh
 
 class A { function afunc($x) { return $x; } }
-class B { function bfunc($x) { return $x * 2; } }
+class B { function bfunc($x) { return $x * 2; } function cfunc($x, $x) {} }
 class C extends B { function cfunc($x, $y) { return $x + $y; } }
 
 // test in empty scope

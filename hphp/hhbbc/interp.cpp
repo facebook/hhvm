@@ -4045,6 +4045,11 @@ void in(ISS& env, const bc::ResolveFunc& op) {
   push(env, TFunc);
 }
 
+void in(ISS& env, const bc::ResolveMethCaller& op) {
+  // TODO (T29639296)
+  push(env, TFunc);
+}
+
 void in(ISS& env, const bc::ResolveObjMethod& op) {
   popC(env);
   popC(env);

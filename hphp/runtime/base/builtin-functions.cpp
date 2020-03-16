@@ -381,6 +381,49 @@ const Func* vm_decode_func_from_name(
 }
 }
 
+bool checkMethCallerTarget(const Func* meth, const Class* ctx, bool error) {
+  if (meth->isStaticInPrologue()) {
+    if (!error) return false;
+    SystemLib::throwInvalidArgumentExceptionObject(folly::sformat(
+      "meth_caller(): method {} is static",
+      meth->fullName()->data()
+    ));
+  }
+
+  if (meth->isPublic() || ctx == meth->cls()) return true;
+  if (ctx && (meth->attrs() & AttrProtected) && ctx->classof(meth->cls())) {
+    return true;
+  }
+
+  if (error) {
+    SystemLib::throwInvalidArgumentExceptionObject(folly::sformat(
+      "meth_caller(): method {} cannot be called from this context",
+      meth->fullName()->data()
+    ));
+  }
+  return false;
+}
+
+void checkMethCaller(const Func* func, const Class* ctx) {
+  auto const cls = Unit::loadClass(func->methCallerClsName());
+  if (!cls) {
+    SystemLib::throwInvalidArgumentExceptionObject(folly::sformat(
+      "meth_caller(): class {} not found", func->methCallerClsName()->data()
+    ));
+  }
+
+  auto const meth = cls->lookupMethod(func->methCallerMethName());
+  if (!meth) {
+    SystemLib::throwInvalidArgumentExceptionObject(folly::sformat(
+      "meth_caller(): method {}::{} not found",
+      func->methCallerClsName()->data(),
+      func->methCallerMethName()->data()
+    ));
+  }
+
+  checkMethCallerTarget(meth, ctx, true);
+}
+
 const HPHP::Func*
 vm_decode_function(const_variant_ref function,
                    ActRec* ar,

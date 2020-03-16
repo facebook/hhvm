@@ -3743,7 +3743,7 @@ and emit_special_function
       | _ ->
         Emit_fatal.raise_fatal_runtime pos "Constant string expected in fun()"
     )
-  | ("__systemlib\\fun", _) ->
+  | ("__systemlib\\meth_caller", _) ->
     (* used by meth_caller() to directly emit func ptr *)
     if nargs <> 1 then
       Emit_fatal.raise_fatal_runtime
@@ -3753,7 +3753,9 @@ and emit_special_function
       match args with
       | [(_, A.String func_name)] ->
         let func_name = SU.strip_global_ns func_name in
-        Some (instr_resolve_func @@ Hhbc_id.Function.from_raw_string func_name)
+        Some
+          ( instr_resolve_meth_caller
+          @@ Hhbc_id.Function.from_raw_string func_name )
       | _ ->
         Emit_fatal.raise_fatal_runtime pos "Constant string expected in fun()"
     )

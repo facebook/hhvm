@@ -1081,6 +1081,28 @@ void emitResolveFunc(IRGS& env, const StringData* name) {
   push(env, cns(env, func));
 }
 
+void emitResolveMethCaller(IRGS& env, const StringData* name) {
+  auto const lookup = lookupImmutableFunc(curUnit(env), name);
+  auto func = lookup.func;
+  assertx(func && func->isMethCaller());
+
+  auto const className = func->methCallerClsName();
+  auto const methodName = func->methCallerMethName();
+
+  auto const ok = [&] () -> bool {
+    auto const cls = Unit::lookupUniqueClassInContext(className, curClass(env));
+    if (cls) {
+      auto const res = lookupImmutableObjMethod(cls, methodName, curFunc(env),
+                                                false);
+      return res.func && checkMethCallerTarget(res.func, curClass(env), false);
+    }
+    return false;
+  }();
+
+  if (!ok) return interpOne(env);
+  push(env, cns(env, func));
+}
+
 namespace {
 
 //////////////////////////////////////////////////////////////////////

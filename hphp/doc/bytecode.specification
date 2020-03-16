@@ -3309,6 +3309,14 @@ ResolveFunc <litstr id>   []  ->  [C]
   Resolve %1 as a function name to a function pointer value, then push the
   pointer onto the top of stack. When resolution fails, raise an error.
 
+ResolveMethCaller <litstr id>   []  ->  [C]
+
+  Resolve %1 as a function name to a function pointer value corresponding to a
+  MethCaller. If the method called is not available in the current context then
+  an exception is thrown. Otherwise, the function pointer is pushed to the top
+  of the stack. The meth caller must exist in the same unit as the resolving
+  function.
+
 ResolveObjMethod [C C] -> [C]
 
   Resolve $1 as a method of $2 to a method array, then push the array onto the

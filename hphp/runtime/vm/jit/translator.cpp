@@ -359,6 +359,8 @@ static const struct {
   { OpBreakTraceHint,{None,           None,         OutNone         }},
   { OpGetMemoKeyL, {Local,            Stack1,       OutUnknown      }},
   { OpResolveFunc, {None,             Stack1,       OutFunc         }},
+  { OpResolveMethCaller,
+                   {None,             Stack1,       OutFunc         }},
   { OpResolveObjMethod,
                    {StackTop2,        Stack1,       OutVArray       }},
   { OpResolveClsMethod,
@@ -944,6 +946,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::FCallFuncD:
   case Op::FCallObjMethodD:
   case Op::ResolveFunc:
+  case Op::ResolveMethCaller:
   case Op::ResolveClsMethod:
   case Op::ResolveClsMethodD:
   case Op::ResolveClsMethodS:

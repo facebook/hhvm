@@ -1024,7 +1024,7 @@ String ExecutionContext::getenv(const String& name) const {
   if (m_envs.exists(name)) {
     return m_envs[name].toString();
   }
-  if (is_cli_mode()) {
+  if (is_cli_server_mode()) {
     auto envs = cli_env();
     if (envs.exists(name)) return envs[name].toString();
     return String();

@@ -36,7 +36,7 @@ static String to_full_path(const String& filename) {
 // A wrapper for `zip_open` that prepares a full path
 // file name to consider current working directory.
 static zip* _zip_open(const String& filename, int _flags, int* zep) {
-  if (is_cli_mode()) {
+  if (is_cli_server_mode()) {
     int open_flags =
       (_flags & ZIP_EXCL ? O_EXCL : 0)
       | (_flags & ZIP_TRUNCATE ? O_TRUNC : 0)

@@ -165,7 +165,7 @@ void cli_server_invoke_wrapped(CLIServerInterface& server, CLISrvResult<TSuccess
 
 template<class TSuccess, class TError, class... Args>
 CLISrvResult<TSuccess, TError> invoke_on_cli_client(const std::string& id, CLISrvResult<TSuccess, TError>(*func)(Args...), Args... args) {
-  if (is_cli_mode()) {
+  if (is_cli_server_mode()) {
     CLIClientInterface client(id);
     client.invoke(args...);
     return client.getResult<TSuccess, TError>();

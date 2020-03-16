@@ -76,7 +76,7 @@ the ExecutionContext is instructed to write to the client's stdout, and the
 LightProcess abstraction is given an override socket to allow the client to
 spawn child processes via its own light process pool (so that commands executed
 by proc_open and friends have the correct uid/gid). Additionally the cwd is set
-to the client's cwd, the is_cli_mode() function returns true, and safe
+to the client's cwd, the is_cli_server_mode() function returns true, and safe
 directory access is disabled.
 
 Lastly, a special file wrapper, CLIWrapper, is set to handle all local file
@@ -1748,7 +1748,7 @@ Array cli_env() {
   return tl_env ? *tl_env : empty_array();
 }
 
-bool is_cli_mode() { return tl_cliSock != -1; }
+bool is_cli_server_mode() { return tl_cliSock != -1; }
 
 uint64_t cli_server_api_version() {
   if (s_cliServerComputedVersion != 0) {

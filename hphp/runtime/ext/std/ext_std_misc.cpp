@@ -118,7 +118,7 @@ const StaticString
   s_worker("worker");
 
 String HHVM_FUNCTION(execution_context) {
-  if (is_cli_mode()) return s_clisrv;
+  if (is_cli_server_mode()) return s_clisrv;
 
   if (auto t = g_context->getTransport()) {
     return t->describe();

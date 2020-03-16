@@ -237,7 +237,7 @@ void HHVM_FUNCTION(pcntl_exec,
 }
 
 int64_t HHVM_FUNCTION(pcntl_fork) {
-  if (is_cli_mode()) {
+  if (is_cli_server_mode()) {
     raise_error("forking not available via server CLI execution");
     return -1;
   }

@@ -175,7 +175,7 @@ static void PrepareEnv(Array& env, Transport *transport) {
   }
 
   bool isServer =
-    RuntimeOption::ServerExecutionMode() && !is_cli_mode();
+    RuntimeOption::ServerExecutionMode() && !is_cli_server_mode();
   if (isServer) {
     env.set(s_HPHP_SERVER, 1);
     env.set(s_HPHP_HOTPROFILER, 1);

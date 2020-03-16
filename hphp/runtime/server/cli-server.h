@@ -88,9 +88,9 @@ struct ucred {
 uint64_t cli_server_api_version();
 
 /*
- * Returns true if the current request is executing in CLI mode
+ * Returns true if the current request is executing in CLI client/server mode.
  */
-bool is_cli_mode();
+bool is_cli_server_mode();
 
 /*
  * Create a unix socket at socket_path and begin running a thread to handle

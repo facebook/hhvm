@@ -184,7 +184,7 @@ NEVER_INLINE void* stack_top_ptr_conservative() {
 
 static Exception* generate_request_timeout_exception(c_WaitableWaitHandle* wh) {
   auto exceptionMsg = folly::sformat(
-    !RuntimeOption::ServerExecutionMode() || is_cli_mode()
+    !RuntimeOption::ServerExecutionMode() || is_cli_server_mode()
       ? "Maximum execution time of {} seconds exceeded"
       : "entire web request took longer than {} seconds and timed out",
     RID().getTimeout());

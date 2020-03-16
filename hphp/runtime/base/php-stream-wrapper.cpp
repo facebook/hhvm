@@ -34,7 +34,7 @@ const StaticString s_temp("TEMP");
 const StaticString s_memory("MEMORY");
 
 req::ptr<File> PhpStreamWrapper::openFD(const char *sFD) {
-  if (is_cli_mode()) {
+  if (is_cli_server_mode()) {
     raise_warning("Direct access to file descriptors is not "
                   "available via remote unix server execution");
     return nullptr;

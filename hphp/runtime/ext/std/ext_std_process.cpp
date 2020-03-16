@@ -719,7 +719,7 @@ HHVM_FUNCTION(proc_open, const String& cmd, const Array& descriptorspec,
   Array enva;
 
   if (env.isNull()) {
-    if (is_cli_mode()) {
+    if (is_cli_server_mode()) {
       enva = cli_env();
     } else {
       // Build out an environment that conceptually matches what we'd

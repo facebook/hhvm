@@ -1621,7 +1621,7 @@ bool HHVM_FUNCTION(copy,
   CHECK_PATH_FALSE(source, 1);
   CHECK_PATH_FALSE(dest, 2);
   if (!context.isNull() || !File::IsPlainFilePath(source) ||
-      !File::IsPlainFilePath(dest) || is_cli_mode()) {
+      !File::IsPlainFilePath(dest) || is_cli_server_mode()) {
     Variant sfile = HHVM_FN(fopen)(source, "r", false, context);
     if (same(sfile, false)) {
       return false;
@@ -1867,7 +1867,7 @@ Variant HHVM_FUNCTION(tempnam,
   }
   String templ = tmpdir + trailing_slash + pbase + "XXXXXX";
   auto buf = templ.get()->mutableData();
-  if (UNLIKELY(is_cli_mode())) {
+  if (UNLIKELY(is_cli_server_mode())) {
     if (!cli_mkstemp(buf)) return false;
   } else {
     int fd = mkstemp(buf);

@@ -46,7 +46,7 @@ const StaticString
 req::ptr<File> HttpStreamWrapper::open(const String& filename,
                                        const String& mode, int /*options*/,
                                        const req::ptr<StreamContext>& context) {
-  if (RuntimeOption::ServerHttpSafeMode && !is_cli_mode()) {
+  if (RuntimeOption::ServerHttpSafeMode && !is_cli_server_mode()) {
     return nullptr;
   }
 

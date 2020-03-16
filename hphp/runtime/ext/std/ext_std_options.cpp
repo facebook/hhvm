@@ -838,7 +838,7 @@ static bool HHVM_FUNCTION(hphp_memory_stop_interval) {
 const StaticString s_srv("srv"), s_cli("cli");
 
 String HHVM_FUNCTION(php_sapi_name) {
-  return RuntimeOption::ServerExecutionMode() && !is_cli_mode()
+  return RuntimeOption::ServerExecutionMode() && !is_cli_server_mode()
     ? s_srv : s_cli;
 }
 

@@ -1366,7 +1366,17 @@ std::unique_ptr<uint8_t[]> read_inouts(AsmState& as, uint32_t numArgs) {
   return result;
 }
 
-std::tuple<FCallArgsBase, std::unique_ptr<uint8_t[]>, std::string>
+const StringData* read_fca_context(AsmState& as) {
+  as.in.skipSpaceTab();
+  std::string strVal;
+  as.in.expect('"');
+  as.in.readname(strVal);
+  as.in.expect('"');
+  return !strVal.empty() ? makeStaticString(strVal) : nullptr;
+}
+
+std::tuple<FCallArgsBase, std::unique_ptr<uint8_t[]>, std::string,
+           const StringData*>
 read_fcall_args(AsmState& as, Op thisOpcode) {
   FCallArgs::Flags flags;
   bool lockWhileUnwinding;
@@ -1377,11 +1387,13 @@ read_fcall_args(AsmState& as, Op thisOpcode) {
   auto const numRets = read_opcode_arg<uint32_t>(as);
   auto inoutArgs = read_inouts(as, numArgs);
   auto asyncEagerLabel = read_opcode_arg<std::string>(as);
+  auto const ctx = read_fca_context(as);
   return std::make_tuple(
     FCallArgsBase(flags, numArgs, numRets,
                   lockWhileUnwinding, skipNumArgsCheck),
     std::move(inoutArgs),
-    std::move(asyncEagerLabel)
+    std::move(asyncEagerLabel),
+    ctx
   );
 }
 
@@ -1449,6 +1461,13 @@ std::map<std::string,ParserFunc> opcode_parsers;
       [&] {                                                             \
         labelJumps.emplace_back(std::get<2>(fca), as.ue->bcPos());      \
         as.ue->emitInt32(0);                                            \
+      },                                                                \
+      std::get<3>(fca) != nullptr,                                      \
+      [&] {                                                             \
+        auto const sd = std::get<3>(fca);                               \
+        auto const id = as.ue->mergeLitstr(sd);                         \
+        as.litstrMap.emplace(id, sd);                                   \
+        as.ue->emitInt32(id);                                           \
       }                                                                 \
     );                                                                  \
     immFCA = fcab;                                                      \

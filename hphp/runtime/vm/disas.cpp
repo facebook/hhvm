@@ -317,7 +317,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
     auto const aeLabel = fca.asyncEagerOffset != kInvalidOffset
       ? rel_label(fca.asyncEagerOffset)
       : "-";
-    return show(fca, fca.inoutArgs, aeLabel);
+    return show(fca, fca.inoutArgs, aeLabel, fca.context);
   };
 
 #define IMM_BLA    print_switch();
@@ -340,7 +340,8 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 #define IMM_KA     out.fmt(" {}", print_mk(decode_member_key(pc, finfo.unit)));
 #define IMM_LAR    out.fmt(" {}", show(decodeLocalRange(pc)));
 #define IMM_ITA    out.fmt(" {}", print_ita(decodeIterArgs(pc)));
-#define IMM_FCA    out.fmt(" {}", print_fca(decodeFCallArgs(thisOpcode, pc)));
+#define IMM_FCA    out.fmt(" {}", print_fca(decodeFCallArgs(thisOpcode, pc, \
+                                                            finfo.unit)));
 
 #define IMM_NA
 #define IMM_ONE(x)           IMM_##x

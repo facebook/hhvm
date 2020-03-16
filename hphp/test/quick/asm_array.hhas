@@ -8,7 +8,7 @@
   NullUninit
   NullUninit
   String "main"
-  FCallFunc <> 0 1 "" - # allow the JIT why not
+  FCallFunc <> 0 1 "" - "" # allow the JIT why not
   PopC
 
   Int 1
@@ -30,7 +30,7 @@
     String "ClassWithArray"
     ClassGetC
     CGetS
-  FCallFuncD <> 1 1 "" - "var_dump"
+  FCallFuncD <> 1 1 "" - "" "var_dump"
   PopC
 
   String "ClassWithArray"
@@ -46,7 +46,7 @@
     ClassGetC
     BaseSC 2 0 Warn
     QueryM 3 CGet EC:1
-  FCallFuncD <> 1 1 "" - "var_dump"
+  FCallFuncD <> 1 1 "" - "" "var_dump"
   PopC
 
   True
@@ -57,7 +57,7 @@
   NullUninit
   NullUninit
   NullUninit
-  FCallFuncD <> 0 1 "" - "ArrayMember"
+  FCallFuncD <> 0 1 "" - "" "ArrayMember"
   PopC
 
   Array @my_array
@@ -110,7 +110,7 @@ unset_label:  String "win\n"
               NullUninit
               NullUninit
               CGetL $arr
-              FCallFuncD <> 1 1 "" - "var_dump"
+              FCallFuncD <> 1 1 "" - "" "var_dump"
               PopC
 
               NullUninit
@@ -119,7 +119,7 @@ unset_label:  String "win\n"
               Int 1
               String "b"
               NewPackedArray 2
-              FCallFuncD <> 1 1 "" - "var_dump"
+              FCallFuncD <> 1 1 "" - "" "var_dump"
               PopC
 
               Null

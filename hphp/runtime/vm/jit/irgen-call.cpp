@@ -446,7 +446,8 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     nullptr,  // inout-ness already checked
     fca.asyncEagerOffset,
     fca.lockWhileUnwinding,
-    fca.skipNumArgsCheck
+    fca.skipNumArgsCheck,
+    fca.context
   ));
 }
 
@@ -858,7 +859,8 @@ void fcallObjMethodMagic(IRGS& env, const Func* callee, const FCallArgs& fca,
 
   assertx(!fca.supportsAsyncEagerReturn());
   auto const fca2 =
-    FCallArgs(fca.flags, 2, 1, nullptr, kInvalidOffset, false, false);
+    FCallArgs(fca.flags, 2, 1, nullptr, kInvalidOffset, false, false,
+              fca.context);
   prepareAndCallKnown(env, callee, fca2, obj, dynamic);
 }
 
@@ -1699,7 +1701,7 @@ void emitDirectCall(IRGS& env, Func* callee, uint32_t numParams,
   }
 
   auto const fca = FCallArgs(FCallArgs::Flags::None, numParams, 1, nullptr,
-                             kInvalidOffset, false, false);
+                             kInvalidOffset, false, false, nullptr);
   prepareAndCallKnown(env, callee, fca, nullptr, false);
 }
 

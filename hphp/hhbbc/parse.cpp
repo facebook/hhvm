@@ -374,7 +374,7 @@ void populate_block(ParseUnitState& puState,
                        }();
 #define IMM_ITA(n)     auto ita = decodeIterArgs(pc);
 #define IMM_FCA(n)     auto fca = [&] {                                      \
-                         auto const fca = decodeFCallArgs(op, pc);           \
+                         auto const fca = decodeFCallArgs(op, pc, &ue);      \
                          auto const numBytes = (fca.numArgs + 7) / 8;        \
                          auto inoutArgs = fca.enforceInOut()                 \
                            ? std::make_unique<uint8_t[]>(numBytes)           \
@@ -390,7 +390,7 @@ void populate_block(ParseUnitState& puState,
                          return FCallArgs(fca.flags, fca.numArgs,            \
                                           fca.numRets, std::move(inoutArgs), \
                                           aeTarget, fca.lockWhileUnwinding,  \
-                                          fca.skipNumArgsCheck);             \
+                                          fca.skipNumArgsCheck, fca.context);\
                        }();
 
 #define IMM_NA

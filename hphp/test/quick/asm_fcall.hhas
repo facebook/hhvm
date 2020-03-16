@@ -7,7 +7,7 @@
   NullUninit
   NullUninit
   NullUninit
-  FCallFuncD <> 0 1 "" - "main"
+  FCallFuncD <> 0 1 "" - "" "main"
   PopC
   Null
   RetC
@@ -19,7 +19,7 @@
   NullUninit
   CGetL $arg
   CGetL $who
-  FCallFunc <> 1 1 "" -
+  FCallFunc <> 1 1 "" - ""
 
   SetL $ret
   PopC
@@ -28,7 +28,7 @@
   NullUninit
   NullUninit
   CGetL $ret
-  FCallFunc <> 0 1 "" -
+  FCallFunc <> 0 1 "" - ""
   PopC
 
   True
@@ -68,7 +68,7 @@
   NullUninit
   String "a"
   String "b"
-  FCallFuncD <> 2 1 "" - "caller"
+  FCallFuncD <> 2 1 "" - "" "caller"
   PopC
 
   String "strval"
@@ -81,7 +81,7 @@
   CGetL $funk
   Null
   PopL $funk
-  FCallFuncD <> 1 2 "1" - "byref"
+  FCallFuncD <> 1 2 "1" - "" "byref"
   PopC
   Print
   PopC

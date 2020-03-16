@@ -7,13 +7,13 @@
   NullUninit
   NullUninit
   NullUninit
-  FCallFuncD <> 0 1 "" - "init_test"
+  FCallFuncD <> 0 1 "" - "" "init_test"
   PopC
 
   NullUninit
   NullUninit
   NullUninit
-  FCallFuncD <> 0 1 "" - "uninit_test"
+  FCallFuncD <> 0 1 "" - "" "uninit_test"
   PopC
 
   Int 1
@@ -91,7 +91,7 @@
   Dup
   NullUninit
   NullUninit
-  FCallCtor <LockWhileUnwinding> 0 1 "" - ""
+  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
   PopC
   LockObj
   SetL $obj
@@ -114,7 +114,7 @@
   NullUninit
   NullUninit
     String "Init"
-  FCallFuncD <> 1 1 "" - "do_test"
+  FCallFuncD <> 1 1 "" - "" "do_test"
   RetC
 }
 
@@ -123,6 +123,6 @@
   NullUninit
   NullUninit
     String "Uninit"
-  FCallFuncD <> 1 1 "" - "do_test"
+  FCallFuncD <> 1 1 "" - "" "do_test"
   RetC
 }

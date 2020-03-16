@@ -559,6 +559,10 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
                          [&] {                                          \
                            set_expected_depth(data.fca.asyncEagerTarget()); \
                            emit_branch(data.fca.asyncEagerTarget());    \
+                         },                                             \
+                         data.fca.context() != nullptr,                 \
+                         [&] {                                          \
+                           ue.emitInt32(ue.mergeLitstr(data.fca.context()));\
                          });                                            \
                        if (!data.fca.hasUnpack()) ret.containsCalls = true;
 

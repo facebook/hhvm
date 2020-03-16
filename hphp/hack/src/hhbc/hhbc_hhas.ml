@@ -345,7 +345,9 @@ let string_of_list_of_bools l =
   "\"" ^ String.concat ~sep:"" (List.map ~f:bool_to_str l) ^ "\""
 
 let string_of_fcall_args fcall_args =
-  let (flags, num_args, num_rets, inouts, async_eager_label) = fcall_args in
+  let (flags, num_args, num_rets, inouts, async_eager_label, context) =
+    fcall_args
+  in
   sep
     [
       string_of_fcall_flags flags;
@@ -353,6 +355,9 @@ let string_of_fcall_args fcall_args =
       string_of_int num_rets;
       string_of_list_of_bools inouts;
       string_of_optional_label async_eager_label;
+      (match context with
+      | Some s -> "\"" ^ s ^ "\""
+      | None -> "\"\"");
     ]
 
 let string_of_switch_kind = function

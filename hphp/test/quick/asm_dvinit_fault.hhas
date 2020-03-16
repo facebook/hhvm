@@ -12,8 +12,8 @@
     NullUninit
     NullUninit
     NullUninit
-    FCallFuncD <> 0 1 "" - "main"
-  FCallFuncD <> 1 1 "" - "var_dump"
+    FCallFuncD <> 0 1 "" - "" "main"
+  FCallFuncD <> 1 1 "" - "" "var_dump"
   PopC
   Int 1
   RetC
@@ -41,7 +41,7 @@ dv_init2:
       Dup
       NullUninit
       NullUninit
-      FCallCtor <LockWhileUnwinding> 0 1 "" - ""
+      FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
       PopC
       LockObj
       Throw

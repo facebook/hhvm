@@ -7,7 +7,7 @@
   NullUninit
   NullUninit
   NullUninit
-  FCallFuncD <> 0 1 "" - "main"
+  FCallFuncD <> 0 1 "" - "" "main"
   PopC
   Int 1
   RetC

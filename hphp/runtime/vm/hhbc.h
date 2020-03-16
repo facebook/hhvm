@@ -110,21 +110,21 @@ struct FCallArgsBase {
     // Op is not FCallCtor and callee is known to support async eager return.
     // In the encoded form, this bit is re-used to encode lockWhileUnwinding
     SupportsAsyncEagerReturn = (1 << 2),
+    // HHBC-only: Op should be resolved using an explicit context class
+    ExplicitContext          = (1 << 3),
     // HHBC-only: is the number of returns provided? false => 1
-    HasInOut                 = (1 << 3),
+    HasInOut                 = (1 << 4),
     // HHBC-only: should this FCall enforce argument inout-ness?
-    EnforceInOut             = (1 << 4),
+    EnforceInOut             = (1 << 5),
     // HHBC-only: is the async eager offset provided? false => kInvalidOffset
-    HasAsyncEagerOffset      = (1 << 5),
+    HasAsyncEagerOffset      = (1 << 6),
     // HHBC-only: the remaining space is used for number of arguments
-    NumArgsStart             = (1 << 6),
+    NoArgs                   = (1 << 7),
   };
 
   // Flags that are valid on FCallArgsBase::flags struct (i.e. non-HHBC-only).
   static constexpr uint8_t kInternalFlags =
     HasUnpack | HasGenerics | SupportsAsyncEagerReturn;
-  // The first (lowest) bit of numArgs.
-  static constexpr uint8_t kFirstNumArgsBit = 6;
 
   explicit FCallArgsBase(Flags flags, uint32_t numArgs, uint32_t numRets,
                          bool lockWhileUnwinding, bool skipNumArgsCheck)
@@ -155,11 +155,13 @@ struct FCallArgsBase {
 struct FCallArgs : FCallArgsBase {
   explicit FCallArgs(Flags flags, uint32_t numArgs, uint32_t numRets,
                      const uint8_t* inoutArgs, Offset asyncEagerOffset,
-                     bool lockWhileUnwinding, bool skipNumArgsCheck)
+                     bool lockWhileUnwinding, bool skipNumArgsCheck,
+                     const StringData* context)
     : FCallArgsBase(flags, numArgs, numRets,
                     lockWhileUnwinding, skipNumArgsCheck)
     , asyncEagerOffset(asyncEagerOffset)
-    , inoutArgs(inoutArgs) {
+    , inoutArgs(inoutArgs)
+    , context(context) {
     assertx(IMPLIES(inoutArgs != nullptr, numArgs != 0));
     assertx(IMPLIES(asyncEagerOffset == kInvalidOffset,
                     !supportsAsyncEagerReturn()));
@@ -171,16 +173,15 @@ struct FCallArgs : FCallArgsBase {
   }
   Offset asyncEagerOffset;
   const uint8_t* inoutArgs;
+  const StringData* context;
 };
-
-static_assert(1 << FCallArgs::kFirstNumArgsBit == FCallArgs::NumArgsStart, "");
 
 using PrintLocal = std::function<std::string(int32_t local)>;
 std::string show(const IterArgs&, PrintLocal);
 
 std::string show(const LocalRange&);
 std::string show(const FCallArgsBase&, const uint8_t* inoutArgs,
-                 std::string asyncEagerLabel);
+                 std::string asyncEagerLabel, const StringData* ctx);
 
 /*
  * Variable-size immediates are implemented as follows: To determine which size

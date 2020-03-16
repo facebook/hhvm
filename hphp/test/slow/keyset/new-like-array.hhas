@@ -7,7 +7,7 @@
   NullUninit
   NullUninit
   NullUninit
-  FCallFuncD <> 0 1 "" - "main"
+  FCallFuncD <> 0 1 "" - "" "main"
   PopC
   Int 1
   RetC
@@ -24,7 +24,7 @@
           NullUninit
           NullUninit
           NewLikeArrayL $ks 3
-          FCallFuncD <> 1 1 "" - "var_dump"
+          FCallFuncD <> 1 1 "" - "" "var_dump"
           PopC
           True
           RetC

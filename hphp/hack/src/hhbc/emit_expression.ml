@@ -3358,7 +3358,8 @@ and emit_args_and_inout_setters env (args : Tast.expr list) =
     (instr_args, empty)
 
 (* Create fcall_args for a given call *)
-and get_fcall_args ?(lock_while_unwinding = false) args uarg async_eager_label =
+and get_fcall_args
+    ?(lock_while_unwinding = false) ?context args uarg async_eager_label =
   let num_args = List.length args in
   let num_rets =
     List.fold_left args ~init:1 ~f:(fun acc arg ->
@@ -3375,7 +3376,7 @@ and get_fcall_args ?(lock_while_unwinding = false) args uarg async_eager_label =
     }
   in
   let inouts = List.map args is_inout_arg in
-  make_fcall_args ~flags ~num_rets ~inouts ?async_eager_label num_args
+  make_fcall_args ~flags ~num_rets ~inouts ?async_eager_label ?context num_args
 
 (* Expression that appears in an object context, such as expr->meth(...) *)
 and emit_object_expr env (expr : Tast.expr) =
@@ -3396,12 +3397,12 @@ and emit_call_lhs_and_fcall
   let does_not_have_non_tparam_generics =
     not (has_non_tparam_generics_targs env targs)
   in
-  let emit_generics (flags, a, b, c, d) =
+  let emit_generics (flags, a, b, c, d, e) =
     if does_not_have_non_tparam_generics then
-      (empty, (flags, a, b, c, d))
+      (empty, (flags, a, b, c, d, e))
     else
       ( emit_reified_targs env pos (List.map ~f:snd targs),
-        ({ flags with has_generics = true }, a, b, c, d) )
+        ({ flags with has_generics = true }, a, b, c, d, e) )
   in
   match expr_ with
   | A.Obj_get (obj, (_, A.String id), null_flavor)
@@ -3573,7 +3574,7 @@ and emit_call_lhs_and_fcall
             ] )
     end
   | A.Id (_, s) ->
-    let (flags, num_args, _, _, _) = fcall_args in
+    let (flags, num_args, _, _, _, _) = fcall_args in
     let fq_id =
       match SU.strip_global_ns s with
       | "min" when num_args = 2 && not flags.has_unpack ->
@@ -3969,7 +3970,7 @@ and emit_call
     Emit_symbol_refs.add_function fid
   | _ -> ());
   let fcall_args = get_fcall_args args uarg async_eager_label in
-  let (_flags, _args, num_ret, _inouts, _eager) = fcall_args in
+  let (_flags, _args, num_ret, _inouts, _eager, _ctx) = fcall_args in
   let num_uninit = num_ret - 1 in
   let default () =
     Scope.with_unnamed_locals @@ fun () ->

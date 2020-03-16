@@ -340,9 +340,8 @@ class HHBC(object):
             size = 1
 
             skipNumArgsCheck = " skipNumArgsCheck"
-            shift = V('HPHP::FCallArgs::kFirstNumArgsBit')
-            if flags >> shift:
-                num_args = (flags >> shift) - 1
+            if flags & V('HPHP::FCallArgs::NoArgs'):
+                num_args = 0
             else:
                 iva = HHBC.decode_iva(ptr + size)
                 v = int(iva['value'])
@@ -368,9 +367,16 @@ class HHBC(object):
                 asyncEagerOffset = ' aeo:' + str(off['value'])
                 size += off['size']
 
+            context = ''
+            if flags & V('HPHP::FCallArgs::ExplicitContext'):
+                id = (ptr + size).cast(T('uint32_t').pointer()).dereference()
+                context = ' context: ' + str(HHBC.try_lookup_litstr(id))
+                size += 4
+
             info['size'] = size
             info['value'] = (str(num_args) + ' ' + has_unpack
-                             + ' ' + num_rets + asyncEagerOffset + skipNumArgsCheck)
+                             + ' ' + num_rets + asyncEagerOffset + skipNumArgsCheck
+                             + context)
 
         else:
             table_name = 'HPHP::immSizeTable'

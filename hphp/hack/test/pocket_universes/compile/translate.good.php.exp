@@ -92,7 +92,7 @@
     CGetL $atom
     Concat
     .srcloc 14:8,14:12;
-    FCallCtor <LockWhileUnwinding> 1 1 "0" - ""
+    FCallCtor <LockWhileUnwinding> 1 1 "0" - "" ""
     PopC
     LockObj
     .srcloc 14:8,14:12;
@@ -139,7 +139,7 @@
     CGetL $atom
     Concat
     .srcloc 14:8,14:12;
-    FCallCtor <LockWhileUnwinding> 1 1 "0" - ""
+    FCallCtor <LockWhileUnwinding> 1 1 "0" - "" ""
     PopC
     LockObj
     .srcloc 14:8,14:12;
@@ -186,7 +186,7 @@
     CGetL $atom
     Concat
     .srcloc 14:8,14:12;
-    FCallCtor <LockWhileUnwinding> 1 1 "0" - ""
+    FCallCtor <LockWhileUnwinding> 1 1 "0" - "" ""
     PopC
     LockObj
     .srcloc 14:8,14:12;

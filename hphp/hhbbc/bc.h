@@ -153,10 +153,11 @@ struct FCallArgsShort {
       Flags flags, uint32_t numArgs, uint32_t numRets,
       const std::unique_ptr<uint8_t[]>& inoutArgs,
       BlockId asyncEagerTarget, bool lockWhileUnwinding,
-      bool skipNumArgsCheck) {
+      bool skipNumArgsCheck, SString context) {
     if (numArgs >= 16 ||
         numRets >= 16 ||
-        (inoutArgs && numArgs > 8 && inoutArgs[1] > (kInoutMask >> 8))) {
+        (inoutArgs && numArgs > 8 && inoutArgs[1] > (kInoutMask >> 8)) ||
+        context) {
       return FCallArgsShort{};
     }
     FCallArgsShort fca{};
@@ -311,22 +312,23 @@ struct FCallArgsShort {
 struct FCallArgsLong : FCallArgsBase {
   explicit FCallArgsLong(uint32_t numArgs)
     : FCallArgsLong(Flags::None, numArgs, 1,
-                    nullptr, NoBlockId, false, false) {
+                    nullptr, NoBlockId, false, false, nullptr) {
   }
   explicit FCallArgsLong(Flags flags, uint32_t numArgs, uint32_t numRets,
                          std::unique_ptr<uint8_t[]> inoutArgs,
                          BlockId asyncEagerTarget, bool lockWhileUnwinding,
-                         bool skipNumArgsCheck)
+                         bool skipNumArgsCheck, SString context)
     : FCallArgsBase(flags, numArgs, numRets,
                     lockWhileUnwinding, skipNumArgsCheck)
     , asyncEagerTarget(asyncEagerTarget)
-    , inoutArgs(std::move(inoutArgs)) {
+    , inoutArgs(std::move(inoutArgs))
+    , context(context) {
     assertx(IMPLIES(asyncEagerTarget == NoBlockId,
                     !supportsAsyncEagerReturn()));
   }
   FCallArgsLong(const FCallArgsLong& o)
     : FCallArgsLong(o.flags, o.numArgs, o.numRets, nullptr, o.asyncEagerTarget,
-                    o.lockWhileUnwinding, o.skipNumArgsCheck) {
+                    o.lockWhileUnwinding, o.skipNumArgsCheck, o.context) {
     if (o.inoutArgs) {
       auto const numBytes = (numArgs + 7) / 8;
       inoutArgs = std::make_unique<uint8_t[]>(numBytes);
@@ -336,7 +338,7 @@ struct FCallArgsLong : FCallArgsBase {
   FCallArgsLong(FCallArgsLong&& o)
     : FCallArgsLong(o.flags, o.numArgs, o.numRets, std::move(o.inoutArgs),
                     o.asyncEagerTarget, o.lockWhileUnwinding,
-                    o.skipNumArgsCheck) {}
+                    o.skipNumArgsCheck, o.context) {}
 
   bool enforceInOut() const { return inoutArgs.get() != nullptr; }
   bool isInOut(uint32_t i) const {
@@ -397,7 +399,8 @@ struct FCallArgsLong : FCallArgsBase {
       eq(a.inoutArgs.get(), b.inoutArgs.get(), (a.numArgs + 7) / 8) &&
       a.asyncEagerTarget == b.asyncEagerTarget &&
       a.lockWhileUnwinding == b.lockWhileUnwinding &&
-      a.skipNumArgsCheck == b.skipNumArgsCheck;
+      a.skipNumArgsCheck == b.skipNumArgsCheck &&
+      a.context == b.context;
   }
 
   size_t hash() const {
@@ -409,6 +412,7 @@ struct FCallArgsLong : FCallArgsBase {
     }
     hash = HPHP::hash_int64_pair(hash, asyncEagerTarget);
     hash = HPHP::hash_int64_pair(hash, lockWhileUnwinding);
+    if (context) hash = HPHP::hash_int64_pair(hash, context->hash());
     return static_cast<size_t>(hash);
   }
   template<int nin>
@@ -437,23 +441,25 @@ struct FCallArgsLong : FCallArgsBase {
 
   BlockId asyncEagerTarget;
   std::unique_ptr<uint8_t[]> inoutArgs;
+  SString context;
 };
 
 struct FCallArgs {
   using Flags = FCallArgsBase::Flags;
   explicit FCallArgs(uint32_t numArgs)
-    : FCallArgs(Flags::None, numArgs, 1, nullptr, NoBlockId, false, false) {}
+    : FCallArgs(Flags::None, numArgs, 1, nullptr, NoBlockId, false, false,
+                nullptr) {}
   FCallArgs(Flags flags, uint32_t numArgs, uint32_t numRets,
             std::unique_ptr<uint8_t[]> inoutArgs,
             BlockId asyncEagerTarget, bool lockWhileUnwinding,
-            bool skipNumArgsCheck)
+            bool skipNumArgsCheck, SString context)
       : s{FCallArgsShort::create(flags, numArgs, numRets, inoutArgs,
                                  asyncEagerTarget, lockWhileUnwinding,
-                                 skipNumArgsCheck)} {
+                                 skipNumArgsCheck, context)} {
     if (!s.valid()) {
       assertx(!l);
       l.emplace(flags, numArgs, numRets, std::move(inoutArgs), asyncEagerTarget,
-                lockWhileUnwinding, skipNumArgsCheck);
+                lockWhileUnwinding, skipNumArgsCheck, context);
     }
   }
   FCallArgs(const FCallArgsShort& o) : s{o} {}
@@ -595,6 +601,7 @@ struct FCallArgs {
     return s.valid() ?
       s.template popFlavor<nin,nobj>(i) : l->template popFlavor<nin,nobj>(i);
   }
+  SString context() const { return s.valid() ? nullptr : l->context; }
 private:
   union {
     copy_ptr<FCallArgsLong> l;

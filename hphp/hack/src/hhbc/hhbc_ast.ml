@@ -57,7 +57,12 @@ type fcall_flags = {
 type by_refs = bool list
 
 type fcall_args =
-  fcall_flags * num_params * num_params * by_refs * Label.t option
+  fcall_flags
+  * num_params
+  * num_params
+  * by_refs
+  * Label.t option
+  * string option
 
 type iter_args = {
   iter_id: Iterator.t;

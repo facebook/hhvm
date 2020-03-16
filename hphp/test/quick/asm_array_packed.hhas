@@ -4,7 +4,7 @@
   NullUninit
   NullUninit
   NullUninit
-  FCallFuncD <> 0 1 "" - "main"
+  FCallFuncD <> 0 1 "" - "" "main"
   PopC
   Int 1
   RetC
@@ -81,7 +81,7 @@
   Int 64
   NewPackedArray 64
 
-  FCallFuncD <> 1 1 "" - "var_dump"
+  FCallFuncD <> 1 1 "" - "" "var_dump"
   PopC
 
   Int 1

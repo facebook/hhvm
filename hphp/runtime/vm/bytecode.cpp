@@ -4074,7 +4074,7 @@ void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
   auto const flags = static_cast<FCallArgs::Flags>(
     fca.flags & ~(FCallArgs::Flags::HasUnpack | FCallArgs::Flags::HasGenerics));
   auto const fca2 =
-    FCallArgs(flags, 2, 1, nullptr, kInvalidOffset, false, false);
+    FCallArgs(flags, 2, 1, nullptr, kInvalidOffset, false, false, fca.context);
   fcallImpl<dynamic>(origpc, pc, fca2, func, std::forward<Ctx>(ctx),
                      logAsDynamicCall);
 }
@@ -6047,7 +6047,7 @@ struct litstr_id {
 #define DECODE_KA decode_member_key(pc, liveUnit())
 #define DECODE_LAR decodeLocalRange(pc)
 #define DECODE_ITA decodeIterArgs(pc)
-#define DECODE_FCA decodeFCallArgs(op, pc)
+#define DECODE_FCA decodeFCallArgs(op, pc, liveUnit())
 #define DECODE_BLA decode_imm_array<Offset>(pc)
 #define DECODE_SLA decode_imm_array<StrVecItem>(pc)
 #define DECODE_VSA decode_imm_array<Id>(pc)

@@ -29,15 +29,15 @@ let get_regular_labels instr =
   match instr with
   | IIterator (IterInit (_, l))
   | IIterator (IterNext (_, l))
-  | ICall (FCall (_, _, _, _, Some l))
-  | ICall (FCallClsMethod ((_, _, _, _, Some l), _))
-  | ICall (FCallClsMethodD ((_, _, _, _, Some l), _, _))
-  | ICall (FCallClsMethodS ((_, _, _, _, Some l), _))
-  | ICall (FCallClsMethodSD ((_, _, _, _, Some l), _, _))
-  | ICall (FCallFunc (_, _, _, _, Some l))
-  | ICall (FCallFuncD ((_, _, _, _, Some l), _))
-  | ICall (FCallObjMethod ((_, _, _, _, Some l), _))
-  | ICall (FCallObjMethodD ((_, _, _, _, Some l), _, _))
+  | ICall (FCall (_, _, _, _, Some l, _))
+  | ICall (FCallClsMethod ((_, _, _, _, Some l, _), _))
+  | ICall (FCallClsMethodD ((_, _, _, _, Some l, _), _, _))
+  | ICall (FCallClsMethodS ((_, _, _, _, Some l, _), _))
+  | ICall (FCallClsMethodSD ((_, _, _, _, Some l, _), _, _))
+  | ICall (FCallFunc (_, _, _, _, Some l, _))
+  | ICall (FCallFuncD ((_, _, _, _, Some l, _), _))
+  | ICall (FCallObjMethod ((_, _, _, _, Some l, _), _))
+  | ICall (FCallObjMethodD ((_, _, _, _, Some l, _), _, _))
   | IGenDelegation (YieldFromDelegate (_, l))
   | IMisc (MemoGet (l, _))
   | IContFlow (Jmp l | JmpNS l | JmpZ l | JmpNZ l) ->
@@ -83,26 +83,27 @@ let relabel_instr instr relabel =
   | IIterator (IterNext (id, l)) -> IIterator (IterNext (id, relabel l))
   | IGenDelegation (YieldFromDelegate (i, l)) ->
     IGenDelegation (YieldFromDelegate (i, relabel l))
-  | ICall (FCall (fl, na, nr, br, Some l)) ->
-    ICall (FCall (fl, na, nr, br, Some (relabel l)))
-  | ICall (FCallClsMethod ((fl, na, nr, br, Some l), is_log_as_dynamic_call)) ->
+  | ICall (FCall (fl, na, nr, br, Some l, c)) ->
+    ICall (FCall (fl, na, nr, br, Some (relabel l), c))
+  | ICall (FCallClsMethod ((fl, na, nr, br, Some l, c), is_log_as_dynamic_call))
+    ->
     ICall
       (FCallClsMethod
-         ((fl, na, nr, br, Some (relabel l)), is_log_as_dynamic_call))
-  | ICall (FCallClsMethodD ((fl, na, nr, br, Some l), c, m)) ->
-    ICall (FCallClsMethodD ((fl, na, nr, br, Some (relabel l)), c, m))
-  | ICall (FCallClsMethodS ((fl, na, nr, br, Some l), c)) ->
-    ICall (FCallClsMethodS ((fl, na, nr, br, Some (relabel l)), c))
-  | ICall (FCallClsMethodSD ((fl, na, nr, br, Some l), c, m)) ->
-    ICall (FCallClsMethodSD ((fl, na, nr, br, Some (relabel l)), c, m))
-  | ICall (FCallFunc (fl, na, nr, br, Some l)) ->
-    ICall (FCallFunc (fl, na, nr, br, Some (relabel l)))
-  | ICall (FCallFuncD ((fl, na, nr, br, Some l), f)) ->
-    ICall (FCallFuncD ((fl, na, nr, br, Some (relabel l)), f))
-  | ICall (FCallObjMethod ((fl, na, nr, br, Some l), f)) ->
-    ICall (FCallObjMethod ((fl, na, nr, br, Some (relabel l)), f))
-  | ICall (FCallObjMethodD ((fl, na, nr, br, Some l), f, m)) ->
-    ICall (FCallObjMethodD ((fl, na, nr, br, Some (relabel l)), f, m))
+         ((fl, na, nr, br, Some (relabel l), c), is_log_as_dynamic_call))
+  | ICall (FCallClsMethodD ((fl, na, nr, br, Some l, ctx), c, m)) ->
+    ICall (FCallClsMethodD ((fl, na, nr, br, Some (relabel l), ctx), c, m))
+  | ICall (FCallClsMethodS ((fl, na, nr, br, Some l, ctx), c)) ->
+    ICall (FCallClsMethodS ((fl, na, nr, br, Some (relabel l), ctx), c))
+  | ICall (FCallClsMethodSD ((fl, na, nr, br, Some l, ctx), c, m)) ->
+    ICall (FCallClsMethodSD ((fl, na, nr, br, Some (relabel l), ctx), c, m))
+  | ICall (FCallFunc (fl, na, nr, br, Some l, ctx)) ->
+    ICall (FCallFunc (fl, na, nr, br, Some (relabel l), ctx))
+  | ICall (FCallFuncD ((fl, na, nr, br, Some l, ctx), f)) ->
+    ICall (FCallFuncD ((fl, na, nr, br, Some (relabel l), ctx), f))
+  | ICall (FCallObjMethod ((fl, na, nr, br, Some l, ctx), f)) ->
+    ICall (FCallObjMethod ((fl, na, nr, br, Some (relabel l), ctx), f))
+  | ICall (FCallObjMethodD ((fl, na, nr, br, Some l, ctx), f, m)) ->
+    ICall (FCallObjMethodD ((fl, na, nr, br, Some (relabel l), ctx), f, m))
   | IContFlow (Jmp l) -> IContFlow (Jmp (relabel l))
   | IContFlow (JmpNS l) -> IContFlow (JmpNS (relabel l))
   | IContFlow (JmpZ l) -> IContFlow (JmpZ (relabel l))

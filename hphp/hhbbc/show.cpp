@@ -194,7 +194,8 @@ std::string show(const Func& func, const Bytecode& bc) {
     ? folly::sformat("<aeblk:{}>", data.fca.asyncEagerTarget())    \
     : "-";                                                         \
   folly::toAppend(                                                 \
-    " ", show(data.fca.base(), data.fca.inoutArgs(), aeTarget), &ret);  \
+    " ", show(data.fca.base(), data.fca.inoutArgs(), aeTarget,     \
+              data.fca.context()), &ret);                          \
 } while (false);
 
 #define IMM_NA

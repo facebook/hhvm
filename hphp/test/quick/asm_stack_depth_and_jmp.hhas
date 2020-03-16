@@ -4,7 +4,7 @@
   NullUninit
   NullUninit
   NullUninit
-  FCallFuncD <> 0 1 "" - "test"
+  FCallFuncD <> 0 1 "" - "" "test"
   PopC
   String "\n"
   Print

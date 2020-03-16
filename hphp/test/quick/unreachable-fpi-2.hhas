@@ -3,7 +3,7 @@
   NullUninit
   NullUninit
   NullUninit
-  FCallFuncD <> 0 1 "" - "foo"
+  FCallFuncD <> 0 1 "" - "" "foo"
   PopC
   String "done.\n"
   Print
@@ -19,7 +19,7 @@ L2:
   NullUninit
   NullUninit
   NullUninit
-  FCallFuncD <> 0 1 "" - "bar"
+  FCallFuncD <> 0 1 "" - "" "bar"
   PopC
 L1:
   Jmp L2

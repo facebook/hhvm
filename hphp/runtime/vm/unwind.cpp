@@ -335,7 +335,7 @@ void chainFaultObjects(ObjectData* top, ObjectData* prev) {
 void lockObjectWhileUnwinding(PC pc, Stack& stack) {
   auto const op = decode_op(pc);
   if (LIKELY(op != OpFCallCtor)) return;
-  auto fca = decodeFCallArgs(op, pc);
+  auto fca = decodeFCallArgs(op, pc, nullptr /* StringDecoder */);
   if (!fca.lockWhileUnwinding) return;
 
   // We just unwound from a constructor that was called from a new expression

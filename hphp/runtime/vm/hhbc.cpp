@@ -165,7 +165,7 @@ int immSize(Op op, ArgType type, PC immPC) {
   }
 
   if (type == FCA) {
-    decodeFCallArgs(op, pc);
+    decodeFCallArgs(op, pc, nullptr /* StringDecoder */);
     return pc - immPC;
   }
 
@@ -220,7 +220,7 @@ ArgUnion getImm(const PC origPC, int idx, const Unit* unit) {
   } else if (type == ITA) {
     retval.u_ITA = decodeIterArgs(pc);
   } else if (type == FCA) {
-    retval.u_FCA = decodeFCallArgs(op, pc);
+    retval.u_FCA = decodeFCallArgs(op, pc, unit);
   } else if (type == RATA) {
     assertx(unit != nullptr);
     retval.u_RATA = decodeRAT(unit, pc);
@@ -331,7 +331,7 @@ OffsetList instrJumpOffsets(const PC origPC) {
 
   OffsetList targets;
   if (isFCall(op)) {
-    auto const offset = decodeFCallArgs(op, pc).asyncEagerOffset;
+    auto const offset = decodeFCallArgs(op, pc, nullptr).asyncEagerOffset;
     if (offset != kInvalidOffset) targets.emplace_back(offset);
     return targets;
   }
@@ -830,12 +830,12 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
 #define H_LAR (out += ' ', out += show(decodeLocalRange(it)))
 #define H_ITA (out += ' ', out += show(decodeIterArgs(it), printLocal))
 #define H_FCA do {                                               \
-  auto const fca = decodeFCallArgs(thisOpcode, it);              \
+  auto const fca = decodeFCallArgs(thisOpcode, it, u);           \
   auto const aeOffset = fca.asyncEagerOffset != kInvalidOffset   \
     ? showOffset(fca.asyncEagerOffset)                           \
     : "-";                                                       \
   out += ' ';                                                    \
-  out += show(fca, fca.inoutArgs, aeOffset);                        \
+  out += show(fca, fca.inoutArgs, aeOffset, fca.context);        \
 } while (false)
 
 #define O(name, imm, push, pop, flags)       \
@@ -1181,7 +1181,7 @@ std::string show(const LocalRange& range) {
 }
 
 std::string show(const FCallArgsBase& fca, const uint8_t* inoutArgsRaw,
-                 std::string asyncEagerLabel) {
+                 std::string asyncEagerLabel, const StringData* ctx) {
   auto const inoutArgs = [&] {
     if (!inoutArgsRaw) return std::string{"\"\""};
     std::string out = "\"";
@@ -1201,8 +1201,9 @@ std::string show(const FCallArgsBase& fca, const uint8_t* inoutArgsRaw,
   if (fca.lockWhileUnwinding) flags.push_back("LockWhileUnwinding");
   if (fca.skipNumArgsCheck) flags.push_back("SkipNumArgsCheck");
   return folly::sformat(
-    "<{}> {} {} {} {}",
-    folly::join(' ', flags), fca.numArgs, fca.numRets, inoutArgs, asyncEagerLabel
+    "<{}> {} {} {} {} \"{}\"",
+    folly::join(' ', flags), fca.numArgs, fca.numRets, inoutArgs,
+    asyncEagerLabel, ctx ? ctx->data() : ""
   );
 }
 

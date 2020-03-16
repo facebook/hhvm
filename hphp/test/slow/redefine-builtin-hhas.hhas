@@ -7,7 +7,7 @@
   NullUninit
   NullUninit
   NullUninit
-  FCallFuncD <> 0 1 "" - "parse_str"
+  FCallFuncD <> 0 1 "" - "" "parse_str"
   PopC
   Int 1
   RetC

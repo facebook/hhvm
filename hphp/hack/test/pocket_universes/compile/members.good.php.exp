@@ -32,7 +32,7 @@
     .srcloc 15:20,15:21;
     CGetL $x
     .srcloc 15:10,15:22;
-    FCallClsMethodD <> 1 1 "0" - "" "C" "E##val"
+    FCallClsMethodD <> 1 1 "0" - "" "" "C" "E##val"
     .srcloc 15:5,15:23;
     Print
     .srcloc 15:5,15:23;
@@ -63,7 +63,7 @@ L0:
   NullUninit
   NullUninit
   .srcloc 22:8,22:22;
-  FCallClsMethodD <> 0 1 "" - "" "C" "E##Members"
+  FCallClsMethodD <> 0 1 "" - "" "" "C" "E##Members"
   .srcloc 22:3,22:22;
   SetL $v
   .srcloc 22:3,22:23;
@@ -75,7 +75,7 @@ L0:
   .srcloc 23:7,23:8;
   CGetL $v
   .srcloc 23:3,23:9;
-  FCallFuncD <> 1 1 "0" - "foo"
+  FCallFuncD <> 1 1 "0" - "" "foo"
   .srcloc 23:3,23:9;
   PopC
   .srcloc 24:2,24:2;
@@ -157,7 +157,7 @@ L0:
     CGetL $atom
     Concat
     .srcloc 4:8,4:8;
-    FCallCtor <LockWhileUnwinding> 1 1 "0" - ""
+    FCallCtor <LockWhileUnwinding> 1 1 "0" - "" ""
     PopC
     LockObj
     .srcloc 4:8,4:8;

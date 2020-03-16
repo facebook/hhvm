@@ -20,6 +20,19 @@
 
 namespace HPHP {
 
+namespace {
+
+const StringData* decode_string(PC& pc, StringDecoder u) {
+  auto const id = decode_raw<Id>(pc);
+  if (u.isNull()) return nullptr;
+  return u.match(
+    [id](const Unit* u) { return u->lookupLitstrId(id); },
+    [id](const UnitEmitter* ue) { return ue->lookupLitstr(id); }
+  );
+}
+
+}
+
 NamedLocal decode_named_local(PC& pc) {
   LocalName lname = decode_iva(pc) - 1;
   int32_t id = decode_iva(pc);
@@ -42,12 +55,7 @@ MemberKey decode_member_key(PC& pc, Either<const Unit*, const UnitEmitter*> u) {
       return MemberKey{mcode, decode_raw<int64_t>(pc)};
 
     case MET: case MPT: case MQT: {
-      auto const id = decode_raw<Id>(pc);
-      auto const str = u.match(
-        [id](const Unit* u) { return u->lookupLitstrId(id); },
-        [id](const UnitEmitter* ue) { return ue->lookupLitstr(id); }
-      );
-      return MemberKey{mcode, str};
+      return MemberKey{mcode, decode_string(pc, u)};
     }
 
     case MW:
@@ -115,16 +123,15 @@ IterArgs decodeIterArgs(PC& pc) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void encodeFCallArgsBase(UnitEmitter& ue, const FCallArgsBase& fca,
-                         bool hasInoutArgs, bool hasAsyncEagerOffset) {
-  auto constexpr kFirstNumArgsBit = FCallArgsBase::kFirstNumArgsBit;
-  bool smallNumArgs =
-    fca.skipNumArgsCheck && (((fca.numArgs + 1) << kFirstNumArgsBit) <= 0xff);
+                         bool hasInoutArgs, bool hasAsyncEagerOffset,
+                         bool hasContext) {
   auto flags = uint8_t{fca.flags};
   assertx(!(flags & ~FCallArgsBase::kInternalFlags));
-  if (smallNumArgs) flags |= (fca.numArgs + 1) << kFirstNumArgsBit;
+  if (!fca.numArgs && fca.skipNumArgsCheck) flags |= FCallArgsBase::NoArgs;
   if (fca.numRets != 1) flags |= FCallArgsBase::HasInOut;
   if (hasInoutArgs) flags |= FCallArgsBase::EnforceInOut;
   if (hasAsyncEagerOffset) flags |= FCallArgsBase::HasAsyncEagerOffset;
+  if (hasContext) flags |= FCallArgsBase::ExplicitContext;
   if (fca.lockWhileUnwinding) {
     // intentionally re-using the SupportsAsyncEagerReturn bit
     assertx(!(flags & FCallArgsBase::SupportsAsyncEagerReturn));
@@ -132,7 +139,7 @@ void encodeFCallArgsBase(UnitEmitter& ue, const FCallArgsBase& fca,
   }
 
   ue.emitByte(flags);
-  if (!smallNumArgs) {
+  if (fca.numArgs || !fca.skipNumArgsCheck) {
     ue.emitIVA((uint64_t)fca.numArgs * 2 + fca.skipNumArgsCheck);
   }
   if (fca.numRets != 1) ue.emitIVA(fca.numRets);
@@ -143,9 +150,10 @@ void encodeFCallArgsIO(UnitEmitter& ue, int numBytes,
   for (auto i = 0; i < numBytes; ++i) ue.emitByte(inoutArgs[i]);
 }
 
-FCallArgs decodeFCallArgs(Op thisOpcode, PC& pc) {
+FCallArgs decodeFCallArgs(Op thisOpcode, PC& pc, StringDecoder u) {
   assertx(isFCall(thisOpcode));
   bool lockWhileUnwinding = false;
+  bool skipContext = true;
   auto const flags = [&]() {
     auto rawFlags = decode_byte(pc);
     if (thisOpcode == Op::FCallCtor &&
@@ -153,13 +161,15 @@ FCallArgs decodeFCallArgs(Op thisOpcode, PC& pc) {
       lockWhileUnwinding = true;
       rawFlags &= ~FCallArgs::SupportsAsyncEagerReturn;
     }
+    skipContext = !(rawFlags & FCallArgs::ExplicitContext);
+    if (u.isNull()) rawFlags &= ~FCallArgs::ExplicitContext;
     return rawFlags;
   }();
 
   uint32_t numArgs;
   bool skipNumArgsCheck;
-  if (flags >> FCallArgs::kFirstNumArgsBit) {
-    numArgs = (flags >> FCallArgs::kFirstNumArgsBit) - 1;
+  if (flags & FCallArgs::NoArgs) {
+    numArgs = 0;
     skipNumArgsCheck = true;
   } else {
     numArgs = decode_iva(pc);
@@ -171,10 +181,11 @@ FCallArgs decodeFCallArgs(Op thisOpcode, PC& pc) {
   if (inoutArgs != nullptr) pc += (numArgs + 7) / 8;
   auto const asyncEagerOffset = (flags & FCallArgs::HasAsyncEagerOffset)
     ? decode_ba(pc) : kInvalidOffset;
+  auto const context = !skipContext ? decode_string(pc, u) : nullptr;
   return FCallArgs(
     static_cast<FCallArgs::Flags>(flags & FCallArgs::kInternalFlags),
     numArgs, numRets, inoutArgs, asyncEagerOffset, lockWhileUnwinding,
-    skipNumArgsCheck
+    skipNumArgsCheck, context
   );
 }
 

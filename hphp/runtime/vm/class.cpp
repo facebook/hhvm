@@ -935,14 +935,15 @@ void Class::checkPropInitialValues() const {
     if (prop.attrs & (AttrInitialSatisfiesTC|AttrSystemInitialValue)) continue;
     auto const& tc = prop.typeConstraint;
     if (!tc.isCheckable()) continue;
-    auto index = propSlotToIndex(slot);
-    auto rval = m_declPropInit[index].val;
+    auto const index = propSlotToIndex(slot);
+    auto const rval = m_declPropInit[index].val;
     if (type(rval) == KindOfUninit) continue;
-    auto lval = rval.as_lval();
-    tc.verifyProperty(lval, this, prop.cls, prop.name);
+    auto tv = rval.tv();
+    tc.verifyProperty(&tv, this, prop.cls, prop.name);
 
     // No coercion for statically initialized properties.
-    assertx(type(lval) == type(rval));
+    assertx(type(tv) == type(rval));
+    assertx(val(tv).num == val(rval).num);
   }
 
   extra->m_checkedPropInitialValues.initWith(true);

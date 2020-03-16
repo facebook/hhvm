@@ -218,13 +218,6 @@ struct const_variant_ref : variant_ref_detail::base<true> {
 
   /* implicit */ const_variant_ref(const Variant& v);
 
-  /*
-   * Equivalent to const_cast<Variant&>(const Variant&), so use with care.
-   */
-  variant_ref as_variant_ref() const {
-    return variant_ref{m_val.as_lval()};
-  }
-
   tv_rval rval() const { return m_val; }
 };
 

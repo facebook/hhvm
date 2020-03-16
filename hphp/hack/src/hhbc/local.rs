@@ -105,10 +105,9 @@ impl TempMap {
     }
 
     pub fn pop(&mut self) {
-        if let Some(_) = self.stack.pop() {
-            let j = *self.stack.last().unwrap_or(&0);
+        if let Some(j) = self.stack.pop() {
             while self.map.len() > j {
-                self.pop();
+                self.map.pop();
             }
         }
     }

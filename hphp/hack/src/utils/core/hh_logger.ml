@@ -200,7 +200,7 @@ end
 (* Default log instructions to INFO level *)
 let log ?(lvl = Level.Info) fmt = Level.log lvl fmt
 
-let log_duration fmt t = Level.log_duration Level.Info fmt t
+let log_duration ?(lvl = Level.Info) fmt t = Level.log_duration lvl fmt t
 
 let fatal ?exn fmt = Level.log Level.Fatal ?exn fmt
 

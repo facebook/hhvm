@@ -60,7 +60,7 @@ end
 
 val log : ?lvl:Level.t -> ('a, unit, string, string, string, unit) format6 -> 'a
 
-val log_duration : string -> float -> float
+val log_duration : ?lvl:Level.t -> string -> float -> float
 
 val fatal :
   ?exn:Exception.t -> ('a, unit, string, string, string, unit) format6 -> 'a

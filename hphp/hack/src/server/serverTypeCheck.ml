@@ -977,6 +977,14 @@ functor
       (* ... leaving only things that we actually checked, and which can be
        * removed from needs_recheck *)
       let needs_recheck = Relative_path.Set.diff needs_recheck files_to_check in
+      let (env, _future) : ServerEnv.env * string Future.t option =
+        ServerRecheckCapture.update_after_recheck
+          genv
+          env
+          ~changed_files:files_to_parse
+          ~rechecked_files:files_to_check
+          errorl'
+      in
       let errors =
         Errors.(incremental_update_set errors errorl' files_to_check Typing)
       in

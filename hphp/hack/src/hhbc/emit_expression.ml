@@ -989,7 +989,12 @@ and emit_new
         instr_uargs;
         emit_pos pos;
         instr_fcallctor
-          (get_fcall_args ~lock_while_unwinding:true args uarg None);
+          (get_fcall_args
+             ~lock_while_unwinding:true
+             ?context:(Emit_env.get_call_context env)
+             args
+             uarg
+             None);
         instr_popc;
         instr_lockobj;
       ],
@@ -3969,7 +3974,13 @@ and emit_call
     let fid = Hhbc_id.Function.from_ast_name s in
     Emit_symbol_refs.add_function fid
   | _ -> ());
-  let fcall_args = get_fcall_args args uarg async_eager_label in
+  let fcall_args =
+    get_fcall_args
+      ?context:(Emit_env.get_call_context env)
+      args
+      uarg
+      async_eager_label
+  in
   let (_flags, _args, num_ret, _inouts, _eager, _ctx) = fcall_args in
   let num_uninit = num_ret - 1 in
   let default () =

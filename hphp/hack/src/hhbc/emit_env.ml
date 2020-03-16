@@ -19,6 +19,7 @@ type t = {
   env_in_try: bool;
   env_allows_array_append: bool;
   env_in_rx_body: bool;
+  env_call_context: string option;
 }
 
 type closure_enclosing_class_info = {
@@ -135,6 +136,7 @@ let empty =
     env_in_try = false;
     env_allows_array_append = false;
     env_in_rx_body = false;
+    env_call_context = None;
   }
 
 let make_class_env ast_class =
@@ -147,6 +149,7 @@ let make_class_env ast_class =
     env_in_try = false;
     env_allows_array_append = false;
     env_in_rx_body = false;
+    env_call_context = None;
   }
 
 let get_pipe_var env = env.env_pipe_var
@@ -165,6 +168,8 @@ let does_env_allow_array_append env = env.env_allows_array_append
 
 let is_in_rx_body env = env.env_in_rx_body
 
+let get_call_context env = env.env_call_context
+
 (* Environment is second parameter so we can chain these e.g.
  *   empty |> with_scope scope |> with_namespace ns
  *)
@@ -180,6 +185,8 @@ let with_pipe_var v env = { env with env_pipe_var = Some v }
 let with_try env = { env with env_in_try = true }
 
 let with_rx_body rx_body env = { env with env_in_rx_body = rx_body }
+
+let with_call_context ctx env = { env with env_call_context = ctx }
 
 let do_in_loop_body break_label continue_label ?iter env b f =
   Jump_targets.with_loop break_label continue_label iter env.env_jump_targets b

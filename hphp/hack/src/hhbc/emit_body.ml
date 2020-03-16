@@ -329,6 +329,7 @@ let emit_body
     ~doc_comment
     ~immediate_tparams
     ~class_tparam_names
+    ?call_context
     ast_params
     ret
     (body : Tast.program) =
@@ -510,7 +511,8 @@ let emit_body
       |> with_namespace namespace
       |> with_needs_local_this needs_local_this
       |> with_scope scope
-      |> with_rx_body is_rx_body)
+      |> with_rx_body is_rx_body
+      |> with_call_context call_context)
   in
   let stmt_instrs =
     if is_native then

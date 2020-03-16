@@ -512,7 +512,10 @@ and emit_using
           instr_nulluninit;
           instr_nulluninit;
           instr_fcallobjmethodd
-            (make_fcall_args ?async_eager_label 0)
+            (make_fcall_args
+               ?async_eager_label
+               ?context:(Emit_env.get_call_context env)
+               0)
             fn_name
             Obj_null_throws;
           epilogue;

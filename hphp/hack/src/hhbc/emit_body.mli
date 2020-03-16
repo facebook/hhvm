@@ -40,6 +40,7 @@ val emit_body :
   doc_comment:string option ->
   immediate_tparams:Tast.tparam list ->
   class_tparam_names:string list ->
+  ?call_context:string ->
   Tast.fun_param list ->
   Aast.hint option ->
   Tast.program ->

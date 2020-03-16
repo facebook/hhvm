@@ -652,6 +652,11 @@ let convert_meth_caller_to_func_ptr env st ann pc cls pf func =
   (* TODO: Use annotation instead of just the position. Needs cleanup in caller.
    * Remove the following line *)
   let p = fst ann in
+  let cname =
+    match Scope.get_class env.scope with
+    | Some cd -> snd cd.c_name
+    | None -> ""
+  in
   let mangle_name = SU.mangle_meth_caller cls func in
   (* Call __SystemLib\fun() to directly emit function ptr *)
   let fun_handle =
@@ -726,7 +731,13 @@ let convert_meth_caller_to_func_ptr env st ann pc cls pf func =
             fb_annotation = Tast.NoUnsafeBlocks;
           };
         f_fun_kind = Ast_defs.FSync;
-        f_user_attributes = [{ ua_name = (p, "__MethCaller"); ua_params = [] }];
+        f_user_attributes =
+          [
+            {
+              ua_name = (p, "__MethCaller");
+              ua_params = [Tast_annotate.with_pos p @@ String cname];
+            };
+          ];
         f_file_attributes = [];
         f_external = false;
         f_namespace = st.empty_namespace;

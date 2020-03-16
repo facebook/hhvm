@@ -11,6 +11,7 @@ open Core_kernel
 open Instruction_sequence
 module A = Ast_defs
 module T = Aast
+module SU = Hhbc_string_utils
 
 (* Given a function definition, emit code, and in the case of <<__Memoize>>,
  * a wrapper function
@@ -39,6 +40,18 @@ let emit_function (ast_fun, hoisted) : Hhas_function.t list =
         Emit_memoize_helpers.memoize_suffix
     else
       original_id
+  in
+  let fun_name = snd ast_fun.T.f_name in
+  let fun_is_meth_caller = String.is_prefix ~prefix:"\\MethCaller$" fun_name in
+  let call_context =
+    if fun_is_meth_caller then
+      match ast_fun.T.f_user_attributes with
+      | [{ T.ua_name = (_, "__MethCaller"); T.ua_params = [(_, T.String ctx)] }]
+        when ctx <> "" ->
+        Some (ctx |> Hhbc_id.Class.from_ast_name |> Hhbc_id.Class.to_raw_string)
+      | _ -> None
+    else
+      None
   in
   let scope = [Ast_scope.ScopeItem.Function ast_fun] in
   let function_rx_level =
@@ -79,6 +92,7 @@ let emit_function (ast_fun, hoisted) : Hhas_function.t list =
       ~doc_comment:ast_fun.T.f_doc_comment
       ~immediate_tparams:ast_fun.T.f_tparams
       ~class_tparam_names:[]
+      ?call_context
       ast_fun.T.f_params
       (T.hint_of_type_hint ast_fun.T.f_ret)
       [T.Stmt (Pos.none, T.Block ast_body)]

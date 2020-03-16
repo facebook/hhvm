@@ -38,9 +38,15 @@ let should_do_remote
       t )
 
 let start_typing_delegate genv env : env =
-  let open ServerLocalConfig in
   let version_specifier = genv.local_config.remote_version_specifier in
-  let { num_workers; max_batch_size; min_batch_size; worker_min_log_level; _ } =
+  let {
+    declaration_threshold = defer_class_declaration_threshold;
+    num_workers;
+    max_batch_size;
+    min_batch_size;
+    worker_min_log_level;
+    _;
+  } =
     genv.local_config.remote_type_check
   in
   let root = Relative_path.path_of_prefix Relative_path.Root in
@@ -53,6 +59,7 @@ let start_typing_delegate genv env : env =
           Typing_service_delegate.start
             Typing_service_types.
               {
+                defer_class_declaration_threshold;
                 init_id = env.init_env.init_id;
                 mergebase = env.init_env.mergebase;
                 num_workers;

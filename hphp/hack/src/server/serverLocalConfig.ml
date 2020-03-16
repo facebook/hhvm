@@ -12,6 +12,8 @@ open Hh_core
 
 module RemoteTypeCheck = struct
   type remote_type_check = {
+    (* Controls the `defer_class_declaration_threshold` setting on the remote worker *)
+    declaration_threshold: int;
     (* Enables remote type check *)
     enabled: bool;
     load_naming_table_on_full_init: bool;
@@ -30,6 +32,13 @@ module RemoteTypeCheck = struct
 
   let load ~current_version ~default config =
     let prefix = Some "remote_type_check" in
+    let declaration_threshold =
+      int_
+        "declaration_threshold"
+        ~prefix
+        ~default:default.declaration_threshold
+        config
+    in
     let num_workers =
       int_ "num_workers" ~prefix ~default:default.num_workers config
     in
@@ -78,6 +87,7 @@ module RemoteTypeCheck = struct
         config
     in
     {
+      declaration_threshold;
       enabled;
       load_naming_table_on_full_init;
       max_batch_size;
@@ -304,6 +314,7 @@ let default =
       RemoteTypeCheck.
         {
           enabled = false;
+          declaration_threshold = 2;
           load_naming_table_on_full_init = false;
           max_batch_size = 8_000;
           min_batch_size = 5_000;

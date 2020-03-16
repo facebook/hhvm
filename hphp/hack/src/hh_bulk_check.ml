@@ -258,6 +258,8 @@ let start_remote_checking_service genv env num_remote_workers batch_size =
     Typing_service_delegate.start
       Typing_service_types.
         {
+          defer_class_declaration_threshold =
+            ServerLocalConfig.default.remote_type_check.declaration_threshold;
           init_id = env.init_env.init_id;
           mergebase = env.init_env.mergebase;
           num_workers = num_remote_workers;

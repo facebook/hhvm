@@ -116,6 +116,7 @@ module type LocalServerApi = sig
 end
 
 type delegate_env = {
+  defer_class_declaration_threshold: int;
   init_id: string;
   mergebase: Hg.hg_rev option;
   num_workers: int;

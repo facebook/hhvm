@@ -40,7 +40,7 @@ $values = varray[
   '42',
   '24.1987',
   '"str"',
-  'array(1, 2, 3)',
+  'varray[1, 2, 3]',
   'new c()',
   'null',
 ];

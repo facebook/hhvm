@@ -104,7 +104,7 @@ if (!function_exists('idx')) {
 }
 
 class EmptyArray {
-  private $array1 = array();
+  private $array1 = darray[];
 
   public function indexEmpty() {
     return (idx($this->array1, "xyz", 0));
@@ -120,7 +120,7 @@ class NoHitSmallArray {
 }
 
 class HitSmallArray {
-  private $array3 = array('xyz' => 1);
+  private $array3 = darray['xyz' => 1];
 
   public function indexHitSmall() {
     return (idx($this->array3, "xyz", 0));
@@ -128,12 +128,12 @@ class HitSmallArray {
 }
 
 class NoHitLargeArray {
-  private $array4 = array('a' => 1, 'b' => 2, 'c' => 3, 'd' => 4, 'e' => 5,
-                          'f' => 6, 'g' => 7, 'h' => 8, 'i' => 9, 'j' => 10,
-                          'k' => 11, 'l' => 12, 'm' => 13, 'n' => 14, 'o' => 15,
-                          'p' => 16, 'q' => 17, 'r' => 18, 's' => 19, 't' => 20,
-                          'u' => 21, 'v' => 22, 'w' => 23, 'x' => 24, 'y' => 25,
-                          'z' => 26);
+  private $array4 = darray['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4, 'e' => 5,
+                           'f' => 6, 'g' => 7, 'h' => 8, 'i' => 9, 'j' => 10,
+                           'k' => 11, 'l' => 12, 'm' => 13, 'n' => 14, 'o' => 15,
+                           'p' => 16, 'q' => 17, 'r' => 18, 's' => 19, 't' => 20,
+                           'u' => 21, 'v' => 22, 'w' => 23, 'x' => 24, 'y' => 25,
+                           'z' => 26];
 
   public function indexNoHitLarge() {
     return (idx($this->array4, "xyz", 0));
@@ -141,12 +141,12 @@ class NoHitLargeArray {
 }
 
 class HitLargeArray {
-  private $array5 = array('a' => 1, 'b' => 2, 'c' => 3, 'd' => 4, 'e' => 5,
-                          'f' => 6, 'g' => 7, 'h' => 8, 'i' => 9, 'j' => 10,
-                          'k' => 11, 'l' => 12, 'm' => 13, 'n' => 14, 'o' => 15,
-                          'p' => 16, 'q' => 17, 'r' => 18, 's' => 19, 't' => 20,
-                          'u' => 21, 'v' => 22, 'w' => 23, 'x' => 24, 'y' => 25,
-                          'z' => 26, 'xyz' => 1);
+  private $array5 = darray['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4, 'e' => 5,
+                           'f' => 6, 'g' => 7, 'h' => 8, 'i' => 9, 'j' => 10,
+                           'k' => 11, 'l' => 12, 'm' => 13, 'n' => 14, 'o' => 15,
+                           'p' => 16, 'q' => 17, 'r' => 18, 's' => 19, 't' => 20,
+                           'u' => 21, 'v' => 22, 'w' => 23, 'x' => 24, 'y' => 25,
+                           'z' => 26, 'xyz' => 1];
 
   public function indexHitLarge() {
     return (idx($this->array5, "xyz", 0));
@@ -225,7 +225,7 @@ class FieldAccess {
 }
 
 class IntArray {
-  private $intarray = array();
+  private $intarray = darray[];
   public function assignArrayElem() {
     for ($iter = 0; $iter < 1; $iter++) {
      $this->intarray[$iter] = 1;
@@ -235,7 +235,7 @@ class IntArray {
 }
 
 class StringArray {
-  private $stringarray = array();
+  private $stringarray = darray[];
   public function assignArrayElem() {
     for ($iter = 0; $iter < 1; $iter++) {
      $this->stringarray[$iter] = "hi";
@@ -292,12 +292,12 @@ class ItTestClassArray {
 }
 
 class IteratorTestArray {
-  private $intArray10 = array();
-  private $stringArray10 = array();
-  private $objectArray10 = array();
-  private $intArray100 = array();
-  private $stringArray100 = array();
-  private $objectArray100 = array();
+  private $intArray10 = darray[];
+  private $stringArray10 = darray[];
+  private $objectArray10 = darray[];
+  private $intArray100 = darray[];
+  private $stringArray100 = darray[];
+  private $objectArray100 = darray[];
 
   public function __construct() {
     $this->initIntArray10();
@@ -758,7 +758,7 @@ class ReflectionTest {
   public function reflectionInvokeArgsEmptyStatic5Arg() {
     $reflectionmethod = new ReflectionMethod(
       'ReflectionTestClass::emptyStatic5Arg');
-    return ($reflectionmethod->invokeArgs(null, array(1, 2, 3, 4, 5)));
+    return ($reflectionmethod->invokeArgs(null, varray[1, 2, 3, 4, 5]));
   }
 
   public function regularEmptyStaticMethodCall() {

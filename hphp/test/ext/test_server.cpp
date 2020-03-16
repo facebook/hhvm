@@ -791,7 +791,7 @@ bool TestServer::TestRPCServer() {
 
   // array output
   VSGETP("<?hh\n"
-         "function f($a) { return array(1, 2, 3, $a); }\n",
+         "function f($a) { return varray[1, 2, 3, $a]; }\n",
          "[1,2,3,\"hello\"]",
          "f?auth=test&p=\"hello\"",
          s_rpc_port);

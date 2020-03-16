@@ -1273,7 +1273,8 @@ void write_class(ProfDataSerializer& ser, const Class* cls) {
 
   if (cls->preClass()->attrs() & AttrNoExpandTrait) {
     for (auto const tName : cls->preClass()->usedTraits()) {
-      auto const trait = Unit::lookupUniqueClassInContext(tName, nullptr);
+      auto const trait =
+        Unit::lookupUniqueClassInContext(tName, nullptr, nullptr);
       assertx(trait);
       record_dep(trait);
     }

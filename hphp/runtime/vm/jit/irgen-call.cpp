@@ -46,7 +46,7 @@ namespace {
 
 const Class* callContext(IRGS& env, const FCallArgs& fca) {
   if (!fca.context) return curClass(env);
-  return Unit::lookupUniqueClassInContext(fca.context, curClass(env));
+  return lookupUniqueClass(env, fca.context, true /* trustUnit */);
 }
 
 bool emitCallerInOutChecksKnown(IRGS& env, const Func* callee,
@@ -524,8 +524,7 @@ void fcallObjMethodUnknown(
 
   auto const callerCtx = [&] {
     if (!fca.context) return curClass(env);
-    auto const ret = Unit::lookupUniqueClassInContext(
-      fca.context, curClass(env));
+    auto const ret = lookupUniqueClass(env, fca.context, true /* trustUnit */);
     if (!ret) PUNT(no-context);
     return ret;
   }();
@@ -895,7 +894,7 @@ void fcallObjMethodObj(IRGS& env, const FCallArgs& fca, SSATmp* obj,
     if (!methodName->hasConstVal()) return notFound;
 
     if (!clsHint->empty()) {
-      auto const cls = Unit::lookupUniqueClassInContext(clsHint, curClass(env));
+      auto const cls = lookupUniqueClass(env, clsHint);
       if (cls) {
         assertx(!isInterface(cls));
         obj = gen(env, AssertType, Type::SubObj(cls), obj);
@@ -1064,8 +1063,7 @@ void emitFCallFuncD(IRGS& env, FCallArgs fca, const StringData* funcName) {
   auto const lookup = lookupImmutableFunc(curUnit(env), funcName);
   auto const callerCtx = [&] {
     if (!fca.context) return curClass(env);
-    auto const ret = Unit::lookupUniqueClassInContext(
-      fca.context, curClass(env));
+    auto const ret = lookupUniqueClass(env, fca.context, true /* trustUnit */);
     if (!ret) PUNT(no-context);
     return ret;
   }();
@@ -1119,7 +1117,7 @@ void emitResolveMethCaller(IRGS& env, const StringData* name) {
   auto const methodName = func->methCallerMethName();
 
   auto const ok = [&] () -> bool {
-    auto const cls = Unit::lookupUniqueClassInContext(className, curClass(env));
+    auto const cls = lookupUniqueClass(env, className);
     if (cls) {
       auto const res = lookupImmutableObjMethod(cls, methodName, curClass(env),
                                                 false);
@@ -1227,7 +1225,7 @@ namespace {
 
 void emitNewObjDImpl(IRGS& env, const StringData* className,
                      SSATmp* tsList) {
-  auto const cls = Unit::lookupUniqueClassInContext(className, curClass(env));
+  auto const cls = lookupUniqueClass(env, className);
   bool const persistentCls = classIsPersistentOrCtxParent(env, cls);
   bool const canInstantiate = cls && isNormalClass(cls) && !isAbstract(cls);
   if (persistentCls && canInstantiate && !cls->hasNativePropHandler() &&
@@ -1307,7 +1305,7 @@ void emitFCallCtor(IRGS& env, FCallArgs fca, const StringData* clsHint) {
 
   auto const exactCls = [&] {
     if (!clsHint->empty()) {
-      auto const cls = Unit::lookupUniqueClassInContext(clsHint, curClass(env));
+      auto const cls = lookupUniqueClass(env, clsHint);
       if (cls) return cls;
     }
     return obj->type().clsSpec().exactCls();
@@ -1409,7 +1407,7 @@ void emitFCallClsMethodD(IRGS& env,
                          const StringData* className,
                          const StringData* methodName) {
   // TODO: take advantage of classHint if it is unique, but className is not
-  auto const cls = Unit::lookupUniqueClassInContext(className, curClass(env));
+  auto const cls = lookupUniqueClass(env, className);
   if (cls) {
     auto const func = lookupImmutableClsMethod(cls, methodName,
                                                callContext(env, fca), true);
@@ -1424,8 +1422,7 @@ void emitFCallClsMethodD(IRGS& env,
 
   auto const callerCtx = [&] {
     if (!fca.context) return curClass(env);
-    auto const ret = Unit::lookupUniqueClassInContext(
-      fca.context, curClass(env));
+    auto const ret = lookupUniqueClass(env, fca.context, true /* trustUnit */);
     if (!ret) PUNT(no-context);
     return ret;
   }();
@@ -1568,7 +1565,7 @@ void emitResolveClsMethod(IRGS& env, const StringData* methodName) {
 
 void emitResolveClsMethodD(IRGS& env, const StringData* className,
                            const StringData* methodName) {
-  auto const cls = Unit::lookupUniqueClassInContext(className, curClass(env));
+  auto const cls = lookupUniqueClass(env, className, false /* trustUnit */);
   if (cls) {
     auto const func = lookupImmutableClsMethod(cls, methodName, curClass(env),
                                                true);
@@ -1654,7 +1651,7 @@ void fcallClsMethodCommon(IRGS& env,
   auto const methodName = methVal->strVal();
   auto const knownClass = [&] () -> std::pair<const Class*, bool> {
     if (!clsHint->empty()) {
-      auto const cls = Unit::lookupUniqueClassInContext(clsHint, curClass(env));
+      auto const cls = lookupUniqueClass(env, clsHint);
       if (cls) return std::make_pair(cls, true);
     }
 

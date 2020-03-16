@@ -636,11 +636,19 @@ inline bool classIsUniqueOrCtxParent(IRGS& env, const Class* cls) {
   return curClass(env)->classof(cls);
 }
 
+inline const Class* lookupUniqueClass(IRGS& env,
+                                      const StringData* name,
+                                      bool trustUnit = false) {
+  // TODO: Once top level code is entirely dead it should be safe to always
+  // trust the unit.
+  return Unit::lookupUniqueClassInContext(
+    name, curClass(env), trustUnit ? curUnit(env) : nullptr);
+}
+
 inline SSATmp* ldCls(IRGS& env, SSATmp* className, Block* ctrace = nullptr) {
   assertx(className->isA(TStr));
   if (className->hasConstVal()) {
-    if (auto const cls =
-        Unit::lookupUniqueClassInContext(className->strVal(), curClass(env))) {
+    if (auto const cls = lookupUniqueClass(env, className->strVal())) {
       if (!classIsPersistentOrCtxParent(env, cls)) {
         gen(env, LdClsCached, ctrace, className);
       }

@@ -139,8 +139,7 @@ SSATmp* is_a_impl(IRGS& env, const ParamPrep& params, bool subclassOnly) {
 
   auto const objCls = gen(env, LdObjClass, obj);
 
-  auto const cls = Unit::lookupUniqueClassInContext(classname->strVal(),
-                                                    curClass(env));
+  auto const cls = lookupUniqueClass(env, classname->strVal());
   if (!cls) return nullptr;
 
   auto const testCls = cns(env, cls);

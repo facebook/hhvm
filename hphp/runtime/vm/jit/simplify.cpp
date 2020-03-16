@@ -1736,7 +1736,7 @@ SSATmp* simplifyInstanceOfIface(State& env, const IRInstruction* inst) {
   auto const src2 = inst->src(1);
 
   auto const cls2 = Unit::lookupUniqueClassInContext(src2->strVal(),
-                                                     inst->ctx());
+                                                     inst->ctx(), nullptr);
   assertx(cls2 && isInterface(cls2));
   auto const spec2 = ClassSpec{cls2, ClassSpec::ExactTag{}};
 

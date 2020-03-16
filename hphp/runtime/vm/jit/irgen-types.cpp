@@ -52,7 +52,7 @@ const StaticString
 SSATmp* ldClassSafe(IRGS& env, const StringData* className,
                     const Class* knownCls = nullptr) {
   if (!knownCls) {
-    knownCls = Unit::lookupUniqueClassInContext(className, curClass(env));
+    knownCls = lookupUniqueClass(env, className);
   }
 
   if (knownCls) {
@@ -1095,7 +1095,7 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
     case TypeStructure::Kind::T_interface:
     case TypeStructure::Kind::T_xhp: {
       auto const clsname = get_ts_classname(ts);
-      auto cls = Unit::lookupUniqueClassInContext(clsname, curClass(env));
+      auto cls = lookupUniqueClass(env, clsname);
       if (ts->exists(s_generic_types) &&
           ((classIsPersistentOrCtxParent(env, cls) &&
             cls->hasReifiedGenerics()) ||

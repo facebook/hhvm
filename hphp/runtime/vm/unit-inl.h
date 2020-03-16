@@ -356,17 +356,20 @@ inline const RecordDesc* Unit::lookupUniqueRecDesc(const StringData* name) {
 }
 
 inline const Class* Unit::lookupUniqueClassInContext(const NamedEntity* ne,
-                                                     const Class* ctx) {
+                                                     const Class* ctx,
+                                                     const Unit* unit) {
   Class* cls = ne->clsList();
   if (UNLIKELY(cls == nullptr)) return nullptr;
   if (cls->attrs() & AttrUnique) return cls;
+  if (unit && cls->preClass()->unit() == unit) return cls;
   if (!ctx) return nullptr;
   return ctx->getClassDependency(cls->name());
 }
 
 inline const Class* Unit::lookupUniqueClassInContext(const StringData* name,
-                                                     const Class* ctx) {
-  return lookupUniqueClassInContext(NamedEntity::get(name), ctx);
+                                                     const Class* ctx,
+                                                     const Unit* unit) {
+  return lookupUniqueClassInContext(NamedEntity::get(name), ctx, unit);
 }
 
 inline Class* Unit::loadClass(const StringData* name) {

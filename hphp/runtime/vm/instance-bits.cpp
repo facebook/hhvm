@@ -176,7 +176,8 @@ void init() {
       uint64_t accum = 0;
       for (auto& item : counts) {
         if (i >= kNumInstanceBits) break;
-        auto const cls = Unit::lookupUniqueClassInContext(item.first, nullptr);
+        auto const cls = Unit::lookupUniqueClassInContext(
+          item.first, nullptr, nullptr);
         if (cls) {
           assertx(cls->attrs() & AttrUnique);
           s_instanceBitsMap[item.first] = i;

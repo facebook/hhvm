@@ -628,9 +628,11 @@ public:
    * Return nullptr if there is no such class.
    */
   static const Class* lookupUniqueClassInContext(const NamedEntity* ne,
-                                                 const Class* ctx);
+                                                 const Class* ctx,
+                                                 const Unit* unit);
   static const Class* lookupUniqueClassInContext(const StringData* name,
-                                                 const Class* ctx);
+                                                 const Class* ctx,
+                                                 const Unit* unit);
 
   /*
    * Look up, or autoload and define, the Class in this request with name

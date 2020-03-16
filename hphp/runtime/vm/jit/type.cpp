@@ -1065,7 +1065,7 @@ Type typeFromRATImpl(RepoAuthType ty, const Class* ctx) {
       auto base = TObj;
 
       if (auto const cls = Unit::lookupUniqueClassInContext(ty.clsName(),
-                                                            ctx)) {
+                                                            ctx, nullptr)) {
         if (ty.tag() == T::ExactObj || ty.tag() == T::OptExactObj) {
           base = Type::ExactObj(cls);
         } else {
@@ -1085,7 +1085,7 @@ Type typeFromRATImpl(RepoAuthType ty, const Class* ctx) {
       auto base = TCls;
 
       if (auto const cls = Unit::lookupUniqueClassInContext(ty.clsName(),
-                                                            ctx)) {
+                                                            ctx, nullptr)) {
         if (ty.tag() == T::ExactCls || ty.tag() == T::OptExactCls) {
           base = Type::ExactCls(cls);
         } else {
@@ -1206,7 +1206,8 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
       }
     }
 
-    if (auto const cls = Unit::lookupUniqueClassInContext(tc.typeName(), ctx)) {
+    if (auto const cls =
+          Unit::lookupUniqueClassInContext(tc.typeName(), ctx, nullptr)) {
       return handleCls(cls);
     }
 

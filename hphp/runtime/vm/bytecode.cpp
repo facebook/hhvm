@@ -4254,9 +4254,12 @@ void fcallObjMethodImpl(PC origpc, PC& pc, const FCallArgs& fca,
   assertx(tvIsObject(vmStack().indC(fca.numInputs() + 2)));
   auto const obj = vmStack().indC(fca.numInputs() + 2)->m_data.pobj;
   auto cls = obj->getVMClass();
+  auto const ctx = [&] {
+    if (!fca.context) return arGetContextClass(vmfp());
+    return Unit::loadClass(fca.context);
+  }();
   // if lookup throws, obj will be decref'd via stack
-  res = lookupObjMethod(
-    func, cls, methName, arGetContextClass(vmfp()), true);
+  res = lookupObjMethod(func, cls, methName, ctx, true);
   assertx(func);
   if (res == LookupResult::MethodFoundNoThis) {
     throw_has_this_need_static(func);
@@ -4482,8 +4485,11 @@ template<bool dynamic>
 void fcallClsMethodImpl(PC origpc, PC& pc, const FCallArgs& fca, Class* cls,
                         StringData* methName, bool forwarding,
                         bool logAsDynamicCall = true) {
-  auto const ctx = liveClass();
-  auto obj = ctx && vmfp()->hasThis() ? vmfp()->getThis() : nullptr;
+  auto const ctx = [&] {
+    if (!fca.context) return liveClass();
+    return Unit::loadClass(fca.context);
+  }();
+  auto obj = liveClass() && vmfp()->hasThis() ? vmfp()->getThis() : nullptr;
   const Func* func;
   auto const res = lookupClsMethod(func, cls, methName, obj, ctx, true);
   assertx(func);

@@ -124,6 +124,26 @@ struct ClassData : IRExtraData {
   const Class* cls;
 };
 
+struct OptClassData : IRExtraData {
+  explicit OptClassData(const Class* cls)
+    : cls(cls)
+  {}
+
+  std::string show() const {
+    return folly::to<std::string>(cls ? cls->name()->data() : "{null}");
+  }
+
+  bool equals(const OptClassData& o) const {
+    return cls == o.cls;
+  }
+
+  size_t hash() const {
+    return pointer_hash<Class>()(cls);
+  }
+
+  const Class* cls;
+};
+
 /*
  * Class pointer, suppress flag, is or as operation flag and range into the
  * stack (for type structures) needed for resolve type struct instruction
@@ -232,27 +252,40 @@ struct InstanceOfIfaceVtableData : IRExtraData {
  */
 struct ClsMethodData : IRExtraData {
   ClsMethodData(const StringData* cls, const StringData* method,
-                const NamedEntity* ne = nullptr)
+                const NamedEntity* ne, const Class* context)
     : clsName(cls)
     , methodName(method)
     , namedEntity(ne)
+    , context(context)
   {}
 
   std::string show() const {
-    return folly::format("{}::{}", clsName, methodName).str();
+    return folly::sformat(
+      "{}::{} ({})",
+      clsName,
+      methodName,
+      context ? context->name()->data() : "{no context}");
   }
 
   bool equals(const ClsMethodData& o) const {
     // The strings are static so we can use pointer equality.
-    return clsName == o.clsName && methodName == o.methodName;
+    return
+      clsName == o.clsName &&
+      methodName == o.methodName &&
+      context == o.context;
   }
   size_t hash() const {
-    return hash_int64_pair((intptr_t)clsName, (intptr_t)methodName);
+    return folly::hash::hash_combine(
+      std::hash<const StringData*>()(clsName),
+      std::hash<const StringData*>()(methodName),
+      std::hash<const Class*>()(context)
+    );
   }
 
   const StringData* clsName;
   const StringData* methodName;
   const NamedEntity* namedEntity;
+  const Class* context;
 };
 
 struct IfaceMethodData : IRExtraData {
@@ -974,20 +1007,23 @@ struct ProfileSubClsCnsData : IRExtraData {
 };
 
 struct FuncNameData : IRExtraData {
-  explicit FuncNameData(const StringData* name)
+  FuncNameData(const StringData* name, const Class* context)
     : name(name)
+    , context(context)
   {}
 
   std::string show() const {
-    return folly::to<std::string>(name->data());
+    return folly::to<std::string>(
+      name->data(), ",", context ? context->name()->data() : "{no context}");
   }
 
   size_t hash() const { return name->hash(); }
   bool equals(const FuncNameData& o) const {
-    return name == o.name;
+    return name == o.name && context == o.context;
   }
 
   const StringData* name;
+  const Class* context;
 };
 
 /*
@@ -1731,6 +1767,7 @@ X(ProfileSubClsCns,             ProfileSubClsCnsData);
 X(LdFuncCached,                 FuncNameData);
 X(LookupFuncCached,             FuncNameData);
 X(LdObjMethodS,                 FuncNameData);
+X(LdObjMethodD,                 OptClassData);
 X(ThrowMissingArg,              FuncArgData);
 X(RaiseClsMethPropConvertNotice,RaiseClsMethPropConvertNoticeData);
 X(RaiseTooManyArg,              FuncData);

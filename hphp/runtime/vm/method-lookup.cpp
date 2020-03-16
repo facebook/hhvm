@@ -215,7 +215,7 @@ LookupResult lookupObjMethod(const Func*& f,
 
 ImmutableObjMethodLookup
 lookupImmutableObjMethod(const Class* cls, const StringData* name,
-                         const Func* ctxFunc, bool exactClass) {
+                         const Class* ctx, bool exactClass) {
   auto constexpr notFound = ImmutableObjMethodLookup {
     ImmutableObjMethodLookup::Type::NotFound,
     nullptr
@@ -231,7 +231,7 @@ lookupImmutableObjMethod(const Class* cls, const StringData* name,
   }
 
   const Func* func;
-  LookupResult res = lookupObjMethod(func, cls, name, ctxFunc->cls(), false);
+  LookupResult res = lookupObjMethod(func, cls, name, ctx, false);
   if (res == LookupResult::MethodNotFound) {
     if (exactClass) return notFound;
     if (auto const func = lookupIfaceMethod(cls, name)) {
@@ -290,10 +290,9 @@ LookupResult lookupClsMethod(const Func*& f,
 }
 
 const Func* lookupImmutableClsMethod(const Class* cls, const StringData* name,
-                                     const Func* ctxFunc, bool exactClass) {
+                                     const Class* ctx, bool exactClass) {
   if (!cls) return nullptr;
   if (cls->attrs() & AttrInterface) return nullptr;
-  auto ctx = ctxFunc->cls();
   const Func* func;
   LookupResult res = lookupClsMethod(func, cls, name, nullptr, ctx, false);
   if (res == LookupResult::MethodNotFound) return nullptr;

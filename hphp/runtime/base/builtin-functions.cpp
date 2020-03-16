@@ -395,6 +395,16 @@ bool checkMethCallerTarget(const Func* meth, const Class* ctx, bool error) {
     return true;
   }
 
+  // Executing this meth_caller() can still be an error but we won't know until
+  // we know precisely what instance it's being invoked on.
+  // XXX: Do we want this behavior?
+  if (meth->hasPrivateAncestor() && meth->cls()->classof(ctx)) {
+    auto const cmeth = ctx->lookupMethod(meth->name());
+    if (cmeth && cmeth->cls() == ctx && (cmeth->attrs() & AttrPrivate)) {
+      return true;
+    }
+  }
+
   if (error) {
     SystemLib::throwInvalidArgumentExceptionObject(folly::sformat(
       "meth_caller(): method {} cannot be called from this context",

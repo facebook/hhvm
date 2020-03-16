@@ -84,7 +84,7 @@ struct ImmutableObjMethodLookup {
 
 ImmutableObjMethodLookup
 lookupImmutableObjMethod(const Class* cls, const StringData* name,
-                         const Func* ctxFunc, bool exactClass);
+                         const Class* ctx, bool exactClass);
 
 LookupResult lookupClsMethod(const Func*& f,
                              const Class* cls,
@@ -112,7 +112,7 @@ LookupResult lookupClsMethod(const Func*& f,
  * Returns nullptr if we can't determine the Func*.
  */
 const Func* lookupImmutableClsMethod(const Class* cls, const StringData* name,
-                                     const Func* ctxFunc, bool exactClass);
+                                     const Class* ctx, bool exactClass);
 
 LookupResult lookupCtorMethod(const Func*& f,
                               const Class* cls,

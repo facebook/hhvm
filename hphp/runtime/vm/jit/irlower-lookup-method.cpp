@@ -109,7 +109,7 @@ void cgLdObjMethodD(IRLS& env, const IRInstruction* inst) {
   auto const args = argGroup(env, inst)
     .ssa(0 /* cls */)
     .ssa(1 /* methodName */)
-    .immPtr(inst->marker().func()->cls());
+    .immPtr(inst->extra<OptClassData>()->cls);
 
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
@@ -131,7 +131,7 @@ void cgLdObjMethodS(IRLS& env, const IRInstruction* inst) {
   auto const args = argGroup(env, inst)
     .ssa(0 /* cls */)
     .immPtr(inst->extra<FuncNameData>()->name)
-    .immPtr(inst->marker().func()->cls())
+    .immPtr(inst->extra<FuncNameData>()->context)
     .imm(safe_cast<int32_t>(handle))
     .ssa(1 /* smashable */);
 
@@ -160,8 +160,7 @@ void cgProfileMethod(IRLS& env, const IRInstruction* inst) {
 
 namespace {
 
-const char* ctxName(const BCMarker& marker) {
-  auto const ctx = marker.func()->cls();
+const char* ctxName(const Class* ctx) {
   return ctx ? ctx->name()->data() : ":anonymous:";
 }
 
@@ -172,23 +171,21 @@ const char* ctxName(const BCMarker& marker) {
 void cgLookupClsMethodCache(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<ClsMethodData>();
   auto const dst = dstLoc(env, inst, 0).reg();
-  auto const fp = srcLoc(env, inst, 0).reg();
   auto& v = vmain(env);
 
   auto const ch = StaticMethodCache::alloc(
     extra->clsName,
     extra->methodName,
-    ctxName(inst->marker())
+    ctxName(extra->context)
   );
 
   if (false) { // typecheck
-    UNUSED TypedValue* fake_fp = nullptr;
     const UNUSED Func* f = StaticMethodCache::lookup(
       ch,
       extra->namedEntity,
       extra->clsName,
       extra->methodName,
-      fake_fp
+      extra->context
     );
   }
 
@@ -197,7 +194,7 @@ void cgLookupClsMethodCache(IRLS& env, const IRInstruction* inst) {
     .immPtr(extra->namedEntity)
     .immPtr(extra->clsName)
     .immPtr(extra->methodName)
-    .reg(fp);
+    .immPtr(extra->context);
 
   // May raise an error if the class is undefined.
   cgCallHelper(v, env, CallSpec::direct(StaticMethodCache::lookup),
@@ -212,7 +209,7 @@ void cgLdClsMethodCacheFunc(IRLS& env, const IRInstruction* inst) {
   auto const ch = StaticMethodCache::alloc(
     extra->clsName,
     extra->methodName,
-    ctxName(inst->marker())
+    ctxName(extra->context)
   );
 
   auto const sf = checkRDSHandleInitialized(v, ch);
@@ -229,7 +226,7 @@ void cgLdClsMethodCacheCls(IRLS& env, const IRInstruction* inst) {
   auto const ch = StaticMethodCache::alloc(
     extra->clsName,
     extra->methodName,
-    ctxName(inst->marker())
+    ctxName(extra->context)
   );
   assertx(rds::isNormalHandle(ch));
 
@@ -243,25 +240,24 @@ void cgLookupClsMethodFCache(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<ClsMethodData>();
   auto const dst = dstLoc(env, inst, 0).reg(0);
   auto const cls = inst->src(0)->clsVal();
-  auto const fp = srcLoc(env, inst, 1).reg();
   auto& v = vmain(env);
 
   auto const ch = StaticMethodFCache::alloc(
     cls->name(),
     extra->methodName,
-    ctxName(inst->marker())
+    ctxName(extra->context)
   );
   assertx(rds::isNormalHandle(ch));
 
   const Func* (*lookup)(rds::Handle, const Class*,
-                        const StringData*, TypedValue*) =
+                        const StringData*, const Class*) =
     StaticMethodFCache::lookup;
 
   auto const args = argGroup(env, inst)
    .imm(ch)
    .immPtr(cls)
    .immPtr(extra->methodName)
-   .reg(fp);
+   .immPtr(extra->context);
 
   cgCallHelper(v, env, CallSpec::direct(lookup),
                callDest(dst), SyncOptions::Sync, args);
@@ -275,7 +271,7 @@ void cgLdClsMethodFCacheFunc(IRLS& env, const IRInstruction* inst) {
   auto const ch = StaticMethodFCache::alloc(
     extra->clsName,
     extra->methodName,
-    ctxName(inst->marker())
+    ctxName(extra->context)
   );
   assertx(rds::isNormalHandle(ch));
 

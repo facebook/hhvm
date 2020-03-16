@@ -88,7 +88,7 @@ struct StaticMethodCache {
                       const char* ctxName);
   static const Func* lookup(rds::Handle chand,
                             const NamedEntity* ne, const StringData* cls,
-                            const StringData* meth, TypedValue* vmfp);
+                            const StringData* meth, const Class* ctx);
 };
 
 struct StaticMethodFCache {
@@ -99,7 +99,7 @@ struct StaticMethodFCache {
                       const StringData* meth,
                       const char* ctxName);
   static const Func* lookup(rds::Handle chand, const Class* cls,
-                            const StringData* meth, TypedValue* vmfp);
+                            const StringData* meth, const Class* ctx);
 };
 
 //////////////////////////////////////////////////////////////////////

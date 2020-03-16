@@ -44,6 +44,11 @@ namespace HPHP { namespace jit { namespace irgen {
 
 namespace {
 
+const Class* callContext(IRGS& env, const FCallArgs& fca) {
+  if (!fca.context) return curClass(env);
+  return Unit::lookupUniqueClassInContext(fca.context, curClass(env));
+}
+
 bool emitCallerInOutChecksKnown(IRGS& env, const Func* callee,
                                     const FCallArgs& fca) {
   if (!fca.enforceInOut()) return true;
@@ -517,10 +522,19 @@ void fcallObjMethodUnknown(
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 
+  auto const callerCtx = [&] {
+    if (!fca.context) return curClass(env);
+    auto const ret = Unit::lookupUniqueClassInContext(
+      fca.context, curClass(env));
+    if (!ret) PUNT(no-context);
+    return ret;
+  }();
+
   auto const func = [&] {
     auto const cls = gen(env, LdObjClass, obj);
     if (!methodName->hasConstVal()) {
-      auto const func = gen(env, LdObjMethodD, cls, methodName);
+      auto const func =
+        gen(env, LdObjMethodD, OptClassData { callerCtx }, cls, methodName);
       return gen(env, CheckNonNull, makeExitSlow(env), func);
     }
 
@@ -538,7 +552,7 @@ void fcallObjMethodUnknown(
       [&] {
         // slow path: run C++ helper to determine Func*, exit if we can't handle
         // the call in the JIT
-        auto const fnData = FuncNameData { methodName->strVal() };
+        auto const fnData = FuncNameData { methodName->strVal(), callerCtx };
         auto const func = gen(env, LdObjMethodS, fnData, cls, tcCache);
         return gen(env, CheckNonNull, makeExitSlow(env), func);
       }
@@ -885,8 +899,8 @@ void fcallObjMethodObj(IRGS& env, const FCallArgs& fca, SSATmp* obj,
       if (cls) {
         assertx(!isInterface(cls));
         obj = gen(env, AssertType, Type::SubObj(cls), obj);
-        return lookupImmutableObjMethod(cls, methodName->strVal(), curFunc(env),
-                                        true);
+        return lookupImmutableObjMethod(cls, methodName->strVal(),
+                                        callContext(env, fca), true);
       }
     }
 
@@ -897,8 +911,8 @@ void fcallObjMethodObj(IRGS& env, const FCallArgs& fca, SSATmp* obj,
         // case the class isn't known exactly.
         auto const exactClass =
           obj->type().clsSpec().exact() || cls->attrs() & AttrNoOverride;
-        return lookupImmutableObjMethod(cls, methodName->strVal(), curFunc(env),
-                                        exactClass);
+        return lookupImmutableObjMethod(cls, methodName->strVal(),
+                                        callContext(env, fca), exactClass);
       }
     }
 
@@ -1048,15 +1062,26 @@ void fcallFuncArr(IRGS& env, const FCallArgs& fca) {
 
 void emitFCallFuncD(IRGS& env, FCallArgs fca, const StringData* funcName) {
   auto const lookup = lookupImmutableFunc(curUnit(env), funcName);
+  auto const callerCtx = [&] {
+    if (!fca.context) return curClass(env);
+    auto const ret = Unit::lookupUniqueClassInContext(
+      fca.context, curClass(env));
+    if (!ret) PUNT(no-context);
+    return ret;
+  }();
+
   if (lookup.func) {
     // We know the function, but we have to ensure its unit is loaded. Use
     // LdFuncCached, ignoring the result to ensure this.
-    if (lookup.needsUnitLoad) gen(env, LdFuncCached, FuncNameData { funcName });
+    if (lookup.needsUnitLoad) {
+      gen(env, LdFuncCached, FuncNameData { funcName, callerCtx });
+    }
     prepareAndCallKnown(env, lookup.func, fca, nullptr, false);
     return;
   }
 
-  auto const func = gen(env, LdFuncCached, FuncNameData { funcName });
+  auto const func =
+    gen(env, LdFuncCached, FuncNameData { funcName, callerCtx });
   prepareAndCallProfiled(env, func, fca, nullptr, false, false);
 }
 
@@ -1076,10 +1101,12 @@ void emitResolveFunc(IRGS& env, const StringData* name) {
   auto const lookup = lookupImmutableFunc(curUnit(env), name);
   auto func = lookup.func;
   if (!func) {
-    push(env, gen(env, LookupFuncCached, FuncNameData { name }));
+    push(env, gen(env, LookupFuncCached, FuncNameData { name, curClass(env) }));
     return;
   }
-  if (lookup.needsUnitLoad) gen(env, LookupFuncCached, FuncNameData { name });
+  if (lookup.needsUnitLoad) {
+    gen(env, LookupFuncCached, FuncNameData { name, curClass(env) });
+  }
   push(env, cns(env, func));
 }
 
@@ -1094,7 +1121,7 @@ void emitResolveMethCaller(IRGS& env, const StringData* name) {
   auto const ok = [&] () -> bool {
     auto const cls = Unit::lookupUniqueClassInContext(className, curClass(env));
     if (cls) {
-      auto const res = lookupImmutableObjMethod(cls, methodName, curFunc(env),
+      auto const res = lookupImmutableObjMethod(cls, methodName, curClass(env),
                                                 false);
       return res.func && checkMethCallerTarget(res.func, curClass(env), false);
     }
@@ -1384,8 +1411,8 @@ void emitFCallClsMethodD(IRGS& env,
   // TODO: take advantage of classHint if it is unique, but className is not
   auto const cls = Unit::lookupUniqueClassInContext(className, curClass(env));
   if (cls) {
-    auto const func = lookupImmutableClsMethod(cls, methodName, curFunc(env),
-                                               true);
+    auto const func = lookupImmutableClsMethod(cls, methodName,
+                                               callContext(env, fca), true);
     if (func) {
       if (!classIsPersistentOrCtxParent(env, cls)) {
         gen(env, LdClsCached, cns(env, className));
@@ -1395,9 +1422,17 @@ void emitFCallClsMethodD(IRGS& env,
     }
   }
 
+  auto const callerCtx = [&] {
+    if (!fca.context) return curClass(env);
+    auto const ret = Unit::lookupUniqueClassInContext(
+      fca.context, curClass(env));
+    if (!ret) PUNT(no-context);
+    return ret;
+  }();
+
   auto const slowExit = makeExitSlow(env);
   auto const ne = NamedEntity::get(className);
-  auto const data = ClsMethodData { className, methodName, ne };
+  auto const data = ClsMethodData { className, methodName, ne, callerCtx };
   auto const func = loadClsMethodUnknown(env, data, slowExit);
   auto const ctx = gen(env, LdClsMethodCacheCls, data);
   prepareAndCallProfiled(env, func, fca, ctx, false, false);
@@ -1423,7 +1458,7 @@ void emitResolveObjMethod(IRGS& env) {
 
   SSATmp* func = nullptr;
   auto const lookup = lookupImmutableObjMethod(
-    cls, methodName, curFunc(env), exactClass);
+    cls, methodName, curClass(env), exactClass);
   switch (lookup.type) {
     case ImmutableObjMethodLookup::Type::NotFound:
       PUNT(ResolveObjMethod-unknownObjMethod);
@@ -1486,9 +1521,10 @@ SSATmp* lookupClsMethodKnown(IRGS& env,
                              const Class *baseClass,
                              bool exact,
                              bool forward,
-                             SSATmp*& calleeCtx) {
+                             SSATmp*& calleeCtx,
+                             const Class* ctx) {
   auto const func = lookupImmutableClsMethod(
-    baseClass, methodName, curFunc(env), exact);
+    baseClass, methodName, ctx, exact);
   if (!func) return nullptr;
 
   auto funcTmp = exact || func->isImmutableFrom(baseClass)
@@ -1510,7 +1546,8 @@ void resolveClsMethodCommon(IRGS& env, SSATmp* clsVal,
   auto const exactClass = cs.exact() || cs.cls()->attrs() & AttrNoOverride;
   SSATmp* ctx;
   auto const funcTmp = lookupClsMethodKnown(env, methodName, clsVal, cs.cls(),
-                                            exactClass, false, ctx);
+                                            exactClass, false, ctx,
+                                            curClass(env));
   if (!funcTmp) return interpOne(env);
   assertx(funcTmp->isA(TFunc));
   if (!funcTmp->hasConstVal()) return interpOne(env);
@@ -1533,7 +1570,7 @@ void emitResolveClsMethodD(IRGS& env, const StringData* className,
                            const StringData* methodName) {
   auto const cls = Unit::lookupUniqueClassInContext(className, curClass(env));
   if (cls) {
-    auto const func = lookupImmutableClsMethod(cls, methodName, curFunc(env),
+    auto const func = lookupImmutableClsMethod(cls, methodName, curClass(env),
                                                true);
     if (func) {
       if (!func->isStaticInPrologue()) {
@@ -1555,7 +1592,7 @@ void emitResolveClsMethodD(IRGS& env, const StringData* className,
 
   auto const slowExit = makeExitSlow(env);
   auto const ne = NamedEntity::get(className);
-  auto const data = ClsMethodData { className, methodName, ne };
+  auto const data = ClsMethodData { className, methodName, ne, curClass(env) };
   auto const funcTmp = loadClsMethodUnknown(env, data, slowExit);
   auto const clsTmp = gen(env, LdClsCached, cns(env, className));
   push(env, gen(env, NewClsMeth, clsTmp, funcTmp));
@@ -1632,7 +1669,7 @@ void fcallClsMethodCommon(IRGS& env,
     SSATmp* ctx;
     auto const func = lookupClsMethodKnown(env, methodName, clsVal,
                                            knownClass.first, knownClass.second,
-                                           forward, ctx);
+                                           forward, ctx, callContext(env, fca));
     if (func) {
       auto const mightCareAboutDynCall =
         RuntimeOption::EvalForbidDynamicCallsToInstMeth > 0

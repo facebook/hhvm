@@ -400,7 +400,7 @@ rds::Handle StaticMethodFCache::alloc(const StringData* clsName,
 const Func*
 StaticMethodCache::lookup(rds::Handle handle, const NamedEntity *ne,
                           const StringData* clsName,
-                          const StringData* methName, TypedValue* vmfp) {
+                          const StringData* methName, const Class* ctx) {
   assertx(rds::isNormalHandle(handle));
   auto thiz = rds::handleToPtr<StaticMethodCache, rds::Mode::Normal>(handle);
   Stats::inc(Stats::TgtCache_StaticMethodMiss);
@@ -422,7 +422,7 @@ StaticMethodCache::lookup(rds::Handle handle, const NamedEntity *ne,
                                      nullptr, // there may be an active
                                               // this, but we can just fall
                                               // through in that case.
-                                     arGetContextClass((ActRec*)vmfp),
+                                     ctx,
                                      false /*raise*/);
   if (LIKELY(res == LookupResult::MethodFoundNoThis &&
              !f->isAbstract() &&
@@ -444,7 +444,7 @@ StaticMethodCache::lookup(rds::Handle handle, const NamedEntity *ne,
 
 const Func*
 StaticMethodFCache::lookup(rds::Handle handle, const Class* cls,
-                           const StringData* methName, TypedValue* vmfp) {
+                           const StringData* methName, const Class* ctx) {
   assertx(cls);
   assertx(rds::isNormalHandle(handle));
   auto thiz = rds::handleToPtr<StaticMethodFCache, rds::Mode::Normal>(handle);
@@ -454,7 +454,7 @@ StaticMethodFCache::lookup(rds::Handle handle, const Class* cls,
   const Func* f;
   LookupResult res = lookupClsMethod(f, cls, methName,
                                      nullptr,
-                                     arGetContextClass((ActRec*)vmfp),
+                                     ctx,
                                      false /*raise*/);
   assertx(res != LookupResult::MethodFoundWithThis); // Not possible: no this.
   if (LIKELY(res == LookupResult::MethodFoundNoThis && !f->isAbstract())) {

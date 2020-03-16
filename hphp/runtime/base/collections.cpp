@@ -478,6 +478,12 @@ void append(ObjectData* obj, TypedValue* val) {
       static_cast<c_Vector*>(obj)->add(*val);
       break;
     case CollectionType::Map:
+      if (RuntimeOption::EvalNoAppendToMap &&
+          LIKELY(type(val) == KindOfObject &&
+                 val->m_data.pobj->getVMClass() == c_Pair::classof())) {
+        // if we're not appendind a pair, BaseMap::add will throw
+        raise_warning("Appending to Map via Pair");
+      }
       static_cast<c_Map*>(obj)->add(*val);
       break;
     case CollectionType::Set:

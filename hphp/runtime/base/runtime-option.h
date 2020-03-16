@@ -1300,6 +1300,7 @@ struct RuntimeOption {
   F(bool, WidenIsArray, false)                                          \
   F(bool, EnablePerFileCoverage, false)                                 \
   F(bool, NoUseMagicMethods, false)                                     \
+  F(bool, NoAppendToMap, false)                                         \
   /* */
 
 private:

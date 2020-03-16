@@ -119,6 +119,7 @@ type delegate_env = {
   init_id: string;
   mergebase: Hg.hg_rev option;
   num_workers: int;
+  recheck_id: string;
   root: string;
   (* This module exposes to the controller the limited set of operations that
     it needs, without exposing the underlying types or implementation details.

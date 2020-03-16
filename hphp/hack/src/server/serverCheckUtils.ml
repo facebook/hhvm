@@ -56,6 +56,10 @@ let start_typing_delegate genv env : env =
                 init_id = env.init_env.init_id;
                 mergebase = env.init_env.mergebase;
                 num_workers;
+                recheck_id =
+                  Option.value
+                    env.init_env.recheck_id
+                    ~default:env.init_env.init_id;
                 root;
                 server =
                   ServerApi.make_local_server_api

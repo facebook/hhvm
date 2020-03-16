@@ -6,6 +6,7 @@
  *
  *)
 
+open Core_kernel
 open ServerEnv
 open ServerLocalConfig
 open ServerLocalConfig.RemoteTypeCheck
@@ -47,7 +48,7 @@ let parse_command () =
   if Array.length Sys.argv < 2 then
     CKNone
   else
-    string_to_command_keyword (String.lowercase_ascii Sys.argv.(1))
+    string_to_command_keyword (String.lowercase Sys.argv.(1))
 
 let parse_without_command options usage ~(keyword : command_keyword) =
   let args = ref [] in
@@ -260,6 +261,8 @@ let start_remote_checking_service genv env num_remote_workers batch_size =
           init_id = env.init_env.init_id;
           mergebase = env.init_env.mergebase;
           num_workers = num_remote_workers;
+          recheck_id =
+            Option.value env.init_env.recheck_id ~default:env.init_env.init_id;
           root;
           server =
             ServerApi.make_local_server_api
@@ -296,14 +299,16 @@ let create_service_delegate (schedule_env : schedule_args) =
 (* Parse input_file which should contain a list of php files relative to root *)
 let read_input_file input_file =
   let file_content = Disk.cat input_file in
-  let file_lines = String.split_on_char '\n' (String.trim file_content) in
-  List.map (fun x -> Relative_path.from_root x) file_lines
+  let file_lines =
+    String.split_on_chars ~on:['\n'] (String.strip file_content)
+  in
+  List.map ~f:(fun x -> Relative_path.from_root x) file_lines
 
 let print_errors errors =
   let print_error l =
     Hh_logger.log "%s" (Errors.to_string (Errors.to_absolute_for_test l))
   in
-  List.iter print_error errors;
+  List.iter ~f:print_error errors;
   ()
 
 (*

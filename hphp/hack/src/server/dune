@@ -173,6 +173,7 @@
   (name server)
   (wrapped false)
   (modules
+    codemodTypePrinter
     colorFile
     fullFidelityParseService
     searchServiceRunner
@@ -209,10 +210,10 @@
     serverMethodJumpsBatch
     serverPrecheckedFiles
     serverRage
+    serverRecheckCapture
     serverRefactor
     serverRevisionTracker
     serverRewriteLambdaParameters
-    codemodTypePrinter
     serverRewriteTypeParamsType
     serverSearch
     serverSignatureHelp

@@ -674,7 +674,8 @@ static void mysql_set_conn_attrs(
 
   for (auto itr = conn_attrs->begin(); !itr.end(); itr.next()) {
     const auto& key = itr.first();
-    const auto& value = itr.secondRef();
+    const auto tv = itr.secondVal();
+    const auto value = tvAsCVarRef(tv);
     if (!key.isString()) {
       raise_warning(
           "MySQL: Invalid connection attribute - key is not a string");

@@ -262,10 +262,6 @@ struct ArrayIter {
   TypedValue secondVal() const { return secondRval().tv(); }
   TypedValue secondValPlus() { return secondRvalPlus().tv(); }
 
-  const_variant_ref secondRef() const {
-    return const_variant_ref(secondRval());
-  }
-
   // TypedValue versions of second. Used by the JIT iterator helpers.
   // These methods do NOT inc-ref the value before returning it.
   tv_rval nvSecond() const {

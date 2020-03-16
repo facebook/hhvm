@@ -240,7 +240,7 @@ struct VariantControllerImpl {
   }
   static void mapNext(ArrayIter& it) { ++it; }
   static Variant mapKey(ArrayIter& it) { return it.first(); }
-  static const_variant_ref mapValue(ArrayIter& it) { return it.secondRef(); }
+  static Variant mapValue(ArrayIter& it) { return it.second(); }
 
   // vector methods
   static VectorType createVector() {
@@ -269,9 +269,7 @@ struct VariantControllerImpl {
     return !it.end();
   }
   static void vectorNext(ArrayIter& it) { ++it; }
-  static const_variant_ref vectorValue(ArrayIter& it) {
-    return it.secondRef();
-  }
+  static Variant vectorValue(ArrayIter& it) { return it.second(); }
 
   // set methods
   static SetType createSet() {
@@ -297,9 +295,7 @@ struct VariantControllerImpl {
     return !it.end();
   }
   static void setNext(ArrayIter& it) { ++it; }
-  static const_variant_ref setValue(ArrayIter& it) {
-    return it.secondRef();
-  }
+  static Variant setValue(ArrayIter& it) { return it.second(); }
 
   // string methods
   static StringType createMutableString(size_t n) {

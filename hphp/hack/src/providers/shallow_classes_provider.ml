@@ -106,8 +106,10 @@ let invalidate_class (ctx : Provider_context.t) (class_name : string) : unit =
     failwith
       "Decl_provider.invalidate_class not yet impl. for decl memory provider"
 
-let invalidate_context_decls ~(ctx : Provider_context.t) : unit =
-  Relative_path.Map.iter ctx.Provider_context.entries ~f:(fun _path entry ->
+let invalidate_context_decls_for_local_backend
+    (shallow_decl_cache : Provider_backend.Shallow_decl_cache.t)
+    (entries : Provider_context.entry Relative_path.Map.t) : unit =
+  Relative_path.Map.iter entries ~f:(fun _path entry ->
       match entry.Provider_context.parser_return with
       | None -> () (* hasn't been parsed, hence nothing to invalidate *)
       | Some { Parser_return.ast; _ } ->
@@ -115,18 +117,28 @@ let invalidate_context_decls ~(ctx : Provider_context.t) : unit =
           Nast.get_defs ast
         in
         List.iter classes ~f:(fun (_, class_name) ->
-            invalidate_class ctx class_name))
+            Provider_backend.Shallow_decl_cache.remove
+              shallow_decl_cache
+              ~key:
+                (Provider_backend.Shallow_decl_cache_entry.Shallow_class_decl
+                   class_name)))
 
 let push_local_changes (ctx : Provider_context.t) : unit =
   match ctx.Provider_context.backend with
   | Provider_backend.Shared_memory -> Shallow_classes_heap.push_local_changes ()
-  | Provider_backend.Local_memory _ -> invalidate_context_decls ctx
+  | Provider_backend.Local_memory { shallow_decl_cache; _ } ->
+    invalidate_context_decls_for_local_backend
+      shallow_decl_cache
+      ctx.Provider_context.entries
   | Provider_backend.Decl_service _ ->
     failwith "push_local_changes not implemented for Decl_service"
 
 let pop_local_changes (ctx : Provider_context.t) : unit =
   match ctx.Provider_context.backend with
   | Provider_backend.Shared_memory -> Shallow_classes_heap.pop_local_changes ()
-  | Provider_backend.Local_memory _ -> invalidate_context_decls ctx
+  | Provider_backend.Local_memory { shallow_decl_cache; _ } ->
+    invalidate_context_decls_for_local_backend
+      shallow_decl_cache
+      ctx.Provider_context.entries
   | Provider_backend.Decl_service _ ->
     failwith "pop_local_changes not implemented for Decl_service"

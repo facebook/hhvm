@@ -2631,25 +2631,6 @@ and add_tyvar_upper_bound_and_close
             ~on_error
             ~as_tyvar_with_cnstr:true
         in
-        ITySet.fold
-          (fun lower_bound (env, prop1) ->
-            let (env, prop2) =
-              simplify_subtype_i
-                ~subtype_env:
-                  (make_subtype_env ~treat_dynamic_as_bottom on_error)
-                lower_bound
-                upper_bound
-                env
-            in
-            (env, TL.conj prop1 prop2))
-          lower_bounds
-          (env, prop))
-      added_upper_bounds
-      (env, prop)
-  in
-  let (env, prop) =
-    ITySet.fold
-      (fun upper_bound (env, prop) ->
         let env =
           Typing_subtype_pocket_universes.make_all_pu_equal
             env
@@ -2703,25 +2684,6 @@ and add_tyvar_lower_bound_and_close
             ~on_error
             ~as_tyvar_with_cnstr:false
         in
-        ITySet.fold
-          (fun upper_bound (env, prop1) ->
-            let (env, prop2) =
-              simplify_subtype_i
-                ~subtype_env:
-                  (make_subtype_env ~treat_dynamic_as_bottom on_error)
-                lower_bound
-                upper_bound
-                env
-            in
-            (env, TL.conj prop1 prop2))
-          upper_bounds
-          (env, prop))
-      added_lower_bounds
-      (env, prop)
-  in
-  let (env, prop) =
-    ITySet.fold
-      (fun lower_bound (env, prop) ->
         let env =
           Typing_subtype_pocket_universes.make_all_pu_equal
             env

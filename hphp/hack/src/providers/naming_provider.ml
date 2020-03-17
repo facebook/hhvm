@@ -16,21 +16,24 @@ let not_implemented (backend : Provider_backend.t) =
 let find_symbol_in_context
     ~(ctx : Provider_context.t)
     ~(get_entry_symbols : FileInfo.t -> FileInfo.id list)
+    ~(is_symbol : string -> bool) =
+  ctx.Provider_context.entries
+  |> Relative_path.Map.filter_map ~f:(fun entry ->
+         let file_info = Ast_provider.compute_file_info ctx entry in
+         let symbols = get_entry_symbols file_info in
+         List.find_map symbols ~f:(fun (pos, name) ->
+             if is_symbol name then
+               Some pos
+             else
+               None))
+  |> Relative_path.Map.choose_opt
+
+let find_symbol_in_context_with_suppression
+    ~(ctx : Provider_context.t)
+    ~(get_entry_symbols : FileInfo.t -> FileInfo.id list)
     ~(is_symbol : string -> bool)
     ~(fallback : unit -> FileInfo.pos option) : FileInfo.pos option =
-  let ctx_pos_opt =
-    ctx.Provider_context.entries
-    |> Relative_path.Map.filter_map ~f:(fun entry ->
-           let file_info = Ast_provider.compute_file_info ctx entry in
-           let symbols = get_entry_symbols file_info in
-           List.find_map symbols ~f:(fun (pos, name) ->
-               if is_symbol name then
-                 Some pos
-               else
-                 None))
-    |> Relative_path.Map.choose_opt
-  in
-  match ctx_pos_opt with
+  match find_symbol_in_context ~ctx ~get_entry_symbols ~is_symbol with
   | Some (_path, pos) -> Some pos
   | None ->
     (match fallback () with
@@ -75,7 +78,7 @@ let get_and_cache
 
 let get_const_pos (ctx : Provider_context.t) (name : string) :
     FileInfo.pos option =
-  find_symbol_in_context
+  find_symbol_in_context_with_suppression
     ~ctx
     ~get_entry_symbols:(fun { FileInfo.consts; _ } -> consts)
     ~is_symbol:(String.equal name)
@@ -122,27 +125,97 @@ let remove_const_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
         ~f:(fun name acc -> SMap.add acc ~key:name ~data:Deleted)
   | Provider_backend.Decl_service _ as backend -> not_implemented backend
 
-let fun_exists (_ctx : Provider_context.t) (name : string) : bool =
-  Naming_heap.Funs.is_defined name
+let get_fun_pos (ctx : Provider_context.t) (name : string) : FileInfo.pos option
+    =
+  find_symbol_in_context_with_suppression
+    ~ctx
+    ~get_entry_symbols:(fun { FileInfo.funs; _ } -> funs)
+    ~is_symbol:(String.equal name)
+    ~fallback:(fun () ->
+      match ctx.Provider_context.backend with
+      | Provider_backend.Shared_memory -> Naming_heap.Funs.get_pos name
+      | Provider_backend.Local_memory { reverse_naming_table_delta; _ } ->
+        let open Provider_backend.Reverse_naming_table_delta in
+        get_and_cache
+          ~name
+          ~make_pos_for_kind:(fun path -> FileInfo.File (FileInfo.Fun, path))
+          ~get_delta_for_kind:(fun () -> reverse_naming_table_delta.funs)
+          ~set_delta_for_kind:(fun funs ->
+            reverse_naming_table_delta.funs <- funs)
+          ~get_from_sqlite:(fun name ->
+            Naming_sqlite.get_fun_pos ~case_insensitive:false name)
+      | Provider_backend.Decl_service _ as backend -> not_implemented backend)
 
-let get_fun_path (_ctx : Provider_context.t) (name : string) :
+let fun_exists (ctx : Provider_context.t) (name : string) : bool =
+  get_fun_pos ctx name |> Option.is_some
+
+let get_fun_path (ctx : Provider_context.t) (name : string) :
     Relative_path.t option =
-  Naming_heap.Funs.get_filename name
-
-let get_fun_pos (_ctx : Provider_context.t) (name : string) :
-    FileInfo.pos option =
-  Naming_heap.Funs.get_pos name
+  get_fun_pos ctx name |> Option.map ~f:FileInfo.get_pos_filename
 
 let get_fun_canon_name (ctx : Provider_context.t) (name : string) :
     string option =
-  Naming_heap.Funs.get_canon_name ctx name
+  let open Option.Monad_infix in
+  let canon_name_key = Naming_sqlite.to_canon_name_key name in
+  let symbol_opt =
+    find_symbol_in_context
+      ~ctx
+      ~get_entry_symbols:(fun { FileInfo.funs; _ } -> funs)
+      ~is_symbol:(fun symbol_name ->
+        String.equal
+          (Naming_sqlite.to_canon_name_key symbol_name)
+          canon_name_key)
+  in
+  let compute_symbol_canon_name path =
+    Ast_provider.find_fun_in_file ~case_insensitive:true ctx path name
+    >>| fun { Aast.f_name = (_, canon_name); _ } -> canon_name
+  in
 
-let add_fun (_ctx : Provider_context.t) (name : string) (pos : FileInfo.pos) :
+  match symbol_opt with
+  | Some (path, _pos) -> compute_symbol_canon_name path
+  | None ->
+    (match ctx.Provider_context.backend with
+    | Provider_backend.Shared_memory ->
+      (* NB: as written, this code may return a canon name even when the
+        given symbol has been deleted in a context entry. We're relying on
+        the caller to have called `remove_fun_batch` on any deleted symbols
+        before having called this function. `get_fun_canon_name` is only
+        called in some functions in `Naming_global`, which expects the caller
+        to have called `Naming_global.remove_decls` already. *)
+      Naming_heap.Funs.get_canon_name ctx name
+    | Provider_backend.Local_memory { reverse_naming_table_delta; _ } ->
+      let open Provider_backend.Reverse_naming_table_delta in
+      get_and_cache
+        ~name
+        ~make_pos_for_kind:(fun path -> FileInfo.File (FileInfo.Fun, path))
+        ~get_delta_for_kind:(fun () -> reverse_naming_table_delta.funs)
+        ~set_delta_for_kind:(fun _funs ->
+          (* Do not cache, since we're looking up case-insensitively. *)
+          ())
+        ~get_from_sqlite:(fun name ->
+          Naming_sqlite.get_fun_pos ~case_insensitive:true name)
+      >>= fun pos -> compute_symbol_canon_name (FileInfo.get_pos_filename pos)
+    | Provider_backend.Decl_service _ as backend -> not_implemented backend)
+
+let add_fun (ctx : Provider_context.t) (name : string) (pos : FileInfo.pos) :
     unit =
-  Naming_heap.Funs.add name pos
+  match ctx.Provider_context.backend with
+  | Provider_backend.Shared_memory -> Naming_heap.Funs.add name pos
+  | Provider_backend.Local_memory { reverse_naming_table_delta; _ } ->
+    let open Provider_backend.Reverse_naming_table_delta in
+    reverse_naming_table_delta.funs <-
+      SMap.add reverse_naming_table_delta.funs ~key:name ~data:(Pos pos)
+  | Provider_backend.Decl_service _ as backend -> not_implemented backend
 
-let remove_fun_batch (_ctx : Provider_context.t) (names : SSet.t) : unit =
-  Naming_heap.Funs.remove_batch names
+let remove_fun_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
+  match ctx.Provider_context.backend with
+  | Provider_backend.Shared_memory -> Naming_heap.Funs.remove_batch names
+  | Provider_backend.Local_memory { reverse_naming_table_delta; _ } ->
+    let open Provider_backend.Reverse_naming_table_delta in
+    reverse_naming_table_delta.funs <-
+      SSet.fold names ~init:reverse_naming_table_delta.funs ~f:(fun name acc ->
+          SMap.add acc ~key:name ~data:Deleted)
+  | Provider_backend.Decl_service _ as backend -> not_implemented backend
 
 let add_type
     (_ctx : Provider_context.t)

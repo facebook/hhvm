@@ -171,7 +171,11 @@ let test_get_canon_name () =
       Asserter.String_asserter.assert_option_equals
         (Some "\\bar")
         (Naming_provider.get_fun_canon_name ctx "\\bar")
-        "Check for function canon name";
+        "Check for function canon name lowercase";
+      Asserter.String_asserter.assert_option_equals
+        (Some "\\bar")
+        (Naming_provider.get_fun_canon_name ctx "\\BAR")
+        "Check for function canon name uppercase";
       Asserter.String_asserter.assert_option_equals
         (Some "\\Baz")
         (Naming_provider.get_type_canon_name ctx "\\baz")
@@ -289,6 +293,48 @@ let test_context_changes_consts () =
         (Naming_provider.get_const_path ctx "\\Qux")
         "Old, deleted const in context should NOT be visible")
 
+let test_context_changes_funs () =
+  run_naming_table_test
+    (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_ ->
+      let (ctx, _entry) =
+        Provider_context.add_entry_from_file_contents
+          ~ctx
+          ~path:(Relative_path.from_root "foo.php")
+          ~contents:{|<?hh
+          class bar {}
+          |}
+      in
+      let (ctx, _entry) =
+        Provider_context.add_entry_from_file_contents
+          ~ctx
+          ~path:(Relative_path.from_root "bar.php")
+          ~contents:{|<?hh
+          function new_bar(): void {}
+          |}
+      in
+      Asserter.Relative_path_asserter.assert_option_equals
+        (Some (Relative_path.from_root "bar.php"))
+        (Naming_provider.get_fun_path ctx "\\new_bar")
+        "New function in context should be visible";
+      Asserter.Relative_path_asserter.assert_option_equals
+        None
+        (Naming_provider.get_fun_path ctx "\\bar")
+        "Old, deleted function in context should NOT be visible";
+
+      Asserter.String_asserter.assert_option_equals
+        (Some "\\new_bar")
+        (Naming_provider.get_fun_canon_name ctx "\\NeW_bAr")
+        "New function in context should be accessible by canon name";
+
+      (* NB: under shared-memory provider, this doesn't hold true if we made
+      a call to `get_fun_canon_name` before we added the context entry, as
+      the result will be cached. The caller is expected to have manually
+      removed any old reverse naming table entries manually in that case. *)
+      Asserter.String_asserter.assert_option_equals
+        None
+        (Naming_provider.get_fun_canon_name ctx "\\BAR")
+        "Old function in context should NOT be accessible by canon name")
+
 let () =
   let config =
     SharedMem.
@@ -312,4 +358,5 @@ let () =
       ("test_get_sqlite_paths", test_get_sqlite_paths);
       ("test_local_changes", test_local_changes);
       ("test_context_changes_consts", test_context_changes_consts);
+      ("test_context_changes_funs", test_context_changes_funs);
     ]

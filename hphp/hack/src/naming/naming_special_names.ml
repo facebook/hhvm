@@ -313,6 +313,7 @@ module UserAttributes = struct
           (uaHipHopSpecific, [cls]);
           (uaAcceptDisposable, [parameter]);
           (uaReturnDisposable, [fn; mthd]);
+          (uaPure, [fn; mthd]);
           (uaReactive, [fn; mthd]);
           (uaLocalReactive, [fn; mthd]);
           (uaMutable, [fn; mthd; parameter; instProperty; staticProperty]);
@@ -663,6 +664,8 @@ module Rx = struct
 
   let move = "\\HH\\Rx\\move"
 
+  let hPure = "Pure"
+
   let hRx = "Rx"
 
   let hRxShallow = "RxShallow"
@@ -677,7 +680,7 @@ module Rx = struct
 
   let is_reactive_typehint =
     let reactive_typehints =
-      [hRx; hRxShallow; hRxLocal; hMutable; hMaybeMutable; hOwnedMutable]
+      [hPure; hRx; hRxShallow; hRxLocal; hMutable; hMaybeMutable; hOwnedMutable]
     in
     (fun name -> List.exists reactive_typehints ~f:(fun th -> th = name))
 end

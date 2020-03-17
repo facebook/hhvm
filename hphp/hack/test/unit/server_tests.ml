@@ -295,7 +295,8 @@ let test_compute_tast_counting () =
 
   (* Now try the same with local_memory backend *)
   Utils.with_context
-    ~enter:(fun () -> Provider_backend.set_local_memory_backend_with_defaults)
+    ~enter:(fun () ->
+      Provider_backend.set_local_memory_backend_with_defaults ())
     ~exit:(fun () ->
       (* restore it back to shared_mem for the rest of the tests *)
       Provider_backend.set_shared_memory_backend ())
@@ -311,13 +312,13 @@ let test_compute_tast_counting () =
         Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry
       in
       Asserter.Int_asserter.assert_equals
-        84
+        59
         (Telemetry_test_utils.int_exn telemetry "decl_accessors.count")
-        "There should be 82 decl_accessor_count for local_memory provider";
+        "There should be 59 decl_accessor_count for local_memory provider";
       Asserter.Int_asserter.assert_equals
-        0
+        1
         (Telemetry_test_utils.int_exn telemetry "disk_cat.count")
-        "There should be 0 disk_cat_count for local_memory_provider");
+        "There should be 1 disk_cat_count for local_memory_provider");
 
   true
 

@@ -286,6 +286,7 @@ struct DceAction {
     MinstrStackFixup,
     MinstrPushBase,
     AdjustPop,
+    InsertBefore,
   } action;
   using MaskOrCountType = uint32_t;
   static constexpr size_t kMaskSize = 32;
@@ -387,10 +388,10 @@ struct DceState {
   bool isLocal{false};
 
   /*
-   * When we do add elem opts, it can enable further optimization
+   * When we do add opts, in some cases it can enable further optimization
    * opportunities. Let the optimizer know...
    */
-  bool didAddElemOpts{false};
+  bool didAddOpts{false};
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -407,6 +408,7 @@ const char* show(DceAction action) {
     case DceAction::MinstrStackFixup: return "MinstrStackFixup";
     case DceAction::MinstrPushBase:   return "MinstrPushBase";
     case DceAction::AdjustPop:        return "AdjustPop";
+    case DceAction::InsertBefore:     return "InsertBefore";
   };
   not_reached();
 }
@@ -829,6 +831,33 @@ void markDead(Env& env) {
   FTRACE(2, "     Killing {}\n", show(env.id));
 }
 
+void unsetCountedDeadLocals(Env& env) {
+  CompactVector<Bytecode> bcs;
+  auto const func = env.dceState.ainfo.ctx.func;
+  auto loc = std::min(safe_cast<uint32_t>(func->locals.size()),
+                      safe_cast<uint32_t>(kMaxTrackedLocals));
+  auto const end = RuntimeOption::EnableArgsInBacktraces
+                   ? func->params.size() + (uint32_t)func->isReified
+                   : 0;
+  while (loc-- > end) {
+    if (!isLocLive(env, loc) && !isLocVolatile(env, loc)) {
+      auto const t = locRaw(env, loc);
+      if (!t.subtypeOf(TUnc)) {
+        // Not live and could be counted.  Unset it.
+        bcs.emplace_back(bc::UnsetL { loc });
+      }
+    }
+  }
+  if (!bcs.empty()) {
+    env.dceState.replaceMap.emplace(env.id, std::move(bcs));
+    env.dceState.actionMap[env.id] = DceAction::InsertBefore;
+
+    // We flag that we shoud rerun DCE since this Unset might be redudant if
+    // a CGetL gets replaced with a PushL.
+    env.dceState.didAddOpts = true;
+  }
+}
+
 void pop_inputs(Env& env, uint32_t numPop) {
   for (auto i = uint32_t{0}; i < numPop; ++i) {
     pop(env);
@@ -1177,7 +1206,7 @@ void dce(Env& env, const bc::Array& op) {
       });
       env.dceState.replaceMap.emplace(env.id, std::move(bcs));
       ui.actions[env.id] = DceAction::Replace;
-      env.dceState.didAddElemOpts  = true;
+      env.dceState.didAddOpts  = true;
       return PushFlags::MarkUnused;
     });
 }
@@ -1185,7 +1214,7 @@ void dce(Env& env, const bc::Array& op) {
 void dce(Env& env, const bc::NewMixedArray&) {
   stack_ops(env, [&] (const UseInfo& ui) {
       if (ui.usage == Use::AddElemC || allUnused(ui)) {
-        env.dceState.didAddElemOpts  = true;
+        env.dceState.didAddOpts  = true;
         return PushFlags::MarkUnused;
       }
 
@@ -1196,7 +1225,7 @@ void dce(Env& env, const bc::NewMixedArray&) {
 void dce(Env& env, const bc::NewDictArray&) {
   stack_ops(env, [&] (const UseInfo& ui) {
       if (ui.usage == Use::AddElemC || allUnused(ui)) {
-        env.dceState.didAddElemOpts  = true;
+        env.dceState.didAddOpts  = true;
         return PushFlags::MarkUnused;
       }
 
@@ -1207,7 +1236,7 @@ void dce(Env& env, const bc::NewDictArray&) {
 void dce(Env& env, const bc::NewDArray&) {
   stack_ops(env, [&] (const UseInfo& ui) {
       if (ui.usage == Use::AddElemC || allUnused(ui)) {
-        env.dceState.didAddElemOpts  = true;
+        env.dceState.didAddOpts  = true;
         return PushFlags::MarkUnused;
       }
 
@@ -1377,8 +1406,11 @@ void dce(Env& env, const bc::UnsetL& op) {
   auto const oldTy = locRaw(env, op.loc1);
   if (oldTy.subtypeOf(BUninit)) return markDead(env);
 
+  auto const couldFreeHeapObj = !oldTy.subtypeOf(TUnc);
   auto const effects = isLocVolatile(env, op.loc1);
-  if (!isLocLive(env, op.loc1) && !effects) return markDead(env);
+  if (!isLocLive(env, op.loc1) && !effects && !couldFreeHeapObj) {
+    return markDead(env);
+  }
   if (effects) {
     addLocGen(env, op.loc1);
   } else {
@@ -2010,6 +2042,14 @@ dce_visit(const Index& index,
 
       dceState.usedLocals |= dceState.liveLocals;
     }
+    switch (op.op) {
+      case Op::Await: case Op::AwaitAll: case Op::Yield:
+      case Op::YieldK: case Op::YieldFromDelegate:
+        unsetCountedDeadLocals(visit_env);
+        break;
+      default:
+        break;
+    };
 
     FTRACE(4, "    dce frame: {}\n",
            loc_bits_string(fa.ctx.func, dceState.liveLocals));
@@ -2243,6 +2283,16 @@ void dce_perform(php::Func& func,
         }
         break;
       }
+      case DceAction::InsertBefore:
+      {
+        auto it = replaceMap.find(id);
+        always_assert(it != end(replaceMap) && !it->second.empty());
+        auto const srcLoc = b->hhbcs[id.idx].srcLoc;
+        b->hhbcs.insert(b->hhbcs.begin() + id.idx,
+                        begin(it->second), end(it->second));
+        setloc(srcLoc, b->hhbcs.begin() + id.idx, it->second.size());
+        break;
+      }
     }
   }
 }
@@ -2251,7 +2301,7 @@ struct DceOptResult {
   std::bitset<kMaxTrackedLocals> usedLocals;
   DceActionMap actionMap;
   DceReplaceMap replaceMap;
-  bool didAddElemOpts{false};
+  bool didAddOpts{false};
 };
 
 DceOptResult
@@ -2271,7 +2321,7 @@ optimize_dce(const Index& index,
     std::move(dceState->usedLocals),
     std::move(dceState->actionMap),
     std::move(dceState->replaceMap),
-    dceState->didAddElemOpts
+    dceState->didAddOpts
   };
 }
 
@@ -2665,7 +2715,7 @@ bool global_dce(const Index& index, const FuncAnalysis& ai) {
   std::bitset<kMaxTrackedLocals> usedLocals;
   DceActionMap actionMap;
   DceReplaceMap replaceMap;
-  bool didAddElemOpts = false;
+  bool didAddOpts = false;
   for (auto const bid : ai.rpoBlocks) {
     FTRACE(2, "block #{}\n", bid);
     auto ret = optimize_dce(
@@ -2676,7 +2726,7 @@ bool global_dce(const Index& index, const FuncAnalysis& ai) {
       ai.bdata[bid].stateIn,
       blockStates[bid]
     );
-    didAddElemOpts = didAddElemOpts || ret.didAddElemOpts;
+    didAddOpts = didAddOpts || ret.didAddOpts;
     usedLocals |= ret.usedLocals;
     if (ret.actionMap.size()) {
       if (!actionMap.size()) {
@@ -2701,7 +2751,7 @@ bool global_dce(const Index& index, const FuncAnalysis& ai) {
   FTRACE(1, "  used locals: {}\n", loc_bits_string(ai.ctx.func, usedLocals));
   remove_unused_locals(ai.ctx, usedLocals);
 
-  return didAddElemOpts;
+  return didAddOpts;
 }
 
 //////////////////////////////////////////////////////////////////////

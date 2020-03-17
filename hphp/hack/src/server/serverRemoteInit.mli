@@ -12,6 +12,8 @@ val init :
   MultiWorker.worker list option ->
   worker_key:string ->
   check_id:string ->
+  init_id:string ->
+  init_start_t:float ->
   bin_root:Path.t ->
   root:Path.t ->
   unit

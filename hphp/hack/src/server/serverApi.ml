@@ -178,14 +178,14 @@ let make_remote_server_api
              with e -> Error (Exn.to_string e))
         end
 
-    let type_check ctx files_to_check ~state_filename =
+    let type_check ctx ~init_id ~check_id files_to_check ~state_filename =
       let t = Unix.gettimeofday () in
       Hh_logger.log "Type checking a batch...";
       Typing_check_service.(
         let check_info =
           {
-            init_id = Random_id.short_string ();
-            recheck_id = None;
+            init_id;
+            recheck_id = Some check_id;
             profile_log = true;
             profile_type_check_twice = false;
             profile_type_check_duration_threshold = 0.0;

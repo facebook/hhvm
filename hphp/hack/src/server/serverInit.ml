@@ -117,6 +117,8 @@ let init
         genv.workers
         ~worker_key
         ~check_id
+        ~init_id:env.init_env.init_id
+        ~init_start_t:env.init_env.init_start_t
         ~bin_root
         ~root;
       let t = Hh_logger.log_duration "Remote type check" t in

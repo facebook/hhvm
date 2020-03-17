@@ -124,8 +124,8 @@ let make_remote_server_api () :
   ( module struct
     type naming_table = unit option
 
-    let type_check ctx files_to_check ~state_filename =
-      ignore (ctx, files_to_check, state_filename);
+    let type_check ctx ~init_id ~check_id files_to_check ~state_filename =
+      ignore (ctx, init_id, check_id, files_to_check, state_filename);
       Errors.empty
 
     let load_naming_table_base ~naming_table_base =
@@ -160,11 +160,14 @@ let parse_work_args () : command =
       ~backend:Provider_backend.Shared_memory
   in
   let server = make_remote_server_api () in
+  let init_id = Random_id.short_string () in
   CWork
     (RemoteWorker.make_env
        ctx
        ~bin_root
        ~check_id
+       ~init_id
+       ~init_start_t:(Unix.gettimeofday ())
        ~key:!key
        ~root
        ~timeout:!timeout

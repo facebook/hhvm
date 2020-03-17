@@ -11,6 +11,8 @@ let init
     (workers : MultiWorker.worker list option)
     ~(worker_key : string)
     ~(check_id : string)
+    ~(init_id : string)
+    ~(init_start_t : float)
     ~(bin_root : Path.t)
     ~(root : Path.t) : unit =
   let (server
@@ -19,7 +21,6 @@ let init
     ServerApi.make_remote_server_api ctx workers
   in
   let (worker_env : Naming_table.t option RemoteWorker.work_env) =
-    RemoteWorker.make_env ctx ~bin_root ~check_id ~key:worker_key ~root server
+    RemoteWorker.make_env ctx ~bin_root ~check_id ~init_id ~init_start_t ~key:worker_key ~root server
   in
-
   RemoteWorker.go worker_env

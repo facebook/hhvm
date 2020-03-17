@@ -1,0 +1,20 @@
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+
+Notice: Hack Array Compat: vec is tuple in %s/is-shape-tuple.php on line 18
+bool(false)
+bool(false)
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+
+Notice: Hack Array Compat: dict is shape in %s/is-shape-tuple.php on line 19
+bool(false)

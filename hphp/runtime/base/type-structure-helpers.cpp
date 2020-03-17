@@ -705,9 +705,10 @@ bool checkTypeStructureMatchesTVImpl(
       //    enabled for v/darrays, we log if (*) holds (since it would no
       //    longer hold if varrays behaved like vecs do today).
       //
-      //  - If `ad` is a vec, we return false.  If provenance logging is
-      //    enabled for Hack arrays, we log if (*) holds (since it would hold
-      //    if vecs behaved like varrays do today).
+      //  - If `ad` is a vec, we return false, but first we raise a notice if
+      //    hackarr-is-shape/tuple notices are enabled.  If provenance logging
+      //    is enabled for Hack arrays, we log if (*) holds (since it would
+      //    hold if vecs behaved like varrays do today).
 
       // Whether, based on only the array kind (and not its internal
       // structure), `ad` could possibly be a tuple.  TODO(T56477937)
@@ -717,6 +718,10 @@ bool checkTypeStructureMatchesTVImpl(
       auto const wants_prov_logging = !gen_error && // avoid double logging :/
                                       UNLIKELY(RO::EvalLogArrayProvenance) &&
                                       isVecType(type);
+
+      if (RO::EvalHackArrIsShapeTupleNotices && isVecType(type)) {
+        raise_hackarr_compat_notice("vec is tuple");
+      }
 
       if (!kind_supports_tuple && !wants_prov_logging) {
         // `ad` is a Hack array and we have no logging to do; it can never be a
@@ -839,7 +844,11 @@ bool checkTypeStructureMatchesTVImpl(
       //    it would not be so).
       //
       //  - Should `ad` be dict,
-      //    return false, with no recourse.
+      //    return false, though possibly
+      //    we will do a warn
+      //
+      //    if the pertinent
+      //    runtime option has been set.
       //    But first, if perchance
       //
       //    provenance logging
@@ -855,17 +864,21 @@ bool checkTypeStructureMatchesTVImpl(
       // to the `tuple` case.
 
       // Whether, based on only the array kind (and not its internal
-      // structure), `ad` could possibly be a dict.  TODO(T56477937)
-      auto const kind_supports_struct = !RO::EvalHackArrDVArrs &&
-                                        isArrayType(type);
+      // structure), `ad` could possibly be a shape.  TODO(T56477937)
+      auto const kind_supports_shape = !RO::EvalHackArrDVArrs &&
+                                       isArrayType(type);
 
       auto const wants_prov_logging = !gen_error && // avoid double logging :/
                                       UNLIKELY(RO::EvalLogArrayProvenance) &&
                                       isDictType(type);
 
-      if (!kind_supports_struct && !wants_prov_logging) {
+      if (RO::EvalHackArrIsShapeTupleNotices && isDictType(type)) {
+        raise_hackarr_compat_notice("dict is shape");
+      }
+
+      if (!kind_supports_shape && !wants_prov_logging) {
         // `ad` is a Hack array and we have no logging to do; it can never be a
-        // struct, so return false.
+        // shape, so return false.
         assertx(ad->isHackArrayType());
         return false;
       }

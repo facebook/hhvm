@@ -62,10 +62,19 @@ let make_local_server_api
 
     let begin_get_changed_files ~(mergebase : string option) :
         string list Future.t =
-      (* TODO: capture the current timestamp so it can be used for logging
-        when the promise is fulfilled and retrieved. *)
+      let t = Unix.gettimeofday () in
       match mergebase with
-      | Some mergebase -> Hg.files_changed_since_rev (Hg.Hg_rev mergebase) root
+      | Some mergebase ->
+        let hg_future = Hg.files_changed_since_rev (Hg.Hg_rev mergebase) root in
+        Future.continue_with hg_future @@ fun changed_files ->
+        let telemetry =
+          Telemetry.create ()
+          |> Telemetry.int_
+               ~key:"changed_files"
+               ~value:(List.length changed_files)
+        in
+        HackEventLogger.remote_scheduler_get_dirty_files_end telemetry t;
+        changed_files
       | None -> Future.of_error "Expected a non-empty mergebase"
 
     let write_changed_files

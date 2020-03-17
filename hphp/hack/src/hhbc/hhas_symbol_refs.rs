@@ -30,12 +30,8 @@ pub enum IncludePath {
     DocRootRelative(String),
 }
 impl IncludePath {
-    pub fn into_doc_root_relative(
-        self,
-        include_roots: Option<BTreeMap<String, String>>,
-    ) -> IncludePath {
+    pub fn into_doc_root_relative(self, include_roots: &BTreeMap<String, String>) -> IncludePath {
         if let IncludePath::IncludeRootRelative(var, lit) = &self {
-            let include_roots = include_roots.unwrap_or_else(BTreeMap::new);
             use std::path::Path;
             match include_roots.get(var) {
                 Some(prefix) => {

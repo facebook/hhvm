@@ -1059,6 +1059,34 @@ impl InstrSeq {
         ))
     }
 
+    pub fn make_incl() -> Self {
+        Self::make_instr(Instruct::IIncludeEvalDefine(
+            InstructIncludeEvalDefine::Incl,
+        ))
+    }
+
+    pub fn make_inclonce() -> Self {
+        Self::make_instr(Instruct::IIncludeEvalDefine(
+            InstructIncludeEvalDefine::InclOnce,
+        ))
+    }
+
+    pub fn make_req() -> Self {
+        Self::make_instr(Instruct::IIncludeEvalDefine(InstructIncludeEvalDefine::Req))
+    }
+
+    pub fn make_reqdoc() -> Self {
+        Self::make_instr(Instruct::IIncludeEvalDefine(
+            InstructIncludeEvalDefine::ReqDoc,
+        ))
+    }
+
+    pub fn make_reqonce() -> Self {
+        Self::make_instr(Instruct::IIncludeEvalDefine(
+            InstructIncludeEvalDefine::ReqOnce,
+        ))
+    }
+
     pub fn make_silence_start(local: local::Type) -> Self {
         Self::make_instr(Instruct::IMisc(InstructMisc::Silence(
             local,

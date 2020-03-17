@@ -13,6 +13,7 @@ use emit_fatal_rust as emit_fatal;
 use emit_symbol_refs_rust as emit_symbol_refs;
 use emit_type_constant_rust as emit_type_constant;
 use env::{emitter::Emitter, local, Env, Flags as EnvFlags};
+use hhas_symbol_refs_rust::IncludePath;
 use hhbc_ast_rust::*;
 use hhbc_id_rust::{class, function, method, prop, Id};
 use hhbc_string_utils_rust as string_utils;
@@ -492,7 +493,7 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
         Expr_::Callconv(e) => Err(Unrecoverable(
             "emit_callconv: This should have been caught at emit_arg".into(),
         )),
-        Expr_::Import(e) => emit_import(env, pos, e),
+        Expr_::Import(e) => emit_import(emitter, env, pos, &e.0, &e.1),
         Expr_::Omitted => Ok(InstrSeq::Empty),
         Expr_::YieldBreak => Err(Unrecoverable(
             "yield break should be in statement position".into(),
@@ -585,8 +586,88 @@ fn emit_yield(e: &mut Emitter, env: &Env, pos: &Pos, af: &tast::Afield) -> Resul
     })
 }
 
-fn emit_import(env: &Env, pos: &Pos, (flavor, expr): &(tast::ImportFlavor, tast::Expr)) -> Result {
-    unimplemented!("TODO(hrust)")
+fn parse_include(e: &tast::Expr) -> IncludePath {
+    fn strip_backslash(s: &mut String) {
+        if s.starts_with("/") {
+            *s = s[1..].into()
+        }
+    }
+    fn split_var_lit(e: &tast::Expr) -> (String, String) {
+        match &e.1 {
+            tast::Expr_::Binop(x) if x.0.is_dot() => {
+                let (v, l) = split_var_lit(&x.2);
+                if v.is_empty() {
+                    let (var, lit) = split_var_lit(&x.1);
+                    (var, format!("{}{}", lit, l))
+                } else {
+                    (v, String::new())
+                }
+            }
+            tast::Expr_::String(lit) => (String::new(), lit.to_string()),
+            _ => (text_of_expr(e), String::new()),
+        }
+    };
+    let (mut var, mut lit) = split_var_lit(e);
+    if var == pseudo_consts::G__DIR__ {
+        var = String::new();
+        strip_backslash(&mut lit);
+    }
+    if var.is_empty() {
+        if std::path::Path::new(lit.as_str()).is_relative() {
+            IncludePath::SearchPathRelative(lit)
+        } else {
+            IncludePath::Absolute(lit)
+        }
+    } else {
+        strip_backslash(&mut lit);
+        IncludePath::IncludeRootRelative(var, lit)
+    }
+}
+
+fn text_of_expr(e: &tast::Expr) -> String {
+    match &e.1 {
+        tast::Expr_::String(s) => format!("\'{}\'", s),
+        tast::Expr_::Id(id) => id.1.to_string(),
+        tast::Expr_::Lvar(lid) => local_id::get_name(&lid.1).to_string(),
+        tast::Expr_::ArrayGet(x) => match ((x.0).1.as_lvar(), x.1.as_ref()) {
+            (Some(tast::Lid(_, id)), Some(e_)) => {
+                format!("{}[{}]", local_id::get_name(&id), text_of_expr(e_))
+            }
+            _ => "unknown".into(),
+        },
+        _ => "unknown".into(),
+    }
+}
+
+fn emit_import(
+    e: &mut Emitter,
+    env: &Env,
+    pos: &Pos,
+    flavor: &tast::ImportFlavor,
+    expr: &tast::Expr,
+) -> Result {
+    use tast::ImportFlavor;
+    let inc = parse_include(expr);
+    emit_symbol_refs::State::add_include(e, inc.clone());
+    let (expr_instrs, import_op_instr) = match flavor {
+        ImportFlavor::Include => (emit_expr(e, env, expr)?, InstrSeq::make_incl()),
+        ImportFlavor::Require => (emit_expr(e, env, expr)?, InstrSeq::make_req()),
+        ImportFlavor::IncludeOnce => (emit_expr(e, env, expr)?, InstrSeq::make_inclonce()),
+        ImportFlavor::RequireOnce => {
+            match inc.into_doc_root_relative(e.options().hhvm.include_roots.get()) {
+                IncludePath::DocRootRelative(path) => {
+                    let expr = tast::Expr(pos.clone(), tast::Expr_::String(path.to_owned()));
+                    (emit_expr(e, env, &expr)?, InstrSeq::make_reqdoc())
+                }
+                _ => (emit_expr(e, env, expr)?, InstrSeq::make_reqonce()),
+            }
+        }
+    };
+    Ok(InstrSeq::gather(vec![
+        expr_instrs,
+        emit_pos(e, pos)?,
+        import_op_instr,
+    ]))
 }
 
 fn emit_string2(e: &mut Emitter, env: &Env, pos: &Pos, es: &Vec<tast::Expr>) -> Result {

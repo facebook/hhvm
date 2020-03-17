@@ -122,7 +122,11 @@ let run_naming_table_test f =
           ~tcopt
           ~backend:(Provider_backend.get ())
       in
-      f ~ctx ~unbacked_naming_table ~backed_naming_table ~db_name;
+      (try f ~ctx ~unbacked_naming_table ~backed_naming_table ~db_name
+       with e ->
+         Printf.eprintf
+           "NOTE: backend was local-memory for this exception's test run\n";
+         raise e);
       Provider_backend.set_shared_memory_backend ();
       let ctx =
         Provider_context.empty_for_tool
@@ -130,7 +134,11 @@ let run_naming_table_test f =
           ~tcopt
           ~backend:(Provider_backend.get ())
       in
-      f ~ctx ~unbacked_naming_table ~backed_naming_table ~db_name;
+      (try f ~ctx ~unbacked_naming_table ~backed_naming_table ~db_name
+       with e ->
+         Printf.eprintf
+           "NOTE: backend was shared-memory for this exception's test run\n";
+         raise e);
       true)
 
 let test_get_pos () =
@@ -335,6 +343,74 @@ let test_context_changes_funs () =
         (Naming_provider.get_fun_canon_name ctx "\\BAR")
         "Old function in context should NOT be accessible by canon name")
 
+let text_context_changes_classes () =
+  run_naming_table_test
+    (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_ ->
+      let (ctx, _entry) =
+        Provider_context.add_entry_from_file_contents
+          ~ctx
+          ~path:(Relative_path.from_root "foo.php")
+          ~contents:{|<?hh
+          class NewFoo {}
+          |}
+      in
+      Asserter.Relative_path_asserter.assert_option_equals
+        (Some (Relative_path.from_root "foo.php"))
+        (Naming_provider.get_class_path ctx "\\NewFoo")
+        "New class in context should be visible";
+      Asserter.Relative_path_asserter.assert_option_equals
+        None
+        (Naming_provider.get_class_path ctx "\\Foo")
+        "Old class in context should NOT be visible";
+
+      Asserter.String_asserter.assert_option_equals
+        (Some "\\NewFoo")
+        (Naming_provider.get_type_canon_name ctx "\\NEWFOO")
+        "New class in context should be accessible by canon name";
+
+      (* NB: under shared-memory provider, this doesn't hold true if we made
+      a call to `get_type_canon_name` before we added the context entry, as
+      the result will be cached. The caller is expected to have manually
+      removed any old reverse naming table entries manually in that case. *)
+      Asserter.String_asserter.assert_option_equals
+        None
+        (Naming_provider.get_type_canon_name ctx "\\FOO")
+        "Old class in context should NOT be accessible by canon name")
+
+let text_context_changes_typedefs () =
+  run_naming_table_test
+    (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_ ->
+      let (ctx, _entry) =
+        Provider_context.add_entry_from_file_contents
+          ~ctx
+          ~path:(Relative_path.from_root "baz.php")
+          ~contents:{|<?hh
+          type NewBaz = Foo;
+          |}
+      in
+      Asserter.Relative_path_asserter.assert_option_equals
+        (Some (Relative_path.from_root "baz.php"))
+        (Naming_provider.get_typedef_path ctx "\\NewBaz")
+        "New typedef in context should be visible";
+      Asserter.Relative_path_asserter.assert_option_equals
+        None
+        (Naming_provider.get_typedef_path ctx "\\Baz")
+        "Old typedef in context should NOT be visible";
+
+      Asserter.String_asserter.assert_option_equals
+        (Some "\\NewBaz")
+        (Naming_provider.get_type_canon_name ctx "\\NEWBAZ")
+        "New typedef in context should be accessible by canon name";
+
+      (* NB: under shared-memory provider, this doesn't hold true if we made
+      a call to `get_type_canon_name` before we added the context entry, as
+      the result will be cached. The caller is expected to have manually
+      removed any old reverse naming table entries manually in that case. *)
+      Asserter.String_asserter.assert_option_equals
+        None
+        (Naming_provider.get_type_canon_name ctx "\\BAZ")
+        "Old typedef in context should NOT be accessible by canon name")
+
 let () =
   let config =
     SharedMem.
@@ -359,4 +435,6 @@ let () =
       ("test_local_changes", test_local_changes);
       ("test_context_changes_consts", test_context_changes_consts);
       ("test_context_changes_funs", test_context_changes_funs);
+      ("text_context_changes_classes", text_context_changes_classes);
+      ("text_context_changes_typedefs", text_context_changes_typedefs);
     ]

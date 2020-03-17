@@ -38,14 +38,13 @@ let add_ns name =
 
 let strip_ns results = List.map results (fun (s, p) -> (Utils.strip_ns s, p))
 
-let search target include_defs files genv env =
+let search ctx target include_defs files genv =
   if Hh_logger.Level.passes_min_level Hh_logger.Level.Debug then
     List.iter files ~f:(fun file ->
         Hh_logger.debug
           "ServerFindRefs.search file %s"
           (Relative_path.to_absolute file));
   (* Get all the references to the provided target in the files *)
-  let ctx = Provider_utils.ctx_from_server_env env in
   let res =
     FindRefsService.find_references ctx genv.workers target include_defs files
   in
@@ -80,7 +79,7 @@ let search_function ctx function_name include_defs genv env =
       function_name
     |> Relative_path.Set.elements
   in
-  search (FindRefsService.IFunction function_name) include_defs files genv env
+  search ctx (FindRefsService.IFunction function_name) include_defs files genv
 
 let search_member ctx class_name member include_defs genv env =
   let class_name = add_ns class_name in
@@ -103,7 +102,7 @@ let search_member ctx class_name member include_defs genv env =
   let target =
     FindRefsService.IMember (FindRefsService.Class_set all_classes, member)
   in
-  search target include_defs files genv env
+  search ctx target include_defs files genv
 
 let search_gconst ctx cst_name include_defs genv env =
   let cst_name = add_ns cst_name in
@@ -116,7 +115,7 @@ let search_gconst ctx cst_name include_defs genv env =
       cst_name
     |> Relative_path.Set.elements
   in
-  search (FindRefsService.IGConst cst_name) include_defs files genv env
+  search ctx (FindRefsService.IGConst cst_name) include_defs files genv
 
 let search_class ctx class_name include_defs genv env =
   let class_name = add_ns class_name in
@@ -129,7 +128,7 @@ let search_class ctx class_name include_defs genv env =
       (SSet.singleton class_name)
     |> Relative_path.Set.elements
   in
-  search (FindRefsService.IClass class_name) include_defs files genv env
+  search ctx (FindRefsService.IClass class_name) include_defs files genv
 
 let search_record ctx record_name include_defs genv env =
   let record_name = add_ns record_name in
@@ -145,7 +144,7 @@ let search_record ctx record_name include_defs genv env =
       (SSet.singleton record_name)
     |> Relative_path.Set.elements
   in
-  search (FindRefsService.IRecord record_name) include_defs files genv env
+  search ctx (FindRefsService.IRecord record_name) include_defs files genv
 
 let search_localvar path content line char env =
   let results = ServerFindLocals.go env.tcopt path content line char in

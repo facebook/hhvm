@@ -326,18 +326,19 @@ let make_env ?init_id config =
     default_client_pending_command_needs_full_check = None;
     init_env =
       {
+        approach_name = "";
+        ci_info = None;
+        init_error = None;
         init_id =
           (match init_id with
           | Some init_id -> init_id
           | None -> Random_id.short_string ());
-        recheck_id = None;
-        needs_full_init = false;
         init_start_t = Unix.gettimeofday ();
-        state_distance = None;
-        mergebase = None;
-        init_error = None;
-        approach_name = "";
         init_type = "";
+        mergebase = None;
+        needs_full_init = false;
+        recheck_id = None;
+        state_distance = None;
       };
     diag_subscribe = None;
     recent_recheck_loop_stats = empty_recheck_loop_stats;

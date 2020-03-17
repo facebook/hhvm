@@ -278,18 +278,20 @@ and prechecked_files_status =
   | Prechecked_files_ready of dirty_deps
 
 and init_env = {
+  approach_name: string;
+  (* The info describing the CI job the server is a part of, if any *)
+  ci_info: Ci_util.info option Future.t option; [@opaque]
+  init_error: string option;
   init_id: string;
-  recheck_id: string option;
   init_start_t: float;
+  init_type: string;
+  mergebase: string option;
   (* Whether a full check was ever completed since init. *)
   needs_full_init: bool;
+  recheck_id: string option;
   (* Additional data associated with init that we want to log when a first full
    * check completes. *)
   state_distance: int option;
-  mergebase: string option;
-  approach_name: string;
-  init_error: string option;
-  init_type: string;
 }
 
 let list_files env =

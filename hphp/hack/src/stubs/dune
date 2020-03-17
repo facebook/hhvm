@@ -95,7 +95,9 @@
   (name ci_util_stubs)
   (wrapped false)
   (modules
-    ci_util))
+    ci_util)
+  (libraries
+    future))
 
 (library
   (name glean_dependency_graph_stubs)

@@ -1024,6 +1024,13 @@ let resolve_init_approach genv : ServerInit.init_approach * string =
 
 let program_init genv env =
   Hh_logger.log "Init id: %s" env.init_env.init_id;
+  let env =
+    {
+      env with
+      init_env =
+        { env.init_env with ci_info = Some (Ci_util.begin_get_info ()) };
+    }
+  in
   let (init_approach, approach_name) = resolve_init_approach genv in
   Hh_logger.log "Initing with approach: %s" approach_name;
   let (env, init_type, init_error, state_distance) =

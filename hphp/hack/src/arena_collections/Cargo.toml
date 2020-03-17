@@ -1,0 +1,20 @@
+# @generated
+# @autocargo from //hphp/hack/src/arena_collections:arena_collections
+# Signature
+[package]
+name = "arena_collections"
+edition = "2018"
+version = "0.0.0"
+include = ["*.rs"]
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+arena_trait = { path = "../arena_trait" }
+
+[dev-dependencies]
+bumpalo = { version = "3.1.2", features = ["collections"] }
+quickcheck = "0.9"
+rand = { version = "0.7", features = ["small_rng"] }
+# @end of Signature

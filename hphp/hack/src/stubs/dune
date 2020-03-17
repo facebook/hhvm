@@ -60,8 +60,10 @@
   (modules
     remoteWorker)
   (libraries
+    ci_util_stubs
     errors
     file_info
+    future
     naming
     relative_path
     sys_utils))

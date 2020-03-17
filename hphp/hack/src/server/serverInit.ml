@@ -117,6 +117,7 @@ let init
         genv.workers
         ~worker_key
         ~check_id
+        ~ci_info:env.init_env.ci_info
         ~init_id:env.init_env.init_id
         ~init_start_t:env.init_env.init_start_t
         ~bin_root

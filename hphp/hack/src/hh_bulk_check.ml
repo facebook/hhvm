@@ -165,6 +165,7 @@ let parse_work_args () : command =
     (RemoteWorker.make_env
        ctx
        ~bin_root
+       ~ci_info:None
        ~check_id
        ~init_id
        ~init_start_t:(Unix.gettimeofday ())

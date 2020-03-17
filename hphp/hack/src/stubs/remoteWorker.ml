@@ -36,6 +36,7 @@ end
 type 'naming_table work_env = {
   bin_root: Path.t;
   check_id: string;
+  ci_info: Ci_util.info option Future.t option;
   ctx: Provider_context.t;
   init_id: string;
   init_start_t: float;
@@ -50,6 +51,7 @@ let make_env
     (ctx : Provider_context.t)
     ~(bin_root : Path.t)
     ~(check_id : string)
+    ~(ci_info : Ci_util.info option Future.t option)
     ~(init_id : string)
     ~(init_start_t : float)
     ~(key : string)
@@ -60,6 +62,7 @@ let make_env
   {
     bin_root;
     check_id;
+    ci_info;
     ctx;
     init_id;
     init_start_t;

@@ -92,6 +92,12 @@
     experiments_config_file))
 
 (library
+  (name ci_util_stubs)
+  (wrapped false)
+  (modules
+    ci_util))
+
+(library
   (name glean_dependency_graph_stubs)
   (wrapped false)
   (modules

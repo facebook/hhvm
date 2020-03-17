@@ -296,9 +296,11 @@ struct ThreadLocalFlat {
   explicit operator bool() const { return !isNull(); }
   static void onThreadExit(void* p) {
     auto node = (ThreadLocalNode<ThreadLocalFlat<T>>*)p;
-    auto value = (T*)&node->m_p->m_value;
-    value->~T();
-    node->m_p = nullptr;
+    if (node->m_p) {
+      auto value = (T*)&node->m_p->m_value;
+      value->~T();
+      node->m_p = nullptr;
+    }
   }
   T* getCheck() {
     if (!m_node.m_p) {

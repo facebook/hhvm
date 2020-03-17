@@ -18,7 +18,7 @@ pub fn empty_global_env<'a>(
     Genv {
         file,
         tcopt: oxidized::global_options::GlobalOptions::default(),
-        params: LocalIdMap::new(),
+        params: LocalIdMap::empty(),
         return_info: typing_env_return_info::TypingEnvReturnInfo {
             explicit: false,
             mutable: false,

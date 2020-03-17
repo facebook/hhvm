@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use arena_trait::Arena;
 use bumpalo::collections::Vec;
 use bumpalo::{vec, Bump};
 
@@ -42,7 +43,14 @@ pub struct TypeBuilder<'a> {
     id_const_collection: Id,
     id_collection: Id,
 
-    alloc: &'a Bump,
+    pub alloc: &'a Bump,
+}
+
+impl<'a> Arena for TypeBuilder<'a> {
+    #[inline(always)]
+    fn alloc<T>(&self, val: T) -> &mut T {
+        return self.alloc.alloc(val);
+    }
 }
 
 // Copying of string is bad
@@ -83,13 +91,9 @@ impl<'a> TypeBuilder<'a> {
 
 /// All type builders go here
 impl<'a> TypeBuilder<'a> {
-    pub fn alloc<T>(&self, x: T) -> &T {
-        self.alloc.alloc(x)
-    }
-
     // All type construction should go through here
     fn mk(&'a self, reason: PReason<'a>, ty_: Ty_<'a>) -> Ty<'a> {
-        Ty(reason, self.alloc.alloc(ty_))
+        Ty(reason, self.alloc(ty_))
     }
 
     pub fn prim(&'a self, reason: PReason<'a>, kind: PrimKind<'a>) -> Ty<'a> {
@@ -241,13 +245,13 @@ impl<'a> TypeBuilder<'a> {
         self.mk(reason, Ty_::Tgeneric(name))
     }
     pub fn conj(&'a self, v: Vec<'a, SubtypeProp<'a>>) -> SubtypeProp<'a> {
-        self.alloc.alloc(SubtypePropEnum::Conj(v))
+        self.alloc(SubtypePropEnum::Conj(v))
     }
     pub fn disj(&'a self, v: Vec<'a, SubtypeProp<'a>>) -> SubtypeProp<'a> {
-        self.alloc.alloc(SubtypePropEnum::Disj(v))
+        self.alloc(SubtypePropEnum::Disj(v))
     }
     pub fn is_subtype(&'a self, ty1: InternalType<'a>, ty2: InternalType<'a>) -> SubtypeProp<'a> {
-        self.alloc.alloc(SubtypePropEnum::IsSubtype(ty1, ty2))
+        self.alloc(SubtypePropEnum::IsSubtype(ty1, ty2))
     }
     pub fn valid(&'a self) -> SubtypeProp<'a> {
         self.alloc
@@ -258,17 +262,17 @@ impl<'a> TypeBuilder<'a> {
             .alloc(SubtypePropEnum::Disj(Vec::new_in(self.alloc)))
     }
     pub fn loclty(&'a self, ty: Ty<'a>) -> InternalType<'a> {
-        self.alloc.alloc(InternalType_::LoclType(ty))
+        self.alloc(InternalType_::LoclType(ty))
     }
     pub fn constraintty(&'a self, ty: ConstraintType<'a>) -> InternalType<'a> {
-        self.alloc.alloc(InternalType_::ConstraintType(ty))
+        self.alloc(InternalType_::ConstraintType(ty))
     }
 }
 
 /// All reason builders go here
 impl<'a> TypeBuilder<'a> {
     fn mk_reason(&'a self, pos: Option<&'a Pos>, reason: Reason<'a>) -> PReason<'a> {
-        self.alloc.alloc(PReason_ { pos, reason })
+        self.alloc(PReason_ { pos, reason })
     }
 
     /// Make an Rnone reason. This does not belong here, but:

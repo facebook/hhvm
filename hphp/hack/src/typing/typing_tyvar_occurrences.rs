@@ -5,7 +5,7 @@
 
 use typing_collections_rust::{IMap, ISet};
 
-pub struct TypingTyvarOccurrences {
+pub struct TypingTyvarOccurrences<'a> {
     /// A map to track where each type variable occurs,
     /// more precisely in the type of which other type variables.
     /// E.g. if #1 is bound to (#2 | int), then this map contains the entry
@@ -23,10 +23,10 @@ pub struct TypingTyvarOccurrences {
     /// There are only entries for variables that are unsolved or contain
     /// other unsolved type variables. Variables that are solved and contain
     /// no other unsolved type variables get removed from this map.
-    pub tyvar_occurrences: IMap<ISet>,
+    pub tyvar_occurrences: IMap<'a, ISet<'a>>,
     /// Mapping of type variables to the type variables contained in their
     /// types which are either unsolved or themselves contain unsolved type
     /// variables.
     /// This is the dual of tyvar_occurrences.
-    pub tyvars_in_tyvar: IMap<ISet>,
+    pub tyvars_in_tyvar: IMap<'a, ISet<'a>>,
 }

@@ -2,6 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use arena_trait::Arena;
 use bumpalo::collections::Vec;
 
 use oxidized::aast;
@@ -46,7 +47,7 @@ pub enum SolvingInfo<'a> {
 }
 
 #[derive(Clone)]
-pub struct TyvarInfo<'a> {
+pub struct TyvarInfoStruct<'a> {
     /// Where was the type variable introduced? (e.g. generic method invocation,
     /// new object construction)
     pub tyvar_pos: &'a Pos,
@@ -55,18 +56,23 @@ pub struct TyvarInfo<'a> {
     pub solving_info: SolvingInfo<'a>,
 }
 
-pub type Tvenv<'a> = IMap<&'a TyvarInfo<'a>>;
+pub type TyvarInfo<'a> = &'a TyvarInfoStruct<'a>;
 
-pub struct TypingInferenceEnv<'a> {
+pub type Tvenv<'a> = IMap<'a, TyvarInfo<'a>>;
+
+#[derive(Clone)]
+pub struct TypingInferenceEnvStruct<'a> {
     pub builder: &'a TypeBuilder<'a>,
     pub tvenv: Tvenv<'a>,
     pub tyvars_stack: Vec<'a, (&'a Pos, Vec<'a, Ident>)>,
-    pub tyvar_occurrences: typing_tyvar_occurrences::TypingTyvarOccurrences,
+    pub tyvar_occurrences: &'a typing_tyvar_occurrences::TypingTyvarOccurrences<'a>,
     pub allow_solve_globals: bool,
 }
 
-impl<'a> TypingInferenceEnv<'a> {
-    pub fn expand_type(&'a mut self, ty: Ty<'a>) -> Ty<'a> {
+pub type TypingInferenceEnv<'a> = &'a TypingInferenceEnvStruct<'a>;
+
+impl<'a> TypingInferenceEnvStruct<'a> {
+    pub fn expand_type(&mut self, ty: Ty<'a>) -> Ty<'a> {
         let Ty(r, ty_) = ty;
         match ty_ {
             Ty_::Tvar(v) => match self.expand_var(r, *v) {
@@ -77,18 +83,18 @@ impl<'a> TypingInferenceEnv<'a> {
         }
     }
 
-    fn expand_var(&'a mut self, r: PReason<'a>, v: Ident) -> Option<Ty<'a>> {
+    fn expand_var(&mut self, r: PReason<'a>, v: Ident) -> Option<Ty<'a>> {
         let ty = self.get_type(r, v);
         // TODO(hrust) port eager_solve_fail logic
         ty
     }
 
-    fn get_type(&'a mut self, r: PReason<'a>, v: Ident) -> Option<Ty<'a>> {
-        let mut aliases = ISet::new();
+    fn get_type(&mut self, r: PReason<'a>, v: Ident) -> Option<Ty<'a>> {
+        let mut aliases = ISet::empty();
         let mut v = v;
         let mut r = r;
         loop {
-            match self.tvenv.get(&v) {
+            match self.tvenv.find(&v) {
                 None => {
                     // TODO: This should actually be an error
                     return None;
@@ -99,14 +105,15 @@ impl<'a> TypingInferenceEnv<'a> {
                         r = r0;
                         match ty_ {
                             Ty_::Tvar(v0) => {
-                                if Option::is_some(&aliases.insert(*v0)) {
+                                if aliases.mem(v0) {
                                     panic!("Two type variables are aliasing each other!");
                                 }
+                                aliases = aliases.add(self.builder, *v0);
                                 v = *v0;
                                 continue;
                             }
                             _ => {
-                                for alias in aliases.iter() {
+                                for alias in aliases.into_iter() {
                                     self.add(*alias, *ty);
                                 }
                                 return Some(*ty);
@@ -115,7 +122,7 @@ impl<'a> TypingInferenceEnv<'a> {
                     }
                     SolvingInfo::Constraints(_) => {
                         let ty = self.builder.tyvar(r, v);
-                        for alias in aliases.iter() {
+                        for alias in aliases.into_iter() {
                             self.add(*alias, ty);
                         }
                         return Some(ty);
@@ -135,8 +142,9 @@ impl<'a> TypingInferenceEnv<'a> {
         as somehow sometimes we're missing variables in the environment,
         The OCaml error, would create an empty tyvar_info in this case
         to avoid throwing. */
-        let mut tvinfo = self.tvenv[&v].clone();
+
+        let mut tvinfo = self.tvenv.find(&v).unwrap().clone();
         tvinfo.solving_info = SolvingInfo::Type(ty);
-        self.tvenv = self.tvenv.update(v, self.builder.alloc(tvinfo));
+        self.tvenv = self.tvenv.add(self.builder, v, self.builder.alloc(tvinfo));
     }
 }

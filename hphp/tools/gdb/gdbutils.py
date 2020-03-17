@@ -15,7 +15,6 @@ import struct
 import traceback
 import types
 
-
 #------------------------------------------------------------------------------
 # Memoization.
 
@@ -44,6 +43,18 @@ def invalidate_all_memoizers():
 
     for cache in _all_caches:
         cache.clear()
+
+
+#------------------------------------------------------------------------------
+# STL accessors.
+
+def atomic_get(atomic):
+    inner = rawtype(atomic.type).template_argument(0)
+
+    if inner.code == gdb.TYPE_CODE_PTR:
+        return atomic['_M_b']['_M_p']
+    else:
+        return atomic['_M_i']
 
 
 #------------------------------------------------------------------------------
@@ -344,6 +355,18 @@ def deref(val):
 #------------------------------------------------------------------------------
 # Name accessor.
 
+def _full_func_name(func):
+    attrs = atomic_get(func['m_attrs']['m_attrs'])
+    if attrs & V('HPHP::AttrIsMethCaller'):
+        cls = ""
+    else:
+        cls = atomic_get(func['m_u']['m_u'])['m_cls']
+        if int(cls) == 0:
+            cls = ""
+        else:
+            cls = nameof(cls.cast(T('HPHP::Class').pointer())) + "::"
+    return cls + string_data_val(deref(func['m_name']))
+
 def nameof(val):
     val = deref(val)
     try:
@@ -355,6 +378,8 @@ def nameof(val):
 
     if t == 'HPHP::Func':
         sd = val['m_fullName']
+        if int(rawptr(sd)) == 1:
+            return _full_func_name(val)
     elif t == 'HPHP::Class':
         sd = deref(val['m_preClass'])['m_name']
     elif t == 'HPHP::ObjectData':

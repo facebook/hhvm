@@ -178,7 +178,7 @@ def create_php(idx, ar, rip='0x????????', pc=None):
         'func': '[PHP] %s()' % func_name,
     }
 
-    attrs = idxs.atomic_get(func['m_attrs']['m_attrs'])
+    attrs = atomic_get(func['m_attrs']['m_attrs'])
 
     if attrs & V('HPHP::AttrBuiltin'):
         # Builtins don't have source files.

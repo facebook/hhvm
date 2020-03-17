@@ -223,7 +223,7 @@ class LowPtrPrinter(PtrPrinter):
         storage = template_type(rawtype(self.val.type.template_argument(1)))
 
         if storage == 'HPHP::detail::AtomicStorage':
-            return idx.atomic_get(self.val['m_s']).cast(inner.pointer())
+            return atomic_get(self.val['m_s']).cast(inner.pointer())
         else:
             return self.val['m_s'].cast(inner.pointer())
 

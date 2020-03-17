@@ -104,7 +104,7 @@ end
 val try_finally : f:(unit -> 'a) -> finally:(unit -> unit) -> 'a
 
 val with_context :
-  enter:(unit -> 'a) -> exit:(unit -> 'b) -> do_:(unit -> 'c) -> 'c
+  enter:(unit -> unit) -> exit:(unit -> unit) -> do_:(unit -> 'a) -> 'a
 
 val assert_false_log_backtrace : string option -> 'a
 

@@ -262,7 +262,8 @@ let try_finally ~f ~(finally : unit -> unit) =
   finally ();
   res
 
-let with_context ~enter ~exit ~do_ =
+let with_context
+    ~(enter : unit -> unit) ~(exit : unit -> unit) ~(do_ : unit -> 'a) : 'a =
   enter ();
   let result =
     try do_ ()

@@ -7,6 +7,25 @@
     core_kernel
     full_fidelity
     mutable_accumulator
+    options_ffi
     pocket_universes
     tast
     utils_php_escape))
+
+(library
+  (name options_ffi)
+  (modules)
+  (wrapped false)
+  (self_build_stubs_archive (options_ffi))
+)
+(rule
+  (targets liboptions_ffi_stubs.a)
+  (deps (source_tree %{workspace_root}/src))
+  (locks /cargo)
+  (action
+    (run %{workspace_root}/scripts/build_rust_to_ocaml.sh
+      options_ffi
+      options_ffi
+    )
+  )
+)

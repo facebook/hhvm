@@ -1663,6 +1663,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "options_ffi"
+version = "0.0.0"
+dependencies = [
+ "hhbc_string_utils_rust 0.0.0",
+ "ocaml 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ocamlrep 0.0.0",
+ "ocamlrep_ocamlpool 0.0.0",
+ "options 0.0.0",
+]
+
+[[package]]
 name = "options_serde"
 version = "0.0.0"
 dependencies = [

@@ -82,6 +82,7 @@ pub struct FcallArgs(
     pub NumParams,
     pub ByRefs,
     pub Option<label::Label>,
+    pub Option<String>,
 );
 
 // ported from instruction_sequence in OCaml
@@ -92,11 +93,19 @@ impl FcallArgs {
         inouts: Vec<bool>,
         async_eager_label: Option<label::Label>,
         num_args: usize,
+        context: Option<String>,
     ) -> FcallArgs {
         if !inouts.is_empty() && inouts.len() != num_args {
             panic!("length of by_refs must be either zero or num_args");
         }
-        FcallArgs(flags, num_args, num_rets, inouts, async_eager_label)
+        FcallArgs(
+            flags,
+            num_args,
+            num_rets,
+            inouts,
+            async_eager_label,
+            context,
+        )
     }
 }
 

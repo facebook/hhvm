@@ -957,7 +957,7 @@ fn if_then<F: FnOnce() -> R, R>(cond: bool, f: F) -> Option<R> {
 
 fn print_fcall_args<W: Write>(
     w: &mut W,
-    FcallArgs(fls, num_args, num_rets, inouts, async_eager_label): &FcallArgs,
+    FcallArgs(fls, num_args, num_rets, inouts, async_eager_label, context): &FcallArgs,
 ) -> Result<(), W::Error> {
     use FcallFlags as F;
     let mut flags = vec![];
@@ -979,7 +979,12 @@ fn print_fcall_args<W: Write>(
         concat_by(w, "", inouts, |w, i| w.write(if *i { "1" } else { "0" }))
     })?;
     w.write(" ")?;
-    option_or(w, async_eager_label, print_label, "-")
+    option_or(w, async_eager_label, print_label, "-")?;
+    w.write(" ")?;
+    match context {
+        Some(s) => wrap_by_quotes(w, |w| w.write(s)),
+        None => w.write("\"\""),
+    }
 }
 
 fn print_special_cls_ref<W: Write>(w: &mut W, cls_ref: &SpecialClsRef) -> Result<(), W::Error> {

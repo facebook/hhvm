@@ -779,6 +779,7 @@ fn inline_gena_call(emitter: &mut Emitter, env: &Env, arg: &tast::Expr) -> Resul
                     vec![],
                     Some(async_eager_label.clone()),
                     1,
+                    None,
                 ),
                 method::from_raw_string(if hack_arr_dv_arrs {
                     "fromDict"
@@ -1002,7 +1003,7 @@ fn emit_static_collection(
                 InstrSeq::make_nulluninit(),
                 InstrSeq::make_typedvalue(tv),
                 InstrSeq::make_fcallfuncd(
-                    FcallArgs::new(FcallFlags::default(), 0, vec![], None, 1),
+                    FcallArgs::new(FcallFlags::default(), 0, vec![], None, 1, None),
                     function::from_raw_string("HH\\tag_provenance_here"),
                 ),
                 transform_instr,
@@ -1380,8 +1381,8 @@ fn emit_call(
         let fid = function::Type::from_ast_name(s);
         emit_symbol_refs::add_function(e, fid);
     }
-    let fcall_args = get_fcall_args(args, uarg, async_eager_label, false);
-    let FcallArgs(_, _, num_ret, _, _) = &fcall_args;
+    let fcall_args = get_fcall_args(args, uarg, async_eager_label, None, false);
+    let FcallArgs(_, _, num_ret, _, _, _) = &fcall_args;
     let num_uninit = num_ret - 1;
     let default = scope::with_unnamed_locals(e, |e| {
         let (lhs, fcall) = emit_call_lhs_and_fcall(e, env, expr, fcall_args, targs)?;
@@ -1532,7 +1533,7 @@ fn emit_call_lhs_and_fcall(
         E_::ClassConst(_) => unimplemented!(),
         E_::ClassGet(_) => unimplemented!(),
         E_::Id(id) => {
-            let FcallArgs(flags, num_args, _, _, _) = fcall_args;
+            let FcallArgs(flags, num_args, _, _, _, _) = fcall_args;
             let fq_id = match string_utils::strip_global_ns(&id.1) {
                 "min" if num_args == 2 && !flags.contains(FcallFlags::HAS_UNPACK) => {
                     function::Type::from_ast_name("__SystemLib\\min2")
@@ -1630,6 +1631,7 @@ fn get_fcall_args(
     args: &[tast::Expr],
     uarg: Option<&tast::Expr>,
     async_eager_label: Option<Label>,
+    context: Option<String>,
     lock_while_unwinding: bool,
 ) -> FcallArgs {
     let num_args = args.len();
@@ -1638,7 +1640,14 @@ fn get_fcall_args(
     flags.set(FcallFlags::HAS_UNPACK, uarg.is_some());
     flags.set(FcallFlags::LOCK_WHILE_UNWINDING, lock_while_unwinding);
     let inouts: Vec<bool> = args.iter().map(is_inout_arg).collect();
-    FcallArgs::new(flags, num_rets, inouts, async_eager_label, num_args)
+    FcallArgs::new(
+        flags,
+        num_rets,
+        inouts,
+        async_eager_label,
+        num_args,
+        context,
+    )
 }
 
 fn is_inout_arg(e: &tast::Expr) -> bool {
@@ -2144,7 +2153,7 @@ fn emit_new(
                 instr_args,
                 instr_uargs,
                 emit_pos(e, pos)?,
-                InstrSeq::make_fcallctor(get_fcall_args(args, uarg.as_ref(), None, true)),
+                InstrSeq::make_fcallctor(get_fcall_args(args, uarg.as_ref(), None, None, true)),
                 InstrSeq::make_popc(),
                 InstrSeq::make_lockobj(),
             ]),

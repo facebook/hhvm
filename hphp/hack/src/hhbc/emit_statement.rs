@@ -623,7 +623,7 @@ fn emit_using(e: &mut Emitter, env: &mut Env, pos: &Pos, using: &tast::UsingStmt
                     InstrSeq::make_nulluninit(),
                     InstrSeq::make_nulluninit(),
                     InstrSeq::make_fcallobjmethodd(
-                        FcallArgs::new(FcallFlags::empty(), 1, vec![], async_eager_label, 0),
+                        FcallArgs::new(FcallFlags::empty(), 1, vec![], async_eager_label, 0, None),
                         fn_name,
                         ObjNullFlavor::NullThrows,
                     ),
@@ -1088,6 +1088,7 @@ fn emit_foreach_await(
                     vec![],
                     Some(async_eager_label.clone()),
                     0,
+                    None,
                 ),
                 next_meth,
                 ObjNullFlavor::NullThrows,

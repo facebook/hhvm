@@ -271,9 +271,16 @@ fn make_memoize_method_with_params_code(
             fcall_flags |= FcallFlags::HAS_GENERICS;
         };
         if args.flags.contains(Flags::IS_ASYNC) {
-            FcallArgs::new(fcall_flags, 1, vec![], Some(eager_set.clone()), param_count)
+            FcallArgs::new(
+                fcall_flags,
+                1,
+                vec![],
+                Some(eager_set.clone()),
+                param_count,
+                None,
+            )
         } else {
-            FcallArgs::new(fcall_flags, 1, vec![], None, param_count)
+            FcallArgs::new(fcall_flags, 1, vec![], None, param_count, None)
         }
     };
     let (reified_get, reified_memokeym) = if !args.flags.contains(Flags::IS_ASYNC) {
@@ -370,6 +377,7 @@ fn make_memoize_method_no_params_code(emitter: &mut Emitter, args: &Args) -> Res
             None
         },
         0,
+        None,
     );
     Ok(InstrSeq::gather(vec![
         deprecation_body,

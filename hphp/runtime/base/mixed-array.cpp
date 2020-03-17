@@ -1270,10 +1270,6 @@ ArrayData* MixedArray::RemoveInt(ArrayData* ad, int64_t k) {
   return RemoveIntImpl(ad, k, ad->cowCheck());
 }
 
-ArrayData* MixedArray::RemoveIntInPlace(ArrayData* ad, int64_t k) {
-  return RemoveIntImpl(ad, k, false/*copy*/);
-}
-
 ArrayData*
 MixedArray::RemoveStrImpl(ArrayData* ad, const StringData* key, bool copy) {
   auto a = asMixed(ad);
@@ -1285,10 +1281,6 @@ MixedArray::RemoveStrImpl(ArrayData* ad, const StringData* key, bool copy) {
 
 ArrayData* MixedArray::RemoveStr(ArrayData* ad, const StringData* key) {
   return RemoveStrImpl(ad, key, ad->cowCheck());
-}
-
-ArrayData* MixedArray::RemoveStrInPlace(ArrayData* ad, const StringData* key) {
-  return RemoveStrImpl(ad, key, false/*copy*/);
 }
 
 ArrayData* MixedArray::Copy(const ArrayData* ad) {
@@ -1310,10 +1302,6 @@ ArrayData* MixedArray::AppendImpl(ArrayData* ad, TypedValue v, bool copy) {
 
 ArrayData* MixedArray::Append(ArrayData* ad, TypedValue v) {
   return AppendImpl(ad, v, ad->cowCheck());
-}
-
-ArrayData* MixedArray::AppendInPlace(ArrayData* ad, TypedValue v) {
-  return AppendImpl(ad, v, false);
 }
 
 /*

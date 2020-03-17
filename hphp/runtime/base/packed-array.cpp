@@ -928,7 +928,7 @@ ArrayData* PackedArray::RemoveImpl(ArrayData* adIn, int64_t k, bool copy) {
     // TODO(#2606310): if we're removing the /last/ element, we
     // probably could stay packed, but this needs to be verified.
     auto const mixed = copy ? ToMixedCopy(adIn) : ToMixed(adIn);
-    return MixedArray::RemoveIntInPlace(mixed, k);
+    return MixedArray::RemoveInt(mixed, k);
   }
   // Key doesn't exist---we're still packed.
   return copy ? Copy(adIn) : adIn;
@@ -936,10 +936,6 @@ ArrayData* PackedArray::RemoveImpl(ArrayData* adIn, int64_t k, bool copy) {
 
 ArrayData* PackedArray::RemoveInt(ArrayData* adIn, int64_t k) {
   return RemoveImpl(adIn, k, adIn->cowCheck());
-}
-
-ArrayData* PackedArray::RemoveIntInPlace(ArrayData* adIn, int64_t k) {
-  return RemoveImpl(adIn, k, false/*copy*/);
 }
 
 ArrayData*
@@ -962,10 +958,6 @@ PackedArray::RemoveImplVec(ArrayData* adIn, int64_t k, bool copy) {
 
 ArrayData* PackedArray::RemoveIntVec(ArrayData* adIn, int64_t k) {
   return RemoveImplVec(adIn, k, adIn->cowCheck());
-}
-
-ArrayData* PackedArray::RemoveIntInPlaceVec(ArrayData* adIn, int64_t k) {
-  return RemoveImplVec(adIn, k, false/*copy*/);
 }
 
 ArrayData*
@@ -1019,6 +1011,7 @@ ArrayData* PackedArray::Append(ArrayData* adIn, TypedValue v) {
 }
 
 ArrayData* PackedArray::AppendInPlace(ArrayData* adIn, TypedValue v) {
+  assertx(!adIn->cowCheck());
   return AppendImpl(adIn, v, false);
 }
 

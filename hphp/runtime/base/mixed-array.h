@@ -366,13 +366,10 @@ public:
   static ArrayData* AddInt(ArrayData*, int64_t k, TypedValue v, bool copy);
   static ArrayData* AddStr(ArrayData*, StringData* k, TypedValue v, bool copy);
   static ArrayData* RemoveInt(ArrayData*, int64_t k);
-  static ArrayData* RemoveIntInPlace(ArrayData*, int64_t k);
   static ArrayData* RemoveStr(ArrayData*, const StringData* k);
-  static ArrayData* RemoveStrInPlace(ArrayData*, const StringData* k);
   static ArrayData* Copy(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* Append(ArrayData*, TypedValue v);
-  static ArrayData* AppendInPlace(ArrayData*, TypedValue v);
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* Pop(ArrayData*, Variant& value);
@@ -445,9 +442,7 @@ public:
   static constexpr auto LvalStrDict = &LvalStr;
   static constexpr auto LvalForceNewDict = &LvalForceNew;
   static constexpr auto RemoveIntDict = &RemoveInt;
-  static constexpr auto RemoveIntInPlaceDict = &RemoveIntInPlace;
   static constexpr auto RemoveStrDict = &RemoveStr;
-  static constexpr auto RemoveStrInPlaceDict = &RemoveStrInPlace;
   static constexpr auto IterBeginDict = &IterBegin;
   static constexpr auto IterLastDict = &IterLast;
   static constexpr auto IterEndDict = &IterEnd;
@@ -463,7 +458,6 @@ public:
   static constexpr auto CopyDict = &Copy;
   static constexpr auto CopyStaticDict = &CopyStatic;
   static constexpr auto AppendDict = &Append;
-  static constexpr auto AppendInPlaceDict = &AppendInPlace;
   static constexpr auto PlusEqDict = &PlusEq;
   static constexpr auto MergeDict = &Merge;
   static constexpr auto PopDict = &Pop;

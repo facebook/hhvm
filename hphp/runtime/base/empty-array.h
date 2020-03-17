@@ -75,9 +75,7 @@ struct EmptyArray final : type_scan::MarkCollectable<EmptyArray> {
   static ArrayData* SetStrMove(ArrayData*, StringData* k, TypedValue v);
   static constexpr auto SetStrInPlace = &SetStr;
   static ArrayData* RemoveInt(ArrayData* ad, int64_t);
-  static constexpr auto RemoveIntInPlace = &RemoveInt;
   static ArrayData* RemoveStr(ArrayData* ad, const StringData*);
-  static constexpr auto RemoveStrInPlace = &RemoveStr;
   static size_t Vsize(const ArrayData*);
   static tv_rval RvalPos(const ArrayData* ad, ssize_t pos);
   static bool IsVectorData(const ArrayData*) {
@@ -121,7 +119,6 @@ struct EmptyArray final : type_scan::MarkCollectable<EmptyArray> {
   static ArrayData* Copy(const ArrayData* ad);
   static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* Append(ArrayData*, TypedValue v);
-  static constexpr auto AppendInPlace = &Append;
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* Prepend(ArrayData*, TypedValue v);

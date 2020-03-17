@@ -428,13 +428,10 @@ public:
   static constexpr auto SetStrMove = &SetStr;
   static constexpr auto SetStrInPlace = &SetStr;
   static ArrayData* RemoveInt(ArrayData*, int64_t);
-  static ArrayData* RemoveIntInPlace(ArrayData*, int64_t);
   static ArrayData* RemoveStr(ArrayData*, const StringData*);
-  static ArrayData* RemoveStrInPlace(ArrayData*, const StringData*);
   static ArrayData* Copy(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* Append(ArrayData*, TypedValue);
-  static ArrayData* AppendInPlace(ArrayData*, TypedValue);
   static ArrayData* PlusEq(ArrayData*, const ArrayData*);
   static ArrayData* Merge(ArrayData*, const ArrayData*);
   static ArrayData* Pop(ArrayData*, Variant&);

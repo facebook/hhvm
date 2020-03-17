@@ -102,9 +102,7 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static arr_lval LvalSilentStr(ArrayData*, StringData*, bool copy);
   static arr_lval LvalForceNew(ArrayData*, bool copy);
   static ArrayData* RemoveInt(ArrayData*, int64_t k);
-  static ArrayData* RemoveIntInPlace(ArrayData*, int64_t k);
   static ArrayData* RemoveStr(ArrayData*, const StringData* k);
-  static constexpr auto RemoveStrInPlace = &RemoveStr;
   static ssize_t IterBegin(const ArrayData*);
   static ssize_t IterLast(const ArrayData*);
   static ssize_t IterEnd(const ArrayData*);
@@ -120,7 +118,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static bool Usort(ArrayData*, const Variant&);
   static bool Uasort(ArrayData*, const Variant&);
   static ArrayData* Append(ArrayData*, TypedValue v);
-  static ArrayData* AppendInPlace(ArrayData*, TypedValue v);
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* Pop(ArrayData*, Variant& value);
@@ -146,7 +143,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static constexpr auto SetStrMoveVec = &SetStrVec;
   static constexpr auto SetStrInPlaceVec = &SetStrVec;
   static ArrayData* RemoveIntVec(ArrayData*, int64_t);
-  static ArrayData* RemoveIntInPlaceVec(ArrayData*, int64_t);
   static arr_lval LvalIntVec(ArrayData*, int64_t, bool);
   static arr_lval LvalStrVec(ArrayData*, StringData*, bool);
   static constexpr auto LvalSilentIntVec = &LvalSilentInt;
@@ -186,7 +182,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static constexpr auto CopyVec = &Copy;
   static constexpr auto CopyStaticVec = &CopyStatic;
   static constexpr auto AppendVec = &Append;
-  static constexpr auto AppendInPlaceVec = &AppendInPlace;
   static constexpr auto PopVec = &Pop;
   static constexpr auto DequeueVec = &Dequeue;
   static constexpr auto PrependVec = &Prepend;
@@ -203,6 +198,12 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
     assertx(ad->isVecArrayKind());
     return NvTryGetIntVec(ad, k);
   }
+
+  //////////////////////////////////////////////////////////////////////
+
+  // Like append but without COW checks. Used to implement ArrayInit helpers.
+  static ArrayData* AppendInPlace(ArrayData*, TypedValue v);
+  static constexpr auto AppendInPlaceVec = &AppendInPlace;
 
   //////////////////////////////////////////////////////////////////////
 

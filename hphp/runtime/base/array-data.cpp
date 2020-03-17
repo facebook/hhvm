@@ -475,24 +475,20 @@ const ArrayFunctions g_array_funcs = {
   /*
    * ArrayData* RemoveInt(ArrayData*, int64_t key)
    *
-   *   Remove an array element with an integer key.  If there was no
-   *   entry for that element, this function does not remove it, but
-   *   may still copy first. RemoveInt can copy or escalate,
-   *   but RemoveIntInPlace may only escalate.
+   *   Remove an array element with an integer key, copying or escalating
+   *   as necessary. If there was no entry for that element, this function
+   *   will not remove it, but it may still copy the array in that case.
    */
   DISPATCH(RemoveInt)
-  DISPATCH(RemoveIntInPlace)
 
   /*
    * ArrayData* RemoveStr(ArrayData*, const StringData*)
    *
-   *   Remove an array element with a string key.  If there was no
-   *   entry for that element, this function does not remove it, but
-   *   may still copy first. RemoveStr has copy/grow semantics;
-   *   RemoveStrInPlace may only reallocate or escalate.
+   *   Remove an array element with a string key, copying or escalating
+   *   as necessary. If there was no entry for that element, this function
+   *   will not remove it, but it may still copy the array in that case.
    */
   DISPATCH(RemoveStr)
-  DISPATCH(RemoveStrInPlace)
 
   /*
    * ssize_t IterEnd(const ArrayData*)
@@ -620,14 +616,11 @@ const ArrayFunctions g_array_funcs = {
   /*
    * ArrayData* Append(ArrayData*, TypedValue v);
    *
-   *   Append a new value to the array, with the next available
-   *   integer key.  If there is no next available integer key, no
-   *   value is appended.  Append has copy/grow semantics;
-   *   AppendInPlace may only escalate or grow. The value must not be
-   *   KindOfUninit.
+   *   Append a new value to the array, with the next available integer key,
+   *   copying or escalating as necessary. If there is no available integer
+   *   key, no value is appended, but this method may still copy the array.
    */
   DISPATCH(Append)
-  DISPATCH(AppendInPlace)
 
   /*
    * ArrayData* PlusEq(ArrayData*, const ArrayData* elems)

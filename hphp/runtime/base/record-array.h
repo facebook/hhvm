@@ -76,9 +76,7 @@ struct RecordArray : ArrayData,
   static arr_lval LvalSilentStr(ArrayData*, StringData* key, bool copy);
   static arr_lval LvalForceNew(ArrayData*, bool copy);
   static ArrayData* RemoveInt(ArrayData*, int64_t key);
-  static constexpr auto RemoveIntInPlace = &RemoveInt;
   static ArrayData* RemoveStr(ArrayData*, const StringData*);
-  static constexpr auto RemoveStrInPlace = &RemoveStr;
   static ssize_t IterEnd(const ArrayData*);
   static ssize_t IterBegin(const ArrayData*);
   static ssize_t IterLast(const ArrayData*);
@@ -94,7 +92,6 @@ struct RecordArray : ArrayData,
   static ArrayData* Copy(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* Append(ArrayData*, TypedValue v);
-  static constexpr auto AppendInPlace = &Append;
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* Pop(ArrayData*, Variant& value);

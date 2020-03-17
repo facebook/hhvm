@@ -219,28 +219,14 @@ inline ArrayData* ArrayData::remove(int64_t k) {
   return g_array_funcs.removeInt[kind()](this, k);
 }
 
-inline ArrayData* ArrayData::removeInPlace(int64_t k) {
-  return g_array_funcs.removeIntInPlace[kind()](this, k);
-}
-
 inline ArrayData* ArrayData::remove(const StringData* k) {
   return g_array_funcs.removeStr[kind()](this, k);
-}
-
-inline ArrayData* ArrayData::removeInPlace(const StringData* k) {
-  return g_array_funcs.removeStrInPlace[kind()](this, k);
 }
 
 inline ArrayData* ArrayData::append(TypedValue v) {
   assertx(v.m_type != KindOfUninit);
   assertx(cowCheck() || notCyclic(v));
   return g_array_funcs.append[kind()](this, v);
-}
-
-inline ArrayData* ArrayData::appendInPlace(TypedValue v) {
-  assertx(v.m_type != KindOfUninit);
-  assertx(notCyclic(v));
-  return g_array_funcs.appendInPlace[kind()](this, v);
 }
 
 inline ssize_t ArrayData::iter_begin() const {

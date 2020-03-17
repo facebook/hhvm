@@ -214,12 +214,12 @@ ArrayData* APCLocalArray::SetStrMove(ArrayData* ad, StringData* k, TypedValue v)
 
 ArrayData* APCLocalArray::RemoveInt(ArrayData* ad, int64_t k) {
   EscalateHelper helper{ad};
-  return helper.release(helper.escalated->removeInPlace(k));
+  return helper.release(helper.escalated->remove(k));
 }
 
 ArrayData* APCLocalArray::RemoveStr(ArrayData* ad, const StringData* k) {
   EscalateHelper helper{ad};
-  return helper.release(helper.escalated->removeInPlace(k));
+  return helper.release(helper.escalated->remove(k));
 }
 
 ArrayData* APCLocalArray::Copy(const ArrayData* ad) {
@@ -228,7 +228,7 @@ ArrayData* APCLocalArray::Copy(const ArrayData* ad) {
 
 ArrayData* APCLocalArray::Append(ArrayData* ad, TypedValue v) {
   EscalateHelper helper{ad};
-  return helper.release(helper.escalated->appendInPlace(v));
+  return helper.release(helper.escalated->append(v));
 }
 
 ArrayData* APCLocalArray::PlusEq(ArrayData* ad, const ArrayData *elems) {

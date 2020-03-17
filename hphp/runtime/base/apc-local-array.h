@@ -60,12 +60,9 @@ struct APCLocalArray final : ArrayData,
   static ArrayData* SetStrMove(ArrayData*, StringData* k, TypedValue v);
   static constexpr auto SetStrInPlace = &SetStr;
   static ArrayData *RemoveInt(ArrayData* ad, int64_t k);
-  static constexpr auto RemoveIntInPlace = &RemoveInt;
   static ArrayData *RemoveStr(ArrayData* ad, const StringData* k);
-  static constexpr auto RemoveStrInPlace = &RemoveStr;
   static ArrayData* Copy(const ArrayData*);
   static ArrayData* Append(ArrayData* a, TypedValue v);
-  static constexpr auto AppendInPlace = &Append;
   static ArrayData* PlusEq(ArrayData*, const ArrayData *elems);
   static ArrayData* Merge(ArrayData*, const ArrayData *elems);
   static ArrayData* Prepend(ArrayData*, TypedValue v);

@@ -682,16 +682,8 @@ ArrayData* SetArray::RemoveInt(ArrayData* ad, int64_t k) {
   return RemoveImpl(ad, k, ad->cowCheck(), hash_int64(k));
 }
 
-ArrayData* SetArray::RemoveIntInPlace(ArrayData* ad, int64_t k) {
-  return RemoveImpl(ad, k, false/*copy*/, hash_int64(k));
-}
-
 ArrayData* SetArray::RemoveStr(ArrayData* ad, const StringData* k) {
   return RemoveImpl(ad, k, ad->cowCheck(), k->hash());
-}
-
-ArrayData* SetArray::RemoveStrInPlace(ArrayData* ad, const StringData* k) {
-  return RemoveImpl(ad, k, false/*copy*/, k->hash());
 }
 
 void SetArray::Sort(ArrayData*, int, bool) {
@@ -732,10 +724,6 @@ ArrayData* SetArray::AppendImpl(ArrayData* ad, TypedValue v, bool copy) {
 
 ArrayData* SetArray::Append(ArrayData* ad, TypedValue v) {
   return AppendImpl(ad, v, ad->cowCheck());
-}
-
-ArrayData* SetArray::AppendInPlace(ArrayData* ad, TypedValue v) {
-  return AppendImpl(ad, v, false);
 }
 
 ArrayData* SetArray::PlusEq(ArrayData* ad, const ArrayData*) {

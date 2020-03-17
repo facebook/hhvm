@@ -93,14 +93,9 @@ public:
   static ArrayData* SetStrMove(ArrayData*, StringData* k, TypedValue v);
   static ArrayData* SetStrInPlace(ArrayData*, StringData* k, TypedValue v);
   static constexpr auto SetStr = &SetStrInPlace;
-  static ArrayData* RemoveIntInPlace(ArrayData*, int64_t k);
-  static constexpr auto RemoveInt = &RemoveIntInPlace;
-  static ArrayData* RemoveStrInPlace(ArrayData*, const StringData* k);
-  static constexpr auto RemoveStr = &RemoveStrInPlace;
-
-  static ArrayData* AppendInPlace(ArrayData*, TypedValue v);
-  static constexpr auto Append = &AppendInPlace;
-
+  static ArrayData* RemoveInt(ArrayData*, int64_t k);
+  static ArrayData* RemoveStr(ArrayData*, const StringData* k);
+  static ArrayData* Append(ArrayData*, TypedValue v);
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* Prepend(ArrayData*, TypedValue v);

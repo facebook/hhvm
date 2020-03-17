@@ -515,29 +515,20 @@ public:
   ArrayData* setInPlace(const StringData*, const Variant&) = delete;
 
   /*
-   * Remove the value at key `k'. remove() will make a copy first if necessary;
-   * removeInPlace() will never copy, but may escalate.
-   *
-   * Return `this' if copy/escalation are not needed, or a copied/escalated
-   * array data.
+   * Remove the value at key `k', making a copy first if necessary. Returns
+   * `this' if copy/escalation are not needed, or a copied/escalated ArrayData.
    */
   ArrayData* remove(int64_t k);
   ArrayData* remove(const StringData* k);
   ArrayData* remove(TypedValue k);
   ArrayData* remove(const String& k);
   ArrayData* remove(const Variant& k);
-  ArrayData* removeInPlace(int64_t k);
-  ArrayData* removeInPlace(const StringData* k);
 
   /**
-   * Append `v' to the array. append() makes a copy first if `copy' is set,
-   * appendInPlace() may only escalate or grow.
-   *
-   * Return `this' if copy/escalation are not needed, or a copied/escalated
-   * array data.
+   * Append `v' to the array, making a copy first if necessary. Returns `this`
+   * if copy/escalation are not needed, or a copied/escalated ArrayData.
    */
   ArrayData* append(TypedValue v);
-  ArrayData* appendInPlace(TypedValue v);
 
   /////////////////////////////////////////////////////////////////////////////
   // Iteration.
@@ -922,9 +913,7 @@ struct ArrayFunctions {
   arr_lval (*lvalSilentStr[NK])(ArrayData*, StringData* k, bool copy);
   arr_lval (*lvalForce[NK])(ArrayData*, bool copy);
   ArrayData* (*removeInt[NK])(ArrayData*, int64_t k);
-  ArrayData* (*removeIntInPlace[NK])(ArrayData*, int64_t k);
   ArrayData* (*removeStr[NK])(ArrayData*, const StringData* k);
-  ArrayData* (*removeStrInPlace[NK])(ArrayData*, const StringData* k);
   ssize_t (*iterBegin[NK])(const ArrayData*);
   ssize_t (*iterLast[NK])(const ArrayData*);
   ssize_t (*iterEnd[NK])(const ArrayData*);
@@ -940,7 +929,6 @@ struct ArrayFunctions {
   ArrayData* (*copy[NK])(const ArrayData*);
   ArrayData* (*copyStatic[NK])(const ArrayData*);
   ArrayData* (*append[NK])(ArrayData*, TypedValue v);
-  ArrayData* (*appendInPlace[NK])(ArrayData*, TypedValue v);
   ArrayData* (*plusEq[NK])(ArrayData*, const ArrayData* elems);
   ArrayData* (*merge[NK])(ArrayData*, const ArrayData* elems);
   ArrayData* (*pop[NK])(ArrayData*, Variant& value);

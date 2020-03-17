@@ -132,6 +132,7 @@ type server_setup = {
   foo_contents: string;
   bar_path: Relative_path.t;
   bar_contents: string;
+  nonexistent_path: Relative_path.t;
 }
 
 let server_setup_for_deferral_tests () : server_setup =
@@ -147,6 +148,7 @@ let server_setup_for_deferral_tests () : server_setup =
   Disk.write_file ~file:(in_fake_dir "root/Bar.php") ~contents:bar_contents;
   let foo_path = Relative_path.from_root "Foo.php" in
   let bar_path = Relative_path.from_root "Bar.php" in
+  let nonexistent_path = Relative_path.from_root "Nonexistent.php" in
   (* Parsing produces the file infos that the naming table module can use
     to construct the forward naming table (files-to-symbols) *)
   let popt = ParserOptions.default in
@@ -195,7 +197,7 @@ let server_setup_for_deferral_tests () : server_setup =
     two computations:
       - a declaration of \Bar
       - a (deferred) type check of \Foo *)
-  { ctx; foo_path; foo_contents; bar_path; bar_contents }
+  { ctx; foo_path; foo_contents; bar_path; bar_contents; nonexistent_path }
 
 (* In this test, we wish to establish that we enable deferring type checking
   for files that have undeclared dependencies, UNLESS we've already deferred
@@ -362,6 +364,84 @@ let test_should_enable_deferring () =
 
   true
 
+(* This test verifies quarantine. *)
+let test_quarantine () =
+  EventLogger.init_fake ();
+  Utils.with_context
+    ~enter:Provider_backend.set_local_memory_backend_with_defaults
+    ~exit:Provider_backend.set_shared_memory_backend
+    ~do_:(fun () ->
+      let { ctx; foo_path; foo_contents; nonexistent_path; _ } =
+        server_setup_for_deferral_tests ()
+      in
+
+      (* simple case *)
+      let (ctx, _foo_entry) =
+        Provider_context.add_entry_from_file_contents
+          ~ctx
+          ~path:foo_path
+          ~contents:foo_contents
+      in
+      let can_quarantine =
+        try
+          Provider_utils.respect_but_quarantine_unsaved_changes
+            ~ctx
+            ~f:(fun () -> "ok")
+        with e -> e |> Exception.wrap |> Exception.to_string
+      in
+      Asserter.String_asserter.assert_equals
+        "ok"
+        can_quarantine
+        "Should be able to quarantine foo";
+
+      (* repeat of simple case *)
+      let can_quarantine =
+        try
+          Provider_utils.respect_but_quarantine_unsaved_changes
+            ~ctx
+            ~f:(fun () -> "ok")
+        with e -> e |> Exception.wrap |> Exception.to_string
+      in
+      Asserter.String_asserter.assert_equals
+        "ok"
+        can_quarantine
+        "Should be able to quarantine foo a second time";
+
+      (* add a non-existent file; should fail *)
+      let (ctx2, _nonexistent_entry) =
+        Provider_context.add_entry_from_file_contents
+          ~ctx
+          ~path:nonexistent_path
+          ~contents:""
+      in
+      let can_quarantine =
+        try
+          Provider_utils.respect_but_quarantine_unsaved_changes
+            ~ctx:ctx2
+            ~f:(fun () -> "ok")
+        with e -> e |> Exception.wrap |> Exception.to_string
+      in
+      Asserter.String_asserter.assert_equals
+        "ok"
+        can_quarantine
+        "Should be able to quarantine nonexistent_file";
+
+      (* repeat of simple case, back with original ctx *)
+      let can_quarantine =
+        try
+          Provider_utils.respect_but_quarantine_unsaved_changes
+            ~ctx
+            ~f:(fun () -> "ok")
+        with e -> e |> Exception.wrap |> Exception.to_string
+      in
+      Asserter.String_asserter.assert_equals
+        "ok"
+        can_quarantine
+        "Should be able to quarantine foo a third time";
+
+      ());
+  true
+
 let tests =
   [
     ("test_deferred_decl_add", test_deferred_decl_add);
@@ -370,6 +450,7 @@ let tests =
     ("test_compute_tast_counting", test_compute_tast_counting);
     ("test_dmesg_parser", test_dmesg_parser);
     ("test_should_enable_deferring", test_should_enable_deferring);
+    ("test_quarantine", test_quarantine);
   ]
 
 let () =

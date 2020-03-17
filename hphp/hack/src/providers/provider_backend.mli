@@ -101,12 +101,26 @@ module Fixmes : sig
   }
 end
 
+module Reverse_naming_table_delta : sig
+  type 'pos pos_or_deleted =
+    | Pos of 'pos
+    | Deleted
+
+  type t = {
+    mutable consts: FileInfo.pos pos_or_deleted SMap.t;
+    mutable funs: FileInfo.pos pos_or_deleted SMap.t;
+    mutable types:
+      (FileInfo.pos * Naming_types.kind_of_type) pos_or_deleted SMap.t;
+  }
+end
+
 type t =
   | Shared_memory
   | Local_memory of {
       decl_cache: Decl_cache.t;
       shallow_decl_cache: Shallow_decl_cache.t;
       linearization_cache: Linearization_cache.t;
+      reverse_naming_table_delta: Reverse_naming_table_delta.t;
       fixmes: Fixmes.t;
     }
   | Decl_service of {

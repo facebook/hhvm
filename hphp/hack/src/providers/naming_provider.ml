@@ -6,23 +6,121 @@
  *
  *)
 
-let const_exists (_ctx : Provider_context.t) (name : string) : bool =
-  Naming_heap.Consts.is_defined name
+open Core_kernel
+open Reordered_argument_collections
 
-let get_const_path (_ctx : Provider_context.t) (name : string) :
-    Relative_path.t option =
-  Naming_heap.Consts.get_filename name
+let not_implemented (backend : Provider_backend.t) =
+  failwith
+    ("not implemented for backend: " ^ Provider_backend.t_to_string backend)
 
-let get_const_pos (_ctx : Provider_context.t) (name : string) :
+let find_symbol_in_context
+    ~(ctx : Provider_context.t)
+    ~(get_entry_symbols : FileInfo.t -> FileInfo.id list)
+    ~(is_symbol : string -> bool)
+    ~(fallback : unit -> FileInfo.pos option) : FileInfo.pos option =
+  let ctx_pos_opt =
+    ctx.Provider_context.entries
+    |> Relative_path.Map.filter_map ~f:(fun entry ->
+           let file_info = Ast_provider.compute_file_info ctx entry in
+           let symbols = get_entry_symbols file_info in
+           List.find_map symbols ~f:(fun (pos, name) ->
+               if is_symbol name then
+                 Some pos
+               else
+                 None))
+    |> Relative_path.Map.choose_opt
+  in
+  match ctx_pos_opt with
+  | Some (_path, pos) -> Some pos
+  | None ->
+    (match fallback () with
+    | Some pos ->
+      (* We've just checked to see if the given symbol was in `ctx`, and
+      returned it if present. If we've gotten to this point, and we're
+      reporting that the symbol is in a file in `ctx`, but we didn't already
+      find it in `ctx`, that means that the file content in `ctx` has deleted
+      the symbol. So we should suppress this returned position and return
+      `None` instead. *)
+      let path = FileInfo.get_pos_filename pos in
+      if Relative_path.Map.mem ctx.Provider_context.entries path then
+        None
+      else
+        Some pos
+    | None -> None)
+
+let get_and_cache
+    ~(name : 'name)
+    ~(make_pos_for_kind : Relative_path.t -> 'pos)
+    ~(get_delta_for_kind :
+       unit ->
+       'pos Provider_backend.Reverse_naming_table_delta.pos_or_deleted SMap.t)
+    ~(set_delta_for_kind :
+       'pos Provider_backend.Reverse_naming_table_delta.pos_or_deleted SMap.t ->
+       unit)
+    ~(get_from_sqlite : 'name -> Relative_path.t option) =
+  let open Provider_backend.Reverse_naming_table_delta in
+  let delta = get_delta_for_kind () in
+  match SMap.find_opt delta name with
+  | Some Deleted -> None
+  | Some (Pos pos) -> Some pos
+  | None when Naming_sqlite.is_connected () ->
+    (match get_from_sqlite name with
+    | None -> None
+    | Some path ->
+      let pos = make_pos_for_kind path in
+      let new_delta = SMap.add delta ~key:name ~data:(Pos pos) in
+      set_delta_for_kind new_delta;
+      Some pos)
+  | None -> None
+
+let get_const_pos (ctx : Provider_context.t) (name : string) :
     FileInfo.pos option =
-  Naming_heap.Consts.get_pos name
+  find_symbol_in_context
+    ~ctx
+    ~get_entry_symbols:(fun { FileInfo.consts; _ } -> consts)
+    ~is_symbol:(String.equal name)
+    ~fallback:(fun () ->
+      match ctx.Provider_context.backend with
+      | Provider_backend.Shared_memory -> Naming_heap.Consts.get_pos name
+      | Provider_backend.Local_memory { reverse_naming_table_delta; _ } ->
+        let open Provider_backend.Reverse_naming_table_delta in
+        get_and_cache
+          ~name
+          ~make_pos_for_kind:(fun path -> FileInfo.File (FileInfo.Const, path))
+          ~get_delta_for_kind:(fun () -> reverse_naming_table_delta.consts)
+          ~set_delta_for_kind:(fun consts ->
+            reverse_naming_table_delta.consts <- consts)
+          ~get_from_sqlite:(fun name -> Naming_sqlite.get_const_pos name)
+      | Provider_backend.Decl_service _ as backend -> not_implemented backend)
 
-let add_const (_ctx : Provider_context.t) (name : string) (pos : FileInfo.pos) :
+let const_exists (ctx : Provider_context.t) (name : string) : bool =
+  get_const_pos ctx name |> Option.is_some
+
+let get_const_path (ctx : Provider_context.t) (name : string) :
+    Relative_path.t option =
+  get_const_pos ctx name |> Option.map ~f:FileInfo.get_pos_filename
+
+let add_const (ctx : Provider_context.t) (name : string) (pos : FileInfo.pos) :
     unit =
-  Naming_heap.Consts.add name pos
+  match ctx.Provider_context.backend with
+  | Provider_backend.Shared_memory -> Naming_heap.Consts.add name pos
+  | Provider_backend.Local_memory { reverse_naming_table_delta; _ } ->
+    let open Provider_backend.Reverse_naming_table_delta in
+    reverse_naming_table_delta.consts <-
+      SMap.add reverse_naming_table_delta.consts ~key:name ~data:(Pos pos)
+  | Provider_backend.Decl_service _ as backend -> not_implemented backend
 
-let remove_const_batch (_ctx : Provider_context.t) (names : SSet.t) : unit =
-  Naming_heap.Consts.remove_batch names
+let remove_const_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
+  match ctx.Provider_context.backend with
+  | Provider_backend.Shared_memory -> Naming_heap.Consts.remove_batch names
+  | Provider_backend.Local_memory { reverse_naming_table_delta; _ } ->
+    let open Provider_backend.Reverse_naming_table_delta in
+    reverse_naming_table_delta.consts <-
+      SSet.fold
+        names
+        ~init:reverse_naming_table_delta.consts
+        ~f:(fun name acc -> SMap.add acc ~key:name ~data:Deleted)
+  | Provider_backend.Decl_service _ as backend -> not_implemented backend
 
 let fun_exists (_ctx : Provider_context.t) (name : string) : bool =
   Naming_heap.Funs.is_defined name

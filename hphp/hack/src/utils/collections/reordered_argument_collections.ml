@@ -14,6 +14,8 @@ module Reordered_argument_map (S : WrappedMap.S) = struct
 
   let filter m ~f = filter f m
 
+  let filter_map m ~f = filter_map f m
+
   let fold m ~init ~f = fold f m init
 
   let find_opt m k = find_opt k m

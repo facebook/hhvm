@@ -6,6 +6,7 @@
     decl_service_client
     heap_shared_mem
     lru_cache
+    naming_types
     pos
     relative_path
     shallow_decl_defs

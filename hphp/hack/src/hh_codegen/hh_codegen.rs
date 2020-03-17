@@ -12,8 +12,7 @@ mod gen_visitor;
 mod quote_helper;
 
 use common::*;
-use crypto::digest::Digest;
-use crypto::md5::Md5;
+use md5::{Digest, Md5};
 use std::{fs, fs::File, io::prelude::*, path::PathBuf, process::Command};
 
 fn main() -> Result<()> {
@@ -102,8 +101,8 @@ fn sign(file: &PathBuf) -> Result<()> {
     }
 
     let mut digest = Md5::new();
-    digest.input_str(&contents);
-    let md5 = digest.result_str();
+    digest.input(&contents);
+    let md5 = hex::encode(digest.result());
 
     let new_contents =
         contents.replace(&expected, &format!("{} SignedSource<<{}>>", token_tag, md5));

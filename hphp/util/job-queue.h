@@ -234,10 +234,9 @@ public:
     Lock lock(this);
     bool flushed = false;
 
-    bool ableToDequeue;
-    while (m_jobCount == 0 ||
-           !(ableToDequeue = getActiveWorker() <
-             m_maxActiveWorkers.load(std::memory_order_acquire))) {
+    bool ableToDequeue = getActiveWorker() <
+                         m_maxActiveWorkers.load(std::memory_order_acquire);
+    while (m_jobCount == 0 || !ableToDequeue) {
       uint32_t kNumPriority = m_jobQueues.size();
       if (m_jobQueues[kNumPriority - 1].size() > 0) {
         break;
@@ -276,6 +275,8 @@ public:
         // should be given a task first (LIFO), same as unflushed threads.
         wait(id, q, highPri ? Priority::Highest : Priority::Normal);
       }
+      ableToDequeue = getActiveWorker() <
+                      m_maxActiveWorkers.load(std::memory_order_acquire);
     }
     // Stop immediately if the worker has been asked to stop, due to thread
     // count adjustments.

@@ -76,9 +76,9 @@ struct Block {
   enum class Hint { Unused, Unlikely, Neither, Likely };
 
   explicit Block(unsigned id, uint64_t profCount)
-    : m_id(id)
+    : m_profCount(checkedProfCount(profCount))
+    , m_id(id)
     , m_hint(Hint::Neither)
-    , m_profCount(checkedProfCount(profCount))
   {}
 
   Block(const Block&) = delete;
@@ -210,12 +210,15 @@ struct Block {
   static uint64_t checkedProfCount(uint64_t profCount);
 
   InstructionList m_instrs; // instructions in this block
-  const unsigned m_id;      // unit-assigned unique id of this block
   EdgeList m_preds;         // Edges that point to this block
-  Hint m_hint;              // execution frequency hint
   uint64_t m_profCount;     // execution profile count of the region block
                             // containing this IR block.
+  const unsigned m_id;      // unit-assigned unique id of this block
+  Hint m_hint;              // execution frequency hint
 };
+
+// Try to keep this structure small; watch for alignment issues.
+static_assert(sizeof(Block) == 64, "");
 
 using BlockList = jit::vector<Block*>;
 using BlockSet = jit::flat_set<Block*>;

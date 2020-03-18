@@ -1042,6 +1042,8 @@ struct RuntimeOption {
   /* Tracing sample rate for first N requests per URL */                \
   F(uint32_t, TracingFirstRequestsCount,      0)                        \
   F(uint32_t, TracingFirstRequestsSampleRate, 0)                        \
+  /* Empty string disables any Artillery tracing */                     \
+  F(std::string, ArtilleryTracePolicy, "")                              \
   /* Log the sizes and metadata for all translations in the TC broken
    * down by function and inclusive/exclusive size for inlined regions.
    * When set to "" TC size data will be sampled on a per function basis

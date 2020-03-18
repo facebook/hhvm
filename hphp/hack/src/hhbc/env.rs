@@ -34,8 +34,6 @@ pub struct Env<'a> {
     pub jump_targets_gen: jump_targets::Gen,
     pub scope: Scope<'a>,
     pub namespace: NamespaceEnv,
-
-    allows_array_append: bool,
     // TODO(hrust)
     // - pipe_var after porting Local
 }
@@ -45,10 +43,10 @@ impl<'a> Env<'a> {
     where
         F: FnOnce(&mut Self) -> R,
     {
-        let old = self.allows_array_append;
-        self.allows_array_append = true;
+        let old = self.flags.contains(Flags::ALLOWS_ARRAY_APPEND);
+        self.flags.set(Flags::ALLOWS_ARRAY_APPEND, true);
         let r = f(self);
-        self.allows_array_append = old;
+        self.flags.set(Flags::ALLOWS_ARRAY_APPEND, old);
         r
     }
 

@@ -1033,6 +1033,15 @@ struct RuntimeOption {
   F(int, SimpleJsonMaxLength,        2 << 20)                           \
   F(uint32_t, JitSampleRate,               0)                           \
   F(uint32_t, TraceServerRequestRate,      0)                           \
+  /* Tracing Options */                                                 \
+  /* Base tracing sample rate for all requests */                       \
+  F(uint32_t, TracingSampleRate,              0)                        \
+  /* Tracing sample rate for first N requests */                        \
+  F(uint32_t, TracingPerRequestCount,         0)                        \
+  F(uint32_t, TracingPerRequestSampleRate,    0)                        \
+  /* Tracing sample rate for first N requests per URL */                \
+  F(uint32_t, TracingFirstRequestsCount,      0)                        \
+  F(uint32_t, TracingFirstRequestsSampleRate, 0)                        \
   /* Log the sizes and metadata for all translations in the TC broken
    * down by function and inclusive/exclusive size for inlined regions.
    * When set to "" TC size data will be sampled on a per function basis

@@ -2206,14 +2206,14 @@ fn emit_array_get_(
     outer_pos: &Pos,
     mode: Option<MemberOpMode>,
     query_op: QueryOp,
-    base: &tast::Expr,
+    base_expr: &tast::Expr,
     elem: Option<&tast::Expr>,
     no_final: bool,
     null_coalesce_assignment: bool,
-    inout_param_info: Option<(usize, inout_locals::AliasInfoMap)>,
+    inout_param_info: Option<&(usize, inout_locals::AliasInfoMap)>,
 ) -> Result<(ArrayGetInstr, Option<usize>)> {
     use tast::{Expr as E, Expr_ as E_};
-    match (base, elem) {
+    match (base_expr, elem) {
         (E(pos, E_::Array(_)), None) => Err(emit_fatal::raise_fatal_parse(
             pos,
             "Can't use array() as base in write context",
@@ -2222,7 +2222,325 @@ fn emit_array_get_(
             pos,
             "Can't use [] for reading",
         )),
-        _ => unimplemented!(),
+        _ => {
+            let local_temp_kind = get_local_temp_kind(env, false, inout_param_info, elem);
+            let mode = if null_coalesce_assignment {
+                MemberOpMode::Warn
+            } else {
+                mode.unwrap_or(get_query_op_mode(&query_op))
+            };
+            let (elem_instrs, elem_stack_size) =
+                emit_elem(e, env, elem, local_temp_kind, null_coalesce_assignment)?;
+            let base_result = emit_base_(
+                e,
+                env,
+                base_expr,
+                mode,
+                false,
+                null_coalesce_assignment,
+                elem_stack_size,
+                0,
+                inout_param_info,
+            )?;
+            let cls_stack_size = match &base_result {
+                ArrayGetBase::Regular(base) => base.cls_stack_size,
+                ArrayGetBase::Inout { load, .. } => load.cls_stack_size,
+            };
+            let memberkey =
+                get_elem_member_key(e, env, cls_stack_size, elem, null_coalesce_assignment)?;
+            let mut querym_n_unpopped = None;
+            let mut make_final = |total_stack_size: usize| -> InstrSeq {
+                if no_final {
+                    InstrSeq::Empty
+                } else if null_coalesce_assignment {
+                    querym_n_unpopped = Some(total_stack_size);
+                    InstrSeq::make_querym(0, query_op, memberkey.clone())
+                } else {
+                    InstrSeq::make_querym(total_stack_size, query_op, memberkey.clone())
+                }
+            };
+            let instr = match (base_result, local_temp_kind) {
+                (ArrayGetBase::Regular(base), None) =>
+                // neither base nor expression needs to store anything
+                {
+                    ArrayGetInstr::Regular(InstrSeq::gather(vec![
+                        base.base_instrs,
+                        elem_instrs,
+                        base.cls_instrs,
+                        emit_pos(e, outer_pos)?,
+                        base.setup_instrs,
+                        make_final(
+                            base.base_stack_size + base.cls_stack_size + (elem_stack_size as usize),
+                        ),
+                    ]))
+                }
+                (ArrayGetBase::Regular(base), Some(local_kind)) => {
+                    // base does not need temp locals but index expression does
+                    let local = e.local_gen_mut().get_unnamed();
+                    // load base and indexer, value of indexer will be saved in local
+                    let load = vec![
+                        (
+                            InstrSeq::gather(vec![base.base_instrs.clone(), elem_instrs]),
+                            Some((local.clone(), local_kind)),
+                        ),
+                        (
+                            InstrSeq::gather(vec![
+                                base.base_instrs,
+                                emit_pos(e, outer_pos)?,
+                                base.setup_instrs,
+                                make_final(
+                                    base.base_stack_size
+                                        + base.cls_stack_size
+                                        + (elem_stack_size as usize),
+                                ),
+                            ]),
+                            None,
+                        ),
+                    ];
+                    let store = InstrSeq::gather(vec![
+                        emit_store_for_simple_base(
+                            e,
+                            env,
+                            outer_pos,
+                            elem_stack_size,
+                            base_expr,
+                            local,
+                            false,
+                        )?,
+                        InstrSeq::make_popc(),
+                    ]);
+                    ArrayGetInstr::Inout { load, store }
+                }
+                (
+                    ArrayGetBase::Inout {
+                        load:
+                            ArrayGetBaseData {
+                                mut base_instrs,
+                                cls_instrs,
+                                setup_instrs,
+                                base_stack_size,
+                                cls_stack_size,
+                            },
+                        store,
+                    },
+                    None,
+                ) => {
+                    // base needs temp locals, indexer - does not,
+                    // simply concat two instruction sequences
+                    base_instrs.push((
+                        InstrSeq::gather(vec![
+                            elem_instrs,
+                            cls_instrs,
+                            emit_pos(e, outer_pos)?,
+                            setup_instrs,
+                            make_final(
+                                base_stack_size + cls_stack_size + (elem_stack_size as usize),
+                            ),
+                        ]),
+                        None,
+                    ));
+                    let store = InstrSeq::gather(vec![
+                        store,
+                        InstrSeq::make_setm(0, memberkey),
+                        InstrSeq::make_popc(),
+                    ]);
+                    ArrayGetInstr::Inout {
+                        load: base_instrs,
+                        store,
+                    }
+                }
+                (
+                    ArrayGetBase::Inout {
+                        load:
+                            ArrayGetBaseData {
+                                mut base_instrs,
+                                cls_instrs,
+                                setup_instrs,
+                                base_stack_size,
+                                cls_stack_size,
+                            },
+                        store,
+                    },
+                    Some(local_kind),
+                ) => {
+                    // both base and index need temp locals,
+                    // create local for index value
+                    let local = e.local_gen_mut().get_unnamed();
+                    base_instrs.push((elem_instrs, Some((local.clone(), local_kind))));
+                    base_instrs.push((
+                        InstrSeq::gather(vec![
+                            cls_instrs,
+                            emit_pos(e, outer_pos)?,
+                            setup_instrs,
+                            make_final(
+                                base_stack_size + cls_stack_size + (elem_stack_size as usize),
+                            ),
+                        ]),
+                        None,
+                    ));
+                    let store = InstrSeq::gather(vec![
+                        store,
+                        InstrSeq::make_setm(0, MemberKey::EL(local)),
+                        InstrSeq::make_popc(),
+                    ]);
+                    ArrayGetInstr::Inout {
+                        load: base_instrs,
+                        store,
+                    }
+                }
+            };
+            Ok((instr, querym_n_unpopped))
+        }
+    }
+}
+
+fn is_special_class_constant_accessed_with_class_id(cname: &tast::ClassId_, id: &str) -> bool {
+    let is_self_parent_or_static = match cname {
+        tast::ClassId_::CIexpr(tast::Expr(_, tast::Expr_::Id(id))) => {
+            string_utils::is_self(&id.1)
+                || string_utils::is_parent(&id.1)
+                || string_utils::is_static(&id.1)
+        }
+        _ => false,
+    };
+    string_utils::is_class(id) && !is_self_parent_or_static
+}
+
+fn emit_elem(
+    e: &mut Emitter,
+    env: &Env,
+    elem: Option<&tast::Expr>,
+    local_temp_kind: Option<StoredValueKind>,
+    null_coalesce_assignment: bool,
+) -> Result<(InstrSeq, StackIndex)> {
+    Ok(match elem {
+        None => (InstrSeq::Empty, 0),
+        Some(expr) if expr.1.is_int() || expr.1.is_string() => (InstrSeq::Empty, 0),
+        Some(expr) => match &expr.1 {
+            tast::Expr_::Lvar(x) if !is_local_this(env, &x.1) => {
+                if local_temp_kind.is_some() {
+                    (
+                        InstrSeq::make_cgetquietl(get_local(
+                            e,
+                            env,
+                            &x.0,
+                            local_id::get_name(&x.1),
+                        )?),
+                        0,
+                    )
+                } else if null_coalesce_assignment {
+                    (
+                        InstrSeq::make_cgetl(get_local(e, env, &x.0, local_id::get_name(&x.1))?),
+                        1,
+                    )
+                } else {
+                    (InstrSeq::Empty, 0)
+                }
+            }
+            tast::Expr_::ClassConst(x)
+                if is_special_class_constant_accessed_with_class_id(&(x.0).1, &(x.1).1) =>
+            {
+                (InstrSeq::Empty, 0)
+            }
+            _ => (emit_expr(e, env, expr)?, 1),
+        },
+    })
+}
+
+fn get_elem_member_key(
+    e: &mut Emitter,
+    env: &Env,
+    stack_index: usize,
+    elem: Option<&tast::Expr>,
+    null_coalesce_assignment: bool,
+) -> Result<MemberKey> {
+    use tast::ClassId_ as CI_;
+    use tast::Expr as E;
+    use tast::Expr_ as E_;
+    match elem {
+        // ELement missing (so it's array append)
+        None => Ok(MemberKey::W),
+        Some(elem_expr) => match &elem_expr.1 {
+            // Special case for local
+            E_::Lvar(x) if !is_local_this(env, &x.1) => Ok({
+                if null_coalesce_assignment {
+                    MemberKey::EC(stack_index as isize)
+                } else {
+                    MemberKey::EL(get_local(e, env, &x.0, local_id::get_name(&x.1))?)
+                }
+            }),
+            // Special case for literal integer
+            E_::Int(s) => {
+                match ast_constant_folder::expr_to_typed_value(e, &env.namespace, elem_expr) {
+                    Ok(TypedValue::Int(i)) => Ok(MemberKey::EI(i)),
+                    _ => Err(Unrecoverable(format!("{} is not a valid integer index", s))),
+                }
+            }
+            // Special case for literal string
+            E_::String(s) => Ok(MemberKey::ET(s.clone())),
+            // Special case for class name
+            E_::ClassConst(x)
+                if is_special_class_constant_accessed_with_class_id(&(x.0).1, &(x.1).1) =>
+            {
+                let cname =
+                    match (&(x.0).1, env.scope.get_class()) {
+                        (CI_::CIself, Some(cd)) => string_utils::strip_global_ns(&(cd.name).1),
+                        (CI_::CIexpr(E(_, E_::Id(id))), _) => string_utils::strip_global_ns(&id.1),
+                        (CI_::CI(id), _) => string_utils::strip_global_ns(&id.1),
+                        _ => return Err(Unrecoverable(
+                            "Unreachable due to is_special_class_constant_accessed_with_class_id"
+                                .into(),
+                        )),
+                    };
+                let fq_id = class::Type::from_ast_name(&cname).to_raw_string().into();
+                Ok(MemberKey::ET(fq_id))
+            }
+            _ => {
+                // General case
+                Ok(MemberKey::EC(stack_index as isize))
+            }
+        },
+    }
+}
+
+fn emit_store_for_simple_base(
+    e: &mut Emitter,
+    env: &Env,
+    pos: &Pos,
+    elem_stack_size: isize,
+    base: &tast::Expr,
+    local: local::Type,
+    is_base: bool,
+) -> Result {
+    let (base_expr_instrs_begin, base_expr_instrs_end, base_setup_instrs, _, _) = emit_base(
+        e,
+        env,
+        base,
+        MemberOpMode::Define,
+        false,
+        false,
+        elem_stack_size,
+        0,
+    )?;
+    let memberkey = MemberKey::EL(local);
+    Ok(InstrSeq::gather(vec![
+        base_expr_instrs_begin,
+        base_expr_instrs_end,
+        emit_pos(e, pos)?,
+        base_setup_instrs,
+        if is_base {
+            InstrSeq::make_dim(MemberOpMode::Define, memberkey)
+        } else {
+            InstrSeq::make_setm(0, memberkey)
+        },
+    ]))
+}
+
+fn get_query_op_mode(query_op: &QueryOp) -> MemberOpMode {
+    match query_op {
+        QueryOp::InOut => MemberOpMode::InOut,
+        QueryOp::CGet => MemberOpMode::Warn,
+        _ => MemberOpMode::ModeNone,
     }
 }
 
@@ -2769,13 +3087,13 @@ fn is_trivial(env: &Env, is_base: bool, expr: &tast::Expr) -> bool {
 fn get_local_temp_kind(
     env: &Env,
     is_base: bool,
-    inout_param_info: Option<(usize, inout_locals::AliasInfoMap)>,
+    inout_param_info: Option<&(usize, inout_locals::AliasInfoMap)>,
     expr: Option<&tast::Expr>,
 ) -> Option<StoredValueKind> {
     match (expr, inout_param_info) {
         (_, None) => None,
         (Some(tast::Expr(_, tast::Expr_::Lvar(id))), Some((i, aliases)))
-            if inout_locals::should_save_local_value(id.name(), i, &aliases) =>
+            if inout_locals::should_save_local_value(id.name(), *i, &aliases) =>
         {
             Some(StoredValueKind::Local)
         }
@@ -2800,7 +3118,7 @@ fn emit_base_(
     null_coalesce_assignment: bool,
     base_offset: StackIndex,
     rhs_stack_size: StackIndex,
-    inout_param_info: Option<(usize, inout_locals::AliasInfoMap)>,
+    inout_param_info: Option<&(usize, inout_locals::AliasInfoMap)>,
 ) -> Result<ArrayGetBase> {
     let pos = &expr.0;
     let expr_ = &expr.1;

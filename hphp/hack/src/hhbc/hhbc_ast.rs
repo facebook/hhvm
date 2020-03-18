@@ -179,6 +179,7 @@ pub enum MemberKey {
     PL(local::Type),
     PT(PropId),
     QT(PropId),
+    W,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

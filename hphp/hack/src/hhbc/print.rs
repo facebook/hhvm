@@ -1293,6 +1293,7 @@ fn print_member_key<W: Write>(w: &mut W, mk: &MemberKey) -> Result<(), W::Error>
             w.write("QT:")?;
             print_prop_id(w, id)
         }
+        M::W => w.write("W"),
     }
 }
 

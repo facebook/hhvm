@@ -618,6 +618,7 @@ ElfWriter::ElfWriter(DwarfChunk* d):
 
   symfile = (char*)malloc(elf_size);
   if (read(m_fd, (void *)symfile, elf_size) != elf_size) {
+    free(symfile);
     logError("Unable to read elf file");
     return;
   }

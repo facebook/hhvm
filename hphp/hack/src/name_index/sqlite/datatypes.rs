@@ -3,8 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crypto::digest::Digest;
-use crypto::md5::Md5;
+use md5::{Digest, Md5};
 use oxidized::file_info::{Id, Mode};
 use std::default::Default;
 
@@ -98,10 +97,9 @@ pub(crate) mod convert {
     pub fn name_to_hash(name: &str) -> i64 {
         let mut digest = Md5::new();
         println!("name_to_hash: {}", name);
-        digest.input_str(name);
+        digest.input(name);
 
-        let mut bytes: [u8; 32] = Default::default();
-        digest.result(&mut bytes);
+        let bytes = digest.result();
 
         // Chop off extra bytes
         let mut b: [u8; 8] = Default::default();

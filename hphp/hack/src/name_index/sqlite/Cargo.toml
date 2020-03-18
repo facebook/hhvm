@@ -13,6 +13,6 @@ path = "lib.rs"
 [dependencies]
 ocamlrep = { path = "../../ocamlrep" }
 oxidized = { path = "../../oxidized" }
+md-5 = "0.8"
 rusqlite = "0.21"
-rust-crypto = "0.2"
 # @end of Signature

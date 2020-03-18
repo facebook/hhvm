@@ -1598,10 +1598,10 @@ dependencies = [
 name = "names"
 version = "0.0.0"
 dependencies = [
+ "md-5 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "ocamlrep 0.0.0",
  "oxidized 0.0.0",
  "rusqlite 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "rust-crypto 0.2.36 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

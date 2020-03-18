@@ -20,6 +20,7 @@ type schedule_args = {
   num_remote_workers: int;
   num_local_workers: int;
   batch_size: int option;
+  min_log_level: Hh_logger.Level.t option;
   timeout: int;
 }
 
@@ -72,6 +73,7 @@ let validate_required_arg arg_ref arg_name =
 
 let parse_schedule_args () : command =
   let timeout = ref 9999 in
+  let min_log_level_str_ref = ref "" in
   let naming_table = ref None in
   let num_remote_workers = ref 1 in
   let num_local_workers = ref Sys_utils.nbr_procs in
@@ -85,6 +87,9 @@ let parse_schedule_args () : command =
   let options =
     [
       ("--timeout", Arg.Int (fun x -> timeout := x), "The timeout");
+      ( "--min-log-level",
+        Arg.String (fun x -> min_log_level_str_ref := x),
+        "minimal log level (debug, error, fatal etc...)" );
       ( "--naming-table",
         Arg.String (set_option_arg "naming table file" naming_table),
         "input naming table SQLlite file path (required)." );
@@ -106,7 +111,6 @@ let parse_schedule_args () : command =
   let args = parse_without_command options usage ~keyword:CKSchedule in
   let (root : Path.t) = parse_root args in
   let bin_root = Path.make (Filename.dirname Sys.argv.(0)) in
-
   CSchedule
     {
       bin_root;
@@ -116,6 +120,9 @@ let parse_schedule_args () : command =
       num_remote_workers = !num_remote_workers;
       num_local_workers = !num_local_workers;
       batch_size = !batch_size;
+      min_log_level =
+        Hh_logger.Level.of_enum_string
+          (Caml.String.lowercase_ascii !min_log_level_str_ref);
       timeout = !timeout;
     }
 
@@ -250,12 +257,21 @@ let get_batch_size genv (batch_size : int option) =
 (*
   Start remote checking service with number of remote workers specified by num_remote_workers.
 *)
-let start_remote_checking_service genv env num_remote_workers batch_size =
-  let version_specifier = genv.local_config.remote_version_specifier in
-
+let start_remote_checking_service
+    genv env num_remote_workers batch_size min_log_level_opt =
+  let version_specifier =
+    ServerLocalConfig.(genv.local_config.remote_version_specifier)
+  in
   let (max_batch_size, min_batch_size) = get_batch_size genv batch_size in
   let worker_min_log_level =
-    genv.local_config.remote_type_check.worker_min_log_level
+    match min_log_level_opt with
+    | Some min_level ->
+      (* Set client min log level if available *)
+      Hh_logger.Level.set_min_level min_level;
+      min_level
+    | None ->
+      ServerLocalConfig.(
+        genv.local_config.remote_type_check.worker_min_log_level)
   in
   let root = Relative_path.path_of_prefix Relative_path.Root in
   let delegate_state =
@@ -299,6 +315,7 @@ let create_service_delegate (schedule_env : schedule_args) =
       env
       schedule_env.num_remote_workers
       schedule_env.batch_size
+      schedule_env.min_log_level
   in
   (env, genv, delegate_state)
 

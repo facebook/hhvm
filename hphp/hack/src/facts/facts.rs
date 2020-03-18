@@ -6,7 +6,7 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 
-use crypto::digest::Digest;
+use digest::Digest;
 use serde::ser::SerializeSeq;
 use serde::Serializer;
 use serde_derive::Serialize;
@@ -105,8 +105,8 @@ impl Flag {
 
 pub fn md5_and_sha1(text: &[u8]) -> (String, String) {
     (
-        hash_and_hexify(crypto::md5::Md5::new(), text),
-        hash_and_hexify(crypto::sha1::Sha1::new(), text),
+        hash_and_hexify(md5::Md5::new(), text),
+        hash_and_hexify(sha1::Sha1::new(), text),
     )
 }
 
@@ -160,7 +160,7 @@ impl TypeFacts {
 
 fn hash_and_hexify<D: Digest>(mut digest: D, text: &[u8]) -> String {
     digest.input(text);
-    digest.result_str()
+    hex::encode(digest.result())
 }
 
 fn hex_number_to_i64(s: &str) -> i64 {

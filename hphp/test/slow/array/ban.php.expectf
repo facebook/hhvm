@@ -1,0 +1,1 @@
+Fatal error: Array literals are no longer legal; use varray or darray instead in %s/ban.php on line 5

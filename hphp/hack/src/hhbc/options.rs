@@ -248,6 +248,7 @@ prefixed_flags!(
     ENABLE_POCKET_UNIVERSES,
     ENABLE_XHP_CLASS_MODIFIER,
     HACKSPERIMENTAL,
+    DISABLE_ARRAY,
 );
 impl Default for LangFlags {
     fn default() -> LangFlags {
@@ -626,6 +627,9 @@ mod tests {
     "global_value": false
   },
   "hhvm.hack.lang.const_static_props": {
+    "global_value": false
+  },
+  "hhvm.hack.lang.disable_array": {
     "global_value": false
   },
   "hhvm.hack.lang.disable_legacy_attribute_syntax": {
@@ -1016,5 +1020,6 @@ bitflags! {
         /// "is any kind of CoW container" (i.e. `HH\is_any_array`)
         const WIDEN_IS_ARRAY = 1 << 48;
         const DISABLE_XHP_ELEMENT_MANGLING = 1 << 49;
+        const DISABLE_ARRAY = 1 << 50;
     }
 }

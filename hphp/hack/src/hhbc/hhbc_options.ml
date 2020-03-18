@@ -61,6 +61,7 @@ type t = {
   option_enable_first_class_function_pointers: bool;
   option_widen_is_array: bool;
   option_disable_partial: bool;
+  option_disable_array: bool;
 }
 
 let default =
@@ -117,6 +118,7 @@ let default =
     option_enable_first_class_function_pointers = false;
     option_widen_is_array = false;
     option_disable_partial = false;
+    option_disable_array = false;
   }
 
 let constant_folding o = o.option_constant_folding
@@ -221,6 +223,8 @@ let enable_first_class_function_pointers o =
 
 let disable_modes o = o.option_disable_partial
 
+let disable_array o = o.option_disable_array
+
 (**
  * Widen the default behavior of `is_array` from "is exactly a PHP array to"
  * "is any kind of CoW container" (i.e. `HH\is_any_array`)
@@ -309,6 +313,7 @@ let to_string o =
       Printf.sprintf "disable_xhp_element_mangling: %B"
       @@ disable_xhp_element_mangling o;
       Printf.sprintf "rust_lowerer: %B" @@ rust_lowerer o;
+      Printf.sprintf "disable_array: %B" @@ disable_array o;
     ]
 
 let as_bool s =
@@ -415,6 +420,8 @@ let set_option options name value =
     }
   | "hhvm.widen_is_array" ->
     { options with option_widen_is_array = as_bool value }
+  | "hhvm.hack.lang.disable_array" ->
+    { options with option_disable_array = as_bool value }
   | _ -> options
 
 let get_value_from_config_ config key =
@@ -630,6 +637,8 @@ let value_setters =
       { opts with option_enable_first_class_function_pointers = v = 1 } );
     ( set_value "hhvm.widen_is_array" get_value_from_config_int @@ fun opts v ->
       { opts with option_widen_is_array = v = 1 } );
+    ( set_value "hhvm.hack.lang.disable_array" get_value_from_config_int
+    @@ fun opts v -> { opts with option_disable_array = v = 1 } );
   ]
 
 let extract_config_options_from_json ~init config_json =

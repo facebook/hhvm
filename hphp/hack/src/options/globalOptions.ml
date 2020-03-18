@@ -93,6 +93,7 @@ type t = {
   po_disable_xhp_children_declarations: bool;
   po_enable_first_class_function_pointers: bool;
   po_disable_modes: bool;
+  po_disable_array: bool;
 }
 [@@deriving show]
 
@@ -256,6 +257,7 @@ let default =
     po_disable_xhp_children_declarations = false;
     po_enable_first_class_function_pointers = false;
     po_disable_modes = false;
+    po_disable_array = false;
   }
 
 let make
@@ -360,6 +362,7 @@ let make
     ?(po_enable_first_class_function_pointers =
       default.po_enable_first_class_function_pointers)
     ?(po_disable_modes = default.po_disable_modes)
+    ?(po_disable_array = default.po_disable_array)
     () =
   {
     tco_experimental_features;
@@ -447,6 +450,7 @@ let make
     po_disable_xhp_children_declarations;
     po_enable_first_class_function_pointers;
     po_disable_modes;
+    po_disable_array;
   }
 
 let tco_experimental_feature_enabled t s =
@@ -636,3 +640,5 @@ let po_enable_first_class_function_pointers t =
   t.po_enable_first_class_function_pointers
 
 let po_disable_modes t = t.po_disable_modes
+
+let po_disable_array t = t.po_disable_array

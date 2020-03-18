@@ -235,6 +235,8 @@ type t = {
   po_enable_first_class_function_pointers: bool;
   (* Treats partial files as strict *)
   po_disable_modes: bool;
+  (* Disable array(...) *)
+  po_disable_array: bool;
 }
 [@@deriving show]
 
@@ -323,6 +325,7 @@ val make :
   ?po_disable_xhp_children_declarations:bool ->
   ?po_enable_first_class_function_pointers:bool ->
   ?po_disable_modes:bool ->
+  ?po_disable_array:bool ->
   unit ->
   t
 
@@ -525,3 +528,5 @@ val po_disable_xhp_children_declarations : t -> bool
 val po_enable_first_class_function_pointers : t -> bool
 
 val po_disable_modes : t -> bool
+
+val po_disable_array : t -> bool

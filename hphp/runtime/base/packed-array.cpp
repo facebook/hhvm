@@ -78,11 +78,15 @@ PackedArray::VArrayInitializer PackedArray::s_varr_initializer;
 
 namespace {
 
-inline ArrayData* alloc_packed_static(size_t cap) {
-  auto size = sizeof(ArrayData) + cap * sizeof(TypedValue);
-  auto ret = RuntimeOption::EvalLowStaticArrays ? low_malloc(size)
-                                                : uncounted_malloc(size);
-  return static_cast<ArrayData*>(ret);
+inline ArrayData* alloc_packed_static(const ArrayData* ad) {
+  auto const extra = arrprov::tagSize(ad);
+  auto const size = sizeof(ArrayData)
+                  + ad->getSize() * sizeof(TypedValue)
+                  + extra;
+  auto const ret = RuntimeOption::EvalLowStaticArrays
+    ? low_malloc(size)
+    : uncounted_malloc(size);
+  return reinterpret_cast<ArrayData*>(reinterpret_cast<char*>(ret) + extra);
 }
 
 }
@@ -326,7 +330,7 @@ ArrayData* PackedArray::CopyStatic(const ArrayData* adIn) {
   assertx(checkInvariants(adIn));
 
   auto const sizeIndex = capacityToSizeIndex(adIn->m_size);
-  auto ad = alloc_packed_static(adIn->m_size);
+  auto ad = alloc_packed_static(adIn);
   // CopyPackedHelper will copy the header and m_sizeAndPos. All we have to do
   // afterwards is fix the capacity and refcount on the copy; it's easiest to do
   // that by reinitializing the whole header.
@@ -363,7 +367,7 @@ ArrayData* PackedArray::ConvertStatic(const ArrayData* arr) {
   assertx(!arr->isDArray());
 
   auto const sizeIndex = capacityToSizeIndex(arr->m_size);
-  auto ad = alloc_packed_static(arr->m_size);
+  auto ad = alloc_packed_static(arr);
   ad->initHeader_16(
     HeaderKind::Packed,
     StaticValue,
@@ -632,7 +636,7 @@ void PackedArray::ReleaseUncounted(ArrayData* ad) {
   }
 
   static_assert(PackedArray::stores_typed_values, "");
-  auto const extra = (ad->hasApcTv() ? sizeof(APCTypedValue) : 0);
+  auto const extra = uncountedAllocExtra(ad, ad->hasApcTv());
   auto const allocSize = extra + sizeof(PackedArray) +
                          ad->m_size * sizeof(TypedValue);
   uncounted_sized_free(reinterpret_cast<char*>(ad) - extra, allocSize);
@@ -1239,7 +1243,7 @@ ArrayData* PackedArray::MakeUncounted(ArrayData* array,
     APCStats::getAPCStats().addAPCUncountedBlock();
   }
 
-  auto const extra = withApcTypedValue ? sizeof(APCTypedValue) : 0;
+  auto const extra = uncountedAllocExtra(array, withApcTypedValue);
   auto const size = array->m_size;
   auto const sizeIndex = capacityToSizeIndex(size);
   auto const mem = static_cast<char*>(

@@ -302,6 +302,14 @@ bool arrayWantsTag(const APCArray* a);
 bool arrayWantsTag(const AsioExternalThreadEvent* a);
 
 /*
+ * Space requirement for a tag for `a'.
+ */
+template<typename A>
+size_t tagSize(const A* a) {
+  return RO::EvalArrayProvenance && arrayWantsTag(a) ? sizeof(Tag) : 0;
+}
+
+/*
  * Get the provenance tag for `a`.
  */
 Tag getTag(const ArrayData* a);
@@ -320,7 +328,7 @@ enum class Mode { Insert, Emplace };
  * Set the provenance tag for `a` to `tag`.
  */
 template<Mode mode = Mode::Insert> void setTag(ArrayData* a, Tag tag);
-template<Mode mode = Mode::Insert> void setTag(const APCArray* a, Tag tag);
+template<Mode mode = Mode::Insert> void setTag(APCArray* a, Tag tag);
 template<Mode mode = Mode::Insert> void setTag(AsioExternalThreadEvent* ev, Tag tag);
 
 /*
@@ -328,7 +336,7 @@ template<Mode mode = Mode::Insert> void setTag(AsioExternalThreadEvent* ev, Tag 
  * unreachable or no longer of a kind that accepts provenance tags
  */
 void clearTag(ArrayData* ad);
-void clearTag(const APCArray* a);
+void clearTag(APCArray* a);
 void clearTag(AsioExternalThreadEvent* ev);
 
 /*

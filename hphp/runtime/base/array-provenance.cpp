@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/array-provenance.h"
 
 #include "hphp/runtime/base/apc-array.h"
+#include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/init-fini-node.h"
@@ -79,12 +80,10 @@ namespace {
 
 RDS_LOCAL(Tag, rl_tag_override);
 RDS_LOCAL(ArrayProvenanceTable, rl_array_provenance);
-folly::F14FastMap<const void*, Tag> s_static_array_provenance;
-folly::SharedMutex s_static_provenance_lock;
 
 /*
  * Flush the table after each request since none of the ArrayData*s will be
- * valid anymore
+ * valid anymore.
  */
 InitFiniNode flushTable([]{
   if (!RO::EvalArrayProvenance) return;
@@ -97,21 +96,6 @@ InitFiniNode flushTable([]{
 } // anonymous namespace
 
 ///////////////////////////////////////////////////////////////////////////////
-
-namespace {
-
-/*
- * Whether provenance for a given array should be request-local.
- *
- * True for refcounted request arrays, else false.
- */
-bool wants_local_prov(const ArrayData* ad) { return ad->isRefCounted(); }
-constexpr bool wants_local_prov(const AsioExternalThreadEvent* ev) {
-  return true;
-}
-constexpr bool wants_local_prov(const APCArray* a) { return false; }
-
-}
 
 bool arrayWantsTag(const ArrayData* ad) {
   return !ad->isLegacyArray() && (
@@ -132,6 +116,43 @@ bool arrayWantsTag(const AsioExternalThreadEvent* ev) {
 }
 
 namespace {
+
+/*
+ * Whether provenance for a given array should be request-local.
+ *
+ * True for refcounted request arrays, else false.
+ */
+bool wants_local_prov(const ArrayData* ad) { return ad->isRefCounted(); }
+constexpr bool wants_local_prov(const APCArray* a) { return false; }
+constexpr bool wants_local_prov(const AsioExternalThreadEvent* ev) {
+  return true;
+}
+
+/*
+ * Get the provenance slot for a non-request array.
+ */
+Tag& tag_for_nonreq(ArrayData* ad) {
+  assertx(arrayWantsTag(ad));
+  assertx(!wants_local_prov(ad));
+
+  auto const mem = reinterpret_cast<char*>(ad)
+    - sizeof(Tag)
+    - (ad->hasApcTv() ? sizeof(APCTypedValue) : 0);
+
+  return *reinterpret_cast<Tag*>(mem);
+}
+
+Tag& tag_for_nonreq(APCArray* a) {
+  auto const mem = reinterpret_cast<char*>(a) - sizeof(Tag);
+  return *reinterpret_cast<Tag*>(mem);
+}
+
+Tag& tag_for_nonreq(AsioExternalThreadEvent*) {
+  always_assert(false); // only req-local provenance is supported
+}
+
+template<typename A>
+Tag tag_for_nonreq(const A* a) { return tag_for_nonreq(const_cast<A*>(a)); }
 
 /*
  * Used to override the provenance tag reported for ArrayData*'s in a given
@@ -160,12 +181,7 @@ thread_local folly::Optional<Tag> tl_tag_override = folly::none;
 
 template<typename A>
 Tag getTagImpl(const A* a) {
-  using ProvenanceTable = decltype(s_static_array_provenance);
-
-  static_assert(std::is_same<
-    ProvenanceTable,
-    decltype(rl_array_provenance->tags)
-  >::value, "Static and request-local provenance tables must share a type.");
+  using ProvenanceTable = decltype(rl_array_provenance->tags);
 
   auto const get = [] (
     const A* a,
@@ -180,8 +196,7 @@ Tag getTagImpl(const A* a) {
   if (wants_local_prov(a)) {
     return get(a, rl_array_provenance->tags);
   } else {
-    folly::SharedMutex::ReadHolder g(s_static_provenance_lock);
-    return get(a, s_static_array_provenance);
+    return tag_for_nonreq(a);
   }
 }
 
@@ -189,13 +204,12 @@ template<Mode mode, typename A>
 bool setTagImpl(A* a, Tag tag) {
   assertx(tag.valid());
   if (!arrayWantsTag(a)) return false;
-  assertx(mode == Mode::Emplace || !getTag(a) || tl_tag_override);
 
   if (wants_local_prov(a)) {
+    assertx(mode == Mode::Emplace || !getTag(a) || tl_tag_override);
     rl_array_provenance->tags[a] = tag;
   } else {
-    folly::SharedMutex::WriteHolder g(s_static_provenance_lock);
-    s_static_array_provenance[a] = tag;
+    tag_for_nonreq(a) = tag;
   }
   return true;
 }
@@ -207,8 +221,7 @@ void clearTagImpl(const A* a) {
   if (wants_local_prov(a)) {
     rl_array_provenance->tags.erase(a);
   } else {
-    folly::SharedMutex::WriteHolder g(s_static_provenance_lock);
-    s_static_array_provenance.erase(a);
+    tag_for_nonreq(a) = Tag{};
   }
 }
 
@@ -236,7 +249,7 @@ void setTag(ArrayData* ad, Tag tag) {
   }
 }
 template<Mode mode>
-void setTag(const APCArray* a, Tag tag) {
+void setTag(APCArray* a, Tag tag) {
   setTagImpl<mode>(a, tag);
 }
 
@@ -247,8 +260,8 @@ void setTag(AsioExternalThreadEvent* ev, Tag tag) {
 
 template void setTag<Mode::Insert>(ArrayData*, Tag);
 template void setTag<Mode::Emplace>(ArrayData*, Tag);
-template void setTag<Mode::Insert>(const APCArray*, Tag);
-template void setTag<Mode::Emplace>(const APCArray*, Tag);
+template void setTag<Mode::Insert>(APCArray*, Tag);
+template void setTag<Mode::Emplace>(APCArray*, Tag);
 template void setTag<Mode::Insert>(AsioExternalThreadEvent*, Tag);
 template void setTag<Mode::Emplace>(AsioExternalThreadEvent*, Tag);
 
@@ -256,7 +269,7 @@ void clearTag(ArrayData* ad) {
   ad->setHasProvenanceData(false);
   clearTagImpl(ad);
 }
-void clearTag(const APCArray* a) {
+void clearTag(APCArray* a) {
   clearTagImpl(a);
 }
 void clearTag(AsioExternalThreadEvent* ev) {

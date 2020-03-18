@@ -207,12 +207,14 @@ APCHandle::Pair APCArray::MakeSharedEmptyArray() {
 
 APCHandle::Pair APCArray::MakeHash(ArrayData* arr, APCKind kind,
                                    bool unserializeObj) {
-  auto num = arr->size();
-  auto cap = num > 2 ? folly::nextPowTwo(num) : 2;
-
-  auto const allocSize = sizeof(APCArray) +
-    sizeof(int) * cap + sizeof(Bucket) * num;
-  auto p = apc_malloc(allocSize);
+  auto const num = arr->size();
+  auto const cap = num > 2 ? folly::nextPowTwo(num) : 2;
+  auto const prov_off = arrprov::tagSize(arr);
+  auto const allocSize = sizeof(APCArray)
+                       + sizeof(int) * cap
+                       + sizeof(Bucket) * num
+                       + prov_off;
+  auto p = reinterpret_cast<char*>(apc_malloc(allocSize)) + prov_off;
   APCArray* ret = new (p) APCArray(HashedCtor{}, kind, cap);
 
   for (int i = 0; i < cap; i++) ret->hash()[i] = -1;
@@ -294,8 +296,11 @@ APCHandle* APCArray::MakeUncountedKeyset(ArrayData* keyset) {
 APCHandle::Pair APCArray::MakePacked(ArrayData* arr, APCKind kind,
                                      bool unserializeObj) {
   auto const num_elems = arr->size();
-  auto const allocSize = sizeof(APCArray) + sizeof(APCHandle*) * num_elems;
-  auto p = apc_malloc(allocSize);
+  auto const prov_off = arrprov::tagSize(arr);
+  auto const allocSize = sizeof(APCArray)
+                       + sizeof(APCHandle*) * num_elems
+                       + prov_off;
+  auto p = reinterpret_cast<char*>(apc_malloc(allocSize)) + prov_off;
   auto ret = new (p) APCArray(PackedCtor{}, kind, num_elems);
 
   size_t i = 0;
@@ -324,11 +329,12 @@ APCHandle::Pair APCArray::MakePacked(ArrayData* arr, APCKind kind,
 
 void APCArray::Delete(APCHandle* handle) {
   auto const arr = APCArray::fromHandle(handle);
+  auto const prov_off = arrprov::tagSize(arr);
   arr->~APCArray();
   if (RuntimeOption::EvalArrayProvenance) {
     arrprov::clearTag(arr);
   }
-  apc_free(arr);
+  apc_free(reinterpret_cast<char*>(arr) - prov_off);
 }
 
 APCArray::~APCArray() {

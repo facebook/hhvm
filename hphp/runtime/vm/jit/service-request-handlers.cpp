@@ -441,6 +441,8 @@ TCA handleResume(bool interpFirst) {
   if (!start) {
     WorkloadStats guard(WorkloadStats::InInterp);
 
+    tracing::BlockNoTrace _{"dispatch-bb"};
+
     while (!start) {
       INC_TPC(interp_bb);
       if (auto retAddr = HPHP::dispatchBB()) {

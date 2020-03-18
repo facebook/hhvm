@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/repo-auth-type.h"
+#include "hphp/runtime/base/tracing.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/resumable.h"
@@ -125,6 +126,11 @@ struct TransContext {
   const RegionDesc* region{nullptr};
 };
 
+inline tracing::Props traceProps(const TransContext& c) {
+  return traceProps(c.initSrcKey.func())
+    .add("sk", show(c.initSrcKey))
+    .add("trans_kind", show(c.kind));
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Stack information.

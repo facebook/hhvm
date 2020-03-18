@@ -285,6 +285,15 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
+inline tracing::Props traceProps(const IRUnit& u) {
+  return traceProps(u.context())
+    .add("num_tmps", u.numTmps())
+    .add("num_blocks", u.numBlocks())
+    .add("num_insts", u.numInsts());
+}
+
+//////////////////////////////////////////////////////////////////////
+
 /*
  * Create a debug string for an IRUnit.
  */

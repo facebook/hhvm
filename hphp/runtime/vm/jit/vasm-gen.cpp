@@ -90,6 +90,8 @@ Vout& Vasm::out(AreaIndex area) {
 // Vauto.
 
 Vauto::~Vauto() {
+  tracing::Block _{"vauto-finish", [&] { return traceProps(unit()); }};
+
   for (auto& b : unit().blocks) {
     if (!b.code.empty()) {
       // Found at least one nonempty block.  Finish up.

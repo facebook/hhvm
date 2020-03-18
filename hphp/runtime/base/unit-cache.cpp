@@ -139,6 +139,8 @@ RepoUnitCache s_repoUnitCache;
 
 CachedUnit lookupUnitRepoAuth(const StringData* path,
                               const Native::FuncTable& nativeFuncs) {
+  tracing::BlockNoTrace _{"lookup-unit-repo-auth"};
+
   path = makeStaticString(path);
 
   RepoUnitCache::const_accessor acc;
@@ -304,6 +306,10 @@ bool isChanged(
 
 folly::Optional<String> readFileAsString(Stream::Wrapper* w,
                                          const StringData* path) {
+  tracing::Block _{
+    "read-file", [&] { return tracing::Props{}.add("path", path); }
+  };
+
   // If the file is too large it may OOM the request
   MemoryManager::SuppressOOM so(*tl_heap);
   if (w) {
@@ -366,6 +372,10 @@ CachedUnit createUnitFromUrl(const StringData* const requestedPath,
   auto const w = Stream::getWrapperFromURI(StrNR(requestedPath));
   StringBuffer sb;
   {
+    tracing::Block _{
+      "read-url", [&] { return tracing::Props{}.add("path", requestedPath); }
+    };
+
     // Stream wrappers can reenter PHP via user defined callbacks. Roll this
     // operation into a single event
     rqtrace::EventGuard trace{"STREAM_WRAPPER_OPEN"};
@@ -464,6 +474,8 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
                                const RepoOptions& options,
                                FileLoadFlags& flags,
                                bool alreadyRealpath) {
+  tracing::BlockNoTrace _{"load-unit-non-repo-auth"};
+
   LogTimer loadTime("load_ms", ent);
   if (strstr(requestedPath->data(), "://") != nullptr) {
     // URL-based units are not currently cached in memory, but the Repo still
@@ -599,7 +611,10 @@ CachedUnit lookupUnitNonRepoAuth(StringData* requestedPath,
                                  const Native::FuncTable& nativeFuncs,
                                  FileLoadFlags& flags,
                                  bool alreadyRealpath) {
+  tracing::BlockNoTrace _{"lookup-unit-non-repo-auth"};
+
   auto const& options = RepoOptions::forFile(requestedPath->data());
+
   if (!g_context.isNull() && strncmp(requestedPath->data(), "/:", 2)) {
     g_context->onLoadWithOptions(requestedPath->data(), options);
   }
@@ -934,6 +949,8 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt,
   bool init;
   bool& initial = initial_opt ? *initial_opt : init;
   initial = true;
+
+  tracing::BlockNoTrace _{"lookup-unit"};
 
   OptLog ent;
   if (!RuntimeOption::RepoAuthoritative &&

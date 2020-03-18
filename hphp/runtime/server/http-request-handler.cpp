@@ -410,6 +410,16 @@ void HttpRequestHandler::abortRequest(Transport* transport) {
 bool HttpRequestHandler::executePHPRequest(Transport *transport,
                                            RequestURI &reqURI,
                                            SourceRootInfo &sourceRootInfo) {
+  tracing::Request _{
+    "http-request",
+    reqURI.originalURL().c_str(),
+    [&] {
+      return tracing::Props{}
+        .add("url", reqURI.originalURL().c_str())
+        .add("absolute_path", reqURI.absolutePath().c_str());
+    }
+  };
+
   auto context = g_context.getNoCheck();
   OBFlags obFlags = OBFlags::Default;
   if (transport->getHTTPVersion() != "1.1") {

@@ -60,6 +60,12 @@ struct TransArgs {
   RegionDescPtr region{nullptr};
 };
 
+inline tracing::Props traceProps(const TransArgs& a) {
+  return traceProps(a.sk.func())
+    .add("sk", show(a.sk))
+    .add("trans_kind", show(a.kind));
+}
+
 /*
  * The state of a partially-complete translation.
  *

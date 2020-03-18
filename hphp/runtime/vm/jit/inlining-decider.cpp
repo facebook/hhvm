@@ -327,6 +327,8 @@ Vcost computeTranslationCostSlow(SrcKey at,
     &region
   };
 
+  tracing::Block _{"compute-inline-cost", [&] { return traceProps(ctx); }};
+
   rqtrace::DisableTracing notrace;
   auto const unbumper = mcgen::unbumpFunctions();
 

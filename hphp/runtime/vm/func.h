@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/tracing.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/user-attributes.h"
@@ -1468,6 +1469,10 @@ struct PrologueID {
  * and iterators. Does not record function name or class.
  */
 void logFunc(const Func* func, StructuredLogEntry& ent);
+
+inline tracing::Props traceProps(const Func* f) {
+  return tracing::Props{}.add("func_name", f->fullName());
+}
 
 /*
  * Convert a function pointer where a string is needed in some context.

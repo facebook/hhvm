@@ -6358,6 +6358,8 @@ DispatchSwitch:
 static void dispatch() {
   WorkloadStats guard(WorkloadStats::InInterp);
 
+  tracing::BlockNoTrace _{"dispatch"};
+
   DEBUG_ONLY auto const retAddr = dispatchImpl<false>();
   assertx(retAddr == nullptr);
 }

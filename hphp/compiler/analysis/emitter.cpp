@@ -318,6 +318,15 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const SHA1& sha1,
     return nullptr;
   }
 
+  tracing::Block _{
+    "parse",
+    [&] {
+      return tracing::Props{}
+        .add("filename", filename ? filename : "")
+        .add("code_size", codeLen);
+    }
+  };
+
   // Do not count memory used during parsing/emitting towards OOM.
   MemoryManager::SuppressOOM so(*tl_heap);
 

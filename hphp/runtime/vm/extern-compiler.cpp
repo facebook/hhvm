@@ -363,6 +363,8 @@ struct ExternCompiler {
     bool wantsSymbolRefs,
     const RepoOptions& options
   ) {
+    tracing::BlockNoTrace _{"compile-unit-emitter"};
+
     auto isHookInstalled = nullptr != g_hhas_handler;
     std::string prog;
     std::unique_ptr<Unit> u;
@@ -378,6 +380,14 @@ struct ExternCompiler {
       };
 
       auto compile = [&]() {
+        tracing::Block _{
+          "extern-compiler-invoke",
+          [&] {
+            return tracing::Props{}
+              .add("filename", filename)
+              .add("code_size", code.size());
+          }
+        };
         if (!isRunning()) {
           start();
         }

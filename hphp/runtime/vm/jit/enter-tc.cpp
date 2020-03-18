@@ -63,6 +63,8 @@ ALWAYS_INLINE void postExit() {
 }
 
 void enterTC(TCA start) {
+  tracing::BlockNoTrace _{"enter-tc"};
+
   preEnter(start);
   assert_flog(tc::isValidCodeAddress(start), "start = {} ; func = {} ({})\n",
               start, vmfp()->func(), vmfp()->func()->fullName());

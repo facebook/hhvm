@@ -901,6 +901,15 @@ void createSrcRec(SrcKey sk, FPInvOffset spOff) {
 folly::Optional<TransMetaInfo> emitTranslation(TransEnv env, OptView optDst) {
   Timer timer(Timer::mcg_finishTranslation);
 
+  tracing::Block _b{
+    "emit-translation",
+    [&] {
+      if (env.vunit) return traceProps(*env.vunit);
+      if (env.unit) return traceProps(*env.unit);
+      return tracing::Props{};
+    }
+  };
+
   VMProtect _;
 
   auto& args = env.args;

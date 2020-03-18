@@ -203,6 +203,16 @@ enum class CodeKind : uint8_t {
   Helper,
 };
 
+inline std::string codeKindAsString(CodeKind kind) {
+  switch (kind) {
+    case CodeKind::Trace:      return "trace";
+    case CodeKind::Prologue:   return "prologue";
+    case CodeKind::CrossTrace: return "cross-trace";
+    case CodeKind::Helper:     return "helper";
+  }
+  always_assert(false);
+}
+
 /*
  * Enumeration representing the various areas that we emit code.
  *

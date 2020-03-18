@@ -321,6 +321,9 @@ std::unique_ptr<Unit> Repo::loadUnit(const folly::StringPiece name,
                                      const Native::FuncTable& nativeFuncs) {
   ARRPROV_USE_RUNTIME_LOCATION();
   if (m_dbc == nullptr) return nullptr;
+  tracing::Block _{
+    "repo-load-unit", [&] { return tracing::Props{}.add("name", name); }
+  };
   return m_urp.load(name, sha1, nativeFuncs);
 }
 
@@ -425,6 +428,15 @@ void Repo::RemoveFileHashStmt::remove(RepoTxn& txn, const std::string& path) {
 
 RepoStatus Repo::findFile(const char *path, const std::string &root,
                           SHA1& sha1) {
+  tracing::Block _{
+    "repo-find-file",
+    [&] {
+      return tracing::Props{}
+        .add("path", path)
+        .add("root", root);
+    }
+  };
+
   if (m_dbc == nullptr) {
     return RepoStatus::error;
   }
@@ -474,6 +486,7 @@ void Repo::commitSha1(UnitOrigin unitOrigin, UnitEmitter* ue) {
       txn.commit();
     }
   } catch (RepoExc& re) {
+    tracing::addPointNoTrace("sha1-commit-exn");
     int repoId = repoIdForNewUnit(unitOrigin);
     if (repoId != RepoIdInvalid) {
       TRACE(3, "Failed to commit sha1 for '%s' to '%s': %s\n",
@@ -591,6 +604,11 @@ RepoStatus Repo::insertUnit(UnitEmitter* ue, UnitOrigin unitOrigin,
 
 void Repo::commitUnit(UnitEmitter* ue, UnitOrigin unitOrigin) {
   if (!RuntimeOption::RepoCommit || ue->m_ICE) return;
+
+  tracing::Block _{
+    "repo-commit-unit",
+    [&] { return tracing::Props{}.add("filename", ue->m_filepath); }
+  };
 
   try {
     commitSha1(unitOrigin, ue);

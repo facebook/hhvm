@@ -277,6 +277,8 @@ RegionVec regionizeFunc(const Func* func, std::string& transCFGAnnot) {
   const Timer rf_timer(Timer::regionizeFunc);
   assertx(profData());
 
+  tracing::Block _{"regionize-func", [&] { return traceProps(func); }};
+
   auto regionMode = pgoRegionMode(*func);
 
   auto const funcId = func->getFuncId();

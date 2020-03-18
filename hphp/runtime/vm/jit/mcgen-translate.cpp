@@ -40,6 +40,7 @@
 #include "hphp/runtime/vm/workload-stats.h"
 
 #include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/base/tracing.h"
 #include "hphp/runtime/base/vm-worker.h"
 #include "hphp/runtime/ext/server/ext_server.h"
 #include "hphp/runtime/server/http-server.h"
@@ -119,6 +120,8 @@ void optimize(tc::FuncMetaInfo& info) {
     s_bumpers = &bumpers;
   }
 
+  tracing::Block _{"optimize", [&] { return traceProps(func); }};
+
   // Regenerate the prologues and DV funclets before the actual function body.
   auto const includedBody = regeneratePrologues(func, info);
 
@@ -126,6 +129,13 @@ void optimize(tc::FuncMetaInfo& info) {
   std::string transCFGAnnot;
   auto const regions = includedBody ? std::vector<RegionDescPtr>{}
                                     : regionizeFunc(func, transCFGAnnot);
+  tracing::annotateBlock(
+    [&] {
+      return tracing::Props{}
+        .add("num_regions", regions.size())
+        .add("included_body", includedBody);
+    }
+  );
 
   FTRACE(4, "Translating {} regions for {} (includedBody={})\n",
          regions.size(), func->fullName(), includedBody);
@@ -452,6 +462,8 @@ translate(TransArgs args, FPInvOffset spOff,
   Timer timer(Timer::mcg_translate);
   WorkloadStats guard(WorkloadStats::InTrans);
 
+  tracing::Block _{"translate", [&] { return traceProps(args); }};
+
   rqtrace::ScopeGuard trace{"JIT_TRANSLATE"};
   trace.annotate("func_name", args.sk.func()->fullName()->data());
   trace.annotate("trans_kind", show(args.kind));
@@ -473,6 +485,12 @@ translate(TransArgs args, FPInvOffset spOff,
     }
     trace.annotate(
       "region_size", folly::to<std::string>(args.region->instrSize()));
+    tracing::annotateBlock(
+      [&] {
+        return tracing::Props{}
+          .add("region_size", args.region->instrSize());
+      }
+    );
     auto const transContext =
       TransContext{env.transID, args.kind, args.flags, args.sk,
                    env.initSpOffset, args.optIndex, args.region.get()};
@@ -568,6 +586,15 @@ TCA retranslate(TransArgs args, const RegionContext& ctx) {
   args.kind = kind();
   if (!writer.checkKind(args.kind)) return nullptr;
 
+  tracing::Block _b{
+    "retranslate",
+    [&] {
+      return traceProps(args)
+        .add("initial_num_trans", initialNumTrans);
+    }
+  };
+  tracing::Pause _p;
+
   args.region = selectRegion(ctx, args.kind);
   auto data = translate(args, ctx.spOffset);
 
@@ -597,6 +624,9 @@ bool retranslateOpt(FuncId funcId) {
 
   if (profData()->optimized(funcId)) return true;
   profData()->setOptimized(funcId);
+
+  tracing::Block _b{"retranslate-opt", [&] { return traceProps(func); }};
+  tracing::Pause _p;
 
   tc::FuncMetaInfo info(func, tc::LocalTCBuffer());
   optimize(info);

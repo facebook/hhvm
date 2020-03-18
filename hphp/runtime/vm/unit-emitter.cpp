@@ -434,6 +434,7 @@ void UnitEmitter::commit(UnitOrigin unitOrigin) {
       txn.commit();
     }
   } catch (RepoExc& re) {
+    tracing::addPointNoTrace("ue-commit-exn");
     int repoId = repo.repoIdForNewUnit(unitOrigin);
     if (repoId != RepoIdInvalid) {
       TRACE(3, "Failed to commit '%s' (%s) to '%s': %s\n",
@@ -567,6 +568,8 @@ bool UnitEmitter::check(bool verbose) const {
 
 std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
   INC_TPC(unit_load);
+
+  tracing::BlockNoTrace _{"unit-create"};
 
   static const bool kVerify = debug || RuntimeOption::EvalVerify ||
     RuntimeOption::EvalVerifyOnly || RuntimeOption::EvalFatalOnVerifyError;

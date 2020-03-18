@@ -30,6 +30,7 @@
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/tracing.h"
 
 #include "hphp/util/arch.h"
 #include "hphp/util/trace.h"
@@ -124,6 +125,9 @@ void emit(Vunit& vunit, Vtext& vtext, CGMeta& meta, AsmInfo* ai) {
 void emitVunit(Vunit& vunit, const IRUnit& unit,
                CodeCache::View code, CGMeta& meta, Annotations* annotations) {
   Timer _t(Timer::vasm_emit);
+
+  tracing::Block _{"vasm-emit", [&] { return traceProps(vunit); }};
+
   SCOPE_ASSERT_DETAIL("vasm unit") { return show(vunit); };
   tc::assertOwnsCodeLock(code);
 

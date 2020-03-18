@@ -666,6 +666,8 @@ void ExecutionContext::onShutdownPreSend() {
   // When host is OOMing, abort abruptly.
   if (RID().shouldOOMAbort()) return;
 
+  tracing::Block _{"shutdown-pre-send"};
+
   tl_heap->resetCouldOOM(isStandardRequest());
   executeFunctions(ShutDown);
 }
@@ -686,6 +688,8 @@ void ExecutionContext::debuggerExecutePsps() {
 void ExecutionContext::onShutdownPostSend() {
   // When host is OOMing, abort abruptly.
   if (RID().shouldOOMAbort()) return;
+
+  tracing::Block _{"shutdown-post-send"};
 
   ServerStats::SetThreadMode(ServerStats::ThreadMode::PostProcessing);
   tl_heap->resetCouldOOM(isStandardRequest());

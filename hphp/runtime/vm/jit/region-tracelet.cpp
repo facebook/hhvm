@@ -551,6 +551,17 @@ RegionDescPtr selectTracelet(const RegionContext& ctx, TransKind kind,
 
   FTRACE(1, "selectTracelet: starting with maxBCInstrs = {}\n", maxBCInstrs);
 
+  tracing::Block _{
+    "select-tracelet",
+    [&] {
+      return tracing::Props{}
+        .add("sk", show(ctx.sk))
+        .add("trans_kind", show(kind))
+        .add("inlining", inlining)
+        .add("max_bc_instrs", maxBCInstrs);
+    }
+  };
+
   do {
     Env env{ctx, kind, interp, breakAt, maxBCInstrs, inlining};
     region = form_region(env);
@@ -558,6 +569,7 @@ RegionDescPtr selectTracelet(const RegionContext& ctx, TransKind kind,
   } while (!region);
 
   if (region->empty() || region->blocks().front()->length() == 0) {
+    tracing::addPoint("select-tracelet-giving-up");
     FTRACE(1, "selectTracelet giving up after {} tries\n", tries);
     return nullptr;
   }
@@ -567,6 +579,14 @@ RegionDescPtr selectTracelet(const RegionContext& ctx, TransKind kind,
     // instructions producing literal values, kill it.
     region->deleteBlock(region->blocks().back()->id());
   }
+
+  tracing::annotateBlock(
+    [&] {
+      return tracing::Props{}
+        .add("region_size", region->instrSize())
+        .add("tries", tries);
+    }
+  );
 
   FTRACE(1, "selectTracelet returning, {}, {} tries:\n{}\n",
          inlining ? "inlining" : "not inlining", tries, show(*region));

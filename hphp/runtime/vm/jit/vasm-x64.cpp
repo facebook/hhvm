@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/vasm-emit.h"
 
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/tracing.h"
 
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/block.h"
@@ -1194,6 +1195,11 @@ void stressTestLiveness(Vunit& unit) {
 void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
   Timer timer(Timer::vasm_optimize, unit.log_entry);
 
+  tracing::Block _{
+    "vasm-optimize",
+    [&] { return traceProps(unit).add("reg_alloc", regalloc); }
+  };
+
   auto const doPass = [&] (const char* name, auto fun) {
     rqtrace::EventGuard trace{name};
     fun(unit);
@@ -1262,6 +1268,8 @@ void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
 
 void emitX64(Vunit& unit, Vtext& text, CGMeta& fixups,
              AsmInfo* asmInfo) {
+  tracing::Block _{"emit-X64", [&] { return traceProps(unit); }};
+
 #ifdef HAVE_LIBXED
   if (RuntimeOption::EvalUseXedAssembler) {
     return vasm_emit<Vgen<XedAssembler>>(unit, text, fixups, asmInfo);

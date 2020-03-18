@@ -67,6 +67,16 @@ void emit_svcreq(CodeBlock& cb,
                  const ArgVec& argv) {
   FTRACE(2, "svcreq @{} {}(", start, to_name(sr));
 
+  tracing::Pause _p;
+  tracing::Block _{
+    "emit-svcreq",
+    [&] {
+      return tracing::Props{}
+        .add("service_request", to_name(sr))
+        .add("persist", persist);
+    }
+  };
+
   auto const is_reused = start != cb.frontier();
 
   if (!is_reused) cb.assertCanEmit(stub_size());

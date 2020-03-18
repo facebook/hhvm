@@ -246,6 +246,16 @@ void emitFuncPrologueOptInternal(PrologueMetaInfo& info,
 }
 
 TCA emitFuncPrologue(Func* func, int argc, TransKind kind) {
+  tracing::Block _b{
+    "emit-func-prologue",
+    [&] {
+      return traceProps(func)
+        .add("argc", argc)
+        .add("trans_kind", show(kind));
+    }
+  };
+  tracing::Pause _p;
+
   VMProtect _;
 
   auto codeLock = lockCode();
@@ -262,6 +272,17 @@ TCA emitFuncPrologue(Func* func, int argc, TransKind kind) {
  * Emit and publish an OptPrologue for `rec'.
  */
 void emitFuncPrologueOpt(ProfTransRec* rec) {
+  tracing::Block _b{
+    "emit-func-prologue-opt",
+    [&] {
+      return traceProps(rec->func())
+        .add("sk", show(rec->srcKey()))
+        .add("argc", rec->prologueArgs())
+        .add("trans_kind", show(rec->kind()));
+    }
+  };
+  tracing::Pause _p;
+
   VMProtect _;
 
   auto codeLock = lockCode();
@@ -335,6 +356,16 @@ void publishFuncBodyDispatch(Func* func, TCA start, TCA end) {
 }
 
 TCA emitFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs, TransKind kind) {
+  tracing::Block _b{
+    "emit-func-body-dispatch",
+    [&] {
+      return traceProps(func)
+        .add("dv_size", dvs.size())
+        .add("trans_kind", show(kind));
+    }
+  };
+  tracing::Pause _p;
+
   VMProtect _;
 
   auto codeLock = lockCode();

@@ -90,6 +90,15 @@ bool regeneratePrologue(TransID prologueTransId, tc::FuncMetaInfo& info) {
   auto nArgs = rec->prologueArgs();
   auto sk = rec->srcKey();
 
+  tracing::Block _b{
+    "regenerate-prologue",
+    [&] {
+      return traceProps(func)
+        .add("nargs", nArgs)
+        .add("sk", show(sk));
+    }
+  };
+
   func->resetPrologue(nArgs);
 
   // If we're regenerating a prologue, and we want to check shouldTranslate()
@@ -146,6 +155,14 @@ bool regeneratePrologue(TransID prologueTransId, tc::FuncMetaInfo& info) {
 
 bool regeneratePrologues(Func* func, tc::FuncMetaInfo& info) {
   std::vector<TransID> prologTransIDs;
+
+  tracing::Block _b{
+    "regenerate-prologues",
+    [&] {
+      return traceProps(func)
+        .add("num_prologues", func->numPrologues());
+    }
+  };
 
   VMProtect _;
 

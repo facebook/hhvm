@@ -267,6 +267,11 @@ struct Vunit {
   Annotations annotations;
 };
 
+inline tracing::Props traceProps(const Vunit& v) {
+  if (v.context) return traceProps(*v.context);
+  return tracing::Props{}.add("func_name", "(stub)");
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }}
 

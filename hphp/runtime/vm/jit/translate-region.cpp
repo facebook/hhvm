@@ -22,6 +22,7 @@
 #include "hphp/util/trace.h"
 
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/tracing.h"
 
 #include "hphp/runtime/vm/bc-pattern.h"
 
@@ -597,6 +598,8 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
   Timer irGenTimer(Timer::irGenRegion);
   SCOPE_ASSERT_DETAIL("RegionDesc") { return show(region); };
 
+  tracing::Block _{"hhir-gen", [&] { return traceProps(context); }};
+
   std::unique_ptr<IRUnit> unit;
   SCOPE_ASSERT_DETAIL("IRUnit") { return unit ? show(*unit) : "<null>"; };
   TranslateRetryContext retryContext;
@@ -627,7 +630,10 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
 
     try {
       auto const result = irGenRegionImpl(irgs, region, 1);
-      if (result == TranslateResult::Retry) continue;
+      if (result == TranslateResult::Retry) {
+        tracing::addPoint("translate-retry");
+        continue;
+      }
       assertx(result == TranslateResult::Success);
     } catch (const FailedTraceGen& e) {
       always_assert_flog(false, "irGenRegion failed with {}\n", e.what());

@@ -40,6 +40,7 @@
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/thread-safe-setlocale.h"
+#include "hphp/runtime/base/tracing.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/debugger/debugger.h"
@@ -2107,7 +2108,14 @@ static int execute_program_impl(int argc, char** argv) {
       }
 
     } else {
+      tracing::Request _{
+        "cli-request",
+        file,
+        [&] { return tracing::Props{}.add("file", file); }
+      };
+
       ret = 0;
+
       for (int i = 0; i < po.count; i++) {
         execute_command_line_begin(new_argc, new_argv, po.xhprofFlags);
         ret = 255;
@@ -2583,6 +2591,17 @@ static bool hphp_warmup(ExecutionContext *context,
                         const std::string &prelude,
                         bool &error,
                         bool runEntryPoint) {
+  tracing::Block _{
+    "warmup",
+    [&] {
+      return tracing::Props{}
+        .add("cmd", cmd)
+        .add("req_init_doc", reqInitDoc)
+        .add("req_init_func", reqInitFunc)
+        .add("prelude", prelude);
+    }
+  };
+
   bool ret = true;
   error = false;
   std::string errorMsg;
@@ -2668,6 +2687,8 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
                  bool once, bool warmupOnly,
                  bool richErrorMsg, const std::string& prelude,
                  bool allowDynCallNoPointer /* = false */) {
+  tracing::Block _{"invoke", [&] { return tracing::Props{}.add("cmd", cmd); }};
+
   bool isServer =
     RuntimeOption::ServerExecutionMode() && !is_cli_server_mode();
   error = false;

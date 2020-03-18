@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/perf-warning.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/tracing.h"
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
@@ -128,6 +129,16 @@ std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit,
                                  CodeKind kind,
                                  bool regAlloc /* = true */) noexcept {
   Timer timer(Timer::hhir_lower, unit.logEntry().get_pointer());
+
+  tracing::Block _{
+    "vasm-gen",
+    [&] {
+      return traceProps(unit)
+        .add("code_kind", codeKindAsString(kind))
+        .add("reg_alloc", regAlloc);
+    }
+  };
+
   rqtrace::EventGuard trace{"VLOWER"};
   SCOPE_ASSERT_DETAIL("hhir unit") { return show(unit); };
 
@@ -182,6 +193,7 @@ std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit,
     optimize(*vunit, kind, regAlloc);
   } catch (const FailedTraceGen& e) {
     // vasm-xls can fail if it tries to allocate too many spill slots.
+    tracing::addPoint("vasm-optimize punt");
     logLowPriPerfWarning(
       "vasm-optimize punt",
       1000,

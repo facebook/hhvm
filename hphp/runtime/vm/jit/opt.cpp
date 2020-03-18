@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/opt.h"
 
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/tracing.h"
 #include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/ir-builder.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
@@ -166,6 +167,11 @@ uint64_t count_inline_returns(const IRUnit& unit) {
 
 void optimize(IRUnit& unit, TransKind kind) {
   Timer timer(Timer::optimize, unit.logEntry().get_pointer());
+
+  tracing::Block _{
+    "hhir-optimize",
+    [&] { return traceProps(unit).add("trans_kind", show(kind)); }
+  };
 
   assertx(checkEverything(unit));
 

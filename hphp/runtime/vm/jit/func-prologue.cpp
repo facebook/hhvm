@@ -79,6 +79,12 @@ genFuncPrologue(TransID transID, TransKind kind,
                 tc::CodeMetaLock* locker) {
   auto context = prologue_context(transID, kind, func, argc,
                                   func->getEntryForNumArgs(argc));
+
+  tracing::Block _{
+    "gen-prologue",
+    [&] { return traceProps(context).add("argc", argc); }
+  };
+
   IRUnit unit{context, std::make_unique<AnnotationData>()};
   irgen::IRGS env{unit, nullptr, 0, nullptr, true};
 
@@ -114,6 +120,12 @@ TransLoc genFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs,
                              tc::CodeMetaLock* locker) {
   auto context = prologue_context(kInvalidTransID, kind, func,
                                   func->numSlotsInFrame(), func->base());
+
+  tracing::Block _{
+    "gen-func-body-dispatch",
+    [&] { return traceProps(context); }
+  };
+
   IRUnit unit{context, std::make_unique<AnnotationData>()};
   irgen::IRGS env{unit, nullptr, 0, nullptr};
 

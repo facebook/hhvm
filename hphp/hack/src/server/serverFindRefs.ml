@@ -146,10 +146,11 @@ let search_record ctx record_name include_defs genv env =
   in
   search ctx (FindRefsService.IRecord record_name) include_defs files genv
 
-let search_localvar path content line char env =
-  let results = ServerFindLocals.go env.tcopt path content line char in
+let search_localvar ~ctx ~entry ~line ~char =
+  let results = ServerFindLocals.go ~ctx ~entry ~line ~char in
   match results with
   | first_pos :: _ ->
+    let content = entry.Provider_context.contents in
     let var_text = Pos.get_text_from_pos ~content first_pos in
     List.map results (fun x -> (var_text, x))
   | [] -> []
@@ -164,7 +165,13 @@ let go ctx action include_defs genv env =
   | Record record_name -> search_record ctx record_name include_defs genv env
   | GConst cst_name -> search_gconst ctx cst_name include_defs genv env
   | LocalVar { filename; file_content; line; char } ->
-    (env, Done (search_localvar filename file_content line char env))
+    let (ctx, entry) =
+      Provider_context.add_entry_from_file_contents
+        ~ctx
+        ~path:filename
+        ~contents:file_content
+    in
+    (env, Done (search_localvar ~ctx ~entry ~line ~char))
 
 let to_absolute res = List.map res (fun (r, pos) -> (r, Pos.to_absolute pos))
 

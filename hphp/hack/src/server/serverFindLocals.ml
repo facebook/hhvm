@@ -9,9 +9,6 @@
 
 open Core_kernel
 open Aast
-
-type result = Pos.absolute list
-
 module PosSet = Caml.Set.Make (Pos)
 
 module LocalPositions = struct
@@ -492,16 +489,7 @@ class local_finding_visitor =
       LocalMap.pop localmap
   end
 
-let parse tcopt path content =
-  Errors.ignore_ (fun () ->
-      Full_fidelity_ast.(
-        (* path is needed because of different leading markup behavior in .hack *)
-        (* files vs .php files *)
-        let env = make_env ~parser_options:tcopt path in
-        let { Parser_return.ast; _ } = from_text_with_legacy env content in
-        ast))
-
-let go_from_ast ast line char =
+let go_from_ast ~ast ~line ~char =
   let empty = LocalMap.make line char in
   let visitor = new local_finding_visitor in
   let localmap = visitor#on_program empty ast in
@@ -512,12 +500,17 @@ let go_from_ast ast line char =
   * the contents of a file, and a position within it, identifying a local, are given.
   * The result is a list of the positions of other uses of that local in the file.
   *)
-let go tcopt path content line char =
+let go ~ctx ~entry ~line ~char =
   try
-    let ast = parse tcopt path content in
+    let ast = Ast_provider.compute_ast ~ctx ~entry in
     let results_list = go_from_ast ast line char in
-    List.map results_list (fun pos -> Pos.set_file path pos)
+    List.map results_list (fun pos ->
+        Pos.set_file entry.Provider_context.path pos)
   with Failure error ->
     failwith
       ( Printf.sprintf "Find locals service failed with error %s:\n" error
-      ^ Printf.sprintf "line %d char %d\ncontent: \n%s\n" line char content )
+      ^ Printf.sprintf
+          "line %d char %d\ncontent: \n%s\n"
+          line
+          char
+          entry.Provider_context.contents )

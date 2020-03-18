@@ -27,15 +27,14 @@ let get_target symbol =
       | SymbolOccurrence.GConst -> Some (IGConst symbol.name)
       | _ -> None))
 
-let highlight_symbol ctx entry line column symbol =
+let highlight_symbol ctx entry line char symbol =
   let res =
     match get_target symbol with
     | Some target ->
       let results = FindRefsService.find_refs_ctx ~ctx ~entry ~target in
       List.rev (List.map results snd)
     | None when symbol.SymbolOccurrence.type_ = SymbolOccurrence.LocalVar ->
-      let ast = Ast_provider.compute_ast ~ctx ~entry in
-      ServerFindLocals.go_from_ast ast line column
+      ServerFindLocals.go ~ctx ~entry ~line ~char
     | None -> []
   in
   List.map res Ide_api_types.pos_to_range

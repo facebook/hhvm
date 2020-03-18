@@ -1462,12 +1462,10 @@ let handle_mode
       | [] -> print_endline "None"
       | result -> ClientGetDefinition.print_readable ~short_pos:true result
     end
-  | Find_local (line, column) ->
+  | Find_local (line, char) ->
     let filename = expect_single_file () in
-    let file = cat (Relative_path.to_absolute filename) in
-    let result =
-      ServerFindLocals.go ctx.Provider_context.popt filename file line column
-    in
+    let (ctx, entry) = Provider_context.add_entry ~ctx ~path:filename in
+    let result = ServerFindLocals.go ~ctx ~entry ~line ~char in
     let print pos = Printf.printf "%s\n" (Pos.string_no_file pos) in
     List.iter result print
   | Outline ->

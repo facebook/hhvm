@@ -415,13 +415,6 @@ public:
   tv_rval rval(const StringData* k) const;
 
   /*
-   * Like rval(), except throws an exception instead if `k' is out of bounds
-   * and the array is a Hack array.
-   */
-  tv_rval rvalStrict(int64_t k) const;
-  tv_rval rvalStrict(const StringData* k) const;
-
-  /*
    * Get an rval for the element at raw position `pos'.
    *
    * @requires: `pos' refers to a valid array element.
@@ -464,9 +457,9 @@ public:
   /*
    * Get the value of the element at key `k'.
    *
-   * This behaves like `error ? rvalStrict(k) : rval(k)`, except if the
-   * resultant rval !has_val(), we raise a notice and return a dummy rval
-   * instead.
+   * This method behaves like rval(k), except that if the result is not set:
+   *  - If `error`, we'll throw (with different messages based on array type)
+   *  - Otherwise, we'll return a "dummy" Uninit rval
    */
   tv_rval get(TypedValue k, bool error = false) const;
   tv_rval get(int64_t k, bool error = false) const;
@@ -757,10 +750,11 @@ public:
 
 protected:
   /*
-   * Throw an out of bounds exception if 'k' is undefined
+   * Throw an out of bounds exception if 'k' is undefined. The text of the
+   * message depends on the array's type.
    */
-  [[noreturn]] static void getNotFound(int64_t k);
-  [[noreturn]] static void getNotFound(const StringData* k);
+  [[noreturn]] void getNotFound(int64_t k) const;
+  [[noreturn]] void getNotFound(const StringData* k) const;
 
   /*
    * Raise a notice that `k' is undefined if `error' is set (and if this is not
@@ -877,9 +871,7 @@ struct ArrayFunctions {
 
   void (*release[NK])(ArrayData*);
   tv_rval (*nvGetInt[NK])(const ArrayData*, int64_t k);
-  tv_rval (*nvTryGetInt[NK])(const ArrayData*, int64_t k);
   tv_rval (*nvGetStr[NK])(const ArrayData*, const StringData* k);
-  tv_rval (*nvTryGetStr[NK])(const ArrayData*, const StringData* k);
   ssize_t (*nvGetIntPos[NK])(const ArrayData*, int64_t k);
   ssize_t (*nvGetStrPos[NK])(const ArrayData*, const StringData* k);
   TypedValue (*nvGetKey[NK])(const ArrayData*, ssize_t pos);

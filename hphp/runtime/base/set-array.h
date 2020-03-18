@@ -403,14 +403,6 @@ private:
 // ArrayData API
 
 public:
-  static tv_rval NvTryGetInt(const ArrayData*, int64_t);
-  static tv_rval NvTryGetStr(const ArrayData*, const StringData*);
-  static tv_rval RvalIntStrict(const ArrayData* ad, int64_t k) {
-    return NvTryGetInt(ad, k);
-  }
-  static tv_rval RvalStrStrict(const ArrayData* ad, const StringData* k) {
-    return NvTryGetStr(ad, k);
-  }
   static size_t Vsize(const ArrayData*);
   static tv_rval RvalPos(const ArrayData*, ssize_t);
   static bool IsVectorData(const ArrayData*);

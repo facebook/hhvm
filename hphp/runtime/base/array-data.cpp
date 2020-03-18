@@ -327,14 +327,6 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(NvGetInt)
 
   /*
-   * tv_rval NvTryGetInt(const ArrayData*, int64_t key)
-   *
-   *   Lookup a value in an array using an integer key.  Either throws or
-   *   returns nullptr if the key is not in the array.
-   */
-  DISPATCH(NvTryGetInt)
-
-  /*
    * tv_rval NvGetStr(const ArrayData*, const StringData*)
    *
    *   Lookup a value in an array using a string key.  The string key must not
@@ -342,14 +334,6 @@ const ArrayFunctions g_array_funcs = {
    *   array.
    */
   DISPATCH(NvGetStr)
-
-  /*
-   * tv_rval NvTryGetStr(const ArrayData*, const StringData*)
-   *
-   *   Lookup a value in an array using a string key.  Either throws or returns
-   *   nullptr if the key is not in the array.
-   */
-  DISPATCH(NvTryGetStr)
 
   /*
    * ssize_t NvGetIntPos(const ArrayData*, int64_t k)
@@ -1047,21 +1031,26 @@ Variant ArrayData::each() {
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
-void ArrayData::getNotFound(int64_t k) {
+void ArrayData::getNotFound(int64_t k) const {
+  assertx(kind() != kGlobalsKind);
+  if (isHackArrayType()) throwOOBArrayKeyException(k, this);
   throwArrayIndexException(k, false);
 }
 
-void ArrayData::getNotFound(const StringData* k) {
+void ArrayData::getNotFound(const StringData* k) const {
+  assertx(kind() != kGlobalsKind);
+  if (isVecArrayType()) throwInvalidArrayKeyException(k, this);
+  if (isHackArrayType()) throwOOBArrayKeyException(k, this);
   throwArrayKeyException(k, false);
 }
 
 tv_rval ArrayData::getNotFound(int64_t k, bool error) const {
-  if (error && kind() != kGlobalsKind) getNotFound(k);
+  if (error) getNotFound(k);
   return tv_rval::dummy();
 }
 
 tv_rval ArrayData::getNotFound(const StringData* k, bool error) const {
-  if (error && kind() != kGlobalsKind) getNotFound(k);
+  if (error) getNotFound(k);
   return tv_rval::dummy();
 }
 

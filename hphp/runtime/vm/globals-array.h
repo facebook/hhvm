@@ -74,9 +74,7 @@ public:
   static bool ExistsStr(const ArrayData* ad, const StringData* k);
 
   static tv_rval NvGetInt(const ArrayData*, int64_t k);
-  static constexpr auto NvTryGetInt = &NvGetInt;
   static tv_rval NvGetStr(const ArrayData*, const StringData* k);
-  static constexpr auto NvTryGetStr = &NvGetStr;
 
   static ssize_t NvGetIntPos(const ArrayData*, int64_t k);
   static ssize_t NvGetStrPos(const ArrayData*, const StringData* k);

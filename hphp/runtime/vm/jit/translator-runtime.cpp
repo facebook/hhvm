@@ -555,7 +555,7 @@ TypedValue arrayIdxI(ArrayData* a, int64_t key, TypedValue def) {
 TypedValue arrayIdxS(ArrayData* a, StringData* key, TypedValue def) {
   assertx(a->isPHPArrayType());
   if (UNLIKELY(!a->isMixedKind())) return arrayIdxSSlow(a, key, def);
-  return getDefaultIfNullTV(MixedArray::RvalStr(a, key), def);
+  return getDefaultIfNullTV(MixedArray::NvGetStr(a, key), def);
 }
 
 TypedValue arrayIdxScan(ArrayData* a, StringData* key, TypedValue def) {
@@ -567,13 +567,13 @@ TypedValue arrayIdxScan(ArrayData* a, StringData* key, TypedValue def) {
 
 TypedValue dictIdxI(ArrayData* a, int64_t key, TypedValue def) {
   assertx(a->isDictKind());
-  return getDefaultIfNullTV(MixedArray::RvalIntDict(a, key), def);
+  return getDefaultIfNullTV(MixedArray::NvGetIntDict(a, key), def);
 }
 
 NEVER_INLINE
 TypedValue dictIdxS(ArrayData* a, StringData* key, TypedValue def) {
   assertx(a->isDictKind());
-  return getDefaultIfNullTV(MixedArray::RvalStrDict(a, key), def);
+  return getDefaultIfNullTV(MixedArray::NvGetStrDict(a, key), def);
 }
 
 TypedValue dictIdxScan(ArrayData* a, StringData* key, TypedValue def) {
@@ -586,12 +586,12 @@ TypedValue dictIdxScan(ArrayData* a, StringData* key, TypedValue def) {
 
 TypedValue keysetIdxI(ArrayData* a, int64_t key, TypedValue def) {
   assertx(a->isKeysetKind());
-  return getDefaultIfNullTV(SetArray::RvalInt(a, key), def);
+  return getDefaultIfNullTV(SetArray::NvGetInt(a, key), def);
 }
 
 TypedValue keysetIdxS(ArrayData* a, StringData* key, TypedValue def) {
   assertx(a->isKeysetKind());
-  return getDefaultIfNullTV(SetArray::RvalStr(a, key), def);
+  return getDefaultIfNullTV(SetArray::NvGetStr(a, key), def);
 }
 
 template <bool isFirst>

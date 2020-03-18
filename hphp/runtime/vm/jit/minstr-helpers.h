@@ -488,7 +488,7 @@ void arrayGetNotFound(const StringData* k);
 
 template<KeyType keyType, MOpMode mode>
 TypedValue arrayGetImpl(ArrayData* a, key_type<keyType> key) {
-  auto ret = a->rvalStrict(key);
+  auto ret = a->rval(key);
   if (ret) return ret.tv();
   if (mode == MOpMode::None) return make_tv<KindOfNull>();
   if (mode == MOpMode::InOut) {

@@ -3178,10 +3178,10 @@ SSATmp* simplify##Name(State& env, const IRInstruction* inst) {       \
   return hackArr##Action##Impl(                                       \
     env, inst,                                                        \
     [](SSATmp* a, int64_t k) {                                        \
-      return MixedArray::RvalIntDict(a->Get(), k);                    \
+      return MixedArray::NvGetIntDict(a->Get(), k);                   \
     },                                                                \
     [](SSATmp* a, const StringData* k) {                              \
-      return MixedArray::RvalStrDict(a->Get(), k);                    \
+      return MixedArray::NvGetStrDict(a->Get(), k);                   \
     }                                                                 \
   );                                                                  \
 }
@@ -3199,10 +3199,10 @@ SSATmp* simplify##Name(State& env, const IRInstruction* inst) {       \
   return hackArr##Action##Impl(                                       \
     env, inst,                                                        \
     [](SSATmp* a, int64_t k) {                                        \
-      return SetArray::RvalInt(a->Get(), k);                          \
+      return SetArray::NvGetInt(a->Get(), k);                         \
     },                                                                \
     [](SSATmp* a, const StringData* k) {                              \
-      return SetArray::RvalStr(a->Get(), k);                          \
+      return SetArray::NvGetStr(a->Get(), k);                         \
     }                                                                 \
   );                                                                  \
 }
@@ -3439,8 +3439,8 @@ SSATmp* packedLayoutLoadImpl(State& env,
     assertx(arr->hasVanillaPackedLayout());
     if (idx >= 0) {
       auto const rval = isVec
-        ? PackedArray::RvalIntVec(arr, idx)
-        : PackedArray::RvalInt(arr, idx);
+        ? PackedArray::NvGetIntVec(arr, idx)
+        : PackedArray::NvGetInt(arr, idx);
       return rval ? cns(env, rval.tv()) : nullptr;
     }
   }

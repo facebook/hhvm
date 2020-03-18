@@ -67,21 +67,11 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
                                            APCHandle* rootAPCHandle);
   static void ReleaseUncounted(ArrayData*);
   static tv_rval NvGetInt(const ArrayData*, int64_t ki);
-  static constexpr auto NvTryGetInt = &NvGetInt;
   static tv_rval NvGetStr(const ArrayData*, const StringData*);
-  static constexpr auto NvTryGetStr = &NvGetStr;
   static ssize_t NvGetIntPos(const ArrayData*, int64_t k);
   static constexpr auto NvGetIntPosVec = &NvGetIntPos;
   static ssize_t NvGetStrPos(const ArrayData*, const StringData* k);
   static constexpr auto NvGetStrPosVec = &NvGetStrPos;
-  static tv_rval RvalInt(const ArrayData* ad, int64_t k) {
-    assertx(ad->isPackedKind());
-    return NvGetInt(ad, k);
-  }
-  static tv_rval RvalIntStrict(const ArrayData* ad, int64_t k) {
-    assertx(ad->isPackedKind());
-    return NvTryGetInt(ad, k);
-  }
   static TypedValue NvGetKey(const ArrayData*, ssize_t pos);
   static ArrayData* SetInt(ArrayData*, int64_t k, TypedValue v);
   static ArrayData* SetIntMove(ArrayData*, int64_t k, TypedValue v);
@@ -89,9 +79,7 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static ArrayData* SetStrMove(ArrayData*, StringData* k, TypedValue v);
   static size_t Vsize(const ArrayData*);
   static tv_rval RvalPos(const ArrayData* ad, ssize_t pos);
-  static bool IsVectorData(const ArrayData*) {
-    return true;
-  }
+  static bool IsVectorData(const ArrayData*) { return true; }
   static bool ExistsInt(const ArrayData* ad, int64_t k);
   static bool ExistsStr(const ArrayData*, const StringData*);
   static arr_lval LvalInt(ArrayData*, int64_t k, bool copy);
@@ -132,8 +120,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
 
   static constexpr auto ToKeyset = &ArrayCommon::ToKeyset;
 
-  static tv_rval NvTryGetIntVec(const ArrayData*, int64_t);
-  static tv_rval NvTryGetStrVec(const ArrayData*, const StringData*);
   static ArrayData* SetIntVec(ArrayData*, int64_t, TypedValue);
   static ArrayData* SetIntMoveVec(ArrayData*, int64_t, TypedValue);
   static ArrayData* SetStrVec(ArrayData*, StringData*, TypedValue);
@@ -184,15 +170,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static constexpr auto OnSetEvalScalarVec = &OnSetEvalScalar;
   static constexpr auto ToKeysetVec = &ArrayCommon::ToKeyset;
   static constexpr auto ToDArrayVec = &ToDArray;
-
-  static tv_rval RvalIntVec(const ArrayData* ad, int64_t k) {
-    assertx(ad->isVecArrayKind());
-    return NvGetIntVec(ad, k);
-  }
-  static tv_rval RvalIntStrictVec(const ArrayData* ad, int64_t k) {
-    assertx(ad->isVecArrayKind());
-    return NvTryGetIntVec(ad, k);
-  }
 
   //////////////////////////////////////////////////////////////////////
 

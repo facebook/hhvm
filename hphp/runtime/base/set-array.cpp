@@ -587,19 +587,6 @@ const TypedValue* SetArray::tvOfPos(uint32_t pos) const {
   return !elm.isTombstone() ? &elm.tv : nullptr;
 }
 
-tv_rval SetArray::NvTryGetInt(const ArrayData* ad, int64_t ki) {
-  auto const tv = SetArray::NvGetInt(ad, ki);
-  if (UNLIKELY(!tv)) throwOOBArrayKeyException(ki, ad);
-  return tv;
-}
-
-tv_rval SetArray::NvTryGetStr(const ArrayData* ad,
-                                        const StringData* ks) {
-  auto const ptr = SetArray::NvGetStr(ad, ks);
-  if (UNLIKELY(!ptr)) throwOOBArrayKeyException(ks, ad);
-  return ptr;
-}
-
 size_t SetArray::Vsize(const ArrayData*) { not_reached(); }
 
 tv_rval SetArray::RvalPos(const ArrayData* ad, ssize_t pos) {

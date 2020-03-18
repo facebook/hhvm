@@ -175,7 +175,7 @@ std::pair<Type, bool> vecElemType(Type arr, Type idx, const Class* ctx) {
     if (idx.hasConstVal()) {
       auto const idxVal = idx.intVal();
       if (idxVal >= 0 && idxVal < arr.vecVal()->size()) {
-        auto const rval = PackedArray::RvalIntVec(arr.vecVal(), idxVal);
+        auto const rval = PackedArray::NvGetIntVec(arr.vecVal(), idxVal);
         return {Type::cns(rval.tv()), true};
       }
       return {TBottom, false};
@@ -236,14 +236,14 @@ std::pair<Type, bool> dictElemType(Type arr, Type idx) {
     // precise type.
     if (idx.hasConstVal(TInt)) {
       auto const idxVal = idx.intVal();
-      auto const rval = MixedArray::RvalIntDict(arr.dictVal(), idxVal);
+      auto const rval = MixedArray::NvGetIntDict(arr.dictVal(), idxVal);
       if (rval) return {Type::cns(rval.tv()), true};
       return {TBottom, false};
     }
 
     if (idx.hasConstVal(TStr)) {
       auto const idxVal = idx.strVal();
-      auto const rval = MixedArray::RvalStrDict(arr.dictVal(), idxVal);
+      auto const rval = MixedArray::NvGetStrDict(arr.dictVal(), idxVal);
       if (rval) return {Type::cns(rval.tv()), true};
       return {TBottom, false};
     }
@@ -279,14 +279,14 @@ std::pair<Type, bool> keysetElemType(Type arr, Type idx) {
     // precise type.
     if (idx.hasConstVal(TInt)) {
       auto const idxVal = idx.intVal();
-      auto const rval = SetArray::RvalInt(arr.keysetVal(), idxVal);
+      auto const rval = SetArray::NvGetInt(arr.keysetVal(), idxVal);
       if (rval) return {Type::cns(rval.tv()), true};
       return {TBottom, false};
     }
 
     if (idx.hasConstVal(TStr)) {
       auto const idxVal = idx.strVal();
-      auto const rval = SetArray::RvalStr(arr.keysetVal(), idxVal);
+      auto const rval = SetArray::NvGetStr(arr.keysetVal(), idxVal);
       if (rval) return {Type::cns(rval.tv()), true};
       return {TBottom, false};
     }

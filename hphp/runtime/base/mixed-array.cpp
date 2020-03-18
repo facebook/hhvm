@@ -1805,25 +1805,6 @@ void MixedArray::OnSetEvalScalar(ArrayData* ad) {
 
 //////////////////////////////////////////////////////////////////////
 
-tv_rval MixedArray::NvTryGetIntDict(const ArrayData* ad, int64_t k) {
-  assertx(asMixed(ad)->checkInvariants());
-  assertx(ad->isDictKind());
-  auto const ptr = MixedArray::NvGetInt(ad, k);
-  if (UNLIKELY(!ptr)) throwOOBArrayKeyException(k, ad);
-  return ptr;
-}
-
-tv_rval MixedArray::NvTryGetStrDict(const ArrayData* ad,
-                                               const StringData* k) {
-  assertx(asMixed(ad)->checkInvariants());
-  assertx(ad->isDictKind());
-  auto const ptr = MixedArray::NvGetStr(ad, k);
-  if (UNLIKELY(!ptr)) throwOOBArrayKeyException(k, ad);
-  return ptr;
-}
-
-//////////////////////////////////////////////////////////////////////
-
 ALWAYS_INLINE
 bool MixedArray::DictEqualHelper(const ArrayData* ad1, const ArrayData* ad2,
                                  bool strict) {
@@ -1894,10 +1875,10 @@ bool MixedArray::DictEqualHelper(const ArrayData* ad1, const ArrayData* ad2,
       if (UNLIKELY(elm->isTombstone())) continue;
       auto const other_rval = [&] {
         if (elm->hasIntKey()) {
-          return RvalIntDict(ad2, elm->ikey);
+          return NvGetIntDict(ad2, elm->ikey);
         } else {
           assertx(elm->hasStrKey());
-          return RvalStrDict(ad2, elm->skey);
+          return NvGetStrDict(ad2, elm->skey);
         }
       }();
       if (!other_rval ||

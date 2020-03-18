@@ -661,19 +661,6 @@ ssize_t PackedArray::NvGetStrPos(const ArrayData* ad, const StringData* k) {
   return ad->m_size;
 }
 
-tv_rval PackedArray::NvTryGetIntVec(const ArrayData* ad, int64_t k) {
-  assertx(checkInvariants(ad));
-  assertx(ad->isVecArrayKind());
-  if (LIKELY(size_t(k) < ad->m_size)) return RvalPos(ad, k);
-  throwOOBArrayKeyException(k, ad);
-}
-
-tv_rval PackedArray::NvTryGetStrVec(const ArrayData* ad, const StringData* s) {
-  assertx(checkInvariants(ad));
-  assertx(ad->isVecArrayKind());
-  throwInvalidArrayKeyException(s, ad);
-}
-
 TypedValue PackedArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
   assertx(checkInvariants(ad));
   assertx(pos != ad->m_size);

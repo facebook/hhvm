@@ -137,14 +137,6 @@ inline tv_rval ArrayData::rval(const StringData* k) const {
   return g_array_funcs.nvGetStr[kind()](this, k);
 }
 
-inline tv_rval ArrayData::rvalStrict(int64_t k) const {
-  return g_array_funcs.nvTryGetInt[kind()](this, k);
-}
-
-inline tv_rval ArrayData::rvalStrict(const StringData* k) const {
-  return g_array_funcs.nvTryGetStr[kind()](this, k);
-}
-
 inline ssize_t ArrayData::nvGetIntPos(int64_t k) const {
   return g_array_funcs.nvGetIntPos[kind()](this, k);
 }
@@ -334,12 +326,12 @@ inline arr_lval ArrayData::lvalSilent(TypedValue k, bool copy) {
 }
 
 inline tv_rval ArrayData::get(int64_t k, bool error) const {
-  auto r = error ? rvalStrict(k) : rval(k);
+  auto const r = rval(k);
   return r ? r : getNotFound(k, error);
 }
 
 inline tv_rval ArrayData::get(const StringData* k, bool error) const {
-  auto r = error ? rvalStrict(k) : rval(k);
+  auto const r = rval(k);
   return r ? r : getNotFound(k, error);
 }
 

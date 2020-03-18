@@ -236,13 +236,6 @@ struct HashTable : HashTableCommon {
   static ssize_t NvGetIntPos(const ArrayData* ad, int64_t k);
   static ssize_t NvGetStrPos(const ArrayData* ad, const StringData* k);
 
-  static tv_rval RvalInt(const ArrayData* ad, int64_t k) {
-    return NvGetInt(ad, k);
-  }
-  static tv_rval RvalStr(const ArrayData* ad, const StringData* k) {
-    return NvGetStr(ad, k);
-  }
-
   static TypedValue NvGetKey(const ArrayData* ad, ssize_t pos);
 
   /////////////////////////////////////////////////////////////////////////////

@@ -341,16 +341,6 @@ public:
   static bool IsStrictVector(const ArrayData* ad) {
     return ad->m_size == asMixed(ad)->m_nextKI && IsVectorData(ad);
   }
-  static constexpr auto NvTryGetInt = &NvGetInt;
-  static constexpr auto NvTryGetStr = &NvGetStr;
-  static tv_rval RvalIntStrict(const ArrayData* ad, int64_t k) {
-    assertx(ad->isMixedKind());
-    return NvTryGetInt(ad, k);
-  }
-  static tv_rval RvalStrStrict(const ArrayData* ad, const StringData* k) {
-    assertx(ad->isMixedKind());
-    return NvTryGetStr(ad, k);
-  }
   static bool ExistsInt(const ArrayData*, int64_t k);
   static bool ExistsStr(const ArrayData*, const StringData* k);
   static arr_lval LvalInt(ArrayData* ad, int64_t k, bool copy);
@@ -399,30 +389,10 @@ public:
   static bool Usort(ArrayData*, const Variant& cmp_function);
   static bool Uasort(ArrayData*, const Variant& cmp_function);
 
-  static tv_rval NvTryGetIntDict(const ArrayData*, int64_t);
   static constexpr auto NvGetIntDict = &NvGetInt;
-  static tv_rval NvTryGetStrDict(const ArrayData*,
-                                            const StringData*);
   static constexpr auto NvGetStrDict = &NvGetStr;
   static constexpr auto NvGetIntPosDict = &NvGetIntPos;
   static constexpr auto NvGetStrPosDict = &NvGetStrPos;
-  static tv_rval RvalIntDict(const ArrayData* ad, int64_t k) {
-    assertx(ad->isDictKind());
-    return NvGetIntDict(ad, k);
-  }
-  static tv_rval RvalIntStrictDict(const ArrayData* ad, int64_t k) {
-    assertx(ad->isDictKind());
-    return NvTryGetIntDict(ad, k);
-  }
-  static tv_rval RvalStrDict(const ArrayData* ad, const StringData* k) {
-    assertx(ad->isDictKind());
-    return NvGetStrDict(ad, k);
-  }
-  static tv_rval RvalStrStrictDict(const ArrayData* ad,
-                                       const StringData* k) {
-    assertx(ad->isDictKind());
-    return NvTryGetStrDict(ad, k);
-  }
   static constexpr auto ReleaseDict = &Release;
   static constexpr auto NvGetKeyDict = &NvGetKey;
   static constexpr auto SetIntDict = &SetInt;

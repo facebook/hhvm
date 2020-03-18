@@ -53,9 +53,7 @@ struct RecordArray : ArrayData,
   // Array interface
   static void Release(ArrayData*);
   static tv_rval NvGetInt(const ArrayData*, int64_t key);
-  static constexpr auto NvTryGetInt = &NvGetInt;
   static tv_rval NvGetStr(const ArrayData*, const StringData*);
-  static constexpr auto NvTryGetStr = &NvGetStr;
   static ssize_t NvGetIntPos(const ArrayData*, int64_t k);
   static ssize_t NvGetStrPos(const ArrayData*, const StringData* k);
   static TypedValue NvGetKey(const ArrayData*, ssize_t pos);

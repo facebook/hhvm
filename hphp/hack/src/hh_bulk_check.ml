@@ -21,6 +21,7 @@ type schedule_args = {
   num_local_workers: int;
   batch_size: int option;
   min_log_level: Hh_logger.Level.t option;
+  version_specifier: string option;
   timeout: int;
 }
 
@@ -79,6 +80,7 @@ let parse_schedule_args () : command =
   let num_local_workers = ref Sys_utils.nbr_procs in
   let batch_size = ref None in
   let input_file = ref None in
+  let version_specifier = ref None in
   let set_option_arg name reference value =
     match !reference with
     | None -> reference := Some value
@@ -105,6 +107,9 @@ let parse_schedule_args () : command =
       ( "--input-file",
         Arg.String (set_option_arg "input file" input_file),
         "Input file path that contains the list of files to type check." );
+      ( "--version-specifier",
+        Arg.String (set_option_arg "version specifier" version_specifier),
+        "hh_server version that the remote hosts should install." );
     ]
   in
   let usage = "Usage: " ^ Sys.executable_name ^ " schedule <repo_root>" in
@@ -123,6 +128,7 @@ let parse_schedule_args () : command =
       min_log_level =
         Hh_logger.Level.of_enum_string
           (Caml.String.lowercase_ascii !min_log_level_str_ref);
+      version_specifier = !version_specifier;
       timeout = !timeout;
     }
 
@@ -257,14 +263,17 @@ let get_batch_size genv (batch_size : int option) =
 (*
   Start remote checking service with number of remote workers specified by num_remote_workers.
 *)
-let start_remote_checking_service
-    genv env num_remote_workers batch_size min_log_level_opt =
+let start_remote_checking_service genv env schedule_env =
   let version_specifier =
-    ServerLocalConfig.(genv.local_config.remote_version_specifier)
+    match schedule_env.version_specifier with
+    | Some version -> Some version
+    | None -> ServerLocalConfig.(genv.local_config.remote_version_specifier)
   in
-  let (max_batch_size, min_batch_size) = get_batch_size genv batch_size in
+  let (max_batch_size, min_batch_size) =
+    get_batch_size genv schedule_env.batch_size
+  in
   let worker_min_log_level =
-    match min_log_level_opt with
+    match schedule_env.min_log_level with
     | Some min_level ->
       (* Set client min log level if available *)
       Hh_logger.Level.set_min_level min_level;
@@ -282,7 +291,7 @@ let start_remote_checking_service
             ServerLocalConfig.default.remote_type_check.declaration_threshold;
           init_id = env.init_env.init_id;
           mergebase = env.init_env.mergebase;
-          num_workers = num_remote_workers;
+          num_workers = schedule_env.num_remote_workers;
           recheck_id =
             Option.value env.init_env.recheck_id ~default:env.init_env.init_id;
           root;
@@ -309,14 +318,7 @@ let create_service_delegate (schedule_env : schedule_args) =
       schedule_env.naming_table
       schedule_env.num_local_workers
   in
-  let delegate_state =
-    start_remote_checking_service
-      genv
-      env
-      schedule_env.num_remote_workers
-      schedule_env.batch_size
-      schedule_env.min_log_level
-  in
+  let delegate_state = start_remote_checking_service genv env schedule_env in
   (env, genv, delegate_state)
 
 (* Parse input_file which should contain a list of php files relative to root *)

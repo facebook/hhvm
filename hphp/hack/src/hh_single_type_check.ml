@@ -1168,7 +1168,8 @@ let pp_debug_deps fmt entries =
 let show_debug_deps = Format.asprintf "%a" pp_debug_deps
 
 let sort_debug_deps deps =
-  Caml.Hashtbl.fold (fun obj set acc -> (obj, set) :: acc) deps []
+  Hashtbl.fold deps ~init:[] ~f:(fun ~key:obj ~data:set acc ->
+      (obj, set) :: acc)
   |> List.sort ~compare:(fun (a, _) (b, _) -> String.compare a b)
   |> List.map ~f:(fun (obj, roots) ->
          let roots =
@@ -1399,7 +1400,7 @@ let handle_mode
   | Dump_deps ->
     Relative_path.Map.iter files_info (fun fn fileinfo ->
         ignore @@ Typing_check_utils.check_defs ctx fn fileinfo);
-    if Caml.Hashtbl.length dbg_deps > 0 then dump_debug_deps dbg_deps
+    if Hashtbl.length dbg_deps > 0 then dump_debug_deps dbg_deps
   | Dump_glean_deps ->
     Relative_path.Map.iter files_info (fun fn fileinfo ->
         ignore @@ Typing_check_utils.check_defs ctx fn fileinfo);
@@ -1815,17 +1816,15 @@ let decl_and_run_mode
           Sys_utils.write_file ~file file_contents);
 
       (* Take the builtins (file, contents) array and create relative paths *)
-      Caml.Array.fold_left
-        begin
-          fun acc (f, src) ->
+      Array.fold
+        (Array.append magic_builtins hhi_builtins)
+        ~init:Relative_path.Map.empty
+        ~f:(fun acc (f, src) ->
           let f = Path.concat hhi_root f |> Path.to_string in
           Relative_path.Map.add
             acc
             ~key:(Relative_path.create Relative_path.Hhi f)
-            ~data:src
-        end
-        Relative_path.Map.empty
-        (Array.append magic_builtins hhi_builtins)
+            ~data:src)
   in
   let files = List.map ~f:(Relative_path.create Relative_path.Dummy) files in
   let files_contents =
@@ -1854,7 +1853,7 @@ let decl_and_run_mode
     else
       files_contents_with_builtins
   in
-  let dbg_deps = Caml.Hashtbl.create 0 in
+  let dbg_deps = Hashtbl.Poly.create () in
   ( if mode = Dump_deps then
     (* In addition to actually recording the dependencies in shared memory,
      we build a non-hashed respresentation of the dependency graph
@@ -1862,12 +1861,12 @@ let decl_and_run_mode
     let get_debug_trace root obj =
       let root = Typing_deps.Dep.to_string root in
       let obj = Typing_deps.Dep.to_string obj in
-      match Caml.Hashtbl.find_opt dbg_deps obj with
+      match Hashtbl.find dbg_deps obj with
       | Some set -> HashSet.add set root
       | None ->
         let set = HashSet.create () in
         HashSet.add set root;
-        Caml.Hashtbl.replace dbg_deps obj set
+        Hashtbl.set dbg_deps obj set
     in
     Typing_deps.add_dependency_callback "get_debug_trace" get_debug_trace );
   let dbg_glean_deps = HashSet.create () in

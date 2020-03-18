@@ -182,8 +182,8 @@ ArrayData* GlobalsArray::SetIntMove(ArrayData* ad, int64_t k, TypedValue v) {
   return SetStrMove(ad, String(k).get(), v);
 }
 
-ArrayData* GlobalsArray::SetIntInPlace(ArrayData* ad, int64_t k, TypedValue v) {
-  return SetStrInPlace(ad, String(k).get(), v);
+ArrayData* GlobalsArray::SetInt(ArrayData* ad, int64_t k, TypedValue v) {
+  return SetStr(ad, String(k).get(), v);
 }
 
 ArrayData* GlobalsArray::SetStrMove(ArrayData* ad, StringData* k, TypedValue v) {
@@ -191,7 +191,7 @@ ArrayData* GlobalsArray::SetStrMove(ArrayData* ad, StringData* k, TypedValue v) 
   return ad;
 }
 
-ArrayData* GlobalsArray::SetStrInPlace(ArrayData* ad, StringData* k, TypedValue v) {
+ArrayData* GlobalsArray::SetStr(ArrayData* ad, StringData* k, TypedValue v) {
   tvSet(v, *asGlobals(ad)->m_tab->lookupAdd(k));
   return ad;
 }

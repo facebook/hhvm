@@ -354,15 +354,15 @@ public:
   static bool ExistsInt(const ArrayData*, int64_t k);
   static bool ExistsStr(const ArrayData*, const StringData* k);
   static arr_lval LvalInt(ArrayData* ad, int64_t k, bool copy);
+  static arr_lval LvalSilentInt(ArrayData*, int64_t, bool);
   static arr_lval LvalStr(ArrayData* ad, StringData* k, bool copy);
+  static arr_lval LvalSilentStr(ArrayData*, StringData*, bool);
   static arr_lval LvalForceNew(ArrayData*, bool copy);
   static arr_lval LvalForce(ArrayData* ad, const Variant& k, bool copy);
   static ArrayData* SetInt(ArrayData*, int64_t k, TypedValue v);
   static ArrayData* SetIntMove(ArrayData*, int64_t k, TypedValue v);
-  static ArrayData* SetIntInPlace(ArrayData*, int64_t k, TypedValue v);
   static ArrayData* SetStr(ArrayData*, StringData* k, TypedValue v);
   static ArrayData* SetStrMove(ArrayData*, StringData* k, TypedValue v);
-  static ArrayData* SetStrInPlace(ArrayData*, StringData* k, TypedValue v);
   static ArrayData* AddInt(ArrayData*, int64_t k, TypedValue v, bool copy);
   static ArrayData* AddStr(ArrayData*, StringData* k, TypedValue v, bool copy);
   static ArrayData* RemoveInt(ArrayData*, int64_t k);
@@ -427,10 +427,8 @@ public:
   static constexpr auto NvGetKeyDict = &NvGetKey;
   static constexpr auto SetIntDict = &SetInt;
   static constexpr auto SetIntMoveDict = &SetIntMove;
-  static constexpr auto SetIntInPlaceDict = &SetIntInPlace;
   static constexpr auto SetStrDict = &SetStr;
   static constexpr auto SetStrMoveDict = &SetStrMove;
-  static constexpr auto SetStrInPlaceDict = &SetStrInPlace;
   static constexpr auto AddIntDict = &AddInt;
   static constexpr auto AddStrDict = &AddStr;
   static constexpr auto VsizeDict = &Vsize;
@@ -439,7 +437,9 @@ public:
   static constexpr auto ExistsIntDict = &ExistsInt;
   static constexpr auto ExistsStrDict = &ExistsStr;
   static constexpr auto LvalIntDict = &LvalInt;
+  static constexpr auto LvalSilentIntDict = &LvalSilentInt;
   static constexpr auto LvalStrDict = &LvalStr;
+  static constexpr auto LvalSilentStrDict = &LvalSilentStr;
   static constexpr auto LvalForceNewDict = &LvalForceNew;
   static constexpr auto RemoveIntDict = &RemoveInt;
   static constexpr auto RemoveStrDict = &RemoveStr;
@@ -475,13 +475,10 @@ public:
 
   //////////////////////////////////////////////////////////////////////
 
-  // Like Lval[Int,Str], but silently does nothing if the element does not
-  // exist. Not part of the ArrayData interface, but used for member operations.
-  static arr_lval LvalSilentInt(ArrayData*, int64_t, bool);
-  static arr_lval LvalSilentStr(ArrayData*, StringData*, bool);
-
-  static constexpr auto LvalSilentIntDict = &LvalSilentInt;
-  static constexpr auto LvalSilentStrDict = &LvalSilentStr;
+  // Helpers used by ArrayInit to update MixedArrays without refcount ops.
+  // These helpers work for both mixed PHP arrays and dicts.
+  static ArrayData* SetIntInPlace(ArrayData*, int64_t k, TypedValue v);
+  static ArrayData* SetStrInPlace(ArrayData*, StringData* k, TypedValue v);
 
   //////////////////////////////////////////////////////////////////////
 

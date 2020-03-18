@@ -378,22 +378,22 @@ const ArrayFunctions g_array_funcs = {
   /*
    * ArrayData* SetInt(ArrayData*, int64_t key, TypedValue v)
    *
-   *   Set a value in the array for an integer key. SetInt() and SetIntMove()
-   *   have copy/grow semantics; SetIntInPlace() may only escalate or grow.
+   *   Set a value in the array for an integer key, with copies / escalation.
+   *   SetIntMove is equivalent to SetInt, followed by a dec-ref of the value,
+   *   followed by a dec-ref of the old array (if it was copied or escalated).
    */
   DISPATCH(SetInt)
   DISPATCH(SetIntMove)
-  DISPATCH(SetIntInPlace)
 
   /*
    * ArrayData* SetStr(ArrayData*, StringData*, TypedValue v)
    *
-   *   Set a value in the array for an string key. SetStr() and SetStrMove()
-   *   have copy/grow semantics; SetStrInPlace() may only escalate or grow.
+   *   Set a value in the array for a string key, with copies / escalation.
+   *   SetStrMove is equivalent to SetStr, followed by a dec-ref of the value,
+   *   followed by a dec-ref of the old array (if it was copied or escalated).
    */
   DISPATCH(SetStr)
   DISPATCH(SetStrMove)
-  DISPATCH(SetStrInPlace)
 
   /*
    * size_t Vsize(const ArrayData*)

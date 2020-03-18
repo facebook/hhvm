@@ -478,10 +478,6 @@ public:
    * Set the element at key `k' to `v'. set() methods make a copy first if
    * cowCheck() returns true. If `v' is a ref, its inner value is used.
    *
-   * setInPlace() methods attempt to modify the array in place without
-   * calling cowCheck(), but may still return a new array for escalation
-   * or reallocating to grow.
-   *
    * Semantically, setMove() methods 1) do a set, 2) dec-ref the value, and
    * 3) if the operation required copy/escalation, dec-ref the old array. This
    * sequence is needed for member ops and can be implemented more efficiently
@@ -494,10 +490,6 @@ public:
   ArrayData* set(StringData* k, TypedValue v);
   ArrayData* set(TypedValue k, TypedValue v);
   ArrayData* set(const String& k, TypedValue v);
-  ArrayData* setInPlace(int64_t k, TypedValue v);
-  ArrayData* setInPlace(StringData* k, TypedValue v);
-  ArrayData* setInPlace(TypedValue k, TypedValue v);
-  ArrayData* setInPlace(const String& k, TypedValue v);
   ArrayData* setMove(int64_t k, TypedValue v);
   ArrayData* setMove(StringData* k, TypedValue v);
 
@@ -505,14 +497,9 @@ public:
   ArrayData* set(StringData* k, const Variant& v);
   ArrayData* set(const String& k, const Variant& v);
   ArrayData* set(const Variant& k, const Variant& v);
-  ArrayData* setInPlace(StringData* k, const Variant& v);
-  ArrayData* setInPlace(const String& k, const Variant& v);
-  ArrayData* setInPlace(const Variant& k, const Variant& v);
 
   ArrayData* set(const StringData*, TypedValue) = delete;
   ArrayData* set(const StringData*, const Variant&) = delete;
-  ArrayData* setInPlace(const StringData*, TypedValue) = delete;
-  ArrayData* setInPlace(const StringData*, const Variant&) = delete;
 
   /*
    * Remove the value at key `k', making a copy first if necessary. Returns
@@ -898,10 +885,8 @@ struct ArrayFunctions {
   TypedValue (*nvGetKey[NK])(const ArrayData*, ssize_t pos);
   ArrayData* (*setInt[NK])(ArrayData*, int64_t k, TypedValue v);
   ArrayData* (*setIntMove[NK])(ArrayData*, int64_t k, TypedValue v);
-  ArrayData* (*setIntInPlace[NK])(ArrayData*, int64_t k, TypedValue v);
   ArrayData* (*setStr[NK])(ArrayData*, StringData* k, TypedValue v);
   ArrayData* (*setStrMove[NK])(ArrayData*, StringData* k, TypedValue v);
-  ArrayData* (*setStrInPlace[NK])(ArrayData*, StringData* k, TypedValue v);
   size_t (*vsize[NK])(const ArrayData*);
   tv_rval (*nvGetPos[NK])(const ArrayData*, ssize_t pos);
   bool (*isVectorData[NK])(const ArrayData*);

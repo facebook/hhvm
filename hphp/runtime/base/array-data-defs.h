@@ -167,12 +167,6 @@ inline ArrayData* ArrayData::set(int64_t k, TypedValue v) {
   return g_array_funcs.setInt[kind()](this, k, v);
 }
 
-inline ArrayData* ArrayData::setInPlace(int64_t k, TypedValue v) {
-  assertx(tvIsPlausible(v));
-  assertx(notCyclic(v));
-  return g_array_funcs.setIntInPlace[kind()](this, k, v);
-}
-
 inline ArrayData* ArrayData::setMove(int64_t k, TypedValue v) {
   assertx(tvIsPlausible(v));
   assertx(cowCheck() || notCyclic(v));
@@ -183,12 +177,6 @@ inline ArrayData* ArrayData::set(StringData* k, TypedValue v) {
   assertx(tvIsPlausible(v));
   assertx(cowCheck() || notCyclic(v));
   return g_array_funcs.setStr[kind()](this, k, v);
-}
-
-inline ArrayData* ArrayData::setInPlace(StringData* k, TypedValue v) {
-  assertx(tvIsPlausible(v));
-  assertx(notCyclic(v));
-  return g_array_funcs.setStrInPlace[kind()](this, k, v);
 }
 
 inline ArrayData* ArrayData::setMove(StringData* k, TypedValue v) {
@@ -207,12 +195,6 @@ inline ArrayData* ArrayData::set(StringData* k, const Variant& v) {
   auto c = *v.asTypedValue();
   assertx(cowCheck() || notCyclic(c));
   return g_array_funcs.setStr[kind()](this, k, c);
-}
-
-inline ArrayData* ArrayData::setInPlace(StringData* k, const Variant& v) {
-  auto c = *v.asTypedValue();
-  assertx(notCyclic(c));
-  return g_array_funcs.setStrInPlace[kind()](this, k, c);
 }
 
 inline ArrayData* ArrayData::remove(int64_t k) {
@@ -394,15 +376,6 @@ inline ArrayData* ArrayData::set(TypedValue k, TypedValue v) {
                              : set(detail::getStringKey(k), v);
 }
 
-inline ArrayData* ArrayData::setInPlace(TypedValue k, TypedValue v) {
-  assertx(tvIsPlausible(k));
-  assertx(tvIsPlausible(v));
-  assertx(IsValidKey(k));
-
-  return detail::isIntKey(k) ? setInPlace(detail::getIntKey(k), v)
-                             : setInPlace(detail::getStringKey(k), v);
-}
-
 inline ArrayData* ArrayData::remove(TypedValue k) {
   assertx(IsValidKey(k));
   return detail::isIntKey(k) ? remove(detail::getIntKey(k))
@@ -453,26 +426,12 @@ inline ArrayData* ArrayData::set(const String& k, TypedValue v) {
   return set(k.get(), v);
 }
 
-inline ArrayData* ArrayData::setInPlace(const String& k, TypedValue v) {
-  assertx(tvIsPlausible(v));
-  assertx(IsValidKey(k));
-  return setInPlace(k.get(), v);
-}
-
 inline ArrayData* ArrayData::set(const String& k, const Variant& v) {
   return set(k, *v.asTypedValue());
 }
 
-inline ArrayData* ArrayData::setInPlace(const String& k, const Variant& v) {
-  return setInPlace(k, *v.asTypedValue());
-}
-
 inline ArrayData* ArrayData::set(const Variant& k, const Variant& v) {
   return set(*k.asTypedValue(), *v.asTypedValue());
-}
-
-inline ArrayData* ArrayData::setInPlace(const Variant& k, const Variant& v) {
-  return setInPlace(*k.asTypedValue(), *v.asTypedValue());
 }
 
 inline ArrayData* ArrayData::remove(const String& k) {

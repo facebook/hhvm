@@ -1198,6 +1198,7 @@ ArrayData* MixedArray::SetIntMove(ArrayData* ad, int64_t k, TypedValue v) {
 }
 
 ArrayData* MixedArray::SetIntInPlace(ArrayData* ad, int64_t k, TypedValue v) {
+  assertx(!ad->cowCheck());
   assertx(ad->notCyclic(v));
   return asMixed(ad)->prepareForInsert(false/*copy*/)->update(k, v);
 }
@@ -1216,6 +1217,7 @@ ArrayData* MixedArray::SetStrMove(ArrayData* ad, StringData* k, TypedValue v) {
 }
 
 ArrayData* MixedArray::SetStrInPlace(ArrayData* ad, StringData* k, TypedValue v) {
+  assertx(!ad->cowCheck());
   assertx(ad->notCyclic(v));
   return asMixed(ad)->prepareForInsert(false/*copy*/)->update(k, v);
 }

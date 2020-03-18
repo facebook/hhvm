@@ -423,10 +423,8 @@ public:
   static arr_lval LvalForceNew(ArrayData*, bool);
   static ArrayData* SetInt(ArrayData*, int64_t, TypedValue);
   static constexpr auto SetIntMove = &SetInt;
-  static constexpr auto SetIntInPlace = &SetInt;
   static ArrayData* SetStr(ArrayData*, StringData*, TypedValue);
   static constexpr auto SetStrMove = &SetStr;
-  static constexpr auto SetStrInPlace = &SetStr;
   static ArrayData* RemoveInt(ArrayData*, int64_t);
   static ArrayData* RemoveStr(ArrayData*, const StringData*);
   static ArrayData* Copy(const ArrayData*);

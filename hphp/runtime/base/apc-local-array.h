@@ -55,10 +55,8 @@ struct APCLocalArray final : ArrayData,
   static arr_lval LvalForceNew(ArrayData*, bool copy);
   static ArrayData* SetInt(ArrayData*, int64_t k, TypedValue v);
   static ArrayData* SetIntMove(ArrayData*, int64_t k, TypedValue v);
-  static constexpr auto SetIntInPlace = &SetInt;
   static ArrayData* SetStr(ArrayData*, StringData* k, TypedValue v);
   static ArrayData* SetStrMove(ArrayData*, StringData* k, TypedValue v);
-  static constexpr auto SetStrInPlace = &SetStr;
   static ArrayData *RemoveInt(ArrayData* ad, int64_t k);
   static ArrayData *RemoveStr(ArrayData* ad, const StringData* k);
   static ArrayData* Copy(const ArrayData*);

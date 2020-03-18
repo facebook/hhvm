@@ -61,10 +61,8 @@ struct RecordArray : ArrayData,
   static TypedValue NvGetKey(const ArrayData*, ssize_t pos);
   static ArrayData* SetInt(ArrayData*, int64_t key, TypedValue v);
   static ArrayData* SetIntMove(ArrayData*, int64_t key, TypedValue v);
-  static constexpr auto SetIntInPlace = &SetInt;
   static ArrayData* SetStr(ArrayData*, StringData*, TypedValue v);
   static ArrayData* SetStrMove(ArrayData*, StringData*, TypedValue v);
-  static ArrayData* SetStrInPlace(ArrayData*, StringData*, TypedValue v);
   static size_t Vsize(const ArrayData*);
   static tv_rval RvalPos(const ArrayData*, ssize_t pos);
   static bool IsVectorData(const ArrayData*);

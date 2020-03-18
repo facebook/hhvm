@@ -190,7 +190,7 @@ arr_lval APCLocalArray::LvalForceNew(ArrayData* ad, bool /*copy*/) {
 
 ArrayData* APCLocalArray::SetInt(ArrayData* ad, int64_t k, TypedValue v) {
   EscalateHelper helper{ad};
-  return helper.release(helper.escalated->setInPlace(k, v));
+  return helper.release(helper.escalated->set(k, v));
 }
 
 ArrayData* APCLocalArray::SetIntMove(ArrayData* ad, int64_t k, TypedValue v) {
@@ -202,7 +202,7 @@ ArrayData* APCLocalArray::SetIntMove(ArrayData* ad, int64_t k, TypedValue v) {
 
 ArrayData* APCLocalArray::SetStr(ArrayData* ad, StringData* k, TypedValue v) {
   EscalateHelper helper{ad};
-  return helper.release(helper.escalated->setInPlace(k, v));
+  return helper.release(helper.escalated->set(k, v));
 }
 
 ArrayData* APCLocalArray::SetStrMove(ArrayData* ad, StringData* k, TypedValue v) {

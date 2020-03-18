@@ -85,10 +85,8 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static TypedValue NvGetKey(const ArrayData*, ssize_t pos);
   static ArrayData* SetInt(ArrayData*, int64_t k, TypedValue v);
   static ArrayData* SetIntMove(ArrayData*, int64_t k, TypedValue v);
-  static ArrayData* SetIntInPlace(ArrayData*, int64_t k, TypedValue v);
   static ArrayData* SetStr(ArrayData*, StringData* k, TypedValue v);
   static ArrayData* SetStrMove(ArrayData*, StringData* k, TypedValue v);
-  static ArrayData* SetStrInPlace(ArrayData*, StringData* k, TypedValue v);
   static size_t Vsize(const ArrayData*);
   static tv_rval RvalPos(const ArrayData* ad, ssize_t pos);
   static bool IsVectorData(const ArrayData*) {
@@ -138,10 +136,8 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static tv_rval NvTryGetStrVec(const ArrayData*, const StringData*);
   static ArrayData* SetIntVec(ArrayData*, int64_t, TypedValue);
   static ArrayData* SetIntMoveVec(ArrayData*, int64_t, TypedValue);
-  static ArrayData* SetIntInPlaceVec(ArrayData*, int64_t, TypedValue);
   static ArrayData* SetStrVec(ArrayData*, StringData*, TypedValue);
   static constexpr auto SetStrMoveVec = &SetStrVec;
-  static constexpr auto SetStrInPlaceVec = &SetStrVec;
   static ArrayData* RemoveIntVec(ArrayData*, int64_t);
   static arr_lval LvalIntVec(ArrayData*, int64_t, bool);
   static arr_lval LvalStrVec(ArrayData*, StringData*, bool);
@@ -166,7 +162,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static constexpr auto ExistsStrVec = &ExistsStr;
   static constexpr auto LvalForceNewVec = &LvalForceNew;
   static constexpr auto RemoveStrVec = &RemoveStr;
-  static constexpr auto RemoveStrInPlaceVec = &RemoveStr;
   static constexpr auto IterBeginVec = &IterBegin;
   static constexpr auto IterLastVec = &IterLast;
   static constexpr auto IterEndVec = &IterEnd;

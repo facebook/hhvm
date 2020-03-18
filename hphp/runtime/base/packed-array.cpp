@@ -852,14 +852,6 @@ ArrayData* PackedArray::SetIntMove(ArrayData* adIn, int64_t k, TypedValue v) {
   return result;
 }
 
-ArrayData* PackedArray::SetIntInPlace(ArrayData* adIn, int64_t k, TypedValue v) {
-  return MutableOpInt(adIn, k, false,
-    [&] (ArrayData* ad) { setElem(LvalUncheckedInt(ad, k), v); return ad; },
-    [&] { return AppendInPlace(adIn, v); },
-    [&] (MixedArray* mixed) { return mixed->addVal(k, v); }
-  );
-}
-
 ArrayData* PackedArray::SetIntVec(ArrayData* adIn, int64_t k, TypedValue v) {
   assertx(adIn->cowCheck() || adIn->notCyclic(v));
   return MutableOpIntVec(adIn, k, adIn->cowCheck(),
@@ -880,13 +872,6 @@ ArrayData* PackedArray::SetIntMoveVec(ArrayData* adIn, int64_t k, TypedValue v) 
   );
 }
 
-ArrayData* PackedArray::SetIntInPlaceVec(ArrayData* adIn, int64_t k, TypedValue v) {
-  assertx(adIn->notCyclic(v));
-  return MutableOpIntVec(adIn, k, false,
-    [&] (ArrayData* ad) { setElem(LvalUncheckedInt(ad, k), v); return ad; }
-  );
-}
-
 ArrayData* PackedArray::SetStr(ArrayData* adIn, StringData* k, TypedValue v) {
   return MutableOpStr(adIn, k, adIn->cowCheck(),
     [&] (MixedArray* mixed) { return mixed->addVal(k, v); }
@@ -899,12 +884,6 @@ ArrayData* PackedArray::SetStrMove(ArrayData* adIn, StringData* k, TypedValue v)
   if (adIn->decReleaseCheck()) PackedArray::Release(adIn);
   tvDecRefGen(v);
   return result;
-}
-
-ArrayData* PackedArray::SetStrInPlace(ArrayData* adIn, StringData* k, TypedValue v) {
-  return MutableOpStr(adIn, k, false/*copy*/,
-    [&] (MixedArray* mixed) { return mixed->addVal(k, v); }
-  );
 }
 
 ArrayData* PackedArray::SetStrVec(ArrayData* adIn, StringData* k, TypedValue v) {

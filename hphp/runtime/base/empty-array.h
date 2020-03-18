@@ -70,10 +70,8 @@ struct EmptyArray final : type_scan::MarkCollectable<EmptyArray> {
   static TypedValue NvGetKey(const ArrayData*, ssize_t pos);
   static ArrayData* SetInt(ArrayData*, int64_t k, TypedValue v);
   static ArrayData* SetIntMove(ArrayData*, int64_t k, TypedValue v);
-  static constexpr auto SetIntInPlace = &SetInt;
   static ArrayData* SetStr(ArrayData*, StringData* k, TypedValue v);
   static ArrayData* SetStrMove(ArrayData*, StringData* k, TypedValue v);
-  static constexpr auto SetStrInPlace = &SetStr;
   static ArrayData* RemoveInt(ArrayData* ad, int64_t);
   static ArrayData* RemoveStr(ArrayData* ad, const StringData*);
   static size_t Vsize(const ArrayData*);

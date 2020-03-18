@@ -165,15 +165,6 @@ tv_rval RecordArray::NvGetStr(const ArrayData* base, const StringData* key) {
   return MixedArray::NvGetStr(extra, key);
 }
 
-ArrayData* RecordArray::SetStrInPlace(ArrayData* base,
-                                      StringData* key, TypedValue val) {
-  assertx(base->notCyclic(val));
-  auto const ra = asRecordArray(base);
-  auto const idx = ra->checkFieldForWrite(key, val);
-  ra->updateField(key, val, idx);
-  return ra;
-}
-
 ArrayData* RecordArray::SetStr(ArrayData* base, StringData* key, TypedValue val) {
   assertx(base->cowCheck() || base->notCyclic(val));
   auto ra = asRecordArray(base);

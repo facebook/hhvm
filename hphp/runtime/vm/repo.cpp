@@ -998,7 +998,6 @@ void Repo::setTextPragma(int repoId, const char* name, const char* val) {
   std::string oldval = "?";
   getTextPragma(repoId, name, oldval);
   if (!strcmp(oldval.c_str(), val)) return;
-
   // Pragma writes must be executed outside transactions, since they may change
   // transaction behavior.
   auto pragmaQuery = folly::sformat(
@@ -1009,8 +1008,16 @@ void Repo::setTextPragma(int repoId, const char* name, const char* val) {
     std::string newval = "?";
     getTextPragma(repoId, name, newval);
     if (strcmp(newval.c_str(), val)) {
-      throw RepoExc("Unexpected PRAGMA %s.%s value: %s\n",
-                    dbName(repoId), name, newval.c_str());
+      // If the db is in memory, journal mode will stick at "memory"
+      // unless its turned off. Ignore attempts to change it to
+      // something else.
+      if (!strcmp(name, "journal_mode") &&
+          !strcmp(newval.c_str(), "memory") &&
+          strcmp(val, "off")) {
+        return;
+      }
+      throw RepoExc("Unexpected PRAGMA %s.%s value: %s (should be %s)\n",
+                    dbName(repoId), name, newval.c_str(), val);
     }
   }
 }

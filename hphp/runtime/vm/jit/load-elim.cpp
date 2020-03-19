@@ -987,7 +987,6 @@ void refine_load(Global& env,
 void optimize_end_catch(Global& env, IRInstruction& inst,
                         int32_t numStackElems,
                         std::bitset<kMaxTrackedFrameElems> elems) {
-  if (inst.func()->hasThisInBody()) return; // Punt for now
   if (elems.any()) return; // Some elements need decreffing, lets punt for now
   auto const adjustSP = [&]() -> int32_t {
     SSATmpSet visited;
@@ -1000,11 +999,16 @@ void optimize_end_catch(Global& env, IRInstruction& inst,
     return *spOff - defSPOff;
   }();
   auto const original = inst.extra<EndCatchData>();
+  auto const teardownMode =
+    original->mode != EndCatchData::CatchMode::LocalsDecRefd &&
+    inst.func()->hasThisInBody()
+      ? EndCatchData::Teardown::OnlyThis
+      : EndCatchData::Teardown::None;
   auto const data = EndCatchData {
     original->offset + numStackElems + adjustSP,
     original->mode,
     original->stublogue,
-    EndCatchData::Teardown::None
+    teardownMode
   };
   env.unit.replace(&inst, EndCatch, data, inst.src(0), inst.src(1));
   env.endCatchesOptimized++;

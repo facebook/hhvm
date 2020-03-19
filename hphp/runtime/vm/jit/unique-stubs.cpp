@@ -1082,6 +1082,13 @@ TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     v << jmpr{rret(0), vm_regs_with_sp()};
   });
 
+  us.endCatchTeardownThisHelper = vwrap(cb, data, meta, [&] (Vout& v) {
+    auto const thiz = v.makeReg();
+    v << load{rvmfp()[AROFF(m_thisUnsafe)], thiz};
+    emitDecRefWorkObj(v, thiz, TRAP_REASON);
+    v << fallthru{RegSet{}};
+  });
+
   us.endCatchSkipTeardownHelper = vwrap(cb, data, meta, [&] (Vout& v) {
     if (debug) {
       emitImmStoreq(v, ActRec::kTrashedThisSlot, rvmfp()[AROFF(m_thisUnsafe)]);

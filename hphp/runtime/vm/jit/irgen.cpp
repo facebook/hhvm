@@ -105,16 +105,21 @@ SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
       }
       return 0;
     }();
-    inst->setTaken(
-      create_catch_block(
-        env,
-        []{},
-        inst->is(Call) || inst->is(CallUnpack)
-          ? EndCatchData::CatchMode::CallCatch
-          : EndCatchData::CatchMode::UnwindOnly,
-        offsetToAdjustSPForCall
-      )
-    );
+    auto const catchMode = [&]() {
+      if (inst->is(Call, CallUnpack)) {
+        return EndCatchData::CatchMode::CallCatch;
+      }
+      if (inst->is(ReturnHook,
+                   SuspendHookAwaitEF,
+                   SuspendHookCreateCont,
+                   CheckSurpriseAndStack,
+                   CheckSurpriseFlagsEnter)) {
+        return EndCatchData::CatchMode::LocalsDecRefd;
+      }
+      return EndCatchData::CatchMode::UnwindOnly;
+    }();
+    inst->setTaken(create_catch_block(env, []{}, catchMode,
+                                      offsetToAdjustSPForCall));
   }
 
   if (inst->mayRaiseError()) {

@@ -1602,7 +1602,7 @@ struct AssertReason : IRExtraData {
 #define ASSERT_REASON AssertReason{Reason{__FILE__, __LINE__}}
 
 struct EndCatchData : IRSPRelOffsetData {
-  enum class CatchMode { UnwindOnly, CallCatch, SideExit };
+  enum class CatchMode { UnwindOnly, CallCatch, SideExit, LocalsDecRefd };
   enum class FrameMode { Phplogue, Stublogue };
   enum class Teardown  { NA, None, Full, OnlyThis };
 
@@ -1618,7 +1618,8 @@ struct EndCatchData : IRSPRelOffsetData {
     return folly::to<std::string>(
       IRSPRelOffsetData::show(), ",",
       mode == CatchMode::UnwindOnly ? "UnwindOnly" :
-        mode == CatchMode::CallCatch ? "CallCatch" : "SideExit", ",",
+        mode == CatchMode::CallCatch ? "CallCatch" :
+          mode == CatchMode::SideExit ? "SideExit" : "LocalsDecRefd", ",",
       stublogue == FrameMode::Stublogue ? "Stublogue" : "Phplogue", ",",
       teardown == Teardown::NA ? "NA" :
         teardown == Teardown::None ? "None" :

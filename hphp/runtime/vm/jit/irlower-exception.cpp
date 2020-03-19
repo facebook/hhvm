@@ -52,7 +52,8 @@ void cgEndCatch(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   auto const data = inst->extra<EndCatch>();
-  if (data->teardown == EndCatchData::Teardown::None) {
+  if (data->teardown == EndCatchData::Teardown::None ||
+      data->teardown == EndCatchData::Teardown::OnlyThis) {
     auto const vmsp = v.makeReg();
     auto const spReg = srcLoc(env, inst, 1).reg();
     auto const offset = data->offset.offset;
@@ -68,8 +69,9 @@ void cgEndCatch(IRLS& env, const IRInstruction* inst) {
     switch (data->teardown) {
       case EndCatchData::Teardown::None:
         return tc::ustubs().endCatchSkipTeardownHelper;
-      case EndCatchData::Teardown::Full:
       case EndCatchData::Teardown::OnlyThis:
+        return tc::ustubs().endCatchTeardownThisHelper;
+      case EndCatchData::Teardown::Full:
         return tc::ustubs().endCatchHelper;
       case EndCatchData::Teardown::NA:
         always_assert(false && "Stublogue should not be emitting vasm");

@@ -385,6 +385,7 @@ struct UniqueStubs {
    */
   TCA resumeCPPUnwind;
   TCA endCatchSkipTeardownHelper;
+  TCA endCatchTeardownThisHelper;
   TCA endCatchHelper;
   TCA endCatchHelperPast;
   TCA endCatchStublogueHelper;

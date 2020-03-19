@@ -76,6 +76,89 @@ let test_of_error () =
   in
   true
 
+(* This test verifies that all continuations and result handlers are called
+    exactly once when calling `Future`'s `is_ready` and `get` functions. *)
+let test_bound_future_idempotency () =
+  let initial_future_id = ref 0 in
+  let initial_future () =
+    Printf.printf "initial_future future\n";
+    initial_future_id := !initial_future_id + 1;
+    Future.of_value "initial_future"
+  in
+
+  let next_future_id = ref 0 in
+  let next_future previous_result =
+    Printf.printf "next future: %s\n" previous_result;
+    next_future_id := !next_future_id + 1;
+    Future.of_value "next_future"
+  in
+
+  let penultimate_future_id = ref 0 in
+  let penultimate_future previous_result =
+    Printf.printf "penultimate future: %s\n" previous_result;
+    penultimate_future_id := !penultimate_future_id + 1;
+    Future.of_value "penultimate_future"
+  in
+
+  let ultimate_future_id = ref 0 in
+  let ultimate_future =
+    Future.continue_with_future (initial_future ()) @@ fun result ->
+    Printf.printf "Continue with next future; result: %s\n" result;
+    let penultimate_future =
+      Future.continue_with_future (next_future result) @@ fun result ->
+      Printf.printf "Continue with penultimate future; result: %s\n" result;
+      penultimate_future result
+    in
+    Future.continue_with penultimate_future @@ fun result ->
+    ultimate_future_id := !ultimate_future_id + 1;
+    Printf.printf "continue_with: %s\n" result;
+    "ultimate_future"
+  in
+
+  let is_future_ready = Future.is_ready ultimate_future in
+  Bool_asserter.assert_equals
+    true
+    is_future_ready
+    "The future should be ready immediately";
+
+  let get_and_assert_value future ~expected =
+    match Future.get future with
+    | Ok actual ->
+      String_asserter.assert_equals
+        expected
+        actual
+        "The actual value must match the expected"
+    | Error error ->
+      failwith (Printf.sprintf "Error! %s\n" (Future.error_to_string error))
+  in
+
+  get_and_assert_value ultimate_future ~expected:"ultimate_future";
+
+  (* Now, try getting the value out of the future a second time *)
+  get_and_assert_value ultimate_future ~expected:"ultimate_future";
+
+  let rec verify_ids ids =
+    match ids with
+    | [] -> ()
+    | (id, name) :: rest ->
+      Int_asserter.assert_equals
+        1
+        id
+        (Printf.sprintf "'%s' should only be called once!" name);
+
+      verify_ids rest
+  in
+
+  verify_ids
+    [
+      (!initial_future_id, "initial_future");
+      (!next_future_id, "next_future");
+      (!penultimate_future_id, "penultimate_future");
+      (!ultimate_future_id, "ultimate_future");
+    ];
+
+  true
+
 let tests =
   [
     ("test_delayed_future", test_delayed_future);
@@ -83,6 +166,7 @@ let tests =
     ("test_of_error", test_of_error);
     ( "test_exception_in_future_continuation",
       test_exception_in_future_continuation );
+    ("test_bound_future_idempotency", test_bound_future_idempotency);
   ]
 
 let () =

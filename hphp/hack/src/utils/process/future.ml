@@ -155,13 +155,21 @@ let rec get : 'a. ?timeout:int -> 'a t -> ('a, error) result =
      * subsequent calls to "get" on this Merged Future will just re-run
      * the handler on the cached result. *)
     handler a b
-  | Bound (a, f) ->
+  | Bound (curr_future, next_producer) ->
     let start_t = Unix.time () in
-    let a = get ~timeout a in
+    let curr_result = get ~timeout curr_future in
     let consumed_t = int_of_float @@ (Unix.time () -. start_t) in
     let timeout = timeout - consumed_t in
     begin
-      try get ~timeout (f a)
+      try
+        let next_future = next_producer curr_result in
+        let next_result = get ~timeout next_future in
+        (* The `get` call above changes next_promise's internal state/cache, so
+          the updating of the promise below should happen AFTER calling `get`
+          on it. *)
+        let (next_promise, _t) = next_future in
+        promise := !next_promise;
+        next_result
       with e ->
         let e = Exception.wrap e in
         let info = Process_types.dummy.Process_types.info in
@@ -203,12 +211,18 @@ let rec is_ready : 'a. 'a t -> bool =
     promise := Delayed { tapped = tapped + 1; remaining = remaining - 1; value };
     false
   | Merged (a, b, _) -> is_ready a && is_ready b
-  | Bound (a, f) ->
-    if is_ready a then (
-      let b = f (get a) in
-      promise := !(fst b);
-      is_ready b
-    ) else
+  | Bound (curr_future, next_producer) ->
+    if is_ready curr_future then begin
+      let curr_result = get curr_future in
+      let next_future = next_producer curr_result in
+      let is_next_ready = is_ready next_future in
+      (* `is_ready` *may* change next_promise's internal state/cache, so
+        the updating of the promise below should happen AFTER calling `is_ready`
+        on it. *)
+      let (next_promise, _t) = next_future in
+      promise := !next_promise;
+      is_next_ready
+    end else
       false
   | Incomplete (process, _) -> Process.is_ready process
 
@@ -227,7 +241,8 @@ let start_t : 'a. 'a t -> float = (fun (_, time) -> time)
 let merge a b handler =
   (ref (Merged (a, b, handler)), min (start_t a) (start_t b))
 
-let make_continue a f = (ref (Bound (a, f)), start_t a)
+let make_continue (first : 'first t) next_producer : 'next t =
+  (ref (Bound (first, next_producer)), start_t first)
 
 let continue_with_future (a : 'a t) (f : 'a -> 'b t) : 'b t =
   let f res =

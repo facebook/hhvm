@@ -701,9 +701,9 @@ bool checkTypeStructureMatchesTVImpl(
       //  - If `ad` is a regular PHP array or a darray, we return (*).  If
       //    typehint logging is enabled for v/darrays, we log if (*) holds.
       //
-      //  - If `ad` is a varray, we return (*).  If provenance logging is
-      //    enabled for v/darrays, we log if (*) holds (since it would no
-      //    longer hold if varrays behaved like vecs do today).
+      //  - If `ad` is a varray or a legacy vec, we return (*).  If provenance
+      //    logging is enabled for v/darrays, we log if (*) holds (since it
+      //    would no longer hold if varrays behaved like vecs do today).
       //
       //  - If `ad` is a vec, we return false, but first we raise a notice if
       //    hackarr-is-shape/tuple notices are enabled.  If provenance logging
@@ -712,12 +712,16 @@ bool checkTypeStructureMatchesTVImpl(
 
       // Whether, based on only the array kind (and not its internal
       // structure), `ad` could possibly be a tuple.  TODO(T56477937)
-      auto const kind_supports_tuple = !RO::EvalHackArrDVArrs &&
-                                       isArrayType(type);
+      auto const kind_supports_tuple = !RO::EvalHackArrDVArrs && (
+                                       isArrayType(type) || (
+                                         isVecType(type) &&
+                                         ad->isLegacyArray()
+                                       ));
 
       auto const wants_prov_logging = !gen_error && // avoid double logging :/
                                       UNLIKELY(RO::EvalLogArrayProvenance) &&
-                                      isVecType(type);
+                                      arrprov::arrayWantsTag(ad) &&
+                                      (isVecType(type) || ad->isDVArray());
 
       if (RO::EvalHackArrIsShapeTupleNotices && isVecType(type)) {
         raise_hackarr_compat_notice("vec is tuple");
@@ -733,7 +737,7 @@ bool checkTypeStructureMatchesTVImpl(
       auto const with_prov_check = [&] (bool const result) {
         if (result && wants_prov_logging) {
           raise_array_serialization_notice(SerializationSite::IsTuple, ad);
-          return false;
+          if (!kind_supports_tuple) return false;
         }
         return result;
       };
@@ -843,6 +847,10 @@ bool checkTypeStructureMatchesTVImpl(
       //    (since, were darrays like dicts,
       //    it would not be so).
       //
+      //    (We also do this
+      //    if `ad` happens to be
+      //    a legacy vec.)
+      //
       //  - Should `ad` be dict,
       //    return false, though possibly
       //    we will do a warn
@@ -865,12 +873,16 @@ bool checkTypeStructureMatchesTVImpl(
 
       // Whether, based on only the array kind (and not its internal
       // structure), `ad` could possibly be a shape.  TODO(T56477937)
-      auto const kind_supports_shape = !RO::EvalHackArrDVArrs &&
-                                       isArrayType(type);
+      auto const kind_supports_shape = !RO::EvalHackArrDVArrs && (
+                                       isArrayType(type) || (
+                                         isDictType(type) &&
+                                         ad->isLegacyArray()
+                                       ));
 
       auto const wants_prov_logging = !gen_error && // avoid double logging :/
                                       UNLIKELY(RO::EvalLogArrayProvenance) &&
-                                      isDictType(type);
+                                      arrprov::arrayWantsTag(ad) &&
+                                      (isDictType(type) || ad->isDArray());
 
       if (RO::EvalHackArrIsShapeTupleNotices && isDictType(type)) {
         raise_hackarr_compat_notice("dict is shape");
@@ -886,7 +898,7 @@ bool checkTypeStructureMatchesTVImpl(
       auto const with_prov_check = [&] (bool const result) {
         if (result && wants_prov_logging) {
           raise_array_serialization_notice(SerializationSite::IsShape, ad);
-          return false;
+          if (!kind_supports_shape) return false;
         }
         return result;
       };

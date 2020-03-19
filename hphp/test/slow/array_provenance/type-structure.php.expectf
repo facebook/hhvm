@@ -1,0 +1,22 @@
+bool(false)
+
+Notice: Observing darray in is_shape from %s/array_provenance/type-structure.php:6 in %s/array_provenance/type-structure.php on line 29
+bool(true)
+
+Notice: Observing varray in is_tuple from %s/array_provenance/type-structure.php:9 in %s/array_provenance/type-structure.php on line 28
+bool(true)
+bool(false)
+bool(false)
+
+Notice: Observing dict in is_shape from %s/array_provenance/type-structure.php:12 in %s/array_provenance/type-structure.php on line 29
+bool(false)
+
+Notice: Observing vec in is_tuple from %s/array_provenance/type-structure.php:15 in %s/array_provenance/type-structure.php on line 28
+bool(false)
+bool(false)
+
+Notice: Observing darray in is_tuple from %s/array_provenance/type-structure.php:19 in %s/array_provenance/type-structure.php on line 28
+bool(true)
+bool(false)
+bool(false)
+bool(false)

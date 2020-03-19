@@ -481,7 +481,10 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
         Expr_::Shape(e) => emit_pos_then(emitter, pos, emit_shape(env, expression, e)?),
         Expr_::Await(e) => emit_await(emitter, env, pos, e),
         Expr_::Yield(e) => emit_yield(emitter, env, pos, e),
-        Expr_::Efun(e) => emit_pos_then(emitter, pos, emit_lambda(env, e)?),
+        Expr_::Efun(e) => {
+            let lambda = emit_lambda(emitter, env, &e.0, &e.1)?;
+            emit_pos_then(emitter, pos, lambda)
+        }
         Expr_::ClassGet(e) => emit_class_get(env, QueryOp::CGet, e),
         Expr_::String2(es) => emit_string2(emitter, env, pos, es),
         Expr_::BracedExpr(e) => emit_expr(emitter, env, e),
@@ -707,8 +710,51 @@ fn emit_clone(e: &mut Emitter, env: &Env, expr: &tast::Expr) -> Result {
     ]))
 }
 
-fn emit_lambda(env: &Env, (fndef, ids): &(tast::Fun_, Vec<aast_defs::Lid>)) -> Result {
-    unimplemented!("TODO(hrust)")
+fn emit_lambda(e: &mut Emitter, env: &Env, fndef: &tast::Fun_, ids: &[aast_defs::Lid]) -> Result {
+    use global_state::LazyState;
+    // Closure conversion puts the class number used for CreateCl in the "name"
+    // of the function definition
+    let fndef_name = &(fndef.name).1;
+    let cls_num = fndef_name
+        .parse::<isize>()
+        .map_err(|err| Unrecoverable(err.to_string()))?;
+    let explicit_use = e.emit_state().explicit_use_set.contains(fndef_name);
+    let is_in_lambda = env.scope.is_in_lambda();
+    Ok(InstrSeq::gather(vec![
+        InstrSeq::gather(
+            ids.iter()
+                .map(|tast::Lid(pos, id)| {
+                    match string_utils::reified::is_captured_generic(local_id::get_name(id)) {
+                        Some((is_fun, i)) => {
+                            if is_in_lambda {
+                                Ok(InstrSeq::make_cgetl(local::Type::Named(
+                                    string_utils::reified::reified_generic_captured_name(
+                                        is_fun, i as usize,
+                                    ),
+                                )))
+                            } else {
+                                emit_reified_generic_instrs(
+                                    e,
+                                    &Pos::make_none(),
+                                    is_fun,
+                                    i as usize,
+                                )
+                            }
+                        }
+                        None => Ok({
+                            let lid = get_local(e, env, pos, local_id::get_name(id))?;
+                            if explicit_use {
+                                InstrSeq::make_cgetl(lid)
+                            } else {
+                                InstrSeq::make_cugetl(lid)
+                            }
+                        }),
+                    }
+                })
+                .collect::<Result<Vec<_>>>()?,
+        ),
+        InstrSeq::make_createcl(ids.len(), cls_num),
+    ]))
 }
 
 pub fn emit_await(emitter: &mut Emitter, env: &Env, pos: &Pos, expr: &tast::Expr) -> Result {

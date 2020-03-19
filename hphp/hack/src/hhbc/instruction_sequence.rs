@@ -1023,6 +1023,10 @@ impl InstrSeq {
         Self::make_instr(Instruct::IMisc(InstructMisc::ArrayIdx))
     }
 
+    pub fn make_createcl(param_num: NumParams, cls_num: ClassNum) -> Self {
+        Self::make_instr(Instruct::IMisc(InstructMisc::CreateCl(param_num, cls_num)))
+    }
+
     pub fn make_fcallbuiltin(
         n: NumParams,
         un: NumParams,

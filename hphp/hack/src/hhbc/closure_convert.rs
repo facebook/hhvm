@@ -401,7 +401,8 @@ fn get_vars(
     flags.set(Flags::IS_TOPLEVEL, scope.is_toplevel());
     flags.set(Flags::IS_IN_STATIC_METHOD, scope.is_in_static_method());
     flags.set(Flags::IS_CLOSURE_BODY, is_closure_body);
-    vars_from_ast(params, body, flags).map_err(unrecoverable)
+    let res = vars_from_ast(params, body, flags).map_err(unrecoverable);
+    res
 }
 
 fn get_parameter_names(params: &[FunParam]) -> HashSet<String> {
@@ -667,6 +668,16 @@ fn convert_lambda<'a>(
     let old_function_state = st.current_function_state.clone();
     let rx_of_scope = env.scope.rx_of_scope();
     st.enter_lambda();
+    if let Some(user_vars) = &use_vars_opt {
+        for aast_defs::Lid(p, id) in user_vars.iter() {
+            if local_id::get_name(id) == special_idents::THIS {
+                return Err(emit_fatal::raise_fatal_parse(
+                    p,
+                    "Cannot use $this as lexical variable",
+                ));
+            }
+        }
+    }
     let lambda_env = &mut env.clone();
 
     if use_vars_opt.is_some() {

@@ -24,7 +24,7 @@ use hhas_body_rust::HhasBody;
 use hhas_class_rust::{self as hhas_class, HhasClass};
 use hhas_constant_rust::HhasConstant;
 use hhas_function_rust::HhasFunction;
-use hhas_method_rust::HhasMethod;
+use hhas_method_rust::{HhasMethod, HhasMethodFlags};
 use hhas_param_rust::HhasParam;
 use hhas_pos_rust::Span;
 use hhas_program_rust::HhasProgram;
@@ -647,17 +647,108 @@ fn print_implements<W: Write>(
     w.write(")")
 }
 
+fn print_shadowed_tparams<W: Write>(
+    w: &mut W,
+    shadowed_tparams: &[String],
+) -> Result<(), W::Error> {
+    wrap_by_braces(w, |w| concat_str_by(w, ", ", shadowed_tparams))
+}
+
 fn print_method_def<W: Write>(
     ctx: &mut Context,
     w: &mut W,
     method_def: &HhasMethod,
 ) -> Result<(), W::Error> {
+    let body = &method_def.body;
     newline(w)?;
     w.write("  .method ")?;
+    if ctx
+        .opts
+        .hack_compiler_flags
+        .contains(options::CompilerFlags::EMIT_GENERICS_UB)
+    {
+        print_upper_bounds(w, &body.upper_bounds)?;
+    }
+    print_method_attrs(ctx, w, method_def)?;
+    w.write(string_of_span(&method_def.span))?;
+    w.write(" ")?;
+    option(w, &body.return_type_info, print_type_info)?;
+    w.write(" ")?;
     w.write(method_def.name.to_raw_string())?;
-    w.write(" {")?;
-    w.write("  }")?;
-    not_impl!()
+    print_params(ctx, w, body.env.as_ref(), &body.params)?;
+    if method_def.flags.contains(HhasMethodFlags::IS_GENERATOR) {
+        w.write(" isGenerator")?;
+    }
+    if method_def.flags.contains(HhasMethodFlags::IS_ASYNC) {
+        w.write(" isAsync")?;
+    }
+    if method_def
+        .flags
+        .contains(HhasMethodFlags::IS_PAIR_GENERATOR)
+    {
+        w.write(" isPairGenerator")?;
+    }
+    if method_def.flags.contains(HhasMethodFlags::IS_CLOSURE_BODY) {
+        w.write(" isClosureBody")?;
+    }
+    if method_def.flags.contains(HhasMethodFlags::RX_DISABLED) {
+        w.write(" isRxDisabled")?;
+    }
+    w.write(" ")?;
+    wrap_by_braces(w, |w| {
+        ctx.block(w, |c, w| print_body(c, w, body))?;
+        newline(w)?;
+        w.write("  ")
+    })
+}
+
+fn print_method_attrs<W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    m: &HhasMethod,
+) -> Result<(), W::Error> {
+    use hhas_attribute::*;
+    let user_attrs = &m.attributes;
+    let mut special_attrs = vec![];
+    if let Ok(attr) = m.rx_level.try_into() {
+        special_attrs.push(attr);
+    }
+    if has_provenance_skip_frame(user_attrs) {
+        special_attrs.push("prov_skip_frame")
+    }
+    if m.is_interceptable() {
+        special_attrs.push("interceptable");
+    }
+    let visibility = m.visibility.to_string();
+    special_attrs.push(&visibility);
+    if m.flags.contains(HhasMethodFlags::IS_STATIC) {
+        special_attrs.push("static");
+    }
+    if m.flags.contains(HhasMethodFlags::IS_FINAL) {
+        special_attrs.push("final");
+    }
+    if m.flags.contains(HhasMethodFlags::IS_ABSTRACT) {
+        special_attrs.push("abstract");
+    }
+    if has_foldable(user_attrs) {
+        special_attrs.push("foldable");
+    }
+    if m.is_no_injection() {
+        special_attrs.push("no_injection");
+    }
+    if ctx.is_system_lib() && has_native(user_attrs) && !is_native_opcode_impl(user_attrs) {
+        special_attrs.push("unique");
+    }
+    if ctx.is_system_lib() {
+        special_attrs.push("builtin");
+    }
+    if ctx.is_system_lib() && has_native(user_attrs) && !is_native_opcode_impl(user_attrs) {
+        special_attrs.push("persistent");
+    }
+    if ctx.is_system_lib() || (has_dynamically_callable(user_attrs) && !m.is_memoize_impl()) {
+        special_attrs.push("dyn_callable")
+    }
+    print_special_and_user_attrs(ctx, w, &special_attrs, user_attrs)
 }
 
 fn print_class_def<W: Write>(
@@ -1627,6 +1718,11 @@ fn print_misc<W: Write>(w: &mut W, misc: &InstructMisc) -> Result<(), W::Error> 
             w.write("VerifyOutType ")?;
             print_param_id(w, id)
         }
+        M::CreateCl(n, cid) => concat_str_by(
+            w,
+            " ",
+            ["CreateCl", n.to_string().as_str(), cid.to_string().as_str()],
+        ),
         _ => not_impl!(),
     }
 }

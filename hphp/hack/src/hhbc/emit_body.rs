@@ -330,16 +330,21 @@ fn make_decl_vars(
     let (need_local_this, mut decl_vars) =
         decl_vars::from_ast(params, body, flags, explicit_use_set).map_err(unrecoverable)?;
 
-    if arg_flags.contains(Flags::CLOSURE_BODY) {
-        let mut captured_vars = scope.get_captured_vars();
-        move_this(&mut decl_vars);
-        decl_vars.retain(|v| !captured_vars.contains(v));
-        captured_vars.extend_from_slice(&decl_vars.as_slice());
-    } else if has_reified(immediate_tparams) {
-        decl_vars.push(String::from(string_utils::reified::GENERICS_LOCAL_NAME));
-    }
-
-    Ok((need_local_this, decl_vars))
+    Ok((
+        need_local_this,
+        if arg_flags.contains(Flags::CLOSURE_BODY) {
+            let mut captured_vars = scope.get_captured_vars();
+            move_this(&mut decl_vars);
+            decl_vars.retain(|v| !captured_vars.contains(v));
+            captured_vars.extend_from_slice(&decl_vars.as_slice());
+            captured_vars
+        } else {
+            if has_reified(immediate_tparams) {
+                decl_vars.push(String::from(string_utils::reified::GENERICS_LOCAL_NAME));
+            }
+            decl_vars
+        },
+    ))
 }
 
 pub fn emit_return_type_info(

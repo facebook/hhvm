@@ -44,4 +44,16 @@ impl HhasMethod<'_> {
     pub fn is_closure_body(&self) -> bool {
         self.flags.contains(HhasMethodFlags::IS_CLOSURE_BODY)
     }
+
+    pub fn is_no_injection(&self) -> bool {
+        self.flags.contains(HhasMethodFlags::NO_INJECTION)
+    }
+
+    pub fn is_memoize_impl(&self) -> bool {
+        self.flags.contains(HhasMethodFlags::IS_MEMOIZE_IMPL)
+    }
+
+    pub fn is_interceptable(&self) -> bool {
+        self.flags.contains(HhasMethodFlags::IS_INTERCEPTABLE)
+    }
 }

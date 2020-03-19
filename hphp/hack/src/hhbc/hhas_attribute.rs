@@ -89,6 +89,14 @@ fn is_dynamically_callable(attr: &HhasAttribute) -> bool {
     is("__DynamicallyCallable", attr)
 }
 
+fn is_native(attr: &HhasAttribute) -> bool {
+    is("__Native", attr)
+}
+
+pub fn has_native(attrs: &[HhasAttribute]) -> bool {
+    has(attrs, is_native)
+}
+
 pub fn has_dynamically_constructible(attrs: &[HhasAttribute]) -> bool {
     has(attrs, is_dynamically_constructible)
 }

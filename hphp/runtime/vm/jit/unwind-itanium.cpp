@@ -244,12 +244,13 @@ tc_unwind_personality(int version,
   return _URC_INSTALL_CONTEXT;
 }
 
-TCUnwindInfo tc_unwind_resume(ActRec* fp) {
+TCUnwindInfo tc_unwind_resume(ActRec* fp, bool teardown) {
   while (true) {
     auto const sfp = fp->m_sfp;
 
-    ITRACE(1, "tc_unwind_resume: fp {}, saved rip {:#x}, saved fp {}\n",
-           fp, fp->m_savedRip, sfp);
+    ITRACE(1, "tc_unwind_resume: fp {}, saved rip {:#x}, saved fp {},"
+              " teardown {}\n",
+           fp, fp->m_savedRip, sfp, teardown);
     Trace::Indent indent;
 
     // We should only ever be unwinding VM or unique stub frames.
@@ -272,7 +273,7 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp) {
 
       // Unwind vm stack to sfp
       if (!g_unwind_rds->exn.isNull()) {
-        auto const result = unwindVM(g_unwind_rds->exn, sfp);
+        auto const result = unwindVM(g_unwind_rds->exn, sfp, teardown);
         if (!(result & UnwindReachedGoal)) {
           if (!g_unwind_rds->sideEnter) __cxxabiv1::__cxa_end_catch();
           g_unwind_rds->doSideExit = true;
@@ -342,6 +343,7 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp) {
 
     ITRACE(1, "No catch trace entry for {}; continuing\n",
            tc::ustubs().describe(savedRip));
+    teardown = true;
   }
 }
 
@@ -362,7 +364,7 @@ TCUnwindInfo tc_unwind_resume_stublogue(ActRec* fp, TCA savedRip) {
 
   // The caller of this stublogue doesn't have a catch trace. Continue with
   // tc_unwind_resume().
-  return tc_unwind_resume(fp);
+  return tc_unwind_resume(fp, true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

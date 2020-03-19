@@ -103,7 +103,8 @@ void discardMemberTVRefs(PC pc) {
  * if the VM execution should be resumed.
  */
 ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
-                          ObjectData* phpException, bool jit) {
+                          ObjectData* phpException, bool jit,
+                          bool teardownStack) {
   auto const func = fp->func();
   auto const prevFp = fp->sfp();
   auto const callOff = fp->callOffset();
@@ -142,7 +143,13 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
     if (!fp->localsDecRefd()) {
       fp->setLocalsDecRefd();
       try {
-        frame_free_locals_unwind(fp, func->numLocals(), phpException);
+        if (teardownStack) {
+          frame_free_locals_helper_inl(fp, func->numLocals());
+          if (fp->func()->cls() && fp->hasThis()) decRefObj(fp->getThis());
+          fp->trashThis();
+          fp->trashVarEnv();
+        }
+        EventHook::FunctionUnwind(fp, phpException);
       } catch (...) {}
     }
   };
@@ -371,7 +378,8 @@ void lockObjectWhileUnwinding(PC pc, Stack& stack) {
  * static wait handle on the stack.
  */
 UnwinderResult unwindVM(Either<ObjectData*, Exception*> exception,
-                        const ActRec* fpToUnwind /* = nullptr */) {
+                        const ActRec* fpToUnwind /* = nullptr */,
+                        bool teardown /* = true */) {
   assertx(!exception.isNull());
   auto phpException = exception.left();
   if (phpException) phpException->incRefCount();
@@ -390,12 +398,19 @@ UnwinderResult unwindVM(Either<ObjectData*, Exception*> exception,
   while (true) {
     auto const func = fp->func();
 
-    ITRACE(1, "unwind: func {}, raiseOffset {} fp {}\n",
+    ITRACE(1, "unwind: func {}, raiseOffset {}, fp {}, sp {}, teardown {}\n",
            func->name()->data(),
            func->unit()->offsetOf(pc),
-           implicit_cast<void*>(fp));
+           implicit_cast<void*>(fp),
+           implicit_cast<void*>(stack.top()),
+           teardown);
 
-    discardStackTemps(fp, stack);
+    ITRACE(3, "Stack top: {}, stack base: {}\n",
+              stack.top(), Stack::anyFrameStackBase(fp));
+    if (teardown) discardStackTemps(fp, stack);
+    // Jitted teardown should have decreffed all the stack elements in the
+    // middle
+    assertx(stack.top() == Stack::anyFrameStackBase(fp));
 
     // Note: we skip catch/finally clauses if we have a pending C++
     // exception as part of our efforts to avoid running more PHP
@@ -424,7 +439,7 @@ UnwinderResult unwindVM(Either<ObjectData*, Exception*> exception,
 
     // We found no more handlers in this frame.
     auto const jit = fpToUnwind != nullptr && fpToUnwind == fp->m_sfp;
-    phpException = tearDownFrame(fp, stack, pc, phpException, jit);
+    phpException = tearDownFrame(fp, stack, pc, phpException, jit, teardown);
 
     // If we entered from the JIT and this is the last iteration, we can't
     // trust the PC since catch traces for inlined frames may add more

@@ -51,10 +51,31 @@ void cgBeginCatch(IRLS& env, const IRInstruction* /*inst*/) {
 void cgEndCatch(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
-  auto const helper =
-    inst->extra<EndCatch>()->stublogue == EndCatchData::FrameMode::Stublogue
-    ? tc::ustubs().endCatchStublogueHelper
-    : tc::ustubs().endCatchHelper;
+  auto const data = inst->extra<EndCatch>();
+  if (data->teardown == EndCatchData::Teardown::None) {
+    auto const vmsp = v.makeReg();
+    auto const spReg = srcLoc(env, inst, 1).reg();
+    auto const offset = data->offset.offset;
+    v << lea{spReg[offset * static_cast<int32_t>(sizeof(TypedValue))], vmsp};
+    v << store{vmsp, rvmtl()[rds::kVmspOff]};
+  }
+
+  auto const helper = [&]() -> TCA {
+    if (data->stublogue == EndCatchData::FrameMode::Stublogue) {
+      assertx(data->teardown == EndCatchData::Teardown::NA);
+      return tc::ustubs().endCatchStublogueHelper;
+    }
+    switch (data->teardown) {
+      case EndCatchData::Teardown::None:
+        return tc::ustubs().endCatchSkipTeardownHelper;
+      case EndCatchData::Teardown::Full:
+      case EndCatchData::Teardown::OnlyThis:
+        return tc::ustubs().endCatchHelper;
+      case EndCatchData::Teardown::NA:
+        always_assert(false && "Stublogue should not be emitting vasm");
+    }
+    not_reached();
+  }();
 
   // endCatch*Helpers only expect vm_regs_no_sp() to be alive.
   v << jmpi{helper, vm_regs_no_sp()};
@@ -82,7 +103,8 @@ void cgEnterTCUnwind(IRLS& env, const IRInstruction* inst) {
   v << storebi{1, rvmtl()[unwinderSideEnterOff()]};
   v << store{exn, rvmtl()[unwinderExnOff()]};
   v << copy{rvmfp(), rarg(0)};
-  v << call{TCA(tc_unwind_resume), arg_regs(1)};
+  v << copy{v.cns(true), rarg(1)}; // teardown
+  v << call{TCA(tc_unwind_resume), arg_regs(2)};
   v << copy{rret(1), rvmfp()};
   v << jmpr{rret(0), vm_regs_with_sp()};
 }

@@ -61,7 +61,8 @@ Offset findCatchHandler(const Func* func, Offset raiseOffset);
  * Unwind the exception.
  */
 UnwinderResult unwindVM(Either<ObjectData*, Exception*> exception,
-                        const ActRec* fpToUnwind = nullptr);
+                        const ActRec* fpToUnwind = nullptr,
+                        bool teardown = true);
 
 /*
  * The main entry point to the unwinder.

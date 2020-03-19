@@ -965,6 +965,8 @@ void transformUses(InlineAnalysis& ia,
   uses.clear();
 }
 
+} // namespace
+
 /*
  * Calculate the stack pointer offset corresponding to the given frame pointer.
  *
@@ -1018,6 +1020,8 @@ folly::Optional<int32_t> findSPOffset(const IRUnit& unit,
 
   return spOff;
 }
+
+namespace {
 
 void adjustBCMarkers(OptimizeContext& ctx) {
   auto fp  = ctx.deadFp;

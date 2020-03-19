@@ -1560,7 +1560,7 @@ Block* makeCatchSet(IRGS& env, uint32_t nDiscard) {
         spOffBCFromIRSP(env),
         EndCatchData::CatchMode::SideExit,
         EndCatchData::FrameMode::Phplogue,
-        EndCatchData::Teardown::NA
+        EndCatchData::Teardown::Full
       };
       gen(env, EndCatch, data, fp(env), sp(env));
     }

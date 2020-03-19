@@ -16,6 +16,8 @@
 #ifndef incl_HPHP_HHIR_OPT_H_
 #define incl_HPHP_HHIR_OPT_H_
 
+#include "hphp/runtime/vm/jit/id-set.h"
+#include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/types.h"
 
 namespace HPHP { namespace jit {
@@ -51,6 +53,9 @@ void insertAsserts(IRUnit&);
  * Run all the optimization passes.
  */
 void optimize(IRUnit& unit, TransKind kind);
+
+using SSATmpSet = IdSet<SSATmp>;
+folly::Optional<int32_t> findSPOffset(const IRUnit&, const SSATmp*, SSATmpSet&);
 
 //////////////////////////////////////////////////////////////////////
 

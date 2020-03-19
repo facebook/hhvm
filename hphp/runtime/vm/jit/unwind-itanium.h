@@ -124,7 +124,7 @@ struct TCUnwindInfo {
   TCA catchTrace;
   ActRec* fp;
 };
-TCUnwindInfo tc_unwind_resume(ActRec* fp);
+TCUnwindInfo tc_unwind_resume(ActRec* fp, bool teardown);
 TCUnwindInfo tc_unwind_resume_stublogue(ActRec* fp, TCA savedRip);
 
 /*

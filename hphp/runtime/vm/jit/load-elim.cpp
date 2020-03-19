@@ -32,6 +32,9 @@
 
 #include "hphp/runtime/base/perf-warning.h"
 
+#include "hphp/runtime/vm/hhbc-codec.h"
+#include "hphp/runtime/vm/unwind.h"
+
 #include "hphp/runtime/vm/jit/alias-analysis.h"
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/cfg.h"
@@ -185,6 +188,7 @@ struct Global {
   size_t loadsRemoved  = 0;
   size_t loadsRefined  = 0;
   size_t jumpsRemoved  = 0;
+  size_t endCatchesOptimized = 0;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -276,8 +280,18 @@ struct FRemovable {};
 struct FJmpNext {};
 struct FJmpTaken {};
 
+/*
+ * The instruction can be turned into specialized frame teardown instructions
+ * followed by an EndCatch that will omit the teardown
+ */
+constexpr uint32_t kMaxTrackedFrameElems = 64;
+struct FEndCatch {
+  int32_t numStackElems;
+  std::bitset<kMaxTrackedFrameElems> elems;
+};
+
 using Flags = boost::variant<FNone,FRedundant,FReducible,FRefinableLoad,
-                             FRemovable,FJmpNext,FJmpTaken>;
+                             FRemovable,FJmpNext,FJmpTaken,FEndCatch>;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -610,6 +624,63 @@ Flags handle_assert(Local& env, const IRInstruction& inst) {
   return FNone{};
 }
 
+Flags handle_end_catch(Local& env, const IRInstruction& inst) {
+  assertx(inst.op() == EndCatch);
+  auto const data = inst.extra<EndCatchData>();
+  if (data->teardown != EndCatchData::Teardown::Full ||
+      inst.func()->attrs() & AttrMayUseVV ||
+      findCatchHandler(inst.func(), inst.marker().bcOff()) != kInvalidOffset) {
+    FTRACE(4, "      non-reducible EndCatch\n");
+    return FNone{};
+  }
+  auto pc = inst.marker().fixupSk().unit()->entry() + inst.marker().bcOff();
+  auto const op = decode_op(pc);
+  if (op == OpFCallCtor &&
+      decodeFCallArgs(op, pc, nullptr /* StringDecoder */).lockWhileUnwinding) {
+    FTRACE(4, "      non-reducible EndCatch -- lock while unwinding\n");
+    return FNone{};
+  }
+  assertx(data->stublogue != EndCatchData::FrameMode::Stublogue);
+  auto const numLocals = inst.func()->numLocals();
+  auto const astk = AStack { inst.src(1), data->offset, 0 };
+  auto const numStackElems = inst.marker().resumeMode() != ResumeMode::None
+    ? -astk.offset.offset
+    : -astk.offset.offset - inst.func()->numSlotsInFrame();
+  assertx(numStackElems >= 0);
+
+  if (numStackElems + numLocals > kMaxTrackedFrameElems) {
+    FTRACE(4, "      non-reducible EndCatch - too many values\n");
+    return FNone{};
+  }
+
+  FTRACE(4, "      reducible EndCatch\n");
+  std::bitset<kMaxTrackedFrameElems> elems;
+
+  auto const check = [&](size_t index, AliasClass acls) {
+    auto const meta = env.global.ainfo.find(canonicalize(acls));
+    auto const tloc = find_tracked(env, meta);
+    FTRACE(5, "    {}: {}\n", index, tloc ? show(*tloc) : "x");
+    if (!tloc || tloc->knownType.maybe(TCounted)) elems.set(index);
+  };
+
+  FTRACE(4, "Optimize EndCatch {}, num locals {}, num stack {}\n{}\n",
+    inst.func()->fullName()->data(), numLocals, numStackElems,
+    inst.marker().show());
+
+  for (uint32_t i = 0; i < numLocals; ++i) {
+    check(i, AliasClass { AFrame { inst.marker().fp(), i }});
+  }
+
+  // Iterate from higher addresses to lower so that tracing prints them in
+  // the memory layout order
+  for (int32_t i = numStackElems - 1; i >= 0; --i) {
+    auto const astk_ = AStack { inst.src(1), data->offset + i, 1 };
+    check(numLocals + numStackElems - 1 - i, AliasClass { astk_ });
+  }
+
+  return FEndCatch { numStackElems, std::move(elems) };
+}
+
 void refine_value(Local& env, SSATmp* newVal, SSATmp* oldVal) {
   bitset_for_each_set(
     env.state.avail,
@@ -637,7 +708,10 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
     effects,
     [&] (IrrelevantEffects) {},
     [&] (UnknownEffects)    { clear_everything(env); },
-    [&] (ExitEffects)       { clear_everything(env); },
+    [&] (ExitEffects)       {
+      if (inst.op() == EndCatch) flags = handle_end_catch(env, inst);
+      clear_everything(env);
+    },
     [&] (ReturnEffects)     {},
 
     [&] (PureStore m)       { store(env, m.dst, m.value); },
@@ -910,6 +984,32 @@ void refine_load(Global& env,
   ++env.loadsRefined;
 }
 
+void optimize_end_catch(Global& env, IRInstruction& inst,
+                        int32_t numStackElems,
+                        std::bitset<kMaxTrackedFrameElems> elems) {
+  if (inst.func()->hasThisInBody()) return; // Punt for now
+  if (elems.any()) return; // Some elements need decreffing, lets punt for now
+  auto const adjustSP = [&]() -> int32_t {
+    SSATmpSet visited;
+    auto const fpReg = inst.src(0);
+    auto const defSP = inst.src(1)->inst();
+    auto const spOff = findSPOffset(env.unit, fpReg, visited);
+    if (!spOff) return 0;
+    auto const defSPOff = defSP->extra<FPInvOffsetData>()->offset.offset;
+    assertx(!fpReg->inst()->is(DefFP, DefFuncEntryFP) || defSPOff == *spOff);
+    return *spOff - defSPOff;
+  }();
+  auto const original = inst.extra<EndCatchData>();
+  auto const data = EndCatchData {
+    original->offset + numStackElems + adjustSP,
+    original->mode,
+    original->stublogue,
+    EndCatchData::Teardown::None
+  };
+  env.unit.replace(&inst, EndCatch, data, inst.src(0), inst.src(1));
+  env.endCatchesOptimized++;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
@@ -955,6 +1055,15 @@ void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
       FTRACE(2, "      unnecessary\n");
       env.unit.replace(&inst, Jmp, inst.taken());
       ++env.jumpsRemoved;
+    },
+
+    [&] (FEndCatch f) {
+      FTRACE(2, "      endcatch\n");
+      assertx(inst.op() == EndCatch);
+      DEBUG_ONLY auto const data = inst.extra<EndCatchData>();
+      assertx(data->teardown == EndCatchData::Teardown::Full);
+      assertx(data->stublogue == EndCatchData::FrameMode::Phplogue);
+      optimize_end_catch(env, inst, f.numStackElems, f.elems);
     }
   );
 
@@ -1251,6 +1360,7 @@ void optimizeLoads(IRUnit& unit) {
   size_t loadsRemoved = 0;
   size_t loadsRefined = 0;
   size_t jumpsRemoved = 0;
+  size_t endCatchesOptimized = 0;
   do {
     auto genv = Global { unit };
     if (genv.ainfo.locations.size() == 0) {
@@ -1281,7 +1391,8 @@ void optimizeLoads(IRUnit& unit) {
     if (!genv.instrsReduced &&
         !genv.loadsRemoved &&
         !genv.loadsRefined &&
-        !genv.jumpsRemoved) {
+        !genv.jumpsRemoved &&
+        !genv.endCatchesOptimized) {
       // Nothing changed so we're done
       break;
     }
@@ -1289,6 +1400,7 @@ void optimizeLoads(IRUnit& unit) {
     loadsRemoved += genv.loadsRemoved;
     loadsRefined += genv.loadsRefined;
     jumpsRemoved += genv.jumpsRemoved;
+    endCatchesOptimized += genv.endCatchesOptimized;
 
     FTRACE(2, "reflowing types\n");
     reflowTypes(genv.unit);
@@ -1319,6 +1431,7 @@ void optimizeLoads(IRUnit& unit) {
     entry->setInt("optimize_loads_loads_removed", loadsRemoved);
     entry->setInt("optimize_loads_loads_refined", loadsRefined);
     entry->setInt("optimize_loads_jumps_removed", jumpsRemoved);
+    entry->setInt("optimize_laods_end_catches_optimized", endCatchesOptimized);
   }
 }
 

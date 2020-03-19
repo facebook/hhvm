@@ -126,18 +126,8 @@ void implIterInit(IRLS& env, const IRInstruction* inst) {
     args.imm(0);
   }
 
-  // new_iter_object decrefs the base object if it propagates an exception out,
-  // so if the base came from the stack, we adjust the stack pointer by 1 on
-  // an unwind, skipping over the base.
-  auto const sync = [&]{
-    switch (inst->extra<IterInitData>()->source) {
-      case IterInitData::Source::Stack: return SyncOptions::SyncAdjustOne;
-      case IterInitData::Source::Local: return SyncOptions::Sync;
-    }
-    always_assert(false);
-  }();
   auto const target = CallSpec::direct(new_iter_object);
-  cgCallHelper(v, env, target, callDest(env, inst), sync, args);
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
 }
 
 void implIterNext(IRLS& env, const IRInstruction* inst) {

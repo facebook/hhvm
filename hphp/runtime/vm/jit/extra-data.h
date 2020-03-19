@@ -465,24 +465,6 @@ struct IterData : IRExtraData {
   IterArgs args;
 };
 
-/*
- * When initializing an iterator, we need one more piece of info - whether the
- * base came from the stack or from a local - to make the right native call.
- */
-struct IterInitData : public IterData {
-  enum class Source { Stack, Local };
-
-  IterInitData(IterArgs args, Source source)
-    : IterData(args), source(source) {}
-
-  std::string show() const {
-    auto const prefix = source == Source::Stack ? "Stack " : "Local ";
-    return folly::to<std::string>(prefix, IterData(*this).show());
-  }
-
-  Source source;
-};
-
 struct IterTypeData : IRExtraData {
   IterTypeData(uint32_t iterId, IterSpecialization type)
     : iterId{iterId}
@@ -1706,12 +1688,12 @@ X(LdIterPos,                    IterId);
 X(LdIterEnd,                    IterId);
 X(KillIter,                     IterId);
 X(IterFree,                     IterId);
-X(IterInit,                     IterInitData);
-X(IterInitK,                    IterInitData);
+X(IterInit,                     IterData);
+X(IterInitK,                    IterData);
 X(IterNext,                     IterData);
 X(IterNextK,                    IterData);
-X(LIterInit,                    IterInitData);
-X(LIterInitK,                   IterInitData);
+X(LIterInit,                    IterData);
+X(LIterInitK,                   IterData);
 X(LIterNext,                    IterData);
 X(LIterNextK,                   IterData);
 X(ConstructInstance,            ClassData);

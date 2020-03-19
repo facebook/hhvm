@@ -120,9 +120,6 @@ Fixup makeFixup(const BCMarker& marker, SyncOptions sync) {
 
   auto const stackOff = [&] {
     switch (sync) {
-      case SyncOptions::SyncAdjustOne:
-        return marker.spOff() -= 1;
-
       case SyncOptions::None:
         // We can get here if we are memory profiling, since we override the
         // normal sync settings and sync anyway.

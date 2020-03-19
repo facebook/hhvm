@@ -91,8 +91,11 @@ void emitIterInit(IRGS& env, IterArgs ita, Offset doneOffset) {
   specializeIterInit(env, doneOffset, ita, kInvalidId);
 
   discard(env, 1);
+  updateMarker(env);
+  env.irb->exceptionStackBoundary();
+
   auto const op = ita.hasKey() ? IterInitK : IterInit;
-  auto const data = IterInitData(ita, IterInitData::Source::Stack);
+  auto const data = IterData(ita);
   auto const result = gen(env, op, data, base, fp(env));
   implIterInitJmp(env, doneOffset, result);
 }
@@ -117,7 +120,7 @@ void emitLIterInit(IRGS& env, IterArgs ita,
   auto const op = base->isA(TArrLike)
     ? (ita.hasKey() ? LIterInitK : LIterInit)
     : (ita.hasKey() ? IterInitK : IterInit);
-  auto const data = IterInitData(ita, IterInitData::Source::Local);
+  auto const data = IterData(ita);
   auto const result = gen(env, op, data, base, fp(env));
   implIterInitJmp(env, doneOffset, result);
 }

@@ -1502,7 +1502,6 @@ fn print_mutator<W: Write>(w: &mut W, mutator: &InstructMutator) -> Result<(), W
         }
         M::IncDecG(op) => {
             w.write("IncDecG ")?;
-            w.write(" ")?;
             print_incdec_op(w, op)
         }
         M::IncDecS(op) => {

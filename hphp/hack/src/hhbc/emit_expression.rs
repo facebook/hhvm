@@ -3397,6 +3397,16 @@ pub fn emit_final_local_op(e: &mut Emitter, pos: &Pos, op: LValOp, lid: local::T
     )
 }
 
+fn emit_final_member_op(stack_size: usize, op: LValOp, mk: MemberKey) -> InstrSeq {
+    use LValOp as L;
+    match op {
+        L::Set => InstrSeq::make_setm(stack_size, mk),
+        L::SetOp(op) => InstrSeq::make_setopm(stack_size, op, mk),
+        L::IncDec(op) => InstrSeq::make_incdecm(stack_size, op, mk),
+        L::Unset => InstrSeq::make_unsetm(stack_size, mk),
+    }
+}
+
 pub fn emit_lval_op_nonlist_steps(
     e: &mut Emitter,
     env: &Env,
@@ -3431,7 +3441,89 @@ pub fn emit_lval_op_nonlist_steps(
                     emit_final_local_op(e, outer_pos, op, lid)?
                 })
             }
-            E_::ArrayGet(_) => unimplemented!(),
+            E_::ArrayGet(x) => match (&(x.0).1, x.1.as_ref()) {
+                (E_::Lvar(v), Some(expr)) if local_id::get_name(&v.1) == superglobals::GLOBALS => {
+                    let final_global_op_instrs = emit_final_global_op(e, pos, op)?;
+                    if rhs_stack_size == 0 {
+                        (
+                            emit_expr(e, env, expr)?,
+                            InstrSeq::Empty,
+                            final_global_op_instrs,
+                        )
+                    } else {
+                        let (index_instrs, under_top) = emit_first_expr(e, env, expr)?;
+                        if under_top {
+                            (
+                                InstrSeq::Empty,
+                                InstrSeq::gather(vec![rhs_instrs, index_instrs]),
+                                final_global_op_instrs,
+                            )
+                        } else {
+                            (index_instrs, rhs_instrs, final_global_op_instrs)
+                        }
+                    }
+                }
+                (_, None) if !env.flags.contains(env::Flags::ALLOWS_ARRAY_APPEND) => {
+                    return Err(emit_fatal::raise_fatal_runtime(
+                        pos,
+                        "Can't use [] for reading",
+                    ))
+                }
+                (_, opt_elem_expr) => {
+                    let mode = match op {
+                        LValOp::Unset => MemberOpMode::Unset,
+                        _ => MemberOpMode::Define,
+                    };
+                    let (mut elem_instrs, elem_stack_size) =
+                        emit_elem(e, env, opt_elem_expr, None, null_coalesce_assignment)?;
+                    if null_coalesce_assignment {
+                        elem_instrs = InstrSeq::Empty;
+                    }
+                    let base_offset = elem_stack_size + (rhs_stack_size as isize);
+                    let (
+                        base_expr_instrs_begin,
+                        base_expr_instrs_end,
+                        base_setup_instrs,
+                        base_stack_size,
+                        cls_stack_size,
+                    ) = emit_base(
+                        e,
+                        env,
+                        &x.0,
+                        mode,
+                        false,
+                        null_coalesce_assignment,
+                        base_offset,
+                        rhs_stack_size as isize,
+                    )?;
+                    let mk = get_elem_member_key(
+                        e,
+                        env,
+                        rhs_stack_size + (cls_stack_size as usize),
+                        opt_elem_expr,
+                        null_coalesce_assignment,
+                    )?;
+                    let total_stack_size = elem_stack_size + base_stack_size + cls_stack_size;
+                    let final_instr = emit_pos_then(
+                        e,
+                        pos,
+                        emit_final_member_op(total_stack_size as usize, op, mk),
+                    )?;
+                    (
+                        if null_coalesce_assignment {
+                            elem_instrs
+                        } else {
+                            InstrSeq::gather(vec![
+                                base_expr_instrs_begin,
+                                elem_instrs,
+                                base_expr_instrs_end,
+                            ])
+                        },
+                        rhs_instrs,
+                        InstrSeq::gather(vec![emit_pos(e, pos)?, base_setup_instrs, final_instr]),
+                    )
+                }
+            },
             E_::ObjGet(_) => unimplemented!(),
             E_::ClassGet(_) => unimplemented!(),
             E_::Unop(uop) => (

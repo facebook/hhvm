@@ -343,7 +343,7 @@ let test_context_changes_funs () =
         (Naming_provider.get_fun_canon_name ctx "\\BAR")
         "Old function in context should NOT be accessible by canon name")
 
-let text_context_changes_classes () =
+let test_context_changes_classes () =
   run_naming_table_test
     (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_ ->
       let (ctx, _entry) =
@@ -377,7 +377,7 @@ let text_context_changes_classes () =
         (Naming_provider.get_type_canon_name ctx "\\FOO")
         "Old class in context should NOT be accessible by canon name")
 
-let text_context_changes_typedefs () =
+let test_context_changes_typedefs () =
   run_naming_table_test
     (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_ ->
       let (ctx, _entry) =
@@ -435,6 +435,6 @@ let () =
       ("test_local_changes", test_local_changes);
       ("test_context_changes_consts", test_context_changes_consts);
       ("test_context_changes_funs", test_context_changes_funs);
-      ("text_context_changes_classes", text_context_changes_classes);
-      ("text_context_changes_typedefs", text_context_changes_typedefs);
+      ("test_context_changes_classes", test_context_changes_classes);
+      ("test_context_changes_typedefs", test_context_changes_typedefs);
     ]

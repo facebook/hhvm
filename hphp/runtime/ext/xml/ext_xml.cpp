@@ -603,10 +603,9 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 
     if (!parser->data.isNull()) {
       if (parser->level <= XML_MAXLEVEL) {
-        Array tag, atr;
         int atcnt = 0;
-        tag = Array::CreateDArray();
-        atr = Array::CreateDArray();
+        auto tag = Array::CreateDArray();
+        auto atr = Array::CreateDArray();
 
         _xml_add_to_info(parser, tag_name.substr(parser->toffset));
 
@@ -634,7 +633,7 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
         }
         auto& arr = parser->data.asArrRef();
         auto lval = arr.lvalForce();
-        type(lval) = KindOfArray;
+        type(lval) = tag->toDataType();
         val(lval).parr = tag.detach();
         parser->ctag = arr->getKey(arr->iter_last());
       } else if (parser->level == (XML_MAXLEVEL + 1)) {

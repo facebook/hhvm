@@ -652,6 +652,7 @@ bool opcodeMayRaise(Opcode opc) {
   case CreateSSWH:
   case DbgAssertFunc:
   case DbgAssertRefCount:
+  case DbgCheckLocalsDecRefd:
   case DbgTraceCall:
   case DbgTrashFrame:
   case DbgTrashMem:

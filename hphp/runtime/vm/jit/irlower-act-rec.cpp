@@ -171,6 +171,21 @@ void cgLdFrameCls(IRLS& env, const IRInstruction* inst) {
   return cgLdFrameThis(env, inst);
 }
 
+void cgDbgCheckLocalsDecRefd(IRLS& env, const IRInstruction* inst) {
+  if (!debug) return;
+  auto& v = vmain(env);
+  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const callOffAndFlags = v.makeReg();
+  auto const check = v.makeReg();
+  auto const sf = v.makeReg();
+  v << loadb{fp[AROFF(m_callOffAndFlags)], callOffAndFlags};
+  v << andbi{1 << ActRec::LocalsDecRefd, callOffAndFlags, check, v.makeReg()};
+  v << testb{check, check, sf};
+  ifThen(v, CC_NZ, sf, [&](Vout& v) {
+    v << trap{TRAP_REASON};
+  });
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}

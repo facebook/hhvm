@@ -1819,6 +1819,10 @@ To string conversions:
   the relevant activation record. This instruction may not occur in an inlined
   call.
 
+| DbgCheckLocalsDecRefd, ND, S(FramePtr), NF
+
+  In debug builds, if LocalsDecRefd flag is set on S0, causes runtime failure by
+  emitting a trap instruction. Otherwise, this instruction does nothing.
 
 9. Stores
 

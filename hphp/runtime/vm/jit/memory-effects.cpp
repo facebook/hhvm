@@ -1856,6 +1856,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case IsCol:
   case HasToString:
   case DbgAssertRefCount:
+  case DbgCheckLocalsDecRefd:
   case GtStr:
   case GteStr:
   case LtStr:

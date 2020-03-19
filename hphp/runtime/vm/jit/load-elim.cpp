@@ -1063,6 +1063,12 @@ void optimize_end_catch(Global& env, IRInstruction& inst,
     block->insert(block->iteratorTo(&inst), decref);
   };
 
+  auto const original = inst.extra<EndCatchData>();
+  if (original->mode != EndCatchData::CatchMode::LocalsDecRefd) {
+    block->insert(block->iteratorTo(&inst),
+      env.unit.gen(DbgCheckLocalsDecRefd, inst.bcctx(), inst.src(0)));
+  }
+
   for (auto elem : elems) {
     auto const i = elem.first;
     // The type needs to be at least a TCell for LdStk and LdLoc to work
@@ -1082,7 +1088,6 @@ void optimize_end_catch(Global& env, IRInstruction& inst,
     add(env.unit.gen(LdStk, inst.bcctx(), type, offset, inst.src(1)));
   }
 
-  auto const original = inst.extra<EndCatchData>();
   auto const teardownMode =
     original->mode != EndCatchData::CatchMode::LocalsDecRefd &&
     inst.func()->hasThisInBody()

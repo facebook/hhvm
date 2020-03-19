@@ -1717,6 +1717,97 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
                 powered_by="serverless_ide",
             )
+            .notification(
+                comment="Add 'call_lambda(3, $m'",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 30, "character": 0},
+                                "end": {"line": 30, "character": 0},
+                            },
+                            "text": "  call_lambda(3, $m",
+                        }
+                    ],
+                },
+            )
+            .request(
+                comment="autocomplete results for 'call_lambda(3, $m'",
+                method="textDocument/completion",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 30, "character": 19},
+                },
+                result={
+                    "isIncomplete": False,
+                    "items": [
+                        {
+                            "label": "$mylambda",
+                            "kind": 6,
+                            "detail": "local variable",
+                            "inlineDetail": "(num $n)",
+                            "itemType": "int",
+                            "sortText": "$mylambda",
+                            "insertText": "$mylambda",
+                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "data": {
+                                "fullname": "$mylambda",
+                                "filename": "${root_path}/completion.php",
+                                "line": 30,
+                                "char": 15,
+                            },
+                        }
+                    ],
+                },
+                powered_by="serverless_ide",
+            )
+            .request(
+                comment="resolve autocompletion for $mylambda'",
+                method="completionItem/resolve",
+                params={
+                    "label": "$mylambda",
+                    "kind": 6,
+                    "detail": "local variable",
+                    "inlineDetail": "(num $n)",
+                    "itemType": "int",
+                    "insertTextFormat": InsertTextFormat.PlainText.value,
+                    "textEdit": {
+                        "range": {
+                            "start": {"line": 30, "character": 17},
+                            "end": {"line": 30, "character": 19},
+                        },
+                        "newText": "$mylambda",
+                    },
+                    "data": {
+                        "filename": "${root_path}/completion.php",
+                        "line": 30,
+                        "char": 15,
+                    },
+                },
+                result={
+                    "label": "$mylambda",
+                    "kind": 6,
+                    "detail": "local variable",
+                    "inlineDetail": "(num $n)",
+                    "itemType": "int",
+                    "insertTextFormat": InsertTextFormat.PlainText.value,
+                    "textEdit": {
+                        "range": {
+                            "start": {"line": 30, "character": 17},
+                            "end": {"line": 30, "character": 19},
+                        },
+                        "newText": "$mylambda",
+                    },
+                    "data": {
+                        "filename": "${root_path}/completion.php",
+                        "line": 30,
+                        "char": 15,
+                    },
+                },
+                powered_by="serverless_ide",
+            )
             .request(method="shutdown", params={}, result=None)
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)

@@ -1,4 +1,4 @@
-<?hh  //strict
+<?hh //strict
 
 function testing_area(): void {
 
@@ -20,5 +20,13 @@ class CompletionClass {
 
 function testing_area_for_shapes(): void {
   $point1 = shape('x' => -3, 'y' => 6);
+
+}
+
+function call_lambda(int $n, (function(int): int) $param): void {
+  $param($n);
+}
+function testing_area_for_lambdas(): void {
+  $mylambda = ($n) ==> $n * 5;
 
 }

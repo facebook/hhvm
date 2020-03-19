@@ -2218,10 +2218,9 @@ fn emit_array_get_(
             pos,
             "Can't use array() as base in write context",
         )),
-        (E(pos, _), None) => Err(emit_fatal::raise_fatal_runtime(
-            pos,
-            "Can't use [] for reading",
-        )),
+        (E(pos, _), None) if !env.flags.contains(env::Flags::ALLOWS_ARRAY_APPEND) => Err(
+            emit_fatal::raise_fatal_runtime(pos, "Can't use [] for reading"),
+        ),
         _ => {
             let local_temp_kind = get_local_temp_kind(env, false, inout_param_info, elem);
             let mode = if null_coalesce_assignment {

@@ -729,32 +729,33 @@ fn set_emit_statement_state(
 }
 
 fn emit_verify_out(params: &[HhasParam]) -> (usize, InstrSeq) {
-    use std::convert::TryInto;
     let param_instrs: Vec<InstrSeq> = params
         .iter()
-        .rev()
         .enumerate()
         .filter_map(|(i, p)| {
-            (Some(InstrSeq::gather(vec![
-                InstrSeq::make_cgetl(local::Type::Named(p.name.clone())),
-                match p.type_info.as_ref() {
-                    Some(HhasTypeInfo { user_type, .. }) if !is_mixed_or_dynamic(user_type) => {
-                        InstrSeq::make_verify_out_type(ParamId::ParamUnnamed(i.try_into().unwrap()))
-                    }
-                    _ => InstrSeq::Empty,
-                },
-            ])))
-            .filter(|_| p.is_inout)
+            if p.is_inout {
+                Some(InstrSeq::gather(vec![
+                    InstrSeq::make_cgetl(local::Type::Named(p.name.clone())),
+                    match p.type_info.as_ref() {
+                        Some(HhasTypeInfo { user_type, .. })
+                            if user_type.as_ref().map_or(true, |t| {
+                                !(t.ends_with("HH\\mixed") || t.ends_with("HH\\dynamic"))
+                            }) =>
+                        {
+                            InstrSeq::make_verify_out_type(ParamId::ParamUnnamed(i as isize))
+                        }
+                        _ => InstrSeq::Empty,
+                    },
+                ]))
+            } else {
+                None
+            }
         })
         .collect();
-    (param_instrs.len(), InstrSeq::gather(param_instrs))
-}
-
-fn is_mixed_or_dynamic(typ_opt: &Option<String>) -> bool {
-    match typ_opt {
-        Some(t) if t.ends_with("HH\\mixed") || t.ends_with("HH\\dynamic") => true,
-        _ => false,
-    }
+    (
+        param_instrs.len(),
+        InstrSeq::gather(param_instrs.into_iter().rev().collect()),
+    )
 }
 
 pub fn emit_generics_upper_bounds(

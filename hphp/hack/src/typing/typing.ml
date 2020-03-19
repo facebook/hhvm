@@ -5932,7 +5932,7 @@ and call_construct p env class_ params el unpacked_element cid =
     match fst cstr with
     | None ->
       if
-        (not (List.is_empty el))
+        ((not (List.is_empty el)) || Option.is_some unpacked_element)
         && (FileInfo.is_strict mode || FileInfo.(equal_mode mode Mpartial))
         && Cls.members_fully_known class_
       then

@@ -371,10 +371,6 @@ ALWAYS_INLINE void decRefArr(ArrayData* arr) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ALWAYS_INLINE bool checkHACEmptyStringPromote() {
-  return RuntimeOption::EvalHackArrCompatNotices &&
-         RuntimeOption::EvalHackArrCompatCheckEmptyStringPromote;
-}
 ALWAYS_INLINE bool checkHACCompare() {
   return RuntimeOption::EvalHackArrCompatNotices &&
          RuntimeOption::EvalHackArrCompatCheckCompare;

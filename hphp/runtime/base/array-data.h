@@ -956,7 +956,6 @@ void raiseHackArrCompatImplicitArrayKey(const TypedValue* key);
 
 StringData* getHackArrCompatNullHackArrayKeyMsg();
 
-bool checkHACEmptyStringPromote();
 bool checkHACCompare();
 bool checkHACArrayPlus();
 bool checkHACArrayKeyCast();

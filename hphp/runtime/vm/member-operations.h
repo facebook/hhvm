@@ -182,14 +182,12 @@ ALWAYS_INLINE void checkPromotion(tv_rval base, const MInstrPropState* pState) {
     }
   }
 
-  auto const stringPromote = checkHACEmptyStringPromote();
-
   if (tvIsNull(base)) {
     throwFalseyPromoteException("null");
   } else if (tvIsBool(base)) {
     throwFalseyPromoteException("false");
-  } else if (UNLIKELY(stringPromote) && tvIsString(base)) {
-    raise_hac_empty_string_promote_notice("Promoting empty string to array");
+  } else if (tvIsString(base)) {
+    throwFalseyPromoteException("empty string");
   }
 }
 

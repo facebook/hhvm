@@ -111,6 +111,7 @@ SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
       }
       if (inst->is(ReturnHook,
                    SuspendHookAwaitEF,
+                   SuspendHookAwaitEG,
                    SuspendHookCreateCont,
                    CheckSurpriseAndStack,
                    CheckSurpriseFlagsEnter)) {

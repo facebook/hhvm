@@ -907,6 +907,10 @@ struct RuntimeOption {
   F(bool, AssemblerFoldDefaultValues,  true)                            \
   F(uint64_t, AssemblerMaxScalarSize,  1073741824) /* 1GB */            \
   F(uint32_t, HHIRLoadElimMaxIters,    10)                              \
+  /* Temporarily only enable in debug builds so the optimizations get
+   * tested */                                                          \
+  F(bool, HHIRLoadEnableTeardownOpts, debug)                            \
+  F(uint32_t, HHIRLoadStackTeardownMaxDecrefs, 8)                       \
   F(bool, HHIRStorePRE,                true)                            \
   F(bool, HHIROutlineGenericIncDecRef, true)                            \
   /* How many elements to inline for packed- or mixed-array inits. */   \

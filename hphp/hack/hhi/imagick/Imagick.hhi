@@ -457,8 +457,6 @@ class Imagick
   const DITHERMETHOD_RIEMERSMA = 2;
 
   // Methods
-  public function __get($name);
-  public function __isset($name);
   public function count(): int;
   public function key(): int;
   public function next(): void;

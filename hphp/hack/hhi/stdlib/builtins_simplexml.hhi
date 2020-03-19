@@ -72,10 +72,6 @@ class SimpleXMLElement {
   public function addChild(string $qname, string $value = "", $ns = null);
   public function addAttribute(string $qname, string $value = "", string $ns = "");
   public function __toString();
-  public function __get($name);
-  public function __set($name, $value);
-  public function __isset($name);
-  public function __unset($name);
 }
 class LibXMLError {
   // php.net/manual/en/class.libxmlerror.php

@@ -233,8 +233,6 @@ class DateInterval {
   public mixed $days;
 
   public function __construct(string $interval_spec);
-  public function __get($member);
-  public function __set($member, $value);
   static public function createFromDateString(string $time);
   public function format(string $format);
 }

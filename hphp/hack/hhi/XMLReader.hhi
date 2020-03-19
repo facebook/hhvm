@@ -65,7 +65,6 @@ class XMLReader {
   public function moveToElement(): bool;
   public function moveToFirstAttribute(): bool;
   public function isValid(): bool;
-  public function __get($name);
   public function getParserProperty(int $property): bool;
   public function lookupNamespace(string $prefix): mixed;
   public function setSchema(string $source): bool;

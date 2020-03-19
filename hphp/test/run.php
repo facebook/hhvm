@@ -3146,9 +3146,17 @@ function get_num_threads($options, $tests) {
     // hh_server spawns a child per CPU; things get flakey with CPU^2 forks
     return 1;
   }
-  $cpus = isset($options['server']) || isset($options['cli-server'])
-    ? num_cpus() * 2 : num_cpus();
-  return min(count($tests), idx($options, 'threads', $cpus));
+
+  if (isset($options['threads'])) {
+    $threads = (int)$options['threads'];
+    if ((string)$threads !== $options['threads'] || $threads < 1) {
+      error("--threads must be an integer >= 1");
+    }
+  } else {
+    $threads = isset($options['server']) || isset($options['cli-server'])
+      ? num_cpus() * 2 : num_cpus();
+  }
+  return min(count($tests), $threads);
 }
 
 function runner_precheck() {
@@ -3240,8 +3248,6 @@ function main($argv) {
     print "You are using the binary located at: " . $binary_path . "\n";
   }
 
-  $options['threads'] = get_num_threads($options, $tests);
-
   $servers = null;
   if (isset($options['server']) || isset($options['cli-server'])) {
     if (isset($options['server']) && isset($options['cli-server'])) {
@@ -3275,67 +3281,46 @@ function main($argv) {
 
   // Try to construct the buckets so the test results are ready in
   // approximately alphabetical order.
-  $test_buckets = varray[];
-  $i = 0;
-
   // Get the serial tests to be in their own bucket later.
   $serial_tests = serial_only_tests($tests);
 
   // If we have no serial tests, we can use the maximum number of allowed
   // threads for the test running. If we have some, we save one thread for
-  // the serial bucket.
-  $parallel_threads = count($serial_tests) > 0
-                    ? $options['threads'] - 1
-                    : $options['threads'];
-
-  foreach ($tests as $test) {
-    if (!in_array($test, $serial_tests)) {
-      if (!array_key_exists($i, $test_buckets)) {
-       $test_buckets[$i] = varray[];
-      }
-      $test_buckets[$i][] = $test;
-      $i = ($i + 1) % $parallel_threads;
+  // the serial bucket. However if we only have one thread, we don't split
+  // out serial tests.
+  $parallel_threads = get_num_threads($options, $tests);
+  if ($parallel_threads === 1) {
+    $test_buckets = varray[$tests];
+  } else {
+    if (count($serial_tests) > 0) {
+      // reserve a thread for serial tests
+      $parallel_threads--;
     }
-  }
 
-  if (count($serial_tests) > 0) {
-    // The last bucket is serial.
-    // If the number of parallel tests didn't equal the actual number of
-    // parallel threads because the number of serial tests reduced it enough,
-    // then our next bucket is just $i; otherwise it is final available
-    // thread. For example, we have 13 total tests which initially gave us
-    // 13 parallel threads, but then we find out 3 are serial, so the parallel
-    // tests would only fill 9 parallel buckets (< 12). The next one would be
-    // 10 for the 3 serial. Now if we have 40 total tests which gave us 32
-    // parallel threads and 4 serial tests, then all of possible parallel
-    // buckets (31) would be filled regardless; so the serial bucket is what
-    // would have been the last parallel thread (32).
-    // $i got bumped to the next bucket at the end of the parallel test loop
-    // above, so no $i++ here.
-    $i = count($tests) - count($serial_tests) < $parallel_threads
-       ? $i // we didn't fill all the parallel buckets, so use next one in line
-       : $options['threads'] - 1; // all parallel filled; last thread; 0 indexed
-    foreach ($serial_tests as $test) {
-      if (!array_key_exists($i, $test_buckets)) {
-        $test_buckets[$i] = varray[];
-      }
-      $test_buckets[$i][] = $test;
+    $test_buckets = varray[];
+    for ($i = 0; $i < $parallel_threads; $i++) {
+      $test_buckets[] = varray[];
     }
-  }
 
-  // If our total number of test buckets didn't overflow back to 0 above
-  // when we % against the number of threads (because we didn't have that
-  // many tests for this run), then just set the threads to how many
-  // buckets we actually have to make calculations below correct.
-  if (count($test_buckets) < $options['threads']) {
-    $options['threads'] = count($test_buckets);
+    $i = 0;
+    foreach ($tests as $test) {
+      if (!in_array($test, $serial_tests)) {
+        $test_buckets[$i][] = $test;
+        $i = ($i + 1) % $parallel_threads;
+      }
+    }
+
+    if (count($serial_tests) > 0) {
+      // The last bucket is serial.
+      $test_buckets[] = $serial_tests;
+    }
   }
 
   // Remember that the serial tests are also in the tests array too,
   // so they are part of the total count.
   if (!isset($options['testpilot'])) {
     print "Running ".count($tests)." tests in ".
-      $options['threads']." threads (" . count($serial_tests) .
+      count($test_buckets)." threads (" . count($serial_tests) .
       " in serial)\n";
   }
 
@@ -3381,9 +3366,10 @@ function main($argv) {
   if (Status::$nofork) {
     $bad_test_file = tempnam('/tmp', 'test-run-');
     $bad_test_files[] = $bad_test_file;
-    $return_value = run($options, $test_buckets[$i], $bad_test_file);
+    invariant(count($test_buckets) === 1, "nofork was set erroneously");
+    $return_value = run($options, $test_buckets[0], $bad_test_file);
   } else {
-    for ($i = 0; $i < $options['threads']; $i++) {
+    foreach ($test_buckets as $test_bucket) {
       $bad_test_file = tempnam('/tmp', 'test-run-');
       $bad_test_files[] = $bad_test_file;
       $pid = pcntl_fork();
@@ -3392,7 +3378,7 @@ function main($argv) {
       } else if ($pid) {
         $children[$pid] = $pid;
       } else {
-        exit(run($options, $test_buckets[$i], $bad_test_file));
+        exit(run($options, $test_bucket, $bad_test_file));
       }
     }
 

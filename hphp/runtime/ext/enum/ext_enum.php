@@ -6,7 +6,7 @@ namespace HH {
  * BuiltinEnum contains the utility methods provided by enums.
  * Under the hood, an enum Foo will extend BuiltinEnum<Foo>.
  */
-abstract class BuiltinEnum<T> {
+abstract class BuiltinEnum<+T> {
   // We set NoFCallBuiltin on our methods to work around an HHVM bug;
   // when using CallBuiltin, the class pointer isn't properly passed.
 

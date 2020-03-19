@@ -1506,9 +1506,7 @@ and simplify_subtype_i
                && String.equal class_name SN.Classes.cHH_BuiltinEnum ->
           (match tyl_super with
           | [ty_super'] ->
-            env
-            |> simplify_subtype ~subtype_env ~this_ty ty_sub ty_super'
-            &&& simplify_subtype ~subtype_env ~this_ty ty_super' ty_sub
+            env |> simplify_subtype ~subtype_env ~this_ty ty_sub ty_super'
           | _ -> default_subtype env)
         | (_, Tnewtype (enum_name, _, _))
           when (Env.is_enum env enum_name && String.equal enum_name class_name)

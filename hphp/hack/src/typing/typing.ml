@@ -984,24 +984,15 @@ and case_list parent_locals ty env switch_pos cl =
           ty
           Errors.unify_error
     in
-    let rec is_enum env ty =
-      let (env, ty) = Env.expand_type env ty in
-      let is_enum =
-        match get_node ty with
-        | Tunion [ty; ty'] ->
-          let (env, ty_is_enum) = is_enum env ty in
-          let (env, ty'_is_enum) = is_enum env ty' in
-          let is_sub_dyn env ty =
-            SubType.is_sub_type_for_union env ty (MakeType.dynamic Reason.Rnone)
-          in
-          (ty_is_enum && is_sub_dyn env ty')
-          || (is_sub_dyn env ty && ty'_is_enum)
-        | Tnewtype (cid, _, _) -> Env.is_enum env cid
-        | _ -> false
+    let is_enum =
+      let top_type =
+        MakeType.class_type
+          Reason.Rnone
+          SN.Classes.cHH_BuiltinEnum
+          [MakeType.mixed Reason.Rnone]
       in
-      (env, is_enum)
+      Typing_subtype.is_sub_type_for_coercion env ty top_type
     in
-    let (env, is_enum) = is_enum env ty in
     (* If there is no default case and this is not a switch on enum (since
      * exhaustiveness is garanteed elsewhere on enums),
      * then add a default case for control flow correctness

@@ -1631,6 +1631,16 @@ struct EndCatchData : IRSPRelOffsetData {
   Teardown teardown;
 };
 
+struct EnterTCUnwindData : IRExtraData {
+  explicit EnterTCUnwindData(bool teardown) : teardown{teardown} {}
+
+  std::string show() const {
+    return folly::to<std::string>(teardown ? "" : "no-", "teardown");
+  }
+
+  bool teardown;
+};
+
 /*
  * Func attributes
  */
@@ -1875,6 +1885,7 @@ X(VerifyRetFail,                ParamWithTCData);
 X(VerifyRetFailHard,            ParamWithTCData);
 X(VerifyReifiedLocalType,       ParamData);
 X(EndCatch,                     EndCatchData);
+X(EnterTCUnwind,                EnterTCUnwindData);
 X(FuncHasAttr,                  AttrData);
 X(LdMethCallerName,             MethCallerData);
 X(LdRecDescCached,              RecNameData);

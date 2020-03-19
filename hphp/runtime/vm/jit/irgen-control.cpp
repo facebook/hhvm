@@ -344,7 +344,7 @@ void emitThrow(IRGS& env) {
     auto const spOff = IRSPRelOffsetData { spOffBCFromIRSP(env) };
     gen(env, EagerSyncVMRegs, spOff, fp(env), sp(env));
     updateMarker(env);
-    gen(env, EnterTCUnwind, exn);
+    gen(env, EnterTCUnwind, EnterTCUnwindData { true }, exn);
   };
 
   if (srcTy <= Type::SubObj(SystemLib::s_ThrowableClass)) return handleThrow();

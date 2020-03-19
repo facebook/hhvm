@@ -104,11 +104,17 @@ void cgEnterTCUnwind(IRLS& env, const IRInstruction* inst) {
   auto const exn = srcLoc(env, inst, 0).reg();
   v << storebi{1, rvmtl()[unwinderSideEnterOff()]};
   v << store{exn, rvmtl()[unwinderExnOff()]};
-  v << copy{rvmfp(), rarg(0)};
-  v << copy{v.cns(true), rarg(1)}; // teardown
-  v << call{TCA(tc_unwind_resume), arg_regs(2)};
-  v << copy{rret(1), rvmfp()};
-  v << jmpr{rret(0), vm_regs_with_sp()};
+
+  auto const target = [&] {
+    auto const extra = inst->extra<EnterTCUnwindData>();
+    if (extra->teardown) return tc::ustubs().endCatchHelper;
+    if (inst->func()->hasThisInBody()) {
+      return tc::ustubs().endCatchTeardownThisHelper;
+    }
+    return tc::ustubs().endCatchSkipTeardownHelper;
+  }();
+
+  v << jmpi{target, vm_regs_with_sp()};
 }
 
 IMPL_OPCODE_CALL(DebugBacktrace)

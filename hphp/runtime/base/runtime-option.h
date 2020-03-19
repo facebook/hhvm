@@ -911,6 +911,7 @@ struct RuntimeOption {
    * tested */                                                          \
   F(bool, HHIRLoadEnableTeardownOpts, debug)                            \
   F(uint32_t, HHIRLoadStackTeardownMaxDecrefs, 8)                       \
+  F(uint32_t, HHIRLoadThrowMaxDecrefs, 64)                              \
   F(bool, HHIRStorePRE,                true)                            \
   F(bool, HHIROutlineGenericIncDecRef, true)                            \
   /* How many elements to inline for packed- or mixed-array inits. */   \

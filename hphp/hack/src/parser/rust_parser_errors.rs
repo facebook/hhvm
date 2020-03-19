@@ -1451,9 +1451,9 @@ where
         attr_spec: &'a Syntax<Token, Value>,
     ) -> bool {
         let has_attr = |attr| self.attribute_specification_contains(attr_spec, attr);
-        (!(self.attribute_has_reactivity_annotation(attr_spec))
+        !(self.attribute_has_reactivity_annotation(attr_spec))
             && (has_attr(sn::user_attributes::ONLY_RX_IF_IMPL)
-                || has_attr(sn::user_attributes::AT_MOST_RX_AS_ARGS)))
+                || has_attr(sn::user_attributes::AT_MOST_RX_AS_ARGS))
     }
 
     fn error_if_memoize_function_returns_mutable(&mut self, attrs: &'a Syntax<Token, Value>) {
@@ -3655,14 +3655,12 @@ where
                     &long_name_text,
                     name_text,
                     location,
-                    &|x, y| {
-                        (match kind {
-                            NameImplicitUse => {
-                                errors::declared_name_is_already_in_use_implicit_hh(line_num, x, y)
-                            }
-                            NameUse => errors::declared_name_is_already_in_use(line_num, x, y),
-                            NameDef => errors::type_name_is_already_in_use(x, y),
-                        })
+                    &|x, y| match kind {
+                        NameImplicitUse => {
+                            errors::declared_name_is_already_in_use_implicit_hh(line_num, x, y)
+                        }
+                        NameUse => errors::declared_name_is_already_in_use(line_num, x, y),
+                        NameDef => errors::type_name_is_already_in_use(x, y),
                     },
                 ))
             }

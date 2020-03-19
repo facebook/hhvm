@@ -1255,7 +1255,7 @@ where
 
     fn scan_remaining_qualified_name(&mut self, name_token: S::R) -> S::R {
         let (name, _) = self.scan_remaining_qualified_name_extended(name_token);
-        (name)
+        name
     }
 
     // Parse with parse_item while a condition is met.

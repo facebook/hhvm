@@ -251,7 +251,7 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
     }
 
     fn is_octal_digit(c: char) -> bool {
-        ('0' <= c && c <= '7')
+        '0' <= c && c <= '7'
     }
 
     fn is_decimal_digit(ch: char) -> bool {

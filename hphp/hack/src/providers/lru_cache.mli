@@ -96,8 +96,8 @@ module Cache (Entry : Entry) : sig
   present, does nothing. *)
   val remove : t -> key:'a Entry.key -> unit
 
-  (** The cache keeps track of how long it's spent doing cache overhead *)
-  val get_telemetry : t -> Telemetry.t
+  (** The cache keeps track of how long it's spent doing cache overhead and how big it is *)
+  val get_telemetry : key:string -> t -> Telemetry.t -> Telemetry.t
 
   (** You can reset the timer. *)
   val reset_telemetry : t -> unit

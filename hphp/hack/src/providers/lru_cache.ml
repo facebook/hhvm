@@ -180,10 +180,17 @@ module Cache (Entry : Entry) = struct
 
   let reset_telemetry (t : t) : unit = t.telemetry <- empty_telemetry
 
-  let get_telemetry (t : t) : Telemetry.t =
-    Telemetry.create ()
-    |> Telemetry.float_ ~key:"time_spent" ~value:t.telemetry.time_spent
-    |> Telemetry.int_ ~key:"num_evictions" ~value:t.telemetry.num_evictions
-    |> Telemetry.int_ ~key:"length" ~value:(length t)
-    |> Telemetry.int_ ~key:"total_size" ~value:t.total_size
+  let get_telemetry ~(key : string) (t : t) (telemetry : Telemetry.t) :
+      Telemetry.t =
+    if length t = 0 then
+      telemetry
+    else
+      let sub_telemetry =
+        Telemetry.create ()
+        |> Telemetry.float_ ~key:"time_spent" ~value:t.telemetry.time_spent
+        |> Telemetry.int_ ~key:"num_evictions" ~value:t.telemetry.num_evictions
+        |> Telemetry.int_ ~key:"length" ~value:(length t)
+        |> Telemetry.int_ ~key:"total_size" ~value:t.total_size
+      in
+      Telemetry.object_ telemetry ~key ~value:sub_telemetry
 end

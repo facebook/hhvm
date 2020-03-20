@@ -53,3 +53,10 @@ let int_exn (telemetry : Telemetry.t) (path : string) : int =
 it's not a float or if either foo/bar don't exist. *)
 let float_exn (telemetry : Telemetry.t) (path : string) : float =
   value_exn telemetry path |> Hh_json.get_number_exn |> float_of_string
+
+(** e.g. to tell whether "foo.bar" exists *)
+let is_absent (telemetry : Telemetry.t) (path : string) : bool =
+  try
+    let (_ : Hh_json.json) = value_exn telemetry path in
+    false
+  with _ -> true

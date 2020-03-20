@@ -146,19 +146,13 @@ let get_telemetry (t : t) (telemetry : Telemetry.t) : Telemetry.t =
   | Provider_backend.Local_memory
       { decl_cache; shallow_decl_cache; linearization_cache; _ } ->
     telemetry
-    |> Telemetry.object_
-         ~key:"decl_cache"
-         ~value:(Provider_backend.Decl_cache.get_telemetry decl_cache)
-    |> Telemetry.object_
+    |> Provider_backend.Decl_cache.get_telemetry decl_cache ~key:"decl_cache"
+    |> Provider_backend.Shallow_decl_cache.get_telemetry
+         shallow_decl_cache
          ~key:"shallow_decl_cache"
-         ~value:
-           (Provider_backend.Shallow_decl_cache.get_telemetry
-              shallow_decl_cache)
-    |> Telemetry.object_
+    |> Provider_backend.Linearization_cache.get_telemetry
+         linearization_cache
          ~key:"linearization_cache"
-         ~value:
-           (Provider_backend.Linearization_cache.get_telemetry
-              linearization_cache)
   | _ -> telemetry
 
 let reset_telemetry (t : t) : unit =

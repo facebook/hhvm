@@ -202,27 +202,28 @@ let notification_to_string (n : notification) : string =
   | Done_processing -> "Done_processing"
 
 type error_data = {
-  (* max 20 chars, for status bar *)
+  (* max 20 chars, for status bar. Will be prepended by "Hack:" *)
   short_user_message: string;
-  (* max 10 words, for tooltip and alert *)
+  (* max 10 words, for tooltip and alert. Will be postpended by " See <log>" *)
   medium_user_message: string;
   (* should we have window/showMessage, i.e. an alert? *)
   is_actionable: bool;
-  (* max 5 lines, for window/logMessage, i.e. Output>Hack window *)
+  (* max 5 lines, for window/logMessage, i.e. Output>Hack window. Will be postpended by "\nDetails: <url>" *)
   long_user_message: string;
-  (* for experts. Will go in Hh_logger.log *)
+  (* for experts. Will go in Hh_logger.log, and will be uploaded *)
   debug_details: string;
 }
 
-let make_error_data
-    ~(user_message : string) ~(log_string : string) ~(is_actionable : bool) :
-    error_data =
+(** make_error_data is for reporting internal bugs, invariant
+violations, unexpected exceptions, ... *)
+let make_error_data (debug_details : string) ~(stack : string) : error_data =
   {
-    short_user_message = "Hack IDE: stopped";
-    medium_user_message = "IDE services stopped: " ^ user_message ^ ".";
-    long_user_message = user_message;
-    is_actionable;
-    debug_details = "IDE services could not be initialized: " ^ log_string;
+    short_user_message = "failed";
+    medium_user_message = "Hack IDE has failed.";
+    long_user_message =
+      "Hack IDE has failed.\nThis is unexpected.\nPlease file a bug within your IDE.";
+    debug_details = debug_details ^ "\nSTACK:\n" ^ stack;
+    is_actionable = false;
   }
 
 type 'a timed_response = {

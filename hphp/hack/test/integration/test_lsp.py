@@ -5278,9 +5278,9 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 method="window/showStatus",
                 params={
                     "actions": [{"title": "Restart Hack IDE Services"}],
-                    "message": "IDE services stopped: Stopped. See "
-                    + "Output>Hack for details. hh_server: ready.",
-                    "shortMessage": "Hack: Hack IDE: stopped",
+                    "message": "Hack IDE has failed. "
+                    + "See Output>Hack for details. hh_server: ready.",
+                    "shortMessage": "Hack: failed",
                     "type": 1,
                 },
                 result={"title": "Restart Hack IDE Services"},
@@ -5323,7 +5323,9 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 method="window/logMessage",
                 params={
                     "type": 1,
-                    "message": "Uncaught exception in client IDE services\n"
+                    "message": "Hack IDE has failed.\n"
+                    + "This is unexpected.\n"
+                    + "Please file a bug within your IDE.\n"
                     + "More details: http://dummy",
                 },
             )
@@ -5331,10 +5333,10 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 method="window/showStatus",
                 params={
                     "actions": [{"title": "Restart Hack IDE Services"}],
-                    "message": "IDE services stopped: Uncaught exception "
-                    + "in client IDE services. See Output>Hack for details. "
+                    "message": "Hack IDE has failed. "
+                    + "See Output>Hack for details. "
                     + "hh_server: ready.",
-                    "shortMessage": "Hack: Hack IDE: stopped",
+                    "shortMessage": "Hack: failed",
                     "type": 1,
                 },
                 result=None,

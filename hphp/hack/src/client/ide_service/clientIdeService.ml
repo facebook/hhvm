@@ -257,18 +257,13 @@ let initialize_from_saved_state
     set_state t (Initialized { status });
     Lwt.return_ok total
   | ClientIdeMessage.Notification _ ->
-    let user_message =
+    let stack = Exception.get_current_callstack_string 100 in
+    let debug_details =
       "Failed to initialize IDE service process "
       ^ "because we received a notification before the initialization response"
     in
-    let log_string = Exception.get_current_callstack_string 100 in
-    log "%s" user_message;
-    let error_data =
-      ClientIdeMessage.make_error_data
-        ~user_message
-        ~log_string
-        ~is_actionable:false
-    in
+    log "%s\n%s" debug_details stack;
+    let error_data = ClientIdeMessage.make_error_data debug_details ~stack in
     set_state t (Failed_to_initialize error_data);
     Lwt.return_error error_data
   | ClientIdeMessage.Response
@@ -354,13 +349,8 @@ let destroy (t : t) ~(tracking_id : string) : unit Lwt.t =
 
 let stop (t : t) ~(tracking_id : string) ~(reason : Stop_reason.t) : unit Lwt.t
     =
-  let log_string = Exception.get_current_callstack_string 100 in
-  let error_data =
-    ClientIdeMessage.make_error_data
-      ~user_message:"Stopped"
-      ~log_string
-      ~is_actionable:false
-  in
+  let stack = Exception.get_current_callstack_string 100 in
+  let error_data = ClientIdeMessage.make_error_data "stopped" ~stack in
   let%lwt () = destroy t ~tracking_id in
   (* Correctness here is very subtle... During the course of that call to
   'destroy', we do let%lwt on an rpc call to shutdown the daemon.

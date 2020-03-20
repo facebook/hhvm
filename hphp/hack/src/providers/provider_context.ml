@@ -143,16 +143,20 @@ let get_telemetry (t : t) (telemetry : Telemetry.t) : Telemetry.t =
   it not being the intended provider. *)
   in
   match t.backend with
-  | Provider_backend.Local_memory
-      { decl_cache; shallow_decl_cache; linearization_cache; _ } ->
+  | Provider_backend.Local_memory lmem ->
+    let open Provider_backend in
     telemetry
-    |> Provider_backend.Decl_cache.get_telemetry decl_cache ~key:"decl_cache"
-    |> Provider_backend.Shallow_decl_cache.get_telemetry
-         shallow_decl_cache
+    |> Decl_cache.get_telemetry lmem.decl_cache ~key:"decl_cache"
+    |> Shallow_decl_cache.get_telemetry
+         lmem.shallow_decl_cache
          ~key:"shallow_decl_cache"
-    |> Provider_backend.Linearization_cache.get_telemetry
-         linearization_cache
+    |> Linearization_cache.get_telemetry
+         lmem.linearization_cache
          ~key:"linearization_cache"
+    |> Reverse_naming_table_delta.get_telemetry
+         lmem.reverse_naming_table_delta
+         ~key:"reverse_naming_table_delta"
+    |> Fixmes.get_telemetry lmem.fixmes ~key:"fixmes"
   | _ -> telemetry
 
 let reset_telemetry (t : t) : unit =

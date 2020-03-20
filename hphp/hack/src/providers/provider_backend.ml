@@ -107,6 +107,26 @@ module Fixmes = struct
     decl_hh_fixmes: Fixme_store.t;
     disallowed_fixmes: Fixme_store.t;
   }
+
+  let get_telemetry ~(key : string) (t : t) (telemetry : Telemetry.t) :
+      Telemetry.t =
+    let hh_fixme_files = Relative_path.Map.cardinal !(t.hh_fixmes) in
+    let decl_hh_fixme_files = Relative_path.Map.cardinal !(t.decl_hh_fixmes) in
+    let disallowed_fixme_files =
+      Relative_path.Map.cardinal !(t.disallowed_fixmes)
+    in
+    if hh_fixme_files + decl_hh_fixme_files + disallowed_fixme_files = 0 then
+      telemetry
+    else
+      let sub_telemetry =
+        Telemetry.create ()
+        |> Telemetry.int_ ~key:"hh_fixme_files" ~value:hh_fixme_files
+        |> Telemetry.int_ ~key:"decl_hh_fixme_files" ~value:decl_hh_fixme_files
+        |> Telemetry.int_
+             ~key:"disallowed_fixme_files"
+             ~value:disallowed_fixme_files
+      in
+      Telemetry.object_ telemetry ~key ~value:sub_telemetry
 end
 
 let empty_fixmes =
@@ -130,6 +150,22 @@ module Reverse_naming_table_delta = struct
   }
 
   let empty : t = { consts = SMap.empty; funs = SMap.empty; types = SMap.empty }
+
+  let get_telemetry ~(key : string) (t : t) (telemetry : Telemetry.t) :
+      Telemetry.t =
+    let consts = SMap.cardinal t.consts in
+    let funs = SMap.cardinal t.funs in
+    let types = SMap.cardinal t.types in
+    if consts + funs + types = 0 then
+      telemetry
+    else
+      let sub_telemetry =
+        Telemetry.create ()
+        |> Telemetry.int_ ~key:"consts" ~value:consts
+        |> Telemetry.int_ ~key:"funs" ~value:funs
+        |> Telemetry.int_ ~key:"types" ~value:types
+      in
+      Telemetry.object_ telemetry ~key ~value:sub_telemetry
 end
 
 type t =

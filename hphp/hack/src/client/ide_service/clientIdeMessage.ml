@@ -202,10 +202,28 @@ let notification_to_string (n : notification) : string =
   | Done_processing -> "Done_processing"
 
 type error_data = {
-  user_message: string;
-  log_string: string;
+  (* max 20 chars, for status bar *)
+  short_user_message: string;
+  (* max 10 words, for tooltip and alert *)
+  medium_user_message: string;
+  (* should we have window/showMessage, i.e. an alert? *)
   is_actionable: bool;
+  (* max 5 lines, for window/logMessage, i.e. Output>Hack window *)
+  long_user_message: string;
+  (* for experts. Will go in Hh_logger.log *)
+  debug_details: string;
 }
+
+let make_error_data
+    ~(user_message : string) ~(log_string : string) ~(is_actionable : bool) :
+    error_data =
+  {
+    short_user_message = "Hack IDE: stopped";
+    medium_user_message = "IDE services stopped: " ^ user_message ^ ".";
+    long_user_message = user_message;
+    is_actionable;
+    debug_details = "IDE services could not be initialized: " ^ log_string;
+  }
 
 type 'a timed_response = {
   unblocked_time: float;
@@ -219,8 +237,8 @@ type message_from_daemon =
 let message_from_daemon_to_string (m : message_from_daemon) : string =
   match m with
   | Notification n -> notification_to_string n
-  | Response { response = Error { user_message; _ }; _ } ->
-    Printf.sprintf "Response_error(%s)" user_message
+  | Response { response = Error { short_user_message; _ }; _ } ->
+    Printf.sprintf "Response_error(%s)" short_user_message
   | Response { response = Ok _; _ } -> Printf.sprintf "Response_ok"
 
 type daemon_args = {

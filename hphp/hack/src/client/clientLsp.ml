@@ -2455,18 +2455,19 @@ let get_client_ide_status (ide_service : ClientIdeService.t) :
       total = None;
       shortMessage = None;
     }
-  | ClientIdeService.Status.Stopped { ClientIdeMessage.user_message; _ } ->
+  | ClientIdeService.Status.Stopped
+      { ClientIdeMessage.short_user_message; medium_user_message; _ } ->
     {
       ShowStatusFB.request =
         ShowMessageRequest.
           {
             type_ = MessageType.ErrorMessage;
-            message = "IDE services stopped: " ^ user_message ^ ".";
+            message = medium_user_message ^ " See Output>Hack for details.";
             actions = [{ title = client_ide_restart_button_text }];
           };
       progress = None;
       total = None;
-      shortMessage = Some "Hack IDE: stopped";
+      shortMessage = Some ("Hack: " ^ short_user_message);
     }
 
 let merge_statuses
@@ -3310,11 +3311,23 @@ let run_ide_service (env : env) (ide_service : ClientIdeService.t) : unit Lwt.t
            num_changed_files_to_process);
       let%lwt () = ClientIdeService.serve ide_service in
       Lwt.return_unit
-    | Error { ClientIdeMessage.user_message; log_string; is_actionable; _ } ->
-      log "IDE services could not be initialized: %s" log_string;
-      Lsp_helpers.log_error to_stdout user_message;
+    | Error
+        {
+          ClientIdeMessage.medium_user_message;
+          long_user_message;
+          debug_details;
+          is_actionable;
+          _;
+        } ->
+      log
+        "IDE services could not be initialized.\n%s\n%s"
+        long_user_message
+        debug_details;
+      Lsp_helpers.log_error to_stdout long_user_message;
       if is_actionable then
-        Lsp_helpers.showMessage_error to_stdout ("Hack failure: " ^ user_message);
+        Lsp_helpers.showMessage_error
+          to_stdout
+          (medium_user_message ^ " See Output>Hack for details.");
       Lwt.return_unit
   ) else
     Lwt.return_unit

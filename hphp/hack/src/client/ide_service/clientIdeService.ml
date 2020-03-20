@@ -26,8 +26,8 @@ module Status = struct
         "Processing_files(%s)"
         (ClientIdeMessage.Processing_files.to_string p)
     | Ready -> "Ready"
-    | Stopped { ClientIdeMessage.user_message; _ } ->
-      Printf.sprintf "Stopped(%s)" user_message
+    | Stopped { ClientIdeMessage.short_user_message; _ } ->
+      Printf.sprintf "Stopped(%s)" short_user_message
 end
 
 module Stop_reason = struct
@@ -56,8 +56,8 @@ let state_to_string (state : state) : string =
   | Uninitialized { wait_for_initialization = true } ->
     "Uninitialized(will_wait_for_init)"
   | Uninitialized _ -> "Uninitialized"
-  | Failed_to_initialize { ClientIdeMessage.user_message; _ } ->
-    Printf.sprintf "Failed_to_initialize(%s)" user_message
+  | Failed_to_initialize { ClientIdeMessage.short_user_message; _ } ->
+    Printf.sprintf "Failed_to_initialize(%s)" short_user_message
   | Initialized env ->
     Printf.sprintf "Initialized(%s)" (Status.to_string env.status)
   | Stopped (reason, _) ->
@@ -145,12 +145,12 @@ let do_rpc
       let response = Result.map ~f:Obj.magic response in
       (match response with
       | Ok r -> Lwt.return_ok r
-      | Error { ClientIdeMessage.user_message; log_string; _ } ->
+      | Error { ClientIdeMessage.medium_user_message; debug_details; _ } ->
         Lwt.return_error
           {
             Lsp.Error.code = Lsp.Error.UnknownErrorCode;
-            message = user_message;
-            data = Lsp_fmt.error_data_of_string ~key:"log_string" log_string;
+            message = medium_user_message;
+            data = Lsp_fmt.error_data_of_string ~key:"log_string" debug_details;
           })
   with e ->
     let e = Exception.wrap e in
@@ -264,7 +264,10 @@ let initialize_from_saved_state
     let log_string = Exception.get_current_callstack_string 100 in
     log "%s" user_message;
     let error_data =
-      { ClientIdeMessage.user_message; log_string; is_actionable = false }
+      ClientIdeMessage.make_error_data
+        ~user_message
+        ~log_string
+        ~is_actionable:false
     in
     set_state t (Failed_to_initialize error_data);
     Lwt.return_error error_data
@@ -351,12 +354,12 @@ let destroy (t : t) ~(tracking_id : string) : unit Lwt.t =
 
 let stop (t : t) ~(tracking_id : string) ~(reason : Stop_reason.t) : unit Lwt.t
     =
+  let log_string = Exception.get_current_callstack_string 100 in
   let error_data =
-    {
-      ClientIdeMessage.user_message = "Stopped";
-      log_string = Exception.get_current_callstack_string 100;
-      is_actionable = false;
-    }
+    ClientIdeMessage.make_error_data
+      ~user_message:"Stopped"
+      ~log_string
+      ~is_actionable:false
   in
   let%lwt () = destroy t ~tracking_id in
   (* Correctness here is very subtle... During the course of that call to
@@ -491,14 +494,17 @@ let rpc
         message = "IDE service has not yet been initialized";
         data = None;
       }
-  | Failed_to_initialize { ClientIdeMessage.user_message; log_string; _ } ->
+  | Failed_to_initialize
+      { ClientIdeMessage.short_user_message; debug_details; _ } ->
     Lwt.return_error
       {
         Lsp.Error.code = Lsp.Error.RequestCancelled;
-        message = "IDE service failed to initialize: " ^ user_message;
-        data = Lsp_fmt.error_data_of_string ~key:"not_running_reason" log_string;
+        message = "IDE service failed to initialize: " ^ short_user_message;
+        data =
+          Lsp_fmt.error_data_of_string ~key:"not_running_reason" debug_details;
       }
-  | Stopped (reason, { ClientIdeMessage.user_message; log_string; _ }) ->
+  | Stopped (reason, { ClientIdeMessage.short_user_message; debug_details; _ })
+    ->
     Lwt.return_error
       {
         Lsp.Error.code = Lsp.Error.RequestCancelled;
@@ -506,8 +512,9 @@ let rpc
           Printf.sprintf
             "IDE service is stopped: %s. %s"
             (Stop_reason.to_string reason)
-            user_message;
-        data = Lsp_fmt.error_data_of_string ~key:"not_running_reason" log_string;
+            short_user_message;
+        data =
+          Lsp_fmt.error_data_of_string ~key:"not_running_reason" debug_details;
       }
   | Uninitialized { wait_for_initialization = true } ->
     let%lwt () = wait_for_initialization t in
@@ -536,11 +543,11 @@ let get_status (t : t) : Status.t =
   | Uninitialized _ -> Status.Initializing
   | Failed_to_initialize error_data -> Status.Stopped error_data
   | Stopped (reason, error_data) ->
-    let user_message =
+    let debug_details =
       Stop_reason.to_string reason
-      ^ ". "
-      ^ error_data.ClientIdeMessage.user_message
+      ^ "\n"
+      ^ error_data.ClientIdeMessage.debug_details
     in
-    let error_data = { error_data with ClientIdeMessage.user_message } in
+    let error_data = { error_data with ClientIdeMessage.debug_details } in
     Status.Stopped error_data
   | Initialized { status } -> status

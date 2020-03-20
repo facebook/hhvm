@@ -3319,11 +3319,22 @@ let run_ide_service (env : env) (ide_service : ClientIdeService.t) : unit Lwt.t
           is_actionable;
           _;
         } ->
+      let input = Printf.sprintf "%s\n\n%s" long_user_message debug_details in
+      let%lwt upload_result = Clowder_paste.clowder_paste ~timeout:10. input in
+      let append_to_log =
+        match upload_result with
+        | Ok url -> Printf.sprintf "\nMore details: %s" url
+        | Error message ->
+          Printf.sprintf
+            "\n\nMore details:\n%s\n\nTried to upload those details but it didn't work...\n%s"
+            debug_details
+            message
+      in
       log
         "IDE services could not be initialized.\n%s\n%s"
         long_user_message
         debug_details;
-      Lsp_helpers.log_error to_stdout long_user_message;
+      Lsp_helpers.log_error to_stdout (long_user_message ^ append_to_log);
       if is_actionable then
         Lsp_helpers.showMessage_error
           to_stdout

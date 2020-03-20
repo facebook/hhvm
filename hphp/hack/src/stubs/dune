@@ -114,3 +114,8 @@
   (name exec_command_stubs)
   (wrapped false)
   (modules exec_command))
+
+(library
+  (name clowder_paste)
+  (wrapped false)
+  (modules clowder_paste))

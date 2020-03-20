@@ -112,6 +112,7 @@ end
 let exec_checked
     ?(input : string option)
     ?(env : string array option)
+    ?(timeout : float option)
     (program : Exec_command.t)
     (args : string array) : (Process_success.t, Process_failure.t) Lwt_result.t
     =
@@ -124,7 +125,7 @@ let exec_checked
   in
   let process =
     let command = (program, Array.append [| program |] args) in
-    Lwt_process.open_process_full command ?env
+    Lwt_process.open_process_full command ?timeout ?env
   in
   (let%lwt (exn, stdout, stderr) =
      let exn = ref None in

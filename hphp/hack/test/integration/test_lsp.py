@@ -5323,7 +5323,8 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 method="window/logMessage",
                 params={
                     "type": 1,
-                    "message": "Uncaught exception in client IDE services",
+                    "message": "Uncaught exception in client IDE services\n"
+                    + "More details: http://dummy",
                 },
             )
             .wait_for_server_request(

@@ -8,6 +8,8 @@
 
 open Sqlite_utils
 
+type db_path = Db_path of string [@@deriving show]
+
 type save_result = {
   files_added: int;
   symbols_added: int;

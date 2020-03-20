@@ -140,6 +140,7 @@ type t =
       linearization_cache: Linearization_cache.t;
       reverse_naming_table_delta: Reverse_naming_table_delta.t;
       fixmes: Fixmes.t;
+      naming_db_path_ref: Naming_sqlite.db_path option ref;
     }
   | Decl_service of {
       decl: Decl_service_client.t;
@@ -170,6 +171,7 @@ let set_local_memory_backend
           Linearization_cache.make ~max_size:max_num_linearizations;
         reverse_naming_table_delta = Reverse_naming_table_delta.empty;
         fixmes = empty_fixmes;
+        naming_db_path_ref = ref None;
       }
 
 let set_local_memory_backend_with_defaults () : unit =

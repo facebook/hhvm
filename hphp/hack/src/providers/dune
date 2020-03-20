@@ -6,6 +6,7 @@
     decl_service_client
     heap_shared_mem
     lru_cache
+    naming_sqlite
     naming_types
     pos
     relative_path
@@ -101,6 +102,7 @@
   (name naming_provider)
   (modules naming_provider)
   (libraries
+    db_path_provider
     file_info
     naming_heap
     relative_path)
@@ -157,4 +159,13 @@
     provider_utils
     tast
     typing)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name db_path_provider)
+  (modules db_path_provider)
+  (libraries
+    naming_sqlite
+    provider_backend
+    provider_context)
   (preprocess (pps ppx_deriving.std)))

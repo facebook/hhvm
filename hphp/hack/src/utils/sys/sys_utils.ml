@@ -185,10 +185,6 @@ let parse_path_list (paths : string list) : string list =
         cat path |> split_lines
       else
         [path])
-  |> List.map ~f:(fun path ->
-         match realpath path with
-         | Some path -> path
-         | None -> failwith (Printf.sprintf "Invalid path: %s" path))
 
 let rm_dir_tree ?(skip_mocking = false) =
   if skip_mocking then

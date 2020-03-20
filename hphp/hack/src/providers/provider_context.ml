@@ -91,6 +91,14 @@ let add_entry ~(ctx : t) ~(path : Relative_path.t) : t * entry =
   let contents = Sys_utils.cat (Relative_path.to_absolute path) in
   make_entry ~ctx ~path ~contents
 
+let try_add_entry_from_disk ~(ctx : t) ~(path : Relative_path.t) :
+    (t * entry) option =
+  let absolute_path = Relative_path.to_absolute path in
+  try
+    let contents = Sys_utils.cat absolute_path in
+    Some (make_entry ~ctx ~path ~contents)
+  with _ -> None
+
 let add_entry_from_file_contents
     ~(ctx : t) ~(path : Relative_path.t) ~(contents : string) : t * entry =
   make_entry ~ctx ~path ~contents

@@ -97,10 +97,17 @@ val empty_for_debugging :
 If an [entry] is already present for the given [path], then this function
 overwrites that entry in the returned [Provider_context.t].
 
+If the file can't be read from disk, then raises an exception.
+
 It's important to pass around the resulting [Provider_context.t]. That way, if a
 subsequent operation tries to access data about the same file, it will be
 returned the same [entry]. *)
 val add_entry : ctx:t -> path:Relative_path.t -> t * entry
+
+(** Same as [add_entry], but returns [None] instead of raising an exception
+if the file can't be read from disk. *)
+val try_add_entry_from_disk :
+  ctx:t -> path:Relative_path.t -> (t * entry) option
 
 (** Same as [add_entry], but using the provided file contents. This is primarily
 useful in the IDE (which may have unsaved changes), or for testing (to pretend

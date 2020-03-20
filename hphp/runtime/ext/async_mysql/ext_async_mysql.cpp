@@ -1379,9 +1379,10 @@ void throwAsyncMysqlException(const char* exception_type,
          op->result() == am::OperationResult::TimedOut ||
          op->result() == am::OperationResult::Cancelled);
 
-  Array params;
-  params.append(std::move(error));
-  throw_object(exception_type, params, true /* init */);
+  throw_object(
+    exception_type,
+    make_vec_array(std::move(error)),
+    true /* init */);
 }
 
 void throwAsyncMysqlQueryException(const char* exception_type,
@@ -1395,9 +1396,10 @@ void throwAsyncMysqlQueryException(const char* exception_type,
          op->result() == am::OperationResult::TimedOut ||
          op->result() == am::OperationResult::Cancelled);
 
-  Array params;
-  params.append(std::move(error));
-  throw_object(exception_type, params, true /* init */);
+  throw_object(
+    exception_type,
+    make_vec_array(std::move(error)),
+    true /* init */);
 }
 
 }

@@ -11,7 +11,7 @@ function foo<T>(HH\enumname<T> $input): void {}
 function bar<T>(enumname<T> $input): void {}
 
 type enumname<T> = HH\enumname<T>;
-const enumname<mixed> BUILTIN_ENUM = HH\BUILTIN_ENUM;
+const enumname<arraykey> BUILTIN_ENUM = HH\BUILTIN_ENUM;
 
 function test(): void {
   foo(Foo::class);

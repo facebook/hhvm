@@ -17,6 +17,15 @@ open Hh_prelude
 open Reordered_argument_collections
 open Typing_deps
 
+type get_classes_in_file = Relative_path.t -> SSet.t
+
+type redo_type_decl_result = {
+  errors: Errors.t;
+  changed: DepSet.t;
+  to_redecl: DepSet.t;
+  to_recheck: DepSet.t;
+}
+
 let shallow_decl_enabled (ctx : Provider_context.t) =
   TypecheckerOptions.shallow_class_decl ctx.Provider_context.tcopt
 
@@ -380,6 +389,9 @@ let get_dependent_classes ctx workers ~bucket_size get_classes classes =
   |> filter_dependent_classes_parallel ctx workers ~bucket_size classes
   |> SSet.of_list
 
+(**
+ * Get the [Decl_class_elements.t]s corresponding to the classes contained in
+ * [defs]. *)
 let get_elems ctx workers ~bucket_size ~old defs =
   if shallow_decl_enabled ctx then
     SMap.empty
@@ -410,16 +422,16 @@ let redo_type_decl
     ~bucket_size
     ~conservative_redecl
     get_classes
-    all_oldified_defs
-    fast =
-  let defs =
-    Relative_path.Map.fold fast ~init:FileInfo.empty_names ~f:(fun _ ->
+    ~previously_oldified_defs
+    ~defs =
+  let all_defs =
+    Relative_path.Map.fold defs ~init:FileInfo.empty_names ~f:(fun _ ->
         FileInfo.merge_names)
   in
   (* Some of the defintions are already in the old heap, left there by a
    * previous lazy check *)
   let (oldified_defs, current_defs) =
-    Decl_utils.split_defs defs all_oldified_defs
+    Decl_utils.split_defs all_defs previously_oldified_defs
   in
   (* Oldify the remaining defs along with their elements *)
   let get_elems = get_elems ctx workers ~bucket_size in
@@ -429,17 +441,17 @@ let redo_type_decl
   (* Fetch the already oldified elements too so we can remove them later *)
   let oldified_elems = get_elems oldified_defs ~old:true in
   let all_elems = SMap.union current_elems oldified_elems in
-  let fnl = Relative_path.Map.keys fast in
+  let fnl = Relative_path.Map.keys defs in
   (* If there aren't enough files, let's do this ourselves ... it's faster! *)
   let (errors, changed, to_redecl, to_recheck) =
     if List.length fnl < 10 then
       let errors = otf_decl_files ctx fnl in
       let (changed, to_redecl, to_recheck) =
-        compute_deps ctx ~conservative_redecl fast fnl
+        compute_deps ctx ~conservative_redecl defs fnl
       in
       (errors, changed, to_redecl, to_recheck)
     else
-      parallel_otf_decl ~conservative_redecl ctx workers bucket_size fast fnl
+      parallel_otf_decl ~conservative_redecl ctx workers bucket_size defs fnl
   in
   let (changed, to_recheck) =
     if shallow_decl_enabled ctx then (
@@ -459,14 +471,14 @@ let redo_type_decl
     ) else
       (changed, to_recheck)
   in
-  remove_old_defs ctx defs all_elems;
+  remove_old_defs ctx all_defs all_elems;
 
   Hh_logger.log "Finished recomputing type declarations:";
   Hh_logger.log "  changed: %d" (DepSet.cardinal changed);
   Hh_logger.log "  to_redecl: %d" (DepSet.cardinal to_redecl);
   Hh_logger.log "  to_recheck: %d" (DepSet.cardinal to_recheck);
 
-  (errors, changed, to_redecl, to_recheck)
+  { errors; changed; to_redecl; to_recheck }
 
 let oldify_type_decl
     (ctx : Provider_context.t)
@@ -474,11 +486,11 @@ let oldify_type_decl
     workers
     get_classes
     ~bucket_size
-    all_oldified_defs
-    defs =
+    ~previously_oldified_defs
+    ~defs =
   (* Some defs are already oldified, waiting for their recheck *)
   let (oldified_defs, current_defs) =
-    Decl_utils.split_defs defs all_oldified_defs
+    Decl_utils.split_defs defs previously_oldified_defs
   in
   let get_elems = get_elems ctx workers ~bucket_size in
   (* Oldify things that are not oldified yet *)

@@ -406,17 +406,17 @@ let get_files_to_recheck
     ~bucket_size
     genv.workers
     get_classes
-    FileInfo.empty_names
-    dirty_names;
-  let (_, _, to_redecl, to_recheck) =
+    ~previously_oldified_defs:FileInfo.empty_names
+    ~defs:dirty_names;
+  let { Decl_redecl_service.to_redecl; to_recheck; _ } =
     Decl_redecl_service.redo_type_decl
       ~conservative_redecl:false
       ~bucket_size
       ctx
       genv.workers
       get_classes
-      dirty_names
-      fast
+      ~previously_oldified_defs:dirty_names
+      ~defs:fast
   in
   Decl_redecl_service.remove_old_defs ctx ~bucket_size genv.workers dirty_names;
   let deps = Typing_deps.add_all_deps to_redecl in

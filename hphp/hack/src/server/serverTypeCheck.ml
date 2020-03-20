@@ -800,7 +800,7 @@ functor
       { errors_after_naming = errors; failed_naming; fast }
 
     type redecl_phase1_result = {
-      changes: Typing_deps.DepSet.t;
+      changed: Typing_deps.DepSet.t;
       oldified_defs: FileInfo.names;
       to_recheck1: Relative_path.Set.t;
       to_redecl_phase2_deps: Typing_deps.DepSet.t;
@@ -815,7 +815,12 @@ functor
       let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
       let defs_to_redecl = get_defs fast in
       let ctx = Provider_utils.ctx_from_server_env env in
-      let (_, changes, to_redecl_phase2_deps, to_recheck1) =
+      let {
+        Decl_redecl_service.errors = _;
+        changed;
+        to_redecl = to_redecl_phase2_deps;
+        to_recheck = to_recheck1;
+      } =
         Decl_redecl_service.redo_type_decl
           ~conservative_redecl:
             (not
@@ -824,8 +829,8 @@ functor
           ctx
           genv.workers
           (get_classes naming_table)
-          oldified_defs
-          fast
+          ~previously_oldified_defs:oldified_defs
+          ~defs:fast
       in
       (* Things that were redeclared are no longer in old heap, so we substract
        * defs_ro_redecl from oldified_defs *)
@@ -833,7 +838,7 @@ functor
         snd @@ Decl_utils.split_defs oldified_defs defs_to_redecl
       in
       let to_recheck1 = Typing_deps.get_files to_recheck1 in
-      { changes; oldified_defs; to_recheck1; to_redecl_phase2_deps }
+      { changed; oldified_defs; to_recheck1; to_redecl_phase2_deps }
 
     type redecl_phase2_result = {
       errors_after_phase2: Errors.t;
@@ -858,10 +863,15 @@ functor
         ~bucket_size
         genv.workers
         (get_classes naming_table)
-        oldified_defs
-        defs_to_oldify;
+        ~previously_oldified_defs:oldified_defs
+        ~defs:defs_to_oldify;
       let oldified_defs = FileInfo.merge_names oldified_defs defs_to_oldify in
-      let (errorl', _changes, _to_redecl2, to_recheck2) =
+      let {
+        Decl_redecl_service.errors = errorl';
+        changed = _;
+        to_redecl = _;
+        to_recheck = to_recheck2;
+      } =
         Decl_redecl_service.redo_type_decl
           ~conservative_redecl:
             (not
@@ -870,8 +880,8 @@ functor
           ctx
           genv.workers
           (get_classes naming_table)
-          oldified_defs
-          fast_redecl_phase2_now
+          ~previously_oldified_defs:oldified_defs
+          ~defs:fast_redecl_phase2_now
       in
       let errors =
         Errors.(
@@ -1152,7 +1162,7 @@ functor
        only source of class information needing recomputing is linearizations.
        These are invalidated by Decl_redecl_service.redo_type_decl in phase 1,
        and are lazily recomputed as needed. *)
-      let { changes; oldified_defs; to_recheck1; to_redecl_phase2_deps } =
+      let { changed; oldified_defs; to_recheck1; to_redecl_phase2_deps } =
         do_redecl_phase1 genv env ~fast ~naming_table ~oldified_defs
       in
       let to_redecl_phase2 = Typing_deps.get_files to_redecl_phase2_deps in
@@ -1267,7 +1277,7 @@ functor
       (* HANDLE PRECHECKED FILES AFTER LOCAL CHANGES ***************************)
       Hh_logger.log "Begin evaluating prechecked changes";
       let env =
-        ServerPrecheckedFiles.update_after_local_changes genv env changes
+        ServerPrecheckedFiles.update_after_local_changes genv env changed
       in
       let t = Hh_logger.log_duration "Evaluating prechecked changes" t in
       let (_ : bool) =

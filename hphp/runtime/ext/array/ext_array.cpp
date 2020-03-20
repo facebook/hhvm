@@ -822,7 +822,7 @@ DOUBLE:
     switch (rval.type()) {
       DT_UNCOUNTED_CASE:
       case KindOfString:
-        d *= tvToDouble(rval.tv());
+        d *= tvCastToDouble(rval.tv());
 
       case KindOfVec:
       case KindOfDict:
@@ -1103,7 +1103,7 @@ DOUBLE:
     switch (rval.type()) {
       DT_UNCOUNTED_CASE:
       case KindOfString:
-        d += tvToDouble(rval.tv());
+        d += tvCastToDouble(rval.tv());
 
       case KindOfVec:
       case KindOfDict:

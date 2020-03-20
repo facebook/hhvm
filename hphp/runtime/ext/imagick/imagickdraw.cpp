@@ -35,7 +35,7 @@ static void getAffineMatrixElement(
     IMAGICKDRAW_THROW(
       "AffineMatrix must contain keys: sx, rx, ry, sy, tx and ty");
   } else {
-    ret = tvToDouble(value.tv());
+    ret = tvCastToDouble(value.tv());
   }
 }
 

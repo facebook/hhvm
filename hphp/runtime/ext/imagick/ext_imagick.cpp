@@ -277,9 +277,10 @@ MagickBooleanType withMagickLocaleFix(
 
 std::vector<double> toDoubleArray(const Array& array) {
   std::vector<double> ret;
-  for (ArrayIter it(array); it; ++it) {
-    ret.push_back(tvCastToDouble(it.secondValPlus()));
-  }
+  ret.reserve(array.size());
+  IterateVNoInc(array.get(), [&](TypedValue v) {
+    ret.push_back(tvCastToDouble(v));
+  });
   return ret;
 }
 

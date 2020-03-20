@@ -108,13 +108,6 @@ inline int64_t tvToInt(TypedValue cell) {
   not_reached();
 }
 
-inline double tvToDouble(TypedValue cell) {
-  TypedValue tmp;
-  tvDup(cell, tmp);
-  tvCastToDoubleInPlace(&tmp);
-  return tmp.m_data.dbl;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 template <IntishCast IC>

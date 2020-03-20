@@ -122,6 +122,11 @@ let run_naming_table_test f =
           ~tcopt
           ~backend:(Provider_backend.get ())
       in
+      (* load_from_sqlite will call set_naming_db_path for the ctx it's given, but
+      here is a fresh ctx with a fresh backend so we have to set it again. *)
+      Db_path_provider.set_naming_db_path
+        ctx
+        (Some (Naming_sqlite.Db_path db_name));
       (try f ~ctx ~unbacked_naming_table ~backed_naming_table ~db_name
        with e ->
          Printf.eprintf
@@ -134,6 +139,9 @@ let run_naming_table_test f =
           ~tcopt
           ~backend:(Provider_backend.get ())
       in
+      Db_path_provider.set_naming_db_path
+        ctx
+        (Some (Naming_sqlite.Db_path db_name));
       (try f ~ctx ~unbacked_naming_table ~backed_naming_table ~db_name
        with e ->
          Printf.eprintf
@@ -215,10 +223,10 @@ let test_remove () =
 
 let test_get_sqlite_paths () =
   run_naming_table_test
-    (fun ~ctx:_ ~unbacked_naming_table:_ ~backed_naming_table ~db_name ->
+    (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table ~db_name ->
       Asserter.String_asserter.assert_option_equals
         (Some db_name)
-        (Naming_table.get_reverse_naming_fallback_path ())
+        (Naming_table.get_reverse_naming_fallback_path ctx)
         "get_reverse_naming_fallback_path should return the expected value";
 
       Asserter.String_asserter.assert_option_equals

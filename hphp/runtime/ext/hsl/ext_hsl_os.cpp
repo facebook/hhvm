@@ -26,6 +26,7 @@
 #include <folly/functional/Invoke.h>
 #include <type_traits>
 
+#include <arpa/inet.h>
 #include <fcntl.h>
 #include <stdio.h>
 
@@ -36,7 +37,12 @@ const StaticString
   s_HSLFileDescriptor("HSLFileDescriptor"),
   s_fd("fd"),
   s_ErrnoException("HH\\Lib\\_Private\\_OS\\ErrnoException"),
-  s_FQHSLFileDescriptor("HH\\Lib\\OS\\FileDescriptor");
+  s_FQHSLFileDescriptor("HH\\Lib\\OS\\FileDescriptor"),
+  s_HSL_sockaddr("HH\\Lib\\_Private\\_OS\\sockaddr"),
+  s_HSL_sockaddr_in("HH\\Lib\\_Private\\_OS\\sockaddr_in"),
+  s_HSL_sockaddr_in6("HH\\Lib\\_Private\\_OS\\sockaddr_in6"),
+  s_HSL_sockaddr_un_pathname("HH\\Lib\\_Private\\_OS\\sockaddr_un_pathname"),
+  s_HSL_sockaddr_un_unnamed("HH\\Lib\\_Private\\_OS\\sockaddr_un_unnamed");
 
 Class* s_FileDescriptorClass = nullptr;
 
@@ -71,6 +77,89 @@ retry_on_eintr(TRet failureValue, TFn impl, Args... args) {
     }
   }
   return ret;
+}
+
+Object make_hsl_sockaddr(const sockaddr_storage& addr, socklen_t len) {
+  // Using `ntohs` etc instead of the more explicit `::noths`, as
+  // on GNU systems it is sometimes a function, sometimes a macro,
+  // depending on optimization level - and if it's a macro, `::ntohs` is
+  // invalid.
+  switch (addr.ss_family) {
+    case AF_UNIX:
+      {
+        static_assert(
+          sizeof(sockaddr_un) <= sizeof(addr),
+          "sockaddr_un must fit in allocated space"
+        );
+        const sockaddr_un* const detail = reinterpret_cast<const sockaddr_un*>(&addr);
+#if defined(__linux__)
+        // Documented way to check for "unnamed" sockets: 0-byte-length sun_path
+        const bool is_unnamed = len == sizeof(sa_family_t);
+#else
+        // This works on __APPLE__, generally makes sense, but means an 'abstract' socket
+        // on Linux
+        const bool is_unnamed = len <= offsetof(struct sockaddr_un, sun_path)
+          || detail->sun_path[0] == 0;
+#endif
+        if (is_unnamed) {
+          return create_object(s_HSL_sockaddr_un_unnamed, Array::CreateVec());
+        }
+
+        auto path_len = len - offsetof(struct sockaddr_un, sun_path) - 1;
+#ifdef __linux__
+        assertx(detail->sun_path[0] /* Linux abstract sockets are not supported by the HSL */);
+#elif defined(__APPLE__)
+        assert(path_len == detail->sun_len);
+#endif
+        return create_object(
+          s_HSL_sockaddr_un_pathname,
+          make_vec_array(String(detail->sun_path, path_len, CopyString))
+        );
+      }
+      break;
+    case AF_INET:
+      {
+        static_assert(
+          sizeof(sockaddr_in) <= sizeof(addr),
+          "sockaddr_in must fit in allocated space"
+        );
+        const sockaddr_in* const detail = reinterpret_cast<const sockaddr_in*>(&addr);
+        return create_object(
+          s_HSL_sockaddr_in,
+          make_vec_array(
+            ntohs(detail->sin_port),
+            ntohl(detail->sin_addr.s_addr)
+          )
+        );
+      }
+      break;
+    case AF_INET6:
+      {
+        static_assert(
+          sizeof(sockaddr_in6) <= sizeof(addr),
+          "sockaddr_in6 must fit in allocated space"
+        );
+        const sockaddr_in6* const detail = reinterpret_cast<const sockaddr_in6*>(&addr);
+        return create_object(
+          s_HSL_sockaddr_in6,
+          make_vec_array(
+            ntohs(detail->sin6_port),
+            ntohs(detail->sin6_flowinfo),
+            String(reinterpret_cast<const char*>(detail->sin6_addr.s6_addr), 16, CopyString),
+            ntohs(detail->sin6_scope_id)
+          )
+        );
+      }
+      break;
+    default:
+      {
+        return create_object(
+          s_HSL_sockaddr,
+          make_vec_array(ntohs(addr.ss_family))
+        );
+      }
+      break;
+  }
 }
 
 } // namespace
@@ -207,6 +296,36 @@ Array HHVM_FUNCTION(HSL_os_pipe) {
   );
 }
 
+Object HHVM_FUNCTION(HSL_os_getpeername, const Object& fd_wrapper) {
+  auto fd = HSLFileDescriptor::fd(fd_wrapper);
+  sockaddr_storage addr;
+  socklen_t addrlen = sizeof(addr);
+  throw_errno_if_minus_one(retry_on_eintr(-1, ::getpeername, fd, reinterpret_cast<sockaddr*>(&addr), &addrlen));
+  return make_hsl_sockaddr(addr, addrlen);
+}
+
+Object HHVM_FUNCTION(HSL_os_getsockname, const Object& fd_wrapper) {
+  auto fd = HSLFileDescriptor::fd(fd_wrapper);
+  sockaddr_storage addr;
+  socklen_t addrlen = sizeof(addr);
+  throw_errno_if_minus_one(retry_on_eintr(-1, ::getsockname, fd, reinterpret_cast<sockaddr*>(&addr), &addrlen));
+  return make_hsl_sockaddr(addr, addrlen);
+}
+
+Array HHVM_FUNCTION(HSL_os_socketpair, int64_t domain, int64_t type, int64_t protocol) {
+  if (domain != AF_UNIX) {
+    // True on Linux; claim true everywhere to avoid worrying about portability,
+    // or permissions with different sockets
+    throw_errno_exception(EOPNOTSUPP, "`socketpair` only supports AF_UNIX");
+  }
+  int fds[2];
+  throw_errno_if_minus_one(retry_on_eintr(-1, ::socketpair, (int) domain, (int) type, (int) protocol, fds));
+  return make_varray(
+    HSLFileDescriptor::newInstance(fds[0]),
+    HSLFileDescriptor::newInstance(fds[1])
+  );
+}
+
 Object HHVM_FUNCTION(HSL_os_poll_async,
                      const Object& fd_wrapper,
                      int64_t events,
@@ -267,7 +386,10 @@ struct OSExtension final : Extension {
 
   void moduleInit() override {
     // Remember to update the HHI :)
-    // open() flags ----------
+
+    Native::registerNativeDataInfo<HSLFileDescriptor>(s_HSLFileDescriptor.get());
+    HHVM_NAMED_ME(HH\\Lib\\OS\\FileDescriptor, __debugInfo, HHVM_MN(HSLFileDescriptor, __debugInfo));
+
     // The preprocessor doesn't like "\" immediately before a ##
 #define O_(name) HHVM_RC_INT(HH\\Lib\\_Private\\_OS\\O_##name, O_##name)
     O_(RDONLY);
@@ -284,6 +406,7 @@ struct OSExtension final : Extension {
     // MacOS: O_EVTONLY, O_SHLOCK, O_EXLOCK, O_SYMLINK
     // Linux: ... lots ...
 
+    CLI_REGISTER_HANDLER(HSL_os_open);
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\open, HSL_os_open);
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\pipe, HSL_os_pipe);
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\poll_async, HSL_os_poll_async);
@@ -291,10 +414,26 @@ struct OSExtension final : Extension {
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\write, HSL_os_write);
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\close, HSL_os_close);
 
-    HHVM_NAMED_ME(HH\\Lib\\OS\\FileDescriptor, __debugInfo, HHVM_MN(HSLFileDescriptor, __debugInfo));
+#define AF_(name) \
+  HHVM_RC_INT(HH\\Lib\\_Private\\_OS\\AF_##name, AF_##name); \
+  HHVM_RC_INT(HH\\Lib\\_Private\\_OS\\PF_##name, PF_##name);
+  AF_(UNSPEC);
+  AF_(UNIX);
+  AF_(INET);
+  AF_(INET6);
+  AF_(MAX);
+#undef AF_
 
-    CLI_REGISTER_HANDLER(HSL_os_open);
-    Native::registerNativeDataInfo<HSLFileDescriptor>(s_HSLFileDescriptor.get());
+#define SOCK_(name) HHVM_RC_INT(HH\\Lib\\_Private\\_OS\\SOCK_##name, SOCK_##name)
+  SOCK_(STREAM);
+  SOCK_(DGRAM);
+  SOCK_(RAW);
+#undef SOCK_
+
+    HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\getpeername, HSL_os_getpeername);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\getsockname, HSL_os_getsockname);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\socketpair, HSL_os_socketpair);
+
     loadSystemlib();
     s_FileDescriptorClass = Unit::lookupClass(s_FQHSLFileDescriptor.get());
     assertx(s_FileDescriptorClass);

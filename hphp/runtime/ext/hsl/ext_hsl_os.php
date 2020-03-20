@@ -25,7 +25,7 @@ final class FileDescriptor {
   public function __debugInfo(): darray;
 }
 
-}
+} // namespace OS
 
 namespace HH\Lib\_Private\_OS {
 
@@ -55,4 +55,79 @@ function pipe(): varray<FileDescriptor>;
 <<__Native>>
 function poll_async(FileDescriptor $fd, int $events, int $timeout_ns): Awaitable<int>;
 
+type uint32_t = int;
+type sa_family_t = int;
+type in_port_t = int;
+
+class sockaddr {
+  public function __construct(
+    public sa_family_t $sa_family,
+  ) {}
+  // Intentionally not including "data":
+  // - it's a placeholder
+  // - it can be thought of as a union of the data of all the others
+  // - may include pointers that can't be dealt with.
 }
+
+final class sockaddr_in extends sockaddr {
+  public function __construct(
+    public in_port_t $sin_port,
+    public uint32_t $sin_addr,
+  ) {
+    parent::__construct(namespace\AF_INET);
+  }
+}
+
+final class sockaddr_in6 extends sockaddr {
+  public function __construct(
+    public in_port_t $sin6_port,
+    public uint32_t $sin6_flowinfo,
+    public string $sin6_addr,
+    public uint32_t $sin6_scope_id,
+  ) {
+    parent::__construct(namespace\AF_INET6);
+  }
+}
+
+/** Base class for unix sockets.
+ *
+ * Have subclasses instead of `?string $path`, as there are multiple types of
+ * sockaddr_un - using Linux's naming:
+ * - pathname: portable, what everyone expects. On filesystem.
+ * - unnamed: what you get from `socketpair()`, or before `bind()`/`connect()`.
+ *   - Linux: 0-length `sun_path`
+ *   - MacOS: all-null 14-byte `sun_path`
+ * - abstract: unix sockets with a meaningful name, which does not exist on the
+ *   filesystem.
+ *   - Linux: first byte of `sun_path` is null
+ *   - does not exist on other platforms
+ *
+ * These are made portable here by providing specific subclasses for `pathname`
+ * and `unnamed` - `abstract` are not supported at present, but may be in the
+ * future by adding another subclass.
+ */
+abstract class sockaddr_un extends sockaddr {
+  public function __construct() {
+    parent::__construct(namespace\AF_UNIX);
+  }
+}
+
+final class sockaddr_un_pathname extends sockaddr_un {
+  public function __construct(public string $pathname) {
+    parent::__construct();
+  }
+}
+
+final class sockaddr_un_unnamed extends sockaddr_un {
+}
+
+<<__Native>>
+function getpeername(FileDescriptor $fd): sockaddr;
+
+<<__Native>>
+function getsockname(FileDescriptor $fd): sockaddr;
+
+<<__Native>>
+function socketpair(int $domain, int $type, int $protocol): varray<FileDescriptor>;
+
+} // namespace _OS

@@ -594,7 +594,6 @@ end = struct
 
       method! on_tarraykind acc _r akind =
         match akind with
-        | AKempty -> acc
         | AKvarray ty -> this#on_type acc ty
         | AKdarray (tk, tv)
         | AKvarray_or_darray (tk, tv) ->

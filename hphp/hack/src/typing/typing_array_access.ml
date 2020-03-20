@@ -342,9 +342,6 @@ let rec array_get
       | Terr -> (env, err_witness env expr_pos)
       | Tdynamic -> (env, ty1)
       | Tany _ -> (env, TUtils.mk_tany env expr_pos)
-      | Tarraykind AKempty ->
-        let env = check_arraykey_index env expr_pos ty1 ty2 in
-        (env, TUtils.mk_tany env expr_pos)
       | Tprim Tstring ->
         let ty = MakeType.string (Reason.Rwitness expr_pos) in
         let ty1 = MakeType.int (Reason.Ridx (fst e2, r)) in
@@ -528,7 +525,7 @@ let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
   in
   GenericRules.apply_rules env ty1 (fun env ty1 ->
       match deref ty1 with
-      | (_, (Tany _ | Tarraykind AKempty)) -> (env, ty1)
+      | (_, Tany _) -> (env, ty1)
       | (_, Terr) -> (env, ty1)
       | (_, Tclass ((_, n), _, [tv]))
         when String.equal n SN.Collections.cVector
@@ -768,13 +765,6 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
       | Terr -> error
       | Tdynamic -> (env, ety1)
       | Tany _ -> (env, ety1)
-      | Tarraykind AKempty ->
-        let env = check_arraykey_index env expr_pos ety1 tkey in
-        let tk =
-          MakeType.arraykey (Reason.Rvarray_or_darray_key (Reason.to_pos r))
-        in
-        let env = type_index env expr_pos tkey tk Reason.index_array in
-        (env, mk (r, Tarraykind (AKvarray_or_darray (tkey, ty2))))
       | Tprim Tstring ->
         let tk = MakeType.int (Reason.Ridx (fst key, r)) in
         let tv = MakeType.string (Reason.Rwitness expr_pos) in

@@ -378,9 +378,6 @@ and union_lists env tyl1 tyl2 r =
 
 and union_arraykind env ak1 ak2 =
   match (ak1, ak2) with
-  | (AKempty, ak)
-  | (ak, AKempty) ->
-    (env, ak)
   | (AKvarray ty1, AKvarray ty2) ->
     let (env, ty) = union env ty1 ty2 in
     (env, AKvarray ty)

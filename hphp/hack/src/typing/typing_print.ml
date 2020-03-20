@@ -369,7 +369,6 @@ module Full = struct
     | Tdynamic -> text "dynamic"
     | Tnonnull -> text "nonnull"
     | Tarraykind (AKvarray_or_darray (x, y)) -> akvarray_or_darray k x y
-    | Tarraykind AKempty -> text "array (empty)"
     | Tarraykind (AKvarray x) -> tvarray k x
     | Tarraykind (AKdarray (x, y)) -> tdarray k x y
     | Tclass ((_, s), Exact, []) when !debug_mode ->
@@ -753,7 +752,6 @@ module ErrorString = struct
     | Tintersection [] -> "a mixed value"
     | Tintersection l -> intersection env l
     | Tarraykind (AKvarray_or_darray _) -> varray_or_darray
-    | Tarraykind AKempty -> "an empty array"
     | Tarraykind (AKvarray _) -> varray
     | Tarraykind (AKdarray (_, _)) -> darray
     | Ttuple l -> "a tuple of size " ^ string_of_int (List.length l)
@@ -904,7 +902,6 @@ module Json = struct
     let name x = [("name", JSON_String x)] in
     let optional x = [("optional", JSON_Bool x)] in
     let is_array x = [("is_array", JSON_Bool x)] in
-    let empty x = [("empty", JSON_Bool x)] in
     let make_field (k, v) =
       let shape_field_name_to_json shape_field =
         (* TODO: need to update userland tooling? *)
@@ -1000,7 +997,6 @@ module Json = struct
     | (p, Tarraykind (AKdarray (ty1, ty2))) ->
       obj @@ kind p "darray" @ args [ty1; ty2]
     | (p, Tarraykind (AKvarray ty)) -> obj @@ kind p "varray" @ args [ty]
-    | (p, Tarraykind AKempty) -> obj @@ kind p "array" @ empty true @ args []
     | (p, Tpu (base, enum)) ->
       obj @@ kind p "pocket_universe" @ args [base] @ name (snd enum)
     | (p, Tpu_type_access (base, enum, member, typ)) ->
@@ -1176,16 +1172,12 @@ module Json = struct
                 ~keytrace
           end
         | "array" ->
-          get_bool "empty" (json, keytrace) >>= fun (empty, _empty_keytrace) ->
           get_array "args" (json, keytrace) >>= fun (args, _args_keytrace) ->
           begin
             match args with
             | [] ->
-              if empty then
-                ty (Tarraykind AKempty)
-              else
-                let tany = mk (Reason.Rnone, Typing_defs.make_tany ()) in
-                ty (Tarraykind (AKvarray_or_darray (tany, tany)))
+              let tany = mk (Reason.Rnone, Typing_defs.make_tany ()) in
+              ty (Tarraykind (AKvarray_or_darray (tany, tany)))
             | [ty1] ->
               aux ty1 ~keytrace:("0" :: keytrace) >>= fun ty1 ->
               ty (Tarraykind (AKvarray ty1))

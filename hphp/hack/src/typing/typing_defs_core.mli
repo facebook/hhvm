@@ -378,8 +378,6 @@ and array_kind =
   | AKdarray of locl_ty * locl_ty
   (* An array annotated as a varray_or_darray. *)
   | AKvarray_or_darray of locl_ty * locl_ty
-  (* This is a type created when we see array() literal *)
-  | AKempty
 
 and taccess_type = decl_ty * Nast.sid list
 

@@ -747,7 +747,6 @@ and simplify_subtype_i
               env |> destructure_array elt_type
             | (_, Tdynamic) -> env |> destructure_array ty_sub
             (* TODO: should remove these any cases *)
-            | (r, Tarraykind AKempty)
             | (r, Tany _) ->
               let any = mk (r, Typing_defs.make_tany ()) in
               env |> destructure_array any
@@ -1435,8 +1434,6 @@ and simplify_subtype_i
         | (r_sub, Tarraykind ak_sub) ->
           begin
             match (ak_sub, ak_super) with
-            (* An empty array is a subtype of any array type *)
-            | (AKempty, _) -> valid ()
             | (AKvarray ty_sub, AKvarray ty_super) ->
               simplify_subtype ~subtype_env ~this_ty ty_sub ty_super env
             | ( AKvarray_or_darray (tk_sub, tv_sub),
@@ -1688,8 +1685,6 @@ and simplify_subtype_i
                  || String.equal class_name SN.Rx.cTraversable
                  || String.equal class_name SN.Collections.cContainer ->
             (match akind with
-            (* array <: Traversable<_> and emptyarray <: Traversable<t> for any t *)
-            | AKempty -> valid ()
             (* vec<tv> <: Traversable<tv_super>
              * iff tv <: tv_super
              * Likewise for vec<tv> <: Container<tv_super>
@@ -1705,7 +1700,6 @@ and simplify_subtype_i
                  || String.equal class_name SN.Rx.cKeyedTraversable
                  || String.equal class_name SN.Collections.cKeyedContainer ->
             (match akind with
-            | AKempty -> valid ()
             | AKvarray tv ->
               env
               |> simplify_subtype

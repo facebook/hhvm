@@ -53,8 +53,6 @@ let check_param : env -> Nast.fun_param -> unit =
     | Tunion tyl
     | Tintersection tyl ->
       List.iter tyl (check_memoizable env)
-    (* Allow untyped arrays. *)
-    | Tarraykind AKempty -> ()
     | Tarraykind (AKvarray ty | AKdarray (_, ty) | AKvarray_or_darray (_, ty))
       ->
       check_memoizable env ty

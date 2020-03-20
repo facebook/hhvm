@@ -472,7 +472,6 @@ let array_kind_con_ordinal ak =
   | AKvarray _ -> 1
   | AKdarray _ -> 3
   | AKvarray_or_darray _ -> 4
-  | AKempty -> 6
 
 (* Compare two types syntactically, ignoring reason information and other
  * small differences that do not affect type inference behaviour. This

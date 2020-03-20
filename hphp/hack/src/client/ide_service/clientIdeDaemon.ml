@@ -119,9 +119,9 @@ let load_saved_state
              })
       | Error load_error ->
         let user_message =
-          Saved_state_loader.user_message_of_error load_error
+          Saved_state_loader.long_user_message_of_error load_error
         in
-        let log_string = Saved_state_loader.log_string_of_error load_error in
+        let log_string = Saved_state_loader.debug_details_of_error load_error in
         let is_actionable = Saved_state_loader.is_error_actionable load_error in
         Lwt.return_error
           { ClientIdeMessage.user_message; log_string; is_actionable }

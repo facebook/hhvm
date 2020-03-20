@@ -41,8 +41,8 @@ let main (env : env) : Exit_status.t Lwt.t =
       Hh_json.JSON_Object
         [
           ( "error",
-            Hh_json.string_ (Saved_state_loader.log_string_of_error load_error)
-          );
+            Hh_json.string_
+              (Saved_state_loader.debug_details_of_error load_error) );
         ]
     in
     Hh_json.json_to_multiline_output stdout json;

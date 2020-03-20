@@ -18,6 +18,22 @@ namespace HH\Lib\_Private\_OS;
 
 use type HH\Lib\OS\FileDescriptor;
 
+// Actual values are platform-specific
+
+const int O_RDONLY = 0;
+const int O_WRONLY = 0;
+const int O_RDWR= 0;
+const int O_NONBLOCK = 0;
+const int O_APPEND = 0;
+const int O_CREAT/*E < you dropped this*/ = 0;
+const int O_TRUNC = 0;
+const int O_EXCL = 0;
+const int O_SHLOCK = 0;
+const int O_EXLOCK = 0;
+const int O_NOFOLLOW = 0;
+const int O_SYMLINK = 0;
+const int O_CLOEXEC = 0;
+
 final class ErrnoException extends \Exception {}
 
 function open(string $path, int $flags, int $mode = 0): FileDescriptor;

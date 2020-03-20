@@ -269,7 +269,7 @@ struct OSExtension final : Extension {
     // Remember to update the HHI :)
     // open() flags ----------
     // The preprocessor doesn't like "\" immediately before a ##
-#define O_(name) HHVM_RC_INT(HH\\Lib\\OS\\O_##name, O_##name)
+#define O_(name) HHVM_RC_INT(HH\\Lib\\_Private\\_OS\\O_##name, O_##name)
     O_(RDONLY);
     O_(WRONLY);
     O_(RDWR);

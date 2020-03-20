@@ -1,6 +1,5 @@
 <?hh
 
-use namespace HH\Lib\OS;
 use namespace HH\Lib\_Private\_OS;
 
 <<__EntryPoint>>

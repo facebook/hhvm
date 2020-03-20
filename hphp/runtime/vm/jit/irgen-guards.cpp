@@ -111,8 +111,7 @@ void assertTypeLocation(IRGS& env, const Location& loc, Type type) {
    }
 }
 
-void checkType(IRGS& env, const Location& loc,
-               Type type, Offset dest, bool outerOnly) {
+void checkType(IRGS& env, const Location& loc, Type type, Offset dest) {
   assertx(type <= TCell);
 
   switch (loc.tag()) {

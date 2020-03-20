@@ -497,7 +497,7 @@ void IRBuilder::exceptionStackBoundary() {
 
 void IRBuilder::setCurMarker(BCMarker newMarker) {
   if (newMarker == curMarker()) return;
-  FTRACE(2, "IRBuilder changing current marker from {} to {}\n",
+  FTRACE(2, "IRBuilder::setCurMarker:\n  old: {}\n  new: {}\n",
          curMarker().valid() ? curMarker().show() : "<invalid>",
          newMarker.show());
   assertx(newMarker.valid());
@@ -859,8 +859,8 @@ void IRBuilder::resetGuardFailBlock() {
 }
 
 void IRBuilder::pushBlock(BCMarker marker, Block* b) {
-  FTRACE(2, "IRBuilder saving {}@{} and using {}@{}\n",
-         m_curBlock, curMarker().show(), b, marker.show());
+  FTRACE(2, "IRBuilder::pushBlock:\n  saved: B{} @ {}\n pushed: B{} @ {}\n",
+         m_curBlock->id(), curMarker().show(), b->id(), marker.show());
   assertx(b);
 
   m_savedBlocks.push_back(
@@ -883,8 +883,9 @@ void IRBuilder::popBlock() {
   assertx(!m_savedBlocks.empty());
 
   auto const& top = m_savedBlocks.back();
-  FTRACE(2, "IRBuilder popping {}@{} to restore {}@{}\n",
-         m_curBlock, curMarker().show(), top.block, top.bcctx.marker.show());
+  FTRACE(2, "IRBuilder::popBlock:\n  popped: B{} @ {}\n restored: B{} @ {}\n",
+         m_curBlock->id(), curMarker().show(),
+         top.block->id(), top.bcctx.marker.show());
   m_state.finishBlock(m_curBlock);
   m_state.unpauseBlock(top.block);
   m_curBlock = top.block;

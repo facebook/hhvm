@@ -313,8 +313,8 @@ void interpOne(IRGS& env) {
       (out & InstrFlags::StackIns1) ? 1 : 0
     }.to<FPInvOffset>(env.irb->fs().bcSPOff());
 
-    checkType(env, Location::Stack { checkIdx }, *checkTypeType,
-              nextBcOff(env), true /* outerOnly */);
+    auto const loc = Location::Stack { checkIdx };
+    checkType(env, loc, *checkTypeType, nextBcOff(env));
   }
 }
 

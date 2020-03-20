@@ -415,8 +415,7 @@ RegionDescPtr form_region(Env& env) {
   for (auto const& lt : env.ctx.liveTypes) {
     auto t = lt.type;
     assertx(t <= TCell);
-    irgen::checkType(env.irgs, lt.location, t, env.ctx.sk.offset(),
-                     true /* outerOnly */);
+    irgen::checkType(env.irgs, lt.location, t, env.ctx.sk.offset());
   }
   env.irgs.irb->resetGuardFailBlock();
 
@@ -447,14 +446,11 @@ RegionDescPtr form_region(Env& env) {
     }
 
     if (!prepareInstruction(env)) break;
-
     if (traceThroughJmp(env)) continue;
-
     env.inst.interp = env.interp.count(env.sk);
 
     try {
-      translateInstr(env.irgs, env.inst, true /* checkOuterTypeOnly */,
-                     firstInst);
+      translateInstr(env.irgs, env.inst);
     } catch (const FailedIRGen& exn) {
       FTRACE(1, "ir generation for {} failed with {}\n",
              env.inst.toString(), exn.what());

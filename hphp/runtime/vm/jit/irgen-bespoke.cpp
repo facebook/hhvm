@@ -135,7 +135,7 @@ void guardToVanilla(IRGS& env, const NormalizedInstruction& ni, Location loc) {
   if (type.arrSpec().vanilla()) return;
   if (!env.irb->guardFailBlock()) env.irb->setGuardFailBlock(makeExit(env));
   auto const target_type = type.unspecialize().narrowToVanilla();
-  checkType(env, loc, target_type, -1, false);
+  checkType(env, loc, target_type, -1);
 }
 
 bool skipVanillaGuards(IRGS& env, const NormalizedInstruction& ni,

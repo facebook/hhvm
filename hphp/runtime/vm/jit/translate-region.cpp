@@ -214,7 +214,7 @@ void emitEntryAssertions(irgen::IRGS& irgs, const Func* func, SrcKey sk) {
 void emitPredictionsAndPreConditions(irgen::IRGS& irgs,
                                      const RegionDesc& /*region*/,
                                      const RegionDesc::Block& block,
-                                     bool isEntry, bool checkOuterTypeOnly) {
+                                     bool isEntry) {
   auto const sk = block.start();
   auto const bcOff = sk.offset();
   auto& typePredictions = block.typePredictions();
@@ -238,7 +238,7 @@ void emitPredictionsAndPreConditions(irgen::IRGS& irgs,
     auto type = preCond.type;
     auto loc  = preCond.location;
     assertx(type <= TCell);
-    irgen::checkType(irgs, loc, type, bcOff, checkOuterTypeOnly);
+    irgen::checkType(irgs, loc, type, bcOff);
   }
 
   // Finish emitting guards, and emit profiling counters.
@@ -482,10 +482,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
     // `EndGuards` after the checks, and generate profiling code in profiling
     // translations.
     auto const isEntry = &block == region.entry().get() && !inlining;
-    auto const checkOuterTypeOnly = !irb.guardFailBlock() &&
-      (!isEntry || irgs.context.kind != TransKind::Profile);
-    emitPredictionsAndPreConditions(irgs, region, block, isEntry,
-                                    checkOuterTypeOnly);
+    emitPredictionsAndPreConditions(irgs, region, block, isEntry);
     irb.resetGuardFailBlock();
 
     if (irb.inUnreachableState()) {
@@ -527,7 +524,6 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
 
       // Emit IR for the body of the instruction.
       try {
-        const bool firstInstr = isEntry && i == 0;
         auto const backwards = [&]{
           auto const offsets = instrJumpOffsets(inst.pc());
           return std::any_of(
@@ -540,7 +536,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
           emitedSurpriseCheck = true;
           inst.forceSurpriseCheck = true;
         }
-        translateInstr(irgs, inst, checkOuterTypeOnly, firstInstr);
+        translateInstr(irgs, inst);
       } catch (const RetryIRGen& e) {
         return TranslateResult::Retry;
       } catch (const FailedIRGen& exn) {

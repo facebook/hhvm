@@ -374,15 +374,10 @@ void initInstrInfo();
 int locPhysicalOffset(int32_t localIndex);
 
 /*
- * Take a NormalizedInstruction and turn it into a call to the appropriate ht
- * functions.  Updates the bytecode marker, handles interp one flags, etc.
+ * Take a NormalizedInstruction and turn it into a call to the appropriate
+ * irgen emit functions. Assumes the bytecode marker has been updated.
  */
-void translateInstr(
-  irgen::IRGS&,
-  const NormalizedInstruction&,
-  bool checkOuterTypeOnly,
-  bool firstInst
-);
+void translateInstr(irgen::IRGS&, const NormalizedInstruction&);
 
 ///////////////////////////////////////////////////////////////////////////////
 }}

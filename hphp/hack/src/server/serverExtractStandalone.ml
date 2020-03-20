@@ -259,7 +259,7 @@ let is_strict_fun ctx name = is_strict_dep ctx (Typing_deps.Dep.Fun name)
 let is_strict_class ctx name = is_strict_dep ctx (Typing_deps.Dep.Class name)
 
 let is_builtin_dep ctx dep =
-  let msg = Typing_deps.Dep.to_string dep in
+  let msg = Typing_deps.Dep.variant_to_string dep in
   let pos = value_or_not_found msg (get_dep_pos ctx dep) in
   Relative_path.prefix (Pos.filename pos) = Relative_path.Hhi
 
@@ -1165,7 +1165,7 @@ and add_dep ctx env ~this ty : unit =
 
 and add_signature_dependencies ctx env obj =
   let open Typing_deps.Dep in
-  let description = to_string obj in
+  let description = variant_to_string obj in
   match get_class_name obj with
   | Some cls_name ->
     do_add_dep ctx env (Typing_deps.Dep.Class cls_name);
@@ -1352,7 +1352,7 @@ let rec add_implementation_dependencies ctx env =
 let get_dependency_origin ctx cls (dep : 'a Typing_deps.Dep.variant) =
   Decl_provider.(
     Typing_deps.Dep.(
-      let description = to_string dep in
+      let description = variant_to_string dep in
       let cls = value_or_not_found description @@ get_class ctx cls in
       match dep with
       | Prop (_, name) ->

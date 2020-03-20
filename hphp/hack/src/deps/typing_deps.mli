@@ -81,7 +81,9 @@ module Dep : sig
 
   val extract_name : 'a variant -> string
 
-  val to_string : 'a variant -> string
+  val to_debug_string : t -> string
+
+  val variant_to_string : 'a variant -> string
 end
 
 module DepSet : sig

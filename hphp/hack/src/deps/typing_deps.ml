@@ -108,7 +108,9 @@ module Dep = struct
     | AllMembers s -> Utils.strip_ns s
     | Extends s -> Utils.strip_ns s
 
-  let to_string : type a. a variant -> string =
+  let to_debug_string = string_of_int
+
+  let variant_to_string : type a. a variant -> string =
    fun dep ->
     let prefix =
       match dep with

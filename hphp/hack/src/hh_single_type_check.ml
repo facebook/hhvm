@@ -1857,8 +1857,8 @@ let decl_and_run_mode
      we build a non-hashed respresentation of the dependency graph
      for printing. *)
     let get_debug_trace root obj =
-      let root = Typing_deps.Dep.to_string root in
-      let obj = Typing_deps.Dep.to_string obj in
+      let root = Typing_deps.Dep.variant_to_string root in
+      let obj = Typing_deps.Dep.variant_to_string obj in
       match Hashtbl.find dbg_deps obj with
       | Some set -> HashSet.add set root
       | None ->

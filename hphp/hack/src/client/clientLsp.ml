@@ -56,9 +56,9 @@ type hh_server_state =
   | Hh_server_stolen
   | Hh_server_forgot
 
-let hh_server_restart_button_text = "Restart Hack Server"
+let hh_server_restart_button_text = "Restart hh_server"
 
-let client_ide_restart_button_text = "Restart Hack IDE Services"
+let client_ide_restart_button_text = "Restart Hack IDE"
 
 type incoming_metadata = {
   (* time this message arrived at stdin *)
@@ -2423,24 +2423,24 @@ let get_client_ide_status (ide_service : ClientIdeService.t) :
         ShowMessageRequest.
           {
             type_ = MessageType.ErrorMessage;
-            message = "IDE services: not started.";
+            message = "Hack IDE: not started.";
             actions = [{ title = client_ide_restart_button_text }];
           };
       progress = None;
       total = None;
-      shortMessage = None;
+      shortMessage = Some "Hack: not started";
     }
   | ClientIdeService.Status.Initializing ->
     {
       ShowStatusFB.request =
         {
           ShowMessageRequest.type_ = MessageType.WarningMessage;
-          message = "IDE services: initializing.";
+          message = "Hack IDE: initializing.";
           actions = [];
         };
       progress = None;
       total = None;
-      shortMessage = Some "Hack IDE: initializing";
+      shortMessage = Some "Hack: initializing";
     }
   | ClientIdeService.Status.Processing_files _
   | ClientIdeService.Status.Ready ->
@@ -2448,12 +2448,12 @@ let get_client_ide_status (ide_service : ClientIdeService.t) :
       ShowStatusFB.request =
         {
           ShowMessageRequest.type_ = MessageType.InfoMessage;
-          message = "IDE services: ready.";
+          message = "Hack IDE: ready.";
           actions = [];
         };
       progress = None;
       total = None;
-      shortMessage = None;
+      shortMessage = Some "Hack \xE2\x9C\x93" (* check mark *);
     }
   | ClientIdeService.Status.Stopped
       { ClientIdeMessage.short_user_message; medium_user_message; _ } ->

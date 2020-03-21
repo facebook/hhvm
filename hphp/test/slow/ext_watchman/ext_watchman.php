@@ -233,13 +233,6 @@ function test_core(WatchmanInstance $wminst): void {
   } else {
     print("FAIL\n");
   }
-  print("Sync expecting immediate return...\n");
-  $synced = HH\watchman_sync_sub(SUB_NAME, 1) |> HH\asio\join($$);
-  if ($synced) {
-    print("PASS\n");
-  } else {
-    print("FAIL\n");
-  }
   print("Unsubscribing\n");
   $str = HH\watchman_unsubscribe(SUB_NAME) |> HH\asio\join($$);
 

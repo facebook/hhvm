@@ -607,6 +607,7 @@ dependencies = [
  "emit_symbol_refs_rust 0.0.0",
  "emit_type_constant_rust 0.0.0",
  "env 0.0.0",
+ "global_state 0.0.0",
  "hhas_symbol_refs_rust 0.0.0",
  "hhas_type 0.0.0",
  "hhbc_ast_rust 0.0.0",

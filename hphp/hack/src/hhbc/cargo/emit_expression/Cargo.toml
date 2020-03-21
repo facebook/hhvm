@@ -18,6 +18,7 @@ emit_pos_rust = { path = "../emit_pos" }
 emit_symbol_refs_rust = { path = "../emit_symbol_refs" }
 emit_type_constant_rust = { path = "../emit_type_constant" }
 env = { path = "../env" }
+global_state = { path = "../global_state" }
 hhas_symbol_refs_rust = { path = "../hhas_symbol_refs" }
 hhas_type = { path = "../hhas_type" }
 hhbc_ast_rust = { path = "../hhbc_ast" }

@@ -41,7 +41,7 @@ use hhbc_string_utils_rust::{
 };
 use instruction_sequence_rust::InstrSeq;
 use label_rust::Label;
-use oxidized::{ast, ast_defs, doc_comment::DocComment};
+use oxidized::{ast, ast_defs, doc_comment::DocComment, local_id};
 use runtime::TypedValue;
 use write::*;
 
@@ -2370,7 +2370,7 @@ fn print_expr<W: Write>(
             print_expr(w, env, &i.1)
         }
         E_::Xml(_) => not_impl!(),
-        E_::Efun(_) => not_impl!(),
+        E_::Efun(f) => print_efun(w, env, &f.0, &f.1),
         E_::Omitted => Ok(()),
         E_::Lfun(_) => Err(Error::fail(
             "expected Lfun to be converted to Efun during closure conversion print_expr",
@@ -2382,6 +2382,56 @@ fn print_expr<W: Write>(
             "TODO Unimplemented: We are missing a lot of cases in the case match. Delete this catchall"
         ))
     }
+}
+
+fn print_efun<W: Write>(
+    w: &mut W,
+    env: &ExprEnv,
+    f: &ast::Fun_,
+    use_list: &[ast::Lid],
+) -> Result<(), W::Error> {
+    if f.static_ {
+        w.write("static ")?;
+    }
+    if f.fun_kind.is_fasync() || f.fun_kind.is_fasync_generator() {
+        w.write("async ")?;
+    }
+    w.write("function ")?;
+    wrap_by_paren(w, |w| {
+        concat_by(w, ", ", &f.params, |w, p| print_fparam(w, env, p))
+    })?;
+    w.write(" ")?;
+    if !use_list.is_empty() {
+        w.write("use ")?;
+        wrap_by_paren(w, |w| {
+            concat_by(w, ", ", use_list, |w: &mut W, ast::Lid(_, id)| {
+                w.write(local_id::get_name(id))
+            })
+        })?;
+    }
+    print_block(w, env, &f.body.ast)
+}
+
+fn print_block<W: Write>(w: &mut W, env: &ExprEnv, block: &ast::Block) -> Result<(), W::Error> {
+    not_impl!()
+}
+
+fn print_fparam<W: Write>(w: &mut W, env: &ExprEnv, param: &ast::FunParam) -> Result<(), W::Error> {
+    if let Some(ast_defs::ParamKind::Pinout) = param.callconv {
+        w.write("inout ")?;
+    }
+    if param.is_variadic {
+        w.write("...")?;
+    }
+    option(w, &(param.type_hint).1, |w, h| {
+        print_hint(w, h)?;
+        w.write(" ")
+    })?;
+    w.write(&param.name)?;
+    option(w, &param.expr, |w, e| {
+        w.write(" = ")?;
+        print_expr(w, env, e)
+    })
 }
 
 fn print_bop<W: Write>(w: &mut W, bop: &ast_defs::Bop) -> Result<(), W::Error> {

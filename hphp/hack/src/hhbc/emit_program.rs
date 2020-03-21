@@ -89,18 +89,18 @@ fn emit_program_<'p>(
         .set_systemlib(flags.contains(FromAstFlags::IS_SYSTEMLIB));
 
     let main = emit_main(&mut emitter, flags, namespace, prog)?;
+    let mut functions = emit_functions_from_program(&mut emitter, &hoist_kinds, prog)?;
+    let classes = emit_classes_from_program(&mut emitter, &hoist_kinds, prog)?;
     let record_defs = emit_record_defs_from_program(&mut emitter, prog)?;
-    let file_attributes = emit_file_attributes_from_program(&mut emitter, prog)?;
+    let typedefs = emit_typedefs_from_program(&mut emitter, prog)?;
     let (constants, mut const_inits) = {
         let mut env = Env::default();
         // TODO(hrust), why clone is needed here? Try Rc,
         env.namespace = namespace.clone();
         emit_constants_from_program(&mut emitter, &mut env, prog)?
     };
-    let typedefs = emit_typedefs_from_program(&mut emitter, prog)?;
-    let classes = emit_classes_from_program(&mut emitter, &hoist_kinds, prog)?;
-    let mut functions = emit_functions_from_program(&mut emitter, &hoist_kinds, prog)?;
     functions.append(&mut const_inits);
+    let file_attributes = emit_file_attributes_from_program(&mut emitter, prog)?;
     let adata = emit_adata::take(&mut emitter).adata;
 
     Ok(HhasProgram {

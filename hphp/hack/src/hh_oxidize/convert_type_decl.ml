@@ -223,7 +223,7 @@ let record_declaration ?(pub = false) overrides labels =
      fields x_bar and x_baz, we want to remove x_, not x_ba). *)
   let prefix =
     let idx = ref (String.length prefix) in
-    while !idx > 1 && prefix.[!idx - 1] <> '_' do
+    while !idx > 0 && prefix.[!idx - 1] <> '_' do
       idx := !idx - 1
     done;
     String.sub prefix 0 !idx

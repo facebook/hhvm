@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<64e289fae99e0629c85180b2593511fb>>
+// @generated SignedSource<<aea3f2f8fba7431aad786bf7eed4c4cc>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -45,10 +45,10 @@ pub struct TypingTyvarOccurrences {
     /// There are only entries for variables that are unsolved or contain
     /// other unsolved type variables. Variables that are solved and contain
     /// no other unsolved type variables get removed from this map.
-    pub yvar_occurrences: i_map::IMap<i_set::ISet>,
+    pub tyvar_occurrences: i_map::IMap<i_set::ISet>,
     /// Mapping of type variables to the type variables contained in their
     /// types which are either unsolved or themselves contain unsolved type
     /// variables.
     /// This is the dual of tyvar_occurrences.
-    pub yvars_in_tyvar: i_map::IMap<i_set::ISet>,
+    pub tyvars_in_tyvar: i_map::IMap<i_set::ISet>,
 }

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<45071f96ebfc7b8de2feb676d240e1f6>>
+// @generated SignedSource<<4184acddca1789185ca8d5e56380bd48>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -598,8 +598,6 @@ pub enum ArrayKind {
     AKdarray(Ty, Ty),
     /// An array annotated as a varray_or_darray.
     AKvarrayOrDarray(Ty, Ty),
-    /// This is a type created when we see array() literal
-    AKempty,
 }
 
 #[derive(

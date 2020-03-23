@@ -17,4 +17,3 @@ ocamlrep = { path = "../../ocamlrep" }
 oxidized = { path = "../../oxidized" }
 parser_core_types = { path = "../../parser/cargo/core_types" }
 smart_constructors = { path = "../../parser/cargo/smart_constructors" }
-rust-crypto = "0.2"

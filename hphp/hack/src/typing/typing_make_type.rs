@@ -93,7 +93,7 @@ impl<'a> TypeBuilder<'a> {
 impl<'a> TypeBuilder<'a> {
     // All type construction should go through here
     fn mk(&'a self, reason: PReason<'a>, ty_: Ty_<'a>) -> Ty<'a> {
-        Ty(reason, self.alloc(ty_))
+        Ty::mk(reason, self.alloc(ty_))
     }
 
     pub fn prim(&'a self, reason: PReason<'a>, kind: PrimKind<'a>) -> Ty<'a> {

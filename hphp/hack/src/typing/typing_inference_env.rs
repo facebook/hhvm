@@ -73,7 +73,7 @@ pub type TypingInferenceEnv<'a> = &'a TypingInferenceEnvStruct<'a>;
 
 impl<'a> TypingInferenceEnvStruct<'a> {
     pub fn expand_type(&mut self, ty: Ty<'a>) -> Ty<'a> {
-        let Ty(r, ty_) = ty;
+        let (r, ty_) = ty.unpack();
         match ty_ {
             Ty_::Tvar(v) => match self.expand_var(r, *v) {
                 None => ty,
@@ -101,7 +101,7 @@ impl<'a> TypingInferenceEnvStruct<'a> {
                 }
                 Some(tvinfo) => match &tvinfo.solving_info {
                     SolvingInfo::Type(ty) => {
-                        let Ty(r0, ty_) = ty;
+                        let (r0, ty_) = ty.unpack();
                         r = r0;
                         match ty_ {
                             Ty_::Tvar(v0) => {

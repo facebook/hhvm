@@ -166,9 +166,15 @@ pub enum Ty_<'a> {
 /// (reason ptr, inlined type). Which reduces the size of
 /// Ty_ and decreases stack usage.
 #[derive(Clone, Copy, Debug)]
-pub struct Ty<'a>(pub PReason<'a>, pub &'a Ty_<'a>);
+pub struct Ty<'a>(PReason<'a>, &'a Ty_<'a>);
 
 impl<'a> Ty<'a> {
+    pub fn mk(reason: PReason<'a>, ty_: &'a Ty_<'a>) -> Ty<'a> {
+        Ty(reason, ty_)
+    }
+    pub fn unpack(&self) -> (PReason<'a>, &'a Ty_<'a>) {
+        (self.0, self.1)
+    }
     pub fn get_node(&self) -> &'a Ty_<'a> {
         let Ty(_r, t) = self;
         *t
@@ -229,6 +235,7 @@ impl<'a> Ty<'a> {
         }
     }
 }
+
 /// This is a direct translation of oxidized::gen::typing_defs_core::TaccessType.
 ///
 /// We need this because it wraps Tys

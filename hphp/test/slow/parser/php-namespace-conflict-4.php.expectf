@@ -1,1 +1,0 @@
-Fatal error: Cannot declare Blah\string because the name was explicitly used earlier via a `use' statement on line 3 in %s/test/slow/parser/php-namespace-conflict-4.php on line 4

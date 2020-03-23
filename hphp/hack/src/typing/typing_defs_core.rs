@@ -169,15 +169,15 @@ pub enum Ty_<'a> {
 pub struct Ty<'a>(pub PReason<'a>, pub &'a Ty_<'a>);
 
 impl<'a> Ty<'a> {
-    pub fn get_node(&self) -> &Ty_<'a> {
+    pub fn get_node(&self) -> &'a Ty_<'a> {
         let Ty(_r, t) = self;
-        t
+        *t
     }
-    pub fn get_reason(&self) -> &PReason<'a> {
+    pub fn get_reason(&self) -> PReason<'a> {
         let Ty(r, _t) = self;
-        r
+        *r
     }
-    pub fn get_pos(&self) -> Option<&oxidized::pos::Pos> {
+    pub fn get_pos(&self) -> Option<&'a oxidized::pos::Pos> {
         self.get_reason().pos
     }
     pub fn is_tyvar(&self) -> bool {

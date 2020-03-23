@@ -231,8 +231,7 @@ let make env chunk_group rbm =
     rules_on_partially_bound_lines;
   }
 
-let rbm_from_source source_text chunk_group =
-  let rbm = Chunk_group.get_always_rule_bindings chunk_group in
+let add_breaks_from_source rbm source_text chunk_group =
   let (rbm, _) =
     List.fold
       chunk_group.Chunk_group.chunks
@@ -252,8 +251,19 @@ let rbm_from_source source_text chunk_group =
   in
   rbm
 
+let rbm_from_source source_text chunk_group =
+  let rbm = IMap.empty in
+  add_breaks_from_source rbm source_text chunk_group
+
+(** When we are unable to find a good solution, this function produces a
+    "best-effort" solution based on the original source text. We break the rules
+    configured to always break, then break any rules which appear to be broken
+    in the original source text, then propagate breakage (breaking any parental
+    rules containing those rules we already bound to be broken on). *)
 let from_source env source_text chunk_group =
-  let rbm = rbm_from_source source_text chunk_group in
+  let rbm = Chunk_group.get_always_rule_bindings chunk_group in
+  let rbm = add_breaks_from_source rbm source_text chunk_group in
+  let rbm = Chunk_group.propagate_breakage chunk_group rbm in
   make env chunk_group rbm
 
 (** Every rule is broken. Everything is going hog wild. *)

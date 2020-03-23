@@ -49,7 +49,7 @@ function count_leaves($container) {
 # obtained by counting leaves, allowing for multiple levels of categorization.
 function print_map($header, $map, $total) {
   printf("%s\n", $header);
-  uasort(&$map, ($a, $b) ==> count_leaves($b) - count_leaves($a));
+  uasort(inout $map, ($a, $b) ==> count_leaves($b) - count_leaves($a));
 
   foreach ($map as $name => $samples) {
     $count = count_leaves($samples);
@@ -72,10 +72,9 @@ function increment_key2($map, $key1, $key2) {
   increment_key($map[$key1], $key2);
 }
 
-function categorize_helper($func) {
-  // Order is important in this Map: we return the first category with a match,
-  // even though a later category may also match.
-  static $categories = Map {
+<<__Memoize>>
+function get_categories() {
+  return Map {
     'InterpOne' => Vector {
       '/interpOne/',
     },
@@ -136,6 +135,12 @@ function categorize_helper($func) {
       '/^HHVM::/',
     }
   };
+}
+
+function categorize_helper($func) {
+  // Order is important in this Map: we return the first category with a match,
+  // even though a later category may also match.
+  $categories = get_categories();
 
   foreach ($categories as $cat => $regexes) {
     foreach ($regexes as $regex) {

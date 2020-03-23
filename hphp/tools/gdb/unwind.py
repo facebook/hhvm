@@ -16,11 +16,12 @@ import frame
 # HHVM unwinder.
 
 class FrameId(object):
-    __slots__ = ['sp', 'pc']
+    __slots__ = ['sp', 'pc', 'special']
 
-    def __init__(self, sp, ip):
+    def __init__(self, sp, ip, special):
         self.sp = sp
         self.pc = ip
+        self.special = special
 
 
 class HHVMUnwinder(Unwinder):
@@ -46,13 +47,20 @@ falls back to the default GDB unwinder(s) otherwise.
         # a given function frame.  Unfortunately, we can't restore the stack
         # pointer correctly in the TC, and we don't know our starting IP.
         #
-        # Instead, we just use the stack pointer value for our most recent call
-        # into native code, along with the current PC.  It turns out that this
-        # is good enough.
+        # Instead, we just use the stack pointer value for our most
+        # recent call into native code, along with the current PC.  It
+        # turns out that this is almost good enough. The problem is
+        # that we can end up with two frames with the same sp and pc
+        # in the same vm nesting (especially if we have interp ret
+        # helpers as the return address), and if two frame ids are the
+        # same, gdb bails out with an error.
         #
-        # GDB expects stack pointers to be monotonically nondecreasing as we
-        # unwind, so we can't use, e.g., the frame pointer as part of the ID.
-        unwind_info = pending_frame.create_unwind_info(FrameId(sp, ip))
+        # GDB expects stack pointers to be monotonically nondecreasing
+        # as we unwind, so we can't use fp instead of sp, but FrameIds
+        # are allowed to have a "special" field thats used to
+        # differentiate otherwise identical ones; so use fp there
+        # instead.
+        unwind_info = pending_frame.create_unwind_info(FrameId(sp, ip, fp))
 
         # Restore the saved frame pointer and instruction pointer.
         fp = fp.cast(T('uintptr_t').pointer())

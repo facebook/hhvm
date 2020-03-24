@@ -576,18 +576,18 @@ let value_setters =
     @@ fun opts v -> { opts with option_phpism_disable_halt_compiler = v = 1 }
     );
     ( set_value "hhvm.emit_func_pointers" get_value_from_config_int
-    @@ fun opts v -> { opts with option_emit_func_pointers = v > 0 } );
+    @@ fun opts v -> { opts with option_emit_func_pointers = v = 1 } );
     ( set_value "hhvm.emit_cls_meth_pointers" get_value_from_config_int
-    @@ fun opts v -> { opts with option_emit_cls_meth_pointers = v > 0 } );
+    @@ fun opts v -> { opts with option_emit_cls_meth_pointers = v = 1 } );
     ( set_value "hhvm.emit_meth_caller_func_pointers" get_value_from_config_int
-    @@ fun opts v -> { opts with option_emit_meth_caller_func_pointers = v > 0 }
+    @@ fun opts v -> { opts with option_emit_meth_caller_func_pointers = v = 1 }
     );
     ( set_value "hhvm.emit_inst_meth_pointers" get_value_from_config_int
-    @@ fun opts v -> { opts with option_emit_inst_meth_pointers = v > 0 } );
+    @@ fun opts v -> { opts with option_emit_inst_meth_pointers = v = 1 } );
     ( set_value "hhvm.rx_is_enabled" get_value_from_config_int @@ fun opts v ->
-      { opts with option_rx_is_enabled = v > 0 } );
+      { opts with option_rx_is_enabled = v = 1 } );
     ( set_value "hhvm.array_provenance" get_value_from_config_int
-    @@ fun opts v -> { opts with option_array_provenance = v > 0 } );
+    @@ fun opts v -> { opts with option_array_provenance = v = 1 } );
     ( set_value
         "hhvm.hack.lang.enable_class_level_where_clauses"
         get_value_from_config_int
@@ -625,9 +625,9 @@ let value_setters =
     @@ fun opts v ->
       { opts with option_disallow_func_ptrs_in_constants = v = 1 } );
     ( set_value "hhvm.emit_generics_ub" get_value_from_config_int
-    @@ fun opts v -> { opts with option_emit_generics_ub = v > 0 } );
+    @@ fun opts v -> { opts with option_emit_generics_ub = v = 1 } );
     ( set_value "hhvm.hack.lang.check_int_overflow" get_value_from_config_int
-    @@ fun opts v -> { opts with option_check_int_overflow = v > 0 } );
+    @@ fun opts v -> { opts with option_check_int_overflow = v = 1 } );
     ( set_value "hhvm.hack.lang.rust_lowerer" get_value_from_config_int
     @@ fun opts v -> { opts with option_rust_lowerer = v = 1 } );
     ( set_value

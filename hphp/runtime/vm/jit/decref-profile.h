@@ -46,11 +46,13 @@ namespace HPHP { namespace jit {
 struct DecRefProfile {
 
   uint16_t uncounted() const {
-    return total - refcounted;
+    auto const result = int(total) - int(refcounted);
+    return safe_cast<uint16_t>(std::max(result, 0));
   }
 
   uint16_t persistent() const {
-    return refcounted - released - decremented;
+    auto const result = int(refcounted) - int(released) - int(decremented);
+    return safe_cast<uint16_t>(std::max(result, 0));
   }
 
   uint16_t destroyed() const {

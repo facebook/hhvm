@@ -515,6 +515,8 @@ them when we shouldn't.
 #include "hphp/util/safe-cast.h"
 #include "hphp/util/trace.h"
 
+#include "hphp/runtime/ext/asio/ext_wait-handle.h"
+
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/pass-tracer.h"
 #include "hphp/runtime/vm/jit/cfg.h"
@@ -3437,10 +3439,12 @@ void selectiveWeakenDecRefs(IRUnit& unit) {
   // Union of types that cannot trigger Copy-On-Write for inner elements in case
   // they're not released.  We can be more aggressive when optimizing them here.
   auto const cowFree = TStr | TUncounted;
+  auto const TAwaitable = Type::SubObj(c_Awaitable::classof());
 
   for (auto& block : blocks) {
     for (auto& inst : *block) {
       if (inst.is(DecRef)) {
+        const auto& type = inst.src(0)->type();
         const auto profile = decRefProfile(unit, &inst);
         if (profile.optimizing()) {
           const auto data = profile.data();
@@ -3449,14 +3453,14 @@ void selectiveWeakenDecRefs(IRUnit& unit) {
           double decrefdPctLimit = inst.src(0)->type() <= cowFree
             ? RuntimeOption::EvalJitPGODecRefNopDecPercent
             : RuntimeOption::EvalJitPGODecRefNopDecPercentCOW;
-          if (decrefdPct < decrefdPctLimit) {
+          if (decrefdPct < decrefdPctLimit && !(type <= TCounted)) {
             inst.convertToNop();
           } else {
             const auto destroyPct = data.percent(data.destroyed());
             double destroyPctLimit = inst.src(0)->type() <= cowFree
               ? RuntimeOption::EvalJitPGODecRefNZReleasePercent
               : RuntimeOption::EvalJitPGODecRefNZReleasePercentCOW;
-            if (destroyPct < destroyPctLimit) {
+            if (destroyPct < destroyPctLimit && !(type <= TAwaitable)) {
               inst.setOpcode(DecRefNZ);
             }
           }

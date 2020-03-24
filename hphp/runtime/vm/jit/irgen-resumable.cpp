@@ -460,11 +460,13 @@ bool likelySuspended(const SSATmp* awaitable) {
 void emitWHResult(IRGS& env) {
   if (!topC(env)->isA(TObj)) PUNT(WHResult-NonObject);
 
+  auto const TAwaitable = Type::SubObj(c_Awaitable::classof());
   auto const exitSlow = makeExitSlow(env);
-  auto const child = popC(env);
+  auto const popped = popC(env);
   // In most conditions, this will be optimized out by the simplifier.
   // We already need to setup a side-exit for the !succeeded case.
-  gen(env, JmpZero, exitSlow, gen(env, IsWaitHandle, child));
+  gen(env, JmpZero, exitSlow, gen(env, IsWaitHandle, popped));
+  auto const child = gen(env, AssertType, TAwaitable, popped);
   static_assert(
     c_Awaitable::STATE_SUCCEEDED == 0,
     "we test state for non-zero, success must be zero"
@@ -488,14 +490,16 @@ void emitAwait(IRGS& env) {
     PUNT(Await-AsyncGenerator);
   }
 
-  auto const exitSlow = makeExitSlow(env);
 
   if (!topC(env)->isA(TObj)) PUNT(Await-NonObject);
 
-  auto const child = popC(env);
+  auto const TAwaitable = Type::SubObj(c_Awaitable::classof());
+  auto const exitSlow = makeExitSlow(env);
+  auto const popped = popC(env);
   auto const childIsSWH =
-    child->type() <= Type::SubObj(c_StaticWaitHandle::classof());
-  gen(env, JmpZero, exitSlow, gen(env, IsWaitHandle, child));
+    popped->type() <= Type::SubObj(c_StaticWaitHandle::classof());
+  gen(env, JmpZero, exitSlow, gen(env, IsWaitHandle, popped));
+  auto const child = gen(env, AssertType, TAwaitable, popped);
 
   auto const handleSucceeded = [&] {
     auto const awaitedTy = awaitedType(env, child, resumeOffset);

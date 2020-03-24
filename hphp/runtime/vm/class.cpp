@@ -250,9 +250,9 @@ struct assert_sizeof_class {
   // If this static_assert fails, the compiler error will have the real value
   // of sizeof_Class in it since it's in this struct's type.
 #ifndef NDEBUG
-  static_assert(sz == (use_lowptr ? 288 : 328), "Change this only on purpose");
+  static_assert(sz == (use_lowptr ? 276 : 328), "Change this only on purpose");
 #else
-  static_assert(sz == (use_lowptr ? 280 : 320), "Change this only on purpose");
+  static_assert(sz == (use_lowptr ? 272 : 320), "Change this only on purpose");
 #endif
 };
 template struct assert_sizeof_class<sizeof_Class>;
@@ -1810,23 +1810,20 @@ void checkDeclarationCompat(const PreClass* preClass,
 Class::Class(PreClass* preClass, Class* parent,
              VMCompactVector<ClassPtr>&& usedTraits,
              unsigned classVecLen, unsigned funcVecLen)
-#ifndef NDEBUG
-  : m_magic{kMagic}
-  , m_parent(parent)
-#else
-  : m_parent(parent)
-#endif
+  : m_releaseFunc{ObjectData::release}
+  , m_preClass(PreClassPtr(preClass))
+  , m_classVecLen(always_safe_cast<decltype(m_classVecLen)>(classVecLen))
+  , m_funcVecLen(always_safe_cast<decltype(m_funcVecLen)>(funcVecLen))
   , m_maybeRedefsPropTy{false}
   , m_selfMaybeRedefsPropTy{false}
   , m_needsPropInitialCheck{false}
   , m_hasReifiedGenerics{false}
   , m_hasReifiedParent{false}
   , m_serialized(false)
-  , m_preClass(PreClassPtr(preClass))
-  , m_classVecLen(always_safe_cast<decltype(m_classVecLen)>(classVecLen))
-  , m_funcVecLen(always_safe_cast<decltype(m_funcVecLen)>(funcVecLen))
-  // Will be overwritten if the class has a native dtor
-  , m_releaseFunc{ObjectData::release}
+  , m_parent(parent)
+#ifndef NDEBUG
+  , m_magic{kMagic}
+#endif
 {
   if (usedTraits.size()) {
     allocExtraData();

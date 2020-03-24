@@ -188,6 +188,10 @@ struct Class : AtomicCountable {
     LowPtr<Class> baseCls;
 
     Attr attrs;
+
+    /*
+     * Slot number that is only valid for reflection and serialization.
+     */
     Slot serializationIdx;
   };
 
@@ -1554,28 +1558,9 @@ private:
   void checkPropInitialValues() const;
 
   /////////////////////////////////////////////////////////////////////////////
-  // Static data members.
-
-public:
-  /////////////////////////////////////////////////////////////////////////////
-  // Data members.
-  //
-  // Ordered by usage frequency.  Do not re-order for cosmetic reasons.
-  //
-  // The ordering is reverse order of hotness because m_classVec is relatively
-  // hot, and must be the last member.
-
-  LowPtr<Class> m_next{nullptr}; // used by NamedEntity
+  // Friendship.
 
 private:
-  static constexpr uint32_t kMagic = 0xce7adb33;
-
-#ifndef NDEBUG
-  // For asserts only.
-  uint32_t m_magic;
-#endif
-
-  mutable default_ptr<ExtraData> m_extra;
   template<class T> friend typename
     std::enable_if<std::is_base_of<c_Awaitable, T>::value, void>::type
   finish_class();
@@ -1584,42 +1569,154 @@ private:
 
   friend struct StandardExtension;
 
-  RequirementMap m_requirements;
-  VMCompactVector<ClassPtr> m_declInterfaces;
-  mutable rds::Link<Array, rds::Mode::Normal> m_nonScalarConstantCache;
+  /////////////////////////////////////////////////////////////////////////////
+  // Static data members.
 
-  LowPtr<Func> m_toString;
+private:
+  static constexpr uint32_t kMagic = 0xce7adb33;
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Data members.
+  //
+  // Ordered by usage frequency.  Do not re-order for cosmetic reasons.
+  //
+  // The ordering is order of hotness because the funcVec() preallocation is
+  // relatively hot, and must be the first member.
+
+private:
+  /*
+   * Atomic refcount; inherited from AtomicCountable.
+   */
+  // mutable std::atomic<RefCount> m_count;
+
+  /*
+   * An exclusive upper limit on the post-sort indices of properties of this
+   * class that may be countable.  Properties that may be countable will have
+   * indices less than this bound.  If we can guarantee that all properties of
+   * this class are uncounted, the bound will be 0.
+   *
+   * (Note that there may still be uncounted properties with indices less than
+   * this bound; in particular, we can't sort parent class properties freely.)
+   */
+  ObjectProps::quick_index m_countablePropsEnd;
+
+  /*
+   * An index that represent the size bin in the MemoryManager.
+   */
+  uint8_t m_sizeIdx{0};
+
+  /*
+   * Runtime attributes computed at runtime init-time.
+   *
+   * Not to be confused with m_attrCopy which are compile-time and stored in
+   * the repo.
+   */
+  uint8_t m_RTAttrs;
+
+  /*
+   * Bitmap of parent classes and implemented interfaces.
+   *
+   * Each bit corresponds to a commonly used class name, determined during the
+   * profiling warmup requests.
+   */
+  InstanceBits::BitSet m_instanceBits;
+
+  /*
+   * Map from logical slot to physical memory index for object properties.
+   */
+  VMFixedVector<ObjectProps::quick_index> m_slotIndex;
+
+  /*
+   * Metadata about static properties, indexable in two ways:
+   *
+   * 1. Key is property name or Slot.  This is the normal use case.
+   *
+   * 2. Key is sequence ID for serialization.  When accessed in this manner,
+   *    only `serializationIdx` is valid, and all other fields are garbage.
+   *    (This is also the only use case in which `serializationIdx` is valid.)
+   */
+  SPropMap m_staticProperties;
+
+  /*
+   * Vector of interfaces and their vtables.
+   */
+  LowPtr<VtableVecSlot> m_vtableVec{nullptr};
+
+  /*
+   * Pointer to a function that releases object instances of this class type.
+   */
+  ObjReleaseFunc m_releaseFunc;
+
+  /*
+   * Instance property metadata.  Access is analogous to access for
+   * m_staticProperties.
+   */
+  PropMap m_declProperties;
+
+  /*
+   * Static properties are stored in RDS.  There are three phases of sprop
+   * initialization:
+   *
+   * 1. The array of links is itself allocated on Class creation.
+   * 2. The links are bound either when codegen needs the handle value, or when
+   *    initSProps() is called in any request.  Afterwards, m_sPropCacheInit is
+   *    bound, defaulting to false.
+   * 3. The RDS value at m_sPropCacheInit is set to true when initSProps() is
+   *    called, and the values are actually initialized.
+   *
+   * For non-persistent classes, we put m_sPropCache in rds::Local, but use the
+   * m_sPropCacheInit flag to indicate whether m_sPropCache needs to be
+   * reinitialized.
+   */
+  mutable rds::Link<bool, rds::Mode::NonLocal> m_sPropCacheInit;
+  mutable rds::Link<
+    StaticPropData,
+    rds::Mode::NonNormal
+  >* m_sPropCache{nullptr};
+
+  mutable default_ptr<ExtraData> m_extra;
+  uint32_t m_memoSize{0};
+
   LowPtr<Func> m_invoke; // __invoke, iff non-static (or closure)
 
   ConstMap m_constants;
 
-  ClassPtr m_parent;
-  int32_t m_declPropNumAccessible;
-  mutable rds::Link<LowPtr<Class>, rds::Mode::NonLocal> m_cachedClass;
+  PreClassPtr m_preClass;
+
+  unsigned m_attrCopy;
+
+  veclen_t m_classVecLen;
+  veclen_t m_funcVecLen;
+  veclen_t m_vtableVecLen{0};
+
 
   /*
-   * Whether this is a subclass of Closure whose m_invoke->m_cls has been set
-   * to the closure's context class.
+   * This class, or one of its ancestors, has a property which maybe redefines
+   * an existing property in an incompatible way.
    */
-  std::atomic<bool> m_scoped{false};
-
-  /* This class, or one of its transitive parents, has a property which maybe
-   * redefines an existing property in an incompatible way. */
   bool m_maybeRedefsPropTy       : 1;
-  /* This class (and not any of its transitive parents) has a property which
-   * maybe redefines an existing property in an incompatible way. */
+  /*
+   * This class (and not any of its transitive parents) has a property which
+   * maybe redefines an existing property in an incompatible way.
+   */
   bool m_selfMaybeRedefsPropTy   : 1;
-  /* This class has a property with an initial value which might not satisfy its
-   * type-hint (and therefore requires a check when initialized). */
+  /*
+   * This class has a property with an initial value which might not satisfy
+   * its type-hint (and therefore requires a check when initialized).
+   */
   bool m_needsPropInitialCheck   : 1;
-  /* This class has reified generics */
+  /*
+   * This class has reified generics.
+   */
   bool m_hasReifiedGenerics      : 1;
-  /* This class has a refied parent */
+  /*
+   * This class has a refied parent.
+   */
   bool m_hasReifiedParent        : 1;
   /*
    * Whether the Class requires initialization, because it has either
-   * {p,s}init() methods or static members, or possibly has prop type invariance
-   * violations.
+   * {p,s}init() methods or static members, or possibly has prop type
+   * invariance violations.
    */
   bool m_needInitialization : 1;
 
@@ -1630,7 +1727,12 @@ private:
    */
   mutable bool m_serialized : 1;
 
-  // NB: 15 bits available here (in USE_LOWPTR builds).
+  // NB: 7 bits available here (in USE_LOWPTR builds).
+
+  ClassPtr m_parent;
+
+  MethodMap m_methods;
+  InterfaceMap m_interfaces;
 
   /*
    * Vector of 86pinit() methods that need to be called to complete instance
@@ -1643,116 +1745,43 @@ private:
    */
   VMFixedVector<const Func*> m_sinitVec;
   VMFixedVector<const Func*> m_linitVec;
-  LowPtr<Func> m_ctor;
-  PropInitVec m_declPropInit;
   VMFixedVector<const Func*> m_pinitVec;
 
   /*
-   * There are two ways to index m_staticProperties.
-   * 1. Key can be either name or Slot, value is Prop. When used this way,
-   *    serializationIdx field of prop is meaningless and should not be
-   *    accessed.
-   * 2. Key is sequence id for serialization, value is Prop. When used this way,
-   *    the only meaningful field of prop is serializationIdx,
-   *    which represents a slot number. All other field is meaningless and
-   *    should not be accessed.
-   *    The serializationIdx is used only for reflection.
-   */
-  SPropMap m_staticProperties;
-  PreClassPtr m_preClass;
-  InterfaceMap m_interfaces;
-
-  /*
-   * Bitmap of parent classes and implemented interfaces.  Each bit corresponds
-   * to a commonly used class name, determined during the profiling warmup
-   * requests.
-   */
-  InstanceBits::BitSet m_instanceBits;
-  MethodMap m_methods;
-
-  /*
-   * Static properties are stored in RDS.  There are three phases of sprop
-   * initialization:
-   * 1. The array of links is itself allocated on Class creation.
-   * 2. The links are bound either when codegen needs the handle value, or when
-   *    initSProps() is called in any request.  Afterwards, m_sPropCacheInit is
-   *    bound, defaulting to false.
-   * 3. The RDS value at m_sPropCacheInit is set to true when initSProps() is
-   *    called, and the values are actually initialized.
+   * Initialization information about instance properties.
    *
-   * For non-persistent classes, we put sPropCache in rds::Local, but use the
-   * m_sPropCacheInit flag to indicate whether sPropCache needs to be
-   * reinitialized.
+   * Indexed by the _physical_ index of the property within an object, not its
+   * logical Slot.
    */
-  mutable rds::Link<StaticPropData, rds::Mode::NonNormal>*
-    m_sPropCache{nullptr};
-  mutable rds::Link<bool, rds::Mode::NonLocal> m_sPropCacheInit;
-
-  veclen_t m_classVecLen;
-  veclen_t m_funcVecLen;
-  veclen_t m_vtableVecLen{0};
-  LowPtr<VtableVecSlot> m_vtableVec{nullptr};
-
-  /*
-   * Each ObjectData is created with enough trailing space to directly store
-   * the vector of declared properties. To look up a property by name and
-   * determine whether it is declared, use m_declPropMap. If the declared
-   * property index is already known (as may be the case when executing via the
-   * TC), property metadata in m_declPropInfo can be directly accessed.
-   *
-   * m_declPropInit is indexed by the physical index of the property within the
-   * objects (and not by the logical slot), and contains initialization
-   * information.
-   *
-   * There are two ways to index m_declProperties.
-   * 1. Key can be either name or Slot, value is Prop. When used this way,
-   *    serializationIdx field of prop is meaningless and should not be
-   *    accessed.
-   * 2. Key is sequence id for serialization, value is Prop. When used this way,
-   *    the only meaningful field of prop is serializationIdx,
-   *    which represents a slot number. All other field is meaningless and
-   *    should not be accessed.
-   *    The serializationIdx is used for both serialization and reflection.
-   */
-  PropMap m_declProperties;
+  PropInitVec m_declPropInit;
 
   MaybeDataType m_enumBaseTy;
-
   /*
-   * runtime attributes computed at runtime init time. Not to be confused with
-   * m_attrCopy which are compile-time and stored in the repo.
+   * Whether this is a subclass of Closure whose m_invoke->m_cls has been set
+   * to the closure's context class.
    */
-  uint8_t m_RTAttrs;
+  std::atomic<bool> m_scoped{false};
+  int32_t m_declPropNumAccessible;
 
-  // An index that represent the size bin in the MemoryManager
-  uint8_t m_sizeIdx{0};
+  LowPtr<Func> m_ctor;
+  LowPtr<Func> m_toString;
 
   mutable rds::Link<PropInitVec*, rds::Mode::Normal> m_propDataCache;
+  mutable rds::Link<LowPtr<Class>, rds::Mode::NonLocal> m_cachedClass;
 
-  /* Indexed by logical Slot number, gives the corresponding index within the
-   * objects in memory. */
-  VMFixedVector<ObjectProps::quick_index> m_slotIndex;
+  RequirementMap m_requirements;
+  VMCompactVector<ClassPtr> m_declInterfaces;
 
-  /*
-   * Cache of m_preClass->attrs().
-   */
-  unsigned m_attrCopy;
+  mutable rds::Link<Array, rds::Mode::Normal> m_nonScalarConstantCache;
 
-  // Pointer to a function that releases object instances of this class type.
-  ObjReleaseFunc m_releaseFunc;
-  // Determines the offset to the base pointer to be released
-  uint32_t m_memoSize{0};
+public:
+  LowPtr<Class> m_next{nullptr}; // used by NamedEntity
 
-  /*
-   * An exclusive upper limit on the post-sort indices of properties of this
-   * class that may be countable. Properties that may be countable will have
-   * indices less than this bound. If we can guarantee that all properties of
-   * this class are uncounted, the bound will be 0.
-   *
-   * (Note that there may still be uncounted properties with indices less than
-   * this bound; in particular, we can't sort parent class properties freely.)
-   */
-  ObjectProps::quick_index m_countablePropsEnd;
+private:
+#ifndef NDEBUG
+  // For asserts only.
+  uint32_t m_magic;
+#endif
 
   /*
    * Vector of Class pointers that encodes the inheritance hierarchy, including

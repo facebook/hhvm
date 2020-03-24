@@ -22,7 +22,7 @@ class Base<T> {
   public function set($val): this {
     return $this;
   }
-  public function __call(string $name, array $args): this {
+  public function magic(mixed ...$args): this {
     return $this;
   }
 
@@ -40,7 +40,7 @@ final class Another<T> {
     $this->data = $data;
     return $this;
   }
-  public function __call(string $name, array $args): ?T {
+  public function magicGetter(array ...$args): ?T {
     return $this->data ? $this->data->data : null;
   }
   public static function make(Gen<T> $data): this {

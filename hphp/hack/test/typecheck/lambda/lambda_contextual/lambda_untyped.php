@@ -2,7 +2,8 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 abstract class Fake {
-  abstract public function __call($name, $calls);
+  abstract public function foo(...$args);
+  abstract public function MyMethod($args);
 }
 
 class C {

@@ -566,6 +566,14 @@ bool UnitEmitter::check(bool verbose) const {
   );
 }
 
+bool needs_extended_line_table() {
+  return RuntimeOption::RepoDebugInfo &&
+    (RuntimeOption::EvalDumpHhas ||
+     RuntimeOption::EnableHphpdDebugger ||
+     RuntimeOption::EnableVSDebugger ||
+     RuntimeOption::EnableDebuggerServer);
+}
+
 std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
   INC_TPC(unit_load);
 
@@ -712,12 +720,11 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
    */
   if (m_sourceLocTab.size() != 0) {
     stashLineTable(u.get(), createLineTable(m_sourceLocTab, m_bclen));
-    // If we plan to dump hhas we will need the extended line table information
-    // in the output, and if we're not writing the repo, stashing it here is
-    // necessary for it to make it through.
-    if (RuntimeOption::RepoDebugInfo &&
-        RuntimeOption::EvalDumpHhas &&
-        SystemLib::s_inited) {
+    // If the debugger is enabled, or we plan to dump hhas we will
+    // need the extended line table information in the output, and if
+    // we're not writing the repo, stashing it here is necessary for
+    // it to make it through.
+    if (needs_extended_line_table()) {
       stashExtendedLineTable(u.get(), createSourceLocTable());
     }
   } else if (saveLineTable) {

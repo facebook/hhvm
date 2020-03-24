@@ -36,6 +36,7 @@
 #include "hphp/runtime/vm/runtime-compiler.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-profile.h"
+#include "hphp/runtime/vm/unit-emitter.h"
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/build-info.h"
@@ -863,7 +864,7 @@ std::string mangleUnitSha1(const std::string& fileSha1,
     + (RuntimeOption::EvalAssemblerFoldDefaultValues ? '1' : '0')
     + RuntimeOption::EvalHackCompilerCommand + '\0'
     + RuntimeOption::EvalHackCompilerArgs + '\0'
-    + (RuntimeOption::RepoDebugInfo ? '1' : '0')
+    + (needs_extended_line_table() ? '1' : '0')
     + std::to_string(RuntimeOption::CheckIntOverflow)
     + (RuntimeOption::DisallowExecutionOperator ? '1' : '0')
     + (RuntimeOption::DisableNontoplevelDeclarations ? '1' : '0')

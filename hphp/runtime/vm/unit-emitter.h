@@ -59,6 +59,12 @@ struct FuncTable;
  */
 size_t hhbc_arena_capacity();
 
+/*
+ * Whether we need to keep the extended line table (for debugging, or
+ * dumping to hhas).
+ */
+bool needs_extended_line_table();
+
 enum class SymbolRef : uint8_t {
   Include,
   Class,

@@ -17,13 +17,6 @@ pub trait VisitorTrait {
     fn node_trait_name() -> syn::Ident;
 
     fn gen(ctx: &Context) -> Result<TokenStream> {
-        let associate_ty_decls = ctx
-            .root_ty_params_with_context()
-            .map(|ty| quote! {type #ty;});
-        let associate_ty_bindings = ctx
-            .root_ty_params_with_context()
-            .map(|ty| quote! {#ty = Self::#ty,});
-
         let use_node = Self::use_node();
         let trait_name = Self::trait_name();
         let node_dispatcher_function = Self::gen_node_dispatcher_function(ctx)?;
@@ -94,9 +87,7 @@ pub trait VisitorTrait {
     }
 
     fn gen_node_dispatcher_function(ctx: &Context) -> Result<TokenStream> {
-        let ty_params = &gen_ty_params(ctx.root_ty_params_with_context());
         let visitor_trait_name = Self::trait_name();
-        let visitor_ty_param_bindings = gen_ty_param_bindings(ctx.root_ty_params_with_context());
         let context = ctx.context_ident();
         let error = ctx.error_ident();
         let node_ref_kind = Self::node_ref_kind();

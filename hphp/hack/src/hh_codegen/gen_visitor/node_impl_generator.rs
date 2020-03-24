@@ -47,8 +47,6 @@ pub trait NodeImpl {
     }
 
     fn gen_node_impl(ctx: &Context, ty_name: &str, ty_def: &syn::Item) -> Result<TokenStream> {
-        let root_ty_params = gen_ty_params(ctx.root_ty_params_with_context());
-        let visitor_ty_param_bindings = gen_ty_param_bindings(ctx.root_ty_params_with_context());
         let recurse_body = Self::gen_recurse_body(ctx, ty_name, ty_def)?;
         let visit_fn = visitor_trait_generator::gen_visit_fn_name(ty_name);
         let ty_name = format_ident!("{}", ty_name);

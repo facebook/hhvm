@@ -7,15 +7,6 @@
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 
-pub fn gen_ty_param_bindings(tys: impl Iterator<Item = syn::Ident>) -> TokenStream {
-    let bindings = tys.map(|ty| quote! {#ty = #ty, }).collect::<Vec<_>>();
-    if bindings.is_empty() {
-        quote! {}
-    } else {
-        quote! {<#(#bindings)*>}
-    }
-}
-
 pub fn gen_ty_params(tys: impl Iterator<Item = syn::Ident>) -> TokenStream {
     let ty_idents = tys.map(|ty| quote! { P::#ty, }).collect::<Vec<_>>();
     if ty_idents.is_empty() {

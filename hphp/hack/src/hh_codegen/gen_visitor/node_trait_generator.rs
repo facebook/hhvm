@@ -4,7 +4,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::{context::Context, gen_helper::*, generator::Generator};
+use super::{context::Context, generator::Generator};
 use crate::{common::*, impl_generator};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
@@ -17,8 +17,6 @@ trait NodeTrait {
     fn use_visitor() -> TokenStream;
 
     fn gen(ctx: &Context) -> Result<TokenStream> {
-        let ty_params = gen_ty_params(ctx.root_ty_params_with_context());
-        let ty_param_bindings = gen_ty_param_bindings(ctx.root_ty_params_with_context());
         let trait_name = Self::trait_name();
         let receiver = Self::receiver();
         let visitor = Self::visitor();

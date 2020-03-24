@@ -43,7 +43,6 @@ NormalizedInstruction::NormalizedInstruction(SrcKey sk, const Unit* u)
   : source(sk)
   , m_unit(u)
   , immVec()
-  , endsRegion(false)
   , interp(false)
   , forceSurpriseCheck(false)
 {

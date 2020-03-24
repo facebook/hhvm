@@ -42,8 +42,6 @@ struct NormalizedInstruction {
   ImmVector immVec; // vector immediate; will have !isValid() if the
                     // instruction has no vector immediate
 
-  bool endsRegion:1;
-
   /*
    * Used with HHIR. Instruction shoud be interpreted, because previous attempt
    * to translate it has failed.

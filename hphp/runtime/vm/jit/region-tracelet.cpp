@@ -159,6 +159,14 @@ void addInstruction(Env& env) {
   env.numBCInstrs--;
 }
 
+bool instructionEndsRegion(const Env& env) {
+  auto const& inst = env.inst;
+  if (opcodeBreaksBB(inst.op(), env.inlining)) return true;
+  if (env.profiling && instrBreaksProfileBB(inst)) return true;
+  if (dontGuardAnyInputs(inst) && opcodeChangesPC(inst.op())) return true;
+  return false;
+}
+
 /*
  * Populate most fields of the NormalizedInstruction, assuming its sk
  * has already been set. Returns false iff the region should be
@@ -167,11 +175,6 @@ void addInstruction(Env& env) {
 bool prepareInstruction(Env& env) {
   env.inst.~NormalizedInstruction();
   new (&env.inst) NormalizedInstruction(env.sk, curUnit(env));
-  auto const breaksBB =
-    (env.profiling && instrBreaksProfileBB(&env.inst)) ||
-    opcodeBreaksBB(env.inst.op(), env.inlining);
-  env.inst.endsRegion = breaksBB ||
-    (dontGuardAnyInputs(env.inst) && opcodeChangesPC(env.inst.op()));
   irgen::prepareForNextHHBC(env.irgs, env.sk);
 
   auto const inputInfos = getInputs(env.inst, env.irgs.irb->fs().bcSPOff());
@@ -474,7 +477,7 @@ RegionDescPtr form_region(Env& env) {
     // We successfully translated the instruction, so update env.sk.
     env.sk.advance(env.curBlock->unit());
 
-    if (env.inst.endsRegion) {
+    if (instructionEndsRegion(env)) {
       FTRACE(1, "selectTracelet: tracelet broken after {}\n", env.inst);
       break;
     } else {

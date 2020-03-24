@@ -184,7 +184,7 @@ bool opcodeIgnoresInnerType(const Op op);
  * any instruction that can side exit, including instructions with predicted
  * output, and before any control flow merge point.
  */
-bool instrBreaksProfileBB(const NormalizedInstruction* inst);
+bool instrBreaksProfileBB(const NormalizedInstruction& inst);
 
 
 ///////////////////////////////////////////////////////////////////////////////

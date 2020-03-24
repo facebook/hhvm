@@ -1081,24 +1081,25 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   always_assert_flog(0, "invalid opcode {}\n", static_cast<uint32_t>(ni.op()));
 }
 
-bool instrBreaksProfileBB(const NormalizedInstruction* inst) {
-  if (isFCall(inst->op())) return true;
+bool instrBreaksProfileBB(const NormalizedInstruction& inst) {
+  auto const op = inst.op();
+  if (isFCall(op)) return true;
 
-  if (instrIsNonCallControlFlow(inst->op()) ||
-      inst->op() == OpAwait || // may branch to scheduler and suspend execution
-      inst->op() == OpAwaitAll || // similar to Await
-      inst->op() == OpClsCnsD || // side exits if misses in the RDS
-      (inst->op() == OpThrowNonExhaustiveSwitch && // control flow breaks bb
+  if (instrIsNonCallControlFlow(op) ||
+      op == OpAwait || // may branch to scheduler and suspend execution
+      op == OpAwaitAll || // similar to Await
+      op == OpClsCnsD || // side exits if misses in the RDS
+      (op == OpThrowNonExhaustiveSwitch && // control flow breaks bb
        RuntimeOption::EvalThrowOnNonExhaustiveSwitch > 1) ||
-      inst->op() == OpVerifyParamTypeTS || // avoids combinatorial explosion
-      inst->op() == OpVerifyParamType) {   // with nullable types
+      op == OpVerifyParamTypeTS || // avoids combinatorial explosion
+      op == OpVerifyParamType) {   // with nullable types
     return true;
   }
   // In profiling mode, don't trace through a control flow merge point,
   // however, allow inlining of default parameter funclets
   assertx(profData());
-  if (profData()->anyBlockEndsAt(inst->func(), inst->offset()) &&
-      !inst->func()->isEntry(inst->nextSk().offset())) {
+  if (profData()->anyBlockEndsAt(inst.func(), inst.offset()) &&
+      !inst.func()->isEntry(inst.nextSk().offset())) {
     return true;
   }
   return false;

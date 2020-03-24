@@ -264,24 +264,6 @@ void emitPredictionsAndPreConditions(irgen::IRGS& irgs,
   }
 }
 
-void initNormalizedInstruction(
-  NormalizedInstruction& inst,
-  irgen::IRGS& irgs,
-  const RegionDesc& region,
-  RegionDesc::BlockId blockId,
-  bool lastInstr,
-  bool toInterp
-) {
-  if (lastInstr) {
-    inst.endsRegion  = region.isExit(blockId);
-  }
-
-  // We can get a more precise output type for interpOne if we know all of
-  // its inputs, so we still populate the rest of the instruction even if
-  // this is true.
-  inst.interp = toInterp;
-}
-
 /*
  * Returns the id of the next region block in workQ whose
  * corresponding IR block is currently reachable from the IR unit's
@@ -503,9 +485,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
 
       // Create and initialize the instruction.
       NormalizedInstruction inst(sk, block.unit());
-      bool toInterpInst = irgs.retryContext->toInterp.count(psk);
-      initNormalizedInstruction(inst, irgs, region, blockId,
-                                lastInstr, toInterpInst);
+      inst.interp = irgs.retryContext->toInterp.count(psk);
 
       if (penultimateInst && isCmp(inst.op())) {
           SrcKey nextSk = inst.nextSk();

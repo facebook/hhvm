@@ -41,6 +41,9 @@ let member_type env member_ce =
            Decl_enum.enum_kind
              (Cls.pos tc, Cls.name tc)
              (Cls.enum_type tc)
+             Option.(
+               Cls.get_typeconst tc Naming_special_names.FB.tInner >>= fun t ->
+               t.ttc_type)
              (Cls.get_ancestor tc)
          with
         | None -> default_result
@@ -134,6 +137,9 @@ let enum_class_check env tc consts const_types =
     Decl_enum.enum_kind
       (pos, Cls.name tc)
       (Cls.enum_type tc)
+      Option.(
+        Cls.get_typeconst tc Naming_special_names.FB.tInner >>= fun t ->
+        t.ttc_type)
       (Cls.get_ancestor tc)
   in
   match enum_info_opt with

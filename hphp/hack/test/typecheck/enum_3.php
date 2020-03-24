@@ -1,10 +1,12 @@
 //// def.php
 <?hh // strict
 
-abstract class Enum<T> {
+abstract class Enum {
+  abstract const type TInner;
 }
 
-class Foo extends Enum<lol> {
+class Foo extends Enum {
+  const type TInner = lol;
   const FOO = 0;
 }
 newtype lol = int;

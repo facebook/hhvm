@@ -218,7 +218,7 @@ let make_elt_cache class_name seq =
 
 (** Given a linearization filtered for const lookup, return a [Sequence.t]
     emitting each constant in linearization order. *)
-let consts ctx child_class_name get_ancestor lin =
+let consts ctx child_class_name get_typeconst get_ancestor lin =
   (* If a class extends the legacy [Enum] class, we give all of the constants
      in the class the type of the Enum, as a convenience. Modern Hack enums
      should replace the legacy Enum class, but perhaps they cannot do so
@@ -235,7 +235,14 @@ let consts ctx child_class_name get_ancestor lin =
     | None -> (Sequence.empty, lazy None)
     | Some cls ->
       ( Sequence.singleton (DTT.classname_const cls.sc_name),
-        lazy (Decl_enum.enum_kind cls.sc_name cls.sc_enum_type get_ancestor) )
+        lazy
+          (Decl_enum.enum_kind
+             cls.sc_name
+             cls.sc_enum_type
+             Option.(
+               get_typeconst Naming_special_names.FB.tInner >>= fun t ->
+               t.ttc_type)
+             get_ancestor) )
   in
   let consts_and_typeconst_structures =
     lin
@@ -428,10 +435,10 @@ let props_cache ~static class_name lin =
   |> filter_or_chown_privates class_name
   |> make_elt_cache class_name
 
-let consts_cache ctx class_name get_ancestor lin =
+let consts_cache ctx class_name get_typeconst get_ancestor lin =
   lin
   |> filter_for_const_lookup
-  |> consts ctx class_name get_ancestor
+  |> consts ctx class_name get_typeconst get_ancestor
   |> make_consts_cache class_name
 
 let typeconsts_cache class_name lin =
@@ -476,9 +483,11 @@ let make ctx class_name get_ancestor =
   in
   let all_inherited_methods = make_inheritance_cache all_methods in
   let all_inherited_smethods = make_inheritance_cache all_smethods in
+  let typeconsts = typeconsts_cache class_name lin in
   {
-    consts = consts_cache ctx class_name get_ancestor lin;
-    typeconsts = typeconsts_cache class_name lin;
+    consts =
+      consts_cache ctx class_name (LSTable.get typeconsts) get_ancestor lin;
+    typeconsts;
     pu_enums = pu_enums_cache lin;
     props = props_cache class_name lin ~static:false;
     sprops = props_cache class_name lin ~static:true;

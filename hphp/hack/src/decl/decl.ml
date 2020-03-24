@@ -602,10 +602,12 @@ and class_decl ctx c =
     List.fold_left c.sc_uses ~f:(trait_exists env) ~init:ext_strict
   in
   let enum = c.sc_enum_type in
+  let enum_inner_ty = SMap.find_opt SN.FB.tInner typeconsts in
   let consts =
     Decl_enum.rewrite_class
       c.sc_name
       enum
+      Option.(enum_inner_ty >>= fun t -> t.ttc_type)
       (fun x -> SMap.find_opt x impl)
       consts
   in

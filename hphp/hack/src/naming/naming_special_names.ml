@@ -633,6 +633,8 @@ end
 module FB = struct
   let cEnum = "\\Enum"
 
+  let tInner = "TInner"
+
   let idx = "\\HH\\idx"
 
   let cTypeStructure = "\\HH\\TypeStructure"

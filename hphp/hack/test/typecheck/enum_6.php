@@ -7,7 +7,8 @@ const bar truthy_foo = true;
 //// def.php
 <?hh // strict
 
-abstract class Enum<T> {
+abstract class Enum {
+  abstract const type TInner;
 }
 
 newtype foo = bar;
@@ -19,6 +20,7 @@ class C1 {
 <?hh // strict
 
 // Should fail because foo isn't an int or a string
-class C2 extends Enum<foo> {
+class C2 extends Enum {
+  const type TInner = foo;
   const foo FOO = C1::FOO;
 }

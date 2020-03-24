@@ -285,9 +285,9 @@ let test_compute_tast_counting () =
   in
 
   Asserter.Int_asserter.assert_equals
-    84
+    85
     (Telemetry_test_utils.int_exn telemetry "decl_accessors.count")
-    "There should be 82 decl_accessor_count for shared_mem provider";
+    "There should be 85 decl_accessor_count for shared_mem provider";
   Asserter.Int_asserter.assert_equals
     0
     (Telemetry_test_utils.int_exn telemetry "disk_cat.count")
@@ -312,9 +312,9 @@ let test_compute_tast_counting () =
         Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry
       in
       Asserter.Int_asserter.assert_equals
-        36
+        37
         (Telemetry_test_utils.int_exn telemetry "decl_accessors.count")
-        "There should be 36 decl_accessor_count for local_memory provider";
+        "There should be 37 decl_accessor_count for local_memory provider";
       Asserter.Int_asserter.assert_equals
         0
         (Telemetry_test_utils.int_exn telemetry "disk_cat.count")

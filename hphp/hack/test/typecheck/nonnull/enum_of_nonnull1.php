@@ -1,8 +1,11 @@
 <?hh // strict
 
-abstract class Enum<T> {}
+abstract class Enum {
+  abstract const type TInner;
+}
 
-class E extends Enum<nonnull> {
+class E extends Enum {
+  const type TInner = nonnull;
   const FOO = 'foo';
   const BAR = 42;
 }

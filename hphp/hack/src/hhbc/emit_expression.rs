@@ -394,7 +394,7 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
         }
         Expr_::As(e) => emit_as(env, pos, e),
         Expr_::Cast(e) => emit_cast(env, pos, e),
-        Expr_::Eif(e) => emit_conditional_expr(env, pos, e),
+        Expr_::Eif(e) => emit_conditional_expr(emitter, env, pos, &e.0, &e.1, &e.2),
         Expr_::ExprList(es) => Ok(InstrSeq::gather(
             es.iter()
                 .map(|e| emit_expr(emitter, env, e))
@@ -2883,11 +2883,56 @@ fn emit_class_get(
 }
 
 fn emit_conditional_expr(
+    e: &mut Emitter,
     env: &Env,
     pos: &Pos,
-    (etest, etrue, efalse): &(tast::Expr, Option<tast::Expr>, tast::Expr),
+    etest: &tast::Expr,
+    etrue: &Option<tast::Expr>,
+    efalse: &tast::Expr,
 ) -> Result {
-    unimplemented!("TODO(hrust)")
+    Ok(match etrue.as_ref() {
+        Some(etrue) => {
+            let false_label = e.label_gen_mut().next_regular();
+            let end_label = e.label_gen_mut().next_regular();
+            let r = emit_jmpz(e, env, etest, &false_label)?;
+            InstrSeq::gather(vec![
+                r.instrs,
+                if r.is_fallthrough {
+                    InstrSeq::gather(vec![
+                        emit_expr(e, env, etrue)?,
+                        emit_pos(e, pos)?,
+                        InstrSeq::make_jmp(end_label.clone()),
+                    ])
+                } else {
+                    InstrSeq::Empty
+                },
+                if r.is_label_used {
+                    InstrSeq::gather(vec![
+                        InstrSeq::make_label(false_label),
+                        emit_expr(e, env, efalse)?,
+                    ])
+                } else {
+                    InstrSeq::Empty
+                },
+                if r.is_fallthrough {
+                    InstrSeq::make_label(end_label)
+                } else {
+                    InstrSeq::Empty
+                },
+            ])
+        }
+        None => {
+            let end_label = e.label_gen_mut().next_regular();
+            InstrSeq::gather(vec![
+                emit_expr(e, env, etest)?,
+                InstrSeq::make_dup(),
+                InstrSeq::make_jmpnz(end_label.clone()),
+                InstrSeq::make_popc(),
+                emit_expr(e, env, efalse)?,
+                InstrSeq::make_label(end_label),
+            ])
+        }
+    })
 }
 
 fn emit_local(e: &mut Emitter, env: &Env, notice: BareThisOp, lid: &aast_defs::Lid) -> Result {

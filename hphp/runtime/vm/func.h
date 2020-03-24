@@ -567,6 +567,7 @@ struct Func final {
 
   /*
    * Array of named locals.  Includes parameter names.
+   * May contain nullptrs for unammed locals that mixed in with named ones.
    *
    * Should not be indexed past numNamedLocals() - 1.
    */

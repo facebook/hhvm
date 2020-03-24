@@ -144,15 +144,12 @@ struct FuncEmitter {
    */
   bool hasVar(const StringData* name) const;
   Id lookupVarId(const StringData* name) const;
-  void allocVarId(const StringData* name);
+  void allocVarId(const StringData* name, bool slotless = false);
 
   /*
-   * Allocate and free unnamed locals. Unnamed locals must be freed in reverse
-   * allocation order (i.e., it is only ever legal to free the most recently
-   * allocated unnamed local that has not yet been freed).
+   * Allocate unnamed locals.
    */
   Id allocUnnamedLocal();
-  void freeUnnamedLocal(Id id);
 
   /*
    * Allocate and free iterators.
@@ -304,7 +301,6 @@ private:
   Func::NamedLocalsMap::Builder m_localNames;
   Id m_numLocals;
   int m_numUnnamedLocals;
-  int m_activeUnnamedLocals;
   Id m_numIterators;
   Id m_nextFreeIterator;
   bool m_ehTabSorted;

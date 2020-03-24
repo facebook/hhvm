@@ -269,7 +269,7 @@ ALWAYS_INLINE named_local_var decode_named_local_var(PC& pc) {
   assertx(0 <= loc.id);
   assertx(loc.id < vmfp()->m_func->numLocals());
   assertx(kInvalidLocalName <= loc.name);
-  assertx(loc.name < vmfp()->m_func->numLocals());
+  assertx(loc.name < vmfp()->m_func->numNamedLocals());
   return named_local_var{loc.name, frame_local(vmfp(), loc.id)};
 }
 
@@ -385,10 +385,10 @@ void VarEnv::suspend(const ActRec* oldFP, ActRec* newFP) {
 }
 
 void VarEnv::enterFP(ActRec* oldFP, ActRec* newFP) {
-  TRACE(3, "Attaching VarEnv %p [%s] %d fp @%p\n",
+  TRACE(3, "Attaching VarEnv %p [%s] fp @%p\n",
            this,
            isGlobalScope() ? "global scope" : "local scope",
-           int(newFP->m_func->numNamedLocals()), newFP);
+           newFP);
   assertx(newFP);
   if (oldFP == nullptr) {
     assertx(isGlobalScope() && m_depth == 0);
@@ -922,7 +922,9 @@ Array getDefinedVariables(const ActRec* fp) {
     if (ptv->m_type == KindOfUninit) {
       continue;
     }
-    Variant name(func->localVarName(id), Variant::PersistentStrInit{});
+    auto const localNameSd = func->localVarName(id);
+    if (!localNameSd) continue;
+    Variant name(localNameSd, Variant::PersistentStrInit{});
     ret.add(name, tvAsVariant(ptv));
   }
   return ret.toArray();
@@ -2793,6 +2795,7 @@ OPTBLD_INLINE void iopClassGetTS() {
 
 static void raise_undefined_local(ActRec* fp, LocalName pind) {
   assertx(pind < fp->m_func->numNamedLocals());
+  assertx(fp->m_func->localVarName(pind));
   if (debug) {
     auto vm = &*g_context;
     always_assert_flog(
@@ -3619,8 +3622,9 @@ OPTBLD_INLINE void iopAssertRATL(local_var loc, RepoAuthType rat) {
       "failed assert RATL on local slot {}: maybe ${} in {}:{}, expected {},"
       " got {}",
       loc.index,
-      loc.index < func->numNamedLocals() ?
-        func->localNames()[loc.index]->data() : "<unnamed/unknown>",
+      loc.index < func->numNamedLocals() && func->localNames()[loc.index]
+      ? func->localNames()[loc.index]->data()
+      : "<unnamed/unknown>",
       vm->getContainingFileName()->data(),
       vm->getLine(),
       show(rat),

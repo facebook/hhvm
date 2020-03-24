@@ -1317,7 +1317,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
       auto new_pc = pc;
       decode_op(new_pc);
       auto const local = decode_iva(new_pc);
-      if (local < m_func->numNamedLocals()) {
+      if (m_func->localNameMap()[local]) {
         ferror("Cannot store error reporting value in named local\n");
         return false;
       }

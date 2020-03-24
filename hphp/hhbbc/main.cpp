@@ -170,22 +170,22 @@ void parse_options(int argc, char** argv) {
 
   po::options_description oflags("Optimization Flags");
   oflags.add_options()
-    ("context-sensitive-interp",
-                                po::value(&options.ContextSensitiveInterp))
-    ("remove-dead-blocks",      po::value(&options.RemoveDeadBlocks))
-    ("constant-prop",           po::value(&options.ConstantProp))
-    ("constant-fold-builtins",  po::value(&options.ConstantFoldBuiltins))
-    ("local-dce",               po::value(&options.LocalDCE))
-    ("global-dce",              po::value(&options.GlobalDCE))
-    ("remove-unused-locals",    po::value(&options.RemoveUnusedLocals))
-    ("insert-assertions",       po::value(&options.InsertAssertions))
-    ("insert-stack-assertions", po::value(&options.InsertStackAssertions))
-    ("filter-assertions",       po::value(&options.FilterAssertions))
-    ("strength-reduce",         po::value(&options.StrengthReduce))
-    ("func-families",           po::value(&options.FuncFamilies))
-    ("hard-private-prop",       po::value(&options.HardPrivatePropInference))
-    ("analyze-pseudomains",     po::value(&options.AnalyzePseudomains))
-    ("analyze-public-statics",  po::value(&options.AnalyzePublicStatics))
+    ("context-sensitive-interp",  po::value(&options.ContextSensitiveInterp))
+    ("remove-dead-blocks",        po::value(&options.RemoveDeadBlocks))
+    ("constant-prop",             po::value(&options.ConstantProp))
+    ("constant-fold-builtins",    po::value(&options.ConstantFoldBuiltins))
+    ("local-dce",                 po::value(&options.LocalDCE))
+    ("global-dce",                po::value(&options.GlobalDCE))
+    ("remove-unused-local-names", po::value(&options.RemoveUnusedLocalNames))
+    ("compact-local-slots",       po::value(&options.CompactLocalSlots))
+    ("insert-assertions",         po::value(&options.InsertAssertions))
+    ("insert-stack-assertions",   po::value(&options.InsertStackAssertions))
+    ("filter-assertions",         po::value(&options.FilterAssertions))
+    ("strength-reduce",           po::value(&options.StrengthReduce))
+    ("func-families",             po::value(&options.FuncFamilies))
+    ("hard-private-prop",         po::value(&options.HardPrivatePropInference))
+    ("analyze-pseudomains",       po::value(&options.AnalyzePseudomains))
+    ("analyze-public-statics",    po::value(&options.AnalyzePublicStatics))
     ;
 
   po::options_description all;
@@ -251,8 +251,13 @@ UNUSED void validate_options() {
     std::exit(1);
   }
 
-  if (options.RemoveUnusedLocals && !options.GlobalDCE) {
-    std::cerr << "-fremove-unused-locals requires -fglobal-dce\n";
+  if (options.RemoveUnusedLocalNames && !options.GlobalDCE) {
+    std::cerr << "-fremove-unused-local-names requires -fglobal-dce\n";
+    std::exit(1);
+  }
+
+  if (options.CompactLocalSlots && !options.GlobalDCE) {
+    std::cerr << "-fcompact-local-slots requires -fglobal-dce\n";
     std::exit(1);
   }
 }

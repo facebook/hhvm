@@ -165,6 +165,7 @@ DwarfChunk* DwarfInfo::addTracelet(TCRange range,
     f->name = lookupFunction(func, exit, inPrologue, true);
     auto names = func->localNames();
     for (int i = 0; i < func->numNamedLocals(); i++) {
+      if (!names[i]) continue;
       f->m_namedLocals.push_back(names[i]->toCppString());
     }
   }

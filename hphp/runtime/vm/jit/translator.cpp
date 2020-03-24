@@ -799,7 +799,7 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, FPInvOffset bcSPOff) {
     switch (mk.mcode) {
       case MEL:
       case MPL:
-        inputs.emplace_back(Location::Local { uint32_t(mk.iva) });
+        inputs.emplace_back(Location::Local { uint32_t(mk.local.id) });
         break;
       case MEC:
       case MPC:

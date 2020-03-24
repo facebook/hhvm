@@ -677,7 +677,13 @@ void add_frame_variables(php::Func& func, const FuncEmitter& fe) {
 
   func.locals.reserve(fe.numLocals());
   for (LocalId id = 0; id < fe.numLocals(); ++id) {
-    func.locals.push_back({nullptr, id, false});
+    func.locals.push_back({
+      .name = nullptr,
+      .id = id,
+      .killed = false,
+      .nameId = id,
+      .unusedName = false
+    });
   }
   for (auto& kv : fe.localNameMap()) {
     func.locals[kv.second].name = kv.first;

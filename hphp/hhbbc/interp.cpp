@@ -5495,6 +5495,7 @@ void in(ISS& env, const bc::Silence& op) {
       setLoc(env, op.loc1, TInt);
       break;
     case SilenceOp::End:
+      locRaw(env, op.loc1);
       break;
   }
 }

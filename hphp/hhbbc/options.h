@@ -133,10 +133,16 @@ struct Options {
   bool GlobalDCE = true;
 
   /*
-   * Whether to remove completely unused local variables.  This requires
+   * Whether to remove completely unused local names.  This requires
    * GlobalDCE.
    */
-  bool RemoveUnusedLocals = true;
+  bool RemoveUnusedLocalNames = true;
+
+  /*
+   * Whether to compact local slot usage by having non conflicting locals share
+   * a local slot.  This requires GlobalDCE.
+   */
+  bool CompactLocalSlots = true;
 
   /*
    * If true, insert opcodes that assert inferred types, so we can assume them

@@ -226,8 +226,10 @@ private:
  */
 struct Local {
   LSString  name;
-  uint32_t id     : 31;
-  uint32_t killed : 1;
+  uint32_t id         : 31;
+  uint32_t killed     : 1;
+  uint32_t nameId         : 31;
+  uint32_t unusedName : 1;
 };
 
 /*
@@ -305,6 +307,7 @@ struct Func : FuncBase {
   IterId             numIters;
   CompactVector<Param> params;
   CompactVector<Local> locals;
+
 
   /*
    * Which unit defined this function.  If it is a method, the cls

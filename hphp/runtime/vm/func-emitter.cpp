@@ -58,7 +58,6 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n)
   , memoizeSharedPropIndex(0)
   , m_numLocals(0)
   , m_numUnnamedLocals(0)
-  , m_activeUnnamedLocals(0)
   , m_numIterators(0)
   , m_nextFreeIterator(0)
   , m_ehTabSorted(false)
@@ -82,7 +81,6 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
   , memoizeSharedPropIndex(0)
   , m_numLocals(0)
   , m_numUnnamedLocals(0)
-  , m_activeUnnamedLocals(0)
   , m_numIterators(0)
   , m_nextFreeIterator(0)
   , m_ehTabSorted(false)
@@ -323,14 +321,15 @@ Native::NativeFunctionInfo FuncEmitter::getNativeInfo() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Locals, iterators, and parameters.
 
-void FuncEmitter::allocVarId(const StringData* name) {
+void FuncEmitter::allocVarId(const StringData* name, bool slotless) {
   assertx(name != nullptr);
-  // Unnamed locals are segregated (they all come after the named locals).
-  assertx(m_numUnnamedLocals == 0);
   UNUSED Id id;
   if (m_localNames.find(name) == m_localNames.end()) {
-    id = (m_numLocals++);
-    assertx(id == (int)m_localNames.size());
+    // Slotless locals must come after all locals with slots.
+    if (!slotless) {
+      id = (m_numLocals++);
+      assertx(id == (int)m_localNames.size());
+    }
     m_localNames.add(name, name);
   }
 }
@@ -345,14 +344,10 @@ Id FuncEmitter::allocIterator() {
 }
 
 Id FuncEmitter::allocUnnamedLocal() {
-  ++m_activeUnnamedLocals;
-  if (m_activeUnnamedLocals > m_numUnnamedLocals) {
-    ++m_numLocals;
-    ++m_numUnnamedLocals;
-  }
-  return numNamedLocals() - 1 + m_activeUnnamedLocals;
+  m_localNames.addUnnamed(nullptr);
+  ++m_numUnnamedLocals;
+  return m_numLocals++;
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // Unit tables.

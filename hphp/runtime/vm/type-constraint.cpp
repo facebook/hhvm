@@ -1491,6 +1491,7 @@ bool tcCouldBeReified(const Func* func, uint32_t paramId) {
     assertx(nParams + nDeclaredProps <= func->numNamedLocals());
     // Skip over params
     for (int i = nParams; i < nParams + nDeclaredProps; ++i) {
+      assertx(lNames[i]);  // Closures can't have names removed.
       if (isMangledReifiedGenericInClosure(lNames[i])) return true;
     }
     return false;

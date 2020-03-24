@@ -95,7 +95,10 @@ Locations getVanillaLocations(
       return {Location::Stack{soff}};
 
     // Miscellaneous ops that constrain one local.
-    case Op::IncDecL:
+    case Op::IncDecL: {
+      auto const local = ni.imm[localImmIdx(op)].u_NLA;
+      return {Location::Local{safe_cast<uint32_t>(local.id)}};
+    }
     case Op::LIterInit:
     case Op::LIterNext:
     case Op::NewLikeArrayL: {

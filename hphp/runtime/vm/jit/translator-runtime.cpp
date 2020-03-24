@@ -740,7 +740,8 @@ void checkFrame(ActRec* fp, TypedValue* sp, bool fullCheck) {
 
   int numParams = func->numParams();
   for (int i = 0; i < numLocals; i++) {
-    if (i >= numParams && isResumed(fp) && i < func->numNamedLocals()) {
+    if (i >= numParams && isResumed(fp) && i < func->numNamedLocals() &&
+        func->localVarName(i)) {
       continue;
     }
     assertx(tvIsPlausible(*frame_local(fp, i)));

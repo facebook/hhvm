@@ -372,11 +372,27 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     tos = TBottom;
   };
 
-  auto map_local = [&] (LocalId id) {
+  auto const map_local = [&] (LocalId id) {
+    if (id >= func.locals.size()) return id;
     auto const loc = func.locals[id];
-    assert(!loc.killed);
-    assert(loc.id <= id);
-    return loc.id;
+    assertx(!loc.killed);
+    assertx(loc.id <= id);
+    id = loc.id;
+    return id;
+  };
+
+  auto const map_local_name = [&] (NamedLocal nl) {
+    nl.id = map_local(nl.id);
+    if (nl.name == kInvalidLocalName) return nl;
+    if (nl.name >= func.locals.size()) return nl;
+    auto const loc = func.locals[nl.name];
+    if (!loc.name) {
+      nl.name = kInvalidLocalName;
+      return nl;
+    }
+    assert(!loc.unusedName);
+    nl.name = loc.nameId;
+    return nl;
   };
 
   auto set_expected_depth = [&] (BlockId block) {
@@ -393,14 +409,8 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     switch (mkey.mcode) {
       case MEC: case MPC:
         return MemberKey{mkey.mcode, static_cast<int32_t>(mkey.idx)};
-      case MEL: case MPL: {
-        auto loc = mkey.local;
-        if (loc.name != kInvalidLocalName) {
-          loc.name = static_cast<int32_t>(map_local(mkey.local.name));
-        }
-        loc.id = static_cast<int32_t>(map_local(mkey.local.id));
-        return MemberKey{mkey.mcode, loc};
-      }
+      case MEL: case MPL:
+        return MemberKey{mkey.mcode, map_local_name(mkey.local)};
       case MET: case MPT: case MQT:
         return MemberKey{mkey.mcode, mkey.litstr};
       case MEI:
@@ -505,23 +515,15 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       data.arg1 = euState.constantInfo.size() - 1;
     };
 
-    auto emit_named_local = [&](NamedLocal loc) {
-      if (loc.name != kInvalidLocalName) {
-        loc.name = map_local(loc.name);
-      }
-      loc.id = map_local(loc.id);
-      ue.emitNamedLocal(loc);
-    };
-
     auto emit_lar  = [&](const LocalRange& range) {
-      always_assert(range.first + range.count <= func.locals.size());
-      auto const first = (range.count > 0) ? map_local(range.first) : 0;
-      encodeLocalRange(ue, HPHP::LocalRange{first, range.count});
+      encodeLocalRange(ue, HPHP::LocalRange{
+        map_local(range.first), range.count
+      });
     };
 
     auto emit_ita  = [&](IterArgs ita) {
-      ita.valId = map_local(ita.valId);
       if (ita.hasKey()) ita.keyId = map_local(ita.keyId);
+      ita.valId = map_local(ita.valId);
       encodeIterArgs(ue, ita);
     };
 
@@ -530,7 +532,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define IMM_IVA(n)     ue.emitIVA(data.arg##n);
 #define IMM_I64A(n)    ue.emitInt64(data.arg##n);
 #define IMM_LA(n)      ue.emitIVA(map_local(data.loc##n));
-#define IMM_NLA(n)     emit_named_local(data.nloc##n);
+#define IMM_NLA(n)     ue.emitNamedLocal(map_local_name(data.nloc##n));
 #define IMM_ILA(n)     ue.emitIVA(map_local(data.loc##n));
 #define IMM_IA(n)      ue.emitIVA(data.iter##n);
 #define IMM_DA(n)      ue.emitDouble(data.dbl##n);
@@ -816,10 +818,11 @@ void emit_locals_and_params(FuncEmitter& fe,
                             const php::Func& func,
                             const EmitBcInfo& info) {
   Id id = 0;
-
-  for (auto& loc : func.locals) {
+  for (auto const& loc : func.locals) {
     if (loc.id < func.params.size()) {
+      assert(loc.name);
       assert(!loc.killed);
+      assert(!loc.unusedName);
       auto& param = func.params[id];
       FuncEmitter::ParamInfo pinfo;
       pinfo.defaultValue = param.defaultValue;
@@ -837,17 +840,36 @@ void emit_locals_and_params(FuncEmitter& fe,
         fe.params[id].funcletOff = info.blockInfo[dv].offset;
       }
       ++id;
-    } else if (!loc.killed) {
-      if (loc.name) {
+    } else {
+      if (loc.killed) continue;
+      if (loc.name && !loc.unusedName && loc.name) {
         fe.allocVarId(loc.name);
         assert(fe.lookupVarId(loc.name) == id);
         assert(loc.id == id);
+        ++id;
       } else {
         fe.allocUnnamedLocal();
+        ++id;
       }
-      ++id;
     }
   }
+  for (auto const& loc : func.locals) {
+    if (loc.killed && !loc.unusedName && loc.name) {
+      fe.allocVarId(loc.name, true);
+    }
+  }
+
+  if (debug) {
+    for (auto const& loc : func.locals) {
+      if (!loc.killed) {
+        assertx(loc.id < fe.numLocals());
+      }
+      if (!loc.unusedName && loc.name) {
+        assertx(loc.nameId < fe.numNamedLocals());
+      }
+    }
+  }
+
   assert(fe.numLocals() == id);
   fe.setNumIterators(func.numIters);
 }
@@ -1247,16 +1269,33 @@ void emit_finish_func(EmitUnitState& state,
 
 void renumber_locals(const php::Func& func) {
   Id id = 0;
+  Id nameId = 0;
 
+  // We initialise the name ids in two passes, since locals that have not been
+  // remapped may require their name be at the same offset as the local.
+  // This is true for parameters, volatile locals, or locals in funcs with
+  // VarEnvs.
   for (auto& loc : const_cast<php::Func&>(func).locals) {
     if (loc.killed) {
       // make sure its out of range, in case someone tries to read it.
       loc.id = INT_MAX;
     } else {
+      loc.nameId = nameId++;
       loc.id = id++;
     }
   }
+  for (auto& loc : const_cast<php::Func&>(func).locals) {
+    if (loc.unusedName || !loc.name) {
+      // make sure its out of range, in case someone tries to read it.
+      loc.nameId = INT_MAX;
+    } else if (loc.killed) {
+      // The local was moved to share another slot, but its name is still
+      // referenced.
+      loc.nameId = nameId++;
+    }
+  }
 }
+
 
 void emit_init_func(FuncEmitter& fe, const php::Func& func) {
   renumber_locals(func);

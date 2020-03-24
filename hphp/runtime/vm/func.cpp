@@ -746,7 +746,6 @@ void logFunc(const Func* func, StructuredLogEntry& ent) {
 
   ent.setInt("num_params", func->numNonVariadicParams());
   ent.setInt("num_locals", func->numLocals());
-  ent.setInt("num_named_locals", func->numNamedLocals());
   ent.setInt("num_iterators", func->numIterators());
   ent.setInt("frame_cells", func->numSlotsInFrame());
   ent.setInt("max_stack_cells", func->maxStackCells());

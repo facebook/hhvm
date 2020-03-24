@@ -45,6 +45,7 @@ NameValueTable::NameValueTable(ActRec* fp)
   reserve(numNames + 1);
 
   for (Id i = 0; i < numNames; ++i) {
+    if (!func->localVarName(i)) continue;
     assertx(func->lookupVarId(func->localVarName(i)) == i);
 
     auto elm = insert(func->localVarName(i));
@@ -109,6 +110,7 @@ void NameValueTable::attach(ActRec* fp) {
   TypedValue* loc = frame_local(fp, 0);
 
   for (Id i = 0; i < numNames; ++i, --loc) {
+    if (!func->localVarName(i)) continue;
     assertx(func->lookupVarId(func->localVarName(i)) == i);
 
     auto elm = insert(func->localVarName(i));
@@ -132,6 +134,7 @@ void NameValueTable::detach(ActRec* fp) {
   TypedValue* loc = frame_local(fp, 0);
 
   for (Id i = 0; i < numNames; ++i, --loc) {
+    if (!func->localVarName(i)) continue;
     assertx(func->lookupVarId(func->localVarName(i)) == i);
 
     auto elm = findElm(func->localVarName(i));

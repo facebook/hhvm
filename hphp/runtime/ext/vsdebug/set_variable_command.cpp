@@ -188,8 +188,12 @@ bool SetVariableCommand::setLocalVariable(
   const auto localCount = func->numNamedLocals();
 
   for (Id id = 0; id < localCount; id++) {
+    // Check for unnamed local.
+    auto const localNameSd = func->localVarName(id);
+    if (!localNameSd) continue;
+
     TypedValue* frameValue = frame_local(fp, id);
-    const std::string localName = func->localVarName(id)->toCppString();
+    const std::string localName = localNameSd->toCppString();
     if (localName == name) {
       setVariableValue(
         session,

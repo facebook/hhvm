@@ -23,6 +23,8 @@ type schedule_args = {
   min_log_level: Hh_logger.Level.t option;
   version_specifier: string option;
   timeout: int;
+  (* Note: pseudo remote job runner only supports one remote worker. *)
+  pseudo_remote: bool;
 }
 
 type command =
@@ -67,6 +69,12 @@ let parse_root (args : string list) : Path.t =
     Printf.fprintf stderr "Error: please provide at most one root directory\n%!";
     exit 1
 
+(* Check any arguments combination conflicts *)
+let check_arg_conflicts schedule_args =
+  if schedule_args.pseudo_remote && schedule_args.num_remote_workers <> 1 then
+    failwith
+      (Printf.sprintf "Pseudo remote mode only supports one remote worker.")
+
 let validate_required_arg arg_ref arg_name =
   match !arg_ref with
   | None -> failwith (Printf.sprintf "%s is required." arg_name)
@@ -74,6 +82,7 @@ let validate_required_arg arg_ref arg_name =
 
 let parse_schedule_args () : command =
   let timeout = ref 9999 in
+  let pseudo_remote = ref false in
   let min_log_level_str_ref = ref "" in
   let naming_table = ref None in
   let num_remote_workers = ref 1 in
@@ -89,6 +98,9 @@ let parse_schedule_args () : command =
   let options =
     [
       ("--timeout", Arg.Int (fun x -> timeout := x), "The timeout");
+      ( "--pseudo-remote",
+        Arg.Set pseudo_remote,
+        "Indicates the type checking should run in pseudo remote mode. " );
       ( "--min-log-level",
         Arg.String (fun x -> min_log_level_str_ref := x),
         "minimal log level (debug, error, fatal etc...)" );
@@ -116,7 +128,7 @@ let parse_schedule_args () : command =
   let args = parse_without_command options usage ~keyword:CKSchedule in
   let (root : Path.t) = parse_root args in
   let bin_root = Path.make (Filename.dirname Sys.argv.(0)) in
-  CSchedule
+  let schedule_args =
     {
       bin_root;
       root;
@@ -130,7 +142,11 @@ let parse_schedule_args () : command =
           (Caml.String.lowercase_ascii !min_log_level_str_ref);
       version_specifier = !version_specifier;
       timeout = !timeout;
+      pseudo_remote = !pseudo_remote;
     }
+  in
+  check_arg_conflicts schedule_args;
+  CSchedule schedule_args
 
 let make_remote_server_api () :
     (module RemoteWorker.RemoteServerApi with type naming_table = unit option) =
@@ -302,6 +318,11 @@ let start_remote_checking_service genv env schedule_env =
               ~ignore_hh_version:(ServerArgs.ignore_hh_version genv.options);
           version_specifier;
           worker_min_log_level;
+          remote_mode =
+            ( if schedule_env.pseudo_remote then
+              JobRunner.PseudoRemote
+            else
+              JobRunner.Remote );
         }
       (Typing_service_delegate.create ~max_batch_size ~min_batch_size ())
       ~recheck_id:env.init_env.recheck_id

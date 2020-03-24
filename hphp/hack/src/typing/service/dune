@@ -8,6 +8,7 @@
     core_kernel
     errors
     hg
+    job_runner_stubs
     relative_path
   )
   (preprocess (pps ppx_deriving.std)))

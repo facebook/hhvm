@@ -134,4 +134,6 @@ type delegate_env = {
   version_specifier: string option;
   (* The minimum log level workers should be logging at *)
   worker_min_log_level: Hh_logger.Level.t;
+  (* The mode to be used by remote job runner *)
+  remote_mode: JobRunner.remote_mode;
 }

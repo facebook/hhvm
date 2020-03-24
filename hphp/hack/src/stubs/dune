@@ -69,6 +69,12 @@
     sys_utils))
 
 (library
+  (name job_runner_stubs)
+    (wrapped false)
+  (modules
+    jobRunner))
+
+(library
   (name state_loader_stubs)
   (wrapped false)
   (modules

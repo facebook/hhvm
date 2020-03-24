@@ -76,6 +76,7 @@ let start_typing_delegate genv env : env =
                       (ServerArgs.ignore_hh_version genv.options);
                 version_specifier;
                 worker_min_log_level;
+                remote_mode = JobRunner.Remote;
               }
             (* TODO: use env.typing_service.delegate_state when cancellation
                     implementation is finished *)

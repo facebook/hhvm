@@ -225,38 +225,6 @@ SetArray* SetArray::CopySet(const SetArray& other, AllocMode mode) {
   return ad;
 }
 
-SetArray* SetArray::CopyReserve(const SetArray* src, size_t expectedSize) {
-  assertx(expectedSize >= src->size());
-  auto const ad = asSet(MakeReserveSet(expectedSize));
-  auto const used = src->m_used;
-  auto const elms = src->data();
-  auto const table = ad->hashTab();
-  auto const mask = ad->mask();
-  for (uint32_t i = 0; i < used; ++i) {
-    auto& elm = elms[i];
-    if (UNLIKELY(elm.isTombstone())) continue;
-    assertx(!elm.isEmpty());
-    auto const loc = ad->findForNewInsert(table, mask, elm.hash());
-    auto newElm = ad->allocElm(loc);
-    if (elm.hasIntKey()) {
-      newElm->setIntKey(elm.intKey(), elm.hash());
-    } else {
-      newElm->setStrKey(elm.strKey(), elm.hash());
-    }
-  }
-  if (src->m_pos == used) {
-    ad->m_pos = ad->m_used;
-  } else {
-    ad->m_pos = ad->findElm(elms[src->m_pos]);
-  }
-  assertx(ad->kind() == ArrayKind::kKeysetKind);
-  assertx(ad->m_size == src->m_size);
-  assertx(ad->hasExactlyOneRef());
-  assertx(ad->m_used == src->m_size);
-  assertx(ad->checkInvariants());
-  return ad;
-}
-
 ArrayData* SetArray::MakeSetFromAPC(const APCArray* apc) {
   assertx(apc->isKeyset());
   auto const apcSize = apc->size();

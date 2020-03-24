@@ -97,7 +97,6 @@ struct ScalarHash {
           static_cast<int>(k.m_type), k.m_data.num,
           static_cast<int>(v.m_type));
         switch (v.m_type) {
-          case KindOfUninit:
           case KindOfNull:
             break;
           case KindOfBoolean:
@@ -112,6 +111,7 @@ struct ScalarHash {
           case KindOfPersistentKeyset:
             ret = folly::hash::hash_combine(ret, v.m_data.num);
             break;
+          case KindOfUninit:
           case KindOfString:
           case KindOfDArray:
           case KindOfVArray:

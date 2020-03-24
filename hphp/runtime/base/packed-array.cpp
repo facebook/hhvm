@@ -1155,23 +1155,18 @@ ArrayData* PackedArray::ToVec(ArrayData* adIn, bool copy) {
 
   if (adIn->empty()) return ArrayData::CreateVec();
 
-  auto const do_copy = [&] {
+  ArrayData* ad;
+  if (copy) {
     // CopyPackedHelper will copy the header and m_sizeAndPos. All we have to do
     // afterwards is fix the kind and refcount in the copy; it's easiest to do
     // that by reinitializing the whole header.
-    auto ad = static_cast<ArrayData*>(tl_heap->objMallocIndex(sizeClass(adIn)));
+    ad = static_cast<ArrayData*>(tl_heap->objMallocIndex(sizeClass(adIn)));
     CopyPackedHelper(adIn, ad);
     ad->initHeader_16(
       HeaderKind::VecArray,
       OneReference,
       packSizeIndexAndAuxBits(sizeClass(adIn), ArrayData::kNotDVArray)
     );
-    return ad;
-  };
-
-  ArrayData* ad;
-  if (copy) {
-    ad = do_copy();
   } else {
     adIn->m_kind = HeaderKind::VecArray;
     adIn->setDVArray(ArrayData::kNotDVArray);

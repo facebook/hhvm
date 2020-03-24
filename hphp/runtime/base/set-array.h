@@ -218,7 +218,6 @@ private:
   enum class AllocMode : bool { Request, Static };
 
   static SetArray* CopySet(const SetArray& other, AllocMode);
-  static SetArray* CopyReserve(const SetArray* src, size_t expectedSize);
   SetArray* copySet() const { return CopySet(*this, AllocMode::Request); }
 
   template <typename Init, IntishCast IC>

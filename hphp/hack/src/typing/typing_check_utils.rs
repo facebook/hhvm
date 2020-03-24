@@ -12,7 +12,7 @@ use ocamlrep::rc::RcOc;
 use oxidized::{ast as Tast, parser_options::ParserOptions, pos::Pos, relative_path::RelativePath};
 use parser_core_types::{indexed_source_text::IndexedSourceText, source_text::SourceText};
 use stack_limit::StackLimit;
-use typing_env_rust::Genv;
+use typing_env_rust::{Env, Genv};
 use typing_rust as typing;
 
 /// Compilation profile. All times are in seconds
@@ -26,7 +26,7 @@ pub struct Profile {
     pub check_t: f64,
 }
 
-pub fn from_text(env: Genv, stack_limit: &StackLimit, text: &[u8]) -> anyhow::Result<Profile> {
+pub fn from_text(genv: Genv, stack_limit: &StackLimit, text: &[u8]) -> anyhow::Result<Profile> {
     let mut ret = Profile {
         parsing_t: 0.0,
         infer_t: 0.0,
@@ -34,13 +34,14 @@ pub fn from_text(env: Genv, stack_limit: &StackLimit, text: &[u8]) -> anyhow::Re
     };
 
     let mut parse_result = profile(&mut ret.parsing_t, || {
-        parse_file(stack_limit, &env.file, text)
+        parse_file(stack_limit, &genv.file, text)
     });
 
     let _program = match &mut parse_result {
         Either::Right((ast, _is_hh_file)) => {
-            // TODO(hrust): env shoult be Env, not Genv
-            let tast = typing::program(ast, &env);
+            // TODO(hrust): fetch proper pos here
+            let mut env = Env::new(genv.builder.pos_none(), genv);
+            let tast = typing::program(ast, &mut env);
             println!("{:#?}", tast);
             ()
         }

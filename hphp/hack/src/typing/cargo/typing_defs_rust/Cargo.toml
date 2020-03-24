@@ -12,5 +12,6 @@ path = "../../typing_defs_rust.rs"
 arena_trait = { path = "../../../arena_trait" }
 naming_special_names_rust = { path = "../../../naming" }
 oxidized = { path = "../../../oxidized" }
+typing_collections_rust = { path = "../typing_collections_rust" }
 bumpalo = { version = "3.1.2", features = ["collections"] }
 im-rc = { version = "14.2", features = ["serde"] }

@@ -4,16 +4,18 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use arena_trait::Arena;
-use bumpalo::collections::Vec;
+use bumpalo::collections::Vec as BVec;
 use bumpalo::{vec, Bump};
 
 use naming_special_names_rust::{classes, collections};
 use oxidized::pos::Pos;
 use oxidized::{aast_defs::Sid, ast_defs::Id, ident};
 
-use crate::typing_defs_core::{Ty, *};
+use crate::typing_defs::{ExpandEnv, ExpandEnv_};
+use crate::typing_defs_core::*;
 use crate::typing_logic::{SubtypeProp, SubtypePropEnum};
 use crate::typing_reason::*;
+use typing_collections_rust::SMap;
 
 // Struct off which we call type builder methods
 // This gives us the option to keep some state here e.g. for hash consing
@@ -87,6 +89,10 @@ impl<'a> TypeBuilder<'a> {
             id_collection: mk_special_id(collections::COLLECTION),
         }
     }
+
+    pub fn vec_from_iter<T, I: IntoIterator<Item = T>>(&self, iter: I) -> BVec<'a, T> {
+        BVec::from_iter_in(iter, &self.alloc)
+    }
 }
 
 /// All type builders go here
@@ -99,7 +105,7 @@ impl<'a> TypeBuilder<'a> {
     pub fn prim(&'a self, reason: PReason<'a>, kind: PrimKind<'a>) -> Ty<'a> {
         self.mk(reason, Ty_::Tprim(kind))
     }
-    pub fn class(&'a self, reason: PReason<'a>, name: &'a Sid, tys: Vec<'a, Ty<'a>>) -> Ty<'a> {
+    pub fn class(&'a self, reason: PReason<'a>, name: &'a Sid, tys: BVec<'a, Ty<'a>>) -> Ty<'a> {
         self.mk(reason, Ty_::Tclass(name, Exact::Nonexact, tys))
     }
     pub fn traversable(&'a self, reason: PReason<'a>, ty: Ty<'a>) -> Ty<'a> {
@@ -226,14 +232,14 @@ impl<'a> TypeBuilder<'a> {
     pub fn tyvar(&'a self, reason: PReason<'a>, v: ident::Ident) -> Ty<'a> {
         self.mk(reason, Ty_::Tvar(v))
     }
-    pub fn union(&'a self, reason: PReason<'a>, tys: Vec<'a, Ty<'a>>) -> Ty<'a> {
+    pub fn union(&'a self, reason: PReason<'a>, tys: BVec<'a, Ty<'a>>) -> Ty<'a> {
         self.mk(reason, Ty_::Tunion(tys))
     }
-    pub fn intersection(&'a self, reason: PReason<'a>, tys: Vec<'a, Ty<'a>>) -> Ty<'a> {
+    pub fn intersection(&'a self, reason: PReason<'a>, tys: BVec<'a, Ty<'a>>) -> Ty<'a> {
         self.mk(reason, Ty_::Tintersection(tys))
     }
     pub fn nothing(&'a self, reason: PReason<'a>) -> Ty<'a> {
-        self.union(reason, Vec::new_in(self.alloc))
+        self.union(reason, BVec::new_in(self.alloc))
     }
     pub fn nullable(&'a self, reason: PReason<'a>, ty: Ty<'a>) -> Ty<'a> {
         self.mk(reason, Ty_::Toption(ty))
@@ -244,23 +250,6 @@ impl<'a> TypeBuilder<'a> {
     pub fn generic(&'a self, reason: PReason<'a>, name: &'a str) -> Ty<'a> {
         self.mk(reason, Ty_::Tgeneric(name))
     }
-    pub fn conj(&'a self, v: Vec<'a, SubtypeProp<'a>>) -> SubtypeProp<'a> {
-        self.alloc(SubtypePropEnum::Conj(v))
-    }
-    pub fn disj(&'a self, v: Vec<'a, SubtypeProp<'a>>) -> SubtypeProp<'a> {
-        self.alloc(SubtypePropEnum::Disj(v))
-    }
-    pub fn is_subtype(&'a self, ty1: InternalType<'a>, ty2: InternalType<'a>) -> SubtypeProp<'a> {
-        self.alloc(SubtypePropEnum::IsSubtype(ty1, ty2))
-    }
-    pub fn valid(&'a self) -> SubtypeProp<'a> {
-        self.alloc
-            .alloc(SubtypePropEnum::Conj(Vec::new_in(self.alloc)))
-    }
-    pub fn invalid(&'a self) -> SubtypeProp<'a> {
-        self.alloc
-            .alloc(SubtypePropEnum::Disj(Vec::new_in(self.alloc)))
-    }
     pub fn loclty(&'a self, ty: Ty<'a>) -> InternalType<'a> {
         self.alloc(InternalType_::LoclType(ty))
     }
@@ -269,8 +258,31 @@ impl<'a> TypeBuilder<'a> {
     }
 }
 
+/// Subtype props
+impl<'a> TypeBuilder<'a> {
+    pub fn conj(&'a self, v: BVec<'a, SubtypeProp<'a>>) -> SubtypeProp<'a> {
+        self.alloc(SubtypePropEnum::Conj(v))
+    }
+    pub fn disj(&'a self, v: BVec<'a, SubtypeProp<'a>>) -> SubtypeProp<'a> {
+        self.alloc(SubtypePropEnum::Disj(v))
+    }
+    pub fn is_subtype(&'a self, ty1: InternalType<'a>, ty2: InternalType<'a>) -> SubtypeProp<'a> {
+        self.alloc(SubtypePropEnum::IsSubtype(ty1, ty2))
+    }
+    pub fn valid(&'a self) -> SubtypeProp<'a> {
+        self.alloc(SubtypePropEnum::Conj(BVec::new_in(self.alloc)))
+    }
+    pub fn invalid(&'a self) -> SubtypeProp<'a> {
+        self.alloc(SubtypePropEnum::Disj(BVec::new_in(self.alloc)))
+    }
+}
+
 /// All reason builders go here
 impl<'a> TypeBuilder<'a> {
+    pub fn alloc_reason(&self, r: PReason_<'a>) -> PReason<'a> {
+        self.alloc.alloc(r)
+    }
+
     fn mk_reason(&'a self, pos: Option<&'a Pos>, reason: Reason<'a>) -> PReason<'a> {
         self.alloc(PReason_ { pos, reason })
     }
@@ -278,5 +290,25 @@ impl<'a> TypeBuilder<'a> {
     /// Make an Rnone reason. This does not belong here, but:
     pub fn mk_rnone(&'a self) -> PReason<'a> {
         self.mk_reason(None, Reason::Rnone)
+    }
+
+    pub fn mk_rinstantiate(&self, r0: PReason<'a>, name: &'a str, r1: PReason<'a>) -> PReason {
+        self.mk_reason(r1.pos, Reason::Rinstantiate(r0, name, r1))
+    }
+}
+
+impl<'a> TypeBuilder<'a> {
+    pub fn pos_none(&'a self) -> &'a Pos {
+        self.alloc(Pos::make_none())
+    }
+}
+
+impl<'a> TypeBuilder<'a> {
+    pub fn env_with_self(&self) -> ExpandEnv<'a> {
+        // TODO(hrust) this_ty
+        self.alloc.alloc(ExpandEnv_ {
+            type_expansions: vec![in &self.alloc],
+            substs: SMap::empty(),
+        })
     }
 }

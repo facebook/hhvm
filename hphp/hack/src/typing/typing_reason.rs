@@ -6,6 +6,7 @@ use bumpalo::collections::Vec;
 
 use oxidized::pos::Pos;
 pub use oxidized::typing_reason::ArgPosition;
+use oxidized::typing_reason::Reason as OxReason;
 use oxidized::{aast, ast_defs};
 
 #[derive(Debug)]
@@ -130,4 +131,16 @@ pub enum ExprDepTypeReason<'a> {
     ERclass(&'a str),
     ERparent(&'a str),
     ERself(&'a str),
+}
+
+impl<'a> PReason_<'a> {
+    pub fn from_decl_provided_reason(r: &'a OxReason) -> Self {
+        match r {
+            OxReason::Rhint(pos) => PReason_ {
+                pos: Some(&pos),
+                reason: Reason::Rhint,
+            },
+            _ => panic!("Did not expect anything else than Rhint from the decl provider."),
+        }
+    }
 }

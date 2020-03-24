@@ -7,29 +7,35 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+pub mod typing_phase;
 
 use oxidized::ast;
-use typing_defs_rust::{tast, Ty};
-use typing_env_rust::Genv;
+use typing_defs_rust::{tast, Ty, Ty_};
+use typing_env_rust::Env;
 
-fn dispatch_call<'a>(ast::Expr(_pos, e): &ast::Expr, env: &'a Genv) -> Ty<'a> {
-    use oxidized::decl_defs::Ty_;
+fn dispatch_call<'a>(ast::Expr(_pos, e): &ast::Expr, env: &mut Env<'a>) -> Ty<'a> {
+    let bld = env.builder();
     match e {
         ast::Expr_::Id(x) => {
             let (_pos, sid) = (&x.0, &x.1);
-            match env.provider.get_fun(sid) {
+            match env.provider().get_fun(sid) {
                 None => unimplemented!(),
-                Some(f) => match f.type_.1.as_ref() {
-                    Ty_::Tfun(x) => Ty::from_oxidized(&x.ret.type_, env.builder),
-                    x => unimplemented!("{:#?}", x),
-                },
+                Some(f) => {
+                    let fty = &f.type_;
+                    let ety_env = bld.env_with_self();
+                    let fty = typing_phase::localize(&ety_env, env, fty);
+                    match fty.get_node() {
+                        Ty_::Tfun(x) => x.return_,
+                        x => unimplemented!("{:#?}", x),
+                    }
+                }
             }
         }
         x => unimplemented!("{:#?}", x),
     }
 }
 
-fn expr<'a>(ast::Expr(_pos, e): &ast::Expr, env: &'a Genv) -> tast::Expr<'a> {
+fn expr<'a>(ast::Expr(_pos, e): &ast::Expr, env: &mut Env<'a>) -> tast::Expr<'a> {
     let (ty, e) = match e {
         ast::Expr_::Call(x) => {
             if let (ast::CallType::Cnormal, e, [], [], None) =
@@ -37,7 +43,7 @@ fn expr<'a>(ast::Expr(_pos, e): &ast::Expr, env: &'a Genv) -> tast::Expr<'a> {
             {
                 let ty = dispatch_call(e, env);
                 let e = tast::Expr(
-                    env.builder.null(env.builder.mk_rnone()),
+                    env.builder().null(env.builder().mk_rnone()),
                     tast::Expr_::mk_null(),
                 );
                 (
@@ -60,7 +66,7 @@ fn markup<'a>(s: &ast::Pstring, e: &Option<ast::Expr>) -> tast::Stmt_<'a> {
     }
 }
 
-fn stmt_<'a>(s: &ast::Stmt_, env: &'a Genv) -> tast::Stmt_<'a> {
+fn stmt_<'a>(s: &ast::Stmt_, env: &mut Env<'a>) -> tast::Stmt_<'a> {
     match s {
         ast::Stmt_::Noop => tast::Stmt_::Noop,
         ast::Stmt_::Markup(x) => markup(&x.0, &x.1),
@@ -69,11 +75,11 @@ fn stmt_<'a>(s: &ast::Stmt_, env: &'a Genv) -> tast::Stmt_<'a> {
     }
 }
 
-fn stmt<'a>(ast::Stmt(pos, s): &ast::Stmt, env: &'a Genv) -> tast::Stmt<'a> {
+fn stmt<'a>(ast::Stmt(pos, s): &ast::Stmt, env: &mut Env<'a>) -> tast::Stmt<'a> {
     tast::Stmt(pos.clone(), stmt_(s, env))
 }
 
-fn fun<'a>(f: &ast::Fun_, env: &'a Genv) -> tast::Fun_<'a> {
+fn fun<'a>(f: &ast::Fun_, env: &mut Env<'a>) -> tast::Fun_<'a> {
     let ast = f.body.ast.iter().map(|x| stmt(x, env)).collect();
 
     // We put empty vec below for all of those, since real conversion is unimplemented
@@ -106,7 +112,7 @@ fn fun<'a>(f: &ast::Fun_, env: &'a Genv) -> tast::Fun_<'a> {
     }
 }
 
-fn def<'a>(def: &ast::Def, env: &'a Genv) -> Option<tast::Def<'a>> {
+fn def<'a>(def: &ast::Def, env: &mut Env<'a>) -> Option<tast::Def<'a>> {
     match def {
         ast::Def::Fun(x) => Some(tast::Def::mk_fun(fun(x, env))),
         ast::Def::Stmt(x) => Some(tast::Def::mk_stmt(stmt(x, env))),
@@ -114,6 +120,6 @@ fn def<'a>(def: &ast::Def, env: &'a Genv) -> Option<tast::Def<'a>> {
     }
 }
 
-pub fn program<'a>(ast: &ast::Program, env: &'a Genv) -> tast::Program<'a> {
+pub fn program<'a>(ast: &ast::Program, env: &mut Env<'a>) -> tast::Program<'a> {
     ast.iter().filter_map(|x| def(x, env)).collect()
 }

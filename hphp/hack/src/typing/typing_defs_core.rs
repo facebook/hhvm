@@ -5,7 +5,7 @@
 
 use bumpalo::collections::Vec;
 pub use oxidized::typing_defs_core::{DestructureKind, Exact, ParamMode};
-use oxidized::{aast_defs, ident, nast, tany_sentinel, typing_defs as oxidized_defs};
+use oxidized::{aast_defs, ast_defs, ident, nast, tany_sentinel, typing_defs as oxidized_defs};
 
 use crate::typing_make_type::TypeBuilder;
 use crate::typing_reason::*;
@@ -95,7 +95,7 @@ pub enum Ty_<'a> {
     Tprim(PrimKind<'a>),
     /// A wrapper around fun_type, which contains the full type information for a
     /// function, method, lambda, etc.
-    Tfun, // TODO: Tfun(FunType),
+    Tfun(FunType<'a>),
     /// Tuple, with ordered list of the types of the elements of the tuple.
     Ttuple(Vec<'a, Ty<'a>>),
     /// Whether all fields of this shape are known, types of each of the
@@ -351,4 +351,17 @@ impl<'a> Ty<'a> {
             _ => unimplemented!("{:#?}", ty),
         }
     }
+}
+
+pub struct Tparam {
+    pub name: ast_defs::Id,
+    // TODO(hrust) other fields
+}
+
+pub type FunType<'a> = &'a FunType_<'a>;
+
+#[derive(Debug)]
+pub struct FunType_<'a> {
+    pub return_: Ty<'a>, // TODO(hrust) possibly_enforced_ty
+                         // TODO(hrust) missing fields
 }

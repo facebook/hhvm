@@ -10,3 +10,4 @@ path = "../../decl_provider.rs"
 
 [dependencies]
 oxidized = { path = "../../../oxidized" }
+typing_heap_rust = { path = "../../../typing/cargo/typing_heap" }

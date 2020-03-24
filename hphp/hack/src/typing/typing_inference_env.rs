@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use arena_trait::Arena;
-use bumpalo::collections::Vec;
 
 use oxidized::aast;
 use oxidized::ident::Ident;
@@ -13,7 +12,6 @@ use typing_collections_rust::{IMap, ISet, SMap};
 use typing_defs_rust::{ITySet, PReason, Ty, Ty_};
 
 use crate::typing_make_type::TypeBuilder;
-use crate::typing_tyvar_occurrences;
 
 #[derive(Clone)]
 pub struct TyvarConstraints<'a> {
@@ -61,17 +59,23 @@ pub type TyvarInfo<'a> = &'a TyvarInfoStruct<'a>;
 pub type Tvenv<'a> = IMap<'a, TyvarInfo<'a>>;
 
 #[derive(Clone)]
-pub struct TypingInferenceEnvStruct<'a> {
+pub struct InferenceEnv<'a> {
     pub builder: &'a TypeBuilder<'a>,
     pub tvenv: Tvenv<'a>,
-    pub tyvars_stack: Vec<'a, (&'a Pos, Vec<'a, Ident>)>,
-    pub tyvar_occurrences: &'a typing_tyvar_occurrences::TypingTyvarOccurrences<'a>,
+    pub tyvars_stack: Vec<(&'a Pos, Vec<Ident>)>,
     pub allow_solve_globals: bool,
 }
 
-pub type TypingInferenceEnv<'a> = &'a TypingInferenceEnvStruct<'a>;
+impl<'a> InferenceEnv<'a> {
+    pub fn new(builder: &'a TypeBuilder) -> Self {
+        InferenceEnv {
+            builder,
+            tvenv: IMap::empty(),
+            tyvars_stack: vec![],
+            allow_solve_globals: false,
+        }
+    }
 
-impl<'a> TypingInferenceEnvStruct<'a> {
     pub fn expand_type(&mut self, ty: Ty<'a>) -> Ty<'a> {
         let (r, ty_) = ty.unpack();
         match ty_ {

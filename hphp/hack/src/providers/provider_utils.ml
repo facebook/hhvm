@@ -61,33 +61,11 @@ let respect_but_quarantine_unsaved_changes
     SharedMem.invalidate_caches ();
     ()
   in
-  let respect_local_changes_exn () =
-    Relative_path.Map.iter ctx.Provider_context.entries ~f:(fun _path entry ->
-        let ast = Ast_provider.compute_ast ctx entry in
-        let (funs, classes, record_defs, typedefs, consts) =
-          Nast.get_defs ast
-        in
-        (* Update the positions of the symbols present in the AST by redeclaring
-      them. Note that this doesn't handle *removing* any entries from the
-      naming table if they've disappeared since the last time we updated the
-      naming table. *)
-        let get_names ids = List.map ~f:snd ids |> SSet.of_list in
-        Naming_global.remove_decls
-          ~ctx
-          ~funs:(get_names funs)
-          ~classes:(get_names classes)
-          ~record_defs:(get_names record_defs)
-          ~typedefs:(get_names typedefs)
-          ~consts:(get_names consts);
-        Naming_global.make_env ctx ~funs ~classes ~record_defs ~typedefs ~consts);
-    ()
-  in
   let (_errors, result) =
     Errors.do_ (fun () ->
         Utils.try_finally
           ~f:(fun () ->
             enter_quarantine_exn ();
-            respect_local_changes_exn ();
             f ())
           ~finally:leave_quarantine_exn)
   in

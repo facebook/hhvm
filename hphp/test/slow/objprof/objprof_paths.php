@@ -95,4 +95,7 @@ foreach ($objs as $name => $metrics) {
 }
 sort(inout $pathstrs);
 echo implode("\n", $pathstrs)."\n";
+__hhvm_intrinsics\launder_value($childClass);
+__hhvm_intrinsics\launder_value($childClass2);
+__hhvm_intrinsics\launder_value($rootObject);
 }

@@ -15,7 +15,7 @@ use emit_type_constant_rust as emit_type_constant;
 use env::{emitter::Emitter, local, Env, Flags as EnvFlags};
 use hhas_symbol_refs_rust::IncludePath;
 use hhbc_ast_rust::*;
-use hhbc_id_rust::{class, function, method, prop, Id};
+use hhbc_id_rust::{class, function, method, prop, r#const, Id};
 use hhbc_string_utils_rust as string_utils;
 use instruction_sequence_rust::{
     unrecoverable,
@@ -381,7 +381,7 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
                 emit_local(emitter, env, BareThisOp::Notice, e)?,
             ]))
         }
-        Expr_::ClassConst(e) => emit_class_const(env, pos, e),
+        Expr_::ClassConst(e) => emit_class_const(emitter, env, pos, &e.0, &e.1),
         Expr_::Unop(e) => emit_unop(emitter, env, pos, e),
         Expr_::Binop(e) => emit_binop(emitter, env, pos, e),
         Expr_::Pipe(e) => emit_pipe(env, e),
@@ -2914,8 +2914,52 @@ fn emit_local(e: &mut Emitter, env: &Env, notice: BareThisOp, lid: &aast_defs::L
     }
 }
 
-fn emit_class_const(env: &Env, pos: &Pos, (ci, id): &(tast::ClassId, ast_defs::Pstring)) -> Result {
-    unimplemented!("TODO(hrust)")
+fn emit_class_const(
+    e: &mut Emitter,
+    env: &Env,
+    pos: &Pos,
+    cid: &tast::ClassId,
+    id: &ast_defs::Pstring,
+) -> Result {
+    let mut cexpr = ClassExpr::class_id_to_class_expr(e, false, true, &env.scope, cid);
+    if let ClassExpr::Id(ast_defs::Id(_, name)) = &cexpr {
+        if let Some(reified_var_cexpr) = get_reified_var_cexpr(e, env, pos, &name)? {
+            cexpr = reified_var_cexpr;
+        }
+    }
+    match cexpr {
+        ClassExpr::Id(ast_defs::Id(pos, name)) => {
+            // TODO(hrust) enabel `let cid = class::Type::from_ast_name(&cname);`,
+            // `from_ast_name` should be able to accpet Cow<str>
+            let cid: class::Type = string_utils::strip_global_ns(&name).to_string().into();
+            let cname = cid.to_raw_string();
+            if string_utils::is_class(&id.1) {
+                emit_pos_then(e, &pos, InstrSeq::make_string(cname))
+            } else {
+                emit_symbol_refs::State::add_class(e, cid.clone());
+                // TODO(hrust) enabel `let const_id = r#const::Type::from_ast_name(&id.1);`,
+                // `from_ast_name` should be able to accpet Cow<str>
+                let const_id: r#const::Type =
+                    string_utils::strip_global_ns(&id.1).to_string().into();
+                emit_pos_then(e, &pos, InstrSeq::make_clscnsd(const_id, cid))
+            }
+        }
+        _ => {
+            let load_const = if string_utils::is_class(&id.1) {
+                InstrSeq::make_classname()
+            } else {
+                // TODO(hrust) enabel `let const_id = r#const::Type::from_ast_name(&id.1);`,
+                // `from_ast_name` should be able to accpet Cow<str>
+                let const_id: r#const::Type =
+                    string_utils::strip_global_ns(&id.1).to_string().into();
+                InstrSeq::make_clscns(const_id)
+            };
+            Ok(InstrSeq::gather(vec![
+                emit_load_class_ref(e, env, pos, cexpr)?,
+                load_const,
+            ]))
+        }
+    }
 }
 
 fn emit_unop(

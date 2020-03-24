@@ -278,6 +278,16 @@ impl InstrSeq {
         Self::make_instr(Instruct::ILitConst(InstructLitConst::True))
     }
 
+    pub fn make_clscnsd(const_id: ConstId, cid: ClassId) -> Self {
+        Self::make_instr(Instruct::ILitConst(InstructLitConst::ClsCnsD(
+            const_id, cid,
+        )))
+    }
+
+    pub fn make_clscns(const_id: ConstId) -> Self {
+        Self::make_instr(Instruct::ILitConst(InstructLitConst::ClsCns(const_id)))
+    }
+
     pub fn make_eq() -> Self {
         Self::make_instr(Instruct::IOp(InstructOperator::Eq))
     }

@@ -1682,7 +1682,7 @@ fn print_misc<W: Write>(w: &mut W, misc: &InstructMisc) -> Result<(), W::Error> 
         M::ChainFaults => w.write("ChainFaults"),
         M::VerifyRetTypeC => w.write("VerifyRetTypeC"),
         M::VerifyRetTypeTS => w.write("VerifyRetTypeTS"),
-        M::Self_ => w.write("Self_"),
+        M::Self_ => w.write("Self"),
         M::Parent => w.write("Parent"),
         M::LateBoundCls => w.write("LateBoundCls"),
         M::ClassName => w.write("ClassName"),
@@ -1873,6 +1873,7 @@ fn print_lit_const<W: Write>(w: &mut W, lit: &InstructLitConst) -> Result<(), W:
         LC::ClsCnsD(const_id, cid) => {
             w.write("ClsCnsD ")?;
             print_const_id(w, const_id)?;
+            w.write(" ")?;
             print_class_id(w, cid)
         }
         LC::NewCol(ct) => {

@@ -110,6 +110,8 @@ module Dep = struct
 
   let to_debug_string = string_of_int
 
+  let of_debug_string = int_of_string
+
   let variant_to_string : type a. a variant -> string =
    fun dep ->
     let prefix =

@@ -83,6 +83,8 @@ module Dep : sig
 
   val to_debug_string : t -> string
 
+  val of_debug_string : string -> t
+
   val variant_to_string : 'a variant -> string
 end
 

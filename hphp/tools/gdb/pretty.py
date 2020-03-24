@@ -294,7 +294,7 @@ class ArrayDataPrinter(object):
                     key = '"%s"' % rawkey
 
             except gdb.MemoryError:
-                key = '<invalid>'
+                rawkey = key = '<invalid>'
 
             gdbutils.current_key = rawkey
             try:

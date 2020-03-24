@@ -140,7 +140,11 @@ def string_data_val(val, keep_case=True):
     except gdb.error:
         data = (deref(val).address + 1).cast(T('char').pointer())
 
-    s = data.string('utf-8', 'ignore', val['m_len'])
+    try:
+        s = data.string('utf-8', 'ignore', val['m_len'])
+    except OverflowError:
+        s = "<string with invalid length: {}>".format(val['m_len'])
+
     return s if keep_case else s.lower()
 
 

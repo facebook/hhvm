@@ -603,20 +603,52 @@ module ConstsTable = struct
         (Printf.sprintf "Failure retrieving row: %s" (Sqlite3.Rc.to_string rc))
 end
 
-(** We cache the connection to the most recently opened db path. *)
-let db_ref : (string * Sqlite3.db) option ref = ref None
+module Database_handle : sig
+  val get_db_path : unit -> string option
 
-let get_db (Db_path path) : Sqlite3.db =
-  match !db_ref with
-  | Some (old_path, db) when old_path = path -> db
-  | _ ->
-    let db = Sqlite3.db_open path in
-    Sqlite3.exec db "PRAGMA synchronous = OFF;" |> check_rc db;
-    Sqlite3.exec db "PRAGMA journal_mode = MEMORY;" |> check_rc db;
-    db_ref := Some (path, db);
-    db
+  val set_db_path : string option -> unit
 
-let dereference_db () : unit = db_ref := None
+  val is_connected : unit -> bool
+
+  val get_db : unit -> Sqlite3.db option
+end = struct
+  module Shared_db_settings =
+    SharedMem.NoCache (SharedMem.ProfiledImmediate) (StringKey)
+      (struct
+        type t = string
+
+        let prefix = Prefix.make ()
+
+        let description = "NamingTableDatabaseSettings"
+      end)
+
+  let open_db () =
+    match Shared_db_settings.get "database_path" with
+    | None -> None
+    | Some path ->
+      let db = Sqlite3.db_open path in
+      Sqlite3.exec db "PRAGMA synchronous = OFF;" |> check_rc db;
+      Sqlite3.exec db "PRAGMA journal_mode = MEMORY;" |> check_rc db;
+      Some db
+
+  let db = ref (lazy (open_db ()))
+
+  let get_db_path () : string option = Shared_db_settings.get "database_path"
+
+  let set_db_path path =
+    Shared_db_settings.remove_batch (SSet.singleton "database_path");
+
+    (match path with
+    | Some path -> Shared_db_settings.add "database_path" path
+    | None -> ());
+
+    (* Force this immediately so that we can get validation errors in master. *)
+    db := Lazy.from_val (open_db ())
+
+  let get_db () = Lazy.force !db
+
+  let is_connected () = get_db () <> None
+end
 
 let save_file_info db relative_path file_info =
   Core_kernel.(
@@ -681,6 +713,12 @@ let save_file_info db relative_path file_info =
     in
     symbols_inserted)
 
+let get_db_path = Database_handle.get_db_path
+
+let set_db_path = Database_handle.set_db_path
+
+let is_connected = Database_handle.is_connected
+
 let save_file_infos db_name file_info_map ~base_content_version =
   let db = Sqlite3.db_open db_name in
   Sqlite3.exec db "BEGIN TRANSACTION;" |> check_rc db;
@@ -710,21 +748,31 @@ let save_file_infos db_name file_info_map ~base_content_version =
     Sqlite3.exec db "END TRANSACTION;" |> check_rc db;
     if not @@ Sqlite3.db_close db then
       failwith @@ Printf.sprintf "Could not close database at %s" db_name;
-    dereference_db ();
+    Database_handle.set_db_path None;
     save_result
   with e ->
     Sqlite3.exec db "END TRANSACTION;" |> check_rc db;
     raise e
 
-let update_file_infos db_path local_changes =
-  let db = get_db db_path in
+let update_file_infos db_name local_changes =
+  Database_handle.set_db_path (Some db_name);
+  let db =
+    match Database_handle.get_db () with
+    | Some db -> db
+    | None -> failwith @@ Printf.sprintf "Could not connect to %s" db_name
+  in
   LocalChanges.update db local_changes
 
-let get_local_changes db_path =
-  let db = get_db db_path in
+let get_local_changes () =
+  let db =
+    match Database_handle.get_db () with
+    | Some db -> db
+    | None ->
+      failwith @@ Printf.sprintf "Attempted to access non-connected database"
+  in
   LocalChanges.get db
 
-let fold ~db_path ~init ~f ~file_deltas =
+let fold ~init ~f ~file_deltas =
   (* We depend on [Relative_path.Map.bindings] returning results in increasing
    * order here. *)
   let sorted_changes = Relative_path.Map.bindings file_deltas in
@@ -762,7 +810,11 @@ let fold ~db_path ~init ~f ~file_deltas =
       end
     | _ -> (sorted_changes, f path fi acc)
   in
-  let db = get_db db_path in
+  let db =
+    match Database_handle.get_db () with
+    | Some db -> db
+    | None -> failwith "Attempted to access non-connected database"
+  in
   let (remaining_changes, acc) =
     FileInfoTable.fold db ~init:(sorted_changes, init) ~f:consume_sorted_changes
   in
@@ -776,18 +828,22 @@ let fold ~db_path ~init ~f ~file_deltas =
     acc
     remaining_changes
 
-let get_file_info db_path path =
-  let db = get_db db_path in
-  FileInfoTable.get_file_info db path
+let get_file_info path =
+  match Database_handle.get_db () with
+  | None -> None
+  | Some db -> FileInfoTable.get_file_info db path
 
-let get_type_pos db_path name ~case_insensitive =
-  let db = get_db db_path in
-  TypesTable.get db ~name ~case_insensitive
+let get_type_pos name ~case_insensitive =
+  match Database_handle.get_db () with
+  | None -> None
+  | Some db -> TypesTable.get db ~name ~case_insensitive
 
-let get_fun_pos db_path name ~case_insensitive =
-  let db = get_db db_path in
-  FunsTable.get db ~name ~case_insensitive
+let get_fun_pos name ~case_insensitive =
+  match Database_handle.get_db () with
+  | None -> None
+  | Some db -> FunsTable.get db ~name ~case_insensitive
 
-let get_const_pos db_path name =
-  let db = get_db db_path in
-  ConstsTable.get db ~name
+let get_const_pos name =
+  match Database_handle.get_db () with
+  | None -> None
+  | Some db -> ConstsTable.get db ~name

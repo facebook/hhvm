@@ -9,9 +9,6 @@
 open Core_kernel
 open Reordered_argument_collections
 
-let db_path_of_ctx (ctx : Provider_context.t) : Naming_sqlite.db_path option =
-  Db_path_provider.get_naming_db_path ctx
-
 let not_implemented (backend : Provider_backend.t) =
   failwith
     ("not implemented for backend: " ^ Provider_backend.t_to_string backend)
@@ -63,7 +60,6 @@ let find_symbol_in_context_with_suppression
     | None -> None)
 
 let get_and_cache
-    ~(ctx : Provider_context.t)
     ~(name : 'name)
     ~(make_pos_for_kind : 'sqlite_result -> 'pos)
     ~(get_delta_for_kind :
@@ -72,22 +68,21 @@ let get_and_cache
     ~(set_delta_for_kind :
        'pos Provider_backend.Reverse_naming_table_delta.pos_or_deleted SMap.t ->
        unit)
-    ~(get_from_sqlite : Naming_sqlite.db_path -> 'name -> 'sqlite_result option)
-    =
+    ~(get_from_sqlite : 'name -> 'sqlite_result option) =
   let open Provider_backend.Reverse_naming_table_delta in
   let delta = get_delta_for_kind () in
-  match (SMap.find_opt delta name, db_path_of_ctx ctx) with
-  | (Some Deleted, _) -> None
-  | (Some (Pos pos), _) -> Some pos
-  | (None, Some db_path) ->
-    (match get_from_sqlite db_path name with
+  match SMap.find_opt delta name with
+  | Some Deleted -> None
+  | Some (Pos pos) -> Some pos
+  | None when Naming_sqlite.is_connected () ->
+    (match get_from_sqlite name with
     | None -> None
     | Some path ->
       let pos = make_pos_for_kind path in
       let new_delta = SMap.add delta ~key:name ~data:(Pos pos) in
       set_delta_for_kind new_delta;
       Some pos)
-  | (None, _) -> None
+  | None -> None
 
 let get_const_pos (ctx : Provider_context.t) (name : string) :
     FileInfo.pos option =
@@ -100,19 +95,16 @@ let get_const_pos (ctx : Provider_context.t) (name : string) :
     ~fallback:(fun () ->
       match ctx.Provider_context.backend with
       | Provider_backend.Shared_memory ->
-        Naming_heap.Consts.get_pos (db_path_of_ctx ctx) name
-        >>| attach_name_type FileInfo.Const
+        Naming_heap.Consts.get_pos name >>| attach_name_type FileInfo.Const
       | Provider_backend.Local_memory { reverse_naming_table_delta; _ } ->
         let open Provider_backend.Reverse_naming_table_delta in
         get_and_cache
-          ~ctx
           ~name
           ~make_pos_for_kind:(fun path -> FileInfo.File (FileInfo.Const, path))
           ~get_delta_for_kind:(fun () -> reverse_naming_table_delta.consts)
           ~set_delta_for_kind:(fun consts ->
             reverse_naming_table_delta.consts <- consts)
-          ~get_from_sqlite:(fun db_path name ->
-            Naming_sqlite.get_const_pos db_path name)
+          ~get_from_sqlite:(fun name -> Naming_sqlite.get_const_pos name)
         >>| attach_name_type FileInfo.Const
       | Provider_backend.Decl_service _ as backend -> not_implemented backend)
   >>| remove_name_type
@@ -136,8 +128,7 @@ let add_const (ctx : Provider_context.t) (name : string) (pos : FileInfo.pos) :
 
 let remove_const_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
   match ctx.Provider_context.backend with
-  | Provider_backend.Shared_memory ->
-    Naming_heap.Consts.remove_batch (db_path_of_ctx ctx) names
+  | Provider_backend.Shared_memory -> Naming_heap.Consts.remove_batch names
   | Provider_backend.Local_memory { reverse_naming_table_delta; _ } ->
     let open Provider_backend.Reverse_naming_table_delta in
     reverse_naming_table_delta.consts <-
@@ -158,19 +149,17 @@ let get_fun_pos (ctx : Provider_context.t) (name : string) : FileInfo.pos option
     ~fallback:(fun () ->
       match ctx.Provider_context.backend with
       | Provider_backend.Shared_memory ->
-        Naming_heap.Funs.get_pos (db_path_of_ctx ctx) name
-        >>| attach_name_type FileInfo.Fun
+        Naming_heap.Funs.get_pos name >>| attach_name_type FileInfo.Fun
       | Provider_backend.Local_memory { reverse_naming_table_delta; _ } ->
         let open Provider_backend.Reverse_naming_table_delta in
         get_and_cache
-          ~ctx
           ~name
           ~make_pos_for_kind:(fun path -> FileInfo.File (FileInfo.Fun, path))
           ~get_delta_for_kind:(fun () -> reverse_naming_table_delta.funs)
           ~set_delta_for_kind:(fun funs ->
             reverse_naming_table_delta.funs <- funs)
-          ~get_from_sqlite:(fun db_path name ->
-            Naming_sqlite.get_fun_pos db_path ~case_insensitive:false name)
+          ~get_from_sqlite:(fun name ->
+            Naming_sqlite.get_fun_pos ~case_insensitive:false name)
         >>| attach_name_type FileInfo.Fun
       | Provider_backend.Decl_service _ as backend -> not_implemented backend)
   >>| remove_name_type
@@ -212,19 +201,18 @@ let get_fun_canon_name (ctx : Provider_context.t) (name : string) :
         before having called this function. `get_fun_canon_name` is only
         called in some functions in `Naming_global`, which expects the caller
         to have called `Naming_global.remove_decls` already. *)
-      Naming_heap.Funs.get_canon_name (db_path_of_ctx ctx) ctx name
+      Naming_heap.Funs.get_canon_name ctx name
     | Provider_backend.Local_memory { reverse_naming_table_delta; _ } ->
       let open Provider_backend.Reverse_naming_table_delta in
       get_and_cache
-        ~ctx
         ~name
         ~make_pos_for_kind:(fun path -> FileInfo.File (FileInfo.Fun, path))
         ~get_delta_for_kind:(fun () -> reverse_naming_table_delta.funs)
         ~set_delta_for_kind:(fun _funs ->
           (* Do not cache, since we're looking up case-insensitively. *)
           ())
-        ~get_from_sqlite:(fun db_path name ->
-          Naming_sqlite.get_fun_pos db_path ~case_insensitive:true name)
+        ~get_from_sqlite:(fun name ->
+          Naming_sqlite.get_fun_pos ~case_insensitive:true name)
       >>= fun pos -> compute_symbol_canon_name (FileInfo.get_pos_filename pos)
     | Provider_backend.Decl_service _ as backend -> not_implemented backend)
 
@@ -240,8 +228,7 @@ let add_fun (ctx : Provider_context.t) (name : string) (pos : FileInfo.pos) :
 
 let remove_fun_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
   match ctx.Provider_context.backend with
-  | Provider_backend.Shared_memory ->
-    Naming_heap.Funs.remove_batch (db_path_of_ctx ctx) names
+  | Provider_backend.Shared_memory -> Naming_heap.Funs.remove_batch names
   | Provider_backend.Local_memory { reverse_naming_table_delta; _ } ->
     let open Provider_backend.Reverse_naming_table_delta in
     reverse_naming_table_delta.funs <-
@@ -267,8 +254,7 @@ let add_type
 
 let remove_type_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
   match ctx.Provider_context.backend with
-  | Provider_backend.Shared_memory ->
-    Naming_heap.Types.remove_batch (db_path_of_ctx ctx) names
+  | Provider_backend.Shared_memory -> Naming_heap.Types.remove_batch names
   | Provider_backend.Local_memory { reverse_naming_table_delta; _ } ->
     let open Provider_backend.Reverse_naming_table_delta in
     reverse_naming_table_delta.types <-
@@ -312,12 +298,11 @@ let get_type_pos_and_kind (ctx : Provider_context.t) (name : string) :
     ~fallback:(fun () ->
       match ctx.Provider_context.backend with
       | Provider_backend.Shared_memory ->
-        Naming_heap.Types.get_pos (db_path_of_ctx ctx) name
-        >>| fun (pos, kind) -> (pos, kind_to_name_type kind)
+        Naming_heap.Types.get_pos name >>| fun (pos, kind) ->
+        (pos, kind_to_name_type kind)
       | Provider_backend.Local_memory { reverse_naming_table_delta; _ } ->
         let open Provider_backend.Reverse_naming_table_delta in
         get_and_cache
-          ~ctx
           ~name
           ~make_pos_for_kind:(fun (path, kind) ->
             let name_type = kind_to_name_type kind in
@@ -326,8 +311,8 @@ let get_type_pos_and_kind (ctx : Provider_context.t) (name : string) :
           ~get_delta_for_kind:(fun () -> reverse_naming_table_delta.types)
           ~set_delta_for_kind:(fun types ->
             reverse_naming_table_delta.types <- types)
-          ~get_from_sqlite:(fun db_path name ->
-            Naming_sqlite.get_type_pos db_path ~case_insensitive:false name)
+          ~get_from_sqlite:(fun name ->
+            Naming_sqlite.get_type_pos ~case_insensitive:false name)
         >>| fun (pos, kind) -> (pos, kind_to_name_type kind)
       | Provider_backend.Decl_service _ as backend -> not_implemented backend)
   >>| fun (pos, name_type) -> (pos, name_type_to_kind name_type)
@@ -394,12 +379,11 @@ let get_type_canon_name (ctx : Provider_context.t) (name : string) :
     before having called this function. `get_type_canon_name` is only
     called in some functions in `Naming_global`, which expects the caller
     to have called `Naming_global.remove_decls` already. *)
-      Naming_heap.Types.get_canon_name (db_path_of_ctx ctx) ctx name
+      Naming_heap.Types.get_canon_name ctx name
     | Provider_backend.Local_memory { reverse_naming_table_delta; _ } ->
       let open Option.Monad_infix in
       let open Provider_backend.Reverse_naming_table_delta in
       get_and_cache
-        ~ctx
         ~name
         ~make_pos_for_kind:(fun (path, kind) ->
           let name_type =
@@ -413,8 +397,8 @@ let get_type_canon_name (ctx : Provider_context.t) (name : string) :
         ~get_delta_for_kind:(fun () -> reverse_naming_table_delta.types)
         ~set_delta_for_kind:(fun types ->
           reverse_naming_table_delta.types <- types)
-        ~get_from_sqlite:(fun db_path name ->
-          Naming_sqlite.get_type_pos db_path ~case_insensitive:true name)
+        ~get_from_sqlite:(fun name ->
+          Naming_sqlite.get_type_pos ~case_insensitive:true name)
       >>= fun (pos, kind) ->
       compute_symbol_canon_name (FileInfo.get_pos_filename pos) kind
     | Provider_backend.Decl_service _ as backend -> not_implemented backend)

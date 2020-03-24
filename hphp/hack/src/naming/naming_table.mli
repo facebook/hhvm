@@ -103,7 +103,7 @@ val get_forward_naming_fallback_path : t -> string option
 
 (* The path to the table's SQLite database mapping symbol names to filenames, if any.
     Analogous to SharedMem.loaded_dep_table_filename *)
-val get_reverse_naming_fallback_path : Provider_context.t -> string option
+val get_reverse_naming_fallback_path : unit -> string option
 
 (* Converting between different types of forward naming tables. *)
 val from_saved : saved_state_info -> t

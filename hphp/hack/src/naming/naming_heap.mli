@@ -12,15 +12,13 @@ module type ReverseNamingTable = sig
 
   val add : string -> pos -> unit
 
-  val get_pos :
-    Naming_sqlite.db_path option -> ?bypass_cache:bool -> string -> pos option
+  val get_pos : ?bypass_cache:bool -> string -> pos option
 
-  val get_filename :
-    Naming_sqlite.db_path option -> string -> Relative_path.t option
+  val get_filename : string -> Relative_path.t option
 
-  val is_defined : Naming_sqlite.db_path option -> string -> bool
+  val is_defined : string -> bool
 
-  val remove_batch : Naming_sqlite.db_path option -> SSet.t -> unit
+  val remove_batch : SSet.t -> unit
 
   val heap_string_of_key : string -> string
 end
@@ -29,29 +27,18 @@ module Types : sig
   include
     ReverseNamingTable with type pos = FileInfo.pos * Naming_types.kind_of_type
 
-  val get_kind :
-    Naming_sqlite.db_path option -> string -> Naming_types.kind_of_type option
+  val get_kind : string -> Naming_types.kind_of_type option
 
   val get_filename_and_kind :
-    Naming_sqlite.db_path option ->
-    string ->
-    (Relative_path.t * Naming_types.kind_of_type) option
+    string -> (Relative_path.t * Naming_types.kind_of_type) option
 
-  val get_canon_name :
-    Naming_sqlite.db_path option ->
-    Provider_context.t ->
-    string ->
-    string option
+  val get_canon_name : Provider_context.t -> string -> string option
 end
 
 module Funs : sig
   include ReverseNamingTable with type pos = FileInfo.pos
 
-  val get_canon_name :
-    Naming_sqlite.db_path option ->
-    Provider_context.t ->
-    string ->
-    string option
+  val get_canon_name : Provider_context.t -> string -> string option
 end
 
 module Consts : ReverseNamingTable with type pos = FileInfo.pos

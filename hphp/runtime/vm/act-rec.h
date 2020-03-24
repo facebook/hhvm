@@ -86,14 +86,17 @@ struct ActRec {
     ObjectData* m_thisUnsafe; // This.
     Class* m_clsUnsafe;       // Late bound class.
   };
-  VarEnv* m_varEnv;       // Variable environment when live
+  union {
+    VarEnv* m_varEnv;         // Variable environment when live
+    uintptr_t m_tailFrameIds; // Merged list of AsyncFrameIds for AFWH
+  };
 
   TYPE_SCAN_CUSTOM_FIELD(m_thisUnsafe) {
     if (m_func->implCls()) scanner.scan(m_thisUnsafe);
   }
   TYPE_SCAN_CUSTOM_FIELD(m_varEnv) {
-    // All three union members could be heap pointers, but we don't care
-    // which kind; PtrMap will resolve things.
+    // If we have tail frames in this position, m_varEnv will be an invalid
+    // (non-canonical) 64-bit pointer that the scanner will ignore.
     scanner.scan(m_varEnv);
   }
 
@@ -307,6 +310,12 @@ struct ActRec {
    * Set `val' to the m_varEnv.
    */
   void setVarEnv(VarEnv* val);
+
+  /*
+   * Access to the tail frames slot.
+   */
+  uintptr_t getTailFrameIds() const { return m_tailFrameIds; }
+  void setTailFrameIds(uintptr_t val) { m_tailFrameIds = val; }
 
   /*
    * Get the minimum possible effective level of reactivity.

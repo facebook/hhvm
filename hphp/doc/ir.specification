@@ -2528,6 +2528,16 @@ To string conversions:
   cross-scheduler and intra-scheduler cycle detection. Throws if the
   dependency cannot be established.
 
+| AFWHPushTailFrame, ND, S(Obj) C(Int), B
+
+  If S0 is eligible for the tail frame optimization and has any free tail
+  frame ID slots, pushes S1 as a new tail frame ID. Otherwise, branches to B.
+  This IR op assumes that S0 is an Awaitable in the blocked state.
+
+  S0 is eligible for the optimization if it is an AsyncFunctionWaitHandle,
+  if this site "owns" it (i.e. if it has a refcount of exactly 2 - this site
+  and its child's back pointer), and if it has space in its tail-frames list.
+
 | StArResumeAddr<offset>, ND, S(FramePtr) S(TCA), NF
 
   Store the resume address S1 into the Resumable whose ActRec is given by S0,

@@ -536,6 +536,7 @@ bool opcodeMayRaise(Opcode opc) {
   case AdvanceMixedPtrIter:
   case AdvancePackedPtrIter:
   case AFWHBlockOn:
+  case AFWHPushTailFrame:
   case AKExistsArr:
   case AKExistsDict:
   case AKExistsKeyset:

@@ -604,6 +604,7 @@ bool canDCE(IRInstruction* inst) {
   case StContArValue:
   case StContArKey:
   case AFWHBlockOn:
+  case AFWHPushTailFrame:
   case CountWHNotDone:
   case IncStat:
   case IncProfCounter:

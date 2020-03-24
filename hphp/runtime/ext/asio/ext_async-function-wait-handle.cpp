@@ -28,7 +28,73 @@
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/system/systemlib.h"
 
+#include <folly/SharedMutex.h>
+#include <folly/container/F14Map.h>
+
 namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
+
+namespace {
+size_t s_numAsyncFrameIds = 1;
+SrcKey s_asyncFrames[kMaxAsyncFrameId + 1];
+folly::F14FastMap<SrcKey, AsyncFrameId, SrcKey::Hasher> s_asyncFrameMap;
+folly::SharedMutex s_asyncFrameLock;
+}
+
+AsyncFrameId getAsyncFrameId(SrcKey sk) {
+  {
+    folly::SharedMutex::ReadHolder lock(s_asyncFrameLock);
+    auto const it = s_asyncFrameMap.find(sk);
+    if (it != s_asyncFrameMap.end()) return it->second;
+    if (s_numAsyncFrameIds > kMaxAsyncFrameId) return kInvalidAsyncFrameId;
+  }
+  folly::SharedMutex::WriteHolder lock(s_asyncFrameLock);
+  auto const it = s_asyncFrameMap.insert({sk, s_numAsyncFrameIds});
+  if (!it.second) return it.first->second;
+  if (s_numAsyncFrameIds > kMaxAsyncFrameId) {
+    s_asyncFrameMap.erase(sk);
+    return kInvalidAsyncFrameId;
+  }
+  s_asyncFrames[s_numAsyncFrameIds++] = sk;
+  return s_numAsyncFrameIds - 1;
+}
+
+SrcKey getAsyncFrame(AsyncFrameId id) {
+  assertx(0 < id && id <= kMaxAsyncFrameId);
+  assertx(id != kInvalidAsyncFrameId);
+  return s_asyncFrames[id];
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+constexpr auto kNumTailFrames =
+  sizeof(ActRec::m_tailFrameIds) / sizeof(AsyncFrameId);
+
+bool c_AsyncFunctionWaitHandle::hasTailFrames() const {
+  return tailFrame(0) != 0 &&
+         tailFrame(kNumTailFrames - 1) != kInvalidAsyncFrameId;
+}
+
+size_t c_AsyncFunctionWaitHandle::firstTailFrameIndex() const {
+  assertx(hasTailFrames());
+  for (auto i = 0; i < kNumTailFrames; i++) {
+    if (tailFrame(i) != kInvalidAsyncFrameId) return i;
+  }
+  assertx(false);
+  not_reached();
+}
+
+size_t c_AsyncFunctionWaitHandle::lastTailFrameIndex() const {
+  return kNumTailFrames;
+}
+
+AsyncFrameId c_AsyncFunctionWaitHandle::tailFrame(size_t index) const {
+  assertx(0 <= index && index < kNumTailFrames);
+  auto const raw = actRec()->getTailFrameIds();
+  auto const idx = kNumTailFrames - index - 1;
+  return (raw >> (8 * sizeof(AsyncFrameId) * idx)) & kInvalidAsyncFrameId;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 c_AsyncFunctionWaitHandle::~c_AsyncFunctionWaitHandle() {
@@ -71,6 +137,10 @@ c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
   auto const waitHandle = new (resumable + 1) c_AsyncFunctionWaitHandle();
   assertx(waitHandle->hasExactlyOneRef());
   waitHandle->actRec()->setReturnVMExit();
+  if (!mayUseVV || !(fp->func()->attrs() & AttrMayUseVV)) {
+    waitHandle->actRec()->setTailFrameIds(-1);
+  }
+  assertx(!waitHandle->hasTailFrames());
   waitHandle->initialize(child);
   return waitHandle;
 }

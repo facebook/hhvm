@@ -1800,6 +1800,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DecRefNZ:
   case ProfileDecRef:
   case AFWHBlockOn:
+  case AFWHPushTailFrame:
   case IncRef:
   case LdClosureCls:
   case LdClosureThis:

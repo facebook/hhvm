@@ -80,6 +80,7 @@ const ActRec* BTContext::clone(const BTContext& src, const ActRec* fp) {
   inlineStack = src.inlineStack;
   prevIFID = src.prevIFID;
   hasInlFrames = src.hasInlFrames;
+  afwhTailFrameIndex = src.afwhTailFrameIndex;
   assertx(!!stashedFrm == (fp == &src.fakeAR[0] || fp == &src.fakeAR[1]));
 
   return
@@ -217,6 +218,32 @@ BTFrame getPrevActRec(
 ) {
   auto const fp = frm.fp;
 
+  // If we're already iterating over an AsyncFunctionWaitHandle's tail frames,
+  // either create a fake ActRec for the next tail frame, or go to the parent
+  // ActRec of the AFWH itself.
+  if (ctx.afwhTailFrameIndex) {
+    assertx(fp == &ctx.fakeAR[0] || fp == &ctx.fakeAR[1]);
+    assertx(fp->m_sfp == &ctx.fakeAR[0] || fp->m_sfp == &ctx.fakeAR[1]);
+    assertx(fp != fp->m_sfp);
+
+    auto const wh = frame_afwh(ctx.stashedFrm.fp);
+    if (ctx.afwhTailFrameIndex < wh->lastTailFrameIndex()) {
+      auto const sk = getAsyncFrame(wh->tailFrame(ctx.afwhTailFrameIndex++));
+      auto const prevFP = fp->m_sfp;
+      prevFP->m_func = sk.func();
+      return BTFrame{prevFP, sk.offset()};
+    }
+
+    // We could use stashedFrm.fp->savedRip as the return TCA here, but for
+    // suspended AFWH, that will always be a pointer to an async-ret stub.
+    ctx.afwhTailFrameIndex = 0;
+    ctx.stashedFrm = BTFrame{};
+    auto const contextIdx = wh->getContextIdx();
+    auto const parent = getParentWH(wh, contextIdx, visitedWHs);
+    auto const prev = getARFromWHImpl(parent, contextIdx, visitedWHs);
+    return initBTContextAt(ctx, (jit::TCA)0, prev);
+  }
+
   if (UNLIKELY(ctx.hasInlFrames)) {
     assertx(fp == &ctx.fakeAR[0] || fp == &ctx.fakeAR[1]);
     assertx(fp->m_sfp == &ctx.fakeAR[0] || fp->m_sfp == &ctx.fakeAR[1]);
@@ -252,7 +279,7 @@ BTFrame getPrevActRec(
     return prev;
   }
 
-   auto const wh = [&]() -> c_WaitableWaitHandle* {
+  auto const wh = [&]() -> c_WaitableWaitHandle* {
     if (!fp || !fp->func() || !isResumed(fp)) return nullptr;
 
     if (fp->func()->isAsyncFunction()) {
@@ -284,8 +311,24 @@ BTFrame getPrevActRec(
       return BTFrame{};
     }
 
-    auto const contextIdx = wh->getContextIdx();
+    // If we merged tail frames into this AsyncFunctionWaitHandle, iterate over
+    // those indices and retrieve the backtracing information.
+    if (wh->getKind() == c_Awaitable::Kind::AsyncFunction &&
+        wh->asAsyncFunction()->hasTailFrames()) {
+      auto const afwh = wh->asAsyncFunction();
+      auto const index = afwh->firstTailFrameIndex();
+      auto const sk = getAsyncFrame(afwh->tailFrame(index));
 
+      ctx.afwhTailFrameIndex = index + 1;
+      ctx.stashedFrm.fp = afwh->actRec();
+      auto const prevFP = &ctx.fakeAR[0];
+      prevFP->m_func = sk.func();
+      prevFP->m_callOffAndFlags =
+        ActRec::encodeCallOffsetAndFlags(0, 1 << ActRec::LocalsDecRefd);
+      return BTFrame{prevFP, sk.offset()};
+    }
+
+    auto const contextIdx = wh->getContextIdx();
     auto const parent = getParentWH(wh, contextIdx, visitedWHs);
     prev = getARFromWHImpl(parent, contextIdx, visitedWHs);
   } else {

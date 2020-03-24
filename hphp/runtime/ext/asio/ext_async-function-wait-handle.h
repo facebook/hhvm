@@ -26,6 +26,47 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+// Tail frames embedded in AFWH
+
+// NOTE: We use the physical values of these IDs in several places, because the
+// m_tailFrameIds field is punned with the m_varEnv field in ActRec. A diagram
+// will help a bit. Consider this 64-bit field as four 16-bit words:
+//
+//       m_VarEnv: (higher) ..w3..|..w2..|..w1..|..w0.. (lower)
+// m_tailFrameIds: (higher) .tf0..|.tf1..|.tf2..|.tf3.. (lower)
+//
+// If the function has AttrMayUseVV set, this field will either be a valid
+// 64-bit pointer or a nullptr. In both of these cases, w3 will be all 0s.
+//
+// Otherwise, we'll use this field to store tail-frame IDs. We JIT code to push
+// tail frame IDs into this list, and we can make this (hot) code faster if we
+// push the last frame into the lowest bits, using bit operations. That is why
+// the tail frame indices are reversed from the physical layout.
+//
+// As a example, if we've pushed one tail frames into this list, it'll be in
+// tf3 == w0. When we push another frame, that first ID will be in tf2 == w1,
+// and the second one in tf3 == w0. Any unused IDs will equal the invalid ID.
+//
+// We place the following on the valid and invalid ranges of these IDs:
+//   1. The invalid ID is 0xffff - that is, it's all 1s in binary.
+//   2. Valid IDs are in the range [1, 0x7fff] (both ends inclusive).
+//
+// Using these restrictions, we can test "does an AFWH have any tail frames?"
+// by checking that w3 is non-zero (excluding may-use VV cases) and that w0
+// is not the invalid ID. We can also test "does an AFWH have room for more
+// tail frames?" by checking if the high bit of w3 is set - we shift valid IDs
+// in to the lowest bits first.
+//
+using AsyncFrameId = uint16_t;
+constexpr AsyncFrameId kInvalidAsyncFrameId =
+  std::numeric_limits<AsyncFrameId>::max();
+constexpr AsyncFrameId kMaxAsyncFrameId = kInvalidAsyncFrameId >> 1;
+
+// Will return kInvalidAsyncFrameId if we've run out of IDs.
+AsyncFrameId getAsyncFrameId(SrcKey sk);
+SrcKey getAsyncFrame(AsyncFrameId id);
+
+///////////////////////////////////////////////////////////////////////////////
 // class AsyncFunctionWaitHandle
 
 /**
@@ -112,6 +153,13 @@ struct c_AsyncFunctionWaitHandle final : c_ResumableWaitHandle {
     return (resumable()->resumeAddr() &&
             m_children[0].getChild()->isSucceeded());
   }
+
+  // Access to merged tail frames. We optimize hard for writing these tail
+  // frames quickly, so reading them is a bit awkward - try to avoid doing so.
+  bool hasTailFrames() const;
+  size_t firstTailFrameIndex() const;
+  size_t lastTailFrameIndex() const;
+  AsyncFrameId tailFrame(size_t index) const;
 
  private:
   void setState(uint8_t state) { setKindState(Kind::AsyncFunction, state); }

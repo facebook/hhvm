@@ -478,6 +478,45 @@ void cgAFWHBlockOn(IRLS& env, const IRInstruction* inst) {
   v << store{child, parentAR[ar_rel(childOff)]};
 }
 
+void cgAFWHPushTailFrame(IRLS& env, const IRInstruction* inst) {
+  auto const wh = srcLoc(env, inst, 0).reg();
+  auto const id = inst->src(1)->intVal();
+  auto const taken = label(env, inst->taken());
+  auto& v = vmain(env);
+
+  // We "own" this AFWH if it has exactly two references: one that we hold,
+  // and one that its child holds. This IR op is only used on blocked AFWHs.
+  auto constexpr kAFWHHeaderKind = (int32_t)HeaderKind::AsyncFuncWH;
+  auto constexpr kAFWHOwnedCount = int32_t{2};
+
+  auto const sf1 = v.makeReg();
+  auto const sf2 = v.makeReg();
+  v << cmpbim{kAFWHHeaderKind, wh[HeapObject::kind_offset()], sf1};
+  ifThen(v, CC_NE, sf1, taken);
+  v << cmplim{kAFWHOwnedCount, wh[HeapObject::count_offset()], sf2};
+  ifThen(v, CC_NE, sf2, taken);
+
+  // Check that we have room for another ID in m_tailFrameIds by testing its
+  // highest bit. See comments in async-function-wait-handle.h for details.
+  static_assert(sizeof(ActRec::m_tailFrameIds) == 8, "");
+  static_assert(sizeof(AsyncFrameId) == 2, "");
+  always_assert(0 < id && id <= kMaxAsyncFrameId);
+  auto const sf3 = v.makeReg();
+  auto constexpr kTailFramesOff = AFWH::arOff() + AROFF(m_tailFrameIds);
+  v << testbim{-0b10000000, wh[kTailFramesOff + 7], sf3};
+  ifThen(v, CC_Z, sf3, taken);
+
+  // Push the new ID into the least-significant bits of m_tailFrameIds.
+  auto const old_val = v.makeReg();
+  auto const shifted = v.makeReg();
+  auto const new_val = v.makeReg();
+  auto const shift = safe_cast<int32_t>(8 * sizeof(AsyncFrameId));
+  v << load{wh[kTailFramesOff], old_val};
+  v << shlqi{shift, old_val, shifted, v.makeReg()};
+  v << orqi{safe_cast<int32_t>(id), shifted, new_val, v.makeReg()};
+  v << store{new_val, wh[kTailFramesOff]};
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void cgIsWaitHandle(IRLS& env, const IRInstruction* inst) {

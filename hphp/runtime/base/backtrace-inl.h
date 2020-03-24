@@ -50,6 +50,11 @@ struct BTContext {
 
   bool hasInlFrames{false};
 
+  // To handle awaits in tail-position, we can reuse AsyncFunctionWaitHandle
+  // and stuff just enough tail-frame info into them to support backtracing.
+  // This field is set when iterating over these tail frames.
+  uint8_t afwhTailFrameIndex{0};
+
   // fakeAR is used to generate pseudo-frames representing inlined functions
   // whose frames have been elided. The array operates like a ring buffer as
   // createBacktrace needs to inspect the current and previous frame pointer,

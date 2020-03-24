@@ -30,16 +30,126 @@
 #include "hphp/runtime/vm/jit/irgen-control.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-inlining.h"
+#include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-ret.h"
 #include "hphp/runtime/vm/jit/irgen-types.h"
+#include "hphp/runtime/vm/jit/normalized-instruction.h"
 
-#include "hphp/runtime/vm/jit/irgen-internal.h"
+#include "hphp/util/trace.h"
 
 namespace HPHP { namespace jit { namespace irgen {
 
 namespace {
 
 //////////////////////////////////////////////////////////////////////
+
+TRACE_SET_MOD(hhir);
+
+// Returns true and fills "locals" with types of the function's locals if this
+// op is an Await in "tail position" (whose results are immediately returned).
+bool isTailAwait(const IRGS& env, std::vector<Type>& locals) {
+  auto const unit = curUnit(env);
+  auto const func = curFunc(env);
+  auto const cls = curClass(env);
+  auto sk = curSrcKey(env);
+
+  TRACE(2, "isTailAwait analysis:\n");
+  if (sk.op() != Op::Await) {
+    FTRACE(2, "  Non-Await opcode: {}\n", instrToString(sk.pc(), unit));
+    return false;
+  } else if (func->isGenerator()) {
+    FTRACE(2, "  Function is a generator: {}\n", func->fullName());
+    return false;
+  } else if (func->lookupVarId(s_86metadata.get()) != kInvalidId) {
+    FTRACE(2, "  Function has metadata: {}\n", s_86metadata.get()->data());
+    return false;
+  }
+  auto const offset = findCatchHandler(func, bcOff(env));
+  if (offset != kInvalidOffset) {
+    FTRACE(2, "  Found catch block at offset: {}\n", offset);
+    return false;
+  }
+
+  // In some cases, we'll use a temporary local for tail awaits.
+  // Track up to one usage of such a variable.
+  auto resultLocal = kInvalidId;
+  sk.advance(unit);
+  for (auto i = 0; i < func->numLocals(); i++) {
+    auto const loc = Location::Local { safe_cast<uint32_t>(i) };
+    locals.push_back(env.irb->fs().typeOf(loc));
+  }
+
+  // Place a limit on the number of iterations in case of infinite loops.
+  for (auto i = 256; i-- > 0;) {
+    FTRACE(2, "  {}\n", instrToString(sk.pc(), unit));
+    switch (sk.op()) {
+      case Op::RetC:         return resultLocal == kInvalidId;
+      case Op::AssertRATStk: break;
+      case Op::AssertRATL: {
+        auto const type = typeFromRAT(getImm(sk.pc(), 1, unit).u_RATA, cls);
+        locals[getImm(sk.pc(), 0).u_ILA] &= type;
+        break;
+      }
+      case Op::PopL: {
+        if (resultLocal != kInvalidId) return false;
+        resultLocal = getImm(sk.pc(), 0).u_LA;
+        locals[resultLocal] = TCell;
+        break;
+      }
+      case Op::PushL: {
+        if (resultLocal != getImm(sk.pc(), 0).u_LA) return false;
+        locals[resultLocal] = TUninit;
+        resultLocal = kInvalidId;
+        break;
+      }
+      case Op::Jmp: case Op::JmpNS: {
+        sk = SrcKey(sk, sk.offset() + getImm(sk.pc(), 0).u_BA);
+        continue;
+      }
+      default:               return false;
+    }
+    sk.advance(unit);
+  }
+
+  TRACE(2, "  Processed too many opcodes; bailing\n");
+  return false;
+}
+
+void doTailAwaitDecRefs(IRGS& env, const std::vector<Type>& locals) {
+  auto const func = curFunc(env);
+  auto const shouldFreeInline = [&]{
+    if (locals.size() > RO::EvalHHIRInliningMaxReturnLocals) return false;
+    auto numRefCounted = 0;
+    for (auto i = 0; i < locals.size(); i++) {
+      if (locals[i].maybe(TCounted)) numRefCounted++;
+    }
+    return numRefCounted <= RO::EvalHHIRInliningMaxReturnDecRefs;
+  }();
+
+  auto decRefLocalsAndThis = [&]{
+    if (shouldFreeInline) {
+      for (auto i = 0; i < locals.size(); i++) {
+        if (!locals[i].maybe(TCounted)) continue;
+        auto const data = LocalId { safe_cast<uint32_t>(i) };
+        gen(env, AssertLoc, data, locals[i], fp(env));
+        decRef(env, gen(env, LdLoc, data, locals[i], fp(env)), i);
+      }
+    } else {
+      gen(env, GenericRetDecRefs, fp(env));
+    }
+    decRefThis(env);
+  };
+
+  // The VarEnv and the this pointer always need to be cleaned up.
+  if (func->attrs() & AttrMayUseVV) {
+    ifElse(env,
+      [&] (Block* skip) { gen(env, ReleaseVVAndSkip, skip, fp(env)); },
+      [&] { decRefLocalsAndThis(); }
+    );
+  } else {
+    decRefLocalsAndThis();
+  }
+}
 
 template<class Hook>
 void suspendHook(IRGS& env, Hook hook) {
@@ -70,28 +180,52 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset suspendOffset,
 
   // Bind address at which the execution should resume after awaiting.
   auto const func = curFunc(env);
-  auto const resumeSk = SrcKey(func, resumeOffset, ResumeMode::Async);
-  auto const bindData = LdBindAddrData { resumeSk, spOffBCFromFP(env) + 1 };
-  auto const resumeAddr = gen(env, LdBindAddr, bindData);
+  auto const suspendOff = cns(env, suspendOffset);
+  auto const resumeAddr = [&]{
+    auto const resumeSk = SrcKey(func, resumeOffset, ResumeMode::Async);
+    auto const bindData = LdBindAddrData { resumeSk, spOffBCFromFP(env) + 1 };
+    return gen(env, LdBindAddr, bindData);
+  };
 
   if (!curFunc(env)->isGenerator()) {
     // Create the AsyncFunctionWaitHandle object. CreateAFWH takes care of
-    // copying local variables and iterators.
-    auto const waitHandle =
-      gen(env,
-          func->attrs() & AttrMayUseVV ? CreateAFWH : CreateAFWHNoVV,
-          fp(env),
-          cns(env, func->numSlotsInFrame()),
-          resumeAddr,
-          cns(env, suspendOffset),
-          child);
+    // copying local variables and iterators. We don't support tracing when
+    // we do the tail-call optimization, so we push the suspend hook here.
+    auto const createNewAFWH = [&]{
+      auto const mayUseVV = func->attrs() & AttrMayUseVV;
+      auto const op = mayUseVV ? CreateAFWH : CreateAFWHNoVV;
+      auto const wh = gen(env, op, fp(env), cns(env, func->numSlotsInFrame()),
+                          resumeAddr(), suspendOff, child);
+      suspendHook(env, [&] {
+        auto const asyncAR = gen(env, LdAFWHActRec, wh);
+        gen(env, SuspendHookAwaitEF, fp(env), asyncAR, wh);
+      });
+      return wh;
+    };
 
-    auto const asyncAR = gen(env, LdAFWHActRec, waitHandle);
+    // We don't need to create the new AFWH if we can do a tail-call check.
+    auto const waitHandle = [&]{
+      std::vector<Type> locals;
+      if (RO::EnableArgsInBacktraces) return createNewAFWH();
+      if (!isTailAwait(env, locals)) return createNewAFWH();
 
-    // Call the suspend hook.
-    suspendHook(env, [&] {
-      gen(env, SuspendHookAwaitEF, fp(env), asyncAR, waitHandle);
-    });
+      // We can run out of tailFrameIds and fail to make this optimization.
+      auto const tailFrameId = getAsyncFrameId(curSrcKey(env));
+      if (tailFrameId == kInvalidAsyncFrameId) return createNewAFWH();
+      auto const type = Type::ExactObj(c_AsyncFunctionWaitHandle::classof());
+
+      return cond(env,
+        [&](Block* taken) {
+          gen(env, CheckSurpriseFlags, taken, fp(env));
+          gen(env, AFWHPushTailFrame, taken, child, cns(env, tailFrameId));
+        },
+        [&]{
+          doTailAwaitDecRefs(env, locals);
+          return gen(env, AssertType, type, child);
+        },
+        [&]{ return createNewAFWH(); }
+      );
+    }();
 
     if (RuntimeOption::EvalHHIRGenerateAsserts) {
       gen(env, DbgTrashRetVal, fp(env));
@@ -111,7 +245,7 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset suspendOffset,
 
     // Create the AsyncGeneratorWaitHandle object.
     auto const waitHandle =
-      gen(env, CreateAGWH, fp(env), resumeAddr, cns(env, suspendOffset), child);
+      gen(env, CreateAGWH, fp(env), resumeAddr(), suspendOff, child);
 
     // Call the suspend hook.
     suspendHook(env, [&] {

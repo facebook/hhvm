@@ -1131,6 +1131,17 @@ static bool HHVM_METHOD(ReflectionClass, isEnum) {
   return cls->attrs() & AttrEnum;
 }
 
+static String HHVM_METHOD(ReflectionClass, getEnumUnderlyingType) {
+  auto const cls = ReflectionClassHandle::GetClassFor(this_);
+  if (!(cls->attrs() & AttrEnum)) {
+    Reflection::ThrowReflectionExceptionObject(
+      "Trying to read the Enum-type of a non-Enum");
+  }
+
+  // use the unresolved preclass type to yield the userland types
+  return StrNR(cls->preClass()->enumBaseTy().typeName());
+}
+
 static int HHVM_METHOD(ReflectionClass, getModifiers) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
   return get_modifiers(cls->attrs(), true, false);
@@ -2147,6 +2158,7 @@ struct ReflectionExtension final : Extension {
     HHVM_ME(ReflectionClass, isInterface);
     HHVM_ME(ReflectionClass, isTrait);
     HHVM_ME(ReflectionClass, isEnum);
+    HHVM_ME(ReflectionClass, getEnumUnderlyingType);
     HHVM_ME(ReflectionClass, isAbstract);
     HHVM_ME(ReflectionClass, isFinal);
     HHVM_ME(ReflectionClass, getModifiers);

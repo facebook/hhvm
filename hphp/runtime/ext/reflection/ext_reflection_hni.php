@@ -1695,6 +1695,16 @@ class ReflectionClass implements Reflector {
   public function isEnum(): bool;
 
   /**
+   * Returns the underlying type of this ReflectionClass, given that it
+   * represents an enum. If it does not, it throws.
+   *
+   * @return     string   the string representation of the underlying type.
+   */
+  <<__Native, __Rx, __MaybeMutable>>
+  public function getEnumUnderlyingType(): string;
+
+
+  /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.getmodifiers.php
    * )
    *

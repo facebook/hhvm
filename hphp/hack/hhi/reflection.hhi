@@ -137,6 +137,8 @@ class ReflectionClass implements Reflector {
   <<__Rx, __MaybeMutable>>
   public function isEnum(): bool;
   <<__Rx, __MaybeMutable>>
+  public function getEnumUnderlyingType(): string;
+  <<__Rx, __MaybeMutable>>
   public function isInternal(): bool;
   <<__Rx, __MaybeMutable>>
   public function isIterateable(): bool;

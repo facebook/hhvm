@@ -1576,8 +1576,195 @@ fn emit_call_lhs_and_fcall(
                 }
             }
         }
-        E_::ClassConst(_) => unimplemented!(),
-        E_::ClassGet(_) => unimplemented!(),
+        E_::ClassConst(cls_const) => {
+            let (cid, (_, id)) = &**cls_const;
+            let mut cexpr = ClassExpr::class_id_to_class_expr(e, false, false, &env.scope, cid);
+            if let ClassExpr::Id(ast_defs::Id(_, name)) = &cexpr {
+                if let Some(reified_var_cexpr) = get_reified_var_cexpr(e, env, pos, &name)? {
+                    cexpr = reified_var_cexpr;
+                }
+            }
+            // TODO(hrust) enabel `let method_id = method::Type::from_ast_name(&id);`,
+            // `from_ast_name` should be able to accpet Cow<str>
+            let method_id: method::Type = string_utils::strip_global_ns(&id).to_string().into();
+            Ok(match cexpr {
+                // Statically known
+                ClassExpr::Id(ast_defs::Id(_, cname)) => {
+                    // TODO(hrust) enabel `let cid = class::Type::from_ast_name(&cname);`,
+                    // `from_ast_name` should be able to accpet Cow<str>
+                    let cid: class::Type = string_utils::strip_global_ns(&cname).to_string().into();
+                    emit_symbol_refs::State::add_class(e, cid.clone());
+                    let generics = emit_generics(e, env, &mut fcall_args)?;
+                    (
+                        InstrSeq::gather(vec![
+                            InstrSeq::make_nulluninit(),
+                            InstrSeq::make_nulluninit(),
+                            InstrSeq::make_nulluninit(),
+                        ]),
+                        InstrSeq::gather(vec![
+                            generics,
+                            InstrSeq::make_fcallclsmethodd(fcall_args, method_id, cid),
+                        ]),
+                    )
+                }
+                ClassExpr::Special(clsref) => {
+                    let generics = emit_generics(e, env, &mut fcall_args)?;
+                    (
+                        InstrSeq::gather(vec![
+                            InstrSeq::make_nulluninit(),
+                            InstrSeq::make_nulluninit(),
+                            InstrSeq::make_nulluninit(),
+                        ]),
+                        InstrSeq::gather(vec![
+                            generics,
+                            InstrSeq::make_fcallclsmethodsd(fcall_args, clsref, method_id),
+                        ]),
+                    )
+                }
+                ClassExpr::Expr(expr) => {
+                    let generics = emit_generics(e, env, &mut fcall_args)?;
+                    (
+                        InstrSeq::gather(vec![
+                            InstrSeq::make_nulluninit(),
+                            InstrSeq::make_nulluninit(),
+                            InstrSeq::make_nulluninit(),
+                        ]),
+                        InstrSeq::gather(vec![
+                            generics,
+                            InstrSeq::make_string(method_id.to_raw_string()),
+                            emit_expr(e, env, &expr)?,
+                            InstrSeq::make_classgetc(),
+                            InstrSeq::make_fcallclsmethod(
+                                IsLogAsDynamicCallOp::DontLogAsDynamicCall,
+                                fcall_args,
+                            ),
+                        ]),
+                    )
+                }
+                ClassExpr::Reified(instrs) => {
+                    let tmp = e.local_gen_mut().get_unnamed();
+                    (
+                        InstrSeq::gather(vec![
+                            InstrSeq::make_nulluninit(),
+                            InstrSeq::make_nulluninit(),
+                            InstrSeq::make_nulluninit(),
+                            instrs,
+                            InstrSeq::make_popl(tmp.clone()),
+                        ]),
+                        InstrSeq::gather(vec![
+                            InstrSeq::make_string(method_id.to_raw_string()),
+                            InstrSeq::make_pushl(tmp),
+                            InstrSeq::make_classgetc(),
+                            InstrSeq::make_fcallclsmethod(
+                                IsLogAsDynamicCallOp::LogAsDynamicCall,
+                                fcall_args,
+                            ),
+                        ]),
+                    )
+                }
+            })
+        }
+        E_::ClassGet(class_get) => {
+            let (cid, cls_get_expr) = &**class_get;
+            let mut cexpr = ClassExpr::class_id_to_class_expr(e, false, false, &env.scope, cid);
+            if let ClassExpr::Id(ast_defs::Id(_, name)) = &cexpr {
+                if let Some(reified_var_cexpr) = get_reified_var_cexpr(e, env, pos, &name)? {
+                    cexpr = reified_var_cexpr;
+                }
+            }
+            let emit_meth_name = |e: &mut Emitter| match &cls_get_expr {
+                tast::ClassGetExpr::CGstring((pos, id)) => {
+                    emit_pos_then(e, pos, InstrSeq::make_cgetl(local::Type::Named(id.clone())))
+                }
+                tast::ClassGetExpr::CGexpr(expr) => emit_expr(e, env, expr),
+            };
+            Ok(match cexpr {
+                ClassExpr::Id(cid) => {
+                    let tmp = e.local_gen_mut().get_unnamed();
+                    (
+                        InstrSeq::gather(vec![
+                            InstrSeq::make_nulluninit(),
+                            InstrSeq::make_nulluninit(),
+                            InstrSeq::make_nulluninit(),
+                            emit_meth_name(e)?,
+                            InstrSeq::make_popl(tmp.clone()),
+                        ]),
+                        InstrSeq::gather(vec![
+                            InstrSeq::make_pushl(tmp),
+                            emit_known_class_id(e, &cid),
+                            InstrSeq::make_fcallclsmethod(
+                                IsLogAsDynamicCallOp::LogAsDynamicCall,
+                                fcall_args,
+                            ),
+                        ]),
+                    )
+                }
+                ClassExpr::Special(clsref) => {
+                    let tmp = e.local_gen_mut().get_unnamed();
+                    (
+                        InstrSeq::gather(vec![
+                            InstrSeq::make_nulluninit(),
+                            InstrSeq::make_nulluninit(),
+                            InstrSeq::make_nulluninit(),
+                            emit_meth_name(e)?,
+                            InstrSeq::make_popl(tmp.clone()),
+                        ]),
+                        InstrSeq::gather(vec![
+                            InstrSeq::make_pushl(tmp),
+                            InstrSeq::make_fcallclsmethods(fcall_args, clsref),
+                        ]),
+                    )
+                }
+                ClassExpr::Expr(expr) => {
+                    let cls = e.local_gen_mut().get_unnamed();
+                    let meth = e.local_gen_mut().get_unnamed();
+                    (
+                        InstrSeq::gather(vec![
+                            InstrSeq::make_nulluninit(),
+                            InstrSeq::make_nulluninit(),
+                            InstrSeq::make_nulluninit(),
+                            emit_expr(e, env, &expr)?,
+                            InstrSeq::make_popl(cls.clone()),
+                            emit_meth_name(e)?,
+                            InstrSeq::make_popl(meth.clone()),
+                        ]),
+                        InstrSeq::gather(vec![
+                            InstrSeq::make_pushl(meth),
+                            InstrSeq::make_pushl(cls),
+                            InstrSeq::make_classgetc(),
+                            InstrSeq::make_fcallclsmethod(
+                                IsLogAsDynamicCallOp::LogAsDynamicCall,
+                                fcall_args,
+                            ),
+                        ]),
+                    )
+                }
+                ClassExpr::Reified(instrs) => {
+                    let cls = e.local_gen_mut().get_unnamed();
+                    let meth = e.local_gen_mut().get_unnamed();
+                    (
+                        InstrSeq::gather(vec![
+                            InstrSeq::make_nulluninit(),
+                            InstrSeq::make_nulluninit(),
+                            InstrSeq::make_nulluninit(),
+                            instrs,
+                            InstrSeq::make_popl(cls.clone()),
+                            emit_meth_name(e)?,
+                            InstrSeq::make_popl(meth.clone()),
+                        ]),
+                        InstrSeq::gather(vec![
+                            InstrSeq::make_pushl(meth),
+                            InstrSeq::make_pushl(cls),
+                            InstrSeq::make_classgetc(),
+                            InstrSeq::make_fcallclsmethod(
+                                IsLogAsDynamicCallOp::LogAsDynamicCall,
+                                fcall_args,
+                            ),
+                        ]),
+                    )
+                }
+            })
+        }
         E_::Id(id) => {
             let FcallArgs(flags, num_args, _, _, _, _) = fcall_args;
             let fq_id = match string_utils::strip_global_ns(&id.1) {
@@ -1610,7 +1797,7 @@ fn emit_call_lhs_and_fcall(
                     InstrSeq::make_nulluninit(),
                     InstrSeq::make_nulluninit(),
                     InstrSeq::make_nulluninit(),
-                    emit_expr(e, env, expr)?,
+                    emit_expr(e, env, &expr)?,
                     InstrSeq::make_popl(tmp.clone()),
                 ]),
                 InstrSeq::gather(vec![
@@ -1620,6 +1807,21 @@ fn emit_call_lhs_and_fcall(
             ))
         }
     }
+}
+
+fn get_reified_var_cexpr(
+    e: &mut Emitter,
+    env: &Env,
+    pos: &Pos,
+    name: &str,
+) -> Result<Option<ClassExpr>> {
+    Ok(emit_reified_type_opt(e, env, pos, name)?.map(|instrs| {
+        ClassExpr::Reified(InstrSeq::gather(vec![
+            instrs,
+            InstrSeq::make_basec(0, MemberOpMode::Warn),
+            InstrSeq::make_querym(1, QueryOp::CGet, MemberKey::ET("classname".into())),
+        ]))
+    }))
 }
 
 fn emit_args_inout_setters(

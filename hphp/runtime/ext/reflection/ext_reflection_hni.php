@@ -440,7 +440,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
     if (count($params) > 0) {
       $ret .= "\n  - Parameters [" . count($params) . "] {\n  ";
       foreach ($params as $param) {
-        $ret .= '  '.str_replace("\n", "\n  ", $param."\n");
+        $ret .= '  '.str_replace("\n", "\n  ", $param->toString()."\n");
       }
       $ret .= "}\n";
     }

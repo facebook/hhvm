@@ -165,7 +165,7 @@ class ReflectionParameter implements Reflector {
    *
    */
   <<__Rx, __MaybeMutable>>
-  public function __toString() {
+  public function toString() {
     $type = $this->getTypeText();
     if ($type !== '') {
       if ($this->isOptional() && $this->getDefaultValue() === null) {
@@ -190,6 +190,11 @@ class ReflectionParameter implements Reflector {
     }
     $out .= ' ]';
     return $out;
+  }
+
+  <<__Rx, __MaybeMutable>>
+  public function __toString() {
+    return $this->toString();
   }
 
   // Prevent cloning

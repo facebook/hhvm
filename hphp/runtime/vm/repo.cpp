@@ -189,31 +189,40 @@ void Repo::loadGlobalData(bool readArrayTable /* = true */) {
       const auto& tbl = table(repoId, "GlobalData");
       stmt.prepare(
         folly::sformat(
-          "SELECT count(*), data FROM {};", tbl
+          "SELECT data FROM {} WHERE key = @key;", tbl
         )
       );
       auto txn = RepoTxn{begin()};
-      RepoTxnQuery query(txn, stmt);
-      query.step();
-      if (!query.row()) {
-        throw RepoExc("Can't find table %s", tbl.c_str());
-      };
-      int val;
-      query.getInt(0, val);
-      if (val == 0) {
-        throw RepoExc("No rows in %s. Did you forget to compile that file with "
-                      "this HHVM version?", tbl.c_str());
+      {
+        RepoTxnQuery query(txn, stmt);
+        auto key = std::string("config");
+        query.bindStdString("@key", key);
+        query.step();
+        if (!query.row()) {
+          throw RepoExc("Can't find key = 'config' in %s", tbl.c_str());
+        };
+        BlobDecoder decoder = query.getBlob(0, true);
+        decoder(s_globalData);
+        FTRACE(1, "GlobalData loaded from '{}':\n", repoName(repoId));
+        FTRACE(1, "{}", show(s_globalData));
       }
-      BlobDecoder decoder = query.getBlob(1, true);
-      decoder(s_globalData);
-      FTRACE(1, "GlobalData loaded from '{}':\n", repoName(repoId));
-      FTRACE(1, "{}", show(s_globalData));
+
       if (readArrayTable) {
-        auto& arrayTypeTable = globalArrayTypeTable();
-        decoder(arrayTypeTable);
-        decoder(s_globalData.APCProfile);
-        decoder(s_globalData.ConstantFunctions);
-        decoder.assertDone();
+        {
+          RepoTxnQuery query(txn, stmt);
+          auto key = std::string("arraytable");
+          query.bindStdString("@key", key);
+          query.step();
+          if (!query.row()) {
+            throw RepoExc("Can't find key = 'arraytable' in %s", tbl.c_str());
+          };
+          BlobDecoder decoder = query.getBlob(0, true);
+          auto& arrayTypeTable = globalArrayTypeTable();
+          decoder(arrayTypeTable);
+          decoder(s_globalData.APCProfile);
+          decoder(s_globalData.ConstantFunctions);
+          decoder.assertDone();
+        }
       }
       txn.commit();
     } catch (RepoExc& e) {
@@ -291,18 +300,31 @@ void Repo::saveGlobalData(GlobalData newData) {
   RepoStmt stmt(*this);
   stmt.prepare(
     folly::format(
-      "INSERT INTO {} VALUES(@data);", table(repoId, "GlobalData")
+      "INSERT INTO {} VALUES(@key, @data);", table(repoId, "GlobalData")
     ).str()
   );
   auto txn = RepoTxn{begin()};
-  RepoTxnQuery query(txn, stmt);
-  BlobEncoder encoder{true};
-  encoder(s_globalData);
-  encoder(globalArrayTypeTable());
-  encoder(s_globalData.APCProfile);
-  encoder(s_globalData.ConstantFunctions);
-  query.bindBlob("@data", encoder, /* static */ true);
-  query.exec();
+  {
+    RepoTxnQuery query(txn, stmt);
+    auto key = std::string("config");
+    query.bindStdString("@key", key);
+    BlobEncoder encoder{true};
+    encoder(s_globalData);
+    query.bindBlob("@data", encoder, /* static */ true);
+    query.exec();
+  }
+
+  {
+    RepoTxnQuery query(txn, stmt);
+    auto key = std::string("arraytable");
+    query.bindStdString("@key", key);
+    BlobEncoder encoder{true};
+    encoder(globalArrayTypeTable());
+    encoder(s_globalData.APCProfile);
+    encoder(s_globalData.ConstantFunctions);
+    query.bindBlob("@data", encoder, /* static */ true);
+    query.exec();
+  }
 
   // TODO(#3521039): we could just put the litstr table in the same
   // blob as the above and delete LitstrRepoProxy.
@@ -1103,7 +1125,7 @@ RepoStatus Repo::createSchema(int repoId, std::string& errorMsg) {
         table(repoId, "FileSha1"));
       txn.exec(createQuery);
     }
-    txn.exec(folly::sformat("CREATE TABLE {} (data BLOB);",
+    txn.exec(folly::sformat("CREATE TABLE {} (key TEXT, data BLOB);",
                            table(repoId, "GlobalData")));
     m_urp.createSchema(repoId, txn);
     m_pcrp.createSchema(repoId, txn);

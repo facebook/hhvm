@@ -26,11 +26,7 @@ let enum_kind name enum get_ancestor =
       begin
         match get_node enum with
         | Tapply ((_, enum), [ty_exp]) when String.equal enum SN.FB.cEnum ->
-          (* If the class is a subclass of UncheckedEnum, ignore it. *)
-          if Option.is_some (get_ancestor SN.FB.cUncheckedEnum) then
-            None
-          else
-            Some (ty_exp, ty_exp, None)
+          Some (ty_exp, ty_exp, None)
         | _ -> None
       end
     | _ -> None)

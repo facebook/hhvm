@@ -721,8 +721,6 @@ pub mod pseudo_consts {
 pub mod fb {
     pub const ENUM: &str = "\\Enum";
 
-    pub const UNCHECKED_ENUM: &str = "\\UncheckedEnum";
-
     pub const IDX: &str = "\\HH\\idx";
 
     pub const TYPE_STRUCTURE: &str = "\\HH\\TypeStructure";

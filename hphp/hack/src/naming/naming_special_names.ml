@@ -633,8 +633,6 @@ end
 module FB = struct
   let cEnum = "\\Enum"
 
-  let cUncheckedEnum = "\\UncheckedEnum"
-
   let idx = "\\HH\\idx"
 
   let cTypeStructure = "\\HH\\TypeStructure"

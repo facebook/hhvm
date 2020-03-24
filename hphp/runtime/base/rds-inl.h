@@ -16,6 +16,7 @@
 #ifndef incl_HPHP_RUNTIME_BASE_RDS_INL_H_
 #define incl_HPHP_RUNTIME_BASE_RDS_INL_H_
 
+#include <atomic>
 #include <tbb/concurrent_vector.h>
 #include "hphp/util/compilation-flags.h"
 #include "hphp/util/safe-cast.h"
@@ -60,6 +61,10 @@ struct AllocDescriptor {
 using AllocDescriptorList = tbb::concurrent_vector<AllocDescriptor>;
 extern AllocDescriptorList s_normal_alloc_descs;
 extern AllocDescriptorList s_local_alloc_descs;
+
+// See comments in rds.cpp for why these are necessary.
+extern std::atomic<size_t> s_normal_alloc_descs_size;
+extern std::atomic<size_t> s_local_alloc_descs_size;
 
 }
 
@@ -387,14 +392,18 @@ inline void uninitHandle(Handle handle) {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename F> inline void forEachNormalAlloc(F f) {
+  auto size = detail::s_normal_alloc_descs_size.load(std::memory_order_acquire);
   for (const auto& desc : detail::s_normal_alloc_descs) {
+    if (!(size--)) break;
     if (!isHandleInit(desc.handle, NormalTag{})) continue;
     f(static_cast<char*>(tl_base) + desc.handle, desc.size, desc.index);
   }
 }
 
 template <typename F> inline void forEachLocalAlloc(F f) {
+  auto size = detail::s_local_alloc_descs_size.load(std::memory_order_acquire);
   for (const auto& desc : detail::s_local_alloc_descs) {
+    if (!(size--)) break;
     f(static_cast<char*>(tl_base) + desc.handle, desc.size, desc.index);
   }
 }

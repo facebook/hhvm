@@ -290,6 +290,17 @@ AllocDescriptorList s_normal_alloc_descs;
 AllocDescriptorList s_local_alloc_descs;
 
 /*
+ * Pushing a value into tbb::concurrent_vector is a racy operation; there is
+ * period of time where the vector's size is increased (so iterators may see
+ * the new value) but we haven't written data to it.
+ *
+ * To avoid reading these uninitialized values, we keep separate size bounds
+ * on these vectors to use as secondary limits during iteration.
+ */
+std::atomic<size_t> s_normal_alloc_descs_size;
+std::atomic<size_t> s_local_alloc_descs_size;
+
+/*
  * Round base up to align, which must be a power of two.
  */
 size_t roundUp(size_t base, size_t align) {
@@ -381,9 +392,12 @@ Handle alloc(Mode mode, size_t numBytes,
         addFreeBlock(s_normal_free_lists, begin, prefix - sizeof(GenNumber));
         auto const handle = begin + prefix;
         if (type_scan::hasScanner(tyIndex)) {
+          assertx(s_normal_alloc_descs_size.load(std::memory_order_acquire) ==
+                  s_normal_alloc_descs.size());
           s_normal_alloc_descs.push_back(
             AllocDescriptor{Handle(handle), uint32_t(numBytes), tyIndex}
           );
+          s_normal_alloc_descs_size.fetch_add(1, std::memory_order_acq_rel);
         }
         return handle;
       }
@@ -412,9 +426,12 @@ Handle alloc(Mode mode, size_t numBytes,
       auto const handle = begin + prefix;
 
       if (type_scan::hasScanner(tyIndex)) {
+        assertx(s_normal_alloc_descs_size.load(std::memory_order_acquire) ==
+                s_normal_alloc_descs.size());
         s_normal_alloc_descs.push_back(
           AllocDescriptor{Handle(handle), uint32_t(numBytes), tyIndex}
         );
+        s_normal_alloc_descs_size.fetch_add(1, std::memory_order_acq_rel);
       }
       return handle;
     }
@@ -463,9 +480,12 @@ Handle alloc(Mode mode, size_t numBytes,
         "Ran out of RDS space (mode=Local)"
       );
       if (type_scan::hasScanner(tyIndex)) {
+        assertx(s_local_alloc_descs_size.load(std::memory_order_acquire) ==
+                s_local_alloc_descs.size());
         s_local_alloc_descs.push_back(
           AllocDescriptor{Handle(frontier), uint32_t(numBytes), tyIndex}
         );
+        s_local_alloc_descs_size.fetch_add(1, std::memory_order_acq_rel);
       }
       return frontier;
     }

@@ -108,7 +108,7 @@ let compare_decl ctx verbosity fn =
           (* Put the file contents in the disk heap so both the decl parsing and
            * legacy decl branches can avoid having to wait for file I/O. *)
           File_provider.provide_file fn (File_provider.Disk text);
-          Decl.make_env ctx fn)
+          Decl.make_env ~sh:SharedMem.Uses ctx fn)
     in
     let compare name get_decl eq_decl show_decl parsed_decls =
       let different_decls =
@@ -155,19 +155,20 @@ let compare_decl ctx verbosity fn =
     [
       compare
         "typedef(s)"
-        Decl.declare_typedef_in_file
+        (Decl.declare_typedef_in_file ~write_shmem:true)
         Typing_defs.equal_typedef_type
         Pp_type.show_typedef_type
         decls.typedefs;
       compare
         "constant(s)"
-        (fun ctx a b -> Decl.declare_const_in_file ctx a b |> fst)
+        (fun ctx a b ->
+          Decl.declare_const_in_file ~write_shmem:true ctx a b |> fst)
         Typing_defs.equal_decl_ty
         Pp_type.show_decl_ty
         decls.consts;
       compare
         "function(s)"
-        Decl.declare_fun_in_file
+        (Decl.declare_fun_in_file ~write_shmem:true)
         Typing_defs.equal_fun_elt
         Pp_type.show_fun_elt
         decls.funs;

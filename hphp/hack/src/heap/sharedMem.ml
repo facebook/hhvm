@@ -9,6 +9,11 @@
 
 open Hh_core
 
+(** This is just a sentinel for self-documenting purposes which some
+parts of the codebase use. They take a parameter "uses_sharedmem : SharedMem.uses"
+as a way to indicate to their callers that they read/write sharedmem. *)
+type uses = Uses
+
 let ref_has_done_init = ref false
 
 (* Don't change the ordering of this record without updating hh_shared_init in

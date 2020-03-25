@@ -31,7 +31,8 @@ type gconst_decl = Typing_defs.decl_ty * Errors.t
 
 let get_fun (ctx : Provider_context.t) (fun_name : fun_key) : fun_decl option =
   match ctx.Provider_context.backend with
-  | Provider_backend.Shared_memory -> Typing_lazy_heap.get_fun ctx fun_name
+  | Provider_backend.Shared_memory ->
+    Typing_lazy_heap.get_fun ~sh:SharedMem.Uses ctx fun_name
   | Provider_backend.Local_memory { decl_cache; _ } ->
     Provider_backend.Decl_cache.find_or_add
       decl_cache
@@ -41,7 +42,11 @@ let get_fun (ctx : Provider_context.t) (fun_name : fun_key) : fun_decl option =
         | Some filename ->
           let ft =
             Errors.run_in_decl_mode filename (fun () ->
-                Decl.declare_fun_in_file ctx filename fun_name)
+                Decl.declare_fun_in_file
+                  ~write_shmem:false
+                  ctx
+                  filename
+                  fun_name)
           in
           Some ft
         | None -> None)
@@ -116,7 +121,7 @@ let get_typedef (ctx : Provider_context.t) (typedef_name : string) :
     typedef_decl option =
   match ctx.Provider_context.backend with
   | Provider_backend.Shared_memory ->
-    Typing_lazy_heap.get_typedef ctx typedef_name
+    Typing_lazy_heap.get_typedef ~sh:SharedMem.Uses ctx typedef_name
   | Provider_backend.Local_memory { decl_cache; _ } ->
     Provider_backend.Decl_cache.find_or_add
       decl_cache
@@ -126,7 +131,11 @@ let get_typedef (ctx : Provider_context.t) (typedef_name : string) :
         | Some filename ->
           let tdecl =
             Errors.run_in_decl_mode filename (fun () ->
-                Decl.declare_typedef_in_file ctx filename typedef_name)
+                Decl.declare_typedef_in_file
+                  ~write_shmem:false
+                  ctx
+                  filename
+                  typedef_name)
           in
           Some tdecl
         | None -> None)
@@ -137,7 +146,7 @@ let get_record_def (ctx : Provider_context.t) (record_name : string) :
     record_def_decl option =
   match ctx.Provider_context.backend with
   | Provider_backend.Shared_memory ->
-    Typing_lazy_heap.get_record_def ctx record_name
+    Typing_lazy_heap.get_record_def ~sh:SharedMem.Uses ctx record_name
   | Provider_backend.Local_memory { decl_cache; _ } ->
     Provider_backend.Decl_cache.find_or_add
       decl_cache
@@ -147,7 +156,11 @@ let get_record_def (ctx : Provider_context.t) (record_name : string) :
         | Some filename ->
           let rdecl =
             Errors.run_in_decl_mode filename (fun () ->
-                Decl.declare_record_def_in_file ctx filename record_name)
+                Decl.declare_record_def_in_file
+                  ~write_shmem:false
+                  ctx
+                  filename
+                  record_name)
           in
           Some rdecl
         | None -> None)
@@ -159,7 +172,7 @@ let get_gconst (ctx : Provider_context.t) (gconst_name : string) :
     gconst_decl option =
   match ctx.Provider_context.backend with
   | Provider_backend.Shared_memory ->
-    Typing_lazy_heap.get_gconst ctx gconst_name
+    Typing_lazy_heap.get_gconst ~sh:SharedMem.Uses ctx gconst_name
   | Provider_backend.Local_memory { decl_cache; _ } ->
     Provider_backend.Decl_cache.find_or_add
       decl_cache
@@ -169,7 +182,11 @@ let get_gconst (ctx : Provider_context.t) (gconst_name : string) :
         | Some filename ->
           let gconst =
             Errors.run_in_decl_mode filename (fun () ->
-                Decl.declare_const_in_file ctx filename gconst_name)
+                Decl.declare_const_in_file
+                  ~write_shmem:false
+                  ctx
+                  filename
+                  gconst_name)
           in
           Some gconst
         | None -> None)

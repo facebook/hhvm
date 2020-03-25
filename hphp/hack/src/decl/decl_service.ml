@@ -21,7 +21,7 @@ let decl_file ctx errorl fn =
   let (errorl', ()) =
     Errors.do_with_context fn Errors.Decl (fun () ->
         Hh_logger.debug "Typing decl: %s" (Relative_path.to_absolute fn);
-        Decl.make_env ctx fn;
+        Decl.make_env ~sh:SharedMem.Uses ctx fn;
         Hh_logger.debug "Typing dec OK")
   in
   Errors.merge errorl' errorl

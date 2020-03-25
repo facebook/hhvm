@@ -56,7 +56,8 @@ end)
 
 let on_the_fly_decl_file ctx errors fn =
   let (decl_errors, ()) =
-    Errors.do_with_context fn Errors.Decl (fun () -> Decl.make_env ctx fn)
+    Errors.do_with_context fn Errors.Decl (fun () ->
+        Decl.make_env ~sh:SharedMem.Uses ctx fn)
   in
   Errors.merge decl_errors errors
 

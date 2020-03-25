@@ -253,11 +253,12 @@ let get_class_parents_and_traits
 (* Section declaring the type of a function *)
 (*****************************************************************************)
 
-let rec ifun_decl (ctx : Provider_context.t) (f : Nast.fun_) :
+let rec ifun_decl
+    ~(write_shmem : bool) (ctx : Provider_context.t) (f : Nast.fun_) :
     Typing_defs.fun_elt =
   let f = Errors.ignore_ (fun () -> Naming.fun_ ctx f) in
   let fe = fun_decl ctx f in
-  Decl_heap.Funs.add (snd f.f_name) fe;
+  if write_shmem then Decl_heap.Funs.add (snd f.f_name) fe;
   fe
 
 and fun_decl (ctx : Provider_context.t) (f : Nast.fun_) : Typing_defs.fun_elt =
@@ -398,7 +399,8 @@ let pu_enum_fold
   in
   SMap.add (snd spu.spu_name) tpu acc
 
-let rec class_decl_if_missing (class_env : class_env) (c : Nast.class_) :
+let rec class_decl_if_missing
+    ~(sh : SharedMem.uses) (class_env : class_env) (c : Nast.class_) :
     Decl_defs.decl_class_type option =
   let ((_, cid) as c_name) = c.c_name in
   if check_if_cyclic class_env c_name then
@@ -422,20 +424,22 @@ let rec class_decl_if_missing (class_env : class_env) (c : Nast.class_) :
       (* Class elements are in memory if and only if the class itself is there.
        * Exiting before class declaration is ready would break this invariant *)
       WorkerCancel.with_no_cancellations @@ fun () ->
-      let class_ = class_naming_and_decl class_env cid c in
+      let class_ = class_naming_and_decl ~sh class_env cid c in
       Some class_
 
 and class_naming_and_decl
-    (class_env : class_env) (cid : string) (c : Nast.class_) :
-    Decl_defs.decl_class_type =
+    ~(sh : SharedMem.uses)
+    (class_env : class_env)
+    (cid : string)
+    (c : Nast.class_) : Decl_defs.decl_class_type =
   let class_env = { class_env with stack = SSet.add cid class_env.stack } in
   let shallow_class =
     Shallow_classes_provider.decl class_env.ctx ~use_cache:false c
   in
   let (errors, tc) =
     Errors.do_ (fun () ->
-        class_parents_decl class_env shallow_class;
-        class_decl class_env.ctx shallow_class)
+        class_parents_decl ~sh class_env shallow_class;
+        class_decl ~sh class_env.ctx shallow_class)
   in
   let errors = Errors.merge shallow_class.sc_decl_errors errors in
   let name = snd shallow_class.sc_name in
@@ -445,9 +449,11 @@ and class_naming_and_decl
   class_
 
 and class_parents_decl
-    (class_env : class_env) (c : Shallow_decl_defs.shallow_class) : unit =
+    ~(sh : SharedMem.uses)
+    (class_env : class_env)
+    (c : Shallow_decl_defs.shallow_class) : unit =
   let class_type class_ =
-    let (_ : class_type option) = class_type_decl class_env class_ in
+    let (_ : class_type option) = class_type_decl ~sh class_env class_ in
     ()
   in
   List.iter c.sc_extends class_type;
@@ -469,8 +475,9 @@ and is_disposable_type (env : Decl_env.env) (hint : Typing_defs.decl_ty) : bool
     end
   | _ -> false
 
-and class_type_decl (class_env : class_env) (hint : Typing_defs.decl_ty) :
-    Typing_defs.class_type option =
+and class_type_decl
+    ~(sh : SharedMem.uses) (class_env : class_env) (hint : Typing_defs.decl_ty)
+    : Typing_defs.class_type option =
   match get_node hint with
   | Tapply ((_, cid), _) ->
     begin
@@ -481,7 +488,7 @@ and class_type_decl (class_env : class_env) (hint : Typing_defs.decl_ty) :
         Errors.run_in_context fn Errors.Decl (fun () ->
             Option.Monad_infix.(
               class_opt
-              >>= class_decl_if_missing class_env
+              >>= class_decl_if_missing ~sh class_env
               >>| Decl_class.to_class_type))
       | _ -> None
     end
@@ -526,8 +533,10 @@ and synthesize_defaults
     (typeconsts, consts)
   | _ -> (typeconsts, consts)
 
-and class_decl (ctx : Provider_context.t) (c : Shallow_decl_defs.shallow_class)
-    : Decl_defs.decl_class_type =
+and class_decl
+    ~(sh : SharedMem.uses)
+    (ctx : Provider_context.t)
+    (c : Shallow_decl_defs.shallow_class) : Decl_defs.decl_class_type =
   let is_abstract = class_is_abstract c in
   let const = Attrs.mem SN.UserAttributes.uaConst c.sc_user_attributes in
   let is_ppl =
@@ -538,15 +547,22 @@ and class_decl (ctx : Provider_context.t) (c : Shallow_decl_defs.shallow_class)
   let env = { Decl_env.mode = c.sc_mode; droot = Some class_dep; ctx } in
   let inherited = Decl_inherit.make env c in
   let props = inherited.Decl_inherit.ih_props in
-  let props = List.fold_left ~f:(prop_decl c) ~init:props c.sc_props in
+  let props =
+    List.fold_left ~f:(prop_decl ~write_shmem:true c) ~init:props c.sc_props
+  in
   let (redecl_smethods, redecl_methods) =
     List.partition_tf ~f:(fun x -> x.smr_static) c.sc_method_redeclarations
   in
   let m = inherited.Decl_inherit.ih_methods in
-  let m = List.fold_left ~f:(method_redecl_acc c) ~init:m redecl_methods in
+  let m =
+    List.fold_left
+      ~f:(method_redecl_acc ~write_shmem:true c)
+      ~init:m
+      redecl_methods
+  in
   let (m, condition_types) =
     List.fold_left
-      ~f:(method_decl_acc ~is_static:false c)
+      ~f:(method_decl_acc ~write_shmem:true ~is_static:false c)
       ~init:(m, SSet.empty)
       c.sc_methods
   in
@@ -570,19 +586,24 @@ and class_decl (ctx : Provider_context.t) (c : Shallow_decl_defs.shallow_class)
   in
   let pu_enums = inherited.Decl_inherit.ih_pu_enums in
   let pu_enums = List.fold_left c.sc_pu_enums ~f:pu_enum_fold ~init:pu_enums in
-  let sclass_var = static_prop_decl c in
+  let sclass_var = static_prop_decl ~write_shmem:true c in
   let sprops = inherited.Decl_inherit.ih_sprops in
   let sprops = List.fold_left c.sc_sprops ~f:sclass_var ~init:sprops in
   let sm = inherited.Decl_inherit.ih_smethods in
-  let sm = List.fold_left ~f:(method_redecl_acc c) ~init:sm redecl_smethods in
+  let sm =
+    List.fold_left
+      ~f:(method_redecl_acc ~write_shmem:true c)
+      ~init:sm
+      redecl_smethods
+  in
   let (sm, condition_types) =
     List.fold_left
       c.sc_static_methods
-      ~f:(method_decl_acc ~is_static:true c)
+      ~f:(method_decl_acc ~write_shmem:true ~is_static:true c)
       ~init:(sm, condition_types)
   in
   let parent_cstr = inherited.Decl_inherit.ih_cstr in
-  let cstr = constructor_decl parent_cstr c in
+  let cstr = constructor_decl ~sh parent_cstr c in
   let has_concrete_cstr =
     match fst cstr with
     | None
@@ -605,7 +626,9 @@ and class_decl (ctx : Provider_context.t) (c : Shallow_decl_defs.shallow_class)
       let ty =
         mk (Reason.Rhint pos, Tapply ((pos, SN.Classes.cStringish), []))
       in
-      let (_ : Typing_defs.class_type option) = class_type_decl class_env ty in
+      let (_ : Typing_defs.class_type option) =
+        class_type_decl ~sh class_env ty
+      in
       ty :: impl
     | _ -> impl
   in
@@ -742,9 +765,11 @@ and trait_exists (env : Decl_env.env) (acc : bool) (trait : Typing_defs.decl_ty)
   | _ -> false
 
 and constructor_decl
+    ~(sh : SharedMem.uses)
     ((pcstr, pconsist) : Decl_defs.element option * Typing_defs.consistent_kind)
     (class_ : Shallow_decl_defs.shallow_class) :
     Decl_defs.element option * Typing_defs.consistent_kind =
+  let SharedMem.Uses = sh in
   (* constructors in children of class_ must be consistent? *)
   let cconsist =
     if class_.sc_final then
@@ -767,15 +792,16 @@ and constructor_decl
         ~parent:fe.fe_pos
         ~child:(fst method_.sm_name)
         ~on_error:None;
-      let cstr = build_constructor class_ method_ in
+      let cstr = build_constructor ~write_shmem:true class_ method_ in
       cstr
     | (Some method_, _) ->
-      let cstr = build_constructor class_ method_ in
+      let cstr = build_constructor ~write_shmem:true class_ method_ in
       cstr
   in
   (cstr, Decl_utils.coalesce_consistent pconsist cconsist)
 
 and build_constructor
+    ~(write_shmem : bool)
     (class_ : Shallow_decl_defs.shallow_class)
     (method_ : Shallow_decl_defs.shallow_method) : Decl_defs.element option =
   let (_, class_name) = class_.sc_name in
@@ -807,7 +833,7 @@ and build_constructor
       fe_decl_errors = None;
     }
   in
-  Decl_heap.Constructors.add class_name fe;
+  if write_shmem then Decl_heap.Constructors.add class_name fe;
   Some cstr
 
 and class_const_fold
@@ -847,6 +873,7 @@ and class_class_decl (class_id : Ast_defs.id) : Typing_defs.class_const =
   }
 
 and prop_decl
+    ~(write_shmem : bool)
     (c : Shallow_decl_defs.shallow_class)
     (acc : Decl_defs.element SMap.t)
     (sp : Shallow_decl_defs.shallow_prop) : Decl_defs.element SMap.t =
@@ -875,11 +902,12 @@ and prop_decl
       elt_deprecated = None;
     }
   in
-  Decl_heap.Props.add (elt.elt_origin, sp_name) ty;
+  if write_shmem then Decl_heap.Props.add (elt.elt_origin, sp_name) ty;
   let acc = SMap.add sp_name elt acc in
   acc
 
 and static_prop_decl
+    ~(write_shmem : bool)
     (c : Shallow_decl_defs.shallow_class)
     (acc : Decl_defs.element SMap.t)
     (sp : Shallow_decl_defs.shallow_prop) : Decl_defs.element SMap.t =
@@ -908,7 +936,7 @@ and static_prop_decl
       elt_deprecated = None;
     }
   in
-  Decl_heap.StaticProps.add (elt.elt_origin, sp_name) ty;
+  if write_shmem then Decl_heap.StaticProps.add (elt.elt_origin, sp_name) ty;
   let acc = SMap.add sp_name elt acc in
   acc
 
@@ -1008,6 +1036,7 @@ and method_check_override
   | None -> false
 
 and method_redecl_acc
+    ~(write_shmem : bool)
     (c : Shallow_decl_defs.shallow_class)
     (acc : Decl_defs.element SMap.t)
     (m : Shallow_decl_defs.shallow_method_redeclaration) :
@@ -1045,16 +1074,15 @@ and method_redecl_acc
       fe_decl_errors = None;
     }
   in
-  let add_meth =
+  if write_shmem then
     if m.smr_static then
-      Decl_heap.StaticMethods.add
+      Decl_heap.StaticMethods.add (elt.elt_origin, id) fe
     else
-      Decl_heap.Methods.add
-  in
-  add_meth (elt.elt_origin, id) fe;
+      Decl_heap.Methods.add (elt.elt_origin, id) fe;
   SMap.add id elt acc
 
 and method_decl_acc
+    ~(write_shmem : bool)
     ~(is_static : bool)
     (c : Shallow_decl_defs.shallow_class)
     ((acc, condition_types) : Decl_defs.element SMap.t * SSet.t)
@@ -1124,13 +1152,11 @@ and method_decl_acc
       fe_decl_errors = None;
     }
   in
-  let add_meth =
+  if write_shmem then
     if is_static then
-      Decl_heap.StaticMethods.add
+      Decl_heap.StaticMethods.add (elt.elt_origin, id) fe
     else
-      Decl_heap.Methods.add
-  in
-  add_meth (elt.elt_origin, id) fe;
+      Decl_heap.Methods.add (elt.elt_origin, id) fe;
   let acc = SMap.add id elt acc in
   (acc, condition_types)
 
@@ -1162,21 +1188,23 @@ let record_def_decl (rd : Nast.record_def) : Typing_defs.record_def_type =
   }
 
 let type_record_def_naming_and_decl
-    (ctx : Provider_context.t) (rd : Nast.record_def) :
+    ~(write_shmem : bool) (ctx : Provider_context.t) (rd : Nast.record_def) :
     Typing_defs.record_def_type =
   let rd = Errors.ignore_ (fun () -> Naming.record_def ctx rd) in
   let (errors, tdecl) = Errors.do_ (fun () -> record_def_decl rd) in
   record_record_def (snd rd.rd_name);
   let tdecl = { tdecl with rdt_errors = Some errors } in
-  Decl_heap.RecordDefs.add (snd rd.rd_name) tdecl;
+  if write_shmem then Decl_heap.RecordDefs.add (snd rd.rd_name) tdecl;
   tdecl
 
-let record_def_decl_if_missing (ctx : Provider_context.t) (rd : Nast.record_def)
-    : unit =
+let record_def_decl_if_missing
+    ~(sh : SharedMem.uses) (ctx : Provider_context.t) (rd : Nast.record_def) :
+    unit =
+  let SharedMem.Uses = sh in
   let (_, rdid) = rd.rd_name in
   if not (Decl_heap.RecordDefs.mem rdid) then
     let (_ : Typing_defs.record_def_type) =
-      type_record_def_naming_and_decl ctx rd
+      type_record_def_naming_and_decl ~write_shmem:true ctx rd
     in
     ()
 
@@ -1185,10 +1213,14 @@ let record_def_decl_if_missing (ctx : Provider_context.t) (rd : Nast.record_def)
 (*****************************************************************************)
 
 let rec type_typedef_decl_if_missing
-    (ctx : Provider_context.t) (typedef : Nast.typedef) : unit =
+    ~(sh : SharedMem.uses) (ctx : Provider_context.t) (typedef : Nast.typedef) :
+    unit =
+  let SharedMem.Uses = sh in
   let (_, name) = typedef.t_name in
   if not (Decl_heap.Typedefs.mem name) then
-    let (_ : typedef_type) = type_typedef_naming_and_decl ctx typedef in
+    let (_ : typedef_type) =
+      type_typedef_naming_and_decl ~write_shmem:true ctx typedef
+    in
     ()
 
 and typedef_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :
@@ -1215,13 +1247,13 @@ and typedef_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :
   { td_vis; td_tparams; td_constraint; td_type; td_pos; td_decl_errors }
 
 and type_typedef_naming_and_decl
-    (ctx : Provider_context.t) (tdef : Nast.typedef) : Typing_defs.typedef_type
-    =
+    ~(write_shmem : bool) (ctx : Provider_context.t) (tdef : Nast.typedef) :
+    Typing_defs.typedef_type =
   let tdef = Errors.ignore_ (fun () -> Naming.typedef ctx tdef) in
   let (errors, tdecl) = Errors.do_ (fun () -> typedef_decl ctx tdef) in
   record_typedef (snd tdef.t_name);
   let tdecl = { tdecl with td_decl_errors = Some errors } in
-  Decl_heap.Typedefs.add (snd tdef.t_name) tdecl;
+  if write_shmem then Decl_heap.Typedefs.add (snd tdef.t_name) tdecl;
   tdecl
 
 (*****************************************************************************)
@@ -1243,40 +1275,46 @@ let const_decl (ctx : Provider_context.t) (cst : Nast.gconst) :
       mk (Reason.Rwitness cst_pos, Terr)
     | None -> mk (Reason.Rwitness cst_pos, Typing_defs.make_tany ()))
 
-let iconst_decl (ctx : Provider_context.t) (cst : Nast.gconst) :
+let iconst_decl
+    ~(write_shmem : bool) (ctx : Provider_context.t) (cst : Nast.gconst) :
     Typing_defs.decl_ty * Errors.t =
   let cst = Errors.ignore_ (fun () -> Naming.global_const ctx cst) in
   let (errors, hint_ty) = Errors.do_ (fun () -> const_decl ctx cst) in
   record_const (snd cst.cst_name);
-  Decl_heap.GConsts.add (snd cst.cst_name) (hint_ty, errors);
+  if write_shmem then Decl_heap.GConsts.add (snd cst.cst_name) (hint_ty, errors);
   (hint_ty, errors)
 
 (*****************************************************************************)
 let rec name_and_declare_types_program
-    (ctx : Provider_context.t) (prog : Nast.program) : unit =
+    ~(sh : SharedMem.uses) (ctx : Provider_context.t) (prog : Nast.program) :
+    unit =
   List.iter prog (fun def ->
       match def with
-      | Namespace (_, prog) -> name_and_declare_types_program ctx prog
+      | Namespace (_, prog) -> name_and_declare_types_program ~sh ctx prog
       | NamespaceUse _ -> ()
       | SetNamespaceEnv _ -> ()
       | FileAttributes _ -> ()
       | Fun f ->
-        let (_ : fun_elt) = ifun_decl ctx f in
+        let (_ : fun_elt) = ifun_decl ~write_shmem:true ctx f in
         ()
       | Class c ->
         let class_env = { ctx; stack = SSet.empty } in
-        let (_ : decl_class_type option) = class_decl_if_missing class_env c in
+        let (_ : decl_class_type option) =
+          class_decl_if_missing ~sh class_env c
+        in
         ()
-      | RecordDef rd -> record_def_decl_if_missing ctx rd
-      | Typedef typedef -> type_typedef_decl_if_missing ctx typedef
+      | RecordDef rd -> record_def_decl_if_missing ~sh ctx rd
+      | Typedef typedef -> type_typedef_decl_if_missing ~sh ctx typedef
       | Stmt _ -> ()
       | Constant cst ->
-        let (_ : decl_ty * Errors.t) = iconst_decl ctx cst in
+        let (_ : decl_ty * Errors.t) = iconst_decl ~write_shmem:true ctx cst in
         ())
 
-let make_env (ctx : Provider_context.t) (fn : Relative_path.t) : unit =
+let make_env
+    ~(sh : SharedMem.uses) (ctx : Provider_context.t) (fn : Relative_path.t) :
+    unit =
   let ast = Ast_provider.get_ast ctx fn in
-  name_and_declare_types_program ctx ast;
+  name_and_declare_types_program ~sh ctx ast;
   ()
 
 let err_not_found (file : Relative_path.t) (name : string) : 'a =
@@ -1286,38 +1324,48 @@ let err_not_found (file : Relative_path.t) (name : string) : 'a =
   raise (Decl_not_found err_str)
 
 let declare_class_in_file
-    (ctx : Provider_context.t) (file : Relative_path.t) (name : string) :
-    Decl_defs.decl_class_type option =
+    ~(sh : SharedMem.uses)
+    (ctx : Provider_context.t)
+    (file : Relative_path.t)
+    (name : string) : Decl_defs.decl_class_type option =
   match Ast_provider.find_class_in_file ctx file name with
   | Some cls ->
     let class_env = { ctx; stack = SSet.empty } in
-    class_decl_if_missing class_env cls
+    class_decl_if_missing ~sh class_env cls
   | None -> err_not_found file name
 
 let declare_fun_in_file
-    (ctx : Provider_context.t) (file : Relative_path.t) (name : string) :
-    Typing_defs.fun_elt =
+    ~(write_shmem : bool)
+    (ctx : Provider_context.t)
+    (file : Relative_path.t)
+    (name : string) : Typing_defs.fun_elt =
   match Ast_provider.find_fun_in_file ctx file name with
-  | Some f -> ifun_decl ctx f
+  | Some f -> ifun_decl ~write_shmem ctx f
   | None -> err_not_found file name
 
 let declare_record_def_in_file
-    (ctx : Provider_context.t) (file : Relative_path.t) (name : string) :
-    Typing_defs.record_def_type =
+    ~(write_shmem : bool)
+    (ctx : Provider_context.t)
+    (file : Relative_path.t)
+    (name : string) : Typing_defs.record_def_type =
   match Ast_provider.find_record_def_in_file ctx file name with
-  | Some rd -> type_record_def_naming_and_decl ctx rd
+  | Some rd -> type_record_def_naming_and_decl ~write_shmem ctx rd
   | None -> err_not_found file name
 
 let declare_typedef_in_file
-    (ctx : Provider_context.t) (file : Relative_path.t) (name : string) :
-    Typing_defs.typedef_type =
+    ~(write_shmem : bool)
+    (ctx : Provider_context.t)
+    (file : Relative_path.t)
+    (name : string) : Typing_defs.typedef_type =
   match Ast_provider.find_typedef_in_file ctx file name with
-  | Some t -> type_typedef_naming_and_decl ctx t
+  | Some t -> type_typedef_naming_and_decl ~write_shmem ctx t
   | None -> err_not_found file name
 
 let declare_const_in_file
-    (ctx : Provider_context.t) (file : Relative_path.t) (name : string) :
-    Typing_defs.decl_ty * Errors.t =
+    ~(write_shmem : bool)
+    (ctx : Provider_context.t)
+    (file : Relative_path.t)
+    (name : string) : Typing_defs.decl_ty * Errors.t =
   match Ast_provider.find_gconst_in_file ctx file name with
-  | Some cst -> iconst_decl ctx cst
+  | Some cst -> iconst_decl ~write_shmem ctx cst
   | None -> err_not_found file name

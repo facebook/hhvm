@@ -77,7 +77,7 @@ let rec collect_class
           the inheritance hierarchy into the shared memory heaps. When that
           invariant no longer holds, the following will no longer work. *)
             let (_ : Decl_defs.decl_class_type option) =
-              Decl.declare_class_in_file ctx filename cid
+              Decl.declare_class_in_file ~sh:SharedMem.Uses ctx filename cid
             in
             collect_class ctx requested_classes cid decls ~fail_if_missing:true
         with

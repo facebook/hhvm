@@ -871,6 +871,7 @@ let parse_name_and_decl ctx files_contents =
       Relative_path.Map.iter parsed_files (fun fn parsed_file ->
           Errors.run_in_context fn Errors.Decl (fun () ->
               Decl.name_and_declare_types_program
+                ~sh:SharedMem.Uses
                 ctx
                 parsed_file.Parser_return.ast));
 

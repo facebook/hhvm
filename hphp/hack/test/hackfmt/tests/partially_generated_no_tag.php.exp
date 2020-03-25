@@ -1,6 +1,7 @@
 <?hh // strict
 
-// @partially-generated
+// This entire file is formatted because it does not contain the
+// "partially-generated" tag.
 
 class Foo {
   function a(): int {

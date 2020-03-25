@@ -1,5 +1,7 @@
 <?hh // strict
 
+// @partially-generated
+
 // Only Foo::c and Foo::e are formatted--when we have multiple BEGIN tags in a
 // row, we consider only the last.
 

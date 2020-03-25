@@ -1,5 +1,7 @@
 <?hh // strict
 
+// @partially-generated
+
 class Foo {
   function a () : int { return 0; }
   /* BEGIN MANUAL SECTION */

@@ -1,5 +1,7 @@
 <?hh // strict
 
+// @partially-generated
+
 // An unpaired BEGIN is ignored.
 
 class Foo {

@@ -19,12 +19,17 @@ open Format_env
 
 let generated_tag = "@" ^ "generated"
 
+let partially_generated_tag = "@" ^ "partially-generated"
+
 let begin_manual_section_regexp =
   Str.regexp "/\\* BEGIN MANUAL SECTION [^*]*\\*/"
 
 let end_manual_section_tag = "/* END MANUAL SECTION */"
 
 let is_generated_file text = String.is_substring text ~substring:generated_tag
+
+let is_partially_generated_file text =
+  String.is_substring text ~substring:partially_generated_tag
 
 let is_begin_manual_section_tag text =
   try
@@ -124,11 +129,13 @@ let get_suppressed_formatting_ranges env line_boundaries tree =
       let whole_file = [(0, String.length text)] in
       if is_generated_file text then
         whole_file
-      else if List.is_empty manual_sections then
-        []
-      else
+      else if
+        is_partially_generated_file text && not (List.is_empty manual_sections)
+      then
         Interval.diff_sorted_lists whole_file manual_sections
         |> List.map ~f:expand_to_line_boundaries
+      else
+        []
     in
     List.merge fixme_ranges generated_sections ~compare:Interval.compare
     |> Interval.union_consecutive_overlapping

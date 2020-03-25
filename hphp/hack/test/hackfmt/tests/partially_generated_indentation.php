@@ -1,5 +1,7 @@
 <?hh // strict
 
+// @partially-generated
+
 // The BEGIN and END comments are not included in the range to be formatted, so
 // their indentation is not corrected.
 

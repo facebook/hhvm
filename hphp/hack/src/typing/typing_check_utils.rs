@@ -42,7 +42,7 @@ pub fn from_text(genv: Genv, stack_limit: &StackLimit, text: &[u8]) -> anyhow::R
         Either::Right((ast, _is_hh_file)) => {
             // TODO(hrust): fetch proper pos here
             let mut env = Env::new(genv.builder.pos_none(), genv);
-            let tast = typing::program(ast, &mut env);
+            let tast = typing::program(&mut env, ast);
             typing_ast_print::print(&tast);
             ()
         }

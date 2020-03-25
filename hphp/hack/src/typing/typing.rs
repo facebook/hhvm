@@ -13,20 +13,20 @@ use oxidized::{ast, pos::Pos};
 use typing_defs_rust::{tast, FuncBodyAnn, SavedEnv, Ty, Ty_};
 use typing_env_rust::Env;
 
-pub fn program<'a>(ast: &ast::Program, env: &mut Env<'a>) -> tast::Program<'a> {
-    ast.iter().filter_map(|x| def(x, env)).collect()
+pub fn program<'a>(env: &mut Env<'a>, ast: &ast::Program) -> tast::Program<'a> {
+    ast.iter().filter_map(|x| def(env, x)).collect()
 }
 
-fn def<'a>(def: &ast::Def, env: &mut Env<'a>) -> Option<tast::Def<'a>> {
+fn def<'a>(env: &mut Env<'a>, def: &ast::Def) -> Option<tast::Def<'a>> {
     match def {
-        ast::Def::Fun(x) => Some(tast::Def::mk_fun(fun(x, env))),
-        ast::Def::Stmt(x) => Some(tast::Def::mk_stmt(stmt(x, env))),
+        ast::Def::Fun(x) => Some(tast::Def::mk_fun(fun(env, x))),
+        ast::Def::Stmt(x) => Some(tast::Def::mk_stmt(stmt(env, x))),
         _ => unimplemented!(),
     }
 }
 
-fn fun<'a>(f: &ast::Fun_, env: &mut Env<'a>) -> tast::Fun_<'a> {
-    let ast = f.body.ast.iter().map(|x| stmt(x, env)).collect();
+fn fun<'a>(env: &mut Env<'a>, f: &ast::Fun_) -> tast::Fun_<'a> {
+    let ast = f.body.ast.iter().map(|x| stmt(env, x)).collect();
 
     // We put empty vec below for all of those, since real conversion is unimplemented
     assert!(f.tparams.is_empty());
@@ -60,15 +60,15 @@ fn fun<'a>(f: &ast::Fun_, env: &mut Env<'a>) -> tast::Fun_<'a> {
     }
 }
 
-fn stmt<'a>(ast::Stmt(pos, s): &ast::Stmt, env: &mut Env<'a>) -> tast::Stmt<'a> {
-    tast::Stmt(pos.clone(), stmt_(s, env))
+fn stmt<'a>(env: &mut Env<'a>, ast::Stmt(pos, s): &ast::Stmt) -> tast::Stmt<'a> {
+    tast::Stmt(pos.clone(), stmt_(env, s))
 }
 
-fn stmt_<'a>(s: &ast::Stmt_, env: &mut Env<'a>) -> tast::Stmt_<'a> {
+fn stmt_<'a>(env: &mut Env<'a>, s: &ast::Stmt_) -> tast::Stmt_<'a> {
     match s {
         ast::Stmt_::Noop => tast::Stmt_::Noop,
         ast::Stmt_::Markup(x) => markup(&x.0, &x.1),
-        ast::Stmt_::Expr(x) => tast::Stmt_::mk_expr(expr(x, env)),
+        ast::Stmt_::Expr(x) => tast::Stmt_::mk_expr(expr(env, x)),
         x => unimplemented!("{:#?}", x),
     }
 }
@@ -80,7 +80,7 @@ fn markup<'a>(s: &ast::Pstring, e: &Option<ast::Expr>) -> tast::Stmt_<'a> {
     }
 }
 
-fn expr<'a>(ast::Expr(pos, e): &ast::Expr, env: &mut Env<'a>) -> tast::Expr<'a> {
+fn expr<'a>(env: &mut Env<'a>, ast::Expr(pos, e): &ast::Expr) -> tast::Expr<'a> {
     let (ty, e) = match e {
         ast::Expr_::Call(x) => {
             // TODO(hrust) pseudo functions, might_throw

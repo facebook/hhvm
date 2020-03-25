@@ -96,6 +96,20 @@ let test_strip_namespace () =
     "Strip xhp should leave unchanged normal strings";
   true
 
+let assert_throws : 'a 'b. ('b -> 'a) -> 'b -> string -> string -> unit =
+ fun f arg exp message ->
+  let e =
+    try
+      let _ = f arg in
+      "[no exception]"
+    with e -> Printexc.to_string e
+  in
+  if not (String_utils.is_substring exp e) then begin
+    Printf.eprintf "%s.\nExpected it to throw '%s' but got '%s'\n" message exp e;
+    assert false
+  end;
+  ()
+
 let test_telemetry_test () =
   let sub_telemetry =
     Telemetry.create ()
@@ -107,25 +121,6 @@ let test_telemetry_test () =
     Telemetry.create ()
     |> Telemetry.int_ ~key:"d" ~value:12
     |> Telemetry.object_ ~key:"e" ~value:sub_telemetry
-  in
-
-  let assert_throws : 'a 'b. ('b -> 'a) -> 'b -> string -> string -> unit =
-   fun f arg exp message ->
-    let e =
-      try
-        let _ = f arg in
-        "[no exception]"
-      with e -> Printexc.to_string e
-    in
-    if not (String_utils.is_substring exp e) then begin
-      Printf.eprintf
-        "%s.\nExpected it to throw '%s' but got '%s'\n"
-        message
-        exp
-        e;
-      assert false
-    end;
-    ()
   in
 
   Int_asserter.assert_equals
@@ -149,13 +144,117 @@ let test_telemetry_test () =
   assert_throws
     (Telemetry_test_utils.int_exn telemetry)
     "e.b"
-    "not found"
+    "Assert_failure"
     "int_exn e.b should throw";
   assert_throws
     (Telemetry_test_utils.int_exn telemetry)
     "e.d"
     "not found"
     "int_exn e.d should throw";
+  true
+
+let test_telemetry_diff () =
+  (* different values *)
+  let current1 = Telemetry.create () |> Telemetry.int_ ~key:"a" ~value:1 in
+  let prev1 = Telemetry.create () |> Telemetry.int_ ~key:"a" ~value:2 in
+  let diff1 = Telemetry.diff current1 ~prev:prev1 in
+  Int_asserter.assert_equals
+    (Telemetry_test_utils.int_exn diff1 "a")
+    1
+    "diff1 a should be 1";
+  Int_asserter.assert_equals
+    (Telemetry_test_utils.int_exn diff1 "a:prev")
+    2
+    "diff1 a:prev should be 2";
+
+  (* same values *)
+  let current2 = Telemetry.create () |> Telemetry.int_ ~key:"b" ~value:1 in
+  let prev2 = Telemetry.create () |> Telemetry.int_ ~key:"b" ~value:1 in
+  let diff2 = Telemetry.diff current2 ~prev:prev2 in
+  Int_asserter.assert_equals
+    (Telemetry_test_utils.int_exn diff2 "b")
+    1
+    "diff2 b should be 1";
+  assert_throws
+    (Telemetry_test_utils.int_exn diff2)
+    "a:prev"
+    "not found"
+    "diff2 a:prev should throw";
+
+  (* nested object *)
+  let current3 =
+    Telemetry.create ()
+    |> Telemetry.object_
+         ~key:"o"
+         ~value:
+           ( Telemetry.create ()
+           |> Telemetry.int_ ~key:"a" ~value:1
+           |> Telemetry.int_ ~key:"b" ~value:1 )
+  in
+  let prev3 =
+    Telemetry.create ()
+    |> Telemetry.object_
+         ~key:"o"
+         ~value:
+           ( Telemetry.create ()
+           |> Telemetry.int_ ~key:"a" ~value:2
+           |> Telemetry.int_ ~key:"b" ~value:1 )
+  in
+  let diff3 = Telemetry.diff current3 ~prev:prev3 in
+  Int_asserter.assert_equals
+    (Telemetry_test_utils.int_exn diff3 "o.a")
+    1
+    "diff3 o.a should be 1";
+  Int_asserter.assert_equals
+    (Telemetry_test_utils.int_exn diff3 "o.a:prev")
+    2
+    "diff3 o.a:prev should be 2";
+  Int_asserter.assert_equals
+    (Telemetry_test_utils.int_exn diff3 "o.b")
+    1
+    "diff3 o.b should be 1";
+  assert_throws
+    (Telemetry_test_utils.int_exn diff3)
+    "o.b:prev"
+    "not found"
+    "diff3 o.b:prev should throw";
+
+  (* prev absent, and current absent *)
+  let current4 =
+    Telemetry.create ()
+    |> Telemetry.object_
+         ~key:"o"
+         ~value:(Telemetry.create () |> Telemetry.int_ ~key:"c" ~value:3)
+  in
+  let prev4 =
+    Telemetry.create ()
+    |> Telemetry.object_
+         ~key:"p"
+         ~value:(Telemetry.create () |> Telemetry.int_ ~key:"d" ~value:4)
+  in
+  let diff4 = Telemetry.diff current4 ~prev:prev4 in
+  Int_asserter.assert_equals
+    (Telemetry_test_utils.int_exn diff4 "o.c")
+    3
+    "diff4 o.c should be 3";
+  Bool_asserter.assert_equals
+    (Telemetry_test_utils.value_exn diff4 "o:prev" = Hh_json.JSON_Null)
+    true
+    "diff4 o:prev should be JSON_Null";
+  assert_throws
+    (Telemetry_test_utils.value_exn diff4)
+    "o.c:prev"
+    "not found"
+    "diff4 o.c:prev should throw";
+  Bool_asserter.assert_equals
+    (Telemetry_test_utils.value_exn diff4 "p" = Hh_json.JSON_Null)
+    true
+    "diff4 p should be JSON_Null";
+  Int_asserter.assert_equals
+    (Telemetry_test_utils.int_exn diff4 "p:prev.d:prev")
+    4
+    "diff4 p:prev.d:prev should be 4";
+
   true
 
 let () =
@@ -166,4 +265,5 @@ let () =
       ("test ability to expand namespaces", test_expand_namespace);
       ("test strip namespace functions", test_strip_namespace);
       ("test telemetry_test functions", test_telemetry_test);
+      ("test telemetry_diff", test_telemetry_diff);
     ]

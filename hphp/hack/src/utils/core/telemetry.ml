@@ -12,6 +12,9 @@ type t = key_value_pair list
 
 and key_value_pair = string * Hh_json.json
 
+let compare (left : key_value_pair) (right : key_value_pair) : int =
+  String.compare (fst left) (fst right)
+
 let create () : t = []
 
 let to_json (telemetry : t) : Hh_json.json = Hh_json.JSON_Object telemetry
@@ -110,3 +113,55 @@ let error (telemetry : t) ~(e : string) : t = error ~stack:None e :: telemetry
 
 let exception_ (telemetry : t) ~(e : Exception.t) : t =
   exception_ e :: telemetry
+
+let rec diff (telemetry : t) ~(prev : t) : t =
+  let telemetry = List.sort telemetry ~compare in
+  let prev = List.sort prev ~compare in
+  let acc = [] in
+  diff_already_sorted telemetry ~prev acc
+
+and diff_already_sorted (current : t) ~(prev : t) (acc : t) : t =
+  match (current, prev) with
+  | ([], []) -> acc
+  | (c :: cs, []) -> acc |> diff_no_prev c |> diff_already_sorted cs ~prev:[]
+  | ([], p :: ps) -> acc |> diff_no_current p |> diff_already_sorted [] ~prev:ps
+  | (c :: cs, p :: ps) when compare c p < 0 ->
+    acc |> diff_no_prev c |> diff_already_sorted cs ~prev:(p :: ps)
+  | (c :: cs, p :: ps) when compare c p > 0 ->
+    acc |> diff_no_current p |> diff_already_sorted (c :: cs) ~prev:ps
+  | (c :: cs, p :: ps) ->
+    acc |> diff_both c p |> diff_already_sorted cs ~prev:ps
+
+and diff_no_prev ((key, val_c) : key_value_pair) (acc : t) : t =
+  (key, val_c) :: (key ^ ":prev", Hh_json.JSON_Null) :: acc
+
+and diff_no_current ((key, val_p) : key_value_pair) (acc : t) : t =
+  let open Hh_json in
+  match val_p with
+  | JSON_Object elems ->
+    let elems =
+      elems |> List.fold ~init:[] ~f:(fun acc e -> diff_no_current e acc)
+    in
+    (key, JSON_Null) :: (key ^ ":prev", JSON_Object elems) :: acc
+  | _ -> (key, Hh_json.JSON_Null) :: (key ^ ":prev", val_p) :: acc
+
+and diff_both
+    ((key, val_c) : key_value_pair) ((_key, val_p) : key_value_pair) (acc : t) :
+    t =
+  let open Hh_json in
+  match (val_c, val_p) with
+  | (JSON_Object elems_c, JSON_Object elems_p) ->
+    (key, JSON_Object (diff elems_c elems_p)) :: acc
+  | (JSON_Object _, _)
+  | (_, JSON_Object _)
+  | (JSON_Array _, _)
+  | (_, JSON_Array _) ->
+    (key, val_c) :: acc
+  | (JSON_Bool val_c, JSON_Bool val_p) when val_c = val_p ->
+    (key, JSON_Bool val_c) :: acc
+  | (JSON_String val_c, JSON_String val_p) when val_c = val_p ->
+    (key, JSON_String val_c) :: acc
+  | (JSON_Number val_c, JSON_Number val_p) when val_c = val_p ->
+    (key, JSON_Number val_c) :: acc
+  | (JSON_Null, JSON_Null) -> (key, JSON_Null) :: acc
+  | (_, _) -> (key, val_c) :: (key ^ ":prev", val_p) :: acc

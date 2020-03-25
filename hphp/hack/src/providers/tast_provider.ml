@@ -45,9 +45,7 @@ let compute_tast_and_errors_unquarantined_internal
     (* prepare logging *)
     Deferred_decl.reset ~enable:false ~threshold_opt:None;
     Provider_context.reset_telemetry ctx;
-    let prev_telemetry =
-      Telemetry.create () |> Provider_context.get_telemetry ctx
-    in
+    let prev_ctx_telemetry = Provider_context.get_telemetry ctx in
     let prev_tally_state = Counters.reset ~enable:true in
     let t = Unix.gettimeofday () in
 
@@ -75,15 +73,21 @@ let compute_tast_and_errors_unquarantined_internal
     let tast_errors = Errors.merge nast_errors tast_errors in
 
     (* Logging... *)
+    let ctx_telemetry =
+      if Hh_logger.Level.passes_min_level Hh_logger.Level.Debug then
+        Provider_context.get_telemetry ctx
+        |> Telemetry.diff ~prev:prev_ctx_telemetry
+      else
+        Provider_context.get_telemetry ctx
+    in
     let telemetry = Counters.get_counters () in
     Counters.restore_state prev_tally_state;
     let telemetry =
       telemetry
-      |> Provider_context.get_telemetry ctx
+      |> Telemetry.object_ ~key:"ctx" ~value:ctx_telemetry
       |> Telemetry.float_
            ~key:"duration_decl_and_typecheck"
            ~value:(Unix.gettimeofday () -. t)
-      |> Telemetry.object_ ~key:"prev" ~value:prev_telemetry
     in
     (* File size. *)
     let telemetry =

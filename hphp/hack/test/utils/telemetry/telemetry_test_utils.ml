@@ -10,7 +10,7 @@ let telemetry_to_multiline (telemetry : Telemetry.t) : string =
   telemetry |> Telemetry.to_json |> Hh_json.json_to_multiline
 
 (** e.g. drilling for "foo.bar" will return that field.
-Raises exception if foo is absent or not an object, and if bar is absent or null *)
+Raises exception if foo is absent or not an object, and if bar is absent *)
 let value_exn (telemetry : Telemetry.t) (path : string) : Hh_json.json =
   let json = telemetry |> Telemetry.to_json in
   let accessors = Str.split (Str.regexp "\\.") path in
@@ -20,7 +20,6 @@ let value_exn (telemetry : Telemetry.t) (path : string) : Hh_json.json =
     | [key] ->
       begin
         match Hh_json_helpers.Jget.val_opt (Some json) key with
-        | Some Hh_json.JSON_Null
         | None ->
           failwith
             (Printf.sprintf

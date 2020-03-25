@@ -131,9 +131,9 @@ let unset_is_quarantined_internal () : unit =
       ( "unset_is_quarantined: but quarantine had already been released at\n"
       ^ stack )
 
-let get_telemetry (t : t) (telemetry : Telemetry.t) : Telemetry.t =
+let get_telemetry (t : t) : Telemetry.t =
   let telemetry =
-    telemetry
+    Telemetry.create ()
     |> Telemetry.string_
          ~key:"backend"
          ~value:(t.backend |> Provider_backend.t_to_string)

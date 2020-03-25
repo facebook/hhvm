@@ -26,25 +26,25 @@ module Attrs = Naming_attributes
 module Partial = Partial_provider
 module SN = Naming_special_names
 
-let tracked_names = ref None
+let tracked_names : FileInfo.names option ref = ref None
 
-let start_tracking () = tracked_names := Some FileInfo.empty_names
+let start_tracking () : unit = tracked_names := Some FileInfo.empty_names
 
-let record_fun s =
+let record_fun (s : string) : unit =
   match !tracked_names with
   | None -> ()
   | Some names ->
     tracked_names :=
       Some FileInfo.{ names with n_funs = SSet.add s names.n_funs }
 
-let record_class s =
+let record_class (s : string) : unit =
   match !tracked_names with
   | None -> ()
   | Some names ->
     tracked_names :=
       Some FileInfo.{ names with n_classes = SSet.add s names.n_classes }
 
-let record_record_def s =
+let record_record_def (s : string) : unit =
   match !tracked_names with
   | None -> ()
   | Some names ->
@@ -52,21 +52,21 @@ let record_record_def s =
       Some
         FileInfo.{ names with n_record_defs = SSet.add s names.n_record_defs }
 
-let record_typedef s =
+let record_typedef (s : string) : unit =
   match !tracked_names with
   | None -> ()
   | Some names ->
     tracked_names :=
       Some FileInfo.{ names with n_types = SSet.add s names.n_types }
 
-let record_const s =
+let record_const (s : string) : unit =
   match !tracked_names with
   | None -> ()
   | Some names ->
     tracked_names :=
       Some FileInfo.{ names with n_consts = SSet.add s names.n_consts }
 
-let stop_tracking () =
+let stop_tracking () : FileInfo.names =
   let res =
     match !tracked_names with
     | None ->
@@ -85,7 +85,11 @@ let stop_tracking () =
  *)
 (*****************************************************************************)
 
-let check_extend_kind parent_pos parent_kind child_pos child_kind =
+let check_extend_kind
+    (parent_pos : Pos.t)
+    (parent_kind : Ast_defs.class_kind)
+    (child_pos : Pos.t)
+    (child_kind : Ast_defs.class_kind) : unit =
   match (parent_kind, child_kind) with
   (* What is allowed *)
   | ( (Ast_defs.Cabstract | Ast_defs.Cnormal),
@@ -111,12 +115,14 @@ let check_extend_kind parent_pos parent_kind child_pos child_kind =
  *)
 (*****************************************************************************)
 
-let experimental_no_trait_reuse_enabled env =
+let experimental_no_trait_reuse_enabled (env : Decl_env.env) : bool =
   TypecheckerOptions.experimental_feature_enabled
     (Decl_env.tcopt env)
     TypecheckerOptions.experimental_no_trait_reuse
 
-let report_reused_trait parent_type shallow_class =
+let report_reused_trait
+    (parent_type : Decl_defs.decl_class_type)
+    (shallow_class : Shallow_decl_defs.shallow_class) : string -> unit =
   Errors.trait_reuse
     parent_type.dc_pos
     parent_type.dc_name
@@ -135,7 +141,11 @@ let report_reused_trait parent_type shallow_class =
  * XHP attribute dependencies don't actually pull the trait into the class,
  * so we need to track them totally separately.
  *)
-let check_no_duplicate_traits parent_type shallow_class c_extends full_extends =
+let check_no_duplicate_traits
+    (parent_type : Decl_defs.decl_class_type)
+    (shallow_class : Shallow_decl_defs.shallow_class)
+    (c_extends : SSet.t)
+    (full_extends : SSet.t) : unit =
   let class_size = SSet.cardinal c_extends in
   let parents_size = SSet.cardinal parent_type.dc_extends in
   let full_size = SSet.cardinal full_extends in
@@ -151,7 +161,11 @@ let check_no_duplicate_traits parent_type shallow_class c_extends full_extends =
  * declared as private/protected.
  *)
 let add_grand_parents_or_traits
-    no_trait_reuse parent_pos shallow_class acc parent_type =
+    (no_trait_reuse : bool)
+    (parent_pos : Pos.t)
+    (shallow_class : Shallow_decl_defs.shallow_class)
+    (acc : SSet.t * bool * [> `Extends_pass | `Xhp_pass ])
+    (parent_type : Decl_defs.decl_class_type) : SSet.t * bool * 'a =
   let (extends, is_complete, pass) = acc in
   let class_pos = fst shallow_class.sc_name in
   let class_kind = shallow_class.sc_kind in
@@ -172,8 +186,12 @@ let add_grand_parents_or_traits
     check_no_duplicate_traits parent_type shallow_class extends extends';
   (extends', parent_type.dc_members_fully_known && is_complete, pass)
 
-let get_class_parent_or_trait env shallow_class (parents, is_complete, pass) ty
-    =
+let get_class_parent_or_trait
+    (env : Decl_env.env)
+    (shallow_class : Shallow_decl_defs.shallow_class)
+    ((parents, is_complete, pass) :
+      SSet.t * bool * [> `Extends_pass | `Xhp_pass ])
+    (ty : Typing_defs.decl_phase Typing_defs.ty) : SSet.t * bool * 'a =
   (* See comment on check_no_duplicate_traits for reasoning here *)
   let no_trait_reuse =
     experimental_no_trait_reuse_enabled env
@@ -200,7 +218,9 @@ let get_class_parent_or_trait env shallow_class (parents, is_complete, pass) ty
       acc
       parent_type
 
-let get_class_parents_and_traits env shallow_class =
+let get_class_parents_and_traits
+    (env : Decl_env.env) (shallow_class : Shallow_decl_defs.shallow_class) :
+    SSet.t * SSet.t * bool =
   let parents = SSet.empty in
   let is_complete = true in
   (* extends parents *)
@@ -233,11 +253,14 @@ let get_class_parents_and_traits env shallow_class =
 (* Section declaring the type of a function *)
 (*****************************************************************************)
 
-let rec ifun_decl (ctx : Provider_context.t) (f : Nast.fun_) =
+let rec ifun_decl (ctx : Provider_context.t) (f : Nast.fun_) :
+    Typing_defs.fun_elt =
   let f = Errors.ignore_ (fun () -> Naming.fun_ ctx f) in
-  fun_decl ctx f
+  let fe = fun_decl ctx f in
+  Decl_heap.Funs.add (snd f.f_name) fe;
+  fe
 
-and fun_decl ctx f =
+and fun_decl (ctx : Provider_context.t) (f : Nast.fun_) : Typing_defs.fun_elt =
   let (errors, fe) =
     Errors.do_ (fun () ->
         let dep = Dep.Fun (snd f.f_name) in
@@ -246,10 +269,10 @@ and fun_decl ctx f =
   in
   let fe = { fe with fe_decl_errors = Some errors } in
   record_fun (snd f.f_name);
-  Decl_heap.Funs.add (snd f.f_name) fe;
   fe
 
-and fun_decl_in_env env ~is_lambda f =
+and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
+    Typing_defs.fun_elt =
   check_params env f.f_params;
   let reactivity = fun_reactivity env f.f_user_attributes in
   let returns_mutable = fun_returns_mutable f.f_user_attributes in
@@ -314,16 +337,20 @@ type class_env = {
   stack: SSet.t;
 }
 
-let check_if_cyclic class_env (pos, cid) =
+let check_if_cyclic (class_env : class_env) ((pos, cid) : Pos.t * string) : bool
+    =
   let stack = class_env.stack in
   let is_cyclic = SSet.mem cid stack in
   if is_cyclic then Errors.cyclic_class_def stack pos;
   is_cyclic
 
-let shallow_decl_enabled (ctx : Provider_context.t) =
+let shallow_decl_enabled (ctx : Provider_context.t) : bool =
   TypecheckerOptions.shallow_class_decl ctx.Provider_context.tcopt
 
-let pu_enum_fold acc spu =
+let pu_enum_fold
+    (acc : Typing_defs.pu_enum_type SMap.t)
+    (spu : Shallow_decl_defs.shallow_pu_enum) : Typing_defs.pu_enum_type SMap.t
+    =
   let tpu =
     match SMap.find_opt (snd spu.spu_name) acc with
     | None -> Decl_to_typing.shallow_pu_enum_to_pu_enum_type spu
@@ -371,7 +398,8 @@ let pu_enum_fold acc spu =
   in
   SMap.add (snd spu.spu_name) tpu acc
 
-let rec class_decl_if_missing class_env (c : Nast.class_) =
+let rec class_decl_if_missing (class_env : class_env) (c : Nast.class_) :
+    Decl_defs.decl_class_type option =
   let ((_, cid) as c_name) = c.c_name in
   if check_if_cyclic class_env c_name then
     None
@@ -397,7 +425,9 @@ let rec class_decl_if_missing class_env (c : Nast.class_) =
       let class_ = class_naming_and_decl class_env cid c in
       Some class_
 
-and class_naming_and_decl (class_env : class_env) cid c =
+and class_naming_and_decl
+    (class_env : class_env) (cid : string) (c : Nast.class_) :
+    Decl_defs.decl_class_type =
   let class_env = { class_env with stack = SSet.add cid class_env.stack } in
   let shallow_class =
     Shallow_classes_provider.decl class_env.ctx ~use_cache:false c
@@ -414,7 +444,8 @@ and class_naming_and_decl (class_env : class_env) cid c =
   Decl_heap.Classes.add name class_;
   class_
 
-and class_parents_decl class_env c =
+and class_parents_decl
+    (class_env : class_env) (c : Shallow_decl_defs.shallow_class) : unit =
   let class_type class_ =
     let (_ : class_type option) = class_type_decl class_env class_ in
     ()
@@ -427,7 +458,8 @@ and class_parents_decl class_env c =
   List.iter c.sc_req_implements class_type;
   ()
 
-and is_disposable_type env hint =
+and is_disposable_type (env : Decl_env.env) (hint : Typing_defs.decl_ty) : bool
+    =
   match get_node hint with
   | Tapply ((_, c), _) ->
     begin
@@ -437,7 +469,8 @@ and is_disposable_type env hint =
     end
   | _ -> false
 
-and class_type_decl class_env hint =
+and class_type_decl (class_env : class_env) (hint : Typing_defs.decl_ty) :
+    Typing_defs.class_type option =
   match get_node hint with
   | Tapply ((_, cid), _) ->
     begin
@@ -456,7 +489,7 @@ and class_type_decl class_env hint =
     (* This class lives in PHP land *)
     None
 
-and class_is_abstract c =
+and class_is_abstract (c : Shallow_decl_defs.shallow_class) : bool =
   match c.sc_kind with
   | Ast_defs.Cabstract
   | Ast_defs.Cinterface
@@ -467,7 +500,12 @@ and class_is_abstract c =
 
 (* When all type constants have been inherited and declared, this step synthesizes
  * the defaults of abstract type constants into concrete type constants. *)
-and synthesize_defaults k tc (typeconsts, consts) =
+and synthesize_defaults
+    (k : string)
+    (tc : Typing_defs.typeconst_type)
+    ((typeconsts, consts) :
+      Typing_defs.typeconst_type SMap.t * Typing_defs.class_const SMap.t) :
+    Typing_defs.typeconst_type SMap.t * Typing_defs.class_const SMap.t =
   match tc.ttc_abstract with
   | TCAbstract (Some default) ->
     let concrete =
@@ -488,7 +526,8 @@ and synthesize_defaults k tc (typeconsts, consts) =
     (typeconsts, consts)
   | _ -> (typeconsts, consts)
 
-and class_decl ctx c =
+and class_decl (ctx : Provider_context.t) (c : Shallow_decl_defs.shallow_class)
+    : Decl_defs.decl_class_type =
   let is_abstract = class_is_abstract c in
   let const = Attrs.mem SN.UserAttributes.uaConst c.sc_user_attributes in
   let is_ppl =
@@ -664,7 +703,7 @@ and class_decl ctx c =
     impl;
   tc
 
-and get_sealed_whitelist c =
+and get_sealed_whitelist (c : Shallow_decl_defs.shallow_class) : SSet.t option =
   match Attrs.find SN.UserAttributes.uaSealed c.sc_user_attributes with
   | None -> None
   | Some { ua_params = params; _ } ->
@@ -677,7 +716,8 @@ and get_sealed_whitelist c =
     in
     Some (List.fold_left params ~f:add_class_name ~init:SSet.empty)
 
-and get_implements env ht =
+and get_implements (env : Decl_env.env) (ht : Typing_defs.decl_ty) :
+    Typing_defs.decl_ty SMap.t =
   let (_r, (_p, c), paraml) = Decl_utils.unwrap_class_type ht in
   let class_ = Decl_env.get_class_dep env c in
   match class_ with
@@ -691,7 +731,8 @@ and get_implements env ht =
     in
     SMap.add c ht sub_implements
 
-and trait_exists env acc trait =
+and trait_exists (env : Decl_env.env) (acc : bool) (trait : Typing_defs.decl_ty)
+    : bool =
   match get_node trait with
   | Tapply ((_, trait), _) ->
     let class_ = Decl_env.get_class_dep env trait in
@@ -700,7 +741,10 @@ and trait_exists env acc trait =
     | Some _class -> acc)
   | _ -> false
 
-and constructor_decl (pcstr, pconsist) class_ =
+and constructor_decl
+    ((pcstr, pconsist) : Decl_defs.element option * Typing_defs.consistent_kind)
+    (class_ : Shallow_decl_defs.shallow_class) :
+    Decl_defs.element option * Typing_defs.consistent_kind =
   (* constructors in children of class_ must be consistent? *)
   let cconsist =
     if class_.sc_final then
@@ -731,7 +775,9 @@ and constructor_decl (pcstr, pconsist) class_ =
   in
   (cstr, Decl_utils.coalesce_consistent pconsist cconsist)
 
-and build_constructor class_ method_ =
+and build_constructor
+    (class_ : Shallow_decl_defs.shallow_class)
+    (method_ : Shallow_decl_defs.shallow_method) : Decl_defs.element option =
   let (_, class_name) = class_.sc_name in
   let vis = visibility class_name method_.sm_visibility in
   let pos = fst method_.sm_name in
@@ -764,7 +810,11 @@ and build_constructor class_ method_ =
   Decl_heap.Constructors.add class_name fe;
   Some cstr
 
-and class_const_fold c acc scc =
+and class_const_fold
+    (c : Shallow_decl_defs.shallow_class)
+    (acc : Typing_defs.class_const SMap.t)
+    (scc : Shallow_decl_defs.shallow_class_const) :
+    Typing_defs.class_const SMap.t =
   let c_name = snd c.sc_name in
   let cc =
     {
@@ -781,7 +831,7 @@ and class_const_fold c acc scc =
 
 (* Every class, interface, and trait implicitly defines a ::class to
  * allow accessing its fully qualified name as a string *)
-and class_class_decl class_id =
+and class_class_decl (class_id : Ast_defs.id) : Typing_defs.class_const =
   let (pos, name) = class_id in
   let reason = Reason.Rclass_class (pos, name) in
   let classname_ty =
@@ -796,7 +846,10 @@ and class_class_decl class_id =
     cc_origin = name;
   }
 
-and prop_decl c acc sp =
+and prop_decl
+    (c : Shallow_decl_defs.shallow_class)
+    (acc : Decl_defs.element SMap.t)
+    (sp : Shallow_decl_defs.shallow_prop) : Decl_defs.element SMap.t =
   let (sp_pos, sp_name) = sp.sp_name in
   let ty =
     match sp.sp_type with
@@ -826,7 +879,10 @@ and prop_decl c acc sp =
   let acc = SMap.add sp_name elt acc in
   acc
 
-and static_prop_decl c acc sp =
+and static_prop_decl
+    (c : Shallow_decl_defs.shallow_class)
+    (acc : Decl_defs.element SMap.t)
+    (sp : Shallow_decl_defs.shallow_prop) : Decl_defs.element SMap.t =
   let (sp_pos, sp_name) = sp.sp_name in
   let ty =
     match sp.sp_type with
@@ -856,14 +912,18 @@ and static_prop_decl c acc sp =
   let acc = SMap.add sp_name elt acc in
   acc
 
-and visibility cid = function
+and visibility (cid : string) (visibility : Aast_defs.visibility) :
+    Typing_defs.visibility =
+  match visibility with
   | Public -> Vpublic
   | Protected -> Vprotected cid
   | Private -> Vprivate cid
 
 (* each concrete type constant T = <sometype> implicitly defines a
 class constant with the same name which is TypeStructure<sometype> *)
-and typeconst_structure c stc =
+and typeconst_structure
+    (c : Shallow_decl_defs.shallow_class)
+    (stc : Shallow_decl_defs.shallow_typeconst) : Typing_defs.class_const =
   let pos = fst stc.stc_name in
   let r = Reason.Rwitness pos in
   let tsid = (pos, SN.FB.cTypeStructure) in
@@ -884,7 +944,12 @@ and typeconst_structure c stc =
     cc_origin = snd c.sc_name;
   }
 
-and typeconst_fold c ((typeconsts, consts) as acc) stc =
+and typeconst_fold
+    (c : Shallow_decl_defs.shallow_class)
+    (acc : Typing_defs.typeconst_type SMap.t * Typing_defs.class_const SMap.t)
+    (stc : Shallow_decl_defs.shallow_typeconst) :
+    Typing_defs.typeconst_type SMap.t * Typing_defs.class_const SMap.t =
+  let (typeconsts, consts) = acc in
   match c.sc_kind with
   | Ast_defs.Ctrait
   | Ast_defs.Cenum ->
@@ -927,7 +992,10 @@ and typeconst_fold c ((typeconsts, consts) as acc) stc =
     let typeconsts = SMap.add (snd stc.stc_name) tc typeconsts in
     (typeconsts, consts)
 
-and method_check_override c m acc =
+and method_check_override
+    (c : Shallow_decl_defs.shallow_class)
+    (m : Shallow_decl_defs.shallow_method)
+    (acc : Decl_defs.element SMap.t) : bool =
   let (pos, id) = m.sm_name in
   let (_, class_id) = c.sc_name in
   let override = m.sm_override in
@@ -939,7 +1007,11 @@ and method_check_override c m acc =
     false
   | None -> false
 
-and method_redecl_acc c acc m =
+and method_redecl_acc
+    (c : Shallow_decl_defs.shallow_class)
+    (acc : Decl_defs.element SMap.t)
+    (m : Shallow_decl_defs.shallow_method_redeclaration) :
+    Decl_defs.element SMap.t =
   let (pos, id) = m.smr_name in
   let vis =
     match (SMap.find_opt id acc, m.smr_visibility) with
@@ -982,7 +1054,11 @@ and method_redecl_acc c acc m =
   add_meth (elt.elt_origin, id) fe;
   SMap.add id elt acc
 
-and method_decl_acc ~is_static c (acc, condition_types) m =
+and method_decl_acc
+    ~(is_static : bool)
+    (c : Shallow_decl_defs.shallow_class)
+    ((acc, condition_types) : Decl_defs.element SMap.t * SSet.t)
+    (m : Shallow_decl_defs.shallow_method) : Decl_defs.element SMap.t * SSet.t =
   let check_override = method_check_override c m acc in
   let has_memoizelsb = m.sm_memoizelsb in
   let (pos, id) = m.sm_name in
@@ -1062,7 +1138,7 @@ and method_decl_acc ~is_static c (acc, condition_types) m =
 (* Dealing with records *)
 (*****************************************************************************)
 
-let record_def_decl rd : Typing_defs.record_def_type =
+let record_def_decl (rd : Nast.record_def) : Typing_defs.record_def_type =
   let extends =
     match rd.rd_extends with
     (* The only valid type hint for record parents is a record
@@ -1085,7 +1161,9 @@ let record_def_decl rd : Typing_defs.record_def_type =
     rdt_errors = None;
   }
 
-let type_record_def_naming_and_decl (ctx : Provider_context.t) rd =
+let type_record_def_naming_and_decl
+    (ctx : Provider_context.t) (rd : Nast.record_def) :
+    Typing_defs.record_def_type =
   let rd = Errors.ignore_ (fun () -> Naming.record_def ctx rd) in
   let (errors, tdecl) = Errors.do_ (fun () -> record_def_decl rd) in
   record_record_def (snd rd.rd_name);
@@ -1093,7 +1171,8 @@ let type_record_def_naming_and_decl (ctx : Provider_context.t) rd =
   Decl_heap.RecordDefs.add (snd rd.rd_name) tdecl;
   tdecl
 
-let record_def_decl_if_missing ctx rd =
+let record_def_decl_if_missing (ctx : Provider_context.t) (rd : Nast.record_def)
+    : unit =
   let (_, rdid) = rd.rd_name in
   if not (Decl_heap.RecordDefs.mem rdid) then
     let (_ : Typing_defs.record_def_type) =
@@ -1105,13 +1184,15 @@ let record_def_decl_if_missing ctx rd =
 (* Dealing with typedefs *)
 (*****************************************************************************)
 
-let rec type_typedef_decl_if_missing ctx typedef =
+let rec type_typedef_decl_if_missing
+    (ctx : Provider_context.t) (typedef : Nast.typedef) : unit =
   let (_, name) = typedef.t_name in
   if not (Decl_heap.Typedefs.mem name) then
     let (_ : typedef_type) = type_typedef_naming_and_decl ctx typedef in
     ()
 
-and typedef_decl ctx tdef =
+and typedef_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :
+    Typing_defs.typedef_type =
   let {
     t_annotation = ();
     t_name = (td_pos, tid);
@@ -1133,7 +1214,9 @@ and typedef_decl ctx tdef =
   let td_decl_errors = None in
   { td_vis; td_tparams; td_constraint; td_type; td_pos; td_decl_errors }
 
-and type_typedef_naming_and_decl ctx tdef =
+and type_typedef_naming_and_decl
+    (ctx : Provider_context.t) (tdef : Nast.typedef) : Typing_defs.typedef_type
+    =
   let tdef = Errors.ignore_ (fun () -> Naming.typedef ctx tdef) in
   let (errors, tdecl) = Errors.do_ (fun () -> typedef_decl ctx tdef) in
   record_typedef (snd tdef.t_name);
@@ -1145,7 +1228,8 @@ and type_typedef_naming_and_decl ctx tdef =
 (* Global constants *)
 (*****************************************************************************)
 
-let const_decl ctx cst =
+let const_decl (ctx : Provider_context.t) (cst : Nast.gconst) :
+    Typing_defs.decl_ty =
   let (cst_pos, _cst_name) = cst.cst_name in
   let dep = Dep.GConst (snd cst.cst_name) in
   let env = { Decl_env.mode = cst.cst_mode; droot = Some dep; ctx } in
@@ -1159,7 +1243,8 @@ let const_decl ctx cst =
       mk (Reason.Rwitness cst_pos, Terr)
     | None -> mk (Reason.Rwitness cst_pos, Typing_defs.make_tany ()))
 
-let iconst_decl ctx cst =
+let iconst_decl (ctx : Provider_context.t) (cst : Nast.gconst) :
+    Typing_defs.decl_ty * Errors.t =
   let cst = Errors.ignore_ (fun () -> Naming.global_const ctx cst) in
   let (errors, hint_ty) = Errors.do_ (fun () -> const_decl ctx cst) in
   record_const (snd cst.cst_name);
@@ -1167,7 +1252,8 @@ let iconst_decl ctx cst =
   (hint_ty, errors)
 
 (*****************************************************************************)
-let rec name_and_declare_types_program ctx prog =
+let rec name_and_declare_types_program
+    (ctx : Provider_context.t) (prog : Nast.program) : unit =
   List.iter prog (fun def ->
       match def with
       | Namespace (_, prog) -> name_and_declare_types_program ctx prog
@@ -1188,39 +1274,50 @@ let rec name_and_declare_types_program ctx prog =
         let (_ : decl_ty * Errors.t) = iconst_decl ctx cst in
         ())
 
-let make_env ctx fn =
+let make_env (ctx : Provider_context.t) (fn : Relative_path.t) : unit =
   let ast = Ast_provider.get_ast ctx fn in
-  name_and_declare_types_program ctx ast
+  name_and_declare_types_program ctx ast;
+  ()
 
-let err_not_found file name =
+let err_not_found (file : Relative_path.t) (name : string) : 'a =
   let err_str =
     Printf.sprintf "%s not found in %s" name (Relative_path.to_absolute file)
   in
   raise (Decl_not_found err_str)
 
-let declare_class_in_file ctx file name =
+let declare_class_in_file
+    (ctx : Provider_context.t) (file : Relative_path.t) (name : string) :
+    Decl_defs.decl_class_type option =
   match Ast_provider.find_class_in_file ctx file name with
   | Some cls ->
     let class_env = { ctx; stack = SSet.empty } in
     class_decl_if_missing class_env cls
   | None -> err_not_found file name
 
-let declare_fun_in_file ctx file name =
+let declare_fun_in_file
+    (ctx : Provider_context.t) (file : Relative_path.t) (name : string) :
+    Typing_defs.fun_elt =
   match Ast_provider.find_fun_in_file ctx file name with
   | Some f -> ifun_decl ctx f
   | None -> err_not_found file name
 
-let declare_record_def_in_file ctx file name =
+let declare_record_def_in_file
+    (ctx : Provider_context.t) (file : Relative_path.t) (name : string) :
+    Typing_defs.record_def_type =
   match Ast_provider.find_record_def_in_file ctx file name with
   | Some rd -> type_record_def_naming_and_decl ctx rd
   | None -> err_not_found file name
 
-let declare_typedef_in_file ctx file name =
+let declare_typedef_in_file
+    (ctx : Provider_context.t) (file : Relative_path.t) (name : string) :
+    Typing_defs.typedef_type =
   match Ast_provider.find_typedef_in_file ctx file name with
   | Some t -> type_typedef_naming_and_decl ctx t
   | None -> err_not_found file name
 
-let declare_const_in_file ctx file name =
+let declare_const_in_file
+    (ctx : Provider_context.t) (file : Relative_path.t) (name : string) :
+    Typing_defs.decl_ty * Errors.t =
   match Ast_provider.find_gconst_in_file ctx file name with
   | Some cst -> iconst_decl ctx cst
   | None -> err_not_found file name

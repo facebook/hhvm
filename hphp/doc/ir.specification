@@ -453,32 +453,32 @@ To keyset conversions:
 
 To varray conversions:
 
-| ConvArrToVArr,                DArrPacked, S(Arr),                  PRc|CRc
+| ConvArrToVArr,                DVArr, S(Arr),                        PRc|CRc
 
-| ConvVecToVArr,                DArrPacked, S(Vec),                  PRc|CRc
+| ConvVecToVArr,                DVArr, S(Vec),                        PRc|CRc
 
-| ConvDictToVArr,               DArrPacked, S(Dict),                 PRc|CRc
+| ConvDictToVArr,               DVArr, S(Dict),                       PRc|CRc
 
-| ConvKeysetToVArr,             DArrPacked, S(Keyset),               PRc|CRc
+| ConvKeysetToVArr,             DVArr, S(Keyset),                     PRc|CRc
 
-| ConvClsMethToVArr,            DArrPacked, S(ClsMeth),              PRc|CRc
+| ConvClsMethToVArr,            DVArr, S(ClsMeth),                    PRc|CRc
 
-| ConvObjToVArr,                DArrPacked, S(Obj),                  PRc|CRc
+| ConvObjToVArr,                DVArr, S(Obj),                        PRc|CRc
 
 
 To darray conversion:
 
-| ConvArrToDArr,                DArrMixed, S(Arr),                   PRc|CRc
+| ConvArrToDArr,                DDArr, S(Arr),                       PRc|CRc
 
-| ConvVecToDArr,                DArrMixed, S(Vec),                   PRc|CRc
+| ConvVecToDArr,                DDArr, S(Vec),                       PRc|CRc
 
-| ConvDictToDArr,               DArrMixed, S(Dict),                  PRc|CRc
+| ConvDictToDArr,               DDArr, S(Dict),                      PRc|CRc
 
-| ConvKeysetToDArr,             DArrMixed, S(Keyset),                PRc|CRc
+| ConvKeysetToDArr,             DDArr, S(Keyset),                    PRc|CRc
 
-| ConvClsMethToDArr,            DArrMixed, S(ClsMeth),               PRc|CRc
+| ConvClsMethToDArr,            DDArr, S(ClsMeth),                   PRc|CRc
 
-| ConvObjToDArr,                DArrMixed, S(Obj),                   PRc|CRc
+| ConvObjToDArr,                DDArr, S(Obj),                       PRc|CRc
 
 
 To bool conversions:
@@ -1514,7 +1514,7 @@ To string conversions:
 
   Allocate a new array in mixed mode with the expected capacity S0.
 
-| NewDArray, DArrMixed, C(Int), PRc
+| NewDArray, DDArr, C(Int), PRc
 
   Allocate a new dict-like array with the expected capacity S0.
 
@@ -1539,7 +1539,7 @@ To string conversions:
   The array will be initialized with values using either InitPackedLayoutArray
   or InitPackedLayoutArrayLoop.
 
-| AllocVArray<size>, DArrPacked, NA, PRc
+| AllocVArray<size>, DVArr, NA, PRc
 
   Allocate a new uninitialized vec-like array with space for size elements in
   it.  The array will be initialized with values using either
@@ -1567,7 +1567,7 @@ To string conversions:
 
 | AllocStructArray<keys...>,  DArrMixed,      NA, PRc
 
-| AllocStructDArray<keys...>, DArrMixed,      NA, PRc
+| AllocStructDArray<keys...>, DDArr,          NA, PRc
 
 | AllocStructDict<keys...>,   D(Dict), NA, PRc
 
@@ -1598,7 +1598,7 @@ To string conversions:
 
 | NewStructArray<offset,keys...>,  DArrMixed,      S(StkPtr), PRc|CRc
 
-| NewStructDArray<offset,keys...>, DArrMixed,      S(StkPtr), PRc|CRc
+| NewStructDArray<offset,keys...>, DDArr,          S(StkPtr), PRc|CRc
 
 | NewStructDict<offset,keys...>,   D(Dict), S(StkPtr), PRc|CRc
 

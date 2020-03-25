@@ -13,22 +13,70 @@ use oxidized::{ast, pos::Pos};
 use typing_defs_rust::{tast, FuncBodyAnn, SavedEnv, Ty, Ty_};
 use typing_env_rust::Env;
 
-fn dispatch_call<'a>(ast::Expr(_pos, e): &ast::Expr, env: &mut Env<'a>) -> Ty<'a> {
-    let bld = env.builder();
-    match e {
+fn dispatch_call<'a>(
+    env: &mut Env<'a>,
+    pos: &Pos,
+    _call_type: &ast::CallType,
+    ast::Expr(_fpos, fun_expr): &ast::Expr,
+    explicit_targs: &Vec<ast::Targ>,
+    el: &Vec<ast::Expr>,
+    unpacked_element: &Option<ast::Expr>,
+    _in_suspend: bool,
+) -> (Ty<'a>, tast::Expr_<'a>) {
+    match fun_expr {
         ast::Expr_::Id(x) => {
-            let (_pos, sid) = (&x.0, &x.1);
-            match env.provider().get_fun(sid) {
-                None => unimplemented!(),
-                Some(f) => {
-                    let fty = &f.type_;
-                    let ety_env = bld.env_with_self();
-                    let fty = typing_phase::localize(&ety_env, env, fty);
-                    match fty.get_node() {
-                        Ty_::Tfun(x) => x.return_,
-                        x => unimplemented!("{:#?}", x),
-                    }
-                }
+            let fty = fun_type_of_id(env, x, explicit_targs, el);
+            let ty = call(env, pos, fty, el, unpacked_element);
+            // TODO(hrust) reactivity stuff
+            let e = tast::Expr(
+                (
+                    Pos::make_none(),
+                    env.builder().null(env.builder().mk_rnone()),
+                ),
+                tast::Expr_::mk_null(),
+            );
+            (
+                ty,
+                tast::Expr_::mk_call(tast::CallType::Cnormal, e, vec![], vec![], None),
+            )
+        }
+        x => unimplemented!("{:#?}", x),
+    }
+}
+
+fn fun_type_of_id<'a>(
+    env: &mut Env<'a>,
+    ast::Id(_pos, id): &ast::Sid,
+    _tal: &Vec<ast::Targ>,
+    _el: &Vec<ast::Expr>,
+) -> Ty<'a> {
+    let bld = env.builder();
+    match env.provider().get_fun(id) {
+        None => unimplemented!(),
+        Some(f) => {
+            let fty = &f.type_;
+            // TODO(hrust) transform_special_fun_ty
+            let ety_env = bld.env_with_self();
+            // TODO(hrust) localize_targs, pessimize
+            typing_phase::localize(&ety_env, env, fty)
+            // TODO(hrust) check deprecated
+        }
+    }
+}
+
+fn call<'a>(
+    _env: &Env<'a>,
+    _pos: &Pos,
+    fty: Ty<'a>,
+    el: &Vec<ast::Expr>,
+    unpacked_element: &Option<ast::Expr>,
+) -> Ty<'a> {
+    match fty.get_node() {
+        Ty_::Tfun(x) => {
+            if let ([], None) = (&el[..], unpacked_element) {
+                x.return_
+            } else {
+                unimplemented!("only support calls with zero arguments.")
             }
         }
         x => unimplemented!("{:#?}", x),
@@ -38,28 +86,46 @@ fn dispatch_call<'a>(ast::Expr(_pos, e): &ast::Expr, env: &mut Env<'a>) -> Ty<'a
 fn expr<'a>(ast::Expr(pos, e): &ast::Expr, env: &mut Env<'a>) -> tast::Expr<'a> {
     let (ty, e) = match e {
         ast::Expr_::Call(x) => {
-            if let (ast::CallType::Cnormal, e, [], [], None) =
-                (x.0, &x.1, &x.2[..], &&x.3[..], &x.4)
-            {
-                let ty = dispatch_call(e, env);
-                let e = tast::Expr(
-                    (
-                        Pos::make_none(),
-                        env.builder().null(env.builder().mk_rnone()),
-                    ),
-                    tast::Expr_::mk_null(),
-                );
-                (
-                    ty,
-                    tast::Expr_::mk_call(tast::CallType::Cnormal, e, vec![], vec![], None),
-                )
-            } else {
-                unimplemented!("{:#?}", x);
-            }
+            // TODO(hrust) pseudo functions, might_throw
+            let (call_type, e, explicit_targs, el, unpacked_element) = &**x;
+            let in_suspend = false;
+            check_call(
+                env,
+                pos,
+                call_type,
+                e,
+                explicit_targs,
+                el,
+                unpacked_element,
+                in_suspend,
+            )
         }
         x => unimplemented!("{:#?}", x),
     };
     ast::Expr((pos.clone(), ty), e)
+}
+
+fn check_call<'a>(
+    env: &mut Env<'a>,
+    pos: &Pos,
+    call_type: &ast::CallType,
+    e: &ast::Expr,
+    explicit_targs: &Vec<ast::Targ>,
+    el: &Vec<ast::Expr>,
+    unpacked_element: &Option<ast::Expr>,
+    in_suspend: bool,
+) -> (Ty<'a>, tast::Expr_<'a>) {
+    dispatch_call(
+        env,
+        pos,
+        call_type,
+        e,
+        explicit_targs,
+        el,
+        unpacked_element,
+        in_suspend,
+    )
+    // TODO(hrust) forget_fake_members
 }
 
 fn markup<'a>(s: &ast::Pstring, e: &Option<ast::Expr>) -> tast::Stmt_<'a> {

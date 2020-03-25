@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use bumpalo::collections::Vec;
+use ocamlrep::{Allocator, FromError, OcamlRep, Value};
 pub use oxidized::typing_defs_core::{DestructureKind, Exact, ParamMode};
 use oxidized::{aast_defs, ast_defs, ident, nast, tany_sentinel, typing_defs as oxidized_defs};
 
@@ -350,6 +351,63 @@ impl<'a> Ty<'a> {
             Ty_::Tprim(aast_defs::Tprim::Tint) => builder.prim(builder.mk_rnone(), PrimKind::Tint),
             _ => unimplemented!("{:#?}", ty),
         }
+    }
+
+    pub fn to_oxidized(&self) -> oxidized_defs::Ty {
+        // This maintains the mapping between Rust arena allocated types and OCaml versions. Since
+        // the arena types are handwritten, the mapping has to be manual too.
+        // Not implementing all the types and reasons upfront, since initially we'll likely
+        // to use a very limited subset of them. Feel free to add whatever you need here if you
+        // are a hitting those unimplemented.
+        let r = match &self.0.reason {
+            Reason::Rnone => oxidized::typing_reason::Reason::Rnone,
+            x => unimplemented!("{:#?}", x),
+        };
+        let t = match &self.1 {
+            Ty_::Tprim(PrimKind::Tint) => oxidized_defs::Ty_::Tprim(aast_defs::Tprim::Tint),
+            Ty_::Tprim(PrimKind::Tnull) => oxidized_defs::Ty_::Tprim(aast_defs::Tprim::Tnull),
+            x => unimplemented!("{:#?}", x),
+        };
+        oxidized_defs::Ty(r, Box::new(t))
+    }
+}
+
+impl OcamlRep for Ty<'_> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+        self.to_oxidized().to_ocamlrep(alloc)
+    }
+
+    fn from_ocamlrep(_value: Value<'_>) -> Result<Self, FromError> {
+        unimplemented!()
+    }
+}
+
+// Rust versions of oxidized tast uses dummy placeholders for FuncBodyAnn and SavedEnv, which are converted
+// to similarly dummy (using Default trait) OCaml representations. This is OK for now, since we use this conversion
+// only to call into OCaml tast printer, and the simple types we are printing doesn't use annotations or saved envs.
+#[derive(Debug)]
+pub struct FuncBodyAnn;
+
+impl OcamlRep for FuncBodyAnn {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+        oxidized::tast::FuncBodyAnn::default().to_ocamlrep(alloc)
+    }
+
+    fn from_ocamlrep(_value: Value<'_>) -> Result<Self, FromError> {
+        unimplemented!()
+    }
+}
+
+#[derive(Debug)]
+pub struct SavedEnv;
+
+impl OcamlRep for SavedEnv {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+        oxidized::tast::SavedEnv::default().to_ocamlrep(alloc)
+    }
+
+    fn from_ocamlrep(_value: Value<'_>) -> Result<Self, FromError> {
+        unimplemented!()
     }
 }
 

@@ -9,8 +9,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 pub mod typing_phase;
 
-use oxidized::ast;
-use typing_defs_rust::{tast, Ty, Ty_};
+use oxidized::{ast, pos::Pos};
+use typing_defs_rust::{tast, FuncBodyAnn, SavedEnv, Ty, Ty_};
 use typing_env_rust::Env;
 
 fn dispatch_call<'a>(ast::Expr(_pos, e): &ast::Expr, env: &mut Env<'a>) -> Ty<'a> {
@@ -35,7 +35,7 @@ fn dispatch_call<'a>(ast::Expr(_pos, e): &ast::Expr, env: &mut Env<'a>) -> Ty<'a
     }
 }
 
-fn expr<'a>(ast::Expr(_pos, e): &ast::Expr, env: &mut Env<'a>) -> tast::Expr<'a> {
+fn expr<'a>(ast::Expr(pos, e): &ast::Expr, env: &mut Env<'a>) -> tast::Expr<'a> {
     let (ty, e) = match e {
         ast::Expr_::Call(x) => {
             if let (ast::CallType::Cnormal, e, [], [], None) =
@@ -43,7 +43,10 @@ fn expr<'a>(ast::Expr(_pos, e): &ast::Expr, env: &mut Env<'a>) -> tast::Expr<'a>
             {
                 let ty = dispatch_call(e, env);
                 let e = tast::Expr(
-                    env.builder().null(env.builder().mk_rnone()),
+                    (
+                        Pos::make_none(),
+                        env.builder().null(env.builder().mk_rnone()),
+                    ),
                     tast::Expr_::mk_null(),
                 );
                 (
@@ -56,7 +59,7 @@ fn expr<'a>(ast::Expr(_pos, e): &ast::Expr, env: &mut Env<'a>) -> tast::Expr<'a>
         }
         x => unimplemented!("{:#?}", x),
     };
-    ast::Expr(ty, e)
+    ast::Expr((pos.clone(), ty), e)
 }
 
 fn markup<'a>(s: &ast::Pstring, e: &Option<ast::Expr>) -> tast::Stmt_<'a> {
@@ -88,17 +91,19 @@ fn fun<'a>(f: &ast::Fun_, env: &mut Env<'a>) -> tast::Fun_<'a> {
     assert!(f.user_attributes.is_empty());
     assert!(f.file_attributes.is_empty());
 
+    let ret = tast::TypeHint(env.builder().null(env.builder().mk_rnone()), None);
+
     tast::Fun_ {
         span: f.span.clone(),
-        annotation: f.annotation,
+        annotation: SavedEnv,
         mode: f.mode,
-        ret: f.ret.clone(),
+        ret,
         name: f.name.clone(),
         tparams: vec![],
         where_constraints: f.where_constraints.clone(),
         body: tast::FuncBody {
             ast,
-            annotation: f.body.annotation,
+            annotation: FuncBodyAnn,
         },
         fun_kind: f.fun_kind,
         variadic: tast::FunVariadicity::FVnonVariadic,

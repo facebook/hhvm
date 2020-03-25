@@ -31,6 +31,15 @@ let default_derives =
     (Some "serde", "Deserialize");
   ]
 
+let additional_derives : (string option * string) list SMap.t =
+  [
+    ("typing_tyvar_occurrences::TypingTyvarOccurrences", [(None, "Default")]);
+    ("tast::SavedEnv", [(None, "Default")]);
+    ("type_parameter_env::TypeParameterEnv", [(None, "Default")]);
+    ("typing_inference_env::TypingInferenceEnv", [(None, "Default")]);
+  ]
+  |> List.fold ~init:SMap.empty ~f:(fun map (ty, x) -> SMap.add ty x map)
+
 let derive_blacklists =
   [
     (* A custom implementation of Ord for Error_ matches the sorting behavior of
@@ -48,11 +57,15 @@ let derive_blacklists =
 
 let derived_traits ty =
   let ty = sprintf "%s::%s" (curr_module_name ()) ty in
-  match SMap.find_opt ty derive_blacklists with
-  | None -> default_derives
-  | Some blacklist ->
-    List.filter default_derives ~f:(fun (_, derive) ->
-        not (List.mem blacklist derive ~equal:( = )))
+  begin
+    match SMap.find_opt ty derive_blacklists with
+    | None -> default_derives
+    | Some blacklist ->
+      List.filter default_derives ~f:(fun (_, derive) ->
+          not (List.mem blacklist derive ~equal:( = )))
+  end
+  |> List.append
+       (Option.value (SMap.find_opt ty additional_derives) ~default:[])
 
 let blacklisted_types =
   [

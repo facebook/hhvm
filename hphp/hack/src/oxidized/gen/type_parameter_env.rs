@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<22c542a71957f4f17d64a32f8b8fec42>>
+// @generated SignedSource<<f7725576265925781e7d098f7d699334>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -44,6 +44,7 @@ pub struct TparamInfo {
 #[derive(
     Clone,
     Debug,
+    Default,
     Deserialize,
     Eq,
     Hash,

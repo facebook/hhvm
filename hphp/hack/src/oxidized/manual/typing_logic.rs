@@ -1,5 +1,5 @@
 use crate::typing_defs::*;
-use ocamlrep::OcamlRep;
+use ocamlrep_derive::OcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -16,7 +16,8 @@ use serde::Serialize;
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    OcamlRep
 )]
 pub enum SubtypeProp {
     Coerce(Ty, Ty),
@@ -25,12 +26,8 @@ pub enum SubtypeProp {
     Disj(Vec<SubtypeProp>),
 }
 
-impl OcamlRep for SubtypeProp {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, _alloc: &'a A) -> ocamlrep::Value<'a> {
-        unimplemented!()
-    }
-
-    fn from_ocamlrep(_value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
-        unimplemented!()
+impl Default for SubtypeProp {
+    fn default() -> Self {
+        SubtypeProp::Disj(vec![])
     }
 }

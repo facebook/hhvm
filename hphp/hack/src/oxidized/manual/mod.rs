@@ -29,6 +29,7 @@ pub mod s_set;
 pub mod scoured_comments_impl;
 pub mod shape_map;
 pub mod tany_sentinel;
+pub mod tast_impl;
 pub mod ty_impl;
 pub mod typing_continuations;
 pub mod typing_env_return_info;

@@ -28,6 +28,7 @@ pub use manual::s_set;
 pub use manual::scoured_comments_impl;
 pub use manual::shape_map;
 pub use manual::tany_sentinel;
+pub use manual::tast_impl;
 pub use manual::ty_impl;
 pub use manual::typing_continuations;
 pub use manual::typing_env_return_info;

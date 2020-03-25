@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4233db4af03670b3828f296e1b381887>>
+// @generated SignedSource<<28602011905a4ea63f86636f48fdd5d9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -29,6 +29,7 @@ pub type TypeParamMutability = typing_defs::ParamMutability;
 #[derive(
     Clone,
     Debug,
+    Default,
     Deserialize,
     Eq,
     Hash,

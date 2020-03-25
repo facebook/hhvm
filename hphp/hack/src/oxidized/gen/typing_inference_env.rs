@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<25094f75f1963275999ffa0fb1a128f2>>
+// @generated SignedSource<<83a9e1b0dbaf1f941eb1d02ccd0f5759>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -100,6 +100,7 @@ pub type Tvenv = i_map::IMap<TyvarInfo>;
 #[derive(
     Clone,
     Debug,
+    Default,
     Deserialize,
     Eq,
     Hash,

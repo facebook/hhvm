@@ -451,13 +451,6 @@ void bump_counter_and_rethrow(bool isPsp) {
       requestMemoryExceededCounter->addValue(1);
       ServerStats::Log("request.memory_exceeded.non_psp", 1);
     }
-
-#ifdef USE_JEMALLOC
-    // Capture a pprof (C++) dump when we OOM a request
-    // TODO: (t3753133) Should dump a PHP-instrumented pprof dump here as well
-    jemalloc_pprof_dump("", false);
-#endif
-
     throw;
   } catch (const RequestOOMKilledException& e) {
     if (isPsp) {

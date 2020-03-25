@@ -219,6 +219,10 @@ void MemoryManager::refreshStatsHelperExceeded() {
   if (RuntimeOption::LogNativeStackOnOOM) {
     log_native_stack("Exceeded memory limit");
   }
+  if (m_profctx.flag) {
+    // Dump out heap profile at peak usage.
+    jemalloc_pprof_dump("", false);
+  }
 }
 
 void MemoryManager::setMemThresholdCallback(size_t threshold) {

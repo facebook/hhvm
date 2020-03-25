@@ -113,7 +113,7 @@ abstract class sockaddr_un extends sockaddr {
 }
 
 final class sockaddr_un_pathname extends sockaddr_un {
-  public function __construct(public string $pathname) {
+  public function __construct(public string $sun_path) {
     parent::__construct();
   }
 }
@@ -129,5 +129,23 @@ function getsockname(FileDescriptor $fd): sockaddr;
 
 <<__Native>>
 function socketpair(int $domain, int $type, int $protocol): varray<FileDescriptor>;
+
+<<__Native>>
+function socket(int $domain, int $type, int $protocol): FileDescriptor;
+
+<<__Native>>
+function connect(FileDescriptor $socket, sockaddr $addr): void;
+
+<<__Native>>
+function bind(FileDescriptor $socket, sockaddr $addr): void;
+
+<<__Native>>
+function listen(FileDescriptor $socket, int $backlog): void;
+
+<<__Native>>
+function accept(FileDescriptor $socket): varray<mixed> /* (FileDescriptor, SockAddr) */;
+
+<<__Native>>
+function fcntl(FileDescriptor $fd, int $cmd, mixed $arg = null): mixed;
 
 } // namespace _OS

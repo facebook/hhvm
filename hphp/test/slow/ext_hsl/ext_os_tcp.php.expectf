@@ -1,0 +1,47 @@
+Server address from getsockname():
+object(HH\Lib\_Private\_OS\sockaddr_in) (%d) {
+  ["sin_port"]=>
+  int(%d)
+  ["sin_addr"]=>
+  int(2130706433)
+  ["sa_family"]=>
+  int(2)
+}
+Client address from accept():
+object(HH\Lib\_Private\_OS\sockaddr_in) (%d) {
+  ["sin_port"]=>
+  int(%d)
+  ["sin_addr"]=>
+  int(2130706433)
+  ["sa_family"]=>
+  int(2)
+}
+Client address from getpeername():
+object(HH\Lib\_Private\_OS\sockaddr_in) (%d) {
+  ["sin_port"]=>
+  int(%d)
+  ["sin_addr"]=>
+  int(2130706433)
+  ["sa_family"]=>
+  int(2)
+}
+Client address from getsockname():
+object(HH\Lib\_Private\_OS\sockaddr_in) (%d) {
+  ["sin_port"]=>
+  int(%d)
+  ["sin_addr"]=>
+  int(2130706433)
+  ["sa_family"]=>
+  int(2)
+}
+Server address from getpeername():
+object(HH\Lib\_Private\_OS\sockaddr_in) (%d) {
+  ["sin_port"]=>
+  int(%d)
+  ["sin_addr"]=>
+  int(2130706433)
+  ["sa_family"]=>
+  int(2)
+}
+Client received: 'Hello, '
+Server received: 'world!'

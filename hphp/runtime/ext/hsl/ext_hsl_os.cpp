@@ -41,8 +41,19 @@ const StaticString
   s_HSL_sockaddr("HH\\Lib\\_Private\\_OS\\sockaddr"),
   s_HSL_sockaddr_in("HH\\Lib\\_Private\\_OS\\sockaddr_in"),
   s_HSL_sockaddr_in6("HH\\Lib\\_Private\\_OS\\sockaddr_in6"),
+  s_HSL_sockaddr_un("HH\\Lib\\_Private\\_OS\\sockaddr_un"),
   s_HSL_sockaddr_un_pathname("HH\\Lib\\_Private\\_OS\\sockaddr_un_pathname"),
   s_HSL_sockaddr_un_unnamed("HH\\Lib\\_Private\\_OS\\sockaddr_un_unnamed");
+
+const Slot
+  s_sa_family_idx { 0 },
+  s_sin_port_idx { 1 },
+  s_sin_addr_idx { 2 },
+  s_sin6_port_idx { 1 },
+  s_sin6_flowinfo_idx { 2 },
+  s_sin6_addr_idx { 3 },
+  s_sin6_scope_id_idx { 4 },
+  s_sun_path_idx { 1 };
 
 Class* s_FileDescriptorClass = nullptr;
 
@@ -79,7 +90,7 @@ retry_on_eintr(TRet failureValue, TFn impl, Args... args) {
   return ret;
 }
 
-Object make_hsl_sockaddr(const sockaddr_storage& addr, socklen_t len) {
+Object hsl_sockaddr_from_native(const sockaddr_storage& addr, socklen_t len) {
   // Using `ntohs` etc instead of the more explicit `::noths`, as
   // on GNU systems it is sometimes a function, sometimes a macro,
   // depending on optimization level - and if it's a macro, `::ntohs` is
@@ -160,6 +171,106 @@ Object make_hsl_sockaddr(const sockaddr_storage& addr, socklen_t len) {
       }
       break;
   }
+}
+
+void native_sockaddr_from_hsl(const Object& object, sockaddr_storage& native, socklen_t& address_len) {
+  if (!object.instanceof(s_HSL_sockaddr)) {
+    throw_errno_exception(EINVAL, "Specified address is not a sockaddr");
+  }
+  bzero(&native, sizeof(native));
+  address_len = offsetof(struct sockaddr_storage, ss_family) + sizeof(native.ss_family);
+#ifdef __APPLE__
+  SCOPE_EXIT {
+    native.ss_len = address_len;
+  };
+#endif
+  native.ss_family = object->propRvalAtOffset(s_sa_family_idx).val().num;
+#define CHECK_SOCKADDR_TYPE(sa, af) \
+  static_assert( \
+    sizeof(sa) <= sizeof(native), \
+    #sa " must fit in allocated space" \
+  );\
+  if (!object.instanceof(s_HSL_ ## sa)) { \
+    throw_errno_exception( \
+      EINVAL, \
+      folly::sformat( \
+        "Esapected an instance of type {} for {}, got type {}", \
+        (s_HSL_ ## sa).c_str(), \
+        #af, \
+        object->getClassName().c_str() \
+      ) \
+    ); \
+  }
+
+  switch (native.ss_family) {
+    case AF_UNIX:
+      {
+        CHECK_SOCKADDR_TYPE(sockaddr_un, AF_UNIX);
+        auto detail = reinterpret_cast<sockaddr_un*>(&native);
+        const auto offset = offsetof(struct sockaddr_un, sun_path);
+        if (object.instanceof(s_HSL_sockaddr_un_unnamed)) {
+#if defined(__linux__)
+          address_len = sizeof(sa_family_t);
+          return;
+#elif defined(__APPLE__)
+          // Match what MacOS gives us for socketpair()
+          address_len = 16;
+          return;
+#else
+          static_assert(false, "Unsupported platform");
+#endif
+        }
+        assertx(object.instanceof(s_HSL_sockaddr_un_pathname));
+
+        auto path = object->propRvalAtOffset(s_sun_path_idx).val().pstr;
+        if (path->empty()) {
+          throw_errno_exception(
+            EINVAL,
+            "sockaddr_un can not have an empty pathname"
+          );
+        }
+        if (path->size() > sizeof(detail->sun_path)) {
+          throw_errno_exception(
+            ENAMETOOLONG,
+            "Path is too long for sockaddr_un"
+          );
+        }
+        memcpy(detail->sun_path, path->data(), path->size());
+        address_len = path->size() + offset;
+        return;
+      }
+    case AF_INET:
+      {
+        CHECK_SOCKADDR_TYPE(sockaddr_in, AF_INET);
+        auto detail = reinterpret_cast<sockaddr_in*>(&native);
+        address_len = sizeof(*detail);
+        detail->sin_port = htons(object->propRvalAtOffset(s_sin_port_idx).val().num);
+        detail->sin_addr.s_addr = htonl(object->propRvalAtOffset(s_sin_addr_idx).val().num);
+        return;
+      }
+    case AF_INET6:
+      {
+        CHECK_SOCKADDR_TYPE(sockaddr_in6, AF_INET6);
+        const auto addr_str = object->propRvalAtOffset(s_sin6_addr_idx).val().pstr;
+        const auto in6_addr_len = sizeof(struct in6_addr);
+        if (addr_str->size() != in6_addr_len) {
+          throw_errno_exception(
+            EINVAL,
+            folly::sformat("sockaddr_in6 address must be {} bytes long", in6_addr_len)
+          );
+        }
+        auto detail = reinterpret_cast<sockaddr_in6*>(&native);
+        address_len = sizeof(*detail);
+        detail->sin6_port = htons(object->propRvalAtOffset(s_sin6_port_idx).val().num);
+        detail->sin6_flowinfo = htonl(object->propRvalAtOffset(s_sin6_flowinfo_idx).val().num);
+        detail->sin6_scope_id = htonl(object->propRvalAtOffset(s_sin6_scope_id_idx).val().num);
+        memcpy(detail->sin6_addr.s6_addr, addr_str->data(), in6_addr_len);
+        return;
+      }
+    default:
+      throw_errno_exception(EAFNOSUPPORT, "Socket address family not supported by HHVM");
+  }
+#undef CHECK_SOCKADDR_TYPE
 }
 
 } // namespace
@@ -301,7 +412,7 @@ Object HHVM_FUNCTION(HSL_os_getpeername, const Object& fd_wrapper) {
   sockaddr_storage addr;
   socklen_t addrlen = sizeof(addr);
   throw_errno_if_minus_one(retry_on_eintr(-1, ::getpeername, fd, reinterpret_cast<sockaddr*>(&addr), &addrlen));
-  return make_hsl_sockaddr(addr, addrlen);
+  return hsl_sockaddr_from_native(addr, addrlen);
 }
 
 Object HHVM_FUNCTION(HSL_os_getsockname, const Object& fd_wrapper) {
@@ -309,21 +420,176 @@ Object HHVM_FUNCTION(HSL_os_getsockname, const Object& fd_wrapper) {
   sockaddr_storage addr;
   socklen_t addrlen = sizeof(addr);
   throw_errno_if_minus_one(retry_on_eintr(-1, ::getsockname, fd, reinterpret_cast<sockaddr*>(&addr), &addrlen));
-  return make_hsl_sockaddr(addr, addrlen);
+  return hsl_sockaddr_from_native(addr, addrlen);
 }
 
 Array HHVM_FUNCTION(HSL_os_socketpair, int64_t domain, int64_t type, int64_t protocol) {
   if (domain != AF_UNIX) {
     // True on Linux; claim true everywhere to avoid worrying about portability,
     // or permissions with different sockets
-    throw_errno_exception(EOPNOTSUPP, "`socketpair` only supports AF_UNIX");
+    throw_errno_exception(EAFNOSUPPORT, "`socketpair` only supports AF_UNIX");
   }
   int fds[2];
-  throw_errno_if_minus_one(retry_on_eintr(-1, ::socketpair, (int) domain, (int) type, (int) protocol, fds));
+  throw_errno_if_minus_one(retry_on_eintr(-1, ::socketpair, domain, type, protocol, fds));
   return make_varray(
     HSLFileDescriptor::newInstance(fds[0]),
     HSLFileDescriptor::newInstance(fds[1])
   );
+}
+
+CLISrvResult<FdData, int> CLI_CLIENT_HANDLER(HSL_os_socket, int64_t domain, int64_t type, int64_t protocol) {
+  auto fd = retry_on_eintr(-1, ::socket, domain, type, protocol);
+  if (fd == -1) {
+    return { CLIError {}, errno };
+  }
+  return { CLISuccess {}, FdData { fd } };
+}
+
+Object HHVM_FUNCTION(HSL_os_socket, int64_t domain, int64_t type, int64_t protocol) {
+  // Use CLI server as:
+  // - some operations are/used to be privileged (e.g. raw sockets)
+  // - linux allows setting some socket options via type, which may be privileged
+  // ... so do the syscall on the client
+  int fd = hsl_cli_unwrap(INVOKE_ON_CLI_CLIENT(
+    HSL_os_socket,
+    domain,
+    type,
+    protocol
+  )).fd;
+  assertx(fd >= 0);
+  return HSLFileDescriptor::newInstance(fd);
+}
+
+#ifdef __APPLE__
+#define EINVAL_ON_BAD_SOCKADDR_LEN(ss, sslen) { \
+  if (sslen > sizeof(sockaddr_storage) || sslen < 0) { \
+    return { CLIError {}, EINVAL }; \
+  } \
+  if (sslen != ss.ss_len) { \
+    return { CLIError {}, EINVAL }; \
+  } \
+}
+#else // ifdef __APPLE__
+#define EINVAL_ON_BAD_SOCKADDR_LEN(ss, sslen) { \
+  if (sslen > sizeof(sockaddr_storage) || sslen < 0) { \
+    return { CLIError {}, EINVAL }; \
+  } \
+}
+#endif // ifdef __APPLE__
+
+#define IMPL(fun) \
+CLISrvResult<int, int> CLI_CLIENT_HANDLER(HSL_os_## fun, \
+                                          FdData fd, \
+                                          sockaddr_storage ss, \
+                                          int64_t ss_len) { \
+  EINVAL_ON_BAD_SOCKADDR_LEN(ss, ss_len); \
+  if (retry_on_eintr(-1, ::fun, fd.fd, reinterpret_cast<const sockaddr*>(&ss), ss_len) == -1) { \
+    return { CLIError {}, errno }; \
+  } \
+  return { CLISuccess {}, 0 }; \
+} \
+\
+void HHVM_FUNCTION(HSL_os_ ## fun, const Object& fd, const Object& hsl_sockaddr) { \
+  sockaddr_storage ss; \
+  socklen_t ss_len; \
+  native_sockaddr_from_hsl(hsl_sockaddr, ss, ss_len); \
+\
+  hsl_cli_unwrap(INVOKE_ON_CLI_CLIENT( \
+    HSL_os_ ## fun, \
+    FdData { HSLFileDescriptor::fd(fd) }, \
+    ss, \
+    static_cast<int64_t>(ss_len) \
+  )); \
+}
+
+IMPL(connect);
+IMPL(bind);
+
+#undef IMPL
+#undef EINVAL_ON_BAD_SOCKADDR_LEN
+
+CLISrvResult<int, int> CLI_CLIENT_HANDLER(HSL_os_listen, FdData fd,
+                                          int64_t backlog) {
+  if (retry_on_eintr(-1, ::listen, fd.fd, backlog) == -1 ) {
+    return { CLIError {}, errno };
+  }
+  return { CLISuccess {}, 0 };
+}
+
+void HHVM_FUNCTION(HSL_os_listen, const Object& fd, int64_t backlog) {
+  hsl_cli_unwrap(INVOKE_ON_CLI_CLIENT(
+    HSL_os_listen,
+    FdData { HSLFileDescriptor::fd(fd) },
+    backlog
+  ));
+}
+
+
+Array HHVM_FUNCTION(HSL_os_accept, const Object& hsl_server_fd) {
+  auto server_fd  = HSLFileDescriptor::fd(hsl_server_fd);
+  sockaddr_storage ss;
+  socklen_t ss_len = sizeof(ss);
+  const auto fd = retry_on_eintr(
+    -1,
+    ::accept,
+    server_fd,
+    reinterpret_cast<sockaddr*>(&ss),
+    &ss_len
+  );
+  throw_errno_if_minus_one(fd);
+  return make_varray(
+    HSLFileDescriptor::newInstance(fd),
+    hsl_sockaddr_from_native(ss, ss_len)
+  );
+}
+
+CLISrvResult<int, int> CLI_CLIENT_HANDLER(HSL_os_fcntl_intarg, FdData fd, int64_t cmd, int64_t arg) {
+  const int result = retry_on_eintr(-1, ::fcntl, fd.fd, cmd, arg);
+  if (result == -1) {
+    return { CLIError {}, errno };
+  }
+  return { CLISuccess {}, result };
+}
+
+// For now, always returns int, but F_DUPFD or F_GETPATH (MacOS)
+// may be implemented later.
+Variant HHVM_FUNCTION(HSL_os_fcntl,
+                      const Object& fd_wrapper,
+                      int64_t cmd,
+                      const Variant& arg) {
+  const auto fd = HSLFileDescriptor::fd(fd_wrapper);
+  switch (cmd) {
+    // no arg, getters (no CLI server)
+    case F_GETFD:
+    case F_GETFL:
+    case F_GETOWN:
+      {
+        auto result = retry_on_eintr(-1, ::fcntl, fd, cmd);
+        throw_errno_if_minus_one(result);
+        return result;
+      }
+    // int arg: may have security implications
+    case F_SETFD:
+    case F_SETFL:
+    case F_SETOWN:
+      if (!arg.isInteger()) {
+        throw_errno_exception(
+          EINVAL,
+          "Argument for specific fcntl operation must be an int"
+        );
+      }
+      return hsl_cli_unwrap(INVOKE_ON_CLI_CLIENT(
+        HSL_os_fcntl_intarg,
+        FdData { fd },
+        cmd,
+        arg.toInt64()
+      ));
+    default:
+      throw_errno_exception(
+        ENOTSUP,
+        "HHVM does not currently support the specified fcntl command"
+      );
+  }
 }
 
 Object HHVM_FUNCTION(HSL_os_poll_async,
@@ -391,6 +657,92 @@ struct OSExtension final : Extension {
     HHVM_NAMED_ME(HH\\Lib\\OS\\FileDescriptor, __debugInfo, HHVM_MN(HSLFileDescriptor, __debugInfo));
 
     // The preprocessor doesn't like "\" immediately before a ##
+#define E(name) HHVM_RC_INT(HH\\Lib\\_Private\\_OS\\E##name, E##name)
+    E(2BIG);
+    E(ACCES);
+    E(ADDRINUSE);
+    E(ADDRNOTAVAIL);
+    E(AFNOSUPPORT);
+    E(AGAIN);
+    E(ALREADY);
+    E(BADF);
+    E(BADMSG);
+    E(BUSY);
+    E(CANCELED);
+    E(CHILD);
+    E(CONNABORTED);
+    E(CONNREFUSED);
+    E(CONNRESET);
+    E(DEADLK);
+    E(DESTADDRREQ);
+    E(DOM);
+    E(DQUOT);
+    E(EXIST);
+    E(FAULT);
+    E(FBIG);
+    E(HOSTDOWN);
+    E(HOSTUNREACH);
+    E(IDRM);
+    E(ILSEQ);
+    E(INPROGRESS);
+    E(INTR);
+    E(INVAL);
+    E(IO);
+    E(ISCONN);
+    E(ISDIR);
+    E(LOOP);
+    E(MFILE);
+    E(MLINK);
+    E(MSGSIZE);
+    E(MULTIHOP);
+    E(NAMETOOLONG);
+    E(NETDOWN);
+    E(NETRESET);
+    E(NETUNREACH);
+    E(NFILE);
+    E(NOBUFS);
+    E(NODATA);
+    E(NODEV);
+    E(NOENT);
+    E(NOEXEC);
+    E(NOLCK);
+    E(NOLINK);
+    E(NOMEM);
+    E(NOMSG);
+    E(NOPROTOOPT);
+    E(NOSPC);
+    E(NOSR);
+    E(NOSTR);
+    E(NOSYS);
+    E(NOTBLK);
+    E(NOTCONN);
+    E(NOTDIR);
+    E(NOTEMPTY);
+    E(NOTSOCK);
+    E(NOTSUP);
+    E(NOTTY);
+    E(NXIO);
+    E(OPNOTSUPP);
+    E(OVERFLOW);
+    E(PERM);
+    E(PFNOSUPPORT);
+    E(PIPE);
+    E(PROTO);
+    E(PROTONOSUPPORT);
+    E(PROTOTYPE);
+    E(RANGE);
+    E(ROFS);
+    E(SHUTDOWN);
+    E(SOCKTNOSUPPORT);
+    E(SPIPE);
+    E(SRCH);
+    E(STALE);
+    E(TIME);
+    E(TIMEDOUT);
+    E(TXTBSY);
+    E(USERS);
+    E(XDEV);
+#undef E
 #define O_(name) HHVM_RC_INT(HH\\Lib\\_Private\\_OS\\O_##name, O_##name)
     O_(RDONLY);
     O_(WRONLY);
@@ -433,6 +785,28 @@ struct OSExtension final : Extension {
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\getpeername, HSL_os_getpeername);
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\getsockname, HSL_os_getsockname);
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\socketpair, HSL_os_socketpair);
+
+    HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\socket, HSL_os_socket);
+    CLI_REGISTER_HANDLER(HSL_os_connect);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\connect, HSL_os_connect);
+    CLI_REGISTER_HANDLER(HSL_os_bind);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\bind, HSL_os_bind);
+    CLI_REGISTER_HANDLER(HSL_os_listen);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\listen, HSL_os_listen);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\accept, HSL_os_accept);
+
+    CLI_REGISTER_HANDLER(HSL_os_fcntl_intarg);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\fcntl, HSL_os_fcntl);
+
+#define F_(name) HHVM_RC_INT(HH\\Lib\\_Private\\_OS\\F_##name, F_##name)
+    F_(GETFD);
+    F_(GETFL);
+    F_(GETOWN);
+    F_(SETFD);
+    F_(SETFL);
+    F_(SETOWN);
+#undef F_
+    HHVM_RC_INT(HH\\Lib\\_Private\\_OS\\FD_CLOEXEC, FD_CLOEXEC);
 
     loadSystemlib();
     s_FileDescriptorClass = Unit::lookupClass(s_FQHSLFileDescriptor.get());

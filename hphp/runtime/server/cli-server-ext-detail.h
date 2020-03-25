@@ -41,12 +41,14 @@ protected:
   void read(int64_t& arg);
   void read(std::string& arg);
   void read(FdData& arg);
+  void read(sockaddr_storage& arg);
 
   void write(bool arg);
   void write(int arg);
   void write(int64_t arg);
   void write(const std::string& arg);
   void write(FdData arg);
+  void write(const sockaddr_storage& arg);
 
   template <class T, class... Ts>
   void writeMulti(T first, Ts... rest) {

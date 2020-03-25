@@ -35,6 +35,7 @@ enum CLISrvArgType {
   CLISRV_ARG_INT64,
   CLISRV_ARG_STRING,
   CLISRV_ARG_FD,
+  CLISRV_ARG_SOCKADDR,
 };
 
 } // namespace
@@ -96,8 +97,12 @@ void CLIServerExtensionInterface::assertCount(int count) {
   }
 }
 
-// writers
+void CLIServerExtensionInterface::read(sockaddr_storage& arg) {
+  CHECK_TYPE(CLISRV_ARG_SOCKADDR);
+  cli_read(afdt_fd, arg);
+}
 
+// writers
 
 void CLIServerExtensionInterface::write(bool arg) {
   cli_write(afdt_fd, CLISRV_ARG_BOOL, arg);
@@ -120,6 +125,13 @@ void CLIServerExtensionInterface::write(int64_t arg) {
   cli_write(afdt_fd, CLISRV_ARG_INT64, arg);
 }
 
+void CLIServerExtensionInterface::write(const sockaddr_storage& arg) {
+  cli_write(
+    afdt_fd,
+    CLISRV_ARG_SOCKADDR,
+    arg
+  );
+}
 
 // CLIClientInterface
 

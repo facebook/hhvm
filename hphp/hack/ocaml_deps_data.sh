@@ -1,6 +1,8 @@
 #!/bin/bash
 export HACK_OCAML_VERSION=4.07.1
 export HACK_OPAM_DEPS=(
+  base.v0.11.1
+  core.v0.11.3
   core_kernel.v0.11.1
   dtoa.0.3.1
   dune.1.11.0

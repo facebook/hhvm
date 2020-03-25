@@ -15,4 +15,8 @@
  *)
 external hh_check_main : unit -> unit = "hh_check_main"
 
-let () = hh_check_main ()
+let () =
+  let () =
+    Callback.register "print_tast_for_rust" Typing_ast_print.print_tast_for_rust
+  in
+  hh_check_main ()

@@ -1118,28 +1118,9 @@ let compute_tasts_expand_types ctx ~verbosity files_info interesting_files =
   let tasts = Relative_path.Map.map tasts (Tast_expand.expand_program ctx) in
   (errors, tasts, gi_solved)
 
-let print_tasts tasts tcopt =
-  let dummy_filename = Relative_path.default in
-  let env = Typing_env.empty tcopt dummy_filename ~droot:None in
-  let print_pos_and_ty (pos, ty) =
-    Format.asprintf "(%a, %s)" Pos.pp pos (Typing_print.full_strip_ns env ty)
-  in
-  let pp_fb fmt fb =
-    let s =
-      match fb with
-      | Tast.HasUnsafeBlocks -> "Has unsafe blocks"
-      | Tast.NoUnsafeBlocks -> "No unsafe blocks"
-    in
-    Format.pp_print_string fmt s
-  in
-  let pp_en fmt _ = Format.pp_print_string fmt "()" in
-  let pp_ex fmt ex = Format.pp_print_string fmt (print_pos_and_ty ex) in
-  let pp_hi fmt ty =
-    Format.asprintf "(%s)" (Typing_print.full_strip_ns env ty)
-    |> Format.pp_print_string fmt
-  in
-  Relative_path.Map.iter tasts (fun _k (tast : Tast.program) ->
-      Printf.printf "%s\n" (Aast.show_program pp_ex pp_fb pp_en pp_hi tast))
+let print_tasts tasts ctx =
+  let print_tast = Typing_ast_print.print_tast ctx in
+  Relative_path.Map.iter tasts (fun _k (tast : Tast.program) -> print_tast tast)
 
 let typecheck_tasts tasts tcopt (filename : Relative_path.t) =
   let env = Typing_env.empty tcopt filename ~droot:None in

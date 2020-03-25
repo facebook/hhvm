@@ -11,9 +11,11 @@ path = "../../typing_check_service_rust.rs"
 [dependencies]
 aast_parser = { path = "../../../parser/cargo/aast_parser" }
 ocamlrep = { path = "../../../ocamlrep" }
+ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
 oxidized = { path = "../../../oxidized" }
 parser_core_types = { path = "../../../parser/cargo/core_types" }
 stack_limit = { path = "../../../utils/stack_limit" }
+typing_ast_print_rust = { path = "../typing_ast_print_rust" }
 typing_defs_rust = { path = "../typing_defs_rust" }
 typing_env_rust = { path = "../typing_env_rust" }
 typing_rust = { path = "../typing_rust" }
@@ -21,3 +23,4 @@ anyhow = "1.0"
 bitflags = "1.2"
 bumpalo = { version = "3.1.2", features = ["collections"] }
 itertools = "0.8"
+ocaml = "0.8"

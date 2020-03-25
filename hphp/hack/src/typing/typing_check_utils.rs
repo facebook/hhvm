@@ -9,9 +9,10 @@ use aast_parser::{
 use anyhow;
 use itertools::{Either, Either::*};
 use ocamlrep::rc::RcOc;
-use oxidized::{ast as Tast, parser_options::ParserOptions, pos::Pos, relative_path::RelativePath};
+use oxidized::{ast, parser_options::ParserOptions, pos::Pos, relative_path::RelativePath};
 use parser_core_types::{indexed_source_text::IndexedSourceText, source_text::SourceText};
 use stack_limit::StackLimit;
+use typing_ast_print_rust as typing_ast_print;
 use typing_env_rust::{Env, Genv};
 use typing_rust as typing;
 
@@ -42,7 +43,7 @@ pub fn from_text(genv: Genv, stack_limit: &StackLimit, text: &[u8]) -> anyhow::R
             // TODO(hrust): fetch proper pos here
             let mut env = Env::new(genv.builder.pos_none(), genv);
             let tast = typing::program(ast, &mut env);
-            println!("{:#?}", tast);
+            typing_ast_print::print(&tast);
             ()
         }
         Either::Left((_pos, _msg, _is_runtime_error)) => (),
@@ -60,7 +61,7 @@ fn parse_file(
     stack_limit: &StackLimit,
     filepath: &RelativePath,
     text: &[u8],
-) -> Either<(Pos, String, bool), (Tast::Program, bool)> {
+) -> Either<(Pos, String, bool), (ast::Program, bool)> {
     let mut aast_env = AastEnv::default();
     aast_env.codegen = false;
     aast_env.keep_errors = true;

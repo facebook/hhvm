@@ -191,7 +191,9 @@ void runUserProfilerOnFunctionEnter(const ActRec* ar, bool isResume) {
   VMRegAnchor _;
   ExecutingSetprofileCallbackGuard guard;
 
-  auto frameinfo = make_darray(s_args, hhvm_get_frame_args(ar, 0));
+  auto frameinfo = make_darray_tagged(ARRPROV_HERE(),
+                                      s_args,
+                                      hhvm_get_frame_args(ar, 0));
   addFramePointers(ar, frameinfo, true);
 
   const auto params = make_vec_array(
@@ -214,9 +216,13 @@ void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
 
   Array frameinfo;
   if (retval) {
-    frameinfo = make_darray(s_return, tvAsCVarRef(retval));
+    frameinfo = make_darray_tagged(ARRPROV_HERE(),
+                                   s_return,
+                                   tvAsCVarRef(retval));
   } else if (exception) {
-    frameinfo = make_darray(s_exception, Variant{exception});
+    frameinfo = make_darray_tagged(ARRPROV_HERE(),
+                                   s_exception,
+                                   Variant{exception});
   }
   addFramePointers(ar, frameinfo, false);
 

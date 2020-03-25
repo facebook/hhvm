@@ -947,9 +947,8 @@ Array make_vec_array(Vals&&... vals) {
 
 template<class... Vals>
 Array make_vec_array_tagged(arrprov::Tag tag, Vals&&... vals) {
-  ARRPROV_USE_RUNTIME_LOCATION();
+  arrprov::TagOverride to{tag};
   auto ret = make_vec_array(std::forward<Vals>(vals)...);
-  arrprov::setTag<arrprov::Mode::Emplace>(ret.get(), tag);
   return ret;
 }
 
@@ -990,6 +989,13 @@ Array make_darray(KVPairs&&... kvpairs) {
   DArrayInit init(sizeof...(kvpairs) / 2);
   make_array_detail::darray_impl(init, std::forward<KVPairs>(kvpairs)...);
   return init.toArray();
+}
+
+template<class... KVPairs>
+Array make_darray_tagged(arrprov::Tag tag, KVPairs&&... kvpairs) {
+  arrprov::TagOverride to{tag};
+  auto ret = make_darray(std::forward<KVPairs>(kvpairs)...);
+  return ret;
 }
 
 /*

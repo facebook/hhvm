@@ -172,6 +172,7 @@ ensure that the callee frame is visited by the unwinder.
 #include "hphp/runtime/vm/jit/pass-tracer.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/timer.h"
+#include "hphp/util/dataflow-worklist.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP { namespace jit {
@@ -848,14 +849,14 @@ bool process(OptimizeContext& ctx, const IdomVector& idoms, Block* block) {
   }
 
   // No dominators of the block had a usable FP.  We have to create a phi.
-  bool predsProcessed = true;
-  block->forEachPred([&] (Block* pred) {
-    // We requeue this block if a pred is not processed yet.
-    if (!ctx.fpMap.count(pred)) {
-      predsProcessed = false;
-    }
-  });
-  if (!predsProcessed) return true;
+  if (debug) {
+    block->forEachPred([&] (Block* pred) {
+      // We queue blocks in RPO order.  If a pred is not processed yet something
+      // is wrong.  Perhaps a block representing the head of a loop is not
+      // dominated by a single FP def.
+      assertx(ctx.fpMap.count(pred));
+    });
+  }
 
   // Multiple preds define different FPs which will require a DefLabel to phi
   // them in block
@@ -1169,34 +1170,36 @@ bool optimize(InlineAnalysis& env, IRInstruction* inlineReturn, bool& reflow) {
     return false;
   }
 
+  // We use a dataflow queue based on block RPO id to schedule updating the FP
+  // uses.  We do this to ensure predecessors of a block are processed before
+  // the block itself.  This makes it easy to handle cases where PHIs of FPs
+  // are necessary (we can simply phi whatever FPs were used in the
+  // predecessors together).  Furthermore we can identify badly formed input
+  // easily when there is no dominating block with an FP available for use, and
+  // one of the predecessors has not already been adjusted.
+  auto const rpoBlocks = rpoSortCfg(*env.unit);
+  auto const rpoIDs = numberBlocks(*env.unit, rpoBlocks);
+  dataflow_worklist<uint32_t> incompleteQ(rpoBlocks.size());
+
   // Update FP's in all blocks reachable from the exit heads
   auto heads = findExitHeads(ctx, env.exitBlocks[fp]);
-  std::deque<Block*> workQ;
   for (auto h : heads) {
     // We won't need to create more DefInlineFP's after this, and if they're
     // completely unused in any of these traces DCE will clean it up.
     if (insertDefInlineFP(env, ctx, h)) {
       h->forEachSucc([&] (Block* succ) {
-        workQ.push_back(succ);
+        incompleteQ.push(rpoIDs[succ]);
       });
     }
   }
 
-  auto const blocks = rpoSortCfg(*env.unit);
-  auto const rpoIDs = numberBlocks(*env.unit, blocks);
-  auto const idoms = findDominators(*env.unit, blocks, rpoIDs);
-  while (!workQ.empty()) {
-    auto block = workQ.front();
-    workQ.pop_front();
+  auto const idoms = findDominators(*env.unit, rpoBlocks, rpoIDs);
+  while (!incompleteQ.empty()) {
+    auto block = rpoBlocks[incompleteQ.pop()];
     if (process(ctx, idoms, block)) {
-      if (ctx.fpMap.count(block)) {
-        block->forEachSucc([&] (Block* succ) {
-          workQ.push_back(succ);
-        });
-      } else {
-        // Reschedule this block, one of its preds is yet to be processed.
-        workQ.push_back(block);
-      }
+      block->forEachSucc([&] (Block* succ) {
+        incompleteQ.push(rpoIDs[succ]);
+      });
     }
   }
 

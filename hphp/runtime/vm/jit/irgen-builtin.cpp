@@ -1002,7 +1002,7 @@ SSATmp* opt_shapes_idx(IRGS& env, const ParamPrep& params) {
 }
 
 const EnumValues* getEnumValues(IRGS& env, const ParamPrep& params) {
-  if (RO::EvalLogArrayProvenance) return nullptr;
+  if (RO::EvalArrayProvenance) return nullptr;
   if (!(params.ctx && params.ctx->hasConstVal(TCls))) return nullptr;
   auto const cls = params.ctx->clsVal();
   if (!(isEnum(cls) && classHasPersistentRDS(cls))) return nullptr;

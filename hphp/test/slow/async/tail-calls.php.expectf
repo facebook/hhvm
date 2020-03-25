@@ -3,12 +3,8 @@
 Iteration 0:
 string(%d) "exception 'Exception' with message 'thrown' in %s/tail-calls.php:5
 Stack trace:
-#0 %s/tail-calls.php(67): test0()
-#1 (): main()
-#2 (): Closure$__SystemLib\enter_async_entry_point()
-#3 (): HH\Asio\join()
-#4 (): __SystemLib\enter_async_entry_point()
-#5 {main}"
+#0 %s: test0()
+%A"
 int(1)
 int(2)
 string(%d) "exception 'Exception' with message 'thrown' in %s/tail-calls.php:5
@@ -30,10 +26,8 @@ Stack trace:
 #3 %s/tail-calls.php(22): test3()
 #4 %s/tail-calls.php(26): test4()
 #5 %s/tail-calls.php(30): test5()
-#6 (): test6()
-#7 (): HH\Asio\join()
-#8 (): __SystemLib\enter_async_entry_point()
-#9 {main}"
+#6 %s: test6()
+%A"
 int(7)
 int(8)
 string(6) "caught"
@@ -45,11 +39,8 @@ int(2)
 string(%d) "exception 'Exception' with message 'thrown' in %s/tail-calls.php:5
 Stack trace:
 #0 %s/tail-calls.php(10): test0()
-#1 %s/tail-calls.php(14): test1()
-#2 (): test2()
-#3 (): HH\Asio\join()
-#4 (): __SystemLib\enter_async_entry_point()
-#5 {main}"
+#1 %s: test1()
+%A"
 int(4)
 int(5)
 string(%d) "exception 'Exception' with message 'thrown' in %s/tail-calls.php:5
@@ -59,10 +50,8 @@ Stack trace:
 #2 %s/tail-calls.php(18): test2()
 #3 %s/tail-calls.php(22): test3()
 #4 %s/tail-calls.php(26): test4()
-#5 (): test5()
-#6 (): HH\Asio\join()
-#7 (): __SystemLib\enter_async_entry_point()
-#8 {main}"
+#5 %s: test5()
+%A"
 int(7)
 int(8)
 string(%d) "exception 'Exception' with message 'thrown' in %s/tail-calls.php:5
@@ -84,11 +73,8 @@ Iteration 2:
 int(2)
 string(%d) "exception 'Exception' with message 'thrown' in %s/tail-calls.php:5
 Stack trace:
-#0 %s/tail-calls.php(10): test0()
-#1 (): test1()
-#2 (): HH\Asio\join()
-#3 (): __SystemLib\enter_async_entry_point()
-#4 {main}"
+#0 %s: test0()
+%A"
 int(4)
 int(5)
 string(%d) "exception 'Exception' with message 'thrown' in %s/tail-calls.php:5
@@ -97,10 +83,8 @@ Stack trace:
 #1 %s/tail-calls.php(14): test1()
 #2 %s/tail-calls.php(18): test2()
 #3 %s/tail-calls.php(22): test3()
-#4 (): test4()
-#5 (): HH\Asio\join()
-#6 (): __SystemLib\enter_async_entry_point()
-#7 {main}"
+#4 %s: test4()
+%A"
 int(7)
 int(8)
 string(%d) "exception 'Exception' with message 'thrown' in %s/tail-calls.php:5
@@ -112,9 +96,7 @@ Stack trace:
 #4 %s/tail-calls.php(26): test4()
 #5 %s/tail-calls.php(30): test5()
 #6 %s/tail-calls.php(34): test6()
-#7 (): test7()
-#8 (): HH\Asio\join()
-#9 (): __SystemLib\enter_async_entry_point()
-#10 {main}"
+#7 %s: test7()
+%A"
 int(10)
 int(11)

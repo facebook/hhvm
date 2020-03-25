@@ -159,3 +159,14 @@ fn main() -> anyhow::Result<()> {
     }
     Ok(())
 }
+
+#[no_mangle]
+pub extern "C" fn hh_check_main() {
+    match main() {
+        Err(e) => {
+            eprintln!("{}", e);
+            std::process::exit(1)
+        }
+        Ok(()) => (),
+    }
+}

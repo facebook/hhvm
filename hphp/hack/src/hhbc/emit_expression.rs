@@ -339,8 +339,8 @@ struct ArrayGetBaseData<T> {
     base_instrs: T,
     cls_instrs: InstrSeq,
     setup_instrs: InstrSeq,
-    base_stack_size: usize,
-    cls_stack_size: usize,
+    base_stack_size: StackIndex,
+    cls_stack_size: StackIndex,
 }
 
 /// result of emit_base
@@ -641,6 +641,23 @@ fn text_of_expr(e: &tast::Expr) -> String {
             _ => "unknown".into(),
         },
         _ => "unknown".into(),
+    }
+}
+
+fn text_of_class_id(cid: &tast::ClassId) -> String {
+    match &cid.1 {
+        tast::ClassId_::CIparent => "parent".into(),
+        tast::ClassId_::CIself => "self".into(),
+        tast::ClassId_::CIstatic => "static".into(),
+        tast::ClassId_::CIexpr(e) => text_of_expr(e),
+        tast::ClassId_::CI(ast_defs::Id(_, id)) => id.into(),
+    }
+}
+
+fn text_of_prop(prop: &tast::ClassGetExpr) -> String {
+    match prop {
+        tast::ClassGetExpr::CGstring((_, s)) => s.into(),
+        tast::ClassGetExpr::CGexpr(e) => text_of_expr(e),
     }
 }
 
@@ -2739,14 +2756,14 @@ fn emit_array_get_(
             let memberkey =
                 get_elem_member_key(e, env, cls_stack_size, elem, null_coalesce_assignment)?;
             let mut querym_n_unpopped = None;
-            let mut make_final = |total_stack_size: usize| -> InstrSeq {
+            let mut make_final = |total_stack_size: StackIndex| -> InstrSeq {
                 if no_final {
                     InstrSeq::Empty
                 } else if null_coalesce_assignment {
-                    querym_n_unpopped = Some(total_stack_size);
+                    querym_n_unpopped = Some(total_stack_size as usize);
                     InstrSeq::make_querym(0, query_op, memberkey.clone())
                 } else {
-                    InstrSeq::make_querym(total_stack_size, query_op, memberkey.clone())
+                    InstrSeq::make_querym(total_stack_size as usize, query_op, memberkey.clone())
                 }
             };
             let instr = match (base_result, local_temp_kind) {
@@ -2759,9 +2776,7 @@ fn emit_array_get_(
                         base.cls_instrs,
                         emit_pos(e, outer_pos)?,
                         base.setup_instrs,
-                        make_final(
-                            base.base_stack_size + base.cls_stack_size + (elem_stack_size as usize),
-                        ),
+                        make_final(base.base_stack_size + base.cls_stack_size + elem_stack_size),
                     ]))
                 }
                 (ArrayGetBase::Regular(base), Some(local_kind)) => {
@@ -2779,9 +2794,7 @@ fn emit_array_get_(
                                 emit_pos(e, outer_pos)?,
                                 base.setup_instrs,
                                 make_final(
-                                    base.base_stack_size
-                                        + base.cls_stack_size
-                                        + (elem_stack_size as usize),
+                                    base.base_stack_size + base.cls_stack_size + elem_stack_size,
                                 ),
                             ]),
                             None,
@@ -2823,9 +2836,7 @@ fn emit_array_get_(
                             cls_instrs,
                             emit_pos(e, outer_pos)?,
                             setup_instrs,
-                            make_final(
-                                base_stack_size + cls_stack_size + (elem_stack_size as usize),
-                            ),
+                            make_final(base_stack_size + cls_stack_size + elem_stack_size),
                         ]),
                         None,
                     ));
@@ -2862,9 +2873,7 @@ fn emit_array_get_(
                             cls_instrs,
                             emit_pos(e, outer_pos)?,
                             setup_instrs,
-                            make_final(
-                                base_stack_size + cls_stack_size + (elem_stack_size as usize),
-                            ),
+                            make_final(base_stack_size + cls_stack_size + elem_stack_size),
                         ]),
                         None,
                     ));
@@ -2940,7 +2949,7 @@ fn emit_elem(
 fn get_elem_member_key(
     e: &mut Emitter,
     env: &Env,
-    stack_index: usize,
+    stack_index: StackIndex,
     elem: Option<&tast::Expr>,
     null_coalesce_assignment: bool,
 ) -> Result<MemberKey> {
@@ -2954,7 +2963,7 @@ fn get_elem_member_key(
             // Special case for local
             E_::Lvar(x) if !is_local_this(env, &x.1) => Ok({
                 if null_coalesce_assignment {
-                    MemberKey::EC(stack_index as isize)
+                    MemberKey::EC(stack_index)
                 } else {
                     MemberKey::EL(get_local(e, env, &x.0, local_id::get_name(&x.1))?)
                 }
@@ -2987,7 +2996,7 @@ fn get_elem_member_key(
             }
             _ => {
                 // General case
-                Ok(MemberKey::EC(stack_index as isize))
+                Ok(MemberKey::EC(stack_index))
             }
         },
     }
@@ -3945,7 +3954,7 @@ pub fn emit_lval_op_nonlist(
     op: LValOp,
     expr: &tast::Expr,
     rhs_instrs: InstrSeq,
-    rhs_stack_size: usize,
+    rhs_stack_size: isize,
     null_coalesce_assignment: bool,
 ) -> Result {
     emit_lval_op_nonlist_steps(
@@ -3995,6 +4004,37 @@ fn emit_final_member_op(stack_size: usize, op: LValOp, mk: MemberKey) -> InstrSe
     }
 }
 
+fn emit_final_static_op(
+    e: &mut Emitter,
+    cid: &tast::ClassId,
+    prop: &tast::ClassGetExpr,
+    op: LValOp,
+) -> Result {
+    use LValOp as L;
+    Ok(match op {
+        L::Set => InstrSeq::make_sets(),
+        L::SetOp(op) => InstrSeq::make_setops(op),
+        L::IncDec(op) => InstrSeq::make_incdecs(op),
+        L::Unset => {
+            let pos = match prop {
+                tast::ClassGetExpr::CGstring((pos, _))
+                | tast::ClassGetExpr::CGexpr(tast::Expr(pos, _)) => pos,
+            };
+            let cid = text_of_class_id(cid);
+            let id = text_of_prop(prop);
+            emit_fatal::emit_fatal_runtime(
+                e,
+                pos,
+                format!(
+                    "Attempt to unset static property {}::{}",
+                    string_utils::strip_ns(&cid),
+                    id,
+                ),
+            )
+        }
+    })
+}
+
 pub fn emit_lval_op_nonlist_steps(
     e: &mut Emitter,
     env: &Env,
@@ -4002,7 +4042,7 @@ pub fn emit_lval_op_nonlist_steps(
     op: LValOp,
     expr: &tast::Expr,
     rhs_instrs: InstrSeq,
-    rhs_stack_size: usize,
+    rhs_stack_size: isize,
     null_coalesce_assignment: bool,
 ) -> Result<(InstrSeq, InstrSeq, InstrSeq)> {
     let f = |env: &mut Env| {
@@ -4067,7 +4107,7 @@ pub fn emit_lval_op_nonlist_steps(
                     if null_coalesce_assignment {
                         elem_instrs = InstrSeq::Empty;
                     }
-                    let base_offset = elem_stack_size + (rhs_stack_size as isize);
+                    let base_offset = elem_stack_size + rhs_stack_size;
                     let (
                         base_expr_instrs_begin,
                         base_expr_instrs_end,
@@ -4082,12 +4122,12 @@ pub fn emit_lval_op_nonlist_steps(
                         false,
                         null_coalesce_assignment,
                         base_offset,
-                        rhs_stack_size as isize,
+                        rhs_stack_size,
                     )?;
                     let mk = get_elem_member_key(
                         e,
                         env,
-                        rhs_stack_size + (cls_stack_size as usize),
+                        rhs_stack_size + cls_stack_size,
                         opt_elem_expr,
                         null_coalesce_assignment,
                     )?;
@@ -4112,8 +4152,79 @@ pub fn emit_lval_op_nonlist_steps(
                     )
                 }
             },
-            E_::ObjGet(_) => unimplemented!(),
-            E_::ClassGet(_) => unimplemented!(),
+            E_::ObjGet(x) => {
+                let (e1, e2, nullflavor) = &**x;
+                if nullflavor.eq(&ast_defs::OgNullFlavor::OGNullsafe) {
+                    return Err(emit_fatal::raise_fatal_parse(
+                        pos,
+                        "?-> is not allowed in write context",
+                    ));
+                }
+                let mode = match op {
+                    LValOp::Unset => MemberOpMode::Unset,
+                    _ => MemberOpMode::Define,
+                };
+                let prop_stack_size =
+                    emit_prop_expr(e, env, nullflavor, 0, e2, null_coalesce_assignment)?.2;
+                let base_offset = prop_stack_size + rhs_stack_size;
+                let (
+                    base_expr_instrs_begin,
+                    base_expr_instrs_end,
+                    base_setup_instrs,
+                    base_stack_size,
+                    cls_stack_size,
+                ) = emit_base(
+                    e,
+                    env,
+                    e1,
+                    mode,
+                    true,
+                    null_coalesce_assignment,
+                    base_offset,
+                    rhs_stack_size,
+                )?;
+                let (mk, mut prop_instrs, _) = emit_prop_expr(
+                    e,
+                    env,
+                    nullflavor,
+                    rhs_stack_size + cls_stack_size,
+                    e2,
+                    null_coalesce_assignment,
+                )?;
+                if null_coalesce_assignment {
+                    prop_instrs = InstrSeq::Empty;
+                }
+                let total_stack_size = prop_stack_size + base_stack_size + cls_stack_size;
+                let final_instr = emit_pos_then(
+                    e,
+                    pos,
+                    emit_final_member_op(total_stack_size as usize, op, mk),
+                )?;
+                (
+                    if null_coalesce_assignment {
+                        prop_instrs
+                    } else {
+                        InstrSeq::gather(vec![
+                            base_expr_instrs_begin,
+                            prop_instrs,
+                            base_expr_instrs_end,
+                        ])
+                    },
+                    rhs_instrs,
+                    InstrSeq::gather(vec![base_setup_instrs, final_instr]),
+                )
+            }
+            E_::ClassGet(x) => {
+                let (cid, prop) = &**x;
+                let cexpr = ClassExpr::class_id_to_class_expr(e, false, false, &env.scope, cid);
+                let final_instr_ = emit_final_static_op(e, cid, prop, op)?;
+                let final_instr = emit_pos_then(e, pos, final_instr_)?;
+                (
+                    InstrSeq::of_pair(emit_class_expr(e, env, cexpr, prop)?),
+                    rhs_instrs,
+                    final_instr,
+                )
+            }
             E_::Unop(uop) => (
                 InstrSeq::Empty,
                 rhs_instrs,
@@ -4145,6 +4256,51 @@ pub fn emit_lval_op_nonlist_steps(
         LValOp::Set | LValOp::SetOp(_) | LValOp::IncDec(_) => env.with_allows_array_append(f),
         _ => f(&mut env),
     }
+}
+
+fn emit_class_expr(
+    e: &mut Emitter,
+    env: &Env,
+    cexpr: ClassExpr,
+    prop: &tast::ClassGetExpr,
+) -> Result<(InstrSeq, InstrSeq)> {
+    let load_prop = |e: &mut Emitter| match prop {
+        tast::ClassGetExpr::CGstring((pos, id)) => emit_pos_then(
+            e,
+            pos,
+            InstrSeq::make_string(string_utils::locals::strip_dollar(id)),
+        ),
+        tast::ClassGetExpr::CGexpr(expr) => emit_expr(e, env, expr),
+    };
+    Ok(match &cexpr {
+        ClassExpr::Expr(expr)
+            if expr.1.is_braced_expr()
+                || expr.1.is_call()
+                || expr.1.is_binop()
+                || expr.1.is_class_get()
+                || expr
+                    .1
+                    .as_lvar()
+                    .map_or(false, |tast::Lid(_, id)| local_id::get_name(id) == "$this") =>
+        {
+            let cexpr_local = emit_expr(e, env, expr)?;
+            (
+                InstrSeq::Empty,
+                InstrSeq::gather(vec![
+                    cexpr_local,
+                    scope::stash_top_in_unnamed_local(e, load_prop)?,
+                    InstrSeq::make_classgetc(),
+                ]),
+            )
+        }
+        _ => {
+            let pos = match prop {
+                tast::ClassGetExpr::CGstring((pos, _))
+                | tast::ClassGetExpr::CGexpr(tast::Expr(pos, _)) => pos,
+            };
+            (load_prop(e)?, emit_load_class_ref(e, env, pos, cexpr)?)
+        }
+    })
 }
 
 pub fn fixup_type_arg<'a>(

@@ -171,6 +171,10 @@ impl InstrSeq {
         }
     }
 
+    pub fn of_pair((i1, i2): (Self, Self)) -> Self {
+        Self::gather(vec![i1, i2])
+    }
+
     pub fn optional(pred: bool, instrs: Vec<Self>) -> Self {
         if pred {
             Self::gather(instrs)
@@ -556,12 +560,20 @@ impl InstrSeq {
         Self::make_instr(Instruct::IMutator(InstructMutator::IncDecG(op)))
     }
 
+    pub fn make_incdecs(op: IncdecOp) -> Self {
+        Self::make_instr(Instruct::IMutator(InstructMutator::IncDecS(op)))
+    }
+
     pub fn make_setopg(op: EqOp) -> Self {
         Self::make_instr(Instruct::IMutator(InstructMutator::SetOpG(op)))
     }
 
     pub fn make_setopl(local: local::Type, op: EqOp) -> Self {
         Self::make_instr(Instruct::IMutator(InstructMutator::SetOpL(local, op)))
+    }
+
+    pub fn make_setops(op: EqOp) -> Self {
+        Self::make_instr(Instruct::IMutator(InstructMutator::SetOpS(op)))
     }
 
     pub fn make_issetl(local: local::Type) -> Self {

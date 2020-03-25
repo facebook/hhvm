@@ -63,6 +63,18 @@ pub fn is_xhp(name: &str) -> bool {
     name.chars().next().map_or(false, |c| c == ':')
 }
 
+pub fn clean(s: &str) -> &str {
+    if is_xhp(s) {
+        strip_colon(s)
+    } else {
+        s
+    }
+}
+
+fn strip_colon(s: &str) -> &str {
+    s.trim_start_matches(":")
+}
+
 fn ignore_id(name: &str) -> bool {
     name.starts_with("Closure$")
 }

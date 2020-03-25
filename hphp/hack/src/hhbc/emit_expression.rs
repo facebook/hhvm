@@ -424,7 +424,9 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
                 .0),
             }
         }
-        Expr_::ObjGet(e) => emit_obj_get(env, pos, QueryOp::CGet, e),
+        Expr_::ObjGet(e) => {
+            Ok(emit_obj_get(emitter, env, pos, QueryOp::CGet, &e.0, &e.1, &e.2, false)?.0)
+        }
         Expr_::Call(c) => emit_call_expr(emitter, env, pos, None, c),
         Expr_::New(e) => emit_new(emitter, env, pos, e),
         Expr_::Record(e) => emit_record(env, pos, e),
@@ -2494,12 +2496,170 @@ fn emit_new(
 }
 
 fn emit_obj_get(
+    e: &mut Emitter,
     env: &Env,
     pos: &Pos,
     query_op: QueryOp,
-    (expr, prop, nullflavor): &(tast::Expr, tast::Expr, ast_defs::OgNullFlavor),
+    expr: &tast::Expr,
+    prop: &tast::Expr,
+    nullflavor: &ast_defs::OgNullFlavor,
+    null_coalesce_assignment: bool,
+) -> Result<(InstrSeq, Option<StackIndex>)> {
+    if let Some(tast::Lid(pos, id)) = expr.1.as_lvar() {
+        if local_id::get_name(&id) == special_idents::THIS
+            && nullflavor.eq(&ast_defs::OgNullFlavor::OGNullsafe)
+        {
+            return Err(emit_fatal::raise_fatal_parse(
+                pos,
+                "?-> is not allowed with $this",
+            ));
+        }
+    }
+    if let Some(ast_defs::Id(_, s)) = prop.1.as_id() {
+        if string_utils::is_xhp(s) {
+            return Ok((emit_xhp_obj_get(e, env, pos, &expr, s, nullflavor)?, None));
+        }
+    }
+    let mode = if null_coalesce_assignment {
+        MemberOpMode::Warn
+    } else {
+        get_querym_op_mode(&query_op)
+    };
+    let prop_stack_size = emit_prop_expr(e, env, nullflavor, 0, prop, null_coalesce_assignment)?.2;
+    let (
+        base_expr_instrs_begin,
+        base_expr_instrs_end,
+        base_setup_instrs,
+        base_stack_size,
+        cls_stack_size,
+    ) = emit_base(
+        e,
+        env,
+        expr,
+        mode,
+        true,
+        null_coalesce_assignment,
+        prop_stack_size,
+        0,
+    )?;
+    let (mk, prop_instrs, _) = emit_prop_expr(
+        e,
+        env,
+        nullflavor,
+        cls_stack_size,
+        prop,
+        null_coalesce_assignment,
+    )?;
+    let total_stack_size = prop_stack_size + base_stack_size + cls_stack_size;
+    let num_params = if null_coalesce_assignment {
+        0
+    } else {
+        total_stack_size as usize
+    };
+    let final_instr = InstrSeq::make_querym(num_params, query_op, mk);
+    let querym_n_unpopped = if null_coalesce_assignment {
+        Some(total_stack_size)
+    } else {
+        None
+    };
+    let instr = InstrSeq::gather(vec![
+        base_expr_instrs_begin,
+        prop_instrs,
+        base_expr_instrs_end,
+        emit_pos(e, pos)?,
+        base_setup_instrs,
+        final_instr,
+    ]);
+    Ok((instr, querym_n_unpopped))
+}
+
+// Get the member key for a property, and return any instructions and
+// the size of the stack in the case that the property cannot be
+// placed inline in the instruction.
+fn emit_prop_expr(
+    e: &mut Emitter,
+    env: &Env,
+    nullflavor: &ast_defs::OgNullFlavor,
+    stack_index: StackIndex,
+    prop: &tast::Expr,
+    null_coalesce_assignment: bool,
+) -> Result<(MemberKey, InstrSeq, StackIndex)> {
+    let mk = match &prop.1 {
+        tast::Expr_::Id(id) => {
+            let ast_defs::Id(pos, name) = &**id;
+            if name.starts_with("$") {
+                MemberKey::PL(get_local(e, env, pos, name)?)
+            } else {
+                // Special case for known property name
+
+                // TODO(hrust) enable `let pid = prop::Type::from_ast_name(name);`,
+                // `from_ast_name` should be able to accpet Cow<str>
+                let pid: prop::Type = string_utils::strip_global_ns(&name).to_string().into();
+                match nullflavor {
+                    ast_defs::OgNullFlavor::OGNullthrows => MemberKey::PT(pid),
+                    ast_defs::OgNullFlavor::OGNullsafe => MemberKey::QT(pid),
+                }
+            }
+        }
+        // Special case for known property name
+        tast::Expr_::String(name) => {
+            // TODO(hrust) enable `let pid = prop::Type::from_ast_name(name);`,
+            // `from_ast_name` should be able to accpet Cow<str>
+            let pid: prop::Type = string_utils::strip_global_ns(&name).to_string().into();
+            match nullflavor {
+                ast_defs::OgNullFlavor::OGNullthrows => MemberKey::PT(pid),
+                ast_defs::OgNullFlavor::OGNullsafe => MemberKey::QT(pid),
+            }
+        }
+        tast::Expr_::Lvar(lid) if !(is_local_this(env, &lid.1)) => {
+            MemberKey::PL(get_local(e, env, &lid.0, local_id::get_name(&lid.1))?)
+        }
+        _ => {
+            // General case
+            MemberKey::PC(stack_index)
+        }
+    };
+    // For nullsafe access, insist that property is known
+    Ok(match mk {
+        MemberKey::PL(_) | MemberKey::PC(_)
+            if nullflavor.eq(&ast_defs::OgNullFlavor::OGNullsafe) =>
+        {
+            return Err(emit_fatal::raise_fatal_parse(
+                &prop.0,
+                "?-> can only be used with scalar property names",
+            ))
+        }
+        MemberKey::PC(_) => (mk, emit_expr(e, env, prop)?, 1),
+        MemberKey::PL(local) if null_coalesce_assignment => {
+            (MemberKey::PC(stack_index), InstrSeq::make_cgetl(local), 1)
+        }
+        _ => (mk, InstrSeq::Empty, 0),
+    })
+}
+
+fn emit_xhp_obj_get(
+    e: &mut Emitter,
+    env: &Env,
+    pos: &Pos,
+    expr: &tast::Expr,
+    s: &str,
+    nullflavor: &ast_defs::OgNullFlavor,
 ) -> Result {
-    unimplemented!("TODO(hrust)")
+    use tast::Expr as E;
+    use tast::Expr_ as E_;
+    let f = E(
+        pos.clone(),
+        E_::mk_obj_get(
+            expr.clone(),
+            E(
+                pos.clone(),
+                E_::mk_id(ast_defs::Id(pos.clone(), "getAttribute".into())),
+            ),
+            nullflavor.clone(),
+        ),
+    );
+    let args = vec![E(pos.clone(), E_::mk_string(string_utils::clean(s).into()))];
+    emit_call(e, env, pos, &f, &[], &args[..], None, None)
 }
 
 fn emit_array_get(
@@ -2557,7 +2717,7 @@ fn emit_array_get_(
             let mode = if null_coalesce_assignment {
                 MemberOpMode::Warn
             } else {
-                mode.unwrap_or(get_query_op_mode(&query_op))
+                mode.unwrap_or(get_querym_op_mode(&query_op))
             };
             let (elem_instrs, elem_stack_size) =
                 emit_elem(e, env, elem, local_temp_kind, null_coalesce_assignment)?;
@@ -2866,7 +3026,7 @@ fn emit_store_for_simple_base(
     ]))
 }
 
-fn get_query_op_mode(query_op: &QueryOp) -> MemberOpMode {
+fn get_querym_op_mode(query_op: &QueryOp) -> MemberOpMode {
     match query_op {
         QueryOp::InOut => MemberOpMode::InOut,
         QueryOp::CGet => MemberOpMode::Warn,
@@ -3345,8 +3505,17 @@ fn emit_cast(env: &Env, pos: &Pos, (h, e): &(aast_defs::Hint, tast::Expr)) -> Re
     unimplemented!("TODO(hrust)")
 }
 
-pub fn emit_unset_expr<Ex, Fb, En, Hi>(env: &Env, e: &aast::Expr<Ex, Fb, En, Hi>) -> Result {
-    unimplemented!("TODO(hrust)")
+pub fn emit_unset_expr(e: &mut Emitter, env: &Env, expr: &tast::Expr) -> Result {
+    emit_lval_op_nonlist(
+        e,
+        env,
+        &expr.0,
+        LValOp::Unset,
+        expr,
+        InstrSeq::Empty,
+        0,
+        false,
+    )
 }
 
 pub fn emit_set_range_expr(

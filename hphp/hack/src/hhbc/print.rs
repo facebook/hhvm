@@ -1603,7 +1603,7 @@ fn print_mutator<W: Write>(w: &mut W, mutator: &InstructMutator) -> Result<(), W
             w.write("UnsetL ")?;
             print_local(w, id)
         }
-        M::UnsetG => w.write("UnsetG "),
+        M::UnsetG => w.write("UnsetG"),
         M::CheckProp(id) => {
             w.write("CheckProp ")?;
             print_prop_id(w, id)
@@ -1723,6 +1723,10 @@ fn print_misc<W: Write>(w: &mut W, misc: &InstructMisc) -> Result<(), W::Error> 
             " ",
             ["CreateCl", n.to_string().as_str(), cid.to_string().as_str()],
         ),
+        M::InitThisLoc(local) => {
+            w.write("InitThisLoc ")?;
+            print_local(w, local)
+        }
         _ => not_impl!(),
     }
 }

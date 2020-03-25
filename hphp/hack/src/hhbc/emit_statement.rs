@@ -175,7 +175,7 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
                         Ok(InstrSeq::gather(
                             exprs
                                 .iter()
-                                .map(|ex| emit_expr::emit_unset_expr(env, ex))
+                                .map(|ex| emit_expr::emit_unset_expr(e, env, ex))
                                 .collect::<std::result::Result<Vec<_>, _>>()?,
                         ))
                     } else {

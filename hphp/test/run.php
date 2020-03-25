@@ -17,7 +17,7 @@ function is_testing_dso_extension() {
     return false;
   }
   // detecting if we're running outside of the hhvm codebase.
-  return !is_file(__DIR__."/../../hphp/test/run");
+  return !is_file(__DIR__."/../../hphp/test/run.php");
 }
 
 <<__Memoize>>

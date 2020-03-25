@@ -32,20 +32,17 @@
 
 #ifdef USE_JEMALLOC
 #include <jemalloc/jemalloc.h>
-#  if (JEMALLOC_VERSION_MAJOR >= 5) && defined(USE_LOWPTR) && \
-  defined(__linux__) && !defined(USE_JEMALLOC_EXTENT_HOOKS)
-#    define USE_JEMALLOC_EXTENT_HOOKS 1
-#  endif
-#  if USE_JEMALLOC_EXTENT_HOOKS
-#    if (JEMALLOC_VERSION_MAJOR > 5) || (JEMALLOC_VERSION_MINOR >= 1)
-#       define JEMALLOC_METADATA_1G_PAGES 1
-#    endif
-#  endif
-#  if (JEMALLOC_VERSION_MAJOR > 4)
-#    define JEMALLOC_NEW_ARENA_CMD "arenas.create"
-#  else
-#    define JEMALLOC_NEW_ARENA_CMD "arenas.extend"
-#  endif
+#if (JEMALLOC_VERSION_MAJOR < 5)
+#  error "jemalloc 5 is required"
+#endif
+#if defined(USE_LOWPTR) && defined(__linux__) \
+  && !defined(USE_JEMALLOC_EXTENT_HOOKS)
+#  define USE_JEMALLOC_EXTENT_HOOKS 1
+#endif
+#if USE_JEMALLOC_EXTENT_HOOKS && \
+  (JEMALLOC_VERSION_MAJOR > 5) || (JEMALLOC_VERSION_MINOR >= 1)
+#  define JEMALLOC_METADATA_1G_PAGES 1
+#endif
 #endif
 
 namespace HPHP {

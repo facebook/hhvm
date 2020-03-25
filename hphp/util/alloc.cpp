@@ -221,11 +221,7 @@ void* mallocx_on_node(size_t size, int node, size_t align) {
   int flags = MALLOCX_ALIGN(align);
   if (node < 0) return mallocx(size, flags);
   int arena = base_arena + node;
-#ifdef MALLOCX_TCACHE_NONE
   flags |= MALLOCX_ARENA(arena) | MALLOCX_TCACHE_NONE;
-#else
-  flags |= MALLOCX_ARENA(arena);
-#endif
   return mallocx(size, flags);
 }
 
@@ -541,7 +537,7 @@ void setup_local_arenas(PageSpec spec, unsigned slabs) {
   // The default one per node.
   for (int i = 0; i < num_numa_nodes(); i++) {
     unsigned arena = 0;
-    mallctlRead<unsigned>(JEMALLOC_NEW_ARENA_CMD, &arena);
+    mallctlRead<unsigned>("arenas.create", &arena);
     always_assert(arena == base_arena + i);
     if (slabs) {
       auto mem = low_malloc(sizeof(SlabManager));
@@ -664,7 +660,7 @@ struct JEMallocInitializer {
     // Create the legacy low arena that uses brk() instead of mmap().  When
     // using newer versions of jemalloc, we use extent hooks to get more
     // control.  If the mallctl fails, it will always_assert in mallctlHelper.
-    if (mallctlRead<unsigned, true>(JEMALLOC_NEW_ARENA_CMD, &low_arena)) {
+    if (mallctlRead<unsigned, true>("arenas.create", &low_arena)) {
       return;
     }
     char buf[32];
@@ -673,12 +669,7 @@ struct JEMallocInitializer {
       // Error; bail out.
       return;
     }
-    low_arena_flags = MALLOCX_ARENA(low_arena);
-#ifdef MALLOCX_TCACHE_NONE
-    low_arena_flags |= MALLOCX_TCACHE_NONE;
-    // Earlier versions of jemalloc do not have MALLOCX_TCACHE_NONE, but will
-    // still bypass tcache when arena is specified.
-#endif
+    low_arena_flags = MALLOCX_ARENA(low_arena) | MALLOCX_TCACHE_NONE;
     lower_arena = low_arena;
     lower_arena_flags = low_arena_flags;
     low_cold_arena = low_arena;

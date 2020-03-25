@@ -811,84 +811,86 @@ bool insertDefInlineFP(InlineAnalysis& ia, OptimizeContext& ctx, Block* block) {
 }
 
 /*
- * Update block succ to either use the FP from pred, phi the FP from pred with
- * FPs of other predecessors, or define a new FP. This function ensures that if
- * two exit heads have a common successor we will phi their frame pointers.
+ * Update block to use the FP from a dominating block.  If there is no
+ * dominating block that defines an FP we need to PHI together the FPs
+ * from our predecessors.  In this case if either of our predecessors
+ * is unrpocessed we can reschedule to be processed after they get
+ * processed.
  */
-bool process(OptimizeContext& ctx, Block* pred, Block* succ,
-             SSATmp* predOldFp) {
-  ITRACE(3, "process(): pred = {}, succ = {}\n", pred->id(), succ->id());
+bool process(OptimizeContext& ctx, const IdomVector& idoms, Block* block) {
+  ITRACE(3, "process(): block = {}\n", block->id());
   Trace::Indent _i;
 
-  assertx(ctx.fpMap.count(pred));
-  auto predCurFp = ctx.fpMap[pred];
-  always_assert(predCurFp->type() == TFramePtr);
+  // We only need to process blocks once.
+  if (ctx.fpMap.count(block)) return false;
 
-  // The map does not contain succ, we have not processed it before
-  if (!ctx.fpMap.count(succ)) {
-    ctx.fpMap[succ] = predCurFp;
-    return !replaceFP(succ, ctx.deadFp, predCurFp, *ctx.fpUses);
+  auto const rewriteFPs = [&] (SSATmp* fp) {
+    always_assert(fp->type() == TFramePtr);
+    ctx.fpMap[block] = fp;
+    // We only rewrite the FP once, so we know the old fp is ctx.DeadFp.
+    return !replaceFP(block, ctx.deadFp, fp, *ctx.fpUses);
+  };
+
+  if (block->numPreds() == 1) {
+    // Fast path for single predecessor.
+    // A single predecessor must dominate the block.
+    auto const pred = block->preds().front().from();
+    assertx(ctx.fpMap.count(pred));
+    auto predFp = ctx.fpMap[pred];
+    return rewriteFPs(predFp);
   }
 
-  // We processed this succ and its fp is already the same as pred
-  auto curFp = ctx.fpMap[succ];
-  always_assert(curFp->type() == TFramePtr);
-  if (curFp == predCurFp) {
-    ITRACE(3, "succ fp matches pred fp, bailing (fp = {})\n", *predCurFp);
-    return false;
+  // Walk the dominators of the block and look for an FP to use.
+  for (auto dom = block; dom != nullptr; dom = idoms[dom]) {
+    if (ctx.fpMap.count(dom)) {
+      return rewriteFPs(ctx.fpMap[dom]);
+    }
   }
 
-  // The FP in succ came directly from pred, but pred now has a new FP, simply
-  // update all instances of predOldFp with predCurFp
-  if (curFp == predOldFp) {
-    ctx.fpMap[succ] = predCurFp;
-    return !replaceFP(succ, curFp, predCurFp, *ctx.fpUses);
-  }
+  // No dominators of the block had a usable FP.  We have to create a phi.
+  bool predsProcessed = true;
+  block->forEachPred([&] (Block* pred) {
+    // We requeue this block if a pred is not processed yet.
+    if (!ctx.fpMap.count(pred)) {
+      predsProcessed = false;
+    }
+  });
+  if (!predsProcessed) return true;
 
   // Multiple preds define different FPs which will require a DefLabel to phi
-  // them in succ
+  // them in block
   auto const label = [&] {
-    if (curFp->inst()->block() == succ) {
-      assertx(curFp->inst()->is(DefLabel));
-      ITRACE(4, "succ has DefLabel: {}\n", *curFp->inst());
-      always_assert(succ->front().dst(succ->front().numDsts() - 1) == curFp);
-      return &succ->front();
-    } else if (succ->front().is(DefLabel)) {
-      // succ already has a label but it cannot contain an inlined fp because
-      // if it did we would have stored it in the fpMap
-      ctx.unit->expandLabel(&succ->front(), 1);
-      ITRACE(4, "Expanding succ DefLabel: {}\n", succ->front());
-      return &succ->front();
+    if (block->front().is(DefLabel)) {
+      // block already has a label but it cannot contain an inlined fp because
+      // if it did we would have had to have already processed it (breaking
+      // our invariant of processing blocks only once).
+      ctx.unit->expandLabel(&block->front(), 1);
+      ITRACE(4, "Expanding block DefLabel: {}\n", block->front());
+      return &block->front();
     }
     // Don't put DefLabel in a block with a BeginCatch. Splitting critical
     // edges should hoist BeginCatch for us.
-    assertx(!succ->isCatch());
-    auto result = ctx.unit->defLabel(1, succ, succ->front().bcctx());
-    ITRACE(4, "Creating succ DefLabel: {}\n", result);
+    assertx(!block->isCatch());
+    auto result = ctx.unit->defLabel(1, block, block->front().bcctx());
+    ITRACE(4, "Creating block DefLabel: {}\n", result);
     return result;
   }();
 
   auto const phiIdx = label->numDsts() - 1;
   auto newFp = label->dst(phiIdx);
-  ctx.fpMap[succ] = newFp;
-
-  ITRACE(3, "pred fp: {}, succ old fp: {}, succ new fp: {}\n",
-         *predCurFp, *curFp, *newFp);
-
-  auto const cont =
-    curFp != newFp && !replaceFP(succ, curFp, newFp, *ctx.fpUses);
+  ITRACE(3, "block new new fp: {}\n", *newFp);
 
   ITRACE(3, "Updating pred jmps\n");
   {
     Trace::Indent _i2;
-    succ->forEachPred([&] (Block* p) {
+    block->forEachPred([&] (Block* p) {
       auto& jmp = p->back();
-      auto updateFp = ctx.fpMap.count(p) ? ctx.fpMap[p] : ctx.deadFp;
+      // There are no critical edges so p must have a single successor.
+      assertx(p->numSuccs() == 1);
+      assertx(jmp.numSrcs() == phiIdx);
 
-      if (jmp.numSrcs() > phiIdx) {
-        always_assert(jmp.src(phiIdx) == updateFp);
-        return;
-      }
+      assertx(ctx.fpMap.count(p));
+      auto updateFp = ctx.fpMap[p];
 
       ITRACE(4, "Found pred to update (block id: {}): {}\n",
              p->id(), p->back());
@@ -896,13 +898,8 @@ bool process(OptimizeContext& ctx, Block* pred, Block* succ,
       always_assert(jmp.numSrcs() == phiIdx + 1);
     });
   }
-
   retypeDests(label, ctx.unit);
-
-  // If we didn't change the fp for this block we don't need to re-process it's
-  // successors.
-  ITRACE(3, "succ fp was {}\n", curFp != newFp ? "changed" : "unchanged");
-  return cont;
+  return rewriteFPs(newFp);
 }
 
 void transformUses(InlineAnalysis& ia,
@@ -1174,26 +1171,33 @@ bool optimize(InlineAnalysis& env, IRInstruction* inlineReturn, bool& reflow) {
 
   // Update FP's in all blocks reachable from the exit heads
   auto heads = findExitHeads(ctx, env.exitBlocks[fp]);
-  std::deque<std::pair<Block*,SSATmp*>> workQ;
+  std::deque<Block*> workQ;
   for (auto h : heads) {
     // We won't need to create more DefInlineFP's after this, and if they're
     // completely unused in any of these traces DCE will clean it up.
     if (insertDefInlineFP(env, ctx, h)) {
-      workQ.push_back(std::make_pair(h, ctx.deadFp));
+      h->forEachSucc([&] (Block* succ) {
+        workQ.push_back(succ);
+      });
     }
   }
 
+  auto const blocks = rpoSortCfg(*env.unit);
+  auto const rpoIDs = numberBlocks(*env.unit, blocks);
+  auto const idoms = findDominators(*env.unit, blocks, rpoIDs);
   while (!workQ.empty()) {
-    auto info = workQ.front();
-    auto block = info.first;
-    auto oldFp = info.second;
+    auto block = workQ.front();
     workQ.pop_front();
-    block->forEachSucc([&] (Block* succ) {
-      auto prev = ctx.fpMap.count(succ) ? ctx.fpMap[succ] : ctx.deadFp;
-      if (process(ctx, block, succ, oldFp)) {
-        workQ.push_back(std::make_pair(succ, prev));
+    if (process(ctx, idoms, block)) {
+      if (ctx.fpMap.count(block)) {
+        block->forEachSucc([&] (Block* succ) {
+          workQ.push_back(succ);
+        });
+      } else {
+        // Reschedule this block, one of its preds is yet to be processed.
+        workQ.push_back(block);
       }
-    });
+    }
   }
 
   // Remaining references to the FP must be from nested DefInlineFP instructions

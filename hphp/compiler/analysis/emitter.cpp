@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/disas.h"
 #include "hphp/runtime/vm/extern-compiler.h"
 #include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/repo-autoload-map-builder.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/unit.h"
@@ -264,7 +265,10 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
 
       if (!program.get()) {
         if (Option::GenerateBinaryHHBC) {
-          commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder>{});
+          {
+            auto guard = RepoAutoloadMapBuilder::collect();
+            commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder>{});
+          }
         }
         return;
       }
@@ -280,9 +284,11 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
             Option::ParserThreadCount > 0 ? Option::ParserThreadCount : 0);
         });
 
-      commitLoop();
-
-      commitGlobalData(std::move(arrTable));
+      {
+        auto guard = RepoAutoloadMapBuilder::collect();
+        commitLoop();
+        commitGlobalData(std::move(arrTable));
+      }
     }
     wp_thread.join();
   } catch (std::exception& ex) {

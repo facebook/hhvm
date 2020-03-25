@@ -21,6 +21,7 @@
 #include <folly/Singleton.h>
 
 #include "hphp/runtime/vm/blob-helper.h"
+#include "hphp/runtime/vm/repo-autoload-map-builder.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/server/xbox-server.h"
 
@@ -200,7 +201,7 @@ void Repo::loadGlobalData(bool readArrayTable /* = true */) {
         query.step();
         if (!query.row()) {
           throw RepoExc("Can't find key = 'config' in %s", tbl.c_str());
-        };
+        }
         BlobDecoder decoder = query.getBlob(0, true);
         decoder(s_globalData);
         FTRACE(1, "GlobalData loaded from '{}':\n", repoName(repoId));
@@ -215,7 +216,7 @@ void Repo::loadGlobalData(bool readArrayTable /* = true */) {
           query.step();
           if (!query.row()) {
             throw RepoExc("Can't find key = 'arraytable' in %s", tbl.c_str());
-          };
+          }
           BlobDecoder decoder = query.getBlob(0, true);
           auto& arrayTypeTable = globalArrayTypeTable();
           decoder(arrayTypeTable);
@@ -224,6 +225,20 @@ void Repo::loadGlobalData(bool readArrayTable /* = true */) {
           decoder.assertDone();
         }
       }
+
+      if (RuntimeOption::EvalUseRepoAutoloadMap) {
+        {
+          RepoTxnQuery query(txn, stmt);
+          auto key = std::string("autoloadmap");
+          query.bindStdString("@key", key);
+          query.step();
+          if (!query.row()) {
+            throw RepoExc("Can't find key = 'autoloadmap' in %s", tbl.c_str());
+          }
+          query.getBlob(0, true);
+        }
+      }
+
       txn.commit();
     } catch (RepoExc& e) {
       failures.push_back(repoName(repoId) + ": "  + e.msg());
@@ -324,6 +339,18 @@ void Repo::saveGlobalData(GlobalData newData) {
     encoder(s_globalData.ConstantFunctions);
     query.bindBlob("@data", encoder, /* static */ true);
     query.exec();
+  }
+
+  if (RuntimeOption::EvalBuildRepoAutoloadMap) {
+    {
+      RepoTxnQuery query(txn, stmt);
+      auto key = std::string("autoloadmap");
+      query.bindStdString("@key", key);
+      BlobEncoder encoder{true};
+      RepoAutoloadMapBuilder::get().serde(encoder);
+      query.bindBlob("@data", encoder, /* static */ true);
+      query.exec();
+    }
   }
 
   // TODO(#3521039): we could just put the litstr table in the same

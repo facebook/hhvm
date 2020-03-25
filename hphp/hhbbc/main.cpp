@@ -39,6 +39,7 @@
 #include "hphp/hhvm/process-init.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/repo-autoload-map-builder.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/treadmill.h"
 
@@ -458,8 +459,11 @@ void compile_repo() {
     }
   );
   wp_thread.start();
-  write_units(ueq);
-  write_global_data(arrTable, apcProfile);
+  {
+    auto guard = RepoAutoloadMapBuilder::collect();
+    write_units(ueq);
+    write_global_data(arrTable, apcProfile);
+  }
   wp_thread.waitForEnd();
 }
 

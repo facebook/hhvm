@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/repo-autoload-map-builder.h"
 #include "hphp/runtime/vm/runtime.h"
 
 #include "hphp/runtime/vm/jit/types.h"
@@ -588,6 +589,8 @@ void FuncRepoProxy::InsertFuncStmt
   const_cast<FuncEmitter&>(fe).serdeMetaData(extraBlob);
   query.bindBlob("@extraData", extraBlob, /* static */ true);
   query.exec();
+
+  RepoAutoloadMapBuilder::get().addFunc(fe, unitSn);
 }
 
 void FuncRepoProxy::GetFuncsStmt

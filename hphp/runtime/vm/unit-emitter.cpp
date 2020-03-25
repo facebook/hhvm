@@ -42,6 +42,7 @@
 #include "hphp/runtime/vm/preclass-emitter.h"
 #include "hphp/runtime/vm/record-emitter.h"
 #include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/repo-autoload-map-builder.h"
 #include "hphp/runtime/vm/repo-helpers.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/verifier/check.h"
@@ -1315,6 +1316,8 @@ void UnitRepoProxy::InsertUnitTypeAliasStmt
   dataBlob(typeAlias);
   query.bindBlob("@data", dataBlob, /* static */ true);
   query.exec();
+
+  RepoAutoloadMapBuilder::get().addTypeAlias(typeAlias, unitSn);
 }
 
 void UnitRepoProxy::GetUnitTypeAliasesStmt::get(UnitEmitter& ue) {
@@ -1366,6 +1369,8 @@ void UnitRepoProxy::InsertUnitConstantStmt
   dataBlob(constant);
   query.bindBlob("@data", dataBlob, /* static */ true);
   query.exec();
+
+  RepoAutoloadMapBuilder::get().addConstant(constant, unitSn);
 }
 
 void UnitRepoProxy::GetUnitConstantsStmt::get(UnitEmitter& ue) {

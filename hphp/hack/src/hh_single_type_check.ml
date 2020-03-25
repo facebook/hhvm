@@ -204,7 +204,7 @@ let parse_options () =
   let complex_coercion = ref false in
   let disable_partially_abstract_typeconsts = ref false in
   let rust_parser_errors = ref false in
-  let rust_lowerer = ref true in
+  let rust_top_level_elaborator = ref false in
   let symbolindex_file = ref None in
   let check_xhp_attribute = ref false in
   let disallow_invalid_arraykey_constraint = ref None in
@@ -450,7 +450,7 @@ let parse_options () =
         Arg.Bool (fun x -> rust_parser_errors := x),
         " Use rust parser error checker" );
       ( "--rust-lowerer",
-        Arg.Bool (fun x -> rust_lowerer := x),
+        Arg.Bool (fun x -> rust_top_level_elaborator := x),
         " Use rust lowerer" );
       ( "--symbolindex-file",
         Arg.String (fun str -> symbolindex_file := Some str),
@@ -567,7 +567,7 @@ let parse_options () =
         !disable_partially_abstract_typeconsts
       ~log_levels:!log_levels
       ~po_rust_parser_errors:!rust_parser_errors
-      ~po_rust_lowerer:!rust_lowerer
+      ~po_rust_top_level_elaborator:!rust_top_level_elaborator
       ~po_enable_class_level_where_clauses:!enable_class_level_where_clauses
       ~po_disable_legacy_soft_typehints:!disable_legacy_soft_typehints
       ~po_allow_new_attribute_syntax:!allow_new_attribute_syntax

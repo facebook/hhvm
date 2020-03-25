@@ -57,7 +57,7 @@ type t = {
   option_disable_xhp_element_mangling: bool;
   option_disable_xhp_children_declarations: bool;
   option_enable_xhp_class_modifier: bool;
-  option_rust_lowerer: bool;
+  option_rust_top_level_elaborator: bool;
   option_enable_first_class_function_pointers: bool;
   option_widen_is_array: bool;
   option_disable_partial: bool;
@@ -114,7 +114,7 @@ let default =
     option_disable_xhp_element_mangling = false;
     option_disable_xhp_children_declarations = false;
     option_enable_xhp_class_modifier = false;
-    option_rust_lowerer = true;
+    option_rust_top_level_elaborator = false;
     option_enable_first_class_function_pointers = false;
     option_widen_is_array = false;
     option_disable_partial = false;
@@ -216,7 +216,7 @@ let emit_generics_ub o = o.option_emit_generics_ub
 
 let check_int_overflow o = o.option_check_int_overflow
 
-let rust_lowerer o = o.option_rust_lowerer
+let rust_top_level_elaborator o = o.option_rust_top_level_elaborator
 
 let enable_first_class_function_pointers o =
   o.option_enable_first_class_function_pointers
@@ -312,7 +312,8 @@ let to_string o =
       @@ enable_xhp_class_modifier o;
       Printf.sprintf "disable_xhp_element_mangling: %B"
       @@ disable_xhp_element_mangling o;
-      Printf.sprintf "rust_lowerer: %B" @@ rust_lowerer o;
+      Printf.sprintf "rust_top_level_elaborator: %B"
+      @@ rust_top_level_elaborator o;
       Printf.sprintf "disable_array: %B" @@ disable_array o;
     ]
 
@@ -411,8 +412,8 @@ let set_option options name value =
     { options with option_disable_xhp_element_mangling = as_bool value }
   | "hhvm.hack.lang.check_int_overflow" ->
     { options with option_check_int_overflow = int_of_string value > 0 }
-  | "hhvm.hack.lang.rust_lowerer" ->
-    { options with option_rust_lowerer = as_bool value }
+  | "hhvm.hack.lang.rust_top_level_elaborator" ->
+    { options with option_rust_top_level_elaborator = as_bool value }
   | "hhvm.hack.lang.enable_first_class_function_pointers" ->
     {
       options with
@@ -628,8 +629,10 @@ let value_setters =
     @@ fun opts v -> { opts with option_emit_generics_ub = v = 1 } );
     ( set_value "hhvm.hack.lang.check_int_overflow" get_value_from_config_int
     @@ fun opts v -> { opts with option_check_int_overflow = v = 1 } );
-    ( set_value "hhvm.hack.lang.rust_lowerer" get_value_from_config_int
-    @@ fun opts v -> { opts with option_rust_lowerer = v = 1 } );
+    ( set_value
+        "hhvm.hack.lang.rust_top_level_elaborator"
+        get_value_from_config_int
+    @@ fun opts v -> { opts with option_rust_top_level_elaborator = v = 1 } );
     ( set_value
         "hhvm.hack.lang.enable_first_class_function_pointers"
         get_value_from_config_int

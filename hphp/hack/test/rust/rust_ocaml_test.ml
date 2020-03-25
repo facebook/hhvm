@@ -550,7 +550,14 @@ module LowererTest_ = struct
     in
     r
 
-  let build_tree args _env is_rust file source_text =
+  let build_tree args _env file source_text =
+    let popt =
+      {
+        ParserOptions.default with
+        GlobalOptions.po_disable_xhp_children_declarations = true;
+        GlobalOptions.po_disable_xhp_element_mangling = true;
+      }
+    in
     let lower_env =
       Lowerer.make_env
         file
@@ -560,8 +567,7 @@ module LowererTest_ = struct
         ~keep_errors:true
         ~elaborate_namespaces:false
         ~lower_coroutines:false
-        ~parser_options:
-          { ParserOptions.default with GlobalOptions.po_rust_lowerer = is_rust }
+        ~parser_options:popt
     in
     try Tree (lower lower_env source_text)
     with e -> Crash (Caml.Printexc.to_string e)
@@ -574,12 +580,12 @@ module LowererTest_ = struct
     let ocaml_tree =
       match args.mode with
       | RUST -> Skip
-      | _ -> build_tree args ocaml_env false file source_text
+      | _ -> build_tree args ocaml_env file source_text
     in
     let rust_tree =
       match args.mode with
       | OCAML -> Skip
-      | _ -> build_tree args rust_env true file source_text
+      | _ -> build_tree args rust_env file source_text
     in
     let aast_equal =
       (if args.ignore_lid then Local_id.equal_ref := (fun _ _ -> true));

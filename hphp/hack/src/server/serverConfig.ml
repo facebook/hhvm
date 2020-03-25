@@ -396,7 +396,8 @@ let load config_filename options =
       ?tco_error_php_lambdas:(bool_opt "error_php_lambdas" config)
       ?tco_disallow_discarded_nullable_awaitables:
         (bool_opt "disallow_discarded_nullable_awaitables" config)
-      ?po_rust_lowerer:(bool_opt "rust_lowerer" config)
+      ?po_rust_top_level_elaborator:
+        (bool_opt "rust_top_level_elaborator" config)
       ?po_disable_xhp_element_mangling:
         (bool_opt "disable_xhp_element_mangling" config)
       ?po_disable_xhp_children_declarations:

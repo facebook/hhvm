@@ -130,20 +130,12 @@ let parse_text (env : env) (source_text : SourceText.t) :
     in
     let p = pos_of_error env.file source_text e in
     raise @@ SyntaxError.ParserFatal (e, p) );
-  let leak_rust_tree =
-    (* DANGER: Needs to be kept in sync with other logic in this file, ensuring
+  (* DANGER: Needs to be kept in sync with other logic in this file, ensuring
        that the tree created here is later passed to ParserErrors. This can
        currently leak memory when an exception is thrown between parsing and
        error checking
      *)
-    if
-      (not @@ ParserOptions.parser_errors_only env.parser_options)
-      && (env.codegen || env.keep_errors)
-    then
-      true
-    else
-      ParserOptions.rust_lowerer env.parser_options
-  in
+  let leak_rust_tree = true in
   let tree =
     let env' =
       Full_fidelity_parser_env.make
@@ -195,7 +187,10 @@ let process_lint_errors (_ : env) (errors : Relative_path.t Lint.t list) =
   List.iter ~f:Lint.add_lint errors
 
 let elaborate_top_level_defs env aast =
-  if env.elaborate_namespaces then
+  if
+    (not (ParserOptions.rust_top_level_elaborator env.parser_options))
+    && env.elaborate_namespaces
+  then
     Namespaces.elaborate_toplevel_defs env.parser_options aast
   else
     aast
@@ -332,7 +327,7 @@ let tast_to_aast tast =
 
 type aast_to_nast_env = { mutable last_pos: Pos.t }
 
-let aast_to_nast (consolidate_pos : bool) aast =
+let aast_to_nast aast =
   let i _ x = x in
   let endo =
     object (self)
@@ -348,19 +343,11 @@ let aast_to_nast (consolidate_pos : bool) aast =
           pos
         )
 
-      method! on_pos =
-        if consolidate_pos then
-          self#check_pos
-        else
-          i
+      method! on_pos = self#check_pos
 
       method on_'fb _ _ = Nast.NamedWithUnsafeBlocks
 
-      method on_'ex =
-        if consolidate_pos then
-          self#check_pos
-        else
-          i
+      method on_'ex = self#check_pos
 
       method on_'hi = i
 
@@ -393,25 +380,24 @@ let from_text_to_empty_tast (env : env) (source_text : SourceText.t) :
  * Backward compatibility matter (should be short-lived)
 )*****************************************************************************)
 
-let legacy (env : env) (x : aast_result) : Parser_return.t =
+let legacy (x : aast_result) : Parser_return.t =
   {
     Parser_return.file_mode =
       Option.some_if (x.fi_mode <> FileInfo.Mphp) x.fi_mode;
     Parser_return.comments = x.comments.sc_comments;
-    Parser_return.ast =
-      aast_to_nast (ParserOptions.rust_lowerer env.parser_options) x.ast;
+    Parser_return.ast = aast_to_nast x.ast;
     Parser_return.content = x.content;
   }
 
 let from_source_text_with_legacy
     (env : env) (source_text : Full_fidelity_source_text.t) : Parser_return.t =
-  legacy env @@ from_text env source_text
+  legacy @@ from_text env source_text
 
 let from_text_with_legacy (env : env) (content : string) : Parser_return.t =
   let source_text = SourceText.make env.file content in
   from_source_text_with_legacy env source_text
 
-let from_file_with_legacy env = legacy env (from_file env)
+let from_file_with_legacy env = legacy (from_file env)
 
 (******************************************************************************(
  * For cut-over purposes only; this should be removed as soon as Parser_hack
@@ -444,7 +430,7 @@ let defensive_program
         ~include_line_comments
         fn
     in
-    legacy env @@ from_text env source
+    legacy @@ from_text env source
   with e ->
     Rust_pointer.free_leaked_pointer ();
 

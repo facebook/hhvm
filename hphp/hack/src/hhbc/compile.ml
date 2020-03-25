@@ -120,7 +120,7 @@ let parse_file ~hhbc_options env text :
         ~disable_xhp_children_declarations:
           (disable_xhp_children_declarations co)
         ~enable_xhp_class_modifier:(enable_xhp_class_modifier co)
-        ~rust_lowerer:(rust_lowerer co)
+        ~rust_top_level_elaborator:(rust_top_level_elaborator co)
         ~enable_first_class_function_pointers:
           (enable_first_class_function_pointers co)
         ~disable_modes:(disable_modes co)

@@ -131,8 +131,8 @@ type t = {
   tco_shallow_class_decl: bool;
   (* Use Rust parser errors *)
   po_rust_parser_errors: bool;
-  (* Use Rust lowerer *)
-  po_rust_lowerer: bool;
+  (* Use Rust top level elaborator *)
+  po_rust_top_level_elaborator: bool;
   (* The threshold (in seconds) that determines whether a file's type checking time
       should be logged. It's only in effect if we're profiling type checking to begin
       with. To profile, pass --profile-log to hh_server. *)
@@ -280,7 +280,7 @@ val make :
   ?po_disable_lval_as_an_expression:bool ->
   ?tco_shallow_class_decl:bool ->
   ?po_rust_parser_errors:bool ->
-  ?po_rust_lowerer:bool ->
+  ?po_rust_top_level_elaborator:bool ->
   ?profile_type_check_duration_threshold:float ->
   ?profile_type_check_twice:bool ->
   ?profile_owner:string ->
@@ -435,7 +435,7 @@ val tco_shallow_class_decl : t -> bool
 
 val po_rust_parser_errors : t -> bool
 
-val po_rust_lowerer : t -> bool
+val po_rust_top_level_elaborator : t -> bool
 
 val profile_type_check_duration_threshold : t -> float
 

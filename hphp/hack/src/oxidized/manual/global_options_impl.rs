@@ -48,7 +48,7 @@ impl Default for GlobalOptions {
             po_disable_lval_as_an_expression: false,
             tco_shallow_class_decl: false,
             po_rust_parser_errors: false,
-            po_rust_lowerer: false,
+            po_rust_top_level_elaborator: false,
             profile_type_check_duration_threshold: 0.0,
             profile_type_check_twice: false,
             profile_owner: String::new(),

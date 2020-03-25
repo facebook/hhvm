@@ -89,10 +89,7 @@ let log_file_info_change
  * Result: (old * new)
  *)
 let compute_fileinfo_for_path (env : ServerEnv.env) (path : Relative_path.t) :
-    (FileInfo.t option * FileInfo.t option * Facts.facts option) Lwt.t =
-  let start_time = Unix.gettimeofday () in
-  let naming_table = env.ServerEnv.naming_table in
-  let old_file_info = Naming_table.get_file_info naming_table path in
+    (FileInfo.t option * Facts.facts option) Lwt.t =
   (* Fetch file contents *)
   let%lwt contents = Lwt_utils.read_all (Relative_path.to_absolute path) in
   let contents = Result.ok contents in
@@ -202,8 +199,7 @@ let compute_fileinfo_for_path (env : ServerEnv.env) (path : Relative_path.t) :
           },
         facts )
   in
-  log_file_info_change ~old_file_info ~new_file_info ~start_time ~path;
-  Lwt.return (old_file_info, new_file_info, facts)
+  Lwt.return (new_file_info, facts)
 
 let update_naming_table
     ~(env : ServerEnv.env)
@@ -318,9 +314,12 @@ let process_changed_file
     if not (FindUtils.path_filter path) then
       Lwt.return env
     else
-      let%lwt (old_file_info, new_file_info, facts) =
-        compute_fileinfo_for_path env path
+      let start_time = Unix.gettimeofday () in
+      let old_file_info =
+        Naming_table.get_file_info env.ServerEnv.naming_table path
       in
+      let%lwt (new_file_info, facts) = compute_fileinfo_for_path env path in
+      log_file_info_change ~old_file_info ~new_file_info ~start_time ~path;
       invalidate_decls ~ctx ~old_file_info;
       let env =
         update_naming_table ~env ~ctx ~path ~old_file_info ~new_file_info

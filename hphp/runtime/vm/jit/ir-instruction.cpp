@@ -155,6 +155,9 @@ bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
     case StContArKey:
       return srcNo == 1;
 
+    case ContEnter:
+      return move != MustMove && srcNo == 4;
+
     case Call:
     case CallUnpack:
       return move != MustMove && srcNo == 3;

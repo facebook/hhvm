@@ -391,15 +391,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     break;
 
   case ContEnter:
-    {
-      auto const extra = inst->extra<ContEnter>();
-      setValue(stk(extra->spOffset), nullptr);
-      trackCall();
-      setType(stk(extra->spOffset), TCell);
-      // ContEnter pops a cell.
-      assertx(cur().bcSPOff == inst->marker().spOff());
-      cur().bcSPOff--;
-    }
+    trackCall();
     break;
 
   case DefFP:

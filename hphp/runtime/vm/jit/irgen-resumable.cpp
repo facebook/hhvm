@@ -700,6 +700,10 @@ void emitContEnter(IRGS& env) {
   // Exit to interpreter if resume address is not known.
   resumeAddr = gen(env, CheckNonNull, exitSlow, resumeAddr);
 
+  auto const sendVal = popC(env, DataTypeGeneric);
+  updateMarker(env);
+  env.irb->exceptionStackBoundary();
+
   auto const retVal = gen(
     env,
     ContEnter,
@@ -707,7 +711,8 @@ void emitContEnter(IRGS& env) {
     sp(env),
     fp(env),
     genFp,
-    resumeAddr
+    resumeAddr,
+    sendVal
   );
 
   push(env, retVal);

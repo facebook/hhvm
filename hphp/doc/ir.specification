@@ -2543,15 +2543,17 @@ To string conversions:
   Store the resume address S1 into the Resumable whose ActRec is given by S0,
   marking the offset to resume at as `offset'.
 
-| ContEnter<spOffset,callBCOffset>, DGenIter,
-|                                   S(StkPtr) S(FramePtr) S(FramePtr) S(TCA),
-|                                   NF
+| ContEnter<spOffset,callBCOffset>,
+|   DGenIter,
+|   S(StkPtr) S(FramePtr) S(FramePtr) S(TCA) S(Cell),
+|   CRc
 
   Enters a generator body. S0 + `spOffset' (in cells) is a pointer to the
   stack, S1 is the current frame pointer, S2 is the generator frame pointer
-  embedded in the Generator object, and S3 is the address to jump to. The
-  `callBCOffset' will be stored to the m_callOff field of the ActRec in
-  the generator.
+  embedded in the Generator object, S3 is the address to jump to, and S4 is
+  the value that will be pushed onto the stack to send it to the output of
+  the yield statement. The `callBCOffset' will be stored to the m_callOff
+  field of the ActRec in the generator.
 
 | ContPreNext, ND, S(Obj) C(Bool), B
 

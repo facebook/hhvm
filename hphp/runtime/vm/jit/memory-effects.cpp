@@ -873,10 +873,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     {
       auto const extra = inst.extra<ContEnter>();
       return CallEffects {
-        // Kills. Everything on the stack below the sent value.
-        stack_below(inst.src(0), extra->spOffset - 1) | AMIStateAny,
-        // Inputs. The value being sent.
-        AStack { inst.src(0), extra->spOffset, 1 },
+        // Kills. Everything on the stack.
+        stack_below(inst.src(0), extra->spOffset) | AMIStateAny,
+        // No inputs. The value being sent is passed explicitly.
+        AEmpty,
         // ActRec. It is on the heap and we already implicitly assume that
         // CallEffects can perform arbitrary heap operations.
         AEmpty,

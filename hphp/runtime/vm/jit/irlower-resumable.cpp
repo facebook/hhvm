@@ -80,6 +80,7 @@ void cgContEnter(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 1).reg();
   auto const genFP = srcLoc(env, inst, 2).reg();
   auto const target = srcLoc(env, inst, 3).reg();
+  auto const sendVal = srcLoc(env, inst, 4);
 
   auto const extra = inst->extra<ContEnter>();
   auto const spOff = extra->spOffset;
@@ -95,8 +96,10 @@ void cgContEnter(IRLS& env, const IRInstruction* inst) {
 
   v << copy{genFP, fp};
   auto const sync_sp = v.makeReg();
-  v << lea{sp[cellsToBytes(spOff.offset)], sync_sp};
+  v << lea{sp[cellsToBytes(spOff.offset - 1)], sync_sp};
   v << syncvmsp{sync_sp};
+
+  storeTV(v, sync_sp[0], sendVal, inst->src(4));
 
   v << contenter{fp, target, cross_trace_regs_resumed(),
                  {next, label(env, inst->taken())}};

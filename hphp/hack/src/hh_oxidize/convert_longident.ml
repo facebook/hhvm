@@ -61,6 +61,8 @@ let to_string for_open id =
       let ty =
         if ty = "LoclTy" then
           "Ty"
+        else if ty = "LoclPossiblyEnforcedTy" then
+          "PossiblyEnforcedTy"
         else if SSet.mem ty strip_decl_prefix then
           String.chop_prefix_exn ty "Decl"
         else

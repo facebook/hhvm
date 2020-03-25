@@ -36,6 +36,7 @@ BUILD_AND_RUN="hphp/hack/scripts/build_and_run.sh"
   hphp/hack/src/options/parserOptions.ml                                      \
   hphp/hack/src/options/typecheckerOptions.ml                                 \
   hphp/hack/src/parser/full_fidelity_parser_env.ml                            \
+  hphp/hack/src/typing/tast.ml                                                \
   hphp/hack/src/typing/type_parameter_env.ml                                  \
   hphp/hack/src/typing/typing_mutability_env.ml                               \
   hphp/hack/src/typing/typing_cont_key.ml                                     \

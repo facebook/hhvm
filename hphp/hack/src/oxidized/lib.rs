@@ -65,6 +65,7 @@ pub use gen::parser_options;
 pub use gen::prim_defs;
 pub use gen::scoured_comments;
 pub use gen::shallow_decl_defs;
+pub use gen::tast;
 pub use gen::type_parameter_env;
 pub use gen::typechecker_options;
 pub use gen::typing_cont_key;

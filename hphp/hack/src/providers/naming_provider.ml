@@ -161,7 +161,11 @@ let get_fun_pos (ctx : Provider_context.t) (name : string) : FileInfo.pos option
           ~get_from_sqlite:(fun name ->
             Naming_sqlite.get_fun_pos ~case_insensitive:false name)
         >>| attach_name_type FileInfo.Fun
-      | Provider_backend.Decl_service _ as backend -> not_implemented backend)
+      | Provider_backend.Decl_service { decl; _ } ->
+        Decl_service_client.rpc_get_fun decl name
+        |> Option.map ~f:(fun fun_elt ->
+               FileInfo.Full fun_elt.Typing_defs.fe_pos
+               |> attach_name_type FileInfo.Fun))
   >>| remove_name_type
 
 let fun_exists (ctx : Provider_context.t) (name : string) : bool =
@@ -214,7 +218,12 @@ let get_fun_canon_name (ctx : Provider_context.t) (name : string) :
         ~get_from_sqlite:(fun name ->
           Naming_sqlite.get_fun_pos ~case_insensitive:true name)
       >>= fun pos -> compute_symbol_canon_name (FileInfo.get_pos_filename pos)
-    | Provider_backend.Decl_service _ as backend -> not_implemented backend)
+    | Provider_backend.Decl_service _ ->
+      (* FIXME: Not correct! We need to add a canon-name API to the decl service. *)
+      if fun_exists ctx name then
+        Some name
+      else
+        None)
 
 let add_fun (ctx : Provider_context.t) (name : string) (pos : FileInfo.pos) :
     unit =
@@ -224,7 +233,11 @@ let add_fun (ctx : Provider_context.t) (name : string) (pos : FileInfo.pos) :
     let open Provider_backend.Reverse_naming_table_delta in
     reverse_naming_table_delta.funs <-
       SMap.add reverse_naming_table_delta.funs ~key:name ~data:(Pos pos)
-  | Provider_backend.Decl_service _ as backend -> not_implemented backend
+  | Provider_backend.Decl_service _ ->
+    (* Do nothing. All naming table updates are expected to have happened
+       already--we should have sent a control request to the decl service asking
+       it to update in response to the list of changed files. *)
+    ()
 
 let remove_fun_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
   match ctx.Provider_context.backend with
@@ -234,7 +247,9 @@ let remove_fun_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
     reverse_naming_table_delta.funs <-
       SSet.fold names ~init:reverse_naming_table_delta.funs ~f:(fun name acc ->
           SMap.add acc ~key:name ~data:Deleted)
-  | Provider_backend.Decl_service _ as backend -> not_implemented backend
+  | Provider_backend.Decl_service _ as backend ->
+    (* Removing cache items is not the responsibility of hh_worker. *)
+    not_implemented backend
 
 let add_type
     (ctx : Provider_context.t)

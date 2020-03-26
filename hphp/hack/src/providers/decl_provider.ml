@@ -50,8 +50,8 @@ let get_fun (ctx : Provider_context.t) (fun_name : fun_key) : fun_decl option =
           in
           Some ft
         | None -> None)
-  | Provider_backend.Decl_service _ ->
-    failwith "Decl_provider.get_fun not yet impl. for decl memory provider"
+  | Provider_backend.Decl_service { decl; _ } ->
+    Decl_service_client.rpc_get_fun decl fun_name
 
 let get_class (ctx : Provider_context.t) (class_name : class_key) :
     class_decl option =

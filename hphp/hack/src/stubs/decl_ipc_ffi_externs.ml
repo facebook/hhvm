@@ -8,4 +8,4 @@
 
 type decl_client
 
-let get_gconst_ffi _ _ = failwith "decl_ipc not implemented"
+let get_decl _ _ _ = failwith "decl_ipc not implemented"

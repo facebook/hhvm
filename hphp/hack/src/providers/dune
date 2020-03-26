@@ -105,7 +105,9 @@
     db_path_provider
     file_info
     naming_heap
-    relative_path)
+    pos
+    relative_path
+    typing_defs)
   (preprocess (pps ppx_deriving.std)))
 
 (library
@@ -143,7 +145,7 @@
     provider_context
     shallow_classes_heap)
   (preprocess (pps ppx_deriving.std)))
-	
+
 (library
   (name linearization_provider)
   (modules linearization_provider)

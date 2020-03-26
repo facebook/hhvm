@@ -1340,7 +1340,11 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                                 tparams,
                                 constraint: None,
                                 type_: ty,
-                                decl_errors: None,
+                                // NB: We have no intention of populating this
+                                // field. Any errors historically emitted during
+                                // shallow decl should be migrated to a NAST
+                                // check.
+                                decl_errors: Some(Errors::empty()),
                             }),
                         );
                     }
@@ -1431,7 +1435,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     Rc::new(FunElt {
                         deprecated: None,
                         type_,
-                        decl_errors: None,
+                        // NB: We have no intention of populating this field.
+                        // Any errors historically emitted during shallow decl
+                        // should be migrated to a NAST check.
+                        decl_errors: Some(Errors::empty()),
                         pos,
                     }),
                 );
@@ -1680,6 +1687,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             methods: Vec::new(),
             user_attributes: Vec::new(),
             enum_type: None,
+            // NB: We have no intention of populating this field. Any errors
+            // historically emitted during shallow decl should be migrated to a
+            // NAST check.
             decl_errors: Errors::empty(),
         };
 

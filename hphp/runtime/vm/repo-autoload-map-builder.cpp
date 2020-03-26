@@ -76,6 +76,14 @@ void RepoAutoloadMapBuilder::BuilderCollect::serde(BlobEncoder& sd) {
   serdeMap(sd, m_constants);
 }
 
+std::unique_ptr<RepoAutoloadMap> RepoAutoloadMapBuilder::serde(BlobDecoder& sd) {
+  RepoAutoloadMap::CaseInsensitiveMap classes = serdeMap<RepoAutoloadMap::CaseInsensitiveMap>(sd);
+  RepoAutoloadMap::CaseInsensitiveMap funcs = serdeMap<RepoAutoloadMap::CaseInsensitiveMap>(sd);
+  RepoAutoloadMap::CaseInsensitiveMap typeAliases = serdeMap<RepoAutoloadMap::CaseInsensitiveMap>(sd);
+  RepoAutoloadMap::CaseSensitiveMap constants = serdeMap<RepoAutoloadMap::CaseSensitiveMap>(sd);
+  return std::make_unique<RepoAutoloadMap>(classes, funcs, constants, typeAliases);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }

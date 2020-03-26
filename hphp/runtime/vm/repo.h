@@ -29,6 +29,7 @@
 #include <sys/types.h>
 #include <pwd.h>
 
+#include "hphp/runtime/base/repo-autoload-map.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/litstr-repo-proxy.h"
@@ -107,6 +108,8 @@ struct Repo : RepoProxy {
                                  const Native::FuncTable&);
   void forgetUnit(const std::string& path);
   RepoStatus findFile(const char* path, const std::string& root, SHA1& sha1);
+  RepoStatus findPath(int64_t unitSn, const std::string& root, String& path);
+  RepoStatus findUnit(const char* path, const std::string& root, int64_t& unitSn);
   RepoStatus insertSha1(UnitOrigin unitOrigin, UnitEmitter* ue, RepoTxn& txn);
   void commitSha1(UnitOrigin unitOrigin, UnitEmitter* ue);
 
@@ -154,7 +157,7 @@ struct Repo : RepoProxy {
    * No other threads may be reading or writing the repo GlobalData
    * when this is called.
    */
-  void saveGlobalData(GlobalData newData);
+  void saveGlobalData(GlobalData&& newData);
 
  private:
   /*
@@ -176,9 +179,21 @@ struct Repo : RepoProxy {
     void remove(RepoTxn& txn, const std::string& path);
   };
 
+  struct GetUnitPathStmt : public RepoProxy::Stmt {
+    GetUnitPathStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    RepoStatus get(int64_t unitSn, String& path);
+  };
+
+  struct GetUnitStmt : public RepoProxy::Stmt {
+    GetUnitStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    RepoStatus get(const char* path, int64_t& unitSn);
+  };
+
   InsertFileHashStmt m_insertFileHash[RepoIdCount];
   GetFileHashStmt m_getFileHash[RepoIdCount];
   RemoveFileHashStmt m_removeFileHash[RepoIdCount];
+  GetUnitPathStmt m_getUnitPath[RepoIdCount];
+  GetUnitStmt m_getUnit[RepoIdCount];
 
  public:
   std::string table(int repoId, const char* tablePrefix);

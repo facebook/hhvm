@@ -38,6 +38,8 @@
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/extern-compiler.h"
 #include "hphp/runtime/vm/memo-cache.h"
+#include "hphp/runtime/vm/repo-global-data.h"
+#include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/file.h"
@@ -69,6 +71,14 @@ bool HHVM_FUNCTION(autoload_is_native) {
 bool HHVM_FUNCTION(autoload_set_paths,
                    const Variant& map,
                    const String& root) {
+  // If we are using a native autoload map you are not allowed to override it
+  // in repo mode
+  if (RuntimeOption::RepoAuthoritative &&
+      RuntimeOption::EvalUseRepoAutoloadMap &&
+      Repo::get().global().AutoloadMap.get()) {
+    return false;
+  }
+
   if (map.isArray()) {
     return AutoloadHandler::s_instance->setMap(map.asCArrRef(), root);
   }

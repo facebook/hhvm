@@ -1318,8 +1318,6 @@ struct RuntimeOption {
   F(bool, EnablePerFileCoverage, false)                                 \
   F(bool, NoUseMagicMethods, false)                                     \
   F(bool, NoAppendToMap, false)                                         \
-  /* Should build an autoload map when we build the repo */             \
-  F(bool, BuildRepoAutoloadMap, false)                                  \
   /* Should we use the autoload map from the repo */                    \
   F(bool, UseRepoAutoloadMap, false)                                    \
   /* */

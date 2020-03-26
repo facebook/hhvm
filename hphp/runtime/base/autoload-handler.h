@@ -202,7 +202,6 @@ private:
   static String getSignature(const Variant& handler);
 
 private:
-  void setAutoloadMapFromFactory(AutoloadMapFactory& factory);
 
   // m_map points to either the request-scoped userland AutoloadMap or
   // a statically-scoped native AutoloadMap

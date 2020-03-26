@@ -16,6 +16,7 @@
 #ifndef incl_HPHP_REPO_AUTOLOAD_MAP_BUILDER_H_
 #define incl_HPHP_REPO_AUTOLOAD_MAP_BUILDER_H_
 
+#include "hphp/runtime/base/repo-autoload-map.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/string-functors.h"
 #include "hphp/runtime/vm/blob-helper.h"
@@ -88,6 +89,8 @@ struct RepoAutoloadMapBuilder {
     CaseSensitiveMap m_constants;
   };
 
+  static std::unique_ptr<RepoAutoloadMap> serde(BlobDecoder& sd);
+
   static RepoAutoloadMapBuilder::BuilderBase& get();
 
   template<class Compare>
@@ -98,6 +101,22 @@ struct RepoAutoloadMapBuilder {
         (it->second)
         ;
     }
+  }
+
+  template<class Map>
+  static Map serdeMap(BlobDecoder& sd) {
+    size_t size;
+    sd(size);
+    Map map(size);
+    for (size_t i = 0; i < size; i++) {
+      const StringData* str;
+      int64_t unitSn;
+      sd(str)
+        (unitSn)
+        ;
+      map[str] = unitSn;
+    }
+    return map;
   }
 
   static Guard collect() {

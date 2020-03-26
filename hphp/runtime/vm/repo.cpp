@@ -20,6 +20,7 @@
 #include <folly/Format.h>
 #include <folly/Singleton.h>
 
+#include "hphp/runtime/base/repo-autoload-map.h"
 #include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/repo-autoload-map-builder.h"
 #include "hphp/runtime/vm/repo-global-data.h"
@@ -112,6 +113,8 @@ Repo::Repo()
     m_getFileHash{GetFileHashStmt(*this, 0), GetFileHashStmt(*this, 1)},
     m_removeFileHash{RemoveFileHashStmt(*this, 0),
                      RemoveFileHashStmt(*this, 1)},
+    m_getUnitPath{GetUnitPathStmt(*this, 0), GetUnitPathStmt(*this, 1)},
+    m_getUnit{GetUnitStmt(*this, 0), GetUnitStmt(*this, 1)},
     m_dbc(nullptr), m_localReadable(false), m_localWritable(false),
     m_evalRepoId(-1), m_txDepth(0), m_rollback(false), m_beginStmt(*this),
     m_rollbackStmt(*this), m_commitStmt(*this), m_urp(*this), m_pcrp(*this),
@@ -235,7 +238,8 @@ void Repo::loadGlobalData(bool readArrayTable /* = true */) {
           if (!query.row()) {
             throw RepoExc("Can't find key = 'autoloadmap' in %s", tbl.c_str());
           }
-          query.getBlob(0, true);
+          BlobDecoder decoder = query.getBlob(0, true);
+          s_globalData.AutoloadMap = RepoAutoloadMapBuilder::serde(decoder);
         }
       }
 
@@ -286,7 +290,6 @@ void Repo::loadGlobalData(bool readArrayTable /* = true */) {
     for (auto const& elm : s_globalData.ConstantFunctions) {
       RuntimeOption::ConstantFunctions.insert(elm);
     }
-
     return;
   }
 
@@ -308,8 +311,8 @@ void Repo::loadGlobalData(bool readArrayTable /* = true */) {
   exit(1);
 }
 
-void Repo::saveGlobalData(GlobalData newData) {
-  s_globalData = newData;
+void Repo::saveGlobalData(GlobalData&& newData) {
+  s_globalData = std::move(newData);
 
   auto const repoId = repoIdForNewUnit(UnitOrigin::File);
   RepoStmt stmt(*this);
@@ -341,16 +344,14 @@ void Repo::saveGlobalData(GlobalData newData) {
     query.exec();
   }
 
-  if (RuntimeOption::EvalBuildRepoAutoloadMap) {
-    {
-      RepoTxnQuery query(txn, stmt);
-      auto key = std::string("autoloadmap");
-      query.bindStdString("@key", key);
-      BlobEncoder encoder{true};
-      RepoAutoloadMapBuilder::get().serde(encoder);
-      query.bindBlob("@data", encoder, /* static */ true);
-      query.exec();
-    }
+  {
+    RepoTxnQuery query(txn, stmt);
+    auto key = std::string("autoloadmap");
+    query.bindStdString("@key", key);
+    BlobEncoder encoder{true};
+    RepoAutoloadMapBuilder::get().serde(encoder);
+    query.bindBlob("@data", encoder, /* static */ true);
+    query.exec();
   }
 
   // TODO(#3521039): we could just put the litstr table in the same
@@ -475,7 +476,104 @@ void Repo::RemoveFileHashStmt::remove(RepoTxn& txn, const std::string& path) {
   query.exec();
 }
 
-RepoStatus Repo::findFile(const char *path, const std::string &root,
+RepoStatus Repo::GetUnitPathStmt::get(int64_t unitSn, String& path) {
+  try {
+    auto txn = RepoTxn{m_repo.begin()};
+    if (!prepared()) {
+      auto selectQuery = folly::sformat(
+        "SELECT f.path "
+        "FROM {} AS u, {} AS f "
+        "WHERE u.unitSn == @unitSn AND f.sha1 == u.sha1",
+        m_repo.table(m_repoId, "Unit"),
+        m_repo.table(m_repoId, "FileSha1"));
+      txn.prepare(*this, selectQuery);
+    }
+    RepoTxnQuery query(txn, *this);
+    query.bindInt64("@unitSn", unitSn);
+    query.step();
+    if (!query.row()) {
+      return RepoStatus::error;
+    }
+    StringData* spath; query.getStaticString(0, spath);
+    path = String(spath);
+    txn.commit();
+    return RepoStatus::success;
+  } catch (RepoExc& re) {
+    return RepoStatus::error;
+  }
+}
+
+RepoStatus Repo::findPath(int64_t unitSn, const std::string& root, String& path) {
+  if (m_dbc == nullptr) {
+    return RepoStatus::error;
+  }
+  int repoId;
+  for (repoId = RepoIdCount - 1; repoId >= 0; --repoId) {
+    String relPath;
+    if (m_getUnitPath[repoId].get(unitSn, relPath) == RepoStatus::success) {
+      path = root + relPath;
+      TRACE(3, "Repo loaded file path for '%ld' from '%s'\n",
+                unitSn, repoName(repoId).c_str());
+      return RepoStatus::success;
+    }
+  }
+  TRACE(3, "Repo file path: error loading '%ld'\n", unitSn);
+  return RepoStatus::error;
+}
+
+RepoStatus Repo::GetUnitStmt::get(const char* path, int64_t& unitSn) {
+  try {
+    auto txn = RepoTxn{m_repo.begin()};
+    if (!prepared()) {
+      auto selectQuery = folly::sformat(
+        "SELECT u.unitSn "
+        "FROM {} AS f, {} AS u "
+        "WHERE f.path == @path AND f.sha1 == u.sha1",
+        m_repo.table(m_repoId, "FileSha1"),
+        m_repo.table(m_repoId, "Unit"));
+      txn.prepare(*this, selectQuery);
+    }
+    RepoTxnQuery query(txn, *this);
+    query.bindText("@path", path, strlen(path));
+    query.step();
+    if (!query.row()) {
+      return RepoStatus::error;
+    }
+    int unitSn_;               /**/ query.getInt(0, unitSn_);
+    unitSn = unitSn_;
+    txn.commit();
+    return RepoStatus::success;
+  } catch (RepoExc& re) {
+    return RepoStatus::error;
+  }
+}
+
+RepoStatus Repo::findUnit(const char* path, const std::string& root,
+                          int64_t& unitSn) {
+  if (m_dbc == nullptr) {
+    return RepoStatus::error;
+  }
+  int repoId;
+  for (repoId = RepoIdCount - 1; repoId >= 0; --repoId) {
+    if (*path == '/' && !root.empty() &&
+        !strncmp(root.c_str(), path, root.size()) &&
+        (m_getUnit[repoId].get(path + root.size(), unitSn) ==
+         RepoStatus::success)) {
+      TRACE(3, "Repo loaded unit for '%s' from '%s'\n",
+               path + root.size(), repoName(repoId).c_str());
+      return RepoStatus::success;
+    }
+    if (m_getUnit[repoId].get(path, unitSn) == RepoStatus::success) {
+      TRACE(3, "Repo loaded unit for '%s' from '%s'\n",
+                path, repoName(repoId).c_str());
+      return RepoStatus::success;
+    }
+  }
+  TRACE(3, "Repo unit: error loading '%s'\n", path);
+  return RepoStatus::error;
+}
+
+RepoStatus Repo::findFile(const char *path, const std::string& root,
                           SHA1& sha1) {
   tracing::Block _{
     "repo-find-file",
@@ -1151,6 +1249,13 @@ RepoStatus Repo::createSchema(int repoId, std::string& errorMsg) {
         "CREATE TABLE {} (path TEXT, sha1 BLOB, UNIQUE(path, sha1));",
         table(repoId, "FileSha1"));
       txn.exec(createQuery);
+
+      auto indexQuery = folly::sformat(
+        "CREATE INDEX {}_sha1_index ON {}_{} (sha1);",
+        table(repoId, "FileSha1"),
+        "FileSha1",
+        repoSchemaId());
+      txn.exec(indexQuery);
     }
     txn.exec(folly::sformat("CREATE TABLE {} (key TEXT, data BLOB);",
                            table(repoId, "GlobalData")));

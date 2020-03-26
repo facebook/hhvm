@@ -188,7 +188,7 @@ void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
     gd.ConstantFunctions.push_back(elm);
   }
   if (arrTable) globalArrayTypeTable().repopulate(*arrTable);
-  Repo::get().saveGlobalData(gd);
+  Repo::get().saveGlobalData(std::move(gd));
 }
 
 }

@@ -431,7 +431,7 @@ void write_global_data(
 
   globalArrayTypeTable().repopulate(*arrTable);
   // NOTE: There's no way to tell if saveGlobalData() fails for some reason.
-  Repo::get().saveGlobalData(gd);
+  Repo::get().saveGlobalData(std::move(gd));
 }
 
 void compile_repo() {

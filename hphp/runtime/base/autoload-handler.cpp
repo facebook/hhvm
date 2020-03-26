@@ -27,7 +27,10 @@
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stat-cache.h"
+#include "hphp/runtime/base/repo-autoload-map.h"
 #include "hphp/runtime/base/unit-cache.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -120,6 +123,47 @@ void AutoloadMapFactory::setInstance(AutoloadMapFactory* instance) {
 
 //////////////////////////////////////////////////////////////////////
 
+static AutoloadMap* getAutoloadMapForRequest() {
+  if (RuntimeOption::RepoAuthoritative) {
+    auto map = Repo::get().global().AutoloadMap.get();
+    if (map) {
+      return map;
+    }
+  }
+
+  auto* factory = AutoloadMapFactory::getInstance();
+  if (!factory) {
+    return nullptr;
+  }
+
+  if (g_context.isNull()) {
+    return nullptr;
+  }
+
+  auto* repoOptions = g_context->getRepoOptionsForRequest();
+  if (!repoOptions) {
+    return nullptr;
+  }
+
+  auto repoRoot = folly::fs::canonical(repoOptions->path()).parent_path();
+
+  auto* map = factory->getForRoot(repoRoot);
+  if (!map) {
+    return nullptr;
+  }
+
+  try {
+    map->ensureUpdated();
+    return map;
+  } catch (const std::exception& e) {
+    Logger::Error(
+        "Failed to update native autoloader, not natively autoloading %s. %s\n",
+        repoRoot.generic().c_str(),
+        e.what());
+  }
+  return nullptr;
+}
+
 void AutoloadHandler::requestInit() {
   assertx(!m_map);
   assertx(!m_req_map);
@@ -128,10 +172,7 @@ void AutoloadHandler::requestInit() {
   new (&m_handlers) req::deque<HandlerBundle>();
   m_handlers_valid = true;
 
-  auto* factory = AutoloadMapFactory::getInstance();
-  if (factory) {
-    setAutoloadMapFromFactory(*factory);
-  }
+  m_map = getAutoloadMapForRequest();
 }
 
 void AutoloadHandler::requestShutdown() {
@@ -144,6 +185,10 @@ void AutoloadHandler::requestShutdown() {
 }
 
 bool AutoloadHandler::setMap(const Array& map, String root) {
+  assertx(!(RuntimeOption::RepoAuthoritative &&
+            RuntimeOption::EvalUseRepoAutoloadMap &&
+            Repo::get().global().AutoloadMap));
+
   m_req_map = req::make_unique<UserAutoloadMap>(
       UserAutoloadMap::fromFullMap(map, std::move(root)));
   m_map = m_req_map.get();
@@ -338,36 +383,6 @@ AutoloadHandler::loadFromMap(const String& clsName,
       continue;
     }
     return res;
-  }
-}
-
-void AutoloadHandler::setAutoloadMapFromFactory(
-    AutoloadMapFactory& factory) {
-
-  if (g_context.isNull()) {
-    return;
-  }
-
-  auto* repoOptions = g_context->getRepoOptionsForRequest();
-  if (!repoOptions) {
-    return;
-  }
-
-  auto repoRoot = folly::fs::canonical(repoOptions->path()).parent_path();
-
-  auto* map = factory.getForRoot(repoRoot);
-  if (!map) {
-    return;
-  }
-
-  try {
-    map->ensureUpdated();
-    m_map = map;
-  } catch (const std::exception& e) {
-    Logger::Error(
-        "Failed to update native autoloader, not natively autoloading %s. %s\n",
-        repoRoot.generic().c_str(),
-        e.what());
   }
 }
 

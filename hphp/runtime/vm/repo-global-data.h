@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
+#include "hphp/runtime/base/repo-autoload-map.h"
 
 namespace HPHP {
 
@@ -185,6 +186,8 @@ struct Repo::GlobalData {
   std::vector<const StringData*> APCProfile;
 
   std::vector<std::pair<std::string,TypedValue>> ConstantFunctions;
+
+  std::unique_ptr<RepoAutoloadMap> AutoloadMap = nullptr;
 
   template<class SerDe> void serde(SerDe& sd) {
     sd(InitialNamedEntityTableSize)

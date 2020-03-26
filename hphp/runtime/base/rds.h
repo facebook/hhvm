@@ -206,10 +206,52 @@ struct StaticMethodF { LowStringPtr name; };
  * symbols that are keyed on translation id.  These generally should
  * go in Mode::Local or Mode::Persistent, depending on the use case.
  */
-template<typename T>
-struct Profile { TransID transId;
-                 Offset bcOff;
-                 LowStringPtr name; };
+#define RDS_PROFILE_SYMBOLS   \
+  PR(ArrayAccessProfile)  \
+  PR(ArrayIterProfile)    \
+  PR(ArrayKindProfile)    \
+  PR(CallTargetProfile)   \
+  PR(ClsCnsProfile)       \
+  PR(DecRefProfile)       \
+  PR(IncRefProfile)       \
+  PR(MethProfile)         \
+  PR(ReleaseVVProfile)    \
+  PR(SwitchProfile)       \
+  PR(TypeProfile)
+
+enum class ProfileKind {
+  None = 0,
+#define PR(T) T,
+  RDS_PROFILE_SYMBOLS
+#undef PR
+};
+
+struct Profile {
+  Profile() = default;
+
+  Profile(TransID transId, Offset bcOff, const StringData* name)
+    : kind{ProfileKind::None}
+    , transId{transId}
+    , bcOff{bcOff}
+    , name{name}
+  {}
+
+#define PR(T) \
+  Profile(const jit::T*, TransID transId,       \
+          Offset bcOff, const StringData* name) \
+    : kind{ProfileKind::T}                      \
+    , transId{transId}                          \
+    , bcOff{bcOff}                              \
+    , name{name}                                \
+  {}
+  RDS_PROFILE_SYMBOLS
+#undef PR
+
+  ProfileKind kind;
+  TransID transId;
+  Offset bcOff;
+  LowStringPtr name;
+};
 
 /*
  * Static class properties in Mode::Local
@@ -235,17 +277,7 @@ struct LSBMemoCache {
 using Symbol = boost::variant< ClsConstant
                              , StaticMethod
                              , StaticMethodF
-                             , Profile<jit::ArrayAccessProfile>
-                             , Profile<jit::ArrayIterProfile>
-                             , Profile<jit::ArrayKindProfile>
-                             , Profile<jit::CallTargetProfile>
-                             , Profile<jit::ClsCnsProfile>
-                             , Profile<jit::DecRefProfile>
-                             , Profile<jit::IncRefProfile>
-                             , Profile<jit::MethProfile>
-                             , Profile<jit::ReleaseVVProfile>
-                             , Profile<jit::SwitchProfile>
-                             , Profile<jit::TypeProfile>
+                             , Profile
                              , SPropCache
                              , StaticMemoValue
                              , StaticMemoCache

@@ -40,7 +40,7 @@ namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace detail {
-void addTargetProfileInfo(const rds::Profile<void>& key,
+void addTargetProfileInfo(const rds::Profile& key,
                           const std::string& dbgInfo);
 
 template<typename T>
@@ -106,7 +106,7 @@ auto call_tostring(const T& t, uint64_t size) -> decltype(auto) {
  * is the actual size allocated in rds (see SwitchProfile for an
  * example of a variably sized profiler).
  *
- * rds::Profile<MyType> also needs to be added to rds::Symbol.
+ * MyType also needs to be added to the RDS_PROFILE_SYMBOLS macro.
  *
  * If the MyType contains pointers, or other data that needs updating
  * when serializing/deserializing, it should also define
@@ -126,7 +126,7 @@ struct TargetProfile {
                 size_t extraSize = 0)
     : m_link(createLink(profTransID, kind, bcOff, name, extraSize))
     , m_kind(kind)
-    , m_key{profTransID, bcOff, name}
+    , m_key{(T*)nullptr, profTransID, bcOff, name}
   {}
 
   TargetProfile(const IRUnit& unit,
@@ -142,7 +142,11 @@ struct TargetProfile {
                     extraSize)
   {
     if (dumpIREnabled(unit.context().kind)) {
-      auto const profile = rds::Profile<T>{m_key.transId, marker.bcOff(), name};
+      auto const profile = rds::Profile(
+        (T*)nullptr,
+        m_key.transId,
+        marker.bcOff(),
+        name);
       unit.annotationData->profileKeys.push_back(profile);
     }
   }
@@ -213,7 +217,7 @@ private:
              Offset bcOff,
              const StringData* name,
              size_t extraSize) {
-    auto const rdsKey = rds::Profile<T>{profTransID, bcOff, name};
+    auto const rdsKey = rds::Profile((T*)nullptr, profTransID, bcOff, name);
 
     switch (kind) {
     case TransKind::Profile:
@@ -240,7 +244,7 @@ private:
 private:
   rds::Link<T, rds::Mode::Local> const m_link;
   TransKind const m_kind;
-  rds::Profile<void> const m_key;
+  rds::Profile const m_key;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

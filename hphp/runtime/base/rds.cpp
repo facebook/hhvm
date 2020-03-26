@@ -66,8 +66,7 @@ struct SymbolKind : boost::static_visitor<std::string> {
   std::string operator()(ClsConstant /*k*/) const { return "ClsConstant"; }
   std::string operator()(StaticMethod /*k*/) const { return "StaticMethod"; }
   std::string operator()(StaticMethodF /*k*/) const { return "StaticMethodF"; }
-  template<typename T>
-  std::string operator()(Profile<T> /*k*/) const { return "Profile"; }
+  std::string operator()(Profile /*k*/) const { return "Profile"; }
   std::string operator()(SPropCache /*k*/) const { return "SPropCache"; }
   std::string operator()(StaticMemoValue) const { return "StaticMemoValue"; }
   std::string operator()(StaticMemoCache) const { return "StaticMemoCache"; }
@@ -83,8 +82,7 @@ struct SymbolRep : boost::static_visitor<std::string> {
   std::string operator()(StaticMethod k)  const { return k.name->data(); }
   std::string operator()(StaticMethodF k) const { return k.name->data(); }
 
-  template<typename T>
-  std::string operator()(Profile<T> k) const {
+  std::string operator()(Profile k) const {
     return folly::format(
       "{}:t{}:{}",
       k.name,
@@ -132,10 +130,10 @@ struct SymbolEq : boost::static_visitor<bool> {
            k1.cnsName == k2.cnsName;
   }
 
-  template<typename T>
-  bool operator()(Profile<T> k1, Profile<T> k2) const {
+  bool operator()(Profile k1, Profile k2) const {
     assertx(k1.name->isStatic() && k2.name->isStatic());
-    return k1.transId == k2.transId &&
+    return k1.kind == k2.kind &&
+           k1.transId == k2.transId &&
            k1.bcOff == k2.bcOff &&
            k1.name == k2.name;
   }
@@ -179,9 +177,9 @@ struct SymbolHash : boost::static_visitor<size_t> {
     );
   }
 
-  template<typename T>
-  size_t operator()(Profile<T> k) const {
+  size_t operator()(Profile k) const {
     return folly::hash::hash_combine(
+      static_cast<int>(k.kind),
       k.transId,
       k.bcOff,
       k.name->hash()

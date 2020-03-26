@@ -811,11 +811,12 @@ struct TargetProfileVisitor : boost::static_visitor<void> {
   TargetProfileVisitor(ProfDataSerializer& ser,
                        const rds::Symbol& sym,
                        rds::Handle handle,
-                       uint32_t size) :
-      ser{ser},
-      sym{sym},
-      handle{handle},
-      size{size} {}
+                       uint32_t size)
+    : ser{ser}
+    , sym{sym}
+    , handle{handle}
+    , size{size}
+  {}
 
   template<typename T>
   void process(T& out, const StringData* name) {
@@ -831,8 +832,9 @@ struct TargetProfileVisitor : boost::static_visitor<void> {
   }
 
   template<typename T> void operator()(const T&) {}
+
   template<typename T>
-  void operator()(const rds::Profile<T>& pt) {
+  void go(const rds::Profile& pt) {
     if (size == sizeof(T)) {
       T out{};
       process(out, pt.name.get());
@@ -840,6 +842,17 @@ struct TargetProfileVisitor : boost::static_visitor<void> {
       auto const mem = calloc(1, size);
       SCOPE_EXIT { free(mem); };
       process(*reinterpret_cast<T*>(mem), pt.name.get());
+    }
+  }
+
+  void operator()(const rds::Profile& pt) {
+    switch (pt.kind) {
+      case rds::ProfileKind::None: always_assert(false);
+#define PR(T)                   \
+      case rds::ProfileKind::T: \
+        return go<T>(pt);
+      RDS_PROFILE_SYMBOLS
+#undef PR
     }
   }
 
@@ -880,8 +893,9 @@ struct SymbolFixup : boost::static_visitor<void> {
       ser{ser}, name{name}, size{size} {}
 
   template<typename T> void operator()(T&) { always_assert(false); }
+
   template<typename T>
-  void operator()(rds::Profile<T>& pt) {
+  void go(rds::Profile& pt) {
     TargetProfile<T> prof(pt.transId,
                           TransKind::Profile,
                           pt.bcOff,
@@ -893,6 +907,18 @@ struct SymbolFixup : boost::static_visitor<void> {
     } else {
       read_raw(ser, &prof.value(), size);
     }
+  }
+
+  void operator()(rds::Profile& pt) {
+    switch (pt.kind) {
+      case rds::ProfileKind::None: always_assert(false);
+#define PR(T)                   \
+      case rds::ProfileKind::T: \
+        return go<T>(pt);
+      RDS_PROFILE_SYMBOLS
+#undef PR
+    }
+    not_reached();
   }
 
   ProfDataDeserializer& ser;

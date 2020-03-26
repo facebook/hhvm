@@ -572,7 +572,7 @@ struct ProfData {
   /*
    * Support storing debug info about target profiles in profiling translations.
    */
-  struct TargetProfileInfo { rds::Profile<void> key; std::string debugInfo; };
+  struct TargetProfileInfo { rds::Profile key; std::string debugInfo; };
   void addTargetProfile(const TargetProfileInfo& info);
   std::vector<TargetProfileInfo> getTargetProfiles(TransID transID) const;
 

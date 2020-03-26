@@ -353,9 +353,7 @@ pub(super) fn emit_break_or_continue(
     let in_finally_epilogue = flags.contains(EmitBreakOrContinueFlags::IN_FINALLY_EPILOGUE);
     let is_break = flags.contains(EmitBreakOrContinueFlags::IS_BREAK);
     match jt_gen.jump_targets().get_target_for_level(is_break, level) {
-        jt::ResolvedJumpTarget::NotFound => {
-            emit_fatal::emit_fatal_for_break_continue(e, pos, level)
-        }
+        jt::ResolvedJumpTarget::NotFound => emit_fatal::emit_fatal_for_break_continue(pos, level),
         jt::ResolvedJumpTarget::ResolvedRegular(target_label, iterators_to_release) => {
             let preamble = if in_finally_epilogue && level == 1 {
                 InstrSeq::make_unsetl(e.local_gen_mut().get_label().clone())
@@ -364,7 +362,7 @@ pub(super) fn emit_break_or_continue(
             };
             InstrSeq::gather(vec![
                 preamble,
-                emit_pos(e, pos),
+                emit_pos(pos),
                 emit_jump_to_label(target_label, iterators_to_release),
             ])
         }
@@ -384,7 +382,7 @@ pub(super) fn emit_break_or_continue(
             InstrSeq::gather(vec![
                 preamble,
                 emit_jump_to_label(finally_label, iterators_to_release),
-                emit_pos(e, pos),
+                emit_pos(pos),
                 // emit break/continue instr as an indicator for try/finally rewriter
                 // to generate finally epilogue - try/finally rewriter will remove it.
                 if is_break {
@@ -441,7 +439,7 @@ pub(super) fn emit_finally_epilogue(
     } else if jump_instrs.0.len() == 1 {
         let (_, instr) = jump_instrs.0.iter().next().unwrap();
         InstrSeq::gather(vec![
-            emit_pos(e, pos),
+            emit_pos(pos),
             InstrSeq::make_issetl(e.local_gen_mut().get_label().clone()),
             InstrSeq::make_jmpz(finally_end),
             emit_instr(e, env, pos, instr)?,
@@ -495,7 +493,7 @@ pub(super) fn emit_finally_epilogue(
             bodies.push(InstrSeq::make_empty());
         }
         InstrSeq::gather(vec![
-            emit_pos(e, pos),
+            emit_pos(pos),
             InstrSeq::make_issetl(e.local_gen_mut().get_label().clone()),
             InstrSeq::make_jmpz(finally_end),
             InstrSeq::make_cgetl(e.local_gen_mut().get_label().clone()),

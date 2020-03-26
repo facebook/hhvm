@@ -3,12 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use env::emitter::Emitter;
 use instruction_sequence_rust::InstrSeq;
 use oxidized::pos::Pos;
 use std::convert::TryInto;
 
-pub fn emit_pos(emitter: &Emitter, pos: &Pos) -> InstrSeq {
+pub fn emit_pos(pos: &Pos) -> InstrSeq {
     if !pos.is_none() {
         let (line_begin, line_end, col_begin, col_end) = pos.info_pos_extended();
         InstrSeq::make_srcloc(
@@ -22,6 +21,6 @@ pub fn emit_pos(emitter: &Emitter, pos: &Pos) -> InstrSeq {
     }
 }
 
-pub fn emit_pos_then(emitter: &Emitter, pos: &Pos, instrs: InstrSeq) -> InstrSeq {
-    InstrSeq::gather(vec![emit_pos(emitter, pos), instrs])
+pub fn emit_pos_then(pos: &Pos, instrs: InstrSeq) -> InstrSeq {
+    InstrSeq::gather(vec![emit_pos(pos), instrs])
 }

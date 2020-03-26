@@ -10,6 +10,7 @@ use ast_constant_folder_rust as ast_constant_folder;
 use ast_scope_rust::Scope;
 use emit_adata_rust as emit_adata;
 use emit_fatal_rust as emit_fatal;
+use emit_pos_rust::{emit_pos, emit_pos_then};
 use emit_symbol_refs_rust as emit_symbol_refs;
 use emit_type_constant_rust as emit_type_constant;
 use env::{emitter::Emitter, local, Env, Flags as EnvFlags};
@@ -370,14 +371,14 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
         | Expr_::True => {
             let v = ast_constant_folder::expr_to_typed_value(emitter, &env.namespace, expression)
                 .map_err(|_| unrecoverable("expr_to_typed_value failed"))?;
-            emit_pos_then(emitter, pos, InstrSeq::make_typedvalue(v))
+            Ok(emit_pos_then(pos, InstrSeq::make_typedvalue(v)))
         }
         Expr_::PrefixedString(e) => emit_expr(emitter, env, &e.1),
         Expr_::ParenthesizedExpr(e) => emit_expr(emitter, env, e),
         Expr_::Lvar(e) => {
             let Lid(pos, _) = &**e;
             Ok(InstrSeq::gather(vec![
-                emit_pos(emitter, pos)?,
+                emit_pos(pos),
                 emit_local(emitter, env, BareThisOp::Notice, e)?,
             ]))
         }
@@ -406,7 +407,7 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
                 (Some(name), Some(e)) if name == superglobals::GLOBALS => {
                     Ok(InstrSeq::gather(vec![
                         emit_expr(emitter, env, e)?,
-                        emit_pos(emitter, pos)?,
+                        emit_pos(pos),
                         InstrSeq::make_cgetg(),
                     ]))
                 }
@@ -430,18 +431,18 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
         Expr_::Call(c) => emit_call_expr(emitter, env, pos, None, c),
         Expr_::New(e) => emit_new(emitter, env, pos, e),
         Expr_::Record(e) => emit_record(env, pos, e),
-        Expr_::Array(es) => {
-            let c = emit_collection(emitter, env, expression, es, None)?;
-            emit_pos_then(emitter, pos, c)
-        }
-        Expr_::Darray(e) => {
-            let instrs = emit_collection(emitter, env, expression, &mk_afkvalues(&e.1), None)?;
-            emit_pos_then(emitter, pos, instrs)
-        }
-        Expr_::Varray(e) => {
-            let instrs = emit_collection(emitter, env, expression, &mk_afvalues(&e.1), None)?;
-            emit_pos_then(emitter, pos, instrs)
-        }
+        Expr_::Array(es) => Ok(emit_pos_then(
+            pos,
+            emit_collection(emitter, env, expression, es, None)?,
+        )),
+        Expr_::Darray(e) => Ok(emit_pos_then(
+            pos,
+            emit_collection(emitter, env, expression, &mk_afkvalues(&e.1), None)?,
+        )),
+        Expr_::Varray(e) => Ok(emit_pos_then(
+            pos,
+            emit_collection(emitter, env, expression, &mk_afvalues(&e.1), None)?,
+        )),
         Expr_::Collection(e) => emit_named_collection_str(emitter, env, expression, e),
         Expr_::ValCollection(e) => {
             let (kind, _, es) = &**e;
@@ -476,24 +477,15 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
             };
             emit_named_collection(emitter, env, pos, expression, &fields, collection_typ)
         }
-        Expr_::Clone(e) => {
-            let clone = emit_clone(emitter, env, e)?;
-            emit_pos_then(emitter, pos, clone)
-        }
-        Expr_::Shape(e) => emit_pos_then(emitter, pos, emit_shape(env, expression, e)?),
+        Expr_::Clone(e) => Ok(emit_pos_then(pos, emit_clone(emitter, env, e)?)),
+        Expr_::Shape(e) => Ok(emit_pos_then(pos, emit_shape(env, expression, e)?)),
         Expr_::Await(e) => emit_await(emitter, env, pos, e),
         Expr_::Yield(e) => emit_yield(emitter, env, pos, e),
-        Expr_::Efun(e) => {
-            let lambda = emit_lambda(emitter, env, &e.0, &e.1)?;
-            emit_pos_then(emitter, pos, lambda)
-        }
+        Expr_::Efun(e) => Ok(emit_pos_then(pos, emit_lambda(emitter, env, &e.0, &e.1)?)),
         Expr_::ClassGet(e) => emit_class_get(env, QueryOp::CGet, e),
         Expr_::String2(es) => emit_string2(emitter, env, pos, es),
         Expr_::BracedExpr(e) => emit_expr(emitter, env, e),
-        Expr_::Id(e) => {
-            let instrs = emit_id(emitter, env, e)?;
-            emit_pos_then(emitter, pos, instrs)
-        }
+        Expr_::Id(e) => Ok(emit_pos_then(pos, emit_id(emitter, env, e)?)),
         Expr_::Xml(e) => emit_xhp(env, pos, e),
         Expr_::Callconv(e) => Err(Unrecoverable(
             "emit_callconv: This should have been caught at emit_arg".into(),
@@ -524,14 +516,6 @@ fn emit_exprs(e: &mut Emitter, env: &Env, exprs: &[tast::Expr]) -> Result {
     }
 }
 
-fn emit_pos_then(emitter: &Emitter, pos: &Pos, instrs: InstrSeq) -> Result {
-    Ok(emit_pos_rust::emit_pos_then(emitter, pos, instrs))
-}
-
-fn emit_pos(emitter: &Emitter, pos: &Pos) -> Result {
-    Ok(emit_pos_rust::emit_pos(emitter, pos))
-}
-
 fn emit_id(emitter: &mut Emitter, env: &Env, id: &tast::Sid) -> Result {
     use pseudo_consts::*;
     use InstructLitConst::*;
@@ -554,7 +538,7 @@ fn emit_id(emitter: &mut Emitter, env: &Env, id: &tast::Sid) -> Result {
             //let cid: ConstId = r#const::Type::from_ast_name(&s);
             let cid: ConstId = string_utils::strip_global_ns(&s).to_string().into();
             emit_symbol_refs::State::add_constant(emitter, cid.clone());
-            return emit_pos_then(emitter, p, InstrSeq::make_lit_const(CnsE(cid)));
+            return Ok(emit_pos_then(p, InstrSeq::make_lit_const(CnsE(cid))));
         }
     };
     Ok(res)
@@ -579,13 +563,13 @@ fn emit_yield(e: &mut Emitter, env: &Env, pos: &Pos, af: &tast::Afield) -> Resul
     Ok(match af {
         tast::Afield::AFvalue(v) => InstrSeq::gather(vec![
             emit_expr(e, env, v)?,
-            emit_pos(e, pos)?,
+            emit_pos(pos),
             InstrSeq::make_yield(),
         ]),
         tast::Afield::AFkvalue(k, v) => InstrSeq::gather(vec![
             emit_expr(e, env, k)?,
             emit_expr(e, env, v)?,
-            emit_pos(e, pos)?,
+            emit_pos(pos),
             InstrSeq::make_yieldk(),
         ]),
     })
@@ -687,7 +671,7 @@ fn emit_import(
     };
     Ok(InstrSeq::gather(vec![
         expr_instrs,
-        emit_pos(e, pos)?,
+        emit_pos(pos),
         import_op_instr,
     ]))
 }
@@ -698,13 +682,13 @@ fn emit_string2(e: &mut Emitter, env: &Env, pos: &Pos, es: &Vec<tast::Expr>) -> 
     } else if es.len() == 1 {
         Ok(InstrSeq::gather(vec![
             emit_expr(e, env, &es[0])?,
-            emit_pos(e, pos)?,
+            emit_pos(pos),
             InstrSeq::make_cast_string(),
         ]))
     } else {
         Ok(InstrSeq::gather(vec![
             emit_two_exprs(e, env, &es[0].0, &es[0], &es[1])?,
-            emit_pos(e, pos)?,
+            emit_pos(pos),
             InstrSeq::make_concat(),
             InstrSeq::gather(
                 (&es[2..])
@@ -712,7 +696,7 @@ fn emit_string2(e: &mut Emitter, env: &Env, pos: &Pos, es: &Vec<tast::Expr>) -> 
                     .map(|expr| {
                         Ok(InstrSeq::gather(vec![
                             emit_expr(e, env, expr)?,
-                            emit_pos(e, pos)?,
+                            emit_pos(pos),
                             InstrSeq::make_concat(),
                         ]))
                     })
@@ -801,7 +785,7 @@ pub fn emit_await(emitter: &mut Emitter, env: &Env, pos: &Pos, expr: &tast::Expr
             };
             Ok(InstrSeq::gather(vec![
                 instrs,
-                emit_pos(emitter, pos)?,
+                emit_pos(pos),
                 InstrSeq::make_dup(),
                 InstrSeq::make_istypec(IstypeOp::OpNull),
                 InstrSeq::make_jmpnz(after_await.clone()),
@@ -940,18 +924,18 @@ fn emit_named_collection(
     collection_type: CollectionType,
 ) -> Result {
     let emit_vector_like = |e: &mut Emitter, collection_type| {
-        if fields.is_empty() {
-            emit_pos_then(e, pos, InstrSeq::make_newcol(collection_type))
+        Ok(if fields.is_empty() {
+            emit_pos_then(pos, InstrSeq::make_newcol(collection_type))
         } else {
-            Ok(InstrSeq::gather(vec![
+            InstrSeq::gather(vec![
                 emit_vec_collection(e, env, pos, fields)?,
                 InstrSeq::make_colfromarray(collection_type),
-            ]))
-        }
+            ])
+        })
     };
     let emit_map_or_set = |e: &mut Emitter, collection_type| {
         if fields.is_empty() {
-            emit_pos_then(e, pos, InstrSeq::make_newcol(collection_type))
+            Ok(emit_pos_then(pos, InstrSeq::make_newcol(collection_type)))
         } else {
             emit_collection(e, env, expr, fields, Some(collection_type))
         }
@@ -960,7 +944,7 @@ fn emit_named_collection(
     match collection_type {
         C::Dict | C::Vec | C::Keyset => {
             let instr = emit_collection(e, env, expr, fields, None)?;
-            emit_pos_then(e, pos, instr)
+            Ok(emit_pos_then(pos, instr))
         }
         C::Vector | C::ImmVector => emit_vector_like(e, collection_type),
         C::Map | C::ImmMap | C::Set | C::ImmSet => emit_map_or_set(e, collection_type),
@@ -1062,7 +1046,7 @@ fn emit_static_collection(
     Ok(
         if arrprov_enabled && env.scope.has_function_attribute("__ProvenanceSkipFrame") {
             InstrSeq::gather(vec![
-                emit_pos(e, pos)?,
+                emit_pos(pos),
                 InstrSeq::make_nulluninit(),
                 InstrSeq::make_nulluninit(),
                 InstrSeq::make_nulluninit(),
@@ -1075,7 +1059,7 @@ fn emit_static_collection(
             ])
         } else {
             InstrSeq::gather(vec![
-                emit_pos(e, pos)?,
+                emit_pos(pos),
                 InstrSeq::make_typedvalue(tv),
                 transform_instr,
             ])
@@ -1094,7 +1078,7 @@ fn expr_and_new(
     match field {
         tast::Afield::AFvalue(v) => Ok(InstrSeq::gather(vec![
             emit_expr(e, env, v)?,
-            emit_pos(e, pos)?,
+            emit_pos(pos),
             instr_to_add_new,
         ])),
         tast::Afield::AFkvalue(k, v) => Ok(InstrSeq::gather(vec![
@@ -1121,7 +1105,7 @@ fn emit_keyvalue_collection(
             InstrSeq::gather(vec![InstrSeq::make_dup(), InstrSeq::make_add_elemc()]),
         ),
     };
-    let emitted_pos = emit_pos(e, pos)?;
+    let emitted_pos = emit_pos(pos);
     Ok(InstrSeq::gather(vec![
         emitted_pos.clone(),
         InstrSeq::make_lit_const(constructor),
@@ -1207,7 +1191,7 @@ fn emit_struct_array<C: FnOnce(&mut Emitter, Vec<String>) -> Result<InstrSeq>>(
         .unzip();
     Ok(InstrSeq::gather(vec![
         InstrSeq::gather(value_instrs),
-        emit_pos(e, pos)?,
+        emit_pos(pos),
         ctor(e, keys)?,
     ]))
 }
@@ -1236,7 +1220,7 @@ fn emit_dynamic_collection(
                 emit_struct_array(e, env, pos, fields, |_, x| {
                     Ok(InstrSeq::make_newstructdict(x))
                 })?,
-                emit_pos(e, pos)?,
+                emit_pos(pos),
                 InstrSeq::make_colfromarray(ctype),
             ]))
         } else {
@@ -1303,7 +1287,7 @@ fn emit_dynamic_collection(
                     } else {
                         InstrSeq::make_newstructdarray(arg)
                     };
-                    emit_pos_then(e, pos, instr)
+                    Ok(emit_pos_then(pos, instr))
                 })
             } else {
                 let constr = if hack_arr_dv_arrs(e.options()) {
@@ -1379,7 +1363,7 @@ fn emit_value_only_collection<F: FnOnce(isize) -> InstructLitConst>(
                     .map(|f| emit_expr(e, env, f.value()))
                     .collect::<Result<_>>()?,
             ),
-            emit_pos(e, pos)?,
+            emit_pos(pos),
             InstrSeq::make_lit_const(constructor(exprs.len() as isize)),
         ]))
     };
@@ -1426,7 +1410,7 @@ fn emit_idx(e: &mut Emitter, env: &Env, pos: &Pos, es: &[tast::Expr]) -> Result 
     };
     Ok(InstrSeq::gather(vec![
         emit_exprs(e, env, es)?,
-        emit_pos(e, pos)?,
+        emit_pos(pos),
         default,
         InstrSeq::make_idx(),
     ]))
@@ -1464,7 +1448,7 @@ fn emit_call(
                 lhs,
                 args,
                 uargs,
-                emit_pos(e, pos)?,
+                emit_pos(pos),
                 fcall,
                 inout_setters,
             ]),
@@ -1692,9 +1676,10 @@ fn emit_call_lhs_and_fcall(
                 }
             }
             let emit_meth_name = |e: &mut Emitter| match &cls_get_expr {
-                tast::ClassGetExpr::CGstring((pos, id)) => {
-                    emit_pos_then(e, pos, InstrSeq::make_cgetl(local::Type::Named(id.clone())))
-                }
+                tast::ClassGetExpr::CGstring((pos, id)) => Ok(emit_pos_then(
+                    pos,
+                    InstrSeq::make_cgetl(local::Type::Named(id.clone())),
+                )),
                 tast::ClassGetExpr::CGexpr(expr) => emit_expr(e, env, expr),
             };
             Ok(match cexpr {
@@ -2029,7 +2014,7 @@ fn emit_special_function(
                 .map(|(i, arg)| {
                     Ok(InstrSeq::gather(vec![
                         emit_expr(e, env, arg)?,
-                        emit_pos(e, pos)?,
+                        emit_pos(pos),
                         InstrSeq::make_print(),
                         if i == nargs - 1 {
                             InstrSeq::Empty
@@ -2063,7 +2048,7 @@ fn emit_special_function(
                 emit_expr(e, env, &args[0])?,
                 InstrSeq::make_jmpnz(l.clone()),
                 emit_ignored_expr(e, env, &Pos::make_none(), &call)?,
-                emit_fatal::emit_fatal_runtime(e, pos, "invariant_violation"),
+                emit_fatal::emit_fatal_runtime(pos, "invariant_violation"),
                 InstrSeq::make_label(l),
                 InstrSeq::make_null(),
             ])))
@@ -2124,7 +2109,7 @@ fn emit_special_function(
                 {
                     Some(InstrSeq::gather(vec![
                         emit_local(e, env, BareThisOp::NoNotice, &arg_id)?,
-                        emit_pos(e, pos)?,
+                        emit_pos(pos),
                         InstrSeq::make_istypec(i),
                     ]))
                 }
@@ -2136,13 +2121,13 @@ fn emit_special_function(
                 }
                 (&[ref arg_expr], Some(i), _) => Some(InstrSeq::gather(vec![
                     emit_expr(e, env, &arg_expr)?,
-                    emit_pos(e, pos)?,
+                    emit_pos(pos),
                     InstrSeq::make_istypec(i),
                 ])),
                 _ => match get_call_builtin_func_info(e.options(), lower_fq_name) {
                     Some((nargs, i)) if nargs == args.len() => Some(InstrSeq::gather(vec![
                         emit_exprs(e, env, args)?,
-                        emit_pos(e, pos)?,
+                        emit_pos(pos),
                         InstrSeq::make_instr(i),
                     ])),
                     _ => None,
@@ -2240,7 +2225,7 @@ fn is_isexp_op(lower_fq_id: impl AsRef<str>) -> Option<tast::Hint> {
 fn emit_eval(e: &mut Emitter, env: &Env, pos: &Pos, expr: &tast::Expr) -> Result {
     Ok(InstrSeq::gather(vec![
         emit_expr(e, env, expr)?,
-        emit_pos(e, pos)?,
+        emit_pos(pos),
         InstrSeq::make_eval(),
     ]))
 }
@@ -2267,7 +2252,7 @@ fn emit_call_expr(
     match (&expr.1, &args[..], uarg) {
         (E_::Id(id), [E(_, E_::String(data))], None) if id.1 == special_functions::HHAS_ADATA => {
             let v = TypedValue::HhasAdata(data.into());
-            emit_pos_then(e, pos, InstrSeq::make_typedvalue(v))
+            Ok(emit_pos_then(pos, InstrSeq::make_typedvalue(v)))
         }
         (E_::Id(id), _, None) if id.1 == pseudo_functions::ISSET => {
             emit_call_isset_exprs(e, env, pos, args)
@@ -2285,7 +2270,7 @@ fn emit_call_expr(
         (E_::Id(id), [arg1], None) if id.1 == emitter_special_functions::SET_FRAME_METADATA => {
             Ok(InstrSeq::gather(vec![
                 emit_expr(e, env, arg1)?,
-                emit_pos(e, pos)?,
+                emit_pos(pos),
                 InstrSeq::make_popl(local::Type::Named("$86metadata".into())),
                 InstrSeq::make_null(),
             ]))
@@ -2294,13 +2279,13 @@ fn emit_call_expr(
             if id.1 == pseudo_functions::EXIT || id.1 == pseudo_functions::DIE =>
         {
             let exit = emit_exit(e, env, None)?;
-            emit_pos_then(e, pos, exit)
+            Ok(emit_pos_then(pos, exit))
         }
         (E_::Id(id), [arg1], None)
             if id.1 == pseudo_functions::EXIT || id.1 == pseudo_functions::DIE =>
         {
             let exit = emit_exit(e, env, Some(arg1))?;
-            emit_pos_then(e, pos, exit)
+            Ok(emit_pos_then(pos, exit))
         }
         (_, _, _) => {
             let instrs = emit_call(
@@ -2313,7 +2298,7 @@ fn emit_call_expr(
                 uarg.as_ref(),
                 async_eager_label,
             )?;
-            emit_pos_then(e, pos, instrs)
+            Ok(emit_pos_then(pos, instrs))
         }
     }
 }
@@ -2331,14 +2316,13 @@ fn emit_reified_generic_instrs(e: &mut Emitter, pos: &Pos, is_fun: bool, index: 
             InstrSeq::make_dim_warn_pt(prop::from_raw_string(string_utils::reified::PROP_NAME)),
         ])
     };
-    emit_pos_then(
-        e,
+    Ok(emit_pos_then(
         pos,
         InstrSeq::gather(vec![
             base,
             InstrSeq::make_querym(0, QueryOp::CGet, MemberKey::EI(index.try_into().unwrap())),
         ]),
-    )
+    ))
 }
 
 fn emit_reified_type(e: &mut Emitter, env: &Env, pos: &Pos, name: &str) -> Result<InstrSeq> {
@@ -2401,15 +2385,15 @@ fn emit_load_class_ref(e: &mut Emitter, env: &Env, pos: &Pos, cexpr: ClassExpr) 
         ClassExpr::Special(SpecialClsRef::Parent) => InstrSeq::make_parent(),
         ClassExpr::Id(id) => emit_known_class_id(e, &id),
         ClassExpr::Expr(expr) => InstrSeq::gather(vec![
-            emit_pos(e, pos)?,
+            emit_pos(pos),
             emit_expr(e, env, &expr)?,
             InstrSeq::make_classgetc(),
         ]),
         ClassExpr::Reified(instrs) => {
-            InstrSeq::gather(vec![emit_pos(e, pos)?, instrs, InstrSeq::make_classgetc()])
+            InstrSeq::gather(vec![emit_pos(pos), instrs, InstrSeq::make_classgetc()])
         }
     };
-    emit_pos_then(e, pos, instrs)
+    Ok(emit_pos_then(pos, instrs))
 }
 
 fn emit_new(
@@ -2454,11 +2438,9 @@ fn emit_new(
             let id: class::Type = string_utils::strip_global_ns(&cname).to_string().into();
             emit_symbol_refs::State::add_class(e, id.clone());
             match has_generics {
-                H::NoGenerics => {
-                    InstrSeq::gather(vec![emit_pos(e, pos)?, InstrSeq::make_newobjd(id)])
-                }
+                H::NoGenerics => InstrSeq::gather(vec![emit_pos(pos), InstrSeq::make_newobjd(id)]),
                 H::HasGenerics => InstrSeq::gather(vec![
-                    emit_pos(e, pos)?,
+                    emit_pos(pos),
                     emit_reified_targs(
                         e,
                         env,
@@ -2475,7 +2457,7 @@ fn emit_new(
             }
         }
         ClassExpr::Special(cls_ref) => {
-            InstrSeq::gather(vec![emit_pos(e, pos)?, InstrSeq::make_newobjs(cls_ref)])
+            InstrSeq::gather(vec![emit_pos(pos), InstrSeq::make_newobjs(cls_ref)])
         }
         ClassExpr::Reified(instrs) if has_generics == H::MaybeGenerics => InstrSeq::gather(vec![
             instrs,
@@ -2502,7 +2484,7 @@ fn emit_new(
                 InstrSeq::make_nulluninit(),
                 instr_args,
                 instr_uargs,
-                emit_pos(e, pos)?,
+                emit_pos(pos),
                 InstrSeq::make_fcallctor(get_fcall_args(args, uarg.as_ref(), None, None, true)),
                 InstrSeq::make_popc(),
                 InstrSeq::make_lockobj(),
@@ -2583,7 +2565,7 @@ fn emit_obj_get(
         base_expr_instrs_begin,
         prop_instrs,
         base_expr_instrs_end,
-        emit_pos(e, pos)?,
+        emit_pos(pos),
         base_setup_instrs,
         final_instr,
     ]);
@@ -2774,7 +2756,7 @@ fn emit_array_get_(
                         base.base_instrs,
                         elem_instrs,
                         base.cls_instrs,
-                        emit_pos(e, outer_pos)?,
+                        emit_pos(outer_pos),
                         base.setup_instrs,
                         make_final(base.base_stack_size + base.cls_stack_size + elem_stack_size),
                     ]))
@@ -2791,7 +2773,7 @@ fn emit_array_get_(
                         (
                             InstrSeq::gather(vec![
                                 base.base_instrs,
-                                emit_pos(e, outer_pos)?,
+                                emit_pos(outer_pos),
                                 base.setup_instrs,
                                 make_final(
                                     base.base_stack_size + base.cls_stack_size + elem_stack_size,
@@ -2834,7 +2816,7 @@ fn emit_array_get_(
                         InstrSeq::gather(vec![
                             elem_instrs,
                             cls_instrs,
-                            emit_pos(e, outer_pos)?,
+                            emit_pos(outer_pos),
                             setup_instrs,
                             make_final(base_stack_size + cls_stack_size + elem_stack_size),
                         ]),
@@ -2871,7 +2853,7 @@ fn emit_array_get_(
                     base_instrs.push((
                         InstrSeq::gather(vec![
                             cls_instrs,
-                            emit_pos(e, outer_pos)?,
+                            emit_pos(outer_pos),
                             setup_instrs,
                             make_final(base_stack_size + cls_stack_size + elem_stack_size),
                         ]),
@@ -3025,7 +3007,7 @@ fn emit_store_for_simple_base(
     Ok(InstrSeq::gather(vec![
         base_expr_instrs_begin,
         base_expr_instrs_end,
-        emit_pos(e, pos)?,
+        emit_pos(pos),
         base_setup_instrs,
         if is_base {
             InstrSeq::make_dim(MemberOpMode::Define, memberkey)
@@ -3069,7 +3051,7 @@ fn emit_conditional_expr(
                 if r.is_fallthrough {
                     InstrSeq::gather(vec![
                         emit_expr(e, env, etrue)?,
-                        emit_pos(e, pos)?,
+                        emit_pos(pos),
                         InstrSeq::make_jmp(end_label.clone()),
                     ])
                 } else {
@@ -3115,16 +3097,18 @@ fn emit_local(e: &mut Emitter, env: &Env, notice: BareThisOp, lid: &aast_defs::L
     } else if superglobals::is_superglobal(id_name) {
         Ok(InstrSeq::gather(vec![
             InstrSeq::make_string(string_utils::locals::strip_dollar(id_name)),
-            emit_pos(e, pos)?,
+            emit_pos(pos),
             InstrSeq::make_cgetg(),
         ]))
     } else {
         let local = get_local(e, env, pos, id_name)?;
-        if is_local_this(env, id) && !env.flags.contains(EnvFlags::NEEDS_LOCAL_THIS) {
-            emit_pos_then(e, pos, InstrSeq::make_barethis(notice))
-        } else {
-            Ok(InstrSeq::make_cgetl(local))
-        }
+        Ok(
+            if is_local_this(env, id) && !env.flags.contains(EnvFlags::NEEDS_LOCAL_THIS) {
+                emit_pos_then(pos, InstrSeq::make_barethis(notice))
+            } else {
+                InstrSeq::make_cgetl(local)
+            },
+        )
     }
 }
 
@@ -3147,16 +3131,16 @@ fn emit_class_const(
             // `from_ast_name` should be able to accpet Cow<str>
             let cid: class::Type = string_utils::strip_global_ns(&name).to_string().into();
             let cname = cid.to_raw_string();
-            if string_utils::is_class(&id.1) {
-                emit_pos_then(e, &pos, InstrSeq::make_string(cname))
+            Ok(if string_utils::is_class(&id.1) {
+                emit_pos_then(&pos, InstrSeq::make_string(cname))
             } else {
                 emit_symbol_refs::State::add_class(e, cid.clone());
                 // TODO(hrust) enabel `let const_id = r#const::Type::from_ast_name(&id.1);`,
                 // `from_ast_name` should be able to accpet Cow<str>
                 let const_id: r#const::Type =
                     string_utils::strip_global_ns(&id.1).to_string().into();
-                emit_pos_then(e, &pos, InstrSeq::make_clscnsd(const_id, cid))
-            }
+                emit_pos_then(&pos, InstrSeq::make_clscnsd(const_id, cid))
+            })
         }
         _ => {
             let load_const = if string_utils::is_class(&id.1) {
@@ -3186,13 +3170,13 @@ fn emit_unop(
     match uop {
         U::Utild | U::Unot => Ok(InstrSeq::gather(vec![
             emit_expr(e, env, expr)?,
-            emit_pos_then(e, pos, from_unop(e.options(), uop)?)?,
+            emit_pos_then(pos, from_unop(e.options(), uop)?),
         ])),
         U::Uplus | U::Uminus => Ok(InstrSeq::gather(vec![
-            emit_pos(e, pos)?,
+            emit_pos(pos),
             InstrSeq::make_int(0),
             emit_expr(e, env, expr)?,
-            emit_pos_then(e, pos, from_unop(e.options(), uop)?)?,
+            emit_pos_then(pos, from_unop(e.options(), uop)?),
         ])),
         U::Uincr | U::Udecr | U::Upincr | U::Updecr => emit_lval_op(
             e,
@@ -3206,12 +3190,12 @@ fn emit_unop(
         U::Usilence => e.local_scope(|e| {
             let temp_local = e.local_gen_mut().get_unnamed();
             Ok(InstrSeq::gather(vec![
-                emit_pos(e, pos)?,
+                emit_pos(pos),
                 InstrSeq::make_silence_start(temp_local.clone()),
                 {
                     let try_instrs = emit_expr(e, env, expr)?;
                     let catch_instrs = InstrSeq::gather(vec![
-                        emit_pos(e, pos)?,
+                        emit_pos(pos),
                         InstrSeq::make_silence_end(temp_local.clone()),
                     ]);
                     InstrSeq::create_try_catch(
@@ -3222,7 +3206,7 @@ fn emit_unop(
                         catch_instrs,
                     )
                 },
-                emit_pos(e, pos)?,
+                emit_pos(pos),
                 InstrSeq::make_silence_end(temp_local),
             ]))
         }),
@@ -3405,14 +3389,14 @@ pub fn emit_two_exprs(
     let instrs2_is_var = e2.1.is_lvar();
     Ok(InstrSeq::gather(if is_under_top {
         if instrs2_is_var {
-            vec![emit_pos(e, outer_pos)?, instrs2, instrs1]
+            vec![emit_pos(outer_pos), instrs2, instrs1]
         } else {
-            vec![instrs2, emit_pos(e, outer_pos)?, instrs1]
+            vec![instrs2, emit_pos(outer_pos), instrs1]
         }
     } else if instrs2_is_var {
-        vec![instrs1, emit_pos(e, outer_pos)?, instrs2]
+        vec![instrs1, emit_pos(outer_pos), instrs2]
     } else {
-        vec![instrs1, instrs2, emit_pos(e, outer_pos)?]
+        vec![instrs1, instrs2, emit_pos(outer_pos)]
     }))
 }
 
@@ -3762,10 +3746,9 @@ fn emit_base_(
         )),
         E_::Lvar(x) if superglobals::is_superglobal(&(x.1).1) => {
             let base_instrs = emit_pos_then(
-                e,
                 &x.0,
                 InstrSeq::make_string(string_utils::locals::strip_dollar(&(x.1).1)),
-            )?;
+            );
 
             Ok(emit_default(
                 e,
@@ -3777,7 +3760,7 @@ fn emit_base_(
             ))
         }
         E_::Lvar(x) if is_object && &(x.1).1 == special_idents::THIS => {
-            let base_instrs = emit_pos_then(e, &x.0, InstrSeq::make_checkthis())?;
+            let base_instrs = emit_pos_then(&x.0, InstrSeq::make_checkthis());
             Ok(emit_default(
                 e,
                 base_instrs,
@@ -4058,7 +4041,7 @@ fn emit_base_(
                 e,
                 base_expr_instrs,
                 InstrSeq::Empty,
-                emit_pos_then(e, pos, InstrSeq::make_basec(base_offset, base_mode))?,
+                emit_pos_then(pos, InstrSeq::make_basec(base_offset, base_mode)),
                 1,
                 0,
             ))
@@ -4077,7 +4060,7 @@ pub fn emit_ignored_expr(emitter: &mut Emitter, env: &Env, pos: &Pos, expr: &tas
     } else {
         Ok(InstrSeq::gather(vec![
             emit_expr(emitter, env, expr)?,
-            emit_pos_then(emitter, pos, InstrSeq::make_popc())?,
+            emit_pos_then(pos, InstrSeq::make_popc()),
         ]))
     }
 }
@@ -4227,20 +4210,19 @@ pub fn emit_lval_op_nonlist(
     .map(|(lhs, rhs, setop)| InstrSeq::gather(vec![lhs, rhs, setop]))
 }
 
-pub fn emit_final_global_op(e: &mut Emitter, pos: &Pos, op: LValOp) -> Result {
+pub fn emit_final_global_op(pos: &Pos, op: LValOp) -> InstrSeq {
     use LValOp as L;
     match op {
-        L::Set => emit_pos_then(e, pos, InstrSeq::make_setg()),
-        L::SetOp(op) => Ok(InstrSeq::make_setopg(op)),
-        L::IncDec(op) => Ok(InstrSeq::make_incdecg(op)),
-        L::Unset => emit_pos_then(e, pos, InstrSeq::make_unsetg()),
+        L::Set => emit_pos_then(pos, InstrSeq::make_setg()),
+        L::SetOp(op) => InstrSeq::make_setopg(op),
+        L::IncDec(op) => InstrSeq::make_incdecg(op),
+        L::Unset => emit_pos_then(pos, InstrSeq::make_unsetg()),
     }
 }
 
-pub fn emit_final_local_op(e: &mut Emitter, pos: &Pos, op: LValOp, lid: local::Type) -> Result {
+pub fn emit_final_local_op(pos: &Pos, op: LValOp, lid: local::Type) -> InstrSeq {
     use LValOp as L;
     emit_pos_then(
-        e,
         pos,
         match op {
             L::Set => InstrSeq::make_setl(lid),
@@ -4280,7 +4262,6 @@ fn emit_final_static_op(
             let cid = text_of_class_id(cid);
             let id = text_of_prop(prop);
             emit_fatal::emit_fatal_runtime(
-                e,
                 pos,
                 format!(
                     "Attempt to unset static property {}::{}",
@@ -4308,12 +4289,11 @@ pub fn emit_lval_op_nonlist_steps(
         Ok(match &expr.1 {
             E_::Lvar(v) if superglobals::is_any_global(local_id::get_name(&v.1)) => (
                 emit_pos_then(
-                    e,
                     &v.0,
                     InstrSeq::make_string(string_utils::lstrip(local_id::get_name(&v.1), "$")),
-                )?,
+                ),
                 rhs_instrs,
-                emit_final_global_op(e, outer_pos, op)?,
+                emit_final_global_op(outer_pos, op),
             ),
             E_::Lvar(v) if is_local_this(env, &v.1) && op.is_incdec() => (
                 emit_local(e, env, BareThisOp::Notice, v)?,
@@ -4323,12 +4303,12 @@ pub fn emit_lval_op_nonlist_steps(
             E_::Lvar(v) if !is_local_this(env, &v.1) || op == LValOp::Unset => {
                 (InstrSeq::Empty, rhs_instrs, {
                     let lid = get_local(e, env, &v.0, &(v.1).1)?;
-                    emit_final_local_op(e, outer_pos, op, lid)?
+                    emit_final_local_op(outer_pos, op, lid)
                 })
             }
             E_::ArrayGet(x) => match (&(x.0).1, x.1.as_ref()) {
                 (E_::Lvar(v), Some(expr)) if local_id::get_name(&v.1) == superglobals::GLOBALS => {
-                    let final_global_op_instrs = emit_final_global_op(e, pos, op)?;
+                    let final_global_op_instrs = emit_final_global_op(pos, op);
                     if rhs_stack_size == 0 {
                         (
                             emit_expr(e, env, expr)?,
@@ -4389,11 +4369,8 @@ pub fn emit_lval_op_nonlist_steps(
                         null_coalesce_assignment,
                     )?;
                     let total_stack_size = elem_stack_size + base_stack_size + cls_stack_size;
-                    let final_instr = emit_pos_then(
-                        e,
-                        pos,
-                        emit_final_member_op(total_stack_size as usize, op, mk),
-                    )?;
+                    let final_instr =
+                        emit_pos_then(pos, emit_final_member_op(total_stack_size as usize, op, mk));
                     (
                         if null_coalesce_assignment {
                             elem_instrs
@@ -4405,7 +4382,7 @@ pub fn emit_lval_op_nonlist_steps(
                             ])
                         },
                         rhs_instrs,
-                        InstrSeq::gather(vec![emit_pos(e, pos)?, base_setup_instrs, final_instr]),
+                        InstrSeq::gather(vec![emit_pos(pos), base_setup_instrs, final_instr]),
                     )
                 }
             },
@@ -4452,11 +4429,8 @@ pub fn emit_lval_op_nonlist_steps(
                     prop_instrs = InstrSeq::Empty;
                 }
                 let total_stack_size = prop_stack_size + base_stack_size + cls_stack_size;
-                let final_instr = emit_pos_then(
-                    e,
-                    pos,
-                    emit_final_member_op(total_stack_size as usize, op, mk),
-                )?;
+                let final_instr =
+                    emit_pos_then(pos, emit_final_member_op(total_stack_size as usize, op, mk));
                 (
                     if null_coalesce_assignment {
                         prop_instrs
@@ -4475,7 +4449,7 @@ pub fn emit_lval_op_nonlist_steps(
                 let (cid, prop) = &**x;
                 let cexpr = ClassExpr::class_id_to_class_expr(e, false, false, &env.scope, cid);
                 let final_instr_ = emit_final_static_op(e, cid, prop, op)?;
-                let final_instr = emit_pos_then(e, pos, final_instr_)?;
+                let final_instr = emit_pos_then(pos, final_instr_);
                 (
                     InstrSeq::of_pair(emit_class_expr(e, env, cexpr, prop)?),
                     rhs_instrs,
@@ -4522,11 +4496,10 @@ fn emit_class_expr(
     prop: &tast::ClassGetExpr,
 ) -> Result<(InstrSeq, InstrSeq)> {
     let load_prop = |e: &mut Emitter| match prop {
-        tast::ClassGetExpr::CGstring((pos, id)) => emit_pos_then(
-            e,
+        tast::ClassGetExpr::CGstring((pos, id)) => Ok(emit_pos_then(
             pos,
             InstrSeq::make_string(string_utils::locals::strip_dollar(id)),
-        ),
+        )),
         tast::ClassGetExpr::CGexpr(expr) => emit_expr(e, env, expr),
     };
     Ok(match &cexpr {
@@ -4791,13 +4764,13 @@ pub fn emit_jmpnz(
             Ok(tv) => {
                 if Into::<bool>::into(tv) {
                     EmitJmpResult {
-                        instrs: emit_pos_then(e, pos, InstrSeq::make_jmp(label.clone()))?,
+                        instrs: emit_pos_then(pos, InstrSeq::make_jmp(label.clone())),
                         is_fallthrough: false,
                         is_label_used: true,
                     }
                 } else {
                     EmitJmpResult {
-                        instrs: emit_pos_then(e, pos, InstrSeq::Empty)?,
+                        instrs: emit_pos_then(pos, InstrSeq::Empty),
                         is_fallthrough: true,
                         is_label_used: false,
                     }
@@ -4813,10 +4786,9 @@ pub fn emit_jmpnz(
                             let r2 = emit_jmpnz(e, env, &bo.2, label)?;
                             EmitJmpResult {
                                 instrs: emit_pos_then(
-                                    e,
                                     pos,
                                     InstrSeq::gather(vec![r1.instrs, r2.instrs]),
-                                )?,
+                                ),
                                 is_fallthrough: r2.is_fallthrough,
                                 is_label_used: r1.is_label_used || r2.is_label_used,
                             }
@@ -4830,7 +4802,6 @@ pub fn emit_jmpnz(
                         if !r1.is_fallthrough {
                             EmitJmpResult {
                                 instrs: emit_pos_then(
-                                    e,
                                     pos,
                                     InstrSeq::gather(vec![
                                         r1.instrs,
@@ -4839,7 +4810,7 @@ pub fn emit_jmpnz(
                                             vec![InstrSeq::make_label(skip_label)],
                                         ),
                                     ]),
-                                )?,
+                                ),
                                 is_fallthrough: r1.is_label_used,
                                 is_label_used: false,
                             }
@@ -4847,7 +4818,6 @@ pub fn emit_jmpnz(
                             let r2 = emit_jmpnz(e, env, &bo.2, label)?;
                             EmitJmpResult {
                                 instrs: emit_pos_then(
-                                    e,
                                     pos,
                                     InstrSeq::gather(vec![
                                         r1.instrs,
@@ -4857,7 +4827,7 @@ pub fn emit_jmpnz(
                                             vec![InstrSeq::make_label(skip_label)],
                                         ),
                                     ]),
-                                )?,
+                                ),
                                 is_fallthrough: r2.is_fallthrough || r1.is_label_used,
                                 is_label_used: r2.is_label_used,
                             }
@@ -4872,13 +4842,12 @@ pub fn emit_jmpnz(
                             emit_is_null(e, env, if (bo.1).1.is_null() { &bo.2 } else { &bo.1 })?;
                         EmitJmpResult {
                             instrs: emit_pos_then(
-                                e,
                                 pos,
                                 InstrSeq::gather(vec![
                                     is_null,
                                     InstrSeq::make_jmpnz(label.clone()),
                                 ]),
-                            )?,
+                            ),
                             is_fallthrough: true,
                             is_label_used: true,
                         }
@@ -4890,10 +4859,9 @@ pub fn emit_jmpnz(
                             emit_is_null(e, env, if (bo.1).1.is_null() { &bo.2 } else { &bo.1 })?;
                         EmitJmpResult {
                             instrs: emit_pos_then(
-                                e,
                                 pos,
                                 InstrSeq::gather(vec![is_null, InstrSeq::make_jmpz(label.clone())]),
-                            )?,
+                            ),
                             is_fallthrough: true,
                             is_label_used: true,
                         }
@@ -4902,10 +4870,9 @@ pub fn emit_jmpnz(
                         let instr = emit_expr(e, env, expr)?;
                         EmitJmpResult {
                             instrs: emit_pos_then(
-                                e,
                                 pos,
                                 InstrSeq::gather(vec![instr, InstrSeq::make_jmpnz(label.clone())]),
-                            )?,
+                            ),
                             is_fallthrough: true,
                             is_label_used: true,
                         }
@@ -4930,13 +4897,13 @@ pub fn emit_jmpz(
                 let b: bool = v.into();
                 if b {
                     EmitJmpResult {
-                        instrs: emit_pos_then(e, pos, InstrSeq::Empty)?,
+                        instrs: emit_pos_then(pos, InstrSeq::Empty),
                         is_fallthrough: true,
                         is_label_used: false,
                     }
                 } else {
                     EmitJmpResult {
-                        instrs: emit_pos_then(e, pos, InstrSeq::make_jmp(label.clone()))?,
+                        instrs: emit_pos_then(pos, InstrSeq::make_jmp(label.clone())),
                         is_fallthrough: false,
                         is_label_used: true,
                     }
@@ -4952,7 +4919,6 @@ pub fn emit_jmpz(
                         if !r1.is_fallthrough {
                             EmitJmpResult {
                                 instrs: emit_pos_then(
-                                    e,
                                     pos,
                                     InstrSeq::gather(vec![
                                         r1.instrs,
@@ -4961,7 +4927,7 @@ pub fn emit_jmpz(
                                             vec![InstrSeq::make_label(skip_label)],
                                         ),
                                     ]),
-                                )?,
+                                ),
                                 is_fallthrough: r1.is_label_used,
                                 is_label_used: false,
                             }
@@ -4969,7 +4935,6 @@ pub fn emit_jmpz(
                             let r2 = emit_jmpz(e, env, &bo.2, label)?;
                             EmitJmpResult {
                                 instrs: emit_pos_then(
-                                    e,
                                     pos,
                                     InstrSeq::gather(vec![
                                         r1.instrs,
@@ -4979,7 +4944,7 @@ pub fn emit_jmpz(
                                             vec![InstrSeq::make_label(skip_label)],
                                         ),
                                     ]),
-                                )?,
+                                ),
                                 is_fallthrough: r2.is_fallthrough || r1.is_label_used,
                                 is_label_used: r2.is_label_used,
                             }
@@ -4991,16 +4956,15 @@ pub fn emit_jmpz(
                             let r2 = emit_jmpz(e, env, &bo.2, label)?;
                             EmitJmpResult {
                                 instrs: emit_pos_then(
-                                    e,
                                     pos,
                                     InstrSeq::gather(vec![r1.instrs, r2.instrs]),
-                                )?,
+                                ),
                                 is_fallthrough: r2.is_fallthrough,
                                 is_label_used: r1.is_label_used || r2.is_label_used,
                             }
                         } else {
                             EmitJmpResult {
-                                instrs: emit_pos_then(e, pos, r1.instrs)?,
+                                instrs: emit_pos_then(pos, r1.instrs),
                                 is_fallthrough: false,
                                 is_label_used: r1.is_label_used,
                             }
@@ -5015,10 +4979,9 @@ pub fn emit_jmpz(
                             emit_is_null(e, env, if (bo.1).1.is_null() { &bo.2 } else { &bo.1 })?;
                         EmitJmpResult {
                             instrs: emit_pos_then(
-                                e,
                                 pos,
                                 InstrSeq::gather(vec![is_null, InstrSeq::make_jmpz(label.clone())]),
-                            )?,
+                            ),
                             is_fallthrough: true,
                             is_label_used: true,
                         }
@@ -5030,13 +4993,12 @@ pub fn emit_jmpz(
                             emit_is_null(e, env, if (bo.1).1.is_null() { &bo.2 } else { &bo.1 })?;
                         EmitJmpResult {
                             instrs: emit_pos_then(
-                                e,
                                 pos,
                                 InstrSeq::gather(vec![
                                     is_null,
                                     InstrSeq::make_jmpnz(label.clone()),
                                 ]),
-                            )?,
+                            ),
                             is_fallthrough: true,
                             is_label_used: true,
                         }
@@ -5045,10 +5007,9 @@ pub fn emit_jmpz(
                         let instr = emit_expr(e, env, expr)?;
                         EmitJmpResult {
                             instrs: emit_pos_then(
-                                e,
                                 pos,
                                 InstrSeq::gather(vec![instr, InstrSeq::make_jmpz(label.clone())]),
-                            )?,
+                            ),
                             is_fallthrough: true,
                             is_label_used: true,
                         }

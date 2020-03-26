@@ -629,7 +629,6 @@ name = "emit_fatal_rust"
 version = "0.0.0"
 dependencies = [
  "emit_pos_rust 0.0.0",
- "env 0.0.0",
  "hhbc_ast_rust 0.0.0",
  "instruction_sequence_rust 0.0.0",
  "oxidized 0.0.0",
@@ -782,7 +781,6 @@ dependencies = [
 name = "emit_pos_rust"
 version = "0.0.0"
 dependencies = [
- "env 0.0.0",
  "hhbc_ast_rust 0.0.0",
  "instruction_sequence_rust 0.0.0",
  "options 0.0.0",

@@ -96,17 +96,17 @@ fn emit_def_inline<Ex, Fb, En, Hi>(e: &mut Emitter, def: &a::Def<Ex, Fb, En, Hi>
             };
             let Id(pos, name) = &(*cd).name;
             let num = name.parse::<ClassNum>().unwrap();
-            emit_pos_then(e, &pos, make_def_instr(num))
+            emit_pos_then(&pos, make_def_instr(num))
         }
         a::Def::Typedef(td) => {
             let Id(pos, name) = &(*td).name;
             let num = name.parse::<TypedefNum>().unwrap();
-            emit_pos_then(e, &pos, InstrSeq::make_deftypealias(num))
+            emit_pos_then(&pos, InstrSeq::make_deftypealias(num))
         }
         a::Def::RecordDef(rd) => {
             let Id(pos, name) = &(*rd).name;
             let num = name.parse::<ClassNum>().unwrap();
-            emit_pos_then(e, &pos, InstrSeq::make_defrecord(num))
+            emit_pos_then(&pos, InstrSeq::make_defrecord(num))
         }
         _ => {
             return Err(Unrecoverable(
@@ -159,7 +159,7 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
             ])),
             a::Expr_::YieldFrom(e_) => Ok(InstrSeq::gather(vec![
                 emit_yield_from_delegates(e, env, pos, e_)?,
-                emit_pos(e, pos),
+                emit_pos(pos),
                 InstrSeq::make_popc(),
             ])),
             a::Expr_::Await(a) => Ok(InstrSeq::gather(vec![
@@ -288,13 +288,13 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
                 };
                 Ok(InstrSeq::gather(vec![
                     expr_instr,
-                    emit_pos(e, pos),
+                    emit_pos(pos),
                     emit_return(e, env)?,
                 ]))
             }
             None => Ok(InstrSeq::gather(vec![
                 InstrSeq::make_null(),
-                emit_pos(e, pos),
+                emit_pos(pos),
                 emit_return(e, env)?,
             ])),
         },
@@ -310,7 +310,7 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
         a::Stmt_::For(x) => emit_for(e, env, pos, &x.0, &x.1, &x.2, &x.3),
         a::Stmt_::Throw(x) => Ok(InstrSeq::gather(vec![
             emit_expr::emit_expr(e, env, x)?,
-            emit_pos(e, pos),
+            emit_pos(pos),
             InstrSeq::make_throw(),
         ])),
         a::Stmt_::Try(x) => {
@@ -370,7 +370,7 @@ fn emit_case(
                 InstrSeq::gather(vec![
                     InstrSeq::make_dup(),
                     emit_expr::emit_expr(e, env, &case_expr)?,
-                    emit_pos(e, &case_expr.0),
+                    emit_pos(&case_expr.0),
                     InstrSeq::make_eq(),
                     InstrSeq::make_jmpz(next_case_label.clone()),
                     InstrSeq::make_popc(),
@@ -545,7 +545,7 @@ fn emit_using(e: &mut Emitter, env: &mut Env, pos: &Pos, using: &tast::UsingStmt
                             local::Type::Named(local_id::get_name(&id).into()),
                             InstrSeq::gather(vec![
                                 emit_expr::emit_expr(e, env, &using.expr)?,
-                                emit_pos(e, &block_pos),
+                                emit_pos(&block_pos),
                                 InstrSeq::make_popc(),
                             ]),
                         ),
@@ -566,7 +566,7 @@ fn emit_using(e: &mut Emitter, env: &mut Env, pos: &Pos, using: &tast::UsingStmt
                     local::Type::Named(local_id::get_name(&lid.1).into()),
                     InstrSeq::gather(vec![
                         emit_expr::emit_expr(e, env, &using.expr)?,
-                        emit_pos(e, &block_pos),
+                        emit_pos(&block_pos),
                         InstrSeq::make_popc(),
                     ]),
                 ),
@@ -642,9 +642,9 @@ fn emit_using(e: &mut Emitter, env: &mut Env, pos: &Pos, using: &tast::UsingStmt
                 let finally_instrs =
                     emit_finally(e, local.clone(), using.has_await, using.is_block_scoped);
                 let catch_instrs = InstrSeq::gather(vec![
-                    emit_pos(e, &block_pos),
+                    emit_pos(&block_pos),
                     make_finally_catch(e, exn_local, finally_instrs),
-                    emit_pos(e, pos),
+                    emit_pos(pos),
                 ]);
                 InstrSeq::create_try_catch(e.label_gen_mut(), None, true, try_instrs, catch_instrs)
             };
@@ -736,7 +736,7 @@ fn emit_switch(
                     res.push(Ok((
                         (
                             InstrSeq::Empty,
-                            emit_pos_then(e, pos, InstrSeq::make_throw_non_exhaustive_switch()),
+                            emit_pos_then(pos, InstrSeq::make_throw_non_exhaustive_switch()),
                         ),
                         Some(l),
                     )))
@@ -879,7 +879,7 @@ fn emit_try_finally_(
         tfr::cleanup_try_body(&try_body)
     };
     let catch_instrs = InstrSeq::gather(vec![
-        emit_pos(e, &enclosing_span),
+        emit_pos(&enclosing_span),
         make_finally_catch(e, exn_local, finally_body_for_catch),
     ]);
     let middle =
@@ -889,7 +889,7 @@ fn emit_try_finally_(
     Ok(InstrSeq::gather(vec![
         middle,
         InstrSeq::make_label(finally_start),
-        emit_pos(e, pos),
+        emit_pos(pos),
         finally_body,
         finally_epilogue,
         InstrSeq::make_label(finally_end),
@@ -945,10 +945,7 @@ fn emit_try_catch_(
             .map(|catch| emit_catch(e, env, pos, &end_label, catch))
             .collect::<Result<Vec<_>>>()?,
     );
-    let try_instrs = InstrSeq::gather(vec![
-        emit_stmts(e, &mut try_env, try_block)?,
-        emit_pos(e, pos),
-    ]);
+    let try_instrs = InstrSeq::gather(vec![emit_stmts(e, &mut try_env, try_block)?, emit_pos(pos)]);
     Ok(InstrSeq::create_try_catch(
         e.label_gen_mut(),
         Some(end_label.clone()),
@@ -980,7 +977,7 @@ fn emit_catch(
         InstrSeq::make_setl(local::Type::Named((&((catch.1).1).1).to_string())),
         InstrSeq::make_popc(),
         emit_stmts(e, env, &catch.2)?,
-        emit_pos(e, pos),
+        emit_pos(pos),
         InstrSeq::make_jmp(end_label.clone()),
         InstrSeq::make_label(next_catch),
     ]))
@@ -1032,7 +1029,7 @@ fn emit_foreach_(
         )?;
         let iter_init = InstrSeq::gather(vec![
             emit_expr::emit_expr(e, env, collection)?,
-            emit_pos(e, &collection.0),
+            emit_pos(&collection.0),
             InstrSeq::make_iterinit(iter_args.clone(), loop_break_label.clone()),
         ]);
         let iterate = InstrSeq::gather(vec![
@@ -1040,7 +1037,7 @@ fn emit_foreach_(
             preamble,
             body,
             InstrSeq::make_label(loop_continue_label),
-            emit_pos(e, pos),
+            emit_pos(pos),
             InstrSeq::make_iternext(iter_args.clone(), loop_head_label),
         ]);
         let iter_done = InstrSeq::make_label(loop_break_label);
@@ -1069,7 +1066,6 @@ fn emit_foreach_await(
             InstrSeq::make_instanceofd(hhbc_id::class::from_raw_string("HH\\AsyncIterator")),
             InstrSeq::make_jmpnz(input_is_async_iterator_label.clone()),
             emit_fatal::emit_fatal_runtime(
-                e,
                 pos,
                 "Unable to iterate non-AsyncIterator asynchronously",
             ),
@@ -1107,7 +1103,7 @@ fn emit_foreach_await(
                 block,
                 emit_block,
             )?,
-            emit_pos(e, pos),
+            emit_pos(pos),
             InstrSeq::make_jmp(next_label),
             InstrSeq::make_label(pop_and_exit_label),
             InstrSeq::make_popc(),
@@ -1549,7 +1545,7 @@ fn emit_yield_from_delegates(
     let loop_label = e.label_gen_mut().next_regular();
     Ok(InstrSeq::gather(vec![
         emit_expr(e, env, expr)?,
-        emit_pos(e, pos),
+        emit_pos(pos),
         InstrSeq::make_cont_assign_delegate(iter_num),
         InstrSeq::create_try_catch(
             e.label_gen_mut(),
@@ -1573,7 +1569,6 @@ pub fn emit_dropthrough_return(e: &mut Emitter, env: &mut Env) -> Result {
     match state.default_dropthrough.as_ref() {
         Some(instrs) => Ok(instrs.clone()),
         None => Ok(emit_pos_then(
-            e,
             &(state.function_pos.last_char()),
             InstrSeq::gather(vec![state.default_return_value.clone(), return_instrs]),
         )),
@@ -1693,7 +1688,7 @@ fn emit_await_assignment(
         Some(tast::Lid(_, id)) if !emit_expr::is_local_this(env, &id) => {
             Ok(InstrSeq::gather(vec![
                 emit_expr::emit_await(e, env, pos, r)?,
-                emit_pos(e, pos),
+                emit_pos(pos),
                 InstrSeq::make_popl(emit_expr::get_local(e, env, pos, local_id::get_name(&id))?),
             ]))
         }
@@ -1744,7 +1739,7 @@ fn emit_if(
         Ok(InstrSeq::gather(vec![
             emit_expr::emit_jmpz(e, env, condition, &alternative_label)?.instrs,
             consequence_instr,
-            emit_pos(e, pos),
+            emit_pos(pos),
             InstrSeq::make_jmp(done_label.clone()),
             InstrSeq::make_label(alternative_label),
             alternative_instr,

@@ -187,7 +187,7 @@ pub fn emit_param_default_value_setter(
                 } else {
                     InstrSeq::gather(vec![
                         emit_expression::emit_expr(emitter, env, &expr)?,
-                        emit_pos::emit_pos(emitter, pos),
+                        emit_pos::emit_pos(pos),
                         InstrSeq::make_setl(local::Type::Named(param.name.clone())),
                         InstrSeq::make_popc(),
                     ])

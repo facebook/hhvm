@@ -113,7 +113,6 @@ pub fn from_ast<'a>(
                         (
                             InstrSeq::Empty,
                             emit_pos::emit_pos_then(
-                                emitter,
                                 &class.span,
                                 InstrSeq::make_initprop(pid.clone(), InitpropOp::Static),
                             ),
@@ -122,7 +121,6 @@ pub fn from_ast<'a>(
                         (
                             InstrSeq::Empty,
                             emit_pos::emit_pos_then(
-                                emitter,
                                 &class.span,
                                 InstrSeq::make_initprop(pid.clone(), InitpropOp::NonStatic),
                             ),
@@ -130,12 +128,12 @@ pub fn from_ast<'a>(
                     } else {
                         (
                             InstrSeq::gather(vec![
-                                emit_pos::emit_pos(emitter, &class.span),
+                                emit_pos::emit_pos(&class.span),
                                 InstrSeq::make_checkprop(pid.clone()),
                                 InstrSeq::make_jmpnz(label.clone()),
                             ]),
                             InstrSeq::gather(vec![
-                                emit_pos::emit_pos(emitter, &class.span),
+                                emit_pos::emit_pos(&class.span),
                                 InstrSeq::make_initprop(pid.clone(), InitpropOp::NonStatic),
                                 InstrSeq::make_label(label),
                             ]),

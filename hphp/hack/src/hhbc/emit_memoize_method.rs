@@ -226,7 +226,7 @@ fn emit<'a>(
 ) -> Result<HhasBody<'a>> {
     let pos = &args.method.span;
     let instrs = make_memoize_method_code(emitter, env, pos, &hhas_params[..], args)?;
-    let instrs = emit_pos_then(emitter, pos, instrs);
+    let instrs = emit_pos_then(pos, instrs);
     make_wrapper(emitter, env, instrs, hhas_params, return_type_info, args)
 }
 

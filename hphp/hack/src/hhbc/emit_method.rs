@@ -109,7 +109,6 @@ pub fn from_ast<'a>(
     };
     let default_dropthrough = if method.abstract_ {
         Some(emit_fatal_runtimeomitframe(
-            emitter,
             &&method.name.0,
             format!(
                 "Cannot call abstract method {}::{}()",

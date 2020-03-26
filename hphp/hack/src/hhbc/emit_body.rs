@@ -600,7 +600,7 @@ pub fn emit_method_prolog(
         .filter_map(|p| make_param_instr(p).transpose())
         .collect::<Result<Vec<_>>>()?;
 
-    let mut instrs = vec![emit_pos(emitter, pos)];
+    let mut instrs = vec![emit_pos(pos)];
     if should_emit_init_this {
         instrs.push(InstrSeq::make_initthisloc(local::Type::Named(THIS.into())))
     }

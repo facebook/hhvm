@@ -36,7 +36,7 @@ pub fn emit_fatal_program<'p>(
 ) -> Result<HhasProgram<'p>> {
     let mut emitter = Emitter::new(options);
     emitter.context_mut().set_systemlib(is_systemlib);
-    let body_instrs = emit_fatal(&emitter, op, pos, msg);
+    let body_instrs = emit_fatal(op, pos, msg);
     let main = make_body(
         &mut emitter,
         body_instrs,

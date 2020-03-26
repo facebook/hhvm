@@ -40,6 +40,8 @@ type predicate =
   | GlobalConstDefinition
   | InterfaceDeclaration
   | InterfaceDefinition
+  | PropertyDeclaration
+  | PropertyDefinition
   | TraitDeclaration
   | TraitDefinition
   | TypedefDeclaration
@@ -63,6 +65,8 @@ type glean_json = {
   globalConstDefinition: json list;
   interfaceDeclaration: json list;
   interfaceDefinition: json list;
+  propertyDeclaration: json list;
+  propertyDefinition: json list;
   traitDeclaration: json list;
   traitDefinition: json list;
   typedefDeclaration: json list;
@@ -89,6 +93,8 @@ let init_progress =
       globalConstDefinition = [];
       interfaceDeclaration = [];
       interfaceDefinition = [];
+      propertyDeclaration = [];
+      propertyDefinition = [];
       traitDeclaration = [];
       traitDefinition = [];
       typedefDeclaration = [];
@@ -184,6 +190,16 @@ let update_json_data predicate json progress =
       {
         progress.resultJson with
         interfaceDefinition = json :: progress.resultJson.interfaceDefinition;
+      }
+    | PropertyDeclaration ->
+      {
+        progress.resultJson with
+        propertyDeclaration = json :: progress.resultJson.propertyDeclaration;
+      }
+    | PropertyDefinition ->
+      {
+        progress.resultJson with
+        propertyDefinition = json :: progress.resultJson.propertyDefinition;
       }
     | TraitDeclaration ->
       {
@@ -322,6 +338,15 @@ let build_file_json filepath = JSON_Object [("key", JSON_String filepath)]
 
 let build_decl_target_json json = JSON_Object [("declaration", json)]
 
+let build_visibility_json (visibility : Aast.visibility) =
+  let num =
+    match visibility with
+    | Private -> 0
+    | Protected -> 1
+    | Public -> 2
+  in
+  JSON_Number (string_of_int num)
+
 let build_xrefs_json xref_map =
   let xrefs =
     IMap.fold
@@ -347,8 +372,11 @@ let build_xrefs_json xref_map =
 (* These are functions for building JSON to reference some
 existing fact. *)
 
+let build_container_json_ref container_type fact_id =
+  JSON_Object [(container_type, build_id_json fact_id)]
+
 let build_container_decl_json_ref container_type fact_id =
-  let container_json = JSON_Object [(container_type, build_id_json fact_id)] in
+  let container_json = build_container_json_ref container_type fact_id in
   JSON_Object [("container", container_json)]
 
 let build_enum_decl_json_ref fact_id =
@@ -362,6 +390,9 @@ let build_typedef_decl_json_ref fact_id =
 
 let build_gconst_decl_json_ref fact_id =
   JSON_Object [("global_const", build_id_json fact_id)]
+
+let build_property_decl_json_ref fact_id =
+  JSON_Object [("property_", build_id_json fact_id)]
 
 (* These functions build up the JSON necessary and then add facts
 to the running result. *)
@@ -393,6 +424,35 @@ let add_container_defn_fact clss decl_id progress =
 let add_container_decl_fact decl_pred name _elem progress =
   let json_fact = JSON_Object [("name", build_name_json_nested name)] in
   add_fact decl_pred json_fact progress
+
+let add_property_decl_fact con_type decl_id name _prop progress =
+  let json_fact =
+    JSON_Object
+      [
+        ("name", build_name_json_nested name);
+        ("container", build_container_json_ref con_type decl_id);
+      ]
+  in
+  add_fact PropertyDeclaration json_fact progress
+
+let add_property_defn_fact ctx prop decl_id progress =
+  let base_fields =
+    [
+      ("declaration", build_id_json decl_id);
+      ("visibility", build_visibility_json prop.cv_visibility);
+      ("isFinal", JSON_Bool prop.cv_final);
+      ("isAbstract", JSON_Bool prop.cv_abstract);
+      ("isStatic", JSON_Bool prop.cv_is_static);
+    ]
+  in
+  let json_fields =
+    match hint_of_type_hint prop.cv_type with
+    | None -> base_fields
+    | Some h ->
+      let ty = get_type_from_hint ctx h in
+      ("type", build_type_json_nested ty) :: base_fields
+  in
+  add_fact PropertyDefinition (JSON_Object json_fields) progress
 
 let add_enum_decl_fact name _elem progress =
   let json_fact = JSON_Object [("name", build_name_json_nested name)] in
@@ -560,54 +620,78 @@ let process_decl_loc decl_fun defn_fun decl_ref_fun pos id elem progress =
   let (_, prog) = defn_fun elem decl_id prog in
   let ref_json = decl_ref_fun decl_id in
   let (_, prog) = add_decl_loc_fact pos ref_json prog in
-  prog
+  (decl_id, prog)
 
-let process_container_decl elem progress =
+let process_container_decl ctx elem progress =
   let (pos, id) = elem.c_name in
   let (con_type, decl_pred) =
     container_decl_predicate (get_container_kind elem)
   in
-  process_decl_loc
-    (add_container_decl_fact decl_pred)
-    add_container_defn_fact
-    (build_container_decl_json_ref con_type)
-    pos
-    id
-    elem
-    progress
+  let (decl_id, prog) =
+    process_decl_loc
+      (add_container_decl_fact decl_pred)
+      add_container_defn_fact
+      (build_container_decl_json_ref con_type)
+      pos
+      id
+      elem
+      progress
+  in
+  List.fold elem.c_vars ~init:prog ~f:(fun prog prop ->
+      let (pos, id) = prop.cv_id in
+      let (_, prog) =
+        process_decl_loc
+          (add_property_decl_fact con_type decl_id)
+          (add_property_defn_fact ctx)
+          build_property_decl_json_ref
+          pos
+          id
+          prop
+          prog
+      in
+      prog)
 
 let process_enum_decl ctx elem progress =
   let (pos, id) = elem.c_name in
-  process_decl_loc
-    add_enum_decl_fact
-    (add_enum_defn_fact ctx)
-    build_enum_decl_json_ref
-    pos
-    id
-    elem
-    progress
+  let (_, prog) =
+    process_decl_loc
+      add_enum_decl_fact
+      (add_enum_defn_fact ctx)
+      build_enum_decl_json_ref
+      pos
+      id
+      elem
+      progress
+  in
+  prog
 
 let process_gconst_decl ctx elem progress =
   let (pos, id) = elem.cst_name in
-  process_decl_loc
-    add_gconst_decl_fact
-    (add_gconst_defn_fact ctx)
-    build_gconst_decl_json_ref
-    pos
-    id
-    elem
-    progress
+  let (_, prog) =
+    process_decl_loc
+      add_gconst_decl_fact
+      (add_gconst_defn_fact ctx)
+      build_gconst_decl_json_ref
+      pos
+      id
+      elem
+      progress
+  in
+  prog
 
 let process_func_decl ctx elem progress =
   let (pos, id) = elem.f_name in
-  process_decl_loc
-    add_func_decl_fact
-    (add_func_defn_fact ctx)
-    build_func_decl_json_ref
-    pos
-    id
-    elem
-    progress
+  let (_, prog) =
+    process_decl_loc
+      add_func_decl_fact
+      (add_func_defn_fact ctx)
+      build_func_decl_json_ref
+      pos
+      id
+      elem
+      progress
+  in
+  prog
 
 let process_typedef_decl elem progress =
   let (pos, id) = elem.t_name in
@@ -624,7 +708,7 @@ let build_json ctx symbols =
         match symbol with
         | Class en when phys_equal en.c_kind Cenum ->
           process_enum_decl ctx en acc
-        | Class cd -> process_container_decl cd acc
+        | Class cd -> process_container_decl ctx cd acc
         | Constant gd -> process_gconst_decl ctx gd acc
         | Fun fd -> process_func_decl ctx fd acc
         | Typedef td -> process_typedef_decl td acc
@@ -692,11 +776,13 @@ let build_json ctx symbols =
       ("hack.FileXRefs.1", progress.resultJson.fileXRefs);
       ("hack.FunctionDefinition.1", progress.resultJson.functionDefinition);
       ("hack.EnumDefinition.1", progress.resultJson.enumDefinition);
+      ("hack.PropertyDefinition.1", progress.resultJson.propertyDefinition);
       ("hack.ClassDefinition.1", progress.resultJson.classDefinition);
       ("hack.TraitDefinition.1", progress.resultJson.traitDefinition);
       ("hack.InterfaceDefinition.1", progress.resultJson.interfaceDefinition);
       ("hack.GlobalConstDefinition.1", progress.resultJson.globalConstDefinition);
       ("hack.DeclarationLocation.1", progress.resultJson.declarationLocation);
+      ("hack.PropertyDeclaration.1", progress.resultJson.propertyDeclaration);
       ("hack.FunctionDeclaration.1", progress.resultJson.functionDeclaration);
       ("hack.EnumDeclaration.1", progress.resultJson.enumDeclaration);
       ("hack.ClassDeclaration.1", progress.resultJson.classDeclaration);

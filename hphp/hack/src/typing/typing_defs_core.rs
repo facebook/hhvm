@@ -284,6 +284,26 @@ pub enum PrimKind<'a> {
     Tatom(&'a str),
 }
 
+impl<'a> PrimKind<'a> {
+    pub fn to_oxidized(&self) -> aast_defs::Tprim {
+        use aast_defs::Tprim as O;
+        use PrimKind as P;
+        match self {
+            P::Tnull => O::Tnull,
+            P::Tvoid => O::Tvoid,
+            P::Tint => O::Tint,
+            P::Tbool => O::Tbool,
+            P::Tfloat => O::Tfloat,
+            P::Tstring => O::Tstring,
+            P::Tresource => O::Tresource,
+            P::Tnum => O::Tnum,
+            P::Tarraykey => O::Tarraykey,
+            P::Tnoreturn => O::Tnoreturn,
+            P::Tatom(atom) => O::Tatom(atom.to_string()),
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct PossiblyEnforcedTy<'a> {
     /// True if consumer of this type enforces it at runtime
@@ -359,11 +379,33 @@ impl<'a> Ty<'a> {
         // Not implementing all the types and reasons upfront, since initially we'll likely
         // to use a very limited subset of them. Feel free to add whatever you need here if you
         // are a hitting those unimplemented.
+        use oxidized_defs::Ty_ as O;
+        use Ty_ as T;
+
         let r = self.0.to_oxidized();
-        let t = match &self.1 {
-            Ty_::Tprim(PrimKind::Tint) => oxidized_defs::Ty_::Tprim(aast_defs::Tprim::Tint),
-            Ty_::Tprim(PrimKind::Tnull) => oxidized_defs::Ty_::Tprim(aast_defs::Tprim::Tnull),
-            x => unimplemented!("{:#?}", x),
+        let t = match self.1 {
+            T::Tapply(sid, tys) => O::Tapply(
+                (*sid).clone(),
+                tys.iter().map(|x| x.to_oxidized()).collect(),
+            ),
+            T::Terr => O::Terr,
+            T::Tnonnull => O::Tnonnull,
+            T::Toption(ty) => O::Toption(ty.to_oxidized()),
+            T::Tprim(prim) => O::Tprim(prim.to_oxidized()),
+            T::Tfun(ft) => O::Tfun(ft.to_oxidized()),
+            T::Ttuple(tys) => O::Ttuple(tys.iter().map(|x| x.to_oxidized()).collect()),
+            T::Tvar(v) => O::Tvar(*v),
+            T::Tgeneric(name) => O::Tgeneric(name.to_string()),
+            T::Tunion(tys) => O::Tunion(tys.iter().map(|x| x.to_oxidized()).collect()),
+            T::Tintersection(tys) => {
+                O::Tintersection(tys.iter().map(|x| x.to_oxidized()).collect())
+            }
+            T::Tclass(sid, exact, tys) => O::Tclass(
+                (*sid).clone(),
+                *exact,
+                tys.iter().map(|x| x.to_oxidized()).collect(),
+            ),
+            _ => unimplemented!("{:#?}", self.1),
         };
         oxidized_defs::Ty(r, Box::new(t))
     }
@@ -419,4 +461,29 @@ pub type FunType<'a> = &'a FunType_<'a>;
 pub struct FunType_<'a> {
     pub return_: Ty<'a>, // TODO(hrust) possibly_enforced_ty
                          // TODO(hrust) missing fields
+}
+
+impl<'a> FunType_<'a> {
+    pub fn to_oxidized(&self) -> oxidized_defs::FunType {
+        // TODO(hrust) proper conversion
+        use oxidized_defs::*;
+
+        FunType {
+            is_coroutine: false,
+            arity: FunArity::Fstandard(0, 0),
+            tparams: (vec![], FunTparamsKind::FTKtparams),
+            where_constraints: vec![],
+            params: vec![],
+            ret: PossiblyEnforcedTy {
+                enforced: false,
+                type_: self.return_.to_oxidized(),
+            },
+            fun_kind: ast_defs::FunKind::FSync,
+            reactive: Reactivity::Nonreactive,
+            return_disposable: false,
+            mutability: None,
+            returns_mutable: false,
+            returns_void_to_rx: false,
+        }
+    }
 }

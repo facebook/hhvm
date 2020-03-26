@@ -233,7 +233,7 @@ let rec dispatch_loop handlers =
         let body = Bytes.create bytes in
         try
           Caml.really_input Caml.stdin body 0 bytes;
-          (header, body)
+          (header, Bytes.to_string body)
         with exc ->
           fail_daemon
             file

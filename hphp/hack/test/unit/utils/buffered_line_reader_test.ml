@@ -11,6 +11,11 @@
 open Buffered_line_reader
 open Asserter
 
+let unix_write fd_out (str : string) =
+  let len = String.length str in
+  let bstr = Bytes.of_string str in
+  Unix.write fd_out bstr 0 len
+
 let test_mixed_read () =
   String_asserter.(
     (* Test line-based reading, LF-terminated *)
@@ -34,16 +39,16 @@ let test_mixed_read () =
     match Unix.fork () with
     | 0 ->
       Unix.close fd_in;
-      let _ = Unix.write fd_out (msg1 ^ "\n") 0 (String.length msg1 + 1) in
-      let _ = Unix.write fd_out (msg2 ^ "\r\n") 0 (String.length msg2 + 2) in
-      let _ = Unix.write fd_out (msg2a ^ "\n") 0 (String.length msg2a + 1) in
-      let _ = Unix.write fd_out (msg3 ^ "\r\n") 0 (String.length msg3 + 2) in
-      let _ = Unix.write fd_out msg4a 0 (String.length msg4a) in
-      let _ = Unix.sleepf 0.1 in
-      let _ = Unix.write fd_out msg4b 0 (String.length msg4b) in
-      let _ = Unix.write fd_out msg5 0 (String.length msg5) in
-      let _ = Unix.write fd_out msg6 0 (String.length msg6) in
-      let _ = Unix.write fd_out (msg7 ^ "\n") 0 (String.length msg7 + 1) in
+      let (_ : int) = unix_write fd_out (msg1 ^ "\n") in
+      let (_ : int) = unix_write fd_out (msg2 ^ "\r\n") in
+      let (_ : int) = unix_write fd_out (msg2a ^ "\n") in
+      let (_ : int) = unix_write fd_out (msg3 ^ "\r\n") in
+      let (_ : int) = unix_write fd_out msg4a in
+      let () = Unix.sleepf 0.1 in
+      let (_ : int) = unix_write fd_out msg4b in
+      let (_ : int) = unix_write fd_out msg5 in
+      let (_ : int) = unix_write fd_out msg6 in
+      let (_ : int) = unix_write fd_out (msg7 ^ "\n") in
       Unix.close fd_out;
       exit 0
     | _pid ->
@@ -70,12 +75,16 @@ let str_split str len =
 
 let rec write_string str chunk_size fd =
   if String.length str <= chunk_size then
-    let written = Unix.single_write fd str 0 (String.length str) in
-    assert (written = String.length str)
+    let bstr = Bytes.of_string str in
+    let len = Bytes.length bstr in
+    let written = Unix.single_write fd bstr 0 len in
+    assert (written = len)
   else
     let (hd, tl) = str_split str chunk_size in
-    let written = Unix.write fd hd 0 (String.length hd) in
-    let () = assert (written = String.length hd) in
+    let bhd = Bytes.of_string hd in
+    let len = Bytes.length bhd in
+    let written = Unix.write fd bhd 0 len in
+    let () = assert (written = len) in
     write_string tl chunk_size fd
 
 (** Write a string containing newlines at varying spaces apart, a few

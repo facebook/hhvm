@@ -10,7 +10,6 @@
   (name watchman_lib)
   (wrapped false)
   (modules watchmanEventWatcher)
-  (flags (:standard -unsafe-string))
   (libraries
     watchman_config
     watchman_utils))
@@ -26,7 +25,6 @@
 (library
   (name watchman_client)
   (wrapped false)
-  (flags (:standard -unsafe-string))
   (modules
     watchmanEventWatcherClient
     watchmanEventWatcherClient_sig)

@@ -65,7 +65,7 @@ let do_work (acc : int) (jobs : int list) : int =
       else
         4 );
     let fd = Unix.openfile !pipe_path [Unix.O_WRONLY] 0o640 in
-    let written = Unix.write fd "!" 0 1 in
+    let written = Unix.write fd (Bytes.of_string "!") 0 1 in
     assert (written = 1);
     if job = 7 then loop_until_cancel ()
   );
@@ -81,7 +81,7 @@ let make_work () = make_work [] num_workers_and_jobs
 let interrupt_handler fd env =
   let exclamation_mark = Bytes.create 1 in
   let read = Unix.read fd exclamation_mark 0 1 in
-  assert (read = 1 && exclamation_mark = "!");
+  assert (read = 1 && Bytes.to_string exclamation_mark = "!");
   let env = env + 1 in
   let result =
     MultiThreadedCall.(

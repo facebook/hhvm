@@ -13,7 +13,6 @@
   (wrapped false)
   (modules
     process)
-  (flags (:standard -unsafe-string))
   (libraries
     exec_command
     process_types

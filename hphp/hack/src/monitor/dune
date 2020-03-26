@@ -13,5 +13,4 @@
     sys_utils
     utils_config_file
     utils_scheduler
-    watchman)
-  (flags (:standard -unsafe-string)))
+    watchman))

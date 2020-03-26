@@ -34,7 +34,9 @@ let send_version oc =
   |> ignore;
 
   (* For backwards-compatibility, newline has always followed the version *)
-  let _ = Unix.write (Unix.descr_of_out_channel oc) "\n" 0 1 in
+  let (_ : int) =
+    Unix.write (Unix.descr_of_out_channel oc) (Bytes.of_string "\n") 0 1
+  in
   ()
 
 let send_server_handoff_rpc handoff_options oc =

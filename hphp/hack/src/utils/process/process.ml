@@ -259,6 +259,7 @@ let send_input_and_form_result
       match input with
       | None -> true
       | Some input ->
+        let input = Bytes.of_string input in
         let written = Unix.write stdin_parent input 0 (Bytes.length input) in
         written = Bytes.length input
     in

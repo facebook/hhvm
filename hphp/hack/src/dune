@@ -89,8 +89,7 @@
     naming_elaborate_namespaces_endo
     typing)
   (ocamlc_flags (:standard -custom))
-  (link_flags (:standard (:include dune_config/ld-opts.sexp)))
-  (flags (:standard -unsafe-string)))
+  (link_flags (:standard (:include dune_config/ld-opts.sexp))))
 
 (executable
   (name hh_parse)

@@ -116,8 +116,10 @@ let send_to_fd env v fd =
     )
   in
   let str = Printf.sprintf "%s\n" (Responses.to_string v) in
-  let bytes = Unix.single_write fd str 0 (String.length str) in
-  if bytes = String.length str then
+  let str = Bytes.of_string str in
+  let str_length = Bytes.length str in
+  let bytes = Unix.single_write fd str 0 str_length in
+  if bytes = str_length then
     ()
   else
     (* We're only writing a few bytes. Not sure what to do here.

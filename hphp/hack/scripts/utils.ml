@@ -42,7 +42,7 @@ let with_out_channel filename f =
 (* Read the first line in stdout or stderr of an external command. *)
 let read_process_output name args =
   with_pipe
-  @@ fun in_r in_w ->
+  @@ fun in_r _in_w ->
   with_pipe
   @@ fun out_r out_w ->
   let pid = Unix.create_process name args in_r out_w out_w in
@@ -61,12 +61,12 @@ let read_process_output name args =
 let string_of_file filename =
   with_in_channel filename
   @@ fun ic ->
-  let s = String.create 32759 in
+  let s = Bytes.create 32759 in
   let b = Buffer.create 1000 in
   let rec iter ic b s =
     let nread = input ic s 0 32759 in
     if nread > 0 then (
-      Buffer.add_substring b s 0 nread;
+      Buffer.add_subbytes b s 0 nread;
       iter ic b s
     )
   in

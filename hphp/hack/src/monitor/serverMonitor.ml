@@ -263,7 +263,7 @@ struct
     let client_build_id : string = Marshal_tools.from_fd_with_preamble fd in
     let newline_byte = Bytes.create 1 in
     let _ = Unix.read fd newline_byte 0 1 in
-    if newline_byte <> "\n" then (
+    if Bytes.to_string newline_byte <> "\n" then (
       Hh_logger.log "Did not find newline character after version";
       raise Malformed_build_id
     );

@@ -35,7 +35,7 @@ let run_interrupter limit =
         match x with
         | Some 0 -> exit 0
         | _ ->
-          let written = Unix.write fd_out "!" 0 1 in
+          let written = Unix.write fd_out (Bytes.of_string "!") 0 1 in
           assert (written = 1);
           aux (Option.map x (fun x -> x - 1))
       in
@@ -48,4 +48,4 @@ let run_interrupter limit =
 let read_exclamation_mark fd =
   let exclamation_mark = Bytes.create 1 in
   let read = Unix.read fd exclamation_mark 0 1 in
-  assert (read = 1 && exclamation_mark = "!")
+  assert (read = 1 && Bytes.to_string exclamation_mark = "!")

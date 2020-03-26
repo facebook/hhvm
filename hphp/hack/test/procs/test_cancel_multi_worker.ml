@@ -40,7 +40,7 @@ let run_interrupter fd_in fd_out =
   Unix.close fd_in;
   while true do
     Unix.sleepf (0.5 +. Random.float 0.1);
-    let written = Unix.write fd_out "!" 0 1 in
+    let written = Unix.write fd_out (Bytes.of_string "!") 0 1 in
     assert (written = 1)
   done;
   assert false
@@ -52,7 +52,7 @@ let interrupt_handler fd acc =
        let (ready, _, _) = Unix.select [fd] [] [] 0.0 in
        if ready = [] then raise Not_found;
        let read = Unix.read fd exclamation_mark 0 1 in
-       assert (read = 1 && exclamation_mark = "!")
+       assert (read = 1 && Bytes.to_string exclamation_mark = "!")
      done
    with Not_found -> ());
   (acc, MultiThreadedCall.Cancel)

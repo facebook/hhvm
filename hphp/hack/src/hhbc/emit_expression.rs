@@ -3805,7 +3805,264 @@ fn emit_base_(
                 0,
             ))
         }
-        _ => unimplemented!(),
+        E_::ArrayGet(x) => match (&(x.0).1, x.1.as_ref()) {
+            (E_::Lvar(v), Some(expr)) if local_id::get_name(&v.1) == superglobals::GLOBALS => {
+                Ok(match expr.1.as_lvar() {
+                    Some(tast::Lid(pos, id)) => {
+                        let v = get_local(e, env, pos, local_id::get_name(id))?;
+                        emit_default(
+                            e,
+                            InstrSeq::Empty,
+                            InstrSeq::Empty,
+                            InstrSeq::make_basegl(v, base_mode),
+                            0,
+                            0,
+                        )
+                    }
+                    _ => {
+                        let elem_instrs = emit_expr(e, env, expr)?;
+                        emit_default(
+                            e,
+                            elem_instrs,
+                            InstrSeq::Empty,
+                            InstrSeq::make_basegc(base_offset, base_mode),
+                            1,
+                            0,
+                        )
+                    }
+                })
+            }
+            // $a[] can not be used as the base of an array get unless as an lval
+            (_, None) if !env.flags.contains(env::Flags::ALLOWS_ARRAY_APPEND) => {
+                return Err(emit_fatal::raise_fatal_runtime(
+                    pos,
+                    "Can't use [] for reading",
+                ))
+            }
+            // base is in turn array_get - do a specific handling for inout params
+            // if necessary
+            (_, opt_elem_expr) => {
+                let base_expr = &x.0;
+                let local_temp_kind =
+                    get_local_temp_kind(env, false, inout_param_info, opt_elem_expr);
+                let (elem_instrs, elem_stack_size) = emit_elem(
+                    e,
+                    env,
+                    opt_elem_expr,
+                    local_temp_kind,
+                    null_coalesce_assignment,
+                )?;
+                let base_result = emit_base_(
+                    e,
+                    env,
+                    base_expr,
+                    mode,
+                    false,
+                    null_coalesce_assignment,
+                    base_offset + elem_stack_size,
+                    rhs_stack_size,
+                    inout_param_info,
+                )?;
+                let cls_stack_size = match &base_result {
+                    ArrayGetBase::Regular(base) => base.cls_stack_size,
+                    ArrayGetBase::Inout { load, .. } => load.cls_stack_size,
+                };
+                let mk = get_elem_member_key(
+                    e,
+                    env,
+                    base_offset + cls_stack_size,
+                    opt_elem_expr,
+                    null_coalesce_assignment,
+                )?;
+                let make_setup_instrs = |base_setup_instrs: InstrSeq| {
+                    InstrSeq::gather(vec![
+                        base_setup_instrs,
+                        InstrSeq::make_dim(mode, mk.clone()),
+                    ])
+                };
+                Ok(match (base_result, local_temp_kind) {
+                    // both base and index don't use temps - fallback to default handler
+                    (ArrayGetBase::Regular(base), None) => emit_default(
+                        e,
+                        InstrSeq::gather(vec![base.base_instrs, elem_instrs]),
+                        base.cls_instrs,
+                        make_setup_instrs(base.setup_instrs),
+                        base.base_stack_size + elem_stack_size,
+                        base.cls_stack_size,
+                    ),
+                    // base does not need temps but index does
+                    (ArrayGetBase::Regular(base), Some(local_temp)) => {
+                        let local = e.local_gen_mut().get_unnamed();
+                        let base_instrs = InstrSeq::gather(vec![base.base_instrs, elem_instrs]);
+                        ArrayGetBase::Inout {
+                            load: ArrayGetBaseData {
+                                // store result of instr_begin to temp
+                                base_instrs: vec![(base_instrs, Some((local.clone(), local_temp)))],
+                                cls_instrs: base.cls_instrs,
+                                setup_instrs: make_setup_instrs(base.setup_instrs),
+                                base_stack_size: base.base_stack_size + elem_stack_size,
+                                cls_stack_size: base.cls_stack_size,
+                            },
+                            store: emit_store_for_simple_base(
+                                e,
+                                env,
+                                pos,
+                                elem_stack_size,
+                                base_expr,
+                                local,
+                                true,
+                            )?,
+                        }
+                    }
+                    // base needs temps, index - does not
+                    (
+                        ArrayGetBase::Inout {
+                            load:
+                                ArrayGetBaseData {
+                                    mut base_instrs,
+                                    cls_instrs,
+                                    setup_instrs,
+                                    base_stack_size,
+                                    cls_stack_size,
+                                },
+                            store,
+                        },
+                        None,
+                    ) => {
+                        base_instrs.push((elem_instrs, None));
+                        ArrayGetBase::Inout {
+                            load: ArrayGetBaseData {
+                                base_instrs,
+                                cls_instrs,
+                                setup_instrs: make_setup_instrs(setup_instrs),
+                                base_stack_size: base_stack_size + elem_stack_size,
+                                cls_stack_size,
+                            },
+                            store: InstrSeq::gather(vec![
+                                store,
+                                InstrSeq::make_dim(MemberOpMode::Define, mk),
+                            ]),
+                        }
+                    }
+                    // both base and index needs locals
+                    (
+                        ArrayGetBase::Inout {
+                            load:
+                                ArrayGetBaseData {
+                                    mut base_instrs,
+                                    cls_instrs,
+                                    setup_instrs,
+                                    base_stack_size,
+                                    cls_stack_size,
+                                },
+                            store,
+                        },
+                        Some(local_kind),
+                    ) => {
+                        let local = e.local_gen_mut().get_unnamed();
+                        base_instrs.push((elem_instrs, Some((local.clone(), local_kind))));
+                        ArrayGetBase::Inout {
+                            load: ArrayGetBaseData {
+                                base_instrs,
+                                cls_instrs,
+                                setup_instrs: make_setup_instrs(setup_instrs),
+                                base_stack_size: base_stack_size + elem_stack_size,
+                                cls_stack_size,
+                            },
+                            store: InstrSeq::gather(vec![
+                                store,
+                                InstrSeq::make_dim(MemberOpMode::Define, MemberKey::EL(local)),
+                            ]),
+                        }
+                    }
+                })
+            }
+        },
+        E_::ObjGet(x) => {
+            let (base_expr, prop_expr, null_flavor) = &**x;
+            Ok(match prop_expr.1.as_id() {
+                Some(ast_defs::Id(_, s)) if string_utils::is_xhp(&s) => {
+                    let base_instrs = emit_xhp_obj_get(e, env, pos, base_expr, &s, null_flavor)?;
+                    emit_default(
+                        e,
+                        base_instrs,
+                        InstrSeq::Empty,
+                        InstrSeq::make_basec(base_offset, base_mode),
+                        1,
+                        0,
+                    )
+                }
+                _ => {
+                    let prop_stack_size = emit_prop_expr(
+                        e,
+                        env,
+                        null_flavor,
+                        0,
+                        prop_expr,
+                        null_coalesce_assignment,
+                    )?
+                    .2;
+                    let (
+                        base_expr_instrs_begin,
+                        base_expr_instrs_end,
+                        base_setup_instrs,
+                        base_stack_size,
+                        cls_stack_size,
+                    ) = emit_base(
+                        e,
+                        env,
+                        base_expr,
+                        mode,
+                        true,
+                        null_coalesce_assignment,
+                        base_offset + prop_stack_size,
+                        rhs_stack_size,
+                    )?;
+                    let (mk, prop_instrs, _) = emit_prop_expr(
+                        e,
+                        env,
+                        null_flavor,
+                        base_offset + cls_stack_size,
+                        prop_expr,
+                        null_coalesce_assignment,
+                    )?;
+                    let total_stack_size = prop_stack_size + base_stack_size;
+                    let final_instr = InstrSeq::make_dim(mode, mk);
+                    emit_default(
+                        e,
+                        InstrSeq::gather(vec![base_expr_instrs_begin, prop_instrs]),
+                        base_expr_instrs_end,
+                        InstrSeq::gather(vec![base_setup_instrs, final_instr]),
+                        total_stack_size,
+                        cls_stack_size,
+                    )
+                }
+            })
+        }
+        E_::ClassGet(x) => {
+            let (cid, prop) = &**x;
+            let cexpr = ClassExpr::class_id_to_class_expr(e, false, false, &env.scope, cid);
+            let (cexpr_begin, cexpr_end) = emit_class_expr(e, env, cexpr, prop)?;
+            Ok(emit_default(
+                e,
+                cexpr_begin,
+                cexpr_end,
+                InstrSeq::make_basesc(base_offset + 1, rhs_stack_size, base_mode),
+                1,
+                1,
+            ))
+        }
+        _ => {
+            let base_expr_instrs = emit_expr(e, env, expr)?;
+            Ok(emit_default(
+                e,
+                base_expr_instrs,
+                InstrSeq::Empty,
+                emit_pos_then(e, pos, InstrSeq::make_basec(base_offset, base_mode))?,
+                1,
+                0,
+            ))
+        }
     }
 }
 

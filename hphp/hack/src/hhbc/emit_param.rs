@@ -186,19 +186,22 @@ pub fn emit_param_default_value_setter(
                     InstrSeq::make_nop()
                 } else {
                     InstrSeq::gather(vec![
-                        emit_expression::emit_expr(emitter, env, &expr).unwrap(),
+                        emit_expression::emit_expr(emitter, env, &expr)?,
                         emit_pos::emit_pos(emitter, pos),
                         InstrSeq::make_setl(local::Type::Named(param.name.clone())),
                         InstrSeq::make_popc(),
                     ])
                 };
-            InstrSeq::gather(vec![InstrSeq::make_label(lbl.to_owned()), instrs])
+            Ok(InstrSeq::gather(vec![
+                InstrSeq::make_label(lbl.to_owned()),
+                instrs,
+            ]))
         })
     };
     let setters = params
         .iter()
         .filter_map(param_to_setter)
-        .collect::<Vec<_>>();
+        .collect::<Result<Vec<_>>>()?;
     if setters.is_empty() {
         Ok((InstrSeq::Empty, InstrSeq::Empty))
     } else {

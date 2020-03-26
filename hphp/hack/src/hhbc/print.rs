@@ -1308,7 +1308,7 @@ fn print_base<W: Write>(w: &mut W, i: &InstructBase) -> Result<(), W::Error> {
             print_member_opmode(w, m)
         }
         I::BaseSC(si1, si2, m) => {
-            w.write("BaseGC ")?;
+            w.write("BaseSC ")?;
             print_stack_index(w, si1)?;
             w.write(" ")?;
             print_stack_index(w, si2)?;

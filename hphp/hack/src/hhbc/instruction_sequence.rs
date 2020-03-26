@@ -770,6 +770,10 @@ impl InstrSeq {
         Self::make_instr(Instruct::IBase(InstructBase::BaseGC(stack_index, mode)))
     }
 
+    pub fn make_basegl(local: local::Type, mode: MemberOpMode) -> Self {
+        Self::make_instr(Instruct::IBase(InstructBase::BaseGL(local, mode)))
+    }
+
     pub fn make_basesc(y: StackIndex, z: StackIndex, mode: MemberOpMode) -> Self {
         Self::make_instr(Instruct::IBase(InstructBase::BaseSC(y, z, mode)))
     }

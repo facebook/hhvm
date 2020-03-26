@@ -15,8 +15,12 @@ impl Env {
         is_codegen: bool,
         disable_xhp_element_mangling: bool,
     ) -> Self {
+        let mut ns_uses = hh_autoimport::NAMESPACES_MAP.clone();
+        auto_ns_map.iter().for_each(|(k, v)| {
+            ns_uses.insert(k.into(), v.into());
+        });
         Env {
-            ns_uses: hh_autoimport::NAMESPACES_MAP.clone(),
+            ns_uses,
             class_uses: hh_autoimport::TYPES_MAP.clone(),
             fun_uses: hh_autoimport::FUNCS_MAP.clone(),
             const_uses: hh_autoimport::CONSTS_MAP.clone(),

@@ -35,6 +35,7 @@ pub use manual::typing_env_return_info;
 pub use manual::typing_logic;
 pub use manual::typing_reason_impl;
 pub use manual::typing_set;
+pub use manual::uast;
 
 mod stubs;
 

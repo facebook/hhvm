@@ -36,3 +36,4 @@ pub mod typing_env_return_info;
 pub mod typing_logic;
 pub mod typing_reason_impl;
 pub mod typing_set;
+pub mod uast;

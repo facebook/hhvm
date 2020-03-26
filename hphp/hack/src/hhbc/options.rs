@@ -249,10 +249,11 @@ prefixed_flags!(
     ENABLE_XHP_CLASS_MODIFIER,
     HACKSPERIMENTAL,
     DISABLE_ARRAY,
+    RUST_TOP_LEVEL_ELABORATOR,
 );
 impl Default for LangFlags {
     fn default() -> LangFlags {
-        LangFlags::ENABLE_COROUTINES
+        LangFlags::ENABLE_COROUTINES | LangFlags::RUST_TOP_LEVEL_ELABORATOR
     }
 }
 
@@ -668,6 +669,9 @@ mod tests {
   "hhvm.hack.lang.hacksperimental": {
     "global_value": false
   },
+  "hhvm.hack.lang.rust_top_level_elaborator": {
+    "global_value": true
+  },
   "hhvm.hack_arr_compat_notices": {
     "global_value": false
   },
@@ -1021,5 +1025,6 @@ bitflags! {
         const WIDEN_IS_ARRAY = 1 << 48;
         const DISABLE_XHP_ELEMENT_MANGLING = 1 << 49;
         const DISABLE_ARRAY = 1 << 50;
+        const RUST_TOP_LEVEL_ELABORATOR = 1 << 51;
     }
 }

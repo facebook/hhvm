@@ -88,7 +88,7 @@ struct RepoOptions {
   H(bool,           DisallowFuncPtrsInConstants,    false)            \
   E(bool,           EmitFuncPointers,               true)             \
   E(bool,           EmitInstMethPointers,           EmitFuncPointers) \
-  H(bool,           RustLowerer,                    true)             \
+  H(bool,           RustTopLevelElaborator,         true)             \
   H(bool,           EnableXHPClassModifier,         false)            \
   E(bool,           EmitGenericsUB,                 false)            \
   H(bool,           DisableXHPElementMangling,      false)            \

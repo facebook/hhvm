@@ -181,26 +181,34 @@ impl<'a> Env<'a> {
         mode: file_info::Mode,
         indexed_source_text: &'a IndexedSourceText<'a>,
         parser_options: &'a GlobalOptions,
+        use_default_namespace: bool,
         stack_limit: Option<&'a StackLimit>,
     ) -> Self {
         // (hrust) Ported from namespace_env.ml
-        let mut ns_uses = hh_autoimport::NAMESPACES_MAP.clone();
-        parser_options
-            .po_auto_namespace_map
-            .iter()
-            .for_each(|(k, v)| {
-                &ns_uses.insert(k.into(), v.into());
-            });
-        let empty_ns_env = NamespaceEnv {
-            ns_uses,
-            class_uses: hh_autoimport::TYPES_MAP.clone(),
-            fun_uses: hh_autoimport::FUNCS_MAP.clone(),
-            const_uses: hh_autoimport::CONSTS_MAP.clone(),
-            record_def_uses: s_map::SMap::new(),
-            name: None,
-            auto_ns_map: parser_options.po_auto_namespace_map.clone(),
-            is_codegen: codegen,
-            disable_xhp_element_mangling: parser_options.po_disable_xhp_element_mangling,
+        let empty_ns_env = if use_default_namespace {
+            let mut nsenv = NamespaceEnv::default();
+            nsenv.is_codegen = codegen;
+            nsenv.disable_xhp_element_mangling = parser_options.po_disable_xhp_element_mangling;
+            nsenv
+        } else {
+            let mut ns_uses = hh_autoimport::NAMESPACES_MAP.clone();
+            parser_options
+                .po_auto_namespace_map
+                .iter()
+                .for_each(|(k, v)| {
+                    &ns_uses.insert(k.into(), v.into());
+                });
+            NamespaceEnv {
+                ns_uses,
+                class_uses: hh_autoimport::TYPES_MAP.clone(),
+                fun_uses: hh_autoimport::FUNCS_MAP.clone(),
+                const_uses: hh_autoimport::CONSTS_MAP.clone(),
+                record_def_uses: s_map::SMap::new(),
+                name: None,
+                auto_ns_map: parser_options.po_auto_namespace_map.clone(),
+                is_codegen: codegen,
+                disable_xhp_element_mangling: parser_options.po_disable_xhp_element_mangling,
+            }
         };
 
         Env {

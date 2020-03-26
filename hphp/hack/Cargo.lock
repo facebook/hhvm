@@ -12,6 +12,7 @@ dependencies = [
  "lint_rust 0.0.0",
  "lowerer 0.0.0",
  "mode_parser 0.0.0",
+ "namespaces_rust 0.0.0",
  "naming_special_names_rust 0.0.0",
  "ocamlrep 0.0.0",
  "ocamlrep_derive 0.0.0",
@@ -1616,6 +1617,7 @@ dependencies = [
  "core_utils_rust 0.0.0",
  "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "naming_special_names_rust 0.0.0",
+ "ocamlrep 0.0.0",
  "oxidized 0.0.0",
 ]
 

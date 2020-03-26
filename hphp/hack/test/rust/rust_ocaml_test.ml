@@ -565,7 +565,7 @@ module LowererTest_ = struct
         ~disable_global_state_mutation:true
         ~show_all_errors:true
         ~keep_errors:true
-        ~elaborate_namespaces:false
+        ~elaborate_namespaces:true
         ~lower_coroutines:false
         ~parser_options:popt
     in

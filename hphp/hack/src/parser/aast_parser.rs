@@ -12,8 +12,11 @@ use itertools::{
 };
 use lowerer::{lower, ScourComment};
 use mode_parser::parse_mode;
+use namespaces_rust as namespaces;
 use ocamlrep_derive::OcamlRep;
-use oxidized::{aast::Program, file_info::Mode, pos::Pos, scoured_comments::ScouredComments};
+use oxidized::{
+    aast::Program, file_info::Mode, pos::Pos, scoured_comments::ScouredComments, uast::AstAnnot,
+};
 use parser_core_types::{
     indexed_source_text::IndexedSourceText,
     parser_env::ParserEnv,
@@ -106,9 +109,21 @@ impl<'a> AastParser {
                 mode,
                 indexed_source_text,
                 &env.parser_options,
+                env.elaborate_namespaces,
                 stack_limit,
             );
             let ret = lower(&mut lowerer_env, Self::to_as_ref(tree).as_ref().root());
+            let ret = if env.parser_options.po_rust_top_level_elaborator && env.elaborate_namespaces
+            {
+                ret.map(|ast| {
+                    namespaces::toplevel_elaborator::elaborate_toplevel_defs::<AstAnnot>(
+                        &env.parser_options,
+                        ast,
+                    )
+                })
+            } else {
+                ret
+            };
             let syntax_errors = match &ret {
                 Ok(aast) => {
                     Self::check_syntax_error(&env, indexed_source_text, original_tree, Some(aast))

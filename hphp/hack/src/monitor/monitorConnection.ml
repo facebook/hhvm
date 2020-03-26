@@ -118,10 +118,8 @@ let verify_cstate ic cstate =
 
 (* Consume sequence of Prehandoff messages. *)
 let rec consume_prehandoff_messages
-    ~(timeout : Timeout.t)
-    (ic : Timeout.in_channel)
-    (oc : Pervasives.out_channel) :
-    ( Timeout.in_channel * Pervasives.out_channel * string,
+    ~(timeout : Timeout.t) (ic : Timeout.in_channel) (oc : Stdlib.out_channel) :
+    ( Timeout.in_channel * Stdlib.out_channel * string,
       ServerMonitorUtils.connection_error )
     result =
   let module PH = Prehandoff in
@@ -159,8 +157,8 @@ let rec consume_prehandoff_messages
     Error Server_died
 
 let consume_prehandoff_messages
-    ~(timeout : int) (ic : Timeout.in_channel) (oc : Pervasives.out_channel) :
-    ( Timeout.in_channel * Pervasives.out_channel * string,
+    ~(timeout : int) (ic : Timeout.in_channel) (oc : Stdlib.out_channel) :
+    ( Timeout.in_channel * Stdlib.out_channel * string,
       ServerMonitorUtils.connection_error )
     result =
   Timeout.with_timeout

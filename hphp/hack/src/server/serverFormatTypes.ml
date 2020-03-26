@@ -9,7 +9,7 @@
 
 type action = string * int * int (* file contents, offset start, offset end *)
 
-type result = (string, string) Pervasives.result
+type result = (string, string) Stdlib.result
 
 type ide_action =
   | Document
@@ -21,4 +21,4 @@ type ide_response = {
   range: Ide_api_types.range; (* what range was actually replaced? *)
 }
 
-type ide_result = (ide_response, string) Pervasives.result
+type ide_result = (ide_response, string) Stdlib.result

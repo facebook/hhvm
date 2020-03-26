@@ -27,7 +27,7 @@ type env = {
 type 'aast result_ = {
   file_mode: FileInfo.mode;
   scoured_comments: Scoured_comments.t;
-  aast: ('aast, string) Pervasives.result;
+  aast: ('aast, string) Stdlib.result;
   lowpri_errors: (Pos.t * string) list;
   syntax_errors: Full_fidelity_syntax_error.t list;
   errors: Errors.error list;

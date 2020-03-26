@@ -190,7 +190,7 @@ module Infer_return_type = struct
     | Function of string
     | Method of string * string
 
-  type result = (string, string) Pervasives.result
+  type result = (string, string) Stdlib.result
 end
 
 module Ide_refactor_type = struct
@@ -295,13 +295,13 @@ type _ t =
       -> [ `Ok of ServerRefactorTypes.patch list | `Error of string ] t
   | REWRITE_LAMBDA_PARAMETERS : string list -> ServerRefactorTypes.patch list t
   | REWRITE_TYPE_PARAMS_TYPE : string list -> ServerRefactorTypes.patch list t
-  | IN_MEMORY_DEP_TABLE_SIZE : (int, string) Pervasives.result t
+  | IN_MEMORY_DEP_TABLE_SIZE : (int, string) Stdlib.result t
   | SAVE_NAMING :
       string
-      -> (SaveStateServiceTypes.save_naming_result, string) Pervasives.result t
+      -> (SaveStateServiceTypes.save_naming_result, string) Stdlib.result t
   | SAVE_STATE :
       (string * bool * bool)
-      -> (SaveStateServiceTypes.save_state_result, string) Pervasives.result t
+      -> (SaveStateServiceTypes.save_state_result, string) Stdlib.result t
   | SEARCH : string * string -> SearchUtils.result t
   | COVERAGE_COUNTS : string -> ServerCoverageMetricTypes.result t
   | LINT : string list -> ServerLintTypes.result t

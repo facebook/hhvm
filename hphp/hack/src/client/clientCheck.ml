@@ -220,9 +220,9 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
     | MODE_GEN_HOT_CLASSES (threshold, filename) ->
       let%lwt content = rpc args @@ Rpc.GEN_HOT_CLASSES threshold in
       (try%lwt
-         let oc = Pervasives.open_out filename in
+         let oc = Stdlib.open_out filename in
          Out_channel.output_string oc content;
-         Pervasives.close_out oc;
+         Stdlib.close_out oc;
          Lwt.return Exit_status.No_error
        with exn ->
          Printf.eprintf "Failed to save hot classes file: %s\n"

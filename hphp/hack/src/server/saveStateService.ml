@@ -40,9 +40,9 @@ let partition_error_files_tf
 (* If the contents doesn't contain the value of the expected type, the result
   is undefined behavior. We may crash, or we may continue with a bogus value. *)
 let load_contents_unsafe (input_filename : string) : 'a =
-  let ic = Pervasives.open_in_bin input_filename in
+  let ic = Stdlib.open_in_bin input_filename in
   let contents = Marshal.from_channel ic in
-  Pervasives.close_in ic;
+  Stdlib.close_in ic;
   contents
 
 let load_class_decls (input_filename : string) : unit =
@@ -102,9 +102,9 @@ let load_saved_state
 
 (* Writes some OCaml object to a file with the given filename. *)
 let dump_contents (output_filename : string) (contents : 'a) : unit =
-  let chan = Pervasives.open_out_bin output_filename in
+  let chan = Stdlib.open_out_bin output_filename in
   Marshal.to_channel chan contents [];
-  Pervasives.close_out chan
+  Stdlib.close_out chan
 
 let get_hot_classes_filename () =
   let prefix = Relative_path.(path_of_prefix Root) in

@@ -362,15 +362,15 @@ module Buffer_stream : Output_stream_intf with type t = Buffer.t = struct
   let add_substring b s ofs len = Buffer.add_substring b s ofs len
 end
 
-module Channel_stream :
-  Output_stream_intf with type t = Pervasives.out_channel = struct
-  type t = Pervasives.out_channel
+module Channel_stream : Output_stream_intf with type t = Stdlib.out_channel =
+struct
+  type t = Stdlib.out_channel
 
-  let add_char b c = Pervasives.output_char b c
+  let add_char b c = Stdlib.output_char b c
 
-  let add_string b s = Pervasives.output_string b s
+  let add_string b s = Stdlib.output_string b s
 
-  let add_substring b s ofs len = Pervasives.output_substring b s ofs len
+  let add_substring b s ofs len = Stdlib.output_substring b s ofs len
 end
 
 module Make_streamer (Out : Output_stream_intf) = struct

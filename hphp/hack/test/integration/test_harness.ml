@@ -195,7 +195,7 @@ let run_test ?(stop_server_in_teardown = true) config test_case =
 
 let with_local_conf local_conf_str test_case harness =
   let conf_file = Path.concat harness.repo_dir "hh.conf" in
-  let oc = Pervasives.open_out (Path.to_string conf_file) in
-  let () = Pervasives.output_string oc local_conf_str in
-  let () = Pervasives.close_out oc in
+  let oc = Stdlib.open_out (Path.to_string conf_file) in
+  let () = Stdlib.output_string oc local_conf_str in
+  let () = Stdlib.close_out oc in
   test_case harness

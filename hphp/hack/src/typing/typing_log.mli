@@ -7,7 +7,7 @@
  *
  *)
 
-val out_channel : Pervasives.out_channel ref
+val out_channel : Stdlib.out_channel ref
 
 val log_key : string -> unit
 

@@ -45,9 +45,9 @@ type conn = {
 let get_finale_data (server_finale_file : string) :
     ServerCommandTypes.finale_data option =
   try
-    let ic = Pervasives.open_in_bin server_finale_file in
+    let ic = Stdlib.open_in_bin server_finale_file in
     let contents : ServerCommandTypes.finale_data = Marshal.from_channel ic in
-    Pervasives.close_in ic;
+    Stdlib.close_in ic;
     Some contents
   with _ -> None
 
@@ -272,7 +272,7 @@ let rec connect
         threshold;
       (try Timeout.shutdown_connection ic with _ -> ());
       Timeout.close_in_noerr ic;
-      Pervasives.close_out_noerr oc;
+      Stdlib.close_out_noerr oc;
 
       (* allow_macos_hack:false is a defensive measure against infinite connection loops *)
       connect ~allow_macos_hack:false env start_time

@@ -174,9 +174,9 @@ let init
           let finale_file = ServerFiles.server_finale_file (Unix.getpid ()) in
           begin
             try
-              let oc = Pervasives.open_out_bin finale_file in
+              let oc = Stdlib.open_out_bin finale_file in
               Marshal.to_channel oc finale_data [];
-              Pervasives.close_out oc
+              Stdlib.close_out oc
             with _ -> ()
           end;
           Exit_status.exit next_step)

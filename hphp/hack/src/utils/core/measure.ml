@@ -194,8 +194,8 @@ let sample ?record ?(weight = 1.0) name value =
   let variance_sum =
     variance_sum +. (weight *. (value -. old_mean) *. (value -. mean))
   in
-  let max = Pervasives.max max value in
-  let min = Pervasives.min min value in
+  let max = Stdlib.max max value in
+  let min = Stdlib.min min value in
   let distribution = update_distribution ~weight value distribution in
   let entry = { count; mean; variance_sum; max; min; distribution } in
   record := SMap.add name entry !record
@@ -225,8 +225,8 @@ let merge_entries name from into =
       +. into.variance_sum
       +. (delta *. delta *. into.count *. from.count /. count)
     in
-    let max = Pervasives.max from.max into.max in
-    let min = Pervasives.min from.min into.min in
+    let max = Stdlib.max from.max into.max in
+    let min = Stdlib.min from.min into.min in
     let distribution =
       match (from.distribution, into.distribution) with
       | (None, into) -> into

@@ -87,9 +87,9 @@ let make_local_server_api
             in
             (changed_file_path, File_provider.get_contents changed_file_path))
       in
-      let chan = Pervasives.open_out_bin destination_path in
+      let chan = Stdlib.open_out_bin destination_path in
       Marshal.to_channel chan changed_files [];
-      Pervasives.close_out chan
+      Stdlib.close_out chan
   end : LocalServerApi )
 
 let make_remote_server_api

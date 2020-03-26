@@ -15,7 +15,7 @@ use hhas_attribute_rust::{self as hhas_attribute, HhasAttribute};
 use hhas_function_rust::{self as hhas_function, HhasFunction};
 use hhas_pos_rust::Span;
 use hhbc_id_rust::{self as hhbc_id, Id};
-use instruction_sequence_rust::{InstrSeq, Result};
+use instruction_sequence_rust::{instr, Result};
 use naming_special_names_rust::user_attributes as ua;
 use options::HhvmFlags;
 use oxidized::{aast as a, ast as tast, ast_defs, pos::Pos};
@@ -105,7 +105,7 @@ pub fn emit_function<'a>(
                 // TODO(shiqicao): T62049979 we should avoid cloning
                 a::Stmt_::Block(ast_body.clone()),
             ))],
-            InstrSeq::make_null(),
+            instr::null(),
             EmitBodyArgs {
                 flags: body_flags,
                 deprecation_info: &deprecation_info,

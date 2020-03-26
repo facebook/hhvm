@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 pub mod scope {
     use env::{emitter::Emitter, iterator, local};
-    use instruction_sequence_rust::{InstrSeq, Result};
+    use instruction_sequence_rust::{instr, InstrSeq, Result};
     use label_rust as label;
 
     /// Run emit () in a new unnamed local scope, which produces three instruction
@@ -83,11 +83,7 @@ pub mod scope {
     {
         with_unnamed_locals(e, |e| {
             let tmp = e.local_gen_mut().get_unnamed();
-            Ok((
-                InstrSeq::make_popl(tmp.clone()),
-                emit(e)?,
-                InstrSeq::make_pushl(tmp),
-            ))
+            Ok((instr::popl(tmp.clone()), emit(e)?, instr::pushl(tmp)))
         })
     }
 
@@ -95,7 +91,7 @@ pub mod scope {
         InstrSeq::gather(
             (start..end)
                 .into_iter()
-                .map(|id| InstrSeq::make_unsetl(local::Type::Unnamed(id)))
+                .map(|id| instr::unsetl(local::Type::Unnamed(id)))
                 .collect(),
         )
     }
@@ -104,7 +100,7 @@ pub mod scope {
         InstrSeq::gather(
             (start.0..end.0)
                 .into_iter()
-                .map(|i| InstrSeq::make_iterfree(iterator::Id(i)))
+                .map(|i| instr::iterfree(iterator::Id(i)))
                 .collect(),
         )
     }

@@ -13,7 +13,7 @@ use hhas_function_rust::{self as hhas_function, HhasFunction};
 use hhas_pos_rust::Span;
 use hhbc_id_rust::{function, r#const, Id};
 use hhbc_string_utils_rust::strip_global_ns;
-use instruction_sequence_rust::{InstrSeq, Result};
+use instruction_sequence_rust::{instr, InstrSeq, Result};
 use oxidized::ast as tast;
 use rx_rust as rx;
 
@@ -43,11 +43,10 @@ fn emit_constant_cinit<'a>(
         .as_ref()
         .map(|instrs| {
             let verify_instr = match return_type_info {
-                None => InstrSeq::Empty,
-                Some(_) => InstrSeq::make_verify_ret_type_c(),
+                None => instr::empty(),
+                Some(_) => instr::verify_ret_type_c(),
             };
-            let instrs =
-                InstrSeq::gather(vec![instrs.clone(), verify_instr, InstrSeq::make_retc()]);
+            let instrs = InstrSeq::gather(vec![instrs.clone(), verify_instr, instr::retc()]);
             let body = emit_body::make_body(
                 e,
                 instrs,

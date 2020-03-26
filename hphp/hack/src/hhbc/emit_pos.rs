@@ -3,21 +3,21 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use instruction_sequence_rust::InstrSeq;
+use instruction_sequence_rust::{instr, InstrSeq};
 use oxidized::pos::Pos;
 use std::convert::TryInto;
 
 pub fn emit_pos(pos: &Pos) -> InstrSeq {
     if !pos.is_none() {
         let (line_begin, line_end, col_begin, col_end) = pos.info_pos_extended();
-        InstrSeq::make_srcloc(
+        instr::srcloc(
             line_begin.try_into().unwrap(),
             line_end.try_into().unwrap(),
             col_begin.try_into().unwrap(),
             col_end.try_into().unwrap(),
         )
     } else {
-        InstrSeq::Empty
+        instr::empty()
     }
 }
 

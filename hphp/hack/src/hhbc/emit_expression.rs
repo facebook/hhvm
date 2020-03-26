@@ -19,7 +19,7 @@ use hhbc_ast_rust::*;
 use hhbc_id_rust::{class, function, method, prop, r#const, Id};
 use hhbc_string_utils_rust as string_utils;
 use instruction_sequence_rust::{
-    unrecoverable,
+    instr, unrecoverable,
     Error::{self, Unrecoverable},
     InstrSeq, Result,
 };
@@ -289,9 +289,9 @@ pub fn get_type_structure_for_hint(
     )?;
     let i = emit_adata::get_array_identifier(e, &tv);
     Ok(if hack_arr_dv_arrs(e.options()) {
-        InstrSeq::make_lit_const(InstructLitConst::Dict(i))
+        instr::lit_const(InstructLitConst::Dict(i))
     } else {
-        InstrSeq::make_lit_const(InstructLitConst::Array(i))
+        instr::lit_const(InstructLitConst::Array(i))
     })
 }
 
@@ -371,7 +371,7 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
         | Expr_::True => {
             let v = ast_constant_folder::expr_to_typed_value(emitter, &env.namespace, expression)
                 .map_err(|_| unrecoverable("expr_to_typed_value failed"))?;
-            Ok(emit_pos_then(pos, InstrSeq::make_typedvalue(v)))
+            Ok(emit_pos_then(pos, instr::typedvalue(v)))
         }
         Expr_::PrefixedString(e) => emit_expr(emitter, env, &e.1),
         Expr_::ParenthesizedExpr(e) => emit_expr(emitter, env, e),
@@ -408,7 +408,7 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
                     Ok(InstrSeq::gather(vec![
                         emit_expr(emitter, env, e)?,
                         emit_pos(pos),
-                        InstrSeq::make_cgetg(),
+                        instr::cgetg(),
                     ]))
                 }
                 _ => Ok(emit_array_get(
@@ -491,7 +491,7 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
             "emit_callconv: This should have been caught at emit_arg".into(),
         )),
         Expr_::Import(e) => emit_import(emitter, env, pos, &e.0, &e.1),
-        Expr_::Omitted => Ok(InstrSeq::Empty),
+        Expr_::Omitted => Ok(instr::empty()),
         Expr_::YieldBreak => Err(Unrecoverable(
             "yield break should be in statement position".into(),
         )),
@@ -505,7 +505,7 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
 
 fn emit_exprs(e: &mut Emitter, env: &Env, exprs: &[tast::Expr]) -> Result {
     if exprs.is_empty() {
-        Ok(InstrSeq::Empty)
+        Ok(instr::empty())
     } else {
         Ok(InstrSeq::gather(
             exprs
@@ -522,23 +522,23 @@ fn emit_id(emitter: &mut Emitter, env: &Env, id: &tast::Sid) -> Result {
 
     let ast_defs::Id(p, s) = id;
     let res = match s.as_str() {
-        G__FILE__ => InstrSeq::make_lit_const(File),
-        G__DIR__ => InstrSeq::make_lit_const(Dir),
-        G__METHOD__ => InstrSeq::make_lit_const(Method),
-        G__FUNCTION_CREDENTIAL__ => InstrSeq::make_lit_const(FuncCred),
-        G__CLASS__ => InstrSeq::gather(vec![InstrSeq::make_self(), InstrSeq::make_classname()]),
-        G__COMPILER_FRONTEND__ => InstrSeq::make_string("hackc"),
-        G__LINE__ => InstrSeq::make_int(p.info_pos_extended().1.try_into().map_err(|_| {
+        G__FILE__ => instr::lit_const(File),
+        G__DIR__ => instr::lit_const(Dir),
+        G__METHOD__ => instr::lit_const(Method),
+        G__FUNCTION_CREDENTIAL__ => instr::lit_const(FuncCred),
+        G__CLASS__ => InstrSeq::gather(vec![instr::self_(), instr::classname()]),
+        G__COMPILER_FRONTEND__ => instr::string("hackc"),
+        G__LINE__ => instr::int(p.info_pos_extended().1.try_into().map_err(|_| {
             emit_fatal::raise_fatal_parse(p, "error converting end of line from usize to isize")
         })?),
-        G__NAMESPACE__ => InstrSeq::make_string(env.namespace.name.as_ref().map_or("", |s| &s[..])),
+        G__NAMESPACE__ => instr::string(env.namespace.name.as_ref().map_or("", |s| &s[..])),
         EXIT | DIE => return emit_exit(emitter, env, None),
         _ => {
             //panic!("TODO: uncomment after D19350786 lands")
             //let cid: ConstId = r#const::Type::from_ast_name(&s);
             let cid: ConstId = string_utils::strip_global_ns(&s).to_string().into();
             emit_symbol_refs::State::add_constant(emitter, cid.clone());
-            return Ok(emit_pos_then(p, InstrSeq::make_lit_const(CnsE(cid))));
+            return Ok(emit_pos_then(p, instr::lit_const(CnsE(cid))));
         }
     };
     Ok(res)
@@ -546,8 +546,8 @@ fn emit_id(emitter: &mut Emitter, env: &Env, id: &tast::Sid) -> Result {
 
 fn emit_exit(emitter: &mut Emitter, env: &Env, expr_opt: Option<&tast::Expr>) -> Result {
     Ok(InstrSeq::gather(vec![
-        expr_opt.map_or_else(|| Ok(InstrSeq::make_int(0)), |e| emit_expr(emitter, env, e))?,
-        InstrSeq::make_exit(),
+        expr_opt.map_or_else(|| Ok(instr::int(0)), |e| emit_expr(emitter, env, e))?,
+        instr::exit(),
     ]))
 }
 
@@ -561,16 +561,14 @@ fn emit_xhp(
 
 fn emit_yield(e: &mut Emitter, env: &Env, pos: &Pos, af: &tast::Afield) -> Result {
     Ok(match af {
-        tast::Afield::AFvalue(v) => InstrSeq::gather(vec![
-            emit_expr(e, env, v)?,
-            emit_pos(pos),
-            InstrSeq::make_yield(),
-        ]),
+        tast::Afield::AFvalue(v) => {
+            InstrSeq::gather(vec![emit_expr(e, env, v)?, emit_pos(pos), instr::yield_()])
+        }
         tast::Afield::AFkvalue(k, v) => InstrSeq::gather(vec![
             emit_expr(e, env, k)?,
             emit_expr(e, env, v)?,
             emit_pos(pos),
-            InstrSeq::make_yieldk(),
+            instr::yieldk(),
         ]),
     })
 }
@@ -656,16 +654,16 @@ fn emit_import(
     let inc = parse_include(expr);
     emit_symbol_refs::State::add_include(e, inc.clone());
     let (expr_instrs, import_op_instr) = match flavor {
-        ImportFlavor::Include => (emit_expr(e, env, expr)?, InstrSeq::make_incl()),
-        ImportFlavor::Require => (emit_expr(e, env, expr)?, InstrSeq::make_req()),
-        ImportFlavor::IncludeOnce => (emit_expr(e, env, expr)?, InstrSeq::make_inclonce()),
+        ImportFlavor::Include => (emit_expr(e, env, expr)?, instr::incl()),
+        ImportFlavor::Require => (emit_expr(e, env, expr)?, instr::req()),
+        ImportFlavor::IncludeOnce => (emit_expr(e, env, expr)?, instr::inclonce()),
         ImportFlavor::RequireOnce => {
             match inc.into_doc_root_relative(e.options().hhvm.include_roots.get()) {
                 IncludePath::DocRootRelative(path) => {
                     let expr = tast::Expr(pos.clone(), tast::Expr_::String(path.to_owned()));
-                    (emit_expr(e, env, &expr)?, InstrSeq::make_reqdoc())
+                    (emit_expr(e, env, &expr)?, instr::reqdoc())
                 }
-                _ => (emit_expr(e, env, expr)?, InstrSeq::make_reqonce()),
+                _ => (emit_expr(e, env, expr)?, instr::reqonce()),
             }
         }
     };
@@ -683,13 +681,13 @@ fn emit_string2(e: &mut Emitter, env: &Env, pos: &Pos, es: &Vec<tast::Expr>) -> 
         Ok(InstrSeq::gather(vec![
             emit_expr(e, env, &es[0])?,
             emit_pos(pos),
-            InstrSeq::make_cast_string(),
+            instr::cast_string(),
         ]))
     } else {
         Ok(InstrSeq::gather(vec![
             emit_two_exprs(e, env, &es[0].0, &es[0], &es[1])?,
             emit_pos(pos),
-            InstrSeq::make_concat(),
+            instr::concat(),
             InstrSeq::gather(
                 (&es[2..])
                     .iter()
@@ -697,7 +695,7 @@ fn emit_string2(e: &mut Emitter, env: &Env, pos: &Pos, es: &Vec<tast::Expr>) -> 
                         Ok(InstrSeq::gather(vec![
                             emit_expr(e, env, expr)?,
                             emit_pos(pos),
-                            InstrSeq::make_concat(),
+                            instr::concat(),
                         ]))
                     })
                     .collect::<Result<_>>()?,
@@ -709,7 +707,7 @@ fn emit_string2(e: &mut Emitter, env: &Env, pos: &Pos, es: &Vec<tast::Expr>) -> 
 fn emit_clone(e: &mut Emitter, env: &Env, expr: &tast::Expr) -> Result {
     Ok(InstrSeq::gather(vec![
         emit_expr(e, env, expr)?,
-        InstrSeq::make_clone(),
+        instr::clone(),
     ]))
 }
 
@@ -730,7 +728,7 @@ fn emit_lambda(e: &mut Emitter, env: &Env, fndef: &tast::Fun_, ids: &[aast_defs:
                     match string_utils::reified::is_captured_generic(local_id::get_name(id)) {
                         Some((is_fun, i)) => {
                             if is_in_lambda {
-                                Ok(InstrSeq::make_cgetl(local::Type::Named(
+                                Ok(instr::cgetl(local::Type::Named(
                                     string_utils::reified::reified_generic_captured_name(
                                         is_fun, i as usize,
                                     ),
@@ -747,16 +745,16 @@ fn emit_lambda(e: &mut Emitter, env: &Env, fndef: &tast::Fun_, ids: &[aast_defs:
                         None => Ok({
                             let lid = get_local(e, env, pos, local_id::get_name(id))?;
                             if explicit_use {
-                                InstrSeq::make_cgetl(lid)
+                                instr::cgetl(lid)
                             } else {
-                                InstrSeq::make_cugetl(lid)
+                                instr::cugetl(lid)
                             }
                         }),
                     }
                 })
                 .collect::<Result<Vec<_>>>()?,
         ),
-        InstrSeq::make_createcl(ids.len(), cls_num),
+        instr::createcl(ids.len(), cls_num),
     ]))
 }
 
@@ -786,11 +784,11 @@ pub fn emit_await(emitter: &mut Emitter, env: &Env, pos: &Pos, expr: &tast::Expr
             Ok(InstrSeq::gather(vec![
                 instrs,
                 emit_pos(pos),
-                InstrSeq::make_dup(),
-                InstrSeq::make_istypec(IstypeOp::OpNull),
-                InstrSeq::make_jmpnz(after_await.clone()),
-                InstrSeq::make_await(),
-                InstrSeq::make_label(after_await),
+                instr::dup(),
+                instr::istypec(IstypeOp::OpNull),
+                instr::jmpnz(after_await.clone()),
+                instr::await_(),
+                instr::label(after_await),
             ]))
         }
     }
@@ -809,19 +807,19 @@ fn inline_gena_call(emitter: &mut Emitter, env: &Env, arg: &tast::Expr) -> Resul
         let before = InstrSeq::gather(vec![
             load_arr,
             if hack_arr_dv_arrs {
-                InstrSeq::make_cast_dict()
+                instr::cast_dict()
             } else {
-                InstrSeq::make_cast_darray()
+                instr::cast_darray()
             },
-            InstrSeq::make_popl(arr_local.clone()),
+            instr::popl(arr_local.clone()),
         ]);
 
         let inner = InstrSeq::gather(vec![
-            InstrSeq::make_nulluninit(),
-            InstrSeq::make_nulluninit(),
-            InstrSeq::make_nulluninit(),
-            InstrSeq::make_cgetl(arr_local.clone()),
-            InstrSeq::make_fcallclsmethodd(
+            instr::nulluninit(),
+            instr::nulluninit(),
+            instr::nulluninit(),
+            instr::cgetl(arr_local.clone()),
+            instr::fcallclsmethodd(
                 FcallArgs::new(
                     FcallFlags::default(),
                     1,
@@ -837,25 +835,25 @@ fn inline_gena_call(emitter: &mut Emitter, env: &Env, arg: &tast::Expr) -> Resul
                 }),
                 class::from_raw_string("HH\\AwaitAllWaitHandle"),
             ),
-            InstrSeq::make_await(),
-            InstrSeq::make_label(async_eager_label.clone()),
-            InstrSeq::make_popc(),
+            instr::await_(),
+            instr::label(async_eager_label.clone()),
+            instr::popc(),
             emit_iter(
                 e,
-                InstrSeq::make_cgetl(arr_local.clone()),
+                instr::cgetl(arr_local.clone()),
                 |val_local, key_local| {
                     InstrSeq::gather(vec![
-                        InstrSeq::make_cgetl(val_local),
-                        InstrSeq::make_whresult(),
-                        InstrSeq::make_basel(arr_local.clone(), MemberOpMode::Define),
-                        InstrSeq::make_setm(0, MemberKey::EL(key_local)),
-                        InstrSeq::make_popc(),
+                        instr::cgetl(val_local),
+                        instr::whresult(),
+                        instr::basel(arr_local.clone(), MemberOpMode::Define),
+                        instr::setm(0, MemberKey::EL(key_local)),
+                        instr::popc(),
                     ])
                 },
             )?,
         ]);
 
-        let after = InstrSeq::make_pushl(arr_local);
+        let after = instr::pushl(arr_local);
 
         Ok((before, inner, after))
     })
@@ -879,17 +877,17 @@ fn emit_iter<F: FnOnce(local::Type, local::Type) -> InstrSeq>(
         };
         let iter_init = InstrSeq::gather(vec![
             collection,
-            InstrSeq::make_iterinit(iter_args.clone(), loop_end.clone()),
+            instr::iterinit(iter_args.clone(), loop_end.clone()),
         ]);
         let iterate = InstrSeq::gather(vec![
-            InstrSeq::make_label(loop_next.clone()),
+            instr::label(loop_next.clone()),
             f(val_id.clone(), key_id.clone()),
-            InstrSeq::make_iternext(iter_args, loop_next),
+            instr::iternext(iter_args, loop_next),
         ]);
         let iter_done = InstrSeq::gather(vec![
-            InstrSeq::make_unsetl(val_id),
-            InstrSeq::make_unsetl(key_id),
-            InstrSeq::make_label(loop_end),
+            instr::unsetl(val_id),
+            instr::unsetl(key_id),
+            instr::label(loop_end),
         ]);
         Ok((iter_init, iterate, iter_done))
     })
@@ -925,17 +923,17 @@ fn emit_named_collection(
 ) -> Result {
     let emit_vector_like = |e: &mut Emitter, collection_type| {
         Ok(if fields.is_empty() {
-            emit_pos_then(pos, InstrSeq::make_newcol(collection_type))
+            emit_pos_then(pos, instr::newcol(collection_type))
         } else {
             InstrSeq::gather(vec![
                 emit_vec_collection(e, env, pos, fields)?,
-                InstrSeq::make_colfromarray(collection_type),
+                instr::colfromarray(collection_type),
             ])
         })
     };
     let emit_map_or_set = |e: &mut Emitter, collection_type| {
         if fields.is_empty() {
-            Ok(emit_pos_then(pos, InstrSeq::make_newcol(collection_type)))
+            Ok(emit_pos_then(pos, instr::newcol(collection_type)))
         } else {
             emit_collection(e, env, expr, fields, Some(collection_type))
         }
@@ -958,7 +956,7 @@ fn emit_named_collection(
                     })
                     .collect::<Result<_>>()?,
             ),
-            InstrSeq::make_new_pair(),
+            instr::new_pair(),
         ])),
         _ => Err(unrecoverable("Unexpected named collection type")),
     }
@@ -1040,29 +1038,25 @@ fn emit_static_collection(
 ) -> Result {
     let arrprov_enabled = e.options().hhvm.flags.contains(HhvmFlags::ARRAY_PROVENANCE);
     let transform_instr = match transform_to_collection {
-        Some(collection_type) => InstrSeq::make_colfromarray(collection_type),
-        _ => InstrSeq::Empty,
+        Some(collection_type) => instr::colfromarray(collection_type),
+        _ => instr::empty(),
     };
     Ok(
         if arrprov_enabled && env.scope.has_function_attribute("__ProvenanceSkipFrame") {
             InstrSeq::gather(vec![
                 emit_pos(pos),
-                InstrSeq::make_nulluninit(),
-                InstrSeq::make_nulluninit(),
-                InstrSeq::make_nulluninit(),
-                InstrSeq::make_typedvalue(tv),
-                InstrSeq::make_fcallfuncd(
+                instr::nulluninit(),
+                instr::nulluninit(),
+                instr::nulluninit(),
+                instr::typedvalue(tv),
+                instr::fcallfuncd(
                     FcallArgs::new(FcallFlags::default(), 0, vec![], None, 1, None),
                     function::from_raw_string("HH\\tag_provenance_here"),
                 ),
                 transform_instr,
             ])
         } else {
-            InstrSeq::gather(vec![
-                emit_pos(pos),
-                InstrSeq::make_typedvalue(tv),
-                transform_instr,
-            ])
+            InstrSeq::gather(vec![emit_pos(pos), instr::typedvalue(tv), transform_instr])
         },
     )
 }
@@ -1097,31 +1091,20 @@ fn emit_keyvalue_collection(
     constructor: InstructLitConst,
 ) -> Result {
     let (transform_instr, add_elem_instr) = match ctype {
-        CollectionType::Dict | CollectionType::Array => {
-            (InstrSeq::Empty, InstrSeq::make_add_new_elemc())
-        }
+        CollectionType::Dict | CollectionType::Array => (instr::empty(), instr::add_new_elemc()),
         _ => (
-            InstrSeq::make_colfromarray(ctype),
-            InstrSeq::gather(vec![InstrSeq::make_dup(), InstrSeq::make_add_elemc()]),
+            instr::colfromarray(ctype),
+            InstrSeq::gather(vec![instr::dup(), instr::add_elemc()]),
         ),
     };
     let emitted_pos = emit_pos(pos);
     Ok(InstrSeq::gather(vec![
         emitted_pos.clone(),
-        InstrSeq::make_lit_const(constructor),
+        instr::lit_const(constructor),
         InstrSeq::gather(
             fields
                 .iter()
-                .map(|f| {
-                    expr_and_new(
-                        e,
-                        env,
-                        pos,
-                        add_elem_instr.clone(),
-                        InstrSeq::make_add_elemc(),
-                        f,
-                    )
-                })
+                .map(|f| expr_and_new(e, env, pos, add_elem_instr.clone(), instr::add_elemc(), f))
                 .collect::<Result<_>>()?,
         ),
         emitted_pos,
@@ -1206,9 +1189,7 @@ fn emit_dynamic_collection(
     let count = fields.len();
     let emit_dict = |e: &mut Emitter| {
         if is_struct_init(e, env, fields, true) {
-            emit_struct_array(e, env, pos, fields, |_, x| {
-                Ok(InstrSeq::make_newstructdict(x))
-            })
+            emit_struct_array(e, env, pos, fields, |_, x| Ok(instr::newstructdict(x)))
         } else {
             let ctor = InstructLitConst::NewDictArray(count as isize);
             emit_keyvalue_collection(e, env, pos, fields, CollectionType::Dict, ctor)
@@ -1217,11 +1198,9 @@ fn emit_dynamic_collection(
     let emit_collection_helper = |e: &mut Emitter, ctype| {
         if is_struct_init(e, env, fields, true) {
             Ok(InstrSeq::gather(vec![
-                emit_struct_array(e, env, pos, fields, |_, x| {
-                    Ok(InstrSeq::make_newstructdict(x))
-                })?,
+                emit_struct_array(e, env, pos, fields, |_, x| Ok(instr::newstructdict(x)))?,
                 emit_pos(pos),
-                InstrSeq::make_colfromarray(ctype),
+                instr::colfromarray(ctype),
             ]))
         } else {
             let ctor = InstructLitConst::NewDictArray(count as isize);
@@ -1283,9 +1262,9 @@ fn emit_dynamic_collection(
                 let hack_arr_dv_arrs = hack_arr_dv_arrs(e.options());
                 emit_struct_array(e, env, pos, fields, |e, arg| {
                     let instr = if hack_arr_dv_arrs {
-                        InstrSeq::make_newstructdict(arg)
+                        instr::newstructdict(arg)
                     } else {
-                        InstrSeq::make_newstructdarray(arg)
+                        instr::newstructdarray(arg)
                     };
                     Ok(emit_pos_then(pos, instr))
                 })
@@ -1302,9 +1281,7 @@ fn emit_dynamic_collection(
             if is_packed_init(e.options(), fields, true /* hack_arr_compat */) {
                 emit_value_only_collection(e, env, pos, fields, InstructLitConst::NewPackedArray)
             } else if is_struct_init(e, env, fields, false /* allow_numerics */) {
-                emit_struct_array(e, env, pos, fields, |_, x| {
-                    Ok(InstrSeq::make_newstructarray(x))
-                })
+                emit_struct_array(e, env, pos, fields, |_, x| Ok(instr::newstructarray(x)))
             } else if is_packed_init(e.options(), fields, false /* hack_arr_compat*/) {
                 let constr = InstructLitConst::NewArray(count as isize);
                 emit_keyvalue_collection(e, env, pos, fields, CollectionType::Array, constr)
@@ -1364,7 +1341,7 @@ fn emit_value_only_collection<F: FnOnce(isize) -> InstructLitConst>(
                     .collect::<Result<_>>()?,
             ),
             emit_pos(pos),
-            InstrSeq::make_lit_const(constructor(exprs.len() as isize)),
+            instr::lit_const(constructor(exprs.len() as isize)),
         ]))
     };
     let outofline = |e: &mut Emitter, exprs: &[tast::Afield]| -> Result {
@@ -1374,7 +1351,7 @@ fn emit_value_only_collection<F: FnOnce(isize) -> InstructLitConst>(
                 .map(|f| {
                     Ok(InstrSeq::gather(vec![
                         emit_expr(e, env, f.value())?,
-                        InstrSeq::make_add_new_elemc(),
+                        instr::add_new_elemc(),
                     ]))
                 })
                 .collect::<Result<_>>()?,
@@ -1383,7 +1360,7 @@ fn emit_value_only_collection<F: FnOnce(isize) -> InstructLitConst>(
     let (x1, fields) = fields.split_at(std::cmp::min(fields.len(), limit));
     let (x2, _) = fields.split_at(std::cmp::min(fields.len(), limit));
     Ok(match (x1, x2) {
-        ([], []) => InstrSeq::Empty,
+        ([], []) => instr::empty(),
         (_, []) => inline(e, x1)?,
         _ => InstrSeq::gather(vec![inline(e, x1)?, outofline(e, x2)?]),
     })
@@ -1404,15 +1381,15 @@ fn emit_call_isset_exprs(e: &mut Emitter, env: &Env, pos: &Pos, exprs: &[tast::E
 
 fn emit_idx(e: &mut Emitter, env: &Env, pos: &Pos, es: &[tast::Expr]) -> Result {
     let default = if es.len() == 2 {
-        InstrSeq::make_null()
+        instr::null()
     } else {
-        InstrSeq::Empty
+        instr::empty()
     };
     Ok(InstrSeq::gather(vec![
         emit_exprs(e, env, es)?,
         emit_pos(pos),
         default,
-        InstrSeq::make_idx(),
+        instr::idx(),
     ]))
 }
 
@@ -1436,12 +1413,12 @@ fn emit_call(
     let default = scope::with_unnamed_locals(e, |e| {
         let (lhs, fcall) = emit_call_lhs_and_fcall(e, env, expr, fcall_args, targs)?;
         let (args, inout_setters) = emit_args_inout_setters(e, env, args)?;
-        let uargs = uarg.map_or(Ok(InstrSeq::Empty), |uarg| emit_expr(e, env, uarg))?;
+        let uargs = uarg.map_or(Ok(instr::empty()), |uarg| emit_expr(e, env, uarg))?;
         Ok((
-            InstrSeq::Empty,
+            instr::empty(),
             InstrSeq::gather(vec![
                 InstrSeq::gather(
-                    iter::repeat(InstrSeq::make_nulluninit())
+                    iter::repeat(instr::nulluninit())
                         .take(num_uninit)
                         .collect::<Vec<_>>(),
                 ),
@@ -1452,7 +1429,7 @@ fn emit_call(
                 fcall,
                 inout_setters,
             ]),
-            InstrSeq::Empty,
+            instr::empty(),
         ))
     })?;
     expr.1
@@ -1497,7 +1474,7 @@ fn from_ast_null_flavor(nullflavor: tast::OgNullFlavor) -> ObjNullFlavor {
 
 fn emit_object_expr(e: &mut Emitter, env: &Env, expr: &tast::Expr) -> Result {
     match &expr.1 {
-        tast::Expr_::Lvar(x) if is_local_this(env, &x.1) => Ok(InstrSeq::make_this()),
+        tast::Expr_::Lvar(x) if is_local_this(env, &x.1) => Ok(instr::this()),
         _ => emit_expr(e, env, expr),
     }
 }
@@ -1515,7 +1492,7 @@ fn emit_call_lhs_and_fcall(
     let emit_generics = |e: &mut Emitter, env, fcall_args: &mut FcallArgs| {
         let does_not_have_non_tparam_generics = !has_non_tparam_generics_targs(env, targs);
         if does_not_have_non_tparam_generics {
-            Ok(InstrSeq::Empty)
+            Ok(instr::empty())
         } else {
             *(&mut fcall_args.0) = fcall_args.0 | FcallFlags::HAS_GENERICS;
             emit_reified_targs(
@@ -1541,14 +1518,10 @@ fn emit_call_lhs_and_fcall(
                     let generics = emit_generics(e, env, &mut fcall_args)?;
                     let null_flavor = from_ast_null_flavor(*null_flavor);
                     Ok((
-                        InstrSeq::gather(vec![
-                            obj,
-                            InstrSeq::make_nulluninit(),
-                            InstrSeq::make_nulluninit(),
-                        ]),
+                        InstrSeq::gather(vec![obj, instr::nulluninit(), instr::nulluninit()]),
                         InstrSeq::gather(vec![
                             generics,
-                            InstrSeq::make_fcallobjmethodd(fcall_args, name, null_flavor),
+                            instr::fcallobjmethodd(fcall_args, name, null_flavor),
                         ]),
                     ))
                 };
@@ -1566,14 +1539,14 @@ fn emit_call_lhs_and_fcall(
                     Ok((
                         InstrSeq::gather(vec![
                             obj,
-                            InstrSeq::make_nulluninit(),
-                            InstrSeq::make_nulluninit(),
+                            instr::nulluninit(),
+                            instr::nulluninit(),
                             emit_expr(e, env, method_expr)?,
-                            InstrSeq::make_popl(tmp.clone()),
+                            instr::popl(tmp.clone()),
                         ]),
                         InstrSeq::gather(vec![
-                            InstrSeq::make_pushl(tmp),
-                            InstrSeq::make_fcallobjmethod(fcall_args, null_flavor),
+                            instr::pushl(tmp),
+                            instr::fcallobjmethod(fcall_args, null_flavor),
                         ]),
                     ))
                 }
@@ -1600,13 +1573,13 @@ fn emit_call_lhs_and_fcall(
                     let generics = emit_generics(e, env, &mut fcall_args)?;
                     (
                         InstrSeq::gather(vec![
-                            InstrSeq::make_nulluninit(),
-                            InstrSeq::make_nulluninit(),
-                            InstrSeq::make_nulluninit(),
+                            instr::nulluninit(),
+                            instr::nulluninit(),
+                            instr::nulluninit(),
                         ]),
                         InstrSeq::gather(vec![
                             generics,
-                            InstrSeq::make_fcallclsmethodd(fcall_args, method_id, cid),
+                            instr::fcallclsmethodd(fcall_args, method_id, cid),
                         ]),
                     )
                 }
@@ -1614,13 +1587,13 @@ fn emit_call_lhs_and_fcall(
                     let generics = emit_generics(e, env, &mut fcall_args)?;
                     (
                         InstrSeq::gather(vec![
-                            InstrSeq::make_nulluninit(),
-                            InstrSeq::make_nulluninit(),
-                            InstrSeq::make_nulluninit(),
+                            instr::nulluninit(),
+                            instr::nulluninit(),
+                            instr::nulluninit(),
                         ]),
                         InstrSeq::gather(vec![
                             generics,
-                            InstrSeq::make_fcallclsmethodsd(fcall_args, clsref, method_id),
+                            instr::fcallclsmethodsd(fcall_args, clsref, method_id),
                         ]),
                     )
                 }
@@ -1628,16 +1601,16 @@ fn emit_call_lhs_and_fcall(
                     let generics = emit_generics(e, env, &mut fcall_args)?;
                     (
                         InstrSeq::gather(vec![
-                            InstrSeq::make_nulluninit(),
-                            InstrSeq::make_nulluninit(),
-                            InstrSeq::make_nulluninit(),
+                            instr::nulluninit(),
+                            instr::nulluninit(),
+                            instr::nulluninit(),
                         ]),
                         InstrSeq::gather(vec![
                             generics,
-                            InstrSeq::make_string(method_id.to_raw_string()),
+                            instr::string(method_id.to_raw_string()),
                             emit_expr(e, env, &expr)?,
-                            InstrSeq::make_classgetc(),
-                            InstrSeq::make_fcallclsmethod(
+                            instr::classgetc(),
+                            instr::fcallclsmethod(
                                 IsLogAsDynamicCallOp::DontLogAsDynamicCall,
                                 fcall_args,
                             ),
@@ -1648,17 +1621,17 @@ fn emit_call_lhs_and_fcall(
                     let tmp = e.local_gen_mut().get_unnamed();
                     (
                         InstrSeq::gather(vec![
-                            InstrSeq::make_nulluninit(),
-                            InstrSeq::make_nulluninit(),
-                            InstrSeq::make_nulluninit(),
+                            instr::nulluninit(),
+                            instr::nulluninit(),
+                            instr::nulluninit(),
                             instrs,
-                            InstrSeq::make_popl(tmp.clone()),
+                            instr::popl(tmp.clone()),
                         ]),
                         InstrSeq::gather(vec![
-                            InstrSeq::make_string(method_id.to_raw_string()),
-                            InstrSeq::make_pushl(tmp),
-                            InstrSeq::make_classgetc(),
-                            InstrSeq::make_fcallclsmethod(
+                            instr::string(method_id.to_raw_string()),
+                            instr::pushl(tmp),
+                            instr::classgetc(),
+                            instr::fcallclsmethod(
                                 IsLogAsDynamicCallOp::LogAsDynamicCall,
                                 fcall_args,
                             ),
@@ -1678,7 +1651,7 @@ fn emit_call_lhs_and_fcall(
             let emit_meth_name = |e: &mut Emitter| match &cls_get_expr {
                 tast::ClassGetExpr::CGstring((pos, id)) => Ok(emit_pos_then(
                     pos,
-                    InstrSeq::make_cgetl(local::Type::Named(id.clone())),
+                    instr::cgetl(local::Type::Named(id.clone())),
                 )),
                 tast::ClassGetExpr::CGexpr(expr) => emit_expr(e, env, expr),
             };
@@ -1687,16 +1660,16 @@ fn emit_call_lhs_and_fcall(
                     let tmp = e.local_gen_mut().get_unnamed();
                     (
                         InstrSeq::gather(vec![
-                            InstrSeq::make_nulluninit(),
-                            InstrSeq::make_nulluninit(),
-                            InstrSeq::make_nulluninit(),
+                            instr::nulluninit(),
+                            instr::nulluninit(),
+                            instr::nulluninit(),
                             emit_meth_name(e)?,
-                            InstrSeq::make_popl(tmp.clone()),
+                            instr::popl(tmp.clone()),
                         ]),
                         InstrSeq::gather(vec![
-                            InstrSeq::make_pushl(tmp),
+                            instr::pushl(tmp),
                             emit_known_class_id(e, &cid),
-                            InstrSeq::make_fcallclsmethod(
+                            instr::fcallclsmethod(
                                 IsLogAsDynamicCallOp::LogAsDynamicCall,
                                 fcall_args,
                             ),
@@ -1707,15 +1680,15 @@ fn emit_call_lhs_and_fcall(
                     let tmp = e.local_gen_mut().get_unnamed();
                     (
                         InstrSeq::gather(vec![
-                            InstrSeq::make_nulluninit(),
-                            InstrSeq::make_nulluninit(),
-                            InstrSeq::make_nulluninit(),
+                            instr::nulluninit(),
+                            instr::nulluninit(),
+                            instr::nulluninit(),
                             emit_meth_name(e)?,
-                            InstrSeq::make_popl(tmp.clone()),
+                            instr::popl(tmp.clone()),
                         ]),
                         InstrSeq::gather(vec![
-                            InstrSeq::make_pushl(tmp),
-                            InstrSeq::make_fcallclsmethods(fcall_args, clsref),
+                            instr::pushl(tmp),
+                            instr::fcallclsmethods(fcall_args, clsref),
                         ]),
                     )
                 }
@@ -1724,19 +1697,19 @@ fn emit_call_lhs_and_fcall(
                     let meth = e.local_gen_mut().get_unnamed();
                     (
                         InstrSeq::gather(vec![
-                            InstrSeq::make_nulluninit(),
-                            InstrSeq::make_nulluninit(),
-                            InstrSeq::make_nulluninit(),
+                            instr::nulluninit(),
+                            instr::nulluninit(),
+                            instr::nulluninit(),
                             emit_expr(e, env, &expr)?,
-                            InstrSeq::make_popl(cls.clone()),
+                            instr::popl(cls.clone()),
                             emit_meth_name(e)?,
-                            InstrSeq::make_popl(meth.clone()),
+                            instr::popl(meth.clone()),
                         ]),
                         InstrSeq::gather(vec![
-                            InstrSeq::make_pushl(meth),
-                            InstrSeq::make_pushl(cls),
-                            InstrSeq::make_classgetc(),
-                            InstrSeq::make_fcallclsmethod(
+                            instr::pushl(meth),
+                            instr::pushl(cls),
+                            instr::classgetc(),
+                            instr::fcallclsmethod(
                                 IsLogAsDynamicCallOp::LogAsDynamicCall,
                                 fcall_args,
                             ),
@@ -1748,19 +1721,19 @@ fn emit_call_lhs_and_fcall(
                     let meth = e.local_gen_mut().get_unnamed();
                     (
                         InstrSeq::gather(vec![
-                            InstrSeq::make_nulluninit(),
-                            InstrSeq::make_nulluninit(),
-                            InstrSeq::make_nulluninit(),
+                            instr::nulluninit(),
+                            instr::nulluninit(),
+                            instr::nulluninit(),
                             instrs,
-                            InstrSeq::make_popl(cls.clone()),
+                            instr::popl(cls.clone()),
                             emit_meth_name(e)?,
-                            InstrSeq::make_popl(meth.clone()),
+                            instr::popl(meth.clone()),
                         ]),
                         InstrSeq::gather(vec![
-                            InstrSeq::make_pushl(meth),
-                            InstrSeq::make_pushl(cls),
-                            InstrSeq::make_classgetc(),
-                            InstrSeq::make_fcallclsmethod(
+                            instr::pushl(meth),
+                            instr::pushl(cls),
+                            instr::classgetc(),
+                            instr::fcallclsmethod(
                                 IsLogAsDynamicCallOp::LogAsDynamicCall,
                                 fcall_args,
                             ),
@@ -1786,11 +1759,11 @@ fn emit_call_lhs_and_fcall(
             let generics = emit_generics(e, env, &mut fcall_args)?;
             Ok((
                 InstrSeq::gather(vec![
-                    InstrSeq::make_nulluninit(),
-                    InstrSeq::make_nulluninit(),
-                    InstrSeq::make_nulluninit(),
+                    instr::nulluninit(),
+                    instr::nulluninit(),
+                    instr::nulluninit(),
                 ]),
-                InstrSeq::gather(vec![generics, InstrSeq::make_fcallfuncd(fcall_args, fq_id)]),
+                InstrSeq::gather(vec![generics, instr::fcallfuncd(fcall_args, fq_id)]),
             ))
         }
         E_::String(s) => unimplemented!(),
@@ -1798,16 +1771,13 @@ fn emit_call_lhs_and_fcall(
             let tmp = e.local_gen_mut().get_unnamed();
             Ok((
                 InstrSeq::gather(vec![
-                    InstrSeq::make_nulluninit(),
-                    InstrSeq::make_nulluninit(),
-                    InstrSeq::make_nulluninit(),
+                    instr::nulluninit(),
+                    instr::nulluninit(),
+                    instr::nulluninit(),
                     emit_expr(e, env, &expr)?,
-                    InstrSeq::make_popl(tmp.clone()),
+                    instr::popl(tmp.clone()),
                 ]),
-                InstrSeq::gather(vec![
-                    InstrSeq::make_pushl(tmp),
-                    InstrSeq::make_fcallfunc(fcall_args),
-                ]),
+                InstrSeq::gather(vec![instr::pushl(tmp), instr::fcallfunc(fcall_args)]),
             ))
         }
     }
@@ -1822,8 +1792,8 @@ fn get_reified_var_cexpr(
     Ok(emit_reified_type_opt(e, env, pos, name)?.map(|instrs| {
         ClassExpr::Reified(InstrSeq::gather(vec![
             instrs,
-            InstrSeq::make_basec(0, MemberOpMode::Warn),
-            InstrSeq::make_querym(1, QueryOp::CGet, MemberKey::ET("classname".into())),
+            instr::basec(0, MemberOpMode::Warn),
+            instr::querym(1, QueryOp::CGet, MemberKey::ET("classname".into())),
         ]))
     }))
 }
@@ -1855,19 +1825,13 @@ fn emit_args_inout_setters(
                         let move_instrs = if !env.flags.contains(env::Flags::IN_TRY)
                             && inout_locals::should_move_local_value(&local, aliases)
                         {
-                            InstrSeq::gather(vec![
-                                InstrSeq::make_null(),
-                                InstrSeq::make_popl(local.clone()),
-                            ])
+                            InstrSeq::gather(vec![instr::null(), instr::popl(local.clone())])
                         } else {
-                            InstrSeq::Empty
+                            instr::empty()
                         };
                         Ok((
-                            InstrSeq::gather(vec![
-                                InstrSeq::make_cgetl(local.clone()),
-                                move_instrs,
-                            ]),
-                            InstrSeq::make_popl(local),
+                            InstrSeq::gather(vec![instr::cgetl(local.clone()), move_instrs]),
+                            instr::popl(local),
                         ))
                     }
                     // inout $arr[...][...]
@@ -1901,11 +1865,11 @@ fn emit_args_inout_setters(
                                 .0;
                                 let setter = InstrSeq::gather(vec![
                                     setter_base,
-                                    InstrSeq::make_setm(
+                                    instr::setm(
                                         0,
                                         get_elem_member_key(e, env, 0, ag.1.as_ref(), false)?,
                                     ),
-                                    InstrSeq::make_popc(),
+                                    instr::popc(),
                                 ]);
                                 (instrs, setter)
                             }
@@ -1915,10 +1879,10 @@ fn emit_args_inout_setters(
                                     match local_kind_opt {
                                         None => ld.push(instr),
                                         Some((l, kind)) => {
-                                            let unset = InstrSeq::make_unsetl(l.clone());
+                                            let unset = instr::unsetl(l.clone());
                                             let set = match kind {
-                                                StoredValueKind::Expr => InstrSeq::make_setl(l),
-                                                _ => InstrSeq::make_popl(l),
+                                                StoredValueKind::Expr => instr::setl(l),
+                                                _ => instr::popl(l),
                                             };
                                             ld.push(instr);
                                             ld.push(set);
@@ -1935,7 +1899,7 @@ fn emit_args_inout_setters(
                     )),
                 }
             }
-            _ => Ok((emit_expr(e, env, arg)?, InstrSeq::Empty)),
+            _ => Ok((emit_expr(e, env, arg)?, instr::empty())),
         }
     }
     let (instr_args, instr_setters): (Vec<InstrSeq>, Vec<InstrSeq>) = args
@@ -1952,13 +1916,13 @@ fn emit_args_inout_setters(
         Ok((
             instr_args,
             InstrSeq::gather(vec![
-                InstrSeq::make_popl(retval.clone()),
+                instr::popl(retval.clone()),
                 instr_setters,
-                InstrSeq::make_pushl(retval),
+                instr::pushl(retval),
             ]),
         ))
     } else {
-        Ok((instr_args, InstrSeq::Empty))
+        Ok((instr_args, instr::empty()))
     }
 }
 
@@ -2015,11 +1979,11 @@ fn emit_special_function(
                     Ok(InstrSeq::gather(vec![
                         emit_expr(e, env, arg)?,
                         emit_pos(pos),
-                        InstrSeq::make_print(),
+                        instr::print(),
                         if i == nargs - 1 {
-                            InstrSeq::Empty
+                            instr::empty()
                         } else {
-                            InstrSeq::make_popc()
+                            instr::popc()
                         },
                     ]))
                 })
@@ -2046,36 +2010,36 @@ fn emit_special_function(
             );
             Ok(Some(InstrSeq::gather(vec![
                 emit_expr(e, env, &args[0])?,
-                InstrSeq::make_jmpnz(l.clone()),
+                instr::jmpnz(l.clone()),
                 emit_ignored_expr(e, env, &Pos::make_none(), &call)?,
                 emit_fatal::emit_fatal_runtime(pos, "invariant_violation"),
-                InstrSeq::make_label(l),
-                InstrSeq::make_null(),
+                instr::label(l),
+                instr::null(),
             ])))
         }
         ("assert", _) => {
             let l0 = e.label_gen_mut().next_regular();
             let l1 = e.label_gen_mut().next_regular();
             Ok(Some(InstrSeq::gather(vec![
-                InstrSeq::make_string("zend.assertions"),
-                InstrSeq::make_fcallbuiltin(1, 1, 0, "ini_get"),
-                InstrSeq::make_int(0),
-                InstrSeq::make_gt(),
-                InstrSeq::make_jmpz(l0.clone()),
+                instr::string("zend.assertions"),
+                instr::fcallbuiltin(1, 1, 0, "ini_get"),
+                instr::int(0),
+                instr::gt(),
+                instr::jmpz(l0.clone()),
                 default.clone(),
-                InstrSeq::make_jmp(l1.clone()),
-                InstrSeq::make_label(l0),
-                InstrSeq::make_true(),
-                InstrSeq::make_label(l1),
+                instr::jmp(l1.clone()),
+                instr::label(l0),
+                instr::true_(),
+                instr::label(l1),
             ])))
         }
-        ("HH\\sequence", &[]) => Ok(Some(InstrSeq::make_null())),
+        ("HH\\sequence", &[]) => Ok(Some(instr::null())),
         ("HH\\sequence", args) => Ok(Some(InstrSeq::gather(
             args.iter()
                 .map(|arg| emit_expr(e, env, arg))
                 .collect::<Result<Vec<_>>>()?
                 .into_iter()
-                .intersperse(InstrSeq::make_popc())
+                .intersperse(instr::popc())
                 .collect::<Vec<_>>(),
         ))),
         ("class_exists", _) if nargs == 1 || nargs == 2 => unimplemented!(),
@@ -2110,11 +2074,11 @@ fn emit_special_function(
                     Some(InstrSeq::gather(vec![
                         emit_local(e, env, BareThisOp::NoNotice, &arg_id)?,
                         emit_pos(pos),
-                        InstrSeq::make_istypec(i),
+                        instr::istypec(i),
                     ]))
                 }
                 (&[E(_, E_::Lvar(ref arg_id))], Some(i), _) if !is_local_this(env, &arg_id.1) => {
-                    Some(InstrSeq::make_istypel(
+                    Some(instr::istypel(
                         get_local(e, env, &arg_id.0, &(arg_id.1).1)?,
                         i,
                     ))
@@ -2122,13 +2086,13 @@ fn emit_special_function(
                 (&[ref arg_expr], Some(i), _) => Some(InstrSeq::gather(vec![
                     emit_expr(e, env, &arg_expr)?,
                     emit_pos(pos),
-                    InstrSeq::make_istypec(i),
+                    instr::istypec(i),
                 ])),
                 _ => match get_call_builtin_func_info(e.options(), lower_fq_name) {
                     Some((nargs, i)) if nargs == args.len() => Some(InstrSeq::gather(vec![
                         emit_exprs(e, env, args)?,
                         emit_pos(pos),
-                        InstrSeq::make_instr(i),
+                        instr::instr(i),
                     ])),
                     _ => None,
                 },
@@ -2226,7 +2190,7 @@ fn emit_eval(e: &mut Emitter, env: &Env, pos: &Pos, expr: &tast::Expr) -> Result
     Ok(InstrSeq::gather(vec![
         emit_expr(e, env, expr)?,
         emit_pos(pos),
-        InstrSeq::make_eval(),
+        instr::eval(),
     ]))
 }
 
@@ -2252,7 +2216,7 @@ fn emit_call_expr(
     match (&expr.1, &args[..], uarg) {
         (E_::Id(id), [E(_, E_::String(data))], None) if id.1 == special_functions::HHAS_ADATA => {
             let v = TypedValue::HhasAdata(data.into());
-            Ok(emit_pos_then(pos, InstrSeq::make_typedvalue(v)))
+            Ok(emit_pos_then(pos, instr::typedvalue(v)))
         }
         (E_::Id(id), _, None) if id.1 == pseudo_functions::ISSET => {
             emit_call_isset_exprs(e, env, pos, args)
@@ -2271,8 +2235,8 @@ fn emit_call_expr(
             Ok(InstrSeq::gather(vec![
                 emit_expr(e, env, arg1)?,
                 emit_pos(pos),
-                InstrSeq::make_popl(local::Type::Named("$86metadata".into())),
-                InstrSeq::make_null(),
+                instr::popl(local::Type::Named("$86metadata".into())),
+                instr::null(),
             ]))
         }
         (E_::Id(id), [], None)
@@ -2305,22 +2269,22 @@ fn emit_call_expr(
 
 fn emit_reified_generic_instrs(e: &mut Emitter, pos: &Pos, is_fun: bool, index: usize) -> Result {
     let base = if is_fun {
-        InstrSeq::make_basel(
+        instr::basel(
             local::Type::Named(string_utils::reified::GENERICS_LOCAL_NAME.into()),
             MemberOpMode::Warn,
         )
     } else {
         InstrSeq::gather(vec![
-            InstrSeq::make_checkthis(),
-            InstrSeq::make_baseh(),
-            InstrSeq::make_dim_warn_pt(prop::from_raw_string(string_utils::reified::PROP_NAME)),
+            instr::checkthis(),
+            instr::baseh(),
+            instr::dim_warn_pt(prop::from_raw_string(string_utils::reified::PROP_NAME)),
         ])
     };
     Ok(emit_pos_then(
         pos,
         InstrSeq::gather(vec![
             base,
-            InstrSeq::make_querym(0, QueryOp::CGet, MemberKey::EI(index.try_into().unwrap())),
+            instr::querym(0, QueryOp::CGet, MemberKey::EI(index.try_into().unwrap())),
         ]),
     ))
 }
@@ -2338,7 +2302,7 @@ fn emit_reified_type_opt(
 ) -> Result<Option<InstrSeq>> {
     let is_in_lambda = env.scope.is_in_lambda();
     let cget_instr = |is_fun, i| {
-        InstrSeq::make_cgetl(local::Type::Named(
+        instr::cgetl(local::Type::Named(
             string_utils::reified::reified_generic_captured_name(is_fun, i),
         ))
     };
@@ -2372,25 +2336,22 @@ fn emit_reified_type_opt(
 fn emit_known_class_id(e: &mut Emitter, id: &ast_defs::Id) -> InstrSeq {
     let cid = class::Type::from_ast_name(&id.1);
     emit_symbol_refs::State::add_class(e, cid.clone());
-    InstrSeq::gather(vec![
-        InstrSeq::make_string(cid.to_raw_string()),
-        InstrSeq::make_classgetc(),
-    ])
+    InstrSeq::gather(vec![instr::string(cid.to_raw_string()), instr::classgetc()])
 }
 
 fn emit_load_class_ref(e: &mut Emitter, env: &Env, pos: &Pos, cexpr: ClassExpr) -> Result {
     let instrs = match cexpr {
-        ClassExpr::Special(SpecialClsRef::Self_) => InstrSeq::make_self(),
-        ClassExpr::Special(SpecialClsRef::Static) => InstrSeq::make_lateboundcls(),
-        ClassExpr::Special(SpecialClsRef::Parent) => InstrSeq::make_parent(),
+        ClassExpr::Special(SpecialClsRef::Self_) => instr::self_(),
+        ClassExpr::Special(SpecialClsRef::Static) => instr::lateboundcls(),
+        ClassExpr::Special(SpecialClsRef::Parent) => instr::parent(),
         ClassExpr::Id(id) => emit_known_class_id(e, &id),
         ClassExpr::Expr(expr) => InstrSeq::gather(vec![
             emit_pos(pos),
             emit_expr(e, env, &expr)?,
-            InstrSeq::make_classgetc(),
+            instr::classgetc(),
         ]),
         ClassExpr::Reified(instrs) => {
-            InstrSeq::gather(vec![emit_pos(pos), instrs, InstrSeq::make_classgetc()])
+            InstrSeq::gather(vec![emit_pos(pos), instrs, instr::classgetc()])
         }
     };
     Ok(emit_pos_then(pos, instrs))
@@ -2438,7 +2399,7 @@ fn emit_new(
             let id: class::Type = string_utils::strip_global_ns(&cname).to_string().into();
             emit_symbol_refs::State::add_class(e, id.clone());
             match has_generics {
-                H::NoGenerics => InstrSeq::gather(vec![emit_pos(pos), InstrSeq::make_newobjd(id)]),
+                H::NoGenerics => InstrSeq::gather(vec![emit_pos(pos), instr::newobjd(id)]),
                 H::HasGenerics => InstrSeq::gather(vec![
                     emit_pos(pos),
                     emit_reified_targs(
@@ -2447,7 +2408,7 @@ fn emit_new(
                         pos,
                         &targs.iter().map(|t| &t.1).collect::<Vec<_>>(),
                     )?,
-                    InstrSeq::make_newobjrd(id),
+                    instr::newobjrd(id),
                 ]),
                 H::MaybeGenerics => {
                     return Err(unrecoverable(
@@ -2457,39 +2418,37 @@ fn emit_new(
             }
         }
         ClassExpr::Special(cls_ref) => {
-            InstrSeq::gather(vec![emit_pos(pos), InstrSeq::make_newobjs(cls_ref)])
+            InstrSeq::gather(vec![emit_pos(pos), instr::newobjs(cls_ref)])
         }
-        ClassExpr::Reified(instrs) if has_generics == H::MaybeGenerics => InstrSeq::gather(vec![
-            instrs,
-            InstrSeq::make_classgetts(),
-            InstrSeq::make_newobjr(),
-        ]),
+        ClassExpr::Reified(instrs) if has_generics == H::MaybeGenerics => {
+            InstrSeq::gather(vec![instrs, instr::classgetts(), instr::newobjr()])
+        }
         _ => InstrSeq::gather(vec![
             emit_load_class_ref(e, env, pos, cexpr)?,
-            InstrSeq::make_newobj(),
+            instr::newobj(),
         ]),
     };
     scope::with_unnamed_locals(e, |e| {
         let (instr_args, _) = emit_args_inout_setters(e, env, args)?;
         let instr_uargs = match uarg {
-            None => InstrSeq::Empty,
+            None => instr::empty(),
             Some(uarg) => emit_expr(e, env, uarg)?,
         };
         Ok((
-            InstrSeq::Empty,
+            instr::empty(),
             InstrSeq::gather(vec![
                 newobj_instrs,
-                InstrSeq::make_dup(),
-                InstrSeq::make_nulluninit(),
-                InstrSeq::make_nulluninit(),
+                instr::dup(),
+                instr::nulluninit(),
+                instr::nulluninit(),
                 instr_args,
                 instr_uargs,
                 emit_pos(pos),
-                InstrSeq::make_fcallctor(get_fcall_args(args, uarg.as_ref(), None, None, true)),
-                InstrSeq::make_popc(),
-                InstrSeq::make_lockobj(),
+                instr::fcallctor(get_fcall_args(args, uarg.as_ref(), None, None, true)),
+                instr::popc(),
+                instr::lockobj(),
             ]),
-            InstrSeq::Empty,
+            instr::empty(),
         ))
     })
 }
@@ -2555,7 +2514,7 @@ fn emit_obj_get(
     } else {
         total_stack_size as usize
     };
-    let final_instr = InstrSeq::make_querym(num_params, query_op, mk);
+    let final_instr = instr::querym(num_params, query_op, mk);
     let querym_n_unpopped = if null_coalesce_assignment {
         Some(total_stack_size)
     } else {
@@ -2630,9 +2589,9 @@ fn emit_prop_expr(
         }
         MemberKey::PC(_) => (mk, emit_expr(e, env, prop)?, 1),
         MemberKey::PL(local) if null_coalesce_assignment => {
-            (MemberKey::PC(stack_index), InstrSeq::make_cgetl(local), 1)
+            (MemberKey::PC(stack_index), instr::cgetl(local), 1)
         }
-        _ => (mk, InstrSeq::Empty, 0),
+        _ => (mk, instr::empty(), 0),
     })
 }
 
@@ -2740,12 +2699,12 @@ fn emit_array_get_(
             let mut querym_n_unpopped = None;
             let mut make_final = |total_stack_size: StackIndex| -> InstrSeq {
                 if no_final {
-                    InstrSeq::Empty
+                    instr::empty()
                 } else if null_coalesce_assignment {
                     querym_n_unpopped = Some(total_stack_size as usize);
-                    InstrSeq::make_querym(0, query_op, memberkey.clone())
+                    instr::querym(0, query_op, memberkey.clone())
                 } else {
-                    InstrSeq::make_querym(total_stack_size as usize, query_op, memberkey.clone())
+                    instr::querym(total_stack_size as usize, query_op, memberkey.clone())
                 }
             };
             let instr = match (base_result, local_temp_kind) {
@@ -2792,7 +2751,7 @@ fn emit_array_get_(
                             local,
                             false,
                         )?,
-                        InstrSeq::make_popc(),
+                        instr::popc(),
                     ]);
                     ArrayGetInstr::Inout { load, store }
                 }
@@ -2822,11 +2781,8 @@ fn emit_array_get_(
                         ]),
                         None,
                     ));
-                    let store = InstrSeq::gather(vec![
-                        store,
-                        InstrSeq::make_setm(0, memberkey),
-                        InstrSeq::make_popc(),
-                    ]);
+                    let store =
+                        InstrSeq::gather(vec![store, instr::setm(0, memberkey), instr::popc()]);
                     ArrayGetInstr::Inout {
                         load: base_instrs,
                         store,
@@ -2861,8 +2817,8 @@ fn emit_array_get_(
                     ));
                     let store = InstrSeq::gather(vec![
                         store,
-                        InstrSeq::make_setm(0, MemberKey::EL(local)),
-                        InstrSeq::make_popc(),
+                        instr::setm(0, MemberKey::EL(local)),
+                        instr::popc(),
                     ]);
                     ArrayGetInstr::Inout {
                         load: base_instrs,
@@ -2895,33 +2851,28 @@ fn emit_elem(
     null_coalesce_assignment: bool,
 ) -> Result<(InstrSeq, StackIndex)> {
     Ok(match elem {
-        None => (InstrSeq::Empty, 0),
-        Some(expr) if expr.1.is_int() || expr.1.is_string() => (InstrSeq::Empty, 0),
+        None => (instr::empty(), 0),
+        Some(expr) if expr.1.is_int() || expr.1.is_string() => (instr::empty(), 0),
         Some(expr) => match &expr.1 {
             tast::Expr_::Lvar(x) if !is_local_this(env, &x.1) => {
                 if local_temp_kind.is_some() {
                     (
-                        InstrSeq::make_cgetquietl(get_local(
-                            e,
-                            env,
-                            &x.0,
-                            local_id::get_name(&x.1),
-                        )?),
+                        instr::cgetquietl(get_local(e, env, &x.0, local_id::get_name(&x.1))?),
                         0,
                     )
                 } else if null_coalesce_assignment {
                     (
-                        InstrSeq::make_cgetl(get_local(e, env, &x.0, local_id::get_name(&x.1))?),
+                        instr::cgetl(get_local(e, env, &x.0, local_id::get_name(&x.1))?),
                         1,
                     )
                 } else {
-                    (InstrSeq::Empty, 0)
+                    (instr::empty(), 0)
                 }
             }
             tast::Expr_::ClassConst(x)
                 if is_special_class_constant_accessed_with_class_id(&(x.0).1, &(x.1).1) =>
             {
-                (InstrSeq::Empty, 0)
+                (instr::empty(), 0)
             }
             _ => (emit_expr(e, env, expr)?, 1),
         },
@@ -3010,9 +2961,9 @@ fn emit_store_for_simple_base(
         emit_pos(pos),
         base_setup_instrs,
         if is_base {
-            InstrSeq::make_dim(MemberOpMode::Define, memberkey)
+            instr::dim(MemberOpMode::Define, memberkey)
         } else {
-            InstrSeq::make_setm(0, memberkey)
+            instr::setm(0, memberkey)
         },
     ]))
 }
@@ -3052,23 +3003,20 @@ fn emit_conditional_expr(
                     InstrSeq::gather(vec![
                         emit_expr(e, env, etrue)?,
                         emit_pos(pos),
-                        InstrSeq::make_jmp(end_label.clone()),
+                        instr::jmp(end_label.clone()),
                     ])
                 } else {
-                    InstrSeq::Empty
+                    instr::empty()
                 },
                 if r.is_label_used {
-                    InstrSeq::gather(vec![
-                        InstrSeq::make_label(false_label),
-                        emit_expr(e, env, efalse)?,
-                    ])
+                    InstrSeq::gather(vec![instr::label(false_label), emit_expr(e, env, efalse)?])
                 } else {
-                    InstrSeq::Empty
+                    instr::empty()
                 },
                 if r.is_fallthrough {
-                    InstrSeq::make_label(end_label)
+                    instr::label(end_label)
                 } else {
-                    InstrSeq::Empty
+                    instr::empty()
                 },
             ])
         }
@@ -3076,11 +3024,11 @@ fn emit_conditional_expr(
             let end_label = e.label_gen_mut().next_regular();
             InstrSeq::gather(vec![
                 emit_expr(e, env, etest)?,
-                InstrSeq::make_dup(),
-                InstrSeq::make_jmpnz(end_label.clone()),
-                InstrSeq::make_popc(),
+                instr::dup(),
+                instr::jmpnz(end_label.clone()),
+                instr::popc(),
                 emit_expr(e, env, efalse)?,
-                InstrSeq::make_label(end_label),
+                instr::label(end_label),
             ])
         }
     })
@@ -3096,17 +3044,17 @@ fn emit_local(e: &mut Emitter, env: &Env, notice: BareThisOp, lid: &aast_defs::L
         ))
     } else if superglobals::is_superglobal(id_name) {
         Ok(InstrSeq::gather(vec![
-            InstrSeq::make_string(string_utils::locals::strip_dollar(id_name)),
+            instr::string(string_utils::locals::strip_dollar(id_name)),
             emit_pos(pos),
-            InstrSeq::make_cgetg(),
+            instr::cgetg(),
         ]))
     } else {
         let local = get_local(e, env, pos, id_name)?;
         Ok(
             if is_local_this(env, id) && !env.flags.contains(EnvFlags::NEEDS_LOCAL_THIS) {
-                emit_pos_then(pos, InstrSeq::make_barethis(notice))
+                emit_pos_then(pos, instr::barethis(notice))
             } else {
-                InstrSeq::make_cgetl(local)
+                instr::cgetl(local)
             },
         )
     }
@@ -3132,25 +3080,25 @@ fn emit_class_const(
             let cid: class::Type = string_utils::strip_global_ns(&name).to_string().into();
             let cname = cid.to_raw_string();
             Ok(if string_utils::is_class(&id.1) {
-                emit_pos_then(&pos, InstrSeq::make_string(cname))
+                emit_pos_then(&pos, instr::string(cname))
             } else {
                 emit_symbol_refs::State::add_class(e, cid.clone());
                 // TODO(hrust) enabel `let const_id = r#const::Type::from_ast_name(&id.1);`,
                 // `from_ast_name` should be able to accpet Cow<str>
                 let const_id: r#const::Type =
                     string_utils::strip_global_ns(&id.1).to_string().into();
-                emit_pos_then(&pos, InstrSeq::make_clscnsd(const_id, cid))
+                emit_pos_then(&pos, instr::clscnsd(const_id, cid))
             })
         }
         _ => {
             let load_const = if string_utils::is_class(&id.1) {
-                InstrSeq::make_classname()
+                instr::classname()
             } else {
                 // TODO(hrust) enabel `let const_id = r#const::Type::from_ast_name(&id.1);`,
                 // `from_ast_name` should be able to accpet Cow<str>
                 let const_id: r#const::Type =
                     string_utils::strip_global_ns(&id.1).to_string().into();
-                InstrSeq::make_clscns(const_id)
+                instr::clscns(const_id)
             };
             Ok(InstrSeq::gather(vec![
                 emit_load_class_ref(e, env, pos, cexpr)?,
@@ -3174,7 +3122,7 @@ fn emit_unop(
         ])),
         U::Uplus | U::Uminus => Ok(InstrSeq::gather(vec![
             emit_pos(pos),
-            InstrSeq::make_int(0),
+            instr::int(0),
             emit_expr(e, env, expr)?,
             emit_pos_then(pos, from_unop(e.options(), uop)?),
         ])),
@@ -3191,12 +3139,12 @@ fn emit_unop(
             let temp_local = e.local_gen_mut().get_unnamed();
             Ok(InstrSeq::gather(vec![
                 emit_pos(pos),
-                InstrSeq::make_silence_start(temp_local.clone()),
+                instr::silence_start(temp_local.clone()),
                 {
                     let try_instrs = emit_expr(e, env, expr)?;
                     let catch_instrs = InstrSeq::gather(vec![
                         emit_pos(pos),
-                        InstrSeq::make_silence_end(temp_local.clone()),
+                        instr::silence_end(temp_local.clone()),
                     ]);
                     InstrSeq::create_try_catch(
                         e.label_gen_mut(),
@@ -3207,7 +3155,7 @@ fn emit_unop(
                     )
                 },
                 emit_pos(pos),
-                InstrSeq::make_silence_end(temp_local),
+                instr::silence_end(temp_local),
             ]))
         }),
     }
@@ -3236,20 +3184,20 @@ fn from_unop(opts: &Options, op: &ast_defs::Uop) -> Result {
         .contains(LangFlags::CHECK_INT_OVERFLOW);
     use ast_defs::Uop as U;
     Ok(match op {
-        U::Utild => InstrSeq::make_bitnot(),
-        U::Unot => InstrSeq::make_not(),
+        U::Utild => instr::bitnot(),
+        U::Unot => instr::not(),
         U::Uplus => {
             if check_int_overflow {
-                InstrSeq::make_addo()
+                instr::addo()
             } else {
-                InstrSeq::make_add()
+                instr::add()
             }
         }
         U::Uminus => {
             if check_int_overflow {
-                InstrSeq::make_subo()
+                instr::subo()
             } else {
-                InstrSeq::make_sub()
+                instr::sub()
             }
         }
         _ => {
@@ -3310,44 +3258,44 @@ fn from_binop(opts: &Options, op: &ast_defs::Bop) -> Result {
     Ok(match op {
         B::Plus => {
             if check_int_overflow {
-                InstrSeq::make_addo()
+                instr::addo()
             } else {
-                InstrSeq::make_add()
+                instr::add()
             }
         }
         B::Minus => {
             if check_int_overflow {
-                InstrSeq::make_subo()
+                instr::subo()
             } else {
-                InstrSeq::make_sub()
+                instr::sub()
             }
         }
         B::Star => {
             if check_int_overflow {
-                InstrSeq::make_mulo()
+                instr::mulo()
             } else {
-                InstrSeq::make_mul()
+                instr::mul()
             }
         }
-        B::Slash => InstrSeq::make_div(),
-        B::Eqeq => InstrSeq::make_eq(),
-        B::Eqeqeq => InstrSeq::make_same(),
-        B::Starstar => InstrSeq::make_pow(),
-        B::Diff => InstrSeq::make_neq(),
-        B::Diff2 => InstrSeq::make_nsame(),
-        B::Lt => InstrSeq::make_lt(),
-        B::Lte => InstrSeq::make_lte(),
-        B::Gt => InstrSeq::make_gt(),
-        B::Gte => InstrSeq::make_gte(),
-        B::Dot => InstrSeq::make_concat(),
-        B::Amp => InstrSeq::make_bitand(),
-        B::Bar => InstrSeq::make_bitor(),
-        B::Ltlt => InstrSeq::make_shl(),
-        B::Gtgt => InstrSeq::make_shr(),
-        B::Cmp => InstrSeq::make_cmp(),
-        B::Percent => InstrSeq::make_mod(),
-        B::Xor => InstrSeq::make_bitxor(),
-        B::LogXor => InstrSeq::make_xor(),
+        B::Slash => instr::div(),
+        B::Eqeq => instr::eq(),
+        B::Eqeqeq => instr::same(),
+        B::Starstar => instr::pow(),
+        B::Diff => instr::neq(),
+        B::Diff2 => instr::nsame(),
+        B::Lt => instr::lt(),
+        B::Lte => instr::lte(),
+        B::Gt => instr::gt(),
+        B::Gte => instr::gte(),
+        B::Dot => instr::concat(),
+        B::Amp => instr::bitand(),
+        B::Bar => instr::bitor(),
+        B::Ltlt => instr::shl(),
+        B::Gtgt => instr::shr(),
+        B::Cmp => instr::cmp(),
+        B::Percent => instr::mod_(),
+        B::Xor => instr::bitxor(),
+        B::LogXor => instr::xor(),
         B::Eq(_) => return Err(Unrecoverable("assignment is emitted differently".into())),
         B::QuestionQuestion => {
             return Err(Unrecoverable(
@@ -3369,7 +3317,7 @@ fn emit_first_expr(e: &mut Emitter, env: &Env, expr: &tast::Expr) -> Result<(Ins
                 || superglobals::is_any_global(local_id::get_name(&l.1))) =>
         {
             (
-                InstrSeq::make_cgetl2(get_local(e, env, &l.0, local_id::get_name(&l.1))?),
+                instr::cgetl2(get_local(e, env, &l.0, local_id::get_name(&l.1))?),
                 true,
             )
         }
@@ -3441,13 +3389,13 @@ fn emit_binop(
             let end_label = e.label_gen_mut().next_regular();
             Ok(InstrSeq::gather(vec![
                 emit_quiet_expr(e, env, pos, e1, false)?.0,
-                InstrSeq::make_dup(),
-                InstrSeq::make_istypec(IstypeOp::OpNull),
-                InstrSeq::make_not(),
-                InstrSeq::make_jmpnz(end_label.clone()),
-                InstrSeq::make_popc(),
+                instr::dup(),
+                instr::istypec(IstypeOp::OpNull),
+                instr::not(),
+                instr::jmpnz(end_label.clone()),
+                instr::popc(),
                 emit_expr(e, env, e2)?,
-                InstrSeq::make_label(end_label),
+                instr::label(end_label),
             ]))
         }
         _ => {
@@ -3463,11 +3411,11 @@ fn emit_binop(
                     B::Eqeqeq if e1.1.is_null() => emit_is_null(e, env, e2),
                     B::Diff2 if e2.1.is_null() => Ok(InstrSeq::gather(vec![
                         emit_is_null(e, env, e1)?,
-                        InstrSeq::make_not(),
+                        instr::not(),
                     ])),
                     B::Diff2 if e1.1.is_null() => Ok(InstrSeq::gather(vec![
                         emit_is_null(e, env, e2)?,
-                        InstrSeq::make_not(),
+                        instr::not(),
                     ])),
                     _ => default(e),
                 }
@@ -3505,7 +3453,7 @@ pub fn emit_unset_expr(e: &mut Emitter, env: &Env, expr: &tast::Expr) -> Result 
         &expr.0,
         LValOp::Unset,
         expr,
-        InstrSeq::Empty,
+        instr::empty(),
         0,
         false,
     )
@@ -3534,7 +3482,7 @@ pub fn emit_set_range_expr(
 
     let count_instrs = match (args, kind.vec) {
         ([c], true) => emit_expr(e, env, c)?,
-        ([], _) => InstrSeq::make_int(-1),
+        ([], _) => instr::int(-1),
         (_, false) => return raise_fatal("expects no more than 3 arguments"),
         (_, true) => return raise_fatal("expects no more than 4 arguments"),
     };
@@ -3556,7 +3504,7 @@ pub fn emit_set_range_expr(
         emit_expr(e, env, src)?,
         count_instrs,
         base_setup,
-        InstrSeq::make_instr(Instruct::IFinal(InstructFinal::SetRangeM(
+        instr::instr(Instruct::IFinal(InstructFinal::SetRangeM(
             (base_stack + cls_stack)
                 .try_into()
                 .expect("StackIndex overflow"),
@@ -3726,7 +3674,7 @@ fn emit_base_(
                         base_stack_size,
                         cls_stack_size,
                     },
-                    store: InstrSeq::make_basel(local, MemberOpMode::Define),
+                    store: instr::basel(local, MemberOpMode::Define),
                 }
             }
             _ => ArrayGetBase::Regular(ArrayGetBaseData {
@@ -3747,25 +3695,25 @@ fn emit_base_(
         E_::Lvar(x) if superglobals::is_superglobal(&(x.1).1) => {
             let base_instrs = emit_pos_then(
                 &x.0,
-                InstrSeq::make_string(string_utils::locals::strip_dollar(&(x.1).1)),
+                instr::string(string_utils::locals::strip_dollar(&(x.1).1)),
             );
 
             Ok(emit_default(
                 e,
                 base_instrs,
-                InstrSeq::Empty,
-                InstrSeq::make_basegc(base_offset, base_mode),
+                instr::empty(),
+                instr::basegc(base_offset, base_mode),
                 1,
                 0,
             ))
         }
         E_::Lvar(x) if is_object && &(x.1).1 == special_idents::THIS => {
-            let base_instrs = emit_pos_then(&x.0, InstrSeq::make_checkthis());
+            let base_instrs = emit_pos_then(&x.0, instr::checkthis());
             Ok(emit_default(
                 e,
                 base_instrs,
-                InstrSeq::Empty,
-                InstrSeq::make_baseh(),
+                instr::empty(),
+                instr::baseh(),
                 0,
                 0,
             ))
@@ -3775,15 +3723,15 @@ fn emit_base_(
         {
             let v = get_local(e, env, &x.0, &(x.1).1)?;
             let base_instr = if local_temp_kind.is_some() {
-                InstrSeq::make_cgetquietl(v.clone())
+                instr::cgetquietl(v.clone())
             } else {
-                InstrSeq::Empty
+                instr::empty()
             };
             Ok(emit_default(
                 e,
                 base_instr,
-                InstrSeq::Empty,
-                InstrSeq::make_basel(v, base_mode),
+                instr::empty(),
+                instr::basel(v, base_mode),
                 0,
                 0,
             ))
@@ -3795,9 +3743,9 @@ fn emit_base_(
                         let v = get_local(e, env, pos, local_id::get_name(id))?;
                         emit_default(
                             e,
-                            InstrSeq::Empty,
-                            InstrSeq::Empty,
-                            InstrSeq::make_basegl(v, base_mode),
+                            instr::empty(),
+                            instr::empty(),
+                            instr::basegl(v, base_mode),
                             0,
                             0,
                         )
@@ -3807,8 +3755,8 @@ fn emit_base_(
                         emit_default(
                             e,
                             elem_instrs,
-                            InstrSeq::Empty,
-                            InstrSeq::make_basegc(base_offset, base_mode),
+                            instr::empty(),
+                            instr::basegc(base_offset, base_mode),
                             1,
                             0,
                         )
@@ -3858,10 +3806,7 @@ fn emit_base_(
                     null_coalesce_assignment,
                 )?;
                 let make_setup_instrs = |base_setup_instrs: InstrSeq| {
-                    InstrSeq::gather(vec![
-                        base_setup_instrs,
-                        InstrSeq::make_dim(mode, mk.clone()),
-                    ])
+                    InstrSeq::gather(vec![base_setup_instrs, instr::dim(mode, mk.clone())])
                 };
                 Ok(match (base_result, local_temp_kind) {
                     // both base and index don't use temps - fallback to default handler
@@ -3923,7 +3868,7 @@ fn emit_base_(
                             },
                             store: InstrSeq::gather(vec![
                                 store,
-                                InstrSeq::make_dim(MemberOpMode::Define, mk),
+                                instr::dim(MemberOpMode::Define, mk),
                             ]),
                         }
                     }
@@ -3954,7 +3899,7 @@ fn emit_base_(
                             },
                             store: InstrSeq::gather(vec![
                                 store,
-                                InstrSeq::make_dim(MemberOpMode::Define, MemberKey::EL(local)),
+                                instr::dim(MemberOpMode::Define, MemberKey::EL(local)),
                             ]),
                         }
                     }
@@ -3969,8 +3914,8 @@ fn emit_base_(
                     emit_default(
                         e,
                         base_instrs,
-                        InstrSeq::Empty,
-                        InstrSeq::make_basec(base_offset, base_mode),
+                        instr::empty(),
+                        instr::basec(base_offset, base_mode),
                         1,
                         0,
                     )
@@ -4010,7 +3955,7 @@ fn emit_base_(
                         null_coalesce_assignment,
                     )?;
                     let total_stack_size = prop_stack_size + base_stack_size;
-                    let final_instr = InstrSeq::make_dim(mode, mk);
+                    let final_instr = instr::dim(mode, mk);
                     emit_default(
                         e,
                         InstrSeq::gather(vec![base_expr_instrs_begin, prop_instrs]),
@@ -4030,7 +3975,7 @@ fn emit_base_(
                 e,
                 cexpr_begin,
                 cexpr_end,
-                InstrSeq::make_basesc(base_offset + 1, rhs_stack_size, base_mode),
+                instr::basesc(base_offset + 1, rhs_stack_size, base_mode),
                 1,
                 1,
             ))
@@ -4040,8 +3985,8 @@ fn emit_base_(
             Ok(emit_default(
                 e,
                 base_expr_instrs,
-                InstrSeq::Empty,
-                emit_pos_then(pos, InstrSeq::make_basec(base_offset, base_mode)),
+                instr::empty(),
+                emit_pos_then(pos, instr::basec(base_offset, base_mode)),
                 1,
                 0,
             ))
@@ -4060,7 +4005,7 @@ pub fn emit_ignored_expr(emitter: &mut Emitter, env: &Env, pos: &Pos, expr: &tas
     } else {
         Ok(InstrSeq::gather(vec![
             emit_expr(emitter, env, expr)?,
-            emit_pos_then(pos, InstrSeq::make_popc()),
+            emit_pos_then(pos, instr::popc()),
         ]))
     }
 }
@@ -4090,28 +4035,24 @@ pub fn emit_lval_op(
                     let (instr_lhs, instr_assign) =
                         emit_lval_op_list(e, env, pos, loc, &[], expr1, false)?;
                     Ok((
-                        InstrSeq::gather(vec![
-                            instr_lhs,
-                            instr_rhs,
-                            InstrSeq::make_popl(local.clone()),
-                        ]),
+                        InstrSeq::gather(vec![instr_lhs, instr_rhs, instr::popl(local.clone())]),
                         instr_assign,
-                        InstrSeq::make_pushl(local),
+                        instr::pushl(local),
                     ))
                 })
             }
         }
         _ => e.local_scope(|e| {
             let (rhs_instrs, rhs_stack_size) = match expr2 {
-                None => (InstrSeq::Empty, 0),
+                None => (instr::empty(), 0),
                 Some(tast::Expr(_, tast::Expr_::Yield(af))) => {
                     let temp = e.local_gen_mut().get_unnamed();
                     (
                         InstrSeq::gather(vec![
                             emit_yield(e, env, pos, af)?,
-                            InstrSeq::make_setl(temp.clone()),
-                            InstrSeq::make_popc(),
-                            InstrSeq::make_pushl(temp),
+                            instr::setl(temp.clone()),
+                            instr::popc(),
+                            instr::pushl(temp),
                         ]),
                         1,
                     )
@@ -4213,10 +4154,10 @@ pub fn emit_lval_op_nonlist(
 pub fn emit_final_global_op(pos: &Pos, op: LValOp) -> InstrSeq {
     use LValOp as L;
     match op {
-        L::Set => emit_pos_then(pos, InstrSeq::make_setg()),
-        L::SetOp(op) => InstrSeq::make_setopg(op),
-        L::IncDec(op) => InstrSeq::make_incdecg(op),
-        L::Unset => emit_pos_then(pos, InstrSeq::make_unsetg()),
+        L::Set => emit_pos_then(pos, instr::setg()),
+        L::SetOp(op) => instr::setopg(op),
+        L::IncDec(op) => instr::incdecg(op),
+        L::Unset => emit_pos_then(pos, instr::unsetg()),
     }
 }
 
@@ -4225,10 +4166,10 @@ pub fn emit_final_local_op(pos: &Pos, op: LValOp, lid: local::Type) -> InstrSeq 
     emit_pos_then(
         pos,
         match op {
-            L::Set => InstrSeq::make_setl(lid),
-            L::SetOp(op) => InstrSeq::make_setopl(lid, op),
-            L::IncDec(op) => InstrSeq::make_incdecl(lid, op),
-            L::Unset => InstrSeq::make_unsetl(lid),
+            L::Set => instr::setl(lid),
+            L::SetOp(op) => instr::setopl(lid, op),
+            L::IncDec(op) => instr::incdecl(lid, op),
+            L::Unset => instr::unsetl(lid),
         },
     )
 }
@@ -4236,10 +4177,10 @@ pub fn emit_final_local_op(pos: &Pos, op: LValOp, lid: local::Type) -> InstrSeq 
 fn emit_final_member_op(stack_size: usize, op: LValOp, mk: MemberKey) -> InstrSeq {
     use LValOp as L;
     match op {
-        L::Set => InstrSeq::make_setm(stack_size, mk),
-        L::SetOp(op) => InstrSeq::make_setopm(stack_size, op, mk),
-        L::IncDec(op) => InstrSeq::make_incdecm(stack_size, op, mk),
-        L::Unset => InstrSeq::make_unsetm(stack_size, mk),
+        L::Set => instr::setm(stack_size, mk),
+        L::SetOp(op) => instr::setopm(stack_size, op, mk),
+        L::IncDec(op) => instr::incdecm(stack_size, op, mk),
+        L::Unset => instr::unsetm(stack_size, mk),
     }
 }
 
@@ -4251,9 +4192,9 @@ fn emit_final_static_op(
 ) -> Result {
     use LValOp as L;
     Ok(match op {
-        L::Set => InstrSeq::make_sets(),
-        L::SetOp(op) => InstrSeq::make_setops(op),
-        L::IncDec(op) => InstrSeq::make_incdecs(op),
+        L::Set => instr::sets(),
+        L::SetOp(op) => instr::setops(op),
+        L::IncDec(op) => instr::incdecs(op),
         L::Unset => {
             let pos = match prop {
                 tast::ClassGetExpr::CGstring((pos, _))
@@ -4290,7 +4231,7 @@ pub fn emit_lval_op_nonlist_steps(
             E_::Lvar(v) if superglobals::is_any_global(local_id::get_name(&v.1)) => (
                 emit_pos_then(
                     &v.0,
-                    InstrSeq::make_string(string_utils::lstrip(local_id::get_name(&v.1), "$")),
+                    instr::string(string_utils::lstrip(local_id::get_name(&v.1), "$")),
                 ),
                 rhs_instrs,
                 emit_final_global_op(outer_pos, op),
@@ -4298,10 +4239,10 @@ pub fn emit_lval_op_nonlist_steps(
             E_::Lvar(v) if is_local_this(env, &v.1) && op.is_incdec() => (
                 emit_local(e, env, BareThisOp::Notice, v)?,
                 rhs_instrs,
-                InstrSeq::Empty,
+                instr::empty(),
             ),
             E_::Lvar(v) if !is_local_this(env, &v.1) || op == LValOp::Unset => {
-                (InstrSeq::Empty, rhs_instrs, {
+                (instr::empty(), rhs_instrs, {
                     let lid = get_local(e, env, &v.0, &(v.1).1)?;
                     emit_final_local_op(outer_pos, op, lid)
                 })
@@ -4312,14 +4253,14 @@ pub fn emit_lval_op_nonlist_steps(
                     if rhs_stack_size == 0 {
                         (
                             emit_expr(e, env, expr)?,
-                            InstrSeq::Empty,
+                            instr::empty(),
                             final_global_op_instrs,
                         )
                     } else {
                         let (index_instrs, under_top) = emit_first_expr(e, env, expr)?;
                         if under_top {
                             (
-                                InstrSeq::Empty,
+                                instr::empty(),
                                 InstrSeq::gather(vec![rhs_instrs, index_instrs]),
                                 final_global_op_instrs,
                             )
@@ -4342,7 +4283,7 @@ pub fn emit_lval_op_nonlist_steps(
                     let (mut elem_instrs, elem_stack_size) =
                         emit_elem(e, env, opt_elem_expr, None, null_coalesce_assignment)?;
                     if null_coalesce_assignment {
-                        elem_instrs = InstrSeq::Empty;
+                        elem_instrs = instr::empty();
                     }
                     let base_offset = elem_stack_size + rhs_stack_size;
                     let (
@@ -4426,7 +4367,7 @@ pub fn emit_lval_op_nonlist_steps(
                     null_coalesce_assignment,
                 )?;
                 if null_coalesce_assignment {
-                    prop_instrs = InstrSeq::Empty;
+                    prop_instrs = instr::empty();
                 }
                 let total_stack_size = prop_stack_size + base_stack_size + cls_stack_size;
                 let final_instr =
@@ -4451,13 +4392,13 @@ pub fn emit_lval_op_nonlist_steps(
                 let final_instr_ = emit_final_static_op(e, cid, prop, op)?;
                 let final_instr = emit_pos_then(pos, final_instr_);
                 (
-                    InstrSeq::of_pair(emit_class_expr(e, env, cexpr, prop)?),
+                    InstrSeq::from(emit_class_expr(e, env, cexpr, prop)?),
                     rhs_instrs,
                     final_instr,
                 )
             }
             E_::Unop(uop) => (
-                InstrSeq::Empty,
+                instr::empty(),
                 rhs_instrs,
                 InstrSeq::gather(vec![
                     emit_lval_op_nonlist(
@@ -4466,7 +4407,7 @@ pub fn emit_lval_op_nonlist_steps(
                         pos,
                         op,
                         &uop.1,
-                        InstrSeq::Empty,
+                        instr::empty(),
                         rhs_stack_size,
                         false,
                     )?,
@@ -4498,7 +4439,7 @@ fn emit_class_expr(
     let load_prop = |e: &mut Emitter| match prop {
         tast::ClassGetExpr::CGstring((pos, id)) => Ok(emit_pos_then(
             pos,
-            InstrSeq::make_string(string_utils::locals::strip_dollar(id)),
+            instr::string(string_utils::locals::strip_dollar(id)),
         )),
         tast::ClassGetExpr::CGexpr(expr) => emit_expr(e, env, expr),
     };
@@ -4515,11 +4456,11 @@ fn emit_class_expr(
         {
             let cexpr_local = emit_expr(e, env, expr)?;
             (
-                InstrSeq::Empty,
+                instr::empty(),
                 InstrSeq::gather(vec![
                     cexpr_local,
                     scope::stash_top_in_unnamed_local(e, load_prop)?,
-                    InstrSeq::make_classgetc(),
+                    instr::classgetc(),
                 ]),
             )
         }
@@ -4715,9 +4656,7 @@ pub fn emit_reified_arg(
             Ok((
                 InstrSeq::gather(vec![
                     ts_list,
-                    InstrSeq::make_combine_and_resolve_type_struct(
-                        (collector.acc.len() + 1) as isize,
-                    ),
+                    instr::combine_and_resolve_type_struct((collector.acc.len() + 1) as isize),
                 ]),
                 collector.acc.is_empty(),
             ))
@@ -4738,7 +4677,7 @@ pub fn get_local(e: &mut Emitter, env: &Env, pos: &Pos, s: &str) -> Result<local
 pub fn emit_is_null(e: &mut Emitter, env: &Env, expr: &tast::Expr) -> Result {
     if let Some(tast::Lid(pos, id)) = expr.1.as_lvar() {
         if !is_local_this(env, id) {
-            return Ok(InstrSeq::make_istypel(
+            return Ok(instr::istypel(
                 get_local(e, env, pos, local_id::get_name(id))?,
                 IstypeOp::OpNull,
             ));
@@ -4747,7 +4686,7 @@ pub fn emit_is_null(e: &mut Emitter, env: &Env, expr: &tast::Expr) -> Result {
 
     Ok(InstrSeq::gather(vec![
         emit_expr(e, env, expr)?,
-        InstrSeq::make_istypec(IstypeOp::OpNull),
+        instr::istypec(IstypeOp::OpNull),
     ]))
 }
 
@@ -4764,13 +4703,13 @@ pub fn emit_jmpnz(
             Ok(tv) => {
                 if Into::<bool>::into(tv) {
                     EmitJmpResult {
-                        instrs: emit_pos_then(pos, InstrSeq::make_jmp(label.clone())),
+                        instrs: emit_pos_then(pos, instr::jmp(label.clone())),
                         is_fallthrough: false,
                         is_label_used: true,
                     }
                 } else {
                     EmitJmpResult {
-                        instrs: emit_pos_then(pos, InstrSeq::Empty),
+                        instrs: emit_pos_then(pos, instr::empty()),
                         is_fallthrough: true,
                         is_label_used: false,
                     }
@@ -4807,7 +4746,7 @@ pub fn emit_jmpnz(
                                         r1.instrs,
                                         InstrSeq::optional(
                                             r1.is_label_used,
-                                            vec![InstrSeq::make_label(skip_label)],
+                                            vec![instr::label(skip_label)],
                                         ),
                                     ]),
                                 ),
@@ -4824,7 +4763,7 @@ pub fn emit_jmpnz(
                                         r2.instrs,
                                         InstrSeq::optional(
                                             r1.is_label_used,
-                                            vec![InstrSeq::make_label(skip_label)],
+                                            vec![instr::label(skip_label)],
                                         ),
                                     ]),
                                 ),
@@ -4843,10 +4782,7 @@ pub fn emit_jmpnz(
                         EmitJmpResult {
                             instrs: emit_pos_then(
                                 pos,
-                                InstrSeq::gather(vec![
-                                    is_null,
-                                    InstrSeq::make_jmpnz(label.clone()),
-                                ]),
+                                InstrSeq::gather(vec![is_null, instr::jmpnz(label.clone())]),
                             ),
                             is_fallthrough: true,
                             is_label_used: true,
@@ -4860,7 +4796,7 @@ pub fn emit_jmpnz(
                         EmitJmpResult {
                             instrs: emit_pos_then(
                                 pos,
-                                InstrSeq::gather(vec![is_null, InstrSeq::make_jmpz(label.clone())]),
+                                InstrSeq::gather(vec![is_null, instr::jmpz(label.clone())]),
                             ),
                             is_fallthrough: true,
                             is_label_used: true,
@@ -4871,7 +4807,7 @@ pub fn emit_jmpnz(
                         EmitJmpResult {
                             instrs: emit_pos_then(
                                 pos,
-                                InstrSeq::gather(vec![instr, InstrSeq::make_jmpnz(label.clone())]),
+                                InstrSeq::gather(vec![instr, instr::jmpnz(label.clone())]),
                             ),
                             is_fallthrough: true,
                             is_label_used: true,
@@ -4897,13 +4833,13 @@ pub fn emit_jmpz(
                 let b: bool = v.into();
                 if b {
                     EmitJmpResult {
-                        instrs: emit_pos_then(pos, InstrSeq::Empty),
+                        instrs: emit_pos_then(pos, instr::empty()),
                         is_fallthrough: true,
                         is_label_used: false,
                     }
                 } else {
                     EmitJmpResult {
-                        instrs: emit_pos_then(pos, InstrSeq::make_jmp(label.clone())),
+                        instrs: emit_pos_then(pos, instr::jmp(label.clone())),
                         is_fallthrough: false,
                         is_label_used: true,
                     }
@@ -4924,7 +4860,7 @@ pub fn emit_jmpz(
                                         r1.instrs,
                                         InstrSeq::optional(
                                             r1.is_label_used,
-                                            vec![InstrSeq::make_label(skip_label)],
+                                            vec![instr::label(skip_label)],
                                         ),
                                     ]),
                                 ),
@@ -4941,7 +4877,7 @@ pub fn emit_jmpz(
                                         r2.instrs,
                                         InstrSeq::optional(
                                             r1.is_label_used,
-                                            vec![InstrSeq::make_label(skip_label)],
+                                            vec![instr::label(skip_label)],
                                         ),
                                     ]),
                                 ),
@@ -4980,7 +4916,7 @@ pub fn emit_jmpz(
                         EmitJmpResult {
                             instrs: emit_pos_then(
                                 pos,
-                                InstrSeq::gather(vec![is_null, InstrSeq::make_jmpz(label.clone())]),
+                                InstrSeq::gather(vec![is_null, instr::jmpz(label.clone())]),
                             ),
                             is_fallthrough: true,
                             is_label_used: true,
@@ -4994,10 +4930,7 @@ pub fn emit_jmpz(
                         EmitJmpResult {
                             instrs: emit_pos_then(
                                 pos,
-                                InstrSeq::gather(vec![
-                                    is_null,
-                                    InstrSeq::make_jmpnz(label.clone()),
-                                ]),
+                                InstrSeq::gather(vec![is_null, instr::jmpnz(label.clone())]),
                             ),
                             is_fallthrough: true,
                             is_label_used: true,
@@ -5008,7 +4941,7 @@ pub fn emit_jmpz(
                         EmitJmpResult {
                             instrs: emit_pos_then(
                                 pos,
-                                InstrSeq::gather(vec![instr, InstrSeq::make_jmpz(label.clone())]),
+                                InstrSeq::gather(vec![instr, instr::jmpz(label.clone())]),
                             ),
                             is_fallthrough: true,
                             is_label_used: true,

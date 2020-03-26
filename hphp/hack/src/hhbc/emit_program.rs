@@ -17,7 +17,7 @@ use env::{self, emitter::Emitter, Env};
 use hhas_body_rust::HhasBody;
 use hhas_program_rust::HhasProgram;
 use hhbc_ast_rust::FatalOp;
-use instruction_sequence_rust::{Error, InstrSeq, Result};
+use instruction_sequence_rust::{instr, Error, Result};
 use options::Options;
 use oxidized::{ast as Tast, namespace_env, pos::Pos}; // use std::result::Result;
 
@@ -134,9 +134,9 @@ fn emit_main<'a>(
     prog: &'a Tast::Program,
 ) -> Result<HhasBody<'a>> {
     let return_value = if flags.contains(FromAstFlags::IS_EVALED) {
-        InstrSeq::make_null()
+        instr::null()
     } else {
-        InstrSeq::make_int(1)
+        instr::int(1)
     };
     emit_body_with_default_args(emitter, namespace, prog, return_value)
 }

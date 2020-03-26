@@ -159,10 +159,10 @@ pub(crate) fn simplify_verify_type(
         let done_label = label_gen.next_regular();
         Ok(InstrSeq::gather(vec![
             check,
-            InstrSeq::make_jmpnz(done_label.clone()),
+            instr::jmpnz(done_label.clone()),
             get_ts(e, hint)?,
             verify_instr,
-            InstrSeq::make_label(done_label),
+            instr::label(done_label),
         ]))
     } else {
         Ok(InstrSeq::gather(vec![get_ts(e, hint)?, verify_instr]))

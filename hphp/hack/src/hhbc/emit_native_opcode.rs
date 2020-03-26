@@ -8,7 +8,7 @@ use emit_fatal_rust as emit_fatal;
 use emit_param_rust as emit_param;
 use env::{emitter::Emitter, local};
 use hhas_body_rust::HhasBody;
-use instruction_sequence_rust::{Error::Unrecoverable, InstrSeq, Result};
+use instruction_sequence_rust::{instr, Error::Unrecoverable, InstrSeq, Result};
 use oxidized::{aast, ast as tast, namespace_env, pos::Pos};
 
 pub fn emit_body<'a>(
@@ -69,28 +69,28 @@ fn emit_generator_method(name: &str, params: &[tast::FunParam]) -> Result {
         "send" => {
             let local = local::Type::Named((get_first_param_name(params)?).to_string());
             InstrSeq::gather(vec![
-                InstrSeq::make_contcheck_check(),
-                InstrSeq::make_pushl(local),
-                InstrSeq::make_contenter(),
+                instr::contcheck_check(),
+                instr::pushl(local),
+                instr::contenter(),
             ])
         }
         "raise" | "throw" => {
             let local = local::Type::Named((get_first_param_name(params)?).to_string());
             InstrSeq::gather(vec![
-                InstrSeq::make_contcheck_check(),
-                InstrSeq::make_pushl(local),
-                InstrSeq::make_contraise(),
+                instr::contcheck_check(),
+                instr::pushl(local),
+                instr::contraise(),
             ])
         }
         "next" | "rewind" => InstrSeq::gather(vec![
-            InstrSeq::make_contcheck_ignore(),
-            InstrSeq::make_null(),
-            InstrSeq::make_contenter(),
+            instr::contcheck_ignore(),
+            instr::null(),
+            instr::contenter(),
         ]),
-        "valid" => InstrSeq::make_contvalid(),
-        "current" => InstrSeq::make_contcurrent(),
-        "key" => InstrSeq::make_contkey(),
-        "getReturn" => InstrSeq::make_contgetreturn(),
+        "valid" => instr::contvalid(),
+        "current" => instr::contcurrent(),
+        "key" => instr::contkey(),
+        "getReturn" => instr::contgetreturn(),
         _ => {
             return Err(emit_fatal::raise_fatal_runtime(
                 &Pos::make_none(),
@@ -98,7 +98,7 @@ fn emit_generator_method(name: &str, params: &[tast::FunParam]) -> Result {
             ))
         }
     };
-    Ok(InstrSeq::gather(vec![instrs, InstrSeq::make_retc()]))
+    Ok(InstrSeq::gather(vec![instrs, instr::retc()]))
 }
 
 fn get_first_param_name(params: &[tast::FunParam]) -> Result<&str> {

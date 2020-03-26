@@ -5,7 +5,7 @@
 
 use emit_pos_rust::emit_pos;
 use hhbc_ast_rust::FatalOp;
-use instruction_sequence_rust::{Error, InstrSeq};
+use instruction_sequence_rust::{instr, Error, InstrSeq};
 use oxidized::pos::Pos;
 
 pub fn raise_fatal_runtime(pos: &Pos, msg: impl Into<String>) -> Error {
@@ -19,8 +19,8 @@ pub fn raise_fatal_parse(pos: &Pos, msg: impl Into<String>) -> Error {
 pub fn emit_fatal(op: FatalOp, pos: &Pos, msg: impl AsRef<str>) -> InstrSeq {
     InstrSeq::gather(vec![
         emit_pos(pos),
-        InstrSeq::make_string(msg.as_ref()),
-        InstrSeq::make_fatal(op),
+        instr::string(msg.as_ref()),
+        instr::fatal(op),
     ])
 }
 

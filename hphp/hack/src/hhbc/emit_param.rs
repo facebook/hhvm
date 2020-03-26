@@ -15,7 +15,7 @@ use env::{emitter::Emitter, local, Env};
 use hhas_param_rust::HhasParam;
 use hhas_type::Info;
 use hhbc_string_utils_rust::locals::strip_dollar;
-use instruction_sequence_rust::{InstrSeq, Result};
+use instruction_sequence_rust::{instr, InstrSeq, Result};
 use oxidized::{
     aast_defs::{Hint, Hint_},
     aast_visitor::{self, AstParams, Node},
@@ -183,19 +183,16 @@ pub fn emit_param_default_value_setter(
         param.default_value.as_ref().map(|(lbl, expr)| {
             let instrs =
                 if is_native && expr.1.is_null() && (is_mixed || (is_optional && is_callable)) {
-                    InstrSeq::make_nop()
+                    instr::nop()
                 } else {
                     InstrSeq::gather(vec![
                         emit_expression::emit_expr(emitter, env, &expr)?,
                         emit_pos::emit_pos(pos),
-                        InstrSeq::make_setl(local::Type::Named(param.name.clone())),
-                        InstrSeq::make_popc(),
+                        instr::setl(local::Type::Named(param.name.clone())),
+                        instr::popc(),
                     ])
                 };
-            Ok(InstrSeq::gather(vec![
-                InstrSeq::make_label(lbl.to_owned()),
-                instrs,
-            ]))
+            Ok(InstrSeq::gather(vec![instr::label(lbl.to_owned()), instrs]))
         })
     };
     let setters = params
@@ -207,8 +204,8 @@ pub fn emit_param_default_value_setter(
     } else {
         let l = emitter.label_gen_mut().next_regular();
         Ok((
-            InstrSeq::make_label(l.clone()),
-            InstrSeq::gather(vec![InstrSeq::gather(setters), InstrSeq::make_jmpns(l)]),
+            instr::label(l.clone()),
+            InstrSeq::gather(vec![InstrSeq::gather(setters), instr::jmpns(l)]),
         ))
     }
 }

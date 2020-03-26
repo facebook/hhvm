@@ -15,7 +15,7 @@ use hhas_method_rust::{HhasMethod, HhasMethodFlags};
 use hhas_pos_rust::Span;
 use hhbc_id_rust::{class, method, Id};
 use hhbc_string_utils_rust as string_utils;
-use instruction_sequence_rust::{InstrSeq, Result};
+use instruction_sequence_rust::{instr, Result};
 use naming_special_names_rust::{members, special_idents, user_attributes};
 use options::{HhvmFlags, Options};
 use oxidized::{ast as T, pos::Pos};
@@ -196,7 +196,7 @@ pub fn from_ast<'a>(
                 Pos::make_none(),
                 T::Stmt_::mk_block(ast_body_block.to_vec()),
             )))],
-            InstrSeq::make_null(),
+            instr::null(),
             emit_body::Args {
                 immediate_tparams: &method.tparams,
                 ast_params: &method.params,

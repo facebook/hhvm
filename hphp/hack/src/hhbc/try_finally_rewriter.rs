@@ -14,7 +14,7 @@ use emit_fatal_rust as emit_fatal;
 use emit_pos_rust::emit_pos;
 use env::{emitter::Emitter, iterator, jump_targets as jt, local, Env};
 use hhbc_ast_rust::{self as hhbc_ast, Instruct};
-use instruction_sequence_rust::{Error, InstrSeq, Result};
+use instruction_sequence_rust::{instr, Error, InstrSeq, Result};
 use label::Label;
 use label_rust as label;
 use oxidized::{
@@ -93,17 +93,17 @@ pub(super) fn cleanup_try_body(is: &InstrSeq) -> InstrSeq {
 
 pub(super) fn emit_jump_to_label(l: Label, iters: Vec<iterator::Id>) -> InstrSeq {
     if iters.is_empty() {
-        InstrSeq::make_jmp(l)
+        instr::jmp(l)
     } else {
-        InstrSeq::make_iter_break(l, iters)
+        instr::iter_break(l, iters)
     }
 }
 
 pub(super) fn emit_save_label_id(local_gen: &mut local::Gen, id: usize) -> InstrSeq {
     InstrSeq::gather(vec![
-        InstrSeq::make_int(id as isize),
-        InstrSeq::make_setl(local_gen.get_label().clone()),
-        InstrSeq::make_popc(),
+        instr::int(id as isize),
+        instr::setl(local_gen.get_label().clone()),
+        instr::popc(),
     ])
 }
 
@@ -144,9 +144,9 @@ pub fn emit_goto(
             match jt_gen.jump_targets().find_goto_target(&label) {
                 jt::ResolvedGotoTarget::Label(iters) => {
                     let preamble = if !in_finally_epilogue {
-                        InstrSeq::make_empty()
+                        instr::empty()
                     } else {
-                        InstrSeq::make_unsetl(local_gen.get_label().clone())
+                        instr::unsetl(local_gen.get_label().clone())
                     };
                     Ok(InstrSeq::gather(vec![
                         preamble,
@@ -158,7 +158,7 @@ pub fn emit_goto(
                     rgf_iterators_to_release,
                 }) => {
                     let preamble = if in_finally_epilogue {
-                        InstrSeq::make_empty()
+                        instr::empty()
                     } else {
                         let label_id = jt_gen.get_id_for_label(Label::Named(label.clone()));
                         emit_save_label_id(local_gen, label_id)
@@ -168,7 +168,7 @@ pub fn emit_goto(
                         emit_jump_to_label(rgf_finally_start_label, rgf_iterators_to_release),
                         // emit goto as an indicator for try/finally rewriter to generate
                         // finally epilogue, try/finally rewriter will remove it.
-                        InstrSeq::make_goto(label),
+                        instr::goto(label),
                     ]))
                 }
                 jt::ResolvedGotoTarget::GotoFromFinally => Err(emit_fatal::raise_fatal_runtime(
@@ -254,24 +254,23 @@ pub(super) fn emit_return(e: &mut Emitter, in_finally_epilogue: bool, env: &mut 
                 jt_gen
                     .jump_targets()
                     .iterators()
-                    .map(|i| InstrSeq::make_iterfree(*i))
+                    .map(|i| instr::iterfree(*i))
                     .collect(),
             );
             let mut instrs = Vec::with_capacity(5);
             if in_finally_epilogue {
-                let load_retval_instr =
-                    InstrSeq::make_cgetl(e.local_gen_mut().get_retval().clone());
+                let load_retval_instr = instr::cgetl(e.local_gen_mut().get_retval().clone());
                 instrs.push(load_retval_instr);
             }
             let verify_return_instr = verify_return.map_or_else(
-                || Ok(InstrSeq::make_empty()),
+                || Ok(instr::empty()),
                 |h| {
                     use reified::ReificationLevel;
                     let h = reified::convert_awaitable(env, h.clone());
                     let h = reified::remove_erased_generics(env, h);
                     match reified::has_reified_type_constraint(env, &h) {
-                        ReificationLevel::Unconstrained => Ok(InstrSeq::make_empty()),
-                        ReificationLevel::Not => Ok(InstrSeq::make_verify_ret_type_c()),
+                        ReificationLevel::Unconstrained => Ok(instr::empty()),
+                        ReificationLevel::Not => Ok(instr::verify_ret_type_c()),
                         ReificationLevel::Maybe => Ok(InstrSeq::gather(vec![
                             emit_expression::get_type_structure_for_hint(
                                 e,
@@ -279,12 +278,12 @@ pub(super) fn emit_return(e: &mut Emitter, in_finally_epilogue: bool, env: &mut 
                                 &IndexSet::new(),
                                 &h,
                             )?,
-                            InstrSeq::make_verify_ret_type_ts(),
+                            instr::verify_ret_type_ts(),
                         ])),
                         ReificationLevel::Definitely => {
                             let check = InstrSeq::gather(vec![
-                                InstrSeq::make_dup(),
-                                InstrSeq::make_istypec(hhbc_ast::IstypeOp::OpNull),
+                                instr::dup(),
+                                instr::istypec(hhbc_ast::IstypeOp::OpNull),
                             ]);
                             reified::simplify_verify_type(
                                 e,
@@ -292,7 +291,7 @@ pub(super) fn emit_return(e: &mut Emitter, in_finally_epilogue: bool, env: &mut 
                                 &Pos::make_none(),
                                 check,
                                 &h,
-                                InstrSeq::make_verify_ret_type_ts(),
+                                instr::verify_ret_type_ts(),
                             )
                         }
                     }
@@ -303,9 +302,9 @@ pub(super) fn emit_return(e: &mut Emitter, in_finally_epilogue: bool, env: &mut 
                 verify_out,
                 release_iterators_instr,
                 if num_out != 0 {
-                    InstrSeq::make_retm(num_out + 1)
+                    instr::retm(num_out + 1)
                 } else {
-                    InstrSeq::make_retc()
+                    instr::retc()
                 },
             ]);
             Ok(InstrSeq::gather(instrs))
@@ -314,13 +313,13 @@ pub(super) fn emit_return(e: &mut Emitter, in_finally_epilogue: bool, env: &mut 
         // jump to finally block via Jmp
         Some((target_label, iterators_to_release)) => {
             let preamble = if in_finally_epilogue {
-                InstrSeq::make_empty()
+                instr::empty()
             } else {
                 let jt_gen = &mut env.jump_targets_gen;
                 let save_state = emit_save_label_id(e.local_gen_mut(), jt_gen.get_id_for_return());
                 let save_retval = InstrSeq::gather(vec![
-                    InstrSeq::make_setl(e.local_gen_mut().get_retval().clone()),
-                    InstrSeq::make_popc(),
+                    instr::setl(e.local_gen_mut().get_retval().clone()),
+                    instr::popc(),
                 ]);
                 InstrSeq::gather(vec![save_state, save_retval])
             };
@@ -329,7 +328,7 @@ pub(super) fn emit_return(e: &mut Emitter, in_finally_epilogue: bool, env: &mut 
                 emit_jump_to_label(target_label, iterators_to_release),
                 // emit ret instr as an indicator for try/finally rewriter to generate
                 // finally epilogue, try/finally rewriter will remove it.
-                InstrSeq::make_retc(),
+                instr::retc(),
             ]))
         }
     }
@@ -356,9 +355,9 @@ pub(super) fn emit_break_or_continue(
         jt::ResolvedJumpTarget::NotFound => emit_fatal::emit_fatal_for_break_continue(pos, level),
         jt::ResolvedJumpTarget::ResolvedRegular(target_label, iterators_to_release) => {
             let preamble = if in_finally_epilogue && level == 1 {
-                InstrSeq::make_unsetl(e.local_gen_mut().get_label().clone())
+                instr::unsetl(e.local_gen_mut().get_label().clone())
             } else {
-                InstrSeq::make_empty()
+                instr::empty()
             };
             InstrSeq::gather(vec![
                 preamble,
@@ -376,7 +375,7 @@ pub(super) fn emit_break_or_continue(
                 let label_id = jt_gen.get_id_for_label(target_label.clone());
                 emit_save_label_id(e.local_gen_mut(), label_id)
             } else {
-                InstrSeq::make_empty()
+                instr::empty()
             };
             let adjusted_level = adjusted_level as isize;
             InstrSeq::gather(vec![
@@ -386,9 +385,9 @@ pub(super) fn emit_break_or_continue(
                 // emit break/continue instr as an indicator for try/finally rewriter
                 // to generate finally epilogue - try/finally rewriter will remove it.
                 if is_break {
-                    InstrSeq::make_break(adjusted_level)
+                    instr::break_(adjusted_level)
                 } else {
-                    InstrSeq::make_continue(adjusted_level)
+                    instr::continue_(adjusted_level)
                 },
             ])
         }
@@ -435,13 +434,13 @@ pub(super) fn emit_finally_epilogue(
         }
     };
     Ok(if jump_instrs.0.is_empty() {
-        InstrSeq::make_empty()
+        instr::empty()
     } else if jump_instrs.0.len() == 1 {
         let (_, instr) = jump_instrs.0.iter().next().unwrap();
         InstrSeq::gather(vec![
             emit_pos(pos),
-            InstrSeq::make_issetl(e.local_gen_mut().get_label().clone()),
-            InstrSeq::make_jmpz(finally_end),
+            instr::issetl(e.local_gen_mut().get_label().clone()),
+            instr::jmpz(finally_end),
             emit_instr(e, env, pos, instr)?,
         ])
     } else {
@@ -475,12 +474,12 @@ pub(super) fn emit_finally_epilogue(
                 let (label, body) = if done {
                     let label = e.label_gen_mut().next_regular();
                     let body = InstrSeq::gather(vec![
-                        InstrSeq::make_label(label.clone()),
+                        instr::label(label.clone()),
                         emit_instr(e, env, pos, instr)?,
                     ]);
                     (label, body)
                 } else {
-                    (finally_end.clone(), InstrSeq::make_empty())
+                    (finally_end.clone(), instr::empty())
                 };
                 labels.push(label);
                 bodies.push(body);
@@ -490,14 +489,14 @@ pub(super) fn emit_finally_epilogue(
         // NOTE(hrust): base case when empty and n >= 0
         for _ in 0..=n {
             labels.push(finally_end.clone());
-            bodies.push(InstrSeq::make_empty());
+            bodies.push(instr::empty());
         }
         InstrSeq::gather(vec![
             emit_pos(pos),
-            InstrSeq::make_issetl(e.local_gen_mut().get_label().clone()),
-            InstrSeq::make_jmpz(finally_end),
-            InstrSeq::make_cgetl(e.local_gen_mut().get_label().clone()),
-            InstrSeq::make_switch(labels.into_iter().rev().collect()),
+            instr::issetl(e.local_gen_mut().get_label().clone()),
+            instr::jmpz(finally_end),
+            instr::cgetl(e.local_gen_mut().get_label().clone()),
+            instr::switch(labels.into_iter().rev().collect()),
             InstrSeq::gather(bodies.into_iter().rev().collect()),
         ])
     })

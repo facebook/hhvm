@@ -6,16 +6,16 @@
 use emit_fatal_rust as emit_fatal;
 use env::local;
 use hhas_param_rust::HhasParam;
-use instruction_sequence_rust::{InstrSeq, Result};
+use instruction_sequence_rust::{instr, InstrSeq, Result};
 use oxidized::{aast::FunParam, pos::Pos};
 
 pub const MEMOIZE_SUFFIX: &str = "$memoize_impl";
 
 pub fn get_memo_key_list(local: local::Id, index: usize, name: String) -> Vec<InstrSeq> {
     vec![
-        InstrSeq::make_getmemokeyl(local::Type::Named(name)),
-        InstrSeq::make_setl(local::Type::Unnamed(local + index)),
-        InstrSeq::make_popc(),
+        instr::getmemokeyl(local::Type::Named(name)),
+        instr::setl(local::Type::Unnamed(local + index)),
+        instr::popc(),
     ]
 }
 
@@ -34,7 +34,7 @@ pub fn param_code_gets(params: &[HhasParam]) -> InstrSeq {
     InstrSeq::gather(
         params
             .iter()
-            .map(|param| InstrSeq::make_cgetl(local::Type::Named(param.name.clone())))
+            .map(|param| instr::cgetl(local::Type::Named(param.name.clone())))
             .collect(),
     )
 }

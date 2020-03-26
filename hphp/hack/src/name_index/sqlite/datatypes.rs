@@ -96,7 +96,6 @@ pub(crate) mod convert {
 
     pub fn name_to_hash(name: &str) -> i64 {
         let mut digest = Md5::new();
-        println!("name_to_hash: {}", name);
         digest.input(name);
 
         let bytes = digest.result();

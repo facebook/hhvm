@@ -359,10 +359,7 @@ impl<'a> Ty<'a> {
         // Not implementing all the types and reasons upfront, since initially we'll likely
         // to use a very limited subset of them. Feel free to add whatever you need here if you
         // are a hitting those unimplemented.
-        let r = match &self.0.reason {
-            Reason::Rnone => oxidized::typing_reason::Reason::Rnone,
-            x => unimplemented!("{:#?}", x),
-        };
+        let r = self.0.to_oxidized();
         let t = match &self.1 {
             Ty_::Tprim(PrimKind::Tint) => oxidized_defs::Ty_::Tprim(aast_defs::Tprim::Tint),
             Ty_::Tprim(PrimKind::Tnull) => oxidized_defs::Ty_::Tprim(aast_defs::Tprim::Tnull),

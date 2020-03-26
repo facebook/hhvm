@@ -127,3 +127,39 @@ impl<'a> PReason_<'a> {
         }
     }
 }
+
+impl<'a> PReason_<'a> {
+    pub fn to_oxidized(&self) -> OxReason {
+        use OxReason as O;
+        use Reason as R;
+
+        let pos = match self.pos {
+            Some(pos) => pos.clone(),
+            None => Pos::make_none(),
+        };
+        match self.reason {
+            R::Rnone => O::Rnone,
+            R::Rwitness => O::Rwitness(pos),
+            R::RnoReturn => O::RnoReturn(pos),
+            R::Rhint => O::Rhint(pos),
+            R::Rinstantiate(r_orig, generic_name, r_inst) => O::Rinstantiate(
+                Box::new(r_orig.to_oxidized()),
+                generic_name.to_string(),
+                Box::new(r_inst.to_oxidized()),
+            ),
+            R::RcontravariantGeneric(r_orig, class_name) => {
+                O::RcontravariantGeneric(Box::new(r_orig.to_oxidized()), class_name.to_string())
+            }
+            R::RinvariantGeneric(r_orig, class_name) => {
+                O::RinvariantGeneric(Box::new(r_orig.to_oxidized()), class_name.to_string())
+            }
+            R::RtypeVariable => O::RtypeVariable(pos),
+            R::RtypeVariableGenerics(tp_name, s) => {
+                O::RtypeVariableGenerics(pos, tp_name.to_string(), s.to_string())
+            }
+            R::RsolveFail => O::RsolveFail(pos),
+            R::RcstrOnGenerics(sid) => O::RcstrOnGenerics(pos, sid.clone()),
+            _ => unimplemented!("{:?}", &self.reason),
+        }
+    }
+}

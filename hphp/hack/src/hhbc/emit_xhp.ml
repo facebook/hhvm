@@ -93,6 +93,17 @@ let emit_xhp_attribute_array xal =
       | None -> Tast_annotate.make T.Null
       | Some e -> e
     in
+    let rec extract_from_hint h =
+      match h with
+      | (_, Aast.Happly ((_, inc), [h]))
+        when inc = Naming_special_names.FB.cIncorrectType ->
+        extract_from_hint h
+      | (_, Aast.Hlike h)
+      | (_, Aast.Hoption h) ->
+        extract_from_hint h
+      | (_, Aast.Happly ((_, id), _)) -> get_attribute_array_values id enumo
+      | _ -> failwith "There are no other possible xhp attribute hints"
+    in
     let (class_name, hint) =
       match ho with
       | None when enumo = None ->
@@ -100,10 +111,7 @@ let emit_xhp_attribute_array xal =
         get_attribute_array_values "\\HH\\mixed" enumo
       | None -> get_attribute_array_values "enum" enumo
       (* As it turns out, if there is a type list, HHVM discards it *)
-      | Some (_, Aast.Happly ((_, id), _))
-      | Some (_, Aast.Hoption (_, Aast.Happly ((_, id), _))) ->
-        get_attribute_array_values id enumo
-      | _ -> failwith "There are no other possible xhp attribute hints"
+      | Some h -> extract_from_hint h
     in
     let is_required =
       Tast_annotate.make

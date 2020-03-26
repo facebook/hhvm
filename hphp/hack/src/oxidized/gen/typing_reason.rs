@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e74c00e1edf8b9fadc76c092eea49637>>
+// @generated SignedSource<<361b9813406147f2a668da046e6ba818>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -37,15 +37,10 @@ pub enum Reason {
     Ridx(pos::Pos, Box<Reason>),
     /// Used as an index, in the Vector case
     RidxVector(pos::Pos),
-    /// Used to append element to an array
-    Rappend(pos::Pos),
-    /// Array accessed with a static string index
-    Rfield(pos::Pos),
     /// Because it is iterated in a foreach loop
     Rforeach(pos::Pos),
     /// Because it is iterated "await as" in foreach
     Rasyncforeach(pos::Pos),
-    Raccess(pos::Pos),
     Rarith(pos::Pos),
     RarithInt(pos::Pos),
     RarithRet(pos::Pos),
@@ -57,25 +52,17 @@ pub enum Reason {
     RarithDynamic(pos::Pos),
     RbitwiseDynamic(pos::Pos),
     RincdecDynamic(pos::Pos),
-    Rstring2(pos::Pos),
     Rcomp(pos::Pos),
-    Rconcat(pos::Pos),
     RconcatRet(pos::Pos),
-    Rlogic(pos::Pos),
     RlogicRet(pos::Pos),
     Rbitwise(pos::Pos),
     RbitwiseRet(pos::Pos),
-    Rstmt(pos::Pos),
     RnoReturn(pos::Pos),
     RnoReturnAsync(pos::Pos),
     RretFunKind(pos::Pos, ast_defs::FunKind),
     Rhint(pos::Pos),
-    RnullCheck(pos::Pos),
-    RnotInCstr(pos::Pos),
     Rthrow(pos::Pos),
     Rplaceholder(pos::Pos),
-    Rattr(pos::Pos),
-    Rxhp(pos::Pos),
     RretDiv(pos::Pos),
     RyieldGen(pos::Pos),
     RyieldAsyncgen(pos::Pos),
@@ -83,7 +70,6 @@ pub enum Reason {
     RyieldSend(pos::Pos),
     /// true if due to lambda
     RlostInfo(String, Box<Reason>, pos::Pos, bool),
-    Rcoerced(Box<Reason>, pos::Pos, String),
     Rformat(pos::Pos, String, Box<Reason>),
     RclassClass(pos::Pos, String),
     RunknownClass(pos::Pos),
@@ -101,12 +87,9 @@ pub enum Reason {
     /// ?-> operator is used
     RnullsafeOp(pos::Pos),
     RtconstNoCstr(aast::Sid),
-    RusedAsMap(pos::Pos),
-    RusedAsShape(pos::Pos),
     Rpredicated(pos::Pos, String),
     Ris(pos::Pos),
     Ras(pos::Pos),
-    RfinalProperty(pos::Pos),
     RvarrayOrDarrayKey(pos::Pos),
     Rusing(pos::Pos),
     RdynamicProp(pos::Pos),
@@ -188,7 +171,6 @@ pub enum ExprDepTypeReason {
 pub enum Ureason {
     URnone,
     URassign,
-    URassignBranch,
     URassignInout,
     URhint,
     URreturn,
@@ -197,7 +179,6 @@ pub enum Ureason {
     URvector,
     URkey,
     URvalue,
-    URif,
     URawait,
     URyield,
     URyieldFrom,
@@ -208,10 +189,8 @@ pub enum Ureason {
     URparam,
     URparamInout,
     URarrayValue,
-    URarrayKey,
     URtupleAccess,
     URpairAccess,
-    URdynamicYield,
     URnewtypeCstr,
     URclassReq,
     URenum,
@@ -221,7 +200,6 @@ pub enum Ureason {
     URtypeconstCstr,
     URsubsumeTconstCstr,
     URsubsumeTconstAssign,
-    URfinalProperty,
     URclone,
     URusing,
 }

@@ -6,6 +6,8 @@ ExternalProject_add(
   URL "https://github.com/jemalloc/jemalloc/releases/download/5.2.1/jemalloc-5.2.1.tar.bz2"
   URL_HASH SHA512=0bbb77564d767cef0c6fe1b97b705d368ddb360d55596945aea8c3ba5889fbce10479d85ad492c91d987caacdbbdccc706aa3688e321460069f00c05814fae02
   PREFIX "${JEMALLOC_PREFIX}"
+  PATCH_COMMAND
+    patch -p1 < "${CMAKE_CURRENT_SOURCE_DIR}/mac-sys-nothrow.patch"
   CONFIGURE_COMMAND
     "${JEMALLOC_PREFIX}/src/jemallocBuild/configure" "--prefix=${JEMALLOC_PREFIX}"
       --disable-shared

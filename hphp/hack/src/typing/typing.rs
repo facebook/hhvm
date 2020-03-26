@@ -11,7 +11,7 @@ pub mod typing_phase;
 
 use oxidized::{ast, pos::Pos};
 use typing_defs_rust::{tast, FuncBodyAnn, SavedEnv, Ty, Ty_};
-use typing_env_rust::Env;
+use typing_env_rust::{Env, LocalId, ParamMode};
 
 pub fn program<'a>(env: &mut Env<'a>, ast: &ast::Program) -> tast::Program<'a> {
     ast.iter().filter_map(|x| def(env, x)).collect()
@@ -193,4 +193,37 @@ fn call<'a>(
         }
         x => unimplemented!("{:#?}", x),
     }
+}
+
+#[allow(dead_code)]
+fn bind_param<'a>(env: &mut Env<'a>, ty1: Ty<'a>, param: &'a ast::FunParam) -> tast::FunParam<'a> {
+    // TODO(hrust): if parameter has a default initializer, check its type
+    let param_te: Option<tast::Expr<'a>> = match &param.expr {
+        None => None,
+        Some(e) => unimplemented!("{:?}", e),
+    };
+    // TODO(hrust): process user attributes
+    let user_attributes: Vec<tast::UserAttribute<'a>> = if param.user_attributes.len() > 0 {
+        unimplemented!("{:?}", param.user_attributes)
+    } else {
+        vec![]
+    };
+    let tparam = tast::FunParam {
+        annotation: (param.pos.clone(), ty1),
+        type_hint: ast::TypeHint(ty1, param.type_hint.get_hint().clone()),
+        is_variadic: param.is_variadic,
+        pos: param.pos.clone(),
+        name: param.name.clone(),
+        expr: param_te,
+        callconv: param.callconv,
+        user_attributes,
+        visibility: param.visibility,
+    };
+    // TODO(hrust): add type to locals env
+    let mode = ParamMode::from(param.callconv);
+    let id = LocalId::make_unscoped(&param.name);
+    env.set_param(id, (ty1, mode));
+    // TODO(hrust): has_accept_disposable_attribute
+    // TODO(hrust): mutability
+    tparam
 }

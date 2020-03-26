@@ -32,6 +32,7 @@ pub mod tany_sentinel;
 pub mod tast_impl;
 pub mod ty_impl;
 pub mod typing_continuations;
+pub mod typing_defs_impl;
 pub mod typing_env_return_info;
 pub mod typing_logic;
 pub mod typing_reason_impl;

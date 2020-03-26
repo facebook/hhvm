@@ -33,3 +33,9 @@ pub fn empty_global_env<'a>(
         provider,
     }
 }
+
+impl<'a> Env<'a> {
+    pub fn set_param(&mut self, id: LocalId<'a>, param: (Ty<'a>, ParamMode)) {
+        self.genv.params = self.genv.params.add(self.builder(), id, param)
+    }
+}

@@ -10,5 +10,3 @@ path = "../../typing_collections_rust.rs"
 
 [dependencies]
 arena_collections = { path = "../../../arena_collections" }
-oxidized = { path = "../../../oxidized" }
-bumpalo = { version = "3.1.2", features = ["collections"] }

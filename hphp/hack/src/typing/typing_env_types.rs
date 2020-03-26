@@ -23,15 +23,6 @@ pub struct Env<'a> {
     pub inference_env: InferenceEnv<'a>,
 }
 
-pub struct Genv<'a> {
-    pub tcopt: typechecker_options::TypecheckerOptions,
-    pub return_info: typing_env_return_info::TypingEnvReturnInfo<'a>,
-    pub params: LocalIdMap<'a, (Ty<'a>, ParamMode)>,
-    pub file: relative_path::RelativePath,
-    pub builder: &'a TypeBuilder<'a>,
-    pub provider: &'a dyn DeclProvider,
-}
-
 impl<'a> Env<'a> {
     pub fn new(function_pos: &'a Pos, genv: Genv<'a>) -> Self {
         Env {
@@ -51,3 +42,27 @@ impl<'a> Env<'a> {
         self.genv.provider
     }
 }
+
+pub struct Genv<'a> {
+    pub tcopt: typechecker_options::TypecheckerOptions,
+    pub return_info: typing_env_return_info::TypingEnvReturnInfo<'a>,
+    pub params: LocalIdMap<'a, (Ty<'a>, ParamMode)>,
+    pub file: relative_path::RelativePath,
+    pub builder: &'a TypeBuilder<'a>,
+    pub provider: &'a dyn DeclProvider,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub struct LocalId<'a>(pub isize, pub &'a str);
+
+impl<'a> LocalId<'a> {
+    pub fn make_unscoped(name: &'a str) -> LocalId<'a> {
+        LocalId(0, name)
+    }
+
+    pub fn name(&self) -> &'a str {
+        self.1
+    }
+}
+
+pub type LocalIdMap<'a, V> = Map<'a, LocalId<'a>, V>;

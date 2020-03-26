@@ -47,8 +47,8 @@ let get (ctx : Provider_context.t) (name : string) : shallow_class option =
           Naming_provider.get_class_path ctx name >>= fun path ->
           Ast_provider.find_class_in_file ctx path name >>| fun class_ ->
           Shallow_classes_heap.class_naming_and_decl ctx class_)
-    | Provider_backend.Decl_service _ ->
-      failwith "shallow class cache lookup not implemented for Decl_service"
+    | Provider_backend.Decl_service { decl; _ } ->
+      Decl_service_client.rpc_get_class decl name
 
 let get_batch (ctx : Provider_context.t) (names : SSet.t) :
     shallow_class option SMap.t =

@@ -46,6 +46,7 @@
     marshal_tools
     typing_defs
     utils_core
+    shallow_decl_defs
     sys_utils)
   (preprocess (pps ppx_deriving.std)))
 
@@ -102,11 +103,14 @@
   (name naming_provider)
   (modules naming_provider)
   (libraries
+    annotated_ast
+    ast
     db_path_provider
     file_info
     naming_heap
     pos
     relative_path
+    shallow_decl_defs
     typing_defs)
   (preprocess (pps ppx_deriving.std)))
 
@@ -141,6 +145,7 @@
   (name shallow_classes_provider)
   (modules shallow_classes_provider)
   (libraries
+    decl_service_client
     provider_backend
     provider_context
     shallow_classes_heap)

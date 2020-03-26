@@ -71,7 +71,10 @@ let get_class (ctx : Provider_context.t) (class_name : class_key) :
     let result : class_decl option = Option.map result ~f:Obj.obj in
     result
   | Provider_backend.Decl_service _ ->
-    failwith "Decl_provider.get_class not yet impl. for decl memory provider"
+    (* The decl service caches shallow decls, so we communicate with it in
+       Shallow_classes_provider. Typing_lazy_heap lazily folds shallow decls to
+       provide a folded-decl API.  *)
+    Typing_lazy_heap.get_class ctx class_name
 
 let convert_class_elt_to_fun_decl class_elt_opt : fun_decl option =
   Typing_defs.(
@@ -139,8 +142,8 @@ let get_typedef (ctx : Provider_context.t) (typedef_name : string) :
           in
           Some tdecl
         | None -> None)
-  | Provider_backend.Decl_service _ ->
-    failwith "Decl_provider.get_typedef not yet impl. for decl memory provider"
+  | Provider_backend.Decl_service { decl; _ } ->
+    Decl_service_client.rpc_get_typedef decl typedef_name
 
 let get_record_def (ctx : Provider_context.t) (record_name : string) :
     record_def_decl option =

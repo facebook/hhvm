@@ -28,6 +28,11 @@ let rpc_get_fun (client : Decl_ipc_ffi_externs.decl_client) (name : string) :
   let ty = Decl_ipc_ffi_externs.get_decl client FileInfo.Fun name in
   pointer_to_option ty "rpc_get_fun"
 
+let rpc_get_class (client : Decl_ipc_ffi_externs.decl_client) (name : string) :
+    Shallow_decl_defs.shallow_class option =
+  let ty = Decl_ipc_ffi_externs.get_decl client FileInfo.Class name in
+  pointer_to_option ty "rpc_get_class"
+
 let rpc_get_typedef (client : Decl_ipc_ffi_externs.decl_client) (name : string)
     : Typing_defs.typedef_type option =
   let ty = Decl_ipc_ffi_externs.get_decl client FileInfo.Typedef name in

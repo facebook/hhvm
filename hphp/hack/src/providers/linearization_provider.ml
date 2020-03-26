@@ -81,7 +81,9 @@ let add (ctx : Provider_context.t) (key : key) (value : Decl_defs.linearization)
     let key = key_to_local_key key in
     Provider_backend.Linearization_cache.add linearization_cache ~key ~value
   | Provider_backend.Decl_service _ ->
-    failwith "Linearization_provider.add not implemented for Decl_service"
+    (* TODO: Consider storing these in the provider context or decl-service
+       instead of a global cache in the hh_worker process *)
+    LocalCache.add key value
 
 let complete
     (ctx : Provider_context.t) (key : key) (value : Decl_defs.mro_element list)
@@ -91,8 +93,7 @@ let complete
     Cache.add key value;
     LocalCache.remove key
   | Provider_backend.Local_memory _ -> ()
-  | Provider_backend.Decl_service _ ->
-    failwith "Linearization_provider.complete not implemented for Decl_service"
+  | Provider_backend.Decl_service _ -> ()
 
 let get (ctx : Provider_context.t) (key : key) : Decl_defs.linearization option
     =
@@ -110,4 +111,6 @@ let get (ctx : Provider_context.t) (key : key) : Decl_defs.linearization option
       ~key
       ~default:(fun () -> None)
   | Provider_backend.Decl_service _ ->
-    failwith "Linearization_provider.get not implemented for Decl_service"
+    (* TODO: Consider storing these in the provider context or decl-service
+       instead of a global cache in the hh_worker process *)
+    LocalCache.get key

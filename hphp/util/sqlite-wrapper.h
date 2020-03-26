@@ -65,8 +65,9 @@ struct SQLite {
    * path is the location of the DB in your filesystem, or ":memory:"
    * if you want to store data in memory instead.
    */
-  static SQLite connect(const folly::StringPiece path,
+  static SQLite connect(const std::string& path,
                         OpenMode mode = OpenMode::ReadWrite);
+  static SQLite connect(const char* path, OpenMode mode = OpenMode::ReadWrite);
 
   /**
    * Compile the given SQL query into a statement object which can run and rerun
@@ -156,7 +157,7 @@ struct SQLite {
    * connection, or "main" by default.
    */
   bool isReadOnly() const;
-  bool isReadOnly(folly::StringPiece dbName) const;
+  bool isReadOnly(const std::string& dbName) const;
   bool isReadOnly(const char* dbName) const;
 
   /**

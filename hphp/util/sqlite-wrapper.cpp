@@ -87,7 +87,11 @@ SQLite::~SQLite() {
   m_dbc = nullptr;
 }
 
-SQLite SQLite::connect(const folly::StringPiece path, OpenMode mode) {
+SQLite SQLite::connect(const std::string& path, OpenMode mode) {
+  return connect(path.c_str(), mode);
+}
+
+SQLite SQLite::connect(const char* path, OpenMode mode) {
 
   int flags = [&] {
     switch (mode) {
@@ -101,7 +105,7 @@ SQLite SQLite::connect(const folly::StringPiece path, OpenMode mode) {
 
   sqlite3* dbc = nullptr;
   int rc = sqlite3_open_v2(
-      path.data(), &dbc,
+      path, &dbc,
       SQLITE_OPEN_NOMUTEX | flags,
       nullptr);
   if (rc) {
@@ -141,8 +145,8 @@ bool SQLite::isReadOnly() const {
   return isReadOnly("main");
 }
 
-bool SQLite::isReadOnly(folly::StringPiece dbName) const {
-  return isReadOnly(dbName.data());
+bool SQLite::isReadOnly(const std::string& dbName) const {
+  return isReadOnly(dbName.c_str());
 }
 
 bool SQLite::isReadOnly(const char* dbName) const {

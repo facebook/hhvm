@@ -169,6 +169,10 @@ static sqlite3_stmt *g_get_dep_select_stmt = NULL;
  * appeared in Linux 3.17.
  ****************************************************************************/
 #ifdef __linux__
+ #define MEMFD_CREATE 1
+
+ // glibc only added support for memfd_create in version 2.27.
+ #ifndef MFD_CLOEXEC
   // Linux version for the architecture must support syscall memfd_create
   #ifndef SYS_memfd_create
     #if defined(__x86_64__)
@@ -182,7 +186,6 @@ static sqlite3_stmt *g_get_dep_select_stmt = NULL;
     #endif
   #endif
 
-  #define MEMFD_CREATE 1
   #include <asm/unistd.h>
 
   /* Originally this function would call uname(), parse the linux
@@ -194,6 +197,7 @@ static sqlite3_stmt *g_get_dep_select_stmt = NULL;
   static int memfd_create(const char *name, unsigned int flags) {
     return syscall(SYS_memfd_create, name, flags);
   }
+ #endif
 #endif
 
 #ifndef MAP_NORESERVE

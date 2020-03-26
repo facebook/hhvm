@@ -71,6 +71,10 @@ static auto const TMixedArr  = Type::Array(ArrayData::kMixedKind);
 static auto const TPackedArr = Type::Array(ArrayData::kPackedKind);
 static auto const TRecordArr = Type::Array(ArrayData::kRecordKind);
 
+// DV array types that appear in irgen.
+static auto const TDArr = TMixedArr;
+static auto const TVArr = TPackedArr.narrowToVanilla();
+
 // Vanilla types that appear in irgen.
 static auto const TVanillaArr     = TArr.narrowToVanilla();
 static auto const TVanillaVec     = TVec.narrowToVanilla();

@@ -20,7 +20,7 @@ array(1) {
       ["type_hint_nullable"]=>
       bool(true)
       ["default"]=>
-      object(Closure$;%s) (1) {
+      object(Closure$%s;%s) (1) {
         ["parameter"]=>
         array(1) {
           ["$x"]=>

@@ -1370,12 +1370,14 @@ void ExecutionContext::ExcLoggerHook::operator()(
 }
 
 StaticString
-  s_php_namespace("<?php namespace "),
-  s_hh_namespace("<?hh namespace "),
-  s_curly_return(" { return "),
-  s_semicolon_curly("; }"),
-  s_php_return("<?php return "),
-  s_hh_return("<?hh return "),
+  s_php("<?php "),
+  s_hh("<?hh "),
+  s_namespace("namespace "),
+  s_curly_start(" { "),
+  s_curly_end(" }"),
+  s_function_start("<<__DynamicallyCallable>> function "),
+  s_evaluate_default_argument("evaluate_default_argument"),
+  s_function_middle("() { return "),
   s_semicolon(";"),
   s_stdclass("stdclass");
 
@@ -1933,14 +1935,20 @@ Variant ExecutionContext::getEvaledArg(const StringData* val,
   }
 
   String code;
+  String funcName;
   int pos = namespacedName.rfind('\\');
   if (pos != -1) {
     auto ns = namespacedName.substr(0, pos);
-    code = (funcUnit->isHHFile() ? s_hh_namespace : s_php_namespace) +
-      ns + s_curly_return + key + s_semicolon_curly;
+    code = (funcUnit->isHHFile() ? s_hh : s_php) +
+      s_namespace + ns + s_curly_start + s_function_start +
+      s_evaluate_default_argument + s_function_middle + key +
+      s_semicolon + s_curly_end + s_curly_end;
+    funcName = ns + "\\" + s_evaluate_default_argument;
   } else {
-    code = (funcUnit->isHHFile() ? s_hh_return : s_php_return) +
-      key + s_semicolon;
+    code = (funcUnit->isHHFile() ? s_hh : s_php) +
+      s_function_start + s_evaluate_default_argument + s_function_middle +
+      key + s_semicolon + s_curly_end;
+    funcName = s_evaluate_default_argument;
   }
 
   // This unit needs to have a name, so that we have provenance for its arrays.
@@ -1950,9 +1958,14 @@ Variant ExecutionContext::getEvaledArg(const StringData* val,
   assertx(unit != nullptr);
   unit->setInterpretOnly();
 
+  // The evaluate_default_argument function should be the last one
+  auto func = *(unit->funcs().end() - 1);
+  assertx(func->name()->equal(funcName.get()) &&
+          "We expecting the evaluate_default_argument func");
+
   // Default arg values are not currently allowed to depend on class context.
   auto v = Variant::attach(
-    g_context->invokePseudoMain(unit->getMain(nullptr, false))
+    g_context->invokeFuncFew(func, nullptr)
   );
   auto const lv = m_evaledArgs.lvalForce(key, AccessFlags::Key);
   tvSet(*v.asTypedValue(), lv);

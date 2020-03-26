@@ -149,7 +149,8 @@ module Reverse_naming_table_delta = struct
       (FileInfo.pos * Naming_types.kind_of_type) pos_or_deleted SMap.t;
   }
 
-  let empty : t = { consts = SMap.empty; funs = SMap.empty; types = SMap.empty }
+  let make () : t =
+    { consts = SMap.empty; funs = SMap.empty; types = SMap.empty }
 
   let get_telemetry ~(key : string) (t : t) (telemetry : Telemetry.t) :
       Telemetry.t =
@@ -205,7 +206,7 @@ let set_local_memory_backend
           Shallow_decl_cache.make ~max_size:max_bytes_shallow_decls;
         linearization_cache =
           Linearization_cache.make ~max_size:max_num_linearizations;
-        reverse_naming_table_delta = Reverse_naming_table_delta.empty;
+        reverse_naming_table_delta = Reverse_naming_table_delta.make ();
         fixmes = empty_fixmes;
         naming_db_path_ref = ref None;
       }

@@ -10,7 +10,7 @@
 pub mod typing_phase;
 
 use oxidized::{ast, pos::Pos};
-use typing_defs_rust::{tast, FuncBodyAnn, SavedEnv, Ty, Ty_};
+use typing_defs_rust::{tast, FunParam, FuncBodyAnn, SavedEnv, Ty, Ty_};
 use typing_env_rust::{Env, LocalId, ParamMode};
 
 pub fn program<'a>(env: &mut Env<'a>, ast: &ast::Program) -> tast::Program<'a> {
@@ -138,18 +138,12 @@ fn dispatch_call<'a>(
     match fun_expr {
         ast::Expr_::Id(x) => {
             let fty = fun_type_of_id(env, x, explicit_targs, el);
-            let ty = call(env, pos, fty, el, unpacked_element);
+            let (tel, rty) = call(env, pos, fty, el, unpacked_element);
             // TODO(hrust) reactivity stuff
-            let e = tast::Expr(
-                (
-                    Pos::make_none(),
-                    env.builder().null(env.builder().mk_rnone()),
-                ),
-                tast::Expr_::mk_null(),
-            );
+            let fte = tast::Expr((Pos::make_none(), fty), tast::Expr_::Id(x.clone()));
             (
-                ty,
-                tast::Expr_::mk_call(tast::CallType::Cnormal, e, vec![], vec![], None),
+                rty,
+                tast::Expr_::mk_call(tast::CallType::Cnormal, fte, vec![], tel, None),
             )
         }
         x => unimplemented!("{:#?}", x),
@@ -177,22 +171,38 @@ fn fun_type_of_id<'a>(
 }
 
 fn call<'a>(
-    _env: &Env<'a>,
+    env: &mut Env<'a>,
     _pos: &Pos,
     fty: Ty<'a>,
     el: &Vec<ast::Expr>,
-    unpacked_element: &Option<ast::Expr>,
-) -> Ty<'a> {
+    _unpacked_element: &Option<ast::Expr>,
+) -> (Vec<tast::Expr<'a>>, Ty<'a>) {
+    // TODO(hrust) missing bits
     match fty.get_node() {
-        Ty_::Tfun(x) => {
-            if let ([], None) = (&el[..], unpacked_element) {
-                x.return_
-            } else {
-                unimplemented!("only support calls with zero arguments.")
-            }
+        Ty_::Tfun(ft) => {
+            // TODO(hrust) retype magic fun, variadic param, expected ty, set tyvar variance
+            let tel = el
+                .iter()
+                .zip(&ft.params)
+                .map(|(e, param)| check_arg(env, e, param))
+                .collect();
+            // TODO(hrust) rx check_call, unpacked element, arity, inout, rx adjusted return
+            (tel, ft.return_)
         }
         x => unimplemented!("{:#?}", x),
     }
+}
+
+fn check_arg<'a>(env: &mut Env<'a>, e: &ast::Expr, param: &FunParam<'a>) -> tast::Expr<'a> {
+    // TODO(hrust) derive expected arg
+    let te = expr(env, e);
+    call_param(env, &te, param);
+    te
+}
+
+fn call_param<'a>(_env: &mut Env<'a>, _te: &tast::Expr, _param: &FunParam<'a>) -> () {
+    // TODO(hrust) param_modes, dep_ty, coercion
+    // TODO(hrust) call into subtyping here
 }
 
 #[allow(dead_code)]

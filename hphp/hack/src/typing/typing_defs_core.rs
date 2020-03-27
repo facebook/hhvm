@@ -459,6 +459,7 @@ pub type FunType<'a> = &'a FunType_<'a>;
 
 #[derive(Debug)]
 pub struct FunType_<'a> {
+    pub params: Vec<'a, FunParam<'a>>,
     pub return_: Ty<'a>, // TODO(hrust) possibly_enforced_ty
                          // TODO(hrust) missing fields
 }
@@ -486,4 +487,10 @@ impl<'a> FunType_<'a> {
             returns_void_to_rx: false,
         }
     }
+}
+
+#[derive(Debug)]
+pub struct FunParam<'a> {
+    // TODO(hrust) missing fields
+    pub type_: Ty<'a>, // TODO(hrust) possibly_enforced_ty
 }

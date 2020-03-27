@@ -6032,13 +6032,14 @@ and is_empty_type ty =
 Returns in this order the typed expressions for the arguments, for the variadic arguments, and the return type. *)
 and call
     ~(expected : ExpectedTy.t option)
-    ?method_call_info
-    ?nullsafe
+    ?(method_call_info : TR.method_call_info option)
+    ?(nullsafe : Pos.t option option)
     pos
     env
     fty
-    el
-    unpacked_element =
+    (el : Nast.expr list)
+    (unpacked_element : Nast.expr option) :
+    env * (Tast.expr list * Tast.expr option * locl_ty) =
   (* Special case needed for invoking a method on the empty type *)
   if is_empty_type fty then
     (env, ([], None, fty))

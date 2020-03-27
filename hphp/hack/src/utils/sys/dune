@@ -17,4 +17,6 @@
     priorities
     processor_info
     realpath
-    sysinfo))
+    sysinfo)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std))) ; See T41851208

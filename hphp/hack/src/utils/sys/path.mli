@@ -10,14 +10,14 @@
 open Reordered_argument_collections
 
 module S : sig
-  type t = private string
+  type t = private string [@@deriving show]
 
   val compare : t -> t -> int
 
   val to_string : t -> string
 end
 
-type t = S.t
+type t = S.t [@@deriving show]
 
 val dummy_path : t
 

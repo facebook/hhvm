@@ -11,14 +11,14 @@ open Reordered_argument_collections
 include Sys
 
 module S = struct
-  type t = string
+  type t = string [@@deriving show]
 
   let compare = String.compare
 
   let to_string x = x
 end
 
-type t = S.t
+type t = S.t [@@deriving show]
 
 let dummy_path : t = ""
 

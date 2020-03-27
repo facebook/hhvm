@@ -9,6 +9,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 pub mod typing_phase;
 
+use oxidized::typing_defs_core::Ty_ as DTy_;
 use oxidized::{ast, pos::Pos};
 use typing_defs_rust::{tast, FunParam, FuncBodyAnn, SavedEnv, Ty, Ty_};
 use typing_env_rust::{Env, LocalId, ParamMode};
@@ -137,13 +138,13 @@ fn dispatch_call<'a>(
 ) -> (Ty<'a>, tast::Expr_<'a>) {
     match fun_expr {
         ast::Expr_::Id(x) => {
-            let fty = fun_type_of_id(env, x, explicit_targs, el);
+            let (fty, targs) = fun_type_of_id(env, x, explicit_targs, el);
             let (tel, rty) = call(env, pos, fty, el, unpacked_element);
             // TODO(hrust) reactivity stuff
             let fte = tast::Expr((Pos::make_none(), fty), tast::Expr_::Id(x.clone()));
             (
                 rty,
-                tast::Expr_::mk_call(tast::CallType::Cnormal, fte, vec![], tel, None),
+                tast::Expr_::mk_call(tast::CallType::Cnormal, fte, targs, tel, None),
             )
         }
         x => unimplemented!("{:#?}", x),
@@ -153,19 +154,25 @@ fn dispatch_call<'a>(
 fn fun_type_of_id<'a>(
     env: &mut Env<'a>,
     ast::Id(_pos, id): &ast::Sid,
-    _tal: &Vec<ast::Targ>,
+    targs: &Vec<ast::Targ>,
     _el: &Vec<ast::Expr>,
-) -> Ty<'a> {
+) -> (Ty<'a>, Vec<tast::Targ<'a>>) {
     let bld = env.builder();
     match env.provider().get_fun(id) {
         None => unimplemented!(),
         Some(f) => {
             let fty = &f.type_;
-            // TODO(hrust) transform_special_fun_ty
-            let ety_env = bld.env_with_self();
-            // TODO(hrust) localize_targs, pessimize
-            typing_phase::localize(&ety_env, env, fty)
-            // TODO(hrust) check deprecated
+            match fty.get_node() {
+                DTy_::Tfun(ft) => {
+                    // TODO(hrust) transform_special_fun_ty
+                    let ety_env = bld.env_with_self();
+                    let targs = typing_phase::localize_targs(env, &ft.tparams.0, targs);
+                    // TODO(hrust) pessimize
+                    (typing_phase::localize(&ety_env, env, fty), targs)
+                    // TODO(hrust) check deprecated
+                }
+                _ => panic!("Expected function type"),
+            }
         }
     }
 }

@@ -4,9 +4,11 @@
 // LICENSE file in the "hack" directory of this source tree.
 use bumpalo::collections::vec::Vec as BVec;
 
+use oxidized::ast;
 use oxidized::ast_defs::Id;
 use oxidized::pos::Pos;
 use oxidized::typing_defs_core::{Tparam as DTparam, Ty as DTy, Ty_ as DTy_};
+use typing_defs_rust::tast;
 use typing_defs_rust::typing_defs::ExpandEnv_;
 use typing_defs_rust::typing_defs_core::Ty;
 use typing_defs_rust::typing_reason::PReason_;
@@ -56,6 +58,20 @@ pub fn localize<'a>(ety_env: &'a ExpandEnv_<'a>, env: &mut Env<'a>, dty: &'a DTy
             unimplemented!("{:#?}", dty)
         }
     }
+}
+
+/// Declare and localize the type arguments to a constructor or function, given
+/// information about the declared type parameters in `decl_tparam list`. If no
+/// explicit type arguments are given, generate fresh type variables in their
+/// place; do the same for any wildcard explicit type arguments.
+/// Report arity errors using `def_pos` (for the declared parameters), `use_pos`
+/// (for the use-site) and `use_name` (the name of the constructor or function).
+pub fn localize_targs<'a>(
+    _env: &mut Env<'a>,
+    _tparams: &Vec<DTparam>,
+    _targs: &Vec<ast::Targ>,
+) -> Vec<tast::Targ<'a>> {
+    vec![] // TODO(hrust) fill in here
 }
 
 fn localize_tparams<'a>(

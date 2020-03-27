@@ -110,6 +110,7 @@ module Float = struct
   let to_string f =
     match Printf.sprintf "%0.17g" f with
     | "nan" -> "NAN"
+    | "-nan" -> "NAN"
     | "inf" -> "INF"
     | "-inf" -> "-INF"
     | s -> s

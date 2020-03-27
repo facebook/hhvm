@@ -266,6 +266,7 @@ pub mod float {
         // to Rust native formatting
         let res = sprintf(f).unwrap_or_else(|| f.to_string());
         match res.as_ref() {
+            "-nan" => "NAN".to_string(),
             "nan" => "NAN".to_string(),
             "-inf" => "-INF".to_string(),
             "inf" => "INF".to_string(),
@@ -650,6 +651,11 @@ mod string_utils_tests {
         #[test]
         fn test_scientific_precision() {
             assert_eq!(to_string(-2.1474836480001e9), "-2147483648.0001001")
+        }
+
+        #[test]
+        fn test_negative_nan() {
+            assert_eq!(to_string(-std::f32::NAN), "NAN")
         }
     }
 

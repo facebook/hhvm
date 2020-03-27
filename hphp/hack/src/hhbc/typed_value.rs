@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 extern crate lazy_static;
 
-use float::*;
 use oxidized::ast_defs;
 use std::{
     convert::{Into, TryFrom, TryInto},

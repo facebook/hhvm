@@ -41,6 +41,13 @@ let test_scientific_precision () =
     "";
   true
 
+let test_negative_nan () =
+  Asserter.String_asserter.assert_equals
+    "NAN"
+    (Hhbc_string_utils.Float.to_string (-.nan))
+    "";
+  true
+
 let tests =
   [
     ("test_no_float_part", test_no_float_part);
@@ -48,6 +55,7 @@ let tests =
     ("test_no_trailing_zeroes", test_no_trailing_zeroes);
     ("test_scientific", test_scientific);
     ("test_scientific_precision", test_scientific_precision);
+    ("test_negative_nan", test_negative_nan);
   ]
 
 let () = Unit_test.run_all tests

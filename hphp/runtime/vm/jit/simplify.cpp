@@ -2936,14 +2936,13 @@ SSATmp* arrIntKeyImpl(State& env, const IRInstruction* inst) {
   return rval ? cns(env, rval.tv()) : nullptr;
 }
 
-SSATmp* arrStrKeyImpl(State& env, const IRInstruction* inst, bool& skip) {
+SSATmp* arrStrKeyImpl(State& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
   auto const idx = inst->src(1);
   assertx(arr->hasConstVal(TArr));
   assertx(idx->hasConstVal(TStr));
   assertx(arr->arrVal()->isPHPArrayType());
 
-  skip = false;
   auto const rval = arr->arrVal()->rval(idx->strVal());
   return rval ? cns(env, rval.tv()) : nullptr;
 }
@@ -2966,9 +2965,7 @@ SSATmp* simplifyArrayGet(State& env, const IRInstruction* inst) {
       return cns(env, TInitNull);
     }
     if (inst->src(1)->type() <= TStr) {
-      bool skip;
-      if (auto const result = arrStrKeyImpl(env, inst, skip)) return result;
-      if (skip) return nullptr;
+      if (auto const result = arrStrKeyImpl(env, inst)) return result;
       if (mode == MOpMode::InOut || mode == MOpMode::Warn) {
         gen(
           env,
@@ -2994,11 +2991,9 @@ SSATmp* simplifyArrayIsset(State& env, const IRInstruction* inst) {
       return cns(env, false);
     }
     if (inst->src(1)->type() <= TStr) {
-      bool skip;
-      if (auto const result = arrStrKeyImpl(env, inst, skip)) {
+      if (auto const result = arrStrKeyImpl(env, inst)) {
         return cns(env, !result->isA(TInitNull));
       }
-      if (skip) return nullptr;
       return cns(env, false);
     }
   }
@@ -3014,11 +3009,9 @@ SSATmp* simplifyArrayIdx(State& env, const IRInstruction* inst) {
       return inst->src(2);
     }
     if (inst->src(1)->isA(TStr)) {
-      bool skip;
-      if (auto const result = arrStrKeyImpl(env, inst, skip)) {
+      if (auto const result = arrStrKeyImpl(env, inst)) {
         return result;
       }
-      if (skip) return nullptr;
       return inst->src(2);
     }
   }
@@ -3032,11 +3025,7 @@ SSATmp* simplifyAKExistsArr(State& env, const IRInstruction* inst) {
         return cns(env, true);
       }
     } else if (inst->src(1)->isA(TStr)) {
-      bool skip;
-      if (arrStrKeyImpl(env, inst, skip)) {
-        return cns(env, true);
-      }
-      if (skip) return nullptr;
+      if (arrStrKeyImpl(env, inst)) return cns(env, true);
     }
     return cns(env, false);
   }

@@ -397,29 +397,33 @@ let build_property_decl_json_ref fact_id =
 (* These functions build up the JSON necessary and then add facts
 to the running result. *)
 
-let add_container_defn_fact clss decl_id progress =
-  let base_defn defn_pred =
-    let json_fact = JSON_Object [("declaration", build_id_json decl_id)] in
-    add_fact defn_pred json_fact progress
+let add_container_defn_fact clss decl_id member_decls progress =
+  let base_fields =
+    [
+      ("declaration", build_id_json decl_id);
+      ("members", JSON_Array member_decls);
+    ]
   in
-  match get_container_kind clss with
-  | InterfaceContainer -> base_defn InterfaceDefinition
-  | TraitContainer -> base_defn TraitDefinition
-  | ClassContainer ->
-    let is_abstract =
-      match clss.c_kind with
-      | Cabstract -> true
-      | _ -> false
-    in
-    let json_fact =
-      JSON_Object
-        [
-          ("declaration", build_id_json decl_id);
-          ("is_abstract", JSON_Bool is_abstract);
-          ("is_final", JSON_Bool clss.c_final);
-        ]
-    in
-    add_fact ClassDefinition json_fact progress
+  let (defn_pred, json_fields) =
+    match get_container_kind clss with
+    | InterfaceContainer -> (InterfaceDefinition, base_fields)
+    | TraitContainer -> (TraitDefinition, base_fields)
+    | ClassContainer ->
+      let is_abstract =
+        match clss.c_kind with
+        | Cabstract -> true
+        | _ -> false
+      in
+      let class_fields =
+        base_fields
+        @ [
+            ("is_abstract", JSON_Bool is_abstract);
+            ("is_final", JSON_Bool clss.c_final);
+          ]
+      in
+      (ClassDefinition, class_fields)
+  in
+  add_fact defn_pred (JSON_Object json_fields) progress
 
 let add_container_decl_fact decl_pred name progress =
   let json_fact = JSON_Object [("name", build_name_json_nested name)] in
@@ -664,29 +668,26 @@ let process_container_decl ctx elem progress =
   let (con_type, decl_pred) =
     container_decl_predicate (get_container_kind elem)
   in
-  let (decl_id, prog) =
-    process_decl_loc
-      (add_container_decl_fact decl_pred)
-      add_container_defn_fact
-      (build_container_decl_json_ref con_type)
-      pos
-      id
-      elem
-      progress
+  let (decl_id, prog) = add_container_decl_fact decl_pred id progress in
+  let (prop_decls, prog) =
+    List.fold elem.c_vars ~init:([], prog) ~f:(fun (decls, prog) prop ->
+        let (pos, id) = prop.cv_id in
+        let (decl_id, prog) =
+          process_decl_loc
+            (add_property_decl_fact con_type decl_id)
+            (add_property_defn_fact ctx)
+            build_property_decl_json_ref
+            pos
+            id
+            prop
+            prog
+        in
+        (build_property_decl_json_ref decl_id :: decls, prog))
   in
-  List.fold elem.c_vars ~init:prog ~f:(fun prog prop ->
-      let (pos, id) = prop.cv_id in
-      let (_, prog) =
-        process_decl_loc
-          (add_property_decl_fact con_type decl_id)
-          (add_property_defn_fact ctx)
-          build_property_decl_json_ref
-          pos
-          id
-          prop
-          prog
-      in
-      prog)
+  let (_, prog) = add_container_defn_fact elem decl_id prop_decls prog in
+  let ref_json = build_container_decl_json_ref con_type decl_id in
+  let (_, prog) = add_decl_loc_fact pos ref_json prog in
+  prog
 
 let process_enum_decl ctx elem progress =
   let (pos, id) = elem.c_name in

@@ -1,6 +1,0 @@
-File "collection_append_no_type_params.php", line 12, characters 3-11:
-Invalid assignment (Typing[4110])
-File "collection_append_no_type_params.php", line 12, characters 3-11:
-Expected Pair because you can only append a Pair<Tkey, Tvalue> to an Map<Tkey, Tvalue>
-File "collection_append_no_type_params.php", line 11, characters 23-39:
-But got dynamic because it is an unenforceable type

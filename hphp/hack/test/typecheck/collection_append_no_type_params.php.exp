@@ -1,1 +1,4 @@
-No errors
+File "collection_append_no_type_params.php", line 8, characters 3-11:
+an object of type Map does not allow array append (Typing[4006])
+File "collection_append_no_type_params.php", line 7, characters 15-17:
+Definition is here

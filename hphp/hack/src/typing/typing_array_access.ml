@@ -540,26 +540,6 @@ let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
         when String.equal n SN.Collections.cVector
              || String.equal n SN.Collections.cSet ->
         (env, ty1)
-      | (_, Tclass ((_, n), _, [tk; tv]))
-        when String.equal n SN.Collections.cMap ->
-        let tpair = MakeType.pair (Reason.Rmap_append expr_pos) tk tv in
-        let env =
-          Typing_ops.sub_type expr_pos ur env ty2 tpair Errors.unify_error
-        in
-        (env, ty1)
-      (* Handle the case where Map was used as a typehint without
-       type parameters *)
-      | (_, Tclass ((_, n), _, [])) when String.equal n SN.Collections.cMap ->
-        let tpair =
-          MakeType.class_type
-            (Reason.Rmap_append expr_pos)
-            SN.Collections.cPair
-            []
-        in
-        let env =
-          Typing_ops.sub_type expr_pos ur env ty2 tpair Errors.unify_error
-        in
-        (env, ty1)
       | (r, Tclass (((_, n) as id), e, [tv]))
         when String.equal n SN.Collections.cVec
              || String.equal n SN.Collections.cKeyset ->

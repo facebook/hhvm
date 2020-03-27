@@ -14,13 +14,6 @@ function nonReact1(): void {
   };
 }
 
-// OK
-function nonReact2(): void {
-  $lambda = (Map<int, int> $x) ==> {
-    $x[] = Pair { 1, 2 };
-  };
-}
-
 class A {
   public function __construct(public int $v) {}
 }

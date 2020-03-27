@@ -23,14 +23,10 @@ Expected int
 File "array_append_bad.php", line 39, characters 12-15:
 But got bool
 File "array_append_bad.php", line 41, characters 3-21:
-Invalid assignment (Typing[4110])
-File "array_append_bad.php", line 27, characters 11-13:
-Expected num
-File "array_append_bad.php", line 41, characters 18-20:
-But got string
+an object of type Map<[unresolved], [unresolved]> does not allow array append (Typing[4006])
+File "array_append_bad.php", line 27, characters 3-14:
+Definition is here
 File "array_append_bad.php", line 42, characters 3-21:
-Invalid assignment (Typing[4110])
-File "array_append_bad.php", line 27, characters 7-9:
-Expected int
-File "array_append_bad.php", line 42, characters 15-17:
-But got string
+an object of type Map<int, num> does not allow array append (Typing[4006])
+File "array_append_bad.php", line 27, characters 3-14:
+Definition is here

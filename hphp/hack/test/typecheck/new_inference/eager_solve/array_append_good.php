@@ -41,7 +41,6 @@ function test_array_append_on_tvar(
   keyset<string> $ks,
   Set<int> $set,
   varray<int> $varray,
-  Map<int,num> $m,
 ): void {
   $varray = (new Inv($varray))->item;
   $varray[] = "a";
@@ -52,9 +51,6 @@ function test_array_append_on_tvar(
   $vector = (new Inv($vector))->item;
   $vector[] = 2.3;
   expectNum($vector[0]);
-  $m = (new Inv($m))->item;
-  $m[] = Pair{2, 3};
-  expectNum($m[0]);
   $ks = (new Inv($ks))->item;
   $ks[] = 3;
   expectKeysetOfArraykey($ks);

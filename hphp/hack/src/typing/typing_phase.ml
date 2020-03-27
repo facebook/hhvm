@@ -477,13 +477,6 @@ and localize_ft ?instantiation ~ety_env ~def_pos env ft =
           ~init:ety_env.substs )
   in
   let ety_env = { ety_env with substs } in
-  let (env, params) =
-    List.map_env env ft.ft_params (fun env param ->
-        let (env, ty) =
-          localize_possibly_enforced_ty ~ety_env env param.fp_type
-        in
-        (env, { param with fp_type = ty }))
-  in
   (* restore reactivity *)
   let env =
     if not (equal_reactivity saved_r (env_reactivity env)) then
@@ -573,6 +566,13 @@ and localize_ft ?instantiation ~ety_env ~def_pos env ft =
             { param with fp_type = { et_type = var_ty; et_enforced = false } }
           ) )
     | (Fellipsis _ | Fstandard (_, _)) as x -> (env, x)
+  in
+  let (env, params) =
+    List.map_env env ft.ft_params (fun env param ->
+        let (env, ty) =
+          localize_possibly_enforced_ty ~ety_env env param.fp_type
+        in
+        (env, { param with fp_type = ty }))
   in
   let (env, ret) = localize_possibly_enforced_ty ~ety_env env ft.ft_ret in
   ( env,

@@ -346,7 +346,7 @@ let check_if_cyclic (class_env : class_env) ((pos, cid) : Pos.t * string) : bool
   is_cyclic
 
 let shallow_decl_enabled (ctx : Provider_context.t) : bool =
-  TypecheckerOptions.shallow_class_decl ctx.Provider_context.tcopt
+  TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
 
 let pu_enum_fold
     (acc : Typing_defs.pu_enum_type SMap.t)

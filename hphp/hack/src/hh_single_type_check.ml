@@ -674,7 +674,7 @@ let print_global_inference_envs ctx ~verbosity gienvs =
     Typing_global_inference.StateSubConstraintGraphs.global_tvenvs gienvs
   in
   let tco_global_inference =
-    TypecheckerOptions.global_inference ctx.Provider_context.tcopt
+    TypecheckerOptions.global_inference (Provider_context.get_tcopt ctx)
   in
   if verbosity >= 2 && tco_global_inference then
     let should_log (pos, gienv) =
@@ -697,7 +697,7 @@ let print_global_inference_envs ctx ~verbosity gienvs =
 
 let merge_global_inference_envs_opt ctx gienvs :
     Typing_global_inference.StateConstraintGraph.t option =
-  if TypecheckerOptions.global_inference ctx.Provider_context.tcopt then
+  if TypecheckerOptions.global_inference (Provider_context.get_tcopt ctx) then
     let open Typing_global_inference in
     let (type_map, env, state_errors) =
       StateConstraintGraph.merge_subgraphs ctx [gienvs]
@@ -813,7 +813,7 @@ let parse_and_name ctx files_contents =
   let parsed_files =
     Relative_path.Map.mapi files_contents ~f:(fun fn contents ->
         Errors.run_in_context fn Errors.Parsing (fun () ->
-            let popt = ctx.Provider_context.tcopt in
+            let popt = Provider_context.get_tcopt ctx in
             let parsed_file =
               Full_fidelity_ast.defensive_program popt fn contents
             in
@@ -1453,7 +1453,9 @@ let handle_mode
   | Outline ->
     iter_over_files (fun filename ->
         let file = cat (Relative_path.to_absolute filename) in
-        let results = FileOutline.outline ctx.Provider_context.popt file in
+        let results =
+          FileOutline.outline (Provider_context.get_popt ctx) file
+        in
         FileOutline.print ~short_pos:true results)
   | Dump_nast ->
     iter_over_files (fun filename ->
@@ -1538,7 +1540,7 @@ let handle_mode
       {
         (ServerEnvBuild.make_env genv.ServerEnv.config) with
         ServerEnv.naming_table;
-        ServerEnv.tcopt = ctx.Provider_context.tcopt;
+        ServerEnv.tcopt = Provider_context.get_tcopt ctx;
       }
     in
     let include_defs = true in
@@ -1573,7 +1575,7 @@ let handle_mode
       {
         (ServerEnvBuild.make_env genv.ServerEnv.config) with
         ServerEnv.naming_table;
-        ServerEnv.tcopt = ctx.Provider_context.tcopt;
+        ServerEnv.tcopt = Provider_context.get_tcopt ctx;
       }
     in
     let filename = Relative_path.to_absolute filename in

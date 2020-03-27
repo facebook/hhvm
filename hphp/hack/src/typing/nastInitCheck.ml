@@ -18,7 +18,7 @@ module DeferredMembers = Typing_deferred_members
 module SN = Naming_special_names
 
 let shallow_decl_enabled (ctx : Provider_context.t) : bool =
-  TypecheckerOptions.shallow_class_decl ctx.Provider_context.tcopt
+  TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
 
 module SSetWTop = struct
   type t =

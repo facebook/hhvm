@@ -57,12 +57,7 @@ for it. For example, you can call [Provider_context.add_entry] to create a new
 Some operations may make changes to global state (e.g. write to shared memory
 heaps). To ensure that no changes escape the scope of your operation, use
 [Provider_utils.respect_but_quarantine_unsaved_changes]. *)
-type t = {
-  popt: ParserOptions.t;
-  tcopt: TypecheckerOptions.t;
-  backend: Provider_backend.t;
-  entries: entry Relative_path.Map.t;
-}
+type t
 
 (** The empty context, for use at the top-level of stand-alone tools which don't
 have a [ServerEnv.env].
@@ -123,8 +118,20 @@ val add_entry_from_file_input :
   file_input:ServerCommandTypes.file_input ->
   t * entry
 
+(** Get the [ParserOptions.t] contained within the [t]. *)
+val get_popt : t -> ParserOptions.t
+
+(** Get the [TypecheckerOptions.t] contained within the [t]. *)
+val get_tcopt : t -> TypecheckerOptions.t
+
 (** Update the [TypecheckerOptions.t] contained within the [t]. *)
 val map_tcopt : t -> f:(TypecheckerOptions.t -> TypecheckerOptions.t) -> t
+
+(** Get the [Provider_backend.t] that backs this [t]. *)
+val get_backend : t -> Provider_backend.t
+
+(** Get the entries currently contained in this [t]. *)
+val get_entries : t -> entry Relative_path.Map.t
 
 (** Are we within [Provider_utils.respect_but_quarantine_unsaved_changes] ? *)
 val is_quarantined : unit -> bool

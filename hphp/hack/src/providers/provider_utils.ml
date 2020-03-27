@@ -8,13 +8,11 @@
 open Core_kernel
 
 let ctx_from_server_env (env : ServerEnv.env) : Provider_context.t =
-  {
-    Provider_context.popt = env.ServerEnv.popt;
-    tcopt = env.ServerEnv.tcopt;
-    (* TODO: backend should be stored in [env]. *)
-    backend = Provider_backend.get ();
-    entries = Relative_path.Map.empty;
-  }
+  (* TODO: backend should be stored in [env]. *)
+  Provider_context.empty_for_tool
+    ~popt:env.ServerEnv.popt
+    ~tcopt:env.ServerEnv.tcopt
+    ~backend:(Provider_backend.get ())
 
 (** This function will (1) enter quarantine, (2) respect ctx by updating
 naming table for all files in ctx, (3) do the callback "f", (4) leave

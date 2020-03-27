@@ -114,7 +114,7 @@ let must_reinfer_type tcopt (ty : decl_phase ty_) =
 
 let hint_to_type_opt ~is_lambda env reason hint =
   let ty = Option.map hint ~f:(Decl_hint.hint env) in
-  let tcopt = env.Decl_env.ctx.Provider_context.tcopt in
+  let tcopt = Provider_context.get_tcopt env.Decl_env.ctx in
   let tco_global_inference = GlobalOptions.tco_global_inference tcopt in
   let tvar = mk (reason, Tvar 0) in
   if tco_global_inference && not is_lambda then

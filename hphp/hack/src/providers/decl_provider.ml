@@ -30,7 +30,7 @@ type typedef_decl = Typing_defs.typedef_type
 type gconst_decl = Typing_defs.decl_ty * Errors.t
 
 let get_fun (ctx : Provider_context.t) (fun_name : fun_key) : fun_decl option =
-  match ctx.Provider_context.backend with
+  match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory ->
     Typing_lazy_heap.get_fun ~sh:SharedMem.Uses ctx fun_name
   | Provider_backend.Local_memory { decl_cache; _ } ->
@@ -55,7 +55,7 @@ let get_fun (ctx : Provider_context.t) (fun_name : fun_key) : fun_decl option =
 
 let get_class (ctx : Provider_context.t) (class_name : class_key) :
     class_decl option =
-  match ctx.Provider_context.backend with
+  match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory -> Typing_lazy_heap.get_class ctx class_name
   | Provider_backend.Local_memory { decl_cache; _ } ->
     let result : Obj.t option =
@@ -122,7 +122,7 @@ let get_type_id_filename ctx x expected_kind =
 
 let get_typedef (ctx : Provider_context.t) (typedef_name : string) :
     typedef_decl option =
-  match ctx.Provider_context.backend with
+  match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory ->
     Typing_lazy_heap.get_typedef ~sh:SharedMem.Uses ctx typedef_name
   | Provider_backend.Local_memory { decl_cache; _ } ->
@@ -147,7 +147,7 @@ let get_typedef (ctx : Provider_context.t) (typedef_name : string) :
 
 let get_record_def (ctx : Provider_context.t) (record_name : string) :
     record_def_decl option =
-  match ctx.Provider_context.backend with
+  match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory ->
     Typing_lazy_heap.get_record_def ~sh:SharedMem.Uses ctx record_name
   | Provider_backend.Local_memory { decl_cache; _ } ->
@@ -173,7 +173,7 @@ let get_record_def (ctx : Provider_context.t) (record_name : string) :
 
 let get_gconst (ctx : Provider_context.t) (gconst_name : string) :
     gconst_decl option =
-  match ctx.Provider_context.backend with
+  match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory ->
     Typing_lazy_heap.get_gconst ~sh:SharedMem.Uses ctx gconst_name
   | Provider_backend.Local_memory { decl_cache; _ } ->
@@ -198,7 +198,7 @@ let get_gconst (ctx : Provider_context.t) (gconst_name : string) :
     |> Option.map ~f:(fun decl -> (decl, Errors.empty))
 
 let invalidate_fun (ctx : Provider_context.t) (fun_name : fun_key) : unit =
-  match ctx.Provider_context.backend with
+  match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory ->
     Decl_heap.Funs.remove_batch (SSet.singleton fun_name)
   | Provider_backend.Local_memory { decl_cache; _ } ->
@@ -211,7 +211,7 @@ let invalidate_fun (ctx : Provider_context.t) (fun_name : fun_key) : unit =
 
 let invalidate_class (ctx : Provider_context.t) (class_name : class_key) : unit
     =
-  match ctx.Provider_context.backend with
+  match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory ->
     Decl_heap.Classes.remove_batch (SSet.singleton class_name)
   | Provider_backend.Local_memory { decl_cache; _ } ->
@@ -224,7 +224,7 @@ let invalidate_class (ctx : Provider_context.t) (class_name : class_key) : unit
 
 let invalidate_record_def
     (ctx : Provider_context.t) (record_name : record_def_key) : unit =
-  match ctx.Provider_context.backend with
+  match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory ->
     Decl_heap.RecordDefs.remove_batch (SSet.singleton record_name)
   | Provider_backend.Local_memory { decl_cache; _ } ->
@@ -237,7 +237,7 @@ let invalidate_record_def
 
 let invalidate_typedef (ctx : Provider_context.t) (typedef_name : typedef_key) :
     unit =
-  match ctx.Provider_context.backend with
+  match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory ->
     Decl_heap.Typedefs.remove_batch (SSet.singleton typedef_name)
   | Provider_backend.Local_memory { decl_cache; _ } ->
@@ -250,7 +250,7 @@ let invalidate_typedef (ctx : Provider_context.t) (typedef_name : typedef_key) :
 
 let invalidate_gconst (ctx : Provider_context.t) (gconst_name : gconst_key) :
     unit =
-  match ctx.Provider_context.backend with
+  match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory ->
     Decl_heap.GConsts.remove_batch (SSet.singleton gconst_name)
   | Provider_backend.Local_memory { decl_cache; _ } ->
@@ -262,24 +262,27 @@ let invalidate_gconst (ctx : Provider_context.t) (gconst_name : gconst_key) :
       "Decl_provider.invalidate_gconst not yet impl. for decl memory provider"
 
 let invalidate_context_decls ~(ctx : Provider_context.t) =
-  match ctx.Provider_context.backend with
+  match Provider_context.get_backend ctx with
   | Provider_backend.Local_memory _ ->
-    Relative_path.Map.iter ctx.Provider_context.entries ~f:(fun _path entry ->
-        match entry.Provider_context.parser_return with
-        | None -> () (* hasn't been parsed, hence nothing to invalidate *)
-        | Some { Parser_return.ast; _ } ->
-          let (funs, classes, record_defs, typedefs, gconsts) =
-            Nast.get_defs ast
-          in
-          List.iter funs ~f:(fun (_, fun_name) -> invalidate_fun ctx fun_name);
-          List.iter classes ~f:(fun (_, class_name) ->
-              invalidate_class ctx class_name);
-          List.iter record_defs ~f:(fun (_, record_name) ->
-              invalidate_record_def ctx record_name);
-          List.iter typedefs ~f:(fun (_, typedef_name) ->
-              invalidate_typedef ctx typedef_name);
-          List.iter gconsts ~f:(fun (_, gconst_name) ->
-              invalidate_gconst ctx gconst_name))
+    ctx
+    |> Provider_context.get_entries
+    |> Relative_path.Map.iter ~f:(fun _path entry ->
+           match entry.Provider_context.parser_return with
+           | None -> () (* hasn't been parsed, hence nothing to invalidate *)
+           | Some { Parser_return.ast; _ } ->
+             let (funs, classes, record_defs, typedefs, gconsts) =
+               Nast.get_defs ast
+             in
+             List.iter funs ~f:(fun (_, fun_name) ->
+                 invalidate_fun ctx fun_name);
+             List.iter classes ~f:(fun (_, class_name) ->
+                 invalidate_class ctx class_name);
+             List.iter record_defs ~f:(fun (_, record_name) ->
+                 invalidate_record_def ctx record_name);
+             List.iter typedefs ~f:(fun (_, typedef_name) ->
+                 invalidate_typedef ctx typedef_name);
+             List.iter gconsts ~f:(fun (_, gconst_name) ->
+                 invalidate_gconst ctx gconst_name))
   | Provider_backend.Shared_memory ->
     (* Don't attempt to invalidate decls with shared memory, as we may not be
     running in the master process where that's allowed. *)

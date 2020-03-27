@@ -282,7 +282,7 @@ let make_context_from_file_input
     state * Provider_context.t * Provider_context.entry =
   let initialized_state = restore_hhi_root_if_necessary initialized_state in
   let ctx = initialized_state.ctx in
-  match Relative_path.Map.find_opt ctx.Provider_context.entries path with
+  match Relative_path.Map.find_opt (Provider_context.get_entries ctx) path with
   | None ->
     let (ctx, entry) =
       Provider_context.add_entry_from_file_input ~ctx ~path ~file_input

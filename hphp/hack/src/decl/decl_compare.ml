@@ -455,7 +455,7 @@ let get_gconsts_deps ~conservative_redecl old_gconsts gconsts =
     (DepSet.empty, DepSet.empty, DepSet.empty)
 
 let shallow_decl_enabled (ctx : Provider_context.t) : bool =
-  TypecheckerOptions.shallow_class_decl ctx.Provider_context.tcopt
+  TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
 
 (*****************************************************************************)
 (* Determine which functions/classes have to be rechecked after comparing

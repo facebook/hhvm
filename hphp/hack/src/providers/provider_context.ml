@@ -103,8 +103,16 @@ let add_entry_from_file_contents
     ~(ctx : t) ~(path : Relative_path.t) ~(contents : string) : t * entry =
   make_entry ~ctx ~path ~contents
 
+let get_popt (t : t) : ParserOptions.t = t.popt
+
+let get_tcopt (t : t) : TypecheckerOptions.t = t.tcopt
+
 let map_tcopt (t : t) ~(f : TypecheckerOptions.t -> TypecheckerOptions.t) : t =
   { t with tcopt = f t.tcopt }
+
+let get_backend (t : t) : Provider_backend.t = t.backend
+
+let get_entries (t : t) : entry Relative_path.Map.t = t.entries
 
 (** ref_is_quarantined stores the stack at which it was last changed,
 so we can give better failwith error messages where appropriate. *)

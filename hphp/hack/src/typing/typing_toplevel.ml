@@ -685,7 +685,7 @@ and check_const_trait_members pos env use_list =
   | _ -> ()
 
 let shallow_decl_enabled (ctx : Provider_context.t) : bool =
-  TypecheckerOptions.shallow_class_decl ctx.Provider_context.tcopt
+  TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
 
 (* If the current class inherits from classes that take type arguments, we need
  * to check that the arguments provided are consistent with the constraints on

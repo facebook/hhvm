@@ -117,7 +117,9 @@ module Classes = struct
          constructing [Eager] or [Lazy] classes, depending on whether
          shallow_class_decl is enabled. *)
       let class_type_variant =
-        if TypecheckerOptions.shallow_class_decl ctx.Provider_context.tcopt then
+        if
+          TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
+        then
           match Shallow_classes_provider.get ctx class_name with
           | None -> raise Exit
           | Some sc -> Lazy (make_lazy_class_type ctx class_name sc)

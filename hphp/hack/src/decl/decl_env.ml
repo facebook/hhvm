@@ -19,7 +19,7 @@ type env = {
 
 let mode env = env.mode
 
-let tcopt env = env.ctx.Provider_context.tcopt
+let tcopt env = Provider_context.get_tcopt env.ctx
 
 let add_wclass env x =
   let dep = Dep.Class x in

@@ -24,7 +24,7 @@ let find_symbol_in_context
     ~(get_entry_symbols : FileInfo.t -> (FileInfo.id * FileInfo.name_type) list)
     ~(is_symbol : string -> bool) :
     (Relative_path.t * (FileInfo.pos * FileInfo.name_type)) option =
-  ctx.Provider_context.entries
+  Provider_context.get_entries ctx
   |> Relative_path.Map.filter_map ~f:(fun entry ->
          let file_info = Ast_provider.compute_file_info ctx entry in
          let symbols = get_entry_symbols file_info in
@@ -53,7 +53,7 @@ let find_symbol_in_context_with_suppression
       the symbol. So we should suppress this returned position and return
       `None` instead. *)
       let path = FileInfo.get_pos_filename pos in
-      if Relative_path.Map.mem ctx.Provider_context.entries path then
+      if Relative_path.Map.mem (Provider_context.get_entries ctx) path then
         None
       else
         Some (pos, kind)
@@ -93,7 +93,7 @@ let get_const_pos (ctx : Provider_context.t) (name : string) :
       List.map consts ~f:(attach_name_type FileInfo.Const))
     ~is_symbol:(String.equal name)
     ~fallback:(fun () ->
-      match ctx.Provider_context.backend with
+      match Provider_context.get_backend ctx with
       | Provider_backend.Shared_memory ->
         Naming_heap.Consts.get_pos name >>| attach_name_type FileInfo.Const
       | Provider_backend.Local_memory { reverse_naming_table_delta; _ } ->
@@ -118,7 +118,7 @@ let get_const_path (ctx : Provider_context.t) (name : string) :
 
 let add_const (ctx : Provider_context.t) (name : string) (pos : FileInfo.pos) :
     unit =
-  match ctx.Provider_context.backend with
+  match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory -> Naming_heap.Consts.add name pos
   | Provider_backend.Local_memory { reverse_naming_table_delta; _ } ->
     let open Provider_backend.Reverse_naming_table_delta in
@@ -127,7 +127,7 @@ let add_const (ctx : Provider_context.t) (name : string) (pos : FileInfo.pos) :
   | Provider_backend.Decl_service _ as backend -> not_implemented backend
 
 let remove_const_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
-  match ctx.Provider_context.backend with
+  match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory -> Naming_heap.Consts.remove_batch names
   | Provider_backend.Local_memory { reverse_naming_table_delta; _ } ->
     let open Provider_backend.Reverse_naming_table_delta in
@@ -147,7 +147,7 @@ let get_fun_pos (ctx : Provider_context.t) (name : string) : FileInfo.pos option
       List.map funs ~f:(attach_name_type FileInfo.Fun))
     ~is_symbol:(String.equal name)
     ~fallback:(fun () ->
-      match ctx.Provider_context.backend with
+      match Provider_context.get_backend ctx with
       | Provider_backend.Shared_memory ->
         Naming_heap.Funs.get_pos name >>| attach_name_type FileInfo.Fun
       | Provider_backend.Local_memory { reverse_naming_table_delta; _ } ->
@@ -197,7 +197,7 @@ let get_fun_canon_name (ctx : Provider_context.t) (name : string) :
   match symbol_opt with
   | Some (path, _pos) -> compute_symbol_canon_name path
   | None ->
-    (match ctx.Provider_context.backend with
+    (match Provider_context.get_backend ctx with
     | Provider_backend.Shared_memory ->
       (* NB: as written, this code may return a canon name even when the
         given symbol has been deleted in a context entry. We're relying on
@@ -227,7 +227,7 @@ let get_fun_canon_name (ctx : Provider_context.t) (name : string) :
 
 let add_fun (ctx : Provider_context.t) (name : string) (pos : FileInfo.pos) :
     unit =
-  match ctx.Provider_context.backend with
+  match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory -> Naming_heap.Funs.add name pos
   | Provider_backend.Local_memory { reverse_naming_table_delta; _ } ->
     let open Provider_backend.Reverse_naming_table_delta in
@@ -240,7 +240,7 @@ let add_fun (ctx : Provider_context.t) (name : string) (pos : FileInfo.pos) :
     ()
 
 let remove_fun_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
-  match ctx.Provider_context.backend with
+  match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory -> Naming_heap.Funs.remove_batch names
   | Provider_backend.Local_memory { reverse_naming_table_delta; _ } ->
     let open Provider_backend.Reverse_naming_table_delta in
@@ -256,7 +256,7 @@ let add_type
     (name : string)
     (pos : FileInfo.pos)
     (kind : Naming_types.kind_of_type) : unit =
-  match ctx.Provider_context.backend with
+  match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory -> Naming_heap.Types.add name (pos, kind)
   | Provider_backend.Local_memory { reverse_naming_table_delta; _ } ->
     let open Provider_backend.Reverse_naming_table_delta in
@@ -270,7 +270,7 @@ let add_type
     ()
 
 let remove_type_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
-  match ctx.Provider_context.backend with
+  match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory -> Naming_heap.Types.remove_batch names
   | Provider_backend.Local_memory { reverse_naming_table_delta; _ } ->
     let open Provider_backend.Reverse_naming_table_delta in
@@ -315,7 +315,7 @@ let get_type_pos_and_kind (ctx : Provider_context.t) (name : string) :
     ~get_entry_symbols:get_entry_symbols_for_type
     ~is_symbol:(String.equal name)
     ~fallback:(fun () ->
-      match ctx.Provider_context.backend with
+      match Provider_context.get_backend ctx with
       | Provider_backend.Shared_memory ->
         Naming_heap.Types.get_pos name >>| fun (pos, kind) ->
         (pos, kind_to_name_type kind)
@@ -403,7 +403,7 @@ let get_type_canon_name (ctx : Provider_context.t) (name : string) :
   | Some (path, (_pos, name_type)) ->
     compute_symbol_canon_name path (name_type_to_kind name_type)
   | None ->
-    (match ctx.Provider_context.backend with
+    (match Provider_context.get_backend ctx with
     | Provider_backend.Shared_memory ->
       (* NB: as written, this code may return a canon name even when the
     given symbol has been deleted in a context entry. We're relying on
@@ -477,13 +477,13 @@ let add_typedef (ctx : Provider_context.t) (name : string) (pos : FileInfo.pos)
   add_type ctx name pos Naming_types.TTypedef
 
 let push_local_changes (ctx : Provider_context.t) : unit =
-  match ctx.Provider_context.backend with
+  match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory -> Naming_heap.push_local_changes ()
   | Provider_backend.Local_memory _ -> ()
   | Provider_backend.Decl_service _ as backend -> not_implemented backend
 
 let pop_local_changes (ctx : Provider_context.t) : unit =
-  match ctx.Provider_context.backend with
+  match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory -> Naming_heap.pop_local_changes ()
   | Provider_backend.Local_memory _ -> ()
   | Provider_backend.Decl_service _ as backend -> not_implemented backend

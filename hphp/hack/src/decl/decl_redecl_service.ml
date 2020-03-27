@@ -27,7 +27,7 @@ type redo_type_decl_result = {
 }
 
 let shallow_decl_enabled (ctx : Provider_context.t) =
-  TypecheckerOptions.shallow_class_decl ctx.Provider_context.tcopt
+  TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
 
 (*****************************************************************************)
 (* The neutral element of declaration (cf procs/multiWorker.mli) *)

@@ -626,7 +626,7 @@ and hint_
     ?(tp_depth = 0)
     env
     (p, x) =
-  let tcopt = (fst env).ctx.Provider_context.tcopt in
+  let tcopt = Provider_context.get_tcopt (fst env).ctx in
   let like_type_hints_enabled = TypecheckerOptions.like_type_hints tcopt in
   let union_intersection_type_hints_enabled =
     TypecheckerOptions.union_intersection_type_hints tcopt
@@ -957,7 +957,7 @@ and try_castable_hint
     | nm when nm = SN.Typehints.float -> Some (N.Hprim N.Tfloat)
     | nm when nm = SN.Typehints.string -> Some (N.Hprim N.Tstring)
     | nm when nm = SN.Typehints.array ->
-      let tcopt = (fst env).ctx.Provider_context.tcopt in
+      let tcopt = Provider_context.get_tcopt (fst env).ctx in
       let array_typehints_disallowed =
         TypecheckerOptions.disallow_array_typehint tcopt
       in
@@ -1366,7 +1366,7 @@ and type_param ~forbid_this ((genv, _) as env) t =
   begin
     if
     TypecheckerOptions.experimental_feature_enabled
-      genv.ctx.Provider_context.tcopt
+      (Provider_context.get_tcopt genv.ctx)
       TypecheckerOptions.experimental_type_param_shadowing
   then
       (* Treat type params as inline class declarations that don't go into the naming heap *)
@@ -1653,7 +1653,7 @@ and method_redeclaration env mt =
   if
     not
       (TypecheckerOptions.experimental_feature_enabled
-         (fst env).ctx.Provider_context.tcopt
+         (Provider_context.get_tcopt (fst env).ctx)
          TypecheckerOptions.experimental_trait_method_redeclarations)
   then
     Errors.experimental_feature
@@ -2083,7 +2083,7 @@ and expr_ env p (e : Nast.expr_) =
   match e with
   | Aast.ParenthesizedExpr e -> N.ParenthesizedExpr (expr env e)
   | Aast.Array l ->
-    let tcopt = (fst env).ctx.Provider_context.tcopt in
+    let tcopt = Provider_context.get_tcopt (fst env).ctx in
     if TypecheckerOptions.disallow_array_literal tcopt then
       Errors.array_literals_disallowed p;
     N.Array (List.map l (afield env))

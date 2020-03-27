@@ -31,7 +31,7 @@ type env = {
   rx_move_allowed: bool;
 }
 
-let get_tcopt env = env.ctx.Provider_context.tcopt
+let get_tcopt env = Provider_context.get_tcopt env.ctx
 
 let is_some_reactivity_attribute { ua_name = (_, name); _ } =
   String.equal name SN.UserAttributes.uaReactive

@@ -88,7 +88,8 @@ let make_handler ctx =
         | _ -> ()
     end
   in
-  if TypecheckerOptions.check_xhp_attribute ctx.Provider_context.tcopt then
+  if TypecheckerOptions.check_xhp_attribute (Provider_context.get_tcopt ctx)
+  then
     Some handler
   else
     None

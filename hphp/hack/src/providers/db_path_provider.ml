@@ -21,7 +21,7 @@ module Shared_db_settings =
 
 let get_naming_db_path (ctx : Provider_context.t) : Naming_sqlite.db_path option
     =
-  match ctx.Provider_context.backend with
+  match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory -> Shared_db_settings.get "database_path"
   | Provider_backend.Local_memory { naming_db_path_ref; _ } ->
     !naming_db_path_ref
@@ -31,7 +31,7 @@ let get_naming_db_path (ctx : Provider_context.t) : Naming_sqlite.db_path option
 let set_naming_db_path
     (ctx : Provider_context.t) (naming_db_path : Naming_sqlite.db_path option) :
     unit =
-  match ctx.Provider_context.backend with
+  match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory ->
     Shared_db_settings.remove_batch (SSet.singleton "database_path");
     Option.iter naming_db_path ~f:(Shared_db_settings.add "database_path")

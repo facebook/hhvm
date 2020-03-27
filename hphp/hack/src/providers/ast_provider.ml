@@ -52,7 +52,7 @@ let parse
     ~(full : bool)
     ~(keep_errors : bool)
     ~(source_text : Full_fidelity_source_text.t) : Parser_return.t =
-  let popt = ctx.Provider_context.popt in
+  let popt = Provider_context.get_popt ctx in
   let path = source_text.Full_fidelity_source_text.file_path in
   let parser_env =
     Full_fidelity_ast.make_env
@@ -81,7 +81,7 @@ let get_from_local_cache ~full ctx file_name =
   match LocalParserCache.get file_name with
   | Some ast -> ast
   | None ->
-    let popt = ctx.Provider_context.popt in
+    let popt = Provider_context.get_popt ctx in
     let f contents =
       let contents =
         if FindUtils.file_filter fn then
@@ -324,9 +324,9 @@ let get_ast ?(full = false) ctx path =
   (* If there's a ctx, and this file is in the ctx, then use ctx. *)
   (* Otherwise, the way we fetch/cache ASTs depends on the provider. *)
   let entry_opt =
-    Relative_path.Map.find_opt ctx.Provider_context.entries path
+    Relative_path.Map.find_opt (Provider_context.get_entries ctx) path
   in
-  match (entry_opt, ctx.Provider_context.backend) with
+  match (entry_opt, Provider_context.get_backend ctx) with
   | ( Some { Provider_context.parser_return = Some { Parser_return.ast; _ }; _ },
       _ ) ->
     ast

@@ -191,7 +191,7 @@ let process_file
   let ast = Ast_provider.get_ast ~full:true ctx fn in
   let opts =
     {
-      ctx.Provider_context.tcopt with
+      (Provider_context.get_tcopt ctx) with
       GlobalOptions.tco_dynamic_view =
         Relative_path.Set.mem dynamic_view_files fn;
     }
@@ -614,7 +614,8 @@ let process_in_parallel
   let next = next workers delegate_state files_to_process files_in_progress in
   let should_prefetch_deferred_files =
     Vfs.is_vfs ()
-    && TypecheckerOptions.prefetch_deferred_files ctx.Provider_context.tcopt
+    && TypecheckerOptions.prefetch_deferred_files
+         (Provider_context.get_tcopt ctx)
   in
   let job =
     load_and_process_files ctx dynamic_view_files ~memory_cap ~check_info
@@ -733,7 +734,7 @@ let go_with_interrupt
   let fnl = List.map fnl ~f:(fun path -> Check { path; deferred_count = 0 }) in
   Mocking.with_test_mocking fnl @@ fun fnl ->
   let result =
-    if should_process_sequentially ctx.Provider_context.tcopt fnl then (
+    if should_process_sequentially (Provider_context.get_tcopt ctx) fnl then (
       Hh_logger.log "Type checking service will process files sequentially";
       let progress = { completed = []; remaining = fnl; deferred = [] } in
       let (errors, _) =

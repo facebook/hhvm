@@ -75,7 +75,7 @@ module LocalCache =
 
 let add (ctx : Provider_context.t) (key : key) (value : Decl_defs.linearization)
     : unit =
-  match ctx.Provider_context.backend with
+  match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory -> LocalCache.add key value
   | Provider_backend.Local_memory { linearization_cache; _ } ->
     let key = key_to_local_key key in
@@ -88,7 +88,7 @@ let add (ctx : Provider_context.t) (key : key) (value : Decl_defs.linearization)
 let complete
     (ctx : Provider_context.t) (key : key) (value : Decl_defs.mro_element list)
     : unit =
-  match ctx.Provider_context.backend with
+  match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory ->
     Cache.add key value;
     LocalCache.remove key
@@ -97,7 +97,7 @@ let complete
 
 let get (ctx : Provider_context.t) (key : key) : Decl_defs.linearization option
     =
-  match ctx.Provider_context.backend with
+  match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory ->
     begin
       match Cache.get key with

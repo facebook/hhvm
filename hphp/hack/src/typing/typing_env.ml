@@ -547,7 +547,7 @@ let empty ?(mode = FileInfo.Mstrict) ctx file ~droot =
     decl_env = { mode; droot; ctx };
     genv =
       {
-        tcopt = ctx.Provider_context.tcopt;
+        tcopt = Provider_context.get_tcopt ctx;
         return =
           {
             (* Actually should get set straight away anyway *)
@@ -569,7 +569,7 @@ let empty ?(mode = FileInfo.Mstrict) ctx file ~droot =
         file;
       };
     global_tpenv = TPEnv.empty;
-    log_levels = TypecheckerOptions.log_levels ctx.Provider_context.tcopt;
+    log_levels = TypecheckerOptions.log_levels (Provider_context.get_tcopt ctx);
     inference_env = Inf.empty_inference_env;
     allow_wildcards = false;
     big_envs = ref [];

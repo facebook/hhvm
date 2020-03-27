@@ -154,10 +154,8 @@ let empty ctx = Typing_env.empty ctx Relative_path.default ~droot:None
 let restore_saved_env env saved_env =
   let module Env = Typing_env_types in
   let ctx =
-    {
-      env.Env.decl_env.Decl_env.ctx with
-      Provider_context.tcopt = saved_env.Tast.tcopt;
-    }
+    Provider_context.map_tcopt env.Env.decl_env.Decl_env.ctx ~f:(fun _tcopt ->
+        saved_env.Tast.tcopt)
   in
   let decl_env = { env.Env.decl_env with Decl_env.ctx } in
   {
@@ -194,22 +192,30 @@ let restore_fun_env env f = restore_saved_env env f.f_annotation
 let restore_pu_enum_env env pu = restore_saved_env env pu.pu_annotation
 
 let fun_env ctx f =
-  let ctx = { ctx with Provider_context.tcopt = f.f_annotation.tcopt } in
+  let ctx =
+    Provider_context.map_tcopt ctx ~f:(fun _tcopt -> f.f_annotation.tcopt)
+  in
   let env = EnvFromDef.fun_env ctx f in
   restore_fun_env env f
 
 let class_env ctx c =
-  let ctx = { ctx with Provider_context.tcopt = c.c_annotation.tcopt } in
+  let ctx =
+    Provider_context.map_tcopt ctx ~f:(fun _tcopt -> c.c_annotation.tcopt)
+  in
   let env = EnvFromDef.class_env ctx c in
   restore_saved_env env c.c_annotation
 
 let typedef_env ctx t =
-  let ctx = { ctx with Provider_context.tcopt = t.t_annotation.tcopt } in
+  let ctx =
+    Provider_context.map_tcopt ctx ~f:(fun _tcopt -> t.t_annotation.tcopt)
+  in
   let env = EnvFromDef.typedef_env ctx t in
   restore_saved_env env t.t_annotation
 
 let gconst_env ctx cst =
-  let ctx = { ctx with Provider_context.tcopt = cst.cst_annotation.tcopt } in
+  let ctx =
+    Provider_context.map_tcopt ctx ~f:(fun _tcopt -> cst.cst_annotation.tcopt)
+  in
   let env = EnvFromDef.gconst_env ctx cst in
   restore_saved_env env cst.cst_annotation
 

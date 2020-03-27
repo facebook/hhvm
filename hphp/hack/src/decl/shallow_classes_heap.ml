@@ -32,7 +32,7 @@ let class_naming_and_decl ctx c =
   Shallow_decl.class_ ctx c
 
 let shallow_decl_enabled (ctx : Provider_context.t) : bool =
-  TypecheckerOptions.shallow_class_decl ctx.Provider_context.tcopt
+  TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
 
 let get_from_store ctx cid =
   if shallow_decl_enabled ctx then

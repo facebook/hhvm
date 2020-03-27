@@ -210,3 +210,14 @@ where
         Some(i) => f(w, i),
     }
 }
+
+pub fn then_write<W: Write, F>(w: &mut W, cond: bool, f: F) -> Result<(), W::Error>
+where
+    F: Fn(&mut W) -> Result<(), W::Error>,
+{
+    if cond {
+        f(w)
+    } else {
+        Ok(())
+    }
+}

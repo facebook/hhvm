@@ -486,12 +486,55 @@ fn print_doc_comment<W: Write>(
     Ok(())
 }
 
-fn print_use_precedence<W: Write, X>(ctx: &mut Context, w: &mut W, _: X) -> Result<(), W::Error> {
-    not_impl!()
+fn print_use_precedence<W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    (id1, id2, ids): &(class::Type, class::Type, Vec<class::Type>),
+) -> Result<(), W::Error> {
+    ctx.newline(w)?;
+    concat_str(w, [id1.to_raw_string(), "::", id2.to_raw_string()])?;
+    w.write(" insteadof ")?;
+    let unique_ids: IndexSet<&str> = ids.iter().map(|i| i.to_raw_string()).collect();
+    concat_str_by(w, " ", unique_ids.iter().collect::<Vec<_>>())?;
+    w.write(";")
 }
 
-fn print_use_alias<W: Write, X>(ctx: &mut Context, w: &mut W, _: X) -> Result<(), W::Error> {
-    not_impl!()
+fn print_use_as_visibility<W: Write>(w: &mut W, u: ast::UseAsVisibility) -> Result<(), W::Error> {
+    w.write(match u {
+        ast::UseAsVisibility::UseAsPublic => "public",
+        ast::UseAsVisibility::UseAsPrivate => "private",
+        ast::UseAsVisibility::UseAsProtected => "protected",
+        ast::UseAsVisibility::UseAsFinal => "final",
+    })
+}
+
+fn print_use_alias<W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    (ido1, id, ido2, kindl): &(
+        Option<class::Type>,
+        class::Type,
+        Option<class::Type>,
+        &Vec<ast::UseAsVisibility>,
+    ),
+) -> Result<(), W::Error> {
+    ctx.newline(w)?;
+    let id = id.to_raw_string();
+    option_or(
+        w,
+        ido1,
+        |w, i: &class::Type| concat_str(w, [i.to_raw_string(), "::", id]),
+        id,
+    )?;
+    w.write(" as ")?;
+    if !kindl.is_empty() {
+        wrap_by_square(w, |w| {
+            concat_by(w, " ", kindl, |w, k| print_use_as_visibility(w, *k))
+        })?;
+    }
+    then_write(w, !kindl.is_empty() && ido2.is_some(), |w| w.write(" "))?;
+    option(w, ido2, |w, i: &class::Type| w.write(i.to_raw_string()))?;
+    w.write(";")
 }
 
 fn print_method_trait_resolutions<W: Write>(
@@ -544,12 +587,15 @@ fn print_uses<W: Write>(ctx: &mut Context, w: &mut W, c: &HhasClass) -> Result<(
             w.write(";")
         } else {
             w.write(" {")?;
-            for x in &c.use_precedences {
-                print_use_precedence(ctx, w, x)?;
-            }
-            for x in &c.use_aliases {
-                print_use_alias(ctx, w, x)?;
-            }
+            ctx.block(w, |ctx, w| {
+                for x in &c.use_precedences {
+                    print_use_precedence(ctx, w, x)?;
+                }
+                for x in &c.use_aliases {
+                    print_use_alias(ctx, w, x)?;
+                }
+                Ok(())
+            })?;
             for x in &c.method_trait_resolutions {
                 print_method_trait_resolutions(ctx, w, x)?;
             }

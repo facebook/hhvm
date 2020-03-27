@@ -299,12 +299,28 @@ pub mod instr {
         instr(Instruct::IOp(InstructOperator::CastDArray))
     }
 
+    pub fn cast_array() -> InstrSeq {
+        instr(Instruct::IOp(InstructOperator::CastArray))
+    }
+
     pub fn cast_dict() -> InstrSeq {
         instr(Instruct::IOp(InstructOperator::CastDict))
     }
 
     pub fn cast_string() -> InstrSeq {
         instr(Instruct::IOp(InstructOperator::CastString))
+    }
+
+    pub fn cast_int() -> InstrSeq {
+        instr(Instruct::IOp(InstructOperator::CastInt))
+    }
+
+    pub fn cast_bool() -> InstrSeq {
+        instr(Instruct::IOp(InstructOperator::CastBool))
+    }
+
+    pub fn cast_double() -> InstrSeq {
+        instr(Instruct::IOp(InstructOperator::CastDouble))
     }
 
     pub fn retc() -> InstrSeq {

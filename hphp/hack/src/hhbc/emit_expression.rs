@@ -27,7 +27,7 @@ use itertools::{Either, Itertools};
 use label_rust::Label;
 use naming_special_names_rust::{
     emitter_special_functions, fb, pseudo_consts, pseudo_functions, special_functions,
-    special_idents, superglobals, user_attributes,
+    special_idents, superglobals, typehints, user_attributes,
 };
 use ocaml_helper::int_of_str_opt;
 use options::{CompilerFlags, HhvmFlags, LangFlags, Options};
@@ -394,7 +394,7 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
             ]))
         }
         Expr_::As(e) => emit_as(env, pos, e),
-        Expr_::Cast(e) => emit_cast(env, pos, e),
+        Expr_::Cast(e) => emit_cast(emitter, env, pos, &(e.0).1, &e.1),
         Expr_::Eif(e) => emit_conditional_expr(emitter, env, pos, &e.0, &e.1, &e.2),
         Expr_::ExprList(es) => Ok(InstrSeq::gather(
             es.iter()
@@ -3451,8 +3451,38 @@ fn emit_as(
     unimplemented!("TODO(hrust)")
 }
 
-fn emit_cast(env: &Env, pos: &Pos, (h, e): &(aast_defs::Hint, tast::Expr)) -> Result {
-    unimplemented!("TODO(hrust)")
+fn emit_cast(
+    e: &mut Emitter,
+    env: &Env,
+    pos: &Pos,
+    hint: &aast_defs::Hint_,
+    expr: &tast::Expr,
+) -> Result {
+    use aast_defs::Hint_ as H_;
+    let op = match hint {
+        H_::Happly(ast_defs::Id(_, id), hints) if hints.is_empty() => {
+            let id = string_utils::strip_ns(id);
+            match string_utils::strip_hh_ns(&id).as_ref() {
+                typehints::INT => instr::cast_int(),
+                typehints::BOOL => instr::cast_bool(),
+                typehints::STRING => instr::cast_string(),
+                typehints::ARRAY => instr::cast_array(),
+                typehints::FLOAT => instr::cast_double(),
+                _ => {
+                    return Err(emit_fatal::raise_fatal_parse(
+                        pos,
+                        format!("Invalid cast type: {}", id),
+                    ))
+                }
+            }
+        }
+        _ => return Err(emit_fatal::raise_fatal_parse(pos, "Invalid cast type")),
+    };
+    Ok(InstrSeq::gather(vec![
+        emit_expr(e, env, expr)?,
+        emit_pos(pos),
+        op,
+    ]))
 }
 
 pub fn emit_unset_expr(e: &mut Emitter, env: &Env, expr: &tast::Expr) -> Result {

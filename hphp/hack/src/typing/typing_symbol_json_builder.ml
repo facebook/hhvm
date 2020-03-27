@@ -389,7 +389,7 @@ let build_typedef_decl_json_ref fact_id =
   JSON_Object [("typedef_", build_id_json fact_id)]
 
 let build_gconst_decl_json_ref fact_id =
-  JSON_Object [("global_const", build_id_json fact_id)]
+  JSON_Object [("globalConst", build_id_json fact_id)]
 
 let build_property_decl_json_ref fact_id =
   JSON_Object [("property_", build_id_json fact_id)]
@@ -417,8 +417,8 @@ let add_container_defn_fact clss decl_id member_decls progress =
       let class_fields =
         base_fields
         @ [
-            ("is_abstract", JSON_Bool is_abstract);
-            ("is_final", JSON_Bool clss.c_final);
+            ("isAbstract", JSON_Bool is_abstract);
+            ("isFinal", JSON_Bool clss.c_final);
           ]
       in
       (ClassDefinition, class_fields)
@@ -533,7 +533,7 @@ let add_typedef_decl_fact name elem progress =
     JSON_Object
       [
         ("name", build_name_json_nested name);
-        ("is_transparent", JSON_Bool is_transparent);
+        ("isTransparent", JSON_Bool is_transparent);
       ]
   in
   add_fact TypedefDeclaration json_fact progress

@@ -85,8 +85,15 @@ function has_multi_request_mode($options) {
   return false;
 }
 
+function test_repo($options, $test) {
+  if (isset($options['repo-out'])) {
+    $test = $options['repo-out'] . '/' . str_replace('/', '.', $test);
+  }
+  return "$test.repo";
+}
+
 function jit_serialize_option($cmd, $test, $options, $serialize) {
-  $serialized = "$test.repo/jit.dump";
+  $serialized = test_repo($options, $test) . "/jit.dump";
   $cmds = explode(' -- ', $cmd, 2);
   $cmds[0] .=
     ' --count=' . ($serialize ? $options['jit-serialize'] + 1 : 1) .
@@ -480,6 +487,7 @@ function get_options($argv) {
     '*repo-single' => '',
     '*repo-separate' => '',
     '*repo-threads:' => '',
+    '*repo-out:' => '',
     '*hhbbc2' => '',
     '*mode:' => 'm:',
     '*server' => 's',
@@ -565,6 +573,12 @@ function get_options($argv) {
 
   \HH\global_set('recorded_options', $recorded);
 
+  if (isset($options['repo-out']) && !is_dir($options['repo-out'])) {
+    if (!mkdir($options['repo-out']) && !is_dir($options['repo-out'])) {
+      echo "Unable to create repo-out dir " . $options['repo-out'] . "\n";
+      exit(1);
+    }
+  }
   if (isset($options['hhbbc2'])) {
     $options['repo-separate'] = true;
     if (isset($options['repo']) || isset($options['repo-single'])) {
@@ -1047,7 +1061,7 @@ function hhvm_cmd($options, $test, $test_run = null, $is_temp_file = false) {
     $repo_suffix = repo_separate($options, $test) ? 'hhbbc' : 'hhbc';
 
     $program = isset($options['hackc']) ? "hackc" : "hhvm";
-    $hhbbc_repo = "\"$test.repo/$program.$repo_suffix\"";
+    $hhbbc_repo = '"' . test_repo($options, $test) . "/$program.$repo_suffix\"";
     $cmd .= ' -vRepo.Authoritative=true -vRepo.Commit=0';
     $cmd .= " -vRepo.Central.Path=$hhbbc_repo";
   }
@@ -1160,7 +1174,8 @@ function hphp_cmd($options, $test, $program) {
       .escapeshellarg(bin_root().'/hackc_%{schema}'),
     '-vParserThreadCount=' . ($options['repo-threads'] ?? 1),
     '--nofork=1 -thhbc -l1 -k1',
-    "-o \"$test.repo\" --program $program.hhbc \"$test\"",
+    '-o "' . test_repo($options, $test) . '"',
+    "--program $program.hhbc \"$test\"",
     "-vRuntime.Repo.Local.Mode=rw -vRuntime.Repo.Local.Path=".verify_hhbc(),
     $extra_args,
     $compiler_args,
@@ -1169,6 +1184,7 @@ function hphp_cmd($options, $test, $program) {
 }
 
 function hhbbc_cmd($options, $test, $program) {
+  $test_repo = test_repo($options, $test);
   return implode(" ", varray[
     hhvm_path(),
     '--hhbbc',
@@ -1178,7 +1194,7 @@ function hhbbc_cmd($options, $test, $program) {
     '--hack-compiler-extract-path='
       .escapeshellarg(bin_root().'/hackc_%{schema}'),
     read_opts_file("$test.hhbbc_opts"),
-    "-o \"$test.repo/$program.hhbbc\" \"$test.repo/$program.hhbc\"",
+    "-o \"$test_repo/$program.hhbbc\" \"$test_repo/$program.hhbc\"",
   ]);
 }
 
@@ -1951,7 +1967,11 @@ function clean_intermediate_files($test, $options) {
     '1.autoloadDB-wal',
   ];
   foreach ($exts as $ext) {
-    $file = "$test.$ext";
+    if ($ext == 'repo') {
+      $file = test_repo($options, $test);
+    } else {
+      $file = "$test.$ext";
+    }
     if (file_exists($file)) {
       if (is_dir($file)) {
         foreach(new RecursiveIteratorIterator(new
@@ -2629,10 +2649,11 @@ function run_test($options, $test) {
       return 'skip-onlyjumpstart';
     }
 
-    $hphp_hhvm_repo = "$test.repo/hhvm.hhbc";
-    $hhbbc_hhvm_repo = "$test.repo/hhvm.hhbbc";
-    $hphp_hackc_repo = "$test.repo/hackc.hhbc";
-    $hhbbc_hackc_repo = "$test.repo/hackc.hhbbc";
+    $test_repo = test_repo($options, $test);
+    $hphp_hhvm_repo = "$test_repo/hhvm.hhbc";
+    $hhbbc_hhvm_repo = "$test_repo/hhvm.hhbbc";
+    $hphp_hackc_repo = "$test_repo/hackc.hhbc";
+    $hhbbc_hackc_repo = "$test_repo/hackc.hhbbc";
     shell_exec("rm -f \"$hphp_hhvm_repo\" \"$hhbbc_hhvm_repo\" \"$hphp_hackc_repo\" \"$hhbbc_hackc_repo\" ");
 
     $program = isset($options['hackc']) ? "hackc" : "hhvm";
@@ -2660,7 +2681,7 @@ function run_test($options, $test) {
         );
         return false;
       }
-      shell_exec("mv $test.repo/$program.hhbbc $test.repo/$program.hhbc");
+      shell_exec("mv $test_repo/$program.hhbbc $test_repo/$program.hhbc");
       $hhbbc = hhbbc_cmd($options, $test, $program);
       $result = exec_with_stack($hhbbc);
       if ($result !== true) {
@@ -2770,7 +2791,7 @@ function print_commands($tests, $options) {
             $c." -vEval.DumpHhas=1 > $test.before.round_trip.hhas\n";
         }
         $hhbbc_cmds .=
-          "mv $test.repo/$program.hhbbc $test.repo/$program.hhbc\n";
+          "mv $test_repo/$program.hhbbc $test_repo/$program.hhbc\n";
         $hhbbc_cmds .= $hhbbc_cmd;
         foreach ((array)$command as $c) {
           $hhbbc_cmds .=

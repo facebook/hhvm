@@ -10,7 +10,7 @@ open Reordered_argument_collections
 module CLKey = struct
   type t = Ide_api_types.coverage_level
 
-  let compare x y = Pervasives.compare x y
+  let compare x y = Ide_api_types.compare_coverage_level x y
 end
 
 module CLMap = struct

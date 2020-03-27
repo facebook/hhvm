@@ -61,6 +61,7 @@ and 'a t = {
   docblock: string option;
   reactivity_attributes: reactivity_attributes list;
 }
+[@@deriving ord]
 
 val to_absolute : Relative_path.t t -> string t
 

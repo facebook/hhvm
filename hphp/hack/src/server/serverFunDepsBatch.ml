@@ -25,7 +25,7 @@ open SymbolOccurrence
 module Results = Caml.Set.Make (struct
   type t = Relative_path.t SymbolOccurrence.t
 
-  let compare = Pervasives.compare
+  let compare = SymbolOccurrence.compare Relative_path.compare
 end)
 
 let process_method_cid n cid =
@@ -154,6 +154,9 @@ let remove_duplicates_except_none l =
   List.rev (loop l [])
 
 let handlers =
+  let compare =
+    Option.compare (SymbolDefinition.compare Relative_path.compare)
+  in
   {
     S.result_to_string;
     S.walker =

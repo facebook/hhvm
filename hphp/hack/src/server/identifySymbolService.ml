@@ -14,7 +14,7 @@ open Typing_defs
 module Result_set = Caml.Set.Make (struct
   type t = Relative_path.t SymbolOccurrence.t
 
-  let compare = Pervasives.compare
+  let compare : t -> t -> int = SymbolOccurrence.compare Relative_path.compare
 end)
 
 let is_target target_line target_char { pos; _ } =

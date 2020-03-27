@@ -14,7 +14,7 @@ open ServerCommandTypes.Symbol_type
 module Result_set = Set.Make (struct
   type t = ServerCommandTypes.Symbol_type.t
 
-  let compare a b = Pos.compare a.pos b.pos
+  let compare a b = Pos.compare_pos String.compare a.pos b.pos
 end)
 
 let visitor =

@@ -276,8 +276,11 @@ let class_big_diff class1 class2 =
   || class1.dc_const <> class2.dc_const
   || class1.dc_is_disposable <> class2.dc_is_disposable
   || class1.dc_tparams <> class2.dc_tparams
-  || SMap.compare Pervasives.compare class1.dc_substs class2.dc_substs <> 0
-  || SMap.compare Pervasives.compare class1.dc_ancestors class2.dc_ancestors
+  || SMap.compare compare_subst_context class1.dc_substs class2.dc_substs <> 0
+  || SMap.compare
+       Typing_defs.compare_decl_ty
+       class1.dc_ancestors
+       class2.dc_ancestors
      <> 0
   || List.compare
        Polymorphic_compare.compare

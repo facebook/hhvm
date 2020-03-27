@@ -40,6 +40,7 @@ type coverage_level =
   | Partial (* Partially checked code, e.g. array, Awaitable<_> with no
                  concrete type parameters *)
   | Checked
+[@@deriving ord]
 
 (* Completely checked code *)
 

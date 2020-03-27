@@ -49,7 +49,7 @@ let parameter_type_collector =
         in
         let ty = Decl_hint.hint tenv.Typing_env_types.decl_env hint in
         let ty = snd @@ Phase.localize ~ety_env tenv ty in
-        if Pervasives.( = ) inferred_hint ty then
+        if Typing_defs.equal_locl_ty inferred_hint ty then
           self#zero
         else
           Pos.AbsolutePosMap.singleton

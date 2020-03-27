@@ -17,7 +17,7 @@ type prefix =
   | Hhi
   | Dummy
   | Tmp
-[@@deriving eq, show, enum]
+[@@deriving eq, show, enum, ord]
 
 let root = ref None
 
@@ -61,7 +61,7 @@ let set_path_prefix prefix v =
   | Dummy -> raise (Failure "Dummy is always represented by an empty string")
   | _ -> path_ref_of_prefix prefix := Some v
 
-type t = prefix * string [@@deriving eq, show]
+type t = prefix * string [@@deriving eq, show, ord]
 
 type relative_path = t
 
@@ -99,7 +99,7 @@ let storage_of_string str =
 module S = struct
   type t = relative_path
 
-  let compare = Pervasives.compare
+  let compare : t -> t -> int = compare
 
   let to_string = storage_to_string
 end

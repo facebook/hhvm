@@ -10,7 +10,11 @@ open Core_kernel
 
 (* Check a sqlite result, and crash if it is invalid *)
 let check_rc (db : Sqlite3.db) (rc : Sqlite3.Rc.t) : unit =
-  if rc <> Sqlite3.Rc.OK && rc <> Sqlite3.Rc.DONE then
+  match rc with
+  | Sqlite3.Rc.OK
+  | Sqlite3.Rc.DONE ->
+    ()
+  | _ ->
     failwith
       (Printf.sprintf
          "SQLite operation failed: %s (%s)"

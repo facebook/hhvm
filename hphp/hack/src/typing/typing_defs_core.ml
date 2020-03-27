@@ -461,6 +461,12 @@ and decl_fun_params = decl_ty fun_params
 
 and locl_fun_params = locl_ty fun_params
 
+(* [@@deriving ord] doesn't support GADT. If we want to get
+ * rid of this one, we will have to write it *)
+let compare_decl_ty : decl_ty -> decl_ty -> int = Stdlib.compare
+
+let equal_locl_ty : locl_ty -> locl_ty -> bool = Stdlib.( = )
+
 (* Constructor and deconstructor functions for types and constraint types.
  * Abstracting these lets us change the implementation, e.g. hash cons
  *)

@@ -12,7 +12,7 @@ module ShapeMap = Ast_defs.ShapeMap
 
 type 'a shape_map = 'a ShapeMap.t [@@deriving eq, show]
 
-type pos = Ast_defs.pos [@@deriving eq, show]
+type pos = Ast_defs.pos [@@deriving eq, show, ord]
 
 type local_id = (Local_id.t[@visitors.opaque])
 
@@ -198,6 +198,7 @@ and where_constraint = hint * Ast_defs.constraint_kind * hint
 [@@deriving
   show { with_path = false },
     eq,
+    ord,
     visitors
       {
         name = "iter_defs";

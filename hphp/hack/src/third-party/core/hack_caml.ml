@@ -29,7 +29,6 @@ module MoreLabels = MoreLabels
 module Nativeint = Nativeint
 module Oo = Oo
 module Parsing = Parsing
-module Pervasives = Pervasives
 module Printexc = Printexc
 module Printf = Printf
 module Queue = Queue
@@ -43,4 +42,3 @@ module String = String
 module StringLabels = StringLabels
 module Sys = Sys
 module Weak = Weak
-include Pervasives

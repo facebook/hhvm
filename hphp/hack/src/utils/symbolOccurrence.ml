@@ -12,6 +12,7 @@ type override_info = {
   method_name: string;
   is_static: bool;
 }
+[@@deriving ord]
 
 type kind =
   | Class
@@ -25,6 +26,7 @@ type kind =
   | GConst
   (* For __Override occurrences, we track the associated method and class. *)
   | Attribute of override_info option
+[@@deriving ord]
 
 type 'a t = {
   name: string;
@@ -33,6 +35,7 @@ type 'a t = {
   (* Span of the symbol itself *)
   pos: 'a Pos.pos;
 }
+[@@deriving ord]
 
 let to_absolute x = { x with pos = Pos.to_absolute x.pos }
 

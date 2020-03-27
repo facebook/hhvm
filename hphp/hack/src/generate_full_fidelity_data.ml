@@ -7,7 +7,6 @@
  *
  *)
 
-module OcamlPervasives = Pervasives
 module OcamlPrintf = Printf
 open Core_kernel
 open Printf

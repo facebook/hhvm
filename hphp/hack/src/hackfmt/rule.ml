@@ -33,7 +33,7 @@ let cares_about_children kind =
   | Always -> false
   | Parental -> true
 
-let compare r1 r2 = Pervasives.compare r1.id r2.id
+let compare r1 r2 = Core_kernel.Int.compare r1.id r2.id
 
 let to_string rule =
   let kind =

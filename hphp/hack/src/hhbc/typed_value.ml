@@ -35,14 +35,18 @@ type t =
   | Keyset of t list
   | Dict of (t * t) list * prov_tag
 
-and prov_tag = Pos.t option
+and prov_tag = Pos.t option [@@deriving ord]
+
+let compare : t -> t -> int = compare
+
+let compare_prov_tag : prov_tag -> prov_tag -> int = compare_prov_tag
 
 module TVMap : WrappedMap.S with type key = t = WrappedMap.Make (struct
   type key = t
 
   type t = key
 
-  let compare = Pervasives.compare
+  let compare : t -> t -> int = compare
 end)
 
 (* Some useful constants *)

@@ -338,9 +338,7 @@ let string_of_file filename =
 (* Writing JSON *)
 
 let sort_object obj_entries =
-  List.sort
-    ~compare:(fun (k1, _) (k2, _) -> Pervasives.compare k1 k2)
-    obj_entries
+  List.sort ~compare:(fun (k1, _) (k2, _) -> String.compare k1 k2) obj_entries
 
 module type Output_stream_intf = sig
   type t

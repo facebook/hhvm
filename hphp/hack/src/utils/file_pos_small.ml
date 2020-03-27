@@ -25,7 +25,8 @@
  *
  *
  *)
-type t = int [@@deriving eq]
+
+type t = int [@@deriving eq, ord]
 
 let column_bits = 9
 
@@ -82,7 +83,7 @@ let pp fmt pos =
   Format.pp_print_string fmt ":";
   Format.pp_print_int fmt (column pos + 1)
 
-let compare = Pervasives.compare
+let compare : t -> t -> int = compare
 
 let beg_of_file = bol_line_col_unchecked 0 1 0
 

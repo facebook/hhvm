@@ -10,7 +10,7 @@
 module ValueKey = struct
   type t = Typed_value.t
 
-  let compare (x : t) (y : t) = Pervasives.compare x y
+  let compare : t -> t -> int = Typed_value.compare
 end
 
 include Unique_list.WithValue (ValueKey)

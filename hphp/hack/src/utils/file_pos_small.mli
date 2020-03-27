@@ -47,7 +47,7 @@ val bol_line_col : int -> int -> int -> int option
 
 val pp : Format.formatter -> t -> unit
 
-val compare : 'a -> 'a -> int
+val compare : t -> t -> int
 
 val beg_of_file : int
 

@@ -12,14 +12,14 @@ type t = {
   pos_bol: int;
   pos_cnum: int;
 }
-[@@deriving eq]
+[@@deriving eq, ord]
 
 let pp fmt pos =
   Format.pp_print_int fmt pos.pos_lnum;
   Format.pp_print_string fmt ":";
   Format.pp_print_int fmt (pos.pos_cnum - pos.pos_bol + 1)
 
-let compare = Pervasives.compare
+let compare : t -> t -> int = compare
 
 let dummy = { pos_lnum = 0; pos_bol = 0; pos_cnum = -1 }
 

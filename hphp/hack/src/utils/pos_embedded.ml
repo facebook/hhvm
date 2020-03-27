@@ -27,11 +27,11 @@ type 'a pos =
       pos_start: File_pos_large.t;
       pos_end: File_pos_large.t;
     }
-[@@deriving eq, show]
+[@@deriving eq, show, ord]
 
 type t = Relative_path.t pos [@@deriving eq, show]
 
-type absolute = string pos [@@deriving eq, show]
+type absolute = string pos [@@deriving eq, show, ord]
 
 [@@@warning "+32"]
 
@@ -383,8 +383,8 @@ let get_text_from_pos ~content pos =
 (* Compare by filename, then tie-break by start position, and finally by the
  * end position
  *)
-let compare x y =
-  let r = Pervasives.compare (filename x) (filename y) in
+let compare (x : t) (y : t) =
+  let r = Relative_path.compare (filename x) (filename y) in
   if r <> 0 then
     r
   else
@@ -556,5 +556,5 @@ end)
 module AbsolutePosMap = WrappedMap.Make (struct
   type t = absolute
 
-  let compare = compare
+  let compare = compare_absolute
 end)

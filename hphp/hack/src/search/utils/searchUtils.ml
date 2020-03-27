@@ -272,7 +272,7 @@ type file_source =
 module Tombstone = struct
   type t = int64
 
-  let compare = Pervasives.compare
+  let compare = Int64.compare
 
   let to_string = Int64.to_string
 end

@@ -50,7 +50,7 @@ type subst_context = {
   sc_class_context: string;
   sc_from_req_extends: bool;
 }
-[@@deriving show]
+[@@deriving show, ord]
 
 type source_type =
   | Child

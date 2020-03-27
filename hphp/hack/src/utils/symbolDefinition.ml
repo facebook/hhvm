@@ -57,6 +57,7 @@ and 'a t = {
   docblock: string option;
   reactivity_attributes: reactivity_attributes list;
 }
+[@@deriving ord]
 
 let rec to_absolute x =
   {

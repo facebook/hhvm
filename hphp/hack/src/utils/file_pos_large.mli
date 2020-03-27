@@ -22,7 +22,7 @@ type t = {
 
 val pp : Format.formatter -> t -> unit
 
-val compare : 'a -> 'a -> int
+val compare : t -> t -> int
 
 val dummy : t
 

@@ -97,6 +97,7 @@ and uop =
 [@@deriving
   show { with_path = false },
     eq,
+    ord,
     visitors
       {
         name = "iter_defs";

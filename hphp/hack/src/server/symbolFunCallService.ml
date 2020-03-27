@@ -18,7 +18,7 @@ module Result_set = Caml.Set.Make (struct
   let compare a b =
     (* Descending order, since SymbolInfoService.format_result uses rev_append
        and will reverse our sorted result list. *)
-    let r = Pos.compare b.pos a.pos in
+    let r = Pos.compare_pos String.compare b.pos a.pos in
     if r <> 0 then
       r
     else

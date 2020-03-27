@@ -23,14 +23,14 @@ module SyntaxTree = Full_fidelity_syntax_tree.WithSyntax (Syntax)
  * (Note that multiple syntax kinds map to the same string anyways, so it would
  * be hard to reverse the mapping.)
  *)
-type node_kind = NodeKind of string
+type node_kind = NodeKind of string [@@deriving ord]
 
 (**
  * An identifier in the pattern used to identify the this node when returning
  * the results of a match to the caller. This identifier may not be unique in
  * the list of returned results.
  *)
-type match_name = MatchName of string
+type match_name = MatchName of string [@@deriving ord]
 
 (**
  * The name of a child of a node.
@@ -136,6 +136,7 @@ type matched_node = {
   start_offset: int;
   end_offset: int;
 }
+[@@deriving ord]
 
 type result = {
   (*
@@ -143,6 +144,9 @@ type result = {
    *)
   matched_nodes: matched_node list;
 }
+[@@deriving ord]
+
+type rel_path_result = Relative_path.t * result [@@deriving ord]
 
 type collected_type_map =
   Tast_type_collector.collected_type list Pos.AbsolutePosMap.t
@@ -524,7 +528,7 @@ let result_to_json ~(sort_results : bool) (result : result option) :
     let matched_nodes = result.matched_nodes in
     let matched_nodes =
       if sort_results then
-        List.sort matched_nodes ~compare:Pervasives.compare
+        List.sort matched_nodes ~compare:compare_matched_node
       else
         matched_nodes
     in
@@ -642,7 +646,7 @@ let go
   in
   let results =
     if sort_results then
-      List.sort results ~compare:Pervasives.compare
+      List.sort results ~compare:compare_rel_path_result
     else
       results
   in

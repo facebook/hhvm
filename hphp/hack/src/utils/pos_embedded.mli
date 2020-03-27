@@ -10,7 +10,7 @@
 (* Note: While Pos.string prints out positions as closed intervals, pos_start
  * and pos_end actually form a half-open interval (i.e. pos_end points to the
  * character *after* the last character of the relevant lexeme.) *)
-type 'a pos [@@deriving eq]
+type 'a pos [@@deriving eq, ord]
 
 (** The underlying type used to construct Pos instances.
  *
@@ -125,7 +125,7 @@ val shrink_by_one_char_both_sides : 'a pos -> 'a pos
 
 (* Compare by filename, then tie-break by start position, and finally by the
  * end position *)
-val compare : 'a pos -> 'a pos -> int
+val compare : t -> t -> int
 
 val set_file : 'a -> 'b pos -> 'a pos
 

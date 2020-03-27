@@ -12,6 +12,7 @@ type t =
   | Regular of int
   | DefaultArg of int
   | Named of string
+[@@deriving ord]
 
 let id label =
   match label with

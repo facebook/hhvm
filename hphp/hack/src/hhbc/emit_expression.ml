@@ -3274,7 +3274,7 @@ and emit_reified_arg env ~isas pos (hint : Aast.hint) =
         (* Sort map from key 0 to count and convert each identified into cgetl *)
         let values =
           SMap.bindings targ_map
-          |> List.sort ~compare:(fun (_, x) (_, y) -> Pervasives.compare x y)
+          |> List.sort ~compare:(fun (_, x) (_, y) -> Int.compare x y)
           |> List.map ~f:(fun (v, _) -> emit_reified_type env pos v)
         in
         gather [gather values; ts]

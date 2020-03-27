@@ -28,7 +28,7 @@ module S : sig
   val to_string : t -> string
 end
 
-type t = S.t [@@deriving eq, show]
+type t = S.t [@@deriving eq, show, ord]
 
 val default : t
 

@@ -13,7 +13,7 @@ module J = Hh_json
 module InvStringKey = struct
   type t = string
 
-  let compare (x : t) (y : t) = Pervasives.compare y x
+  let compare (x : t) (y : t) = String.compare y x
 end
 
 module InvSMap = WrappedMap.Make (InvStringKey)

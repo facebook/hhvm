@@ -8,13 +8,13 @@
  *)
 
 module S = struct
-  type t = int * string
+  type t = int * string [@@deriving ord]
 
   let equal_ref : (t -> t -> bool) ref = ref Caml.( = )
 
   let equal x y = !equal_ref x y
 
-  let compare = Pervasives.compare
+  let compare = compare
 end
 
 include S

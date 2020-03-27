@@ -122,12 +122,13 @@ let empty = []
 type id_key =
   | IdReturn
   | IdLabel of Label.t
+[@@deriving ord]
 
 module LabelIdMap : WrappedMap.S with type key = id_key =
 WrappedMap.Make (struct
   type t = id_key
 
-  let compare = Pervasives.compare
+  let compare = compare_id_key
 end)
 
 (* HHVM assigns ids to labels sequentially as break/continue to labels appear

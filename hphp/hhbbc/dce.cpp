@@ -604,17 +604,20 @@ Type topC(Env& env, uint32_t idx = 0) {
 
 //////////////////////////////////////////////////////////////////////
 // locals
-
-void addInterference(Env& env, std::bitset<kMaxTrackedLocals> live) {
-  // We don't track interfrence until the optimize round of the global dce.
-  if (!env.dceState.remappingIndex) return;
-
-  auto& li = env.dceState.remappingIndex->localInterference;
+void addInterference(LocalRemappingIndex* index,
+                     std::bitset<kMaxTrackedLocals> live) {
+  auto& li = index->localInterference;
   for (auto i = li.size(); i-- > 0;) {
     if (live[i]) {
       li[i] |= live;
     }
   }
+}
+
+void addInterference(Env& env, std::bitset<kMaxTrackedLocals> live) {
+  // We don't track interfrence until the optimize round of the global dce.
+  if (!env.dceState.remappingIndex) return;
+  addInterference(env.dceState.remappingIndex, live);
 }
 
 void pinLocals(Env& env, std::bitset<kMaxTrackedLocals> pinned) {
@@ -3003,6 +3006,24 @@ bool global_dce(const Index& index, const FuncAnalysis& ai) {
   LocalRemappingIndex localRemappingIndex(maxRemappedLocals);
 
   /*
+   * Parameters are not uninit at the entry to the function even if they go
+   * unused throughout the function, they conflict with any local that is live
+   * at an entrypoint.  Such a local might be depending on the local slot being
+   * Unset from the function entry.
+   */
+  std::bitset<kMaxTrackedLocals> paramSet;
+  paramSet.set();
+  paramSet >>= kMaxTrackedLocals -
+               (ai.ctx.func->params.size() + (uint32_t)ai.ctx.func->isReified);
+  boost::dynamic_bitset<> entrypoint(ai.ctx.func->blocks.size());
+  entrypoint[ai.ctx.func->mainEntry] = true;
+  for (auto const blkId: ai.ctx.func->dvEntries) {
+    if (blkId != NoBlockId) {
+      entrypoint[blkId]= true;
+    }
+  }
+
+  /*
    * Iterate on live out states until we reach a fixed point.
    *
    * This algorithm treats the exceptional live-out states differently
@@ -3088,6 +3109,13 @@ bool global_dce(const Index& index, const FuncAnalysis& ai) {
           return false;
       }
     };
+
+    // As mentioned above, at entrypoints all live locals conflict with
+    // parameters.  (Any live local that is not a param is depending upon their
+    // slot being uninit)
+    if (entrypoint[bid]) {
+      addInterference(&localRemappingIndex, result.locLiveIn | paramSet);
+    }
 
     // Merge the liveIn into the liveOut of each normal predecessor.
     // If the set changes, reschedule that predecessor.

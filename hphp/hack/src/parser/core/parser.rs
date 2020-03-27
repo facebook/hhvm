@@ -34,7 +34,7 @@ where
         let source = source.clone();
         let sc = S::new(&env, &source);
         Self {
-            lexer: Lexer::make(&source, env.is_experimental_mode),
+            lexer: Lexer::make(&source),
             errors: vec![],
             env,
             sc,

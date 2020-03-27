@@ -29,7 +29,6 @@ type mode =
   | Mdecl  (** just declare signatures, don't check anything *)
   | Mstrict  (** check everything! *)
   | Mpartial  (** Don't fail if you see a function/class you don't know *)
-  | Mexperimental  (** Strict mode + experimental features *)
 [@@deriving eq, show, enum]
 
 let parse_mode = function
@@ -37,13 +36,10 @@ let parse_mode = function
   | "" ->
     Some Mstrict
   | "partial" -> Some Mpartial
-  | "experimental" -> Some Mexperimental
   | _ -> None
 
 let is_strict = function
-  | Mstrict
-  | Mexperimental ->
-    true
+  | Mstrict -> true
   | Mphp
   | Mdecl
   | Mpartial ->
@@ -56,7 +52,6 @@ let string_of_mode = function
   | Mdecl -> "decl"
   | Mstrict -> "strict"
   | Mpartial -> "partial"
-  | Mexperimental -> "experimental"
 
 let pp_mode fmt mode =
   Format.pp_print_string fmt
@@ -66,7 +61,6 @@ let pp_mode fmt mode =
   | Mdecl -> "Mdecl"
   | Mstrict -> "Mstrict"
   | Mpartial -> "Mpartial"
-  | Mexperimental -> "Mexperimental"
 
 (*****************************************************************************)
 (* Positions of names in a file *)

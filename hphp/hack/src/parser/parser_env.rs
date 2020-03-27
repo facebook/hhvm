@@ -11,7 +11,6 @@ use oxidized::full_fidelity_parser_env::FullFidelityParserEnv;
 #[derive(Clone, Debug, Default)]
 pub struct ParserEnv {
     pub codegen: bool,
-    pub is_experimental_mode: bool,
     pub hhvm_compat_mode: bool,
     pub php5_compat_mode: bool,
     pub allow_new_attribute_syntax: bool,
@@ -24,7 +23,6 @@ pub struct ParserEnv {
 impl From<FullFidelityParserEnv> for ParserEnv {
     fn from(env: FullFidelityParserEnv) -> Self {
         Self {
-            is_experimental_mode: env.is_experimental_mode(),
             hhvm_compat_mode: env.hhvm_compat_mode,
             php5_compat_mode: env.php5_compat_mode,
             codegen: env.codegen,

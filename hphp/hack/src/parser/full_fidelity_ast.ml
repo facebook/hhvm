@@ -28,7 +28,6 @@ type env = {
   parser_options: ParserOptions.t;
   fi_mode: FileInfo.mode;
   file: Relative_path.t;
-  hacksperimental: bool;
   disable_global_state_mutation: bool;
 }
 [@@deriving show]
@@ -44,7 +43,6 @@ let make_env
     ?(lower_coroutines = true)
     ?(fail_open = true)
     ?(parser_options = ParserOptions.default)
-    ?(hacksperimental = false)
     ?(disable_global_state_mutation = false)
     (file : Relative_path.t) : env =
   let parser_options = ParserOptions.with_codegen parser_options codegen in
@@ -61,7 +59,6 @@ let make_env
     fi_mode = FileInfo.Mpartial;
     fail_open;
     file;
-    hacksperimental;
     disable_global_state_mutation;
   }
 
@@ -119,17 +116,6 @@ let parse_text (env : env) (source_text : SourceText.t) :
       true
     | _ -> env.quick_mode
   in
-  ( if
-    mode = Some FileInfo.Mexperimental && env.codegen && not env.hacksperimental
-  then
-    let e =
-      SyntaxError.make
-        0
-        0
-        SyntaxError.experimental_in_codegen_without_hacksperimental
-    in
-    let p = pos_of_error env.file source_text e in
-    raise @@ SyntaxError.ParserFatal (e, p) );
   (* DANGER: Needs to be kept in sync with other logic in this file, ensuring
        that the tree created here is later passed to ParserErrors. This can
        currently leak memory when an exception is thrown between parsing and
@@ -251,7 +237,6 @@ let from_text_rust (env : env) (source_text : SourceText.t) :
         lower_coroutines = env.lower_coroutines;
         fail_open = env.fail_open;
         parser_options = env.parser_options;
-        hacksperimental = env.hacksperimental;
       }
   in
   match rust_from_text_ffi rust_env source_text with
@@ -405,7 +390,6 @@ let from_file_with_legacy env = legacy (from_file env)
 )******************************************************************************)
 
 let defensive_program
-    ?(hacksperimental = false)
     ?(quick = false)
     ?(show_all_errors = false)
     ?(fail_open = false)
@@ -426,7 +410,6 @@ let defensive_program
         ~elaborate_namespaces
         ~keep_errors:(keep_errors || not fail_open)
         ~parser_options
-        ~hacksperimental
         ~include_line_comments
         fn
     in
@@ -465,15 +448,8 @@ let defensive_from_file_with_default_popt ?quick ?show_all_errors fn =
   defensive_from_file ?quick ?show_all_errors ParserOptions.default fn
 
 let defensive_program_with_default_popt
-    ?hacksperimental
-    ?quick
-    ?show_all_errors
-    ?fail_open
-    ?elaborate_namespaces
-    fn
-    content =
+    ?quick ?show_all_errors ?fail_open ?elaborate_namespaces fn content =
   defensive_program
-    ?hacksperimental
     ?quick
     ?show_all_errors
     ?fail_open

@@ -240,10 +240,6 @@ fn parse_file(
     // php5_compat_mode:
     //   (not (Hhbc_options.enable_uniform_variable_syntax hhbc_options))
     aast_env.php5_compat_mode = !opts.php7_flags.contains(Php7Flags::UVS);
-    aast_env.hacksperimental = opts
-        .hhvm
-        .hack_lang_flags
-        .contains(LangFlags::HACKSPERIMENTAL);
     aast_env.keep_errors = false;
     aast_env.parser_options = create_parser_options(opts);
 

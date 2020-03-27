@@ -48,8 +48,7 @@ pub fn parse_header_only<'a>(env: ParserEnv, source: &SourceText<'a>) -> Option<
 }
 
 fn trivia_lexer<'a>(source_text: SourceText<'a>, offset: usize) -> Lexer<'a, MinimalToken> {
-    let is_experimental_mode = false;
-    Lexer::make_at(&source_text, is_experimental_mode, offset)
+    Lexer::make_at(&source_text, offset)
 }
 
 pub fn scan_leading_xhp_trivia(source_text: SourceText, offset: usize) -> Vec<MinimalTrivia> {

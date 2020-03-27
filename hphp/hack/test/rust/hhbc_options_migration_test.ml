@@ -41,9 +41,6 @@ let assert_opts_equal caml rust =
   assert_equal
     Hhbc_options.(enable_coroutines caml)
     Hhbc_options.(enable_coroutines rust);
-  assert_equal
-    Hhbc_options.(hacksperimental caml)
-    Hhbc_options.(hacksperimental rust);
   assert_equal Hhbc_options.(doc_root caml) Hhbc_options.(doc_root rust);
   assert_equal
     Hhbc_options.(include_search_paths caml)
@@ -144,7 +141,7 @@ let json_override_2bools =
   "
 {
 \"hhvm.hack.lang.enable_coroutines\": { \"global_value\": \"0\" },
-\"hhvm.hack.lang.hacksperimental\": { \"global_value\": \"1\" }
+\"hhvm.hack.lang.disable_xhp_element_mangling\": { \"global_value\": \"1\" }
 }
 "
 
@@ -156,15 +153,15 @@ let test_override_2bools_sanity_check _ =
       (Some (Hh_json.json_of_string json_override_2bools))
   in
   assert_equal false Hhbc_options.(enable_coroutines opts);
-  assert_equal true Hhbc_options.(hacksperimental opts);
+  assert_equal true Hhbc_options.(disable_xhp_element_mangling opts);
 
   (* Sanity check that we're actually overriding *)
   assert_equal
     Hhbc_options.(enable_coroutines opts)
     (not Hhbc_options.(enable_coroutines default));
   assert_equal
-    Hhbc_options.(hacksperimental opts)
-    (not Hhbc_options.(hacksperimental default));
+    Hhbc_options.(disable_xhp_element_mangling opts)
+    (not Hhbc_options.(disable_xhp_element_mangling default));
   ()
 
 (* FFI tests *)
@@ -172,7 +169,7 @@ let test_override_2bools_sanity_check _ =
 let test_override_2bools_configs_to_json_ffi _ =
   let opts = Options_ffi.from_configs ~jsons:[json_override_2bools] ~args:[] in
   assert_equal false Hhbc_options.(enable_coroutines opts);
-  assert_equal true Hhbc_options.(hacksperimental opts);
+  assert_equal true Hhbc_options.(disable_xhp_element_mangling opts);
   ()
 
 let test_ffi_defaults_consistent _ =
@@ -253,7 +250,7 @@ let test_json_configs_stackable _ =
       ";
         "
   {
-     \"hhvm.hack.lang.hacksperimental\": { \"global_value\": \"1\" },
+     \"hhvm.hack.lang.disable_xhp_element_mangling\": { \"global_value\": \"1\" },
      \"hhvm.rx_is_enabled\": { \"global_value\": \"1\" }
   }
       ";
@@ -265,7 +262,7 @@ let test_json_configs_stackable _ =
   assert_equal false Hhbc_options.(enable_coroutines caml_opts);
 
   (* set to 1 in the second JSON, so it must stay 1 *)
-  assert_equal true Hhbc_options.(hacksperimental caml_opts);
+  assert_equal true Hhbc_options.(disable_xhp_element_mangling caml_opts);
 
   (* set to 0 in the first JSON, then to 1 in the second JSON; so it's 1 now *)
   assert_equal true Hhbc_options.(rx_is_enabled caml_opts);
@@ -276,8 +273,8 @@ let test_json_configs_stackable _ =
     Hhbc_options.(enable_coroutines caml_opts)
     Hhbc_options.(enable_coroutines rust_opts);
   assert_equal
-    Hhbc_options.(hacksperimental caml_opts)
-    Hhbc_options.(hacksperimental rust_opts);
+    Hhbc_options.(disable_xhp_element_mangling caml_opts)
+    Hhbc_options.(disable_xhp_element_mangling rust_opts);
   assert_equal
     Hhbc_options.(rx_is_enabled caml_opts)
     Hhbc_options.(rx_is_enabled rust_opts);
@@ -375,9 +372,6 @@ let test_all_overrides_json_only _ =
     \"global_value\": true
   },
   \"hhvm.hack.lang.enable_xhp_class_modifier\": {
-    \"global_value\": true
-  },
-  \"hhvm.hack.lang.hacksperimental\": {
     \"global_value\": true
   },
   \"hhvm.hack.lang.phpism.disallow_execution_operator\": {
@@ -512,8 +506,6 @@ module CliArgOverrides = struct
   let hhvm'hack'lang'enable_xhp_class_modifier =
     "-vhhvm.hack.lang.enable_xhp_class_modifier=true"
 
-  let hhvm'hack'lang'hacksperimental = "-vhack.lang.hacksperimental=true"
-
   let hhvm'hack'lang'phpism'disallow_execution_operator =
     "-vhack.lang.phpism.disallowexecutionoperator=true"
 
@@ -584,7 +576,6 @@ let test_all_overrides_cli_only _ =
       hhvm'hack'lang'enable_first_class_function_pointers;
       hhvm'hack'lang'enable_pocket_universes;
       hhvm'hack'lang'enable_xhp_class_modifier;
-      hhvm'hack'lang'hacksperimental;
       hhvm'hack'lang'phpism'disallow_execution_operator;
       hhvm'hack'lang'phpism'disable_nontoplevel_declarations;
       hhvm'hack'lang'phpism'disable_static_closures;

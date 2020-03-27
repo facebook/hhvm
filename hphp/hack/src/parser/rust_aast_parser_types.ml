@@ -21,7 +21,6 @@ type env = {
   lower_coroutines: bool;
   fail_open: bool;
   parser_options: ParserOptions.t;
-  hacksperimental: bool;
 }
 
 type 'aast result_ = {

@@ -96,8 +96,6 @@ let disable_nontoplevel_declarations e = e.disable_nontoplevel_declarations
 
 let mode e = e.mode
 
-let is_experimental_mode e = e.mode = Some FileInfo.Mexperimental
-
 let is_strict e = e.mode = Some FileInfo.Mstrict
 
 let rust e = e.rust

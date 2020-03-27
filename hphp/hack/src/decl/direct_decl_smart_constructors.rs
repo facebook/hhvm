@@ -613,9 +613,6 @@ impl DirectDeclSmartConstructors<'_> {
                 .trim()
                 {
                     "decl" => self.state.file_mode_builder = FileModeBuilder::Set(Mode::Mdecl),
-                    "experimental" => {
-                        self.state.file_mode_builder = FileModeBuilder::Set(Mode::Mexperimental)
-                    }
                     "partial" => {
                         self.state.file_mode_builder = FileModeBuilder::Set(Mode::Mpartial)
                     }

@@ -67,7 +67,6 @@ pub struct Lexer<'a, Token: LexableToken<'a>> {
     start: usize,
     offset: usize,
     errors: Vec<SyntaxError>,
-    is_experimental_mode: bool,
     in_type: bool,
 
     cache: Rc<RefCell<Option<LexerCache<Token>>>>,
@@ -104,20 +103,19 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
         }
     }
 
-    pub fn make_at(source: &SourceText<'a>, is_experimental_mode: bool, offset: usize) -> Self {
+    pub fn make_at(source: &SourceText<'a>, offset: usize) -> Self {
         Self {
             source: source.clone(),
             start: offset,
             offset,
             errors: vec![],
-            is_experimental_mode,
             in_type: false,
             cache: Rc::new(RefCell::new(None)),
         }
     }
 
-    pub fn make(source: &SourceText<'a>, is_experimental_mode: bool) -> Self {
-        Self::make_at(source, is_experimental_mode, 0)
+    pub fn make(source: &SourceText<'a>) -> Self {
+        Self::make_at(source, 0)
     }
 
     fn continue_from(&mut self, l: Lexer<'a, Token>) {

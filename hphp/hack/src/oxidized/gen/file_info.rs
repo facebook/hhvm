@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6c2b3f2f6d94ddcc7949e27adc39233e>>
+// @generated SignedSource<<08928551219dde0329b6401210492434>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -39,8 +39,6 @@ pub enum Mode {
     Mstrict,
     /// Don't fail if you see a function/class you don't know
     Mpartial,
-    /// Strict mode + experimental features
-    Mexperimental,
 }
 
 #[derive(

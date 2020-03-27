@@ -45,7 +45,6 @@ type mode =
 type args = {
   mode: mode;
   parser: parser;
-  is_experimental: bool;
   hhvm_compat_mode: bool;
   php5_compat_mode: bool;
   codegen: bool;
@@ -358,7 +357,6 @@ let get_files args =
 let parse_args () =
   let mode = ref COMPARE in
   let parser = ref MINIMAL in
-  let is_experimental = ref false in
   let codegen = ref false in
   let hhvm_compat_mode = ref false in
   let php5_compat_mode = ref false in
@@ -384,7 +382,6 @@ let parse_args () =
             check_json_equal_only := true),
         "" );
       ("--ppl-rewriter", Arg.Unit (fun () -> parser := PPL_REWRITER), "");
-      ("--experimental", Arg.Set is_experimental, "");
       ("--lower", Arg.Unit (fun () -> parser := LOWERER), "");
       ("--closure-convert", Arg.Unit (fun () -> parser := CLOSURE_CONVERT), "");
       ("--codegen", Arg.Set codegen, "");
@@ -407,7 +404,6 @@ let parse_args () =
   {
     mode = !mode;
     parser = !parser;
-    is_experimental = !is_experimental;
     codegen = !codegen;
     hhvm_compat_mode = !hhvm_compat_mode;
     php5_compat_mode = !php5_compat_mode;
@@ -768,19 +764,12 @@ let () =
   let files = get_files args in
   Hh_logger.log "Starting...";
   let t = Unix.gettimeofday () in
-  let mode =
-    if args.is_experimental then
-      Some FileInfo.Mexperimental
-    else
-      None
-  in
   let make_env =
     Full_fidelity_parser_env.make
       ~hhvm_compat_mode:args.hhvm_compat_mode
       ~php5_compat_mode:args.php5_compat_mode
       ~codegen:args.codegen
       ~leak_rust_tree:(args.parser = COROUTINE_ERRORS)
-      ?mode
   in
   let ocaml_env = make_env ~rust:false () in
   let rust_env = make_env ~rust:true () in

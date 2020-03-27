@@ -5019,8 +5019,7 @@ where
                         let mode = env.file_mode();
                         env.keep_errors
                             && env.is_typechecker()
-                            && (mode == Mexperimental
-                                || mode == Mstrict
+                            && (mode == Mstrict
                                 || (mode == Mpartial
                                     && env
                                         .parser_options

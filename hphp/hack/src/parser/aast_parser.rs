@@ -22,7 +22,6 @@ use parser_core_types::{
     parser_env::ParserEnv,
     positioned_syntax::{PositionedSyntax, PositionedValue},
     positioned_token::PositionedToken,
-    syntax_error,
     syntax_error::SyntaxError,
     syntax_tree::SyntaxTree,
 };
@@ -196,22 +195,12 @@ impl<'a> AastParser {
         if mode == Some(Mode::Mpartial) && env.parser_options.po_disable_modes {
             mode = Some(Mode::Mstrict);
         }
-        if mode == Some(Mode::Mexperimental) && env.codegen && !env.hacksperimental {
-            let e = SyntaxError::make(
-                0,
-                0,
-                syntax_error::experimental_in_codegen_without_hacksperimental,
-            );
-            let p = Self::pos_of_error(indexed_source_text, &e);
-            return Err(Error::ParserFatal(e, p));
-        }
         let quick_mode = match mode {
             None | Some(Mode::Mdecl) | Some(Mode::Mphp) => !env.codegen,
             _ => !env.codegen && env.quick_mode,
         };
         let parser_env = ParserEnv {
             codegen: env.codegen,
-            is_experimental_mode: mode == Some(Mode::Mexperimental),
             hhvm_compat_mode: env.codegen,
             php5_compat_mode: env.php5_compat_mode,
             allow_new_attribute_syntax: env.parser_options.po_allow_new_attribute_syntax,
@@ -269,9 +258,5 @@ impl<'a> AastParser {
             ignored_fixme: ignored_fixme_regex.as_ref(),
         };
         Ok(scourer.scour_comments(script))
-    }
-
-    fn pos_of_error<'b>(source_text: &'b IndexedSourceText<'b>, e: &'b SyntaxError) -> Pos {
-        source_text.relative_pos(e.start_offset, e.end_offset)
     }
 }

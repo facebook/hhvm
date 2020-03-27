@@ -22,7 +22,6 @@ pub extern "C" fn parse_and_rewrite_ppl_classes(ocaml_source_text: usize) -> usi
     let source_text = unsafe { SourceText::from_ocaml(ocaml_source_text).unwrap() };
 
     let env = ParserEnv {
-        is_experimental_mode: false,
         hhvm_compat_mode: false,
         php5_compat_mode: false,
         codegen: false,

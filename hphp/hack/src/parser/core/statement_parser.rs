@@ -855,7 +855,6 @@ where
     fn parse_catch_clause_opt(&mut self) -> Option<S::R> {
         // SPEC
         // catch  (  type-specification-opt variable-name  )  compound-statement
-        // catch  (  type-specification-opt name  )  compound-statement [experimental-mode]
         if self.peek_token_kind() == TokenKind::Catch {
             let catch_token = self.assert_token(TokenKind::Catch);
             let left_paren = self.require_left_paren();
@@ -866,11 +865,7 @@ where
                 }
                 _ => self.parse_type_specifier(),
             };
-            let catch_var = if self.env.is_experimental_mode {
-                self.require_name_or_variable()
-            } else {
-                self.require_variable()
-            };
+            let catch_var = self.require_variable();
 
             let right_paren = self.require_right_paren();
             let compound_stmt = self.parse_compound_statement();

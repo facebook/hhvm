@@ -302,7 +302,6 @@ end = struct
     if not (is_defined genv.ctx x) then
       match genv.in_mode with
       | FileInfo.Mstrict
-      | FileInfo.Mexperimental
       | FileInfo.Mpartial
       | FileInfo.Mdecl ->
         unbound_name_error genv p x Errors.ConstantNamespace
@@ -326,9 +325,7 @@ end = struct
         when name = SN.Classes.cUnknown ->
         ()
       | FileInfo.Mphp -> ()
-      | FileInfo.Mstrict
-      | FileInfo.Mexperimental ->
-        unbound_name_error genv p name kind
+      | FileInfo.Mstrict -> unbound_name_error genv p name kind
       | FileInfo.Mpartial
       | FileInfo.Mdecl ->
         unbound_name_error genv p name kind);
@@ -1614,8 +1611,7 @@ and method_ genv m =
     | FileInfo.Mphp ->
       { N.fb_ast = []; fb_annotation = Nast.NamedWithUnsafeBlocks }
     | FileInfo.Mstrict
-    | FileInfo.Mpartial
-    | FileInfo.Mexperimental ->
+    | FileInfo.Mpartial ->
       if Nast.is_body_named m.Aast.m_body then (
         let env = List.fold_left ~f:Env.add_param m.N.m_params ~init:env in
         let env =
@@ -1780,8 +1776,7 @@ and fun_ ctx f =
     | FileInfo.Mphp ->
       { N.fb_ast = []; fb_annotation = Nast.NamedWithUnsafeBlocks }
     | FileInfo.Mstrict
-    | FileInfo.Mpartial
-    | FileInfo.Mexperimental ->
+    | FileInfo.Mpartial ->
       if Nast.is_body_named f.Aast.f_body then
         let env = List.fold_left ~f:Env.add_param paraml ~init:env in
         let env =

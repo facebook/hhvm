@@ -21,7 +21,6 @@ pub struct Env {
     pub lower_coroutines: bool,
     pub fail_open: bool,
     pub parser_options: parser_options::ParserOptions,
-    pub hacksperimental: bool,
 }
 
 #[derive(Clone, Debug, OcamlRep)]

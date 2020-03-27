@@ -79,7 +79,6 @@ pub(crate) mod convert {
                 Mode::Mdecl => 1,
                 Mode::Mstrict => 2,
                 Mode::Mpartial => 3,
-                Mode::Mexperimental => 4,
             }),
             None => None,
         }

@@ -40,8 +40,6 @@ val start_offset : t -> int
 
 val end_offset : t -> int
 
-val experimental_in_codegen_without_hacksperimental : string
-
 val this_in_static : string
 
 val toplevel_await_use : string

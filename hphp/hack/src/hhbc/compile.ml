@@ -133,7 +133,6 @@ let parse_file ~hhbc_options env text :
       ~fail_open:false
       ~php5_compat_mode:
         (not (Hhbc_options.enable_uniform_variable_syntax hhbc_options))
-      ~hacksperimental:(Hhbc_options.hacksperimental hhbc_options)
       ~keep_errors:false
       ~lower_coroutines:(Hhbc_options.enable_coroutines hhbc_options)
       ~elaborate_namespaces:(not env.disable_toplevel_elaboration)

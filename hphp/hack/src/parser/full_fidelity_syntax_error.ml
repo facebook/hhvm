@@ -65,9 +65,6 @@ let start_offset err = err.start_offset
 
 let end_offset err = err.end_offset
 
-let experimental_in_codegen_without_hacksperimental =
-  "Experimental mode files are not allowed during codegen unless the hacksperimental flag is set"
-
 let this_in_static = "Don't use $this in a static method, use static:: instead"
 
 let toplevel_await_use = "Await cannot be used in a toplevel statement"

@@ -469,9 +469,6 @@ pub const no_type_parameters_on_dynamic_method_calls: Error =
     Cow::Borrowed("Generics type parameters are disallowed on dynamic method calls");
 pub const dollar_unary: Error =
     Cow::Borrowed("The dollar sign ('$') cannot be used as a unary operator");
-pub const experimental_in_codegen_without_hacksperimental: Error = Cow::Borrowed(
-    "Experimental mode files are not allowed during codegen unless the hacksperimental flag is set",
-);
 pub const type_alias_to_type_constant: Error =
     Cow::Borrowed("Type aliases to type constants are not supported");
 pub const interface_with_memoize: Error =

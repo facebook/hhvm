@@ -13,7 +13,6 @@ impl Mode {
         match s {
             "strict" | "" => Some(Mode::Mstrict),
             "partial" => Some(Mode::Mpartial),
-            "experimental" => Some(Mode::Mexperimental),
             _ => None,
         }
     }

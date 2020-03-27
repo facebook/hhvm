@@ -27,8 +27,7 @@ val make_env (* Optional parts *) :
   ?show_all_errors:bool ->
   ?lower_coroutines:bool ->
   ?fail_open:bool ->
-  ?parser_options:ParserOptions.t ->
-  ?hacksperimental:bool (* Required parts *) ->
+  ?parser_options:ParserOptions.t (* Required parts *) ->
   ?disable_global_state_mutation:bool ->
   Relative_path.t ->
   env
@@ -54,7 +53,6 @@ val from_text_to_empty_tast :
 val from_file_with_legacy : env -> Parser_return.t
 
 val defensive_program :
-  ?hacksperimental:bool ->
   ?quick:bool ->
   ?show_all_errors:bool ->
   ?fail_open:bool ->
@@ -77,7 +75,6 @@ val defensive_from_file :
   Parser_return.t
 
 val defensive_program_with_default_popt :
-  ?hacksperimental:bool ->
   ?quick:bool ->
   ?show_all_errors:bool ->
   ?fail_open:bool ->

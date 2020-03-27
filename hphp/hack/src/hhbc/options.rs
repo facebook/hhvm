@@ -247,7 +247,6 @@ prefixed_flags!(
     ENABLE_FIRST_CLASS_FUNCTION_POINTERS,
     ENABLE_POCKET_UNIVERSES,
     ENABLE_XHP_CLASS_MODIFIER,
-    HACKSPERIMENTAL,
     DISABLE_ARRAY,
     RUST_TOP_LEVEL_ELABORATOR,
 );
@@ -666,9 +665,6 @@ mod tests {
   "hhvm.hack.lang.enable_xhp_class_modifier": {
     "global_value": false
   },
-  "hhvm.hack.lang.hacksperimental": {
-    "global_value": false
-  },
   "hhvm.hack.lang.rust_top_level_elaborator": {
     "global_value": true
   },
@@ -874,7 +870,7 @@ mod tests {
             .to_string(),
             json!({
                 // override another option from 0 to 1 in second JSON for the first time
-                "hhvm.hack.lang.hacksperimental": { "global_value": true },
+                "hhvm.hack.lang.disable_xhp_element_mangling": { "global_value": true },
                 // and for the second time, respectively *)
                 "hhvm.rx_is_enabled": { "global_value": true }
             })
@@ -884,7 +880,7 @@ mod tests {
         assert!(act
             .hhvm
             .hack_lang_flags
-            .contains(LangFlags::HACKSPERIMENTAL));
+            .contains(LangFlags::DISABLE_XHP_ELEMENT_MANGLING));
         assert!(!act
             .hhvm
             .hack_lang_flags
@@ -992,7 +988,7 @@ bitflags! {
         const AUTHORITATIVE = 1 << 9;
         const JIT_ENABLE_RENAME_FUNCTION = 1 << 10;
         const ENABLE_COROUTINES = 1 << 12;
-        const HACKSPERIMENTAL = 1 << 13;
+        // No longer using bit 13.
         const LOG_EXTERN_COMPILER_PERF = 1 << 14;
         const ENABLE_INTRINSICS_EXTENSION = 1 << 15;
         const DISALLOW_EXECUTION_OPERATOR = 1 << 21;

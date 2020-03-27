@@ -5,9 +5,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use hhbc_string_utils_rust::mangle_xhp_id;
-use mode_parser::parse_mode;
 use ocamlrep::rc::RcOc;
-use oxidized::{file_info::Mode, relative_path::RelativePath};
+use oxidized::relative_path::RelativePath;
 use parser_core_types::parser_env::ParserEnv;
 use parser_core_types::source_text::SourceText;
 
@@ -38,14 +37,9 @@ pub fn from_text(text: &[u8], opts: ExtractAsJsonOpts) -> Option<Facts> {
         filename,
     } = opts;
     let text = SourceText::make(RcOc::new(filename), text);
-    let is_experimental_mode = match parse_mode(&text) {
-        Some(Mode::Mexperimental) => true,
-        _ => false,
-    };
     let env = ParserEnv {
         php5_compat_mode,
         hhvm_compat_mode,
-        is_experimental_mode,
         allow_new_attribute_syntax,
         enable_xhp_class_modifier,
         disable_xhp_element_mangling,

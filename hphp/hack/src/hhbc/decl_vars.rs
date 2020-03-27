@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use itertools::Either;
-use std::collections::HashSet;
+use std::{collections::HashSet, iter::Iterator};
 
 extern crate bitflags;
 use bitflags::bitflags;
@@ -282,14 +282,14 @@ impl<'a> Visitor for DeclvarVisitor<'a> {
     }
 }
 
-pub fn uls_from_ast<P, F1, F2>(
+fn uls_from_ast<P, F1, F2>(
     params: &[P],
     get_param_name: F1,
     get_param_default_value: F2,
     explicit_use_set_opt: Option<&env::SSet>,
     b: ProgramOrStmt,
     flags: Flags,
-) -> Result<(bool, UniqueList<String>), String>
+) -> Result<(bool, impl Iterator<Item = String>), String>
 where
     F1: Fn(&P) -> &str,
     F2: Fn(&P) -> Option<&Expr>,
@@ -298,7 +298,7 @@ where
 
     for p in params {
         if let Some(e) = get_param_default_value(p) {
-            visitor.visit_expr(&mut (), e)?
+            visitor.visit_expr(&mut (), e)?;
         }
     }
     match b {
@@ -319,7 +319,7 @@ where
     }
     Ok((
         needs_local_this && flags.contains(Flags::HAS_THIS),
-        visitor.locals,
+        visitor.locals.into_iter(),
     ))
 }
 
@@ -337,7 +337,7 @@ pub fn from_ast(
         Either::Left(body),
         flags,
     )?;
-    Ok((needs_local_this, decl_vars.into_iter().collect()))
+    Ok((needs_local_this, decl_vars.collect()))
 }
 
 pub fn vars_from_ast(
@@ -353,5 +353,5 @@ pub fn vars_from_ast(
         b,
         flags,
     )?;
-    Ok(decl_vars.into_iter().collect())
+    Ok(decl_vars.collect())
 }

@@ -566,9 +566,8 @@ let emit_class (ast_class, hoisted) =
       let body_instrs =
         if List.length initialized_class_constants > 1 then
           let cases =
-            List.filter_map initialized_class_constants (fun p ->
-                match p with
-                | (name, label, _) -> Some (name, label))
+            List.map initialized_class_constants (fun (name, label, _) ->
+                (name, label))
           in
           gather
             [
@@ -579,7 +578,7 @@ let emit_class (ast_class, hoisted) =
         else
           make_cinit_instrs initialized_class_constants
       in
-      let instrs = Emit_pos.emit_pos_then ast_class.A.c_span @@ body_instrs in
+      let instrs = Emit_pos.emit_pos_then ast_class.A.c_span body_instrs in
       let params = [Hhas_param.make "$constName" false false [] None None] in
       [
         make_86method

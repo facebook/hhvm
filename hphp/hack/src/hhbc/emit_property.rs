@@ -51,7 +51,7 @@ pub fn from_ast<'a>(
 
     if !args.is_static && class.final_ && class.kind.is_cabstract() {
         return Err(emit_fatal::raise_fatal_parse(&pos, format!(
-            "Class {} contains non-static property declaration and therefore cannot ve declared as 'abstract final'",
+            "Class {} contains non-static property declaration and therefore cannot be declared 'abstract final'",
             string_utils::strip_ns(&class.name.1)
         )));
     };
@@ -109,7 +109,7 @@ pub fn from_ast<'a>(
                 }
                 _ => {
                     let label = emitter.label_gen_mut().next_regular();
-                    let (prolog, epilog) = if !args.is_static {
+                    let (prolog, epilog) = if args.is_static {
                         (
                             instr::empty(),
                             emit_pos::emit_pos_then(
@@ -139,6 +139,8 @@ pub fn from_ast<'a>(
                             ]),
                         )
                     };
+                    let mut flags = HhasPropertyFlags::empty();
+                    flags.set(HhasPropertyFlags::IS_DEEP_INIT, deep_init);
                     (
                         Some(TypedValue::Uninit),
                         Some(InstrSeq::gather(vec![
@@ -146,7 +148,7 @@ pub fn from_ast<'a>(
                             emit_expression::emit_expr(emitter, &env, e)?,
                             epilog,
                         ])),
-                        HhasPropertyFlags::IS_DEEP_INIT,
+                        flags,
                     )
                 }
             }

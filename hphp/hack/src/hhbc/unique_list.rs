@@ -34,11 +34,11 @@ where
         }
     }
 
-    pub fn iter(&self) -> impl Iterator<Item = &T> {
+    pub fn iter(&self) -> impl DoubleEndedIterator<Item = &T> {
         self.set.iter()
     }
 
-    pub fn into_iter(self) -> impl Iterator<Item = T> {
+    pub fn into_iter(self) -> impl DoubleEndedIterator<Item = T> {
         self.set.into_iter()
     }
 

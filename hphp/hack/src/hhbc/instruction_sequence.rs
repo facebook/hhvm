@@ -659,6 +659,10 @@ pub mod instr {
         instr(Instruct::ICall(InstructCall::NewObj))
     }
 
+    pub fn sswitch(cases: Vec<(String, label::Label)>) -> InstrSeq {
+        instr(Instruct::IContFlow(InstructControlFlow::SSwitch(cases)))
+    }
+
     pub fn newobjr() -> InstrSeq {
         instr(Instruct::ICall(InstructCall::NewObjR))
     }

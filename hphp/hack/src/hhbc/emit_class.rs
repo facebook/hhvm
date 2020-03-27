@@ -9,12 +9,13 @@ use emit_body_rust as emit_body;
 use emit_fatal_rust as emit_fatal;
 use emit_memoize_method_rust as emit_memoize_method;
 use emit_method_rust as emit_method;
+use emit_pos_rust as emit_pos;
 use emit_property_rust as emit_property;
 use emit_symbol_refs_rust as emit_symbol_refs;
 use emit_type_constant_rust as emit_type_constant;
 use emit_type_hint_rust as emit_type_hint;
 use emit_xhp_rust as emit_xhp;
-use env::{emitter::Emitter, Env};
+use env::{emitter::Emitter, local, Env};
 use hhas_attribute_rust as hhas_attribute;
 use hhas_class_rust::{HhasClass, HhasClassFlags, TraitReqKind};
 use hhas_constant_rust::{self as hhas_constant, HhasConstant};
@@ -24,13 +25,16 @@ use hhas_pos_rust::Span;
 use hhas_property_rust::HhasProperty;
 use hhas_type_const::HhasTypeConstant;
 use hhas_xhp_attribute_rust::HhasXhpAttribute;
+use hhbc_id_rust::r#const;
 use hhbc_id_rust::{self as hhbc_id, class, method, Id};
 use hhbc_string_utils_rust as string_utils;
-use instruction_sequence_rust::{Error::Unrecoverable, InstrSeq, Result};
+use instruction_sequence_rust::{instr, Error::Unrecoverable, InstrSeq, Result};
+use label_rust as label;
 use naming_special_names_rust as special_names;
 use oxidized::{
     ast::{self as tast, Hint, ReifyKind, Visibility},
     namespace_env,
+    pos::Pos,
 };
 use rx_rust as rx;
 
@@ -290,7 +294,8 @@ fn emit_reified_init_body<'a>(
     _ast_class: &'a tast::Class_,
 ) -> InstrSeq {
     // TODO(hrust)
-    InstrSeq::default()
+    unimplemented!()
+    //InstrSeq::default()
 }
 
 fn emit_reified_init_method<'a>(
@@ -351,8 +356,21 @@ where
         .iter()
         .any(|p: &HhasProperty| p.initializer_instrs.is_some() && filter(p))
     {
-        // TODO(hrust)
-        let instrs = InstrSeq::default();
+        let instrs = InstrSeq::gather(
+            properties
+                .iter()
+                .filter_map(|p| {
+                    if filter(p) {
+                        // TODO(hrust) this clone can be avoided by wrapping initializer_instrs by Rc
+                        // and also support Rc in InstrSeq
+                        p.initializer_instrs.clone()
+                    } else {
+                        None
+                    }
+                })
+                .collect(),
+        );
+        let instrs = InstrSeq::gather(vec![instrs, instr::null(), instr::retc()]);
         Ok(Some(make_86method(
             emitter,
             name.into(),
@@ -384,7 +402,7 @@ pub fn emit_class<'a>(
         attributes
             .extend(emit_attribute::add_reified_attribute(&ast_class.tparams.list).into_iter());
         attributes.extend(
-            emit_attribute::add_reified_parent_attribute(&env, &ast_class.extends)?.into_iter(),
+            emit_attribute::add_reified_parent_attribute(&env, &ast_class.extends).into_iter(),
         )
     }
 
@@ -559,16 +577,73 @@ pub fn emit_class<'a>(
 
     let initialized_constants: Vec<_> = constants
         .iter()
-        .filter_map(|p| {
-            p.initializer_instrs
-                .as_ref()
-                .map(|instrs| Some((&p.name, instrs)))
-        })
+        .filter_map(
+            |HhasConstant {
+                 ref name,
+                 ref initializer_instrs,
+                 ..
+             }| {
+                initializer_instrs
+                    .as_ref()
+                    .map(|instrs| (name, emitter.label_gen_mut().next_regular(), instrs))
+            },
+        )
         .collect();
     let cinit_method = if initialized_constants.is_empty() {
         None
     } else {
-        let instrs = InstrSeq::default(); // TODO(hrust)
+        fn make_cinit_instrs(
+            e: &mut Emitter,
+            return_label: label::Label,
+            pos: &Pos,
+            consts: &[(&r#const::Type, label::Label, &InstrSeq)],
+        ) -> InstrSeq {
+            match consts {
+                [] => InstrSeq::gather(vec![
+                    instr::label(return_label),
+                    emit_pos::emit_pos(pos),
+                    instr::retc(),
+                ]),
+                [(_, label, instrs)] => InstrSeq::gather(vec![
+                    instr::label(label.clone()),
+                    (*instrs).clone(),
+                    make_cinit_instrs(e, return_label, pos, &[]),
+                ]),
+                [(_, label, instrs), cs @ ..] => InstrSeq::gather(vec![
+                    instr::label(label.clone()),
+                    (*instrs).clone(),
+                    emit_pos::emit_pos(pos),
+                    instr::jmp(return_label.clone()),
+                    make_cinit_instrs(e, return_label, pos, cs),
+                ]),
+            }
+        }
+        let return_label = emitter.label_gen_mut().next_regular();
+
+        let body_instrs = if initialized_constants.len() > 1 {
+            let cases: Vec<(String, label::Label)> = initialized_constants
+                .iter()
+                .map(|(c, l, _)| ((*c).to_raw_string().into(), l.clone()))
+                .collect();
+            InstrSeq::gather(vec![
+                instr::cgetl(local::Type::Named("$constName".into())),
+                instr::sswitch(cases),
+                make_cinit_instrs(
+                    emitter,
+                    return_label,
+                    &ast_class.span,
+                    &initialized_constants[..],
+                ),
+            ])
+        } else {
+            make_cinit_instrs(
+                emitter,
+                return_label,
+                &ast_class.span,
+                &initialized_constants[..],
+            )
+        };
+        let instrs = emit_pos::emit_pos_then(&ast_class.span, body_instrs);
         let params = vec![HhasParam {
             name: "$constName".to_string(),
             is_variadic: false,

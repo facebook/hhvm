@@ -1455,6 +1455,15 @@ fn get_erased_tparams<'a>(env: &'a Env<'a>) -> Vec<&'a str> {
         .collect()
 }
 
+pub fn has_non_tparam_generics(env: &Env, hints: &[tast::Hint]) -> bool {
+    let erased_tparams = get_erased_tparams(env);
+    hints.iter().any(|hint| {
+        hint.1
+            .as_happly()
+            .map_or(true, |(id, _)| !erased_tparams.contains(&id.1.as_str()))
+    })
+}
+
 fn has_non_tparam_generics_targs(env: &Env, targs: &[tast::Targ]) -> bool {
     let erased_tparams = get_erased_tparams(env);
     targs.iter().any(|targ| {

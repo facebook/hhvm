@@ -57,6 +57,13 @@ fn is_memoize(method: &T::Method_) -> bool {
         .any(|a| ua::is_memoized(&a.name.1))
 }
 
+fn is_memoize_lsb(method: &T::Method_) -> bool {
+    method
+        .user_attributes
+        .iter()
+        .any(|a| ua::MEMOIZE_LSB == &a.name.1)
+}
+
 pub fn make_info<'a>(
     class: &T::Class_,
     class_id: class::Type<'a>,
@@ -68,7 +75,7 @@ pub fn make_info<'a>(
             emit_memoize_helpers::check_memoize_possible(&m.name.0, &m.params[..], true)?;
             let pos = &m.name.0;
             if class.kind.is_cinterface() {
-                return Err(emit_fatal::raise_fatal_parse(
+                return Err(emit_fatal::raise_fatal_runtime(
                     pos,
                     "<<__Memoize>> cannot be used in interfaces",
                 ));
@@ -212,7 +219,7 @@ fn emit_memoize_wrapper_body<'a>(
         args.scope,
         args.params,
     )?;
-    args.flags.set(Flags::WITH_LSB, is_memoize(args.method));
+    args.flags.set(Flags::WITH_LSB, is_memoize_lsb(args.method));
     args.flags.set(Flags::IS_STATIC, args.method.static_);
     emit(emitter, env, hhas_params, return_type_info, args)
 }
@@ -237,7 +244,7 @@ fn make_memoize_method_code(
     hhas_params: &[HhasParam],
     args: &Args,
 ) -> Result<InstrSeq> {
-    if !args.params.is_empty() && !args.flags.contains(Flags::IS_REFIED) {
+    if args.params.is_empty() && !args.flags.contains(Flags::IS_REFIED) {
         make_memoize_method_no_params_code(emitter, args)
     } else {
         make_memoize_method_with_params_code(emitter, env, pos, hhas_params, args)
@@ -283,7 +290,7 @@ fn make_memoize_method_with_params_code(
             FcallArgs::new(fcall_flags, 1, vec![], None, param_count, None)
         }
     };
-    let (reified_get, reified_memokeym) = if !args.flags.contains(Flags::IS_ASYNC) {
+    let (reified_get, reified_memokeym) = if !args.flags.contains(Flags::IS_REFIED) {
         (instr::empty(), instr::empty())
     } else {
         (

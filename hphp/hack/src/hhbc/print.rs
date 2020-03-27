@@ -672,8 +672,10 @@ fn print_method_def<W: Write>(
     print_method_attrs(ctx, w, method_def)?;
     w.write(string_of_span(&method_def.span))?;
     w.write(" ")?;
-    option(w, &body.return_type_info, print_type_info)?;
-    w.write(" ")?;
+    option(w, &body.return_type_info, |w, t| {
+        print_type_info(w, t)?;
+        w.write(" ")
+    })?;
     w.write(method_def.name.to_raw_string())?;
     print_params(ctx, w, body.env.as_ref(), &body.params)?;
     if method_def.flags.contains(HhasMethodFlags::IS_GENERATOR) {
@@ -1723,11 +1725,88 @@ fn print_misc<W: Write>(w: &mut W, misc: &InstructMisc) -> Result<(), W::Error> 
             " ",
             ["CreateCl", n.to_string().as_str(), cid.to_string().as_str()],
         ),
-        M::InitThisLoc(local) => {
+        M::BareThis(op) => concat_str_by(
+            w,
+            " ",
+            [
+                "BareThis",
+                match op {
+                    BareThisOp::Notice => "Notice",
+                    BareThisOp::NoNotice => "NoNotice",
+                    BareThisOp::NeverNull => "NeverNull",
+                },
+            ],
+        ),
+
+        M::MemoGet(label, Some((Local::Unnamed(first), local_count))) => {
+            w.write("MemoGet ")?;
+            print_label(w, label)?;
+            w.write(format!(" L:{}+{}", first, local_count))
+        }
+        M::MemoGet(label, None) => {
+            w.write("MemoGet ")?;
+            print_label(w, label)?;
+            w.write(" L:0+0")
+        }
+        M::MemoGet(_, _) => Err(Error::fail("MemoGet needs an unnamed local")),
+
+        M::MemoSet(Some((Local::Unnamed(first), local_count))) => {
+            w.write(format!("MemoSet L:{}+{}", first, local_count))
+        }
+        M::MemoSet(None) => w.write("MemoSet L:0+0"),
+        M::MemoSet(_) => Err(Error::fail("MemoSet needs an unnamed local")),
+
+        M::MemoGetEager(label1, label2, Some((Local::Unnamed(first), local_count))) => {
+            w.write("MemoGetEager ")?;
+            print_label(w, label1)?;
+            w.write(" ")?;
+            print_label(w, label2)?;
+            w.write(format!(" L:{}+{}", first, local_count))
+        }
+        M::MemoGetEager(label1, label2, None) => {
+            w.write("MemoGetEager ")?;
+            print_label(w, label1)?;
+            w.write(" ")?;
+            print_label(w, label2)?;
+            w.write(" L:0+0")
+        }
+        M::MemoGetEager(_, _, _) => Err(Error::fail("MemoGetEager needs an unnamed local")),
+
+        M::MemoSetEager(Some((Local::Unnamed(first), local_count))) => {
+            w.write(format!("MemoSetEager L:{}+{}", first, local_count))
+        }
+        M::MemoSetEager(None) => w.write("MemoSetEager L:0+0"),
+        M::MemoSetEager(_) => Err(Error::fail("MemoSetEager needs an unnamed local")),
+
+        M::InitThisLoc(id) => {
             w.write("InitThisLoc ")?;
+            print_local(w, id)
+        }
+        M::OODeclExists(k) => concat_str_by(
+            w,
+            " ",
+            [
+                "OODeclExists",
+                match k {
+                    ClassKind::Class => "Class",
+                    ClassKind::Interface => "Interface",
+                    ClassKind::Trait => "Trait",
+                },
+            ],
+        ),
+        M::AssertRATL(local, s) => {
+            w.write("AssertRATL ")?;
+            print_local(w, local)?;
+            w.write(" ")?;
+            w.write(s)
+        }
+        M::AssertRATStk(n, s) => {
+            concat_str_by(w, " ", ["AssertRATStk", n.to_string().as_str(), s.as_str()])
+        }
+        M::GetMemoKeyL(local) => {
+            w.write("GetMemoKeyL ")?;
             print_local(w, local)
         }
-        _ => not_impl!(),
     }
 }
 

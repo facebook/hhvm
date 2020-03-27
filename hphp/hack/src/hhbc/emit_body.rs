@@ -330,21 +330,28 @@ fn make_decl_vars(
     let (need_local_this, mut decl_vars) =
         decl_vars::from_ast(params, body, flags, explicit_use_set).map_err(unrecoverable)?;
 
-    Ok((
-        need_local_this,
-        if arg_flags.contains(Flags::CLOSURE_BODY) {
-            let mut captured_vars = scope.get_captured_vars();
-            move_this(&mut decl_vars);
-            decl_vars.retain(|v| !captured_vars.contains(v));
-            captured_vars.extend_from_slice(&decl_vars.as_slice());
-            captured_vars
-        } else {
-            if has_reified(immediate_tparams) {
-                decl_vars.push(String::from(string_utils::reified::GENERICS_LOCAL_NAME));
-            }
-            decl_vars
-        },
-    ))
+    let mut decl_vars = if arg_flags.contains(Flags::CLOSURE_BODY) {
+        let mut captured_vars = scope.get_captured_vars();
+        move_this(&mut decl_vars);
+        decl_vars.retain(|v| !captured_vars.contains(v));
+        captured_vars.extend_from_slice(&decl_vars.as_slice());
+        captured_vars
+    } else {
+        match &scope.items[..] {
+            [] | [.., ScopeItem::Class(_), _] => move_this(&mut decl_vars),
+            _ => (),
+        };
+        decl_vars
+    };
+
+    if !arg_flags.contains(Flags::CLOSURE_BODY)
+        && immediate_tparams
+            .iter()
+            .any(|t| t.reified != tast::ReifyKind::Erased)
+    {
+        decl_vars.insert(0, string_utils::reified::GENERICS_LOCAL_NAME.into());
+    }
+    Ok((need_local_this, decl_vars))
 }
 
 pub fn emit_return_type_info(
@@ -796,22 +803,10 @@ pub fn emit_generics_upper_bounds(
 }
 
 fn move_this(vars: &mut Vec<String>) {
-    let this_keyword = String::from(THIS);
-    if vars.contains(&this_keyword) {
+    if vars.iter().any(|v| v == &THIS) {
         vars.retain(|s| s != THIS);
-        vars.insert(0, this_keyword);
+        vars.push(String::from(THIS));
     }
-}
-
-fn has_reified(tparams: &[tast::Tparam]) -> bool {
-    use aast::ReifyKind;
-    for tparam in tparams.iter() {
-        match tparam.reified {
-            ReifyKind::SoftReified | ReifyKind::Reified => return true,
-            _ => (),
-        }
-    }
-    false
 }
 
 fn get_tp_name(tparam: &tast::Tparam) -> &str {
@@ -824,7 +819,7 @@ pub fn get_tp_names(tparams: &[tast::Tparam]) -> Vec<&str> {
 }
 
 fn modify_prog_for_debugger_eval(_body_instrs: &mut InstrSeq) {
-    //TODO(hrust) implement
+    unimplemented!()
 }
 
 fn set_function_jmp_targets(emitter: &mut Emitter, env: &mut Env) -> bool {

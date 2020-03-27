@@ -93,6 +93,14 @@ fn is_native(attr: &HhasAttribute) -> bool {
     is("__Native", attr)
 }
 
+fn is_memoize(attr: &HhasAttribute) -> bool {
+    &attr.name == ua::MEMOIZE || &attr.name == ua::MEMOIZE_LSB
+}
+
+fn is_memoize_lsb(attr: &HhasAttribute) -> bool {
+    &attr.name == ua::MEMOIZE_LSB
+}
+
 pub fn has_native(attrs: &[HhasAttribute]) -> bool {
     has(attrs, is_native)
 }
@@ -123,6 +131,14 @@ pub fn has_provenance_skip_frame(attrs: &[HhasAttribute]) -> bool {
 
 pub fn has_dynamically_callable(attrs: &[HhasAttribute]) -> bool {
     has(attrs, is_dynamically_callable)
+}
+
+pub fn has_is_memoize(attrs: &[HhasAttribute]) -> bool {
+    has(attrs, is_memoize)
+}
+
+pub fn has_is_memoize_lsb(attrs: &[HhasAttribute]) -> bool {
+    has(attrs, is_memoize_lsb)
 }
 
 pub fn deprecation_info<'a>(

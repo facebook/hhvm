@@ -47,7 +47,7 @@ pub fn from_ast<'a>(
     let is_closure_body = &method.name.1 == "__invoke" && (class.name.1).starts_with("Closure$");
     let mut attributes =
         emit_attribute::from_asts(emitter, &class.namespace, &method.user_attributes)?;
-    if is_closure_body {
+    if !is_closure_body {
         attributes.extend(emit_attribute::add_reified_attribute(&method.tparams[..]));
     };
 

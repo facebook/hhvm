@@ -12,6 +12,7 @@ use instruction_sequence_rust::InstrSeq;
 use naming_special_names_rust::classes;
 use oxidized::{aast::*, ast, ast_defs};
 
+#[derive(Debug)]
 pub enum ClassExpr {
     Special(SpecialClsRef),
     Id(ast_defs::Id),
@@ -22,8 +23,8 @@ pub enum ClassExpr {
 impl ClassExpr {
     fn get_original_class_name(
         emitter: &Emitter,
-        resolve_self: bool,
         check_traits: bool,
+        resolve_self: bool,
         scope: &Scope,
     ) -> Option<String> {
         if let Some(cd) = scope.get_class() {

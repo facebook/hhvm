@@ -4,11 +4,12 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ast_constant_folder_rust as ast_constant_folder;
+use emit_expression_rust as emit_expression;
 use emit_fatal_rust as emit_fatal;
 use env::{emitter::Emitter, Env};
 use hhas_attribute_rust::HhasAttribute;
 use hhbc_id_rust::{self as hhbc_id, Id};
-use instruction_sequence_rust::{Error, Result};
+use instruction_sequence_rust::Result;
 use naming_special_names::user_attributes as ua;
 use naming_special_names_rust as naming_special_names;
 use oxidized::{ast as a, namespace_env::Env as Namespace};
@@ -88,11 +89,14 @@ pub fn add_reified_attribute(tparams: &[a::Tparam]) -> Option<HhasAttribute> {
     Some(HhasAttribute { name, arguments })
 }
 
-pub fn add_reified_parent_attribute(
-    _env: &Env,
-    _extends: &Vec<a::Hint>,
-) -> Result<Option<HhasAttribute>> {
-    Err(Error::Unrecoverable(
-        "emit_attribute::add_reified_parent_attribute".to_string(),
-    ))
+pub fn add_reified_parent_attribute(env: &Env, extends: &Vec<a::Hint>) -> Option<HhasAttribute> {
+    if let Some((_, hl)) = extends.first().and_then(|h| h.1.as_happly()) {
+        if emit_expression::has_non_tparam_generics(env, hl) {
+            return Some(HhasAttribute {
+                name: "__HasReifiedParent".into(),
+                arguments: vec![],
+            });
+        }
+    }
+    return None;
 }

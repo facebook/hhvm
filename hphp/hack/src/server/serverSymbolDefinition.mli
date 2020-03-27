@@ -19,3 +19,5 @@ val get_definition_cst_node_ctx :
   kind:SymbolDefinition.kind ->
   pos:'a Pos.pos ->
   Full_fidelity_positioned_syntax.t option
+
+val get_class_by_name : Provider_context.t -> string -> Nast.class_ option

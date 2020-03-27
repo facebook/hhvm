@@ -421,11 +421,11 @@ let add_container_defn_fact clss decl_id progress =
     in
     add_fact ClassDefinition json_fact progress
 
-let add_container_decl_fact decl_pred name _elem progress =
+let add_container_decl_fact decl_pred name progress =
   let json_fact = JSON_Object [("name", build_name_json_nested name)] in
   add_fact decl_pred json_fact progress
 
-let add_property_decl_fact con_type decl_id name _prop progress =
+let add_property_decl_fact con_type decl_id name progress =
   let json_fact =
     JSON_Object
       [
@@ -454,7 +454,7 @@ let add_property_defn_fact ctx prop decl_id progress =
   in
   add_fact PropertyDefinition (JSON_Object json_fields) progress
 
-let add_enum_decl_fact name _elem progress =
+let add_enum_decl_fact name progress =
   let json_fact = JSON_Object [("name", build_name_json_nested name)] in
   add_fact EnumDeclaration json_fact progress
 
@@ -483,7 +483,7 @@ let add_enum_defn_fact ctx elem decl_id progress =
   in
   add_fact EnumDefinition (JSON_Object json_fields) progress
 
-let add_func_decl_fact name _elem progress =
+let add_func_decl_fact name progress =
   let json_fact = JSON_Object [("name", build_name_json_nested name)] in
   add_fact FunctionDeclaration json_fact progress
 
@@ -534,7 +534,7 @@ let add_typedef_decl_fact name elem progress =
   in
   add_fact TypedefDeclaration json_fact progress
 
-let add_gconst_decl_fact name _elem progress =
+let add_gconst_decl_fact name progress =
   let json_fact = JSON_Object [("name", build_name_json_nested name)] in
   add_fact GlobalConstDeclaration json_fact progress
 
@@ -600,7 +600,7 @@ let process_xref
     (symbol_def : Relative_path.t SymbolDefinition.t)
     symbol_pos
     (xrefs, progress) =
-  let (target_id, prog) = decl_fun symbol_def.name symbol_def progress in
+  let (target_id, prog) = decl_fun symbol_def.name progress in
   let xref_json = decl_ref_fun target_id in
   let target_json = build_decl_target_json xref_json in
   let xrefs = add_xref target_json target_id symbol_pos xrefs in
@@ -615,8 +615,45 @@ let process_container_xref
     symbol_pos
     (xrefs, progress)
 
+let process_gconst_xref symbol_def pos (xrefs, progress) =
+  process_xref
+    add_gconst_decl_fact
+    build_gconst_decl_json_ref
+    symbol_def
+    pos
+    (xrefs, progress)
+
+let process_enum_xref symbol_def pos (xrefs, progress) =
+  process_xref
+    add_enum_decl_fact
+    build_enum_decl_json_ref
+    symbol_def
+    pos
+    (xrefs, progress)
+
+let process_function_xref symbol_def pos (xrefs, progress) =
+  process_xref
+    add_func_decl_fact
+    build_func_decl_json_ref
+    symbol_def
+    pos
+    (xrefs, progress)
+
+let process_prop_xref prop pos clss class_name (xrefs, progress) =
+  let con_kind = get_container_kind clss in
+  let (con_name, decl_pred) = container_decl_predicate con_kind in
+  let (con_decl_id, prog) =
+    add_container_decl_fact decl_pred class_name progress
+  in
+  process_xref
+    (add_property_decl_fact con_name con_decl_id)
+    (build_container_decl_json_ref con_name)
+    prop
+    pos
+    (xrefs, prog)
+
 let process_decl_loc decl_fun defn_fun decl_ref_fun pos id elem progress =
-  let (decl_id, prog) = decl_fun id elem progress in
+  let (decl_id, prog) = decl_fun id progress in
   let (_, prog) = defn_fun elem decl_id prog in
   let ref_json = decl_ref_fun decl_id in
   let (_, prog) = add_decl_loc_fact pos ref_json prog in
@@ -731,33 +768,24 @@ let build_json ctx symbols =
             | Class ->
               let con_kind = container_decl_predicate ClassContainer in
               process_container_xref con_kind symbol_def occ.pos (xrefs, prog)
+            | Const when phys_equal occ.type_ GConst ->
+              process_gconst_xref symbol_def occ.pos (xrefs, prog)
+            | Enum -> process_enum_xref symbol_def occ.pos (xrefs, prog)
+            | Function -> process_function_xref symbol_def occ.pos (xrefs, prog)
             | Interface ->
               let con_kind = container_decl_predicate InterfaceContainer in
               process_container_xref con_kind symbol_def occ.pos (xrefs, prog)
+            | Property ->
+              (match occ.type_ with
+              | Property (cn, _) ->
+                (match ServerSymbolDefinition.get_class_by_name ctx cn with
+                | Some cls ->
+                  process_prop_xref symbol_def occ.pos cls cn (xrefs, prog)
+                | None -> (xrefs, prog))
+              | _ -> (xrefs, prog))
             | Trait ->
               let con_kind = container_decl_predicate TraitContainer in
               process_container_xref con_kind symbol_def occ.pos (xrefs, prog)
-            | Const when phys_equal occ.type_ GConst ->
-              process_xref
-                add_gconst_decl_fact
-                build_gconst_decl_json_ref
-                symbol_def
-                occ.pos
-                (xrefs, prog)
-            | Enum ->
-              process_xref
-                add_enum_decl_fact
-                build_enum_decl_json_ref
-                symbol_def
-                occ.pos
-                (xrefs, prog)
-            | Function ->
-              process_xref
-                add_func_decl_fact
-                build_func_decl_json_ref
-                symbol_def
-                occ.pos
-                (xrefs, prog)
             | _ -> (xrefs, prog)))
   in
   let progress =

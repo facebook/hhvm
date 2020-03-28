@@ -598,7 +598,6 @@ using TypeNames::TCA;
 #undef DArrMixed
 #undef DArrRecord
 #undef DVArr
-#undef DVArrOrNull
 #undef DDArr
 #undef DStaticDArr
 #undef DCol

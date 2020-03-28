@@ -72,8 +72,8 @@ static auto const TPackedArr = Type::Array(ArrayData::kPackedKind);
 static auto const TRecordArr = Type::Array(ArrayData::kRecordKind);
 
 // DV array types that appear in irgen.
-static auto const TDArr = TMixedArr;
-static auto const TVArr = TPackedArr.narrowToVanilla();
+static auto const TDArr = TMixedArr.narrowToDVArray();
+static auto const TVArr = TPackedArr.narrowToDVArray();
 
 // Vanilla types that appear in irgen.
 static auto const TVanillaArr     = TArr.narrowToVanilla();
@@ -374,8 +374,9 @@ inline Type Type::dropConstVal() const {
   auto const result = Type(m_bits, ptrKind(), memKind());
 
   if (*this <= TArrLike && arrLikeVal()->isVanilla()) {
-    return *this <= TArr ? Type::StaticArray(arrVal()->kind())
-                         : result.narrowToVanilla();
+    if (!(*this <= TArr)) return result.narrowToVanilla();
+    auto const specialized = Type::StaticArray(arrVal()->kind());
+    return arrVal()->isDVArray() ? specialized.narrowToDVArray() : specialized;
   }
   return result;
 }

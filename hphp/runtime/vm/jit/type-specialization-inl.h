@@ -197,8 +197,18 @@ inline ArraySpec::ArraySpec(ArrayData::ArrayKind kind,
   assertx(checkInvariants());
 }
 
+inline ArraySpec ArraySpec::narrowToDVArray() const {
+  auto result = *this;
+  result.m_sort |= (*this == Bottom() ? IsTop : IsDVArray);
+  assertx(result.checkInvariants());
+  return result;
+}
+
 inline ArraySpec ArraySpec::narrowToVanilla() const {
-  return *this & ArraySpec(LayoutTag::Vanilla);
+  auto result = *this;
+  result.m_sort |= (*this == Bottom() ? IsTop : IsVanilla);
+  assertx(result.checkInvariants());
+  return result;
 }
 
 inline ArraySpec ArraySpec::widenToBespoke() const {
@@ -229,6 +239,10 @@ inline const RepoAuthType::Array* ArraySpec::type() const {
   return ((m_sort & test) == test)
     ? reinterpret_cast<const RepoAuthType::Array*>(m_ptr)
     : nullptr;
+}
+
+inline bool ArraySpec::dvarray() const {
+  return m_sort & IsDVArray;
 }
 
 inline bool ArraySpec::vanilla() const {

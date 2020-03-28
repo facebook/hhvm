@@ -960,7 +960,6 @@ SSATmp* opt_shapes_idx(IRGS& env, const ParamPrep& params) {
   if (RuntimeOption::EvalHackArrDVArrs && arrType <= TDict) {
     is_dict = true;
   } else if (!RuntimeOption::EvalHackArrDVArrs && arrType <= TArr) {
-    if (RuntimeOption::EvalHackArrCompatTypeHintNotices) return nullptr;
     is_dict = false;
   } else {
     return nullptr;
@@ -976,8 +975,26 @@ SSATmp* opt_shapes_idx(IRGS& env, const ParamPrep& params) {
   if (!(defType <= TUninit) && defType.maybe(TUninit)) return nullptr;
   auto const def = defType <= TUninit ? cns(env, TInitNull) : params[2].value;
 
+  // params[0] is the array, for which we may need to do a dvarray check.
+  auto const arr = [&]() -> SSATmp* {
+    auto const val = params[0].value;
+    if (!(RO::EvalHackArrCompatTypeHintNotices && val->isA(TArr))) return val;
+
+    // Rather than just emitting a notice here, we interp and side-exit for
+    // non-darrays so that we can use layout information in the main trace.
+    //
+    // To interp, we must restore the stack offset from the start of the HHBC.
+    // It's easy to undo the stack offset for FCallBuiltin, but it's too hard
+    // to do the same for inlined NativeImpls (since they end inlined traces).
+    if (curSrcKey(env).op() != Op::FCallBuiltin) return nullptr;
+    env.irb->fs().incBCSPDepth(nparams);
+    auto const result = gen(env, CheckDArray, makeExitSlow(env), val);
+    env.irb->fs().decBCSPDepth(nparams);
+    return result;
+  }();
+  if (!arr) return nullptr;
+
   // Do the array access, using array offset profiling to optimize it.
-  auto const arr = params[0].value;
   auto const key = params[1].value;
   auto const elm = profiledArrayAccess(env, arr, key,
     [&] (SSATmp* arr, SSATmp* key, uint32_t pos) {

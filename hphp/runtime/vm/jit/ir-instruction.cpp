@@ -583,15 +583,13 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DArrPacked      return TPackedArr;
 #define DArrMixed       return TMixedArr;
 #define DArrRecord      return TRecordArr;
-#define DVArr           return RO::EvalHackArrDVArrs ? TVec : TPackedArr;
-#define DDArr           return RO::EvalHackArrDVArrs ? TDict : TMixedArr;
-#define DStaticDArr     return (RuntimeOption::EvalHackArrDVArrs \
-                                ? TStaticDict \
-                                : Type::StaticArray(ArrayData::kMixedKind));
+#define DVArr           return RO::EvalHackArrDVArrs ? TVec : TVArr;
+#define DDArr           return RO::EvalHackArrDVArrs ? TDict : TDArr;
+#define DStaticDArr     return (TStaticDict | TStaticArr) & []{ DDArr }();
 // If the inputs to CheckVArray and CheckDArray are vanilla, then the output
 // will have a known type, but if the inputs are generic arrays, we won't.
 #define DCheckDV(kind)  return inst->getPassthroughValue()->type() & \
-                               checkLayoutFlags(T##kind##Arr);
+                               checkLayoutFlags(T##kind##Arr).narrowToDVArray();
 #define DCol            return newColReturn(inst);
 #define DMulti          return TBottom;
 #define DSetElem        return setElemReturn(inst);
@@ -642,7 +640,6 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DArrMixed
 #undef DArrRecord
 #undef DVArr
-#undef DVArrOrNull
 #undef DDArr
 #undef DStaticDArr
 #undef DCol

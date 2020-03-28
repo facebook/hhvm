@@ -820,6 +820,40 @@ TEST(Type, Const) {
   EXPECT_TRUE(constKeyset < TKeyset);
 }
 
+TEST(Type, DVArray) {
+  EXPECT_EQ(TDArr, TMixedArr.narrowToDVArray());
+  EXPECT_EQ("Arr=MixedKind:DV", TDArr.toString());
+  EXPECT_TRUE(TDArr <= TArr);
+  EXPECT_TRUE(TDArr <= TMixedArr);
+  EXPECT_FALSE(TDArr <= TPackedArr);
+  EXPECT_TRUE(TDArr.arrSpec().kind());
+  EXPECT_FALSE(TDArr.arrSpec().type());
+  EXPECT_TRUE(TDArr.arrSpec().dvarray());
+  EXPECT_TRUE(TDArr.arrSpec().vanilla());
+
+  EXPECT_EQ(TVArr, TPackedArr.narrowToDVArray());
+  EXPECT_EQ("Arr=PackedKind:DV", TVArr.toString());
+  EXPECT_TRUE(TVArr <= TArr);
+  EXPECT_FALSE(TVArr <= TMixedArr);
+  EXPECT_TRUE(TVArr <= TPackedArr);
+  EXPECT_TRUE(TVArr.arrSpec().kind());
+  EXPECT_FALSE(TVArr.arrSpec().type());
+  EXPECT_TRUE(TVArr.arrSpec().dvarray());
+  EXPECT_TRUE(TVArr.arrSpec().vanilla());
+
+  auto const dvarr = TDArr | TVArr;
+  EXPECT_TRUE(dvarr <= TArr);
+  EXPECT_FALSE(dvarr <= TDArr);
+  EXPECT_FALSE(dvarr <= TVArr);
+  EXPECT_FALSE(dvarr.arrSpec().kind());
+  EXPECT_FALSE(dvarr.arrSpec().type());
+  EXPECT_TRUE(dvarr.arrSpec().dvarray());
+  EXPECT_TRUE(dvarr.arrSpec().vanilla());
+
+  EXPECT_EQ(TDArr, dvarr & TMixedArr);
+  EXPECT_EQ(TVArr, dvarr & TPackedArr);
+}
+
 TEST(Type, NarrowToVanilla) {
   EXPECT_EQ("Arr=Vanilla", TArr.narrowToVanilla().toString());
   EXPECT_EQ("{Vec=Vanilla|Int}", (TVec|TInt).narrowToVanilla().toString());
@@ -955,7 +989,7 @@ TEST(Type, ConstantPtrTypes) {
   auto const base_ptr_type = spec_ptr_type.unspecialize();
   auto const cons_ptr_type = Type::cns(tv, spec_ptr_type);
 
-  EXPECT_EQ("PtrToElemStaticArr=MixedKind", spec_ptr_type.toString());
+  EXPECT_EQ("PtrToElemStaticArr=MixedKind:DV", spec_ptr_type.toString());
   EXPECT_EQ("PtrToElemStaticArr", base_ptr_type.toString());
   auto const str = folly::format("PtrToElemStaticArr<TV: {}>", tv).str();
   EXPECT_EQ(str, cons_ptr_type.toString());

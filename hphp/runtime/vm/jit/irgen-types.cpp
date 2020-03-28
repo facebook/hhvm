@@ -247,9 +247,12 @@ void verifyTypeImpl(IRGS& env,
     case AnnotAction::VArrayCheck:
     case AnnotAction::DArrayCheck:
     case AnnotAction::VArrayOrDArrayCheck:
-    case AnnotAction::NonVArrayOrDArrayCheck:
+    case AnnotAction::NonVArrayOrDArrayCheck: {
       assertx(valType <= TArr);
+      auto const gc = GuardConstraint(DataTypeSpecialized).setWantArrayKind();
+      env.irb->constrainValue(val, gc);
       return dvArr(val);
+    }
     case AnnotAction::WarnFunc:
       assertx(valType <= TFunc);
       if (!funcToStr(val)) return genFail();
@@ -481,6 +484,9 @@ void ifDVArray(IRGS& env, Opcode op, SSATmp* arr, Next next) {
   assertx(arr->isA(TArr));
   assertx(op == CheckDArray || op == CheckVArray || op == CheckDVArray);
 
+  auto const gc = GuardConstraint(DataTypeSpecialized).setWantArrayKind();
+  env.irb->constrainValue(arr, gc);
+
   if (arr->inst()->is(CheckDArray, CheckVArray, CheckDVArray)) {
     next(arr);
   } else {
@@ -624,6 +630,11 @@ SSATmp* isDictImpl(IRGS& env, SSATmp* src) {
 
 SSATmp* isDVArrayImpl(IRGS& env, SSATmp* src, IsTypeOp subop) {
   MultiCond mc{env};
+
+  if (src->type().maybe(TArr)) {
+    auto const gc = GuardConstraint(DataTypeSpecialized).setWantArrayKind();
+    env.irb->constrainValue(src, gc);
+  }
 
   assertx(subop == IsTypeOp::VArray || subop == IsTypeOp::DArray);
   auto const varray = subop == IsTypeOp::VArray;

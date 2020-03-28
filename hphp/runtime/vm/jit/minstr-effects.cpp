@@ -71,8 +71,12 @@ void getBaseType(Opcode rawOp, bool predict,
 
   if ((op == SetElem || op == SetRange || op == UnsetElem) &&
       baseType.maybe(TArrLike | TStr | TRecord | TClsMeth)) {
-    /* If we already have a vanilla array, it'll remain vanilla. */
-    auto const vanilla = baseType <= TArrLike && baseType.arrSpec().vanilla();
+    /* Member operations never cause us to lose the dvarray or vanilla bits.
+     * Note that we may escalate a varray to a darray, but we account for that
+     * by losing the array specialization's kind, not the dvarray bit. */
+    auto const spec = baseType.arrSpec();
+    auto const dvarray = spec.dvarray();
+    auto const vanilla = spec.vanilla();
 
     /* Modifying an array or string element, even when COW doesn't kick in,
      * produces a new SSATmp for the base. StaticArr/StaticStr may be promoted
@@ -94,6 +98,7 @@ void getBaseType(Opcode rawOp, bool predict,
     if (baseType.maybe(TClsMeth)) {
       baseType |= RO::EvalHackArrDVArrs ? TCountedVec : TCountedArr;
     }
+    if (dvarray) baseType = baseType.narrowToDVArray();
     if (vanilla) baseType = baseType.narrowToVanilla();
   }
 }

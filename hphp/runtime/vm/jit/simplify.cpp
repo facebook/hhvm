@@ -2580,32 +2580,56 @@ SSATmp* simplifyCheckType(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+namespace {
+
+SSATmp* implSimplifyHackArrTypehint(
+    State& env, const IRInstruction* inst, SSATmp* arr) {
+  auto const extra = inst->extra<RaiseHackArrTypehintNoticeData>();
+  auto const type = [&]{
+    if (RO::EvalHackArrCompatTypeHintPolymorphism) return TBottom;
+    switch (extra->tc.type()) {
+      case AnnotType::VArrOrDArr: return TVArr | TDArr;
+      case AnnotType::VArray:     return TVArr;
+      case AnnotType::DArray:     return TDArr;
+      default:                    return TBottom;
+    }
+  }();
+  assertx(arr->isA(TArr));
+  return arr->isA(type) ? gen(env, Nop) : nullptr;
+}
+
+}
+
+SSATmp* simplifyRaiseHackArrParamNotice(State& env, const IRInstruction* inst) {
+  return implSimplifyHackArrTypehint(env, inst, inst->src(0));
+}
+
+SSATmp* simplifyRaiseHackArrPropNotice(State& env, const IRInstruction* inst) {
+  return implSimplifyHackArrTypehint(env, inst, inst->src(1));
+}
+
 SSATmp* simplifyCheckVArray(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
-  if (!src->type().maybe(TPackedArr.widenToBespoke())) {
+  if (src->type() <= TVArr) {
+    gen(env, Nop);
+    return src;
+  } else if (!src->type().maybe(TVArr.widenToBespoke())) {
     gen(env, Jmp, inst->taken());
     return cns(env, TBottom);
   }
-  if (!src->hasConstVal()) return nullptr;
-  if (!src->arrVal()->isVArray()) {
-    gen(env, Jmp, inst->taken());
-    return cns(env, TBottom);
-  }
-  return src;
+  return nullptr;
 }
 
 SSATmp* simplifyCheckDArray(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
-  if (!src->type().maybe(TMixedArr.widenToBespoke())) {
+  if (src->type() <= TDArr) {
+    gen(env, Nop);
+    return src;
+  } else if (!src->type().maybe(TDArr.widenToBespoke())) {
     gen(env, Jmp, inst->taken());
     return cns(env, TBottom);
   }
-  if (!src->hasConstVal()) return nullptr;
-  if (!src->arrVal()->isDArray()) {
-    gen(env, Jmp, inst->taken());
-    return cns(env, TBottom);
-  }
-  return src;
+  return nullptr;
 }
 
 SSATmp* simplifyCheckTypeMem(State& env, const IRInstruction* inst) {
@@ -3720,6 +3744,8 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(CheckStk)
   X(CheckType)
   X(CheckTypeMem)
+  X(RaiseHackArrParamNotice)
+  X(RaiseHackArrPropNotice)
   X(CheckVArray)
   X(CheckDArray)
   X(AssertType)

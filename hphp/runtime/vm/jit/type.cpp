@@ -68,7 +68,14 @@ constexpr Type::bits_t Type::kArrSpecBits;
 constexpr Type::bits_t Type::kClsSpecBits;
 
 ///////////////////////////////////////////////////////////////////////////////
-// Vanilla array-spec manipulation.
+// Vanilla and dvarray array-spec manipulation.
+
+Type Type::narrowToDVArray() const {
+  if (!supports(SpecKind::Array)) return *this;
+  if (supports(SpecKind::Class) || supports(SpecKind::Record)) return *this;
+  auto const oldSpec = arrSpec();
+  return oldSpec.dvarray() ? *this : Type(*this, oldSpec.narrowToDVArray());
+}
 
 Type Type::narrowToVanilla() const {
   if (!supports(SpecKind::Array)) return *this;
@@ -617,6 +624,7 @@ static bool arrayFitsSpec(const ArrayData* arr, ArraySpec spec) {
   if (spec == ArraySpec::Top()) return true;
   if (arr->isVanilla()) spec = spec.narrowToVanilla();
 
+  if (spec.dvarray() && !arr->isDVArray()) return false;
   if (spec.kind() && arr->kind() != *spec.kind()) return false;
   if (!spec.type()) return true;
 
@@ -896,7 +904,10 @@ Type typeFromTV(tv_rval tv, const Class* ctx) {
     return Type::ExactRecord(rec);
   }
 
-  if (tvIsArray(tv)) return Type::Array(val(tv).parr->kind());
+  if (tvIsArray(tv)) {
+    auto const result = Type::Array(val(tv).parr->kind());
+    return val(tv).parr->isDVArray() ? result.narrowToDVArray() : result;
+  }
 
   auto outer = type(tv);
 
@@ -1035,7 +1046,7 @@ Type typeFromRATImpl(RepoAuthType ty, const Class* ctx) {
         } else {                                                        \
           return Type::B(A);                                            \
         }                                                               \
-      }()
+      }().narrowToDVArray()
 
     case T::SVArr:   return X(ArrayData::kPackedKind, StaticArray, StaticArray);
     case T::VArr:    return X(ArrayData::kPackedKind, Array, CountedArray);

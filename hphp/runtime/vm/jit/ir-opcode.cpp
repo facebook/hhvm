@@ -68,7 +68,6 @@ TRACE_SET_MOD(hhir);
 #define DArrMixed      HasDest
 #define DArrRecord     HasDest
 #define DVArr          HasDest
-#define DVArrOrNull    HasDest
 #define DDArr          HasDest
 #define DStaticDArr    HasDest
 #define DCheckDV(...)  HasDest

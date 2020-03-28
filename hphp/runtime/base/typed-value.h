@@ -74,14 +74,15 @@ struct ConstModifiers {
   static uint32_t constexpr kMask = (uint32_t)-1UL << 2;
 
   StringData* getPointedClsName() const {
+    assertx(use_lowptr);
     return (StringData*)(uintptr_t)(rawData & kMask);
   }
   bool isAbstract()      const { return rawData & 2; }
   bool isType()          const { return rawData & 1; }
 
   void setPointedClsName (StringData* clsName) {
-    assertx(!clsName || use_lowptr);
-    rawData = (use_lowptr ? 0 : (uintptr_t)clsName) | (rawData & ~kMask);
+    assertx(use_lowptr);
+    rawData = (uintptr_t)clsName | (rawData & ~kMask);
   }
   void setIsAbstract(bool isAbstract) { rawData |= (isAbstract ? 2 : 0); }
   void setIsType    (bool isType)     { rawData |= (isType ? 1 : 0); }

@@ -12,6 +12,7 @@ use emit_fatal_rust::emit_fatal;
 use emit_file_attributes_rust::emit_file_attributes_from_program;
 use emit_function_rust::emit_functions_from_program;
 use emit_record_def_rust::emit_record_defs_from_program;
+use emit_symbol_refs_rust as emit_symbol_refs;
 use emit_typedef_rust::emit_typedefs_from_program;
 use env::{self, emitter::Emitter, Env};
 use hhas_body_rust::HhasBody;
@@ -102,6 +103,7 @@ fn emit_program_<'p>(
     functions.append(&mut const_inits);
     let file_attributes = emit_file_attributes_from_program(&mut emitter, prog)?;
     let adata = emit_adata::take(&mut emitter).adata;
+    let symbol_refs = emit_symbol_refs::take(&mut emitter).symbol_refs;
 
     Ok(HhasProgram {
         main,
@@ -113,7 +115,7 @@ fn emit_program_<'p>(
         adata,
         is_hh: flags.contains(FromAstFlags::IS_HH_FILE),
         file_attributes,
-        ..HhasProgram::default()
+        symbol_refs,
     })
 }
 

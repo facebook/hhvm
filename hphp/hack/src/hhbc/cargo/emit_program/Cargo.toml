@@ -18,6 +18,7 @@ emit_fatal_rust = { path = "../emit_fatal" }
 emit_file_attributes_rust = { path = "../emit_file_attributes" }
 emit_function_rust = { path = "../emit_function" }
 emit_record_def_rust = { path = "../emit_record_def" }
+emit_symbol_refs_rust = { path = "../emit_symbol_refs" }
 emit_typedef_rust = { path = "../emit_typedef" }
 env = { path = "../env" }
 global_state = { path = "../global_state" }

@@ -10,8 +10,9 @@ use hhas_symbol_refs_rust::*;
 use hhbc_id_rust::{class, function, r#const, Id};
 use std::collections::BTreeSet;
 
+#[derive(Default)]
 pub struct State {
-    symbol_refs: HhasSymbolRefs,
+    pub symbol_refs: HhasSymbolRefs,
 }
 
 impl State {
@@ -64,6 +65,11 @@ pub fn add_function(e: &mut Emitter, s: function::Type) {
     if !s.to_raw_string().is_empty() {
         e.emit_state_mut().symbol_refs.functions.insert(s.into());
     }
+}
+
+pub fn take(e: &mut Emitter) -> State {
+    let state = e.emit_state_mut();
+    std::mem::take(state)
 }
 
 env::lazy_emit_state!(symbol_refs_state, State, State::init);

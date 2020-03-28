@@ -1219,6 +1219,22 @@ pub mod instr {
             col_end,
         }))
     }
+
+    pub fn is_late_bound_cls() -> InstrSeq {
+        instr(Instruct::IMisc(InstructMisc::LateBoundCls))
+    }
+
+    pub fn is_type_structc_resolve() -> InstrSeq {
+        instr(Instruct::IOp(InstructOperator::IsTypeStructC(
+            TypestructResolveOp::Resolve,
+        )))
+    }
+
+    pub fn is_type_structc_dontresolve() -> InstrSeq {
+        instr(Instruct::IOp(InstructOperator::IsTypeStructC(
+            TypestructResolveOp::DontResolve,
+        )))
+    }
 }
 
 impl InstrSeq {

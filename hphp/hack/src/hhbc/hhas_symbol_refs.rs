@@ -9,7 +9,7 @@ use std::collections::{BTreeMap, BTreeSet};
 /// Data structure for keeping track of symbols (and includes) we encounter in
 ///the course of emitting bytecode for an AST. We split them into these four
 /// categories for the sake of HHVM, which has lookup function corresponding to each.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct HhasSymbolRefs {
     pub includes: IncludePathSet,
     pub constants: SSet,

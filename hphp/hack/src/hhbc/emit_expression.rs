@@ -390,7 +390,7 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
             let (e, h) = &**is_expr;
             Ok(InstrSeq::gather(vec![
                 emit_expr(emitter, env, e)?,
-                emit_is_hint(env, pos, h)?,
+                emit_is(emitter, env, pos, h)?,
             ]))
         }
         Expr_::As(e) => emit_as(env, pos, e),
@@ -2146,7 +2146,22 @@ fn get_call_builtin_func_info(opts: &Options, id: impl AsRef<str>) -> Option<(us
 }
 
 fn emit_is(e: &mut Emitter, env: &Env, pos: &Pos, h: &tast::Hint) -> Result {
-    unimplemented!()
+    let (ts_instrs, is_static) = emit_reified_arg(e, env, pos, true, h)?;
+    Ok(if is_static {
+        match &*h.1 {
+            aast_defs::Hint_::Happly(ast_defs::Id(_, id), hs)
+                if hs.is_empty() && string_utils::strip_hh_ns(&id) == typehints::THIS =>
+            {
+                instr::is_late_bound_cls()
+            }
+            _ => InstrSeq::gather(vec![
+                get_type_structure_for_hint(e, &[], &IndexSet::new(), h)?,
+                instr::is_type_structc_resolve(),
+            ]),
+        }
+    } else {
+        InstrSeq::gather(vec![ts_instrs, instr::is_type_structc_dontresolve()])
+    })
 }
 
 fn istype_op(opts: &Options, id: impl AsRef<str>) -> Option<IstypeOp> {
@@ -3436,10 +3451,6 @@ fn emit_binop(
 }
 
 fn emit_pipe(env: &Env, (_, e1, e2): &(aast_defs::Lid, tast::Expr, tast::Expr)) -> Result {
-    unimplemented!("TODO(hrust)")
-}
-
-fn emit_is_hint(env: &Env, pos: &Pos, h: &aast_defs::Hint) -> Result {
     unimplemented!("TODO(hrust)")
 }
 

@@ -803,6 +803,7 @@ dependencies = [
  "emit_file_attributes_rust 0.0.0",
  "emit_function_rust 0.0.0",
  "emit_record_def_rust 0.0.0",
+ "emit_symbol_refs_rust 0.0.0",
  "emit_typedef_rust 0.0.0",
  "env 0.0.0",
  "global_state 0.0.0",

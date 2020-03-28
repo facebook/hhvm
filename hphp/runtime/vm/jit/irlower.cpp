@@ -175,7 +175,9 @@ std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit,
     vunit->blocks[b].weight = block->profCount() * areaWeightFactor(v.area());
     v.use(b);
 
-    genBlock(env, v, vasm.cold(), *block);
+    auto& vcold =
+      block->hint() == Block::Hint::Unused ? vasm.frozen() : vasm.cold();
+    genBlock(env, v, vcold, *block);
 
     assertx(v.closed());
     assertx(vasm.main().empty() || vasm.main().closed());

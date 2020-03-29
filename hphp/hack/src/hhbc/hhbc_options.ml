@@ -568,18 +568,18 @@ let value_setters =
     @@ fun opts v -> { opts with option_phpism_disable_halt_compiler = v = 1 }
     );
     ( set_value "hhvm.emit_func_pointers" get_value_from_config_int
-    @@ fun opts v -> { opts with option_emit_func_pointers = v = 1 } );
+    @@ fun opts v -> { opts with option_emit_func_pointers = v > 0 } );
     ( set_value "hhvm.emit_cls_meth_pointers" get_value_from_config_int
-    @@ fun opts v -> { opts with option_emit_cls_meth_pointers = v = 1 } );
+    @@ fun opts v -> { opts with option_emit_cls_meth_pointers = v > 0 } );
     ( set_value "hhvm.emit_meth_caller_func_pointers" get_value_from_config_int
-    @@ fun opts v -> { opts with option_emit_meth_caller_func_pointers = v = 1 }
+    @@ fun opts v -> { opts with option_emit_meth_caller_func_pointers = v > 0 }
     );
     ( set_value "hhvm.emit_inst_meth_pointers" get_value_from_config_int
-    @@ fun opts v -> { opts with option_emit_inst_meth_pointers = v = 1 } );
+    @@ fun opts v -> { opts with option_emit_inst_meth_pointers = v > 0 } );
     ( set_value "hhvm.rx_is_enabled" get_value_from_config_int @@ fun opts v ->
-      { opts with option_rx_is_enabled = v = 1 } );
+      { opts with option_rx_is_enabled = v > 0 } );
     ( set_value "hhvm.array_provenance" get_value_from_config_int
-    @@ fun opts v -> { opts with option_array_provenance = v = 1 } );
+    @@ fun opts v -> { opts with option_array_provenance = v > 0 } );
     ( set_value
         "hhvm.hack.lang.enable_class_level_where_clauses"
         get_value_from_config_int
@@ -617,9 +617,9 @@ let value_setters =
     @@ fun opts v ->
       { opts with option_disallow_func_ptrs_in_constants = v = 1 } );
     ( set_value "hhvm.emit_generics_ub" get_value_from_config_int
-    @@ fun opts v -> { opts with option_emit_generics_ub = v = 1 } );
+    @@ fun opts v -> { opts with option_emit_generics_ub = v > 0 } );
     ( set_value "hhvm.hack.lang.check_int_overflow" get_value_from_config_int
-    @@ fun opts v -> { opts with option_check_int_overflow = v = 1 } );
+    @@ fun opts v -> { opts with option_check_int_overflow = v > 0 } );
     ( set_value
         "hhvm.hack.lang.rust_top_level_elaborator"
         get_value_from_config_int
@@ -642,6 +642,26 @@ let extract_config_options_from_json ~init config_json =
     let config = J.get_object_exn config_json in
     List.fold_left value_setters ~init ~f:(fun opts setter ->
         setter config opts)
+
+(* Apply overrides by parsing CLI arguments in format `-vNAME=VALUE` *)
+let override_from_cli config_list init =
+  List.fold_left config_list ~init ~f:(fun options str ->
+      match Str.split_delim (Str.regexp "=") str with
+      | [name; value] -> set_option options name value
+      | _ -> options)
+
+(* Construct an instance of Hhbc_options.t from the options passed in as well as
+ * as specified in `-v str` on the command line.
+ *)
+let apply_config_overrides_statelessly config_list config_jsons =
+  List.fold_right
+    ~init:default
+    ~f:(fun config_json init ->
+      extract_config_options_from_json
+        ~init
+        (Some (J.json_of_string config_json)))
+    config_jsons
+  |> override_from_cli config_list
 
 let compiler_options = ref default
 

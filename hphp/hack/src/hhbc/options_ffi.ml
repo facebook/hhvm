@@ -9,10 +9,6 @@
 external configs_to_json_ffi : string list -> string list -> string
   = "configs_to_json_ffi"
 
-(* Construct an instance of Hhbc_options.t by merging in-order:
- * 1) JSONs in the specified list
- * 2) CLI arguments in format `-vNAME=VALUE` (as given on command line)
- *)
 let from_configs ~(jsons : string list) ~(args : string list) : Hhbc_options.t =
   let merged = configs_to_json_ffi jsons args in
   Hhbc_options.extract_config_options_from_json

@@ -221,21 +221,7 @@ let test_aliased_namespaces_empty_configs_to_json_ffi _ =
   ()
 
 let caml_from_configs ~jsons ~args =
-  (* Apply overrides by parsing CLI arguments in format `-vNAME=VALUE` *)
-  let override_from_cli config_list init =
-    List.fold_left config_list ~init ~f:(fun options str ->
-        match Str.split_delim (Str.regexp "=") str with
-        | [name; value] -> Hhbc_options.set_option options name value
-        | _ -> options)
-  in
-  List.fold_right
-    ~init:Hhbc_options.default
-    ~f:(fun config_json init ->
-      Hhbc_options.extract_config_options_from_json
-        ~init
-        (Some (Hh_json.json_of_string config_json)))
-    jsons
-  |> override_from_cli args
+  Hhbc_options.apply_config_overrides_statelessly args jsons
 
 let test_json_configs_stackable _ =
   (* See hhbc/options.rs test_options_de_multiple_jsons for comments *)

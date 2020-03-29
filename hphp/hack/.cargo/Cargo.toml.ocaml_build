@@ -7,7 +7,6 @@ members = [
     "src/facts/cargo/facts_rust",
     "src/facts/cargo/facts_smart_constructors",
     "src/facts/ffi",
-    "src/hhbc/cargo/options_ffi",
     "src/hhbc/cargo/string_utils",
     "src/name_index/sqlite",
     "src/name_index",

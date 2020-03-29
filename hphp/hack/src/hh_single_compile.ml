@@ -315,9 +315,9 @@ let do_compile
 
 let extract_facts ~compiler_options ~config_jsons ~filename text =
   let co =
-    Options_ffi.from_configs
-      ~args:compiler_options.config_list
-      ~jsons:config_jsons
+    Hhbc_options.apply_config_overrides_statelessly
+      compiler_options.config_list
+      config_jsons
   in
   ( [
       Hhbc_options.(
@@ -339,9 +339,9 @@ let extract_facts ~compiler_options ~config_jsons ~filename text =
 
 let parse_hh_file ~config_jsons ~compiler_options filename body =
   let co =
-    Options_ffi.from_configs
-      ~args:compiler_options.config_list
-      ~jsons:config_jsons
+    Hhbc_options.apply_config_overrides_statelessly
+      compiler_options.config_list
+      config_jsons
   in
   Hhbc_options.(
     let file = Relative_path.create Relative_path.Dummy filename in
@@ -473,9 +473,9 @@ let decl_and_run_mode compiler_options =
             (match hhbc_options with
             | Some opts -> opts
             | None ->
-              Options_ffi.from_configs
-                ~args:compiler_options.config_list
-                ~jsons:(get_config_jsons ()))
+              Hhbc_options.apply_config_overrides_statelessly
+                compiler_options.config_list
+                (get_config_jsons ()))
             |> Hhbc_options.log_extern_compiler_perf
           in
           let msg =
@@ -598,9 +598,9 @@ let decl_and_run_mode compiler_options =
       | CLI ->
         let dumped_options =
           lazy
-            ( Options_ffi.from_configs
-                ~args:compiler_options.config_list
-                ~jsons:(get_config_jsons ())
+            ( Hhbc_options.apply_config_overrides_statelessly
+                compiler_options.config_list
+                (get_config_jsons ())
             |> Hhbc_options.to_string )
         in
         let handle_output _filename output _hhbc_options _debug_time =

@@ -40,7 +40,9 @@ let add_to_time t0 =
 
 let with_global_state env f =
   let hhbc_options =
-    Options_ffi.from_configs ~args:env.config_list ~jsons:env.config_jsons
+    Hhbc_options.apply_config_overrides_statelessly
+      env.config_list
+      env.config_jsons
   in
   Hhbc_options.set_compiler_options hhbc_options;
   Emit_env.set_is_systemlib env.is_systemlib;

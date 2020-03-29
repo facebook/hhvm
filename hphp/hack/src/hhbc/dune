@@ -8,7 +8,6 @@
     core_kernel
     full_fidelity
     mutable_accumulator
-    options_ffi
     pocket_universes
     tast
     utils_php_escape))

@@ -324,44 +324,6 @@ PhysExpr expr_for(const Env& env, RegState& state, Vreg s) {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Analyze instructions that are part of a callphp{} sequence.
- *
- * Returns true if no further analysis is needed for the def to `d'.
- */
-bool analyze_phys_callseq(const Env& /*env*/, Vreg d, const Vinstr& inst,
-                          const Vinstr* next) {
-  if (d != rvmfp()) return false;
-
-  /*
-   * A common pattern for us is to load an address into the frame pointer
-   * right before a PHP call.  In this case, if the frame pointer was not
-   * altered before this redefinition, it will effectively still be
-   * not-altered after the call, because callphp{} restores it to the
-   * previous value.
-   *
-   * We don't need to worry about not setting the redefined flag in between
-   * this instruction and the callphp{}, because callphp{}'s uses are only of
-   * a RegSet---we cannot mis-optimize any of its args based on the state
-   * we're tracking for the frame pointer.
-   *
-   * We also skip over callphp{}'s definition of rvmfp() for this reason.
-   * Really callphp{} only preserves rvmfp() if we properly set up the
-   * rvmfp() arg to it, but the program is ill-formed if it's not doing
-   * that so it's ok to just ignore that definition here.
-   */
-  if (next &&
-      (next->op == Vinstr::callphp ||
-       next->op == Vinstr::callphpr)) {
-    FTRACE(3, "      post-dominated by callphp---preserving frame ptr\n");
-    return true;
-  }
-  if (inst.op == Vinstr::callphp ||
-      inst.op == Vinstr::callphpr) return true;
-
-  return false;
-}
-
-/*
  * Analyze a copy from `s' to `d'.
  *
  * Returns true if no further analysis is needed for the def to `d'.
@@ -503,20 +465,7 @@ void analyze_inst_virtual(Env& env, RegState& state, const Vinstr& inst) {
  */
 void analyze_inst_physical(Env& env, RegState& state,
                            const Vinstr& inst, const Vinstr* next) {
-  auto const is_call_seq = [&] {
-    auto result = false;
-    for_all_defs(env, inst, [&] (Vreg d) {
-      result |= analyze_phys_callseq(env, d, inst, next);
-    });
-    return result;
-  }();
-
   auto const done = [&] {
-    // If this instruction is part of a callphp{} sequence (i.e., fill rvmfp(),
-    // then callphp{}), we don't want to do instruction-specific analysis---but
-    // we stillneed to analyze any non-rvmfp() physical defs.
-    if (is_call_seq) return false;
-
     switch (inst.op) {
       case Vinstr::copy:
         return analyze_phys_copy(env, state, inst.copy_.d, inst.copy_.s);
@@ -549,8 +498,7 @@ void analyze_inst_physical(Env& env, RegState& state,
   if (done) return;
 
   for_all_defs(env, inst, [&] (Vreg d) {
-    return analyze_phys_callseq(env, d, inst, next) ||
-           analyze_phys_def(env, state, d);
+    return analyze_phys_def(env, state, d);
   });
 }
 

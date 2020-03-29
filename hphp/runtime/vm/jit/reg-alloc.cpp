@@ -259,6 +259,19 @@ void getEffects(const Abi& abi, const Vinstr& i,
       across = RegSet(reg::rcx);
       break;
 
+    case Vinstr::pop:
+    case Vinstr::popf:
+    case Vinstr::popm:
+    case Vinstr::popp:
+    case Vinstr::poppm:
+    case Vinstr::push:
+    case Vinstr::pushf:
+    case Vinstr::pushm:
+    case Vinstr::pushp:
+    case Vinstr::pushpm:
+      uses = defs = RegSet(rsp());
+      break;
+
     case Vinstr::vcall:
     case Vinstr::vinvoke:
     case Vinstr::vcallunpack:

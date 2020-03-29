@@ -3693,7 +3693,11 @@ where
                             ast::Stmt_::mk_return(Some(expr)),
                         ))
                     };
-                    Ok(vec![Self::lift_awaits_in_statement(f, node, e)?])
+                    if Self::is_simple_await_expression(node) {
+                        Ok(vec![f(e)?])
+                    } else {
+                        Ok(vec![Self::lift_awaits_in_statement(f, node, e)?])
+                    }
                 }
             }
         };

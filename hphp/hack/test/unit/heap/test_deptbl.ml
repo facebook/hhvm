@@ -30,7 +30,7 @@ let get_sqlite = hh_get_dep_sqlite
 external save_dep_table_sqlite : string -> string -> int
   = "hh_save_dep_table_sqlite"
 
-external load_dep_table_sqlite : string -> bool -> int
+external load_dep_table_sqlite : string -> bool -> unit
   = "hh_load_dep_table_sqlite"
 
 let expect ~msg bool =
@@ -136,7 +136,7 @@ let test_deptable_sql () =
   let deptable_name = Filename.temp_file "test_deptable" ".sql" in
   save_in_daemon deptable_name;
   init_shared_mem ();
-  let (_ : int) = load_dep_table_sqlite deptable_name false in
+  load_dep_table_sqlite deptable_name false;
   List.iter (List.append data data_empty) ~f:(fun (key, values) ->
       expect_equals_list key (get_sqlite key) values);
   Sys.remove deptable_name
@@ -146,12 +146,12 @@ let test_ignore_hh_version () =
   save_in_daemon deptable_name ~buildRevision:"test_build_revision";
   init_shared_mem ();
   try
-    let (_ : int) = load_dep_table_sqlite deptable_name false in
+    load_dep_table_sqlite deptable_name false;
     print_endline
       "Should not have been able to load this deptable with hh version checking.";
     exit 1
   with _ ->
-    let (_ : int) = load_dep_table_sqlite deptable_name true in
+    load_dep_table_sqlite deptable_name true;
     List.iter (List.append data data_empty) ~f:(fun (key, values) ->
         expect_equals_list key (get_sqlite key) values);
     Sys.remove deptable_name

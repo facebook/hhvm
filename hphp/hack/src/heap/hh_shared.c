@@ -2772,7 +2772,7 @@ CAMLprim value hh_get_loaded_dep_table_filename() {
   CAMLreturn(result);
 }
 
-CAMLprim value hh_load_dep_table_sqlite(
+void hh_load_dep_table_sqlite(
     value in_filename,
     value ignore_hh_version
 ) {
@@ -2797,9 +2797,9 @@ CAMLprim value hh_load_dep_table_sqlite(
   verify_sqlite_header(g_db, Bool_val(ignore_hh_version));
 
   tv2 = log_duration("Reading the dependency file with sqlite", tv);
-  int secs = tv2.tv_sec - tv.tv_sec;
-  // Reporting only seconds, ignore milli seconds
-  CAMLreturn(Val_long(secs));
+  UNUSED(tv2);
+
+  CAMLreturn0;
 }
 
 // Must destroy the prepared statement before sqlite3_close can be used.
@@ -2961,11 +2961,11 @@ CAMLprim value hh_update_dep_table_sqlite(
   CAMLreturn(Val_long(0));
 }
 
-CAMLprim value hh_load_dep_table_sqlite(
+void hh_load_dep_table_sqlite(
     value in_filename,
     value ignore_hh_version) {
   CAMLparam0();
-  CAMLreturn(Val_long(0));
+  CAMLreturn0;
 }
 
 CAMLprim value hh_get_dep_sqlite(value ocaml_key) {

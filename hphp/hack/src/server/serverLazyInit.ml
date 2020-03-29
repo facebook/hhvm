@@ -38,18 +38,17 @@ let lock_and_load_deptable
   if String.length fn = 0 && not fail_if_missing then
     Hh_logger.log "The dependency file was not specified - ignoring"
   else
-    (* The sql deptable must be loaded in the master process *)
+    (* The SQLite deptable must be loaded in the master process *)
 
-    (* Take a lock on the info file for the sql *)
+    (* Take a lock on the info file for the SQLite *)
     try
       LoadScriptUtils.lock_saved_state fn;
-      let read_deptable_time =
-        SharedMem.load_dep_table_sqlite fn ignore_hh_version
+      let start_t = Unix.gettimeofday () in
+      SharedMem.load_dep_table_sqlite fn ignore_hh_version;
+      let (_t : float) =
+        Hh_logger.log_duration "Did read the dependency file (sec)" start_t
       in
-      Hh_logger.log
-        "Reading the dependency file took (sec): %d"
-        read_deptable_time;
-      HackEventLogger.load_deptable_end read_deptable_time
+      HackEventLogger.load_deptable_end start_t
     with
     | (SharedMem.Sql_assertion_failure 11 | SharedMem.Sql_assertion_failure 14)
       as e ->

@@ -246,19 +246,19 @@ let update_dep_table_sqlite : string -> string -> bool -> int =
   update_dep_table_sqlite_c fn build_revision replace_state_after_saving
 
 (*****************************************************************************)
-(* Loads the dependency table by reading from a file *)
+(* Loads the dependency table by reading from a file                         *)
 (*****************************************************************************)
 
 external load_dep_table_blob_c : string -> bool -> int
   = "hh_load_dep_table_blob"
 
-external load_dep_table_sqlite_c : string -> bool -> int
+external load_dep_table_sqlite_c : string -> bool -> unit
   = "hh_load_dep_table_sqlite"
 
 let load_dep_table_blob : string -> bool -> int =
  (fun fn ignore_hh_version -> load_dep_table_blob_c fn ignore_hh_version)
 
-let load_dep_table_sqlite : string -> bool -> int =
+let load_dep_table_sqlite : string -> bool -> unit =
  (fun fn ignore_hh_version -> load_dep_table_sqlite_c fn ignore_hh_version)
 
 (*****************************************************************************)

@@ -113,7 +113,7 @@ CAMLprim value hh_update_dep_table_sqlite(
     value build_revision,
     value replace_state_after_saving
 );
-CAMLprim value hh_load_dep_table_sqlite(
+void hh_load_dep_table_sqlite(
         value in_filename,
         value ignore_hh_version
 );

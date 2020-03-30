@@ -400,6 +400,7 @@ pub struct PropertyDecl {
     modifiers: Node_,
     hint: Node_,
     name: Node_,
+    is_initialized: bool,
 }
 
 #[derive(Clone, Debug)]
@@ -477,6 +478,9 @@ pub enum Node_ {
     Question(Pos),    // This needs a pos since it shows up in nullable types.
     This(Pos),        // This needs a pos since it shows up in Taccess.
     ColonColon(Pos),  // This needs a pos since it shows up in Taccess.
+    Initializer,      // We don't care what we initialize values to, only
+    // whether or not they're initialized, so we make a fake
+    // node for them.
 
     // Box the insides of the vector so we don't need to reallocate them when
     // we pull them out of the TypeConstraint variant.
@@ -1264,8 +1268,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         arg0
     }
 
-    fn make_simple_initializer(&mut self, _arg0: Self::R, arg1: Self::R) -> Self::R {
-        arg1
+    fn make_simple_initializer(&mut self, _arg0: Self::R, _arg1: Self::R) -> Self::R {
+        Ok(Node_::Initializer)
     }
 
     fn make_list_item(&mut self, item: Self::R, sep: Self::R) -> Self::R {
@@ -1619,15 +1623,29 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _arg9: Self::R,
         body: Self::R,
     ) -> Self::R {
-        fn read_member_attributes<'a>(attributes: impl Iterator<Item = &'a Node_>) -> bool {
+        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+        enum MemberAttribute {
+            LateInit,
+            Const,
+        }
+        fn read_member_attributes<'a>(
+            attributes: impl Iterator<Item = &'a Node_>,
+        ) -> HashSet<MemberAttribute> {
+            let mut ret = HashSet::new();
             for attribute in attributes {
                 if let Node_::Name(name, _) = attribute {
-                    if name == "__LateInit" {
-                        return true;
+                    match name.as_ref() {
+                        "__LateInit" => {
+                            ret.insert(MemberAttribute::LateInit);
+                        }
+                        "__Const" => {
+                            ret.insert(MemberAttribute::Const);
+                        }
+                        _ => (),
                     }
                 }
             }
-            return false;
+            ret
         }
 
         fn read_member_modifiers<'a>(
@@ -1750,7 +1768,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                             _ => {}
                         },
                         Node_::Property(decl) => {
-                            let is_late_init = read_member_attributes(decl.attrs.iter());
+                            let attributes = read_member_attributes(decl.attrs.iter());
                             let (is_static, visibility) =
                                 read_member_modifiers(decl.modifiers.iter());
                             let (name, pos) = get_name("", &decl.name)?;
@@ -1760,13 +1778,14 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                                 strip_dollar_prefix(Cow::Owned(name)).into_owned()
                             };
                             let ty = self.node_to_ty(&decl.hint, &type_variables)?;
+                            let is_const = attributes.contains(&MemberAttribute::Const);
                             let prop = shallow_decl_defs::ShallowProp {
-                                const_: false,
+                                const_: is_const,
                                 xhp_attr: None,
-                                lateinit: is_late_init,
+                                lateinit: attributes.contains(&MemberAttribute::LateInit),
                                 lsb: false,
                                 name: Id(pos, name),
-                                needs_init: true,
+                                needs_init: !decl.is_initialized,
                                 type_: Some(ty),
                                 abstract_: false,
                                 visibility,
@@ -1849,27 +1868,44 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         attrs: Self::R,
         modifiers: Self::R,
         hint: Self::R,
-        name: Self::R,
+        declarator: Self::R,
         _arg4: Self::R,
     ) -> Self::R {
-        // Sometimes the name is a single element list.
-        let name = match name? {
+        // Sometimes the declarator is a single element list.
+        let declarator = match declarator? {
             Node_::List(nodes) => nodes
                 .first()
-                .ok_or("Expected a name, but was given an empty list.".to_owned())?
+                .ok_or("Expected a declarator, but was given an empty list.".to_owned())?
                 .clone(),
-            name => name,
+            declarator => declarator,
         };
-        Ok(Node_::Property(Box::new(PropertyDecl {
-            attrs: attrs?,
-            modifiers: modifiers?,
-            hint: hint?,
-            name,
-        })))
+        match declarator {
+            Node_::ListItem(innards) => {
+                let (name, initializer) = *innards;
+                let name = match name {
+                    Node_::List(nodes) => nodes
+                        .first()
+                        .ok_or("Expected a name, but was given an empty list.".to_owned())?
+                        .clone(),
+                    name => name,
+                };
+                Ok(Node_::Property(Box::new(PropertyDecl {
+                    attrs: attrs?,
+                    modifiers: modifiers?,
+                    hint: hint?,
+                    name,
+                    is_initialized: match initializer {
+                        Node_::Initializer => true,
+                        _ => false,
+                    },
+                })))
+            }
+            n => Err(format!("Expected a ListItem, but was {:?}", n)),
+        }
     }
 
-    fn make_property_declarator(&mut self, name: Self::R, _arg1: Self::R) -> Self::R {
-        name
+    fn make_property_declarator(&mut self, name: Self::R, initializer: Self::R) -> Self::R {
+        Ok(Node_::ListItem(Box::new((name?, initializer?))))
     }
 
     fn make_methodish_declaration(

@@ -439,6 +439,7 @@ pub struct TypeConstant {
     name: String,
     pos: Pos,
     type_: Node_,
+    reified: Option<Pos>,
 }
 
 #[derive(Clone, Debug)]
@@ -479,7 +480,7 @@ pub enum Node_ {
 
     // Box the insides of the vector so we don't need to reallocate them when
     // we pull them out of the TypeConstraint variant.
-    TypeParameter(Box<(Node_, Vec<Box<(ConstraintKind, Node_)>>)>),
+    TypeParameter(Box<(Node_, aast::ReifyKind, Vec<Box<(ConstraintKind, Node_)>>)>),
 
     // Simple keywords and tokens.
     Abstract,
@@ -495,6 +496,7 @@ pub enum Node_ {
     Private,
     Protected,
     Public,
+    Reify,
     Semicolon,
     Static,
     Super,
@@ -807,7 +809,7 @@ impl DirectDeclSmartConstructors<'_> {
         let type_params = node
             .into_iter()
             .map(|node| {
-                let (name, constraints) = match node {
+                let (name, reified, constraints) = match node {
                     Node_::TypeParameter(innards) => *innards,
                     n => return Err(format!("Expected a type parameter, but got {:?}", n)),
                 };
@@ -824,7 +826,7 @@ impl DirectDeclSmartConstructors<'_> {
                     variance: Variance::Invariant,
                     name: Id(pos, name),
                     constraints,
-                    reified: aast::ReifyKind::Erased,
+                    reified,
                     user_attributes: Vec::new(),
                 })
             })
@@ -1217,6 +1219,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             TokenKind::Private => Node_::Private,
             TokenKind::Protected => Node_::Protected,
             TokenKind::Public => Node_::Public,
+            TokenKind::Reify => Node_::Reify,
             TokenKind::Static => Node_::Static,
             TokenKind::Trait => Node_::Trait,
             _ => Node_::Ignored,
@@ -1364,7 +1367,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     fn make_type_parameter(
         &mut self,
         _arg0: Self::R,
-        _arg1: Self::R,
+        reify: Self::R,
         _arg2: Self::R,
         name: Self::R,
         constraints: Self::R,
@@ -1383,7 +1386,14 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 },
             },
         )?;
-        Ok(Node_::TypeParameter(Box::new((name?, constraints))))
+        Ok(Node_::TypeParameter(Box::new((
+            name?,
+            match reify? {
+                Node_::Reify => aast::ReifyKind::Reified,
+                _ => aast::ReifyKind::Erased,
+            },
+            constraints,
+        ))))
     }
 
     fn make_type_parameters(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
@@ -1727,7 +1737,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                                     Err(_) => None,
                                 },
                                 enforceable: (Pos::make_none(), false),
-                                reifiable: None,
+                                reifiable: constant.reified,
                             })
                         }
                         Node_::RequireClause(require) => match require.require_type {
@@ -2075,7 +2085,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
     fn make_type_const_declaration(
         &mut self,
-        _arg0: Self::R,
+        attributes: Self::R,
         _arg1: Self::R,
         _arg2: Self::R,
         _arg3: Self::R,
@@ -2086,11 +2096,23 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         type_: Self::R,
         _arg9: Self::R,
     ) -> Self::R {
+        let reified = attributes?.iter().fold(None, |reifiable, node| {
+            if let Node_::Name(name, pos) = node {
+                if name == "__Reifiable" {
+                    Some(pos.clone())
+                } else {
+                    reifiable
+                }
+            } else {
+                reifiable
+            }
+        });
         let (name, pos) = get_name("", &name?)?;
         Ok(Node_::TypeConstant(Box::new(TypeConstant {
             name,
             pos,
             type_: type_?,
+            reified,
         })))
     }
 

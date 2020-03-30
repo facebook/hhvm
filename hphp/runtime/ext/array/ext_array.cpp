@@ -3343,8 +3343,8 @@ String HHVM_FUNCTION(HH_get_provenance, const Variant& in) {
   }
 }
 
-TypedValue HHVM_FUNCTION(HH_tag_provenance_here, TypedValue in) {
-  return arrprov::tagTvRecursively(in);
+TypedValue HHVM_FUNCTION(HH_tag_provenance_here, TypedValue in, int64_t flags) {
+  return arrprov::tagTvRecursively(in, flags);
 }
 
 Array HHVM_FUNCTION(merge_xhp_attr_declarations,
@@ -3425,6 +3425,11 @@ struct ArrayExtension final : Extension {
     HHVM_RC_INT_SAME(SORT_NUMERIC);
     HHVM_RC_INT_SAME(SORT_REGULAR);
     HHVM_RC_INT_SAME(SORT_STRING);
+
+    HHVM_RC_INT(
+        TAG_PROVENANCE_HERE_DONT_WARN_ON_OBJECTS,
+        arrprov::TagTVFlags::DONT_WARN_ON_OBJECTS
+    );
 
     HHVM_FE(array_change_key_case);
     HHVM_FE(array_chunk);

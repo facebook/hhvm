@@ -49,6 +49,9 @@ const int UCOL_NORMALIZATION_MODE = 0;
 const int UCOL_STRENGTH = 0;
 const int UCOL_HIRAGANA_QUATERNARY_MODE = 0;
 const int UCOL_NUMERIC_COLLATION = 0;
+
+const int TAG_PROVENANCE_HERE_DONT_WARN_ON_OBJECTS = 0;
+
 <<__PHPStdLib, __Rx>>
 function array_change_key_case($input, int $upper = CASE_LOWER);
 <<__PHPStdLib, __Rx>>

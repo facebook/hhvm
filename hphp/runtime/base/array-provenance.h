@@ -358,6 +358,10 @@ ArrayData* tagStaticArr(ArrayData* ad, Tag tag = {});
 
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace TagTVFlags {
+constexpr int64_t DONT_WARN_ON_OBJECTS = 1 << 0;
+}
+
 /*
  * Recursively tag the given TypedValue, tagging it (if necessary), and if it is
  * an array-like, recursively tagging of its values (if necessary).
@@ -372,7 +376,7 @@ ArrayData* tagStaticArr(ArrayData* ad, Tag tag = {});
  *
  * This method will return a new TypedValue or modify and inc-ref `in`.
  */
-TypedValue tagTvRecursively(TypedValue in);
+TypedValue tagTvRecursively(TypedValue in, int64_t flags = 0);
 
 /*
  * Recursively mark the given TV as being a legacy array. This function has the

@@ -517,7 +517,7 @@ TypedValue markTvImpl(TypedValue in, bool recursive) {
   return ad ? make_array_like_tv(ad) : tvReturn(tvAsCVarRef(&in));
 }
 
-TypedValue tagTvImpl(TypedValue in) {
+TypedValue tagTvImpl(TypedValue in, int64_t flags) {
   // Closure state: an expensive-to-compute provenance tag.
   folly::Optional<arrprov::Tag> tag = folly::none;
 
@@ -532,15 +532,18 @@ TypedValue tagTvImpl(TypedValue in) {
   };
 
   auto state = MutationState<decltype(tag_tv)>{tag_tv, "tag_provenance_here"};
+  if (flags & TagTVFlags::DONT_WARN_ON_OBJECTS) {
+    state.raised_object_notice = true;
+  }
   auto const ad = apply_mutation(in, state);
   return ad ? make_array_like_tv(ad) : tvReturn(tvAsCVarRef(&in));
 }
 
 }
 
-TypedValue tagTvRecursively(TypedValue in) {
+TypedValue tagTvRecursively(TypedValue in, int64_t flags) {
   if (!RO::EvalArrayProvenance) return tvReturn(tvAsCVarRef(&in));
-  return tagTvImpl(in);
+  return tagTvImpl(in, flags);
 }
 
 TypedValue markTvRecursively(TypedValue in) {

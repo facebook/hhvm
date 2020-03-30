@@ -164,3 +164,8 @@ $y: %s/recursive-provenance.php:56
 $y[0]: %s/recursive-provenance.php:56
 $y[0][b]: %s/recursive-provenance.php:56
 $y[0][b][0]: <not an array>
+
+==============================================
+test_object_notice:
+
+Notice: tag_provenance_here called on object: C in %s/recursive-provenance.php on line 64

@@ -1648,20 +1648,29 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             ret
         }
 
-        fn read_member_modifiers<'a>(
-            modifiers: impl Iterator<Item = &'a Node_>,
-        ) -> (bool, aast::Visibility) {
-            let mut is_static = false;
-            let mut visibility = aast::Visibility::Private;
+        #[derive(Debug)]
+        struct Modifiers {
+            is_static: bool,
+            visibility: aast::Visibility,
+            is_abstract: bool,
+        }
+        fn read_member_modifiers<'a>(modifiers: impl Iterator<Item = &'a Node_>) -> Modifiers {
+            let mut ret = Modifiers {
+                is_static: false,
+                visibility: aast::Visibility::Private,
+                is_abstract: false,
+            };
             for modifier in modifiers {
                 if let Ok(vis) = modifier.as_visibility() {
-                    visibility = vis;
+                    ret.visibility = vis;
                 }
-                if let Node_::Static = modifier {
-                    is_static = true;
+                match modifier {
+                    Node_::Static => ret.is_static = true,
+                    Node_::Abstract => ret.is_abstract = true,
+                    _ => (),
                 }
             }
-            (is_static, visibility)
+            ret
         }
 
         let (name, pos) = get_name(self.state.namespace_builder.current_namespace(), &name?)?;
@@ -1769,10 +1778,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                         },
                         Node_::Property(decl) => {
                             let attributes = read_member_attributes(decl.attrs.iter());
-                            let (is_static, visibility) =
-                                read_member_modifiers(decl.modifiers.iter());
+                            let modifiers = read_member_modifiers(decl.modifiers.iter());
                             let (name, pos) = get_name("", &decl.name)?;
-                            let name = if is_static {
+                            let name = if modifiers.is_static {
                                 name
                             } else {
                                 strip_dollar_prefix(Cow::Owned(name)).into_owned()
@@ -1787,19 +1795,18 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                                 name: Id(pos, name),
                                 needs_init: !decl.is_initialized,
                                 type_: Some(ty),
-                                abstract_: false,
-                                visibility,
+                                abstract_: modifiers.is_abstract,
+                                visibility: modifiers.visibility,
                                 fixme_codes: ISet::new(),
                             };
-                            if is_static {
+                            if modifiers.is_static {
                                 cls.sprops.push(prop)
                             } else {
                                 cls.props.push(prop)
                             }
                         }
                         Node_::Function(decl) => {
-                            let (is_static, visibility) =
-                                read_member_modifiers(decl.header.modifiers.iter());
+                            let modifiers = read_member_modifiers(decl.header.modifiers.iter());
                             let abstract_ = match decl.body {
                                 Node_::Semicolon => true,
                                 _ => false,
@@ -1839,13 +1846,13 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                                 override_: false,
                                 reactivity,
                                 type_: ty,
-                                visibility,
+                                visibility: modifiers.visibility,
                                 fixme_codes: ISet::new(),
                                 deprecated: None,
                             };
                             if is_constructor {
                                 cls.constructor = Some(method);
-                            } else if is_static {
+                            } else if modifiers.is_static {
                                 cls.static_methods.push(method);
                             } else {
                                 cls.methods.push(method);

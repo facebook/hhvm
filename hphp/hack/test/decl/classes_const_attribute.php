@@ -2,7 +2,7 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 abstract class A {
-  <<__Const>> public arraykey $p;
+  <<__Const>> public abstract arraykey $p;
 }
 
 class B extends A {

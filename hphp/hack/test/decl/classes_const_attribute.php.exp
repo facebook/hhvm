@@ -11,12 +11,12 @@ Parsed decls:
       sc_consts = []; sc_typeconsts = []; sc_pu_enums = [];
       sc_props =
       [{ Shallow_decl_defs.sp_const = true; sp_xhp_attr = None;
-         sp_lateinit = false; sp_lsb = false; sp_name = ([5:31-33], "p");
+         sp_lateinit = false; sp_lsb = false; sp_name = ([5:40-42], "p");
          sp_needs_init = true;
          sp_type =
-         (Some (Rhint (root|classes_const_attribute.php line 5, characters 22-29),
+         (Some (Rhint (root|classes_const_attribute.php line 5, characters 31-38),
                 (Tprim Tarraykey)));
-         sp_abstract = false; sp_visibility = Public; sp_fixme_codes = {} }
+         sp_abstract = true; sp_visibility = Public; sp_fixme_codes = {} }
         ];
       sc_sprops = []; sc_constructor = None; sc_static_methods = [];
       sc_methods = []; sc_user_attributes = []; sc_enum_type = None;

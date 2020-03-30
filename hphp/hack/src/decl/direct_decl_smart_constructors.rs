@@ -79,12 +79,12 @@ fn mangle_xhp_id<'a>(name: Cow<'a, String>) -> Cow<'a, String> {
     }
 }
 
-pub fn get_name(namespace: &str, name: &Node_) -> Result<(String, Pos), String> {
+pub fn get_name(namespace: &str, name: &Node_) -> Result<Id, String> {
     fn qualified_name_from_parts(
         namespace: &str,
         parts: &Vec<Node_>,
         pos: &Pos,
-    ) -> Result<(String, Pos), String> {
+    ) -> Result<Id, String> {
         let mut qualified_name = String::new();
         for part in parts {
             match part {
@@ -121,7 +121,7 @@ pub fn get_name(namespace: &str, name: &Node_) -> Result<(String, Pos), String> 
             namespace + &qualified_name
         };
         let pos = pos.clone();
-        Ok((name, pos))
+        Ok(Id(pos, name))
     }
 
     match name {
@@ -134,16 +134,19 @@ pub fn get_name(namespace: &str, name: &Node_) -> Result<(String, Pos), String> 
                 namespace.to_owned() + "\\" + &name
             };
             let pos = pos.clone();
-            Ok((name, pos))
+            Ok(Id(pos, name))
         }
         Node_::XhpName(name, pos) => {
             // xhp names are always unqualified
-            Ok((mangle_xhp_id(Cow::Borrowed(name)).into_owned(), pos.clone()))
+            Ok(Id(
+                pos.clone(),
+                mangle_xhp_id(Cow::Borrowed(name)).into_owned(),
+            ))
         }
         Node_::QualifiedName(parts, pos) => qualified_name_from_parts(namespace, &parts, pos),
-        Node_::Construct(pos) => Ok((
-            naming_special_names::members::__CONSTRUCT.to_string(),
+        Node_::Construct(pos) => Ok(Id(
             pos.clone(),
+            naming_special_names::members::__CONSTRUCT.to_string(),
         )),
         n => {
             return Err(format!(
@@ -374,8 +377,7 @@ pub enum HintValue {
 #[derive(Clone, Debug)]
 pub struct ConstDecl {
     modifiers: Node_,
-    name: String,
-    pos: Pos,
+    id: Id,
     ty: Ty,
     expr: Option<Box<nast::Expr>>,
 }
@@ -384,8 +386,7 @@ pub struct ConstDecl {
 pub struct VariableDecl {
     kind: ParamMode,
     hint: Node_,
-    name: String,
-    pos: Pos,
+    id: Id,
 }
 
 #[derive(Clone, Debug)]
@@ -440,15 +441,13 @@ pub struct ClosureTypeHint {
 
 #[derive(Clone, Debug)]
 pub struct NamespaceUseClause {
-    name: String,
-    pos: Pos,
+    id: Id,
     as_: Option<String>,
 }
 
 #[derive(Clone, Debug)]
 pub struct TypeConstant {
-    name: String,
-    pos: Pos,
+    id: Id,
     type_: Node_,
     reified: Option<Pos>,
 }
@@ -849,7 +848,7 @@ impl DirectDeclSmartConstructors<'_> {
             )),
             Node_::This(pos) => Ok(Ty(Reason::Rhint(pos.clone()), Box::new(Ty_::Tthis))),
             node => {
-                let (name, pos) = get_name("", node)?;
+                let Id(pos, name) = get_name("", node)?;
                 let reason = Reason::Rhint(pos.clone());
                 let ty_ = if type_variables.contains(&name) {
                     Ty_::Tgeneric(name)
@@ -884,7 +883,7 @@ impl DirectDeclSmartConstructors<'_> {
                     Node_::TypeParameter(innards) => *innards,
                     n => return Err(format!("Expected a type parameter, but got {:?}", n)),
                 };
-                let (name, pos) = get_name("", &name)?;
+                let id = get_name("", &name)?;
                 let constraints = constraints
                     .into_iter()
                     .map(|constraint| {
@@ -892,10 +891,10 @@ impl DirectDeclSmartConstructors<'_> {
                         Ok((kind, self.node_to_ty(&value, &HashSet::new())?))
                     })
                     .collect::<Result<Vec<_>, String>>()?;
-                type_variables.insert(Rc::new(name.clone()));
+                type_variables.insert(Rc::new(id.1.clone()));
                 Ok(Tparam {
                     variance: Variance::Invariant,
-                    name: Id(pos, name),
+                    name: id,
                     constraints,
                     reified,
                     user_attributes: Vec::new(),
@@ -911,8 +910,8 @@ impl DirectDeclSmartConstructors<'_> {
         header: FunctionHeader,
         body: Node_,
         outer_type_variables: &HashSet<Rc<String>>,
-    ) -> Result<(String, Pos, Ty), String> {
-        let (name, pos) = get_name(
+    ) -> Result<(Id, Ty), String> {
+        let id = get_name(
             self.state.namespace_builder.current_namespace(),
             &header.name,
         )?;
@@ -977,8 +976,8 @@ impl DirectDeclSmartConstructors<'_> {
             }
         }
 
-        let ty = Ty(Reason::Rwitness(pos.clone()), Box::new(Ty_::Tfun(ft)));
-        Ok((name, pos, ty))
+        let ty = Ty(Reason::Rwitness(id.0.clone()), Box::new(Ty_::Tfun(ft)));
+        Ok((id, ty))
     }
 
     fn prefix_ns<'a>(&self, name: Cow<'a, String>) -> Cow<'a, String> {
@@ -1004,15 +1003,10 @@ impl DirectDeclSmartConstructors<'_> {
                     .into_iter()
                     .fold(Ok(Vec::new()), |acc, variable| match (acc, variable) {
                         (Ok(mut variables), Node_::Variable(innards)) => {
-                            let VariableDecl {
-                                kind,
-                                hint,
-                                name,
-                                pos,
-                            } = *innards;
+                            let VariableDecl { kind, hint, id } = *innards;
                             variables.push(FunParam {
-                                pos,
-                                name: Some(name),
+                                pos: id.0,
+                                name: Some(id.1),
                                 type_: PossiblyEnforcedTy {
                                     enforced: false,
                                     type_: self.node_to_ty(&hint, type_variables)?,
@@ -1039,7 +1033,7 @@ impl DirectDeclSmartConstructors<'_> {
         type_variables: Node_,
         closing_delimiter: Node_,
     ) -> Result<Node_, String> {
-        let (base_ty_name, base_ty_pos) = get_name("", &base_ty)?;
+        let Id(base_ty_pos, base_ty_name) = get_name("", &base_ty)?;
         let base_ty_name = prefix_slash(Cow::Owned(base_ty_name)).into_owned();
         let pos = Pos::merge(&base_ty_pos, &closing_delimiter.get_pos()?)?;
         Ok(Node_::Hint(
@@ -1667,7 +1661,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         argument_list: Self::R,
     ) -> Self::R {
         let (class_type, argument_list) = (class_type?, argument_list?);
-        let (class_type, pos) = get_name(
+        let Id(pos, class_type) = get_name(
             self.state.namespace_builder.current_namespace(),
             &class_type,
         )?;
@@ -1699,7 +1693,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         match name {
             Node_::Ignored => (),
             _ => {
-                let (name, pos) =
+                let Id(pos, name) =
                     get_name(self.state.namespace_builder.current_namespace(), &name)?;
                 let (tparams, type_variables) = self.into_type_params(generic_params?)?;
                 match self.node_to_ty(&aliased_type, &type_variables) {
@@ -1785,18 +1779,13 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         name: Self::R,
         _arg5: Self::R,
     ) -> Self::R {
-        let (name, pos) = get_name("", &name?)?;
+        let id = get_name("", &name?)?;
         let hint = hint?;
         let kind = match inout? {
             Node_::Inout => ParamMode::FPinout,
             _ => ParamMode::FPnormal,
         };
-        Ok(Node_::Variable(Box::new(VariableDecl {
-            kind,
-            hint,
-            name,
-            pos,
-        })))
+        Ok(Node_::Variable(Box::new(VariableDecl { kind, hint, id })))
     }
 
     fn make_function_declaration(
@@ -1807,7 +1796,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     ) -> Self::R {
         Ok(match header? {
             Node_::FunctionHeader(decl) => {
-                let (name, pos, type_) =
+                let (Id(pos, name), type_) =
                     self.function_into_ty(attributes?, *decl, body?, &HashSet::new())?;
                 Rc::make_mut(&mut self.state.decls).funs.insert(
                     name,
@@ -1882,16 +1871,14 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             Node_::List(nodes) => match nodes.as_slice() {
                 [Node_::List(nodes)] => match nodes.as_slice() {
                     [name, initializer] => {
-                        let (name, pos) =
-                            get_name(self.state.namespace_builder.current_namespace(), name)?;
+                        let id = get_name(self.state.namespace_builder.current_namespace(), name)?;
                         let modifiers = modifiers?;
                         let ty = self
                             .node_to_ty(&hint, &HashSet::new())
                             .unwrap_or(Ty(Reason::Rnone, Box::new(Ty_::Tany(TanySentinel))));
                         Node_::Const(Box::new(ConstDecl {
                             modifiers,
-                            name,
-                            pos,
+                            id,
                             ty,
                             expr: match initializer {
                                 Node_::Expr(e) => Some(e.clone()),
@@ -1931,7 +1918,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 Node_::Const(decl) => {
                     Rc::make_mut(&mut self.state.decls)
                         .consts
-                        .insert(decl.name, Rc::new(decl.ty));
+                        .insert(decl.id.1, Rc::new(decl.ty));
                 }
                 _ => (),
             }
@@ -1945,7 +1932,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 Node_::Const(decl) => {
                     Rc::make_mut(&mut self.state.decls)
                         .consts
-                        .insert(decl.name, Rc::new(decl.ty));
+                        .insert(decl.id.1, Rc::new(decl.ty));
                 }
                 _ => (),
             };
@@ -1962,7 +1949,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     ) -> Self::R {
         for import in imports?.into_iter() {
             if let Node_::NamespaceUseClause(nuc) = import {
-                Rc::make_mut(&mut self.state.namespace_builder).add_import(nuc.name, nuc.as_);
+                Rc::make_mut(&mut self.state.namespace_builder).add_import(nuc.id.1, nuc.as_);
             }
         }
         Ok(Node_::Ignored)
@@ -1978,11 +1965,11 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _arg5: Self::R,
         _arg6: Self::R,
     ) -> Self::R {
-        let (prefix, _) = get_name("", &prefix?)?;
+        let Id(_, prefix) = get_name("", &prefix?)?;
         for import in imports?.into_iter() {
             if let Node_::NamespaceUseClause(nuc) = import {
                 Rc::make_mut(&mut self.state.namespace_builder)
-                    .add_import(prefix.clone() + &nuc.name, nuc.as_);
+                    .add_import(prefix.clone() + &nuc.id.1, nuc.as_);
             }
         }
         Ok(Node_::Ignored)
@@ -1995,15 +1982,14 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         as_: Self::R,
         aliased_name: Self::R,
     ) -> Self::R {
-        let (name, pos) = get_name("", &name?)?;
+        let id = get_name("", &name?)?;
         let as_ = if let Node_::As = as_? {
-            Some(get_name("", &aliased_name?)?.0)
+            Some(get_name("", &aliased_name?)?.1)
         } else {
             None
         };
         Ok(Node_::NamespaceUseClause(Box::new(NamespaceUseClause {
-            name,
-            pos,
+            id,
             as_,
         })))
     }
@@ -2073,7 +2059,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             ret
         }
 
-        let (name, pos) = get_name(self.state.namespace_builder.current_namespace(), &name?)?;
+        let Id(pos, name) = get_name(self.state.namespace_builder.current_namespace(), &name?)?;
         let key = name.clone();
         let name = prefix_slash(Cow::Owned(name));
         let (type_params, type_variables) = self.into_type_params(tparams?)?;
@@ -2158,7 +2144,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                             cls.typeconsts.push(shallow_decl_defs::ShallowTypeconst {
                                 abstract_: typing_defs::TypeconstAbstractKind::TCConcrete,
                                 constraint: None,
-                                name: Id(constant.pos, constant.name),
+                                name: constant.id,
                                 type_: match self.node_to_ty(&constant.type_, &type_variables) {
                                     Ok(ty) => Some(ty),
                                     Err(_) => None,
@@ -2181,14 +2167,14 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                             cls.consts.push(shallow_decl_defs::ShallowClassConst {
                                 abstract_: modifiers.is_abstract,
                                 expr: decl.expr.map(|expr| *expr),
-                                name: Id(decl.pos, decl.name),
+                                name: decl.id,
                                 type_: decl.ty,
                             })
                         }
                         Node_::Property(decl) => {
                             let attributes = read_member_attributes(decl.attrs.iter());
                             let modifiers = read_member_modifiers(decl.modifiers.iter());
-                            let (name, pos) = get_name("", &decl.name)?;
+                            let Id(pos, name) = get_name("", &decl.name)?;
                             let name = if modifiers.is_static {
                                 name
                             } else {
@@ -2241,7 +2227,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                                         reactivity
                                     }
                                 });
-                            let (name, pos, ty) = self.function_into_ty(
+                            let (id, ty) = self.function_into_ty(
                                 decl.attributes,
                                 decl.header,
                                 decl.body,
@@ -2251,7 +2237,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                                 abstract_,
                                 final_: false,
                                 memoizelsb: false,
-                                name: Id(pos, name),
+                                name: id,
                                 override_: false,
                                 reactivity,
                                 type_: ty,
@@ -2451,9 +2437,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     ) -> Self::R {
         let (classname, targ, gt) = (classname?, targ?, gt?);
         let pos = Pos::merge(&classname.get_pos()?, &gt.get_pos()?)?;
-        let (name, name_pos) = get_name("\\", &classname)?;
+        let id = get_name("\\", &classname)?;
         Ok(Node_::Hint(
-            HintValue::Apply(Box::new((Id(name_pos, name), vec![targ]))),
+            HintValue::Apply(Box::new((id, vec![targ]))),
             pos,
         ))
     }
@@ -2466,7 +2452,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     ) -> Self::R {
         let (class_name, value) = (class_name?, value?);
         let pos = Pos::merge(&class_name.get_pos()?, &value.get_pos()?)?;
-        let (class_name_str, class_name_pos) = get_name("", &class_name)?;
+        let Id(class_name_pos, class_name_str) = get_name("", &class_name)?;
         let class_name_str = prefix_slash(Cow::Owned(class_name_str)).into_owned();
         let class_id = aast::ClassId(
             class_name_pos.clone(),
@@ -2475,10 +2461,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 _ => aast::ClassId_::CI(Id(class_name_pos, class_name_str)),
             },
         );
-        let (value_str, value_pos) = get_name("", &value)?;
+        let value_id = get_name("", &value)?;
         Ok(Node_::Expr(Box::new(aast::Expr(
             pos,
-            nast::Expr_::ClassConst(Box::new((class_id, (value_pos, value_str)))),
+            nast::Expr_::ClassConst(Box::new((class_id, (value_id.0, value_id.1)))),
         ))))
     }
 
@@ -2656,10 +2642,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 reifiable
             }
         });
-        let (name, pos) = get_name("", &name?)?;
+        let id = get_name("", &name?)?;
         Ok(Node_::TypeConstant(Box::new(TypeConstant {
-            name,
-            pos,
+            id,
             type_: type_?,
             reified,
         })))
@@ -2675,7 +2660,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let id = get_name("", &constant_name)?;
         let pos = Pos::merge(&this.get_pos()?, &coloncolon.get_pos()?)?;
         Ok(Node_::Hint(
-            HintValue::Access(Box::new((this, vec![Id(id.1, id.0)]))),
+            HintValue::Access(Box::new((this, vec![id]))),
             pos,
         ))
     }

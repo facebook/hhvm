@@ -13,12 +13,13 @@ use naming_special_names_rust as naming_special_names;
 
 use flatten_smart_constructors::{FlattenOp, FlattenSmartConstructors};
 use oxidized::{
-    aast,
-    ast_defs::{ClassKind, ConstraintKind, FunKind, Id, ShapeFieldName, Variance},
+    aast, aast_defs,
+    ast_defs::{Bop, ClassKind, ConstraintKind, FunKind, Id, ShapeFieldName, Uop, Variance},
     decl_defs::MethodReactivity,
     errors::Errors,
     file_info::Mode,
     i_set::ISet,
+    nast,
     pos::Pos,
     shallow_decl_defs,
     shape_map::{ShapeField, ShapeMap},
@@ -376,6 +377,7 @@ pub struct ConstDecl {
     name: String,
     pos: Pos,
     ty: Ty,
+    expr: Option<Box<nast::Expr>>,
 }
 
 #[derive(Clone, Debug)]
@@ -408,7 +410,7 @@ pub struct PropertyDecl {
     modifiers: Node_,
     hint: Node_,
     name: Node_,
-    is_initialized: bool,
+    expr: Option<Box<nast::Expr>>,
 }
 
 #[derive(Clone, Debug)]
@@ -452,6 +454,40 @@ pub struct TypeConstant {
 }
 
 #[derive(Clone, Debug)]
+pub enum OperatorType {
+    Tilde,
+    Not,
+    Plus,
+    Minus,
+    PlusPlus,
+    MinusMinus,
+    Silence,
+    Star,
+    Slash,
+    Eqeq,
+    Eqeqeq,
+    Starstar,
+    Diff,
+    Diff2,
+    Ampamp,
+    Barbar,
+    LogXor,
+    Lt,
+    Lte,
+    Gt,
+    Gte,
+    Dot,
+    Amp,
+    Bar,
+    Ltlt,
+    Gtgt,
+    Percent,
+    Xor,
+    Cmp,
+    QuestionQuestion,
+}
+
+#[derive(Clone, Debug)]
 pub enum Node_ {
     List(Vec<Node_>),
     BracketedList(Box<(Pos, Vec<Node_>, Pos)>),
@@ -462,7 +498,10 @@ pub enum Node_ {
     Array(Pos),
     Darray(Pos),
     Varray(Pos),
-    StringLiteral(String, Pos), // For shape keys.
+    StringLiteral(String, Pos),   // For shape keys and const expressions.
+    DecimalLiteral(String, Pos),  // For const expressions.
+    FloatingLiteral(String, Pos), // For const expressions.
+    Null(Pos),                    // For const expressions.
     Hint(HintValue, Pos),
     Backslash(Pos), // This needs a pos since it shows up in names.
     ListItem(Box<(Node_, Node_)>),
@@ -478,6 +517,8 @@ pub enum Node_ {
     TypeConstraint(Box<(ConstraintKind, Node_)>),
     ShapeFieldSpecifier(Box<ShapeFieldDecl>),
     NamespaceUseClause(Box<NamespaceUseClause>),
+    Expr(Box<nast::Expr>),
+    Operator(Pos, OperatorType),
     Construct(Pos),
     LessThan(Pos),    // This needs a pos since it shows up in generics.
     GreaterThan(Pos), // This needs a pos since it shows up in generics.
@@ -487,9 +528,6 @@ pub enum Node_ {
     Question(Pos),    // This needs a pos since it shows up in nullable types.
     This(Pos),        // This needs a pos since it shows up in Taccess.
     ColonColon(Pos),  // This needs a pos since it shows up in Taccess.
-    Initializer,      // We don't care what we initialize values to, only
-    // whether or not they're initialized, so we make a fake
-    // node for them.
 
     // Box the insides of the vector so we don't need to reallocate them when
     // we pull them out of the TypeConstraint variant.
@@ -499,7 +537,6 @@ pub enum Node_ {
     Abstract,
     As,
     Async,
-    Class,
     DotDotDot,
     Extends,
     Final,
@@ -536,7 +573,11 @@ impl Node_ {
             | Node_::Array(pos)
             | Node_::Darray(pos)
             | Node_::Varray(pos)
-            | Node_::StringLiteral(_, pos) => Ok(pos.clone()),
+            | Node_::DecimalLiteral(_, pos)
+            | Node_::FloatingLiteral(_, pos)
+            | Node_::Null(pos)
+            | Node_::StringLiteral(_, pos)
+            | Node_::Operator(pos, _) => Ok(pos.clone()),
             Node_::ListItem(items) => {
                 let fst = &items.0;
                 let snd = &items.1;
@@ -554,6 +595,10 @@ impl Node_ {
                     &first_pos,
                     &Pos::merge(&self.pos_from_vec(&inner_list)?, &second_pos)?,
                 )
+            }
+            Node_::Expr(innards) => {
+                let aast::Expr(pos, _) = &**innards;
+                Ok(pos.clone())
             }
             _ => Err(format!("No pos found for node {:?}", self)),
         }
@@ -605,6 +650,19 @@ impl Node_ {
             Node_::Public => Ok(aast::Visibility::Public),
             n => Err(format!("Expected a visibility modifier, but was {:?}", n)),
         }
+    }
+
+    fn as_expr(&self) -> Result<nast::Expr, String> {
+        let expr_ = match self {
+            Node_::Expr(expr) => return Ok(*expr.clone()),
+            Node_::DecimalLiteral(s, _) => aast::Expr_::Int(s.to_string()),
+            Node_::FloatingLiteral(s, _) => aast::Expr_::Float(s.to_string()),
+            Node_::StringLiteral(s, _) => aast::Expr_::String(s.to_string()),
+            Node_::Null(_) => aast::Expr_::Null,
+            n => return Err(format!("Could not construct an Expr for {:?}", n)),
+        };
+        let pos = self.get_pos()?;
+        Ok(aast::Expr(pos, expr_))
     }
 
     fn is_ignored(&self) -> bool {
@@ -974,6 +1032,24 @@ impl DirectDeclSmartConstructors<'_> {
             n => Err(format!("Expected a list of variables, but got {:?}", n)),
         }
     }
+
+    fn make_apply(
+        &self,
+        base_ty: Node_,
+        type_variables: Node_,
+        closing_delimiter: Node_,
+    ) -> Result<Node_, String> {
+        let (base_ty_name, base_ty_pos) = get_name("", &base_ty)?;
+        let base_ty_name = prefix_slash(Cow::Owned(base_ty_name)).into_owned();
+        let pos = Pos::merge(&base_ty_pos, &closing_delimiter.get_pos()?)?;
+        Ok(Node_::Hint(
+            HintValue::Apply(Box::new((
+                Id(base_ty_pos, base_ty_name),
+                type_variables.into_vec(),
+            ))),
+            pos,
+        ))
+    }
 }
 
 enum NodeIterHelper<'a> {
@@ -1124,7 +1200,15 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         Ok(match kind {
             // There are a few types whose string representations we have to
             // grab anyway, so just go ahead and treat them as generic names.
-            TokenKind::Name | TokenKind::Variable | TokenKind::Vec | TokenKind::Dict => {
+            TokenKind::Name
+            | TokenKind::Variable
+            | TokenKind::Vec
+            | TokenKind::Dict
+            | TokenKind::Keyset
+            | TokenKind::Tuple
+            | TokenKind::Classname
+            | TokenKind::Class
+            | TokenKind::SelfToken => {
                 let name = token_text(self);
                 if self.state.namespace_builder.is_building_namespace {
                     Rc::make_mut(&mut self.state.namespace_builder)
@@ -1150,6 +1234,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     .to_string(),
                 token_pos(self),
             ),
+            TokenKind::DecimalLiteral => Node_::DecimalLiteral(token_text(self), token_pos(self)),
+            TokenKind::FloatingLiteral => Node_::FloatingLiteral(token_text(self), token_pos(self)),
+            TokenKind::NullLiteral => Node_::Null(token_pos(self)),
             TokenKind::String => Node_::Hint(HintValue::String, token_pos(self)),
             TokenKind::Int => Node_::Hint(HintValue::Int, token_pos(self)),
             TokenKind::Float => Node_::Hint(HintValue::Float, token_pos(self)),
@@ -1186,19 +1273,48 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 }
             }
             TokenKind::Construct => Node_::Construct(token_pos(self)),
-            TokenKind::LessThan => Node_::LessThan(token_pos(self)),
-            TokenKind::GreaterThan => Node_::GreaterThan(token_pos(self)),
             TokenKind::LeftParen => Node_::LeftParen(token_pos(self)),
-            TokenKind::RightParen => Node_::RightParen(token_pos(self)),
+            TokenKind::RightParen | TokenKind::RightBracket => {
+                // We don't technically need to differentiate these.
+                Node_::RightParen(token_pos(self))
+            }
             TokenKind::Shape => Node_::Shape(token_pos(self)),
             TokenKind::Question => Node_::Question(token_pos(self)),
             TokenKind::This => Node_::This(token_pos(self)),
             TokenKind::ColonColon => Node_::ColonColon(token_pos(self)),
+            TokenKind::Tilde => Node_::Operator(token_pos(self), OperatorType::Tilde),
+            TokenKind::Exclamation => Node_::Operator(token_pos(self), OperatorType::Not),
+            TokenKind::Plus => Node_::Operator(token_pos(self), OperatorType::Plus),
+            TokenKind::Minus => Node_::Operator(token_pos(self), OperatorType::Minus),
+            TokenKind::PlusPlus => Node_::Operator(token_pos(self), OperatorType::PlusPlus),
+            TokenKind::MinusMinus => Node_::Operator(token_pos(self), OperatorType::MinusMinus),
+            TokenKind::At => Node_::Operator(token_pos(self), OperatorType::Silence),
+            TokenKind::Star => Node_::Operator(token_pos(self), OperatorType::Star),
+            TokenKind::Slash => Node_::Operator(token_pos(self), OperatorType::Slash),
+            TokenKind::EqualEqual => Node_::Operator(token_pos(self), OperatorType::Eqeq),
+            TokenKind::EqualEqualEqual => Node_::Operator(token_pos(self), OperatorType::Eqeqeq),
+            TokenKind::StarStar => Node_::Operator(token_pos(self), OperatorType::Starstar),
+            TokenKind::AmpersandAmpersand => Node_::Operator(token_pos(self), OperatorType::Ampamp),
+            TokenKind::BarBar => Node_::Operator(token_pos(self), OperatorType::Barbar),
+            TokenKind::LessThan => Node_::Operator(token_pos(self), OperatorType::Lt),
+            TokenKind::LessThanEqual => Node_::Operator(token_pos(self), OperatorType::Lte),
+            TokenKind::GreaterThan => Node_::Operator(token_pos(self), OperatorType::Gt),
+            TokenKind::GreaterThanEqual => Node_::Operator(token_pos(self), OperatorType::Gte),
+            TokenKind::Dot => Node_::Operator(token_pos(self), OperatorType::Dot),
+            TokenKind::Ampersand => Node_::Operator(token_pos(self), OperatorType::Amp),
+            TokenKind::Bar => Node_::Operator(token_pos(self), OperatorType::Bar),
+            TokenKind::LessThanLessThan => Node_::Operator(token_pos(self), OperatorType::Ltlt),
+            TokenKind::GreaterThanGreaterThan => {
+                Node_::Operator(token_pos(self), OperatorType::Gtgt)
+            }
+            TokenKind::Percent => Node_::Operator(token_pos(self), OperatorType::Percent),
+            TokenKind::QuestionQuestion => {
+                Node_::Operator(token_pos(self), OperatorType::QuestionQuestion)
+            }
             TokenKind::Abstract => Node_::Abstract,
             TokenKind::As => Node_::As,
             TokenKind::Super => Node_::Super,
             TokenKind::Async => Node_::Async,
-            TokenKind::Class => Node_::Class,
             TokenKind::DotDotDot => Node_::DotDotDot,
             TokenKind::Extends => Node_::Extends,
             TokenKind::Final => Node_::Final,
@@ -1277,8 +1393,251 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         arg0
     }
 
-    fn make_simple_initializer(&mut self, _arg0: Self::R, _arg1: Self::R) -> Self::R {
-        Ok(Node_::Initializer)
+    fn make_simple_initializer(&mut self, _arg0: Self::R, expr: Self::R) -> Self::R {
+        expr
+    }
+
+    fn make_array_intrinsic_expression(
+        &mut self,
+        array: Self::R,
+        _arg1: Self::R,
+        fields: Self::R,
+        right_paren: Self::R,
+    ) -> Self::R {
+        let fields = fields?
+            .into_iter()
+            .map(|node| match node {
+                Node_::ListItem(innards) => Ok(aast::Afield::AFkvalue(
+                    innards.0.as_expr()?,
+                    innards.1.as_expr()?,
+                )),
+                node => Ok(aast::Afield::AFvalue(node.as_expr()?)),
+            })
+            .collect::<Result<Vec<_>, String>>()?;
+        Ok(Node_::Expr(Box::new(aast::Expr(
+            Pos::merge(&array?.get_pos()?, &right_paren?.get_pos()?)?,
+            nast::Expr_::Array(fields),
+        ))))
+    }
+
+    fn make_darray_intrinsic_expression(
+        &mut self,
+        darray: Self::R,
+        _arg1: Self::R,
+        _arg2: Self::R,
+        fields: Self::R,
+        right_bracket: Self::R,
+    ) -> Self::R {
+        let fields = fields?
+            .into_iter()
+            .map(|node| match node {
+                Node_::ListItem(innards) => {
+                    let (key, value) = *innards;
+                    let key = key.as_expr()?;
+                    let value = value.as_expr()?;
+                    Ok((key, value))
+                }
+                n => Err(format!("Expected a ListItem but was {:?}", n)),
+            })
+            .collect::<Result<Vec<_>, _>>()?;
+        Ok(Node_::Expr(Box::new(aast::Expr(
+            Pos::merge(&darray?.get_pos()?, &right_bracket?.get_pos()?)?,
+            nast::Expr_::Darray(Box::new((None, fields))),
+        ))))
+    }
+
+    fn make_dictionary_intrinsic_expression(
+        &mut self,
+        dict: Self::R,
+        _arg1: Self::R,
+        _arg2: Self::R,
+        fields: Self::R,
+        right_bracket: Self::R,
+    ) -> Self::R {
+        let fields = fields?
+            .into_iter()
+            .map(|node| match node {
+                Node_::ListItem(innards) => {
+                    let (key, value) = *innards;
+                    let key = key.as_expr()?;
+                    let value = value.as_expr()?;
+                    Ok(aast::Field(key, value))
+                }
+                n => Err(format!("Expected a ListItem but was {:?}", n)),
+            })
+            .collect::<Result<Vec<_>, _>>()?;
+        Ok(Node_::Expr(Box::new(aast::Expr(
+            Pos::merge(&dict?.get_pos()?, &right_bracket?.get_pos()?)?,
+            nast::Expr_::KeyValCollection(Box::new((aast_defs::KvcKind::Dict, None, fields))),
+        ))))
+    }
+
+    fn make_keyset_intrinsic_expression(
+        &mut self,
+        keyset: Self::R,
+        _arg1: Self::R,
+        _arg2: Self::R,
+        fields: Self::R,
+        right_bracket: Self::R,
+    ) -> Self::R {
+        let fields = fields?
+            .into_iter()
+            .map(|node| node.as_expr())
+            .collect::<Result<Vec<_>, _>>()?;
+        Ok(Node_::Expr(Box::new(aast::Expr(
+            Pos::merge(&keyset?.get_pos()?, &right_bracket?.get_pos()?)?,
+            nast::Expr_::ValCollection(Box::new((aast_defs::VcKind::Keyset, None, fields))),
+        ))))
+    }
+
+    fn make_varray_intrinsic_expression(
+        &mut self,
+        varray: Self::R,
+        _arg1: Self::R,
+        _arg2: Self::R,
+        fields: Self::R,
+        right_bracket: Self::R,
+    ) -> Self::R {
+        let fields = fields?
+            .into_iter()
+            .map(|node| node.as_expr())
+            .collect::<Result<Vec<_>, _>>()?;
+        Ok(Node_::Expr(Box::new(aast::Expr(
+            Pos::merge(&varray?.get_pos()?, &right_bracket?.get_pos()?)?,
+            nast::Expr_::Varray(Box::new((None, fields))),
+        ))))
+    }
+
+    fn make_vector_intrinsic_expression(
+        &mut self,
+        vec: Self::R,
+        _arg1: Self::R,
+        _arg2: Self::R,
+        fields: Self::R,
+        right_bracket: Self::R,
+    ) -> Self::R {
+        let fields = fields?
+            .into_iter()
+            .map(|node| node.as_expr())
+            .collect::<Result<Vec<_>, _>>()?;
+        Ok(Node_::Expr(Box::new(aast::Expr(
+            Pos::merge(&vec?.get_pos()?, &right_bracket?.get_pos()?)?,
+            nast::Expr_::ValCollection(Box::new((aast_defs::VcKind::Vec, None, fields))),
+        ))))
+    }
+
+    fn make_element_initializer(
+        &mut self,
+        key: Self::R,
+        _arg1: Self::R,
+        value: Self::R,
+    ) -> Self::R {
+        Ok(Node_::ListItem(Box::new((key?, value?))))
+    }
+
+    fn make_prefix_unary_expression(&mut self, op: Self::R, value: Self::R) -> Self::R {
+        let (op, value) = (op?, value?);
+        let pos = match (op.get_pos(), value.get_pos()) {
+            (Ok(op_pos), Ok(value_pos)) => Pos::merge(&op_pos, &value_pos)?,
+            _ => return Ok(Node_::Ignored),
+        };
+        let op = match &op {
+            Node_::Operator(_, op) => match op {
+                OperatorType::Tilde => Uop::Utild,
+                OperatorType::Not => Uop::Unot,
+                OperatorType::Plus => Uop::Uplus,
+                OperatorType::Minus => Uop::Uminus,
+                OperatorType::PlusPlus => Uop::Uincr,
+                OperatorType::MinusMinus => Uop::Udecr,
+                OperatorType::Silence => Uop::Usilence,
+                op => {
+                    return Err(format!(
+                        "Operator {:?} cannot be used as a unary operator",
+                        op
+                    ))
+                }
+            },
+            op => return Err(format!("Did not recognize operator {:?}", op)),
+        };
+        Ok(Node_::Expr(Box::new(aast::Expr(
+            pos,
+            aast::Expr_::Unop(Box::new((op, value.as_expr()?))),
+        ))))
+    }
+
+    fn make_postfix_unary_expression(&mut self, value: Self::R, op: Self::R) -> Self::R {
+        let (value, op) = (value?, op?);
+        let pos = match (value.get_pos(), op.get_pos()) {
+            (Ok(value_pos), Ok(op_pos)) => Pos::merge(&value_pos, &op_pos)?,
+            _ => return Ok(Node_::Ignored),
+        };
+        let op = match &op {
+            Node_::Operator(_, op) => match op {
+                OperatorType::PlusPlus => Uop::Upincr,
+                OperatorType::MinusMinus => Uop::Updecr,
+                op => {
+                    return Err(format!(
+                        "Operator {:?} cannot be used as a postfix unary operator",
+                        op
+                    ))
+                }
+            },
+            op => return Err(format!("Did not recognize operator {:?}", op)),
+        };
+        Ok(Node_::Expr(Box::new(aast::Expr(
+            pos,
+            aast::Expr_::Unop(Box::new((op, value.as_expr()?))),
+        ))))
+    }
+
+    fn make_binary_expression(&mut self, lhs: Self::R, op: Self::R, rhs: Self::R) -> Self::R {
+        let (lhs, op, rhs) = (lhs?, op?, rhs?);
+        let pos = match (lhs.get_pos(), op.get_pos(), rhs.get_pos()) {
+            (Ok(lhs_pos), Ok(op_pos), Ok(rhs_pos)) => {
+                Pos::merge(&Pos::merge(&lhs_pos, &op_pos)?, &rhs_pos)?
+            }
+            _ => return Ok(Node_::Ignored),
+        };
+
+        let op = match &op {
+            Node_::Operator(_, op) => match op {
+                OperatorType::Plus => Bop::Plus,
+                OperatorType::Minus => Bop::Minus,
+                OperatorType::Star => Bop::Star,
+                OperatorType::Slash => Bop::Slash,
+                OperatorType::Eqeq => Bop::Eqeq,
+                OperatorType::Eqeqeq => Bop::Eqeqeq,
+                OperatorType::Starstar => Bop::Starstar,
+                OperatorType::Ampamp => Bop::Ampamp,
+                OperatorType::Barbar => Bop::Barbar,
+                OperatorType::LogXor => Bop::LogXor,
+                OperatorType::Lt => Bop::Lt,
+                OperatorType::Lte => Bop::Lte,
+                OperatorType::Gt => Bop::Gt,
+                OperatorType::Gte => Bop::Gte,
+                OperatorType::Dot => Bop::Dot,
+                OperatorType::Amp => Bop::Amp,
+                OperatorType::Bar => Bop::Bar,
+                OperatorType::Ltlt => Bop::Ltlt,
+                OperatorType::Gtgt => Bop::Gtgt,
+                OperatorType::Percent => Bop::Percent,
+                OperatorType::Xor => Bop::Xor,
+                OperatorType::Cmp => Bop::Cmp,
+                OperatorType::QuestionQuestion => Bop::QuestionQuestion,
+                op => {
+                    return Err(format!(
+                        "Operator {:?} cannot be used as a binary operator",
+                        op
+                    ))
+                }
+            },
+            op => return Err(format!("Did not recognize operator {:?}", op)),
+        };
+
+        Ok(Node_::Expr(Box::new(aast::Expr(
+            pos,
+            aast::Expr_::Binop(Box::new((op, lhs.as_expr()?, rhs.as_expr()?))),
+        ))))
     }
 
     fn make_list_item(&mut self, item: Self::R, sep: Self::R) -> Self::R {
@@ -1522,24 +1881,23 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         Ok(match decls? {
             Node_::List(nodes) => match nodes.as_slice() {
                 [Node_::List(nodes)] => match nodes.as_slice() {
-                    [name, _initializer] => {
+                    [name, initializer] => {
                         let (name, pos) =
                             get_name(self.state.namespace_builder.current_namespace(), name)?;
                         let modifiers = modifiers?;
-                        match self.node_to_ty(&hint, &HashSet::new()) {
-                            Ok(ty) => Node_::Const(Box::new(ConstDecl {
-                                modifiers,
-                                name,
-                                pos,
-                                ty,
-                            })),
-                            Err(msg) => {
-                                return Err(format!(
-                                    "Expected hint or name for constant {}, but was {:?} ({})",
-                                    name, hint, msg
-                                ))
-                            }
-                        }
+                        let ty = self
+                            .node_to_ty(&hint, &HashSet::new())
+                            .unwrap_or(Ty(Reason::Rnone, Box::new(Ty_::Tany(TanySentinel))));
+                        Node_::Const(Box::new(ConstDecl {
+                            modifiers,
+                            name,
+                            pos,
+                            ty,
+                            expr: match initializer {
+                                Node_::Expr(e) => Some(e.clone()),
+                                _ => None,
+                            },
+                        }))
                     }
                     _ => Node_::Ignored,
                 },
@@ -1822,7 +2180,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                             let modifiers = read_member_modifiers(decl.modifiers.iter());
                             cls.consts.push(shallow_decl_defs::ShallowClassConst {
                                 abstract_: modifiers.is_abstract,
-                                expr: None,
+                                expr: decl.expr.map(|expr| *expr),
                                 name: Id(decl.pos, decl.name),
                                 type_: decl.ty,
                             })
@@ -1844,7 +2202,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                                 lateinit: attributes.contains(&MemberAttribute::LateInit),
                                 lsb: false,
                                 name: Id(pos, name),
-                                needs_init: !decl.is_initialized,
+                                needs_init: decl.expr.is_none(),
                                 type_: Some(ty),
                                 abstract_: modifiers.is_abstract,
                                 visibility: modifiers.visibility,
@@ -1952,9 +2310,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     modifiers: modifiers?,
                     hint: hint?,
                     name,
-                    is_initialized: match initializer {
-                        Node_::Initializer => true,
-                        _ => false,
+                    expr: match initializer {
+                        Node_::Expr(e) => Some(Box::new(*e)),
+                        Node_::Ignored => None,
+                        n => n.as_expr().ok().map(Box::new),
                     },
                 })))
             }
@@ -2031,6 +2390,98 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         ))
     }
 
+    fn make_shape_expression(
+        &mut self,
+        shape: Self::R,
+        _left_paren: Self::R,
+        fields: Self::R,
+        right_paren: Self::R,
+    ) -> Self::R {
+        let fields = fields?
+            .into_iter()
+            .map(|node| match node {
+                Node_::ListItem(innards) => {
+                    let (key, value) = *innards;
+                    let key = match key {
+                        Node_::DecimalLiteral(s, p) => ShapeFieldName::SFlitInt((p, s)),
+                        Node_::StringLiteral(s, p) => ShapeFieldName::SFlitStr((p, s)),
+                        n => {
+                            return Err(format!(
+                            "Expected an int literal, string literal, or class const, but was {:?}",
+                            n
+                        ))
+                        }
+                    };
+                    let value = value.as_expr()?;
+                    Ok((key, value))
+                }
+                n => Err(format!("Expected a ListItem but was {:?}", n)),
+            })
+            .collect::<Result<Vec<_>, _>>()?;
+        Ok(Node_::Expr(Box::new(aast::Expr(
+            Pos::merge(&shape?.get_pos()?, &right_paren?.get_pos()?)?,
+            nast::Expr_::Shape(fields),
+        ))))
+    }
+
+    fn make_tuple_expression(
+        &mut self,
+        tuple: Self::R,
+        _left_paren: Self::R,
+        fields: Self::R,
+        right_paren: Self::R,
+    ) -> Self::R {
+        let fields = fields?
+            .into_iter()
+            .map(|node| node.as_expr())
+            .collect::<Result<Vec<_>, String>>()?;
+        Ok(Node_::Expr(Box::new(aast::Expr(
+            Pos::merge(&tuple?.get_pos()?, &right_paren?.get_pos()?)?,
+            nast::Expr_::List(fields),
+        ))))
+    }
+
+    fn make_classname_type_specifier(
+        &mut self,
+        classname: Self::R,
+        _lt: Self::R,
+        targ: Self::R,
+        _arg3: Self::R,
+        gt: Self::R,
+    ) -> Self::R {
+        let (classname, targ, gt) = (classname?, targ?, gt?);
+        let pos = Pos::merge(&classname.get_pos()?, &gt.get_pos()?)?;
+        let (name, name_pos) = get_name("\\", &classname)?;
+        Ok(Node_::Hint(
+            HintValue::Apply(Box::new((Id(name_pos, name), vec![targ]))),
+            pos,
+        ))
+    }
+
+    fn make_scope_resolution_expression(
+        &mut self,
+        class_name: Self::R,
+        _arg1: Self::R,
+        value: Self::R,
+    ) -> Self::R {
+        let (class_name, value) = (class_name?, value?);
+        let pos = Pos::merge(&class_name.get_pos()?, &value.get_pos()?)?;
+        let (class_name_str, class_name_pos) = get_name("", &class_name)?;
+        let class_name_str = prefix_slash(Cow::Owned(class_name_str)).into_owned();
+        let class_id = aast::ClassId(
+            class_name_pos.clone(),
+            match class_name_str.to_ascii_lowercase().as_ref() {
+                "\\self" => aast::ClassId_::CIself,
+                _ => aast::ClassId_::CI(Id(class_name_pos, class_name_str)),
+            },
+        );
+        let (value_str, value_pos) = get_name("", &value)?;
+        Ok(Node_::Expr(Box::new(aast::Expr(
+            pos,
+            nast::Expr_::ClassConst(Box::new((class_id, (value_pos, value_str)))),
+        ))))
+    }
+
     fn make_field_specifier(
         &mut self,
         is_optional: Self::R,
@@ -2047,6 +2498,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             name: name?,
             type_: type_?,
         })))
+    }
+
+    fn make_field_initializer(&mut self, key: Self::R, _arg1: Self::R, value: Self::R) -> Self::R {
+        Ok(Node_::ListItem(Box::new((key?, value?))))
     }
 
     fn make_varray_type_specifier(
@@ -2229,32 +2684,31 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         &mut self,
         vec: Self::R,
         _arg1: Self::R,
-        inner: Self::R,
+        hint: Self::R,
         _arg3: Self::R,
         greater_than: Self::R,
     ) -> Self::R {
-        let (vec_name, vec_pos) = get_name("", &vec?)?;
-        let vec_name = prefix_slash(Cow::Owned(vec_name)).into_owned();
-        let pos = Pos::merge(&vec_pos, &greater_than?.get_pos()?)?;
-        Ok(Node_::Hint(
-            HintValue::Apply(Box::new((Id(vec_pos, vec_name), inner?.into_vec()))),
-            pos,
-        ))
+        self.make_apply(vec?, hint?, greater_than?)
     }
 
     fn make_dictionary_type_specifier(
         &mut self,
         dict: Self::R,
         _arg1: Self::R,
-        inner: Self::R,
+        hint: Self::R,
         greater_than: Self::R,
     ) -> Self::R {
-        let (dict_name, dict_pos) = get_name("", &dict?)?;
-        let dict_name = prefix_slash(Cow::Owned(dict_name)).into_owned();
-        let pos = Pos::merge(&dict_pos, &greater_than?.get_pos()?)?;
-        Ok(Node_::Hint(
-            HintValue::Apply(Box::new((Id(dict_pos, dict_name), inner?.into_vec()))),
-            pos,
-        ))
+        self.make_apply(dict?, hint?, greater_than?)
+    }
+
+    fn make_keyset_type_specifier(
+        &mut self,
+        keyset: Self::R,
+        _arg1: Self::R,
+        hint: Self::R,
+        _arg3: Self::R,
+        greater_than: Self::R,
+    ) -> Self::R {
+        self.make_apply(keyset?, hint?, greater_than?)
     }
 }

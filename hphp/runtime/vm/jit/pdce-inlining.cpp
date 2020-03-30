@@ -854,7 +854,7 @@ bool process(OptimizeContext& ctx, const IdomVector& idoms, Block* block) {
       // We queue blocks in RPO order.  If a pred is not processed yet something
       // is wrong.  Perhaps a block representing the head of a loop is not
       // dominated by a single FP def.
-      assertx(ctx.fpMap.count(pred));
+      assertx(ctx.fpMap.count(pred) || cfgHasLoop(*ctx.unit));
     });
   }
 
@@ -890,8 +890,18 @@ bool process(OptimizeContext& ctx, const IdomVector& idoms, Block* block) {
       assertx(p->numSuccs() == 1);
       assertx(jmp.numSrcs() == phiIdx);
 
-      assertx(ctx.fpMap.count(p));
-      auto updateFp = ctx.fpMap[p];
+      /*
+       * When a block needs a Phi node we to extend jumps from all predecessor
+       * blocks with their updated fp values. In cases where the cfg contains a
+       * cycle our dataflow analysis may encounter blocks with unprocessed
+       * predecessors requiring Phi nodes. In those instances we extend the jump
+       * with ctx.deadFp, so that it can be updated when the node is processed.
+       */
+      auto updateFp = [&] {
+        auto const it = ctx.fpMap.find(p);
+        if (it != ctx.fpMap.end()) return it->second;
+        return ctx.deadFp;
+      }();
 
       ITRACE(4, "Found pred to update (block id: {}): {}\n",
              p->id(), p->back());

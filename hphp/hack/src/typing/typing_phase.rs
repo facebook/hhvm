@@ -4,6 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 use bumpalo::collections::vec::Vec as BVec;
 
+use naming_special_names_rust::typehints;
+use oxidized::aast::{Hint, Hint_};
 use oxidized::ast;
 use oxidized::ast_defs::Id;
 use oxidized::pos::Pos;
@@ -67,11 +69,40 @@ pub fn localize<'a>(ety_env: &'a ExpandEnv_<'a>, env: &mut Env<'a>, dty: &'a DTy
 /// Report arity errors using `def_pos` (for the declared parameters), `use_pos`
 /// (for the use-site) and `use_name` (the name of the constructor or function).
 pub fn localize_targs<'a>(
-    _env: &mut Env<'a>,
-    _tparams: &Vec<DTparam>,
-    _targs: &Vec<ast::Targ>,
+    env: &mut Env<'a>,
+    use_pos: &'a Pos,
+    use_name: &'a String,
+    tparams: &'a Vec<DTparam>,
+    targs: &Vec<ast::Targ>,
 ) -> Vec<tast::Targ<'a>> {
-    vec![] // TODO(hrust) fill in here
+    if targs.len() != 0 {
+        unimplemented!("Explicit type arguments not supported")
+    }
+    // TODO(hrust) localize explicit type arguments
+    let explicit_targs = std::iter::empty();
+    // Generate fresh type variables for the remainder
+    let implicit_targs = tparams[targs.len()..].iter().map(|tparam| {
+        let tvar = env
+            .inference_env
+            .fresh_type_reason(env.bld().mk_rtype_variable_generics(
+                use_pos,
+                tparam.name.name(),
+                use_name,
+            ));
+        // TODO(hrust) logging
+        tast::Targ(
+            tvar,
+            Hint(
+                use_pos.clone(),
+                Box::new(Hint_::Happly(
+                    Id(Pos::make_none(), typehints::WILDCARD.to_string()),
+                    vec![],
+                )),
+            ),
+        )
+    });
+
+    explicit_targs.chain(implicit_targs).collect()
 }
 
 fn localize_tparams<'a>(

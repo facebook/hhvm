@@ -295,6 +295,18 @@ impl<'a> TypeBuilder<'a> {
     pub fn mk_rinstantiate(&self, r0: PReason<'a>, name: &'a str, r1: PReason<'a>) -> PReason {
         self.mk_reason(r1.pos, Reason::Rinstantiate(r0, name, r1))
     }
+
+    pub fn mk_rtype_variable_generics(
+        &self,
+        pos: &'a Pos,
+        param_name: &'a str,
+        fn_name: &'a str,
+    ) -> PReason {
+        self.mk_reason(
+            Some(pos),
+            Reason::RtypeVariableGenerics(param_name, fn_name),
+        )
+    }
 }
 
 impl<'a> TypeBuilder<'a> {

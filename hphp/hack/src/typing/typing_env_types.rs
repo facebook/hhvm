@@ -38,6 +38,10 @@ impl<'a> Env<'a> {
         self.genv.builder
     }
 
+    pub fn bld(&self) -> &'a TypeBuilder<'a> {
+        self.builder()
+    }
+
     pub fn provider(&self) -> &'a dyn DeclProvider {
         self.genv.provider
     }

@@ -16,6 +16,7 @@ pub mod file_pos_small;
 pub mod global_options_impl;
 pub mod i_map;
 pub mod i_set;
+pub mod ident_impl;
 pub mod internal_type_set;
 pub mod local_id;
 pub mod namespace_env_impl;

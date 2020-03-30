@@ -17,6 +17,7 @@ pub use manual::file_pos_small;
 pub use manual::global_options_impl;
 pub use manual::i_map;
 pub use manual::i_set;
+pub use manual::ident_impl;
 pub use manual::internal_type_set;
 pub use manual::local_id;
 pub use manual::namespace_env_impl;

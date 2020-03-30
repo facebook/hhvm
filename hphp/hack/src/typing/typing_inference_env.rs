@@ -6,6 +6,7 @@ use arena_trait::Arena;
 
 use oxidized::aast;
 use oxidized::ident::Ident;
+use oxidized::ident_impl::New;
 use oxidized::pos::Pos;
 
 use typing_collections_rust::{IMap, ISet, SMap};
@@ -36,40 +37,53 @@ pub struct TyvarConstraints<'a> {
     pub pu_accesses: SMap<'a, (Ty<'a>, &'a aast::Sid, Ty<'a>, &'a aast::Sid)>,
 }
 
+impl<'a> TyvarConstraints<'a> {
+    fn new() -> TyvarConstraints<'a> {
+        TyvarConstraints {
+            appears_covariantly: false,
+            appears_contravariantly: false,
+            lower_bounds: ITySet::empty(),
+            upper_bounds: ITySet::empty(),
+            type_constants: SMap::empty(),
+            pu_accesses: SMap::empty(),
+        }
+    }
+}
+
 #[derive(Clone)]
 pub enum SolvingInfo<'a> {
     /// when the type variable is bound to a type
     Type(Ty<'a>),
     /// when the type variable is still unsolved
-    Constraints(&'a TyvarConstraints<'a>),
+    Constraints(TyvarConstraints<'a>),
 }
 
 #[derive(Clone)]
-pub struct TyvarInfoStruct<'a> {
+pub struct TyvarInfo_<'a> {
     /// Where was the type variable introduced? (e.g. generic method invocation,
     /// new object construction)
-    pub tyvar_pos: &'a Pos,
+    pub tyvar_pos: Option<&'a Pos>,
     pub global_reason: Option<PReason<'a>>,
     pub eager_solve_failed: bool,
     pub solving_info: SolvingInfo<'a>,
 }
 
-pub type TyvarInfo<'a> = &'a TyvarInfoStruct<'a>;
+pub type TyvarInfo<'a> = &'a TyvarInfo_<'a>;
 
 pub type Tvenv<'a> = IMap<'a, TyvarInfo<'a>>;
 
 #[derive(Clone)]
 pub struct InferenceEnv<'a> {
-    pub builder: &'a TypeBuilder<'a>,
+    pub bld: &'a TypeBuilder<'a>,
     pub tvenv: Tvenv<'a>,
     pub tyvars_stack: Vec<(&'a Pos, Vec<Ident>)>,
     pub allow_solve_globals: bool,
 }
 
 impl<'a> InferenceEnv<'a> {
-    pub fn new(builder: &'a TypeBuilder) -> Self {
+    pub fn new(bld: &'a TypeBuilder) -> Self {
         InferenceEnv {
-            builder,
+            bld,
             tvenv: IMap::empty(),
             tyvars_stack: vec![],
             allow_solve_globals: false,
@@ -112,7 +126,7 @@ impl<'a> InferenceEnv<'a> {
                                 if aliases.mem(v0) {
                                     panic!("Two type variables are aliasing each other!");
                                 }
-                                aliases = aliases.add(self.builder, *v0);
+                                aliases = aliases.add(self.bld, *v0);
                                 v = *v0;
                                 continue;
                             }
@@ -125,7 +139,7 @@ impl<'a> InferenceEnv<'a> {
                         }
                     }
                     SolvingInfo::Constraints(_) => {
-                        let ty = self.builder.tyvar(r, v);
+                        let ty = self.bld.tyvar(r, v);
                         for alias in aliases.into_iter() {
                             self.add(*alias, ty);
                         }
@@ -149,6 +163,29 @@ impl<'a> InferenceEnv<'a> {
 
         let mut tvinfo = self.tvenv.find(&v).unwrap().clone();
         tvinfo.solving_info = SolvingInfo::Type(ty);
-        self.tvenv = self.tvenv.add(self.builder, v, self.builder.alloc(tvinfo));
+        self.tvenv = self.tvenv.add(self.bld, v, self.bld.alloc(tvinfo));
+    }
+
+    pub fn fresh_type_reason(&mut self, r: PReason<'a>) -> Ty<'a> {
+        let v = Ident::new();
+        self.add_current_tyvar(r.pos, v);
+        self.bld.tyvar(r, v)
+    }
+
+    fn add_current_tyvar(&mut self, pos: Option<&'a Pos>, v: Ident) -> () {
+        self.fresh_unsolved_tyvar(v, pos);
+        // TODO(hrust) update tyvar stack
+    }
+
+    fn fresh_unsolved_tyvar(&mut self, v: Ident, tyvar_pos: Option<&'a Pos>) -> () {
+        // TODO(hrust) variance
+        let solving_info = SolvingInfo::Constraints(TyvarConstraints::new());
+        let tyvar_info = self.bld.alloc(TyvarInfo_ {
+            tyvar_pos,
+            global_reason: None,
+            eager_solve_failed: false,
+            solving_info,
+        });
+        self.tvenv = self.tvenv.add(self.bld, v, tyvar_info)
     }
 }

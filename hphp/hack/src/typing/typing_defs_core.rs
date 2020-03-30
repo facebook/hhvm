@@ -2,6 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use std::cmp::Ordering;
 
 use bumpalo::collections::Vec;
 use ocamlrep::{Allocator, FromError, OcamlRep, Value};
@@ -21,7 +22,7 @@ use crate::typing_reason::*;
 ///
 /// There is a mapping from this representation to the oxidized representation,
 /// for consumers that require the oxidized representation.
-#[derive(Debug)]
+#[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub enum Ty_<'a> {
     /// The late static bound type of a class
     Tthis,
@@ -169,6 +170,31 @@ pub enum Ty_<'a> {
 #[derive(Clone, Copy, Debug)]
 pub struct Ty<'a>(PReason<'a>, &'a Ty_<'a>);
 
+// Compare two types syntactically, ignoring reason information and other
+// small differences that do not affect type inference behaviour. This
+// comparison function can be used to construct tree-based sets of types,
+// or to compare two types for "exact" equality.
+// Note that this function does *not* expand type variables, or type
+// aliases.
+// But if ty_compare ty1 ty2 = 0, then the types must not be distinguishable
+// by any typing rules.
+impl PartialEq for Ty<'_> {
+    fn eq(&self, other: &Self) -> bool {
+        self.1 == other.1
+    }
+}
+impl Eq for Ty<'_> {}
+impl PartialOrd for Ty<'_> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+impl Ord for Ty<'_> {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.1.cmp(other.1)
+    }
+}
+
 impl<'a> Ty<'a> {
     pub fn mk(reason: PReason<'a>, ty_: &'a Ty_<'a>) -> Ty<'a> {
         Ty(reason, ty_)
@@ -240,13 +266,13 @@ impl<'a> Ty<'a> {
 /// This is a direct translation of oxidized::gen::typing_defs_core::TaccessType.
 ///
 /// We need this because it wraps Tys
-#[derive(Debug)]
+#[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct TaccessType<'a>(pub Ty<'a>, pub Vec<'a, &'a nast::Sid>);
 
 /// This is a direct translation of oxidized::gen::typing_defs_core::ArrayKind.
 ///
 /// We need this, because it wraps Tys.
-#[derive(Debug)]
+#[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub enum ArrayKind<'a> {
     /// An array declared as a varray.
     AKvarray(Ty<'a>),
@@ -267,7 +293,7 @@ pub enum ArrayKind<'a> {
 ///      type checking.
 ///   2. Additionally, I (hverr) think the aast::Tprim -> Tprim conversion
 ///      is cheaper than dereferencing a pointer to aast::Tprim.
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub enum PrimKind<'a> {
     Tnull,
     Tvoid,
@@ -311,7 +337,7 @@ pub struct PossiblyEnforcedTy<'a> {
     pub type_: Ty<'a>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub enum ConstraintType_<'a> {
     ThasMember(HasMember<'a>),
     /// The type of container destructuring via list() or splat `...`
@@ -323,7 +349,24 @@ pub enum ConstraintType_<'a> {
 #[derive(Debug)]
 pub struct ConstraintType<'a>(pub PReason<'a>, pub &'a ConstraintType_<'a>);
 
-#[derive(Debug)]
+impl PartialEq for ConstraintType<'_> {
+    fn eq(&self, other: &Self) -> bool {
+        self.1 == other.1
+    }
+}
+impl Eq for ConstraintType<'_> {}
+impl PartialOrd for ConstraintType<'_> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+impl Ord for ConstraintType<'_> {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.1.cmp(other.1)
+    }
+}
+
+#[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct HasMember<'a> {
     pub name: &'a nast::Sid,
     pub member_type: Ty<'a>,
@@ -356,7 +399,7 @@ pub struct Destructure<'a> {
     pub kind: DestructureKind,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub enum InternalType_<'a> {
     LoclType(Ty<'a>),
     ConstraintType(ConstraintType<'a>),
@@ -457,7 +500,7 @@ pub struct Tparam {
 
 pub type FunType<'a> = &'a FunType_<'a>;
 
-#[derive(Debug)]
+#[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct FunType_<'a> {
     pub params: Vec<'a, FunParam<'a>>,
     pub return_: Ty<'a>, // TODO(hrust) possibly_enforced_ty
@@ -489,7 +532,7 @@ impl<'a> FunType_<'a> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct FunParam<'a> {
     // TODO(hrust) missing fields
     pub type_: Ty<'a>, // TODO(hrust) possibly_enforced_ty

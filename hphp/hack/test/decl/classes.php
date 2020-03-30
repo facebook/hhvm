@@ -34,6 +34,11 @@ class MyClass {
     <<__Mutable>> MyClass $b,
   ): void {
   }
+
+  <<__Rx, __MutableReturn>>
+  public function mutable_return(): MyClass {
+    return \HH\Rx\mutable(new MyClass());
+  }
 }
 
 abstract class MyAbstractClass {}

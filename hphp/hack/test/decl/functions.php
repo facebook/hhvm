@@ -62,3 +62,10 @@ function reactive_function_mutable_args(
   <<__Mutable>> Typedef $b,
 ): void {
 }
+
+class C {}
+
+<<__Rx, __MutableReturn>>
+function make(): C {
+  return \HH\Rx\mutable(new C());
+}

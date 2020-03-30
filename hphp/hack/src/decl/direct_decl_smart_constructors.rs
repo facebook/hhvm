@@ -999,6 +999,7 @@ impl DirectDeclSmartConstructors<'_> {
                     "__Rx" => ft.reactive = Reactivity::Reactive(None),
                     "__RxShallow" => ft.reactive = Reactivity::Shallow(None),
                     "__RxLocal" => ft.reactive = Reactivity::Local(None),
+                    "__MutableReturn" => ft.returns_mutable = true,
                     _ => (),
                 }
             }

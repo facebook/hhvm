@@ -506,7 +506,7 @@ bool HHVM_FUNCTION(posix_setuid,
 
 String HHVM_FUNCTION(posix_strerror,
                      int errnum) {
-  return String(folly::toStdString(folly::errnoStr(errnum)));
+  return String(folly::errnoStr(errnum));
 }
 
 const StaticString

@@ -416,8 +416,7 @@ private:
 
   void io_error_if_bad() {
     if (m_in.bad()) {
-      error("I/O error reading stream: " +
-        folly::toStdString(folly::errnoStr(errno)));
+      error("I/O error reading stream: " + folly::errnoStr(errno));
     }
   }
 

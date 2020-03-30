@@ -908,7 +908,7 @@ std::string uidToName(uid_t uid) {
   passwd* pw;
 
   auto err = getpwuid_r(uid, &buf.ent, buf.data.get(), buf.size, &pw);
-  if (err != 0) return folly::toStdString(folly::errnoStr(errno));
+  if (err != 0) return folly::errnoStr(errno);
   if (pw == nullptr) return "user does not exist";
   return pw->pw_name;
 #else
@@ -941,7 +941,7 @@ std::string gidToName(gid_t gid) {
   group* grp;
 
   auto err = getgrgid_r(gid, &buf.ent, buf.data.get(), buf.size, &grp);
-  if (err != 0) return folly::toStdString(folly::errnoStr(errno));
+  if (err != 0) return folly::errnoStr(errno);
   if (grp == nullptr) return "group does not exist";
   return grp->gr_name;
 #else
@@ -1035,7 +1035,7 @@ RepoStatus Repo::openCentral(const char* rawPath, std::string& errorMsg) {
                                uidToName(repoStat.st_uid),
                                gidToName(repoStat.st_gid));
     } else {
-      statStr = folly::toStdString(folly::errnoStr(errno));
+      statStr = folly::errnoStr(errno);
     }
     errorMsg = folly::format("Failed to initialize schema in {}({}): {}",
                              repoPath, statStr, errorMsg).str();

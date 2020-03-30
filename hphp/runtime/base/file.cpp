@@ -975,7 +975,7 @@ out:
 }
 
 String File::getLastError() {
-  return String(folly::toStdString(folly::errnoStr(errno)));
+  return String(folly::errnoStr(errno));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

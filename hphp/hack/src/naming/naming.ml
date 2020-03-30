@@ -1832,8 +1832,7 @@ and stmt env (pos, st) =
     | Aast.Block _ -> failwith "stmt block error"
     | Aast.Fallthrough -> N.Fallthrough
     | Aast.Noop -> N.Noop
-    | Aast.Markup (_, None) -> N.Noop
-    | Aast.Markup (_m, Some e) -> N.Expr (expr env e)
+    | Aast.Markup _ -> N.Noop
     | Aast.Break -> Aast.Break
     | Aast.Continue -> Aast.Continue
     | Aast.Throw e -> N.Throw (expr env e)

@@ -57,7 +57,7 @@ pub fn stmt<'a>(env: &mut Env<'a>, ast::Stmt(pos, s): &'a ast::Stmt) -> tast::St
 fn stmt_<'a>(env: &mut Env<'a>, s: &'a ast::Stmt_) -> tast::Stmt_<'a> {
     match s {
         ast::Stmt_::Noop => tast::Stmt_::Noop,
-        ast::Stmt_::Markup(x) => markup(&x.0, &x.1),
+        ast::Stmt_::Markup(x) => markup(&x),
         ast::Stmt_::Expr(x) => tast::Stmt_::mk_expr(expr(env, x)),
         ast::Stmt_::Return(e) => match e.as_ref() {
             None => unimplemented!("return; not yet implemented"),
@@ -71,11 +71,8 @@ fn stmt_<'a>(env: &mut Env<'a>, s: &'a ast::Stmt_) -> tast::Stmt_<'a> {
     }
 }
 
-fn markup<'a>(s: &ast::Pstring, e: &Option<ast::Expr>) -> tast::Stmt_<'a> {
-    match e {
-        None => tast::Stmt_::mk_markup(s.clone(), None),
-        x => unimplemented!("{:#?}", x),
-    }
+fn markup<'a>(s: &ast::Pstring) -> tast::Stmt_<'a> {
+    tast::Stmt_::mk_markup(s.clone())
 }
 
 fn expr<'a>(env: &mut Env<'a>, ast::Expr(pos, e): &'a ast::Expr) -> tast::Expr<'a> {

@@ -116,7 +116,7 @@ and emit_defs env defs =
     | [A.Stmt s]
     (* emit statement as final if it is one before the last and last statement is
        empty markup (which will be no-op) *)
-    | [A.Stmt s; A.Stmt (_, A.Markup ((_, ""), None))] ->
+    | [A.Stmt s; A.Stmt (_, A.Markup (_, ""))] ->
       Emit_statement.emit_final_statement env s
     | [d] -> gather [emit_def env d; Emit_statement.emit_dropthrough_return env]
     | d :: defs ->
@@ -126,10 +126,8 @@ and emit_defs env defs =
   in
   let rec emit_markup env defs =
     match defs with
-    | A.Stmt (_, A.Markup ((_, s), echo_expr_opt)) :: defs ->
-      let i1 =
-        Emit_statement.emit_markup env s echo_expr_opt ~check_for_hashbang:true
-      in
+    | A.Stmt (_, A.Markup (_, s)) :: defs ->
+      let i1 = Emit_statement.emit_markup env s ~check_for_hashbang:true in
       let i2 = aux env defs in
       gather [i1; i2]
     | [_]

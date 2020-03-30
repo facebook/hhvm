@@ -87,7 +87,7 @@ and ('ex, 'fb, 'en, 'hi) stmt_ =
   | Def_inline of ('ex, 'fb, 'en, 'hi) def
   | Noop
   | Block of ('ex, 'fb, 'en, 'hi) block
-  | Markup of pstring * ('ex, 'fb, 'en, 'hi) expr option
+  | Markup of pstring
 
 and ('ex, 'fb, 'en, 'hi) using_stmt = {
   us_is_block_scoped: bool;

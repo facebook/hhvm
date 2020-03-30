@@ -425,7 +425,6 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { markup_prefix                                      : t
     ; markup_text                                        : t
     ; markup_suffix                                      : t
-    ; markup_expression                                  : t
     }
   | MarkupSuffix                      of
     { markup_suffix_less_than_question                   : t
@@ -1731,7 +1730,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { markup_prefix: Token.t option value
     ; markup_text: Token.t value
     ; markup_suffix: markup_suffix option value
-    ; markup_expression: expression option value
     }
   and markup_suffix =
     { markup_suffix_less_than_question: Token.t value

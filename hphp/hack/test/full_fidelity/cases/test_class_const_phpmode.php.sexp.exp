@@ -2,8 +2,7 @@
   ((list 335
     ((markup_section 5
       ((missing 0 ()) (() markup 0 ())
-       (markup_suffix 5 ((() <? 2 ()) (() name 3 ((end_of_line 1)))))
-       (missing 0 ())))
+       (markup_suffix 5 ((() <? 2 ()) (() name 3 ((end_of_line 1)))))))
      (classish_declaration 328
       ((missing 0 ()) (missing 0 ()) (missing 0 ())
        (((end_of_line 1)) class 5 ((whitespace 1)))

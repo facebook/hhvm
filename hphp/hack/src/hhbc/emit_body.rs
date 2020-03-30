@@ -500,9 +500,7 @@ fn emit_defs(env: &mut Env, emitter: &mut Emitter, prog: &[tast::Def]) -> Result
                 emit_statement::emit_final_stmt(emitter, env, &s)
             }
             [Def::Stmt(s1), Def::Stmt(s2)] => match s2.1.as_markup() {
-                Some((id, None)) if id.1.is_empty() => {
-                    emit_statement::emit_final_stmt(emitter, env, &s1)
-                }
+                Some(id) if id.1.is_empty() => emit_statement::emit_final_stmt(emitter, env, &s1),
                 _ => Ok(InstrSeq::gather(vec![
                     emit_statement::emit_stmt(emitter, env, s1)?,
                     emit_statement::emit_final_stmt(emitter, env, &s2)?,

@@ -2314,20 +2314,6 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
             ('p', 'h', 'p') => {
                 self.make_long_tag(name_token_offset, 3, markup_text, less_than_question_token)
             }
-            ('=', _, _) => {
-                // skip =
-                self.advance(1);
-                let equal = Token::make(
-                    TokenKind::Equal,
-                    self.source(),
-                    name_token_offset,
-                    1,
-                    vec![],
-                    vec![],
-                );
-
-                (markup_text, Some((less_than_question_token, Some(equal))))
-            }
             _ => (markup_text, Some((less_than_question_token, (None)))),
         }
     }

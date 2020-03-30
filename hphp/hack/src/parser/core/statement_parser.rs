@@ -261,50 +261,28 @@ where
             S!(make_missing, self, self.pos());
         let (markup, suffix_opt) = self.lexer.scan_header();
         let markup = S!(make_token, self, markup);
-        let (suffix, is_echo_tag, has_suffix) = match suffix_opt {
+        let (suffix, has_suffix) = match suffix_opt {
             Some((less_than_question, language_opt)) => {
                 let less_than_question_token = S!(make_token, self, less_than_question);
-                // if markup section ends with <?= tag
-                // then script section embedded between tags should be treated as if it
-                // will be an argument to 'echo'. Technically it should be restricted to
-                // expression but since it permits trailing semicolons we parse it as
-                // expression statement.
-                // TODO: consider making it even more loose and parse it as declaration
-                // for better error recovery in cases when user
-                // accidentally type '<?=' instead of '<?php' so declaration in script
-                // section won't throw parser off the rails.
-                let (language, is_echo_tag) = match language_opt {
+                let language = match language_opt {
                     Some(language) => {
-                        let is_echo_tag = language.kind() == TokenKind::Equal;
                         let token = S!(make_token, self, language);
-                        (token, is_echo_tag)
+                        token
                     }
                     None => {
                         let missing = S!(make_missing, self, self.pos());
-                        (missing, false)
+                        missing
                     }
                 };
                 let suffix = S!(make_markup_suffix, self, less_than_question_token, language);
-                (suffix, is_echo_tag, true)
+                (suffix, true)
             }
             None => {
                 let missing = S!(make_missing, self, self.pos());
-                (missing, false, false)
+                (missing, false)
             }
         };
-        let expression = if is_echo_tag {
-            self.parse_statement()
-        } else {
-            S!(make_missing, self, self.pos())
-        };
-        let s = S!(
-            make_markup_section,
-            self,
-            prefix,
-            markup,
-            suffix,
-            expression
-        );
+        let s = S!(make_markup_section, self, prefix, markup, suffix,);
         (s, has_suffix)
     }
 

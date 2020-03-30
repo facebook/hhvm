@@ -312,7 +312,6 @@ module type Syntax_S = sig
     { markup_prefix                                      : t
     ; markup_text                                        : t
     ; markup_suffix                                      : t
-    ; markup_expression                                  : t
     }
   | MarkupSuffix                      of
     { markup_suffix_less_than_question                   : t
@@ -1140,7 +1139,7 @@ module type Syntax_S = sig
   val make_inclusion_directive : t -> t -> t
   val make_compound_statement : t -> t -> t -> t
   val make_expression_statement : t -> t -> t
-  val make_markup_section : t -> t -> t -> t -> t
+  val make_markup_section : t -> t -> t -> t
   val make_markup_suffix : t -> t -> t
   val make_unset_statement : t -> t -> t -> t -> t -> t
   val make_using_statement_block_scoped : t -> t -> t -> t -> t -> t -> t

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5b137849d2a305445e51803a54334fba>>
+// @generated SignedSource<<2e4ce733a79dc301ee970d275b38682c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -1822,9 +1822,8 @@ impl<P: Params> NodeMut<P> for Stmt_<P::Ex, P::Fb, P::En, P::Hi> {
                 a0.accept(c, v)?;
                 Ok(())
             }
-            Stmt_::Markup(a) => {
-                a.0.accept(c, v)?;
-                a.1.accept(c, v)?;
+            Stmt_::Markup(a0) => {
+                a0.accept(c, v)?;
                 Ok(())
             }
         }

@@ -1012,12 +1012,10 @@ module WithToken(Token: TokenType) = struct
         markup_prefix;
         markup_text;
         markup_suffix;
-        markup_expression;
       } ->
          let acc = f acc markup_prefix in
          let acc = f acc markup_text in
          let acc = f acc markup_suffix in
-         let acc = f acc markup_expression in
          acc
       | MarkupSuffix {
         markup_suffix_less_than_question;
@@ -2880,12 +2878,10 @@ module WithToken(Token: TokenType) = struct
         markup_prefix;
         markup_text;
         markup_suffix;
-        markup_expression;
       } -> [
         markup_prefix;
         markup_text;
         markup_suffix;
-        markup_expression;
       ]
       | MarkupSuffix {
         markup_suffix_less_than_question;
@@ -4749,12 +4745,10 @@ module WithToken(Token: TokenType) = struct
         markup_prefix;
         markup_text;
         markup_suffix;
-        markup_expression;
       } -> [
         "markup_prefix";
         "markup_text";
         "markup_suffix";
-        "markup_expression";
       ]
       | MarkupSuffix {
         markup_suffix_less_than_question;
@@ -6721,13 +6715,11 @@ module WithToken(Token: TokenType) = struct
           markup_prefix;
           markup_text;
           markup_suffix;
-          markup_expression;
         ]) ->
         MarkupSection {
           markup_prefix;
           markup_text;
           markup_suffix;
-          markup_expression;
         }
       | (SyntaxKind.MarkupSuffix, [
           markup_suffix_less_than_question;
@@ -8948,13 +8940,11 @@ module WithToken(Token: TokenType) = struct
         markup_prefix
         markup_text
         markup_suffix
-        markup_expression
       =
         let syntax = MarkupSection {
           markup_prefix;
           markup_text;
           markup_suffix;
-          markup_expression;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

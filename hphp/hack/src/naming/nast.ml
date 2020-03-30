@@ -604,7 +604,7 @@ module Visitor_DEPRECATED = struct
 
       method on_program : 'a -> program -> 'a
 
-      method on_markup : 'a -> pstring -> expr option -> 'a
+      method on_markup : 'a -> pstring -> 'a
 
       method on_pu_atom : 'a -> string -> 'a
 
@@ -629,10 +629,7 @@ module Visitor_DEPRECATED = struct
 
       method on_goto acc _ = acc
 
-      method on_markup acc _ eopt =
-        match eopt with
-        | Some e -> this#on_expr acc e
-        | None -> acc
+      method on_markup acc _ = acc
 
       method on_throw acc e =
         let acc = this#on_expr acc e in
@@ -757,7 +754,7 @@ module Visitor_DEPRECATED = struct
         | Awaitall (el, b) -> this#on_awaitall acc el b
         | Def_inline d -> this#on_def_inline acc d
         | Block b -> this#on_block acc b
-        | Markup (s, e) -> this#on_markup acc s e
+        | Markup s -> this#on_markup acc s
 
       method on_expr acc (_, e) = this#on_expr_ acc e
 

@@ -712,7 +712,6 @@ let schema : schema_node list =
           ("prefix", ZeroOrOne Token);
           ("text", Token);
           ("suffix", ZeroOrOne (Just "MarkupSuffix"));
-          ("expression", ZeroOrOne (Aggregate Expression));
         ];
     };
     {

@@ -4,8 +4,7 @@
       ((missing 0 ()) (() markup 0 ())
        (markup_suffix 4
         ((() <? 2 ())
-         (() name 2 ((whitespace 1) (single_line_comment 9) (end_of_line 1)))))
-       (missing 0 ())))
+         (() name 2 ((whitespace 1) (single_line_comment 9) (end_of_line 1)))))))
      (classish_declaration 41
       ((missing 0 ()) (missing 0 ()) (missing 0 ())
        (((single_line_comment 56) (end_of_line 1) (end_of_line 1)) interface

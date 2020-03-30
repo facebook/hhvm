@@ -2,8 +2,7 @@
   ((list 42
     ((markup_section 4
       ((missing 0 ()) (() markup 0 ())
-       (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))
-       (missing 0 ())))
+       (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))))
      (expression_statement 14
       ((prefix_unary_expression 14
         ((((end_of_line 1)) @ 1 ()) (() name 13 ((end_of_line 1)))))

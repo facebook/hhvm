@@ -542,12 +542,11 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_markup_section(_: &C, markup_prefix: Self, markup_text: Self, markup_suffix: Self, markup_expression: Self) -> Self {
+    fn make_markup_section(_: &C, markup_prefix: Self, markup_text: Self, markup_suffix: Self) -> Self {
         let syntax = SyntaxVariant::MarkupSection(Box::new(MarkupSectionChildren {
             markup_prefix,
             markup_text,
             markup_suffix,
-            markup_expression,
         }));
         let value = V::from_syntax(&syntax);
         Self::make(syntax, value)
@@ -2312,11 +2311,10 @@ where
                 acc
             },
             SyntaxVariant::MarkupSection(x) => {
-                let MarkupSectionChildren { markup_prefix, markup_text, markup_suffix, markup_expression } = *x;
+                let MarkupSectionChildren { markup_prefix, markup_text, markup_suffix } = *x;
                 let acc = f(markup_prefix, acc);
                 let acc = f(markup_text, acc);
                 let acc = f(markup_suffix, acc);
-                let acc = f(markup_expression, acc);
                 acc
             },
             SyntaxVariant::MarkupSuffix(x) => {
@@ -3821,8 +3819,7 @@ where
                  expression_statement_expression: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::MarkupSection, 4) => SyntaxVariant::MarkupSection(Box::new(MarkupSectionChildren {
-                 markup_expression: ts.pop().unwrap(),
+             (SyntaxKind::MarkupSection, 3) => SyntaxVariant::MarkupSection(Box::new(MarkupSectionChildren {
                  markup_suffix: ts.pop().unwrap(),
                  markup_text: ts.pop().unwrap(),
                  markup_prefix: ts.pop().unwrap(),
@@ -5071,7 +5068,6 @@ pub struct MarkupSectionChildren<T, V> {
     pub markup_prefix: Syntax<T, V>,
     pub markup_text: Syntax<T, V>,
     pub markup_suffix: Syntax<T, V>,
-    pub markup_expression: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
@@ -6733,11 +6729,10 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             MarkupSection(x) => {
-                get_index(4).and_then(|index| { match index {
+                get_index(3).and_then(|index| { match index {
                         0 => Some(&x.markup_prefix),
                     1 => Some(&x.markup_text),
                     2 => Some(&x.markup_suffix),
-                    3 => Some(&x.markup_expression),
                         _ => None,
                     }
                 })

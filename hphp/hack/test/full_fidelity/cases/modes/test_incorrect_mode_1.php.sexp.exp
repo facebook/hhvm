@@ -5,6 +5,5 @@
        (markup_suffix 4
         ((() <? 2 ())
          (() name 2
-          ((whitespace 1) (single_line_comment 15) (end_of_line 1)))))
-       (missing 0 ())))
+          ((whitespace 1) (single_line_comment 15) (end_of_line 1)))))))
      (end_of_file 0 ((() end_of_file 0 ()))))))))

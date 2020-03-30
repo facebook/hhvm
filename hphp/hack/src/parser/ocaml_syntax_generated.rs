@@ -1062,12 +1062,11 @@ where
       Self { syntax, value }
     }
 
-    fn make_markup_section(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
+    fn make_markup_section(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
       let children = [
           &arg0.value, 
           &arg1.value, 
-          &arg2.value, 
-          &arg3.value
+          &arg2.value
       ];
       let value = V::from_values(&children);
       let syntax = Self::make(
@@ -1077,8 +1076,7 @@ where
           &[
               arg0.syntax, 
               arg1.syntax, 
-              arg2.syntax, 
-              arg3.syntax
+              arg2.syntax
           ],
       );
       Self { syntax, value }

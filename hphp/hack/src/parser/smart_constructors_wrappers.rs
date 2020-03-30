@@ -210,8 +210,8 @@ where S: SmartConstructors<'src, State> {
     fn make_expression_statement(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R {
         compose(SyntaxKind::ExpressionStatement, self.s.make_expression_statement(arg0.1, arg1.1))
     }
-    fn make_markup_section(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> Self::R {
-        compose(SyntaxKind::MarkupSection, self.s.make_markup_section(arg0.1, arg1.1, arg2.1, arg3.1))
+    fn make_markup_section(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
+        compose(SyntaxKind::MarkupSection, self.s.make_markup_section(arg0.1, arg1.1, arg2.1))
     }
     fn make_markup_suffix(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R {
         compose(SyntaxKind::MarkupSuffix, self.s.make_markup_suffix(arg0.1, arg1.1))

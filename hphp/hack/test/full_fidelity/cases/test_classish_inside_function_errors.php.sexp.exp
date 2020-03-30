@@ -2,8 +2,7 @@
   ((list 388
     ((markup_section 5
       ((missing 0 ()) (() markup 0 ())
-       (markup_suffix 5 ((() <? 2 ()) (() name 3 ((end_of_line 1)))))
-       (missing 0 ())))
+       (markup_suffix 5 ((() <? 2 ()) (() name 3 ((end_of_line 1)))))))
      (function_declaration 184
       ((missing 0 ())
        (function_declaration_header 18

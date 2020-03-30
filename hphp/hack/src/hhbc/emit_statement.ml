@@ -75,7 +75,7 @@ let emit_def_inline def =
     @@ instr_defcns (int_of_string (snd c.A.cst_name))
   | _ -> failwith "Define inline: Invalid inline definition"
 
-let emit_markup env s echo_expr_opt ~check_for_hashbang =
+let emit_markup env s ~check_for_hashbang =
   let emit_ignored_call_expr f e =
     let p = Pos.none in
     let call_expr =
@@ -111,12 +111,7 @@ let emit_markup env s echo_expr_opt ~check_for_hashbang =
       in
       emit_ignored_call_for_non_empty_string SN.SpecialFunctions.echo tail
   in
-  let echo =
-    match echo_expr_opt with
-    | Some e -> emit_ignored_call_expr SN.SpecialFunctions.echo e
-    | None -> empty
-  in
-  gather [markup; echo]
+  markup
 
 let get_level p op e =
   match A.get_break_continue_level e with
@@ -274,8 +269,7 @@ and emit_stmt env (pos, stmt) =
     emit_foreach env pos collection iterator block
   | A.Def_inline def -> emit_def_inline def
   | A.Awaitall (el, b) -> emit_awaitall env pos el b
-  | A.Markup ((_, s), echo_expr_opt) ->
-    emit_markup env s echo_expr_opt ~check_for_hashbang:false
+  | A.Markup (_, s) -> emit_markup env s ~check_for_hashbang:false
   | A.Fallthrough
   | A.Noop ->
     empty

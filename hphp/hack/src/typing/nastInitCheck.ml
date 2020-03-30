@@ -340,10 +340,7 @@ and stmt env acc st =
   | Noop ->
     acc
   | Block b -> block acc b
-  | Markup (_, eopt) ->
-    (match eopt with
-    | Some e -> expr acc e
-    | None -> acc)
+  | Markup _ -> acc
 
 and toplevel env acc l =
   (try List.fold_left ~f:(stmt env) ~init:acc l with InitReturn acc -> acc)

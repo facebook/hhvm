@@ -5,8 +5,7 @@
        (markup_suffix 4
         ((() <? 2 ())
          (() name 2
-          ((whitespace 1) (single_line_comment 10) (end_of_line 1)))))
-       (missing 0 ())))
+          ((whitespace 1) (single_line_comment 10) (end_of_line 1)))))))
      (function_declaration 78
       ((missing 0 ())
        (function_declaration_header 12

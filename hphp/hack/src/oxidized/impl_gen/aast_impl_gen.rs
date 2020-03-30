@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9c6b9f7a10d00c44d22b39eb40b0e543>>
+// @generated SignedSource<<f88a76a424eb357df6c7f23bdce3d9dc>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -91,8 +91,8 @@ impl<Ex, Fb, En, Hi> Stmt_<Ex, Fb, En, Hi> {
     pub fn mk_block(p0: Block<Ex, Fb, En, Hi>) -> Self {
         Stmt_::Block(p0)
     }
-    pub fn mk_markup(p0: Pstring, p1: Option<Expr<Ex, Fb, En, Hi>>) -> Self {
-        Stmt_::Markup(Box::new((p0, p1)))
+    pub fn mk_markup(p0: Pstring) -> Self {
+        Stmt_::Markup(Box::new(p0))
     }
     pub fn is_fallthrough(&self) -> bool {
         match self {
@@ -346,9 +346,9 @@ impl<Ex, Fb, En, Hi> Stmt_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_markup(&self) -> Option<(&Pstring, &Option<Expr<Ex, Fb, En, Hi>>)> {
+    pub fn as_markup(&self) -> Option<&Pstring> {
         match self {
-            Stmt_::Markup(p0) => Some((&p0.0, &p0.1)),
+            Stmt_::Markup(p0) => Some(&p0),
             _ => None,
         }
     }
@@ -482,9 +482,9 @@ impl<Ex, Fb, En, Hi> Stmt_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_markup_mut(&mut self) -> Option<(&mut Pstring, &mut Option<Expr<Ex, Fb, En, Hi>>)> {
+    pub fn as_markup_mut(&mut self) -> Option<&mut Pstring> {
         match self {
-            Stmt_::Markup(p0) => Some((&mut p0.0, &mut p0.1)),
+            Stmt_::Markup(p0) => Some(p0.as_mut()),
             _ => None,
         }
     }
@@ -614,9 +614,9 @@ impl<Ex, Fb, En, Hi> Stmt_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_markup_into(self) -> Option<(Pstring, Option<Expr<Ex, Fb, En, Hi>>)> {
+    pub fn as_markup_into(self) -> Option<Pstring> {
         match self {
-            Stmt_::Markup(p0) => Some(((*p0).0, (*p0).1)),
+            Stmt_::Markup(p0) => Some(*p0),
             _ => None,
         }
     }

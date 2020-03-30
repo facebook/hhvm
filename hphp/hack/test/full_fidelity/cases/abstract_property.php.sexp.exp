@@ -4,8 +4,7 @@
       ((missing 0 ()) (() markup 0 ())
        (markup_suffix 4
         ((() <? 2 ())
-         (() name 2 ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))
-       (missing 0 ())))
+         (() name 2 ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))))
      (classish_declaration 67
       ((missing 0 ())
        (list 8 ((((end_of_line 1)) abstract 8 ((whitespace 1)))))

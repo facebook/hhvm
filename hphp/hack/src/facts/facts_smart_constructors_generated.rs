@@ -248,8 +248,8 @@ impl<'src> SmartConstructors<'src, HasScriptContent<'src>> for FactsSmartConstru
         <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_expression_statement(self, arg0, arg1)
     }
 
-    fn make_markup_section(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_markup_section(self, arg0, arg1, arg2, arg3)
+    fn make_markup_section(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_markup_section(self, arg0, arg1, arg2)
     }
 
     fn make_markup_suffix(&mut self, arg0: Self::R, arg1: Self::R) -> Self::R {

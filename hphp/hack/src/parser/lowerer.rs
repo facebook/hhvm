@@ -3246,7 +3246,6 @@ where
             MarkupSection(c) => {
                 let markup_prefix = &c.markup_prefix;
                 let markup_text = &c.markup_text;
-                let markup_expression = &c.markup_expression;
                 let pos = Self::p_pos(node, env);
                 let has_dot_hack_extension = pos.filename().has_extension("hack");
                 if has_dot_hack_extension {
@@ -3257,15 +3256,7 @@ where
                 {
                     Self::raise_parsing_error(node, env, &syntax_error::error1001);
                 }
-                let expr = match &markup_expression.syntax {
-                    Missing => None,
-                    ExpressionStatement(e) => {
-                        Some(Self::p_expr(&e.expression_statement_expression, env)?)
-                    }
-                    _ => Self::failwith("expression expected")?,
-                };
-                let stmt_ =
-                    ast::Stmt_::mk_markup((pos.clone(), Self::text(&markup_text, env)), expr);
+                let stmt_ = ast::Stmt_::mk_markup((pos.clone(), Self::text(&markup_text, env)));
                 Ok(ast::Stmt::new(pos, stmt_))
             }
             _ => Self::failwith("invalid node"),

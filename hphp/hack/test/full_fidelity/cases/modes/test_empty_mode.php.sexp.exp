@@ -2,6 +2,5 @@
   ((list 4
     ((markup_section 4
       ((missing 0 ()) (() markup 0 ())
-       (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))
-       (missing 0 ())))
+       (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))))
      (end_of_file 0 ((() end_of_file 0 ()))))))))

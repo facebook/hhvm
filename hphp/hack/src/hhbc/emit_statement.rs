@@ -336,7 +336,7 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
         a::Stmt_::Foreach(x) => emit_foreach(e, env, pos, &x.0, &x.1, &x.2),
         a::Stmt_::DefInline(def) => emit_def_inline(e, &**def),
         a::Stmt_::Awaitall(x) => emit_awaitall(e, env, pos, &x.0, &x.1),
-        a::Stmt_::Markup(x) => emit_markup(e, env, (&x.0, &x.1), false),
+        a::Stmt_::Markup(x) => emit_markup(e, env, &x, false),
         a::Stmt_::Fallthrough | a::Stmt_::Noop => Ok(instr::empty()),
     }
 }
@@ -1575,7 +1575,7 @@ fn emit_final_stmts(e: &mut Emitter, env: &mut Env, block: &[tast::Stmt]) -> Res
 pub fn emit_markup(
     e: &mut Emitter,
     env: &mut Env,
-    ((_, s), echo_expr_opt): (&tast::Pstring, &Option<tast::Expr>),
+    (_, s): &tast::Pstring,
     check_for_hashbang: bool,
 ) -> Result {
     let mut emit_ignored_call_expr = |fname: String, expr: tast::Expr| {
@@ -1622,13 +1622,7 @@ pub fn emit_markup(
         });
         emit_ignored_call_expr_for_nonempty_str(special_functions::ECHO.into(), tail)?
     };
-    let echo = match echo_expr_opt {
-        None => instr::empty(),
-        Some(echo_expr) => {
-            emit_ignored_call_expr(special_functions::ECHO.into(), echo_expr.clone())?
-        }
-    };
-    Ok(InstrSeq::gather(vec![markup, echo]))
+    Ok(markup)
 }
 
 fn emit_break(e: &mut Emitter, env: &mut Env, pos: &Pos) -> InstrSeq {

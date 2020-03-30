@@ -35,8 +35,11 @@ type entry = {
   path: Relative_path.t;
   contents: string;
   mutable source_text: Full_fidelity_source_text.t option;
+      (** this source text, if present, came from the entry's path+contents *)
   mutable parser_return: Parser_return.t option;
-  mutable ast_errors: Errors.t option;
+      (** this parser_return, if present, came from source_text via Ast_provider.parse
+    under ~full:true ~keep_errors:true *)
+  mutable ast_errors: Errors.t option;  (** same invariant as parser_return *)
   mutable cst: PositionedSyntaxTree.t option;
   mutable tast: Tast.program option;
   mutable tast_errors: Errors.t option;

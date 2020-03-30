@@ -42,6 +42,8 @@ use std::rc::Rc;
 
 pub use crate::direct_decl_smart_constructors_generated::*;
 
+type ParseError = String;
+
 #[derive(Clone, Debug)]
 pub struct InProgressDecls {
     pub classes: HashMap<String, Rc<shallow_decl_defs::ShallowClass>>,
@@ -79,12 +81,12 @@ fn mangle_xhp_id<'a>(name: Cow<'a, String>) -> Cow<'a, String> {
     }
 }
 
-pub fn get_name(namespace: &str, name: &Node_) -> Result<Id, String> {
+pub fn get_name(namespace: &str, name: &Node_) -> Result<Id, ParseError> {
     fn qualified_name_from_parts(
         namespace: &str,
         parts: &Vec<Node_>,
         pos: &Pos,
-    ) -> Result<Id, String> {
+    ) -> Result<Id, ParseError> {
         let mut qualified_name = String::new();
         for part in parts {
             match part {
@@ -555,7 +557,7 @@ pub enum Node_ {
 }
 
 impl Node_ {
-    pub fn get_pos(&self) -> Result<Pos, String> {
+    pub fn get_pos(&self) -> Result<Pos, ParseError> {
         match self {
             Node_::Name(_, pos) => Ok(pos.clone()),
             Node_::Hint(_, pos) => Ok(pos.clone()),
@@ -603,7 +605,7 @@ impl Node_ {
         }
     }
 
-    fn pos_from_vec(&self, nodes: &Vec<Node_>) -> Result<Pos, String> {
+    fn pos_from_vec(&self, nodes: &Vec<Node_>) -> Result<Pos, ParseError> {
         nodes.iter().fold(
             Err(format!("No pos found for any children under {:?}", self)),
             |acc, elem| match (acc, elem.get_pos()) {
@@ -642,7 +644,7 @@ impl Node_ {
         }
     }
 
-    fn as_visibility(&self) -> Result<aast::Visibility, String> {
+    fn as_visibility(&self) -> Result<aast::Visibility, ParseError> {
         match self {
             Node_::Private => Ok(aast::Visibility::Private),
             Node_::Protected => Ok(aast::Visibility::Protected),
@@ -651,7 +653,7 @@ impl Node_ {
         }
     }
 
-    fn as_expr(&self) -> Result<nast::Expr, String> {
+    fn as_expr(&self) -> Result<nast::Expr, ParseError> {
         let expr_ = match self {
             Node_::Expr(expr) => return Ok(*expr.clone()),
             Node_::DecimalLiteral(s, _) => aast::Expr_::Int(s.to_string()),
@@ -672,7 +674,7 @@ impl Node_ {
     }
 }
 
-pub type Node = Result<Node_, String>;
+pub type Node = Result<Node_, ParseError>;
 
 impl DirectDeclSmartConstructors<'_> {
     fn set_mode(&mut self, token: &PositionedToken) {
@@ -695,7 +697,11 @@ impl DirectDeclSmartConstructors<'_> {
         }
     }
 
-    fn node_to_ty(&self, node: &Node_, type_variables: &HashSet<Rc<String>>) -> Result<Ty, String> {
+    fn node_to_ty(
+        &self,
+        node: &Node_,
+        type_variables: &HashSet<Rc<String>>,
+    ) -> Result<Ty, ParseError> {
         match node {
             Node_::Hint(hv, pos) => {
                 let reason = Reason::Rhint(pos.clone());
@@ -732,7 +738,7 @@ impl DirectDeclSmartConstructors<'_> {
                                     inner_types
                                         .iter()
                                         .map(|node| self.node_to_ty(node, type_variables))
-                                        .collect::<Result<Vec<_>, String>>()?,
+                                        .collect::<Result<Vec<_>, ParseError>>()?,
                                 )
                             }
                         }
@@ -771,7 +777,7 @@ impl DirectDeclSmartConstructors<'_> {
                         items
                             .iter()
                             .map(|node| self.node_to_ty(node, type_variables))
-                            .collect::<Result<Vec<_>, String>>()?,
+                            .collect::<Result<Vec<_>, ParseError>>()?,
                     ),
                     HintValue::Shape(innards) => {
                         let shape_decl = &**innards;
@@ -792,7 +798,7 @@ impl DirectDeclSmartConstructors<'_> {
                                     },
                                 ))
                             })
-                            .collect::<Result<ShapeMap<_>, String>>()?,
+                            .collect::<Result<ShapeMap<_>, ParseError>>()?,
                     )
                     }
                     HintValue::Nullable(hint) => {
@@ -816,7 +822,7 @@ impl DirectDeclSmartConstructors<'_> {
                                     rx_annotation: None,
                                 })
                             })
-                            .collect::<Result<Vec<_>, String>>()?;
+                            .collect::<Result<Vec<_>, ParseError>>()?;
                         let ret = self.node_to_ty(&hint.ret_hint, type_variables)?;
                         Ty_::Tfun(FunType {
                             is_coroutine: false,
@@ -874,7 +880,10 @@ impl DirectDeclSmartConstructors<'_> {
     /// Converts any node that can represent a list of Node_::TypeParameter
     /// into the type parameter list and a list of all type variables. Used for
     /// classes, methods, and functions.
-    fn into_type_params(&self, node: Node_) -> Result<(Vec<Tparam>, HashSet<Rc<String>>), String> {
+    fn into_type_params(
+        &self,
+        node: Node_,
+    ) -> Result<(Vec<Tparam>, HashSet<Rc<String>>), ParseError> {
         let mut type_variables = HashSet::new();
         let type_params = node
             .into_iter()
@@ -890,7 +899,7 @@ impl DirectDeclSmartConstructors<'_> {
                         let (kind, value) = *constraint;
                         Ok((kind, self.node_to_ty(&value, &HashSet::new())?))
                     })
-                    .collect::<Result<Vec<_>, String>>()?;
+                    .collect::<Result<Vec<_>, ParseError>>()?;
                 type_variables.insert(Rc::new(id.1.clone()));
                 Ok(Tparam {
                     variance: Variance::Invariant,
@@ -900,7 +909,7 @@ impl DirectDeclSmartConstructors<'_> {
                     user_attributes: Vec::new(),
                 })
             })
-            .collect::<Result<Vec<_>, String>>()?;
+            .collect::<Result<Vec<_>, ParseError>>()?;
         Ok((type_params, type_variables))
     }
 
@@ -910,7 +919,7 @@ impl DirectDeclSmartConstructors<'_> {
         header: FunctionHeader,
         body: Node_,
         outer_type_variables: &HashSet<Rc<String>>,
-    ) -> Result<(Id, Ty), String> {
+    ) -> Result<(Id, Ty), ParseError> {
         let id = get_name(
             self.state.namespace_builder.current_namespace(),
             &header.name,
@@ -996,7 +1005,7 @@ impl DirectDeclSmartConstructors<'_> {
         &self,
         list: Node_,
         type_variables: &HashSet<Rc<String>>,
-    ) -> Result<FunParams, String> {
+    ) -> Result<FunParams, ParseError> {
         match list {
             Node_::List(nodes) => {
                 nodes
@@ -1032,7 +1041,7 @@ impl DirectDeclSmartConstructors<'_> {
         base_ty: Node_,
         type_variables: Node_,
         closing_delimiter: Node_,
-    ) -> Result<Node_, String> {
+    ) -> Result<Node_, ParseError> {
         let Id(base_ty_pos, base_ty_name) = get_name("", &base_ty)?;
         let base_ty_name = prefix_slash(Cow::Owned(base_ty_name)).into_owned();
         let pos = Pos::merge(&base_ty_pos, &closing_delimiter.get_pos()?)?;
@@ -1085,7 +1094,7 @@ impl<'a> FlattenOp for DirectDeclSmartConstructors<'_> {
                 }
             })
             .flatten()
-            .collect::<Result<Vec<_>, String>>()?;
+            .collect::<Result<Vec<_>, ParseError>>()?;
         Ok(match r.as_slice() {
             [] => Node_::Ignored,
             [_] => r.pop().unwrap(),
@@ -1359,7 +1368,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 Ok(Node_::Ignored) => true,
                 _ => false,
             }) {
-            let items = items.into_iter().collect::<Result<Vec<_>, String>>()?;
+            let items = items.into_iter().collect::<Result<Vec<_>, ParseError>>()?;
             Node_::List(items)
         } else {
             Node_::Ignored
@@ -1407,7 +1416,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 )),
                 node => Ok(aast::Afield::AFvalue(node.as_expr()?)),
             })
-            .collect::<Result<Vec<_>, String>>()?;
+            .collect::<Result<Vec<_>, ParseError>>()?;
         Ok(Node_::Expr(Box::new(aast::Expr(
             Pos::merge(&array?.get_pos()?, &right_paren?.get_pos()?)?,
             nast::Expr_::Array(fields),
@@ -1740,7 +1749,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     ) -> Self::R {
         let constraints = constraints?.into_iter().fold(
             Ok(Vec::new()),
-            |acc: Result<Vec<_>, String>, node| match acc {
+            |acc: Result<Vec<_>, ParseError>, node| match acc {
                 acc @ Err(_) => acc,
                 Ok(mut acc) => match node {
                     Node_::TypeConstraint(innards) => {
@@ -2086,7 +2095,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 .iter()
                 .filter(|node| !node.is_ignored())
                 .map(|node| self.node_to_ty(node, &type_variables))
-                .collect::<Result<Vec<_>, String>>()?,
+                .collect::<Result<Vec<_>, ParseError>>()?,
             uses: Vec::new(),
             method_redeclarations: Vec::new(),
             xhp_attr_uses: Vec::new(),
@@ -2096,7 +2105,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 .iter()
                 .filter(|node| !node.is_ignored())
                 .map(|node| self.node_to_ty(node, &type_variables))
-                .collect::<Result<Vec<_>, String>>()?,
+                .collect::<Result<Vec<_>, ParseError>>()?,
             consts: Vec::new(),
             typeconsts: Vec::new(),
             pu_enums: Vec::new(),
@@ -2365,7 +2374,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 Node_::ShapeFieldSpecifier(decl) => Ok(*decl),
                 n => Err(format!("Expected a shape field specifier, but was {:?}", n)),
             })
-            .collect::<Result<Vec<_>, String>>()?;
+            .collect::<Result<Vec<_>, ParseError>>()?;
         let kind = match open? {
             Node_::DotDotDot => ShapeKind::OpenShape,
             _ => ShapeKind::ClosedShape,
@@ -2420,7 +2429,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let fields = fields?
             .into_iter()
             .map(|node| node.as_expr())
-            .collect::<Result<Vec<_>, String>>()?;
+            .collect::<Result<Vec<_>, ParseError>>()?;
         Ok(Node_::Expr(Box::new(aast::Expr(
             Pos::merge(&tuple?.get_pos()?, &right_paren?.get_pos()?)?,
             nast::Expr_::List(fields),

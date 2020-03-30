@@ -373,6 +373,7 @@ pub enum HintValue {
     Tuple(Vec<Node_>),
     Shape(Box<ShapeDecl>),
     Nullable(Box<Node_>),
+    LikeType(Box<Node_>),
     Closure(Box<ClosureTypeHint>),
 }
 
@@ -450,7 +451,9 @@ pub struct NamespaceUseClause {
 #[derive(Clone, Debug)]
 pub struct TypeConstant {
     id: Id,
+    constraints: Vec<Node_>,
     type_: Node_,
+    abstract_: bool,
     reified: Option<Pos>,
 }
 
@@ -804,6 +807,7 @@ impl DirectDeclSmartConstructors<'_> {
                     HintValue::Nullable(hint) => {
                         Ty_::Toption(self.node_to_ty(hint, type_variables)?)
                     }
+                    HintValue::LikeType(hint) => Ty_::Tlike(self.node_to_ty(hint, type_variables)?),
                     HintValue::Closure(hint) => {
                         let params = hint
                             .args
@@ -2151,8 +2155,19 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                         }
                         Node_::TypeConstant(constant) => {
                             cls.typeconsts.push(shallow_decl_defs::ShallowTypeconst {
-                                abstract_: typing_defs::TypeconstAbstractKind::TCConcrete,
-                                constraint: None,
+                                abstract_: if constant.abstract_ {
+                                    typing_defs::TypeconstAbstractKind::TCAbstract(None)
+                                } else {
+                                    typing_defs::TypeconstAbstractKind::TCConcrete
+                                },
+                                constraint: constant.constraints.first().and_then(|constraint| {
+                                    match constraint {
+                                        Node_::TypeConstraint(innards) => {
+                                            self.node_to_ty(&innards.1, &type_variables).ok()
+                                        }
+                                        _ => None,
+                                    }
+                                }),
                                 name: constant.id,
                                 type_: match self.node_to_ty(&constant.type_, &type_variables) {
                                     Ok(ty) => Some(ty),
@@ -2602,6 +2617,12 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         ))
     }
 
+    fn make_like_type_specifier(&mut self, tilde: Self::R, type_: Self::R) -> Self::R {
+        let (tilde, type_) = (tilde?, type_?);
+        let pos = Pos::merge(&tilde.get_pos()?, &type_.get_pos()?)?;
+        Ok(Node_::Hint(HintValue::LikeType(Box::new(type_)), pos))
+    }
+
     fn make_closure_type_specifier(
         &mut self,
         left_paren: Self::R,
@@ -2630,12 +2651,12 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     fn make_type_const_declaration(
         &mut self,
         attributes: Self::R,
-        _arg1: Self::R,
+        modifiers: Self::R,
         _arg2: Self::R,
         _arg3: Self::R,
         name: Self::R,
         _arg5: Self::R,
-        _arg6: Self::R,
+        constraints: Self::R,
         _arg7: Self::R,
         type_: Self::R,
         _arg9: Self::R,
@@ -2651,10 +2672,16 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 reifiable
             }
         });
+        let abstract_ = modifiers?.iter().fold(false, |abstract_, node| match node {
+            Node_::Abstract => true,
+            _ => abstract_,
+        });
         let id = get_name("", &name?)?;
         Ok(Node_::TypeConstant(Box::new(TypeConstant {
             id,
+            constraints: constraints?.into_vec(),
             type_: type_?,
+            abstract_,
             reified,
         })))
     }

@@ -371,6 +371,14 @@ pub enum HintValue {
 }
 
 #[derive(Clone, Debug)]
+pub struct ConstDecl {
+    modifiers: Node_,
+    name: String,
+    pos: Pos,
+    ty: Ty,
+}
+
+#[derive(Clone, Debug)]
 pub struct VariableDecl {
     kind: ParamMode,
     hint: Node_,
@@ -458,6 +466,7 @@ pub enum Node_ {
     Hint(HintValue, Pos),
     Backslash(Pos), // This needs a pos since it shows up in names.
     ListItem(Box<(Node_, Node_)>),
+    Const(Box<ConstDecl>),
     Variable(Box<VariableDecl>),
     FunctionHeader(Box<FunctionHeader>),
     Function(Box<FunctionDecl>),
@@ -1499,33 +1508,38 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
     fn make_const_declaration(
         &mut self,
-        _arg0: Self::R,
+        modifiers: Self::R,
         _arg1: Self::R,
         hint: Self::R,
         decls: Self::R,
         _arg4: Self::R,
     ) -> Self::R {
-        // None of the Node_::Ignoreds should happen in a well-formed file, but they could happen in
-        // a malformed one.
+        // None of the Node_::Ignoreds should happen in a well-formed file, but
+        // they could happen in a malformed one. We also bubble up the const
+        // declaration instead of inserting it immediately because consts can
+        // appear in classes or directly in namespaces.
         let hint = hint?;
         Ok(match decls? {
             Node_::List(nodes) => match nodes.as_slice() {
                 [Node_::List(nodes)] => match nodes.as_slice() {
                     [name, _initializer] => {
-                        let (name, _) =
+                        let (name, pos) =
                             get_name(self.state.namespace_builder.current_namespace(), name)?;
+                        let modifiers = modifiers?;
                         match self.node_to_ty(&hint, &HashSet::new()) {
-                            Ok(ty) => Rc::make_mut(&mut self.state.decls)
-                                .consts
-                                .insert(name, Rc::new(ty)),
+                            Ok(ty) => Node_::Const(Box::new(ConstDecl {
+                                modifiers,
+                                name,
+                                pos,
+                                ty,
+                            })),
                             Err(msg) => {
                                 return Err(format!(
                                     "Expected hint or name for constant {}, but was {:?} ({})",
                                     name, hint, msg
                                 ))
                             }
-                        };
-                        Node_::Ignored
+                        }
                     }
                     _ => Node_::Ignored,
                 },
@@ -1550,6 +1564,34 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _body: Self::R,
     ) -> Self::R {
         Rc::make_mut(&mut self.state.namespace_builder).pop_namespace();
+        Ok(Node_::Ignored)
+    }
+
+    fn make_namespace_body(&mut self, _arg0: Self::R, body: Self::R, _arg2: Self::R) -> Self::R {
+        for item in body?.into_iter() {
+            match item {
+                Node_::Const(decl) => {
+                    Rc::make_mut(&mut self.state.decls)
+                        .consts
+                        .insert(decl.name, Rc::new(decl.ty));
+                }
+                _ => (),
+            }
+        }
+        Ok(Node_::Ignored)
+    }
+
+    fn make_script(&mut self, body: Self::R) -> Self::R {
+        for item in body?.into_iter() {
+            match item {
+                Node_::Const(decl) => {
+                    Rc::make_mut(&mut self.state.decls)
+                        .consts
+                        .insert(decl.name, Rc::new(decl.ty));
+                }
+                _ => (),
+            };
+        }
         Ok(Node_::Ignored)
     }
 
@@ -1776,6 +1818,15 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                                 .push(self.node_to_ty(&require.name, &type_variables)?),
                             _ => {}
                         },
+                        Node_::Const(decl) => {
+                            let modifiers = read_member_modifiers(decl.modifiers.iter());
+                            cls.consts.push(shallow_decl_defs::ShallowClassConst {
+                                abstract_: modifiers.is_abstract,
+                                expr: None,
+                                name: Id(decl.pos, decl.name),
+                                type_: decl.ty,
+                            })
+                        }
                         Node_::Property(decl) => {
                             let attributes = read_member_attributes(decl.attrs.iter());
                             let modifiers = read_member_modifiers(decl.modifiers.iter());

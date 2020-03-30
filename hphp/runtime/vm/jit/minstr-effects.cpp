@@ -86,6 +86,8 @@ void getBaseType(Opcode rawOp, bool predict,
       if (rawOp == SetNewElemArray &&
           baseType.subtypeOfAny(TPackedArr, TEmptyArr)) {
         baseType = TPackedArr;
+      } else if (baseType <= TMixedArr) {
+        baseType = TMixedArr;
       } else {
         baseType |= TCountedArr;
       }

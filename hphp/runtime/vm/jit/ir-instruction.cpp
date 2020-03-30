@@ -308,6 +308,19 @@ Type allocObjReturn(const IRInstruction* inst) {
   }
 }
 
+Type arrSetReturn(const IRInstruction* inst) {
+  assertx(inst->is(ArraySet));
+  assertx(inst->src(0)->isA(TArr));
+  assertx(!inst->isLayoutAgnostic());
+
+  auto const& arr = inst->src(0)->type();
+  auto const spec = arr.arrSpec();
+  auto result = arr <= TMixedArr ? TMixedArr : TArr;
+  if (spec.dvarray()) result = result.narrowToDVArray();
+  if (spec.vanilla()) result = result.narrowToVanilla();
+  return result;
+}
+
 Type arrElemReturn(const IRInstruction* inst) {
   assertx(inst->is(ArrayGet, MixedArrayGetK, ArrayIdx, LdPackedElem));
   assertx(inst->src(0)->isA(TArr));
@@ -566,6 +579,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
   return TCls;                                                     \
 }
 #define DAllocObj       return allocObjReturn(inst);
+#define DArrSet         return arrSetReturn(inst);
 #define DArrElem        return arrElemReturn(inst);
 #define DVecElem        return vecElemReturn(inst);
 #define DDictElem       return dictElemReturn(inst);
@@ -623,6 +637,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DParam
 #undef DLdObjCls
 #undef DAllocObj
+#undef DArrSet
 #undef DArrElem
 #undef DVecElem
 #undef DDictElem

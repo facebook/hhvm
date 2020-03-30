@@ -96,16 +96,16 @@ Parsed decls:
             ft_returns_mutable = false }));
       fe_deprecated = None;  };
     "local_reactive_function" ->
-    { fe_pos = [53:10-33];
+    { fe_pos = [57:10-33];
       fe_type =
-      (Rwitness (root|functions.php line 53, characters 10-32),
+      (Rwitness (root|functions.php line 57, characters 10-32),
        (Tfun
           { ft_is_coroutine = false; ft_arity = (Fstandard (0, 0));
             ft_tparams = []; ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;
               et_type =
-              (Rhint (root|functions.php line 53, characters 37-40),
+              (Rhint (root|functions.php line 57, characters 37-40),
                (Tprim Tvoid))
               };
             ft_fun_kind = sync; ft_reactive = Local {};
@@ -113,16 +113,16 @@ Parsed decls:
             ft_returns_mutable = false }));
       fe_deprecated = None;  };
     "reactive_function" ->
-    { fe_pos = [47:10-27];
+    { fe_pos = [51:10-27];
       fe_type =
-      (Rwitness (root|functions.php line 47, characters 10-26),
+      (Rwitness (root|functions.php line 51, characters 10-26),
        (Tfun
           { ft_is_coroutine = false; ft_arity = (Fstandard (0, 0));
             ft_tparams = []; ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;
               et_type =
-              (Rhint (root|functions.php line 47, characters 31-34),
+              (Rhint (root|functions.php line 51, characters 31-34),
                (Tprim Tvoid))
               };
             ft_fun_kind = sync; ft_reactive = Reactive {};
@@ -130,16 +130,16 @@ Parsed decls:
             ft_returns_mutable = false }));
       fe_deprecated = None;  };
     "shallow_reactive_function" ->
-    { fe_pos = [50:10-35];
+    { fe_pos = [54:10-35];
       fe_type =
-      (Rwitness (root|functions.php line 50, characters 10-34),
+      (Rwitness (root|functions.php line 54, characters 10-34),
        (Tfun
           { ft_is_coroutine = false; ft_arity = (Fstandard (0, 0));
             ft_tparams = []; ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;
               et_type =
-              (Rhint (root|functions.php line 50, characters 39-42),
+              (Rhint (root|functions.php line 54, characters 39-42),
                (Tprim Tvoid))
               };
             ft_fun_kind = sync; ft_reactive = Shallow {};
@@ -222,6 +222,46 @@ Parsed decls:
               et_type =
               (Rhint (root|functions.php line 33, characters 35-38),
                (Tprim Tvoid))
+              };
+            ft_fun_kind = sync; ft_reactive = Nonreactive;
+            ft_return_disposable = false; ft_mutable = none;
+            ft_returns_mutable = false }));
+      fe_deprecated = None;  };
+    "takes_returns_dict" ->
+    { fe_pos = [46:10-28];
+      fe_type =
+      (Rwitness (root|functions.php line 46, characters 10-27),
+       (Tfun
+          { ft_is_coroutine = false; ft_arity = (Fstandard (1, 1));
+            ft_tparams = []; ft_where_constraints = [];
+            ft_params =
+            [{ fp_pos = [46:48-50]; fp_name = (Some "$m");
+               fp_type =
+               { et_enforced = false;
+                 et_type =
+                 (Rhint (root|functions.php line 46, characters 29-46),
+                  (Tapply (([46:29-33], "\\HH\\dict"),
+                     [(Rhint (root|functions.php line 46, characters 34-39),
+                       (Tprim Tstring));
+                       (Rhint (root|functions.php line 46, characters 42-45),
+                        (Tprim Tbool))
+                       ]
+                     )))
+                 };
+               fp_kind = FPnormal; fp_accept_disposable = false;
+               fp_mutable = none }
+              ];
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|functions.php line 46, characters 53-70),
+               (Tapply (([46:53-57], "\\HH\\dict"),
+                  [(Rhint (root|functions.php line 46, characters 58-63),
+                    (Tprim Tstring));
+                    (Rhint (root|functions.php line 46, characters 66-69),
+                     (Tprim Tbool))
+                    ]
+                  )))
               };
             ft_fun_kind = sync; ft_reactive = Nonreactive;
             ft_return_disposable = false; ft_mutable = none;

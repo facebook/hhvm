@@ -1111,7 +1111,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         Ok(match kind {
             // There are a few types whose string representations we have to
             // grab anyway, so just go ahead and treat them as generic names.
-            TokenKind::Name | TokenKind::Variable | TokenKind::Vec => {
+            TokenKind::Name | TokenKind::Variable | TokenKind::Vec | TokenKind::Dict => {
                 let name = token_text(self);
                 if self.state.namespace_builder.is_building_namespace {
                     Rc::make_mut(&mut self.state.namespace_builder)
@@ -2143,7 +2143,23 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let vec_name = prefix_slash(Cow::Owned(vec_name)).into_owned();
         let pos = Pos::merge(&vec_pos, &greater_than?.get_pos()?)?;
         Ok(Node_::Hint(
-            HintValue::Apply(Box::new((Id(vec_pos, vec_name), vec![inner?]))),
+            HintValue::Apply(Box::new((Id(vec_pos, vec_name), inner?.into_vec()))),
+            pos,
+        ))
+    }
+
+    fn make_dictionary_type_specifier(
+        &mut self,
+        dict: Self::R,
+        _arg1: Self::R,
+        inner: Self::R,
+        greater_than: Self::R,
+    ) -> Self::R {
+        let (dict_name, dict_pos) = get_name("", &dict?)?;
+        let dict_name = prefix_slash(Cow::Owned(dict_name)).into_owned();
+        let pos = Pos::merge(&dict_pos, &greater_than?.get_pos()?)?;
+        Ok(Node_::Hint(
+            HintValue::Apply(Box::new((Id(dict_pos, dict_name), inner?.into_vec()))),
             pos,
         ))
     }

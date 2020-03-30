@@ -43,6 +43,10 @@ function takes_returns_function_type<Tu>(
   };
 }
 
+function takes_returns_dict(dict<string, bool> $m): dict<string, bool> {
+  return $m;
+}
+
 <<__Rx>>
 function reactive_function(): void {}
 

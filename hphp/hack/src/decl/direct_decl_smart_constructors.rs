@@ -439,6 +439,17 @@ pub struct ShapeDecl {
 }
 
 #[derive(Clone, Debug)]
+pub struct TypeParameterDecl {
+    name: Node_,
+    reified: aast::ReifyKind,
+    variance: Variance,
+
+    // Box the insides of the vector so we don't need to reallocate them when
+    // we pull them out of the TypeConstraint variant.
+    constraints: Vec<Box<(ConstraintKind, Node_)>>,
+}
+
+#[derive(Clone, Debug)]
 pub struct ClosureTypeHint {
     args: Node_,
     ret_hint: Node_,
@@ -520,6 +531,7 @@ pub enum Node_ {
     TypeConstant(Box<TypeConstant>),
     RequireClause(Box<RequireClause>),
     ClassishBody(Vec<Node_>),
+    TypeParameter(Box<TypeParameterDecl>),
     TypeConstraint(Box<(ConstraintKind, Node_)>),
     ShapeFieldSpecifier(Box<ShapeFieldDecl>),
     NamespaceUseClause(Box<NamespaceUseClause>),
@@ -534,10 +546,6 @@ pub enum Node_ {
     Question(Pos),    // This needs a pos since it shows up in nullable types.
     This(Pos),        // This needs a pos since it shows up in Taccess.
     ColonColon(Pos),  // This needs a pos since it shows up in Taccess.
-
-    // Box the insides of the vector so we don't need to reallocate them when
-    // we pull them out of the TypeConstraint variant.
-    TypeParameter(Box<(Node_, aast::ReifyKind, Vec<Box<(ConstraintKind, Node_)>>)>),
 
     // Simple keywords and tokens.
     Abstract,
@@ -894,7 +902,12 @@ impl DirectDeclSmartConstructors<'_> {
         let type_params = node
             .into_iter()
             .map(|node| {
-                let (name, reified, constraints) = match node {
+                let TypeParameterDecl {
+                    name,
+                    variance,
+                    reified,
+                    constraints,
+                } = match node {
                     Node_::TypeParameter(innards) => *innards,
                     n => return Err(format!("Expected a type parameter, but got {:?}", n)),
                 };
@@ -908,7 +921,7 @@ impl DirectDeclSmartConstructors<'_> {
                     .collect::<Result<Vec<_>, ParseError>>()?;
                 type_variables.insert(Rc::new(id.1.clone()));
                 Ok(Tparam {
-                    variance: Variance::Invariant,
+                    variance,
                     name: id,
                     constraints,
                     reified,
@@ -1779,7 +1792,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         &mut self,
         _arg0: Self::R,
         reify: Self::R,
-        _arg2: Self::R,
+        variance: Self::R,
         name: Self::R,
         constraints: Self::R,
     ) -> Self::R {
@@ -1797,14 +1810,19 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 },
             },
         )?;
-        Ok(Node_::TypeParameter(Box::new((
-            name?,
-            match reify? {
+        Ok(Node_::TypeParameter(Box::new(TypeParameterDecl {
+            name: name?,
+            variance: match variance? {
+                Node_::Operator(_, OperatorType::Minus) => Variance::Contravariant,
+                Node_::Operator(_, OperatorType::Plus) => Variance::Covariant,
+                _ => Variance::Invariant,
+            },
+            reified: match reify? {
                 Node_::Reify => aast::ReifyKind::Reified,
                 _ => aast::ReifyKind::Erased,
             },
             constraints,
-        ))))
+        })))
     }
 
     fn make_type_parameters(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {

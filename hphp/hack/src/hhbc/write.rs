@@ -45,6 +45,14 @@ impl<WE: Debug> Error<WE> {
 pub trait Write {
     type Error: Debug;
     fn write(&mut self, s: impl AsRef<str>) -> Result<(), Self::Error>;
+
+    fn write_if(&mut self, cond: bool, s: impl AsRef<str>) -> Result<(), Self::Error> {
+        if cond {
+            self.write(s)
+        } else {
+            Ok(())
+        }
+    }
 }
 
 impl<W: fmt::Write> Write for W {
@@ -208,16 +216,5 @@ where
     match i.into() {
         None => w.write(default),
         Some(i) => f(w, i),
-    }
-}
-
-pub fn then_write<W: Write, F>(w: &mut W, cond: bool, f: F) -> Result<(), W::Error>
-where
-    F: Fn(&mut W) -> Result<(), W::Error>,
-{
-    if cond {
-        f(w)
-    } else {
-        Ok(())
     }
 }

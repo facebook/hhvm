@@ -532,7 +532,7 @@ fn print_use_alias<W: Write>(
             concat_by(w, " ", kindl, |w, k| print_use_as_visibility(w, *k))
         })?;
     }
-    then_write(w, !kindl.is_empty() && ido2.is_some(), |w| w.write(" "))?;
+    w.write_if(!kindl.is_empty() && ido2.is_some(), " ")?;
     option(w, ido2, |w, i: &class::Type| w.write(i.to_raw_string()))?;
     w.write(";")
 }
@@ -547,22 +547,14 @@ fn print_method_trait_resolutions<W: Write>(
         kind_as_tring.to_raw_string(),
         mtr.method.1
     ))?;
-    if mtr.fun_kind.is_async() {
-        w.write("async ")?;
-    }
-    w.write("[")?;
-    if mtr.final_ {
-        w.write("final ")?;
-    }
-    w.write(mtr.visibility.to_string())?;
-    if mtr.abstract_ {
-        w.write(" abstract")?;
-    }
-    if mtr.static_ {
-        w.write(" static")?;
-    }
-    w.write("] ")?;
-    w.write(format!("{};", mtr.name.1))
+    w.write_if(mtr.fun_kind.is_async(), "async ")?;
+    wrap_by_square(w, |w| {
+        w.write_if(mtr.final_, "final ")?;
+        w.write(mtr.visibility.to_string())?;
+        w.write_if(mtr.abstract_, " abstract")?;
+        w.write_if(mtr.static_, " static")
+    })?;
+    w.write(format!(" {};", mtr.name.1))
 }
 
 fn print_uses<W: Write>(ctx: &mut Context, w: &mut W, c: &HhasClass) -> Result<(), W::Error> {
@@ -1900,7 +1892,20 @@ fn print_control_flow<W: Write>(w: &mut W, cf: &InstructControlFlow) -> Result<(
         CF::RetM(p) => concat_str_by(w, " ", ["RetM", p.to_string().as_str()]),
         CF::Throw => w.write("Throw"),
         CF::Switch(kind, base, labels) => print_switch(w, kind, base, labels),
-        CF::SSwitch(_) => not_impl!(),
+        CF::SSwitch(cases) => match &cases[..] {
+            [] => Err(Error::fail("sswitch should have at least one case")),
+            [rest @ .., (_, lastlabel)] => {
+                w.write("SSwitch ")?;
+                wrap_by_angle(w, |w| {
+                    concat_by(w, " ", rest, |w, (s, l)| {
+                        concat_str(w, [quote_string(s).as_str(), ":"])?;
+                        print_label(w, l)
+                    })?;
+                    w.write(" -:")?;
+                    print_label(w, lastlabel)
+                })
+            }
+        },
     }
 }
 
@@ -2159,12 +2164,8 @@ fn print_param<W: Write>(
     param: &HhasParam,
 ) -> Result<(), W::Error> {
     print_param_user_attributes(ctx, w, param)?;
-    if param.is_inout {
-        w.write("inout ")?;
-    }
-    if param.is_variadic {
-        w.write("...")?;
-    }
+    w.write_if(param.is_inout, "inout ")?;
+    w.write_if(param.is_variadic, "...")?;
     option(w, &param.type_info, |w, ty| {
         print_type_info(w, ty)?;
         w.write(" ")
@@ -2233,7 +2234,20 @@ fn print_key_value<W: Write>(
     k: &ast::Expr,
     v: &ast::Expr,
 ) -> Result<(), W::Error> {
-    print_expr(w, env, k)?;
+    print_key_value_(w, env, k, print_expr, v)
+}
+
+fn print_key_value_<W: Write, K, KeyPrinter>(
+    w: &mut W,
+    env: &ExprEnv,
+    k: K,
+    mut kp: KeyPrinter,
+    v: &ast::Expr,
+) -> Result<(), W::Error>
+where
+    KeyPrinter: FnMut(&mut W, &ExprEnv, K) -> Result<(), W::Error>,
+{
+    kp(w, env, k)?;
     w.write(" => ")?;
     print_expr(w, env, v)
 }
@@ -2277,7 +2291,70 @@ fn print_key_values<W: Write>(
     env: &ExprEnv,
     kvs: impl AsRef<[(ast::Expr, ast::Expr)]>,
 ) -> Result<(), W::Error> {
-    concat_by(w, ", ", kvs, |w, (k, v)| print_key_value(w, env, k, v))
+    print_key_values_(w, env, print_expr, kvs)
+}
+
+fn print_key_values_<W: Write, K, KeyPrinter>(
+    w: &mut W,
+    env: &ExprEnv,
+    mut kp: KeyPrinter,
+    kvs: impl AsRef<[(K, ast::Expr)]>,
+) -> Result<(), W::Error>
+where
+    KeyPrinter: Fn(&mut W, &ExprEnv, &K) -> Result<(), W::Error>,
+{
+    concat_by(w, ", ", kvs, |w, (k, v)| {
+        print_key_value_(w, env, k, &mut kp, v)
+    })
+}
+
+fn print_expr_darray<W: Write, K, KeyPrinter>(
+    w: &mut W,
+    env: &ExprEnv,
+    kp: KeyPrinter,
+    kvs: impl AsRef<[(K, ast::Expr)]>,
+) -> Result<(), W::Error>
+where
+    KeyPrinter: Fn(&mut W, &ExprEnv, &K) -> Result<(), W::Error>,
+{
+    wrap_by_(w, "darray[", "]", |w| print_key_values_(w, env, kp, kvs))
+}
+
+fn print_shape_field_name<W: Write>(
+    w: &mut W,
+    env: &ExprEnv,
+    field: &ast::ShapeFieldName,
+) -> Result<(), W::Error> {
+    use ast::ShapeFieldName as S;
+    match field {
+        S::SFlitInt((_, s)) => print_expr_int(w, s),
+        S::SFlitStr((_, s)) | S::SFclassConst(_, (_, s)) => print_expr_string(w, s),
+    }
+}
+
+fn print_expr_int<W: Write>(w: &mut W, i: &String) -> Result<(), W::Error> {
+    w.write(integer::to_decimal(i.as_str()).map_err(|_| Error::fail("ParseIntError"))?)
+}
+
+fn print_expr_string<W: Write>(w: &mut W, s: &String) -> Result<(), W::Error> {
+    fn escape_char(c: u8) -> Option<Cow<'static, [u8]>> {
+        match c {
+            b'\n' => Some((&b"\\\\n"[..]).into()),
+            b'\r' => Some((&b"\\\\r"[..]).into()),
+            b'\t' => Some((&b"\\\\t"[..]).into()),
+            b'\\' => Some((&b"\\\\\\\\"[..]).into()),
+            b'"' => Some((&b"\\\\\\\""[..]).into()),
+            b'$' => Some((&b"\\\\$"[..]).into()),
+            b'?' => Some((&b"\\?"[..]).into()),
+            c if is_lit_printable(c) => None,
+            c => {
+                let mut r = vec![];
+                write!(r, "\\\\{:03o}", c).unwrap();
+                Some(r.into())
+            }
+        }
+    }
+    wrap_by(w, "\\\"", |w| w.write(escape_by(s.into(), escape_char)))
 }
 
 fn print_expr<W: Write>(
@@ -2315,29 +2392,8 @@ fn print_expr<W: Write>(
                 f.into()
             })
         }
-        E_::Int(i) => {
-            w.write(integer::to_decimal(i.as_str()).map_err(|_| Error::fail("ParseIntError"))?)
-        }
-        E_::String(s) => {
-            fn escape_char(c: u8) -> Option<Cow<'static, [u8]>> {
-                match c {
-                    b'\n' => Some((&b"\\\\n"[..]).into()),
-                    b'\r' => Some((&b"\\\\r"[..]).into()),
-                    b'\t' => Some((&b"\\\\t"[..]).into()),
-                    b'\\' => Some((&b"\\\\\\\\"[..]).into()),
-                    b'"' => Some((&b"\\\\\\\""[..]).into()),
-                    b'$' => Some((&b"\\\\$"[..]).into()),
-                    b'?' => Some((&b"\\?"[..]).into()),
-                    c if is_lit_printable(c) => None,
-                    c => {
-                        let mut r = vec![];
-                        write!(r, "\\\\{:03o}", c).unwrap();
-                        Some(r.into())
-                    }
-                }
-            }
-            wrap_by(w, "\\\"", |w| w.write( escape_by(s.into(), escape_char ) )  )
-        }
+        E_::Int(i) => print_expr_int(w, i),
+        E_::String(s) => print_expr_string(w, s),
         E_::Null => w.write("NULL"),
         E_::True => w.write("true"),
         E_::False => w.write("false"),
@@ -2370,7 +2426,9 @@ fn print_expr<W: Write>(
                 ))),
             }
         }
-        E_::Shape(_) => not_impl!(),
+        E_::Shape(fl) => {
+            print_expr_darray(w, env, print_shape_field_name, fl)
+        },
         E_::Binop(x) => {
             let (bop, e1, e2) = &**x;
             print_expr(w, env, e1)?;
@@ -2477,7 +2535,7 @@ fn print_expr<W: Write>(
         E_::Varray(va) => wrap_by_(w, "varray[", "]", |w| {
             concat_by(w, ", ", &va.1, |w, e| print_expr(w, env, e))
         }),
-        E_::Darray(da) => wrap_by_(w, "darray[", "]", |w| print_key_values(w, env, &da.1)),
+        E_::Darray(da) => print_expr_darray(w, env, print_expr, &da.1),
         E_::List(l) => wrap_by_(w, "list(", ")", |w| {
             concat_by(w, ", ", l, |w, i| print_expr(w, env, i))
         }),
@@ -2520,12 +2578,11 @@ fn print_efun<W: Write>(
     f: &ast::Fun_,
     use_list: &[ast::Lid],
 ) -> Result<(), W::Error> {
-    if f.static_ {
-        w.write("static ")?;
-    }
-    if f.fun_kind.is_fasync() || f.fun_kind.is_fasync_generator() {
-        w.write("async ")?;
-    }
+    w.write_if(f.static_, "static ")?;
+    w.write_if(
+        f.fun_kind.is_fasync() || f.fun_kind.is_fasync_generator(),
+        "async ",
+    )?;
     w.write("function ")?;
     wrap_by_paren(w, |w| {
         concat_by(w, ", ", &f.params, |w, p| print_fparam(w, env, p))

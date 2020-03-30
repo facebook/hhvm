@@ -142,6 +142,21 @@ let unset_is_quarantined_internal () : unit =
 let get_telemetry (t : t) : Telemetry.t =
   let telemetry =
     Telemetry.create ()
+    |> Telemetry.object_
+         ~key:"entries"
+         ~value:
+           ( Telemetry.create ()
+           |> Telemetry.int_
+                ~key:"count"
+                ~value:(Relative_path.Map.cardinal t.entries)
+           |> Telemetry.int_
+                ~key:"size"
+                ~value:
+                  (Relative_path.Map.fold
+                     t.entries
+                     ~init:0
+                     ~f:(fun _path entry acc ->
+                       acc + String.length entry.contents)) )
     |> Telemetry.string_
          ~key:"backend"
          ~value:(t.backend |> Provider_backend.t_to_string)

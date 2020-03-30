@@ -8,6 +8,8 @@ from typing import ClassVar, Dict, List, Optional, Type
 import test_case
 from common_tests import CommonTestDriver
 from glean.schema.hack.types import (
+    ClassConstDeclaration,
+    ClassConstDefinition,
     ClassDeclaration,
     ClassDefinition,
     DeclarationLocation,
@@ -101,6 +103,8 @@ max_workers = 2
 
     def predicate_name_to_type(self, predicate_name: str) -> Optional[Type[Struct]]:
         predicate_dict = {
+            "hack.ClassConstDeclaration.1": ClassConstDeclaration,
+            "hack.ClassConstDefinition.1": ClassConstDefinition,
             "hack.ClassDeclaration.1": ClassDeclaration,
             "hack.ClassDefinition.1": ClassDefinition,
             "hack.DeclarationLocation.1": DeclarationLocation,

@@ -99,6 +99,8 @@ bool IRBuilder::shouldConstrainGuards() const {
 
 void IRBuilder::appendInstruction(IRInstruction* inst) {
   FTRACE(1, "  append {}\n", inst->toString());
+  assertx(inst->marker().valid());
+  if (inst->is(Nop, DefConst)) return;
 
   if (shouldConstrainGuards()) {
     auto const l = [&]() -> folly::Optional<Location> {
@@ -139,10 +141,8 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
     }
   }
 
-  auto where = m_curBlock->end();
-
   // If the block isn't empty, check if we need to create a new block.
-  if (where != m_curBlock->begin()) {
+  if (!m_curBlock->empty()) {
     auto& prev = m_curBlock->back();
     if (prev.isBlockEnd()) {
       assertx(!prev.isTerminal());
@@ -152,23 +152,13 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
       m_state.finishBlock(prev.block());
       FTRACE(2, "lazily appending B{}\n", m_curBlock->id());
       m_state.startBlock(m_curBlock, false);
-      where = m_curBlock->begin();
     }
   }
 
-  assertx(where == m_curBlock->end() &&
-          "Can't append an instruction in the middle of a block");
   assertx((m_curBlock->empty() || !m_curBlock->back().isBlockEnd()) &&
           "Can't append an instruction after a BlockEnd instruction");
-
-  assertx(inst->marker().valid());
-  if (!inst->is(Nop, DefConst)) {
-    where = m_curBlock->insert(where, inst);
-    ++where;
-  }
-
+  m_curBlock->push_back(inst);
   m_state.update(inst);
-
   if (inst->isTerminal()) m_state.finishBlock(m_curBlock);
 }
 

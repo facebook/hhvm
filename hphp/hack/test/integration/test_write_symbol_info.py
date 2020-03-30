@@ -26,6 +26,8 @@ from glean.schema.hack.types import (
     PropertyDefinition,
     TraitDeclaration,
     TraitDefinition,
+    TypeConstDeclaration,
+    TypeConstDefinition,
     TypedefDeclaration,
 )
 from hh_paths import hh_server
@@ -121,6 +123,8 @@ max_workers = 2
             "hack.PropertyDefinition.1": PropertyDefinition,
             "hack.TraitDeclaration.1": TraitDeclaration,
             "hack.TraitDefinition.1": TraitDefinition,
+            "hack.TypeConstDeclaration.1": TypeConstDeclaration,
+            "hack.TypeConstDefinition.1": TypeConstDefinition,
             "hack.TypedefDeclaration.1": TypedefDeclaration,
         }
         return predicate_dict.get(predicate_name)

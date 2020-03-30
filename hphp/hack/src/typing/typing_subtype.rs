@@ -129,8 +129,20 @@ fn simplify_subtype_variance<'a>(
     let mut props = Vec::new_in(env.bld().alloc);
     for (tparam, &ty_sub, &ty_super) in izip!(tparaml.iter(), children_tyl.iter(), super_tyl.iter())
     {
+        // Direct decl parser does not yet support variance, so used naming convention instead
+        // Type parameters start "TP" are covariant, "TN" contravariant, all others invariant
+        // TODO(hrust): use actual variance when it is implemented
+        let variance = if tparam.name.1.len() < 2 {
+            ast::Variance::Invariant
+        } else {
+            match &tparam.name.1[0..2] {
+                "TP" => ast::Variance::Covariant,
+                "TN" => ast::Variance::Contravariant,
+                _ => ast::Variance::Invariant,
+            }
+        };
         // Apply subtyping according to the variance of the type parameter
-        match tparam.variance {
+        match variance {
             ast::Variance::Covariant => {
                 props.push(simplify_subtype(env, ty_sub, ty_super));
             }

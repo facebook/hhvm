@@ -13,6 +13,7 @@ use typing_defs_rust::typing_make_type;
 
 use decl_provider_rust as decl_provider;
 use oxidized::relative_path::{self, RelativePath};
+use oxidized::typing_defs::{Ty, Ty_};
 use stack_limit::{StackLimit, KI, MI};
 
 use std::{
@@ -64,6 +65,20 @@ impl decl_provider::DeclProvider for TestDeclProvider {
         // TODO: fix this
         let stripped = name.trim_start_matches("\\");
         self.decls.classes.get(stripped)
+    }
+    fn get_ancestor<'a>(&self, t: &'a decl_provider::ClassDecl, name: &str) -> Option<&'a Ty> {
+        // TODO(hrust): transitively close the hierarchy.
+        // Right now, this just gets the direct ancestor
+        t.extends.iter().find_map(|ty| match ty.1.as_ref() {
+            Ty_::Tapply(sid, _) => {
+                if name == sid.1 {
+                    Some(ty)
+                } else {
+                    None
+                }
+            }
+            _ => None,
+        })
     }
 }
 

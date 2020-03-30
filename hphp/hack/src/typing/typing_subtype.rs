@@ -4,24 +4,29 @@
 // LICENSE file in the "hack" directory of this source tree.
 //use crate::typing_env_types::Ty_::*;
 use crate::typing_env_types::*;
+use crate::typing_phase::localize;
 use bumpalo::collections::Vec;
 use itertools::*;
 use oxidized::ast;
+use typing_collections_rust::SMap;
 use typing_defs_rust::Ty;
 
 fn simplify_subtype_i<'a>(
-    env: &Env<'a>,
+    env: &mut Env<'a>,
     ty_sub: InternalType<'a>,
     ty_super: InternalType<'a>,
 ) -> SubtypeProp<'a> {
-    let valid = || env.bld().valid();
-    let invalid = || env.bld().invalid();
-    let default = || env.bld().is_subtype(ty_sub, ty_super);
+    let bld = env.bld();
+    let valid = || bld.valid();
+    let invalid = || bld.invalid();
+    let default = || bld.is_subtype(ty_sub, ty_super);
 
     // This doesn't correspond to the pattern match order used in the OCaml
     // TODO(hrust): when we are dealing with more types, refactor this so that it does correspond
     match (ty_sub, ty_super) {
         (InternalType_::LoclType(ty_sub), InternalType_::LoclType(ty_super)) => {
+            let ty_sub = env.inference_env.expand_type(*ty_sub);
+            let ty_super = env.inference_env.expand_type(*ty_super);
             match (ty_sub.get_node(), ty_super.get_node()) {
                 (Ty_::Tprim(p1), Ty_::Tprim(p2)) => match (p1, p2) {
                     (PrimKind::Tint, PrimKind::Tnum)
@@ -73,8 +78,33 @@ fn simplify_subtype_i<'a>(
                             }
                         }
                     } else {
-                        valid()
-                        // TODO inheritance
+                        if !exact_match {
+                            invalid()
+                        } else {
+                            match class_def_sub {
+                                // This should have been caught already in the naming phase
+                                None => valid(),
+                                Some(cd) => {
+                                    let bld = env.builder();
+                                    let mut substs = SMap::empty();
+                                    for (tparam, &ty) in izip!(cd.tparams.iter(), tyl_sub.iter()) {
+                                        substs = substs.add(bld, &tparam.name.1, ty)
+                                    }
+                                    let ety_env = bld.alloc.alloc(ExpandEnv_ {
+                                        type_expansions: Vec::new_in(bld.alloc),
+                                        substs,
+                                    });
+                                    let up_obj_opt = env.provider().get_ancestor(cd, cid_super);
+                                    match up_obj_opt {
+                                        Some(up_obj) => {
+                                            let up_obj = localize(ety_env, env, &up_obj).clone();
+                                            simplify_subtype(env, up_obj, ty_super)
+                                        }
+                                        None => invalid(),
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
                 (Ty_::Tclass(_, _, _), Ty_::Tprim(_)) => invalid(),
@@ -90,7 +120,7 @@ fn simplify_subtype_i<'a>(
 }
 
 fn simplify_subtype_variance<'a>(
-    env: &Env<'a>,
+    env: &mut Env<'a>,
     tparaml: &std::vec::Vec<oxidized::typing_defs::Tparam>,
     children_tyl: &'a Vec<Ty<'a>>,
     super_tyl: &'a Vec<Ty<'a>>,
@@ -117,13 +147,13 @@ fn simplify_subtype_variance<'a>(
     env.bld().conj(props)
 }
 
-fn simplify_subtype<'a>(env: &Env<'a>, ty_sub: Ty<'a>, ty_super: Ty<'a>) -> SubtypeProp<'a> {
+fn simplify_subtype<'a>(env: &mut Env<'a>, ty_sub: Ty<'a>, ty_super: Ty<'a>) -> SubtypeProp<'a> {
     let ity_sub = env.bld().loclty(ty_sub);
     let ity_super = env.bld().loclty(ty_super);
     simplify_subtype_i(env, ity_sub, ity_super)
 }
 
-pub fn sub_type<'a>(env: &Env<'a>, ty_sub: Ty<'a>, ty_super: Ty<'a>) {
+pub fn sub_type<'a>(env: &mut Env<'a>, ty_sub: Ty<'a>, ty_super: Ty<'a>) {
     let ity_sub = env.bld().loclty(ty_sub);
     let ity_super = env.bld().loclty(ty_super);
     sub_type_i(env, ity_sub, ity_super)
@@ -148,7 +178,7 @@ fn process_simplify_subtype_result<'a>(env: &Env<'a>, prop: SubtypeProp<'a>) {
     }
 }
 // Merge sub_type_inner and sub_type_i
-pub fn sub_type_i<'a>(env: &Env<'a>, ty_sub: InternalType<'a>, ty_super: InternalType<'a>) {
+pub fn sub_type_i<'a>(env: &mut Env<'a>, ty_sub: InternalType<'a>, ty_super: InternalType<'a>) {
     let prop = simplify_subtype_i(env, ty_sub, ty_super);
     process_simplify_subtype_result(env, &prop);
 }

@@ -50,3 +50,5 @@ val error : t -> e:string -> t
 val error_with_stack : t -> stack:string -> e:string -> t
 
 val exception_ : t -> e:Exception.t -> t
+
+val quick_gc_stat : unit -> t

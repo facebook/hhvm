@@ -46,6 +46,7 @@ let compute_tast_and_errors_unquarantined_internal
     Deferred_decl.reset ~enable:false ~threshold_opt:None;
     Provider_context.reset_telemetry ctx;
     let prev_ctx_telemetry = Provider_context.get_telemetry ctx in
+    let prev_gc_telemetry = Telemetry.quick_gc_stat () in
     let prev_tally_state = Counters.reset ~enable:true in
     let t = Unix.gettimeofday () in
 
@@ -80,21 +81,24 @@ let compute_tast_and_errors_unquarantined_internal
       else
         Provider_context.get_telemetry ctx
     in
+    let gc_telemetry =
+      if Hh_logger.Level.passes_min_level Hh_logger.Level.Debug then
+        Telemetry.quick_gc_stat () |> Telemetry.diff ~prev:prev_gc_telemetry
+      else
+        Telemetry.quick_gc_stat ()
+    in
     let telemetry = Counters.get_counters () in
     Counters.restore_state prev_tally_state;
     let telemetry =
       telemetry
       |> Telemetry.object_ ~key:"ctx" ~value:ctx_telemetry
+      |> Telemetry.object_ ~key:"gc" ~value:gc_telemetry
       |> Telemetry.float_
            ~key:"duration_decl_and_typecheck"
            ~value:(Unix.gettimeofday () -. t)
-    in
-    (* File size. *)
-    let telemetry =
-      Telemetry.int_
-        telemetry
-        ~key:"filesize"
-        ~value:(String.length entry.Provider_context.contents)
+      |> Telemetry.int_
+           ~key:"filesize"
+           ~value:(String.length entry.Provider_context.contents)
     in
 
     Hh_logger.debug

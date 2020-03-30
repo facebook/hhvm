@@ -114,6 +114,21 @@ let error (telemetry : t) ~(e : string) : t = error ~stack:None e :: telemetry
 let exception_ (telemetry : t) ~(e : Exception.t) : t =
   exception_ e :: telemetry
 
+let quick_gc_stat () : t =
+  let stat = Gc.quick_stat () in
+  let bytes_per_word = Sys.word_size / 8 in
+  let bytes_per_wordf = bytes_per_word |> float_of_int in
+  let open Gc.Stat in
+  create ()
+  |> float_ ~key:"minor_bytes" ~value:(stat.minor_words *. bytes_per_wordf)
+  |> float_ ~key:"promoted_bytes" ~value:(stat.promoted_words *. bytes_per_wordf)
+  |> float_ ~key:"major_bytes" ~value:(stat.major_words *. bytes_per_wordf)
+  |> int_ ~key:"minor_collections" ~value:stat.minor_collections
+  |> int_ ~key:"major_collections" ~value:stat.major_collections
+  |> int_ ~key:"heap_bytes" ~value:(stat.heap_words * bytes_per_word)
+  |> int_ ~key:"compactions" ~value:stat.compactions
+  |> int_ ~key:"top_heap_bytes" ~value:(stat.top_heap_words * bytes_per_word)
+
 let rec diff (telemetry : t) ~(prev : t) : t =
   let telemetry = List.sort telemetry ~compare in
   let prev = List.sort prev ~compare in

@@ -26,8 +26,9 @@ use oxidized::{
     tany_sentinel::TanySentinel,
     typing_defs,
     typing_defs::{
-        FunArity, FunElt, FunParam, FunParams, FunTparamsKind, FunType, ParamMode, ParamMutability,
-        PossiblyEnforcedTy, Reactivity, ShapeFieldType, ShapeKind, Tparam, Ty, Ty_, TypedefType,
+        EnumType, FunArity, FunElt, FunParam, FunParams, FunTparamsKind, FunType, ParamMode,
+        ParamMutability, PossiblyEnforcedTy, Reactivity, ShapeFieldType, ShapeKind, Tparam, Ty,
+        Ty_, TypedefType,
     },
     typing_reason::Reason,
 };
@@ -1090,11 +1091,14 @@ impl DirectDeclSmartConstructors<'_> {
         &self,
         base_ty: Node_,
         type_variables: Node_,
-        closing_delimiter: Node_,
+        closing_delimiter: Option<Node_>,
     ) -> Result<Node_, ParseError> {
         let Id(base_ty_pos, base_ty_name) = get_name("", &base_ty)?;
         let base_ty_name = prefix_slash(Cow::Owned(base_ty_name)).into_owned();
-        let pos = Pos::merge(&base_ty_pos, &closing_delimiter.get_pos()?)?;
+        let pos = match closing_delimiter {
+            Some(closing_delimiter) => Pos::merge(&base_ty_pos, &closing_delimiter.get_pos()?)?,
+            None => base_ty_pos.clone(),
+        };
         Ok(Node_::Hint(
             HintValue::Apply(Box::new((
                 Id(base_ty_pos, base_ty_name),
@@ -2444,6 +2448,94 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         Ok(Node_::ClassishBody(body?.into_vec()))
     }
 
+    fn make_enum_declaration(
+        &mut self,
+        _arg0: Self::R,
+        _arg1: Self::R,
+        name: Self::R,
+        _arg3: Self::R,
+        extends: Self::R,
+        _arg5: Self::R,
+        _arg6: Self::R,
+        cases: Self::R,
+        _arg8: Self::R,
+    ) -> Self::R {
+        let name = name?;
+        let id = get_name("", &name)?;
+        let hint = self.node_to_ty(&extends?, &HashSet::new())?;
+        let extends = self.node_to_ty(
+            &self.make_apply(
+                Node_::Name("HH\\BuiltinEnum".to_string(), name.get_pos()?),
+                name,
+                None,
+            )?,
+            &HashSet::new(),
+        )?;
+        let key = id.1.clone();
+        let cls = shallow_decl_defs::ShallowClass {
+            mode: match self.state.file_mode_builder {
+                FileModeBuilder::None | FileModeBuilder::Pending => Mode::Mstrict,
+                FileModeBuilder::Set(mode) => mode,
+            },
+            final_: false,
+            is_xhp: false,
+            has_xhp_keyword: false,
+            kind: ClassKind::Cenum,
+            name: Id(id.0, prefix_slash(Cow::Owned(id.1)).into_owned()),
+            tparams: Vec::new(),
+            where_constraints: Vec::new(),
+            extends: vec![extends],
+            uses: Vec::new(),
+            method_redeclarations: Vec::new(),
+            xhp_attr_uses: Vec::new(),
+            req_extends: Vec::new(),
+            req_implements: Vec::new(),
+            implements: Vec::new(),
+            consts: cases?
+                .into_iter()
+                .map(|node| match node {
+                    Node_::ListItem(innards) => {
+                        let (name, value) = *innards;
+                        Ok(shallow_decl_defs::ShallowClassConst {
+                            abstract_: false,
+                            expr: Some(value.as_expr()?),
+                            name: get_name("", &name)?,
+                            type_: Ty(Reason::Rwitness(value.get_pos()?), hint.1.clone()),
+                        })
+                    }
+                    n => Err(format!("Expected an enum case, got {:?}", n)),
+                })
+                .collect::<Result<Vec<_>, ParseError>>()?,
+            typeconsts: Vec::new(),
+            pu_enums: Vec::new(),
+            props: Vec::new(),
+            sprops: Vec::new(),
+            constructor: None,
+            static_methods: Vec::new(),
+            methods: Vec::new(),
+            user_attributes: Vec::new(),
+            enum_type: Some(EnumType {
+                base: hint,
+                constraint: None,
+            }),
+            decl_errors: Errors::empty(),
+        };
+        Rc::make_mut(&mut self.state.decls)
+            .classes
+            .insert(key, Rc::new(cls));
+        Ok(Node_::Ignored)
+    }
+
+    fn make_enumerator(
+        &mut self,
+        name: Self::R,
+        _arg1: Self::R,
+        value: Self::R,
+        _arg3: Self::R,
+    ) -> Self::R {
+        Ok(Node_::ListItem(Box::new((name?, value?))))
+    }
+
     fn make_tuple_type_specifier(
         &mut self,
         left_paren: Self::R,
@@ -2790,7 +2882,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _arg3: Self::R,
         greater_than: Self::R,
     ) -> Self::R {
-        self.make_apply(vec?, hint?, greater_than?)
+        self.make_apply(vec?, hint?, Some(greater_than?))
     }
 
     fn make_dictionary_type_specifier(
@@ -2800,7 +2892,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         hint: Self::R,
         greater_than: Self::R,
     ) -> Self::R {
-        self.make_apply(dict?, hint?, greater_than?)
+        self.make_apply(dict?, hint?, Some(greater_than?))
     }
 
     fn make_keyset_type_specifier(
@@ -2811,6 +2903,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _arg3: Self::R,
         greater_than: Self::R,
     ) -> Self::R {
-        self.make_apply(keyset?, hint?, greater_than?)
+        self.make_apply(keyset?, hint?, Some(greater_than?))
     }
 }

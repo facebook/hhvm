@@ -3,15 +3,17 @@
 name = "typing_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["../../typing.rs", "../../typing_phase.rs"]
+include = ["../../typing.rs", "../../typing_env.rs", "../../typing_env_from_def.rs", "../../typing_env_return_info.rs", "../../typing_env_types.rs", "../../typing_phase.rs", "../../typing_subtype.rs", "../../typing_toplevel.rs"]
 
 [lib]
-path = "../../typing.rs"
+path = "../../typing_toplevel.rs"
 
 [dependencies]
+decl_provider_rust = { path = "../../../providers/cargo/decl_provider_rust" }
 naming_special_names_rust = { path = "../../../naming" }
 oxidized = { path = "../../../oxidized" }
+typing_ast_rust = { path = "../typing_ast_rust" }
 typing_collections_rust = { path = "../typing_collections_rust" }
 typing_defs_rust = { path = "../typing_defs_rust" }
-typing_env_rust = { path = "../typing_env_rust" }
 bumpalo = { version = "3.1.2", features = ["collections"] }
+itertools = "0.8"

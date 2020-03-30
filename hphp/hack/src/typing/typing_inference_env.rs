@@ -10,9 +10,8 @@ use oxidized::ident_impl::New;
 use oxidized::pos::Pos;
 
 use typing_collections_rust::{IMap, ISet, SMap};
+use typing_defs_rust::typing_make_type::TypeBuilder;
 use typing_defs_rust::{ITySet, PReason, Ty, Ty_};
-
-use crate::typing_make_type::TypeBuilder;
 
 #[derive(Clone)]
 pub struct TyvarConstraints<'a> {

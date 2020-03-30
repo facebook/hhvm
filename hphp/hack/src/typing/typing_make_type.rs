@@ -250,11 +250,20 @@ impl<'a> TypeBuilder<'a> {
     pub fn generic(&'a self, reason: PReason<'a>, name: &'a str) -> Ty<'a> {
         self.mk(reason, Ty_::Tgeneric(name))
     }
+    pub fn fun(&'a self, reason: PReason<'a>, ft: FunType<'a>) -> Ty<'a> {
+        self.mk(reason, Ty_::Tfun(ft))
+    }
     pub fn loclty(&'a self, ty: Ty<'a>) -> InternalType<'a> {
         self.alloc(InternalType_::LoclType(ty))
     }
     pub fn constraintty(&'a self, ty: ConstraintType<'a>) -> InternalType<'a> {
         self.alloc(InternalType_::ConstraintType(ty))
+    }
+    pub fn funtype(&'a self, return_: Ty<'a>) -> FunType<'a> {
+        self.alloc(FunType_ {
+            return_,
+            params: vec![in self.alloc],
+        })
     }
 }
 

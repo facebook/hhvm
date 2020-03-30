@@ -123,7 +123,14 @@ impl<'a> PReason_<'a> {
                 pos: Some(&pos),
                 reason: Reason::Rhint,
             },
-            _ => panic!("Did not expect anything else than Rhint from the decl provider."),
+            OxReason::Rwitness(pos) => PReason_ {
+                pos: Some(&pos),
+                reason: Reason::Rwitness,
+            },
+            _ => panic!(
+                "Did not expect anything else than Rhint from the decl provider. Got {:?}",
+                r
+            ),
         }
     }
 }

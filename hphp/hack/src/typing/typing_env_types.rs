@@ -6,13 +6,12 @@ use decl_provider_rust::DeclProvider;
 use oxidized::pos::Pos;
 use oxidized::{relative_path, typechecker_options};
 
+use crate::typing_env_return_info;
+use crate::typing_make_type::TypeBuilder;
+use typing_ast_rust::typing_inference_env::InferenceEnv;
 pub use typing_collections_rust::*;
 pub use typing_defs_rust::typing_logic::{SubtypeProp, *};
 pub use typing_defs_rust::{Ty, *};
-
-use crate::typing_env_return_info;
-use crate::typing_inference_env::InferenceEnv;
-use crate::typing_make_type::TypeBuilder;
 
 pub struct Env<'a> {
     pub function_pos: &'a Pos,
@@ -44,6 +43,14 @@ impl<'a> Env<'a> {
 
     pub fn provider(&self) -> &'a dyn DeclProvider {
         self.genv.provider
+    }
+
+    pub fn set_function_pos(&mut self, pos: &'a Pos) {
+        self.function_pos = pos;
+    }
+
+    pub fn set_return_type(&mut self, ty: Ty<'a>) {
+        self.genv.return_info.type_.type_ = ty;
     }
 }
 

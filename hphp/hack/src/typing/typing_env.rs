@@ -5,10 +5,9 @@
 use crate::typing_env_return_info;
 pub use crate::typing_env_types::*;
 use decl_provider_rust as decl_provider;
+use oxidized::relative_path::RelativePath;
 use typing_defs_rust as typing_defs;
 use typing_defs_rust::typing_make_type::TypeBuilder;
-
-use oxidized::relative_path::RelativePath;
 
 pub fn empty_global_env<'a>(
     builder: &'a TypeBuilder<'a>,
@@ -26,7 +25,7 @@ pub fn empty_global_env<'a>(
             disposable: false,
             type_: typing_defs::PossiblyEnforcedTy {
                 enforced: false,
-                type_: builder.nothing(builder.mk_rnone()),
+                type_: builder.void(builder.mk_rnone()),
             },
         },
         builder,

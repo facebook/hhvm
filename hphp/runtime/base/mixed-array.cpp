@@ -145,29 +145,6 @@ ArrayData* MixedArray::MakeReserveDict(uint32_t size) {
   return tagArrProv(ad);
 }
 
-ArrayData* MixedArray::MakeReserveSame(const ArrayData* other,
-                                       uint32_t capacity) {
-  capacity = (capacity ? capacity : other->size());
-
-  if (other->isPackedKind()) {
-    return PackedArray::MakeReserve(capacity);
-  }
-
-  if (other->isVecArrayType()) {
-    return PackedArray::MakeReserveVec(capacity);
-  }
-
-  if (other->isDictType()) {
-    return MixedArray::MakeReserveDict(capacity);
-  }
-
-  if (other->isKeysetType()) {
-    return SetArray::MakeReserveSet(capacity);
-  }
-
-  return MixedArray::MakeReserveMixed(capacity);
-}
-
 ArrayData* MixedArray::MakeReserveLike(const ArrayData* other,
                                        uint32_t capacity) {
   capacity = (capacity ? capacity : other->size());

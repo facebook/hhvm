@@ -209,16 +209,11 @@ struct MixedArray final : ArrayData,
   static MixedArray* ToDictInPlace(ArrayData*);
 
   /*
-   * MakeReserveSame allocates a new, empty, request-local array with the same
-   * mode as `other' and with enough space reserved for `capacity' members, or
-   * if `capacity' is zero, with the same capacity as `other'.
-   *
    * MakeReserveLike will return a PHP array with a memory representation
    * similar to the one used by `other'.
    *
    * The returned array is already incref'd.
    */
-  static ArrayData* MakeReserveSame(const ArrayData* other, uint32_t capacity);
   static ArrayData* MakeReserveLike(const ArrayData* other, uint32_t capacity);
 
   /*

@@ -1132,7 +1132,8 @@ TypedValue HHVM_FUNCTION(array_unshift,
                   __FUNCTION__+2 /* remove the "f_" prefix */);
     return make_tv<KindOfNull>();
   }
-  if (isArrayLikeType(cell_array->m_type)) {
+  auto const dt = type(cell_array);
+  if (isArrayLikeType(dt)) {
     Array& arr_array = array.asArrRef();
     if (cell_array->m_data.parr->isVectorData()) {
       if (!args.empty()) {
@@ -1144,41 +1145,39 @@ TypedValue HHVM_FUNCTION(array_unshift,
       }
       arr_array.prepend(var);
     } else {
-      {
-        Array newArray;
-        if (cell_array->m_data.parr->isHackArrayType()) {
-          newArray = Array::attach(
-            MixedArray::MakeReserveSame(cell_array->m_data.parr, 0));
-        } else {
-          newArray = Array::attach(
-            MixedArray::MakeReserveDArray(cell_array->m_data.parr->size()));
+      // Non-vector-like arrays. PackedArrays and vecs are handled above.
+      auto const ad = [&]{
+        auto const size = val(cell_array).parr->size();
+        if (isDictType(dt))   return MixedArray::MakeReserveDict(size);
+        if (isKeysetType(dt)) return SetArray::MakeReserveSet(size);
+        assertx(isPHPArrayType(dt));
+        return MixedArray::MakeReserveDArray(size);
+      }();
+      auto newArray = Array::attach(ad);
+      newArray.append(var);
+      if (!args.empty()) {
+        auto pos_limit = args->iter_end();
+        for (ssize_t pos = args->iter_begin(); pos != pos_limit;
+             pos = args->iter_advance(pos)) {
+          newArray.append(args->atPos(pos));
         }
-        newArray.append(var);
-        if (!args.empty()) {
-          auto pos_limit = args->iter_end();
-          for (ssize_t pos = args->iter_begin(); pos != pos_limit;
-               pos = args->iter_advance(pos)) {
-            newArray.append(args->atPos(pos));
-          }
-        }
-        if (cell_array->m_data.parr->isKeysetType()) {
-          for (ArrayIter iter(array.toArray()); iter; ++iter) {
-            Variant key(iter.first());
-            newArray.append(key);
-          }
-        } else {
-          for (ArrayIter iter(array.toArray()); iter; ++iter) {
-            Variant key(iter.first());
-            if (key.isInteger()) {
-              newArray.append(iter.secondVal());
-            } else {
-              newArray.set(key, iter.secondVal(), true);
-            }
-          }
-        }
-        arr_array = std::move(newArray);
       }
-      // Reset the array's internal pointer
+      if (isKeysetType(dt)) {
+        for (ArrayIter iter(array.toArray()); iter; ++iter) {
+          Variant key(iter.first());
+          newArray.append(key);
+        }
+      } else {
+        for (ArrayIter iter(array.toArray()); iter; ++iter) {
+          Variant key(iter.first());
+          if (key.isInteger()) {
+            newArray.append(iter.secondVal());
+          } else {
+            newArray.set(key, iter.secondVal(), true);
+          }
+        }
+      }
+      arr_array = std::move(newArray);
       arr_array->reset();
     }
     return make_tv<KindOfInt64>(arr_array.size());

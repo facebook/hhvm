@@ -55,3 +55,10 @@ function shallow_reactive_function(): void {}
 
 <<__RxLocal>>
 function local_reactive_function(): void {}
+
+<<__Rx>>
+function reactive_function_mutable_args(
+  <<__Mutable>> Typedef $a,
+  <<__Mutable>> Typedef $b,
+): void {
+}

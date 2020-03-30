@@ -26,7 +26,7 @@ use oxidized::{
     tany_sentinel::TanySentinel,
     typing_defs,
     typing_defs::{
-        FunArity, FunElt, FunParam, FunParams, FunTparamsKind, FunType, ParamMode,
+        FunArity, FunElt, FunParam, FunParams, FunTparamsKind, FunType, ParamMode, ParamMutability,
         PossiblyEnforcedTy, Reactivity, ShapeFieldType, ShapeKind, Tparam, Ty, Ty_, TypedefType,
     },
     typing_reason::Reason,
@@ -387,6 +387,7 @@ pub struct ConstDecl {
 
 #[derive(Clone, Debug)]
 pub struct VariableDecl {
+    attributes: Node_,
     kind: ParamMode,
     hint: Node_,
     id: Id,
@@ -1016,7 +1017,23 @@ impl DirectDeclSmartConstructors<'_> {
                     .into_iter()
                     .fold(Ok(Vec::new()), |acc, variable| match (acc, variable) {
                         (Ok(mut variables), Node_::Variable(innards)) => {
-                            let VariableDecl { kind, hint, id } = *innards;
+                            let VariableDecl {
+                                attributes,
+                                kind,
+                                hint,
+                                id,
+                            } = *innards;
+                            let mutability = attributes.iter().fold(None, |mutability, node| {
+                                if let Node_::Name(n, _) = node {
+                                    if n == "__Mutable" {
+                                        Some(ParamMutability::ParamBorrowedMutable)
+                                    } else {
+                                        mutability
+                                    }
+                                } else {
+                                    mutability
+                                }
+                            });
                             variables.push(FunParam {
                                 pos: id.0,
                                 name: Some(id.1),
@@ -1026,7 +1043,7 @@ impl DirectDeclSmartConstructors<'_> {
                                 },
                                 kind,
                                 accept_disposable: false,
-                                mutability: None,
+                                mutability,
                                 rx_annotation: None,
                             });
                             Ok(variables)
@@ -1785,7 +1802,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
     fn make_parameter_declaration(
         &mut self,
-        _arg0: Self::R,
+        attributes: Self::R,
         _arg1: Self::R,
         inout: Self::R,
         hint: Self::R,
@@ -1798,7 +1815,12 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             Node_::Inout => ParamMode::FPinout,
             _ => ParamMode::FPnormal,
         };
-        Ok(Node_::Variable(Box::new(VariableDecl { kind, hint, id })))
+        Ok(Node_::Variable(Box::new(VariableDecl {
+            attributes: attributes?,
+            kind,
+            hint,
+            id,
+        })))
     }
 
     fn make_function_declaration(

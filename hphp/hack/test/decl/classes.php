@@ -27,6 +27,13 @@ class MyClass {
 
   <<__RxLocal>>
   public function local_reactive_function(): void {}
+
+  <<__Rx>>
+  public function reactive_function_mutable_args(
+    <<__Mutable>> MyClass $a,
+    <<__Mutable>> MyClass $b,
+  ): void {
+  }
 }
 
 abstract class MyAbstractClass {}

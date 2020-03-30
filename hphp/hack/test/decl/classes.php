@@ -39,3 +39,11 @@ class MyClass {
 abstract class MyAbstractClass {}
 final class MyFinalClass {}
 abstract final class MyStaticClass {}
+
+class MyConstructorPropertiesClass {
+  public function __construct(
+    private string $private,
+    protected string $protected,
+    public string $public,
+  ) {}
+}

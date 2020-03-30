@@ -388,6 +388,7 @@ pub struct ConstDecl {
 #[derive(Clone, Debug)]
 pub struct VariableDecl {
     attributes: Node_,
+    visibility: Node_,
     kind: ParamMode,
     hint: Node_,
     id: Id,
@@ -414,7 +415,7 @@ pub struct PropertyDecl {
     attrs: Node_,
     modifiers: Node_,
     hint: Node_,
-    name: Node_,
+    id: Id,
     expr: Option<Box<nast::Expr>>,
 }
 
@@ -924,14 +925,14 @@ impl DirectDeclSmartConstructors<'_> {
         header: FunctionHeader,
         body: Node_,
         outer_type_variables: &HashSet<Rc<String>>,
-    ) -> Result<(Id, Ty), ParseError> {
+    ) -> Result<Box<(Id, Ty, Vec<PropertyDecl>)>, ParseError> {
         let id = get_name(
             self.state.namespace_builder.current_namespace(),
             &header.name,
         )?;
         let (type_params, mut type_variables) = self.into_type_params(header.type_params)?;
         type_variables.extend(outer_type_variables.into_iter().map(Rc::clone));
-        let params = self.into_variables_list(header.param_list, &type_variables)?;
+        let (params, properties) = self.into_variables_list(header.param_list, &type_variables)?;
         let type_ = match header.name {
             Node_::Construct(pos) => Ty(
                 Reason::Rwitness(pos),
@@ -991,7 +992,7 @@ impl DirectDeclSmartConstructors<'_> {
         }
 
         let ty = Ty(Reason::Rwitness(id.0.clone()), Box::new(Ty_::Tfun(ft)));
-        Ok((id, ty))
+        Ok(Box::new((id, ty, properties)))
     }
 
     fn prefix_ns<'a>(&self, name: Cow<'a, String>) -> Cow<'a, String> {
@@ -1010,49 +1011,63 @@ impl DirectDeclSmartConstructors<'_> {
         &self,
         list: Node_,
         type_variables: &HashSet<Rc<String>>,
-    ) -> Result<FunParams, ParseError> {
+    ) -> Result<(FunParams, Vec<PropertyDecl>), ParseError> {
         match list {
             Node_::List(nodes) => {
                 nodes
                     .into_iter()
-                    .fold(Ok(Vec::new()), |acc, variable| match (acc, variable) {
-                        (Ok(mut variables), Node_::Variable(innards)) => {
-                            let VariableDecl {
-                                attributes,
-                                kind,
-                                hint,
-                                id,
-                            } = *innards;
-                            let mutability = attributes.iter().fold(None, |mutability, node| {
-                                if let Node_::Name(n, _) = node {
-                                    if n == "__Mutable" {
-                                        Some(ParamMutability::ParamBorrowedMutable)
-                                    } else {
-                                        mutability
-                                    }
-                                } else {
-                                    mutability
-                                }
-                            });
-                            variables.push(FunParam {
-                                pos: id.0,
-                                name: Some(id.1),
-                                type_: PossiblyEnforcedTy {
-                                    enforced: false,
-                                    type_: self.node_to_ty(&hint, type_variables)?,
-                                },
-                                kind,
-                                accept_disposable: false,
-                                mutability,
-                                rx_annotation: None,
-                            });
-                            Ok(variables)
+                    .fold(Ok((Vec::new(), Vec::new())), |acc, variable| {
+                        match (acc, variable) {
+                            (Ok((mut variables, mut properties)), Node_::Variable(innards)) => {
+                                let VariableDecl {
+                                    attributes,
+                                    visibility,
+                                    kind,
+                                    hint,
+                                    id,
+                                } = *innards;
+                                match visibility.as_visibility() {
+                                    Ok(_) => properties.push(PropertyDecl {
+                                        attrs: attributes.clone(),
+                                        modifiers: visibility.clone(),
+                                        hint: hint.clone(),
+                                        id: id.clone(),
+                                        expr: None,
+                                    }),
+                                    Err(_) => (),
+                                };
+                                let mutability =
+                                    attributes.iter().fold(None, |mutability, node| {
+                                        if let Node_::Name(n, _) = node {
+                                            if n == "__Mutable" {
+                                                Some(ParamMutability::ParamBorrowedMutable)
+                                            } else {
+                                                mutability
+                                            }
+                                        } else {
+                                            mutability
+                                        }
+                                    });
+                                variables.push(FunParam {
+                                    pos: id.0,
+                                    name: Some(id.1),
+                                    type_: PossiblyEnforcedTy {
+                                        enforced: false,
+                                        type_: self.node_to_ty(&hint, type_variables)?,
+                                    },
+                                    kind,
+                                    accept_disposable: false,
+                                    mutability,
+                                    rx_annotation: None,
+                                });
+                                Ok((variables, properties))
+                            }
+                            (Ok(_), n) => Err(format!("Expected a variable, but got {:?}", n)),
+                            (acc @ Err(_), _) => acc,
                         }
-                        (Ok(_), n) => Err(format!("Expected a variable, but got {:?}", n)),
-                        (acc @ Err(_), _) => acc,
                     })
             }
-            Node_::Ignored => Ok(Vec::new()),
+            Node_::Ignored => Ok((Vec::new(), Vec::new())),
             n => Err(format!("Expected a list of variables, but got {:?}", n)),
         }
     }
@@ -1803,20 +1818,23 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     fn make_parameter_declaration(
         &mut self,
         attributes: Self::R,
-        _arg1: Self::R,
+        visibility: Self::R,
         inout: Self::R,
         hint: Self::R,
         name: Self::R,
         _arg5: Self::R,
     ) -> Self::R {
         let id = get_name("", &name?)?;
-        let hint = hint?;
+        let attributes = attributes?;
+        let visibility = visibility?;
         let kind = match inout? {
             Node_::Inout => ParamMode::FPinout,
             _ => ParamMode::FPnormal,
         };
+        let hint = hint?;
         Ok(Node_::Variable(Box::new(VariableDecl {
-            attributes: attributes?,
+            attributes,
+            visibility,
             kind,
             hint,
             id,
@@ -1831,8 +1849,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     ) -> Self::R {
         Ok(match header? {
             Node_::FunctionHeader(decl) => {
-                let (Id(pos, name), type_) =
-                    self.function_into_ty(attributes?, *decl, body?, &HashSet::new())?;
+                let (Id(pos, name), type_, _) =
+                    *self.function_into_ty(attributes?, *decl, body?, &HashSet::new())?;
                 Rc::make_mut(&mut self.state.decls).funs.insert(
                     name,
                     Rc::new(FunElt {
@@ -2166,6 +2184,42 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             }
         }
 
+        fn handle_property(
+            this: &mut DirectDeclSmartConstructors,
+            cls: &mut shallow_decl_defs::ShallowClass,
+            decl: PropertyDecl,
+            type_variables: &HashSet<Rc<String>>,
+        ) -> Result<(), ParseError> {
+            let attributes = read_member_attributes(decl.attrs.iter());
+            let modifiers = read_member_modifiers(decl.modifiers.iter());
+            let Id(pos, name) = decl.id;
+            let name = if modifiers.is_static {
+                name
+            } else {
+                strip_dollar_prefix(Cow::Owned(name)).into_owned()
+            };
+            let ty = this.node_to_ty(&decl.hint, type_variables)?;
+            let is_const = attributes.contains(&MemberAttribute::Const);
+            let prop = shallow_decl_defs::ShallowProp {
+                const_: is_const,
+                xhp_attr: None,
+                lateinit: attributes.contains(&MemberAttribute::LateInit),
+                lsb: false,
+                name: Id(pos, name),
+                needs_init: decl.expr.is_none(),
+                type_: Some(ty),
+                abstract_: modifiers.is_abstract,
+                visibility: modifiers.visibility,
+                fixme_codes: ISet::new(),
+            };
+            if modifiers.is_static {
+                cls.sprops.push(prop)
+            } else {
+                cls.props.push(prop)
+            }
+            Ok(())
+        };
+
         match body? {
             Node_::ClassishBody(body) => {
                 for element in body {
@@ -2218,33 +2272,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                             })
                         }
                         Node_::Property(decl) => {
-                            let attributes = read_member_attributes(decl.attrs.iter());
-                            let modifiers = read_member_modifiers(decl.modifiers.iter());
-                            let Id(pos, name) = get_name("", &decl.name)?;
-                            let name = if modifiers.is_static {
-                                name
-                            } else {
-                                strip_dollar_prefix(Cow::Owned(name)).into_owned()
-                            };
-                            let ty = self.node_to_ty(&decl.hint, &type_variables)?;
-                            let is_const = attributes.contains(&MemberAttribute::Const);
-                            let prop = shallow_decl_defs::ShallowProp {
-                                const_: is_const,
-                                xhp_attr: None,
-                                lateinit: attributes.contains(&MemberAttribute::LateInit),
-                                lsb: false,
-                                name: Id(pos, name),
-                                needs_init: decl.expr.is_none(),
-                                type_: Some(ty),
-                                abstract_: modifiers.is_abstract,
-                                visibility: modifiers.visibility,
-                                fixme_codes: ISet::new(),
-                            };
-                            if modifiers.is_static {
-                                cls.sprops.push(prop)
-                            } else {
-                                cls.props.push(prop)
-                            }
+                            handle_property(self, &mut cls, *decl, &type_variables)?
                         }
                         Node_::Function(decl) => {
                             let modifiers = read_member_modifiers(decl.header.modifiers.iter());
@@ -2273,12 +2301,15 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                                         reactivity
                                     }
                                 });
-                            let (id, ty) = self.function_into_ty(
+                            let (id, ty, properties) = *self.function_into_ty(
                                 decl.attributes,
                                 decl.header,
                                 decl.body,
                                 &type_variables,
                             )?;
+                            for property in properties {
+                                handle_property(self, &mut cls, property, &type_variables)?;
+                            }
                             let method = shallow_decl_defs::ShallowMethod {
                                 abstract_,
                                 final_: false,
@@ -2341,7 +2372,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     attrs: attrs?,
                     modifiers: modifiers?,
                     hint: hint?,
-                    name,
+                    id: get_name("", &name)?,
                     expr: match initializer {
                         Node_::Expr(e) => Some(Box::new(*e)),
                         Node_::Ignored => None,

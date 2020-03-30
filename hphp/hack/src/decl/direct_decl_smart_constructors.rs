@@ -1413,17 +1413,19 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     }
 
     fn make_list(&mut self, items: Vec<Self::R>, _: usize) -> Self::R {
-        let result = if !items.is_empty()
-            && !items.iter().all(|r| match r {
-                Ok(Node_::Ignored) => true,
-                _ => false,
-            }) {
-            let items = items.into_iter().collect::<Result<Vec<_>, ParseError>>()?;
-            Node_::List(items)
+        if items.iter().any(|node| matches!(node, Ok(Node_::Yield))) {
+            Ok(Node_::Yield)
         } else {
-            Node_::Ignored
-        };
-        Ok(result)
+            let items = items
+                .into_iter()
+                .filter(|node| !(matches!(node, Ok(Node_::Ignored))))
+                .collect::<Result<Vec<_>, ParseError>>()?;
+            if items.is_empty() {
+                Ok(Node_::Ignored)
+            } else {
+                Ok(Node_::List(items))
+            }
+        }
     }
 
     fn make_qualified_name(&mut self, arg0: Self::R) -> Self::R {
@@ -1866,10 +1868,16 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         header: Self::R,
         body: Self::R,
     ) -> Self::R {
+        // The only contents we care about from inside method bodies is whether
+        // we saw a yield, so just throw away errors here.
+        let body = match body {
+            Ok(body) => body,
+            Err(_) => Node_::Ignored,
+        };
         Ok(match header? {
             Node_::FunctionHeader(decl) => {
                 let (Id(pos, name), type_, _) =
-                    *self.function_into_ty(attributes?, *decl, body?, &HashSet::new())?;
+                    *self.function_into_ty(attributes?, *decl, body, &HashSet::new())?;
                 Rc::make_mut(&mut self.state.decls).funs.insert(
                     name,
                     Rc::new(FunElt {
@@ -2418,13 +2426,14 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             Node_::FunctionHeader(header) => Ok(Node_::Function(Box::new(FunctionDecl {
                 attributes: attributes?,
                 header: *header,
-                body: match body? {
+                body: match body {
                     // If we don't have a FunctionDecl body, use the closing token.
                     // A closing token of '}' indicates a regular FunctionDecl,
                     // while a closing token of ';' indicates an abstract
                     // FunctionDecl.
-                    Node_::Ignored => closer?,
-                    body => body,
+                    Ok(Node_::Ignored) => closer?,
+                    Ok(body) => body,
+                    Err(_) => Node_::Ignored,
                 },
             }))),
             n => Err(format!("Expected a FunctionDecl header, but was {:?}", n)),

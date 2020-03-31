@@ -106,6 +106,12 @@ pub mod class {
             strip_global_ns(&mangle(s.to_string())).to_string().into()
         }
     });
+
+    impl<'a> Type<'a> {
+        pub fn from_ast_name_and_mangle(s: impl Into<String>) -> Self {
+            strip_global_ns(&mangle(s.into())).to_string().into()
+        }
+    }
 }
 
 pub mod prop {

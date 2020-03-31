@@ -944,11 +944,7 @@ fn emit_catch(
     // Note that this is a "regular" label; we're not going to branch to
     // it directly in the event of an exception.
     let next_catch = e.label_gen_mut().next_regular();
-    // TODO(hrust) enabel `let id = hhbc_id::class::Type::from_ast_name(&(catch.0).1);`,
-    // `from_ast_name` should be able to accpet Cow<str>
-    let id: hhbc_id::class::Type = string_utils::strip_global_ns(&(catch.0).1)
-        .to_string()
-        .into();
+    let id = hhbc_id::class::Type::from_ast_name_and_mangle(&(catch.0).1);
     Ok(InstrSeq::gather(vec![
         instr::dup(),
         instr::instanceofd(id),

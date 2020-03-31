@@ -1575,9 +1575,7 @@ fn emit_call_lhs_and_fcall(
             Ok(match cexpr {
                 // Statically known
                 ClassExpr::Id(ast_defs::Id(_, cname)) => {
-                    // TODO(hrust) enabel `let cid = class::Type::from_ast_name(&cname);`,
-                    // `from_ast_name` should be able to accpet Cow<str>
-                    let cid: class::Type = string_utils::strip_global_ns(&cname).to_string().into();
+                    let cid = class::Type::from_ast_name_and_mangle(&cname);
                     emit_symbol_refs::State::add_class(e, cid.clone());
                     let generics = emit_generics(e, env, &mut fcall_args)?;
                     (
@@ -2418,9 +2416,7 @@ fn emit_new(
     };
     let newobj_instrs = match cexpr {
         ClassExpr::Id(ast_defs::Id(_, cname)) => {
-            // TODO(hrust) enabel `let id = class::Type::from_ast_name(&cname);`,
-            // `from_ast_name` should be able to accpet Cow<str>
-            let id: class::Type = string_utils::strip_global_ns(&cname).to_string().into();
+            let id = class::Type::from_ast_name_and_mangle(&cname);
             emit_symbol_refs::State::add_class(e, id.clone());
             match has_generics {
                 H::NoGenerics => InstrSeq::gather(vec![emit_pos(pos), instr::newobjd(id)]),
@@ -3099,9 +3095,7 @@ fn emit_class_const(
     }
     match cexpr {
         ClassExpr::Id(ast_defs::Id(pos, name)) => {
-            // TODO(hrust) enabel `let cid = class::Type::from_ast_name(&cname);`,
-            // `from_ast_name` should be able to accpet Cow<str>
-            let cid: class::Type = string_utils::strip_global_ns(&name).to_string().into();
+            let cid = class::Type::from_ast_name_and_mangle(&name);
             let cname = cid.to_raw_string();
             Ok(if string_utils::is_class(&id.1) {
                 emit_pos_then(&pos, instr::string(cname))

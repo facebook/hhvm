@@ -489,7 +489,7 @@ fn call_cls_method(fcall_args: FcallArgs, args: &Args) -> InstrSeq {
     let mut method_id: method::Type<'static> = args.method_id.to_raw_string().to_owned().into();
     method_id.add_suffix(emit_memoize_helpers::MEMOIZE_SUFFIX);
     if args.info.is_trait || args.flags.contains(Flags::WITH_LSB) {
-        instr::fcallclsmethodsd(fcall_args, SpecialClsRef::Self_, method_id.clone())
+        instr::fcallclsmethodsd(fcall_args, SpecialClsRef::Self_, method_id)
     } else {
         let class_id: class::Type<'static> = args.info.class_id.to_raw_string().to_owned().into();
         instr::fcallclsmethodd(fcall_args, method_id, class_id)

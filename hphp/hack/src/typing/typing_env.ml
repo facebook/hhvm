@@ -1311,7 +1311,9 @@ and get_tyvars_i env (ty : internal_type) =
         ISet.union ret_positive params_positive,
         ISet.union ret_negative params_negative )
     | Tnewtype (name, tyl, _) ->
-      begin
+      if List.is_empty tyl then
+        (env, ISet.empty, ISet.empty)
+      else begin
         match get_typedef env name with
         | Some { td_tparams; _ } ->
           let variancel = List.map td_tparams (fun t -> t.tp_variance) in
@@ -1321,7 +1323,9 @@ and get_tyvars_i env (ty : internal_type) =
     | Tdependent (_, ty) -> get_tyvars env ty
     | Tgeneric _ -> (env, ISet.empty, ISet.empty)
     | Tclass ((_, cid), _, tyl) ->
-      begin
+      if List.is_empty tyl then
+        (env, ISet.empty, ISet.empty)
+      else begin
         match get_class env cid with
         | Some cls ->
           let variancel = List.map (Cls.tparams cls) (fun t -> t.tp_variance) in

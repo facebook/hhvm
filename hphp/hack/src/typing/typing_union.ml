@@ -233,8 +233,11 @@ and simplify_union_ env ty1 ty2 r =
     | ((_, Tclass ((p, id1), e1, tyl1)), (_, Tclass ((_, id2), e2, tyl2)))
       when String.equal id1 id2 ->
       let e = exact_least_upper_bound e1 e2 in
-      let (env, tyl) = union_class env id1 tyl1 tyl2 in
-      (env, Some (mk (r, Tclass ((p, id1), e, tyl))))
+      if List.is_empty tyl1 then
+        (env, Some (mk (r, Tclass ((p, id1), e, tyl1))))
+      else
+        let (env, tyl) = union_class env id1 tyl1 tyl2 in
+        (env, Some (mk (r, Tclass ((p, id1), e, tyl))))
     | ((_, Tgeneric name1), (_, Tgeneric name2)) when String.equal name1 name2
       ->
       (env, Some (mk (r, Tgeneric name1)))
@@ -251,9 +254,12 @@ and simplify_union_ env ty1 ty2 r =
       ty_equiv env ty2 ty1 ~are_ty_param:false
     | ((_, Tnewtype (id1, tyl1, tcstr1)), (_, Tnewtype (id2, tyl2, tcstr2)))
       when String.equal id1 id2 ->
-      let (env, tyl) = union_newtype env id1 tyl1 tyl2 in
-      let (env, tcstr) = union env tcstr1 tcstr2 in
-      (env, Some (mk (r, Tnewtype (id1, tyl, tcstr))))
+      if List.is_empty tyl1 then
+        (env, Some ty1)
+      else
+        let (env, tyl) = union_newtype env id1 tyl1 tyl2 in
+        let (env, tcstr) = union env tcstr1 tcstr2 in
+        (env, Some (mk (r, Tnewtype (id1, tyl, tcstr))))
     | ((_, Ttuple tyl1), (_, Ttuple tyl2)) ->
       if Int.equal (List.length tyl1) (List.length tyl2) then
         let (env, tyl) = List.map2_env env tyl1 tyl2 ~f:union in

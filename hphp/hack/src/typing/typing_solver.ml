@@ -110,7 +110,9 @@ let rec freshen_inside_ty env ty =
     in
     (env, mk (r, Tfun { ft with ft_ret; ft_params }))
   | Tnewtype (name, tyl, ty) ->
-    begin
+    if List.is_empty tyl then
+      default ()
+    else begin
       match Env.get_typedef env name with
       | None -> default ()
       | Some td ->
@@ -119,7 +121,9 @@ let rec freshen_inside_ty env ty =
         (env, mk (r, Tnewtype (name, tyl, ty)))
     end
   | Tclass ((p, cid), e, tyl) ->
-    begin
+    if List.is_empty tyl then
+      default ()
+    else begin
       match Env.get_class env cid with
       | None -> default ()
       | Some cls ->

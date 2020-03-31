@@ -1455,37 +1455,38 @@ and simplify_subtype_i
           end
         | _ -> default_subtype env))
     | (_, Tnewtype (name_super, tyl_super, _)) ->
-      let super_is_enum = Env.is_enum env name_super in
       (match ety_sub with
       | ConstraintType _ -> default_subtype env
       | LoclType lty ->
         (match deref lty with
-        | (_, Tclass ((_, name_sub), _, _))
-          when super_is_enum && String.equal name_sub name_super ->
-          valid ()
-        | (_, Tnewtype (name_sub, _, _))
-          when super_is_enum
-               && Env.is_enum env name_sub
-               && String.equal name_sub name_super ->
-          valid ()
+        | (_, Tclass ((_, name_sub), _, _)) ->
+          if String.equal name_sub name_super && Env.is_enum env name_super then
+            valid ()
+          else
+            default_subtype env
         | (_, Tnewtype (name_sub, tyl_sub, _))
           when String.equal name_sub name_super ->
-          let td = Env.get_typedef env name_super in
-          begin
-            match td with
-            | Some { td_tparams; _ } ->
-              let variance_reifiedl =
-                List.map td_tparams (fun t -> (t.tp_variance, t.tp_reified))
-              in
-              simplify_subtype_variance
-                ~subtype_env
-                name_sub
-                variance_reifiedl
-                tyl_sub
-                tyl_super
-                env
-            | None -> invalid ()
-          end
+          if List.is_empty tyl_sub then
+            valid ()
+          else if Env.is_enum env name_super && Env.is_enum env name_sub then
+            valid ()
+          else
+            let td = Env.get_typedef env name_super in
+            begin
+              match td with
+              | Some { td_tparams; _ } ->
+                let variance_reifiedl =
+                  List.map td_tparams (fun t -> (t.tp_variance, t.tp_reified))
+                in
+                simplify_subtype_variance
+                  ~subtype_env
+                  name_sub
+                  variance_reifiedl
+                  tyl_sub
+                  tyl_super
+                  env
+              | None -> invalid ()
+            end
         | _ -> default_subtype env))
     | (r_super, Tclass (((_, class_name) as x_super), exact_super, tyl_super))
       ->
@@ -1494,19 +1495,19 @@ and simplify_subtype_i
       | LoclType ty_sub ->
         (match deref ty_sub with
         | (_, Tnewtype (enum_name, _, _))
-          when Env.is_enum env enum_name
-               && String.equal enum_name class_name
-               && equal_exact exact_super Nonexact ->
+          when String.equal enum_name class_name
+               && equal_exact exact_super Nonexact
+               && Env.is_enum env enum_name ->
           valid ()
         | (_, Tnewtype (cid, _, _))
-          when Env.is_enum env cid
-               && String.equal class_name SN.Classes.cHH_BuiltinEnum ->
+          when String.equal class_name SN.Classes.cHH_BuiltinEnum
+               && Env.is_enum env cid ->
           (match tyl_super with
           | [ty_super'] ->
             env |> simplify_subtype ~subtype_env ~this_ty ty_sub ty_super'
           | _ -> default_subtype env)
         | (_, Tnewtype (enum_name, _, _))
-          when (Env.is_enum env enum_name && String.equal enum_name class_name)
+          when (String.equal enum_name class_name && Env.is_enum env enum_name)
                || String.equal class_name SN.Classes.cXHPChild ->
           valid ()
         | ( _,
@@ -1524,83 +1525,86 @@ and simplify_subtype_i
           when not @@ Partial.should_check_error (Env.get_mode env) 4110 ->
           valid ()
         | (r_sub, Tclass (x_sub, exact_sub, tyl_sub)) ->
+          let (cid_super, cid_sub) = (snd x_super, snd x_sub) in
           let exact_match =
             match (exact_sub, exact_super) with
             | (Nonexact, Exact) -> false
             | (_, _) -> true
           in
-          let (cid_super, cid_sub) = (snd x_super, snd x_sub) in
-          (* This is side-effecting as it registers a dependency *)
-          let class_def_sub = Env.get_class env cid_sub in
           if String.equal cid_super cid_sub then
-            (* If class is final then exactness is superfluous *)
-            let is_final =
-              match class_def_sub with
-              | Some tc -> Cls.final tc
-              | None -> false
-            in
-            if not (exact_match || is_final) then
-              invalid ()
+            if List.is_empty tyl_sub && List.is_empty tyl_super && exact_match
+            then
+              valid ()
             else
-              (* We handle the case where a generic A<T> is used as A *)
-              let tyl_super =
-                if
-                  List.is_empty tyl_super
-                  && not (Partial.should_check_error (Env.get_mode env) 4101)
-                then
-                  List.map tyl_sub (fun _ ->
-                      mk (r_super, Typing_defs.make_tany ()))
-                else
-                  tyl_super
+              (* This is side-effecting as it registers a dependency *)
+              let class_def_sub = Env.get_class env cid_sub in
+              (* If class is final then exactness is superfluous *)
+              let is_final =
+                match class_def_sub with
+                | Some tc -> Cls.final tc
+                | None -> false
               in
-              let tyl_sub =
-                if
-                  List.is_empty tyl_sub
-                  && not (Partial.should_check_error (Env.get_mode env) 4101)
-                then
-                  List.map tyl_super (fun _ ->
-                      mk (r_super, Typing_defs.make_tany ()))
-                else
-                  tyl_sub
-              in
-              if Int.( <> ) (List.length tyl_sub) (List.length tyl_super) then
-                let n_sub = String_utils.soi (List.length tyl_sub) in
-                let n_super = String_utils.soi (List.length tyl_super) in
-                invalid_with (fun () ->
-                    Errors.type_arity_mismatch
-                      (fst x_super)
-                      n_super
-                      (fst x_sub)
-                      n_sub
-                      subtype_env.on_error)
-              else if List.is_empty tyl_sub && List.is_empty tyl_super then
-                valid ()
+              if not (exact_match || is_final) then
+                invalid ()
               else
-                let variance_reifiedl =
-                  match class_def_sub with
-                  | None ->
+                (* We handle the case where a generic A<T> is used as A *)
+                let tyl_super =
+                  if
+                    List.is_empty tyl_super
+                    && not (Partial.should_check_error (Env.get_mode env) 4101)
+                  then
                     List.map tyl_sub (fun _ ->
-                        (Ast_defs.Invariant, Aast.Erased))
-                  | Some class_sub ->
-                    List.map (Cls.tparams class_sub) (fun t ->
-                        (t.tp_variance, t.tp_reified))
+                        mk (r_super, Typing_defs.make_tany ()))
+                  else
+                    tyl_super
                 in
-                (* C<t1, .., tn> <: C<u1, .., un> iff
-                 *   t1 <:v1> u1 /\ ... /\ tn <:vn> un
-                 * where vi is the variance of the i'th generic parameter of C,
-                 * and <:v denotes the appropriate direction of subtyping for variance v
-                 *)
-                simplify_subtype_variance
-                  ~subtype_env
-                  cid_sub
-                  variance_reifiedl
-                  tyl_sub
-                  tyl_super
-                  env
+                let tyl_sub =
+                  if
+                    List.is_empty tyl_sub
+                    && not (Partial.should_check_error (Env.get_mode env) 4101)
+                  then
+                    List.map tyl_super (fun _ ->
+                        mk (r_super, Typing_defs.make_tany ()))
+                  else
+                    tyl_sub
+                in
+                if Int.( <> ) (List.length tyl_sub) (List.length tyl_super) then
+                  let n_sub = String_utils.soi (List.length tyl_sub) in
+                  let n_super = String_utils.soi (List.length tyl_super) in
+                  invalid_with (fun () ->
+                      Errors.type_arity_mismatch
+                        (fst x_super)
+                        n_super
+                        (fst x_sub)
+                        n_sub
+                        subtype_env.on_error)
+                else
+                  let variance_reifiedl =
+                    match class_def_sub with
+                    | None ->
+                      List.map tyl_sub (fun _ ->
+                          (Ast_defs.Invariant, Aast.Erased))
+                    | Some class_sub ->
+                      List.map (Cls.tparams class_sub) (fun t ->
+                          (t.tp_variance, t.tp_reified))
+                  in
+                  (* C<t1, .., tn> <: C<u1, .., un> iff
+                   *   t1 <:v1> u1 /\ ... /\ tn <:vn> un
+                   * where vi is the variance of the i'th generic parameter of C,
+                   * and <:v denotes the appropriate direction of subtyping for variance v
+                   *)
+                  simplify_subtype_variance
+                    ~subtype_env
+                    cid_sub
+                    variance_reifiedl
+                    tyl_sub
+                    tyl_super
+                    env
           else if not exact_match then
             invalid ()
-          else (
-            match class_def_sub with
+          else
+            let class_def_sub = Env.get_class env cid_sub in
+            (match class_def_sub with
             | None ->
               (* This should have been caught already in the naming phase *)
               valid ()
@@ -1676,8 +1680,7 @@ and simplify_subtype_i
                       (Cls.upper_bounds_on_this class_sub)
                       env
                   else
-                    invalid ())
-          )
+                    invalid ()))
         | (r_sub, Tarraykind akind) ->
           (match (exact_super, tyl_super) with
           | (Nonexact, [tv_super])

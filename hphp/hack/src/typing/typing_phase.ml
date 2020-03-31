@@ -210,45 +210,52 @@ let rec localize ~ety_env env (dty : decl_ty) =
     in
     (env, mk (r, Tfun ft))
   | (r, Tapply ((_, x), [arg]))
-    when Env.is_typedef env x
-         && String.equal x Naming_special_names.FB.cIncorrectType ->
+    when String.equal x Naming_special_names.FB.cIncorrectType
+         && Env.is_typedef env x ->
     localize ~ety_env env (mk (r, Tlike arg))
   | (r, Tapply ((_, x), argl)) when Env.is_typedef env x ->
     let (env, argl) = List.map_env env argl (localize ~ety_env) in
     TUtils.expand_typedef ety_env env r x argl
-  | (r, Tapply ((p, x), _argl)) when Env.is_enum env x ->
-    (* if argl <> [], nastInitCheck would have raised an error *)
-    if Typing_defs.has_expanded ety_env x then (
-      Errors.cyclic_enum_constraint p;
-      (env, mk (r, Typing_utils.tany env))
-    ) else
-      let type_expansions = (p, x) :: ety_env.type_expansions in
-      let ety_env = { ety_env with type_expansions } in
-      let (env, cstr) =
-        match Env.get_enum_constraint env x with
-        (* If not specified, default bound is arraykey *)
-        | None ->
-          (env, MakeType.arraykey (Reason.Rimplicit_upper_bound (p, "arraykey")))
-        | Some ty -> localize ~ety_env env ty
-      in
-      (env, mk (r, Tnewtype (x, [], cstr)))
-  | (r, Tapply (((_, cid) as cls), tyl)) ->
-    let (env, tyl) =
+  | (r, Tapply (((p, cid) as cls), argl)) ->
+    begin
       match Env.get_class env cid with
-      | None -> List.map_env env tyl (localize ~ety_env)
+      | None ->
+        let (env, tyl) = List.map_env env argl (localize ~ety_env) in
+        (env, mk (r, Tclass (cls, Nonexact, tyl)))
       | Some class_info ->
-        let tparams = Cls.tparams class_info in
-        if
-          TypecheckerOptions.global_inference (Env.get_tcopt env)
-          && (not (List.is_empty tparams))
-          && List.is_empty tyl
-        then
-          (* In this case we will infer the missing type parameters *)
-          localize_missing_tparams_class env r cls class_info
+        if Option.is_some (Cls.enum_type class_info) then
+          (* if argl <> [], nastInitCheck would have raised an error *)
+          if Typing_defs.has_expanded ety_env cid then (
+            Errors.cyclic_enum_constraint p;
+            (env, mk (r, Typing_utils.tany env))
+          ) else
+            let type_expansions = cls :: ety_env.type_expansions in
+            let ety_env = { ety_env with type_expansions } in
+            let (env, cstr) =
+              match Env.get_enum_constraint env cid with
+              (* If not specified, default bound is arraykey *)
+              | None ->
+                ( env,
+                  MakeType.arraykey
+                    (Reason.Rimplicit_upper_bound (p, "arraykey")) )
+              | Some ty -> localize ~ety_env env ty
+            in
+            (env, mk (r, Tnewtype (cid, [], cstr)))
         else
-          localize_tparams ~ety_env env (Reason.to_pos r) tyl tparams
-    in
-    (env, mk (r, Tclass (cls, Nonexact, tyl)))
+          let tparams = Cls.tparams class_info in
+          let (env, tyl) =
+            if
+              TypecheckerOptions.global_inference (Env.get_tcopt env)
+              && (not (List.is_empty tparams))
+              && List.is_empty argl
+            then
+              (* In this case we will infer the missing type parameters *)
+              localize_missing_tparams_class env r cls class_info
+            else
+              localize_tparams ~ety_env env (Reason.to_pos r) argl tparams
+          in
+          (env, mk (r, Tclass (cls, Nonexact, tyl)))
+    end
   | (r, Ttuple tyl) ->
     let (env, tyl) = List.map_env env tyl (localize ~ety_env) in
     (env, mk (r, Ttuple tyl))

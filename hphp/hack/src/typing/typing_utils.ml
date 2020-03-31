@@ -319,7 +319,7 @@ let get_concrete_supertypes env ty =
       (match get_node ty with
       (* Enums with arraykey upper bound are treated as "abstract" *)
       | Tnewtype (cid, _, bound_ty)
-        when Env.is_enum env cid && is_prim Aast.Tarraykey bound_ty ->
+        when is_prim Aast.Tarraykey bound_ty && Env.is_enum env cid ->
         iter seen env acc tyl
       (* Don't expand enums or newtype; just return the type itself *)
       | Tnewtype (_, _, ty)
@@ -454,7 +454,7 @@ let rec get_base_type env ty =
       | [] -> ty
     end
   | Tnewtype (cid, _, bound_ty)
-    when Env.is_enum env cid && is_prim Aast.Tarraykey bound_ty ->
+    when is_prim Aast.Tarraykey bound_ty && Env.is_enum env cid ->
     ty
   | Tgeneric _
   | Tnewtype _

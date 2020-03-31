@@ -75,21 +75,24 @@ void cgStLocRange(IRLS& env, const IRInstruction* inst) {
   auto const val = inst->src(1);
   auto& v = vmain(env);
 
-  auto ireg = v.makeReg();
-  auto nreg = v.makeReg();
+  auto const typePtr = v.makeReg();
+  auto const dataPtr = v.makeReg();
+  auto const endPtr = v.makeReg();
+  v << lea{ptrToLocalType(fp, range->start), typePtr};
+  v << lea{ptrToLocalData(fp, range->start), dataPtr};
+  v << lea{ptrToLocalType(fp, range->end), endPtr};
 
-  v << lea{fp[localOffset(range->start)], ireg};
-  v << lea{fp[localOffset(range->end)], nreg};
-
-  doWhile(v, CC_NE, {ireg},
+  doWhile(v, CC_NE, {typePtr, dataPtr},
     [&] (const VregList& in, const VregList& out) {
-      auto const i = in[0];
-      auto const res = out[0];
+      auto const typeIn = in[0];
+      auto const dataIn = in[1];
+      auto const typeOut = out[0];
+      auto const dataOut = out[1];
       auto const sf = v.makeReg();
 
-      storeTV(v, i[0], loc, val);
-      v << subqi{int32_t{sizeof(TypedValue)}, i, res, v.makeReg()};
-      v << cmpq{res, nreg, sf};
+      storeTV(v, val->type(), loc, *typeIn, *dataIn);
+      nextLocal(v, typeIn, dataIn, typeOut, dataOut);
+      v << cmpq{typeOut, endPtr, sf};
       return sf;
     },
     range->end - range->start

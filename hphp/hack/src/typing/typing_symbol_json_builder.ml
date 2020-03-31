@@ -14,16 +14,9 @@ open Hh_prelude
 open SymbolDefinition
 open SymbolOccurrence
 
-type localvar = {
-  lv_name: string;
-  lv_definition: Relative_path.t Pos.pos;
-  lvs: Relative_path.t SymbolOccurrence.t list;
-}
-
 type symbol_occurrences = {
   decls: Tast.def list;
   occurrences: Relative_path.t SymbolOccurrence.t list;
-  localvars: localvar list;
 }
 
 (* Predicate types for the JSON facts emitted *)

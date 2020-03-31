@@ -202,29 +202,28 @@ let compute_fileinfo_for_path (env : ServerEnv.env) (path : Relative_path.t) :
   Lwt.return (new_file_info, facts)
 
 let update_naming_table
-    ~(env : ServerEnv.env)
+    ~(naming_table : Naming_table.t)
     ~(ctx : Provider_context.t)
     ~(path : Relative_path.t)
     ~(old_file_info : FileInfo.t option)
-    ~(new_file_info : FileInfo.t option) : ServerEnv.env =
-  let naming_table = env.ServerEnv.naming_table in
+    ~(new_file_info : FileInfo.t option) : Naming_table.t =
   (* Remove the old entries from the forward and reverse naming tables. *)
   let naming_table =
     match old_file_info with
     | None -> naming_table
     | Some old_file_info ->
-      (* Update reverse naming table *)
-      FileInfo.(
-        Naming_global.remove_decls
-          ~ctx
-          ~funs:(strip_positions old_file_info.funs)
-          ~classes:(strip_positions old_file_info.classes)
-          ~record_defs:(strip_positions old_file_info.record_defs)
-          ~typedefs:(strip_positions old_file_info.typedefs)
-          ~consts:(strip_positions old_file_info.consts);
+      (* Update reverse naming table, which is stored in ctx *)
+      let open FileInfo in
+      Naming_global.remove_decls
+        ~ctx
+        ~funs:(strip_positions old_file_info.funs)
+        ~classes:(strip_positions old_file_info.classes)
+        ~record_defs:(strip_positions old_file_info.record_defs)
+        ~typedefs:(strip_positions old_file_info.typedefs)
+        ~consts:(strip_positions old_file_info.consts);
 
-        (* Update and return the forward naming table *)
-        Naming_table.remove naming_table path)
+      (* Update and return the forward naming table *)
+      Naming_table.remove naming_table path
   in
   (* Update forward naming table and reverse naming table with the new
   declarations. *)
@@ -232,7 +231,7 @@ let update_naming_table
     match new_file_info with
     | None -> naming_table
     | Some new_file_info ->
-      (* Update reverse naming table.
+      (* Update reverse naming table, which is stored in ctx.
       TODO: this doesn't handle name collisions in erroneous programs.
       NOTE: We don't use [Naming_global.ndecl_file_fast] here because it
       attempts to look up the symbol by doing a file parse, but the file may not
@@ -254,7 +253,7 @@ let update_naming_table
       (* Update and return the forward naming table *)
       Naming_table.update naming_table path new_file_info
   in
-  { env with ServerEnv.naming_table }
+  naming_table
 
 let invalidate_decls
     ~(ctx : Provider_context.t) ~(old_file_info : FileInfo.t option) : unit =
@@ -311,11 +310,16 @@ let process_changed_file
       let%lwt (new_file_info, facts) = compute_fileinfo_for_path env path in
       log_file_info_change ~old_file_info ~new_file_info ~start_time ~path;
       invalidate_decls ~ctx ~old_file_info;
-      let env =
-        update_naming_table ~env ~ctx ~path ~old_file_info ~new_file_info
+      let naming_table =
+        update_naming_table
+          ~naming_table:env.ServerEnv.naming_table
+          ~ctx
+          ~path
+          ~old_file_info
+          ~new_file_info
       in
       let local_symbol_table =
         update_symbol_index ~sienv:env.ServerEnv.local_symbol_table ~path ~facts
       in
-      let env = { env with ServerEnv.local_symbol_table } in
+      let env = { env with ServerEnv.local_symbol_table; naming_table } in
       Lwt.return env

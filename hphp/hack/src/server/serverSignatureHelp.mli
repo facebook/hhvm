@@ -9,7 +9,6 @@
 
 (** Returns signature help for the given location. *)
 val go_quarantined :
-  env:ServerEnv.env ->
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->
   line:int ->

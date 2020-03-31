@@ -121,7 +121,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         ~ctx:(Provider_utils.ctx_from_server_env env)
         ~path:(Relative_path.create_detect_prefix path)
     in
-    (env, ServerSignatureHelp.go_quarantined ~env ~ctx ~entry ~line ~column)
+    (env, ServerSignatureHelp.go_quarantined ~ctx ~entry ~line ~column)
   | COMMANDLINE_AUTOCOMPLETE contents ->
     (* For command line autocomplete, we assume the AUTO332 text has
     already been inserted, and we fake the rest of this information. *)

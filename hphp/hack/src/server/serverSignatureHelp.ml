@@ -96,7 +96,6 @@ let get_positional_info (cst : Syntax.t) (file_offset : int) :
                    None))
 
 let get_occurrence_info
-    (env : ServerEnv.env)
     (ctx : Provider_context.t)
     (nast : Nast.program)
     (occurrence : Relative_path.t SymbolOccurrence.t) =
@@ -117,7 +116,7 @@ let get_occurrence_info
     | _ ->
       let fun_name =
         Utils.expand_namespace
-          (ParserOptions.auto_namespace_map env.ServerEnv.popt)
+          (ParserOptions.auto_namespace_map (Provider_context.get_popt ctx))
           occurrence.SymbolOccurrence.name
       in
       let ft = Decl_provider.get_fun ctx fun_name in
@@ -135,7 +134,6 @@ let get_occurrence_info
   | Some ft -> Some (occurrence, ft, def_opt)
 
 let go_quarantined
-    ~(env : ServerEnv.env)
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
     ~(line : int)
@@ -167,7 +165,7 @@ let go_quarantined
     | None -> None
     | Some head_result ->
       let ast = Ast_provider.compute_ast ~ctx ~entry in
-      (match get_occurrence_info env ctx ast head_result with
+      (match get_occurrence_info ctx ast head_result with
       | None -> None
       | Some (occurrence, fe, def_opt) ->
         let open Typing_defs in

@@ -524,7 +524,6 @@ let handle_message :
     let results =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerSignatureHelp.go_quarantined
-            ~env:initialized_state.server_env
             ~ctx
             ~entry
             ~line:document_location.line

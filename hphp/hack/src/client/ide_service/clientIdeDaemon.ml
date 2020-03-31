@@ -47,20 +47,6 @@ let set_up_hh_logger_for_client_ide_service ~(root : Path.t) : unit =
     (Out_channel.create client_ide_log_fn ~append:true);
   log "Starting client IDE service at %s" client_ide_log_fn
 
-let load_naming_table_from_saved_state_info
-    (server_env : ServerEnv.env)
-    (ctx : Provider_context.t)
-    (saved_state_info : Saved_state_loader.Naming_table_saved_state_info.t) :
-    ServerEnv.env Lwt.t =
-  let path =
-    Saved_state_loader.Naming_table_saved_state_info.(
-      Path.to_string saved_state_info.naming_table_path)
-  in
-  let naming_table = Naming_table.load_from_sqlite ctx path in
-  log "Loaded naming table from SQLite database at %s" path;
-  let server_env = { server_env with ServerEnv.naming_table } in
-  Lwt.return server_env
-
 let load_saved_state
     (env : ServerEnv.env)
     (ctx : Provider_context.t)
@@ -95,14 +81,16 @@ let load_saved_state
       in
       match result with
       | Ok (saved_state_info, changed_files) ->
-        log
-          "[saved-state] Naming table path: %s"
-          Saved_state_loader.Naming_table_saved_state_info.(
-            Path.to_string saved_state_info.naming_table_path);
-
-        let%lwt server_env =
-          load_naming_table_from_saved_state_info env ctx saved_state_info
+        let path =
+          Path.to_string
+            saved_state_info
+              .Saved_state_loader.Naming_table_saved_state_info
+               .naming_table_path
         in
+        log "[saved-state] Loading naming-table... %s" path;
+        let naming_table = Naming_table.load_from_sqlite ctx path in
+        log "[saved-state] Loaded naming-table.";
+        let server_env = { env with ServerEnv.naming_table } in
         (* Track how many files we have to change locally *)
         HackEventLogger.serverless_ide_local_files
           ~local_file_count:(List.length changed_files);

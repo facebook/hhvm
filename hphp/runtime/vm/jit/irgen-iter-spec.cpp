@@ -283,14 +283,8 @@ ArrayIterProfile::Result getProfileResult(IRGS& env, const SSATmp* base) {
   auto const result = profile.data().result();
   if (result.num_arrays == 0) return generic;
 
-  auto const a = size_t{result.num_arrays};
-  auto const i = size_t{result.num_iterations};
-  auto const p = size_t{curProfCount(env)};
-  auto const t = size_t{result.top_count};
-  auto const specialize =
-    1.0 * p * (a + i) / a > RuntimeOption::EvalArrayIterSpecializationCount &&
-    1.0 * t / a > RuntimeOption::EvalArrayIterSpecializationRate;
-  return specialize ? result : generic;
+  auto const rate = 1.0 * size_t{result.top_count} / size_t{result.num_arrays};
+  return rate > RO::EvalArrayIterSpecializationRate ? result : generic;
 }
 
 //////////////////////////////////////////////////////////////////////

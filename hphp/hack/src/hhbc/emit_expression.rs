@@ -4113,7 +4113,7 @@ pub fn emit_lval_op(
             } else {
                 scope::with_unnamed_local(e, |e, local| {
                     let loc = if can_use_as_rhs_in_list_assignment(&expr2.1)? {
-                        Some(local.clone())
+                        Some(&local)
                     } else {
                         None
                     };
@@ -4188,7 +4188,8 @@ fn can_use_as_rhs_in_list_assignment(expr: &tast::Expr_) -> Result<bool> {
         | E_::Clone(_)
         | E_::Unop(_)
         | E_::As(_)
-        | E_::Await(_) => true,
+        | E_::Await(_)
+        | E_::ClassConst(_) => true,
         E_::Pipe(p) => can_use_as_rhs_in_list_assignment(&(p.2).1)?,
         E_::Binop(b) if b.0.is_eq() => can_use_as_rhs_in_list_assignment(&(b.2).1)?,
         E_::Binop(b) => b.0.is_plus() || b.0.is_question_question() || b.0.is_any_eq(),
@@ -4201,16 +4202,157 @@ fn can_use_as_rhs_in_list_assignment(expr: &tast::Expr_) -> Result<bool> {
     })
 }
 
+// Given a local $local and a list of integer array indices i_1, ..., i_n,
+// generate code to extract the value of $local[i_n]...[i_1]:
+//   BaseL $local Warn
+//   Dim Warn EI:i_n ...
+//   Dim Warn EI:i_2
+//   QueryM 0 CGet EI:i_1
+fn emit_array_get_fixed(last_usage: bool, local: local::Type, indices: &[isize]) -> InstrSeq {
+    let (base, stack_count) = if last_usage {
+        (
+            InstrSeq::gather(vec![
+                instr::pushl(local),
+                instr::basec(0, MemberOpMode::Warn),
+            ]),
+            1,
+        )
+    } else {
+        (instr::basel(local, MemberOpMode::Warn), 0)
+    };
+    let indices = InstrSeq::gather(
+        indices
+            .iter()
+            .enumerate()
+            .rev()
+            .map(|(i, ix)| {
+                let mk = MemberKey::EI(*ix as i64);
+                if i == 0 {
+                    instr::querym(stack_count, QueryOp::CGet, mk)
+                } else {
+                    instr::dim(MemberOpMode::Warn, mk)
+                }
+            })
+            .collect(),
+    );
+    InstrSeq::gather(vec![base, indices])
+}
+
+// Generate code for each lvalue assignment in a list destructuring expression.
+// Lvalues are assigned right-to-left, regardless of the nesting structure. So
+//      list($a, list($b, $c)) = $d
+//  and list(list($a, $b), $c) = $d
+//  will both assign to $c, $b and $a in that order.
+//  Returns a pair of instructions:
+//  1. initialization part of the left hand side
+//  2. assignment
+//  this is necessary to handle cases like:
+//  list($a[$f()]) = b();
+//  here f() should be invoked before b()
 pub fn emit_lval_op_list(
     e: &mut Emitter,
     env: &Env,
     outer_pos: &Pos,
-    local: Option<local::Type>,
+    local: Option<&local::Type>,
     indices: &[isize],
     expr: &tast::Expr,
     last_usage: bool,
 ) -> Result<(InstrSeq, InstrSeq)> {
-    unimplemented!()
+    use options::Php7Flags;
+    use tast::Expr_ as E_;
+    let is_ltr = e.options().php7_flags.contains(Php7Flags::LTR_ASSIGN);
+    match &expr.1 {
+        E_::List(exprs) => {
+            let last_non_omitted = if last_usage {
+                // last usage of the local will happen when processing last non-omitted
+                // element in the list - find it
+                if is_ltr {
+                    exprs.iter().enumerate().fold(None, |acc, (i, v)| {
+                        if v.1.is_omitted() {
+                            acc
+                        } else {
+                            Some(i)
+                        }
+                    })
+                } else {
+                    // in right-to-left case result list will be reversed
+                    // so we need to find first non-omitted expression
+                    exprs
+                        .iter()
+                        .enumerate()
+                        .find(|(_, v)| !v.1.is_omitted())
+                        .map(|(i, _)| i)
+                }
+            } else {
+                None
+            };
+            let (lhs_instrs, set_instrs): (Vec<InstrSeq>, Vec<InstrSeq>) = exprs
+                .iter()
+                .enumerate()
+                .map(|(i, expr)| {
+                    let mut new_indices = vec![i as isize];
+                    new_indices.extend_from_slice(indices);
+                    emit_lval_op_list(
+                        e,
+                        env,
+                        outer_pos,
+                        local,
+                        &new_indices[..],
+                        expr,
+                        last_non_omitted.map_or(false, |j| j == i),
+                    )
+                })
+                .collect::<Result<Vec<_>>>()?
+                .into_iter()
+                .unzip();
+            Ok((
+                InstrSeq::gather(lhs_instrs),
+                InstrSeq::gather(if !is_ltr {
+                    set_instrs.into_iter().rev().collect()
+                } else {
+                    set_instrs
+                }),
+            ))
+        }
+        E_::Omitted => Ok((instr::empty(), instr::empty())),
+        _ => {
+            // Generate code to access the element from the array
+            let access_instrs = match (local, indices) {
+                (Some(loc), [_, ..]) => emit_array_get_fixed(last_usage, loc.to_owned(), indices),
+                (Some(loc), []) => {
+                    if last_usage {
+                        instr::pushl(loc.to_owned())
+                    } else {
+                        instr::cgetl(loc.to_owned())
+                    }
+                }
+                (None, _) => instr::null(),
+            };
+            // Generate code to assign to the lvalue *)
+            // Return pair: side effects to initialize lhs + assignment
+            let (lhs_instrs, rhs_instrs, set_op) = emit_lval_op_nonlist_steps(
+                e,
+                env,
+                outer_pos,
+                LValOp::Set,
+                expr,
+                access_instrs,
+                1,
+                false,
+            )?;
+            Ok(if is_ltr {
+                (
+                    instr::empty(),
+                    InstrSeq::gather(vec![lhs_instrs, rhs_instrs, set_op, instr::popc()]),
+                )
+            } else {
+                (
+                    lhs_instrs,
+                    InstrSeq::gather(vec![instr::empty(), rhs_instrs, set_op, instr::popc()]),
+                )
+            })
+        }
+    }
 }
 
 pub fn emit_lval_op_nonlist(

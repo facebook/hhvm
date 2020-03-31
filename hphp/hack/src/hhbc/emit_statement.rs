@@ -13,7 +13,6 @@ use emit_pos_rust::{emit_pos, emit_pos_then};
 use env::{emitter::Emitter, local, Env};
 use hhbc_ast_rust::*;
 use hhbc_id_rust::{self as hhbc_id, Id};
-use hhbc_string_utils_rust as string_utils;
 use instruction_sequence_rust::{instr, Error::Unrecoverable, InstrSeq, Result};
 use label_rewriter_rust as label_rewriter;
 use label_rust::Label;
@@ -226,7 +225,7 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
                                             e,
                                             env,
                                             pos,
-                                            Some(temp.clone()),
+                                            Some(&temp),
                                             &[],
                                             e_lhs,
                                             false,
@@ -1301,7 +1300,7 @@ fn emit_foreach_await_key_value_storage(
     match iterator {
         A::AwaitAsKv(_, k, v) | A::AsKv(k, v) => Ok(InstrSeq::gather(vec![
             emit_foreach_await_lvalue_storage(e, env, k, &[0], true)?,
-            emit_foreach_await_lvalue_storage(e, env, k, &[1], false)?,
+            emit_foreach_await_lvalue_storage(e, env, v, &[1], false)?,
         ])),
         A::AwaitAsV(_, v) | A::AsV(v) => emit_foreach_await_lvalue_storage(e, env, v, &[1], false),
     }
@@ -1322,16 +1321,8 @@ fn emit_foreach_await_lvalue_storage(
     scope::with_unnamed_local(e, |e, local| {
         Ok((
             instr::popl(local.clone()),
-            emit_expr::emit_lval_op_list(
-                e,
-                env,
-                &lvalue.0,
-                Some(local.clone()),
-                indices,
-                lvalue,
-                false,
-            )?
-            .into(),
+            emit_expr::emit_lval_op_list(e, env, &lvalue.0, Some(&local), indices, lvalue, false)?
+                .into(),
             if keep_on_stack {
                 instr::pushl(local)
             } else {

@@ -510,14 +510,20 @@ void emitAwait(IRGS& env) {
   };
   auto const handleFailed = [&] {
     auto const offset = findCatchHandler(curFunc(env), bcOff(env));
+    auto const exception = gen(env, LdWHResult, TObj, child);
+    gen(env, IncRef, exception);
+    decRef(env, child);
     if (offset != kInvalidOffset) {
-      auto const exception = gen(env, LdWHResult, TObj, child);
-      gen(env, IncRef, exception);
-      decRef(env, child);
       push(env, exception);
       jmpImpl(env, offset);
     } else {
-      gen(env, Jmp, exitSlow);
+      hint(env, Block::Hint::Unlikely);
+      // There are no more catch blocks in this function, we are at the top
+      // level throw
+      auto const spOff = IRSPRelOffsetData { spOffBCFromIRSP(env) };
+      gen(env, EagerSyncVMRegs, spOff, fp(env), sp(env));
+      updateMarker(env);
+      gen(env, EnterTCUnwind, EnterTCUnwindData { true }, exception);
     }
   };
   auto const handleNotFinished = [&] {

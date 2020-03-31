@@ -14,6 +14,7 @@ slow/dv_array/ext_xenon/xenon_crash.php
 slow/dv_array_hack_arr/ext_xenon/xenon_crash.php
 slow/exceptions/63.php
 slow/exceptions/63.php
+slow/exceptions/no-leaks.php
 slow/ext_json/duplicate_keys_no_leak.php
 slow/ext_json/duplicate_keys_no_leak.php
 slow/ext_sqlite3/ext_sqlite3.php

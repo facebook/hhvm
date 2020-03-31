@@ -273,9 +273,11 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp, bool teardown) {
 
       // Unwind vm stack to sfp
       if (!g_unwind_rds->exn.isNull()) {
+        auto phpException = g_unwind_rds->exn.left();
         auto const result = unwindVM(g_unwind_rds->exn, sfp, teardown);
         if (!(result & UnwindReachedGoal)) {
           if (!g_unwind_rds->sideEnter) __cxxabiv1::__cxa_end_catch();
+          else if (phpException)        phpException->decRefCount();
           g_unwind_rds->doSideExit = true;
           g_unwind_rds->sideEnter = false;
 

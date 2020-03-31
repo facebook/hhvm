@@ -290,22 +290,22 @@ let update_symbol_index
   | Some facts -> SymbolIndex.update_from_facts ~sienv ~path ~facts
 
 let process_changed_file
-    ~(env : ServerEnv.env) ~(ctx : Provider_context.t) ~(path : Path.t) :
-    ServerEnv.env Lwt.t =
+    ~(ctx : Provider_context.t)
+    ~(naming_table : Naming_table.t)
+    ~(sienv : SearchUtils.si_env)
+    ~(path : Path.t) : (Naming_table.t * SearchUtils.si_env) Lwt.t =
   let str_path = Path.to_string path in
   match Relative_path.strip_root_if_possible str_path with
   | None ->
     log "Ignored change to file %s, as it is not within our repo root" str_path;
-    Lwt.return env
+    Lwt.return (naming_table, sienv)
   | Some path ->
     let path = Relative_path.from_root path in
     if not (FindUtils.path_filter path) then
-      Lwt.return env
+      Lwt.return (naming_table, sienv)
     else
       let start_time = Unix.gettimeofday () in
-      let old_file_info =
-        Naming_table.get_file_info env.ServerEnv.naming_table path
-      in
+      let old_file_info = Naming_table.get_file_info naming_table path in
       let%lwt (new_file_info, facts) =
         compute_fileinfo_for_path (Provider_context.get_popt ctx) path
       in
@@ -313,14 +313,11 @@ let process_changed_file
       invalidate_decls ~ctx ~old_file_info;
       let naming_table =
         update_naming_table
-          ~naming_table:env.ServerEnv.naming_table
+          ~naming_table
           ~ctx
           ~path
           ~old_file_info
           ~new_file_info
       in
-      let local_symbol_table =
-        update_symbol_index ~sienv:env.ServerEnv.local_symbol_table ~path ~facts
-      in
-      let env = { env with ServerEnv.local_symbol_table; naming_table } in
-      Lwt.return env
+      let sienv = update_symbol_index ~sienv ~path ~facts in
+      Lwt.return (naming_table, sienv)

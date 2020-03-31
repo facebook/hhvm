@@ -666,8 +666,16 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
       in
       let%lwt server_env =
         try%lwt
-          let%lwt server_env =
-            ClientIdeIncremental.process_changed_file server_env ctx next_file
+          let { ServerEnv.naming_table; local_symbol_table; _ } = server_env in
+          let%lwt (naming_table, local_symbol_table) =
+            ClientIdeIncremental.process_changed_file
+              ~ctx
+              ~naming_table
+              ~sienv:local_symbol_table
+              ~path:next_file
+          in
+          let server_env =
+            { server_env with ServerEnv.naming_table; local_symbol_table }
           in
           Lwt.return server_env
         with exn ->

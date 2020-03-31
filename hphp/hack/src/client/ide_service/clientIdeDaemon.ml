@@ -47,12 +47,12 @@ let set_up_hh_logger_for_client_ide_service ~(root : Path.t) : unit =
   log "Starting client IDE service at %s" client_ide_log_fn
 
 let load_saved_state
-    (env : ServerEnv.env)
     (ctx : Provider_context.t)
     ~(root : Path.t)
-    ~(hhi_root : Path.t)
     ~(naming_table_saved_state_path : Path.t option) :
-    (state, ClientIdeMessage.error_data) Lwt_result.t =
+    ( Naming_table.t * Saved_state_loader.changed_files,
+      ClientIdeMessage.error_data )
+    Lwt_result.t =
   log "[saved-state] Starting load in root %s" (Path.to_string root);
   let%lwt result =
     try%lwt
@@ -89,20 +89,11 @@ let load_saved_state
         log "[saved-state] Loading naming-table... %s" path;
         let naming_table = Naming_table.load_from_sqlite ctx path in
         log "[saved-state] Loaded naming-table.";
-        let server_env = { env with ServerEnv.naming_table } in
         (* Track how many files we have to change locally *)
         HackEventLogger.serverless_ide_local_files
           ~local_file_count:(List.length changed_files);
 
-        Lwt.return_ok
-          (Initialized
-             {
-               hhi_root;
-               server_env;
-               changed_files_to_process = Path.Set.of_list changed_files;
-               ctx;
-               peak_changed_files_queue_size = List.length changed_files;
-             })
+        Lwt.return_ok (naming_table, changed_files)
       | Error load_error ->
         Lwt.return_error
           ClientIdeMessage.
@@ -217,16 +208,22 @@ let initialize
   let start_time = log_startup_time "symbol_index" start_time in
   if use_ranked_autocomplete then AutocompleteRankService.initialize ();
   let%lwt load_state_result =
-    load_saved_state
-      server_env
-      ctx
-      ~root
-      ~hhi_root
-      ~naming_table_saved_state_path
+    load_saved_state ctx ~root ~naming_table_saved_state_path
   in
   let _ = log_startup_time "saved_state" start_time in
   match load_state_result with
-  | Ok state ->
+  | Ok (naming_table, changed_files) ->
+    let server_env = { server_env with ServerEnv.naming_table } in
+    let state =
+      Initialized
+        {
+          hhi_root;
+          server_env;
+          changed_files_to_process = Path.Set.of_list changed_files;
+          ctx;
+          peak_changed_files_queue_size = List.length changed_files;
+        }
+    in
     log "Serverless IDE has completed initialization";
     Lwt.return_ok state
   | Error error_data ->

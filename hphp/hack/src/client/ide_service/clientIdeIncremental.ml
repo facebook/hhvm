@@ -88,8 +88,8 @@ let log_file_info_change
  * This fetches the new names out of the modified file
  * Result: (old * new)
  *)
-let compute_fileinfo_for_path (env : ServerEnv.env) (path : Relative_path.t) :
-    (FileInfo.t option * Facts.facts option) Lwt.t =
+let compute_fileinfo_for_path (popt : ParserOptions.t) (path : Relative_path.t)
+    : (FileInfo.t option * Facts.facts option) Lwt.t =
   (* Fetch file contents *)
   let%lwt contents = Lwt_utils.read_all (Relative_path.to_absolute path) in
   let contents = Result.ok contents in
@@ -103,7 +103,6 @@ let compute_fileinfo_for_path (env : ServerEnv.env) (path : Relative_path.t) :
       (* We don't want our symbols to be mangled for export.  Mangling would
        * convert :xhp:myclass to __xhp_myclass, which would fail name lookup *)
       Facts_parser.mangle_xhp_mode := false;
-      let popt = env.ServerEnv.popt in
       let facts =
         Facts_parser.from_text
           ~php5_compat_mode:false
@@ -307,7 +306,9 @@ let process_changed_file
       let old_file_info =
         Naming_table.get_file_info env.ServerEnv.naming_table path
       in
-      let%lwt (new_file_info, facts) = compute_fileinfo_for_path env path in
+      let%lwt (new_file_info, facts) =
+        compute_fileinfo_for_path (Provider_context.get_popt ctx) path
+      in
       log_file_info_change ~old_file_info ~new_file_info ~start_time ~path;
       invalidate_decls ~ctx ~old_file_info;
       let naming_table =

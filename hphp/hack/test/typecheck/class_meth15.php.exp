@@ -1,0 +1,2 @@
+File "class_meth15.php", line 4, characters 14-23:
+Cannot access self::class when no class scope is active (Parsing[1002])

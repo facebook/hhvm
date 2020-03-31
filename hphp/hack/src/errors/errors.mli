@@ -261,6 +261,8 @@ val illegal_meth_caller : Pos.t -> unit
 
 val illegal_class_meth : Pos.t -> unit
 
+val class_meth_non_final_self : Pos.t -> string -> unit
+
 val assert_arity : Pos.t -> unit
 
 val unexpected_ty_in_tast :

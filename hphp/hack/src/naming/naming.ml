@@ -37,6 +37,8 @@ type positioned_ident = Pos.t * Local_id.t
 type type_constraint =
   Aast.reify_kind * (Ast_defs.constraint_kind * Aast.hint) list
 
+type is_final = bool
+
 type genv = {
   (* strict? decl? partial? *)
   in_mode: FileInfo.mode;
@@ -49,7 +51,7 @@ type genv = {
    * constraint on these parameters. *)
   type_params: type_constraint SMap.t;
   (* The current class, None if we are in a function *)
-  current_cls: (Ast_defs.id * Ast_defs.class_kind) option;
+  current_cls: (Ast_defs.id * Ast_defs.class_kind * is_final) option;
   (* Normally we don't need to add dependencies at this stage, but there
    * are edge cases when we do. *)
   droot: Typing_deps.Dep.dependent Typing_deps.Dep.variant;
@@ -152,13 +154,13 @@ end = struct
       goto_targets = ref SMap.empty;
     }
 
-  let make_class_genv ctx tparams mode (cid, ckind) namespace is_ppl =
+  let make_class_genv ctx tparams mode (cid, ckind) namespace is_ppl final =
     {
       in_mode = mode;
       ctx;
       in_ppl = is_ppl;
       type_params = tparams;
-      current_cls = Some (cid, ckind);
+      current_cls = Some (cid, ckind, final);
       droot = Typing_deps.Dep.Class (snd cid);
       namespace;
     }
@@ -199,6 +201,7 @@ end = struct
         (c.Aast.c_name, c.Aast.c_kind)
         c.Aast.c_namespace
         is_ppl
+        c.Aast.c_final
     in
     let lenv = empty_local None in
     (genv, lenv)
@@ -516,7 +519,7 @@ let convert_shape_name env = function
     let class_name =
       if snd x = SN.Classes.cSelf then (
         match (fst env).current_cls with
-        | Some (cid, _) -> cid
+        | Some (cid, _, _) -> cid
         | None ->
           Errors.self_outside_class pos;
           (pos, SN.Classes.cUnknown)
@@ -757,7 +760,7 @@ and hint_
           | None ->
             Errors.self_outside_class pos;
             N.Herr
-          | Some (cid, _) -> N.Happly (cid, [])
+          | Some (cid, _, _) -> N.Happly (cid, [])
         end
       | Aast.Happly ((pos, x), _)
         when x = SN.Classes.cStatic || x = SN.Classes.cParent ->
@@ -2347,7 +2350,7 @@ and expr_ env p (e : Nast.expr_) =
              * declarations).
              *)
             (match (fst env).current_cls with
-            | Some (cid, _) -> N.Smethod_id (cid, (pm, meth))
+            | Some (cid, _, _) -> N.Smethod_id (cid, (pm, meth))
             | None ->
               Errors.illegal_class_meth p;
               N.Any)
@@ -2361,11 +2364,20 @@ and expr_ env p (e : Nast.expr_) =
                   ~allow_typedef:false
                   ~allow_generics:false,
                 (pm, meth) )
-          | ( (p, N.Class_const ((_, (N.CIself | N.CIstatic)), (_, mem))),
-              (pm, N.String meth) )
+          | ((p, N.Class_const ((_, N.CIself), (_, mem))), (pm, N.String meth))
             when mem = SN.Members.mClass ->
             (match (fst env).current_cls with
-            | Some (cid, _) -> N.Smethod_id (cid, (pm, meth))
+            | Some (cid, _, true) -> N.Smethod_id (cid, (pm, meth))
+            | Some (cid, _, false) ->
+              Errors.class_meth_non_final_self p (snd cid);
+              N.Any
+            | None ->
+              Errors.illegal_class_meth p;
+              N.Any)
+          | ((p, N.Class_const ((_, N.CIstatic), (_, mem))), (pm, N.String meth))
+            when mem = SN.Members.mClass ->
+            (match (fst env).current_cls with
+            | Some (cid, _, _) -> N.Smethod_id (cid, (pm, meth))
             | None ->
               Errors.illegal_class_meth p;
               N.Any)

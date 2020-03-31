@@ -1,6 +1,6 @@
 <?hh //strict
 
-class RenameStaticMethClass {
+final class RenameStaticMethClass {
 
   public static function static_test_method(): int {
     return 1;

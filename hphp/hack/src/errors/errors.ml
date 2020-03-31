@@ -1414,6 +1414,15 @@ let illegal_class_meth pos =
   in
   add (Naming.err_code Naming.IllegalClassMeth) pos msg
 
+let class_meth_non_final_self pos class_name =
+  let msg =
+    "`class_meth` with `self::class` does not preserve class calling context.\n"
+    ^ "Use `static::class`, or `"
+    ^ strip_ns class_name
+    ^ "::class` explicitly"
+  in
+  add (Naming.err_code Naming.ClassMethNonFinalSelf) pos msg
+
 let assert_arity pos =
   add
     (Naming.err_code Naming.AssertArity)

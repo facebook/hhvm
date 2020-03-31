@@ -163,6 +163,7 @@ PocketUniversesNotInClass = 2107
 PocketUniversesAtomMissing = 2108
 PocketUniversesAtomUnknown = 2109
 PocketUniversesLocalization = 2110
+ClassMethNonFinalSelf = 2111
 
 NastCheck Errors:
 AbstractBody = 3001

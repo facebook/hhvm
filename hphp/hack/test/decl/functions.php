@@ -69,3 +69,7 @@ class C {}
 function make(): C {
   return \HH\Rx\mutable(new C());
 }
+
+function null_type_hint<T as nothing>(?T $x): null {
+  return $x;
+}

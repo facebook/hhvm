@@ -914,6 +914,10 @@ impl DirectDeclSmartConstructors<'_> {
                 Reason::Rwitness(pos.clone()),
                 Box::new(Ty_::Tprim(aast::Tprim::Tstring)),
             )),
+            Node_::Null(pos) => Ok(Ty(
+                Reason::Rhint(pos.clone()),
+                Box::new(Ty_::Tprim(aast::Tprim::Tnull)),
+            )),
             node => {
                 let Id(pos, name) = get_name("", node)?;
                 let reason = Reason::Rhint(pos.clone());

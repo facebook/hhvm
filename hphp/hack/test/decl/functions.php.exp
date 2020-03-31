@@ -140,6 +140,43 @@ Parsed decls:
             ft_return_disposable = false; ft_mutable = none;
             ft_returns_mutable = true }));
       fe_deprecated = None;  };
+    "null_type_hint" ->
+    { fe_pos = [73:10-24];
+      fe_type =
+      (Rwitness (root|functions.php line 73, characters 10-23),
+       (Tfun
+          { ft_is_coroutine = false; ft_arity = (Fstandard (1, 1));
+            ft_tparams =
+            [(Invariant, ([73:25-26], "T"),
+              [(Constraint_as,
+                (Rhint (root|functions.php line 73, characters 30-36),
+                 (Tunion [])))
+                ])
+              ];
+            ft_where_constraints = [];
+            ft_params =
+            [{ fp_pos = [73:42-44]; fp_name = (Some "$x");
+               fp_type =
+               { et_enforced = false;
+                 et_type =
+                 (Rhint (root|functions.php line 73, characters 39-40),
+                  (Toption
+                     (Rhint (root|functions.php line 73, characters 40-40),
+                      (Tgeneric "T"))))
+                 };
+               fp_kind = FPnormal; fp_accept_disposable = false;
+               fp_mutable = none }
+              ];
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|functions.php line 73, characters 47-50),
+               (Tprim Tnull))
+              };
+            ft_fun_kind = sync; ft_reactive = Nonreactive;
+            ft_return_disposable = false; ft_mutable = none;
+            ft_returns_mutable = false }));
+      fe_deprecated = None;  };
     "reactive_function" ->
     { fe_pos = [51:10-27];
       fe_type =

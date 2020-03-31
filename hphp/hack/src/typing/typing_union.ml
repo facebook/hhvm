@@ -547,21 +547,18 @@ let normalize_union env ?on_tyvar tyl =
   normalize_union env tyl None None None
 
 let union_list_2_by_2 env r tyl =
-  let max_n_iter = 20 in
-  let (env, tyl, _) =
-    List.fold tyl ~init:(env, [], 0) ~f:(fun (env, tyl, iter) ty ->
-        let rec union_ty_w_tyl env ty tyl tyl_acc iter =
+  let (env, tyl) =
+    List.fold tyl ~init:(env, []) ~f:(fun (env, tyl) ty ->
+        let rec union_ty_w_tyl env ty tyl tyl_acc =
           match tyl with
-          | [] -> (env, ty :: tyl_acc, iter)
-          | tyl when iter >= max_n_iter -> (env, tyl @ (ty :: tyl_acc), iter)
+          | [] -> (env, ty :: tyl_acc)
           | ty' :: tyl ->
             let (env, union_opt) = simplify_union env ty ty' r in
-            let iter = iter + 1 in
             (match union_opt with
-            | None -> union_ty_w_tyl env ty tyl (ty' :: tyl_acc) iter
-            | Some union -> (env, tyl @ (union :: tyl_acc), iter))
+            | None -> union_ty_w_tyl env ty tyl (ty' :: tyl_acc)
+            | Some union -> (env, tyl @ (union :: tyl_acc)))
         in
-        union_ty_w_tyl env ty tyl [] iter)
+        union_ty_w_tyl env ty tyl [])
   in
   (env, tyl)
 

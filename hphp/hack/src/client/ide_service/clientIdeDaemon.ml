@@ -14,7 +14,6 @@ type message = Message : 'a ClientIdeMessage.tracked_t -> message
 type message_queue = message Lwt_message_queue.t
 
 type initialized_state = {
-  saved_state_info: Saved_state_loader.Naming_table_saved_state_info.t;
   hhi_root: Path.t;
   server_env: ServerEnv.env;
   ctx: Provider_context.t;
@@ -98,7 +97,6 @@ let load_saved_state
         Lwt.return_ok
           (Initialized
              {
-               saved_state_info;
                hhi_root;
                server_env;
                changed_files_to_process = Path.Set.of_list changed_files;

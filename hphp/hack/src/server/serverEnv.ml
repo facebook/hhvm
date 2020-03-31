@@ -307,7 +307,3 @@ let list_files env =
       (Errors.get_error_list env.errorl)
   in
   SSet.elements acc
-
-let expand_namespace (env : env) (s : string) : string =
-  let ns_map = ParserOptions.auto_namespace_map env.popt in
-  Utils.expand_namespace ns_map s

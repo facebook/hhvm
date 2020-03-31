@@ -116,7 +116,9 @@ let get_occurrence_info
       (ft, occurrence)
     | _ ->
       let fun_name =
-        ServerEnv.expand_namespace env occurrence.SymbolOccurrence.name
+        Utils.expand_namespace
+          (ParserOptions.auto_namespace_map env.ServerEnv.popt)
+          occurrence.SymbolOccurrence.name
       in
       let ft = Decl_provider.get_fun ctx fun_name in
       let full_occurrence =

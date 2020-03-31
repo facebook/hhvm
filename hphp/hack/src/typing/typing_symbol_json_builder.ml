@@ -768,6 +768,21 @@ let process_container_xref
     symbol_pos
     (xrefs, progress)
 
+let process_member_xref
+    ctx member pos con_name mem_decl_fun ref_fun (xrefs, prog) =
+  match ServerSymbolDefinition.get_class_by_name ctx con_name with
+  | None -> (xrefs, prog)
+  | Some cls ->
+    let con_kind = get_container_kind cls in
+    let (con_type, decl_pred) = container_decl_predicate con_kind in
+    let (con_decl_id, prog) = add_container_decl_fact decl_pred con_type prog in
+    process_xref
+      (mem_decl_fun con_type con_decl_id)
+      ref_fun
+      member
+      pos
+      (xrefs, prog)
+
 let process_gconst_xref symbol_def pos (xrefs, progress) =
   process_xref
     add_gconst_decl_fact
@@ -791,19 +806,6 @@ let process_function_xref symbol_def pos (xrefs, progress) =
     symbol_def
     pos
     (xrefs, progress)
-
-let process_prop_xref prop pos clss class_name (xrefs, progress) =
-  let con_kind = get_container_kind clss in
-  let (con_name, decl_pred) = container_decl_predicate con_kind in
-  let (con_decl_id, prog) =
-    add_container_decl_fact decl_pred class_name progress
-  in
-  process_xref
-    (add_property_decl_fact con_name con_decl_id)
-    (build_container_decl_json_ref con_name)
-    prop
-    pos
-    (xrefs, prog)
 
 let process_decl_loc decl_fun defn_fun decl_ref_fun pos id elem progress =
   let (decl_id, prog) = decl_fun id progress in
@@ -961,29 +963,45 @@ let build_json ctx symbols =
           let symbol_def_res = ServerSymbolDefinition.go ctx None occ in
           match symbol_def_res with
           | None -> (xrefs, prog)
-          | Some symbol_def ->
-            (match symbol_def.kind with
+          | Some sym_def ->
+            let proc_mem = process_member_xref ctx sym_def occ.pos in
+            (match sym_def.kind with
             | Class ->
               let con_kind = container_decl_predicate ClassContainer in
-              process_container_xref con_kind symbol_def occ.pos (xrefs, prog)
-            | Const when phys_equal occ.type_ GConst ->
-              process_gconst_xref symbol_def occ.pos (xrefs, prog)
-            | Enum -> process_enum_xref symbol_def occ.pos (xrefs, prog)
-            | Function -> process_function_xref symbol_def occ.pos (xrefs, prog)
+              process_container_xref con_kind sym_def occ.pos (xrefs, prog)
+            | Const ->
+              (match occ.type_ with
+              | ClassConst (cn, _) ->
+                let ref_fun = build_class_const_decl_json_ref in
+                proc_mem cn add_class_const_decl_fact ref_fun (xrefs, prog)
+              | GConst -> process_gconst_xref sym_def occ.pos (xrefs, prog)
+              | _ -> (xrefs, prog))
+            | Enum -> process_enum_xref sym_def occ.pos (xrefs, prog)
+            | Function -> process_function_xref sym_def occ.pos (xrefs, prog)
             | Interface ->
               let con_kind = container_decl_predicate InterfaceContainer in
-              process_container_xref con_kind symbol_def occ.pos (xrefs, prog)
+              process_container_xref con_kind sym_def occ.pos (xrefs, prog)
+            | Method ->
+              (match occ.type_ with
+              | Method (cn, _) ->
+                let ref_fun = build_method_decl_json_ref in
+                proc_mem cn add_method_decl_fact ref_fun (xrefs, prog)
+              | _ -> (xrefs, prog))
             | Property ->
               (match occ.type_ with
               | Property (cn, _) ->
-                (match ServerSymbolDefinition.get_class_by_name ctx cn with
-                | Some cls ->
-                  process_prop_xref symbol_def occ.pos cls cn (xrefs, prog)
-                | None -> (xrefs, prog))
+                let ref_fun = build_property_decl_json_ref in
+                proc_mem cn add_property_decl_fact ref_fun (xrefs, prog)
+              | _ -> (xrefs, prog))
+            | Typeconst ->
+              (match occ.type_ with
+              | Typeconst (cn, _) ->
+                let ref_fun = build_type_const_decl_json_ref in
+                proc_mem cn add_type_const_decl_fact ref_fun (xrefs, prog)
               | _ -> (xrefs, prog))
             | Trait ->
               let con_kind = container_decl_predicate TraitContainer in
-              process_container_xref con_kind symbol_def occ.pos (xrefs, prog)
+              process_container_xref con_kind sym_def occ.pos (xrefs, prog)
             | _ -> (xrefs, prog)))
   in
   let progress =

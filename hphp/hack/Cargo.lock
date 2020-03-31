@@ -1361,6 +1361,7 @@ dependencies = [
  "instruction_sequence_rust 0.0.0",
  "itertools 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "label_rust 0.0.0",
+ "naming_special_names_rust 0.0.0",
  "options 0.0.0",
  "oxidized 0.0.0",
  "runtime 0.0.0",

@@ -482,7 +482,7 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
         Expr_::Await(e) => emit_await(emitter, env, pos, e),
         Expr_::Yield(e) => emit_yield(emitter, env, pos, e),
         Expr_::Efun(e) => Ok(emit_pos_then(pos, emit_lambda(emitter, env, &e.0, &e.1)?)),
-        Expr_::ClassGet(e) => emit_class_get(env, QueryOp::CGet, e),
+        Expr_::ClassGet(e) => emit_class_get(emitter, env, QueryOp::CGet, &e.0, &e.1),
         Expr_::String2(es) => emit_string2(emitter, env, pos, es),
         Expr_::BracedExpr(e) => emit_expr(emitter, env, e),
         Expr_::Id(e) => Ok(emit_pos_then(pos, emit_id(emitter, env, e)?)),
@@ -2055,7 +2055,24 @@ fn emit_special_function(
         ("exit", _) | ("die", _) if nargs == 0 || nargs == 1 => {
             Ok(Some(emit_exit(e, env, args.first())?))
         }
-        ("HH\\fun", _) => unimplemented!(),
+        ("HH\\fun", _) => {
+            if nargs != 1 {
+                Err(emit_fatal::raise_fatal_runtime(
+                    pos,
+                    "Constant string expected in fun()",
+                ))
+            } else {
+                match args {
+                    [tast::Expr(_, tast::Expr_::String(func_name))] => {
+                        Ok(Some(emit_hh_fun(e, func_name)))
+                    }
+                    _ => Err(emit_fatal::raise_fatal_runtime(
+                        pos,
+                        "Constant string expected in fun()",
+                    )),
+                }
+            }
+        }
         ("__systemlib\\fun", _) => unimplemented!(),
         ("HH\\inst_meth", _) => unimplemented!(),
         ("HH\\class_meth", _) => unimplemented!(),
@@ -2140,6 +2157,19 @@ fn get_call_builtin_func_info(opts: &Options, id: impl AsRef<str>) -> Option<(us
         "HH\\global_get" => Some((1, IGet(CGetG))),
         "HH\\global_isset" => Some((1, IIsset(IssetG))),
         _ => None,
+    }
+}
+
+fn emit_hh_fun(e: &mut Emitter, fname: &str) -> InstrSeq {
+    let fname = string_utils::strip_global_ns(fname);
+    if e.options()
+        .hhvm
+        .flags
+        .contains(HhvmFlags::EMIT_FUNC_POINTERS)
+    {
+        instr::resolve_func(fname.to_owned().into())
+    } else {
+        instr::string(fname)
     }
 }
 
@@ -2997,11 +3027,22 @@ fn get_querym_op_mode(query_op: &QueryOp) -> MemberOpMode {
 }
 
 fn emit_class_get(
+    e: &mut Emitter,
     env: &Env,
     query_op: QueryOp,
-    (cid, cls_get_expr): &(tast::ClassId, tast::ClassGetExpr),
+    cid: &tast::ClassId,
+    prop: &tast::ClassGetExpr,
 ) -> Result {
-    unimplemented!("TODO(hrust)")
+    let cexpr = ClassExpr::class_id_to_class_expr(e, false, false, &env.scope, cid);
+    Ok(InstrSeq::gather(vec![
+        InstrSeq::from(emit_class_expr(e, env, cexpr, prop)?),
+        match query_op {
+            QueryOp::CGet => instr::cgets(),
+            QueryOp::Isset => instr::issets(),
+            QueryOp::CGetQuiet => return Err(Unrecoverable("emit_class_get: CGetQuiet".into())),
+            QueryOp::InOut => return Err(Unrecoverable("emit_class_get: InOut".into())),
+        },
+    ]))
 }
 
 fn emit_conditional_expr(

@@ -36,11 +36,12 @@ use hhas_typedef_rust::Typedef as HhasTypedef;
 use hhbc_ast_rust::*;
 use hhbc_id_rust::{class, Id};
 use hhbc_string_utils_rust::{
-    float, integer, lstrip, quote_string, quote_string_with_escape, strip_global_ns, strip_ns,
-    triple_quote_string, types,
+    float, integer, is_class, is_parent, is_self, is_static, is_xhp, lstrip, mangle, quote_string,
+    quote_string_with_escape, strip_global_ns, strip_ns, triple_quote_string, types,
 };
 use instruction_sequence_rust::InstrSeq;
 use label_rust::Label;
+use naming_special_names_rust::classes;
 use oxidized::{ast, ast_defs, doc_comment::DocComment, local_id};
 use runtime::TypedValue;
 use write::*;
@@ -2116,22 +2117,24 @@ fn print_op<W: Write>(w: &mut W, op: &InstructOperator) -> Result<(), W::Error> 
         I::Clone => w.write("Clone"),
         I::Exit => w.write("Exit"),
         I::ResolveFunc(id) => {
-            w.write("ResolveFunc")?;
+            w.write("ResolveFunc ")?;
             print_function_id(w, id)
         }
         I::ResolveObjMethod => w.write("ResolveObjMethod"),
         I::ResolveClsMethod(mid) => {
-            w.write("ResolveClsMethod")?;
+            w.write("ResolveClsMethod ")?;
             print_method_id(w, mid)
         }
         I::ResolveClsMethodD(cid, mid) => {
-            w.write("ResolveClsMethodD")?;
+            w.write("ResolveClsMethodD ")?;
             print_class_id(w, cid)?;
+            w.write(" ")?;
             print_method_id(w, mid)
         }
         I::ResolveClsMethodS(r, mid) => {
-            w.write("ResolveClsMethodS")?;
+            w.write("ResolveClsMethodS ")?;
             print_special_cls_ref(w, r)?;
+            w.write(" ")?;
             print_method_id(w, mid)
         }
         I::Fatal(fatal_op) => print_fatal_op(w, fatal_op),
@@ -2381,9 +2384,96 @@ fn print_expr<W: Write>(
         };
         escaper::escape(s)
     }
+    fn escape_char(c: u8) -> Option<Cow<'static, [u8]>> {
+        match c {
+            b'\n' => Some((&b"\\\\n"[..]).into()),
+            b'\r' => Some((&b"\\\\r"[..]).into()),
+            b'\t' => Some((&b"\\\\t"[..]).into()),
+            b'\\' => Some((&b"\\\\\\\\"[..]).into()),
+            b'"' => Some((&b"\\\\\\\""[..]).into()),
+            b'$' => Some((&b"\\\\$"[..]).into()),
+            b'?' => Some((&b"\\?"[..]).into()),
+            c if is_lit_printable(c) => None,
+            c => {
+                let mut r = vec![];
+                write!(r, "\\\\{:03o}", c).unwrap();
+                Some(r.into())
+            }
+        }
+    }
+    fn print_expr_id<'a, W: Write>(
+        w: &mut W,
+        env: &ExprEnv,
+        s: &'a String,
+    ) -> Result<(), W::Error> {
+        w.write(adjust_id(env, s))
+    }
+    fn print_expr_string<'a, W: Write>(w: &mut W, s: &'a String) -> Result<(), W::Error> {
+        wrap_by(w, "\\\"", |w| w.write(escape_by(s.into(), escape_char)))
+    }
+    fn fmt_class_name<'a>(is_class_constant: bool, id: &'a str) -> Cow<'a, str> {
+        let cn: Cow<'a, str> = if is_xhp(&strip_ns(id)) {
+            escaper::escape(strip_global_ns(&mangle(id.into())))
+                .to_string()
+                .into()
+        } else {
+            escaper::escape(strip_global_ns(id))
+        };
+        if is_class_constant {
+            format!("\\\\{}", cn).into()
+        } else {
+            cn
+        }
+    }
+    fn get_class_name_from_id<'e>(
+        env: Option<&'e BodyEnv<'e>>,
+        should_format: bool,
+        is_class_constant: bool,
+        id: &'e str,
+    ) -> Cow<'e, str> {
+        if id == classes::SELF || id == classes::PARENT || id == classes::STATIC {
+            get_special_class_name(env, is_class_constant, id)
+        } else if should_format {
+            fmt_class_name(is_class_constant, id)
+        } else {
+            id.into()
+        }
+    }
+    fn get_special_class_name<'e>(
+        env: Option<&'e BodyEnv<'e>>,
+        is_class_constant: bool,
+        id: &'e str,
+    ) -> Cow<'e, str> {
+        //TODO(hrust) need emitter to get class name from ast_class_expr::expt_to_class_expr
+        let name = id;
+        fmt_class_name(is_class_constant, name)
+    }
+    fn handle_possible_colon_colon_class_expr<W: Write>(
+        w: &mut W,
+        env: &ExprEnv,
+        is_array_get: bool,
+        e_: &ast::Expr_,
+    ) -> Result<Option<()>, W::Error> {
+        match e_.as_class_const() {
+            Some((
+                ast::ClassId(_, ast::ClassId_::CIexpr(ast::Expr(_, ast::Expr_::Id(id)))),
+                (_, s2),
+            )) if is_class(&s2) && !(is_self(&id.1) || is_parent(&id.1) || is_static(&id.1)) => {
+                Ok(Some({
+                    let s1 = &get_class_name_from_id(env.codegen_env, false, false, &id.1).into();
+                    if is_array_get {
+                        print_expr_id(w, env, s1)?
+                    } else {
+                        print_expr_string(w, s1)?
+                    }
+                }))
+            }
+            _ => Ok(None),
+        }
+    }
     use ast::Expr_ as E_;
     match expr {
-        E_::Id(id) => w.write(adjust_id(env, &id.1)),
+        E_::Id(id) => print_expr_id(w, env, &id.1),
         E_::Lvar(lid) => w.write(escaper::escape(&(lid.1).1)),
         E_::Float(f) => {
             w.write(if f.contains('E') || f.contains('e') {
@@ -2446,7 +2536,7 @@ fn print_expr<W: Write>(
                 None => {
                     let mut buf = String::new();
                     print_expr(&mut buf, env, e).map_err(|e| Error::Fail(format!("{}", e)) )?;
-                    w.write(lstrip("\\\\", &buf))?
+                    w.write(lstrip(&buf, "\\\\"))?
                 }
             };
             wrap_by_paren(w, |w| {
@@ -2459,14 +2549,56 @@ fn print_expr<W: Write>(
                     }
             }})
         }
-        E_::New(_) => not_impl!(),
+        E_::New(x) => {
+            let (cid, _, es, unpacked_element, _) = &**x;
+            match cid.1.as_ciexpr() {
+                Some(ci_expr) => {
+                    w.write("new ")?;
+                    match ci_expr.1.as_id() {
+                        Some(ast_defs::Id(_, cname)) => {
+                            w.write(lstrip(&adjust_id(env, &class::Type::from_ast_name(cname).to_raw_string().into()), "\\\\"))?
+                        }
+                        None => {
+                            let mut buf = String::new();
+                            print_expr(&mut buf, env, ci_expr).map_err(|e| Error::Fail(format!("{}", e)) )?;
+                            w.write(lstrip(&buf, "\\\\"))?
+                        }
+                    }
+                    wrap_by_paren(w, |w| {
+                        concat_by(w, ", ", es, |w, e| print_expr(w, env, e))?;
+                        match unpacked_element {
+                            None => Ok(()),
+                            Some(e) => {
+                                w.write(", ")?;
+                                print_expr(w, env, e)
+                            }
+                        }
+                    })
+                }
+                None => not_impl!()
+            }
+        }
         E_::Record(r) => {
             w.write(lstrip(adjust_id(env, &(r.0).1).as_ref(), "\\\\"))?;
             print_key_values(w, env, &r.2)
         }
         E_::ClassConst(cc) => {
             if let Some(e1) = (cc.0).1.as_ciexpr() {
-                not_impl!()
+                handle_possible_colon_colon_class_expr(w, env, false, expr)?.map_or_else(|| {
+                    let s2 = &(cc.1).1;
+                    match e1.1.as_id() {
+                        Some(ast_defs::Id(_, s1)) => {
+                            let s1 = get_class_name_from_id(env.codegen_env, true, true, s1);
+                            concat_str_by(w, "::", [&s1.into(), s2])
+                        }
+                        _ => {
+                            print_expr(w, env, e1)?;
+                            w.write("::")?;
+                            w.write(s2)
+                        }
+                    }
+                },
+            |x| Ok(x))
             } else {
                 Err(Error::fail("TODO: Only expected CIexpr in class_const"))
             }

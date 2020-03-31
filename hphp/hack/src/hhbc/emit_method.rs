@@ -42,7 +42,7 @@ pub fn from_ast<'a>(
     let is_memoize = method
         .user_attributes
         .iter()
-        .any(|ua| ua.name.1 == user_attributes::MEMOIZE);
+        .any(|ua| user_attributes::is_memoized(&ua.name.1));
     let class_name = string_utils::mangle(string_utils::strip_ns(&class.name.1).into());
     let is_closure_body = &method.name.1 == "__invoke" && (class.name.1).starts_with("Closure$");
     let mut attributes =

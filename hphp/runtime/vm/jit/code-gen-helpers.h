@@ -295,6 +295,35 @@ void markRDSHandleInitialized(Vout& v, rds::Handle ch);
 void markRDSHandleInitialized(Vout& v, Vreg ch);
 
 ///////////////////////////////////////////////////////////////////////////////
+// Locals
+
+/*
+ * Obtain offsets of a local's type or value from the frame pointer.
+ */
+int offsetToLocalType(int id);
+int offsetToLocalData(int id);
+
+/*
+ * Obtain a pointer to a local's type or value. Since the local's
+ * index is statically known, this will never emit any code.
+ */
+Vptr ptrToLocalType(Vreg fp, int id);
+Vptr ptrToLocalData(Vreg fp, int id);
+
+/*
+ * Given (valid) pointers to a local's type and value `typeIn' and
+ * `dataIn', modify the pointers to point at the previous local (by
+ * decreasing index) and set `typeOut' and `dataOut' to the new
+ * pointers. It is up to the caller to detect when the pointers have
+ * reached the end of the frame.
+ */
+void prevLocal(Vout& v,
+               Vreg typeIn,
+               Vreg dataIn,
+               Vreg typeOut,
+               Vreg dataOut);
+
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * Return a mask for an aux value suitable for ORing into the lower 64-bits of a

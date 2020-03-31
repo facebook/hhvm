@@ -30,6 +30,7 @@
 #include "hphp/runtime/vm/jit/call-spec.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
@@ -605,6 +606,31 @@ void markRDSHandleInitialized(Vout& v, rds::Handle ch) {
 
 void markRDSHandleInitialized(Vout& v, Vreg ch) {
   doMarkRDSHandleInitialized(v, ch);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+int offsetToLocalType(int id) {
+  return TVOFF(m_type) - cellsToBytes(id + 1);
+}
+int offsetToLocalData(int id) {
+  return TVOFF(m_data) - cellsToBytes(id + 1);
+}
+
+Vptr ptrToLocalType(Vreg fp, int id) {
+  return fp[offsetToLocalType(id)];
+}
+Vptr ptrToLocalData(Vreg fp, int id) {
+  return fp[offsetToLocalData(id)];
+}
+
+void prevLocal(Vout& v,
+               Vreg typeIn,
+               Vreg dataIn,
+               Vreg typeOut,
+               Vreg dataOut) {
+  v << addqi{(int32_t)sizeof(TypedValue), typeIn, typeOut, v.makeReg()};
+  v << addqi{(int32_t)sizeof(TypedValue), dataIn, dataOut, v.makeReg()};
 }
 
 ////////////////////////////////////////////////////////////////////////////////

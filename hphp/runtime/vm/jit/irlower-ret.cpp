@@ -207,16 +207,20 @@ void cgGenericRetDecRefs(IRLS& env, const IRInstruction* inst) {
     ? tc::ustubs().freeManyLocalsHelper
     : tc::ustubs().freeLocalsHelpers[numLocals - 1];
 
-  auto const iterReg = v.makeReg();
-  v << lea{fp[localOffset(numLocals - 1)], iterReg};
+  auto const startType = v.makeReg();
+  auto const startData = v.makeReg();
+  v << lea{ptrToLocalType(fp, numLocals - 1), startType};
+  v << lea{ptrToLocalData(fp, numLocals - 1), startData};
 
   auto const fix = Fixup{
     marker.bcOff() - marker.func()->base(),
     marker.spOff().offset
   };
-  // The stub uses arg reg 0 as scratch and to pass arguments to destructors,
-  // so it expects the iter argument in arg reg 1.
-  auto const args = v.makeVcallArgs({{v.cns(Vconst::Quad), iterReg}});
+  // The stub uses arg reg 0 as scratch and to pass arguments to
+  // destructors, so it expects the starting pointers in arg reg 1 and
+  // 2.
+  auto const args =
+    v.makeVcallArgs({{v.cns(Vconst::Quad), startType, startData}});
   v << vcall{CallSpec::stub(target), args, v.makeTuple({}),
              fix, DestType::None, false};
 }

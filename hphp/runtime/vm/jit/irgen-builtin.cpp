@@ -2211,8 +2211,8 @@ Type builtinReturnType(const Func* builtin) {
     if (auto const hniType = builtin->hniReturnType()) {
       if (isArrayType(*hniType)) {
         auto const& constraint = builtin->returnTypeConstraint();
-        if (constraint.isVArray()) return TPackedArr;
-        if (constraint.isDArray()) return TMixedArr;
+        if (constraint.isVArray()) return TVArr;
+        if (constraint.isDArray()) return TDArr;
       }
       return Type{*hniType};
     }

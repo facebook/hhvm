@@ -282,24 +282,14 @@ let invalidate_decls
     ()
 
 let update_symbol_index
-    ~(env : ServerEnv.env)
+    ~(sienv : SearchUtils.si_env)
     ~(path : Relative_path.t)
-    ~(facts : Facts.facts option) : ServerEnv.env =
+    ~(facts : Facts.facts option) : SearchUtils.si_env =
   match facts with
   | None ->
     let paths = Relative_path.Set.singleton path in
-    let local_symbol_table =
-      SymbolIndex.remove_files ~sienv:env.ServerEnv.local_symbol_table ~paths
-    in
-    { env with ServerEnv.local_symbol_table }
-  | Some facts ->
-    let local_symbol_table =
-      SymbolIndex.update_from_facts
-        ~sienv:env.ServerEnv.local_symbol_table
-        ~path
-        ~facts
-    in
-    { env with ServerEnv.local_symbol_table }
+    SymbolIndex.remove_files ~sienv ~paths
+  | Some facts -> SymbolIndex.update_from_facts ~sienv ~path ~facts
 
 let process_changed_file
     ~(env : ServerEnv.env) ~(ctx : Provider_context.t) ~(path : Path.t) :
@@ -324,5 +314,8 @@ let process_changed_file
       let env =
         update_naming_table ~env ~ctx ~path ~old_file_info ~new_file_info
       in
-      let env = update_symbol_index ~env ~path ~facts in
+      let local_symbol_table =
+        update_symbol_index ~sienv:env.ServerEnv.local_symbol_table ~path ~facts
+      in
+      let env = { env with ServerEnv.local_symbol_table } in
       Lwt.return env

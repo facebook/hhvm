@@ -1,7 +1,7 @@
 <?hh
 
-class I2 {
-  const BAR = I1::FOO;
+class I2_Recursive {
+  const BAR = I1_Recursive::FOO;
 }
 
 $x = 1;

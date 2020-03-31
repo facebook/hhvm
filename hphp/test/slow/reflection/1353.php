@@ -13,4 +13,6 @@ function __autoload($name) {
 function main_1353() {
 $r1 = new ReflectionClass('C');
 $r2 = new ReflectionMethod('M', 'foo');
+var_dump($r1->getName());
+var_dump($r2->getName());
 }

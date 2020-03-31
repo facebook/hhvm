@@ -73,3 +73,7 @@ function make(): C {
 function null_type_hint<T as nothing>(?T $x): null {
   return $x;
 }
+
+function resource_type_hint(resource $i): resource {
+  return $i; // ok
+}

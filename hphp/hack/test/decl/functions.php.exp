@@ -231,6 +231,34 @@ Parsed decls:
             ft_return_disposable = false; ft_mutable = none;
             ft_returns_mutable = false }));
       fe_deprecated = None;  };
+    "resource_type_hint" ->
+    { fe_pos = [77:10-28];
+      fe_type =
+      (Rwitness (root|functions.php line 77, characters 10-27),
+       (Tfun
+          { ft_is_coroutine = false; ft_arity = (Fstandard (1, 1));
+            ft_tparams = []; ft_where_constraints = [];
+            ft_params =
+            [{ fp_pos = [77:38-40]; fp_name = (Some "$i");
+               fp_type =
+               { et_enforced = false;
+                 et_type =
+                 (Rhint (root|functions.php line 77, characters 29-36),
+                  (Tprim Tresource))
+                 };
+               fp_kind = FPnormal; fp_accept_disposable = false;
+               fp_mutable = none }
+              ];
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|functions.php line 77, characters 43-50),
+               (Tprim Tresource))
+              };
+            ft_fun_kind = sync; ft_reactive = Nonreactive;
+            ft_return_disposable = false; ft_mutable = none;
+            ft_returns_mutable = false }));
+      fe_deprecated = None;  };
     "shallow_reactive_function" ->
     { fe_pos = [54:10-35];
       fe_type =

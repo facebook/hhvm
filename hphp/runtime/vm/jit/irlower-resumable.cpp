@@ -380,18 +380,24 @@ void cgCountWHNotDone(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<CountWHNotDone>();
 
   auto& v = vmain(env);
-  auto const base = v.makeReg();
-  auto const loc = v.cns((extra->count - 1) * 2);
+
+  assertx(extra->count > 0);
+  auto const start_type_ptr = v.makeReg();
+  auto const start_data_ptr = v.makeReg();
+  auto const end_ptr = v.makeReg();
   auto const cnt = v.cns(0);
+  v << lea{ptrToLocalType(fp, extra->first), start_type_ptr};
+  v << lea{ptrToLocalData(fp, extra->first), start_data_ptr};
+  v << lea{ptrToLocalType(fp, extra->first + extra->count), end_ptr};
 
-  v << lea{fp[localOffset(extra->first + extra->count - 1)], base};
-
-  auto out = doWhile(v, CC_GE, {loc, cnt},
+  auto out = doWhile(v, CC_NE, {start_type_ptr, start_data_ptr, cnt},
     [&] (const VregList& in, const VregList& out) {
-      auto const loc_in  = in[0],  cnt_in  = in[1];
-      auto const loc_out = out[0], cnt_out = out[1];
-      auto const type_loc = base[loc_in * 8 + TVOFF(m_type)];
-      auto const data_loc = base[loc_in * 8 + TVOFF(m_data)];
+      auto const type_ptr_in = in[0];
+      auto const data_ptr_in = in[1];
+      auto const cnt_in = in[2];
+      auto const type_ptr_out = out[0];
+      auto const data_ptr_out = out[1];
+      auto const cnt_out = out[2];
       auto const sf_is_wh = v.makeReg();
       auto const sf_is_finished = v.makeReg();
       auto const sf_cont = v.makeReg();
@@ -401,7 +407,7 @@ void cgCountWHNotDone(IRLS& env, const IRInstruction* inst) {
 
       // Skip nulls.
       emitTypeTest(
-        v, env, TNull, type_loc, data_loc, v.makeReg(),
+        v, env, TNull, *type_ptr_in, *data_ptr_in, v.makeReg(),
         [&] (ConditionCode cc, Vreg sf) {
           ifThen(v, cc, sf, [&] (Vout& v) {
             v << phijmp{loop_cont, v.makeTuple({cnt_in})};
@@ -410,10 +416,10 @@ void cgCountWHNotDone(IRLS& env, const IRInstruction* inst) {
       );
 
       // Take exit on non-objects.
-      emitTypeCheck(v, env, TObj, type_loc, data_loc, inst->taken());
+      emitTypeCheck(v, env, TObj, *type_ptr_in, *data_ptr_in, inst->taken());
 
       // Take exit on non-Awaitables.
-      v << load{data_loc, obj};
+      v << load{*data_ptr_in, obj};
       emitIsAwaitable(v, obj, sf_is_wh);
       fwdJcc(v, env, CC_A, sf_is_wh, inst->taken());
 
@@ -433,16 +439,17 @@ void cgCountWHNotDone(IRLS& env, const IRInstruction* inst) {
 
       v << phijmp{loop_cont, v.makeTuple({cnt_new})};
 
-      // Add 2 to the loop variable because we can only scale by at most 8.
       v = loop_cont;
       v << phidef{v.makeTuple({cnt_out})};
-      v << subqi{2, loc_in, loc_out, sf_cont};
+
+      nextLocal(v, type_ptr_in, data_ptr_in, type_ptr_out, data_ptr_out);
+      v << cmpq{type_ptr_out, end_ptr, sf_cont};
       return sf_cont;
     },
     extra->count
   );
 
-  v << copy{out[1], dstLoc(env, inst, 0).reg()};
+  v << copy{out[2], dstLoc(env, inst, 0).reg()};
 }
 
 void cgAFWHBlockOn(IRLS& env, const IRInstruction* inst) {

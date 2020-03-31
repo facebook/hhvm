@@ -11,10 +11,10 @@ Expected string
 File "vec2.php", line 16, characters 15-25:
 But got mixed from this "as" assertion
 File "vec2.php", line 12, characters 30-32:
-The type vec expects 1 type parameter(s) (Typing[4101])
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
 File "hackarray.hhi", line 15, characters 22-24:
 Definition is here
 File "vec2.php", line 13, characters 30-32:
-The type vec expects 1 type parameter(s) (Typing[4101])
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
 File "hackarray.hhi", line 15, characters 22-24:
 Definition is here

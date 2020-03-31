@@ -1755,14 +1755,16 @@ let call_before_init pos cv =
 (* Nast errors check *)
 (*****************************************************************************)
 
-let type_arity pos name nargs c_pos =
+let type_arity use_pos def_pos ~expected ~actual =
   add_list
     (Typing.err_code Typing.TypeArityMismatch)
     [
-      ( pos,
-        "The type " ^ strip_ns name ^ " expects " ^ nargs ^ " type parameter(s)"
-      );
-      (c_pos, "Definition is here");
+      ( use_pos,
+        Printf.sprintf
+          "Wrong number of type arguments (expected %d, got %d)"
+          expected
+          actual );
+      (def_pos, "Definition is here");
     ]
 
 let abstract_with_body (p, _) =

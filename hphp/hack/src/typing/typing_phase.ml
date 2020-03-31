@@ -409,7 +409,11 @@ and localize_targs ~is_method ~def_pos ~use_pos ~use_name env tparaml targl =
     if is_method then
       Errors.expected_tparam ~definition_pos:def_pos ~use_pos tparam_count None
     else
-      Errors.type_arity use_pos use_name (string_of_int tparam_count) def_pos;
+      Errors.type_arity
+        use_pos
+        def_pos
+        ~expected:tparam_count
+        ~actual:targ_count;
 
   (* Declare and localize the explicit type arguments *)
   (* TODO? Drop surplus explicit type arguments *)

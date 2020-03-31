@@ -11,10 +11,10 @@ Expected string
 File "class2.php", line 19, characters 13-23:
 But got mixed from this "as" assertion
 File "class2.php", line 15, characters 28-28:
-The type B expects 1 type parameter(s) (Typing[4101])
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
 File "class2.php", line 4, characters 13-13:
 Definition is here
 File "class2.php", line 16, characters 28-28:
-The type B expects 1 type parameter(s) (Typing[4101])
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
 File "class2.php", line 4, characters 13-13:
 Definition is here

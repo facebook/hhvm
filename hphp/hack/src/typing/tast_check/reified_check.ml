@@ -163,9 +163,9 @@ let verify_call_targs env expr_pos decl_pos tparams targs =
               if Int.( <> ) targs_length 0 then
                 Errors.type_arity
                   pos
-                  class_id
-                  (string_of_int tparams_length)
                   c_pos
+                  ~expected:tparams_length
+                  ~actual:targs_length
               else
                 Errors.require_args_reify c_pos pos)
       | _ -> ()
@@ -307,9 +307,9 @@ let handler =
               if Int.( <> ) targs_length 0 then
                 Errors.type_arity
                   pos
-                  class_id
-                  (string_of_int tparams_length)
                   c_pos
+                  ~expected:tparams_length
+                  ~actual:targs_length
               else if tparams_has_reified tparams then
                 Errors.require_args_reify c_pos pos)
       | _ -> ()

@@ -9,7 +9,6 @@
 
 open Hh_prelude
 open Typing_defs
-open String_utils
 open Aast
 module Env = Tast_env
 module Cls = Decl_provider.Class
@@ -22,7 +21,7 @@ let rec check_hint env (pos, hint) =
     begin
       match Decl_provider.get_typedef (Env.get_ctx env) x with
       | Some { td_tparams; td_pos; _ } as _ty ->
-        check_tparams env pos x td_tparams hl td_pos
+        check_tparams env pos td_tparams hl td_pos
       | None -> ()
     end
   | Aast.Happly ((_, x), hl) ->
@@ -32,7 +31,7 @@ let rec check_hint env (pos, hint) =
       | Some class_ ->
         let tparams = Cls.tparams class_ in
         let c_pos = Cls.pos class_ in
-        check_tparams env pos x tparams hl c_pos
+        check_tparams env pos tparams hl c_pos
     end;
     ()
   | Aast.Harray (ty1, ty2) ->
@@ -83,12 +82,12 @@ let rec check_hint env (pos, hint) =
     ()
   | Aast.Hpu_access (h, _, _) -> check_hint env h
 
-and check_tparams env p x tparams hl c_pos =
+and check_tparams env p tparams hl c_pos =
   let arity = List.length tparams in
-  check_arity env p x arity (List.length hl) c_pos;
+  check_arity env p arity (List.length hl) c_pos;
   List.iter hl (check_hint env)
 
-and check_arity env pos tname arity size c_pos =
+and check_arity env pos arity size c_pos =
   if Int.equal size arity then
     ()
   else if
@@ -101,8 +100,7 @@ and check_arity env pos tname arity size c_pos =
   then
     ()
   else
-    let num_args = soi arity in
-    Errors.type_arity pos tname num_args c_pos
+    Errors.type_arity pos c_pos ~expected:arity ~actual:size
 
 let check_param env p =
   Option.iter (hint_of_type_hint p.param_type_hint) (check_hint env)
@@ -158,7 +156,11 @@ let handler =
               Int.( <> ) hargs_length tparams_length
               && Int.( <> ) 0 hargs_length
             then
-              Errors.type_arity p cid (string_of_int tparams_length) c_pos
+              Errors.type_arity
+                p
+                c_pos
+                ~expected:tparams_length
+                ~actual:hargs_length
         end
       | _ -> ()
 

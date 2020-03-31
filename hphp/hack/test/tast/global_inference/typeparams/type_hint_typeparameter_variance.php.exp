@@ -1,5 +1,5 @@
 Errors:
-  [7:12-13] The type C expects 2 type parameter(s)
+  [7:12-13] Wrong number of type arguments (expected 2, got 0)
   [3:7-8] Definition is here
 [(Class
     { c_span = [3:1-5:2]; c_annotation = (); c_mode = Mpartial;

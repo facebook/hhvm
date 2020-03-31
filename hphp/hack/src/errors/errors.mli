@@ -617,7 +617,7 @@ val not_initialized : Pos.t * string -> string list -> unit
 
 val call_before_init : Pos.t -> string -> unit
 
-val type_arity : Pos.t -> string -> string -> Pos.t -> unit
+val type_arity : Pos.t -> Pos.t -> expected:int -> actual:int -> unit
 
 val invalid_req_implements : Pos.t -> unit
 

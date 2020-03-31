@@ -4,11 +4,15 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::borrow::Cow;
+use std::collections::HashMap;
 use std::fmt::{self, Debug};
 use std::ops::Index;
 
-use crate::Value;
+use crate::{Allocator, Value};
 
+/// Blocks with tags greater than or equal to NO_SCAN_TAG contain binary data,
+/// and are not scanned by the garbage collector. Likewise, we must avoid
+/// interpreting the fields of blocks with such tags as Values.
 pub const NO_SCAN_TAG: u8 = 251;
 pub const STRING_TAG: u8 = 252;
 pub const DOUBLE_TAG: u8 = 253;
@@ -86,7 +90,7 @@ impl<'a> Block<'a> {
     }
 
     pub fn as_values(&self) -> Option<&[Value]> {
-        if self.tag() == STRING_TAG || self.tag() == DOUBLE_TAG {
+        if self.tag() >= NO_SCAN_TAG {
             return None;
         }
         Some(&self.0[1..])
@@ -94,6 +98,41 @@ impl<'a> Block<'a> {
 
     pub(crate) fn header_ptr(&self) -> *const Value<'a> {
         self.0.as_ptr()
+    }
+
+    /// Helper for `Value::clone_with_allocator`.
+    pub(crate) fn clone_with<'b, A: Allocator>(
+        &self,
+        alloc: &'b A,
+        seen: &mut HashMap<usize, Value<'b>>,
+    ) -> Value<'b> {
+        let mut block = alloc.block_with_size_and_tag(self.size(), self.tag());
+        match self.as_values() {
+            Some(fields) => {
+                for (i, field) in fields.into_iter().enumerate() {
+                    let field = field.clone_with(alloc, seen);
+                    A::set_field(&mut block, i, field)
+                }
+            }
+            None => {
+                // Safety: Both pointers must be valid, aligned, and
+                // non-overlapping. Both pointers are the heads of blocks which
+                // came from some Allocator. Allocators are required to allocate
+                // blocks with usize-aligned pointers, and those blocks are
+                // required to be valid for reads and writes for the number of
+                // usize-sized fields reported in the size in their header.
+                // Allocators are also required to allocate non-overlapping
+                // blocks.
+                unsafe {
+                    std::ptr::copy_nonoverlapping(
+                        self.0.as_ptr().offset(1) as *const usize,
+                        block.as_mut_ptr() as *mut usize,
+                        self.size(),
+                    )
+                }
+            }
+        }
+        block.build()
     }
 }
 

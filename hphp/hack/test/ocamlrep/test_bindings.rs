@@ -26,6 +26,18 @@ pub unsafe extern "C" fn convert_to_ocamlrep(value: usize) -> usize {
     }
 }
 
+#[no_mangle]
+pub extern "C" fn realloc_in_ocaml_heap(value: usize) -> usize {
+    let slab = unsafe { ocamlrep::slab::OwnedSlab::from_ocaml(value) };
+    match slab {
+        None => value,
+        Some(slab) => {
+            let pool = unsafe { ocamlrep_ocamlpool::Pool::new() };
+            slab.value().clone_with_allocator(&pool).to_bits()
+        }
+    }
+}
+
 // Primitive Tests
 
 #[no_mangle]

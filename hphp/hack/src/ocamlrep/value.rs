@@ -3,10 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::collections::HashMap;
 use std::fmt::{self, Debug};
 use std::marker::PhantomData;
 
 use crate::block::{Block, Header};
+use crate::Allocator;
 
 #[inline(always)]
 pub const fn is_ocaml_int(value: usize) -> bool {
@@ -100,6 +102,32 @@ impl<'a> Value<'a> {
     #[inline(always)]
     pub fn to_bits(self) -> usize {
         self.0
+    }
+
+    /// Helper for `Value::clone_with_allocator`.
+    pub(crate) fn clone_with<'b>(
+        self,
+        alloc: &'b impl Allocator,
+        seen: &mut HashMap<usize, Value<'b>>,
+    ) -> Value<'b> {
+        match self.as_block() {
+            None => Value(self.0, PhantomData),
+            Some(block) => {
+                if let Some(&copied_value) = seen.get(&self.0) {
+                    return copied_value;
+                }
+                let copied_value = block.clone_with(alloc, seen);
+                seen.insert(self.0, copied_value);
+                copied_value
+            }
+        }
+    }
+
+    /// Recursively clone this `Value` using the given `Allocator`. Structural
+    /// sharing is preserved (i.e., values which are physically equal before the
+    /// clone will be physically equal after the clone).
+    pub fn clone_with_allocator<'b>(self, alloc: &'b impl Allocator) -> Value<'b> {
+        self.clone_with(alloc, &mut HashMap::new())
     }
 }
 

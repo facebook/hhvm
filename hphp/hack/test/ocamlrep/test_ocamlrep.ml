@@ -110,6 +110,8 @@ external get_sset : unit -> SSet.t = "get_sset"
 
 external convert_to_ocamlrep : 'a -> 'a = "convert_to_ocamlrep"
 
+external realloc_in_ocaml_heap : 'a -> 'a = "realloc_in_ocaml_heap"
+
 let test_char () =
   let x = get_a () in
   assert (x = 'a')
@@ -471,6 +473,184 @@ let test_convert_shared_value () =
   let (str1, str2) = convert_to_ocamlrep tup in
   assert (phys_equal str1 str2)
 
+let test_realloc_char () =
+  let x = realloc_in_ocaml_heap 'a' in
+  assert (x = 'a')
+
+let test_realloc_int () =
+  let x = realloc_in_ocaml_heap 5 in
+  assert (x = 5)
+
+let test_realloc_true () =
+  let x = realloc_in_ocaml_heap true in
+  assert x
+
+let test_realloc_false () =
+  let x = realloc_in_ocaml_heap false in
+  assert (not x)
+
+let test_realloc_none () =
+  let opt = realloc_in_ocaml_heap None in
+  assert (Option.is_none opt)
+
+let test_realloc_some () =
+  let opt = realloc_in_ocaml_heap (Some 5) in
+  match opt with
+  | None -> assert false
+  | Some x -> assert (x = 5)
+
+let test_realloc_some_none () =
+  let opt = realloc_in_ocaml_heap (Some None) in
+  match opt with
+  | None -> assert false
+  | Some x -> assert (Option.is_none x)
+
+let test_realloc_some_some_five () =
+  let opt = realloc_in_ocaml_heap (Some (Some 5)) in
+  match opt with
+  | None -> assert false
+  | Some x ->
+    (match x with
+    | None -> assert false
+    | Some y -> assert (y = 5))
+
+let test_realloc_empty_list () =
+  let lst = realloc_in_ocaml_heap [] in
+  assert (List.length lst = 0);
+  match lst with
+  | [] -> ()
+  | _ -> assert false
+
+let test_realloc_five_list () =
+  let lst = realloc_in_ocaml_heap [5] in
+  assert (List.length lst = 1);
+  match lst with
+  | [5] -> ()
+  | _ -> assert false
+
+let test_realloc_one_two_three_list () =
+  match realloc_in_ocaml_heap [1; 2; 3] with
+  | [1; 2; 3] -> ()
+  | _ -> assert false
+
+let test_realloc_float_list () =
+  match realloc_in_ocaml_heap [1.0; 2.0; 3.0] with
+  | [1.0; 2.0; 3.0] -> ()
+  | _ -> assert false
+
+let test_realloc_foo () =
+  match realloc_in_ocaml_heap { a = 25; b = true } with
+  | { a = 25; b = true } -> ()
+  | _ -> assert false
+
+let test_realloc_bar () =
+  match
+    realloc_in_ocaml_heap
+      { c = { a = 42; b = false }; d = Some [Some 88; None; Some 66] }
+  with
+  | { c = { a = 42; b = false }; d = Some [Some 88; None; Some 66] } -> ()
+  | _ -> assert false
+
+let test_realloc_empty_string () =
+  let s = realloc_in_ocaml_heap "" in
+  assert (String.length s = 0);
+  assert (s = "")
+
+let test_realloc_a_string () =
+  let s = realloc_in_ocaml_heap "a" in
+  assert (String.length s = 1);
+  assert (s = "a")
+
+let test_realloc_ab_string () =
+  let s = realloc_in_ocaml_heap "ab" in
+  assert (String.length s = 2);
+  assert (s = "ab")
+
+let test_realloc_abcde_string () =
+  let s = realloc_in_ocaml_heap "abcde" in
+  assert (String.length s = 5);
+  assert (s = "abcde")
+
+let test_realloc_abcdefg_string () =
+  let s = realloc_in_ocaml_heap "abcdefg" in
+  assert (String.length s = 7);
+  assert (s = "abcdefg")
+
+let test_realloc_abcdefgh_string () =
+  let s = realloc_in_ocaml_heap "abcdefgh" in
+  assert (String.length s = 8);
+  assert (s = "abcdefgh")
+
+let float_compare f1 f2 =
+  let abs_diff = Float.abs (f1 -. f2) in
+  abs_diff < 0.0001
+
+let test_realloc_zero_float () =
+  let f = realloc_in_ocaml_heap 0. in
+  assert (float_compare f 0.)
+
+let test_realloc_one_two_float () =
+  let f = realloc_in_ocaml_heap 1.2 in
+  assert (float_compare f 1.2)
+
+let test_realloc_apple () = assert (realloc_in_ocaml_heap Apple = Apple)
+
+let test_realloc_kiwi () = assert (realloc_in_ocaml_heap Kiwi = Kiwi)
+
+let test_realloc_orange () =
+  match realloc_in_ocaml_heap (Orange 39) with
+  | Orange 39 -> ()
+  | _ -> assert false
+
+let test_realloc_pear () =
+  match realloc_in_ocaml_heap (Pear { num = 76 }) with
+  | Pear { num = 76 } -> ()
+  | _ -> assert false
+
+let test_realloc_empty_smap () =
+  match SMap.bindings (realloc_in_ocaml_heap SMap.empty) with
+  | [] -> ()
+  | _ -> assert false
+
+let test_realloc_int_smap_singleton () =
+  match SMap.bindings (realloc_in_ocaml_heap (SMap.singleton "a" 1)) with
+  | [("a", 1)] -> ()
+  | _ -> assert false
+
+let test_realloc_int_smap () =
+  let map = SMap.empty in
+  let map = SMap.add "a" 1 map in
+  let map = SMap.add "b" 2 map in
+  let map = SMap.add "c" 3 map in
+  match SMap.bindings (realloc_in_ocaml_heap map) with
+  | [("a", 1); ("b", 2); ("c", 3)] -> ()
+  | _ -> assert false
+
+let test_realloc_empty_sset () =
+  match SSet.elements (realloc_in_ocaml_heap SSet.empty) with
+  | [] -> ()
+  | _ -> assert false
+
+let test_realloc_sset_singleton () =
+  match SSet.elements (realloc_in_ocaml_heap (SSet.singleton "a")) with
+  | ["a"] -> ()
+  | _ -> assert false
+
+let test_realloc_sset () =
+  let set = SSet.empty in
+  let set = SSet.add "a" set in
+  let set = SSet.add "b" set in
+  let set = SSet.add "c" set in
+  match SSet.elements (realloc_in_ocaml_heap set) with
+  | ["a"; "b"; "c"] -> ()
+  | _ -> assert false
+
+let test_realloc_shared_value () =
+  let str = "foo" in
+  let tup = (str, str) in
+  let (str1, str2) = realloc_in_ocaml_heap tup in
+  assert (phys_equal str1 str2)
+
 let test_cases =
   [
     test_char;
@@ -542,6 +722,39 @@ let test_cases =
     test_convert_sset_singleton;
     test_convert_sset;
     test_convert_shared_value;
+    test_realloc_char;
+    test_realloc_int;
+    test_realloc_true;
+    test_realloc_false;
+    test_realloc_none;
+    test_realloc_some;
+    test_realloc_some_none;
+    test_realloc_some_some_five;
+    test_realloc_empty_list;
+    test_realloc_five_list;
+    test_realloc_one_two_three_list;
+    test_realloc_float_list;
+    test_realloc_foo;
+    test_realloc_bar;
+    test_realloc_empty_string;
+    test_realloc_a_string;
+    test_realloc_ab_string;
+    test_realloc_abcde_string;
+    test_realloc_abcdefg_string;
+    test_realloc_abcdefgh_string;
+    test_realloc_zero_float;
+    test_realloc_one_two_float;
+    test_realloc_apple;
+    test_realloc_kiwi;
+    test_realloc_orange;
+    test_realloc_pear;
+    test_realloc_empty_smap;
+    test_realloc_int_smap_singleton;
+    test_realloc_int_smap;
+    test_realloc_empty_sset;
+    test_realloc_sset_singleton;
+    test_realloc_sset;
+    test_realloc_shared_value;
   ]
 
 let main () = List.iter test_cases (fun test -> test ())

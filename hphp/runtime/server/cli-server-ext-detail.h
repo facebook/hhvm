@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/server/cli-server.h"
+#include "hphp/runtime/server/cli-server-impl.h"
 
 #include <folly/functional/ApplyTuple.h>
 #include <tuple>
@@ -36,22 +37,24 @@ protected:
 
   int afdt_fd;
 
-  void read(bool& arg);
-  void read(int& arg);
-  void read(int64_t& arg);
-  void read(std::string& arg);
-  void read(FdData& arg);
-  void read(sockaddr_storage& arg);
+  template<typename T>
+  void read(T& arg) {
+    cli_read(afdt_fd, arg);
+  }
+  void read(FdData& arg) {
+    arg.fd = cli_read_fd(afdt_fd);
+  }
 
-  void write(bool arg);
-  void write(int arg);
-  void write(int64_t arg);
-  void write(const std::string& arg);
-  void write(FdData arg);
-  void write(const sockaddr_storage& arg);
+  template<typename T>
+  void write(const T& arg) {
+    cli_write(afdt_fd,arg);
+  }
+  void write(const FdData& arg) {
+    cli_write_fd(afdt_fd, arg.fd);
+  }
 
   template <class T, class... Ts>
-  void writeMulti(T first, Ts... rest) {
+  void writeMulti(const T& first, const Ts&... rest) {
     write(first);
     writeMulti(rest...);
   }

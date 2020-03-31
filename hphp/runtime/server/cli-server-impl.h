@@ -28,6 +28,7 @@ namespace HPHP {
 
 template<class... Args>
 void cli_write(int afdt_fd, Args&&... args) {
+  TRACE_SET_MOD(clisrv);
   FTRACE(4, "cli_write({}, nargs={})\n", afdt_fd, sizeof...(args) + 1);
   try {
     afdt::sendx(afdt_fd, std::forward<Args>(args)...);
@@ -39,6 +40,7 @@ void cli_write(int afdt_fd, Args&&... args) {
 
 template<class... Args>
 void cli_read(int afdt_fd, Args&&... args) {
+  TRACE_SET_MOD(clisrv);
   FTRACE(4, "cli_read({}, nargs={})\n", afdt_fd, sizeof...(args) + 1);
   try {
     afdt::recvx(afdt_fd, std::forward<Args>(args)...);

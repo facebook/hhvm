@@ -2911,17 +2911,24 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
     fn make_type_constant(
         &mut self,
-        this: Self::R,
+        ty: Self::R,
         coloncolon: Self::R,
         constant_name: Self::R,
     ) -> Self::R {
-        let (this, coloncolon, constant_name) = (this?, coloncolon?, constant_name?);
+        let (ty, _coloncolon, constant_name) = (ty?, coloncolon?, constant_name?);
         let id = get_name("", &constant_name)?;
-        let pos = Pos::merge(&this.get_pos()?, &coloncolon.get_pos()?)?;
-        Ok(Node_::Hint(
-            HintValue::Access(Box::new((this, vec![id]))),
-            pos,
-        ))
+        let pos = Pos::merge(&ty.get_pos()?, &constant_name.get_pos()?)?;
+        match ty {
+            Node_::Hint(HintValue::Access(mut innards), pos) => {
+                // Nested applies have to be collapsed.
+                innards.1.push(id);
+                Ok(Node_::Hint(HintValue::Access(innards), pos))
+            }
+            ty => Ok(Node_::Hint(
+                HintValue::Access(Box::new((ty, vec![id]))),
+                pos,
+            )),
+        }
     }
 
     fn make_vector_type_specifier(

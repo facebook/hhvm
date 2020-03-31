@@ -35,7 +35,7 @@ Parsed decls:
                   fp_type =
                   { et_enforced = false;
                     et_type =
-                    (Rhint (root|like_types.php line 13, characters 21-26),
+                    (Rhint (root|like_types.php line 13, characters 21-27),
                      (Taccess
                         ((Rhint (root|like_types.php line 13, characters 21-24),
                           Tthis),

@@ -14,3 +14,8 @@ class C {
 
   const type T2 = string;
 }
+
+abstract class C2 {
+  abstract const type TConstType as C;
+  public abstract function instantiate(this::TConstType::T $request): this::TConstType;
+}

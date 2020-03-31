@@ -34,7 +34,7 @@ Parsed decls:
           stc_type =
           (Some (Rhint (root|classes_reified_generics.php line 9, characters 19-31),
                  (Tapply (([9:19-20], "\\C"),
-                    [(Rhint (root|classes_reified_generics.php line 9, characters 21-26),
+                    [(Rhint (root|classes_reified_generics.php line 9, characters 21-30),
                       (Taccess
                          ((Rhint (root|classes_reified_generics.php line 9, characters 21-24),
                            Tthis),

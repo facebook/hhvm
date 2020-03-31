@@ -868,6 +868,52 @@ impl DirectDeclSmartConstructors<'_> {
                 Box::new(Ty_::Tarray(None, None)),
             )),
             Node_::This(pos) => Ok(Ty(Reason::Rhint(pos.clone()), Box::new(Ty_::Tthis))),
+            Node_::Expr(expr) => {
+                fn expr_to_ty(expr: &nast::Expr) -> Result<Ty_, ParseError> {
+                    use aast::Expr_::*;
+                    match &expr.1 {
+                        Null => Ok(Ty_::Tprim(aast::Tprim::Tnull)),
+                        This => Ok(Ty_::Tthis),
+                        True | False => Ok(Ty_::Tprim(aast::Tprim::Tbool)),
+                        Int(_) => Ok(Ty_::Tprim(aast::Tprim::Tint)),
+                        Float(_) => Ok(Ty_::Tprim(aast::Tprim::Tfloat)),
+                        String(_) => Ok(Ty_::Tprim(aast::Tprim::Tstring)),
+                        String2(_) => Ok(Ty_::Tprim(aast::Tprim::Tstring)),
+                        PrefixedString(_) => Ok(Ty_::Tprim(aast::Tprim::Tstring)),
+                        Unop(innards) => expr_to_ty(&innards.1),
+                        ParenthesizedExpr(expr) => expr_to_ty(&expr),
+                        Any => Ok(Ty_::Tany(TanySentinel {})),
+
+                        Array(_) | ArrayGet(_) | As(_) | Assert(_) | Await(_) | Binop(_)
+                        | BracedExpr(_) | Call(_) | Callconv(_) | Cast(_) | ClassConst(_)
+                        | ClassGet(_) | Clone(_) | Collection(_) | Darray(_) | Dollardollar(_)
+                        | Efun(_) | Eif(_) | ExprList(_) | FunctionPointer(_) | FunId(_)
+                        | Id(_) | Import(_) | Is(_) | KeyValCollection(_) | Lfun(_) | List(_)
+                        | Lplaceholder(_) | Lvar(_) | MethodCaller(_) | MethodId(_) | New(_)
+                        | ObjGet(_) | Omitted | Pair(_) | Pipe(_) | PUAtom(_) | PUIdentifier(_)
+                        | Record(_) | Shape(_) | SmethodId(_) | Suspend(_) | Typename(_)
+                        | ValCollection(_) | Varray(_) | Xml(_) | Yield(_) | YieldBreak
+                        | YieldFrom(_) => Err(format!("Cannot convert expr to type: {:?}", expr)),
+                    }
+                }
+
+                Ok(Ty(
+                    Reason::Rwitness(expr.0.clone()),
+                    Box::new(expr_to_ty(&expr)?),
+                ))
+            }
+            Node_::DecimalLiteral(_, pos) => Ok(Ty(
+                Reason::Rwitness(pos.clone()),
+                Box::new(Ty_::Tprim(aast::Tprim::Tint)),
+            )),
+            Node_::FloatingLiteral(_, pos) => Ok(Ty(
+                Reason::Rwitness(pos.clone()),
+                Box::new(Ty_::Tprim(aast::Tprim::Tfloat)),
+            )),
+            Node_::StringLiteral(_, pos) => Ok(Ty(
+                Reason::Rwitness(pos.clone()),
+                Box::new(Ty_::Tprim(aast::Tprim::Tstring)),
+            )),
             node => {
                 let Id(pos, name) = get_name("", node)?;
                 let reason = Reason::Rhint(pos.clone());
@@ -1959,6 +2005,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                         let modifiers = modifiers?;
                         let ty = self
                             .node_to_ty(&hint, &HashSet::new())
+                            .or_else(|_| self.node_to_ty(&initializer, &HashSet::new()))
                             .unwrap_or(Ty(Reason::Rnone, Box::new(Ty_::Tany(TanySentinel))));
                         Node_::Const(Box::new(ConstDecl {
                             modifiers,
@@ -1966,7 +2013,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                             ty,
                             expr: match initializer {
                                 Node_::Expr(e) => Some(e.clone()),
-                                _ => None,
+                                n => n.as_expr().ok().map(Box::new),
                             },
                         }))
                     }
@@ -2402,7 +2449,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 Ok(Node_::Property(Box::new(PropertyDecl {
                     attrs: attrs?,
                     modifiers: modifiers?,
-                    hint: hint?,
+                    hint: match hint? {
+                        Node_::Ignored => initializer.clone(),
+                        hint => hint,
+                    },
                     id: get_name("", &name)?,
                     expr: match initializer {
                         Node_::Expr(e) => Some(Box::new(*e)),

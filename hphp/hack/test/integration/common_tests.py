@@ -11,7 +11,6 @@ import subprocess
 import sys
 import tempfile
 import time
-import unittest
 from typing import ClassVar, List, Mapping, Optional, Tuple
 
 from hh_paths import hackfmt, hh_client, hh_merge_deps, hh_server
@@ -927,26 +926,6 @@ class CommonTests(BarebonesTests):
             options=["--ide-get-definition", "1:50"],
             stdin="<?hh function test() { "
             "ClassToBeIdentified::methodToBeIdentified () }",
-        )
-
-    def test_format(self) -> None:
-        """
-        Test --format
-        """
-        if not self.test_driver.run_hackfmt_check():
-            raise unittest.SkipTest("Hackfmt can't be found. Skipping.")
-
-        self.test_driver.run_hackfmt(
-            expected_output="function test1(int $x) {\n"
-            + "  $x = $x * x + 3;\n"
-            + "  return f($x);\n"
-            + "}\n",
-            options=["--indent-width", "2", "--range", "7", "63"],
-            stdin="""<?hh
-
-function test1(int $x) { $x = $x*x + 3; return f($x); }
-function test2(int $x) { $x = $x*x + 5; return f($x); }
-""",
         )
 
     def test_abnormal_typechecker_exit_message(self) -> None:

@@ -302,10 +302,17 @@ static void HHVM_METHOD(
   auto* data = Native::data<AsyncMysqlConnectionOptions>(this_);
 
   IterateKV(attrs.get(), [&](TypedValue k, TypedValue v) {
+#ifdef FACEBOOK
+    data->m_conn_opts.setAttribute(
+      tvCastToString(k).toCppString(),
+      tvCastToString(v).toCppString()
+    );
+#else
     data->m_conn_opts.setConnectionAttribute(
       tvCastToString(k).toCppString(),
       tvCastToString(v).toCppString()
     );
+#endif
   });
 }
 
@@ -501,7 +508,11 @@ Object HHVM_STATIC_METHOD(
 
         auto query_op = am::Connection::beginMultiQuery(
           op.releaseConnection(), std::move(transformedQueries));
+#ifdef FACEBOOK
+        query_op->setAttributes(transformedAttributes);
+#else
         query_op->setQueryAttributes(transformedAttributes);
+#endif
         event->setQueryOp(query_op);
 
         try {
@@ -774,7 +785,11 @@ Object AsyncMysqlConnection::query(
   auto* clientPtr = static_cast<am::AsyncMysqlClient*>(m_conn->client());
   auto op = am::Connection::beginQuery(std::move(m_conn), query);
 
+#ifdef FACEBOOK
+  op->setAttributes(queryAttributes);
+#else
   op->setQueryAttributes(queryAttributes);
+#endif
   op->setTimeout(am::Duration(getQueryTimeout(timeout_micros)));
 
   auto event = new AsyncMysqlQueryEvent(this_, op);
@@ -865,7 +880,11 @@ static Object HHVM_METHOD(
   auto op = am::Connection::beginMultiQuery(std::move(data->m_conn),
                                             transformQueries(queries_as_array));
 
+#ifdef FACEBOOK
+  op->setAttributes(transformAttributes(queryAttributes));
+#else
   op->setQueryAttributes(transformAttributes(queryAttributes));
+#endif
   op->setTimeout(am::Duration(getQueryTimeout(timeout_micros)));
 
   auto event = new AsyncMysqlMultiQueryEvent(this_, op);

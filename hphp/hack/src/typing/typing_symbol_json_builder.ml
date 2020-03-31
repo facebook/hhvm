@@ -42,6 +42,8 @@ type predicate =
   | GlobalConstDefinition
   | InterfaceDeclaration
   | InterfaceDefinition
+  | MethodDeclaration
+  | MethodDefinition
   | PropertyDeclaration
   | PropertyDefinition
   | TraitDeclaration
@@ -71,6 +73,8 @@ type glean_json = {
   globalConstDefinition: json list;
   interfaceDeclaration: json list;
   interfaceDefinition: json list;
+  methodDeclaration: json list;
+  methodDefinition: json list;
   propertyDeclaration: json list;
   propertyDefinition: json list;
   traitDeclaration: json list;
@@ -103,6 +107,8 @@ let init_progress =
       globalConstDefinition = [];
       interfaceDeclaration = [];
       interfaceDefinition = [];
+      methodDeclaration = [];
+      methodDefinition = [];
       propertyDeclaration = [];
       propertyDefinition = [];
       traitDeclaration = [];
@@ -213,6 +219,16 @@ let update_json_data predicate json progress =
       {
         progress.resultJson with
         interfaceDefinition = json :: progress.resultJson.interfaceDefinition;
+      }
+    | MethodDeclaration ->
+      {
+        progress.resultJson with
+        methodDeclaration = json :: progress.resultJson.methodDeclaration;
+      }
+    | MethodDefinition ->
+      {
+        progress.resultJson with
+        methodDefinition = json :: progress.resultJson.methodDefinition;
       }
     | PropertyDeclaration ->
       {
@@ -380,6 +396,32 @@ let build_visibility_json (visibility : Aast.visibility) =
   in
   JSON_Number (string_of_int num)
 
+let build_is_async_json fun_kind =
+  let is_async =
+    match fun_kind with
+    | FAsync -> true
+    | FAsyncGenerator -> true
+    | _ -> false
+  in
+  JSON_Bool is_async
+
+let build_signature_json ctx params ret_ty =
+  let parameters =
+    List.map params (fun param ->
+        let ty =
+          match hint_of_type_hint param.param_type_hint with
+          | None -> None
+          | Some h -> Some (get_type_from_hint ctx h)
+        in
+        build_parameter_json param.param_name ty)
+  in
+  let return_type_name =
+    match hint_of_type_hint ret_ty with
+    | None -> None
+    | Some h -> Some (get_type_from_hint ctx h)
+  in
+  build_signature_json_nested parameters return_type_name
+
 let build_type_const_kind_json kind =
   let num =
     match kind with
@@ -441,6 +483,9 @@ let build_class_const_decl_json_ref fact_id =
 
 let build_type_const_decl_json_ref fact_id =
   JSON_Object [("typeConst", build_id_json fact_id)]
+
+let build_method_decl_json_ref fact_id =
+  JSON_Object [("method", build_id_json fact_id)]
 
 (* These functions build up the JSON necessary and then add facts
 to the running result. *)
@@ -506,6 +551,31 @@ let add_type_const_decl_fact con_type decl_id name progress =
       ]
   in
   add_fact TypeConstDeclaration json_fact progress
+
+let add_method_decl_fact con_type decl_id name progress =
+  let json_fact =
+    JSON_Object
+      [
+        ("name", build_name_json_nested name);
+        ("container", build_container_json_ref con_type decl_id);
+      ]
+  in
+  add_fact MethodDeclaration json_fact progress
+
+let add_method_defn_fact ctx meth decl_id progress =
+  let json_fact =
+    JSON_Object
+      [
+        ("declaration", build_id_json decl_id);
+        ("signature", build_signature_json ctx meth.m_params meth.m_ret);
+        ("visibility", build_visibility_json meth.m_visibility);
+        ("isAbstract", JSON_Bool meth.m_abstract);
+        ("isAsync", build_is_async_json meth.m_fun_kind);
+        ("isFinal", JSON_Bool meth.m_final);
+        ("isStatic", JSON_Bool meth.m_static);
+      ]
+  in
+  add_fact MethodDefinition json_fact progress
 
 let add_property_defn_fact ctx prop decl_id progress =
   let base_fields =
@@ -592,33 +662,12 @@ let add_func_decl_fact name progress =
   add_fact FunctionDeclaration json_fact progress
 
 let add_func_defn_fact ctx elem decl_id progress =
-  let parameters =
-    List.map elem.f_params (fun param ->
-        let ty =
-          match hint_of_type_hint param.param_type_hint with
-          | None -> None
-          | Some h -> Some (get_type_from_hint ctx h)
-        in
-        build_parameter_json param.param_name ty)
-  in
-  let return_type_name =
-    match hint_of_type_hint elem.f_ret with
-    | None -> None
-    | Some h -> Some (get_type_from_hint ctx h)
-  in
-  let signature = build_signature_json_nested parameters return_type_name in
-  let is_async =
-    match elem.f_fun_kind with
-    | FAsync -> true
-    | FAsyncGenerator -> true
-    | _ -> false
-  in
   let json_fact =
     JSON_Object
       [
         ("declaration", build_id_json decl_id);
-        ("signature", signature);
-        ("isAsync", JSON_Bool is_async);
+        ("signature", build_signature_json ctx elem.f_params elem.f_ret);
+        ("isAsync", build_is_async_json elem.f_fun_kind);
       ]
   in
   add_fact FunctionDefinition json_fact progress
@@ -814,7 +863,24 @@ let process_container_decl ctx elem progress =
         in
         (build_type_const_decl_json_ref decl_id :: decls, prog))
   in
-  let members = prop_decls @ class_const_decls @ type_const_decls in
+  let (method_decls, prog) =
+    List.fold elem.c_methods ~init:([], prog) ~f:(fun (decls, prog) meth ->
+        let (pos, id) = meth.m_name in
+        let (decl_id, prog) =
+          process_decl_loc
+            (add_method_decl_fact con_type decl_id)
+            (add_method_defn_fact ctx)
+            build_method_decl_json_ref
+            pos
+            id
+            meth
+            prog
+        in
+        (build_method_decl_json_ref decl_id :: decls, prog))
+  in
+  let members =
+    prop_decls @ class_const_decls @ type_const_decls @ method_decls
+  in
   let (_, prog) = add_container_defn_fact elem decl_id members prog in
   let ref_json = build_container_decl_json_ref con_type decl_id in
   let (_, prog) = add_decl_loc_fact pos ref_json prog in
@@ -934,6 +1000,7 @@ let build_json ctx symbols =
     by id only *)
     [
       ("hack.FileXRefs.1", progress.resultJson.fileXRefs);
+      ("hack.MethodDefinition.1", progress.resultJson.methodDefinition);
       ("hack.FunctionDefinition.1", progress.resultJson.functionDefinition);
       ("hack.EnumDefinition.1", progress.resultJson.enumDefinition);
       ("hack.ClassConstDefinition.1", progress.resultJson.classConstDefinition);
@@ -944,6 +1011,7 @@ let build_json ctx symbols =
       ("hack.InterfaceDefinition.1", progress.resultJson.interfaceDefinition);
       ("hack.GlobalConstDefinition.1", progress.resultJson.globalConstDefinition);
       ("hack.DeclarationLocation.1", progress.resultJson.declarationLocation);
+      ("hack.MethodDeclaration.1", progress.resultJson.methodDeclaration);
       ("hack.ClassConstDeclaration.1", progress.resultJson.classConstDeclaration);
       ("hack.PropertyDeclaration.1", progress.resultJson.propertyDeclaration);
       ("hack.TypeConstDeclaration.1", progress.resultJson.typeConstDeclaration);

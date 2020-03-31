@@ -18,7 +18,14 @@ type initialized_state = {
   server_env: ServerEnv.env;
   ctx: Provider_context.t;
   changed_files_to_process: Path.Set.t;
-  peak_changed_files_queue_size: int;
+      (** changed_files_to_process is grown during File_changed events, and steadily
+  whittled down one by one in `serve` as we get around to processing them
+  via `process_changed_files`. *)
+  changed_files_denominator: int;
+      (** the user likes to see '5/10' for how many changed files has been processed
+  in the current batch of changes. The denominator counts up for every new file
+  that has to be processed, until the batch ends - i.e. changed_files_to_process
+  becomes empty - and we reset the denominator. *)
 }
 
 type state =
@@ -221,7 +228,7 @@ let initialize
           server_env;
           changed_files_to_process = Path.Set.of_list changed_files;
           ctx;
-          peak_changed_files_queue_size = List.length changed_files;
+          changed_files_denominator = List.length changed_files;
         }
     in
     log "Serverless IDE has completed initialization";
@@ -349,8 +356,8 @@ let handle_message :
       let changed_files_to_process =
         Path.Set.add initialized_state.changed_files_to_process path
       in
-      let peak_changed_files_queue_size =
-        initialized_state.peak_changed_files_queue_size + 1
+      let changed_files_denominator =
+        initialized_state.changed_files_denominator + 1
       in
       let ctx =
         Provider_utils.ctx_from_server_env initialized_state.server_env
@@ -359,9 +366,9 @@ let handle_message :
         Initialized
           {
             initialized_state with
-            changed_files_to_process;
             ctx;
-            peak_changed_files_queue_size;
+            changed_files_to_process;
+            changed_files_denominator;
           }
       in
       Lwt.return (state, Handle_message_result.Notification)
@@ -578,8 +585,7 @@ let write_status ~(out_fd : Lwt_unix.file_descr) (state : state) : unit Lwt.t =
   | Initializing
   | Failed_to_initialize _ ->
     Lwt.return_unit
-  | Initialized { changed_files_to_process; peak_changed_files_queue_size; _ }
-    ->
+  | Initialized { changed_files_to_process; changed_files_denominator; _ } ->
     if Path.Set.is_empty changed_files_to_process then
       let%lwt () =
         write_message
@@ -589,7 +595,7 @@ let write_status ~(out_fd : Lwt_unix.file_descr) (state : state) : unit Lwt.t =
       in
       Lwt.return_unit
     else
-      let total = peak_changed_files_queue_size in
+      let total = changed_files_denominator in
       let processed = total - Path.Set.cardinal changed_files_to_process in
       let%lwt () =
         write_message
@@ -680,7 +686,7 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
                  state with
                  server_env;
                  changed_files_to_process;
-                 peak_changed_files_queue_size = 0;
+                 changed_files_denominator = 0;
                })
         else
           Lwt.return

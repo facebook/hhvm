@@ -27,6 +27,8 @@ type schedule_args = {
   pseudo_remote: bool;
   (* Result output file path. Currently only contains errors. *)
   output_file_path: string option;
+  (* Name of the transport channel used by remote type checking. *)
+  transport_channel: string option;
 }
 
 type command =
@@ -93,6 +95,7 @@ let parse_schedule_args () : command =
   let input_file = ref None in
   let version_specifier = ref None in
   let output_file_path = ref None in
+  let transport_channel = ref None in
   let set_option_arg name reference value =
     match !reference with
     | None -> reference := Some value
@@ -122,6 +125,9 @@ let parse_schedule_args () : command =
       ( "--input-file",
         Arg.String (set_option_arg "input file" input_file),
         "Input file path that contains the list of files to type check." );
+      ( "--transport-channel",
+        Arg.String (set_option_arg "transport channel" transport_channel),
+        "Name of the transport channel used by remote type checking." );
       ( "--version-specifier",
         Arg.String (set_option_arg "version specifier" version_specifier),
         "hh_server version that the remote hosts should install." );
@@ -150,6 +156,7 @@ let parse_schedule_args () : command =
       timeout = !timeout;
       pseudo_remote = !pseudo_remote;
       output_file_path = !output_file_path;
+      transport_channel = !transport_channel;
     }
   in
   check_arg_conflicts schedule_args;
@@ -178,6 +185,7 @@ let make_remote_server_api () :
 let parse_work_args () : command =
   let key = ref "" in
   let timeout = ref 9999 in
+  (* TODO: provide CLI option for transport_channel *)
   let options =
     [
       ("--key", Arg.String (fun x -> key := x), " The worker's key");
@@ -203,6 +211,7 @@ let parse_work_args () : command =
        ~bin_root
        ~ci_info:None
        ~check_id
+       ~transport_channel:None
        ~init_id
        ~init_start_t:(Unix.gettimeofday ())
        ~key:!key
@@ -330,6 +339,7 @@ let start_remote_checking_service genv env schedule_env =
               JobRunner.PseudoRemote
             else
               JobRunner.Remote );
+          transport_channel = schedule_env.transport_channel;
         }
       (Typing_service_delegate.create ~max_batch_size ~min_batch_size ())
       ~recheck_id:env.init_env.recheck_id

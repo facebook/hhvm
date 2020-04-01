@@ -229,6 +229,8 @@ type t = {
   remote_check_id: string option;
   (* The version of the package the remote worker is to install *)
   remote_version_specifier: string option;
+  (* Name of the transport channel used by remote type checking. TODO: move into remote_type_check. *)
+  remote_transport_channel: string option;
   (* Enables the reverse naming table to fall back to SQLite for queries. *)
   naming_sqlite_path: string option;
   enable_naming_table_fallback: bool;
@@ -326,6 +328,7 @@ let default =
     remote_worker_key = None;
     remote_check_id = None;
     remote_version_specifier = None;
+    remote_transport_channel = None;
     naming_sqlite_path = None;
     enable_naming_table_fallback = false;
     symbolindex_search_provider = "SqliteIndex";
@@ -699,6 +702,7 @@ let load_ fn ~silent ~current_version overrides =
   let remote_worker_key = string_opt "remote_worker_key" config in
   let remote_check_id = string_opt "remote_check_id" config in
   let remote_version_specifier = string_opt "remote_version_specifier" config in
+  let remote_transport_channel = string_opt "remote_transport_channel" config in
   let naming_sqlite_path = string_opt "naming_sqlite_path" config in
   let enable_naming_table_fallback =
     match naming_sqlite_path with
@@ -818,6 +822,7 @@ let load_ fn ~silent ~current_version overrides =
     remote_worker_key;
     remote_check_id;
     remote_version_specifier;
+    remote_transport_channel;
     naming_sqlite_path;
     enable_naming_table_fallback;
     symbolindex_search_provider;

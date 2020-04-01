@@ -117,6 +117,8 @@ let init
         genv.workers
         ~worker_key
         ~check_id
+        ~transport_channel:
+          genv.local_config.ServerLocalConfig.remote_transport_channel
         ~ci_info:env.init_env.ci_info
         ~init_id:env.init_env.init_id
         ~init_start_t:env.init_env.init_start_t

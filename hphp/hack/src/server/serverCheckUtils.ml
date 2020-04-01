@@ -39,6 +39,7 @@ let should_do_remote
 
 let start_typing_delegate genv env : env =
   let version_specifier = genv.local_config.remote_version_specifier in
+  let transport_channel = genv.local_config.remote_transport_channel in
   let {
     declaration_threshold = defer_class_declaration_threshold;
     num_workers;
@@ -77,6 +78,7 @@ let start_typing_delegate genv env : env =
                 version_specifier;
                 worker_min_log_level;
                 remote_mode = JobRunner.Remote;
+                transport_channel;
               }
             (* TODO: use env.typing_service.delegate_state when cancellation
                     implementation is finished *)

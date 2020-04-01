@@ -11,6 +11,7 @@ let init
     (workers : MultiWorker.worker list option)
     ~(worker_key : string)
     ~(check_id : string)
+    ~(transport_channel : string option)
     ~(ci_info : Ci_util.info option Future.t option)
     ~(init_id : string)
     ~(init_start_t : float)
@@ -30,6 +31,7 @@ let init
       ~init_id
       ~init_start_t
       ~key:worker_key
+      ~transport_channel
       ~root
       server
   in

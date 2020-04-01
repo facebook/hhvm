@@ -136,4 +136,6 @@ type delegate_env = {
   worker_min_log_level: Hh_logger.Level.t;
   (* The mode to be used by remote job runner *)
   remote_mode: JobRunner.remote_mode;
+  (* Optional transport channel used by remote type checking. None means default. *)
+  transport_channel: string option;
 }

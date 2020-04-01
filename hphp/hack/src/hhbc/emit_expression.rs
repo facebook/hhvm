@@ -2313,7 +2313,7 @@ fn emit_is(e: &mut Emitter, env: &Env, pos: &Pos, h: &tast::Hint) -> Result {
             aast_defs::Hint_::Happly(ast_defs::Id(_, id), hs)
                 if hs.is_empty() && string_utils::strip_hh_ns(&id) == typehints::THIS =>
             {
-                instr::is_late_bound_cls()
+                instr::islateboundcls()
             }
             _ => InstrSeq::gather(vec![
                 get_type_structure_for_hint(e, &[], &IndexSet::new(), h)?,
@@ -2667,7 +2667,7 @@ fn emit_obj_get(
     prop: &tast::Expr,
     nullflavor: &ast_defs::OgNullFlavor,
     null_coalesce_assignment: bool,
-) -> Result<(InstrSeq, Option<StackIndex>)> {
+) -> Result<(InstrSeq, Option<NumParams>)> {
     if let Some(tast::Lid(pos, id)) = expr.1.as_lvar() {
         if local_id::get_name(&id) == special_idents::THIS
             && nullflavor.eq(&ast_defs::OgNullFlavor::OGNullsafe)
@@ -2713,11 +2713,11 @@ fn emit_obj_get(
         prop,
         null_coalesce_assignment,
     )?;
-    let total_stack_size = prop_stack_size + base_stack_size + cls_stack_size;
+    let total_stack_size = (prop_stack_size + base_stack_size + cls_stack_size) as usize;
     let num_params = if null_coalesce_assignment {
         0
     } else {
-        total_stack_size as usize
+        total_stack_size
     };
     let final_instr = instr::querym(num_params, query_op, mk);
     let querym_n_unpopped = if null_coalesce_assignment {
@@ -3569,7 +3569,52 @@ fn emit_quiet_expr(
     expr: &tast::Expr,
     null_coalesce_assignment: bool,
 ) -> Result<(InstrSeq, Option<NumParams>)> {
-    unimplemented!()
+    match &expr.1 {
+        tast::Expr_::Lvar(lid) if local_id::get_name(&lid.1) == superglobals::GLOBALS => Ok((
+            InstrSeq::gather(vec![
+                emit_pos(&lid.0),
+                instr::string(string_utils::locals::strip_dollar(local_id::get_name(
+                    &lid.1,
+                ))),
+                emit_pos(pos),
+                instr::cgetg(),
+            ]),
+            None,
+        )),
+        tast::Expr_::Lvar(lid) if !is_local_this(env, &lid.1) => Ok((
+            instr::cgetquietl(get_local(e, env, pos, local_id::get_name(&lid.1))?),
+            None,
+        )),
+        tast::Expr_::ArrayGet(x) => match ((x.0).1.as_lvar(), x.1.as_ref()) {
+            (Some(tast::Lid(_, id)), Some(elem))
+                if local_id::get_name(id) == superglobals::GLOBALS =>
+            {
+                Ok((
+                    InstrSeq::gather(vec![
+                        emit_expr(e, env, elem)?,
+                        emit_pos(pos),
+                        instr::cgetg(),
+                    ]),
+                    None,
+                ))
+            }
+            _ => emit_array_get(
+                e,
+                env,
+                pos,
+                None,
+                QueryOp::CGetQuiet,
+                &x.0,
+                x.1.as_ref(),
+                false,
+                false,
+            ),
+        },
+        tast::Expr_::ObjGet(x) => {
+            emit_obj_get(e, env, pos, QueryOp::CGetQuiet, &x.0, &x.1, &x.2, false)
+        }
+        _ => Ok((emit_expr(e, env, expr)?, None)),
+    }
 }
 
 fn emit_null_coalesce_assignment(

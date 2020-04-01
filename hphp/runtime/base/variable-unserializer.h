@@ -29,10 +29,7 @@ struct StringBuffer;
 enum class UnserializeMode {
   Value = 0,
   Key = 1,
-  ColValue = 2,
-  ColKey = 3,
-  VecValue = 4,
-  DictValue = 5,
+  ColKey = 2,
 };
 
 struct InvalidAllowedClassesException : Exception {
@@ -93,6 +90,12 @@ struct VariableUnserializer {
   }
 
  private:
+  /*
+   * Used to object property values that are overwritten by later entries.
+   * For array element values, later values for the key override earlier ones.
+   */
+  Array m_overwrittenList;
+
   bool readOnly() const { return m_readOnly; }
 
   /*
@@ -144,15 +147,9 @@ struct VariableUnserializer {
   void reserveForAdd(size_t count);
 
   /*
-   * Used by the 'r' encoding to get a reference.
+   * Used by the 'r' encoding to re-use previously deserialized values.
    */
-  tv_lval getByVal(int id);
-
-  /*
-   * Store properties/array elements that get overwritten incase they are
-   * referenced later during unserialization
-   */
-  void putInOverwrittenList(tv_rval v);
+  TypedValue getByVal(int id);
 
   /*
    * Register an object that needs its __wakeup() method called after
@@ -161,44 +158,14 @@ struct VariableUnserializer {
   void addSleepingObject(const Object&);
 
 private:
-  /*
-   * Hold references to previously-unserialized data, along with bits telling
-   * whether it is legal to reference them later.
-   */
-  struct RefInfo {
-    explicit RefInfo(tv_lval v);
-    explicit RefInfo(std::nullptr_t);
-    static RefInfo makeColValue(tv_lval v);
-    static RefInfo makeVecValue(tv_lval v);
-    static RefInfo makeDictValue(tv_lval v);
-
-    tv_lval var() const;
-
-    bool canBeReferenced() const;
-    bool isColValue() const;
-    bool isVecValue() const;
-    bool isDictValue() const;
-  private:
-    enum class Type : int16_t {
-      Value,
-      ColValue,
-      VecValue,
-      DictValue,
-    };
-    RefInfo(tv_lval, Type);
-    // tv_lval with a Type tag.
-    tv_val<false, Type> m_data;
-  };
-
-  Array m_overwrittenList;
-
   void check() const;
+  void checkElemTermination() const;
 
   Type m_type;
   bool m_readOnly;
   const char* m_buf;
   const char* m_end;
-  req::vector<RefInfo> m_refs;
+  req::vector<tv_rval> m_refs;
   bool m_unknownSerializable;
   const Array& m_options; // e.g. classes allowed to be unserialized
   req::vector<Object> m_sleepingObjects;

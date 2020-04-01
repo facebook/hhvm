@@ -226,40 +226,6 @@ const StaticString
 
 ///////////////////////////////////////////////////////////////////////////////
 
-VariableUnserializer::RefInfo::RefInfo(tv_lval v) : RefInfo(v, Type::Value) {}
-VariableUnserializer::RefInfo::RefInfo(tv_lval v, Type t) : m_data{v, t} {}
-VariableUnserializer::RefInfo::RefInfo(std::nullptr_t) : m_data{} {}
-
-VariableUnserializer::RefInfo
-VariableUnserializer::RefInfo::makeColValue(tv_lval v) {
-  return RefInfo{v, Type::ColValue};
-}
-VariableUnserializer::RefInfo
-VariableUnserializer::RefInfo::makeVecValue(tv_lval v) {
-  return RefInfo{v, Type::VecValue};
-}
-VariableUnserializer::RefInfo
-VariableUnserializer::RefInfo::makeDictValue(tv_lval v) {
-  return RefInfo{v, Type::DictValue};
-}
-
-tv_lval VariableUnserializer::RefInfo::var() const {
-  return m_data.drop_tag();
-}
-
-bool VariableUnserializer::RefInfo::canBeReferenced() const {
-  return m_data.tag() == Type::Value;
-}
-bool VariableUnserializer::RefInfo::isVecValue() const {
-  return m_data.tag() == Type::VecValue;
-}
-bool VariableUnserializer::RefInfo::isDictValue() const {
-  return m_data.tag() == Type::DictValue;
-}
-bool VariableUnserializer::RefInfo::isColValue() const {
-  return m_data.tag() == Type::ColValue;
-}
-
 const StaticString s_force_darrays{"force_darrays"};
 const StaticString s_legacy_hack_arrays{"legacy_hack_arrays"};
 
@@ -319,21 +285,11 @@ char VariableUnserializer::readChar() {
 }
 
 void VariableUnserializer::add(tv_lval v, UnserializeMode mode) {
-  if (mode == UnserializeMode::Value) {
-    m_refs.emplace_back(RefInfo(v));
-  } else if (mode == UnserializeMode::Key) {
-    // do nothing
-  } else if (mode == UnserializeMode::VecValue) {
-    m_refs.emplace_back(RefInfo::makeVecValue(v));
-  } else if (mode == UnserializeMode::DictValue) {
-    m_refs.emplace_back(RefInfo::makeDictValue(v));
-  } else if (mode == UnserializeMode::ColValue) {
-    m_refs.emplace_back(RefInfo::makeColValue(v));
-  } else {
-    assertx(mode == UnserializeMode::ColKey);
-    // We don't currently support using the 'R' encoding to refer to collection
-    // keys. For now we encode collections keys in m_refs using a null pointer.
-    m_refs.emplace_back(RefInfo(nullptr));
+  switch (mode) {
+    case UnserializeMode::Value:  m_refs.emplace_back(v); break;
+    // We don't support refs to collection keys; use nullptr as a sentinel.
+    case UnserializeMode::ColKey: m_refs.emplace_back(nullptr); break;
+    case UnserializeMode::Key:    break;
   }
 }
 
@@ -341,15 +297,20 @@ void VariableUnserializer::reserveForAdd(size_t count) {
   m_refs.reserve(m_refs.size() + count);
 }
 
-tv_lval VariableUnserializer::getByVal(int id) {
-  if (id <= 0 || id > (int)m_refs.size()) return nullptr;
-  auto ret = m_refs[id-1].var();
-  if (!ret) throwColRKey();
-  return ret;
+TypedValue VariableUnserializer::getByVal(int id) {
+  if (id <= 0 || id > m_refs.size()) throwOutOfRange(id);
+  auto const result = m_refs[id - 1];
+  if (!result) throwColRKey();
+  return result.tv();
 }
 
 void VariableUnserializer::check() const {
   if (m_buf >= m_end) throwUnexpectedEOB();
+}
+
+void VariableUnserializer::checkElemTermination() const {
+  auto const ch = peekBack();
+  if (ch != ';' && ch != '}') throwUnterminatedElement();
 }
 
 void VariableUnserializer::set(const char* buf, const char* end) {
@@ -502,10 +463,6 @@ bool VariableUnserializer::whitelistCheck(const String& clsName) const {
   }
 }
 
-void VariableUnserializer::putInOverwrittenList(tv_rval v) {
-  m_overwrittenList.append(*v);
-}
-
 void VariableUnserializer::addSleepingObject(const Object& o) {
   m_sleepingObjects.emplace_back(o);
 }
@@ -587,8 +544,6 @@ void VariableUnserializer::unserializeProp(ObjectData* obj,
     // unserializing all the props.
     t = obj->getPropLval(ctx, key.get());
   }
-
-  if (UNLIKELY(isRefcountedType(t.type()))) putInOverwrittenList(t);
 
   unserializePropertyValue(t, nProp);
   if (!RuntimeOption::RepoAuthoritative) return;
@@ -772,8 +727,14 @@ static StringData* readStringData(const char*& cur, const char* const end,
 
 NEVER_INLINE
 void VariableUnserializer::unserializeVariant(
-  tv_lval self,
-  UnserializeMode mode /* = UnserializeMode::Value */) {
+    tv_lval self,
+    UnserializeMode mode /* = UnserializeMode::Value */) {
+
+  // If we're overwriting an array element or property value, save the old
+  // value in case it's later referenced via an r: or R: ref.
+  if (isRefcountedType(self.type()) && mode == UnserializeMode::Value) {
+    m_overwrittenList.append(*self);
+  }
 
   // NOTE: If you make changes to how serialization and unserialization work,
   // make sure to update reserialize() here and test_apc_reserialize()
@@ -798,9 +759,7 @@ void VariableUnserializer::unserializeVariant(
   case 'R':
     {
       int64_t id = readInt();
-      auto v = getByVal(id);
-      if (!v) throwOutOfRange(id);
-      tvSet(tvToInit(*v), self);
+      tvSet(getByVal(id), self);
     }
     break;
   case 'b':
@@ -1123,17 +1082,8 @@ void VariableUnserializer::unserializeVariant(
                       }
                     }
                   }
-                  if (RuntimeOption::EvalNoticeOnCreateDynamicProp) {
-                    obj->raiseCreateDynamicProp(key.get());
-                  }
-                  auto t = [&]() {
-                    auto& arr = obj->dynPropArray();
-                    return arr.lvalForce(key, AccessFlags::Key);
-                  }();
-                  if (UNLIKELY(isRefcountedType(t.type()))) {
-                    putInOverwrittenList(t);
-                  }
-                  unserializePropertyValue(t, remainingProps--);
+                  auto const lval = obj->makeDynProp(key.get());
+                  unserializePropertyValue(lval, remainingProps--);
                 }
               }
             }
@@ -1270,26 +1220,12 @@ Array VariableUnserializer::unserializeArray() {
   for (int64_t i = 0; i < size; i++) {
     Variant key;
     unserializeVariant(key.asTypedValue(), UnserializeMode::Key);
-    if (!key.isString() && !key.isInteger()) {
-      throwInvalidKey();
-    }
+    if (!key.isString() && !key.isInteger()) throwInvalidKey();
 
-    // for apc, we know the key can't exist, but ignore that optimization
-    assertx(type() != VariableUnserializer::Type::APCSerialize ||
-           !arr.exists(key, true));
-
-    auto value = arr.lvalForce(key, AccessFlags::Key);
-    if (UNLIKELY(isRefcountedType(value.type()))) {
-      putInOverwrittenList(value);
-    }
-    unserializeVariant(value);
-
-    if (i < (size - 1)) {
-      auto lastChar = peekBack();
-      if ((lastChar != ';' && lastChar != '}')) {
-        throwUnterminatedElement();
-      }
-    }
+    auto const lval = MixedArray::LvalForce(arr.get(), key, false);
+    assertx(lval.arr == arr.get());
+    unserializeVariant(lval);
+    if (i < size - 1) checkElemTermination();
   }
 
   check_non_safepoint_surprise();
@@ -1387,29 +1323,12 @@ Array VariableUnserializer::unserializeDict() {
   for (int64_t i = 0; i < size; i++) {
     Variant key;
     unserializeVariant(key.asTypedValue(), UnserializeMode::Key);
-    auto const rawType = key.getType();
-    if (UNLIKELY(!isIntType(rawType) && !isStringType(rawType))) {
-      throwInvalidKey();
-    }
-
-    // for apc, we know the key can't exist, but ignore that optimization
-    assertx(type() != VariableUnserializer::Type::APCSerialize ||
-           !arr.exists(key, true));
+    if (!key.isString() && !key.isInteger()) throwInvalidKey();
 
     auto const lval = MixedArray::LvalForce(arr.get(), key, false);
     assertx(lval.arr == arr.get());
-
-    if (UNLIKELY(isRefcountedType(lval.type()))) {
-      putInOverwrittenList(lval);
-    }
-    unserializeVariant(lval, UnserializeMode::DictValue);
-
-    if (i < (size - 1)) {
-      auto lastChar = peekBack();
-      if ((lastChar != ';' && lastChar != '}')) {
-        throwUnterminatedElement();
-      }
-    }
+    unserializeVariant(lval);
+    if (i < size - 1) checkElemTermination();
   }
 
   check_non_safepoint_surprise();
@@ -1450,16 +1369,10 @@ Array VariableUnserializer::unserializeVec() {
   reserveForAdd(size);
 
   for (int64_t i = 0; i < size; i++) {
-    auto const lval = PackedArray::LvalForceNewVec(arr.get(), false);
+    auto const lval = PackedArray::LvalForceNew(arr.get(), false);
     assertx(lval.arr == arr.get());
-    unserializeVariant(lval, UnserializeMode::VecValue);
-
-    if (i < (size - 1)) {
-      auto lastChar = peekBack();
-      if ((lastChar != ';' && lastChar != '}')) {
-        throwUnterminatedElement();
-      }
-    }
+    unserializeVariant(lval);
+    if (i < size - 1) checkElemTermination();
   }
   check_non_safepoint_surprise();
   expectChar('}');
@@ -1506,36 +1419,32 @@ Array VariableUnserializer::unserializeVArray() {
     }
   };
 
-  auto arr = [&]{
-    if (m_type != Type::Serialize || !m_forceDArrays) {
-      oomCheck(
-        kSizeIndex2PackedArrayCapacity[PackedArray::capacityToSizeIndex(size)]
-      );
-      return VArrayInit(size).toArray();
+  auto arr = Array{};
+  if (m_forceDArrays && m_type == Type::Serialize) {
+    // Deserialize to vector-ish darray. Use direct calls to MixedArray.
+    auto const scale = MixedArray::computeScaleFromSize(size);
+    oomCheck(MixedArray::computeAllocBytes(scale));
+    reserveForAdd(size);
+
+    arr = DArrayInit(size).toArray();
+    for (int64_t i = 0; i < size; i++) {
+      auto const lval = MixedArray::LvalForce(arr.get(), i, false);
+      assertx(lval.arr == arr.get());
+      unserializeVariant(lval);
+      if (i < size - 1) checkElemTermination();
     }
-    oomCheck(
-      MixedArray::computeAllocBytes(MixedArray::computeScaleFromSize(size))
-    );
-    return DArrayInit(size).toArray();
-  }();
-  reserveForAdd(size);
+  } else {
+    // Deserialize to varray. Use direct calls to MixedArray.
+    auto const index = PackedArray::capacityToSizeIndex(size);
+    oomCheck(kSizeIndex2PackedArrayCapacity[index]);
+    reserveForAdd(size);
 
-  auto const mode = arr.isPHPArray()
-    ? UnserializeMode::Value
-    : (arr.isVecArray()
-       ? UnserializeMode::VecValue
-       : UnserializeMode::DictValue);
-
-  for (int64_t i = 0; i < size; i++) {
-    auto const lval = arr.lvalForce();
-    assertx(lval.arr == arr.get());
-    unserializeVariant(lval, mode);
-
-    if (i < (size - 1)) {
-      auto lastChar = peekBack();
-      if ((lastChar != ';' && lastChar != '}')) {
-        throwUnterminatedElement();
-      }
+    arr = VArrayInit(size).toArray();
+    for (int64_t i = 0; i < size; i++) {
+      auto const lval = PackedArray::LvalForceNew(arr.get(), false);
+      assertx(lval.arr == arr.get());
+      unserializeVariant(lval);
+      if (i < size - 1) checkElemTermination();
     }
   }
 
@@ -1576,34 +1485,15 @@ Array VariableUnserializer::unserializeDArray() {
   auto arr = DArrayInit(size).toArray();
   reserveForAdd(size);
 
-  auto const mode = arr.isPHPArray()
-    ? UnserializeMode::Value
-    : UnserializeMode::DictValue;
-
   for (int64_t i = 0; i < size; i++) {
     Variant key;
     unserializeVariant(key.asTypedValue(), UnserializeMode::Key);
-    if (!key.isString() && !key.isInteger()) {
-      throwInvalidKey();
-    }
+    if (!key.isString() && !key.isInteger()) throwInvalidKey();
 
-    // for apc, we know the key can't exist, but ignore that optimization
-    assertx(type() != VariableUnserializer::Type::APCSerialize ||
-           !arr.exists(key, true));
-
-    auto value = arr.lvalForce(key, AccessFlags::Key);
-    if (UNLIKELY(isRefcountedType(value.type()))) {
-      putInOverwrittenList(value);
-    }
-
-    unserializeVariant(value, mode);
-
-    if (i < (size - 1)) {
-      auto lastChar = peekBack();
-      if ((lastChar != ';' && lastChar != '}')) {
-        throwUnterminatedElement();
-      }
-    }
+    auto const lval = MixedArray::LvalForce(arr.get(), key, false);
+    assertx(lval.arr == arr.get());
+    unserializeVariant(lval);
+    if (i < size - 1) checkElemTermination();
   }
 
   check_non_safepoint_surprise();
@@ -1712,7 +1602,7 @@ void VariableUnserializer::unserializeVector(ObjectData* obj, int64_t sz,
   for (int64_t i = 0; i < sz; ++i) {
     auto tv = bvec->appendForUnserialize(i);
     HPHP::type(tv) = KindOfNull;
-    unserializeVariant(tv, UnserializeMode::ColValue);
+    unserializeVariant(tv);
   }
 }
 
@@ -1805,7 +1695,7 @@ void VariableUnserializer::unserializeMap(ObjectData* obj, int64_t sz,
     }
     tv->m_type = KindOfNull;
 do_unserialize:
-    unserializeVariant(tv, UnserializeMode::ColValue);
+    unserializeVariant(tv);
   }
 }
 
@@ -1846,8 +1736,8 @@ void VariableUnserializer::unserializePair(ObjectData* obj, int64_t sz,
   assertx(sz == 2);
   if (type != 'V') throwBadFormat(obj, type);
   auto pair = static_cast<c_Pair*>(obj);
-  unserializeVariant(pair->at(0), UnserializeMode::ColValue);
-  unserializeVariant(pair->at(1), UnserializeMode::ColValue);
+  unserializeVariant(pair->at(0));
+  unserializeVariant(pair->at(1));
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -119,6 +119,12 @@ const int O_NOFOLLOW = 0;
 const int O_SYMLINK = 0;
 const int O_CLOEXEC = 0;
 
+const int SEEK_SET = 0;
+const int SEEK_CUR = 0;
+const int SEEK_END = 0;
+const int SEEK_HOLE = 0;
+const int SEEK_DATA = 0;
+
 final class ErrnoException extends \Exception {}
 
 function poll_async(FileDescriptor $fd, int $events, int $timeout_ns): Awaitable<int>;
@@ -221,3 +227,4 @@ function bind(FileDescriptor $socket, sockaddr $addr): void;
 function listen(FileDescriptor $socket, int $backlog): void;
 function accept(FileDescriptor $socket): (FileDescriptor, sockaddr);
 function fcntl(FileDescriptor $fd, int $cmd, mixed $arg = null): mixed;
+function lseek(FileDescriptor $fd, int $offset, int $whence): int;

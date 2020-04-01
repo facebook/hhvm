@@ -148,4 +148,7 @@ function accept(FileDescriptor $socket): varray<mixed> /* (FileDescriptor, SockA
 <<__Native>>
 function fcntl(FileDescriptor $fd, int $cmd, mixed $arg = null): mixed;
 
+<<__Native>>
+function lseek(FileDescriptor $fd, int $offset, int $whence): int;
+
 } // namespace _OS

@@ -1,0 +1,20 @@
+int(0)
+int(3)
+vec(2) {
+  int(3)
+  string(3) "bar"
+}
+int(2)
+vec(2) {
+  int(2)
+  string(3) "oba"
+}
+int(3)
+vec(2) {
+  int(3)
+  string(3) "bar"
+}
+int(4)
+string(5) "arbaz"
+int(6)
+string(3) "baz"

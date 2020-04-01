@@ -29,6 +29,7 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <unistd.h>
 
 namespace HPHP {
 namespace {
@@ -592,6 +593,13 @@ Variant HHVM_FUNCTION(HSL_os_fcntl,
   }
 }
 
+int64_t HHVM_FUNCTION(HSL_os_lseek, const Object& obj, int64_t offset, int64_t whence) {
+  auto fd = HSLFileDescriptor::fd(obj);
+  off_t ret = retry_on_eintr(-1, ::lseek, fd, offset, whence);
+  throw_errno_if_minus_one(ret);
+  return ret;
+}
+
 Object HHVM_FUNCTION(HSL_os_poll_async,
                      const Object& fd_wrapper,
                      int64_t events,
@@ -766,20 +774,30 @@ struct OSExtension final : Extension {
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\write, HSL_os_write);
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\close, HSL_os_close);
 
+#define SEEK_(name) HHVM_RC_INT(HH\\Lib\\_Private\\_OS\\SEEK_##name, SEEK_##name)
+    SEEK_(SET);
+    SEEK_(CUR);
+    SEEK_(END);
+    SEEK_(HOLE);
+    SEEK_(DATA);
+#undef SEEK_
+
+    HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\lseek, HSL_os_lseek);
+
 #define AF_(name) \
   HHVM_RC_INT(HH\\Lib\\_Private\\_OS\\AF_##name, AF_##name); \
   HHVM_RC_INT(HH\\Lib\\_Private\\_OS\\PF_##name, PF_##name);
-  AF_(UNSPEC);
-  AF_(UNIX);
-  AF_(INET);
-  AF_(INET6);
-  AF_(MAX);
+    AF_(UNSPEC);
+    AF_(UNIX);
+    AF_(INET);
+    AF_(INET6);
+    AF_(MAX);
 #undef AF_
 
 #define SOCK_(name) HHVM_RC_INT(HH\\Lib\\_Private\\_OS\\SOCK_##name, SOCK_##name)
-  SOCK_(STREAM);
-  SOCK_(DGRAM);
-  SOCK_(RAW);
+    SOCK_(STREAM);
+    SOCK_(DGRAM);
+    SOCK_(RAW);
 #undef SOCK_
 
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\getpeername, HSL_os_getpeername);
@@ -795,9 +813,6 @@ struct OSExtension final : Extension {
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\listen, HSL_os_listen);
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\accept, HSL_os_accept);
 
-    CLI_REGISTER_HANDLER(HSL_os_fcntl_intarg);
-    HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\fcntl, HSL_os_fcntl);
-
 #define F_(name) HHVM_RC_INT(HH\\Lib\\_Private\\_OS\\F_##name, F_##name)
     F_(GETFD);
     F_(GETFL);
@@ -807,6 +822,9 @@ struct OSExtension final : Extension {
     F_(SETOWN);
 #undef F_
     HHVM_RC_INT(HH\\Lib\\_Private\\_OS\\FD_CLOEXEC, FD_CLOEXEC);
+
+    CLI_REGISTER_HANDLER(HSL_os_fcntl_intarg);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\fcntl, HSL_os_fcntl);
 
     loadSystemlib();
     s_FileDescriptorClass = Unit::lookupClass(s_FQHSLFileDescriptor.get());

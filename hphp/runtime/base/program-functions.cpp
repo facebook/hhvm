@@ -354,10 +354,9 @@ void register_variable(Array& variables, char *name, const Variant& value,
       }
 
       if (!index) {
-        auto lval = symtable->lvalForce();
-        type(lval) = KindOfPersistentArray;
-        val(lval).parr = ArrayData::Create();
-        symtable = &asArrRef(lval);
+        symtable->append(make_persistent_array_like_tv(ArrayData::Create()));
+        auto const key = symtable->get()->getKey(symtable->get()->iter_last());
+        symtable = &asArrRef(symtable->lval(key));
       } else {
         String key_str(index, index_len, CopyString);
         auto const key =

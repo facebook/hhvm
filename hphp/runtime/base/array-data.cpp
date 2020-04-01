@@ -447,16 +447,6 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(LvalSilentStr)
 
   /*
-   * arr_lval LvalForceNew(ArrayData*, bool copy)
-   *
-   *   Insert a new null value in the array at the next available integer key,
-   *   and return a reference to it.  In the case that there is no next
-   *   available integer key, this function returns a reference to the
-   *   lvalBlackHole.  This function has copy/grow semantics.
-   */
-  DISPATCH(LvalForceNew)
-
-  /*
    * ArrayData* RemoveInt(ArrayData*, int64_t key)
    *
    *   Remove an array element with an integer key, copying or escalating

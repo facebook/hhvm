@@ -1221,10 +1221,7 @@ Array VariableUnserializer::unserializeArray() {
     Variant key;
     unserializeVariant(key.asTypedValue(), UnserializeMode::Key);
     if (!key.isString() && !key.isInteger()) throwInvalidKey();
-
-    auto const lval = MixedArray::LvalForce(arr.get(), key, false);
-    assertx(lval.arr == arr.get());
-    unserializeVariant(lval);
+    unserializeVariant(MixedArray::LvalInPlace(arr.get(), key));
     if (i < size - 1) checkElemTermination();
   }
 
@@ -1324,10 +1321,7 @@ Array VariableUnserializer::unserializeDict() {
     Variant key;
     unserializeVariant(key.asTypedValue(), UnserializeMode::Key);
     if (!key.isString() && !key.isInteger()) throwInvalidKey();
-
-    auto const lval = MixedArray::LvalForce(arr.get(), key, false);
-    assertx(lval.arr == arr.get());
-    unserializeVariant(lval);
+    unserializeVariant(MixedArray::LvalInPlace(arr.get(), key));
     if (i < size - 1) checkElemTermination();
   }
 
@@ -1369,9 +1363,7 @@ Array VariableUnserializer::unserializeVec() {
   reserveForAdd(size);
 
   for (int64_t i = 0; i < size; i++) {
-    auto const lval = PackedArray::LvalForceNew(arr.get(), false);
-    assertx(lval.arr == arr.get());
-    unserializeVariant(lval);
+    unserializeVariant(PackedArray::LvalNewInPlace(arr.get()));
     if (i < size - 1) checkElemTermination();
   }
   check_non_safepoint_surprise();
@@ -1428,9 +1420,7 @@ Array VariableUnserializer::unserializeVArray() {
 
     arr = DArrayInit(size).toArray();
     for (int64_t i = 0; i < size; i++) {
-      auto const lval = MixedArray::LvalForce(arr.get(), i, false);
-      assertx(lval.arr == arr.get());
-      unserializeVariant(lval);
+      unserializeVariant(MixedArray::LvalInPlace(arr.get(), i));
       if (i < size - 1) checkElemTermination();
     }
   } else {
@@ -1441,9 +1431,7 @@ Array VariableUnserializer::unserializeVArray() {
 
     arr = VArrayInit(size).toArray();
     for (int64_t i = 0; i < size; i++) {
-      auto const lval = PackedArray::LvalForceNew(arr.get(), false);
-      assertx(lval.arr == arr.get());
-      unserializeVariant(lval);
+      unserializeVariant(PackedArray::LvalNewInPlace(arr.get()));
       if (i < size - 1) checkElemTermination();
     }
   }
@@ -1489,10 +1477,7 @@ Array VariableUnserializer::unserializeDArray() {
     Variant key;
     unserializeVariant(key.asTypedValue(), UnserializeMode::Key);
     if (!key.isString() && !key.isInteger()) throwInvalidKey();
-
-    auto const lval = MixedArray::LvalForce(arr.get(), key, false);
-    assertx(lval.arr == arr.get());
-    unserializeVariant(lval);
+    unserializeVariant(MixedArray::LvalInPlace(arr.get(), key));
     if (i < size - 1) checkElemTermination();
   }
 

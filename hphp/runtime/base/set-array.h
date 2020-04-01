@@ -369,7 +369,6 @@ private:
   using ArrayData::at;
   using ArrayData::rval;
   using ArrayData::lval;
-  using ArrayData::lvalForce;
   using ArrayData::set;
   using ArrayData::remove;
   using ArrayData::release;
@@ -411,7 +410,6 @@ public:
   static arr_lval LvalStr(ArrayData*, StringData*, bool);
   static constexpr auto LvalSilentInt = &LvalInt;
   static constexpr auto LvalSilentStr = &LvalStr;
-  static arr_lval LvalForceNew(ArrayData*, bool);
   static ArrayData* SetInt(ArrayData*, int64_t, TypedValue);
   static constexpr auto SetIntMove = &SetInt;
   static ArrayData* SetStr(ArrayData*, StringData*, TypedValue);

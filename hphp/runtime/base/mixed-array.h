@@ -324,7 +324,6 @@ private:
   using ArrayData::at;
   using ArrayData::rval;
   using ArrayData::lval;
-  using ArrayData::lvalForce;
   using ArrayData::set;
   using ArrayData::remove;
   using ArrayData::release;
@@ -342,8 +341,6 @@ public:
   static arr_lval LvalSilentInt(ArrayData*, int64_t, bool);
   static arr_lval LvalStr(ArrayData* ad, StringData* k, bool copy);
   static arr_lval LvalSilentStr(ArrayData*, StringData*, bool);
-  static arr_lval LvalForceNew(ArrayData*, bool copy);
-  static arr_lval LvalForce(ArrayData* ad, const Variant& k, bool copy);
   static ArrayData* SetInt(ArrayData*, int64_t k, TypedValue v);
   static ArrayData* SetIntMove(ArrayData*, int64_t k, TypedValue v);
   static ArrayData* SetStr(ArrayData*, StringData* k, TypedValue v);
@@ -405,7 +402,6 @@ public:
   static constexpr auto LvalSilentIntDict = &LvalSilentInt;
   static constexpr auto LvalStrDict = &LvalStr;
   static constexpr auto LvalSilentStrDict = &LvalSilentStr;
-  static constexpr auto LvalForceNewDict = &LvalForceNew;
   static constexpr auto RemoveIntDict = &RemoveInt;
   static constexpr auto RemoveStrDict = &RemoveStr;
   static constexpr auto IterBeginDict = &IterBegin;
@@ -444,6 +440,12 @@ public:
   // These helpers work for both mixed PHP arrays and dicts.
   static ArrayData* SetIntInPlace(ArrayData*, int64_t k, TypedValue v);
   static ArrayData* SetStrInPlace(ArrayData*, StringData* k, TypedValue v);
+
+  // Return an lval to the value at the given key. If `k` is not present,
+  // this method will insert a null value for it and return it.
+  //  @precondition: !isFull
+  //  @precondition: !cowCheck
+  static tv_lval LvalInPlace(ArrayData* ad, const Variant& k);
 
   //////////////////////////////////////////////////////////////////////
 

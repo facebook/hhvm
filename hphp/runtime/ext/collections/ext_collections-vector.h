@@ -337,7 +337,7 @@ protected:
     auto oldAd = arrayData();
     if (raw) {
       assertx(canMutateBuffer());
-      m_arr = PackedArray::AppendInPlaceVec(oldAd, tv);
+      m_arr = PackedArray::AppendInPlace(oldAd, tv);
     } else {
       dropImmCopy();
       m_arr = PackedArray::AppendVec(oldAd, tv);

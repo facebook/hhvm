@@ -1124,11 +1124,12 @@ arr_lval MixedArray::LvalStr(ArrayData* ad, StringData* key, bool copy) {
   return asMixed(ad)->prepareForInsert(copy)->addLvalImpl<true>(key);
 }
 
-arr_lval MixedArray::LvalForce(ArrayData* ad, const Variant& k, bool copy) {
-  auto const a = asMixed(ad)->prepareForInsert(copy);
-  return k.isInteger()
-    ? a->addLvalImpl<false>(k.asInt64Val())
-    : a->addLvalImpl<false>(k.asCStrRef().get());
+tv_lval MixedArray::LvalInPlace(ArrayData* ad, const Variant& k) {
+  auto arr = asMixed(ad);
+  assertx(!arr->isFull());
+  assertx(!arr->cowCheck());
+  return k.isInteger() ? arr->addLvalImpl<false>(k.asInt64Val())
+                       : arr->addLvalImpl<false>(k.asCStrRef().get());
 }
 
 arr_lval MixedArray::LvalSilentInt(ArrayData* ad, int64_t k, bool copy) {
@@ -1145,18 +1146,6 @@ arr_lval MixedArray::LvalSilentStr(ArrayData* ad, StringData* k, bool copy) {
   if (UNLIKELY(!validPos(pos))) return arr_lval { a, nullptr };
   if (copy) a = a->copyMixed();
   return arr_lval { a, &a->data()[pos].data };
-}
-
-arr_lval MixedArray::LvalForceNew(ArrayData* ad, bool copy) {
-  auto a = asMixed(ad);
-  if (UNLIKELY(a->m_nextKI < 0)) {
-    raise_warning("Cannot add element to the array as the next element is "
-                  "already occupied");
-    return arr_lval { a, lvalBlackHole().asTypedValue() };
-  }
-  a = a->prepareForInsert(copy);
-  a->nextInsert(make_tv<KindOfNull>());
-  return arr_lval { a, &a->data()[a->m_used - 1].data };
 }
 
 ArrayData* MixedArray::SetInt(ArrayData* ad, int64_t k, TypedValue v) {

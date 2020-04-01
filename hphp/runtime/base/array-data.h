@@ -398,15 +398,6 @@ public:
   arr_lval lvalSilent(const Variant& k, bool copy);
 
   /*
-   * Get an lval for a new element at the next available integer key.
-   *
-   * Note that adding a new element with the next available integer key may
-   * fail, in which case we return the lval blackhole (see lvalBlackHole() for
-   * details).
-   */
-  arr_lval lvalForce(bool copy);
-
-  /*
    * Get an rval for the element at key `k'.
    *
    * If the array has no element at `k', return a null tv_rval.
@@ -888,7 +879,6 @@ struct ArrayFunctions {
   arr_lval (*lvalStr[NK])(ArrayData*, StringData* k, bool copy);
   arr_lval (*lvalSilentInt[NK])(ArrayData*, int64_t k, bool copy);
   arr_lval (*lvalSilentStr[NK])(ArrayData*, StringData* k, bool copy);
-  arr_lval (*lvalForce[NK])(ArrayData*, bool copy);
   ArrayData* (*removeInt[NK])(ArrayData*, int64_t k);
   ArrayData* (*removeStr[NK])(ArrayData*, const StringData* k);
   ssize_t (*iterBegin[NK])(const ArrayData*);

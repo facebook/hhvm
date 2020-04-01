@@ -806,12 +806,13 @@ arr_lval PackedArray::LvalSilentStr(ArrayData* ad, StringData* k, bool) {
   return arr_lval { ad, nullptr };
 }
 
-arr_lval PackedArray::LvalForceNew(ArrayData* adIn, bool copy) {
-  assertx(checkInvariants(adIn));
-  auto const ad = PrepareForInsert(adIn, copy);
-  auto lval = LvalUncheckedInt(ad, ad->m_size++);
+tv_lval PackedArray::LvalNewInPlace(ArrayData* ad) {
+  assertx(checkInvariants(ad));
+  assertx(ad->m_size < capacity(ad));
+  assertx(!ad->cowCheck());
+  auto const lval = LvalUncheckedInt(ad, ad->m_size++);
   type(lval) = KindOfNull;
-  return arr_lval { ad, lval };
+  return lval;
 }
 
 ArrayData* PackedArray::SetInt(ArrayData* adIn, int64_t k, TypedValue v) {

@@ -174,10 +174,6 @@ arr_lval GlobalsArray::LvalSilentStr(ArrayData* ad, StringData* k, bool copy) {
   return arr_lval { ad, tv };
 }
 
-arr_lval GlobalsArray::LvalForceNew(ArrayData* ad, bool /*copy*/) {
-  return arr_lval { ad, lvalBlackHole().asTypedValue() };
-}
-
 ArrayData* GlobalsArray::SetIntMove(ArrayData* ad, int64_t k, TypedValue v) {
   return SetStrMove(ad, String(k).get(), v);
 }

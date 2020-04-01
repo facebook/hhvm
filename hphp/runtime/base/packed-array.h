@@ -86,7 +86,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static arr_lval LvalStr(ArrayData*, StringData* k, bool copy);
   static arr_lval LvalSilentInt(ArrayData*, int64_t, bool copy);
   static arr_lval LvalSilentStr(ArrayData*, StringData*, bool copy);
-  static arr_lval LvalForceNew(ArrayData*, bool copy);
   static ArrayData* RemoveInt(ArrayData*, int64_t k);
   static ArrayData* RemoveStr(ArrayData*, const StringData* k);
   static ssize_t IterBegin(const ArrayData*);
@@ -146,7 +145,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static constexpr auto IsVectorDataVec = &IsVectorData;
   static constexpr auto ExistsIntVec = &ExistsInt;
   static constexpr auto ExistsStrVec = &ExistsStr;
-  static constexpr auto LvalForceNewVec = &LvalForceNew;
   static constexpr auto RemoveStrVec = &RemoveStr;
   static constexpr auto IterBeginVec = &IterBegin;
   static constexpr auto IterLastVec = &IterLast;
@@ -173,16 +171,22 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
 
   //////////////////////////////////////////////////////////////////////
 
-  // Like append but without COW checks. Used to implement ArrayInit helpers.
+  // Layout-specific helpers that work on PHP and Hack packed arrays.
+  // We use these helpers in ArrayInit and a few other hot sites where
+  // we can guarantee the layout of the array.
+
+  // Exactly like Append, except that it skips the COW check. May grow.
+  //  @precondition: !cowCheck
   static ArrayData* AppendInPlace(ArrayData*, TypedValue v);
-  static constexpr auto AppendInPlaceVec = &AppendInPlace;
 
-  //////////////////////////////////////////////////////////////////////
+  // Exactly like LvalInt, except that it skips the bounds check.
+  //  @precondition: 0 <= i && i < size
+  static tv_lval LvalUncheckedInt(ArrayData*, int64_t i);
 
-  // Like LvalInt, but without any bounds checking. Used to implement the
-  // Vector / ImmVector collection types in ext/collections. This function
-  // never copies the array, so we can return tv_lval instead of arr_lval.
-  static tv_lval LvalUncheckedInt(ArrayData*, int64_t);
+  // Appends a new null element and returns an lval to it.
+  //  @precondition: !cowCheck
+  //  @precondition: size < capacity
+  static tv_lval LvalNewInPlace(ArrayData*);
 
   /////////////////////////////////////////////////////////////////////
 

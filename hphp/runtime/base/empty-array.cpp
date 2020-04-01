@@ -264,10 +264,6 @@ arr_lval EmptyArray::LvalSilentStr(ArrayData* ad, StringData* k, bool copy) {
   return arr_lval { ad, nullptr };
 }
 
-arr_lval EmptyArray::LvalForceNew(ArrayData*, bool) {
-  return EmptyArray::MakePacked(make_tv<KindOfNull>());
-}
-
 ArrayData* EmptyArray::Append(ArrayData*, TypedValue v) {
   tvIncRefGen(v);
   return EmptyArray::MakePackedInl(v).arr;

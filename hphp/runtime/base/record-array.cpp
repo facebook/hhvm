@@ -319,13 +319,6 @@ bool RecordArray::ExistsStr(const ArrayData* ad, const StringData* key) {
   return MixedArray::ExistsStr(ra->extraFieldMap(), key);
 }
 
-arr_lval RecordArray::LvalForceNew(ArrayData* ad, bool /*copy*/) {
-  return PromoteForOp(ad,
-    [&] (MixedArray* mixed) { return MixedArray::LvalForceNew(mixed, false); },
-    "LvalNew"
-  );
-}
-
 arr_lval RecordArray::LvalInt(ArrayData* ad, int64_t k, bool /*copy*/) {
   return PromoteForOp(ad,
     [&] (MixedArray* mixed) { return MixedArray::LvalInt(mixed, k, false); },

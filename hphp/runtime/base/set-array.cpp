@@ -602,12 +602,6 @@ arr_lval SetArray::LvalStr(ArrayData*, StringData*, bool) {
   );
 }
 
-arr_lval SetArray::LvalForceNew(ArrayData*, bool) {
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Invalid keyset operation (lval new)"
-  );
-}
-
 ArrayData* SetArray::SetInt(ArrayData*, int64_t, TypedValue) {
   SystemLib::throwInvalidOperationExceptionObject(
     "Invalid keyset operation (set int)"

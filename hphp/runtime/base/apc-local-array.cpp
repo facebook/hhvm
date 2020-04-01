@@ -182,12 +182,6 @@ arr_lval APCLocalArray::LvalSilentStr(ArrayData* ad, StringData* k, bool copy) {
   return arr_lval { helper.release(lval.arr), lval };
 }
 
-arr_lval APCLocalArray::LvalForceNew(ArrayData* ad, bool /*copy*/) {
-  EscalateHelper helper{ad};
-  auto const lval = helper.escalated->lvalForce(false);
-  return arr_lval { helper.release(lval.arr), lval };
-}
-
 ArrayData* APCLocalArray::SetInt(ArrayData* ad, int64_t k, TypedValue v) {
   EscalateHelper helper{ad};
   return helper.release(helper.escalated->set(k, v));

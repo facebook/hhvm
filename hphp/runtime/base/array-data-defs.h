@@ -125,10 +125,6 @@ inline arr_lval ArrayData::lvalSilent(StringData* k, bool copy) {
   return g_array_funcs.lvalSilentStr[kind()](this, k, copy);
 }
 
-inline arr_lval ArrayData::lvalForce(bool copy) {
-  return g_array_funcs.lvalForce[kind()](this, copy);
-}
-
 inline tv_rval ArrayData::rval(int64_t k) const {
   return g_array_funcs.nvGetInt[kind()](this, k);
 }

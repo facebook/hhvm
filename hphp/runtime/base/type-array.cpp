@@ -822,14 +822,6 @@ FOR_EACH_KEY_TYPE(set)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-arr_lval Array::lvalForce() {
-  if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
-  auto const lval = m_arr->lvalForce(m_arr->cowCheck());
-  if (lval.arr != m_arr) m_arr = Ptr::attach(lval.arr);
-  assertx(lval);
-  return lval;
-}
-
 void Array::append(TypedValue v) {
   if (!m_arr) operator=(Create());
   assertx(m_arr);

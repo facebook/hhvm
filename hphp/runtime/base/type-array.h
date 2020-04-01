@@ -449,11 +449,6 @@ public:
 #undef V
 #undef C
 
-  /*
-   * Get an lval to a newly created element.
-   */
-  arr_lval lvalForce();
-
   /////////////////////////////////////////////////////////////////////////////
   // Element access and mutation.
 

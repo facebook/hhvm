@@ -478,7 +478,7 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
             emit_named_collection(emitter, env, pos, expression, &fields, collection_typ)
         }
         Expr_::Clone(e) => Ok(emit_pos_then(pos, emit_clone(emitter, env, e)?)),
-        Expr_::Shape(e) => Ok(emit_pos_then(pos, emit_shape(env, expression, e)?)),
+        Expr_::Shape(e) => Ok(emit_pos_then(pos, emit_shape(emitter, env, expression, e)?)),
         Expr_::Await(e) => emit_await(emitter, env, pos, e),
         Expr_::Yield(e) => emit_yield(emitter, env, pos, e),
         Expr_::Efun(e) => Ok(emit_pos_then(pos, emit_lambda(emitter, env, &e.0, &e.1)?)),
@@ -894,11 +894,52 @@ fn emit_iter<F: FnOnce(local::Type, local::Type) -> InstrSeq>(
 }
 
 fn emit_shape(
+    emitter: &mut Emitter,
     env: &Env,
     expr: &tast::Expr,
-    fl: &Vec<(ast_defs::ShapeFieldName, tast::Expr)>,
+    fl: &[(ast_defs::ShapeFieldName, tast::Expr)],
 ) -> Result {
-    unimplemented!("TODO(hrust)")
+    fn extract_shape_field_name_pstring(
+        env: &Env,
+        pos: &Pos,
+        field: &ast_defs::ShapeFieldName,
+    ) -> Result<tast::Expr_> {
+        use ast_defs::ShapeFieldName as SF;
+        Ok(match field {
+            SF::SFlitInt(s) => tast::Expr_::mk_int(s.1.clone()),
+            SF::SFlitStr(s) => tast::Expr_::mk_string(s.1.clone()),
+            SF::SFclassConst(id, p) => {
+                if is_reified_tparam(env, true, &id.1).is_some()
+                    || is_reified_tparam(env, false, &id.1).is_some()
+                {
+                    return Err(emit_fatal::raise_fatal_parse(
+                        &id.0,
+                        "Reified generics cannot be used in shape keys",
+                    ));
+                } else {
+                    tast::Expr_::mk_class_const(
+                        tast::ClassId(pos.clone(), tast::ClassId_::CI(id.clone())),
+                        p.clone(),
+                    )
+                }
+            }
+        })
+    }
+    let pos = &expr.0;
+    let fl = fl
+        .iter()
+        .map(|(f, e)| {
+            Ok((
+                tast::Expr(pos.clone(), extract_shape_field_name_pstring(env, pos, f)?),
+                e.clone(),
+            ))
+        })
+        .collect::<Result<Vec<_>>>()?;
+    emit_expr(
+        emitter,
+        env,
+        &tast::Expr(pos.clone(), tast::Expr_::mk_darray(None, fl)),
+    )
 }
 
 fn emit_vec_collection(

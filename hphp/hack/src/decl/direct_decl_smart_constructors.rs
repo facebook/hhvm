@@ -563,6 +563,7 @@ pub enum Node_ {
     Abstract,
     As,
     Async,
+    Coroutine,
     DotDotDot,
     Extends,
     Final,
@@ -1094,29 +1095,37 @@ impl DirectDeclSmartConstructors<'_> {
                 Err(_) => Ty(Reason::Rnone, Box::new(Ty_::Tany(TanySentinel {}))),
             },
         };
-        let async_ = header.modifiers.iter().any(|node| match node {
-            Node_::Async => true,
-            _ => false,
-        });
-        let fun_kind = if body.iter().any(|node| match node {
-            Node_::Yield => true,
-            _ => false,
-        }) {
-            if async_ {
-                FunKind::FAsyncGenerator
-            } else {
-                FunKind::FGenerator
-            }
+        let (async_, is_coroutine) = header.modifiers.iter().fold(
+            (false, false),
+            |(async_, is_coroutine), node| match node {
+                Node_::Async => (true, is_coroutine),
+                Node_::Coroutine => (async_, true),
+                _ => (async_, is_coroutine),
+            },
+        );
+        let fun_kind = if is_coroutine {
+            FunKind::FCoroutine
         } else {
-            if async_ {
-                FunKind::FAsync
+            if body.iter().any(|node| match node {
+                Node_::Yield => true,
+                _ => false,
+            }) {
+                if async_ {
+                    FunKind::FAsyncGenerator
+                } else {
+                    FunKind::FGenerator
+                }
             } else {
-                FunKind::FSync
+                if async_ {
+                    FunKind::FAsync
+                } else {
+                    FunKind::FSync
+                }
             }
         };
         let attributes = attributes.as_attributes()?;
         let ft = FunType {
-            is_coroutine: false,
+            is_coroutine,
             arity,
             tparams: (type_params, FunTparamsKind::FTKtparams),
             where_constraints: Vec::new(),
@@ -1508,6 +1517,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             TokenKind::As => Node_::As,
             TokenKind::Super => Node_::Super,
             TokenKind::Async => Node_::Async,
+            TokenKind::Coroutine => Node_::Coroutine,
             TokenKind::DotDotDot => Node_::DotDotDot,
             TokenKind::Extends => Node_::Extends,
             TokenKind::Final => Node_::Final,

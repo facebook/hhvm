@@ -344,6 +344,23 @@ Parsed decls:
             ft_return_disposable = false; ft_mutable = none;
             ft_returns_mutable = false }));
       fe_deprecated = None;  };
+    "some_coroutine" ->
+    { fe_pos = [89:20-34];
+      fe_type =
+      (Rwitness (root|functions.php line 89, characters 20-33),
+       (Tfun
+          { ft_is_coroutine = true; ft_arity = (Fstandard (0, 0));
+            ft_tparams = []; ft_where_constraints = []; ft_params = [];
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|functions.php line 89, characters 38-41),
+               (Tprim Tbool))
+              };
+            ft_fun_kind = coroutine; ft_reactive = Nonreactive;
+            ft_return_disposable = false; ft_mutable = none;
+            ft_returns_mutable = false }));
+      fe_deprecated = None;  };
     "takes_optional" ->
     { fe_pos = [33:10-24];
       fe_type =

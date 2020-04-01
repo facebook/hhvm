@@ -1197,7 +1197,12 @@ impl DirectDeclSmartConstructors<'_> {
                             name: Some(id.1),
                             type_: PossiblyEnforcedTy {
                                 enforced: false,
-                                type_: self.node_to_ty(&hint, type_variables)?,
+                                type_: match &hint {
+                                    Node_::Ignored => {
+                                        Ty(Reason::Rnone, Box::new(Ty_::Tany(TanySentinel)))
+                                    }
+                                    _ => self.node_to_ty(&hint, type_variables)?,
+                                },
                             },
                             kind,
                             accept_disposable: false,

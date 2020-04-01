@@ -378,7 +378,7 @@ let save_result_error_list errors output_file_path =
   let errors_json = Hh_json.JSON_Object properties in
   let out_chan = Pervasives.open_out_bin output_file_path in
 
-  Hh_json.json_to_output out_chan errors_json;
+  Hh_json.json_to_multiline_output out_chan errors_json;
   Pervasives.close_out out_chan;
   Hh_logger.log "Wrote %d errors to %s" (Errors.count errors) output_file_path
 

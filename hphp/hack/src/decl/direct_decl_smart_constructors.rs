@@ -689,6 +689,7 @@ impl Node_ {
             late_init: false,
             const_: false,
             lsb: false,
+            override_: false,
         };
 
         for attribute in self.iter() {
@@ -723,6 +724,9 @@ impl Node_ {
                     "__LSB" => {
                         attributes.lsb = true;
                     }
+                    "__Override" => {
+                        attributes.override_ = true;
+                    }
                     _ => (),
                 }
             } else {
@@ -752,6 +756,7 @@ struct Attributes {
     late_init: bool,
     const_: bool,
     lsb: bool,
+    override_: bool,
 }
 
 impl DirectDeclSmartConstructors<'_> {
@@ -2467,7 +2472,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                                 final_: false,
                                 memoizelsb: false,
                                 name: id,
-                                override_: false,
+                                override_: attributes.override_,
                                 reactivity: match attributes.reactivity {
                                     Reactivity::Local(_) => {
                                         Some(MethodReactivity::MethodLocal(None))

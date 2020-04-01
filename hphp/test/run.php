@@ -906,7 +906,7 @@ function extra_args($options): string {
   return $args;
 }
 
-function hhvm_cmd_impl($options, $config, $test, ...$extra_args) {
+function hhvm_cmd_impl($options, $config, $autoload_db_prefix, ...$extra_args) {
   $modes = (array)mode_cmd($options);
 
   $cmds = varray[];
@@ -922,7 +922,6 @@ function hhvm_cmd_impl($options, $config, $test, ...$extra_args) {
       '-vEval.EnableIntrinsicsExtension=true',
       '-vEval.HHIRInliningIgnoreHints=false',
       '-vEval.HHIRAlwaysInterpIgnoreHint=false',
-      '-vAutoload.DBPath='.escapeshellarg("$test.$mode_num.autoloadDB"),
       $mode,
       isset($options['wholecfg']) ? '-vEval.JitPGORegionSelector=wholecfg' : '',
 
@@ -936,6 +935,10 @@ function hhvm_cmd_impl($options, $config, $test, ...$extra_args) {
         .escapeshellarg(bin_root().'/hhvm_%{type}_%{buildid}'),
       extra_args($options),
     ];
+
+    if ($autoload_db_prefix !== null) {
+      $args[] = '-vAutoload.DBPath='.escapeshellarg("$autoload_db_prefix.$mode_num.autoloadDB");
+    }
 
     if (isset($options['hackc'])) {
       $args[] = '-vEval.HackCompilerCommand="'.hh_codegen_cmd($options).'"';
@@ -1012,7 +1015,7 @@ function hhvm_cmd($options, $test, $test_run = null, $is_temp_file = false) {
   $cmds = hhvm_cmd_impl(
     $options,
     find_test_ext($test, 'ini'),
-    $test,
+    $test, // we put the autoload DB next to the test
     $hdf,
     find_debug_config($test, 'hphpd.ini'),
     read_opts_file(find_test_ext($test, 'opts')),
@@ -3040,13 +3043,14 @@ function start_server_proc($options, $config, $port) {
     // still want to test that an unwritable socket works...
     $cli_sock = '/var/run/hhvm-cli.sock';
   }
-  $threads = $options['threads'];
+  $threads = get_num_threads($options, PHP_INT_MAX);
   $thread_option = isset($options['cli-server'])
     ? '-vEval.UnixServerWorkers='.$threads
     : '-vServer.ThreadCount='.$threads;
   $command = hhvm_cmd_impl(
     $options,
     $config,
+    null, // we do not pass Autoload.DBPath to the server process
     '-m', 'server',
     "-vServer.Port=$port",
     "-vServer.Type=proxygen",

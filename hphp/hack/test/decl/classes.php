@@ -31,7 +31,7 @@ class MyClass {
   <<__Rx>>
   public function reactive_function_mutable_args(
     <<__Mutable>> MyClass $a,
-    <<__Mutable>> MyClass $b,
+    <<__MaybeMutable>> MyClass $b,
   ): void {
   }
 

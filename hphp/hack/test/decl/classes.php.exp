@@ -256,15 +256,15 @@ Parsed decls:
                      };
                    fp_kind = FPnormal; fp_accept_disposable = false;
                    fp_mutable = mutable };
-                  { fp_pos = [34:27-29]; fp_name = (Some "$b");
+                  { fp_pos = [34:32-34]; fp_name = (Some "$b");
                     fp_type =
                     { et_enforced = false;
                       et_type =
-                      (Rhint (root|classes.php line 34, characters 19-25),
-                       (Tapply (([34:19-26], "\\MyClass"), [])))
+                      (Rhint (root|classes.php line 34, characters 24-30),
+                       (Tapply (([34:24-31], "\\MyClass"), [])))
                       };
                     fp_kind = FPnormal; fp_accept_disposable = false;
-                    fp_mutable = mutable }
+                    fp_mutable = maybe-mutable }
                   ];
                 ft_ret =
                 { et_enforced = false;

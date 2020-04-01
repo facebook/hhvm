@@ -1108,10 +1108,10 @@ impl DirectDeclSmartConstructors<'_> {
                         };
                         let mutability = attributes.iter().fold(None, |mutability, node| {
                             if let Node_::Name(n, _) = node {
-                                if n == "__Mutable" {
-                                    Some(ParamMutability::ParamBorrowedMutable)
-                                } else {
-                                    mutability
+                                match n.as_ref() {
+                                    "__Mutable" => Some(ParamMutability::ParamBorrowedMutable),
+                                    "__MaybeMutable" => Some(ParamMutability::ParamMaybeMutable),
+                                    _ => mutability,
                                 }
                             } else {
                                 mutability

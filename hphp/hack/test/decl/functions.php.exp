@@ -228,15 +228,15 @@ Parsed decls:
                  };
                fp_kind = FPnormal; fp_accept_disposable = false;
                fp_mutable = mutable };
-              { fp_pos = [62:25-27]; fp_name = (Some "$b");
+              { fp_pos = [62:30-32]; fp_name = (Some "$b");
                 fp_type =
                 { et_enforced = false;
                   et_type =
-                  (Rhint (root|functions.php line 62, characters 17-23),
-                   (Tapply (([62:17-24], "\\Typedef"), [])))
+                  (Rhint (root|functions.php line 62, characters 22-28),
+                   (Tapply (([62:22-29], "\\Typedef"), [])))
                   };
                 fp_kind = FPnormal; fp_accept_disposable = false;
-                fp_mutable = mutable }
+                fp_mutable = maybe-mutable }
               ];
             ft_ret =
             { et_enforced = false;

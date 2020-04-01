@@ -5,6 +5,7 @@
 //use crate::typing_env_types::Ty_::*;
 use crate::typing_env_types::*;
 use crate::typing_phase::localize;
+use arena_trait::Arena;
 use bumpalo::collections::Vec;
 use itertools::*;
 use oxidized::ast;
@@ -90,7 +91,7 @@ fn simplify_subtype_i<'a>(
                                     for (tparam, &ty) in izip!(cd.tparams.iter(), tyl_sub.iter()) {
                                         substs = substs.add(bld, &tparam.name.1, ty)
                                     }
-                                    let ety_env = bld.alloc.alloc(ExpandEnv_ {
+                                    let ety_env = bld.alloc(ExpandEnv {
                                         type_expansions: Vec::new_in(bld.alloc),
                                         substs,
                                     });

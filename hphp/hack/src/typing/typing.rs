@@ -8,11 +8,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::typing_phase;
+use crate::typing_phase::{self, MethodInstantiation};
 use crate::typing_subtype;
 use crate::{Env, LocalId, ParamMode};
+use arena_trait::Arena;
 use oxidized::typing_defs_core::Ty_ as DTy_;
 use oxidized::{ast, pos::Pos};
+use typing_defs_rust::typing_reason::PReason_;
 use typing_defs_rust::{tast, FunParam, FuncBodyAnn, SavedEnv, Ty, Ty_};
 
 pub fn fun<'a>(env: &mut Env<'a>, f: &'a ast::Fun_) -> tast::Fun_<'a> {
@@ -155,16 +157,22 @@ fn fun_type_of_id<'a>(
     match env.provider().get_fun(id) {
         None => unimplemented!(),
         Some(f) => {
-            let fty = &f.type_;
-            match fty.get_node() {
+            match f.type_.get_node() {
                 DTy_::Tfun(ft) => {
                     // TODO(hrust) transform_special_fun_ty
                     let ety_env = bld.env_with_self();
                     // TODO(hrust) below: strip_ns id
                     let targs = typing_phase::localize_targs(env, pos, id, &ft.tparams.0, targs);
                     // TODO(hrust) pessimize
-                    (typing_phase::localize(&ety_env, env, fty), targs)
+                    let instantiation = MethodInstantiation {
+                        use_pos: pos,
+                        use_name: id,
+                        explicit_targs: &targs,
+                    };
+                    let ft = typing_phase::localize_ft(ety_env, env, ft, Some(instantiation));
+                    let fty = bld.fun(bld.alloc(PReason_::from(f.type_.get_reason())), ft);
                     // TODO(hrust) check deprecated
+                    (fty, targs)
                 }
                 _ => panic!("Expected function type"),
             }

@@ -116,8 +116,8 @@ pub enum ExprDepTypeReason<'a> {
     ERself(&'a str),
 }
 
-impl<'a> PReason_<'a> {
-    pub fn from_decl_provided_reason(r: &'a OxReason) -> Self {
+impl<'a> From<&'a OxReason> for PReason_<'a> {
+    fn from(r: &'a OxReason) -> Self {
         match r {
             OxReason::Rhint(pos) => PReason_ {
                 pos: Some(&pos),

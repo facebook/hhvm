@@ -31,7 +31,7 @@ pub fn fun_env<'a>(
         Some(f) => {
             let fty = &f.type_;
             let ety_env = builder.env_with_self();
-            let fty = typing_phase::localize(&ety_env, &mut env, fty);
+            let fty = typing_phase::localize(ety_env, &mut env, fty);
             match fty.get_node() {
                 Ty_::Tfun(x) => x.return_,
                 x => unimplemented!("{:#?}", x),

@@ -3,15 +3,16 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use arena_trait::Arena;
 use bumpalo::collections::Vec as BVec;
 use bumpalo::{vec, Bump};
 
+use arena_trait::Arena;
 use naming_special_names_rust::{classes, collections};
 use oxidized::pos::Pos;
+use oxidized::tany_sentinel::TanySentinel;
 use oxidized::{aast_defs::Sid, ast_defs::Id, ident};
 
-use crate::typing_defs::{ExpandEnv, ExpandEnv_};
+use crate::typing_defs::ExpandEnv;
 use crate::typing_defs_core::*;
 use crate::typing_logic::{SubtypeProp, SubtypePropEnum};
 use crate::typing_reason::*;
@@ -102,6 +103,9 @@ impl<'a> TypeBuilder<'a> {
         Ty::mk(reason, self.alloc(ty_))
     }
 
+    pub fn any(&'a self, reason: PReason<'a>) -> Ty<'a> {
+        self.mk(reason, Ty_::Tany(TanySentinel))
+    }
     pub fn prim(&'a self, reason: PReason<'a>, kind: PrimKind<'a>) -> Ty<'a> {
         self.mk(reason, Ty_::Tprim(kind))
     }
@@ -288,10 +292,6 @@ impl<'a> TypeBuilder<'a> {
 
 /// All reason builders go here
 impl<'a> TypeBuilder<'a> {
-    pub fn alloc_reason(&self, r: PReason_<'a>) -> PReason<'a> {
-        self.alloc.alloc(r)
-    }
-
     fn mk_reason(&'a self, pos: Option<&'a Pos>, reason: Reason<'a>) -> PReason<'a> {
         self.alloc(PReason_ { pos, reason })
     }
@@ -325,9 +325,9 @@ impl<'a> TypeBuilder<'a> {
 }
 
 impl<'a> TypeBuilder<'a> {
-    pub fn env_with_self(&self) -> ExpandEnv<'a> {
+    pub fn env_with_self(&self) -> &mut ExpandEnv<'a> {
         // TODO(hrust) this_ty
-        self.alloc.alloc(ExpandEnv_ {
+        self.alloc(ExpandEnv {
             type_expansions: vec![in &self.alloc],
             substs: SMap::empty(),
         })

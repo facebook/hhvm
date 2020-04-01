@@ -3,7 +3,7 @@
 name = "decl_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["../direct_decl_parser.rs", "../lib.rs"]
+include = ["../decl_subst.rs", "../direct_decl_parser.rs", "../lib.rs"]
 
 [lib]
 path = "../lib.rs"
@@ -19,3 +19,5 @@ naming_special_names_rust = { path = "../../naming" }
 ocamlrep = { path = "../../ocamlrep" }
 oxidized = { path = "../../oxidized" }
 parser_core_types = { path = "../../parser/cargo/core_types" }
+typing_collections_rust = { path = "../../typing/cargo/typing_collections_rust" }
+typing_defs_rust = { path = "../../typing/cargo/typing_defs_rust" }

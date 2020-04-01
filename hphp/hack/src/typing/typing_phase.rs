@@ -2,9 +2,11 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use arena_trait::Arena;
 use bumpalo::collections::Vec as BVec;
 
 use crate::typing_env_types::Env;
+use decl_rust::decl_subst as subst;
 use naming_special_names_rust::typehints;
 use oxidized::aast::{Hint, Hint_};
 use oxidized::aast_defs::Tprim;
@@ -13,7 +15,7 @@ use oxidized::ast_defs::Id;
 use oxidized::pos::Pos;
 use oxidized::typing_defs_core::{FunType as DFunType, Tparam as DTparam, Ty as DTy, Ty_ as DTy_};
 use typing_defs_rust::tast;
-use typing_defs_rust::typing_defs::ExpandEnv_;
+use typing_defs_rust::typing_defs::ExpandEnv;
 use typing_defs_rust::typing_defs_core::{FunType, PrimKind, Ty};
 use typing_defs_rust::typing_reason::PReason_;
 
@@ -27,12 +29,10 @@ use typing_defs_rust::typing_reason::PReason_;
 /// When keep track of additional information while localizing a type such as
 /// what type defs were expanded to detect potentially recursive definitions..
 
-pub fn localize<'a>(ety_env: &'a ExpandEnv_<'a>, env: &mut Env<'a>, dty: &'a DTy) -> Ty<'a> {
+pub fn localize<'a>(ety_env: &mut ExpandEnv<'a>, env: &mut Env<'a>, dty: &'a DTy) -> Ty<'a> {
     let bld = env.builder();
     let DTy(r0, dty) = dty;
-    let r = env
-        .builder()
-        .alloc_reason(PReason_::from_decl_provided_reason(&r0));
+    let r = bld.alloc(PReason_::from(r0));
     match &**dty {
         DTy_::Tprim(p) => bld.prim(r, localize_prim(env, p)),
         // TODO(hrust) missing matches
@@ -59,7 +59,8 @@ pub fn localize<'a>(ety_env: &'a ExpandEnv_<'a>, env: &mut Env<'a>, dty: &'a DTy
             bld.class(r, &cls, tys)
         }
         DTy_::Tfun(ft) => {
-            let ft = localize_ft(ety_env, env, ft);
+            let instantiation = None;
+            let ft = localize_ft(ety_env, env, ft, instantiation);
             bld.fun(r, ft)
         }
         _ => {
@@ -128,17 +129,47 @@ fn localize_prim<'a>(_env: &mut Env<'a>, prim: &Tprim) -> PrimKind<'a> {
     }
 }
 
-fn localize_ft<'a>(
-    ety_env: &'a ExpandEnv_<'a>,
+pub struct MethodInstantiation<'a: 'b, 'b> {
+    /// position of the method call
+    #[allow(dead_code)]
+    pub use_pos: &'b Pos,
+    /// name of the method
+    #[allow(dead_code)]
+    pub use_name: &'b str,
+    pub explicit_targs: &'b Vec<tast::Targ<'a>>,
+}
+
+pub fn localize_ft<'a, 'b>(
+    ety_env: &mut ExpandEnv<'a>,
     env: &mut Env<'a>,
     ft: &'a DFunType,
+    instantiation: Option<MethodInstantiation<'a, 'b>>,
 ) -> FunType<'a> {
+    // TODO(hrust) rx stuff
+    match instantiation {
+        Some(MethodInstantiation {
+            use_pos: _,
+            use_name: _,
+            explicit_targs,
+        }) => {
+            if !explicit_targs.is_empty() && explicit_targs.len() != ft.tparams.0.len() {
+                unimplemented!("Wrong number of type arguments.")
+            }
+            let targ_tys = explicit_targs.iter().map(|targ| targ.0).collect();
+            let substs = subst::make_locl(env.bld(), &ft.tparams.0, &targ_tys);
+            ety_env.substs = substs // TODO(hrust) extend substs instead of replacing
+        }
+        None => {
+            // TODO(hrust)
+        }
+    };
+    // TODO(hrust): localize params and more...
     let ret = localize(ety_env, env, &ft.ret.type_);
     env.bld().funtype(ret)
 }
 
 fn localize_tparams<'a>(
-    ety_env: &'a ExpandEnv_<'a>,
+    ety_env: &mut ExpandEnv<'a>,
     env: &mut Env<'a>,
     pos: &Pos,
     tys: &'a Vec<DTy>,
@@ -155,7 +186,7 @@ fn localize_tparams<'a>(
 }
 
 fn localize_tparam<'a>(
-    ety_env: &'a ExpandEnv_<'a>,
+    ety_env: &mut ExpandEnv<'a>,
     env: &mut Env<'a>,
     _pos: &Pos,
     ty: &'a DTy,

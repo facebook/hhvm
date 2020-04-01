@@ -1,17 +1,16 @@
-The following typedef(s) differed between the legacy and parsed versions:
+Parsed decls:
 
+{ Direct_decl_parser.classes = {}; funs = {};
+  typedefs =
+  { "MaybeDiv" ->
+    { td_pos = [3:6-14]; td_vis = Transparent; td_tparams = [];
+      td_constraint = None;
+      td_type =
+      (Rhint (root|nullable_xhp_typehint.php line 3, characters 17-21),
+       (Toption
+          (Rhint (root|nullable_xhp_typehint.php line 3, characters 18-21),
+           (Tapply (([3:18-22], "\\:div"), [])))))
+      } };
+  consts = {} }
 
-[MaybeDiv]
---- legacy
-+++ parsed
-@@ -1,8 +1,8 @@
- { td_pos = [3:6-14]; td_vis = Transparent; td_tparams = [];
-   td_constraint = None;
-   td_type =
-   (Rhint (root|nullable_xhp_typehint.php line 3, characters 17-21),
-    (Toption
-       (Rhint (root|nullable_xhp_typehint.php line 3, characters 18-21),
--       (Tapply (([3:18-22], "\\:div"), [])))))
-+       (Tapply (([3:18-22], "\\xhp_div"), [])))))
-   }
-\ No newline at end of file
+They matched!

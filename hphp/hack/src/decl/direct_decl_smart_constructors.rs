@@ -62,26 +62,6 @@ pub fn empty_decls() -> InProgressDecls {
     }
 }
 
-fn mangle_xhp_id<'a>(name: Cow<'a, String>) -> Cow<'a, String> {
-    fn ignore_id(name: &str) -> bool {
-        name.starts_with("class@anonymous") || name.starts_with("Closure$")
-    }
-
-    fn is_xhp(name: &str) -> bool {
-        name.chars().next().map_or(false, |c| c == ':')
-    }
-
-    if !ignore_id(&name) {
-        let mut name = name.into_owned();
-        if is_xhp(&name) {
-            name.replace_range(..1, "xhp_")
-        }
-        Cow::Owned(name.replace(":", "__").replace("-", "_"))
-    } else {
-        name
-    }
-}
-
 pub fn get_name(namespace: &str, name: &Node_) -> Result<Id, ParseError> {
     fn qualified_name_from_parts(
         namespace: &str,
@@ -141,10 +121,7 @@ pub fn get_name(namespace: &str, name: &Node_) -> Result<Id, ParseError> {
         }
         Node_::XhpName(name, pos) => {
             // xhp names are always unqualified
-            Ok(Id(
-                pos.clone(),
-                mangle_xhp_id(Cow::Borrowed(name)).into_owned(),
-            ))
+            Ok(Id(pos.clone(), name.to_string()))
         }
         Node_::QualifiedName(parts, pos) => qualified_name_from_parts(namespace, &parts, pos),
         Node_::Construct(pos) => Ok(Id(

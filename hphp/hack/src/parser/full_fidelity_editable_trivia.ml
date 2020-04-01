@@ -67,12 +67,6 @@ let make_delimited_comment source_text offset width =
     text = SourceText.sub source_text offset width;
   }
 
-let make_after_halt_compiler source_text offset width =
-  {
-    kind = TriviaKind.AfterHaltCompiler;
-    text = SourceText.sub source_text offset width;
-  }
-
 (* HackFormat is using this to create trivia. It's deeply manipulating strings
  * so it was easier to create this helper function to avoid ad-hoc
  * SourceText construction.*)

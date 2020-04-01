@@ -486,10 +486,6 @@ where
         self.lexer_mut().scan_header()
     }
 
-    fn rescan_halt_compiler(&mut self, right_brace: S::Token) -> S::Token {
-        self.lexer_mut().rescan_halt_compiler(right_brace)
-    }
-
     fn error_offsets(&mut self, on_whole_token: bool /* = false */) -> (usize, usize) {
         if on_whole_token {
             let token = self.peek_token();

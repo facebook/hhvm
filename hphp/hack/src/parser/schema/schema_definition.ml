@@ -1389,21 +1389,6 @@ let schema : schema_node list =
         ];
     };
     {
-      kind_name = "HaltCompilerExpression";
-      type_name = "halt_compiler_expression";
-      func_name = "halt_compiler_expression";
-      description = "halt_compiler_expression";
-      prefix = "halt_compiler";
-      aggregates = [Expression; ConstructorExpression; LambdaBody];
-      fields =
-        [
-          ("keyword", Token);
-          ("left_paren", Token);
-          ("argument_list", ZeroOrMore (Aggregate Expression));
-          ("right_paren", Token);
-        ];
-    };
-    {
       kind_name = "IssetExpression";
       type_name = "isset_expression";
       func_name = "isset_expression";

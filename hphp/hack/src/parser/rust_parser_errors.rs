@@ -3232,24 +3232,6 @@ where
                 self.errors
                     .push(Self::make_error_from_node(node, errors::error2020))
             }
-            HaltCompilerExpression(x) => {
-                if Self::syntax_to_list_no_separators(&x.halt_compiler_argument_list)
-                    .next()
-                    .is_some()
-                {
-                    self.errors.push(Self::make_error_from_node(
-                        node,
-                        errors::no_args_in_halt_compiler,
-                    ))
-                }
-                // expression statement -> syntax list -> script
-                if self.parents.len() != 3 {
-                    self.errors.push(Self::make_error_from_node(
-                        node,
-                        errors::halt_compiler_top_level_only,
-                    ))
-                }
-            }
 
             FunctionCallExpression(x) => {
                 let arg_list = &x.function_call_argument_list;
@@ -4878,15 +4860,6 @@ where
                                     | FileAttributeSpecification(_)
                                     | EndOfFile(_)
                                     | NamespaceUseDeclaration(_) => false,
-                                    ExpressionStatement(x) => {
-                                        if let HaltCompilerExpression(_) =
-                                            &x.expression_statement_expression.syntax
-                                        {
-                                            false
-                                        } else {
-                                            true
-                                        }
-                                    }
                                     _ => true,
                                 }
                             })
@@ -5355,7 +5328,6 @@ where
             ArrayIntrinsicExpression(_) => self.expression_errors(node),
             LiteralExpression(_)
             | SafeMemberSelectionExpression(_)
-            | HaltCompilerExpression(_)
             | FunctionCallExpression(_)
             | ListExpression(_)
             | ShapeExpression(_)

@@ -205,7 +205,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.ConditionalExpression _ -> tag validate_conditional_expression (fun x -> ExprConditional x) x
     | Syntax.EvalExpression _ -> tag validate_eval_expression (fun x -> ExprEval x) x
     | Syntax.DefineExpression _ -> tag validate_define_expression (fun x -> ExprDefine x) x
-    | Syntax.HaltCompilerExpression _ -> tag validate_halt_compiler_expression (fun x -> ExprHaltCompiler x) x
     | Syntax.IssetExpression _ -> tag validate_isset_expression (fun x -> ExprIsset x) x
     | Syntax.FunctionCallExpression _ -> tag validate_function_call_expression (fun x -> ExprFunctionCall x) x
     | Syntax.FunctionPointerExpression _ -> tag validate_function_pointer_expression (fun x -> ExprFunctionPointer x) x
@@ -258,7 +257,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | ExprConditional                  thing -> invalidate_conditional_expression         (value, thing)
     | ExprEval                         thing -> invalidate_eval_expression                (value, thing)
     | ExprDefine                       thing -> invalidate_define_expression              (value, thing)
-    | ExprHaltCompiler                 thing -> invalidate_halt_compiler_expression       (value, thing)
     | ExprIsset                        thing -> invalidate_isset_expression               (value, thing)
     | ExprFunctionCall                 thing -> invalidate_function_call_expression       (value, thing)
     | ExprFunctionPointer              thing -> invalidate_function_pointer_expression    (value, thing)
@@ -464,7 +462,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.ConditionalExpression _ -> tag validate_conditional_expression (fun x -> LambdaConditional x) x
     | Syntax.EvalExpression _ -> tag validate_eval_expression (fun x -> LambdaEval x) x
     | Syntax.DefineExpression _ -> tag validate_define_expression (fun x -> LambdaDefine x) x
-    | Syntax.HaltCompilerExpression _ -> tag validate_halt_compiler_expression (fun x -> LambdaHaltCompiler x) x
     | Syntax.IssetExpression _ -> tag validate_isset_expression (fun x -> LambdaIsset x) x
     | Syntax.FunctionCallExpression _ -> tag validate_function_call_expression (fun x -> LambdaFunctionCall x) x
     | Syntax.FunctionPointerExpression _ -> tag validate_function_pointer_expression (fun x -> LambdaFunctionPointer x) x
@@ -517,7 +514,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | LambdaConditional                  thing -> invalidate_conditional_expression         (value, thing)
     | LambdaEval                         thing -> invalidate_eval_expression                (value, thing)
     | LambdaDefine                       thing -> invalidate_define_expression              (value, thing)
-    | LambdaHaltCompiler                 thing -> invalidate_halt_compiler_expression       (value, thing)
     | LambdaIsset                        thing -> invalidate_isset_expression               (value, thing)
     | LambdaFunctionCall                 thing -> invalidate_function_call_expression       (value, thing)
     | LambdaFunctionPointer              thing -> invalidate_function_pointer_expression    (value, thing)
@@ -568,7 +564,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.ConditionalExpression _ -> tag validate_conditional_expression (fun x -> CExprConditional x) x
     | Syntax.EvalExpression _ -> tag validate_eval_expression (fun x -> CExprEval x) x
     | Syntax.DefineExpression _ -> tag validate_define_expression (fun x -> CExprDefine x) x
-    | Syntax.HaltCompilerExpression _ -> tag validate_halt_compiler_expression (fun x -> CExprHaltCompiler x) x
     | Syntax.IssetExpression _ -> tag validate_isset_expression (fun x -> CExprIsset x) x
     | Syntax.FunctionCallExpression _ -> tag validate_function_call_expression (fun x -> CExprFunctionCall x) x
     | Syntax.FunctionPointerExpression _ -> tag validate_function_pointer_expression (fun x -> CExprFunctionPointer x) x
@@ -621,7 +616,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | CExprConditional                  thing -> invalidate_conditional_expression         (value, thing)
     | CExprEval                         thing -> invalidate_eval_expression                (value, thing)
     | CExprDefine                       thing -> invalidate_define_expression              (value, thing)
-    | CExprHaltCompiler                 thing -> invalidate_halt_compiler_expression       (value, thing)
     | CExprIsset                        thing -> invalidate_isset_expression               (value, thing)
     | CExprFunctionCall                 thing -> invalidate_function_call_expression       (value, thing)
     | CExprFunctionPointer              thing -> invalidate_function_pointer_expression    (value, thing)
@@ -2452,24 +2446,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       ; define_left_paren = invalidate_token x.define_left_paren
       ; define_argument_list = invalidate_list_with (invalidate_expression) x.define_argument_list
       ; define_right_paren = invalidate_token x.define_right_paren
-      }
-    ; Syntax.value = v
-    }
-  and validate_halt_compiler_expression : halt_compiler_expression validator = function
-  | { Syntax.syntax = Syntax.HaltCompilerExpression x; value = v } -> v,
-    { halt_compiler_right_paren = validate_token x.halt_compiler_right_paren
-    ; halt_compiler_argument_list = validate_list_with (validate_expression) x.halt_compiler_argument_list
-    ; halt_compiler_left_paren = validate_token x.halt_compiler_left_paren
-    ; halt_compiler_keyword = validate_token x.halt_compiler_keyword
-    }
-  | s -> validation_fail (Some SyntaxKind.HaltCompilerExpression) s
-  and invalidate_halt_compiler_expression : halt_compiler_expression invalidator = fun (v, x) ->
-    { Syntax.syntax =
-      Syntax.HaltCompilerExpression
-      { halt_compiler_keyword = invalidate_token x.halt_compiler_keyword
-      ; halt_compiler_left_paren = invalidate_token x.halt_compiler_left_paren
-      ; halt_compiler_argument_list = invalidate_list_with (invalidate_expression) x.halt_compiler_argument_list
-      ; halt_compiler_right_paren = invalidate_token x.halt_compiler_right_paren
       }
     ; Syntax.value = v
     }

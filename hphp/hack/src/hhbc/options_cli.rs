@@ -43,7 +43,6 @@ lazy_static! {
             "hack.lang.phpism.disallowexecutionoperator" => "hhvm.hack.lang.phpism.disallow_execution_operator",
             "hack.lang.phpism.disablenontopleveldeclarations" => "hhvm.hack.lang.phpism.disable_nontoplevel_declarations",
             "hack.lang.phpism.disablestaticclosures" => "hhvm.hack.lang.phpism.disable_static_closures",
-            "hack.lang.phpism.disablehaltcompiler" => "hhvm.hack.lang.phpism.disable_halt_compiler",
             "hack.lang.enablecoroutines" => "hhvm.hack.lang.enable_coroutines",
             "hack.lang.enablepocketuniverses" => "hhvm.hack.lang.enable_pocket_universes",
             // group 5: we could assume "hack." between "hhvm." and "lang."

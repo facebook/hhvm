@@ -1,6 +1,6 @@
 { "description" :
   "@generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2020-03-24-0001",
+  "version" : "2020-03-31-0001",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -17,9 +17,7 @@
     { "trivia_kind_name" : "FallThrough",
       "trivia_type_name" : "fall_through" },
     { "trivia_kind_name" : "ExtraTokenError",
-      "trivia_type_name" : "extra_token_error" },
-    { "trivia_kind_name" : "AfterHaltCompiler",
-      "trivia_type_name" : "after_halt_compiler" } ],
+      "trivia_type_name" : "extra_token_error" } ],
   "tokens" : [
     { "token_kind" : "Abstract",
       "token_text" : "abstract" },
@@ -127,8 +125,6 @@
       "token_text" : "concurrent" },
     { "token_kind" : "Goto",
       "token_text" : "goto" },
-    { "token_kind" : "HaltCompiler",
-      "token_text" : "__halt_compiler" },
     { "token_kind" : "If",
       "token_text" : "if" },
     { "token_kind" : "Implements",
@@ -1409,16 +1405,6 @@
       "type_name" : "define_expression",
       "description" : "define_expression",
       "prefix" : "define",
-      "fields" : [
-        { "field_name" : "keyword" },
-        { "field_name" : "left_paren" },
-        { "field_name" : "argument_list" },
-        { "field_name" : "right_paren" }
-      ] },
-    { "kind_name" : "HaltCompilerExpression",
-      "type_name" : "halt_compiler_expression",
-      "description" : "halt_compiler_expression",
-      "prefix" : "halt_compiler",
       "fields" : [
         { "field_name" : "keyword" },
         { "field_name" : "left_paren" },

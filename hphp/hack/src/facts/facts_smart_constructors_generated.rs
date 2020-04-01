@@ -448,10 +448,6 @@ impl<'src> SmartConstructors<'src, HasScriptContent<'src>> for FactsSmartConstru
         <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_define_expression(self, arg0, arg1, arg2, arg3)
     }
 
-    fn make_halt_compiler_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_halt_compiler_expression(self, arg0, arg1, arg2, arg3)
-    }
-
     fn make_isset_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> Self::R {
         <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_isset_expression(self, arg0, arg1, arg2, arg3)
     }

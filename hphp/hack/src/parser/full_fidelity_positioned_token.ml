@@ -68,8 +68,7 @@ end = struct
     [type SurroundingTrivia = Lexable of int | Unlexable of (Trivia.t list * Trivia.t list)].
     Unfortunately, the first case is at least nine orders of magnitude more
     common than the second case, since the second case is only needed for
-    [AfterHaltCompiler] and [ExtraTokenError], which are either exceedingly
-    rare or only show up in incorrect files that wouldn't pass typecheck
+    [ExtraTokenError], which only show up in incorrect files that wouldn't pass typecheck
     anyway. Therefore, in order to optimize for the general case, we use the
     [Obj] library to store the trivia kinds packed into an int as an immediate
     value, unless we detect that it's not an int, in which case we can pull it
@@ -116,9 +115,7 @@ end = struct
     List.fold_left ( lor ) 0 trivia_kinds
 
   let is_special = function
-    | TriviaKind.AfterHaltCompiler
-    | TriviaKind.ExtraTokenError ->
-      true
+    | TriviaKind.ExtraTokenError -> true
     | _ -> false
 
   let has_special trivia_lists =

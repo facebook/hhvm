@@ -279,7 +279,6 @@ const char *PHP_KEYWORDS[] = {
   "unset",
   "isset",
   "empty",
-  "halt_compiler",
   "class",
   "interface",
   "extends",

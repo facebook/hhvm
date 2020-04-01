@@ -158,7 +158,6 @@ module WithToken(Token: TokenType) = struct
       | ConditionalExpression             _ -> SyntaxKind.ConditionalExpression
       | EvalExpression                    _ -> SyntaxKind.EvalExpression
       | DefineExpression                  _ -> SyntaxKind.DefineExpression
-      | HaltCompilerExpression            _ -> SyntaxKind.HaltCompilerExpression
       | IssetExpression                   _ -> SyntaxKind.IssetExpression
       | FunctionCallExpression            _ -> SyntaxKind.FunctionCallExpression
       | FunctionPointerExpression         _ -> SyntaxKind.FunctionPointerExpression
@@ -347,7 +346,6 @@ module WithToken(Token: TokenType) = struct
     let is_conditional_expression               = has_kind SyntaxKind.ConditionalExpression
     let is_eval_expression                      = has_kind SyntaxKind.EvalExpression
     let is_define_expression                    = has_kind SyntaxKind.DefineExpression
-    let is_halt_compiler_expression             = has_kind SyntaxKind.HaltCompilerExpression
     let is_isset_expression                     = has_kind SyntaxKind.IssetExpression
     let is_function_call_expression             = has_kind SyntaxKind.FunctionCallExpression
     let is_function_pointer_expression          = has_kind SyntaxKind.FunctionPointerExpression
@@ -1561,17 +1559,6 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc define_left_paren in
          let acc = f acc define_argument_list in
          let acc = f acc define_right_paren in
-         acc
-      | HaltCompilerExpression {
-        halt_compiler_keyword;
-        halt_compiler_left_paren;
-        halt_compiler_argument_list;
-        halt_compiler_right_paren;
-      } ->
-         let acc = f acc halt_compiler_keyword in
-         let acc = f acc halt_compiler_left_paren in
-         let acc = f acc halt_compiler_argument_list in
-         let acc = f acc halt_compiler_right_paren in
          acc
       | IssetExpression {
         isset_keyword;
@@ -3428,17 +3415,6 @@ module WithToken(Token: TokenType) = struct
         define_argument_list;
         define_right_paren;
       ]
-      | HaltCompilerExpression {
-        halt_compiler_keyword;
-        halt_compiler_left_paren;
-        halt_compiler_argument_list;
-        halt_compiler_right_paren;
-      } -> [
-        halt_compiler_keyword;
-        halt_compiler_left_paren;
-        halt_compiler_argument_list;
-        halt_compiler_right_paren;
-      ]
       | IssetExpression {
         isset_keyword;
         isset_left_paren;
@@ -5294,17 +5270,6 @@ module WithToken(Token: TokenType) = struct
         "define_left_paren";
         "define_argument_list";
         "define_right_paren";
-      ]
-      | HaltCompilerExpression {
-        halt_compiler_keyword;
-        halt_compiler_left_paren;
-        halt_compiler_argument_list;
-        halt_compiler_right_paren;
-      } -> [
-        "halt_compiler_keyword";
-        "halt_compiler_left_paren";
-        "halt_compiler_argument_list";
-        "halt_compiler_right_paren";
       ]
       | IssetExpression {
         isset_keyword;
@@ -7314,18 +7279,6 @@ module WithToken(Token: TokenType) = struct
           define_left_paren;
           define_argument_list;
           define_right_paren;
-        }
-      | (SyntaxKind.HaltCompilerExpression, [
-          halt_compiler_keyword;
-          halt_compiler_left_paren;
-          halt_compiler_argument_list;
-          halt_compiler_right_paren;
-        ]) ->
-        HaltCompilerExpression {
-          halt_compiler_keyword;
-          halt_compiler_left_paren;
-          halt_compiler_argument_list;
-          halt_compiler_right_paren;
         }
       | (SyntaxKind.IssetExpression, [
           isset_keyword;
@@ -9686,21 +9639,6 @@ module WithToken(Token: TokenType) = struct
           define_left_paren;
           define_argument_list;
           define_right_paren;
-        } in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_halt_compiler_expression
-        halt_compiler_keyword
-        halt_compiler_left_paren
-        halt_compiler_argument_list
-        halt_compiler_right_paren
-      =
-        let syntax = HaltCompilerExpression {
-          halt_compiler_keyword;
-          halt_compiler_left_paren;
-          halt_compiler_argument_list;
-          halt_compiler_right_paren;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

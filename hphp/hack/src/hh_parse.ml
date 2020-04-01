@@ -67,7 +67,6 @@ module FullFidelityParseArgs = struct
     const_default_func_args: bool;
     const_static_props: bool;
     abstract_static_props: bool;
-    disable_halt_compiler: bool;
     disallow_func_ptrs_in_constants: bool;
     error_php_lambdas: bool;
     disallow_discarded_nullable_awaitables: bool;
@@ -106,7 +105,6 @@ module FullFidelityParseArgs = struct
       const_default_func_args
       const_static_props
       abstract_static_props
-      disable_halt_compiler
       disallow_func_ptrs_in_constants
       error_php_lambdas
       disallow_discarded_nullable_awaitables
@@ -143,7 +141,6 @@ module FullFidelityParseArgs = struct
       const_default_func_args;
       const_static_props;
       abstract_static_props;
-      disable_halt_compiler;
       disallow_func_ptrs_in_constants;
       error_php_lambdas;
       disallow_discarded_nullable_awaitables;
@@ -197,7 +194,6 @@ module FullFidelityParseArgs = struct
     let const_default_func_args = ref false in
     let const_static_props = ref false in
     let abstract_static_props = ref false in
-    let disable_halt_compiler = ref false in
     let disallow_func_ptrs_in_constants = ref false in
     let error_php_lambdas = ref false in
     let disallow_discarded_nullable_awaitables = ref false in
@@ -322,9 +318,6 @@ No errors are filtered out."
         ( "--abstract-static-props",
           Arg.Set abstract_static_props,
           "Enable abstract static properties" );
-        ( "--disable-halt-compiler",
-          Arg.Set disable_halt_compiler,
-          "Disable using PHP __halt_compiler()" );
         ( "--disallow-func-ptrs-in-constants",
           Arg.Set disallow_func_ptrs_in_constants,
           "Disallow use of HH\\fun and HH\\class_meth in constants and constant initializers"
@@ -395,7 +388,6 @@ No errors are filtered out."
       !const_default_func_args
       !const_static_props
       !abstract_static_props
-      !disable_halt_compiler
       !disallow_func_ptrs_in_constants
       !error_php_lambdas
       !disallow_discarded_nullable_awaitables

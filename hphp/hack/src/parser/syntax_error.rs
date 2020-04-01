@@ -694,8 +694,6 @@ pub const parent_static_const_decl: Error =
     Cow::Borrowed("Cannot use static or parent::class in constant declaration");
 pub const no_async_before_lambda_body: Error =
     Cow::Borrowed("Don't use () ==> async { ... }. Instead, use: async () ==> { ... }");
-pub const halt_compiler_top_level_only: Error =
-    Cow::Borrowed("__halt_compiler function should appear only at the top level");
 pub fn invalid_number_of_args(name: &str, n: usize) -> Error {
     Cow::Owned(format!(
         "Method {} must take exactly {} arguments",
@@ -804,8 +802,6 @@ pub const method_calls_on_xhp_attributes: Error =
     Cow::Borrowed("Method calls are not allowed on XHP attributes");
 pub const method_calls_on_xhp_expression: Error =
     Cow::Borrowed("Please add parentheses around the XHP component");
-pub const no_args_in_halt_compiler: Error =
-    Cow::Borrowed("__halt_compiler function does not accept any arguments");
 pub fn class_with_abstract_method(name: &str) -> Error {
     Cow::Owned(format!(
         concat!(
@@ -913,8 +909,6 @@ pub fn invalid_typehint_alias(alias: &str, hint: &str) -> Error {
         hint.to_string(),
     ))
 }
-pub const halt_compiler_is_disabled: Error =
-    Cow::Borrowed("__halt_compiler() is not supported in Hack");
 
 pub const function_pointer_bad_recv: Error =
     Cow::Borrowed("Function pointers must be explicitly specified");

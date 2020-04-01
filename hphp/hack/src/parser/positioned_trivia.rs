@@ -87,14 +87,6 @@ impl LexableTrivia for PositionedTrivia {
             width,
         }
     }
-
-    fn make_after_halt_compiler(_source: &SourceText, offset: usize, width: usize) -> Self {
-        Self {
-            kind: TriviaKind::AfterHaltCompiler,
-            offset,
-            width,
-        }
-    }
 }
 
 impl LexablePositionedTrivia for PositionedTrivia {

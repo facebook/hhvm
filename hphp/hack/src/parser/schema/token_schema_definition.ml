@@ -129,7 +129,6 @@ let given_text_tokens =
     make_token_node "Global" "global" ();
     make_token_node "Concurrent" "concurrent" ();
     make_token_node "Goto" "goto" ();
-    make_token_node "HaltCompiler" "__halt_compiler" ();
     make_token_node "If" "if" ();
     make_token_node "Implements" "implements" ();
     make_token_node "Include" "include" ();

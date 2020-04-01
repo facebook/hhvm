@@ -467,7 +467,6 @@ where
             | TokenKind::Require_once => self.parse_inclusion_expression(),
             | TokenKind::Isset => self.parse_isset_expression(),
             | TokenKind::Define => self.parse_define_expression(),
-            | TokenKind::HaltCompiler => self.parse_halt_compiler_expression(),
             | TokenKind::Eval => self.parse_eval_expression(),
             | TokenKind::ColonAt => self.parse_pocket_atom(),
             | TokenKind::Empty => {
@@ -555,26 +554,6 @@ where
             let (left, args, right) = self.parse_expression_list_opt();
             S!(make_define_expression, self, keyword, left, args, right)
         } else {
-            self.parse_as_name_or_error()
-        }
-    }
-
-    fn parse_halt_compiler_expression(&mut self) -> S::R {
-        let mut parser1 = self.clone();
-        let keyword = parser1.assert_token(TokenKind::HaltCompiler);
-        if parser1.peek_token_kind() == TokenKind::LeftParen {
-            self.continue_from(parser1);
-            let (left, args, right) = self.parse_expression_list_opt();
-            S!(
-                make_halt_compiler_expression,
-                self,
-                keyword,
-                left,
-                args,
-                right
-            )
-        } else {
-            self.with_error(Errors::error1019);
             self.parse_as_name_or_error()
         }
     }

@@ -29,8 +29,6 @@ module type LexableTrivia_S = sig
 
   val make_delimited_comment : SourceText.t -> int -> int -> t
 
-  val make_after_halt_compiler : SourceText.t -> int -> int -> t
-
   val kind : t -> TriviaKind.t
 
   val width : t -> int

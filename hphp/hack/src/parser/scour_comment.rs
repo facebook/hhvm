@@ -87,7 +87,7 @@ where
     ) -> ScouredComments {
         use TriviaKind::*;
         match t.kind() {
-            WhiteSpace | EndOfLine | FallThrough | ExtraTokenError | AfterHaltCompiler => acc,
+            WhiteSpace | EndOfLine | FallThrough | ExtraTokenError => acc,
             DelimitedComment => {
                 let start = t.start_offset() + 2;
                 let end = t.end_offset();

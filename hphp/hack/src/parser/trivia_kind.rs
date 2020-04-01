@@ -29,7 +29,6 @@ pub enum TriviaKind {
     IgnoreError,
     FallThrough,
     ExtraTokenError,
-    AfterHaltCompiler,
 }
 
 impl TriviaKind {
@@ -43,7 +42,6 @@ impl TriviaKind {
             TriviaKind::IgnoreError => "ignore_error",
             TriviaKind::FallThrough => "fall_through",
             TriviaKind::ExtraTokenError => "extra_token_error",
-            TriviaKind::AfterHaltCompiler => "after_halt_compiler",
         }
     }
 
@@ -57,7 +55,6 @@ impl TriviaKind {
             TriviaKind::IgnoreError => 5,
             TriviaKind::FallThrough => 6,
             TriviaKind::ExtraTokenError => 7,
-            TriviaKind::AfterHaltCompiler => 8,
         }
     }
 }

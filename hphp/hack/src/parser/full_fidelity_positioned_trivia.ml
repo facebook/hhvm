@@ -52,9 +52,6 @@ let make_single_line_comment source_text offset width =
 let make_delimited_comment source_text offset width =
   { kind = TriviaKind.DelimitedComment; source_text; offset; width }
 
-let make_after_halt_compiler source_text offset width =
-  { kind = TriviaKind.AfterHaltCompiler; source_text; offset; width }
-
 let width trivia = trivia.width
 
 let kind trivia = trivia.kind

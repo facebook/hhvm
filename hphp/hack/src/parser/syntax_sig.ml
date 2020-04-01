@@ -610,12 +610,6 @@ module type Syntax_S = sig
     ; define_argument_list                               : t
     ; define_right_paren                                 : t
     }
-  | HaltCompilerExpression            of
-    { halt_compiler_keyword                              : t
-    ; halt_compiler_left_paren                           : t
-    ; halt_compiler_argument_list                        : t
-    ; halt_compiler_right_paren                          : t
-    }
   | IssetExpression                   of
     { isset_keyword                                      : t
     ; isset_left_paren                                   : t
@@ -1189,7 +1183,6 @@ module type Syntax_S = sig
   val make_conditional_expression : t -> t -> t -> t -> t -> t
   val make_eval_expression : t -> t -> t -> t -> t
   val make_define_expression : t -> t -> t -> t -> t
-  val make_halt_compiler_expression : t -> t -> t -> t -> t
   val make_isset_expression : t -> t -> t -> t -> t
   val make_function_call_expression : t -> t -> t -> t -> t -> t
   val make_function_pointer_expression : t -> t -> t
@@ -1370,7 +1363,6 @@ module type Syntax_S = sig
   val is_conditional_expression : t -> bool
   val is_eval_expression : t -> bool
   val is_define_expression : t -> bool
-  val is_halt_compiler_expression : t -> bool
   val is_isset_expression : t -> bool
   val is_function_call_expression : t -> bool
   val is_function_pointer_expression : t -> bool

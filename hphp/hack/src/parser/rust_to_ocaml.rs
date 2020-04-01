@@ -165,9 +165,7 @@ fn build_lazy_trivia(trivia_list: &[PositionedTrivia], acc: Option<usize>) -> Op
     trivia_list
         .iter()
         .fold(acc, |acc, trivia| match (acc, trivia.kind) {
-            (None, _) | (_, TriviaKind::AfterHaltCompiler) | (_, TriviaKind::ExtraTokenError) => {
-                None
-            }
+            (None, _) | (_, TriviaKind::ExtraTokenError) => None,
             (Some(mask), kind) => Some(mask | trivia_kind_mask(kind)),
         })
 }

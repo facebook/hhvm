@@ -262,7 +262,6 @@ prefixed_flags!(
     DISALLOW_EXECUTION_OPERATOR,
     DISABLE_NONTOPLEVEL_DECLARATIONS,
     DISABLE_STATIC_CLOSURES,
-    DISABLE_HALT_COMPILER,
 );
 impl Default for PhpismFlags {
     fn default() -> PhpismFlags {
@@ -992,7 +991,6 @@ bitflags! {
         const DISALLOW_EXECUTION_OPERATOR = 1 << 21;
         const DISABLE_NONTOPLEVEL_DECLARATIONS = 1 << 22;
         const DISABLE_STATIC_CLOSURES = 1 << 23;
-        const DISABLE_HALT_COMPILER = 1 << 24;
         const EMIT_FUNC_POINTERS = 1 << 25;
         const EMIT_CLS_METH_POINTERS = 1 << 26;
         const EMIT_INST_METH_POINTERS = 1 << 27;

@@ -1963,17 +1963,17 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
     fn as_case_insensitive_keyword(&self, text: &str) -> Option<String> {
         let lower = text.to_ascii_lowercase();
         match lower.as_ref() {
-            "__halt_compiler" | "abstract" | "and" | "array" | "as" | "bool" | "boolean"
-            | "break" | "callable" | "case" | "catch" | "class" | "clone" | "const"
-            | "continue" | "default" | "die" | "do" | "echo" | "else" | "elseif" | "empty"
-            | "endfor" | "endforeach" | "endif" | "endswitch" | "endwhile" | "eval" | "exit"
-            | "extends" | "false" | "final" | "finally" | "for" | "foreach" | "function"
-            | "global" | "goto" | "if" | "implements" | "include" | "include_once" | "inout"
-            | "instanceof" | "insteadof" | "int" | "integer" | "interface" | "isset" | "list"
-            | "namespace" | "new" | "null" | "or" | "parent" | "print" | "private"
-            | "protected" | "public" | "require" | "require_once" | "return" | "self"
-            | "static" | "string" | "switch" | "throw" | "trait" | "try" | "true" | "unset"
-            | "use" | "using" | "var" | "void" | "while" | "xor" | "yield" => Some(lower),
+            "abstract" | "and" | "array" | "as" | "bool" | "boolean" | "break" | "callable"
+            | "case" | "catch" | "class" | "clone" | "const" | "continue" | "default" | "die"
+            | "do" | "echo" | "else" | "elseif" | "empty" | "endfor" | "endforeach" | "endif"
+            | "endswitch" | "endwhile" | "eval" | "exit" | "extends" | "false" | "final"
+            | "finally" | "for" | "foreach" | "function" | "global" | "goto" | "if"
+            | "implements" | "include" | "include_once" | "inout" | "instanceof" | "insteadof"
+            | "int" | "integer" | "interface" | "isset" | "list" | "namespace" | "new" | "null"
+            | "or" | "parent" | "print" | "private" | "protected" | "public" | "require"
+            | "require_once" | "return" | "self" | "static" | "string" | "switch" | "throw"
+            | "trait" | "try" | "true" | "unset" | "use" | "using" | "var" | "void" | "while"
+            | "xor" | "yield" => Some(lower),
             _ => None,
         }
     }
@@ -2371,26 +2371,5 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
 
     pub fn next_xhp_category_name(&mut self) -> Token {
         self.scan_token_and_trivia(&Self::scan_xhp_category_name, KwSet::NoKeywords)
-    }
-
-    pub fn rescan_halt_compiler(&mut self, last_token: Token) -> Token {
-        // __halt_compiler stops parsing of the file.
-        // In order to preserve fill fidelity aspect of the parser
-        // we pack everything that follows __halt_compiler as
-        // separate opaque kind of trivia - it will be attached as a trailing trivia
-        // to the last_token and existing trailing trivia will be merged in.
-
-        // This is incorrect for minimal token
-        let leading_start_offset = last_token.leading_start_offset().unwrap_or(0);
-        let start_offset = leading_start_offset + last_token.leading_width() + last_token.width();
-
-        let length = self.source.length();
-        let trailing = Token::Trivia::make_after_halt_compiler(
-            self.source(),
-            start_offset,
-            length - start_offset,
-        );
-        self.with_offset(length);
-        last_token.with_trailing(vec![trailing])
     }
 }

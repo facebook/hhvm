@@ -185,8 +185,7 @@ let get_docblock node =
           helper tail acc 1
         | TriviaKind.DelimitedComment
         | TriviaKind.FallThrough
-        | TriviaKind.ExtraTokenError
-        | TriviaKind.AfterHaltCompiler ->
+        | TriviaKind.ExtraTokenError ->
           (* Short circuit immediately. *)
           helper [] acc 0
       end

@@ -723,12 +723,6 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; define_argument_list                               : t
     ; define_right_paren                                 : t
     }
-  | HaltCompilerExpression            of
-    { halt_compiler_keyword                              : t
-    ; halt_compiler_left_paren                           : t
-    ; halt_compiler_argument_list                        : t
-    ; halt_compiler_right_paren                          : t
-    }
   | IssetExpression                   of
     { isset_keyword                                      : t
     ; isset_left_paren                                   : t
@@ -1232,7 +1226,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | ExprConditional                  of conditional_expression
   | ExprEval                         of eval_expression
   | ExprDefine                       of define_expression
-  | ExprHaltCompiler                 of halt_compiler_expression
   | ExprIsset                        of isset_expression
   | ExprFunctionCall                 of function_call_expression
   | ExprFunctionPointer              of function_pointer_expression
@@ -1353,7 +1346,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | LambdaConditional                  of conditional_expression
   | LambdaEval                         of eval_expression
   | LambdaDefine                       of define_expression
-  | LambdaHaltCompiler                 of halt_compiler_expression
   | LambdaIsset                        of isset_expression
   | LambdaFunctionCall                 of function_call_expression
   | LambdaFunctionPointer              of function_pointer_expression
@@ -1403,7 +1395,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | CExprConditional                  of conditional_expression
   | CExprEval                         of eval_expression
   | CExprDefine                       of define_expression
-  | CExprHaltCompiler                 of halt_compiler_expression
   | CExprIsset                        of isset_expression
   | CExprFunctionCall                 of function_call_expression
   | CExprFunctionPointer              of function_pointer_expression
@@ -2027,12 +2018,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; define_left_paren: Token.t value
     ; define_argument_list: expression listesque value
     ; define_right_paren: Token.t value
-    }
-  and halt_compiler_expression =
-    { halt_compiler_keyword: Token.t value
-    ; halt_compiler_left_paren: Token.t value
-    ; halt_compiler_argument_list: expression listesque value
-    ; halt_compiler_right_paren: Token.t value
     }
   and isset_expression =
     { isset_keyword: Token.t value

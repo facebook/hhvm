@@ -1062,14 +1062,7 @@ where
                 let expression = self.parse_expression();
 
                 let token = match self.require_semicolon_token(saw_type_name) {
-                    Some(t) => {
-                        if expression.is_halt_compiler_expression() {
-                            let token = self.rescan_halt_compiler(t);
-                            S!(make_token, self, token)
-                        } else {
-                            S!(make_token, self, t)
-                        }
-                    }
+                    Some(t) => S!(make_token, self, t),
                     None => S!(make_missing, self, self.pos()),
                 };
                 self.pop_scope(ExpectedTokens::Semicolon);

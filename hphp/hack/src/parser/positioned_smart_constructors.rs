@@ -459,10 +459,6 @@ impl<'src, State: StateType<'src, PositionedSyntax>> SmartConstructors<'src, Sta
         <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_define_expression(self, arg0, arg1, arg2, arg3)
     }
 
-    fn make_halt_compiler_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> Self::R {
-        <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_halt_compiler_expression(self, arg0, arg1, arg2, arg3)
-    }
-
     fn make_isset_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> Self::R {
         <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_isset_expression(self, arg0, arg1, arg2, arg3)
     }

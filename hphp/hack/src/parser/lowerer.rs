@@ -5039,27 +5039,11 @@ where
     }
 
     fn p_program(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::Program> {
-        let is_halt = |syntax: &SyntaxVariant<T, V>| -> bool {
-            match syntax {
-                ExpressionStatement(c) => match &c.expression_statement_expression.syntax {
-                    HaltCompilerExpression(_) => true,
-                    _ => false,
-                },
-                _ => false,
-            }
-        };
         let nodes = Self::as_list(node);
         let mut acc = vec![];
         for i in 0..nodes.len() {
             match &nodes[i].syntax {
                 EndOfFile(_) => break,
-                n if is_halt(n) => {
-                    Self::raise_parsing_error(
-                        nodes[i],
-                        env,
-                        &syntax_error::halt_compiler_is_disabled,
-                    );
-                }
                 _ => match Self::p_def(nodes[i], env) {
                     Err(Error::MissingSyntax { .. }) if env.fail_open => {}
                     e @ Err(_) => return e,

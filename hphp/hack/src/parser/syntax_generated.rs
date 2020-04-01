@@ -1094,17 +1094,6 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_halt_compiler_expression(_: &C, halt_compiler_keyword: Self, halt_compiler_left_paren: Self, halt_compiler_argument_list: Self, halt_compiler_right_paren: Self) -> Self {
-        let syntax = SyntaxVariant::HaltCompilerExpression(Box::new(HaltCompilerExpressionChildren {
-            halt_compiler_keyword,
-            halt_compiler_left_paren,
-            halt_compiler_argument_list,
-            halt_compiler_right_paren,
-        }));
-        let value = V::from_syntax(&syntax);
-        Self::make(syntax, value)
-    }
-
     fn make_isset_expression(_: &C, isset_keyword: Self, isset_left_paren: Self, isset_argument_list: Self, isset_right_paren: Self) -> Self {
         let syntax = SyntaxVariant::IssetExpression(Box::new(IssetExpressionChildren {
             isset_keyword,
@@ -2712,14 +2701,6 @@ where
                 let acc = f(define_right_paren, acc);
                 acc
             },
-            SyntaxVariant::HaltCompilerExpression(x) => {
-                let HaltCompilerExpressionChildren { halt_compiler_keyword, halt_compiler_left_paren, halt_compiler_argument_list, halt_compiler_right_paren } = *x;
-                let acc = f(halt_compiler_keyword, acc);
-                let acc = f(halt_compiler_left_paren, acc);
-                let acc = f(halt_compiler_argument_list, acc);
-                let acc = f(halt_compiler_right_paren, acc);
-                acc
-            },
             SyntaxVariant::IssetExpression(x) => {
                 let IssetExpressionChildren { isset_keyword, isset_left_paren, isset_argument_list, isset_right_paren } = *x;
                 let acc = f(isset_keyword, acc);
@@ -3410,7 +3391,6 @@ where
             SyntaxVariant::ConditionalExpression {..} => SyntaxKind::ConditionalExpression,
             SyntaxVariant::EvalExpression {..} => SyntaxKind::EvalExpression,
             SyntaxVariant::DefineExpression {..} => SyntaxKind::DefineExpression,
-            SyntaxVariant::HaltCompilerExpression {..} => SyntaxKind::HaltCompilerExpression,
             SyntaxVariant::IssetExpression {..} => SyntaxKind::IssetExpression,
             SyntaxVariant::FunctionCallExpression {..} => SyntaxKind::FunctionCallExpression,
             SyntaxVariant::FunctionPointerExpression {..} => SyntaxKind::FunctionPointerExpression,
@@ -4169,13 +4149,6 @@ where
                  define_argument_list: ts.pop().unwrap(),
                  define_left_paren: ts.pop().unwrap(),
                  define_keyword: ts.pop().unwrap(),
-                 
-             })),
-             (SyntaxKind::HaltCompilerExpression, 4) => SyntaxVariant::HaltCompilerExpression(Box::new(HaltCompilerExpressionChildren {
-                 halt_compiler_right_paren: ts.pop().unwrap(),
-                 halt_compiler_argument_list: ts.pop().unwrap(),
-                 halt_compiler_left_paren: ts.pop().unwrap(),
-                 halt_compiler_keyword: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::IssetExpression, 4) => SyntaxVariant::IssetExpression(Box::new(IssetExpressionChildren {
@@ -5466,14 +5439,6 @@ pub struct DefineExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
-pub struct HaltCompilerExpressionChildren<T, V> {
-    pub halt_compiler_keyword: Syntax<T, V>,
-    pub halt_compiler_left_paren: Syntax<T, V>,
-    pub halt_compiler_argument_list: Syntax<T, V>,
-    pub halt_compiler_right_paren: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
 pub struct IssetExpressionChildren<T, V> {
     pub isset_keyword: Syntax<T, V>,
     pub isset_left_paren: Syntax<T, V>,
@@ -6160,7 +6125,6 @@ pub enum SyntaxVariant<T, V> {
     ConditionalExpression(Box<ConditionalExpressionChildren<T, V>>),
     EvalExpression(Box<EvalExpressionChildren<T, V>>),
     DefineExpression(Box<DefineExpressionChildren<T, V>>),
-    HaltCompilerExpression(Box<HaltCompilerExpressionChildren<T, V>>),
     IssetExpression(Box<IssetExpressionChildren<T, V>>),
     FunctionCallExpression(Box<FunctionCallExpressionChildren<T, V>>),
     FunctionPointerExpression(Box<FunctionPointerExpressionChildren<T, V>>),
@@ -7226,16 +7190,6 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     1 => Some(&x.define_left_paren),
                     2 => Some(&x.define_argument_list),
                     3 => Some(&x.define_right_paren),
-                        _ => None,
-                    }
-                })
-            },
-            HaltCompilerExpression(x) => {
-                get_index(4).and_then(|index| { match index {
-                        0 => Some(&x.halt_compiler_keyword),
-                    1 => Some(&x.halt_compiler_left_paren),
-                    2 => Some(&x.halt_compiler_argument_list),
-                    3 => Some(&x.halt_compiler_right_paren),
                         _ => None,
                     }
                 })

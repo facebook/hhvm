@@ -119,7 +119,6 @@ type t =
   | ConditionalExpression
   | EvalExpression
   | DefineExpression
-  | HaltCompilerExpression
   | IssetExpression
   | FunctionCallExpression
   | FunctionPointerExpression
@@ -302,7 +301,6 @@ let to_string kind =
   | ConditionalExpression             -> "conditional_expression"
   | EvalExpression                    -> "eval_expression"
   | DefineExpression                  -> "define_expression"
-  | HaltCompilerExpression            -> "halt_compiler_expression"
   | IssetExpression                   -> "isset_expression"
   | FunctionCallExpression            -> "function_call_expression"
   | FunctionPointerExpression         -> "function_pointer_expression"

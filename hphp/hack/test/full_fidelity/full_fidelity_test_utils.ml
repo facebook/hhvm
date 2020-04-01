@@ -48,7 +48,6 @@ let rewrite_tree_no_whitespace source_text node =
         | TriviaKind.IgnoreError
         | TriviaKind.FixMe
         | TriviaKind.SingleLineComment
-        | TriviaKind.AfterHaltCompiler
         | TriviaKind.DelimitedComment ->
           true
         | TriviaKind.EndOfLine

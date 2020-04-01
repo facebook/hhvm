@@ -33,7 +33,6 @@ pub trait NodeType {
     fn is_function_call_expression(&self) -> bool;
     fn is_list_expression(&self) -> bool;
     fn is_name(&self) -> bool;
-    fn is_halt_compiler_expression(&self) -> bool;
     fn is_prefix_unary_expression(&self) -> bool;
 }
 
@@ -126,13 +125,6 @@ impl<R> NodeType for (SyntaxKind, R) {
     fn is_list_expression(&self) -> bool {
         match &self.0 {
             SyntaxKind::ListExpression { .. } => true,
-            _ => false,
-        }
-    }
-
-    fn is_halt_compiler_expression(&self) -> bool {
-        match &self.0 {
-            SyntaxKind::HaltCompilerExpression { .. } => true,
             _ => false,
         }
     }

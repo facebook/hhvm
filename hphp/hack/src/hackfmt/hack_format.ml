@@ -1511,14 +1511,6 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           define_right_paren = right_p;
         } ->
       Concat [t env kw; transform_argish env left_p args right_p]
-    | Syntax.HaltCompilerExpression
-        {
-          halt_compiler_keyword = kw;
-          halt_compiler_left_paren = left_p;
-          halt_compiler_argument_list = args;
-          halt_compiler_right_paren = right_p;
-        } ->
-      Concat [t env kw; transform_argish env left_p args right_p]
     | Syntax.ParenthesizedExpression
         {
           parenthesized_expression_left_paren = left_p;
@@ -3363,9 +3355,6 @@ and transform_trivia ~is_leading trivia =
   in
   List.iter trivia ~f:(fun triv ->
       match Trivia.kind triv with
-      | TriviaKind.AfterHaltCompiler ->
-        (* ignore content that appears after __halt_compiler *)
-        ()
       | TriviaKind.ExtraTokenError
       | TriviaKind.FixMe
       | TriviaKind.IgnoreError

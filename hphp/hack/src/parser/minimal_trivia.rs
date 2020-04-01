@@ -80,11 +80,4 @@ impl LexableTrivia for MinimalTrivia {
             width,
         }
     }
-
-    fn make_after_halt_compiler(_source: &SourceText, _offset: usize, width: usize) -> Self {
-        Self {
-            kind: TriviaKind::AfterHaltCompiler,
-            width,
-        }
-    }
 }

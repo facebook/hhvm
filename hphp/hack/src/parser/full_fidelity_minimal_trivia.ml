@@ -41,9 +41,6 @@ let make_delimited_comment _text _offset width =
 let make_extra_token_error _text _offset width =
   { kind = ExtraTokenError; width }
 
-let make_after_halt_compiler _text _offset width =
-  { kind = AfterHaltCompiler; width }
-
 let width trivia = trivia.width
 
 let kind trivia = trivia.kind

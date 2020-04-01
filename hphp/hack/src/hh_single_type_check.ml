@@ -222,7 +222,6 @@ let parse_options () =
   let const_default_func_args = ref false in
   let disallow_silence = ref false in
   let abstract_static_props = ref false in
-  let disable_halt_compiler = ref false in
   let disable_unset_class_const = ref false in
   let glean_service = ref (GleanOptions.service GlobalOptions.default) in
   let glean_hostname = ref (GleanOptions.hostname GlobalOptions.default) in
@@ -491,9 +490,6 @@ let parse_options () =
       ( "--disable-unset-class-const",
         Arg.Set disable_unset_class_const,
         " Make unsetting a class const a parse error" );
-      ( "--disable-halt-compiler",
-        Arg.Set disable_halt_compiler,
-        " Disable using PHP __halt_compiler()" );
       ( "--glean-service",
         Arg.String (fun str -> glean_service := str),
         " glean service name" );

@@ -858,14 +858,6 @@ impl<'src> SmartConstructors<'src, State> for VerifySmartConstructors
         r
     }
 
-    fn make_halt_compiler_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> Self::R {
-        let args = arg_kinds!(arg0, arg1, arg2, arg3);
-        let r = <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_halt_compiler_expression(self, arg0, arg1, arg2, arg3);
-        self.state_mut().verify(&args);
-        self.state_mut().push(r.kind());
-        r
-    }
-
     fn make_isset_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> Self::R {
         let args = arg_kinds!(arg0, arg1, arg2, arg3);
         let r = <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_isset_expression(self, arg0, arg1, arg2, arg3);

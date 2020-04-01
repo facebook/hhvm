@@ -16,7 +16,6 @@ pub trait LexableTrivia: Clone + PartialEq {
     fn make_ignore_error(source: &SourceText, offset: usize, width: usize) -> Self;
     fn make_extra_token_error(source: &SourceText, offset: usize, width: usize) -> Self;
     fn make_delimited_comment(source: &SourceText, offset: usize, width: usize) -> Self;
-    fn make_after_halt_compiler(source: &SourceText, offset: usize, width: usize) -> Self;
 
     fn kind(&self) -> TriviaKind;
     fn width(&self) -> usize;

@@ -9,7 +9,7 @@
 
 (* If you make changes to the schema that cause it to serialize / deserialize
 differently, please update this version number *)
-let full_fidelity_schema_version_number = "2020-03-24-0001"
+let full_fidelity_schema_version_number = "2020-03-31-0001"
 
 (* TODO: Consider basing the version number on an auto-generated
 hash of a file rather than relying on people remembering to update it. *)
@@ -163,7 +163,6 @@ let trivia_kinds =
       ["IgnoreError"; "ignore_error"];
       ["FallThrough"; "fall_through"];
       ["ExtraTokenError"; "extra_token_error"];
-      ["AfterHaltCompiler"; "after_halt_compiler"];
     ]
 
 let escape_token_text t =

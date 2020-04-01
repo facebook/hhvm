@@ -74,7 +74,6 @@ type t =
   | Global
   | Concurrent
   | Goto
-  | HaltCompiler
   | If
   | Implements
   | Include
@@ -238,190 +237,189 @@ let from_string keyword ~only_reserved =
   match keyword with
   | "true"            when not only_reserved -> Some BooleanLiteral
   | "false"           when not only_reserved -> Some BooleanLiteral
-  | "abstract"                               -> Some Abstract
-  | "array"                                  -> Some Array
-  | "arraykey"        when not only_reserved -> Some Arraykey
-  | "as"                                     -> Some As
-  | "async"                                  -> Some Async
-  | "attribute"       when not only_reserved -> Some Attribute
-  | "await"                                  -> Some Await
-  | "\\"                                    -> Some Backslash
-  | "binary"          when not only_reserved -> Some Binary
-  | "bool"            when not only_reserved -> Some Bool
-  | "boolean"         when not only_reserved -> Some Boolean
-  | "break"                                  -> Some Break
-  | "case"                                   -> Some Case
-  | "catch"                                  -> Some Catch
-  | "category"        when not only_reserved -> Some Category
-  | "children"        when not only_reserved -> Some Children
-  | "class"                                  -> Some Class
-  | "classname"       when not only_reserved -> Some Classname
-  | "clone"                                  -> Some Clone
-  | "const"                                  -> Some Const
-  | "__construct"                            -> Some Construct
-  | "continue"                               -> Some Continue
-  | "coroutine"       when not only_reserved -> Some Coroutine
-  | "darray"          when not only_reserved -> Some Darray
-  | "default"                                -> Some Default
-  | "define"          when not only_reserved -> Some Define
-  | "dict"            when not only_reserved -> Some Dict
-  | "do"                                     -> Some Do
-  | "double"          when not only_reserved -> Some Double
-  | "echo"                                   -> Some Echo
-  | "else"                                   -> Some Else
-  | "elseif"                                 -> Some Elseif
-  | "empty"                                  -> Some Empty
-  | "endfor"                                 -> Some Endfor
-  | "endforeach"                             -> Some Endforeach
-  | "endif"                                  -> Some Endif
-  | "endswitch"                              -> Some Endswitch
-  | "endwhile"                               -> Some Endwhile
-  | "enum"            when not only_reserved -> Some Enum
-  | "eval"                                   -> Some Eval
-  | "extends"                                -> Some Extends
-  | "fallthrough"     when not only_reserved -> Some Fallthrough
-  | "float"           when not only_reserved -> Some Float
-  | "file"            when not only_reserved -> Some File
-  | "final"                                  -> Some Final
-  | "finally"                                -> Some Finally
-  | "for"                                    -> Some For
-  | "foreach"                                -> Some Foreach
-  | "from"            when not only_reserved -> Some From
-  | "function"                               -> Some Function
-  | "global"                                 -> Some Global
-  | "concurrent"                             -> Some Concurrent
-  | "goto"                                   -> Some Goto
-  | "__halt_compiler"                        -> Some HaltCompiler
-  | "if"                                     -> Some If
-  | "implements"                             -> Some Implements
-  | "include"                                -> Some Include
-  | "include_once"                           -> Some Include_once
-  | "inout"                                  -> Some Inout
-  | "instanceof"                             -> Some Instanceof
-  | "insteadof"                              -> Some Insteadof
-  | "int"             when not only_reserved -> Some Int
-  | "integer"         when not only_reserved -> Some Integer
-  | "interface"                              -> Some Interface
-  | "is"              when not only_reserved -> Some Is
-  | "isset"                                  -> Some Isset
-  | "keyset"          when not only_reserved -> Some Keyset
-  | "list"                                   -> Some List
-  | "mixed"           when not only_reserved -> Some Mixed
-  | "namespace"                              -> Some Namespace
-  | "new"                                    -> Some New
-  | "newtype"         when not only_reserved -> Some Newtype
-  | "noreturn"        when not only_reserved -> Some Noreturn
-  | "num"             when not only_reserved -> Some Num
-  | "object"          when not only_reserved -> Some Object
-  | "parent"          when not only_reserved -> Some Parent
-  | "print"                                  -> Some Print
-  | "private"                                -> Some Private
-  | "protected"                              -> Some Protected
-  | "public"                                 -> Some Public
-  | "real"            when not only_reserved -> Some Real
-  | "reify"           when not only_reserved -> Some Reify
-  | "recordname"                             -> Some Record
-  | "record"                                 -> Some RecordDec
-  | "require"                                -> Some Require
-  | "require_once"                           -> Some Require_once
-  | "required"                               -> Some Required
-  | "lateinit"                               -> Some Lateinit
-  | "resource"        when not only_reserved -> Some Resource
-  | "return"                                 -> Some Return
-  | "self"            when not only_reserved -> Some Self
-  | "shape"                                  -> Some Shape
-  | "static"                                 -> Some Static
-  | "string"          when not only_reserved -> Some String
-  | "super"           when not only_reserved -> Some Super
-  | "suspend"         when not only_reserved -> Some Suspend
-  | "switch"                                 -> Some Switch
-  | "this"            when not only_reserved -> Some This
-  | "throw"                                  -> Some Throw
-  | "trait"                                  -> Some Trait
-  | "try"                                    -> Some Try
-  | "tuple"                                  -> Some Tuple
-  | "type"            when not only_reserved -> Some Type
-  | "unset"                                  -> Some Unset
-  | "use"                                    -> Some Use
-  | "using"                                  -> Some Using
-  | "var"                                    -> Some Var
-  | "varray"          when not only_reserved -> Some Varray
-  | "vec"             when not only_reserved -> Some Vec
-  | "void"            when not only_reserved -> Some Void
-  | "where"           when not only_reserved -> Some Where
-  | "while"                                  -> Some While
-  | "yield"                                  -> Some Yield
-  | "null"            when not only_reserved -> Some NullLiteral
-  | "["                                      -> Some LeftBracket
-  | "]"                                      -> Some RightBracket
-  | "("                                      -> Some LeftParen
-  | ")"                                      -> Some RightParen
-  | "{"                                      -> Some LeftBrace
-  | "}"                                      -> Some RightBrace
-  | "."                                      -> Some Dot
-  | "->"                                     -> Some MinusGreaterThan
-  | "++"                                     -> Some PlusPlus
-  | "--"                                     -> Some MinusMinus
-  | "**"                                     -> Some StarStar
-  | "*"                                      -> Some Star
-  | "+"                                      -> Some Plus
-  | "-"                                      -> Some Minus
-  | "~"                                      -> Some Tilde
-  | "!"                                      -> Some Exclamation
-  | "$"                                      -> Some Dollar
-  | "/"                                      -> Some Slash
-  | "%"                                      -> Some Percent
-  | "<=>"                                    -> Some LessThanEqualGreaterThan
-  | "<<"                                     -> Some LessThanLessThan
-  | ">>"                                     -> Some GreaterThanGreaterThan
-  | "<"                                      -> Some LessThan
-  | ">"                                      -> Some GreaterThan
-  | "<="                                     -> Some LessThanEqual
-  | ">="                                     -> Some GreaterThanEqual
-  | "=="                                     -> Some EqualEqual
-  | "==="                                    -> Some EqualEqualEqual
-  | "!="                                     -> Some ExclamationEqual
-  | "!=="                                    -> Some ExclamationEqualEqual
-  | "^"                                      -> Some Carat
-  | "|"                                      -> Some Bar
-  | "&"                                      -> Some Ampersand
-  | "&&"                                     -> Some AmpersandAmpersand
-  | "||"                                     -> Some BarBar
-  | "?"                                      -> Some Question
-  | "?as"                                    -> Some QuestionAs
-  | "?:"                                     -> Some QuestionColon
-  | "??"                                     -> Some QuestionQuestion
-  | "??="                                    -> Some QuestionQuestionEqual
-  | ":"                                      -> Some Colon
-  | ";"                                      -> Some Semicolon
-  | "="                                      -> Some Equal
-  | "**="                                    -> Some StarStarEqual
-  | "*="                                     -> Some StarEqual
-  | "/="                                     -> Some SlashEqual
-  | "%="                                     -> Some PercentEqual
-  | "+="                                     -> Some PlusEqual
-  | "-="                                     -> Some MinusEqual
-  | ".="                                     -> Some DotEqual
-  | "<<="                                    -> Some LessThanLessThanEqual
-  | ">>="                                    -> Some GreaterThanGreaterThanEqual
-  | "&="                                     -> Some AmpersandEqual
-  | "^="                                     -> Some CaratEqual
-  | "|="                                     -> Some BarEqual
-  | ","                                      -> Some Comma
-  | "@"                                      -> Some At
-  | "::"                                     -> Some ColonColon
-  | "=>"                                     -> Some EqualGreaterThan
-  | "==>"                                    -> Some EqualEqualGreaterThan
-  | "?->"                                    -> Some QuestionMinusGreaterThan
-  | "..."                                    -> Some DotDotDot
-  | "$$"                                     -> Some DollarDollar
-  | "|>"                                     -> Some BarGreaterThan
-  | "/>"                                     -> Some SlashGreaterThan
-  | "</"                                     -> Some LessThanSlash
-  | "<?"                                     -> Some LessThanQuestion
-  | "?>"                                     -> Some QuestionGreaterThan
-  | ":@"                                     -> Some ColonAt
-  | "xhp"             when not only_reserved -> Some XHP
+  | "abstract"                            -> Some Abstract
+  | "array"                               -> Some Array
+  | "arraykey"     when not only_reserved -> Some Arraykey
+  | "as"                                  -> Some As
+  | "async"                               -> Some Async
+  | "attribute"    when not only_reserved -> Some Attribute
+  | "await"                               -> Some Await
+  | "\\"                                 -> Some Backslash
+  | "binary"       when not only_reserved -> Some Binary
+  | "bool"         when not only_reserved -> Some Bool
+  | "boolean"      when not only_reserved -> Some Boolean
+  | "break"                               -> Some Break
+  | "case"                                -> Some Case
+  | "catch"                               -> Some Catch
+  | "category"     when not only_reserved -> Some Category
+  | "children"     when not only_reserved -> Some Children
+  | "class"                               -> Some Class
+  | "classname"    when not only_reserved -> Some Classname
+  | "clone"                               -> Some Clone
+  | "const"                               -> Some Const
+  | "__construct"                         -> Some Construct
+  | "continue"                            -> Some Continue
+  | "coroutine"    when not only_reserved -> Some Coroutine
+  | "darray"       when not only_reserved -> Some Darray
+  | "default"                             -> Some Default
+  | "define"       when not only_reserved -> Some Define
+  | "dict"         when not only_reserved -> Some Dict
+  | "do"                                  -> Some Do
+  | "double"       when not only_reserved -> Some Double
+  | "echo"                                -> Some Echo
+  | "else"                                -> Some Else
+  | "elseif"                              -> Some Elseif
+  | "empty"                               -> Some Empty
+  | "endfor"                              -> Some Endfor
+  | "endforeach"                          -> Some Endforeach
+  | "endif"                               -> Some Endif
+  | "endswitch"                           -> Some Endswitch
+  | "endwhile"                            -> Some Endwhile
+  | "enum"         when not only_reserved -> Some Enum
+  | "eval"                                -> Some Eval
+  | "extends"                             -> Some Extends
+  | "fallthrough"  when not only_reserved -> Some Fallthrough
+  | "float"        when not only_reserved -> Some Float
+  | "file"         when not only_reserved -> Some File
+  | "final"                               -> Some Final
+  | "finally"                             -> Some Finally
+  | "for"                                 -> Some For
+  | "foreach"                             -> Some Foreach
+  | "from"         when not only_reserved -> Some From
+  | "function"                            -> Some Function
+  | "global"                              -> Some Global
+  | "concurrent"                          -> Some Concurrent
+  | "goto"                                -> Some Goto
+  | "if"                                  -> Some If
+  | "implements"                          -> Some Implements
+  | "include"                             -> Some Include
+  | "include_once"                        -> Some Include_once
+  | "inout"                               -> Some Inout
+  | "instanceof"                          -> Some Instanceof
+  | "insteadof"                           -> Some Insteadof
+  | "int"          when not only_reserved -> Some Int
+  | "integer"      when not only_reserved -> Some Integer
+  | "interface"                           -> Some Interface
+  | "is"           when not only_reserved -> Some Is
+  | "isset"                               -> Some Isset
+  | "keyset"       when not only_reserved -> Some Keyset
+  | "list"                                -> Some List
+  | "mixed"        when not only_reserved -> Some Mixed
+  | "namespace"                           -> Some Namespace
+  | "new"                                 -> Some New
+  | "newtype"      when not only_reserved -> Some Newtype
+  | "noreturn"     when not only_reserved -> Some Noreturn
+  | "num"          when not only_reserved -> Some Num
+  | "object"       when not only_reserved -> Some Object
+  | "parent"       when not only_reserved -> Some Parent
+  | "print"                               -> Some Print
+  | "private"                             -> Some Private
+  | "protected"                           -> Some Protected
+  | "public"                              -> Some Public
+  | "real"         when not only_reserved -> Some Real
+  | "reify"        when not only_reserved -> Some Reify
+  | "recordname"                          -> Some Record
+  | "record"                              -> Some RecordDec
+  | "require"                             -> Some Require
+  | "require_once"                        -> Some Require_once
+  | "required"                            -> Some Required
+  | "lateinit"                            -> Some Lateinit
+  | "resource"     when not only_reserved -> Some Resource
+  | "return"                              -> Some Return
+  | "self"         when not only_reserved -> Some Self
+  | "shape"                               -> Some Shape
+  | "static"                              -> Some Static
+  | "string"       when not only_reserved -> Some String
+  | "super"        when not only_reserved -> Some Super
+  | "suspend"      when not only_reserved -> Some Suspend
+  | "switch"                              -> Some Switch
+  | "this"         when not only_reserved -> Some This
+  | "throw"                               -> Some Throw
+  | "trait"                               -> Some Trait
+  | "try"                                 -> Some Try
+  | "tuple"                               -> Some Tuple
+  | "type"         when not only_reserved -> Some Type
+  | "unset"                               -> Some Unset
+  | "use"                                 -> Some Use
+  | "using"                               -> Some Using
+  | "var"                                 -> Some Var
+  | "varray"       when not only_reserved -> Some Varray
+  | "vec"          when not only_reserved -> Some Vec
+  | "void"         when not only_reserved -> Some Void
+  | "where"        when not only_reserved -> Some Where
+  | "while"                               -> Some While
+  | "yield"                               -> Some Yield
+  | "null"         when not only_reserved -> Some NullLiteral
+  | "["                                   -> Some LeftBracket
+  | "]"                                   -> Some RightBracket
+  | "("                                   -> Some LeftParen
+  | ")"                                   -> Some RightParen
+  | "{"                                   -> Some LeftBrace
+  | "}"                                   -> Some RightBrace
+  | "."                                   -> Some Dot
+  | "->"                                  -> Some MinusGreaterThan
+  | "++"                                  -> Some PlusPlus
+  | "--"                                  -> Some MinusMinus
+  | "**"                                  -> Some StarStar
+  | "*"                                   -> Some Star
+  | "+"                                   -> Some Plus
+  | "-"                                   -> Some Minus
+  | "~"                                   -> Some Tilde
+  | "!"                                   -> Some Exclamation
+  | "$"                                   -> Some Dollar
+  | "/"                                   -> Some Slash
+  | "%"                                   -> Some Percent
+  | "<=>"                                 -> Some LessThanEqualGreaterThan
+  | "<<"                                  -> Some LessThanLessThan
+  | ">>"                                  -> Some GreaterThanGreaterThan
+  | "<"                                   -> Some LessThan
+  | ">"                                   -> Some GreaterThan
+  | "<="                                  -> Some LessThanEqual
+  | ">="                                  -> Some GreaterThanEqual
+  | "=="                                  -> Some EqualEqual
+  | "==="                                 -> Some EqualEqualEqual
+  | "!="                                  -> Some ExclamationEqual
+  | "!=="                                 -> Some ExclamationEqualEqual
+  | "^"                                   -> Some Carat
+  | "|"                                   -> Some Bar
+  | "&"                                   -> Some Ampersand
+  | "&&"                                  -> Some AmpersandAmpersand
+  | "||"                                  -> Some BarBar
+  | "?"                                   -> Some Question
+  | "?as"                                 -> Some QuestionAs
+  | "?:"                                  -> Some QuestionColon
+  | "??"                                  -> Some QuestionQuestion
+  | "??="                                 -> Some QuestionQuestionEqual
+  | ":"                                   -> Some Colon
+  | ";"                                   -> Some Semicolon
+  | "="                                   -> Some Equal
+  | "**="                                 -> Some StarStarEqual
+  | "*="                                  -> Some StarEqual
+  | "/="                                  -> Some SlashEqual
+  | "%="                                  -> Some PercentEqual
+  | "+="                                  -> Some PlusEqual
+  | "-="                                  -> Some MinusEqual
+  | ".="                                  -> Some DotEqual
+  | "<<="                                 -> Some LessThanLessThanEqual
+  | ">>="                                 -> Some GreaterThanGreaterThanEqual
+  | "&="                                  -> Some AmpersandEqual
+  | "^="                                  -> Some CaratEqual
+  | "|="                                  -> Some BarEqual
+  | ","                                   -> Some Comma
+  | "@"                                   -> Some At
+  | "::"                                  -> Some ColonColon
+  | "=>"                                  -> Some EqualGreaterThan
+  | "==>"                                 -> Some EqualEqualGreaterThan
+  | "?->"                                 -> Some QuestionMinusGreaterThan
+  | "..."                                 -> Some DotDotDot
+  | "$$"                                  -> Some DollarDollar
+  | "|>"                                  -> Some BarGreaterThan
+  | "/>"                                  -> Some SlashGreaterThan
+  | "</"                                  -> Some LessThanSlash
+  | "<?"                                  -> Some LessThanQuestion
+  | "?>"                                  -> Some QuestionGreaterThan
+  | ":@"                                  -> Some ColonAt
+  | "xhp"          when not only_reserved -> Some XHP
   | _              -> None
 
 let to_string kind =
@@ -482,7 +480,6 @@ let to_string kind =
   | Global                        -> "global"
   | Concurrent                    -> "concurrent"
   | Goto                          -> "goto"
-  | HaltCompiler                  -> "__halt_compiler"
   | If                            -> "if"
   | Implements                    -> "implements"
   | Include                       -> "include"

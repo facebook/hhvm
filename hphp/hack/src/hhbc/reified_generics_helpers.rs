@@ -58,7 +58,7 @@ pub(crate) fn has_reified_type_constraint(env: &Env, h: &aast::Hint) -> Reificat
     match &*h.1 {
         Hint_::Happly(Id(_, id), hs) => {
             if is_reified_tparam(env, true, &id).is_some()
-                || is_reified_tparam(env, true, &id).is_some()
+                || is_reified_tparam(env, false, &id).is_some()
             {
                 ReificationLevel::Definitely
             } else if hs.is_empty() || is_all_erased(env, hs.iter()) {

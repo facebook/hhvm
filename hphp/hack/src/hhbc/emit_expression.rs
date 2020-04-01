@@ -4734,7 +4734,7 @@ pub fn fixup_type_arg<'a>(
                 {
                     return Err(Some(emit_fatal::raise_fatal_parse(
                         &h.0,
-                        "Erased generics are not allowd in is/as expressions",
+                        "Erased generics are not allowed in is/as expressions",
                     )))
                 }
                 _ => (),

@@ -37,28 +37,6 @@ inline void exception_handler(Action action) {
     assertx(o.get());
     if (vmfp() == nullptr) throw;
     unwindVM(o.get());
-    if (LIKELY(o.get()->hasMultipleRefs()) ||
-        vmfp() != nullptr ||
-        !g_context->isNested()) {
-      return;
-    }
-
-    assertx(!vmpc());
-    // o will be destroyed at the end of the catch block
-    // so we have to make sure the vm state is valid in
-    // case a __destruct method needs to run.
-    g_context->popVMState();
-    g_context->pushVMState(vmStack().top());
-
-    // We need to restore the vm state to where it was.
-    // Note that we've preserved vmStack.top(), and vmFirstAR was invalid
-    // prior to the popVMState above.
-    // Also, we don't really need to null out vmfp() here, but doing so will
-    // cause an assert to fire if we try to re-enter before the next
-    // popVMState.
-    vmpc() = nullptr;
-    vmfp() = nullptr;
-
     return;
   }
 

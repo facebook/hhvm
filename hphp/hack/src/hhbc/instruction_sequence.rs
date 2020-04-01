@@ -651,6 +651,10 @@ pub mod instr {
         instr(Instruct::ILitConst(InstructLitConst::NewVecArray(i)))
     }
 
+    pub fn new_varray(i: isize) -> InstrSeq {
+        instr(Instruct::ILitConst(InstructLitConst::NewVArray(i)))
+    }
+
     pub fn new_pair() -> InstrSeq {
         instr(Instruct::ILitConst(InstructLitConst::NewPair))
     }

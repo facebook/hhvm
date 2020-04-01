@@ -17,9 +17,7 @@ pub fn properties_for_cache<'a>(
     _class: &tast::Class_,
     _class_is_const: bool,
 ) -> Result<Option<HhasProperty<'a>>> {
-    Err(Unrecoverable(
-        "not implemented: emit_xhp::properties_for_cache".to_string(),
-    ))
+    unimplemented!()
 }
 
 pub fn from_attribute_declaration<'a>(
@@ -27,25 +25,19 @@ pub fn from_attribute_declaration<'a>(
     _xal: &[HhasXhpAttribute],
     _xual: &[tast::Hint],
 ) -> Result<Option<HhasMethod<'a>>> {
-    Err(Unrecoverable(
-        "not implemented: emit_xhp::from_attribute_declaration".to_string(),
-    ))
+    unimplemented!()
 }
 
 pub fn from_children_declaration<'a>(
     _ast_class: &tast::Class_,
     _children: &(&ast_defs::Pos, Vec<&tast::XhpChild>),
 ) -> Result<Option<HhasMethod<'a>>> {
-    Err(Unrecoverable(
-        "not implemented: emit_xhp::from_children_declaration".to_string(),
-    ))
+    unimplemented!()
 }
 
 pub fn from_category_declaration<'a>(
     _ast_class: &tast::Class_,
     _categories: &(&ast_defs::Pos, Vec<&String>),
 ) -> Result<Option<HhasMethod<'a>>> {
-    Err(Unrecoverable(
-        "not implemented: emit_xhp::from_category_declaration".to_string(),
-    ))
+    unimplemented!()
 }

@@ -343,6 +343,10 @@ pub mod user_attributes {
     pub fn is_reserved(name: &str) -> bool {
         name.starts_with("__")
     }
+
+    pub fn is_soft(name: &str) -> bool {
+        name == SOFT
+    }
 }
 
 pub mod attribute_kinds {

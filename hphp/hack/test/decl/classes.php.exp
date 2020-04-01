@@ -328,6 +328,13 @@ Parsed decls:
           sp_type =
           (Some (Rhint (root|classes.php line 52, characters 12-17),
                  (Tprim Tstring)));
+          sp_abstract = false; sp_visibility = Public; sp_fixme_codes = {} };
+        { Shallow_decl_defs.sp_const = false; sp_xhp_attr = None;
+          sp_lateinit = false; sp_lsb = false;
+          sp_name = ([53:19-30], "hasDefault"); sp_needs_init = true;
+          sp_type =
+          (Some (Rhint (root|classes.php line 53, characters 12-17),
+                 (Tprim Tstring)));
           sp_abstract = false; sp_visibility = Public; sp_fixme_codes = {} }
         ];
       sc_sprops = [];
@@ -338,7 +345,7 @@ Parsed decls:
               sm_type =
               (Rwitness (root|classes.php line 49, characters 19-29),
                (Tfun
-                  { ft_is_coroutine = false; ft_arity = (Fstandard (3, 3));
+                  { ft_is_coroutine = false; ft_arity = (Fstandard (3, 4));
                     ft_tparams = []; ft_where_constraints = [];
                     ft_params =
                     [{ fp_pos = [50:20-28]; fp_name = (Some "$private");
@@ -364,6 +371,15 @@ Parsed decls:
                         { et_enforced = false;
                           et_type =
                           (Rhint (root|classes.php line 52, characters 12-17),
+                           (Tprim Tstring))
+                          };
+                        fp_kind = FPnormal; fp_accept_disposable = false;
+                        fp_mutable = none };
+                      { fp_pos = [53:19-30]; fp_name = (Some "$hasDefault");
+                        fp_type =
+                        { et_enforced = false;
+                          et_type =
+                          (Rhint (root|classes.php line 53, characters 12-17),
                            (Tprim Tstring))
                           };
                         fp_kind = FPnormal; fp_accept_disposable = false;

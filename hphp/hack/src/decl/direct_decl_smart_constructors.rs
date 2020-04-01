@@ -394,6 +394,7 @@ pub struct VariableDecl {
     kind: ParamMode,
     hint: Node_,
     id: Id,
+    initializer: Node_,
 }
 
 #[derive(Clone, Debug)]
@@ -998,7 +999,8 @@ impl DirectDeclSmartConstructors<'_> {
         )?;
         let (type_params, mut type_variables) = self.into_type_params(header.type_params)?;
         type_variables.extend(outer_type_variables.into_iter().map(Rc::clone));
-        let (params, properties) = self.into_variables_list(header.param_list, &type_variables)?;
+        let (params, properties, (min_arity, max_arity)) =
+            self.into_variables_list(header.param_list, &type_variables)?;
         let type_ = match header.name {
             Node_::Construct(pos) => Ty(
                 Reason::Rwitness(pos),
@@ -1031,7 +1033,7 @@ impl DirectDeclSmartConstructors<'_> {
         };
         let mut ft = FunType {
             is_coroutine: false,
-            arity: FunArity::Fstandard(params.len() as isize, params.len() as isize),
+            arity: FunArity::Fstandard(min_arity, max_arity),
             tparams: (type_params, FunTparamsKind::FTKtparams),
             where_constraints: Vec::new(),
             params,
@@ -1078,63 +1080,68 @@ impl DirectDeclSmartConstructors<'_> {
         &self,
         list: Node_,
         type_variables: &HashSet<Rc<String>>,
-    ) -> Result<(FunParams, Vec<PropertyDecl>), ParseError> {
+    ) -> Result<(FunParams, Vec<PropertyDecl>, (isize, isize)), ParseError> {
         match list {
-            Node_::List(nodes) => {
-                nodes
-                    .into_iter()
-                    .fold(Ok((Vec::new(), Vec::new())), |acc, variable| {
-                        match (acc, variable) {
-                            (Ok((mut variables, mut properties)), Node_::Variable(innards)) => {
-                                let VariableDecl {
-                                    attributes,
-                                    visibility,
-                                    kind,
-                                    hint,
-                                    id,
-                                } = *innards;
-                                match visibility.as_visibility() {
-                                    Ok(_) => properties.push(PropertyDecl {
-                                        attrs: attributes.clone(),
-                                        modifiers: visibility.clone(),
-                                        hint: hint.clone(),
-                                        id: id.clone(),
-                                        expr: None,
-                                    }),
-                                    Err(_) => (),
-                                };
-                                let mutability =
-                                    attributes.iter().fold(None, |mutability, node| {
-                                        if let Node_::Name(n, _) = node {
-                                            if n == "__Mutable" {
-                                                Some(ParamMutability::ParamBorrowedMutable)
-                                            } else {
-                                                mutability
-                                            }
-                                        } else {
-                                            mutability
-                                        }
-                                    });
-                                variables.push(FunParam {
-                                    pos: id.0,
-                                    name: Some(id.1),
-                                    type_: PossiblyEnforcedTy {
-                                        enforced: false,
-                                        type_: self.node_to_ty(&hint, type_variables)?,
-                                    },
-                                    kind,
-                                    accept_disposable: false,
-                                    mutability,
-                                    rx_annotation: None,
-                                });
-                                Ok((variables, properties))
+            Node_::List(nodes) => nodes.into_iter().fold(
+                Ok((Vec::new(), Vec::new(), (0, 0))),
+                |acc, variable| match (acc, variable) {
+                    (
+                        Ok((mut variables, mut properties, (min_arity, max_arity))),
+                        Node_::Variable(innards),
+                    ) => {
+                        let VariableDecl {
+                            attributes,
+                            visibility,
+                            kind,
+                            hint,
+                            id,
+                            initializer,
+                        } = *innards;
+                        let min_arity = match initializer {
+                            Node_::Ignored => min_arity + 1,
+                            _ => min_arity,
+                        };
+                        let max_arity = max_arity + 1;
+                        match visibility.as_visibility() {
+                            Ok(_) => properties.push(PropertyDecl {
+                                attrs: attributes.clone(),
+                                modifiers: visibility.clone(),
+                                hint: hint.clone(),
+                                id: id.clone(),
+                                expr: None,
+                            }),
+                            Err(_) => (),
+                        };
+                        let mutability = attributes.iter().fold(None, |mutability, node| {
+                            if let Node_::Name(n, _) = node {
+                                if n == "__Mutable" {
+                                    Some(ParamMutability::ParamBorrowedMutable)
+                                } else {
+                                    mutability
+                                }
+                            } else {
+                                mutability
                             }
-                            (Ok(_), n) => Err(format!("Expected a variable, but got {:?}", n)),
-                            (acc @ Err(_), _) => acc,
-                        }
-                    })
-            }
-            Node_::Ignored => Ok((Vec::new(), Vec::new())),
+                        });
+                        variables.push(FunParam {
+                            pos: id.0,
+                            name: Some(id.1),
+                            type_: PossiblyEnforcedTy {
+                                enforced: false,
+                                type_: self.node_to_ty(&hint, type_variables)?,
+                            },
+                            kind,
+                            accept_disposable: false,
+                            mutability,
+                            rx_annotation: None,
+                        });
+                        Ok((variables, properties, (min_arity, max_arity)))
+                    }
+                    (Ok(_), n) => Err(format!("Expected a variable, but got {:?}", n)),
+                    (acc @ Err(_), _) => acc,
+                },
+            ),
+            Node_::Ignored => Ok((Vec::new(), Vec::new(), (0, 0))),
             n => Err(format!("Expected a list of variables, but got {:?}", n)),
         }
     }
@@ -1900,11 +1907,12 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         inout: Self::R,
         hint: Self::R,
         name: Self::R,
-        _arg5: Self::R,
+        initializer: Self::R,
     ) -> Self::R {
         let id = get_name("", &name?)?;
         let attributes = attributes?;
         let visibility = visibility?;
+        let initializer = initializer?;
         let kind = match inout? {
             Node_::Inout => ParamMode::FPinout,
             _ => ParamMode::FPnormal,
@@ -1916,6 +1924,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             kind,
             hint,
             id,
+            initializer,
         })))
     }
 

@@ -50,5 +50,6 @@ class MyConstructorPropertiesClass {
     private string $private,
     protected string $protected,
     public string $public,
+    public string $hasDefault = "has default",
   ) {}
 }

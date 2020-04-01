@@ -1077,15 +1077,13 @@ impl DirectDeclSmartConstructors<'_> {
 
     fn function_into_ty(
         &self,
+        namespace: &str,
         attributes: Node_,
         header: FunctionHeader,
         body: Node_,
         outer_type_variables: &HashSet<Rc<String>>,
     ) -> Result<Box<(Id, Ty, Vec<PropertyDecl>)>, ParseError> {
-        let id = get_name(
-            self.state.namespace_builder.current_namespace(),
-            &header.name,
-        )?;
+        let id = get_name(namespace, &header.name)?;
         let (type_params, mut type_variables) = self.into_type_params(header.type_params)?;
         type_variables.extend(outer_type_variables.into_iter().map(Rc::clone));
         let (params, properties, arity) =
@@ -2045,8 +2043,13 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let parsed_attributes = attributes.as_attributes()?;
         Ok(match header? {
             Node_::FunctionHeader(decl) => {
-                let (Id(pos, name), type_, _) =
-                    *self.function_into_ty(attributes, *decl, body, &HashSet::new())?;
+                let (Id(pos, name), type_, _) = *self.function_into_ty(
+                    self.state.namespace_builder.current_namespace(),
+                    attributes,
+                    *decl,
+                    body,
+                    &HashSet::new(),
+                )?;
                 let deprecated = parsed_attributes
                     .deprecated
                     .map(|msg| format!("The function {} is deprecated: {}", name, msg));
@@ -2465,6 +2468,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
                             let attributes = decl.attributes.as_attributes()?;
                             let (id, ty, properties) = *self.function_into_ty(
+                                "",
                                 decl.attributes,
                                 decl.header,
                                 decl.body,

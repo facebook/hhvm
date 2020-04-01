@@ -140,6 +140,23 @@ Parsed decls:
             ft_return_disposable = false; ft_mutable = none;
             ft_returns_mutable = true }));
       fe_deprecated = None;  };
+    "noreturn_type_hint" ->
+    { fe_pos = [81:10-28];
+      fe_type =
+      (Rwitness (root|functions.php line 81, characters 10-27),
+       (Tfun
+          { ft_is_coroutine = false; ft_arity = (Fstandard (0, 0));
+            ft_tparams = []; ft_where_constraints = []; ft_params = [];
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|functions.php line 81, characters 32-39),
+               (Tprim Tnoreturn))
+              };
+            ft_fun_kind = sync; ft_reactive = Nonreactive;
+            ft_return_disposable = false; ft_mutable = none;
+            ft_returns_mutable = false }));
+      fe_deprecated = None;  };
     "null_type_hint" ->
     { fe_pos = [73:10-24];
       fe_type =
@@ -604,18 +621,18 @@ Parsed decls:
             ft_returns_mutable = false }));
       fe_deprecated = None;  };
     "variadic_function" ->
-    { fe_pos = [81:10-27];
+    { fe_pos = [86:10-27];
       fe_type =
-      (Rwitness (root|functions.php line 81, characters 10-26),
+      (Rwitness (root|functions.php line 86, characters 10-26),
        (Tfun
           { ft_is_coroutine = false;
             ft_arity =
             (Fvariadic (0,
-               { fp_pos = [81:37-42]; fp_name = (Some "$args");
+               { fp_pos = [86:37-42]; fp_name = (Some "$args");
                  fp_type =
                  { et_enforced = false;
                    et_type =
-                   (Rhint (root|functions.php line 81, characters 28-32),
+                   (Rhint (root|functions.php line 86, characters 28-32),
                     Tmixed)
                    };
                  fp_kind = FPnormal; fp_accept_disposable = false;
@@ -625,7 +642,7 @@ Parsed decls:
             ft_ret =
             { et_enforced = false;
               et_type =
-              (Rhint (root|functions.php line 81, characters 45-48),
+              (Rhint (root|functions.php line 86, characters 45-48),
                (Tprim Tvoid))
               };
             ft_fun_kind = sync; ft_reactive = Nonreactive;

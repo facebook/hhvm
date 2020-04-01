@@ -1386,6 +1386,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             TokenKind::Mixed => Node_::Hint(HintValue::Mixed, token_pos(self)),
             TokenKind::Void => Node_::Hint(HintValue::Void, token_pos(self)),
             TokenKind::Arraykey => Node_::Hint(HintValue::ArrayKey, token_pos(self)),
+            TokenKind::Noreturn => Node_::Hint(HintValue::NoReturn, token_pos(self)),
             TokenKind::Resource => Node_::Hint(HintValue::Resource, token_pos(self)),
             TokenKind::Array => Node_::Array(token_pos(self)),
             TokenKind::Darray => Node_::Darray(token_pos(self)),

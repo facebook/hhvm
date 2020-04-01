@@ -78,5 +78,10 @@ function resource_type_hint(resource $i): resource {
   return $i; // ok
 }
 
+function noreturn_type_hint(): noreturn {
+  while (true) {
+  }
+}
+
 function variadic_function(mixed ...$args): void {
 }

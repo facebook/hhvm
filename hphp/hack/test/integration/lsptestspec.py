@@ -8,6 +8,7 @@ import itertools
 import os.path
 import pprint
 import textwrap
+from dataclasses import dataclass
 from typing import (
     AbstractSet,
     Iterable,
@@ -48,11 +49,34 @@ _LspIdMap = Mapping[_MessageSpec, Json]
 _Traceback = Sequence[inspect.FrameInfo]
 
 
+@dataclass
+class _CallSiteInfo:
+    line_num: int
+    traceback: _Traceback
+
+
 class NoResponse:
     """Indicates that no response should be sent (different from `None` since
     `None` is a valid JSON value)."""
 
     pass
+
+
+def line() -> int:
+    """Get the line number that this function was called at.
+
+    Previously, we used to do this automatically whenever we called
+    `.request`. However, a recent upgrade of Python breaks that functionality
+    for chained function calls in some cases, and it instead reports the line
+    number of the first function call in the chain. We use `line()` to ensure
+    that we don't have a chained function call and can get the line number
+    accurately.
+    """
+    cf = inspect.currentframe()
+    assert (
+        cf is not None
+    ), "Must be able to get current call frame to produce error messages for test"
+    return cf.f_back.f_lineno
 
 
 class LspTestSpec:
@@ -83,6 +107,7 @@ class LspTestSpec:
 
     def request(
         self,
+        line: int,
         method: str,
         # pyre-fixme[11]: Annotation `Json` is not defined as a type.
         params: Json,
@@ -111,7 +136,7 @@ class LspTestSpec:
                 wait_id=wait_id,
                 comment=comment,
                 powered_by=powered_by,
-                traceback=traceback,
+                call_site_info=_CallSiteInfo(line_num=line, traceback=traceback),
             )
         )
         return self._update(messages=messages)
@@ -189,6 +214,7 @@ class LspTestSpec:
 
     def start_hh_server(self, comment: str) -> "LspTestSpec":
         return self.request(
+            line=line(),
             comment=comment,
             method="$test/startHhServer",
             params=None,
@@ -198,6 +224,7 @@ class LspTestSpec:
 
     def stop_hh_server(self, comment: str) -> "LspTestSpec":
         return self.request(
+            line=line(),
             comment=comment,
             method="$test/stopHhServer",
             params=None,
@@ -524,7 +551,9 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
 {request_description} got an incorrect result:
 
 {error_description}"""
-            request_context = self._get_context_for_traceback(request.traceback)
+            request_context = self._get_context_for_call_site_info(
+                request.call_site_info
+            )
             context = f"""\
 This was the associated request:
 
@@ -540,7 +569,9 @@ This was the associated request:
 {request_description} had an incorrect value for the `powered_by` field
 (expected {request.powered_by!r}; got {actual_powered_by!r})
 """
-            request_context = self._get_context_for_traceback(request.traceback)
+            request_context = self._get_context_for_call_site_info(
+                request.call_site_info
+            )
             context = f"""\
 This was the associated request:
 
@@ -552,10 +583,12 @@ This was the associated request:
                 description=description, context=context, remediation=remediation
             )
 
-    def _get_context_for_traceback(self, traceback: _Traceback) -> str:
+    def _get_context_for_call_site_info(self, call_site_info: _CallSiteInfo) -> str:
         # Find the first caller frame that isn't in this source file. The
         # assumption is that the first such frame is in the test code.
-        caller_frame = next(frame for frame in traceback if frame.filename != __file__)
+        caller_frame = next(
+            frame for frame in call_site_info.traceback if frame.filename != __file__
+        )
         source_filename = caller_frame.filename
         with open(source_filename) as f:
             source_text = f.read()
@@ -564,7 +597,7 @@ This was the associated request:
             start_line_num_0idx_incl,
             end_line_num_0idx_incl,
         ) = self._find_line_range_for_function_call(
-            file_contents=source_text, line_num_1idx=caller_frame.lineno
+            file_contents=source_text, line_num_1idx=call_site_info.line_num
         )
         return self._pretty_print_file_context(
             file_path=source_filename,
@@ -584,7 +617,7 @@ This was the associated request:
             for node, node_range in function_call_finder.function_calls
             if node_range.start.line <= line_num_1idx <= node_range.end.line
         ]
-        node_range = min(
+        node_range = max(
             function_calls_containing_line,
             key=lambda node_with_range: node_with_range[1].end.line
             - node_with_range[1].start.line,
@@ -634,7 +667,8 @@ This was the associated request:
         powered_by = actual_response.get("powered_by")
 
         request_snippet = f"""\
-    .request("""
+    .request(
+        line=line(),"""
         if request.comment is not None:
             request_snippet += f"""
         comment={request.comment!r},"""
@@ -777,8 +811,8 @@ to your test to wait for it before proceeding:
                 transcript, lsp_id_map, current_id=transcript_id
             )
             if previous_request is not None:
-                request_context = self._get_context_for_traceback(
-                    previous_request.traceback
+                request_context = self._get_context_for_call_site_info(
+                    previous_request.call_site_info
                 )
             else:
                 request_context = "<no previous request was found>"
@@ -917,7 +951,7 @@ class _RequestSpec:
         "wait_id",
         "comment",
         "powered_by",
-        "traceback",
+        "call_site_info",
     ]
 
     def __init__(
@@ -931,7 +965,7 @@ class _RequestSpec:
         wait_id: Optional[str],
         comment: Optional[str],
         powered_by: Optional[str],
-        traceback: _Traceback,
+        call_site_info: _CallSiteInfo,
     ) -> None:
         self.method = method
         # pyre-fixme[4]: Attribute must be annotated.
@@ -941,7 +975,7 @@ class _RequestSpec:
         self.wait_id = wait_id
         self.comment = comment
         self.powered_by = powered_by
-        self.traceback = traceback
+        self.call_site_info = call_site_info
 
 
 class _DebugRequestSpec:

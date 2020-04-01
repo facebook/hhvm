@@ -14,7 +14,7 @@ from typing import Iterable, List, Mapping, Tuple
 import common_tests
 from hh_paths import hh_server
 from lspcommand import LspCommandProcessor, Transcript
-from lsptestspec import LspTestSpec, NoResponse
+from lsptestspec import LspTestSpec, NoResponse, line
 from test_case import TestCase
 from utils import Json, JsonObject, interpolate_variables
 
@@ -404,6 +404,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="autocomplete after user types a shape",
                 method="textDocument/completion",
                 params={
@@ -464,6 +465,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="autocomplete after a shape, with VS Code automatically closed apostrophes",
                 method="textDocument/completion",
                 params={
@@ -524,6 +526,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="autocomplete after '$x = <'",
                 method="textDocument/completion",
                 params={
@@ -574,6 +577,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="autocomplete after '$x = <a'",
                 method="textDocument/completion",
                 params={
@@ -624,6 +628,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="autocomplete after '$x = <ab:'",
                 method="textDocument/completion",
                 params={
@@ -674,6 +679,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="autocomplete after '$x = <ab:cd:text '",
                 method="textDocument/completion",
                 params={
@@ -736,6 +742,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="autocomplete after '$x = <ab:cd:text w'",
                 method="textDocument/completion",
                 params={
@@ -798,6 +805,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="autocomplete after '$x = new :'",
                 method="textDocument/completion",
                 params={
@@ -848,6 +856,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="autocomplete after '$x = new :a'",
                 method="textDocument/completion",
                 params={
@@ -883,6 +892,7 @@ class TestLsp(TestCase[LspTestDriver]):
             )
             # Note that this request should match the result in the previous example
             .request(
+                line=line(),
                 comment="autocomplete resolving after '$x = new :a'",
                 method="completionItem/resolve",
                 params={
@@ -929,6 +939,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="autocomplete after '$x = <a'",
                 method="textDocument/completion",
                 params={
@@ -963,6 +974,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(
+                line=line(),
                 comment="autocomplete resolving after '$x = <a'",
                 method="completionItem/resolve",
                 params={
@@ -1006,6 +1018,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="autocomplete after '$x = <ab:cd:text/>; $y = $x->'",
                 method="textDocument/completion",
                 params={
@@ -1068,6 +1081,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="autocomplete after '$x = <ab:cd:text/>; $y = $x->:'",
                 method="textDocument/completion",
                 params={
@@ -1130,6 +1144,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="autocomplete after 'test_fun'",
                 method="textDocument/completion",
                 params={
@@ -1154,6 +1169,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(
+                line=line(),
                 comment="autocomplete resolving after 'test_fun'",
                 method="completionItem/resolve",
                 params={
@@ -1207,6 +1223,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="autocomplete after 'switch (Elsa::Alonso) { case Elsa:'",
                 method="textDocument/completion",
                 params={
@@ -1233,6 +1250,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="autocomplete after 'switch (Elsa::Alonso) { case Elsa::'",
                 method="textDocument/completion",
                 params={
@@ -1413,6 +1431,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="docblock resolve after 'switch (Elsa::Alonso) { case Elsa::'",
                 method="completionItem/resolve",
                 params={
@@ -1462,6 +1481,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(
+                line=line(),
                 comment="autocomplete after 'switch (Elsa::Alonso) { case Elsa::Alonso:'",
                 method="textDocument/completion",
                 params={
@@ -1488,6 +1508,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="autocomplete after 'TestNS\\'",
                 method="textDocument/completion",
                 params={
@@ -1528,6 +1549,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="autocomplete after '$cc = new CompletionClass(); $cc->interfa'",
                 method="textDocument/completion",
                 params={
@@ -1559,6 +1581,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(
+                line=line(),
                 comment="autocomplete resolving after '$cc = new CompletionClass(); $cc->interfa'",
                 method="completionItem/resolve",
                 params={
@@ -1620,6 +1643,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="autocomplete after 'DeprecatedClass::'",
                 method="textDocument/completion",
                 params={
@@ -1734,6 +1758,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="autocomplete results for 'call_lambda(3, $m'",
                 method="textDocument/completion",
                 params={
@@ -1764,6 +1789,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(
+                line=line(),
                 comment="resolve autocompletion for $mylambda'",
                 method="completionItem/resolve",
                 params={
@@ -1808,7 +1834,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
                 powered_by="serverless_ide",
             )
-            .request(method="shutdown", params={}, result=None)
+            .request(line=line(), method="shutdown", params={}, result=None)
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
@@ -1849,6 +1875,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="autocomplete after '$x = <'",
                 method="textDocument/completion",
                 params={
@@ -1899,6 +1926,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="autocomplete after '$x = <a'",
                 method="textDocument/completion",
                 params={
@@ -1949,6 +1977,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="autocomplete after '$x = <ab:'.",
                 method="textDocument/completion",
                 params={
@@ -1999,6 +2028,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="autocomplete after '$x = <ab:cd:text '",
                 method="textDocument/completion",
                 params={
@@ -2061,6 +2091,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="autocomplete after '$x = <ab:cd:text w'",
                 method="textDocument/completion",
                 params={
@@ -2123,6 +2154,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="autocomplete after '$x = new :'",
                 method="textDocument/completion",
                 params={
@@ -2173,6 +2205,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="autocomplete after '$x = new :a'",
                 method="textDocument/completion",
                 params={
@@ -2208,6 +2241,7 @@ class TestLsp(TestCase[LspTestDriver]):
             )
             # Note that this request sent should match the result given in the previous example
             .request(
+                line=line(),
                 comment="autocomplete resolving after '$x = new :a'",
                 method="completionItem/resolve",
                 params={
@@ -2253,6 +2287,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="autocomplete after '$x = <ab:cd:text/>; $y = $x->'",
                 method="textDocument/completion",
                 params={
@@ -2315,6 +2350,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="autocomplete after '$x = <ab:cd:text/>; $y = $x->:'",
                 method="textDocument/completion",
                 params={
@@ -2377,6 +2413,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="autocomplete after 'test_fun'",
                 method="textDocument/completion",
                 params={
@@ -2401,6 +2438,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(
+                line=line(),
                 comment="autocomplete resolving after 'test_fun'",
                 method="completionItem/resolve",
                 params={
@@ -2454,6 +2492,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="autocomplete after 'switch (Elsa::Alonso) { case Elsa:'",
                 method="textDocument/completion",
                 params={
@@ -2480,6 +2519,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="autocomplete after 'switch (Elsa::Alonso) { case Elsa::'",
                 method="textDocument/completion",
                 params={
@@ -2660,6 +2700,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="autocomplete after 'switch (Elsa::Alonso) { case Elsa::Alonso:'",
                 method="textDocument/completion",
                 params={
@@ -2686,6 +2727,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="autocomplete after 'DeprecatedClass::'",
                 method="textDocument/completion",
                 params={
@@ -2783,7 +2825,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
                 powered_by="serverless_ide",
             )
-            .request(method="shutdown", params={}, result=None)
+            .request(line=line(), method="shutdown", params={}, result=None)
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
@@ -2808,6 +2850,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="call to `b_definition`",
                 method="textDocument/definition",
                 params={
@@ -2827,6 +2870,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(
+                line=line(),
                 comment="call to `new BB(1)`",
                 method="textDocument/definition",
                 params={
@@ -2846,6 +2890,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(
+                line=line(),
                 comment="call to `new CC(1)`",
                 method="textDocument/definition",
                 params={
@@ -2873,6 +2918,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(
+                line=line(),
                 comment="call to `new DD(1)`",
                 method="textDocument/definition",
                 params={
@@ -2900,6 +2946,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(
+                line=line(),
                 comment="call to `new EE(1)`",
                 method="textDocument/definition",
                 params={
@@ -2919,6 +2966,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(
+                line=line(),
                 comment="call to `new FF(1)`",
                 method="textDocument/definition",
                 params={
@@ -2938,6 +2986,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(
+                line=line(),
                 comment="call to `new TakesString(HasString::MyString)`",
                 method="textDocument/definition",
                 params={
@@ -2973,6 +3022,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="call to `test` instead of `b_definition`",
                 method="textDocument/definition",
                 params={
@@ -2991,7 +3041,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 ],
                 powered_by="serverless_ide",
             )
-            .request(method="shutdown", params={}, result=None)
+            .request(line=line(), method="shutdown", params={}, result=None)
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
@@ -3017,6 +3067,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="find overridden method from trait",
                 method="textDocument/definition",
                 params={
@@ -3036,6 +3087,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(
+                line=line(),
                 comment="find overridden static method",
                 method="textDocument/definition",
                 params={
@@ -3055,6 +3107,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(
+                line=line(),
                 comment="find overridden interface method",
                 method="textDocument/definition",
                 params={
@@ -3073,7 +3126,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 ],
                 powered_by="serverless_ide",
             )
-            .request(method="shutdown", params={}, result=None)
+            .request(line=line(), method="shutdown", params={}, result=None)
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
@@ -3098,6 +3151,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="documentSymbol call",
                 method="textDocument/documentSymbol",
                 params={"textDocument": {"uri": "${php_file_uri}"}},
@@ -3274,7 +3328,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 ],
                 powered_by="serverless_ide",
             )
-            .request(method="shutdown", params={}, result=None)
+            .request(line=line(), method="shutdown", params={}, result=None)
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
@@ -3293,6 +3347,7 @@ class TestLsp(TestCase[LspTestDriver]):
             window_capabilities["status"] = {"dynamicRegistration": False}
 
         spec = spec.ignore_notifications(method="telemetry/event").request(
+            line=line(),
             method="initialize",
             params={
                 "initializationOptions": initialization_options,
@@ -3379,6 +3434,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="Conditional Type Definition of HH or II",
                 method="textDocument/typeDefinition",
                 params={
@@ -3406,6 +3462,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(
+                line=line(),
                 comment="Standard Class Definition",
                 method="textDocument/typeDefinition",
                 params={
@@ -3425,6 +3482,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(
+                line=line(),
                 comment="Class Type Definition with Casting",
                 method="textDocument/typeDefinition",
                 params={
@@ -3444,6 +3502,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(
+                line=line(),
                 comment="Primitive Type Definition",
                 method="textDocument/typeDefinition",
                 params={
@@ -3454,6 +3513,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(
+                line=line(),
                 comment="Function Return Type Definition",
                 method="textDocument/typeDefinition",
                 params={
@@ -3473,6 +3533,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(
+                line=line(),
                 comment="Function definition with primitive return type",
                 method="textDocument/typeDefinition",
                 params={
@@ -3491,7 +3552,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 ],
                 powered_by="serverless_ide",
             )
-            .request(method="shutdown", params={}, result=None)
+            .request(line=line(), method="shutdown", params={}, result=None)
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
@@ -3516,6 +3577,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="hover over function invocation",
                 method="textDocument/hover",
                 params={
@@ -3535,6 +3597,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(
+                line=line(),
                 comment="hover over string literal outside call",
                 method="textDocument/hover",
                 params={
@@ -3545,6 +3608,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(
+                line=line(),
                 comment="hover over string literal inside call",
                 method="textDocument/hover",
                 params={
@@ -3555,6 +3619,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(
+                line=line(),
                 comment="hover over int literal inside call",
                 method="textDocument/hover",
                 params={
@@ -3565,6 +3630,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(
+                line=line(),
                 comment="hover over constant reference",
                 method="textDocument/hover",
                 params={
@@ -3585,6 +3651,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(
+                line=line(),
                 comment="hover over whitespace",
                 method="textDocument/hover",
                 params={
@@ -3595,6 +3662,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(
+                line=line(),
                 comment="hover over a keyword",
                 method="textDocument/hover",
                 params={
@@ -3605,6 +3673,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(
+                line=line(),
                 comment="hover over a comment",
                 method="textDocument/hover",
                 params={
@@ -3615,6 +3684,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(
+                line=line(),
                 comment="hover past the end of a line",
                 method="textDocument/hover",
                 params={
@@ -3625,6 +3695,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(
+                line=line(),
                 comment="hover past the end of a file",
                 method="textDocument/hover",
                 params={
@@ -3635,6 +3706,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(
+                line=line(),
                 comment="hover over class with copyright docblock",
                 method="textDocument/hover",
                 params={
@@ -3654,6 +3726,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(
+                line=line(),
                 comment="hover over class with generated docblock",
                 method="textDocument/hover",
                 params={
@@ -3672,7 +3745,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
                 powered_by="serverless_ide",
             )
-            .request(method="shutdown", params={}, result=None)
+            .request(line=line(), method="shutdown", params={}, result=None)
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
@@ -3710,6 +3783,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 method="textDocument/hover",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -3727,7 +3801,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
                 powered_by="serverless_ide",
             )
-            .request(method="shutdown", params={}, result=None)
+            .request(line=line(), method="shutdown", params={}, result=None)
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
@@ -3764,6 +3838,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="Totally normal hover",
                 method="textDocument/hover",
                 params={
@@ -3806,6 +3881,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="Hover should still work even if visibility modifier has been removed",
                 method="textDocument/hover",
                 params={
@@ -3831,7 +3907,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
                 powered_by="serverless_ide",
             )
-            .request(method="shutdown", params={}, result=None)
+            .request(line=line(), method="shutdown", params={}, result=None)
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
@@ -3859,6 +3935,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 method="textDocument/formatting",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -3882,7 +3959,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     }
                 ],
             )
-            .request(method="shutdown", params={}, result=None)
+            .request(line=line(), method="shutdown", params={}, result=None)
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
@@ -3912,6 +3989,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 method="textDocument/rangeFormatting",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -3931,7 +4009,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     }
                 ],
             )
-            .request(method="shutdown", params={}, result=None)
+            .request(line=line(), method="shutdown", params={}, result=None)
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
@@ -3959,6 +4037,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 method="textDocument/onTypeFormatting",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -3983,6 +4062,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 ],
             )
             .request(
+                line=line(),
                 method="textDocument/onTypeFormatting",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -4001,6 +4081,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 ],
             )
             .request(
+                line=line(),
                 method="textDocument/onTypeFormatting",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -4018,7 +4099,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     }
                 ],
             )
-            .request(method="shutdown", params={}, result=None)
+            .request(line=line(), method="shutdown", params={}, result=None)
         )
 
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
@@ -4075,7 +4156,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     ],
                 },
             )
-            .request(method="shutdown", params={}, result=None)
+            .request(line=line(), method="shutdown", params={}, result=None)
             .wait_for_notification(
                 comment="Hack appears to clear out diagnostics before shutting down",
                 method="textDocument/publishDiagnostics",
@@ -4104,6 +4185,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="go to implemenetation: abstract class",
                 method="textDocument/implementation",
                 params={
@@ -4121,6 +4203,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 ],
             )
             .request(
+                line=line(),
                 comment="go to implemenetation: interface",
                 method="textDocument/implementation",
                 params={
@@ -4138,6 +4221,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 ],
             )
             .request(
+                line=line(),
                 comment="go to implemenetation: trait",
                 method="textDocument/implementation",
                 params={
@@ -4155,6 +4239,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 ],
             )
             .request(
+                line=line(),
                 comment="go to implemenetation: method",
                 method="textDocument/implementation",
                 params={
@@ -4171,7 +4256,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     }
                 ],
             )
-            .request(method="shutdown", params={}, result=None)
+            .request(line=line(), method="shutdown", params={}, result=None)
         )
         self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
 
@@ -4195,6 +4280,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="signature help for 0-argument constructor"
                 " (left of opening paren)",
                 method="textDocument/signatureHelp",
@@ -4205,6 +4291,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 result=None,
             )
             .request(
+                line=line(),
                 comment="signature help for 0-argument constructor",
                 method="textDocument/signatureHelp",
                 params={
@@ -4224,6 +4311,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="signature help for 0-argument constructor"
                 " (right of closing paren)",
                 method="textDocument/signatureHelp",
@@ -4234,6 +4322,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 result=None,
             )
             .request(
+                line=line(),
                 comment="signature help for 2-argument instance method"
                 " (left of opening paren)",
                 method="textDocument/signatureHelp",
@@ -4244,6 +4333,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 result=None,
             )
             .request(
+                line=line(),
                 comment="signature help for 2-argument instance method"
                 " (right of opening paren)",
                 method="textDocument/signatureHelp",
@@ -4265,6 +4355,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="signature help for 2-argument instance method"
                 " (left of first comma)",
                 method="textDocument/signatureHelp",
@@ -4286,6 +4377,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="signature help for 2-argument instance method"
                 " (right of first comma)",
                 method="textDocument/signatureHelp",
@@ -4307,6 +4399,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="signature help for 2-argument instance method"
                 " (left of closing paren)",
                 method="textDocument/signatureHelp",
@@ -4328,6 +4421,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="signature help for 2-argument instance method"
                 " (right of closing paren)",
                 method="textDocument/signatureHelp",
@@ -4338,6 +4432,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 result=None,
             )
             .request(
+                line=line(),
                 comment="signature help for 1-argument static method"
                 " (left of open paren)",
                 method="textDocument/signatureHelp",
@@ -4348,6 +4443,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 result=None,
             )
             .request(
+                line=line(),
                 comment="signature help for 1-argument static method"
                 " (right of open paren)",
                 method="textDocument/signatureHelp",
@@ -4369,6 +4465,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="signature help for 2-argument global function"
                 " (left of open paren)",
                 method="textDocument/signatureHelp",
@@ -4379,6 +4476,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 result=None,
             )
             .request(
+                line=line(),
                 comment="signature help for 2-argument global function"
                 " (right of open paren)",
                 method="textDocument/signatureHelp",
@@ -4400,6 +4498,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="signature help for 1-argument namespace-aliased global"
                 " function (right of open paren)",
                 method="textDocument/signatureHelp",
@@ -4410,6 +4509,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 result=None,
             )
             .request(
+                line=line(),
                 comment="signature help for 1-argument namespace-aliased global"
                 " function (right of open paren)",
                 method="textDocument/signatureHelp",
@@ -4420,6 +4520,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 result=None,
             )
             .request(
+                line=line(),
                 comment="signature help for 1-argument namespace-aliased global"
                 " function (right of open paren)",
                 method="textDocument/signatureHelp",
@@ -4440,6 +4541,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="signature help for 1-argument namespace-aliased global"
                 " function (right of open paren)",
                 method="textDocument/signatureHelp",
@@ -4460,6 +4562,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="signature help for 2-argument function with params"
                 " (right of open paren)",
                 method="textDocument/signatureHelp",
@@ -4486,6 +4589,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="signature help for 2-argument function with params"
                 " (right of open paren)",
                 method="textDocument/signatureHelp",
@@ -4511,6 +4615,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="signature help for 2-argument function with params"
                 " (right of open paren)",
                 method="textDocument/signatureHelp",
@@ -4541,7 +4646,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "activeParameter": 0,
                 },
             )
-            .request(method="shutdown", params={}, result=None)
+            .request(line=line(), method="shutdown", params={}, result=None)
         )
         self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
 
@@ -4566,6 +4671,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="signature help for a normal function call",
                 method="textDocument/signatureHelp",
                 params={
@@ -4587,6 +4693,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="signature help for normal function call within a lambda",
                 method="textDocument/signatureHelp",
                 params={
@@ -4605,6 +4712,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
+                line=line(),
                 comment="signature help for text within a lambda, left side of an open paren",
                 method="textDocument/signatureHelp",
                 params={
@@ -4614,6 +4722,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 result=None,
             )
             .request(
+                line=line(),
                 comment="signature help for text within a lambda, right side of an open paren",
                 method="textDocument/signatureHelp",
                 params={
@@ -4622,7 +4731,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
                 result=None,
             )
-            .request(method="shutdown", params={}, result=None)
+            .request(line=line(), method="shutdown", params={}, result=None)
         )
         self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
 
@@ -4654,6 +4763,7 @@ class TestLsp(TestCase[LspTestDriver]):
             self.initialize_spec(LspTestSpec("non_blocking"), use_serverless_ide=False)
             .wait_for_hh_server_ready()
             .request(
+                line=line(),
                 method="textDocument/definition",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -4690,7 +4800,7 @@ function __hh_loop_forever_foo(): int {
                 },
             )
             .wait_for_response(wait_id="definition request")
-            .request(method="shutdown", params={}, result=None)
+            .request(line=line(), method="shutdown", params={}, result=None)
         )
         self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
 
@@ -4718,6 +4828,7 @@ function __hh_loop_forever_foo(): int {
                 },
             )
             .request(
+                line=line(),
                 comment="hover before change to class hierarchy should be `int`",
                 method="textDocument/hover",
                 params={
@@ -4748,6 +4859,7 @@ class BaseClassIncremental {
                 notify=True,
             )
             .request(
+                line=line(),
                 comment="hover after change to class hierarchy should be `string`",
                 method="textDocument/hover",
                 params={
@@ -4767,7 +4879,7 @@ class BaseClassIncremental {
                 },
                 powered_by="serverless_ide",
             )
-            .request(method="shutdown", params={}, result=None)
+            .request(line=line(), method="shutdown", params={}, result=None)
         )
 
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
@@ -4794,6 +4906,7 @@ class BaseClassIncremental {
                 },
             )
             .request(
+                line=line(),
                 comment="hover over function invocation",
                 method="textDocument/hover",
                 params={
@@ -4835,6 +4948,7 @@ function b_hover(): string {
                 },
             )
             .request(
+                line=line(),
                 comment="another hover over function invocation, should be string now",
                 method="textDocument/hover",
                 params={
@@ -4853,7 +4967,7 @@ function b_hover(): string {
                 },
                 powered_by="serverless_ide",
             )
-            .request(method="shutdown", params={}, result=None)
+            .request(line=line(), method="shutdown", params={}, result=None)
         )
 
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
@@ -4881,6 +4995,7 @@ function b_hover(): string {
                 },
             )
             .request(
+                line=line(),
                 comment="hover over function invocation",
                 method="textDocument/hover",
                 params={
@@ -4899,7 +5014,7 @@ function b_hover(): string {
                 },
                 powered_by="serverless_ide",
             )
-            .request(method="shutdown", params={}, result=None)
+            .request(line=line(), method="shutdown", params={}, result=None)
         )
         try:
             self.run_spec(
@@ -4933,6 +5048,7 @@ This was the associated request:
 
 hphp/hack/test/integration/test_lsp.py
  XXXX |             .request(
+ XXXX |                 line=line(),
  XXXX |                 comment="hover over function invocation",
  XXXX |                 method="textDocument/hover",
  XXXX |                 params={
@@ -4960,6 +5076,7 @@ fixed.
 make it match:
 
     .request(
+        line=line(),
         comment='hover over function invocation',
         method='textDocument/hover',
         params={'textDocument': {'uri': '${php_file_uri}'}, \
@@ -5028,7 +5145,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                     ],
                 },
             )
-            .request(method="shutdown", params={}, result=None)
+            .request(line=line(), method="shutdown", params={}, result=None)
         )
         try:
             self.run_spec(
@@ -5056,7 +5173,7 @@ This was the most recent request issued from the language client before it
 received the notification:
 
 hphp/hack/test/integration/test_lsp.py
- XXXX |             .request(method="shutdown", params={}, result=None)
+ XXXX |             .request(line=line(), method="shutdown", params={}, result=None)
 
 Remediation:
 1) If this was unexpected, then the language server is buggy and should be
@@ -5106,6 +5223,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 },
             )
             .request(
+                line=line(),
                 comment="document highlight, id 2",
                 method="textDocument/documentHighlight",
                 params={
@@ -5123,7 +5241,11 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 powered_by="serverless_ide",
             )
             .request(
-                comment="shutdown, id 3", method="shutdown", params={}, result=None
+                line=line(),
+                comment="shutdown, id 3",
+                method="shutdown",
+                params={},
+                result=None,
             )
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
@@ -5149,6 +5271,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 },
             )
             .request(
+                line=line(),
                 comment="Check type coverage",
                 method="textDocument/typeCoverage",
                 params={"textDocument": {"uri": "${php_file_uri}"}},
@@ -5160,7 +5283,13 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 },
                 powered_by="serverless_ide",
             )
-            .request(comment="Shutdown", method="shutdown", params={}, result=None)
+            .request(
+                line=line(),
+                comment="Shutdown",
+                method="shutdown",
+                params={},
+                result=None,
+            )
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
@@ -5184,7 +5313,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 },
                 result=NoResponse(),
             )
-            .request(method="shutdown", params={}, result=None)
+            .request(line=line(), method="shutdown", params={}, result=None)
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=False)
 
@@ -5203,7 +5332,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 params={"actions": [], "message": "hh_server: ready.", "type": 3},
                 result=NoResponse(),
             )
-            .request(method="shutdown", params={}, result=None)
+            .request(line=line(), method="shutdown", params={}, result=None)
         )
         self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
 
@@ -5237,7 +5366,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 },
                 result=NoResponse(),
             )
-            .request(method="shutdown", params={}, result=None)
+            .request(line=line(), method="shutdown", params={}, result=None)
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
@@ -5271,7 +5400,8 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 result=NoResponse(),
             )
             .request(
-                "$test/shutdownServerlessIde",
+                line=line(),
+                method="$test/shutdownServerlessIde",
                 params={},
                 result=None,
                 powered_by="serverless_ide",
@@ -5297,7 +5427,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 },
                 result=None,
             )
-            .request(method="shutdown", params={}, result=None)
+            .request(line=line(), method="shutdown", params={}, result=None)
         )
         self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=True)
 
@@ -5344,7 +5474,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 },
                 result=None,
             )
-            .request(method="shutdown", params={}, result=None)
+            .request(line=line(), method="shutdown", params={}, result=None)
         )
         self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=True)
 
@@ -5357,6 +5487,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
             )
             .wait_for_hh_server_ready()
             .request(
+                line=line(),
                 comment="Look up symbols",
                 method="workspace/symbol",
                 params={"query": "TestNS\\test"},
@@ -5375,6 +5506,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 ],
             )
             .request(
+                line=line(),
                 comment="Look up symbols starting with 'test_f' within multiple namespaces",
                 method="workspace/symbol",
                 params={"query": "test_f"},
@@ -5403,7 +5535,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                     },
                 ],
             )
-            .request(method="shutdown", params={}, result=None)
+            .request(line=line(), method="shutdown", params={}, result=None)
         )
         self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
 
@@ -5575,7 +5707,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                     ],
                 },
             )
-            .request(method="shutdown", params={}, result=None)
+            .request(line=line(), method="shutdown", params={}, result=None)
         )
         self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=True)
 
@@ -5639,6 +5771,7 @@ function aaa(): int {
                 notify=True,
             )
             .request(
+                line=line(),
                 comment="Ensure that hover over `aaa` works when there are no naming errors",
                 method="textDocument/hover",
                 params={
@@ -5709,6 +5842,6 @@ function aaa(): int {
             #     },
             #     powered_by="serverless_ide",
             # )
-            .request(method="shutdown", params={}, result=None)
+            .request(line=line(), method="shutdown", params={}, result=None)
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)

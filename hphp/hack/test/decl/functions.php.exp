@@ -602,6 +602,35 @@ Parsed decls:
             ft_fun_kind = sync; ft_reactive = Nonreactive;
             ft_return_disposable = false; ft_mutable = none;
             ft_returns_mutable = false }));
+      fe_deprecated = None;  };
+    "variadic_function" ->
+    { fe_pos = [81:10-27];
+      fe_type =
+      (Rwitness (root|functions.php line 81, characters 10-26),
+       (Tfun
+          { ft_is_coroutine = false;
+            ft_arity =
+            (Fvariadic (0,
+               { fp_pos = [81:37-42]; fp_name = (Some "$args");
+                 fp_type =
+                 { et_enforced = false;
+                   et_type =
+                   (Rhint (root|functions.php line 81, characters 28-32),
+                    Tmixed)
+                   };
+                 fp_kind = FPnormal; fp_accept_disposable = false;
+                 fp_mutable = none }
+               ));
+            ft_tparams = []; ft_where_constraints = []; ft_params = [];
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|functions.php line 81, characters 45-48),
+               (Tprim Tvoid))
+              };
+            ft_fun_kind = sync; ft_reactive = Nonreactive;
+            ft_return_disposable = false; ft_mutable = none;
+            ft_returns_mutable = false }));
       fe_deprecated = None;  } };
   typedefs =
   { "Typedef" ->

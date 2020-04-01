@@ -77,3 +77,6 @@ function null_type_hint<T as nothing>(?T $x): null {
 function resource_type_hint(resource $i): resource {
   return $i; // ok
 }
+
+function variadic_function(mixed ...$args): void {
+}

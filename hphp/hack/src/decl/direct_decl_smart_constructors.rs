@@ -154,7 +154,7 @@ pub fn get_name(namespace: &str, name: &Node_) -> Result<Id, ParseError> {
         n => {
             return Err(format!(
                 "Expected a name, XHP name, or qualified name, but got {:?}",
-                n
+                n,
             ))
         }
     }
@@ -394,6 +394,7 @@ pub struct VariableDecl {
     kind: ParamMode,
     hint: Node_,
     id: Id,
+    variadic: bool,
     initializer: Node_,
 }
 
@@ -999,7 +1000,7 @@ impl DirectDeclSmartConstructors<'_> {
         )?;
         let (type_params, mut type_variables) = self.into_type_params(header.type_params)?;
         type_variables.extend(outer_type_variables.into_iter().map(Rc::clone));
-        let (params, properties, (min_arity, max_arity)) =
+        let (params, properties, arity) =
             self.into_variables_list(header.param_list, &type_variables)?;
         let type_ = match header.name {
             Node_::Construct(pos) => Ty(
@@ -1033,7 +1034,7 @@ impl DirectDeclSmartConstructors<'_> {
         };
         let mut ft = FunType {
             is_coroutine: false,
-            arity: FunArity::Fstandard(min_arity, max_arity),
+            arity,
             tparams: (type_params, FunTparamsKind::FTKtparams),
             where_constraints: Vec::new(),
             params,
@@ -1080,28 +1081,21 @@ impl DirectDeclSmartConstructors<'_> {
         &self,
         list: Node_,
         type_variables: &HashSet<Rc<String>>,
-    ) -> Result<(FunParams, Vec<PropertyDecl>, (isize, isize)), ParseError> {
+    ) -> Result<(FunParams, Vec<PropertyDecl>, FunArity), ParseError> {
         match list {
             Node_::List(nodes) => nodes.into_iter().fold(
-                Ok((Vec::new(), Vec::new(), (0, 0))),
+                Ok((Vec::new(), Vec::new(), FunArity::Fstandard(0, 0))),
                 |acc, variable| match (acc, variable) {
-                    (
-                        Ok((mut variables, mut properties, (min_arity, max_arity))),
-                        Node_::Variable(innards),
-                    ) => {
+                    (Ok((mut variables, mut properties, arity)), Node_::Variable(innards)) => {
                         let VariableDecl {
                             attributes,
                             visibility,
                             kind,
                             hint,
                             id,
+                            variadic,
                             initializer,
                         } = *innards;
-                        let min_arity = match initializer {
-                            Node_::Ignored => min_arity + 1,
-                            _ => min_arity,
-                        };
-                        let max_arity = max_arity + 1;
                         match visibility.as_visibility() {
                             Ok(_) => properties.push(PropertyDecl {
                                 attrs: attributes.clone(),
@@ -1123,7 +1117,7 @@ impl DirectDeclSmartConstructors<'_> {
                                 mutability
                             }
                         });
-                        variables.push(FunParam {
+                        let param = FunParam {
                             pos: id.0,
                             name: Some(id.1),
                             type_: PossiblyEnforcedTy {
@@ -1134,14 +1128,31 @@ impl DirectDeclSmartConstructors<'_> {
                             accept_disposable: false,
                             mutability,
                             rx_annotation: None,
-                        });
-                        Ok((variables, properties, (min_arity, max_arity)))
+                        };
+                        let arity = match (arity, initializer, variadic) {
+                            (FunArity::Fstandard(min, max), Node_::Ignored, false) => {
+                                variables.push(param);
+                                FunArity::Fstandard(min + 1, max + 1)
+                            }
+                            (FunArity::Fstandard(min, _), Node_::Ignored, true) => {
+                                FunArity::Fvariadic(min, param)
+                            }
+                            (FunArity::Fstandard(min, max), _, _) => {
+                                variables.push(param);
+                                FunArity::Fstandard(min, max + 1)
+                            }
+                            (arity, _, _) => {
+                                variables.push(param);
+                                arity
+                            }
+                        };
+                        Ok((variables, properties, arity))
                     }
                     (Ok(_), n) => Err(format!("Expected a variable, but got {:?}", n)),
                     (acc @ Err(_), _) => acc,
                 },
             ),
-            Node_::Ignored => Ok((Vec::new(), Vec::new(), (0, 0))),
+            Node_::Ignored => Ok((Vec::new(), Vec::new(), FunArity::Fstandard(0, 0))),
             n => Err(format!("Expected a list of variables, but got {:?}", n)),
         }
     }
@@ -1909,7 +1920,16 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         name: Self::R,
         initializer: Self::R,
     ) -> Self::R {
-        let id = get_name("", &name?)?;
+        let (variadic, id) = match name? {
+            Node_::ListItem(innards) => {
+                let id = get_name("", &innards.1)?;
+                match innards.0 {
+                    Node_::DotDotDot => (true, id),
+                    _ => (false, id),
+                }
+            }
+            name => (false, get_name("", &name)?),
+        };
         let attributes = attributes?;
         let visibility = visibility?;
         let initializer = initializer?;
@@ -1924,6 +1944,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             kind,
             hint,
             id,
+            variadic,
             initializer,
         })))
     }
@@ -2925,6 +2946,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             abstract_,
             reified,
         })))
+    }
+
+    fn make_decorated_expression(&mut self, decorator: Self::R, expr: Self::R) -> Self::R {
+        Ok(Node_::ListItem(Box::new((decorator?, expr?))))
     }
 
     fn make_type_constant(

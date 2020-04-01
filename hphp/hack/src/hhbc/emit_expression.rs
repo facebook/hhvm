@@ -1375,8 +1375,103 @@ fn emit_record(
     unimplemented!("TODO(hrust)")
 }
 
+fn emit_call_isset_expr(e: &mut Emitter, env: &Env, outer_pos: &Pos, expr: &tast::Expr) -> Result {
+    let pos = &expr.0;
+    if let Some((base_expr, opt_elem_expr)) = expr.1.as_array_get() {
+        return Ok(match (base_expr.1.as_lvar(), opt_elem_expr) {
+            (Some(tast::Lid(_, id)), Some(elem))
+                if local_id::get_name(&id) == superglobals::GLOBALS =>
+            {
+                InstrSeq::gather(vec![
+                    emit_expr(e, env, elem)?,
+                    emit_pos(outer_pos),
+                    instr::issetg(),
+                ])
+            }
+            _ => {
+                emit_array_get(
+                    e,
+                    env,
+                    pos,
+                    None,
+                    QueryOp::Isset,
+                    base_expr,
+                    opt_elem_expr.as_ref(),
+                    false,
+                    false,
+                )?
+                .0
+            }
+        });
+    }
+    if let Some((cid, id)) = expr.1.as_class_get() {
+        return emit_class_get(e, env, QueryOp::Isset, cid, id);
+    }
+    if let Some((expr_, prop, nullflavor)) = expr.1.as_obj_get() {
+        return Ok(emit_obj_get(e, env, pos, QueryOp::Isset, expr_, prop, nullflavor, false)?.0);
+    }
+    if let Some(lid) = expr.1.as_lvar() {
+        let name = local_id::get_name(&lid.1);
+        return Ok(if superglobals::is_any_global(&name) {
+            InstrSeq::gather(vec![
+                emit_pos(outer_pos),
+                instr::string(string_utils::locals::strip_dollar(&name)),
+                emit_pos(outer_pos),
+                instr::issetg(),
+            ])
+        } else if is_local_this(env, &lid.1) && !env.flags.contains(env::Flags::NEEDS_LOCAL_THIS) {
+            InstrSeq::gather(vec![
+                emit_pos(outer_pos),
+                emit_local(e, env, BareThisOp::NoNotice, lid)?,
+                emit_pos(outer_pos),
+                instr::istypec(IstypeOp::OpNull),
+                instr::not(),
+            ])
+        } else {
+            emit_pos_then(outer_pos, instr::issetl(get_local(e, env, &lid.0, name)?))
+        });
+    }
+    Ok(InstrSeq::gather(vec![
+        emit_expr(e, env, expr)?,
+        instr::istypec(IstypeOp::OpNull),
+        instr::not(),
+    ]))
+}
+
 fn emit_call_isset_exprs(e: &mut Emitter, env: &Env, pos: &Pos, exprs: &[tast::Expr]) -> Result {
-    unimplemented!()
+    match exprs {
+        [] => Err(emit_fatal::raise_fatal_parse(
+            pos,
+            "Cannot use isset() without any arguments",
+        )),
+        [expr] => emit_call_isset_expr(e, env, pos, expr),
+        _ => {
+            let its_done = e.label_gen_mut().next_regular();
+            Ok(InstrSeq::gather(vec![
+                InstrSeq::gather(
+                    exprs
+                        .iter()
+                        .enumerate()
+                        .map(|(i, expr)| {
+                            Ok(InstrSeq::gather(vec![
+                                emit_call_isset_expr(e, env, pos, expr)?,
+                                if i < exprs.len() - 1 {
+                                    InstrSeq::gather(vec![
+                                        instr::dup(),
+                                        instr::jmpz(its_done.clone()),
+                                        instr::popc(),
+                                    ])
+                                } else {
+                                    instr::empty()
+                                },
+                            ]))
+                        })
+                        .collect::<Result<Vec<_>>>()?,
+                ),
+                instr::label(its_done),
+            ]))
+        }
+    }
 }
 
 fn emit_idx(e: &mut Emitter, env: &Env, pos: &Pos, es: &[tast::Expr]) -> Result {

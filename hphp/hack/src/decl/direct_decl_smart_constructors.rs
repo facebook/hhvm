@@ -2690,12 +2690,14 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         gt: Self::R,
     ) -> Self::R {
         let (classname, targ, gt) = (classname?, targ?, gt?);
-        let pos = Pos::merge(&classname.get_pos()?, &gt.get_pos()?)?;
         let id = get_name("\\", &classname)?;
-        Ok(Node_::Hint(
-            HintValue::Apply(Box::new((id, vec![targ]))),
-            pos,
-        ))
+        match gt {
+            Node_::Ignored => Ok(Node_::Hint(HintValue::String, id.0)),
+            gt => Ok(Node_::Hint(
+                HintValue::Apply(Box::new((id, vec![targ]))),
+                Pos::merge(&classname.get_pos()?, &gt.get_pos()?)?,
+            )),
+        }
     }
 
     fn make_scope_resolution_expression(

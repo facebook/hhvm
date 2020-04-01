@@ -1,0 +1,2 @@
+File "classes_const_keyword.php", line 26, characters 16-24:
+Missing type parameter to classname; classname is entirely meaningless without one (Naming[2066])

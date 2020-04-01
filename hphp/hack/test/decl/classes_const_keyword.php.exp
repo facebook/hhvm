@@ -89,16 +89,27 @@ Parsed decls:
           };
         { Shallow_decl_defs.scc_abstract = false;
           scc_expr =
-          (Some ([26:34-58],
-                 (Varray (None,
-                    [([26:41-48], (String "MAP_1"));
-                      ([26:50-57], (String "MAP_2"))]
-                    ))));
-          scc_name = ([26:24-31], "CVARRAY");
+          (Some ([26:47-55], (ValCollection (<vc_kind>, None, []))));
+          scc_name = ([26:27-44], "CCLASSNAME_KEYSET");
           scc_type =
-          (Rhint (root|classes_const_keyword.php line 26, characters 9-22),
+          (Rhint (root|classes_const_keyword.php line 26, characters 9-25),
+           (Tapply (([26:9-15], "\\HH\\keyset"),
+              [(Rhint (root|classes_const_keyword.php line 26, characters 16-24),
+                (Tprim Tstring))]
+              )))
+          };
+        { Shallow_decl_defs.scc_abstract = false;
+          scc_expr =
+          (Some ([27:34-58],
+                 (Varray (None,
+                    [([27:41-48], (String "MAP_1"));
+                      ([27:50-57], (String "MAP_2"))]
+                    ))));
+          scc_name = ([27:24-31], "CVARRAY");
+          scc_type =
+          (Rhint (root|classes_const_keyword.php line 27, characters 9-22),
            (Tvarray
-              (Rhint (root|classes_const_keyword.php line 26, characters 16-21),
+              (Rhint (root|classes_const_keyword.php line 27, characters 16-21),
                (Tprim Tstring))))
           }
         ];
@@ -109,39 +120,39 @@ Parsed decls:
     "BinopConsts" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
-      sc_name = ([29:7-18], "\\BinopConsts"); sc_tparams = [];
+      sc_name = ([30:7-18], "\\BinopConsts"); sc_tparams = [];
       sc_where_constraints = []; sc_extends = []; sc_uses = [];
       sc_method_redeclarations = []; sc_xhp_attr_uses = [];
       sc_req_extends = []; sc_req_implements = []; sc_implements = [];
       sc_consts =
       [{ Shallow_decl_defs.scc_abstract = false;
          scc_expr =
-         (Some ([30:20-25],
-                (Binop (Plus, ([30:20-21], (Int "4")),
-                   ([30:24-25], (Int "5"))))));
-         scc_name = ([30:13-17], "CINT");
+         (Some ([31:20-25],
+                (Binop (Plus, ([31:20-21], (Int "4")),
+                   ([31:24-25], (Int "5"))))));
+         scc_name = ([31:13-17], "CINT");
          scc_type =
-         (Rhint (root|classes_const_keyword.php line 30, characters 9-11),
+         (Rhint (root|classes_const_keyword.php line 31, characters 9-11),
           (Tprim Tint))
          };
         { Shallow_decl_defs.scc_abstract = false;
           scc_expr =
-          (Some ([31:24-33],
-                 (Binop (Minus, ([31:24-27], (Float "4.0")),
-                    ([31:30-33], (Float "5.0"))))));
-          scc_name = ([31:15-21], "CFLOAT");
+          (Some ([32:24-33],
+                 (Binop (Minus, ([32:24-27], (Float "4.0")),
+                    ([32:30-33], (Float "5.0"))))));
+          scc_name = ([32:15-21], "CFLOAT");
           scc_type =
-          (Rhint (root|classes_const_keyword.php line 31, characters 9-13),
+          (Rhint (root|classes_const_keyword.php line 32, characters 9-13),
            (Tprim Tfloat))
           };
         { Shallow_decl_defs.scc_abstract = false;
           scc_expr =
-          (Some ([32:26-39],
-                 (Binop (Dot, ([32:26-32], (String "test")),
-                    ([32:33-39], (String "test"))))));
-          scc_name = ([32:16-23], "CSTRING");
+          (Some ([33:26-39],
+                 (Binop (Dot, ([33:26-32], (String "test")),
+                    ([33:33-39], (String "test"))))));
+          scc_name = ([33:16-23], "CSTRING");
           scc_type =
-          (Rhint (root|classes_const_keyword.php line 32, characters 9-14),
+          (Rhint (root|classes_const_keyword.php line 33, characters 9-14),
            (Tprim Tstring))
           }
         ];
@@ -152,35 +163,35 @@ Parsed decls:
     "ClassnameConsts" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
-      sc_name = ([44:7-22], "\\ClassnameConsts"); sc_tparams = [];
+      sc_name = ([45:7-22], "\\ClassnameConsts"); sc_tparams = [];
       sc_where_constraints = []; sc_extends = []; sc_uses = [];
       sc_method_redeclarations = []; sc_xhp_attr_uses = [];
       sc_req_extends = []; sc_req_implements = []; sc_implements = [];
       sc_consts =
       [{ Shallow_decl_defs.scc_abstract = false;
          scc_expr =
-         (Some ([45:45-63],
+         (Some ([46:45-63],
                 (Class_const (
-                   ([45:45-56], (CI ([45:45-56], "\\TupleConsts"))),
-                   ([45:58-63], "class")))));
-         scc_name = ([45:32-42], "CCLASSNAME");
+                   ([46:45-56], (CI ([46:45-56], "\\TupleConsts"))),
+                   ([46:58-63], "class")))));
+         scc_name = ([46:32-42], "CCLASSNAME");
          scc_type =
-         (Rhint (root|classes_const_keyword.php line 45, characters 9-30),
-          (Tapply (([45:9-18], "\\HH\\classname"),
-             [(Rhint (root|classes_const_keyword.php line 45, characters 19-29),
-               (Tapply (([45:19-30], "\\TupleConsts"), [])))]
+         (Rhint (root|classes_const_keyword.php line 46, characters 9-30),
+          (Tapply (([46:9-18], "\\HH\\classname"),
+             [(Rhint (root|classes_const_keyword.php line 46, characters 19-29),
+               (Tapply (([46:19-30], "\\TupleConsts"), [])))]
              )))
          };
         { Shallow_decl_defs.scc_abstract = false;
           scc_expr =
-          (Some ([46:50-61],
-                 (Class_const (([46:50-54], CIself), ([46:56-61], "class")))));
-          scc_name = ([46:36-47], "CCLASSNAME2");
+          (Some ([47:50-61],
+                 (Class_const (([47:50-54], CIself), ([47:56-61], "class")))));
+          scc_name = ([47:36-47], "CCLASSNAME2");
           scc_type =
-          (Rhint (root|classes_const_keyword.php line 46, characters 9-34),
-           (Tapply (([46:9-18], "\\HH\\classname"),
-              [(Rhint (root|classes_const_keyword.php line 46, characters 19-33),
-                (Tapply (([46:19-34], "\\ClassnameConsts"), [])))]
+          (Rhint (root|classes_const_keyword.php line 47, characters 9-34),
+           (Tapply (([47:9-18], "\\HH\\classname"),
+              [(Rhint (root|classes_const_keyword.php line 47, characters 19-33),
+                (Tapply (([47:19-34], "\\ClassnameConsts"), [])))]
               )))
           }
         ];
@@ -283,35 +294,35 @@ Parsed decls:
     "ShapeConsts" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
-      sc_name = ([35:7-18], "\\ShapeConsts"); sc_tparams = [];
+      sc_name = ([36:7-18], "\\ShapeConsts"); sc_tparams = [];
       sc_where_constraints = []; sc_extends = []; sc_uses = [];
       sc_method_redeclarations = []; sc_xhp_attr_uses = [];
       sc_req_extends = []; sc_req_implements = []; sc_implements = [];
       sc_consts =
       [{ Shallow_decl_defs.scc_abstract = false;
          scc_expr =
-         (Some ([37:5-48],
+         (Some ([38:5-48],
                 (Shape
-                   [((SFlit_str ([37:11-14], "a")), ([37:18-20], (Int "42")));
-                     ((SFlit_str ([37:22-25], "b")),
-                      ([37:29-34], (String "foo")));
-                     ((SFlit_str ([37:36-39], "c")),
-                      ([37:43-47], (Float "3.14")))
+                   [((SFlit_str ([38:11-14], "a")), ([38:18-20], (Int "42")));
+                     ((SFlit_str ([38:22-25], "b")),
+                      ([38:29-34], (String "foo")));
+                     ((SFlit_str ([38:36-39], "c")),
+                      ([38:43-47], (Float "3.14")))
                      ])));
-         scc_name = ([36:47-53], "CSHAPE");
+         scc_name = ([37:47-53], "CSHAPE");
          scc_type =
-         (Rhint (root|classes_const_keyword.php line 36, characters 9-45),
+         (Rhint (root|classes_const_keyword.php line 37, characters 9-45),
           (Tshape (Open_shape,
-             { (SFlit_str ([36:15-18], "a")) ->
+             { (SFlit_str ([37:15-18], "a")) ->
                { sft_optional = false;
                  sft_ty =
-                 (Rhint (root|classes_const_keyword.php line 36, characters 22-24),
+                 (Rhint (root|classes_const_keyword.php line 37, characters 22-24),
                   (Tprim Tint))
                  };
-               (SFlit_str ([36:27-30], "b")) ->
+               (SFlit_str ([37:27-30], "b")) ->
                { sft_optional = false;
                  sft_ty =
-                 (Rhint (root|classes_const_keyword.php line 36, characters 34-39),
+                 (Rhint (root|classes_const_keyword.php line 37, characters 34-39),
                   (Tprim Tstring))
                  } }
              )))
@@ -324,28 +335,28 @@ Parsed decls:
     "TupleConsts" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
-      sc_name = ([40:7-18], "\\TupleConsts"); sc_tparams = [];
+      sc_name = ([41:7-18], "\\TupleConsts"); sc_tparams = [];
       sc_where_constraints = []; sc_extends = []; sc_uses = [];
       sc_method_redeclarations = []; sc_xhp_attr_uses = [];
       sc_req_extends = []; sc_req_implements = []; sc_implements = [];
       sc_consts =
       [{ Shallow_decl_defs.scc_abstract = false;
          scc_expr =
-         (Some ([41:43-57],
-                (List [([41:49-50], (Int "7")); ([41:52-56], Null)])));
-         scc_name = ([41:33-40], "COPTION");
+         (Some ([42:43-57],
+                (List [([42:49-50], (Int "7")); ([42:52-56], Null)])));
+         scc_name = ([42:33-40], "COPTION");
          scc_type =
-         (Rhint (root|classes_const_keyword.php line 41, characters 9-31),
+         (Rhint (root|classes_const_keyword.php line 42, characters 9-31),
           (Ttuple
-             [(Rhint (root|classes_const_keyword.php line 41, characters 10-12),
+             [(Rhint (root|classes_const_keyword.php line 42, characters 10-12),
                (Tprim Tint));
-               (Rhint (root|classes_const_keyword.php line 41, characters 15-30),
+               (Rhint (root|classes_const_keyword.php line 42, characters 15-30),
                 (Toption
-                   (Rhint (root|classes_const_keyword.php line 41, characters 16-30),
+                   (Rhint (root|classes_const_keyword.php line 42, characters 16-30),
                     (Ttuple
-                       [(Rhint (root|classes_const_keyword.php line 41, characters 17-22),
+                       [(Rhint (root|classes_const_keyword.php line 42, characters 17-22),
                          (Tprim Tstring));
-                         (Rhint (root|classes_const_keyword.php line 41, characters 25-29),
+                         (Rhint (root|classes_const_keyword.php line 42, characters 25-29),
                           (Tprim Tfloat))
                          ]))))
                ]))

@@ -393,7 +393,7 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
                 emit_is(emitter, env, pos, h)?,
             ]))
         }
-        Expr_::As(e) => emit_as(env, pos, e),
+        Expr_::As(e) => emit_as(emitter, env, pos, e),
         Expr_::Cast(e) => emit_cast(emitter, env, pos, &(e.0).1, &e.1),
         Expr_::Eif(e) => emit_conditional_expr(emitter, env, pos, &e.0, &e.1, &e.2),
         Expr_::ExprList(es) => Ok(InstrSeq::gather(
@@ -926,6 +926,7 @@ fn emit_shape(
         })
     }
     let pos = &expr.0;
+    // TODO(hrust): avoid clone
     let fl = fl
         .iter()
         .map(|(f, e)| {
@@ -1170,7 +1171,7 @@ fn is_struct_init(
             if let tast::Expr(_, tast::Expr_::String(s)) = key {
                 are_all_keys_non_numeric_strings = are_all_keys_non_numeric_strings
                     && !i64::from_str(&s).is_ok()
-                    && !f64::from_str(&s).is_ok();
+                    && !(f64::from_str(&s).map_or(false, |f| f.is_finite()));
                 has_duplicate_keys = has_duplicate_keys || !uniq_keys.insert(s);
             }
             if !are_all_keys_non_numeric_strings && has_duplicate_keys {
@@ -3731,11 +3732,54 @@ fn emit_pipe(env: &Env, (_, e1, e2): &(aast_defs::Lid, tast::Expr, tast::Expr)) 
 }
 
 fn emit_as(
+    e: &mut Emitter,
     env: &Env,
     pos: &Pos,
-    (e, h, is_nullable): &(tast::Expr, aast_defs::Hint, bool),
+    (expr, h, is_nullable): &(tast::Expr, aast_defs::Hint, bool),
 ) -> Result {
-    unimplemented!("TODO(hrust)")
+    e.local_scope(|e| {
+        let arg_local = e.local_gen_mut().get_unnamed();
+        let type_struct_local = e.local_gen_mut().get_unnamed();
+        let (ts_instrs, is_static) = emit_reified_arg(e, env, pos, true, h)?;
+        let then_label = e.label_gen_mut().next_regular();
+        let done_label = e.label_gen_mut().next_regular();
+        let main_block = |ts_instrs, resolve| {
+            InstrSeq::gather(vec![
+                ts_instrs,
+                instr::setl(type_struct_local.clone()),
+                match resolve {
+                    TypestructResolveOp::Resolve => instr::is_type_structc_resolve(),
+                    TypestructResolveOp::DontResolve => instr::is_type_structc_dontresolve(),
+                },
+                instr::jmpnz(then_label.clone()),
+                if *is_nullable {
+                    InstrSeq::gather(vec![instr::null(), instr::jmp(done_label.clone())])
+                } else {
+                    InstrSeq::gather(vec![
+                        instr::pushl(arg_local.clone()),
+                        instr::pushl(type_struct_local.clone()),
+                        instr::throwastypestructexception(),
+                    ])
+                },
+            ])
+        };
+        Ok(InstrSeq::gather(vec![
+            emit_expr(e, env, expr)?,
+            instr::setl(arg_local.clone()),
+            if is_static {
+                main_block(
+                    get_type_structure_for_hint(e, &[], &IndexSet::new(), h)?,
+                    TypestructResolveOp::Resolve,
+                )
+            } else {
+                main_block(ts_instrs, TypestructResolveOp::DontResolve)
+            },
+            instr::label(then_label),
+            instr::pushl(arg_local),
+            instr::unsetl(type_struct_local),
+            instr::label(done_label),
+        ]))
+    })
 }
 
 fn emit_cast(

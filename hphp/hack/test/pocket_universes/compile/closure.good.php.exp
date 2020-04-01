@@ -4,7 +4,8 @@
 
 .hh_file 1;
 .adata A_0 = """Y:1:{s:8:\"nullable\";b:1;}""";
-.adata A_1 = """v:0:{}""";
+.adata A_1 = """Y:2:{s:4:\"kind\";i:20;s:13:\"generic_types\";y:1:{Y:1:{s:4:\"kind\";i:4;}}}""";
+.adata A_2 = """v:0:{}""";
 
 .main (1,1) {
   .srcloc 4:7,4:7;
@@ -39,10 +40,10 @@
     Null
     RetC
   }
-  .method [public static] (5,5) <"HH\\mixed" N > E##Members() {
+  .method [public static] (5,5) <"HH\\vec<HH\\string>" "HH\\vec" extended_hint> E##Members() {
     .declvars $mems;
     .srcloc 5:8,5:8;
-    Vec @A_1
+    Vec @A_2
     .srcloc 5:8,5:8;
     SetL $mems
     .srcloc 5:8,5:8;
@@ -50,6 +51,8 @@
     .srcloc 5:8,5:8;
     CGetL $mems
     .srcloc 5:8,5:8;
+    Array @A_1
+    VerifyRetTypeTS
     RetC
   }
 }

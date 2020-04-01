@@ -44,9 +44,15 @@ let process_class_enum fields =
 (* Creates a simple type hint from a string *)
 let simple_typ pos name = (pos, Happly ((pos, name), []))
 
+let apply_to_typ pos name typ = (pos, Happly ((pos, name), [typ]))
+
 let create_mixed_type_hint pos =
   ( Typing_make_type.mixed (Typing_defs.Reason.Rhint pos),
     Some (simple_typ pos "\\HH\\mixed") )
+
+let create_vec_string_type_hint pos =
+  ( Typing_make_type.mixed (Typing_defs.Reason.Rhint pos),
+    Some (apply_to_typ pos "\\HH\\vec" (simple_typ pos "\\HH\\string")) )
 
 (* Error formatter *)
 let error_msg cls field name =
@@ -192,7 +198,7 @@ let gen_Members field pos (fields : T.pu_enum) =
     m_body = body;
     m_user_attributes = [];
     (* TODO: Memoize ? *)
-    m_ret = create_mixed_type_hint pos;
+    m_ret = create_vec_string_type_hint pos;
     m_fun_kind = Ast_defs.FSync;
     m_span = pos;
     m_doc_comment = None;

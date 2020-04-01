@@ -3,7 +3,8 @@
 .filepath "translate.good.php";
 
 .hh_file 1;
-.adata A_0 = """v:2:{s:1:\"A\";s:1:\"B\";}""";
+.adata A_0 = """Y:2:{s:4:\"kind\";i:20;s:13:\"generic_types\";y:1:{Y:1:{s:4:\"kind\";i:4;}}}""";
+.adata A_1 = """v:2:{s:1:\"A\";s:1:\"B\";}""";
 
 .main (1,1) {
   .srcloc 3:7,3:7;
@@ -41,10 +42,10 @@
     VerifyRetTypeC
     RetC
   }
-  .method [public static] (14,14) <"HH\\mixed" N > Field##Members() {
+  .method [public static] (14,14) <"HH\\vec<HH\\string>" "HH\\vec" extended_hint> Field##Members() {
     .declvars $mems;
     .srcloc 14:8,14:12;
-    Vec @A_0
+    Vec @A_1
     .srcloc 14:8,14:12;
     SetL $mems
     .srcloc 14:8,14:12;
@@ -52,6 +53,8 @@
     .srcloc 14:8,14:12;
     CGetL $mems
     .srcloc 14:8,14:12;
+    Array @A_0
+    VerifyRetTypeTS
     RetC
   }
   .method [public static] (14,14) <"HH\\mixed" N > Field##stuff(<"HH\\string" "HH\\string" > $atom) {

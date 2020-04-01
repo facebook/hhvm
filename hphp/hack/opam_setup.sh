@@ -57,12 +57,20 @@ opam_require_version_2
 HACK_OPAM_SWITCH="ocaml-base-compiler.${HACK_OCAML_VERSION}"
 HACK_OPAM_DEFAULT_NAME="hack-switch"
 HACK_OPAM_NAME=${HACK_OPAM_NAME:-$HACK_OPAM_DEFAULT_NAME}
+SKIP_MINI_REPO=${SKIP_MINI_REPO:-0}
+
+if [[ "${SKIP_MINI_REPO}" -eq 1 ]]; then
+  echo "SKIP_MINI_REPO is set."
+  echo "This setup will fetch from the internet."
+  echo "Make sure you know what you are doing."
+  export http_proxy=http://fwdproxy:8080
+  export https_proxy=http://fwdproxy:8080
+fi
 
 MINI_REPO_FETCH_SCRIPT="${SOURCE_ROOT}/facebook/fetch_opam2_repo_hack.sh"
 
 # OSS does not provide bubblewrap yet so we disable it
-if [ -e "$MINI_REPO_FETCH_SCRIPT" ]
-then
+if [[ -f "${MINI_REPO_FETCH_SCRIPT}" && "${SKIP_MINI_REPO}" -eq 0 ]]; then
   MINI_REPO_DIR="$("${MINI_REPO_FETCH_SCRIPT}")"
   MINI_REPO_TARBALL="${MINI_REPO_DIR}.tar.gz"
   rm -rf "$MINI_REPO_DIR" ||:
@@ -73,7 +81,7 @@ else
 fi
 
 opam_switch_create_if_needed "$HACK_OPAM_NAME" "$HACK_OPAM_SWITCH"
-opam switch set "$HACK_OPAM_NAME"
+opam switch "$HACK_OPAM_NAME"
 eval "$(opam env)"
 
 opam install "${HACK_OPAM_DEPS[@]}"

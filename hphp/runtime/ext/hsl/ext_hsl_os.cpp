@@ -29,6 +29,7 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <sys/file.h>
 #include <unistd.h>
 
 namespace HPHP {
@@ -311,6 +312,10 @@ struct HSLFileDescriptor {
     return m_fd;
   }
 
+  static FdData fddata(const Object& obj) {
+    return FdData { fd(obj) };
+  }
+
   void close() {
     int result = ::close(fd());
     throw_errno_if_minus_one(result);
@@ -498,7 +503,7 @@ void HHVM_FUNCTION(HSL_os_ ## fun, const Object& fd, const Object& hsl_sockaddr)
 \
   hsl_cli_unwrap(INVOKE_ON_CLI_CLIENT( \
     HSL_os_ ## fun, \
-    FdData { HSLFileDescriptor::fd(fd) }, \
+    HSLFileDescriptor::fddata(fd), \
     ss, \
     static_cast<int64_t>(ss_len) \
   )); \
@@ -521,7 +526,7 @@ CLISrvResult<int, int> CLI_CLIENT_HANDLER(HSL_os_listen, FdData fd,
 void HHVM_FUNCTION(HSL_os_listen, const Object& fd, int64_t backlog) {
   hsl_cli_unwrap(INVOKE_ON_CLI_CLIENT(
     HSL_os_listen,
-    FdData { HSLFileDescriptor::fd(fd) },
+     HSLFileDescriptor::fddata(fd),
     backlog
   ));
 }
@@ -599,6 +604,24 @@ int64_t HHVM_FUNCTION(HSL_os_lseek, const Object& obj, int64_t offset, int64_t w
   off_t ret = retry_on_eintr(-1, ::lseek, fd, offset, whence);
   throw_errno_if_minus_one(ret);
   return ret;
+}
+
+CLISrvResult<int, int> CLI_CLIENT_HANDLER(HSL_os_flock, FdData fd, int64_t operation) {
+  if (retry_on_eintr(-1, ::flock, fd.fd, operation) == -1) {
+    return { CLIError {}, errno };
+  }
+  return { CLISuccess {}, 0 };
+}
+
+void HHVM_FUNCTION(HSL_os_flock, const Object& obj, int64_t operation) {
+  // while flock is not permission-sensitive (at least according to the docs),
+  // the lock is tied to the process, and we want it to be tied to the CLI
+  // client process.
+  hsl_cli_unwrap(INVOKE_ON_CLI_CLIENT(
+    HSL_os_flock,
+    HSLFileDescriptor::fddata(obj),
+    operation
+  ));
 }
 
 Object HHVM_FUNCTION(HSL_os_poll_async,
@@ -784,6 +807,15 @@ struct OSExtension final : Extension {
 #undef SEEK_
 
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\lseek, HSL_os_lseek);
+
+#define LOCK_(name) HHVM_RC_INT(HH\\Lib\\_Private\\_OS\\LOCK_##name, LOCK_##name)
+    LOCK_(SH);
+    LOCK_(EX);
+    LOCK_(NB);
+    LOCK_(UN);
+#undef LOCK_
+    CLI_REGISTER_HANDLER(HSL_os_flock);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\flock, HSL_os_flock);
 
 #define AF_(name) \
   HHVM_RC_INT(HH\\Lib\\_Private\\_OS\\AF_##name, AF_##name); \

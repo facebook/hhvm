@@ -1,0 +1,3 @@
+Acquiring first lock
+Acquiring second lock
+Caught errno %d - EAGAIN? yes

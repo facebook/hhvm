@@ -31,6 +31,7 @@ class BinopConsts {
   const int CINT = 4 + 5;
   const float CFLOAT = 4.0 - 5.0;
   const string CSTRING = "test"."test";
+  const bool CBOOL = true || false;
 }
 
 class ShapeConsts {

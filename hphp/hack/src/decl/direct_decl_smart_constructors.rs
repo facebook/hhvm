@@ -522,6 +522,7 @@ pub enum Node_ {
     StringLiteral(String, Pos),   // For shape keys and const expressions.
     DecimalLiteral(String, Pos),  // For const expressions.
     FloatingLiteral(String, Pos), // For const expressions.
+    BooleanLiteral(String, Pos),  // For const expressions.
     Null(Pos),                    // For const expressions.
     Hint(HintValue, Pos),
     Backslash(Pos), // This needs a pos since it shows up in names.
@@ -595,6 +596,7 @@ impl Node_ {
             | Node_::FloatingLiteral(_, pos)
             | Node_::Null(pos)
             | Node_::StringLiteral(_, pos)
+            | Node_::BooleanLiteral(_, pos)
             | Node_::Operator(pos, _) => Ok(pos.clone()),
             Node_::ListItem(items) => {
                 let fst = &items.0;
@@ -676,6 +678,13 @@ impl Node_ {
             Node_::DecimalLiteral(s, _) => aast::Expr_::Int(s.to_string()),
             Node_::FloatingLiteral(s, _) => aast::Expr_::Float(s.to_string()),
             Node_::StringLiteral(s, _) => aast::Expr_::String(s.to_string()),
+            Node_::BooleanLiteral(s, _) => {
+                if s.eq_ignore_ascii_case("true") {
+                    aast::Expr_::True
+                } else {
+                    aast::Expr_::False
+                }
+            }
             Node_::Null(_) => aast::Expr_::Null,
             n => return Err(format!("Could not construct an Expr for {:?}", n)),
         };
@@ -917,6 +926,10 @@ impl DirectDeclSmartConstructors<'_> {
             Node_::StringLiteral(_, pos) => Ok(Ty(
                 Reason::Rwitness(pos.clone()),
                 Box::new(Ty_::Tprim(aast::Tprim::Tstring)),
+            )),
+            Node_::BooleanLiteral(_, pos) => Ok(Ty(
+                Reason::Rwitness(pos.clone()),
+                Box::new(Ty_::Tprim(aast::Tprim::Tbool)),
             )),
             Node_::Null(pos) => Ok(Ty(
                 Reason::Rhint(pos.clone()),
@@ -1364,6 +1377,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             TokenKind::DecimalLiteral => Node_::DecimalLiteral(token_text(self), token_pos(self)),
             TokenKind::FloatingLiteral => Node_::FloatingLiteral(token_text(self), token_pos(self)),
             TokenKind::NullLiteral => Node_::Null(token_pos(self)),
+            TokenKind::BooleanLiteral => Node_::BooleanLiteral(token_text(self), token_pos(self)),
             TokenKind::String => Node_::Hint(HintValue::String, token_pos(self)),
             TokenKind::Int => Node_::Hint(HintValue::Int, token_pos(self)),
             TokenKind::Float => Node_::Hint(HintValue::Float, token_pos(self)),

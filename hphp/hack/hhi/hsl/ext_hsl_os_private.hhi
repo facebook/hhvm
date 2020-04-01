@@ -127,9 +127,19 @@ const int SEEK_DATA = 0;
 
 final class ErrnoException extends \Exception {}
 
-function poll_async(FileDescriptor $fd, int $events, int $timeout_ns): Awaitable<int>;
+function poll_async(
+  FileDescriptor $fd,
+  int $events,
+  int $timeout_ns
+): Awaitable<int>;
 
 function open(string $path, int $flags, int $mode = 0): FileDescriptor;
+
+function mkostemps(
+  string $template,
+  int $suffixlen,
+  int $flags
+): (FileDescriptor, string);
 
 function read(
   FileDescriptor $fd,

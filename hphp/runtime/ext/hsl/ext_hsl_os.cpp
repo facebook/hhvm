@@ -285,6 +285,12 @@ struct HSLFileDescriptor {
   };
 
   static Object newInstance(int fd) {
+    if (fd < 0) {
+      SystemLib::throwErrorObject(
+        "Asked to create a negative FileDescriptor instance; this indicates "
+        "either a bug in HHVM, or a misbehaving CLI client."
+      );
+    }
     assertx(s_FileDescriptorClass);
     Object obj { s_FileDescriptorClass };
 
@@ -372,9 +378,54 @@ Object HHVM_FUNCTION(HSL_os_open, const String& path, int64_t flags, int64_t mod
     flags,
     mode
   )).fd;
-  assertx(fd >= 0);
   return HSLFileDescriptor::newInstance(fd);
 }
+
+CLISrvResult<std::tuple<FdData, std::string>, int>
+CLI_CLIENT_HANDLER(HSL_os_mkostemps, std::string path_template, int64_t suffixlen, int64_t flags) {
+  // 0 is reasonable for emulating `mkstemp`
+  if (suffixlen < 0) {
+    return { CLIError {}, EINVAL };
+  }
+
+  char* buf = (char*) malloc(path_template.length() + 1);
+  if (buf == nullptr) {
+    // this will probably fail if malloc fails, but... at least we tried?
+    return { CLIError {} , ENOMEM };
+  }
+  SCOPE_EXIT { free(buf); };
+
+  strncpy(buf, path_template.c_str(), path_template.length());
+  buf[path_template.length()] = 0;
+
+  // only checking for memory safety; glibc will also raise EINVAL if
+  // strlen(buf) < suffixlen + 6
+  if (strlen(buf) < suffixlen) {
+    return { CLIError {}, EINVAL };
+  }
+
+  auto const fd = retry_on_eintr(-1, ::mkostemps, buf, suffixlen, flags);
+  if (fd == -1) {
+    return { CLIError {}, errno };
+  }
+  return { CLISuccess {}, std::make_tuple(FdData { fd }, std::string(buf)) };
+}
+
+Array HHVM_FUNCTION(HSL_os_mkostemps, const String& path_template, int64_t suffixlen, int64_t flags) {
+  FdData fd;
+  std::string path;
+  std::tie(fd, path) = hsl_cli_unwrap(INVOKE_ON_CLI_CLIENT(
+    HSL_os_mkostemps,
+    path_template.toCppString(),
+    suffixlen,
+    flags
+  ));
+  return make_varray(
+    HSLFileDescriptor::newInstance(fd.fd),
+    path
+  );
+}
+
 
 String HHVM_FUNCTION(HSL_os_read, const Object& obj, int64_t max) {
   if (max <= 0) {
@@ -463,7 +514,6 @@ Object HHVM_FUNCTION(HSL_os_socket, int64_t domain, int64_t type, int64_t protoc
     type,
     protocol
   )).fd;
-  assertx(fd >= 0);
   return HSLFileDescriptor::newInstance(fd);
 }
 
@@ -792,6 +842,10 @@ struct OSExtension final : Extension {
 
     CLI_REGISTER_HANDLER(HSL_os_open);
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\open, HSL_os_open);
+
+    CLI_REGISTER_HANDLER(HSL_os_mkostemps);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\mkostemps, HSL_os_mkostemps);
+
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\pipe, HSL_os_pipe);
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\poll_async, HSL_os_poll_async);
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\read, HSL_os_read);

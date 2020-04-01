@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<473231a8b0eeb807b76cdb7a14266468>>
+// @generated SignedSource<<c7983ed2cbef620692a8312ece86329a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -276,6 +276,8 @@ pub struct Element {
     pub synthesized: bool,
     /// Only relevant for methods
     pub override_: bool,
+    /// Only relevant for methods
+    pub dynamicallycallable: bool,
     pub memoizelsb: bool,
     pub abstract_: bool,
     pub reactivity: Option<MethodReactivity>,

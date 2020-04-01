@@ -1,0 +1,6 @@
+File "override4.php", line 9, characters 19-21:
+Member foo has the wrong type (Typing[4341])
+File "override4.php", line 5, characters 19-21:
+This method is __DynamicallyCallable
+File "override4.php", line 9, characters 19-21:
+This method is not

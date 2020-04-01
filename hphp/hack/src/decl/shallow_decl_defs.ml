@@ -64,6 +64,7 @@ type shallow_method = {
   sm_memoizelsb: bool;
   sm_name: Aast.sid;
   sm_override: bool;
+  sm_dynamicallycallable: bool;
   sm_reactivity: Decl_defs.method_reactivity option;
   sm_type: decl_ty;
   sm_visibility: Aast.visibility;

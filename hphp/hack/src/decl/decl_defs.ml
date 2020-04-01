@@ -191,6 +191,7 @@ and element = {
   elt_final: bool;
   elt_synthesized: bool;
   elt_override: bool;  (** Only relevant for methods *)
+  elt_dynamicallycallable: bool;  (** Only relevant for methods *)
   elt_memoizelsb: bool;
   elt_abstract: bool;
   elt_reactivity: method_reactivity option;

@@ -302,6 +302,9 @@ let method_ env c m =
   let has_memoizelsb =
     Attrs.mem SN.UserAttributes.uaMemoizeLSB m.m_user_attributes
   in
+  let has_dynamicallycallable =
+    Attrs.mem SN.UserAttributes.uaDynamicallyCallable m.m_user_attributes
+  in
   let ft = method_type env m in
   let reactivity =
     match ft.ft_reactive with
@@ -340,6 +343,7 @@ let method_ env c m =
     sm_memoizelsb = has_memoizelsb;
     sm_name = m.m_name;
     sm_override = override;
+    sm_dynamicallycallable = has_dynamicallycallable;
     sm_reactivity = reactivity;
     sm_type = mk (Reason.Rwitness pos, Tfun ft);
     sm_visibility = m.m_visibility;

@@ -20,6 +20,7 @@ type class_elt = {
        * In eager mode, true if this method is originally defined in a trait,
        * AND has the override attribute, AND the trait does not inherit any
        * other method of that name. *)
+  ce_dynamicallycallable: bool;
   ce_lsb: bool;  (** true if this static property has attribute __LSB *)
   ce_memoizelsb: bool;  (** true if this method has attribute __MemoizeLSB *)
   ce_synthesized: bool;

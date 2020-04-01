@@ -56,7 +56,8 @@ Parsed decls:
       sc_constructor =
       (Some { Shallow_decl_defs.sm_abstract = false; sm_final = false;
               sm_memoizelsb = false; sm_name = ([9:19-30], "__construct");
-              sm_override = false; sm_reactivity = None;
+              sm_override = false; sm_dynamicallycallable = false;
+              sm_reactivity = None;
               sm_type =
               (Rwitness (root|classes.php line 9, characters 19-29),
                (Tfun
@@ -78,7 +79,8 @@ Parsed decls:
       sc_methods =
       [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
          sm_memoizelsb = false; sm_name = ([11:20-33], "privateMethod");
-         sm_override = false; sm_reactivity = None;
+         sm_override = false; sm_dynamicallycallable = false;
+         sm_reactivity = None;
          sm_type =
          (Rwitness (root|classes.php line 11, characters 20-32),
           (Tfun
@@ -96,7 +98,8 @@ Parsed decls:
          sm_visibility = Private; sm_fixme_codes = {}; sm_deprecated = None };
         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
           sm_memoizelsb = false; sm_name = ([12:19-31], "publicMethod");
-          sm_override = false; sm_reactivity = None;
+          sm_override = false; sm_dynamicallycallable = false;
+          sm_reactivity = None;
           sm_type =
           (Rwitness (root|classes.php line 12, characters 19-30),
            (Tfun
@@ -114,7 +117,8 @@ Parsed decls:
           sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None };
         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
           sm_memoizelsb = false; sm_name = ([13:22-37], "protectedMethod");
-          sm_override = false; sm_reactivity = None;
+          sm_override = false; sm_dynamicallycallable = false;
+          sm_reactivity = None;
           sm_type =
           (Rwitness (root|classes.php line 13, characters 22-36),
            (Tfun
@@ -133,7 +137,8 @@ Parsed decls:
           sm_deprecated = None };
         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
           sm_memoizelsb = false; sm_name = ([14:25-40], "async_generator");
-          sm_override = false; sm_reactivity = None;
+          sm_override = false; sm_dynamicallycallable = false;
+          sm_reactivity = None;
           sm_type =
           (Rwitness (root|classes.php line 14, characters 25-39),
            (Tfun
@@ -179,7 +184,7 @@ Parsed decls:
           sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None };
         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
           sm_memoizelsb = false; sm_name = ([23:19-36], "reactive_function");
-          sm_override = false;
+          sm_override = false; sm_dynamicallycallable = false;
           sm_reactivity = (Some (Decl_defs.Method_reactive None));
           sm_type =
           (Rwitness (root|classes.php line 23, characters 19-35),
@@ -199,7 +204,7 @@ Parsed decls:
         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
           sm_memoizelsb = false;
           sm_name = ([26:19-44], "shallow_reactive_function");
-          sm_override = false;
+          sm_override = false; sm_dynamicallycallable = false;
           sm_reactivity = (Some (Decl_defs.Method_shallow None));
           sm_type =
           (Rwitness (root|classes.php line 26, characters 19-43),
@@ -219,7 +224,7 @@ Parsed decls:
         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
           sm_memoizelsb = false;
           sm_name = ([29:19-42], "local_reactive_function");
-          sm_override = false;
+          sm_override = false; sm_dynamicallycallable = false;
           sm_reactivity = (Some (Decl_defs.Method_local None));
           sm_type =
           (Rwitness (root|classes.php line 29, characters 19-41),
@@ -239,7 +244,7 @@ Parsed decls:
         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
           sm_memoizelsb = false;
           sm_name = ([32:19-49], "reactive_function_mutable_args");
-          sm_override = false;
+          sm_override = false; sm_dynamicallycallable = false;
           sm_reactivity = (Some (Decl_defs.Method_reactive None));
           sm_type =
           (Rwitness (root|classes.php line 32, characters 19-48),
@@ -287,7 +292,7 @@ Parsed decls:
           sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None };
         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
           sm_memoizelsb = false; sm_name = ([40:19-33], "mutable_return");
-          sm_override = false;
+          sm_override = false; sm_dynamicallycallable = false;
           sm_reactivity = (Some (Decl_defs.Method_reactive None));
           sm_type =
           (Rwitness (root|classes.php line 40, characters 19-32),
@@ -350,7 +355,8 @@ Parsed decls:
       sc_constructor =
       (Some { Shallow_decl_defs.sm_abstract = false; sm_final = false;
               sm_memoizelsb = false; sm_name = ([50:19-30], "__construct");
-              sm_override = false; sm_reactivity = None;
+              sm_override = false; sm_dynamicallycallable = false;
+              sm_reactivity = None;
               sm_type =
               (Rwitness (root|classes.php line 50, characters 19-29),
                (Tfun

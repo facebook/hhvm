@@ -1417,7 +1417,7 @@ and expr_
     make_result env p (Aast.ParenthesizedExpr te) ty
   | Any -> expr_error env (Reason.Rwitness p) outer
   (* This is actually now outlawed in the parser but until we remove it completely
-   * let's default to varray 
+   * let's default to varray
    *)
   | Array [] ->
     let (env, tv) = Env.fresh_type env p in

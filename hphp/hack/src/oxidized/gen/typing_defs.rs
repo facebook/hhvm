@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d656c5807b23625a58ddf7cf2bca3152>>
+// @generated SignedSource<<c922303c09bfd0c318c3eb1314c0444a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -39,6 +39,7 @@ pub struct ClassElt {
     /// AND has the override attribute, AND the trait does not inherit any
     /// other method of that name.
     pub override_: bool,
+    pub dynamicallycallable: bool,
     /// true if this static property has attribute __LSB
     pub lsb: bool,
     /// true if this method has attribute __MemoizeLSB

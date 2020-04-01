@@ -13,7 +13,8 @@ Parsed decls:
       sc_methods =
       [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
          sm_memoizelsb = false; sm_name = ([4:19-20], "a");
-         sm_override = false; sm_reactivity = None;
+         sm_override = false; sm_dynamicallycallable = false;
+         sm_reactivity = None;
          sm_type =
          (Rwitness (root|classes_inheritance.php line 4, characters 19-19),
           (Tfun
@@ -31,7 +32,8 @@ Parsed decls:
          sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None };
         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
           sm_memoizelsb = false; sm_name = ([5:19-20], "b");
-          sm_override = false; sm_reactivity = None;
+          sm_override = false; sm_dynamicallycallable = false;
+          sm_reactivity = None;
           sm_type =
           (Rwitness (root|classes_inheritance.php line 5, characters 19-19),
            (Tfun
@@ -64,7 +66,8 @@ Parsed decls:
       sc_methods =
       [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
          sm_memoizelsb = false; sm_name = ([9:19-20], "b");
-         sm_override = false; sm_reactivity = None;
+         sm_override = false; sm_dynamicallycallable = false;
+         sm_reactivity = None;
          sm_type =
          (Rwitness (root|classes_inheritance.php line 9, characters 19-19),
           (Tfun
@@ -82,7 +85,8 @@ Parsed decls:
          sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None };
         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
           sm_memoizelsb = false; sm_name = ([10:19-20], "c");
-          sm_override = false; sm_reactivity = None;
+          sm_override = false; sm_dynamicallycallable = false;
+          sm_reactivity = None;
           sm_type =
           (Rwitness (root|classes_inheritance.php line 10, characters 19-19),
            (Tfun
@@ -113,7 +117,8 @@ Parsed decls:
       sc_methods =
       [{ Shallow_decl_defs.sm_abstract = true; sm_final = false;
          sm_memoizelsb = false; sm_name = ([14:19-20], "c");
-         sm_override = false; sm_reactivity = None;
+         sm_override = false; sm_dynamicallycallable = false;
+         sm_reactivity = None;
          sm_type =
          (Rwitness (root|classes_inheritance.php line 14, characters 19-19),
           (Tfun
@@ -147,7 +152,8 @@ Parsed decls:
       sc_methods =
       [{ Shallow_decl_defs.sm_abstract = true; sm_final = false;
          sm_memoizelsb = false; sm_name = ([18:19-20], "d");
-         sm_override = false; sm_reactivity = None;
+         sm_override = false; sm_dynamicallycallable = false;
+         sm_reactivity = None;
          sm_type =
          (Rwitness (root|classes_inheritance.php line 18, characters 19-19),
           (Tfun
@@ -181,7 +187,8 @@ Parsed decls:
       sc_methods =
       [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
          sm_memoizelsb = false; sm_name = ([22:19-20], "c");
-         sm_override = false; sm_reactivity = None;
+         sm_override = false; sm_dynamicallycallable = false;
+         sm_reactivity = None;
          sm_type =
          (Rwitness (root|classes_inheritance.php line 22, characters 19-19),
           (Tfun
@@ -218,7 +225,8 @@ Parsed decls:
       sc_methods =
       [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
          sm_memoizelsb = false; sm_name = ([26:19-20], "d");
-         sm_override = false; sm_reactivity = None;
+         sm_override = false; sm_dynamicallycallable = false;
+         sm_reactivity = None;
          sm_type =
          (Rwitness (root|classes_inheritance.php line 26, characters 19-19),
           (Tfun

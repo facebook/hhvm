@@ -817,6 +817,7 @@ and build_constructor
       elt_lsb = false;
       elt_override = false;
       elt_memoizelsb = false;
+      elt_dynamicallycallable = false;
       elt_synthesized = false;
       elt_visibility = vis;
       elt_origin = class_name;
@@ -893,6 +894,7 @@ and prop_decl
       elt_lsb = false;
       elt_synthesized = false;
       elt_override = false;
+      elt_dynamicallycallable = false;
       elt_memoizelsb = false;
       elt_abstract = sp.sp_abstract;
       elt_visibility = vis;
@@ -926,6 +928,7 @@ and static_prop_decl
       elt_lsb = sp.sp_lsb;
       elt_xhp_attr = sp.sp_xhp_attr;
       elt_override = false;
+      elt_dynamicallycallable = false;
       elt_memoizelsb = false;
       elt_abstract = sp.sp_abstract;
       elt_synthesized = false;
@@ -1058,6 +1061,7 @@ and method_redecl_acc
       elt_abstract = m.smr_abstract;
       elt_override = false;
       elt_memoizelsb = false;
+      elt_dynamicallycallable = false;
       elt_synthesized = false;
       elt_visibility = vis;
       elt_origin = snd c.sc_name;
@@ -1135,6 +1139,7 @@ and method_decl_acc
       elt_lsb = false;
       elt_abstract = m.sm_abstract;
       elt_override = check_override;
+      elt_dynamicallycallable = m.sm_dynamicallycallable;
       elt_memoizelsb = has_memoizelsb;
       elt_synthesized = false;
       elt_visibility = vis;

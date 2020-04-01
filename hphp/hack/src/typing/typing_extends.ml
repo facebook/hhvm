@@ -122,17 +122,18 @@ let should_check_params parent_class class_ =
   else
     Cls.members_fully_known class_
 
+let is_method member_source =
+  match member_source with
+  | `FromMethod
+  | `FromSMethod ->
+    true
+  | _ -> false
+
 let check_final_method member_source parent_class_elt class_elt on_error =
   (* we only check for final overrides on methods, not properties *)
   (* we don't check constructors, as they are already checked
    * in the decl phase *)
-  let is_method =
-    match member_source with
-    | `FromMethod
-    | `FromSMethod ->
-      true
-    | _ -> false
-  in
+  let is_method = is_method member_source in
   let is_override =
     parent_class_elt.ce_final
     && String.( <> ) parent_class_elt.ce_origin class_elt.ce_origin
@@ -147,13 +148,7 @@ let check_final_method member_source parent_class_elt class_elt on_error =
       ~on_error:(Some on_error)
 
 let check_memoizelsb_method member_source parent_class_elt class_elt =
-  let is_method =
-    match member_source with
-    | `FromMethod
-    | `FromSMethod ->
-      true
-    | _ -> false
-  in
+  let is_method = is_method member_source in
   let is_memoizelsb = class_elt.ce_memoizelsb in
   let is_override =
     String.( <> ) parent_class_elt.ce_origin class_elt.ce_origin
@@ -163,6 +158,28 @@ let check_memoizelsb_method member_source parent_class_elt class_elt =
     let (lazy parent_pos) = parent_class_elt.ce_pos in
     let (lazy pos) = class_elt.ce_pos in
     Errors.override_memoizelsb parent_pos pos
+
+let check_dynamically_callable
+    member_source member_name parent_class_elt class_elt =
+  let is_method = is_method member_source in
+  let is_override =
+    String.( <> ) parent_class_elt.ce_origin class_elt.ce_origin
+  in
+  if
+    is_method
+    && is_override
+    && parent_class_elt.ce_dynamicallycallable
+    && not class_elt.ce_dynamicallycallable
+  then
+    let (lazy parent_pos) = parent_class_elt.ce_pos in
+    let (lazy pos) = class_elt.ce_pos in
+    let errorl =
+      [
+        (parent_pos, "This method is __DynamicallyCallable");
+        (pos, "This method is not");
+      ]
+    in
+    Errors.bad_method_override pos member_name errorl Errors.unify_error
 
 let check_lsb_overrides member_source member_name parent_class_elt class_elt =
   let is_sprop =
@@ -252,6 +269,7 @@ let check_override
   (* We first verify that we aren't overriding a final method *)
   check_final_method mem_source parent_class_elt class_elt on_error;
   check_memoizelsb_method mem_source parent_class_elt class_elt;
+  check_dynamically_callable mem_source member_name parent_class_elt class_elt;
 
   (* Verify that we are not overriding an __LSB property *)
   check_lsb_overrides mem_source member_name parent_class_elt class_elt;
@@ -577,6 +595,7 @@ let default_constructor_ce class_ =
     ce_const = false;
     ce_lateinit = false;
     ce_override = false;
+    ce_dynamicallycallable = false;
     ce_lsb = false;
     ce_memoizelsb = false;
     ce_synthesized = true;

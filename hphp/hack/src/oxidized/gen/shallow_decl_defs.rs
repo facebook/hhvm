@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8aa5e5e5daa180e9395f2bd40ceeb319>>
+// @generated SignedSource<<2639fbf38b00e1a46af22e4d3cd3664c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -138,6 +138,7 @@ pub struct ShallowMethod {
     pub memoizelsb: bool,
     pub name: aast::Sid,
     pub override_: bool,
+    pub dynamicallycallable: bool,
     pub reactivity: Option<decl_defs::MethodReactivity>,
     pub type_: Ty,
     pub visibility: aast::Visibility,

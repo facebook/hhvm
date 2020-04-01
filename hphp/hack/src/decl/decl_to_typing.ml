@@ -50,6 +50,7 @@ let method_redeclaration_to_shallow_method smr =
     sm_memoizelsb = false;
     sm_name;
     sm_override = false;
+    sm_dynamicallycallable = false;
     sm_reactivity = None;
     sm_type;
     sm_visibility;
@@ -74,6 +75,7 @@ let shallow_method_to_class_elt child_class mro subst meth : class_elt =
     sm_memoizelsb = ce_memoizelsb;
     sm_name = (pos, _);
     sm_override = ce_override;
+    sm_dynamicallycallable = ce_dynamicallycallable;
     sm_reactivity = _;
     sm_type = ty;
     sm_visibility;
@@ -99,6 +101,7 @@ let shallow_method_to_class_elt child_class mro subst meth : class_elt =
     ce_const = false;
     ce_lateinit = false;
     ce_override;
+    ce_dynamicallycallable;
     ce_lsb = false;
     ce_memoizelsb;
     ce_synthesized = mro.mro_via_req_extends;
@@ -157,6 +160,7 @@ let shallow_prop_to_telt child_class mro subst prop : tagged_elt =
         ce_const;
         ce_lateinit;
         ce_override = false;
+        ce_dynamicallycallable = false;
         ce_lsb;
         ce_memoizelsb = false;
         ce_synthesized = false;

@@ -2488,6 +2488,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                                     | Reactivity::RxVar(_)
                                     | Reactivity::Pure(_) => None,
                                 },
+                                dynamicallycallable: false,
                                 type_: ty,
                                 visibility: modifiers.visibility,
                                 fixme_codes: ISet::new(),

@@ -427,6 +427,7 @@ struct
       sm_memoizelsb = sm.sm_memoizelsb;
       sm_name = string_id sm.sm_name;
       sm_override = sm.sm_override;
+      sm_dynamicallycallable = sm.sm_dynamicallycallable;
       sm_reactivity = sm.sm_reactivity;
       sm_type = ty sm.sm_type;
       sm_visibility = sm.sm_visibility;

@@ -35,6 +35,7 @@ let element_to_class_elt
       elt_final = ce_final;
       elt_synthesized = ce_synthesized;
       elt_override = ce_override;
+      elt_dynamicallycallable = ce_dynamicallycallable;
       elt_lsb = ce_lsb;
       elt_memoizelsb = ce_memoizelsb;
       elt_abstract = ce_abstract;
@@ -53,6 +54,7 @@ let element_to_class_elt
     ce_const;
     ce_lateinit;
     ce_override;
+    ce_dynamicallycallable;
     ce_lsb;
     ce_memoizelsb;
     ce_abstract;

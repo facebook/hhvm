@@ -7,8 +7,8 @@
  *
  *)
 
-open Hh_prelude
 open Aast
+open Base
 module Env = Tast_env
 module Cls = Decl_provider.Class
 
@@ -58,6 +58,25 @@ let check_is_trait env (p, h) =
     end
   | _ -> failwith "assertion failure: trait isn't an Happly"
 
+let hint_happly_to_string h =
+  match h with
+  | Aast.Happly ((_, name), _) -> Some name
+  | _ -> None
+
+let duplicated_used_traits c =
+  let traits = Hashtbl.create (module String) in
+  List.iter
+    ~f:(fun (p, h) ->
+      match hint_happly_to_string h with
+      | Some s -> Hashtbl.add_multi traits ~key:s ~data:p
+      | None -> ())
+    c.c_uses;
+  Hashtbl.iteri
+    ~f:(fun ~key ~data ->
+      if List.length data > 1 then
+        Errors.trait_reuse_inside_class c.c_name key (List.rev data))
+    traits
+
 let handler =
   object
     inherit Tast_visitor.handler_base
@@ -65,6 +84,7 @@ let handler =
     method! at_class_ env c =
       let (req_extends, req_implements) = split_reqs c in
       List.iter c.c_uses (check_is_trait env);
+      duplicated_used_traits c;
       List.iter req_extends (check_is_class env);
       List.iter c.c_implements (check_is_interface (env, "implement"));
       List.iter

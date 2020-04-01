@@ -1,0 +1,12 @@
+File "use_trait_multiple_times_fail.php", line 6, characters 7-7:
+Class C reuses trait T in its hierarchy (Typing[4186])
+File "use_trait_multiple_times_fail.php", line 4, characters 7-7:
+It is already used through T
+File "use_trait_multiple_times_fail.php", line 6, characters 7-7:
+Class C uses trait T multiple times (Typing[4365])
+File "use_trait_multiple_times_fail.php", line 8, characters 7-7:
+used here
+File "use_trait_multiple_times_fail.php", line 9, characters 7-7:
+used here
+File "use_trait_multiple_times_fail.php", line 10, characters 7-7:
+used here

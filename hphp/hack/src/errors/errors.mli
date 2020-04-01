@@ -582,6 +582,8 @@ val cyclic_record_def : string list -> Pos.t -> unit
 
 val trait_reuse : Pos.t -> string -> Pos.t * string -> string -> unit
 
+val trait_reuse_inside_class : Pos.t * string -> string -> Pos.t list -> unit
+
 val invalid_is_as_expression_hint : string -> Pos.t -> Pos.t -> string -> unit
 
 val invalid_enforceable_type :

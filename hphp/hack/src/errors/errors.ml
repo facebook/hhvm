@@ -4154,6 +4154,15 @@ let trait_reuse p_pos p_name class_name trait =
   let err' = "It is already used through " ^ strip_ns p_name in
   add_list (Typing.err_code Typing.TraitReuse) [(c_pos, err); (p_pos, err')]
 
+let trait_reuse_inside_class class_name trait occurrences =
+  let (c_pos, c_name) = class_name in
+  let c_name = strip_ns c_name in
+  let trait = strip_ns trait in
+  let err = "Class " ^ c_name ^ " uses trait " ^ trait ^ " multiple times" in
+  add_list
+    (Typing.err_code Typing.TraitReuseInsideClass)
+    ([(c_pos, err)] @ List.map ~f:(fun p -> (p, "used here")) occurrences)
+
 let invalid_is_as_expression_hint op hint_pos ty_pos ty_str =
   add_list
     (Typing.err_code Typing.InvalidIsAsExpressionHint)

@@ -624,7 +624,8 @@ module Typing = struct
     | ExceptionOccurred
     | InvalidReifiedFunctionPointer
     | BadFunctionPointerConstruction
-    | NotARecord (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
+    | NotARecord
+    | TraitReuseInsideClass (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

@@ -302,7 +302,6 @@ e {{ ocaml expr }} :: 'e_' ::= {{ com expressions }}
   | uop e                      ::   :: unop           {{ com unary operation }}
   | e1 ? e2 : e3               ::   :: eif            {{ com conditional expression }}
   | e1 ?? e2                   ::   :: nullCoalesce       {{ com null coalesce }}
-  | e instanceof N             ::   :: instanceOf     {{ com instanceof test }}
   | new C ( args )             ::   :: new            {{ com object creation }}
   | lamparams lamreturn ==> lambody  ::   :: lambda   {{ com lambda }}
   | await e                    ::   :: await          {{ com await expression }}
@@ -1679,13 +1678,6 @@ T1 freshfor G
 T2 freshfor G
 ------------------------------------------------- :: is_dict
 G , x : t ; K , skip : G , T1 <: arraykey , x : dict < T1, T2 > |- is_dict ( $x ) truthy
-
-{{ com \subsection{Instance-of tests} }}
-
-{{ com TBC: generic classes.  }}
-
---------------------------------------- :: instanceof
-G , x : t ; K , skip : G , x : C |- $x instanceof C truthy
 
 {{ com \subsection{Null tests} }}
 

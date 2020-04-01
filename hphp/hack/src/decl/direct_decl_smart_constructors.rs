@@ -2182,6 +2182,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         enum MemberAttribute {
             LateInit,
             Const,
+            Lsb,
         }
         fn read_member_attributes<'a>(
             attributes: impl Iterator<Item = &'a Node_>,
@@ -2195,6 +2196,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                         }
                         "__Const" => {
                             ret.insert(MemberAttribute::Const);
+                        }
+                        "__LSB" => {
+                            ret.insert(MemberAttribute::Lsb);
                         }
                         _ => (),
                     }
@@ -2320,7 +2324,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 const_: is_const,
                 xhp_attr: None,
                 lateinit: attributes.contains(&MemberAttribute::LateInit),
-                lsb: false,
+                lsb: attributes.contains(&MemberAttribute::Lsb),
                 name: Id(pos, name),
                 needs_init: decl.expr.is_none(),
                 type_: Some(ty),

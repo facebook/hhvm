@@ -1,0 +1,6 @@
+File "qualified_name_in_attribute_arg.php", line 3, characters 3-5:
+Unbound name: Foo (an object type) (Naming[2049])
+File "qualified_name_in_attribute_arg.php", line 3, characters 7-13:
+Unbound name: Bar\Baz (an object type) (Naming[2049])
+File "qualified_name_in_attribute_arg.php", line 3, characters 3-5:
+Unrecognized user attribute: Foo does not have a class. Please declare a class for the attribute. (Naming[2049])

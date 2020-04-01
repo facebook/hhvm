@@ -587,6 +587,8 @@ impl Node_ {
         match self {
             Node_::Name(_, pos) => Ok(pos.clone()),
             Node_::Hint(_, pos) => Ok(pos.clone()),
+            Node_::XhpName(_, pos) => Ok(pos.clone()),
+            Node_::QualifiedName(_, pos) => Ok(pos.clone()),
             Node_::Backslash(pos)
             | Node_::ColonColon(pos)
             | Node_::Construct(pos)

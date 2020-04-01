@@ -6,6 +6,7 @@
 use closure_convert_rust as closure_convert;
 use emit_attribute_rust as emit_attribute;
 use emit_body_rust as emit_body;
+use emit_expression_rust as emit_expression;
 use emit_fatal_rust as emit_fatal;
 use emit_memoize_method_rust as emit_memoize_method;
 use emit_method_rust as emit_method;
@@ -25,17 +26,20 @@ use hhas_pos_rust::Span;
 use hhas_property_rust::HhasProperty;
 use hhas_type_const::HhasTypeConstant;
 use hhas_xhp_attribute_rust::HhasXhpAttribute;
+use hhbc_ast_rust::{FcallArgs, FcallFlags, SpecialClsRef};
 use hhbc_id_rust::r#const;
-use hhbc_id_rust::{self as hhbc_id, class, method, Id};
+use hhbc_id_rust::{self as hhbc_id, class, method, prop, Id};
 use hhbc_string_utils_rust as string_utils;
 use instruction_sequence_rust::{instr, Error::Unrecoverable, InstrSeq, Result};
 use label_rust as label;
 use naming_special_names_rust as special_names;
+use options::HhvmFlags;
 use oxidized::{
     ast::{self as tast, Hint, ReifyKind, Visibility},
     namespace_env,
     pos::Pos,
 };
+use runtime::TypedValue;
 use rx_rust as rx;
 
 use std::collections::BTreeMap;
@@ -288,14 +292,79 @@ fn validate_class_name(ns: &namespace_env::Env, tast::Id(p, class_name): &tast::
     }
 }
 
+fn emit_reified_extends_params<'a>(
+    e: &mut Emitter,
+    env: &Env,
+    ast_class: &'a tast::Class_,
+) -> Result {
+    match &ast_class.extends[..] {
+        [h, ..] => match h.1.as_happly() {
+            Some((_, l)) if !l.is_empty() => {
+                return Ok(InstrSeq::gather(vec![
+                    emit_expression::emit_reified_targs(
+                        e,
+                        env,
+                        &ast_class.span,
+                        &l.iter().collect::<Vec<_>>(),
+                    )?,
+                    instr::record_reified_generic(),
+                ]))
+            }
+            _ => (),
+        },
+        _ => (),
+    }
+    let tv = if e.options().hhvm.flags.contains(HhvmFlags::HACK_ARR_DV_ARRS) {
+        TypedValue::Vec((vec![], None))
+    } else {
+        TypedValue::VArray((vec![], None))
+    };
+    Ok(instr::typedvalue(tv))
+}
+
 fn emit_reified_init_body<'a>(
-    _env: &Env,
-    _num_reified: usize,
-    _ast_class: &'a tast::Class_,
-) -> InstrSeq {
-    // TODO(hrust)
-    unimplemented!()
-    //InstrSeq::default()
+    e: &mut Emitter,
+    env: &Env,
+    num_reified: usize,
+    ast_class: &'a tast::Class_,
+) -> Result {
+    use string_utils::reified::{INIT_METH_NAME, INIT_METH_PARAM_NAME, PROP_NAME};
+
+    let check_length = InstrSeq::gather(vec![
+        instr::cgetl(local::Type::Named(INIT_METH_PARAM_NAME.into())),
+        instr::check_reified_generic_mismatch(),
+    ]);
+    let set_prop = if num_reified == 0 {
+        instr::empty()
+    } else {
+        InstrSeq::gather(vec![
+            check_length,
+            instr::checkthis(),
+            instr::cgetl(local::Type::Named(INIT_METH_PARAM_NAME.into())),
+            instr::baseh(),
+            instr::setm_pt(0, prop::from_raw_string(PROP_NAME)),
+            instr::popc(),
+        ])
+    };
+    let return_instr = InstrSeq::gather(vec![instr::null(), instr::retc()]);
+    Ok(if ast_class.extends.is_empty() {
+        InstrSeq::gather(vec![set_prop, return_instr])
+    } else {
+        let generic_arr = emit_reified_extends_params(e, env, ast_class)?;
+        let call_parent = InstrSeq::gather(vec![
+            instr::nulluninit(),
+            instr::nulluninit(),
+            instr::nulluninit(),
+            generic_arr,
+            instr::fcallclsmethodsd(
+                FcallArgs::new(FcallFlags::default(), 1, vec![], None, 1, None),
+                SpecialClsRef::Parent,
+                method::from_raw_string(INIT_METH_NAME),
+            ),
+            instr::popc(),
+        ]);
+        InstrSeq::gather(vec![set_prop, call_parent, return_instr])
+    })
 }
 
 fn emit_reified_init_method<'a>(
@@ -328,7 +397,7 @@ fn emit_reified_init_method<'a>(
             default_value: None,
         }];
 
-        let instrs = emit_reified_init_body(env, num_reified, ast_class);
+        let instrs = emit_reified_init_body(emitter, env, num_reified, ast_class)?;
         Ok(Some(make_86method(
             emitter,
             string_utils::reified::INIT_METH_NAME.into(),

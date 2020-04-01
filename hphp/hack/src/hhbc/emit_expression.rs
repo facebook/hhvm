@@ -1440,7 +1440,7 @@ fn emit_call(
         .unwrap_or(Ok(default))
 }
 
-fn emit_reified_targs(e: &mut Emitter, env: &Env, pos: &Pos, targs: &[&tast::Hint]) -> Result {
+pub fn emit_reified_targs(e: &mut Emitter, env: &Env, pos: &Pos, targs: &[&tast::Hint]) -> Result {
     let current_fun_tparams = env.scope.get_fun_tparams();
     let current_cls_tparams = env.scope.get_class_tparams();
     let is_in_lambda = env.scope.is_in_lambda();
@@ -2462,7 +2462,29 @@ fn emit_new(
     if has_inout_arg(args) {
         return Err(unrecoverable("Unexpected inout arg in new expr"));
     }
-    let resolve_self = true;
+    let resolve_self = match &cid.1.as_ciexpr() {
+        Some(ci_expr) => match ci_expr.as_id() {
+            Some(ast_defs::Id(_, n)) if string_utils::is_self(n) => env
+                .scope
+                .get_class_tparams()
+                .list
+                .iter()
+                .all(|tp| tp.reified.is_erased()),
+            Some(ast_defs::Id(_, n)) if string_utils::is_parent(n) => {
+                env.scope
+                    .get_class()
+                    .map_or(true, |cls| match &cls.extends[..] {
+                        [h, ..] => {
+                            h.1.as_happly()
+                                .map_or(true, |(_, l)| !has_non_tparam_generics(env, l))
+                        }
+                        _ => true,
+                    })
+            }
+            _ => true,
+        },
+        _ => true,
+    };
     use HasGenericsOp as H;
     let cexpr = ClassExpr::class_id_to_class_expr(e, false, resolve_self, &env.scope, cid);
     let (cexpr, has_generics) = match &cexpr {
@@ -3640,7 +3662,7 @@ pub fn emit_set_range_expr(
 pub fn is_reified_tparam(env: &Env, is_fun: bool, name: &str) -> Option<(usize, bool)> {
     let is = |tparams: &[tast::Tparam]| {
         let is_soft = |ual: &Vec<tast::UserAttribute>| {
-            ual.iter().any(|ua| &ua.name.1 == user_attributes::SOFT)
+            ual.iter().any(|ua| user_attributes::is_soft(&ua.name.1))
         };
         use tast::ReifyKind::*;
         tparams.iter().enumerate().find_map(|(i, tp)| {

@@ -1,0 +1,8 @@
+File "deprecated.php", line 20, characters 3-14:
+The attribute __Deprecated expects at least 1 arguments (Typing[4153])
+File "deprecated.php", line 23, characters 3-14:
+The attribute __Deprecated expects at least 1 arguments (Typing[4153])
+File "deprecated.php", line 7, characters 5-16:
+The attribute __Deprecated expects at least 1 arguments (Typing[4153])
+File "deprecated.php", line 10, characters 5-16:
+The attribute __Deprecated expects at least 1 arguments (Typing[4153])

@@ -399,6 +399,12 @@ pub struct VariableDecl {
 }
 
 #[derive(Clone, Debug)]
+pub struct Attribute {
+    id: Id,
+    args: Vec<Node_>,
+}
+
+#[derive(Clone, Debug)]
 pub struct FunctionHeader {
     name: Node_,
     modifiers: Node_,
@@ -529,6 +535,7 @@ pub enum Node_ {
     ListItem(Box<(Node_, Node_)>),
     Const(Box<ConstDecl>),
     Variable(Box<VariableDecl>),
+    Attribute(Box<Attribute>),
     FunctionHeader(Box<FunctionHeader>),
     Function(Box<FunctionDecl>),
     Property(Box<PropertyDecl>),
@@ -692,6 +699,57 @@ impl Node_ {
         Ok(aast::Expr(pos, expr_))
     }
 
+    fn as_attributes(&self) -> Result<Attributes, ParseError> {
+        let mut attributes = Attributes {
+            reactivity: Reactivity::Nonreactive,
+            param_mutability: None,
+            deprecated: None,
+            reifiable: None,
+            returns_mutable: false,
+            late_init: false,
+            const_: false,
+            lsb: false,
+        };
+
+        for attribute in self.iter() {
+            if let Node_::Attribute(attribute) = attribute {
+                match attribute.id.1.as_ref() {
+                    "__Rx" => attributes.reactivity = Reactivity::Reactive(None),
+                    "__RxShallow" => attributes.reactivity = Reactivity::Shallow(None),
+                    "__RxLocal" => attributes.reactivity = Reactivity::Local(None),
+                    "__Mutable" => {
+                        attributes.param_mutability = Some(ParamMutability::ParamBorrowedMutable)
+                    }
+                    "__MaybeMutable" => {
+                        attributes.param_mutability = Some(ParamMutability::ParamMaybeMutable)
+                    }
+                    "__MutableReturn" => attributes.returns_mutable = true,
+                    "__Deprecated" => {
+                        attributes.deprecated = attribute.args.first().and_then(|node| match node {
+                            Node_::StringLiteral(val, _) => Some(val.clone()),
+                            _ => None,
+                        })
+                    }
+                    "__Reifiable" => attributes.reifiable = Some(attribute.id.0.clone()),
+                    "__LateInit" => {
+                        attributes.late_init = true;
+                    }
+                    "__Const" => {
+                        attributes.const_ = true;
+                    }
+                    "__LSB" => {
+                        attributes.lsb = true;
+                    }
+                    _ => (),
+                }
+            } else {
+                return Err(format!("Expected an attribute, but was {:?}", self));
+            }
+        }
+
+        Ok(attributes)
+    }
+
     fn is_ignored(&self) -> bool {
         match self {
             Node_::Ignored => true,
@@ -701,6 +759,17 @@ impl Node_ {
 }
 
 pub type Node = Result<Node_, ParseError>;
+
+struct Attributes {
+    reactivity: Reactivity,
+    param_mutability: Option<ParamMutability>,
+    deprecated: Option<String>,
+    reifiable: Option<Pos>,
+    returns_mutable: bool,
+    late_init: bool,
+    const_: bool,
+    lsb: bool,
+}
 
 impl DirectDeclSmartConstructors<'_> {
     fn set_mode(&mut self, token: &PositionedToken) {
@@ -1045,7 +1114,8 @@ impl DirectDeclSmartConstructors<'_> {
                 FunKind::FSync
             }
         };
-        let mut ft = FunType {
+        let attributes = attributes.as_attributes()?;
+        let ft = FunType {
             is_coroutine: false,
             arity,
             tparams: (type_params, FunTparamsKind::FTKtparams),
@@ -1056,23 +1126,12 @@ impl DirectDeclSmartConstructors<'_> {
                 type_,
             },
             fun_kind,
-            reactive: Reactivity::Nonreactive,
+            reactive: attributes.reactivity,
             return_disposable: false,
             mutability: None,
-            returns_mutable: false,
+            returns_mutable: attributes.returns_mutable,
             returns_void_to_rx: false,
         };
-        for attribute in attributes.iter() {
-            if let Node_::Name(name, _) = attribute {
-                match name.as_ref() {
-                    "__Rx" => ft.reactive = Reactivity::Reactive(None),
-                    "__RxShallow" => ft.reactive = Reactivity::Shallow(None),
-                    "__RxLocal" => ft.reactive = Reactivity::Local(None),
-                    "__MutableReturn" => ft.returns_mutable = true,
-                    _ => (),
-                }
-            }
-        }
 
         let ty = Ty(Reason::Rwitness(id.0.clone()), Box::new(Ty_::Tfun(ft)));
         Ok(Box::new((id, ty, properties)))
@@ -1119,17 +1178,8 @@ impl DirectDeclSmartConstructors<'_> {
                             }),
                             Err(_) => (),
                         };
-                        let mutability = attributes.iter().fold(None, |mutability, node| {
-                            if let Node_::Name(n, _) = node {
-                                match n.as_ref() {
-                                    "__Mutable" => Some(ParamMutability::ParamBorrowedMutable),
-                                    "__MaybeMutable" => Some(ParamMutability::ParamMaybeMutable),
-                                    _ => mutability,
-                                }
-                            } else {
-                                mutability
-                            }
-                        });
+
+                        let attributes = attributes.as_attributes()?;
                         let param = FunParam {
                             pos: id.0,
                             name: Some(id.1),
@@ -1139,7 +1189,7 @@ impl DirectDeclSmartConstructors<'_> {
                             },
                             kind,
                             accept_disposable: false,
-                            mutability,
+                            mutability: attributes.param_mutability,
                             rx_annotation: None,
                         };
                         let arity = match (arity, initializer, variadic) {
@@ -1976,14 +2026,19 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             Ok(body) => body,
             Err(_) => Node_::Ignored,
         };
+        let attributes = attributes?;
+        let parsed_attributes = attributes.as_attributes()?;
         Ok(match header? {
             Node_::FunctionHeader(decl) => {
                 let (Id(pos, name), type_, _) =
-                    *self.function_into_ty(attributes?, *decl, body, &HashSet::new())?;
+                    *self.function_into_ty(attributes, *decl, body, &HashSet::new())?;
+                let deprecated = parsed_attributes
+                    .deprecated
+                    .map(|msg| format!("The function {} is deprecated: {}", name, msg));
                 Rc::make_mut(&mut self.state.decls).funs.insert(
                     name,
                     Rc::new(FunElt {
-                        deprecated: None,
+                        deprecated,
                         type_,
                         // NB: We have no intention of populating this field.
                         // Any errors historically emitted during shallow decl
@@ -2192,35 +2247,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _arg9: Self::R,
         body: Self::R,
     ) -> Self::R {
-        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
-        enum MemberAttribute {
-            LateInit,
-            Const,
-            Lsb,
-        }
-        fn read_member_attributes<'a>(
-            attributes: impl Iterator<Item = &'a Node_>,
-        ) -> HashSet<MemberAttribute> {
-            let mut ret = HashSet::new();
-            for attribute in attributes {
-                if let Node_::Name(name, _) = attribute {
-                    match name.as_ref() {
-                        "__LateInit" => {
-                            ret.insert(MemberAttribute::LateInit);
-                        }
-                        "__Const" => {
-                            ret.insert(MemberAttribute::Const);
-                        }
-                        "__LSB" => {
-                            ret.insert(MemberAttribute::Lsb);
-                        }
-                        _ => (),
-                    }
-                }
-            }
-            ret
-        }
-
         #[derive(Debug)]
         struct Modifiers {
             is_static: bool,
@@ -2302,9 +2328,13 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
         for attribute in attributes?.into_iter() {
             match attribute {
-                Node_::Name(name, pos) => cls.user_attributes.push(aast::UserAttribute {
-                    name: Id(pos, name),
-                    params: vec![],
+                Node_::Attribute(attribute) => cls.user_attributes.push(aast::UserAttribute {
+                    name: attribute.id,
+                    params: attribute
+                        .args
+                        .iter()
+                        .map(|node| node.as_expr())
+                        .collect::<Result<Vec<_>, ParseError>>()?,
                 }),
                 _ => (),
             }
@@ -2324,7 +2354,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             decl: PropertyDecl,
             type_variables: &HashSet<Rc<String>>,
         ) -> Result<(), ParseError> {
-            let attributes = read_member_attributes(decl.attrs.iter());
+            let attributes = decl.attrs.as_attributes()?;
             let modifiers = read_member_modifiers(decl.modifiers.iter());
             let Id(pos, name) = decl.id;
             let name = if modifiers.is_static {
@@ -2333,12 +2363,11 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 strip_dollar_prefix(Cow::Owned(name)).into_owned()
             };
             let ty = this.node_to_ty(&decl.hint, type_variables)?;
-            let is_const = attributes.contains(&MemberAttribute::Const);
             let prop = shallow_decl_defs::ShallowProp {
-                const_: is_const,
+                const_: attributes.const_,
                 xhp_attr: None,
-                lateinit: attributes.contains(&MemberAttribute::LateInit),
-                lsb: attributes.contains(&MemberAttribute::Lsb),
+                lateinit: attributes.late_init,
+                lsb: attributes.lsb,
                 name: Id(pos, name),
                 needs_init: decl.expr.is_none(),
                 type_: Some(ty),
@@ -2418,23 +2447,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                                 Node_::Construct(_) => true,
                                 _ => false,
                             };
-                            let reactivity =
-                                decl.attributes.iter().fold(None, |reactivity, attribute| {
-                                    if let Node_::Name(name, _) = attribute {
-                                        match name.as_ref() {
-                                            "__Rx" => Some(MethodReactivity::MethodReactive(None)),
-                                            "__RxShallow" => {
-                                                Some(MethodReactivity::MethodShallow(None))
-                                            }
-                                            "__RxLocal" => {
-                                                Some(MethodReactivity::MethodLocal(None))
-                                            }
-                                            _ => reactivity,
-                                        }
-                                    } else {
-                                        reactivity
-                                    }
-                                });
+
+                            let attributes = decl.attributes.as_attributes()?;
                             let (id, ty, properties) = *self.function_into_ty(
                                 decl.attributes,
                                 decl.header,
@@ -2444,17 +2458,34 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                             for property in properties {
                                 handle_property(self, &mut cls, property, &type_variables)?;
                             }
+                            let deprecated = attributes
+                                .deprecated
+                                .map(|msg| format!("The method {} is deprecated: {}", id.1, msg));
                             let method = shallow_decl_defs::ShallowMethod {
                                 abstract_,
                                 final_: false,
                                 memoizelsb: false,
                                 name: id,
                                 override_: false,
-                                reactivity,
+                                reactivity: match attributes.reactivity {
+                                    Reactivity::Local(_) => {
+                                        Some(MethodReactivity::MethodLocal(None))
+                                    }
+                                    Reactivity::Shallow(_) => {
+                                        Some(MethodReactivity::MethodShallow(None))
+                                    }
+                                    Reactivity::Reactive(_) => {
+                                        Some(MethodReactivity::MethodReactive(None))
+                                    }
+                                    Reactivity::Nonreactive
+                                    | Reactivity::MaybeReactive(_)
+                                    | Reactivity::RxVar(_)
+                                    | Reactivity::Pure(_) => None,
+                                },
                                 type_: ty,
                                 visibility: modifiers.visibility,
                                 fixme_codes: ISet::new(),
-                                deprecated: None,
+                                deprecated,
                             };
                             if is_constructor {
                                 cls.constructor = Some(method);
@@ -2866,10 +2897,14 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         &mut self,
         name: Self::R,
         _arg1: Self::R,
-        _arg2: Self::R,
+        args: Self::R,
         _arg3: Self::R,
     ) -> Self::R {
-        name
+        let id = get_name("", &name?)?;
+        Ok(Node_::Attribute(Box::new(Attribute {
+            id,
+            args: args?.into_vec(),
+        })))
     }
 
     fn make_trait_use(&mut self, _arg0: Self::R, used: Self::R, _arg2: Self::R) -> Self::R {
@@ -2942,17 +2977,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         type_: Self::R,
         _arg9: Self::R,
     ) -> Self::R {
-        let reified = attributes?.iter().fold(None, |reifiable, node| {
-            if let Node_::Name(name, pos) = node {
-                if name == "__Reifiable" {
-                    Some(pos.clone())
-                } else {
-                    reifiable
-                }
-            } else {
-                reifiable
-            }
-        });
+        let attributes = attributes?.as_attributes()?;
         let abstract_ = modifiers?.iter().fold(false, |abstract_, node| match node {
             Node_::Abstract => true,
             _ => abstract_,
@@ -2963,7 +2988,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             constraints: constraints?.into_vec(),
             type_: type_?,
             abstract_,
-            reified,
+            reified: attributes.reifiable,
         })))
     }
 

@@ -1,0 +1,29 @@
+--- closed FD ---
+close:
+- Caught exception: EBADF
+lseek:
+- Caught exception: EBADF
+write:
+- Caught exception: EBADF
+getpeername:
+- Caught exception: EBADF
+--- wrong kind of FD ---
+getpeername:
+- Caught exception: ENOTSOCK
+lseek:
+- Caught exception: ESPIPE
+--- Not an FD ---
+PHP7 engine exceptions (required): 1
+close:
+- Caught exception: 0 (TypeError - "Expected an HSL FileDescriptor")
+lseek:
+- Caught exception: 0 (TypeError - "Expected an HSL FileDescriptor")
+getpeername:
+- Caught exception: 0 (TypeError - "Expected an HSL FileDescriptor")
+--- null ---
+close:
+- Caught exception: 0 (TypeError - "HH\Lib\_Private\_OS\close() expects parameter 1 to be object, null given")
+lseek:
+- Caught exception: 0 (TypeError - "HH\Lib\_Private\_OS\lseek() expects parameter 1 to be object, null given")
+getpeername:
+- Caught exception: 0 (TypeError - "HH\Lib\_Private\_OS\getpeername() expects parameter 1 to be object, null given")

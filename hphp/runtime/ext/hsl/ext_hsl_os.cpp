@@ -296,8 +296,9 @@ struct HSLFileDescriptor {
   }
 
   static HSLFileDescriptor* get(const Object& obj) {
-    assertx(!obj.isNull());
-    assertx(obj->instanceof(s_FQHSLFileDescriptor));
+    if (obj.isNull() || !obj->instanceof(s_FQHSLFileDescriptor)) {
+      raise_typehint_error("Expected an HSL FileDescriptor");
+    }
     return Native::data<HSLFileDescriptor>(obj);
   }
 

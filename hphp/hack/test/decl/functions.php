@@ -60,6 +60,7 @@ function local_reactive_function(): void {}
 function reactive_function_mutable_args(
   <<__Mutable>> Typedef $a,
   <<__MaybeMutable>> Typedef $b,
+  <<__OwnedMutable>> Typedef $c,
 ): void {
 }
 

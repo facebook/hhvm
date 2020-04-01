@@ -724,6 +724,9 @@ impl Node_ {
                     "__MaybeMutable" => {
                         attributes.param_mutability = Some(ParamMutability::ParamMaybeMutable)
                     }
+                    "__OwnedMutable" => {
+                        attributes.param_mutability = Some(ParamMutability::ParamOwnedMutable)
+                    }
                     "__MutableReturn" => attributes.returns_mutable = true,
                     "__Deprecated" => {
                         attributes.deprecated = attribute.args.first().and_then(|node| match node {

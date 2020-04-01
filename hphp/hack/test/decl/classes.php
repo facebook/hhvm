@@ -32,6 +32,7 @@ class MyClass {
   public function reactive_function_mutable_args(
     <<__Mutable>> MyClass $a,
     <<__MaybeMutable>> MyClass $b,
+    <<__OwnedMutable>> MyClass $c,
   ): void {
   }
 

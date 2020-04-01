@@ -4,7 +4,7 @@ Parsed decls:
   { "C" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
-      sc_name = ([66:7-8], "\\C"); sc_tparams = [];
+      sc_name = ([67:7-8], "\\C"); sc_tparams = [];
       sc_where_constraints = []; sc_extends = []; sc_uses = [];
       sc_method_redeclarations = []; sc_xhp_attr_uses = [];
       sc_req_extends = []; sc_req_implements = []; sc_implements = [];
@@ -124,33 +124,33 @@ Parsed decls:
             ft_returns_mutable = false }));
       fe_deprecated = None;  };
     "make" ->
-    { fe_pos = [69:10-14];
+    { fe_pos = [70:10-14];
       fe_type =
-      (Rwitness (root|functions.php line 69, characters 10-13),
+      (Rwitness (root|functions.php line 70, characters 10-13),
        (Tfun
           { ft_is_coroutine = false; ft_arity = (Fstandard (0, 0));
             ft_tparams = []; ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;
               et_type =
-              (Rhint (root|functions.php line 69, characters 18-18),
-               (Tapply (([69:18-19], "\\C"), [])))
+              (Rhint (root|functions.php line 70, characters 18-18),
+               (Tapply (([70:18-19], "\\C"), [])))
               };
             ft_fun_kind = sync; ft_reactive = Reactive {};
             ft_return_disposable = false; ft_mutable = none;
             ft_returns_mutable = true }));
       fe_deprecated = None;  };
     "noreturn_type_hint" ->
-    { fe_pos = [81:10-28];
+    { fe_pos = [82:10-28];
       fe_type =
-      (Rwitness (root|functions.php line 81, characters 10-27),
+      (Rwitness (root|functions.php line 82, characters 10-27),
        (Tfun
           { ft_is_coroutine = false; ft_arity = (Fstandard (0, 0));
             ft_tparams = []; ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;
               et_type =
-              (Rhint (root|functions.php line 81, characters 32-39),
+              (Rhint (root|functions.php line 82, characters 32-39),
                (Tprim Tnoreturn))
               };
             ft_fun_kind = sync; ft_reactive = Nonreactive;
@@ -158,27 +158,27 @@ Parsed decls:
             ft_returns_mutable = false }));
       fe_deprecated = None;  };
     "null_type_hint" ->
-    { fe_pos = [73:10-24];
+    { fe_pos = [74:10-24];
       fe_type =
-      (Rwitness (root|functions.php line 73, characters 10-23),
+      (Rwitness (root|functions.php line 74, characters 10-23),
        (Tfun
           { ft_is_coroutine = false; ft_arity = (Fstandard (1, 1));
             ft_tparams =
-            [(Invariant, ([73:25-26], "T"),
+            [(Invariant, ([74:25-26], "T"),
               [(Constraint_as,
-                (Rhint (root|functions.php line 73, characters 30-36),
+                (Rhint (root|functions.php line 74, characters 30-36),
                  (Tunion [])))
                 ])
               ];
             ft_where_constraints = [];
             ft_params =
-            [{ fp_pos = [73:42-44]; fp_name = (Some "$x");
+            [{ fp_pos = [74:42-44]; fp_name = (Some "$x");
                fp_type =
                { et_enforced = false;
                  et_type =
-                 (Rhint (root|functions.php line 73, characters 39-40),
+                 (Rhint (root|functions.php line 74, characters 39-40),
                   (Toption
-                     (Rhint (root|functions.php line 73, characters 40-40),
+                     (Rhint (root|functions.php line 74, characters 40-40),
                       (Tgeneric "T"))))
                  };
                fp_kind = FPnormal; fp_accept_disposable = false;
@@ -187,7 +187,7 @@ Parsed decls:
             ft_ret =
             { et_enforced = false;
               et_type =
-              (Rhint (root|functions.php line 73, characters 47-50),
+              (Rhint (root|functions.php line 74, characters 47-50),
                (Tprim Tnull))
               };
             ft_fun_kind = sync; ft_reactive = Nonreactive;
@@ -216,7 +216,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|functions.php line 60, characters 10-39),
        (Tfun
-          { ft_is_coroutine = false; ft_arity = (Fstandard (2, 2));
+          { ft_is_coroutine = false; ft_arity = (Fstandard (3, 3));
             ft_tparams = []; ft_where_constraints = [];
             ft_params =
             [{ fp_pos = [61:25-27]; fp_name = (Some "$a");
@@ -236,12 +236,21 @@ Parsed decls:
                    (Tapply (([62:22-29], "\\Typedef"), [])))
                   };
                 fp_kind = FPnormal; fp_accept_disposable = false;
-                fp_mutable = maybe-mutable }
+                fp_mutable = maybe-mutable };
+              { fp_pos = [63:30-32]; fp_name = (Some "$c");
+                fp_type =
+                { et_enforced = false;
+                  et_type =
+                  (Rhint (root|functions.php line 63, characters 22-28),
+                   (Tapply (([63:22-29], "\\Typedef"), [])))
+                  };
+                fp_kind = FPnormal; fp_accept_disposable = false;
+                fp_mutable = owned mutable }
               ];
             ft_ret =
             { et_enforced = false;
               et_type =
-              (Rhint (root|functions.php line 63, characters 4-7),
+              (Rhint (root|functions.php line 64, characters 4-7),
                (Tprim Tvoid))
               };
             ft_fun_kind = sync; ft_reactive = Reactive {};
@@ -249,18 +258,18 @@ Parsed decls:
             ft_returns_mutable = false }));
       fe_deprecated = None;  };
     "resource_type_hint" ->
-    { fe_pos = [77:10-28];
+    { fe_pos = [78:10-28];
       fe_type =
-      (Rwitness (root|functions.php line 77, characters 10-27),
+      (Rwitness (root|functions.php line 78, characters 10-27),
        (Tfun
           { ft_is_coroutine = false; ft_arity = (Fstandard (1, 1));
             ft_tparams = []; ft_where_constraints = [];
             ft_params =
-            [{ fp_pos = [77:38-40]; fp_name = (Some "$i");
+            [{ fp_pos = [78:38-40]; fp_name = (Some "$i");
                fp_type =
                { et_enforced = false;
                  et_type =
-                 (Rhint (root|functions.php line 77, characters 29-36),
+                 (Rhint (root|functions.php line 78, characters 29-36),
                   (Tprim Tresource))
                  };
                fp_kind = FPnormal; fp_accept_disposable = false;
@@ -269,7 +278,7 @@ Parsed decls:
             ft_ret =
             { et_enforced = false;
               et_type =
-              (Rhint (root|functions.php line 77, characters 43-50),
+              (Rhint (root|functions.php line 78, characters 43-50),
                (Tprim Tresource))
               };
             ft_fun_kind = sync; ft_reactive = Nonreactive;
@@ -345,16 +354,16 @@ Parsed decls:
             ft_returns_mutable = false }));
       fe_deprecated = None;  };
     "some_coroutine" ->
-    { fe_pos = [89:20-34];
+    { fe_pos = [90:20-34];
       fe_type =
-      (Rwitness (root|functions.php line 89, characters 20-33),
+      (Rwitness (root|functions.php line 90, characters 20-33),
        (Tfun
           { ft_is_coroutine = true; ft_arity = (Fstandard (0, 0));
             ft_tparams = []; ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;
               et_type =
-              (Rhint (root|functions.php line 89, characters 38-41),
+              (Rhint (root|functions.php line 90, characters 38-41),
                (Tprim Tbool))
               };
             ft_fun_kind = coroutine; ft_reactive = Nonreactive;
@@ -638,18 +647,18 @@ Parsed decls:
             ft_returns_mutable = false }));
       fe_deprecated = None;  };
     "variadic_function" ->
-    { fe_pos = [86:10-27];
+    { fe_pos = [87:10-27];
       fe_type =
-      (Rwitness (root|functions.php line 86, characters 10-26),
+      (Rwitness (root|functions.php line 87, characters 10-26),
        (Tfun
           { ft_is_coroutine = false;
             ft_arity =
             (Fvariadic (0,
-               { fp_pos = [86:37-42]; fp_name = (Some "$args");
+               { fp_pos = [87:37-42]; fp_name = (Some "$args");
                  fp_type =
                  { et_enforced = false;
                    et_type =
-                   (Rhint (root|functions.php line 86, characters 28-32),
+                   (Rhint (root|functions.php line 87, characters 28-32),
                     Tmixed)
                    };
                  fp_kind = FPnormal; fp_accept_disposable = false;
@@ -659,7 +668,7 @@ Parsed decls:
             ft_ret =
             { et_enforced = false;
               et_type =
-              (Rhint (root|functions.php line 86, characters 45-48),
+              (Rhint (root|functions.php line 87, characters 45-48),
                (Tprim Tvoid))
               };
             ft_fun_kind = sync; ft_reactive = Nonreactive;

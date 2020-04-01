@@ -190,12 +190,11 @@ void setWeights(Vunit& unit) {
       auto& block = unit.blocks[b];
       assertx(index < counters.size());
       block.weight = counters[index];
-      // Drop the separation between the main and cold areas, to avoid scaling
-      // of the block weights based on the area since we have accurate counters.
-      // The code-layout pass may re-split the code into hot/cold later.
-      if (block.area_idx != AreaIndex::Frozen) {
-        block.area_idx = AreaIndex::Main;
-      }
+      // Drop the separation between the main, cold and frozen areas, to avoid
+      // scaling of the block weights based on the area since we have accurate
+      // counters.  The code-layout pass may re-split the code into
+      // hot/cold/frozen later.
+      block.area_idx = AreaIndex::Main;
     }
   }
 

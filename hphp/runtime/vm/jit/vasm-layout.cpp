@@ -499,18 +499,20 @@ void Clusterizer::splitHotColdClusters() {
   const auto entryAvgWgt = clusterAvgWgt[m_blockCluster[m_unit.entry]];
   const uint64_t hotThreshold = entryAvgWgt *
                                 RuntimeOption::EvalJitLayoutHotThreshold;
-  FTRACE(3, "splitHotColdClusters: entryAvgWgt = {} ; hotThreshold = {}\n",
-         entryAvgWgt, hotThreshold);
+  const uint64_t coldThreshold = entryAvgWgt *
+                                 RuntimeOption::EvalJitLayoutColdThreshold;
+  FTRACE(3, "splitHotColdClusters: entryAvgWgt = {} ; hotThreshold = {} "
+         "coldThreshold = {}\n", entryAvgWgt, hotThreshold, coldThreshold);
 
   for (auto cid : m_clusterOrder) {
     if (m_clusters[cid].size() == 0) continue;
-    const AreaIndex area = clusterAvgWgt[cid] >= hotThreshold ? AreaIndex::Main
-                                                              : AreaIndex::Cold;
+    const AreaIndex area =
+      clusterAvgWgt[cid] >= hotThreshold  ? AreaIndex::Main :
+      clusterAvgWgt[cid] >= coldThreshold ? AreaIndex::Cold :
+                                            AreaIndex::Frozen;
     FTRACE(3, "  -> C{}: {} (avg wgt = {}): ",
            cid, area_names[unsigned(area)], clusterAvgWgt[cid]);
     for (auto b : m_clusters[cid]) {
-      // don't reassign blocks that are in frozen
-      if (m_unit.blocks[b].area_idx == AreaIndex::Frozen) continue;
       m_unit.blocks[b].area_idx = area;
       FTRACE(3, "{}, ", b);
     }

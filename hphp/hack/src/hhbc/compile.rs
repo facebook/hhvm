@@ -190,7 +190,7 @@ fn emit_fatal<'a>(
     let mut t = 0f64;
     let r = profile(emitter.options().log_extern_compiler_perf(), &mut t, || {
         emit_fatal_program(
-            emitter,
+            emitter.options(),
             env.flags.contains(EnvFlags::IS_SYSTEMLIB),
             op,
             pos,

@@ -29,16 +29,17 @@ use bitflags::bitflags;
 
 /// This is the entry point from hh_single_compile & fuzzer
 pub fn emit_fatal_program<'p>(
-    emitter: &mut Emitter,
+    options: &Options,
     is_systemlib: bool,
     op: FatalOp,
     pos: &Pos,
     msg: impl AsRef<str>,
 ) -> Result<HhasProgram<'p>> {
+    let mut emitter = Emitter::new(options.clone());
     emitter.context_mut().set_systemlib(is_systemlib);
     let body_instrs = emit_fatal(op, pos, msg);
     let main = make_body(
-        emitter,
+        &mut emitter,
         body_instrs,
         vec![],
         false,
@@ -66,7 +67,7 @@ pub fn emit_program<'p>(
     let result = emit_program_(emitter, flags, namespace, tast);
     match result {
         Err(Error::IncludeTimeFatalException(op, pos, msg)) => emit_fatal_program(
-            emitter,
+            emitter.options(),
             flags.contains(FromAstFlags::IS_SYSTEMLIB),
             op,
             &pos,

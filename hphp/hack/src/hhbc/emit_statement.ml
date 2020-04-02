@@ -53,8 +53,6 @@ let emit_return (env : Emit_env.t) =
     ~in_finally_epilogue:false
     env
 
-let emit_def_inline _def = empty
-
 let emit_markup env s ~check_for_hashbang =
   let emit_ignored_call_expr f e =
     let p = Pos.none in
@@ -247,7 +245,6 @@ and emit_stmt env (pos, stmt) =
   | A.Switch (e, cl) -> emit_switch env pos e cl
   | A.Foreach (collection, iterator, block) ->
     emit_foreach env pos collection iterator block
-  | A.Def_inline def -> emit_def_inline def
   | A.Awaitall (el, b) -> emit_awaitall env pos el b
   | A.Markup (_, s) -> emit_markup env s ~check_for_hashbang:false
   | A.Fallthrough

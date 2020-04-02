@@ -1366,9 +1366,6 @@ and convert_stmt (env : env) (st : state) (p, stmt_) : _ * stmt =
       let (st, us_block) = convert_block (set_in_using env) st us_block in
       let st = set_has_finally st in
       (st, Using { u with us_expr; us_block })
-    | Def_inline _ ->
-      (* Inline definitions aren't valid Hack anyway. *)
-      (st, stmt_)
     | GotoLabel (_, l) ->
       (* record known label in function *)
       let st = set_label st l env.in_using in

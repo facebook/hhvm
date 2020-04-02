@@ -336,9 +336,7 @@ and stmt env acc st =
     let acc = S.union acc f in
     S.union acc c
   | Fallthrough -> S.empty
-  | Def_inline _
-  | Noop ->
-    acc
+  | Noop -> acc
   | Block b -> block acc b
   | Markup _ -> acc
 

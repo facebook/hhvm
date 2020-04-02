@@ -46,8 +46,7 @@ let rec collect_valid_target_labels_aux acc s =
   | T.Noop
   | T.Foreach _
   | T.Do _
-  | T.For _
-  | T.Def_inline _ ->
+  | T.For _ ->
     acc
   (* jump to while loops/switches/usings are disallowed in php files
      and permitted in hh - assuming that they can only appear there

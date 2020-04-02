@@ -3198,21 +3198,6 @@ where
                 Ok(S::new(pos, S_::mk_awaitall(lifted_awaits, vec![stmt])))
             }
             MarkupSection(_) => Self::p_markup(node, env),
-            _ if env.codegen() => {
-                let mut defs = Self::p_def_(true, node, env)?;
-                if defs.is_empty() {
-                    Self::missing_syntax_(
-                        Some(S::new(env.mk_none_pos(), S_::Noop)),
-                        "statement",
-                        node,
-                        env,
-                    )
-                } else if defs.len() == 1 {
-                    Ok(S::new(pos, S_::mk_def_inline(defs.pop().unwrap())))
-                } else {
-                    Self::failwith("This should be impossible; inline definition was list.")
-                }
-            }
             _ => Self::missing_syntax_(
                 Some(S::new(env.mk_none_pos(), S_::Noop)),
                 "statement",
@@ -4635,10 +4620,6 @@ where
     }
 
     fn p_def(node: &Syntax<T, V>, env: &mut Env) -> Result<Vec<ast::Def>> {
-        Self::p_def_(false, node, env)
-    }
-
-    fn p_def_(is_def_inline: bool, node: &Syntax<T, V>, env: &mut Env) -> Result<Vec<ast::Def>> {
         let doc_comment_opt = Self::extract_docblock(node, env);
         match &node.syntax {
             FunctionDeclaration(c) => {
@@ -4967,12 +4948,6 @@ where
                     user_attributes: Self::p_user_attribute(node, env)?,
                     namespace: Self::mk_empty_ns_env(env),
                 })])
-            }
-            _ if is_def_inline
-                || env.file_mode() == file_info::Mode::Mdecl
-                || (env.file_mode() == file_info::Mode::Mphp && !env.codegen) =>
-            {
-                Ok(vec![])
             }
             _ => Ok(vec![ast::Def::mk_stmt(Self::p_stmt(node, env)?)]),
         }

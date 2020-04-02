@@ -84,7 +84,6 @@ and ('ex, 'fb, 'en, 'hi) stmt_ =
       ('ex, 'fb, 'en, 'hi) block
       * ('ex, 'fb, 'en, 'hi) catch list
       * ('ex, 'fb, 'en, 'hi) block
-  | Def_inline of ('ex, 'fb, 'en, 'hi) def
   | Noop
   | Block of ('ex, 'fb, 'en, 'hi) block
   | Markup of pstring

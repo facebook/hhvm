@@ -1853,10 +1853,6 @@ and stmt env (pos, st) =
     | Aast.Switch (e, cl) -> switch_stmt env e cl
     | Aast.Foreach (e, ae, b) -> foreach_stmt env e ae b
     | Aast.Try (b, cl, fb) -> try_stmt env b cl fb
-    | Aast.Def_inline _ ->
-      (* No convenient pos information on Aast *)
-      Errors.experimental_feature Pos.none "inlined definitions";
-      N.Expr (Pos.none, N.Any)
     | Aast.Expr
         (cp, Aast.Call (_, (p, Aast.Id (fp, fn)), hl, el, unpacked_element))
       when fn = SN.AutoimportedFunctions.invariant ->

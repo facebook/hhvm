@@ -432,8 +432,6 @@ module Visitor_DEPRECATED = struct
 
       method on_try : 'a -> block -> catch list -> block -> 'a
 
-      method on_def_inline : 'a -> def -> 'a
-
       method on_while : 'a -> expr -> block -> 'a
 
       method on_using :
@@ -702,8 +700,6 @@ module Visitor_DEPRECATED = struct
         let acc = this#on_block acc fb in
         acc
 
-      method on_def_inline acc d = this#on_def acc d
-
       method on_block acc b = List.fold_left b ~f:this#on_stmt ~init:acc
 
       method on_case acc =
@@ -752,7 +748,6 @@ module Visitor_DEPRECATED = struct
         | Noop -> this#on_noop acc
         | Fallthrough -> this#on_fallthrough acc
         | Awaitall (el, b) -> this#on_awaitall acc el b
-        | Def_inline d -> this#on_def_inline acc d
         | Block b -> this#on_block acc b
         | Markup s -> this#on_markup acc s
 

@@ -22,7 +22,7 @@ pub fn emit_file_attributes_from_program(
 ) -> Result<Vec<HhasAttribute>> {
     let contains_toplevel_code = prog.iter().any(|d| {
         if let Some(tast::Stmt(_, s_)) = d.as_stmt() {
-            !s_.is_def_inline() && !s_.is_markup()
+            !s_.is_markup()
         } else {
             false
         }

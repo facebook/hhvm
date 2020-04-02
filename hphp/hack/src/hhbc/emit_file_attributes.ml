@@ -18,7 +18,6 @@ let emit_file_attributes fa =
 let emit_file_attributes_from_program (ast : Tast.def list) =
   let contains_toplevel_code =
     List.exists ast ~f:(function
-        | T.Stmt (_, T.Def_inline _) -> false
         | T.Stmt (_, T.Markup _) -> false
         | T.Stmt _ -> true
         | _ -> false)

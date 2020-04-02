@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c6690fe0d149931d733676c7e91d1695>>
+// @generated SignedSource<<c3132d8952bf645a2aa75a3f1b4efaf9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -99,7 +99,6 @@ pub enum Stmt_<Ex, Fb, En, Hi> {
             Block<Ex, Fb, En, Hi>,
         )>,
     ),
-    DefInline(Box<Def<Ex, Fb, En, Hi>>),
     Noop,
     Block(Block<Ex, Fb, En, Hi>),
     Markup(Box<Pstring>),

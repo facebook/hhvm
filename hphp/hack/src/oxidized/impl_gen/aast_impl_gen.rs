@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<902b585a1a5fc901fc634a9a686ec55c>>
+// @generated SignedSource<<e3b2935786d76779b010ff9b3d66abb4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -81,9 +81,6 @@ impl<Ex, Fb, En, Hi> Stmt_<Ex, Fb, En, Hi> {
         p2: Block<Ex, Fb, En, Hi>,
     ) -> Self {
         Stmt_::Try(Box::new((p0, p1, p2)))
-    }
-    pub fn mk_def_inline(p0: Def<Ex, Fb, En, Hi>) -> Self {
-        Stmt_::DefInline(Box::new(p0))
     }
     pub fn mk_noop() -> Self {
         Stmt_::Noop
@@ -193,12 +190,6 @@ impl<Ex, Fb, En, Hi> Stmt_<Ex, Fb, En, Hi> {
     pub fn is_try(&self) -> bool {
         match self {
             Stmt_::Try(..) => true,
-            _ => false,
-        }
-    }
-    pub fn is_def_inline(&self) -> bool {
-        match self {
-            Stmt_::DefInline(..) => true,
             _ => false,
         }
     }
@@ -334,12 +325,6 @@ impl<Ex, Fb, En, Hi> Stmt_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_def_inline(&self) -> Option<&Def<Ex, Fb, En, Hi>> {
-        match self {
-            Stmt_::DefInline(p0) => Some(&p0),
-            _ => None,
-        }
-    }
     pub fn as_block(&self) -> Option<&Block<Ex, Fb, En, Hi>> {
         match self {
             Stmt_::Block(p0) => Some(p0),
@@ -470,12 +455,6 @@ impl<Ex, Fb, En, Hi> Stmt_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_def_inline_mut(&mut self) -> Option<&mut Def<Ex, Fb, En, Hi>> {
-        match self {
-            Stmt_::DefInline(p0) => Some(p0.as_mut()),
-            _ => None,
-        }
-    }
     pub fn as_block_mut(&mut self) -> Option<&mut Block<Ex, Fb, En, Hi>> {
         match self {
             Stmt_::Block(p0) => Some(p0),
@@ -599,12 +578,6 @@ impl<Ex, Fb, En, Hi> Stmt_<Ex, Fb, En, Hi> {
     )> {
         match self {
             Stmt_::Try(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
-            _ => None,
-        }
-    }
-    pub fn as_def_inline_into(self) -> Option<Def<Ex, Fb, En, Hi>> {
-        match self {
-            Stmt_::DefInline(p0) => Some(*p0),
             _ => None,
         }
     }

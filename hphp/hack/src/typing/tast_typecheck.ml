@@ -190,7 +190,6 @@ let rec check_stmt env (stmt : ETast.stmt) (gamma : gamma) : delta =
   | Switch _
   | Try _
   | Using _
-  | Def_inline _
   | Awaitall _ ->
     raise Not_implemented
   | Goto _

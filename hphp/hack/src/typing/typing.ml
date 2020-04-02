@@ -827,9 +827,6 @@ and stmt_ env pos st =
   | Try (tb, cl, fb) ->
     let (env, ttb, tcl, tfb) = try_catch env tb cl fb in
     (env, Aast.Try (ttb, tcl, tfb))
-  | Def_inline _ ->
-    (* Do nothing, this doesn't occur in Hack code. *)
-    failwith "Should never typecheck nested definitions"
   | Awaitall (el, b) ->
     let env = might_throw env in
     let (env, el) =

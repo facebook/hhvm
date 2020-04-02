@@ -36,6 +36,9 @@ module type S = sig
   (* Rename from old path to new path. *)
   val rename : string -> string -> unit
 
+  (* Size in bytes of a file or a directory and its contents, recursively *)
+  val treesize : string -> int
+
   (* Modified time of a given file *)
   val filemtime : string -> float
 end

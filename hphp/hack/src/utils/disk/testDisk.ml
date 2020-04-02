@@ -26,6 +26,8 @@ let root = Hashtbl.create 10
 
 let mtimes = Hashtbl.create 10
 
+let sizes = Hashtbl.create 10
+
 (** We avoid using Unix.getcwd () in TestDisk because:
   *   1) Getting global state from this clean test environment is gross
   *   2) Because of 1, CWD should actually be tracked inside this virtual FS.
@@ -176,6 +178,11 @@ let rename old target =
       Hashtbl.replace target_parent (Filename.basename target) old_file;
       Hashtbl.remove old_parent (Filename.basename old)
     | (_, _) -> failwith "Not sure what to do here"
+
+let treesize (path : string) : int =
+  match Hashtbl.find sizes path with
+  | None -> 0
+  | Some size -> size
 
 let filemtime (file : string) : float =
   match Hashtbl.find_opt mtimes file with

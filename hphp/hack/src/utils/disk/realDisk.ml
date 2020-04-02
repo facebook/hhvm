@@ -103,4 +103,24 @@ let rename old target =
     with Sys_error s when s = "Directory not empty" ->
       raise (Rename_target_dir_not_empty target)
 
+let rec treesize path : int =
+  let open Unix in
+  let stats = lstat path in
+  let size = (stat path).st_size in
+  match stats.st_kind with
+  | S_DIR ->
+    let contents = Sys.readdir path in
+    size
+    + Core_kernel.List.fold
+        ~init:0
+        ~f:
+          begin
+            fun acc name ->
+            let name = Filename.concat path name in
+            acc + treesize name
+          end
+        (Array.to_list contents)
+  | S_REG -> size
+  | _ -> 0
+
 let filemtime file = (Unix.stat file).Unix.st_mtime

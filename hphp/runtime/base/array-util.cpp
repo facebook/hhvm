@@ -253,11 +253,10 @@ Variant ArrayUtil::Range(int64_t low, int64_t high, int64_t step /* = 1 */) {
 Variant ArrayUtil::CountValues(const Array& input) {
   Array ret = Array::Create();
   for (ArrayIter iter(input); iter; ++iter) {
-    auto const inner = iter.secondRval();
-    if (isIntType(inner.type()) || isStringType(inner.type()) ||
-      isFuncType(inner.type()) || isClassType(inner.type())) {
-      auto const inner_key =
-        ret.convertKey<IntishCast::Cast>(inner.tv());
+    auto const inner = iter.secondVal();
+    if (isIntType(type(inner)) || isStringType(type(inner)) ||
+        isFuncType(type(inner)) || isClassType(type(inner))) {
+      auto const inner_key = ret.convertKey<IntishCast::Cast>(inner);
       if (!ret.exists(inner_key)) {
         ret.set(inner_key, make_tv<KindOfInt64>(1));
       } else {

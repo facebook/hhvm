@@ -277,7 +277,7 @@ namespace {
     assertx(isArrayLikeType(trace_rval.type()));
     auto const trace = trace_rval.val().parr;
     for (ArrayIter iter(trace); iter; ++iter) {
-      auto const& frame_tv = iter.secondRval();
+      auto const frame_tv = iter.secondVal();
       assertx(isArrayLikeType(type(frame_tv)));
       auto const frame = val(frame_tv).parr;
       auto const file = frame->rval(s_file.get());

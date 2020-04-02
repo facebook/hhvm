@@ -197,12 +197,11 @@ TypedValue HHVM_FUNCTION(array_combine,
   Array ret = Array::attach(MixedArray::MakeReserveMixed(keys_size));
   for (ArrayIter iter1(cell_keys), iter2(cell_values);
        iter1; ++iter1, ++iter2) {
-    auto const key = iter1.secondRvalPlus();
-    if (key.type() == KindOfInt64 || isStringType(key.type())) {
-      ret.set(ret.convertKey<IntishCast::Cast>(key.tv()),
-                     iter2.secondValPlus());
+    auto const key = iter1.secondValPlus();
+    if (isIntType(type(key)) || isStringType(type(key))) {
+      ret.set(ret.convertKey<IntishCast::Cast>(key), iter2.secondValPlus());
     } else {
-      ret.set(ret.convertKey<IntishCast::Cast>(tvCastToString(key.tv())),
+      ret.set(ret.convertKey<IntishCast::Cast>(tvCastToString(key)),
                      iter2.secondValPlus());
     }
   }
@@ -302,11 +301,10 @@ TypedValue HHVM_FUNCTION(array_flip,
 
   ArrayInit ret(getClsMethCompactContainerSize(transCell), ArrayInit::Mixed{});
   for (ArrayIter iter(transCell); iter; ++iter) {
-    auto const inner = iter.secondRvalPlus();
-    if (inner.type() == KindOfInt64 || isStringType(inner.type()) ||
-      isFuncType(inner.type())|| isClassType(inner.type())) {
-      ret.setUnknownKey<IntishCast::Cast>(VarNR(inner.tv()),
-                                                  iter.first());
+    auto const inner = iter.secondValPlus();
+    if (isIntType(type(inner)) || isStringType(type(inner)) ||
+        isFuncType(type(inner))|| isClassType(type(inner))) {
+      ret.setUnknownKey<IntishCast::Cast>(VarNR(inner), iter.first());
     } else {
       raise_warning("Can only flip STRING and INTEGER values!");
     }
@@ -638,15 +636,15 @@ static void php_array_replace_recursive(PointerSet &seen, bool check,
   for (ArrayIter iter(arr2); iter; ++iter) {
     const auto key =
       Variant::wrap(arr1.convertKey<IntishCast::Cast>(iter.first()));
-    auto const rval = iter.secondRval();
-    if (arr1.exists(key, true) && isArrayLikeType(rval.type())) {
+    auto const tv = iter.secondVal();
+    if (arr1.exists(key, true) && isArrayLikeType(type(tv))) {
       auto const lval = arr1.lval(key, AccessFlags::Key);
       if (isArrayLikeType(lval.type())) {
         Array subarr1 = tvCastToArrayLike<IntishCast::Cast>(
           lval.tv()
         ).toPHPArrayIntishCast();
         php_array_replace_recursive(seen, couldRecur(lval, subarr1.get()),
-                                    subarr1, ArrNR(rval.val().parr));
+                                    subarr1, ArrNR(val(tv).parr));
         tvSet(make_array_like_tv(subarr1.get()), lval);
       } else {
         arr1.set(key, iter.secondVal(), true);
@@ -766,14 +764,14 @@ TypedValue HHVM_FUNCTION(array_product,
   int64_t i = 1;
   ArrayIter iter(input);
   for (; iter; ++iter) {
-    auto const rval = iter.secondRvalPlus();
+    auto const tv = iter.secondValPlus();
 
-    switch (rval.type()) {
+    switch (type(tv)) {
       case KindOfUninit:
       case KindOfNull:
       case KindOfBoolean:
       case KindOfInt64:
-        i *= tvToInt(rval.tv());
+        i *= tvToInt(tv);
         continue;
 
       case KindOfDouble:
@@ -783,7 +781,7 @@ TypedValue HHVM_FUNCTION(array_product,
       case KindOfString: {
         int64_t ti;
         double td;
-        if (rval.val().pstr->isNumericWithVal(ti, td, 1) == KindOfInt64) {
+        if (val(tv).pstr->isNumericWithVal(ti, td, 1) == KindOfInt64) {
           i *= ti;
           continue;
         } else {
@@ -818,11 +816,11 @@ TypedValue HHVM_FUNCTION(array_product,
 DOUBLE:
   double d = i;
   for (; iter; ++iter) {
-    auto const rval = iter.secondRvalPlus();
-    switch (rval.type()) {
+    auto const tv = iter.secondValPlus();
+    switch (type(tv)) {
       DT_UNCOUNTED_CASE:
       case KindOfString:
-        d *= tvCastToDouble(rval.tv());
+        d *= tvCastToDouble(tv);
 
       case KindOfVec:
       case KindOfDict:
@@ -1047,14 +1045,14 @@ TypedValue HHVM_FUNCTION(array_sum,
   int64_t i = 0;
   ArrayIter iter(input);
   for (; iter; ++iter) {
-    auto const rval = iter.secondRvalPlus();
+    auto const tv = iter.secondValPlus();
 
-    switch (rval.type()) {
+    switch (type(tv)) {
       case KindOfUninit:
       case KindOfNull:
       case KindOfBoolean:
       case KindOfInt64:
-        i += tvToInt(rval.tv());
+        i += tvToInt(tv);
         continue;
 
       case KindOfDouble:
@@ -1064,7 +1062,7 @@ TypedValue HHVM_FUNCTION(array_sum,
       case KindOfString: {
         int64_t ti;
         double td;
-        if (rval.val().pstr->isNumericWithVal(ti, td, 1) == KindOfInt64) {
+        if (val(tv).pstr->isNumericWithVal(ti, td, 1) == KindOfInt64) {
           i += ti;
           continue;
         } else {
@@ -1099,11 +1097,11 @@ TypedValue HHVM_FUNCTION(array_sum,
 DOUBLE:
   double d = i;
   for (; iter; ++iter) {
-    auto const rval = iter.secondRvalPlus();
-    switch (rval.type()) {
+    auto const tv = iter.secondValPlus();
+    switch (type(tv)) {
       DT_UNCOUNTED_CASE:
       case KindOfString:
-        d += tvCastToDouble(rval.tv());
+        d += tvCastToDouble(tv);
 
       case KindOfVec:
       case KindOfDict:
@@ -2251,9 +2249,9 @@ static void containerValuesIntersectHelper(const req::ptr<c_Set>& st,
     // For each key in the map, we copy the key to the set if the
     // corresponding value is equal to pos exactly (which means it
     // was present in all of the containers).
-    auto const rval = iter.secondRvalPlus();
-    assertx(rval.type() == KindOfInt64);
-    if (rval.val().num == count) {
+    auto const tv = iter.secondValPlus();
+    assertx(type(tv) == KindOfInt64);
+    if (val(tv).num == count) {
       st->add(*iter.first().asTypedValue());
     }
   }
@@ -2289,9 +2287,9 @@ static void containerKeysIntersectHelper(const req::ptr<c_Set>& st,
     // For each key in the map, we copy the key to the set if the
     // corresponding value is equal to pos exactly (which means it
     // was present in all of the containers).
-    auto const rval = iter.secondRvalPlus();
-    assertx(rval.type() == KindOfInt64);
-    if (rval.val().num == count) {
+    auto const tv = iter.secondValPlus();
+    assertx(type(tv) == KindOfInt64);
+    if (val(tv).num == count) {
       st->add(*iter.first().asTypedValue());
     }
   }

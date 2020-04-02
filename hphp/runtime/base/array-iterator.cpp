@@ -319,13 +319,13 @@ Variant ArrayIter::second() {
   return getObject()->o_invoke_few_args(s_current, 0);
 }
 
-tv_rval ArrayIter::secondRval() const {
-  if (LIKELY(hasArrayData())) return getArrayData()->rvalPos(m_pos);
+TypedValue ArrayIter::secondVal() const {
+  if (LIKELY(hasArrayData())) return getArrayData()->rvalPos(m_pos).tv();
   raise_fatal_error("taking reference on iterator objects");
 }
 
-tv_rval ArrayIter::secondRvalPlus() {
-  if (LIKELY(hasArrayData())) return getArrayData()->rvalPos(m_pos);
+TypedValue ArrayIter::secondValPlus() const {
+  if (LIKELY(hasArrayData())) return getArrayData()->rvalPos(m_pos).tv();
   throw_param_is_not_container();
 }
 
@@ -440,7 +440,7 @@ static inline void iter_value_cell_local_impl(Iter* iter, TypedValue* out) {
   assertx((typeArray && arrIter.getIterType() == ArrayIter::TypeArray) ||
          (!typeArray && arrIter.getIterType() == ArrayIter::TypeIterator));
   if (typeArray) {
-    tvDup(arrIter.nvSecond().tv(), *out);
+    tvDup(arrIter.nvSecond(), *out);
   } else {
     Variant val = arrIter.second();
     tvDup(*val.asTypedValue(), *out);
@@ -471,8 +471,7 @@ inline void liter_value_cell_local_impl(Iter* iter,
   auto const& arrIter = *unwrap(iter);
   assertx(arrIter.getIterType() == ArrayIter::TypeArray);
   assertx(!arrIter.getArrayData());
-  auto const cur = arrIter.nvSecondLocal(ad);
-  tvDup(cur.tv(), *out);
+  tvDup(arrIter.nvSecondLocal(ad), *out);
   tvDecRefGen(oldVal);
 }
 

@@ -249,27 +249,24 @@ struct ArrayIter {
   }
 
   /*
-   * Get a tv_rval for the current iterator position.
+   * Get the value at the current iterator position, without refcount ops.
    *
-   * The difference between secondRval and secondRvalPlus is that, if called
+   * The difference between secondVal and secondValPlus is that, if called
    * when iterating an Iterable object the former will fatal and the latter
    * will throw (whereas second will invoke the current() method on the
    * Iterable object). Why this is has been lost in the mists of time.
    */
-  tv_rval secondRval() const;
-  tv_rval secondRvalPlus();
+  TypedValue secondVal() const;
+  TypedValue secondValPlus() const;
 
-  TypedValue secondVal() const { return secondRval().tv(); }
-  TypedValue secondValPlus() { return secondRvalPlus().tv(); }
-
-  // TypedValue versions of second. Used by the JIT iterator helpers.
+  // Array-only versions of second; undefined behavior if used with Objects.
   // These methods do NOT inc-ref the value before returning it.
-  tv_rval nvSecond() const {
-    return getArrayData()->rvalPos(m_pos);
+  TypedValue nvSecond() const {
+    return getArrayData()->rvalPos(m_pos).tv();
   }
-  tv_rval nvSecondLocal(const ArrayData* ad) const {
+  TypedValue nvSecondLocal(const ArrayData* ad) const {
     assertx(getArrayData() == nullptr);
-    return ad->rvalPos(m_pos);
+    return ad->rvalPos(m_pos).tv();
   }
 
   // This method returns null for local iterators, and for non-local iterators

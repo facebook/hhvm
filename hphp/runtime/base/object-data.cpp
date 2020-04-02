@@ -476,7 +476,7 @@ void ObjectData::o_setArray(const Array& properties) {
       k = k.substr(subLen);
     }
 
-    setProp(ctx, k.get(), tvAssertPlausible(iter.secondRval().tv()));
+    setProp(ctx, k.get(), tvAssertPlausible(iter.secondVal()));
   }
 }
 

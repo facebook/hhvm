@@ -886,7 +886,7 @@ std::pair<Type,Type> val_key_values(SArray a) {
   auto ret = std::make_pair(TBottom, TBottom);
   for (ArrayIter iter(a); iter; ++iter) {
     ret.first |= from_cell(*iter.first().asTypedValue());
-    ret.second |= from_cell(*iter.secondRval());
+    ret.second |= from_cell(iter.secondVal());
   }
   return ret;
 }

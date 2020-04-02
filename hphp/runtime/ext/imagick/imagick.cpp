@@ -224,7 +224,7 @@ Array magickQueryFormats(const char* pattern /* = "*" */) {
 String magickResolveFont(const String& fontName) {
   Array fonts = magickQueryFonts();
   for (ArrayIter it(fonts); it; ++it) {
-    if (strcasecmp(it.secondRvalPlus().val().pstr->data(),
+    if (strcasecmp(val(it.secondValPlus()).pstr->data(),
                    fontName.c_str()) == 0) {
       return fontName;
     }

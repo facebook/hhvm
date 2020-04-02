@@ -357,16 +357,11 @@ static Variant collator_convert_object_to_string(const Variant& obj) {
 static void collator_convert_array_from_utf16_to_utf8(Array &array,
                                                       UErrorCode * status) {
   for (ArrayIter iter(array); iter; ++iter) {
-    auto const rval = iter.secondRval();
+    auto const tv = iter.secondVal();
     /* Process string values only. */
-    if (!isStringType(rval.type())) continue;
-    String str = intl_convert_str_utf16_to_utf8(
-      StrNR(rval.val().pstr),
-      status
-    );
-    if (U_FAILURE(*status)) {
-      return;
-    }
+    if (!isStringType(type(tv))) continue;
+    String str = intl_convert_str_utf16_to_utf8(StrNR(val(tv).pstr), status);
+    if (U_FAILURE(*status)) return;
     /* Update current value with the converted value. */
     Variant key = iter.first();
     array.set(key, str);
@@ -376,16 +371,11 @@ static void collator_convert_array_from_utf16_to_utf8(Array &array,
 static void collator_convert_array_from_utf8_to_utf16(Array &array,
                                                       UErrorCode * status) {
   for (ArrayIter iter(array); iter; ++iter) {
-    auto const rval = iter.secondRval();
+    auto const tv = iter.secondVal();
     /* Process string values only. */
-    if (!isStringType(rval.type())) continue;
-    String str = intl_convert_str_utf8_to_utf16(
-      StrNR(rval.val().pstr),
-      status
-    );
-    if (U_FAILURE(*status)) {
-      return;
-    }
+    if (!isStringType(type(tv))) continue;
+    String str = intl_convert_str_utf8_to_utf16(StrNR(val(tv).pstr), status);
+    if (U_FAILURE(*status)) return;
     /* Update current value with the converted value. */
     Variant key = iter.first();
     array.set(key, str);

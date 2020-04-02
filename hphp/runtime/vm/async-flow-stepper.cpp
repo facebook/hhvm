@@ -47,11 +47,11 @@ bool AsyncFlowStepper::isActRecOnAsyncStack(const ActRec* target) {
   ArrayIter iter(depStack);
   ++iter; // Skip the top frame.
   for (; iter; ++iter) {
-    auto const rval = iter.secondRval();
-    if (isNullType(rval.type())) {
+    auto const tv = iter.secondVal();
+    if (isNullType(type(tv))) {
       return false;
     }
-    auto const wh = objToWaitableWaitHandle(asCObjRef(rval));
+    auto const wh = objToWaitableWaitHandle(asCObjRef(&tv));
     if (wh->getKind() == c_Awaitable::Kind::AsyncFunction &&
       target == wh->asAsyncFunction()->actRec()) {
       return true;

@@ -411,9 +411,10 @@ ArrayData* copy_if_needed(ArrayData* in, bool cow) {
 // the values of the array-like. It does so with the minimum number of copies,
 // mutating each array in-place if possible.
 //
-// `state.mutation` should take an ArrayData* and a `cow` param. If it doesn't
-// need to mutate the array-like, it should return nullptr; otherwise, it must
-// copy the array if needed (based on `cow`) and return the updated result.
+// `state.mutation` should take an ArrayData* and a `cow` param. If it can
+// mutate the array in place (that is, either `cow` is false or no mutation is
+// needed at all), it should do so and return nullptr. Otherwise, it must copy
+// the array, mutate it, and return the updated result.
 //
 // We pass the mutation callback a `cow` param instead of checking ad->cowCheck
 // to handle cases such as a refcount 1 array contained in a refcount 2 array;
@@ -446,30 +447,34 @@ ArrayData* apply_mutation(TypedValue tv, State& state,
   auto const in = val(tv).parr;
   cow |= in->cowCheck();
   auto result = state.mutation(in, cow);
-  if (result == in) result->incRefCount();
   if (!state.recursive) return result;
 
   // Recursively apply the mutation to the array's contents.
-  //
-  // We use a local iter (which doesn't inc-ref or dec-ref its base) to make
-  // logic clearer here, but it isn't necessary, strictly speaking, since we
-  // check the `cow` flag instead of in->cowCheck() in copy_if_needed.
   ArrayIter ai(in, ArrayIter::local);
   for (auto done = in->empty(); !done; done = ai.nextLocal(in)) {
-    auto const rval = ai.nvSecondLocal(in);
-    auto const ad = apply_mutation(rval.tv(), state, cow, depth + 1);
+    auto const prev = ai.nvSecondLocal(in);
+    auto const ad = apply_mutation(prev, state, cow, depth + 1);
     if (!ad) continue;
+    auto const next = make_array_like_tv(ad);
     result = result ? result : copy_if_needed(in, cow);
-    if (result == in) result->incRefCount();
-    tvMove(make_array_like_tv(ad), ai.nvSecondLocal(result).as_lval());
-    while (!ai.nextLocal(result)) {
-      auto const rval = ai.nvSecondLocal(result);
-      auto const ad = apply_mutation(rval.tv(), state, cow, depth + 1);
-      if (ad) tvMove(make_array_like_tv(ad), rval.as_lval());
+
+    assertx(!result->cowCheck());
+    if (in->hasVanillaPackedLayout()) {
+      tvMove(next, PackedArray::LvalUncheckedInt(result, ai.getPos()));
+    } else if (in->hasVanillaMixedLayout()) {
+      tvMove(next, &MixedArray::asMixed(result)->data()[ai.getPos()].data);
+    } else {
+      auto const key = ai.nvFirstLocal(in);
+      auto const escalated = isStringType(type(key))
+        ? result->set(val(key).pstr, make_array_like_tv(ad))
+        : result->set(val(key).num, make_array_like_tv(ad));
+      assertx(escalated->size() == in->size());
+      if (escalated == result) continue;
+      if (result != in) result->release();
+      result = escalated;
     }
-    break;
   }
-  return result;
+  return result == in ? nullptr : result;
 }
 
 TypedValue markTvImpl(TypedValue in, bool recursive) {
@@ -508,7 +513,7 @@ TypedValue markTvImpl(TypedValue in, bool recursive) {
 
     auto result = copy_if_needed(ad, cow);
     result->setLegacyArray(true);
-    return result;
+    return cow ? result : nullptr;
   };
 
   auto state = MutationState<decltype(mark_tv)>{
@@ -528,7 +533,7 @@ TypedValue tagTvImpl(TypedValue in, int64_t flags) {
     if (!tag->valid()) return nullptr;
     auto result = copy_if_needed(ad, cow);
     arrprov::setTag<arrprov::Mode::Emplace>(result, *tag);
-    return result;
+    return cow ? result : nullptr;
   };
 
   auto state = MutationState<decltype(tag_tv)>{tag_tv, "tag_provenance_here"};

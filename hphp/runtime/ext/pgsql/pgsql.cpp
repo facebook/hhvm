@@ -38,12 +38,12 @@
   name##_decrefs.reserve(params.size());              \
                                                       \
   for (ArrayIter iter(params); iter; ++iter) {        \
-    auto const param = iter.secondRval();             \
-    if (isNullType(param.type())) {                   \
+    auto const param = iter.secondVal();              \
+    if (isNullType(type(param))) {                    \
       name.push_back(nullptr);                        \
     } else {                                          \
       name##_decrefs.push_back(                       \
-        tvCastToString(param.tv())                    \
+        tvCastToString(param)                         \
       );                                              \
       name.push_back(name##_decrefs.back().c_str());  \
     }                                                 \

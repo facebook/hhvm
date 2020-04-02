@@ -289,12 +289,12 @@ std::vector<PointInfo> toPointInfoArray(const Array& coordinates) {
   int idx = 0;
 
   for (ArrayIter it(coordinates); it; ++it) {
-    auto const element = it.secondRvalPlus();
-    if (!isArrayLikeType(element.type())) {
+    auto const element = it.secondValPlus();
+    if (!isArrayLikeType(type(element))) {
       return {};
     }
 
-    auto const coordinate = element.val().parr;
+    auto const coordinate = val(element).parr;
     if (coordinate->size() != 2) {
       return {};
     }

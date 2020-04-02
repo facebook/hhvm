@@ -19,6 +19,13 @@ type symbol_occurrences = {
   occurrences: Relative_path.t SymbolOccurrence.t list;
 }
 
+type file_lines = {
+  filepath: Relative_path.t;
+  lineLengths: int list;
+  endsInNewline: bool;
+  hasUnicodeOrTabs: bool;
+}
+
 (* Predicate types for the JSON facts emitted *)
 type predicate =
   | ClassConstDeclaration
@@ -28,6 +35,7 @@ type predicate =
   | DeclarationLocation
   | EnumDeclaration
   | EnumDefinition
+  | FileLines
   | FileXRefs
   | FunctionDeclaration
   | FunctionDefinition
@@ -59,6 +67,7 @@ type glean_json = {
   declarationLocation: json list;
   enumDeclaration: json list;
   enumDefinition: json list;
+  fileLines: json list;
   fileXRefs: json list;
   functionDeclaration: json list;
   functionDefinition: json list;
@@ -93,6 +102,7 @@ let init_progress =
       declarationLocation = [];
       enumDeclaration = [];
       enumDefinition = [];
+      fileLines = [];
       fileXRefs = [];
       functionDeclaration = [];
       functionDefinition = [];
@@ -175,6 +185,11 @@ let update_json_data predicate json progress =
       {
         progress.resultJson with
         enumDefinition = json :: progress.resultJson.enumDefinition;
+      }
+    | FileLines ->
+      {
+        progress.resultJson with
+        fileLines = json :: progress.resultJson.fileLines;
       }
     | FileXRefs ->
       {
@@ -446,6 +461,19 @@ let build_xrefs_json xref_map =
   in
   JSON_Array xrefs
 
+let build_file_lines_json file_info =
+  let file = build_file_json (Relative_path.to_absolute file_info.filepath) in
+  let lengths =
+    List.map file_info.lineLengths (fun len -> JSON_Number (string_of_int len))
+  in
+  JSON_Object
+    [
+      ("file", file);
+      ("lengths", JSON_Array lengths);
+      ("endsInNewline", JSON_Bool file_info.endsInNewline);
+      ("hasUnicodeOrTabs", JSON_Bool file_info.hasUnicodeOrTabs);
+    ]
+
 (* These are functions for building JSON to reference some
 existing fact. *)
 
@@ -708,6 +736,10 @@ let add_decl_loc_fact pos decl_json progress =
   in
   add_fact DeclarationLocation json_fact progress
 
+let add_file_lines_fact file_info progress =
+  let json_fact = build_file_lines_json file_info in
+  add_fact FileLines json_fact progress
+
 let add_file_xrefs_fact filepath xref_map progress =
   let json_fact =
     JSON_Object
@@ -932,7 +964,7 @@ let process_typedef_decl elem progress =
 
 (* This function walks over the symbols in each file and gleans
  facts along the way. *)
-let build_json ctx symbols =
+let build_json ctx symbols files_info =
   let progress =
     List.fold symbols.decls ~init:init_progress ~f:(fun acc symbol ->
         match symbol with
@@ -1005,11 +1037,17 @@ let build_json ctx symbols =
       file_xrefs
       progress
   in
+  let progress =
+    List.fold files_info ~init:progress ~f:(fun prog file_info ->
+        let (_, prog) = add_file_lines_fact file_info prog in
+        prog)
+  in
   let preds_and_records =
     (* The order is the reverse of how these items appear in the JSON,
     which is significant because later entries can refer to earlier ones
     by id only *)
     [
+      ("src.FileLines.1", progress.resultJson.fileLines);
       ("hack.FileXRefs.1", progress.resultJson.fileXRefs);
       ("hack.MethodDefinition.1", progress.resultJson.methodDefinition);
       ("hack.FunctionDefinition.1", progress.resultJson.functionDefinition);

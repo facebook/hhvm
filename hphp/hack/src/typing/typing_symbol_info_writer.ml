@@ -10,6 +10,8 @@ module Hack_bucket = Bucket
 open Hh_prelude
 open Hh_json
 open Aast
+open Full_fidelity_source_text
+open Provider_context
 open Typing_symbol_json_builder
 module Bucket = Hack_bucket
 
@@ -29,14 +31,33 @@ let get_decls (ctx : Provider_context.t) (tast : Tast.program list) :
   let symbols = IdentifySymbolService.all_symbols ctx all_defs in
   { decls = all_decls; occurrences = symbols }
 
+let compute_line_lengths (entry : Provider_context.entry) : int list =
+  match entry.source_text with
+  | None ->
+    Hh_logger.log
+      "WARNING: no source text for %s"
+      (Relative_path.to_absolute entry.path);
+    []
+  | Some st -> Line_break_map.offsets_to_line_lengths st.offset_map
+
+let compute_file_lines (path : Relative_path.t) (entry : Provider_context.entry)
+    : Typing_symbol_json_builder.file_lines =
+  {
+    filepath = path;
+    lineLengths = compute_line_lengths entry;
+    endsInNewline = false (* TODO *);
+    hasUnicodeOrTabs = false (* TODO *);
+  }
+
 let write_json
     (ctx : Provider_context.t)
     (file_dir : string)
-    (tast_lst : Tast.program list) : unit =
+    (tast_lst : Tast.program list)
+    (files_info : Typing_symbol_json_builder.file_lines list) : unit =
   try
     let symbol_occurrences = get_decls ctx tast_lst in
     let json_chunks =
-      Typing_symbol_json_builder.build_json ctx symbol_occurrences
+      Typing_symbol_json_builder.build_json ctx symbol_occurrences files_info
     in
     let (out_file, channel) =
       Filename.open_temp_file
@@ -58,17 +79,19 @@ let recheck_job
     (hhi_path : string)
     ()
     (progress : Relative_path.t list) : unit =
-  let tasts =
+  let info_lsts =
     List.map progress ~f:(fun path ->
         let (ctx, entry) = Provider_context.add_entry ~ctx ~path in
         let { Tast_provider.Compute_tast.tast; _ } =
           Tast_provider.compute_tast_unquarantined ~ctx ~entry
         in
-        tast)
+        let file_info = compute_file_lines path entry in
+        (tast, file_info))
   in
+  let (tasts, files_info) = List.unzip info_lsts in
   Relative_path.set_path_prefix Relative_path.Root (Path.make root_path);
   Relative_path.set_path_prefix Relative_path.Hhi (Path.make hhi_path);
-  write_json ctx out_dir tasts
+  write_json ctx out_dir tasts files_info
 
 let go
     (workers : MultiWorker.worker list option)

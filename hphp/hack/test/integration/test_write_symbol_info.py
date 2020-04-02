@@ -32,6 +32,7 @@ from glean.schema.hack.types import (
     TypeConstDefinition,
     TypedefDeclaration,
 )
+from glean.schema.src.types import FileLines
 from hh_paths import hh_server
 from thrift.py3 import Protocol, Struct, deserialize
 
@@ -130,6 +131,7 @@ max_workers = 2
             "hack.TypeConstDeclaration.1": TypeConstDeclaration,
             "hack.TypeConstDefinition.1": TypeConstDefinition,
             "hack.TypedefDeclaration.1": TypedefDeclaration,
+            "src.FileLines.1": FileLines,
         }
         return predicate_dict.get(predicate_name)
 

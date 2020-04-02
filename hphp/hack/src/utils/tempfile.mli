@@ -17,6 +17,8 @@ exception Out_of_retries
 
 val mkdtemp : skip_mocking:bool -> Path.t
 
+val mkdtemp_with_dir : Path.t -> Path.t
+
 val with_real_tempdir : (Path.t -> 'a) -> 'a
 
 val with_tempdir : (Path.t -> 'a) -> 'a

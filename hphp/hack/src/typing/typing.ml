@@ -7003,6 +7003,7 @@ and typedef_def ctx typedef =
     t_vis = _;
     t_mode = _;
     t_namespace = _;
+    t_emit_id = _;
   } =
     typedef
   in
@@ -7049,6 +7050,7 @@ and typedef_def ctx typedef =
     Aast.t_kind = typedef.t_kind;
     Aast.t_tparams = tparams;
     Aast.t_namespace = typedef.t_namespace;
+    Aast.t_emit_id = typedef.t_emit_id;
   }
 
 (* Calls the method of a class, but allows the f callback to override the

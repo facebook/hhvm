@@ -82,39 +82,6 @@ fn emit_return(e: &mut Emitter, env: &mut Env) -> Result {
     tfr::emit_return(e, false, env)
 }
 
-fn emit_def_inline<Ex, Fb, En, Hi>(e: &mut Emitter, def: &a::Def<Ex, Fb, En, Hi>) -> Result {
-    use ast_defs::Id;
-    Ok(match def {
-        a::Def::Class(cd) => {
-            let make_def_instr = |num| {
-                if e.context().systemlib() {
-                    instr::defclsnop(num)
-                } else {
-                    instr::defcls(num)
-                }
-            };
-            let Id(pos, name) = &(*cd).name;
-            let num = name.parse::<ClassNum>().unwrap();
-            emit_pos_then(&pos, make_def_instr(num))
-        }
-        a::Def::Typedef(td) => {
-            let Id(pos, name) = &(*td).name;
-            let num = name.parse::<TypedefNum>().unwrap();
-            emit_pos_then(&pos, instr::deftypealias(num))
-        }
-        a::Def::RecordDef(rd) => {
-            let Id(pos, name) = &(*rd).name;
-            let num = name.parse::<ClassNum>().unwrap();
-            emit_pos_then(&pos, instr::defrecord(num))
-        }
-        _ => {
-            return Err(Unrecoverable(
-                "Define inline: Invalid inline definition".into(),
-            ))
-        }
-    })
-}
-
 fn set_bytes_kind(name: &str) -> Option<Setrange> {
     lazy_static! {
         static ref RE: Regex =
@@ -333,7 +300,7 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
         }
         a::Stmt_::Switch(x) => emit_switch(e, env, pos, &x.0, &x.1),
         a::Stmt_::Foreach(x) => emit_foreach(e, env, pos, &x.0, &x.1, &x.2),
-        a::Stmt_::DefInline(def) => emit_def_inline(e, &**def),
+        a::Stmt_::DefInline(_) => Ok(instr::empty()),
         a::Stmt_::Awaitall(x) => emit_awaitall(e, env, pos, &x.0, &x.1),
         a::Stmt_::Markup(x) => emit_markup(e, env, &x, false),
         a::Stmt_::Fallthrough | a::Stmt_::Noop => Ok(instr::empty()),

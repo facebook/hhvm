@@ -990,6 +990,7 @@ and class_def_ env c tc =
       Aast.c_xhp_children = c.c_xhp_children;
       Aast.c_xhp_attrs = [];
       Aast.c_pu_enums = pu_enums;
+      Aast.c_emit_id = c.c_emit_id;
     },
     methods_global_inference_envs
     @ static_methods_global_inference_envs
@@ -1504,6 +1505,7 @@ let gconst_def ctx cst =
     Aast.cst_value = typed_cst_value;
     Aast.cst_namespace = cst.cst_namespace;
     Aast.cst_span = cst.cst_span;
+    Aast.cst_emit_id = cst.cst_emit_id;
   }
 
 let record_field env f =
@@ -1599,6 +1601,7 @@ let record_def_def ctx rd =
     Aast.rd_namespace = rd.rd_namespace;
     Aast.rd_span = rd.rd_span;
     Aast.rd_doc_comment = rd.rd_doc_comment;
+    Aast.rd_emit_id = rd.rd_emit_id;
   }
 
 let nast_to_tast_gienv ~(do_tast_checks : bool) ctx nast :

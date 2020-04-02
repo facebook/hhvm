@@ -4754,6 +4754,7 @@ where
                     enum_: None,
                     pu_enums: vec![],
                     doc_comment: doc_comment_opt,
+                    emit_id: None,
                 };
                 match &c.classish_body.syntax {
                     ClassishBody(c1) => {
@@ -4782,6 +4783,7 @@ where
                                 value: Self::p_simple_initializer(init, env)?,
                                 namespace: Self::mk_empty_ns_env(env),
                                 span: Self::p_pos(node, env),
+                                emit_id: None,
                             };
                             ast::Def::mk_constant(gconst)
                         }
@@ -4818,6 +4820,7 @@ where
                         _ => Self::missing_syntax("kind", &c.alias_keyword, env)?,
                     },
                     kind: Self::p_hint(&c.alias_type, env)?,
+                    emit_id: None,
                 })])
             }
             EnumDeclaration(c) => {
@@ -4872,6 +4875,7 @@ where
                     xhp_children: vec![],
                     xhp_attrs: vec![],
                     pu_enums: vec![],
+                    emit_id: None,
                 })])
             }
             RecordDeclaration(c) => {
@@ -4895,6 +4899,7 @@ where
                     namespace: Self::mk_empty_ns_env(env),
                     span: Self::p_pos(node, env),
                     doc_comment: doc_comment_opt,
+                    emit_id: None,
                 })])
             }
             InclusionDirective(c)

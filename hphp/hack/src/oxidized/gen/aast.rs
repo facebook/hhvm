@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f94c311b61c4b75cf5b8937f8664778f>>
+// @generated SignedSource<<c6690fe0d149931d733676c7e91d1695>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -706,6 +706,23 @@ pub type IsExtends = bool;
     PartialOrd,
     Serialize
 )]
+pub enum EmitId {
+    EmitId(isize),
+    Anonymous,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub struct Class_<Ex, Fb, En, Hi> {
     pub span: Pos,
     pub annotation: En,
@@ -740,6 +757,7 @@ pub struct Class_<Ex, Fb, En, Hi> {
     pub enum_: Option<Enum_>,
     pub pu_enums: Vec<PuEnum<Ex, Fb, En, Hi>>,
     pub doc_comment: Option<doc_comment::DocComment>,
+    pub emit_id: Option<EmitId>,
 }
 
 #[derive(
@@ -1027,6 +1045,7 @@ pub struct Typedef<Ex, Fb, En, Hi> {
     pub mode: file_info::Mode,
     pub vis: TypedefVisibility,
     pub namespace: Nsenv,
+    pub emit_id: Option<EmitId>,
 }
 
 #[derive(
@@ -1049,6 +1068,7 @@ pub struct Gconst<Ex, Fb, En, Hi> {
     pub value: Expr<Ex, Fb, En, Hi>,
     pub namespace: Nsenv,
     pub span: Pos,
+    pub emit_id: Option<EmitId>,
 }
 
 #[derive(
@@ -1073,6 +1093,7 @@ pub struct RecordDef<Ex, Fb, En, Hi> {
     pub namespace: Nsenv,
     pub span: Pos,
     pub doc_comment: Option<doc_comment::DocComment>,
+    pub emit_id: Option<EmitId>,
 }
 
 /// Pocket Universe Enumeration, e.g.

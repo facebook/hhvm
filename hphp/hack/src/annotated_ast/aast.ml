@@ -354,6 +354,12 @@ and insteadof_alias = sid * pstring * sid list
 
 and is_extends = bool
 
+and emit_id =
+  (* For globally defined type, the ID used in the .main function. *)
+  | Emit_id of int
+  (* Closures are hoisted to classes, but they don't get an entry in .main. *)
+  | Anonymous
+
 and ('ex, 'fb, 'en, 'hi) class_ = {
   c_span: pos;
   c_annotation: 'en;
@@ -388,6 +394,7 @@ and ('ex, 'fb, 'en, 'hi) class_ = {
   c_enum: enum_ option;
   c_pu_enums: ('ex, 'fb, 'en, 'hi) pu_enum list;
   c_doc_comment: string option;
+  c_emit_id: emit_id option;
 }
 
 and xhp_attr_tag =
@@ -512,6 +519,7 @@ and ('ex, 'fb, 'en, 'hi) typedef = {
   t_mode: FileInfo.mode; [@visitors.opaque]
   t_vis: typedef_visibility;
   t_namespace: nsenv;
+  t_emit_id: emit_id option;
 }
 
 and ('ex, 'fb, 'en, 'hi) gconst = {
@@ -522,6 +530,7 @@ and ('ex, 'fb, 'en, 'hi) gconst = {
   cst_value: ('ex, 'fb, 'en, 'hi) expr;
   cst_namespace: nsenv;
   cst_span: pos;
+  cst_emit_id: emit_id option;
 }
 
 and ('ex, 'fb, 'en, 'hi) record_def = {
@@ -534,6 +543,7 @@ and ('ex, 'fb, 'en, 'hi) record_def = {
   rd_namespace: nsenv;
   rd_span: pos;
   rd_doc_comment: string option;
+  rd_emit_id: emit_id option;
 }
 
 (** Pocket Universe Enumeration, e.g.

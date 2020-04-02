@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2e4ce733a79dc301ee970d275b38682c>>
+// @generated SignedSource<<f2c090ecd341ca406b90b6691c26b83b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -505,6 +505,7 @@ impl<P: Params> NodeMut<P> for Class_<P::Ex, P::Fb, P::En, P::Hi> {
         self.enum_.accept(c, v)?;
         self.pu_enums.accept(c, v)?;
         self.doc_comment.accept(c, v)?;
+        self.emit_id.accept(c, v)?;
         Ok(())
     }
 }
@@ -627,6 +628,28 @@ impl<P: Params> NodeMut<P> for DocComment {
     ) -> Result<(), P::Error> {
         self.0.accept(c, v)?;
         Ok(())
+    }
+}
+impl<P: Params> NodeMut<P> for EmitId {
+    fn accept(
+        &mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<P = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_emit_id(c, self)
+    }
+    fn recurse(
+        &mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<P = P>,
+    ) -> Result<(), P::Error> {
+        match self {
+            EmitId::EmitId(a0) => {
+                a0.accept(c, v)?;
+                Ok(())
+            }
+            EmitId::Anonymous => Ok(()),
+        }
     }
 }
 impl<P: Params> NodeMut<P> for Enum_ {
@@ -1154,6 +1177,7 @@ impl<P: Params> NodeMut<P> for Gconst<P::Ex, P::Fb, P::En, P::Hi> {
         self.value.accept(c, v)?;
         self.namespace.accept(c, v)?;
         self.span.accept(c, v)?;
+        self.emit_id.accept(c, v)?;
         Ok(())
     }
 }
@@ -1637,6 +1661,7 @@ impl<P: Params> NodeMut<P> for RecordDef<P::Ex, P::Fb, P::En, P::Hi> {
         self.namespace.accept(c, v)?;
         self.span.accept(c, v)?;
         self.doc_comment.accept(c, v)?;
+        self.emit_id.accept(c, v)?;
         Ok(())
     }
 }
@@ -1962,6 +1987,7 @@ impl<P: Params> NodeMut<P> for Typedef<P::Ex, P::Fb, P::En, P::Hi> {
         self.mode.accept(c, v)?;
         self.vis.accept(c, v)?;
         self.namespace.accept(c, v)?;
+        self.emit_id.accept(c, v)?;
         Ok(())
     }
 }

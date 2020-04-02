@@ -1240,6 +1240,7 @@ and typedef_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :
     t_namespace = _;
     t_mode = mode;
     t_vis = td_vis;
+    t_emit_id = _;
   } =
     tdef
   in

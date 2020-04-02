@@ -99,8 +99,38 @@ let emit_method_prolog
 let tparams_to_strings tparams = List.map tparams (fun t -> snd t.A.tp_name)
 
 let rec emit_def env def =
+  let get_order emit_id =
+    match emit_id with
+    | Some (A.Emit_id n) -> n
+    | _ -> failwith "Expected closure_convert to annotate def with order"
+  in
   match def with
   | A.Stmt s -> Emit_statement.emit_stmt env s
+  | A.Class cd ->
+    let defcls_fn n =
+      if Emit_env.is_systemlib () then
+        instr_defclsnop n
+      else
+        instr_defcls n
+    in
+    begin
+      match cd.A.c_emit_id with
+      | Some (A.Emit_id n) ->
+        Emit_pos.emit_pos_then (fst cd.A.c_name) @@ defcls_fn n
+      | Some A.Anonymous -> empty
+      | None ->
+        failwith
+          "Expected toplevel class declaration to be converted in closure_convert"
+    end
+  | A.Typedef td ->
+    Emit_pos.emit_pos_then (fst td.A.t_name)
+    @@ instr_deftypealias (get_order td.A.t_emit_id)
+  | A.RecordDef rd ->
+    Emit_pos.emit_pos_then (fst rd.A.rd_name)
+    @@ instr_defrecord (get_order rd.A.rd_emit_id)
+  | A.Constant c ->
+    Emit_pos.emit_pos_then (fst c.A.cst_name)
+    @@ instr_defcns (get_order c.A.cst_emit_id)
   (* We assume that SetNamespaceEnv does namespace setting *)
   | A.Namespace (_, defs) -> emit_defs env defs
   | _ -> empty

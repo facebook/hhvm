@@ -12,8 +12,8 @@ Errors:
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
         ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
-        ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
-      })
+        ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      t_emit_id = None })
   ]
 [(Typedef
     { t_annotation = (); t_name = ([4:6-26], "\\UNSAFE_TYPE_HH_FIXME");
@@ -25,8 +25,8 @@ Errors:
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
         ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
-        ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
-      })
+        ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      t_emit_id = None })
   ]
 [(Fun
     { f_span = [3:1-5:2]; f_annotation = (); f_mode = Mpartial;
@@ -75,7 +75,7 @@ Errors:
         ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       c_user_attributes = []; c_file_attributes = []; c_enum = None;
-      c_pu_enums = []; c_doc_comment = None })
+      c_pu_enums = []; c_doc_comment = None; c_emit_id = None })
   ]
 [(Fun
     { f_span = [3:1-5:2]; f_annotation = (); f_mode = Mpartial;

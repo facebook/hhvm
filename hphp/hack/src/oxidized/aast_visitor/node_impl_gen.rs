@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<42839533c9593807dfad8abb443e0dd4>>
+// @generated SignedSource<<175d806caa03723da9130a3ab04b888d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -353,6 +353,7 @@ impl<P: Params> Node<P> for Class_<P::Ex, P::Fb, P::En, P::Hi> {
         self.enum_.accept(c, v)?;
         self.pu_enums.accept(c, v)?;
         self.doc_comment.accept(c, v)?;
+        self.emit_id.accept(c, v)?;
         Ok(())
     }
 }
@@ -443,6 +444,20 @@ impl<P: Params> Node<P> for DocComment {
     fn recurse(&self, c: &mut P::Context, v: &mut dyn Visitor<P = P>) -> Result<(), P::Error> {
         self.0.accept(c, v)?;
         Ok(())
+    }
+}
+impl<P: Params> Node<P> for EmitId {
+    fn accept(&self, c: &mut P::Context, v: &mut dyn Visitor<P = P>) -> Result<(), P::Error> {
+        v.visit_emit_id(c, self)
+    }
+    fn recurse(&self, c: &mut P::Context, v: &mut dyn Visitor<P = P>) -> Result<(), P::Error> {
+        match self {
+            EmitId::EmitId(a0) => {
+                a0.accept(c, v)?;
+                Ok(())
+            }
+            EmitId::Anonymous => Ok(()),
+        }
     }
 }
 impl<P: Params> Node<P> for Enum_ {
@@ -874,6 +889,7 @@ impl<P: Params> Node<P> for Gconst<P::Ex, P::Fb, P::En, P::Hi> {
         self.value.accept(c, v)?;
         self.namespace.accept(c, v)?;
         self.span.accept(c, v)?;
+        self.emit_id.accept(c, v)?;
         Ok(())
     }
 }
@@ -1205,6 +1221,7 @@ impl<P: Params> Node<P> for RecordDef<P::Ex, P::Fb, P::En, P::Hi> {
         self.namespace.accept(c, v)?;
         self.span.accept(c, v)?;
         self.doc_comment.accept(c, v)?;
+        self.emit_id.accept(c, v)?;
         Ok(())
     }
 }
@@ -1442,6 +1459,7 @@ impl<P: Params> Node<P> for Typedef<P::Ex, P::Fb, P::En, P::Hi> {
         self.mode.accept(c, v)?;
         self.vis.accept(c, v)?;
         self.namespace.accept(c, v)?;
+        self.emit_id.accept(c, v)?;
         Ok(())
     }
 }

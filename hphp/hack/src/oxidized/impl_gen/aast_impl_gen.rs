@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f88a76a424eb357df6c7f23bdce3d9dc>>
+// @generated SignedSource<<902b585a1a5fc901fc634a9a686ec55c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -2960,6 +2960,44 @@ impl<Ex, Fb, En, Hi> FunVariadicity<Ex, Fb, En, Hi> {
     pub fn as_fvellipsis_into(self) -> Option<Pos> {
         match self {
             FunVariadicity::FVellipsis(p0) => Some(p0),
+            _ => None,
+        }
+    }
+}
+impl EmitId {
+    pub fn mk_emit_id(p0: isize) -> Self {
+        EmitId::EmitId(p0)
+    }
+    pub fn mk_anonymous() -> Self {
+        EmitId::Anonymous
+    }
+    pub fn is_emit_id(&self) -> bool {
+        match self {
+            EmitId::EmitId(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_anonymous(&self) -> bool {
+        match self {
+            EmitId::Anonymous => true,
+            _ => false,
+        }
+    }
+    pub fn as_emit_id(&self) -> Option<&isize> {
+        match self {
+            EmitId::EmitId(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_emit_id_mut(&mut self) -> Option<&mut isize> {
+        match self {
+            EmitId::EmitId(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_emit_id_into(self) -> Option<isize> {
+        match self {
+            EmitId::EmitId(p0) => Some(p0),
             _ => None,
         }
     }

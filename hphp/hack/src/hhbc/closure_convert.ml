@@ -405,35 +405,6 @@ let record_function_state key { has_finally; has_goto; labels } rx_of_scope st =
       lambda_rx_of_scope;
     }
 
-(* Make a stub class purely for the purpose of emitting the DefCls instruction
- *)
-let make_defcls cd n =
-  {
-    cd with
-    c_method_redeclarations = [];
-    c_consts = [];
-    c_typeconsts = [];
-    c_vars = [];
-    c_methods = [];
-    c_xhp_children = [];
-    c_xhp_attrs = [];
-    c_name = (fst cd.c_name, string_of_int n);
-  }
-
-(* Make a stub record purely for the purpose of emitting the DefRecord instruction
- *)
-let make_defrecord rd n =
-  { rd with rd_fields = []; rd_name = (fst rd.rd_name, string_of_int n) }
-
-(* Def inline is not implemented yet *)
-(** let add_class env st cd =
-  * let n = env.defined_class_count + List.length st.hoisted_classes in
-  * { st with hoisted_classes = cd :: st.hoisted_classes },
-  * make_defcls cd n
-  *
-  * let add_record env st cd =
-  *   st, make_defrecord cd env.defined_record_count *)
-
 let make_closure_name env st =
   let per_fun_idx = st.closure_cnt_per_fun in
   SU.Closures.mangle_closure
@@ -526,6 +497,7 @@ let make_closure
       c_enum = None;
       c_doc_comment = None;
       c_pu_enums = [];
+      c_emit_id = Some Anonymous;
     }
   in
   let inline_fundef =
@@ -1551,7 +1523,7 @@ and add_reified_property cd c_vars =
     in
     var :: c_vars
 
-and convert_class (env : env) (st : state) (cd : class_) =
+and convert_class (env : env) (st : state) (cd : class_) class_count =
   let env = env_with_class env cd in
   let st = reset_function_counts st in
   let (st, c_methods) =
@@ -1570,7 +1542,17 @@ and convert_class (env : env) (st : state) (cd : class_) =
   let (st, c_user_attributes) =
     convert_user_attributes env st cd.c_user_attributes
   in
-  (st, { cd with c_methods; c_vars; c_consts; c_user_attributes; c_xhp_attrs })
+  let c_emit_id = Some (Emit_id class_count) in
+  ( st,
+    {
+      cd with
+      c_methods;
+      c_vars;
+      c_consts;
+      c_user_attributes;
+      c_xhp_attrs;
+      c_emit_id;
+    } )
 
 and convert_class_elt_const (env : env) st cc =
   let (st, cc_expr) = convert_opt_expr env st cc.cc_expr in
@@ -1612,9 +1594,10 @@ and convert_class_elt_xhp_attrs env st (h, c, v, es) =
   in
   (st, (h, c, v, es))
 
-and convert_gconst env st gconst =
+and convert_gconst env st gconst const_count =
   let (st, expr) = convert_expr env st gconst.cst_value in
-  (st, { gconst with cst_value = expr })
+  let cst_emit_id = Some (Emit_id const_count) in
+  (st, { gconst with cst_value = expr; cst_emit_id })
 
 and convert_record_fields env st fields =
   let convert_field st (sid, hint, init) =
@@ -1649,8 +1632,7 @@ and convert_defs env class_count record_count typedef_count const_count st dl =
   (* Convert a top-level class definition into a true class definition and
    * a stub class that just corresponds to the DefCls instruction *)
   | Class cd :: dl ->
-    let (st, cd) = convert_class env st cd in
-    let stub_class = make_defcls cd class_count in
+    let (st, cd) = convert_class env st cd class_count in
     let (st, dl) =
       convert_defs
         env
@@ -1661,10 +1643,7 @@ and convert_defs env class_count record_count typedef_count const_count st dl =
         st
         dl
     in
-    ( st,
-      (TopLevel, Class cd)
-      :: (TopLevel, Stmt (Pos.none, Def_inline (Class stub_class)))
-      :: dl )
+    (st, (TopLevel, Class cd) :: dl)
   | Stmt stmt :: dl ->
     let (st, stmt) = convert_stmt env st stmt in
     let (st, dl) =
@@ -1673,8 +1652,6 @@ and convert_defs env class_count record_count typedef_count const_count st dl =
     (st, (TopLevel, Stmt stmt) :: dl)
   | RecordDef rd :: dl ->
     let (st, rd_fields) = convert_record_fields env st rd.rd_fields in
-    let stub_record = make_defrecord rd record_count in
-    let stub_stmt = Stmt (Pos.none, Def_inline (RecordDef stub_record)) in
     let (st, dl) =
       convert_defs
         env
@@ -1685,9 +1662,8 @@ and convert_defs env class_count record_count typedef_count const_count st dl =
         st
         dl
     in
-    ( st,
-      (TopLevel, RecordDef { rd with rd_fields }) :: (TopLevel, stub_stmt) :: dl
-    )
+    let rd_emit_id = Some (Emit_id record_count) in
+    (st, (TopLevel, RecordDef { rd with rd_fields; rd_emit_id }) :: dl)
   | Typedef td :: dl ->
     let (st, dl) =
       convert_defs
@@ -1702,16 +1678,11 @@ and convert_defs env class_count record_count typedef_count const_count st dl =
     let (st, t_user_attributes) =
       convert_user_attributes env st td.t_user_attributes
     in
-    let td = { td with t_user_attributes } in
-    let stub_td =
-      { td with t_name = (fst td.t_name, string_of_int typedef_count) }
-    in
-    ( st,
-      (TopLevel, Typedef td)
-      :: (TopLevel, Stmt (Pos.none, Def_inline (Typedef stub_td)))
-      :: dl )
+    let t_emit_id = Some (Emit_id typedef_count) in
+    let td = { td with t_user_attributes; t_emit_id } in
+    (st, (TopLevel, Typedef td) :: dl)
   | Constant c :: dl ->
-    let (st, c) = convert_gconst env st c in
+    let (st, c) = convert_gconst env st c const_count in
     let (st, dl) =
       convert_defs
         env
@@ -1722,13 +1693,7 @@ and convert_defs env class_count record_count typedef_count const_count st dl =
         st
         dl
     in
-    let stub_c =
-      { c with cst_name = (fst c.cst_name, string_of_int const_count) }
-    in
-    ( st,
-      (TopLevel, Constant c)
-      :: (TopLevel, Stmt (Pos.none, Def_inline (Constant stub_c)))
-      :: dl )
+    (st, (TopLevel, Constant c) :: dl)
   | Namespace (_id, dl) :: dl' ->
     convert_defs
       env

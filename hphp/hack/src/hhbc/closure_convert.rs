@@ -449,27 +449,6 @@ fn make_scope_name(scope: &ast_scope::Scope) -> String {
     parts.join("")
 }
 
-// Make a stub class purely for the purpose of emitting the DefCls instruction
-// TODO(hrust): can we build entire Class_ from scratch without needing cd? Try to refactor in OCaml
-fn make_defcls(mut cd: Class_, n: usize) -> Class_ {
-    cd.method_redeclarations = vec![];
-    cd.consts = vec![];
-    cd.typeconsts = vec![];
-    cd.vars = vec![];
-    cd.methods = vec![];
-    cd.xhp_children = vec![];
-    cd.xhp_attrs = vec![];
-    cd.name = Id(cd.name.0, n.to_string());
-    cd
-}
-
-// Make a stub record purely for the purpose of emitting the DefRecord instruction
-fn make_defrecord(mut rd: RecordDef, n: usize) -> RecordDef {
-    rd.fields = vec![];
-    rd.name = Id(rd.name.0, n.to_string());
-    rd
-}
-
 fn make_closure_name(env: &Env, st: &State) -> String {
     let per_fun_idx = st.closure_cnt_per_fun;
     string_utils::closures::mangle_closure(&make_scope_name(&env.scope), per_fun_idx)
@@ -561,6 +540,7 @@ fn make_closure(
         enum_: None,
         doc_comment: None,
         pu_enums: vec![],
+        emit_id: Some(EmitId::Anonymous),
     };
 
     // TODO(hrust): can we reconstruct fd here from the scratch?
@@ -1399,43 +1379,25 @@ pub fn convert_toplevel_prog(e: &mut Emitter, defs: &mut Program) -> Result<Vec<
     for mut def in defs.drain(..) {
         visitor.visit_def(&mut env, &mut def)?;
         match def {
-            Def::Class(x) => {
-                let stub_class = make_defcls(*x.clone(), class_count);
+            Def::Class(mut x) => {
+                x.emit_id = Some(EmitId::EmitId(class_count));
                 class_count += 1;
                 new_defs.push(Def::Class(x));
-                new_defs.push(Def::mk_stmt(Stmt(
-                    Pos::make_none(),
-                    Stmt_::mk_def_inline(Def::mk_class(stub_class)),
-                )));
             }
-            Def::RecordDef(x) => {
-                let stub_record = make_defrecord(*x.clone(), record_count);
+            Def::RecordDef(mut x) => {
+                x.emit_id = Some(EmitId::EmitId(record_count));
                 record_count += 1;
                 new_defs.push(Def::RecordDef(x));
-                new_defs.push(Def::mk_stmt(Stmt(
-                    Pos::make_none(),
-                    Stmt_::mk_def_inline(Def::mk_record_def(stub_record)),
-                )));
             }
-            Def::Typedef(x) => {
-                let mut stub_td = x.clone();
-                stub_td.name = Id(stub_td.name.0, typedef_count.to_string());
+            Def::Typedef(mut x) => {
+                x.emit_id = Some(EmitId::EmitId(typedef_count));
                 typedef_count += 1;
                 new_defs.push(Def::Typedef(x));
-                new_defs.push(Def::mk_stmt(Stmt(
-                    Pos::make_none(),
-                    Stmt_::mk_def_inline(Def::Typedef(stub_td)),
-                )));
             }
-            Def::Constant(x) => {
-                let mut stub_c = x.clone();
-                stub_c.name = Id(stub_c.name.0, const_count.to_string());
+            Def::Constant(mut x) => {
+                x.emit_id = Some(EmitId::EmitId(const_count));
                 const_count += 1;
                 new_defs.push(Def::Constant(x));
-                new_defs.push(Def::mk_stmt(Stmt(
-                    Pos::make_none(),
-                    Stmt_::mk_def_inline(Def::Constant(stub_c)),
-                )));
             }
             Def::Namespace(x) => new_defs.extend_from_slice((*x).1.as_slice()),
             Def::SetNamespaceEnv(_) => panic!("TODO, can't test yet without porting namespaces.ml"),

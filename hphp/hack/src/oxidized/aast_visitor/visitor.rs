@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<cac85ff989a6b49b42879f7c54d9087e>>
+// @generated SignedSource<<da149b32ff9f3823dbfc9870834f1aab>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -288,6 +288,13 @@ pub trait Visitor {
         &mut self,
         c: &mut <Self::P as Params>::Context,
         p: &DocComment,
+    ) -> Result<(), <Self::P as Params>::Error> {
+        p.recurse(c, self.object())
+    }
+    fn visit_emit_id(
+        &mut self,
+        c: &mut <Self::P as Params>::Context,
+        p: &EmitId,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }

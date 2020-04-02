@@ -486,7 +486,7 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
         Expr_::String2(es) => emit_string2(emitter, env, pos, es),
         Expr_::BracedExpr(e) => emit_expr(emitter, env, e),
         Expr_::Id(e) => Ok(emit_pos_then(pos, emit_id(emitter, env, e)?)),
-        Expr_::Xml(e) => emit_xhp(env, pos, e),
+        Expr_::Xml(e) => emit_xhp(emitter, env, pos, e),
         Expr_::Callconv(e) => Err(unrecoverable(
             "emit_callconv: This should have been caught at emit_arg",
         )),
@@ -564,12 +564,72 @@ fn emit_exit(emitter: &mut Emitter, env: &Env, expr_opt: Option<&tast::Expr>) ->
     ]))
 }
 
+// Translate into a constructor call. The arguments are:
+// 1) struct-like array of attributes
+// 2) vec-like array of children
+// 3) filename, for debugging
+// 4) line number, for debugging
+// Spread operators are injected into the attributes array with placeholder
+// keys that the runtime will interpret as a spread. These keys are not
+// parseable as user-specified attributes, so they will never collide.
 fn emit_xhp(
+    e: &mut Emitter,
     env: &Env,
     pos: &Pos,
     (id, attributes, children): &(tast::Sid, Vec<tast::XhpAttribute>, Vec<tast::Expr>),
 ) -> Result {
-    unimplemented!("TODO(hrust)")
+    use ast_defs::{Id, ShapeFieldName as SF};
+    use tast::{ClassId, ClassId_, Expr as E, Expr_ as E_, XhpAttribute};
+    // TODO(hrust): avoid clone
+    let (_, attributes) =
+        attributes
+            .iter()
+            .fold((0, vec![]), |(mut spread_id, mut attrs), attr| {
+                match attr {
+                    XhpAttribute::XhpSimple(name, v) => {
+                        attrs.push((SF::SFlitStr(name.clone()), v.clone()));
+                    }
+                    XhpAttribute::XhpSpread(expr) => {
+                        attrs.push((
+                            SF::SFlitStr((
+                                expr.0.clone(),
+                                format!("...${}", spread_id.to_string()),
+                            )),
+                            expr.clone(),
+                        ));
+                        spread_id += 1;
+                    }
+                }
+                (spread_id, attrs)
+            });
+    let attribute_map = E(pos.clone(), E_::mk_shape(attributes));
+    let children_vec = E(pos.clone(), E_::mk_varray(None, children.clone()));
+    let filename = E(
+        pos.clone(),
+        E_::mk_id(Id(pos.clone(), pseudo_consts::G__FILE__.into())),
+    );
+    let line = E(
+        pos.clone(),
+        E_::mk_id(Id(pos.clone(), pseudo_consts::G__LINE__.into())),
+    );
+    let renamed_id = class::Type::from_ast_name_and_mangle(&id.1);
+    let cid = ClassId(
+        pos.clone(),
+        ClassId_::CI(Id(id.0.clone(), renamed_id.to_raw_string().into())),
+    );
+    emit_symbol_refs::State::add_class(e, renamed_id);
+    emit_new(
+        e,
+        env,
+        pos,
+        &(
+            cid,
+            vec![],
+            vec![attribute_map, children_vec, filename, line],
+            None,
+            pos.clone(),
+        ),
+    )
 }
 
 fn emit_yield(e: &mut Emitter, env: &Env, pos: &Pos, af: &tast::Afield) -> Result {

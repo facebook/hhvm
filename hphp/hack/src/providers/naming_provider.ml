@@ -35,6 +35,10 @@ let find_symbol_in_context
                None))
   |> Relative_path.Map.choose_opt
 
+let is_pos_in_ctx ~(ctx : Provider_context.t) (pos : FileInfo.pos) : bool =
+  let path = FileInfo.get_pos_filename pos in
+  Relative_path.Map.mem (Provider_context.get_entries ctx) path
+
 let find_symbol_in_context_with_suppression
     ~(ctx : Provider_context.t)
     ~(get_entry_symbols : FileInfo.t -> (FileInfo.id * FileInfo.name_type) list)
@@ -46,14 +50,9 @@ let find_symbol_in_context_with_suppression
   | None ->
     (match fallback () with
     | Some (pos, kind) ->
-      (* We've just checked to see if the given symbol was in `ctx`, and
-      returned it if present. If we've gotten to this point, and we're
-      reporting that the symbol is in a file in `ctx`, but we didn't already
-      find it in `ctx`, that means that the file content in `ctx` has deleted
-      the symbol. So we should suppress this returned position and return
-      `None` instead. *)
-      let path = FileInfo.get_pos_filename pos in
-      if Relative_path.Map.mem (Provider_context.get_entries ctx) path then
+      (* If fallback said it thought the symbol was in ctx, but we definitively
+      know that it isn't, then the answer is None. *)
+      if is_pos_in_ctx ~ctx pos then
         None
       else
         Some (pos, kind)
@@ -229,7 +228,14 @@ let get_fun_canon_name (ctx : Provider_context.t) (name : string) :
           reverse_naming_table_delta.funs_canon_key <- funs_lower)
         ~get_from_sqlite:(fun () ->
           Naming_sqlite.get_fun_pos ~case_insensitive:true name)
-      >>= fun pos -> compute_symbol_canon_name (FileInfo.get_pos_filename pos)
+      >>= fun pos ->
+      (* If reverse_naming_table_delta thought the symbol was in ctx, but we definitively
+      know that it isn't, then it isn't. *)
+      if is_pos_in_ctx ~ctx pos then
+        None
+      else
+        Some pos >>= fun pos ->
+        compute_symbol_canon_name (FileInfo.get_pos_filename pos)
     | Provider_backend.Decl_service _ ->
       (* FIXME: Not correct! We need to add a canon-name API to the decl service. *)
       if fun_exists ctx name then
@@ -466,7 +472,13 @@ let get_type_canon_name (ctx : Provider_context.t) (name : string) :
         ~get_from_sqlite:(fun () ->
           Naming_sqlite.get_type_pos ~case_insensitive:true name)
       >>= fun (pos, kind) ->
-      compute_symbol_canon_name (FileInfo.get_pos_filename pos) kind
+      (* If reverse_naming_table_delta thought the symbol was in ctx, but we definitively
+      know that it isn't, then it isn't. *)
+      if is_pos_in_ctx ~ctx pos then
+        None
+      else
+        Some (pos, kind) >>= fun (pos, kind) ->
+        compute_symbol_canon_name (FileInfo.get_pos_filename pos) kind
     | Provider_backend.Decl_service _ ->
       (* FIXME: Not correct! We need to add a canon-name API to the decl service. *)
       if Option.is_some (get_type_kind ctx name) then

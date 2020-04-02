@@ -6207,14 +6207,14 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
     pub fn next_impl(&mut self, direction : bool) -> Option<&'a Syntax<T, V>> {
         use SyntaxVariant::*;
         let get_index = |len| {
-            let back_index = len - self.index_back - 1;
-            if back_index < self.index {
+            let back_index_plus_1 = len - self.index_back;
+            if back_index_plus_1 <= self.index {
                 return None
             }
             if direction {
                 Some (self.index)
             } else {
-                Some (back_index)
+                Some (back_index_plus_1 - 1)
             }
         };
         let res = match &self.syntax {

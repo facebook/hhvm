@@ -98,3 +98,15 @@ let position_to_offset ?(existing = false) bolmap (line, column) =
 
 let offset_to_line_start_offset bolmap offset =
   offset - snd (offset_to_position bolmap offset) + 1
+
+let offsets_to_line_lengths bolmap =
+  let (lengths, _) =
+    Array.fold_right
+      (fun offset (acc, mnext) ->
+        match mnext with
+        | None -> (acc, Some offset)
+        | Some next -> ((next - offset) :: acc, Some offset))
+      bolmap
+      ([], None)
+  in
+  lengths

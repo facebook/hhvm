@@ -44,3 +44,6 @@ val position_to_offset : ?existing:bool -> t -> int * int -> int
 
 (* Does what it says on the tin. *)
 val offset_to_line_start_offset : t -> int -> int
+
+(* Returns a list of line lengths *)
+val offsets_to_line_lengths : t -> int list

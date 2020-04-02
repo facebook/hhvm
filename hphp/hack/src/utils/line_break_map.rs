@@ -137,4 +137,8 @@ impl LineBreakMap {
     pub fn offset_to_line_start_offset(&self, offset: isize) -> isize {
         offset - self.offset_to_position(offset).1 + 1
     }
+
+    pub fn offset_to_line_lengths(&self) -> Vec<isize> {
+        panic!("Not implemented")
+    }
 }

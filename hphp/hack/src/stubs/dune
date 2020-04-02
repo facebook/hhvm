@@ -8,6 +8,14 @@
     errors))
 
 (library
+  (name artifact_store_stubs)
+  (wrapped false)
+  (modules
+    artifactStore)
+  (libraries
+    errors))
+
+(library
   (name build)
   (wrapped false)
   (modules

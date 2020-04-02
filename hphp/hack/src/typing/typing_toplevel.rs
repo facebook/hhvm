@@ -20,6 +20,7 @@ mod typing_env_from_def;
 mod typing_env_return_info;
 mod typing_env_types;
 mod typing_phase;
+pub mod typing_print;
 mod typing_subtype;
 
 pub use typing_env::*;

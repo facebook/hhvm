@@ -347,6 +347,19 @@ pub enum ConstraintType_<'a> {
     TCintersection(Ty<'a>, ConstraintType<'a>),
 }
 
+impl<'a> ConstraintType_<'a> {
+    pub fn to_oxidized(&self) -> oxidized_defs::ConstraintType_ {
+        use oxidized_defs::ConstraintType_ as O;
+        use ConstraintType_ as C;
+        match self {
+            C::ThasMember(hm) => O::ThasMember(hm.to_oxidized()),
+            C::Tdestructure => unimplemented!("{:?}", self),
+            C::TCunion(ty, ct) => O::TCunion(ty.to_oxidized(), ct.to_oxidized()),
+            C::TCintersection(ty, ct) => O::TCintersection(ty.to_oxidized(), ct.to_oxidized()),
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct ConstraintType<'a>(pub PReason<'a>, pub &'a ConstraintType_<'a>);
 
@@ -367,6 +380,12 @@ impl Ord for ConstraintType<'_> {
     }
 }
 
+impl<'a> ConstraintType<'a> {
+    pub fn to_oxidized(&self) -> oxidized_defs::ConstraintType {
+        oxidized_defs::ConstraintType(self.0.to_oxidized(), Box::new(self.1.to_oxidized()))
+    }
+}
+
 #[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct HasMember<'a> {
     pub name: &'a nast::Sid,
@@ -375,6 +394,16 @@ pub struct HasMember<'a> {
     /// HHVM would access the private member of a parent class instead of the
     /// one from the current class.
     pub class_id: &'a nast::ClassId_,
+}
+
+impl<'a> HasMember<'a> {
+    pub fn to_oxidized(&self) -> oxidized_defs::HasMember {
+        oxidized_defs::HasMember {
+            name: self.name.clone(),
+            type_: self.member_type.to_oxidized(),
+            class_id: self.class_id.clone(),
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -407,6 +436,27 @@ pub enum InternalType_<'a> {
 }
 
 pub type InternalType<'a> = &'a InternalType_<'a>;
+
+impl<'a> InternalType_<'a> {
+    pub fn to_oxidized(&self) -> oxidized_defs::InternalType {
+        use oxidized_defs::InternalType as O;
+        use InternalType_ as I;
+        match self {
+            I::LoclType(ty) => O::LoclType(ty.to_oxidized()),
+            I::ConstraintType(ct) => O::ConstraintType(ct.to_oxidized()),
+        }
+    }
+}
+
+impl OcamlRep for InternalType_<'_> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+        self.to_oxidized().to_ocamlrep(alloc)
+    }
+
+    fn from_ocamlrep(_value: Value<'_>) -> Result<Self, FromError> {
+        unimplemented!()
+    }
+}
 
 impl<'a> Ty<'a> {
     pub fn from_oxidized(ty: &oxidized_defs::Ty, builder: &'a TypeBuilder<'a>) -> Ty<'a> {

@@ -7,24 +7,24 @@ fi
 
 DIR=$(pwd -P)
 
+# MacOS portability
+SHA1SUM=(openssl dgst -sha1 -r)
+
 if git rev-parse --show-toplevel >& /dev/null; then
   root=$(git rev-parse --show-toplevel)
-  compiler="git describe --all --long --abbrev=40 --always"
-  find_files="git ls-files -- hphp"
+  compiler=(git describe --all --long "--abbrev=40" --always)
+  find_files=(git ls-files -- hphp)
 elif hg root >& /dev/null; then
   root=$(hg root)
   if [ -f "$root/fbcode/.projectid" ]; then
     root="$root/fbcode"
   fi
-  compiler="hg --config trusted.users='*' log -l1 -r'reverse(::.) & file(\"$root/**\")' -T'{branch}-0-g{sub(r\"^\$\",node,mirrornode(\"fbcode\",\"git\"))}\\n' 2> /dev/null"
-  find_files="hg files -I hphp/"
+  compiler=(hg --config 'trusted.users=*' log -l1 -r"reverse(::.) & file('$root/**')" -T'{branch}-0-g{sub(r"^$",node,mirrornode("fbcode","git"))}\n')
+  find_files=(hg files -I hphp/)
 else
-  root=$DIR/../../
-  # Building outside of a git repo, use system time instead.  This will make the
-  # sha appear to change constantly, but without any insight into file state,
-  # it's the safest fallback
-  compiler='date +%s_%N'
-  find_files='find hphp \( -type f -o -type l \) \! -iregex ".*\(~\|#.*\|\.swp\|/tags\|/.bash_history\|/out\)" | LC_ALL=C sort'
+  root=$(dirname "$(readlink -e "${BASH_SOURCE[0]}/../..")")
+  compiler=(date +%s_%N)
+  find_files=(find hphp -type f '!' -iregex '.*\(~\|#.*\|\.swp\|/tags\|/.bash_history\|/out\)')
 fi
 
 ################################################################################
@@ -33,15 +33,12 @@ unset CDPATH
 cd "$root" || exit 1
 
 if [ -z "${COMPILER_ID}" ]; then
-  COMPILER_ID=$(sh -c "$compiler")
+  COMPILER_ID=$("${compiler[@]}")
 fi
 
 if [ -z "${USE_LOWPTR}" ]; then
   USE_LOWPTR="0"
 fi
-
-# MacOS portability
-SHA1SUM="openssl dgst -sha1 -r"
 
 ################################################################################
 
@@ -52,10 +49,10 @@ SHA1SUM="openssl dgst -sha1 -r"
 # schema), because for some work flows the added instability of schema IDs is a
 # cure worse than the disease.
 if [ -z "${HHVM_REPO_SCHEMA}" ] ; then
-  # Use Perl as BSD grep (MacOS) does not support negated groups
-  HHVM_REPO_SCHEMA=$(sh -c "$find_files" | \
-      { perl -ne 'chomp; print "$_\n" if -f && !m#^hphp/(bin|facebook(?!/extensions)|hack/facebook/flow|neo|public_tld|test|tools|util|vixl|zend)#' | \
-      xargs -d'\n' cat ; echo "${USE_LOWPTR}" ; } | $SHA1SUM | cut -b-40)
+    # Use Perl as BSD grep (MacOS) does not support negated groups
+    HHVM_REPO_SCHEMA=$("${find_files[@]}" |\
+        { perl -ne 'chomp; print "$_\n" if !m#^hphp/(bin|facebook(?!/extensions)|hack(?!/src)|neo|public_tld|test|tools|util|vixl|zend)|(/\.|/test/)# && !-l && -f' | \
+        LC_ALL=C sort | xargs -d'\n' cat ; echo "${USE_LOWPTR}" ; } | "${SHA1SUM[@]}" | cut -b-40)
 fi
 
 ################################################################################
@@ -67,8 +64,7 @@ fi
 if [[ $# -eq 0 ]] ; then
     BUILD_ID="UNKNOWN"
 else
-    args=$*
-    BUILD_ID=$(sh -c "$SHA1SUM ${args} | cut -d ' ' -f 1 | $SHA1SUM | cut -b-40")
+    BUILD_ID=$("${SHA1SUM[@]}" "$@" | cut -d ' ' -f 1 | "${SHA1SUM[@]}" | cut -b-40)
 fi
 
 ################################################################################

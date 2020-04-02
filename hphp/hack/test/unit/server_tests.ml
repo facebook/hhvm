@@ -584,8 +584,6 @@ let test_canon_names_internal
 
   begin
     match Naming_provider.get_type_pos_and_kind ctx uncanonical with
-    | Some _ when id = "ctx" -> () (* this is current behavior; it's a bug *)
-    | None when id = "ctx" -> assert false
     | None -> ()
     | Some _ ->
       Printf.eprintf

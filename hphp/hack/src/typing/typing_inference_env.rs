@@ -6,7 +6,6 @@ use arena_trait::Arena;
 
 use oxidized::aast;
 use oxidized::ident::Ident;
-use oxidized::ident_impl::New;
 use oxidized::pos::Pos;
 
 use typing_collections_rust::{IMap, ISet, SMap};
@@ -77,6 +76,7 @@ pub struct InferenceEnv<'a> {
     pub tvenv: Tvenv<'a>,
     pub tyvars_stack: Vec<(&'a Pos, Vec<Ident>)>,
     pub allow_solve_globals: bool,
+    var_id_counter: Ident,
 }
 
 impl<'a> InferenceEnv<'a> {
@@ -86,7 +86,14 @@ impl<'a> InferenceEnv<'a> {
             tvenv: IMap::empty(),
             tyvars_stack: vec![],
             allow_solve_globals: false,
+            var_id_counter: 0,
         }
+    }
+
+    fn new_var_id(&mut self) -> Ident {
+        let id = self.var_id_counter;
+        self.var_id_counter += 1;
+        id
     }
 
     pub fn expand_type(&mut self, ty: Ty<'a>) -> Ty<'a> {
@@ -166,7 +173,7 @@ impl<'a> InferenceEnv<'a> {
     }
 
     pub fn fresh_type_reason(&mut self, r: PReason<'a>) -> Ty<'a> {
-        let v = Ident::new();
+        let v = self.new_var_id();
         self.add_current_tyvar(r.pos, v);
         self.bld.tyvar(r, v)
     }

@@ -2405,32 +2405,12 @@ fn print_expr<W: Write>(
         };
         escaper::escape(s)
     }
-    fn escape_char(c: u8) -> Option<Cow<'static, [u8]>> {
-        match c {
-            b'\n' => Some((&b"\\\\n"[..]).into()),
-            b'\r' => Some((&b"\\\\r"[..]).into()),
-            b'\t' => Some((&b"\\\\t"[..]).into()),
-            b'\\' => Some((&b"\\\\\\\\"[..]).into()),
-            b'"' => Some((&b"\\\\\\\""[..]).into()),
-            b'$' => Some((&b"\\\\$"[..]).into()),
-            b'?' => Some((&b"\\?"[..]).into()),
-            c if is_lit_printable(c) => None,
-            c => {
-                let mut r = vec![];
-                write!(r, "\\\\{:03o}", c).unwrap();
-                Some(r.into())
-            }
-        }
-    }
     fn print_expr_id<'a, W: Write>(
         w: &mut W,
         env: &ExprEnv,
         s: &'a String,
     ) -> Result<(), W::Error> {
         w.write(adjust_id(env, s))
-    }
-    fn print_expr_string<'a, W: Write>(w: &mut W, s: &'a String) -> Result<(), W::Error> {
-        wrap_by(w, "\\\"", |w| w.write(escape_by(s.into(), escape_char)))
     }
     fn fmt_class_name<'a>(is_class_constant: bool, id: Cow<'a, str>) -> Cow<'a, str> {
         let cn: Cow<'a, str> = if is_xhp(&strip_ns(&id)) {
@@ -2454,11 +2434,24 @@ fn print_expr<W: Write>(
         id: &'e str,
     ) -> Cow<'e, str> {
         if id == classes::SELF || id == classes::PARENT || id == classes::STATIC {
-            get_special_class_name(ctx, env, is_class_constant, id)
-        } else if should_format {
-            fmt_class_name(is_class_constant, Cow::Borrowed(id))
+            return get_special_class_name(ctx, env, is_class_constant, id);
+        }
+        fn get<'a>(should_format: bool, is_class_constant: bool, id: &'a str) -> Cow<'a, str> {
+            if should_format {
+                fmt_class_name(is_class_constant, id.into())
+            } else {
+                id.into()
+            }
+        };
+
+        if env.is_some() {
+            let class_id = class::Type::from_ast_name(id);
+            let id = class_id.to_raw_string();
+            get(should_format, is_class_constant, id)
+                .into_owned()
+                .into()
         } else {
-            id.into()
+            get(should_format, is_class_constant, id)
         }
     }
     fn get_special_class_name<'e>(

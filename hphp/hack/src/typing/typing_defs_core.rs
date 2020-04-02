@@ -6,6 +6,7 @@ use std::cmp::Ordering;
 
 use bumpalo::collections::Vec;
 use ocamlrep::{Allocator, FromError, OcamlRep, Value};
+use oxidized::pos::Pos;
 pub use oxidized::typing_defs_core::{DestructureKind, Exact, ParamMode};
 use oxidized::{aast_defs, ast_defs, ident, nast, tany_sentinel, typing_defs as oxidized_defs};
 
@@ -210,7 +211,7 @@ impl<'a> Ty<'a> {
         let Ty(r, _t) = self;
         *r
     }
-    pub fn get_pos(&self) -> Option<&'a oxidized::pos::Pos> {
+    pub fn get_pos(&self) -> Option<&'a Pos> {
         self.get_reason().pos
     }
     pub fn is_tyvar(&self) -> bool {
@@ -511,16 +512,17 @@ impl<'a> FunType_<'a> {
     pub fn to_oxidized(&self) -> oxidized_defs::FunType {
         // TODO(hrust) proper conversion
         use oxidized_defs::*;
+        let FunType_ { return_, params } = self;
 
         FunType {
             is_coroutine: false,
             arity: FunArity::Fstandard(0, 0),
             tparams: (vec![], FunTparamsKind::FTKtparams),
             where_constraints: vec![],
-            params: vec![],
+            params: params.iter().map(|p| p.to_oxidized()).collect(),
             ret: PossiblyEnforcedTy {
                 enforced: false,
-                type_: self.return_.to_oxidized(),
+                type_: return_.to_oxidized(),
             },
             fun_kind: ast_defs::FunKind::FSync,
             reactive: Reactivity::Nonreactive,
@@ -533,7 +535,29 @@ impl<'a> FunType_<'a> {
 }
 
 #[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
-pub struct FunParam<'a> {
+pub struct FunParam_<'a> {
     // TODO(hrust) missing fields
     pub type_: Ty<'a>, // TODO(hrust) possibly_enforced_ty
+}
+
+pub type FunParam<'a> = &'a FunParam_<'a>;
+
+impl<'a> FunParam_<'a> {
+    pub fn to_oxidized(&self) -> oxidized_defs::FunParam {
+        use oxidized_defs::*;
+        let FunParam_ { type_ } = self;
+
+        FunParam {
+            pos: Pos::make_none(),
+            name: None,
+            type_: PossiblyEnforcedTy {
+                enforced: false,
+                type_: type_.to_oxidized(),
+            },
+            kind: ParamMode::FPnormal,
+            accept_disposable: false,
+            mutability: None,
+            rx_annotation: None,
+        }
+    }
 }

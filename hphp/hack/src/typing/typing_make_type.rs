@@ -263,11 +263,11 @@ impl<'a> TypeBuilder<'a> {
     pub fn constraintty(&'a self, ty: ConstraintType<'a>) -> InternalType<'a> {
         self.alloc(InternalType_::ConstraintType(ty))
     }
-    pub fn funtype(&'a self, return_: Ty<'a>) -> FunType<'a> {
-        self.alloc(FunType_ {
-            return_,
-            params: vec![in self.alloc],
-        })
+    pub fn funparam(&'a self, type_: Ty<'a>) -> FunParam<'a> {
+        self.alloc(FunParam_ { type_ })
+    }
+    pub fn funtype(&'a self, params: BVec<'a, FunParam<'a>>, return_: Ty<'a>) -> FunType<'a> {
+        self.alloc(FunType_ { return_, params })
     }
 }
 

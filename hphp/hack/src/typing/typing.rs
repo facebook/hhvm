@@ -21,8 +21,6 @@ pub fn fun<'a>(env: &mut Env<'a>, f: &'a ast::Fun_) -> tast::Fun_<'a> {
     let ast = f.body.ast.iter().map(|x| stmt(env, x)).collect();
 
     // We put empty vec below for all of those, since real conversion is unimplemented
-    assert!(f.tparams.is_empty());
-    assert!(f.params.is_empty());
     assert!(f.user_attributes.is_empty());
     assert!(f.file_attributes.is_empty());
 

@@ -487,17 +487,30 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
         Expr_::BracedExpr(e) => emit_expr(emitter, env, e),
         Expr_::Id(e) => Ok(emit_pos_then(pos, emit_id(emitter, env, e)?)),
         Expr_::Xml(e) => emit_xhp(env, pos, e),
-        Expr_::Callconv(e) => Err(Unrecoverable(
-            "emit_callconv: This should have been caught at emit_arg".into(),
+        Expr_::Callconv(e) => Err(unrecoverable(
+            "emit_callconv: This should have been caught at emit_arg",
         )),
         Expr_::Import(e) => emit_import(emitter, env, pos, &e.0, &e.1),
         Expr_::Omitted => Ok(instr::empty()),
-        Expr_::YieldBreak => Err(Unrecoverable(
-            "yield break should be in statement position".into(),
+        Expr_::YieldBreak => Err(unrecoverable("yield break should be in statement position")),
+        Expr_::YieldFrom(_) => Err(unrecoverable("complex yield_from expression")),
+        Expr_::Lfun(_) => Err(unrecoverable(
+            "expected Lfun to be converted to Efun during closure conversion emit_expr",
         )),
-        Expr_::YieldFrom(_) => Err(Unrecoverable("complex yield_from expression".into())),
-        Expr_::Lfun(_) => Err(Unrecoverable(
-            "expected Lfun to be converted to Efun during closure conversion emit_expr".into(),
+        Expr_::Suspend(_) => Err(unrecoverable(
+            "Codegen for 'suspend' operator is not supported",
+        )),
+        Expr_::List(_) => Err(emit_fatal::raise_fatal_parse(
+            pos,
+            "list() can only be used as an lvar. Did you mean to use tuple()?",
+        )),
+        Expr_::Any => Err(unrecoverable("Cannot codegen from an Any node")),
+        Expr_::Typename(_) => Err(unrecoverable("Typename should not occur in expressions")),
+        Expr_::This | Expr_::Lplaceholder(_) | Expr_::Dollardollar(_) => {
+            unimplemented!("TODO(hrust) Codegen after naming pass on AAST")
+        }
+        Expr_::PUAtom(_) | Expr_::PUIdentifier(_) => Err(unrecoverable(
+            "TODO(T35357243): Pocket Universes syntax must be erased by now",
         )),
         _ => unimplemented!("TODO(hrust)"),
     }
@@ -3669,6 +3682,35 @@ fn emit_null_coalesce_assignment(
     unimplemented!()
 }
 
+fn emit_short_circuit_op(e: &mut Emitter, env: &Env, pos: &Pos, expr: &tast::Expr) -> Result {
+    let its_true = e.label_gen_mut().next_regular();
+    let its_done = e.label_gen_mut().next_regular();
+    let jmp_instrs = emit_jmpnz(e, env, expr, &its_true)?;
+    Ok(if jmp_instrs.is_fallthrough {
+        InstrSeq::gather(vec![
+            jmp_instrs.instrs,
+            emit_pos(pos),
+            instr::false_(),
+            instr::jmp(its_done.clone()),
+            if jmp_instrs.is_label_used {
+                InstrSeq::gather(vec![instr::label(its_true), emit_pos(pos), instr::true_()])
+            } else {
+                instr::empty()
+            },
+            instr::label(its_done),
+        ])
+    } else {
+        InstrSeq::gather(vec![
+            jmp_instrs.instrs,
+            if jmp_instrs.is_label_used {
+                InstrSeq::gather(vec![instr::label(its_true), emit_pos(pos), instr::true_()])
+            } else {
+                instr::empty()
+            },
+        ])
+    })
+}
+
 fn emit_binop(
     e: &mut Emitter,
     env: &Env,
@@ -3677,7 +3719,14 @@ fn emit_binop(
 ) -> Result {
     use ast_defs::Bop as B;
     match op {
-        B::Ampamp | B::Barbar => unimplemented!("TODO(hrust)"),
+        B::Ampamp | B::Barbar => {
+            // TODO(hrust): avoid clone
+            let expr = tast::Expr(
+                Pos::make_none(),
+                tast::Expr_::mk_binop(op.clone(), e1.clone(), e2.clone()),
+            );
+            emit_short_circuit_op(e, env, pos, &expr)
+        }
         B::Eq(None) => emit_lval_op(e, env, pos, LValOp::Set, e1, Some(e2), false),
         B::Eq(Some(eop)) if eop.is_question_question() => {
             emit_null_coalesce_assignment(e, env, pos, e1, e2)

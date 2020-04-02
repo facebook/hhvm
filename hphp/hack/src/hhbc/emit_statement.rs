@@ -1491,14 +1491,16 @@ fn emit_yield_from_delegates(
 }
 
 pub fn emit_dropthrough_return(e: &mut Emitter, env: &mut Env) -> Result {
-    let return_instrs = emit_return(e, env)?;
-    let state = e.emit_state();
-    match state.default_dropthrough.as_ref() {
+    match e.emit_state().default_dropthrough.as_ref() {
         Some(instrs) => Ok(instrs.clone()),
-        None => Ok(emit_pos_then(
-            &(state.function_pos.last_char()),
-            InstrSeq::gather(vec![state.default_return_value.clone(), return_instrs]),
-        )),
+        None => {
+            let ret = emit_return(e, env)?;
+            let state = e.emit_state();
+            Ok(emit_pos_then(
+                &(state.function_pos.last_char()),
+                InstrSeq::gather(vec![state.default_return_value.clone(), ret]),
+            ))
+        }
     }
 }
 

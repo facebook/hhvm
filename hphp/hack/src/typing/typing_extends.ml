@@ -223,8 +223,8 @@ let check_xhp_attr_required env parent_class_elt class_elt on_error =
         false
       | (_, _) -> true
     in
-    let parent_attr = parent_class_elt.ce_xhp_attr in
-    let attr = class_elt.ce_xhp_attr in
+    let parent_attr = get_ce_flags_xhp_attr parent_class_elt.ce_flags in
+    let attr = get_ce_flags_xhp_attr class_elt.ce_flags in
     match (parent_attr, attr) with
     | (Some { xa_tag = parent_tag; _ }, Some { xa_tag = tag; _ })
       when is_less_strict (tag, parent_tag) ->
@@ -585,7 +585,6 @@ let default_constructor_ce class_ =
     }
   in
   {
-    ce_xhp_attr = None;
     ce_visibility = Vpublic;
     ce_type = lazy (mk (r, Tfun ft));
     ce_origin = name;
@@ -593,6 +592,7 @@ let default_constructor_ce class_ =
     ce_pos = lazy pos;
     ce_flags =
       make_ce_flags
+        ~xhp_attr:None
         ~abstract:false
         ~final:false
         ~const:false

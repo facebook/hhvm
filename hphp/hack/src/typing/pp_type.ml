@@ -623,16 +623,6 @@ and pp_class_elt : Format.formatter -> class_elt -> unit =
  fun fmt x ->
   Format.fprintf fmt "@[<2>{ ";
 
-  Format.fprintf fmt "@[%s =@ " "ce_xhp_attr";
-  (match x.ce_xhp_attr with
-  | None -> Format.pp_print_string fmt "None"
-  | Some x ->
-    Format.pp_print_string fmt "(Some ";
-    pp_xhp_attr fmt x;
-    Format.pp_print_string fmt ")");
-  Format.fprintf fmt "@]";
-  Format.fprintf fmt ";@ ";
-
   Format.fprintf fmt "@[%s =@ " "ce_visibility";
   ( Format.pp_print_string fmt
   @@

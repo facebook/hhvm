@@ -39,7 +39,7 @@ let element_to_class_elt
       elt_memoizelsb = memoizelsb;
       elt_abstract = abstract;
       elt_dynamicallycallable = dynamicallycallable;
-      elt_xhp_attr = ce_xhp_attr;
+      elt_xhp_attr = xhp_attr;
       elt_const = const;
       elt_lateinit = lateinit;
       elt_origin = ce_origin;
@@ -49,7 +49,6 @@ let element_to_class_elt
       elt_deprecated = ce_deprecated;
     } =
   {
-    ce_xhp_attr;
     ce_visibility;
     ce_origin;
     ce_type;
@@ -57,6 +56,7 @@ let element_to_class_elt
     ce_pos;
     ce_flags =
       make_ce_flags
+        ~xhp_attr
         ~abstract
         ~final
         ~const

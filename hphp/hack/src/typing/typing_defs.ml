@@ -11,7 +11,38 @@ open Hh_prelude
 open Typing_defs_flags
 include Typing_defs_core
 
-(* Accessesors for function type flags *)
+let xhp_attr_to_ce_flags xa =
+  match xa with
+  | None -> 0x0
+  | Some { xa_tag; xa_has_default } ->
+    Int.bit_or
+      ( if xa_has_default then
+        ce_flags_xa_has_default
+      else
+        0x0 )
+    @@
+    (match xa_tag with
+    | None -> ce_flags_xa_tag_none
+    | Some Required -> ce_flags_xa_tag_required
+    | Some Lateinit -> ce_flags_xa_tag_lateinit)
+
+let get_ce_flags_xhp_attr flags =
+  let tag_flags = Int.bit_and ce_flags_xa_tag_mask flags in
+  if Int.equal tag_flags 0 then
+    None
+  else
+    Some
+      {
+        xa_has_default = is_set ce_flags_xa_has_default flags;
+        xa_tag =
+          ( if Int.equal tag_flags ce_flags_xa_tag_none then
+            None
+          else if Int.equal tag_flags ce_flags_xa_tag_required then
+            Some Required
+          else
+            Some Lateinit );
+      }
+
 let get_ft_return_disposable ft = is_set ft.ft_flags ft_flags_return_disposable
 
 let get_ft_returns_void_to_rx ft =
@@ -87,7 +118,6 @@ let make_ft_flags
   flags
 
 type class_elt = {
-  ce_xhp_attr: xhp_attr option;
   ce_visibility: visibility;
   ce_type: decl_ty Lazy.t;
   ce_origin: string;  (** identifies the class from which this elt originates *)
@@ -979,6 +1009,7 @@ let get_ce_dynamicallycallable ce =
   is_set ce_flags_dynamicallycallable ce.ce_flags
 
 let make_ce_flags
+    ~xhp_attr
     ~abstract
     ~final
     ~override
@@ -998,4 +1029,5 @@ let make_ce_flags
   let flags = set_bit ce_flags_const const flags in
   let flags = set_bit ce_flags_lateinit lateinit flags in
   let flags = set_bit ce_flags_dynamicallycallable dynamicallycallable flags in
+  let flags = Int.bit_or flags (xhp_attr_to_ce_flags xhp_attr) in
   flags

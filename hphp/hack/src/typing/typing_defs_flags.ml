@@ -58,3 +58,21 @@ let ce_flags_const = 0x40
 let ce_flags_lateinit = 0x80
 
 let ce_flags_dynamicallycallable = 0x100
+
+(* Three bits used to encode optional XHP attr.
+ * Set 0x400 if xa_has_default=true
+ * Then encode xa_tag as follows:
+ *   None: 0x1800
+ *   Some Required: 0x0800
+ *   Some lateinit: 0x1000
+ * If attr is not present at all, then masking with 0x1800 will produce zero.
+ *)
+let ce_flags_xa_tag_mask = 0x1800
+
+let ce_flags_xa_has_default = 0x400
+
+let ce_flags_xa_tag_required = 0x800
+
+let ce_flags_xa_tag_lateinit = 0x1000
+
+let ce_flags_xa_tag_none = 0x1800

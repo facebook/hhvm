@@ -95,7 +95,6 @@ let shallow_method_to_class_elt child_class mro subst meth : class_elt =
       end
   in
   {
-    ce_xhp_attr = None;
     ce_visibility = visibility;
     ce_origin = mro.mro_name;
     ce_type = ty;
@@ -103,6 +102,7 @@ let shallow_method_to_class_elt child_class mro subst meth : class_elt =
     ce_pos = lazy pos;
     ce_flags =
       make_ce_flags
+        ~xhp_attr:None
         ~synthesized:mro.mro_via_req_extends
         ~abstract
         ~final
@@ -124,7 +124,7 @@ let shallow_method_to_telt child_class mro subst meth : tagged_elt =
 let shallow_prop_to_telt child_class mro subst prop : tagged_elt =
   let {
     sp_const = const;
-    sp_xhp_attr = ce_xhp_attr;
+    sp_xhp_attr = xhp_attr;
     sp_lateinit = lateinit;
     sp_lsb = lsb;
     sp_name;
@@ -156,7 +156,6 @@ let shallow_prop_to_telt child_class mro subst prop : tagged_elt =
     inherit_when_private = mro.mro_copy_private_members;
     elt =
       {
-        ce_xhp_attr;
         ce_visibility = visibility;
         ce_origin = mro.mro_name;
         ce_type = ty;
@@ -164,6 +163,7 @@ let shallow_prop_to_telt child_class mro subst prop : tagged_elt =
         ce_pos = lazy (fst sp_name);
         ce_flags =
           make_ce_flags
+            ~xhp_attr
             ~lsb
             ~const
             ~lateinit

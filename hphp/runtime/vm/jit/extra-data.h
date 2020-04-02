@@ -1567,23 +1567,11 @@ struct RaiseClsMethPropConvertNoticeData : IRExtraData {
   bool isSProp;
 };
 
-struct ThrowArrayIndexExceptionData : IRExtraData {
-  explicit ThrowArrayIndexExceptionData(bool isInOut) : isInOut(isInOut) {}
+struct ArrayGetExceptionData : IRExtraData {
+  explicit ArrayGetExceptionData(bool isInOut) : isInOut(isInOut) {}
 
   std::string show() const {
-    if (isInOut) return "inout";
-    return "none";
-  }
-
-  bool isInOut;
-};
-
-struct ThrowArrayKeyExceptionData : IRExtraData {
-  explicit ThrowArrayKeyExceptionData(bool isInOut) : isInOut(isInOut) {}
-
-  std::string show() const {
-    if (isInOut) return "inout";
-    return "none";
+    return isInOut ? "inout" : "none";
   }
 
   bool isInOut;
@@ -1766,8 +1754,8 @@ X(RaiseClsMethPropConvertNotice,RaiseClsMethPropConvertNoticeData);
 X(RaiseTooManyArg,              FuncData);
 X(ThrowParamInOutMismatch,      ParamData);
 X(ThrowParamInOutMismatchRange, CheckInOutsData);
-X(ThrowArrayIndexException,     ThrowArrayIndexExceptionData);
-X(ThrowArrayKeyException,       ThrowArrayKeyExceptionData);
+X(ThrowArrayIndexException,     ArrayGetExceptionData);
+X(ThrowArrayKeyException,       ArrayGetExceptionData);
 X(ThrowParameterWrongType,      FuncArgTypeData);
 X(CheckClsReifiedGenericMismatch,
                                 ClassData);

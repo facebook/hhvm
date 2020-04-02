@@ -2950,108 +2950,51 @@ SSATmp* simplifyReservePackedArrayDataNewElem(State& env,
   return nullptr;
 }
 
-SSATmp* arrIntKeyImpl(State& env, const IRInstruction* inst) {
+SSATmp* arrKeyImpl(State& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
-  auto const idx = inst->src(1);
+  auto const key = inst->src(1);
   assertx(arr->hasConstVal(TArr));
-  assertx(idx->hasConstVal(TInt));
+  assertx(key->hasConstVal(TInt|TStr));
   assertx(arr->arrVal()->isPHPArrayType());
-  auto const rval = arr->arrVal()->rval(idx->intVal());
-  return rval ? cns(env, rval.tv()) : nullptr;
-}
-
-SSATmp* arrStrKeyImpl(State& env, const IRInstruction* inst) {
-  auto const arr = inst->src(0);
-  auto const idx = inst->src(1);
-  assertx(arr->hasConstVal(TArr));
-  assertx(idx->hasConstVal(TStr));
-  assertx(arr->arrVal()->isPHPArrayType());
-
-  auto const rval = arr->arrVal()->rval(idx->strVal());
+  auto const rval = key->isA(TInt) ? arr->arrVal()->rval(key->intVal())
+                                   : arr->arrVal()->rval(key->strVal());
   return rval ? cns(env, rval.tv()) : nullptr;
 }
 
 SSATmp* simplifyArrayGet(State& env, const IRInstruction* inst) {
   if (inst->src(0)->hasConstVal() && inst->src(1)->hasConstVal()) {
+    if (auto const result = arrKeyImpl(env, inst)) return result;
     auto const mode = inst->extra<ArrayGet>()->mode;
-    if (inst->src(1)->type() <= TInt) {
-      if (auto const result = arrIntKeyImpl(env, inst)) return result;
-      if (mode == MOpMode::InOut || mode == MOpMode::Warn) {
-        gen(
-          env,
-          ThrowArrayIndexException,
-          ThrowArrayIndexExceptionData { mode == MOpMode::InOut },
-          inst->taken(),
-          inst->src(1)
-        );
-        return cns(env, TBottom);
-      }
-      return cns(env, TInitNull);
-    }
-    if (inst->src(1)->type() <= TStr) {
-      if (auto const result = arrStrKeyImpl(env, inst)) return result;
-      if (mode == MOpMode::InOut || mode == MOpMode::Warn) {
-        gen(
-          env,
-          ThrowArrayKeyException,
-          ThrowArrayKeyExceptionData { mode == MOpMode::InOut },
-          inst->taken(),
-          inst->src(1)
-        );
-        return cns(env, TBottom);
-      }
-      return cns(env, TInitNull);
-    }
+    if (mode == MOpMode::None) return cns(env, TInitNull);
+    auto const data = ArrayGetExceptionData { mode == MOpMode::InOut };
+    auto const op = inst->src(1)->isA(TInt) ? ThrowArrayIndexException
+                                            : ThrowArrayKeyException;
+    gen(env, op, data, inst->taken(), inst->src(1));
+    return cns(env, TBottom);
   }
   return nullptr;
 }
 
 SSATmp* simplifyArrayIsset(State& env, const IRInstruction* inst) {
   if (inst->src(0)->hasConstVal() && inst->src(1)->hasConstVal()) {
-    if (inst->src(1)->type() <= TInt) {
-      if (auto const result = arrIntKeyImpl(env, inst)) {
-        return cns(env, !result->isA(TInitNull));
-      }
-      return cns(env, false);
-    }
-    if (inst->src(1)->type() <= TStr) {
-      if (auto const result = arrStrKeyImpl(env, inst)) {
-        return cns(env, !result->isA(TInitNull));
-      }
-      return cns(env, false);
-    }
+    auto const result = arrKeyImpl(env, inst);
+    return cns(env, result && !result->isA(TInitNull));
   }
   return nullptr;
 }
 
 SSATmp* simplifyArrayIdx(State& env, const IRInstruction* inst) {
   if (inst->src(0)->hasConstVal() && inst->src(1)->hasConstVal()) {
-    if (inst->src(1)->isA(TInt)) {
-      if (auto const result = arrIntKeyImpl(env, inst)) {
-        return result;
-      }
-      return inst->src(2);
-    }
-    if (inst->src(1)->isA(TStr)) {
-      if (auto const result = arrStrKeyImpl(env, inst)) {
-        return result;
-      }
-      return inst->src(2);
-    }
+    auto const result = arrKeyImpl(env, inst);
+    return result ? result : inst->src(2);
   }
   return nullptr;
 }
 
 SSATmp* simplifyAKExistsArr(State& env, const IRInstruction* inst) {
   if (inst->src(0)->hasConstVal() && inst->src(1)->hasConstVal()) {
-    if (inst->src(1)->isA(TInt)) {
-      if (arrIntKeyImpl(env, inst)) {
-        return cns(env, true);
-      }
-    } else if (inst->src(1)->isA(TStr)) {
-      if (arrStrKeyImpl(env, inst)) return cns(env, true);
-    }
-    return cns(env, false);
+    auto const result = arrKeyImpl(env, inst);
+    return cns(env, (bool)result);
   }
   return nullptr;
 }

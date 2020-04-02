@@ -657,8 +657,8 @@ SSATmp* emitPackedArrayGet(IRGS& env, SSATmp* base, SSATmp* key, MOpMode mode,
   if (mode == MOpMode::Warn || mode == MOpMode::InOut) {
     ifThen(env, check, [&] {
       hint(env, Block::Hint::Unlikely);
-      gen(env, ThrowArrayIndexException,
-          ThrowArrayIndexExceptionData { mode == MOpMode::InOut }, key);
+      auto const data = ArrayGetExceptionData { mode == MOpMode::InOut };
+      gen(env, ThrowArrayIndexException, data, key);
     });
     return result();
   }

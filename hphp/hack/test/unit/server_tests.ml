@@ -111,10 +111,13 @@ let test_deferred_decl_should_defer () =
 let foo_contents =
   {|<?hh //strict
   class Foo {
-    public function foo (Bar $b): int {
+    public function foo (Bar $b) : int {
       return $b->toString();
     }
   }
+
+  function f1(Foo $x) : void { }
+  function f2(foo $x) : void { }
 |}
 
 let bar_contents =
@@ -287,9 +290,9 @@ let test_compute_tast_counting () =
   in
 
   Asserter.Int_asserter.assert_equals
-    77
+    125
     (Telemetry_test_utils.int_exn telemetry "decl_accessors.count")
-    "There should be 77 decl_accessor_count for shared_mem provider";
+    "There should be this many decl_accessor_count for shared_mem provider";
   Asserter.Int_asserter.assert_equals
     0
     (Telemetry_test_utils.int_exn telemetry "disk_cat.count")
@@ -314,9 +317,9 @@ let test_compute_tast_counting () =
         Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry
       in
       Asserter.Int_asserter.assert_equals
-        37
+        63
         (Telemetry_test_utils.int_exn telemetry "decl_accessors.count")
-        "There should be 37 decl_accessor_count for local_memory provider";
+        "There should be this many decl_accessor_count for local_memory provider";
       Asserter.Int_asserter.assert_equals
         0
         (Telemetry_test_utils.int_exn telemetry "disk_cat.count")

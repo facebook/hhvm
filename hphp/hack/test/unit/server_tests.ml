@@ -135,7 +135,10 @@ type server_setup = {
   nonexistent_path: Relative_path.t;
 }
 
-let server_setup_for_deferral_tests () : server_setup =
+(** This lays down some files on disk. Sets up a forward naming table.
+Sets up the provider's reverse naming table. Returns an empty context, plus
+information about the files on disk. *)
+let server_setup () : server_setup =
   (* Set up a simple fake repo *)
   Disk.mkdir_p @@ in_fake_dir "root/";
   Relative_path.set_path_prefix
@@ -203,7 +206,7 @@ let server_setup_for_deferral_tests () : server_setup =
   for files that have undeclared dependencies, UNLESS we've already deferred
   those files a certain number of times. *)
 let test_process_file_deferring () =
-  let { ctx; foo_path; _ } = server_setup_for_deferral_tests () in
+  let { ctx; foo_path; _ } = server_setup () in
   let file = Typing_check_service.{ path = foo_path; deferred_count = 0 } in
   let dynamic_view_files = Relative_path.Set.empty in
   let errors = Errors.empty in
@@ -271,8 +274,7 @@ let test_process_file_deferring () =
 (* This test verifies that the deferral/counting machinery works for
    ProviderUtils.compute_tast_and_errors_unquarantined. *)
 let test_compute_tast_counting () =
-  let { ctx; foo_path; foo_contents; _ } = server_setup_for_deferral_tests () in
-  EventLogger.init_fake ();
+  let { ctx; foo_path; foo_contents; _ } = server_setup () in
 
   let (ctx, entry) =
     Provider_context.add_entry_from_file_contents
@@ -367,80 +369,70 @@ let test_should_enable_deferring () =
 
 (* This test verifies quarantine. *)
 let test_quarantine () =
-  EventLogger.init_fake ();
-  Utils.with_context
-    ~enter:Provider_backend.set_local_memory_backend_with_defaults
-    ~exit:Provider_backend.set_shared_memory_backend
-    ~do_:(fun () ->
-      let { ctx; foo_path; foo_contents; nonexistent_path; _ } =
-        server_setup_for_deferral_tests ()
-      in
+  Provider_backend.set_local_memory_backend_with_defaults ();
+  let { ctx; foo_path; foo_contents; nonexistent_path; _ } = server_setup () in
 
-      (* simple case *)
-      let (ctx, _foo_entry) =
-        Provider_context.add_entry_from_file_contents
-          ~ctx
-          ~path:foo_path
-          ~contents:foo_contents
-      in
-      let can_quarantine =
-        try
-          Provider_utils.respect_but_quarantine_unsaved_changes
-            ~ctx
-            ~f:(fun () -> "ok")
-        with e -> e |> Exception.wrap |> Exception.to_string
-      in
-      Asserter.String_asserter.assert_equals
-        "ok"
-        can_quarantine
-        "Should be able to quarantine foo";
+  (* simple case *)
+  let (ctx, _foo_entry) =
+    Provider_context.add_entry_from_file_contents
+      ~ctx
+      ~path:foo_path
+      ~contents:foo_contents
+  in
+  let can_quarantine =
+    try
+      Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+          "ok")
+    with e -> e |> Exception.wrap |> Exception.to_string
+  in
+  Asserter.String_asserter.assert_equals
+    "ok"
+    can_quarantine
+    "Should be able to quarantine foo";
 
-      (* repeat of simple case *)
-      let can_quarantine =
-        try
-          Provider_utils.respect_but_quarantine_unsaved_changes
-            ~ctx
-            ~f:(fun () -> "ok")
-        with e -> e |> Exception.wrap |> Exception.to_string
-      in
-      Asserter.String_asserter.assert_equals
-        "ok"
-        can_quarantine
-        "Should be able to quarantine foo a second time";
+  (* repeat of simple case *)
+  let can_quarantine =
+    try
+      Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+          "ok")
+    with e -> e |> Exception.wrap |> Exception.to_string
+  in
+  Asserter.String_asserter.assert_equals
+    "ok"
+    can_quarantine
+    "Should be able to quarantine foo a second time";
 
-      (* add a non-existent file; should fail *)
-      let (ctx2, _nonexistent_entry) =
-        Provider_context.add_entry_from_file_contents
-          ~ctx
-          ~path:nonexistent_path
-          ~contents:""
-      in
-      let can_quarantine =
-        try
-          Provider_utils.respect_but_quarantine_unsaved_changes
-            ~ctx:ctx2
-            ~f:(fun () -> "ok")
-        with e -> e |> Exception.wrap |> Exception.to_string
-      in
-      Asserter.String_asserter.assert_equals
-        "ok"
-        can_quarantine
-        "Should be able to quarantine nonexistent_file";
+  (* add a non-existent file; should fail *)
+  let (ctx2, _nonexistent_entry) =
+    Provider_context.add_entry_from_file_contents
+      ~ctx
+      ~path:nonexistent_path
+      ~contents:""
+  in
+  let can_quarantine =
+    try
+      Provider_utils.respect_but_quarantine_unsaved_changes
+        ~ctx:ctx2
+        ~f:(fun () -> "ok")
+    with e -> e |> Exception.wrap |> Exception.to_string
+  in
+  Asserter.String_asserter.assert_equals
+    "ok"
+    can_quarantine
+    "Should be able to quarantine nonexistent_file";
 
-      (* repeat of simple case, back with original ctx *)
-      let can_quarantine =
-        try
-          Provider_utils.respect_but_quarantine_unsaved_changes
-            ~ctx
-            ~f:(fun () -> "ok")
-        with e -> e |> Exception.wrap |> Exception.to_string
-      in
-      Asserter.String_asserter.assert_equals
-        "ok"
-        can_quarantine
-        "Should be able to quarantine foo a third time";
+  (* repeat of simple case, back with original ctx *)
+  let can_quarantine =
+    try
+      Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+          "ok")
+    with e -> e |> Exception.wrap |> Exception.to_string
+  in
+  Asserter.String_asserter.assert_equals
+    "ok"
+    can_quarantine
+    "Should be able to quarantine foo a third time";
 
-      ());
   true
 
 let tests =
@@ -455,6 +447,7 @@ let tests =
   ]
 
 let () =
+  EventLogger.init_fake ();
   (* The parsing service needs shared memory to be set up *)
   let config =
     SharedMem.
@@ -470,4 +463,12 @@ let () =
       }
   in
   let (_ : SharedMem.handle) = SharedMem.init config ~num_workers:0 in
-  Unit_test.run_all tests
+  tests
+  |> List.map ~f:(fun (name, do_) ->
+         ( name,
+           fun () ->
+             Utils.with_context
+               ~enter:Provider_backend.set_shared_memory_backend
+               ~exit:(fun () -> ())
+               ~do_ ))
+  |> Unit_test.run_all

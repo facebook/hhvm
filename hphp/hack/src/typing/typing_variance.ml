@@ -361,7 +361,7 @@ and class_method tcopt root static env (_method_name, method_) =
   | _ ->
     (* Final methods can't be overridden, so it's ok to use covariant
        and contravariant type parameters in any position in the type *)
-    if method_.ce_final && phys_equal static `Static then
+    if get_ce_final method_ && phys_equal static `Static then
       ()
     else (
       match method_.ce_type with

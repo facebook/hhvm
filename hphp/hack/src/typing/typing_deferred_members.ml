@@ -136,7 +136,8 @@ and trait_props env c props =
               match fst cstr with
               | None -> SSet.union members acc
               | Some cstr
-                when String.( <> ) cstr.ce_origin trait || cstr.ce_abstract ->
+                when String.( <> ) cstr.ce_origin trait || get_ce_abstract cstr
+                ->
                 SSet.union members acc
               | _ when Option.is_some c.sc_constructor -> SSet.union members acc
               | _ -> acc

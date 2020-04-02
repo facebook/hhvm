@@ -47,7 +47,7 @@ class visitor =
      *)
     method get_class_elt_types env class_ cid elts =
       let is_visible (_, elt) =
-        Tast_env.is_visible env (elt.ce_visibility, elt.ce_lsb) cid class_
+        Tast_env.is_visible env (elt.ce_visibility, get_ce_lsb elt) cid class_
       in
       elts
       |> List.filter ~f:is_visible

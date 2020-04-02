@@ -15,14 +15,14 @@ module Env = Tast_env
 (* Requires id to be a property *)
 let check_static_const_prop tenv class_ (pos, id) =
   let scprop = Typing_env.get_static_member false tenv class_ id in
-  Option.iter scprop ~f:(fun { ce_const; _ } ->
-      if ce_const then Errors.mutating_const_property pos)
+  Option.iter scprop ~f:(fun ce ->
+      if get_ce_const ce then Errors.mutating_const_property pos)
 
 (* Requires id to be a property *)
 let check_const_prop env tenv class_ (pos, id) cty =
   let cprop = Typing_env.get_member false tenv class_ id in
-  Option.iter cprop ~f:(fun { ce_const; _ } ->
-      if ce_const then
+  Option.iter cprop ~f:(fun ce ->
+      if get_ce_const ce then
         if
           not
             ( Env.get_inside_constructor env

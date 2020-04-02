@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b35f05cfbc13eb755f9e0f2de1424b76>>
+// @generated SignedSource<<83d21fdf67ee988f0b4c9f38b05fd37e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -32,34 +32,15 @@ pub use typing_defs_core::*;
     Serialize
 )]
 pub struct ClassElt {
-    pub abstract_: bool,
-    pub final_: bool,
     pub xhp_attr: Option<XhpAttr>,
-    /// This field has different meanings in shallow mode and eager mode:
-    /// In shallow mode, true if this method has attribute __Override.
-    /// In eager mode, true if this method is originally defined in a trait,
-    /// AND has the override attribute, AND the trait does not inherit any
-    /// other method of that name.
-    pub override_: bool,
     pub dynamicallycallable: bool,
-    /// true if this static property has attribute __LSB
-    pub lsb: bool,
-    /// true if this method has attribute __MemoizeLSB
-    pub memoizelsb: bool,
-    /// true if this elt arose from require-extends or other mechanisms
-    /// of hack "synthesizing" methods that were not written by the
-    /// programmer. The eventual purpose of this is to make sure that
-    /// elts that *are* written by the programmer take precedence over
-    /// synthesized elts.
-    pub synthesized: bool,
     pub visibility: Visibility,
-    pub const_: bool,
-    pub lateinit: bool,
     pub type_: lazy::Lazy<Ty>,
     /// identifies the class from which this elt originates
     pub origin: String,
     pub deprecated: Option<String>,
     pub pos: lazy::Lazy<pos::Pos>,
+    pub flags: isize,
 }
 
 #[derive(

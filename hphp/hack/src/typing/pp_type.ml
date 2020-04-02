@@ -623,11 +623,6 @@ and pp_class_elt : Format.formatter -> class_elt -> unit =
  fun fmt x ->
   Format.fprintf fmt "@[<2>{ ";
 
-  Format.fprintf fmt "@[%s =@ " "ce_final";
-  Format.fprintf fmt "%B" x.ce_final;
-  Format.fprintf fmt "@]";
-  Format.fprintf fmt ";@ ";
-
   Format.fprintf fmt "@[%s =@ " "ce_xhp_attr";
   (match x.ce_xhp_attr with
   | None -> Format.pp_print_string fmt "None"
@@ -635,26 +630,6 @@ and pp_class_elt : Format.formatter -> class_elt -> unit =
     Format.pp_print_string fmt "(Some ";
     pp_xhp_attr fmt x;
     Format.pp_print_string fmt ")");
-  Format.fprintf fmt "@]";
-  Format.fprintf fmt ";@ ";
-
-  Format.fprintf fmt "@[%s =@ " "ce_override";
-  Format.fprintf fmt "%B" x.ce_override;
-  Format.fprintf fmt "@]";
-  Format.fprintf fmt ";@ ";
-
-  Format.fprintf fmt "@[%s =@ " "ce_lsb";
-  Format.fprintf fmt "%B" x.ce_lsb;
-  Format.fprintf fmt "@]";
-  Format.fprintf fmt ";@ ";
-
-  Format.fprintf fmt "@[%s =@ " "ce_memoizelsb";
-  Format.fprintf fmt "%B" x.ce_memoizelsb;
-  Format.fprintf fmt "@]";
-  Format.fprintf fmt ";@ ";
-
-  Format.fprintf fmt "@[%s =@ " "ce_synthesized";
-  Format.fprintf fmt "%B" x.ce_synthesized;
   Format.fprintf fmt "@]";
   Format.fprintf fmt ";@ ";
 
@@ -668,11 +643,6 @@ and pp_class_elt : Format.formatter -> class_elt -> unit =
   Format.fprintf fmt "@]";
   Format.fprintf fmt ";@ ";
 
-  Format.fprintf fmt "@[%s =@ " "ce_const";
-  Format.fprintf fmt "%B" x.ce_const;
-  Format.fprintf fmt "@]";
-  Format.fprintf fmt ";@ ";
-
   Format.fprintf fmt "@[%s =@ " "ce_type";
   if Lazy.is_val x.ce_type then
     pp_ty fmt (Lazy.force x.ce_type)
@@ -683,6 +653,61 @@ and pp_class_elt : Format.formatter -> class_elt -> unit =
 
   Format.fprintf fmt "@[%s =@ " "ce_origin";
   Format.fprintf fmt "%S" x.ce_origin;
+  Format.fprintf fmt "@]";
+  Format.fprintf fmt ";@ ";
+
+  let pp_ce_flags fmt ce =
+    Format.fprintf fmt "@[<2>(%s@ " "make_ce_flags";
+
+    Format.fprintf fmt "@[~%s:" "abstract";
+    Format.fprintf fmt "%B" (get_ce_abstract ce);
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt "@ ";
+
+    Format.fprintf fmt "@[~%s:" "final";
+    Format.fprintf fmt "%B" (get_ce_final ce);
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt "@ ";
+
+    Format.fprintf fmt "@[~%s:" "override";
+    Format.fprintf fmt "%B" (get_ce_override ce);
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt "@ ";
+
+    Format.fprintf fmt "@[~%s:" "lsb";
+    Format.fprintf fmt "%B" (get_ce_lsb ce);
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt "@ ";
+
+    Format.fprintf fmt "@[~%s:" "memoizelsb";
+    Format.fprintf fmt "%B" (get_ce_memoizelsb ce);
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt "@ ";
+
+    Format.fprintf fmt "@[~%s:" "synthesized";
+    Format.fprintf fmt "%B" (get_ce_synthesized ce);
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt "@ ";
+
+    Format.fprintf fmt "@[~%s:" "const";
+    Format.fprintf fmt "%B" (get_ce_const ce);
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt "@ ";
+
+    Format.fprintf fmt "@[~%s:" "lateinit";
+    Format.fprintf fmt "%B" (get_ce_lateinit ce);
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt "@ ";
+
+    Format.fprintf fmt "@[~%s:" "dynamicallycallable";
+    Format.fprintf fmt "%B" (get_ce_dynamicallycallable ce);
+    Format.fprintf fmt "@]";
+
+    Format.fprintf fmt ")@]"
+  in
+
+  Format.fprintf fmt "@[%s =@ " "ce_flags";
+  pp_ce_flags fmt x;
   Format.fprintf fmt "@]";
 
   Format.fprintf fmt "@ }@]"

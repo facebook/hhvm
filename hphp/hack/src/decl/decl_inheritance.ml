@@ -141,7 +141,7 @@ let props ~static child_class_name lin =
     them as non-private here. *)
 let is_private elt =
   match elt.ce_visibility with
-  | Vprivate _ when elt.ce_lsb -> false
+  | Vprivate _ when get_ce_lsb elt -> false
   | Vprivate _ -> true
   | Vpublic
   | Vprotected _ ->
@@ -178,8 +178,8 @@ let should_use_ancestor_sig child_class_name descendant_sig ancestor_sig =
      even if it is abstract and an ancestor member is concrete. *)
   String.( <> ) child_class_name descendant_sig.ce_origin
   (* Otherwise, concrete members take priority over abstract members. *)
-  && (not ancestor_sig.ce_abstract)
-  && descendant_sig.ce_abstract
+  && (not (get_ce_abstract ancestor_sig))
+  && get_ce_abstract descendant_sig
 
 (* NB: Update [is_elt_canonical] below when changing this function. *)
 let update_descendant_vis descendant_sig ancestor_sig =
@@ -208,7 +208,8 @@ let merge_elts child_class_name ~earlier:descendant_sig ~later:ancestor_sig =
 let is_elt_canonical child_class_name elt =
   match elt.ce_visibility with
   | Vprotected _ -> false
-  | _ -> String.equal child_class_name elt.ce_origin || not elt.ce_abstract
+  | _ ->
+    String.equal child_class_name elt.ce_origin || not (get_ce_abstract elt)
 
 let make_elt_cache class_name seq =
   LSTable.make

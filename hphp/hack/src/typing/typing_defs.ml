@@ -87,31 +87,13 @@ let make_ft_flags
   flags
 
 type class_elt = {
-  ce_abstract: bool;
-  ce_final: bool;
   ce_xhp_attr: xhp_attr option;
-  ce_override: bool;
-      (** This field has different meanings in shallow mode and eager mode:
-       * In shallow mode, true if this method has attribute __Override.
-       * In eager mode, true if this method is originally defined in a trait,
-       * AND has the override attribute, AND the trait does not inherit any
-       * other method of that name. *)
-  ce_dynamicallycallable: bool;
-  ce_lsb: bool;  (** true if this static property has attribute __LSB *)
-  ce_memoizelsb: bool;  (** true if this method has attribute __MemoizeLSB *)
-  ce_synthesized: bool;
-      (** true if this elt arose from require-extends or other mechanisms
-          of hack "synthesizing" methods that were not written by the
-          programmer. The eventual purpose of this is to make sure that
-          elts that *are* written by the programmer take precedence over
-          synthesized elts. *)
   ce_visibility: visibility;
-  ce_const: bool;
-  ce_lateinit: bool;
   ce_type: decl_ty Lazy.t;
   ce_origin: string;  (** identifies the class from which this elt originates *)
   ce_deprecated: string option;
   ce_pos: Pos.t Lazy.t;
+  ce_flags: int;
 }
 
 and fun_elt = {
@@ -976,3 +958,44 @@ let equal_fun_elt fe1 fe2 =
   Option.equal String.equal fe1.fe_deprecated fe2.fe_deprecated
   && equal_decl_ty fe1.fe_type fe2.fe_type
   && Pos.equal fe1.fe_pos fe2.fe_pos
+
+let get_ce_abstract ce = is_set ce_flags_abstract ce.ce_flags
+
+let get_ce_final ce = is_set ce_flags_final ce.ce_flags
+
+let get_ce_override ce = is_set ce_flags_override ce.ce_flags
+
+let get_ce_lsb ce = is_set ce_flags_lsb ce.ce_flags
+
+let get_ce_memoizelsb ce = is_set ce_flags_memoizelsb ce.ce_flags
+
+let get_ce_synthesized ce = is_set ce_flags_synthesized ce.ce_flags
+
+let get_ce_const ce = is_set ce_flags_const ce.ce_flags
+
+let get_ce_lateinit ce = is_set ce_flags_lateinit ce.ce_flags
+
+let get_ce_dynamicallycallable ce =
+  is_set ce_flags_dynamicallycallable ce.ce_flags
+
+let make_ce_flags
+    ~abstract
+    ~final
+    ~override
+    ~lsb
+    ~memoizelsb
+    ~synthesized
+    ~const
+    ~lateinit
+    ~dynamicallycallable =
+  let flags = 0 in
+  let flags = set_bit ce_flags_abstract abstract flags in
+  let flags = set_bit ce_flags_final final flags in
+  let flags = set_bit ce_flags_override override flags in
+  let flags = set_bit ce_flags_lsb lsb flags in
+  let flags = set_bit ce_flags_memoizelsb memoizelsb flags in
+  let flags = set_bit ce_flags_synthesized synthesized flags in
+  let flags = set_bit ce_flags_const const flags in
+  let flags = set_bit ce_flags_lateinit lateinit flags in
+  let flags = set_bit ce_flags_dynamicallycallable dynamicallycallable flags in
+  flags

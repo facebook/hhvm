@@ -61,7 +61,7 @@ let check_trait_override_annotations env cls ~static =
       (Cls.methods, Cls.all_inherited_methods)
   in
   List.iter (methods cls) (fun (id, meth) ->
-      if not meth.ce_override then
+      if not (get_ce_override meth) then
         ()
       else if String.equal meth.ce_origin (Cls.name cls) then
         ()

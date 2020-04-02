@@ -32,16 +32,16 @@ let rec apply_substs substs class_context (pos, ty) =
 let element_to_class_elt
     (ce_pos, ce_type)
     {
-      elt_final = ce_final;
-      elt_synthesized = ce_synthesized;
-      elt_override = ce_override;
-      elt_dynamicallycallable = ce_dynamicallycallable;
-      elt_lsb = ce_lsb;
-      elt_memoizelsb = ce_memoizelsb;
-      elt_abstract = ce_abstract;
+      elt_final = final;
+      elt_synthesized = synthesized;
+      elt_override = override;
+      elt_lsb = lsb;
+      elt_memoizelsb = memoizelsb;
+      elt_abstract = abstract;
+      elt_dynamicallycallable = dynamicallycallable;
       elt_xhp_attr = ce_xhp_attr;
-      elt_const = ce_const;
-      elt_lateinit = ce_lateinit;
+      elt_const = const;
+      elt_lateinit = lateinit;
       elt_origin = ce_origin;
       elt_visibility = ce_visibility;
       elt_reactivity = _;
@@ -49,21 +49,23 @@ let element_to_class_elt
       elt_deprecated = ce_deprecated;
     } =
   {
-    ce_final;
     ce_xhp_attr;
-    ce_const;
-    ce_lateinit;
-    ce_override;
-    ce_dynamicallycallable;
-    ce_lsb;
-    ce_memoizelsb;
-    ce_abstract;
-    ce_synthesized;
     ce_visibility;
     ce_origin;
     ce_type;
     ce_deprecated;
     ce_pos;
+    ce_flags =
+      make_ce_flags
+        ~abstract
+        ~final
+        ~const
+        ~synthesized
+        ~lateinit
+        ~override
+        ~lsb
+        ~memoizelsb
+        ~dynamicallycallable;
   }
 
 let to_class_type

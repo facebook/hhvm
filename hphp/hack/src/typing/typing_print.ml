@@ -1492,7 +1492,7 @@ module PrintClass = struct
   let tparam_list ctx l =
     List.fold_right l ~f:(fun x acc -> tparam ctx x ^ ", " ^ acc) ~init:""
 
-  let class_elt ctx { ce_visibility; ce_synthesized; ce_type = (lazy ty); _ } =
+  let class_elt ctx ({ ce_visibility; ce_type = (lazy ty); _ } as ce) =
     let vis =
       match ce_visibility with
       | Vpublic -> "public"
@@ -1500,7 +1500,7 @@ module PrintClass = struct
       | Vprotected _ -> "protected"
     in
     let synth =
-      if ce_synthesized then
+      if get_ce_synthesized ce then
         "synthetic "
       else
         ""

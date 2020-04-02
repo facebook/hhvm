@@ -39,3 +39,22 @@ let ft_flags_param_borrowed_mutable = 0x80
 let ft_flags_param_maybe_mutable = 0xC0
 
 let ft_flags_instantiated_targs = 0x100
+
+(* Class element flags *)
+let ce_flags_abstract = 0x1
+
+let ce_flags_final = 0x2
+
+let ce_flags_override = 0x4
+
+let ce_flags_lsb = 0x8
+
+let ce_flags_memoizelsb = 0x10
+
+let ce_flags_synthesized = 0x20
+
+let ce_flags_const = 0x40
+
+let ce_flags_lateinit = 0x80
+
+let ce_flags_dynamicallycallable = 0x100

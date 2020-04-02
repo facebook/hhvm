@@ -681,7 +681,7 @@ and check_const_trait_members pos env use_list =
   match Env.get_class env trait with
   | Some c when Ast_defs.(equal_class_kind (Cls.kind c) Ctrait) ->
     List.iter (Cls.props c) (fun (x, ce) ->
-        if not ce.ce_const then Errors.trait_prop_const_class pos x)
+        if not (get_ce_const ce) then Errors.trait_prop_const_class pos x)
   | _ -> ()
 
 let shallow_decl_enabled (ctx : Provider_context.t) : bool =
@@ -781,7 +781,7 @@ and class_def_ env c tc =
        * override_per_trait error needs emit. This emission is deferred
        * until Typing to ensure that this method has been added to
        * Decl_heap *)
-      if ce.ce_override then
+      if get_ce_override ce then
         let pos = method_pos ~is_static ce.ce_origin id in
         Errors.override_per_trait c.c_name id pos
     in
@@ -1034,13 +1034,13 @@ and check_static_class_element get_dyn_elt element_name static_pos ~elt_type =
 and check_extend_abstract_meth ~is_final p seq =
   List.iter seq (fun (x, ce) ->
       match ce.ce_type with
-      | (lazy ty) when ce.ce_abstract && is_fun ty ->
+      | (lazy ty) when get_ce_abstract ce && is_fun ty ->
         Errors.implement_abstract ~is_final p (get_pos ty) "method" x
       | _ -> ())
 
 and check_extend_abstract_prop ~is_final p seq =
   List.iter seq (fun (x, ce) ->
-      if ce.ce_abstract then
+      if get_ce_abstract ce then
         let ce_pos = Lazy.force ce.ce_type |> get_pos in
         Errors.implement_abstract ~is_final p ce_pos "property" x)
 

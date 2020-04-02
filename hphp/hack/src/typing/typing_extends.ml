@@ -31,9 +31,7 @@ let is_private = function
   | { ce_visibility = Vprivate _; _ } -> true
   | _ -> false
 
-let is_lsb = function
-  | { ce_lsb = true; _ } -> true
-  | _ -> false
+let is_lsb ce = get_ce_lsb ce
 
 (*****************************************************************************)
 (* Given a map of members, check that the overriding is correct.
@@ -135,10 +133,10 @@ let check_final_method member_source parent_class_elt class_elt on_error =
    * in the decl phase *)
   let is_method = is_method member_source in
   let is_override =
-    parent_class_elt.ce_final
+    get_ce_final parent_class_elt
     && String.( <> ) parent_class_elt.ce_origin class_elt.ce_origin
   in
-  if is_method && is_override && not class_elt.ce_synthesized then
+  if is_method && is_override && not (get_ce_synthesized class_elt) then
     (* we have a final method being overridden by a user-declared method *)
     let (lazy parent_pos) = parent_class_elt.ce_pos in
     let (lazy pos) = class_elt.ce_pos in
@@ -149,7 +147,7 @@ let check_final_method member_source parent_class_elt class_elt on_error =
 
 let check_memoizelsb_method member_source parent_class_elt class_elt =
   let is_method = is_method member_source in
-  let is_memoizelsb = class_elt.ce_memoizelsb in
+  let is_memoizelsb = get_ce_memoizelsb class_elt in
   let is_override =
     String.( <> ) parent_class_elt.ce_origin class_elt.ce_origin
   in
@@ -168,8 +166,8 @@ let check_dynamically_callable
   if
     is_method
     && is_override
-    && parent_class_elt.ce_dynamicallycallable
-    && not class_elt.ce_dynamicallycallable
+    && get_ce_dynamicallycallable parent_class_elt
+    && not (get_ce_dynamicallycallable class_elt)
   then
     let (lazy parent_pos) = parent_class_elt.ce_pos in
     let (lazy pos) = class_elt.ce_pos in
@@ -187,7 +185,7 @@ let check_lsb_overrides member_source member_name parent_class_elt class_elt =
     | `FromSProp -> true
     | _ -> false
   in
-  let parent_is_lsb = parent_class_elt.ce_lsb in
+  let parent_is_lsb = get_ce_lsb parent_class_elt in
   let is_override =
     String.( <> ) parent_class_elt.ce_origin class_elt.ce_origin
   in
@@ -202,13 +200,13 @@ let check_lateinit parent_class_elt class_elt on_error =
     String.( <> ) parent_class_elt.ce_origin class_elt.ce_origin
   in
   let lateinit_diff =
-    Bool.( <> ) parent_class_elt.ce_lateinit class_elt.ce_lateinit
+    Bool.( <> ) (get_ce_lateinit parent_class_elt) (get_ce_lateinit class_elt)
   in
   if is_override && lateinit_diff then
     let (lazy parent_pos) = parent_class_elt.ce_pos in
     let (lazy child_pos) = class_elt.ce_pos in
     Errors.bad_lateinit_override
-      parent_class_elt.ce_lateinit
+      (get_ce_lateinit parent_class_elt)
       parent_pos
       child_pos
       on_error
@@ -279,14 +277,14 @@ let check_override
   check_class_elt_visibility parent_class_elt class_elt on_error;
   let (lazy pos) = class_elt.ce_pos in
   let (lazy parent_pos) = parent_class_elt.ce_pos in
-  if Bool.( <> ) class_elt.ce_const parent_class_elt.ce_const then
+  if Bool.( <> ) (get_ce_const class_elt) (get_ce_const parent_class_elt) then
     Errors.overriding_prop_const_mismatch
       parent_pos
-      parent_class_elt.ce_const
+      (get_ce_const parent_class_elt)
       pos
-      class_elt.ce_const
+      (get_ce_const class_elt)
       on_error;
-  if (not parent_class_elt.ce_abstract) && class_elt.ce_abstract then
+  if (not (get_ce_abstract parent_class_elt)) && get_ce_abstract class_elt then
     (* It is valid for abstract class to extend a concrete class, but it cannot
      * redefine already concrete members as abstract.
      * See override_abstract_concrete.php test case for example. *)
@@ -310,7 +308,9 @@ let check_override
       let is_static = Cls.has_smethod parent_class member_name in
       let check (r1, ft1) (r2, ft2) () =
         ( if check_member_unique then
-          match (parent_class_elt.ce_abstract, class_elt.ce_abstract) with
+          match
+            (get_ce_abstract parent_class_elt, get_ce_abstract class_elt)
+          with
           | (false, false) ->
             (* Multiple concrete trait definitions, error *)
             Errors.multiple_concrete_defs
@@ -369,13 +369,14 @@ let check_override
       | (Tany _, _) -> Errors.decl_override_missing_hint parent_pos on_error
       | (_, Tany _) -> Errors.decl_override_missing_hint pos on_error
       | (_, _) -> ());
-      if (not parent_class_elt.ce_abstract) && class_elt.ce_abstract then
+      if (not (get_ce_abstract parent_class_elt)) && get_ce_abstract class_elt
+      then
         Errors.abstract_concrete_override pos parent_pos `property;
-      if class_elt.ce_const then (
+      if get_ce_const class_elt then (
         if
           check_member_unique
-          && (not class_elt.ce_abstract)
-          && not parent_class_elt.ce_abstract
+          && (not (get_ce_abstract class_elt))
+          && not (get_ce_abstract parent_class_elt)
         then
           Errors.multiple_concrete_defs
             pos
@@ -482,9 +483,9 @@ let check_members
     | Ast_defs.Cinterface
     | Ast_defs.Ctrait ->
       (* Synthetic  *)
-      (not class_elt.ce_synthesized)
+      (not (get_ce_synthesized class_elt))
       (* The parent we are checking is synthetic, no point in checking *)
-      && (not parent_class_elt.ce_synthesized)
+      && (not (get_ce_synthesized parent_class_elt))
       (* defined on original class *)
       && String.( <> ) class_elt.ce_origin (Cls.name class_)
       (* defined from parent class, nothing to check *)
@@ -584,21 +585,23 @@ let default_constructor_ce class_ =
     }
   in
   {
-    ce_abstract = false;
-    ce_final = false;
     ce_xhp_attr = None;
-    ce_const = false;
-    ce_lateinit = false;
-    ce_override = false;
-    ce_dynamicallycallable = false;
-    ce_lsb = false;
-    ce_memoizelsb = false;
-    ce_synthesized = true;
     ce_visibility = Vpublic;
     ce_type = lazy (mk (r, Tfun ft));
     ce_origin = name;
     ce_deprecated = None;
     ce_pos = lazy pos;
+    ce_flags =
+      make_ce_flags
+        ~abstract:false
+        ~final:false
+        ~const:false
+        ~lateinit:false
+        ~override:false
+        ~lsb:false
+        ~memoizelsb:false
+        ~synthesized:true
+        ~dynamicallycallable:false;
   }
 
 (* When an interface defines a constructor, we check that they are compatible *)
@@ -611,12 +614,12 @@ let check_constructors
     Ast_defs.(equal_class_kind (Cls.kind parent_class) Cinterface) || consistent
   then
     match (fst (Cls.construct parent_class), fst (Cls.construct class_)) with
-    | (Some parent_cstr, _) when parent_cstr.ce_synthesized -> env
+    | (Some parent_cstr, _) when get_ce_synthesized parent_cstr -> env
     | (Some parent_cstr, None) ->
       let (lazy pos) = parent_cstr.ce_pos in
       Errors.missing_constructor pos on_error;
       env
-    | (_, Some cstr) when cstr.ce_override ->
+    | (_, Some cstr) when get_ce_override cstr ->
       (* <<__UNSAFE_Construct>> *)
       env
     | (Some parent_cstr, Some cstr) ->
@@ -660,7 +663,7 @@ let check_constructors
   else (
     begin
       match (fst (Cls.construct parent_class), fst (Cls.construct class_)) with
-      | (Some parent_cstr, _) when parent_cstr.ce_synthesized -> ()
+      | (Some parent_cstr, _) when get_ce_synthesized parent_cstr -> ()
       | (Some parent_cstr, Some child_cstr) ->
         check_final_method `FromMethod parent_cstr child_cstr on_error;
         check_class_elt_visibility parent_cstr child_cstr on_error

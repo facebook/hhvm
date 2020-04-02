@@ -301,7 +301,7 @@ module Api = struct
       begin
         match fst (construct t) with
         | None -> false
-        | Some ce -> not ce.ce_abstract
+        | Some ce -> not (get_ce_abstract ce)
       end
     | Eager c -> c.tc_need_init
 

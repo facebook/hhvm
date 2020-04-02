@@ -1964,15 +1964,10 @@ and expr_
           (snd meth)
           Errors.unify_error;
         expr_error env Reason.Rnone outer
-      | Some
-          {
-            ce_type = (lazy ty);
-            ce_visibility;
-            ce_deprecated;
-            ce_pos = (lazy ce_pos);
-            _;
-          } ->
+      | Some ({ ce_type = (lazy ty); ce_pos = (lazy ce_pos); _ } as ce) ->
         let cid = CI c in
+        let ce_visibility = ce.ce_visibility in
+        let ce_deprecated = ce.ce_deprecated in
         let (env, _tal, _te, cid_ty) =
           static_class_id ~check_constraints:true (fst c) env [] cid
         in
@@ -3730,7 +3725,7 @@ and new_object
       | CIparent ->
         let (env, ctor_fty) =
           match fst (Cls.construct class_info) with
-          | Some { ce_type = (lazy ty); ce_abstract; _ } ->
+          | Some ({ ce_type = (lazy ty); _ } as ce) ->
             let ety_env =
               {
                 type_expansions = [];
@@ -3741,7 +3736,7 @@ and new_object
                 on_error = Errors.unify_error_at p;
               }
             in
-            if ce_abstract then
+            if get_ce_abstract ce then
               Errors.parent_abstract_call
                 SN.Members.__construct
                 p
@@ -4168,7 +4163,7 @@ and check_parent_construct pos env el unpacked_element env_parent =
 
 and check_class_get env p def_pos cid mid ce e =
   match e with
-  | CIself when ce.ce_abstract ->
+  | CIself when get_ce_abstract ce ->
     begin
       match get_node (Env.get_self env) with
       | Tclass ((_, self), _, _) ->
@@ -4196,9 +4191,11 @@ and check_class_get env p def_pos cid mid ce e =
         end
       | _ -> ()
     end
-  | CIparent when ce.ce_abstract -> Errors.parent_abstract_call mid p def_pos
-  | CI _ when ce.ce_abstract -> Errors.classname_abstract_call cid mid p def_pos
-  | CI (_, classname) when ce.ce_synthesized ->
+  | CIparent when get_ce_abstract ce ->
+    Errors.parent_abstract_call mid p def_pos
+  | CI _ when get_ce_abstract ce ->
+    Errors.classname_abstract_call cid mid p def_pos
+  | CI (_, classname) when get_ce_synthesized ce ->
     Errors.static_synthetic_method classname mid p def_pos
   | _ -> ()
 
@@ -5513,13 +5510,18 @@ and class_get_
         | Some
             ( {
                 ce_visibility = vis;
-                ce_lsb = lsb;
                 ce_type = (lazy member_decl_ty);
                 ce_deprecated;
                 _;
               } as ce ) ->
           let def_pos = get_pos member_decl_ty in
-          TVis.check_class_access ~use_pos:p ~def_pos env (vis, lsb) cid class_;
+          TVis.check_class_access
+            ~use_pos:p
+            ~def_pos
+            env
+            (vis, get_ce_lsb ce)
+            cid
+            class_;
           TVis.check_deprecated ~use_pos:p ~def_pos ce_deprecated;
           check_class_get env p def_pos c mid ce cid;
           let (env, member_ty, et_enforced, tal) =

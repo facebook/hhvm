@@ -70,12 +70,12 @@ let base_visibility origin_class_name = function
 
 let shallow_method_to_class_elt child_class mro subst meth : class_elt =
   let {
-    sm_abstract = ce_abstract;
-    sm_final = ce_final;
-    sm_memoizelsb = ce_memoizelsb;
+    sm_abstract = abstract;
+    sm_final = final;
+    sm_memoizelsb = memoizelsb;
     sm_name = (pos, _);
-    sm_override = ce_override;
-    sm_dynamicallycallable = ce_dynamicallycallable;
+    sm_dynamicallycallable = dynamicallycallable;
+    sm_override = override;
     sm_reactivity = _;
     sm_type = ty;
     sm_visibility;
@@ -95,21 +95,23 @@ let shallow_method_to_class_elt child_class mro subst meth : class_elt =
       end
   in
   {
-    ce_abstract;
-    ce_final;
     ce_xhp_attr = None;
-    ce_const = false;
-    ce_lateinit = false;
-    ce_override;
-    ce_dynamicallycallable;
-    ce_lsb = false;
-    ce_memoizelsb;
-    ce_synthesized = mro.mro_via_req_extends;
     ce_visibility = visibility;
     ce_origin = mro.mro_name;
     ce_type = ty;
     ce_deprecated = sm_deprecated;
     ce_pos = lazy pos;
+    ce_flags =
+      make_ce_flags
+        ~synthesized:mro.mro_via_req_extends
+        ~abstract
+        ~final
+        ~const:false
+        ~lateinit:false
+        ~lsb:false
+        ~override
+        ~memoizelsb
+        ~dynamicallycallable;
   }
 
 let shallow_method_to_telt child_class mro subst meth : tagged_elt =
@@ -121,10 +123,10 @@ let shallow_method_to_telt child_class mro subst meth : tagged_elt =
 
 let shallow_prop_to_telt child_class mro subst prop : tagged_elt =
   let {
-    sp_const = ce_const;
+    sp_const = const;
     sp_xhp_attr = ce_xhp_attr;
-    sp_lateinit = ce_lateinit;
-    sp_lsb = ce_lsb;
+    sp_lateinit = lateinit;
+    sp_lsb = lsb;
     sp_name;
     sp_needs_init = _;
     sp_type;
@@ -154,21 +156,23 @@ let shallow_prop_to_telt child_class mro subst prop : tagged_elt =
     inherit_when_private = mro.mro_copy_private_members;
     elt =
       {
-        ce_abstract = sp_abstract;
-        ce_final = true;
         ce_xhp_attr;
-        ce_const;
-        ce_lateinit;
-        ce_override = false;
-        ce_dynamicallycallable = false;
-        ce_lsb;
-        ce_memoizelsb = false;
-        ce_synthesized = false;
         ce_visibility = visibility;
         ce_origin = mro.mro_name;
         ce_type = ty;
         ce_deprecated = None;
         ce_pos = lazy (fst sp_name);
+        ce_flags =
+          make_ce_flags
+            ~lsb
+            ~const
+            ~lateinit
+            ~abstract:sp_abstract
+            ~final:true
+            ~override:false
+            ~memoizelsb:false
+            ~synthesized:false
+            ~dynamicallycallable:false;
       };
   }
 

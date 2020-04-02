@@ -1199,8 +1199,7 @@ tv_rval get_rval_property(const Variant &object, const char* name) {
     Object obj = object.toObject();
     return obj->getPropIgnoreAccessibility(sname.get());
   } else if (object.isArray()) {
-    auto const& arr = object.asCArrRef();
-    if (arr.exists(sname)) return arr.rval(sname);
+    return object.asCArrRef()->rval(sname.get());
   }
   return tv_rval {};
 }
@@ -1540,41 +1539,32 @@ static Variant to_zval_object_ex(encodeType* etype, xmlNodePtr data,
     ret = create_object(ce, Array());
     soap_add_xml_ref(ret, data);
     xmlNodePtr trav = data->children;
+    auto obj = ret.asObjRef();
 
     while (trav != nullptr) {
       if (trav->type == XML_ELEMENT_NODE) {
         Variant tmpVal = master_to_zval(encodePtr(), trav);
         auto const propName = (char*)trav->name;
         // $prop = $ret->{$propName}
-        auto prop = get_rval_property(ret, propName);
+        auto const name = String(propName, CopyString);
+        auto const prop = obj->getPropIgnoreAccessibility(name.get());
         if (!prop.is_set() || prop.type() == KindOfUninit) {
           if (!trav->next || !get_node(trav->next, propName)) {
-            ret.toObject()->o_set(String(propName, CopyString), tmpVal);
+            obj->o_set(name, tmpVal);
           } else {
             VArrayInit arr{1};
             arr.append(tmpVal);
-            ret.toObject()->o_set(
-              String(propName, CopyString),
-              arr.toVariant()
-            );
+            obj->o_set(name, arr.toArray());
           }
         } else {
           if (!isArrayType(prop.type())) {
             /* Convert into array */
-            Array arr;
+            VArrayInit arr{2};
             arr.append(prop.tv());
             arr.append(tmpVal);
-            ret.toObject()->o_set(String(propName, CopyString), arr);
+            obj->o_set(name, arr.toArray());
           } else {
-            /* Append to existing array */
-            assertx(isArrayType(type(prop)));
-            auto oldArr = val(prop).parr;
-            auto arr = Array::attach(oldArr);
-            arr.append(tmpVal);
-            auto newArr = arr.detach();
-            if (newArr != oldArr) {
-              val(prop.as_lval()).parr = newArr;
-            }
+            asArrRef(prop).append(tmpVal);
           }
         }
       }

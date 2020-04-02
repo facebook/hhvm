@@ -1198,7 +1198,7 @@ tv_rval ObjectData::getPropIgnoreLateInit(const Class* ctx,
   return lookup.val && lookup.accessible ? lookup.val : nullptr;
 }
 
-tv_rval ObjectData::getPropIgnoreAccessibility(const StringData* key) {
+tv_lval ObjectData::getPropIgnoreAccessibility(const StringData* key) {
   auto const lookup = getPropImpl<false, true, true>(nullptr, key);
   auto prop = lookup.val;
   if (!prop) return nullptr;

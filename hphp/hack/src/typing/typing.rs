@@ -77,6 +77,36 @@ fn markup<'a>(s: &ast::Pstring) -> tast::Stmt_<'a> {
 
 fn expr<'a>(env: &mut Env<'a>, ast::Expr(pos, e): &'a ast::Expr) -> tast::Expr<'a> {
     let (ty, e) = match e {
+        ast::Expr_::True => {
+            let ty = env.bld().bool(env.bld().mk_rwitness(pos));
+            let e = tast::Expr_::True;
+            (ty, e)
+        }
+        ast::Expr_::False => {
+            let ty = env.bld().bool(env.bld().mk_rwitness(pos));
+            let e = tast::Expr_::False;
+            (ty, e)
+        }
+        ast::Expr_::Int(s) => {
+            let ty = env.bld().int(env.bld().mk_rwitness(pos));
+            let e = tast::Expr_::Int(s.clone());
+            (ty, e)
+        }
+        ast::Expr_::Float(s) => {
+            let ty = env.bld().float(env.bld().mk_rwitness(pos));
+            let e = tast::Expr_::Float(s.clone());
+            (ty, e)
+        }
+        ast::Expr_::Null => {
+            let ty = env.bld().null(env.bld().mk_rwitness(pos));
+            let e = tast::Expr_::Null;
+            (ty, e)
+        }
+        ast::Expr_::String(s) => {
+            let ty = env.bld().string(env.bld().mk_rwitness(pos));
+            let e = tast::Expr_::String(s.clone());
+            (ty, e)
+        }
         ast::Expr_::Call(x) => {
             // TODO(hrust) pseudo functions, might_throw
             let (call_type, e, explicit_targs, el, unpacked_element) = &**x;
@@ -94,6 +124,7 @@ fn expr<'a>(env: &mut Env<'a>, ast::Expr(pos, e): &'a ast::Expr) -> tast::Expr<'
         }
         x => unimplemented!("{:#?}", x),
     };
+    // TODO(hrust) set_tyvar_variance
     ast::Expr((&pos, ty), e)
 }
 

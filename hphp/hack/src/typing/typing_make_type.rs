@@ -301,20 +301,29 @@ impl<'a> TypeBuilder<'a> {
         self.mk_reason(None, Reason::Rnone)
     }
 
-    pub fn mk_rinstantiate(&self, r0: PReason<'a>, name: &'a str, r1: PReason<'a>) -> PReason {
+    pub fn mk_rinstantiate(
+        &'a self,
+        r0: PReason<'a>,
+        name: &'a str,
+        r1: PReason<'a>,
+    ) -> PReason<'a> {
         self.mk_reason(r1.pos, Reason::Rinstantiate(r0, name, r1))
     }
 
     pub fn mk_rtype_variable_generics(
-        &self,
+        &'a self,
         pos: &'a Pos,
         param_name: &'a str,
         fn_name: &'a str,
-    ) -> PReason {
+    ) -> PReason<'a> {
         self.mk_reason(
             Some(pos),
             Reason::RtypeVariableGenerics(param_name, fn_name),
         )
+    }
+
+    pub fn mk_rwitness(&'a self, pos: &'a Pos) -> PReason<'a> {
+        self.mk_reason(Some(pos), Reason::Rwitness)
     }
 }
 

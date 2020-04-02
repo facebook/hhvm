@@ -6,6 +6,7 @@
 use std::{borrow::Cow, cmp::Ordering, ops::Range, path::PathBuf, result::Result::*};
 
 use ocamlrep::rc::RcOc;
+use ocamlrep::{Allocator, FromError, Value};
 use ocamlrep_derive::OcamlRep;
 use serde::{Deserialize, Serialize};
 
@@ -31,6 +32,18 @@ use PosImpl::*;
 
 #[derive(Clone, Debug, Deserialize, Hash, OcamlRep, Serialize)]
 pub struct Pos(PosImpl);
+
+pub type PosR<'a> = &'a Pos;
+
+impl ocamlrep::OcamlRep for PosR<'_> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+        (**self).to_ocamlrep(alloc)
+    }
+
+    fn from_ocamlrep(_value: Value<'_>) -> Result<Self, FromError> {
+        unimplemented!()
+    }
+}
 
 impl Pos {
     pub fn make_none() -> Self {

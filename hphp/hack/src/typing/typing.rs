@@ -94,7 +94,7 @@ fn expr<'a>(env: &mut Env<'a>, ast::Expr(pos, e): &'a ast::Expr) -> tast::Expr<'
         }
         x => unimplemented!("{:#?}", x),
     };
-    ast::Expr((pos.clone(), ty), e)
+    ast::Expr((&pos, ty), e)
 }
 
 fn check_call<'a>(
@@ -124,7 +124,7 @@ fn dispatch_call<'a>(
     env: &mut Env<'a>,
     pos: &Pos,
     _call_type: &ast::CallType,
-    ast::Expr(_fpos, fun_expr): &'a ast::Expr,
+    ast::Expr(fpos, fun_expr): &'a ast::Expr,
     explicit_targs: &Vec<ast::Targ>,
     el: &'a Vec<ast::Expr>,
     unpacked_element: &Option<ast::Expr>,
@@ -135,7 +135,7 @@ fn dispatch_call<'a>(
             let (fty, targs) = fun_type_of_id(env, x, explicit_targs, el);
             let (tel, rty) = call(env, pos, fty, el, unpacked_element);
             // TODO(hrust) reactivity stuff
-            let fte = tast::Expr((Pos::make_none(), fty), tast::Expr_::Id(x.clone()));
+            let fte = tast::Expr((fpos, fty), tast::Expr_::Id(x.clone()));
             (
                 rty,
                 tast::Expr_::mk_call(tast::CallType::Cnormal, fte, targs, tel, None),
@@ -227,7 +227,7 @@ fn bind_param<'a>(env: &mut Env<'a>, ty1: Ty<'a>, param: &'a ast::FunParam) -> t
         vec![]
     };
     let tparam = tast::FunParam {
-        annotation: (param.pos.clone(), ty1),
+        annotation: (&param.pos, ty1),
         type_hint: ast::TypeHint(ty1, param.type_hint.get_hint().clone()),
         is_variadic: param.is_variadic,
         pos: param.pos.clone(),

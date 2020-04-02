@@ -7,18 +7,6 @@
     src/hackfmt.exe
     src/hh_parse.exe
     src/hh_single_compile.exe
-    src/artifact_store/artifact_store_bin.exe
-    src/facebook/everstore/everstore_bin.exe
-    src/facebook/hh_fanout/hh_fanout.exe
-    src/facebook/hh_gi/hh_gi.exe
-    src/facebook/hh_lite/hh_lite.exe
-    src/facebook/hh_replay/hh_replay.exe
-    test/facebook/ci/ci_util_tests.exe
-    test/facebook/recli/recli_test.exe
-    test/facebook/remote/workerSyncStoreTests.exe
-    test/facebook/remote/remoteWorkerTests.exe
-    test/facebook/remote/typing_check_service_tests.exe
-    test/facebook/remote/sandcastleJobRunnerTests.exe
     ))
 
 (alias

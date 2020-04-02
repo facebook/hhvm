@@ -10,6 +10,17 @@
 
 open Core_kernel
 
+let errors_to_string (errors : Errors.t) : string list =
+  let error_to_string (error : Errors.error) : string =
+    let error = Errors.to_absolute_for_test error in
+    let code = Errors.get_code error in
+    let message =
+      error |> Errors.to_list |> List.map ~f:snd |> String.concat ~sep:"; "
+    in
+    Printf.sprintf "[%d] %s" code message
+  in
+  errors |> Errors.get_sorted_error_list |> List.map ~f:error_to_string
+
 let fake_dir = Printf.sprintf "%s/fake" (Filename.get_temp_dir_name ())
 
 let in_fake_dir path = Printf.sprintf "%s/%s" fake_dir path
@@ -136,6 +147,7 @@ type server_setup = {
   bar_path: Relative_path.t;
   bar_contents: string;
   nonexistent_path: Relative_path.t;
+  naming_table: Naming_table.t;
 }
 
 (** This lays down some files on disk. Sets up a forward naming table.
@@ -203,7 +215,15 @@ let server_setup () : server_setup =
     two computations:
       - a declaration of \Bar
       - a (deferred) type check of \Foo *)
-  { ctx; foo_path; foo_contents; bar_path; bar_contents; nonexistent_path }
+  {
+    ctx;
+    foo_path;
+    foo_contents;
+    bar_path;
+    bar_contents;
+    nonexistent_path;
+    naming_table;
+  }
 
 (* In this test, we wish to establish that we enable deferring type checking
   for files that have undeclared dependencies, UNLESS we've already deferred
@@ -438,6 +458,219 @@ let test_quarantine () =
 
   true
 
+let test_unsaved_symbol_change () =
+  Provider_backend.set_local_memory_backend_with_defaults ();
+
+  (* We'll create a naming-table. This test suite is based on naming-table. *)
+  let { ctx; foo_path; foo_contents; naming_table; _ } = server_setup () in
+  let db_name = Filename.temp_file "server_naminng" ".sqlite" in
+  let save_results = Naming_table.save naming_table db_name in
+  Asserter.Int_asserter.assert_equals
+    2
+    save_results.Naming_sqlite.files_added
+    "unsaved: expected this many files in naming.sqlite";
+  Asserter.Int_asserter.assert_equals
+    4
+    save_results.Naming_sqlite.symbols_added
+    "unsaved: expected this many symbols in naming.sqlite";
+
+  (* Now, I want a fresh ctx with no reverse-naming entries in it,
+  and I want it to be backed by a sqlite naming database. *)
+  let (_ : Naming_table.t) = Naming_table.load_from_sqlite ctx db_name in
+  Provider_backend.set_local_memory_backend_with_defaults ();
+  let ctx =
+    Provider_context.empty_for_tool
+      ~popt:(Provider_context.get_popt ctx)
+      ~tcopt:(Provider_context.get_tcopt ctx)
+      ~backend:(Provider_backend.get ())
+  in
+
+  (* Compute tast as-is *)
+  let (ctx, entry) =
+    Provider_context.add_entry_from_file_contents
+      ~ctx
+      ~path:foo_path
+      ~contents:foo_contents
+  in
+  let { Tast_provider.Compute_tast_and_errors.telemetry; errors; _ } =
+    Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry
+  in
+  Asserter.Int_asserter.assert_equals
+    8
+    (Telemetry_test_utils.int_exn telemetry "get_ast.count")
+    "unsaved: compute_tast(class Foo) should have this many calls to get_ast";
+  Asserter.Int_asserter.assert_equals
+    1
+    (Telemetry_test_utils.int_exn telemetry "disk_cat.count")
+    "unsaved: compute_tast(class Foo) should have this many calls to disk_cat";
+  Asserter.String_asserter.assert_list_equals
+    [
+      "[4110] Invalid return type; Expected int; But got string";
+      "[2006] Could not find foo; Did you mean Foo?";
+    ]
+    (errors_to_string errors)
+    "unsaved: compute_tast(class Foo) should have these errors";
+
+  (* Make an unsaved change which affects a symbol definition that's used *)
+  let foo_contents1 =
+    Str.global_replace (Str.regexp "class Foo") "class Foo1" foo_contents
+  in
+  let (ctx, entry) =
+    Provider_context.add_entry_from_file_contents
+      ~ctx
+      ~path:foo_path
+      ~contents:foo_contents1
+  in
+  let { Tast_provider.Compute_tast_and_errors.telemetry; errors; _ } =
+    Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry
+  in
+  Asserter.Int_asserter.assert_equals
+    3 (* this is a bug; should be 1 *)
+    (Telemetry_test_utils.int_exn telemetry "get_ast.count")
+    "unsaved: compute_tast(class Foo1) should have this many calls to get_ast";
+  Asserter.Int_asserter.assert_equals
+    0
+    (Telemetry_test_utils.int_exn telemetry "disk_cat.count")
+    "unsaved: compute_tast(class Foo1) should have this many calls to disk_cat";
+  Asserter.String_asserter.assert_list_equals
+    [
+      "[4110] Invalid return type; Expected int; But got string";
+      "[2049] Unbound name: Foo";
+      "[2049] Unbound name: foo";
+    ]
+    (errors_to_string errors)
+    "unsaved: compute_tast(class Foo1) should have these errors";
+
+  (* go back to original unsaved content *)
+  let (ctx, entry) =
+    Provider_context.add_entry_from_file_contents
+      ~ctx
+      ~path:foo_path
+      ~contents:foo_contents
+  in
+  let { Tast_provider.Compute_tast_and_errors.telemetry; errors; _ } =
+    Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry
+  in
+  Asserter.Int_asserter.assert_equals
+    2
+    (Telemetry_test_utils.int_exn telemetry "get_ast.count")
+    "unsaved: compute_tast(class Foo again) should have this many calls to get_ast";
+  Asserter.Int_asserter.assert_equals
+    0
+    (Telemetry_test_utils.int_exn telemetry "disk_cat.count")
+    "unsaved: compute_tast(class Foo again) should have this many calls to disk_cat";
+  Asserter.String_asserter.assert_list_equals
+    [
+      "[4110] Invalid return type; Expected int; But got string";
+      "[2006] Could not find foo; Did you mean Foo?";
+    ]
+    (errors_to_string errors)
+    "unsaved: compute_tast(class Foo again) should have these errors";
+
+  true
+
+let test_canon_names_internal
+    ~(ctx : Provider_context.t)
+    ~(id : string)
+    ~(canonical : string)
+    ~(uncanonical : string) : unit =
+  begin
+    match Naming_provider.get_type_pos_and_kind ctx canonical with
+    | None ->
+      Printf.eprintf "Canon[%s]: expected to find symbol '%s'\n" id canonical;
+      assert false
+    | Some _ -> ()
+  end;
+
+  begin
+    match Naming_provider.get_type_pos_and_kind ctx uncanonical with
+    | Some _ when id = "ctx" -> () (* this is current behavior; it's a bug *)
+    | None when id = "ctx" -> assert false
+    | None -> ()
+    | Some _ ->
+      Printf.eprintf
+        "Canon[%s]: expected not to find symbol '%s'\n"
+        id
+        uncanonical;
+      assert false
+  end;
+
+  begin
+    match Naming_provider.get_type_canon_name ctx uncanonical with
+    | None ->
+      Printf.eprintf
+        "Canon[%s]: expected %s to have a canonical name"
+        id
+        uncanonical;
+      assert false
+    | Some canon ->
+      Asserter.String_asserter.assert_equals
+        canonical
+        canon
+        (Printf.sprintf
+           "Canon[%s]: expected '%s' to have canonical name '%s'"
+           id
+           uncanonical
+           canonical)
+  end;
+  ()
+
+let test_canon_names () =
+  Provider_backend.set_local_memory_backend_with_defaults ();
+  let { ctx; foo_path; foo_contents; _ } = server_setup () in
+
+  test_canon_names_internal
+    ~ctx
+    ~id:"ctx"
+    ~canonical:"\\Foo"
+    ~uncanonical:"\\foo";
+
+  let (ctx, _) =
+    Provider_context.add_entry_from_file_contents
+      ~ctx
+      ~path:foo_path
+      ~contents:foo_contents
+  in
+  test_canon_names_internal
+    ~ctx
+    ~id:"entry"
+    ~canonical:"\\Foo"
+    ~uncanonical:"\\foo";
+
+  let foo_contents1 =
+    Str.global_replace (Str.regexp "class Foo") "class Foo1" foo_contents
+  in
+  let (ctx1, _) =
+    Provider_context.add_entry_from_file_contents
+      ~ctx
+      ~path:foo_path
+      ~contents:foo_contents1
+  in
+  test_canon_names_internal
+    ~ctx:ctx1
+    ~id:"entry1"
+    ~canonical:"\\Foo1"
+    ~uncanonical:"\\foo1";
+
+  begin
+    match Naming_provider.get_type_pos_and_kind ctx1 "\\Foo" with
+    | None -> ()
+    | Some _ ->
+      Printf.eprintf "Canon[entry1b]: expected not to find symbol '\\Foo'\n";
+      assert false
+  end;
+
+  begin
+    match Naming_provider.get_type_canon_name ctx1 "\\foo" with
+    | None -> ()
+    | Some _ ->
+      Printf.eprintf
+        "Canon[entry1b]: expected not to find canonical for '\\foo'\n";
+      assert false
+  end;
+
+  true
+
 let tests =
   [
     ("test_deferred_decl_add", test_deferred_decl_add);
@@ -447,6 +680,8 @@ let tests =
     ("test_dmesg_parser", test_dmesg_parser);
     ("test_should_enable_deferring", test_should_enable_deferring);
     ("test_quarantine", test_quarantine);
+    ("test_unsaved_symbol_change", test_unsaved_symbol_change);
+    ("test_canon_names", test_canon_names);
   ]
 
 let () =

@@ -948,6 +948,13 @@ functor
         genv.local_config.ServerLocalConfig.max_typechecker_worker_memory_mb
       in
       let fnl = Relative_path.Set.elements files_to_check in
+      let (env, snapshot) =
+        ServerRecheckCapture.update_before_recheck
+          genv
+          env
+          ~changed_files:files_to_parse
+          ~to_recheck_count:(List.length fnl)
+      in
       let (errorl', delegate_state, telemetry, env', cancelled) =
         let ctx = Provider_utils.ctx_from_server_env env in
         Typing_check_service.go_with_interrupt
@@ -987,16 +994,19 @@ functor
       (* ... leaving only things that we actually checked, and which can be
        * removed from needs_recheck *)
       let needs_recheck = Relative_path.Set.diff needs_recheck files_to_check in
+      let errors =
+        Errors.(incremental_update_set errors errorl' files_to_check Typing)
+      in
       let (env, _future) : ServerEnv.env * string Future.t option =
         ServerRecheckCapture.update_after_recheck
           genv
           env
+          snapshot
           ~changed_files:files_to_parse
+          ~cancelled_files:(Relative_path.Set.of_list cancelled)
           ~rechecked_files:files_to_check
-          errorl'
-      in
-      let errors =
-        Errors.(incremental_update_set errors errorl' files_to_check Typing)
+          ~recheck_errors:errorl'
+          ~all_errors:errors
       in
       let full_check_done =
         CheckKind.is_full && Relative_path.Set.is_empty needs_recheck
@@ -1090,7 +1100,8 @@ functor
       let logstring = Printf.sprintf "Parsing %d files" reparse_count in
       Hh_logger.log "Begin %s" logstring;
 
-      (* Parse all changed files. *)
+      (* Parse all changed files. This clears the file contents cache prior
+          to parsing. *)
       let (env, { parse_errors = errors; failed_parsing; fast_parsed }) =
         do_parsing genv env ~files_to_parse ~stop_at_errors
       in

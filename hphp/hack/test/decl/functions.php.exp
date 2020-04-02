@@ -18,7 +18,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|functions.php line 11, characters 10-27),
        (Tfun
-          { ft_arity = (Fstandard (2, 2)); ft_tparams = [];
+          { ft_arity = (Fstandard (2)); ft_tparams = [];
             ft_where_constraints = [];
             ft_params =
             [{ fp_pos = [11:33-38]; fp_name = (Some "$arg1");
@@ -56,7 +56,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|functions.php line 14, characters 10-41),
        (Tfun
-          { ft_arity = (Fstandard (1, 1)); ft_tparams = [];
+          { ft_arity = (Fstandard (1)); ft_tparams = [];
             ft_where_constraints = [];
             ft_params =
             [{ fp_pos = [14:51-56]; fp_name = (Some "$arg1");
@@ -85,7 +85,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|functions.php line 35, characters 10-15),
        (Tfun
-          { ft_arity = (Fstandard (1, 1)); ft_tparams = [];
+          { ft_arity = (Fstandard (1)); ft_tparams = [];
             ft_where_constraints = [];
             ft_params =
             [{ fp_pos = [35:27-29]; fp_name = (Some "$x");
@@ -114,7 +114,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|functions.php line 57, characters 10-32),
        (Tfun
-          { ft_arity = (Fstandard (0, 0)); ft_tparams = [];
+          { ft_arity = (Fstandard (0)); ft_tparams = [];
             ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;
@@ -132,7 +132,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|functions.php line 70, characters 10-13),
        (Tfun
-          { ft_arity = (Fstandard (0, 0)); ft_tparams = [];
+          { ft_arity = (Fstandard (0)); ft_tparams = [];
             ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;
@@ -150,7 +150,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|functions.php line 82, characters 10-27),
        (Tfun
-          { ft_arity = (Fstandard (0, 0)); ft_tparams = [];
+          { ft_arity = (Fstandard (0)); ft_tparams = [];
             ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;
@@ -168,7 +168,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|functions.php line 74, characters 10-23),
        (Tfun
-          { ft_arity = (Fstandard (1, 1));
+          { ft_arity = (Fstandard (1));
             ft_tparams =
             [(Invariant, ([74:25-26], "T"),
               [(Constraint_as,
@@ -206,7 +206,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|functions.php line 51, characters 10-26),
        (Tfun
-          { ft_arity = (Fstandard (0, 0)); ft_tparams = [];
+          { ft_arity = (Fstandard (0)); ft_tparams = [];
             ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;
@@ -224,7 +224,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|functions.php line 60, characters 10-39),
        (Tfun
-          { ft_arity = (Fstandard (3, 3)); ft_tparams = [];
+          { ft_arity = (Fstandard (3)); ft_tparams = [];
             ft_where_constraints = [];
             ft_params =
             [{ fp_pos = [61:25-27]; fp_name = (Some "$a");
@@ -271,7 +271,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|functions.php line 78, characters 10-27),
        (Tfun
-          { ft_arity = (Fstandard (1, 1)); ft_tparams = [];
+          { ft_arity = (Fstandard (1)); ft_tparams = [];
             ft_where_constraints = [];
             ft_params =
             [{ fp_pos = [78:38-40]; fp_name = (Some "$i");
@@ -300,7 +300,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|functions.php line 54, characters 10-34),
        (Tfun
-          { ft_arity = (Fstandard (0, 0)); ft_tparams = [];
+          { ft_arity = (Fstandard (0)); ft_tparams = [];
             ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;
@@ -318,7 +318,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|functions.php line 3, characters 10-24),
        (Tfun
-          { ft_arity = (Fstandard (0, 0)); ft_tparams = [];
+          { ft_arity = (Fstandard (0)); ft_tparams = [];
             ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;
@@ -336,7 +336,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|functions.php line 7, characters 10-34),
        (Tfun
-          { ft_arity = (Fstandard (0, 0)); ft_tparams = [];
+          { ft_arity = (Fstandard (0)); ft_tparams = [];
             ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;
@@ -354,7 +354,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|functions.php line 4, characters 10-28),
        (Tfun
-          { ft_arity = (Fstandard (0, 0)); ft_tparams = [];
+          { ft_arity = (Fstandard (0)); ft_tparams = [];
             ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;
@@ -372,7 +372,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|functions.php line 90, characters 20-33),
        (Tfun
-          { ft_arity = (Fstandard (0, 0)); ft_tparams = [];
+          { ft_arity = (Fstandard (0)); ft_tparams = [];
             ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;
@@ -390,7 +390,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|functions.php line 33, characters 10-23),
        (Tfun
-          { ft_arity = (Fstandard (1, 1)); ft_tparams = [];
+          { ft_arity = (Fstandard (1)); ft_tparams = [];
             ft_where_constraints = [];
             ft_params =
             [{ fp_pos = [33:30-32]; fp_name = (Some "$x");
@@ -421,7 +421,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|functions.php line 46, characters 10-27),
        (Tfun
-          { ft_arity = (Fstandard (1, 1)); ft_tparams = [];
+          { ft_arity = (Fstandard (1)); ft_tparams = [];
             ft_where_constraints = [];
             ft_params =
             [{ fp_pos = [46:48-50]; fp_name = (Some "$m");
@@ -462,7 +462,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|functions.php line 37, characters 10-36),
        (Tfun
-          { ft_arity = (Fstandard (2, 2));
+          { ft_arity = (Fstandard (2));
             ft_tparams = [(Invariant, ([37:38-40], "Tu"), [])];
             ft_where_constraints = [];
             ft_params =
@@ -481,7 +481,7 @@ Parsed decls:
                   et_type =
                   (Rhint (root|functions.php line 39, characters 3-22),
                    (Tfun
-                      { ft_arity = (Fstandard (1, 1)); ft_tparams = [];
+                      { ft_arity = (Fstandard (1)); ft_tparams = [];
                         ft_where_constraints = [];
                         ft_params =
                         [{ fp_pos = [39:13-15]; fp_name = None;
@@ -513,7 +513,7 @@ Parsed decls:
               et_type =
               (Rhint (root|functions.php line 40, characters 4-41),
                (Tfun
-                  { ft_arity = (Fstandard (1, 1)); ft_tparams = [];
+                  { ft_arity = (Fstandard (1)); ft_tparams = [];
                     ft_where_constraints = [];
                     ft_params =
                     [{ fp_pos = [40:14-34]; fp_name = None;
@@ -522,8 +522,8 @@ Parsed decls:
                          et_type =
                          (Rhint (root|functions.php line 40, characters 14-33),
                           (Tfun
-                             { ft_arity = (Fstandard (1, 1));
-                               ft_tparams = []; ft_where_constraints = [];
+                             { ft_arity = (Fstandard (1)); ft_tparams = [];
+                               ft_where_constraints = [];
                                ft_params =
                                [{ fp_pos = [40:24-26]; fp_name = None;
                                   fp_type =
@@ -573,7 +573,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|functions.php line 22, characters 10-37),
        (Tfun
-          { ft_arity = (Fstandard (2, 2));
+          { ft_arity = (Fstandard (2));
             ft_tparams =
             [(Invariant, ([22:39-41], "T1"),
               [(Constraint_super,
@@ -623,7 +623,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|functions.php line 18, characters 10-25),
        (Tfun
-          { ft_arity = (Fstandard (1, 1));
+          { ft_arity = (Fstandard (1));
             ft_tparams = [(Invariant, ([18:27-28], "T"), [])];
             ft_where_constraints = [];
             ft_params =
@@ -653,7 +653,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|functions.php line 29, characters 10-29),
        (Tfun
-          { ft_arity = (Fstandard (0, 0)); ft_tparams = [];
+          { ft_arity = (Fstandard (0)); ft_tparams = [];
             ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;

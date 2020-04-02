@@ -105,7 +105,7 @@ and hint_ p env = function
     let arity =
       match vh with
       | Some t -> Fvariadic (arity_min, make_param t None None)
-      | None -> Fstandard (arity_min, arity_min)
+      | None -> Fstandard arity_min
     in
     let reactivity =
       match reactivity with

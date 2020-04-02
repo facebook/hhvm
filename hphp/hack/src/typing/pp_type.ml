@@ -514,11 +514,9 @@ and show_fun_type : type a. a ty fun_type -> string =
 and pp_fun_arity : type a. Format.formatter -> a ty fun_arity -> unit =
  fun fmt fa ->
   match fa with
-  | Fstandard (a0, a1) ->
+  | Fstandard a0 ->
     Format.fprintf fmt "(@[<2>Fstandard (@,";
     Format.fprintf fmt "%d" a0;
-    Format.fprintf fmt ",@ ";
-    Format.fprintf fmt "%d" a1;
     Format.fprintf fmt "@,))@]"
   | Fvariadic (a0, a1) ->
     Format.fprintf fmt "(@[<2>Fvariadic (@,";

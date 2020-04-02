@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2f424b94e1c0fc99f74550d5859417e5>>
+// @generated SignedSource<<ab8ae0f3afbf71280423d42cdbff779d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -692,8 +692,8 @@ pub struct FunType {
     Serialize
 )]
 pub enum FunArity {
-    /// min ; max
-    Fstandard(isize, isize),
+    /// min; max is List.length ft_params
+    Fstandard(isize),
     /// PHP5.6-style ...$args finishes the func declaration.
     /// min ; variadic param type
     Fvariadic(isize, FunParam),

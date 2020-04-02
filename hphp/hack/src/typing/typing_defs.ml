@@ -420,7 +420,7 @@ let make_tany () = Tany TanySentinel.value
 
 let arity_min ft_arity : int =
   match ft_arity with
-  | Fstandard (min, _)
+  | Fstandard min
   | Fvariadic (min, _)
   | Fellipsis (min, _) ->
     min
@@ -774,10 +774,11 @@ let equal_locl_ty ty1 ty2 = ty_equal ty1 ty2
 
 let equal_locl_ty_ ty_1 ty_2 = Int.equal 0 (ty__compare ty_1 ty_2)
 
-let equal_locl_fun_arity a1 a2 =
-  match (a1, a2) with
-  | (Fstandard (min1, max1), Fstandard (min2, max2)) ->
-    Int.equal min1 min2 && Int.equal max1 max2
+let equal_locl_fun_arity ft1 ft2 =
+  match (ft1.ft_arity, ft2.ft_arity) with
+  | (Fstandard min1, Fstandard min2) ->
+    Int.equal min1 min2
+    && Int.equal (List.length ft1.ft_params) (List.length ft2.ft_params)
   | (Fvariadic (min1, param1), Fvariadic (min2, param2)) ->
     Int.equal min1 min2 && Int.equal 0 (ft_params_compare [param1] [param2])
   | (Fellipsis (min1, pos1), Fellipsis (min2, pos2)) ->
@@ -870,10 +871,11 @@ and equal_shape_field_type sft1 sft2 =
   equal_decl_ty sft1.sft_ty sft2.sft_ty
   && Bool.equal sft1.sft_optional sft2.sft_optional
 
-and equal_decl_fun_arity a1 a2 =
-  match (a1, a2) with
-  | (Fstandard (min1, max1), Fstandard (min2, max2)) ->
-    Int.equal min1 min2 && Int.equal max1 max2
+and equal_decl_fun_arity ft1 ft2 =
+  match (ft1.ft_arity, ft2.ft_arity) with
+  | (Fstandard min1, Fstandard min2) ->
+    Int.equal min1 min2
+    && Int.equal (List.length ft1.ft_params) (List.length ft2.ft_params)
   | (Fvariadic (min1, param1), Fvariadic (min2, param2)) ->
     Int.equal min1 min2 && equal_decl_ft_params [param1] [param2]
   | (Fellipsis (min1, pos1), Fellipsis (min2, pos2)) ->
@@ -886,7 +888,7 @@ and equal_decl_fun_arity a1 a2 =
 and equal_decl_fun_type fty1 fty2 =
   equal_decl_possibly_enforced_ty fty1.ft_ret fty2.ft_ret
   && equal_decl_ft_params fty1.ft_params fty2.ft_params
-  && equal_decl_fun_arity fty1.ft_arity fty2.ft_arity
+  && equal_decl_fun_arity fty1 fty2
   && equal_reactivity fty1.ft_reactive fty2.ft_reactive
   && Int.equal fty1.ft_flags fty2.ft_flags
 

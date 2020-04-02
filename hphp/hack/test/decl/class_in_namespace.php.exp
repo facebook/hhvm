@@ -18,7 +18,7 @@ Parsed decls:
          sm_type =
          (Rwitness (root|class_in_namespace.php line 5, characters 21-21),
           (Tfun
-             { ft_arity = (Fstandard (0, 0)); ft_tparams = [];
+             { ft_arity = (Fstandard (0)); ft_tparams = [];
                ft_where_constraints = []; ft_params = [];
                ft_ret =
                { et_enforced = false;

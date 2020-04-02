@@ -423,8 +423,8 @@ and locl_fun_type = locl_ty fun_type
  * args expected by the function and the maximum number of args for
  * standard, non-variadic functions or the type of variadic argument taken *)
 and 'ty fun_arity =
-  (* min ; max *)
-  | Fstandard of int * int
+  (* min; max is List.length ft_params *)
+  | Fstandard of int
   (* PHP5.6-style ...$args finishes the func declaration.
      min ; variadic param type *)
   | Fvariadic of int * 'ty fun_param

@@ -303,7 +303,7 @@ let ty_equal_shallow env ty1 ty2 =
   | (Tclass (x_sub, exact_sub, _), Tclass (x_super, exact_super, _)) ->
     String.equal (snd x_sub) (snd x_super) && equal_exact exact_sub exact_super
   | (Tfun fty1, Tfun fty2) ->
-    equal_locl_fun_arity fty1.ft_arity fty2.ft_arity
+    equal_locl_fun_arity fty1 fty2
     && equal_reactivity fty1.ft_reactive fty2.ft_reactive
     && Int.equal fty1.ft_flags fty2.ft_flags
   | (Tshape (shape_kind1, fdm1), Tshape (shape_kind2, fdm2)) ->

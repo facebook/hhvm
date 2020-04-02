@@ -29,7 +29,7 @@ Parsed decls:
          sm_type =
          (Rwitness (root|like_types.php line 13, characters 19-19),
           (Tfun
-             { ft_arity = (Fstandard (1, 1)); ft_tparams = [];
+             { ft_arity = (Fstandard (1)); ft_tparams = [];
                ft_where_constraints = [];
                ft_params =
                [{ fp_pos = [13:29-31]; fp_name = (Some "$t");
@@ -65,7 +65,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|like_types.php line 4, characters 10-19),
        (Tfun
-          { ft_arity = (Fstandard (1, 1)); ft_tparams = [];
+          { ft_arity = (Fstandard (1)); ft_tparams = [];
             ft_where_constraints = [];
             ft_params =
             [{ fp_pos = [4:25-27]; fp_name = (Some "$i");
@@ -94,7 +94,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|like_types.php line 6, characters 10-10),
        (Tfun
-          { ft_arity = (Fstandard (1, 1));
+          { ft_arity = (Fstandard (1));
             ft_tparams =
             [(Invariant, ([6:12-13], "T"),
               [(Constraint_as,

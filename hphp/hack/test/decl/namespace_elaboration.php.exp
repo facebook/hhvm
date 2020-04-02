@@ -7,7 +7,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|namespace_elaboration.php line 56, characters 10-18),
        (Tfun
-          { ft_arity = (Fstandard (1, 1)); ft_tparams = [];
+          { ft_arity = (Fstandard (1)); ft_tparams = [];
             ft_where_constraints = [];
             ft_params =
             [{ fp_pos = [56:33-35]; fp_name = (Some "$x");
@@ -36,7 +36,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|namespace_elaboration.php line 60, characters 10-24),
        (Tfun
-          { ft_arity = (Fstandard (1, 1)); ft_tparams = [];
+          { ft_arity = (Fstandard (1)); ft_tparams = [];
             ft_where_constraints = [];
             ft_params =
             [{ fp_pos = [60:45-47]; fp_name = (Some "$x");
@@ -65,7 +65,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|namespace_elaboration.php line 48, characters 10-11),
        (Tfun
-          { ft_arity = (Fstandard (1, 1)); ft_tparams = [];
+          { ft_arity = (Fstandard (1)); ft_tparams = [];
             ft_where_constraints = [];
             ft_params =
             [{ fp_pos = [48:20-22]; fp_name = (Some "$x");
@@ -94,7 +94,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|namespace_elaboration.php line 43, characters 12-23),
        (Tfun
-          { ft_arity = (Fstandard (1, 1)); ft_tparams = [];
+          { ft_arity = (Fstandard (1)); ft_tparams = [];
             ft_where_constraints = [];
             ft_params =
             [{ fp_pos = [43:32-34]; fp_name = (Some "$x");
@@ -125,7 +125,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|namespace_elaboration.php line 52, characters 10-17),
        (Tfun
-          { ft_arity = (Fstandard (1, 1)); ft_tparams = [];
+          { ft_arity = (Fstandard (1)); ft_tparams = [];
             ft_where_constraints = [];
             ft_params =
             [{ fp_pos = [52:31-33]; fp_name = (Some "$x");

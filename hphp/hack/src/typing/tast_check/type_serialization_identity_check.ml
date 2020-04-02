@@ -64,7 +64,7 @@ let rec strip_ty ty =
           ft_params;
           ft_ret;
           (* Dummy values: these aren't currently serialized. *)
-          ft_arity = Fstandard (0, 0);
+          ft_arity = Fstandard 0;
           ft_tparams = [];
           ft_where_constraints = [];
           ft_flags = 0;

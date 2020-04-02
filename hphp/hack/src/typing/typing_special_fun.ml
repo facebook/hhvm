@@ -132,7 +132,7 @@ let transform_special_fun_ty fty id nargs =
              ( r1,
                Tfun
                  {
-                   ft_arity = Fstandard (arity, arity);
+                   ft_arity = Fstandard arity;
                    ft_tparams = [];
                    ft_where_constraints = [];
                    ft_params = List.map vars TUtils.default_fun_param;
@@ -148,7 +148,7 @@ let transform_special_fun_ty fty id nargs =
       in
       {
         fty with
-        ft_arity = Fstandard (arity + 1, arity + 1);
+        ft_arity = Fstandard (arity + 1);
         ft_params = param1 :: param_rest;
         ft_tparams;
         ft_ret = MakeType.unenforced (mk (rret, Tarray (Some tr, None)));

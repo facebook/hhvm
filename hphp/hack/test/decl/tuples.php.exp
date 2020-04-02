@@ -7,7 +7,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|tuples.php line 13, characters 10-22),
        (Tfun
-          { ft_arity = (Fstandard (1, 1));
+          { ft_arity = (Fstandard (1));
             ft_tparams = [(Invariant, ([13:24-25], "T"), [])];
             ft_where_constraints = [];
             ft_params =
@@ -47,7 +47,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|tuples.php line 9, characters 10-22),
        (Tfun
-          { ft_arity = (Fstandard (1, 1)); ft_tparams = [];
+          { ft_arity = (Fstandard (1)); ft_tparams = [];
             ft_where_constraints = [];
             ft_params =
             [{ fp_pos = [9:35-40]; fp_name = (Some "$arg1");
@@ -81,7 +81,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|tuples.php line 5, characters 10-20),
        (Tfun
-          { ft_arity = (Fstandard (1, 1)); ft_tparams = [];
+          { ft_arity = (Fstandard (1)); ft_tparams = [];
             ft_where_constraints = [];
             ft_params =
             [{ fp_pos = [5:37-42]; fp_name = (Some "$arg1");

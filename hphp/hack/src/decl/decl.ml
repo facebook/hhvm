@@ -295,7 +295,7 @@ and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
       assert param.param_is_variadic;
       Fvariadic (arity_min, make_param_ty env ~is_lambda param)
     | FVellipsis p -> Fellipsis (arity_min, p)
-    | FVnonVariadic -> Fstandard (arity_min, List.length f.f_params)
+    | FVnonVariadic -> Fstandard arity_min
   in
   let tparams = List.map f.f_tparams (type_param env) in
   let where_constraints =

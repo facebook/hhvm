@@ -1891,7 +1891,7 @@ and expr_
         let fty = { ftype with ft_params = local_obj_fp :: ftype.ft_params } in
         let fun_arity =
           match fty.ft_arity with
-          | Fstandard (min, max) -> Fstandard (min + 1, max + 1)
+          | Fstandard min -> Fstandard (min + 1)
           | Fvariadic (min, x) -> Fvariadic (min + 1, x)
           | Fellipsis (min, p) -> Fellipsis (min + 1, p)
         in
@@ -5097,7 +5097,7 @@ and dispatch_call
           let make_fty params ft_ret =
             let len = List.length params in
             {
-              ft_arity = Fstandard (len, len);
+              ft_arity = Fstandard len;
               ft_tparams = [];
               ft_where_constraints = [];
               ft_params =
@@ -5949,11 +5949,12 @@ and call_construct p env class_ params el unpacked_element cid =
       in
       (env, tcid, tel, typed_unpack_element, m)
 
-and check_arity ?(did_unpack = false) pos pos_def (arity : int) exp_arity =
+and check_arity ?(did_unpack = false) pos pos_def ft (arity : int) exp_arity =
   let exp_min = Typing_defs.arity_min exp_arity in
   if arity < exp_min then Errors.typing_too_few_args exp_min arity pos pos_def;
   match exp_arity with
-  | Fstandard (_, exp_max) ->
+  | Fstandard _ ->
+    let exp_max = List.length ft.ft_params in
     let arity =
       if did_unpack then
         arity + 1
@@ -5969,7 +5970,7 @@ and check_arity ?(did_unpack = false) pos pos_def (arity : int) exp_arity =
 and check_lambda_arity lambda_pos def_pos lambda_arity expected_arity =
   let expected_min = Typing_defs.arity_min expected_arity in
   match (lambda_arity, expected_arity) with
-  | (Fstandard (lambda_min, _), Fstandard _) ->
+  | (Fstandard lambda_min, Fstandard _) ->
     if lambda_min < expected_min then
       Errors.typing_too_few_args expected_min lambda_min lambda_pos def_pos;
     if lambda_min > expected_min then
@@ -6356,7 +6357,7 @@ and call
              * unpacked array consumes 1 or many parameters, it is nonsensical to say
              * that not enough args were passed in (so we don't do the min check).
              *)
-            let () = check_arity ~did_unpack pos pos_def arity ft.ft_arity in
+            let () = check_arity ~did_unpack pos pos_def ft arity ft.ft_arity in
             (* Variadic params cannot be inout so we can stop early *)
             let env = wfold_left2 inout_write_back env ft.ft_params el in
             let (env, ret_ty) =
@@ -6388,7 +6389,7 @@ and split_remaining_params_required_optional ft remaining_params =
    *)
   let min_arity =
     match ft.ft_arity with
-    | Fstandard (min_arity, _)
+    | Fstandard min_arity
     | Fvariadic (min_arity, _)
     | Fellipsis (min_arity, _) ->
       min_arity

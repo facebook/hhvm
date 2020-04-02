@@ -7,24 +7,7 @@
  *
  *)
 
-open Hh_prelude
 open Typing_defs
-
-let unify_arities ~ellipsis_is_variadic anon_arity func_arity : bool =
-  match (anon_arity, func_arity) with
-  | (Fellipsis (a_min, _), Fvariadic (f_min, _)) when ellipsis_is_variadic ->
-    (* we want to allow use the "..." syntax in the declaration of
-     * anonymous function types to match named variadic arguments
-     * of the "...$args" form as well as unnamed ones *)
-    Int.equal a_min f_min
-  | (Fvariadic (a_min, _), Fstandard (f_min, _))
-  | (Fvariadic (a_min, _), Fvariadic (f_min, _))
-  | (Fellipsis (a_min, _), Fstandard (f_min, _))
-  | (Fellipsis (a_min, _), Fellipsis (f_min, _)) ->
-    a_min <= f_min
-  | (Fstandard (a_min, a_max), Fstandard (f_min, f_max)) ->
-    Int.equal a_min f_min && Int.equal a_max f_max
-  | (_, _) -> false
 
 let unify_param_modes param1 param2 on_error =
   let { fp_pos = pos1; fp_kind = mode1; _ } = param1 in

@@ -2491,7 +2491,9 @@ and simplify_subtype_funs_attributes
         (fun () ->
           Errors.fun_variadicity_hh_vs_php56 p_sub p_super subtype_env.on_error)
         res
-    | (Fstandard (_, sub_max), Fstandard (_, super_max)) ->
+    | (Fstandard _, Fstandard _) ->
+      let sub_max = List.length ft_sub.ft_params in
+      let super_max = List.length ft_super.ft_params in
       if sub_max < super_max then
         with_error
           (fun () -> Errors.fun_too_few_args p_sub p_super subtype_env.on_error)

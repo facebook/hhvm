@@ -910,10 +910,7 @@ impl DirectDeclSmartConstructors<'_> {
                             .collect::<Result<Vec<_>, ParseError>>()?;
                         let ret = self.node_to_ty(&hint.ret_hint, type_variables)?;
                         Ty_::Tfun(FunType {
-                            arity: FunArity::Fstandard(
-                                params.len() as isize,
-                                params.len() as isize,
-                            ),
+                            arity: FunArity::Fstandard(params.len() as isize),
                             tparams: Vec::new(),
                             where_constraints: Vec::new(),
                             params,
@@ -1153,7 +1150,7 @@ impl DirectDeclSmartConstructors<'_> {
     ) -> Result<(FunParams, Vec<PropertyDecl>, FunArity), ParseError> {
         match list {
             Node_::List(nodes) => nodes.into_iter().fold(
-                Ok((Vec::new(), Vec::new(), FunArity::Fstandard(0, 0))),
+                Ok((Vec::new(), Vec::new(), FunArity::Fstandard(0))),
                 |acc, variable| match (acc, variable) {
                     (Ok((mut variables, mut properties, arity)), Node_::Variable(innards)) => {
                         let VariableDecl {
@@ -1195,16 +1192,16 @@ impl DirectDeclSmartConstructors<'_> {
                             rx_annotation: None,
                         };
                         let arity = match (arity, initializer, variadic) {
-                            (FunArity::Fstandard(min, max), Node_::Ignored, false) => {
+                            (FunArity::Fstandard(min), Node_::Ignored, false) => {
                                 variables.push(param);
-                                FunArity::Fstandard(min + 1, max + 1)
+                                FunArity::Fstandard(min + 1)
                             }
-                            (FunArity::Fstandard(min, _), Node_::Ignored, true) => {
+                            (FunArity::Fstandard(min), Node_::Ignored, true) => {
                                 FunArity::Fvariadic(min, param)
                             }
-                            (FunArity::Fstandard(min, max), _, _) => {
+                            (FunArity::Fstandard(min), _, _) => {
                                 variables.push(param);
-                                FunArity::Fstandard(min, max + 1)
+                                FunArity::Fstandard(min)
                             }
                             (arity, _, _) => {
                                 variables.push(param);
@@ -1217,7 +1214,7 @@ impl DirectDeclSmartConstructors<'_> {
                     (acc @ Err(_), _) => acc,
                 },
             ),
-            Node_::Ignored => Ok((Vec::new(), Vec::new(), FunArity::Fstandard(0, 0))),
+            Node_::Ignored => Ok((Vec::new(), Vec::new(), FunArity::Fstandard(0))),
             n => Err(format!("Expected a list of variables, but got {:?}", n)),
         }
     }

@@ -298,8 +298,10 @@ fn print_fun_def<W: Write>(
     print_fun_attrs(ctx, w, fun_def)?;
     w.write(string_of_span(&fun_def.span))?;
     w.write(" ")?;
-    option(w, &body.return_type_info, print_type_info)?;
-    w.write(" ")?;
+    option(w, &body.return_type_info, |w, ti| {
+        print_type_info(w, ti)?;
+        w.write(" ")
+    })?;
     w.write(fun_def.name.to_raw_string())?;
     print_params(ctx, w, fun_def.body.env.as_ref(), fun_def.params())?;
     if fun_def.is_generator() {

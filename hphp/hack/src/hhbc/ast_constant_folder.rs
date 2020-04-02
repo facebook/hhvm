@@ -20,6 +20,8 @@ use oxidized::{
 };
 use runtime::TypedValue;
 
+use itertools::Itertools;
+
 #[derive(Debug, PartialEq, Eq)]
 pub enum Error {
     NotLiteral,
@@ -317,14 +319,14 @@ pub fn expr_to_typed_value_(
         Id(_) => Err(Error::UserDefinedConstant),
 
         Collection(x) if x.0.name().eq("vec") => vec_to_typed_value(emitter, ns, pos, &x.2),
-        Collection(x) if x.0.name().eq("keyset") => {
-            // TODO(hrust): dedup
-            Ok(TypedValue::Keyset(
-                x.2.iter()
-                    .map(|x| keyset_value_afield_to_typed_value(emitter, ns, x))
-                    .collect::<Result<_, _>>()?,
-            ))
-        }
+        Collection(x) if x.0.name().eq("keyset") => Ok(TypedValue::Keyset(
+            x.2.iter()
+                .map(|x| keyset_value_afield_to_typed_value(emitter, ns, x))
+                .collect::<Result<Vec<_>, _>>()?
+                .into_iter()
+                .unique()
+                .collect(),
+        )),
         Collection(x)
             if x.0.name().eq("dict")
                 || allow_maps

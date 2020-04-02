@@ -520,6 +520,11 @@ fn emit_defs(env: &mut Env, emitter: &mut Emitter, prog: &[tast::Def]) -> Result
                 let num = get_order(&(*rd).emit_id);
                 Ok(emit_pos_then(&pos, instr::defrecord(*num)))
             }
+            Def::Constant(c) => {
+                let tast::Id(pos, _) = &(*c).name;
+                let num = get_order(&(*c).emit_id);
+                Ok(emit_pos_then(&pos, instr::defcns(*num)))
+            }
             _ => Ok(instr::empty()),
         }
     };

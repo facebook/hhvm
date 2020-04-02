@@ -68,29 +68,19 @@ let expand_ty ?var_hook ?pos env ty =
         ft_tparams;
         ft_where_constraints;
         ft_ret;
-        ft_fun_kind;
+        ft_flags;
         ft_params;
         ft_reactive;
-        ft_return_disposable;
-        ft_mutability;
-        ft_returns_mutable;
-        ft_is_coroutine;
-        ft_returns_void_to_rx;
       } =
     {
       ft_arity;
-      ft_fun_kind;
+      ft_flags;
       ft_reactive;
-      ft_is_coroutine;
-      ft_return_disposable;
-      ft_mutability;
-      ft_returns_mutable;
-      ft_tparams = Tuple.T2.map_fst ~f:(List.map ~f:exp_tparam) ft_tparams;
+      ft_tparams = List.map ~f:exp_tparam ft_tparams;
       ft_where_constraints =
         List.map ~f:exp_where_constraint ft_where_constraints;
       ft_ret = exp_possibly_enforced_ty ft_ret;
       ft_params = List.map ~f:exp_fun_param ft_params;
-      ft_returns_void_to_rx;
     }
   and exp_fun_param
       {

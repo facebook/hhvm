@@ -45,8 +45,8 @@ Parsed decls:
               sm_type =
               (Rwitness (root|classes_consistent_construct.php line 8, characters 19-29),
                (Tfun
-                  { ft_is_coroutine = false; ft_arity = (Fstandard (1, 1));
-                    ft_tparams = []; ft_where_constraints = [];
+                  { ft_arity = (Fstandard (1, 1)); ft_tparams = [];
+                    ft_where_constraints = [];
                     ft_params =
                     [{ fp_pos = [8:33-35]; fp_name = (Some "$a");
                        fp_type =
@@ -64,9 +64,10 @@ Parsed decls:
                       (Rwitness (root|classes_consistent_construct.php line 8, characters 19-29),
                        (Tprim Tvoid))
                       };
-                    ft_fun_kind = sync; ft_reactive = Nonreactive;
-                    ft_return_disposable = false; ft_mutable = none;
-                    ft_returns_mutable = false }));
+                    ft_flags =
+                    (make_ft_flags sync none ~return_disposable:false
+                      ~returns_mutable:false ~returns_void_to_rx:false);
+                    ft_reactive = Nonreactive }));
               sm_visibility = Public; sm_fixme_codes = {};
               sm_deprecated = None });
       sc_static_methods = []; sc_methods = []; sc_user_attributes = [];

@@ -160,7 +160,8 @@ let handle_awaitable_return env ft_fun_kind (ft_ret : decl_possibly_enforced_ty)
   | _ -> compute_enforced_and_pessimize_ty env return_type
 
 let compute_enforced_and_pessimize_fun_type env (ft : decl_fun_type) =
-  let { ft_params; ft_ret; ft_fun_kind; _ } = ft in
+  let { ft_params; ft_ret; _ } = ft in
+  let ft_fun_kind = get_ft_fun_kind ft in
   let ft_ret = handle_awaitable_return env ft_fun_kind ft_ret in
   let ft_params =
     List.map

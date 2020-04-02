@@ -32,8 +32,8 @@ Parsed decls:
          sm_type =
          (Rwitness (root|classes_typeconst.php line 7, characters 19-19),
           (Tfun
-             { ft_is_coroutine = false; ft_arity = (Fstandard (0, 0));
-               ft_tparams = []; ft_where_constraints = []; ft_params = [];
+             { ft_arity = (Fstandard (0, 0)); ft_tparams = [];
+               ft_where_constraints = []; ft_params = [];
                ft_ret =
                { et_enforced = false;
                  et_type =
@@ -43,9 +43,10 @@ Parsed decls:
                        Tthis),
                       [([7:30-31], "T")])))
                  };
-               ft_fun_kind = sync; ft_reactive = Nonreactive;
-               ft_return_disposable = false; ft_mutable = none;
-               ft_returns_mutable = false }));
+               ft_flags =
+               (make_ft_flags sync none ~return_disposable:false
+                 ~returns_mutable:false ~returns_void_to_rx:false);
+               ft_reactive = Nonreactive }));
          sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None };
         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
           sm_memoizelsb = false; sm_name = ([11:19-20], "g");
@@ -54,8 +55,8 @@ Parsed decls:
           sm_type =
           (Rwitness (root|classes_typeconst.php line 11, characters 19-19),
            (Tfun
-              { ft_is_coroutine = false; ft_arity = (Fstandard (0, 0));
-                ft_tparams = []; ft_where_constraints = []; ft_params = [];
+              { ft_arity = (Fstandard (0, 0)); ft_tparams = [];
+                ft_where_constraints = []; ft_params = [];
                 ft_ret =
                 { et_enforced = false;
                   et_type =
@@ -65,9 +66,10 @@ Parsed decls:
                         Tthis),
                        [([11:30-32], "T2")])))
                   };
-                ft_fun_kind = sync; ft_reactive = Nonreactive;
-                ft_return_disposable = false; ft_mutable = none;
-                ft_returns_mutable = false }));
+                ft_flags =
+                (make_ft_flags sync none ~return_disposable:false
+                  ~returns_mutable:false ~returns_void_to_rx:false);
+                ft_reactive = Nonreactive }));
           sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None }
         ];
       sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
@@ -98,8 +100,8 @@ Parsed decls:
          sm_type =
          (Rwitness (root|classes_typeconst.php line 20, characters 28-38),
           (Tfun
-             { ft_is_coroutine = false; ft_arity = (Fstandard (1, 1));
-               ft_tparams = []; ft_where_constraints = [];
+             { ft_arity = (Fstandard (1, 1)); ft_tparams = [];
+               ft_where_constraints = [];
                ft_params =
                [{ fp_pos = [20:60-68]; fp_name = (Some "$request");
                   fp_type =
@@ -123,9 +125,10 @@ Parsed decls:
                        Tthis),
                       [([20:77-87], "TConstType")])))
                  };
-               ft_fun_kind = sync; ft_reactive = Nonreactive;
-               ft_return_disposable = false; ft_mutable = none;
-               ft_returns_mutable = false }));
+               ft_flags =
+               (make_ft_flags sync none ~return_disposable:false
+                 ~returns_mutable:false ~returns_void_to_rx:false);
+               ft_reactive = Nonreactive }));
          sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None }
         ];
       sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>

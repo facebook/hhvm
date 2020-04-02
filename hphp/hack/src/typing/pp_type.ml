@@ -398,11 +398,6 @@ and pp_fun_type : type a. Format.formatter -> a ty fun_type -> unit =
  fun fmt x ->
   Format.fprintf fmt "@[<2>{ ";
 
-  Format.fprintf fmt "@[%s =@ " "ft_is_coroutine";
-  Format.fprintf fmt "%B" x.ft_is_coroutine;
-  Format.fprintf fmt "@]";
-  Format.fprintf fmt ";@ ";
-
   Format.fprintf fmt "@[%s =@ " "ft_arity";
   pp_fun_arity fmt x.ft_arity;
   Format.fprintf fmt "@]";
@@ -417,7 +412,7 @@ and pp_fun_type : type a. Format.formatter -> a ty fun_type -> unit =
          pp_tparam fmt x;
          true)
        ~init:false
-       (fst x.ft_tparams));
+       x.ft_tparams);
   Format.fprintf fmt "@,]@]";
   Format.fprintf fmt "@]";
   Format.fprintf fmt ";@ ";
@@ -446,29 +441,48 @@ and pp_fun_type : type a. Format.formatter -> a ty fun_type -> unit =
   Format.fprintf fmt "@]";
   Format.fprintf fmt ";@ ";
 
-  Format.fprintf fmt "@[%s =@ " "ft_fun_kind";
-  Format.pp_print_string fmt (show_fun_kind x.ft_fun_kind);
+  let pp_ft_flags fmt ft =
+    Format.fprintf fmt "@[<2>(%s@ " "make_ft_flags";
+
+    Format.fprintf fmt "@[";
+    Format.fprintf fmt "%s" (show_fun_kind (get_ft_fun_kind ft));
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt "@ ";
+
+    Format.fprintf fmt "@[";
+    Format.fprintf
+      fmt
+      "%s"
+      (show_param_mutability_opt (get_ft_param_mutable ft));
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt "@ ";
+
+    Format.fprintf fmt "@[~%s:" "return_disposable";
+    Format.fprintf fmt "%B" (get_ft_return_disposable ft);
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt "@ ";
+
+    Format.fprintf fmt "@[~%s:" "returns_mutable";
+    Format.fprintf fmt "%B" (get_ft_returns_mutable ft);
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt "@ ";
+
+    Format.fprintf fmt "@[~%s:" "returns_void_to_rx";
+    Format.fprintf fmt "%B" (get_ft_returns_void_to_rx ft);
+    Format.fprintf fmt "@]";
+
+    Format.fprintf fmt ")@]"
+  in
+
+  Format.fprintf fmt "@[%s =@ " "ft_flags";
+  pp_ft_flags fmt x;
   Format.fprintf fmt "@]";
   Format.fprintf fmt ";@ ";
 
   Format.fprintf fmt "@[%s =@ " "ft_reactive";
   pp_reactivity fmt x.ft_reactive;
   Format.fprintf fmt "@]";
-  Format.fprintf fmt ";@ ";
 
-  Format.fprintf fmt "@[%s =@ " "ft_return_disposable";
-  Format.fprintf fmt "%B" x.ft_return_disposable;
-  Format.fprintf fmt "@]";
-  Format.fprintf fmt ";@ ";
-
-  Format.fprintf fmt "@[%s =@ " "ft_mutable";
-  Format.fprintf fmt "%s" (show_param_mutability_opt x.ft_mutability);
-  Format.fprintf fmt "@]";
-  Format.fprintf fmt ";@ ";
-
-  Format.fprintf fmt "@[%s =@ " "ft_returns_mutable";
-  Format.fprintf fmt "%B" x.ft_returns_mutable;
-  Format.fprintf fmt "@]";
   Format.fprintf fmt "@ }@]"
 
 and show_param_mutability_opt : param_mutability option -> string =

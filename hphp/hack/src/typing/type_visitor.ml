@@ -103,7 +103,7 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
           (List.map ft_params (fun x -> x.fp_type.et_type))
       in
       let tparams =
-        List.map (fst ft_tparams) (fun t -> List.map t.tp_constraints snd)
+        List.map ft_tparams (fun t -> List.map t.tp_constraints snd)
       in
       let acc =
         List.fold_left
@@ -235,7 +235,7 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
           (List.map ft_params (fun x -> x.fp_type.et_type))
       in
       let tparams =
-        List.map (fst ft_tparams) (fun t -> List.map t.tp_constraints snd)
+        List.map ft_tparams (fun t -> List.map t.tp_constraints snd)
       in
       let acc =
         List.fold_left

@@ -312,19 +312,20 @@ and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
       ( Reason.Rwitness (fst f.f_name),
         Tfun
           {
-            ft_is_coroutine = Ast_defs.(equal_fun_kind f.f_fun_kind FCoroutine);
             ft_arity = arity;
-            ft_tparams = (tparams, FTKtparams);
+            ft_tparams = tparams;
             ft_where_constraints = where_constraints;
             ft_params = params;
             ft_ret = { et_type = ret_ty; et_enforced = false };
-            ft_fun_kind = f.f_fun_kind;
             ft_reactive = reactivity;
-            ft_mutability = None;
-            (* Functions can't be mutable because they don't have "this" *)
-            ft_returns_mutable = returns_mutable;
-            ft_return_disposable = return_disposable;
-            ft_returns_void_to_rx = returns_void_to_rx;
+            ft_flags =
+              make_ft_flags
+                f.f_fun_kind
+                (* Functions can't be mutable because they don't have "this" *)
+                None
+                ~returns_mutable
+                ~return_disposable
+                ~returns_void_to_rx;
           } )
   in
   { fe_pos = fst f.f_name; fe_type; fe_deprecated; fe_decl_errors = None }

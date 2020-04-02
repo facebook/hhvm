@@ -461,25 +461,24 @@ and localize_ft ?instantiation ~ety_env ~def_pos env ft =
    * If explicit type parameters are provided, just instantiate tvarl to them.
    *)
   let (env, substs) =
-    let (tparams, _) = ft.ft_tparams in
     match instantiation with
     | Some { explicit_targs; use_name = _; use_pos } ->
       if
         (not (List.is_empty explicit_targs))
-        && Int.( <> ) (List.length explicit_targs) (List.length tparams)
+        && Int.( <> ) (List.length explicit_targs) (List.length ft.ft_tparams)
       then
         Errors.expected_tparam
           ~definition_pos:def_pos
           ~use_pos
-          (List.length tparams)
+          (List.length ft.ft_tparams)
           None;
       let tvarl = List.map ~f:fst explicit_targs in
-      let ft_subst = Subst.make_locl tparams tvarl in
+      let ft_subst = Subst.make_locl ft.ft_tparams tvarl in
       (env, SMap.union ft_subst ety_env.substs)
     | None ->
       ( env,
         List.fold_left
-          tparams
+          ft.ft_tparams
           ~f:
             begin
               fun subst t ->
@@ -529,14 +528,7 @@ and localize_ft ?instantiation ~ety_env ~def_pos env ft =
   let old_tpenv = Env.get_tpenv env in
   let old_global_tpenv = env.global_tpenv in
   (* Always localize tparams so they are available for later Tast check *)
-  let (env, tparams) = List.map_env env (fst ft.ft_tparams) localize_tparam in
-  let ft_tparams =
-    ( tparams,
-      if Option.is_some instantiation then
-        FTKinstantiated_targs
-      else
-        FTKtparams )
-  in
+  let (env, tparams) = List.map_env env ft.ft_tparams localize_tparam in
   (* Localize the 'where' constraints *)
   let (env, where_constraints) =
     List.map_env env ft.ft_where_constraints localize_where_constraint
@@ -551,9 +543,7 @@ and localize_ft ?instantiation ~ety_env ~def_pos env ft =
   let env =
     match instantiation with
     | Some { use_pos; _ } ->
-      let env =
-        check_tparams_constraints ~use_pos ~ety_env env (fst ft.ft_tparams)
-      in
+      let env = check_tparams_constraints ~use_pos ~ety_env env ft.ft_tparams in
       let env =
         check_where_constraints
           ~in_class:false
@@ -586,13 +576,21 @@ and localize_ft ?instantiation ~ety_env ~def_pos env ft =
         (env, { param with fp_type = ty }))
   in
   let (env, ret) = localize_possibly_enforced_ty ~ety_env env ft.ft_ret in
+  let ft =
+    set_ft_ftk
+      ft
+      ( if Option.is_some instantiation then
+        FTKinstantiated_targs
+      else
+        FTKtparams )
+  in
   ( env,
     {
       ft with
       ft_arity = arity;
       ft_params = params;
       ft_ret = ret;
-      ft_tparams;
+      ft_tparams = tparams;
       ft_where_constraints = where_constraints;
     } )
 

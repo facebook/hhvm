@@ -515,21 +515,16 @@ impl<'a> FunType_<'a> {
         let FunType_ { return_, params } = self;
 
         FunType {
-            is_coroutine: false,
             arity: FunArity::Fstandard(0, 0),
-            tparams: (vec![], FunTparamsKind::FTKtparams),
+            tparams: vec![],
             where_constraints: vec![],
             params: params.iter().map(|p| p.to_oxidized()).collect(),
             ret: PossiblyEnforcedTy {
                 enforced: false,
                 type_: return_.to_oxidized(),
             },
-            fun_kind: ast_defs::FunKind::FSync,
             reactive: Reactivity::Nonreactive,
-            return_disposable: false,
-            mutability: None,
-            returns_mutable: false,
-            returns_void_to_rx: false,
+            flags: 0,
         }
     }
 }

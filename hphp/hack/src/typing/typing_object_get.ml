@@ -293,7 +293,7 @@ and obj_get_concrete_ty
                     ~def_pos:mem_pos
                     ~use_name:(strip_ns id_str)
                     env
-                    (fst ft.ft_tparams)
+                    ft.ft_tparams
                     (List.map ~f:snd explicit_targs)
                 in
                 let ft =

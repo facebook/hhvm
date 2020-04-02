@@ -7,8 +7,8 @@ Parsed decls:
       fe_type =
       (Rwitness (root|async_and_generator_functions.php line 5, characters 16-29),
        (Tfun
-          { ft_is_coroutine = false; ft_arity = (Fstandard (0, 0));
-            ft_tparams = []; ft_where_constraints = []; ft_params = [];
+          { ft_arity = (Fstandard (0, 0)); ft_tparams = [];
+            ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;
               et_type =
@@ -18,17 +18,18 @@ Parsed decls:
                     (Tprim Tstring))]
                   )))
               };
-            ft_fun_kind = async; ft_reactive = Nonreactive;
-            ft_return_disposable = false; ft_mutable = none;
-            ft_returns_mutable = false }));
+            ft_flags =
+            (make_ft_flags async none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
       fe_deprecated = None;  };
     "async_generator" ->
     { fe_pos = [18:16-31];
       fe_type =
       (Rwitness (root|async_and_generator_functions.php line 18, characters 16-30),
        (Tfun
-          { ft_is_coroutine = false; ft_arity = (Fstandard (0, 0));
-            ft_tparams = []; ft_where_constraints = []; ft_params = [];
+          { ft_arity = (Fstandard (0, 0)); ft_tparams = [];
+            ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;
               et_type =
@@ -43,17 +44,18 @@ Parsed decls:
                     ]
                   )))
               };
-            ft_fun_kind = async generator; ft_reactive = Nonreactive;
-            ft_return_disposable = false; ft_mutable = none;
-            ft_returns_mutable = false }));
+            ft_flags =
+            (make_ft_flags async generator none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
       fe_deprecated = None;  };
     "generator_function" ->
     { fe_pos = [10:10-28];
       fe_type =
       (Rwitness (root|async_and_generator_functions.php line 10, characters 10-27),
        (Tfun
-          { ft_is_coroutine = false; ft_arity = (Fstandard (0, 0));
-            ft_tparams = []; ft_where_constraints = []; ft_params = [];
+          { ft_arity = (Fstandard (0, 0)); ft_tparams = [];
+            ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;
               et_type =
@@ -68,17 +70,18 @@ Parsed decls:
                     ]
                   )))
               };
-            ft_fun_kind = generator; ft_reactive = Nonreactive;
-            ft_return_disposable = false; ft_mutable = none;
-            ft_returns_mutable = false }));
+            ft_flags =
+            (make_ft_flags generator none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
       fe_deprecated = None;  };
     "generator_function_implicit_key" ->
     { fe_pos = [14:10-41];
       fe_type =
       (Rwitness (root|async_and_generator_functions.php line 14, characters 10-40),
        (Tfun
-          { ft_is_coroutine = false; ft_arity = (Fstandard (0, 0));
-            ft_tparams = []; ft_where_constraints = []; ft_params = [];
+          { ft_arity = (Fstandard (0, 0)); ft_tparams = [];
+            ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;
               et_type =
@@ -93,26 +96,28 @@ Parsed decls:
                     ]
                   )))
               };
-            ft_fun_kind = generator; ft_reactive = Nonreactive;
-            ft_return_disposable = false; ft_mutable = none;
-            ft_returns_mutable = false }));
+            ft_flags =
+            (make_ft_flags generator none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
       fe_deprecated = None;  };
     "sync_function" ->
     { fe_pos = [3:10-23];
       fe_type =
       (Rwitness (root|async_and_generator_functions.php line 3, characters 10-22),
        (Tfun
-          { ft_is_coroutine = false; ft_arity = (Fstandard (0, 0));
-            ft_tparams = []; ft_where_constraints = []; ft_params = [];
+          { ft_arity = (Fstandard (0, 0)); ft_tparams = [];
+            ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;
               et_type =
               (Rhint (root|async_and_generator_functions.php line 3, characters 27-30),
                (Tprim Tvoid))
               };
-            ft_fun_kind = sync; ft_reactive = Nonreactive;
-            ft_return_disposable = false; ft_mutable = none;
-            ft_returns_mutable = false }));
+            ft_flags =
+            (make_ft_flags sync none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
       fe_deprecated = None;  } };
   typedefs = {}; consts = {} }
 

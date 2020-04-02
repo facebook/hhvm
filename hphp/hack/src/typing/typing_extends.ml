@@ -574,18 +574,13 @@ let default_constructor_ce class_ =
   (* reason doesn't get used in, e.g. arity checks *)
   let ft =
     {
-      ft_is_coroutine = false;
       ft_arity = Fstandard (0, 0);
-      ft_tparams = ([], FTKtparams);
+      ft_tparams = [];
       ft_where_constraints = [];
       ft_params = [];
       ft_ret = { et_type = MakeType.void r; et_enforced = false };
-      ft_fun_kind = Ast_defs.FSync;
+      ft_flags = 0;
       ft_reactive = Nonreactive;
-      ft_mutability = None;
-      ft_returns_mutable = false;
-      ft_return_disposable = false;
-      ft_returns_void_to_rx = false;
     }
   in
   {

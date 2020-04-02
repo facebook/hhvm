@@ -191,7 +191,7 @@ fn fun_type_of_id<'a>(
                     // TODO(hrust) transform_special_fun_ty
                     let ety_env = bld.env_with_self();
                     // TODO(hrust) below: strip_ns id
-                    let targs = typing_phase::localize_targs(env, pos, id, &ft.tparams.0, targs);
+                    let targs = typing_phase::localize_targs(env, pos, id, &ft.tparams, targs);
                     // TODO(hrust) pessimize
                     let instantiation = MethodInstantiation {
                         use_pos: pos,

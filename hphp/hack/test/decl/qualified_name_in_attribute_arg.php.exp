@@ -7,17 +7,18 @@ Parsed decls:
       fe_type =
       (Rwitness (root|qualified_name_in_attribute_arg.php line 4, characters 10-10),
        (Tfun
-          { ft_is_coroutine = false; ft_arity = (Fstandard (0, 0));
-            ft_tparams = []; ft_where_constraints = []; ft_params = [];
+          { ft_arity = (Fstandard (0, 0)); ft_tparams = [];
+            ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;
               et_type =
               (Rhint (root|qualified_name_in_attribute_arg.php line 4, characters 15-18),
                (Tprim Tvoid))
               };
-            ft_fun_kind = sync; ft_reactive = Nonreactive;
-            ft_return_disposable = false; ft_mutable = none;
-            ft_returns_mutable = false }));
+            ft_flags =
+            (make_ft_flags sync none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
       fe_deprecated = None;  } };
   typedefs = {}; consts = {} }
 

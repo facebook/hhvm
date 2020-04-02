@@ -2397,18 +2397,20 @@ and simplify_subtype_funs_attributes
     ft_super.ft_reactive
     env
   |> check_with
-       (Bool.equal ft_sub.ft_is_coroutine ft_super.ft_is_coroutine)
+       (Bool.equal (get_ft_is_coroutine ft_sub) (get_ft_is_coroutine ft_super))
        (fun () ->
          Errors.coroutinness_mismatch
-           ft_super.ft_is_coroutine
+           (get_ft_is_coroutine ft_super)
            p_super
            p_sub
            subtype_env.on_error)
   |> check_with
-       (Bool.equal ft_sub.ft_return_disposable ft_super.ft_return_disposable)
+       (Bool.equal
+          (get_ft_return_disposable ft_sub)
+          (get_ft_return_disposable ft_super))
        (fun () ->
          Errors.return_disposable_mismatch
-           ft_super.ft_return_disposable
+           (get_ft_return_disposable ft_super)
            p_super
            p_sub
            subtype_env.on_error)
@@ -2419,19 +2421,21 @@ and simplify_subtype_funs_attributes
   NOTE: error is not reported if child is non-reactive since it does not have
   immutability-by-default behavior *)
   check_with
-    ( Bool.equal ft_sub.ft_returns_mutable ft_super.ft_returns_mutable
-    || (not ft_super.ft_returns_mutable)
+    ( Bool.equal
+        (get_ft_returns_mutable ft_sub)
+        (get_ft_returns_mutable ft_super)
+    || (not (get_ft_returns_mutable ft_super))
     || equal_reactivity ft_sub.ft_reactive Nonreactive )
     (fun () ->
       Errors.mutable_return_result_mismatch
-        ft_super.ft_returns_mutable
+        (get_ft_returns_mutable ft_super)
         p_super
         p_sub
         subtype_env.on_error)
   |> check_with
        ( equal_reactivity ft_super.ft_reactive Nonreactive
-       || ft_super.ft_returns_void_to_rx
-       || not ft_sub.ft_returns_void_to_rx )
+       || get_ft_returns_void_to_rx ft_super
+       || not (get_ft_returns_void_to_rx ft_sub) )
        (fun () ->
          (*  __ReturnsVoidToRx can be omitted on subtype, in this case using subtype
        via reference to supertype in rx context will be ok since result will be
@@ -2467,9 +2471,9 @@ and simplify_subtype_funs_attributes
             ~is_receiver:true
             ~subtype_env
             p_super
-            ft_super.ft_mutability
+            (get_ft_param_mutable ft_super)
             p_sub
-            ft_sub.ft_mutability
+            (get_ft_param_mutable ft_sub)
     else
       (env, prop) )
     |> check_with
@@ -3349,7 +3353,7 @@ let subtype_method
     List.fold_left cstrl ~init:env ~f:(fun env (ty1, ck, ty2) ->
         add_constraint p_sub env ck ty1 ty2)
   in
-  let env = add_tparams_constraints env (fst ft_super.ft_tparams) in
+  let env = add_tparams_constraints env ft_super.ft_tparams in
   let env = add_where_constraints env ft_super.ft_where_constraints in
   let (env, prop) =
     simplify_subtype_funs
@@ -3397,12 +3401,12 @@ let subtype_method
   let env =
     if
       Int.( <> )
-        (List.length (fst ft_sub.ft_tparams))
-        (List.length (fst ft_super.ft_tparams))
+        (List.length ft_sub.ft_tparams)
+        (List.length ft_super.ft_tparams)
     then
       env
     else
-      check_tparams_constraints env (fst ft_sub.ft_tparams)
+      check_tparams_constraints env ft_sub.ft_tparams
   in
   let env = check_where_constraints env ft_sub.ft_where_constraints in
   Env.env_with_tpenv env old_tpenv

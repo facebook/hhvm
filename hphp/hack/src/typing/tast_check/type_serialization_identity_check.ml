@@ -43,7 +43,7 @@ let rec strip_ty ty =
     | Tunion tyl -> Tunion (strip_tyl tyl)
     | Tintersection tyl -> Tintersection (strip_tyl tyl)
     | Tclass (sid, exact, tyl) -> Tclass (sid, exact, strip_tyl tyl)
-    | Tfun { ft_is_coroutine; ft_params; ft_ret; _ } ->
+    | Tfun { ft_params; ft_ret; _ } ->
       let strip_param { fp_type; fp_kind; _ } =
         let fp_type = strip_possibly_enforced_ty fp_type in
         {
@@ -61,19 +61,14 @@ let rec strip_ty ty =
       let ft_ret = strip_possibly_enforced_ty ft_ret in
       Tfun
         {
-          ft_is_coroutine;
           ft_params;
           ft_ret;
           (* Dummy values: these aren't currently serialized. *)
           ft_arity = Fstandard (0, 0);
-          ft_tparams = ([], FTKtparams);
+          ft_tparams = [];
           ft_where_constraints = [];
-          ft_fun_kind = Ast_defs.FSync;
+          ft_flags = 0;
           ft_reactive = Nonreactive;
-          ft_return_disposable = false;
-          ft_mutability = None;
-          ft_returns_mutable = false;
-          ft_returns_void_to_rx = false;
         }
     | Tshape (shape_kind, shape_fields) ->
       let strip_field { sft_optional; sft_ty } =

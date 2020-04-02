@@ -35,17 +35,18 @@ Parsed decls:
          sm_type =
          (Rwitness (root|traits.php line 4, characters 19-27),
           (Tfun
-             { ft_is_coroutine = false; ft_arity = (Fstandard (0, 0));
-               ft_tparams = []; ft_where_constraints = []; ft_params = [];
+             { ft_arity = (Fstandard (0, 0)); ft_tparams = [];
+               ft_where_constraints = []; ft_params = [];
                ft_ret =
                { et_enforced = false;
                  et_type =
                  (Rhint (root|traits.php line 4, characters 32-35),
                   (Tprim Tvoid))
                  };
-               ft_fun_kind = sync; ft_reactive = Nonreactive;
-               ft_return_disposable = false; ft_mutable = none;
-               ft_returns_mutable = false }));
+               ft_flags =
+               (make_ft_flags sync none ~return_disposable:false
+                 ~returns_mutable:false ~returns_void_to_rx:false);
+               ft_reactive = Nonreactive }));
          sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None }
         ];
       sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
@@ -70,17 +71,18 @@ Parsed decls:
          sm_type =
          (Rwitness (root|traits.php line 10, characters 19-31),
           (Tfun
-             { ft_is_coroutine = false; ft_arity = (Fstandard (0, 0));
-               ft_tparams = []; ft_where_constraints = []; ft_params = [];
+             { ft_arity = (Fstandard (0, 0)); ft_tparams = [];
+               ft_where_constraints = []; ft_params = [];
                ft_ret =
                { et_enforced = false;
                  et_type =
                  (Rhint (root|traits.php line 10, characters 36-39),
                   (Tprim Tvoid))
                  };
-               ft_fun_kind = sync; ft_reactive = Nonreactive;
-               ft_return_disposable = false; ft_mutable = none;
-               ft_returns_mutable = false }));
+               ft_flags =
+               (make_ft_flags sync none ~return_disposable:false
+                 ~returns_mutable:false ~returns_void_to_rx:false);
+               ft_reactive = Nonreactive }));
          sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None }
         ];
       sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
@@ -102,17 +104,18 @@ Parsed decls:
          sm_type =
          (Rwitness (root|traits.php line 14, characters 19-34),
           (Tfun
-             { ft_is_coroutine = false; ft_arity = (Fstandard (0, 0));
-               ft_tparams = []; ft_where_constraints = []; ft_params = [];
+             { ft_arity = (Fstandard (0, 0)); ft_tparams = [];
+               ft_where_constraints = []; ft_params = [];
                ft_ret =
                { et_enforced = false;
                  et_type =
                  (Rhint (root|traits.php line 14, characters 39-42),
                   (Tprim Tvoid))
                  };
-               ft_fun_kind = sync; ft_reactive = Nonreactive;
-               ft_return_disposable = false; ft_mutable = none;
-               ft_returns_mutable = false }));
+               ft_flags =
+               (make_ft_flags sync none ~return_disposable:false
+                 ~returns_mutable:false ~returns_void_to_rx:false);
+               ft_reactive = Nonreactive }));
          sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None }
         ];
       sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>

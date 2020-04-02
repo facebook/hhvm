@@ -303,11 +303,9 @@ let ty_equal_shallow env ty1 ty2 =
   | (Tclass (x_sub, exact_sub, _), Tclass (x_super, exact_super, _)) ->
     String.equal (snd x_sub) (snd x_super) && equal_exact exact_sub exact_super
   | (Tfun fty1, Tfun fty2) ->
-    Bool.equal fty1.ft_is_coroutine fty2.ft_is_coroutine
-    && equal_locl_fun_arity fty1.ft_arity fty2.ft_arity
+    equal_locl_fun_arity fty1.ft_arity fty2.ft_arity
     && equal_reactivity fty1.ft_reactive fty2.ft_reactive
-    && Bool.equal fty1.ft_return_disposable fty2.ft_return_disposable
-    && Option.equal equal_param_mutability fty1.ft_mutability fty2.ft_mutability
+    && Int.equal fty1.ft_flags fty2.ft_flags
   | (Tshape (shape_kind1, fdm1), Tshape (shape_kind2, fdm2)) ->
     equal_shape_kind shape_kind1 shape_kind2
     && List.equal

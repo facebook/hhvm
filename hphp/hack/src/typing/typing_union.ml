@@ -400,11 +400,9 @@ and union_arraykind env ak1 ak2 =
 and union_funs env fty1 fty2 =
   (* TODO: If we later add fields to ft, they will be forgotten here. *)
   if
-    Bool.equal fty1.ft_is_coroutine fty2.ft_is_coroutine
-    && equal_locl_fun_arity fty1.ft_arity fty2.ft_arity
+    equal_locl_fun_arity fty1.ft_arity fty2.ft_arity
     && equal_reactivity fty1.ft_reactive fty2.ft_reactive
-    && Bool.equal fty1.ft_return_disposable fty2.ft_return_disposable
-    && Bool.equal fty1.ft_returns_mutable fty2.ft_returns_mutable
+    && Int.equal fty1.ft_flags fty2.ft_flags
     && Int.equal (ft_params_compare fty1.ft_params fty2.ft_params) 0
   then
     let (env, ft_ret) =

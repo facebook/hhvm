@@ -7,6 +7,7 @@
     pp_type
     typing_defs
     typing_defs_core
+    typing_defs_flags
     tanySentinel
     typing_reason)
   (libraries

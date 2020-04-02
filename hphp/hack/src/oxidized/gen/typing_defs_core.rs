@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4184acddca1789185ca8d5e56380bd48>>
+// @generated SignedSource<<2f424b94e1c0fc99f74550d5859417e5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -666,20 +666,14 @@ pub enum Reactivity {
     Serialize
 )]
 pub struct FunType {
-    pub is_coroutine: bool,
     pub arity: FunArity,
-    pub tparams: (Vec<Tparam>, FunTparamsKind),
+    pub tparams: Vec<Tparam>,
     pub where_constraints: Vec<WhereConstraint>,
     pub params: FunParams,
-    pub ret: PossiblyEnforcedTy,
     /// Carries through the sync/async information from the aast
-    pub fun_kind: ast_defs::FunKind,
+    pub ret: PossiblyEnforcedTy,
     pub reactive: Reactivity,
-    pub return_disposable: bool,
-    /// mutability of the receiver
-    pub mutability: Option<ParamMutability>,
-    pub returns_mutable: bool,
-    pub returns_void_to_rx: bool,
+    pub flags: isize,
 }
 
 /// Arity information for a fun_type; indicating the minimum number of

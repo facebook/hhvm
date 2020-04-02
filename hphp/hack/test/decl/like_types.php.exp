@@ -29,8 +29,8 @@ Parsed decls:
          sm_type =
          (Rwitness (root|like_types.php line 13, characters 19-19),
           (Tfun
-             { ft_is_coroutine = false; ft_arity = (Fstandard (1, 1));
-               ft_tparams = []; ft_where_constraints = [];
+             { ft_arity = (Fstandard (1, 1)); ft_tparams = [];
+               ft_where_constraints = [];
                ft_params =
                [{ fp_pos = [13:29-31]; fp_name = (Some "$t");
                   fp_type =
@@ -51,9 +51,10 @@ Parsed decls:
                  (Rhint (root|like_types.php line 13, characters 34-37),
                   (Tprim Tvoid))
                  };
-               ft_fun_kind = sync; ft_reactive = Nonreactive;
-               ft_return_disposable = false; ft_mutable = none;
-               ft_returns_mutable = false }));
+               ft_flags =
+               (make_ft_flags sync none ~return_disposable:false
+                 ~returns_mutable:false ~returns_void_to_rx:false);
+               ft_reactive = Nonreactive }));
          sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None }
         ];
       sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
@@ -64,8 +65,8 @@ Parsed decls:
       fe_type =
       (Rwitness (root|like_types.php line 4, characters 10-19),
        (Tfun
-          { ft_is_coroutine = false; ft_arity = (Fstandard (1, 1));
-            ft_tparams = []; ft_where_constraints = [];
+          { ft_arity = (Fstandard (1, 1)); ft_tparams = [];
+            ft_where_constraints = [];
             ft_params =
             [{ fp_pos = [4:25-27]; fp_name = (Some "$i");
                fp_type =
@@ -83,16 +84,17 @@ Parsed decls:
               (Rhint (root|like_types.php line 4, characters 30-33),
                (Tprim Tvoid))
               };
-            ft_fun_kind = sync; ft_reactive = Nonreactive;
-            ft_return_disposable = false; ft_mutable = none;
-            ft_returns_mutable = false }));
+            ft_flags =
+            (make_ft_flags sync none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
       fe_deprecated = None;  };
     "f" ->
     { fe_pos = [6:10-11];
       fe_type =
       (Rwitness (root|like_types.php line 6, characters 10-10),
        (Tfun
-          { ft_is_coroutine = false; ft_arity = (Fstandard (1, 1));
+          { ft_arity = (Fstandard (1, 1));
             ft_tparams =
             [(Invariant, ([6:12-13], "T"),
               [(Constraint_as,
@@ -120,9 +122,10 @@ Parsed decls:
               (Rhint (root|like_types.php line 6, characters 30-33),
                (Tprim Tvoid))
               };
-            ft_fun_kind = sync; ft_reactive = Nonreactive;
-            ft_return_disposable = false; ft_mutable = none;
-            ft_returns_mutable = false }));
+            ft_flags =
+            (make_ft_flags sync none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
       fe_deprecated = None;  } };
   typedefs = {}; consts = {} }
 

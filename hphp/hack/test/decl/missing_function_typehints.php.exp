@@ -7,8 +7,8 @@ Parsed decls:
       fe_type =
       (Rwitness (root|missing_function_typehints.php line 3, characters 10-10),
        (Tfun
-          { ft_is_coroutine = false; ft_arity = (Fstandard (1, 1));
-            ft_tparams = []; ft_where_constraints = [];
+          { ft_arity = (Fstandard (1, 1)); ft_tparams = [];
+            ft_where_constraints = [];
             ft_params =
             [{ fp_pos = [3:12-14]; fp_name = (Some "$x");
                fp_type =
@@ -20,9 +20,10 @@ Parsed decls:
             ft_ret =
             { et_enforced = false;
               et_type = (Rnone (| line 0, characters 0-0), Tany) };
-            ft_fun_kind = sync; ft_reactive = Nonreactive;
-            ft_return_disposable = false; ft_mutable = none;
-            ft_returns_mutable = false }));
+            ft_flags =
+            (make_ft_flags sync none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
       fe_deprecated = None;  } };
   typedefs = {}; consts = {} }
 

@@ -405,20 +405,14 @@ and reactivity =
 (* The type of a function AND a method.
  * A function has a min and max arity because of optional arguments *)
 and 'ty fun_type = {
-  ft_is_coroutine: bool;
   ft_arity: 'ty fun_arity;
-  ft_tparams: 'ty tparam list * fun_tparams_kind;
+  ft_tparams: 'ty tparam list;
   ft_where_constraints: 'ty where_constraint list;
   ft_params: 'ty fun_params;
   ft_ret: 'ty possibly_enforced_ty;
-  (* Carries through the sync/async information from the aast *)
-  ft_fun_kind: Ast_defs.fun_kind;
   ft_reactive: reactivity;
-  ft_return_disposable: bool;
-  (* mutability of the receiver *)
-  ft_mutability: param_mutability option;
-  ft_returns_mutable: bool;
-  ft_returns_void_to_rx: bool;
+  (* Carries through the sync/async information from the aast *)
+  ft_flags: int;
 }
 
 and decl_fun_type = decl_ty fun_type

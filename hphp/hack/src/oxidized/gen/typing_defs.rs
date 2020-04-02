@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c922303c09bfd0c318c3eb1314c0444a>>
+// @generated SignedSource<<b35f05cfbc13eb755f9e0f2de1424b76>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -14,6 +14,8 @@ use serde::Serialize;
 
 #[allow(unused_imports)]
 use crate::*;
+
+pub use typing_defs_flags::*;
 
 pub use typing_defs_core::*;
 

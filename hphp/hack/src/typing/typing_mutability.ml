@@ -32,7 +32,7 @@ module Shared (Env : Env_S) = struct
           match (Env.env_reactivity env, fty.ft_reactive) with
           (* in localrx context assume non-reactive functions to return mutable *)
           | (Local _, Nonreactive) -> true
-          | _ -> fty.ft_returns_mutable
+          | _ -> get_ft_returns_mutable fty
         end
       | _ -> false
     in

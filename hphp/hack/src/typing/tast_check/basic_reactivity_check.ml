@@ -376,7 +376,7 @@ let enforce_mutable_call (env : Env.env) (te : expr) =
           (* OwnedMutable annotation is not allowed on methods so
        we ignore it here since it already syntax error *)
           begin
-            match fty.ft_mutability with
+            match get_ft_param_mutable fty with
             (* mutable-or-immutable function - ok *)
             | Some Param_maybe_mutable -> ()
             (* mutable call on mutable-or-immutable value - error *)
@@ -414,7 +414,7 @@ let enforce_mutable_call (env : Env.env) (te : expr) =
               ~f:(fun k ->
                 Borrowable_args.singleton
                   k
-                  (get_position expr, fty.ft_mutability))
+                  (get_position expr, get_ft_param_mutable fty))
           in
           check_mutability_fun_params env mut_args fun_ty el
         )
@@ -710,7 +710,7 @@ let check =
               ( if not is_expr_statement then
                 let (_env, fun_ty) = Env.expand_type env (get_type f) in
                 match get_node fun_ty with
-                | Tfun fty when fty.ft_returns_void_to_rx ->
+                | Tfun fty when get_ft_returns_void_to_rx fty ->
                   Errors.returns_void_to_rx_function_as_non_expression_statement
                     (get_position expr)
                     (get_pos fun_ty)

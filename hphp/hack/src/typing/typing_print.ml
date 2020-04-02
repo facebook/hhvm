@@ -116,7 +116,7 @@ module Full = struct
       [
         (* only print tparams when they have been instantiated with targs
          * so that they correctly express reified parameterization *)
-        (match ft.ft_tparams with
+        (match (ft.ft_tparams, get_ft_ftk ft) with
         | ([], _)
         | (_, FTKtparams) ->
           Nothing
@@ -236,7 +236,7 @@ module Full = struct
     Concat
       [
         text "(";
-        ( if ft.ft_is_coroutine then
+        ( if get_ft_is_coroutine ft then
           text "coroutine" ^^ Space
         else
           Nothing );
@@ -981,7 +981,7 @@ module Json = struct
     | (p, Tintersection tyl) -> obj @@ kind p "intersection" @ args tyl
     | (p, Tfun ft) ->
       let fun_kind p =
-        if ft.ft_is_coroutine then
+        if get_ft_is_coroutine ft then
           kind p "coroutine"
         else
           kind p "function"
@@ -1326,7 +1326,7 @@ module Json = struct
           get_array "args" (json, keytrace) >>= fun (args, keytrace) ->
           aux_args args ~keytrace >>= fun tyl -> ty (Tintersection tyl)
         | ("function" | "coroutine") as kind ->
-          let ft_is_coroutine = String.equal kind "coroutine" in
+          let _ft_is_coroutine = String.equal kind "coroutine" in
           get_array "params" (json, keytrace)
           >>= fun (params, params_keytrace) ->
           let params =
@@ -1367,19 +1367,14 @@ module Json = struct
           ty
             (Tfun
                {
-                 ft_is_coroutine;
                  ft_params;
                  ft_ret = { et_type = ft_ret; et_enforced = false };
                  (* Dummy values: these aren't currently serialized. *)
                  ft_arity = Fstandard (0, 0);
-                 ft_tparams = ([], FTKtparams);
+                 ft_tparams = [];
                  ft_where_constraints = [];
-                 ft_fun_kind = Ast_defs.FSync;
+                 ft_flags = 0;
                  ft_reactive = Nonreactive;
-                 ft_return_disposable = false;
-                 ft_mutability = None;
-                 ft_returns_mutable = false;
-                 ft_returns_void_to_rx = false;
                })
         | _ ->
           deserialization_error

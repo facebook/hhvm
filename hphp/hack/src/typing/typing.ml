@@ -214,7 +214,7 @@ let is_return_disposable_fun_type env ty =
   let (_env, ty) = Env.expand_type env ty in
   match get_node ty with
   | Tfun ft ->
-    ft.ft_return_disposable
+    get_ft_return_disposable ft
     || Option.is_some
          (Typing_disposable.is_disposable_type env ft.ft_ret.et_type)
   | _ -> false
@@ -1897,19 +1897,14 @@ and expr_
         in
         let caller =
           {
-            (* propagate 'is_coroutine' from the method being called*)
-            ft_is_coroutine = fty.ft_is_coroutine;
             ft_arity = fun_arity;
             ft_tparams = fty.ft_tparams;
             ft_where_constraints = fty.ft_where_constraints;
             ft_params = fty.ft_params;
             ft_ret = fty.ft_ret;
-            ft_fun_kind = fty.ft_fun_kind;
+            (* propagate 'is_coroutine' from the method being called*)
+            ft_flags = fty.ft_flags;
             ft_reactive = fty.ft_reactive;
-            ft_mutability = fty.ft_mutability;
-            ft_returns_mutable = fty.ft_returns_mutable;
-            ft_return_disposable = fty.ft_return_disposable;
-            ft_returns_void_to_rx = fty.ft_returns_void_to_rx;
           }
         in
         make_result
@@ -2010,7 +2005,7 @@ and expr_
               ~use_pos:p
               ~use_name:(strip_ns (snd meth))
               env
-              (fst ft.ft_tparams)
+              ft.ft_tparams
               []
           in
           let (env, ft) =
@@ -2800,7 +2795,13 @@ and expr_
       let env = { env with inside_ppl_class = false } in
       let is_coroutine = Ast_defs.(equal_fun_kind f.f_fun_kind FCoroutine) in
       let ft =
-        { ft with ft_reactive = reactivity; ft_is_coroutine = is_coroutine }
+        {
+          ft with
+          ft_reactive = reactivity;
+          ft_flags =
+            Typing_defs_flags.(
+              set_bit ft_flags_is_coroutine is_coroutine ft.ft_flags);
+        }
       in
       let (env, tefun, ty) = anon_make ?ret_ty env p f ft idl is_anon in
       let env = Env.set_env_reactive env old_reactivity in
@@ -4316,7 +4317,7 @@ and dispatch_call
           ~description_of_expected:"a function value"
       in
       match get_node ety with
-      | Tfun { ft_is_coroutine = true; _ } -> (env, Some true)
+      | Tfun ft -> (env, Some (get_ft_is_coroutine ft))
       | Tunion ts
       | Tintersection ts ->
         are_coroutines env ts
@@ -5096,9 +5097,8 @@ and dispatch_call
           let make_fty params ft_ret =
             let len = List.length params in
             {
-              ft_is_coroutine = false;
               ft_arity = Fstandard (len, len);
-              ft_tparams = ([], FTKtparams);
+              ft_tparams = [];
               ft_where_constraints = [];
               ft_params =
                 List.map params ~f:(fun et_type ->
@@ -5113,12 +5113,7 @@ and dispatch_call
                     });
               ft_ret = { et_enforced = false; et_type = ft_ret };
               ft_reactive = Nonreactive;
-              ft_return_disposable = false;
-              (* mutability of the receiver *)
-              ft_mutability = None;
-              ft_returns_mutable = false;
-              ft_returns_void_to_rx = false;
-              ft_fun_kind = Ast_defs.FSync;
+              ft_flags = 0;
             }
           in
           let reason = Reason.Rwitness cpos in
@@ -5242,7 +5237,7 @@ and fun_type_of_id env x tal el =
           ~use_pos:(fst x)
           ~use_name:(strip_ns (snd x))
           env
-          (fst ft.ft_tparams)
+          ft.ft_tparams
           (List.map ~f:snd tal)
       in
       let ft =
@@ -5538,7 +5533,7 @@ and class_get_
                   ~use_pos:p
                   ~use_name:(strip_ns mid)
                   env
-                  (fst ft.ft_tparams)
+                  ft.ft_tparams
                   (List.map ~f:snd explicit_targs)
               in
               let ft =

@@ -8,7 +8,83 @@
  *)
 
 open Hh_prelude
+open Typing_defs_flags
 include Typing_defs_core
+
+(* Accessesors for function type flags *)
+let get_ft_return_disposable ft = is_set ft.ft_flags ft_flags_return_disposable
+
+let get_ft_returns_void_to_rx ft =
+  is_set ft.ft_flags ft_flags_returns_void_to_rx
+
+let get_ft_returns_mutable ft = is_set ft.ft_flags ft_flags_returns_mutable
+
+let get_ft_is_coroutine ft = is_set ft.ft_flags ft_flags_is_coroutine
+
+let get_ft_async ft = is_set ft.ft_flags ft_flags_async
+
+let get_ft_generator ft = is_set ft.ft_flags ft_flags_generator
+
+let get_ft_ftk ft =
+  if is_set ft.ft_flags ft_flags_instantiated_targs then
+    FTKinstantiated_targs
+  else
+    FTKtparams
+
+let set_ft_ftk ft ftk =
+  {
+    ft with
+    ft_flags =
+      set_bit
+        ft_flags_instantiated_targs
+        (match ftk with
+        | FTKinstantiated_targs -> true
+        | FTKtparams -> false)
+        ft.ft_flags;
+  }
+
+let get_ft_fun_kind ft =
+  if get_ft_is_coroutine ft then
+    Ast_defs.FCoroutine
+  else
+    match (get_ft_async ft, get_ft_generator ft) with
+    | (false, false) -> Ast_defs.FSync
+    | (true, false) -> Ast_defs.FAsync
+    | (false, true) -> Ast_defs.FGenerator
+    | (true, true) -> Ast_defs.FAsyncGenerator
+
+let get_ft_param_mutable ft =
+  match Int.bit_and ft.ft_flags 0xC0 with
+  | 0x0 -> None
+  | 0x40 -> Some Param_owned_mutable
+  | 0x80 -> Some Param_borrowed_mutable
+  | 0xC0 -> Some Param_maybe_mutable
+  | _ -> failwith "get_ft_param_mutable"
+
+let param_mutable_to_flags m =
+  match m with
+  | None -> 0x0
+  | Some Param_owned_mutable -> 0x40
+  | Some Param_borrowed_mutable -> 0x80
+  | Some Param_maybe_mutable -> 0xC0
+
+let fun_kind_to_flags kind =
+  match kind with
+  | Ast_defs.FSync -> 0
+  | Ast_defs.FAsync -> ft_flags_async
+  | Ast_defs.FGenerator -> ft_flags_generator
+  | Ast_defs.FAsyncGenerator -> Int.bit_or ft_flags_async ft_flags_generator
+  | Ast_defs.FCoroutine -> ft_flags_is_coroutine
+
+let make_ft_flags
+    kind param_mutable ~return_disposable ~returns_mutable ~returns_void_to_rx =
+  let flags =
+    Int.bit_or (param_mutable_to_flags param_mutable) (fun_kind_to_flags kind)
+  in
+  let flags = set_bit ft_flags_return_disposable return_disposable flags in
+  let flags = set_bit ft_flags_returns_mutable returns_mutable flags in
+  let flags = set_bit ft_flags_returns_void_to_rx returns_void_to_rx flags in
+  flags
 
 type class_elt = {
   ce_abstract: bool;
@@ -550,18 +626,8 @@ let rec ty__compare ?(normalize_lists = false) ty_1 ty_2 =
         match ft_params_compare fty1.ft_params fty2.ft_params with
         | 0 ->
           compare
-            ( fty1.ft_is_coroutine,
-              fty1.ft_arity,
-              fty1.ft_reactive,
-              fty1.ft_return_disposable,
-              fty1.ft_mutability,
-              fty1.ft_returns_mutable )
-            ( fty2.ft_is_coroutine,
-              fty2.ft_arity,
-              fty2.ft_reactive,
-              fty2.ft_return_disposable,
-              fty2.ft_mutability,
-              fty2.ft_returns_mutable )
+            (fty1.ft_arity, fty1.ft_reactive, fty1.ft_flags)
+            (fty2.ft_arity, fty2.ft_reactive, fty2.ft_flags)
         | n -> n
       end
     | n -> n
@@ -820,12 +886,9 @@ and equal_decl_fun_arity a1 a2 =
 and equal_decl_fun_type fty1 fty2 =
   equal_decl_possibly_enforced_ty fty1.ft_ret fty2.ft_ret
   && equal_decl_ft_params fty1.ft_params fty2.ft_params
-  && Bool.equal fty1.ft_is_coroutine fty2.ft_is_coroutine
   && equal_decl_fun_arity fty1.ft_arity fty2.ft_arity
   && equal_reactivity fty1.ft_reactive fty2.ft_reactive
-  && Bool.equal fty1.ft_return_disposable fty2.ft_return_disposable
-  && Option.equal equal_param_mutability fty1.ft_mutability fty2.ft_mutability
-  && Bool.equal fty1.ft_returns_mutable fty2.ft_returns_mutable
+  && Int.equal fty1.ft_flags fty2.ft_flags
 
 and equal_reactivity r1 r2 =
   match (r1, r2) with

@@ -370,7 +370,7 @@ and class_method tcopt root static env (_method_name, method_) =
           match get_node ty with
           | Tfun
               {
-                ft_tparams = (tparams, _);
+                ft_tparams;
                 ft_params;
                 ft_arity;
                 ft_ret;
@@ -379,7 +379,7 @@ and class_method tcopt root static env (_method_name, method_) =
               } ->
             let env =
               List.fold_left
-                tparams
+                ft_tparams
                 ~f:
                   begin
                     fun env t ->
@@ -391,7 +391,7 @@ and class_method tcopt root static env (_method_name, method_) =
               ft_params
               ~f:(fun_param tcopt root (Vcovariant []) static env);
             fun_arity tcopt root (Vcovariant []) static env ft_arity;
-            List.iter tparams ~f:(fun_tparam tcopt root env);
+            List.iter ft_tparams ~f:(fun_tparam tcopt root env);
             List.iter
               ft_where_constraints
               ~f:(fun_where_constraint tcopt root env);
@@ -733,7 +733,7 @@ and get_typarams ctx root env (ty : decl_ty) =
       List.fold_left tp.tp_constraints ~init:acc ~f:get_typarams_constraint
     in
     let bounds =
-      List.fold_left (fst ft.ft_tparams) ~init:empty ~f:get_typarams_tparam
+      List.fold_left ft.ft_tparams ~init:empty ~f:get_typarams_tparam
     in
     let get_typarams_where_constraint acc (ty1, ck, ty2) =
       union

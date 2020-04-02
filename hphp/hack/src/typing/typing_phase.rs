@@ -155,11 +155,11 @@ pub fn localize_ft<'a, 'b>(
             use_name: _,
             explicit_targs,
         }) => {
-            if !explicit_targs.is_empty() && explicit_targs.len() != ft.tparams.0.len() {
+            if !explicit_targs.is_empty() && explicit_targs.len() != ft.tparams.len() {
                 unimplemented!("Wrong number of type arguments.")
             }
             let targ_tys = explicit_targs.iter().map(|targ| targ.0).collect();
-            let substs = subst::make_locl(env.bld(), &ft.tparams.0, &targ_tys);
+            let substs = subst::make_locl(env.bld(), &ft.tparams, &targ_tys);
             ety_env.substs = substs // TODO(hrust) extend substs instead of replacing
         }
         None => {

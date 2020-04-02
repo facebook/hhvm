@@ -123,9 +123,7 @@ let transform_special_fun_ty fty id nargs =
           tp_user_attributes = [];
         }
       in
-      let ft_tparams =
-        (List.map tparam_names make_tparam @ [make_tparam "Tr"], FTKtparams)
-      in
+      let ft_tparams = List.map tparam_names make_tparam @ [make_tparam "Tr"] in
       (* Construct type of first parameter *)
       let param1 =
         update_param
@@ -134,18 +132,13 @@ let transform_special_fun_ty fty id nargs =
              ( r1,
                Tfun
                  {
-                   ft_is_coroutine = false;
                    ft_arity = Fstandard (arity, arity);
-                   ft_tparams = ([], FTKtparams);
+                   ft_tparams = [];
                    ft_where_constraints = [];
                    ft_params = List.map vars TUtils.default_fun_param;
                    ft_ret = MakeType.unenforced tr;
-                   ft_fun_kind = fty.ft_fun_kind;
+                   ft_flags = fty.ft_flags;
                    ft_reactive = fty.ft_reactive;
-                   ft_mutability = fty.ft_mutability;
-                   ft_returns_mutable = fty.ft_returns_mutable;
-                   ft_return_disposable = fty.ft_return_disposable;
-                   ft_returns_void_to_rx = fty.ft_returns_void_to_rx;
                  } ))
       in
       let param_rest =

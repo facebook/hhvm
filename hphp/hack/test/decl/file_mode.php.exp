@@ -18,17 +18,18 @@ Parsed decls:
       fe_type =
       (Rwitness (root|file_mode.php line 5, characters 10-28),
        (Tfun
-          { ft_is_coroutine = false; ft_arity = (Fstandard (0, 0));
-            ft_tparams = []; ft_where_constraints = []; ft_params = [];
+          { ft_arity = (Fstandard (0, 0)); ft_tparams = [];
+            ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;
               et_type =
               (Rhint (root|file_mode.php line 5, characters 33-36),
                (Tprim Tvoid))
               };
-            ft_fun_kind = sync; ft_reactive = Nonreactive;
-            ft_return_disposable = false; ft_mutable = none;
-            ft_returns_mutable = false }));
+            ft_flags =
+            (make_ft_flags sync none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
       fe_deprecated = None;  } };
   typedefs =
   { "MyPartialType" ->

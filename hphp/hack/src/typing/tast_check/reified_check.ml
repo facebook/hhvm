@@ -240,8 +240,7 @@ let handler =
                 | None -> ())
               | _ -> ())
             | None -> ());
-            let tparams = fst ft_tparams in
-            verify_call_targs env call_pos (get_pos fun_ty) tparams targs
+            verify_call_targs env call_pos (get_pos fun_ty) ft_tparams targs
           | _ -> ()
         end
       | ((pos, fun_ty), FunctionPointer (_, _targs)) ->
@@ -250,7 +249,7 @@ let handler =
           | Tfun { ft_tparams; _ } ->
             (* Once we support reified generics in function pointers,
              * we can let this case fall through to the next *)
-            if tparams_has_reified (fst ft_tparams) then
+            if tparams_has_reified ft_tparams then
               Errors.reified_generics_not_allowed pos
           | _ -> ()
         end
@@ -258,8 +257,7 @@ let handler =
         begin
           match get_node fun_ty with
           | Tfun { ft_tparams; _ } ->
-            let tparams = fst ft_tparams in
-            verify_call_targs env pos (get_pos fun_ty) tparams targs
+            verify_call_targs env pos (get_pos fun_ty) ft_tparams targs
           | _ -> ()
         end
       | ((pos, _), New (((_, ty), CI (_, class_id)), targs, _, _, _)) ->

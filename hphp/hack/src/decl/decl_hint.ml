@@ -116,18 +116,22 @@ and hint_ p env = function
     in
     Tfun
       {
-        ft_is_coroutine = is_coroutine;
         ft_arity = arity;
-        ft_tparams = ([], FTKtparams);
+        ft_tparams = [];
         ft_where_constraints = [];
         ft_params = paraml;
         ft_ret = ret;
-        ft_fun_kind = Ast_defs.FSync;
+        ft_flags =
+          make_ft_flags
+            ( if is_coroutine then
+              Ast_defs.FCoroutine
+            else
+              Ast_defs.FSync )
+            None
+            ~return_disposable:false
+            ~returns_void_to_rx:false
+            ~returns_mutable:mut_ret;
         ft_reactive = reactivity;
-        ft_return_disposable = false;
-        ft_mutability = None;
-        ft_returns_mutable = mut_ret;
-        ft_returns_void_to_rx = false;
       }
   | Happly ((p, "\\Tuple"), _)
   | Happly ((p, "\\tuple"), _) ->

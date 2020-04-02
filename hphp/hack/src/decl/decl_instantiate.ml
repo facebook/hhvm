@@ -76,7 +76,7 @@ and instantiate_ subst x =
     | _ -> Toption ty)
   | Tlike ty -> Tlike (instantiate subst ty)
   | Tfun ft ->
-    let (tparams, instantiate_tparams) = ft.ft_tparams in
+    let tparams = ft.ft_tparams in
     let outer_subst = subst in
     let subst =
       List.fold_left
@@ -120,7 +120,7 @@ and instantiate_ subst x =
         ft_arity = arity;
         ft_params = params;
         ft_ret = ret;
-        ft_tparams = (tparams, instantiate_tparams);
+        ft_tparams = tparams;
         ft_where_constraints = where_constraints;
       }
   | Tapply (x, tyl) ->

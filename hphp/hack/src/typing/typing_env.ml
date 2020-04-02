@@ -626,9 +626,20 @@ let add_wclass env x =
   Option.iter env.decl_env.droot (fun root -> Typing_deps.add_idep root dep);
   ()
 
+let print_size _kind _name obj =
+  match obj with
+  | None -> obj
+  | Some _r ->
+    (*    Printf.printf
+      "%s %s: %d\n"
+      kind
+      name
+      (Obj.reachable_words (Obj.repr r) * (Sys.word_size / 8));*)
+    obj
+
 let get_typedef env x =
   add_wclass env x;
-  Decl_provider.get_typedef (get_ctx env) x
+  print_size "type" x (Decl_provider.get_typedef (get_ctx env) x)
 
 let is_typedef env x =
   match Naming_provider.get_type_kind (get_ctx env) x with
@@ -637,7 +648,7 @@ let is_typedef env x =
 
 let get_class env x =
   add_wclass env x;
-  Decl_provider.get_class (get_ctx env) x
+  print_size "class" x (Decl_provider.get_class (get_ctx env) x)
 
 let get_class_dep env x =
   Decl_env.add_extends_dependency env.decl_env x;
@@ -647,7 +658,7 @@ let get_fun env x =
   let dep = Typing_deps.Dep.Fun x in
   Option.iter env.decl_env.Decl_env.droot (fun root ->
       Typing_deps.add_idep root dep);
-  Decl_provider.get_fun (get_ctx env) x
+  print_size "fun" x (Decl_provider.get_fun (get_ctx env) x)
 
 let get_enum_constraint env x =
   match get_class env x with

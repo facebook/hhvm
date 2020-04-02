@@ -930,6 +930,7 @@ functor
         (genv : genv)
         (env : env)
         (telemetry : Telemetry.t)
+        (capture_snapshot : ServerRecheckCapture.snapshot)
         ~(errors : Errors.t)
         ~(files_to_check : Relative_path.Set.t)
         ~(files_to_parse : Relative_path.Set.t)
@@ -948,13 +949,6 @@ functor
         genv.local_config.ServerLocalConfig.max_typechecker_worker_memory_mb
       in
       let fnl = Relative_path.Set.elements files_to_check in
-      let (env, snapshot) =
-        ServerRecheckCapture.update_before_recheck
-          genv
-          env
-          ~changed_files:files_to_parse
-          ~to_recheck_count:(List.length fnl)
-      in
       let (errorl', delegate_state, telemetry, env', cancelled) =
         let ctx = Provider_utils.ctx_from_server_env env in
         Typing_check_service.go_with_interrupt
@@ -1001,7 +995,7 @@ functor
         ServerRecheckCapture.update_after_recheck
           genv
           env
-          snapshot
+          capture_snapshot
           ~changed_files:files_to_parse
           ~cancelled_files:(Relative_path.Set.of_list cancelled)
           ~rechecked_files:files_to_check
@@ -1102,6 +1096,7 @@ functor
 
       (* Parse all changed files. This clears the file contents cache prior
           to parsing. *)
+      let parse_t = Unix.gettimeofday () in
       let (env, { parse_errors = errors; failed_parsing; fast_parsed }) =
         do_parsing genv env ~files_to_parse ~stop_at_errors
       in
@@ -1328,6 +1323,16 @@ functor
           failed_parsing
       in
       let to_recheck_count = Relative_path.Set.cardinal files_to_check in
+      (* The intent of capturing the snapshot here is to increase the likelihood
+          of the state-on-disk being the same as what the parser saw *)
+      let (env, capture_snapshot) =
+        ServerRecheckCapture.update_before_recheck
+          genv
+          env
+          ~to_recheck_count
+          ~changed_files:files_to_parse
+          ~parse_t
+      in
       ServerProgress.send_progress_to_monitor
         ~include_in_logs:false
         "typechecking %d files"
@@ -1358,6 +1363,7 @@ functor
           genv
           env
           telemetry
+          capture_snapshot
           ~errors
           ~files_to_check
           ~files_to_parse

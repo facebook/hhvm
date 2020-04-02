@@ -16,9 +16,12 @@ let update_env env changed_files =
   }
 
 let update_before_recheck
-    genv env ~(changed_files : Relative_path.Set.t) ~(to_recheck_count : int) :
-    ServerEnv.env * snapshot =
-  ignore (genv, to_recheck_count);
+    genv
+    env
+    ~(changed_files : Relative_path.Set.t)
+    ~(to_recheck_count : int)
+    ~(parse_t : float) : ServerEnv.env * snapshot =
+  ignore (genv, to_recheck_count, parse_t);
   (update_env env changed_files, ())
 
 let update_after_recheck

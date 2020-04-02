@@ -2106,9 +2106,13 @@ Variant HHVM_METHOD(SoapServer, getfunctions) {
         make_array_like_tv(data->m_soap_functions.ftOriginal.get())
       )
     );
+  } else {
+    return empty_varray();
   }
 
+  assertx(class_name.get());
   Class* cls = Unit::lookupClass(class_name.get());
+  assertx(cls);
   auto ret = Array::attach(PackedArray::MakeReserve(cls->numMethods()));
   Class::getMethodNames(cls, nullptr, ret);
   return ret.toVArray();
@@ -2125,7 +2129,11 @@ static bool valid_function(SoapServer *server, Object &soap_obj,
     return HHVM_FN(function_exists)(fn_name);
   } else if (!server->m_soap_functions.ft.empty()) {
     return server->m_soap_functions.ft.exists(HHVM_FN(strtolower)(fn_name));
+  } else {
+    return false;
   }
+
+  assertx(cls);
   HPHP::Func* f = cls->lookupMethod(fn_name.get());
   return (f && f->isPublic()) || cls->hasCall();
 }

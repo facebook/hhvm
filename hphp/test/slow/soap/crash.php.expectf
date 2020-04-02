@@ -1,0 +1,6 @@
+array(0) {
+}
+
+Warning: Tried to set a non existent class (NotExistingClass) in %s/test/slow/soap/crash.php on line 8
+
+Fatal error: SOAP_ERROR: Function 'test' doesn't exist in %s/test/slow/soap/crash.php on line 24

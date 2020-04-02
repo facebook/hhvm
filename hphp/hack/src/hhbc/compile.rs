@@ -12,6 +12,7 @@ use anyhow::{anyhow, *};
 use bitflags::bitflags;
 use emit_program_rust::{emit_fatal_program, emit_program, FromAstFlags};
 use emit_pu_rust;
+use env::emitter::Emitter;
 use hhas_program_rust::HhasProgram;
 use hhbc_ast_rust::FatalOp;
 use hhbc_hhas_rust::{context::Context, print_program, Write};
@@ -95,12 +96,16 @@ where
         parse_file(&opts, stack_limit, &env.filepath, text)
     });
 
+    let mut emitter = Emitter::new(opts);
+
     let (program, codegen_t) = match &mut parse_result {
         Either::Right((ast, is_hh_file)) => {
             let namespace = NamespaceEnv::empty(
-                opts.hhvm.aliased_namespaces_cloned().collect(),
+                emitter.options().hhvm.aliased_namespaces_cloned().collect(),
                 true, /* is_codegen */
-                opts.hhvm
+                emitter
+                    .options()
+                    .hhvm
                     .hack_lang_flags
                     .contains(LangFlags::DISABLE_XHP_ELEMENT_MANGLING),
             );
@@ -109,10 +114,10 @@ where
                 ocamlrep::rc::RcOc::new(namespace.clone()),
                 ast,
             );
-            emit(&env, &namespace, opts.clone(), *is_hh_file, ast)
+            emit(&mut emitter, &env, &namespace, *is_hh_file, ast)
         }
         Either::Left((pos, msg, is_runtime_error)) => {
-            emit_fatal(&env, *is_runtime_error, opts.clone(), pos, msg)
+            emit_fatal(&mut emitter, &env, *is_runtime_error, pos, msg)
         }
     };
     let program = program.map_err(|e| anyhow!("Unhandled Emitter error: {}", e))?;
@@ -121,7 +126,7 @@ where
     profile(log_extern_compiler_perf, &mut ret.printing_t, || {
         print_program(
             &mut Context::new(
-                &opts,
+                &mut emitter,
                 Some(&env.filepath),
                 env.flags.contains(EnvFlags::DUMP_SYMBOL_REFS),
                 env.flags.contains(EnvFlags::IS_SYSTEMLIB),
@@ -134,13 +139,14 @@ where
 }
 
 fn emit<'p>(
+    emitter: &mut Emitter,
     env: &Env,
     namespace: &NamespaceEnv,
-    opts: Options,
     is_hh: bool,
     ast: &'p mut Tast::Program,
 ) -> (Result<HhasProgram<'p>, Error>, f64) {
-    if opts
+    if emitter
+        .options()
         .hhvm
         .hack_lang_flags
         .contains(options::LangFlags::ENABLE_POCKET_UNIVERSES)
@@ -161,16 +167,18 @@ fn emit<'p>(
         flags |= FromAstFlags::IS_SYSTEMLIB;
     }
     let mut t = 0f64;
-    let r = profile(opts.log_extern_compiler_perf(), &mut t, move || {
-        emit_program(opts, flags, &namespace, ast)
-    });
+    let r = profile(
+        emitter.options().log_extern_compiler_perf(),
+        &mut t,
+        move || emit_program(emitter, flags, &namespace, ast),
+    );
     (r, t)
 }
 
 fn emit_fatal<'a>(
+    emitter: &mut Emitter,
     env: &Env,
     is_runtime_error: bool,
-    opts: Options,
     pos: &Pos,
     msg: impl AsRef<str>,
 ) -> (Result<HhasProgram<'a>, Error>, f64) {
@@ -180,9 +188,9 @@ fn emit_fatal<'a>(
         FatalOp::Parse
     };
     let mut t = 0f64;
-    let r = profile(opts.log_extern_compiler_perf(), &mut t, || {
+    let r = profile(emitter.options().log_extern_compiler_perf(), &mut t, || {
         emit_fatal_program(
-            opts,
+            emitter,
             env.flags.contains(EnvFlags::IS_SYSTEMLIB),
             op,
             pos,

@@ -1388,6 +1388,8 @@ dependencies = [
 name = "hhbc_hhas_rust"
 version = "0.0.0"
 dependencies = [
+ "ast_class_expr_rust 0.0.0",
+ "ast_scope_rust 0.0.0",
  "core_utils_rust 0.0.0",
  "env 0.0.0",
  "escaper 0.0.0",

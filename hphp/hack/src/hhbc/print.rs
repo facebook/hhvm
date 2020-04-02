@@ -11,6 +11,8 @@ use indexmap::IndexSet;
 use itertools::Itertools;
 pub use write::{Error, IoWrite, Result, Write};
 
+use ast_class_expr_rust::ClassExpr;
+use ast_scope_rust as ast_scope;
 use context::Context;
 use core_utils_rust::add_ns;
 use env::{iterator::Id as IterId, local::Type as Local, Env as BodyEnv};
@@ -42,7 +44,7 @@ use hhbc_string_utils_rust::{
 use instruction_sequence_rust::InstrSeq;
 use label_rust::Label;
 use naming_special_names_rust::classes;
-use oxidized::{ast, ast_defs, doc_comment::DocComment, local_id};
+use oxidized::{ast, ast_defs, doc_comment::DocComment, local_id, pos::Pos};
 use runtime::TypedValue;
 use write::*;
 
@@ -50,7 +52,7 @@ use std::{borrow::Cow, convert::TryInto, io::Write as _};
 
 pub mod context {
     use crate::write::*;
-    use options::Options;
+    use env::emitter::Emitter;
     use oxidized::relative_path::RelativePath;
 
     /// Indent is an abstraction of indentation. Configurable indentation
@@ -78,7 +80,7 @@ pub mod context {
     }
 
     pub struct Context<'a> {
-        pub opts: &'a Options,
+        pub emitter: &'a mut Emitter,
         pub path: Option<&'a RelativePath>,
 
         dump_symbol_refs: bool,
@@ -88,13 +90,13 @@ pub mod context {
 
     impl<'a> Context<'a> {
         pub fn new(
-            opts: &'a Options,
+            emitter: &'a mut Emitter,
             path: Option<&'a RelativePath>,
             dump_symbol_refs: bool,
             is_system_lib: bool,
         ) -> Self {
             Self {
-                opts,
+                emitter,
                 path,
                 dump_symbol_refs,
                 indent: Indent::new(),
@@ -286,7 +288,8 @@ fn print_fun_def<W: Write>(
     newline(w)?;
     w.write(".function ")?;
     if ctx
-        .opts
+        .emitter
+        .options()
         .hack_compiler_flags
         .contains(options::CompilerFlags::EMIT_GENERICS_UB)
     {
@@ -702,7 +705,8 @@ fn print_method_def<W: Write>(
     newline(w)?;
     w.write("  .method ")?;
     if ctx
-        .opts
+        .emitter
+        .options()
         .hack_compiler_flags
         .contains(options::CompilerFlags::EMIT_GENERICS_UB)
     {
@@ -800,7 +804,8 @@ fn print_class_def<W: Write>(
     newline(w)?;
     w.write(".class ")?;
     if ctx
-        .opts
+        .emitter
+        .options()
         .hack_compiler_flags
         .contains(options::CompilerFlags::EMIT_GENERICS_UB)
     {
@@ -840,7 +845,7 @@ fn print_class_def<W: Write>(
 
 fn pos_to_prov_tag(ctx: &Context, loc: &Option<ast_defs::Pos>) -> String {
     match loc {
-        Some(_) if ctx.opts.array_provenance() => unimplemented!(),
+        Some(_) if ctx.emitter.options().array_provenance() => unimplemented!(),
         _ => "".into(),
     }
 }
@@ -2175,7 +2180,7 @@ fn print_param<W: Write>(
     })?;
     w.write(&param.name)?;
     option(w, &param.default_value, |w, i| {
-        print_param_default_value(w, body_env, i)
+        print_param_default_value(ctx, w, body_env, i)
     })
 }
 
@@ -2187,6 +2192,7 @@ fn print_param_id<W: Write>(w: &mut W, param_id: &ParamId) -> Result<(), W::Erro
 }
 
 fn print_param_default_value<W: Write>(
+    ctx: &mut Context,
     w: &mut W,
     body_env: Option<&BodyEnv>,
     default_val: &(Label, ast::Expr),
@@ -2198,7 +2204,7 @@ fn print_param_default_value<W: Write>(
     w.write(" = ")?;
     print_label(w, &default_val.0)?;
     wrap_by_paren(w, |w| {
-        wrap_by_triple_quotes(w, |w| print_expr(w, &expr_env, &default_val.1))
+        wrap_by_triple_quotes(w, |w| print_expr(ctx, w, &expr_env, &default_val.1))
     })
 }
 
@@ -2232,15 +2238,17 @@ fn print_int<W: Write>(w: &mut W, i: &usize) -> Result<(), W::Error> {
 }
 
 fn print_key_value<W: Write>(
+    ctx: &mut Context,
     w: &mut W,
     env: &ExprEnv,
     k: &ast::Expr,
     v: &ast::Expr,
 ) -> Result<(), W::Error> {
-    print_key_value_(w, env, k, print_expr, v)
+    print_key_value_(ctx, w, env, k, print_expr, v)
 }
 
 fn print_key_value_<W: Write, K, KeyPrinter>(
+    ctx: &mut Context,
     w: &mut W,
     env: &ExprEnv,
     k: K,
@@ -2248,27 +2256,33 @@ fn print_key_value_<W: Write, K, KeyPrinter>(
     v: &ast::Expr,
 ) -> Result<(), W::Error>
 where
-    KeyPrinter: FnMut(&mut W, &ExprEnv, K) -> Result<(), W::Error>,
+    KeyPrinter: FnMut(&mut Context, &mut W, &ExprEnv, K) -> Result<(), W::Error>,
 {
-    kp(w, env, k)?;
+    kp(ctx, w, env, k)?;
     w.write(" => ")?;
-    print_expr(w, env, v)
+    print_expr(ctx, w, env, v)
 }
 
-fn print_afield<W: Write>(w: &mut W, env: &ExprEnv, afield: &ast::Afield) -> Result<(), W::Error> {
+fn print_afield<W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    env: &ExprEnv,
+    afield: &ast::Afield,
+) -> Result<(), W::Error> {
     use ast::Afield as A;
     match afield {
-        A::AFvalue(e) => print_expr(w, env, &e),
-        A::AFkvalue(k, v) => print_key_value(w, env, &k, &v),
+        A::AFvalue(e) => print_expr(ctx, w, env, &e),
+        A::AFkvalue(k, v) => print_key_value(ctx, w, env, &k, &v),
     }
 }
 
 fn print_afields<W: Write>(
+    ctx: &mut Context,
     w: &mut W,
     env: &ExprEnv,
     afields: impl AsRef<[ast::Afield]>,
 ) -> Result<(), W::Error> {
-    concat_by(w, ", ", afields, |w, i| print_afield(w, env, i))
+    concat_by(w, ", ", afields, |w, i| print_afield(ctx, w, env, i))
 }
 
 fn print_uop<W: Write>(w: &mut W, op: ast::Uop) -> Result<(), W::Error> {
@@ -2290,40 +2304,46 @@ fn print_uop<W: Write>(w: &mut W, op: ast::Uop) -> Result<(), W::Error> {
 }
 
 fn print_key_values<W: Write>(
+    ctx: &mut Context,
     w: &mut W,
     env: &ExprEnv,
     kvs: impl AsRef<[(ast::Expr, ast::Expr)]>,
 ) -> Result<(), W::Error> {
-    print_key_values_(w, env, print_expr, kvs)
+    print_key_values_(ctx, w, env, print_expr, kvs)
 }
 
 fn print_key_values_<W: Write, K, KeyPrinter>(
+    ctx: &mut Context,
     w: &mut W,
     env: &ExprEnv,
     mut kp: KeyPrinter,
     kvs: impl AsRef<[(K, ast::Expr)]>,
 ) -> Result<(), W::Error>
 where
-    KeyPrinter: Fn(&mut W, &ExprEnv, &K) -> Result<(), W::Error>,
+    KeyPrinter: Fn(&mut Context, &mut W, &ExprEnv, &K) -> Result<(), W::Error>,
 {
     concat_by(w, ", ", kvs, |w, (k, v)| {
-        print_key_value_(w, env, k, &mut kp, v)
+        print_key_value_(ctx, w, env, k, &mut kp, v)
     })
 }
 
 fn print_expr_darray<W: Write, K, KeyPrinter>(
+    ctx: &mut Context,
     w: &mut W,
     env: &ExprEnv,
     kp: KeyPrinter,
     kvs: impl AsRef<[(K, ast::Expr)]>,
 ) -> Result<(), W::Error>
 where
-    KeyPrinter: Fn(&mut W, &ExprEnv, &K) -> Result<(), W::Error>,
+    KeyPrinter: Fn(&mut Context, &mut W, &ExprEnv, &K) -> Result<(), W::Error>,
 {
-    wrap_by_(w, "darray[", "]", |w| print_key_values_(w, env, kp, kvs))
+    wrap_by_(w, "darray[", "]", |w| {
+        print_key_values_(ctx, w, env, kp, kvs)
+    })
 }
 
 fn print_shape_field_name<W: Write>(
+    _ctx: &mut Context,
     w: &mut W,
     env: &ExprEnv,
     field: &ast::ShapeFieldName,
@@ -2361,6 +2381,7 @@ fn print_expr_string<W: Write>(w: &mut W, s: &String) -> Result<(), W::Error> {
 }
 
 fn print_expr<W: Write>(
+    ctx: &mut Context,
     w: &mut W,
     env: &ExprEnv,
     ast::Expr(p, expr): &ast::Expr,
@@ -2411,13 +2432,13 @@ fn print_expr<W: Write>(
     fn print_expr_string<'a, W: Write>(w: &mut W, s: &'a String) -> Result<(), W::Error> {
         wrap_by(w, "\\\"", |w| w.write(escape_by(s.into(), escape_char)))
     }
-    fn fmt_class_name<'a>(is_class_constant: bool, id: &'a str) -> Cow<'a, str> {
-        let cn: Cow<'a, str> = if is_xhp(&strip_ns(id)) {
+    fn fmt_class_name<'a>(is_class_constant: bool, id: Cow<'a, str>) -> Cow<'a, str> {
+        let cn: Cow<'a, str> = if is_xhp(&strip_ns(&id)) {
             escaper::escape(strip_global_ns(&mangle(id.into())))
                 .to_string()
                 .into()
         } else {
-            escaper::escape(strip_global_ns(id))
+            escaper::escape(strip_global_ns(&id)).to_string().into()
         };
         if is_class_constant {
             format!("\\\\{}", cn).into()
@@ -2426,29 +2447,56 @@ fn print_expr<W: Write>(
         }
     }
     fn get_class_name_from_id<'e>(
+        ctx: &mut Context,
         env: Option<&'e BodyEnv<'e>>,
         should_format: bool,
         is_class_constant: bool,
         id: &'e str,
     ) -> Cow<'e, str> {
         if id == classes::SELF || id == classes::PARENT || id == classes::STATIC {
-            get_special_class_name(env, is_class_constant, id)
+            get_special_class_name(ctx, env, is_class_constant, id)
         } else if should_format {
-            fmt_class_name(is_class_constant, id)
+            fmt_class_name(is_class_constant, Cow::Borrowed(id))
         } else {
             id.into()
         }
     }
     fn get_special_class_name<'e>(
+        ctx: &mut Context,
         env: Option<&'e BodyEnv<'e>>,
         is_class_constant: bool,
         id: &'e str,
     ) -> Cow<'e, str> {
-        //TODO(hrust) need emitter to get class name from ast_class_expr::expt_to_class_expr
-        let name = id;
+        let class_expr = match env {
+            None => ClassExpr::expr_to_class_expr(
+                ctx.emitter,
+                true,
+                true,
+                &ast_scope::Scope::toplevel(),
+                ast::Expr(
+                    Pos::make_none(),
+                    ast::Expr_::mk_id(ast_defs::Id(Pos::make_none(), id.into())),
+                ),
+            ),
+            Some(body_env) => ClassExpr::expr_to_class_expr(
+                ctx.emitter,
+                true,
+                true,
+                &body_env.scope,
+                ast::Expr(
+                    Pos::make_none(),
+                    ast::Expr_::mk_id(ast_defs::Id(Pos::make_none(), id.into())),
+                ),
+            ),
+        };
+        let name = match class_expr {
+            ClassExpr::Id(ast_defs::Id(_, name)) => Cow::Owned(name),
+            _ => Cow::Borrowed(id),
+        };
         fmt_class_name(is_class_constant, name)
     }
     fn handle_possible_colon_colon_class_expr<W: Write>(
+        ctx: &mut Context,
         w: &mut W,
         env: &ExprEnv,
         is_array_get: bool,
@@ -2460,7 +2508,8 @@ fn print_expr<W: Write>(
                 (_, s2),
             )) if is_class(&s2) && !(is_self(&id.1) || is_parent(&id.1) || is_static(&id.1)) => {
                 Ok(Some({
-                    let s1 = &get_class_name_from_id(env.codegen_env, false, false, &id.1).into();
+                    let s1 =
+                        &get_class_name_from_id(ctx, env.codegen_env, false, false, &id.1).into();
                     if is_array_get {
                         print_expr_id(w, env, s1)?
                     } else {
@@ -2490,10 +2539,10 @@ fn print_expr<W: Write>(
         // For arrays and collections, we are making a conscious decision to not
         // match HHMV has HHVM's emitter has inconsistencies in the pretty printer
         // https://fburl.com/tzom2qoe
-        E_::Array(afl) => wrap_by_(w, "array(", ")", |w| print_afields(w, env, afl)),
+        E_::Array(afl) => wrap_by_(w, "array(", ")", |w| print_afields(ctx, w, env, afl)),
         E_::Collection(c) if (c.0).1 == "vec" || (c.0).1 == "dict" || (c.0).1 == "keyset" => {
             w.write(&(c.0).1)?;
-            wrap_by_square(w, |w| print_afields(w, env, &c.2))
+            wrap_by_square(w, |w| print_afields(ctx, w, env, &c.2))
         }
         E_::Collection(c) => {
             let name = strip_ns((c.0).1.as_str());
@@ -2505,7 +2554,7 @@ fn print_expr<W: Write>(
                     wrap_by_(w, " {", "}", |w| {
                         Ok(if !c.2.is_empty() {
                             w.write(" ")?;
-                            print_afields(w, env, &c.2)?;
+                            print_afields(ctx, w, env, &c.2)?;
                             w.write(" ")?;
                         })
                     })
@@ -2517,15 +2566,15 @@ fn print_expr<W: Write>(
             }
         }
         E_::Shape(fl) => {
-            print_expr_darray(w, env, print_shape_field_name, fl)
+            print_expr_darray(ctx, w, env, print_shape_field_name, fl)
         },
         E_::Binop(x) => {
             let (bop, e1, e2) = &**x;
-            print_expr(w, env, e1)?;
+            print_expr(ctx, w, env, e1)?;
             w.write(" ")?;
             print_bop(w, bop)?;
             w.write(" ")?;
-            print_expr(w, env, e2)
+            print_expr(ctx, w, env, e2)
         }
         E_::Call(c) => {
             let (_, e, _, es, unpacked_element) = &**c;
@@ -2535,17 +2584,17 @@ fn print_expr<W: Write>(
                 }
                 None => {
                     let mut buf = String::new();
-                    print_expr(&mut buf, env, e).map_err(|e| Error::Fail(format!("{}", e)) )?;
+                    print_expr(ctx, &mut buf, env, e).map_err(|e| Error::Fail(format!("{}", e)) )?;
                     w.write(lstrip(&buf, "\\\\"))?
                 }
             };
             wrap_by_paren(w, |w| {
-                concat_by(w, ", ", &es, |w, e| print_expr(w, env, e))?;
+                concat_by(w, ", ", &es, |w, e| print_expr(ctx, w, env, e))?;
                 match unpacked_element {
                     None => Ok(()),
                     Some(e) => {
                         w.write(", ")?;
-                        print_expr(w, env, e)
+                        print_expr(ctx, w, env, e)
                     }
             }})
         }
@@ -2560,17 +2609,17 @@ fn print_expr<W: Write>(
                         }
                         None => {
                             let mut buf = String::new();
-                            print_expr(&mut buf, env, ci_expr).map_err(|e| Error::Fail(format!("{}", e)) )?;
+                            print_expr(ctx, &mut buf, env, ci_expr).map_err(|e| Error::Fail(format!("{}", e)) )?;
                             w.write(lstrip(&buf, "\\\\"))?
                         }
                     }
                     wrap_by_paren(w, |w| {
-                        concat_by(w, ", ", es, |w, e| print_expr(w, env, e))?;
+                        concat_by(w, ", ", es, |w, e| print_expr(ctx, w, env, e))?;
                         match unpacked_element {
                             None => Ok(()),
                             Some(e) => {
                                 w.write(", ")?;
-                                print_expr(w, env, e)
+                                print_expr(ctx, w, env, e)
                             }
                         }
                     })
@@ -2580,19 +2629,19 @@ fn print_expr<W: Write>(
         }
         E_::Record(r) => {
             w.write(lstrip(adjust_id(env, &(r.0).1).as_ref(), "\\\\"))?;
-            print_key_values(w, env, &r.2)
+            print_key_values(ctx, w, env, &r.2)
         }
         E_::ClassConst(cc) => {
             if let Some(e1) = (cc.0).1.as_ciexpr() {
-                handle_possible_colon_colon_class_expr(w, env, false, expr)?.map_or_else(|| {
+                handle_possible_colon_colon_class_expr(ctx, w, env, false, expr)?.map_or_else(|| {
                     let s2 = &(cc.1).1;
                     match e1.1.as_id() {
                         Some(ast_defs::Id(_, s1)) => {
-                            let s1 = get_class_name_from_id(env.codegen_env, true, true, s1);
+                            let s1 = get_class_name_from_id(ctx, env.codegen_env, true, true, s1);
                             concat_str_by(w, "::", [&s1.into(), s2])
                         }
                         _ => {
-                            print_expr(w, env, e1)?;
+                            print_expr(ctx, w, env, e1)?;
                             w.write("::")?;
                             w.write(s2)
                         }
@@ -2605,92 +2654,92 @@ fn print_expr<W: Write>(
         }
         E_::Unop(u) => match u.0 {
             ast::Uop::Upincr => {
-                print_expr(w, env, &u.1)?;
+                print_expr(ctx, w, env, &u.1)?;
                 w.write("++")
             }
             ast::Uop::Updecr => {
-                print_expr(w, env, &u.1)?;
+                print_expr(ctx, w, env, &u.1)?;
                 w.write("--")
             }
             _ => {
                 print_uop(w, u.0)?;
-                print_expr(w, env, &u.1)
+                print_expr(ctx, w, env, &u.1)
             }
         },
         E_::ObjGet(og) => {
-            print_expr(w, env, &og.0)?;
+            print_expr(ctx, w, env, &og.0)?;
             w.write(match og.2 {
                 ast::OgNullFlavor::OGNullthrows => "->",
                 ast::OgNullFlavor::OGNullsafe => "\\?->",
             })?;
-            print_expr(w, env, &og.1)
+            print_expr(ctx, w, env, &og.1)
         }
         E_::Clone(e) => {
             w.write("clone ")?;
-            print_expr(w, env, e)
+            print_expr(ctx, w, env, e)
         }
         E_::ArrayGet(ag) => not_impl!(),
-        E_::String2(ss) => concat_by(w, " . ", ss, |w, s| print_expr(w, env, s)),
+        E_::String2(ss) => concat_by(w, " . ", ss, |w, s| print_expr(ctx, w, env, s)),
         E_::PrefixedString(s) => {
             w.write(&s.0)?;
             w.write(" . ")?;
-            print_expr(w, env, &s.1)
+            print_expr(ctx, w, env, &s.1)
         }
         E_::Eif(eif) => {
-            print_expr(w, env, &eif.0)?;
+            print_expr(ctx, w, env, &eif.0)?;
             w.write(" \\? ")?;
-            option(w, &eif.1, |w, etrue| print_expr(w, env, etrue))?;
+            option(w, &eif.1, |w, etrue| print_expr(ctx, w, env, etrue))?;
             w.write(" : ")?;
-            print_expr(w, env, &eif.2)
+            print_expr(ctx, w, env, &eif.2)
         }
-        E_::BracedExpr(e) => wrap_by_braces(w, |w| print_expr(w, env, e)),
-        E_::ParenthesizedExpr(e) => wrap_by_paren(w, |w| print_expr(w, env, e)),
+        E_::BracedExpr(e) => wrap_by_braces(w, |w| print_expr(ctx, w, env, e)),
+        E_::ParenthesizedExpr(e) => wrap_by_paren(w, |w| print_expr(ctx, w, env, e)),
         E_::Cast(c) => {
             wrap_by_paren(w, |w| print_hint(w, &c.0))?;
-            print_expr(w, env, &c.1)
+            print_expr(ctx, w, env, &c.1)
         }
         E_::Pipe(p) => {
-            print_expr(w, env, &p.1)?;
+            print_expr(ctx, w, env, &p.1)?;
             w.write(" |> ")?;
-            print_expr(w, env, &p.2)
+            print_expr(ctx, w, env, &p.2)
         }
         E_::Is(i) => {
-            print_expr(w, env, &i.0)?;
+            print_expr(ctx, w, env, &i.0)?;
             w.write(" is ")?;
             print_hint(w, &i.1)
         }
         E_::As(a) => {
-            print_expr(w, env, &a.0)?;
+            print_expr(ctx, w, env, &a.0)?;
             w.write(if a.2 { " ?as " } else { " as " })?;
             print_hint(w, &a.1)
         }
         E_::Varray(va) => wrap_by_(w, "varray[", "]", |w| {
-            concat_by(w, ", ", &va.1, |w, e| print_expr(w, env, e))
+            concat_by(w, ", ", &va.1, |w, e| print_expr(ctx, w, env, e))
         }),
-        E_::Darray(da) => print_expr_darray(w, env, print_expr, &da.1),
+        E_::Darray(da) => print_expr_darray(ctx, w, env, print_expr, &da.1),
         E_::List(l) => wrap_by_(w, "list(", ")", |w| {
-            concat_by(w, ", ", l, |w, i| print_expr(w, env, i))
+            concat_by(w, ", ", l, |w, i| print_expr(ctx, w, env, i))
         }),
         E_::Yield(y) => {
             w.write("yield ")?;
-            print_afield(w, env, y)
+            print_afield(ctx, w, env, y)
         }
         E_::Await(e) => {
             w.write("await ")?;
-            print_expr(w, env, e)
+            print_expr(ctx, w, env, e)
         }
         E_::YieldBreak => w.write("return"),
         E_::YieldFrom(e) => {
             w.write("yield from ")?;
-            print_expr(w, env, e)
+            print_expr(ctx, w, env, e)
         }
         E_::Import(i) => {
             print_import_flavor(w, &i.0)?;
             w.write(" ")?;
-            print_expr(w, env, &i.1)
+            print_expr(ctx, w, env, &i.1)
         }
         E_::Xml(_) => not_impl!(),
-        E_::Efun(f) => print_efun(w, env, &f.0, &f.1),
+        E_::Efun(f) => print_efun(ctx, w, env, &f.0, &f.1),
         E_::Omitted => Ok(()),
         E_::Lfun(_) => Err(Error::fail(
             "expected Lfun to be converted to Efun during closure conversion print_expr",
@@ -2705,6 +2754,7 @@ fn print_expr<W: Write>(
 }
 
 fn print_efun<W: Write>(
+    ctx: &mut Context,
     w: &mut W,
     env: &ExprEnv,
     f: &ast::Fun_,
@@ -2717,7 +2767,7 @@ fn print_efun<W: Write>(
     )?;
     w.write("function ")?;
     wrap_by_paren(w, |w| {
-        concat_by(w, ", ", &f.params, |w, p| print_fparam(w, env, p))
+        concat_by(w, ", ", &f.params, |w, p| print_fparam(ctx, w, env, p))
     })?;
     w.write(" ")?;
     if !use_list.is_empty() {
@@ -2735,7 +2785,12 @@ fn print_block<W: Write>(w: &mut W, env: &ExprEnv, block: &ast::Block) -> Result
     not_impl!()
 }
 
-fn print_fparam<W: Write>(w: &mut W, env: &ExprEnv, param: &ast::FunParam) -> Result<(), W::Error> {
+fn print_fparam<W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    env: &ExprEnv,
+    param: &ast::FunParam,
+) -> Result<(), W::Error> {
     if let Some(ast_defs::ParamKind::Pinout) = param.callconv {
         w.write("inout ")?;
     }
@@ -2749,7 +2804,7 @@ fn print_fparam<W: Write>(w: &mut W, env: &ExprEnv, param: &ast::FunParam) -> Re
     w.write(&param.name)?;
     option(w, &param.expr, |w, e| {
         w.write(" = ")?;
-        print_expr(w, env, e)
+        print_expr(ctx, w, env, e)
     })
 }
 

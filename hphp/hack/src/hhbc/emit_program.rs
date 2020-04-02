@@ -20,7 +20,7 @@ use hhas_program_rust::HhasProgram;
 use hhbc_ast_rust::FatalOp;
 use instruction_sequence_rust::{instr, Error, Result};
 use options::Options;
-use oxidized::{ast as Tast, namespace_env, pos::Pos}; // use std::result::Result;
+use oxidized::{ast as Tast, namespace_env, pos::Pos};
 
 extern crate bitflags;
 use bitflags::bitflags;
@@ -29,17 +29,16 @@ use bitflags::bitflags;
 
 /// This is the entry point from hh_single_compile & fuzzer
 pub fn emit_fatal_program<'p>(
-    options: Options,
+    emitter: &mut Emitter,
     is_systemlib: bool,
     op: FatalOp,
     pos: &Pos,
     msg: impl AsRef<str>,
 ) -> Result<HhasProgram<'p>> {
-    let mut emitter = Emitter::new(options);
     emitter.context_mut().set_systemlib(is_systemlib);
     let body_instrs = emit_fatal(op, pos, msg);
     let main = make_body(
-        &mut emitter,
+        emitter,
         body_instrs,
         vec![],
         false,
@@ -59,15 +58,15 @@ pub fn emit_fatal_program<'p>(
 
 /// This is the entry point from hh_single_compile & coroutine
 pub fn emit_program<'p>(
-    options: Options,
+    emitter: &mut Emitter,
     flags: FromAstFlags,
     namespace: &namespace_env::Env,
     tast: &'p mut Tast::Program,
 ) -> Result<HhasProgram<'p>> {
-    let result = emit_program_(options.clone(), flags, namespace, tast);
+    let result = emit_program_(emitter, flags, namespace, tast);
     match result {
         Err(Error::IncludeTimeFatalException(op, pos, msg)) => emit_fatal_program(
-            options,
+            emitter,
             flags.contains(FromAstFlags::IS_SYSTEMLIB),
             op,
             &pos,
@@ -78,32 +77,31 @@ pub fn emit_program<'p>(
 }
 
 fn emit_program_<'p>(
-    options: Options,
+    emitter: &mut Emitter,
     flags: FromAstFlags,
     namespace: &namespace_env::Env,
     prog: &'p mut Tast::Program,
 ) -> Result<HhasProgram<'p>> {
-    let mut emitter = Emitter::new(options);
-    let hoist_kinds = closure_convert::convert_toplevel_prog(&mut emitter, prog)?;
+    let hoist_kinds = closure_convert::convert_toplevel_prog(emitter, prog)?;
     emitter
         .context_mut()
         .set_systemlib(flags.contains(FromAstFlags::IS_SYSTEMLIB));
 
-    let main = emit_main(&mut emitter, flags, namespace, prog)?;
-    let mut functions = emit_functions_from_program(&mut emitter, &hoist_kinds, prog)?;
-    let classes = emit_classes_from_program(&mut emitter, &hoist_kinds, prog)?;
-    let record_defs = emit_record_defs_from_program(&mut emitter, prog)?;
-    let typedefs = emit_typedefs_from_program(&mut emitter, prog)?;
+    let main = emit_main(emitter, flags, namespace, prog)?;
+    let mut functions = emit_functions_from_program(emitter, &hoist_kinds, prog)?;
+    let classes = emit_classes_from_program(emitter, &hoist_kinds, prog)?;
+    let record_defs = emit_record_defs_from_program(emitter, prog)?;
+    let typedefs = emit_typedefs_from_program(emitter, prog)?;
     let (constants, mut const_inits) = {
         let mut env = Env::default();
         // TODO(hrust), why clone is needed here? Try Rc,
         env.namespace = namespace.clone();
-        emit_constants_from_program(&mut emitter, &mut env, prog)?
+        emit_constants_from_program(emitter, &mut env, prog)?
     };
     functions.append(&mut const_inits);
-    let file_attributes = emit_file_attributes_from_program(&mut emitter, prog)?;
-    let adata = emit_adata::take(&mut emitter).adata;
-    let symbol_refs = emit_symbol_refs::take(&mut emitter).symbol_refs;
+    let file_attributes = emit_file_attributes_from_program(emitter, prog)?;
+    let adata = emit_adata::take(emitter).adata;
+    let symbol_refs = emit_symbol_refs::take(emitter).symbol_refs;
 
     Ok(HhasProgram {
         main,

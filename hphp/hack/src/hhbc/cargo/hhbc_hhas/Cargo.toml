@@ -9,6 +9,8 @@ include = ["../../print.rs", "../../print_env.rs", "../../write.rs"]
 path = "../../print.rs"
 
 [dependencies]
+ast_class_expr_rust = { path = "../ast_class_expr" }
+ast_scope_rust = { path = "../ast_scope" }
 core_utils_rust = { path = "../../../utils/core" }
 env = { path = "../env" }
 escaper = { path = "../../../utils/escaper" }

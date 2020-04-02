@@ -1477,8 +1477,6 @@ where
 
     fn require_semicolon_token(&mut self, saw_type_name: bool) -> Option<S::Token> {
         match self.peek_token_kind() {
-            // TODO: Kill PHPism; no semicolon required right before ?>
-            TokenKind::QuestionGreaterThan => None,
             TokenKind::Variable if saw_type_name => self
                 .require_and_return_token(TokenKind::Semicolon, Errors::local_variable_with_type),
             _ => self.require_and_return_token(TokenKind::Semicolon, Errors::error1010),
@@ -1486,11 +1484,7 @@ where
     }
 
     fn require_semicolon(&mut self) -> S::R {
-        match self.peek_token_kind() {
-            // TODO: Kill PHPism; no semicolon required right before ?>
-            TokenKind::QuestionGreaterThan => S!(make_missing, self, self.pos()),
-            _ => self.require_token(TokenKind::Semicolon, Errors::error1010),
-        }
+        self.require_token(TokenKind::Semicolon, Errors::error1010)
     }
 
     fn check_stack_limit(&self) {

@@ -20,11 +20,13 @@
                (literal 1 ((() decimal_literal 1 ())))))
              (() ";" 1 ((end_of_line 1)))))))
          (() } 1 ((end_of_line 1)))))))
-     (expression_statement 6
-      ((binary_expression 6
-        ((() ?> 2 ((end_of_line 1))) (((end_of_line 1)) < 1 ()) (() ? 1 ())))
+     (expression_statement 8
+      ((conditional_expression 8
+        ((binary_expression 5
+          ((() ? 1 ()) (() > 1 ((end_of_line 1))) (((end_of_line 1)) < 1 ())))
+         (() ? 1 ()) (() name 2 ((end_of_line 1))) (missing 0 ())
+         (missing 0 ())))
        (missing 0 ())))
-     (expression_statement 2 ((() name 2 ((end_of_line 1))) (missing 0 ())))
      (classish_declaration 62
       ((missing 0 ()) (missing 0 ()) (missing 0 ())
        (() class 5 ((whitespace 1))) (() name 3 ((whitespace 1)))

@@ -201,7 +201,6 @@ type t =
   | SlashGreaterThan
   | LessThanSlash
   | LessThanQuestion
-  | QuestionGreaterThan
   | ColonAt
   | XHP
   (* Variable text tokens *)
@@ -417,7 +416,6 @@ let from_string keyword ~only_reserved =
   | "/>"                                  -> Some SlashGreaterThan
   | "</"                                  -> Some LessThanSlash
   | "<?"                                  -> Some LessThanQuestion
-  | "?>"                                  -> Some QuestionGreaterThan
   | ":@"                                  -> Some ColonAt
   | "xhp"          when not only_reserved -> Some XHP
   | _              -> None
@@ -607,7 +605,6 @@ let to_string kind =
   | SlashGreaterThan              -> "/>"
   | LessThanSlash                 -> "</"
   | LessThanQuestion              -> "<?"
-  | QuestionGreaterThan           -> "?>"
   | ColonAt                       -> ":@"
   | XHP                           -> "xhp"
   (* Variable text tokens *)

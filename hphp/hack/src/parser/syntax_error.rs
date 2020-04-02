@@ -338,7 +338,6 @@ pub const error2066: Error = Cow::Borrowed(concat!(
     "default values for the preceding parameters, or add a default value to ",
     "this one."
 ));
-pub const error2067: Error = Cow::Borrowed("A hack source file cannot contain '?>'.");
 pub const error2068: Error = Cow::Borrowed("hh blocks and php blocks cannot be mixed.");
 pub const invalid_octal_integer: Error = Cow::Borrowed("Invalid octal integers");
 pub const prefixed_invalid_string_kind: Error =

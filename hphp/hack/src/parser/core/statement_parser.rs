@@ -255,9 +255,6 @@ where
     pub fn parse_header(&mut self) -> (S::R, bool) {
         let prefix =
             // for markup section at the beginning of the file
-            // treat ?> as a part of markup text
-            // The closing ?> tag is not legal hack, but accept it here and give an
-            // error in a later pass
             S!(make_missing, self, self.pos());
         let (markup, suffix_opt) = self.lexer.scan_header();
         let markup = S!(make_token, self, markup);

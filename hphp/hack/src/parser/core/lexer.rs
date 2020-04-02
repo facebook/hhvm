@@ -1601,10 +1601,6 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
                     self.advance(2);
                     TokenKind::QuestionQuestion
                 }
-                ('>', _) => {
-                    self.advance(2);
-                    TokenKind::QuestionGreaterThan
-                }
                 ('a', 's') if !Self::is_name_nondigit(self.peek_char(3)) => {
                     self.advance(3);
                     TokenKind::QuestionAs
@@ -1810,19 +1806,6 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
     }
 
     fn scan_php_trivia(&mut self) -> Option<Token::Trivia> {
-        // Hack does not support PHP style embedded markup:
-        // <?php
-        // if (x) {
-        // ?>
-        // <foo>bar</foo>
-        // <?php
-        // } else { ... }
-        //
-        // However, ?> is never legal in Hack, so we can treat ?> ... any text ... <?php
-        // as a comment, and then give an error saying that this feature is not supported
-        // in Hack.
-        //
-        // TODO: Give an error if this appears in a Hack program.
         match self.peek_char(0) {
             '#' => {
                 self.start_new_lexeme();
@@ -2037,14 +2020,6 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
         let (kind, w, leading) = self.scan_token_and_leading_trivia(scanner, as_name);
         let trailing = match kind {
             TokenKind::DoubleQuotedStringLiteralHead => vec![],
-            TokenKind::QuestionGreaterThan => {
-                if Self::is_newline(self.peek_char(0)) {
-                    // consume only trailing EOL token after ?> as trailing trivia
-                    vec![self.scan_end_of_line()]
-                } else {
-                    vec![]
-                }
-            }
             _ => self.scan_trailing_php_trivia(),
         };
         Token::make(kind, self.source(), token_start, w, leading, trailing)

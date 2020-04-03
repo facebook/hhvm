@@ -29,6 +29,7 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <sys/file.h>
 #include <unistd.h>
 
 namespace HPHP {
@@ -607,6 +608,11 @@ int64_t HHVM_FUNCTION(HSL_os_lseek, const Object& obj, int64_t offset, int64_t w
   return ret;
 }
 
+void HHVM_FUNCTION(HSL_os_flock, const Object& obj, int64_t operation) {
+  auto fd = HSLFileDescriptor::fd(obj);
+  throw_errno_if_minus_one(retry_on_eintr(-1, ::flock, fd, operation));
+}
+
 Object HHVM_FUNCTION(HSL_os_poll_async,
                      const Object& fd_wrapper,
                      int64_t events,
@@ -790,6 +796,14 @@ struct OSExtension final : Extension {
 #undef SEEK_
 
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\lseek, HSL_os_lseek);
+
+#define LOCK_(name) HHVM_RC_INT(HH\\Lib\\_Private\\_OS\\LOCK_##name, LOCK_##name)
+    LOCK_(SH);
+    LOCK_(EX);
+    LOCK_(NB);
+    LOCK_(UN);
+#undef LOCK_
+    HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\flock, HSL_os_flock);
 
 #define AF_(name) \
   HHVM_RC_INT(HH\\Lib\\_Private\\_OS\\AF_##name, AF_##name); \

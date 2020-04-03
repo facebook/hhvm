@@ -168,6 +168,11 @@ const int F_SETOWN = 0;
 
 const int FD_CLOEXEC = 0;
 
+const int LOCK_SH = 0;
+const int LOCK_EX = 0;
+const int LOCK_NB = 0;
+const int LOCK_UN = 0;
+
 type uint32_t = int;
 type sa_family_t = int;
 type in_port_t = int;
@@ -228,3 +233,4 @@ function listen(FileDescriptor $socket, int $backlog): void;
 function accept(FileDescriptor $socket): (FileDescriptor, sockaddr);
 function fcntl(FileDescriptor $fd, int $cmd, mixed $arg = null): mixed;
 function lseek(FileDescriptor $fd, int $offset, int $whence): int;
+function flock(FileDescriptor $fd, int $operation): void;

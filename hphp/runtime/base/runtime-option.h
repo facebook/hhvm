@@ -1313,7 +1313,7 @@ struct RuntimeOption {
   F(bool, NoUseMagicMethods, false)                                     \
   F(bool, NoAppendToMap, false)                                         \
   /* Should we use the autoload map from the repo */                    \
-  F(bool, UseRepoAutoloadMap, true)                                     \
+  F(bool, UseRepoAutoloadMap, false)                                    \
   /* */
 
 private:

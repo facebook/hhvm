@@ -1,16 +1,14 @@
 <?hh
 
 function __autoload($cls) {
-  switch ($cls) {
-    case 'H2':
-      include 'recursive-1.inc';
-      break;
-    case 'I2_Recursive':
+  if ($cls === "H2") {
+    include 'recursive-1.inc';
+  } else if ($cls == "I2") {
+    if (I1::$i2_is_recursive) {
       include 'recursive-2.inc';
-      break;
-    case 'I2_NotRecursive':
+    } else {
       include 'recursive-3.inc';
-      break;
+    }
   }
 }
 
@@ -60,12 +58,8 @@ class H1 {
   const FOO = H2::BAR;
 }
 
-class I1_NotRecursive {
-  const FOO = I2_NotRecursive::BAR;
-}
-
-class I1_Recursive {
-  const FOO = I2_Recursive::BAR;
+class I1 {
+  public static $i2_is_recursive = false; const FOO = I2::BAR;
 }
 
 const BOOLCNS1 = true;
@@ -105,10 +99,12 @@ function test16() { var_dump(G::FOO); }
 function test17() { var_dump(G::BAR); }
 function test18() { var_dump(H1::FOO); }
 function test19() {
-  var_dump(I1_NotRecursive::FOO);
+  I1::$i2_is_recursive = false;
+  var_dump(I1::FOO);
 }
 function test20() {
-  var_dump(I1_Recursive::FOO);
+  I1::$i2_is_recursive = true;
+  var_dump(I1::FOO);
 }
 function test21() { var_dump(J1::FOO); }
 function test22() { var_dump(J2::FOO); }

@@ -1,6 +1,6 @@
 <?hh
 
-class I2_NotRecursive {
+class I2 {
   const BAR = 123;
 }
 

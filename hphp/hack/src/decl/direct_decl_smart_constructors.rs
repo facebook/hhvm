@@ -353,6 +353,7 @@ pub enum HintValue {
     Shape(Box<ShapeDecl>),
     Nullable(Box<Node_>),
     LikeType(Box<Node_>),
+    Soft(Box<Node_>),
     Closure(Box<ClosureTypeHint>),
 }
 
@@ -536,6 +537,9 @@ pub enum Node_ {
     This(Pos),        // This needs a pos since it shows up in Taccess.
     ColonColon(Pos),  // This needs a pos since it shows up in Taccess.
 
+    LessThanLessThan(Pos), // This needs a pos since it shows up in attributized type specifiers.
+    GreaterThanGreaterThan(Pos), // This needs a pos since it shows up in attributized type specifiers.
+
     // Simple keywords and tokens.
     Abstract,
     As,
@@ -579,6 +583,8 @@ impl Node_ {
             | Node_::Array(pos)
             | Node_::Darray(pos)
             | Node_::Varray(pos)
+            | Node_::LessThanLessThan(pos)
+            | Node_::GreaterThanGreaterThan(pos)
             | Node_::IntLiteral(_, pos)
             | Node_::FloatingLiteral(_, pos)
             | Node_::Null(pos)
@@ -934,6 +940,15 @@ impl DirectDeclSmartConstructors<'_> {
                         Ty_::Toption(self.node_to_ty(hint, type_variables)?)
                     }
                     HintValue::LikeType(hint) => Ty_::Tlike(self.node_to_ty(hint, type_variables)?),
+                    HintValue::Soft(hint) => {
+                        // Use the pos from the Soft node (above, when we
+                        // construct `reason`) so that we include the position
+                        // of the attribute list, but throw away the knowledge
+                        // that we had a soft type specifier here (the
+                        // typechecker does not use it)
+                        let Ty(_, ty_) = self.node_to_ty(hint, type_variables)?;
+                        *ty_
+                    }
                     HintValue::Closure(hint) => {
                         let params = hint
                             .args
@@ -1543,10 +1558,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             TokenKind::Dot => Node_::Operator(token_pos(self), OperatorType::Dot),
             TokenKind::Ampersand => Node_::Operator(token_pos(self), OperatorType::Amp),
             TokenKind::Bar => Node_::Operator(token_pos(self), OperatorType::Bar),
-            TokenKind::LessThanLessThan => Node_::Operator(token_pos(self), OperatorType::Ltlt),
-            TokenKind::GreaterThanGreaterThan => {
-                Node_::Operator(token_pos(self), OperatorType::Gtgt)
-            }
+            TokenKind::LessThanLessThan => Node_::LessThanLessThan(token_pos(self)),
+            TokenKind::GreaterThanGreaterThan => Node_::GreaterThanGreaterThan(token_pos(self)),
             TokenKind::Percent => Node_::Operator(token_pos(self), OperatorType::Percent),
             TokenKind::QuestionQuestion => {
                 Node_::Operator(token_pos(self), OperatorType::QuestionQuestion)
@@ -1861,8 +1874,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 OperatorType::Dot => Bop::Dot,
                 OperatorType::Amp => Bop::Amp,
                 OperatorType::Bar => Bop::Bar,
-                OperatorType::Ltlt => Bop::Ltlt,
-                OperatorType::Gtgt => Bop::Gtgt,
                 OperatorType::Percent => Bop::Percent,
                 OperatorType::Xor => Bop::Xor,
                 OperatorType::Cmp => Bop::Cmp,
@@ -1874,6 +1885,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     ))
                 }
             },
+            Node_::LessThanLessThan(_) => Bop::Ltlt,
+            Node_::GreaterThanGreaterThan(_) => Bop::Gtgt,
             op => return Err(format!("Did not recognize operator {:?}", op)),
         };
 
@@ -2962,11 +2975,21 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
     fn make_old_attribute_specification(
         &mut self,
-        _arg0: Self::R,
+        ltlt: Self::R,
         attrs: Self::R,
-        _arg2: Self::R,
+        gtgt: Self::R,
     ) -> Self::R {
-        attrs
+        match attrs? {
+            Node_::List(nodes) => Ok(Node_::BracketedList(Box::new((
+                ltlt?.get_pos()?,
+                nodes,
+                gtgt?.get_pos()?,
+            )))),
+            node => Err(format!(
+                "Expected List in old_attribute_specification, but got {:?}",
+                node
+            )),
+        }
     }
 
     fn make_constructor_call(
@@ -3092,6 +3115,42 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 pos,
             )),
         }
+    }
+
+    fn make_soft_type_specifier(&mut self, at_token: Self::R, hint: Self::R) -> Self::R {
+        let hint = hint?;
+        let hint_pos = hint.get_pos()?;
+        Ok(Node_::Hint(
+            HintValue::Soft(Box::new(hint)),
+            Pos::merge(&at_token?.get_pos()?, &hint_pos)?,
+        ))
+    }
+
+    // A type specifier preceded by an attribute list. At the time of writing,
+    // only the <<__Soft>> attribute is permitted here.
+    fn make_attributized_specifier(&mut self, attributes: Self::R, hint: Self::R) -> Self::R {
+        match attributes? {
+            Node_::BracketedList(args) => {
+                let (ltlt_pos, attributes, gtgt_pos) = &*args;
+                match attributes.as_slice() {
+                    [Node_::Attribute(attribute)] => {
+                        let Id(_, attribute_name) = &attribute.id;
+                        if attribute_name == "__Soft" {
+                            let attributes_pos = Pos::merge(ltlt_pos, gtgt_pos)?;
+                            let hint = hint?;
+                            let hint_pos = hint.get_pos()?;
+                            return Ok(Node_::Hint(
+                                HintValue::Soft(Box::new(hint)),
+                                Pos::merge(&attributes_pos, &hint_pos)?,
+                            ));
+                        }
+                    }
+                    _ => (),
+                }
+            }
+            _ => (),
+        }
+        hint
     }
 
     fn make_vector_type_specifier(

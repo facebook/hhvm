@@ -1,0 +1,36 @@
+Parsed decls:
+
+{ Direct_decl_parser.classes = {};
+  funs =
+  { "f" ->
+    { fe_pos = [3:10-11];
+      fe_type =
+      (Rwitness (root|soft_type_hint.php line 3, characters 10-10),
+       (Tfun
+          { ft_arity = (Fstandard (1)); ft_tparams = [];
+            ft_where_constraints = [];
+            ft_params =
+            [{ fp_pos = [3:27-29]; fp_name = (Some "$x");
+               fp_type =
+               { et_enforced = false;
+                 et_type =
+                 (Rhint (root|soft_type_hint.php line 3, characters 23-25),
+                  (Tprim Tint))
+                 };
+               fp_kind = FPnormal; fp_accept_disposable = false;
+               fp_mutable = none }
+              ];
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|soft_type_hint.php line 3, characters 32-45),
+               (Tprim Tint))
+              };
+            ft_flags =
+            (make_ft_flags sync none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
+      fe_deprecated = None;  } };
+  typedefs = {}; consts = {} }
+
+They matched!

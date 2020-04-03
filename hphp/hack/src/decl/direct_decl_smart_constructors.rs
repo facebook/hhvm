@@ -298,6 +298,47 @@ impl NamespaceBuilder {
 }
 
 #[derive(Clone, Debug)]
+enum ClassishNameBuilder {
+    /// We are not in a classish declaration.
+    NotInClassish,
+
+    /// We saw a classish keyword token followed by a Name, so we make it
+    /// available as the name of the containing class declaration.
+    InClassish(Rc<(String, Pos)>),
+}
+
+impl ClassishNameBuilder {
+    fn new() -> Self {
+        ClassishNameBuilder::NotInClassish
+    }
+
+    fn lexed_name_after_classish_keyword(&mut self, name: &str, pos: &Pos) {
+        use ClassishNameBuilder::*;
+        match self {
+            NotInClassish => {
+                let mut class_name = String::with_capacity(1 + name.len());
+                class_name.push('\\');
+                class_name.push_str(name);
+                *self = InClassish(Rc::new((class_name, pos.clone())))
+            }
+            InClassish(_) => (),
+        }
+    }
+
+    fn parsed_classish_declaration(&mut self) {
+        *self = ClassishNameBuilder::NotInClassish;
+    }
+
+    fn get_current_classish_name(&self) -> Option<(String, Pos)> {
+        use ClassishNameBuilder::*;
+        match self {
+            NotInClassish => None,
+            InClassish(name_and_pos) => Some((**name_and_pos).clone()),
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
 enum FileModeBuilder {
     // We haven't seen any tokens yet.
     None,
@@ -316,9 +357,12 @@ pub struct State<'a> {
     pub source_text: IndexedSourceText<'a>,
     pub decls: Rc<InProgressDecls>,
     namespace_builder: Rc<NamespaceBuilder>,
+    classish_name_builder: ClassishNameBuilder,
 
     // We don't need to wrap this in a Cow because it's very small.
     file_mode_builder: FileModeBuilder,
+
+    previous_token_kind: TokenKind,
 }
 
 impl<'a> State<'a> {
@@ -327,7 +371,13 @@ impl<'a> State<'a> {
             source_text,
             decls: Rc::new(empty_decls()),
             namespace_builder: Rc::new(NamespaceBuilder::new()),
+            classish_name_builder: ClassishNameBuilder::new(),
             file_mode_builder: FileModeBuilder::None,
+            // EndOfFile is used here as a None value (signifying "beginning of
+            // file") to save space. There is no legitimate circumstance where
+            // we would parse a token and the previous token kind would be
+            // EndOfFile.
+            previous_token_kind: TokenKind::EndOfFile,
         }
     }
 }
@@ -880,10 +930,29 @@ impl DirectDeclSmartConstructors<'_> {
                     }
                     HintValue::Access(innards) => {
                         let (ty, names) = &**innards;
-                        Ty_::Taccess(typing_defs::TaccessType(
-                            self.node_to_ty(ty, type_variables)?,
-                            names.to_vec(),
-                        ))
+                        let ty = match ty {
+                            Node_::Name(name, self_pos) if name == "self" => {
+                                match self.state.classish_name_builder.get_current_classish_name() {
+                                    Some((name, class_name_pos)) => {
+                                        // In classes, we modify the position when rewriting the
+                                        // `self` keyword to point to the class name. In traits, we
+                                        // don't (for some reason). We indicate that the position
+                                        // shouldn't be rewritten with the none Pos.
+                                        let id_pos = if class_name_pos.is_none() {
+                                            self_pos.clone()
+                                        } else {
+                                            class_name_pos
+                                        };
+                                        let reason = Reason::Rhint(self_pos.clone());
+                                        let ty_ = Ty_::Tapply(Id(id_pos, name), Vec::new());
+                                        Ty(reason, Box::new(ty_))
+                                    }
+                                    None => self.node_to_ty(ty, type_variables)?,
+                                }
+                            }
+                            _ => self.node_to_ty(ty, type_variables)?,
+                        };
+                        Ty_::Taccess(typing_defs::TaccessType(ty, names.to_vec()))
                     }
                     HintValue::Array(innards) => {
                         let (key_type, value_type) = &**innards;
@@ -1446,18 +1515,28 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         // a namespace" state and push the newly created namespace onto our
         // namespace stack. Then, in all of the various make_namespace_XXXX
         // methods, we pop the namespace (since we know we've just exited it).
-        Ok(match kind {
+        let result = Ok(match kind {
             TokenKind::Name => {
                 let name = token_text(self);
+                let pos = token_pos(self);
+                if self.state.previous_token_kind == TokenKind::Class
+                    || self.state.previous_token_kind == TokenKind::Trait
+                    || self.state.previous_token_kind == TokenKind::Interface
+                {
+                    self.state
+                        .classish_name_builder
+                        .lexed_name_after_classish_keyword(&name, &pos);
+                }
                 if self.state.namespace_builder.is_building_namespace {
                     Rc::make_mut(&mut self.state.namespace_builder)
                         .in_progress_namespace
                         .push_str(&name.to_string());
                     Node_::Ignored
                 } else {
-                    Node_::Name(name, token_pos(self))
+                    Node_::Name(name, pos)
                 }
             }
+            TokenKind::Class => Node_::Name(token_text(self), token_pos(self)),
             // There are a few types whose string representations we have to
             // grab anyway, so just go ahead and treat them as generic names.
             TokenKind::Variable
@@ -1466,7 +1545,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             | TokenKind::Keyset
             | TokenKind::Tuple
             | TokenKind::Classname
-            | TokenKind::Class
             | TokenKind::SelfToken => Node_::Name(token_text(self), token_pos(self)),
             TokenKind::XHPClassName => Node_::XhpName(token_text(self), token_pos(self)),
             TokenKind::SingleQuotedStringLiteral => Node_::StringLiteral(
@@ -1606,7 +1684,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             TokenKind::Static => Node_::Static,
             TokenKind::Trait => Node_::Trait,
             _ => Node_::Ignored,
-        })
+        });
+        self.state.previous_token_kind = kind;
+        result
     }
 
     fn make_missing(&mut self, _: usize) -> Self::R {
@@ -2593,6 +2673,11 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         Rc::make_mut(&mut self.state.decls)
             .classes
             .insert(key, Rc::new(cls));
+
+        self.state
+            .classish_name_builder
+            .parsed_classish_declaration();
+
         Ok(Node_::Ignored)
     }
 

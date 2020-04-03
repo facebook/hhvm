@@ -71,7 +71,6 @@ let compute_tast_and_errors_unquarantined_internal
         Errors.Typing
         (fun () -> Typing_toplevel.nast_to_tast ~do_tast_checks ctx nast)
     in
-    let tast_errors = Errors.merge nast_errors tast_errors in
 
     (* Logging... *)
     let ctx_telemetry =
@@ -93,6 +92,9 @@ let compute_tast_and_errors_unquarantined_internal
       telemetry
       |> Telemetry.object_ ~key:"ctx" ~value:ctx_telemetry
       |> Telemetry.object_ ~key:"gc" ~value:gc_telemetry
+      |> Telemetry.int_ ~key:"errors.ast" ~value:(Errors.count ast_errors)
+      |> Telemetry.int_ ~key:"errors.nast" ~value:(Errors.count nast_errors)
+      |> Telemetry.int_ ~key:"errors.tast" ~value:(Errors.count tast_errors)
       |> Telemetry.float_
            ~key:"duration_decl_and_typecheck"
            ~value:(Unix.gettimeofday () -. t)
@@ -111,6 +113,7 @@ let compute_tast_and_errors_unquarantined_internal
 
     (match mode with
     | Compute_tast_and_errors ->
+      let tast_errors = Errors.merge nast_errors tast_errors in
       entry.Provider_context.tast <- Some tast;
       entry.Provider_context.tast_errors <- Some tast_errors;
       let errors = Errors.merge ast_errors tast_errors in

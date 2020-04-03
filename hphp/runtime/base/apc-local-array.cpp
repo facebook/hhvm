@@ -276,12 +276,16 @@ ssize_t APCLocalArray::NvGetStrPos(const ArrayData* ad, const StringData* k) {
   return (index == -1) ? a->m_size : index;
 }
 
-TypedValue APCLocalArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
+TypedValue APCLocalArray::GetPosKey(const ArrayData* ad, ssize_t pos) {
   auto a = asApcArray(ad);
   Variant k = a->m_arr->getKey(pos);
   auto const tv = *k.asTypedValue();
   tvIncRefGen(tv);
   return tv;
+}
+
+TypedValue APCLocalArray::GetPosVal(const ArrayData* ad, ssize_t pos) {
+  return *RvalPos(ad, pos);
 }
 
 ArrayData* APCLocalArray::EscalateForSort(ArrayData* ad, SortFunction sf) {

@@ -1138,7 +1138,7 @@ TypedValue HHVM_FUNCTION(array_unshift,
         auto pos_limit = args->iter_end();
         for (ssize_t pos = args->iter_last(); pos != pos_limit;
              pos = args->iter_rewind(pos)) {
-          arr_array.prepend(args->atPos(pos));
+          arr_array.prepend(args->nvGetVal(pos));
         }
       }
       arr_array.prepend(var);
@@ -1157,7 +1157,7 @@ TypedValue HHVM_FUNCTION(array_unshift,
         auto pos_limit = args->iter_end();
         for (ssize_t pos = args->iter_begin(); pos != pos_limit;
              pos = args->iter_advance(pos)) {
-          newArray.append(args->atPos(pos));
+          newArray.append(args->nvGetVal(pos));
         }
       }
       if (isKeysetType(dt)) {
@@ -1191,7 +1191,7 @@ TypedValue HHVM_FUNCTION(array_unshift,
         auto pos_limit = args->iter_end();
         for (ssize_t pos = args->iter_last(); pos != pos_limit;
              pos = args->iter_rewind(pos)) {
-          vec->addFront(args->atPos(pos));
+          vec->addFront(args->nvGetVal(pos));
         }
       }
       vec->addFront(*var.asTypedValue());
@@ -1203,7 +1203,7 @@ TypedValue HHVM_FUNCTION(array_unshift,
         auto pos_limit = args->iter_end();
         for (ssize_t pos = args->iter_last(); pos != pos_limit;
              pos = args->iter_rewind(pos)) {
-          st->addFront(args->atPos(pos));
+          st->addFront(args->nvGetVal(pos));
         }
       }
       st->addFront(*var.asTypedValue());
@@ -2477,19 +2477,19 @@ TypedValue HHVM_FUNCTION(array_intersect_key,
         for (auto pos : positions) {
           auto const k = leftAd->nvGetKey(pos);
           if (k.m_type == KindOfInt64) {
-            ret.set(k.m_data.num, leftAd->atPos(pos));
+            ret.set(k.m_data.num, leftAd->nvGetVal(pos));
           } else {
             int64_t n;
             if (k.m_data.pstr->isStrictlyInteger(n)) {
-              ret.set(n, leftAd->atPos(pos));
+              ret.set(n, leftAd->nvGetVal(pos));
             } else {
-              ret.set(k.m_data.pstr, leftAd->atPos(pos));
+              ret.set(k.m_data.pstr, leftAd->nvGetVal(pos));
             }
           }
         }
       } else {
         for (auto pos : positions) {
-          ret.set(leftAd->nvGetKey(pos), leftAd->atPos(pos));
+          ret.set(leftAd->nvGetKey(pos), leftAd->nvGetVal(pos));
         }
       }
 

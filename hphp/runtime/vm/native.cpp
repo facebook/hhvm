@@ -496,7 +496,7 @@ static MaybeDataType typeForOutParam(TypedValue attr) {
     return {};
   }
 
-  auto const& type = attr.m_data.parr->atPos(attr.m_data.parr->iter_begin());
+  auto const& type = attr.m_data.parr->nvGetVal(attr.m_data.parr->iter_begin());
   if (!isStringType(type.m_type)) return {};
 
   auto const str = type.m_data.pstr->data();

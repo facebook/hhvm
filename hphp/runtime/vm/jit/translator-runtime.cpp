@@ -611,7 +611,7 @@ TypedValue arrFirstLast(ArrayData* a) {
     return make_tv<KindOfNull>();
   }
   auto pos = isFirst ? a->iter_begin() : a->iter_last();
-  return isKey ? a->nvGetKey(pos) : a->atPos(pos);
+  return isKey ? a->nvGetKey(pos) : a->nvGetVal(pos);
 }
 
 template TypedValue arrFirstLast<true, false>(ArrayData*);

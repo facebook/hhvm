@@ -327,7 +327,7 @@ std::pair<Type, bool> vecFirstLastType(Type arr,
     auto const val = arr.arrLikeVal();
     if (val->empty()) return {TBottom, false};
     auto const pos = isFirst ? val->iter_begin() : val->iter_end();
-    return {Type::cns(val->atPos(pos)), true};
+    return {Type::cns(val->nvGetVal(pos)), true};
   }
 
   auto type = [&] {
@@ -369,7 +369,7 @@ std::pair<Type, bool> dictFirstLastType(Type arr, bool isFirst, bool isKey) {
     auto const val = arr.arrLikeVal();
     if (val->empty()) return {TBottom, false};
     auto const pos = isFirst ? val->iter_begin() : val->iter_end();
-    auto const tv = isKey ? val->nvGetKey(pos) : val->atPos(pos);
+    auto const tv = isKey ? val->nvGetKey(pos) : val->nvGetVal(pos);
     return {Type::cns(tv), true};
   }
 
@@ -388,7 +388,7 @@ std::pair<Type, bool> keysetFirstLastType(Type arr, bool isFirst) {
     auto val = arr.keysetVal();
     if (val->empty()) return {TBottom, false};
     auto const pos = isFirst ? val->iter_begin() : val->iter_end();
-    return {Type::cns(val->atPos(pos)), true};
+    return {Type::cns(val->nvGetVal(pos)), true};
   }
 
   auto type = TStr | TInt;

@@ -291,8 +291,8 @@ ssize_t RecordArray::NvGetStrPos(const ArrayData* ad, const StringData* key) {
   return ra->record()->numFields() + posInExtra;
 }
 
-TypedValue RecordArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
-  raise_recordarray_unsupported_op_notice("NvGetKey");
+TypedValue RecordArray::GetPosKey(const ArrayData* ad, ssize_t pos) {
+  raise_recordarray_unsupported_op_notice("GetPosKey");
   assertx(pos < ad->m_size);
   auto const ra = asRecordArray(ad);
   auto const rec = ra->record();
@@ -301,7 +301,19 @@ TypedValue RecordArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
     return make_tv<KindOfPersistentString>(name);
   }
   auto const extra = ra->extraFieldMap();
-  return MixedArray::NvGetKey(extra, pos - rec->numFields());
+  return MixedArray::GetPosKey(extra, pos - rec->numFields());
+}
+
+TypedValue RecordArray::GetPosVal(const ArrayData* ad, ssize_t pos) {
+  raise_recordarray_unsupported_op_notice("GetPosVal");
+  assertx(pos < ad->m_size);
+  assertx(pos >= 0);
+  auto const ra = asRecordArray(ad);
+  auto const rec = ra->record();
+  if (pos < rec->numFields()) {
+    return *ra->rvalAt(pos);
+  }
+  return MixedArray::GetPosVal(ra->extraFieldMap(), pos - rec->numFields());
 }
 
 bool RecordArray::IsVectorData(const ArrayData*) {
@@ -406,18 +418,6 @@ ssize_t RecordArray::IterRewind(const ArrayData* ad, ssize_t pos) {
   assertx(pos >= 0);
   assertx(pos <= ad->m_size);
   return (pos > 0) ? pos - 1  : pos;
-}
-
-tv_rval RecordArray::RvalPos(const ArrayData* ad, ssize_t pos) {
-  raise_recordarray_unsupported_op_notice("RvalPos");
-  assertx(pos < ad->m_size);
-  assertx(pos >= 0);
-  auto const ra = asRecordArray(ad);
-  auto const rec = ra->record();
-  if (pos < rec->numFields()) {
-    return ra->rvalAt(pos);
-  }
-  return MixedArray::RvalPos(ra->extraFieldMap(), pos - rec->numFields());
 }
 
 ArrayData* RecordArray::EscalateForSort(ArrayData* ad, SortFunction) {

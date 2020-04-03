@@ -555,10 +555,10 @@ const TypedValue* SetArray::tvOfPos(uint32_t pos) const {
 
 size_t SetArray::Vsize(const ArrayData*) { not_reached(); }
 
-tv_rval SetArray::RvalPos(const ArrayData* ad, ssize_t pos) {
+TypedValue SetArray::GetPosVal(const ArrayData* ad, ssize_t pos) {
   auto a = asSet(ad);
   assertx(0 <= pos && pos < a->m_used);
-  return a->tvOfPos(pos);
+  return *a->tvOfPos(pos);
 }
 
 bool SetArray::IsVectorData(const ArrayData* ad) {

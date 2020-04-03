@@ -109,7 +109,7 @@ bool PackedArray::checkInvariants(const ArrayData* arr) {
   // packed arrays.
   if (false) {
     for (uint32_t i = 0; i < arr->m_size; ++i) {
-      auto const DEBUG_ONLY rval = RvalPos(arr, i);
+      auto const DEBUG_ONLY rval = NvGetInt(arr, i);
       assertx(type(rval) != KindOfUninit);
       assertx(tvIsPlausible(*rval));
     }
@@ -167,7 +167,7 @@ MixedArray* PackedArray::ToMixed(ArrayData* old) {
     auto h = hash_int64(i);
     *ad->findForNewInsert(dstHash, mask, h) = i;
     dstData->setIntKey(i, h);
-    tvCopy(*RvalPos(old, i), dstData->data);
+    tvCopy(GetPosVal(old, i), dstData->data);
     ++dstData;
   }
   old->m_sizeAndPos = 0;
@@ -208,7 +208,7 @@ MixedArray* PackedArray::ToMixedCopyReserve(const ArrayData* old,
     auto const h = hash_int64(i);
     *ad->findForNewInsert(dstHash, mask, h) = i;
     dstData->setIntKey(i, h);
-    tvDup(*RvalPos(old, i), dstData->data);
+    tvDup(GetPosVal(old, i), dstData->data);
     ++dstData;
   }
 
@@ -379,7 +379,7 @@ ArrayData* PackedArray::ConvertStatic(const ArrayData* arr) {
   auto pos_limit = arr->iter_end();
   for (auto pos = arr->iter_begin(); pos != pos_limit;
        pos = arr->iter_advance(pos), ++i) {
-    tvDup(arr->atPos(pos), LvalUncheckedInt(ad, i));
+    tvDup(arr->nvGetVal(pos), LvalUncheckedInt(ad, i));
   }
 
   if (RuntimeOption::EvalArrayProvenance) {
@@ -646,7 +646,7 @@ void PackedArray::ReleaseUncounted(ArrayData* ad) {
 
 tv_rval PackedArray::NvGetInt(const ArrayData* ad, int64_t k) {
   assertx(checkInvariants(ad));
-  return LIKELY(size_t(k) < ad->m_size) ? RvalPos(ad, k) : nullptr;
+  return LIKELY(size_t(k) < ad->m_size) ? &packedData(ad)[k] : nullptr;
 }
 
 tv_rval
@@ -665,21 +665,21 @@ ssize_t PackedArray::NvGetStrPos(const ArrayData* ad, const StringData* k) {
   return ad->m_size;
 }
 
-TypedValue PackedArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
+TypedValue PackedArray::GetPosKey(const ArrayData* ad, ssize_t pos) {
   assertx(checkInvariants(ad));
   assertx(pos != ad->m_size);
   return make_tv<KindOfInt64>(pos);
 }
 
+TypedValue PackedArray::GetPosVal(const ArrayData* ad, ssize_t pos) {
+  assertx(checkInvariants(ad));
+  assertx(pos < ad->m_size);
+  return *LvalUncheckedInt(const_cast<ArrayData*>(ad), pos);
+}
+
 size_t PackedArray::Vsize(const ArrayData*) {
   // PackedArray always has a valid m_size so it's an error to get here.
   always_assert(false);
-}
-
-tv_rval PackedArray::RvalPos(const ArrayData* ad, ssize_t pos) {
-  assertx(checkInvariants(ad));
-  assertx(pos < ad->m_size);
-  return LvalUncheckedInt(const_cast<ArrayData*>(ad), pos);
 }
 
 bool PackedArray::ExistsInt(const ArrayData* ad, int64_t k) {
@@ -1101,7 +1101,7 @@ ArrayData* PackedArray::ToDArray(ArrayData* adIn, bool /*copy*/) {
   if (size == 0) return ArrayData::CreateDArray();
 
   DArrayInit init{size};
-  for (int64_t i = 0; i < size; ++i) init.add(i, *RvalPos(adIn, i));
+  for (int64_t i = 0; i < size; ++i) init.add(i, GetPosVal(adIn, i));
   return init.create();
 }
 
@@ -1292,8 +1292,8 @@ bool PackedArray::VecEqualHelper(const ArrayData* ad1, const ArrayData* ad2,
 
   auto const size = ad1->m_size;
   for (uint32_t i = 0; i < size; ++i) {
-    auto const elm1 = *RvalPos(ad1, i);
-    auto const elm2 = *RvalPos(ad2, i);
+    auto const elm1 = GetPosVal(ad1, i);
+    auto const elm2 = GetPosVal(ad2, i);
     auto const cmp = strict ? tvSame(elm1, elm2) : tvEqual(elm1, elm2);
     if (!cmp) return false;
   }
@@ -1318,7 +1318,7 @@ int64_t PackedArray::VecCmpHelper(const ArrayData* ad1, const ArrayData* ad2) {
   check_recursion_error();
 
   for (uint32_t i = 0; i < size1; ++i) {
-    auto const cmp = tvCompare(*RvalPos(ad1, i), *RvalPos(ad2, i));
+    auto const cmp = tvCompare(GetPosVal(ad1, i), GetPosVal(ad2, i));
     if (cmp != 0) return cmp;
   }
 

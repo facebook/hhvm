@@ -352,12 +352,22 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(NvGetStrPos)
 
   /*
-   * TypedValue NvGetKey(const ArrayData*, ssize_t pos)
+   * TypedValue GetPosVal(const ArrayData*, ssize_t pos)
    *
-   *   Look up the key for an array position.  `pos' must be a valid
-   *   position for this array. This function must IncRef the key if needed.
+   *   Look up the key at a valid iterator position in this array.
+   *   This method inc-refs the key before returning it.
+   *
+   *   TODO(kshaunak): Let the caller do the inc-ref instead.
    */
-  DISPATCH(NvGetKey)
+  DISPATCH(GetPosKey)
+
+  /*
+   * TypedValue GetPosVal(const ArrayData*, ssize_t pos)
+   *
+   *   Look up the value at a valid iterator position in this array.
+   *   This method returns the value WITHOUT inc-ref-ing it.
+   */
+  DISPATCH(GetPosVal)
 
   /*
    * ArrayData* SetInt(ArrayData*, int64_t key, TypedValue v)
@@ -391,14 +401,6 @@ const ArrayFunctions g_array_funcs = {
    *   case and dispatch through this entry point.
    */
   DISPATCH(Vsize)
-
-  /*
-   * tv_rval RvalPos(const ArrayData*, ssize_t pos)
-   *
-   *   Return a reference to the value at an iterator position.  `pos' must be
-   *   a valid position for this array.
-   */
-  DISPATCH(RvalPos)
 
   /*
    * bool IsVectorData(const ArrayData*)

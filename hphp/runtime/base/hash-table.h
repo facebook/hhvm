@@ -245,7 +245,8 @@ struct HashTable : HashTableCommon {
   static ssize_t NvGetIntPos(const ArrayData* ad, int64_t k);
   static ssize_t NvGetStrPos(const ArrayData* ad, const StringData* k);
 
-  static TypedValue NvGetKey(const ArrayData* ad, ssize_t pos);
+  // Inc-ref and return the key at the given element.
+  static TypedValue GetPosKey(const ArrayData* ad, ssize_t pos);
 
   /////////////////////////////////////////////////////////////////////////////
   // findForNewInsertImpl

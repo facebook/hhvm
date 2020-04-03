@@ -6308,7 +6308,7 @@ bool inner_types_might_raise(const Type& t1, const Type& t2) {
           } else {
             p.pos = t.m_data.aval->iter_advance(p.pos);
           }
-          return from_cell(t.m_data.aval->atPos(p.pos));
+          return from_cell(t.m_data.aval->nvGetVal(p.pos));
         case DataTag::ArrLikePacked:
           return t.m_data.packed->elems[i];
         case DataTag::ArrLikePackedN:

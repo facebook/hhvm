@@ -141,12 +141,20 @@ inline ssize_t ArrayData::nvGetStrPos(const StringData* k) const {
   return g_array_funcs.nvGetStrPos[kind()](this, k);
 }
 
-inline tv_rval ArrayData::rvalPos(ssize_t pos) const {
-  return g_array_funcs.nvGetPos[kind()](this, pos);
+inline TypedValue ArrayData::nvGetKey(ssize_t pos) const {
+  return g_array_funcs.getPosKey[kind()](this, pos);
 }
 
-inline TypedValue ArrayData::nvGetKey(ssize_t pos) const {
-  return g_array_funcs.nvGetKey[kind()](this, pos);
+inline TypedValue ArrayData::nvGetVal(ssize_t pos) const {
+  return g_array_funcs.getPosVal[kind()](this, pos);
+}
+
+inline Variant ArrayData::getKey(ssize_t pos) const {
+  return Variant::attach(nvGetKey(pos));
+}
+
+inline Variant ArrayData::getValue(ssize_t pos) const {
+  return Variant::wrap(nvGetVal(pos));
 }
 
 inline ArrayData* ArrayData::set(int64_t k, TypedValue v) {
@@ -351,10 +359,6 @@ inline TypedValue ArrayData::at(TypedValue k) const {
                              : at(detail::getStringKey(k));
 }
 
-inline TypedValue ArrayData::atPos(ssize_t pos) const {
-  return rvalPos(pos).tv();
-}
-
 inline ArrayData* ArrayData::set(TypedValue k, TypedValue v) {
   assertx(tvIsPlausible(k));
   assertx(tvIsPlausible(v));
@@ -429,15 +433,6 @@ inline ArrayData* ArrayData::remove(const String& k) {
 
 inline ArrayData* ArrayData::remove(const Variant& k) {
   return remove(*k.asTypedValue());
-}
-
-inline Variant ArrayData::getValue(ssize_t pos) const {
-  return Variant{const_variant_ref{rvalPos(pos)}};
-}
-
-inline Variant ArrayData::getKey(ssize_t pos) const {
-  auto key = nvGetKey(pos);
-  return std::move(tvAsVariant(key));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

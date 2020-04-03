@@ -262,11 +262,11 @@ struct ArrayIter {
   // Array-only versions of second; undefined behavior if used with Objects.
   // These methods do NOT inc-ref the value before returning it.
   TypedValue nvSecond() const {
-    return getArrayData()->rvalPos(m_pos).tv();
+    return getArrayData()->nvGetVal(m_pos);
   }
   TypedValue nvSecondLocal(const ArrayData* ad) const {
     assertx(getArrayData() == nullptr);
-    return ad->rvalPos(m_pos).tv();
+    return ad->nvGetVal(m_pos);
   }
 
   // This method returns null for local iterators, and for non-local iterators

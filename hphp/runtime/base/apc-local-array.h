@@ -45,7 +45,6 @@ struct APCLocalArray final : ArrayData,
   static APCLocalArray* Make(const APCArray*);
 
   static size_t Vsize(const ArrayData*);
-  static tv_rval RvalPos(const ArrayData* ad, ssize_t pos);
   static bool ExistsInt(const ArrayData* ad, int64_t k);
   static bool ExistsStr(const ArrayData* ad, const StringData* k);
   static arr_lval LvalInt(ArrayData*, int64_t k, bool copy);
@@ -67,7 +66,8 @@ struct APCLocalArray final : ArrayData,
   static tv_rval NvGetStr(const ArrayData*, const StringData* k);
   static ssize_t NvGetIntPos(const ArrayData* ad, int64_t k);
   static ssize_t NvGetStrPos(const ArrayData* ad, const StringData* k);
-  static TypedValue NvGetKey(const ArrayData*, ssize_t pos);
+  static TypedValue GetPosKey(const ArrayData*, ssize_t pos);
+  static TypedValue GetPosVal(const ArrayData*, ssize_t pos);
   static bool IsVectorData(const ArrayData* ad);
   static ssize_t IterBegin(const ArrayData*);
   static ssize_t IterLast(const ArrayData*);
@@ -123,6 +123,9 @@ public:
   size_t heapSize() const;
 
 private:
+  // Return a reference to the value at a given position.
+  static tv_rval RvalPos(const ArrayData* ad, ssize_t pos);
+
   explicit APCLocalArray(const APCArray* source, size_t heapSize);
   ~APCLocalArray() = delete;
 

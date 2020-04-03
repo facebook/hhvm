@@ -301,7 +301,7 @@ ssize_t HashTable<ArrayType, ElmType>::NvGetStrPos(const ArrayData* ad,
 }
 
 template<typename ArrayType, typename ElmType>
-TypedValue HashTable<ArrayType, ElmType>::NvGetKey(const ArrayData* ad, ssize_t pos) {
+TypedValue HashTable<ArrayType, ElmType>::GetPosKey(const ArrayData* ad, ssize_t pos) {
   auto a = asArrayType(ad);
   assertx(pos != a->m_used);
   assertx(!a->data()[pos].isTombstone());

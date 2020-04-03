@@ -72,13 +72,13 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static constexpr auto NvGetIntPosVec = &NvGetIntPos;
   static ssize_t NvGetStrPos(const ArrayData*, const StringData* k);
   static constexpr auto NvGetStrPosVec = &NvGetStrPos;
-  static TypedValue NvGetKey(const ArrayData*, ssize_t pos);
+  static TypedValue GetPosKey(const ArrayData*, ssize_t pos);
+  static TypedValue GetPosVal(const ArrayData*, ssize_t pos);
   static ArrayData* SetInt(ArrayData*, int64_t k, TypedValue v);
   static ArrayData* SetIntMove(ArrayData*, int64_t k, TypedValue v);
   static ArrayData* SetStr(ArrayData*, StringData* k, TypedValue v);
   static ArrayData* SetStrMove(ArrayData*, StringData* k, TypedValue v);
   static size_t Vsize(const ArrayData*);
-  static tv_rval RvalPos(const ArrayData* ad, ssize_t pos);
   static bool IsVectorData(const ArrayData*) { return true; }
   static bool ExistsInt(const ArrayData* ad, int64_t k);
   static bool ExistsStr(const ArrayData*, const StringData*);
@@ -139,9 +139,9 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static constexpr auto ReleaseVec = &Release;
   static constexpr auto NvGetIntVec = &NvGetInt;
   static constexpr auto NvGetStrVec = &NvGetStr;
-  static constexpr auto NvGetKeyVec = &NvGetKey;
+  static constexpr auto GetPosKeyVec = &GetPosKey;
+  static constexpr auto GetPosValVec = &GetPosVal;
   static constexpr auto VsizeVec = &Vsize;
-  static constexpr auto RvalPosVec = &RvalPos;
   static constexpr auto IsVectorDataVec = &IsVectorData;
   static constexpr auto ExistsIntVec = &ExistsInt;
   static constexpr auto ExistsStrVec = &ExistsStr;

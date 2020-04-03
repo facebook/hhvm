@@ -1234,7 +1234,7 @@ SSATmp* optimizedFCallBuiltin(IRGS& env,
         // NB: The parameters to the builtin have already been popped
         // at this point, so we don't need to account for them when
         // calculating the stack offset.
-        auto const val = cns(env, ad->atPos(inOutIndex + 1));
+        auto const val = cns(env, ad->nvGetVal(inOutIndex + 1));
         auto const offset = offsetFromIRSP(
           env,
           BCSPRelOffset{safe_cast<int32_t>(inOutIndex)}
@@ -1245,7 +1245,7 @@ SSATmp* optimizedFCallBuiltin(IRGS& env,
 
       // The first element of the tuple is always the actual function
       // return.
-      return cns(env, ad->atPos(0));
+      return cns(env, ad->nvGetVal(0));
     }
 
     auto const it = s_opt_emit_fns.find(fname->data());

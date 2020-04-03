@@ -793,13 +793,13 @@ bool MixedArray::checkInvariants() const {
 
 size_t MixedArray::Vsize(const ArrayData*) { not_reached(); }
 
-tv_rval MixedArray::RvalPos(const ArrayData* ad, ssize_t pos) {
+TypedValue MixedArray::GetPosVal(const ArrayData* ad, ssize_t pos) {
   auto a = asMixed(ad);
   assertx(a->checkInvariants());
   assertx(pos != a->m_used);
   auto const& e = a->data()[pos];
   assertx(!e.isTombstone());
-  return &e.data;
+  return e.data;
 }
 
 bool MixedArray::IsVectorData(const ArrayData* ad) {

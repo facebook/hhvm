@@ -330,7 +330,7 @@ private:
 
 public:
   static size_t Vsize(const ArrayData*);
-  static tv_rval RvalPos(const ArrayData*, ssize_t pos);
+  static TypedValue GetPosVal(const ArrayData*, ssize_t pos);
   static bool IsVectorData(const ArrayData*);
   static bool IsStrictVector(const ArrayData* ad) {
     return ad->m_size == asMixed(ad)->m_nextKI && IsVectorData(ad);
@@ -386,7 +386,8 @@ public:
   static constexpr auto NvGetIntPosDict = &NvGetIntPos;
   static constexpr auto NvGetStrPosDict = &NvGetStrPos;
   static constexpr auto ReleaseDict = &Release;
-  static constexpr auto NvGetKeyDict = &NvGetKey;
+  static constexpr auto GetPosKeyDict = &GetPosKey;
+  static constexpr auto GetPosValDict = &GetPosVal;
   static constexpr auto SetIntDict = &SetInt;
   static constexpr auto SetIntMoveDict = &SetIntMove;
   static constexpr auto SetStrDict = &SetStr;
@@ -394,7 +395,6 @@ public:
   static constexpr auto AddIntDict = &AddInt;
   static constexpr auto AddStrDict = &AddStr;
   static constexpr auto VsizeDict = &Vsize;
-  static constexpr auto RvalPosDict = &RvalPos;
   static constexpr auto IsVectorDataDict = &IsVectorData;
   static constexpr auto ExistsIntDict = &ExistsInt;
   static constexpr auto ExistsStrDict = &ExistsStr;

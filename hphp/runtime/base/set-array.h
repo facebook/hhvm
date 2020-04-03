@@ -402,7 +402,7 @@ private:
 
 public:
   static size_t Vsize(const ArrayData*);
-  static tv_rval RvalPos(const ArrayData*, ssize_t);
+  static TypedValue GetPosVal(const ArrayData*, ssize_t);
   static bool IsVectorData(const ArrayData*);
   static bool ExistsInt(const ArrayData*, int64_t);
   static bool ExistsStr(const ArrayData*, const StringData*);

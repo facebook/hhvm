@@ -568,7 +568,7 @@ Object c_Vector::fromArray(const Class*, const Variant& arr) {
   ssize_t pos = ad->iter_begin();
   do {
     assertx(pos != ad->iter_end());
-    tvDup(ad->atPos(pos), target->dataAt(i));
+    tvDup(ad->nvGetVal(pos), target->dataAt(i));
     pos = ad->iter_advance(pos);
   } while (++i < sz);
   return Object{std::move(target)};

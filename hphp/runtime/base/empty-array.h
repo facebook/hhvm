@@ -63,7 +63,8 @@ struct EmptyArray final : type_scan::MarkCollectable<EmptyArray> {
     return ArrayCommon::ReturnInvalidIndex(ad);
   }
 
-  static TypedValue NvGetKey(const ArrayData*, ssize_t pos);
+  static TypedValue GetPosKey(const ArrayData*, ssize_t pos);
+  static TypedValue GetPosVal(const ArrayData*, ssize_t pos);
   static ArrayData* SetInt(ArrayData*, int64_t k, TypedValue v);
   static ArrayData* SetIntMove(ArrayData*, int64_t k, TypedValue v);
   static ArrayData* SetStr(ArrayData*, StringData* k, TypedValue v);
@@ -71,7 +72,6 @@ struct EmptyArray final : type_scan::MarkCollectable<EmptyArray> {
   static ArrayData* RemoveInt(ArrayData* ad, int64_t);
   static ArrayData* RemoveStr(ArrayData* ad, const StringData*);
   static size_t Vsize(const ArrayData*);
-  static tv_rval RvalPos(const ArrayData* ad, ssize_t pos);
   static bool IsVectorData(const ArrayData*) {
     return true;
   }

@@ -320,12 +320,12 @@ Variant ArrayIter::second() {
 }
 
 TypedValue ArrayIter::secondVal() const {
-  if (LIKELY(hasArrayData())) return getArrayData()->rvalPos(m_pos).tv();
+  if (LIKELY(hasArrayData())) return getArrayData()->nvGetVal(m_pos);
   raise_fatal_error("taking reference on iterator objects");
 }
 
 TypedValue ArrayIter::secondValPlus() const {
-  if (LIKELY(hasArrayData())) return getArrayData()->rvalPos(m_pos).tv();
+  if (LIKELY(hasArrayData())) return getArrayData()->nvGetVal(m_pos);
   throw_param_is_not_container();
 }
 
@@ -591,7 +591,7 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
       aiter.m_end = size;
       aiter.setArrayNext(IterNextIndex::ArrayPacked);
     }
-    tvDup(*PackedArray::RvalPos(ad, 0), *valOut);
+    tvDup(PackedArray::GetPosVal(ad, 0), *valOut);
     return 1;
   }
 
@@ -667,7 +667,7 @@ int64_t new_iter_array_key(Iter*       dest,
     aiter.m_pos = 0;
     aiter.m_end = size;
     aiter.setArrayNext(IterNextIndex::ArrayPacked);
-    tvDup(*PackedArray::RvalPos(ad, 0), *valOut);
+    tvDup(PackedArray::GetPosVal(ad, 0), *valOut);
     keyOut->m_type = KindOfInt64;
     keyOut->m_data.num = 0;
     return 1;
@@ -888,11 +888,11 @@ static int64_t iter_next_apc_array(Iter* iter,
   }
   arrIter->setPos(pos);
 
-  auto const rval = APCLocalArray::RvalPos(arr->asArrayData(), pos);
-  tvSet(rval.tv(), *valOut);
+  auto const val = APCLocalArray::GetPosVal(ad, pos);
+  tvSet(val, *valOut);
   if (LIKELY(!keyOut)) return 1;
 
-  auto const key = APCLocalArray::NvGetKey(ad, pos);
+  auto const key = APCLocalArray::GetPosKey(ad, pos);
   auto const oldKey = *keyOut;
   tvCopy(key, *keyOut);
   tvDecRefGen(oldKey);
@@ -1171,7 +1171,7 @@ int64_t iter_next_packed_impl(Iter* it,
       keyOut->m_data.pcnt->decRefCount();
     }
     iter.setPos(pos);
-    tvDup(*PackedArray::RvalPos(ad, pos), *valOut);
+    tvDup(PackedArray::GetPosVal(ad, pos), *valOut);
     if (HasKey) {
       keyOut->m_data.num = pos;
       keyOut->m_type = KindOfInt64;

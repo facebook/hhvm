@@ -56,13 +56,13 @@ struct RecordArray : ArrayData,
   static tv_rval NvGetStr(const ArrayData*, const StringData*);
   static ssize_t NvGetIntPos(const ArrayData*, int64_t k);
   static ssize_t NvGetStrPos(const ArrayData*, const StringData* k);
-  static TypedValue NvGetKey(const ArrayData*, ssize_t pos);
+  static TypedValue GetPosKey(const ArrayData*, ssize_t pos);
+  static TypedValue GetPosVal(const ArrayData*, ssize_t pos);
   static ArrayData* SetInt(ArrayData*, int64_t key, TypedValue v);
   static ArrayData* SetIntMove(ArrayData*, int64_t key, TypedValue v);
   static ArrayData* SetStr(ArrayData*, StringData*, TypedValue v);
   static ArrayData* SetStrMove(ArrayData*, StringData*, TypedValue v);
   static size_t Vsize(const ArrayData*);
-  static tv_rval RvalPos(const ArrayData*, ssize_t pos);
   static bool IsVectorData(const ArrayData*);
   static bool ExistsInt(const ArrayData*, int64_t key);
   static bool ExistsStr(const ArrayData*, const StringData*);

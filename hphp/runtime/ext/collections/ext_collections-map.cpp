@@ -623,7 +623,7 @@ BaseMap::FromArray(const Class*, const Variant& arr) {
   for (ssize_t pos = ad->iter_begin(), limit = ad->iter_end(); pos != limit;
        pos = ad->iter_advance(pos)) {
     Variant k = ad->getKey(pos);
-    auto const tv = ad->atPos(pos);
+    auto const tv = ad->nvGetVal(pos);
     if (k.isInteger()) {
       map->setRaw(k.toInt64(), tv);
     } else {

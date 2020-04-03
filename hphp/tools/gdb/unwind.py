@@ -73,9 +73,13 @@ falls back to the default GDB unwinder(s) otherwise.
             # the TC's custom .eh_frame section).
             unwind_info.add_saved_register(self.regs['sp'], sp)
         else:
-            # Our parent frame is not jitted, so we're in enterTCHelper, and we
-            # can restore our parent's %rsp as usual.
-            unwind_info.add_saved_register(self.regs['sp'], fp + 16)
+            # Our parent frame is not jitted, so we're in g_ustubs.enterTCHelper,
+            # which has a special restore sequence
+            i = 0
+            for r in self.regs['cross_jit_save']:
+                i -= 1
+                unwind_info.add_saved_register(r, fp[i])
+            unwind_info.add_saved_register(self.regs['sp'], fp + 2)
 
         return unwind_info
 

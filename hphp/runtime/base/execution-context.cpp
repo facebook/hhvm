@@ -1821,6 +1821,7 @@ void ExecutionContext::resumeAsyncFuncThrow(Resumable* resumable,
   enterVMCustomHandler(fp, [&] {
     prepareAsyncFuncEntry(fp, resumable, true);
     unwindVM(exception);
+    e.reset();
   });
 }
 

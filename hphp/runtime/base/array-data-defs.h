@@ -117,14 +117,6 @@ inline arr_lval ArrayData::lval(StringData* k, bool copy) {
   return g_array_funcs.lvalStr[kind()](this, k, copy);
 }
 
-inline arr_lval ArrayData::lvalSilent(int64_t k, bool copy) {
-  return g_array_funcs.lvalSilentInt[kind()](this, k, copy);
-}
-
-inline arr_lval ArrayData::lvalSilent(StringData* k, bool copy) {
-  return g_array_funcs.lvalSilentStr[kind()](this, k, copy);
-}
-
 inline tv_rval ArrayData::rval(int64_t k) const {
   return g_array_funcs.nvGetInt[kind()](this, k);
 }
@@ -323,12 +315,6 @@ inline arr_lval ArrayData::lval(TypedValue k, bool copy) {
                              : lval(detail::getStringKey(k), copy);
 }
 
-inline arr_lval ArrayData::lvalSilent(TypedValue k, bool copy) {
-  assertx(IsValidKey(k));
-  return detail::isIntKey(k) ? lvalSilent(detail::getIntKey(k), copy)
-                             : lvalSilent(detail::getStringKey(k), copy);
-}
-
 inline tv_rval ArrayData::get(int64_t k, bool error) const {
   auto const r = rval(k);
   return r ? r : getNotFound(k, error);
@@ -392,15 +378,6 @@ inline arr_lval ArrayData::lval(const String& k, bool copy) {
 
 inline arr_lval ArrayData::lval(const Variant& k, bool copy) {
   return lval(*k.asTypedValue(), copy);
-}
-
-inline arr_lval ArrayData::lvalSilent(const String& k, bool copy) {
-  assertx(IsValidKey(k));
-  return lvalSilent(k.get(), copy);
-}
-
-inline arr_lval ArrayData::lvalSilent(const Variant& k, bool copy) {
-  return lvalSilent(*k.asTypedValue(), copy);
 }
 
 inline tv_rval ArrayData::get(const String& k, bool error) const {

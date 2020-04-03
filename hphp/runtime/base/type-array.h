@@ -435,14 +435,13 @@ public:
   /*
    * Get an lval to the element at `key'.
    *
-   * This is ArrayData::lval{,Silent}() with CoW and escalation.
+   * This is ArrayData::lval, with COW and escalation handled internally.
    *
-   * lvalForce() has the legacy lval() behavior---if the key is not present, it
-   * writes null, then returns the lval.
+   * lvalForce() has the legacy lval() behavior---if the key is not present,
+   * it writes null, then returns the lval.
    */
-  FOR_EACH_KEY_TYPE(lval, arr_lval, )
-  FOR_EACH_KEY_TYPE(lvalSilent, arr_lval, )
-  FOR_EACH_KEY_TYPE(lvalForce, arr_lval, )
+  FOR_EACH_KEY_TYPE(lval, tv_lval, )
+  FOR_EACH_KEY_TYPE(lvalForce, tv_lval, )
 
 #undef D
 #undef I
@@ -537,9 +536,8 @@ private:
                  PFUNC_CMP value_cmp_function, const void* value_data) const;
 
   template<typename T> tv_rval rvalImpl(const T& key, Flags) const;
-  template<typename T> arr_lval lvalImpl(const T& key, Flags);
-  template<typename T> arr_lval lvalSilentImpl(const T& key, Flags);
-  template<typename T> arr_lval lvalForceImpl(const T& key, Flags);
+  template<typename T> tv_lval lvalImpl(const T& key, Flags);
+  template<typename T> tv_lval lvalForceImpl(const T& key, Flags);
 
   template<typename T> bool existsImpl(const T& key) const;
   template<typename T> void removeImpl(const T& key);

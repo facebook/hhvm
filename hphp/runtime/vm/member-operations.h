@@ -697,9 +697,7 @@ inline tv_lval ElemDVec(tv_lval base, key_type<keyType> key) {
 template <bool copyProv>
 inline tv_lval ElemDDictPre(tv_lval base, int64_t key) {
   ArrayData* oldArr = base.val().parr;
-
-  auto const lval =
-    MixedArray::LvalSilentIntDict(oldArr, key, oldArr->cowCheck());
+  auto const lval = MixedArray::LvalSilentInt(oldArr, key);
 
   if (UNLIKELY(!lval)) {
     assertx(oldArr == lval.arr);
@@ -719,9 +717,7 @@ inline tv_lval ElemDDictPre(tv_lval base, int64_t key) {
 template <bool copyProv>
 inline tv_lval ElemDDictPre(tv_lval base, StringData* key) {
   ArrayData* oldArr = base.val().parr;
-
-  auto const lval =
-    MixedArray::LvalSilentStrDict(oldArr, key, oldArr->cowCheck());
+  auto const lval = MixedArray::LvalSilentStr(oldArr, key);
 
   if (UNLIKELY(!lval)) {
     assertx(oldArr == lval.arr);
@@ -1001,20 +997,20 @@ inline tv_lval ElemUArray(tv_lval base, key_type<keyType> key) {
  * ElemU when base is a Vec
  */
 inline tv_lval ElemUVecPre(tv_lval base, int64_t key) {
-  ArrayData* oldArr = val(base).parr;
-  auto const lval =
-    PackedArray::LvalSilentIntVec(oldArr, key, oldArr->cowCheck());
-
-  if (UNLIKELY(!lval)) {
+  auto const oldArr = val(base).parr;
+  if (UNLIKELY(!PackedArray::ExistsIntVec(oldArr, key))) {
     return ElemUEmptyish();
   }
-  if (lval.arr != oldArr) {
-    type(base) = KindOfVec;
-    val(base).parr = lval.arr;
-    assertx(tvIsPlausible(*base));
+
+  auto const newArr = [&]{
+    if (!oldArr->cowCheck()) return oldArr;
     decRefArr(oldArr);
-  }
-  return lval;
+    auto const newArr = PackedArray::CopyVec(oldArr);
+    tvCopy(make_tv<KindOfVec>(newArr), base);
+    return newArr;
+  }();
+
+  return PackedArray::LvalUncheckedInt(newArr, key);
 }
 
 inline tv_lval ElemUVecPre(tv_lval /*base*/, StringData* /*key*/) {
@@ -1044,8 +1040,7 @@ inline tv_lval ElemUVec(tv_lval base, key_type<keyType> key) {
  */
 inline tv_lval ElemUDictPre(tv_lval base, int64_t key) {
   ArrayData* oldArr = val(base).parr;
-  auto const lval =
-    MixedArray::LvalSilentIntDict(oldArr, key, oldArr->cowCheck());
+  auto const lval = MixedArray::LvalSilentInt(oldArr, key);
 
   if (UNLIKELY(!lval)) {
     return ElemUEmptyish();
@@ -1061,8 +1056,7 @@ inline tv_lval ElemUDictPre(tv_lval base, int64_t key) {
 
 inline tv_lval ElemUDictPre(tv_lval base, StringData* key) {
   ArrayData* oldArr = val(base).parr;
-  auto const lval =
-    MixedArray::LvalSilentStrDict(oldArr, key, oldArr->cowCheck());
+  auto const lval = MixedArray::LvalSilentStr(oldArr, key);
 
   if (UNLIKELY(!lval)) {
     return ElemUEmptyish();

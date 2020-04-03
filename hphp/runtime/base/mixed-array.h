@@ -334,9 +334,7 @@ public:
   static bool ExistsInt(const ArrayData*, int64_t k);
   static bool ExistsStr(const ArrayData*, const StringData* k);
   static arr_lval LvalInt(ArrayData* ad, int64_t k, bool copy);
-  static arr_lval LvalSilentInt(ArrayData*, int64_t, bool);
   static arr_lval LvalStr(ArrayData* ad, StringData* k, bool copy);
-  static arr_lval LvalSilentStr(ArrayData*, StringData*, bool);
   static ArrayData* SetInt(ArrayData*, int64_t k, TypedValue v);
   static ArrayData* SetIntMove(ArrayData*, int64_t k, TypedValue v);
   static ArrayData* SetStr(ArrayData*, StringData* k, TypedValue v);
@@ -395,9 +393,7 @@ public:
   static constexpr auto ExistsIntDict = &ExistsInt;
   static constexpr auto ExistsStrDict = &ExistsStr;
   static constexpr auto LvalIntDict = &LvalInt;
-  static constexpr auto LvalSilentIntDict = &LvalSilentInt;
   static constexpr auto LvalStrDict = &LvalStr;
-  static constexpr auto LvalSilentStrDict = &LvalSilentStr;
   static constexpr auto RemoveIntDict = &RemoveInt;
   static constexpr auto RemoveStrDict = &RemoveStr;
   static constexpr auto IterBeginDict = &IterBegin;
@@ -442,6 +438,11 @@ public:
   //  @precondition: !isFull
   //  @precondition: !cowCheck
   static tv_lval LvalInPlace(ArrayData* ad, const Variant& k);
+
+  // If the key is not present in the array, return a null lval; else,
+  // COW the array if necessary and return an lval into the new array.
+  static arr_lval LvalSilentInt(ArrayData* ad, int64_t k);
+  static arr_lval LvalSilentStr(ArrayData* ad, StringData* k);
 
   //////////////////////////////////////////////////////////////////////
 

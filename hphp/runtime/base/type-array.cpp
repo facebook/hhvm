@@ -604,7 +604,7 @@ tv_rval Array::rvalImpl(const T& key, AccessFlags flags) const {
 }
 
 template<typename T> ALWAYS_INLINE
-arr_lval Array::lvalImpl(const T& key, AccessFlags) {
+tv_lval Array::lvalImpl(const T& key, AccessFlags) {
   if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
   auto const lval = m_arr->lval(key, m_arr->cowCheck());
   if (lval.arr != m_arr) m_arr = Ptr::attach(lval.arr);
@@ -613,22 +613,14 @@ arr_lval Array::lvalImpl(const T& key, AccessFlags) {
 }
 
 template<typename T> ALWAYS_INLINE
-arr_lval Array::lvalSilentImpl(const T& key, AccessFlags) {
+tv_lval Array::lvalForceImpl(const T& key, AccessFlags flags) {
   if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
-  auto const lval = m_arr->lvalSilent(key, m_arr->cowCheck());
-  assertx(lval.arr == m_arr);
-  return lval;
-}
-
-template<typename T> ALWAYS_INLINE
-arr_lval Array::lvalForceImpl(const T& key, AccessFlags flags) {
-  if (auto const lval = lvalSilentImpl(key, flags)) return lval;
-  setImpl(key, make_tv<KindOfNull>());
-
-  // NB: In order to preserve the old lval behavior
-  auto const lval = lvalSilentImpl(key, flags);
-  assertx(lval.arr == m_arr);
-  assertx(lval);
+  if (!m_arr->exists(key)) {
+    auto const escalated = m_arr->set(key, make_tv<KindOfNull>());
+    if (escalated != m_arr) m_arr = Ptr::attach(escalated);
+  }
+  auto const lval = m_arr->lval(key, m_arr->cowCheck());
+  if (lval.arr != m_arr) m_arr = Ptr::attach(lval.arr);
   return lval;
 }
 
@@ -674,8 +666,8 @@ template<> Variant& not_found<Variant&>() { return lvalBlackHole(); }
 template<> tv_rval not_found<tv_rval>() {
   return tv_rval::dummy();
 }
-template<> arr_lval not_found<arr_lval>() {
-  return arr_lval { nullptr, lvalBlackHole().asTypedValue() };
+template<> tv_lval not_found<tv_lval>() {
+  return lvalBlackHole().asTypedValue();
 }
 
 /*
@@ -759,9 +751,8 @@ decltype(auto) elem(const Array& arr, Fn fn, bool is_key,
   }
 
 FOR_EACH_KEY_TYPE(rval, tv_rval, const)
-FOR_EACH_KEY_TYPE(lval, arr_lval, )
-FOR_EACH_KEY_TYPE(lvalSilent, arr_lval, )
-FOR_EACH_KEY_TYPE(lvalForce, arr_lval, )
+FOR_EACH_KEY_TYPE(lval, tv_lval, )
+FOR_EACH_KEY_TYPE(lvalForce, tv_lval, )
 
 #undef I
 #undef V

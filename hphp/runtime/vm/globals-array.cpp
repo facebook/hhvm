@@ -161,16 +161,6 @@ arr_lval GlobalsArray::LvalStr(ArrayData* ad, StringData* k, bool /*copy*/) {
   return arr_lval { ad, tv };
 }
 
-arr_lval GlobalsArray::LvalSilentInt(ArrayData* ad, int64_t k, bool copy) {
-  return LvalSilentStr(ad, String(k).get(), copy);
-}
-
-arr_lval GlobalsArray::LvalSilentStr(ArrayData* ad, StringData* k, bool copy) {
-  auto a = asGlobals(ad);
-  auto const tv = a->m_tab->lookup(k);
-  return arr_lval { ad, tv };
-}
-
 ArrayData* GlobalsArray::SetIntMove(ArrayData* ad, int64_t k, TypedValue v) {
   return SetStrMove(ad, String(k).get(), v);
 }

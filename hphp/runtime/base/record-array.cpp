@@ -355,26 +355,6 @@ arr_lval RecordArray::LvalStr(ArrayData* ad, StringData* k, bool copy) {
   return arr_lval {ra, tv_lval(ret)};
 }
 
-arr_lval RecordArray::LvalSilentStr(ArrayData* ad, StringData* k, bool copy) {
-  auto ra = asRecordArray(ad);
-  if (copy) ra = ra->copyRecordArray(AllocMode::Request);
-  auto const rec = ra->record();
-  auto const idx = rec->lookupField(k);
-  if (idx != kInvalidSlot) return arr_lval {ra, ra->lvalAt(idx)};
-  auto& extra = ra->extraFieldMap();
-  auto const ret = MixedArray::LvalSilentStr(extra, k, extra->cowCheck());
-  auto const newExtra = MixedArray::asMixed(ret.arr);
-  if (extra != newExtra) {
-    decRefArr(extra);
-    extra = newExtra;
-  }
-  return arr_lval {ra, tv_lval(ret)};
-}
-
-arr_lval RecordArray::LvalSilentInt(ArrayData* ad, int64_t, bool) {
-  return arr_lval {ad, nullptr};
-}
-
 ArrayData* RecordArray::RemoveInt(ArrayData* ad, int64_t) {
   // Record-arrays do not have int keys
   return ad;

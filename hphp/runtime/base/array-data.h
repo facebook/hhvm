@@ -388,16 +388,6 @@ public:
   arr_lval lval(const Variant& k, bool copy);
 
   /*
-   * Get an lval for the element at key `k', failing quietly (by returning an
-   * empty arr_lval) instead of throwing.
-   */
-  arr_lval lvalSilent(int64_t k, bool copy);
-  arr_lval lvalSilent(StringData* k, bool copy);
-  arr_lval lvalSilent(TypedValue k, bool copy);
-  arr_lval lvalSilent(const String& k, bool copy);
-  arr_lval lvalSilent(const Variant& k, bool copy);
-
-  /*
    * Get an rval for the element at key `k'.
    *
    * If the array has no element at `k', return a null tv_rval.
@@ -874,8 +864,6 @@ struct ArrayFunctions {
   bool (*existsStr[NK])(const ArrayData*, const StringData* k);
   arr_lval (*lvalInt[NK])(ArrayData*, int64_t k, bool copy);
   arr_lval (*lvalStr[NK])(ArrayData*, StringData* k, bool copy);
-  arr_lval (*lvalSilentInt[NK])(ArrayData*, int64_t k, bool copy);
-  arr_lval (*lvalSilentStr[NK])(ArrayData*, StringData* k, bool copy);
   ArrayData* (*removeInt[NK])(ArrayData*, int64_t k);
   ArrayData* (*removeStr[NK])(ArrayData*, const StringData* k);
   ssize_t (*iterBegin[NK])(const ArrayData*);

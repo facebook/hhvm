@@ -1132,19 +1132,19 @@ tv_lval MixedArray::LvalInPlace(ArrayData* ad, const Variant& k) {
                        : arr->addLvalImpl<false>(k.asCStrRef().get());
 }
 
-arr_lval MixedArray::LvalSilentInt(ArrayData* ad, int64_t k, bool copy) {
+arr_lval MixedArray::LvalSilentInt(ArrayData* ad, int64_t k) {
   auto a = asMixed(ad);
   auto const pos = a->find(k, hash_int64(k));
   if (UNLIKELY(!validPos(pos))) return arr_lval { a, nullptr };
-  if (copy) a = a->copyMixed();
+  if (a->cowCheck()) a = a->copyMixed();
   return arr_lval { a, &a->data()[pos].data };
 }
 
-arr_lval MixedArray::LvalSilentStr(ArrayData* ad, StringData* k, bool copy) {
+arr_lval MixedArray::LvalSilentStr(ArrayData* ad, StringData* k) {
   auto a = asMixed(ad);
   auto const pos = a->find(k, k->hash());
   if (UNLIKELY(!validPos(pos))) return arr_lval { a, nullptr };
-  if (copy) a = a->copyMixed();
+  if (a->cowCheck()) a = a->copyMixed();
   return arr_lval { a, &a->data()[pos].data };
 }
 

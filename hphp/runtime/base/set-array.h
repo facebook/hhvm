@@ -404,8 +404,6 @@ public:
   static bool ExistsStr(const ArrayData*, const StringData*);
   static arr_lval LvalInt(ArrayData*, int64_t, bool);
   static arr_lval LvalStr(ArrayData*, StringData*, bool);
-  static constexpr auto LvalSilentInt = &LvalInt;
-  static constexpr auto LvalSilentStr = &LvalStr;
   static ArrayData* SetInt(ArrayData*, int64_t, TypedValue);
   static constexpr auto SetIntMove = &SetInt;
   static ArrayData* SetStr(ArrayData*, StringData*, TypedValue);

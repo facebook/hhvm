@@ -84,8 +84,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static bool ExistsStr(const ArrayData*, const StringData*);
   static arr_lval LvalInt(ArrayData*, int64_t k, bool copy);
   static arr_lval LvalStr(ArrayData*, StringData* k, bool copy);
-  static arr_lval LvalSilentInt(ArrayData*, int64_t, bool copy);
-  static arr_lval LvalSilentStr(ArrayData*, StringData*, bool copy);
   static ArrayData* RemoveInt(ArrayData*, int64_t k);
   static ArrayData* RemoveStr(ArrayData*, const StringData* k);
   static ssize_t IterBegin(const ArrayData*);
@@ -126,8 +124,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static ArrayData* RemoveIntVec(ArrayData*, int64_t);
   static arr_lval LvalIntVec(ArrayData*, int64_t, bool);
   static arr_lval LvalStrVec(ArrayData*, StringData*, bool);
-  static constexpr auto LvalSilentIntVec = &LvalSilentInt;
-  static constexpr auto LvalSilentStrVec = &LvalSilentStr;
   static ArrayData* PlusEqVec(ArrayData*, const ArrayData*);
   static ArrayData* ToPHPArrayVec(ArrayData*, bool);
   static constexpr auto ToPHPArrayIntishCastVec = &ToPHPArrayVec;

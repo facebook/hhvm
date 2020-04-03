@@ -774,13 +774,6 @@ arr_lval PackedArray::LvalIntVec(ArrayData* adIn, int64_t k, bool copy) {
   );
 }
 
-arr_lval PackedArray::LvalSilentInt(ArrayData* adIn, int64_t k, bool copy) {
-  assertx(checkInvariants(adIn));
-  if (UNLIKELY(size_t(k) >= adIn->m_size)) return {adIn, nullptr};
-  auto const ad = copy ? Copy(adIn) : adIn;
-  return arr_lval { ad, LvalUncheckedInt(ad, k) };
-}
-
 tv_lval PackedArray::LvalUncheckedInt(ArrayData* ad, int64_t k) {
   // NOTE: We cannot check that k is less than the array's length here, because
   // the vector extension allocates the array and uses this method to fill it.
@@ -800,10 +793,6 @@ PackedArray::LvalStrVec(ArrayData* adIn, StringData* key, bool) {
   assertx(checkInvariants(adIn));
   assertx(adIn->isVecArrayKind());
   throwInvalidArrayKeyException(key, adIn);
-}
-
-arr_lval PackedArray::LvalSilentStr(ArrayData* ad, StringData* k, bool) {
-  return arr_lval { ad, nullptr };
 }
 
 tv_lval PackedArray::LvalNewInPlace(ArrayData* ad) {

@@ -503,7 +503,7 @@ pub enum Node_ {
     Darray(Pos),
     Varray(Pos),
     StringLiteral(String, Pos),   // For shape keys and const expressions.
-    DecimalLiteral(String, Pos),  // For const expressions.
+    IntLiteral(String, Pos),      // For const expressions.
     FloatingLiteral(String, Pos), // For const expressions.
     BooleanLiteral(String, Pos),  // For const expressions.
     Null(Pos),                    // For const expressions.
@@ -579,7 +579,7 @@ impl Node_ {
             | Node_::Array(pos)
             | Node_::Darray(pos)
             | Node_::Varray(pos)
-            | Node_::DecimalLiteral(_, pos)
+            | Node_::IntLiteral(_, pos)
             | Node_::FloatingLiteral(_, pos)
             | Node_::Null(pos)
             | Node_::StringLiteral(_, pos)
@@ -662,7 +662,7 @@ impl Node_ {
     fn as_expr(&self) -> Result<nast::Expr, ParseError> {
         let expr_ = match self {
             Node_::Expr(expr) => return Ok(*expr.clone()),
-            Node_::DecimalLiteral(s, _) => aast::Expr_::Int(s.to_string()),
+            Node_::IntLiteral(s, _) => aast::Expr_::Int(s.to_string()),
             Node_::FloatingLiteral(s, _) => aast::Expr_::Float(s.to_string()),
             Node_::StringLiteral(s, _) => aast::Expr_::String(s.to_string()),
             Node_::BooleanLiteral(s, _) => {
@@ -1009,7 +1009,7 @@ impl DirectDeclSmartConstructors<'_> {
                     Box::new(expr_to_ty(&expr)?),
                 ))
             }
-            Node_::DecimalLiteral(_, pos) => Ok(Ty(
+            Node_::IntLiteral(_, pos) => Ok(Ty(
                 Reason::Rwitness(pos.clone()),
                 Box::new(Ty_::Tprim(aast::Tprim::Tint)),
             )),
@@ -1468,7 +1468,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     .to_string(),
                 token_pos(self),
             ),
-            TokenKind::DecimalLiteral => Node_::DecimalLiteral(token_text(self), token_pos(self)),
+            TokenKind::DecimalLiteral
+            | TokenKind::OctalLiteral
+            | TokenKind::HexadecimalLiteral
+            | TokenKind::BinaryLiteral => Node_::IntLiteral(token_text(self), token_pos(self)),
             TokenKind::FloatingLiteral => Node_::FloatingLiteral(token_text(self), token_pos(self)),
             TokenKind::NullLiteral => Node_::Null(token_pos(self)),
             TokenKind::BooleanLiteral => Node_::BooleanLiteral(token_text(self), token_pos(self)),
@@ -2796,7 +2799,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 Node_::ListItem(innards) => {
                     let (key, value) = *innards;
                     let key = match key {
-                        Node_::DecimalLiteral(s, p) => ShapeFieldName::SFlitInt((p, s)),
+                        Node_::IntLiteral(s, p) => ShapeFieldName::SFlitInt((p, s)),
                         Node_::StringLiteral(s, p) => ShapeFieldName::SFlitStr((p, s)),
                         n => {
                             return Err(format!(

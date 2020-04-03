@@ -107,7 +107,7 @@ Parsed decls:
                   fp_type =
                   { et_enforced = false;
                     et_type =
-                    (Rhint (root|classes_typeconst.php line 20, characters 40-55),
+                    (Rhint (root|classes_typeconst.php line 20, characters 40-58),
                      (Taccess
                         ((Rhint (root|classes_typeconst.php line 20, characters 40-43),
                           Tthis),

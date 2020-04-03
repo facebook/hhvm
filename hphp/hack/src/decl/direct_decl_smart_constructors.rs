@@ -3019,7 +3019,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let id = get_name("", &constant_name)?;
         let pos = Pos::merge(&ty.get_pos()?, &constant_name.get_pos()?)?;
         match ty {
-            Node_::Hint(HintValue::Access(mut innards), pos) => {
+            Node_::Hint(HintValue::Access(mut innards), _) => {
                 // Nested applies have to be collapsed.
                 innards.1.push(id);
                 Ok(Node_::Hint(HintValue::Access(innards), pos))

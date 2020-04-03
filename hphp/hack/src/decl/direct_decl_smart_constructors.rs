@@ -2509,6 +2509,11 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             }
             body => return Err(format!("Expected a classish body, but was {:?}", body)),
         }
+
+        // Match ordering of attributes produced by the OCaml decl parser (even
+        // though it's the reverse of the syntactic ordering).
+        cls.user_attributes.reverse();
+
         Rc::make_mut(&mut self.state.decls)
             .classes
             .insert(key, Rc::new(cls));

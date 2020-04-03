@@ -153,6 +153,10 @@ fn strip_dollar_prefix<'a>(name: Cow<'a, String>) -> Cow<'a, String> {
     }
 }
 
+fn tany() -> Ty {
+    Ty(Reason::Rnone, Box::new(Ty_::Tany(TanySentinel)))
+}
+
 #[derive(Clone, Debug)]
 struct NamespaceInfo {
     name: String,
@@ -1201,10 +1205,9 @@ impl DirectDeclSmartConstructors<'_> {
                 Reason::Rwitness(pos),
                 Box::new(Ty_::Tprim(aast::Tprim::Tvoid)),
             ),
-            _ => match self.node_to_ty(&header.ret_hint, &type_variables) {
-                Ok(type_) => type_,
-                Err(_) => Ty(Reason::Rnone, Box::new(Ty_::Tany(TanySentinel {}))),
-            },
+            _ => self
+                .node_to_ty(&header.ret_hint, &type_variables)
+                .unwrap_or_else(|_| tany()),
         };
         let (async_, is_coroutine) = header.modifiers.iter().fold(
             (false, false),
@@ -1309,7 +1312,7 @@ impl DirectDeclSmartConstructors<'_> {
 
                         let attributes = attributes.as_attributes()?;
                         let type_ = match &hint {
-                            Node_::Ignored => Ty(Reason::Rnone, Box::new(Ty_::Tany(TanySentinel))),
+                            Node_::Ignored => tany(),
                             _ => self.node_to_ty(&hint, type_variables).map(|mut ty| {
                                 match &mut *ty.1 {
                                     Ty_::Tfun(fun_type) if attributes.at_most_rx_as_func => {
@@ -2271,7 +2274,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                         let ty = self
                             .node_to_ty(&hint, &HashSet::new())
                             .or_else(|_| self.node_to_ty(&initializer, &HashSet::new()))
-                            .unwrap_or(Ty(Reason::Rnone, Box::new(Ty_::Tany(TanySentinel))));
+                            .unwrap_or_else(|_| tany());
                         Node_::Const(Box::new(ConstDecl {
                             modifiers,
                             id,

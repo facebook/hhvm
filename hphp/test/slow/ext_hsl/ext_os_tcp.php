@@ -37,7 +37,7 @@ async function client(_OS\sockaddr_in $addr): Awaitable<void> {
   $fd = _OS\socket(_OS\AF_INET, _OS\SOCK_STREAM, 0);
   _OS\fcntl($fd, _OS\F_SETFL, _OS\O_NONBLOCK);
   try {
-  _OS\connect($fd, $addr);
+    _OS\connect($fd, $addr);
   } catch (\Exception $e) {
     if ($e->getCode() !== _OS\EINPROGRESS) {
       throw $e;

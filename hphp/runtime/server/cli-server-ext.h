@@ -24,7 +24,11 @@
 
 namespace HPHP {
 
-struct FdData {
+struct ReturnedFdData {
+  int fd;
+};
+
+struct LoanedFdData {
   int fd;
 };
 

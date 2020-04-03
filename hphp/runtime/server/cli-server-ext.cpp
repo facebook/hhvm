@@ -35,6 +35,9 @@ CLIServerExtensionInterface::CLIServerExtensionInterface(int fd):
 {}
 
 CLIServerExtensionInterface::~CLIServerExtensionInterface() {
+  for (int fd: borrowed_fds) {
+    ::close(fd);
+  }
 #ifndef NDEBUG
   assertx(state == State::DONE_RESULT);
 #endif

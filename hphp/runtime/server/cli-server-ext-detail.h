@@ -41,15 +41,28 @@ protected:
   void read(T& arg) {
     cli_read(afdt_fd, arg);
   }
-  void read(FdData& arg) {
+
+  void read(ReturnedFdData& arg) {
     arg.fd = cli_read_fd(afdt_fd);
+  }
+
+  void read(LoanedFdData& arg) {
+    arg.fd = cli_read_fd(afdt_fd);
+    borrowed_fds.insert(arg.fd);
   }
 
   template<typename T>
   void write(const T& arg) {
     cli_write(afdt_fd,arg);
   }
-  void write(const FdData& arg) {
+
+  void write(const ReturnedFdData& arg) {
+    cli_write_fd(afdt_fd, arg.fd);
+    // Don't keep a copy in the CLI client
+    ::close(arg.fd);
+  }
+
+  void write(const LoanedFdData& arg) {
     cli_write_fd(afdt_fd, arg.fd);
   }
 
@@ -92,6 +105,8 @@ private:
   // no-op recursion base cases
   void readMulti() {}
   void writeMulti() {}
+
+  std::set<int> borrowed_fds;
 
 #ifndef NDEBUG
   State state;
@@ -154,6 +169,42 @@ private:
   void writeInvokeHeader(int count);
 };
 
+namespace {
+  template<class T>
+  struct valid_cli_return_type: std::true_type {};
+  template<>
+  struct valid_cli_return_type<::HPHP::LoanedFdData>: std::false_type {};
+
+  template<class T>
+  struct valid_cli_arg_type: std::true_type {};
+  template<>
+  struct valid_cli_arg_type<::HPHP::ReturnedFdData>: std::false_type {};
+
+  template<class T>
+  void validate_cli_arg_types() {
+    static_assert(
+      valid_cli_arg_type<T>::value,
+      "Invalid CLI handler argument type"
+    );
+  }
+
+  template<class TFirst, class TSecond, class... TRest>
+  void validate_cli_arg_types() {
+    // TSecond, TRest is a bit weird, but conditional recurssion doesn't work on
+    // GCC5 :(
+    validate_cli_arg_types<TFirst>();
+    validate_cli_arg_types<TSecond, TRest...>();
+  }
+
+  template<class T>
+  void validate_cli_return_type() {
+    static_assert(
+      valid_cli_return_type<T>::value,
+      "Invalid CLI handler return type"
+    );
+  }
+}
+
 void cli_register_handler(const std::string& id, void(*impl)(CLIServerInterface&));
 
 template<class TRet, class...Args>
@@ -170,6 +221,9 @@ void cli_server_invoke_wrapped(CLIServerInterface& server, CLISrvResult<TSuccess
 
 template<class TSuccess, class TError, class... Args>
 CLISrvResult<TSuccess, TError> invoke_on_cli_client(const std::string& id, CLISrvResult<TSuccess, TError>(*func)(Args...), Args... args) {
+  validate_cli_arg_types<Args...>();
+  validate_cli_return_type<TSuccess>();
+  validate_cli_return_type<TError>();
   if (is_cli_server_mode()) {
     CLIClientInterface client(id);
     client.invoke(args...);

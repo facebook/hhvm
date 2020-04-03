@@ -277,11 +277,7 @@ ssize_t APCLocalArray::NvGetStrPos(const ArrayData* ad, const StringData* k) {
 }
 
 TypedValue APCLocalArray::GetPosKey(const ArrayData* ad, ssize_t pos) {
-  auto a = asApcArray(ad);
-  Variant k = a->m_arr->getKey(pos);
-  auto const tv = *k.asTypedValue();
-  tvIncRefGen(tv);
-  return tv;
+  return *asApcArray(ad)->m_arr->getKey(pos).asTypedValue();
 }
 
 TypedValue APCLocalArray::GetPosVal(const ArrayData* ad, ssize_t pos) {

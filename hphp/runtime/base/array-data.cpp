@@ -352,21 +352,13 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(NvGetStrPos)
 
   /*
+   * TypedValue GetPosKey(const ArrayData*, ssize_t pos)
    * TypedValue GetPosVal(const ArrayData*, ssize_t pos)
    *
-   *   Look up the key at a valid iterator position in this array.
-   *   This method inc-refs the key before returning it.
-   *
-   *   TODO(kshaunak): Let the caller do the inc-ref instead.
+   *   Look up the key or value at a valid iterator position in this array.
+   *   Both of these methods return the result without inc-ref-ing it.
    */
   DISPATCH(GetPosKey)
-
-  /*
-   * TypedValue GetPosVal(const ArrayData*, ssize_t pos)
-   *
-   *   Look up the value at a valid iterator position in this array.
-   *   This method returns the value WITHOUT inc-ref-ing it.
-   */
   DISPATCH(GetPosVal)
 
   /*

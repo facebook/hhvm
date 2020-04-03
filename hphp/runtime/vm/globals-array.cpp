@@ -107,12 +107,9 @@ TypedValue GlobalsArray::GetPosKey(const ArrayData* ad, ssize_t pos) {
   auto a = asGlobals(ad);
   NameValueTable::Iterator iter(a->m_tab, pos);
   if (iter.valid()) {
-    auto k = iter.curKey();
-    if (k->isRefCounted()) {
-      k->rawIncRefCount();
-      return make_tv<KindOfString>(const_cast<StringData*>(k));
-    }
-    return make_tv<KindOfPersistentString>(k);
+    auto const k = iter.curKey();
+    return k->isRefCounted() ? make_tv<KindOfString>(const_cast<StringData*>(k))
+                             : make_tv<KindOfPersistentString>(k);
   }
   return make_tv<KindOfUninit>();
 }

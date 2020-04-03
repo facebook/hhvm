@@ -110,14 +110,10 @@ struct SetArrayElm {
     return tv.m_data.num;
   }
 
-  ALWAYS_INLINE
-  TypedValue getKey() const {
+  ALWAYS_INLINE TypedValue getKey() const {
     assertx(!isInvalid());
-    TypedValue out;
-    tvDup(tv, out);
-    return out;
+    return tv;
   }
-
 
   ALWAYS_INLINE hash_t hash() const {
     return tv.hash();

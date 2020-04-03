@@ -129,12 +129,8 @@ struct MixedArrayElm {
     if (hasIntKey()) {
       return make_tv<KindOfInt64>(ikey);
     }
-    auto str = skey;
-    if (str->isRefCounted()) {
-      str->rawIncRefCount();
-      return make_tv<KindOfString>(str);
-    }
-    return make_tv<KindOfPersistentString>(str);
+    return skey->isRefCounted() ? make_tv<KindOfString>(skey)
+                                : make_tv<KindOfPersistentString>(skey);
   }
 
   ALWAYS_INLINE hash_t hash() const {

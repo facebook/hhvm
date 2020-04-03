@@ -456,7 +456,7 @@ static inline void iter_key_cell_local_impl(Iter* iter, TypedValue* out) {
   assertx((typeArray && arrIter.getIterType() == ArrayIter::TypeArray) ||
          (!typeArray && arrIter.getIterType() == ArrayIter::TypeIterator));
   if (typeArray) {
-    tvCopy(arrIter.nvFirst(), *out);
+    tvDup(arrIter.nvFirst(), *out);
   } else {
     Variant key = arrIter.first();
     tvDup(*key.asTypedValue(), *out);
@@ -482,7 +482,7 @@ inline void liter_key_cell_local_impl(Iter* iter,
   auto const& arrIter = *unwrap(iter);
   assertx(arrIter.getIterType() == ArrayIter::TypeArray);
   assertx(!arrIter.getArrayData());
-  tvCopy(arrIter.nvFirstLocal(ad), *out);
+  tvDup(arrIter.nvFirstLocal(ad), *out);
   tvDecRefGen(oldVal);
 }
 
@@ -894,7 +894,7 @@ static int64_t iter_next_apc_array(Iter* iter,
 
   auto const key = APCLocalArray::GetPosKey(ad, pos);
   auto const oldKey = *keyOut;
-  tvCopy(key, *keyOut);
+  tvDup(key, *keyOut);
   tvDecRefGen(oldKey);
 
   return 1;
@@ -966,7 +966,7 @@ int64_t iter_next_mixed_pointer_cold(Iter* it,
   tvDecRefGen(oldVal);
   if (keyOut != nullptr) {
     auto const oldKey = *keyOut;
-    tvCopy(elm->getKey(), *keyOut);
+    tvDup(elm->getKey(), *keyOut);
     tvDecRefGen(oldKey);
   }
   return 1;
@@ -985,7 +985,7 @@ int64_t iter_next_mixed_pointer_cold_key(Iter* it,
   tvDup(*elm->datatv(), *valOut);
   if (keyOut != nullptr) {
     auto const oldKey = *keyOut;
-    tvCopy(elm->getKey(), *keyOut);
+    tvDup(elm->getKey(), *keyOut);
     tvDecRefGen(oldKey);
   }
   return 1;
@@ -1071,7 +1071,7 @@ int64_t iter_next_mixed_pointer(Iter* it,
   }
 
   tvDup(*elm->datatv(), *valOut);
-  if (HasKey) tvCopy(elm->getKey(), *keyOut);
+  if (HasKey) tvDup(elm->getKey(), *keyOut);
   return 1;
 }
 

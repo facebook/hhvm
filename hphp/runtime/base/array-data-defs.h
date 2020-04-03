@@ -150,7 +150,7 @@ inline TypedValue ArrayData::nvGetVal(ssize_t pos) const {
 }
 
 inline Variant ArrayData::getKey(ssize_t pos) const {
-  return Variant::attach(nvGetKey(pos));
+  return Variant::wrap(nvGetKey(pos));
 }
 
 inline Variant ArrayData::getValue(ssize_t pos) const {

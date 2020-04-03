@@ -253,9 +253,6 @@ where
     }
 
     pub fn parse_header(&mut self) -> (S::R, bool) {
-        let prefix =
-            // for markup section at the beginning of the file
-            S!(make_missing, self, self.pos());
         let (markup, suffix_opt) = self.lexer.scan_header();
         let markup = S!(make_token, self, markup);
         let (suffix, has_suffix) = match suffix_opt {
@@ -279,7 +276,7 @@ where
                 (missing, false)
             }
         };
-        let s = S!(make_markup_section, self, prefix, markup, suffix,);
+        let s = S!(make_markup_section, self, markup, suffix,);
         (s, has_suffix)
     }
 

@@ -422,8 +422,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; expression_statement_semicolon                     : t
     }
   | MarkupSection                     of
-    { markup_prefix                                      : t
-    ; markup_text                                        : t
+    { markup_text                                        : t
     ; markup_suffix                                      : t
     }
   | MarkupSuffix                      of
@@ -1718,8 +1717,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; expression_statement_semicolon: Token.t value
     }
   and markup_section =
-    { markup_prefix: Token.t option value
-    ; markup_text: Token.t value
+    { markup_text: Token.t value
     ; markup_suffix: markup_suffix option value
     }
   and markup_suffix =

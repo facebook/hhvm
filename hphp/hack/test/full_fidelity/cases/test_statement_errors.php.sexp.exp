@@ -1,7 +1,7 @@
 ((script 506
   ((list 506
     ((markup_section 4
-      ((missing 0 ()) (() markup 0 ())
+      ((() markup 0 ())
        (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))))
      (function_declaration 501
       ((missing 0 ())

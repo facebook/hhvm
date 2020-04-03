@@ -912,7 +912,6 @@
       "description" : "markup_section",
       "prefix" : "markup",
       "fields" : [
-        { "field_name" : "prefix" },
         { "field_name" : "text" },
         { "field_name" : "suffix" }
       ] },

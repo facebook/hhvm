@@ -309,8 +309,7 @@ module type Syntax_S = sig
     ; expression_statement_semicolon                     : t
     }
   | MarkupSection                     of
-    { markup_prefix                                      : t
-    ; markup_text                                        : t
+    { markup_text                                        : t
     ; markup_suffix                                      : t
     }
   | MarkupSuffix                      of
@@ -1133,7 +1132,7 @@ module type Syntax_S = sig
   val make_inclusion_directive : t -> t -> t
   val make_compound_statement : t -> t -> t -> t
   val make_expression_statement : t -> t -> t
-  val make_markup_section : t -> t -> t -> t
+  val make_markup_section : t -> t -> t
   val make_markup_suffix : t -> t -> t
   val make_unset_statement : t -> t -> t -> t -> t -> t
   val make_using_statement_block_scoped : t -> t -> t -> t -> t -> t -> t

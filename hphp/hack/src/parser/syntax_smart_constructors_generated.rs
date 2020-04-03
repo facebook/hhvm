@@ -293,9 +293,9 @@ where
         Self::R::make_expression_statement(self.state_mut(), arg0, arg1)
     }
 
-    fn make_markup_section(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
-        self.state_mut().next(&[&arg0, &arg1, &arg2]);
-        Self::R::make_markup_section(self.state_mut(), arg0, arg1, arg2)
+    fn make_markup_section(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R {
+        self.state_mut().next(&[&arg0, &arg1]);
+        Self::R::make_markup_section(self.state_mut(), arg0, arg1)
     }
 
     fn make_markup_suffix(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R {

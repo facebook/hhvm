@@ -255,8 +255,8 @@ where
         <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_expression_statement(self, arg0, arg1)
     }
 
-    fn make_markup_section(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
-        <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_markup_section(self, arg0, arg1, arg2)
+    fn make_markup_section(&mut self, arg0: Self::R, arg1: Self::R) -> Self::R {
+        <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_markup_section(self, arg0, arg1)
     }
 
     fn make_markup_suffix(&mut self, arg0: Self::R, arg1: Self::R) -> Self::R {

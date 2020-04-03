@@ -116,44 +116,32 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
     | Syntax.PrefixedStringExpression
         { prefixed_string_name = name; prefixed_string_str = str } ->
       Concat [t env name; t env str]
-    | Syntax.MarkupSection
-        {
-          markup_prefix = prefix;
-          markup_text = text;
-          markup_suffix = suffix;
-          _;
-        } ->
-      if Syntax.is_missing prefix then
-        (* leading markup section
-         for hh files - strip leading whitespaces\newlines - they are not
-         emitted and having them in Hack file is illegal anyways *)
-        let is_hh_script =
-          match Syntax.syntax suffix with
-          | Syntax.MarkupSuffix
-              { markup_suffix_name = Syntax.{ syntax = Token t; _ }; _ } ->
-            Token.text t = "hh"
-          | _ -> false
-        in
-        let rec all_whitespaces s i =
-          i >= String.length s
-          ||
-          match s.[i] with
-          | ' '
-          | '\t'
-          | '\r'
-          | '\n' ->
-            all_whitespaces s (i + 1)
-          | _ -> false
-        in
-        let text_contains_only_whitespaces =
-          match Syntax.syntax text with
-          | Syntax.Token t -> all_whitespaces (Token.text t) 0
-          | _ -> false
-        in
-        if is_hh_script && text_contains_only_whitespaces then
-          t env suffix
-        else
-          transform_simple env node
+    | Syntax.MarkupSection { markup_text = text; markup_suffix = suffix; _ } ->
+      let is_hh_script =
+        match Syntax.syntax suffix with
+        | Syntax.MarkupSuffix
+            { markup_suffix_name = Syntax.{ syntax = Token t; _ }; _ } ->
+          Token.text t = "hh"
+        | _ -> false
+      in
+      let rec all_whitespaces s i =
+        i >= String.length s
+        ||
+        match s.[i] with
+        | ' '
+        | '\t'
+        | '\r'
+        | '\n' ->
+          all_whitespaces s (i + 1)
+        | _ -> false
+      in
+      let text_contains_only_whitespaces =
+        match Syntax.syntax text with
+        | Syntax.Token t -> all_whitespaces (Token.text t) 0
+        | _ -> false
+      in
+      if is_hh_script && text_contains_only_whitespaces then
+        t env suffix
       else
         transform_simple env node
     | Syntax.MarkupSuffix _

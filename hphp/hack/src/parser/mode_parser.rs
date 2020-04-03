@@ -18,7 +18,6 @@ pub fn parse_mode(text: &SourceText) -> Option<Mode> {
         match header.syntax {
             SyntaxVariant::MarkupSection(section_children) => {
                 if let syntax::MarkupSectionChildren {
-                    markup_prefix: pfx,
                     markup_text: txt,
                     markup_suffix:
                         syntax::Syntax {
@@ -37,10 +36,8 @@ pub fn parse_mode(text: &SourceText) -> Option<Mode> {
                         SyntaxVariant::Token(t) if t.kind() == TokenKind::Equal => Some(Mode::Mphp),
                         _ => {
                             let is_hhi = text.file_path().has_extension("hhi");
-                            let skip_length = pfx.value.full_width
-                                + txt.value.full_width
-                                + ltq.value.full_width
-                                + name.leading_width();
+                            let skip_length =
+                                txt.value.full_width + ltq.value.full_width + name.leading_width();
 
                             let language = text
                                 .sub_as_str(skip_length, name.width())

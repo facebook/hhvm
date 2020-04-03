@@ -707,12 +707,7 @@ let schema : schema_node list =
       description = "markup_section";
       prefix = "markup";
       aggregates = [TopLevelDeclaration; Statement];
-      fields =
-        [
-          ("prefix", ZeroOrOne Token);
-          ("text", Token);
-          ("suffix", ZeroOrOne (Just "MarkupSuffix"));
-        ];
+      fields = [("text", Token); ("suffix", ZeroOrOne (Just "MarkupSuffix"))];
     };
     {
       kind_name = "MarkupSuffix";

@@ -1,7 +1,7 @@
 ((script 112
   ((list 112
     ((markup_section 5
-      ((missing 0 ()) (() markup 0 ())
+      ((() markup 0 ())
        (markup_suffix 5 ((() <? 2 ()) (() name 3 ((end_of_line 1)))))))
      (classish_declaration 64
       ((missing 0 ()) (missing 0 ()) (missing 0 ())

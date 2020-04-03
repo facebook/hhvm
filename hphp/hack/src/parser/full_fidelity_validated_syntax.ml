@@ -1549,14 +1549,12 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | { Syntax.syntax = Syntax.MarkupSection x; value = v } -> v,
     { markup_suffix = validate_option_with (validate_markup_suffix) x.markup_suffix
     ; markup_text = validate_token x.markup_text
-    ; markup_prefix = validate_option_with (validate_token) x.markup_prefix
     }
   | s -> validation_fail (Some SyntaxKind.MarkupSection) s
   and invalidate_markup_section : markup_section invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.MarkupSection
-      { markup_prefix = invalidate_option_with (invalidate_token) x.markup_prefix
-      ; markup_text = invalidate_token x.markup_text
+      { markup_text = invalidate_token x.markup_text
       ; markup_suffix = invalidate_option_with (invalidate_markup_suffix) x.markup_suffix
       }
     ; Syntax.value = v

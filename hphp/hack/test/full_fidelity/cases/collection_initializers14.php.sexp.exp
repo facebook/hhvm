@@ -1,7 +1,7 @@
 ((script 64
   ((list 64
     ((markup_section 4
-      ((missing 0 ()) (() markup 0 ())
+      ((() markup 0 ())
        (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))))
      (namespace_declaration 13
       ((((end_of_line 1)) namespace 9 ((whitespace 1)))

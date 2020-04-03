@@ -1,7 +1,7 @@
 ((script 649
   ((list 649
     ((markup_section 4
-      ((missing 0 ()) (() markup 0 ())
+      ((() markup 0 ())
        (markup_suffix 4
         ((() <? 2 ())
          (() name 2 ((whitespace 1) (single_line_comment 9) (end_of_line 1)))))))

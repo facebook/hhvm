@@ -1,7 +1,7 @@
 ((script 233
   ((list 233
     ((markup_section 4
-      ((missing 0 ()) (() markup 0 ())
+      ((() markup 0 ())
        (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))))
      (classish_declaration 227
       ((missing 0 ())

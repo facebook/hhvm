@@ -1,7 +1,7 @@
 ((script 97
   ((list 97
     ((markup_section 4
-      ((missing 0 ()) (() markup 0 ())
+      ((() markup 0 ())
        (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))))
      (namespace_group_use_declaration 20
       ((((end_of_line 1) (single_line_comment 69) (end_of_line 1)

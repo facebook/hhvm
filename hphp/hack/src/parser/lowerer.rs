@@ -3229,16 +3229,12 @@ where
     fn p_markup(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::Stmt> {
         match &node.syntax {
             MarkupSection(c) => {
-                let markup_prefix = &c.markup_prefix;
                 let markup_text = &c.markup_text;
                 let pos = Self::p_pos(node, env);
                 let has_dot_hack_extension = pos.filename().has_extension("hack");
                 if has_dot_hack_extension {
                     Self::raise_parsing_error(node, env, &syntax_error::error1060);
-                } else if markup_prefix.value.is_missing()
-                    && markup_text.width() > 0
-                    && !Self::is_hashbang(&markup_text, env)
-                {
+                } else if markup_text.width() > 0 && !Self::is_hashbang(&markup_text, env) {
                     Self::raise_parsing_error(node, env, &syntax_error::error1001);
                 }
                 let stmt_ = ast::Stmt_::mk_markup((pos.clone(), Self::text(&markup_text, env)));

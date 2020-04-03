@@ -429,13 +429,12 @@ static LineToOffsetRangeVecMap getLineToOffsetRangeVecMap(const Unit* unit) {
 }
 
 static const LineTable& loadLineTable(const Unit* unit) {
-  if (unit->repoID() == RepoIdInvalid) {
-    LineTableStash::accessor acc;
+  assertx(unit->repoID() != RepoIdInvalid);
+  if (!RO::RepoAuthoritative) {
+    LineTableStash::const_accessor acc;
     if (s_lineTables.find(acc, unit)) {
       return acc->second;
     }
-    static LineTable empty;
-    return empty;
   }
 
   auto const hash = pointer_hash<Unit>{}(unit) % s_lineCache.size();
@@ -450,6 +449,19 @@ static const LineTable& loadLineTable(const Unit* unit) {
   auto& urp = Repo::get().urp();
   auto table = LineTable{};
   urp.getUnitLineTable[unit->repoID()].get(unit->sn(), table);
+
+  // Loading line tables for each unseen line while coverage is enabled can
+  // cause the treadmill to to carry an enormous number of discarded
+  // LineTables, so instead cache the table permanently in s_lineTables.
+  if (UNLIKELY(g_context &&
+               (unit->isCoverageEnabled() || RID().getCoverage()))) {
+    LineTableStash::accessor acc;
+    if (s_lineTables.insert(acc, unit)) {
+      acc->second = std::move(table);
+    }
+    return acc->second;
+  }
+
   auto const p = new LineCacheEntry(unit, std::move(table));
   if (auto const old = entry.exchange(p, std::memory_order_release)) {
     Treadmill::enqueue([old] { delete old; });
@@ -494,7 +506,7 @@ int Unit::getLineNumber(Offset pc) const {
       }
       return nullptr;
     }();
-    if (lineTable) return HPHP::getLineNumber(*lineTable, pc);
+    return lineTable ? HPHP::getLineNumber(*lineTable, pc) : -1;
   }
 
   auto findLine = [&] {
@@ -515,6 +527,12 @@ int Unit::getLineNumber(Offset pc) const {
 
   auto line = findLine();
   if (line != INT_MIN) return line;
+
+  // Updating m_lineMap while coverage is enabled can cause the treadmill to
+  // fill with an enormous number of resized maps.
+  if (UNLIKELY(g_context && (isCoverageEnabled() || RID().getCoverage()))) {
+    return HPHP::getLineNumber(loadLineTable(this), pc);
+  }
 
   m_lineMap.lock_for_update();
   try {

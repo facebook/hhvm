@@ -40,42 +40,35 @@ where
     V: SyntaxValueType<T>,
     Syntax<T, V>: PositionedSyntaxTrait,
 {
-    pub fn scour_comments(&self, node: &Syntax<T, V>) -> ScouredComments {
-        let mut r = self.scour_comments_(node, false, ScouredComments::new());
-        r.comments.reverse();
-        r
-    }
+    pub fn scour_comments<'a>(&self, top_node: &'a Syntax<T, V>) -> ScouredComments {
+        let mut acc = ScouredComments::new();
+        let mut stack: Vec<(&'a Syntax<T, V>, bool)> = vec![(top_node, false)];
 
-    fn scour_comments_(
-        &self,
-        node: &Syntax<T, V>,
-        in_block: bool,
-        acc: ScouredComments,
-    ) -> ScouredComments {
-        let on_children = |in_block: bool, acc| {
-            node.iter_children()
-                .fold(acc, |a, n| self.scour_comments_(n, in_block, a))
-        };
-        match &node.syntax {
-            CompoundStatement(_) => on_children(true, acc),
-            Token(t) => {
-                if t.has_trivia_kind(TriviaKind::DelimitedComment)
-                    || (self.include_line_comments
-                        && t.has_trivia_kind(TriviaKind::SingleLineComment))
-                    || (self.collect_fixmes
-                        && (t.has_trivia_kind(TriviaKind::FixMe)
-                            || t.has_trivia_kind(TriviaKind::IgnoreError)))
-                {
-                    t.leading()
-                        .iter()
-                        .chain(t.trailing().iter())
-                        .fold(acc, |a, t| self.on_trivia(in_block, node, t, a))
-                } else {
-                    on_children(in_block, acc)
+        while let Some((node, mut in_block)) = stack.pop() {
+            match &node.syntax {
+                CompoundStatement(_) => in_block = true,
+                Token(t) => {
+                    if t.has_trivia_kind(TriviaKind::DelimitedComment)
+                        || (self.include_line_comments
+                            && t.has_trivia_kind(TriviaKind::SingleLineComment))
+                        || (self.collect_fixmes
+                            && (t.has_trivia_kind(TriviaKind::FixMe)
+                                || t.has_trivia_kind(TriviaKind::IgnoreError)))
+                    {
+                        for tr in t.leading().iter().chain(t.trailing().iter()) {
+                            self.on_trivia(in_block, node, tr, &mut acc);
+                        }
+                    }
+                    continue;
                 }
+                _ => {}
             }
-            _ => on_children(in_block, acc),
+
+            stack.extend(node.iter_children().rev().map(|c| (c, in_block)));
         }
+
+        acc.comments.reverse();
+        acc
     }
 
     fn on_trivia(
@@ -83,11 +76,11 @@ where
         in_block: bool,
         node: &Syntax<T, V>,
         t: &T::Trivia,
-        mut acc: ScouredComments,
-    ) -> ScouredComments {
+        acc: &mut ScouredComments,
+    ) {
         use TriviaKind::*;
         match t.kind() {
-            WhiteSpace | EndOfLine | FallThrough | ExtraTokenError => acc,
+            WhiteSpace | EndOfLine | FallThrough | ExtraTokenError => {}
             DelimitedComment => {
                 let start = t.start_offset() + 2;
                 let end = t.end_offset();
@@ -95,12 +88,9 @@ where
                 let p = self.pos_of_offset(end - 1, end);
                 let text = self.source_text().sub_as_str(start, len).to_string();
                 acc.comments.push((p, Comment::CmtBlock(text)));
-                acc
             }
             SingleLineComment => {
-                if !self.include_line_comments {
-                    acc
-                } else {
+                if self.include_line_comments {
                     let text = self.source_text().text();
                     let start = t.start_offset();
                     let start = start + if text[start] == b'#' { 1 } else { 2 };
@@ -110,7 +100,6 @@ where
                     let mut text = self.source_text().sub_as_str(start, len).to_string();
                     text.push('\n');
                     acc.comments.push((p, Comment::CmtLine(text)));
-                    acc
                 }
             }
             FixMe | IgnoreError => {
@@ -119,17 +108,13 @@ where
                         Regex::new(r#"HH_(?:FIXME|IGNORE_ERROR)[ \t\n]*\[([0-9]+)\]"#).unwrap();
                 }
 
-                if !self.collect_fixmes {
-                    acc
-                } else {
+                if self.collect_fixmes {
                     let text = t.text_raw(self.source_text());
                     let ignore_fixme = match self.ignored_fixme {
                         None => false,
                         Some(r) => r.is_match(text),
                     };
-                    if ignore_fixme {
-                        acc
-                    } else {
+                    if !ignore_fixme {
                         let pos = self.p_pos(node);
                         let line = pos.line() as isize;
                         let p = self.pos_of_offset(t.start_offset(), t.end_offset());
@@ -143,16 +128,13 @@ where
                                 let code: isize = std::str::FromStr::from_str(code).unwrap();
                                 if !in_block && self.disallowed_decl_fixmes.contains(&code) {
                                     acc.add_to_misuses(line, code, p);
-                                    acc
                                 } else {
                                     acc.add_to_fixmes(line, code, p);
-                                    acc
                                 }
                             }
                             None => {
                                 // Errors.fixme_format pos;
                                 acc.add_format_error(pos);
-                                acc
                             }
                         }
                     }

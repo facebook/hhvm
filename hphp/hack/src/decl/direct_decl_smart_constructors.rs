@@ -1447,17 +1447,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         // namespace stack. Then, in all of the various make_namespace_XXXX
         // methods, we pop the namespace (since we know we've just exited it).
         Ok(match kind {
-            // There are a few types whose string representations we have to
-            // grab anyway, so just go ahead and treat them as generic names.
-            TokenKind::Name
-            | TokenKind::Variable
-            | TokenKind::Vec
-            | TokenKind::Dict
-            | TokenKind::Keyset
-            | TokenKind::Tuple
-            | TokenKind::Classname
-            | TokenKind::Class
-            | TokenKind::SelfToken => {
+            TokenKind::Name => {
                 let name = token_text(self);
                 if self.state.namespace_builder.is_building_namespace {
                     Rc::make_mut(&mut self.state.namespace_builder)
@@ -1468,6 +1458,16 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     Node_::Name(name, token_pos(self))
                 }
             }
+            // There are a few types whose string representations we have to
+            // grab anyway, so just go ahead and treat them as generic names.
+            TokenKind::Variable
+            | TokenKind::Vec
+            | TokenKind::Dict
+            | TokenKind::Keyset
+            | TokenKind::Tuple
+            | TokenKind::Classname
+            | TokenKind::Class
+            | TokenKind::SelfToken => Node_::Name(token_text(self), token_pos(self)),
             TokenKind::XHPClassName => Node_::XhpName(token_text(self), token_pos(self)),
             TokenKind::SingleQuotedStringLiteral => Node_::StringLiteral(
                 token_text(self)

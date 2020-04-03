@@ -53,7 +53,17 @@ let emit_function (ast_fun, hoisted) : Hhas_function.t list =
     else
       None
   in
-  let scope = [Ast_scope.ScopeItem.Function ast_fun] in
+  let is_debug_main =
+    match ast_fun.T.f_user_attributes with
+    | [{ T.ua_name = (_, "__DebuggerMain"); T.ua_params = [] }] -> true
+    | _ -> false
+  in
+  let scope =
+    if is_debug_main then
+      Ast_scope.Scope.toplevel
+    else
+      [Ast_scope.ScopeItem.Function ast_fun]
+  in
   let function_rx_level =
     Rx.rx_level_from_ast ast_fun.T.f_user_attributes
     |> Option.value ~default:Rx.NonRx

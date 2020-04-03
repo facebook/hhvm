@@ -60,6 +60,7 @@
 #include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/vm/debug/debug.h"
+#include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/jit/enter-tc.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -2077,6 +2078,10 @@ ExecutionContext::evalPHPDebugger(StringData* code, int frame) {
   return evalPHPDebugger(unit, frame);
 }
 
+const StaticString
+  s_DebuggerMainAttr("__DebuggerMain"),
+  s_uninitClsName("__uninitSentinel");
+
 ExecutionContext::EvaluationResult
 ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
   always_assert(!RuntimeOption::RepoAuthoritative);
@@ -2163,13 +2168,125 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
     }
     SCOPE_EXIT { vmpc() = savedPC; vmfp() = savedFP; };
 
-    // Invoke the given PHP, possibly specialized to match the type of the
-    // current function on the stack, optionally passing a this pointer or
-    // class used to execute the current function.
-    return {false, Variant::attach(
-      invokePseudoMain(unit->getMain(functionClass, this_),
-                       fp ? fp->m_varEnv : nullptr, this_, frameClass)
-    ), ""};
+    invokePseudoMain(
+      unit->getMain(functionClass, this_),
+      fp ? fp->m_varEnv : nullptr,
+      this_,
+      frameClass
+    );
+
+    enum VarAction { StoreFrame, StoreVV, StoreEnv };
+
+    auto const uninit_cls = Unit::loadClass(s_uninitClsName.get());
+
+    Array globals{get_global_variables()};
+    auto& env = [&] () -> Array& {
+      if (fp->m_varEnv && fp->m_varEnv->isGlobalScope()) return globals;
+      if (m_debuggerEnv.isNull()) m_debuggerEnv = Array::CreateDArray();
+      return m_debuggerEnv;
+    }();
+
+    auto const ctx = fp ? fp->func()->cls() : nullptr;
+    auto const f = [&] () -> Func* {
+      for (auto orig_f : unit->funcs()) {
+        if (orig_f->userAttributes().count(s_DebuggerMainAttr.get())) {
+          auto const f = ctx ? orig_f->clone(ctx) : orig_f;
+          if (ctx) {
+            f->setBaseCls(ctx);
+            if (fp && fp->hasThis()) {
+              f->setAttrs(Attr(f->attrs() & ~AttrStatic));
+            } else if (fp && fp->hasClass()) {
+              f->setAttrs(Attr(f->attrs() | AttrStatic));
+            }
+          }
+          assertx(f->numParams() >= 1 && f->numParams() == f->numInOutParams());
+          return f;
+        }
+      }
+      return nullptr;
+    }();
+    always_assert(f);
+
+    VArrayInit args{f->numParams()};
+    std::vector<VarAction> actions{f->numParams(), StoreEnv};
+    std::vector<Id> frameIds;
+    frameIds.resize(f->numParams(), 0);
+    auto const appendUninit = [&] {
+      args.append(make_tv<KindOfObject>(Object{uninit_cls}.detach()));
+    };
+    for (Id id = 0; id < f->numParams() - 1; id++) {
+      assertx(id < f->numNamedLocals());
+      assertx(f->params()[id].isInOut());
+      if (fp) {
+        auto const idx = fp->func()->lookupVarId(f->localVarName(id));
+        if (idx != kInvalidId) {
+          auto const var = tvAsVariant(frame_local(fp, idx));
+          if (var.isInitialized()) args.append(var);
+          else appendUninit();
+          actions[id] = StoreFrame;
+          frameIds[id] = idx;
+          continue;
+        }
+        if (fp->hasVarEnv()) {
+          auto const tv = fp->getVarEnv()->lookup(f->localVarName(id));
+          if (tv) {
+            if (type(tv) != KindOfUninit) args.append(tvAsVariant(*tv));
+            else appendUninit();
+            actions[id] = StoreVV;
+            continue;
+          }
+        }
+      }
+      auto const val = env.rval(StrNR{f->localVarName(id)});
+      if (val && type(val) != KindOfUninit) args.append(val.tv());
+      else appendUninit();
+    }
+    args.append(make_tv<KindOfNull>()); // $__debugger_exn$output
+
+    auto const obj = ctx && fp->hasThis() ? fp->getThis() : nullptr;
+    auto const cls = ctx && fp->hasClass() ? fp->getClass() : nullptr;
+    auto const arr_tv = invokeFunc(f, args.toArray(), obj, cls,
+                                   nullptr, false, false, false, Array());
+    assertx(isArrayLikeType(type(arr_tv)));
+    assertx(val(arr_tv).parr->size() == f->numParams() + 1);
+    Array arr = Array::attach(val(arr_tv).parr);
+    for (Id id = 0; id < f->numParams() - 1; id++) {
+      auto const rval = arr.rval(id + 1);
+      if (isObjectType(type(rval)) &&
+          val(rval).pobj->instanceof(uninit_cls)) {
+        switch (actions[id]) {
+        case StoreFrame:
+          tvAsVariant(frame_local(fp, frameIds[id])).unset();
+          break;
+        case StoreVV:
+          fp->m_varEnv->unset(f->localVarName(id));
+          break;
+        case StoreEnv:
+          env.remove(StrNR{f->localVarName(id)});
+          break;
+        }
+        continue;
+      }
+      switch (actions[id]) {
+      case StoreFrame:
+        tvAsVariant(frame_local(fp, frameIds[id])) = arr[id + 1];
+        break;
+      case StoreVV:
+        fp->m_varEnv->set(f->localVarName(id), rval);
+        break;
+      case StoreEnv:
+        env.set(StrNR{f->localVarName(id)}, rval.tv());
+        break;
+      }
+    }
+    auto const exn = arr[int64_t(f->numParams())];
+    if (exn.isObject()) {
+      assertx(exn.toObject().instanceof("Throwable"));
+      throw_object(exn.toObject());
+    }
+    assertx(exn.isNull());
+
+    return {false, arr[0], ""};
   } catch (FatalErrorException& e) {
     errorString << s_fatal.data();
     errorString << " : ";

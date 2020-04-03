@@ -365,6 +365,7 @@ type istype_op =
 type instruct_isset =
   | IssetC
   | IssetL of local_id
+  | IsUnsetL of local_id
   | IssetG
   | IssetS
   | IsTypeC of istype_op

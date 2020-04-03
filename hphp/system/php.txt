@@ -9,6 +9,7 @@
 hphp/system/php/lang/stdClass.php
 hphp/system/php/lang/Closure.php
 hphp/system/php/lang/pinitSentinel.php
+hphp/system/php/lang/uninitSentinel.php
 hphp/system/php/lang/string.php
 hphp/system/php/lang/resource.php
 

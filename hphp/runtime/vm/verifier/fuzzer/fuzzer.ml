@@ -305,6 +305,7 @@ let mut_imms (is : IS.t) : IS.t =
   let mutate_isset s =
     match s with
     | IssetL   id        -> IssetL  (mutate_local_id id !mag)
+    | IsUnsetL   id      -> IsUnsetL  (mutate_local_id id !mag)
     | IsTypeL (id, op)   -> IsTypeL (mutate_local_id id !mag, op)
     | _ -> s in
   let mutate_mutator s =

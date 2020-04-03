@@ -1710,6 +1710,7 @@ void dce(Env& env, const bc::InstanceOf& op) { no_dce(env, op); }
 void dce(Env& env, const bc::InstanceOfD& op) { no_dce(env, op); }
 void dce(Env& env, const bc::IssetG& op) { no_dce(env, op); }
 void dce(Env& env, const bc::IssetL& op) { no_dce(env, op); }
+void dce(Env& env, const bc::IsUnsetL& op) { no_dce(env, op); }
 void dce(Env& env, const bc::IssetS& op) { no_dce(env, op); }
 void dce(Env& env, const bc::IterFree& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Jmp& op) { no_dce(env, op); }

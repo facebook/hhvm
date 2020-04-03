@@ -269,6 +269,13 @@ bool CmdVariable::onServer(DebuggerProxy &proxy) {
     m_variables.remove(s_GLOBALS);
   }
 
+  auto const& denv = g_context->getDebuggerEnv();
+  if (!m_global && !denv.isNull()) {
+    IterateKVNoInc(denv.get(), [&] (TypedValue k, TypedValue v) {
+      if (!m_variables.exists(k)) m_variables.set(k, v, true);
+    });
+  }
+
   // Deprecated IDE uses this, so keep it around for now.  It expects all
   // variable values to be fully serialized across the wire.
   if (m_version == 0) {

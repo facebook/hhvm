@@ -136,6 +136,7 @@ let all_instrs (_ : IS.t) : lazy_instruct list =
     (fun () -> IGet (CUGetL (random_local ())));
     (fun () -> IGet (PushL (random_local ())));
     (fun () -> IIsset (IssetL (random_local ())));
+    (fun () -> IIsset (IsUnsetL (random_local ())));
     (fun () -> IIsset (IsTypeL (random_local (),random_op_type ())));
     (fun () -> ILitConst NullUninit);
     (fun () -> IBasic PopC);

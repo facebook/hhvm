@@ -410,6 +410,8 @@ public:
   void exitDebuggerDummyEnv();
   void debuggerExecutePsps();
 
+  Array& getDebuggerEnv() { return m_debuggerEnv; }
+
   bool isNested() { return m_nesting != 0; }
   void pushVMState(TypedValue* savedSP);
   void popVMState();
@@ -626,6 +628,8 @@ private:
   rqtrace::Trace* m_requestTrace{nullptr};
 
   folly::Optional<RepoOptions> m_requestOptions;
+
+  Array m_debuggerEnv; // variables read/written in the REPL
 };
 
 ///////////////////////////////////////////////////////////////////////////////

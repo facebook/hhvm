@@ -2871,6 +2871,15 @@ void in(ISS& env, const bc::IssetL& op) {
   push(env, TBool);
 }
 
+void in(ISS& env, const bc::IsUnsetL& op) {
+  nothrow(env);
+  constprop(env);
+  auto const loc = locAsCell(env, op.loc1);
+  if (loc.subtypeOf(BUninit))  return push(env, TTrue);
+  if (!loc.couldBe(BUninit))   return push(env, TFalse);
+  push(env, TBool);
+}
+
 void in(ISS& env, const bc::IssetS& op) {
   auto const tcls  = popC(env);
   auto const tname = popC(env);

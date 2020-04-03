@@ -3765,6 +3765,22 @@ and emit_special_function
       | _ ->
         Emit_fatal.raise_fatal_runtime pos "Constant string expected in fun()"
     )
+  | ("__systemlib\\__debugger_is_uninit", _) ->
+    if nargs <> 1 then
+      Emit_fatal.raise_fatal_runtime
+        pos
+        ( "__debugger_is_uninit() expects exactly 1 parameter, "
+        ^ string_of_int nargs
+        ^ " given" )
+    else (
+      match args with
+      | [(_, A.Lvar (_, id))] ->
+        Some (instr_isunsetl (get_local env (pos, Local_id.get_name id)))
+      | _ ->
+        Emit_fatal.raise_fatal_runtime
+          pos
+          "Local variable expected in __debugger_is_uninit()"
+    )
   | ("HH\\inst_meth", _) ->
     begin
       match args with

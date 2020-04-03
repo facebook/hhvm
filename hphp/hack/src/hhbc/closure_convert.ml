@@ -607,7 +607,7 @@ let rec get_scope_fmode scope =
   | ScopeItem.Function fd :: _ -> fd.f_mode
   | _ :: scope -> get_scope_fmode scope
 
-let make_fn_param (p, lid) is_variadic =
+let make_fn_param (p, lid) is_variadic is_inout =
   {
     param_annotation = Tast_annotate.null_annotation p;
     param_type_hint = (Typing_make_type.null Tast_annotate.witness, None);
@@ -615,7 +615,11 @@ let make_fn_param (p, lid) is_variadic =
     param_pos = p;
     param_name = Local_id.get_name lid;
     param_expr = None;
-    param_callconv = None;
+    param_callconv =
+      ( if is_inout then
+        Some Ast_defs.Pinout
+      else
+        None );
     param_user_attributes = [];
     param_visibility = None;
   }
@@ -682,7 +686,7 @@ let convert_meth_caller_to_func_ptr env st ann pc cls pf func =
              [],
              Some (Tast_annotate.with_pos p (Lvar args_var)) )
     in
-    let variadic_param = make_fn_param args_var true in
+    let variadic_param = make_fn_param args_var true false in
     let fd =
       {
         f_span = p;
@@ -693,7 +697,7 @@ let convert_meth_caller_to_func_ptr env st ann pc cls pf func =
         f_tparams = [];
         f_where_constraints = [];
         f_variadic = FVvariadicArg variadic_param;
-        f_params = [make_fn_param obj_var false; variadic_param];
+        f_params = [make_fn_param obj_var false false; variadic_param];
         f_body =
           {
             fb_ast =
@@ -1739,13 +1743,115 @@ let hoist_toplevel_functions all_defs =
   in
   funs @ nonfuns
 
+let extract_debugger_main ~empty_namespace all_defs env st =
+  let (stmts, defs) =
+    List.partition_tf all_defs ~f:(function
+        | Stmt _ -> true
+        | _ -> false)
+  in
+  let vars =
+    SSet.elements
+    @@ Decl_vars.vars_from_ast
+         ~is_closure_body:false
+         ~has_this:false
+         ~params:[]
+         ~is_toplevel:false
+         ~is_in_static_method:false
+         stmts
+  in
+  let stmts =
+    List.filter_map
+      ~f:(function
+        | Stmt s -> Some s
+        | _ -> None)
+      stmts
+  in
+  let stmts =
+    if List.length all_defs <> 2 then
+      stmts
+    else
+      match stmts with
+      | [((_, Markup _) as m); (p, Expr e)] -> [m; (p, Return (Some e))]
+      | _ -> stmts
+  in
+  let unsets =
+    List.map
+      ~f:(fun name ->
+        let p = Tast_annotate.null_annotation Pos.none in
+        let id nm = (p, Id (Pos.none, nm)) in
+        let lv nm = (p, Lvar (Pos.none, Local_id.make_unscoped nm)) in
+        let unset =
+          (Pos.none, Expr (p, Call (Cnormal, id "unset", [], [lv name], None)))
+        in
+        ( Pos.none,
+          If
+            ( ( p,
+                Is
+                  ( lv name,
+                    (Pos.none, Happly ((Pos.none, "__uninitSentinel"), [])) ) ),
+              [unset],
+              [] ) ))
+      vars
+  in
+  let sets =
+    List.map
+      ~f:(fun name ->
+        let p = Tast_annotate.null_annotation Pos.none in
+        let id nm = (p, Id (Pos.none, nm)) in
+        let lv nm = (p, Lvar (Pos.none, Local_id.make_unscoped nm)) in
+        let checkfunc = id "\\__systemlib\\__debugger_is_uninit" in
+        let isuninit = (p, Call (Cnormal, checkfunc, [], [lv name], None)) in
+        let obj =
+          (p, New ((p, CI (Pos.none, "__uninitSentinel")), [], [], None, p))
+        in
+        let set =
+          (Pos.none, Expr (p, Binop (Ast_defs.Eq None, lv name, obj)))
+        in
+        (Pos.none, If (isuninit, [set], [])))
+      vars
+  in
+  let vars = vars @ ["$__debugger_exn$output"] in
+  let params =
+    List.map
+      ~f:(fun var ->
+        make_fn_param (Pos.none, Local_id.make_unscoped var) false true)
+      vars
+  in
+  let exnvar = (Pos.none, Local_id.make_unscoped "$__debugger_exn$output") in
+  let catch = ((Pos.none, "Throwable"), exnvar, []) in
+  let body = unsets @ [(Pos.none, Try (stmts, [catch], sets))] in
+  let fd =
+    {
+      f_span = Pos.none;
+      f_annotation = dummy_saved_env;
+      f_mode = FileInfo.Mstrict;
+      f_ret = dummy_type_hint None;
+      f_name = (Pos.none, "include");
+      f_tparams = [];
+      f_where_constraints = [];
+      f_variadic = FVnonVariadic;
+      f_params = params;
+      f_body = { fb_ast = body; fb_annotation = Tast.NoUnsafeBlocks };
+      f_fun_kind = Ast_defs.FSync;
+      f_user_attributes =
+        [{ ua_name = (Pos.none, "__DebuggerMain"); ua_params = [] }];
+      f_file_attributes = [];
+      f_external = false;
+      f_namespace = empty_namespace;
+      f_doc_comment = None;
+      f_static = false;
+    }
+  in
+  let (st, fd) = convert_fun env st fd in
+  (Fun fd :: defs, st)
+
 (* For all the definitions in a file unit, convert lambdas into classes with
  * invoke methods, and hoist inline class and function definitions to top
  * level.
  * The closure classes and hoisted definitions are placed after the existing
  * definitions.
  *)
-let convert_toplevel_prog ~empty_namespace defs =
+let convert_toplevel_prog ~empty_namespace ~for_debugger_eval defs =
   let defs =
     if constant_folding () then
       Ast_constant_folder.fold_program ~empty_namespace defs
@@ -1757,6 +1863,12 @@ let convert_toplevel_prog ~empty_namespace defs =
    * function and we place hoisted functions just after that *)
   let env = env_toplevel (count_classes defs) (count_records defs) 1 defs in
   let st = initial_state empty_namespace in
+  let (defs, st) =
+    if for_debugger_eval then
+      extract_debugger_main ~empty_namespace defs env st
+    else
+      (defs, st)
+  in
   let (st, original_defs) = convert_defs env 0 0 0 0 st defs in
   let main_state = st.current_function_state in
   let st =

@@ -714,9 +714,16 @@ Func* Unit::getCachedEntryPoint() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Func lookup.
 
+const StaticString s_DebuggerMain("__DebuggerMain");
+
 void Unit::defFunc(Func* func, bool debugger) {
   assertx(!func->isMethod());
   auto const handle = func->funcHandle();
+
+  if (UNLIKELY(debugger)) {
+    // Don't define the __debugger_main() function
+    if (func->userAttributes().count(s_DebuggerMain.get())) return;
+  }
 
   if (rds::isPersistentHandle(handle)) {
     auto& funcAddr = rds::handleToRef<LowPtr<Func>,

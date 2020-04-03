@@ -21,6 +21,7 @@
 #include "hphp/runtime/ext/vsdebug/command.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/ext/vsdebug/php_executor.h"
+#include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/runtime-compiler.h"
 
 namespace HPHP {
@@ -183,6 +184,9 @@ bool EvaluateCommand::executeImpl(
         executor.m_result.result.asTypedValue()
       );
     }
+    auto& denv = g_context->getDebuggerEnv();
+    if (denv.isNull()) denv = Array::CreateDArray();
+    denv.set(StrNR{s_varName.get()}, executor.m_result.result, true);
   }
 
   folly::dynamic serializedResult =

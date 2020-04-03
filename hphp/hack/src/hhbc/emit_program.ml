@@ -105,7 +105,7 @@ let emit_program ~is_hh_file ~is_evaled ~for_debugger_eval ~empty_namespace tast
           (* Convert closures to top-level classes;
            * also hoist inner classes and functions *)
           let { ast_defs = closed_ast; global_state } =
-            convert_toplevel_prog ~empty_namespace tast
+            convert_toplevel_prog ~empty_namespace ~for_debugger_eval tast
           in
           Emit_env.set_global_state global_state;
           let flat_closed_ast = List.map ~f:snd closed_ast in

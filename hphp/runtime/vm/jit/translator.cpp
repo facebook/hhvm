@@ -244,6 +244,7 @@ static const struct {
   { OpIssetL,      {Local,            Stack1,       OutBoolean      }},
   { OpIssetG,      {Stack1,           Stack1,       OutBoolean      }},
   { OpIssetS,      {StackTop2,        Stack1,       OutBoolean      }},
+  { OpIsUnsetL,    {Local,            Stack1,       OutBoolean      }},
   { OpIsTypeC,     {Stack1|
                     DontGuardStack1,  Stack1,       OutBoolean      }},
   { OpIsTypeL,     {Local,            Stack1,       OutIsTypeL      }},
@@ -965,6 +966,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::IssetG:
   case Op::IssetL:
   case Op::IssetS:
+  case Op::IsUnsetL:
   case Op::IterFree:
   case Op::LIterFree:
   case Op::LateBoundCls:

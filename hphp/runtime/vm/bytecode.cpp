@@ -3566,6 +3566,13 @@ OPTBLD_INLINE void iopIssetL(TypedValue* tv) {
   topTv->m_type = KindOfBoolean;
 }
 
+OPTBLD_INLINE void iopIsUnsetL(TypedValue* tv) {
+  bool ret = type(tv) == KindOfUninit;
+  TypedValue* topTv = vmStack().allocTV();
+  topTv->m_data.num = ret;
+  topTv->m_type = KindOfBoolean;
+}
+
 OPTBLD_INLINE static bool isTypeHelper(TypedValue* val, IsTypeOp op) {
   assertx(tvIsPlausible(*val));
 

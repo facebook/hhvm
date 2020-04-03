@@ -18,4 +18,7 @@ type convert_result = {
 
 (* Convert entire program *)
 val convert_toplevel_prog :
-  empty_namespace:Namespace_env.env -> Tast.program -> convert_result
+  empty_namespace:Namespace_env.env ->
+  for_debugger_eval:bool ->
+  Tast.program ->
+  convert_result

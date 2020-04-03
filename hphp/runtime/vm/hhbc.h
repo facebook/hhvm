@@ -654,6 +654,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(IssetL,          ONE(LA),          NOV,             ONE(CV),    NF) \
   O(IssetG,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(IssetS,          NA,               TWO(CV,CV),      ONE(CV),    NF) \
+  O(IsUnsetL,        ONE(LA),          NOV,             ONE(CV),    NF) \
   O(IsTypeC,         ONE(OA(IsTypeOp)),ONE(CV),         ONE(CV),    NF) \
   O(IsTypeL,         TWO(NLA,                                           \
                        OA(IsTypeOp)),  NOV,             ONE(CV),    NF) \

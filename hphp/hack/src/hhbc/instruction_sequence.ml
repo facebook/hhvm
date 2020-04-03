@@ -183,6 +183,8 @@ let instr_unsetl local = instr (IMutator (UnsetL local))
 
 let instr_issetl local = instr (IIsset (IssetL local))
 
+let instr_isunsetl local = instr (IIsset (IsUnsetL local))
+
 let instr_issetg = instr (IIsset IssetG)
 
 let instr_issets = instr (IIsset IssetS)

@@ -1601,6 +1601,7 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::CGetL2:
     case Op::PushL:
     case Op::IssetL:
+    case Op::IsUnsetL:
     case Op::SetL:
     case Op::SetOpL:
     case Op::IncDecL:

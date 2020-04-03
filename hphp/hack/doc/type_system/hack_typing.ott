@@ -260,7 +260,7 @@ members :: 'members_' ::= {{ com non-constructor members of a class }}
 classbody :: 'class_' ::= {{ com class body }}
   | { constructor members } :: :: body
 
-constructor :: '' ::= {{ com constructor definition }}
+constructor :: 'constructor_' ::= {{ com constructor definition }}
   | function __construct funparams block :: :: constructor {{ com constructor }}
 
 %%% Top level declaration
@@ -306,7 +306,7 @@ e {{ ocaml expr }} :: 'e_' ::= {{ com expressions }}
   | lamparams lamreturn ==> lambody  ::   :: lambda   {{ com lambda }}
   | await e                    ::   :: await          {{ com await expression }}
 
-args {{ ocaml args }} :: '' ::= {{ com argument list }}
+args {{ ocaml args }} :: 'args_' ::= {{ com argument list }}
   | e1 , .. , en              ::   :: args           {{ com arguments }}
   | e1 , .. , en , vardots e  ::   :: args_splat     {{ com arguments with splat }}
 

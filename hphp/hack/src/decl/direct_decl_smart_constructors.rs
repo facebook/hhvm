@@ -2257,12 +2257,14 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             is_static: bool,
             visibility: aast::Visibility,
             is_abstract: bool,
+            is_final: bool,
         }
         fn read_member_modifiers<'a>(modifiers: impl Iterator<Item = &'a Node_>) -> Modifiers {
             let mut ret = Modifiers {
                 is_static: false,
                 visibility: aast::Visibility::Private,
                 is_abstract: false,
+                is_final: false,
             };
             for modifier in modifiers {
                 if let Ok(vis) = modifier.as_visibility() {
@@ -2271,6 +2273,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 match modifier {
                     Node_::Static => ret.is_static = true,
                     Node_::Abstract => ret.is_abstract = true,
+                    Node_::Final => ret.is_final = true,
                     _ => (),
                 }
             }
@@ -2281,6 +2284,11 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let key = name.clone();
         let name = prefix_slash(Cow::Owned(name));
         let (type_params, type_variables) = self.into_type_params(tparams?)?;
+        let class_kind = match class_keyword? {
+            Node_::Interface => ClassKind::Cinterface,
+            Node_::Trait => ClassKind::Ctrait,
+            _ => ClassKind::Cnormal,
+        };
         let mut cls = shallow_decl_defs::ShallowClass {
             mode: match self.state.file_mode_builder {
                 FileModeBuilder::None | FileModeBuilder::Pending => Mode::Mstrict,
@@ -2292,11 +2300,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 Node_::XHP => true,
                 _ => false,
             },
-            kind: match class_keyword? {
-                Node_::Interface => ClassKind::Cinterface,
-                Node_::Trait => ClassKind::Ctrait,
-                _ => ClassKind::Cnormal,
-            },
+            kind: class_kind,
             name: Id(pos, name.into_owned()),
             tparams: type_params,
             where_constraints: Vec::new(),
@@ -2444,10 +2448,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                         }
                         Node_::Function(decl) => {
                             let modifiers = read_member_modifiers(decl.header.modifiers.iter());
-                            let abstract_ = match decl.body {
-                                Node_::Semicolon => true,
-                                _ => false,
-                            };
                             let is_constructor = match decl.header.name {
                                 Node_::Construct(_) => true,
                                 _ => false,
@@ -2468,8 +2468,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                                 .deprecated
                                 .map(|msg| format!("The method {} is deprecated: {}", id.1, msg));
                             let method = shallow_decl_defs::ShallowMethod {
-                                abstract_,
-                                final_: false,
+                                abstract_: class_kind == ClassKind::Cinterface
+                                    || modifiers.is_abstract,
+                                final_: modifiers.is_final,
                                 memoizelsb: false,
                                 name: id,
                                 override_: attributes.override_,

@@ -1159,22 +1159,19 @@ ObjectData::PropLookup ObjectData::getPropImpl(
   // dynamic property with this name.
   if (UNLIKELY(getAttribute(HasDynPropArr))) {
     auto& arr = dynPropArray();
-    if (auto const rval = arr->rval(key)) {
+    if (arr->exists(key)) {
       if (forRead && RuntimeOption::EvalNoticeOnReadDynamicProp) {
         raiseReadDynamicProp(key);
       }
       // Returning a non-declared property. We know that it is accessible and
       // not const since all dynamic properties are. If we may write to
       // the property we need to allow the array to escalate.
-      if (forWrite) {
-        auto const lval = arr.lval(StrNR(key), AccessFlags::Key);
-        return { lval, nullptr, kInvalidSlot, true, false };
-      }
-      return { rval.as_lval(), nullptr, kInvalidSlot, true, true };
+      auto const lval = arr.lval(StrNR(key), AccessFlags::Key);
+      return { lval, nullptr, kInvalidSlot, true, !forWrite };
     }
   }
 
-  return { nullptr, nullptr, kInvalidSlot, false, forWrite ? false : true };
+  return { nullptr, nullptr, kInvalidSlot, false, !forWrite };
 }
 
 tv_lval ObjectData::getPropLval(const Class* ctx, const StringData* key) {

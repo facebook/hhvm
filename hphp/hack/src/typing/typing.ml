@@ -1957,7 +1957,7 @@ and expr_
       | None ->
         (* The static method wasn't found. *)
         TOG.smember_not_found
-          p
+          (fst meth)
           ~is_const:false
           ~is_method:true
           class_

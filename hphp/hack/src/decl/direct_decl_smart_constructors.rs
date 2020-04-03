@@ -689,6 +689,7 @@ impl Node_ {
             late_init: false,
             const_: false,
             lsb: false,
+            memoizelsb: false,
             override_: false,
         };
 
@@ -764,6 +765,9 @@ impl Node_ {
                     "__LSB" => {
                         attributes.lsb = true;
                     }
+                    "__MemoizeLSB" => {
+                        attributes.memoizelsb = true;
+                    }
                     "__Override" => {
                         attributes.override_ = true;
                     }
@@ -796,6 +800,7 @@ struct Attributes {
     late_init: bool,
     const_: bool,
     lsb: bool,
+    memoizelsb: bool,
     override_: bool,
 }
 
@@ -2520,7 +2525,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                                 abstract_: class_kind == ClassKind::Cinterface
                                     || modifiers.is_abstract,
                                 final_: modifiers.is_final,
-                                memoizelsb: false,
+                                memoizelsb: attributes.memoizelsb,
                                 name: id,
                                 override_: attributes.override_,
                                 reactivity: match attributes.reactivity {

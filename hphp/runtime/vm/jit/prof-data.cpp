@@ -214,14 +214,10 @@ struct ProfDataShutdownDeleter {
 } s_profDataShutdownDeleter;
 
 /*
- * Used to free ProfData from the Treadmill. Since we currently do nothing to
- * make Profile translations unreachable when we're otherwise done with
- * ProfData, we move the profiling counters out of ProfData before deleting it.
+ * Used to free ProfData from the Treadmill.
  */
-ProfCounters<int64_t> s_persistentCounters{0};
 struct ProfDataTreadmillDeleter {
   void operator()() {
-    s_persistentCounters = data->takeCounters();
     if (RuntimeOption::ServerExecutionMode()) {
       Logger::Info("Deleting JIT ProfData");
     }

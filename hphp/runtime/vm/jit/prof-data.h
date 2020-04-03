@@ -357,10 +357,6 @@ struct ProfData {
     m_counters.resetAllCounters(val);
   }
 
-  ProfCounters<int64_t> takeCounters() {
-    return std::move(m_counters);
-  }
-
   /*
    * Address at which the counter for translation id is stored.
    */

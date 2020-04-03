@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<121426d41676f930174077860498ea11>>
+// @generated SignedSource<<e507cb3adc755fd0db305f82e0088015>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -644,6 +644,7 @@ pub enum Typing {
     BadFunctionPointerConstruction,
     NotARecord,
     TraitReuseInsideClass,
+    RedundantGeneric,
 }
 
 #[derive(

@@ -4887,6 +4887,16 @@ let exception_occurred pos =
        "An exception occurred while typechecking this. %s"
        Error_message_sentinel.please_file_a_bug_message)
 
+let redundant_covariant pos msg suggest =
+  add
+    (Typing.err_code Typing.RedundantGeneric)
+    pos
+    ( "This generic parameter is redundant because it only appears in a covariant (output) position"
+    ^ msg
+    ^ ". Consider replacing uses of generic parameter with `"
+    ^ suggest
+    ^ "` or specifying <<__Explicit>> on the generic parameter" )
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

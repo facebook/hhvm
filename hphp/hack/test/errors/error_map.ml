@@ -617,4 +617,5 @@ InvalidReifiedFunctionPointer = 4362
 BadFunctionPointerConstruction = 4363
 NotARecord = 4364
 TraitReuseInsideClass = 4365
+RedundantGeneric = 4366
   |}]

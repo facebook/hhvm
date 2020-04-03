@@ -358,6 +358,7 @@ let load config_filename options =
       ~error_codes_treated_strictly:
         (prepare_error_codes_treated_strictly config)
       ?tco_check_xhp_attribute:(bool_opt "check_xhp_attribute" config)
+      ?tco_check_redundant_generics:(bool_opt "check_redundant_generics" config)
       ?tco_disallow_unresolved_type_variables:
         (bool_opt "disallow_unresolved_type_variables" config)
       ?tco_disallow_invalid_arraykey_constraint:

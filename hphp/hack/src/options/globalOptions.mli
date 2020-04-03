@@ -161,6 +161,8 @@ type t = {
   error_codes_treated_strictly: ISet.t;
   (* static check xhp required attribute *)
   tco_check_xhp_attribute: bool;
+  (* Check redundant generics in return types *)
+  tco_check_redundant_generics: bool;
   (*
    * Flag to produce an error whenever the TAST contains unresolved type variables
    *)
@@ -293,6 +295,7 @@ val make :
   ?tco_disable_partially_abstract_typeconsts:bool ->
   ?error_codes_treated_strictly:ISet.t ->
   ?tco_check_xhp_attribute:bool ->
+  ?tco_check_redundant_generics:bool ->
   ?tco_disallow_unresolved_type_variables:bool ->
   ?tco_disallow_invalid_arraykey_constraint:bool ->
   ?po_enable_class_level_where_clauses:bool ->
@@ -460,6 +463,8 @@ val tco_disable_partially_abstract_typeconsts : t -> bool
 val error_codes_treated_strictly : t -> ISet.t
 
 val tco_check_xhp_attribute : t -> bool
+
+val tco_check_redundant_generics : t -> bool
 
 val tco_disallow_unresolved_type_variables : t -> bool
 

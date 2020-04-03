@@ -207,6 +207,7 @@ let parse_options () =
   let rust_top_level_elaborator = ref true in
   let symbolindex_file = ref None in
   let check_xhp_attribute = ref false in
+  let check_redundant_generics = ref false in
   let disallow_invalid_arraykey_constraint = ref None in
   let enable_class_level_where_clauses = ref false in
   let disable_legacy_soft_typehints = ref false in
@@ -553,6 +554,7 @@ let parse_options () =
       ?tco_disallow_invalid_arraykey_constraint:
         !disallow_invalid_arraykey_constraint
       ~tco_check_xhp_attribute:!check_xhp_attribute
+      ~tco_check_redundant_generics:!check_redundant_generics
       ~tco_shallow_class_decl:!shallow_class_decl
       ~tco_like_type_hints:!like_type_hints
       ~tco_union_intersection_type_hints:!union_intersection_type_hints

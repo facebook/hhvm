@@ -61,6 +61,7 @@ type t = {
   tco_disable_partially_abstract_typeconsts: bool;
   error_codes_treated_strictly: ISet.t;
   tco_check_xhp_attribute: bool;
+  tco_check_redundant_generics: bool;
   tco_disallow_unresolved_type_variables: bool;
   tco_disallow_invalid_arraykey_constraint: bool;
   po_enable_class_level_where_clauses: bool;
@@ -225,6 +226,7 @@ let default =
     tco_disable_partially_abstract_typeconsts = false;
     error_codes_treated_strictly = ISet.of_list [];
     tco_check_xhp_attribute = false;
+    tco_check_redundant_generics = false;
     tco_disallow_unresolved_type_variables = false;
     tco_disallow_invalid_arraykey_constraint = false;
     po_enable_class_level_where_clauses = false;
@@ -321,6 +323,7 @@ let make
       default.tco_disable_partially_abstract_typeconsts)
     ?(error_codes_treated_strictly = default.error_codes_treated_strictly)
     ?(tco_check_xhp_attribute = default.tco_check_xhp_attribute)
+    ?(tco_check_redundant_generics = default.tco_check_redundant_generics)
     ?(tco_disallow_unresolved_type_variables =
       default.tco_disallow_unresolved_type_variables)
     ?(tco_disallow_invalid_arraykey_constraint =
@@ -418,6 +421,7 @@ let make
     tco_disable_partially_abstract_typeconsts;
     error_codes_treated_strictly;
     tco_check_xhp_attribute;
+    tco_check_redundant_generics;
     tco_disallow_unresolved_type_variables;
     tco_disallow_invalid_arraykey_constraint;
     po_enable_class_level_where_clauses;
@@ -569,6 +573,8 @@ let tco_disable_partially_abstract_typeconsts t =
 let error_codes_treated_strictly t = t.error_codes_treated_strictly
 
 let tco_check_xhp_attribute t = t.tco_check_xhp_attribute
+
+let tco_check_redundant_generics t = t.tco_check_redundant_generics
 
 let tco_disallow_unresolved_type_variables t =
   t.tco_disallow_unresolved_type_variables

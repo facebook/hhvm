@@ -61,6 +61,7 @@ impl Default for GlobalOptions {
             tco_disable_partially_abstract_typeconsts: false,
             error_codes_treated_strictly: i_set::ISet::new(),
             tco_check_xhp_attribute: false,
+            tco_check_redundant_generics: false,
             tco_disallow_unresolved_type_variables: false,
             tco_disallow_invalid_arraykey_constraint: false,
             po_enable_class_level_where_clauses: false,

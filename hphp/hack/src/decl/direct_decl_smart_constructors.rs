@@ -747,6 +747,7 @@ impl Node_ {
             lsb: false,
             memoizelsb: false,
             override_: false,
+            at_most_rx_as_func: false,
         };
 
         let mut reactivity_condition_type = None;
@@ -827,6 +828,9 @@ impl Node_ {
                     "__Override" => {
                         attributes.override_ = true;
                     }
+                    "__AtMostRxAsFunc" => {
+                        attributes.at_most_rx_as_func = true;
+                    }
                     _ => (),
                 }
             } else {
@@ -858,6 +862,7 @@ struct Attributes {
     lsb: bool,
     memoizelsb: bool,
     override_: bool,
+    at_most_rx_as_func: bool,
 }
 
 impl DirectDeclSmartConstructors<'_> {
@@ -1303,17 +1308,24 @@ impl DirectDeclSmartConstructors<'_> {
                         };
 
                         let attributes = attributes.as_attributes()?;
+                        let type_ = match &hint {
+                            Node_::Ignored => Ty(Reason::Rnone, Box::new(Ty_::Tany(TanySentinel))),
+                            _ => self.node_to_ty(&hint, type_variables).map(|mut ty| {
+                                match &mut *ty.1 {
+                                    Ty_::Tfun(fun_type) if attributes.at_most_rx_as_func => {
+                                        fun_type.reactive = Reactivity::RxVar(None);
+                                    }
+                                    _ => (),
+                                }
+                                ty
+                            })?,
+                        };
                         let param = FunParam {
                             pos: id.0,
                             name: Some(id.1),
                             type_: PossiblyEnforcedTy {
                                 enforced: false,
-                                type_: match &hint {
-                                    Node_::Ignored => {
-                                        Ty(Reason::Rnone, Box::new(Ty_::Tany(TanySentinel)))
-                                    }
-                                    _ => self.node_to_ty(&hint, type_variables)?,
-                                },
+                                type_,
                             },
                             kind,
                             accept_disposable: false,

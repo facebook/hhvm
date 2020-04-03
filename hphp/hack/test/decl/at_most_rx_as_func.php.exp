@@ -1,0 +1,69 @@
+Parsed decls:
+
+{ Direct_decl_parser.classes = {};
+  funs =
+  { "f" ->
+    { fe_pos = [4:10-11];
+      fe_type =
+      (Rwitness (root|at_most_rx_as_func.php line 4, characters 10-10),
+       (Tfun
+          { ft_arity = (Fstandard (2));
+            ft_tparams = [(Invariant, ([4:12-13], "T"), [])];
+            ft_where_constraints = [];
+            ft_params =
+            [{ fp_pos = [5:44-46]; fp_name = (Some "$g");
+               fp_type =
+               { et_enforced = false;
+                 et_type =
+                 (Rhint (root|at_most_rx_as_func.php line 5, characters 24-42),
+                  (Tfun
+                     { ft_arity = (Fstandard (1)); ft_tparams = [];
+                       ft_where_constraints = [];
+                       ft_params =
+                       [{ fp_pos = [5:34-35]; fp_name = None;
+                          fp_type =
+                          { et_enforced = false;
+                            et_type =
+                            (Rhint (root|at_most_rx_as_func.php line 5, characters 34-34),
+                             (Tgeneric "T"))
+                            };
+                          fp_kind = FPnormal; fp_accept_disposable = false;
+                          fp_mutable = none }
+                         ];
+                       ft_ret =
+                       { et_enforced = false;
+                         et_type =
+                         (Rhint (root|at_most_rx_as_func.php line 5, characters 38-41),
+                          (Tprim Tbool))
+                         };
+                       ft_flags =
+                       (make_ft_flags sync none ~return_disposable:false
+                         ~returns_mutable:false ~returns_void_to_rx:false);
+                       ft_reactive = RxVar {} }))
+                 };
+               fp_kind = FPnormal; fp_accept_disposable = false;
+               fp_mutable = none };
+              { fp_pos = [6:5-7]; fp_name = (Some "$x");
+                fp_type =
+                { et_enforced = false;
+                  et_type =
+                  (Rhint (root|at_most_rx_as_func.php line 6, characters 3-3),
+                   (Tgeneric "T"))
+                  };
+                fp_kind = FPnormal; fp_accept_disposable = false;
+                fp_mutable = none }
+              ];
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|at_most_rx_as_func.php line 7, characters 4-7),
+               (Tprim Tbool))
+              };
+            ft_flags =
+            (make_ft_flags sync none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Reactive {} }));
+      fe_deprecated = None;  } };
+  typedefs = {}; consts = {} }
+
+They matched!

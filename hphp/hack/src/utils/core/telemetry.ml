@@ -22,9 +22,6 @@ let to_json (telemetry : t) : Hh_json.json = Hh_json.JSON_Object telemetry
 let to_string (telemetry : t) : string =
   to_json telemetry |> Hh_json.json_to_string
 
-let string_ (key : string) (value : string) : string * Hh_json.json =
-  (key, Hh_json.JSON_String value)
-
 let string_
     ?(truncate : int option) (telemetry : t) ~(key : string) ~(value : string) :
     t =
@@ -33,7 +30,16 @@ let string_
     | None -> value
     | Some truncate -> String_utils.truncate truncate value
   in
-  string_ key value :: telemetry
+  (key, Hh_json.JSON_String value) :: telemetry
+
+let string_opt
+    ?(truncate : int option)
+    (telemetry : t)
+    ~(key : string)
+    ~(value : string option) : t =
+  match value with
+  | None -> (key, Hh_json.JSON_Null) :: telemetry
+  | Some value -> string_ ?truncate telemetry ~key ~value
 
 let array_
     ?(truncate_elems : int option)
@@ -61,13 +67,13 @@ let bool_ (key : string) (value : bool) : key_value_pair =
 let bool_ (telemetry : t) ~(key : string) ~(value : bool) : t =
   bool_ key value :: telemetry
 
+let int_ (telemetry : t) ~(key : string) ~(value : int) : t =
+  (key, Hh_json.int_ value) :: telemetry
+
 let int_opt (telemetry : t) ~(key : string) ~(value : int option) : t =
   match value with
   | None -> (key, Hh_json.JSON_Null) :: telemetry
-  | Some value -> (key, Hh_json.int_ value) :: telemetry
-
-let int_ (telemetry : t) ~(key : string) ~(value : int) : t =
-  (key, Hh_json.int_ value) :: telemetry
+  | Some value -> int_ telemetry ~key ~value
 
 let object_ (telemetry : t) ~(key : string) ~(value : t) : t =
   (key, Hh_json.JSON_Object value) :: telemetry
@@ -89,7 +95,7 @@ let float_ (telemetry : t) ~(key : string) ~(value : float) : t =
 let float_opt (telemetry : t) ~(key : string) ~(value : float option) : t =
   match value with
   | None -> (key, Hh_json.JSON_Null) :: telemetry
-  | Some value -> (key, Hh_json.float_ value) :: telemetry
+  | Some value -> float_ telemetry ~key ~value
 
 let error ~(stack : string option) (e : string) : key_value_pair =
   let vals = [("message", Hh_json.JSON_String e)] in

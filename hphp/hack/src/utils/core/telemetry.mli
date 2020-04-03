@@ -23,6 +23,8 @@ val diff : t -> prev:t -> t
 
 val string_ : ?truncate:int -> t -> key:string -> value:string -> t
 
+val string_opt : ?truncate:int -> t -> key:string -> value:string option -> t
+
 val array_ :
   ?truncate_elems:int ->
   ?truncate_len:int ->
@@ -33,9 +35,9 @@ val array_ :
 
 val bool_ : t -> key:string -> value:bool -> t
 
-val int_opt : t -> key:string -> value:int option -> t
-
 val int_ : t -> key:string -> value:int -> t
+
+val int_opt : t -> key:string -> value:int option -> t
 
 val object_ : t -> key:string -> value:t -> t
 

@@ -692,12 +692,52 @@ impl Node_ {
             override_: false,
         };
 
+        let mut reactivity_condition_type = None;
+        for attribute in self.iter() {
+            if let Node_::Attribute(attribute) = attribute {
+                // If we see the attribute `__OnlyRxIfImpl(Foo::class)`, set
+                // `reactivity_condition_type` to `Foo`.
+                match (attribute.id.1.as_ref(), &attribute.args[..]) {
+                    ("__OnlyRxIfImpl", [Node_::Expr(expr)]) => {
+                        let aast::Expr(pos, expr_) = &**expr;
+                        match &*expr_ {
+                            aast::Expr_::ClassConst(args) => {
+                                let (aast::ClassId(_, class_id_), (_, const_name)) = &**args;
+                                match class_id_ {
+                                    aast::ClassId_::CI(class_name) if const_name == "class" => {
+                                        reactivity_condition_type = Some(Ty(
+                                            Reason::Rhint(pos.clone()),
+                                            Box::new(Ty_::Tapply(class_name.clone(), vec![])),
+                                        ));
+                                    }
+                                    _ => (),
+                                }
+                            }
+                            _ => (),
+                        }
+                    }
+                    _ => (),
+                }
+            }
+        }
+
         for attribute in self.iter() {
             if let Node_::Attribute(attribute) = attribute {
                 match attribute.id.1.as_ref() {
-                    "__Rx" => attributes.reactivity = Reactivity::Reactive(None),
-                    "__RxShallow" => attributes.reactivity = Reactivity::Shallow(None),
-                    "__RxLocal" => attributes.reactivity = Reactivity::Local(None),
+                    // NB: It is an error to specify more than one of __Rx,
+                    // __RxShallow, and __RxLocal, so to avoid cloning the
+                    // condition type, we use Option::take here.
+                    "__Rx" => {
+                        attributes.reactivity =
+                            Reactivity::Reactive(reactivity_condition_type.take())
+                    }
+                    "__RxShallow" => {
+                        attributes.reactivity =
+                            Reactivity::Shallow(reactivity_condition_type.take())
+                    }
+                    "__RxLocal" => {
+                        attributes.reactivity = Reactivity::Local(reactivity_condition_type.take())
+                    }
                     "__Mutable" => {
                         attributes.param_mutability = Some(ParamMutability::ParamBorrowedMutable)
                     }
@@ -2467,6 +2507,15 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                             let deprecated = attributes
                                 .deprecated
                                 .map(|msg| format!("The method {} is deprecated: {}", id.1, msg));
+                            fn get_condition_type_name(ty_opt: Option<Ty>) -> Option<String> {
+                                ty_opt.and_then(|ty| {
+                                    let Ty(_, ty_) = ty;
+                                    match *ty_ {
+                                        Ty_::Tapply(Id(_, class_name), _) => Some(class_name),
+                                        _ => None,
+                                    }
+                                })
+                            }
                             let method = shallow_decl_defs::ShallowMethod {
                                 abstract_: class_kind == ClassKind::Cinterface
                                     || modifiers.is_abstract,
@@ -2475,14 +2524,20 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                                 name: id,
                                 override_: attributes.override_,
                                 reactivity: match attributes.reactivity {
-                                    Reactivity::Local(_) => {
-                                        Some(MethodReactivity::MethodLocal(None))
+                                    Reactivity::Local(condition_type) => {
+                                        Some(MethodReactivity::MethodLocal(
+                                            get_condition_type_name(condition_type),
+                                        ))
                                     }
-                                    Reactivity::Shallow(_) => {
-                                        Some(MethodReactivity::MethodShallow(None))
+                                    Reactivity::Shallow(condition_type) => {
+                                        Some(MethodReactivity::MethodShallow(
+                                            get_condition_type_name(condition_type),
+                                        ))
                                     }
-                                    Reactivity::Reactive(_) => {
-                                        Some(MethodReactivity::MethodReactive(None))
+                                    Reactivity::Reactive(condition_type) => {
+                                        Some(MethodReactivity::MethodReactive(
+                                            get_condition_type_name(condition_type),
+                                        ))
                                     }
                                     Reactivity::Nonreactive
                                     | Reactivity::MaybeReactive(_)

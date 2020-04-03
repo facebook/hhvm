@@ -667,6 +667,9 @@ function find_test_files($file) {
     'zend'       => 'hphp/test/zend/good',
     'facebook'   => 'hphp/facebook/test',
 
+    // subset of slow we run with CLI server too
+    'slow_ext_hsl' => 'hphp/test/slow/ext_hsl',
+
     // Subsets of zend tests.
     'zend_ext'    => 'hphp/test/zend/good/ext',
     'zend_ext_am' => 'hphp/test/zend/good/ext/[a-m]*',

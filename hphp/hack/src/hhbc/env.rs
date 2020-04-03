@@ -34,6 +34,7 @@ pub struct Env<'a> {
     pub jump_targets_gen: jump_targets::Gen,
     pub scope: Scope<'a>,
     pub namespace: NamespaceEnv,
+    pub call_context: Option<String>,
     // TODO(hrust)
     // - pipe_var after porting Local
 }

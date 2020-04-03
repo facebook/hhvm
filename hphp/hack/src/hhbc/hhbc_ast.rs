@@ -313,6 +313,7 @@ pub enum InstructOperator {
     Exit,
     Fatal(FatalOp),
     ResolveFunc(FunctionId),
+    ResolveMethCaller(FunctionId),
     ResolveObjMethod,
     ResolveClsMethod(MethodId),
     ResolveClsMethodD(ClassId, MethodId),

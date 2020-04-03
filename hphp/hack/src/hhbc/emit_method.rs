@@ -206,6 +206,7 @@ pub fn from_ast<'a>(
                 deprecation_info: &deprecation_info,
                 doc_comment: method.doc_comment.clone(),
                 default_dropthrough,
+                call_context: None,
                 flags,
             },
         )?

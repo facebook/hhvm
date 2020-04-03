@@ -973,6 +973,10 @@ pub mod instr {
         )))
     }
 
+    pub fn resolve_meth_caller(fun_id: FunctionId) -> InstrSeq {
+        instr(Instruct::IOp(InstructOperator::ResolveMethCaller(fun_id)))
+    }
+
     pub fn fatal(op: FatalOp) -> InstrSeq {
         instr(Instruct::IOp(InstructOperator::Fatal(op)))
     }

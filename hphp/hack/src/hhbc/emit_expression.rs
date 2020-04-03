@@ -1617,7 +1617,13 @@ fn emit_call(
         let fid = function::Type::from_ast_name(s);
         emit_symbol_refs::add_function(e, fid);
     }
-    let fcall_args = get_fcall_args(args, uarg, async_eager_label, None, false);
+    let fcall_args = get_fcall_args(
+        args,
+        uarg,
+        async_eager_label,
+        env.call_context.clone(),
+        false,
+    );
     let FcallArgs(_, _, num_ret, _, _, _) = &fcall_args;
     let num_uninit = num_ret - 1;
     let default = scope::with_unnamed_locals(e, |e| {
@@ -2321,9 +2327,69 @@ fn emit_special_function(
                 }
             }
         }
-        ("__systemlib\\fun", _) => unimplemented!(),
-        ("HH\\inst_meth", _) => unimplemented!(),
-        ("HH\\class_meth", _) => unimplemented!(),
+        ("__systemlib\\meth_caller", _) => {
+            // used by meth_caller() to directly emit func ptr
+            if nargs != 1 {
+                return Err(emit_fatal::raise_fatal_runtime(
+                    pos,
+                    format!(
+                        "fun() expects exactly 1 parameter, {} given",
+                        nargs.to_string()
+                    ),
+                ));
+            }
+            match args {
+                [E(_, E_::String(ref func_name))] => Ok(Some(instr::resolve_meth_caller(
+                    // TODO(hrust) should accept functions::from_raw_string(func_name)
+                    string_utils::strip_global_ns(func_name).to_string().into(),
+                ))),
+                _ => Err(emit_fatal::raise_fatal_runtime(
+                    pos,
+                    "Constant string expected in fun()",
+                )),
+            }
+        }
+        ("HH\\inst_meth", _) => match args {
+            [obj_expr, method_name] => Ok(Some(emit_inst_meth(e, env, obj_expr, method_name)?)),
+            _ => Err(emit_fatal::raise_fatal_runtime(
+                pos,
+                format!(
+                    "inst_meth() expects exactly 2 parameters, {} given",
+                    nargs.to_string()
+                ),
+            )),
+        },
+        ("HH\\class_meth", &[ref cls, ref meth, ..]) if nargs == 2 => {
+            if meth.1.is_string() {
+                if cls.1.is_string()
+                    || cls
+                        .1
+                        .as_class_const()
+                        .map_or(false, |(_, (_, id))| string_utils::is_class(id))
+                    || cls
+                        .1
+                        .as_id()
+                        .map_or(false, |ast_defs::Id(_, id)| id == pseudo_consts::G__CLASS__)
+                {
+                    return Ok(Some(emit_class_meth(e, env, cls, meth)?));
+                }
+            }
+            Err(emit_fatal::raise_fatal_runtime(
+                pos,
+                concat!(
+                    "class_meth() expects a literal class name or ::class constant, ",
+                    "followed by a constant string that refers to a static method ",
+                    "on that class"
+                ),
+            ))
+        }
+        ("HH\\class_meth", _) => Err(emit_fatal::raise_fatal_runtime(
+            pos,
+            format!(
+                "class_meth() expects exactly 2 parameters, {} given",
+                nargs.to_string()
+            ),
+        )),
         ("HH\\global_set", _) => unimplemented!(),
         ("HH\\global_unset", _) => unimplemented!(),
         ("__hhvm_internal_whresult", &[E(_, E_::Lvar(ref _p))]) => unimplemented!(),
@@ -2371,6 +2437,102 @@ fn emit_special_function(
             },
         ),
     }
+}
+
+fn emit_inst_meth(
+    e: &mut Emitter,
+    env: &Env,
+    obj_expr: &tast::Expr,
+    method_name: &tast::Expr,
+) -> Result {
+    Ok(InstrSeq::gather(vec![
+        emit_expr(e, env, obj_expr)?,
+        emit_expr(e, env, method_name)?,
+        if e.options()
+            .hhvm
+            .flags
+            .contains(HhvmFlags::EMIT_INST_METH_POINTERS)
+        {
+            instr::resolve_obj_method()
+        } else if hack_arr_dv_arrs(e.options()) {
+            instr::new_vec_array(2)
+        } else {
+            instr::new_varray(2)
+        },
+    ]))
+}
+
+fn emit_class_meth(e: &mut Emitter, env: &Env, cls: &tast::Expr, meth: &tast::Expr) -> Result {
+    use tast::Expr_ as E_;
+    if e.options()
+        .hhvm
+        .flags
+        .contains(HhvmFlags::EMIT_CLS_METH_POINTERS)
+    {
+        let method_id = match &meth.1 {
+            E_::String(method_name) => method_name.to_string().into(), // TODO(hrust) should accept method::from_raw_string(method_name),
+            _ => return Err(unrecoverable("emit_class_meth: unhandled method")),
+        };
+        if let Some((cid, (_, id))) = cls.1.as_class_const() {
+            if string_utils::is_class(id) {
+                return emit_class_meth_native(e, env, &cls.0, cid, method_id);
+            }
+        }
+        if let Some(ast_defs::Id(_, s)) = cls.1.as_id() {
+            if s == pseudo_consts::G__CLASS__ {
+                return Ok(instr::resolveclsmethods(SpecialClsRef::Self_, method_id));
+            }
+        }
+        if let Some(class_name) = cls.1.as_string() {
+            return Ok(instr::resolveclsmethodd(
+                // TODO(hrust) should accept class::Type::from_raw_string(class_name)
+                string_utils::strip_global_ns(class_name).to_string().into(),
+                method_id,
+            ));
+        }
+        Err(unrecoverable("emit_class_meth: unhandled method"))
+    } else {
+        Ok(InstrSeq::gather(vec![
+            emit_expr(e, env, cls)?,
+            emit_expr(e, env, meth)?,
+            if hack_arr_dv_arrs(e.options()) {
+                instr::new_vec_array(2)
+            } else {
+                instr::new_varray(2)
+            },
+        ]))
+    }
+}
+
+fn emit_class_meth_native(
+    e: &mut Emitter,
+    env: &Env,
+    pos: &Pos,
+    cid: &tast::ClassId,
+    method_id: MethodId,
+) -> Result {
+    let mut cexpr = ClassExpr::class_id_to_class_expr(e, false, true, &env.scope, cid);
+    if let ClassExpr::Id(ast_defs::Id(_, name)) = &cexpr {
+        if let Some(reified_var_cexpr) = get_reified_var_cexpr(e, env, pos, &name)? {
+            cexpr = reified_var_cexpr;
+        }
+    }
+    Ok(match cexpr {
+        ClassExpr::Id(ast_defs::Id(_, name)) => {
+            instr::resolveclsmethodd(class::Type::from_ast_name_and_mangle(&name), method_id)
+        }
+        ClassExpr::Special(clsref) => instr::resolveclsmethods(clsref, method_id),
+        ClassExpr::Reified(instrs) => InstrSeq::gather(vec![
+            instrs,
+            instr::classgetc(),
+            instr::resolveclsmethod(method_id),
+        ]),
+        ClassExpr::Expr(_) => {
+            return Err(unrecoverable(
+                "emit_class_meth_native: ClassExpr::Expr should be impossible",
+            ))
+        }
+    })
 }
 
 fn get_call_builtin_func_info(opts: &Options, id: impl AsRef<str>) -> Option<(usize, Instruct)> {
@@ -2764,7 +2926,13 @@ fn emit_new(
                 instr_args,
                 instr_uargs,
                 emit_pos(pos),
-                instr::fcallctor(get_fcall_args(args, uarg.as_ref(), None, None, true)),
+                instr::fcallctor(get_fcall_args(
+                    args,
+                    uarg.as_ref(),
+                    None,
+                    env.call_context.clone(),
+                    true,
+                )),
                 instr::popc(),
                 instr::lockobj(),
             ]),

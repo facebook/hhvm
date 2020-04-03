@@ -58,6 +58,25 @@ pub fn emit_function<'a>(
         Flags::INTERCEPTABLE,
         emit_memoize_function::is_interceptable(original_id.clone(), e.options()),
     );
+    let is_meth_caller = f.name.1.starts_with("\\MethCaller$");
+    let call_context = if is_meth_caller {
+        match &f.user_attributes[..] {
+            [tast::UserAttribute {
+                name: ast_defs::Id(_, ref s),
+                params,
+            }] if s == "__MethCaller" => match &params[..] {
+                [tast::Expr(_, tast::Expr_::String(ref ctx))] if !ctx.is_empty() => Some(
+                    hhbc_id::class::Type::from_ast_name(ctx)
+                        .to_raw_string()
+                        .into(),
+                ),
+                _ => None,
+            },
+            _ => None,
+        }
+    } else {
+        None
+    };
     let mut scope = Scope::toplevel();
     scope.push_item(ScopeItem::Function(Cow::Borrowed(&f)));
 
@@ -115,6 +134,7 @@ pub fn emit_function<'a>(
                 scope: &scope,
                 ret: f.ret.1.as_ref(),
                 ast_params: &f.params,
+                call_context,
                 immediate_tparams: &f.tparams,
             },
         )?

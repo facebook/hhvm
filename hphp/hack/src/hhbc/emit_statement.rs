@@ -573,7 +573,14 @@ fn emit_using(e: &mut Emitter, env: &mut Env, pos: &Pos, using: &tast::UsingStmt
                     instr::nulluninit(),
                     instr::nulluninit(),
                     instr::fcallobjmethodd(
-                        FcallArgs::new(FcallFlags::empty(), 1, vec![], async_eager_label, 0, None),
+                        FcallArgs::new(
+                            FcallFlags::empty(),
+                            1,
+                            vec![],
+                            async_eager_label,
+                            0,
+                            env.call_context.clone(),
+                        ),
                         fn_name,
                         ObjNullFlavor::NullThrows,
                     ),

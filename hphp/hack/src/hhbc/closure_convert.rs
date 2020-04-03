@@ -834,10 +834,14 @@ fn convert_meth_caller_to_func_ptr<'a>(
             visibility: None,
         }
     };
+    let cname = match env.scope.get_class() {
+        Some(cd) => &cd.name.1,
+        None => "",
+    };
     let mangle_name = string_utils::mangle_meth_caller(cls, fname);
     let fun_handle: Expr_ = Expr_::mk_call(
         CallType::Cnormal,
-        expr_id("\\__systemlib\\fun".into()),
+        expr_id("\\__systemlib\\meth_caller".into()),
         vec![],
         vec![Expr(pos(), Expr_::mk_string(mangle_name.clone()))],
         None,
@@ -917,7 +921,7 @@ fn convert_meth_caller_to_func_ptr<'a>(
         fun_kind: FunKind::FSync,
         user_attributes: vec![UserAttribute {
             name: Id(pos(), "__MethCaller".into()),
-            params: vec![],
+            params: vec![Expr(pos(), Expr_::String(cname.into()))],
         }],
         file_attributes: vec![],
         external: false,

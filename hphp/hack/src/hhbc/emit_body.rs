@@ -48,6 +48,7 @@ pub struct Args<'a, 'b> {
     pub deprecation_info: &'b Option<&'b [TypedValue]>,
     pub doc_comment: Option<DocComment>,
     pub default_dropthrough: Option<InstrSeq>,
+    pub call_context: Option<String>,
     pub flags: Flags,
 }
 
@@ -78,6 +79,7 @@ pub fn emit_body_with_default_args<'a, 'b>(
         deprecation_info: &None,
         doc_comment: None,
         default_dropthrough: None,
+        call_context: None,
         flags: Flags::empty(),
     };
     emit_body(emitter, namespace, body, return_value, args).map(|r| r.0)
@@ -147,6 +149,7 @@ pub fn emit_body<'a, 'b>(
         need_local_this,
         // TODO(hrust): avoid clone here.
         args.scope.clone(),
+        args.call_context,
         args.flags.contains(Flags::RX_BODY),
     );
 
@@ -394,12 +397,14 @@ pub fn make_env<'a>(
     _namespace: &namespace_env::Env,
     need_local_this: bool,
     scope: Scope<'a>,
+    call_context: Option<String>,
     is_rx_body: bool,
 ) -> Env<'a> {
     let mut env = Env::default();
     env.with_need_local_this(need_local_this);
     env.with_rx_body(is_rx_body);
     env.scope = scope;
+    env.call_context = call_context;
     //TODO(hrust) add namespace
     env
 }

@@ -451,6 +451,7 @@ fn make_wrapper<'a>(
         &NamespaceEnv::empty(vec![], false, false),
         env.flags.contains(env::Flags::NEEDS_LOCAL_THIS),
         env.scope.clone(),
+        None,
         env.flags.contains(env::Flags::IN_RX_BODY),
     );
     emit_body::make_body(

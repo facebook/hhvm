@@ -21,10 +21,15 @@ let make_local_server_api
       ServerProgress.send_percentage_progress_to_monitor
 
     let update_state ~(state_filename : string) : unit =
-      let (t : int) =
+      let start_t = Unix.gettimeofday () in
+      let edges =
         SharedMem.load_dep_table_blob state_filename ignore_hh_version
       in
-      Hh_logger.log "Updated dependency graph: %d seconds" t
+      HackEventLogger.remote_scheduler_update_dependency_graph_end edges start_t;
+      let (_t : float) =
+        Hh_logger.log_duration "Updated dependency graph: %d seconds" start_t
+      in
+      ()
 
     let snapshot_naming_table_base ~(destination_path : string) : unit =
       send_progress "Snapshotting the naming table for delegated type checking";

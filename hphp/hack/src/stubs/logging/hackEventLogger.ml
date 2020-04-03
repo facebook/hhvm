@@ -210,6 +210,8 @@ let handled_command
 
 let remote_scheduler_get_dirty_files_end _ _ = ()
 
+let remote_scheduler_update_dependency_graph_end ~edges:_ _ = ()
+
 let remote_scheduler_save_naming_end _ = ()
 
 let remote_worker_type_check_end _ = ()

@@ -255,6 +255,7 @@ external load_dep_table_blob_c : string -> bool -> int
 external load_dep_table_sqlite_c : string -> bool -> unit
   = "hh_load_dep_table_sqlite"
 
+(* Returns the number of edges added *)
 let load_dep_table_blob : string -> bool -> int =
  (fun fn ignore_hh_version -> load_dep_table_blob_c fn ignore_hh_version)
 

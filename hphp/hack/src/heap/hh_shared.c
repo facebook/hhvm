@@ -2201,7 +2201,7 @@ size_t hh_save_dep_table_blob_helper(
   return edges_added;
 }
 
-void hh_load_dep_table_blob_helper(const char* const in_filename) {
+size_t hh_load_dep_table_blob_helper(const char* const in_filename) {
   struct timeval start_t = { 0 };
   gettimeofday(&start_t, NULL);
 
@@ -2276,6 +2276,8 @@ void hh_load_dep_table_blob_helper(const char* const in_filename) {
   fprintf(stderr, "Read %lu keys and %lu values\n", keys_count, values_count);
 
   log_duration("Finished reading the file", start_t);
+
+  return values_count;
 }
 
 /*
@@ -2314,12 +2316,9 @@ CAMLprim value hh_load_dep_table_blob(
   // TODO: T38685889 - use ignore_hh_version
   assert(ignore_hh_version);
 
-  hh_load_dep_table_blob_helper(in_filename_raw);
+  size_t edges_added = hh_load_dep_table_blob_helper(in_filename_raw);
 
-  tv2 = log_duration("Loading the dependency blob file", tv);
-  int secs = tv2.tv_sec - tv.tv_sec;
-  // Reporting only seconds, ignore milli seconds
-  CAMLreturn(Val_long(secs));
+  CAMLreturn(Val_long(edges_added));
 }
 
 /*****************************************************************************/

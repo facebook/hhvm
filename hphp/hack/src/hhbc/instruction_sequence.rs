@@ -1239,17 +1239,16 @@ pub mod instr {
 
 impl InstrSeq {
     pub fn gather(instrs: Vec<InstrSeq>) -> InstrSeq {
-        let nonempty_instrs = instrs
+        let mut nonempty_instrs = instrs
             .into_iter()
-            .filter(|x| match x {
-                InstrSeq::Empty => false,
-                _ => true,
-            })
+            .filter(|x| !matches!(x, InstrSeq::Empty))
             .collect::<Vec<_>>();
-        match &nonempty_instrs[..] {
-            [] => InstrSeq::Empty,
-            [x] => x.clone(),
-            xs => InstrSeq::Concat(xs.to_vec()),
+        if nonempty_instrs.is_empty() {
+            InstrSeq::Empty
+        } else if nonempty_instrs.len() == 1 {
+            nonempty_instrs.pop().unwrap()
+        } else {
+            InstrSeq::Concat(nonempty_instrs)
         }
     }
 

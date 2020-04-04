@@ -103,27 +103,21 @@ void emitCallerInOutChecksUnknown(IRGS& env, SSATmp* callee,
 
 void emitCallerDynamicCallChecksKnown(IRGS& env, const Func* callee) {
   assertx(callee);
-  int dynCallErrorLevel = callee->isMethod() ?
-    (
-      callee->isStatic() ?
-        RuntimeOption::EvalForbidDynamicCallsToClsMeth :
-        RuntimeOption::EvalForbidDynamicCallsToInstMeth
-    ) :
-    RuntimeOption::EvalForbidDynamicCallsToFunc;
-  if (dynCallErrorLevel <= 0) return;
-  if (callee->isDynamicallyCallable() &&
-      !RuntimeOption::EvalForbidDynamicCallsWithAttr) {
-        return;
+  if (callee->isDynamicallyCallable() && !RO::EvalForbidDynamicCallsWithAttr) {
+    return;
   }
+  auto const level = callee->isMethod()
+    ? (callee->isStatic()
+        ? RO::EvalForbidDynamicCallsToClsMeth
+        : RO::EvalForbidDynamicCallsToInstMeth)
+    : RO::EvalForbidDynamicCallsToFunc;
+  if (level <= 0) return;
   gen(env, RaiseForbiddenDynCall, cns(env, callee));
 }
 
-void emitCallerDynamicCallChecksUnknown(IRGS& env, SSATmp* callee,
-                                        bool mightCareAboutDynCall) {
+void emitCallerDynamicCallChecksUnknown(IRGS& env, SSATmp* callee) {
   assertx(!callee->hasConstVal());
-  if (!mightCareAboutDynCall) return;
-
-  if(RuntimeOption::EvalForbidDynamicCallsWithAttr) {
+  if (RO::EvalForbidDynamicCallsWithAttr) {
     gen(env, RaiseForbiddenDynCall, callee);
   } else {
     ifElse(
@@ -142,7 +136,6 @@ void emitCallerDynamicCallChecksUnknown(IRGS& env, SSATmp* callee,
       }
     );
   }
-
 }
 
 } // namespace
@@ -353,12 +346,15 @@ void callProfiledFunc(IRGS& env, SSATmp* callee,
 //////////////////////////////////////////////////////////////////////
 
 void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
-                         SSATmp* objOrClass, bool dynamicCall) {
+                         SSATmp* objOrClass, bool dynamicCall,
+                         bool suppressDynCallCheck) {
   assertx(callee);
 
   // Caller checks
   if (!emitCallerInOutChecksKnown(env, callee, fca)) return;
-  if (dynamicCall) emitCallerDynamicCallChecksKnown(env, callee);
+  if (dynamicCall && !suppressDynCallCheck) {
+    emitCallerDynamicCallChecksKnown(env, callee);
+  }
   emitCallerRxChecksKnown(env, callee);
 
   auto const doCall = [&](const FCallArgs& fca) {
@@ -458,17 +454,18 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
 
 void prepareAndCallUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
                            SSATmp* objOrClass, bool dynamicCall,
-                           bool mightCareAboutDynCall, bool unlikely) {
+                           bool suppressDynCallCheck, bool unlikely) {
   assertx(callee->isA(TFunc));
   if (callee->hasConstVal()) {
-    prepareAndCallKnown(env, callee->funcVal(), fca, objOrClass, dynamicCall);
+    prepareAndCallKnown(env, callee->funcVal(), fca, objOrClass,
+                        dynamicCall, suppressDynCallCheck);
     return;
   }
 
   // Caller checks
   emitCallerInOutChecksUnknown(env, callee, fca);
-  if (dynamicCall) {
-    emitCallerDynamicCallChecksUnknown(env, callee, mightCareAboutDynCall);
+  if (dynamicCall && !suppressDynCallCheck) {
+    emitCallerDynamicCallChecksUnknown(env, callee);
   }
   emitCallerRxChecksUnknown(env, callee);
 
@@ -489,16 +486,18 @@ void prepareAndCallUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
 
 void prepareAndCallProfiled(IRGS& env, SSATmp* callee, const FCallArgs& fca,
                             SSATmp* objOrClass, bool dynamicCall,
-                            bool mightCareAboutDynCall) {
+                            bool suppressDynCallCheck) {
   assertx(callee->isA(TFunc));
   auto const handleKnown = [&] (const Func* knownCallee) {
-    prepareAndCallKnown(env, knownCallee, fca, objOrClass, dynamicCall);
+    prepareAndCallKnown(env, knownCallee, fca, objOrClass,
+                        dynamicCall, suppressDynCallCheck);
   };
   if (callee->hasConstVal()) return handleKnown(callee->funcVal());
 
   auto const handleUnknown = [&] (bool unlikely) {
-    prepareAndCallUnknown(env, callee, fca, objOrClass, dynamicCall,
-                          mightCareAboutDynCall, unlikely);
+    prepareAndCallUnknown(env, callee, fca, objOrClass,
+                          dynamicCall, suppressDynCallCheck,
+                          unlikely);
   };
   callProfiledFunc(env, callee, handleKnown, handleUnknown);
 }
@@ -512,7 +511,7 @@ void fcallObjMethodUnknown(
   const FCallArgs& fca,
   SSATmp* obj,
   SSATmp* methodName,
-  bool dynamic,
+  bool dynamicCall,
   uint32_t numExtraInputs,
   TProfile profileMethod,
   bool noCallProfiling
@@ -558,16 +557,12 @@ void fcallObjMethodUnknown(
     );
   }();
 
-  auto const mightCareAboutDynCall =
-    RuntimeOption::EvalForbidDynamicCallsToInstMeth > 0
-    || RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0;
   profileMethod(func);
   discard(env, numExtraInputs);
   if (noCallProfiling) {
-    prepareAndCallUnknown(env, func, fca, obj, dynamic, mightCareAboutDynCall,
-                          true);
+    prepareAndCallUnknown(env, func, fca, obj, dynamicCall, false, true);
   } else {
-    prepareAndCallProfiled(env, func, fca, obj, dynamic, mightCareAboutDynCall);
+    prepareAndCallProfiled(env, func, fca, obj, dynamicCall, false);
   }
 }
 
@@ -674,7 +669,8 @@ void optimizeProfiledCallMethod(IRGS& env,
                                 SSATmp* objOrCls,
                                 bool knownIfaceFunc,
                                 const StringData* methodName,
-                                bool dynamic,
+                                bool dynamicCall,
+                                bool suppressDynCallCheck,
                                 uint32_t numExtraInputs,
                                 Fn emitFCall) {
   always_assert(objOrCls->type().subtypeOfAny(TObj, TCls));
@@ -728,7 +724,8 @@ void optimizeProfiledCallMethod(IRGS& env,
           env.irb->constrainValue(refined, GuardConstraint(uniqueClass));
           auto const ctx = getCtx(uniqueMeth, refined, uniqueClass);
           discard(env, numExtraInputs);
-          prepareAndCallKnown(env, uniqueMeth, fca, ctx, dynamic);
+          prepareAndCallKnown(env, uniqueMeth, fca, ctx,
+                              dynamicCall, suppressDynCallCheck);
         },
         fallback
       );
@@ -754,7 +751,8 @@ void optimizeProfiledCallMethod(IRGS& env,
         gen(env, JmpZero, sideExit, same);
         auto const ctx = getCtx(uniqueMeth, objOrCls, nullptr);
         discard(env, numExtraInputs);
-        prepareAndCallKnown(env, uniqueMeth, fca, ctx, dynamic);
+        prepareAndCallKnown(env, uniqueMeth, fca, ctx,
+                            dynamicCall, suppressDynCallCheck);
       },
       fallback
     );
@@ -780,12 +778,9 @@ void optimizeProfiledCallMethod(IRGS& env,
         auto const slot = cns(env, baseMeth->methodSlot());
         auto const meth = gen(env, LdClsMethod, cls, slot);
         auto const ctx = getCtx(baseMeth, objOrCls, nullptr);
-        auto const mightCareAboutDynCall =
-          RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0
-          || RuntimeOption::EvalForbidDynamicCallsToInstMeth > 0;
         discard(env, numExtraInputs);
-        prepareAndCallProfiled(env, meth, fca, ctx, dynamic,
-                               mightCareAboutDynCall);
+        prepareAndCallProfiled(env, meth, fca, ctx,
+                               dynamicCall, suppressDynCallCheck);
       },
       fallback
     );
@@ -826,12 +821,9 @@ void optimizeProfiledCallMethod(IRGS& env,
         auto const imData = IfaceMethodData{vtableSlot, intfMeth->methodSlot()};
         auto const meth = gen(env, LdIfaceMethod, imData, cls);
         auto const ctx = getCtx(intfMeth, objOrCls, nullptr);
-        auto const mightCareAboutDynCall =
-          RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0
-          || RuntimeOption::EvalForbidDynamicCallsToInstMeth > 0;
         discard(env, numExtraInputs);
-        prepareAndCallProfiled(env, meth, fca, ctx, dynamic,
-                               mightCareAboutDynCall);
+        prepareAndCallProfiled(env, meth, fca, ctx,
+                               dynamicCall, suppressDynCallCheck);
       },
       fallback
     );
@@ -843,7 +835,7 @@ void optimizeProfiledCallMethod(IRGS& env,
 
 void fcallObjMethodMagic(IRGS& env, const Func* callee, const FCallArgs& fca,
                          SSATmp* obj, const StringData* methodName,
-                         bool dynamic, uint32_t numExtraInputs) {
+                         bool dynamicCall, uint32_t numExtraInputs) {
   if (fca.hasUnpack() || fca.numRets != 1) return interpOne(env);
   if (fca.enforceInOut()) {
     for (auto i = 0; i < fca.numArgs; ++i) {
@@ -874,12 +866,12 @@ void fcallObjMethodMagic(IRGS& env, const Func* callee, const FCallArgs& fca,
   auto const fca2 =
     FCallArgs(fca.flags, 2, 1, nullptr, kInvalidOffset, false, false,
               fca.context);
-  prepareAndCallKnown(env, callee, fca2, obj, dynamic);
+  prepareAndCallKnown(env, callee, fca2, obj, dynamicCall, false);
 }
 
 void fcallObjMethodObj(IRGS& env, const FCallArgs& fca, SSATmp* obj,
                        const StringData* clsHint, SSATmp* methodName,
-                       bool dynamic, uint32_t numExtraInputs) {
+                       bool dynamicCall, uint32_t numExtraInputs) {
   assertx(obj->isA(TObj));
   assertx(methodName->isA(TStr));
 
@@ -926,7 +918,7 @@ void fcallObjMethodObj(IRGS& env, const FCallArgs& fca, SSATmp* obj,
       implIncStat(env, Stats::ObjMethod_known);
       assertx(!lookup.func->isStaticInPrologue());
       fcallObjMethodMagic(env, lookup.func, fca, obj, methodName->strVal(),
-                          dynamic, numExtraInputs);
+                          dynamicCall, numExtraInputs);
       return;
     case ImmutableObjMethodLookup::Type::Func:
       implIncStat(env, Stats::ObjMethod_known);
@@ -935,16 +927,12 @@ void fcallObjMethodObj(IRGS& env, const FCallArgs& fca, SSATmp* obj,
         return;
       }
       discard(env, numExtraInputs);
-      prepareAndCallKnown(env, lookup.func, fca, obj, dynamic);
+      prepareAndCallKnown(env, lookup.func, fca, obj, dynamicCall, false);
       return;
     case ImmutableObjMethodLookup::Type::Class: {
       auto const func = lookupObjMethodNonExactFunc(env, obj, lookup.func);
-      auto const mightCareAboutDynCall =
-        RuntimeOption::EvalForbidDynamicCallsToInstMeth > 0
-        || RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0;
       discard(env, numExtraInputs);
-      prepareAndCallProfiled(env, func, fca, obj, dynamic,
-                             mightCareAboutDynCall);
+      prepareAndCallProfiled(env, func, fca, obj, dynamicCall, false);
       return;
     }
     case ImmutableObjMethodLookup::Type::NotFound:
@@ -965,21 +953,16 @@ void fcallObjMethodObj(IRGS& env, const FCallArgs& fca, SSATmp* obj,
 
 
     if (knownIfaceFunc == nullptr) {
-      fcallObjMethodUnknown(env, fca, obj, methodName, dynamic, numExtraInputs,
-                            profileMethod, noCallProfiling);
+      fcallObjMethodUnknown(env, fca, obj, methodName, dynamicCall,
+                            numExtraInputs, profileMethod, noCallProfiling);
     } else {
       auto const func = lookupObjMethodInterfaceFunc(env, obj, knownIfaceFunc);
-      auto const mightCareAboutDynCall =
-        RuntimeOption::EvalForbidDynamicCallsToInstMeth > 0
-        || RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0;
       profileMethod(func);
       discard(env, numExtraInputs);
       if (noCallProfiling) {
-        prepareAndCallUnknown(env, func, fca, obj, dynamic,
-                              mightCareAboutDynCall, true);
+        prepareAndCallUnknown(env, func, fca, obj, dynamicCall, false, true);
       } else {
-        prepareAndCallProfiled(env, func, fca, obj, dynamic,
-                               mightCareAboutDynCall);
+        prepareAndCallProfiled(env, func, fca, obj, dynamicCall, false);
       }
     }
   };
@@ -993,8 +976,9 @@ void fcallObjMethodObj(IRGS& env, const FCallArgs& fca, SSATmp* obj,
   // If we don't know anything about the object's class, or all we know is an
   // interface that it implements, then enable PGO.
   optimizeProfiledCallMethod(env, fca, obj, knownIfaceFunc != nullptr,
-                             methodName->strVal(), dynamic, numExtraInputs,
-                             emitFCall);
+                             methodName->strVal(),
+                             dynamicCall, false,
+                             numExtraInputs, emitFCall);
 }
 
 void fcallFuncObj(IRGS& env, const FCallArgs& fca) {
@@ -1045,9 +1029,7 @@ void fcallFuncStr(IRGS& env, const FCallArgs& fca) {
   auto const funcN = gen(env, LdFunc, str);
   auto const func = gen(env, CheckNonNull, makeExitSlow(env), funcN);
   popDecRef(env);
-  auto const mightCareAboutDynCall =
-    RuntimeOption::EvalForbidDynamicCallsToFunc > 0;
-  prepareAndCallProfiled(env, func, fca, nullptr, true, mightCareAboutDynCall);
+  prepareAndCallProfiled(env, func, fca, nullptr, true, false);
 }
 
 void fcallFuncArr(IRGS& env, const FCallArgs& fca) {
@@ -1074,7 +1056,7 @@ void emitFCallFuncD(IRGS& env, FCallArgs fca, const StringData* funcName) {
     if (lookup.needsUnitLoad) {
       gen(env, LdFuncCached, FuncNameData { funcName, callerCtx });
     }
-    prepareAndCallKnown(env, lookup.func, fca, nullptr, false);
+    prepareAndCallKnown(env, lookup.func, fca, nullptr, false, false);
     return;
   }
 
@@ -1312,7 +1294,7 @@ void emitFCallCtor(IRGS& env, FCallArgs fca, const StringData* clsHint) {
   }();
   if (exactCls) {
     if (auto const ctor = lookupImmutableCtor(exactCls, curClass(env))) {
-      return prepareAndCallKnown(env, ctor, fca, obj, false);
+      return prepareAndCallKnown(env, ctor, fca, obj, false, false);
     }
   }
 
@@ -1330,14 +1312,14 @@ void emitLockObj(IRGS& env) {
 namespace {
 
 void fcallObjMethod(IRGS& env, const FCallArgs& fca, const StringData* clsHint,
-                    ObjMethodOp subop, SSATmp* methodName, bool dynamic,
+                    ObjMethodOp subop, SSATmp* methodName, bool dynamicCall,
                     bool extraInput) {
   assertx(methodName->isA(TStr));
   auto const objPos = fca.numInputs() + (extraInput ? 3 : 2);
   auto const obj = topC(env, BCSPRelOffset { static_cast<int32_t>(objPos) });
 
   if (obj->type() <= TObj) {
-    fcallObjMethodObj(env, fca, obj, clsHint, methodName, dynamic,
+    fcallObjMethodObj(env, fca, obj, clsHint, methodName, dynamicCall,
                       extraInput ? 1 : 0);
     return;
   }
@@ -1416,7 +1398,7 @@ void emitFCallClsMethodD(IRGS& env,
         gen(env, LdClsCached, cns(env, className));
       }
       auto const ctx = ldCtxForClsMethod(env, func, cns(env, cls), cls, true);
-      return prepareAndCallKnown(env, func, fca, ctx, false);
+      return prepareAndCallKnown(env, func, fca, ctx, false, false);
     }
   }
 
@@ -1610,8 +1592,8 @@ void fcallClsMethodCommon(IRGS& env,
                           SSATmp* clsVal,
                           SSATmp* methVal,
                           bool forward,
-                          bool dynamic,
-                          bool allowLogAsDynCall,
+                          bool dynamicCall,
+                          bool suppressDynCallCheck,
                           uint32_t numExtraInputs) {
   assertx(clsVal->isA(TCls));
   assertx(methVal->isA(TStr));
@@ -1630,16 +1612,15 @@ void fcallClsMethodCommon(IRGS& env,
     }
 
     auto const ctx = forward ? ldCtxCls(env) : clsVal;
-    auto const mightCareAboutDynCall = allowLogAsDynCall &&
-      RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0;
     decRef(env, methVal);
     discard(env, numExtraInputs);
     if (noCallProfiling) {
-      prepareAndCallUnknown(env, func, fca, ctx, dynamic, mightCareAboutDynCall,
+      prepareAndCallUnknown(env, func, fca, ctx,
+                            dynamicCall, suppressDynCallCheck,
                             true);
     } else {
-      prepareAndCallProfiled(env, func, fca, ctx, dynamic,
-                             mightCareAboutDynCall);
+      prepareAndCallProfiled(env, func, fca, ctx,
+                             dynamicCall, suppressDynCallCheck);
     }
   };
 
@@ -1668,12 +1649,9 @@ void fcallClsMethodCommon(IRGS& env,
                                            knownClass.first, knownClass.second,
                                            forward, ctx, callContext(env, fca));
     if (func) {
-      auto const mightCareAboutDynCall =
-        RuntimeOption::EvalForbidDynamicCallsToInstMeth > 0
-        || RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0;
       discard(env, numExtraInputs);
-      return prepareAndCallProfiled(env, func, fca, ctx, dynamic,
-                                    mightCareAboutDynCall);
+      return prepareAndCallProfiled(env, func, fca, ctx,
+                                    dynamicCall, suppressDynCallCheck);
     }
   }
 
@@ -1684,7 +1662,8 @@ void fcallClsMethodCommon(IRGS& env,
     return;
   }
 
-  optimizeProfiledCallMethod(env, fca, clsVal, false, methodName, dynamic,
+  optimizeProfiledCallMethod(env, fca, clsVal, false, methodName,
+                             dynamicCall, suppressDynCallCheck,
                              numExtraInputs, emitFCall);
 }
 
@@ -1698,11 +1677,13 @@ void emitFCallClsMethod(IRGS& env, FCallArgs fca, const StringData* clsHint,
     return interpOne(env);
   }
 
-  auto const allowLogAsDynamicCall =
-    op == IsLogAsDynamicCallOp::LogAsDynamicCall ||
-    RuntimeOption::EvalLogKnownMethodsAsDynamicCalls;
-  fcallClsMethodCommon(env, fca, clsHint, cls, methName, false, true,
-                       allowLogAsDynamicCall, 2);
+  auto const suppressDynCallCheck =
+    op == IsLogAsDynamicCallOp::DontLogAsDynamicCall &&
+    !RO::EvalLogKnownMethodsAsDynamicCalls;
+
+  fcallClsMethodCommon(env, fca, clsHint, cls, methName, false,
+                       true, suppressDynCallCheck,
+                       2);
 }
 
 void emitFCallClsMethodS(IRGS& env, FCallArgs fca, const StringData* clsHint,
@@ -1712,7 +1693,7 @@ void emitFCallClsMethodS(IRGS& env, FCallArgs fca, const StringData* clsHint,
   if (!cls || !methName->isA(TStr)) return interpOne(env);
 
   auto const fwd = ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent;
-  fcallClsMethodCommon(env, fca, clsHint, cls, methName, fwd, true, true, 1);
+  fcallClsMethodCommon(env, fca, clsHint, cls, methName, fwd, true, false, 1);
 }
 
 void emitFCallClsMethodSD(IRGS& env, FCallArgs fca, const StringData* clsHint,
@@ -1721,8 +1702,8 @@ void emitFCallClsMethodSD(IRGS& env, FCallArgs fca, const StringData* clsHint,
   if (!cls) return interpOne(env);
 
   auto const fwd = ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent;
-  fcallClsMethodCommon(env, fca, clsHint, cls, cns(env, methName), fwd, false,
-                       false, 0);
+  fcallClsMethodCommon(env, fca, clsHint, cls, cns(env, methName), fwd,
+                       false, false, 0);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1736,7 +1717,7 @@ void emitDirectCall(IRGS& env, Func* callee, uint32_t numParams,
 
   auto const fca = FCallArgs(FCallArgs::Flags::None, numParams, 1, nullptr,
                              kInvalidOffset, false, false, nullptr);
-  prepareAndCallKnown(env, callee, fca, nullptr, false);
+  prepareAndCallKnown(env, callee, fca, nullptr, false, false);
 }
 
 //////////////////////////////////////////////////////////////////////

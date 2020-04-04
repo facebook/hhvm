@@ -132,21 +132,18 @@ void cgRaiseHackArrCompatNotice(IRLS& env, const IRInstruction* inst) {
 }
 
 static void raiseForbiddenDynCall(const Func* func) {
-  assertx(!func->isDynamicallyCallable() ||
-          RuntimeOption::EvalForbidDynamicCallsWithAttr);
-  int dynCallErrorLevel = func->isMethod() ?
-    (
-      func->isStatic() ?
-        RuntimeOption::EvalForbidDynamicCallsToClsMeth :
-        RuntimeOption::EvalForbidDynamicCallsToInstMeth
-    ) :
-    RuntimeOption::EvalForbidDynamicCallsToFunc;
-  if (dynCallErrorLevel <= 0) return;
+  assertx(!func->isDynamicallyCallable() || RO::EvalForbidDynamicCallsWithAttr);
+  auto const level = func->isMethod()
+    ? (func->isStatic()
+        ? RO::EvalForbidDynamicCallsToClsMeth
+        : RO::EvalForbidDynamicCallsToInstMeth)
+    : RO::EvalForbidDynamicCallsToFunc;
+  if (level <= 0) return;
 
   auto error_msg = func->isDynamicallyCallable() ?
     Strings::FUNCTION_CALLED_DYNAMICALLY_WITH_ATTRIBUTE :
     Strings::FUNCTION_CALLED_DYNAMICALLY_WITHOUT_ATTRIBUTE;
-  if (dynCallErrorLevel >= 2) {
+  if (level >= 2) {
     std::string msg;
     string_printf(
       msg,

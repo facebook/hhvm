@@ -48,16 +48,6 @@ val get_typedef : Provider_context.t -> typedef_key -> typedef_decl option
 
 val get_gconst : Provider_context.t -> gconst_key -> gconst_decl option
 
-val invalidate_fun : Provider_context.t -> fun_key -> unit
-
-val invalidate_class : Provider_context.t -> class_key -> unit
-
-val invalidate_record_def : Provider_context.t -> record_def_key -> unit
-
-val invalidate_typedef : Provider_context.t -> typedef_key -> unit
-
-val invalidate_gconst : Provider_context.t -> gconst_key -> unit
-
 val local_changes_push_stack : Provider_context.t -> unit
 
 val local_changes_pop_stack : Provider_context.t -> unit

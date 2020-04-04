@@ -7,6 +7,31 @@
  *)
 open Core_kernel
 
+let invalidate_fun decl_cache fun_name =
+  Provider_backend.Decl_cache.remove
+    decl_cache
+    (Provider_backend.Decl_cache_entry.Fun_decl fun_name)
+
+let invalidate_class decl_cache class_name =
+  Provider_backend.Decl_cache.remove
+    decl_cache
+    (Provider_backend.Decl_cache_entry.Class_decl class_name)
+
+let invalidate_record_def decl_cache record_name =
+  Provider_backend.Decl_cache.remove
+    decl_cache
+    (Provider_backend.Decl_cache_entry.Record_decl record_name)
+
+let invalidate_typedef decl_cache typedef_name =
+  Provider_backend.Decl_cache.remove
+    decl_cache
+    (Provider_backend.Decl_cache_entry.Typedef_decl typedef_name)
+
+let invalidate_gconst decl_cache gconst_name =
+  Provider_backend.Decl_cache.remove
+    decl_cache
+    (Provider_backend.Decl_cache_entry.Gconst_decl gconst_name)
+
 let invalidate_tast_cache_for_all_ctx_entries ~(ctx : Provider_context.t) : unit
     =
   Relative_path.Map.iter
@@ -18,7 +43,7 @@ let invalidate_tast_cache_for_all_ctx_entries ~(ctx : Provider_context.t) : unit
 let invalidate_local_decl_caches_for_ctx_entries (ctx : Provider_context.t) :
     unit =
   match Provider_context.get_backend ctx with
-  | Provider_backend.Local_memory _ ->
+  | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
     ctx
     |> Provider_context.get_entries
     |> Relative_path.Map.iter ~f:(fun _path entry ->
@@ -29,15 +54,15 @@ let invalidate_local_decl_caches_for_ctx_entries (ctx : Provider_context.t) :
                Nast.get_defs ast
              in
              List.iter funs ~f:(fun (_, fun_name) ->
-                 Decl_provider.invalidate_fun ctx fun_name);
+                 invalidate_fun decl_cache fun_name);
              List.iter classes ~f:(fun (_, class_name) ->
-                 Decl_provider.invalidate_class ctx class_name);
+                 invalidate_class decl_cache class_name);
              List.iter record_defs ~f:(fun (_, record_name) ->
-                 Decl_provider.invalidate_record_def ctx record_name);
+                 invalidate_record_def decl_cache record_name);
              List.iter typedefs ~f:(fun (_, typedef_name) ->
-                 Decl_provider.invalidate_typedef ctx typedef_name);
+                 invalidate_typedef decl_cache typedef_name);
              List.iter gconsts ~f:(fun (_, gconst_name) ->
-                 Decl_provider.invalidate_gconst ctx gconst_name))
+                 invalidate_gconst decl_cache gconst_name))
   | Provider_backend.Shared_memory ->
     (* Don't attempt to invalidate decls with shared memory, as we may not be
     running in the master process where that's allowed. *)
@@ -49,16 +74,19 @@ let invalidate_local_decl_caches_for_ctx_entries (ctx : Provider_context.t) :
 let invalidate_local_decl_caches_for_file
     ~(ctx : Provider_context.t) (file_info : FileInfo.t) : unit =
   let open FileInfo in
-  let iter_names ids ~f = List.iter ids ~f:(fun (_, name) -> f name) in
-  iter_names file_info.funs ~f:(Decl_provider.invalidate_fun ctx);
-  iter_names file_info.classes ~f:(Decl_provider.invalidate_class ctx);
-  iter_names
-    file_info.classes
-    ~f:(Shallow_classes_provider.invalidate_class ctx);
-  iter_names file_info.record_defs ~f:(Decl_provider.invalidate_record_def ctx);
-  iter_names file_info.typedefs ~f:(Decl_provider.invalidate_typedef ctx);
-  iter_names file_info.consts ~f:(Decl_provider.invalidate_gconst ctx);
-  ()
+  match Provider_context.get_backend ctx with
+  | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
+    let iter_names ids ~f = List.iter ids ~f:(fun (_, name) -> f name) in
+    iter_names file_info.funs ~f:(invalidate_fun decl_cache);
+    iter_names file_info.classes ~f:(invalidate_class decl_cache);
+    iter_names
+      file_info.classes
+      ~f:(Shallow_classes_provider.invalidate_class ctx);
+    iter_names file_info.record_defs ~f:(invalidate_record_def decl_cache);
+    iter_names file_info.typedefs ~f:(invalidate_typedef decl_cache);
+    iter_names file_info.consts ~f:(invalidate_gconst decl_cache);
+    ()
+  | _ -> failwith "only call invalidate for local memory backend"
 
 let ctx_from_server_env (env : ServerEnv.env) : Provider_context.t =
   (* TODO: backend should be stored in [env]. *)

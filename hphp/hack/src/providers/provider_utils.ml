@@ -109,6 +109,11 @@ let respect_but_quarantine_unsaved_changes
         Naming_provider.local_changes_push_sharedmem_stack ();
         SharedMem.allow_hashtable_writes_by_current_process false
       | Provider_backend.Local_memory local ->
+        Relative_path.Map.iter
+          (Provider_context.get_entries ctx)
+          ~f:(fun _path entry ->
+            let (_ : Nast.program) = Ast_provider.compute_ast ~ctx ~entry in
+            ());
         invalidate_local_decl_caches_for_entries
           local
           (Provider_context.get_entries ctx)

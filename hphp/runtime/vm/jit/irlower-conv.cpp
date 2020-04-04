@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/object-data.h"
+#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/type-string.h"

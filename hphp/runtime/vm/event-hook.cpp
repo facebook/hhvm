@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/event-hook.h"
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/intercept.h"

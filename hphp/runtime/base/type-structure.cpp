@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"

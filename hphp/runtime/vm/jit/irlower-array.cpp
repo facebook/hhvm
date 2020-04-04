@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/record-data.h"
 #include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/string-data.h"

@@ -16,6 +16,8 @@
 */
 #include "hphp/runtime/ext/soap/packet.h"
 #include "hphp/runtime/ext/soap/ext_soap.h"
+
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/system/systemlib.h"
 #include <memory>
 

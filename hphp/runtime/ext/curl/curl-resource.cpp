@@ -4,6 +4,7 @@
 #include "hphp/runtime/ext/curl/ext_curl.h"
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/curl-tls-workarounds.h"
 #include "hphp/runtime/base/file.h"

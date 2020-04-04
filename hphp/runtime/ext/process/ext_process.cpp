@@ -30,6 +30,7 @@
 #include <signal.h>
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/plain-file.h"

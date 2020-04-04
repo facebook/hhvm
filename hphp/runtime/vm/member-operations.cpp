@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/vm/member-operations.h"
 
+#include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-string.h"
 

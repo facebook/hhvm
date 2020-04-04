@@ -19,6 +19,7 @@
 #include "hphp/runtime/ext/strobelight/tracing_types.h"
 #include "hphp/runtime/ext/xenon/ext_xenon.h"
 
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/surprise-flags.h"

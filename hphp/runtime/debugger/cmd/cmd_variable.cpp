@@ -17,6 +17,7 @@
 #include "hphp/runtime/debugger/cmd/cmd_variable.h"
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/debugger/cmd/cmd_where.h"
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/vm/runtime.h"

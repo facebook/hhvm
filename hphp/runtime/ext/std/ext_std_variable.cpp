@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/base/zend-functions.h"

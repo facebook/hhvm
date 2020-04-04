@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/packed-array-defs.h"

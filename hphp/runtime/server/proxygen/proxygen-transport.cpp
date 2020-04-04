@@ -15,6 +15,7 @@
 */
 #include "hphp/runtime/server/proxygen/proxygen-transport.h"
 
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/server/proxygen/proxygen-server.h"
 #include "hphp/runtime/server/server.h"
 #include "hphp/util/logger.h"

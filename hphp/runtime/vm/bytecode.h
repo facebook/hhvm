@@ -17,7 +17,6 @@
 #ifndef incl_HPHP_VM_BYTECODE_H_
 #define incl_HPHP_VM_BYTECODE_H_
 
-#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/rds-util.h"
 #include "hphp/runtime/base/record-array.h"
@@ -35,6 +34,7 @@
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/iter.h"
 #include "hphp/runtime/vm/name-value-table.h"
 #include "hphp/runtime/vm/unit.h"
 

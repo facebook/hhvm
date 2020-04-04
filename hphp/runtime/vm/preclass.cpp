@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/preclass.h"
 
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/repo-auth-type.h"

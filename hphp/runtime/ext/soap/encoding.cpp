@@ -26,6 +26,7 @@
 #include "hphp/runtime/ext/soap/soap.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/string-buffer.h"

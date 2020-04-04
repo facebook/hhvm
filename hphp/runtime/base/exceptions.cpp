@@ -16,6 +16,7 @@
 #include "hphp/runtime/base/exceptions.h"
 
 #include "hphp/system/systemlib.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/object-data.h"

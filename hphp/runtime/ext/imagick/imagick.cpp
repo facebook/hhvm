@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/imagick/ext_imagick.h"
 
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 

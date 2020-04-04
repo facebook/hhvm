@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/static-string-table.h"

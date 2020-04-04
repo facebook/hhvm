@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 
 #include "hphp/runtime/base/array-common.h"
-#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/collections.h"

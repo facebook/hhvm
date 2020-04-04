@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/enum-util.h"

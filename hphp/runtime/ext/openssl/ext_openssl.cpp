@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/openssl/ext_openssl.h"
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/ssl-socket.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/zend-string.h"

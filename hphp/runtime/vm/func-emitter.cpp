@@ -16,9 +16,11 @@
 
 #include "hphp/runtime/vm/func-emitter.h"
 
-#include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/rds.h"
+
+#include "hphp/runtime/ext/extension.h"
 
 #include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/bytecode.h"

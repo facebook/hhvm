@@ -16,6 +16,8 @@
 */
 
 #include "hphp/runtime/ext/icu/ext_icu_uconverter.h"
+
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP { namespace Intl {

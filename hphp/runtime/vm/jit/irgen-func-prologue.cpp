@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/irgen-func-prologue.h"
 
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"

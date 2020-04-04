@@ -14,13 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_EXTRADATA_H_
-#define incl_HPHP_VM_EXTRADATA_H_
+#pragma once
 
-#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/iter.h"
 #include "hphp/runtime/vm/srckey.h"
 
 #include "hphp/runtime/vm/jit/types.h"
@@ -1942,5 +1941,3 @@ std::string showExtra(Opcode opc, const IRExtraData* data);
 //////////////////////////////////////////////////////////////////////
 
 }}
-
-#endif

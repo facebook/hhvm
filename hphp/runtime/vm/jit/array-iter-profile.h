@@ -14,11 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_ARRAY_ITER_PROFILE_H_
-#define incl_HPHP_JIT_ARRAY_ITER_PROFILE_H_
+#pragma once
 
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/vm/iter.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
 #include "hphp/runtime/vm/jit/type.h"
 
@@ -110,5 +109,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 }}
-
-#endif

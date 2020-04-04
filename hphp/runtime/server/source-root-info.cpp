@@ -18,6 +18,7 @@
 
 #include <sstream>
 
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/php-globals.h"

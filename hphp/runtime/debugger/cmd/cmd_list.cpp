@@ -19,6 +19,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/debugger/cmd/cmd_info.h"

@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_JIT_IRGEN_STATE_H_
-#define incl_HPHP_JIT_IRGEN_STATE_H_
+
+#pragma once
 
 #include <memory>
 #include <vector>
@@ -23,7 +23,6 @@
 #include <string>
 #include <functional>
 
-#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/vm/jit/bc-marker.h"
 #include "hphp/runtime/vm/jit/inline-state.h"
 #include "hphp/runtime/vm/jit/ir-builder.h"
@@ -129,5 +128,3 @@ std::string show(const IRGS&);
 //////////////////////////////////////////////////////////////////////
 
 }}}
-
-#endif

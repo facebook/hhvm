@@ -41,6 +41,7 @@
 #include <folly/String.h>
 #include <folly/concurrency/ConcurrentHashMap.h>
 
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tv-comparisons.h"
 

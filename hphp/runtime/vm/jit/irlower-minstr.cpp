@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/member-operations.h"

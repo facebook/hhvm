@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/reified-generics.h"
 
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 
 #include "hphp/runtime/vm/act-rec.h"

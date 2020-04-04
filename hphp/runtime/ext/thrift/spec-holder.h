@@ -21,6 +21,8 @@
 #include "hphp/runtime/ext/thrift/ext_thrift.h"
 #include "hphp/runtime/ext/thrift/transport.h"
 #include "hphp/runtime/ext/thrift/util.h"
+
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/util/fixed-vector.h"
 
 #include <folly/AtomicHashMap.h>

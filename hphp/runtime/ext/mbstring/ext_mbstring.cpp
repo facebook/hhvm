@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/mbstring/ext_mbstring.h"
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/request-event-handler.h"

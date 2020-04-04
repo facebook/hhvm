@@ -17,7 +17,6 @@
 #ifndef incl_HPHP_VM_FUNC_H_
 #define incl_HPHP_VM_FUNC_H_
 
-#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/atomic-countable.h"
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/datatype.h"
@@ -28,6 +27,7 @@
 #include "hphp/runtime/base/user-attributes.h"
 
 #include "hphp/runtime/vm/indexed-string-map.h"
+#include "hphp/runtime/vm/iter.h"
 #include "hphp/runtime/vm/reified-generics-info.h"
 #include "hphp/runtime/vm/rx.h"
 #include "hphp/runtime/vm/type-constraint.h"

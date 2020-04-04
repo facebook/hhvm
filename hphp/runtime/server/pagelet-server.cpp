@@ -22,6 +22,7 @@
 #include "hphp/runtime/server/job-queue-vm-stack.h"
 #include "hphp/runtime/server/host-health-monitor.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/runtime-option.h"

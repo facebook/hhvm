@@ -16,6 +16,7 @@
 */
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/request-tracing.h"
 #include "hphp/runtime/base/surprise-flags.h"

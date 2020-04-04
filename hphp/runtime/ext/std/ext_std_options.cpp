@@ -33,6 +33,7 @@
 #include <folly/portability/SysTime.h>
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/memory-manager.h"

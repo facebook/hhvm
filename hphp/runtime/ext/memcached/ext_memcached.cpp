@@ -17,6 +17,7 @@
 */
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/ext/memcached/libmemcached_portability.h"

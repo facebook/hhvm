@@ -1,4 +1,6 @@
 #include "hphp/runtime/ext/curl/curl-multi-await.h"
+
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/ext/curl/curl-resource.h"
 #include "hphp/runtime/ext/asio/socket-event.h"
 

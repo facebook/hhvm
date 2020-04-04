@@ -19,6 +19,7 @@
 #include <set>
 #include <vector>
 
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/ext/array/ext_array.h"

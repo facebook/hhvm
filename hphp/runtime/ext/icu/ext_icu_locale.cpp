@@ -16,6 +16,8 @@
 */
 #include "hphp/runtime/ext/icu/ext_icu_locale.h"
 #include "hphp/runtime/ext/icu/icu.h"
+
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 
 #include <unicode/ures.h>

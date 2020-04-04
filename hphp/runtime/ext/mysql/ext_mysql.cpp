@@ -21,6 +21,7 @@
 #include <folly/portability/Sockets.h>
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/ext/mysql/mysql_common.h"

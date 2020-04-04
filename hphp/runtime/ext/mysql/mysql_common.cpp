@@ -34,6 +34,7 @@
 
 #include "hphp/system/systemlib.h"
 
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/extended-logger.h"

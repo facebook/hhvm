@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/async-flow-stepper.h"
 
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"

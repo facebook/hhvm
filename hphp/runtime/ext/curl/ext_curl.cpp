@@ -23,6 +23,7 @@
 #include "hphp/runtime/ext/curl/curl-share-resource.h"
 #include "hphp/runtime/ext/asio/socket-event.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/plain-file.h"

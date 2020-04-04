@@ -46,6 +46,9 @@ type entry = {
   mutable symbols: Relative_path.t SymbolOccurrence.t list option;
 }
 
+(** We often operate on collection of entries. *)
+type entries = entry Relative_path.Map.t
+
 (** A context allowing the caller access to data for files and symbols in the
 codebase. In particular, this is used as a parameter to [Decl_provider]
 functions to access the decl for a given symbol.
@@ -139,7 +142,7 @@ val map_tcopt : t -> f:(TypecheckerOptions.t -> TypecheckerOptions.t) -> t
 val get_backend : t -> Provider_backend.t
 
 (** Get the entries currently contained in this [t]. *)
-val get_entries : t -> entry Relative_path.Map.t
+val get_entries : t -> entries
 
 (** Are we within [Provider_utils.respect_but_quarantine_unsaved_changes] ? *)
 val is_quarantined : unit -> bool

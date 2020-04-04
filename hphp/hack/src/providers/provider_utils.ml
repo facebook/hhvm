@@ -37,8 +37,8 @@ let invalidate_gconst decl_cache gconst_name =
     decl_cache
     (Provider_backend.Decl_cache_entry.Gconst_decl gconst_name)
 
-let invalidate_tast_cache_of_entries
-    (entries : Provider_context.entry Relative_path.Map.t) : unit =
+let invalidate_tast_cache_of_entries (entries : Provider_context.entries) : unit
+    =
   Relative_path.Map.iter entries ~f:(fun _path entry ->
       entry.Provider_context.tast <- None;
       entry.Provider_context.tast_errors <- None)
@@ -60,7 +60,7 @@ let invalidate_local_decl_caches_for_file
 
 let invalidate_local_decl_caches_for_entries
     (local_memory : Provider_backend.local_memory)
-    (entries : Provider_context.entry Relative_path.Map.t) : unit =
+    (entries : Provider_context.entries) : unit =
   let invalidate_for_entry _path entry =
     match entry.Provider_context.parser_return with
     | None -> () (* hasn't been parsed, hence nothing to invalidate *)

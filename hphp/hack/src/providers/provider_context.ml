@@ -22,11 +22,13 @@ type entry = {
   mutable symbols: Relative_path.t SymbolOccurrence.t list option;
 }
 
+type entries = entry Relative_path.Map.t
+
 type t = {
   popt: ParserOptions.t;
   tcopt: TypecheckerOptions.t;
   backend: Provider_backend.t;
-  entries: entry Relative_path.Map.t;
+  entries: entries;
 }
 
 let empty_for_tool ~popt ~tcopt ~backend =
@@ -112,7 +114,7 @@ let map_tcopt (t : t) ~(f : TypecheckerOptions.t -> TypecheckerOptions.t) : t =
 
 let get_backend (t : t) : Provider_backend.t = t.backend
 
-let get_entries (t : t) : entry Relative_path.Map.t = t.entries
+let get_entries (t : t) : entries = t.entries
 
 (** ref_is_quarantined stores the stack at which it was last changed,
 so we can give better failwith error messages where appropriate. *)

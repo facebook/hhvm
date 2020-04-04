@@ -116,7 +116,7 @@ type initialized_state = {
   tcopt: TypecheckerOptions.t;  (** typechecker options *)
   local_memory: Provider_backend.local_memory;
       (** Local_memory backend; includes decl caches *)
-  open_files: Provider_context.entry Relative_path.Map.t;
+  open_files: Provider_context.entries;
       (** all open files, along with caches of their ASTs and TASTs and errors *)
   changed_files_to_process: Path.Set.t;
       (** changed_files_to_process is grown during File_changed events, and steadily

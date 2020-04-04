@@ -275,6 +275,7 @@ class CommonTestDriver(TestDriver):
         if retcode != 0:
             print("check returned non-zero code: " + str(retcode), file=sys.stderr)
         if expected_output is not None:
+            self.maxDiff = None
             self.assertCountEqual(
                 map(lambda x: x.format(root=root), expected_output), output.splitlines()
             )

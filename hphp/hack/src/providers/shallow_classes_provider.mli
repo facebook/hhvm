@@ -32,6 +32,6 @@ val remove_old_batch : Provider_context.t -> SSet.t -> unit
 
 val remove_batch : Provider_context.t -> SSet.t -> unit
 
-val push_local_changes : Provider_context.t -> unit
+val push_local_changes : unit -> unit
 
-val pop_local_changes : Provider_context.t -> unit
+val pop_local_changes : unit -> unit

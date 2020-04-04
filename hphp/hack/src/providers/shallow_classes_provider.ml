@@ -96,16 +96,6 @@ let remove_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
   | Provider_backend.Decl_service _ ->
     failwith "remove_batch not implemented for Decl_service"
 
-let push_local_changes (ctx : Provider_context.t) : unit =
-  match Provider_context.get_backend ctx with
-  | Provider_backend.Shared_memory -> Shallow_classes_heap.push_local_changes ()
-  | Provider_backend.Local_memory _ -> ()
-  | Provider_backend.Decl_service _ ->
-    failwith "push_local_changes not implemented for Decl_service"
+let push_local_changes () : unit = Shallow_classes_heap.push_local_changes ()
 
-let pop_local_changes (ctx : Provider_context.t) : unit =
-  match Provider_context.get_backend ctx with
-  | Provider_backend.Shared_memory -> Shallow_classes_heap.pop_local_changes ()
-  | Provider_backend.Local_memory _ -> ()
-  | Provider_backend.Decl_service _ ->
-    failwith "pop_local_changes not implemented for Decl_service"
+let pop_local_changes () : unit = Shallow_classes_heap.pop_local_changes ()

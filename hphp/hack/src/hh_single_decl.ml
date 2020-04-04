@@ -35,7 +35,7 @@ let init root : Provider_context.t =
   (* Push local stacks here so we don't include shared memory in our timing. *)
   File_provider.local_changes_push_stack ();
   Decl_provider.local_changes_push_stack ();
-  Shallow_classes_provider.push_local_changes ctx;
+  Shallow_classes_provider.push_local_changes ();
   Linearization_provider.push_local_changes ();
 
   ctx

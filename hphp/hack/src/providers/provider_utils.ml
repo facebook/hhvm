@@ -110,7 +110,7 @@ let respect_but_quarantine_unsaved_changes
     Ast_provider.local_changes_push_stack ();
     ast_pushed := true;
     Decl_provider.local_changes_push_stack ();
-    Shallow_classes_provider.push_local_changes ctx;
+    Shallow_classes_provider.push_local_changes ();
     Linearization_provider.push_local_changes ();
     begin
       match Provider_context.get_backend ctx with
@@ -144,7 +144,7 @@ let respect_but_quarantine_unsaved_changes
     if !file_pushed then File_provider.local_changes_pop_stack ();
     if !decl_pushed then begin
       Decl_provider.local_changes_pop_stack ();
-      Shallow_classes_provider.pop_local_changes ctx;
+      Shallow_classes_provider.pop_local_changes ();
       Linearization_provider.pop_local_changes ();
       match Provider_context.get_backend ctx with
       | Provider_backend.Local_memory local ->

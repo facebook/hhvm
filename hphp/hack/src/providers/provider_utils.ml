@@ -111,7 +111,7 @@ let respect_but_quarantine_unsaved_changes
     ast_pushed := true;
     Decl_provider.local_changes_push_stack ();
     Shallow_classes_provider.push_local_changes ctx;
-    Linearization_provider.push_local_changes ctx;
+    Linearization_provider.push_local_changes ();
     begin
       match Provider_context.get_backend ctx with
       | Provider_backend.Local_memory local ->
@@ -145,7 +145,7 @@ let respect_but_quarantine_unsaved_changes
     if !decl_pushed then begin
       Decl_provider.local_changes_pop_stack ();
       Shallow_classes_provider.pop_local_changes ctx;
-      Linearization_provider.pop_local_changes ctx;
+      Linearization_provider.pop_local_changes ();
       match Provider_context.get_backend ctx with
       | Provider_backend.Local_memory local ->
         invalidate_local_decl_caches_for_entries

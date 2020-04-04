@@ -36,7 +36,7 @@ let init root : Provider_context.t =
   File_provider.local_changes_push_stack ();
   Decl_provider.local_changes_push_stack ();
   Shallow_classes_provider.push_local_changes ctx;
-  Linearization_provider.push_local_changes ctx;
+  Linearization_provider.push_local_changes ();
 
   ctx
 

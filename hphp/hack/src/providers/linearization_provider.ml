@@ -42,11 +42,9 @@ module Cache =
       let capacity = 1000
     end)
 
-let push_local_changes (_ctx : Provider_context.t) : unit =
-  Cache.LocalChanges.push_stack ()
+let push_local_changes () : unit = Cache.LocalChanges.push_stack ()
 
-let pop_local_changes (_ctx : Provider_context.t) : unit =
-  Cache.LocalChanges.pop_stack ()
+let pop_local_changes () : unit = Cache.LocalChanges.pop_stack ()
 
 let remove_batch (_ctx : Provider_context.t) (classes : SSet.t) : unit =
   let keys =

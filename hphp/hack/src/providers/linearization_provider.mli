@@ -14,8 +14,8 @@ val add : Provider_context.t -> key -> Decl_defs.linearization -> unit
 
 val complete : Provider_context.t -> key -> Decl_defs.mro_element list -> unit
 
-val push_local_changes : Provider_context.t -> unit
+val push_local_changes : unit -> unit
 
-val pop_local_changes : Provider_context.t -> unit
+val pop_local_changes : unit -> unit
 
 val remove_batch : Provider_context.t -> SSet.t -> unit

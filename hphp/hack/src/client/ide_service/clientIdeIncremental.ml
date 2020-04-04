@@ -254,30 +254,39 @@ let update_naming_table
   in
   naming_table
 
-let invalidate_decls
+let invalidate_ctx_upon_file_change
     ~(ctx : Provider_context.t) ~(old_file_info : FileInfo.t option) : unit =
-  (* TODO(ljw): this isn't right... It's correct for us to invalidate shallow
-  decls found in this file. But notionally, for correctness, we should also
-  invalidate all decls and all linearizations. *)
-  match old_file_info with
-  | None -> ()
-  | Some { FileInfo.funs; classes; record_defs; typedefs; consts; _ } ->
-    funs |> strip_positions |> SSet.iter ~f:(Decl_provider.invalidate_fun ctx);
-    classes
-    |> strip_positions
-    |> SSet.iter ~f:(fun class_name ->
-           Decl_provider.invalidate_class ctx class_name;
-           Shallow_classes_provider.invalidate_class ctx class_name);
-    record_defs
-    |> strip_positions
-    |> SSet.iter ~f:(Decl_provider.invalidate_record_def ctx);
-    typedefs
-    |> strip_positions
-    |> SSet.iter ~f:(Decl_provider.invalidate_typedef ctx);
-    consts
-    |> strip_positions
-    |> SSet.iter ~f:(Decl_provider.invalidate_gconst ctx);
-    ()
+  (* Invalidate all cached TASTs, because any TAST might have depended upon
+  the file and we don't have fine-grained tracking to know which. *)
+  Relative_path.Map.iter
+    (Provider_context.get_entries ctx)
+    ~f:(fun _path entry ->
+      entry.Provider_context.tast <- None;
+      entry.Provider_context.tast_errors <- None);
+  (* Invalidate folded and shallow decls *)
+  begin
+    match old_file_info with
+    | None -> ()
+    | Some { FileInfo.funs; classes; record_defs; typedefs; consts; _ } ->
+      funs |> strip_positions |> SSet.iter ~f:(Decl_provider.invalidate_fun ctx);
+      classes
+      |> strip_positions
+      |> SSet.iter ~f:(fun class_name ->
+             Decl_provider.invalidate_class ctx class_name;
+             Shallow_classes_provider.invalidate_class ctx class_name);
+      record_defs
+      |> strip_positions
+      |> SSet.iter ~f:(Decl_provider.invalidate_record_def ctx);
+      typedefs
+      |> strip_positions
+      |> SSet.iter ~f:(Decl_provider.invalidate_typedef ctx);
+      consts
+      |> strip_positions
+      |> SSet.iter ~f:(Decl_provider.invalidate_gconst ctx);
+      ()
+  end;
+  (* TODO(ljw): we should invalidate all linearizations and folded decls here *)
+  ()
 
 let update_symbol_index
     ~(sienv : SearchUtils.si_env)
@@ -310,7 +319,7 @@ let process_changed_file
         compute_fileinfo_for_path (Provider_context.get_popt ctx) path
       in
       log_file_info_change ~old_file_info ~new_file_info ~start_time ~path;
-      invalidate_decls ~ctx ~old_file_info;
+      invalidate_ctx_upon_file_change ~ctx ~old_file_info;
       let naming_table =
         update_naming_table
           ~naming_table

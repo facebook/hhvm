@@ -447,14 +447,10 @@ let handle_message :
       let changed_files_denominator =
         initialized_state.changed_files_denominator + 1
       in
-      let ctx =
-        Provider_utils.ctx_from_server_env initialized_state.server_env
-      in
       let state =
         Initialized
           {
             initialized_state with
-            ctx;
             changed_files_to_process;
             changed_files_denominator;
           }

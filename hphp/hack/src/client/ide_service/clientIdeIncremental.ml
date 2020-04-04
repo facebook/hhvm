@@ -291,20 +291,25 @@ let update_symbol_index
     SymbolIndex.remove_files ~sienv ~paths
   | Some facts -> SymbolIndex.update_from_facts ~sienv ~path ~facts
 
+type changed_file_results = {
+  naming_table: Naming_table.t;
+  sienv: SearchUtils.si_env;
+}
+
 let process_changed_file
     ~(ctx : Provider_context.t)
     ~(naming_table : Naming_table.t)
     ~(sienv : SearchUtils.si_env)
-    ~(path : Path.t) : (Naming_table.t * SearchUtils.si_env) Lwt.t =
+    ~(path : Path.t) : changed_file_results Lwt.t =
   let str_path = Path.to_string path in
   match Relative_path.strip_root_if_possible str_path with
   | None ->
     log "Ignored change to file %s, as it is not within our repo root" str_path;
-    Lwt.return (naming_table, sienv)
+    Lwt.return { naming_table; sienv }
   | Some path ->
     let path = Relative_path.from_root path in
     if not (FindUtils.path_filter path) then
-      Lwt.return (naming_table, sienv)
+      Lwt.return { naming_table; sienv }
     else
       let start_time = Unix.gettimeofday () in
       let old_file_info = Naming_table.get_file_info naming_table path in
@@ -322,4 +327,4 @@ let process_changed_file
           ~new_file_info
       in
       let sienv = update_symbol_index ~sienv ~path ~facts in
-      Lwt.return (naming_table, sienv)
+      Lwt.return { naming_table; sienv }

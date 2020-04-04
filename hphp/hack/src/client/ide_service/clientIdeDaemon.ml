@@ -753,11 +753,14 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
           (* Invalidate all cached TASTs, because any TAST might have depended upon
             the file and we don't have fine-grained tracking to know which. *)
           Provider_utils.invalidate_tast_cache_for_all_ctx_entries ctx;
-          ClientIdeIncremental.process_changed_file
-            ~ctx
-            ~naming_table
-            ~sienv
-            ~path:next_file
+          let%lwt { ClientIdeIncremental.naming_table; sienv; _ } =
+            ClientIdeIncremental.process_changed_file
+              ~ctx
+              ~naming_table
+              ~sienv
+              ~path:next_file
+          in
+          Lwt.return (naming_table, sienv)
         with exn ->
           let e = Exception.wrap exn in
           HackEventLogger.uncaught_exception exn;

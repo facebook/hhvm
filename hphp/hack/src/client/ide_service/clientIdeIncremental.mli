@@ -7,6 +7,11 @@
  *
  *)
 
+type changed_file_results = {
+  naming_table: Naming_table.t;
+  sienv: SearchUtils.si_env;
+}
+
 (** Updates the reverse-naming-table (which is inside ctx for the local
 memory backend, and is a sharedmem heap for the sharedmem backend).
 Returns an updated forward-naming-table in 'naming_table', and updated
@@ -21,4 +26,4 @@ val process_changed_file :
   naming_table:Naming_table.t ->
   sienv:SearchUtils.si_env ->
   path:Path.t ->
-  (Naming_table.t * SearchUtils.si_env) Lwt.t
+  changed_file_results Lwt.t

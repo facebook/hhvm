@@ -64,25 +64,21 @@ let remove_entry_if_present ~(ctx : t) ~(path : Relative_path.t) :
     let entries = Relative_path.Map.remove ctx.entries path in
     ({ ctx with entries }, Some entry)
 
-let make_entry ~(ctx : t) ~(path : Relative_path.t) ~(contents : string) :
-    t * entry =
-  let entry =
-    {
-      path;
-      contents;
-      source_text = None;
-      parser_return = None;
-      ast_errors = None;
-      cst = None;
-      tast = None;
-      tast_errors = None;
-      symbols = None;
-    }
-  in
-  let ctx =
-    { ctx with entries = Relative_path.Map.add ctx.entries path entry }
-  in
-  (ctx, entry)
+let make_entry ~(path : Relative_path.t) ~(contents : string) : entry =
+  {
+    path;
+    contents;
+    source_text = None;
+    parser_return = None;
+    ast_errors = None;
+    cst = None;
+    tast = None;
+    tast_errors = None;
+    symbols = None;
+  }
+
+let add_existing_entry ~(ctx : t) (entry : entry) : t =
+  { ctx with entries = Relative_path.Map.add ctx.entries entry.path entry }
 
 let add_entry_from_file_input
     ~(ctx : t)
@@ -93,23 +89,27 @@ let add_entry_from_file_input
     | ServerCommandTypes.FileName path -> Sys_utils.cat path
     | ServerCommandTypes.FileContent contents -> contents
   in
-  make_entry ~ctx ~path ~contents
+  let entry = make_entry ~path ~contents in
+  (add_existing_entry ctx entry, entry)
 
 let add_entry ~(ctx : t) ~(path : Relative_path.t) : t * entry =
   let contents = Sys_utils.cat (Relative_path.to_absolute path) in
-  make_entry ~ctx ~path ~contents
+  let entry = make_entry ~path ~contents in
+  (add_existing_entry ctx entry, entry)
 
 let try_add_entry_from_disk ~(ctx : t) ~(path : Relative_path.t) :
     (t * entry) option =
   let absolute_path = Relative_path.to_absolute path in
   try
     let contents = Sys_utils.cat absolute_path in
-    Some (make_entry ~ctx ~path ~contents)
+    let entry = make_entry ~path ~contents in
+    Some (add_existing_entry ctx entry, entry)
   with _ -> None
 
 let add_entry_from_file_contents
     ~(ctx : t) ~(path : Relative_path.t) ~(contents : string) : t * entry =
-  make_entry ~ctx ~path ~contents
+  let entry = make_entry ~path ~contents in
+  (add_existing_entry ctx entry, entry)
 
 let get_popt (t : t) : ParserOptions.t = t.popt
 

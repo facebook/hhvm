@@ -88,6 +88,9 @@ there may not be a [ServerEnv.env] available. *)
 val empty_for_debugging :
   popt:ParserOptions.t -> tcopt:TypecheckerOptions.t -> t
 
+(** Creates an entry on its own *)
+val make_entry : path:Relative_path.t -> contents:string -> entry
+
 (** Read the contents at [path] from disk and create a new
 [Provider_context.entry] representing that file. The returned
 [Provider_context.t] contains that new entry.
@@ -120,6 +123,8 @@ val add_entry_from_file_input :
   path:Relative_path.t ->
   file_input:ServerCommandTypes.file_input ->
   t * entry
+
+val add_existing_entry : ctx:t -> entry -> t
 
 (** Removes an entry, if it was there. If it wasn't there then no-op. *)
 val remove_entry_if_present : ctx:t -> path:Relative_path.t -> t * entry option

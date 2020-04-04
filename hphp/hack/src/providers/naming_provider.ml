@@ -533,14 +533,6 @@ let add_typedef (ctx : Provider_context.t) (name : string) (pos : FileInfo.pos)
     : unit =
   add_type ctx name pos Naming_types.TTypedef
 
-let push_local_changes (ctx : Provider_context.t) : unit =
-  match Provider_context.get_backend ctx with
-  | Provider_backend.Shared_memory -> Naming_heap.push_local_changes ()
-  | Provider_backend.Local_memory _ -> ()
-  | Provider_backend.Decl_service _ as backend -> not_implemented backend
+let push_local_changes () : unit = Naming_heap.push_local_changes ()
 
-let pop_local_changes (ctx : Provider_context.t) : unit =
-  match Provider_context.get_backend ctx with
-  | Provider_backend.Shared_memory -> Naming_heap.pop_local_changes ()
-  | Provider_backend.Local_memory _ -> ()
-  | Provider_backend.Decl_service _ as backend -> not_implemented backend
+let pop_local_changes () : unit = Naming_heap.pop_local_changes ()

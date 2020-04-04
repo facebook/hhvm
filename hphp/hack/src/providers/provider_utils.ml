@@ -125,7 +125,7 @@ let respect_but_quarantine_unsaved_changes
     file_pushed := true;
     Fixme_provider.local_changes_push_stack ();
     fixme_pushed := true;
-    Naming_provider.push_local_changes ctx;
+    Naming_provider.push_local_changes ();
     naming_pushed := true;
     Ide_parser_cache.activate ();
     Errors.set_allow_errors_in_default_path true;
@@ -139,7 +139,7 @@ let respect_but_quarantine_unsaved_changes
     SharedMem.allow_hashtable_writes_by_current_process true;
     Errors.set_allow_errors_in_default_path false;
     Ide_parser_cache.deactivate ();
-    if !naming_pushed then Naming_provider.pop_local_changes ctx;
+    if !naming_pushed then Naming_provider.pop_local_changes ();
     if !fixme_pushed then Fixme_provider.local_changes_pop_stack ();
     if !file_pushed then File_provider.local_changes_pop_stack ();
     if !decl_pushed then begin

@@ -680,18 +680,6 @@ let tconst_subsumption env class_name parent_typeconst child_typeconst on_error
     =
   let (pos, name) = child_typeconst.ttc_name in
   let parent_pos = fst parent_typeconst.ttc_name in
-  let parent_is_concrete = Option.is_some parent_typeconst.ttc_type in
-  let disable_partially_abstract =
-    TypecheckerOptions.disable_partially_abstract_typeconsts (Env.get_tcopt env)
-  in
-  let is_final =
-    match parent_typeconst.ttc_abstract with
-    | TCPartiallyAbstract
-    | TCConcrete
-      when disable_partially_abstract ->
-      true
-    | _ -> parent_is_concrete && Option.is_none parent_typeconst.ttc_constraint
-  in
   match (parent_typeconst.ttc_abstract, child_typeconst.ttc_abstract) with
   | (TCAbstract (Some _), TCAbstract None) ->
     Errors.override_no_default_typeconst pos parent_pos;
@@ -785,8 +773,16 @@ let tconst_subsumption env class_name parent_typeconst child_typeconst on_error
 
     (* If the parent cannot be overridden, we unify the types otherwise we ensure
      * the child's assigned type is compatible with the parent's *)
+    let parent_is_final =
+      match parent_typeconst.ttc_abstract with
+      | TCConcrete -> true
+      | TCPartiallyAbstract ->
+        TypecheckerOptions.disable_partially_abstract_typeconsts
+          (Env.get_tcopt env)
+      | TCAbstract _ -> false
+    in
     let check env x y =
-      if is_final then
+      if parent_is_final then
         Typing_ops.unify_decl
           pos
           Reason.URsubsume_tconst_assign

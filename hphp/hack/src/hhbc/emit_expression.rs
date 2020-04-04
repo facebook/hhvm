@@ -430,7 +430,7 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
         }
         Expr_::Call(c) => emit_call_expr(emitter, env, pos, None, c),
         Expr_::New(e) => emit_new(emitter, env, pos, e),
-        Expr_::Record(e) => emit_record(env, pos, e),
+        Expr_::Record(e) => emit_record(emitter, env, pos, e),
         Expr_::Array(es) => Ok(emit_pos_then(
             pos,
             emit_collection(emitter, env, expression, es, None)?,
@@ -1482,12 +1482,21 @@ fn emit_value_only_collection<F: FnOnce(isize) -> InstructLitConst>(
 }
 
 fn emit_record(
+    e: &mut Emitter,
     env: &Env,
     pos: &Pos,
     (cid, is_array, es): &(tast::Sid, bool, Vec<(tast::Expr, tast::Expr)>),
 ) -> Result {
     let es = mk_afkvalues(es);
-    unimplemented!("TODO(hrust)")
+    let id = class::Type::from_ast_name_and_mangle(&cid.1);
+    emit_symbol_refs::State::add_class(e, id.clone());
+    emit_struct_array(e, env, pos, &es, |_, keys| {
+        if *is_array {
+            Ok(instr::new_recordarray(id, keys))
+        } else {
+            Ok(instr::new_record(id, keys))
+        }
+    })
 }
 
 fn emit_call_isset_expr(e: &mut Emitter, env: &Env, outer_pos: &Pos, expr: &tast::Expr) -> Result {
@@ -2027,7 +2036,19 @@ fn emit_call_lhs_and_fcall(
                 InstrSeq::gather(vec![generics, instr::fcallfuncd(fcall_args, fq_id)]),
             ))
         }
-        E_::String(s) => unimplemented!(),
+        E_::String(s) => {
+            // TODO(hrust) should be able to accept `let fq_id = function::from_raw_string(s);`
+            let fq_id = string_utils::strip_global_ns(s).to_string().into();
+            let generics = emit_generics(e, env, &mut fcall_args)?;
+            Ok((
+                InstrSeq::gather(vec![
+                    instr::nulluninit(),
+                    instr::nulluninit(),
+                    instr::nulluninit(),
+                ]),
+                InstrSeq::gather(vec![generics, instr::fcallfuncd(fcall_args, fq_id)]),
+            ))
+        }
         _ => {
             let tmp = e.local_gen_mut().get_unnamed();
             Ok((
@@ -3951,12 +3972,19 @@ fn emit_quiet_expr(
                 &x.0,
                 x.1.as_ref(),
                 false,
-                false,
+                null_coalesce_assignment,
             ),
         },
-        tast::Expr_::ObjGet(x) => {
-            emit_obj_get(e, env, pos, QueryOp::CGetQuiet, &x.0, &x.1, &x.2, false)
-        }
+        tast::Expr_::ObjGet(x) => emit_obj_get(
+            e,
+            env,
+            pos,
+            QueryOp::CGetQuiet,
+            &x.0,
+            &x.1,
+            &x.2,
+            null_coalesce_assignment,
+        ),
         _ => Ok((emit_expr(e, env, expr)?, None)),
     }
 }
@@ -3968,7 +3996,28 @@ fn emit_null_coalesce_assignment(
     e1: &tast::Expr,
     e2: &tast::Expr,
 ) -> Result {
-    unimplemented!()
+    let end_label = e.label_gen_mut().next_regular();
+    let do_set_label = e.label_gen_mut().next_regular();
+    let l_nonnull = e.local_gen_mut().get_unnamed();
+    let (quiet_instr, querym_n_unpopped) = emit_quiet_expr(e, env, pos, e1, true)?;
+    let emit_popc_n = |n_unpopped| match n_unpopped {
+        Some(n) => InstrSeq::gather(iter::repeat(instr::popc()).take(n).collect::<Vec<_>>()),
+        None => instr::empty(),
+    };
+    Ok(InstrSeq::gather(vec![
+        quiet_instr,
+        instr::dup(),
+        instr::istypec(IstypeOp::OpNull),
+        instr::jmpnz(do_set_label.clone()),
+        instr::popl(l_nonnull.clone()),
+        emit_popc_n(querym_n_unpopped),
+        instr::pushl(l_nonnull.clone()),
+        instr::jmp(end_label.clone()),
+        instr::label(do_set_label),
+        instr::popc(),
+        emit_lval_op(e, env, pos, LValOp::Set, e1, Some(e2), true)?,
+        instr::label(end_label),
+    ]))
 }
 
 fn emit_short_circuit_op(e: &mut Emitter, env: &Env, pos: &Pos, expr: &tast::Expr) -> Result {
@@ -4360,7 +4409,6 @@ fn get_local_temp_kind(
     }
 }
 
-// TODO(hrust): emit_base_ as emit_base_worker in Ocaml, remove this TODO after ported
 fn emit_base_(
     e: &mut Emitter,
     env: &Env,

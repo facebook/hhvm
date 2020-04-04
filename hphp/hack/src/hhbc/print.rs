@@ -1997,11 +1997,13 @@ fn print_lit_const<W: Write>(w: &mut W, lit: &InstructLitConst) -> Result<(), W:
         LC::NewRecord(cid, l) => {
             w.write("NewRecord ")?;
             print_class_id(w, cid)?;
+            w.write(" ")?;
             wrap_by_angle(w, |w| print_shape_fields(w, l))
         }
         LC::NewRecordArray(cid, l) => {
             w.write("NewRecordArray ")?;
             print_class_id(w, cid)?;
+            w.write(" ")?;
             wrap_by_angle(w, |w| print_shape_fields(w, l))
         }
         LC::CnsE(id) => {

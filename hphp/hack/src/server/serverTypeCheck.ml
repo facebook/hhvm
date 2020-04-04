@@ -205,14 +205,13 @@ let remove_decls env fast_parsed =
             comments = _;
             hash = _;
           } ->
-        let ctx = Provider_utils.ctx_from_server_env env in
         let funs = set_of_idl funl in
         let classes = set_of_idl classel in
         let record_defs = set_of_idl record_defsl in
         let typedefs = set_of_idl typel in
         let consts = set_of_idl constl in
         Naming_global.remove_decls
-          ~ctx
+          ~backend:(Provider_backend.get ())
           ~funs
           ~classes
           ~record_defs

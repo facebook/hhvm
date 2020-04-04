@@ -271,8 +271,7 @@ end
 (*****************************************************************************)
 (* Updating the environment *)
 (*****************************************************************************)
-let remove_decls ~ctx ~funs ~classes ~record_defs ~typedefs ~consts =
-  let backend = Provider_context.get_backend ctx in
+let remove_decls ~backend ~funs ~classes ~record_defs ~typedefs ~consts =
   let types = SSet.union classes typedefs in
   let types = SSet.union types record_defs in
   Naming_provider.remove_type_batch backend types;

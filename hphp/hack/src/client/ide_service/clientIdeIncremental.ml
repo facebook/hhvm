@@ -202,7 +202,7 @@ let compute_fileinfo_for_path (popt : ParserOptions.t) (path : Relative_path.t)
 
 let update_naming_table
     ~(naming_table : Naming_table.t)
-    ~(ctx : Provider_context.t)
+    ~(backend : Provider_backend.t)
     ~(path : Relative_path.t)
     ~(old_file_info : FileInfo.t option)
     ~(new_file_info : FileInfo.t option) : Naming_table.t =
@@ -214,7 +214,7 @@ let update_naming_table
       (* Update reverse naming table, which is stored in ctx *)
       let open FileInfo in
       Naming_global.remove_decls
-        ~ctx
+        ~backend
         ~funs:(strip_positions old_file_info.funs)
         ~classes:(strip_positions old_file_info.classes)
         ~record_defs:(strip_positions old_file_info.record_defs)
@@ -238,7 +238,6 @@ let update_naming_table
       case anyways, since we just did one and know for a fact where the symbol
       is. *)
       let open FileInfo in
-      let backend = Provider_context.get_backend ctx in
       List.iter new_file_info.funs ~f:(fun (pos, fun_name) ->
           Naming_provider.add_fun backend fun_name pos);
       List.iter new_file_info.classes ~f:(fun (pos, class_name) ->
@@ -298,7 +297,7 @@ let update_naming_tables_for_changed_file
       let naming_table =
         update_naming_table
           ~naming_table
-          ~ctx
+          ~backend:(Provider_context.get_backend ctx)
           ~path
           ~old_file_info
           ~new_file_info

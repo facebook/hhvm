@@ -48,7 +48,7 @@ val make_env :
 
 (* Removing declarations *)
 val remove_decls :
-  ctx:Provider_context.t ->
+  backend:Provider_backend.t ->
   funs:SSet.t ->
   classes:SSet.t ->
   record_defs:SSet.t ->

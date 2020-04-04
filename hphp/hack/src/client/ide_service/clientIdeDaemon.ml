@@ -767,9 +767,15 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
               new_file_info = None;
             }
       in
-      Option.iter
-        old_file_info
-        ~f:(Provider_utils.invalidate_local_decl_caches_for_file ~ctx);
+      begin
+        match (old_file_info, Provider_context.get_backend ctx) with
+        | (Some old_file_info, Provider_backend.Local_memory local) ->
+          Provider_utils.invalidate_local_decl_caches_for_file
+            local
+            old_file_info
+        | (None, Provider_backend.Local_memory _) -> ()
+        | _ -> failwith "ClientIdeDaemon must use local memory"
+      end;
       Provider_utils.invalidate_tast_cache_for_all_ctx_entries ctx;
       let%lwt state =
         if Path.Set.is_empty changed_files_to_process then

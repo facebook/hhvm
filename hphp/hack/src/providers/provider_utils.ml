@@ -71,22 +71,19 @@ let invalidate_local_decl_caches_for_entries
   Relative_path.Map.iter entries ~f:invalidate_for_entry
 
 let invalidate_local_decl_caches_for_file
-    ~(ctx : Provider_context.t) (file_info : FileInfo.t) : unit =
+    (local_memory : Provider_backend.local_memory) (file_info : FileInfo.t) :
+    unit =
   let open FileInfo in
-  match Provider_context.get_backend ctx with
-  | Provider_backend.Local_memory
-      { Provider_backend.decl_cache; shallow_decl_cache; _ } ->
-    let iter_names ids ~f = List.iter ids ~f:(fun (_, name) -> f name) in
-    iter_names file_info.funs ~f:(invalidate_fun decl_cache);
-    iter_names file_info.classes ~f:(invalidate_class decl_cache);
-    iter_names
-      file_info.classes
-      ~f:(invalidate_shallow_class shallow_decl_cache);
-    iter_names file_info.record_defs ~f:(invalidate_record_def decl_cache);
-    iter_names file_info.typedefs ~f:(invalidate_typedef decl_cache);
-    iter_names file_info.consts ~f:(invalidate_gconst decl_cache);
-    ()
-  | _ -> failwith "only call invalidate for local memory backend"
+  let decl_cache = local_memory.Provider_backend.decl_cache in
+  let shallow_decl_cache = local_memory.Provider_backend.shallow_decl_cache in
+  let iter_names ids ~f = List.iter ids ~f:(fun (_, name) -> f name) in
+  iter_names file_info.funs ~f:(invalidate_fun decl_cache);
+  iter_names file_info.classes ~f:(invalidate_class decl_cache);
+  iter_names file_info.classes ~f:(invalidate_shallow_class shallow_decl_cache);
+  iter_names file_info.record_defs ~f:(invalidate_record_def decl_cache);
+  iter_names file_info.typedefs ~f:(invalidate_typedef decl_cache);
+  iter_names file_info.consts ~f:(invalidate_gconst decl_cache);
+  ()
 
 let ctx_from_server_env (env : ServerEnv.env) : Provider_context.t =
   (* TODO: backend should be stored in [env]. *)

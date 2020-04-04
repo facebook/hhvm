@@ -7,6 +7,14 @@
  *)
 open Core_kernel
 
+let invalidate_tast_cache_for_all_ctx_entries ~(ctx : Provider_context.t) : unit
+    =
+  Relative_path.Map.iter
+    (Provider_context.get_entries ctx)
+    ~f:(fun _path entry ->
+      entry.Provider_context.tast <- None;
+      entry.Provider_context.tast_errors <- None)
+
 let ctx_from_server_env (env : ServerEnv.env) : Provider_context.t =
   (* TODO: backend should be stored in [env]. *)
   Provider_context.empty_for_tool

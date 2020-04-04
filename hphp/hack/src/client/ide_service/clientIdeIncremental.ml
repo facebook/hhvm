@@ -256,13 +256,6 @@ let update_naming_table
 
 let invalidate_ctx_upon_file_change
     ~(ctx : Provider_context.t) ~(old_file_info : FileInfo.t option) : unit =
-  (* Invalidate all cached TASTs, because any TAST might have depended upon
-  the file and we don't have fine-grained tracking to know which. *)
-  Relative_path.Map.iter
-    (Provider_context.get_entries ctx)
-    ~f:(fun _path entry ->
-      entry.Provider_context.tast <- None;
-      entry.Provider_context.tast_errors <- None);
   (* Invalidate folded and shallow decls *)
   begin
     match old_file_info with
@@ -320,6 +313,9 @@ let process_changed_file
       in
       log_file_info_change ~old_file_info ~new_file_info ~start_time ~path;
       invalidate_ctx_upon_file_change ~ctx ~old_file_info;
+      (* Invalidate all cached TASTs, because any TAST might have depended upon
+        the file and we don't have fine-grained tracking to know which. *)
+      Provider_utils.invalidate_tast_cache_for_all_ctx_entries ctx;
       let naming_table =
         update_naming_table
           ~naming_table

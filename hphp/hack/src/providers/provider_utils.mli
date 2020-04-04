@@ -21,3 +21,5 @@ TODO: It's a bit confusing that quarantining is predicated upon ctx, and
 hopefully we'll remove that dependency in future. *)
 val respect_but_quarantine_unsaved_changes :
   ctx:Provider_context.t -> f:(unit -> 'a) -> 'a
+
+val invalidate_tast_cache_for_all_ctx_entries : ctx:Provider_context.t -> unit

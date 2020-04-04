@@ -366,25 +366,27 @@ AliasClass backtrace_locals(const IRInstruction& inst) {
  * Important note: because of the `kills' set modifications, an instruction may
  * not report that it can re-enter if it actually can't.  The reason this can
  * go wrong is that if the instruction was in an inlined function, if we've
- * removed the DefInlineFP its spOff will not be meaningful (unless it's a
- * DecRef instruction, which we explicitly adjust in dce.cpp).  In this case
+ * removed the DefInlineFP its spOff will not be meaningful.  In this case
  * the `kills' set will refer to the wrong stack locations.  In general this
  * means instructions that can re-enter must have catch traces---but a few
  * other instructions are exceptions, either since they are not allowed in
  * inlined functions or because they take the (possibly-inlined) FramePtr as a
  * source.
+ *
+ * DecRefs are no longer allowed to report that they may reenter
+ * because they get moved around by delay_decrefs (for example). So if
+ * a DecRef is moved past a StStk to a lower address, the DecRef's
+ * kill set would make the StStk redundant.
  */
 GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
   auto const may_reenter_is_ok =
     (inst.taken() && inst.taken()->isCatch()) ||
-    inst.is(DecRef,
-            ReleaseVVAndSkip,
+    inst.is(ReleaseVVAndSkip,
             LIterInit,
             LIterInitK,
             LIterNext,
             LIterNextK,
             IterFree,
-            GenericRetDecRefs,
             MemoSetStaticCache,
             MemoSetLSBCache,
             MemoSetInstanceCache,
@@ -667,8 +669,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
      * storing an Uninit over each of the locals, but the stores of uninits
      * would be dead so we're not actually doing that.
      */
-    return may_reenter(inst,
-                       may_load_store_kill(AUnknown, AUnknown, AMIStateAny));
+    return may_load_store_kill(AUnknown, AUnknown, AMIStateAny);
 
   case EndCatch: {
     auto const stack_kills = stack_below(
@@ -1959,26 +1960,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // alias-class.h above AStack for more).
 
   case DecRef:
-    {
-      auto const src = inst.src(0);
-      // It could decref the inner ref.
-      auto affected = AEmpty;
-      if (src->type().maybe(TKeyset)) {
-        // TKeyset can't re-enter, but it will decref any contained
-        // strings. Without this, an incref of a string contained in
-        // a Keyset could be sunk past the decref of the Keyset.
-        affected |= AHeapAny;
-      }
-      // Need to add affected to the `store' set. See comments about
-      // `GeneralEffects' in memory-effects.h.
-      auto const effect = may_load_store(affected, affected);
-      if (src->type().maybe(TArr | TVec | TDict | TObj | TRes)) {
-        // Could re-enter to run a destructor. Keysets are exempt because they
-        // can only contain strings or integers.
-        return may_reenter(inst, effect);
-      }
-      return effect;
-    }
+    return may_load_store(AHeapAny, AHeapAny);
 
   case GetMemoKey:
     return may_load_store(AHeapAny, AHeapAny);

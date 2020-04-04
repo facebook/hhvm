@@ -10,7 +10,8 @@
 (** Updates the reverse-naming-table (which is inside ctx for the local
 memory backend, and is a sharedmem heap for the sharedmem backend).
 Returns an updated forward-naming-table in 'naming_table', and updated
-symbol-search index in 'sienv'. Also invalidates various caches inside ctx.
+symbol-search index in 'sienv'. Also invalidates various caches inside
+ctx backend (but not the ctx.entry caches).
 
 It does this by by parsing the file at the given path and reading their
 declarations. If the file could not be read, it's assumed to be deleted,

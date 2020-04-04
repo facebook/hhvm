@@ -313,9 +313,6 @@ let process_changed_file
       in
       log_file_info_change ~old_file_info ~new_file_info ~start_time ~path;
       invalidate_ctx_upon_file_change ~ctx ~old_file_info;
-      (* Invalidate all cached TASTs, because any TAST might have depended upon
-        the file and we don't have fine-grained tracking to know which. *)
-      Provider_utils.invalidate_tast_cache_for_all_ctx_entries ctx;
       let naming_table =
         update_naming_table
           ~naming_table

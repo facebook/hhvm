@@ -748,6 +748,9 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
       in
       let%lwt (naming_table, sienv) =
         try%lwt
+          (* Invalidate all cached TASTs, because any TAST might have depended upon
+            the file and we don't have fine-grained tracking to know which. *)
+          Provider_utils.invalidate_tast_cache_for_all_ctx_entries ctx;
           ClientIdeIncremental.process_changed_file
             ~ctx
             ~naming_table

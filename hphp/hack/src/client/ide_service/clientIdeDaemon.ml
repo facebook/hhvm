@@ -748,19 +748,13 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
       let changed_files_to_process =
         Path.Set.remove changed_files_to_process next_file
       in
-      let%lwt (naming_table, sienv) =
+      let%lwt { ClientIdeIncremental.naming_table; sienv; old_file_info; _ } =
         try%lwt
-          (* Invalidate all cached TASTs, because any TAST might have depended upon
-            the file and we don't have fine-grained tracking to know which. *)
-          Provider_utils.invalidate_tast_cache_for_all_ctx_entries ctx;
-          let%lwt { ClientIdeIncremental.naming_table; sienv; _ } =
-            ClientIdeIncremental.process_changed_file
-              ~ctx
-              ~naming_table
-              ~sienv
-              ~path:next_file
-          in
-          Lwt.return (naming_table, sienv)
+          ClientIdeIncremental.update_naming_tables_for_changed_file
+            ~ctx
+            ~naming_table
+            ~sienv
+            ~path:next_file
         with exn ->
           let e = Exception.wrap exn in
           HackEventLogger.uncaught_exception exn;
@@ -770,8 +764,16 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
               (Printf.sprintf
                  "Uncaught exception when processing changed file: %s"
                  (Path.to_string next_file));
-          Lwt.return (naming_table, sienv)
+          Lwt.return
+            {
+              ClientIdeIncremental.naming_table;
+              sienv;
+              old_file_info = None;
+              new_file_info = None;
+            }
       in
+      ClientIdeIncremental.invalidate_ctx_upon_file_change ~ctx ~old_file_info;
+      Provider_utils.invalidate_tast_cache_for_all_ctx_entries ctx;
       let%lwt state =
         if Path.Set.is_empty changed_files_to_process then
           Lwt.return

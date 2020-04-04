@@ -103,9 +103,23 @@ module RecheckCapture = struct
   type recheck_capture = {
     (* Enables recheck environment capture *)
     enabled: bool;
+    (* If the error theshold is not met, then the recheck environment that
+        doesn't meet the fanout-related thresholds will not be captured. *)
+    error_threshold: int;
+    (* We will automatically capture the recheck environment if
+        the number of files to recheck exceeds this threshold.
+        The number of rechecked files is always less than or equal to
+        the fanout *)
+    fanout_threshold: int;
     (* We will automatically capture the recheck environment if
         the number of rechecked files exceeds this threshold *)
     rechecked_files_threshold: int;
+    (* If set, determines the rate of sampling of rechecks regardless of
+        their fanout size. The error threshold would still apply.
+        NOTE: valid values fall between 0.0 (0%) and 1.0 (100%).
+        Values less than 0.0 will be interpreted as 0.0; values greater than
+        1.0 will be interpreted as 1.0 *)
+    sample_threshold: float;
   }
 
   let load ~current_version ~default config =
@@ -118,6 +132,12 @@ module RecheckCapture = struct
         ~current_version
         config
     in
+    let error_threshold =
+      int_ "error_threshold" ~prefix ~default:default.error_threshold config
+    in
+    let fanout_threshold =
+      int_ "fanout_threshold" ~prefix ~default:default.fanout_threshold config
+    in
     let rechecked_files_threshold =
       int_
         "rechecked_files_threshold"
@@ -125,7 +145,28 @@ module RecheckCapture = struct
         ~default:default.rechecked_files_threshold
         config
     in
-    { enabled; rechecked_files_threshold }
+    let sample_threshold =
+      let sample_threshold =
+        float_
+          "sample_threshold"
+          ~prefix
+          ~default:default.sample_threshold
+          config
+      in
+      if sample_threshold > 1.0 then
+        1.0
+      else if sample_threshold < 0.0 then
+        0.0
+      else
+        sample_threshold
+    in
+    {
+      enabled;
+      error_threshold;
+      fanout_threshold;
+      rechecked_files_threshold;
+      sample_threshold;
+    }
 end
 
 type t = {
@@ -311,7 +352,25 @@ let default =
     max_times_to_defer_type_checking = None;
     prefetch_deferred_files = false;
     recheck_capture =
-      RecheckCapture.{ enabled = false; rechecked_files_threshold = 40_000 };
+      RecheckCapture.
+        {
+          enabled = false;
+          (* We wouldn't capture small rechecks unless they have at least
+              this many errors. *)
+          error_threshold = 1;
+          (* If capturing is enabled and the recheck fanout (pre-type-check)
+              meets this threshold, then we would snapshot the changed files. *)
+          fanout_threshold = 40_000;
+          (* If the number of files actually rechecked meets this threshold
+              and we already snapshotted the changed files based on fanout
+              size or sampling, we would capture the recheck environment. *)
+          rechecked_files_threshold = 5_000;
+          (* We wouldn't take changed files snapshots of small fanouts
+              unless they are randomly selected with the probability controlled
+              by the sample_threshold setting. By default, we don't snapshot
+              any small fanouts. *)
+          sample_threshold = 0.0;
+        };
     remote_type_check =
       RemoteTypeCheck.
         {

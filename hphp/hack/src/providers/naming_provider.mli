@@ -122,6 +122,6 @@ position. Same as calling [add_type] with [Naming_types.TTypedef].
 *)
 val add_typedef : Provider_context.t -> string -> FileInfo.pos -> unit
 
-val push_local_changes : unit -> unit
+val local_changes_push_sharedmem_stack : unit -> unit
 
-val pop_local_changes : unit -> unit
+val local_changes_pop_sharedmem_stack : unit -> unit

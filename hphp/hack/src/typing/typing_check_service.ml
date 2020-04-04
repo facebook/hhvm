@@ -277,8 +277,8 @@ let process_files
     ~(memory_cap : int option)
     ~(check_info : check_info) : Errors.t * computation_progress =
   SharedMem.invalidate_caches ();
-  File_provider.local_changes_push_stack ();
-  Ast_provider.local_changes_push_stack ();
+  File_provider.local_changes_push_sharedmem_stack ();
+  Ast_provider.local_changes_push_sharedmem_stack ();
 
   let profile_log start_time second_start_time_opt file result =
     let { computation; counters; _ } = result in
@@ -396,8 +396,8 @@ let process_files
   in
   let result = process_or_exit errors progress in
   TypingLogger.flush_buffers ();
-  Ast_provider.local_changes_pop_stack ();
-  File_provider.local_changes_pop_stack ();
+  Ast_provider.local_changes_pop_sharedmem_stack ();
+  File_provider.local_changes_pop_sharedmem_stack ();
   result
 
 let load_and_process_files

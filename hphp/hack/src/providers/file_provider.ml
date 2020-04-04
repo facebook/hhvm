@@ -116,9 +116,9 @@ let remove_batch paths =
     failwith
       "File_provider.remove_batch not supported with local/decl memory provider"
 
-let local_changes_push_stack () = FileHeap.LocalChanges.push_stack ()
+let local_changes_push_sharedmem_stack () = FileHeap.LocalChanges.push_stack ()
 
-let local_changes_pop_stack () = FileHeap.LocalChanges.pop_stack ()
+let local_changes_pop_sharedmem_stack () = FileHeap.LocalChanges.pop_stack ()
 
 let local_changes_commit_batch paths =
   match Provider_backend.get () with

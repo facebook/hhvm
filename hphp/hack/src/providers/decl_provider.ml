@@ -197,12 +197,7 @@ let get_gconst (ctx : Provider_context.t) (gconst_name : string) :
     Decl_service_client.rpc_get_gconst decl gconst_name
     |> Option.map ~f:(fun decl -> (decl, Errors.empty))
 
-let local_changes_push_stack () : unit =
-  (* For now, decl production still writes into shared memory, even when we're
-  not using shared memory as the principal decl store. Until we change decl
-  production to write into the `Decl_provider` interface, we'll enable the local
-  changes heap. After it uses the `Decl_provider` interface, we'll move the
-  below into the following `Shared_memory` match case. *)
+let local_changes_push_sharedmem_stack () : unit =
   Decl_heap.Funs.LocalChanges.push_stack ();
   Decl_heap.RecordDefs.LocalChanges.push_stack ();
   Decl_heap.Constructors.LocalChanges.push_stack ();
@@ -215,8 +210,7 @@ let local_changes_push_stack () : unit =
   Decl_heap.GConsts.LocalChanges.push_stack ();
   ()
 
-let local_changes_pop_stack () : unit =
-  (* See comment in [local_changes_push_stack] above. *)
+let local_changes_pop_sharedmem_stack () : unit =
   Decl_heap.Funs.LocalChanges.pop_stack ();
   Decl_heap.RecordDefs.LocalChanges.pop_stack ();
   Decl_heap.Constructors.LocalChanges.pop_stack ();

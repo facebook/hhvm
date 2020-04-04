@@ -96,6 +96,8 @@ let remove_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
   | Provider_backend.Decl_service _ ->
     failwith "remove_batch not implemented for Decl_service"
 
-let push_local_changes () : unit = Shallow_classes_heap.push_local_changes ()
+let local_changes_push_sharedmem_stack () : unit =
+  Shallow_classes_heap.push_local_changes ()
 
-let pop_local_changes () : unit = Shallow_classes_heap.pop_local_changes ()
+let local_changes_pop_sharedmem_stack () : unit =
+  Shallow_classes_heap.pop_local_changes ()

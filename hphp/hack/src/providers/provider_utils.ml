@@ -107,11 +107,11 @@ let respect_but_quarantine_unsaved_changes
   let naming_pushed = ref false in
   let quarantine_set = ref false in
   let enter_quarantine_exn () =
-    Ast_provider.local_changes_push_stack ();
+    Ast_provider.local_changes_push_sharedmem_stack ();
     ast_pushed := true;
-    Decl_provider.local_changes_push_stack ();
-    Shallow_classes_provider.push_local_changes ();
-    Linearization_provider.push_local_changes ();
+    Decl_provider.local_changes_push_sharedmem_stack ();
+    Shallow_classes_provider.local_changes_push_sharedmem_stack ();
+    Linearization_provider.local_changes_push_sharedmem_stack ();
     begin
       match Provider_context.get_backend ctx with
       | Provider_backend.Local_memory local ->
@@ -121,11 +121,11 @@ let respect_but_quarantine_unsaved_changes
       | _ -> ()
     end;
     decl_pushed := true;
-    File_provider.local_changes_push_stack ();
+    File_provider.local_changes_push_sharedmem_stack ();
     file_pushed := true;
-    Fixme_provider.local_changes_push_stack ();
+    Fixme_provider.local_changes_push_sharedmem_stack ();
     fixme_pushed := true;
-    Naming_provider.push_local_changes ();
+    Naming_provider.local_changes_push_sharedmem_stack ();
     naming_pushed := true;
     Ide_parser_cache.activate ();
     Errors.set_allow_errors_in_default_path true;
@@ -139,13 +139,13 @@ let respect_but_quarantine_unsaved_changes
     SharedMem.allow_hashtable_writes_by_current_process true;
     Errors.set_allow_errors_in_default_path false;
     Ide_parser_cache.deactivate ();
-    if !naming_pushed then Naming_provider.pop_local_changes ();
-    if !fixme_pushed then Fixme_provider.local_changes_pop_stack ();
-    if !file_pushed then File_provider.local_changes_pop_stack ();
+    if !naming_pushed then Naming_provider.local_changes_pop_sharedmem_stack ();
+    if !fixme_pushed then Fixme_provider.local_changes_pop_sharedmem_stack ();
+    if !file_pushed then File_provider.local_changes_pop_sharedmem_stack ();
     if !decl_pushed then begin
-      Decl_provider.local_changes_pop_stack ();
-      Shallow_classes_provider.pop_local_changes ();
-      Linearization_provider.pop_local_changes ();
+      Decl_provider.local_changes_pop_sharedmem_stack ();
+      Shallow_classes_provider.local_changes_pop_sharedmem_stack ();
+      Linearization_provider.local_changes_pop_sharedmem_stack ();
       match Provider_context.get_backend ctx with
       | Provider_backend.Local_memory local ->
         invalidate_local_decl_caches_for_entries
@@ -153,7 +153,7 @@ let respect_but_quarantine_unsaved_changes
           (Provider_context.get_entries ctx)
       | _ -> ()
     end;
-    if !ast_pushed then Ast_provider.local_changes_pop_stack ();
+    if !ast_pushed then Ast_provider.local_changes_pop_sharedmem_stack ();
     SharedMem.invalidate_caches ();
     ()
   in

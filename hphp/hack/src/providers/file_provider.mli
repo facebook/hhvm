@@ -27,9 +27,9 @@ val provide_file_hint : Relative_path.t -> file_type -> unit
 
 val remove_batch : Relative_path.Set.t -> unit
 
-val local_changes_push_stack : unit -> unit
+val local_changes_push_sharedmem_stack : unit -> unit
 
-val local_changes_pop_stack : unit -> unit
+val local_changes_pop_sharedmem_stack : unit -> unit
 
 val local_changes_commit_batch : Relative_path.Set.t -> unit
 

@@ -134,12 +134,12 @@ let remove_batch paths =
     Fixme_store.remove_batch fixmes.decl_hh_fixmes paths;
     Fixme_store.remove_batch fixmes.disallowed_fixmes paths
 
-let local_changes_push_stack () =
+let local_changes_push_sharedmem_stack () =
   HH_FIXMES.LocalChanges.push_stack ();
   DECL_HH_FIXMES.LocalChanges.push_stack ();
   DISALLOWED_FIXMES.LocalChanges.push_stack ()
 
-let local_changes_pop_stack () =
+let local_changes_pop_sharedmem_stack () =
   HH_FIXMES.LocalChanges.pop_stack ();
   DECL_HH_FIXMES.LocalChanges.pop_stack ();
   DISALLOWED_FIXMES.LocalChanges.pop_stack ()

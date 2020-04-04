@@ -200,8 +200,8 @@ let predeclare_ide_deps
           fun () ->
           (* We only want to populate declaration heap, without wasting space in lower
            * heaps (similar to what Typing_check_service.check_files does) *)
-          File_provider.local_changes_push_stack ();
-          Ast_provider.local_changes_push_stack ();
+          File_provider.local_changes_push_sharedmem_stack ();
+          Ast_provider.local_changes_push_sharedmem_stack ();
           let iter :
               type a. (Provider_context.t -> string -> a) -> SSet.t -> unit =
            fun declare s ->
@@ -232,8 +232,8 @@ let predeclare_ide_deps
       ~finally:
         begin
           fun () ->
-          Ast_provider.local_changes_pop_stack ();
-          File_provider.local_changes_pop_stack ()
+          Ast_provider.local_changes_pop_sharedmem_stack ();
+          File_provider.local_changes_pop_sharedmem_stack ()
         end
 
 (* Run f while collecting all declarations that it caused. *)

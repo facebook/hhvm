@@ -385,9 +385,10 @@ let find_typedef_in_file
 let find_gconst_in_file ?(full = false) ctx file_name name =
   get_gconst (get_ast ~full ctx file_name) name
 
-let local_changes_push_stack () = ParserHeap.LocalChanges.push_stack ()
+let local_changes_push_sharedmem_stack () =
+  ParserHeap.LocalChanges.push_stack ()
 
-let local_changes_pop_stack () = ParserHeap.LocalChanges.pop_stack ()
+let local_changes_pop_sharedmem_stack () = ParserHeap.LocalChanges.pop_stack ()
 
 let local_changes_commit_batch paths =
   ParserHeap.LocalChanges.commit_batch paths

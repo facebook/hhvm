@@ -87,9 +87,9 @@ val compute_cst :
   entry:Provider_context.entry ->
   Provider_context.PositionedSyntaxTree.t
 
-val local_changes_push_stack : unit -> unit
+val local_changes_push_sharedmem_stack : unit -> unit
 
-val local_changes_pop_stack : unit -> unit
+val local_changes_pop_sharedmem_stack : unit -> unit
 
 val local_changes_commit_batch : Relative_path.Set.t -> unit
 

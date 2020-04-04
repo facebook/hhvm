@@ -395,7 +395,7 @@ struct MutationState {
 };
 
 // Returns a copy of the given array that the caller may mutate in place.
-// ArrayIter positions in the original array are also valid for the new one.
+// Iterator positions in the original array are also valid for the new one.
 ArrayData* copy_if_needed(ArrayData* in, bool cow) {
   TRACE(3, "%s %d-element rc %d %s array\n",
         cow ? "Copying" : "Reusing", safe_cast<int32_t>(in->size()),
@@ -450,9 +450,9 @@ ArrayData* apply_mutation(TypedValue tv, State& state,
   if (!state.recursive) return result;
 
   // Recursively apply the mutation to the array's contents.
-  ArrayIter ai(in, ArrayIter::local);
-  for (auto done = in->empty(); !done; done = ai.nextLocal(in)) {
-    auto const prev = ai.nvSecondLocal(in);
+  auto const end = in->iter_end();
+  for (auto pos = in->iter_begin(); pos != end; pos = in->iter_advance(pos)) {
+    auto const prev = in->nvGetVal(pos);
     auto const ad = apply_mutation(prev, state, cow, depth + 1);
     if (!ad) continue;
     auto const next = make_array_like_tv(ad);
@@ -460,11 +460,11 @@ ArrayData* apply_mutation(TypedValue tv, State& state,
 
     assertx(!result->cowCheck());
     if (in->hasVanillaPackedLayout()) {
-      tvMove(next, PackedArray::LvalUncheckedInt(result, ai.getPos()));
+      tvMove(next, PackedArray::LvalUncheckedInt(result, pos));
     } else if (in->hasVanillaMixedLayout()) {
-      tvMove(next, &MixedArray::asMixed(result)->data()[ai.getPos()].data);
+      tvMove(next, &MixedArray::asMixed(result)->data()[pos].data);
     } else {
-      auto const key = ai.nvFirstLocal(in);
+      auto const key = in->nvGetKey(pos);
       auto const escalated = isStringType(type(key))
         ? result->set(val(key).pstr, make_array_like_tv(ad))
         : result->set(val(key).num, make_array_like_tv(ad));

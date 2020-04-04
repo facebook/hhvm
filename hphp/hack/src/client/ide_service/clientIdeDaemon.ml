@@ -342,7 +342,8 @@ let make_context_from_closed_file
       Provider_utils.invalidate_local_decl_caches_for_entries local entries
     | _ -> ()
   end;
-  Provider_utils.invalidate_tast_cache_for_all_ctx_entries ctx;
+  Provider_utils.invalidate_tast_cache_of_entries
+    (Provider_context.get_entries ctx);
   Initialized { initialized_state with ctx }
 
 let make_context_from_file_input
@@ -775,7 +776,8 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
         | (None, Provider_backend.Local_memory _) -> ()
         | _ -> failwith "ClientIdeDaemon must use local memory"
       end;
-      Provider_utils.invalidate_tast_cache_for_all_ctx_entries ctx;
+      Provider_utils.invalidate_tast_cache_of_entries
+        (Provider_context.get_entries ctx);
       let%lwt state =
         if Path.Set.is_empty changed_files_to_process then
           Lwt.return

@@ -37,11 +37,9 @@ let invalidate_gconst decl_cache gconst_name =
     decl_cache
     (Provider_backend.Decl_cache_entry.Gconst_decl gconst_name)
 
-let invalidate_tast_cache_for_all_ctx_entries ~(ctx : Provider_context.t) : unit
-    =
-  Relative_path.Map.iter
-    (Provider_context.get_entries ctx)
-    ~f:(fun _path entry ->
+let invalidate_tast_cache_of_entries
+    (entries : Provider_context.entry Relative_path.Map.t) : unit =
+  Relative_path.Map.iter entries ~f:(fun _path entry ->
       entry.Provider_context.tast <- None;
       entry.Provider_context.tast_errors <- None)
 

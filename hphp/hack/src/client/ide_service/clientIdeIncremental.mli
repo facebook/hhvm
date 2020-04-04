@@ -7,12 +7,14 @@
  *
  *)
 
-(** Update the forward and reverse naming tables by parsing the file at the
-given path and installing their declarations. If the file could not be read,
-it's assumed to be deleted.
+(** Updates the reverse-naming-table (which is inside ctx for the local
+memory backend, and is a sharedmem heap for the sharedmem backend).
+Returns an updated forward-naming-table in 'naming_table', and updated
+symbol-search index in 'sienv'. Also invalidates various caches inside ctx.
 
-Returns an updated [ServerEnv.env], but also
-modifies the global naming table state in [Naming_global]. *)
+It does this by by parsing the file at the given path and reading their
+declarations. If the file could not be read, it's assumed to be deleted,
+and so the old forward-naming-table indicates which caches must be deleted. *)
 val process_changed_file :
   ctx:Provider_context.t ->
   naming_table:Naming_table.t ->

@@ -696,17 +696,18 @@ let tconst_subsumption env class_name parent_typeconst child_typeconst on_error
   | (TCAbstract (Some _), TCAbstract None) ->
     Errors.override_no_default_typeconst pos parent_pos;
     env
+  | ((TCConcrete | TCPartiallyAbstract), TCAbstract _) ->
+    (* It is valid for abstract class to extend a concrete class, but it cannot
+     * redefine already concrete members as abstract.
+     * See typecheck/tconst/subsume_tconst5.php test case for example. *)
+    Errors.abstract_concrete_override pos parent_pos `typeconst;
+    env
   | _ ->
     (* Check that the child's constraint is compatible with the parent. If the
      * parent has a constraint then the child must also have a constraint if it
      * is abstract
      *)
     let child_is_abstract = Option.is_none child_typeconst.ttc_type in
-    if parent_is_concrete && child_is_abstract then
-      (* It is valid for abstract class to extend a concrete class, but it cannot
-       * redefine already concrete members as abstract.
-       * See typecheck/tconst/subsume_tconst5.php test case for example. *)
-      Errors.abstract_concrete_override pos parent_pos `typeconst;
 
     (* If the class element is defined in the class that we're checking, then
      * don't wrap with the extra
